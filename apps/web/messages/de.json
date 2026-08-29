@@ -2067,6 +2067,9 @@
         "agendaPoints": "Agenda {value}"
       }
     },
+    "access": {
+      "cardPosition": "Karte {number} von {total}"
+    },
     "event": {
       "gameCreated": "Das Spiel wurde erstellt.",
       "timeExpired": "{subject}: Spielerzeit abgelaufen.",
@@ -2085,6 +2088,12 @@
       "runEnded": "Der Run wurde beendet.",
       "cardAccessed": "{subject}: auf {card} zugegriffen.",
       "cardAccessedInServer": "{subject}: auf {card} in {server} zugegriffen.",
+      "numberedCardAccessedInServerYou": "Karte {number} von {total}: Du hast in {server} auf {card} zugegriffen.",
+      "numberedCardAccessedInServerOther": "Karte {number} von {total}: {subject} hat in {server} auf {card} zugegriffen.",
+      "cardAccessedAndStolenYou": "{position}Du hast in {server} auf {card} zugegriffen und die Agenda gestohlen.",
+      "cardAccessedAndStolenOther": "{position}{subject} hat in {server} auf {card} zugegriffen und die Agenda gestohlen.",
+      "cardAccessedAndTrashedYou": "{position}Du hast in {server} auf {card} zugegriffen und die Karte getrasht.",
+      "cardAccessedAndTrashedOther": "{position}{subject} hat in {server} auf {card} zugegriffen und die Karte getrasht.",
       "cardTrashed": "{subject}: {card} getrasht.",
       "damage": "{subject}: {amount} Schaden erlitten.",
       "tagsGained": "{subject}: {amount} Tags erhalten.",
@@ -2092,6 +2101,8 @@
       "badPublicity": "{subject}: {amount} Bad Publicity erhalten.",
       "traceStarted": "{subject}: Trace gestartet.",
       "choiceResolved": "{subject}: Auswahl aufgelöst.",
+      "stackProgramRevealedYou": "Du hast mit {source} {program} aus dem Stack vorgezeigt und auf die Hand genommen.",
+      "stackProgramRevealedOther": "{subject} hat mit {source} {program} aus dem Stack vorgezeigt und auf die Hand genommen.",
       "cardsDiscardedToArchives": "{subject}: am Zugende {count, plural, one {# Karte} other {# Karten}} ins Archiv abgeworfen.",
       "cardsDiscardedToHeap": "{subject}: am Zugende {count, plural, one {# Karte} other {# Karten}} in den Heap abgeworfen.",
       "discardResultMissing": "{subject}: Angaben zum Abwurf am Zugende fehlen.",
@@ -2104,6 +2115,7 @@
       "firstSubroutineBroken": "{subject}: erste Subroutine von {ice} gebrochen.",
       "secondSubroutineBroken": "{subject}: zweite Subroutine von {ice} gebrochen.",
       "numberedSubroutineBroken": "{subject}: Subroutine {number} von {ice} gebrochen.",
+      "numberedSubroutineBrokenWithBreaker": "{subject}: Subroutine {number} von {ice} mit {breaker} gebrochen.",
       "icePassed": "{subject}: {card} passiert.",
       "subroutineBroken": "{subject}: Subroutine gebrochen.",
       "subroutineResolved": "Eine Subroutine wurde aufgelöst.",
@@ -2134,6 +2146,10 @@
       "tagGainedChip": "Tag erhalten",
       "tagsAddedChip": "+{amount} {amount, plural, one {Tag} other {Tags}}",
       "tagsCurrentChip": "Jetzt {amount} {amount, plural, one {Tag} other {Tags}}",
+      "runnerPaidToPassIce": "{subject}: {amount, plural, one {# Credit} other {# Credits}} bezahlt, um {source} zu passieren.",
+      "runnerDidNotPayToPassIce": "{subject}: nicht für {source} bezahlt; der Run wurde beendet.",
+      "creditsPaidChip": "{amount, plural, one {# Credit bezahlt} other {# Credits bezahlt}}",
+      "notPaidChip": "Nicht bezahlt",
       "resolved": "Ein automatischer Effekt von {source} wurde aufgelöst.",
       "automatic": "Automatisch",
       "flatline": "Flatline",

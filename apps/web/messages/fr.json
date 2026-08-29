@@ -2143,6 +2143,9 @@
         "agendaPoints": "Agenda {value}"
       }
     },
+    "access": {
+      "cardPosition": "Carte {number} sur {total}"
+    },
     "event": {
       "gameCreated": "Le jeu a été créé.",
       "timeExpired": "{subject} : l'horloge du joueur a expiré.",
@@ -2161,6 +2164,12 @@
       "runEnded": "La course s'est terminée.",
       "cardAccessed": "{subject} : accès à {card}.",
       "cardAccessedInServer": "{subject} : accès à {card} dans {server}.",
+      "numberedCardAccessedInServerYou": "Carte {number} sur {total} : vous avez accédé à {card} dans {server}.",
+      "numberedCardAccessedInServerOther": "Carte {number} sur {total} : {subject} a accédé à {card} dans {server}.",
+      "cardAccessedAndStolenYou": "{position}Vous avez accédé à {card} dans {server} et volé le projet.",
+      "cardAccessedAndStolenOther": "{position}{subject} a accédé à {card} dans {server} et volé le projet.",
+      "cardAccessedAndTrashedYou": "{position}Vous avez accédé à {card} dans {server} et détruit la carte.",
+      "cardAccessedAndTrashedOther": "{position}{subject} a accédé à {card} dans {server} et détruit la carte.",
       "cardTrashed": "{subject} : {card} détruit.",
       "damage": "{subject} : a subi des dommages {amount}.",
       "tagsGained": "{subject} : gain des balises {amount}.",
@@ -2168,6 +2177,8 @@
       "badPublicity": "{subject} : a obtenu une mauvaise publicité pour {amount}.",
       "traceStarted": "{subject} : lancement d'une trace.",
       "choiceResolved": "{subject} : résolu un choix.",
+      "stackProgramRevealedYou": "Vous avez utilisé {source} pour révéler {program} depuis la pile et l’ajouter à votre main.",
+      "stackProgramRevealedOther": "{subject} a utilisé {source} pour révéler {program} depuis la pile et l’ajouter à sa main.",
       "cardsDiscardedToArchives": "{subject} : a défaussé {count, plural, one {# carte} other {# cartes}} dans les Archives à la fin du tour.",
       "cardsDiscardedToHeap": "{subject} : a défaussé {count, plural, one {# carte} other {# cartes}} dans le Tas à la fin du tour.",
       "discardResultMissing": "{subject} : les détails de la défausse de fin de tour sont manquants.",
@@ -2180,6 +2191,7 @@
       "firstSubroutineBroken": "{subject} : a brisé le premier sous-programme de {ice}.",
       "secondSubroutineBroken": "{subject} : a brisé le deuxième sous-programme de {ice}.",
       "numberedSubroutineBroken": "{subject} : a brisé le sous-programme {number} de {ice}.",
+      "numberedSubroutineBrokenWithBreaker": "{subject} : a brisé le sous-programme {number} de {ice} avec {breaker}.",
       "icePassed": "{subject} : a passé {card}.",
       "subroutineBroken": "{subject} : rupture d'un sous-programme.",
       "subroutineResolved": "Un sous-programme résolu.",
@@ -2210,6 +2222,10 @@
       "tagGainedChip": "Balise reçue",
       "tagsAddedChip": "+{amount} {amount, plural, one {balise} other {balises}}",
       "tagsCurrentChip": "Maintenant {amount} {amount, plural, one {balise} other {balises}}",
+      "runnerPaidToPassIce": "{subject} : a payé {amount, plural, one {# crédit} other {# crédits}} pour passer {source}.",
+      "runnerDidNotPayToPassIce": "{subject} : n’a pas payé pour {source} ; le piratage est terminé.",
+      "creditsPaidChip": "{amount, plural, one {# crédit payé} other {# crédits payés}}",
+      "notPaidChip": "Non payé",
       "resolved": "Un effet automatique de {source} résolu.",
       "automatic": "Automatique",
       "flatline": "Flatline",

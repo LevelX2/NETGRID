@@ -331,6 +331,10 @@ import {
   currentRunRemainingIce,
 } from "./current-encounter";
 import {
+  breakSubroutineIndexesForAction,
+  parseSubroutineIndexes,
+} from "./subroutine-indexes";
+import {
   corpRegionReplacementComponent,
   corpUpgradeInstallPlacementComponent,
   corpUpgradePlacementAssessment,
@@ -591,6 +595,10 @@ export function choosePlanFirstLiveAction(
       resolvePlanBoundRunnerRunStartOrderChoice(schedulerContext, previous) ??
       resolvePlanBoundRunnerTraceBaseLinkChoice(schedulerContext, previous) ??
       resolvePlanBoundRunnerTraceSuccessCancelChoice(
+        schedulerContext,
+        previous,
+      ) ??
+      resolvePlanBoundRunnerBrokenIceVirusCounterChoice(
         schedulerContext,
         previous,
       ) ??
@@ -4498,12 +4506,25 @@ export function runnerActionDispositions(
   ) => RunnerProgramInstallTrashAssessment | undefined,
 ): PlanActionDisposition[] {
   const dispositions: PlanActionDisposition[] = [];
+  const addDisposition = (disposition: PlanActionDisposition) => {
+    if (
+      dispositions.some(
+        (existing) =>
+          existing.actionId === disposition.actionId &&
+          existing.disposition === disposition.disposition &&
+          existing.ownerModuleId === disposition.ownerModuleId,
+      )
+    ) {
+      return;
+    }
+    dispositions.push(disposition);
+  };
   const add = (
     actionId: string,
     ownerModuleId: PlanActionDisposition["ownerModuleId"],
     evidenceCode: string,
   ) => {
-    dispositions.push({
+    addDisposition({
       actionId,
       disposition: "explicitly_nonproductive",
       ownerModuleId,
@@ -4515,7 +4536,7 @@ export function runnerActionDispositions(
     ownerModuleId: PlanActionDisposition["ownerModuleId"],
     evidenceCode: string,
   ) => {
-    dispositions.push({
+    addDisposition({
       actionId,
       disposition: "assessment_unknown",
       ownerModuleId,
@@ -5042,11 +5063,33 @@ export function runnerActionDispositions(
   );
   for (const actionId of domain.defense
     .defenseSupportRejectedInstallActionIds ?? []) {
+    if (optionalProgramTrashInstallDispositionActionIds.has(actionId)) {
+      continue;
+    }
     add(
       actionId,
       "runner.defense_and_recovery",
       "runner_defense_support_install_deferred_no_current_need_or_constraint",
     );
+  }
+  if ((domain.defense.defenseSupportInstallActionIds?.length ?? 0) > 0) {
+    for (const candidate of candidates) {
+      const evidenceCode =
+        candidate.semanticActionType === "tag.remove"
+          ? "runner_tag_removal_deferred_for_defense_support_install"
+          : candidate.semanticActionType === "counter.remove_trace_tag" ||
+              candidate.semanticActionType === "counter.remove_runner_hazard"
+            ? "runner_persistent_hazard_counter_deferred_for_defense_support_install"
+            : undefined;
+      if (!evidenceCode) {
+        continue;
+      }
+      add(
+        candidate.actionId,
+        "runner.defense_and_recovery",
+        evidenceCode,
+      );
+    }
   }
   const rejectedCoverageGapsByActionId = new Map<
     string,
@@ -5541,6 +5584,7 @@ export function runnerActionDispositions(
       runnerEffectsProvideTopTrashRecovery(candidate.functionalEffects);
     if (
       structuredTopHeapRecovery &&
+      !dispositions.some((entry) => entry.actionId === candidate.actionId) &&
       !defenseHandBufferActionIds.has(candidate.actionId) &&
       !coverageOwnedActionIds.has(candidate.actionId) &&
       !installedRecoveryOwnedActionIds.has(candidate.actionId)
@@ -7434,6 +7478,7 @@ function buildRunnerDomain(
                     input,
                     actionCandidate,
                     evaluation.targetServerId as "hq" | "rd" | "archives",
+                    sameServerEvaluations,
                   );
                 const opensHqSuccessWindow =
                   candidate.actionId === hqSuccessWindowRoute?.actionId;
@@ -21420,6 +21465,221 @@ function planBoundRunnerTraceSuccessCancelOption(
     : { optionId: pass.id };
 }
 
+function resolvePlanBoundRunnerBrokenIceVirusCounterChoice(
+  context: PlanSchedulerContext,
+  previous: ResidentPlanPortfolio | undefined,
+): EngineWindowResolution | undefined {
+  const choice = context.input.playerView.pendingChoice;
+  if (
+    context.input.side !== "runner" ||
+    !choice?.source.startsWith("broken_ice.virus_counter:")
+  ) {
+    return undefined;
+  }
+  const executor = previous?.instances.find(
+    (instance) =>
+      instance.instanceId === previous.executorInstanceId &&
+      (instance.moduleId === "runner.convert_run_window" ||
+        instance.moduleId === "runner.pressure_central" ||
+        instance.moduleId === "runner.contest_remote") &&
+      instance.executionState === "executor",
+  );
+  const executorState = executor?.moduleState as
+    | {
+        kind?: unknown;
+        brokenIceVirusCounterChoiceBinding?: {
+          choiceId: string;
+          actionId: string;
+          selectedOptionIds: string[];
+          observedAtStateVersion: number;
+        };
+      }
+    | undefined;
+  const root = previous?.instances.find(
+    (instance) => instance.instanceId === previous.rootForegroundInstanceId,
+  );
+  const choiceActions = context.input.legalActions.filter(
+    (action) => action.type === "resolve_choice",
+  );
+  const action = choiceActions.length === 1 ? choiceActions[0] : undefined;
+  const [requirement] = action?.choiceRequirements ?? [];
+  const optionIds = choice.options.map((option) => option.id);
+  const selectedOptionIds = planBoundRunnerBrokenIceVirusCounterOptions(
+    context.input,
+    choice,
+  );
+  const exactChoiceState =
+    choice.source ===
+      `broken_ice.virus_counter:${context.input.playerView.stateVersion}` &&
+    choice.choiceId ===
+      `broken_ice_virus_counter_${context.input.playerView.stateVersion}`;
+  const exactBinding =
+    previous !== undefined &&
+    previous.side === "runner" &&
+    previous.stateVersion === context.input.playerView.stateVersion - 1 &&
+    root?.side === "runner" &&
+    executor !== undefined &&
+    (executor.parentInstanceId === root.instanceId ||
+      executor.instanceId === root.instanceId) &&
+    (executorState?.kind === "run_window" ||
+      executorState?.kind === "central_pressure" ||
+      executorState?.kind === "remote_contest") &&
+    previous.turnPlanCommitment?.status === "active" &&
+    previous.turnPlanCommitment.sequenceRootPlanInstanceId ===
+      root.instanceId &&
+    exactChoiceState &&
+    choice.side === "runner" &&
+    choice.kind === "select_option" &&
+    choice.visibility === "public" &&
+    choice.stateVersion === context.input.playerView.stateVersion &&
+    choice.minSelections > 0 &&
+    choice.maxSelections === choice.minSelections &&
+    selectedOptionIds !== undefined &&
+    selectedOptionIds.length === choice.minSelections &&
+    action !== undefined &&
+    action.side === "runner" &&
+    action.source === "game_rule" &&
+    action.expiresAtStateVersion === context.input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === choice.minSelections &&
+    requirement.maxSelections === choice.maxSelections &&
+    requirement.optionIds.length === optionIds.length &&
+    optionIds.every((optionId) => requirement.optionIds.includes(optionId));
+  if (
+    !exactBinding ||
+    !action ||
+    !root ||
+    !executor ||
+    !executorState ||
+    !selectedOptionIds
+  ) {
+    const failedChecks = [
+      ["previous", previous !== undefined],
+      ["previous_side", previous?.side === "runner"],
+      [
+        "previous_state",
+        previous?.stateVersion === context.input.playerView.stateVersion - 1,
+      ],
+      ["root", root?.side === "runner"],
+      ["executor", executor !== undefined],
+      [
+        "executor_kind",
+        ["run_window", "central_pressure", "remote_contest"].includes(
+          String(executorState?.kind),
+        ),
+      ],
+      ["turn_plan", previous?.turnPlanCommitment?.status === "active"],
+      ["choice_state", exactChoiceState],
+      ["selection", selectedOptionIds !== undefined],
+      ["action", action !== undefined],
+      ["action_source", action?.source === "game_rule"],
+      [
+        "action_state",
+        action?.expiresAtStateVersion === context.input.playerView.stateVersion,
+      ],
+      ["choice_requirement", requirement?.choiceId === choice.choiceId],
+    ]
+      .filter(([, valid]) => !valid)
+      .map(([name]) => name)
+      .join(",");
+    throw new PlanResolutionFailure("window_origin_missing", {
+      side: context.input.side,
+      stateVersion: context.input.playerView.stateVersion,
+      timingPoint: context.input.playerView.timingPoint,
+      legalActionTypes: context.input.legalActions.map(
+        (legalAction) => legalAction.type,
+      ),
+      unresolvedActionIds: choiceActions.map(
+        (legalAction) => legalAction.actionId,
+      ),
+      owner: "continuation",
+      ...(executor ? { planInstanceId: executor.instanceId } : {}),
+      removalCondition: `Resolve broken-ICE virus counters only from the immediately preceding active Runner run-plan executor, one complete option group per source and the exact current Engine choice contract. Failed=${failedChecks || "unknown"}.`,
+    });
+  }
+  executorState.brokenIceVirusCounterChoiceBinding = {
+    choiceId: choice.choiceId,
+    actionId: action.actionId,
+    selectedOptionIds,
+    observedAtStateVersion: context.input.playerView.stateVersion,
+  };
+  return {
+    actionId: action.actionId,
+    reasonCode: "plan_bound_runner_broken_ice_virus_counter_choice",
+    origin: {
+      rootPlanInstanceId: root.instanceId,
+      leafPlanInstanceId: executor.instanceId,
+      side: "runner",
+      windowKind: "mandatory_choice",
+      windowId: choice.choiceId,
+      stateVersion: context.input.playerView.stateVersion,
+      timingPoint: context.input.playerView.timingPoint,
+    },
+  };
+}
+
+function planBoundRunnerBrokenIceVirusCounterOptions(
+  input: AiDecisionInput,
+  choice: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>,
+): string[] | undefined {
+  const targetById = new Map(
+    input.playerView.servers.flatMap((server) =>
+      server.ice
+        .filter(
+          (card) =>
+            card.known &&
+            card.rezzed === true &&
+            typeof card.definitionId === "string" &&
+            (typeof card.effectiveRunQuote?.effectiveStrength === "number" ||
+              typeof card.strength === "number"),
+        )
+        .map((card) => [card.instanceId, card] as const),
+    ),
+  );
+  const sourceIds = [
+    ...new Set(
+      choice.options.flatMap((option) =>
+        typeof option.metadata?.sourceCardInstanceId === "string"
+          ? [option.metadata.sourceCardInstanceId]
+          : [],
+      ),
+    ),
+  ].sort();
+  if (sourceIds.length !== choice.minSelections) return undefined;
+  const selected = sourceIds.flatMap((sourceId) => {
+    const candidates = choice.options
+      .flatMap((option) => {
+        if (
+          option.metadata?.sourceCardInstanceId !== sourceId ||
+          typeof option.metadata.targetCardInstanceId !== "string" ||
+          option.value !== option.metadata.targetCardInstanceId
+        ) {
+          return [];
+        }
+        const target = targetById.get(option.metadata.targetCardInstanceId);
+        if (!target) return [];
+        return [
+          {
+            optionId: option.id,
+            targetId: target.instanceId,
+            strength:
+              target.effectiveRunQuote?.effectiveStrength ??
+              (target.strength ?? 0) + (target.strengthModifier ?? 0),
+          },
+        ];
+      })
+      .sort(
+        (left, right) =>
+          right.strength - left.strength ||
+          left.targetId.localeCompare(right.targetId) ||
+          left.optionId.localeCompare(right.optionId),
+      );
+    return candidates[0] ? [candidates[0].optionId] : [];
+  });
+  return selected.length === sourceIds.length ? selected : undefined;
+}
+
 function resolvePlanBoundRunnerVacuumLinkChoice(
   context: PlanSchedulerContext,
   previous: ResidentPlanPortfolio | undefined,
@@ -24999,6 +25259,7 @@ function uniqueCoverageGaps(
         input,
         candidates,
         evaluation,
+        runTargets,
       )
     ) {
       continue;
@@ -25094,6 +25355,7 @@ function uniqueCoverageGaps(
         input,
         candidates,
         evaluation,
+        runTargets,
       )
     ) {
       continue;
@@ -27121,6 +27383,7 @@ function bindRunnerRemoteRunActionAssessments(
         input,
         actionCandidate,
         signal.serverId,
+        evaluations,
       );
     const fundingSupport = runnerRunFundingSupport(
       input,
@@ -28551,6 +28814,14 @@ function runnerExactRunWindowPhaseActionIds(
       .filter((candidate) => candidate.actionType === "jack_out")
       .map((candidate) => candidate.actionId);
   }
+  const exactPayOrEndRunRouteActionIds =
+    runnerExactPayOrEndRunAccessRouteActionIds(
+      input,
+      admissibleRunWindowCandidates,
+    );
+  if (exactPayOrEndRunRouteActionIds.length > 0) {
+    return exactPayOrEndRunRouteActionIds;
+  }
   if (encounterRequiresTargetPreservingBreak) {
     const directEncounterActionIds = input.legalActions
       .filter(
@@ -28593,6 +28864,68 @@ function runnerExactRunWindowPhaseActionIds(
       .map((candidate) => candidate.actionId);
   }
   return [];
+}
+
+function runnerExactPayOrEndRunAccessRouteActionIds(
+  input: AiDecisionInput,
+  admissibleRunWindowCandidates: readonly ActionSemanticCandidate[],
+): string[] {
+  if (
+    input.playerView.run?.phase !== "encounter_ice" ||
+    input.playerView.timingPoint !== "run.encounter_ice"
+  ) {
+    return [];
+  }
+  const encounteredIce = currentEncounteredIceCard(input);
+  const subroutines = encounteredIce?.effectiveRunQuote?.subroutines;
+  if (!subroutines) return [];
+  const admissibleActionIds = new Set(
+    admissibleRunWindowCandidates.map((candidate) => candidate.actionId),
+  );
+  const paidContinuation = input.legalActions
+    .filter(
+      (action) =>
+        action.type === "continue_run" &&
+        action.payload?.encounterContinue === true &&
+        action.payload?.encounterWillEndRun === false &&
+        Number(action.payload?.payOrEndRunSubroutinePayment ?? 0) > 0 &&
+        admissibleActionIds.has(action.actionId),
+    )
+    .map((action) => ({
+      action,
+      indexes: parseSubroutineIndexes(
+        action.payload?.payOrEndRunSubroutineIndexes,
+      ),
+      unbrokenSubroutineCount: Number(
+        action.payload?.unbrokenSubroutineCount ?? 0,
+      ),
+    }))
+    .find(
+      ({ indexes, unbrokenSubroutineCount }) =>
+        indexes.size > 0 &&
+        indexes.size === unbrokenSubroutineCount &&
+        [...indexes].every(
+          (index) =>
+            subroutines[index]?.type === "end_the_run_unless_runner_pays",
+        ),
+    );
+  if (!paidContinuation) return [];
+
+  const completeAccessRoutes = input.legalActions.filter((action) => {
+    if (!admissibleActionIds.has(action.actionId)) return false;
+    if (action.actionId === paidContinuation.action.actionId) return true;
+    if (action.type !== "break_subroutine") return false;
+    const brokenIndexes = breakSubroutineIndexesForAction(action);
+    return [...paidContinuation.indexes].every((index) =>
+      brokenIndexes.has(index),
+    );
+  });
+  const cheapestRouteCost = Math.min(
+    ...completeAccessRoutes.map(legalActionCreditCost),
+  );
+  return completeAccessRoutes
+    .filter((action) => legalActionCreditCost(action) === cheapestRouteCost)
+    .map((action) => action.actionId);
 }
 
 function runnerBindExactRunWindowPhaseRoute(
@@ -30548,6 +30881,7 @@ function runnerCoverageRunTargetHasDifferentialPayoff(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   evaluation: RunnerRunTargetEvaluation,
+  runTargets: readonly RunnerRunTargetEvaluation[],
 ): boolean {
   const candidate = candidates.find(
     (entry) => entry.actionId === evaluation.actionId,
@@ -30564,6 +30898,7 @@ function runnerCoverageRunTargetHasDifferentialPayoff(
       input,
       candidate,
       evaluation.targetServerId,
+      runTargets,
     )
   );
 }

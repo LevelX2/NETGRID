@@ -212,6 +212,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "encounterWillEndRun",
   "encounterSourceWillTrashAtEndOfTurn",
   "shellTradersAbility",
+  "runnerAbility",
   "abilityFamily",
   "abilityId",
   "effectKind",
@@ -941,6 +942,7 @@ function sanitizePlayerView(
             view.own.credits,
             view.own.agendaPoints,
             view.own.scoreArea,
+            view.own.rig ?? [],
             view.servers,
           ),
         }
@@ -2885,6 +2887,7 @@ function sanitizeVisibleChoiceRequest(
   ownCredits: number,
   ownAgendaPoints: number,
   ownScoreArea: readonly VisibleCard[],
+  ownRig: readonly VisibleCard[],
   servers: readonly PlayerView["servers"][number][],
 ): VisibleChoiceRequest {
   const stackSearchResolution = sanitizeStackSearchResolution(
@@ -2918,7 +2921,11 @@ function sanitizeVisibleChoiceRequest(
     kind: choice.kind,
     options: choice.options.map((option) => {
       const value = sanitizePrimitive(option.value);
-      const metadata = sanitizeChoiceOptionMetadata(option.metadata, servers);
+      const metadata = sanitizeChoiceOptionMetadata(
+        option.metadata,
+        ownRig,
+        servers,
+      );
       const hqInstallRezOptionQuote = sanitizeCorpOptionalRezChoiceQuote(
         option.hqInstallRezOptionQuote,
         {
@@ -3560,6 +3567,7 @@ function sanitizePrimitive(
 
 function sanitizeChoiceOptionMetadata(
   value: unknown,
+  ownRig: readonly VisibleCard[],
   servers: readonly PlayerView["servers"][number][],
 ):
   | NonNullable<VisibleChoiceRequest["options"][number]["metadata"]>
@@ -3608,6 +3616,26 @@ function sanitizeChoiceOptionMetadata(
   ) {
     result.targetServerId = targetServerId;
     result.targetIcePosition = targetIcePosition;
+  }
+  const sourceCardInstanceId = metadata.sourceCardInstanceId;
+  if (
+    typeof sourceCardInstanceId === "string" &&
+    ownRig.some(
+      (card) => card.known && card.instanceId === sourceCardInstanceId,
+    )
+  ) {
+    result.sourceCardInstanceId = sourceCardInstanceId;
+  }
+  const targetCardInstanceId = metadata.targetCardInstanceId;
+  if (
+    typeof targetCardInstanceId === "string" &&
+    servers.some((server) =>
+      server.ice.some(
+        (card) => card.known && card.instanceId === targetCardInstanceId,
+      ),
+    )
+  ) {
+    result.targetCardInstanceId = targetCardInstanceId;
   }
   return Object.keys(result).length > 0 ? result : undefined;
 }

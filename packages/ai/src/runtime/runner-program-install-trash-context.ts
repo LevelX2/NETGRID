@@ -91,9 +91,9 @@ export function createRunnerProgramInstallTrashContext(
     );
     if (!assessment.memoryRequired) return [];
     if (assessment.requiredMemoryToFree <= 0) return [];
-    const forcedMinimalSacrifice = choice.source.startsWith(
-      "runner.program_install_memory:",
-    );
+    const forcedMinimalSacrifice =
+      choice.source.startsWith("runner.program_install_memory:") ||
+      choice.source.startsWith("v1912.delayed_install_memory:");
     if (!assessment.canFreeRequiredMemory && !forcedMinimalSacrifice) {
       throw new PlanResolutionFailure("commitment_invalidated", {
         side: input.side,

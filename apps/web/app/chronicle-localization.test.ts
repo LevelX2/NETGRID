@@ -7,6 +7,7 @@ import enMessages from "../messages/en.json";
 import frMessages from "../messages/fr.json";
 import type { AppLocale } from "../i18n/locale";
 import {
+  chronicleAccessOutcomePlan,
   formatChronicleEffectItems,
   formatChronicleEvent,
   type ChronicleTranslate,
@@ -129,6 +130,120 @@ describe("semantic chronicle localization", () => {
     );
     expect(runnerItems[0]?.title).toBe(
       "Die Korp: 1 Credit durch Investment Firm erhalten.",
+    );
+  });
+
+  it("shows Karl de Veres' public credit after a successful run", () => {
+    const runEnd = event("continue_run", {
+      actor: "runner",
+      runSuccessful: true,
+      serverLabel: "R&D",
+      successfulRunRunnerCreditGain: 1,
+      gainedCredits: 1,
+      karlSuccessfulRunCreditGain: 1,
+      karlSuccessfulRunSourceDefinitionIds:
+        "onr_v1_166_karl-de-veres-corporate-stooge",
+      runnerCreditsAfter: 6,
+      aiReasonCode: "plan_first.runner.pressure_central",
+    });
+    const presentations = {
+      "onr_v1_166_karl-de-veres-corporate-stooge": {
+        title: "Karl de Veres, Corporate Stooge",
+        type: "resource" as const,
+      },
+    };
+
+    const [de] = formatChronicleEffectItems(
+      runEnd,
+      "corp",
+      presentations,
+      translate("de"),
+    );
+    const [en] = formatChronicleEffectItems(
+      runEnd,
+      "corp",
+      presentations,
+      translate("en"),
+    );
+
+    expect(de).toMatchObject({
+      title:
+        "Die Runner-KI: 1 Credit durch Karl de Veres, Corporate Stooge erhalten.",
+      category: "economy",
+      importance: "important",
+      visibility: "public",
+      actor: "runner",
+      cardDefinitionId: "onr_v1_166_karl-de-veres-corporate-stooge",
+      cardTitle: "Karl de Veres, Corporate Stooge",
+    });
+    expect(de?.chips).toContain("+1 Credit");
+    expect(en?.title).toBe(
+      "The Runner AI: gained 1 credit from Karl de Veres, Corporate Stooge.",
+    );
+  });
+
+  it("shows credits taken with Short-Term Contract instead of a generic ability", () => {
+    const contract = event("activated_card_ability", {
+      actor: "runner",
+      cardDefinitionId: "onr_v1_178_short-term-contract",
+      cardImplementationAbility: "activated",
+      hostedCreditsTaken: 2,
+      hostedCreditsAfter: 10,
+      remainingCounters: 10,
+      gainedCredits: 2,
+      runnerCreditsAfter: 7,
+      aiReasonCode: "runner_credit_bank_cash_out",
+      resolvedEffects: [
+        {
+          effectId: "short-term-contract.take-hosted-credits",
+          kind: "take_hosted_credits",
+          visibility: "public",
+          side: "runner",
+          amount: 2,
+          remainingCounters: 10,
+          sourceDefinitionId: "onr_v1_178_short-term-contract",
+          sourceTitle: "Short-Term Contract",
+          reason: "card_resolver",
+        },
+      ],
+    });
+    const presentations = {
+      "onr_v1_178_short-term-contract": {
+        title: "Short-Term Contract",
+        type: "resource" as const,
+      },
+    };
+
+    const de = formatChronicleEvent(contract, "corp", {
+      translate: translate("de"),
+      cardPresentationsById: presentations,
+    });
+    const en = formatChronicleEvent(contract, "corp", {
+      translate: translate("en"),
+      cardPresentationsById: presentations,
+    });
+    const effects = formatChronicleEffectItems(
+      contract,
+      "corp",
+      presentations,
+      translate("de"),
+    );
+
+    expect(de).toMatchObject({
+      title: "Die Runner-KI: 2 Credits von Short-Term Contract erhalten.",
+      category: "economy",
+      visibility: "public",
+      cardDefinitionId: "onr_v1_178_short-term-contract",
+      cardTitle: "Short-Term Contract",
+    });
+    expect(de.chips).toContain("Short-Term Contract");
+    expect(de.chips).toContain("+2");
+    expect(en.title).toBe(
+      "The Runner AI: gained 2 credits from Short-Term Contract.",
+    );
+    expect(effects).toEqual([]);
+    expect(`${de.title} ${en.title}`).not.toMatch(
+      /Fähigkeit.+aufgelöst|resolved an ability/,
     );
   });
 
@@ -453,6 +568,57 @@ describe("semantic chronicle localization", () => {
     );
   });
 
+  it("names the program publicly revealed with Temple Microcode Outlet", () => {
+    const templeSearch = event("resolve_choice", {
+      actor: "runner",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "p3_37_search_stack_to_grip",
+      sourceDefinitionId: "temple_microcode_outlet",
+      selectedCount: 1,
+      movedCardCount: 1,
+      searchDestination: "runner_grip",
+      publicRevealKind: "reveal",
+      publicRevealDefinitionId: "codecracker",
+      cardDefinitionId: "codecracker",
+      shuffled: true,
+      aiReasonCode: "runner_stack_search_program",
+    });
+    const presentations = {
+      temple_microcode_outlet: {
+        title: "Temple Microcode Outlet",
+        type: "event",
+      },
+      codecracker: { title: "Codecracker", type: "program" },
+    };
+
+    const de = formatChronicleEvent(templeSearch, "corp", {
+      translate: translate("de"),
+      cardPresentationsById: presentations,
+    });
+    const en = formatChronicleEvent(templeSearch, "corp", {
+      translate: translate("en"),
+      cardPresentationsById: presentations,
+    });
+
+    expect(de).toMatchObject({
+      title:
+        "Die Runner-KI hat mit Temple Microcode Outlet Codecracker aus dem Stack vorgezeigt und auf die Hand genommen.",
+      category: "card",
+      importance: "important",
+      visibility: "public",
+      cardDefinitionId: "codecracker",
+      cardTitle: "Codecracker",
+    });
+    expect(de.chips).toContain("Temple Microcode Outlet");
+    expect(de.chips).toContain("Codecracker");
+    expect(en.title).toBe(
+      "The Runner AI used Temple Microcode Outlet to reveal Codecracker from the stack and add it to their grip.",
+    );
+    expect(`${de.title} ${en.title}`).not.toMatch(
+      /Auswahl aufgelöst|resolved a choice/,
+    );
+  });
+
   it("describes the public steps and lethal access effect of the R&D run", () => {
     const presentations = {
       krash: { title: "Krash", type: "program" },
@@ -536,7 +702,9 @@ describe("semantic chronicle localization", () => {
     );
 
     expect(pump.title).toBe("Du: Stärke von Krash um 1 erhöht.");
-    expect(broken.title).toBe("Du: erste Subroutine von Brain Wash gebrochen.");
+    expect(broken.title).toBe(
+      "Du: Subroutine 1 von Brain Wash mit Krash gebrochen.",
+    );
     expect(passed.title).toBe("Du: Brain Wash passiert.");
     expect(continued.title).toBe("Du: Run auf R&D fortgesetzt.");
     expect(accessItem.title).toBe("Du: auf Fetal AI in R&D zugegriffen.");
@@ -552,6 +720,143 @@ describe("semantic chronicle localization", () => {
       importance: "critical",
       visibility: "public",
     });
+  });
+
+  it("describes pay-or-end-run ICE as the runner's concrete payment", () => {
+    const snowbank = event("continue_run", {
+      actor: "runner",
+      aiReasonCode: "runner.continue_encounter",
+      encounterContinue: true,
+      resolvedEffects: [
+        {
+          effectId: "subroutine_1",
+          kind: "resolve_subroutine",
+          visibility: "public",
+          side: "runner",
+          reason: "ice_subroutine",
+          sourceDefinitionId: "snowbank",
+          sourceTitle: "Snowbank",
+          subroutineIndex: 0,
+          subroutineType: "end_the_run_unless_runner_pays",
+          paidCredits: 1,
+        },
+      ],
+    });
+
+    const [de] = formatChronicleEffectItems(
+      snowbank,
+      "corp",
+      undefined,
+      translate("de"),
+    );
+    const [en] = formatChronicleEffectItems(
+      snowbank,
+      "corp",
+      undefined,
+      translate("en"),
+    );
+
+    expect(de).toMatchObject({
+      title: "Die Runner-KI: 1 Credit bezahlt, um Snowbank zu passieren.",
+      category: "run",
+      importance: "normal",
+      visibility: "public",
+      cardDefinitionId: "snowbank",
+      cardTitle: "Snowbank",
+    });
+    expect(en?.title).toBe("The Runner AI: paid 1 credit to pass Snowbank.");
+    expect(`${de?.title} ${en?.title}`).not.toMatch(
+      /automatischer Effekt|automatic effect/,
+    );
+  });
+
+  it("numbers multiaccess cards and combines access with steal or trash outcomes", () => {
+    const firstAccess = {
+      ...event("access_card", {
+        actor: "runner",
+        aiReasonCode: "runner.access",
+        breachId: "breach_rd",
+        accessIndex: 0,
+        effectiveAccessCount: 2,
+        serverLabel: "R&D",
+        cardDefinitionId: "project_babylon",
+        title: "Project Babylon",
+        redactedKind: "hidden_zone",
+        hiddenZoneBarrier: true,
+      }),
+      eventId: "evt_access_1",
+    };
+    const stolen = {
+      ...event("steal_agenda", {
+        actor: "runner",
+        aiReasonCode: "runner.steal",
+        breachId: "breach_rd",
+        accessIndex: 0,
+        serverLabel: "R&D",
+        cardDefinitionId: "project_babylon",
+        title: "Project Babylon",
+        redactedKind: "hidden_zone",
+        hiddenZoneBarrier: true,
+      }),
+      eventId: "evt_steal_1",
+    };
+    const secondAccess = {
+      ...event("access_card", {
+        actor: "runner",
+        aiReasonCode: "runner.access",
+        breachId: "breach_rd",
+        accessIndex: 1,
+        effectiveAccessCount: 2,
+        serverLabel: "R&D",
+        cardDefinitionId: "pad_campaign",
+        title: "PAD Campaign",
+        redactedKind: "hidden_zone",
+        hiddenZoneBarrier: true,
+      }),
+      eventId: "evt_access_2",
+    };
+    const trashed = {
+      ...event("trash_accessed_card", {
+        actor: "runner",
+        aiReasonCode: "runner.trash",
+        breachId: "breach_rd",
+        accessIndex: 1,
+        serverLabel: "R&D",
+        cardDefinitionId: "pad_campaign",
+        title: "PAD Campaign",
+        redactedKind: "hidden_zone",
+        hiddenZoneBarrier: true,
+      }),
+      eventId: "evt_trash_2",
+    };
+    const events = [firstAccess, stolen, secondAccess, trashed];
+    const plan = chronicleAccessOutcomePlan(events);
+    const firstAccessItem = formatChronicleEvent(firstAccess, "corp", {
+      translate: translate("de"),
+    });
+    const stolenItem = formatChronicleEvent(stolen, "corp", {
+      translate: translate("de"),
+      accessContext: plan.accessContextByOutcomeEventId[stolen.eventId]!,
+    });
+    const trashedItem = formatChronicleEvent(trashed, "corp", {
+      translate: translate("de"),
+      accessContext: plan.accessContextByOutcomeEventId[trashed.eventId]!,
+    });
+
+    expect(firstAccessItem.title).toBe(
+      "Karte 1 von 2: Die Runner-KI hat in R&D auf Project Babylon zugegriffen.",
+    );
+    expect(plan.suppressedAccessEventIds).toEqual(
+      new Set(["evt_access_1", "evt_access_2"]),
+    );
+    expect(stolenItem.title).toBe(
+      "Karte 1 von 2: Die Runner-KI hat in R&D auf Project Babylon zugegriffen und die Agenda gestohlen.",
+    );
+    expect(stolenItem.visibility).toBe("public");
+    expect(trashedItem.title).toBe(
+      "Karte 2 von 2: Die Runner-KI hat in R&D auf PAD Campaign zugegriffen und die Karte getrasht.",
+    );
+    expect(trashedItem.visibility).toBe("public");
   });
 
   it("names damage from a publicly identified installed access card", () => {

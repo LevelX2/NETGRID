@@ -531,6 +531,125 @@ describe("AI input DTO score-conversion contract", () => {
     );
   });
 
+  it("preserves visible source and ICE target bindings in a public choice", () => {
+    const action = conversionAction();
+    action.side = "runner";
+    action.type = "resolve_choice";
+    action.timingPoint = "runner_action.main";
+    action.payload = { choiceId: "broken_ice_virus_counter_7" };
+    const view = playerView(action, "runner");
+    view.own.rig = [
+      {
+        instanceId: "visible-pattel",
+        known: true,
+        title: "Pattel's Virus",
+        type: "program",
+        owner: "runner",
+        controller: "runner",
+      },
+    ];
+    view.servers = [
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [
+          {
+            instanceId: "visible-glacier",
+            known: true,
+            title: "Glacier",
+            type: "ice",
+            rezzed: true,
+          },
+          { instanceId: "hidden-ice", known: false, rezzed: false },
+        ],
+        root: [],
+      },
+    ] as PlayerView["servers"];
+    view.pendingChoice = {
+      choiceId: "broken_ice_virus_counter_7",
+      side: "runner",
+      source: "broken_ice.virus_counter:7",
+      prompt: "Pattel-Counter platzieren",
+      kind: "select_option",
+      options: [
+        {
+          id: "valid",
+          label: "Glacier",
+          value: "visible-glacier",
+          metadata: {
+            sourceCardInstanceId: "visible-pattel",
+            targetCardInstanceId: "visible-glacier",
+          },
+        },
+        {
+          id: "hidden",
+          label: "Verborgen",
+          value: "hidden-ice",
+          metadata: {
+            sourceCardInstanceId: "unknown-source",
+            targetCardInstanceId: "hidden-ice",
+          },
+        },
+      ],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: 7,
+      visibility: "public",
+    };
+    view.stateVersion = 7;
+    action.expiresAtStateVersion = 7;
+    const built = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "hard",
+      seed: "visible-choice-bindings",
+      decisionId: "visible-choice-bindings:runner:7",
+      actionNumber: 1,
+      profileId: "visible-choice-bindings-test",
+    });
+
+    expect(built.playerView.pendingChoice?.options[0]?.metadata).toEqual({
+      sourceCardInstanceId: "visible-pattel",
+      targetCardInstanceId: "visible-glacier",
+    });
+    expect(built.playerView.pendingChoice?.options[1]).not.toHaveProperty(
+      "metadata",
+    );
+  });
+
+  it("preserves the structured Runner hazard-removal discriminator", () => {
+    const action = conversionAction();
+    action.side = "runner";
+    action.type = "trigger_ability";
+    action.payload = {
+      cardId: "runner-identity",
+      runnerAbility: "remove_runner_trace_counter",
+      counterType: "baskerville",
+      removeCounterAmount: 1,
+      abilityId: "remove_runner_trace_counter",
+    };
+    const view = playerView(action, "runner");
+    const built = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "hard",
+      seed: "runner-hazard-removal",
+      decisionId: "runner-hazard-removal:runner:1",
+      actionNumber: 1,
+      profileId: "runner-hazard-removal-test",
+    });
+
+    expect(built.legalActions[0]?.payload).toMatchObject({
+      runnerAbility: "remove_runner_trace_counter",
+      counterType: "baskerville",
+      removeCounterAmount: 1,
+    });
+  });
+
   it("preserves only explicitly public resolved effects for plan-phase communication", () => {
     const action = conversionAction();
     action.side = "runner";

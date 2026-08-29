@@ -750,6 +750,22 @@ export function selectedChoicesForDecision(
   if (
     input.side === "runner" &&
     choice.kind === "select_option" &&
+    choice.source.startsWith("broken_ice.virus_counter:")
+  ) {
+    return resolved(
+      selectedRunnerBrokenIceVirusCounterOptionIds(
+        input,
+        action,
+        choice,
+        selectableOptions,
+        currentPortfolio,
+      ),
+      "resident_runner_broken_ice_virus_counter",
+    );
+  }
+  if (
+    input.side === "runner" &&
+    choice.kind === "select_option" &&
     choice.source === "card_implementation.vacuum_link_rewind"
   ) {
     return resolved(
@@ -2587,6 +2603,90 @@ function selectedRunnerAccessProgramInstallMemoryOptionIds(
       input,
       action,
       "The accessed-agenda memory continuation must select the minimal installed-program set that satisfies its encoded memory deficit.",
+    );
+  }
+  return selectedOptionIds;
+}
+
+function selectedRunnerBrokenIceVirusCounterOptionIds(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+  selectableOptions: PendingChoiceOptions,
+  currentPortfolio?: ResidentPlanPortfolio,
+): string[] {
+  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+  const executor = portfolio?.instances.find(
+    (instance) =>
+      instance.instanceId === portfolio.executorInstanceId &&
+      (instance.moduleId === "runner.convert_run_window" ||
+        instance.moduleId === "runner.pressure_central" ||
+        instance.moduleId === "runner.contest_remote") &&
+      instance.executionState === "executor",
+  );
+  const executorState = executor?.moduleState as
+    | {
+        kind?: unknown;
+        brokenIceVirusCounterChoiceBinding?: {
+          choiceId?: unknown;
+          actionId?: unknown;
+          selectedOptionIds?: unknown;
+          observedAtStateVersion?: unknown;
+        };
+      }
+    | undefined;
+  const binding = executorState?.brokenIceVirusCounterChoiceBinding;
+  const selectedOptionIds = Array.isArray(binding?.selectedOptionIds)
+    ? binding.selectedOptionIds.filter(
+        (optionId): optionId is string => typeof optionId === "string",
+      )
+    : [];
+  const optionIds = selectableOptions.map((option) => option.id);
+  const sourceIds = new Set(
+    selectedOptionIds.flatMap((optionId) => {
+      const option = selectableOptions.find((entry) => entry.id === optionId);
+      return typeof option?.metadata?.sourceCardInstanceId === "string"
+        ? [option.metadata.sourceCardInstanceId]
+        : [];
+    }),
+  );
+  const [requirement] = action.choiceRequirements ?? [];
+  const exactBinding =
+    portfolio?.side === "runner" &&
+    executor !== undefined &&
+    (executorState?.kind === "run_window" ||
+      executorState?.kind === "central_pressure" ||
+      executorState?.kind === "remote_contest") &&
+    binding?.choiceId === choice.choiceId &&
+    binding.actionId === action.actionId &&
+    binding.observedAtStateVersion === input.playerView.stateVersion &&
+    selectedOptionIds.length === choice.minSelections &&
+    sourceIds.size === choice.minSelections &&
+    choice.source ===
+      `broken_ice.virus_counter:${input.playerView.stateVersion}` &&
+    choice.choiceId ===
+      `broken_ice_virus_counter_${input.playerView.stateVersion}` &&
+    choice.side === "runner" &&
+    choice.stateVersion === input.playerView.stateVersion &&
+    choice.visibility === "public" &&
+    choice.minSelections > 0 &&
+    choice.maxSelections === choice.minSelections &&
+    action.side === "runner" &&
+    action.type === "resolve_choice" &&
+    action.source === "game_rule" &&
+    action.timingPoint === input.playerView.timingPoint &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === choice.minSelections &&
+    requirement.maxSelections === choice.maxSelections &&
+    requirement.optionIds.length === optionIds.length &&
+    optionIds.every((optionId) => requirement.optionIds.includes(optionId));
+  if (!exactBinding) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "Complete broken-ICE virus counters only from the exact resident Runner run-plan binding and matching Engine choice payload.",
     );
   }
   return selectedOptionIds;

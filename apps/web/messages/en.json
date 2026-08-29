@@ -2059,6 +2059,9 @@
         "agendaPoints": "Agenda {value}"
       }
     },
+    "access": {
+      "cardPosition": "Card {number} of {total}"
+    },
     "event": {
       "gameCreated": "The game was created.",
       "timeExpired": "{subject}: player clock expired.",
@@ -2077,6 +2080,12 @@
       "runEnded": "The run ended.",
       "cardAccessed": "{subject}: accessed {card}.",
       "cardAccessedInServer": "{subject}: accessed {card} in {server}.",
+      "numberedCardAccessedInServerYou": "Card {number} of {total}: You accessed {card} in {server}.",
+      "numberedCardAccessedInServerOther": "Card {number} of {total}: {subject} accessed {card} in {server}.",
+      "cardAccessedAndStolenYou": "{position}You accessed {card} in {server} and stole the agenda.",
+      "cardAccessedAndStolenOther": "{position}{subject} accessed {card} in {server} and stole the agenda.",
+      "cardAccessedAndTrashedYou": "{position}You accessed {card} in {server} and trashed the card.",
+      "cardAccessedAndTrashedOther": "{position}{subject} accessed {card} in {server} and trashed the card.",
       "cardTrashed": "{subject}: trashed {card}.",
       "damage": "{subject}: suffered {amount} damage.",
       "tagsGained": "{subject}: gained {amount} tags.",
@@ -2084,6 +2093,8 @@
       "badPublicity": "{subject}: gained {amount} bad publicity.",
       "traceStarted": "{subject}: initiated a trace.",
       "choiceResolved": "{subject}: resolved a choice.",
+      "stackProgramRevealedYou": "You used {source} to reveal {program} from the stack and add it to your grip.",
+      "stackProgramRevealedOther": "{subject} used {source} to reveal {program} from the stack and add it to their grip.",
       "cardsDiscardedToArchives": "{subject}: discarded {count, plural, one {# card} other {# cards}} to Archives at the end of the turn.",
       "cardsDiscardedToHeap": "{subject}: discarded {count, plural, one {# card} other {# cards}} to the Heap at the end of the turn.",
       "discardResultMissing": "{subject}: turn-end discard details are missing.",
@@ -2096,6 +2107,7 @@
       "firstSubroutineBroken": "{subject}: broke the first subroutine on {ice}.",
       "secondSubroutineBroken": "{subject}: broke the second subroutine on {ice}.",
       "numberedSubroutineBroken": "{subject}: broke subroutine {number} on {ice}.",
+      "numberedSubroutineBrokenWithBreaker": "{subject}: broke subroutine {number} on {ice} with {breaker}.",
       "icePassed": "{subject}: passed {card}.",
       "subroutineBroken": "{subject}: broke a subroutine.",
       "subroutineResolved": "A subroutine resolved.",
@@ -2126,6 +2138,10 @@
       "tagGainedChip": "Tag gained",
       "tagsAddedChip": "+{amount} {amount, plural, one {tag} other {tags}}",
       "tagsCurrentChip": "Now {amount} {amount, plural, one {tag} other {tags}}",
+      "runnerPaidToPassIce": "{subject}: paid {amount, plural, one {# credit} other {# credits}} to pass {source}.",
+      "runnerDidNotPayToPassIce": "{subject}: did not pay for {source}; the run ended.",
+      "creditsPaidChip": "{amount, plural, one {# credit paid} other {# credits paid}}",
+      "notPaidChip": "Not paid",
       "resolved": "An automatic effect from {source} resolved.",
       "automatic": "Automatic",
       "flatline": "Flatline",
