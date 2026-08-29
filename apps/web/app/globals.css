@@ -13717,9 +13717,9 @@ select,
 }
 
 .optionsDialogHeader {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
   padding: 14px;
   border-bottom: 1px solid var(--line);
@@ -13727,6 +13727,10 @@ select,
 
 .optionsDialogHeader h2 {
   margin: 0;
+}
+
+.optionsDialogClose {
+  justify-self: end;
 }
 
 .confirmationDialogOverlay {
@@ -13824,10 +13828,66 @@ select,
   cursor: pointer;
 }
 
+.optionsHeaderLocaleSelect {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--muted);
+}
+
+.optionsHeaderLocaleIcon {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  filter: drop-shadow(
+    0 1px 2px color-mix(in srgb, var(--runner), transparent 58%)
+  );
+}
+
+.optionsHeaderLocaleIconFill {
+  fill: var(--runner);
+}
+
+.optionsHeaderLocaleIconGrid {
+  fill: none;
+  stroke: var(--mark-text);
+  stroke-width: 1.55;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.localeSelect.optionsHeaderLocaleSelect select {
+  min-width: 132px;
+  min-height: 34px;
+  padding-block: 0.35rem;
+}
+
 .maintenanceLocaleSelect select {
   background: #fff;
   color: #102033;
   border-color: #9db0c3;
+}
+
+@media (max-width: 520px) {
+  .optionsPanel > .catalogHeader > .optionsHeaderLocaleSelect {
+    flex-basis: 100%;
+  }
+
+  .optionsDialogHeader {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .optionsDialogHeader > .optionsHeaderLocaleSelect {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: start;
+  }
+
+  .optionsDialogClose {
+    grid-column: 2;
+    grid-row: 1;
+  }
 }
 
 .segmented button {

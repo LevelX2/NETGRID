@@ -6,7 +6,6 @@ import {
   Keyboard,
   Moon,
   Shield,
-  SlidersHorizontal,
   Sun,
   Trash2,
   Volume2,
@@ -212,7 +211,10 @@ export function OptionsPanel({
             <h2>{t("title")}</h2>
             <p className="meta">{t("subtitle")}</p>
           </div>
-          <SlidersHorizontal size={18} />
+          <LocaleSelect
+            className="optionsHeaderLocaleSelect"
+            presentation="header"
+          />
         </div>
       ) : null}
       <div className="optionsTabs" role="tablist" aria-label={t("tabs.label")}>
@@ -296,7 +298,6 @@ export function OptionsPanel({
           </>
         ) : activeTab === "display" ? (
           <>
-            <LocaleSettings />
             <ColorSchemeSettings
               scheme={colorScheme}
               onChange={onColorScheme}
@@ -386,20 +387,6 @@ export function OptionsPanel({
         )}
       </div>
     </section>
-  );
-}
-
-function LocaleSettings() {
-  const t = useTranslations("LocaleSettings");
-
-  return (
-    <div className="colorSchemeSettings">
-      <div>
-        <span className="settingsTitle">{t("title")}</span>
-        <span className="meta">{t("help")}</span>
-      </div>
-      <LocaleSelect />
-    </div>
   );
 }
 
