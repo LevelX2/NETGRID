@@ -54,6 +54,11 @@ export type RunnerRunStartTrashSourceProfile = Readonly<{
   sourceEffect: "trash_source";
 }>;
 
+export type RunnerRunStartRandomStrengthSourceProfile = Readonly<{
+  sourceEffect: "random_run_strength";
+  dieSides: number;
+}>;
+
 export function runnerInstalledDebtFinancingLiability(
   definitionIds: readonly (string | undefined)[],
 ): RunnerDebtFinancingLiability {
@@ -430,6 +435,42 @@ export function runnerRunStartTrashSourceProfileFromPlanningCard(
   ).flatMap((ability) => ability.effects);
   return effects.length === 1 && effects[0]?.kind === "trash_source"
     ? { sourceEffect: "trash_source" }
+    : undefined;
+}
+
+/**
+ * Canonical profile for a random-strength breaker that the Engine resolves at
+ * the start of every run. Multiple copies of the same definition are
+ * order-equivalent; the Engine still requires one exact source payload.
+ */
+export function runnerRunStartRandomStrengthSourceProfile(
+  definitionId: string | undefined,
+): RunnerRunStartRandomStrengthSourceProfile | undefined {
+  if (!definitionId) return undefined;
+  return runnerRunStartRandomStrengthSourceProfileFromPlanningCard(
+    cardSpecPlanningCardByDefinitionId(definitionId),
+  );
+}
+
+export function runnerRunStartRandomStrengthSourceProfileFromPlanningCard(
+  card: RunnerPlanningCard | undefined,
+): RunnerRunStartRandomStrengthSourceProfile | undefined {
+  const planning = card?.planning;
+  const strength = planning?.engine.characteristics?.strength;
+  const hasRunStartRandomStrengthAbility =
+    planning?.engine.icebreakerAbilities?.some(
+      (ability) =>
+        ability.kind === "break_subroutine" &&
+        ability.special?.kind === "run_start_random_strength_bonus",
+    ) === true;
+  return planning?.side === "runner" &&
+    strength?.kind === "random_die" &&
+    positiveSafeInteger(strength.dieSides) &&
+    hasRunStartRandomStrengthAbility
+    ? {
+        sourceEffect: "random_run_strength",
+        dieSides: strength.dieSides,
+      }
     : undefined;
 }
 

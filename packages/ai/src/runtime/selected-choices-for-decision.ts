@@ -21,6 +21,7 @@ import {
   corpScoredAgendaFreeRezProfile,
 } from "./corp-canonical-card-facts";
 import { selectedCorpProgramTrashChoiceOptionIds } from "./corp-program-trash-choice";
+import { selectedCorpStartOfTurnOrderChoiceOptionId } from "./corp-start-of-turn-order-choice";
 import {
   selectedDiscardChoiceOptionIds,
   type DiscardChoiceKeepScore,
@@ -692,6 +693,26 @@ export function selectedChoicesForDecision(
       selectedOptionId !== undefined ? [selectedOptionId] : [],
       "setup_mulligan",
     );
+  }
+  if (
+    input.side === "corp" &&
+    choice.kind === "select_cards" &&
+    choice.source.startsWith("corp_start.order:")
+  ) {
+    const selectedOptionId = selectedCorpStartOfTurnOrderChoiceOptionId(
+      input,
+      action,
+      choice,
+      selectableOptions,
+    );
+    if (!selectedOptionId) {
+      throw unresolvedChoiceFailure(
+        input,
+        action,
+        "Resolve Corp start-of-turn ordering only from the exact current rule window and equivalent complete canonical source-effect profiles.",
+      );
+    }
+    return resolved([selectedOptionId], "corp_start_of_turn_order");
   }
   if (
     input.side === "runner" &&
