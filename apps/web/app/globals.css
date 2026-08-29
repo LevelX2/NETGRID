@@ -5682,6 +5682,24 @@ select {
   overflow-x: auto;
 }
 
+.damageImpactMeter.is-compact {
+  width: 100%;
+  min-height: 36px;
+  padding: 6px;
+}
+
+.damageImpactMeter.is-compact .damageImpactSegment {
+  min-width: 12px;
+  min-height: 22px;
+}
+
+.damageImpactMeter.is-compact .damageImpactFlatline {
+  min-height: 22px;
+  padding-right: 5px;
+  padding-left: 7px;
+  font-size: 9px;
+}
+
 .damageImpactSegment {
   flex: 1 1 22px;
   min-width: 16px;
@@ -11660,6 +11678,18 @@ section[data-testid="legal-actions"].cueHighlight {
   justify-self: center;
 }
 
+.accessRevealBody.hasDamageImpact {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.accessRevealBody.hasDamageImpact .accessRevealCard {
+  width: min(220px, 100%);
+}
+
+.accessRevealBody.hasDamageImpact .accessRevealDecision {
+  width: 100%;
+}
+
 .accessRevealCard .card.preview {
   min-height: 0;
 }
@@ -11689,6 +11719,7 @@ section[data-testid="legal-actions"].cueHighlight {
 
 .accessDamageStage {
   --access-damage: #39d0ff;
+  --damage-impact: var(--access-damage);
   width: 100%;
   display: grid;
   justify-items: center;
@@ -11701,6 +11732,10 @@ section[data-testid="legal-actions"].cueHighlight {
 
 .accessDamageStage.damage-core {
   --access-damage: #b98cff;
+}
+
+.accessDamageStage.is-flatline {
+  --access-damage: #ff3b30;
 }
 
 .accessDamageTitle {

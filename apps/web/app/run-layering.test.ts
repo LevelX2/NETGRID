@@ -81,12 +81,8 @@ describe("run window layering", () => {
     expect(runTimelineOverlaySource).toContain(
       'data-testid="corp-run-auto-pass-control"',
     );
-    expect(runTimelineOverlaySource).toContain(
-      't("autoPassRest")',
-    );
-    expect(runTimelineOverlaySource).toContain(
-      't("autoPassActive")',
-    );
+    expect(runTimelineOverlaySource).toContain('t("autoPassRest")');
+    expect(runTimelineOverlaySource).toContain('t("autoPassActive")');
     expect(runTimelineOverlaySource).toContain('view.side === "corp"');
     expect(pageSource).toContain("automaticCorpRunPassAction(");
     expect(pageSource).toContain("corpRunAutoPassSubmittedKeyRef");
@@ -344,6 +340,9 @@ describe("run window layering", () => {
     expect(accessReviewModalSource).toContain(
       'data-testid="access-damage-stage"',
     );
+    expect(accessReviewModalSource).toContain("<DamageImpactMeter");
+    expect(accessReviewModalSource).toContain('" hasDamageImpact"');
+    expect(accessReviewModalSource).toContain("reveal.card?.title");
     expect(accessReviewModalSource).toContain("reveal.outcomeStatus");
   });
 

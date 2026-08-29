@@ -1,6 +1,6 @@
 # Damage-Anzeige visuell vereinheitlichen
 
-Status: DVI-01 abgeschlossen, DVI-02 aktiv
+Status: DVI-01 und DVI-02 abgeschlossen, DVI-03 aktiv
 
 ## Quelle und Zielprüfung
 
@@ -123,6 +123,23 @@ app/damage-impact-meter.test.ts app/damage-impact-overlay.test.ts`: 10 Tests
   zeigt dasselbe Meter ohne erzwungene Karte; Hidden-Info-Grenze bleibt
   testgesichert.
 - Commit: `feat(web): unify access and standalone damage presentation`
+
+Abschluss 2026-08-29:
+
+- `AccessDamageStage` nutzt dieselbe `DamageImpactMeter`-Komponente wie das
+  normale Damage-Fenster.
+- Während eines Damage-Ergebnisses bleibt `reveal.card` sichtbar; die Karte
+  stammt unverändert aus der bereits öffentlichen Access-Reveal-Darstellung.
+- Das Damage-Layout ordnet die öffentliche Karte kompakt über dem gemeinsamen
+  Meter an und wechselt danach zurück in den bisherigen Access-Ablauf.
+- Flatline-Farbe und -Titel sind in beiden Varianten konsistent.
+- `corepack pnpm --filter @netgrid/web exec vitest run
+app/damage-impact-meter.test.ts app/damage-impact-overlay.test.ts
+app/run-layering.test.ts app/action-cues.test.ts`: 69 Tests bestanden.
+- Web-Typecheck erneut ausgeführt; weiterhin ausschließlich der dokumentierte,
+  unabhängige Baseline-Fixture-Fehler in
+  `app/ai-turn-plan-comparison-ui.test.ts`.
+- `git diff --check`: bestanden.
 
 ### DVI-03 – Fokussierte Endverifikation und Prozessabschluss
 

@@ -18,6 +18,7 @@ import { CardView } from "../cards/CardView";
 import type { DisplayVisibleCard } from "../cards/card-view-model";
 import type { CardDisplayMode } from "../settings/settings-model";
 import { CostChips } from "./ActionControls";
+import { DamageImpactMeter } from "./DamageImpactMeter";
 import { WindowEventIcon } from "./WindowEventIcon";
 
 const reviewCardPreviewStyle = {
@@ -214,7 +215,7 @@ export function AccessRevealModal({
           </div>
         ) : null}
         <div
-          className={`accessRevealBody${singleRevealedCard ? " hasSingleRevealedCard" : ""}`}
+          className={`accessRevealBody${singleRevealedCard ? " hasSingleRevealedCard" : ""}${damageImpact ? " hasDamageImpact" : ""}`}
         >
           {reveal.card ? (
             <div className="accessRevealCard">
@@ -379,8 +380,18 @@ function AccessDamageStage({
   onDismiss?: () => void;
 }) {
   const t = useTranslations("Actions.access");
+  const damageT = useTranslations("Actions.damage");
   const typeLabel = t(`damageType.${cue.damageType}`);
   const sourceLabel = sourceTitle ?? cue.sourceLabel;
+  const gripLabel =
+    cue.runnerGripBefore !== undefined && cue.runnerGripAfter !== undefined
+      ? t("gripTransition", {
+          before: cue.runnerGripBefore,
+          after: cue.runnerGripAfter,
+        })
+      : cue.runnerGripAfter !== undefined
+        ? damageT("gripNow", { value: cue.runnerGripAfter })
+        : damageT("gripPool");
   const damageSentence = t("damageSentence", {
     amount: cue.amount,
     type: typeLabel,
@@ -388,12 +399,15 @@ function AccessDamageStage({
   });
   return (
     <div
-      className={`accessDamageStage damage-${cue.damageType}`}
+      className={`accessDamageStage damage-${cue.damageType}${cue.flatline ? " is-flatline" : ""}`}
       data-testid="access-damage-stage"
     >
       <WindowEventIcon kind={`${cue.damageType}-damage`} side="runner" />
-      <strong className="accessDamageTitle">{typeLabel}</strong>
+      <strong className="accessDamageTitle">
+        {cue.flatline ? damageT("flatline") : typeLabel}
+      </strong>
       <p className="accessRevealStatus">{damageSentence}</p>
+      <DamageImpactMeter cue={cue} ariaLabel={gripLabel} compact />
       <div className="accessDamageStats">
         {cue.runnerGripBefore !== undefined &&
         cue.runnerGripAfter !== undefined ? (
