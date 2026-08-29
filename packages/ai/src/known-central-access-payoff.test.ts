@@ -618,6 +618,77 @@ describe("known central access payoff HQ knownness", () => {
     expect(payoff.evidence).not.toContain("central_memory_payoff:access_bonus");
   });
 
+  it("suppresses the match-like repeat run from reconstructed multiaccess memory", () => {
+    const accessedDefinitions = [
+      "simple_economy_operation",
+      "simple_agenda",
+      "onr_proteus_032_misleading-access-menus",
+      "simple_priority_agenda",
+      "onr_v1_295_night-shift",
+    ];
+    const publicEvents: PublicGameEvent[] = [];
+    let stateVersion = 0;
+    for (const [accessIndex, cardDefinitionId] of accessedDefinitions.entries()) {
+      publicEvents.push(
+        publicEvent(`evt_access_${accessIndex}`, "access_card", stateVersion, {
+          actor: "runner",
+          actionType: "access_card",
+          serverId: "rd",
+          cardDefinitionId,
+          accessIndex,
+          effectiveAccessCount: accessedDefinitions.length,
+        }),
+      );
+      stateVersion += 1;
+      if (accessIndex === 1 || accessIndex === 3) {
+        publicEvents.push(
+          publicEvent(`evt_steal_${accessIndex}`, "steal_agenda", stateVersion, {
+            actor: "runner",
+            actionType: "steal_agenda",
+            serverId: "rd",
+            cardDefinitionId,
+            accessIndex,
+          }),
+        );
+        stateVersion += 1;
+      }
+    }
+    publicEvents.push(
+      publicEvent("evt_corp_draw", "mandatory_draw", stateVersion, {
+        actor: "corp",
+        actionType: "mandatory_draw",
+      }),
+    );
+    const input = aiInput({
+      handCount: 1,
+      publicEvents,
+      rig: [
+        visibleInstalledRunnerCard("onr_v1_139_r-and-d-interface", "hardware"),
+      ],
+      servers: [
+        { id: "hq", label: "HQ", ice: [], root: [] },
+        { id: "rd", label: "R&D", ice: [], root: [] },
+      ],
+      legalActions: [runAction("run-rd", "rd")],
+    });
+
+    const payoff = evaluateKnownCentralAccessPayoff(input, "rd");
+
+    expect(payoff).toMatchObject({
+      payoff: "known_low_value",
+      knownNoCurrentPayoff: true,
+      penalty: 760,
+    });
+    expect(payoff.evidence).toEqual(
+      expect.arrayContaining([
+        "rnd_known_access_depth_estimate:2",
+        "rnd_known_sequence_evaluated_count:2",
+        "central_memory_payoff:known_low_value",
+        "rd_run_suppressed_by_known_sequence_no_payoff:true",
+      ]),
+    );
+  });
+
   it("keeps R&D multiaccess pressure when the known accessible sequence contains an agenda", () => {
     const input = aiInput({
       handCount: 1,

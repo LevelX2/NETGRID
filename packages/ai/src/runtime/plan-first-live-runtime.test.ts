@@ -22945,6 +22945,144 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("keeps match-like known R&D multiaccess repetition blocked inside runner.pressure_central", () => {
+    resetResidentPlanPortfolioMemory();
+    const run = legalAction(
+      "runner.start_run.rd",
+      "runner",
+      "start_run",
+      "Run R&D",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "rd" } },
+    );
+    const credit = legalAction(
+      "runner.gain_credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [run, credit]);
+    input.playerView.own.credits = 0;
+    input.playerView.own.gripOrHq = [
+      visibleCard("grip-1", "runner", "event"),
+      visibleCard("grip-2", "runner", "event"),
+      visibleCard("grip-3", "runner", "event"),
+    ];
+    input.playerView.own.rig = [
+      visibleCard("rd-interface", "runner", "hardware", {
+        definitionId: "onr_v1_139_r-and-d-interface",
+        title: "R&D Interface",
+      }),
+    ];
+    input.playerView.opponent.deckCount = 20;
+    input.playerView.servers = [server("hq"), server("rd")];
+
+    const accessedDefinitions = [
+      "simple_economy_operation",
+      "simple_agenda",
+      "onr_proteus_032_misleading-access-menus",
+      "simple_priority_agenda",
+      "onr_v1_295_night-shift",
+    ];
+    const publicEvents: PublicGameEvent[] = [];
+    let stateVersion = 0;
+    for (const [accessIndex, cardDefinitionId] of accessedDefinitions.entries()) {
+      publicEvents.push({
+        eventId: `evt_access_${accessIndex}`,
+        type: "access_card",
+        stateVersionBefore: stateVersion,
+        stateVersionAfter: stateVersion + 1,
+        stateHashAfter: `hash_access_${accessIndex}`,
+        visibilityClass: "hidden_info_barrier",
+        publicPayload: {
+          actor: "runner",
+          actionType: "access_card",
+          serverId: "rd",
+          cardDefinitionId,
+          accessIndex,
+          effectiveAccessCount: accessedDefinitions.length,
+        },
+      } as PublicGameEvent);
+      stateVersion += 1;
+      if (accessIndex === 1 || accessIndex === 3) {
+        publicEvents.push({
+          eventId: `evt_steal_${accessIndex}`,
+          type: "steal_agenda",
+          stateVersionBefore: stateVersion,
+          stateVersionAfter: stateVersion + 1,
+          stateHashAfter: `hash_steal_${accessIndex}`,
+          visibilityClass: "hidden_info_barrier",
+          publicPayload: {
+            actor: "runner",
+            actionType: "steal_agenda",
+            serverId: "rd",
+            cardDefinitionId,
+            accessIndex,
+          },
+        } as PublicGameEvent);
+        stateVersion += 1;
+      }
+    }
+    publicEvents.push({
+      eventId: "evt_corp_draw",
+      type: "mandatory_draw",
+      stateVersionBefore: stateVersion,
+      stateVersionAfter: stateVersion + 1,
+      stateHashAfter: "hash_corp_draw",
+      visibilityClass: "hidden_info_barrier",
+      publicPayload: { actor: "corp", actionType: "mandatory_draw" },
+    } as PublicGameEvent);
+    stateVersion += 1;
+    input.playerView.stateVersion = stateVersion;
+    input.playerView.publicEvents = publicEvents;
+    input.eventTail = publicEvents;
+    input.legalActions.forEach((action) => {
+      action.expiresAtStateVersion = stateVersion;
+    });
+    Object.assign(input, {
+      planningStateIdentity: buildPlanningStateIdentity(input),
+    });
+
+    expect(evaluateRunnerRunTargets({ input })[0]).toMatchObject({
+      actionId: "runner.start_run.rd",
+      targetServerId: "rd",
+      knownAccessState: "known_no_current_payoff",
+      recommendation: "do_not_run_now",
+    });
+    const decision = liveContext({
+      evaluateRunnerRunTargets,
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
+    expect(
+      decision.decisionDebug?.actionAlternatives?.find(
+        (alternative) => alternative.actionId === run.actionId,
+      ),
+    ).toMatchObject({
+      excluded: true,
+      whyNot: expect.arrayContaining([
+        expect.stringContaining("runner.pressure_central"),
+        expect.stringContaining(
+          "runner_central_run_not_active_pressure_route:rd:reachable:do_not_run_now",
+        ),
+      ]),
+    });
+    expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
+      instances: expect.arrayContaining([
+        expect.objectContaining({
+          moduleId: "runner.pressure_central",
+          target: { kind: "server", id: "rd" },
+          viability: "blocked",
+        }),
+      ]),
+    });
+  });
+
   it("keeps HQ pressure when current memory contains a payoff", () => {
     resetResidentPlanPortfolioMemory();
     const run = legalAction(
