@@ -750,6 +750,9 @@ export default function Page() {
   const [standardDeckTablePreviewId, setStandardDeckTablePreviewId] = useState<
     string | null
   >(null);
+  const [localDeckTableEditId, setLocalDeckTableEditId] = useState<
+    string | null
+  >(null);
   const [standardDecksLoaded, setStandardDecksLoaded] = useState(false);
   const [standardDeckCatalogState, setStandardDeckCatalogState] = useState(
     INITIAL_STANDARD_DECK_CATALOG_STATE,
@@ -3594,9 +3597,10 @@ export default function Page() {
   ]);
 
   useEffect(() => {
-    if (entryTab !== "decks" && standardDeckTablePreviewId)
-      setStandardDeckTablePreviewId(null);
-  }, [entryTab, standardDeckTablePreviewId]);
+    if (entryTab === "decks") return;
+    if (standardDeckTablePreviewId) setStandardDeckTablePreviewId(null);
+    if (localDeckTableEditId) setLocalDeckTableEditId(null);
+  }, [entryTab, localDeckTableEditId, standardDeckTablePreviewId]);
 
   useEffect(() => {
     if (entryTab !== "decks" || playableCatalogCards.length === 0) return;
@@ -5600,7 +5604,19 @@ export default function Page() {
       setNotice(noticeT("standardDecksUnavailable"));
       return;
     }
+    setLocalDeckTableEditId(null);
     setStandardDeckTablePreviewId(standardDeckId);
+    setEntryTab("decks");
+  };
+
+  const openLocalDeckOnTable = (deckId: string) => {
+    if (!localDecks.some((deck) => deck.deckId === deckId)) {
+      setNotice(noticeT("personalDeckNotFound"));
+      return;
+    }
+    setStandardDeckTablePreviewId(null);
+    setSelectedLocalDeckId(deckId);
+    setLocalDeckTableEditId(deckId);
     setEntryTab("decks");
   };
 
@@ -6568,6 +6584,7 @@ export default function Page() {
                                 setSelectedCorpLocalDeckId
                               }
                               onOpenStandardDeck={openStandardDeckOnTable}
+                              onOpenLocalDeck={openLocalDeckOnTable}
                               onReloadStandardDeckCatalog={
                                 reloadStandardDeckCatalog
                               }
@@ -6682,6 +6699,7 @@ export default function Page() {
                               setSelectedParticipantBCorpLocalDeckId
                             }
                             onOpenStandardDeck={openStandardDeckOnTable}
+                            onOpenLocalDeck={openLocalDeckOnTable}
                             onJoinMatchId={setJoinMatchId}
                             onJoinToken={setJoinToken}
                             onJoinMatch={joinMatch}
@@ -6739,6 +6757,10 @@ export default function Page() {
                         }
                         standardCopyBusy={accountDeckBusy}
                         standardDeckPreview={standardDeckTablePreview}
+                        openLocalDeckOnTableId={localDeckTableEditId}
+                        onLocalDeckTableOpened={() =>
+                          setLocalDeckTableEditId(null)
+                        }
                         onCloseStandardDeckPreview={
                           closeStandardDeckTablePreview
                         }
@@ -7593,6 +7615,9 @@ export default function Page() {
                       standardDeckCatalogState.refreshing,
                     standardCopyBusy: accountDeckBusy,
                     standardDeckPreview: standardDeckTablePreview,
+                    openLocalDeckOnTableId: localDeckTableEditId,
+                    onLocalDeckTableOpened: () =>
+                      setLocalDeckTableEditId(null),
                     onCloseStandardDeckPreview: closeStandardDeckTablePreview,
                     onStandardDeckPreviewCopied:
                       finishStandardDeckTablePreviewCopy,

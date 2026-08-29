@@ -84,6 +84,7 @@ export function MatchStartAdvancedOptions({
   onSelectedParticipantBRunnerLocalDeckId,
   onSelectedParticipantBCorpLocalDeckId,
   onOpenStandardDeck,
+  onOpenLocalDeck,
 }: {
   isHumanVsHuman: boolean;
   isHumanVsAi: boolean;
@@ -134,6 +135,7 @@ export function MatchStartAdvancedOptions({
   onSelectedParticipantBRunnerLocalDeckId(deckId: string): void;
   onSelectedParticipantBCorpLocalDeckId(deckId: string): void;
   onOpenStandardDeck(standardDeckId: string): void;
+  onOpenLocalDeck(deckId: string): void;
 }) {
   const t = useTranslations("MatchStart.advanced");
   const includesProteus =
@@ -391,6 +393,7 @@ export function MatchStartAdvancedOptions({
               onSnapshot={onSelectedParticipantBRunnerSnapshotId}
               onLocalDeck={onSelectedParticipantBRunnerLocalDeckId}
               onOpenStandardDeck={onOpenStandardDeck}
+              onOpenLocalDeck={onOpenLocalDeck}
             />
             <DeckSlotSelect
               label={
@@ -411,6 +414,7 @@ export function MatchStartAdvancedOptions({
               onSnapshot={onSelectedParticipantBCorpSnapshotId}
               onLocalDeck={onSelectedParticipantBCorpLocalDeckId}
               onOpenStandardDeck={onOpenStandardDeck}
+              onOpenLocalDeck={onOpenLocalDeck}
             />
           </>
         </div>

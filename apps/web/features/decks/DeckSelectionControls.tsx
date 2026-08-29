@@ -41,6 +41,7 @@ export function DeckSlotSelect({
   onSnapshot,
   onLocalDeck,
   onOpenStandardDeck,
+  onOpenLocalDeck,
 }: {
   label: string;
   side: DeckSlotSide;
@@ -54,6 +55,7 @@ export function DeckSlotSelect({
   onSnapshot(value: string): void;
   onLocalDeck(value: string): void;
   onOpenStandardDeck?(standardDeckId: string): void;
+  onOpenLocalDeck?(deckId: string): void;
 }) {
   const t = useTranslations("Decks.selection");
   const SideIcon = side === "runner" ? Cable : Building2;
@@ -77,6 +79,10 @@ export function DeckSlotSelect({
         )
       : undefined;
   const selectedStandardDeckId = selectedStandardSnapshot?.sourceDeckId;
+  const selectedPersonalDeckId =
+    resolvedSelection?.source === "local"
+      ? resolvedSelection.localDeckId
+      : undefined;
   const guideControl = standardDeckGuideControlState({
     source: resolvedSelection?.source ?? source,
     ...(selectedStandardSnapshot ? { snapshot: selectedStandardSnapshot } : {}),
@@ -202,6 +208,18 @@ export function DeckSlotSelect({
           >
             <Move size={15} aria-hidden="true" />
             {t("openOnTable")}
+          </button>
+        ) : null}
+        {selectedPersonalDeckId && onOpenLocalDeck ? (
+          <button
+            className="button deckTablePreviewButton"
+            type="button"
+            disabled={disabled}
+            title={t("editOnTable")}
+            onClick={() => onOpenLocalDeck(selectedPersonalDeckId)}
+          >
+            <Move size={15} aria-hidden="true" />
+            {t("editOnTable")}
           </button>
         ) : null}
       </div>

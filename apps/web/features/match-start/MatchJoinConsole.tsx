@@ -43,6 +43,7 @@ export function MatchJoinConsole({
   onSelectedParticipantBRunnerLocalDeckId,
   onSelectedParticipantBCorpLocalDeckId,
   onOpenStandardDeck,
+  onOpenLocalDeck,
   onJoinMatchId,
   onJoinToken,
   onJoinMatch,
@@ -73,6 +74,7 @@ export function MatchJoinConsole({
   onSelectedParticipantBRunnerLocalDeckId(deckId: string): void;
   onSelectedParticipantBCorpLocalDeckId(deckId: string): void;
   onOpenStandardDeck(standardDeckId: string): void;
+  onOpenLocalDeck(deckId: string): void;
   onJoinMatchId(matchId: string): void;
   onJoinToken(token: string): void;
   onJoinMatch(): void;
@@ -136,6 +138,7 @@ export function MatchJoinConsole({
           onSnapshot={onSelectedParticipantBRunnerSnapshotId}
           onLocalDeck={onSelectedParticipantBRunnerLocalDeckId}
           onOpenStandardDeck={onOpenStandardDeck}
+          onOpenLocalDeck={onOpenLocalDeck}
         />
         <DeckSlotSelect
           label={t("corpDeck")}
@@ -149,6 +152,7 @@ export function MatchJoinConsole({
           onSnapshot={onSelectedParticipantBCorpSnapshotId}
           onLocalDeck={onSelectedParticipantBCorpLocalDeckId}
           onOpenStandardDeck={onOpenStandardDeck}
+          onOpenLocalDeck={onOpenLocalDeck}
         />
       </div>
       <details

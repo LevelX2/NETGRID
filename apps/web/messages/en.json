@@ -965,6 +965,7 @@
       "standard": "{side} · Standard deck · {name}",
       "personal": "{side} · My deck · {name}",
       "openOnTable": "View on deck table",
+      "editOnTable": "Edit on deck table",
       "guide": {
         "available": "Deck guide",
         "stale": "Guide must be updated",

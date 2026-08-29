@@ -289,6 +289,8 @@ export function DeckEditorPanel({
   standardDeckCatalogRefreshing = false,
   standardCopyBusy = false,
   standardDeckPreview = null,
+  openLocalDeckOnTableId = null,
+  onLocalDeckTableOpened,
   onCopyStandard,
   onCloseStandardDeckPreview,
   onStandardDeckPreviewCopied,
@@ -322,6 +324,8 @@ export function DeckEditorPanel({
   standardDeckCatalogRefreshing?: boolean;
   standardCopyBusy?: boolean;
   standardDeckPreview?: StandardDeck | null;
+  openLocalDeckOnTableId?: string | null;
+  onLocalDeckTableOpened?(): void;
   onCopyStandard?(
     deck: StandardDeck,
     name: string,
@@ -748,6 +752,25 @@ export function DeckEditorPanel({
     setSelectedTableCardKeys([]);
     setTableSelectionAnchor(null);
   }, [standardDeckPreview]);
+  useEffect(() => {
+    if (
+      !openLocalDeckOnTableId ||
+      standardDeckPreview ||
+      personalSelectedDeck?.deckId !== openLocalDeckOnTableId
+    )
+      return;
+    setDeckEditorMode("table");
+    setTableCardMenuKey(null);
+    setTableSelectionMode(false);
+    setSelectedTableCardKeys([]);
+    setTableSelectionAnchor(null);
+    onLocalDeckTableOpened?.();
+  }, [
+    openLocalDeckOnTableId,
+    onLocalDeckTableOpened,
+    personalSelectedDeck?.deckId,
+    standardDeckPreview,
+  ]);
   useEffect(() => {
     if (!selectedDeck) {
       setDeckStrategyProfileResponse(null);

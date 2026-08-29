@@ -58,4 +58,19 @@ describe("standard deck table navigation contract", () => {
     expect(editorSource).toContain("onCloseStandardDeckPreview?.()");
     expect(editorSource).toContain("onStandardDeckPreviewCopied?.()");
   });
+
+  it("opens a selected personal deck directly in editable table mode", () => {
+    expect(selectionSource).toContain(
+      "onOpenLocalDeck(selectedPersonalDeckId)",
+    );
+    expect(selectionSource).toContain('t("editOnTable")');
+    expect(pageSource).toContain("openLocalDeckOnTable");
+    expect(pageSource).toContain("setSelectedLocalDeckId(deckId)");
+    expect(pageSource).toContain("setLocalDeckTableEditId(deckId)");
+    expect(editorSource).toContain("onLocalDeckTableOpened?.()");
+    expect(editorSource).toContain(
+      "personalSelectedDeck?.deckId !== openLocalDeckOnTableId",
+    );
+    expect(editorSource).toContain('setDeckEditorMode("table")');
+  });
 });

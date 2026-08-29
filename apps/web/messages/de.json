@@ -969,6 +969,7 @@
       "standard": "{side} · Standard-Deck · {name}",
       "personal": "{side} · Mein Deck · {name}",
       "openOnTable": "Im Decktisch ansehen",
+      "editOnTable": "Im Decktisch bearbeiten",
       "guide": {
         "available": "Deck-Anleitung",
         "stale": "Anleitung muss aktualisiert werden",
