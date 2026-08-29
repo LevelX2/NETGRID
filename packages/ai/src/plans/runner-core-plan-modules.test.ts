@@ -1533,6 +1533,54 @@ describe("Runner core plan modules", () => {
     ]);
   });
 
+  it("does not materialize a dispositioned composite draw as economy funding", () => {
+    const composite = candidate(
+      "composite-draw-credit",
+      "play_event",
+      "draw.card",
+      "test-composite-economy",
+    );
+    composite.economyProjection =
+      candidate("projection-source").economyProjection!;
+    const economy = coreModule("runner.economy");
+    const runnerContext = context([composite], {
+      fundingNeeds: [
+        {
+          kind: "portfolio_reserve",
+          ...fundingRouteContract(composite.actionId),
+          needId: "runner-portfolio-credit-reserve",
+          targetCredits: 5,
+          currentCreditsAtRevalidation: 4,
+          gap: 1,
+          priorityClass: "P6",
+          revalidation: {
+            stateVersion: 10,
+            status: "portfolio_reserve_open",
+          },
+          evidenceCode: "runner_finite_portfolio_credit_reserve",
+        },
+      ],
+    });
+    runnerContext.actionDispositions = [
+      {
+        actionId: composite.actionId,
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "runner.defense_and_recovery",
+        evidenceCode: "runner_confirmed_damage_draw_tax_tag_unsafe",
+      },
+    ];
+    const [proposal] = economy.discover(runnerContext);
+    const instance = instantiatePlanProposal(proposal!, 10);
+
+    expect(proposal).toMatchObject({
+      initialViability: "blocked",
+      blockers: [{ code: "no_compatible_credit_route" }],
+    });
+    expect(
+      economy.materialize(instance, {} as never, runnerContext).candidates,
+    ).toEqual([]);
+  });
+
   it("does not claim a composite card action without exact delegation", () => {
     const composite = candidate(
       "composite-draw-credit",

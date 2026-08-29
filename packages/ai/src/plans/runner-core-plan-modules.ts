@@ -2044,6 +2044,9 @@ function economyCandidates(
   return context.actionCandidates
     .filter(
       (candidate) =>
+        !context.actionDispositions?.some(
+          (entry) => entry.actionId === candidate.actionId,
+        ) &&
         routeActionIds.has(candidate.actionId) &&
         (need.kind === "develop_liquidity"
           ? runnerTurnLiquidityCandidateIsMaterializable(candidate)
@@ -2712,6 +2715,14 @@ function defenseCandidates(
   );
   return actionCandidates
     .filter((candidate) => {
+      if (
+        (phase === "fund_tag_clear" || phase === "build_reaction_reserve") &&
+        (actionDispositions ?? []).some(
+          (entry) => entry.actionId === candidate.actionId,
+        )
+      ) {
+        return false;
+      }
       if (phase === "discard_window")
         return signals.discardChoiceBinding?.actionId === candidate.actionId;
       if (

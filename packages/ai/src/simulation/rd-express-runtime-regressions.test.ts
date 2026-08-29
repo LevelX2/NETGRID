@@ -207,6 +207,32 @@ describe("R&D Express selfplay runtime regressions", () => {
     60_000,
   );
 
+  it("keeps Vacuum Link bound across consecutive Runner continuation windows", () => {
+    const summary = simulateStandardGame({
+      corpDeckId: "standard_corp_mp1ddh7c",
+      seed: "meta-339-final-019",
+      maxActions: 110,
+    });
+
+    expect(summary.errors).toEqual([]);
+    expect(summary.runtimeFailures).toEqual([]);
+    expect(summary.metrics.illegalActions).toBe(0);
+    expect(summary.replayOk).toBe(true);
+  }, 120_000);
+
+  it("keeps damage-taxed draw funding out of the selected economy route", () => {
+    const summary = simulateStandardGame({
+      corpDeckId: "standard_corp_mp1ddh7c",
+      seed: "meta-339-final-032",
+      maxActions: 100,
+    });
+
+    expect(summary.errors).toEqual([]);
+    expect(summary.runtimeFailures).toEqual([]);
+    expect(summary.metrics.illegalActions).toBe(0);
+    expect(summary.replayOk).toBe(true);
+  }, 120_000);
+
   it("keeps the next R&D multiaccess target current after declining trash", () => {
     const captures: AiSimulationDecisionCheckpointCapture[] = [];
     const summary = simulateStandardGame({

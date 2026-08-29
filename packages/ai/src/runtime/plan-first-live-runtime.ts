@@ -21855,14 +21855,19 @@ function resolvePlanBoundRunnerVacuumLinkChoice(
         effect.kind === "resolve_subroutine" &&
         effect.sourceDefinitionId === choice.sourceCardDefinitionId,
     ) === true &&
-    continuationEvents
-      .slice(1, -1)
-      .every(
-        (event) =>
-          event.publicPayload?.actor === "corp" &&
-          (event.publicPayload?.actionType === "rez_ice" ||
-            event.publicPayload?.actionType === "decline_rez"),
-      );
+    continuationEvents.slice(1, -1).every((event) => {
+      const payload = event.publicPayload;
+      const isCorpRezPass =
+        payload?.actor === "corp" &&
+        (payload.actionType === "rez_ice" ||
+          payload.actionType === "decline_rez");
+      const isBoundRunnerRunContinuation =
+        payload?.actor === "runner" &&
+        payload.actionType === "continue_run" &&
+        payload.abilityFamily === "run-access" &&
+        payload.serverId === context.input.playerView.run?.attackedServerId;
+      return isCorpRezPass || isBoundRunnerRunContinuation;
+    });
   const immediateOriginMatches =
     origin?.immediateChoicePolicy === "resolve_runner_vacuum_link_rewind" &&
     origin.selectedAtStateVersion === previous?.stateVersion &&
