@@ -24,19 +24,37 @@ type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
 >;
 
+type RunnerTraceBidOption = {
+  id: string;
+  amount: number;
+  linkDelta: number;
+};
+
 export function selectedBidChoiceOptionId(
   input: AiDecisionInput,
   choice: PendingChoice,
   traceContext: LatestTraceContext,
 ): string | undefined {
-  const bidOptions = choice.options
-    .map((option) => ({
-      id: option.id,
-      amount: typeof option.value === "number" ? option.value : Number.NaN,
-    }))
-    .filter((option) => Number.isInteger(option.amount) && option.amount >= 0)
+  const bidOptions: RunnerTraceBidOption[] = choice.options
+    .map((option) => {
+      const amount =
+        typeof option.value === "number" ? option.value : Number.NaN;
+      return {
+        id: option.id,
+        amount,
+        linkDelta: traceBidOptionLinkDelta(option, traceContext, amount),
+      };
+    })
+    .filter(
+      (option) =>
+        Number.isInteger(option.amount) &&
+        option.amount >= 0 &&
+        Number.isInteger(option.linkDelta) &&
+        option.linkDelta >= 0,
+    )
     .sort((left, right) => left.amount - right.amount);
-  const maxBid = bidOptions.at(-1)?.amount ?? 0;
+  if (bidOptions.length === 0) return undefined;
+  const maxBid = bidOptions.at(-1)!.amount;
   let desired = 0;
   if (input.side === "corp") {
     desired = corpDesiredBidAmount(input, choice, traceContext, maxBid);
@@ -48,17 +66,21 @@ export function selectedBidChoiceOptionId(
     const runnerNeedsStrictlyMore =
       traceContext.traceRulesProfile === "classic_blind_corp_ties" ||
       traceContext.traceRulesProfile === undefined;
-    const winningBid = Math.max(
+    const requiredLinkDelta = Math.max(
       0,
       (traceContext.traceValue ?? 0) -
         (traceContext.runnerLink ?? 0) +
         (runnerNeedsStrictlyMore ? 1 : 0),
     );
-    desired = input.difficulty === "easy" ? 0 : Math.min(maxBid, winningBid);
+    if (input.difficulty !== "easy") {
+      desired =
+        bidOptions.find((option) => option.linkDelta >= requiredLinkDelta)
+          ?.amount ?? maxBid;
+    }
   }
-  let selected =
-    bidOptions.find((option) => option.amount === desired) ?? bidOptions[0];
-  if (input.side === "runner" && selected) {
+  let selected: RunnerTraceBidOption =
+    bidOptions.find((option) => option.amount === desired) ?? bidOptions[0]!;
+  if (input.side === "runner") {
     selected =
       selectEfficientTraceBidOption({
         side: input.side,
@@ -74,15 +96,36 @@ export function selectedBidChoiceOptionId(
         traceContext,
       ) ?? selected;
   }
-  return selected?.id;
+  return selected.id;
+}
+
+function traceBidOptionLinkDelta(
+  option: PendingChoice["options"][number],
+  traceContext: LatestTraceContext,
+  paymentAmount: number,
+): number {
+  if (
+    traceContext.traceRulesProfile === "classic_blind" ||
+    traceContext.traceRulesProfile === "classic_blind_corp_ties"
+  ) {
+    const structuredDelta = option.metadata?.amount;
+    if (
+      typeof structuredDelta === "number" &&
+      Number.isInteger(structuredDelta) &&
+      structuredDelta >= 0
+    ) {
+      return structuredDelta;
+    }
+  }
+  return paymentAmount;
 }
 
 function runnerRunBudgetPreservingBidOption(
   input: AiDecisionInput,
-  bidOptions: readonly { id: string; amount: number }[],
-  selected: { id: string; amount: number },
+  bidOptions: readonly RunnerTraceBidOption[],
+  selected: RunnerTraceBidOption,
   traceContext: LatestTraceContext,
-): { id: string; amount: number } | undefined {
+): RunnerTraceBidOption | undefined {
   const traceValue = traceContext.traceValue;
   const runnerLink = traceContext.runnerLink;
   if (
@@ -94,7 +137,7 @@ function runnerRunBudgetPreservingBidOption(
     typeof runnerLink !== "number" ||
     !runnerAvoidsTrace(
       runnerLink,
-      selected.amount,
+      selected.linkDelta,
       traceValue,
       traceContext.traceRulesProfile,
     )
@@ -120,7 +163,7 @@ function runnerRunBudgetPreservingBidOption(
     (option) =>
       !runnerAvoidsTrace(
         runnerLink,
-        option.amount,
+        option.linkDelta,
         traceValue,
         traceContext.traceRulesProfile,
       ),
@@ -265,11 +308,11 @@ function runnerRunPlanReserveTarget(plan: RunnerRunPlan): number {
 
 function runnerAvoidsTrace(
   runnerLink: number,
-  runnerBid: number,
+  runnerLinkDelta: number,
   traceValue: number,
   profile: LatestTraceContext["traceRulesProfile"],
 ): boolean {
-  const runnerStrength = Math.max(0, runnerLink) + runnerBid;
+  const runnerStrength = Math.max(0, runnerLink) + runnerLinkDelta;
   const corpStrength = Math.max(0, traceValue);
   return profile === "classic_blind_corp_ties" || profile === undefined
     ? runnerStrength > corpStrength
