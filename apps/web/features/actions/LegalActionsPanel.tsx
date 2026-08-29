@@ -36,11 +36,6 @@ import {
 } from "../../app/action-board-ui";
 import { ActionSlotMeter } from "../game-board/ResourceStrip";
 import {
-  ZoneIdentityIcon,
-  serverZoneIdentityIconKind,
-} from "../game-board/ZoneFrame";
-import {
-  ActionLeadIcon,
   ActionPanelFloatButton,
   OverflowAwareActionButton,
   PriorityWindowHoldToggle,
@@ -287,12 +282,18 @@ export function LegalActionsPanel({
               option,
               view.servers.map((server) => server.id),
             );
+            const label = choiceOptionPresentationLabel(
+              genericChoice,
+              option,
+              locale,
+            );
             return (
-              <button
-                className={`button actionButton primary ${
-                  targetServerId ? "hasServerTarget" : ""
-                }`}
+              <OverflowAwareActionButton
+                action={genericChoiceAction}
+                className="button actionButton primary"
                 key={option.id}
+                label={label}
+                serverTargetId={targetServerId}
                 onClick={() =>
                   onChoiceOption(
                     genericChoiceAction,
@@ -302,24 +303,7 @@ export function LegalActionsPanel({
                 }
                 disabled={disabled}
                 data-testid="generic-choice-button"
-              >
-                <ActionLeadIcon action={genericChoiceAction} />
-                {targetServerId ? (
-                  <ZoneIdentityIcon
-                    side="corp"
-                    kind={serverZoneIdentityIconKind(targetServerId)}
-                    label={
-                      targetServerId === "new_remote"
-                        ? t("newRemote")
-                        : serverDisplayLabel(targetServerId)
-                    }
-                    className="actionTargetServerIcon"
-                  />
-                ) : null}
-                <span className="actionButtonLabel">
-                  {choiceOptionPresentationLabel(genericChoice, option, locale)}
-                </span>
-              </button>
+              />
             );
           })}
         </div>
