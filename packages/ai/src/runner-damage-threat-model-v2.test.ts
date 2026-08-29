@@ -36,6 +36,49 @@ describe("runner damage threat model v2 red evidence", () => {
     });
   });
 
+  it("attributes Runner-initiated access damage to its revealed Corp source", () => {
+    const assessment = runnerDamageThreatAssessment(
+      input({
+        handCount: 1,
+        turnSerial: 8,
+        events: [
+          event("virus-test-site-access-damage", 31, 8, {
+            actor: "runner",
+            actionType: "access_card",
+            damageType: "net",
+            damageAmount: 2,
+            damageResolved: true,
+            resolvedEffects: [
+              {
+                effectId: "virus-test-site-access-damage-effect",
+                kind: "damage",
+                visibility: "public",
+                side: "runner",
+                amount: 2,
+                damageType: "net",
+                cardsTrashed: 2,
+                sourceDefinitionId: "onr_v1_348_virus-test-site",
+              },
+            ],
+          }),
+        ],
+      }),
+    );
+
+    expect(assessment).toMatchObject({
+      deckBelief: {
+        level: "confirmed",
+        resolvedCorpDamageEvents: 1,
+      },
+      flatlineRisk: {
+        level: "critical",
+        recentResolvedCorpDamageEvents: 1,
+        recentResolvedCorpDamageAmount: 2,
+        criticalRunSuppression: true,
+      },
+    });
+  });
+
   it("separates a fully prevented Corp damage attempt from resolved damage", () => {
     const assessment = runnerDamageThreatAssessment(
       input({

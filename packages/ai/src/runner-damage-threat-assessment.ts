@@ -984,8 +984,19 @@ function corpDamageEventEvidence(
 
 function publicEventCanBeCorpDamage(event: PublicGameEvent): boolean {
   const payload = event.publicPayload ?? {};
-  if (payload.actor === "runner") return false;
-  if (payload.actor !== "corp" && payload.actor !== undefined) return false;
+  const resolvedCorpDamageSource = payload.resolvedEffects?.some(
+    (effect) =>
+      effect.kind === "damage" &&
+      typeof effect.sourceDefinitionId === "string" &&
+      AI_HINTS.get(effect.sourceDefinitionId)?.side === "corp",
+  );
+  if (
+    payload.actor !== "corp" &&
+    payload.actor !== undefined &&
+    !resolvedCorpDamageSource
+  ) {
+    return false;
+  }
   const sourceDefinitionId =
     typeof payload.sourceDefinitionId === "string"
       ? payload.sourceDefinitionId
