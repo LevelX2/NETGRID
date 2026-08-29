@@ -48,13 +48,21 @@ export type RunnerCreditBankProspectivePlan = {
     actionCost: 0;
     hostedCreditsAdded: number;
   };
-  cashOut: {
-    availability: ProspectivePlanningStatus;
-    projection: ProspectivePlanningStatus;
-    resolution: ProspectivePlanningStatus;
-    capabilityKey: string;
-    canonicalCapabilityId: string;
-  };
+  cashOut:
+    | {
+        kind: "activated";
+        availability: ProspectivePlanningStatus;
+        projection: ProspectivePlanningStatus;
+        resolution: ProspectivePlanningStatus;
+        capabilityKey: string;
+        canonicalCapabilityId: string;
+      }
+    | {
+        kind: "automatic_lifecycle";
+        phase: "start_of_runner_turn";
+        creditsPerTrigger: number;
+        resolution: "feasible_in_projection";
+      };
   evidenceCodes: string[];
 };
 
@@ -93,7 +101,8 @@ export function runnerCreditBankProspectivePlan(params: {
           annotation.route === "cash_out",
       ),
   );
-  if (cashOut?.identity.kind !== "keyed") return undefined;
+  const automaticPayout = automaticRunnerTurnPayout(card);
+  if (cashOut?.identity.kind !== "keyed" && !automaticPayout) return undefined;
 
   const installLifecycleLoad = card.engine.lifecycle?.on_install?.find(
     (effect) =>
@@ -177,16 +186,26 @@ export function runnerCreditBankProspectivePlan(params: {
       installChoices,
     },
     build: projectedBuild,
-    cashOut: {
-      availability: "available_by_spec",
-      projection:
-        cashOut.initialConditionEvaluation.state === "condition_unsatisfied"
-          ? "blocked"
-          : "unknown",
-      resolution: "requires_engine_quote",
-      capabilityKey: cashOut.identity.capabilityKey,
-      canonicalCapabilityId: cashOut.identity.canonicalCapabilityId,
-    },
+    cashOut:
+      cashOut?.identity.kind === "keyed"
+        ? {
+            kind: "activated",
+            availability: "available_by_spec",
+            projection:
+              cashOut.initialConditionEvaluation.state ===
+              "condition_unsatisfied"
+                ? "blocked"
+                : "unknown",
+            resolution: "requires_engine_quote",
+            capabilityKey: cashOut.identity.capabilityKey,
+            canonicalCapabilityId: cashOut.identity.canonicalCapabilityId,
+          }
+        : {
+            kind: "automatic_lifecycle",
+            phase: "start_of_runner_turn",
+            creditsPerTrigger: automaticPayout!,
+            resolution: "feasible_in_projection",
+          },
     evidenceCodes: [
       "runner_credit_bank_prospective_card_spec",
       ...(projectedBuild.kind === "activated"
@@ -197,8 +216,34 @@ export function runnerCreditBankProspectivePlan(params: {
               : "runner_credit_bank_build_requires_later_rematerialization",
           ]
         : ["runner_credit_bank_loaded_by_install_lifecycle"]),
+      ...(automaticPayout
+        ? ["runner_credit_bank_automatic_lifecycle_payout"]
+        : []),
     ],
   };
+}
+
+function automaticRunnerTurnPayout(card: PlanningCard): number | undefined {
+  const lifecycle = card.engine.lifecycle?.start_of_runner_turn ?? [];
+  for (const ability of lifecycle) {
+    if (ability.condition?.kind !== "source_has_hosted_credits") continue;
+    const payout = ability.effects.find(
+      (effect) =>
+        effect.kind === "take_hosted_credits" &&
+        effect.source === "source" &&
+        effect.recipient === "controller" &&
+        effect.mode === "up_to_amount_if_available",
+    );
+    if (payout?.kind !== "take_hosted_credits") continue;
+    if (
+      typeof payout.amount === "number" &&
+      Number.isFinite(payout.amount) &&
+      payout.amount > 0
+    ) {
+      return payout.amount;
+    }
+  }
+  return undefined;
 }
 
 export function rematerializedRunnerCreditBankBuildCandidate(
