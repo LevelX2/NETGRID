@@ -8,6 +8,8 @@ import {
   runnerNoRunRecurringEconomyProfileFromPlanningCard,
   runnerRunStartTrashSourceProfile,
   runnerRunStartTrashSourceProfileFromPlanningCard,
+  runnerRunStartRandomStrengthSourceProfile,
+  runnerRunStartRandomStrengthSourceProfileFromPlanningCard,
   runnerStartOfTurnCreditProfile,
   runnerStartOfTurnCreditProfileFromPlanningCard,
   runnerStartOfTurnDelayedInstallCountdownProfile,
@@ -19,6 +21,23 @@ import {
 } from "./runner-canonical-card-facts";
 
 describe("Runner canonical card facts", () => {
+  it("recognizes only a complete run-start random-strength breaker", () => {
+    expect(
+      runnerRunStartRandomStrengthSourceProfile("onr_v1_002_ai-boon"),
+    ).toEqual({ sourceEffect: "random_run_strength", dieSides: 6 });
+    expect(
+      runnerRunStartRandomStrengthSourceProfileFromPlanningCard({
+        planning: {
+          side: "runner",
+          engine: {
+            characteristics: { strength: { kind: "random_die", dieSides: 6 } },
+            icebreakerAbilities: [],
+          },
+        },
+      } as never),
+    ).toBeUndefined();
+  });
+
   it("accepts run-start ordering only for a complete pure self-trash lifecycle", () => {
     expect(
       runnerRunStartTrashSourceProfile("onr_v1_184_top-runners-conference"),
