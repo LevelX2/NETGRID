@@ -150,6 +150,20 @@ export function accessPresentationOutcomeAfter(
   return null;
 }
 
+export function latestStolenAgendaAccessEvent(
+  events: PublicGameEvent[],
+  dismissedEventIds: readonly string[],
+): PublicGameEvent | null {
+  const dismissed = new Set(dismissedEventIds);
+  for (let index = events.length - 1; index >= 0; index -= 1) {
+    const event = events[index];
+    if (!event || event.publicPayload.actionType !== "steal_agenda") continue;
+    const accessEvent = publicAccessEventForOutcome(events, event);
+    if (accessEvent && !dismissed.has(accessEvent.eventId)) return accessEvent;
+  }
+  return null;
+}
+
 function publicAccessEventForOutcome(
   events: PublicGameEvent[],
   outcomeEvent: PublicGameEvent,

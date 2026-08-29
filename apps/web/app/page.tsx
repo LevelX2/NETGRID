@@ -99,6 +99,7 @@ import {
   accessPresentationOwnsActionCue,
   coalesceAccessActionCues,
   interactionPresentationBlocksAi,
+  latestStolenAgendaAccessEvent,
   observerAccessAutoDismissMs,
 } from "./access-presentation";
 import {
@@ -2861,7 +2862,19 @@ export default function Page() {
   const retainedAccessReveal = payload
     ? retainedAccessRevealEvent(payload.eventTail, lastDismissedAccessEventId)
     : null;
+  const runnerWonByAgendaPoints = Boolean(
+    resultSummary?.winner === "runner" &&
+    resultSummary.reason === "agenda_points",
+  );
+  const concludingAgendaAccessEvent =
+    matchEnded && runnerWonByAgendaPoints && payload
+      ? latestStolenAgendaAccessEvent(
+          payload.eventTail,
+          dismissedAccessEventIds,
+        )
+      : null;
   const queuedAccessRevealEvent =
+    concludingAgendaAccessEvent ??
     (pendingAccessContinuationRef.current &&
     latestAccessRevealEvent?.eventId !==
       pendingAccessContinuationRef.current.accessEventId
@@ -2964,9 +2977,7 @@ export default function Page() {
       Boolean(currentDamageImpact) || damageImpactQueue.length > 0,
     resultAvailable: Boolean(resultSummary && resultKey),
     resultDismissed: Boolean(resultKey && dismissedResultKey === resultKey),
-    runnerWonByAgendaPoints:
-      resultSummary?.winner === "runner" &&
-      resultSummary.reason === "agenda_points",
+    runnerWonByAgendaPoints,
     terminalAccessFlatline: accessRevealEvent?.publicPayload.flatline === true,
   });
   const showAccessReveal = overlayPresentation.showAccessReveal;
