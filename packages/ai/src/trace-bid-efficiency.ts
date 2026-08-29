@@ -2,7 +2,10 @@ import type { Side, TraceRulesProfile } from "@netgrid/shared";
 
 export type TraceBidOption = {
   id: string;
+  /** Actual credits/bits committed and paid. */
   amount: number;
+  /** Link increase produced by that payment. Defaults to amount for Modern Open. */
+  linkDelta?: number;
 };
 
 export type TraceBidEfficiencyReason =
@@ -11,9 +14,11 @@ export type TraceBidEfficiencyReason =
   | "trace_bid_existing_choice"
   | "trace_bid_unknown_context";
 
-export type TraceBidEfficiencyInput = {
+export type TraceBidEfficiencyInput<
+  TOption extends TraceBidOption = TraceBidOption,
+> = {
   side: Side;
-  bidOptions: readonly TraceBidOption[];
+  bidOptions: readonly TOption[];
   desiredAmount: number;
   traceValue?: number;
   runnerLink?: number;
@@ -21,8 +26,10 @@ export type TraceBidEfficiencyInput = {
   traceRulesProfile?: TraceRulesProfile;
 };
 
-export type TraceBidEfficiencySelection = {
-  option?: TraceBidOption;
+export type TraceBidEfficiencySelection<
+  TOption extends TraceBidOption = TraceBidOption,
+> = {
+  option?: TOption;
   reason: TraceBidEfficiencyReason;
 };
 
@@ -55,11 +62,19 @@ export type PostBidTraceLinkEfficiencySelection = {
   reason: PostBidTraceLinkEfficiencyReason;
 };
 
-export function selectEfficientTraceBidOption(
-  input: TraceBidEfficiencyInput,
-): TraceBidEfficiencySelection {
+export function selectEfficientTraceBidOption<
+  TOption extends TraceBidOption,
+>(
+  input: TraceBidEfficiencyInput<TOption>,
+): TraceBidEfficiencySelection<TOption> {
   const bidOptions = input.bidOptions
-    .filter((option) => Number.isInteger(option.amount) && option.amount >= 0)
+    .filter(
+      (option) =>
+        Number.isInteger(option.amount) &&
+        option.amount >= 0 &&
+        (option.linkDelta === undefined ||
+          (Number.isInteger(option.linkDelta) && option.linkDelta >= 0)),
+    )
     .slice()
     .sort((left, right) => left.amount - right.amount);
   if (bidOptions.length === 0) {
@@ -89,7 +104,7 @@ export function selectEfficientTraceBidOption(
   const runnerBase = Math.max(0, runnerLink);
   const desiredOutcome = runnerAvoidsTrace(
     runnerBase,
-    desiredOption.amount,
+    traceBidLinkDelta(desiredOption),
     corpTotal,
     input.traceRulesProfile,
   );
@@ -97,7 +112,7 @@ export function selectEfficientTraceBidOption(
     (option) =>
       runnerAvoidsTrace(
         runnerBase,
-        option.amount,
+        traceBidLinkDelta(option),
         corpTotal,
         input.traceRulesProfile,
       ) === desiredOutcome,
@@ -191,17 +206,21 @@ export function selectEfficientPostBidLinkOption(
   );
 }
 
-function closestBidOptionAtOrBelow(
-  bidOptions: readonly TraceBidOption[],
+function closestBidOptionAtOrBelow<TOption extends TraceBidOption>(
+  bidOptions: readonly TOption[],
   desiredAmount: number,
-): TraceBidOption {
+): TOption {
   const clampedDesired = Math.max(0, Math.floor(desiredAmount));
-  let selected = bidOptions[0] ?? { id: "bid_0", amount: 0 };
+  let selected = bidOptions[0]!;
   for (const option of bidOptions) {
     if (option.amount > clampedDesired) break;
     selected = option;
   }
   return selected;
+}
+
+function traceBidLinkDelta(option: TraceBidOption): number {
+  return Math.max(0, option.linkDelta ?? option.amount);
 }
 
 function runnerAvoidsTrace(
@@ -219,25 +238,32 @@ function runnerAvoidsTrace(
 function currentRunnerTraceStrength(
   input: Pick<
     PostBidTraceLinkEfficiencyInput,
-    "runnerStrength" | "runnerLink" | "runnerBid" | "postBidTraceLinkBonus"
+    | "runnerStrength"
+    | "runnerLink"
+    | "runnerBid"
+    | "postBidTraceLinkBonus"
+    | "traceRulesProfile"
   >,
 ): number | undefined {
   if (Number.isInteger(input.runnerStrength)) return input.runnerStrength;
   const runnerLink = input.runnerLink;
-  const runnerBid = input.runnerBid;
-  if (
-    typeof runnerLink === "number" &&
-    typeof runnerBid === "number" &&
-    Number.isInteger(runnerLink) &&
-    Number.isInteger(runnerBid)
-  ) {
-    return (
-      Math.max(0, runnerLink) +
-      Math.max(0, runnerBid) +
-      Math.max(0, input.postBidTraceLinkBonus ?? 0)
-    );
+  if (typeof runnerLink !== "number" || !Number.isInteger(runnerLink)) {
+    return undefined;
   }
-  return undefined;
+  const postBidBonus = Math.max(0, input.postBidTraceLinkBonus ?? 0);
+  if (
+    input.traceRulesProfile === "classic_blind" ||
+    input.traceRulesProfile === "classic_blind_corp_ties"
+  ) {
+    // In Classic, runnerLink is already the card-derived pre-reveal strength.
+    // runnerBid is the amount paid and must not be added a second time.
+    return Math.max(0, runnerLink) + postBidBonus;
+  }
+  const runnerBid = input.runnerBid;
+  if (typeof runnerBid !== "number" || !Number.isInteger(runnerBid)) {
+    return undefined;
+  }
+  return Math.max(0, runnerLink) + Math.max(0, runnerBid) + postBidBonus;
 }
 
 function postBidTraceLinkSelection(

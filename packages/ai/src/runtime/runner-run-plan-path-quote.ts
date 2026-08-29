@@ -20,6 +20,7 @@ import { quoteRunnerRunRoute } from "../run-analysis/runner-run-route-quote";
 import {
   traceBaseStrengthForVisibleSubroutine,
   traceSuccessEffectForVisibleSubroutine,
+  visibleCorpTraceBidCapacityForSubroutine,
   visibleRunnerTraceSupport,
   visibleTraceAvoidanceForBaseStrength,
 } from "../run-analysis/visible-run-hazards";
@@ -581,6 +582,8 @@ function cheapestTraceAccessSequence(params: {
     );
   let guaranteedTraceCost = 0;
   const acceptedEffectTypes: string[] = [];
+  const traceRulesProfile =
+    params.input.playerView.traceRulesProfile ?? "modern_open";
   for (const { subroutine } of requiredSubroutines) {
     const effect = traceSuccessEffectForVisibleSubroutine(subroutine);
     if (!traceEffectRequiresAccessGuarantee(params.input, effect)) {
@@ -588,20 +591,25 @@ function cheapestTraceAccessSequence(params: {
         acceptedEffectTypes.push(effect.type);
       continue;
     }
-    const baseStrength = traceBaseStrengthForVisibleSubroutine(subroutine);
+    const baseStrength = traceBaseStrengthForVisibleSubroutine(
+      subroutine,
+      traceRulesProfile,
+    );
     if (baseStrength === undefined) return undefined;
     const support = visibleRunnerTraceSupport(
       params.input.playerView.own.runnerTraceSupportQuote,
       remainingGeneralCredits,
       params.input.playerView.run?.runTraceLinkBonus,
+      { traceRulesProfile },
+    );
+    const corpBidCapacity = visibleCorpTraceBidCapacityForSubroutine(
+      params.ice.effectiveRunQuote,
+      subroutine,
+      params.input.playerView.opponent.credits,
+      traceRulesProfile,
     );
     const guarantee = visibleTraceAvoidanceForBaseStrength(
-      baseStrength +
-        visibleCorpTraceBidCapacity(
-          params.ice.effectiveRunQuote,
-          subroutine,
-          params.input.playerView.opponent.credits,
-        ),
+      baseStrength + corpBidCapacity,
       support,
     ).cheapestAffordableSafe;
     if (!guarantee) {
@@ -634,7 +642,8 @@ function cheapestTraceAccessSequence(params: {
         ? "current_encounter_trace_route:true"
         : "known_ice_estimated_trace_route:true",
       `trace_route_guaranteed_cost:${guaranteedTraceCost}`,
-      `trace_route_visible_corp_trace_bid_capacity:${visibleCorpTraceBidCapacity(params.ice.effectiveRunQuote, requiredSubroutines[0]?.subroutine, params.input.playerView.opponent.credits)}`,
+      `trace_route_rules_profile:${traceRulesProfile}`,
+      `trace_route_visible_corp_trace_bid_capacity:${visibleCorpTraceBidCapacityForSubroutine(params.ice.effectiveRunQuote, requiredSubroutines[0]?.subroutine, params.input.playerView.opponent.credits, traceRulesProfile)}`,
       ...acceptedEffectTypes.map(
         (effectType) => `trace_route_accepts_effect:${effectType}`,
       ),
@@ -642,20 +651,6 @@ function cheapestTraceAccessSequence(params: {
     plan: params.plan,
     input: params.input,
   });
-}
-
-function visibleCorpTraceBidCapacity(
-  quote: VisibleCard["effectiveRunQuote"] | undefined,
-  subroutine: VisibleEffectiveSubroutine | undefined,
-  visibleCorpCredits: number,
-): number {
-  const available =
-    Math.max(0, Math.floor(visibleCorpCredits)) +
-    Math.max(0, Math.floor(quote?.encounterTemporaryTraceCredits ?? 0));
-  const bidLimit = subroutine?.traceLimit;
-  return bidLimit === undefined
-    ? available
-    : Math.min(available, Math.max(0, Math.floor(bidLimit)));
 }
 
 function traceEffectRequiresAccessGuarantee(
@@ -1449,6 +1444,8 @@ function visibleDeflectorContextForInput(input: AiDecisionInput) {
       candidate.id.startsWith("remote_"),
     ).length,
     visibleCorpCredits: input.playerView.opponent.credits,
+    traceRulesProfile:
+      input.playerView.traceRulesProfile ?? "modern_open",
     netOrCoreDamagePreventionRemaining: Math.max(
       0,
       input.playerView.own.freeNetOrCoreDamagePreventionRemaining ?? 0,

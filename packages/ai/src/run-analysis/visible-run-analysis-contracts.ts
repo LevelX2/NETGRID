@@ -1,4 +1,5 @@
 import type {
+  TraceRulesProfile,
   TraceSuccessEffect,
   VisibleEffectiveIceRunQuote,
   VisibleEffectiveSubroutine,
@@ -46,6 +47,8 @@ export type VisibleDeflectorContext = {
   prohibitNoisyIcebreakers?: boolean;
   /** Runner-private Engine quote for trace base-link and credit support. */
   runnerTraceSupportQuote?: VisibleRunnerTraceSupportQuote;
+  /** Active trace rules profile used by run-path trace projections. */
+  traceRulesProfile?: TraceRulesProfile;
   /** Structured server restriction for trace-credit sources with Stealth. */
   excludeStealthTraceCredits?: boolean;
   /** Explicit current or projected run-duration Link bonus. */

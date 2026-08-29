@@ -12,6 +12,7 @@ export type TraceRulesDefinition = {
   corpBidLimitMode: "payment_capacity" | "effective_trace_limit";
   corpBidVisibility: "immediate" | "after_both_commit";
   runnerBidVisibility: "after_both_commit";
+  runnerLinkSpendMode: "generic_credit_per_link" | "printed_card_modifiers";
   tieWinner: "runner" | "corp";
 };
 
@@ -24,6 +25,7 @@ const TRACE_RULES_DEFINITIONS: Record<TraceRulesProfile, TraceRulesDefinition> =
       corpBidLimitMode: "payment_capacity",
       corpBidVisibility: "immediate",
       runnerBidVisibility: "after_both_commit",
+      runnerLinkSpendMode: "generic_credit_per_link",
       tieWinner: "runner",
     },
     classic_blind: {
@@ -33,6 +35,7 @@ const TRACE_RULES_DEFINITIONS: Record<TraceRulesProfile, TraceRulesDefinition> =
       corpBidLimitMode: "effective_trace_limit",
       corpBidVisibility: "after_both_commit",
       runnerBidVisibility: "after_both_commit",
+      runnerLinkSpendMode: "printed_card_modifiers",
       tieWinner: "runner",
     },
     classic_blind_corp_ties: {
@@ -42,6 +45,7 @@ const TRACE_RULES_DEFINITIONS: Record<TraceRulesProfile, TraceRulesDefinition> =
       corpBidLimitMode: "effective_trace_limit",
       corpBidVisibility: "after_both_commit",
       runnerBidVisibility: "after_both_commit",
+      runnerLinkSpendMode: "printed_card_modifiers",
       tieWinner: "corp",
     },
   };

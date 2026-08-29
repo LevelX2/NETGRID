@@ -18,6 +18,7 @@ import {
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import type {
   ActivatedCardAbilityImplementation,
+  IncreaseTraceLinkEffectImplementation,
   UseBaseLinkEffectImplementation,
 } from "../../ability-engine/definition-types";
 import {
@@ -44,6 +45,10 @@ export type TraceBaseLinkCardImplementationQuote = {
   creditCost: number;
   endsRunAfterEncounter: boolean;
   rewardCreditsOnAvoidTrace?: number;
+  classicLinkModifier?: {
+    creditCost: number;
+    linkDelta: number;
+  };
 };
 
 function mustInstance(
@@ -169,6 +174,7 @@ function cardImplementationQuoteForAbility(
     effect.visibility !== "public"
   )
     throw new Error("Base-link effect is invalid.");
+  const classicLinkModifier = classicLinkModifierForDefinition(definition);
   return {
     sourceDefinitionId: definition.id,
     label: definition.title,
@@ -178,6 +184,7 @@ function cardImplementationQuoteForAbility(
     ...(effect.rewardCreditsOnAvoidTrace
       ? { rewardCreditsOnAvoidTrace: effect.rewardCreditsOnAvoidTrace }
       : {}),
+    ...(classicLinkModifier ? { classicLinkModifier } : {}),
   };
 }
 
@@ -194,6 +201,54 @@ export function traceBaseLinkCardImplementationQuotesForDefinition(
       (quote): quote is TraceBaseLinkCardImplementationQuote =>
         quote !== undefined,
     );
+}
+
+function classicLinkModifierForDefinition(
+  definition: CardDefinition,
+): TraceBaseLinkCardImplementationQuote["classicLinkModifier"] | undefined {
+  const candidates =
+    cardImplementationForDefinitionId(definition.id)?.abilities?.flatMap(
+      (ability) => {
+        if (
+          ability.kind !== "activated" ||
+          ability.timing !== "trace_post_bid_link_window" ||
+          ability.limit !== undefined
+        ) {
+          return [];
+        }
+        const creditCosts = ability.costs.filter(
+          (cost) => cost.kind === "credit",
+        );
+        const linkEffects = ability.effects.filter(
+          (effect): effect is IncreaseTraceLinkEffectImplementation =>
+            effect.kind === "increase_trace_link",
+        );
+        if (
+          ability.costs.length !== 1 ||
+          creditCosts.length !== 1 ||
+          !Number.isInteger(creditCosts[0]?.amount) ||
+          (creditCosts[0]?.amount ?? 0) <= 0 ||
+          linkEffects.length !== 1 ||
+          !Number.isInteger(linkEffects[0]?.amount) ||
+          (linkEffects[0]?.amount ?? 0) <= 0 ||
+          linkEffects[0]?.visibility !== "public"
+        ) {
+          return [];
+        }
+        return [
+          {
+            creditCost: creditCosts[0]!.amount,
+            linkDelta: linkEffects[0]!.amount,
+          },
+        ];
+      },
+    ) ?? [];
+  if (candidates.length > 1) {
+    throw new Error(
+      "Eine Base-Link-Karte hat mehrere wiederholbare Classic-Link-Modifikatoren.",
+    );
+  }
+  return candidates[0];
 }
 
 function quoteForAbility(
