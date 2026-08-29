@@ -157,6 +157,7 @@ describe("trace orchestration", () => {
     });
 
     startTraceFromOperation(host, sourceDefinition.id, 3, startAction);
+    const traceId = state.trace!.traceId;
 
     expect(state.trace).toMatchObject({
       traceRulesProfile: "classic_blind",
@@ -186,7 +187,7 @@ describe("trace orchestration", () => {
     });
     expect(state.pendingChoice).toMatchObject({
       side: "runner",
-      source: "trace_base_link:trace_1",
+      source: `trace_base_link:${traceId}`,
       visibility: "public",
     });
     expect(corpAction.payload).not.toHaveProperty("corpCreditBid");
@@ -204,7 +205,7 @@ describe("trace orchestration", () => {
     });
     expect(state.pendingChoice).toMatchObject({
       side: "runner",
-      source: "trace:trace_1",
+      source: `trace:${traceId}`,
       visibility: "hidden_info_barrier",
     });
     expect(
@@ -1236,7 +1237,10 @@ function testHost(
         const sourceDefinitionId = options.postBidLinkSourceId
           ? state.cardInstances[options.postBidLinkSourceId]?.definitionId
           : undefined;
-        if (!options.postBidLinkSourceId || definition.id !== sourceDefinitionId)
+        if (
+          !options.postBidLinkSourceId ||
+          definition.id !== sourceDefinitionId
+        )
           return [];
         return [
           {
