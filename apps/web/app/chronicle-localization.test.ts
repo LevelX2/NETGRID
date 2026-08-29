@@ -181,6 +181,71 @@ describe("semantic chronicle localization", () => {
     );
   });
 
+  it("shows credits taken with Short-Term Contract instead of a generic ability", () => {
+    const contract = event("activated_card_ability", {
+      actor: "runner",
+      cardDefinitionId: "onr_v1_178_short-term-contract",
+      cardImplementationAbility: "activated",
+      hostedCreditsTaken: 2,
+      hostedCreditsAfter: 10,
+      remainingCounters: 10,
+      gainedCredits: 2,
+      runnerCreditsAfter: 7,
+      aiReasonCode: "runner_credit_bank_cash_out",
+      resolvedEffects: [
+        {
+          effectId: "short-term-contract.take-hosted-credits",
+          kind: "take_hosted_credits",
+          visibility: "public",
+          side: "runner",
+          amount: 2,
+          remainingCounters: 10,
+          sourceDefinitionId: "onr_v1_178_short-term-contract",
+          sourceTitle: "Short-Term Contract",
+          reason: "card_resolver",
+        },
+      ],
+    });
+    const presentations = {
+      "onr_v1_178_short-term-contract": {
+        title: "Short-Term Contract",
+        type: "resource" as const,
+      },
+    };
+
+    const de = formatChronicleEvent(contract, "corp", {
+      translate: translate("de"),
+      cardPresentationsById: presentations,
+    });
+    const en = formatChronicleEvent(contract, "corp", {
+      translate: translate("en"),
+      cardPresentationsById: presentations,
+    });
+    const effects = formatChronicleEffectItems(
+      contract,
+      "corp",
+      presentations,
+      translate("de"),
+    );
+
+    expect(de).toMatchObject({
+      title: "Die Runner-KI: 2 Credits von Short-Term Contract erhalten.",
+      category: "economy",
+      visibility: "public",
+      cardDefinitionId: "onr_v1_178_short-term-contract",
+      cardTitle: "Short-Term Contract",
+    });
+    expect(de.chips).toContain("Short-Term Contract");
+    expect(de.chips).toContain("+2");
+    expect(en.title).toBe(
+      "The Runner AI: gained 2 credits from Short-Term Contract.",
+    );
+    expect(effects).toEqual([]);
+    expect(`${de.title} ${en.title}`).not.toMatch(
+      /Fähigkeit.+aufgelöst|resolved an ability/,
+    );
+  });
+
   it("localizes trace bids, results, and payload-based tag gains", () => {
     const corpBid = event("resolve_choice", {
       actor: "corp",

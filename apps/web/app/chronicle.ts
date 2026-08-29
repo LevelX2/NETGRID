@@ -427,6 +427,11 @@ function formatSemanticChronicleEvent(
   const publicStackRevealDefinitionId = publicStackToGripReveal
     ? stringValue(payload.publicRevealDefinitionId)
     : undefined;
+  const hostedCreditsTaken = positiveIntegerValue(payload.hostedCreditsTaken);
+  const hostedCreditAbility =
+    (actionType === "trigger_ability" ||
+      actionType === "activated_card_ability") &&
+    hostedCreditsTaken !== undefined;
   let category = semanticChronicleCategory(actionType);
   const isAi = Boolean(
     stringValue(payload.aiExplanation) || stringValue(payload.aiReasonCode),
@@ -477,6 +482,14 @@ function formatSemanticChronicleEvent(
     );
     detailChips = [sourceTitle, cardTitle];
     category = "card";
+  } else if (hostedCreditAbility) {
+    explicitTitle = translate("effect.hostedCreditsTaken", {
+      subject,
+      amount: hostedCreditsTaken,
+      source: cardTitle,
+    });
+    detailChips = [cardTitle, `+${hostedCreditsTaken}`];
+    category = "economy";
   } else if (
     actionType === "resolve_choice" &&
     payload.discardResolved === true
