@@ -1,6 +1,6 @@
 # AI-Architektur
 
-Stand: 2026-08-18
+Stand: 2026-08-29
 
 Dieser Ordner enthält ausschließlich aktuell benötigte Architektur- und Referenzverträge der NETGRID-KI. Abgeschlossene Implementierungs-, Replay-, Remediation-, Audit-, Cutover- und Match-Prozessdokumente gehören nicht in den aktiven Architekturbestand. Git bleibt die Historie.
 
@@ -19,6 +19,7 @@ Diese drei Dokumente bilden den führenden Architekturverbund. Bei Widersprüche
 ## Aktuelle Detail- und Referenzverträge
 
 - `turn-campaign-planner.md` – umgesetzter Detailvertrag des Zug- und Kampagnenplaners.
+- `rnd-access-memory.md` – umgesetzter Detailvertrag für das side-sichere, geordnete R&D-Zugriffsgedächtnis und seine Plan-Ownership.
 - `controller-contract.md` – Controller-, LegalAction- und Engine-Autoritätsgrenze.
 - `decision-trace-contract.md` – lokaler Trace-, Redaction- und Debugvertrag.
 - `simulation-test-matrix.md` – aktuelle Evidenz- und Simulationsmatrix.

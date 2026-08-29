@@ -1,6 +1,6 @@
 # R&D-Zugriffsgedächtnis
 
-Status: Umsetzung im Arbeitsbranch `codex/rnd-multiaccess-memory`  
+Status: umgesetzt
 Stand: 2026-08-29
 
 ## Quelle und Zielprüfung
@@ -101,89 +101,29 @@ Rekonstruktionszustand während der Auswertung des side-sicheren Eventpräfixes.
   am Engine-Regelvertrag ist ein Sicherheitsblocker. Der Prozess stoppt dann
   mit konkreter Removal Condition statt eines Fallbacks.
 
-## Paketfolge
+## Implementierungs- und Testanker
 
-### P1 – Vertrag und Prozessartefakt
+- `packages/ai/src/belief-state.ts` rekonstruiert die geordnete Sequenz sowie
+  bekannte Übergänge nach R&D, HQ und entfernten Zugriffskarten zentral.
+- `packages/ai/src/known-central-access-payoff.ts` konsumiert ausschließlich
+  den Belief-State-Vertrag und bewertet die aktuell erreichbare bekannte
+  Sequenz.
+- `packages/ai/src/runtime/plan-first-live-runtime.ts` behält
+  `runner.pressure_central` als Owner und schließt eine bekannte
+  No-Payoff-Route aus dem ausführbaren Portfolio aus.
+- `packages/ai/src/belief-state.test.ts` belegt den geordneten
+  Fünffachzugriff, zwei Steals, den folgenden Corp-Draw, widersprüchliche
+  Prefixe und fehlende Removal-Bindungen.
+- `packages/ai/src/known-central-access-payoff.test.ts` und
+  `packages/ai/src/runtime/plan-first-live-runtime.test.ts` belegen die
+  Consumer-Bewertung und die unveränderte Plan-Ownership anhand der
+  matchnahen Eventfolge.
 
-- Ziel: Owner, Zustandsmodell, Sicherheitsgrenzen und Paketprozess festlegen.
-- Kernartefakt: dieses Dokument.
-- Check: Architektur-Preflight, `git diff --check`.
-- Done-Gate: alle Pflichtfragen des Änderungskompasses sind beantwortet.
-- Commit: `docs(ai): define ordered R&D access memory contract`.
-
-### P2 – Belief-State-Produzent
-
-- Ziel: geordnete Multiaccess-Batches, gebundene Entfernungen, Prefix-Abgleich
-  und Corp-Draw-Fortschreibung implementieren.
-- Kernartefakte: `packages/ai/src/belief-state.ts` und der direkte Test.
-- Checks: fokussierte `belief-state.test.ts`, `git diff --check`.
-- Done-Gate: Fünffachzugriff mit zwei gestohlenen Agendas und Corp-Draw lässt
-  exakt die beiden beobachteten Restkarten in R&D; Shuffle und widersprüchlicher
-  Prefix bleiben fail-closed.
-- Commit: `fix(ai): retain ordered R&D multiaccess memory`.
-
-### P3 – Pressure-Consumer und Ownership
-
-- Ziel: die reale Restsequenz als bekannten Low-Payoff an
-  `runner.pressure_central` liefern und den wertlosen Wiederholungsrun
-  unterdrücken.
-- Kernartefakte: zentrale Payoff-/Run-Target- beziehungsweise
-  Plan-first-Regressionstests; produktiver Consumer nur bei belegter Lücke.
-- Checks: ausschließlich die direkt betroffenen Testdateien,
-  `git diff --check`.
-- Done-Gate: Ergebnis, `runner.pressure_central`-Owner, Step/Route und
-  unveränderte LegalAction-Autorität sind belegt.
-- Commit: `test(ai): cover known R&D multiaccess repeat-run decision`.
-
-### P4 – Current-State-Abschluss
-
-- Ziel: aktuellen Architekturstand verlinken, Prozessstatus abschließen und
-  alle direkt änderungsnahen Checks gesammelt bestätigen.
-- Kernartefakte: `docs/architecture/ai/README.md`, dieses Dokument.
-- Checks: fokussierte Regressionen und `git diff --check`; Typecheck nur bei
-  geänderter Typoberfläche.
-- Done-Gate: Dokumentation beschreibt den implementierten Stand, Arbeitsbranch
-  ist sauber und alle Paketcommits liegen vor.
-- Commit: `docs(ai): record implemented R&D memory contract`.
-
-## Worktree-, Git- und Integrationsregeln
-
-- Umsetzung ausschließlich in
-  `C:\Projekte\NETGRID_RND_MULTIACCESS_MEMORY` auf
-  `codex/rnd-multiaccess-memory`.
-- Genau ein Paket ist aktiv; jedes Paket erhält einen eigenen Commit.
-- Der Hauptcheckout wird erst für den finalen lokalen Fast-Forward-Merge nach
-  `main` verwendet.
-- Vor der Integration wird aktuelles `main` defensiv in den Arbeitsbranch
-  eingebunden. Konflikte erhalten beide kompatiblen Intentionen.
-- Nach erfolgreichem Merge werden Worktree und vollständig gemergter Branch
-  entfernt und in Git sowie im Dateisystem verifiziert.
-- Es erfolgt weder Push noch Pull Request.
-
-## Controller-Prompt-Kern
-
-```text
-/Goal Arbeite R&D-Zugriffsgedächtnis vollständig und sequenziell von P1 bis
-P4 ab und merge den abgeschlossenen Arbeitsbranch lokal nach main.
-
-Lies zuerst AGENTS.md, packages/ai/AGENTS.md, den KI-Änderungskompass und
-dieses Prozessartefakt. Arbeite ausschließlich im Worktree
-C:\Projekte\NETGRID_RND_MULTIACCESS_MEMORY auf Branch
-codex/rnd-multiaccess-memory. Arbeite immer nur am aktuellen Paket, führe nur
-änderungsnahe Checks aus und committe jedes abgeschlossene Paket. Erzeuge
-keine zweite Entscheidungsautorität und verwende nur side-sichere Events und
-LegalActions. Bei einem Sicherheitsblocker stoppe mit Removal Condition.
-Integriere nach P4 aktuelles main, merge lokal nach main, prüfe main und
-entferne Worktree und Branch verifiziert. Markiere das Goal erst danach als
-complete.
-```
-
-## Abschlusskriterien
+## Geltende Garantien
 
 - Multiaccess-Beobachtungen werden geordnet und duplikatsicher geführt.
-- Steal, Trash, Remove, Corp-Draw und R&D-Reorder besitzen belegte Übergänge.
+- Steal, Trash, Remove, Corp-Draw und R&D-Reorder besitzen deterministische,
+  belegte Übergänge.
 - Bekannte wertlose Restsequenzen werden nicht als vollständig neu bewertet.
 - `runner.pressure_central` bleibt Owner; kein Resolver und kein Sensor wählt
   eine Action.
-- Fokussierte Tests, `git diff --check`, lokaler Main-Merge und verifizierter
-  Worktree-/Branch-Cleanup sind erfolgreich.
