@@ -7474,6 +7474,7 @@ function buildRunnerDomain(
                     input,
                     actionCandidate,
                     evaluation.targetServerId as "hq" | "rd" | "archives",
+                    sameServerEvaluations,
                   );
                 const opensHqSuccessWindow =
                   candidate.actionId === hqSuccessWindowRoute?.actionId;
@@ -25254,6 +25255,7 @@ function uniqueCoverageGaps(
         input,
         candidates,
         evaluation,
+        runTargets,
       )
     ) {
       continue;
@@ -25349,6 +25351,7 @@ function uniqueCoverageGaps(
         input,
         candidates,
         evaluation,
+        runTargets,
       )
     ) {
       continue;
@@ -27376,6 +27379,7 @@ function bindRunnerRemoteRunActionAssessments(
         input,
         actionCandidate,
         signal.serverId,
+        evaluations,
       );
     const fundingSupport = runnerRunFundingSupport(
       input,
@@ -30803,6 +30807,7 @@ function runnerCoverageRunTargetHasDifferentialPayoff(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   evaluation: RunnerRunTargetEvaluation,
+  runTargets: readonly RunnerRunTargetEvaluation[],
 ): boolean {
   const candidate = candidates.find(
     (entry) => entry.actionId === evaluation.actionId,
@@ -30819,6 +30824,7 @@ function runnerCoverageRunTargetHasDifferentialPayoff(
       input,
       candidate,
       evaluation.targetServerId,
+      runTargets,
     )
   );
 }
