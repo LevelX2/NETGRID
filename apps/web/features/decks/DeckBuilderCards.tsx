@@ -35,6 +35,7 @@ export function DeckTableLibraryCard({
   overlapped,
   quantity,
   selected,
+  readOnly = false,
   stackIndex,
   onAddToFirstPile,
   onSelect
@@ -44,6 +45,7 @@ export function DeckTableLibraryCard({
   overlapped: boolean;
   quantity: number;
   selected: boolean;
+  readOnly?: boolean;
   stackIndex: number;
   onAddToFirstPile(): void;
   onSelect(): void;
@@ -58,12 +60,17 @@ export function DeckTableLibraryCard({
       style={{ "--deck-table-card-z": stackIndex } as CSSProperties}
     >
       <div
-        draggable
+        draggable={!readOnly}
         onDoubleClick={(event) => {
           event.stopPropagation();
+          if (readOnly) return;
           onAddToFirstPile();
         }}
         onDragStart={(event) => {
+          if (readOnly) {
+            event.preventDefault();
+            return;
+          }
           event.dataTransfer.setData("application/x-netgrid-card", JSON.stringify({ cardId: card.catalogCardId }));
           event.dataTransfer.effectAllowed = "copy";
         }}

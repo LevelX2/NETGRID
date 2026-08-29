@@ -1815,7 +1815,7 @@ export function DeckEditorPanel({
                   </aside>
                 )}
                 <section
-                  className={`deckLibraryPanel ${deckEditorMode === "table" ? "deckTableLibraryPanel" : ""} ${standardPreviewActive ? "deckStandardPreviewHidden" : ""}`}
+                  className={`deckLibraryPanel ${deckEditorMode === "table" ? "deckTableLibraryPanel" : ""}`}
                 >
                   <div className="deckBuilderPanelHeader">
                     <div>
@@ -2026,6 +2026,7 @@ export function DeckEditorPanel({
                           selected={
                             previewCard?.catalogCardId === card.catalogCardId
                           }
+                          readOnly={standardPreviewActive}
                           stackIndex={index + 1}
                           onAddToFirstPile={() =>
                             tableLayout &&
