@@ -22078,16 +22078,18 @@ function resolvePlanBoundCorpDelayedSuccessChoice(
   const action = choiceActions.length === 1 ? choiceActions[0] : undefined;
   const [requirement] = action?.choiceRequirements ?? [];
   const optionIds = choice.options.map((option) => option.id);
-  const continuationEvents = (context.input.eventTail ?? []).filter(
-    (event) =>
-      previous !== undefined &&
-      event.stateVersionBefore >= previous.stateVersion &&
-      event.stateVersionAfter <= context.input.playerView.stateVersion,
+  const currentEventTail = (context.input.eventTail ?? []).filter(
+    (event) => event.stateVersionAfter <= context.input.playerView.stateVersion,
   );
-  const firstContinuationEvent = continuationEvents[0];
   const activeRunId = context.input.playerView.run?.runId;
-  const reactiveRunStartEvent = continuationEvents.find((event) => {
+  const reactiveRunStartEvent = currentEventTail.find((event) => {
     if (event.publicPayload?.actor !== "runner") return false;
+    if (
+      typeof activeRunId !== "string" ||
+      activeRunId !== `run_${event.stateVersionAfter}`
+    ) {
+      return false;
+    }
     if (
       event.publicPayload?.actionType === "start_run" &&
       event.publicPayload?.serverId === serverId
@@ -22095,15 +22097,37 @@ function resolvePlanBoundCorpDelayedSuccessChoice(
       return true;
     }
     return (
-      typeof activeRunId === "string" &&
-      activeRunId === `run_${event.stateVersionAfter}` &&
-      (event.publicPayload?.actionType === "play_event" ||
-        event.publicPayload?.actionType === "activated_card_ability" ||
-        event.publicPayload?.actionType === "trigger_ability")
+      event.publicPayload?.actionType === "play_event" ||
+      event.publicPayload?.actionType === "activated_card_ability" ||
+      event.publicPayload?.actionType === "trigger_ability"
     );
   });
+  const reactiveRunStartIndex = reactiveRunStartEvent
+    ? currentEventTail.indexOf(reactiveRunStartEvent)
+    : -1;
+  const reactiveTurnAnchor =
+    reactiveRunStartIndex > 0
+      ? currentEventTail
+          .slice(0, reactiveRunStartIndex)
+          .reverse()
+          .find(
+            (event) =>
+              event.publicPayload?.actor === "corp" &&
+              event.publicPayload?.actionType === "end_turn",
+          )
+      : undefined;
+  const continuationEvents = previous
+    ? currentEventTail.filter(
+        (event) => event.stateVersionBefore >= previous.stateVersion,
+      )
+    : [];
+  const firstContinuationEvent = continuationEvents[0];
   const exactReactiveRunChain =
     previous !== undefined &&
+    reactiveTurnAnchor !== undefined &&
+    reactiveRunStartEvent !== undefined &&
+    previous.stateVersion >= reactiveTurnAnchor.stateVersionBefore &&
+    previous.stateVersion < reactiveRunStartEvent.stateVersionAfter &&
     continuationEvents.length >= 2 &&
     firstContinuationEvent?.stateVersionBefore === previous.stateVersion &&
     continuationEvents.every(
@@ -22115,9 +22139,8 @@ function resolvePlanBoundCorpDelayedSuccessChoice(
     ) &&
     continuationEvents.at(-1)?.stateVersionAfter ===
       context.input.playerView.stateVersion &&
-    firstContinuationEvent.publicPayload?.actor === "corp" &&
-    firstContinuationEvent.publicPayload?.actionType === "end_turn" &&
-    reactiveRunStartEvent !== undefined &&
+    reactiveTurnAnchor.publicPayload?.actor === "corp" &&
+    reactiveTurnAnchor.publicPayload?.actionType === "end_turn" &&
     context.input.playerView.run?.attackedServerId === serverId;
   const exactActiveDefenseOrigin =
     previous !== undefined &&
