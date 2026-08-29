@@ -1491,6 +1491,7 @@ export function persistentInstallEvidence(params: {
   handBufferPenalty: number;
   muPressurePenalty: number;
   displacementPenalty: number;
+  rigDemandFitScore: number;
   finalInstallFit: number;
   handSizeBonus: number;
   role: RunnerHandDevelopmentRole;
@@ -1556,6 +1557,7 @@ export function persistentInstallEvidence(params: {
     `hand_buffer_penalty:${params.handBufferPenalty}`,
     `mu_pressure_penalty:${params.muPressurePenalty}`,
     `displacement_penalty:${params.displacementPenalty}`,
+    `rig_demand_fit_score:${params.rigDemandFitScore}`,
     `final_install_fit:${params.finalInstallFit}`,
     ...(params.profile.handSizeSupport && params.handSizeBonus > 0
       ? [

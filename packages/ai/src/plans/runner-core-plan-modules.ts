@@ -147,6 +147,7 @@ export type RunnerCoverageGapSignal = {
   installActionIds?: string[];
   installActionValues?: Record<string, number>;
   preparationActionIds?: string[];
+  memorySupportActionIds?: string[];
   fundingGap?: number;
   sameTurnRunConversion?: {
     targetRunActionId: string;
@@ -1596,7 +1597,11 @@ function coverageModule(
                   candidates.map((entry) => entry.candidate.semanticActionType),
                 ),
               ],
-              legalActionTypes: ["trigger_ability"],
+              legalActionTypes: [
+                ...new Set(
+                  candidates.map((entry) => entry.candidate.actionType),
+                ),
+              ],
             },
             purpose: `Prepare the exact installed answer for ${current.gap.requiredRole}.`,
           },
@@ -2439,23 +2444,34 @@ function coveragePreparationCandidates(
   gap: RunnerCoverageGapSignal,
 ): PlanMaterialization["candidates"] {
   const actionIds = new Set(gap.preparationActionIds ?? []);
+  const memorySupportActionIds = new Set(gap.memorySupportActionIds ?? []);
   return context.actionCandidates
     .filter((candidate) => {
       if (!actionIds.has(candidate.actionId)) return false;
       const action = context.input.legalActions.find(
         (entry) => entry.actionId === candidate.actionId,
       );
-      return (
+      const exactMemorySupportInstall =
+        memorySupportActionIds.has(candidate.actionId) &&
         action?.side === "runner" &&
-        action.type === "trigger_ability" &&
+        action.type === "install_card" &&
         action.timingPoint === context.input.playerView.timingPoint &&
-        action.expiresAtStateVersion ===
-          context.input.playerView.stateVersion &&
-        action.payload?.runnerAbility === "change_icebreaker_subtype" &&
-        typeof action.payload.selectedSubtype === "string"
+        action.expiresAtStateVersion === context.input.playerView.stateVersion;
+      return (
+        exactMemorySupportInstall ||
+        (action?.side === "runner" &&
+          action.type === "trigger_ability" &&
+          action.timingPoint === context.input.playerView.timingPoint &&
+          action.expiresAtStateVersion ===
+            context.input.playerView.stateVersion &&
+          action.payload?.runnerAbility === "change_icebreaker_subtype" &&
+          typeof action.payload.selectedSubtype === "string")
       );
     })
-    .map((candidate) => ({ candidate, stepValue: 130 }));
+    .map((candidate) => ({
+      candidate,
+      stepValue: memorySupportActionIds.has(candidate.actionId) ? 120 : 130,
+    }));
 }
 
 function runnerInstallSourceCardInstanceId(

@@ -561,6 +561,7 @@ export type {
   RunnerHandDevelopmentDeferReason,
   RunnerHandDevelopmentEvaluation,
   RunnerHandDevelopmentFundingNeed,
+  RunnerHandDevelopmentRigDemandBinding,
   RunnerHandDevelopmentRole,
   RunnerHandDevelopmentStrategicFit,
   RunnerPersistentInstallCapabilityDelta,

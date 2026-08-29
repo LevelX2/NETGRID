@@ -67,6 +67,12 @@ import {
   assessRunnerHandRotation,
   type RunnerHandRotationAssessment,
 } from "./runner-hand-rotation-assessment";
+import {
+  bindRunnerRigDemandProjectionToCoverageGaps,
+  buildRunnerRigDemandProjectionForCoverage,
+  runnerCoverageRigDemandInputsComplete,
+} from "./runner-rig-demand-adapter";
+import type { RunnerRigDemandProjection } from "../runner/rig-demand/runner-rig-demand-projection";
 import type { RunnerStrategicIntentProfile } from "../runner-strategic-intent";
 import {
   CORP_PLAN_PRIORITY_POLICY,
@@ -3599,54 +3605,59 @@ function runnerContext(
     input,
     deckCapabilities,
   );
-  const handDevelopment = dependencies
-    .evaluateRunnerHandDevelopment({
-      input,
-      strategicIntent,
-      deckCapabilities,
-      actionCandidates: candidates,
-    })
-    .map((evaluation) => {
-      if (!evaluation.legalActionId) return evaluation;
-      const action = input.legalActions.find(
-        (candidate) => candidate.actionId === evaluation.legalActionId,
-      );
-      if (!action) return evaluation;
-      const assessment =
-        dependencies.runnerProgramInstallTrashAssessmentForAction(
-          input,
-          action,
+  const evaluateHandDevelopment = (
+    rigDemandProjection?: RunnerRigDemandProjection,
+  ) =>
+    dependencies
+      .evaluateRunnerHandDevelopment({
+        input,
+        strategicIntent,
+        deckCapabilities,
+        actionCandidates: candidates,
+        ...(rigDemandProjection ? { rigDemandProjection } : {}),
+      })
+      .map((evaluation) => {
+        if (!evaluation.legalActionId) return evaluation;
+        const action = input.legalActions.find(
+          (candidate) => candidate.actionId === evaluation.legalActionId,
         );
-      if (
-        assessment?.memoryRequired !== true ||
-        assessment.canFreeRequiredMemory
-      ) {
-        return evaluation;
-      }
-      return {
-        ...evaluation,
-        availability: "missing_mu" as const,
-        strategicFit: "blocked" as const,
-        deferReason: "missing_mu" as const,
-        evidence: [
-          ...evaluation.evidence,
-          "runner_program_trash_install_has_no_acceptable_sacrifice",
-          ...assessment.evidence,
-        ],
-      };
-    });
-  const economy = dependencies.buildRunnerEconomyPosture({
+        if (!action) return evaluation;
+        const assessment =
+          dependencies.runnerProgramInstallTrashAssessmentForAction(
+            input,
+            action,
+          );
+        if (
+          assessment?.memoryRequired !== true ||
+          assessment.canFreeRequiredMemory
+        ) {
+          return evaluation;
+        }
+        return {
+          ...evaluation,
+          availability: "missing_mu" as const,
+          strategicFit: "blocked" as const,
+          deferReason: "missing_mu" as const,
+          evidence: [
+            ...evaluation.evidence,
+            "runner_program_trash_install_has_no_acceptable_sacrifice",
+            ...assessment.evidence,
+          ],
+        };
+      });
+  const initialHandDevelopment = evaluateHandDevelopment();
+  const initialEconomy = dependencies.buildRunnerEconomyPosture({
     input,
     strategicIntent,
     deckCapabilities,
-    handDevelopmentEvaluations: handDevelopment,
+    handDevelopmentEvaluations: initialHandDevelopment,
   });
-  const runTargets = dependencies.evaluateRunnerRunTargets({
+  const initialRunTargets = dependencies.evaluateRunnerRunTargets({
     input,
     strategicIntent,
     deckCapabilities,
     actionCandidates: candidates,
-    handDevelopmentEvaluations: handDevelopment,
+    handDevelopmentEvaluations: initialHandDevelopment,
   });
   assertRunnerRestrictedProgramInstallCommitment(input, candidates, previous);
   const activeRunRoot = reassessActiveInformationRunParent(
@@ -3662,11 +3673,11 @@ function runnerContext(
     candidates,
     previous,
   );
-  const runWindowActionAssessments = runnerRunWindowActionAssessments(
+  const initialRunWindowActionAssessments = runnerRunWindowActionAssessments(
     input,
     candidates,
-    runTargets,
-    economy,
+    initialRunTargets,
+    initialEconomy,
     dependencies,
     activeRunRoot,
     runRiskReassessment,
@@ -3678,6 +3689,66 @@ function runnerContext(
       ? { discardKeepScore: dependencies.discardKeepScore }
       : {}),
   });
+  const preliminaryUnboundDomain = buildRunnerDomain(
+    input,
+    candidates,
+    deckCapabilities,
+    strategicIntent,
+    initialEconomy,
+    initialHandDevelopment,
+    initialRunTargets,
+    initialRunWindowActionAssessments,
+    activeRunRoot,
+    runRiskReassessment,
+    exposeInformation,
+    previous,
+    discardChoiceBinding,
+    dependencies.discardKeepScore,
+    undefined,
+  );
+  const preliminaryDomain = bindRunnerCoverageSearchProgramTrashSacrifices(
+    input,
+    preliminaryUnboundDomain,
+    dependencies.runnerProgramInstallTrashAssessmentForCard,
+  );
+  const rigDemandProjection =
+    runnerRigDemandProjectionInputAvailable(input) &&
+    runnerCoverageRigDemandInputsComplete({
+      input,
+      deckCapabilities,
+      coverageGaps: preliminaryDomain.coverageGaps,
+    })
+      ? buildRunnerRigDemandProjectionForCoverage({
+          input,
+          strategicIntent,
+          deckCapabilities,
+          coverageGaps: preliminaryDomain.coverageGaps,
+          rolesForDefinitionId: rolesForDeckDoctrineCard,
+        })
+      : undefined;
+  const handDevelopment = evaluateHandDevelopment(rigDemandProjection);
+  const economy = dependencies.buildRunnerEconomyPosture({
+    input,
+    strategicIntent,
+    deckCapabilities,
+    handDevelopmentEvaluations: handDevelopment,
+  });
+  const runTargets = dependencies.evaluateRunnerRunTargets({
+    input,
+    strategicIntent,
+    deckCapabilities,
+    actionCandidates: candidates,
+    handDevelopmentEvaluations: handDevelopment,
+  });
+  const runWindowActionAssessments = runnerRunWindowActionAssessments(
+    input,
+    candidates,
+    runTargets,
+    economy,
+    dependencies,
+    activeRunRoot,
+    runRiskReassessment,
+  );
   const unboundDomain = buildRunnerDomain(
     input,
     candidates,
@@ -3693,6 +3764,7 @@ function runnerContext(
     previous,
     discardChoiceBinding,
     dependencies.discardKeepScore,
+    rigDemandProjection,
   );
   const domain = bindRunnerCoverageSearchProgramTrashSacrifices(
     input,
@@ -3715,6 +3787,23 @@ function runnerContext(
     turnKey: turnKey(input),
     domain,
   };
+}
+
+function runnerRigDemandProjectionInputAvailable(
+  input: AiDecisionInput,
+): boolean {
+  const extended = input as AiDecisionInputWithDeckCapabilities;
+  const memoryUsed = input.playerView.own.memoryUsed;
+  const memoryLimit = input.playerView.own.memoryLimit;
+  return (
+    extended.planningStateIdentity !== undefined &&
+    typeof memoryUsed === "number" &&
+    Number.isSafeInteger(memoryUsed) &&
+    memoryUsed >= 0 &&
+    typeof memoryLimit === "number" &&
+    Number.isSafeInteger(memoryLimit) &&
+    memoryLimit >= 0
+  );
 }
 
 function bindRunnerCoverageSearchProgramTrashSacrifices(
@@ -5080,11 +5169,7 @@ export function runnerActionDispositions(
       if (!evidenceCode) {
         continue;
       }
-      add(
-        candidate.actionId,
-        "runner.defense_and_recovery",
-        evidenceCode,
-      );
+      add(candidate.actionId, "runner.defense_and_recovery", evidenceCode);
     }
   }
   const rejectedCoverageGapsByActionId = new Map<
@@ -6252,6 +6337,7 @@ function buildRunnerDomain(
   previous: ResidentPlanPortfolio | undefined,
   discardChoiceBinding: RunnerDiscardChoiceBinding | undefined,
   discardKeepScore: PlanFirstLiveDependencies["discardKeepScore"],
+  rigDemandProjection: RunnerRigDemandProjection | undefined,
 ): RunnerPlanDomain {
   const currentCredits = input.playerView.own.credits;
   const remainingClicks = input.playerView.own.clicks;
@@ -6471,7 +6557,7 @@ function buildRunnerDomain(
       input,
       Math.max(10, economy.desiredCreditReserve + 3),
     );
-  const coverageGaps = uniqueCoverageGaps(
+  const projectedCoverageGaps = uniqueCoverageGaps(
     input,
     candidates,
     runTargets,
@@ -6481,6 +6567,13 @@ function buildRunnerDomain(
     economy,
     handRotationAssessment,
   );
+  const coverageGaps = rigDemandProjection
+    ? bindRunnerRigDemandProjectionToCoverageGaps({
+        input,
+        coverageGaps: projectedCoverageGaps,
+        projection: rigDemandProjection,
+      })
+    : projectedCoverageGaps;
   const terminalContestThreat = runnerTerminalContestThreat(input);
   const exactCoverageRecoveryActionIds = new Set(
     coverageGaps.flatMap((gap) => gap.directSearchActionIds),

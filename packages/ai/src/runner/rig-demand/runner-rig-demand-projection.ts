@@ -444,7 +444,7 @@ function doctrineSignalsFor(
 ): RunnerRigDoctrineSignal[] {
   if (!intent) return [];
   return [
-    ...intent.setupEngine.map((signalId) => ({
+    ...(intent.setupEngine ?? []).map((signalId) => ({
       signalId,
       kind: "setup_engine" as const,
       confidence: intent.confidence,
@@ -456,7 +456,7 @@ function doctrineSignalsFor(
       confidence: intent.confidence,
       evidenceCodes: [`runner_rig_doctrine_engine_line:${signalId}`],
     })),
-    ...intent.pressureVectors.map((signalId) => ({
+    ...(intent.pressureVectors ?? []).map((signalId) => ({
       signalId,
       kind: "pressure_vector" as const,
       confidence: intent.confidence,

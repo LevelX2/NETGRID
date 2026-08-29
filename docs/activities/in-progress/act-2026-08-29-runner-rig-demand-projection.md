@@ -1,6 +1,6 @@
 # Runner-Rig-Bedarfs- und Retentionsprojektion
 
-Status: In Umsetzung – Paket P2 aktiv
+Status: In Umsetzung – Paket P3 aktiv
 
 ## Quelle
 
@@ -139,6 +139,8 @@ Tests: MU 0/4 mit zwei gebundenen Programmen positiv; MU 4/4 mit vollständigem 
 Done-Gate: Generische MU- und Coverage-Bindung wirkt nur beim bestehenden Owner; kein zweiter Chooser oder globaler Rohscore entsteht.
 
 Commit: `fix(ai): bind rig installs to concrete demand`
+
+Nachweis: Die bestehenden planlokalen Coverage-Gaps werden in einem reinen Adapter in stateVersion-gebundene Demand-Facts übersetzt. Ein nachweislich benötigter allgemeiner MU-Ausbau wird an die konkrete sichtbare Memory-Support-Karte und deren aktuelle `install_card`-Action gebunden; diese Action materialisiert weiterhin ausschließlich als `prepare_coverage`-Step von `runner.rig_and_coverage`. Handentwicklung konsumiert nur Retention, Horizon und Installbereitschaft und neutralisiert bei vorhandener Projektion ungebundene Memory-/Breaker-Annahmen. Vollständiges Rig, Doctrine und Handfülle erzeugen keinen Bedarf. Fehlende MU-Quotes werden weder zu `0` normalisiert noch als negativer Bedarf interpretiert: Der Adapter meldet unvollständige Provider-Facts strukturiert, während der Runtime-Integrationspunkt die Projektion nur bei vollständigen State-/MU-/Coverage-Fakten aktiviert. Fokussierte Fact-, Adapter- und Planowner-Tests (65 Fälle vor dem zusätzlichen Unknown-MU-Fall), AI-Typecheck und die vollständige `plan-first-live-runtime`-Datei sind gegenüber der lokalen Main-Baseline regressionsfrei; deren vier bereits auf `main` identisch vorhandene Fehler bleiben außerhalb dieses Pakets.
 
 ### P3 – Handökonomie, eingeschränkte Ressourcen und Run-Economy
 

@@ -2,6 +2,11 @@ import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate";
 import type { DeckCapabilityProfile } from "../../deck-capabilities";
 import type { RunnerStrategicIntentProfile } from "../../runner-strategic-intent";
+import type {
+  RunnerRigCardInstallReadiness,
+  RunnerRigCardRetentionValue,
+  RunnerRigDemandProjection,
+} from "../rig-demand/runner-rig-demand-projection";
 
 export const RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION =
   "runner-hand-development-evaluation-v4" as const;
@@ -177,8 +182,16 @@ export type RunnerPersistentInstallEvaluation = {
   handBufferPenalty: number;
   muPressurePenalty: number;
   displacementPenalty: number;
+  rigDemandFitScore?: number;
+  boundRigDemandIds?: string[];
   finalInstallFit: number;
   evidence: string[];
+};
+
+export type RunnerHandDevelopmentRigDemandBinding = {
+  boundDemandIds: string[];
+  retentionValue: RunnerRigCardRetentionValue;
+  installReadiness: RunnerRigCardInstallReadiness;
 };
 
 export type RunnerHandDevelopmentEvaluation = {
@@ -197,6 +210,7 @@ export type RunnerHandDevelopmentEvaluation = {
   activationPrerequisites: RunnerHandDevelopmentActivationPrerequisite[];
   deferReason: RunnerHandDevelopmentDeferReason;
   legalActionId?: string;
+  rigDemandBinding?: RunnerHandDevelopmentRigDemandBinding;
   persistentInstallEvaluation?: RunnerPersistentInstallEvaluation;
   evidence: string[];
 };
@@ -206,4 +220,5 @@ export type EvaluateRunnerHandDevelopmentParams = {
   strategicIntent?: RunnerStrategicIntentProfile;
   deckCapabilities?: DeckCapabilityProfile;
   actionCandidates?: readonly ActionSemanticCandidate[];
+  rigDemandProjection?: RunnerRigDemandProjection;
 };

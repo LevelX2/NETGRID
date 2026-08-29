@@ -1600,6 +1600,69 @@ describe("Runner core plan modules", () => {
     });
   });
 
+  it("keeps an exact memory-support install inside runner.rig_and_coverage", () => {
+    const memoryInstall = candidate(
+      "install-memory-support",
+      "install_card",
+      "install.card",
+      "onr_v1_146_zetatech-mem-chip",
+    );
+    const coverage = coreModule("runner.rig_and_coverage");
+    const runnerContext = context([memoryInstall], {
+      coverageGaps: [
+        {
+          gapId: "code-gate-memory-bound",
+          requiredRole: "breaker_code_gate",
+          priorityClass: "P2",
+          evidenceCode: "memory_required_for_bound_decoder",
+          deckHasAnswer: true,
+          answerInHand: true,
+          fundingActionIds: [],
+          directSearchActionIds: [],
+          searchEngineSetupActionIds: [],
+          drawForAnswerActionIds: [],
+          preparationActionIds: [memoryInstall.actionId],
+          memorySupportActionIds: [memoryInstall.actionId],
+        },
+      ],
+    });
+    runnerContext.input.legalActions = [
+      {
+        actionId: memoryInstall.actionId,
+        side: "runner",
+        type: "install_card",
+        label: "Install memory support",
+        source: "memory-chip-instance",
+        timingPoint: "runner_action.main",
+        costs: [{ clicks: 1 }],
+        targetRequirements: [],
+        visibility: "private_to_actor",
+        expiresAtStateVersion: 10,
+        payload: { cardId: "memory-chip-instance" },
+      },
+    ];
+
+    const [proposal] = coverage.discover(runnerContext);
+    const instance = instantiatePlanProposal(proposal!, 10);
+    const materialized = coverage.materialize(
+      instance,
+      {} as never,
+      runnerContext,
+    );
+
+    expect(proposal).toMatchObject({
+      moduleId: "runner.rig_and_coverage",
+      initialViability: "ready",
+    });
+    expect(instance.phase).toBe("prepare_coverage");
+    expect(materialized.step.capability.legalActionTypes).toEqual([
+      "install_card",
+    ]);
+    expect(
+      materialized.candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual([memoryInstall.actionId]);
+  });
+
   it("keeps a known universal breaker draw route despite general hand-development disposition", () => {
     const coverage = coreModule("runner.rig_and_coverage");
     const draw = candidate("draw", "draw_card", "draw.card");
