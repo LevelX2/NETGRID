@@ -772,6 +772,65 @@ describe("semantic chronicle localization", () => {
     );
   });
 
+  it("describes end-the-run subroutines with ICE, number, and outcome", () => {
+    const creditBlocks = event("continue_run", {
+      actor: "runner",
+      serverLabel: "R&D",
+      resolvedEffects: [
+        {
+          effectId: "subroutine_1",
+          kind: "resolve_subroutine",
+          visibility: "public",
+          side: "runner",
+          reason: "ice_subroutine",
+          sourceDefinitionId: "onr_proteus_017_credit-blocks",
+          sourceTitle: "Credit Blocks",
+          subroutineIndex: 0,
+          subroutineType: "end_the_run",
+          endedRun: true,
+        },
+      ],
+    });
+
+    const [de] = formatChronicleEffectItems(
+      creditBlocks,
+      "corp",
+      undefined,
+      translate("de"),
+    );
+    const [en] = formatChronicleEffectItems(
+      creditBlocks,
+      "corp",
+      undefined,
+      translate("en"),
+    );
+    const [fr] = formatChronicleEffectItems(
+      creditBlocks,
+      "corp",
+      undefined,
+      translate("fr"),
+    );
+
+    expect(de).toMatchObject({
+      title: "Credit Blocks: Subroutine 1 beendet den Run.",
+      category: "run",
+      importance: "important",
+      groupLabel: "Run auf R&D",
+      cardDefinitionId: "onr_proteus_017_credit-blocks",
+      cardTitle: "Credit Blocks",
+    });
+    expect(de?.chips).toEqual(
+      expect.arrayContaining(["Credit Blocks", "Subroutine 1", "Run beendet"]),
+    );
+    expect(en?.title).toBe("Credit Blocks: subroutine 1 ends the run.");
+    expect(fr?.title).toBe(
+      "Credit Blocks : le sous-programme 1 met fin au piratage.",
+    );
+    expect(`${de?.title} ${en?.title} ${fr?.title}`).not.toMatch(
+      /automatischer Effekt|automatic effect|effet automatique/,
+    );
+  });
+
   it("numbers multiaccess cards and combines access with steal or trash outcomes", () => {
     const firstAccess = {
       ...event("access_card", {

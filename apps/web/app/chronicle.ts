@@ -5174,6 +5174,11 @@ function formatSemanticChronicleEffect(
   const subject = semanticChronicleSubject(actor, side, isAi, translate);
   const kind = stringValue(effect.kind) ?? "effect";
   const subroutineType = stringValue(effect.subroutineType);
+  const subroutineIndex = numberValue(effect.subroutineIndex);
+  const subroutineNumber =
+    subroutineIndex !== undefined ? subroutineIndex + 1 : undefined;
+  const endRunSubroutine =
+    kind === "resolve_subroutine" && subroutineType === "end_the_run";
   const payOrEndRun =
     kind === "resolve_subroutine" &&
     subroutineType === "end_the_run_unless_runner_pays";
@@ -5212,49 +5217,54 @@ function formatSemanticChronicleEffect(
       stringValue(event.publicPayload.selectedServerId),
     translate,
   );
-  const category: ChronicleCategory = payOrEndRun
-    ? "run"
-    : kind === "gain_credits" ||
-        kind === "take_hosted_credits" ||
-        kind === "lose_credits"
-      ? "economy"
-      : kind === "damage" || kind === "add_tags" || kind === "remove_tags"
-        ? "danger"
-        : kind === "draw_cards" || kind === "trash_card"
-          ? "card"
-          : "system";
+  const category: ChronicleCategory =
+    endRunSubroutine || payOrEndRun
+      ? "run"
+      : kind === "gain_credits" ||
+          kind === "take_hosted_credits" ||
+          kind === "lose_credits"
+        ? "economy"
+        : kind === "damage" || kind === "add_tags" || kind === "remove_tags"
+          ? "danger"
+          : kind === "draw_cards" || kind === "trash_card"
+            ? "card"
+            : "system";
   const key =
     visibility === "redacted"
       ? "effect.redacted"
-      : payOrEndRun
-        ? paidCredits > 0
-          ? "effect.runnerPaidToPassIce"
-          : "effect.runnerDidNotPayToPassIce"
-        : kind === "gain_credits"
-          ? "effect.creditsGained"
-          : kind === "take_hosted_credits"
-            ? "effect.hostedCreditsTaken"
-            : kind === "lose_credits"
-              ? "effect.creditsLost"
-              : kind === "draw_cards"
-                ? "effect.cardsDrawn"
-                : kind === "trash_card"
-                  ? "effect.cardTrashed"
-                  : kind === "damage"
-                    ? flatline
-                      ? "effect.damageFlatline"
-                      : "effect.damageTyped"
-                    : kind === "add_tags"
-                      ? "effect.tagsGained"
-                      : kind === "remove_tags"
-                        ? "effect.tagsRemoved"
-                        : "effect.resolved";
+      : endRunSubroutine
+        ? subroutineNumber !== undefined
+          ? "effect.numberedEndRunSubroutine"
+          : "effect.endRunSubroutine"
+        : payOrEndRun
+          ? paidCredits > 0
+            ? "effect.runnerPaidToPassIce"
+            : "effect.runnerDidNotPayToPassIce"
+          : kind === "gain_credits"
+            ? "effect.creditsGained"
+            : kind === "take_hosted_credits"
+              ? "effect.hostedCreditsTaken"
+              : kind === "lose_credits"
+                ? "effect.creditsLost"
+                : kind === "draw_cards"
+                  ? "effect.cardsDrawn"
+                  : kind === "trash_card"
+                    ? "effect.cardTrashed"
+                    : kind === "damage"
+                      ? flatline
+                        ? "effect.damageFlatline"
+                        : "effect.damageTyped"
+                      : kind === "add_tags"
+                        ? "effect.tagsGained"
+                        : kind === "remove_tags"
+                          ? "effect.tagsRemoved"
+                          : "effect.resolved";
   return {
     id: `${event.eventId}:effect:${effect.effectId || index}`,
     category,
     importance: flatline
       ? "critical"
-      : payOrEndRun && paidCredits === 0
+      : endRunSubroutine || (payOrEndRun && paidCredits === 0)
         ? "important"
         : category === "danger"
           ? "important"
@@ -5267,17 +5277,28 @@ function formatSemanticChronicleEffect(
       count: amount,
       source: sourceTitle,
       damageType,
+      number: subroutineNumber ?? 1,
     }),
     chips: [
       ...(actor ? [translate(`side.${actor}`)] : []),
-      ...(payOrEndRun
+      ...(endRunSubroutine
         ? [
             sourceTitle,
-            paidCredits > 0
-              ? translate("effect.creditsPaidChip", { amount: paidCredits })
-              : translate("effect.notPaidChip"),
+            subroutineNumber !== undefined
+              ? translate("effect.numberedSubroutineChip", {
+                  number: subroutineNumber,
+                })
+              : translate("effect.subroutineChip"),
+            translate("effect.runEndedChip"),
           ]
-        : [translate("effect.automatic")]),
+        : payOrEndRun
+          ? [
+              sourceTitle,
+              paidCredits > 0
+                ? translate("effect.creditsPaidChip", { amount: paidCredits })
+                : translate("effect.notPaidChip"),
+            ]
+          : [translate("effect.automatic")]),
       ...(kind === "damage" ? [`${amount} ${damageType}`] : []),
       ...(flatline ? [translate("effect.flatline")] : []),
     ],
