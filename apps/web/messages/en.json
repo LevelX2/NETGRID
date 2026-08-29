@@ -2084,6 +2084,8 @@
       "badPublicity": "{subject}: gained {amount} bad publicity.",
       "traceStarted": "{subject}: initiated a trace.",
       "choiceResolved": "{subject}: resolved a choice.",
+      "stackProgramRevealedYou": "You used {source} to reveal {program} from the stack and add it to your grip.",
+      "stackProgramRevealedOther": "{subject} used {source} to reveal {program} from the stack and add it to their grip.",
       "cardsDiscardedToArchives": "{subject}: discarded {count, plural, one {# card} other {# cards}} to Archives at the end of the turn.",
       "cardsDiscardedToHeap": "{subject}: discarded {count, plural, one {# card} other {# cards}} to the Heap at the end of the turn.",
       "discardResultMissing": "{subject}: turn-end discard details are missing.",

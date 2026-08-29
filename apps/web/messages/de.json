@@ -2092,6 +2092,8 @@
       "badPublicity": "{subject}: {amount} Bad Publicity erhalten.",
       "traceStarted": "{subject}: Trace gestartet.",
       "choiceResolved": "{subject}: Auswahl aufgelöst.",
+      "stackProgramRevealedYou": "Du hast mit {source} {program} aus dem Stack vorgezeigt und auf die Hand genommen.",
+      "stackProgramRevealedOther": "{subject} hat mit {source} {program} aus dem Stack vorgezeigt und auf die Hand genommen.",
       "cardsDiscardedToArchives": "{subject}: am Zugende {count, plural, one {# Karte} other {# Karten}} ins Archiv abgeworfen.",
       "cardsDiscardedToHeap": "{subject}: am Zugende {count, plural, one {# Karte} other {# Karten}} in den Heap abgeworfen.",
       "discardResultMissing": "{subject}: Angaben zum Abwurf am Zugende fehlen.",

@@ -2168,6 +2168,8 @@
       "badPublicity": "{subject} : a obtenu une mauvaise publicité pour {amount}.",
       "traceStarted": "{subject} : lancement d'une trace.",
       "choiceResolved": "{subject} : résolu un choix.",
+      "stackProgramRevealedYou": "Vous avez utilisé {source} pour révéler {program} depuis la pile et l’ajouter à votre main.",
+      "stackProgramRevealedOther": "{subject} a utilisé {source} pour révéler {program} depuis la pile et l’ajouter à sa main.",
       "cardsDiscardedToArchives": "{subject} : a défaussé {count, plural, one {# carte} other {# cartes}} dans les Archives à la fin du tour.",
       "cardsDiscardedToHeap": "{subject} : a défaussé {count, plural, one {# carte} other {# cartes}} dans le Tas à la fin du tour.",
       "discardResultMissing": "{subject} : les détails de la défausse de fin de tour sont manquants.",

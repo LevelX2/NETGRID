@@ -132,6 +132,55 @@ describe("semantic chronicle localization", () => {
     );
   });
 
+  it("shows Karl de Veres' public credit after a successful run", () => {
+    const runEnd = event("continue_run", {
+      actor: "runner",
+      runSuccessful: true,
+      serverLabel: "R&D",
+      successfulRunRunnerCreditGain: 1,
+      gainedCredits: 1,
+      karlSuccessfulRunCreditGain: 1,
+      karlSuccessfulRunSourceDefinitionIds:
+        "onr_v1_166_karl-de-veres-corporate-stooge",
+      runnerCreditsAfter: 6,
+      aiReasonCode: "plan_first.runner.pressure_central",
+    });
+    const presentations = {
+      "onr_v1_166_karl-de-veres-corporate-stooge": {
+        title: "Karl de Veres, Corporate Stooge",
+        type: "resource" as const,
+      },
+    };
+
+    const [de] = formatChronicleEffectItems(
+      runEnd,
+      "corp",
+      presentations,
+      translate("de"),
+    );
+    const [en] = formatChronicleEffectItems(
+      runEnd,
+      "corp",
+      presentations,
+      translate("en"),
+    );
+
+    expect(de).toMatchObject({
+      title:
+        "Die Runner-KI: 1 Credit durch Karl de Veres, Corporate Stooge erhalten.",
+      category: "economy",
+      importance: "important",
+      visibility: "public",
+      actor: "runner",
+      cardDefinitionId: "onr_v1_166_karl-de-veres-corporate-stooge",
+      cardTitle: "Karl de Veres, Corporate Stooge",
+    });
+    expect(de?.chips).toContain("+1 Credit");
+    expect(en?.title).toBe(
+      "The Runner AI: gained 1 credit from Karl de Veres, Corporate Stooge.",
+    );
+  });
+
   it("localizes trace bids, results, and payload-based tag gains", () => {
     const corpBid = event("resolve_choice", {
       actor: "corp",
@@ -450,6 +499,57 @@ describe("semantic chronicle localization", () => {
     );
     expect(`${en.title} ${de.title}`).not.toMatch(
       /resolved a choice|Auswahl aufgelöst/,
+    );
+  });
+
+  it("names the program publicly revealed with Temple Microcode Outlet", () => {
+    const templeSearch = event("resolve_choice", {
+      actor: "runner",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "p3_37_search_stack_to_grip",
+      sourceDefinitionId: "temple_microcode_outlet",
+      selectedCount: 1,
+      movedCardCount: 1,
+      searchDestination: "runner_grip",
+      publicRevealKind: "reveal",
+      publicRevealDefinitionId: "codecracker",
+      cardDefinitionId: "codecracker",
+      shuffled: true,
+      aiReasonCode: "runner_stack_search_program",
+    });
+    const presentations = {
+      temple_microcode_outlet: {
+        title: "Temple Microcode Outlet",
+        type: "event",
+      },
+      codecracker: { title: "Codecracker", type: "program" },
+    };
+
+    const de = formatChronicleEvent(templeSearch, "corp", {
+      translate: translate("de"),
+      cardPresentationsById: presentations,
+    });
+    const en = formatChronicleEvent(templeSearch, "corp", {
+      translate: translate("en"),
+      cardPresentationsById: presentations,
+    });
+
+    expect(de).toMatchObject({
+      title:
+        "Die Runner-KI hat mit Temple Microcode Outlet Codecracker aus dem Stack vorgezeigt und auf die Hand genommen.",
+      category: "card",
+      importance: "important",
+      visibility: "public",
+      cardDefinitionId: "codecracker",
+      cardTitle: "Codecracker",
+    });
+    expect(de.chips).toContain("Temple Microcode Outlet");
+    expect(de.chips).toContain("Codecracker");
+    expect(en.title).toBe(
+      "The Runner AI used Temple Microcode Outlet to reveal Codecracker from the stack and add it to their grip.",
+    );
+    expect(`${de.title} ${en.title}`).not.toMatch(
+      /Auswahl aufgelöst|resolved a choice/,
     );
   });
 

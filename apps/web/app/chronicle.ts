@@ -418,6 +418,15 @@ function formatSemanticChronicleEvent(
   const actionType = stringValue(payload.actionType) ?? event.type;
   const abilityId = payloadAbilityId(payload);
   const actor = sideValue(payload.actor);
+  const publicStackToGripReveal =
+    actionType === "resolve_choice" &&
+    stringValue(payload.hiddenZoneAction) ===
+      "p3_37_search_stack_to_grip" &&
+    stringValue(payload.publicRevealKind) === "reveal" &&
+    stringValue(payload.publicRevealDefinitionId) !== undefined;
+  const publicStackRevealDefinitionId = publicStackToGripReveal
+    ? stringValue(payload.publicRevealDefinitionId)
+    : undefined;
   let category = semanticChronicleCategory(actionType);
   const isAi = Boolean(
     stringValue(payload.aiExplanation) || stringValue(payload.aiReasonCode),
@@ -431,6 +440,7 @@ function formatSemanticChronicleEvent(
     numberValue(payload.discardCount) ??
     1;
   const cardDefinitionId =
+    publicStackRevealDefinitionId ??
     stringValue(payload.cardDefinitionId) ??
     stringValue(payload.sourceDefinitionId) ??
     stringValue(payload.targetCardDefinitionId);
@@ -453,7 +463,24 @@ function formatSemanticChronicleEvent(
   let explicitTitle: string | undefined;
   let description: string | undefined;
   let detailChips: string[] = [];
-  if (actionType === "resolve_choice" && payload.discardResolved === true) {
+  if (publicStackToGripReveal) {
+    const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
+    const sourceTitle =
+      publicCardTitle(sourceDefinitionId, context.cardPresentationsById) ??
+      stringValue(payload.sourceTitle) ??
+      translate("card.unknown");
+    explicitTitle = translate(
+      actor === side
+        ? "event.stackProgramRevealedYou"
+        : "event.stackProgramRevealedOther",
+      { subject, source: sourceTitle, program: cardTitle },
+    );
+    detailChips = [sourceTitle, cardTitle];
+    category = "card";
+  } else if (
+    actionType === "resolve_choice" &&
+    payload.discardResolved === true
+  ) {
     const discardCount = numberValue(payload.discardCount);
     const discardZone = stringValue(payload.discardZone);
     titleKey =
@@ -568,7 +595,9 @@ function formatSemanticChronicleEvent(
   const visibility: ChronicleVisibility =
     actionType === "resolve_choice" && payload.setupStep === "mulligan"
       ? "system"
-      : publiclyIdentifiedAccessCard || publiclyRevealedTraceResult
+      : publiclyIdentifiedAccessCard ||
+          publiclyRevealedTraceResult ||
+          publicStackToGripReveal
         ? "public"
         : stringValue(payload.redactedKind) ||
             payload.hiddenZoneBarrier === true
@@ -593,7 +622,11 @@ function formatSemanticChronicleEvent(
     id: event.eventId,
     category,
     importance:
-      category === "danger" || category === "agenda" ? "important" : "normal",
+      category === "danger" ||
+      category === "agenda" ||
+      publicStackToGripReveal
+        ? "important"
+        : "normal",
     visibility,
     ...(actor ? { actor } : {}),
     ...(actionUse ? { actionUse } : {}),
@@ -5080,6 +5113,12 @@ export function formatChronicleEffectItems(
   );
   const mergedRecurringCreditPayoutCounters =
     recurringCreditPayoutCounterEffects(effects);
+  const successfulRunCreditItem = successfulRunCreditGainChronicleItem(
+    event,
+    side,
+    cardPresentationsById,
+    translate,
+  );
   if (translate) {
     const effectItems = effects
       .filter(
@@ -5107,6 +5146,7 @@ export function formatChronicleEffectItems(
     );
     const terminalItem = terminalFlatlineChronicleItem(event, side, translate);
     return [
+      ...(successfulRunCreditItem ? [successfulRunCreditItem] : []),
       ...(tagGainItem ? [tagGainItem] : []),
       ...effectItems,
       ...(terminalItem ? [terminalItem] : []),
@@ -5158,6 +5198,7 @@ export function formatChronicleEffectItems(
     ...(aiBoonRunStrengthItem ? [aiBoonRunStrengthItem] : []),
     ...(insideJobAutoPassItem ? [insideJobAutoPassItem] : []),
     ...(encounterTaxItem ? [encounterTaxItem] : []),
+    ...(successfulRunCreditItem ? [successfulRunCreditItem] : []),
     ...(payloadItem ? [payloadItem] : []),
     ...(traceHardwareWreckerItem ? [traceHardwareWreckerItem] : []),
     ...(tagGainItem ? [tagGainItem] : []),
@@ -5165,6 +5206,59 @@ export function formatChronicleEffectItems(
     ...(runnerForgoneActionItem ? [runnerForgoneActionItem] : []),
     ...(terminalItem ? [terminalItem] : []),
   ];
+}
+
+function successfulRunCreditGainChronicleItem(
+  event: PublicGameEvent,
+  side: Side,
+  cardPresentationsById?: PublicCardPresentationsById,
+  translate?: ChronicleTranslate,
+): ChronicleItem | undefined {
+  const payload = event.publicPayload ?? {};
+  const amount = positiveIntegerValue(payload.karlSuccessfulRunCreditGain);
+  const sourceDefinitionId = definitionIdsFromCsv(
+    stringValue(payload.karlSuccessfulRunSourceDefinitionIds),
+  )[0];
+  if (!amount || !sourceDefinitionId) return undefined;
+
+  const sourceTitle =
+    publicCardTitle(sourceDefinitionId, cardPresentationsById) ??
+    "Karl de Veres, Corporate Stooge";
+  const isAi = Boolean(
+    stringValue(payload.aiExplanation) || stringValue(payload.aiReasonCode),
+  );
+  const subject = translate
+    ? semanticChronicleSubject("runner", side, isAi, translate)
+    : subjectFor("runner", side, isAi);
+  const title = translate
+    ? translate("effect.creditsGained", {
+        subject,
+        amount,
+        source: sourceTitle,
+      })
+    : `${sourceTitle} gibt ${side === "runner" ? "dir" : "dem Runner"} ${creditText(amount)}.`;
+
+  return {
+    id: `${event.eventId}:successful-run-credit`,
+    category: "economy",
+    importance: "important",
+    visibility: "public",
+    actor: "runner",
+    title: ensurePeriod(title),
+    chips: uniqueChips([
+      ...(translate
+        ? [translate("side.runner"), translate("category.economy")]
+        : baseChips("runner", isAi)),
+      sourceTitle,
+      `+${creditText(amount)}`,
+    ]),
+    cardDefinitionId: sourceDefinitionId,
+    cardTitle: sourceTitle,
+    cardDetailLines: [],
+    groupLabel: translate
+      ? translate("group.economy")
+      : groupLabelFor("economy", "runner", undefined, undefined, undefined),
+  };
 }
 
 function recurringCreditPayoutCounterEffects(
