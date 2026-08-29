@@ -99,6 +99,7 @@ import {
   accessPresentationOwnsActionCue,
   coalesceAccessActionCues,
   interactionPresentationBlocksAi,
+  latestStolenAgendaAccessEvent,
   observerAccessAutoDismissMs,
 } from "./access-presentation";
 import {
@@ -250,6 +251,7 @@ import { downloadTextFile } from "../lib/download";
 import { runtimeRandomId } from "../lib/runtime-id";
 import { reconnectUrlForSession } from "../lib/session-url";
 import { NETGRID_APP_STATUS_LABEL } from "../lib/app-build-info";
+import { AppRuntimeStatus } from "../features/app-shell/AppRuntimeStatus";
 import { userErrorMessageKey } from "../i18n/presentation";
 import {
   bootstrap,
@@ -312,6 +314,7 @@ import {
   deckFingerprint,
   deckMetadataFromEditable,
   type DeckCardEntry,
+  type DeckEditorMode,
   type EditableDeck,
 } from "../features/decks/deck-table-model";
 import { editableStandardDeckPreview } from "../features/decks/standard-deck-table-preview";
@@ -607,6 +610,8 @@ export default function Page() {
   const [entryTab, setEntryTab] = useState<EntryTab>("play");
   const [activeMatchWorkspace, setActiveMatchWorkspace] =
     useState<ActiveMatchWorkspace>("game");
+  const [deckEditorMode, setDeckEditorMode] =
+    useState<DeckEditorMode>("list");
   const [mode, setMode] = useState<"host" | "join">("host");
   const [recoveryTabSelected, setRecoveryTabSelected] = useState(false);
   const [playMode, setPlayMode] = useState<PlayMode>("human_vs_human");
@@ -2861,7 +2866,19 @@ export default function Page() {
   const retainedAccessReveal = payload
     ? retainedAccessRevealEvent(payload.eventTail, lastDismissedAccessEventId)
     : null;
+  const runnerWonByAgendaPoints = Boolean(
+    resultSummary?.winner === "runner" &&
+    resultSummary.reason === "agenda_points",
+  );
+  const concludingAgendaAccessEvent =
+    matchEnded && runnerWonByAgendaPoints && payload
+      ? latestStolenAgendaAccessEvent(
+          payload.eventTail,
+          dismissedAccessEventIds,
+        )
+      : null;
   const queuedAccessRevealEvent =
+    concludingAgendaAccessEvent ??
     (pendingAccessContinuationRef.current &&
     latestAccessRevealEvent?.eventId !==
       pendingAccessContinuationRef.current.accessEventId
@@ -2964,9 +2981,7 @@ export default function Page() {
       Boolean(currentDamageImpact) || damageImpactQueue.length > 0,
     resultAvailable: Boolean(resultSummary && resultKey),
     resultDismissed: Boolean(resultKey && dismissedResultKey === resultKey),
-    runnerWonByAgendaPoints:
-      resultSummary?.winner === "runner" &&
-      resultSummary.reason === "agenda_points",
+    runnerWonByAgendaPoints,
     terminalAccessFlatline: accessRevealEvent?.publicPayload.flatline === true,
   });
   const showAccessReveal = overlayPresentation.showAccessReveal;
@@ -6332,7 +6347,7 @@ export default function Page() {
                       wordmarkSrc={APP_WORDMARK_SRC}
                     />
                     <div className="topbarMeta">
-                      <span className="topbarVersion">{APP_STATUS_LABEL}</span>
+                      <AppRuntimeStatus statusLabel={APP_STATUS_LABEL} />
                       <ConnectionBadge text={statusText} state={connection} />
                     </div>
                   </div>
@@ -6726,6 +6741,8 @@ export default function Page() {
                     ) : null}
                     {entryTab === "decks" ? (
                       <DeckEditorPanel
+                        mode={deckEditorMode}
+                        onModeChange={setDeckEditorMode}
                         localDecks={localDecks}
                         selectedDeck={selectedDeck}
                         selectedDeckDirty={selectedDeckDirty}
@@ -7587,6 +7604,8 @@ export default function Page() {
                   workspace={activeMatchWorkspace}
                   catalogPanelProps={catalogPanelProps}
                   deckEditorPanelProps={{
+                    mode: deckEditorMode,
+                    onModeChange: setDeckEditorMode,
                     localDecks,
                     selectedDeck,
                     selectedDeckDirty,

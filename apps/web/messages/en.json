@@ -77,8 +77,8 @@
       "build": "Build",
       "commit": "Commit",
       "sourceDate": "Source revision",
-      "development": "Local development build",
-      "developmentDirty": "Local development build with uncommitted changes",
+      "sourceClean": "Clean when the web client started",
+      "sourceDirty": "Changes were uncommitted when the web client started",
       "unavailable": "unavailable"
     },
     "session": {
@@ -133,13 +133,13 @@
     },
     "tooltip": {
       "title": "Tooltip display",
-      "localHelp": "Independent of the in-game card display; not part of match state",
+      "localHelp": "Changes hover previews only; saved locally and does not affect the match",
       "mode": "Mode",
       "simple": "Compact",
       "enhanced": "Text card",
       "image": "Card image",
       "translateRules": "Translate rules to the selected language",
-      "translateRulesHelp": "Applies to text tooltips. If no confirmed translation exists, the English rules text is shown.",
+      "translateRulesHelp": "Available for Text card and Compact tooltips. If no confirmed translation exists, the English rules text is shown.",
       "hoverDelay": "Hover delay",
       "seconds": "{seconds} seconds"
     },
@@ -232,6 +232,12 @@
     }
   },
   "AppShell": {
+    "runtimeStatus": {
+      "watch": "Watch",
+      "watchTitle": "Server watch is active; backend changes reload automatically.",
+      "localChanges": "locally changed",
+      "localChangesTitle": "Changes were uncommitted when the web client started."
+    },
     "navigation": {
       "catalog": "Catalog",
       "decks": "Decks",

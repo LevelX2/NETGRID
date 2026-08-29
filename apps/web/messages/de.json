@@ -77,8 +77,8 @@
       "build": "Build",
       "commit": "Commit",
       "sourceDate": "Quellstand",
-      "development": "Lokaler Entwicklungsstand",
-      "developmentDirty": "Lokaler Entwicklungsstand mit nicht committeten Änderungen",
+      "sourceClean": "Beim Webstart sauber",
+      "sourceDirty": "Beim Webstart waren Änderungen nicht committet",
       "unavailable": "nicht verfügbar"
     },
     "session": {
@@ -133,13 +133,13 @@
     },
     "tooltip": {
       "title": "Tooltip-Anzeige",
-      "localHelp": "Unabhängig von der Kartenanzeige im Spiel; kein Match-State",
+      "localHelp": "Ändert nur die Vorschau beim Darüberfahren; wird lokal gespeichert und beeinflusst das Match nicht",
       "mode": "Modus",
       "simple": "Kompakt",
       "enhanced": "Textkarte",
       "image": "Kartenbild",
       "translateRules": "Regeltext in die ausgewählte Sprache übersetzen",
-      "translateRulesHelp": "Gilt für Text-Tooltips. Fehlt eine bestätigte Übersetzung, wird der englische Regeltext angezeigt.",
+      "translateRulesHelp": "Verfügbar für Textkarte und Kompakt. Fehlt eine bestätigte Übersetzung, wird der englische Regeltext angezeigt.",
       "hoverDelay": "Hover-Verzögerung",
       "seconds": "{seconds} Sekunden"
     },
@@ -232,6 +232,12 @@
     }
   },
   "AppShell": {
+    "runtimeStatus": {
+      "watch": "Watch",
+      "watchTitle": "Server-Watch ist aktiv; Backend-Änderungen werden automatisch neu geladen.",
+      "localChanges": "lokal geändert",
+      "localChangesTitle": "Beim Webstart waren Änderungen nicht committet."
+    },
     "navigation": {
       "catalog": "Katalog",
       "decks": "Decks",

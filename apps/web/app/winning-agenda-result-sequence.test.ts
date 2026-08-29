@@ -1,33 +1,45 @@
 import type { PublicGameEvent } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { retainedAccessRevealEvent } from "./action-board-ui";
+import { latestStolenAgendaAccessEvent } from "./access-presentation";
 import { matchOverlayPresentation } from "./match-overlay-presentation";
 import { accessRevealFromLatestEvent } from "../features/actions/access-review-derivation";
 
 describe("winning agenda access result sequence", () => {
   it("keeps the public R&D agenda access ahead of the finished result", () => {
-    const access = event("evt_access", "access_card", {
+    const earlierAccess = event("evt_access_earlier", "access_card", {
       actor: "runner",
-      cardDefinitionId: "public_agenda",
-      title: "Public Agenda",
+      cardDefinitionId: "onr_v1_305_team-restructuring",
+      title: "Team Restructuring",
       serverLabel: "R&D",
       accessOrigin: "rd",
+      accessIndex: 0,
+      effectiveAccessCount: 2,
+    });
+    const access = event("evt_access", "access_card", {
+      actor: "runner",
+      cardDefinitionId: "onr_v1_199_employee-empowerment",
+      title: "Employee Empowerment",
+      serverLabel: "R&D",
+      accessOrigin: "rd",
+      accessIndex: 1,
+      effectiveAccessCount: 2,
     });
     const steal = event(
       "evt_steal",
       "steal_agenda",
       {
         actor: "runner",
-        cardDefinitionId: "public_agenda",
+        cardDefinitionId: "onr_v1_199_employee-empowerment",
       },
       2,
     );
-    const events = [access, steal];
+    const events = [earlierAccess, access, steal];
     const retained = retainedAccessRevealEvent(events, null);
     const details = {
-      public_agenda: {
-        catalogCardId: "public_agenda",
-        title: "Public Agenda",
+      "onr_v1_199_employee-empowerment": {
+        catalogCardId: "onr_v1_199_employee-empowerment",
+        title: "Employee Empowerment",
         side: "corp" as const,
         type: "agenda",
         subtypes: [],
@@ -40,6 +52,9 @@ describe("winning agenda access result sequence", () => {
     };
 
     expect(retained?.eventId).toBe("evt_access");
+    expect(latestStolenAgendaAccessEvent(events, [])?.eventId).toBe(
+      "evt_access",
+    );
     for (const side of ["runner", "corp"] as const) {
       const reveal = accessRevealFromLatestEvent(
         retained ?? undefined,
@@ -53,7 +68,10 @@ describe("winning agenda access result sequence", () => {
         outcomeKind: "stolen",
         dismissLabel: "Agenda bestätigen",
         actions: [],
-        card: { definitionId: "public_agenda", title: "Public Agenda" },
+        card: {
+          definitionId: "onr_v1_199_employee-empowerment",
+          title: "Employee Empowerment",
+        },
       });
       expect(
         matchOverlayPresentation({
@@ -75,6 +93,7 @@ describe("winning agenda access result sequence", () => {
     }
 
     expect(retainedAccessRevealEvent(events, "evt_access")).toBeNull();
+    expect(latestStolenAgendaAccessEvent(events, ["evt_access"])).toBeNull();
     expect(
       matchOverlayPresentation({
         accessRevealAvailable: false,

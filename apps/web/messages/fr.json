@@ -77,8 +77,8 @@
       "build": "Construire",
       "commit": "S'engager",
       "sourceDate": "Révision de la source",
-      "development": "Construction du développement local",
-      "developmentDirty": "Développement local construit avec des changements non engagés",
+      "sourceClean": "État propre au démarrage du client web",
+      "sourceDirty": "Modifications non validées au démarrage du client web",
       "unavailable": "indisponible"
     },
     "session": {
@@ -133,13 +133,13 @@
     },
     "tooltip": {
       "title": "Affichage de l’infobulle",
-      "localHelp": "Indépendant de l’affichage des cartes en jeu ; ne fait pas partie de l’état du match",
+      "localHelp": "Modifie uniquement l’aperçu au survol ; enregistré localement et sans effet sur la partie",
       "mode": "Mode",
       "simple": "Compact",
       "enhanced": "Carte textuelle",
       "image": "Image de la carte",
       "translateRules": "Traduire les règles dans la langue sélectionnée",
-      "translateRulesHelp": "S’applique aux infobulles textuelles. En l’absence de traduction confirmée, le texte anglais des règles est affiché.",
+      "translateRulesHelp": "Disponible pour Carte textuelle et Compact. En l’absence de traduction confirmée, le texte anglais des règles est affiché.",
       "hoverDelay": "Délai de survol",
       "seconds": "{seconds} secondes"
     },
@@ -232,6 +232,12 @@
     }
   },
   "AppShell": {
+    "runtimeStatus": {
+      "watch": "Watch",
+      "watchTitle": "La surveillance du serveur est active ; les modifications du backend sont rechargées automatiquement.",
+      "localChanges": "modifié localement",
+      "localChangesTitle": "Des modifications n’étaient pas validées au démarrage du client web."
+    },
     "navigation": {
       "catalog": "Catalogue",
       "decks": "Decks",
