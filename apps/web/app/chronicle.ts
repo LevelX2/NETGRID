@@ -5205,6 +5205,13 @@ function formatSemanticChronicleEffect(
       stringValue(event.publicPayload.damageType),
     translate,
   );
+  const runServer = semanticServerLabel(
+    stringValue(event.publicPayload.serverLabel) ??
+      stringValue(event.publicPayload.selectedServerLabel) ??
+      stringValue(event.publicPayload.serverId) ??
+      stringValue(event.publicPayload.selectedServerId),
+    translate,
+  );
   const category: ChronicleCategory = payOrEndRun
     ? "run"
     : kind === "gain_credits" ||
@@ -5279,7 +5286,10 @@ function formatSemanticChronicleEffect(
       : {}),
     ...(visibility !== "redacted" ? { cardTitle: sourceTitle } : {}),
     cardDetailLines: [],
-    groupLabel: translate(`group.${category}`),
+    groupLabel:
+      category === "run"
+        ? translate("group.run", { server: runServer })
+        : translate(`group.${category}`),
   };
 }
 

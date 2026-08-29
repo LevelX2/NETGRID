@@ -759,12 +759,14 @@ describe("semantic chronicle localization", () => {
     expect(de).toMatchObject({
       title: "Die Runner-KI: 1 Credit bezahlt, um Snowbank zu passieren.",
       category: "run",
+      groupLabel: "Run auf einen Server",
       importance: "normal",
       visibility: "public",
       cardDefinitionId: "snowbank",
       cardTitle: "Snowbank",
     });
     expect(en?.title).toBe("The Runner AI: paid 1 credit to pass Snowbank.");
+    expect(en?.groupLabel).toBe("Run on a server");
     expect(`${de?.title} ${en?.title}`).not.toMatch(
       /automatischer Effekt|automatic effect/,
     );
