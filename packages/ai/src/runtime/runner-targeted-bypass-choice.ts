@@ -258,7 +258,6 @@ function targetedBypassPaymentSupportOffset(
           : supportEvents[index - 1]!.stateVersionAfter),
   );
   const exactSupportEvents =
-    supportEvents.length > 0 &&
     supportEvents.every(
       (event) =>
         event.type === "activated_card_ability" &&
@@ -278,7 +277,7 @@ function targetedBypassPaymentSupportOffset(
     continuous &&
     continuationEvent !== undefined &&
     continuationEvent.stateVersionBefore ===
-      supportEvents.at(-1)!.stateVersionAfter;
+      (supportEvents.at(-1)?.stateVersionAfter ?? openingStateVersion);
   return exact
     ? continuationEvent.stateVersionAfter - openingStateVersion
     : false;

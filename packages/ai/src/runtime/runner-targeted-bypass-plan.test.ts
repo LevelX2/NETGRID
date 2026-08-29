@@ -287,6 +287,30 @@ describe("Runner targeted-bypass resident continuation", () => {
     ).toThrowError("window_origin_missing");
   });
 
+  it("preserves the exact targeted-bypass origin when an unused payment window immediately continues", () => {
+    rememberContinuation(targetedContinuation());
+    const hideInput = choiceInput(12, {
+      source:
+        "hidden_zone.secret_spend_guess_then_targeted_bypass_run.hide:social-1:12",
+      kind: "bid_amount",
+      options: [
+        { id: "hide_2", label: "2", value: 2 },
+        { id: "hide_3", label: "3", value: 3 },
+      ],
+    });
+    hideInput.eventTail = unusedPaymentSupportEventTail();
+    const hideChoice = hideInput.playerView.pendingChoice!;
+
+    expect(
+      selectedRunnerTargetedBypassHideChoiceOptionId(
+        hideInput,
+        resolveChoiceAction(12),
+        hideChoice,
+        hideChoice.options,
+      ),
+    ).toBe("hide_2");
+  });
+
   it("fails closed for a missing exact option or stale executor continuation", () => {
     rememberContinuation(targetedContinuation());
     const missingOptionInput = choiceInput(13, {
@@ -680,6 +704,17 @@ function paymentSupportEventTail(): AiDecisionInput["eventTail"] {
       },
     },
   ];
+}
+
+function unusedPaymentSupportEventTail(): AiDecisionInput["eventTail"] {
+  return [paymentSupportEventTail()[0]!, paymentSupportEventTail()[2]!].map(
+    (event, index) => ({
+      ...event,
+      eventId: `evt_${11 + index}`,
+      stateVersionBefore: 10 + index,
+      stateVersionAfter: 11 + index,
+    }),
+  );
 }
 
 function choiceDependencies(): Parameters<
