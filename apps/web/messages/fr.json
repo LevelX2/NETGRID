@@ -1459,6 +1459,7 @@
       "coreDamageValue": "Dommages au noyau : {value}",
       "handLimit": "Limite de main : {value}",
       "zeroLine": "Ligne zéro",
+      "flatlineBoundary": "Seuil de flatline",
       "damageAmount": "Dommages {amount}",
       "prevented": "Empêché",
       "queued": "{count, plural, one {Encore # notification de dégâts} other {Encore # notifications de dégâts}}",

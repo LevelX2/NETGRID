@@ -1,6 +1,6 @@
 # Damage-Anzeige visuell vereinheitlichen
 
-Status: In Arbeit
+Status: DVI-01 abgeschlossen, DVI-02 aktiv
 
 ## Quelle und Zielprüfung
 
@@ -92,6 +92,21 @@ Paket. Follow-ups erweitern den Scope nicht stillschweigend.
   sind im Test abgedeckt; keine Engine-Änderung.
 - Commit: `feat(web): align damage meter with flatline boundary`
 
+Abschluss 2026-08-29:
+
+- Gemeinsame Meter-Komponente und separat testbare Segmentberechnung erstellt.
+- Reihenfolge `lost -> remaining -> flatline -> overkill` umgesetzt.
+- Flatline-Grenze mit Symbol, Text, Tooltip und zugänglicher Beschriftung
+  ersetzt die visuelle Null.
+- `corepack pnpm --filter @netgrid/web exec vitest run
+app/damage-impact-meter.test.ts app/damage-impact-overlay.test.ts`: 10 Tests
+  bestanden.
+- Web-Typecheck ausgeführt; einziger gemeldeter Fehler ist der unabhängige
+  Baseline-Fixture-Fehler in `app/ai-turn-plan-comparison-ui.test.ts`, dem die
+  Felder `executionOrigin` und `selectedStep` fehlen. Dieser Scope verändert
+  weder das Fixture noch den betreffenden AI-Vertrag.
+- `git diff --check`: bestanden.
+
 ### DVI-02 – Normale und Access-Damage-Darstellung vereinheitlichen
 
 - Ziel: Dieselbe Meter-Komponente in beiden Darstellungswegen verwenden.
@@ -144,4 +159,3 @@ Paket. Follow-ups erweitern den Scope nicht stillschweigend.
 - Worktree erst nach erfolgreichem Merge und sauberem Status entfernen; Pfad
   und Git-Registrierung danach separat prüfen.
 - Gemergten Branch mit `git branch -d` löschen.
-

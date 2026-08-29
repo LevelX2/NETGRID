@@ -1421,6 +1421,7 @@
       "coreDamageValue": "Core Damage: {value}",
       "handLimit": "Handlimit: {value}",
       "zeroLine": "Null-Linie",
+      "flatlineBoundary": "Flatline-Grenze",
       "damageAmount": "Damage {amount}",
       "prevented": "Verhindert",
       "queued": "{count, plural, one {# weitere Damage-Meldung} other {# weitere Damage-Meldungen}}",

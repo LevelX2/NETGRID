@@ -26,14 +26,19 @@ describe("DamageImpactOverlay lifecycle", () => {
     );
   });
 
-  it("shows a zero line and overkill labels instead of an unlabeled Grip-Pool delta", () => {
+  it("shows a flatline boundary and overkill labels instead of an unlabeled Grip-Pool delta", () => {
     const source = overlaySource();
+    const meterSource = readFileSync(
+      new URL("../features/actions/DamageImpactMeter.tsx", import.meta.url),
+      "utf8",
+    );
 
-    expect(source).toContain('className="damageImpactZero"');
-    expect(source).toContain('t("zeroLine")');
+    expect(source).toContain("<DamageImpactMeter");
+    expect(meterSource).toContain('className="damageImpactFlatline"');
+    expect(meterSource).toContain('t("flatlineBoundary")');
     expect(source).toContain('t("flatlineOverkillSummary"');
     expect(source).toContain('t("overkill"');
-    expect(deMessages.Actions.damage.zeroLine).toBe("Null-Linie");
+    expect(deMessages.Actions.damage.flatlineBoundary).toBe("Flatline-Grenze");
     expect(source).not.toContain("<span>-{cue.amount}</span>");
   });
 
@@ -53,7 +58,7 @@ describe("DamageImpactOverlay lifecycle", () => {
     const source = overlaySource();
 
     expect(source).toContain('t("queued"');
-    expect(source).toContain('cue.flatline ? t("flatline")');
+    expect(source).toMatch(/cue\.flatline\s*\?\s*t\("flatline"\)/);
     expect(source).toContain('cue.damageType === "core"');
     expect(source).toContain('t("type.core")');
     expect(source).toContain("runnerMaxHandSizeAfter");
