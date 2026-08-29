@@ -7,6 +7,7 @@ import {
 } from "@netgrid/shared";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import { runnerStrategicExchangeRequiresBoundParent } from "../runtime/runner-strategic-exchange";
 import { currentTurnPlanningInvocationVariants } from "./corp-turn-planner-shadow";
 import type { PlanModuleId } from "./plan-kernel-types";
 import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
@@ -257,8 +258,12 @@ function runnerCoverageDispositions(params: {
     const isUnboundBreakerSubtypeChange =
       action?.type === "trigger_ability" &&
       action.payload?.runnerAbility === "change_icebreaker_subtype";
+    const isUnboundStrategicExchange =
+      runnerStrategicExchangeRequiresBoundParent(candidate);
     const ownerModuleId =
-      candidate.semanticActionType.startsWith("search.") ||
+      isUnboundStrategicExchange
+        ? ("runner.economy" as const)
+        : candidate.semanticActionType.startsWith("search.") ||
       isUnboundBreakerSubtypeChange
         ? ("runner.rig_and_coverage" as const)
         : candidate.semanticActionType === "play.runner_event"
@@ -269,7 +274,9 @@ function runnerCoverageDispositions(params: {
       actionId: candidate.actionId,
       disposition: "explicitly_nonproductive",
       ownerModuleId,
-      evidenceCode: isUnboundBreakerSubtypeChange
+      evidenceCode: isUnboundStrategicExchange
+        ? "runner_strategic_exchange_requires_current_exact_parent_head"
+        : isUnboundBreakerSubtypeChange
         ? "runner_breaker_subtype_change_requires_current_bound_run_coverage_head"
         : candidate.semanticActionType.startsWith("search.")
           ? "runner_search_has_no_current_bound_coverage_or_development_need"

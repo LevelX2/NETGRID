@@ -17292,7 +17292,6 @@ describe("authoritative plan-first live runtime", () => {
         source: "debt-card",
         payload: {
           cardId: "debt-card",
-          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
           gainCreditsAmount: 12,
         },
       },

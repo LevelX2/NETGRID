@@ -7,6 +7,8 @@ import {
 } from "../simulation";
 import type { AiSimulationDecisionCheckpointCapture } from "./ai-simulation-config";
 import { resolveBenchmarkDeckSlot } from "./benchmark-deck-slot-resolver";
+import { visibleSourceDefinitionsByInstanceId } from "../runtime/visible-source-definitions";
+import { runnerStrategicExchangeKinds } from "../runtime/runner-strategic-exchange";
 
 describe("AI behavior baseline runtime regressions", () => {
   it("keeps a card development route bound to the exact visible card action", () => {
@@ -149,13 +151,18 @@ function captureDiagnostic(capture: AiSimulationDecisionCheckpointCapture) {
       source: action.source,
       payload: action.payload,
     })),
-    candidates: buildActionSemanticCandidates(capture.input).map(
+    candidates: buildActionSemanticCandidates({
+      ...capture.input,
+      visibleSourceDefinitionsByInstanceId:
+        visibleSourceDefinitionsByInstanceId(capture.input.playerView),
+    }).map(
       (candidate) => ({
         actionId: candidate.actionId,
         actionType: candidate.actionType,
         semanticActionType: candidate.semanticActionType,
         sourceCardInstanceId: candidate.sourceCardInstanceId,
         sourceDefinitionId: candidate.sourceDefinitionId,
+        strategicExchangeKinds: runnerStrategicExchangeKinds(candidate),
         planOwnerBinding: candidate.planOwnerBinding,
         economyProjection: candidate.economyProjection,
       }),

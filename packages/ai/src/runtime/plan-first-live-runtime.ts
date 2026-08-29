@@ -6453,6 +6453,8 @@ function runnerBoundStrategicExchangeFundingActionIds(
   return new Set(
     domain.fundingNeeds.flatMap((need) =>
       need.kind === "parent_plan_support" &&
+      need.gap > 0 &&
+      runnerFundingNeedHasMaterialParent(domain, need) &&
       (need.parentPlanInstanceId.startsWith("plan:runner.pressure_central:") ||
         need.parentPlanInstanceId.startsWith("plan:runner.contest_remote:"))
         ? need.routeActionIds
