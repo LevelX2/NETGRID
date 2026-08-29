@@ -53,6 +53,7 @@ import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import { getStrategicIntentMemorySnapshot } from "../strategic-intent-memory";
 import type { StrategicIntentState } from "../strategic-intent-state";
 import type { RequiredCapabilityKind } from "../plans/tactical-plan-types";
+import type { RunnerDevelopmentSignal } from "../plans/runner-tactical-plan-modules";
 import type { AiHintStructuredEffect } from "../hint-ontology";
 import {
   isRunnerTargetedBypassChoice,
@@ -991,6 +992,41 @@ export function selectedChoicesForDecision(
         currentPortfolio,
       ),
       "runner_coverage_bound_program_install_memory",
+    );
+  }
+  if (
+    input.side === "runner" &&
+    choice.kind === "select_cards" &&
+    choice.source.startsWith(
+      "card_implementation.pro018_stack_install_run_cleanup:",
+    )
+  ) {
+    return resolved(
+      selectedRunnerDelayedProgramSearchChoiceOptionIds(
+        input,
+        action,
+        choice,
+        selectableOptions,
+        currentPortfolio,
+        dependencies,
+      ),
+      "resident_runner_delayed_program_search_choice",
+    );
+  }
+  if (
+    input.side === "runner" &&
+    choice.kind === "select_cards" &&
+    choice.source.startsWith("runner.program_install_memory:nonsearch:")
+  ) {
+    return resolved(
+      selectedRunnerEventInstallMemoryOptionIds(
+        input,
+        action,
+        choice,
+        selectableOptions,
+        currentPortfolio,
+      ),
+      "resident_runner_event_install_memory",
     );
   }
   if (
@@ -2205,6 +2241,277 @@ function selectedRunnerEventInstallChoiceOptionId(
     );
   }
   return [selectedOptionId];
+}
+
+function selectedRunnerEventInstallMemoryOptionIds(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+  selectableOptions: PendingChoiceOptions,
+  currentPortfolio?: ResidentPlanPortfolio,
+): string[] {
+  const sourceParts = choice.source.split(":");
+  const targetCardInstanceId = sourceParts[2];
+  const automaticFreedMemory = Number(sourceParts[3]);
+  const originalChoiceId = decodeURIComponent(sourceParts[4] ?? "");
+  const originalChoiceSource = decodeURIComponent(sourceParts[5] ?? "");
+  const installedRigCardIds = new Set(
+    (input.playerView.own.rig ?? []).map((card) => card.instanceId),
+  );
+  const exactOptions =
+    selectableOptions.length > 0 &&
+    selectableOptions.every(
+      (option) =>
+        typeof option.value === "string" &&
+        option.id === `card_${option.value}` &&
+        installedRigCardIds.has(option.value),
+    );
+  const requirement = action.choiceRequirements?.[0];
+  const exactActionBinding =
+    action.side === "runner" &&
+    action.type === "resolve_choice" &&
+    action.source === "game_rule" &&
+    action.timingPoint === input.playerView.timingPoint &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === choice.minSelections &&
+    requirement.maxSelections === choice.maxSelections &&
+    requirement.optionIds.length === selectableOptions.length &&
+    requirement.optionIds.every(
+      (optionId, index) => optionId === selectableOptions[index]?.id,
+    );
+  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+  const executor = portfolio?.instances.find(
+    (instance) =>
+      instance.instanceId === portfolio.executorInstanceId &&
+      instance.moduleId === "runner.develop_board_and_hand" &&
+      instance.executionState === "executor",
+  );
+  const moduleState = executor?.moduleState as
+    | { kind?: unknown; signal?: RunnerDevelopmentSignal }
+    | undefined;
+  const signal = moduleState?.signal;
+  const commitment = signal?.eventInstallChoiceCommitment;
+  const binding = signal?.eventInstallChoiceBinding;
+  const delayedBinding = signal?.delayedProgramSearchChoiceBinding;
+  const activeBinding = binding ?? delayedBinding;
+  const sacrifice =
+    commitment?.installMemorySacrificeBinding ??
+    delayedBinding?.installMemorySacrificeBinding;
+  const boundTargetCardInstanceId =
+    commitment?.targetCardInstanceId ?? delayedBinding?.targetCardInstanceId;
+  const optionIds = new Set(selectableOptions.map((option) => option.id));
+  const selectedOptionIds = sacrifice?.selectedCards.map(
+    (card) => `card_${card.cardInstanceId}`,
+  );
+  const memoryFreed = sacrifice?.selectedCards.reduce(
+    (total, card) => total + card.memoryCost,
+    0,
+  );
+  const bindingChecks: Array<readonly [string, boolean]> = [
+    [
+      "source_contract",
+      sourceParts.length === 6 &&
+        sourceParts[0] === "runner.program_install_memory" &&
+        sourceParts[1] === "nonsearch" &&
+        typeof targetCardInstanceId === "string" &&
+        Number.isInteger(automaticFreedMemory) &&
+        automaticFreedMemory >= 0,
+    ],
+    ["options_contract", exactOptions],
+    ["action_contract", exactActionBinding],
+    [
+      "portfolio_contract",
+      portfolio?.side === "runner" &&
+        portfolio.stateVersion === input.playerView.stateVersion - 1,
+    ],
+    [
+      "executor_contract",
+      executor !== undefined &&
+        moduleState?.kind === "development" &&
+        (signal?.phase === "resolve_event_install_choice" ||
+          signal?.phase === "resolve_delayed_program_search_choice"),
+    ],
+    [
+      "binding_state_contract",
+      activeBinding?.sourceStateVersion === input.playerView.stateVersion - 1,
+    ],
+    [
+      "source_chain_contract",
+      activeBinding?.choiceId === originalChoiceId &&
+        activeBinding?.choiceSource === originalChoiceSource,
+    ],
+    [
+      "target_chain_contract",
+      activeBinding?.targetCardInstanceId === targetCardInstanceId &&
+        boundTargetCardInstanceId === targetCardInstanceId &&
+        sacrifice?.targetCardInstanceId === targetCardInstanceId,
+    ],
+    [
+      "sacrifice_contract",
+      Number.isInteger(sacrifice?.targetMemoryCost) &&
+        Number(sacrifice?.targetMemoryCost) > 0 &&
+        Number.isInteger(sacrifice?.requiredMemoryToFree) &&
+        Number(sacrifice?.requiredMemoryToFree) > automaticFreedMemory,
+    ],
+    [
+      "selection_contract",
+      Array.isArray(selectedOptionIds) &&
+        selectedOptionIds.length >= choice.minSelections &&
+        selectedOptionIds.length <= choice.maxSelections &&
+        selectedOptionIds.every((optionId) => optionIds.has(optionId)),
+    ],
+    [
+      "memory_contract",
+      typeof memoryFreed === "number" &&
+        sacrifice !== undefined &&
+        memoryFreed >= sacrifice.requiredMemoryToFree - automaticFreedMemory,
+    ],
+  ];
+  const failedBindings = bindingChecks
+    .filter(([, matches]) => !matches)
+    .map(([name]) => name);
+  if (failedBindings.length > 0 || !selectedOptionIds) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      `Resolve event-install memory pressure only from the current development executor and its exact prebound target and program-sacrifice set. Failed bindings: ${failedBindings.join(",") || "selection_missing"}.`,
+    );
+  }
+  return selectedOptionIds;
+}
+
+function selectedRunnerDelayedProgramSearchChoiceOptionIds(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+  selectableOptions: PendingChoiceOptions,
+  currentPortfolio?: ResidentPlanPortfolio,
+  dependencies?: SelectedChoicesForDecisionDependencies,
+): string[] {
+  const coverageBinding = runnerCoverageSearchChoiceBinding(input, choice);
+  if (coverageBinding) {
+    const selectedOptionIds = dependencies
+      ? selectedSearchChoiceOptionIds(choice, selectableOptions, {
+          features: dependencies.extractAiFeatures(input),
+          rolesForCardId: dependencies.rolesForCardId,
+          effectsForCardId: dependencies.effectsForCardId,
+          requiredCoverage: coverageBinding.requiredCoverage,
+          ...(coverageBinding.targetCardInstanceId
+            ? {
+                preferredCardInstanceId: coverageBinding.targetCardInstanceId,
+              }
+            : {}),
+          ...(coverageBinding.targetDefinitionId
+            ? {
+                preferredCardDefinitionId: coverageBinding.targetDefinitionId,
+              }
+            : {}),
+        })
+      : undefined;
+    const selectedOption =
+      selectedOptionIds?.length === 1
+        ? selectableOptions.find(
+            (candidate) => candidate.id === selectedOptionIds[0],
+          )
+        : undefined;
+    const requirement = action.choiceRequirements?.[0];
+    const exactCoverageBinding =
+      selectedOption !== undefined &&
+      selectedOption.card?.known !== false &&
+      selectedOption.card?.type === "program" &&
+      (coverageBinding.targetCardInstanceId === undefined ||
+        selectedOption.card.instanceId ===
+          coverageBinding.targetCardInstanceId) &&
+      (coverageBinding.targetDefinitionId === undefined ||
+        selectedOption.card.definitionId ===
+          coverageBinding.targetDefinitionId) &&
+      choice.side === "runner" &&
+      choice.kind === "select_cards" &&
+      choice.visibility === "hidden_info_barrier" &&
+      choice.stateVersion === input.playerView.stateVersion &&
+      choice.minSelections === 1 &&
+      choice.maxSelections === 1 &&
+      action.side === "runner" &&
+      action.type === "resolve_choice" &&
+      action.source === "game_rule" &&
+      action.expiresAtStateVersion === input.playerView.stateVersion &&
+      action.choiceRequirements?.length === 1 &&
+      requirement?.choiceId === choice.choiceId &&
+      requirement.minSelections === 1 &&
+      requirement.maxSelections === 1 &&
+      requirement.optionIds.length === choice.options.length &&
+      choice.options.every((candidate) =>
+        requirement.optionIds.includes(candidate.id),
+      );
+    if (!exactCoverageBinding || !selectedOptionIds) {
+      throw unresolvedChoiceFailure(
+        input,
+        action,
+        "Resolve the delayed program-search target only from the current resident Runner coverage executor and its exact source and capability target binding.",
+      );
+    }
+    return selectedOptionIds;
+  }
+  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+  const executor = portfolio?.instances.find(
+    (instance) =>
+      instance.instanceId === portfolio.executorInstanceId &&
+      instance.moduleId === "runner.develop_board_and_hand" &&
+      instance.executionState === "executor",
+  );
+  const moduleState = executor?.moduleState as
+    | { kind?: unknown; signal?: RunnerDevelopmentSignal }
+    | undefined;
+  const signal = moduleState?.signal;
+  const binding = signal?.delayedProgramSearchChoiceBinding;
+  const option = selectableOptions.find(
+    (candidate) => candidate.id === binding?.selectedOptionId,
+  );
+  const requirement = action.choiceRequirements?.[0];
+  const exactBinding =
+    portfolio?.side === "runner" &&
+    portfolio.stateVersion === input.playerView.stateVersion &&
+    executor !== undefined &&
+    moduleState?.kind === "development" &&
+    signal?.phase === "resolve_delayed_program_search_choice" &&
+    binding?.choiceId === choice.choiceId &&
+    binding.choiceSource === choice.source &&
+    binding.actionId === action.actionId &&
+    binding.sourceStateVersion === input.playerView.stateVersion &&
+    binding.sourceCardInstanceId === choice.sourceCardInstanceId &&
+    binding.sourceDefinitionId === choice.sourceCardDefinitionId &&
+    choice.side === "runner" &&
+    choice.kind === "select_cards" &&
+    choice.visibility === "hidden_info_barrier" &&
+    choice.stateVersion === input.playerView.stateVersion &&
+    choice.minSelections === 1 &&
+    choice.maxSelections === 1 &&
+    action.side === "runner" &&
+    action.type === "resolve_choice" &&
+    action.source === "game_rule" &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === 1 &&
+    requirement.maxSelections === 1 &&
+    requirement.optionIds.length === choice.options.length &&
+    choice.options.every((candidate) =>
+      requirement.optionIds.includes(candidate.id),
+    ) &&
+    option?.value === binding.targetCardInstanceId &&
+    option.card?.instanceId === binding.targetCardInstanceId &&
+    option.card.definitionId === binding.targetDefinitionId &&
+    option.card.type === "program";
+  if (!exactBinding || !binding) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "Resolve the delayed program-search target only from the current resident Runner development executor and its exact prebound visible target.",
+    );
+  }
+  return [binding.selectedOptionId];
 }
 
 function selectedCorpRezOrTrashIceOptionId(
