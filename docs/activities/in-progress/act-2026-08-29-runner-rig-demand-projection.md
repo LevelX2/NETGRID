@@ -1,6 +1,6 @@
 # Runner-Rig-Bedarfs- und Retentionsprojektion
 
-Status: In Umsetzung – Paket P1 aktiv
+Status: In Umsetzung – Paket P2 aktiv
 
 ## Quelle
 
@@ -121,6 +121,8 @@ Tests: neue Fact-Service-Testdatei; TypeScript nur soweit die neue Typoberfläch
 Done-Gate: identische side-sichere Eingaben erzeugen identische Facts; StateVersion/Fingerprint stimmen; Handdruck ist keine Demand-Quelle; Doctrine-Optionen erzeugen keine unmittelbare Installationsbereitschaft; keine Action-/Executorfelder im Vertrag.
 
 Commit: `feat(ai): add runner rig demand projection facts`
+
+Nachweis: Der reine Fact-Service, seine öffentliche Typoberfläche und fünf fokussierte Vertragsfälle sind umgesetzt. Die Tests belegen simultanen MU-Bedarf, getrennte Hosting-Nachfrage, doctrine-only ohne erfundenen Bedarf, fail-closed StateVersion-/Fingerprint-Bindung, deterministische Sortierung sowie action- und instanzfreie Redaction. Fokussierter Vitest und AI-Typecheck sind grün.
 
 ### P2 – Konkrete MU- und Coverage-Bindung
 
