@@ -319,12 +319,12 @@ function runMemoryPressuredSneakPreviewCoveragePath() {
     MUMIE_DECK,
   );
   RealEngineFixtureBuilder.forState(state)
-    .withRunnerCredits(4)
+    .withRunnerCredits(5)
     .withRunnerClicks(1)
     .withRunnerGripSize(0)
     .withRunnerCardInGrip("onr_v1_110_sneak-preview")
-    .withRunnerCardInGrip("onr_v1_176_the-shell-traders")
-    .withRunnerCardInGrip("onr_v1_071_vewy-vewy-quiet")
+    .withRunnerCardInGrip("onr_v1_079_bodyweight-synthetic-blood")
+    .withRunnerCardInGrip("onr_v1_108_score")
     .withRunnerProgramInstalled("onr_classic_031_rent-i-con")
     .withRunnerProgramInstalled("onr_v1_035_invisibility")
     .withRezzedCorpIceOnServer("hq", "onr_v1_224_bolter-cluster")

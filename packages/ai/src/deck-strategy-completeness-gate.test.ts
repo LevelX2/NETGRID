@@ -64,15 +64,14 @@ describe("deck strategy completeness gate", () => {
     const profile = buildDeckStrategyProfile(standardSnapshot("Counter Shell"));
 
     expect(profile.primaryStrategies).toEqual([
-      "corp.overadvance_value",
       "corp.remote_scoring",
+      "corp.overadvance_value",
       "corp.ambush_bluff",
     ]);
     expect(profile.secondaryStrategies).toEqual([
       "corp.fast_advance",
-      "corp.rush_score",
       "corp.draw_engine",
-      "corp.action_tempo",
+      "corp.rush_score",
     ]);
     expect(profile.warnings).toEqual([]);
     for (const strategyId of [

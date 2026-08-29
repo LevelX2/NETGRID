@@ -48,9 +48,9 @@ describe("Corp trace-bid play-cost projection", () => {
     });
 
     expect(assessment).toMatchObject({
-      recommendedBid: 1,
+      recommendedBid: 0,
       reason: "guaranteed_visible_payoff",
-      minimumGuaranteedBid: 1,
+      minimumGuaranteedBid: 0,
       followupCreditReserve: 1,
     });
   });

@@ -7106,6 +7106,7 @@ function buildRunnerDomain(
   );
   const recurringEconomyRunDeferral = recurringEconomy.find(
     (signal) =>
+      signal.commitmentActive &&
       signal.phase === "hold" &&
       signal.investmentHorizon.decision === "wait" &&
       signal.investmentHorizon.futureValueAtRisk > 0,
@@ -25469,6 +25470,7 @@ function runnerRecurringEconomySignals(
         {
           commitmentId: card.instanceId,
           definitionId,
+          commitmentActive: true,
           phase: "hold" as const,
           actionIds: holdActionIds,
           priorityClass:
@@ -25550,6 +25552,7 @@ function runnerRecurringEconomySignals(
             candidate.sourceCardId ??
             candidate.sourceDefinitionId,
           definitionId: candidate.sourceDefinitionId,
+          commitmentActive: false,
           phase: setupWindow ? ("install" as const) : ("hold" as const),
           actionIds: setupWindow ? [candidate.actionId] : [],
           priorityClass: setupWindow ? ("P4" as const) : ("P5" as const),

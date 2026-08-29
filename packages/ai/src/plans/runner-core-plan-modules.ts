@@ -285,6 +285,7 @@ export type RunnerCreditBankSignal = {
 export type RunnerRecurringEconomySignal = {
   commitmentId: string;
   definitionId: string;
+  commitmentActive: boolean;
   phase: "install" | "hold";
   actionIds: string[];
   priorityClass: "P3" | "P4" | "P5";
