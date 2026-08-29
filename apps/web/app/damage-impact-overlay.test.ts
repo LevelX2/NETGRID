@@ -10,6 +10,8 @@ describe("DamageImpactOverlay lifecycle", () => {
     );
   const pageSource = () =>
     readFileSync(new URL("./page.tsx", import.meta.url), "utf8");
+  const cssSource = () =>
+    readFileSync(new URL("./globals.css", import.meta.url), "utf8");
 
   it("requires manual confirmation instead of auto-dismissing damage impact", () => {
     const source = overlaySource();
@@ -52,6 +54,20 @@ describe("DamageImpactOverlay lifecycle", () => {
     expect(source).toContain('t("preventedTitle"');
     expect(source).toContain("!preventedDamage ? (");
     expect(source).toContain('t("prevented")');
+  });
+
+  it("uses the defined success token for visible remaining grip segments", () => {
+    const css = cssSource();
+
+    expect(css).toMatch(
+      /\.damageImpactSegment\.remaining\s*\{[\s\S]*?var\(--ok\)/,
+    );
+    expect(css).toMatch(
+      /\.damageImpactOverlay\.is-prevented\s*\{[\s\S]*?var\(--ok\)/,
+    );
+    expect(css).not.toMatch(
+      /\.damageImpactSegment\.remaining\s*\{[\s\S]*?var\(--success\)/,
+    );
   });
 
   it("keeps queue, flatline, and core-damage copy explicit", () => {

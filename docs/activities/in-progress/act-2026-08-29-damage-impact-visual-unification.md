@@ -1,6 +1,6 @@
 # Damage-Anzeige visuell vereinheitlichen
 
-Status: DVI-01 und DVI-02 abgeschlossen, DVI-03 aktiv
+Status: Alle Pakete abgeschlossen, lokale Integration ausstehend
 
 ## Quelle und Zielprüfung
 
@@ -155,6 +155,27 @@ app/run-layering.test.ts app/action-cues.test.ts`: 69 Tests bestanden.
   `8787` verändert; Prozessartefakt aus dem aktuellen Dokumentationsstand
   entfernt.
 - Commit: `chore(web): verify unified damage presentation`
+
+Abschluss 2026-08-29:
+
+- Firefox-Prüfung mit den echten Komponenten auf dem isolierten Web-Port
+  `3410` durchgeführt; Standardports `3100` und `8787` blieben unangetastet.
+- Normale Ansicht geprüft: verlorene Segmente beginnen links, verbleibende
+  Segmente stehen sichtbar direkt an der Flatline-Grenze.
+- Access-Ansicht geprüft: bereits aufgedeckte Ambush-Karte bleibt oberhalb des
+  identischen kompakten Meters sichtbar; Bestätigung passt ohne Scrollen in
+  die Desktop-Ansicht.
+- Visuell entdeckten Bestandsfehler behoben: Die undefinierte CSS-Variable
+  `--success` machte verbleibende Segmente unsichtbar; Damage-Flächen nutzen
+  nun das vorhandene Projekttoken `--ok`.
+- Temporäre Vorschau-Routen, Screenshots, Playwright-Sitzung und separater
+  Next-Cache wurden nach der Prüfung entfernt; Port `3410` wurde beendet.
+- Finaler fokussierter Vitest-Lauf: 70 Tests bestanden.
+- `node scripts/check-web-i18n.mjs`: 2301 Nachrichten über drei Locales und 64
+  lokalisierte Oberflächen konsistent. Der Paket-Alias für denselben Check ist
+  wegen seines bestehenden relativen CWD-Pfads nicht aus `apps/web` lauffähig;
+  der Root-Aufruf ist grün.
+- `git diff --check`: bestanden.
 
 ## Automatische Fehlerbehandlung
 

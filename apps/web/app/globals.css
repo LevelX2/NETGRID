@@ -5623,7 +5623,7 @@ select {
 }
 
 .damageImpactOverlay.is-prevented {
-  --damage-impact: var(--success);
+  --damage-impact: var(--ok);
 }
 
 .damageImpactHeader,
@@ -5708,8 +5708,8 @@ select {
 }
 
 .damageImpactSegment.remaining {
-  border: 1px solid color-mix(in srgb, var(--success), transparent 38%);
-  background: color-mix(in srgb, var(--success), transparent 70%);
+  border: 1px solid color-mix(in srgb, var(--ok), transparent 38%);
+  background: color-mix(in srgb, var(--ok), transparent 70%);
 }
 
 .damageImpactSegment.lost {
@@ -11683,7 +11683,7 @@ section[data-testid="legal-actions"].cueHighlight {
 }
 
 .accessRevealBody.hasDamageImpact .accessRevealCard {
-  width: min(220px, 100%);
+  width: min(180px, 100%);
 }
 
 .accessRevealBody.hasDamageImpact .accessRevealDecision {
@@ -11723,7 +11723,13 @@ section[data-testid="legal-actions"].cueHighlight {
   width: 100%;
   display: grid;
   justify-items: center;
-  gap: 10px;
+  gap: 8px;
+}
+
+.accessDamageStage .windowEventIcon {
+  width: 96px;
+  height: 96px;
+  flex-basis: 96px;
 }
 
 .accessDamageStage.damage-meat {
