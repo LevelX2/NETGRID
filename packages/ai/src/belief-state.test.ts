@@ -89,6 +89,143 @@ describe("belief-state revealed opponent ownership", () => {
 });
 
 describe("belief-state R&D top freshness", () => {
+  it("retains the ordered non-stolen remainder of a five-card R&D multiaccess after the Corp draw", () => {
+    const accessedDefinitions = [
+      "simple_economy_operation",
+      "simple_agenda",
+      "onr_proteus_032_misleading-access-menus",
+      "simple_priority_agenda",
+      "onr_v1_295_night-shift",
+    ];
+    const events: PublicGameEvent[] = [];
+    let stateVersion = 0;
+    for (const [accessIndex, cardDefinitionId] of accessedDefinitions.entries()) {
+      events.push(
+        publicEvent(`evt_access_${accessIndex}`, "access_card", stateVersion, {
+          actor: "runner",
+          actionType: "access_card",
+          serverId: "rd",
+          cardDefinitionId,
+          accessIndex,
+          effectiveAccessCount: accessedDefinitions.length,
+        }),
+      );
+      stateVersion += 1;
+      if (accessIndex === 1 || accessIndex === 3) {
+        events.push(
+          publicEvent(`evt_steal_${accessIndex}`, "steal_agenda", stateVersion, {
+            actor: "runner",
+            actionType: "steal_agenda",
+            serverId: "rd",
+            cardDefinitionId,
+            accessIndex,
+          }),
+        );
+        stateVersion += 1;
+      }
+    }
+    events.push(
+      publicEvent("evt_corp_draw", "mandatory_draw", stateVersion, {
+        actor: "corp",
+        actionType: "mandatory_draw",
+      }),
+    );
+
+    const belief = reconstructBeliefState(runnerInput(events, 1));
+
+    expect(belief.runnerOpponentModel?.rndTopFreshness).toMatchObject({
+      freshness: "stale_known_same_top",
+      knownTopDefinitionId: "onr_proteus_032_misleading-access-menus",
+      knownSequenceDefinitionIds: [
+        "onr_proteus_032_misleading-access-menus",
+        "onr_v1_295_night-shift",
+      ],
+    });
+    expect(
+      belief.runnerOpponentModel?.knownPositionMemory.filter(
+        (entry) => entry.zone === "rd",
+      ),
+    ).toEqual([
+      expect.objectContaining({
+        positionKey: "top",
+        definitionId: "onr_proteus_032_misleading-access-menus",
+      }),
+      expect.objectContaining({
+        positionKey: "top:1",
+        definitionId: "onr_v1_295_night-shift",
+      }),
+    ]);
+    expect(
+      belief.runnerOpponentModel?.hqHandMemory.knownDefinitions,
+    ).toContain("simple_economy_operation");
+    expect(
+      belief.runnerOpponentModel?.hqHandMemory.knownDefinitions,
+    ).not.toContain("onr_v1_295_night-shift");
+  });
+
+  it("drops an unconfirmed known R&D suffix when a new access contradicts its prefix", () => {
+    const look = rndPrivateLookEvent("evt_rd_look", 1, [
+      "simple_economy_operation",
+      "simple_agenda",
+      "simple_upgrade",
+    ]);
+    const contradictoryAccess = publicEvent(
+      "evt_contradictory_access",
+      "access_card",
+      2,
+      {
+        actor: "runner",
+        actionType: "access_card",
+        serverId: "rd",
+        cardDefinitionId: "simple_barrier_ice",
+        accessIndex: 0,
+        effectiveAccessCount: 1,
+      },
+    );
+
+    const freshness = reconstructBeliefState(
+      runnerInput([look, contradictoryAccess]),
+    ).runnerOpponentModel?.rndTopFreshness;
+
+    expect(freshness).toMatchObject({
+      freshness: "stale_known_same_top",
+      knownSequenceDefinitionIds: ["simple_barrier_ice"],
+    });
+    expect(freshness?.invalidationReasons).toContain(
+      "rd_known_sequence_prefix_changed:evt_contradictory_access:0",
+    );
+  });
+
+  it("does not remove a remembered R&D card without an exact access-index binding", () => {
+    const access = publicEvent("evt_unbound_access", "access_card", 1, {
+      actor: "runner",
+      actionType: "access_card",
+      serverId: "rd",
+      cardDefinitionId: "simple_economy_asset",
+    });
+    const trash = publicEvent("evt_unbound_trash", "trash_accessed_card", 2, {
+      actor: "runner",
+      actionType: "trash_accessed_card",
+      serverId: "rd",
+      cardDefinitionId: "simple_economy_asset",
+    });
+
+    const freshness = reconstructBeliefState(
+      runnerInput([access, trash]),
+    ).runnerOpponentModel?.rndTopFreshness;
+
+    expect(freshness).toMatchObject({
+      freshness: "stale_known_same_top",
+      knownSequenceDefinitionIds: ["simple_economy_asset"],
+    });
+    expect(freshness?.invalidationReasons).toEqual(
+      expect.arrayContaining([
+        "rd_access_sequence_binding_unavailable:evt_unbound_access",
+        "rd_access_removal_binding_unavailable:evt_unbound_trash",
+      ]),
+    );
+  });
+
   it("advances a five-card private-look sequence over consecutive Corp draws", () => {
     const look = rndPrivateLookEvent("evt_rd_look", 1, [
       "simple_economy_operation",
@@ -150,12 +287,15 @@ describe("belief-state R&D top freshness", () => {
       actionType: "access_card",
       serverId: "rd",
       cardDefinitionId: "simple_economy_asset",
+      accessIndex: 0,
+      effectiveAccessCount: 1,
     });
     const trash = publicEvent("evt_trash", "trash_accessed_card", 3, {
       actor: "runner",
       actionType: "trash_accessed_card",
       serverId: "rd",
       cardDefinitionId: "simple_economy_asset",
+      accessIndex: 0,
     });
 
     const belief = reconstructBeliefState(runnerInput([look, access, trash]));
@@ -186,12 +326,15 @@ describe("belief-state R&D top freshness", () => {
       actionType: "access_card",
       serverId: "rd",
       cardDefinitionId: "simple_agenda",
+      accessIndex: 0,
+      effectiveAccessCount: 1,
     });
     const steal = publicEvent("evt_steal", "steal_agenda", 3, {
       actor: "runner",
       actionType: "steal_agenda",
       serverId: "rd",
       cardDefinitionId: "simple_agenda",
+      accessIndex: 0,
     });
     const draw = publicEvent("evt_draw", "mandatory_draw", 4, {
       actor: "corp",
@@ -309,6 +452,8 @@ describe("belief-state R&D top freshness", () => {
       serverId: "rd",
       cardDefinitionId: "onr_v1_343_south-african-mining-corp",
       title: "South African Mining Corp",
+      accessIndex: 0,
+      effectiveAccessCount: 1,
     });
     const trashEvent = publicEvent("evt_2", "trash_accessed_card", 2, {
       actor: "runner",
@@ -316,6 +461,7 @@ describe("belief-state R&D top freshness", () => {
       serverId: "rd",
       cardDefinitionId: "onr_v1_343_south-african-mining-corp",
       title: "South African Mining Corp",
+      accessIndex: 0,
     });
 
     const belief = reconstructBeliefState(
@@ -342,6 +488,8 @@ describe("belief-state R&D top freshness", () => {
       serverLabel: "R&D",
       targets: { serverLabel: "R&D" },
       cardDefinitionId: "onr_v1_343_south-african-mining-corp",
+      accessIndex: 0,
+      effectiveAccessCount: 1,
     });
     const stealEvent = publicEvent("evt_label_2", "steal_agenda", 2, {
       actor: "runner",
@@ -349,6 +497,7 @@ describe("belief-state R&D top freshness", () => {
       serverLabel: "R&D",
       targets: { serverLabel: "R&D" },
       cardDefinitionId: "onr_v1_343_south-african-mining-corp",
+      accessIndex: 0,
     });
 
     const belief = reconstructBeliefState(
