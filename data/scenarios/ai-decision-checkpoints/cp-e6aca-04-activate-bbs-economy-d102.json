@@ -12141,7 +12141,9 @@
     "planExecution": {
       "acceptablePlanKinds": ["corp.economy"],
       "acceptableCapabilities": ["develop_or_convert_corp_economy"],
-      "requiredAssessmentEvidence": ["corp_visible_economy_campaign:rez:remote_1:protected_contestable"]
+      "requiredAssessmentEvidence": [
+        "corp_visible_economy_campaign:rez:remote_3:unprotected"
+      ]
     }
   }
 }

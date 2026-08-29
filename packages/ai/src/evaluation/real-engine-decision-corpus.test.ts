@@ -134,7 +134,7 @@ describe("RealEngineDecisionCorpus", () => {
     expect(
       sampleFor(samples, "runner_real_low_credits").leagueExpectation
         ?.expectedTopActionTypes,
-    ).toEqual(["start_run", "play_event"]);
+    ).toEqual(["start_run", "play_event", "gain_credit"]);
     expect(
       sampleFor(samples, "runner_real_low_credits").leagueExpectation
         ?.pilotEligibleScopes,

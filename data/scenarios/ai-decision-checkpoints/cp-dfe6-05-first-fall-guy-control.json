@@ -5096,11 +5096,9 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.develop_board_and_hand"],
-      "acceptableCapabilities": ["develop_onr_v1_161_fall-guy"],
-      "requiredAssessmentEvidence": [
-        "source:own_runner_hand:card_specific_purpose:defense_support:setup"
-      ]
+      "acceptablePlanKinds": ["runner.defense_and_recovery"],
+      "acceptableCapabilities": ["install_defense_support"],
+      "requiredAssessmentEvidence": ["runner_defense_support_current_need"]
     }
   }
 }

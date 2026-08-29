@@ -260,11 +260,10 @@ function runnerCoverageDispositions(params: {
       action.payload?.runnerAbility === "change_icebreaker_subtype";
     const isUnboundStrategicExchange =
       runnerStrategicExchangeRequiresBoundParent(candidate);
-    const ownerModuleId =
-      isUnboundStrategicExchange
-        ? ("runner.economy" as const)
-        : candidate.semanticActionType.startsWith("search.") ||
-      isUnboundBreakerSubtypeChange
+    const ownerModuleId = isUnboundStrategicExchange
+      ? ("runner.economy" as const)
+      : candidate.semanticActionType.startsWith("search.") ||
+          isUnboundBreakerSubtypeChange
         ? ("runner.rig_and_coverage" as const)
         : candidate.semanticActionType === "play.runner_event"
           ? ("runner.develop_board_and_hand" as const)
@@ -277,10 +276,10 @@ function runnerCoverageDispositions(params: {
       evidenceCode: isUnboundStrategicExchange
         ? "runner_strategic_exchange_requires_current_exact_parent_head"
         : isUnboundBreakerSubtypeChange
-        ? "runner_breaker_subtype_change_requires_current_bound_run_coverage_head"
-        : candidate.semanticActionType.startsWith("search.")
-          ? "runner_search_has_no_current_bound_coverage_or_development_need"
-          : "runner_event_has_no_current_bound_run_or_development_route",
+          ? "runner_breaker_subtype_change_requires_current_bound_run_coverage_head"
+          : candidate.semanticActionType.startsWith("search.")
+            ? "runner_search_has_no_current_bound_coverage_or_development_need"
+            : "runner_event_has_no_current_bound_run_or_development_route",
     });
     classified.add(candidate.actionId);
   }

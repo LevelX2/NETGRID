@@ -13,8 +13,7 @@ describe("All-Nighter restricted run-window plan-first coverage", () => {
     expect(checkpoint.expectation).toMatchObject({
       acceptableActions: [
         {
-          actionId:
-            "runner.start_run.rd.bonus_run.onr_v1_076_all-nighter",
+          actionId: "runner.start_run.rd.bonus_run.onr_v1_076_all-nighter",
         },
       ],
       forbiddenActions: [
@@ -25,9 +24,7 @@ describe("All-Nighter restricted run-window plan-first coverage", () => {
       ],
       planExecution: {
         acceptablePlanKinds: ["runner.convert_run_window"],
-        acceptableCapabilities: [
-          "continue_engine_restricted_run_sequence",
-        ],
+        acceptableCapabilities: ["continue_engine_restricted_run_sequence"],
       },
     });
 

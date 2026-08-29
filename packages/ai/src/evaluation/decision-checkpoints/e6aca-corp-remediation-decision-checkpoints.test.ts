@@ -73,7 +73,7 @@ describe("e6aca Corp remediation decision checkpoints", () => {
     expectCheckpointToPass(checkpoint);
   });
 
-  it("uses the protected BBS economy route before an unfunded third R&D layer", () => {
+  it("draws for missing concrete R&D defense before an unfunded third layer", () => {
     const checkpoint = mutateFixture(
       avoidUnfundedRdOverstackJson,
       (fixture) => {
@@ -91,17 +91,12 @@ describe("e6aca Corp remediation decision checkpoints", () => {
           };
         }
         fixture.expectation = {
-          acceptableActions: [
-            {
-              type: "rez_card",
-              sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
-            },
-          ],
+          acceptableActions: [{ type: "draw_card" }],
           planExecution: {
-            acceptablePlanKinds: ["corp.economy"],
-            acceptableCapabilities: ["develop_or_convert_corp_economy"],
+            acceptablePlanKinds: ["corp.defend_servers"],
+            acceptableCapabilities: ["allocate_server_defense"],
             requiredAssessmentEvidence: [
-              "corp_visible_economy_campaign:rez:remote_1:protected_contestable",
+              "corp_missing_concrete_defense_draw:rd",
             ],
           },
         };

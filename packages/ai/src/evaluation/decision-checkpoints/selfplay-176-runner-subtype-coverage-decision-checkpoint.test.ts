@@ -5,7 +5,7 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 
 describe("selfplay 176 Runner subtype coverage decision checkpoint", () => {
-  it("rejects both unbound Morphing Tool changes and develops the credit bank", () => {
+  it("uses the exact bound Morphing Tool wall change", () => {
     const result = runAiDecisionCheckpoint(
       structuredClone(subtypeCoverageJson) as AiDecisionCheckpointV1,
     );
@@ -13,10 +13,10 @@ describe("selfplay 176 Runner subtype coverage decision checkpoint", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
     expect(result.decision).toMatchObject({
       actionId:
-        "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:store_credits",
-      reasonCode: "plan_first.runner.credit_bank",
+        "runner.trigger_ability.runner_onr_proteus_092_morphing-tool_1.wall.runner_onr_proteus_092_morphing-tool_1.change_icebreaker_subtype",
+      reasonCode: "plan_first.runner.rig_and_coverage",
       decisionDebug: {
-        planKind: "runner.credit_bank",
+        planKind: "runner.rig_and_coverage",
       },
     });
   });

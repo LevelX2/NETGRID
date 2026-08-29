@@ -20014,7 +20014,8 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "draw_card"
+        "type": "activated_card_ability",
+        "sourceDefinitionId": "onr_v1_154_broker"
       }
     ],
     "forbiddenActions": [
@@ -20035,8 +20036,9 @@
       }
     ],
     "planExecution": {
-      "acceptableCapabilities": ["build_required_hand_buffer"],
-      "acceptablePlanKinds": ["runner.defense_and_recovery"]
+      "acceptablePlanKinds": ["runner.credit_bank"],
+      "acceptableCapabilities": ["credit_bank_build"],
+      "requiredAssessmentEvidence": ["runner_credit_bank_first_load"]
     }
   }
 }

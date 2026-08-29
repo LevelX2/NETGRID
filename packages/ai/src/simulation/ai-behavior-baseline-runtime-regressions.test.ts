@@ -155,17 +155,15 @@ function captureDiagnostic(capture: AiSimulationDecisionCheckpointCapture) {
       ...capture.input,
       visibleSourceDefinitionsByInstanceId:
         visibleSourceDefinitionsByInstanceId(capture.input.playerView),
-    }).map(
-      (candidate) => ({
-        actionId: candidate.actionId,
-        actionType: candidate.actionType,
-        semanticActionType: candidate.semanticActionType,
-        sourceCardInstanceId: candidate.sourceCardInstanceId,
-        sourceDefinitionId: candidate.sourceDefinitionId,
-        strategicExchangeKinds: runnerStrategicExchangeKinds(candidate),
-        planOwnerBinding: candidate.planOwnerBinding,
-        economyProjection: candidate.economyProjection,
-      }),
-    ),
+    }).map((candidate) => ({
+      actionId: candidate.actionId,
+      actionType: candidate.actionType,
+      semanticActionType: candidate.semanticActionType,
+      sourceCardInstanceId: candidate.sourceCardInstanceId,
+      sourceDefinitionId: candidate.sourceDefinitionId,
+      strategicExchangeKinds: runnerStrategicExchangeKinds(candidate),
+      planOwnerBinding: candidate.planOwnerBinding,
+      economyProjection: candidate.economyProjection,
+    })),
   };
 }

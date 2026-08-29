@@ -8346,7 +8346,7 @@
       "acceptablePlanIds": ["plan:runner.defense_and_recovery:runner"],
       "acceptablePlanKinds": ["runner.defense_and_recovery"],
       "acceptableCapabilities": ["resolve_plan_bound_runner_discard"],
-      "requiredAssessmentEvidence": ["runner_discard_owned_by_defense_plan"]
+      "requiredAssessmentEvidence": ["runner_no_defense_support_current_need"]
     }
   }
 }

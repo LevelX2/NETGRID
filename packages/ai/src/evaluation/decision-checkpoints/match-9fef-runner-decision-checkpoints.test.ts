@@ -33,23 +33,17 @@ describe("match 9FEF runner decision checkpoints", () => {
     ["F02 retains Jettison during the D34 discard", retainJettisonD34Json],
     ["F03 targets useful Corp servers with RNZ at D66", rnzTargetD66Json],
     ["F03 builds the liquid reserve at D159", noLateRnzD159Json],
-    [
-      "F04 starts the available Broker bank at D88",
-      probeNotFundingD88Json,
-    ],
+    ["F04 starts the available Broker bank at D88", probeNotFundingD88Json],
     [
       "F05 follows the current HQ pressure route at D95",
       rdAfterKnownTopInvalidatedD95Json,
     ],
     ["F06 builds the liquid reserve at D109", hqProbeD109Json],
     ["F05 avoids the repeated costly R&D run at D115", noRepeatRdD115Json],
-    [
-      "F07 builds the liquid reserve at D127",
-      noDeadFundingD127Json,
-    ],
+    ["F07 builds the liquid reserve at D127", noDeadFundingD127Json],
     ["F08 classifies the D143 remote run as a probe", remote2ProbeD143Json],
     [
-      "F08 declines to break without remaining payoff at D144",
+      "F08 continues the hidden-root contest through Reinforced Wall at D144",
       noBreakWithoutPayoffD144Json,
     ],
   ])("satisfies %s", (_label, json) => {

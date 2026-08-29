@@ -9152,8 +9152,8 @@
     ],
     "planExecution": {
       "acceptablePlanKinds": ["runner.rig_and_coverage"],
-      "acceptableCapabilities": ["install_breaker_ap"],
-      "requiredAssessmentEvidence": ["target:remote_1"]
+      "acceptableCapabilities": ["install_breaker_wall"],
+      "requiredAssessmentEvidence": ["target:rd"]
     }
   }
 }

@@ -118,7 +118,7 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
     expectCheckpointToPass(belowHandLimit);
   });
 
-  it("uses immediate liquidity when a one-card hand cap makes search nonproductive", () => {
+  it("uses the hand-neutral Temple search to close code-gate coverage at a one-card cap", () => {
     const noMeaningfulAlternative = mutateFixture(
       repeatedEarlyBankJson,
       (checkpoint) => {
@@ -132,7 +132,12 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
         checkpoint.source.findingId =
           "20EB-C05-REPEATED-BANK-WITHOUT-MEANINGFUL-ALTERNATIVE";
         checkpoint.expectation = {
-          acceptableActions: [{ type: "gain_credit" }],
+          acceptableActions: [
+            {
+              type: "play_event",
+              sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
+            },
+          ],
           forbiddenActions: [
             {
               type: "activated_card_ability",
@@ -140,10 +145,10 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
             },
           ],
           planExecution: {
-            acceptablePlanKinds: ["runner.economy"],
-            acceptableCapabilities: ["gain_general_liquid_credits"],
+            acceptablePlanKinds: ["runner.rig_and_coverage"],
+            acceptableCapabilities: ["search_answer_breaker_code_gate"],
             requiredAssessmentEvidence: [
-              "runner_finite_portfolio_credit_reserve",
+              "deck_strategy_open_code_gate_coverage",
             ],
           },
         };

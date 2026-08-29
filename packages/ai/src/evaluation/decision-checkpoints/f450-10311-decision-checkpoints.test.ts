@@ -18,10 +18,7 @@ describe("F450 and 10311 exact decision checkpoints", () => {
       cp02Json,
     ],
     ["comfortable Streetware bank is not overfilled", cp03Json],
-    [
-      "confirmed damage floor blocks the captured R&D pressure",
-      cp04Json,
-    ],
+    ["confirmed damage floor blocks the captured R&D pressure", cp04Json],
   ])("satisfies %s", (_label, json) => {
     const result = runAiDecisionCheckpoint(fixture(json));
 
@@ -64,12 +61,10 @@ describe("F450 and 10311 exact decision checkpoints", () => {
     const stillSafe = mutateFixture(cp04Json, (checkpoint) => {
       checkpoint.engine.testOnlyGameState.runner.credits = 10;
       checkpoint.expectation = {
-        acceptableActions: [
-          { type: "start_run", targetServerId: "hq" },
-        ],
+        acceptableActions: [{ type: "start_run", targetServerId: "hq" }],
         planExecution: {
           acceptablePlanKinds: ["runner.pressure_central"],
-          acceptableCapabilities: ["pressure_hq_information"],
+          acceptableCapabilities: ["pressure_hq_access"],
         },
         runTargets: [
           {

@@ -990,13 +990,8 @@
             "id": "remote_1",
             "kind": "remote",
             "label": "Remote 1",
-            "ice": [
-              "corp_onr_v1_236_data-raven_3",
-              "corp_onr_v1_249_hunter_1"
-            ],
-            "root": [
-              "corp_onr_v1_190_bioweapons-engineering_1"
-            ]
+            "ice": ["corp_onr_v1_236_data-raven_3", "corp_onr_v1_249_hunter_1"],
+            "root": ["corp_onr_v1_190_bioweapons-engineering_1"]
           }
         ]
       },
@@ -1068,9 +1063,7 @@
             "runner_onr_proteus_092_morphing-tool_1"
           ],
           "hardware": [],
-          "resources": [
-            "runner_onr_v1_154_broker_2"
-          ]
+          "resources": ["runner_onr_v1_154_broker_2"]
         }
       },
       "specialZones": {
@@ -2465,9 +2458,7 @@
         "edgerunnerTempsInstallActionsRemaining": 0,
         "scoredAgendaStartDrawChoiceResolvedSourceIds": [],
         "scoredAgendaStartDrawChoiceSelectedSourceIds": [],
-        "fortActivityServerIdsSinceCorpTurnStart": [
-          "remote_1"
-        ],
+        "fortActivityServerIdsSinceCorpTurnStart": ["remote_1"],
         "corpStartOfTurnResolvedSourceIds": [],
         "pdcaUsedSourceIdsThisTurn": []
       },
@@ -7169,9 +7160,7 @@
             "support": 80,
             "final": 78
           },
-          "supportGaps": [
-            "no_search_support"
-          ],
+          "supportGaps": ["no_search_support"],
           "evidence": [
             "strategy:runner.hq_pressure",
             "confidence:high",
@@ -7214,9 +7203,7 @@
               "support": 80,
               "final": 75
             },
-            "supportGaps": [
-              "no_search_support"
-            ],
+            "supportGaps": ["no_search_support"],
             "evidence": [
               "strategy:runner.rnd_pressure",
               "confidence:high",
@@ -7237,9 +7224,7 @@
               "support": 65,
               "final": 71
             },
-            "supportGaps": [
-              "low_centralAccess_support"
-            ],
+            "supportGaps": ["low_centralAccess_support"],
             "evidence": [
               "strategy:runner.interface_closeout",
               "confidence:high",
@@ -7337,9 +7322,7 @@
             "severity": "soft",
             "reason": "support_gap",
             "removalCondition": "resolve support gap no_search_support",
-            "evidence": [
-              "support_gap:no_search_support"
-            ]
+            "evidence": ["support_gap:no_search_support"]
           }
         ],
         "transition": {
@@ -7437,10 +7420,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7799,10 +7779,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7824,9 +7801,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -7889,10 +7864,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7945,10 +7917,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8127,10 +8096,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8304,9 +8270,7 @@
           "milestone": "productive_routes_exhausted",
           "moduleState": {
             "kind": "turn_completion",
-            "standardEndTurnActionIds": [
-              "runner.end_turn"
-            ]
+            "standardEndTurnActionIds": ["runner.end_turn"]
           },
           "blockers": [],
           "resumeConditions": [],
@@ -8361,9 +8325,7 @@
             "kind": "server",
             "id": "remote_1"
           },
-          "openNeedIds": [
-            "run-support:remote:remote_1"
-          ],
+          "openNeedIds": ["run-support:remote:remote_1"],
           "phase": "execute",
           "milestone": "admitted",
           "moduleState": {
@@ -8401,9 +8363,7 @@
                   "knownPathCost": 0,
                   "creditsAfterKnownPath": 2,
                   "unknownIceCount": 1,
-                  "unknownIcePositions": [
-                    0
-                  ],
+                  "unknownIcePositions": [0],
                   "corpRezCredits": 2,
                   "visibleCoverage": "typed_only",
                   "requiredCredits": 3,
@@ -8830,9 +8790,7 @@
                 }
               }
             ],
-            "protectedValueClaimIds": [
-              "fnv1a:df0a958d"
-            ],
+            "protectedValueClaimIds": ["fnv1a:df0a958d"],
             "transition": {
               "kind": "projected_plan_discovery_required"
             }
@@ -8897,23 +8855,18 @@
   },
   "expectation": {
     "planExecution": {
-      "acceptablePlanKinds": [
-        "runner.credit_bank"
-      ]
+      "acceptablePlanKinds": ["runner.rig_and_coverage"],
+      "acceptableCapabilities": ["prepare_breaker_wall"]
     },
     "forbiddenActions": [
       {
         "actionId": "runner.trigger_ability.runner_onr_proteus_092_morphing-tool_1.sentry.runner_onr_proteus_092_morphing-tool_1.change_icebreaker_subtype"
-      },
-      {
-        "actionId": "runner.trigger_ability.runner_onr_proteus_092_morphing-tool_1.wall.runner_onr_proteus_092_morphing-tool_1.change_icebreaker_subtype"
       }
     ],
     "contractKind": "correctness",
     "acceptableActions": [
       {
-        "type": "activated_card_ability",
-        "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:store_credits"
+        "actionId": "runner.trigger_ability.runner_onr_proteus_092_morphing-tool_1.wall.runner_onr_proteus_092_morphing-tool_1.change_icebreaker_subtype"
       }
     ]
   }

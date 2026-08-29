@@ -8732,16 +8732,13 @@
     "contractKind": "correctness",
     "acceptableActions": [
       {
-        "type": "play_event",
-        "sourceDefinitionId": "onr_v1_108_score"
+        "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:store_credits"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.develop_board_and_hand"],
-      "acceptableCapabilities": ["develop_onr_v1_108_score"],
-      "requiredAssessmentEvidence": [
-        "source:own_runner_hand:card_specific_purpose:economy_engine:setup"
-      ]
+      "acceptablePlanKinds": ["runner.credit_bank"],
+      "acceptableCapabilities": ["credit_bank_build"],
+      "requiredAssessmentEvidence": ["runner_credit_bank_first_load"]
     }
   }
 }
