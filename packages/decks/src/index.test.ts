@@ -208,7 +208,7 @@ describe("deck validation and snapshots", () => {
     );
 
     expect(entry).toMatchObject({
-      version: "1.2.0",
+      version: "1.3.0",
       name: "Counter Shell",
       side: "corp",
       cardPoolVersion: "private-local-onr-v1-plus-proteus-playtest",
@@ -220,11 +220,11 @@ describe("deck validation and snapshots", () => {
       { cardId: "onr_proteus_007_project-venice", quantity: 1 },
       { cardId: "onr_v1_199_employee-empowerment", quantity: 3 },
       { cardId: "onr_v1_205_main-office-relocation", quantity: 1 },
-      { cardId: "onr_v1_291_falsified-transactions-expert", quantity: 2 },
+      { cardId: "onr_v1_291_falsified-transactions-expert", quantity: 1 },
       { cardId: "onr_v1_305_team-restructuring", quantity: 3 },
       { cardId: "onr_v1_347_vapor-ops", quantity: 3 },
       { cardId: "onr_v1_348_virus-test-site", quantity: 3 },
-      { cardId: "onr_v1_346_vacant-soulkiller", quantity: 1 },
+      { cardId: "onr_v1_346_vacant-soulkiller", quantity: 2 },
       { cardId: "onr_v1_328_information-laundering", quantity: 1 },
       { cardId: "onr_v1_312_chicago-branch", quantity: 1 },
       { cardId: "onr_proteus_062_lesley-major", quantity: 1 },
