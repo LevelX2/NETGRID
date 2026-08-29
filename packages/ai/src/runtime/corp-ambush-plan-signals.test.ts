@@ -428,6 +428,20 @@ describe("Corp compromised Ambush disposition", () => {
     });
   });
 
+  it("rezzes a prepared zero-cost ambush at the exact root access window", () => {
+    const fixture = installedTrapFixture({
+      exposed: false,
+      corpCredits: 3,
+      zeroCostAccessRez: true,
+    });
+    const [signal] = buildCorpAmbushPlanSignals(fixture);
+    expect(signal).toMatchObject({
+      sourceDefinitionId: "onr_v1_348_virus-test-site",
+      phase: "trigger",
+      actionIds: ["rez-prepared-trap"],
+    });
+  });
+
   it("is deterministic across different hidden Runner hand identities", () => {
     const left = installedTrapFixture({ exposed: true, corpCredits: 3 });
     const right = installedTrapFixture({ exposed: true, corpCredits: 3 });
@@ -461,16 +475,19 @@ function installedTrapFixture(options: {
   exposed: boolean;
   corpCredits: number;
   triggerAction?: boolean;
+  zeroCostAccessRez?: boolean;
 }): {
   input: AiDecisionInput;
   candidates: ActionSemanticCandidate[];
   previous: ResidentPlanPortfolio;
 } {
   const trap = visibleCard("trap-installed", "corp", "asset", {
-    definitionId: "onr_v1_345_trap",
-    title: "TRAP!",
+    definitionId: options.zeroCostAccessRez
+      ? "onr_v1_348_virus-test-site"
+      : "onr_v1_345_trap",
+    title: options.zeroCostAccessRez ? "Virus Test Site" : "TRAP!",
     rezzed: false,
-    advancementCounters: 0,
+    advancementCounters: options.zeroCostAccessRez ? 3 : 0,
   });
   const recycler = visibleCard("recycler-installed", "corp", "asset", {
     definitionId: "onr_v1_316_cowboy-sysop",
@@ -492,7 +509,21 @@ function installedTrapFixture(options: {
       },
     },
   );
-  const input = aiInput("corp", [recycle]);
+  const accessRez = legalAction(
+    "rez-prepared-trap",
+    "corp",
+    "rez_card",
+    "Rez prepared ambush",
+    { credits: 0, clicks: 0 },
+    {
+      source: trap.instanceId,
+      payload: { cardId: trap.instanceId, serverId: "remote_1" },
+    },
+  );
+  const legalActions = options.zeroCostAccessRez
+    ? [recycle, accessRez]
+    : [recycle];
+  const input = aiInput("corp", legalActions);
   input.playerView.own.credits = options.corpCredits;
   input.playerView.opponent.handCount = 5;
   input.playerView.servers = [
@@ -501,6 +532,16 @@ function installedTrapFixture(options: {
     server("archives"),
     server("remote_1", [], [trap, recycler]),
   ];
+  if (options.zeroCostAccessRez) {
+    input.playerView.timingPoint = "run.movement_rez_window";
+    input.playerView.run = {
+      runId: "run-access-remote-1",
+      attackedServerId: "remote_1",
+      phase: "movement",
+      position: { kind: "server", serverId: "remote_1" },
+      successful: true,
+    };
+  }
   const exposeEvent: PublicGameEvent = {
     eventId: "evt-expose-trap",
     type: "resolve_choice",
@@ -523,11 +564,12 @@ function installedTrapFixture(options: {
   input.playerView.publicEvents = options.exposed ? [exposeEvent] : [];
   input.eventTail = options.exposed ? [exposeEvent] : [];
   const candidates = buildActionSemanticCandidates({
-    legalActions: [recycle],
+    legalActions,
     observerSide: "corp",
     stateVersion: input.playerView.stateVersion,
     visibleSourceDefinitionsByInstanceId: {
       [recycler.instanceId]: recycler.definitionId!,
+      [trap.instanceId]: trap.definitionId!,
     },
   });
   if (options.triggerAction) {
