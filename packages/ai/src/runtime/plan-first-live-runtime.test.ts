@@ -18637,6 +18637,114 @@ describe("authoritative plan-first live runtime", () => {
     expect(decision.evidence).toContain("plan_priority_class:P2");
   });
 
+  it("uses an exact burst-credit provider before a terminal remote contest instead of exposing two owners", () => {
+    resetResidentPlanPortfolioMemory();
+    const networking = legalAction(
+      "play-networking-for-terminal-remote",
+      "runner",
+      "play_event",
+      "Play Networking",
+      { credits: 3, clicks: 2 },
+      {
+        source: "networking-card",
+        payload: {
+          cardId: "networking-card",
+          sourceDefinitionId: "onr_classic_041_networking",
+          gainCreditsAmount: 9,
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityId:
+            "onr_classic_041_networking:on_play_gain_nine_credits",
+          cardImplementationAbilityKey: "on_play_gain_nine_credits",
+        },
+      },
+    );
+    const run = legalAction(
+      "run-funded-terminal-remote",
+      "runner",
+      "start_run",
+      "Run terminal remote",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "remote_1" } },
+    );
+    const credit = legalAction(
+      "credit-funded-terminal-remote",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [networking, run, credit]);
+    input.playerView.own.credits = 4;
+    input.playerView.own.clicks = 4;
+    input.playerView.opponent.agendaPoints = 6;
+    input.playerView.agendaPointsToWin = 7;
+    input.playerView.own.gripOrHq = [
+      visibleCard("networking-card", "runner", "event", {
+        definitionId: "onr_classic_041_networking",
+        title: "Networking",
+      }),
+    ];
+    const terminalRemote = server("remote_1");
+    terminalRemote.root = [
+      {
+        instanceId: "advanced-funded-terminal-remote-card",
+        known: false,
+        advancementCounters: 2,
+      },
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      terminalRemote,
+    ];
+    const target = {
+      ...safeRuntimeRunTarget(run.actionId, "remote_1"),
+      targetKind: "remote" as const,
+      accessTargetKind: "remote" as const,
+      scoreThreat: false,
+      pathCost: 4,
+      creditsAfterRun: 0,
+      recommendation: "gain_credits_first" as const,
+      score: 500,
+      fundingNeed: {
+        reason: "post_run_floor_gap" as const,
+        routeFundingGap: 0,
+        postRunFloorGap: 3,
+        protectedLiquidReserve: 7,
+      },
+    };
+
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => [target],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 3,
+        desiredCreditReserve: 7,
+        fundingNeed: true,
+        buildEconomyBeforePressure: true,
+        evidence: ["test_terminal_remote_exact_funding"],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: networking.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_priority_class:P2",
+        expect.stringContaining(
+          "runner_run_support_fund_concrete_gap:remote_1",
+        ),
+      ]),
+    );
+    expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
+      rootForegroundInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      executorInstanceId: "plan:runner.economy:run-support%3Aremote%3Aremote_1",
+    });
+  });
+
   it("keeps an exact executable run above the repeated matchpoint-remote focus placeholder", () => {
     resetResidentPlanPortfolioMemory();
     const run = legalAction(

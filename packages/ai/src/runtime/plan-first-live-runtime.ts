@@ -7900,6 +7900,18 @@ function buildRunnerDomain(
           );
         const terminalRemoteContestIsDirectlyMandatory =
           runnerTerminalRemoteContestIsDirectlyMandatory(input, evaluation);
+        const fundingSupportCanExecuteBeforeUrgentContest =
+          fundingSupport !== undefined &&
+          fundingSupport.routeActionIds.length > 0;
+        const urgentContestBypassesUnavailableFundingSupport =
+          (terminalRemoteContestIsDirectlyMandatory ||
+            irrecoverableScoreThreatContest) &&
+          fundingSupport !== undefined &&
+          !fundingSupportCanExecuteBeforeUrgentContest;
+        const boundFundingSupport =
+          urgentContestBypassesUnavailableFundingSupport
+            ? undefined
+            : fundingSupport;
         const repeatedTerminalDamageContest =
           runnerTerminalNonlethalDamageContestAlreadyFailedThisTurn(
             input,
@@ -7939,11 +7951,11 @@ function buildRunnerDomain(
           reachable:
             !safetyBlocked &&
             !forgoUnsafeRunCapacity &&
+            coverageSupport === undefined &&
+            boundFundingSupport === undefined &&
             (terminalRemoteContestIsDirectlyMandatory ||
               irrecoverableScoreThreatContest ||
               (evaluation.prerunReserveQuote?.status !== "blocked" &&
-                coverageSupport === undefined &&
-                fundingSupport === undefined &&
                 directRunRouteReady)),
           marginalValue: terminalRemoteContestIsDirectlyMandatory
             ? 1_400
@@ -7951,7 +7963,7 @@ function buildRunnerDomain(
               ? 1_200
               : coverageSupport
                 ? Math.max(1, evaluation.score)
-                : fundingSupport
+                : boundFundingSupport
                   ? Math.max(1, evaluation.score)
                   : evaluation.recommendation === "run_now" ||
                       productiveProbeCanConvertNow
@@ -7971,8 +7983,8 @@ function buildRunnerDomain(
                   ? `runner_irrecoverable_random_break_damage_score_threat_contest:${evaluation.targetServerId}`
                   : coverageSupport
                     ? coverageSupport.evidenceCode
-                    : fundingSupport
-                      ? fundingSupport.evidenceCode
+                    : boundFundingSupport
+                      ? boundFundingSupport.evidenceCode
                       : directRunCanConvertNow
                         ? `runner_direct_run_converts_now:${evaluation.targetServerId}`
                         : evaluation.recommendation === "gain_credits_first"
@@ -7983,8 +7995,8 @@ function buildRunnerDomain(
                               "runner_remote_target"),
           ...(coverageSupport
             ? { supportNeedId: coverageSupport.gapId }
-            : fundingSupport
-              ? { supportNeedId: fundingSupport.needId }
+            : boundFundingSupport
+              ? { supportNeedId: boundFundingSupport.needId }
               : {}),
           preferredRunActionIds: [evaluation.actionId],
           ...(purpose === "information"
