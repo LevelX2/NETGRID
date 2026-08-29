@@ -5060,9 +5060,9 @@
     },
     {
       "standardDeckId": "standard_corp_counter_shell",
-      "sourceDeckVersion": "1.0.0",
-      "sourceDeckHash": "standard-deck:09f24ad6",
-      "sourceAnalysisHash": "deck-analysis:ec79b836",
+      "sourceDeckVersion": "1.1.0",
+      "sourceDeckHash": "standard-deck:eaebcbde",
+      "sourceAnalysisHash": "deck-analysis:75cdffec",
       "reviewedAt": "2026-08-29",
       "analysis": {
         "primaryStrategyIds": [
@@ -5078,13 +5078,13 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:af654ea4",
+      "sourceAnalysisInputHash": "deck-analysis-input:c59b10fb",
       "contentByLocale": {
         "en": {
           "summary": "Counter Shell stores advancement counters on credible traps and Vapor Ops, then converts that prepared board into same-turn scores and efficient overadvance payoffs.",
           "deckIdea": "Counter Shell treats advancement counters as flexible capital. Virus Test Site and Vacant Soulkiller make early counters dangerous to access, while Vapor Ops safely banks counters for later. Once an agenda and a transfer effect line up, Falsified-Transactions Expert or Vapor Ops moves the stored counters onto the agenda for an immediate score. Team Restructuring advances the current agenda and a second trap or bank at the same time. Project Babylon converts excess counters directly into points; Project Zurich and Project Venice turn them into recurring economy or actions.",
           "gamePlan": {
-            "opening": "Protect the centrals with the cheap ICE mix and establish one purposeful counter remote. Prefer Vapor Ops when the remote is secure; prefer Virus Test Site when the access threat itself is useful. Do not spread advancement counters across cards without a trap, bank, or score conversion purpose.",
+            "opening": "Protect the centrals and the first scoring remote with real stopping ICE before expanding. Quandary supplies the cheap stop, while Fire Wall and Credit Blocks form the durable middle and upper rez curve; Snowbank and Misleading Access Menus are supplemental economy taxes, not reliable barriers. Establish one purposeful counter remote only after the essential servers are covered.",
             "midgame": "Force the Runner to choose between testing the advanced remote and respecting it. Preserve enough credits and actions to install an agenda and complete the counter handoff in the same turn. Team Restructuring is strongest when one counter closes the agenda gap and the other improves a real trap or bank.",
             "endgame": "Convert stored counters immediately when a safe scoring window appears. Use exact-fit transfers for ordinary agendas, but take free excess counters on Project Babylon, Project Zurich, or Project Venice when the same transfer already crosses an overadvance threshold. Information Laundering is the fallback cashout only when no credible score handoff remains."
           },
@@ -5097,7 +5097,7 @@
             {
               "cardId": "onr_v1_291_falsified-transactions-expert",
               "title": "Falsified-Transactions Expert",
-              "role": "Turns up to three counters from a prepared trap or bank into an immediate score conversion."
+              "role": "The two-copy bridge turns up to three counters from a prepared trap or bank into an immediate score conversion when that exact window appears."
             },
             {
               "cardId": "onr_v1_305_team-restructuring",
@@ -5123,10 +5123,11 @@
           "pilotingTips": [
             "Count the complete line before committing: agenda installation, transfer or placement costs, required clicks, and the free score window must all fit.",
             "Treat exposed or avoided traps as stored resources, not failed bluffs; preserve them until a score handoff or deliberate cashout is available.",
-            "Keep the counter source and the new agenda in different remotes so installing the agenda does not replace the bank."
+            "Keep the counter source and the new agenda in different remotes so installing the agenda does not replace the bank.",
+            "Use Snowbank and Misleading Access Menus to fund the real barriers; do not count their one-credit tax as protection for an agenda."
           ],
           "weaknesses": [
-            "Only ten ICE means every installation must have a clear central or scoring purpose; careless remote sprawl opens the deck quickly.",
+            "Eleven ICE is still a lean package. Protect HQ, R&D and one scoring remote first; careless remote sprawl can still expose the deck.",
             "The deck can draw traps, banks, or transfer operations in the wrong order. Annual Reviews and Night Shift help, but weak sequencing can strand several cards at once.",
             "Aggressive Runner pressure can force counters to remain damage deterrents instead of becoming points, while premature cashout removes the strongest score conversion resource."
           ]
@@ -5135,7 +5136,7 @@
           "summary": "Counter Shell speichert Advancement-Counter auf glaubwürdigen Traps und Vapor Ops und verwandelt diesen vorbereiteten Boardzustand später in Same-Turn-Scores und effiziente Overadvance-Payoffs.",
           "deckIdea": "Counter Shell behandelt Advancement-Counter als flexibles Kapital. Virus Test Site und Vacant Soulkiller machen frühe Counter beim Zugriff gefährlich, während Vapor Ops sie sicher für später lagert. Sobald Agenda und Transfer zusammenkommen, verschieben Falsified-Transactions Expert oder Vapor Ops die gespeicherten Counter auf die Agenda, die sofort gescort wird. Team Restructuring entwickelt zugleich die aktuelle Agenda und einen zweiten Trap oder eine Bank weiter. Project Babylon wandelt überschüssige Counter direkt in Punkte um; Project Zurich und Project Venice machen daraus dauerhafte Economy oder zusätzliche Aktionen.",
           "gamePlan": {
-            "opening": "Schütze die Zentralserver mit dem günstigen ICE-Mix und errichte genau ein Counter-Remote mit klarem Zweck. Bevorzuge Vapor Ops in einem sicheren Remote und Virus Test Site, wenn schon die Zugriffsdrohung wertvoll ist. Verteile Advancement-Counter nicht ohne Trap-, Bank- oder Scorekonversion.",
+            "opening": "Schütze Zentralserver und das erste Score-Remote zuerst mit echtem Stopper-ICE. Quandary liefert den günstigen Stopp, Fire Wall und Credit Blocks bilden die belastbare mittlere und obere Rez-Kurve; Snowbank und Misleading Access Menus sind ergänzende Economy-Taxes, keine verlässlichen Barrieren. Errichte erst danach genau ein Counter-Remote mit klarem Zweck.",
             "midgame": "Zwinge den Runner zur Entscheidung zwischen Testen und Respektieren des advanced Remotes. Bewahre genug Credits und Aktionen, um eine Agenda zu installieren und den Counter-Transfer im selben Zug abzuschließen. Team Restructuring ist am stärksten, wenn ein Counter die Agendalücke schließt und der zweite einen echten Trap oder eine Bank verbessert.",
             "endgame": "Konvertiere gespeicherte Counter sofort, sobald ein sicheres Scorefenster entsteht. Nutze für gewöhnliche Agendas möglichst die exakte Menge; nimm kostenlose Überschüsse auf Project Babylon, Project Zurich oder Project Venice mit, wenn derselbe Transfer ohnehin eine Overadvance-Schwelle erreicht. Information Laundering ist nur dann der Cashout, wenn keine glaubwürdige Scoreübergabe mehr besteht."
           },
@@ -5148,7 +5149,7 @@
             {
               "cardId": "onr_v1_291_falsified-transactions-expert",
               "title": "Falsified-Transactions Expert",
-              "role": "Verwandelt bis zu drei Counter eines vorbereiteten Traps oder einer Bank in eine unmittelbare Scorekonversion."
+              "role": "Die auf zwei Exemplare reduzierte Brückenkarte verwandelt bis zu drei Counter eines vorbereiteten Traps oder einer Bank in eine unmittelbare Scorekonversion, wenn genau dieses Fenster entsteht."
             },
             {
               "cardId": "onr_v1_305_team-restructuring",
@@ -5174,10 +5175,11 @@
           "pilotingTips": [
             "Zähle vor der Bindung die ganze Linie: Agendainstallation, Transfer- oder Platzierungskosten, benötigte Klicks und das kostenlose Scorefenster müssen gemeinsam passen.",
             "Behandle exposed oder gemiedene Traps als gespeicherte Ressource statt als gescheiterten Bluff; halte sie bis zur Scoreübergabe oder zu einem bewussten Cashout.",
-            "Halte Counterquelle und neue Agenda in getrennten Remotes, damit die Agendainstallation die Bank nicht ersetzt."
+            "Halte Counterquelle und neue Agenda in getrennten Remotes, damit die Agendainstallation die Bank nicht ersetzt.",
+            "Nutze Snowbank und Misleading Access Menus zur Finanzierung der echten Barrieren; rechne ihre Ein-Credit-Tax nicht als Agendaschutz."
           ],
           "weaknesses": [
-            "Nur zehn ICE bedeuten, dass jede Installation einen klaren Zweck für Zentralserver oder Scorelinie braucht; unbedachte Remote-Ausbreitung öffnet das Deck schnell.",
+            "Elf ICE bleiben ein schlankes Paket. Schütze zuerst HQ, R&D und genau ein Score-Remote; unbedachte Remote-Ausbreitung kann das Deck weiterhin öffnen.",
             "Traps, Banken und Transferoperationen können in der falschen Reihenfolge erscheinen. Annual Reviews und Night Shift helfen, doch schwaches Sequencing kann mehrere Karten zugleich stranden lassen.",
             "Aggressiver Runnerdruck kann erzwingen, dass Counter Schadensdrohung statt Punktressource bleiben; ein vorschneller Cashout entfernt dagegen die stärkste Scorekonversion."
           ]
