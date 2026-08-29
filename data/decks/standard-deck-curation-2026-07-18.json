@@ -9,7 +9,7 @@
   },
   "localDeckLibrary": {
     "counts": {
-      "standard": 48,
+      "standard": 49,
       "internal_ai": 2,
       "retire": 1,
       "test_fixture": 10
@@ -461,6 +461,14 @@
         "classification": "standard",
         "reason": "ai_playtest_derived",
         "standardDeckId": "standard_corp_dead_channel"
+      },
+      {
+        "sourceDeckId": "local_corp_counter_shell",
+        "name": "Counter Shell",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_corp_counter_shell"
       },
       {
         "sourceDeckId": "local_runner_unused_resource_cybernetics_lab",

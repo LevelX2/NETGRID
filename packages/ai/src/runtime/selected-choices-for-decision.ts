@@ -1018,6 +1018,7 @@ export function selectedChoicesForDecision(
       scoreBinding.targetCardId,
       undefined,
       scoreBinding.move,
+      scoreBinding.placement,
     );
     return resolved(
       selected ? [selected] : [],
@@ -3139,10 +3140,7 @@ function selectedCorpAgendaPurgeInstallTargetOptionIds(
   const targetServerIds = input.playerView.servers.map((server) => server.id);
   const allowedTargetServerIds = new Set([...targetServerIds, "new_remote"]);
   const revealedIdSet = new Set(revealedIds);
-  const optionsByCardId = new Map<
-    string,
-    Map<string, PendingChoiceOptions>
-  >();
+  const optionsByCardId = new Map<string, Map<string, PendingChoiceOptions>>();
   let optionsAreExact = selectableOptions.length > 0;
   for (const option of selectableOptions) {
     const valueParts =
@@ -3161,8 +3159,7 @@ function selectedCorpAgendaPurgeInstallTargetOptionIds(
       continue;
     }
     const optionsByServerId =
-      optionsByCardId.get(cardId) ??
-      new Map<string, PendingChoiceOptions>();
+      optionsByCardId.get(cardId) ?? new Map<string, PendingChoiceOptions>();
     const variants = optionsByServerId.get(serverId) ?? [];
     if (
       variants.some((variant) => {
@@ -3330,6 +3327,9 @@ function residentCorpScoreChoiceBinding(
   planInstanceId: string;
   targetCardId: string;
   move?: { sourceCardId: string; targetCardId: string; amount: number };
+  placement?: {
+    placements: Array<{ targetCardId: string; amount: number }>;
+  };
 } {
   const portfolio = residentPlanPortfolioSnapshot(input);
   const executor = portfolio?.instances.find(
@@ -3349,6 +3349,7 @@ function residentCorpScoreChoiceBinding(
           targetCardId?: unknown;
           sourceCardId?: unknown;
           amount?: unknown;
+          placements?: unknown;
         };
       }
     | undefined;
@@ -3371,6 +3372,21 @@ function residentCorpScoreChoiceBinding(
           targetCardId,
           amount: continuation.amount,
         }
+      : undefined;
+  const placement =
+    !isMoveChoice &&
+    Array.isArray(continuation?.placements) &&
+    continuation.placements.every(
+      (entry): entry is { targetCardId: string; amount: number } =>
+        entry !== null &&
+        typeof entry === "object" &&
+        typeof (entry as { targetCardId?: unknown }).targetCardId ===
+          "string" &&
+        typeof (entry as { amount?: unknown }).amount === "number" &&
+        Number.isInteger((entry as { amount: number }).amount) &&
+        (entry as { amount: number }).amount > 0,
+    )
+      ? { placements: continuation.placements }
       : undefined;
   const exactContinuation =
     portfolio !== undefined &&
@@ -3395,10 +3411,17 @@ function residentCorpScoreChoiceBinding(
             option.value ===
             `${move.sourceCardId}|${move.targetCardId}|${move.amount}`,
         )
-      : !isMoveChoice &&
-        selectableOptions.some((option) =>
-          advancementChoiceOptionTargetsCard(option.value, targetCardId),
-        ));
+      : placement
+        ? selectableOptions.some((option) =>
+            advancementChoiceOptionMatchesPlacements(
+              option.value,
+              placement.placements,
+            ),
+          )
+        : !isMoveChoice &&
+          selectableOptions.some((option) =>
+            advancementChoiceOptionTargetsCard(option.value, targetCardId),
+          ));
   if (!exactContinuation || !executor || !targetCardId) {
     throw new PlanResolutionFailure("window_origin_missing", {
       side: input.side,
@@ -3415,6 +3438,7 @@ function residentCorpScoreChoiceBinding(
     planInstanceId: executor.instanceId,
     targetCardId,
     ...(move ? { move } : {}),
+    ...(placement ? { placement } : {}),
   };
 }
 
@@ -3922,6 +3946,26 @@ function advancementChoiceOptionTargetsCard(
       Number(amount) > 0
     );
   });
+}
+
+function advancementChoiceOptionMatchesPlacements(
+  value: PendingChoiceOptions[number]["value"],
+  placements: Array<{ targetCardId: string; amount: number }>,
+): boolean {
+  if (typeof value !== "string" || !value.includes(":")) return false;
+  const valueSignature = value
+    .split("|")
+    .map((placement) => {
+      const [cardId, amount] = placement.split(":");
+      return `${cardId}:${Number(amount)}`;
+    })
+    .sort()
+    .join("|");
+  const plannedSignature = placements
+    .map((placement) => `${placement.targetCardId}:${placement.amount}`)
+    .sort()
+    .join("|");
+  return valueSignature === plannedSignature;
 }
 
 function runnerStrategicSearchTarget(

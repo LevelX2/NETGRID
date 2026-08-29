@@ -114,12 +114,12 @@ describe("deck validation and snapshots", () => {
     const localCuration = standardDeckCurationData.localDeckLibrary;
     const projectCuration = standardDeckCurationData.projectSnapshots;
 
-    expect(entries).toHaveLength(48);
+    expect(entries).toHaveLength(49);
     expect(new Set(entries.map((entry) => entry.standardDeckId)).size).toBe(
       entries.length,
     );
     expect(localCuration.counts).toEqual({
-      standard: 48,
+      standard: 49,
       internal_ai: 2,
       retire: 1,
       test_fixture: 10,
@@ -197,6 +197,58 @@ describe("deck validation and snapshots", () => {
         ).toBeLessThanOrEqual(range.maximum);
       }
     }
+  });
+
+  it("keeps Counter Shell on its exact 45-card and 20-point list", () => {
+    const runtimeCardsById = createRuntimeCardsById();
+    const entry = (
+      standardDeckCatalogData.decks as StandardDeckCatalogEntry[]
+    ).find(
+      (candidate) => candidate.standardDeckId === "standard_corp_counter_shell",
+    );
+
+    expect(entry).toMatchObject({
+      version: "1.0.0",
+      name: "Counter Shell",
+      side: "corp",
+      cardPoolVersion: "private-local-onr-v1-plus-proteus-playtest",
+      formatProfileId: "netgrid_private_local_proteus_playtest_v1",
+    });
+    expect(entry?.cards).toEqual([
+      { cardId: "onr_v1_214_project-babylon", quantity: 3 },
+      { cardId: "onr_proteus_008_project-zurich", quantity: 3 },
+      { cardId: "onr_proteus_007_project-venice", quantity: 2 },
+      { cardId: "onr_v1_199_employee-empowerment", quantity: 2 },
+      { cardId: "onr_v1_203_hostile-takeover", quantity: 1 },
+      { cardId: "onr_v1_291_falsified-transactions-expert", quantity: 3 },
+      { cardId: "onr_v1_305_team-restructuring", quantity: 3 },
+      { cardId: "onr_v1_347_vapor-ops", quantity: 3 },
+      { cardId: "onr_v1_348_virus-test-site", quantity: 3 },
+      { cardId: "onr_v1_346_vacant-soulkiller", quantity: 1 },
+      { cardId: "onr_v1_328_information-laundering", quantity: 1 },
+      { cardId: "onr_v1_312_chicago-branch", quantity: 1 },
+      { cardId: "onr_proteus_062_lesley-major", quantity: 1 },
+      { cardId: "onr_v1_290_efficiency-experts", quantity: 3 },
+      { cardId: "onr_v1_295_night-shift", quantity: 2 },
+      { cardId: "onr_v1_282_annual-reviews", quantity: 2 },
+      { cardId: "onr_v1_281_accounts-receivable", quantity: 1 },
+      { cardId: "onr_proteus_038_snowbank", quantity: 3 },
+      { cardId: "onr_proteus_032_misleading-access-menus", quantity: 3 },
+      { cardId: "onr_proteus_017_credit-blocks", quantity: 2 },
+      { cardId: "onr_v1_245_fire-wall", quantity: 2 },
+    ]);
+    expect(entry?.cards.reduce((total, card) => total + card.quantity, 0)).toBe(
+      45,
+    );
+    expect(
+      entry?.cards.reduce(
+        (total, card) =>
+          total +
+          card.quantity *
+            (runtimeCardsById[card.cardId]?.numeric.agendaPoints ?? 0),
+        0,
+      ),
+    ).toBe(20);
   });
 
   it("keeps Ghost Circuit v2 on its exact Originalset stealth recon list", () => {

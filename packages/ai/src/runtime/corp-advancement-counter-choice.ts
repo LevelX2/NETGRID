@@ -15,10 +15,26 @@ export function selectedCorpAdvancementCounterChoiceOptionId(
     targetCardId: string;
     amount: number;
   },
+  plannedPlacement?: {
+    placements: Array<{ targetCardId: string; amount: number }>;
+  },
 ): string | undefined {
   if (plannedMove) {
     const exactValue = `${plannedMove.sourceCardId}|${plannedMove.targetCardId}|${plannedMove.amount}`;
     return selectableOptions.find((option) => option.value === exactValue)?.id;
+  }
+  if (plannedPlacement) {
+    return selectableOptions.find(
+      (option) =>
+        typeof option.value === "string" &&
+        sameAdvancementPlacements(
+          advancementPlacements(option.value),
+          plannedPlacement.placements.map((placement) => ({
+            cardId: placement.targetCardId,
+            amount: placement.amount,
+          })),
+        ),
+    )?.id;
   }
   return selectableOptions
     .map((option) => ({
@@ -35,6 +51,18 @@ export function selectedCorpAdvancementCounterChoiceOptionId(
         right.score - left.score ||
         left.option.id.localeCompare(right.option.id, "de"),
     )[0]?.option.id;
+}
+
+function sameAdvancementPlacements(
+  left: Array<{ cardId: string; amount: number }>,
+  right: Array<{ cardId: string; amount: number }>,
+): boolean {
+  const signature = (placements: Array<{ cardId: string; amount: number }>) =>
+    placements
+      .map((placement) => `${placement.cardId}:${placement.amount}`)
+      .sort()
+      .join("|");
+  return signature(left) === signature(right);
 }
 
 function corpAdvancementCounterChoiceScore(

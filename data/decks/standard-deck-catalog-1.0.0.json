@@ -5590,6 +5590,109 @@
         "sourceDeckId": "local_corp_dead_channel",
         "sourceDeckVersion": "1.1.0-ai-playtest"
       }
+    },
+    {
+      "standardDeckId": "standard_corp_counter_shell",
+      "version": "1.0.0",
+      "status": "active",
+      "name": "Counter Shell",
+      "side": "corp",
+      "identityCardId": "corp_identity_001",
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
+      "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
+      "formatProfileVersion": "1.0.0",
+      "cards": [
+        {
+          "cardId": "onr_v1_214_project-babylon",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_proteus_008_project-zurich",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_proteus_007_project-venice",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_199_employee-empowerment",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_203_hostile-takeover",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_291_falsified-transactions-expert",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_305_team-restructuring",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_347_vapor-ops",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_348_virus-test-site",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_346_vacant-soulkiller",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_328_information-laundering",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_312_chicago-branch",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_062_lesley-major",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_290_efficiency-experts",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_295_night-shift",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_282_annual-reviews",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_281_accounts-receivable",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_038_snowbank",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_proteus_032_misleading-access-menus",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_proteus_017_credit-blocks",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_245_fire-wall",
+          "quantity": 2
+        }
+      ],
+      "source": {
+        "kind": "curated_local_deck",
+        "sourceDeckId": "local_corp_counter_shell",
+        "sourceDeckVersion": "1.0.0-user-curated-2026-08-29"
+      }
     }
   ]
 }

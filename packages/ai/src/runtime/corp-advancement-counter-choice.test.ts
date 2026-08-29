@@ -105,6 +105,41 @@ describe("selectedCorpAdvancementCounterChoiceOptionId", () => {
       ),
     ).toBe("planned_exact_fit");
   });
+
+  it("completes the exact two-target placement bound by the score plan", () => {
+    const agenda = card("agenda", "simple_agenda", {
+      type: "agenda",
+      advancementRequirement: 4,
+    });
+    const bank = card("bank", "onr_v1_348_virus-test-site", {
+      advancementCounters: 3,
+    });
+    const input = decisionInput([agenda, bank]);
+    const options = [
+      { id: "agenda-only", label: "Agenda", value: "agenda:1" },
+      {
+        id: "agenda-and-bank",
+        label: "Agenda und Bank",
+        value: "bank:1|agenda:1",
+      },
+    ];
+
+    expect(
+      selectedCorpAdvancementCounterChoiceOptionId(
+        input,
+        options as never,
+        agenda.instanceId,
+        undefined,
+        undefined,
+        {
+          placements: [
+            { targetCardId: agenda.instanceId, amount: 1 },
+            { targetCardId: bank.instanceId, amount: 1 },
+          ],
+        },
+      ),
+    ).toBe("agenda-and-bank");
+  });
 });
 
 function card(

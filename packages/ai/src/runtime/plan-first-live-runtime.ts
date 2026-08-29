@@ -2717,6 +2717,7 @@ function bindSelectedCorpScoreChoiceContinuation(
             sourceCardId?: unknown;
             targetCardId?: unknown;
             amount?: unknown;
+            placements?: unknown;
           };
         };
         choiceContinuation?: {
@@ -2726,6 +2727,7 @@ function bindSelectedCorpScoreChoiceContinuation(
           targetCardId?: unknown;
           sourceCardId?: unknown;
           amount?: unknown;
+          placements?: unknown;
           freeRezChoiceBinding?: unknown;
           iceMarkChoiceBinding?: unknown;
           hqAgendaShuffleChoiceBinding?: unknown;
@@ -2755,12 +2757,20 @@ function bindSelectedCorpScoreChoiceContinuation(
       typeof moveBinding.amount === "number" &&
       Number.isInteger(moveBinding.amount) &&
       moveBinding.amount > 0);
+  const exactPlacementBinding =
+    result.route.head.semanticActionType !==
+      "score_conversion.place_advancement" ||
+    moveBinding === undefined ||
+    (moveBinding.kind === "place_advancement" &&
+      Array.isArray(moveBinding.placements) &&
+      moveBinding.placements.length > 0);
   if (
     !executor ||
     moduleState?.kind !== "score" ||
     !targetCardId ||
     !exactScoreAction ||
-    !exactMoveBinding
+    !exactMoveBinding ||
+    !exactPlacementBinding
   ) {
     throw new PlanResolutionFailure("window_origin_missing", {
       side: input.side,
@@ -2829,6 +2839,10 @@ function bindSelectedCorpScoreChoiceContinuation(
           sourceCardId: moveBinding.sourceCardId,
           amount: moveBinding.amount,
         }
+      : {}),
+    ...(moveBinding?.kind === "place_advancement" &&
+    Array.isArray(moveBinding.placements)
+      ? { placements: moveBinding.placements }
       : {}),
     ...(freeRezProfile && freeRezTarget
       ? {
@@ -9370,13 +9384,17 @@ function runnerHeapRecoveryActionContract(
   const action = input.legalActions.find(
     (entry) => entry.actionId === candidate.actionId,
   );
-  if (action?.payload?.cardImplementationEffectKind === "search_trash_to_grip") {
+  if (
+    action?.payload?.cardImplementationEffectKind === "search_trash_to_grip"
+  ) {
     const searchFilter = action.payload.cardImplementationSearchFilter;
     return searchFilter === "program" || searchFilter === "any_card"
       ? { searchFilter }
       : undefined;
   }
-  if (action?.payload?.cardImplementationEffectKind !== "move_top_trash_to_grip")
+  if (
+    action?.payload?.cardImplementationEffectKind !== "move_top_trash_to_grip"
+  )
     return undefined;
   const exactTargetCardId =
     typeof action.payload.cardImplementationTopTrashTargetId === "string"
@@ -16807,6 +16825,26 @@ function sameTurnScoreConversionProjectForCandidate(
             },
           }
         : {}),
+      ...(step.kind === "place_advancement" &&
+      step.offTargetCardId !== undefined &&
+      step.offTargetAdvancementAmount !== undefined &&
+      step.offTargetAdvancementAmount > 0
+        ? {
+            advancementCounterChoiceBinding: {
+              kind: "place_advancement" as const,
+              placements: [
+                {
+                  targetCardId: step.targetCardId,
+                  amount: step.advancementAmount,
+                },
+                {
+                  targetCardId: step.offTargetCardId,
+                  amount: step.offTargetAdvancementAmount,
+                },
+              ],
+            },
+          }
+        : {}),
       ...(preventsTerminalSteal ? { preventsTerminalSteal: true } : {}),
       feasible: true,
       evidenceCode: preventsTerminalSteal
@@ -18530,10 +18568,7 @@ function corpEconomyDevelopmentCampaigns(
       const targetServerId =
         currentServerId ?? corpEconomyCampaignTargetServerId(input, candidate);
       if (!targetServerId) continue;
-      if (
-        phase === "install" &&
-        reservedScoreServerIds.has(targetServerId)
-      ) {
+      if (phase === "install" && reservedScoreServerIds.has(targetServerId)) {
         continue;
       }
       const setupCreditCost =
@@ -26702,11 +26737,7 @@ function coverageSupportActionIds(
       sourceDefinitionId !== undefined &&
       searchToolIds.has(sourceDefinitionId) &&
       candidate.semanticActionType !== "install.card" &&
-      runnerCoverageSearchTargetIsPayable(
-        input,
-        candidate,
-        targetBreaker,
-      )
+      runnerCoverageSearchTargetIsPayable(input, candidate, targetBreaker)
     );
   });
   const stackSearchCandidates = deckHasStackAnswer
@@ -26893,8 +26924,7 @@ function runnerCoverageSearchTargetIsPayable(
     0,
   );
   return (
-    input.playerView.own.credits >=
-    sourceCreditCost + targetBreaker.installCost
+    input.playerView.own.credits >= sourceCreditCost + targetBreaker.installCost
   );
 }
 

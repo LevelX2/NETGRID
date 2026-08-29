@@ -595,6 +595,75 @@ describe("Corp same-turn score conversion", () => {
     ).toMatchObject({ actionId: "falsified", sourceCardId: "funded" });
   });
 
+  it("executes the Counter Shell Team plus Falsified difficulty-four score line", () => {
+    const agenda = card("project-venice", "agenda", {
+      advancementRequirement: 4,
+    });
+    const counterBankAsset = counterBank("virus-test-site", 3);
+    const team = placement("team-restructuring", 2);
+    team.payload!.scoreConversionAdvancementMode =
+      "up_to_distinct_targets_one_each";
+    team.costs = [{ clicks: 1, credits: 1 }];
+    const input = corpInput({
+      clicks: 3,
+      credits: 1,
+      hq: [agenda],
+      root: [counterBankAsset],
+      actions: [
+        action("install-venice", "install_card", agenda.instanceId, {
+          serverId: "new_remote",
+          placement: "root",
+        }),
+        team,
+        action(
+          "falsified-transactions",
+          "play_operation",
+          "falsified-transactions",
+          {
+            scoreConversionCapability: "move_advancement",
+            scoreConversionAdvancementMaximum: 3,
+            scoreConversionSourceMode: "chosen_card",
+            scoreConversionTargetMode: "chosen_installed_advanceable_card",
+            scoreConversionTiming: "immediate",
+          },
+        ),
+      ],
+    });
+
+    const path = bestCorpSameTurnScoreConversionPath(input);
+
+    expect(path).toMatchObject({
+      agendaCardId: agenda.instanceId,
+      clicksRequired: 3,
+      creditsRequired: 1,
+      desiredAdvancementCounters: 4,
+      sameTurnGuaranteed: true,
+      reservedAdvancementCounters: { [counterBankAsset.instanceId]: 3 },
+    });
+    expect(path?.steps.map((step) => step.kind)).toEqual([
+      "install_score_target",
+      "place_advancement",
+      "move_advancement",
+      "score_ready",
+    ]);
+    expect(
+      path?.steps.find((step) => step.kind === "place_advancement"),
+    ).toMatchObject({
+      actionId: "team-restructuring",
+      advancementAmount: 1,
+      offTargetAdvancementAmount: 1,
+      offTargetCardId: counterBankAsset.instanceId,
+    });
+    expect(
+      path?.steps.find((step) => step.kind === "move_advancement"),
+    ).toMatchObject({
+      actionId: "falsified-transactions",
+      sourceCardId: counterBankAsset.instanceId,
+      targetCardId: agenda.instanceId,
+      advancementAmount: 3,
+    });
+  });
+
   it("preserves a score-ready agenda by sourcing Falsified Transactions from an asset", () => {
     const target = card("target", "agenda", { advancementRequirement: 3 });
     const scoreReadySource = card("ready-source", "agenda", {

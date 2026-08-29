@@ -120,13 +120,18 @@ export type CorpScoreProjectSignal = {
     runnerStealIsMatchpoint: boolean;
     realizedStrategySupportCount: number;
   };
-  /** Exact route selected by corp.score_agenda for a move-counter choice. */
-  advancementCounterChoiceBinding?: {
-    kind: "move_advancement";
-    sourceCardId: string;
-    targetCardId: string;
-    amount: number;
-  };
+  /** Exact route selected by corp.score_agenda for an advancement choice. */
+  advancementCounterChoiceBinding?:
+    | {
+        kind: "move_advancement";
+        sourceCardId: string;
+        targetCardId: string;
+        amount: number;
+      }
+    | {
+        kind: "place_advancement";
+        placements: Array<{ targetCardId: string; amount: number }>;
+      };
   /**
    * Published only by corp.score_agenda from an Engine continuation quote.
    * corp.defend_servers may preserve this request but must never reconstruct it.

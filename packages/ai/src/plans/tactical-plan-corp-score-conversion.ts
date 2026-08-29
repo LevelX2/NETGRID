@@ -31,6 +31,8 @@ export type CorpScoreConversionStep = {
   targetCardId: string;
   targetServerId: string;
   advancementAmount: number;
+  offTargetAdvancementAmount?: number;
+  offTargetCardId?: string;
   sourceOpportunityCost?: number;
   clickCost: number;
   creditCost: number;
@@ -66,6 +68,7 @@ type ConversionCapability = {
   action?: LegalAction;
   capabilityId: string;
   amount: number;
+  offTargetAdvancementAmount?: number;
   sourceCardId?: string;
   sourceOpportunityCost?: number;
   clickCost: number;
@@ -390,12 +393,21 @@ function conversionCapabilities(
         );
         const mode = stringPayload(action, "scoreConversionAdvancementMode");
         if (!amount || amount <= 0) return [];
+        const targetAmount =
+          mode === "up_to_distinct_targets_one_each" ? 1 : amount;
+        const offTargetAdvancementAmount =
+          mode === "up_to_distinct_targets_one_each"
+            ? Math.max(0, amount - targetAmount)
+            : 0;
         return [
           {
             kind: "place_advancement" as const,
             action,
             capabilityId: action.actionId,
-            amount: mode === "up_to_distinct_targets_one_each" ? 1 : amount,
+            amount: targetAmount,
+            ...(offTargetAdvancementAmount > 0
+              ? { offTargetAdvancementAmount }
+              : {}),
             clickCost: actionCost(action, "clicks"),
             creditCost: actionCost(action, "credits"),
             projected: false,
@@ -493,22 +505,34 @@ function conversionCapabilities(
         hint.quality?.hintReviewed !== true
       )
         return [];
-      const amount = Math.max(
-        0,
-        ...(hint.effects ?? [])
-          .filter(
-            (effect) =>
-              effect.timing === "action" &&
-              effect.resource === "advancement_counters" &&
-              (effect.kind === "advance_burst" ||
-                effect.kind === "score_acceleration"),
-          )
-          .map((effect) =>
+      const placement = (hint.effects ?? [])
+        .filter(
+          (effect) =>
+            effect.timing === "action" &&
+            effect.resource === "advancement_counters" &&
+            (effect.kind === "advance_burst" ||
+              effect.kind === "score_acceleration"),
+        )
+        .map((effect) => {
+          const totalAmount = Math.max(0, effect.amount ?? 0);
+          const targetAmount =
             effect.target === "advance.up_to_distinct_targets_one_each"
-              ? Math.min(1, effect.amount ?? 0)
-              : (effect.amount ?? 0),
-          ),
-      );
+              ? Math.min(1, totalAmount)
+              : totalAmount;
+          return {
+            targetAmount,
+            offTargetAdvancementAmount:
+              effect.target === "advance.up_to_distinct_targets_one_each"
+                ? Math.max(0, totalAmount - targetAmount)
+                : 0,
+          };
+        })
+        .sort(
+          (left, right) =>
+            right.targetAmount - left.targetAmount ||
+            right.offTargetAdvancementAmount - left.offTargetAdvancementAmount,
+        )[0];
+      const amount = placement?.targetAmount ?? 0;
       if (amount <= 0) return [];
       const creditCost = visibleCardCost(card);
       if (creditCost === undefined) return [];
@@ -517,6 +541,12 @@ function conversionCapabilities(
           kind: "place_advancement",
           capabilityId: `projected:${card.instanceId}:place_advancement`,
           amount,
+          ...(placement && placement.offTargetAdvancementAmount > 0
+            ? {
+                offTargetAdvancementAmount:
+                  placement.offTargetAdvancementAmount,
+              }
+            : {}),
           sourceCardId: card.instanceId,
           clickCost: 1,
           creditCost,
@@ -717,23 +747,30 @@ function completedPath(
   initialCounters: number,
   steps: CorpScoreConversionStep[],
 ): CandidatePath {
-  const advancementAdded = steps.reduce(
+  const boundSteps = bindOffTargetAdvancementSteps(input, steps);
+  const advancementAdded = boundSteps.reduce(
     (sum, step) => sum + step.advancementAmount,
     0,
   );
   const reservedAdvancementCounters: Record<string, number> = {};
-  for (const step of steps) {
+  for (const step of boundSteps) {
     if (step.kind !== "move_advancement" || !step.sourceCardId) continue;
     reservedAdvancementCounters[step.sourceCardId] =
       (reservedAdvancementCounters[step.sourceCardId] ?? 0) +
       step.advancementAmount;
   }
-  const clicksRequired = steps.reduce((sum, step) => sum + step.clickCost, 0);
-  const clicksGenerated = steps.reduce(
+  const clicksRequired = boundSteps.reduce(
+    (sum, step) => sum + step.clickCost,
+    0,
+  );
+  const clicksGenerated = boundSteps.reduce(
     (sum, step) => sum + step.generatedClicks,
     0,
   );
-  const creditsRequired = steps.reduce((sum, step) => sum + step.creditCost, 0);
+  const creditsRequired = boundSteps.reduce(
+    (sum, step) => sum + step.creditCost,
+    0,
+  );
   const overadvance = Math.max(
     0,
     initialCounters + advancementAdded - requirement,
@@ -762,7 +799,7 @@ function completedPath(
     reservedAdvancementCounters,
     ...(overadvanceReason ? { overadvanceReason } : {}),
     sameTurnGuaranteed: true,
-    steps,
+    steps: boundSteps,
     evidence: [
       "corp_score_conversion_path:true",
       "corp_score_conversion_same_turn_guaranteed:true",
@@ -785,6 +822,65 @@ function completedPath(
     overadvance,
     rewardedOveradvance,
   };
+}
+
+function bindOffTargetAdvancementSteps(
+  input: AiDecisionInput,
+  steps: readonly CorpScoreConversionStep[],
+): CorpScoreConversionStep[] {
+  const advanceableSourceIds = new Set(
+    input.playerView.servers.flatMap((server) =>
+      server.root.flatMap((card) => {
+        const isAgenda = card.type === "agenda";
+        const hasCounterBankQuote =
+          readCorpCounterBankPreparationQuote(
+            input,
+            card,
+            "installed_root",
+            server.id,
+          ) !== undefined;
+        return isAgenda || hasCounterBankQuote ? [card.instanceId] : [];
+      }),
+    ),
+  );
+  const reservedSourceIds = steps
+    .filter(
+      (step) =>
+        step.kind === "move_advancement" &&
+        step.sourceCardId !== undefined &&
+        advanceableSourceIds.has(step.sourceCardId),
+    )
+    .map((step) => step.sourceCardId!);
+
+  return steps.map((step) => {
+    if (step.kind !== "place_advancement" || !step.offTargetAdvancementAmount) {
+      return step;
+    }
+    const offTargetCardId = reservedSourceIds.find(
+      (sourceCardId) => sourceCardId !== step.targetCardId,
+    );
+    if (offTargetCardId) {
+      return {
+        ...step,
+        offTargetCardId,
+        evidence: [
+          ...step.evidence,
+          `score_conversion_off_target_card:${offTargetCardId}`,
+        ],
+      };
+    }
+    const {
+      offTargetAdvancementAmount: _unusedOffTargetAmount,
+      ...withoutOffTarget
+    } = step;
+    return {
+      ...withoutOffTarget,
+      evidence: step.evidence.filter(
+        (entry) =>
+          !entry.startsWith("score_conversion_off_target_advancement_amount:"),
+      ),
+    };
+  });
 }
 
 function visibleAgendaPoints(
@@ -841,6 +937,11 @@ function conversionStep(
     targetCardId: target.card.instanceId,
     targetServerId: target.serverId,
     advancementAmount: amount,
+    ...(capability.offTargetAdvancementAmount !== undefined
+      ? {
+          offTargetAdvancementAmount: capability.offTargetAdvancementAmount,
+        }
+      : {}),
     ...(capability.sourceOpportunityCost !== undefined
       ? { sourceOpportunityCost: capability.sourceOpportunityCost }
       : {}),
@@ -850,6 +951,11 @@ function conversionStep(
     evidence: [
       `score_conversion:${capability.kind}`,
       `score_conversion_advancement_amount:${amount}`,
+      ...(capability.offTargetAdvancementAmount !== undefined
+        ? [
+            `score_conversion_off_target_advancement_amount:${capability.offTargetAdvancementAmount}`,
+          ]
+        : []),
       ...(capability.projected
         ? ["score_conversion:projected_from_visible_hand"]
         : []),
@@ -1034,12 +1140,23 @@ function comparePaths(
     (sum, step) => sum + (step.sourceOpportunityCost ?? 0),
     0,
   );
+  const leftOffTargetAdvancement = left.steps.reduce(
+    (sum, step) =>
+      sum + (step.offTargetCardId ? (step.offTargetAdvancementAmount ?? 0) : 0),
+    0,
+  );
+  const rightOffTargetAdvancement = right.steps.reduce(
+    (sum, step) =>
+      sum + (step.offTargetCardId ? (step.offTargetAdvancementAmount ?? 0) : 0),
+    0,
+  );
   return (
     right.agendaPoints - left.agendaPoints ||
     left.steps.length - right.steps.length ||
     left.creditsRequired - right.creditsRequired ||
     leftNetClicks - rightNetClicks ||
     leftSourceOpportunityCost - rightSourceOpportunityCost ||
+    rightOffTargetAdvancement - leftOffTargetAdvancement ||
     rightRewarded - leftRewarded ||
     leftOveradvance - rightOveradvance ||
     left.agendaCardId.localeCompare(right.agendaCardId) ||
