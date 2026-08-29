@@ -256,6 +256,12 @@ export function buildCorpMainActions(
           cardId: offer.sourceCardInstanceId,
           sourceDefinitionId: offer.sourceDefinitionId,
           restrictedActionFamily: offer.restriction,
+          scoreConversionCapability: "gain_action_capacity",
+          gainActionsAmount: 1,
+          actionCapacityTiming: "immediate",
+          actionCapacityReliability: "guaranteed",
+          actionCapacityExpiresAt: "side_turn_end",
+          ...optionalExtraActionOfferProjection(offer.restriction),
           ...(offer.dieRoll ? { dieRoll: offer.dieRoll } : {}),
         },
       ),
@@ -889,6 +895,39 @@ export function buildCorpMainActions(
     );
   }
   return filterActionsForRestrictedExtraActions(state, "corp", actions);
+}
+
+function optionalExtraActionOfferProjection(
+  restriction: NonNullable<GameState["actionEconomy"]>["pendingOffer"] extends
+    | { restriction: infer Restriction }
+    | undefined
+    ? Restriction
+    : never,
+): {
+  actionCapacityRestriction: "unrestricted" | "install_only" | "run_only";
+  actionCapacityAllowedActionType?: string;
+} {
+  if (restriction === "corp_install")
+    return {
+      actionCapacityRestriction: "install_only",
+      actionCapacityAllowedActionType: "install_card",
+    };
+  if (restriction === "gain_credit")
+    return {
+      actionCapacityRestriction: "unrestricted",
+      actionCapacityAllowedActionType: "gain_credit",
+    };
+  if (restriction === "draw_card")
+    return {
+      actionCapacityRestriction: "unrestricted",
+      actionCapacityAllowedActionType: "draw_card",
+    };
+  if (restriction === "start_run" || restriction === "start_run_remote")
+    return {
+      actionCapacityRestriction: "run_only",
+      actionCapacityAllowedActionType: "start_run",
+    };
+  return { actionCapacityRestriction: "unrestricted" };
 }
 
 function cardImplementationOwnsCorpOperationLegalActionProjection(

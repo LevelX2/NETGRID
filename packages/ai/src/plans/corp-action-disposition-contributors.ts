@@ -251,6 +251,19 @@ function contributeCorpActionDispositionForCandidate(
   ) => void,
   facts: CorpActionDispositionContributorFacts,
 ): void {
+  const optionalActionCapacitySignal = domain.economyNeeds.find(
+    (signal) =>
+      signal.kind === "resolve_optional_action_capacity_offer" &&
+      signal.rejectedActionId === candidate.actionId,
+  );
+  if (optionalActionCapacitySignal) {
+    add(
+      candidate.actionId,
+      "corp.economy",
+      "corp_optional_action_capacity_unselected_offer_route_is_nonproductive",
+    );
+    return;
+  }
   const deckoutHorizonDisposition = corpVoluntaryDrawDeckoutHorizonDisposition(
     input,
     candidate,
