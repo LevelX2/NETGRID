@@ -45,6 +45,18 @@ export type ChronicleContext = {
   turnSide?: Side | null;
   runServerLabel?: string | null;
   actionUse?: ChronicleActionUse | null;
+  accessContext?: ChronicleAccessContext | null;
+};
+
+export type ChronicleAccessContext = {
+  number: number;
+  total: number;
+  serverLabel?: string;
+};
+
+export type ChronicleAccessOutcomePlan = {
+  suppressedAccessEventIds: ReadonlySet<string>;
+  accessContextByOutcomeEventId: Record<string, ChronicleAccessContext>;
 };
 
 export type ChronicleTranslate = (
@@ -107,6 +119,82 @@ const VIRAL_15_ID = "onr_v1_276_viral-15";
 const PLAYFUL_AI_ID = "onr_v1_104_playful-ai";
 const GYPSY_SCHEDULE_ANALYZER_ID = "onr_classic_038_gypsytm-schedule-analyzer";
 const EMPTY_EVENT_ID_SET: ReadonlySet<string> = new Set();
+
+export function chronicleAccessOutcomePlan(
+  events: PublicGameEvent[],
+): ChronicleAccessOutcomePlan {
+  const suppressedAccessEventIds = new Set<string>();
+  const accessContextByOutcomeEventId: Record<string, ChronicleAccessContext> =
+    {};
+  let pendingAccess: PublicGameEvent | undefined;
+
+  for (const event of events) {
+    const payload = event.publicPayload ?? {};
+    const actionType = stringValue(payload.actionType) ?? event.type;
+    if (actionType === "access_card") {
+      pendingAccess = event;
+      continue;
+    }
+    if (actionType === "decline_trash") {
+      pendingAccess = undefined;
+      continue;
+    }
+    if (actionType !== "steal_agenda" && actionType !== "trash_accessed_card")
+      continue;
+    if (!pendingAccess || !accessOutcomeMatches(pendingAccess, event)) continue;
+
+    const accessPayload = pendingAccess.publicPayload ?? {};
+    const accessIndex = numberValue(accessPayload.accessIndex);
+    const effectiveAccessCount = positiveIntegerValue(
+      accessPayload.effectiveAccessCount,
+    );
+    const number =
+      accessIndex !== undefined && accessIndex >= 0
+        ? Math.floor(accessIndex) + 1
+        : 1;
+    const serverLabel = stringValue(accessPayload.serverLabel);
+    accessContextByOutcomeEventId[event.eventId] = {
+      number,
+      total: Math.max(number, effectiveAccessCount ?? number),
+      ...(serverLabel ? { serverLabel } : {}),
+    };
+    suppressedAccessEventIds.add(pendingAccess.eventId);
+    pendingAccess = undefined;
+  }
+
+  return { suppressedAccessEventIds, accessContextByOutcomeEventId };
+}
+
+function accessOutcomeMatches(
+  accessEvent: PublicGameEvent,
+  outcomeEvent: PublicGameEvent,
+): boolean {
+  const access = accessEvent.publicPayload ?? {};
+  const outcome = outcomeEvent.publicPayload ?? {};
+  const accessBreachId = stringValue(access.breachId);
+  const outcomeBreachId = stringValue(outcome.breachId);
+  if (
+    accessBreachId !== undefined &&
+    outcomeBreachId !== undefined &&
+    accessBreachId !== outcomeBreachId
+  )
+    return false;
+  const accessIndex = numberValue(access.accessIndex);
+  const outcomeIndex = numberValue(outcome.accessIndex);
+  if (
+    accessIndex !== undefined &&
+    outcomeIndex !== undefined &&
+    accessIndex !== outcomeIndex
+  )
+    return false;
+  const accessCardDefinitionId = stringValue(access.cardDefinitionId);
+  const outcomeCardDefinitionId = stringValue(outcome.cardDefinitionId);
+  return !(
+    accessCardDefinitionId !== undefined &&
+    outcomeCardDefinitionId !== undefined &&
+    accessCardDefinitionId !== outcomeCardDefinitionId
+  );
+}
 
 export function isISpySuccessfulRunFollowupPayload(
   payload: Record<string, unknown>,
@@ -420,8 +508,7 @@ function formatSemanticChronicleEvent(
   const actor = sideValue(payload.actor);
   const publicStackToGripReveal =
     actionType === "resolve_choice" &&
-    stringValue(payload.hiddenZoneAction) ===
-      "p3_37_search_stack_to_grip" &&
+    stringValue(payload.hiddenZoneAction) === "p3_37_search_stack_to_grip" &&
     stringValue(payload.publicRevealKind) === "reveal" &&
     stringValue(payload.publicRevealDefinitionId) !== undefined;
   const publicStackRevealDefinitionId = publicStackToGripReveal
@@ -452,9 +539,11 @@ function formatSemanticChronicleEvent(
   const cardTitle =
     context.cardTitle ??
     publicCardTitle(cardDefinitionId, context.cardPresentationsById) ??
+    stringValue(payload.title) ??
     translate("card.unknown");
   const server = semanticServerLabel(
     stringValue(payload.serverLabel) ??
+      context.accessContext?.serverLabel ??
       stringValue(payload.selectedServerLabel) ??
       stringValue(payload.serverId) ??
       context.runServerLabel ??
@@ -468,6 +557,23 @@ function formatSemanticChronicleEvent(
   let explicitTitle: string | undefined;
   let description: string | undefined;
   let detailChips: string[] = [];
+  const payloadAccessIndex = numberValue(payload.accessIndex);
+  const payloadAccessNumber =
+    payloadAccessIndex !== undefined && payloadAccessIndex >= 0
+      ? Math.floor(payloadAccessIndex) + 1
+      : undefined;
+  const accessNumber = context.accessContext?.number ?? payloadAccessNumber;
+  const accessTotal =
+    context.accessContext?.total ??
+    positiveIntegerValue(payload.effectiveAccessCount);
+  const numberedAccess =
+    accessNumber !== undefined && accessTotal !== undefined && accessTotal > 1;
+  const accessPosition = numberedAccess
+    ? `${translate("access.cardPosition", {
+        number: accessNumber,
+        total: Math.max(accessNumber, accessTotal),
+      })}: `
+    : "";
   if (publicStackToGripReveal) {
     const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
     const sourceTitle =
@@ -490,6 +596,32 @@ function formatSemanticChronicleEvent(
     });
     detailChips = [cardTitle, `+${hostedCreditsTaken}`];
     category = "economy";
+  } else if (
+    context.accessContext &&
+    (actionType === "steal_agenda" || actionType === "trash_accessed_card")
+  ) {
+    explicitTitle = translate(
+      actionType === "steal_agenda"
+        ? actor === side
+          ? "event.cardAccessedAndStolenYou"
+          : "event.cardAccessedAndStolenOther"
+        : actor === side
+          ? "event.cardAccessedAndTrashedYou"
+          : "event.cardAccessedAndTrashedOther",
+      { position: accessPosition, subject, card: cardTitle, server },
+    );
+    detailChips = [
+      ...(numberedAccess && accessNumber !== undefined
+        ? [
+            translate("access.cardPosition", {
+              number: accessNumber,
+              total: accessTotal,
+            }),
+          ]
+        : []),
+      cardTitle,
+      server,
+    ];
   } else if (
     actionType === "resolve_choice" &&
     payload.discardResolved === true
@@ -563,19 +695,42 @@ function formatSemanticChronicleEvent(
         stringValue(payload.targetIceDefinitionId),
         context.cardPresentationsById,
       );
-    if (targetIceTitle && rawSubroutineIndex === 0)
-      titleKey = "event.firstSubroutineBroken";
-    else if (targetIceTitle && rawSubroutineIndex === 1)
-      titleKey = "event.secondSubroutineBroken";
-    else if (targetIceTitle && rawSubroutineIndex !== undefined)
+    if (
+      targetIceTitle &&
+      rawSubroutineIndex !== undefined &&
+      cardTitle !== translate("card.unknown")
+    ) {
+      explicitTitle = translate("event.numberedSubroutineBrokenWithBreaker", {
+        subject,
+        number: rawSubroutineIndex + 1,
+        ice: targetIceTitle,
+        breaker: cardTitle,
+      });
+    } else if (targetIceTitle && rawSubroutineIndex !== undefined) {
       titleKey = "event.numberedSubroutineBroken";
+    }
   } else if (
     actionType === "continue_run" &&
     payload.encounterContinue === true
   ) {
     titleKey = "event.icePassed";
   } else if (actionType === "access_card") {
-    titleKey = "event.cardAccessedInServer";
+    if (numberedAccess && accessNumber !== undefined) {
+      explicitTitle = translate(
+        actor === side
+          ? "event.numberedCardAccessedInServerYou"
+          : "event.numberedCardAccessedInServerOther",
+        {
+          subject,
+          number: accessNumber,
+          total: accessTotal,
+          card: cardTitle,
+          server,
+        },
+      );
+    } else {
+      titleKey = "event.cardAccessedInServer";
+    }
   }
   const targetIceTitle =
     stringValue(payload.targetIceTitle) ??
@@ -598,9 +753,10 @@ function formatSemanticChronicleEvent(
       number: rawSubroutineIndex !== undefined ? rawSubroutineIndex + 1 : 1,
     });
   const actionUse = context.actionUse ?? semanticActionUse(payload, translate);
-  const publiclyIdentifiedAccessCard =
-    actionType === "access_card" &&
-    stringValue(payload.cardDefinitionId) !== undefined;
+  const publiclyIdentifiedAccessResult =
+    ["access_card", "steal_agenda", "trash_accessed_card"].includes(
+      actionType,
+    ) && stringValue(payload.cardDefinitionId) !== undefined;
   const publiclyRevealedTraceResult =
     actionType === "resolve_choice" &&
     payload.traceBidsRevealed === true &&
@@ -608,7 +764,7 @@ function formatSemanticChronicleEvent(
   const visibility: ChronicleVisibility =
     actionType === "resolve_choice" && payload.setupStep === "mulligan"
       ? "system"
-      : publiclyIdentifiedAccessCard ||
+      : publiclyIdentifiedAccessResult ||
           publiclyRevealedTraceResult ||
           publicStackToGripReveal
         ? "public"
@@ -635,9 +791,7 @@ function formatSemanticChronicleEvent(
     id: event.eventId,
     category,
     importance:
-      category === "danger" ||
-      category === "agenda" ||
-      publicStackToGripReveal
+      category === "danger" || category === "agenda" || publicStackToGripReveal
         ? "important"
         : "normal",
     visibility,
@@ -5013,8 +5167,17 @@ function formatSemanticChronicleEffect(
     stringValue(effect.sourceTitle) ??
     publicCardTitle(sourceDefinitionId, cardPresentationsById) ??
     translate("card.unknown");
-  const subject = semanticChronicleSubject(actor, side, false, translate);
+  const isAi = Boolean(
+    stringValue(event.publicPayload.aiExplanation) ||
+    stringValue(event.publicPayload.aiReasonCode),
+  );
+  const subject = semanticChronicleSubject(actor, side, isAi, translate);
   const kind = stringValue(effect.kind) ?? "effect";
+  const subroutineType = stringValue(effect.subroutineType);
+  const payOrEndRun =
+    kind === "resolve_subroutine" &&
+    subroutineType === "end_the_run_unless_runner_pays";
+  const paidCredits = numberValue(effect.paidCredits) ?? 0;
   const sourcePubliclyNamedByAccess =
     stringValue(event.publicPayload.actionType) === "access_card" &&
     sourceDefinitionId !== undefined &&
@@ -5042,10 +5205,11 @@ function formatSemanticChronicleEffect(
       stringValue(event.publicPayload.damageType),
     translate,
   );
-  const category: ChronicleCategory =
-    kind === "gain_credits" ||
-    kind === "take_hosted_credits" ||
-    kind === "lose_credits"
+  const category: ChronicleCategory = payOrEndRun
+    ? "run"
+    : kind === "gain_credits" ||
+        kind === "take_hosted_credits" ||
+        kind === "lose_credits"
       ? "economy"
       : kind === "damage" || kind === "add_tags" || kind === "remove_tags"
         ? "danger"
@@ -5055,45 +5219,58 @@ function formatSemanticChronicleEffect(
   const key =
     visibility === "redacted"
       ? "effect.redacted"
-      : kind === "gain_credits"
-        ? "effect.creditsGained"
-        : kind === "take_hosted_credits"
-          ? "effect.hostedCreditsTaken"
-          : kind === "lose_credits"
-            ? "effect.creditsLost"
-            : kind === "draw_cards"
-              ? "effect.cardsDrawn"
-              : kind === "trash_card"
-                ? "effect.cardTrashed"
-                : kind === "damage"
-                  ? flatline
-                    ? "effect.damageFlatline"
-                    : "effect.damageTyped"
-                  : kind === "add_tags"
-                    ? "effect.tagsGained"
-                    : kind === "remove_tags"
-                      ? "effect.tagsRemoved"
-                      : "effect.resolved";
+      : payOrEndRun
+        ? paidCredits > 0
+          ? "effect.runnerPaidToPassIce"
+          : "effect.runnerDidNotPayToPassIce"
+        : kind === "gain_credits"
+          ? "effect.creditsGained"
+          : kind === "take_hosted_credits"
+            ? "effect.hostedCreditsTaken"
+            : kind === "lose_credits"
+              ? "effect.creditsLost"
+              : kind === "draw_cards"
+                ? "effect.cardsDrawn"
+                : kind === "trash_card"
+                  ? "effect.cardTrashed"
+                  : kind === "damage"
+                    ? flatline
+                      ? "effect.damageFlatline"
+                      : "effect.damageTyped"
+                    : kind === "add_tags"
+                      ? "effect.tagsGained"
+                      : kind === "remove_tags"
+                        ? "effect.tagsRemoved"
+                        : "effect.resolved";
   return {
     id: `${event.eventId}:effect:${effect.effectId || index}`,
     category,
     importance: flatline
       ? "critical"
-      : category === "danger"
+      : payOrEndRun && paidCredits === 0
         ? "important"
-        : "normal",
+        : category === "danger"
+          ? "important"
+          : "normal",
     visibility,
     ...(actor ? { actor } : {}),
     title: translate(key, {
       subject,
-      amount,
+      amount: payOrEndRun ? paidCredits : amount,
       count: amount,
       source: sourceTitle,
       damageType,
     }),
     chips: [
       ...(actor ? [translate(`side.${actor}`)] : []),
-      translate("effect.automatic"),
+      ...(payOrEndRun
+        ? [
+            sourceTitle,
+            paidCredits > 0
+              ? translate("effect.creditsPaidChip", { amount: paidCredits })
+              : translate("effect.notPaidChip"),
+          ]
+        : [translate("effect.automatic")]),
       ...(kind === "damage" ? [`${amount} ${damageType}`] : []),
       ...(flatline ? [translate("effect.flatline")] : []),
     ],

@@ -6,6 +6,7 @@ import { useTranslations } from "use-intl/react";
 import type { PublicGameEvent, Side } from "@netgrid/shared";
 
 import {
+  chronicleAccessOutcomePlan,
   chronicleEventProjectionPlan,
   chronicleGroupLabel,
   chronicleItemBelongsToSystemSetup,
@@ -298,6 +299,7 @@ export function ChroniclePanel({
   );
   const presentationEvents = coalesceAiPumpPresentationEvents(events);
   const projectionPlan = chronicleEventProjectionPlan(turnContextEvents);
+  const accessOutcomePlan = chronicleAccessOutcomePlan(presentationEvents);
   const contextByEventId = chronicleContextByEventId(
     turnContextEvents,
     cardDetailsById,
@@ -314,6 +316,7 @@ export function ChroniclePanel({
       contextByEventId,
       cardDetailsById,
       projectionPlan.suppressedEventIds,
+      accessOutcomePlan,
       translate,
     ).reverse(),
   );
@@ -471,6 +474,7 @@ function chronicleEntriesWithRunGroups(
   contextByEventId: Record<string, Omit<ChronicleContext, "side">>,
   cardDetailsById: Record<string, CatalogCardDetail>,
   projectionSuppressedEventIds: ReadonlySet<string>,
+  accessOutcomePlan: ReturnType<typeof chronicleAccessOutcomePlan>,
   translate: ChronicleTranslate,
 ): Array<{
   card: CatalogCardDetail | null;
@@ -534,6 +538,8 @@ function chronicleEntriesWithRunGroups(
     const eventItem = formatChronicleEvent(event, side, {
       ...(contextByEventId[event.eventId] ?? {}),
       runServerLabel: activeRunServerLabel,
+      accessContext:
+        accessOutcomePlan.accessContextByOutcomeEventId[event.eventId] ?? null,
       translate,
     });
     const effectItems = formatChronicleEffectItems(
@@ -542,12 +548,11 @@ function chronicleEntriesWithRunGroups(
       contextByEventId[event.eventId]?.cardPresentationsById,
       translate,
     );
-    const items = shouldSuppressChronicleEventItem(
-      event,
-      projectionSuppressedEventIds,
-    )
-      ? effectItems
-      : [eventItem, ...effectItems];
+    const items =
+      shouldSuppressChronicleEventItem(event, projectionSuppressedEventIds) ||
+      accessOutcomePlan.suppressedAccessEventIds.has(event.eventId)
+        ? effectItems
+        : [eventItem, ...effectItems];
     const followingEvent = events[eventIndex + 1];
     const followingRunGroupLabel = !activeRunGroupLabel
       ? chroniclePaymentSupportFollowingRunGroupLabel(

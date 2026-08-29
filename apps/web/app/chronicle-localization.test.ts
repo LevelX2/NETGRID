@@ -7,6 +7,7 @@ import enMessages from "../messages/en.json";
 import frMessages from "../messages/fr.json";
 import type { AppLocale } from "../i18n/locale";
 import {
+  chronicleAccessOutcomePlan,
   formatChronicleEffectItems,
   formatChronicleEvent,
   type ChronicleTranslate,
@@ -701,7 +702,9 @@ describe("semantic chronicle localization", () => {
     );
 
     expect(pump.title).toBe("Du: Stärke von Krash um 1 erhöht.");
-    expect(broken.title).toBe("Du: erste Subroutine von Brain Wash gebrochen.");
+    expect(broken.title).toBe(
+      "Du: Subroutine 1 von Brain Wash mit Krash gebrochen.",
+    );
     expect(passed.title).toBe("Du: Brain Wash passiert.");
     expect(continued.title).toBe("Du: Run auf R&D fortgesetzt.");
     expect(accessItem.title).toBe("Du: auf Fetal AI in R&D zugegriffen.");
@@ -717,6 +720,143 @@ describe("semantic chronicle localization", () => {
       importance: "critical",
       visibility: "public",
     });
+  });
+
+  it("describes pay-or-end-run ICE as the runner's concrete payment", () => {
+    const snowbank = event("continue_run", {
+      actor: "runner",
+      aiReasonCode: "runner.continue_encounter",
+      encounterContinue: true,
+      resolvedEffects: [
+        {
+          effectId: "subroutine_1",
+          kind: "resolve_subroutine",
+          visibility: "public",
+          side: "runner",
+          reason: "ice_subroutine",
+          sourceDefinitionId: "snowbank",
+          sourceTitle: "Snowbank",
+          subroutineIndex: 0,
+          subroutineType: "end_the_run_unless_runner_pays",
+          paidCredits: 1,
+        },
+      ],
+    });
+
+    const [de] = formatChronicleEffectItems(
+      snowbank,
+      "corp",
+      undefined,
+      translate("de"),
+    );
+    const [en] = formatChronicleEffectItems(
+      snowbank,
+      "corp",
+      undefined,
+      translate("en"),
+    );
+
+    expect(de).toMatchObject({
+      title: "Die Runner-KI: 1 Credit bezahlt, um Snowbank zu passieren.",
+      category: "run",
+      importance: "normal",
+      visibility: "public",
+      cardDefinitionId: "snowbank",
+      cardTitle: "Snowbank",
+    });
+    expect(en?.title).toBe("The Runner AI: paid 1 credit to pass Snowbank.");
+    expect(`${de?.title} ${en?.title}`).not.toMatch(
+      /automatischer Effekt|automatic effect/,
+    );
+  });
+
+  it("numbers multiaccess cards and combines access with steal or trash outcomes", () => {
+    const firstAccess = {
+      ...event("access_card", {
+        actor: "runner",
+        aiReasonCode: "runner.access",
+        breachId: "breach_rd",
+        accessIndex: 0,
+        effectiveAccessCount: 2,
+        serverLabel: "R&D",
+        cardDefinitionId: "project_babylon",
+        title: "Project Babylon",
+        redactedKind: "hidden_zone",
+        hiddenZoneBarrier: true,
+      }),
+      eventId: "evt_access_1",
+    };
+    const stolen = {
+      ...event("steal_agenda", {
+        actor: "runner",
+        aiReasonCode: "runner.steal",
+        breachId: "breach_rd",
+        accessIndex: 0,
+        serverLabel: "R&D",
+        cardDefinitionId: "project_babylon",
+        title: "Project Babylon",
+        redactedKind: "hidden_zone",
+        hiddenZoneBarrier: true,
+      }),
+      eventId: "evt_steal_1",
+    };
+    const secondAccess = {
+      ...event("access_card", {
+        actor: "runner",
+        aiReasonCode: "runner.access",
+        breachId: "breach_rd",
+        accessIndex: 1,
+        effectiveAccessCount: 2,
+        serverLabel: "R&D",
+        cardDefinitionId: "pad_campaign",
+        title: "PAD Campaign",
+        redactedKind: "hidden_zone",
+        hiddenZoneBarrier: true,
+      }),
+      eventId: "evt_access_2",
+    };
+    const trashed = {
+      ...event("trash_accessed_card", {
+        actor: "runner",
+        aiReasonCode: "runner.trash",
+        breachId: "breach_rd",
+        accessIndex: 1,
+        serverLabel: "R&D",
+        cardDefinitionId: "pad_campaign",
+        title: "PAD Campaign",
+        redactedKind: "hidden_zone",
+        hiddenZoneBarrier: true,
+      }),
+      eventId: "evt_trash_2",
+    };
+    const events = [firstAccess, stolen, secondAccess, trashed];
+    const plan = chronicleAccessOutcomePlan(events);
+    const firstAccessItem = formatChronicleEvent(firstAccess, "corp", {
+      translate: translate("de"),
+    });
+    const stolenItem = formatChronicleEvent(stolen, "corp", {
+      translate: translate("de"),
+      accessContext: plan.accessContextByOutcomeEventId[stolen.eventId]!,
+    });
+    const trashedItem = formatChronicleEvent(trashed, "corp", {
+      translate: translate("de"),
+      accessContext: plan.accessContextByOutcomeEventId[trashed.eventId]!,
+    });
+
+    expect(firstAccessItem.title).toBe(
+      "Karte 1 von 2: Die Runner-KI hat in R&D auf Project Babylon zugegriffen.",
+    );
+    expect(plan.suppressedAccessEventIds).toEqual(
+      new Set(["evt_access_1", "evt_access_2"]),
+    );
+    expect(stolenItem.title).toBe(
+      "Karte 1 von 2: Die Runner-KI hat in R&D auf Project Babylon zugegriffen und die Agenda gestohlen.",
+    );
+    expect(stolenItem.visibility).toBe("public");
+    expect(trashedItem.title).toBe(
+      "Karte 2 von 2: Die Runner-KI hat in R&D auf PAD Campaign zugegriffen und die Karte getrasht.",
+    );
+    expect(trashedItem.visibility).toBe("public");
   });
 
   it("names damage from a publicly identified installed access card", () => {
