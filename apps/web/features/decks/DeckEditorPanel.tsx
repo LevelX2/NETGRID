@@ -261,6 +261,8 @@ function snapshotAllowedForMatchCardPool(
   return snapshot.cardPoolSnapshotId === matchCardPool.snapshotId;
 }
 export function DeckEditorPanel({
+  mode: deckEditorMode,
+  onModeChange: setDeckEditorMode,
   localDecks,
   selectedDeck: personalSelectedDeck,
   selectedDeckDirty: personalSelectedDeckDirty,
@@ -296,6 +298,8 @@ export function DeckEditorPanel({
   onStandardDeckPreviewCopied,
   onReloadStandardDecks,
 }: {
+  mode: DeckEditorMode;
+  onModeChange(mode: DeckEditorMode): void;
   localDecks: EditableDeck[];
   selectedDeck: EditableDeck | null;
   selectedDeckDirty: boolean;
@@ -352,7 +356,6 @@ export function DeckEditorPanel({
   const [builderFiltersOpen, setBuilderFiltersOpen] = useState(false);
   const [deckDetailsOpen, setDeckDetailsOpen] = useState(true);
   const [deckPickerOpen, setDeckPickerOpen] = useState(true);
-  const [deckEditorMode, setDeckEditorMode] = useState<DeckEditorMode>("list");
   const [tableCardMenuKey, setTableCardMenuKey] = useState<string | null>(null);
   const [tableCardWidth, setTableCardWidth] = useState(
     DECK_TABLE_CARD_WIDTH_DEFAULT,

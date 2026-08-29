@@ -313,6 +313,7 @@ import {
   deckFingerprint,
   deckMetadataFromEditable,
   type DeckCardEntry,
+  type DeckEditorMode,
   type EditableDeck,
 } from "../features/decks/deck-table-model";
 import { editableStandardDeckPreview } from "../features/decks/standard-deck-table-preview";
@@ -608,6 +609,8 @@ export default function Page() {
   const [entryTab, setEntryTab] = useState<EntryTab>("play");
   const [activeMatchWorkspace, setActiveMatchWorkspace] =
     useState<ActiveMatchWorkspace>("game");
+  const [deckEditorMode, setDeckEditorMode] =
+    useState<DeckEditorMode>("list");
   const [mode, setMode] = useState<"host" | "join">("host");
   const [recoveryTabSelected, setRecoveryTabSelected] = useState(false);
   const [playMode, setPlayMode] = useState<PlayMode>("human_vs_human");
@@ -6737,6 +6740,8 @@ export default function Page() {
                     ) : null}
                     {entryTab === "decks" ? (
                       <DeckEditorPanel
+                        mode={deckEditorMode}
+                        onModeChange={setDeckEditorMode}
                         localDecks={localDecks}
                         selectedDeck={selectedDeck}
                         selectedDeckDirty={selectedDeckDirty}
@@ -7598,6 +7603,8 @@ export default function Page() {
                   workspace={activeMatchWorkspace}
                   catalogPanelProps={catalogPanelProps}
                   deckEditorPanelProps={{
+                    mode: deckEditorMode,
+                    onModeChange: setDeckEditorMode,
                     localDecks,
                     selectedDeck,
                     selectedDeckDirty,

@@ -73,4 +73,14 @@ describe("standard deck table navigation contract", () => {
     );
     expect(editorSource).toContain('setDeckEditorMode("table")');
   });
+
+  it("keeps the chosen editor view when navigating away and back", () => {
+    expect(pageSource).toContain('useState<DeckEditorMode>("list")');
+    expect(pageSource).toContain("mode={deckEditorMode}");
+    expect(pageSource).toContain("onModeChange={setDeckEditorMode}");
+    expect(pageSource).toContain("mode: deckEditorMode");
+    expect(editorSource).toContain("mode: deckEditorMode");
+    expect(editorSource).toContain("onModeChange: setDeckEditorMode");
+    expect(editorSource).not.toContain('useState<DeckEditorMode>("list")');
+  });
 });
