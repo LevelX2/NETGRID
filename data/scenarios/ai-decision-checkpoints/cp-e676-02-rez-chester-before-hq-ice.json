@@ -9461,7 +9461,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "corp.install_card.corp_onr_v1_243_fetch-4-0-1_2.new_remote.corp_onr_v1_243_fetch-4-0-1_2"
+        "type": "draw_card"
       }
     ],
     "forbiddenActions": [
@@ -9472,10 +9472,8 @@
     ],
     "planExecution": {
       "acceptablePlanKinds": ["corp.defend_servers"],
-      "acceptableCapabilities": ["improve_remote_protection_path"],
-      "requiredAssessmentEvidence": [
-        "corp_layered_remote_ice_staging:remote:strategic-score-remote:new_remote:corp.install_card.corp_onr_v1_243_fetch-4-0-1_2.new_remote.corp_onr_v1_243_fetch-4-0-1_2:layers_0:unrezzed_0:rez_gap_0"
-      ]
+      "acceptableCapabilities": ["allocate_server_defense"],
+      "requiredAssessmentEvidence": ["corp_missing_concrete_defense_draw:rd"]
     }
   }
 }

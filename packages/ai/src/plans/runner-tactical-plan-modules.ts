@@ -222,7 +222,8 @@ export type RunnerDevelopmentSignal = {
     | "open_restricted_sequence"
     | "execute_restricted_sequence"
     | "complete_restricted_sequence"
-    | "resolve_event_install_choice";
+    | "resolve_event_install_choice"
+    | "resolve_delayed_program_search_choice";
   purposeCode?: string;
   assignedDomainPlanIds: string[];
   duplicateAlreadyInstalled: boolean;
@@ -247,6 +248,15 @@ export type RunnerDevelopmentSignal = {
     selectedAtStateVersion?: number;
     targetCardInstanceId: string;
     targetDefinitionId: string;
+    installMemorySacrificeBinding?: {
+      targetCardInstanceId: string;
+      targetMemoryCost: number;
+      requiredMemoryToFree: number;
+      selectedCards: Array<{
+        cardInstanceId: string;
+        memoryCost: number;
+      }>;
+    };
   };
   eventInstallChoiceBinding?: {
     choiceId: string;
@@ -256,9 +266,30 @@ export type RunnerDevelopmentSignal = {
     sourceCapabilityKey: string;
     sourceStateVersion: number;
     originSelectedAtStateVersion: number;
+    choiceSource: string;
     selectedOptionId: string;
     targetCardInstanceId: string;
     targetDefinitionId: string;
+  };
+  delayedProgramSearchChoiceBinding?: {
+    choiceId: string;
+    choiceSource: string;
+    actionId: string;
+    sourceCardInstanceId: string;
+    sourceDefinitionId: string;
+    sourceStateVersion: number;
+    selectedOptionId: string;
+    targetCardInstanceId: string;
+    targetDefinitionId: string;
+    installMemorySacrificeBinding?: {
+      targetCardInstanceId: string;
+      targetMemoryCost: number;
+      requiredMemoryToFree: number;
+      selectedCards: Array<{
+        cardInstanceId: string;
+        memoryCost: number;
+      }>;
+    };
   };
   programSearchCommitment?: {
     sourceCardInstanceId: string;

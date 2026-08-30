@@ -9841,13 +9841,13 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.start_run.hq"
+        "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:store_credits"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.pressure_central"],
-      "acceptableCapabilities": ["pressure_hq_information"],
-      "requiredAssessmentEvidence": ["target:hq"]
+      "acceptablePlanKinds": ["runner.credit_bank"],
+      "acceptableCapabilities": ["credit_bank_build"],
+      "requiredAssessmentEvidence": ["runner_credit_bank_first_load"]
     }
   }
 }

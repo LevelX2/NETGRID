@@ -295,10 +295,10 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
     await createHumanVsAiGame(page, "v1-0-7-tablet-board");
     await expectActiveBoardBasics(page);
     await expect(page.getByTestId("server-run-action").first()).toBeVisible();
+    await exerciseCardDisplayModes(page);
     await page.getByTestId("server-run-action").first().click();
     await expect(page.getByTestId("run-timeline")).toContainText("Run auf");
     await expect(page.locator(".activeRunTarget")).toHaveCount(1);
-    await exerciseCardDisplayModes(page);
     await expectNoCriticalLayoutOverflow(page);
     await expectNoDomOrLocalStorageLeaks(page);
     await saveFlowScreenshot(page, testInfo, "tablet-active-board-run");
@@ -321,9 +321,9 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
         .getByRole("button", { name: /Ausblenden|Hinweis schließen/ })
         .click();
     }
+    await exerciseCardDisplayModes(page);
     await page.getByTestId("server-run-action").first().click();
     await expect(page.getByTestId("run-timeline")).toContainText("Run auf");
-    await exerciseCardDisplayModes(page);
     await expectNoCriticalLayoutOverflow(page);
     await expectNoDomOrLocalStorageLeaks(page);
     await saveFlowScreenshot(page, testInfo, "narrow-active-board-run");
@@ -449,21 +449,17 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
         deck: {
           ...legalDeck,
           deckId: "e2e_v130_invalid",
-          cards: [
-            ...legalDeck.cards,
-            { cardId: "catalog_preview_resource_001", quantity: 1 },
-          ],
+          cards: legalDeck.cards.map((entry) =>
+            entry.cardId === "onr_v1_021_dwarf"
+              ? { ...entry, quantity: 4 }
+              : entry,
+          ),
         },
       },
     });
     const invalidBody = await invalid.json();
     expect(invalidBody.validation.ok).toBe(false);
-    expect(invalidBody.validation.errorCodes).toContain(
-      "card_missing_required_status",
-    );
-    expect(invalidBody.validation.errorCodes).toContain(
-      "format_legal_requires_deck_legal",
-    );
+    expect(invalidBody.validation.errorCodes).toContain("too_many_copies");
     expect(JSON.stringify(invalidBody)).not.toMatch(
       /sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privateDeckSnapshots|privatePayload|decklist/i,
     );

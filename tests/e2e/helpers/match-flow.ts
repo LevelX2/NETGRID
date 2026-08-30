@@ -157,46 +157,17 @@ export async function installFirstCorpCard(page: Page): Promise<string> {
     const marker = slot.getByTestId("card-action-marker");
     const title = await knownCardTitle(card);
     if (!title) continue;
-    if (await marker.isVisible().catch(() => false)) {
-      await marker
-        .click({ force: true, timeout: 1_000 })
-        .catch(() => undefined);
-      const install = page
-        .locator(
-          '[data-testid="card-action-button"][data-action-type="install_card"]',
-        )
-        .first();
-      if (await install.isVisible().catch(() => false)) {
-        await install.click();
-        await expect(
-          page
-            .locator('[data-testid="server"] [data-testid="known-card"]')
-            .first(),
-        ).toBeVisible();
-        return title;
-      }
-    }
-    await card.click({ timeout: 1_000 }).catch(() => undefined);
-    const panelInstall = page
-      .locator('[data-testid="action-button"][data-action-type="install_card"]')
-      .first();
-    if (await panelInstall.isVisible().catch(() => false)) {
-      await panelInstall.click();
-      await expect(
-        page
-          .locator('[data-testid="server"] [data-testid="known-card"]')
-          .first(),
-      ).toBeVisible();
-      return title;
-    }
+    const cardClass = (await card.getAttribute("class")) ?? "";
+    if (/\boperation\b/.test(cardClass)) continue;
     if (!(await marker.isVisible().catch(() => false))) continue;
-    await marker.click({ force: true, timeout: 1_000 }).catch(() => undefined);
+    await card.hover({ position: { x: 8, y: 20 }, timeout: 2_000 });
+    await marker.click({ timeout: 2_000 });
     const install = page
       .locator(
         '[data-testid="card-action-button"][data-action-type="install_card"]',
       )
       .first();
-    if (await install.isVisible().catch(() => false)) {
+    if (await locatorBecomesVisible(install, 1_500)) {
       await install.click();
       await expect(
         page
@@ -223,11 +194,20 @@ export async function exerciseCardDisplayModes(page: Page): Promise<void> {
       await moveOpponentCueAwayFromPreview(page);
     }
   }
-  await page.getByTestId("card-display-text").first().click();
-  await expect(page.getByTestId("card-preview")).toContainText("Kartenanzeige");
-  await page.getByTestId("card-display-compact").first().click();
+  await page.getByRole("button", { name: "Optionen öffnen" }).click();
+  await page.getByRole("tab", { name: "Darstellung" }).click();
+  const textMode = page.getByTestId("card-display-text").first();
+  const compactMode = page.getByTestId("card-display-compact").first();
+  const imageMode = page.getByTestId("card-display-image").first();
+  await textMode.click();
+  await expect(textMode).toHaveClass(/active/);
+  await compactMode.click();
+  await expect(compactMode).toHaveClass(/active/);
+  await imageMode.click();
+  await expect(imageMode).toHaveClass(/active/);
+  await page.getByRole("button", { name: "Zurück zum aktiven Spiel" }).click();
   await expect(page.getByTestId("card-preview")).toBeVisible();
-  await page.getByTestId("card-display-image").first().click();
+  await expect(page.getByTestId("card-preview")).toContainText("Kartenanzeige");
 }
 
 export async function expectActiveBoardBasics(page: Page): Promise<void> {
@@ -343,6 +323,16 @@ async function clickActionIfVisible(
   }
 }
 
+async function locatorBecomesVisible(
+  locator: Locator,
+  timeout: number,
+): Promise<boolean> {
+  return locator
+    .waitFor({ state: "visible", timeout })
+    .then(() => true)
+    .catch(() => false);
+}
+
 async function knownCardTitle(card: Locator): Promise<string | null> {
   const ariaTitle = titleFromKnownCardAriaLabel(
     await card.getAttribute("aria-label"),
@@ -450,7 +440,7 @@ async function resolveSetupChoices(...pages: Page[]): Promise<void> {
     let clicked = false;
     for (const page of pages) {
       const keep = page
-        .getByRole("button", { name: "Starthand behalten" })
+        .getByRole("button", { name: "Hand behalten", exact: true })
         .first();
       if (await keep.isVisible().catch(() => false)) {
         await keep.click({ timeout: 2_000 }).catch(() => undefined);
@@ -471,7 +461,7 @@ async function advanceAiUntilHumanTurn(page: Page): Promise<void> {
     const aiStep = page.getByRole("button", {
       name: /KI-Schritt|Jetzt ausführen/,
     });
-    if (await aiStep.isEnabled().catch(() => false)) {
+    if (await aiStep.isEnabled({ timeout: 1_000 }).catch(() => false)) {
       await aiStep.click();
       await page.waitForTimeout(250);
       continue;

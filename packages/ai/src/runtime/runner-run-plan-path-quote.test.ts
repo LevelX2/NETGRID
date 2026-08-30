@@ -83,7 +83,7 @@ describe("runner run plan path quote", () => {
         iceDefinitionId: "onr_proteus_024_homing-missile",
         iceTitle: "Homing Missile",
         iceStrength: 5,
-        credits: 10,
+        credits: 15,
         opponentCredits: 10,
         rig: [],
         subroutines: [
@@ -101,7 +101,10 @@ describe("runner run plan path quote", () => {
           }),
         ],
       }),
-      runPlan(),
+      {
+        ...runPlan(),
+        budget: { ...runPlan().budget, availableCredits: 15 },
+      },
     );
     const temporaryPoolTrace = quoteRunnerRunPath(
       runnerEncounterInput({
@@ -130,7 +133,7 @@ describe("runner run plan path quote", () => {
 
     expect(
       cappedTrace.iceQuotes[0]?.cheapestAccessPreservingSequence,
-    ).toMatchObject({ totalCost: 10, usesTrace: true });
+    ).toMatchObject({ totalCost: 15, usesTrace: true });
     expect(
       temporaryPoolTrace.iceQuotes[0]?.cheapestAccessPreservingSequence,
     ).toMatchObject({ totalCost: 8, usesTrace: true });
@@ -922,8 +925,7 @@ function visibleIce(params: {
     effectiveStrength: params.iceStrength,
     ...(params.encounterTemporaryTraceCredits !== undefined
       ? {
-          encounterTemporaryTraceCredits:
-            params.encounterTemporaryTraceCredits,
+          encounterTemporaryTraceCredits: params.encounterTemporaryTraceCredits,
         }
       : {}),
     subroutines: params.subroutines ?? [

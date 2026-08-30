@@ -626,7 +626,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
       {
         ...mandatoryDraw,
         timingPoint: "corp_draw.mandatory_draw",
-        expiresAtStateVersion: 3,
+        expiresAtStateVersion: 2,
       },
     ];
     input.playerView.legalActions = input.legalActions;

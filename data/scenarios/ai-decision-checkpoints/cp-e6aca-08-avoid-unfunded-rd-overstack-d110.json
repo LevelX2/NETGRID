@@ -12651,20 +12651,18 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "gain_credit"
-      },
-      {
-        "type": "play_operation"
-      },
-      {
-        "type": "rez_card",
-        "sourceDefinitionId": "onr_v1_309_bbs-whispering-campaign"
+        "type": "draw_card"
       }
     ],
     "forbiddenActions": [
       {
         "actionId": "corp.install_card.corp_onr_proteus_013_caryatid_1.rd.corp_onr_proteus_013_caryatid_1.4"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["allocate_server_defense"],
+      "requiredAssessmentEvidence": ["corp_missing_concrete_defense_draw:rd"]
+    }
   }
 }

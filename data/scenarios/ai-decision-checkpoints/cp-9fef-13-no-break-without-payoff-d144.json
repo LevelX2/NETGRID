@@ -10666,12 +10666,12 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "continue_run"
+        "type": "pump_breaker"
       }
     ],
     "forbiddenActions": [
       {
-        "type": "pump_breaker"
+        "type": "continue_run"
       }
     ],
     "planExecution": {

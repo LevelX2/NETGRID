@@ -92,20 +92,31 @@ export const REAL_ENGINE_TARGET_CHOICE_FOLLOWUP_CANDIDATE_KINDS = [
 ] as const satisfies readonly TargetChoiceFollowupCandidateKind[];
 
 const LEAGUE_EXPECTATION_BY_SCENARIO_ID = {
-  runner_real_low_credits: expectation(["start_run", "play_event"], {
-    pilotEligibleScopes: ["runner_safe_access"],
-    forbiddenMistakes: ["missed_safe_access"],
-    notes: ["low credits should still take free unknown R&D access"],
-  }),
-  runner_real_safe_hq_access: expectation(["start_run", "play_event"], {
-    pilotEligibleScopes: ["runner_safe_access"],
-    forbiddenMistakes: ["missed_safe_access"],
-    notes: ["safe central run should stay visible to shadow league"],
-  }),
-  runner_real_safe_rd_access: expectation(["start_run", "play_event"], {
-    pilotEligibleScopes: ["runner_safe_access"],
-    forbiddenMistakes: ["missed_safe_access"],
-  }),
+  runner_real_low_credits: expectation(
+    ["start_run", "play_event", "gain_credit"],
+    {
+      pilotEligibleScopes: ["runner_safe_access"],
+      forbiddenMistakes: ["missed_safe_access"],
+      notes: [
+        "low credits may take free unknown R&D access or fund the current setup plan",
+      ],
+    },
+  ),
+  runner_real_safe_hq_access: expectation(
+    ["start_run", "play_event", "install_card"],
+    {
+      pilotEligibleScopes: ["runner_safe_access"],
+      forbiddenMistakes: ["missed_safe_access"],
+      notes: ["safe central run and current breaker setup stay admissible"],
+    },
+  ),
+  runner_real_safe_rd_access: expectation(
+    ["start_run", "play_event", "install_card"],
+    {
+      pilotEligibleScopes: ["runner_safe_access"],
+      forbiddenMistakes: ["missed_safe_access"],
+    },
+  ),
   runner_real_target_choice_hq_remote_mix: expectation(
     ["play_event", "start_run"],
     {
@@ -785,9 +796,7 @@ function corpRezScenario(
   deckSnapshotId?: string,
   evidence: readonly string[] = [],
 ): RealEngineDecisionCorpusScenario {
-  let state = toRunnerTurn(
-    createCorpusGame(seed),
-  );
+  let state = toRunnerTurn(createCorpusGame(seed));
   RealEngineFixtureBuilder.forState(state).withCorpRezWindow(corpCredits);
   state = apply(
     state,
@@ -813,9 +822,7 @@ function runnerDiscardChoiceScenario(
   seed: string,
   deckSnapshotId?: string,
 ): RealEngineDecisionCorpusScenario {
-  let state = toRunnerTurn(
-    createCorpusGame(seed),
-  );
+  let state = toRunnerTurn(createCorpusGame(seed));
   RealEngineFixtureBuilder.forState(state)
     .withRunnerCredits(5)
     .withRunnerGripSize(5);

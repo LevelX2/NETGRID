@@ -297,7 +297,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "broker-load",
       planKind: "runner.credit_bank",
       capability: "credit_bank_build",
-      priorityClass: "P5",
+      priorityClass: "P4",
       assessmentEvidence: "runner_credit_bank_first_load",
     });
 
@@ -412,7 +412,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "broker-load",
       planKind: "runner.credit_bank",
       capability: "credit_bank_build",
-      priorityClass: "P5",
+      priorityClass: "P4",
       assessmentEvidence: "runner_credit_bank_first_load",
     });
     expect(actionAlternative(decision, "draw")?.selected).toBe(false);

@@ -34,18 +34,18 @@ describe("pairing 318 recurring-economy draw-tax checkpoint", () => {
 
     expect(decision).toMatchObject({
       actionId: "runner.gain_credit",
-      reasonCode: "plan_first.runner.recurring_economy",
+      reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
           rootPlanInstanceId:
-            "plan:runner.recurring_economy:runner_onr_v1_184_top-runners-conference_1",
+            "plan:runner.develop_board_and_hand:card%3Arunner_onr_v1_079_bodyweight-synthetic-blood_1",
           leafExecutorInstanceId:
-            "plan:runner.recurring_economy:runner_onr_v1_184_top-runners-conference_1",
+            "plan:runner.economy:development-support%3Arunner_onr_v1_079_bodyweight-synthetic-blood_1",
           route: {
             actionType: "gain_credit",
             semanticActionType: "economy.gain_credit",
-            capabilityId: "recurring_economy_hold",
+            capabilityId: "gain_general_liquid_credits",
           },
           dispositions: expect.arrayContaining([
             expect.objectContaining({

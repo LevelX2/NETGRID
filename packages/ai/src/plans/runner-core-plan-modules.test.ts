@@ -1212,7 +1212,7 @@ describe("Runner core plan modules", () => {
   it("removes parent support as soon as revalidation removes the material need", () => {
     const economy = coreModule("runner.economy");
     const [proposal] = economy.discover(
-      context([candidate("credit")], {
+      context([exactBasicCreditCandidate("credit")], {
         fundingNeeds: [
           {
             kind: "parent_plan_support",
@@ -1238,12 +1238,20 @@ describe("Runner core plan modules", () => {
         ],
       }),
     );
-    const open = reconcileResidentPlanPortfolio({
-      side: "runner",
-      stateVersion: 10,
-      timingPoint: "runner_action.main",
-      proposals: [proposal!],
-    });
+    const support = instantiatePlanProposal(proposal!, 10);
+    const parent = structuredClone(support);
+    parent.instanceId = "plan:runner.contest_remote:remote%3Aremote_1";
+    parent.moduleId = "runner.contest_remote";
+    parent.dedupeKey = "remote:remote_1";
+    delete parent.parentInstanceId;
+    delete parent.parentNeedId;
+    parent.moduleState = {
+      kind: "remote_contest",
+      signal: { supportNeedId: "fund-remote-1", marginalValue: 120 },
+    };
+    const open = emptyPortfolio();
+    open.stateVersion = 10;
+    open.instances = [parent, support];
     const afterMaterialityLoss = reconcileResidentPlanPortfolio({
       side: "runner",
       stateVersion: 11,

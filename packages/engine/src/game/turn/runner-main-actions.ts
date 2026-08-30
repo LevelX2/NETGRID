@@ -106,7 +106,7 @@ export type RunnerMainActionGenerationHost = {
     canPlayPrintedCostOnPlayImplementation: HostFn<boolean>;
     runnerEventResolver: HostFn<any>;
     runnerEventInstallChoiceActionPayload?: HostFn<
-      Record<string, unknown> | undefined
+      NonNullable<LegalAction["payload"]> | undefined
     >;
     printedCostMakeRunEffect: HostFn<any>;
     pushActivatedActions: HostFn<void>;
@@ -868,7 +868,8 @@ export function buildRunnerMainActions(
         }
         if (makeRunEffect?.target.kind === "chosen_server") {
           for (const server of state.corp.servers) {
-            if (!evaluateRunStartEligibility(state, server.id).allowed) continue;
+            if (!evaluateRunStartEligibility(state, server.id).allowed)
+              continue;
             actions.push(
               action(
                 state,

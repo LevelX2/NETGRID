@@ -280,7 +280,7 @@ function economyContractViolations(hintCards) {
     violations,
     "onr_v1_193_corporate-coup",
     15,
-    "score_area",
+    "corp",
     "when_scored",
   );
   requireFixedPool(
@@ -288,7 +288,7 @@ function economyContractViolations(hintCards) {
     violations,
     "onr_v1_209_political-coup",
     12,
-    "score_area",
+    "corp",
     "when_scored",
   );
   requireFixedPool(
@@ -296,8 +296,8 @@ function economyContractViolations(hintCards) {
     violations,
     "onr_v1_309_bbs-whispering-campaign",
     16,
-    "remote",
-    "action",
+    "corp",
+    "on_rez",
   );
 
   const bbs = cardsById.get("onr_v1_309_bbs-whispering-campaign");

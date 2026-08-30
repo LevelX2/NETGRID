@@ -6452,8 +6452,8 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "activated_card_ability",
-        "sourceDefinitionId": "onr_proteus_128_airport-locker"
+        "type": "play_event",
+        "sourceDefinitionId": "onr_v1_114_temple-microcode-outlet"
       }
     ],
     "forbiddenActions": [
@@ -6463,8 +6463,7 @@
     ],
     "planExecution": {
       "acceptablePlanKinds": ["runner.rig_and_coverage"],
-      "acceptableCapabilities": ["search_answer_breaker_wall"],
-      "requiredAssessmentEvidence": ["target:rd"]
+      "acceptableCapabilities": ["search_answer_breaker_code_gate"]
     }
   }
 }

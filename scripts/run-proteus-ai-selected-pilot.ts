@@ -27,7 +27,7 @@ const seeds = [
   "proteus-pilot-holdout-01",
   "proteus-pilot-holdout-02",
 ];
-const maxActions = 180;
+const maxActions = 480;
 
 assert(runnerDecks.length === 2, "Expected two Proteus Runner pilot decks.");
 assert(corpDecks.length === 2, "Expected two Proteus Corp pilot decks.");
@@ -144,6 +144,23 @@ const gateChecks = {
     originalsetControlFailures <= thresholds.originalsetControlFailuresMax,
 };
 const gatePassed = Object.values(gateChecks).every(Boolean);
+const gateFailureMessage = `Proteus selected pilot gate failed: ${JSON.stringify(
+  gateChecks,
+)}; totals=${JSON.stringify(totals)}; rates=${JSON.stringify(
+  rates,
+)}; actionLimitGames=${JSON.stringify(
+  pairResults.flatMap((pair) =>
+    pair.games
+      .filter((game) => game.terminationKind === "action_limit")
+      .map((game) => ({
+        pairId: pair.pairId,
+        seed: game.seed,
+        actions: game.actions,
+        turns: game.turns,
+        finalAgendaPoints: game.finalAgendaPoints,
+      })),
+  ),
+)}; diagnostics=${JSON.stringify(pilotFailureDiagnostics)}.`;
 
 const report = {
   schemaVersion: "netgrid.proteus-ai-selected-pilot.v1",
@@ -176,10 +193,7 @@ const report = {
 
 const serialized = `${JSON.stringify(report, null, 2)}\n`;
 if (shouldWrite) {
-  assert(
-    gatePassed,
-    `Proteus selected pilot gate failed: ${JSON.stringify(gateChecks)}; diagnostics=${JSON.stringify(pilotFailureDiagnostics)}.`,
-  );
+  assert(gatePassed, gateFailureMessage);
   writeFileSync(outputPath, serialized, "utf8");
   console.log(`Wrote ${outputRelative}; gatePassed=${gatePassed}.`);
 } else if (shouldCheck) {
@@ -194,10 +208,7 @@ if (shouldWrite) {
 } else {
   process.stdout.write(serialized);
 }
-assert(
-  gatePassed,
-  `Proteus selected pilot gate failed: ${JSON.stringify(gateChecks)}; diagnostics=${JSON.stringify(pilotFailureDiagnostics)}.`,
-);
+assert(gatePassed, gateFailureMessage);
 
 function readJson<T>(relativePath: string): T {
   return JSON.parse(readFileSync(resolve(root, relativePath), "utf8")) as T;

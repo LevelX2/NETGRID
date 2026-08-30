@@ -517,6 +517,26 @@ export type CorpEconomyStartRezChoiceSignal = CorpEconomySignalBase & {
   optionIds: string[];
 };
 
+export type CorpEconomyOptionalActionCapacitySignal = CorpEconomySignalBase & {
+  kind: "resolve_optional_action_capacity_offer";
+  sourceInstanceId: string;
+  sourceDefinitionId: string;
+  actionIds: [string];
+  decision: "accept" | "decline";
+  rejectedActionId: string;
+  restriction:
+    | "unrestricted"
+    | "install_only"
+    | "program_install_only"
+    | "run_only";
+  allowedActionTypes: string[];
+  followupActionCapacity: 1;
+  observedAtStateVersion: number;
+  completion: {
+    kind: "offer_consumed";
+  };
+};
+
 export type CorpEconomyNeedSignal =
   | CorpEconomyParentFundingSignal
   | CorpEconomyReserveSignal
@@ -525,7 +545,8 @@ export type CorpEconomyNeedSignal =
   | CorpEconomyImmediateOperationSignal
   | CorpEconomyVisibleCardWithdrawalSignal
   | CorpEconomyOperationThresholdSignal
-  | CorpEconomyStartRezChoiceSignal;
+  | CorpEconomyStartRezChoiceSignal
+  | CorpEconomyOptionalActionCapacitySignal;
 
 export type CorpCorePlanDomain = {
   scoreProjects: CorpScoreProjectSignal[];
@@ -1803,6 +1824,7 @@ function economyModule(): PlanModule {
             signal.kind === "prepare_immediate_operation" ||
             signal.kind === "develop_liquidity" ||
             signal.kind === "resolve_start_rez_choice" ||
+            signal.kind === "resolve_optional_action_capacity_offer" ||
             signal.gap > 0,
         )
         .map((signal) =>
@@ -2153,6 +2175,7 @@ export function corpEconomyPriorityClass(
   if (signal.kind === "prepare_immediate_operation") return "P4";
   if (signal.kind === "develop_liquidity") return "P6";
   if (signal.kind === "resolve_start_rez_choice") return "P3";
+  if (signal.kind === "resolve_optional_action_capacity_offer") return "P4";
   if (signal.kind === "reserve" && signal.priorityClass)
     return signal.priorityClass;
   if (
@@ -2192,6 +2215,8 @@ function economyAssessmentValue(signal: CorpEconomyNeedSignal): number {
     return 50 + signal.futureConversion.strategicEconomyValue * 10;
   }
   if (signal.kind === "resolve_start_rez_choice") return 1;
+  if (signal.kind === "resolve_optional_action_capacity_offer")
+    return signal.decision === "accept" ? 100 : 1;
   if (signal.kind === "develop_campaign") {
     return Math.max(1, signal.payback.projectedNetCredits * 20);
   }
@@ -5766,7 +5791,8 @@ function economyCandidates(
     signal.kind === "convert_visible_card_payout" ||
     signal.kind === "prepare_immediate_operation" ||
     signal.kind === "develop_liquidity" ||
-    signal.kind === "resolve_start_rez_choice"
+    signal.kind === "resolve_start_rez_choice" ||
+    signal.kind === "resolve_optional_action_capacity_offer"
       ? undefined
       : (
           signal.fundingRouteAssessment ??
@@ -5790,6 +5816,10 @@ function economyCandidates(
     signal.kind === "develop_liquidity" ? signal.actionIds[0] : undefined;
   const startRezChoiceActionId =
     signal.kind === "resolve_start_rez_choice"
+      ? signal.actionIds[0]
+      : undefined;
+  const optionalActionCapacityActionId =
+    signal.kind === "resolve_optional_action_capacity_offer"
       ? signal.actionIds[0]
       : undefined;
   return context.actionCandidates
@@ -5825,8 +5855,14 @@ function economyCandidates(
                   : signal.kind === "resolve_start_rez_choice"
                     ? candidate.actionId === startRezChoiceActionId &&
                       candidate.semanticActionType === "choice.resolve"
-                    : candidate.actionId === exactFundingHead &&
-                      immediateCorpLiquidCreditGain(candidate) > 0) &&
+                    : signal.kind === "resolve_optional_action_capacity_offer"
+                      ? candidate.actionId === optionalActionCapacityActionId &&
+                        optionalActionCapacityCandidateMatchesSignal(
+                          candidate,
+                          signal,
+                        )
+                      : candidate.actionId === exactFundingHead &&
+                        immediateCorpLiquidCreditGain(candidate) > 0) &&
         corpEconomyCandidateHasExecutablePayload(context.input, candidate),
     )
     .map((candidate) => ({
@@ -5844,7 +5880,11 @@ function economyCandidates(
                   ? -9_999
                   : signal.kind === "resolve_start_rez_choice"
                     ? 1
-                    : immediateCorpLiquidCreditGain(candidate) * 10,
+                    : signal.kind === "resolve_optional_action_capacity_offer"
+                      ? signal.decision === "accept"
+                        ? 100
+                        : 1
+                      : immediateCorpLiquidCreditGain(candidate) * 10,
     }));
 }
 
@@ -6166,10 +6206,46 @@ function economyMaterialization(
                     : `Convert the exact Engine-certified Basic Credit action toward the stable, visible-demand target of ${signal.targetCredits} credits.`
                   : signal.kind === "resolve_start_rez_choice"
                     ? "Decline the exact current Corp start-of-turn rez choice because no reviewed economy campaign is admitted."
-                    : "Convert an immediate positive liquid-credit route for the bound Corp funding need.",
+                    : signal.kind === "resolve_optional_action_capacity_offer"
+                      ? signal.decision === "accept"
+                        ? `Accept the exact current optional action-capacity offer from ${signal.sourceDefinitionId}; the granted action is replanned by its normal domain owner.`
+                        : `Decline the exact current optional action-capacity offer from ${signal.sourceDefinitionId} because its restricted follow-up has no admitted productive route.`
+                      : "Convert an immediate positive liquid-credit route for the bound Corp funding need.",
     },
     candidates,
   };
+}
+
+function optionalActionCapacityCandidateMatchesSignal(
+  candidate: ActionSemanticCandidate,
+  signal: CorpEconomyOptionalActionCapacitySignal,
+): boolean {
+  const projection = candidate.actionCapacityProjection;
+  if (signal.decision === "decline") {
+    return (
+      candidate.actionId === signal.actionIds[0] &&
+      candidate.sourceKind === "card" &&
+      candidate.actionType === "trigger_ability" &&
+      candidate.sourceCardInstanceId === signal.sourceInstanceId &&
+      candidate.sourceDefinitionId === signal.sourceDefinitionId &&
+      projection?.followupActionCapacity === 0
+    );
+  }
+  return (
+    candidate.sourceKind === "card" &&
+    candidate.actionType === "trigger_ability" &&
+    candidate.semanticActionType === "score_conversion.gain_action_capacity" &&
+    candidate.sourceCardInstanceId === signal.sourceInstanceId &&
+    candidate.sourceDefinitionId === signal.sourceDefinitionId &&
+    projection?.timing === "immediate" &&
+    projection.reliability === "guaranteed" &&
+    projection.followupActionCapacity === signal.followupActionCapacity &&
+    projection.restriction === signal.restriction &&
+    projection.allowedActionTypes.length === signal.allowedActionTypes.length &&
+    signal.allowedActionTypes.every((actionType) =>
+      projection.allowedActionTypes.includes(actionType),
+    )
+  );
 }
 
 function immediateOperationCandidateMatchesSignal(

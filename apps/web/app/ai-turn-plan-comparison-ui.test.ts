@@ -71,6 +71,20 @@ function planFirstDecision(): AiPlanFirstDecisionDebug {
     selectionAuthority: "turn_plan_commitment",
     rootPlanInstanceId: "plan:economy",
     leafExecutorInstanceId: "plan:economy",
+    executionOrigin: {
+      rootPlanInstanceId: "plan:economy",
+      leafPlanInstanceId: "plan:economy",
+      commitmentId: "commitment:corp:turn:3",
+      side: "corp",
+      windowKind: "main_action",
+      windowId: "corp_action:7",
+      stateVersion: 7,
+      timingPoint: "corp_action",
+    },
+    selectedStep: {
+      planInstanceId: "plan:economy",
+      stepId: "draw",
+    },
     selectedPlan: planInstance("plan:economy", "corp.economy"),
     priority: {
       requestedClass: "P4",

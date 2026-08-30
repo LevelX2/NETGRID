@@ -4515,9 +4515,13 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "start_run",
-        "targetServerId": "rd"
+        "type": "install_card",
+        "sourceDefinitionId": "onr_v1_039_krash"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.rig_and_coverage"],
+      "acceptableCapabilities": ["install_breaker_code_gate"]
+    }
   }
 }

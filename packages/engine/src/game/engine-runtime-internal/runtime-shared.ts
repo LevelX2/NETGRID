@@ -87,6 +87,7 @@ export type RunnerDrawSummary = {
   crashEverettSourceCardId?: CardInstanceId;
   crashEverettChoiceOpened?: boolean;
 };
+export type RunnerEventActionPayload = NonNullable<LegalAction["payload"]>;
 export type RunnerEventResolver = {
   name: string;
   startsRun?: boolean;
@@ -97,7 +98,7 @@ export type RunnerEventResolver = {
     state: GameState;
     cardId: CardInstanceId;
     definition: CardDefinition;
-  }) => Record<string, unknown>;
+  }) => RunnerEventActionPayload;
   legalActions?: (input: {
     state: GameState;
     cardId: CardInstanceId;
