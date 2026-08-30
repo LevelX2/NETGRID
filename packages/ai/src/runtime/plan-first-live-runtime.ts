@@ -26584,6 +26584,14 @@ function uniqueCoverageGaps(
       ...(coverageUpgrade
         ? {
             upgradeQuote: runnerBreakerUpgradeSignalQuote(coverageUpgrade),
+            ...(coverageUpgrade.memorySupportActionId
+              ? {
+                  memorySupportActionIds: [
+                    coverageUpgrade.memorySupportActionId,
+                  ],
+                  preparationActionIds: [coverageUpgrade.memorySupportActionId],
+                }
+              : {}),
           }
         : {}),
       fundingActionIds: runnerCoverageFundingActionIds(
@@ -26755,8 +26763,18 @@ type RunnerBreakerCoverageUpgrade = Readonly<{
   targetDefinitionId: string;
   searchActionId?: string;
   recoveryMode: "install_visible_upgrade" | "search_known_upgrade";
+  memorySupportActionId?: string;
+  memorySupportDefinitionId?: string;
   economicQuote: RunnerBreakerUpgradeEconomicQuote;
   evidenceCodes: string[];
+}>;
+
+type RunnerBreakerUpgradeMemorySupportRoute = Readonly<{
+  actionId: string;
+  definitionId: string;
+  additionalMu: number;
+  creditCost: number;
+  clickCost: number;
 }>;
 
 function runnerBreakerCoverageUpgrade(
@@ -26850,13 +26868,38 @@ function runnerBreakerCoverageUpgrade(
       ) {
         return [];
       }
-      const installRoute = visibleAnswer
+      const memoryDeficit = Math.max(
+        0,
+        (candidateMemoryCost as number) - memoryAvailable,
+      );
+      const memorySupportRoutes: readonly (
+        | RunnerBreakerUpgradeMemorySupportRoute
+        | undefined
+      )[] =
+        memoryDeficit > 0
+          ? runnerBreakerUpgradeMemorySupportRoutes(
+              input,
+              candidates,
+              memoryDeficit,
+            )
+          : [undefined];
+      if (memorySupportRoutes.length === 0) return [];
+      const currentInstallRoute = visibleAnswer
         ? runnerVisibleBreakerUpgradeInstallRoute(
             input,
             candidates,
             visibleAnswer,
           )
         : undefined;
+      const installRoute =
+        currentInstallRoute ??
+        (visibleAnswer && memoryDeficit > 0
+          ? runnerVisibleBreakerUpgradeMemoryBlockedInstallRoute(
+              input,
+              candidates,
+              visibleAnswer,
+            )
+          : undefined);
       const searchRoute = visibleAnswer
         ? undefined
         : runnerBreakerUpgradeSearchRoute(
@@ -26891,52 +26934,70 @@ function runnerBreakerCoverageUpgrade(
       ) {
         return [];
       }
-      const economicQuote = quoteRunnerBreakerUpgradeEconomics({
-        phase: economy.creditReservePolicy.phase,
-        scoreThreat: evaluation.scoreThreat,
-        currentPathCost: evaluation.pathCost,
-        projectedPathCost: projectedPathCost as number,
-        plannedRunHorizon: 2,
-        installCreditCost: installCreditCost as number,
-        searchCreditCost: visibleAnswer ? 0 : (searchRoute?.creditCost ?? 0),
-        installActionClicks: installRoute?.clickCost ?? 1,
-        searchActionClicks: visibleAnswer ? 0 : (searchRoute?.clickCost ?? 0),
-        consumesSearchCard:
-          !visibleAnswer && searchRoute?.consumesCard === true,
-        currentCredits: input.playerView.own.credits,
-        desiredCreditReserve: economy.desiredCreditReserve,
-        memoryAvailable,
-        candidateMemoryCost: candidateMemoryCost as number,
+      return memorySupportRoutes.flatMap((memorySupportRoute) => {
+        const economicQuote = quoteRunnerBreakerUpgradeEconomics({
+          phase: economy.creditReservePolicy.phase,
+          scoreThreat: evaluation.scoreThreat,
+          currentPathCost: evaluation.pathCost,
+          projectedPathCost: projectedPathCost as number,
+          plannedRunHorizon: 2,
+          installCreditCost: installCreditCost as number,
+          searchCreditCost: visibleAnswer ? 0 : (searchRoute?.creditCost ?? 0),
+          installActionClicks: installRoute?.clickCost ?? 1,
+          searchActionClicks: visibleAnswer ? 0 : (searchRoute?.clickCost ?? 0),
+          memorySupportCreditCost: memorySupportRoute?.creditCost ?? 0,
+          memorySupportActionClicks: memorySupportRoute?.clickCost ?? 0,
+          memorySupportAdditionalMu: memorySupportRoute?.additionalMu ?? 0,
+          consumesSearchCard:
+            !visibleAnswer && searchRoute?.consumesCard === true,
+          currentCredits: input.playerView.own.credits,
+          desiredCreditReserve: economy.desiredCreditReserve,
+          memoryAvailable,
+          candidateMemoryCost: candidateMemoryCost as number,
+        });
+        if (!economicQuote.admitted) return [];
+        const answer = visibleAnswer
+          ? {
+              ...visibleAnswer,
+              installCost: installCreditCost as number,
+            }
+          : undefined;
+        return [
+          {
+            requiredRole,
+            ...(answer ? { visibleAnswer: answer } : {}),
+            deckHasAlternative: true as const,
+            targetDefinitionId: breaker.cardId,
+            ...(!answer && searchRoute
+              ? { searchActionId: searchRoute.actionId }
+              : {}),
+            ...(memorySupportRoute
+              ? {
+                  memorySupportActionId: memorySupportRoute.actionId,
+                  memorySupportDefinitionId: memorySupportRoute.definitionId,
+                }
+              : {}),
+            recoveryMode: answer
+              ? ("install_visible_upgrade" as const)
+              : ("search_known_upgrade" as const),
+            economicQuote,
+            evidenceCodes: [
+              `coverage_upgrade_target:${evaluation.targetServerId}`,
+              `coverage_upgrade_breaker:${breaker.cardId}`,
+              `coverage_upgrade_required_role:${requiredRole}`,
+              "coverage_upgrade_no_replacement_required:true",
+              ...(memorySupportRoute
+                ? [
+                    `coverage_upgrade_memory_support:${memorySupportRoute.definitionId}`,
+                    `coverage_upgrade_memory_support_action:${memorySupportRoute.actionId}`,
+                    `coverage_upgrade_memory_support_mu:${memorySupportRoute.additionalMu}`,
+                  ]
+                : []),
+              ...economicQuote.evidence,
+            ],
+          },
+        ];
       });
-      if (!economicQuote.admitted) return [];
-      const answer = visibleAnswer
-        ? {
-            ...visibleAnswer,
-            installCost: installCreditCost as number,
-          }
-        : undefined;
-      return [
-        {
-          requiredRole,
-          ...(answer ? { visibleAnswer: answer } : {}),
-          deckHasAlternative: true as const,
-          targetDefinitionId: breaker.cardId,
-          ...(!answer && searchRoute
-            ? { searchActionId: searchRoute.actionId }
-            : {}),
-          recoveryMode: answer
-            ? ("install_visible_upgrade" as const)
-            : ("search_known_upgrade" as const),
-          economicQuote,
-          evidenceCodes: [
-            `coverage_upgrade_target:${evaluation.targetServerId}`,
-            `coverage_upgrade_breaker:${breaker.cardId}`,
-            `coverage_upgrade_required_role:${requiredRole}`,
-            "coverage_upgrade_no_replacement_required:true",
-            ...economicQuote.evidence,
-          ],
-        },
-      ];
     })
     .sort(
       (left, right) =>
@@ -27066,6 +27127,103 @@ function runnerVisibleBreakerUpgradeInstallRoute(
     )[0];
 }
 
+function runnerVisibleBreakerUpgradeMemoryBlockedInstallRoute(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  card: VisibleCard,
+): { actionId: string; creditCost: number; clickCost: number } | undefined {
+  return candidates
+    .flatMap((candidate) => {
+      if (candidate.semanticActionType !== "install.card") return [];
+      const action = input.legalActions.find(
+        (legalAction) => legalAction.actionId === candidate.actionId,
+      );
+      if (
+        !action ||
+        runnerInstallSourceInstanceId(candidate, action) !== card.instanceId ||
+        (action.payload?.runnerProgramTrashBeforeInstall !== true &&
+          !candidate.actionId.endsWith(".runner_program_trash_before_install"))
+      ) {
+        return [];
+      }
+      return [
+        {
+          actionId: candidate.actionId,
+          creditCost: legalActionCreditCost(action),
+          clickCost: action.costs.reduce(
+            (sum, cost) => sum + Math.max(0, cost.clicks ?? 0),
+            0,
+          ),
+        },
+      ];
+    })
+    .sort(
+      (left, right) =>
+        left.creditCost +
+          left.clickCost -
+          (right.creditCost + right.clickCost) ||
+        left.actionId.localeCompare(right.actionId),
+    )[0];
+}
+
+function runnerBreakerUpgradeMemorySupportRoutes(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  requiredAdditionalMu: number,
+): RunnerBreakerUpgradeMemorySupportRoute[] {
+  if (!Number.isSafeInteger(requiredAdditionalMu) || requiredAdditionalMu <= 0)
+    return [];
+  return candidates
+    .flatMap((candidate) => {
+      if (candidate.semanticActionType !== "install.card") return [];
+      const action = input.legalActions.find(
+        (legalAction) => legalAction.actionId === candidate.actionId,
+      );
+      if (!action || action.side !== "runner" || action.type !== "install_card")
+        return [];
+      const sourceInstanceId = runnerInstallSourceInstanceId(candidate, action);
+      const card = input.playerView.own.gripOrHq.find(
+        (entry) =>
+          entry.known !== false && entry.instanceId === sourceInstanceId,
+      );
+      const definition = card?.definitionId
+        ? CARD_DEFINITIONS_BY_ID[card.definitionId]
+        : undefined;
+      const additionalMu = Math.max(
+        0,
+        card?.memoryLimitBonus ?? definition?.memoryLimitBonus ?? 0,
+      );
+      if (
+        !card?.definitionId ||
+        !Number.isSafeInteger(additionalMu) ||
+        additionalMu < requiredAdditionalMu
+      ) {
+        return [];
+      }
+      return [
+        {
+          actionId: action.actionId,
+          definitionId: card.definitionId,
+          additionalMu,
+          creditCost: legalActionCreditCost(action),
+          clickCost: action.costs.reduce(
+            (sum, cost) => sum + Math.max(0, cost.clicks ?? 0),
+            0,
+          ),
+        },
+      ];
+    })
+    .sort(
+      (left, right) =>
+        left.creditCost +
+          left.clickCost -
+          (right.creditCost + right.clickCost) ||
+        left.additionalMu - right.additionalMu ||
+        left.definitionId.localeCompare(right.definitionId) ||
+        left.actionId.localeCompare(right.actionId),
+    );
+}
+
 function runnerBreakerUpgradeRequiredRole(
   breaker: BreakerCapability,
   server: AiDecisionInput["playerView"]["servers"][number],
@@ -27141,6 +27299,10 @@ function runnerBreakerUpgradeSignalQuote(
       quote.projectedLiquidCreditsAfterUpgradeAndRun,
     desiredCreditReserve: quote.desiredCreditReserve,
     memoryAvailable: quote.memoryAvailable,
+    memorySupportAdditionalMu: quote.memorySupportAdditionalMu,
+    memorySupportCreditCost: quote.memorySupportCreditCost,
+    memorySupportActionClicks: quote.memorySupportActionClicks,
+    projectedMemoryAvailable: quote.projectedMemoryAvailable,
     candidateMemoryCost: quote.candidateMemoryCost,
   };
 }

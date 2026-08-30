@@ -169,7 +169,7 @@ export type RunnerCoverageGapSignal = {
     | "search_known_upgrade";
   recoveryEvidenceCodes?: string[];
   upgradeQuote?: {
-    schemaVersion: "runner-breaker-upgrade-economic-quote-v1";
+    schemaVersion: "runner-breaker-upgrade-economic-quote-v2";
     targetDefinitionId: string;
     currentKnownPathCost: number;
     projectedKnownPathCost: number;
@@ -183,6 +183,10 @@ export type RunnerCoverageGapSignal = {
     projectedLiquidCreditsAfterUpgradeAndRun: number;
     desiredCreditReserve: number;
     memoryAvailable: number;
+    memorySupportAdditionalMu: number;
+    memorySupportCreditCost: number;
+    memorySupportActionClicks: number;
+    projectedMemoryAvailable: number;
     candidateMemoryCost: number;
   };
   fundingActionIds: string[];

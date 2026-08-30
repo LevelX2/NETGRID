@@ -24945,7 +24945,7 @@ describe("authoritative plan-first live runtime", () => {
           },
         ],
         upgradeQuote: {
-          schemaVersion: "runner-breaker-upgrade-economic-quote-v1",
+          schemaVersion: "runner-breaker-upgrade-economic-quote-v2",
           targetDefinitionId: "onr_v1_053_ramming-piston",
           currentKnownPathCost: 10,
           savingsPerRun: expect.any(Number),
@@ -24954,6 +24954,155 @@ describe("authoritative plan-first live runtime", () => {
         },
       },
     });
+  });
+
+  it("prepares the cheapest sufficient MU support for an amortizing breaker upgrade", () => {
+    resetResidentPlanPortfolioMemory();
+    const wuTech = legalAction(
+      "install-wutech-for-wall-upgrade",
+      "runner",
+      "install_card",
+      "Install WuTech Mem Chip",
+      { credits: 1, clicks: 1 },
+      {
+        source: "wutech-card",
+        payload: {
+          cardId: "wutech-card",
+          sourceDefinitionId: "onr_v1_145_wutech-mem-chip",
+        },
+      },
+    );
+    const tycho = legalAction(
+      "install-tycho-for-wall-upgrade",
+      "runner",
+      "install_card",
+      "Install Tycho Mem Chip",
+      { credits: 5, clicks: 1 },
+      {
+        source: "tycho-card",
+        payload: {
+          cardId: "tycho-card",
+          sourceDefinitionId: "onr_v1_144_tycho-mem-chip",
+        },
+      },
+    );
+    const rammingPiston = legalAction(
+      "install-ramming-piston.runner_program_trash_before_install",
+      "runner",
+      "install_card",
+      "Trash a program and install Ramming Piston",
+      { credits: 4, clicks: 1 },
+      {
+        source: "ramming-piston-card",
+        payload: {
+          cardId: "ramming-piston-card",
+          sourceDefinitionId: "onr_v1_053_ramming-piston",
+          runnerProgramTrashBeforeInstall: true,
+        },
+      },
+    );
+    const run = costIneffectiveWallRunAction();
+    const credit = costIneffectiveCoverageCreditAction();
+    const input = costIneffectiveWallInput([
+      wuTech,
+      tycho,
+      rammingPiston,
+      run,
+      credit,
+    ]);
+    input.playerView.stateVersion = 12;
+    input.playerView.turnSerial = 3;
+    input.playerView.own.credits = 22;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.memoryUsed = 4;
+    input.playerView.own.memoryLimit = 4;
+    input.playerView.own.gripOrHq = [
+      visibleCard("ramming-piston-card", "runner", "program", {
+        definitionId: "onr_v1_053_ramming-piston",
+        title: "Ramming Piston",
+        installCost: 4,
+        memoryCost: 1,
+        strength: 5,
+        subtypes: ["icebreaker", "noisy"],
+      }),
+      visibleCard("wutech-card", "runner", "hardware", {
+        definitionId: "onr_v1_145_wutech-mem-chip",
+        title: "WuTech Mem Chip",
+        installCost: 1,
+        memoryLimitBonus: 1,
+      }),
+      visibleCard("tycho-card", "runner", "hardware", {
+        definitionId: "onr_v1_144_tycho-mem-chip",
+        title: "Tycho Mem Chip",
+        installCost: 5,
+        memoryLimitBonus: 3,
+      }),
+    ];
+    for (const action of input.legalActions) action.expiresAtStateVersion = 12;
+    input.playerView.legalActions = input.legalActions;
+    const blockedTarget = costIneffectiveWallTarget(run.actionId);
+    const target = {
+      ...blockedTarget,
+      pathPassability: "reachable" as const,
+      recommendation: "run_now" as const,
+      creditsAfterRun: 12,
+      score: 220,
+      runActionProjection: {
+        ...blockedTarget.runActionProjection,
+        sourceKind: "basic_action" as const,
+      },
+      routeQuote: {
+        ...blockedTarget.routeQuote,
+        reachability: "guaranteed_access" as const,
+        availableCredits: 22,
+        fundingGap: 0,
+      },
+    };
+
+    const decision = liveContext({
+      deckCapabilitiesForInput: () =>
+        costIneffectiveCoverageCapabilities("in_hand"),
+      buildRunnerEconomyPosture: midgameUpgradeEconomyPosture,
+      evaluateRunnerRunTargets: () => [target],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: wuTech.actionId,
+      reasonCode: "plan_first.runner.rig_and_coverage",
+      fallbackUsed: false,
+      decisionDebug: { planKind: "runner.rig_and_coverage" },
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_step_capability:prepare_breaker_wall",
+        "plan_assessment_evidence:coverage_upgrade_memory_support:onr_v1_145_wutech-mem-chip",
+      ]),
+    );
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.find(
+        (instance) => instance.moduleId === "runner.rig_and_coverage",
+      )?.moduleState,
+    ).toMatchObject({
+      phase: "prepare_coverage",
+      gap: {
+        needKind: "coverage_upgrade",
+        memorySupportActionIds: [wuTech.actionId],
+        preparationActionIds: [wuTech.actionId],
+        upgradeQuote: {
+          schemaVersion: "runner-breaker-upgrade-economic-quote-v2",
+          targetDefinitionId: "onr_v1_053_ramming-piston",
+          memoryAvailable: 0,
+          memorySupportAdditionalMu: 1,
+          memorySupportCreditCost: 1,
+          projectedMemoryAvailable: 1,
+        },
+      },
+    });
+    expect(
+      decision.decisionDebug?.actionAlternatives?.find(
+        (alternative) => alternative.actionId === tycho.actionId,
+      )?.selected,
+    ).not.toBe(true);
   });
 
   it("does not let Central-plan priority rescue a non-amortizing upgrade", () => {
