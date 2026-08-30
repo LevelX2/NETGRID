@@ -1,6 +1,6 @@
 # Globale Format-Baseline bereinigen
 
-Status: in Arbeit  
+Status: abgeschlossen  
 Priorität: normal  
 Arbeitsbranch: `codex/global-format-baseline-20260830-01`  
 Worktree: `C:\Projekte\NETGRID-worktrees\global-format-baseline-20260830-01`
@@ -224,6 +224,16 @@ origin/main`, Workspace-Typecheck, `git diff --check` und sauberer Status.
   keine Änderung innerhalb dieses rein mechanischen Formatprozesses.
 - Der temporäre Diagnose-Checkout wurde aus Git und dem Dateisystem vollständig
   entfernt.
+- P5: Der Arbeitsbranch wurde per Fast-Forward von
+  `18fe3da753117e894b8578301cdd620123470394` bis `73273e350` in das lokale
+  `main` integriert. Der reale Main-Checkout meldete zunächst noch 40 reine
+  CRLF-Arbeitsbaumreste; Prettier und der neue LF-Vertrag normalisierten sie
+  ohne verbleibenden Git-Inhaltsdiff. Der anschließend erneut ausgeführte
+  globale Formatcheck war grün.
+- Der Prozessworktree ist weder in `git worktree list --porcelain` noch im
+  Dateisystem vorhanden. Der vollständig gemergte Arbeitsbranch wurde mit
+  `git branch -d` gelöscht.
+- Es wurde nichts gepusht und keine Remote-Integration ausgeführt.
 
 ## Worktree-, Git- und Integrationsregeln
 
