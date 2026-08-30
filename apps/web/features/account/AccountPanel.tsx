@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { useLocale, useTranslations } from "use-intl/react";
 import { formatAppDateTime } from "../../i18n/format";
 import type { AppLocale } from "../../i18n/locale";
@@ -20,6 +21,7 @@ export function AccountPanel({
   const t = useTranslations("Account.panel");
   const [loginName, setLoginName] = useState("");
   const [password, setPassword] = useState("");
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [inviteToken, setInviteToken] = useState("");
   const [invitePassword, setInvitePassword] = useState("");
   const [resetToken, setResetToken] = useState("");
@@ -252,7 +254,10 @@ export function AccountPanel({
 
   const submitLogin = async (event: FormEvent) => {
     event.preventDefault();
-    if (await accountSession.login(loginName, password)) setPassword("");
+    if (await accountSession.login(loginName, password)) {
+      setPassword("");
+      setIsPasswordVisible(false);
+    }
   };
   const submitInvite = async (event: FormEvent) => {
     event.preventDefault();
@@ -293,16 +298,35 @@ export function AccountPanel({
                 value={loginName}
               />
             </label>
-            <label>
-              {t("password")}
-              <input
-                autoComplete="current-password"
-                onChange={(event) => setPassword(event.target.value)}
-                required
-                type="password"
-                value={password}
-              />
-            </label>
+            <div className="accountField">
+              <label htmlFor="account-login-password">{t("password")}</label>
+              <span className="accountPasswordField">
+                <input
+                  autoComplete="current-password"
+                  id="account-login-password"
+                  onChange={(event) => setPassword(event.target.value)}
+                  required
+                  type={isPasswordVisible ? "text" : "password"}
+                  value={password}
+                />
+                <button
+                  aria-label={t(
+                    isPasswordVisible ? "hidePassword" : "showPassword",
+                  )}
+                  aria-pressed={isPasswordVisible}
+                  className="accountPasswordToggle"
+                  onClick={() => setIsPasswordVisible((visible) => !visible)}
+                  title={t(isPasswordVisible ? "hidePassword" : "showPassword")}
+                  type="button"
+                >
+                  {isPasswordVisible ? (
+                    <EyeOff aria-hidden="true" size={18} />
+                  ) : (
+                    <Eye aria-hidden="true" size={18} />
+                  )}
+                </button>
+              </span>
+            </div>
             <button
               className="button primary"
               disabled={accountSession.busy}

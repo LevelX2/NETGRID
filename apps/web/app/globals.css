@@ -18165,8 +18165,45 @@ select,
   gap: 6px;
 }
 
+.accountField {
+  display: grid;
+  gap: 6px;
+}
+
 .accountForm input {
   width: 100%;
+}
+
+.accountPasswordField {
+  position: relative;
+  display: block;
+}
+
+.accountPasswordField input {
+  padding-right: 42px;
+}
+
+.accountPasswordToggle {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  place-items: center;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.accountPasswordToggle:hover,
+.accountPasswordToggle:focus-visible {
+  background: var(--panel);
+  color: var(--text);
 }
 
 .accountIssuedLink {
