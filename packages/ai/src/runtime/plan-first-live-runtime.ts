@@ -8520,6 +8520,10 @@ function buildRunnerDomain(
           );
         const terminalRemoteContestIsDirectlyMandatory =
           runnerTerminalRemoteContestIsDirectlyMandatory(input, evaluation);
+        const terminalRemoteThreat = runnerCoverageGapIsTerminalRemoteThreat(
+          input,
+          evaluation,
+        );
         const fundingSupportCanExecuteBeforeUrgentContest =
           fundingSupport !== undefined &&
           fundingSupport.routeActionIds.length > 0;
@@ -8567,7 +8571,7 @@ function buildRunnerDomain(
           serverId: evaluation.targetServerId,
           purpose: purpose === "information" ? purpose : ("contest" as const),
           knownAgendaThreat: evaluation.scoreThreat,
-          terminalPatternThreat: terminalRemoteContestIsDirectlyMandatory,
+          terminalPatternThreat: terminalRemoteThreat,
           reachable:
             !safetyBlocked &&
             !forgoUnsafeRunCapacity &&
@@ -8577,7 +8581,7 @@ function buildRunnerDomain(
               irrecoverableScoreThreatContest ||
               (evaluation.prerunReserveQuote?.status !== "blocked" &&
                 directRunRouteReady)),
-          marginalValue: terminalRemoteContestIsDirectlyMandatory
+          marginalValue: terminalRemoteThreat
             ? 1_400
             : irrecoverableScoreThreatContest
               ? 1_200
@@ -12051,7 +12055,8 @@ function runnerRunFundingSupport(
   if (!admission.admitted && terminalVisibleHazardFundingGap === undefined) {
     return undefined;
   }
-  const gap = terminalVisibleHazardFundingGap ?? admission.concreteFundingGap;
+  const conservativeGap =
+    terminalVisibleHazardFundingGap ?? admission.concreteFundingGap;
   const remote = evaluation.accessTargetKind === "remote";
   const dedupeKey = remote
     ? `remote:${evaluation.targetServerId}`
@@ -12060,7 +12065,7 @@ function runnerRunFundingSupport(
     ? "runner.contest_remote"
     : "runner.pressure_central";
   const parentPlanInstanceId = `plan:${parentModule}:${encodeURIComponent(dedupeKey)}`;
-  const route = runnerExactFundingRouteContract(input, candidates, {
+  let route = runnerExactFundingRouteContract(input, candidates, {
     demandId: `run-support:${dedupeKey}`,
     sourcePlanId: parentPlanInstanceId,
     purpose: "current_run",
@@ -12069,7 +12074,7 @@ function runnerRunFundingSupport(
       : "current_foreground_plan",
     hardness: "hard",
     deadline: "end_of_current_turn",
-    targetCredits: input.playerView.own.credits + gap,
+    targetCredits: input.playerView.own.credits + conservativeGap,
     remainingClicks: Math.max(0, input.playerView.own.clicks - 1),
     allowStrategicExchange: true,
     debtFinancingParent: {
@@ -12091,6 +12096,52 @@ function runnerRunFundingSupport(
       admission.reasonCode,
     ],
   });
+  const terminalKnownPathGap =
+    route.routeActionIds.length === 0
+      ? runnerTerminalRemoteLastChanceKnownPathFundingGap(input, evaluation)
+      : undefined;
+  if (terminalKnownPathGap !== undefined) {
+    const terminalRoute = runnerExactFundingRouteContract(input, candidates, {
+      demandId: `run-support:${dedupeKey}`,
+      sourcePlanId: parentPlanInstanceId,
+      purpose: "current_run",
+      priority: "acute_hard_plan_blocker",
+      hardness: "hard",
+      deadline: "end_of_current_turn",
+      targetCredits: input.playerView.own.credits + terminalKnownPathGap,
+      remainingClicks: Math.max(0, input.playerView.own.clicks - 1),
+      allowStrategicExchange: true,
+      debtFinancingParent: {
+        planInstanceId: parentPlanInstanceId,
+        runActionId: evaluation.actionId,
+        targetServerId: evaluation.targetServerId,
+        accessPayoff: evaluation.accessPayoff,
+        scoreThreat: evaluation.scoreThreat,
+        score: evaluation.score,
+        pathPassability: evaluation.pathPassability,
+        creditsAfterRun: evaluation.creditsAfterRun,
+        unknownUnrezzedIceCount: evaluation.unknownUnrezzedIceCount ?? 0,
+        riskyUniversalCoverage: evaluation.riskyUniversalCoverage,
+        remainingClicksAfterRun: Math.max(0, input.playerView.own.clicks - 2),
+      },
+      evidence: [
+        `runner_run_support_target:${evaluation.targetServerId}`,
+        "runner_run_conversion_click_reserved:1",
+        "runner_terminal_remote_last_chance_known_path_funding",
+      ],
+    });
+    if (terminalRoute.routeActionIds.length > 0) {
+      route = terminalRoute;
+    }
+  }
+  const gap =
+    terminalKnownPathGap !== undefined && route.routeActionIds.length > 0
+      ? terminalKnownPathGap
+      : conservativeGap;
+  const terminalKnownPathRouteSelected =
+    terminalKnownPathGap !== undefined &&
+    gap === terminalKnownPathGap &&
+    route.routeActionIds.length > 0;
   return {
     needId: `run-support:${dedupeKey}`,
     gap,
@@ -12100,17 +12151,41 @@ function runnerRunFundingSupport(
     driver: {
       kind: remote ? "contest" : "run",
       targetId: evaluation.targetServerId,
-      reasonCode:
-        terminalVisibleHazardFundingGap !== undefined
+      reasonCode: terminalKnownPathRouteSelected
+        ? "terminal_remote_last_chance_known_path_funding"
+        : terminalVisibleHazardFundingGap !== undefined
           ? "terminal_remote_visible_hazard_funding_gap"
           : admission.reasonCode,
     },
     ...route,
-    evidenceCode:
-      terminalVisibleHazardFundingGap !== undefined
+    evidenceCode: terminalKnownPathRouteSelected
+      ? `runner_run_support_terminal_last_chance_known_path_gap:${evaluation.targetServerId}:${gap}:${evaluation.actionId}`
+      : terminalVisibleHazardFundingGap !== undefined
         ? `runner_run_support_terminal_visible_hazard_gap:${evaluation.targetServerId}:${terminalVisibleHazardFundingGap}:${evaluation.actionId}`
         : `runner_run_support_fund_concrete_gap:${evaluation.targetServerId}:${admission.reasonCode}`,
   };
+}
+
+function runnerTerminalRemoteLastChanceKnownPathFundingGap(
+  input: AiDecisionInput,
+  evaluation: RunnerRunTargetEvaluation,
+): number | undefined {
+  const routeFundingGap = evaluation.routeQuote?.fundingGap;
+  if (
+    !runnerCoverageGapIsTerminalRemoteThreat(input, evaluation) ||
+    evaluation.pathPassability !== "blocked_unpayable" ||
+    evaluation.recommendation !== "gain_credits_first" ||
+    evaluation.knownAccessState === "known_no_current_payoff" ||
+    evaluation.accessPayoffContestable === false ||
+    evaluation.visibleTraceTagHazardUnavoidable === true ||
+    (evaluation.unavoidableVisibleIceHazardCount ?? 0) > 0 ||
+    !Number.isSafeInteger(routeFundingGap) ||
+    (routeFundingGap ?? 0) <= 0 ||
+    evaluation.creditsAfterRun + (routeFundingGap ?? 0) < 0
+  ) {
+    return undefined;
+  }
+  return routeFundingGap;
 }
 
 function runnerRunTargetCanConvertNow(

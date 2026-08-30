@@ -20708,6 +20708,133 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("funds the known path before taking central last-chance pressure against a terminal remote", () => {
+    resetResidentPlanPortfolioMemory();
+    const runRd = legalAction(
+      "run-rd-terminal-funding-alternative",
+      "runner",
+      "start_run",
+      "Run R&D",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "rd" } },
+    );
+    const runRemote = legalAction(
+      "run-remote-terminal-known-path-gap",
+      "runner",
+      "start_run",
+      "Run Remote 1",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "remote_1" } },
+    );
+    const credit = legalAction(
+      "credit-terminal-known-path-gap",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [runRd, runRemote, credit]);
+    input.playerView.own.agendaPoints = 6;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.credits = 6;
+    input.playerView.opponent.agendaPoints = 4;
+    input.playerView.opponent.credits = 3;
+    input.playerView.opponent.deckCount = 8;
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "remote_1",
+        [
+          visibleCard("remote-known-ice", "corp", "ice"),
+          {
+            instanceId: "remote-hidden-ice",
+            owner: "corp",
+            controller: "corp",
+            type: "ice",
+            known: false,
+          },
+        ],
+        [
+          {
+            instanceId: "terminal-remote-root",
+            owner: "corp",
+            controller: "corp",
+            type: "agenda",
+            known: false,
+            advancementCounters: 1,
+          },
+        ],
+      ),
+    ];
+    const rdTarget = {
+      ...safeRuntimeRunTarget(runRd.actionId, "rd"),
+      accessPayoff: "unknown" as const,
+      knownAccessState: "unknown" as const,
+      recommendation: "gain_credits_first" as const,
+      score: -40,
+    };
+    const remoteTarget = {
+      ...safeRuntimeRunTarget(runRemote.actionId, "remote_1"),
+      targetKind: "remote" as const,
+      accessTargetKind: "remote" as const,
+      accessPayoff: "score_threat" as const,
+      knownAccessState: "unknown" as const,
+      pathPassability: "blocked_unpayable" as const,
+      pathCost: 7,
+      creditsAfterRun: -1,
+      unknownUnrezzedIceCount: 1,
+      scoreThreat: true,
+      recommendation: "gain_credits_first" as const,
+      score: -80,
+      routeQuote: {
+        ...safeRuntimeRunTarget(runRemote.actionId, "remote_1").routeQuote,
+        reachability: "no_access" as const,
+        knownCost: 7,
+        guaranteedKnownCost: 7,
+        availableCredits: 6,
+        fundingGap: 1,
+        unknownIceCount: 1,
+        noAccessReason: "insufficient_credits" as const,
+      },
+      fundingNeed: {
+        reason: "route_funding_gap" as const,
+        routeFundingGap: 1,
+        postRunFloorGap: 17,
+        protectedLiquidReserve: 16,
+      },
+    };
+
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => [rdTarget, remoteTarget],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.economy",
+        planFirstDecision: {
+          rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+          leafExecutorInstanceId:
+            "plan:runner.economy:run-support%3Aremote%3Aremote_1",
+          selectedStep: {
+            stepId: expect.stringContaining(
+              ":fund:run-support:remote:remote_1",
+            ),
+          },
+        },
+        evidence: expect.arrayContaining([
+          expect.stringContaining(
+            "runner_run_support_terminal_last_chance_known_path_gap:remote_1:1",
+          ),
+        ]),
+      },
+    });
+  });
+
   it("uses existing central pressure for a last-chance access when the terminal remote is unreachable", () => {
     resetResidentPlanPortfolioMemory();
     const runHq = legalAction(
