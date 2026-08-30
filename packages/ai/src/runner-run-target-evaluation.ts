@@ -298,6 +298,7 @@ function evaluateRunnerRunTarget(
     creditsAfterRun,
   );
   const runActionPayoff = runActionPayoffForTarget(
+    params.input,
     projection,
     accessTargetKind,
     bypassedFirstIce,
@@ -767,6 +768,7 @@ function runActionGripCardCost(
 }
 
 function runActionPayoffForTarget(
+  input: AiDecisionInput,
   projection: RunActionProjection,
   targetKind: RunnerRunTargetKind,
   bypassedFirstIce: boolean,
@@ -792,6 +794,25 @@ function runActionPayoffForTarget(
   if (projection.structure === "multi_run_sequence") {
     values.futureSetupValue += 35;
     evidence.add(`run_action_payoff:${targetKind}:multi_run_sequence`);
+  }
+  if ((projection.successfulRunRunnerCreditGain ?? 0) > 0) {
+    const currentEligibility =
+      projection.successfulRunRunnerCreditGainRequiresOpponentCredits !==
+        true || input.playerView.opponent.credits > 0;
+    if (currentEligibility) {
+      values.economyValue +=
+        8 * Math.max(0, projection.successfulRunRunnerCreditGain ?? 0);
+      evidence.add(
+        `run_action_payoff:${targetKind}:successful_run_credit_gain:${projection.successfulRunRunnerCreditGain}`,
+      );
+      evidence.add(
+        `run_action_payoff:${targetKind}:successful_run_credit_gain_currently_eligible:true`,
+      );
+    } else {
+      evidence.add(
+        `run_action_payoff:${targetKind}:successful_run_credit_gain_currently_eligible:false`,
+      );
+    }
   }
   if ((projection.postRunSelfDamage ?? 0) > 0) {
     values.riskPenalty += 120 * projection.postRunSelfDamage!;

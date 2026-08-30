@@ -105,6 +105,8 @@ export type RunActionProjection = {
     sourceDefinitionId?: string;
   };
   runnerCreditGainOnCorpRez?: number;
+  successfulRunRunnerCreditGain?: number;
+  successfulRunRunnerCreditGainRequiresOpponentCredits?: boolean;
   damagePreventionPool?: number;
   eventApproachIceExposeBeforeRez?: boolean;
   spendLimit?: number;

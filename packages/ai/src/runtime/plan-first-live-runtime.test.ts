@@ -758,6 +758,79 @@ describe("authoritative plan-first live runtime", () => {
     resetResidentPlanPortfolioMemory();
   });
 
+  it("keeps a successful-run economy event owned by the existing central pressure plan", () => {
+    resetResidentPlanPortfolioMemory();
+    const shippingCard = visibleCard(
+      "runner-edited-shipping",
+      "runner",
+      "event",
+      {
+        definitionId: "onr_v1_084_edited-shipping-manifests",
+        title: "Edited Shipping Manifests",
+      },
+    );
+    const shippingRun = legalAction(
+      "runner.play-edited-shipping.hq",
+      "runner",
+      "play_event",
+      "Edited Shipping Manifests auf HQ",
+      { credits: 1, clicks: 1 },
+      {
+        source: shippingCard.instanceId,
+        payload: {
+          cardId: shippingCard.instanceId,
+          sourceDefinitionId: "onr_v1_084_edited-shipping-manifests",
+          serverId: "hq",
+          runnerEventRun: true,
+          cardImplementationAbilityKey: "abilities_on_play_make_run",
+        },
+      },
+    );
+    const basicRun = legalAction(
+      "runner.start-run.hq",
+      "runner",
+      "start_run",
+      "Run HQ",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "hq" } },
+    );
+    const input = aiInput("runner", [shippingRun, basicRun]);
+    input.playerView.own.credits = 5;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.gripOrHq = [shippingCard];
+    input.playerView.opponent.credits = 5;
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    const targetFor = (actionId: string, score: number) => ({
+      ...safeRuntimeRunTarget(actionId, "hq"),
+      score,
+      recommendation: "run_now" as const,
+      accessPayoff: "access_bonus" as const,
+      knownAccessState: "unknown" as const,
+      evidence: ["test_successful_run_economy_payoff"],
+    });
+
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => [
+        targetFor(shippingRun.actionId, 240),
+        targetFor(basicRun.actionId, 160),
+      ],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: shippingRun.actionId,
+      reasonCode: "plan_first.runner.pressure_central",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
+          leafExecutorInstanceId: "plan:runner.pressure_central:central%3Ahq",
+          selectedPlan: { moduleId: "runner.pressure_central" },
+        },
+      },
+    });
+    resetResidentPlanPortfolioMemory();
+  });
+
   it("keeps an HQ setup run admissible when its direct access score is negative but it opens a targeted ICE-trash window", () => {
     resetResidentPlanPortfolioMemory();
     const hqRun = legalAction(

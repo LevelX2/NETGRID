@@ -62,6 +62,36 @@ describe("projectRunnerRunActions", () => {
     ]);
   });
 
+  it("projects exact successful-run economy from the bound event capability", () => {
+    const shippingManifest = action({
+      actionId: "edited-shipping-hq",
+      type: "play_event",
+      source: "shipping-manifest-instance",
+      payload: {
+        cardId: "shipping-manifest-instance",
+        sourceDefinitionId: "onr_v1_084_edited-shipping-manifests",
+        serverId: "hq",
+        runnerEventRun: true,
+        cardImplementationAbilityKey: "abilities_on_play_make_run",
+      },
+    });
+
+    expect(
+      projectRunnerRunActions({ input: input([shippingManifest]) }),
+    ).toEqual([
+      expect.objectContaining({
+        actionId: "edited-shipping-hq",
+        targetServerId: "hq",
+        successfulRunRunnerCreditGain: 10,
+        successfulRunRunnerCreditGainRequiresOpponentCredits: true,
+        evidence: expect.arrayContaining([
+          "run_action_projection_successful_run_runner_credit_gain:10",
+          "run_action_projection_successful_run_runner_credit_gain_requires_opponent_credits:true",
+        ]),
+      }),
+    ]);
+  });
+
   it("projects structured external run context without card-rule reconstruction", () => {
     const eventRun = action({
       actionId: "external-run-context",
