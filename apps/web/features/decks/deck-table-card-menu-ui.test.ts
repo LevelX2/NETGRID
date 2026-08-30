@@ -22,8 +22,8 @@ describe("deck table card menu contract", () => {
   });
 
   it("describes the shortcut as filling the card count to three", () => {
-    expect(boardSource).toContain(
-      "onDuplicateCard(pile.id, entry.cardId, entry.order, DECK_TABLE_MAX_COPIES_PER_CARD)",
+    expect(boardSource).toMatch(
+      /onDuplicateCard\(\s*pile\.id,\s*entry\.cardId,\s*entry\.order,\s*DECK_TABLE_MAX_COPIES_PER_CARD,?\s*\)/,
     );
     expect(germanMessages.Decks.table.upToThree).toBe("Auf 3 auffüllen");
   });

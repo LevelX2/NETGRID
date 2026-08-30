@@ -471,6 +471,196 @@ describe("Corp compromised Ambush disposition", () => {
   });
 });
 
+describe("Corp Ambush advancement support ownership", () => {
+  it("keeps an exact support install inside the resident Ambush plan", () => {
+    const trap = visibleCard("trap-installed", "corp", "asset", {
+      definitionId: "onr_v1_346_vacant-soulkiller",
+      title: "Vacant Soulkiller",
+      advancementCounters: 0,
+    });
+    const support = visibleCard("lesley-in-hq", "corp", "upgrade", {
+      definitionId: "onr_proteus_062_lesley-major",
+      title: "Lesley Major",
+    });
+    const install = legalAction(
+      "install-lesley-remote-1",
+      "corp",
+      "install_card",
+      "Install Lesley Major in Remote 1",
+      { credits: 0, clicks: 1 },
+      {
+        source: support.instanceId,
+        payload: {
+          cardId: support.instanceId,
+          serverId: "remote_1",
+          placement: "root",
+        },
+      },
+    );
+    const input = aiInput("corp", [install]);
+    input.playerView.own.credits = 6;
+    input.playerView.own.gripOrHq = [support];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [], [trap]),
+    ];
+    setAmbushIntent(input);
+
+    const [signal] = buildCorpAmbushPlanSignals({
+      input,
+      candidates: [
+        ambushInstallCandidate(
+          install.actionId,
+          support.instanceId,
+          support.definitionId!,
+          "remote_1",
+        ),
+      ],
+      previous: ambushSupportPrevious(input, trap),
+    });
+
+    expect(signal).toMatchObject({
+      sourceInstanceId: trap.instanceId,
+      phase: "install_support",
+      actionIds: [install.actionId],
+      plannedAdvancementTarget: 2,
+      advancementSupportRoute: {
+        phase: "install",
+        actionId: install.actionId,
+        supportSourceInstanceId: support.instanceId,
+        supportSourceDefinitionId: support.definitionId,
+        targetCardInstanceId: trap.instanceId,
+        serverId: "remote_1",
+      },
+    });
+  });
+
+  it("binds the exact support trigger and Ambush target without changing the resident root", () => {
+    const trap = visibleCard("trap-installed", "corp", "asset", {
+      definitionId: "onr_v1_346_vacant-soulkiller",
+      title: "Vacant Soulkiller",
+      advancementCounters: 0,
+    });
+    const support = visibleCard("lesley-installed", "corp", "upgrade", {
+      definitionId: "onr_proteus_062_lesley-major",
+      title: "Lesley Major",
+      rezzed: true,
+    });
+    const trigger = legalAction(
+      "trigger-lesley-on-trap",
+      "corp",
+      "trigger_ability",
+      "Lesley Major: 2 Advancement-Counter auf Vacant Soulkiller",
+      { credits: 5, clicks: 0 },
+      {
+        source: support.instanceId,
+        payload: {
+          cardId: support.instanceId,
+          sourceDefinitionId: support.definitionId!,
+          targetCardId: trap.instanceId,
+          targetCardDefinitionId: trap.definitionId!,
+          serverId: "remote_1",
+          fortRunWindowAbility:
+            "add_advancement_counters_after_passing_last_ice_on_this_fort",
+        },
+      },
+    );
+    const input = aiInput("corp", [trigger]);
+    input.playerView.own.credits = 5;
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [], [trap, support]),
+    ];
+    setAmbushIntent(input);
+    const candidate = {
+      ...ambushInstallCandidate(
+        trigger.actionId,
+        support.instanceId,
+        support.definitionId!,
+        "remote_1",
+      ),
+      actionType: "trigger_ability",
+      semanticActionType: "card_ability.trigger",
+      targetContext: {
+        selectedTargets: [
+          {
+            targetId: trap.instanceId,
+            targetKind: "card",
+            source: "legal_action_payload",
+          },
+        ],
+        availableTargets: [],
+        targetProfileMatches: [],
+      },
+      costProfile: {
+        clickCost: 0,
+        creditCost: 5,
+        paidBy: "corp",
+        beneficiary: "corp",
+        costKnownStatus: "known",
+        additionalCosts: [],
+      },
+    } as unknown as ActionSemanticCandidate;
+
+    const [signal] = buildCorpAmbushPlanSignals({
+      input,
+      candidates: [candidate],
+      previous: ambushSupportPrevious(input, trap),
+    });
+
+    expect(signal).toMatchObject({
+      ambushId: `ambush:${trap.instanceId}`,
+      sourceInstanceId: trap.instanceId,
+      phase: "trigger_support",
+      actionIds: [trigger.actionId],
+      advancementSupportRoute: {
+        phase: "trigger",
+        actionId: trigger.actionId,
+        supportSourceInstanceId: support.instanceId,
+        targetCardInstanceId: trap.instanceId,
+      },
+    });
+  });
+});
+
+function ambushSupportPrevious(
+  input: AiDecisionInput,
+  trap: ReturnType<typeof visibleCard>,
+): ResidentPlanPortfolio {
+  return {
+    instances: [
+      {
+        instanceId: `plan:corp.ambush_and_bluff:ambush%3A${trap.instanceId}`,
+        moduleId: "corp.ambush_and_bluff",
+        viability: "ready",
+        moduleState: {
+          kind: "ambush",
+          signal: {
+            commitmentVersion: CORP_AMBUSH_COMMITMENT_VERSION,
+            ambushId: `ambush:${trap.instanceId}`,
+            sourceDefinitionId: trap.definitionId,
+            sourceInstanceId: trap.instanceId,
+            actionIds: [],
+            serverId: "remote_1",
+            phase: "advance",
+            assignedDomainPlanIds: ["corp.ambush_bluff"],
+            duplicateAlreadyInstalled: false,
+            affordableOrSupportable: true,
+            plannedAtStateVersion: input.playerView.stateVersion,
+            plannedAdvancementTarget: 2,
+            value: 300,
+            evidenceCode: "test_ambush_advancement_support",
+          },
+        },
+      },
+    ],
+  } as unknown as ResidentPlanPortfolio;
+}
+
 function installedTrapFixture(options: {
   exposed: boolean;
   corpCredits: number;

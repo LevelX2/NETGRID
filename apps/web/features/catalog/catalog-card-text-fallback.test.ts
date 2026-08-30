@@ -29,8 +29,8 @@ describe("catalog card text fallback", () => {
     );
 
     expect(source).toContain("setCatalogImageUnavailable(false)");
-    expect(source).toContain(
-      "[detail?.catalogCardId, catalogImageSource.src, catalogImageSource.fallbackSrc]",
+    expect(source).toMatch(
+      /\[\s*detail\?\.catalogCardId,\s*catalogImageSource\.src,\s*catalogImageSource\.fallbackSrc,?\s*\]/,
     );
   });
 });

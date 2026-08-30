@@ -12,6 +12,7 @@ type PendingChoiceOptions = PendingChoice["options"];
 const TARGETED_ICE_TRASH_CHOICE_SOURCES = {
   rezzed: "card_implementation.pay_rez_cost_trash_rezzed_ice:",
   unrezzed: "card_implementation.trash_unrezzed_ice:",
+  rez_or_trash: "card_implementation.corp_choice_rez_or_trash_ice_target:",
 } as const;
 
 export function isRunnerTargetedIceTrashChoice(choice: PendingChoice): boolean {
@@ -93,12 +94,12 @@ function targetedIceTrashChoiceSource(choice: PendingChoice):
   | {
       sourceCardInstanceId: string;
       choiceStateVersion: number;
-      targetIceState: "rezzed" | "unrezzed";
+      targetIceState: "rezzed" | "unrezzed" | "rez_or_trash";
     }
   | undefined {
   const sourceEntry = Object.entries(TARGETED_ICE_TRASH_CHOICE_SOURCES).find(
     ([, prefix]) => choice.source.startsWith(prefix),
-  ) as ["rezzed" | "unrezzed", string] | undefined;
+  ) as ["rezzed" | "unrezzed" | "rez_or_trash", string] | undefined;
   if (!sourceEntry) return undefined;
   const [targetIceState, prefix] = sourceEntry;
   const suffix = choice.source.slice(prefix.length);

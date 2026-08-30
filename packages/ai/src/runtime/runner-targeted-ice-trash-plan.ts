@@ -8,10 +8,14 @@ import {
 
 const PAY_REZ_COST_TO_TRASH_REZZED_ICE = "pay_rez_cost_to_trash_rezzed_ice";
 const TRASH_UNREZZED_ICE = "trash_unrezzed_ice";
+const CORP_CHOICE_REZ_OR_TRASH_ICE = "corp_choice_rez_or_trash_ice";
 const TRASH_UNREZZED_ICE_ABILITY_KEY = "abilities_on_play_trash_unrezzed_ice";
 const ROUTE_OPENING_PAYOFF_FLOOR = 120;
 
-export type RunnerTargetedIceTrashState = "rezzed" | "unrezzed";
+export type RunnerTargetedIceTrashState =
+  | "rezzed"
+  | "unrezzed"
+  | "rez_or_trash";
 
 export type RunnerTargetedIceTrashCommitment = {
   kind: "targeted_ice_trash";
@@ -66,6 +70,7 @@ export function runnerTargetedIceTrashState(
   }
   const targets = new Set(candidate.effectTargets ?? []);
   if (targets.has(PAY_REZ_COST_TO_TRASH_REZZED_ICE)) return "rezzed";
+  if (targets.has(CORP_CHOICE_REZ_OR_TRASH_ICE)) return "rez_or_trash";
   if (
     targets.has(TRASH_UNREZZED_ICE) ||
     candidate.abilityKey === TRASH_UNREZZED_ICE_ABILITY_KEY ||
@@ -158,15 +163,21 @@ export function runnerTargetedIceTrashPlanCommitment(params: {
       ) {
         return [];
       }
-      if (targetIceState === "unrezzed") {
+      if (targetIceState === "unrezzed" || targetIceState === "rez_or_trash") {
         return server.ice.flatMap((ice, targetIcePosition) => {
           if (ice.rezzed === true) return [];
           const remainingUnrezzedCount = server.ice.filter(
             (candidateIce, index) =>
               index !== targetIcePosition && candidateIce.rezzed !== true,
           ).length;
+          const corpCreditPressureValue =
+            targetIceState === "rez_or_trash"
+              ? Math.max(0, 5 - input.playerView.opponent.credits) * 20
+              : 0;
           const routeNetValue =
-            target.payoffValue - remainingUnrezzedCount * 25;
+            target.payoffValue +
+            corpCreditPressureValue -
+            remainingUnrezzedCount * 25;
           if (routeNetValue <= 0) return [];
           return [
             {
@@ -188,7 +199,13 @@ export function runnerTargetedIceTrashPlanCommitment(params: {
                   `runner_targeted_ice_trash_owner:${target.ownerModuleId}`,
                   `runner_targeted_ice_trash_server:${target.serverId}`,
                   `runner_targeted_ice_trash_position:${targetIcePosition}`,
-                  "runner_targeted_ice_trash_state:unrezzed",
+                  `runner_targeted_ice_trash_state:${targetIceState}`,
+                  ...(targetIceState === "rez_or_trash"
+                    ? [
+                        `runner_targeted_ice_trash_corp_credits:${input.playerView.opponent.credits}`,
+                        `runner_targeted_ice_trash_corp_credit_pressure_value:${corpCreditPressureValue}`,
+                      ]
+                    : []),
                   `runner_targeted_ice_trash_remaining_unrezzed:${remainingUnrezzedCount}`,
                   `runner_targeted_ice_trash_route_net_value:${routeNetValue}`,
                 ],

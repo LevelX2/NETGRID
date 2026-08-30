@@ -10005,17 +10005,28 @@ function runnerTargetedIceTrashCentralPreparationSignals(
             signal.marginalValue,
             runTargets,
           ),
-          targetIceState === "unrezzed"
+          targetIceState === "unrezzed" || targetIceState === "rez_or_trash"
             ? runnerUnrezzedIceTrashRouteOpeningPayoff(input, signal.serverId)
             : 0,
-          targetIceState === "unrezzed" &&
+          (targetIceState === "unrezzed" ||
+            targetIceState === "rez_or_trash") &&
             signal.serverId === "rd" &&
             input.playerView.own.agendaPoints >=
               input.playerView.agendaPointsToWin - 1
             ? 1_000
             : 0,
         );
-        if (payoffValue <= 0) return [];
+        if (
+          payoffValue <= 0 ||
+          !runnerRezOrTrashPreparationBeatsImmediateRun({
+            input,
+            targetIceState,
+            serverId: signal.serverId,
+            payoffValue,
+            runTargets,
+          })
+        )
+          return [];
         return [
           {
             ownerModuleId: "runner.pressure_central" as const,
@@ -10072,6 +10083,30 @@ function runnerTargetedIceTrashPayoffValue(
       (best, evaluation) => Math.max(best, evaluation.score),
       Math.max(0, baseValue),
     );
+}
+
+function runnerRezOrTrashPreparationBeatsImmediateRun(params: {
+  input: AiDecisionInput;
+  targetIceState: ReturnType<typeof runnerTargetedIceTrashState>;
+  serverId: string;
+  payoffValue: number;
+  runTargets: readonly RunnerRunTargetEvaluation[];
+}): boolean {
+  if (params.targetIceState !== "rez_or_trash") return true;
+  const corpCreditPressureValue =
+    Math.max(0, 5 - params.input.playerView.opponent.credits) * 20;
+  const bestImmediateAlternative = params.runTargets
+    .filter(
+      (target) =>
+        target.targetServerId !== params.serverId &&
+        target.accessServerId !== params.serverId &&
+        target.recommendation !== "do_not_run_now" &&
+        target.recommendation !== "known_no_current_payoff",
+    )
+    .reduce((best, target) => Math.max(best, target.score), 0);
+  return (
+    params.payoffValue + corpCreditPressureValue > bestImmediateAlternative
+  );
 }
 
 function runnerTargetedBypassCentralPreparationSignals(
@@ -10369,11 +10404,21 @@ function runnerTargetedIceTrashRemotePreparationSignals(
             signal.marginalValue,
             runTargets,
           ),
-          targetIceState === "unrezzed"
+          targetIceState === "unrezzed" || targetIceState === "rez_or_trash"
             ? runnerUnrezzedIceTrashRouteOpeningPayoff(input, signal.serverId)
             : 0,
         );
-        if (payoffValue <= 0) return [];
+        if (
+          payoffValue <= 0 ||
+          !runnerRezOrTrashPreparationBeatsImmediateRun({
+            input,
+            targetIceState,
+            serverId: signal.serverId,
+            payoffValue,
+            runTargets,
+          })
+        )
+          return [];
         return [
           {
             ownerModuleId: "runner.contest_remote" as const,
@@ -12074,6 +12119,16 @@ function runnerRunTargetCanConvertNow(
   evaluation: RunnerRunTargetEvaluation,
   candidates: readonly ActionSemanticCandidate[],
 ): boolean {
+  const terminalRemoteContestIsDirectlyMandatory =
+    runnerTerminalRemoteContestIsDirectlyMandatory(input, evaluation);
+  // The terminal route already converts if it can pay the known path and
+  // retain liquid credits; a generic post-run floor top-up is not run support.
+  if (
+    terminalRemoteContestIsDirectlyMandatory &&
+    evaluation.creditsAfterRun > 0
+  ) {
+    return true;
+  }
   if (evaluation.prerunReserveQuote?.status === "blocked") {
     return false;
   }
@@ -15374,8 +15429,7 @@ function buildCorpDomain(
             !(
               centralDefenseAllocation?.status === "known" &&
               centralDefenseAllocation.selectedServerId === serverId &&
-              centralDefenseAllocation.evidence[serverId].threat ===
-                "material"
+              centralDefenseAllocation.evidence[serverId].threat === "material"
             ) &&
             (() => {
               const installedIceCount =
