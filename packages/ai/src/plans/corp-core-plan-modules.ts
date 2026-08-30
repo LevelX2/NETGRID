@@ -4095,7 +4095,11 @@ function selectedGenericDefensePortfolioBand(
   candidates: PlanMaterialization["candidates"];
   supportable: boolean;
 }> {
-  const windowEligibleSignals = urgentDefenseBand(context, signals);
+  const windowEligibleSignals = allocatedCentralPlacementSignals(
+    context,
+    urgentDefenseBand(context, signals),
+    centralAllocation,
+  );
   const priorityClasses = ["P2", "P3", "P5", "P6"] as const;
   for (const priorityClass of priorityClasses) {
     const prioritySignals = windowEligibleSignals.filter(
@@ -4129,6 +4133,43 @@ function selectedGenericDefensePortfolioBand(
     candidates: [],
     supportable: false,
   };
+}
+
+/**
+ * The central allocator compares HQ and R&D from one complete fact set. Do
+ * not let per-signal urgency bands discard its selected placement before the
+ * exact route materializer can apply that comparison. Independently urgent
+ * non-central defense remains eligible, and an unavailable selected central
+ * route still permits the existing exact fallback to the other central.
+ */
+function allocatedCentralPlacementSignals(
+  context: PlanSchedulerContext,
+  signals: readonly CorpGenericDefenseSignal[],
+  allocation: CorpCentralDefenseAllocation | undefined,
+): readonly CorpGenericDefenseSignal[] {
+  if (
+    allocation?.status !== "known" ||
+    allocation.canonicalNearTieCandidateServerIds.length === 2
+  ) {
+    return signals;
+  }
+  const selectedPlacementSignals = signals.filter(
+    (signal) =>
+      isDefensePlacementPhase(signal.phase) &&
+      signal.serverId === allocation.selectedServerId,
+  );
+  const selectedPlacementActionable = selectedPlacementSignals.some(
+    (signal) =>
+      defenseCandidates(context, signal).length > 0 ||
+      genericDefenseFundingAlternativeExists(context, signal),
+  );
+  if (!selectedPlacementActionable) return signals;
+  return signals.filter(
+    (signal) =>
+      !isDefensePlacementPhase(signal.phase) ||
+      (signal.serverId !== "hq" && signal.serverId !== "rd") ||
+      signal.serverId === allocation.selectedServerId,
+  );
 }
 
 function genericDefenseBandHasExactFundingSupport(
