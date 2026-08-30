@@ -3,7 +3,10 @@ import { describe, expect, it } from "vitest";
 
 import { archiveCardStepPx } from "../features/game-board/archive-stack-layout";
 
-const globalsCss = readFileSync(new URL("./globals.css", import.meta.url), "utf8");
+const globalsCss = readFileSync(
+  new URL("./globals.css", import.meta.url),
+  "utf8",
+);
 
 describe("archiveCardStepPx", () => {
   it("keeps the default card step while the archive stack fits", () => {
@@ -45,10 +48,18 @@ describe("archiveCardStepPx", () => {
 
 describe("corp server width contract", () => {
   it("keeps empty Archives and HQ content-sized", () => {
-    expect(globalsCss).not.toMatch(/\.server\[data-server-id="archives"\]\s*\{[^}]*flex:\s*1/s);
-    expect(globalsCss).toMatch(/\.server\[data-server-id="archives"\]:has\(\.archivesDualStack\)/);
-    expect(globalsCss).toMatch(/\.corpHqServer\s*\{[^}]*flex:\s*0 1 auto[^}]*width:\s*fit-content/s);
-    expect(globalsCss).toMatch(/\.fixedZoneCards\.corpHqHandCards\s*\{[^}]*width:\s*fit-content/s);
+    expect(globalsCss).not.toMatch(
+      /\.server\[data-server-id="archives"\]\s*\{[^}]*flex:\s*1/s,
+    );
+    expect(globalsCss).toMatch(
+      /\.server\[data-server-id="archives"\]:has\(\.archivesDualStack\)/,
+    );
+    expect(globalsCss).toMatch(
+      /\.corpHqServer\s*\{[^}]*flex:\s*0 1 auto[^}]*width:\s*fit-content/s,
+    );
+    expect(globalsCss).toMatch(
+      /\.fixedZoneCards\.corpHqHandCards\s*\{[^}]*width:\s*fit-content/s,
+    );
   });
 
   it("keeps the Corp HQ composite shrinkable and exposes the two-row hand layout", () => {

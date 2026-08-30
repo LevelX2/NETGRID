@@ -26,7 +26,11 @@ describe("Runner hand-development run-event roles", () => {
           clicks: 2,
           hand: [runningInterference],
           legalActions: [
-            playEventAction("play-running-interference", runningInterference, 1),
+            playEventAction(
+              "play-running-interference",
+              runningInterference,
+              1,
+            ),
             startRunAction("run-hq", "hq"),
           ],
         }),

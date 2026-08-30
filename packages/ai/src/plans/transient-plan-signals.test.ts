@@ -93,17 +93,14 @@ describe("transient plan goal/threat signals", () => {
   it.each([
     { label: "stale", observedAtStateVersion: 16 },
     { label: "future", observedAtStateVersion: 18 },
-  ])(
-    "fails closed for a $label signal",
-    ({ observedAtStateVersion }) => {
-      expect(() =>
-        requireCurrentTransientPlanSignals(
-          [signal({ observedAtStateVersion })],
-          { side: "runner", stateVersion: 17 },
-        ),
-      ).toThrow(PlanResolutionFailure);
-    },
-  );
+  ])("fails closed for a $label signal", ({ observedAtStateVersion }) => {
+    expect(() =>
+      requireCurrentTransientPlanSignals([signal({ observedAtStateVersion })], {
+        side: "runner",
+        stateVersion: 17,
+      }),
+    ).toThrow(PlanResolutionFailure);
+  });
 
   it("rejects an undeclared action-authority field instead of ignoring it", () => {
     const authorityBearingSignal = {
@@ -122,9 +119,9 @@ describe("transient plan goal/threat signals", () => {
     }
 
     expect(failure).toBeInstanceOf(PlanResolutionFailure);
-    expect((failure as PlanResolutionFailure).context.removalCondition).toContain(
-      "unknown_or_authority_field:actionIds",
-    );
+    expect(
+      (failure as PlanResolutionFailure).context.removalCondition,
+    ).toContain("unknown_or_authority_field:actionIds");
   });
 });
 

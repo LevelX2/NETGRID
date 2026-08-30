@@ -58,8 +58,7 @@ function unsafeScoreChosenEntry(
     return false;
   }
   return !(
-    summary.winner === "corp" &&
-    index === summary.actionSequence.length - 1
+    summary.winner === "corp" && index === summary.actionSequence.length - 1
   );
 }
 

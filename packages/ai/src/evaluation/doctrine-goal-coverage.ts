@@ -109,7 +109,9 @@ export function buildDoctrineGoalCoverageReport(
   return report;
 }
 
-function strategyHasAnchor(strategy: DeckDoctrineV2StrategyDiagnostic): boolean {
+function strategyHasAnchor(
+  strategy: DeckDoctrineV2StrategyDiagnostic,
+): boolean {
   return strategy.anchorEvidenceCount > 0 || strategy.anchorScore > 0;
 }
 
@@ -118,6 +120,8 @@ function strategyCoveredByGoals(
   goals: readonly TacticalGoalLike[],
 ): boolean {
   return goals.some((goal) =>
-    goal.evidence?.some((entry) => entry === `doctrine_v2:${strategy.strategyId}`),
+    goal.evidence?.some(
+      (entry) => entry === `doctrine_v2:${strategy.strategyId}`,
+    ),
   );
 }

@@ -13,13 +13,16 @@ import {
 
 export type RunnerCentralPressureDiagnosticsCompositionDependencies =
   RunnerRemoteThreatTargetingCompositionDependencies & {
-  isRunnerEconomyAction: (input: AiDecisionInput, action: LegalAction) => boolean;
-  rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
-  centralRunStreakWithoutValueForMetrics: (
-    input: AiDecisionInput,
-    serverId: CentralServerId,
-  ) => number;
-};
+    isRunnerEconomyAction: (
+      input: AiDecisionInput,
+      action: LegalAction,
+    ) => boolean;
+    rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
+    centralRunStreakWithoutValueForMetrics: (
+      input: AiDecisionInput,
+      serverId: CentralServerId,
+    ) => number;
+  };
 
 export function createRunnerCentralPressureDiagnosticsComposition(
   dependencies: RunnerCentralPressureDiagnosticsCompositionDependencies,

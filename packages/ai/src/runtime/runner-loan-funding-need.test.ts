@@ -5,8 +5,12 @@ import { runnerLoanCriticalBreakerFundingNeed } from "./runner-loan-funding-need
 describe("runnerLoanCriticalBreakerFundingNeed", () => {
   it("matches critical breaker funding roles by bounded role terms", () => {
     expect(criticalBreakerFundingActive(["breaker_fracter"])).toBe(true);
-    expect(criticalBreakerFundingActive(["support_breaker_fracter"])).toBe(true);
-    expect(criticalBreakerFundingActive(["breaker_fracterish_noise"])).toBe(false);
+    expect(criticalBreakerFundingActive(["support_breaker_fracter"])).toBe(
+      true,
+    );
+    expect(criticalBreakerFundingActive(["breaker_fracterish_noise"])).toBe(
+      false,
+    );
   });
 });
 

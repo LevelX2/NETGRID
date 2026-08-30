@@ -88,7 +88,9 @@ export function buildSemanticRuntimeWhyCoverageReport(
     ).length;
   const missingCoverageSignals = [
     ...(decisionsMissingTopLevelWhyNot > 0
-      ? [`decisions_missing_top_level_why_not:${decisionsMissingTopLevelWhyNot}`]
+      ? [
+          `decisions_missing_top_level_why_not:${decisionsMissingTopLevelWhyNot}`,
+        ]
       : []),
     ...(decisionsMissingRuntimeWhyNotSection > 0
       ? [

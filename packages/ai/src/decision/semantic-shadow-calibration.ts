@@ -246,14 +246,18 @@ export function resolveSemanticShadowCalibrationProfile(
 }
 
 export function semanticShadowCalibrationProfileFromEnv(
-  env: string | undefined = process.env[SEMANTIC_SHADOW_CALIBRATION_PROFILE_ENV],
+  env: string | undefined = process.env[
+    SEMANTIC_SHADOW_CALIBRATION_PROFILE_ENV
+  ],
 ): SemanticShadowCalibrationProfile {
   if (env === "shadow_calibrated_v1") return SEMANTIC_SHADOW_CALIBRATED_V1;
   return SEMANTIC_SHADOW_BASELINE_V1;
 }
 
 export function semanticShadowCalibrationProfileEnvEnabled(
-  env: string | undefined = process.env[SEMANTIC_SHADOW_CALIBRATION_PROFILE_ENV],
+  env: string | undefined = process.env[
+    SEMANTIC_SHADOW_CALIBRATION_PROFILE_ENV
+  ],
 ): boolean {
   return env === "shadow_calibrated_v1" || env === "baseline_v1";
 }

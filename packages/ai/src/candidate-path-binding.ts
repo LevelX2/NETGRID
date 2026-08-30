@@ -81,14 +81,18 @@ export function buildCandidatePathBinding(
     ].join("|"),
     signatureKey: input.signature.signatureKey,
     ...(input.actionId ? { actionId: input.actionId } : {}),
-    ...(input.redactedActionRef ? { redactedActionRef: input.redactedActionRef } : {}),
+    ...(input.redactedActionRef
+      ? { redactedActionRef: input.redactedActionRef }
+      : {}),
     stateVersion: input.stateVersion,
     actionType: input.signature.actionType,
     side: input.side,
     ...(input.signature.sourceDefinitionId
       ? { sourceDefinitionId: input.signature.sourceDefinitionId }
       : {}),
-    ...(input.signature.abilityId ? { abilityId: input.signature.abilityId } : {}),
+    ...(input.signature.abilityId
+      ? { abilityId: input.signature.abilityId }
+      : {}),
     targetIdentity: input.signature.targetIdentity,
     costClass: input.signature.costClass,
     timingClass: input.signature.timingClass,
@@ -112,8 +116,13 @@ export function buildCandidatePathBinding(
       costClass: "hidden_blocked",
       timingClass: "hidden_blocked",
       proofStatus: "blocked",
-      blockers: [...new Set([...binding.blockers, "hidden_info_marker_detected"])],
-      evidence: [...binding.evidence, "binding_redacted_after_hidden_marker_scan"],
+      blockers: [
+        ...new Set([...binding.blockers, "hidden_info_marker_detected"]),
+      ],
+      evidence: [
+        ...binding.evidence,
+        "binding_redacted_after_hidden_marker_scan",
+      ],
     };
   }
   return binding;
@@ -128,7 +137,8 @@ function bindingBlockers(
   hardGates: readonly string[],
 ): string[] {
   const blockers = new Set<string>();
-  if (!input.actionId && !input.redactedActionRef) blockers.add("action_ref_missing");
+  if (!input.actionId && !input.redactedActionRef)
+    blockers.add("action_ref_missing");
   if (!input.signature.signatureKey) blockers.add("signature_key_missing");
   if (input.signature.targetIdentity === "unknown_target") {
     blockers.add("target_identity_unresolved");
@@ -146,7 +156,8 @@ function bindingBlockers(
     blockers.add("target_blocked_by_hard_gate");
   }
   if (hardGates.length > 0) blockers.add("hard_gate_blocked");
-  if (input.blockedReason) blockers.add(`blocked_reason:${input.blockedReason}`);
+  if (input.blockedReason)
+    blockers.add(`blocked_reason:${input.blockedReason}`);
   return [...blockers].sort();
 }
 

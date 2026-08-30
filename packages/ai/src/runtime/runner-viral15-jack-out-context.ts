@@ -4,9 +4,7 @@ import type {
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
-import {
-  runnerViral15JackOutScoreComponent as buildRunnerViral15JackOutScoreComponent,
-} from "./runner-viral15-jack-out-score";
+import { runnerViral15JackOutScoreComponent as buildRunnerViral15JackOutScoreComponent } from "./runner-viral15-jack-out-score";
 
 export type RunnerViral15JackOutContextDependencies = {
   actionCreditCost: (action: LegalAction) => number;

@@ -9,7 +9,11 @@ import type {
   AccountStorage,
   CreateAccountSessionResult,
 } from "./account-session";
-import { AccountSessionService, normalizeLoginName, validateLoginName } from "./account-session";
+import {
+  AccountSessionService,
+  normalizeLoginName,
+  validateLoginName,
+} from "./account-session";
 
 export const ACCOUNT_PASSWORD_MIN_LENGTH = 15;
 export const ACCOUNT_PASSWORD_MAX_LENGTH = 256;
@@ -68,15 +72,23 @@ export class AccountAuthService {
     this.sessions = new AccountSessionService(storage, {
       ...(options.tokenSalt ? { tokenSalt: options.tokenSalt } : {}),
       now: this.now,
-      ...(options.maxSessionAgeDays ? { maxSessionAgeDays: options.maxSessionAgeDays } : {}),
+      ...(options.maxSessionAgeDays
+        ? { maxSessionAgeDays: options.maxSessionAgeDays }
+        : {}),
     });
   }
 
-  async bootstrapAdmin(input: { loginName: string; displayName: string; password: string; deviceLabel?: string }): Promise<{
+  async bootstrapAdmin(input: {
+    loginName: string;
+    displayName: string;
+    password: string;
+    deviceLabel?: string;
+  }): Promise<{
     account: AccountSelfView;
     session: CreateAccountSessionResult;
   }> {
-    if ((await this.storage.countAccounts()) !== 0) throw new Error("account_bootstrap_closed");
+    if ((await this.storage.countAccounts()) !== 0)
+      throw new Error("account_bootstrap_closed");
     return this.createAccountWithPassword({ ...input, role: "admin" });
   }
 
@@ -88,7 +100,10 @@ export class AccountAuthService {
     role?: AccountRole;
     mustChange?: boolean;
     deviceLabel?: string;
-  }): Promise<{ account: AccountSelfView; session: CreateAccountSessionResult }> {
+  }): Promise<{
+    account: AccountSelfView;
+    session: CreateAccountSessionResult;
+  }> {
     validateNewAccountPassword(input.password, input.loginName);
     const account = await this.sessions.createAccount({
       ...(input.accountId ? { accountId: input.accountId } : {}),
@@ -125,32 +140,60 @@ export class AccountAuthService {
     });
     const now = this.now();
     const inviteToken = randomBytes(32).toString("base64url");
-    const expiresAt = new Date(Date.parse(now) + clampHours(input.expiresInHours, 72) * 60 * 60 * 1000).toISOString();
+    const expiresAt = new Date(
+      Date.parse(now) + clampHours(input.expiresInHours, 72) * 60 * 60 * 1000,
+    ).toISOString();
     const invite: AccountInviteRecord = {
       inviteId: randomId("acct_inv"),
       inviteTokenHash: this.sessions.hashOneTimeToken("invite", inviteToken),
       targetAccountId: account.accountId,
       createdAt: now,
       expiresAt,
-      ...(input.createdByAccountId ? { createdByAccountId: input.createdByAccountId } : {}),
+      ...(input.createdByAccountId
+        ? { createdByAccountId: input.createdByAccountId }
+        : {}),
     };
     await this.storage.saveInvite(invite);
-    return { inviteToken, invite: { loginName: account.loginName, displayName: account.displayName, expiresAt } };
+    return {
+      inviteToken,
+      invite: {
+        loginName: account.loginName,
+        displayName: account.displayName,
+        expiresAt,
+      },
+    };
   }
 
-  async inspectInvite(inviteToken: string): Promise<AccountInvitePublicView | undefined> {
-    const invite = await this.storage.loadInviteByTokenHash(this.sessions.hashOneTimeToken("invite", inviteToken));
+  async inspectInvite(
+    inviteToken: string,
+  ): Promise<AccountInvitePublicView | undefined> {
+    const invite = await this.storage.loadInviteByTokenHash(
+      this.sessions.hashOneTimeToken("invite", inviteToken),
+    );
     if (!invite || !isOneTimeTokenUsable(invite, this.now())) return undefined;
     const account = await this.storage.loadAccount(invite.targetAccountId);
     if (!account || account.status !== "disabled") return undefined;
-    return { loginName: account.loginName, displayName: account.displayName, expiresAt: invite.expiresAt };
+    return {
+      loginName: account.loginName,
+      displayName: account.displayName,
+      expiresAt: invite.expiresAt,
+    };
   }
 
-  async acceptInvite(input: { inviteToken: string; password: string; deviceLabel?: string }): Promise<{
-    account: AccountSelfView;
-    session: CreateAccountSessionResult;
-  } | undefined> {
-    const invite = await this.storage.loadInviteByTokenHash(this.sessions.hashOneTimeToken("invite", input.inviteToken));
+  async acceptInvite(input: {
+    inviteToken: string;
+    password: string;
+    deviceLabel?: string;
+  }): Promise<
+    | {
+        account: AccountSelfView;
+        session: CreateAccountSessionResult;
+      }
+    | undefined
+  > {
+    const invite = await this.storage.loadInviteByTokenHash(
+      this.sessions.hashOneTimeToken("invite", input.inviteToken),
+    );
     const now = this.now();
     if (!invite || !isOneTimeTokenUsable(invite, now)) return undefined;
     const account = await this.storage.loadAccount(invite.targetAccountId);
@@ -162,8 +205,13 @@ export class AccountAuthService {
       changedAt: now,
       parameters: this.passwordKdf,
     });
-    if (!(await this.storage.claimInvite(invite.inviteId, now))) return undefined;
-    const activeAccount = { ...account, status: "active" as const, updatedAt: now };
+    if (!(await this.storage.claimInvite(invite.inviteId, now)))
+      return undefined;
+    const activeAccount = {
+      ...account,
+      status: "active" as const,
+      updatedAt: now,
+    };
     await this.storage.savePasswordCredential(credential);
     await this.storage.saveAccount(activeAccount);
     const session = await this.sessions.createSession({
@@ -178,25 +226,36 @@ export class AccountAuthService {
     createdByAccountId?: string;
     expiresInHours?: number;
   }): Promise<{ resetToken: string; expiresAt: string } | undefined> {
-    const account = await this.storage.loadAccountByLoginNameNormalized(normalizeLoginName(input.loginName).normalized);
+    const account = await this.storage.loadAccountByLoginNameNormalized(
+      normalizeLoginName(input.loginName).normalized,
+    );
     if (!account || account.status === "deleted") return undefined;
     const now = this.now();
     const resetToken = randomBytes(32).toString("base64url");
-    const expiresAt = new Date(Date.parse(now) + clampHours(input.expiresInHours, 2) * 60 * 60 * 1000).toISOString();
+    const expiresAt = new Date(
+      Date.parse(now) + clampHours(input.expiresInHours, 2) * 60 * 60 * 1000,
+    ).toISOString();
     const record: AccountResetTokenRecord = {
       resetId: randomId("acct_reset"),
       resetTokenHash: this.sessions.hashOneTimeToken("reset", resetToken),
       targetAccountId: account.accountId,
       createdAt: now,
       expiresAt,
-      ...(input.createdByAccountId ? { createdByAccountId: input.createdByAccountId } : {}),
+      ...(input.createdByAccountId
+        ? { createdByAccountId: input.createdByAccountId }
+        : {}),
     };
     await this.storage.saveResetToken(record);
     return { resetToken, expiresAt };
   }
 
-  async acceptReset(input: { resetToken: string; newPassword: string }): Promise<boolean> {
-    const resetToken = await this.storage.loadResetTokenByHash(this.sessions.hashOneTimeToken("reset", input.resetToken));
+  async acceptReset(input: {
+    resetToken: string;
+    newPassword: string;
+  }): Promise<boolean> {
+    const resetToken = await this.storage.loadResetTokenByHash(
+      this.sessions.hashOneTimeToken("reset", input.resetToken),
+    );
     const now = this.now();
     if (!resetToken || !isOneTimeTokenUsable(resetToken, now)) return false;
     const account = await this.storage.loadAccount(resetToken.targetAccountId);
@@ -208,19 +267,42 @@ export class AccountAuthService {
       changedAt: now,
       parameters: this.passwordKdf,
     });
-    if (!(await this.storage.claimResetToken(resetToken.resetId, now))) return false;
+    if (!(await this.storage.claimResetToken(resetToken.resetId, now)))
+      return false;
     await this.storage.savePasswordCredential(credential);
-    await this.storage.saveAccount({ ...account, status: "active", credentialVersion: account.credentialVersion + 1, updatedAt: now });
+    await this.storage.saveAccount({
+      ...account,
+      status: "active",
+      credentialVersion: account.credentialVersion + 1,
+      updatedAt: now,
+    });
     await this.sessions.revokeAllAccountSessions(account.accountId);
     return true;
   }
 
-  async login(input: { loginName: string; password: string; deviceLabel?: string }): Promise<AccountPasswordLoginResult> {
+  async login(input: {
+    loginName: string;
+    password: string;
+    deviceLabel?: string;
+  }): Promise<AccountPasswordLoginResult> {
     const normalized = normalizeLoginName(input.loginName);
-    const account = await this.storage.loadAccountByLoginNameNormalized(normalized.normalized);
-    const credential = account ? await this.storage.loadPasswordCredential(account.accountId) : undefined;
-    const verification = await verifyPasswordCredential(input.password, credential ?? dummyCredential(this.passwordKdf));
-    if (!account || account.status !== "active" || !credential || !verification.ok) return { ok: false, errorCode: "invalid_credentials" };
+    const account = await this.storage.loadAccountByLoginNameNormalized(
+      normalized.normalized,
+    );
+    const credential = account
+      ? await this.storage.loadPasswordCredential(account.accountId)
+      : undefined;
+    const verification = await verifyPasswordCredential(
+      input.password,
+      credential ?? dummyCredential(this.passwordKdf),
+    );
+    if (
+      !account ||
+      account.status !== "active" ||
+      !credential ||
+      !verification.ok
+    )
+      return { ok: false, errorCode: "invalid_credentials" };
 
     if (verification.needsRehash) {
       await this.storage.savePasswordCredential(
@@ -240,12 +322,28 @@ export class AccountAuthService {
     return { ok: true, account: accountSelfView(account), session };
   }
 
-  async changePassword(input: { accountId: string; currentPassword: string; newPassword: string }): Promise<boolean> {
+  async changePassword(input: {
+    accountId: string;
+    currentPassword: string;
+    newPassword: string;
+  }): Promise<boolean> {
     const account = await this.storage.loadAccount(input.accountId);
-    const credential = account ? await this.storage.loadPasswordCredential(account.accountId) : undefined;
-    if (!account || account.status !== "active" || !credential || !(await verifyPasswordCredential(input.currentPassword, credential)).ok) return false;
+    const credential = account
+      ? await this.storage.loadPasswordCredential(account.accountId)
+      : undefined;
+    if (
+      !account ||
+      account.status !== "active" ||
+      !credential ||
+      !(await verifyPasswordCredential(input.currentPassword, credential)).ok
+    )
+      return false;
     validateNewAccountPassword(input.newPassword, account.loginName);
-    const nextAccount = { ...account, credentialVersion: account.credentialVersion + 1, updatedAt: this.now() };
+    const nextAccount = {
+      ...account,
+      credentialVersion: account.credentialVersion + 1,
+      updatedAt: this.now(),
+    };
     await this.storage.savePasswordCredential(
       await createPasswordCredential({
         accountId: account.accountId,
@@ -260,7 +358,11 @@ export class AccountAuthService {
     return true;
   }
 
-  async replacePassword(input: { accountId: string; newPassword: string; mustChange?: boolean }): Promise<boolean> {
+  async replacePassword(input: {
+    accountId: string;
+    newPassword: string;
+    mustChange?: boolean;
+  }): Promise<boolean> {
     const account = await this.storage.loadAccount(input.accountId);
     if (!account || account.status === "deleted") return false;
     validateNewAccountPassword(input.newPassword, account.loginName);
@@ -274,12 +376,18 @@ export class AccountAuthService {
         mustChange: input.mustChange === true,
       }),
     );
-    await this.storage.saveAccount({ ...account, credentialVersion: account.credentialVersion + 1, updatedAt: now });
+    await this.storage.saveAccount({
+      ...account,
+      credentialVersion: account.credentialVersion + 1,
+      updatedAt: now,
+    });
     await this.sessions.revokeAllAccountSessions(account.accountId);
     return true;
   }
 
-  async authenticateSession(sessionToken: string): Promise<AccountSessionAuthResult> {
+  async authenticateSession(
+    sessionToken: string,
+  ): Promise<AccountSessionAuthResult> {
     return this.sessions.authenticateSessionToken(sessionToken);
   }
 
@@ -291,10 +399,21 @@ export class AccountAuthService {
     return this.sessions.exportAccount(accountId);
   }
 
-  async deleteAccount(input: { accountId: string; currentPassword: string }): Promise<boolean> {
+  async deleteAccount(input: {
+    accountId: string;
+    currentPassword: string;
+  }): Promise<boolean> {
     const account = await this.storage.loadAccount(input.accountId);
-    const credential = account ? await this.storage.loadPasswordCredential(account.accountId) : undefined;
-    if (!account || account.status !== "active" || !credential || !(await verifyPasswordCredential(input.currentPassword, credential)).ok) return false;
+    const credential = account
+      ? await this.storage.loadPasswordCredential(account.accountId)
+      : undefined;
+    if (
+      !account ||
+      account.status !== "active" ||
+      !credential ||
+      !(await verifyPasswordCredential(input.currentPassword, credential)).ok
+    )
+      return false;
     const now = this.now();
     await this.storage.deleteAccountPrivateData({
       ...account,
@@ -314,14 +433,25 @@ export class AccountAuthService {
   }
 }
 
-export function validateNewAccountPassword(password: string, loginName?: string): string {
+export function validateNewAccountPassword(
+  password: string,
+  loginName?: string,
+): string {
   const normalizedPassword = password.normalize("NFC");
   const length = Array.from(normalizedPassword).length;
-  if (length < ACCOUNT_PASSWORD_MIN_LENGTH) throw new Error("account_password_too_short");
-  if (length > ACCOUNT_PASSWORD_MAX_LENGTH) throw new Error("account_password_too_long");
+  if (length < ACCOUNT_PASSWORD_MIN_LENGTH)
+    throw new Error("account_password_too_short");
+  if (length > ACCOUNT_PASSWORD_MAX_LENGTH)
+    throw new Error("account_password_too_long");
   const comparison = normalizedPassword.toLocaleLowerCase("en-US");
-  const loginComparison = loginName ? normalizeLoginName(loginName).normalized : undefined;
-  if (COMMON_PASSWORD_BLOCKLIST.has(comparison) || comparison.includes("netgrid") || (loginComparison && comparison === loginComparison)) {
+  const loginComparison = loginName
+    ? normalizeLoginName(loginName).normalized
+    : undefined;
+  if (
+    COMMON_PASSWORD_BLOCKLIST.has(comparison) ||
+    comparison.includes("netgrid") ||
+    (loginComparison && comparison === loginComparison)
+  ) {
     throw new Error("account_password_blocked");
   }
   return normalizedPassword;
@@ -337,7 +467,9 @@ export async function createPasswordCredential(input: {
   const parameters = input.parameters ?? DEFAULT_ACCOUNT_PASSWORD_KDF;
   const password = input.password.normalize("NFC");
   const salt = randomBytes(32).toString("base64url");
-  const passwordHash = (await derivePassword(password, salt, parameters)).toString("base64url");
+  const passwordHash = (
+    await derivePassword(password, salt, parameters)
+  ).toString("base64url");
   return {
     accountId: input.accountId,
     algorithm: "scrypt",
@@ -354,13 +486,26 @@ export async function verifyPasswordCredential(
   password: string,
   credential: AccountPasswordCredentialRecord,
 ): Promise<{ ok: boolean; needsRehash: boolean }> {
-  const actual = await derivePassword(password.normalize("NFC"), credential.salt, credential);
+  const actual = await derivePassword(
+    password.normalize("NFC"),
+    credential.salt,
+    credential,
+  );
   const expected = Buffer.from(credential.passwordHash, "base64url");
-  const ok = actual.length === expected.length && timingSafeEqual(actual, expected);
-  return { ok, needsRehash: credential.parametersVersion < ACCOUNT_PASSWORD_PARAMETERS_VERSION };
+  const ok =
+    actual.length === expected.length && timingSafeEqual(actual, expected);
+  return {
+    ok,
+    needsRehash:
+      credential.parametersVersion < ACCOUNT_PASSWORD_PARAMETERS_VERSION,
+  };
 }
 
-function derivePassword(password: string, salt: string, parameters: AccountPasswordKdfParameters): Promise<Buffer> {
+function derivePassword(
+  password: string,
+  salt: string,
+  parameters: AccountPasswordKdfParameters,
+): Promise<Buffer> {
   return new Promise((resolvePromise, reject) => {
     scrypt(
       password,
@@ -380,7 +525,9 @@ function derivePassword(password: string, salt: string, parameters: AccountPassw
   });
 }
 
-function dummyCredential(parameters: AccountPasswordKdfParameters): AccountPasswordCredentialRecord {
+function dummyCredential(
+  parameters: AccountPasswordKdfParameters,
+): AccountPasswordCredentialRecord {
   return {
     accountId: "dummy",
     algorithm: "scrypt",
@@ -427,8 +574,15 @@ export function validateAccountLoginName(loginName: string): void {
   validateLoginName(normalizeLoginName(loginName));
 }
 
-function isOneTimeTokenUsable(record: { usedAt?: string; revokedAt?: string; expiresAt: string }, now: string): boolean {
-  return !record.usedAt && !record.revokedAt && Date.parse(record.expiresAt) > Date.parse(now);
+function isOneTimeTokenUsable(
+  record: { usedAt?: string; revokedAt?: string; expiresAt: string },
+  now: string,
+): boolean {
+  return (
+    !record.usedAt &&
+    !record.revokedAt &&
+    Date.parse(record.expiresAt) > Date.parse(now)
+  );
 }
 
 function clampHours(value: number | undefined, fallback: number): number {

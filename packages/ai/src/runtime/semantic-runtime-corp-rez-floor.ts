@@ -1,4 +1,8 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 import { readExactCurrentInstalledCorpIceRezQuote } from "./corp-exact-ice-rez-route";
 
 type CorpServerLike = {
@@ -102,8 +106,7 @@ export function semanticRuntimeCorpRemoteRezFloorAssessment<
   const blockedByFloor =
     !completesScore &&
     (rezFloor === undefined ||
-      (rezFloor > 0 &&
-        creditsAfterAction < (requiredCreditsAfterAction ?? 0)));
+      (rezFloor > 0 && creditsAfterAction < (requiredCreditsAfterAction ?? 0)));
   return {
     serverId,
     knowledge: rezFloor === undefined ? "unknown" : "known",
@@ -133,10 +136,7 @@ export function semanticRuntimeCorpRemoteRezFloorAssessment<
 
 export function semanticRuntimeCorpRemoteRezFloor<
   TServer extends CorpServerLike,
->(
-  input: AiDecisionInput,
-  server: TServer | undefined,
-): number | undefined {
+>(input: AiDecisionInput, server: TServer | undefined): number | undefined {
   if (!server || server.ice.length === 0) return 0;
   if (server.ice.some((ice) => ice.rezzed === true)) return 0;
   const rezCosts: number[] = [];
@@ -173,7 +173,9 @@ export function semanticRuntimeCorpHasRemoteRezFloorFundingNeed<
       const candidate = server as unknown as TServer;
       if (!dependencies.remoteHasScoreLine(candidate)) return false;
       const rezFloor = semanticRuntimeCorpRemoteRezFloor(input, candidate);
-      return rezFloor !== undefined && rezFloor > 0 && currentCredits < rezFloor;
+      return (
+        rezFloor !== undefined && rezFloor > 0 && currentCredits < rezFloor
+      );
     })
   ) {
     return true;
@@ -185,8 +187,7 @@ export function semanticRuntimeCorpHasRemoteRezFloorFundingNeed<
       dependencies,
     );
     return (
-      assessment?.blockedByFloor === true &&
-      assessment.rezFloor !== undefined
+      assessment?.blockedByFloor === true && assessment.rezFloor !== undefined
     );
   });
 }

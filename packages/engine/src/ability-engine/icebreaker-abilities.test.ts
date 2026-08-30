@@ -240,5 +240,4 @@ describe("icebreaker ability identity binding", () => {
       ),
     ).toThrow();
   });
-
 });

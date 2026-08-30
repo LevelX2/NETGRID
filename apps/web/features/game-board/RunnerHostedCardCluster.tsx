@@ -28,7 +28,7 @@ export function RunnerHostedCardCluster({
       </span>
       <div
         className="runnerHostedCardLane"
-        aria-label={t("ariaLabel", {host: hostLabel})}
+        aria-label={t("ariaLabel", { host: hostLabel })}
       >
         <span className="runnerHostedCardBadge">{t("badge")}</span>
         <div className="runnerHostedCardLaneCards">

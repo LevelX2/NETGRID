@@ -52,21 +52,23 @@ export function corpActiveRemoteScorelineState(
             Math.max(2, advancesRemaining + unrezzedRemoteRezCost),
           );
           const agendaPointsAtRisk = corpVisibleAgendaPoints(card);
-          return [{
-            serverId: server.id,
-            cardId: card.instanceId,
-            reserveFloor,
-            agendaPointsAtRisk,
-            advancesRemaining,
-            unrezzedRemoteRezCost,
-            evidence: [
-              `active_scoreline_server:${server.id}`,
-              `active_scoreline_card:${card.instanceId}`,
-              `active_scoreline_requirement:${requirement ?? "unknown"}`,
-              `active_scoreline_counters:${counters}`,
-              `active_scoreline_reserve_floor:${reserveFloor}`,
-            ],
-          }];
+          return [
+            {
+              serverId: server.id,
+              cardId: card.instanceId,
+              reserveFloor,
+              agendaPointsAtRisk,
+              advancesRemaining,
+              unrezzedRemoteRezCost,
+              evidence: [
+                `active_scoreline_server:${server.id}`,
+                `active_scoreline_card:${card.instanceId}`,
+                `active_scoreline_requirement:${requirement ?? "unknown"}`,
+                `active_scoreline_counters:${counters}`,
+                `active_scoreline_reserve_floor:${reserveFloor}`,
+              ],
+            },
+          ];
         }),
     )
     .sort(

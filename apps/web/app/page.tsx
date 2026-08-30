@@ -610,8 +610,7 @@ export default function Page() {
   const [entryTab, setEntryTab] = useState<EntryTab>("play");
   const [activeMatchWorkspace, setActiveMatchWorkspace] =
     useState<ActiveMatchWorkspace>("game");
-  const [deckEditorMode, setDeckEditorMode] =
-    useState<DeckEditorMode>("list");
+  const [deckEditorMode, setDeckEditorMode] = useState<DeckEditorMode>("list");
   const [mode, setMode] = useState<"host" | "join">("host");
   const [recoveryTabSelected, setRecoveryTabSelected] = useState(false);
   const [playMode, setPlayMode] = useState<PlayMode>("human_vs_human");
@@ -2486,15 +2485,15 @@ export default function Page() {
       : null;
   const corpRunAutoPassActive = Boolean(
     currentCorpRunAutoPassKey &&
-      corpRunAutoPassKey === currentCorpRunAutoPassKey,
+    corpRunAutoPassKey === currentCorpRunAutoPassKey,
   );
   const humanCorpRunServerActionBlocksAiPacing = Boolean(
     humanOpponentIsAi &&
-      humanCorpRunServerActionBlocksAutomaticRunnerAiAdvance(
-        payload?.playerView,
-        payload?.legalActions ?? [],
-        corpRunAutoPassActive,
-      ),
+    humanCorpRunServerActionBlocksAutomaticRunnerAiAdvance(
+      payload?.playerView,
+      payload?.legalActions ?? [],
+      corpRunAutoPassActive,
+    ),
   );
   const hasPendingAiCue =
     currentActionCue?.source === "ai" ||
@@ -7635,8 +7634,7 @@ export default function Page() {
                     standardCopyBusy: accountDeckBusy,
                     standardDeckPreview: standardDeckTablePreview,
                     openLocalDeckOnTableId: localDeckTableEditId,
-                    onLocalDeckTableOpened: () =>
-                      setLocalDeckTableEditId(null),
+                    onLocalDeckTableOpened: () => setLocalDeckTableEditId(null),
                     onCloseStandardDeckPreview: closeStandardDeckTablePreview,
                     onStandardDeckPreviewCopied:
                       finishStandardDeckTablePreviewCopy,

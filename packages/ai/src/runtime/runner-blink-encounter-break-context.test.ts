@@ -67,13 +67,17 @@ describe("runner Blink encounter break context", () => {
       visibleCard("grip-3", "runner", "event"),
     ];
     input.playerView.servers = [
-      server("remote_1", [encounteredIce], [
-        {
-          instanceId: "hidden-advanced-root",
-          known: false,
-          advancementCounters: 2,
-        },
-      ]),
+      server(
+        "remote_1",
+        [encounteredIce],
+        [
+          {
+            instanceId: "hidden-advanced-root",
+            known: false,
+            advancementCounters: 2,
+          },
+        ],
+      ),
     ];
     input.playerView.run = {
       attackedServerId: "remote_1",

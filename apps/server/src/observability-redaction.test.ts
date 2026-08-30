@@ -4,7 +4,7 @@ import {
   OBSERVABILITY_ALLOWED_TECHNICAL_LABELS,
   redactSensitiveText,
   redactedHealth,
-  type DeploymentConfig
+  type DeploymentConfig,
 } from "./internet-hardening";
 
 describe("V2.7 observability redaction baseline", () => {
@@ -12,19 +12,37 @@ describe("V2.7 observability redaction baseline", () => {
     const violations = findObservabilityRedactionViolations({
       sessionToken: "runner-session-secret",
       cookie: "ng_account_session=account-cookie-secret",
-      sessionTokenHash: "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      sessionTokenHash:
+        "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
       deckHash: "fnv1a:deadbeef",
       cards: [{ cardId: "Hidden Priority Agenda", quantity: 3 }],
       privatePayload: { cardInstances: ["hidden-card"] },
       AIInput: { DecisionDebug: { beliefState: "side-private" } },
-      localPath: "C:\\Users\\Lui\\AppData\\Local\\NetGrid\\Decks\\deck.json"
+      localPath: "C:\\Users\\Lui\\AppData\\Local\\NetGrid\\Decks\\deck.json",
     });
 
-    expect(violations.map((violation) => violation.id)).toEqual(expect.arrayContaining(["raw_token", "token_hash", "deck_private", "hidden_info", "ai_debug", "local_path"]));
+    expect(violations.map((violation) => violation.id)).toEqual(
+      expect.arrayContaining([
+        "raw_token",
+        "token_hash",
+        "deck_private",
+        "hidden_info",
+        "ai_debug",
+        "local_path",
+      ]),
+    );
   });
 
   it("allows the explicitly approved technical label set", () => {
-    expect(OBSERVABILITY_ALLOWED_TECHNICAL_LABELS).toEqual(expect.arrayContaining(["rulesBaseline", "cardPoolVersion", "formatProfileId", "aiVersion", "rateLimitCategory"]));
+    expect(OBSERVABILITY_ALLOWED_TECHNICAL_LABELS).toEqual(
+      expect.arrayContaining([
+        "rulesBaseline",
+        "cardPoolVersion",
+        "formatProfileId",
+        "aiVersion",
+        "rateLimitCategory",
+      ]),
+    );
     expect(
       findObservabilityRedactionViolations({
         rulesBaseline: "rules-baseline-mvp-0.99",
@@ -35,8 +53,8 @@ describe("V2.7 observability redaction baseline", () => {
         profile: "private_internet",
         rateLimitCategory: "token_probe",
         errorCode: "rate_limited",
-        latencyBucket: "100-250ms"
-      })
+        latencyBucket: "100-250ms",
+      }),
     ).toEqual([]);
   });
 
@@ -54,7 +72,7 @@ describe("V2.7 observability redaction baseline", () => {
       maintenanceEnabled: false,
       maintenanceBaseUrl: "https://maintenance.netgrid.example",
       maintenanceAllowedOrigins: [],
-      maintenanceTrustedProxyAddresses: []
+      maintenanceTrustedProxyAddresses: [],
     };
     const health = redactedHealth(
       {
@@ -63,17 +81,19 @@ describe("V2.7 observability redaction baseline", () => {
         schemaVersion: 1,
         storageFormat: "netgrid_multiplayer_sqlite",
         database: "netgrid.sqlite",
-        matchCount: 12
+        matchCount: 12,
       },
-      config
+      config,
     );
 
     expect(findObservabilityRedactionViolations(health)).toEqual([]);
 
     const sanitized = redactSensitiveText(
-      `ng_account_session=account-cookie-secret sessionToken=runner-session-secret deckHash=fnv1a:deadbeef AIInput DecisionDebug privatePayload FullState C:\\Users\\Lui\\deck.json`
+      `ng_account_session=account-cookie-secret sessionToken=runner-session-secret deckHash=fnv1a:deadbeef AIInput DecisionDebug privatePayload FullState C:\\Users\\Lui\\deck.json`,
     );
-    expect(sanitized).not.toMatch(/account-cookie-secret|runner-session-secret|fnv1a:deadbeef|AIInput|DecisionDebug|privatePayload|FullState|C:\\Users\\Lui/i);
+    expect(sanitized).not.toMatch(
+      /account-cookie-secret|runner-session-secret|fnv1a:deadbeef|AIInput|DecisionDebug|privatePayload|FullState|C:\\Users\\Lui/i,
+    );
     expect(findObservabilityRedactionViolations(sanitized)).toEqual([]);
   });
 });

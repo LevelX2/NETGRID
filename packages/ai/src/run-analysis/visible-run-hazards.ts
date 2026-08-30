@@ -1074,7 +1074,9 @@ export function unbrokenEffectIsUnavoidableTraceRunLock(
 ): boolean | undefined {
   if ((effect.createsRunLockOrActionTax ?? 0) <= 0) return undefined;
   if (sourceSubroutine.type !== "initiate_trace") return undefined;
-  const traceRulesProfile = planningTraceRulesProfile(options.traceRulesProfile);
+  const traceRulesProfile = planningTraceRulesProfile(
+    options.traceRulesProfile,
+  );
   const traceBaseStrength = traceBaseStrengthForVisibleSubroutine(
     sourceSubroutine,
     traceRulesProfile,

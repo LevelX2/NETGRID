@@ -93,9 +93,9 @@ describe("trace rules profile planning", () => {
       encounterTemporaryTraceCredits: 0,
     } as VisibleEffectiveIceRunQuote;
 
-    expect(traceBaseStrengthForVisibleSubroutine(subroutine, "modern_open")).toBe(
-      5,
-    );
+    expect(
+      traceBaseStrengthForVisibleSubroutine(subroutine, "modern_open"),
+    ).toBe(5);
     expect(
       visibleCorpTraceBidCapacityForSubroutine(
         quote,
@@ -156,13 +156,12 @@ describe("trace rules profile planning", () => {
       traceRulesProfile: "modern_open",
     });
 
-    expect(classic.postBidLinkOptions.map((option) => option.sourceTitle)).toEqual([
-      "Signpost-like",
-    ]);
-    expect(modern.postBidLinkOptions.map((option) => option.sourceTitle)).toEqual([
-      "Bakdoor",
-      "Signpost-like",
-    ]);
+    expect(
+      classic.postBidLinkOptions.map((option) => option.sourceTitle),
+    ).toEqual(["Signpost-like"]);
+    expect(
+      modern.postBidLinkOptions.map((option) => option.sourceTitle),
+    ).toEqual(["Bakdoor", "Signpost-like"]);
   });
 });
 

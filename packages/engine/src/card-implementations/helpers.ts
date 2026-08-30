@@ -65,7 +65,7 @@ export function endTheRunSubroutine(): CardPrintedSubroutineImplementation {
 }
 
 export function endTheRunSubroutines(
-  count: number
+  count: number,
 ): readonly CardPrintedSubroutineImplementation[] {
   return Array.from({ length: count }, () => endTheRunSubroutine());
 }
@@ -78,7 +78,7 @@ export function trashProgramSubroutine(): CardPrintedSubroutineImplementation {
 }
 
 export function netDamageSubroutine(
-  amount: number
+  amount: number,
 ): CardPrintedSubroutineImplementation {
   return {
     kind: "damage",
@@ -90,7 +90,7 @@ export function netDamageSubroutine(
 }
 
 export function brainDamageSubroutine(
-  amount: number
+  amount: number,
 ): CardPrintedSubroutineImplementation {
   return {
     kind: "damage",
@@ -145,7 +145,7 @@ export function deflectRunSubroutine(input: {
 }
 
 export function traceTagSuccess(
-  amount = 1
+  amount = 1,
 ): readonly CardTraceSuccessEffectImplementation[] {
   return [
     {
@@ -159,7 +159,7 @@ export function traceTagSuccess(
 
 export function traceTagSubroutine(
   traceLimit: number,
-  amount = 1
+  amount = 1,
 ): CardPrintedSubroutineImplementation {
   const tagText =
     amount === 1 ? "give Runner a tag" : `give Runner ${amount} tags`;
@@ -174,7 +174,7 @@ export function traceTagSubroutine(
 
 export function traceTagEffect(
   traceLimit: number,
-  amount = 1
+  amount = 1,
 ): Extract<CardEffectImplementation, TraceEffectImplementation> {
   return {
     kind: "trace",
@@ -193,10 +193,12 @@ export function addHostedCredits(amount: number): AddHostedCreditsEffect {
   };
 }
 
-export function takeHostedCredits(input: {
-  amount?: number;
-  mode?: "up_to_amount_if_available" | "all";
-} = {}): TakeHostedCreditsEffect {
+export function takeHostedCredits(
+  input: {
+    amount?: number;
+    mode?: "up_to_amount_if_available" | "all";
+  } = {},
+): TakeHostedCreditsEffect {
   return {
     kind: "take_hosted_credits",
     source: "source",
@@ -264,11 +266,10 @@ export function hostedCreditTakeAbility(input: {
     condition: { kind: "source_has_hosted_credits" },
     ...(input.limit ? { limit: input.limit } : {}),
     label: input.label,
-    effects: input.trashWhenEmpty && input.amount !== undefined
-      ? takeHostedCreditsAndTrashWhenEmpty({ amount: input.amount })
-      : [
-          takeHostedCredits(takeInput),
-        ],
+    effects:
+      input.trashWhenEmpty && input.amount !== undefined
+        ? takeHostedCreditsAndTrashWhenEmpty({ amount: input.amount })
+        : [takeHostedCredits(takeInput)],
   };
 }
 
@@ -368,7 +369,10 @@ export function lookTopStackTakeMatchingEffect(input: {
   count: number;
   allowedTypes: readonly ("program" | "event" | "hardware" | "resource")[];
   costPerTaken: number;
-}): Extract<CardEffectImplementation, { kind: "look_top_stack_take_matching" }> {
+}): Extract<
+  CardEffectImplementation,
+  { kind: "look_top_stack_take_matching" }
+> {
   return {
     kind: "look_top_stack_take_matching",
     count: input.count,

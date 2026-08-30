@@ -1,12 +1,6 @@
-import {
-  createSemanticRuntimeCorpCentralRezContext,
-} from "./semantic-runtime-corp-central-rez-context";
-import {
-  createSemanticRuntimeCorpRemoteContestabilityContext,
-} from "./semantic-runtime-corp-remote-contestability-context";
-import {
-  createSemanticRuntimeCorpRezFloorContext,
-} from "./semantic-runtime-corp-rez-floor-context";
+import { createSemanticRuntimeCorpCentralRezContext } from "./semantic-runtime-corp-central-rez-context";
+import { createSemanticRuntimeCorpRemoteContestabilityContext } from "./semantic-runtime-corp-remote-contestability-context";
+import { createSemanticRuntimeCorpRezFloorContext } from "./semantic-runtime-corp-rez-floor-context";
 import {
   createSemanticRuntimeVisibleCardContext,
   type SemanticRuntimeVisibleCardContextDependencies,
@@ -53,16 +47,15 @@ export function createSemanticRuntimeCorpFundingContestabilityComposition(
     sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
   });
 
-  const {
-    semanticRuntimeCorpRemoteScoreContestabilityAssessment,
-  } = createSemanticRuntimeCorpRemoteContestabilityContext({
-    actionServerId: dependencies.actionServerId,
-    server: dependencies.server,
-    actionIsScoreLine: dependencies.actionIsScoreLine,
-    advanceCompletesScore: dependencies.advanceCompletesScore,
-    remoteIsProtected: dependencies.remoteIsProtected,
-    isRemoteServerTarget: dependencies.isRemoteServerTarget,
-  });
+  const { semanticRuntimeCorpRemoteScoreContestabilityAssessment } =
+    createSemanticRuntimeCorpRemoteContestabilityContext({
+      actionServerId: dependencies.actionServerId,
+      server: dependencies.server,
+      actionIsScoreLine: dependencies.actionIsScoreLine,
+      advanceCompletesScore: dependencies.advanceCompletesScore,
+      remoteIsProtected: dependencies.remoteIsProtected,
+      isRemoteServerTarget: dependencies.isRemoteServerTarget,
+    });
 
   return {
     normalizedRulesTextForDefinition,

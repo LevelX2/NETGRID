@@ -26,28 +26,30 @@ export type RunnerCreditBankProspectivePlan = {
     remainingActions: number;
     installChoices: ProspectivePlanningStatus;
   };
-  build: {
-    kind: "activated";
-    availability: ProspectivePlanningStatus;
-    projection: ProspectivePlanningStatus;
-    resolution: ProspectivePlanningStatus;
-    capabilityKey: string;
-    canonicalCapabilityId: string;
-    actionCost: number;
-    hostedCreditsAdded: number;
-    sharedLimit: {
-      kind: "once_per_turn_per_source";
-      scope: "any_ability_on_source";
-    };
-    futureInvocation: CanonicalLegalActionInvocation;
-  } | {
-    kind: "install_lifecycle";
-    availability: "available_by_spec";
-    projection: "feasible_in_projection" | "blocked";
-    resolution: "feasible_in_projection" | "blocked";
-    actionCost: 0;
-    hostedCreditsAdded: number;
-  };
+  build:
+    | {
+        kind: "activated";
+        availability: ProspectivePlanningStatus;
+        projection: ProspectivePlanningStatus;
+        resolution: ProspectivePlanningStatus;
+        capabilityKey: string;
+        canonicalCapabilityId: string;
+        actionCost: number;
+        hostedCreditsAdded: number;
+        sharedLimit: {
+          kind: "once_per_turn_per_source";
+          scope: "any_ability_on_source";
+        };
+        futureInvocation: CanonicalLegalActionInvocation;
+      }
+    | {
+        kind: "install_lifecycle";
+        availability: "available_by_spec";
+        projection: "feasible_in_projection" | "blocked";
+        resolution: "feasible_in_projection" | "blocked";
+        actionCost: 0;
+        hostedCreditsAdded: number;
+      };
   cashOut:
     | {
         kind: "activated";
@@ -111,9 +113,10 @@ export function runnerCreditBankProspectivePlan(params: {
   if (build?.identity.kind !== "keyed" && !installLifecycleLoad)
     return undefined;
 
-  const activatedBuild = build?.identity.kind === "keyed"
-    ? activatedBuildProjection(build)
-    : undefined;
+  const activatedBuild =
+    build?.identity.kind === "keyed"
+      ? activatedBuildProjection(build)
+      : undefined;
   if (!activatedBuild && !installLifecycleLoad) return undefined;
 
   const installCost = card.engine.characteristics.numeric.installCost;

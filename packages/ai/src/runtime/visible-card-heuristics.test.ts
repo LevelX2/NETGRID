@@ -10,10 +10,18 @@ import {
 describe("visible card heuristics", () => {
   it("uses structured bad-publicity and trace roles", () => {
     expect(
-      runnerBadPublicityOrTraceTechCard(undefined, ["bad_publicity"], undefined),
+      runnerBadPublicityOrTraceTechCard(
+        undefined,
+        ["bad_publicity"],
+        undefined,
+      ),
     ).toBe(true);
     expect(
-      runnerBadPublicityOrTraceTechCard(undefined, ["trace_support"], undefined),
+      runnerBadPublicityOrTraceTechCard(
+        undefined,
+        ["trace_support"],
+        undefined,
+      ),
     ).toBe(true);
   });
 
@@ -26,7 +34,11 @@ describe("visible card heuristics", () => {
       ),
     ).toBe(false);
     expect(
-      runnerBadPublicityOrTraceTechCard(undefined, ["traceroute_noise"], undefined),
+      runnerBadPublicityOrTraceTechCard(
+        undefined,
+        ["traceroute_noise"],
+        undefined,
+      ),
     ).toBe(false);
   });
 

@@ -15,10 +15,7 @@ export function visibleSourceDefinitionsByInstanceId(
     ...playerView.own.scoreArea,
     ...(playerView.own.rig ?? []),
     ...(playerView.run?.accessedCard ? [playerView.run.accessedCard] : []),
-    ...playerView.servers.flatMap((server) => [
-      ...server.ice,
-      ...server.root,
-    ]),
+    ...playerView.servers.flatMap((server) => [...server.ice, ...server.root]),
   ];
   const entries = ownCards
     .filter(

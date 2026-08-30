@@ -119,7 +119,8 @@ function costFitComponent(
     candidate.semanticActionType === "economy.gain_credit"
       ? creditPressureBonus(creditPressure)
       : 0;
-  const costPenalty = utility.family === "economy" ? Math.min(10, creditCost) : creditCost;
+  const costPenalty =
+    utility.family === "economy" ? Math.min(10, creditCost) : creditCost;
   return {
     component: "cost_fit",
     delta: creditGain + pressureBonus - costPenalty,
@@ -154,7 +155,8 @@ function timingFitComponent(
     utility.family === "corp_scoreline" &&
     candidate.semanticActionType === "score.agenda"
       ? 12
-      : candidate.timingProfile.scoreWindow && utility.family === "corp_scoreline"
+      : candidate.timingProfile.scoreWindow &&
+          utility.family === "corp_scoreline"
         ? 8
         : 2;
   return {
@@ -228,7 +230,9 @@ function targetFitComponent(
       : 0;
   return {
     component: "target_fit",
-    delta: needsTarget ? (hasTargetContext ? 12 : -10) + recommendationBonus : 0,
+    delta: needsTarget
+      ? (hasTargetContext ? 12 : -10) + recommendationBonus
+      : 0,
     evidence: [
       `needs_target:${needsTarget}`,
       `has_target:${hasTargetContext}`,
@@ -254,7 +258,9 @@ function fallbackSafetyComponent(
   return {
     component: "fallback_safety",
     delta: safe ? 3 : -50,
-    evidence: [`engine_legal_action_gate:${engineLegalGate?.status ?? "missing"}`],
+    evidence: [
+      `engine_legal_action_gate:${engineLegalGate?.status ?? "missing"}`,
+    ],
   };
 }
 

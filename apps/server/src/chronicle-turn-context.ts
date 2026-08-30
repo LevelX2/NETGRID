@@ -32,7 +32,8 @@ function chronicleTurnNumberByEventId(
   let justEndedTurn: { side: Side; turnNumber: number } | null = null;
 
   for (const event of events) {
-    const actionType = stringValue(event.publicPayload.actionType) ?? event.type;
+    const actionType =
+      stringValue(event.publicPayload.actionType) ?? event.type;
     const actor = sideValue(event.publicPayload.actor);
     if (!actor) continue;
 
@@ -76,7 +77,8 @@ function chronicleTurnSideByEventId(
   let justEndedTurn: { side: Side } | null = null;
 
   for (const event of events) {
-    const actionType = stringValue(event.publicPayload.actionType) ?? event.type;
+    const actionType =
+      stringValue(event.publicPayload.actionType) ?? event.type;
     const actor = sideValue(event.publicPayload.actor);
     if (!actor) continue;
 

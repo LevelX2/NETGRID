@@ -62,7 +62,9 @@ export function AccountPanel({
           </div>
           <div className="accountHeaderActions">
             <span className="accountRoleBadge">
-              {accountSession.account.role === "admin" ? t("admin") : t("player")}
+              {accountSession.account.role === "admin"
+                ? t("admin")
+                : t("player")}
             </span>
             <button
               className="button"
@@ -147,9 +149,7 @@ export function AccountPanel({
                   value={newPassword}
                 />
               </label>
-              <small>
-                {t("passwordHelp")}
-              </small>
+              <small>{t("passwordHelp")}</small>
               <button
                 className="button primary"
                 disabled={accountSession.busy}
@@ -165,77 +165,77 @@ export function AccountPanel({
             <summary>{t("administration")}</summary>
             <div className="accountSegmentContent accountFormGrid">
               <form
-              className="accountForm"
-              onSubmit={(event) => {
-                event.preventDefault();
-                void accountSession
-                  .createInvite(adminLoginName, adminDisplayName)
-                  .then((created) => {
-                    if (created)
-                      setIssuedLink(
-                        `${window.location.origin}/?invite=${encodeURIComponent(created.inviteToken)}`,
-                      );
-                  });
-              }}
-            >
-              <h3>{t("inviteAccount")}</h3>
-              <label>
-                {t("loginName")}
-                <input
-                  onChange={(event) => setAdminLoginName(event.target.value)}
-                  required
-                  value={adminLoginName}
-                />
-              </label>
-              <label>
-                {t("displayName")}
-                <input
-                  onChange={(event) => setAdminDisplayName(event.target.value)}
-                  required
-                  value={adminDisplayName}
-                />
-              </label>
-              <button
-                className="button primary"
-                disabled={accountSession.busy}
-                type="submit"
+                className="accountForm"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  void accountSession
+                    .createInvite(adminLoginName, adminDisplayName)
+                    .then((created) => {
+                      if (created)
+                        setIssuedLink(
+                          `${window.location.origin}/?invite=${encodeURIComponent(created.inviteToken)}`,
+                        );
+                    });
+                }}
               >
-                {t("createInviteLink")}
-              </button>
+                <h3>{t("inviteAccount")}</h3>
+                <label>
+                  {t("loginName")}
+                  <input
+                    onChange={(event) => setAdminLoginName(event.target.value)}
+                    required
+                    value={adminLoginName}
+                  />
+                </label>
+                <label>
+                  {t("displayName")}
+                  <input
+                    onChange={(event) =>
+                      setAdminDisplayName(event.target.value)
+                    }
+                    required
+                    value={adminDisplayName}
+                  />
+                </label>
+                <button
+                  className="button primary"
+                  disabled={accountSession.busy}
+                  type="submit"
+                >
+                  {t("createInviteLink")}
+                </button>
               </form>
               <form
-              className="accountForm"
-              onSubmit={(event) => {
-                event.preventDefault();
-                void accountSession
-                  .createReset(adminLoginName)
-                  .then((created) => {
-                    if (created)
-                      setIssuedLink(
-                        `${window.location.origin}/?reset=${encodeURIComponent(created.resetToken)}`,
-                      );
-                  });
-              }}
-            >
-              <h3>{t("passwordReset")}</h3>
-              <label>
-                {t("loginName")}
-                <input
-                  onChange={(event) => setAdminLoginName(event.target.value)}
-                  required
-                  value={adminLoginName}
-                />
-              </label>
-              <small>
-                {t("resetLinkHelp")}
-              </small>
-              <button
-                className="button"
-                disabled={accountSession.busy}
-                type="submit"
+                className="accountForm"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  void accountSession
+                    .createReset(adminLoginName)
+                    .then((created) => {
+                      if (created)
+                        setIssuedLink(
+                          `${window.location.origin}/?reset=${encodeURIComponent(created.resetToken)}`,
+                        );
+                    });
+                }}
               >
-                {t("createResetLink")}
-              </button>
+                <h3>{t("passwordReset")}</h3>
+                <label>
+                  {t("loginName")}
+                  <input
+                    onChange={(event) => setAdminLoginName(event.target.value)}
+                    required
+                    value={adminLoginName}
+                  />
+                </label>
+                <small>{t("resetLinkHelp")}</small>
+                <button
+                  className="button"
+                  disabled={accountSession.busy}
+                  type="submit"
+                >
+                  {t("createResetLink")}
+                </button>
               </form>
             </div>
           </details>
@@ -278,111 +278,29 @@ export function AccountPanel({
       <details className="accountSegment" open>
         <summary>{t("guestAndLogin")}</summary>
         <div className="accountSegmentContent">
-          <p className="muted">
-            {t("guestHelp")}
-          </p>
-          <form
-          className="accountForm"
-          onSubmit={(event) => void submitLogin(event)}
-        >
-          <h3>{t("login")}</h3>
-          <label>
-            {t("loginName")}
-            <input
-              autoComplete="username"
-              onChange={(event) => setLoginName(event.target.value)}
-              required
-              value={loginName}
-            />
-          </label>
-          <label>
-            {t("password")}
-            <input
-              autoComplete="current-password"
-              onChange={(event) => setPassword(event.target.value)}
-              required
-              type="password"
-              value={password}
-            />
-          </label>
-          <button
-            className="button primary"
-            disabled={accountSession.busy}
-            type="submit"
-          >
-            {t("login")}
-          </button>
-          </form>
-        </div>
-      </details>
-      <details className="accountSegment" open={Boolean(inviteToken)}>
-        <summary>{t("activateAccount")}</summary>
-        <div className="accountSegmentContent">
-          <form
-          className="accountForm"
-          onSubmit={(event) => void submitInvite(event)}
-        >
-          <h3>{t("acceptInvite")}</h3>
-          <label>
-            {t("inviteCode")}
-            <input
-              autoComplete="off"
-              onChange={(event) => setInviteToken(event.target.value)}
-              required
-              value={inviteToken}
-            />
-          </label>
-          <label>
-            {t("newPassword")}
-            <input
-              autoComplete="new-password"
-              minLength={15}
-              onChange={(event) => setInvitePassword(event.target.value)}
-              required
-              type="password"
-              value={invitePassword}
-            />
-          </label>
-          <small>
-            {t("inviteHelp")}
-          </small>
-          <button
-            className="button primary"
-            disabled={accountSession.busy}
-            type="submit"
-          >
-            {t("activateAccount")}
-          </button>
-          </form>
-        </div>
-      </details>
-      {resetToken ? (
-        <details className="accountSegment" open>
-          <summary>{t("resetPassword")}</summary>
-          <div className="accountSegmentContent">
+          <p className="muted">{t("guestHelp")}</p>
           <form
             className="accountForm"
-            onSubmit={(event) => void submitReset(event)}
+            onSubmit={(event) => void submitLogin(event)}
           >
-            <h3>{t("resetPassword")}</h3>
+            <h3>{t("login")}</h3>
             <label>
-              {t("resetCode")}
+              {t("loginName")}
               <input
-                autoComplete="off"
-                onChange={(event) => setResetToken(event.target.value)}
+                autoComplete="username"
+                onChange={(event) => setLoginName(event.target.value)}
                 required
-                value={resetToken}
+                value={loginName}
               />
             </label>
             <label>
-              {t("newPassword")}
+              {t("password")}
               <input
-                autoComplete="new-password"
-                minLength={15}
-                onChange={(event) => setResetPassword(event.target.value)}
+                autoComplete="current-password"
+                onChange={(event) => setPassword(event.target.value)}
                 required
                 type="password"
-                value={resetPassword}
+                value={password}
               />
             </label>
             <button
@@ -390,8 +308,86 @@ export function AccountPanel({
               disabled={accountSession.busy}
               type="submit"
             >
-              {t("setNewPassword")}
+              {t("login")}
             </button>
+          </form>
+        </div>
+      </details>
+      <details className="accountSegment" open={Boolean(inviteToken)}>
+        <summary>{t("activateAccount")}</summary>
+        <div className="accountSegmentContent">
+          <form
+            className="accountForm"
+            onSubmit={(event) => void submitInvite(event)}
+          >
+            <h3>{t("acceptInvite")}</h3>
+            <label>
+              {t("inviteCode")}
+              <input
+                autoComplete="off"
+                onChange={(event) => setInviteToken(event.target.value)}
+                required
+                value={inviteToken}
+              />
+            </label>
+            <label>
+              {t("newPassword")}
+              <input
+                autoComplete="new-password"
+                minLength={15}
+                onChange={(event) => setInvitePassword(event.target.value)}
+                required
+                type="password"
+                value={invitePassword}
+              />
+            </label>
+            <small>{t("inviteHelp")}</small>
+            <button
+              className="button primary"
+              disabled={accountSession.busy}
+              type="submit"
+            >
+              {t("activateAccount")}
+            </button>
+          </form>
+        </div>
+      </details>
+      {resetToken ? (
+        <details className="accountSegment" open>
+          <summary>{t("resetPassword")}</summary>
+          <div className="accountSegmentContent">
+            <form
+              className="accountForm"
+              onSubmit={(event) => void submitReset(event)}
+            >
+              <h3>{t("resetPassword")}</h3>
+              <label>
+                {t("resetCode")}
+                <input
+                  autoComplete="off"
+                  onChange={(event) => setResetToken(event.target.value)}
+                  required
+                  value={resetToken}
+                />
+              </label>
+              <label>
+                {t("newPassword")}
+                <input
+                  autoComplete="new-password"
+                  minLength={15}
+                  onChange={(event) => setResetPassword(event.target.value)}
+                  required
+                  type="password"
+                  value={resetPassword}
+                />
+              </label>
+              <button
+                className="button primary"
+                disabled={accountSession.busy}
+                type="submit"
+              >
+                {t("setNewPassword")}
+              </button>
             </form>
           </div>
         </details>
@@ -400,10 +396,7 @@ export function AccountPanel({
   );
 }
 
-function formatDate(
-  value: string | undefined,
-  locale: AppLocale,
-): string {
+function formatDate(value: string | undefined, locale: AppLocale): string {
   if (!value) return "–";
   return formatAppDateTime(value, locale, {
     dateStyle: "medium",

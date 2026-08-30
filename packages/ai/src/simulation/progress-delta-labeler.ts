@@ -132,7 +132,10 @@ function directProgressLabel(
 ): ProgressDeltaLabel | undefined {
   const text = actionText(action);
   if (action.actionType === "access_card") return "progress_access";
-  if (action.actionType === "trash_accessed_card" || action.runnerRemoteTrashTaken) {
+  if (
+    action.actionType === "trash_accessed_card" ||
+    action.runnerRemoteTrashTaken
+  ) {
     return "progress_trash";
   }
   if (action.actionType === "steal_agenda" || action.advancedAgendaStolen) {
@@ -150,7 +153,8 @@ function directProgressLabel(
   }
   if (actionTextHasFlatlineSignal(text)) return "progress_flatline";
   if (isCoverageInstall(action)) return "progress_coverage_install";
-  if (isReachabilityImprovement(action)) return "progress_reachability_improved";
+  if (isReachabilityImprovement(action))
+    return "progress_reachability_improved";
   if (isServerProtection(action)) return "progress_server_protected";
   return undefined;
 }
@@ -158,7 +162,11 @@ function directProgressLabel(
 function isCoverageInstall(action: ProgressDeltaAction): boolean {
   if (action.runnerCoverageImproved) return true;
   if (action.side !== "runner") return false;
-  if (!["install_card", "play_event", "activated_card_ability"].includes(action.actionType)) {
+  if (
+    !["install_card", "play_event", "activated_card_ability"].includes(
+      action.actionType,
+    )
+  ) {
     return false;
   }
   const text = actionText(action);
@@ -186,7 +194,9 @@ function isReachabilityImprovement(action: ProgressDeltaAction): boolean {
 function isServerProtection(action: ProgressDeltaAction): boolean {
   if (action.protectBeforeAdvance) return true;
   if (action.side !== "corp") return false;
-  if (!["install_card", "rez_ice", "advance_card"].includes(action.actionType)) {
+  if (
+    !["install_card", "rez_ice", "advance_card"].includes(action.actionType)
+  ) {
     return false;
   }
   return actionTextHasServerProtectionSignal(actionText(action));

@@ -24,8 +24,9 @@ describe("Proteus random model readiness", () => {
       "Rio de Janeiro City Grid",
       "Roadblock",
     ]);
-    expect(report.cards.every((card) => card.deterministicRuntimeAllowed === false))
-      .toBe(true);
+    expect(
+      report.cards.every((card) => card.deterministicRuntimeAllowed === false),
+    ).toBe(true);
     expect(report.cards.flatMap((card) => card.requiredModelEvidence)).toEqual(
       expect.arrayContaining([
         "random_outcome_model_required:true",

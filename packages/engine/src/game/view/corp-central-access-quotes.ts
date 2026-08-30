@@ -32,8 +32,7 @@ function quoteCentralAccess(
     ...modifiers.sourceDefinitionIds,
     ...counterModifiers.sourceDefinitionIds,
   ].sort();
-  const effectiveAccessCount =
-    1 + modifiers.amount + counterModifiers.amount;
+  const effectiveAccessCount = 1 + modifiers.amount + counterModifiers.amount;
   if (!Number.isSafeInteger(effectiveAccessCount) || effectiveAccessCount < 1)
     return undefined;
 

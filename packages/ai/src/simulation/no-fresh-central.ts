@@ -179,10 +179,7 @@ export function trueCentralCloseoutProfile(
     ...(hqPressure ? ["hq_pressure"] : []),
   ];
   const hasSpecificPressure =
-    matchingInterface ||
-    anyMultiaccess ||
-    hasRunEvent ||
-    hqPressure;
+    matchingInterface || anyMultiaccess || hasRunEvent || hqPressure;
   return {
     opportunity: hasSpecificPressure,
     reasons,

@@ -389,6 +389,8 @@ describe("hidden-zone search/install intents", () => {
           type: "event",
         },
       }),
-    ).toThrow("Der offengelegte Stack-Plan kann nur ein Programm installieren.");
+    ).toThrow(
+      "Der offengelegte Stack-Plan kann nur ein Programm installieren.",
+    );
   });
 });

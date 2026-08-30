@@ -392,7 +392,8 @@ describe("selectedChoicesForDecision", () => {
 
   it("materializes delegated hidden-search memory only for the exact parent need", () => {
     const rootId = "plan:runner.contest_remote:remote%3Aremote_2";
-    const executorId = "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate";
+    const executorId =
+      "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate";
     const needId = "coverage:breaker_code_gate";
     const searchActionId = "runner.play_event.sneak_3.sneak_3.install_program";
     const targetCardId = "rent_i_con_3";
@@ -507,7 +508,9 @@ describe("selectedChoicesForDecision", () => {
 
     (
       portfolio as {
-        instances: Array<{ moduleState?: { gap?: { requesterNeedId?: string } } }>;
+        instances: Array<{
+          moduleState?: { gap?: { requesterNeedId?: string } };
+        }>;
       }
     ).instances[1]!.moduleState!.gap!.requesterNeedId = "coverage:wrong";
     expect(() =>

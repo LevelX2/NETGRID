@@ -30,14 +30,10 @@ export function quoteAccessReserve(params: {
       evidence: [
         "access_reserve_source:runner_economy_posture",
         `access_reserve_desired:${desiredCreditReserve}`,
-        ...(
-          params.economyPosture.creditReservePolicy?.reserveDrivers ?? []
-        )
+        ...(params.economyPosture.creditReservePolicy?.reserveDrivers ?? [])
           .slice(0, 6)
           .map((driver) => `access_reserve_driver:${driver}`),
-        ...(
-          params.economyPosture.creditReservePolicy?.reserveOverrides ?? []
-        )
+        ...(params.economyPosture.creditReservePolicy?.reserveOverrides ?? [])
           .slice(0, 6)
           .map((override) => `access_reserve_override:${override}`),
       ],
@@ -55,4 +51,3 @@ export function quoteAccessReserve(params: {
     ],
   };
 }
-

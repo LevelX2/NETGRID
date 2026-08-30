@@ -425,8 +425,7 @@ describe("Runner targeted-bypass resident continuation", () => {
             planInstanceId: "plan:runner.develop_board_and_hand:social",
             step: {},
             head: {
-              planInstanceId:
-                "plan:runner.develop_board_and_hand:social",
+              planInstanceId: "plan:runner.develop_board_and_hand:social",
               stepId: "play-social",
               actionId: candidate.actionId,
               actionType: candidate.actionType,
@@ -438,12 +437,10 @@ describe("Runner targeted-bypass resident continuation", () => {
             schemaVersion: "resident-plan-portfolio-v2",
             side: "runner",
             stateVersion: 10,
-            executorInstanceId:
-              "plan:runner.develop_board_and_hand:social",
+            executorInstanceId: "plan:runner.develop_board_and_hand:social",
             instances: [
               {
-                instanceId:
-                  "plan:runner.develop_board_and_hand:social",
+                instanceId: "plan:runner.develop_board_and_hand:social",
                 moduleId: "runner.develop_board_and_hand",
                 executionState: "executor",
                 moduleState: { kind: "development" },
@@ -498,9 +495,7 @@ function planningInput(params: {
         credits: params.credits ?? 5,
         rig: params.rig,
       },
-      servers: [
-        { id: "hq", ice: params.ice, root: [] },
-      ],
+      servers: [{ id: "hq", ice: params.ice, root: [] }],
     },
   } as unknown as AiDecisionInput;
 }
@@ -627,9 +622,7 @@ function choiceInput(
     legalActions: choice ? [resolveChoiceAction(stateVersion)] : [],
     playerView: {
       stateVersion,
-      timingPoint: choice
-        ? "choice.resolve"
-        : "runner_action.main",
+      timingPoint: choice ? "choice.resolve" : "runner_action.main",
       winner: null,
       own: { credits: 4 },
       servers: [],

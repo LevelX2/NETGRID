@@ -285,10 +285,7 @@ function frameFor(legalActions: LegalAction[]) {
   });
 }
 
-function legalAction(
-  actionId: string,
-  type: LegalAction["type"],
-): LegalAction {
+function legalAction(actionId: string, type: LegalAction["type"]): LegalAction {
   return {
     actionId,
     side: "corp",

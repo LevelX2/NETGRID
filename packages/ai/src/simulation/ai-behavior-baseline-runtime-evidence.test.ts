@@ -41,13 +41,8 @@ describe("actionLimitDiagnosisForSimulation", () => {
   });
 
   it("attributes a repeated-run limit to its repeated root plan instead of the final window leaf", () => {
-    const pressure = () =>
-      action("start_run", "runner.pressure_central", "hq");
-    const runWindow = action(
-      "continue_run",
-      "runner.convert_run_window",
-      "hq",
-    );
+    const pressure = () => action("start_run", "runner.pressure_central", "hq");
+    const runWindow = action("continue_run", "runner.convert_run_window", "hq");
     const corpWindow = action(
       "decline_rez",
       "corp.defend_servers",
@@ -89,8 +84,7 @@ describe("actionLimitDiagnosisForSimulation", () => {
   });
 
   it("does not blame an earlier repeated pressure plan for a later foreign limit cycle", () => {
-    const pressure = () =>
-      action("start_run", "runner.pressure_central", "hq");
+    const pressure = () => action("start_run", "runner.pressure_central", "hq");
     const access = () =>
       action("access_card", "runner.convert_run_window", "hq");
     const laterEconomy = () =>
@@ -128,8 +122,7 @@ function summary(
 ): AiSimulationSummary {
   return {
     terminationKind: errors.length > 0 ? "runtime_failure" : "action_limit",
-    winner:
-      errors.length > 0 ? "runtime_failure" : "action_limit_reached",
+    winner: errors.length > 0 ? "runtime_failure" : "action_limit_reached",
     actionSequence,
     errors,
   } as AiSimulationSummary;

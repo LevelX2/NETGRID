@@ -101,7 +101,10 @@ describe("run fort trigger execution", () => {
       hostedOn: microtechId,
     } as CardInstance;
     const host = testHost(state, {
-      [MICROTECH_BACKUP_DRIVE_ID]: definition(MICROTECH_BACKUP_DRIVE_ID, "hardware"),
+      [MICROTECH_BACKUP_DRIVE_ID]: definition(
+        MICROTECH_BACKUP_DRIVE_ID,
+        "hardware",
+      ),
       simple_fracter: definition("simple_fracter", "program"),
       simple_decoder: definition("simple_decoder", "program"),
     });
@@ -181,9 +184,7 @@ function triggerAction(
 
 function testHost(
   state: GameState,
-  definitionsOrOverrides:
-    | Record<string, CardDefinition>
-    | HostOverrides = {},
+  definitionsOrOverrides: Record<string, CardDefinition> | HostOverrides = {},
   maybeOverrides: HostOverrides = {},
 ): RunFortTriggerExecutionHost {
   const definitions =
@@ -242,8 +243,7 @@ function testHost(
         overrides.resolveApproachIceExposeAbility ?? (() => undefined),
       resolveApproachIceExposeViewingDecision:
         overrides.resolveApproachIceExposeViewingDecision ?? (() => undefined),
-      startHqIceSwapChoice:
-        overrides.startHqIceSwapChoice ?? (() => undefined),
+      startHqIceSwapChoice: overrides.startHqIceSwapChoice ?? (() => undefined),
     },
   };
 }
@@ -278,10 +278,7 @@ function instance(
   } as unknown as CardInstance;
 }
 
-function definition(
-  id: string,
-  type: CardDefinition["type"],
-): CardDefinition {
+function definition(id: string, type: CardDefinition["type"]): CardDefinition {
   return {
     id,
     title: id,

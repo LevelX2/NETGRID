@@ -93,10 +93,7 @@ function eventServerId(event: PublicGameEvent): string | undefined {
   }
   const targets = payload.targets;
   if (isRecord(targets)) {
-    if (
-      typeof targets.serverId === "string" &&
-      targets.serverId.length > 0
-    ) {
+    if (typeof targets.serverId === "string" && targets.serverId.length > 0) {
       return targets.serverId;
     }
     const targetLabel = serverIdForLabel(targets.serverLabel);

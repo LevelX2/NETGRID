@@ -53,7 +53,8 @@ export function planningRunnerNeedsStrictlyMore(
   profile: TraceRulesProfile | undefined,
 ): boolean {
   return (
-    traceRulesDefinition(planningTraceRulesProfile(profile)).tieWinner === "corp"
+    traceRulesDefinition(planningTraceRulesProfile(profile)).tieWinner ===
+    "corp"
   );
 }
 

@@ -259,8 +259,7 @@ describe("Runner targeted rezzed-ICE trash plan", () => {
       payload: {
         cardId: "worm-1",
         cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-        cardImplementationAbilityKey:
-          "abilities_on_play_trash_unrezzed_ice",
+        cardImplementationAbilityKey: "abilities_on_play_trash_unrezzed_ice",
         cardImplementationAbilityId:
           "onr_v1_109_security-code-worm-chip:abilities_on_play_trash_unrezzed_ice",
       },
@@ -274,15 +273,10 @@ describe("Runner targeted rezzed-ICE trash plan", () => {
     });
     const input = planningInput({
       credits: 6,
-      ice: [
-        blockingIce("rd-wall", "wall", 1),
-        unrezzedIce("rd-hidden-outer"),
-      ],
+      ice: [blockingIce("rd-wall", "wall", 1), unrezzedIce("rd-hidden-outer")],
     });
 
-    expect(candidate?.abilityKey).toBe(
-      "abilities_on_play_trash_unrezzed_ice",
-    );
+    expect(candidate?.abilityKey).toBe("abilities_on_play_trash_unrezzed_ice");
     expect(runnerActionRequiresTargetedIceTrashPlan(candidate!)).toBe(true);
     expect(runnerUnrezzedIceTrashRouteOpeningPayoff(input, "rd")).toBe(120);
     expect(
@@ -550,7 +544,9 @@ function pressurePortfolio(
 }
 
 function targetedChoiceInput(
-  options: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>["options"] = [
+  options: NonNullable<
+    AiDecisionInput["playerView"]["pendingChoice"]
+  >["options"] = [
     { id: "card_rd-wall", label: "Crystal Wall", value: "rd-wall" },
     {
       id: "card_rd-sentry",

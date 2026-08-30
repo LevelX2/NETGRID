@@ -10,7 +10,7 @@ import {
   resultWinnerMotifUi,
   retentionProtectionUi,
   seriesResultHeadline,
-  seriesScoreUi
+  seriesScoreUi,
 } from "./result-modal-ui";
 
 describe("result modal UI helpers", () => {
@@ -24,31 +24,46 @@ describe("result modal UI helpers", () => {
     expect(resultWinnerMotifUi("runner")).toMatchObject({
       ariaLabel: "Runner-Sieg",
       caption: "Runner",
-      imageSrc: "/result-motifs/result-runner-victory.png"
+      imageSrc: "/result-motifs/result-runner-victory.png",
     });
     expect(resultWinnerMotifUi("corp")).toMatchObject({
       ariaLabel: "Korp-Sieg",
       caption: "Korp",
-      imageSrc: "/result-motifs/result-corp-victory.png"
+      imageSrc: "/result-motifs/result-corp-victory.png",
     });
     expect(resultWinnerMotifUi("draw")).toEqual({
       ariaLabel: "Unentschieden",
-      caption: "Draw"
+      caption: "Draw",
     });
   });
 
   it("keeps the result footer neutral instead of repeating win wording", () => {
     expect(resultFooterOutcomeLabel("runner", "runner")).toBe("Deine Seite");
-    expect(resultFooterOutcomeLabel("corp", "runner", "Korp-KI")).toBe("Korp-KI");
+    expect(resultFooterOutcomeLabel("corp", "runner", "Korp-KI")).toBe(
+      "Korp-KI",
+    );
     expect(resultFooterOutcomeLabel("draw", "runner")).toBe("Draw");
   });
 
   it("uses the finished series winner as the primary result headline", () => {
-    expect(seriesResultHeadline(series("won"), "Korp-KI")).toBe("Du hast die Match-Serie gewonnen.");
-    expect(seriesResultHeadline(series("won"), "Korp-KI", "Ludwig")).toBe("Ludwig hat die Match-Serie gewonnen.");
-    expect(seriesResultHeadline(series("lost"), "Korp-KI")).toBe("Korp-KI hat die Match-Serie gewonnen.");
-    expect(seriesResultHeadline(series("draw"), "Korp-KI")).toBe("Die Match-Serie endet unentschieden.");
-    expect(seriesResultHeadline({ ...series("won"), status: "between_games" }, "Korp-KI")).toBeNull();
+    expect(seriesResultHeadline(series("won"), "Korp-KI")).toBe(
+      "Du hast die Match-Serie gewonnen.",
+    );
+    expect(seriesResultHeadline(series("won"), "Korp-KI", "Ludwig")).toBe(
+      "Ludwig hat die Match-Serie gewonnen.",
+    );
+    expect(seriesResultHeadline(series("lost"), "Korp-KI")).toBe(
+      "Korp-KI hat die Match-Serie gewonnen.",
+    );
+    expect(seriesResultHeadline(series("draw"), "Korp-KI")).toBe(
+      "Die Match-Serie endet unentschieden.",
+    );
+    expect(
+      seriesResultHeadline(
+        { ...series("won"), status: "between_games" },
+        "Korp-KI",
+      ),
+    ).toBeNull();
     expect(resultOutcomeText("runner")).toBe("Runner gewinnt.");
   });
 
@@ -57,12 +72,13 @@ describe("result modal UI helpers", () => {
       seriesScoreUi(
         { ...series("won"), viewerMatchPoints: 15, opponentMatchPoints: 11 },
         "Teilnehmer A (Runner)",
-        "Korp KI (Korp)"
-      )
+        "Korp KI (Korp)",
+      ),
     ).toEqual({
       label: "Endergebnis",
       score: "15 : 11",
-      ariaLabel: "Endergebnis: Teilnehmer A (Runner) 15 zu Korp KI (Korp) 11 Matchpunkte."
+      ariaLabel:
+        "Endergebnis: Teilnehmer A (Runner) 15 zu Korp KI (Korp) 11 Matchpunkte.",
     });
   });
 
@@ -71,27 +87,41 @@ describe("result modal UI helpers", () => {
       seriesScoreUi(
         { ...series("won"), status: "between_games" },
         "Teilnehmer A (Korp)",
-        "Korp KI (Runner)"
-      ).label
+        "Korp KI (Runner)",
+      ).label,
     ).toBe("Zwischenstand");
   });
 
   it("uses player names and sides for single-game result headlines", () => {
-    expect(resultOutcomeHeadline("corp", "runner", "Ludwig", "Korp-KI")).toBe("Korp-KI gewinnt als Korp.");
-    expect(resultOutcomeHeadline("runner", "runner", "Ludwig", "Korp-KI")).toBe("Ludwig gewinnt als Runner.");
-    expect(resultOutcomeHeadline("runner", "runner")).toBe("Du gewinnst als Runner.");
-    expect(resultOutcomeHeadline("draw", "runner", "Ludwig", "Korp-KI")).toBe("Das Spiel endet unentschieden.");
+    expect(resultOutcomeHeadline("corp", "runner", "Ludwig", "Korp-KI")).toBe(
+      "Korp-KI gewinnt als Korp.",
+    );
+    expect(resultOutcomeHeadline("runner", "runner", "Ludwig", "Korp-KI")).toBe(
+      "Ludwig gewinnt als Runner.",
+    );
+    expect(resultOutcomeHeadline("runner", "runner")).toBe(
+      "Du gewinnst als Runner.",
+    );
+    expect(resultOutcomeHeadline("draw", "runner", "Ludwig", "Korp-KI")).toBe(
+      "Das Spiel endet unentschieden.",
+    );
   });
 
   it("formats player labels with side context", () => {
-    expect(resultPlayerRoleLabel("runner", "runner", "Ludwig", "Korp-KI")).toBe("Ludwig (Runner)");
-    expect(resultPlayerRoleLabel("corp", "runner", "Ludwig", "Korp-KI")).toBe("Korp-KI (Korp)");
+    expect(resultPlayerRoleLabel("runner", "runner", "Ludwig", "Korp-KI")).toBe(
+      "Ludwig (Runner)",
+    );
+    expect(resultPlayerRoleLabel("corp", "runner", "Ludwig", "Korp-KI")).toBe(
+      "Korp-KI (Korp)",
+    );
     expect(resultPlayerRoleLabel("corp", "runner")).toBe("Gegenseite (Korp)");
   });
 
   it("uses replay-safe retention labels without the old aufheben wording", () => {
     expect(retentionProtectionUi(false).label).toBe("Spiel für Replay sichern");
-    expect(retentionProtectionUi(true).label).toBe("Replay-Sicherung entfernen");
+    expect(retentionProtectionUi(true).label).toBe(
+      "Replay-Sicherung entfernen",
+    );
     expect(retentionProtectionUi(false).title).toContain("Replay");
     expect(retentionProtectionUi(true).title).not.toContain("aufheben");
   });
@@ -99,11 +129,11 @@ describe("result modal UI helpers", () => {
   it("makes the start-screen path secondary when a next series game is available", () => {
     expect(resultExitButtonUi(true)).toMatchObject({
       label: "Serie verlassen",
-      needsConfirmation: true
+      needsConfirmation: true,
     });
     expect(resultExitButtonUi(false)).toMatchObject({
       label: "Zurück zum Startbildschirm",
-      needsConfirmation: false
+      needsConfirmation: false,
     });
   });
 
@@ -113,18 +143,19 @@ describe("result modal UI helpers", () => {
         {
           winner: "runner",
           runnerAgendaPoints: 7,
-          corpAgendaPoints: 2
+          corpAgendaPoints: 2,
         },
         "runner",
         "Ludwig",
-        "Korp-KI"
-      )
+        "Korp-KI",
+      ),
     ).toEqual({
-      summary: "Ludwig (Runner): 10 Matchpunkte. Korp-KI (Korp): 2 Agenda-Punkte aus gescorten Agendas.",
+      summary:
+        "Ludwig (Runner): 10 Matchpunkte. Korp-KI (Korp): 2 Agenda-Punkte aus gescorten Agendas.",
       viewerMatchPoints: 10,
       opponentMatchPoints: 2,
       viewerAgendaPoints: 7,
-      opponentAgendaPoints: 2
+      opponentAgendaPoints: 2,
     });
   });
 
@@ -134,18 +165,19 @@ describe("result modal UI helpers", () => {
         {
           winner: "corp",
           runnerAgendaPoints: 0,
-          corpAgendaPoints: 4
+          corpAgendaPoints: 4,
         },
         "runner",
         "Ludwig",
-        "Korp-KI"
-      )
+        "Korp-KI",
+      ),
     ).toEqual({
-      summary: "Korp-KI (Korp): 10 Matchpunkte. Ludwig (Runner): 0 Agenda-Punkte aus gestohlenen Agendas.",
+      summary:
+        "Korp-KI (Korp): 10 Matchpunkte. Ludwig (Runner): 0 Agenda-Punkte aus gestohlenen Agendas.",
       viewerMatchPoints: 0,
       opponentMatchPoints: 10,
       viewerAgendaPoints: 0,
-      opponentAgendaPoints: 4
+      opponentAgendaPoints: 4,
     });
   });
 
@@ -155,16 +187,16 @@ describe("result modal UI helpers", () => {
         {
           winner: "draw",
           runnerAgendaPoints: 4,
-          corpAgendaPoints: 3
+          corpAgendaPoints: 3,
         },
-        "corp"
-      )
+        "corp",
+      ),
     ).toEqual({
       summary: "Draw: beide Seiten erhalten ihre Agenda-Punkte.",
       viewerMatchPoints: 3,
       opponentMatchPoints: 4,
       viewerAgendaPoints: 3,
-      opponentAgendaPoints: 4
+      opponentAgendaPoints: 4,
     });
   });
 });
@@ -185,7 +217,10 @@ function series(viewerSeriesOutcome: "won" | "lost" | "draw") {
     viewerAgendaPoints: 7,
     opponentAgendaPoints: 6,
     viewerSeriesOutcome,
-    seriesDecision: viewerSeriesOutcome === "draw" ? "draw" as const : "match_points" as const,
+    seriesDecision:
+      viewerSeriesOutcome === "draw"
+        ? ("draw" as const)
+        : ("match_points" as const),
     nextAvailable: false,
   };
 }

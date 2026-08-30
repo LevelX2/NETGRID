@@ -19,10 +19,7 @@ describe("match FD7671 runner decision checkpoints", () => {
       "preserves the matchpoint run reserve over central economy trash",
       centralTrashJson,
     ],
-    [
-      "cash-outs Broker before the bound run-lock release",
-      releaseRunLockJson,
-    ],
+    ["cash-outs Broker before the bound run-lock release", releaseRunLockJson],
     ["exposes the valuable unseen remote-root position", exposeTargetJson],
   ])("%s", (_label, json) => {
     expectCheckpointToPass(fixture(json));

@@ -1396,14 +1396,15 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       materialized.engineEventRows.every(
         (row, index) => Number(row.eventIndex) === index,
       );
-    const checkpointState = exactState && eventPrefixIsComplete
-      ? hydrateSnapshotGameState(
-          exactState,
-          materialized.engineEventRows.map(
-            (row) => JSON.parse(row.eventJson) as GameEvent,
-          ),
-        )
-      : undefined;
+    const checkpointState =
+      exactState && eventPrefixIsComplete
+        ? hydrateSnapshotGameState(
+            exactState,
+            materialized.engineEventRows.map(
+              (row) => JSON.parse(row.eventJson) as GameEvent,
+            ),
+          )
+        : undefined;
     const checkpointReplayContext = checkpointState
       ? checkpointReplayContextFromStoredJson({
           matchId,
@@ -4081,9 +4082,7 @@ function checkpointReplayContextFromStoredJson(params: {
   const assignment = persisted.match.deckSetup.assignment;
   if (!assignment) return undefined;
   const player =
-    params.side === "runner"
-      ? assignment.runnerPlayer
-      : assignment.corpPlayer;
+    params.side === "runner" ? assignment.runnerPlayer : assignment.corpPlayer;
   const ownDeckSnapshot =
     privateDeckSnapshots?.participants?.[player]?.[params.side];
   if (
@@ -4099,8 +4098,7 @@ function checkpointReplayContextFromStoredJson(params: {
     ownDeckSnapshot,
     difficulty,
     profileId:
-      controller?.profileId ??
-      `${params.side}-server-ai-v0.9-${difficulty}`,
+      controller?.profileId ?? `${params.side}-server-ai-v0.9-${difficulty}`,
     decisionId: `${params.matchId}:${params.state.stateVersion}:${params.side}`,
     actionNumber: params.state.stateVersion,
   };

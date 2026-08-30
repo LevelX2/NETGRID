@@ -47,4 +47,3 @@ describe("access decision type contract", () => {
     expect(ACCESS_TARGET_KINDS).toEqual(targetKinds);
   });
 });
-

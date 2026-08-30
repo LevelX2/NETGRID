@@ -12,10 +12,7 @@ describe("mobile runner zone content width", () => {
   );
 
   it("keeps direct runner zones content-sized and viewport-bounded", () => {
-    const rule = cssRule(
-      mobileCss,
-      ".runnerGripHeapLayout > .sideZoneFrame",
-    );
+    const rule = cssRule(mobileCss, ".runnerGripHeapLayout > .sideZoneFrame");
 
     expect(rule).toContain("flex: 0 1 auto;");
     expect(rule).toContain("width: fit-content;");
@@ -29,10 +26,7 @@ describe("mobile runner zone content width", () => {
   });
 
   it("lets runner card rows shrink-wrap while preserving their viewport cap", () => {
-    const rule = cssRule(
-      mobileCss,
-      ".runnerGripHeapLayout .fixedZoneCards",
-    );
+    const rule = cssRule(mobileCss, ".runnerGripHeapLayout .fixedZoneCards");
 
     expect(rule).toContain("width: fit-content;");
     expect(rule).toContain("max-width: 100%;");

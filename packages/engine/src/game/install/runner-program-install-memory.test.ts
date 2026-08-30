@@ -90,7 +90,8 @@ describe("runner program install memory", () => {
       kind: "nonsearch",
       targetCardId: target,
       originalChoiceId: "original_choice_3",
-      originalChoiceSource: "card_implementation.pro018_stack_install_run_cleanup",
+      originalChoiceSource:
+        "card_implementation.pro018_stack_install_run_cleanup",
       options: [
         { id: `card_${first}`, label: "First", value: first },
         { id: `card_${second}`, label: "Second", value: second },

@@ -14,7 +14,7 @@ export type ConfirmationDialogRequest = {
 export function ConfirmationDialog({
   request,
   onCancel,
-  onConfirm
+  onConfirm,
 }: {
   request: ConfirmationDialogRequest;
   onCancel(): void;
@@ -41,11 +41,19 @@ export function ConfirmationDialog({
       aria-labelledby="confirmation-dialog-title"
       aria-describedby="confirmation-dialog-message"
     >
-      <div className="confirmationDialogBackdrop" aria-hidden="true" onClick={onCancel} />
+      <div
+        className="confirmationDialogBackdrop"
+        aria-hidden="true"
+        onClick={onCancel}
+      />
       <section className="confirmationDialogPanel">
         <div className="confirmationDialogHeader">
           <span className="confirmationDialogIcon" aria-hidden="true">
-            {tone === "danger" ? <AlertTriangle size={18} /> : <Shield size={18} />}
+            {tone === "danger" ? (
+              <AlertTriangle size={18} />
+            ) : (
+              <Shield size={18} />
+            )}
           </span>
           <div>
             <p className="eyebrow">{t("eyebrow")}</p>
@@ -54,12 +62,25 @@ export function ConfirmationDialog({
         </div>
         <p id="confirmation-dialog-message">{request.message}</p>
         <div className="confirmationDialogActions">
-          <button ref={cancelButtonRef} className="button" onClick={onCancel} type="button">
+          <button
+            ref={cancelButtonRef}
+            className="button"
+            onClick={onCancel}
+            type="button"
+          >
             <X size={15} />
             {request.cancelLabel ?? t("cancel")}
           </button>
-          <button className={`button primary ${tone === "danger" ? "dangerButton" : ""}`} onClick={onConfirm} type="button">
-            {tone === "danger" ? <AlertTriangle size={15} /> : <Check size={15} />}
+          <button
+            className={`button primary ${tone === "danger" ? "dangerButton" : ""}`}
+            onClick={onConfirm}
+            type="button"
+          >
+            {tone === "danger" ? (
+              <AlertTriangle size={15} />
+            ) : (
+              <Check size={15} />
+            )}
             {request.confirmLabel}
           </button>
         </div>

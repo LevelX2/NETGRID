@@ -22,8 +22,7 @@ describe("match 2c49 runner fully broken future effect decision checkpoint", () 
     ).toBe(false);
     expect(result.decision?.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-      leafExecutorInstanceId:
-        "plan:runner.convert_run_window:run%3Arun_89",
+      leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_89",
       selectedStep: {
         planInstanceId: "plan:runner.convert_run_window:run%3Arun_89",
         parentInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",

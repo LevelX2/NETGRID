@@ -208,8 +208,7 @@ describe("run duration payment", () => {
       sourceDefinitionId: "lucidrine_def",
     };
     cannotPay.run!.encounterTaxForFutureIce = 3;
-    cannotPay.run!.encounterTaxSourceDefinitionId =
-      "onr_v1_222_ball-and-chain";
+    cannotPay.run!.encounterTaxSourceDefinitionId = "onr_v1_222_ball-and-chain";
     const unpaidAction = { payload: {} } as LegalAction;
 
     const unpaid = payEncounterTaxForFutureIce(

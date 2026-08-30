@@ -112,15 +112,17 @@ describe("Corp agenda turn-planning vertical slice", () => {
       },
     } as unknown as CorpScoreProjectSignal;
 
-    const slice = buildSlice(input, blocked, [
-      iceCandidate("remote-hardening", "remote_1"),
-      economyCandidate(),
-    ], [
-      scoreProtectionProvider(
-        "score-protection:agenda-1:remote_1:revision-2",
-        "remote-hardening",
-      ),
-    ]);
+    const slice = buildSlice(
+      input,
+      blocked,
+      [iceCandidate("remote-hardening", "remote_1"), economyCandidate()],
+      [
+        scoreProtectionProvider(
+          "score-protection:agenda-1:remote_1:revision-2",
+          "remote-hardening",
+        ),
+      ],
+    );
 
     expect(slice.lines).toEqual([
       expect.objectContaining({

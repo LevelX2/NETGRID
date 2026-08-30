@@ -195,9 +195,7 @@ export function activatedAbilityPayload(
     ...(scoresSourceAsAgenda
       ? { cardImplementationScoresSourceAsAgenda: true }
       : {}),
-    ...(exactEndRunEffect
-      ? { cardImplementationEffectKind: "end_run" }
-      : {}),
+    ...(exactEndRunEffect ? { cardImplementationEffectKind: "end_run" } : {}),
     ...(advancementDistribution
       ? {
           cardImplementationEffectKind: "distribute_advancement_counters",

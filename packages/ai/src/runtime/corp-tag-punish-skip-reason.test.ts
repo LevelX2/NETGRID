@@ -6,7 +6,10 @@ import { corpTagPunishSkipReason } from "./corp-tag-punish-skip-reason";
 describe("corp tag punish skip reason", () => {
   it("classifies structured reason-code segments", () => {
     expect(
-      corpTagPunishSkipReason(action("install_card"), decision("corp.plan.protect_rnd")),
+      corpTagPunishSkipReason(
+        action("install_card"),
+        decision("corp.plan.protect_rnd"),
+      ),
     ).toBe("central_protection");
     expect(
       corpTagPunishSkipReason(

@@ -71,8 +71,7 @@ describe("runner credit-bank prospective planning", () => {
         hostedCreditsAdded: 12,
       },
       cashOut: {
-        capabilityKey:
-          "abilities_activated_runner_main_take_hosted_credits",
+        capabilityKey: "abilities_activated_runner_main_take_hosted_credits",
       },
     });
     expect(plan?.evidenceCodes).toContain(

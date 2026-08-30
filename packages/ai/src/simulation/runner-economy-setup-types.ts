@@ -175,8 +175,7 @@ export function runnerEconomySetupActionClass(
       ? (definition.mechanics as string[])
       : [];
   const isShortTermContract = definitionId === SHORT_TERM_CONTRACT_CARD_ID;
-  const debtFinancing =
-    runnerDebtFinancingProfile(definitionId) !== undefined;
+  const debtFinancing = runnerDebtFinancingProfile(definitionId) !== undefined;
   const isMramHandSize =
     definitionId !== undefined && MRAM_HAND_SIZE_CARD_IDS.has(definitionId);
   const economy = dependencies.isRunnerEconomyAction(input, action);
@@ -190,7 +189,11 @@ export function runnerEconomySetupActionClass(
   );
   const handSizeSupport =
     isMramHandSize ||
-    rolesMatch(roles, ["hand_size", "damage_resilience", "damage_prevention"]) ||
+    rolesMatch(roles, [
+      "hand_size",
+      "damage_resilience",
+      "damage_prevention",
+    ]) ||
     rolesMatch(mechanics, ["hand", "damage_prevention"]);
   const memoryHardware =
     !handSizeSupport &&
@@ -211,12 +214,8 @@ export function runnerEconomySetupActionClass(
         rolesMatch(roles, ["finite", "pool"]) ||
         rolesMatch(mechanics, ["counter", "resource_action"])),
     loanDebtEconomy:
-      economy &&
-      (debtFinancing ||
-        rolesMatch(roles, ["loan", "debt"])),
-    recurringEconomy:
-      economy &&
-      rolesMatch(roles, ["recurring", "drip"]),
+      economy && (debtFinancing || rolesMatch(roles, ["loan", "debt"])),
+    recurringEconomy: economy && rolesMatch(roles, ["recurring", "drip"]),
     resourceEconomy: economy && definition?.type === "resource",
     hardwareEconomy: economy && definition?.type === "hardware",
     memoryHardware,
@@ -228,9 +227,7 @@ export function runnerEconomySetupActionClass(
       (debtFinancing ||
         rolesMatch(roles, ["risk", "downside", "penalty", "tag"])),
     delayedPenaltyEconomy:
-      economy &&
-      (debtFinancing ||
-        rolesMatch(roles, ["delayed", "penalty"])),
+      economy && (debtFinancing || rolesMatch(roles, ["delayed", "penalty"])),
   };
 }
 

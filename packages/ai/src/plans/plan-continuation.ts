@@ -143,7 +143,9 @@ export function materializeCommitmentStep(
       candidate.condition !== "always" &&
       observation.outcomeCodes.includes(candidate.condition),
   );
-  const chosen = branch ?? node.branches.find((candidate) => candidate.condition === "always");
+  const chosen =
+    branch ??
+    node.branches.find((candidate) => candidate.condition === "always");
   const next = structuredClone(commitment);
   next.materializedAtStateVersion = observation.stateVersion;
   const origin = originFor(commitment, observation);

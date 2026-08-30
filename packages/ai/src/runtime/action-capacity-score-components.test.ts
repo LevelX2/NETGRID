@@ -187,8 +187,9 @@ describe("action-capacity runtime scoring", () => {
     const invalid = candidate("invalid-capacity", Number.NaN);
     const valid = candidate("valid-capacity", 1);
 
-    expect(() => actionCapacityRuntimeScoreComponents(invalid, undefined))
-      .toThrow("action_capacity_score_non_finite:invalid-capacity");
+    expect(() =>
+      actionCapacityRuntimeScoreComponents(invalid, undefined),
+    ).toThrow("action_capacity_score_non_finite:invalid-capacity");
     expect(() => compareActionCapacityDominance(invalid, valid)).toThrow(
       "action_capacity_score_non_finite:invalid-capacity",
     );

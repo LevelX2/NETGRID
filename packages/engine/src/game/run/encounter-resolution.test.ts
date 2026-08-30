@@ -200,9 +200,7 @@ describe("encounter resolution boundary", () => {
       });
     }
 
-    expect(state.run?.runDurationAdditionalSubroutineModifiers).toHaveLength(
-      2,
-    );
+    expect(state.run?.runDurationAdditionalSubroutineModifiers).toHaveLength(2);
     expect(state.run?.passRezzedIceProgramTrashModifiers).toHaveLength(2);
     expect(
       new Set(

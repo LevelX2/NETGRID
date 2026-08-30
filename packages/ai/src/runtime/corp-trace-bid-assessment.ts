@@ -48,9 +48,7 @@ export function assessCorpTraceBid(params: {
   }
 
   const tieMargin =
-    params.traceContext.traceRulesProfile === "classic_blind_corp_ties"
-      ? 0
-      : 1;
+    params.traceContext.traceRulesProfile === "classic_blind_corp_ties" ? 0 : 1;
   const visibleRunnerMaximumStrength =
     typeof params.traceContext.runnerMaximumPreRevealStrength === "number" &&
     Number.isInteger(params.traceContext.runnerMaximumPreRevealStrength)
@@ -122,7 +120,9 @@ export function assessCorpTraceBid(params: {
   };
 }
 
-function sourceHasNativeTraceSuccessPayoff(sourceDefinitionId: string): boolean {
+function sourceHasNativeTraceSuccessPayoff(
+  sourceDefinitionId: string,
+): boolean {
   const hint = AI_HINTS_BY_CARD.get(sourceDefinitionId);
   if (!hint || hint.cardType !== "ice") return false;
   const hasTrace = (hint.effects ?? []).some(

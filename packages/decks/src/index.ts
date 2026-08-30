@@ -32,7 +32,16 @@ export type DeckTableLayoutEntry = {
   order: number;
 };
 
-export type DeckTablePileSortMode = "free" | "name" | "type" | "install" | "rez" | "trash" | "cost" | "strength" | "agenda";
+export type DeckTablePileSortMode =
+  | "free"
+  | "name"
+  | "type"
+  | "install"
+  | "rez"
+  | "trash"
+  | "cost"
+  | "strength"
+  | "agenda";
 
 export type DeckTablePile = {
   id: string;
@@ -211,10 +220,13 @@ export const FORBIDDEN_DECK_PAYLOAD_KEYS = [
   "tokenHash",
   "fullState",
   "stateSnapshots",
-  "undoSnapshots"
+  "undoSnapshots",
 ];
 
-export function createEditableDeckFromTemplate(template: DeckTemplate, now = new Date().toISOString()): EditableDeck {
+export function createEditableDeckFromTemplate(
+  template: DeckTemplate,
+  now = new Date().toISOString(),
+): EditableDeck {
   return {
     deckId: `local_${template.sourceDeckId}_${hashText(`${template.templateId}:${now}`).slice(-8)}`,
     deckVersion: "0.6.0-local",
@@ -225,35 +237,54 @@ export function createEditableDeckFromTemplate(template: DeckTemplate, now = new
     formatProfileId: "local-demo-v0.6",
     cards: normalizeCards(template.cards),
     createdAt: now,
-    updatedAt: now
+    updatedAt: now,
   };
 }
 
-export function validateEditableDeck(deck: EditableDeck, context: DeckValidationContext): DeckValidationResult {
+export function validateEditableDeck(
+  deck: EditableDeck,
+  context: DeckValidationContext,
+): DeckValidationResult {
   return validateDeckLike(deck, context);
 }
 
-export function validateDeckSnapshot(snapshot: DeckSnapshot, context: DeckValidationContext): DeckValidationResult {
+export function validateDeckSnapshot(
+  snapshot: DeckSnapshot,
+  context: DeckValidationContext,
+): DeckValidationResult {
   const validation = validateDeckLike(
     {
       name: snapshot.name,
       side: snapshot.side,
       identityCardId: snapshot.identityCardId,
       cardPoolSnapshotId: snapshot.cardPoolSnapshotId,
-      ...(snapshot.cardPoolVersion ? { cardPoolVersion: snapshot.cardPoolVersion } : {}),
+      ...(snapshot.cardPoolVersion
+        ? { cardPoolVersion: snapshot.cardPoolVersion }
+        : {}),
       formatProfileId: snapshot.formatProfileId,
-      ...(snapshot.formatProfileVersion ? { formatProfileVersion: snapshot.formatProfileVersion } : {}),
-      cards: snapshot.cards
+      ...(snapshot.formatProfileVersion
+        ? { formatProfileVersion: snapshot.formatProfileVersion }
+        : {}),
+      cards: snapshot.cards,
     },
-    context
+    context,
   );
-  if (!snapshot.immutable) validation.errors.push("Deck snapshot must be immutable.");
+  if (!snapshot.immutable)
+    validation.errors.push("Deck snapshot must be immutable.");
   const expectedHash = computeDeckHash(snapshot);
-  if (snapshot.deckHash !== expectedHash || snapshot.publicMetadata.deckHash !== expectedHash) validation.errors.push("Deck snapshot hash mismatch.");
+  if (
+    snapshot.deckHash !== expectedHash ||
+    snapshot.publicMetadata.deckHash !== expectedHash
+  )
+    validation.errors.push("Deck snapshot hash mismatch.");
   return { ...validation, ok: validation.errors.length === 0 };
 }
 
-export function createDeckSnapshot(deck: EditableDeck, context: DeckValidationContext, options: { snapshotId?: string; rulesBaselineId?: string } = {}): DeckSnapshot {
+export function createDeckSnapshot(
+  deck: EditableDeck,
+  context: DeckValidationContext,
+  options: { snapshotId?: string; rulesBaselineId?: string } = {},
+): DeckSnapshot {
   const validation = validateEditableDeck(deck, context);
   const snapshot: DeckSnapshot = {
     deckSnapshotId: options.snapshotId ?? `${deck.deckId}_snapshot_v0_6`,
@@ -263,9 +294,19 @@ export function createDeckSnapshot(deck: EditableDeck, context: DeckValidationCo
     side: deck.side,
     identityCardId: deck.identityCardId,
     cardPoolSnapshotId: deck.cardPoolSnapshotId,
-    ...(deck.cardPoolVersion || context.profile.cardPoolVersion ? { cardPoolVersion: deck.cardPoolVersion ?? context.profile.cardPoolVersion } : {}),
+    ...(deck.cardPoolVersion || context.profile.cardPoolVersion
+      ? {
+          cardPoolVersion:
+            deck.cardPoolVersion ?? context.profile.cardPoolVersion,
+        }
+      : {}),
     formatProfileId: deck.formatProfileId,
-    ...(deck.formatProfileVersion || context.profile.version ? { formatProfileVersion: deck.formatProfileVersion ?? context.profile.version } : {}),
+    ...(deck.formatProfileVersion || context.profile.version
+      ? {
+          formatProfileVersion:
+            deck.formatProfileVersion ?? context.profile.version,
+        }
+      : {}),
     rulesBaselineId: options.rulesBaselineId ?? "rules-baseline-mvp-0.4",
     immutable: true,
     cards: normalizeCards(deck.cards),
@@ -275,12 +316,22 @@ export function createDeckSnapshot(deck: EditableDeck, context: DeckValidationCo
       identityCardId: deck.identityCardId,
       deckName: deck.name,
       cardPoolSnapshotId: deck.cardPoolSnapshotId,
-      ...(deck.cardPoolVersion || context.profile.cardPoolVersion ? { cardPoolVersion: deck.cardPoolVersion ?? context.profile.cardPoolVersion } : {}),
+      ...(deck.cardPoolVersion || context.profile.cardPoolVersion
+        ? {
+            cardPoolVersion:
+              deck.cardPoolVersion ?? context.profile.cardPoolVersion,
+          }
+        : {}),
       formatProfileId: deck.formatProfileId,
-      ...(deck.formatProfileVersion || context.profile.version ? { formatProfileVersion: deck.formatProfileVersion ?? context.profile.version } : {}),
-      deckHash: "pending"
+      ...(deck.formatProfileVersion || context.profile.version
+        ? {
+            formatProfileVersion:
+              deck.formatProfileVersion ?? context.profile.version,
+          }
+        : {}),
+      deckHash: "pending",
     },
-    deckHash: "pending"
+    deckHash: "pending",
   };
   const hash = computeDeckHash(snapshot);
   snapshot.deckHash = hash;
@@ -302,7 +353,10 @@ export function buildEngineDeck(snapshot: DeckSnapshot): EngineDeckDefinition {
     name: snapshot.name,
     side: snapshot.side,
     identity: snapshot.identityCardId,
-    cards: normalizeCards(snapshot.cards).map((entry) => ({ id: entry.cardId, quantity: entry.quantity }))
+    cards: normalizeCards(snapshot.cards).map((entry) => ({
+      id: entry.cardId,
+      quantity: entry.quantity,
+    })),
   };
 }
 
@@ -310,7 +364,10 @@ export function exportDeck(deck: EditableDeck): string {
   return `${JSON.stringify({ schemaVersion: "editable-deck-v0.6", deck }, null, 2)}\n`;
 }
 
-export function importDeck(text: string, now = new Date().toISOString()): DeckImportResult {
+export function importDeck(
+  text: string,
+  now = new Date().toISOString(),
+): DeckImportResult {
   let parsed: unknown;
   try {
     parsed = JSON.parse(text);
@@ -319,40 +376,80 @@ export function importDeck(text: string, now = new Date().toISOString()): DeckIm
   }
   const record = parsed as { deck?: Partial<EditableDeck> };
   const deck = record.deck;
-  if (!deck || typeof deck !== "object") return { ok: false, errors: ["Deck JSON enthält kein Deck."] };
-  if (deck.side !== "runner" && deck.side !== "corp") return { ok: false, errors: ["Deck Side ist ungültig."] };
-  if (!deck.name || !deck.identityCardId || !Array.isArray(deck.cards)) return { ok: false, errors: ["Deck Pflichtfelder fehlen."] };
+  if (!deck || typeof deck !== "object")
+    return { ok: false, errors: ["Deck JSON enthält kein Deck."] };
+  if (deck.side !== "runner" && deck.side !== "corp")
+    return { ok: false, errors: ["Deck Side ist ungültig."] };
+  if (!deck.name || !deck.identityCardId || !Array.isArray(deck.cards))
+    return { ok: false, errors: ["Deck Pflichtfelder fehlen."] };
   return {
     ok: true,
     deck: {
-      deckId: typeof deck.deckId === "string" ? sanitizeId(deck.deckId) : `local_import_${hashText(text).slice(-8)}`,
-      deckVersion: typeof deck.deckVersion === "string" ? deck.deckVersion : "0.6.0-local",
+      deckId:
+        typeof deck.deckId === "string"
+          ? sanitizeId(deck.deckId)
+          : `local_import_${hashText(text).slice(-8)}`,
+      deckVersion:
+        typeof deck.deckVersion === "string" ? deck.deckVersion : "0.6.0-local",
       name: deck.name.slice(0, 80),
       side: deck.side,
       identityCardId: deck.identityCardId,
-      cardPoolSnapshotId: typeof deck.cardPoolSnapshotId === "string" ? deck.cardPoolSnapshotId : "card-snapshot-0.5",
-      ...(typeof deck.cardPoolVersion === "string" ? { cardPoolVersion: deck.cardPoolVersion } : {}),
-      formatProfileId: typeof deck.formatProfileId === "string" ? deck.formatProfileId : "local-demo-v0.6",
-      ...(typeof deck.formatProfileVersion === "string" ? { formatProfileVersion: deck.formatProfileVersion } : {}),
-      validationStatus: typeof deck.formatProfileId === "string" ? "needs_revalidation" : "needs_revalidation",
+      cardPoolSnapshotId:
+        typeof deck.cardPoolSnapshotId === "string"
+          ? deck.cardPoolSnapshotId
+          : "card-snapshot-0.5",
+      ...(typeof deck.cardPoolVersion === "string"
+        ? { cardPoolVersion: deck.cardPoolVersion }
+        : {}),
+      formatProfileId:
+        typeof deck.formatProfileId === "string"
+          ? deck.formatProfileId
+          : "local-demo-v0.6",
+      ...(typeof deck.formatProfileVersion === "string"
+        ? { formatProfileVersion: deck.formatProfileVersion }
+        : {}),
+      validationStatus:
+        typeof deck.formatProfileId === "string"
+          ? "needs_revalidation"
+          : "needs_revalidation",
       cards: normalizeCards(deck.cards as DeckCardEntry[]),
       createdAt: typeof deck.createdAt === "string" ? deck.createdAt : now,
       updatedAt: now,
-      ...(typeof deck.notes === "string" ? { notes: deck.notes.slice(0, 500) } : {})
+      ...(typeof deck.notes === "string"
+        ? { notes: deck.notes.slice(0, 500) }
+        : {}),
     },
-    warnings: []
+    warnings: [],
   };
 }
 
 export function assertDeckPayloadSafe(payload: unknown): DeckValidationResult {
   const serialized = stableStringify(payload);
-  const errors = FORBIDDEN_DECK_PAYLOAD_KEYS.filter((key) => serialized.includes(key)).map((key) => `Forbidden payload key ${key}.`);
-  return withErrorCodes({ ok: errors.length === 0, errors, warnings: [], totalCards: 0, agendaPoints: null });
+  const errors = FORBIDDEN_DECK_PAYLOAD_KEYS.filter((key) =>
+    serialized.includes(key),
+  ).map((key) => `Forbidden payload key ${key}.`);
+  return withErrorCodes({
+    ok: errors.length === 0,
+    errors,
+    warnings: [],
+    totalCards: 0,
+    agendaPoints: null,
+  });
 }
 
 function validateDeckLike(
-  deck: Pick<EditableDeck, "name" | "side" | "identityCardId" | "cards" | "cardPoolSnapshotId" | "cardPoolVersion" | "formatProfileId" | "formatProfileVersion">,
-  context: DeckValidationContext
+  deck: Pick<
+    EditableDeck,
+    | "name"
+    | "side"
+    | "identityCardId"
+    | "cards"
+    | "cardPoolSnapshotId"
+    | "cardPoolVersion"
+    | "formatProfileId"
+    | "formatProfileVersion"
+  >,
+  context: DeckValidationContext,
 ): DeckValidationResult {
   const errors: string[] = [];
   const errorCodes: string[] = [];
@@ -361,22 +458,68 @@ function validateDeckLike(
     errorCodes.push(code);
     errors.push(message);
   };
-  if (!deck.name.trim()) addError("deck_name_required", "Deck name is required.");
-  if (deck.cardPoolSnapshotId !== context.profile.cardPoolSnapshotId) addError("card_pool_mismatch", "Deck card pool does not match format profile.");
-  if (context.profile.cardPoolVersion && deck.cardPoolVersion && deck.cardPoolVersion !== context.profile.cardPoolVersion) addError("card_pool_version_mismatch", "Deck card pool version does not match format profile.");
-  if (deck.formatProfileId !== context.profile.profileId) addError("format_profile_unsupported", "Deck format profile is not supported.");
-  if (context.profile.version && deck.formatProfileVersion && deck.formatProfileVersion !== context.profile.version) addError("format_profile_version_mismatch", "Deck format profile version does not match.");
+  if (!deck.name.trim())
+    addError("deck_name_required", "Deck name is required.");
+  if (deck.cardPoolSnapshotId !== context.profile.cardPoolSnapshotId)
+    addError(
+      "card_pool_mismatch",
+      "Deck card pool does not match format profile.",
+    );
+  if (
+    context.profile.cardPoolVersion &&
+    deck.cardPoolVersion &&
+    deck.cardPoolVersion !== context.profile.cardPoolVersion
+  )
+    addError(
+      "card_pool_version_mismatch",
+      "Deck card pool version does not match format profile.",
+    );
+  if (deck.formatProfileId !== context.profile.profileId)
+    addError(
+      "format_profile_unsupported",
+      "Deck format profile is not supported.",
+    );
+  if (
+    context.profile.version &&
+    deck.formatProfileVersion &&
+    deck.formatProfileVersion !== context.profile.version
+  )
+    addError(
+      "format_profile_version_mismatch",
+      "Deck format profile version does not match.",
+    );
   const identity = context.cardsById[deck.identityCardId];
-  const identityRule = context.profile.identityRules?.[deck.side]?.[deck.identityCardId];
-  if (!identity) addError("identity_missing", `Missing identity ${deck.identityCardId}.`);
+  const identityRule =
+    context.profile.identityRules?.[deck.side]?.[deck.identityCardId];
+  if (!identity)
+    addError("identity_missing", `Missing identity ${deck.identityCardId}.`);
   else {
-    if (identity.side !== deck.side) addError("identity_wrong_side", `Identity ${deck.identityCardId} has wrong side.`);
-    if (!identity.statuses.playable || !identity.statuses.deck_legal) addError("identity_not_deck_legal", `Identity ${deck.identityCardId} is not deck legal.`);
-    if (context.profile.requireIdentity && !context.profile.allowedIdentityCards[deck.side]?.includes(deck.identityCardId)) {
-      addError("identity_not_allowed", `Identity ${deck.identityCardId} is not allowed in this format.`);
+    if (identity.side !== deck.side)
+      addError(
+        "identity_wrong_side",
+        `Identity ${deck.identityCardId} has wrong side.`,
+      );
+    if (!identity.statuses.playable || !identity.statuses.deck_legal)
+      addError(
+        "identity_not_deck_legal",
+        `Identity ${deck.identityCardId} is not deck legal.`,
+      );
+    if (
+      context.profile.requireIdentity &&
+      !context.profile.allowedIdentityCards[deck.side]?.includes(
+        deck.identityCardId,
+      )
+    ) {
+      addError(
+        "identity_not_allowed",
+        `Identity ${deck.identityCardId} is not allowed in this format.`,
+      );
     }
     if (context.profile.identityRules?.[deck.side] && !identityRule) {
-      addError("identity_rule_missing", `Identity ${deck.identityCardId} is missing format identity rules.`);
+      addError(
+        "identity_rule_missing",
+        `Identity ${deck.identityCardId} is missing format identity rules.`,
+      );
     }
   }
 
@@ -386,45 +529,130 @@ function validateDeckLike(
   for (const entry of normalizeCards(deck.cards)) {
     totalCards += entry.quantity;
     const card = context.cardsById[entry.cardId];
-    if (!Number.isInteger(entry.quantity) || entry.quantity <= 0) addError("invalid_quantity", `Invalid quantity for ${entry.cardId}.`);
+    if (!Number.isInteger(entry.quantity) || entry.quantity <= 0)
+      addError("invalid_quantity", `Invalid quantity for ${entry.cardId}.`);
     const copyLimit = copyLimitForEntry(entry, card, context.profile);
-    if (entry.quantity > copyLimit) addError("too_many_copies", `Too many copies of ${entry.cardId}; maximum is ${copyLimit}.`);
+    if (entry.quantity > copyLimit)
+      addError(
+        "too_many_copies",
+        `Too many copies of ${entry.cardId}; maximum is ${copyLimit}.`,
+      );
     if (!card) {
       addError("unknown_card", `Unknown card ${entry.cardId}.`);
       continue;
     }
-    if (card.side !== deck.side) addError("wrong_side_card", `Wrong-side card ${entry.cardId}.`);
-    const missingStatus = context.profile.allowedCardStatuses.find((status) => !card.statuses[status]);
-    if (missingStatus) addError("card_missing_required_status", `Card ${entry.cardId} is not playable and deck legal; missing required status ${missingStatus}.`);
-    if (card.statuses.deck_legal && Object.prototype.hasOwnProperty.call(card.statuses, "human_playable") && !card.statuses.human_playable) {
-      addError("deck_legal_without_human_playable", `Card ${entry.cardId} is deck legal without human_playable status.`);
+    if (card.side !== deck.side)
+      addError("wrong_side_card", `Wrong-side card ${entry.cardId}.`);
+    const missingStatus = context.profile.allowedCardStatuses.find(
+      (status) => !card.statuses[status],
+    );
+    if (missingStatus)
+      addError(
+        "card_missing_required_status",
+        `Card ${entry.cardId} is not playable and deck legal; missing required status ${missingStatus}.`,
+      );
+    if (
+      card.statuses.deck_legal &&
+      Object.prototype.hasOwnProperty.call(card.statuses, "human_playable") &&
+      !card.statuses.human_playable
+    ) {
+      addError(
+        "deck_legal_without_human_playable",
+        `Card ${entry.cardId} is deck legal without human_playable status.`,
+      );
     }
-    if (context.profile.formatLegal?.requiresDeckLegal && !card.statuses.deck_legal) addError("format_legal_requires_deck_legal", `Card ${entry.cardId} is not deck legal and cannot be format legal.`);
-    if (context.profile.formatLegal?.requiresHumanPlayable && !card.statuses.human_playable) addError("format_legal_requires_human_playable", `Card ${entry.cardId} is not human playable and cannot be format legal.`);
-    const influence = influenceCostForCard(card, deck.side, identityRule, context.profile);
-    if (influence === null) addError("influence_data_missing", `Card ${entry.cardId} is missing influence or faction data for this format.`);
+    if (
+      context.profile.formatLegal?.requiresDeckLegal &&
+      !card.statuses.deck_legal
+    )
+      addError(
+        "format_legal_requires_deck_legal",
+        `Card ${entry.cardId} is not deck legal and cannot be format legal.`,
+      );
+    if (
+      context.profile.formatLegal?.requiresHumanPlayable &&
+      !card.statuses.human_playable
+    )
+      addError(
+        "format_legal_requires_human_playable",
+        `Card ${entry.cardId} is not human playable and cannot be format legal.`,
+      );
+    const influence = influenceCostForCard(
+      card,
+      deck.side,
+      identityRule,
+      context.profile,
+    );
+    if (influence === null)
+      addError(
+        "influence_data_missing",
+        `Card ${entry.cardId} is missing influence or faction data for this format.`,
+      );
     else influenceSpent += influence * entry.quantity;
-    if (card.type === "agenda" && card.numeric.agendaPoints === null && context.profile.agenda?.missingDataPolicy === "block") {
-      addError("agenda_points_missing", `Agenda ${entry.cardId} is missing agenda points.`);
+    if (
+      card.type === "agenda" &&
+      card.numeric.agendaPoints === null &&
+      context.profile.agenda?.missingDataPolicy === "block"
+    ) {
+      addError(
+        "agenda_points_missing",
+        `Agenda ${entry.cardId} is missing agenda points.`,
+      );
     }
     agendaPoints += (card.numeric.agendaPoints ?? 0) * entry.quantity;
   }
 
-  const minimumDeckCards = identityRule?.minimumDeckCards ?? context.profile.minimumDeckCards[deck.side];
-  const minimumAgendaPoints = context.profile.agenda?.minimumAgendaPoints?.corp ?? context.profile.minimumAgendaPoints.corp;
-  if (totalCards < minimumDeckCards) addError("minimum_deck_size", `Deck has ${totalCards} cards, expected at least ${minimumDeckCards}.`);
-  if (deck.side === "corp" && agendaPoints < minimumAgendaPoints) addError("minimum_agenda_points", `Corp deck has ${agendaPoints} agenda points, expected at least ${minimumAgendaPoints}.`);
+  const minimumDeckCards =
+    identityRule?.minimumDeckCards ??
+    context.profile.minimumDeckCards[deck.side];
+  const minimumAgendaPoints =
+    context.profile.agenda?.minimumAgendaPoints?.corp ??
+    context.profile.minimumAgendaPoints.corp;
+  if (totalCards < minimumDeckCards)
+    addError(
+      "minimum_deck_size",
+      `Deck has ${totalCards} cards, expected at least ${minimumDeckCards}.`,
+    );
+  if (deck.side === "corp" && agendaPoints < minimumAgendaPoints)
+    addError(
+      "minimum_agenda_points",
+      `Corp deck has ${agendaPoints} agenda points, expected at least ${minimumAgendaPoints}.`,
+    );
   const agendaDensity = context.profile.agenda?.density;
-  if (deck.side === "corp" && agendaDensity?.minAgendaPointsPerCards && agendaPoints < Math.floor((totalCards / 5) * agendaDensity.minAgendaPointsPerCards)) {
-    addError("agenda_density_too_low", "Corp deck agenda density is below the format minimum.");
+  if (
+    deck.side === "corp" &&
+    agendaDensity?.minAgendaPointsPerCards &&
+    agendaPoints <
+      Math.floor((totalCards / 5) * agendaDensity.minAgendaPointsPerCards)
+  ) {
+    addError(
+      "agenda_density_too_low",
+      "Corp deck agenda density is below the format minimum.",
+    );
   }
-  if (deck.side === "corp" && agendaDensity?.maxAgendaPointsPerCards && agendaPoints > Math.ceil((totalCards / 5) * agendaDensity.maxAgendaPointsPerCards)) {
-    addError("agenda_density_too_high", "Corp deck agenda density is above the format maximum.");
+  if (
+    deck.side === "corp" &&
+    agendaDensity?.maxAgendaPointsPerCards &&
+    agendaPoints >
+      Math.ceil((totalCards / 5) * agendaDensity.maxAgendaPointsPerCards)
+  ) {
+    addError(
+      "agenda_density_too_high",
+      "Corp deck agenda density is above the format maximum.",
+    );
   }
-  if (context.profile.influence?.enabled && identityRule && influenceSpent > identityRule.influenceLimit) {
-    addError("influence_limit_exceeded", `Deck spends ${influenceSpent} influence, limit is ${identityRule.influenceLimit}.`);
+  if (
+    context.profile.influence?.enabled &&
+    identityRule &&
+    influenceSpent > identityRule.influenceLimit
+  ) {
+    addError(
+      "influence_limit_exceeded",
+      `Deck spends ${influenceSpent} influence, limit is ${identityRule.influenceLimit}.`,
+    );
   }
-  if (deck.side === "runner" && agendaPoints > 0) warnings.push("Runner deck contains agenda points.");
+  if (deck.side === "runner" && agendaPoints > 0)
+    warnings.push("Runner deck contains agenda points.");
 
   return withErrorCodes({
     ok: errors.length === 0,
@@ -433,7 +661,7 @@ function validateDeckLike(
     warnings,
     totalCards,
     agendaPoints: deck.side === "corp" ? agendaPoints : null,
-    influenceSpent: context.profile.influence?.enabled ? influenceSpent : null
+    influenceSpent: context.profile.influence?.enabled ? influenceSpent : null,
   });
 }
 
@@ -445,25 +673,61 @@ function withErrorCodes(result: DeckValidationResult): DeckValidationResult {
   return result;
 }
 
-function copyLimitForEntry(entry: DeckCardEntry, card: CatalogCard | undefined, profile: DeckFormatProfile): number {
-  const exception = profile.copyLimit?.exceptions?.find((candidate) => candidate.cardId === entry.cardId || (candidate.title && candidate.title === card?.title));
-  return exception?.limit ?? profile.copyLimit?.defaultLimit ?? profile.maxCopiesPerCard;
+function copyLimitForEntry(
+  entry: DeckCardEntry,
+  card: CatalogCard | undefined,
+  profile: DeckFormatProfile,
+): number {
+  const exception = profile.copyLimit?.exceptions?.find(
+    (candidate) =>
+      candidate.cardId === entry.cardId ||
+      (candidate.title && candidate.title === card?.title),
+  );
+  return (
+    exception?.limit ??
+    profile.copyLimit?.defaultLimit ??
+    profile.maxCopiesPerCard
+  );
 }
 
-function influenceCostForCard(card: CatalogCard, side: DeckSide, identityRule: NonNullable<DeckFormatProfile["identityRules"]>[DeckSide][string] | undefined, profile: DeckFormatProfile): number | null {
+function influenceCostForCard(
+  card: CatalogCard,
+  side: DeckSide,
+  identityRule:
+    | NonNullable<DeckFormatProfile["identityRules"]>[DeckSide][string]
+    | undefined,
+  profile: DeckFormatProfile,
+): number | null {
   if (!profile.influence?.enabled || card.type === "identity") return 0;
-  if (!card.faction) return profile.influence.missingDataPolicy === "block" ? null : 0;
-  if (!identityRule) return profile.influence.missingDataPolicy === "block" ? null : 0;
-  if (card.faction === identityRule.faction || profile.influence.neutralFactions.includes(card.faction)) return 0;
-  if (identityRule.allowedFactions && !identityRule.allowedFactions.includes(card.faction)) return profile.influence.missingDataPolicy === "block" ? null : 0;
-  return profile.influence.cardInfluenceCosts?.[card.catalogCardId] ?? profile.influence.defaultInfluenceCost;
+  if (!card.faction)
+    return profile.influence.missingDataPolicy === "block" ? null : 0;
+  if (!identityRule)
+    return profile.influence.missingDataPolicy === "block" ? null : 0;
+  if (
+    card.faction === identityRule.faction ||
+    profile.influence.neutralFactions.includes(card.faction)
+  )
+    return 0;
+  if (
+    identityRule.allowedFactions &&
+    !identityRule.allowedFactions.includes(card.faction)
+  )
+    return profile.influence.missingDataPolicy === "block" ? null : 0;
+  return (
+    profile.influence.cardInfluenceCosts?.[card.catalogCardId] ??
+    profile.influence.defaultInfluenceCost
+  );
 }
 
 function normalizeCards(cards: DeckCardEntry[]): DeckCardEntry[] {
   const byId = new Map<string, number>();
   for (const entry of cards) {
-    if (typeof entry.cardId !== "string" || !Number.isFinite(entry.quantity)) continue;
-    byId.set(entry.cardId, (byId.get(entry.cardId) ?? 0) + Math.floor(entry.quantity));
+    if (typeof entry.cardId !== "string" || !Number.isFinite(entry.quantity))
+      continue;
+    byId.set(
+      entry.cardId,
+      (byId.get(entry.cardId) ?? 0) + Math.floor(entry.quantity),
+    );
   }
   return [...byId.entries()]
     .filter(([, quantity]) => quantity > 0)
@@ -472,7 +736,10 @@ function normalizeCards(cards: DeckCardEntry[]): DeckCardEntry[] {
 }
 
 function sanitizeId(value: string): string {
-  return value.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 80) || `local_${hashText(value).slice(-8)}`;
+  return (
+    value.replace(/[^a-zA-Z0-9_-]/g, "_").slice(0, 80) ||
+    `local_${hashText(value).slice(-8)}`
+  );
 }
 
 function hashText(value: string): string {

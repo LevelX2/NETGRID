@@ -145,9 +145,7 @@ describe("ReplayDecisionCaseExtraction", () => {
 
     expect(first.caseId).toBe(second.caseId);
     expect(first.source.traceDigest).toBe(second.source.traceDigest);
-    expect(replayDecisionCaseSplit("match_00ff5d28ba6a855e")).toBe(
-      "discovery",
-    );
+    expect(replayDecisionCaseSplit("match_00ff5d28ba6a855e")).toBe("discovery");
     expect(replayDecisionCaseSplit("match_6812fb0eff800ba2")).toBe("holdout");
   });
 });

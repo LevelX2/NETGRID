@@ -2,7 +2,11 @@ import {
   cardSpecPlanningCardByDefinitionId,
   type CardSpecPlanningCompatibilityCard,
 } from "@netgrid/cards/planning";
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 import { remoteTrashActionTotalCost } from "./remote-trash-cost";
 
 export type RunnerAccessTrashImpactClass =
@@ -91,7 +95,10 @@ export function assessRunnerAccessTrashImpactFromPlanningCard(params: {
     params.parentReservedCredits ?? 0,
   );
   const requiredReserve = Math.max(economyReserve, parentReservedCredits);
-  const facts = canonicalVisibleImpactFacts(params.planningCard, params.accessed);
+  const facts = canonicalVisibleImpactFacts(
+    params.planningCard,
+    params.accessed,
+  );
 
   const storedEconomyValue = facts.finiteStoredEconomy
     ? facts.visibleStoredCredits * 140
@@ -224,9 +231,8 @@ function canonicalVisibleImpactFacts(
       : 0;
   const role = remoteRole?.role ?? "";
   const scoringSupport = /(score|advance|agenda)/u.test(role);
-  const defenseOrTax = /(protect|defen[cs]e|tax|ice|capacity|run_control)/u.test(
-    role,
-  );
+  const defenseOrTax =
+    /(protect|defen[cs]e|tax|ice|capacity|run_control)/u.test(role);
   const damageOrTags = capabilities.some((capability) =>
     capability.descriptors.some(
       (descriptor) =>
@@ -317,7 +323,10 @@ function maximumAmountForKinds(
   );
 }
 
-function maximumAmountForKind(value: unknown, kinds: ReadonlySet<string>): number[] {
+function maximumAmountForKind(
+  value: unknown,
+  kinds: ReadonlySet<string>,
+): number[] {
   if (Array.isArray(value))
     return value.flatMap((entry) => maximumAmountForKind(entry, kinds));
   if (!value || typeof value !== "object") return [];

@@ -1,11 +1,16 @@
-import type { PlayerView, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
+import type {
+  PlayerView,
+  PublicGameEvent,
+  Side,
+  VisibleCard,
+} from "@netgrid/shared";
 
 import type { BoardHighlight } from "../../app/action-cues";
 import {
   actionSlotCapacityForTurn,
   baseActionSlotCapacity,
   corpInstalledCardState,
-  corpRootCardsForDisplay
+  corpRootCardsForDisplay,
 } from "../../app/action-board-ui";
 
 export type ServerLane = {
@@ -14,17 +19,38 @@ export type ServerLane = {
   cards: VisibleCard[];
 };
 
-export type HighlightableBoardZone = "hq" | "rd" | "archives" | "grip" | "stack" | "heap" | "rig" | "scoreArea";
+export type HighlightableBoardZone =
+  | "hq"
+  | "rd"
+  | "archives"
+  | "grip"
+  | "stack"
+  | "heap"
+  | "rig"
+  | "scoreArea";
 
-export function serverLanesForSide(side: Side, server: PlayerView["servers"][number]): ServerLane[] {
-  const iceLane = { kind: "ice" as const, label: "ICE" as const, cards: server.ice };
-  const rootLane = { kind: "root" as const, label: "Root" as const, cards: corpRootCardsForDisplay(side, server.id, server.root) };
+export function serverLanesForSide(
+  side: Side,
+  server: PlayerView["servers"][number],
+): ServerLane[] {
+  const iceLane = {
+    kind: "ice" as const,
+    label: "ICE" as const,
+    cards: server.ice,
+  };
+  const rootLane = {
+    kind: "root" as const,
+    label: "Root" as const,
+    cards: corpRootCardsForDisplay(side, server.id, server.root),
+  };
   return [rootLane, iceLane];
 }
 
 export function iceStackSlotClass(card: VisibleCard): string {
   const installedState = corpInstalledCardState(card);
-  return installedState === "rezzed" ? "iceCardSlot rezzedIceStackSlot" : "iceCardSlot unrezzedIceStackSlot";
+  return installedState === "rezzed"
+    ? "iceCardSlot rezzedIceStackSlot"
+    : "iceCardSlot unrezzedIceStackSlot";
 }
 
 export function opponentSide(side: Side): Side {
@@ -36,12 +62,18 @@ export function sideLabel(side: Side): string {
 }
 
 export function turnSideForView(view: PlayerView): Side | null {
-  if (view.phase === "corp_draw_phase" || view.phase === "corp_action_phase") return "corp";
-  if (view.phase === "runner_action_phase" || view.phase === "run") return "runner";
+  if (view.phase === "corp_draw_phase" || view.phase === "corp_action_phase")
+    return "corp";
+  if (view.phase === "runner_action_phase" || view.phase === "run")
+    return "runner";
   return null;
 }
 
-export function turnActionHeaderLabel(view: PlayerView, side: Side, activeAiSide?: Side): string {
+export function turnActionHeaderLabel(
+  view: PlayerView,
+  side: Side,
+  activeAiSide?: Side,
+): string {
   const actorLabel = `${sideLabel(side)}${activeAiSide === side ? "-KI" : ""}`;
   return `Zug: ${currentTurnNumberForView(view)}  ${actorLabel} Aktionen`;
 }
@@ -51,7 +83,8 @@ export function sideStatusLineForView(view: PlayerView, side: Side): string {
   const turnSide = turnSideForView(view);
   if (turnSide !== side) return "Wartet";
   const choiceOwner = view.pendingChoice?.side;
-  if (choiceOwner && choiceOwner !== side) return `Am Zug · ${sideLabel(choiceOwner)} entscheidet`;
+  if (choiceOwner && choiceOwner !== side)
+    return `Am Zug · ${sideLabel(choiceOwner)} entscheidet`;
   return "Am Zug";
 }
 
@@ -60,7 +93,10 @@ export function currentTurnNumberForView(view: PlayerView): number {
   let activeTurnNumber = 1;
 
   for (const event of view.publicEvents) {
-    const actionType = typeof event.publicPayload.actionType === "string" ? event.publicPayload.actionType : event.type;
+    const actionType =
+      typeof event.publicPayload.actionType === "string"
+        ? event.publicPayload.actionType
+        : event.type;
     const actor = sideFromPublicPayload(event.publicPayload.actor);
     if (!actor) continue;
 
@@ -86,10 +122,19 @@ export function sideFromPublicPayload(value: unknown): Side | null {
   return value === "corp" || value === "runner" ? value : null;
 }
 
-export function updateActionSlotCapacity(capacities: Record<Side, number>, side: Side, currentClicks: number, active: boolean, resetActiveSide: boolean, events: PublicGameEvent[]): void {
+export function updateActionSlotCapacity(
+  capacities: Record<Side, number>,
+  side: Side,
+  currentClicks: number,
+  active: boolean,
+  resetActiveSide: boolean,
+  events: PublicGameEvent[],
+): void {
   const baseCapacity = baseActionSlotCapacity(side);
   const safeClicks = Math.max(0, Math.floor(currentClicks));
-  const turnCapacity = active ? actionSlotCapacityForTurn(side, safeClicks, events) : safeClicks;
+  const turnCapacity = active
+    ? actionSlotCapacityForTurn(side, safeClicks, events)
+    : safeClicks;
   if (active && resetActiveSide) {
     capacities[side] = Math.max(baseCapacity, turnCapacity);
     return;
@@ -98,30 +143,59 @@ export function updateActionSlotCapacity(capacities: Record<Side, number>, side:
     capacities[side] = Math.max(capacities[side] ?? baseCapacity, turnCapacity);
     return;
   }
-  if (safeClicks > (capacities[side] ?? baseCapacity)) capacities[side] = safeClicks;
+  if (safeClicks > (capacities[side] ?? baseCapacity))
+    capacities[side] = safeClicks;
 }
 
-export function centralServerCountLabel(view: PlayerView, serverId: PlayerView["servers"][number]["id"]): string | null {
+export function centralServerCountLabel(
+  view: PlayerView,
+  serverId: PlayerView["servers"][number]["id"],
+): string | null {
   switch (serverId) {
     case "hq":
-      return formatHandLimitCount(view.side === "corp" ? view.own.gripOrHq.length : view.opponent.handCount, view.side === "corp" ? view.own.maxHandSize : view.opponent.maxHandSize);
+      return formatHandLimitCount(
+        view.side === "corp"
+          ? view.own.gripOrHq.length
+          : view.opponent.handCount,
+        view.side === "corp" ? view.own.maxHandSize : view.opponent.maxHandSize,
+      );
     case "rd":
-      return formatCardCount(view.side === "corp" ? view.own.stackOrRdCount : view.opponent.deckCount);
+      return formatCardCount(
+        view.side === "corp"
+          ? view.own.stackOrRdCount
+          : view.opponent.deckCount,
+      );
     case "archives":
-      return formatCardCount(view.side === "corp" ? view.own.heapOrArchives.length : (view.opponent.discardCount ?? 0));
+      return formatCardCount(
+        view.side === "corp"
+          ? view.own.heapOrArchives.length
+          : (view.opponent.discardCount ?? 0),
+      );
     default:
       return null;
   }
 }
 
-export function serverHighlighted(highlight: BoardHighlight | null, serverId: string): boolean {
+export function serverHighlighted(
+  highlight: BoardHighlight | null,
+  serverId: string,
+): boolean {
   if (!highlight) return false;
-  if (highlight.kind === "server" || highlight.kind === "run") return Boolean(highlight.serverId && highlight.serverId === serverId);
+  if (highlight.kind === "server" || highlight.kind === "run")
+    return Boolean(highlight.serverId && highlight.serverId === serverId);
   return false;
 }
 
-export function zoneHighlighted(highlight: BoardHighlight | null, side: Side, zone: HighlightableBoardZone): boolean {
-  return Boolean(highlight?.kind === "zone" && highlight.side === side && highlight.zone === zone);
+export function zoneHighlighted(
+  highlight: BoardHighlight | null,
+  side: Side,
+  zone: HighlightableBoardZone,
+): boolean {
+  return Boolean(
+    highlight?.kind === "zone" &&
+    highlight.side === side &&
+    highlight.zone === zone,
+  );
 }
 
 export function formatCardCount(count: number): string {

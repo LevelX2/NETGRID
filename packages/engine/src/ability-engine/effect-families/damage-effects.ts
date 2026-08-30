@@ -1,14 +1,8 @@
 import type { CardEffectFamilyInput } from "./family-runtime";
 
 export function executeDamageEffect(input: CardEffectFamilyInput): boolean {
-  const {
-    context,
-    effect,
-    index,
-    publicPayload,
-    resolvedEffects,
-    runtime,
-  } = input;
+  const { context, effect, index, publicPayload, resolvedEffects, runtime } =
+    input;
 
   if (effect.kind !== "damage") return false;
 

@@ -12,12 +12,12 @@ const FIXTURES = [
     "uses the exact program tutor instead of a negative persistent install",
     negativeInstallJson,
   ],
-  ["funds Rent-I-Con after the coverage search is saturated", saturatedSearchJson],
-  ["funds the bound same-turn economy development", richCreditRepeatJson],
   [
-    "funds Tycho without forcing an ordinary Archives run",
-    overflowDrawJson,
+    "funds Rent-I-Con after the coverage search is saturated",
+    saturatedSearchJson,
   ],
+  ["funds the bound same-turn economy development", richCreditRepeatJson],
+  ["funds Tycho without forcing an ordinary Archives run", overflowDrawJson],
 ] as const;
 
 describe("Rent-I-Con versus CODE ROT cycle-six remediation checkpoints", () => {

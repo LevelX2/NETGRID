@@ -4,10 +4,7 @@ import { shellTradersTargetValue } from "./shell-traders-action";
 describe("shell traders role scoring", () => {
   it("matches target value roles by bounded role terms", () => {
     expect(
-      shellTradersTargetValue(
-        ["support_memory", "setup", "runner_economy"],
-        2,
-      ),
+      shellTradersTargetValue(["support_memory", "setup", "runner_economy"], 2),
     ).toBe(140);
     expect(
       shellTradersTargetValue(
@@ -18,5 +15,4 @@ describe("shell traders role scoring", () => {
     expect(shellTradersTargetValue(["support_breaker_fracter"], 0)).toBe(105);
     expect(shellTradersTargetValue(["breaker_fracterish_noise"], 0)).toBe(0);
   });
-
 });

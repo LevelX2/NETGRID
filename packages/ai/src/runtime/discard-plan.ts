@@ -6,7 +6,9 @@ import { rolesHaveBreakerRole } from "./breaker-role-match";
 
 export type DiscardPlanDependencies = {
   readonly rolesForCardId: (cardId: string | undefined) => readonly string[];
-  readonly definitionTypeForCardId: (cardId: string | undefined) => string | undefined;
+  readonly definitionTypeForCardId: (
+    cardId: string | undefined,
+  ) => string | undefined;
 };
 
 export function discardCurrentPlanKind(
@@ -21,11 +23,14 @@ export function discardCurrentPlanKind(
     );
     if (
       !hasInstalledBreaker &&
-      hand.some((card) =>
-        rolesHaveBreakerRole(dependencies.rolesForCardId(card.definitionId)) ||
-        dependencies
-          .rolesForCardId(card.definitionId)
-          .some((role) => role === "memory" || role === "setup"),
+      hand.some(
+        (card) =>
+          rolesHaveBreakerRole(
+            dependencies.rolesForCardId(card.definitionId),
+          ) ||
+          dependencies
+            .rolesForCardId(card.definitionId)
+            .some((role) => role === "memory" || role === "setup"),
       )
     )
       return "build_rig";
@@ -67,12 +72,13 @@ export function discardEvidenceForInput(
   return sortedUnique(evidence);
 }
 
-function discardStrategicPlanKind(
-  input: AiDecisionInput,
-): string | undefined {
+function discardStrategicPlanKind(input: AiDecisionInput): string | undefined {
   const strategicIntent = (input as AiDecisionInputWithDeckCapabilities)
     .ownStrategicIntentState;
-  if (!strategicIntent || strategicIntent.primaryStrategy.family === "neutral") {
+  if (
+    !strategicIntent ||
+    strategicIntent.primaryStrategy.family === "neutral"
+  ) {
     return undefined;
   }
   switch (strategicIntent.primaryStrategy.family) {

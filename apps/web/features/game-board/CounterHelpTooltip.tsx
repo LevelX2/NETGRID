@@ -9,7 +9,7 @@ export function CounterHelpTooltipTrigger({
   ariaLabel,
   onVisibilityChange,
   role,
-  "data-testid": testId
+  "data-testid": testId,
 }: {
   children: ReactNode;
   className: string;
@@ -21,13 +21,18 @@ export function CounterHelpTooltipTrigger({
 }) {
   const tooltipId = useId();
   const [tooltipStyle, setTooltipStyle] = useState<CSSProperties>({});
-  const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">("above");
+  const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">(
+    "above",
+  );
   const [visible, setVisible] = useState(false);
   const [pinned, setPinned] = useState(false);
   const showTooltip = (element: HTMLElement, pin = false) => {
     const rect = element.getBoundingClientRect();
     const width = Math.min(280, Math.max(220, window.innerWidth - 16));
-    const left = Math.min(Math.max(8, rect.left + rect.width / 2 - width / 2), Math.max(8, window.innerWidth - width - 8));
+    const left = Math.min(
+      Math.max(8, rect.left + rect.width / 2 - width / 2),
+      Math.max(8, window.innerWidth - width - 8),
+    );
     const above = rect.top > 132;
     const top = above ? rect.top - 10 : rect.bottom + 10;
     setTooltipPlacement(above ? "above" : "below");
@@ -75,10 +80,15 @@ export function CounterHelpTooltipTrigger({
       {children}
       {visible
         ? createPortal(
-            <span id={tooltipId} className={`cardTooltip counterHelpTooltip ${tooltipPlacement} visible`} role="tooltip" style={tooltipStyle}>
+            <span
+              id={tooltipId}
+              className={`cardTooltip counterHelpTooltip ${tooltipPlacement} visible`}
+              role="tooltip"
+              style={tooltipStyle}
+            >
               <span className="cardTooltipText">{tooltip}</span>
             </span>,
-            document.body
+            document.body,
           )
         : null}
     </span>

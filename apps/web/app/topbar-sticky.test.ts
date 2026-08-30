@@ -1,7 +1,10 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-const globalsCss = readFileSync(new URL("./globals.css", import.meta.url), "utf8");
+const globalsCss = readFileSync(
+  new URL("./globals.css", import.meta.url),
+  "utf8",
+);
 const pageSource = readFileSync(new URL("./page.tsx", import.meta.url), "utf8");
 
 describe("global sticky header", () => {
@@ -19,7 +22,9 @@ describe("global sticky header", () => {
     expect(globalsCss).toMatch(
       /\.setup\.v07Entry\s*>\s*\.entryTabs\s*\{[^}]*position:\s*sticky[^}]*z-index:\s*20[^}]*background:\s*var\(--entry-tabs-bg\)/s,
     );
-    expect(pageSource).toContain('"--entry-tabs-sticky-top": `${topbarHeightPx}px`');
+    expect(pageSource).toContain(
+      '"--entry-tabs-sticky-top": `${topbarHeightPx}px`',
+    );
     expect(pageSource).toContain('<header className="topbar" ref={topbarRef}>');
   });
 

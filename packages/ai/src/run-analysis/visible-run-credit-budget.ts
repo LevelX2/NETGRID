@@ -28,9 +28,7 @@ export function runnerRunPathCreditBudgetWithVisiblePools(
     ...(rigBudget.icebreakerCredits > 0
       ? { icebreakerCredits: rigBudget.icebreakerCredits }
       : {}),
-    ...(nonNoisyIcebreakerCredits > 0
-      ? { nonNoisyIcebreakerCredits }
-      : {}),
+    ...(nonNoisyIcebreakerCredits > 0 ? { nonNoisyIcebreakerCredits } : {}),
     ...(rigBudget.nonStealthNonNoisyIcebreakerCredits > 0
       ? {
           nonStealthNonNoisyIcebreakerCredits:
@@ -311,7 +309,9 @@ export function spendBreakerCreditsAndApplySideEffects(
   const projectedBudget = cloneRunnerRunPathCreditBudget(budget);
   spendBreakerCredits(projectedBudget, breakAssessment);
   if (!canApplyPostBreakStealthLosses(projectedBudget, breakAssessment)) {
-    throw new Error("Verpflichtender Stealth-Credit-Verlust ist nicht bezahlbar.");
+    throw new Error(
+      "Verpflichtender Stealth-Credit-Verlust ist nicht bezahlbar.",
+    );
   }
   spendBreakerCredits(budget, breakAssessment);
   for (const loss of breakAssessment.postBreakStealthLosses ?? []) {
@@ -320,11 +320,14 @@ export function spendBreakerCreditsAndApplySideEffects(
       const sources = Object.keys(budget.stealthCreditsBySourceId).sort();
       if (loss.sourceMode === "single_stealth_card") {
         const source = sources.find(
-          (sourceId) => (budget.stealthCreditsBySourceId[sourceId] ?? 0) >= amount,
+          (sourceId) =>
+            (budget.stealthCreditsBySourceId[sourceId] ?? 0) >= amount,
         );
         if (!source) {
           if (loss.optionalIfUnavailable) continue;
-          throw new Error("Verpflichtender Stealth-Credit-Verlust hat keine Quelle.");
+          throw new Error(
+            "Verpflichtender Stealth-Credit-Verlust hat keine Quelle.",
+          );
         }
         spendStealthCreditsFromSource(budget, source, amount);
         continue;

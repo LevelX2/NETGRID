@@ -7,7 +7,10 @@ const appShellSource = readFileSync(
   resolve(process.cwd(), "features/app-shell/AppShell.tsx"),
   "utf8",
 );
-const cssSource = readFileSync(resolve(process.cwd(), "app/globals.css"), "utf8");
+const cssSource = readFileSync(
+  resolve(process.cwd(), "app/globals.css"),
+  "utf8",
+);
 
 describe("active workspace navigation tooltips", () => {
   it("uses accessible descriptive tooltips instead of native title attributes", () => {

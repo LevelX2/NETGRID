@@ -58,9 +58,7 @@ export function createCorpVisibleTagPunishOpportunityContext(
         };
       })
       .filter(
-        (
-          opportunity,
-        ): opportunity is CorpVisibleTagPunishOpportunity =>
+        (opportunity): opportunity is CorpVisibleTagPunishOpportunity =>
           opportunity !== undefined,
       );
   }

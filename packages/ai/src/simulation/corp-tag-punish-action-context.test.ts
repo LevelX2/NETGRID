@@ -6,7 +6,8 @@ describe("createCorpTagPunishActionContext", () => {
   it("matches tag-punish roles by bounded role terms", () => {
     const context = createCorpTagPunishActionContext({
       sourceDefinitionIdForAction: () => "unknown",
-      rolesForAction: (_input, action) => rolesByActionId[action.actionId] ?? [],
+      rolesForAction: (_input, action) =>
+        rolesByActionId[action.actionId] ?? [],
     });
     const input = corpInput();
 
@@ -16,15 +17,18 @@ describe("createCorpTagPunishActionContext", () => {
     expect(context.isCorpTagSourceAction(input, action("tag-noise"))).toBe(
       false,
     );
-    expect(context.isCorpTraceTagSourceAction(input, action("trace-source")))
-      .toBe(true);
-    expect(context.isCorpTraceTagSourceAction(input, action("trace-noise")))
-      .toBe(false);
+    expect(
+      context.isCorpTraceTagSourceAction(input, action("trace-source")),
+    ).toBe(true);
+    expect(
+      context.isCorpTraceTagSourceAction(input, action("trace-noise")),
+    ).toBe(false);
     expect(context.corpPunishKindForAction(input, action("punish"))).toBe(
       "unknown",
     );
-    expect(context.corpPunishKindForAction(input, action("punish-noise")))
-      .toBeUndefined();
+    expect(
+      context.corpPunishKindForAction(input, action("punish-noise")),
+    ).toBeUndefined();
   });
 
   it("rejects runner actions before legacy role or action-type classification", () => {
@@ -41,7 +45,9 @@ describe("createCorpTagPunishActionContext", () => {
 
     expect(context.isCorpTagSourceAction(input, runnerAction)).toBe(false);
     expect(context.isCorpTraceTagSourceAction(input, runnerAction)).toBe(false);
-    expect(context.corpPunishKindForAction(input, runnerAction)).toBeUndefined();
+    expect(
+      context.corpPunishKindForAction(input, runnerAction),
+    ).toBeUndefined();
   });
 });
 

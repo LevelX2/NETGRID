@@ -80,24 +80,26 @@ function selectCardsChoice(
   };
 }
 
-function makeHost(input: {
-  runnerGrip?: CardInstanceId[];
-  runnerHeap?: CardInstanceId[];
-  runnerInstalled?: {
-    programs?: CardInstanceId[];
-    hardware?: CardInstanceId[];
-    resources?: CardInstanceId[];
-  };
-  corpHq?: CardInstanceId[];
-  corpArchives?: CardInstanceId[];
-  servers?: CorpServer[];
-  pendingChoice?: ChoiceRequest;
-  playerAction?: PlayerAction;
-  definitions?: Record<string, CardDefinition>;
-  instances?: Record<string, CardInstance>;
-  corpUtilities?: Record<string, CardCorpUtilityImplementation>;
-  runStartCalls?: Array<{ serverId: string; iceId: CardInstanceId }>;
-} = {}): HiddenZoneNonSearchChoiceHandlerHost {
+function makeHost(
+  input: {
+    runnerGrip?: CardInstanceId[];
+    runnerHeap?: CardInstanceId[];
+    runnerInstalled?: {
+      programs?: CardInstanceId[];
+      hardware?: CardInstanceId[];
+      resources?: CardInstanceId[];
+    };
+    corpHq?: CardInstanceId[];
+    corpArchives?: CardInstanceId[];
+    servers?: CorpServer[];
+    pendingChoice?: ChoiceRequest;
+    playerAction?: PlayerAction;
+    definitions?: Record<string, CardDefinition>;
+    instances?: Record<string, CardInstance>;
+    corpUtilities?: Record<string, CardCorpUtilityImplementation>;
+    runStartCalls?: Array<{ serverId: string; iceId: CardInstanceId }>;
+  } = {},
+): HiddenZoneNonSearchChoiceHandlerHost {
   const definitions = {
     [sourceId]: definition(offSiteId, "operation", "Off-Site Backups"),
     ...input.definitions,
@@ -195,7 +197,9 @@ function makeHost(input: {
     },
     servers: {
       mustServer: (serverId) => {
-        const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+        const server = state.corp.servers.find(
+          (candidate) => candidate.id === serverId,
+        );
         if (!server) throw new Error(`missing server ${serverId}`);
         return server;
       },
@@ -253,7 +257,9 @@ describe("hidden-zone nonsearch choice handlers", () => {
     });
 
     startCorpArchivesToHqChoice(host, sourceId);
-    expect(host.state.pendingChoice?.source).toContain("v1922.corp_archives_to_hq");
+    expect(host.state.pendingChoice?.source).toContain(
+      "v1922.corp_archives_to_hq",
+    );
 
     host.playerAction = playerAction([`card_${archived}`]);
     const result = handleHiddenZoneNonSearchChoice(host);
@@ -297,10 +303,9 @@ describe("hidden-zone nonsearch choice handlers", () => {
     });
 
     startCorpArchivesToHqChoice(host, sourceId);
-    expect(host.state.pendingChoice?.options.map((option) => option.value)).toEqual([
-      ice1,
-      ice2,
-    ]);
+    expect(
+      host.state.pendingChoice?.options.map((option) => option.value),
+    ).toEqual([ice1, ice2]);
     expect(host.state.pendingChoice?.minSelections).toBe(0);
     expect(host.state.pendingChoice?.maxSelections).toBe(2);
 
@@ -680,9 +685,9 @@ describe("hidden-zone nonsearch choice handlers", () => {
     host.playerAction = playerAction(["hide_3"]);
     handleHiddenZoneNonSearchChoice(host);
     expect(host.state.activeSide).toBe("corp");
-    expect(host.state.pendingChoice?.options.map((option) => option.value)).toEqual(
-      [2, 3, 4, 5, 6],
-    );
+    expect(
+      host.state.pendingChoice?.options.map((option) => option.value),
+    ).toEqual([2, 3, 4, 5, 6]);
 
     host.playerAction = playerAction(["guess_2"]);
     handleHiddenZoneNonSearchChoice(host);

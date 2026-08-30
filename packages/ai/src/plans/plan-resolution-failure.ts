@@ -129,9 +129,7 @@ function normalizePlanResolutionFailureContext(
       ? {
           unresolvedActionIds: [
             ...new Set(
-              context.unresolvedActionIds.map((entry) =>
-                redactedToken(entry),
-              ),
+              context.unresolvedActionIds.map((entry) => redactedToken(entry)),
             ),
           ]
             .filter(Boolean)
@@ -168,9 +166,7 @@ function formatPlanResolutionFailureMessage(
     `timing=${context.timingPoint}`,
     `actions=${context.legalActionTypes.join(",") || "none"}`,
     ...(context.unresolvedActionIds
-      ? [
-          `unresolved=${context.unresolvedActionIds.join(",") || "none"}`,
-        ]
+      ? [`unresolved=${context.unresolvedActionIds.join(",") || "none"}`]
       : []),
     `owner=${context.owner}`,
   ].join(" ");

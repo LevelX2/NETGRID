@@ -543,12 +543,10 @@ describe("plan-first Remote contest continuation", () => {
         },
       },
     );
-    const blockedTarget = (
-      actionId: string,
-      serverId: "remote_1" | "rd",
-    ) => ({
+    const blockedTarget = (actionId: string, serverId: "remote_1" | "rd") => ({
       ...safeRuntimeRunTarget(actionId, serverId),
-      targetKind: serverId === "remote_1" ? ("remote" as const) : ("rd" as const),
+      targetKind:
+        serverId === "remote_1" ? ("remote" as const) : ("rd" as const),
       accessTargetKind:
         serverId === "remote_1" ? ("remote" as const) : ("rd" as const),
       pathPassability: "blocked_missing_coverage" as const,
@@ -588,11 +586,7 @@ describe("plan-first Remote contest continuation", () => {
         ],
       },
     );
-    const input = aiInput("runner", [
-      remoteRun,
-      rdRun,
-      installCodecracker,
-    ]);
+    const input = aiInput("runner", [remoteRun, rdRun, installCodecracker]);
     input.playerView.own.credits = 10;
     input.playerView.own.clicks = 3;
     input.playerView.own.gripOrHq = [
@@ -640,8 +634,7 @@ describe("plan-first Remote contest continuation", () => {
       instanceId: "plan:runner.pressure_central:central%3Ard",
       moduleState: {
         signal: {
-          supportNeedId:
-            "coverage:breaker_code_gate:run:run-rd-after-puzzle",
+          supportNeedId: "coverage:breaker_code_gate:run:run-rd-after-puzzle",
         },
       },
     });

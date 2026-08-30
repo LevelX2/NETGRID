@@ -1,4 +1,8 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 import type { RunnerMuPressureAssessment } from "./runner-mu-pressure-policy";
 
 type ProgramSacrificeCandidateLike = {
@@ -90,9 +94,7 @@ export function runnerMuPressureAssessment(
       dependencies.programInstallTrashAssessmentForAction(input, action),
     )
     .filter(
-      (
-        assessment,
-      ): assessment is ProgramInstallTrashAssessmentLike =>
+      (assessment): assessment is ProgramInstallTrashAssessmentLike =>
         assessment !== undefined,
     );
   const requiresProgramTrash =
@@ -121,7 +123,8 @@ export function runnerMuPressureAssessment(
     dependencies.isMemorySupportAction(input, action),
   );
   const affordableMemorySupportActions = memorySupportLegalActions.filter(
-    (action) => dependencies.actionCreditCost(action) <= input.playerView.own.credits,
+    (action) =>
+      dependencies.actionCreditCost(action) <= input.playerView.own.credits,
   );
   const memorySupportCardsInHand = input.playerView.own.gripOrHq.filter(
     (card) => dependencies.isMemorySupportCard(card),

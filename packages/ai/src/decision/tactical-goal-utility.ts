@@ -15,11 +15,7 @@ export type TacticalGoalUtilityFamily =
   | "target_resolution"
   | "cleanup";
 
-export type TacticalGoalUtilityUrgency =
-  | "low"
-  | "medium"
-  | "high"
-  | "critical";
+export type TacticalGoalUtilityUrgency = "low" | "medium" | "high" | "critical";
 
 export type TacticalGoalUtilitySource =
   | "neutral"
@@ -72,7 +68,10 @@ export function normalizeTacticalGoalUtility(
 export function assertTacticalGoalUtilitySideSafe(
   utility: TacticalGoalUtility,
 ): void {
-  const forbiddenPath = findForbiddenSemanticPath(utility, "TacticalGoalUtility");
+  const forbiddenPath = findForbiddenSemanticPath(
+    utility,
+    "TacticalGoalUtility",
+  );
   if (forbiddenPath) {
     throw new Error(
       `TacticalGoalUtility contains forbidden hidden-info marker: ${forbiddenPath}`,
@@ -80,7 +79,9 @@ export function assertTacticalGoalUtilitySideSafe(
   }
   for (const signal of utility.requiredActionSignals) {
     if (signal.startsWith("actionId:")) {
-      throw new Error("TacticalGoalUtility must not require a concrete actionId.");
+      throw new Error(
+        "TacticalGoalUtility must not require a concrete actionId.",
+      );
     }
   }
 }
@@ -161,7 +162,8 @@ function normalizeUrgency(
   priority: number,
 ): TacticalGoalUtilityUrgency {
   if (urgency === "critical") return "critical";
-  if (urgency === "high" && normalizePriority(priority) >= 95) return "critical";
+  if (urgency === "high" && normalizePriority(priority) >= 95)
+    return "critical";
   if (urgency === "high") return "high";
   if (urgency === "medium") return "medium";
   return "low";
@@ -223,7 +225,9 @@ function evidenceTokensIncludePhrase(
   phrase: readonly string[],
 ): boolean {
   return tokens.some((token, index) =>
-    phrase.every((phraseToken, offset) => tokens[index + offset] === phraseToken),
+    phrase.every(
+      (phraseToken, offset) => tokens[index + offset] === phraseToken,
+    ),
   );
 }
 

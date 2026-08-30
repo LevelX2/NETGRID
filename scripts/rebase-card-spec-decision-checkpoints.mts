@@ -146,9 +146,7 @@ const files = readdirSync(CHECKPOINT_DIRECTORY)
     const checkpoint = JSON.parse(
       readFileSync(path.join(CHECKPOINT_DIRECTORY, file), "utf8"),
     ) as { schemaVersion?: unknown };
-    return (
-      checkpoint.schemaVersion === AI_DECISION_CHECKPOINT_SCHEMA_VERSION
-    );
+    return checkpoint.schemaVersion === AI_DECISION_CHECKPOINT_SCHEMA_VERSION;
   })
   .sort();
 const changed: Array<{ file: string; paths: string[] }> = [];

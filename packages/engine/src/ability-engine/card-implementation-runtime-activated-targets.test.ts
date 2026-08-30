@@ -7,10 +7,7 @@ import {
   scoreConversionCapabilityPayloadForEffects,
 } from "./card-implementation-runtime-activated-targets";
 import { actionCapacityLegalActionPayloadForEffects } from "./card-implementation-action-capacity";
-import {
-  canonicalCapabilityId,
-  capabilityKey,
-} from "@netgrid/cards/engine";
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards/engine";
 import type { ActivatedAbilityBinding } from "./card-capability-binding";
 
 function binding(
@@ -47,7 +44,12 @@ describe("activatedAbilityPayload advancement semantics", () => {
     } as unknown as GameState;
 
     expect(
-      activatedAbilityPayload("source" as never, ability, binding(ability), state),
+      activatedAbilityPayload(
+        "source" as never,
+        ability,
+        binding(ability),
+        state,
+      ),
     ).toMatchObject({
       drawCardsAmount: 2,
     });
@@ -75,7 +77,12 @@ describe("activatedAbilityPayload advancement semantics", () => {
     } as unknown as GameState;
 
     expect(
-      activatedAbilityPayload("source" as never, ability, binding(ability), state),
+      activatedAbilityPayload(
+        "source" as never,
+        ability,
+        binding(ability),
+        state,
+      ),
     ).toMatchObject({
       gainCreditsAmount: 12,
       hostedCreditTakeAmount: 12,
@@ -161,7 +168,12 @@ describe("activatedAbilityPayload advancement semantics", () => {
     } as unknown as GameState;
 
     expect(
-      activatedAbilityPayload("source" as never, ability, binding(ability), state),
+      activatedAbilityPayload(
+        "source" as never,
+        ability,
+        binding(ability),
+        state,
+      ),
     ).toMatchObject({
       gainCreditsAmount: 8,
       advancementCounterCount: 2,

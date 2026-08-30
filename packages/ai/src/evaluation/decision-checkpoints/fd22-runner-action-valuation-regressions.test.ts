@@ -35,9 +35,7 @@ describe("match fd22 runner action valuation regression evidence", () => {
   });
 
   it("rejects the redundant second Psychic Friend and keeps productive alternatives", () => {
-    const result = runAiDecisionCheckpoint(
-      fixture(redundantPsychicFriendJson),
-    );
+    const result = runAiDecisionCheckpoint(fixture(redundantPsychicFriendJson));
 
     expect(result.ok, result.message).toBe(true);
     expect(result.selectedAction?.type).not.toBe("install_card");
@@ -48,16 +46,13 @@ describe("match fd22 runner action valuation regression evidence", () => {
     ["D74", prematureEndTurnD74Json],
     ["D75", prematureEndTurnD75Json],
     ["D76", prematureEndTurnD76Json],
-  ])(
-    "rejects premature four-click end turn at %s",
-    (_label, json) => {
-      const result = runAiDecisionCheckpoint(fixture(json));
+  ])("rejects premature four-click end turn at %s", (_label, json) => {
+    const result = runAiDecisionCheckpoint(fixture(json));
 
-      expect(result.ok, result.message).toBe(true);
-      expect(result.selectedAction?.type).not.toBe("end_turn");
-      expect(result.input.playerView.own.clicks).toBe(4);
-    },
-  );
+    expect(result.ok, result.message).toBe(true);
+    expect(result.selectedAction?.type).not.toBe("end_turn");
+    expect(result.input.playerView.own.clicks).toBe(4);
+  });
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {

@@ -23,9 +23,7 @@ export function isRunnerTargetedBypassHideChoice(
   return choice.source.startsWith(TARGETED_BYPASS_HIDE_CHOICE_SOURCE);
 }
 
-export function isRunnerTargetedBypassChoice(
-  choice: PendingChoice,
-): boolean {
+export function isRunnerTargetedBypassChoice(choice: PendingChoice): boolean {
   return choice.source.startsWith(TARGETED_BYPASS_TARGET_CHOICE_SOURCE);
 }
 
@@ -183,12 +181,12 @@ function targetedBypassContinuation(params: {
     executor.dedupeKey === continuation?.ownerDedupeKey &&
     continuation?.family === "runner_targeted_bypass" &&
     continuation.kind === "targeted_bypass_run" &&
-    continuation.sourceDefinitionId ===
-      SOCIAL_ENGINEERING_DEFINITION_ID &&
+    continuation.sourceDefinitionId === SOCIAL_ENGINEERING_DEFINITION_ID &&
     continuation.ownerModuleId === executor.moduleId &&
     continuation.sourceCardInstanceId === source?.sourceCardInstanceId &&
     continuation.sourceActionId === continuation.selectedActionId &&
-    continuation.selectedAtStateVersion === continuation.plannedAtStateVersion &&
+    continuation.selectedAtStateVersion ===
+      continuation.plannedAtStateVersion &&
     portfolioStateMatches &&
     stateVersionMatches &&
     (moduleState?.kind === "central_pressure" ||
@@ -211,14 +209,15 @@ function targetedBypassStateVersionMatches(
   paymentSupportOffset: number | false,
 ): boolean {
   const currentStateVersion = input.playerView.stateVersion;
-  if (continuation.selectedAtStateVersion + baseOffset === currentStateVersion) {
+  if (
+    continuation.selectedAtStateVersion + baseOffset ===
+    currentStateVersion
+  ) {
     return true;
   }
   return (
     paymentSupportOffset !== false &&
-    continuation.selectedAtStateVersion +
-      baseOffset +
-      paymentSupportOffset ===
+    continuation.selectedAtStateVersion + baseOffset + paymentSupportOffset ===
       currentStateVersion
   );
 }
@@ -253,17 +252,16 @@ function targetedBypassPaymentSupportOffset(
   const continuous = supportEvents.every(
     (event, index) =>
       event.stateVersionBefore ===
-        (index === 0
-          ? openingStateVersion
-          : supportEvents[index - 1]!.stateVersionAfter),
+      (index === 0
+        ? openingStateVersion
+        : supportEvents[index - 1]!.stateVersionAfter),
   );
-  const exactSupportEvents =
-    supportEvents.every(
-      (event) =>
-        event.type === "activated_card_ability" &&
-        event.publicPayload.actor === "runner" &&
-        event.publicPayload.actionType === "activated_card_ability",
-    );
+  const exactSupportEvents = supportEvents.every(
+    (event) =>
+      event.type === "activated_card_ability" &&
+      event.publicPayload.actor === "runner" &&
+      event.publicPayload.actionType === "activated_card_ability",
+  );
   const exact =
     openingEvent?.type === "play_event" &&
     openingEvent.publicPayload.actor === "runner" &&
@@ -331,9 +329,7 @@ function targetedBypassChoiceFailure(
     side: input.side,
     stateVersion: input.playerView.stateVersion,
     timingPoint: input.playerView.timingPoint,
-    legalActionTypes: input.legalActions.map(
-      (legalAction) => legalAction.type,
-    ),
+    legalActionTypes: input.legalActions.map((legalAction) => legalAction.type),
     unresolvedActionIds: [action.actionId],
     owner: "continuation",
     removalCondition,

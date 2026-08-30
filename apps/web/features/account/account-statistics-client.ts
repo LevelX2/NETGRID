@@ -19,7 +19,11 @@ export function loadAccountStatistics(
   filters: AccountStatisticsFilters,
   fetcher: AccountFetch = fetch,
 ): Promise<ApiAccountStatistics> {
-  return accountRequest(fetcher, `/api/account/statistics?${statisticsParams(filters)}`, { method: "GET" });
+  return accountRequest(
+    fetcher,
+    `/api/account/statistics?${statisticsParams(filters)}`,
+    { method: "GET" },
+  );
 }
 
 export function loadAccountMatchHistory(
@@ -30,7 +34,9 @@ export function loadAccountMatchHistory(
   const params = statisticsParams(filters);
   params.set("limit", String(options.limit ?? 20));
   if (options.cursor) params.set("cursor", options.cursor);
-  return accountRequest(fetcher, `/api/account/match-history?${params}`, { method: "GET" });
+  return accountRequest(fetcher, `/api/account/match-history?${params}`, {
+    method: "GET",
+  });
 }
 
 function statisticsParams(filters: AccountStatisticsFilters): URLSearchParams {

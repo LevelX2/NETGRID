@@ -73,7 +73,9 @@ export function createTopNTakeMatchingMoveIntent(input: {
     throw new Error("Die Stack-Look-Quelle ist nicht mehr installiert.");
   const topCardIds = input.topCardIds.slice(0, selection.count);
   const selectedCards = selection.selectedCardIds.map((cardId) => {
-    const selectedCard = input.selectedCards.find((card) => card.cardId === cardId);
+    const selectedCard = input.selectedCards.find(
+      (card) => card.cardId === cardId,
+    );
     if (!selectedCard)
       throw new Error("Eine gewaehlte Stack-Karte fehlt im Move-Kontext.");
     return selectedCard;
@@ -87,7 +89,9 @@ export function createTopNTakeMatchingMoveIntent(input: {
         !allowedTypes.has(card.type),
     )
   )
-    throw new Error("Eine gewaehlte Stack-Karte ist fuer diesen Effekt nicht legal.");
+    throw new Error(
+      "Eine gewaehlte Stack-Karte ist fuer diesen Effekt nicht legal.",
+    );
   return {
     sourceDefinitionId: selection.sourceDefinitionId,
     topCardIds,
@@ -143,7 +147,9 @@ export function createTopNTakeMatchingMoveResult(
     paidCredits: intent.paidCredits,
     revealToCorp: true,
     shuffleNeeded: intent.shuffleNeeded,
-    revealedDefinitionIds: intent.selectedCards.map((card) => card.definitionId),
+    revealedDefinitionIds: intent.selectedCards.map(
+      (card) => card.definitionId,
+    ),
     revealedTitles: intent.selectedCards.map((card) => card.title),
   };
 }

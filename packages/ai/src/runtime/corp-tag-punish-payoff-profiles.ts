@@ -184,9 +184,7 @@ function corpNumericPayload(action: LegalAction, key: string): number {
   return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
 
-export function corpVisibleCardPlayCost(
-  card: VisibleCard,
-): number | undefined {
+export function corpVisibleCardPlayCost(card: VisibleCard): number | undefined {
   const playCost = card.playCost;
   if (playCost === undefined) return undefined;
   if (playCost.kind === "fixed") {

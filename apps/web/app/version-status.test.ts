@@ -49,7 +49,9 @@ describe("web client release status", () => {
     expect(serverRuntimeModeFromHealth({ runtime: { mode: "normal" } })).toBe(
       "normal",
     );
-    expect(serverRuntimeModeFromHealth({ runtime: { mode: "dev" } })).toBeUndefined();
+    expect(
+      serverRuntimeModeFromHealth({ runtime: { mode: "dev" } }),
+    ).toBeUndefined();
   });
 
   it("uses the match end state to suppress transient active-match overlays", () => {

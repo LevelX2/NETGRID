@@ -29,9 +29,7 @@ describe("standard deck guide match projection", () => {
     expect(created.playerView.deckMetadata?.opponent).not.toHaveProperty(
       "standardDeckId",
     );
-    expect(JSON.stringify(created.playerView)).not.toContain(
-      "contentByLocale",
-    );
+    expect(JSON.stringify(created.playerView)).not.toContain("contentByLocale");
 
     const joinToken = new URL(created.joinUrl ?? "").searchParams.get(
       "joinToken",

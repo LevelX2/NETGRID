@@ -1,8 +1,5 @@
 import { createRuntimeCardsById } from "@netgrid/catalog";
-import type {
-  DeckDefinition,
-  DeckPublicMetadata,
-} from "@netgrid/shared";
+import type { DeckDefinition, DeckPublicMetadata } from "@netgrid/shared";
 import type { AiBenchmarkSnapshotDeck } from "./benchmark-deck-types";
 import { DECK_SNAPSHOTS_08 } from "./benchmark-deck-snapshot-data";
 import {

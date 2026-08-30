@@ -23,10 +23,7 @@ export type CorpTaggedPayoffWindowDependencies = {
     input: AiDecisionInput,
     action: LegalAction,
   ) => boolean;
-  actionIsScoreLine: (
-    input: AiDecisionInput,
-    action: LegalAction,
-  ) => boolean;
+  actionIsScoreLine: (input: AiDecisionInput, action: LegalAction) => boolean;
   visibleMeatDamagePayoff: (input: AiDecisionInput) => boolean;
 };
 

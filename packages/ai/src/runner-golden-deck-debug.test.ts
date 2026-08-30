@@ -145,9 +145,7 @@ describe("Runner Golden Deck strategy and debug", () => {
       servers: [
         server("rd"),
         server("remote_2", {
-          ice: [
-            wallOfStatic("remote-ice-rd-choice"),
-          ],
+          ice: [wallOfStatic("remote-ice-rd-choice")],
           root: [
             visibleCard("remote-root-2", {
               known: false,
@@ -187,9 +185,7 @@ describe("Runner Golden Deck strategy and debug", () => {
       decision.decisionDebug?.actionAlternatives?.find(
         (alternative) => alternative.actionId === "run-rd",
       )?.whyChosen,
-    ).toEqual(
-      expect.arrayContaining(["selected_for_step:pressure_rd_access"]),
-    );
+    ).toEqual(expect.arrayContaining(["selected_for_step:pressure_rd_access"]));
     expect(debugText).not.toMatch(
       /local_realistic_runner_blink_pressure_rig_snapshot_v1|onr_v1_|Blink|cardInstances|privatePayload|fullGameState/i,
     );
@@ -306,9 +302,7 @@ describe("Runner Golden Deck strategy and debug", () => {
       credits: 6,
       servers: [
         server("remote_2", {
-          ice: [
-            wallOfStatic("remote-ice-coverage"),
-          ],
+          ice: [wallOfStatic("remote-ice-coverage")],
           root: [
             visibleCard("remote-root-2", {
               known: false,

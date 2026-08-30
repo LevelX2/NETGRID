@@ -149,7 +149,5 @@ export function runnerMuPressureReasonTags(
 }
 
 function sortedUnique(values: string[]): string[] {
-  return [...new Set(values)].sort((left, right) =>
-    left.localeCompare(right),
-  );
+  return [...new Set(values)].sort((left, right) => left.localeCompare(right));
 }

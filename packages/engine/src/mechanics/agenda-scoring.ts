@@ -25,7 +25,8 @@ export type ScoredAgendaActionProfile = {
   label: string;
 };
 
-export const SCORED_AGENDA_COUNTER_CREDIT_PROFILES: ScoredAgendaActionProfile[] = [];
+export const SCORED_AGENDA_COUNTER_CREDIT_PROFILES: ScoredAgendaActionProfile[] =
+  [];
 
 export function scoredAgendaCounterCreditProfileForDefinition(
   sourceDefinitionId: string,

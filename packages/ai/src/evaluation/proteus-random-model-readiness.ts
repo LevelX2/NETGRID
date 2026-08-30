@@ -61,7 +61,9 @@ export function buildProteusRandomModelReadinessReport(
   return report;
 }
 
-function randomReadinessCard(cardName: string): ProteusRandomModelReadinessCard {
+function randomReadinessCard(
+  cardName: string,
+): ProteusRandomModelReadinessCard {
   return {
     cardName,
     model: "random_outcome_model",

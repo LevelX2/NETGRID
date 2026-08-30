@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 import { runnerLoanProjectedSpendAfterLoan } from "./runner-loan-projected-spend";
 
 describe("runnerLoanProjectedSpendAfterLoan", () => {
@@ -14,22 +18,17 @@ describe("runnerLoanProjectedSpendAfterLoan", () => {
     } as unknown as AiDecisionInput;
     const loanAction = { source: "loan", payload: {} } as LegalAction;
 
-    const projected = runnerLoanProjectedSpendAfterLoan(
-      input,
-      loanAction,
-      6,
-      {
-        actionClickCost: () => 1,
-        actionCreditCost: () => 0,
-        projectedCreditGainForAction: () => 0,
-        definitionIsHighRiskLoan: () => false,
-        visibleCardPlayOrInstallCost: (candidate) =>
-          candidate.definitionId ? 4 : 0,
-        rolesForCardId: () => [],
-        spendCandidateKind: () => "generic_setup",
-        spendKindRank: () => 1,
-      },
-    );
+    const projected = runnerLoanProjectedSpendAfterLoan(input, loanAction, 6, {
+      actionClickCost: () => 1,
+      actionCreditCost: () => 0,
+      projectedCreditGainForAction: () => 0,
+      definitionIsHighRiskLoan: () => false,
+      visibleCardPlayOrInstallCost: (candidate) =>
+        candidate.definitionId ? 4 : 0,
+      rolesForCardId: () => [],
+      spendCandidateKind: () => "generic_setup",
+      spendKindRank: () => 1,
+    });
 
     expect(projected.plannedSpendAfterLoan).toBe(4);
     expect(projected.genericSetupSpendCount).toBe(1);

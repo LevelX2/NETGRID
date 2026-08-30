@@ -4,7 +4,11 @@ import { runnerEconomySetupActionClass } from "./runner-economy-setup-types";
 
 describe("runnerEconomySetupActionClass", () => {
   it("matches economy setup roles by bounded role terms", () => {
-    const structured = classify(["finite_economy_pool", "loan_debt", "tag_risk"]);
+    const structured = classify([
+      "finite_economy_pool",
+      "loan_debt",
+      "tag_risk",
+    ]);
 
     expect(structured).toMatchObject({
       finitePoolEconomy: true,

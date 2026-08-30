@@ -306,9 +306,7 @@ describe("Proteus Public Fort Pass Windows", () => {
       amounts: { addedCounterAmount: 2 },
     });
     expect(lesleyPayload).not.toHaveProperty("targetCardDefinitionId");
-    expect(lesleyPayload?.targets).not.toHaveProperty(
-      "targetCardDefinitionId",
-    );
+    expect(lesleyPayload?.targets).not.toHaveProperty("targetCardDefinitionId");
     expect(JSON.stringify(lesleyPayload)).not.toContain(AGENDA);
     expect(JSON.stringify(lesleyPayload)).not.toContain(agendaId);
     expect(JSON.stringify(lesleyPayload)).not.toContain("Hostile Takeover");

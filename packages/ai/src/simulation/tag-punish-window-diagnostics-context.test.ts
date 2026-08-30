@@ -9,9 +9,11 @@ import { createTagPunishWindowDiagnosticsContext } from "./tag-punish-window-dia
 
 describe("tag punish window diagnostics", () => {
   it("matches runner trace tag reason codes by bounded terms", () => {
-    expect(diagnosticsForReason("corp.trace.bid_visible_amount")).toMatchObject({
-      runnerTaggedAfterTraceDuringRun: true,
-    });
+    expect(diagnosticsForReason("corp.trace.bid_visible_amount")).toMatchObject(
+      {
+        runnerTaggedAfterTraceDuringRun: true,
+      },
+    );
     expect(diagnosticsForReason("traceroute_noise")).not.toHaveProperty(
       "runnerTaggedAfterTraceDuringRun",
     );

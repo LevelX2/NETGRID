@@ -275,15 +275,24 @@ function directionForDelta(
 }
 
 function buildScopeBreakdownDelta(
-  baseline: Record<AiPlayStrengthPilotScope, SemanticShadowLeaguePilotScopeBreakdown>,
-  current: Record<AiPlayStrengthPilotScope, SemanticShadowLeaguePilotScopeBreakdown>,
+  baseline: Record<
+    AiPlayStrengthPilotScope,
+    SemanticShadowLeaguePilotScopeBreakdown
+  >,
+  current: Record<
+    AiPlayStrengthPilotScope,
+    SemanticShadowLeaguePilotScopeBreakdown
+  >,
 ): Record<AiPlayStrengthPilotScope, SemanticShadowLeagueScopeBreakdownDelta> {
   return Object.fromEntries(
     PILOT_SCOPES.map((scope) => [
       scope,
       buildSingleScopeDelta(scope, baseline[scope], current[scope]),
     ]),
-  ) as Record<AiPlayStrengthPilotScope, SemanticShadowLeagueScopeBreakdownDelta>;
+  ) as Record<
+    AiPlayStrengthPilotScope,
+    SemanticShadowLeagueScopeBreakdownDelta
+  >;
 }
 
 function buildPilotReadinessDelta(
@@ -306,7 +315,8 @@ function buildReadinessDelta(
   const baselineReadiness =
     baseline.metrics.pilotCutoverReadiness.scopes[scope];
   const currentReadiness = current.metrics.pilotCutoverReadiness.scopes[scope];
-  const candidateDelta = currentReadiness.candidate - baselineReadiness.candidate;
+  const candidateDelta =
+    currentReadiness.candidate - baselineReadiness.candidate;
   const allowedDelta = currentReadiness.allowed - baselineReadiness.allowed;
   const wouldOverrideDelta =
     currentReadiness.wouldOverride - baselineReadiness.wouldOverride;
@@ -439,7 +449,9 @@ function buildTopDisagreementReasonDelta(
 ): SemanticShadowLeagueTopDisagreementReasonDelta {
   const baseline = new Set(baselineReasons.map(safe));
   const current = new Set(currentReasons.map(safe));
-  const addedReasons = [...current].filter((reason) => !baseline.has(reason)).sort();
+  const addedReasons = [...current]
+    .filter((reason) => !baseline.has(reason))
+    .sort();
   const removedReasons = [...baseline]
     .filter((reason) => !current.has(reason))
     .sort();
@@ -468,7 +480,9 @@ function safe(value: string): string {
   return redactSemanticString(value);
 }
 
-function assertDeltaReportSideSafe(report: SemanticShadowLeagueDeltaReport): void {
+function assertDeltaReportSideSafe(
+  report: SemanticShadowLeagueDeltaReport,
+): void {
   const forbiddenPath = findForbiddenSemanticPath(
     report,
     "SemanticShadowLeagueDeltaReport",

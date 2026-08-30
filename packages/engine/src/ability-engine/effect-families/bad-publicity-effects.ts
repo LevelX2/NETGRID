@@ -1,6 +1,8 @@
 import type { CardEffectFamilyInput } from "./family-runtime";
 
-export function executeBadPublicityEffect(input: CardEffectFamilyInput): boolean {
+export function executeBadPublicityEffect(
+  input: CardEffectFamilyInput,
+): boolean {
   const {
     state,
     context,

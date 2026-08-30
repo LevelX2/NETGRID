@@ -29,43 +29,89 @@ export type DeploymentConfig = {
 };
 
 export class DeploymentConfigError extends Error {
-  constructor(readonly code: "insecure_deployment_config" | "missing_required_secret" | "unsafe_base_url" | "origin_not_allowed" | "proxy_not_trusted", message: string) {
+  constructor(
+    readonly code:
+      | "insecure_deployment_config"
+      | "missing_required_secret"
+      | "unsafe_base_url"
+      | "origin_not_allowed"
+      | "proxy_not_trusted",
+    message: string,
+  ) {
     super(message);
     this.name = "DeploymentConfigError";
   }
 }
 
-export function loadDeploymentConfig(env: NodeJS.ProcessEnv = process.env): DeploymentConfig {
-  const profile = envValue(env, "NETGRID_DEPLOYMENT_PROFILE") === "private_internet" ? "private_internet" : "local";
-  const webBaseUrl = trimTrailingSlash(envValue(env, "NETGRID_WEB_BASE_URL") ?? LOCAL_DEFAULT_WEB_BASE_URL);
-  const serverBaseUrl = trimTrailingSlash(envValue(env, "NETGRID_SERVER_BASE_URL") ?? LOCAL_DEFAULT_SERVER_BASE_URL);
-  const configuredOrigins = parseOrigins(envValue(env, "NETGRID_ALLOWED_ORIGINS"));
-  const maintenanceEnabled = profile === "local" ? envValue(env, "NETGRID_MAINTENANCE_ENABLED") !== "false" : envValue(env, "NETGRID_MAINTENANCE_ENABLED") === "true";
-  const maintenanceBaseUrl = trimTrailingSlash(envValue(env, "NETGRID_MAINTENANCE_BASE_URL") ?? LOCAL_DEFAULT_MAINTENANCE_BASE_URL);
-  const configuredMaintenanceOrigins = parseOrigins(envValue(env, "NETGRID_MAINTENANCE_ALLOWED_ORIGINS"));
+export function loadDeploymentConfig(
+  env: NodeJS.ProcessEnv = process.env,
+): DeploymentConfig {
+  const profile =
+    envValue(env, "NETGRID_DEPLOYMENT_PROFILE") === "private_internet"
+      ? "private_internet"
+      : "local";
+  const webBaseUrl = trimTrailingSlash(
+    envValue(env, "NETGRID_WEB_BASE_URL") ?? LOCAL_DEFAULT_WEB_BASE_URL,
+  );
+  const serverBaseUrl = trimTrailingSlash(
+    envValue(env, "NETGRID_SERVER_BASE_URL") ?? LOCAL_DEFAULT_SERVER_BASE_URL,
+  );
+  const configuredOrigins = parseOrigins(
+    envValue(env, "NETGRID_ALLOWED_ORIGINS"),
+  );
+  const maintenanceEnabled =
+    profile === "local"
+      ? envValue(env, "NETGRID_MAINTENANCE_ENABLED") !== "false"
+      : envValue(env, "NETGRID_MAINTENANCE_ENABLED") === "true";
+  const maintenanceBaseUrl = trimTrailingSlash(
+    envValue(env, "NETGRID_MAINTENANCE_BASE_URL") ??
+      LOCAL_DEFAULT_MAINTENANCE_BASE_URL,
+  );
+  const configuredMaintenanceOrigins = parseOrigins(
+    envValue(env, "NETGRID_MAINTENANCE_ALLOWED_ORIGINS"),
+  );
   const localOrigins = uniqueOrigins([
     originOf(webBaseUrl),
     originOf(serverBaseUrl),
     "http://127.0.0.1:3100",
     "http://localhost:3100",
     "http://127.0.0.1:8787",
-    "http://localhost:8787"
+    "http://localhost:8787",
   ]);
-  const allowedOrigins = configuredOrigins.length > 0 ? configuredOrigins : localOrigins;
-  const localMaintenanceOrigins = uniqueOrigins([originOf(maintenanceBaseUrl), "http://127.0.0.1:3100", "http://localhost:3100"]);
+  const allowedOrigins =
+    configuredOrigins.length > 0 ? configuredOrigins : localOrigins;
+  const localMaintenanceOrigins = uniqueOrigins([
+    originOf(maintenanceBaseUrl),
+    "http://127.0.0.1:3100",
+    "http://localhost:3100",
+  ]);
   const config: DeploymentConfig = {
     profile,
     webBaseUrl,
     serverBaseUrl,
     allowedOrigins,
-    rateLimitProfile: rateLimitProfileFromEnv(envValue(env, "NETGRID_RATE_LIMIT_PROFILE"), profile),
+    rateLimitProfile: rateLimitProfileFromEnv(
+      envValue(env, "NETGRID_RATE_LIMIT_PROFILE"),
+      profile,
+    ),
     trustProxyHeaders: envValue(env, "NETGRID_TRUST_PROXY_HEADERS") === "true",
-    healthDetail: envValue(env, "NETGRID_HEALTH_DETAIL") === "local_diagnostics" ? "local_diagnostics" : "safe",
-    runtimeMode: envValue(env, "NETGRID_SERVER_RUNTIME_MODE") === "watch" ? "watch" : "normal",
+    healthDetail:
+      envValue(env, "NETGRID_HEALTH_DETAIL") === "local_diagnostics"
+        ? "local_diagnostics"
+        : "safe",
+    runtimeMode:
+      envValue(env, "NETGRID_SERVER_RUNTIME_MODE") === "watch"
+        ? "watch"
+        : "normal",
     maintenanceEnabled,
     maintenanceBaseUrl,
-    maintenanceAllowedOrigins: configuredMaintenanceOrigins.length > 0 ? configuredMaintenanceOrigins : localMaintenanceOrigins,
-    maintenanceTrustedProxyAddresses: parseCommaSeparated(envValue(env, "NETGRID_MAINTENANCE_TRUSTED_PROXY_ADDRESSES"))
+    maintenanceAllowedOrigins:
+      configuredMaintenanceOrigins.length > 0
+        ? configuredMaintenanceOrigins
+        : localMaintenanceOrigins,
+    maintenanceTrustedProxyAddresses: parseCommaSeparated(
+      envValue(env, "NETGRID_MAINTENANCE_TRUSTED_PROXY_ADDRESSES"),
+    ),
   };
   const tokenSalt = envValue(env, "NETGRID_TOKEN_SALT");
   if (tokenSalt) config.tokenSalt = tokenSalt;
@@ -73,48 +119,110 @@ export function loadDeploymentConfig(env: NodeJS.ProcessEnv = process.env): Depl
   return config;
 }
 
-export function validateDeploymentConfig(config: DeploymentConfig, env: NodeJS.ProcessEnv = process.env): void {
+export function validateDeploymentConfig(
+  config: DeploymentConfig,
+  env: NodeJS.ProcessEnv = process.env,
+): void {
   if (config.profile === "private_internet") {
-    if (!hasEnvValue(env, "NETGRID_WEB_BASE_URL") || !hasEnvValue(env, "NETGRID_SERVER_BASE_URL")) {
-      throw new DeploymentConfigError("insecure_deployment_config", "Private Internet verlangt explizite Web- und Server-Base-URLs.");
+    if (
+      !hasEnvValue(env, "NETGRID_WEB_BASE_URL") ||
+      !hasEnvValue(env, "NETGRID_SERVER_BASE_URL")
+    ) {
+      throw new DeploymentConfigError(
+        "insecure_deployment_config",
+        "Private Internet verlangt explizite Web- und Server-Base-URLs.",
+      );
     }
     if (!isHttpsUrl(config.webBaseUrl) || !isHttpsUrl(config.serverBaseUrl)) {
-      throw new DeploymentConfigError("unsafe_base_url", "Private Internet erlaubt nur HTTPS-Base-URLs; WebSocket-Clients leiten daraus WSS ab.");
+      throw new DeploymentConfigError(
+        "unsafe_base_url",
+        "Private Internet erlaubt nur HTTPS-Base-URLs; WebSocket-Clients leiten daraus WSS ab.",
+      );
     }
-    if (!hasEnvValue(env, "NETGRID_ALLOWED_ORIGINS") || config.allowedOrigins.length === 0) {
-      throw new DeploymentConfigError("origin_not_allowed", "Private Internet verlangt eine explizite Origin-Allowlist.");
+    if (
+      !hasEnvValue(env, "NETGRID_ALLOWED_ORIGINS") ||
+      config.allowedOrigins.length === 0
+    ) {
+      throw new DeploymentConfigError(
+        "origin_not_allowed",
+        "Private Internet verlangt eine explizite Origin-Allowlist.",
+      );
     }
-    if (config.allowedOrigins.some((origin) => origin === "*" || origin.includes("*"))) {
-      throw new DeploymentConfigError("origin_not_allowed", "Private Internet erlaubt keine Wildcard-Origin.");
+    if (
+      config.allowedOrigins.some(
+        (origin) => origin === "*" || origin.includes("*"),
+      )
+    ) {
+      throw new DeploymentConfigError(
+        "origin_not_allowed",
+        "Private Internet erlaubt keine Wildcard-Origin.",
+      );
     }
     if (!config.tokenSalt || config.tokenSalt === LOCAL_DEFAULT_TOKEN_SALT) {
-      throw new DeploymentConfigError("missing_required_secret", "Private Internet verlangt einen eigenen NETGRID_TOKEN_SALT.");
+      throw new DeploymentConfigError(
+        "missing_required_secret",
+        "Private Internet verlangt einen eigenen NETGRID_TOKEN_SALT.",
+      );
     }
   }
   if (!config.maintenanceEnabled) return;
-  if (isLoopbackHttpUrl(config.maintenanceBaseUrl) && config.profile === "local") return;
-  if (!hasEnvValue(env, "NETGRID_MAINTENANCE_BASE_URL") || !isHttpsUrl(config.maintenanceBaseUrl)) {
-    throw new DeploymentConfigError("unsafe_base_url", "Remote Maintenance verlangt eine explizite HTTPS-Base-URL.");
+  if (
+    isLoopbackHttpUrl(config.maintenanceBaseUrl) &&
+    config.profile === "local"
+  )
+    return;
+  if (
+    !hasEnvValue(env, "NETGRID_MAINTENANCE_BASE_URL") ||
+    !isHttpsUrl(config.maintenanceBaseUrl)
+  ) {
+    throw new DeploymentConfigError(
+      "unsafe_base_url",
+      "Remote Maintenance verlangt eine explizite HTTPS-Base-URL.",
+    );
   }
-  if (!hasEnvValue(env, "NETGRID_MAINTENANCE_ALLOWED_ORIGINS") || config.maintenanceAllowedOrigins.length === 0 || config.maintenanceAllowedOrigins.some((origin) => origin === "*" || !isHttpsUrl(origin))) {
-    throw new DeploymentConfigError("origin_not_allowed", "Remote Maintenance verlangt eine explizite HTTPS-Origin ohne Wildcard.");
+  if (
+    !hasEnvValue(env, "NETGRID_MAINTENANCE_ALLOWED_ORIGINS") ||
+    config.maintenanceAllowedOrigins.length === 0 ||
+    config.maintenanceAllowedOrigins.some(
+      (origin) => origin === "*" || !isHttpsUrl(origin),
+    )
+  ) {
+    throw new DeploymentConfigError(
+      "origin_not_allowed",
+      "Remote Maintenance verlangt eine explizite HTTPS-Origin ohne Wildcard.",
+    );
   }
   if (config.maintenanceTrustedProxyAddresses.length === 0) {
-    throw new DeploymentConfigError("proxy_not_trusted", "Remote Maintenance verlangt mindestens eine exakt benannte vertrauenswürdige Proxy-Adresse.");
+    throw new DeploymentConfigError(
+      "proxy_not_trusted",
+      "Remote Maintenance verlangt mindestens eine exakt benannte vertrauenswürdige Proxy-Adresse.",
+    );
   }
 }
 
-export function envValue(env: NodeJS.ProcessEnv, key: string, legacyKey?: string): string | undefined {
+export function envValue(
+  env: NodeJS.ProcessEnv,
+  key: string,
+  legacyKey?: string,
+): string | undefined {
   return env[key] ?? (legacyKey ? env[legacyKey] : undefined);
 }
 
-export function hasEnvValue(env: NodeJS.ProcessEnv, key: string, legacyKey?: string): boolean {
+export function hasEnvValue(
+  env: NodeJS.ProcessEnv,
+  key: string,
+  legacyKey?: string,
+): boolean {
   return Boolean(envValue(env, key, legacyKey));
 }
 
 export type OriginDecision = "allowed" | "denied";
 
-export function applyCors(request: IncomingMessage, response: ServerResponse, config: DeploymentConfig): OriginDecision {
+export function applyCors(
+  request: IncomingMessage,
+  response: ServerResponse,
+  config: DeploymentConfig,
+): OriginDecision {
   const origin = request.headers.origin;
   const pathname = new URL(request.url ?? "/", "http://localhost").pathname;
   response.setHeader("vary", "Origin");
@@ -124,7 +232,10 @@ export function applyCors(request: IncomingMessage, response: ServerResponse, co
       ? "GET,POST,PUT,DELETE,OPTIONS"
       : "GET,POST,OPTIONS",
   );
-  response.setHeader("access-control-allow-headers", "content-type,authorization,x-netgrid-csrf");
+  response.setHeader(
+    "access-control-allow-headers",
+    "content-type,authorization,x-netgrid-csrf",
+  );
   response.setHeader("access-control-max-age", "600");
   if (!origin) return "allowed";
   if (!isOriginAllowed(origin, config)) return "denied";
@@ -133,15 +244,23 @@ export function applyCors(request: IncomingMessage, response: ServerResponse, co
   return "allowed";
 }
 
-export function isOriginAllowed(origin: string | undefined, config: DeploymentConfig): boolean {
+export function isOriginAllowed(
+  origin: string | undefined,
+  config: DeploymentConfig,
+): boolean {
   if (!origin) return true;
   const normalized = originOf(origin);
   return Boolean(normalized && config.allowedOrigins.includes(normalized));
 }
 
-export function clientIdentity(request: IncomingMessage, config: DeploymentConfig): string {
+export function clientIdentity(
+  request: IncomingMessage,
+  config: DeploymentConfig,
+): string {
   if (config.trustProxyHeaders) {
-    const forwardedFor = firstHeaderValue(request.headers["x-forwarded-for"])?.split(",")[0]?.trim();
+    const forwardedFor = firstHeaderValue(request.headers["x-forwarded-for"])
+      ?.split(",")[0]
+      ?.trim();
     if (forwardedFor) return forwardedFor;
     const realIp = firstHeaderValue(request.headers["x-real-ip"]);
     if (realIp) return realIp.trim();
@@ -149,7 +268,14 @@ export function clientIdentity(request: IncomingMessage, config: DeploymentConfi
   return request.socket.remoteAddress ?? "unknown-client";
 }
 
-export type RateLimitCategory = "create_match" | "token_probe" | "account_read" | "lifecycle" | "ai_advance" | "ws_handshake" | "ws_join";
+export type RateLimitCategory =
+  | "create_match"
+  | "token_probe"
+  | "account_read"
+  | "lifecycle"
+  | "ai_advance"
+  | "ws_handshake"
+  | "ws_join";
 
 export type RateLimitResult = {
   allowed: boolean;
@@ -171,10 +297,14 @@ export class FixedWindowRateLimiter {
 
   constructor(
     private readonly rules: Record<RateLimitCategory, RateRule | undefined>,
-    private readonly now: () => number = () => Date.now()
+    private readonly now: () => number = () => Date.now(),
   ) {}
 
-  check(category: RateLimitCategory, clientKey: string, scope = "global"): RateLimitResult {
+  check(
+    category: RateLimitCategory,
+    clientKey: string,
+    scope = "global",
+  ): RateLimitResult {
     const rule = this.rules[category];
     if (!rule || rule.limit <= 0) return { allowed: true };
     const now = this.now();
@@ -185,14 +315,23 @@ export class FixedWindowRateLimiter {
       return { allowed: true };
     }
     if (bucket.count >= rule.limit) {
-      return { allowed: false, retryAfterSeconds: Math.max(1, Math.ceil((bucket.resetAt - now) / 1000)) };
+      return {
+        allowed: false,
+        retryAfterSeconds: Math.max(
+          1,
+          Math.ceil((bucket.resetAt - now) / 1000),
+        ),
+      };
     }
     bucket.count += 1;
     return { allowed: true };
   }
 }
 
-export function createRateLimiter(profile: RateLimitProfile, now?: () => number): FixedWindowRateLimiter {
+export function createRateLimiter(
+  profile: RateLimitProfile,
+  now?: () => number,
+): FixedWindowRateLimiter {
   if (profile === "off") return new FixedWindowRateLimiter(emptyRules(), now);
   if (profile === "test") {
     return new FixedWindowRateLimiter(
@@ -203,36 +342,76 @@ export function createRateLimiter(profile: RateLimitProfile, now?: () => number)
         lifecycle: { limit: 2, windowMs: 60_000 },
         ai_advance: { limit: 2, windowMs: 60_000 },
         ws_handshake: { limit: 2, windowMs: 60_000 },
-        ws_join: { limit: 2, windowMs: 60_000 }
+        ws_join: { limit: 2, windowMs: 60_000 },
       },
-      now
+      now,
     );
   }
   const privateRules: Record<RateLimitCategory, RateRule> = {
-    create_match: { limit: profile === "private_internet" ? 20 : 200, windowMs: 60_000 },
-    token_probe: { limit: profile === "private_internet" ? 60 : 300, windowMs: 60_000 },
-    account_read: { limit: profile === "private_internet" ? 120 : 600, windowMs: 60_000 },
-    lifecycle: { limit: profile === "private_internet" ? 60 : 300, windowMs: 60_000 },
-    ai_advance: { limit: profile === "private_internet" ? 120 : 600, windowMs: 60_000 },
-    ws_handshake: { limit: profile === "private_internet" ? 80 : 400, windowMs: 60_000 },
-    ws_join: { limit: profile === "private_internet" ? 60 : 300, windowMs: 60_000 }
+    create_match: {
+      limit: profile === "private_internet" ? 20 : 200,
+      windowMs: 60_000,
+    },
+    token_probe: {
+      limit: profile === "private_internet" ? 60 : 300,
+      windowMs: 60_000,
+    },
+    account_read: {
+      limit: profile === "private_internet" ? 120 : 600,
+      windowMs: 60_000,
+    },
+    lifecycle: {
+      limit: profile === "private_internet" ? 60 : 300,
+      windowMs: 60_000,
+    },
+    ai_advance: {
+      limit: profile === "private_internet" ? 120 : 600,
+      windowMs: 60_000,
+    },
+    ws_handshake: {
+      limit: profile === "private_internet" ? 80 : 400,
+      windowMs: 60_000,
+    },
+    ws_join: {
+      limit: profile === "private_internet" ? 60 : 300,
+      windowMs: 60_000,
+    },
   };
   return new FixedWindowRateLimiter(privateRules, now);
 }
 
-export function rateLimitedPayload(): { error: { code: "rate_limited"; message: string } } {
-  return { error: { code: "rate_limited", message: "Zu viele Versuche. Bitte kurz warten." } };
+export function rateLimitedPayload(): {
+  error: { code: "rate_limited"; message: string };
+} {
+  return {
+    error: {
+      code: "rate_limited",
+      message: "Zu viele Versuche. Bitte kurz warten.",
+    },
+  };
 }
 
-export function originDeniedPayload(): { error: { code: "origin_not_allowed"; message: string } } {
-  return { error: { code: "origin_not_allowed", message: "Diese Browser-Origin ist nicht erlaubt." } };
+export function originDeniedPayload(): {
+  error: { code: "origin_not_allowed"; message: string };
+} {
+  return {
+    error: {
+      code: "origin_not_allowed",
+      message: "Diese Browser-Origin ist nicht erlaubt.",
+    },
+  };
 }
 
-export function deploymentErrorPayload(error: DeploymentConfigError): { error: { code: DeploymentConfigError["code"]; message: string } } {
+export function deploymentErrorPayload(error: DeploymentConfigError): {
+  error: { code: DeploymentConfigError["code"]; message: string };
+} {
   return { error: { code: error.code, message: error.message } };
 }
 
-export function redactedHealth(storage: StorageHealth, config: DeploymentConfig): Record<string, unknown> {
+export function redactedHealth(
+  storage: StorageHealth,
+  config: DeploymentConfig,
+): Record<string, unknown> {
   return {
     ok: true,
     service: "netgrid-multiplayer",
@@ -243,15 +422,26 @@ export function redactedHealth(storage: StorageHealth, config: DeploymentConfig)
     storage: {
       ok: storage.ok,
       kind: storage.kind,
-      ...(typeof storage.schemaVersion === "number" ? { schemaVersion: storage.schemaVersion } : {}),
-      ...(storage.storageFormat ? { storageFormat: storage.storageFormat } : {}),
-      ...(storage.database ? { database: storage.database } : {})
-    }
+      ...(typeof storage.schemaVersion === "number"
+        ? { schemaVersion: storage.schemaVersion }
+        : {}),
+      ...(storage.storageFormat
+        ? { storageFormat: storage.storageFormat }
+        : {}),
+      ...(storage.database ? { database: storage.database } : {}),
+    },
   };
 }
 
-export function redactedDiagnosticsUnavailable(): { error: { code: "diagnostics_unavailable"; message: string } } {
-  return { error: { code: "diagnostics_unavailable", message: "Diagnose ist in diesem Profil nicht verfügbar." } };
+export function redactedDiagnosticsUnavailable(): {
+  error: { code: "diagnostics_unavailable"; message: string };
+} {
+  return {
+    error: {
+      code: "diagnostics_unavailable",
+      message: "Diagnose ist in diesem Profil nicht verfügbar.",
+    },
+  };
 }
 
 export const OBSERVABILITY_ALLOWED_TECHNICAL_LABELS = [
@@ -271,63 +461,91 @@ export const OBSERVABILITY_ALLOWED_TECHNICAL_LABELS = [
   "errorCode",
   "matchStatus",
   "latencyBucket",
-  "regionCode"
+  "regionCode",
 ] as const;
 
 export type ObservabilityRedactionViolation = {
-  id: "raw_token" | "token_hash" | "deck_private" | "hidden_info" | "ai_debug" | "local_path";
+  id:
+    | "raw_token"
+    | "token_hash"
+    | "deck_private"
+    | "hidden_info"
+    | "ai_debug"
+    | "local_path";
   label: string;
 };
 
-export function findObservabilityRedactionViolations(value: unknown): ObservabilityRedactionViolation[] {
+export function findObservabilityRedactionViolations(
+  value: unknown,
+): ObservabilityRedactionViolation[] {
   const text = serializedObservabilityValue(value);
-  const checks: Array<{ id: ObservabilityRedactionViolation["id"]; label: string; pattern: RegExp }> = [
+  const checks: Array<{
+    id: ObservabilityRedactionViolation["id"];
+    label: string;
+    pattern: RegExp;
+  }> = [
     {
       id: "raw_token",
       label: "Roh-Token oder Account-Session-Cookie",
-      pattern: /\b(?:hostSessionToken|hostReconnectToken|sessionToken|reconnectToken|joinToken|accountSessionToken|inviteToken|recoveryToken|ng_account_session)\b["']?\s*[:=]\s*["']?(?!\[redacted\])[A-Za-z0-9_.:-]{8,}/i
+      pattern:
+        /\b(?:hostSessionToken|hostReconnectToken|sessionToken|reconnectToken|joinToken|accountSessionToken|inviteToken|recoveryToken|ng_account_session)\b["']?\s*[:=]\s*["']?(?!\[redacted\])[A-Za-z0-9_.:-]{8,}/i,
     },
     {
       id: "token_hash",
       label: "Token-Hash",
-      pattern: /\b(?:tokenHash|sessionTokenHash|inviteTokenHash|recoveryTokenHash)\b["']?\s*[:=]\s*["']?(?!\[redacted\])[A-Za-z0-9_.:-]{8,}|sha256:[a-f0-9]{64}/i
+      pattern:
+        /\b(?:tokenHash|sessionTokenHash|inviteTokenHash|recoveryTokenHash)\b["']?\s*[:=]\s*["']?(?!\[redacted\])[A-Za-z0-9_.:-]{8,}|sha256:[a-f0-9]{64}/i,
     },
     {
       id: "deck_private",
       label: "Deckliste, Deckhash oder privater Decksnapshot",
-      pattern: /\b(?:decklist|privateDeckSnapshots)\b|\b(?:deckHash|cloudDeckId)\b["']?\s*[:=]\s*["']?(?!\[redacted\])[A-Za-z0-9_.:-]{4,}|["']cards["']\s*:/i
+      pattern:
+        /\b(?:decklist|privateDeckSnapshots)\b|\b(?:deckHash|cloudDeckId)\b["']?\s*[:=]\s*["']?(?!\[redacted\])[A-Za-z0-9_.:-]{4,}|["']cards["']\s*:/i,
     },
     {
       id: "hidden_info",
       label: "Hidden-Info- oder FullState-Daten",
-      pattern: /\b(?:privatePayload|cardInstances|fullGameState|FullState|hidden-card|Hidden Priority Agenda)\b/i
+      pattern:
+        /\b(?:privatePayload|cardInstances|fullGameState|FullState|hidden-card|Hidden Priority Agenda)\b/i,
     },
     {
       id: "ai_debug",
       label: "AIInput oder DecisionDebug",
-      pattern: /\b(?:AIInput|DecisionDebug|aiDecisionDebug|decisionDebug|beliefState)\b/i
+      pattern:
+        /\b(?:AIInput|DecisionDebug|aiDecisionDebug|decisionDebug|beliefState)\b/i,
     },
     {
       id: "local_path",
       label: "lokaler Dateipfad",
-      pattern: /(?:[A-Za-z]:\\|\/Users\/|\/home\/|%APPDATA%)/i
-    }
+      pattern: /(?:[A-Za-z]:\\|\/Users\/|\/home\/|%APPDATA%)/i,
+    },
   ];
-  return checks.filter((check) => check.pattern.test(text)).map(({ id, label }) => ({ id, label }));
+  return checks
+    .filter((check) => check.pattern.test(text))
+    .map(({ id, label }) => ({ id, label }));
 }
 
 export function redactSensitiveText(value: unknown): string {
   return String(value)
     .replace(/(joinToken=)[A-Za-z0-9_-]+/g, "$1[redacted]")
     .replace(/(ng_account_session=)[A-Za-z0-9_.:-]+/gi, "$1[redacted]")
-    .replace(/("(?:hostSessionToken|hostReconnectToken|sessionToken|reconnectToken|joinToken|tokenHash)"\s*:\s*")[^"]+(")/gi, "$1[redacted]$2")
+    .replace(
+      /("(?:hostSessionToken|hostReconnectToken|sessionToken|reconnectToken|joinToken|tokenHash)"\s*:\s*")[^"]+(")/gi,
+      "$1[redacted]$2",
+    )
     .replace(
       /\b(?:hostSessionToken|hostReconnectToken|sessionToken|reconnectToken|joinToken|tokenHash|accountSessionToken|sessionTokenHash|inviteToken|inviteTokenHash|recoveryToken|recoveryTokenHash|deckHash)\b\s*[:=]\s*[A-Za-z0-9_.:-]+/gi,
-      (match) => match.replace(/[:=]\s*.*/, "=[redacted]")
+      (match) => match.replace(/[:=]\s*.*/, "=[redacted]"),
     )
     .replace(/sha256:[a-f0-9]{64}/gi, "sha256:[redacted]")
-    .replace(/privateDeckSnapshots|privatePayload|cardInstances|decklist|fullGameState|FullState|AIInput|DecisionDebug|aiDecisionDebug|decisionDebug|cloudDeckId/gi, "[redacted-field]")
-    .replace(/[A-Za-z]:\\[^\s"]+|\/Users\/[^\s"]+|\/home\/[^\s"]+|%APPDATA%\\?[^\s"]*/gi, "[redacted-path]");
+    .replace(
+      /privateDeckSnapshots|privatePayload|cardInstances|decklist|fullGameState|FullState|AIInput|DecisionDebug|aiDecisionDebug|decisionDebug|cloudDeckId/gi,
+      "[redacted-field]",
+    )
+    .replace(
+      /[A-Za-z]:\\[^\s"]+|\/Users\/[^\s"]+|\/home\/[^\s"]+|%APPDATA%\\?[^\s"]*/gi,
+      "[redacted-path]",
+    );
 }
 
 export function redactedJoinUrl(url: string | undefined): string | undefined {
@@ -347,7 +565,7 @@ function emptyRules(): Record<RateLimitCategory, undefined> {
     lifecycle: undefined,
     ai_advance: undefined,
     ws_handshake: undefined,
-    ws_join: undefined
+    ws_join: undefined,
   };
 }
 
@@ -359,17 +577,26 @@ function parseOrigins(value: string | undefined): string[] {
       .map((entry) => entry.trim())
       .filter(Boolean)
       .map((entry) => (entry === "*" ? "*" : originOf(entry)))
-      .filter((entry): entry is string => Boolean(entry))
+      .filter((entry): entry is string => Boolean(entry)),
   );
 }
 
 function parseCommaSeparated(value: string | undefined): string[] {
   if (!value) return [];
-  return [...new Set(value.split(",").map((entry) => entry.trim().toLowerCase()).filter(Boolean))];
+  return [
+    ...new Set(
+      value
+        .split(",")
+        .map((entry) => entry.trim().toLowerCase())
+        .filter(Boolean),
+    ),
+  ];
 }
 
 function uniqueOrigins(values: Array<string | undefined>): string[] {
-  return [...new Set(values.filter((entry): entry is string => Boolean(entry)))];
+  return [
+    ...new Set(values.filter((entry): entry is string => Boolean(entry))),
+  ];
 }
 
 function originOf(value: string | undefined): string | undefined {
@@ -393,18 +620,35 @@ function isHttpsUrl(value: string): boolean {
 function isLoopbackHttpUrl(value: string): boolean {
   try {
     const url = new URL(value);
-    return url.protocol === "http:" && (url.hostname === "127.0.0.1" || url.hostname === "localhost" || url.hostname === "::1" || url.hostname === "[::1]");
+    return (
+      url.protocol === "http:" &&
+      (url.hostname === "127.0.0.1" ||
+        url.hostname === "localhost" ||
+        url.hostname === "::1" ||
+        url.hostname === "[::1]")
+    );
   } catch {
     return false;
   }
 }
 
-function rateLimitProfileFromEnv(value: string | undefined, profile: DeploymentProfile): RateLimitProfile {
-  if (value === "off" || value === "local" || value === "private_internet" || value === "test") return value;
+function rateLimitProfileFromEnv(
+  value: string | undefined,
+  profile: DeploymentProfile,
+): RateLimitProfile {
+  if (
+    value === "off" ||
+    value === "local" ||
+    value === "private_internet" ||
+    value === "test"
+  )
+    return value;
   return profile === "private_internet" ? "private_internet" : "local";
 }
 
-function firstHeaderValue(value: string | string[] | undefined): string | undefined {
+function firstHeaderValue(
+  value: string | string[] | undefined,
+): string | undefined {
   return Array.isArray(value) ? value[0] : value;
 }
 

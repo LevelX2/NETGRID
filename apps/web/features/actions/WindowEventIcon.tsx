@@ -55,7 +55,11 @@ export function WindowEventIcon({
       {kind === "gain-tag" ? (
         <span className="windowEventIconTagGain">
           <Crosshair size={76} strokeWidth={1.45} />
-          <Tag className="windowEventIconTagGlyph" size={34} strokeWidth={2.1} />
+          <Tag
+            className="windowEventIconTagGlyph"
+            size={34}
+            strokeWidth={2.1}
+          />
         </span>
       ) : null}
       {badge ? <span className="windowEventIconBadge">{badge}</span> : null}

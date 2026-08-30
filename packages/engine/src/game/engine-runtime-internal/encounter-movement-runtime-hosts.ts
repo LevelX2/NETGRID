@@ -841,11 +841,7 @@ export function createEncounterMovementRuntimeHosts(
             legalAction,
             subroutine,
           ),
-        resolveMultiBreakSubroutinesAction: (
-          breakerId,
-          legalAction,
-          options,
-        ) =>
+        resolveMultiBreakSubroutinesAction: (breakerId, legalAction, options) =>
           deps.resolveMultiBreakSubroutinesAction(
             state,
             breakerId,

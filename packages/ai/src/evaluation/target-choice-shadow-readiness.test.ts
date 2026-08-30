@@ -172,7 +172,9 @@ describe("TargetChoice selectedChoices readiness", () => {
       },
     ]);
 
-    expect(report.followupCandidates.map((candidate) => candidate.kind)).toEqual([
+    expect(
+      report.followupCandidates.map((candidate) => candidate.kind),
+    ).toEqual([
       "engine_only_target",
       "hidden_info_blocked",
       "missing_side_safe_options",

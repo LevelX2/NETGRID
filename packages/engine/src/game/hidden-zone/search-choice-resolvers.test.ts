@@ -64,14 +64,16 @@ describe("hidden-zone search choice resolvers", () => {
 
   it("validates stack-install and top-N take-matching intents", () => {
     const installProgramId = "install_program" as CardInstanceId;
-    expect(resolveSearchStackInstallSelection({
-      choice: choice({
-        source:
-          "p3_38.search_stack_install:source_card:source_definition:program:free:shuffle:3",
+    expect(
+      resolveSearchStackInstallSelection({
+        choice: choice({
+          source:
+            "p3_38.search_stack_install:source_card:source_definition:program:free:shuffle:3",
+        }),
+        selectedCardId: installProgramId,
+        legalTargetIdsFor: () => [installProgramId],
       }),
-      selectedCardId: installProgramId,
-      legalTargetIdsFor: () => [installProgramId],
-    })).toEqual({
+    ).toEqual({
       sourceCardId: "source_card",
       sourceDefinitionId: "source_definition",
       filter: "program",
@@ -81,16 +83,18 @@ describe("hidden-zone search choice resolvers", () => {
     });
 
     const takenCardId = "taken_program" as CardInstanceId;
-    expect(resolveLookTopStackTakeMatchingSelection({
-      choice: choice({
-        source:
-          "p3_37.look_top_stack_take_matching:source_card:source_definition:5:program,event:2:reveal:shuffle:8",
+    expect(
+      resolveLookTopStackTakeMatchingSelection({
+        choice: choice({
+          source:
+            "p3_37.look_top_stack_take_matching:source_card:source_definition:5:program,event:2:reveal:shuffle:8",
+        }),
+        selectedCardIds: [takenCardId],
+        topCardIdsForCount: () => [takenCardId, "other_card" as CardInstanceId],
+        legalTargetIdsFor: () => [takenCardId],
+        runnerCredits: 2,
       }),
-      selectedCardIds: [takenCardId],
-      topCardIdsForCount: () => [takenCardId, "other_card" as CardInstanceId],
-      legalTargetIdsFor: () => [takenCardId],
-      runnerCredits: 2,
-    })).toEqual({
+    ).toEqual({
       sourceCardId: "source_card",
       sourceDefinitionId: "source_definition",
       count: 5,
@@ -116,26 +120,30 @@ describe("hidden-zone search choice resolvers", () => {
 
   it("validates SMC, Sneak Preview and Mystery Box install selections", () => {
     const programId = "program" as CardInstanceId;
-    expect(resolvePaidStackProgramInstallSelection({
-      choice: choice({
-        source: "v1911.hidden_stack_program_install:source_card:8",
+    expect(
+      resolvePaidStackProgramInstallSelection({
+        choice: choice({
+          source: "v1911.hidden_stack_program_install:source_card:8",
+        }),
+        selectedCardId: programId,
+        stackCardIds: [programId],
+        isSelectedProgram: true,
       }),
-      selectedCardId: programId,
-      stackCardIds: [programId],
-      isSelectedProgram: true,
-    })).toEqual({
+    ).toEqual({
       selectedCardId: programId,
       shuffleNeeded: true,
     });
 
-    expect(resolveTemporaryProgramSearchInstallSelection({
-      choice: choice({
-        source: "v1911.temporary_program_install_stack_install:8",
+    expect(
+      resolveTemporaryProgramSearchInstallSelection({
+        choice: choice({
+          source: "v1911.temporary_program_install_stack_install:8",
+        }),
+        selectedCardId: programId,
+        legalTargetIds: [programId],
+        defaultSourceDefinitionId: "onr_v1_089_sneak-preview",
       }),
-      selectedCardId: programId,
-      legalTargetIds: [programId],
-      defaultSourceDefinitionId: "onr_v1_089_sneak-preview",
-    })).toEqual({
+    ).toEqual({
       selectedCardId: programId,
       sourceZone: "stack",
       sourceDefinitionId: "onr_v1_089_sneak-preview",
@@ -143,15 +151,17 @@ describe("hidden-zone search choice resolvers", () => {
       shuffleNeeded: true,
     });
 
-    expect(resolveTemporaryProgramSearchInstallSelection({
-      choice: choice({
-        source:
-          "p3_38.stack_or_trash_program_install:source_card:onr_v1_110_sneak-preview:heap:8",
+    expect(
+      resolveTemporaryProgramSearchInstallSelection({
+        choice: choice({
+          source:
+            "p3_38.stack_or_trash_program_install:source_card:onr_v1_110_sneak-preview:heap:8",
+        }),
+        selectedCardId: programId,
+        legalTargetIds: [programId],
+        defaultSourceDefinitionId: undefined,
       }),
-      selectedCardId: programId,
-      legalTargetIds: [programId],
-      defaultSourceDefinitionId: undefined,
-    })).toEqual({
+    ).toEqual({
       selectedCardId: programId,
       sourceZone: "heap",
       sourceDefinitionId: "onr_v1_110_sneak-preview",
@@ -159,14 +169,17 @@ describe("hidden-zone search choice resolvers", () => {
       shuffleNeeded: true,
     });
 
-    expect(resolveRevealedStackProgramInstallSelection({
-      choice: choice({
-        source: "v1915.revealed_stack_program_install:source_card:top_a,top_b:8",
+    expect(
+      resolveRevealedStackProgramInstallSelection({
+        choice: choice({
+          source:
+            "v1915.revealed_stack_program_install:source_card:top_a,top_b:8",
+        }),
+        selectedCardId: programId,
+        currentTopCardIds: [programId],
+        isSelectedProgram: true,
       }),
-      selectedCardId: programId,
-      currentTopCardIds: [programId],
-      isSelectedProgram: true,
-    })).toEqual({
+    ).toEqual({
       sourceCardId: "source_card",
       selectedCardId: programId,
       shuffleNeeded: true,

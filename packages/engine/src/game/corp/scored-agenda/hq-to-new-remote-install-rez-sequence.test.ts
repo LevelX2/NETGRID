@@ -22,7 +22,9 @@ describe("data fort reclamation sequence routing", () => {
       ),
     ).toBe(true);
     expect(
-      isHqToNewRemoteInstallRezChoiceSource("card_implementation.scored_agenda_free_rez"),
+      isHqToNewRemoteInstallRezChoiceSource(
+        "card_implementation.scored_agenda_free_rez",
+      ),
     ).toBe(false);
   });
 });

@@ -36,11 +36,7 @@ describe("visibleSourceDefinitionsByInstanceId", () => {
   });
 
   it("binds the currently revealed accessed card for access-step semantics", () => {
-    const accessed = card(
-      "accessed-krumz",
-      "onr_v1_330_krumz",
-      "asset",
-    );
+    const accessed = card("accessed-krumz", "onr_v1_330_krumz", "asset");
     const playerView = {
       own: {
         identity: card("runner-identity", "test-runner-identity", "identity"),

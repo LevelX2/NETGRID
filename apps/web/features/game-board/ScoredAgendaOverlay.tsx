@@ -6,9 +6,15 @@ import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
 import type { LegalAction, Side, VisibleCard } from "@netgrid/shared";
 import { useTranslations } from "use-intl/react";
 
-import { clampOverlayPosition, type OverlayPositionPreference } from "../../lib/overlay-position";
+import {
+  clampOverlayPosition,
+  type OverlayPositionPreference,
+} from "../../lib/overlay-position";
 import { useCardScaleSettings } from "../cards/card-display-settings";
-import { CARD_SCALE_PERCENT_MIN, type CardDisplayMode } from "../settings/settings-model";
+import {
+  CARD_SCALE_PERCENT_MIN,
+  type CardDisplayMode,
+} from "../settings/settings-model";
 import { CardView } from "../cards/CardView";
 import { ScoredAgendaStateLines } from "../cards/ScoredAgendaState";
 import {
@@ -36,7 +42,7 @@ export function ScoredAgendaOverlay({
   onFocus,
   onActionContextSelect,
   onClose,
-  onPosition
+  onPosition,
 }: {
   side: Side;
   cards: VisibleCard[];
@@ -59,19 +65,21 @@ export function ScoredAgendaOverlay({
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
   const { handPercent } = useCardScaleSettings();
-  const handCardScale = Math.max(CARD_SCALE_PERCENT_MIN / 100, handPercent / 100);
-  const scoredAgendaCardsStyle = useMemo(
-    () => {
-      const columnCount = Math.min(Math.max(cards.length, 1), 3);
-      const cardMinWidth = Math.round(CARD_DISPLAY_BASE_MIN_WIDTH * handCardScale);
-      return {
-        "--cards-min-width": `${cardMinWidth}px`,
-        "--score-area-columns": String(columnCount),
-        "--score-area-list-width": `${cardMinWidth * columnCount + 8 * (columnCount - 1)}px`
-      } as CSSProperties;
-    },
-    [cards.length, handCardScale]
+  const handCardScale = Math.max(
+    CARD_SCALE_PERCENT_MIN / 100,
+    handPercent / 100,
   );
+  const scoredAgendaCardsStyle = useMemo(() => {
+    const columnCount = Math.min(Math.max(cards.length, 1), 3);
+    const cardMinWidth = Math.round(
+      CARD_DISPLAY_BASE_MIN_WIDTH * handCardScale,
+    );
+    return {
+      "--cards-min-width": `${cardMinWidth}px`,
+      "--score-area-columns": String(columnCount),
+      "--score-area-list-width": `${cardMinWidth * columnCount + 8 * (columnCount - 1)}px`,
+    } as CSSProperties;
+  }, [cards.length, handCardScale]);
   const visibleCards = cards.map((card) => enrichCard(card));
   if (!open || visibleCards.length === 0) return null;
   const visibleLimitCards = visibleCards.slice(0, SCORE_AREA_PREVIEW_LIMIT);
@@ -80,7 +88,10 @@ export function ScoredAgendaOverlay({
     const overlay = overlayRef.current;
     if (!overlay) return;
     const rect = overlay.getBoundingClientRect();
-    dragOffsetRef.current = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    dragOffsetRef.current = {
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    };
     event.currentTarget.setPointerCapture(event.pointerId);
   };
   const dragOverlay = (event: ReactPointerEvent<HTMLElement>) => {
@@ -95,17 +106,24 @@ export function ScoredAgendaOverlay({
         window.innerWidth,
         window.innerHeight,
         rect.width,
-        rect.height
-      )
+        rect.height,
+      ),
     );
   };
   const stopDrag = (event: ReactPointerEvent<HTMLElement>) => {
     dragOffsetRef.current = null;
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+    if (event.currentTarget.hasPointerCapture(event.pointerId))
+      event.currentTarget.releasePointerCapture(event.pointerId);
   };
-  const overlayPositionStyle: CSSProperties = position.kind === "custom"
-    ? { left: `${position.xPercent}%`, top: `${position.yPercent}%`, right: "auto", transform: "none" }
-    : {};
+  const overlayPositionStyle: CSSProperties =
+    position.kind === "custom"
+      ? {
+          left: `${position.xPercent}%`,
+          top: `${position.yPercent}%`,
+          right: "auto",
+          transform: "none",
+        }
+      : {};
 
   return (
     <div
@@ -122,8 +140,8 @@ export function ScoredAgendaOverlay({
           onPointerMove={dragOverlay}
           onPointerUp={stopDrag}
           onPointerCancel={stopDrag}
-          title={t("move", {title})}
-          aria-label={t("move", {title})}
+          title={t("move", { title })}
+          aria-label={t("move", { title })}
         >
           <div className="scoreAreaWindowControls" aria-hidden="true">
             <span className="scoreAreaDragHint">
@@ -132,7 +150,9 @@ export function ScoredAgendaOverlay({
           </div>
           <div className="scoredAgendaTitleBlock">
             <strong>{title}</strong>
-            <span className="scoredAgendaPointBadge">{t("points", {points: agendaPoints, target: agendaPointsToWin})}</span>
+            <span className="scoredAgendaPointBadge">
+              {t("points", { points: agendaPoints, target: agendaPointsToWin })}
+            </span>
           </div>
         </header>
         <button
@@ -140,8 +160,8 @@ export function ScoredAgendaOverlay({
           type="button"
           onPointerDown={(event) => event.stopPropagation()}
           onClick={onClose}
-          aria-label={t("close", {title})}
-          title={t("close", {title})}
+          aria-label={t("close", { title })}
+          title={t("close", { title })}
         >
           <X size={14} />
         </button>
@@ -154,7 +174,10 @@ export function ScoredAgendaOverlay({
                 showAdvancementCounters={false}
                 actions={cardActionsFor(card)}
                 actionDisabled={actionDisabled}
-                selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
+                selected={
+                  selectedContext?.kind === "card" &&
+                  selectedContext.id === card.instanceId
+                }
                 onAction={onAction}
                 {...(onFocus ? { onFocus } : {})}
                 {...(onActionContextSelect ? { onActionContextSelect } : {})}
@@ -162,7 +185,11 @@ export function ScoredAgendaOverlay({
               <ScoredAgendaStateLines card={card} side={side} />
             </div>
           ))}
-          {cards.length > SCORE_AREA_PREVIEW_LIMIT ? <div className="scoredAgendaOverflow">{t("more", {count: cards.length - SCORE_AREA_PREVIEW_LIMIT})}</div> : null}
+          {cards.length > SCORE_AREA_PREVIEW_LIMIT ? (
+            <div className="scoredAgendaOverflow">
+              {t("more", { count: cards.length - SCORE_AREA_PREVIEW_LIMIT })}
+            </div>
+          ) : null}
         </div>
       </section>
     </div>

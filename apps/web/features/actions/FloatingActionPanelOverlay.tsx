@@ -3,7 +3,11 @@
 import { Move, PanelTopClose, Zap } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import type { CSSProperties, PointerEvent as ReactPointerEvent, ReactNode } from "react";
+import type {
+  CSSProperties,
+  PointerEvent as ReactPointerEvent,
+  ReactNode,
+} from "react";
 import { useTranslations } from "use-intl/react";
 
 import {
@@ -15,7 +19,7 @@ export function FloatingActionPanelOverlay({
   position,
   onPosition,
   onDock,
-  children
+  children,
 }: {
   position: OverlayPositionPreference;
   onPosition(position: OverlayPositionPreference): void;
@@ -32,8 +36,20 @@ export function FloatingActionPanelOverlay({
       const overlay = overlayRef.current;
       if (!overlay) return;
       const rect = overlay.getBoundingClientRect();
-      const next = clampOverlayPosition(position.xPercent, position.yPercent, window.innerWidth, window.innerHeight, rect.width, rect.height);
-      if (next.kind !== "custom" || next.xPercent !== position.xPercent || next.yPercent !== position.yPercent) onPosition(next);
+      const next = clampOverlayPosition(
+        position.xPercent,
+        position.yPercent,
+        window.innerWidth,
+        window.innerHeight,
+        rect.width,
+        rect.height,
+      );
+      if (
+        next.kind !== "custom" ||
+        next.xPercent !== position.xPercent ||
+        next.yPercent !== position.yPercent
+      )
+        onPosition(next);
     };
     clampToViewport();
     window.addEventListener("resize", clampToViewport);
@@ -44,7 +60,10 @@ export function FloatingActionPanelOverlay({
     const overlay = overlayRef.current;
     if (!overlay) return;
     const rect = overlay.getBoundingClientRect();
-    dragOffsetRef.current = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    dragOffsetRef.current = {
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    };
     event.currentTarget.setPointerCapture(event.pointerId);
   };
   const dragOverlay = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -59,18 +78,31 @@ export function FloatingActionPanelOverlay({
         window.innerWidth,
         window.innerHeight,
         rect.width,
-        rect.height
-      )
+        rect.height,
+      ),
     );
   };
   const stopDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
     dragOffsetRef.current = null;
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+    if (event.currentTarget.hasPointerCapture(event.pointerId))
+      event.currentTarget.releasePointerCapture(event.pointerId);
   };
-  const positionStyle: CSSProperties = position.kind === "custom" ? { left: `${position.xPercent}%`, top: `${position.yPercent}%`, transform: "none" } : {};
+  const positionStyle: CSSProperties =
+    position.kind === "custom"
+      ? {
+          left: `${position.xPercent}%`,
+          top: `${position.yPercent}%`,
+          transform: "none",
+        }
+      : {};
 
   const overlay = (
-    <div ref={overlayRef} className={`actionPanelFloatingOverlay ${position.kind === "custom" ? "custom" : ""}`} style={positionStyle} data-testid="floating-legal-actions">
+    <div
+      ref={overlayRef}
+      className={`actionPanelFloatingOverlay ${position.kind === "custom" ? "custom" : ""}`}
+      style={positionStyle}
+      data-testid="floating-legal-actions"
+    >
       <section className="actionPanelFloatingWindow" aria-label={t("possible")}>
         <div
           className="actionPanelFloatingHead actionPanelFloatingDragHandle"

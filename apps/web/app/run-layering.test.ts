@@ -89,9 +89,7 @@ describe("run window layering", () => {
     expect(pageSource).toContain(
       "humanCorpRunServerActionBlocksAutomaticRunnerAiAdvance(",
     );
-    expect(pageSource).toContain(
-      "humanCorpRunServerActionBlocksAiPacing",
-    );
+    expect(pageSource).toContain("humanCorpRunServerActionBlocksAiPacing");
     expect(selectorBlock(".runAutoPassControl.active")).toContain(
       "grid-template-columns: minmax(0, 1fr) auto",
     );

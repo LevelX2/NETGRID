@@ -26,11 +26,7 @@ describe("plan assessment and priority claims", () => {
       reasonCodes: ["missing_threat_witness"],
     });
     expect(() =>
-      requireValidatedPlanAssessment(
-        assessment,
-        CORP_PLAN_PRIORITY_POLICY,
-        17,
-      ),
+      requireValidatedPlanAssessment(assessment, CORP_PLAN_PRIORITY_POLICY, 17),
     ).toThrow(PlanResolutionFailure);
   });
 
@@ -48,11 +44,8 @@ describe("plan assessment and priority claims", () => {
     };
 
     expect(
-      requireValidatedPlanAssessment(
-        assessment,
-        CORP_PLAN_PRIORITY_POLICY,
-        20,
-      ).priorityValidation.effectiveClass,
+      requireValidatedPlanAssessment(assessment, CORP_PLAN_PRIORITY_POLICY, 20)
+        .priorityValidation.effectiveClass,
     ).toBe("P1");
   });
 
@@ -72,12 +65,7 @@ describe("plan assessment and priority claims", () => {
   });
 
   it("requires intent fit or tactical evidence for P4 and P5", () => {
-    const assessment = assessmentFor(
-      "runner.development",
-      "runner",
-      "P5",
-      10,
-    );
+    const assessment = assessmentFor("runner.development", "runner", "P5", 10);
     assessment.intentFit = "none";
 
     expect(
@@ -110,12 +98,7 @@ describe("plan assessment and priority claims", () => {
   );
 
   it("rejects a P3 intent override without reliable current evidence", () => {
-    const assessment = assessmentFor(
-      "runner.expiring",
-      "runner",
-      "P3",
-      10,
-    );
+    const assessment = assessmentFor("runner.expiring", "runner", "P3", 10);
     assessment.intentFit = "none";
     assessment.feasibility.confidence = "belief_supported";
     assessment.evidenceCodes = [];
@@ -296,12 +279,7 @@ describe("plan assessment and priority claims", () => {
   );
 
   it("cannot encode a future action id in the step preview contract", () => {
-    const assessment = assessmentFor(
-      "runner.pressure",
-      "runner",
-      "P4",
-      10,
-    );
+    const assessment = assessmentFor("runner.pressure", "runner", "P4", 10);
 
     expect(JSON.stringify(assessment.nextStepPreview)).not.toContain(
       "actionId",
@@ -350,7 +328,7 @@ function assessmentFor(
       requestedClass: priorityClass,
       reasonCode: reasonByClass[priorityClass],
       horizon: priorityClass === "P3" ? "current_turn" : "multi_turn",
-      ...((priorityClass === "P1" || priorityClass === "P2")
+      ...(priorityClass === "P1" || priorityClass === "P2"
         ? {
             witness: {
               kind:

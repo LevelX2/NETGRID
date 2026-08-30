@@ -362,7 +362,8 @@ describe("plan-first coupled Corp punish sequence contract", () => {
       runnerTags: 1,
       stage: "scorched",
     });
-    const executableRoute = input.playerView.corpPunishRouteQuoteSet!.routes[0]!;
+    const executableRoute =
+      input.playerView.corpPunishRouteQuoteSet!.routes[0]!;
     const urban = urbanRenewalCard();
     input.playerView.own.gripOrHq.push(urban);
     input.playerView.corpPunishRouteQuoteSet!.routes.push({

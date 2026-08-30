@@ -96,12 +96,14 @@ export function buildCurrentAiHoldoutRunnerReport(
   },
 ): CurrentAiHoldoutRunnerReport {
   const fixedPatternHistoricalCases = options.fixedPattern
-    ? evaluations.filter((entry) => matchesHistoricalPattern(entry, options.fixedPattern!))
-        .length
+    ? evaluations.filter((entry) =>
+        matchesHistoricalPattern(entry, options.fixedPattern!),
+      ).length
     : 0;
   const fixedPatternCurrentRecurrence = options.fixedPattern
-    ? evaluations.filter((entry) => matchesCurrentRecurrence(entry, options.fixedPattern!))
-        .length
+    ? evaluations.filter((entry) =>
+        matchesCurrentRecurrence(entry, options.fixedPattern!),
+      ).length
     : 0;
   const evaluated = evaluations.filter((entry) => entry.status === "evaluated");
   const report: CurrentAiHoldoutRunnerReport = {
@@ -117,13 +119,16 @@ export function buildCurrentAiHoldoutRunnerReport(
     aggregate: {
       holdoutCases: evaluations.length,
       evaluated: evaluated.length,
-      changedDecisions: evaluated.filter((entry) => entry.changedDecision).length,
-      illegalActions: evaluated.filter((entry) => entry.current?.legal === false)
+      changedDecisions: evaluated.filter((entry) => entry.changedDecision)
         .length,
+      illegalActions: evaluated.filter(
+        (entry) => entry.current?.legal === false,
+      ).length,
       reconstructionErrors: evaluations.filter(
         (entry) => entry.status === "reconstruction_error",
       ).length,
-      aiErrors: evaluations.filter((entry) => entry.status === "ai_error").length,
+      aiErrors: evaluations.filter((entry) => entry.status === "ai_error")
+        .length,
       redactionViolations: evaluations.filter(
         (entry) => entry.status === "redaction_violation",
       ).length,
@@ -146,7 +151,9 @@ export function buildCurrentAiHoldoutRunnerReport(
       .map(safeEvaluation),
     gates: {
       currentAiHoldoutEvaluated: evaluated.length > 0,
-      noIllegalActions: evaluated.every((entry) => entry.current?.legal !== false),
+      noIllegalActions: evaluated.every(
+        (entry) => entry.current?.legal !== false,
+      ),
       noRedactionViolations: evaluations.every(
         (entry) => entry.status !== "redaction_violation",
       ),
@@ -261,7 +268,9 @@ function conclusions(report: CurrentAiHoldoutRunnerReport): string[] {
     );
   }
   if (!report.gates.noIllegalActions) {
-    result.push("Mindestens eine aktuelle KI-Ausgabe lag nicht in LegalActions.");
+    result.push(
+      "Mindestens eine aktuelle KI-Ausgabe lag nicht in LegalActions.",
+    );
   }
   return result;
 }

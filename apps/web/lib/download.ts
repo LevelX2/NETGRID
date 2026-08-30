@@ -1,5 +1,16 @@
-export function downloadTextFile(fileName: string, text: string, mimeType: string): boolean {
-  if (!text.trim() || typeof document === "undefined" || !document.body || typeof Blob === "undefined" || typeof URL === "undefined") return false;
+export function downloadTextFile(
+  fileName: string,
+  text: string,
+  mimeType: string,
+): boolean {
+  if (
+    !text.trim() ||
+    typeof document === "undefined" ||
+    !document.body ||
+    typeof Blob === "undefined" ||
+    typeof URL === "undefined"
+  )
+    return false;
   const blob = new Blob([text], { type: mimeType });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");

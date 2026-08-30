@@ -1,4 +1,8 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 
 import { rolesMatch } from "./role-match";
 
@@ -42,7 +46,9 @@ export function isRunnerMemorySupportCard(
   );
 }
 
-function memorySupportTokens(values: readonly (string | undefined)[]): string[] {
+function memorySupportTokens(
+  values: readonly (string | undefined)[],
+): string[] {
   return values
     .filter((entry): entry is string => typeof entry === "string")
     .flatMap((entry) =>

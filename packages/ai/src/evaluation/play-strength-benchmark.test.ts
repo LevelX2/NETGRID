@@ -4,9 +4,7 @@ import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { buildSemanticDecisionFrame } from "../decision/semantic-decision-frame";
 import type { SemanticDecisionTrace } from "../decision/semantic-decision-trace";
 import { buildSemanticShadowDecision } from "../decision/semantic-shadow-decision";
-import {
-  buildRealEngineDecisionCorpusScenarios,
-} from "./real-engine-decision-corpus-fixtures";
+import { buildRealEngineDecisionCorpusScenarios } from "./real-engine-decision-corpus-fixtures";
 import { buildRealEngineDecisionCorpus } from "./real-engine-decision-corpus";
 import {
   buildPlayStrengthCalibrationBenchmark,
@@ -82,9 +80,7 @@ describe("PlayStrengthCalibrationBenchmark", () => {
     expect(diff.baselineProfileVersion).toBe("2026-06-12");
     expect(diff.candidateProfileId).toBe("shadow_calibrated_v1");
     expect(diff.candidateProfileVersion).toBe("2026-06-12");
-    expect(diff.baselineReference).toBe(
-      "ai-shadow-league-baseline-2026-06-12",
-    );
+    expect(diff.baselineReference).toBe("ai-shadow-league-baseline-2026-06-12");
     expect(diff.baselineReportPath).toBe(
       "docs/reviews/ai/ai-shadow-league-baseline-2026-06-12.md",
     );
@@ -176,7 +172,8 @@ function inputFor(
     playerView: {
       side,
       stateVersion: 1,
-      timingPoint: side === "runner" ? "runner_action.main" : "corp_action.main",
+      timingPoint:
+        side === "runner" ? "runner_action.main" : "corp_action.main",
       activeSide: side,
       phase: side === "runner" ? "runner_action_phase" : "corp_action_phase",
       own: {

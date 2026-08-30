@@ -80,7 +80,10 @@ describe("createAiSelfplayTraceMiningRunner", () => {
   });
 
   it("still reports forbidden markers in retained trace facts", () => {
-    const summary = simulationSummary({ seed: "retained-leak", maxActions: 20 });
+    const summary = simulationSummary({
+      seed: "retained-leak",
+      maxActions: 20,
+    });
     summary.actionSequence[0]!.debugFacts = ["privatePayload:bad"];
     const { runAiSelfplayTraceMining } = createAiSelfplayTraceMiningRunner({
       simulateAiGame: () => summary,

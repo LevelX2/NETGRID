@@ -188,11 +188,7 @@ describe("visible Corp ICE rez resource exchange quote", () => {
     };
 
     expect(
-      visibleCorpIceRezResourceExchangeQuote(
-        state,
-        FILTER_ID,
-        visibleGlacier,
-      ),
+      visibleCorpIceRezResourceExchangeQuote(state, FILTER_ID, visibleGlacier),
     ).toMatchObject({
       complete: true,
       hardEndTheRunSubroutineCount: 2,

@@ -9,7 +9,9 @@ describe("PracticalTacticBenchmark", () => {
   it("contains a compact balanced corpus of concrete legal-action situations", () => {
     expect(PRACTICAL_TACTIC_BENCHMARK_CASES).toHaveLength(40);
     const categories = new Set(
-      PRACTICAL_TACTIC_BENCHMARK_CASES.map((benchmarkCase) => benchmarkCase.category),
+      PRACTICAL_TACTIC_BENCHMARK_CASES.map(
+        (benchmarkCase) => benchmarkCase.category,
+      ),
     );
     expect(categories).toEqual(
       new Set([

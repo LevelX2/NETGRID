@@ -5,7 +5,7 @@ import {
   CARD_SCALE_DEFAULT_PERCENT,
   CARD_TOOLTIP_HOVER_OPEN_DELAY_MS,
   type CardScaleSettings,
-  type CardTooltipSettings
+  type CardTooltipSettings,
 } from "../settings/settings-model";
 
 export type CardImagePreferenceSettings = {
@@ -26,13 +26,14 @@ export const CardScaleSettingsContext = createContext<CardScaleSettings>({
   zonePercent: CARD_SCALE_DEFAULT_PERCENT,
   boardPercent: CARD_SCALE_DEFAULT_PERCENT,
   rigPercent: CARD_SCALE_DEFAULT_PERCENT,
-  specialZonePercent: CARD_SCALE_DEFAULT_PERCENT
+  specialZonePercent: CARD_SCALE_DEFAULT_PERCENT,
 });
 
-export const CardImagePreferenceContext = createContext<CardImagePreferenceSettings>({
-  preferGermanCardImages: false,
-  showSetBadges: true
-});
+export const CardImagePreferenceContext =
+  createContext<CardImagePreferenceSettings>({
+    preferGermanCardImages: false,
+    showSetBadges: true,
+  });
 
 export function useCardTooltipSettings(): CardTooltipSettings {
   return useContext(CardTooltipSettingsContext);
@@ -46,12 +47,18 @@ export function useCardImagePreference(): CardImagePreferenceSettings {
   return useContext(CardImagePreferenceContext);
 }
 
-export function usePreferredCardImageSource(cardId: string | undefined | null): { src: string | undefined; fallbackSrc: string | undefined } {
+export function usePreferredCardImageSource(
+  cardId: string | undefined | null,
+): { src: string | undefined; fallbackSrc: string | undefined } {
   const { preferGermanCardImages } = useCardImagePreference();
-  const src = localCardImageUrl(cardId, { preferGerman: preferGermanCardImages });
-  const originalSrc = preferGermanCardImages ? localCardImageUrl(cardId) : undefined;
+  const src = localCardImageUrl(cardId, {
+    preferGerman: preferGermanCardImages,
+  });
+  const originalSrc = preferGermanCardImages
+    ? localCardImageUrl(cardId)
+    : undefined;
   return {
     src,
-    fallbackSrc: originalSrc && originalSrc !== src ? originalSrc : undefined
+    fallbackSrc: originalSrc && originalSrc !== src ? originalSrc : undefined,
   };
 }

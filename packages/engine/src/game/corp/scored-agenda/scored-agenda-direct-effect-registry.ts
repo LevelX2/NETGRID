@@ -100,11 +100,13 @@ export const SCORED_AGENDA_DIRECT_EFFECT_RESOLVERS: readonly ScoredAgendaDirectE
       kind: "scored_agenda_credit_until_install_or_rez",
       mode: "agenda_kind",
       resolveOnScore: ({ host, cardId, legalAction, scoredAgenda }) => {
-        if (
-          scoredAgenda?.kind !== "scored_agenda_credit_until_install_or_rez"
-        )
+        if (scoredAgenda?.kind !== "scored_agenda_credit_until_install_or_rez")
           return;
-        markScoredAgendaInstallRezCreditAvailableOnScore(host, cardId, legalAction);
+        markScoredAgendaInstallRezCreditAvailableOnScore(
+          host,
+          cardId,
+          legalAction,
+        );
       },
     },
     {
@@ -117,7 +119,12 @@ export const SCORED_AGENDA_DIRECT_EFFECT_RESOLVERS: readonly ScoredAgendaDirectE
           "score_credit_swing_if_corp_credit_threshold_met"
         )
           return;
-        resolveScoreCreditSwingOnScore(host, definition, legalAction, scoredAgenda);
+        resolveScoreCreditSwingOnScore(
+          host,
+          definition,
+          legalAction,
+          scoredAgenda,
+        );
       },
     },
     {
@@ -126,8 +133,7 @@ export const SCORED_AGENDA_DIRECT_EFFECT_RESOLVERS: readonly ScoredAgendaDirectE
       mode: "agenda_kind",
       resolveOnScore: ({ host, legalAction, scoredAgenda }) => {
         if (
-          scoredAgenda?.kind !==
-          "purge_runner_virus_counters_and_prevent_next"
+          scoredAgenda?.kind !== "purge_runner_virus_counters_and_prevent_next"
         )
           return;
         const removed = clearPurgeableRunnerVirusCounters(host.state);
@@ -141,8 +147,7 @@ export const SCORED_AGENDA_DIRECT_EFFECT_RESOLVERS: readonly ScoredAgendaDirectE
           applySequencePayloadPatch(legalAction, {
             runnerVirusCountersPurged: removed.total,
             runnerVirusCounterPurgeSummary: removed.publicSummary,
-            runnerVirusCounterPreventionChargesAdded:
-              scoredAgenda.preventCount,
+            runnerVirusCounterPreventionChargesAdded: scoredAgenda.preventCount,
             corpRunnerVirusCounterPreventionChargesAfter:
               host.state.corpRunnerVirusCounterPreventionCharges,
           });

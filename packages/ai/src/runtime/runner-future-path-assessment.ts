@@ -1,7 +1,4 @@
-import type {
-  AiDecisionInput,
-  VisibleCard,
-} from "@netgrid/shared";
+import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
 import {
   assessKnownRezzedIcePath,

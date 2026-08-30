@@ -30,27 +30,21 @@ describe("match D153 Runner decision checkpoints", () => {
       noJunkyardCashoutD124Json,
     ],
     [
-        "F04 funds the remote contest reserve through Broker at D131",
+      "F04 funds the remote contest reserve through Broker at D131",
       releaseRemotePlanD131Json,
     ],
     [
       "F05 pumps before allowing four ETR subroutines at D134",
       breakBeforeEtrD134Json,
     ],
-    [
-      "F06 cashes out the bound Broker reserve at D179",
-      cashoutForRdD179Json,
-    ],
-    [
-      "F06 cashes out the bound Broker reserve at D185",
-      cashoutForRdD185Json,
-    ],
+    ["F06 cashes out the bound Broker reserve at D179", cashoutForRdD179Json],
+    ["F06 cashes out the bound Broker reserve at D185", cashoutForRdD185Json],
     [
       "F07 builds the remote pressure reserve at D161",
       buildRemoteReserveD161Json,
     ],
     [
-        "F08 cashes out Broker for the urgent remote threat at D167",
+      "F08 cashes out Broker for the urgent remote threat at D167",
       liquidateForRemoteD167Json,
     ],
   ])("satisfies %s", (_label, json) => {

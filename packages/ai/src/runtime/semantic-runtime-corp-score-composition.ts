@@ -1,7 +1,5 @@
 import type { AiDecisionScoreComponent } from "@netgrid/shared";
-import {
-  createSemanticRuntimeCorpScoreContext,
-} from "./semantic-runtime-corp-score-context";
+import { createSemanticRuntimeCorpScoreContext } from "./semantic-runtime-corp-score-context";
 import type { SemanticRuntimeCorpScoreDependencies } from "./semantic-runtime-corp-score";
 
 export type SemanticRuntimeCorpScoreCompositionDependencies<
@@ -12,17 +10,14 @@ export type SemanticRuntimeCorpScoreCompositionDependencies<
 
 export function createSemanticRuntimeCorpScoreComposition<
   TConsumer extends string,
->(
-  dependencies: SemanticRuntimeCorpScoreCompositionDependencies<TConsumer>,
-) {
+>(dependencies: SemanticRuntimeCorpScoreCompositionDependencies<TConsumer>) {
   return createSemanticRuntimeCorpScoreContext(
     {
       actionCreditCost: dependencies.actionCreditCost,
       rolesForAction: dependencies.rolesForAction,
       corpScoreNowSafetyGate: dependencies.corpScoreNowSafetyGate,
       corpAdvanceRemoteScore: dependencies.corpAdvanceRemoteScore,
-      corpRemoteRezFloorAssessment:
-        dependencies.corpRemoteRezFloorAssessment,
+      corpRemoteRezFloorAssessment: dependencies.corpRemoteRezFloorAssessment,
       corpCentralRezReserveAssessment:
         dependencies.corpCentralRezReserveAssessment,
       corpRemoteScoreContestabilityAssessment:
@@ -34,7 +29,10 @@ export function createSemanticRuntimeCorpScoreComposition<
       corpInstallRemoteScore: dependencies.corpInstallRemoteScore,
       corpScoringWindowAssessment: dependencies.corpScoringWindowAssessment,
       ...(dependencies.corpScorelineWindowAssessment
-        ? { corpScorelineWindowAssessment: dependencies.corpScorelineWindowAssessment }
+        ? {
+            corpScorelineWindowAssessment:
+              dependencies.corpScorelineWindowAssessment,
+          }
         : {}),
       corpAdvancementCounterPlacementAssessment:
         dependencies.corpAdvancementCounterPlacementAssessment,

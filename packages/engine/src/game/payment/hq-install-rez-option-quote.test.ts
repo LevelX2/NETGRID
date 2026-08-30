@@ -27,9 +27,9 @@ describe("Data Fort Reclamation sequence rez payment projection", () => {
       zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
     };
 
-    expect(
-      projectInstalledCorpSequenceRezPayment(state, cardId, 10),
-    ).toEqual({ complete: false });
+    expect(projectInstalledCorpSequenceRezPayment(state, cardId, 10)).toEqual({
+      complete: false,
+    });
   });
 
   it("refuses a sequence payment projection outside the new remote", () => {
@@ -51,8 +51,8 @@ describe("Data Fort Reclamation sequence rez payment projection", () => {
       zone: { side: "corp", zone: "serverIce", serverId: "hq" },
     };
 
-    expect(
-      projectInstalledCorpSequenceRezPayment(state, cardId, 10),
-    ).toEqual({ complete: false });
+    expect(projectInstalledCorpSequenceRezPayment(state, cardId, 10)).toEqual({
+      complete: false,
+    });
   });
 });

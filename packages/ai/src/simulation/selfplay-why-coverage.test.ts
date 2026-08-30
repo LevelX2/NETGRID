@@ -4,8 +4,8 @@ import { buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries } from "./
 
 describe("selfplay why coverage", () => {
   it("builds why coverage from redacted simulation summaries", () => {
-    const report =
-      buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries([
+    const report = buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries(
+      [
         summary([
           action({
             debugFacts: [
@@ -31,7 +31,8 @@ describe("selfplay why coverage", () => {
           }),
           action(),
         ]),
-      ]);
+      ],
+    );
 
     expect(report).toMatchObject({
       auditStatus: "complete",

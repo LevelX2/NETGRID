@@ -93,10 +93,7 @@ function corpInput(hand: VisibleCard[]): AiDecisionInput {
   } as AiDecisionInput;
 }
 
-function runnerInput(
-  hand: VisibleCard[],
-  rig: VisibleCard[],
-): AiDecisionInput {
+function runnerInput(hand: VisibleCard[], rig: VisibleCard[]): AiDecisionInput {
   return {
     side: "runner",
     playerView: {

@@ -154,11 +154,7 @@ export function createDamageCardImplementationRuntimeDeps(
     amount: number,
   ): CardEffectDamageResult {
     const summary = host.damage.resolveUnpreventableDamage(state, {
-      damageId: damageResolutionId(
-        state,
-        sourceDefinitionId,
-        "unpreventable",
-      ),
+      damageId: damageResolutionId(state, sourceDefinitionId, "unpreventable"),
       damageType,
       amount,
       source: `unpreventable:${sourceDefinitionId}`,

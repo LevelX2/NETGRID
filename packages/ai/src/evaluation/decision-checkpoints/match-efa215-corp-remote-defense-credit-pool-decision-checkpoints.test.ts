@@ -28,30 +28,38 @@ describe("match EFA215 Corp remote-defense credit-pool decision checkpoints", ()
   });
 
   it("defends the urgent Archives agenda before preparing an empty remote", () => {
-    const noResidentPayoff = mutateFixture(projectBabylonCreditPoolJson, (checkpoint) => {
-      const state = checkpoint.engine.testOnlyGameState;
-      const remote = state.corp.servers.find((server) => server.id === "remote_1");
-      if (!remote) throw new Error("Missing Remote 1 in EFA215 counterprobe");
-      remote.root = remote.root.filter((cardId) => cardId !== PROJECT_BABYLON);
-      state.corp.archives.push(PROJECT_BABYLON);
-      const project = state.cardInstances[PROJECT_BABYLON];
-      if (!project) throw new Error("Missing Project Babylon in EFA215 counterprobe");
-      project.zone = { side: "corp", zone: "archives" };
-      project.faceup = true;
-      checkpoint.expectation = {
-        acceptableActions: [
-          { type: "install_card", targetServerId: "archives" },
-        ],
-        forbiddenActions: [
-          { type: "advance_card" },
-          { type: "install_card", targetServerId: "remote_1" },
-        ],
-        planExecution: {
-          acceptablePlanKinds: ["corp.defend_servers"],
-          acceptableCapabilities: ["allocate_server_defense"],
-        },
-      };
-    });
+    const noResidentPayoff = mutateFixture(
+      projectBabylonCreditPoolJson,
+      (checkpoint) => {
+        const state = checkpoint.engine.testOnlyGameState;
+        const remote = state.corp.servers.find(
+          (server) => server.id === "remote_1",
+        );
+        if (!remote) throw new Error("Missing Remote 1 in EFA215 counterprobe");
+        remote.root = remote.root.filter(
+          (cardId) => cardId !== PROJECT_BABYLON,
+        );
+        state.corp.archives.push(PROJECT_BABYLON);
+        const project = state.cardInstances[PROJECT_BABYLON];
+        if (!project)
+          throw new Error("Missing Project Babylon in EFA215 counterprobe");
+        project.zone = { side: "corp", zone: "archives" };
+        project.faceup = true;
+        checkpoint.expectation = {
+          acceptableActions: [
+            { type: "install_card", targetServerId: "archives" },
+          ],
+          forbiddenActions: [
+            { type: "advance_card" },
+            { type: "install_card", targetServerId: "remote_1" },
+          ],
+          planExecution: {
+            acceptablePlanKinds: ["corp.defend_servers"],
+            acceptableCapabilities: ["allocate_server_defense"],
+          },
+        };
+      },
+    );
 
     expectCheckpointToPass(noResidentPayoff);
   });
@@ -103,7 +111,9 @@ function mutateFixture(
 ): AiDecisionCheckpointV1 {
   const checkpoint = fixture(value);
   mutation(checkpoint);
-  checkpoint.engine.stateHash = hashGameState(checkpoint.engine.testOnlyGameState);
+  checkpoint.engine.stateHash = hashGameState(
+    checkpoint.engine.testOnlyGameState,
+  );
   return checkpoint;
 }
 

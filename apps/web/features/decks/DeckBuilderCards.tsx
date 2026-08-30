@@ -38,7 +38,7 @@ export function DeckTableLibraryCard({
   readOnly = false,
   stackIndex,
   onAddToFirstPile,
-  onSelect
+  onSelect,
 }: {
   card: DeckBuilderCard;
   detail: DeckBuilderDetail | undefined;
@@ -71,7 +71,10 @@ export function DeckTableLibraryCard({
             event.preventDefault();
             return;
           }
-          event.dataTransfer.setData("application/x-netgrid-card", JSON.stringify({ cardId: card.catalogCardId }));
+          event.dataTransfer.setData(
+            "application/x-netgrid-card",
+            JSON.stringify({ cardId: card.catalogCardId }),
+          );
           event.dataTransfer.effectAllowed = "copy";
         }}
       >
@@ -83,8 +86,14 @@ export function DeckTableLibraryCard({
           metricLine={cardMetricLine(detail)}
           textDensity="table"
           {...(detail?.text ? { rulesText: detail.text } : {})}
-          {...(detail?.numeric.installCost !== null && detail?.numeric.installCost !== undefined ? { installCost: detail.numeric.installCost } : {})}
-          {...(detail?.numeric.cost !== null && detail?.numeric.cost !== undefined ? { cost: detail.numeric.cost } : {})}
+          {...(detail?.numeric.installCost !== null &&
+          detail?.numeric.installCost !== undefined
+            ? { installCost: detail.numeric.installCost }
+            : {})}
+          {...(detail?.numeric.cost !== null &&
+          detail?.numeric.cost !== undefined
+            ? { cost: detail.numeric.cost }
+            : {})}
         />
         <strong>{card.title}</strong>
         <span>{formatCardTypeLine(card)}</span>
@@ -101,7 +110,7 @@ export function DeckLibraryCard({
   selected,
   onAdd,
   onRemove,
-  onSelect
+  onSelect,
 }: {
   card: DeckBuilderCard;
   detail: DeckBuilderDetail | undefined;
@@ -128,8 +137,13 @@ export function DeckLibraryCard({
         typeLine={formatCardTypeLine(card)}
         metricLine={metrics}
         {...(detail?.text ? { rulesText: detail.text } : {})}
-        {...(detail?.numeric.installCost !== null && detail?.numeric.installCost !== undefined ? { installCost: detail.numeric.installCost } : {})}
-        {...(detail?.numeric.cost !== null && detail?.numeric.cost !== undefined ? { cost: detail.numeric.cost } : {})}
+        {...(detail?.numeric.installCost !== null &&
+        detail?.numeric.installCost !== undefined
+          ? { installCost: detail.numeric.installCost }
+          : {})}
+        {...(detail?.numeric.cost !== null && detail?.numeric.cost !== undefined
+          ? { cost: detail.numeric.cost }
+          : {})}
       />
       <div className="deckBuilderCardText">
         <strong>{card.title}</strong>
@@ -137,12 +151,32 @@ export function DeckLibraryCard({
         {metrics ? <small>{metrics}</small> : null}
         {detail?.text ? <p>{detail.text}</p> : null}
       </div>
-      <div className="deckQuantityControls" aria-label={t("quantity", {title: card.title})}>
-        <button className="deckQtyButton" onClick={(event) => { event.stopPropagation(); onRemove(); }} disabled={quantity <= 0} type="button" aria-label={t("remove", {title: card.title})}>
+      <div
+        className="deckQuantityControls"
+        aria-label={t("quantity", { title: card.title })}
+      >
+        <button
+          className="deckQtyButton"
+          onClick={(event) => {
+            event.stopPropagation();
+            onRemove();
+          }}
+          disabled={quantity <= 0}
+          type="button"
+          aria-label={t("remove", { title: card.title })}
+        >
           -
         </button>
         <output>{quantity}</output>
-        <button className="deckQtyButton" onClick={(event) => { event.stopPropagation(); onAdd(); }} type="button" aria-label={t("add", {title: card.title})}>
+        <button
+          className="deckQtyButton"
+          onClick={(event) => {
+            event.stopPropagation();
+            onAdd();
+          }}
+          type="button"
+          aria-label={t("add", { title: card.title })}
+        >
           +
         </button>
       </div>
@@ -155,7 +189,7 @@ export function DeckBuilderPreview({
   detail,
   quantity,
   onAdd,
-  onRemove
+  onRemove,
 }: {
   card: DeckBuilderCard;
   detail: DeckBuilderDetail | undefined;
@@ -175,8 +209,13 @@ export function DeckBuilderPreview({
         metricLine={metrics}
         preview
         {...(detail?.text ? { rulesText: detail.text } : {})}
-        {...(detail?.numeric.installCost !== null && detail?.numeric.installCost !== undefined ? { installCost: detail.numeric.installCost } : {})}
-        {...(detail?.numeric.cost !== null && detail?.numeric.cost !== undefined ? { cost: detail.numeric.cost } : {})}
+        {...(detail?.numeric.installCost !== null &&
+        detail?.numeric.installCost !== undefined
+          ? { installCost: detail.numeric.installCost }
+          : {})}
+        {...(detail?.numeric.cost !== null && detail?.numeric.cost !== undefined
+          ? { cost: detail.numeric.cost }
+          : {})}
       />
       <div className="deckBuilderPreviewText">
         <span>{deckBuilderCardGroup(card)}</span>
@@ -186,11 +225,22 @@ export function DeckBuilderPreview({
         <p>{detail?.text ?? t("textLoading")}</p>
       </div>
       <div className="deckQuantityControls preview">
-        <button className="deckQtyButton" onClick={onRemove} disabled={quantity <= 0} type="button" aria-label={t("remove", {title: card.title})}>
+        <button
+          className="deckQtyButton"
+          onClick={onRemove}
+          disabled={quantity <= 0}
+          type="button"
+          aria-label={t("remove", { title: card.title })}
+        >
           -
         </button>
         <output>{quantity}</output>
-        <button className="deckQtyButton" onClick={onAdd} type="button" aria-label={t("add", {title: card.title})}>
+        <button
+          className="deckQtyButton"
+          onClick={onAdd}
+          type="button"
+          aria-label={t("add", { title: card.title })}
+        >
           +
         </button>
       </div>
@@ -206,7 +256,7 @@ export function DeckListCard({
   onIncrement,
   onDecrement,
   onRemove,
-  onSelect
+  onSelect,
 }: {
   card: DeckBuilderCard | null;
   cardId: string;
@@ -234,8 +284,13 @@ export function DeckListCard({
         {...(card ? { typeLine: formatCardTypeLine(card) } : {})}
         {...(metrics ? { metricLine: metrics } : {})}
         {...(detail?.text ? { rulesText: detail.text } : {})}
-        {...(detail?.numeric.installCost !== null && detail?.numeric.installCost !== undefined ? { installCost: detail.numeric.installCost } : {})}
-        {...(detail?.numeric.cost !== null && detail?.numeric.cost !== undefined ? { cost: detail.numeric.cost } : {})}
+        {...(detail?.numeric.installCost !== null &&
+        detail?.numeric.installCost !== undefined
+          ? { installCost: detail.numeric.installCost }
+          : {})}
+        {...(detail?.numeric.cost !== null && detail?.numeric.cost !== undefined
+          ? { cost: detail.numeric.cost }
+          : {})}
       />
       <div className="deckBuilderCardText">
         <strong>{card?.title ?? cardId}</strong>
@@ -243,14 +298,38 @@ export function DeckListCard({
         {metrics ? <small>{metrics}</small> : null}
       </div>
       <div className="deckQuantityControls">
-        <button className="deckQtyButton" onClick={(event) => { event.stopPropagation(); onDecrement(); }} type="button" aria-label={t("decrease", {title: card?.title ?? cardId})}>
+        <button
+          className="deckQtyButton"
+          onClick={(event) => {
+            event.stopPropagation();
+            onDecrement();
+          }}
+          type="button"
+          aria-label={t("decrease", { title: card?.title ?? cardId })}
+        >
           -
         </button>
         <output>{quantity}</output>
-        <button className="deckQtyButton" onClick={(event) => { event.stopPropagation(); onIncrement(); }} type="button" aria-label={t("increase", {title: card?.title ?? cardId})}>
+        <button
+          className="deckQtyButton"
+          onClick={(event) => {
+            event.stopPropagation();
+            onIncrement();
+          }}
+          type="button"
+          aria-label={t("increase", { title: card?.title ?? cardId })}
+        >
           +
         </button>
-        <button className="deckQtyButton remove" onClick={(event) => { event.stopPropagation(); onRemove(); }} type="button" aria-label={t("remove", {title: card?.title ?? cardId})}>
+        <button
+          className="deckQtyButton remove"
+          onClick={(event) => {
+            event.stopPropagation();
+            onRemove();
+          }}
+          type="button"
+          aria-label={t("remove", { title: card?.title ?? cardId })}
+        >
           <Trash2 size={13} />
         </button>
       </div>
@@ -260,5 +339,10 @@ export function DeckListCard({
 
 function deckBuilderCardGroup(card: DeckBuilderCard | null): string {
   if (!card) return "Unbekannt";
-  return [formatCardTerm(card.type), card.subtypes.map(formatCardTerm).join(" / ")].filter(Boolean).join(" - ");
+  return [
+    formatCardTerm(card.type),
+    card.subtypes.map(formatCardTerm).join(" / "),
+  ]
+    .filter(Boolean)
+    .join(" - ");
 }

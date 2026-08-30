@@ -144,8 +144,7 @@ describe("resident Corp scoring remote project", () => {
         kind: "awaiting_remote_protection",
         agendaInstanceId: "agenda-in-hq",
         targetServerId: "remote_2",
-        protectionNeedId:
-          "score-protection:score-agenda-1:remote_2:revision-4",
+        protectionNeedId: "score-protection:score-agenda-1:remote_2:revision-4",
       },
     });
   });

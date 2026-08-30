@@ -293,9 +293,7 @@ function buildCardSetFiles(): LoadedCardSet[] {
   }
 
   const materializedCardSpecIds = new Set(
-    cardSetFiles
-      .flatMap(({ set }) => set.cards)
-      .map((card) => card.cardId),
+    cardSetFiles.flatMap(({ set }) => set.cards).map((card) => card.cardId),
   );
   for (const view of listPublicCardViews())
     if (!materializedCardSpecIds.has(view.cardDefinitionId))
@@ -472,9 +470,7 @@ function validateSupportEntry(entry: CardSupportEntry): string[] {
   }
   if (statuses.ai_supported) {
     if (entry.support.scenarioRefs.length === 0)
-      errors.push(
-        `${entry.cardId}: ai_supported needs scenarioRefs.`,
-      );
+      errors.push(`${entry.cardId}: ai_supported needs scenarioRefs.`);
   }
   const serialized = JSON.stringify(entry);
   for (const pattern of SUPPORT_PAYLOAD_FORBIDDEN_PATTERNS) {

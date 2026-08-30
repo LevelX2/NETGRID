@@ -20,9 +20,7 @@ import type {
 } from "@netgrid/shared";
 import { formatAppDateTime } from "../../i18n/format";
 import type { AppLocale } from "../../i18n/locale";
-import {
-  singleRecentMatchPoints,
-} from "../../app/recent-results-ui";
+import { singleRecentMatchPoints } from "../../app/recent-results-ui";
 import { gamebookDownloadTarget } from "../match-start/public-match-navigation";
 
 export function RecentGamesPanel({
@@ -65,16 +63,16 @@ export function RecentGamesPanel({
         </button>
       </div>
       {!accountMode ? (
-        <p className="recentGamesEmpty">
-          {t("signInHelp")}
-        </p>
+        <p className="recentGamesEmpty">{t("signInHelp")}</p>
       ) : error ? (
         <p className="notice recentGamesNotice" role="status">
           {error}
         </p>
       ) : null}
       {accountMode && results.length === 0 ? (
-        <p className="recentGamesEmpty">{loading ? t("loading") : t("empty")}</p>
+        <p className="recentGamesEmpty">
+          {loading ? t("loading") : t("empty")}
+        </p>
       ) : accountMode ? (
         <ol className="recentGamesList">
           {results.map((result) => (
@@ -97,7 +95,7 @@ export function RecentGamesPanel({
       ) : null}
       {accountMode && updatedAt ? (
         <p className="recentGamesTimestamp">
-          {t("lastUpdated", {date: formatLobbyTime(updatedAt, locale)})}
+          {t("lastUpdated", { date: formatLobbyTime(updatedAt, locale) })}
         </p>
       ) : null}
     </section>
@@ -147,20 +145,26 @@ function RecentGameResultCard({
             {t(`matchMode.${result.matchMode}`)} ·{" "}
             {t(`matchFormat.${result.matchFormat}`)}
             {result.series
-              ? ` · ${t("gameNumber", {number: result.series.gameNumber, total: result.series.gamesPlanned})}`
+              ? ` · ${t("gameNumber", { number: result.series.gameNumber, total: result.series.gamesPlanned })}`
               : ""}
           </p>
         </div>
         <div
           className="recentGameScore"
-          aria-label={t("agendaScoreAria", {runner: result.runner.agendaPoints, corp: result.corp.agendaPoints})}
+          aria-label={t("agendaScoreAria", {
+            runner: result.runner.agendaPoints,
+            corp: result.corp.agendaPoints,
+          })}
         >
           <span>{scoreText}</span>
           <small>{t("agendaPoints")}</small>
         </div>
         <div
           className="recentGameScore matchPoints"
-          aria-label={t("matchScoreAria", {runner: runnerMatchPoints, corp: corpMatchPoints})}
+          aria-label={t("matchScoreAria", {
+            runner: runnerMatchPoints,
+            corp: corpMatchPoints,
+          })}
         >
           <span>
             {runnerMatchPoints} : {corpMatchPoints}
@@ -172,13 +176,21 @@ function RecentGameResultCard({
       <div className="recentGameDetails">
         <span>
           <Award size={14} />
-          {result.winner === "draw" ? winnerName : t("wins", {name: winnerName})}
+          {result.winner === "draw"
+            ? winnerName
+            : t("wins", { name: winnerName })}
         </span>
-        <span title={resultReasonLabelKey(result.reason, result.winner) ? t(resultReasonLabelKey(result.reason, result.winner)!) : t("reason.unknown")}>
+        <span
+          title={
+            resultReasonLabelKey(result.reason, result.winner)
+              ? t(resultReasonLabelKey(result.reason, result.winner)!)
+              : t("reason.unknown")
+          }
+        >
           {t(`reasonShort.${result.reason}`)}
         </span>
-        <span>{t("actionCount", {count: result.actionCount})}</span>
-        <span>{t("runCount", {count: result.runCount})}</span>
+        <span>{t("actionCount", { count: result.actionCount })}</span>
+        <span>{t("runCount", { count: result.runCount })}</span>
         <span title={result.finalStateHash}>
           {t("hash")} {result.finalStateHash.slice(0, 8)}
         </span>
@@ -186,12 +198,12 @@ function RecentGameResultCard({
       <div className="recentGameDecks">
         <span>
           {result.runner.deckName
-            ? t("runnerDeckNamed", {name: result.runner.deckName})
+            ? t("runnerDeckNamed", { name: result.runner.deckName })
             : t("runnerDeck")}
         </span>
         <span>
           {result.corp.deckName
-            ? t("corpDeckNamed", {name: result.corp.deckName})
+            ? t("corpDeckNamed", { name: result.corp.deckName })
             : t("corpDeck")}
         </span>
         {result.isPublic ? (
@@ -224,9 +236,10 @@ function RecentSeriesResultCard({
   locale: AppLocale;
 }) {
   const t = useTranslations("Games.recent");
-  const winnerLabel = result.outcome === "draw"
-    ? t("seriesDraw")
-    : t("seriesWinner", {name: result.players[result.outcome].displayName});
+  const winnerLabel =
+    result.outcome === "draw"
+      ? t("seriesDraw")
+      : t("seriesWinner", { name: result.players[result.outcome].displayName });
   return (
     <article className="recentGameCard recentSeriesCard">
       <div className="recentGamePrimary">
@@ -241,14 +254,21 @@ function RecentSeriesResultCard({
             <span>{t("playerB")}</span>
           </p>
           <p className="recentGameMeta">
-            {formatRecentGameDate(result.finishedAt, locale)} · {t("matchSeries")} ·{" "}
-            {t("seriesGames", {played: result.gamesPlayed, planned: result.gamesPlanned})} ·{" "}
-            {t(`seriesStatus.${result.status}`)}
+            {formatRecentGameDate(result.finishedAt, locale)} ·{" "}
+            {t("matchSeries")} ·{" "}
+            {t("seriesGames", {
+              played: result.gamesPlayed,
+              planned: result.gamesPlanned,
+            })}{" "}
+            · {t(`seriesStatus.${result.status}`)}
           </p>
         </div>
         <div
           className="recentGameScore matchPoints"
-          aria-label={t("seriesMatchScoreAria", {playerA: result.players.player_a.matchPoints, playerB: result.players.player_b.matchPoints})}
+          aria-label={t("seriesMatchScoreAria", {
+            playerA: result.players.player_a.matchPoints,
+            playerB: result.players.player_b.matchPoints,
+          })}
         >
           <span>
             {result.players.player_a.matchPoints} :{" "}
@@ -258,7 +278,10 @@ function RecentSeriesResultCard({
         </div>
         <div
           className="recentGameScore"
-          aria-label={t("seriesAgendaScoreAria", {playerA: result.players.player_a.agendaPoints, playerB: result.players.player_b.agendaPoints})}
+          aria-label={t("seriesAgendaScoreAria", {
+            playerA: result.players.player_a.agendaPoints,
+            playerB: result.players.player_b.agendaPoints,
+          })}
         >
           <span>
             {result.players.player_a.agendaPoints} :{" "}
@@ -273,19 +296,32 @@ function RecentSeriesResultCard({
           {winnerLabel}
         </span>
         <span>
-          {t("seriesWins", {playerA: result.players.player_a.wins, playerB: result.players.player_b.wins})}
+          {t("seriesWins", {
+            playerA: result.players.player_a.wins,
+            playerB: result.players.player_b.wins,
+          })}
         </span>
-        <span title={result.seriesId}>{t("seriesId", {id: result.seriesId.slice(0, 8)})}</span>
+        <span title={result.seriesId}>
+          {t("seriesId", { id: result.seriesId.slice(0, 8) })}
+        </span>
       </div>
       <ol className="recentSeriesGames">
         {result.games.map((game) => (
           <li key={game.matchId}>
-            <span>{t("game", {number: game.gameNumber})}</span>
+            <span>{t("game", { number: game.gameNumber })}</span>
             <span>
-              {t("seriesRunnerLine", {name: game.runnerDisplayName, agenda: game.runnerAgendaPoints, match: game.runnerMatchPoints})}
+              {t("seriesRunnerLine", {
+                name: game.runnerDisplayName,
+                agenda: game.runnerAgendaPoints,
+                match: game.runnerMatchPoints,
+              })}
             </span>
             <span>
-              {t("seriesCorpLine", {name: game.corpDisplayName, agenda: game.corpAgendaPoints, match: game.corpMatchPoints})}
+              {t("seriesCorpLine", {
+                name: game.corpDisplayName,
+                agenda: game.corpAgendaPoints,
+                match: game.corpMatchPoints,
+              })}
             </span>
             <span>{t(`reasonShort.${game.reason}`)}</span>
             {game.isPublic ? (
@@ -344,7 +380,7 @@ function PlayerIdentityBadge({
   return (
     <span
       className={`playerIdentityBadge ${kind}`}
-      aria-label={t("identityAria", {label})}
+      aria-label={t("identityAria", { label })}
       title={
         kind === "account"
           ? t("identityTitle.account")
@@ -362,13 +398,17 @@ function PlayerIdentityBadge({
 function resultReasonLabelKey(
   reason: ApiRecentGameResult["reason"],
   winner?: Winner,
-): "reason.agendaRunner" | "reason.agendaCorp" | "reason.agenda" | `reason.${ApiRecentGameResult["reason"]}` | null {
+):
+  | "reason.agendaRunner"
+  | "reason.agendaCorp"
+  | "reason.agenda"
+  | `reason.${ApiRecentGameResult["reason"]}`
+  | null {
   if (reason === "agenda_points" && winner === "runner")
     return "reason.agendaRunner";
   if (reason === "agenda_points" && winner === "corp")
     return "reason.agendaCorp";
-  if (reason === "agenda_points")
-    return "reason.agenda";
+  if (reason === "agenda_points") return "reason.agenda";
   return `reason.${reason}`;
 }
 
@@ -382,10 +422,7 @@ function formatRecentGameDate(value: string, locale: AppLocale): string {
   });
 }
 
-function formatLobbyTime(
-  value: string | undefined,
-  locale: AppLocale,
-): string {
+function formatLobbyTime(value: string | undefined, locale: AppLocale): string {
   if (!value) return "";
   return formatAppDateTime(value, locale, {
     hour: "2-digit",

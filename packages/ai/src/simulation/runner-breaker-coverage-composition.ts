@@ -1,4 +1,8 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 
 import type { KnownPositionMemory } from "../belief-state";
 import type { assessKnownRezzedIcePath } from "../visible-run-analysis";

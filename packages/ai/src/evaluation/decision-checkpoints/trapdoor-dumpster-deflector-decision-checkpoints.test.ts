@@ -13,7 +13,10 @@ describe("Trapdoor and Dumpster exact decision checkpoints", () => {
   it.each([
     ["starts the affordable Trapdoor break sequence", pumpTrapdoorJson],
     ["defers the restricted-credit R&D path", avoidUnaffordableRunJson],
-    ["starts the second affordable Trapdoor break sequence", unaffordableEncounterControlJson],
+    [
+      "starts the second affordable Trapdoor break sequence",
+      unaffordableEncounterControlJson,
+    ],
     ["continues the redirected run on free Archives", archivesContinueJson],
   ])("%s", (_label, json) => {
     const result = runAiDecisionCheckpoint(fixture(json));
@@ -43,8 +46,7 @@ describe("Trapdoor and Dumpster exact decision checkpoints", () => {
       forbiddenActions: [
         {
           type: "play_event",
-          sourceDefinitionId:
-            "onr_proteus_106_disgruntled-ice-technician",
+          sourceDefinitionId: "onr_proteus_106_disgruntled-ice-technician",
           targetServerId: "archives",
         },
       ],

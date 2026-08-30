@@ -37,10 +37,12 @@ export type ConnectionAuditLogger = {
 };
 
 export const noopConnectionAuditLogger: ConnectionAuditLogger = {
-  record: () => undefined
+  record: () => undefined,
 };
 
-export function createFileConnectionAuditLogger(logPath?: string): ConnectionAuditLogger {
+export function createFileConnectionAuditLogger(
+  logPath?: string,
+): ConnectionAuditLogger {
   const targetPath = resolve(logPath ?? defaultConnectionAuditLogPath());
   let pending = Promise.resolve();
   return {
@@ -48,7 +50,7 @@ export function createFileConnectionAuditLogger(logPath?: string): ConnectionAud
       const entry = sanitizeConnectionAuditEvent({
         ...event,
         timestamp: event.timestamp ?? new Date().toISOString(),
-        pid: event.pid ?? process.pid
+        pid: event.pid ?? process.pid,
       });
       pending = pending
         .then(async () => {
@@ -56,18 +58,28 @@ export function createFileConnectionAuditLogger(logPath?: string): ConnectionAud
           await appendFile(targetPath, `${JSON.stringify(entry)}\n`, "utf8");
         })
         .catch(() => undefined);
-    }
+    },
   };
 }
 
-export function createConnectionAuditLoggerFromEnv(env: NodeJS.ProcessEnv = process.env): ConnectionAuditLogger {
-  if (env.NETGRID_CONNECTION_AUDIT_LOG === "off") return noopConnectionAuditLogger;
-  if (env.VITEST === "true" || env.NODE_ENV === "test") return noopConnectionAuditLogger;
+export function createConnectionAuditLoggerFromEnv(
+  env: NodeJS.ProcessEnv = process.env,
+): ConnectionAuditLogger {
+  if (env.NETGRID_CONNECTION_AUDIT_LOG === "off")
+    return noopConnectionAuditLogger;
+  if (env.VITEST === "true" || env.NODE_ENV === "test")
+    return noopConnectionAuditLogger;
   return createFileConnectionAuditLogger(env.NETGRID_CONNECTION_AUDIT_LOG_PATH);
 }
 
-function sanitizeConnectionAuditEvent(event: ConnectionAuditEvent): ConnectionAuditEvent {
-  return Object.fromEntries(Object.entries(event).filter(([, value]) => value !== undefined && value !== "")) as ConnectionAuditEvent;
+function sanitizeConnectionAuditEvent(
+  event: ConnectionAuditEvent,
+): ConnectionAuditEvent {
+  return Object.fromEntries(
+    Object.entries(event).filter(
+      ([, value]) => value !== undefined && value !== "",
+    ),
+  ) as ConnectionAuditEvent;
 }
 
 function defaultConnectionAuditLogPath(): string {

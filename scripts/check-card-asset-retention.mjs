@@ -12,7 +12,9 @@ const findings = [];
 const printingIds = new Set();
 
 if (manifest.sourceRegistry !== "@netgrid/catalog#createRuntimeCardsById") {
-  findings.push("localized manifest sourceRegistry is not the CardSpec-backed catalog");
+  findings.push(
+    "localized manifest sourceRegistry is not the CardSpec-backed catalog",
+  );
 }
 
 for (const card of manifest.cards ?? []) {
@@ -43,7 +45,9 @@ for (const card of manifest.cards ?? []) {
     findings.push(`${card.cardId}: Full-PNG fehlt`);
   }
   if (card.art !== `art/${card.printingId}.png`)
-    findings.push(`${card.cardId}: Art-Pfad ist nicht aus printingId abgeleitet`);
+    findings.push(
+      `${card.cardId}: Art-Pfad ist nicht aus printingId abgeleitet`,
+    );
   if (!existsSync(path.join(skinRoot, card.art)))
     findings.push(`${card.cardId}: Art-Quelle fehlt`);
 }

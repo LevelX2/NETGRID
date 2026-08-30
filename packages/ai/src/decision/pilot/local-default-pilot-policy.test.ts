@@ -19,9 +19,9 @@ describe("local default pilot policy", () => {
     expect(policy.noRuntimeEffect).toBe(true);
     expect(policy.defaultEnabledScopes).toEqual([]);
     expect(defaultActiveScopes()).toEqual([]);
-    expect(policy.scopes.every((scope) => scope.enabledByDefault === false)).toBe(
-      true,
-    );
+    expect(
+      policy.scopes.every((scope) => scope.enabledByDefault === false),
+    ).toBe(true);
     expect(localDefaultPolicyEnvOverrideRequired()).toBe(true);
   });
 

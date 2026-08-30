@@ -11,7 +11,9 @@ describe("remote role ontology legacy conflict detection", () => {
       ]),
     ).toBe(true);
     expect(
-      structuredRemoteRoleConflictWithLegacy(role("run_tax"), ["remote_economy_asset"]),
+      structuredRemoteRoleConflictWithLegacy(role("run_tax"), [
+        "remote_economy_asset",
+      ]),
     ).toBe(true);
   });
 

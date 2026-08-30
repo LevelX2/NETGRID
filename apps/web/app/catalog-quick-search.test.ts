@@ -42,7 +42,10 @@ describe("catalog quick search", () => {
   it("resets special filters without clearing the quick search", () => {
     const resetBody = panelSource.slice(
       panelSource.indexOf("const resetSpecialFilters"),
-      panelSource.indexOf("useEffect(() =>", panelSource.indexOf("const resetSpecialFilters")),
+      panelSource.indexOf(
+        "useEffect(() =>",
+        panelSource.indexOf("const resetSpecialFilters"),
+      ),
     );
     expect(resetBody).toContain('onSetAddon("original", true)');
     expect(resetBody).toContain('onSetAddon("classic", true)');
