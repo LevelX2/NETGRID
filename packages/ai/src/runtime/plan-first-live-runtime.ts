@@ -45,7 +45,11 @@ import type {
 } from "../runner-run-target-evaluation";
 import { reconstructBeliefState } from "../belief-state";
 import { quoteRunnerRunRiskReserve } from "../run-analysis/runner-run-risk-reserve";
-import { runnerRunTargetHasOptionalBonusRunValue } from "../runner-run-target-guidance";
+import {
+  runnerRunTargetHasOptionalBonusRunValue,
+  runnerRunTargetMultiRunPayoffClass,
+  runnerRunTargetPlausibleForMultiRun,
+} from "../runner-run-target-guidance";
 import {
   runnerEffectsProvideNonNoisyBreakerCredits,
   runnerEffectsProvideTopTrashRecovery,
@@ -208,6 +212,11 @@ import {
 } from "./corp-canonical-card-facts";
 import { assessCorpEconomyAssetPayback } from "./corp-economy-asset-payback";
 import { selectableChoiceOptions } from "./choice-option";
+import {
+  runnerMultiRunEventAssessment,
+  type RunnerMultiRunEventAssessment,
+} from "./runner-multi-run-event-assessment";
+import { runnerMultiRunEventScoreValue } from "./runner-multi-run-event-score";
 import { discardOptionInstanceId } from "./discard-choice-option";
 import { selectedSearchChoiceOptionIds } from "./search-choice-option";
 import { extractAiFeatures } from "./ai-features";
@@ -7865,6 +7874,24 @@ function buildRunnerDomain(
             (candidate) =>
               candidate.targetServerId === evaluation.targetServerId,
           );
+          const multiRunRoutesByActionId = new Map(
+            sameServerEvaluations.flatMap((candidateEvaluation) => {
+              const quote = runnerCentralPressureMultiRunRouteQuote(
+                input,
+                candidates,
+                candidateEvaluation,
+              );
+              return quote
+                ? [[candidateEvaluation.actionId, quote] as const]
+                : [];
+            }),
+          );
+          const bestMultiRunRouteValue = Math.max(
+            0,
+            ...[...multiRunRoutesByActionId.values()].map(
+              (quote) => quote.value,
+            ),
+          );
           const directlyAvailableBasicRun = sameServerEvaluations.some(
             (candidateEvaluation) => {
               const actionCandidate = candidates.find(
@@ -8007,15 +8034,17 @@ function buildRunnerDomain(
                   : ("P4" as const),
             reachable:
               currentPressureRoute && !safetyBlocked && !forgoUnsafeRunCapacity,
-            marginalValue: knownAgendaInArchives
-              ? 1_000
-              : terminalRemoteUnreachableCentralLastChance
-                ? 1_400 + evaluation.score
-                : hqSuccessWindowRoute
-                  ? Math.max(320, evaluation.score)
-                  : evaluation.recommendation === "run_now"
-                    ? evaluation.score
-                    : Math.min(evaluation.score, 60),
+            marginalValue:
+              (knownAgendaInArchives
+                ? 1_000
+                : terminalRemoteUnreachableCentralLastChance
+                  ? 1_400 + evaluation.score
+                  : hqSuccessWindowRoute
+                    ? Math.max(320, evaluation.score)
+                    : evaluation.recommendation === "run_now"
+                      ? evaluation.score
+                      : Math.min(evaluation.score, 60)) +
+              bestMultiRunRouteValue,
             evidenceCode: forgoUnsafeRunCapacity
               ? "runner_restricted_run_capacity_below_required_hand_buffer"
               : knownAgendaInArchives
@@ -8078,14 +8107,22 @@ function buildRunnerDomain(
                       : candidate.runActionProjection?.spendLimit !== undefined
                         ? 10
                         : 0;
+                  const multiRunRouteValue =
+                    multiRunRoutesByActionId.get(candidate.actionId)?.value ??
+                    0;
                   return [
                     candidate.actionId,
                     candidate.score -
                       evaluation.score +
-                      routeSpecificPreference,
+                      routeSpecificPreference +
+                      multiRunRouteValue -
+                      bestMultiRunRouteValue,
                   ];
                 }),
             ),
+            runActionDifferentialPayoffIds: [
+              ...multiRunRoutesByActionId.keys(),
+            ].sort(),
             runActionEvidence: Object.fromEntries(
               sameServerEvaluations.flatMap((candidate) => {
                 const spendLimit = candidate.runActionProjection?.spendLimit;
@@ -8094,6 +8131,9 @@ function buildRunnerDomain(
                 }
                 const opportunityQuote =
                   candidate.consumableRunOpportunityQuote;
+                const multiRunRoute = multiRunRoutesByActionId.get(
+                  candidate.actionId,
+                );
                 return [
                   [
                     candidate.actionId,
@@ -8103,6 +8143,12 @@ function buildRunnerDomain(
                       `run_route_effective_score:${candidate.score}`,
                       `run_route_relative_value:${candidate.score - evaluation.score}`,
                       ...(opportunityQuote?.evidence ?? []),
+                      ...(multiRunRoute?.evidence ?? []),
+                      ...(multiRunRoute
+                        ? [
+                            `runner_central_pressure_multi_run_value:${multiRunRoute.value}`,
+                          ]
+                        : []),
                       ...(candidate.actionId === hqSuccessWindowRoute?.actionId
                         ? [
                             "plan_route_preference:hq_success_window_setup",
@@ -8144,6 +8190,7 @@ function buildRunnerDomain(
                 const lacksDifferentialPayoff =
                   directlyAvailableBasicRun &&
                   actionCandidate?.semanticActionType === "play.runner_event" &&
+                  !multiRunRoutesByActionId.has(candidate.actionId) &&
                   !runnerCardRunHasVisibleDifferentialPayoff(
                     input,
                     actionCandidate,
@@ -28490,6 +28537,35 @@ function bestRunTargetsByServer(
     }
   }
   return [...byServer.values()];
+}
+
+function runnerCentralPressureMultiRunRouteQuote(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  evaluation: RunnerRunTargetEvaluation,
+): RunnerMultiRunEventAssessment | undefined {
+  const candidate = candidates.find(
+    (entry) => entry.actionId === evaluation.actionId,
+  );
+  if (candidate?.semanticActionType !== "play.runner_event") {
+    return undefined;
+  }
+  const action = input.legalActions.find(
+    (entry) => entry.actionId === evaluation.actionId,
+  );
+  if (!action) return undefined;
+  const quote = runnerMultiRunEventAssessment(input, action, {
+    sourceDefinitionIdForAction: () => candidate.sourceDefinitionId,
+    targetServerId: (legalAction) =>
+      typeof legalAction.payload?.serverId === "string"
+        ? legalAction.payload.serverId
+        : undefined,
+    targetEvaluation: () => evaluation,
+    payoffClass: runnerRunTargetMultiRunPayoffClass,
+    canTakeRun: runnerRunTargetPlausibleForMultiRun,
+    scoreValue: runnerMultiRunEventScoreValue,
+  });
+  return quote?.phase === "first_run" && quote.canTakeRun ? quote : undefined;
 }
 
 function witnessedRunRouteExists(

@@ -852,6 +852,10 @@ describe("AI input DTO score-conversion contract", () => {
       successfulRunPrivateLookCount: 5,
       bypassFirstIce: true,
       runSpendingCap: 3,
+      followupRunOnEnd: "optional",
+      bonusRunNoClick: true,
+      optionalBonusRun: true,
+      bonusRunSource: "runner-multi-run-event",
       privateRunProbe: "must-not-cross-dto",
     };
     const input = buildAiDecisionInputDto({
@@ -876,11 +880,19 @@ describe("AI input DTO score-conversion contract", () => {
       successfulRunPrivateLookCount: 5,
       bypassFirstIce: true,
       runSpendingCap: 3,
+      followupRunOnEnd: "optional",
+      bonusRunNoClick: true,
+      optionalBonusRun: true,
+      bonusRunSource: "runner-multi-run-event",
     });
     expect(input.playerView.legalActions[0]?.payload).toMatchObject({
       cardImplementationEffectKind: "make_run",
       successfulRunAccessReplacement: "private_look_top_rd",
       runSpendingCap: 3,
+      followupRunOnEnd: "optional",
+      bonusRunNoClick: true,
+      optionalBonusRun: true,
+      bonusRunSource: "runner-multi-run-event",
     });
     expect(input.legalActions[0]?.payload).not.toHaveProperty(
       "privateRunProbe",
