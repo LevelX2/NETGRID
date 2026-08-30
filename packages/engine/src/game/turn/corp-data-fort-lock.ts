@@ -1,8 +1,4 @@
-import type {
-  CardInstanceId,
-  GameState,
-  LegalAction,
-} from "@netgrid/shared";
+import type { CardInstanceId, GameState, LegalAction } from "@netgrid/shared";
 import {
   activeCardImplementationModifiersForRunnerInstalled,
   type ActiveCardImplementationModifier,

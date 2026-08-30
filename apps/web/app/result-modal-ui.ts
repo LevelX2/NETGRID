@@ -1,4 +1,9 @@
-import type { ApiGameResultSummary, ApiSeriesResultSummary, Side, Winner } from "@netgrid/shared";
+import type {
+  ApiGameResultSummary,
+  ApiSeriesResultSummary,
+  Side,
+  Winner,
+} from "@netgrid/shared";
 
 export type ResultWinnerMotifKind = Side | "draw";
 export type ResultWinnerMotifUi = {
@@ -25,45 +30,71 @@ export function resultWinnerMotifFor(winner: Winner): ResultWinnerMotifKind {
   return winner === "runner" || winner === "corp" ? winner : "draw";
 }
 
-export function resultWinnerMotifUi(motif: ResultWinnerMotifKind): ResultWinnerMotifUi {
+export function resultWinnerMotifUi(
+  motif: ResultWinnerMotifKind,
+): ResultWinnerMotifUi {
   if (motif === "runner") {
     return {
       ariaLabel: "Runner-Sieg",
       caption: "Runner",
-      imageSrc: "/result-motifs/result-runner-victory.png"
+      imageSrc: "/result-motifs/result-runner-victory.png",
     };
   }
   if (motif === "corp") {
     return {
       ariaLabel: "Korp-Sieg",
       caption: "Korp",
-      imageSrc: "/result-motifs/result-corp-victory.png"
+      imageSrc: "/result-motifs/result-corp-victory.png",
     };
   }
   return {
     ariaLabel: "Unentschieden",
-    caption: "Draw"
+    caption: "Draw",
   };
 }
 
-export function resultFooterOutcomeLabel(winner: Winner, viewerSide: Side, opponentName?: string): string {
+export function resultFooterOutcomeLabel(
+  winner: Winner,
+  viewerSide: Side,
+  opponentName?: string,
+): string {
   if (winner === "draw") return "Draw";
-  return winner === viewerSide ? "Deine Seite" : opponentName ?? "Gegenseite";
+  return winner === viewerSide ? "Deine Seite" : (opponentName ?? "Gegenseite");
 }
 
-export function resultPlayerLabel(side: Side, viewerSide: Side, viewerName?: string, opponentName?: string): string {
+export function resultPlayerLabel(
+  side: Side,
+  viewerSide: Side,
+  viewerName?: string,
+  opponentName?: string,
+): string {
   const name = side === viewerSide ? viewerName : opponentName;
   const fallback = side === viewerSide ? "Du" : "Gegenseite";
   return normalizePlayerName(name) ?? fallback;
 }
 
-export function resultPlayerRoleLabel(side: Side, viewerSide: Side, viewerName?: string, opponentName?: string): string {
+export function resultPlayerRoleLabel(
+  side: Side,
+  viewerSide: Side,
+  viewerName?: string,
+  opponentName?: string,
+): string {
   return `${resultPlayerLabel(side, viewerSide, viewerName, opponentName)} (${resultSideLabel(side)})`;
 }
 
-export function resultOutcomeHeadline(winner: Winner, viewerSide: Side, viewerName?: string, opponentName?: string): string {
+export function resultOutcomeHeadline(
+  winner: Winner,
+  viewerSide: Side,
+  viewerName?: string,
+  opponentName?: string,
+): string {
   if (winner === "draw") return "Das Spiel endet unentschieden.";
-  const winnerLabel = resultPlayerLabel(winner, viewerSide, viewerName, opponentName);
+  const winnerLabel = resultPlayerLabel(
+    winner,
+    viewerSide,
+    viewerName,
+    opponentName,
+  );
   const addressesViewerDirectly =
     winner === viewerSide && normalizePlayerName(viewerName) === null;
   const verb = addressesViewerDirectly ? "gewinnst" : "gewinnt";
@@ -76,58 +107,82 @@ export function resultOutcomeText(winner: Winner): string {
   return "Das Spiel endet unentschieden.";
 }
 
-export function seriesResultHeadline(series: ApiSeriesResultSummary, opponentName?: string, viewerName?: string): string | null {
+export function seriesResultHeadline(
+  series: ApiSeriesResultSummary,
+  opponentName?: string,
+  viewerName?: string,
+): string | null {
   if (series.status !== "finished") return null;
   const viewerLabel = normalizePlayerName(viewerName);
-  if (series.viewerSeriesOutcome === "won") return viewerLabel ? `${viewerLabel} hat die Match-Serie gewonnen.` : "Du hast die Match-Serie gewonnen.";
-  if (series.viewerSeriesOutcome === "lost") return `${opponentName ?? "Gegenseite"} hat die Match-Serie gewonnen.`;
+  if (series.viewerSeriesOutcome === "won")
+    return viewerLabel
+      ? `${viewerLabel} hat die Match-Serie gewonnen.`
+      : "Du hast die Match-Serie gewonnen.";
+  if (series.viewerSeriesOutcome === "lost")
+    return `${opponentName ?? "Gegenseite"} hat die Match-Serie gewonnen.`;
   return "Die Match-Serie endet unentschieden.";
 }
 
 export function seriesScoreUi(
-  series: Pick<ApiSeriesResultSummary, "status" | "viewerMatchPoints" | "opponentMatchPoints">,
+  series: Pick<
+    ApiSeriesResultSummary,
+    "status" | "viewerMatchPoints" | "opponentMatchPoints"
+  >,
   viewerLabel: string,
-  opponentLabel: string
+  opponentLabel: string,
 ): SeriesScoreUi {
   const label = series.status === "finished" ? "Endergebnis" : "Zwischenstand";
   return {
     label,
     score: `${series.viewerMatchPoints} : ${series.opponentMatchPoints}`,
-    ariaLabel: `${label}: ${viewerLabel} ${series.viewerMatchPoints} zu ${opponentLabel} ${series.opponentMatchPoints} Matchpunkte.`
+    ariaLabel: `${label}: ${viewerLabel} ${series.viewerMatchPoints} zu ${opponentLabel} ${series.opponentMatchPoints} Matchpunkte.`,
   };
 }
 
-export function retentionProtectionUi(retentionProtected: boolean): { label: string; title: string } {
+export function retentionProtectionUi(retentionProtected: boolean): {
+  label: string;
+  title: string;
+} {
   return retentionProtected
     ? {
         label: "Replay-Sicherung entfernen",
-        title: "Entfernt den Schutz vor History- und Cleanup-Löschung. Das Spielergebnis bleibt unverändert."
+        title:
+          "Entfernt den Schutz vor History- und Cleanup-Löschung. Das Spielergebnis bleibt unverändert.",
       }
     : {
         label: "Spiel für Replay sichern",
-        title: "Schützt dieses Spiel vor History- und Cleanup-Löschung, damit das Replay später verfügbar bleibt. Das Spielergebnis bleibt unverändert."
+        title:
+          "Schützt dieses Spiel vor History- und Cleanup-Löschung, damit das Replay später verfügbar bleibt. Das Spielergebnis bleibt unverändert.",
       };
 }
 
-export function resultExitButtonUi(hasNextSeriesGame: boolean): { label: string; title: string; needsConfirmation: boolean } {
+export function resultExitButtonUi(hasNextSeriesGame: boolean): {
+  label: string;
+  title: string;
+  needsConfirmation: boolean;
+} {
   return hasNextSeriesGame
     ? {
         label: "Serie verlassen",
-        title: "Verlässt die lokale Serie-Sitzung, ohne das nächste Serienspiel zu starten.",
-        needsConfirmation: true
+        title:
+          "Verlässt die lokale Serie-Sitzung, ohne das nächste Serienspiel zu starten.",
+        needsConfirmation: true,
       }
     : {
         label: "Zurück zum Startbildschirm",
         title: "Zurück zum Startbildschirm",
-        needsConfirmation: false
+        needsConfirmation: false,
       };
 }
 
 export function gameStandingForResult(
-  result: Pick<ApiGameResultSummary, "winner" | "runnerAgendaPoints" | "corpAgendaPoints">,
+  result: Pick<
+    ApiGameResultSummary,
+    "winner" | "runnerAgendaPoints" | "corpAgendaPoints"
+  >,
   viewerSide: Side,
   viewerName?: string,
-  opponentName?: string
+  opponentName?: string,
 ): GameStanding {
   const opponentSide = oppositeSide(viewerSide);
   const viewerAgendaPoints = agendaPointsForResultSide(result, viewerSide);
@@ -138,29 +193,48 @@ export function gameStandingForResult(
       viewerMatchPoints: viewerAgendaPoints,
       opponentMatchPoints: opponentAgendaPoints,
       viewerAgendaPoints,
-      opponentAgendaPoints
+      opponentAgendaPoints,
     };
   }
 
   const winnerSide = result.winner;
   const loserSide = oppositeSide(winnerSide);
   const loserAgendaPoints = agendaPointsForResultSide(result, loserSide);
-  const winnerLabel = resultPlayerRoleLabel(winnerSide, viewerSide, viewerName, opponentName);
-  const loserLabel = resultPlayerRoleLabel(loserSide, viewerSide, viewerName, opponentName);
-  const viewerMatchPoints = winnerSide === viewerSide ? SERIES_WIN_MATCH_POINTS : viewerAgendaPoints;
-  const opponentMatchPoints = winnerSide === opponentSide ? SERIES_WIN_MATCH_POINTS : opponentAgendaPoints;
+  const winnerLabel = resultPlayerRoleLabel(
+    winnerSide,
+    viewerSide,
+    viewerName,
+    opponentName,
+  );
+  const loserLabel = resultPlayerRoleLabel(
+    loserSide,
+    viewerSide,
+    viewerName,
+    opponentName,
+  );
+  const viewerMatchPoints =
+    winnerSide === viewerSide ? SERIES_WIN_MATCH_POINTS : viewerAgendaPoints;
+  const opponentMatchPoints =
+    winnerSide === opponentSide
+      ? SERIES_WIN_MATCH_POINTS
+      : opponentAgendaPoints;
 
   return {
     summary: `${winnerLabel}: ${SERIES_WIN_MATCH_POINTS} Matchpunkte. ${loserLabel}: ${loserAgendaPoints} Agenda-Punkte aus ${agendaPointSourceLabel(loserSide)} Agendas.`,
     viewerMatchPoints,
     opponentMatchPoints,
     viewerAgendaPoints,
-    opponentAgendaPoints
+    opponentAgendaPoints,
   };
 }
 
-function agendaPointsForResultSide(result: Pick<ApiGameResultSummary, "runnerAgendaPoints" | "corpAgendaPoints">, side: Side): number {
-  return side === "runner" ? result.runnerAgendaPoints : result.corpAgendaPoints;
+function agendaPointsForResultSide(
+  result: Pick<ApiGameResultSummary, "runnerAgendaPoints" | "corpAgendaPoints">,
+  side: Side,
+): number {
+  return side === "runner"
+    ? result.runnerAgendaPoints
+    : result.corpAgendaPoints;
 }
 
 function agendaPointSourceLabel(side: Side): string {

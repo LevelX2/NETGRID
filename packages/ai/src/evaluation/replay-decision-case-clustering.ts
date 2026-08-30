@@ -79,7 +79,9 @@ export function buildReplayDecisionCandidateClusterReport(
     .map(candidateFromCase)
     .filter((entry): entry is ReplayDecisionCandidate => entry !== undefined);
   const clusters = clusterCandidates(
-    candidates.filter((entry) => entry.status === "candidate_needs_same_state_repro"),
+    candidates.filter(
+      (entry) => entry.status === "candidate_needs_same_state_repro",
+    ),
   );
   const output: ReplayDecisionCandidateClusterReport = {
     schemaVersion: REPLAY_DECISION_CASE_CLUSTERING_SCHEMA_VERSION,
@@ -89,8 +91,9 @@ export function buildReplayDecisionCandidateClusterReport(
       sourceCases: sourceCases.length,
       discoveryCases: sourceCases.filter((entry) => entry.split === "discovery")
         .length,
-      holdoutCasesIgnored: sourceCases.filter((entry) => entry.split === "holdout")
-        .length,
+      holdoutCasesIgnored: sourceCases.filter(
+        (entry) => entry.split === "holdout",
+      ).length,
       candidates: candidates.filter(
         (entry) => entry.status === "candidate_needs_same_state_repro",
       ).length,
@@ -130,11 +133,15 @@ function candidateFromCase(
     ]);
   }
   const top = decisionCase.observables.rankedAlternatives[0];
-  if (!top?.selectedActionType || top.selectedActionType === decisionCase.decision.selectedActionType) {
+  if (
+    !top?.selectedActionType ||
+    top.selectedActionType === decisionCase.decision.selectedActionType
+  ) {
     return undefined;
   }
   const selectedAlternative = decisionCase.observables.rankedAlternatives.find(
-    (entry) => entry.selectedActionType === decisionCase.decision.selectedActionType,
+    (entry) =>
+      entry.selectedActionType === decisionCase.decision.selectedActionType,
   );
   const selectedActionAlternative =
     decisionCase.observables.actionAlternatives.find((entry) => entry.selected);
@@ -142,7 +149,8 @@ function candidateFromCase(
     decisionCase.observables.actionAlternatives.find(
       (entry) => !entry.selected && entry.actionType === top.selectedActionType,
     );
-  const selectedScore = selectedAlternative?.score ?? decisionCase.decision.score;
+  const selectedScore =
+    selectedAlternative?.score ?? decisionCase.decision.score;
   if (top.score === undefined || selectedScore === undefined) {
     return blockedCandidate(decisionCase, "blocked_shadow_only", [
       "score_gap_unavailable",
@@ -204,7 +212,9 @@ function candidateFromCase(
         "challenger_action_why_not",
         challengerActionAlternative?.whyNot ?? [],
       ),
-      ...decisionCase.observables.warnings.map((warning) => `warning:${warning}`),
+      ...decisionCase.observables.warnings.map(
+        (warning) => `warning:${warning}`,
+      ),
     ],
   };
 }
@@ -223,7 +233,10 @@ function whyFactEvidence(prefix: string, facts: readonly string[]): string[] {
 
 function blockedCandidate(
   decisionCase: ReplayDecisionCase,
-  status: Exclude<ReplayDecisionCandidateStatus, "candidate_needs_same_state_repro">,
+  status: Exclude<
+    ReplayDecisionCandidateStatus,
+    "candidate_needs_same_state_repro"
+  >,
   evidence: string[],
 ): ReplayDecisionCandidate {
   const clusterKey = [
@@ -260,14 +273,18 @@ function clusterCandidates(
       const scoreGaps = entries
         .map((entry) => entry.scoreGap)
         .filter((entry): entry is number => entry !== undefined);
-      const mistakeClasses = unique(entries.flatMap((entry) => entry.mistakeClasses));
+      const mistakeClasses = unique(
+        entries.flatMap((entry) => entry.mistakeClasses),
+      );
       return {
         clusterId: `replay-cluster-${digest(clusterKey).slice(0, 12)}`,
         status: "candidate_cluster_needs_repro" as const,
         clusterKey,
         candidateCount: entries.length,
         side: entries[0]?.side ?? "runner",
-        selectedActionTypes: unique(entries.map((entry) => entry.selectedActionType)),
+        selectedActionTypes: unique(
+          entries.map((entry) => entry.selectedActionType),
+        ),
         challengerActionTypes: unique(
           entries.flatMap((entry) =>
             entry.challengerActionType ? [entry.challengerActionType] : [],
@@ -276,7 +293,9 @@ function clusterCandidates(
         mistakeClasses,
         averageScoreGap: average(scoreGaps),
         maxScoreGap: Math.max(...scoreGaps, 0),
-        sampleCandidateIds: entries.slice(0, 12).map((entry) => entry.candidateId),
+        sampleCandidateIds: entries
+          .slice(0, 12)
+          .map((entry) => entry.candidateId),
         evidence: [
           "cluster_status:candidate_needs_same_state_repro",
           `candidate_count:${entries.length}`,
@@ -325,5 +344,9 @@ function unique<T extends string>(values: readonly T[]): T[] {
 
 function average(values: readonly number[]): number {
   if (values.length === 0) return 0;
-  return Math.round((values.reduce((sum, value) => sum + value, 0) / values.length) * 1000) / 1000;
+  return (
+    Math.round(
+      (values.reduce((sum, value) => sum + value, 0) / values.length) * 1000,
+    ) / 1000
+  );
 }

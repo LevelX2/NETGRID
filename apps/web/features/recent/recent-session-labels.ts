@@ -2,10 +2,14 @@ import type { RecentSessionInfo } from "../../app/session-recovery";
 import { sideLabel } from "../game-board/board-view-helpers";
 
 export function recentSessionHeadline(session: RecentSessionInfo): string {
-  return session.opponentDisplayName ? `${sideLabel(session.side)} gegen ${session.opponentDisplayName}` : `${sideLabel(session.side)}-Spiel`;
+  return session.opponentDisplayName
+    ? `${sideLabel(session.side)} gegen ${session.opponentDisplayName}`
+    : `${sideLabel(session.side)}-Spiel`;
 }
 
-export function recentSessionStatusLabel(status: RecentSessionInfo["matchStatus"]): string {
+export function recentSessionStatusLabel(
+  status: RecentSessionInfo["matchStatus"],
+): string {
   switch (status) {
     case "pending":
       return "Wartet";

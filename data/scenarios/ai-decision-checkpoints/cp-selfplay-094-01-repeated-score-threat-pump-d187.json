@@ -1121,28 +1121,20 @@
           "corp_onr_v1_281_accounts-receivable_3",
           "corp_onr_v1_281_accounts-receivable_1"
         ],
-        "scoreArea": [
-          "corp_onr_v1_193_corporate-coup_1"
-        ],
+        "scoreArea": ["corp_onr_v1_193_corporate-coup_1"],
         "servers": [
           {
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_229_code-corpse_1"
-            ],
-            "root": [
-              "corp_onr_v1_358_dr-dreff_1"
-            ]
+            "ice": ["corp_onr_v1_229_code-corpse_1"],
+            "root": ["corp_onr_v1_358_dr-dreff_1"]
           },
           {
             "id": "rd",
             "kind": "rd",
             "label": "R&D",
-            "ice": [
-              "corp_onr_v1_238_data-wall-2-0_1"
-            ],
+            "ice": ["corp_onr_v1_238_data-wall-2-0_1"],
             "root": []
           },
           {
@@ -1161,9 +1153,7 @@
               "corp_onr_v1_247_haunting-inquisition_1",
               "corp_onr_v1_266_scramble_2"
             ],
-            "root": [
-              "corp_onr_v1_211_polymer-breakthrough_1"
-            ]
+            "root": ["corp_onr_v1_211_polymer-breakthrough_1"]
           }
         ]
       },
@@ -2629,9 +2619,7 @@
         "edgerunnerTempsInstallActionsRemaining": 0,
         "scoredAgendaStartDrawChoiceResolvedSourceIds": [],
         "scoredAgendaStartDrawChoiceSelectedSourceIds": [],
-        "fortActivityServerIdsSinceCorpTurnStart": [
-          "remote_1"
-        ],
+        "fortActivityServerIdsSinceCorpTurnStart": ["remote_1"],
         "corpStartOfTurnResolvedSourceIds": [],
         "pdcaUsedSourceIdsThisTurn": []
       },
@@ -8537,9 +8525,7 @@
         "transition": {
           "status": "selected",
           "reason": "initial_strategy_selection",
-          "evidence": [
-            "selected:runner.rnd_pressure"
-          ]
+          "evidence": ["selected:runner.rnd_pressure"]
         },
         "commitment": {
           "strategyId": "runner.rnd_pressure",
@@ -8821,10 +8807,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9026,9 +9009,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -9339,10 +9320,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9548,10 +9526,7 @@
                   "knownPathCost": 8,
                   "creditsAfterKnownPath": 4,
                   "unknownIceCount": 2,
-                  "unknownIcePositions": [
-                    0,
-                    1
-                  ],
+                  "unknownIcePositions": [0, 1],
                   "corpRezCredits": 16,
                   "visibleCoverage": "stable_universal",
                   "requiredCredits": 4,
@@ -9773,9 +9748,7 @@
             "need": {
               "kind": "develop_liquidity",
               "needId": "economy-liquidity-development:runner:25",
-              "actionIds": [
-                "runner.gain_credit"
-              ],
+              "actionIds": ["runner.gain_credit"],
               "currentCreditsAtRevalidation": 12,
               "targetCredits": 16,
               "gap": 4,
@@ -9867,9 +9840,7 @@
                 "stateVersion": 184,
                 "status": "portfolio_reserve_open"
               },
-              "routeActionIds": [
-                "runner.gain_credit"
-              ],
+              "routeActionIds": ["runner.gain_credit"],
               "routeAssessment": {
                 "stateVersion": 184,
                 "routeId": "runner-portfolio-credit-reserve:legal_action:runner.gain_credit",
@@ -9933,9 +9904,7 @@
           "moduleId": "runner.pressure_central",
           "moduleVersion": "1",
           "side": "runner",
-          "strategyLineIds": [
-            "runner.steal_agendas_default"
-          ],
+          "strategyLineIds": ["runner.steal_agendas_default"],
           "executionClass": "strategic_campaign",
           "viability": "blocked",
           "portfolioRole": "background",
@@ -9962,16 +9931,12 @@
               "pressureId": "central:archives",
               "serverId": "archives",
               "purpose": "information",
-              "strategyLineIds": [
-                "runner.steal_agendas_default"
-              ],
+              "strategyLineIds": ["runner.steal_agendas_default"],
               "priorityClass": "P6",
               "reachable": false,
               "marginalValue": 60,
               "evidenceCode": "runner_central_pressure_below_material_value:archives",
-              "runActionIds": [
-                "runner.start_run.archives"
-              ],
+              "runActionIds": ["runner.start_run.archives"],
               "runActionValues": {
                 "runner.start_run.archives": 0
               },
@@ -10125,9 +10090,7 @@
           "moduleId": "runner.pressure_central",
           "moduleVersion": "1",
           "side": "runner",
-          "strategyLineIds": [
-            "runner.steal_agendas_default"
-          ],
+          "strategyLineIds": ["runner.steal_agendas_default"],
           "executionClass": "strategic_campaign",
           "viability": "blocked",
           "portfolioRole": "background",
@@ -10154,9 +10117,7 @@
               "pressureId": "central:hq",
               "serverId": "hq",
               "purpose": "access",
-              "strategyLineIds": [
-                "runner.steal_agendas_default"
-              ],
+              "strategyLineIds": ["runner.steal_agendas_default"],
               "priorityClass": "P4",
               "reachable": false,
               "marginalValue": -500,
@@ -10305,9 +10266,7 @@
           "moduleId": "runner.pressure_central",
           "moduleVersion": "1",
           "side": "runner",
-          "strategyLineIds": [
-            "runner.steal_agendas_default"
-          ],
+          "strategyLineIds": ["runner.steal_agendas_default"],
           "executionClass": "strategic_campaign",
           "viability": "blocked",
           "portfolioRole": "background",
@@ -10334,9 +10293,7 @@
               "pressureId": "central:rd",
               "serverId": "rd",
               "purpose": "multiaccess",
-              "strategyLineIds": [
-                "runner.steal_agendas_default"
-              ],
+              "strategyLineIds": ["runner.steal_agendas_default"],
               "priorityClass": "P4",
               "reachable": false,
               "marginalValue": -65,
@@ -10608,9 +10565,7 @@
                 "boundaryAfter": "opponent_response_window"
               }
             ],
-            "protectedValueClaimIds": [
-              "fnv1a:9d8bca01"
-            ],
+            "protectedValueClaimIds": ["fnv1a:9d8bca01"],
             "transition": {
               "kind": "observation_boundary"
             }
@@ -10631,12 +10586,8 @@
         "quoteIds": [],
         "valueClaimIds": [],
         "priorityCoverage": {
-          "requiredObligationIds": [
-            "priority-band:P2"
-          ],
-          "satisfiedObligationIds": [
-            "priority-band:P2"
-          ],
+          "requiredObligationIds": ["priority-band:P2"],
+          "satisfiedObligationIds": ["priority-band:P2"],
           "violatedObligationIds": [],
           "deferredObligationIds": []
         },
@@ -10696,11 +10647,7 @@
         "type": "pump_breaker"
       }
     ],
-    "acceptablePlanKinds": [
-      "runner.convert_run_window"
-    ],
-    "acceptableCapabilities": [
-      "convert_active_run_window"
-    ]
+    "acceptablePlanKinds": ["runner.convert_run_window"],
+    "acceptableCapabilities": ["convert_active_run_window"]
   }
 }

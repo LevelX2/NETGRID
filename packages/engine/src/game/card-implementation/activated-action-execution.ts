@@ -6,7 +6,9 @@ export type ActivatedCardImplementationExecutionHost = {
     legalAction: LegalAction;
   };
   callbacks: {
-    handleCorpTraceDamageActivatedAbility: (legalAction: LegalAction) => boolean;
+    handleCorpTraceDamageActivatedAbility: (
+      legalAction: LegalAction,
+    ) => boolean;
     handleScoredAgendaActivatedAbilityAction: (
       legalAction: LegalAction,
     ) => boolean;

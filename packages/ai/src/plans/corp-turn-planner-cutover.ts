@@ -263,10 +263,7 @@ function continueResidentCommitment(params: {
 export function planningHeadMatchesCommittedPhaseRoot(
   head: Pick<
     TurnPlanningHeadCandidate,
-    | "rootPlanInstanceId"
-    | "rootPlanModuleId"
-    | "moduleId"
-    | "nextMilestoneId"
+    "rootPlanInstanceId" | "rootPlanModuleId" | "moduleId" | "nextMilestoneId"
   >,
   phaseRoot: TurnPlan["phases"][number]["root"],
 ): boolean {
@@ -451,8 +448,7 @@ function continuationDiagnostic(params: {
   return {
     status: params.status,
     previousCommitmentId: params.previous.commitmentId,
-    previousOwnerRootPlanInstanceId:
-      params.previous.sequenceRootPlanInstanceId,
+    previousOwnerRootPlanInstanceId: params.previous.sequenceRootPlanInstanceId,
     intendedNextMilestoneId: params.intendedNextMilestoneId,
     boundaryKind: params.boundaryKind,
     ...(params.nextCommitmentId
@@ -884,8 +880,8 @@ function cutoverDebug(
       ? source.boundary
       : node.boundaryAfter !== undefined &&
           source.boundary?.kind === node.boundaryAfter
-      ? source.boundary
-      : undefined;
+        ? source.boundary
+        : undefined;
   return {
     ...structuredClone(source),
     mode: "cutover",
@@ -947,9 +943,7 @@ function cutoverDebug(
         : selectedBoundary
           ? { replanReason: "scheduled_information_boundary" }
           : {}),
-      ...(continuation
-        ? { continuation: structuredClone(continuation) }
-        : {}),
+      ...(continuation ? { continuation: structuredClone(continuation) } : {}),
     },
     ...(selectedBoundary
       ? { boundary: structuredClone(selectedBoundary) }

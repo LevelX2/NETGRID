@@ -62,9 +62,7 @@ export type PostBidTraceLinkEfficiencySelection = {
   reason: PostBidTraceLinkEfficiencyReason;
 };
 
-export function selectEfficientTraceBidOption<
-  TOption extends TraceBidOption,
->(
+export function selectEfficientTraceBidOption<TOption extends TraceBidOption>(
   input: TraceBidEfficiencyInput<TOption>,
 ): TraceBidEfficiencySelection<TOption> {
   const bidOptions = input.bidOptions

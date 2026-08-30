@@ -11,7 +11,7 @@ export function AiPacingControls({
   connection,
   observerMode = false,
   onAdvance,
-  onMode
+  onMode,
 }: {
   presentation: ClientPayload["aiTurnPresentation"] | undefined;
   mode: AiPacingMode;
@@ -28,24 +28,53 @@ export function AiPacingControls({
         <Bot size={16} />
       </div>
       <p className="aiPacingHint">
-        {mode === "manual" ? "Pausiert. Der letzte echte Spielzustand bleibt sichtbar." : mode === "paced" ? "Getakteter Automatiklauf: jede KI-Aktion wird einzeln angezeigt." : "Schneller Automatiklauf: weiterhin genau eine sichtbare KI-Aktion pro Schritt."}
+        {mode === "manual"
+          ? "Pausiert. Der letzte echte Spielzustand bleibt sichtbar."
+          : mode === "paced"
+            ? "Getakteter Automatiklauf: jede KI-Aktion wird einzeln angezeigt."
+            : "Schneller Automatiklauf: weiterhin genau eine sichtbare KI-Aktion pro Schritt."}
       </p>
       {observerMode && onMode ? (
-        <div className="aiPacingModeButtons" role="group" aria-label="Simulationstempo">
-          <button className={`button ${mode === "manual" ? "active" : ""}`} onClick={() => onMode("manual")} type="button">
+        <div
+          className="aiPacingModeButtons"
+          role="group"
+          aria-label="Simulationstempo"
+        >
+          <button
+            className={`button ${mode === "manual" ? "active" : ""}`}
+            onClick={() => onMode("manual")}
+            type="button"
+          >
             <Pause size={14} /> Pause
           </button>
-          <button className={`button ${mode === "paced" ? "active" : ""}`} onClick={() => onMode("paced")} type="button">
+          <button
+            className={`button ${mode === "paced" ? "active" : ""}`}
+            onClick={() => onMode("paced")}
+            type="button"
+          >
             <Play size={14} /> Weiter
           </button>
-          <button className={`button ${mode === "fast" ? "active" : ""}`} onClick={() => onMode("fast")} type="button">
+          <button
+            className={`button ${mode === "fast" ? "active" : ""}`}
+            onClick={() => onMode("fast")}
+            type="button"
+          >
             <FastForward size={14} /> Schnell
           </button>
         </div>
       ) : null}
-      <button className="aiStepButton" onClick={onAdvance} disabled={!presentation.canAdvanceAi || connection !== "online"} type="button">
+      <button
+        className="aiStepButton"
+        onClick={onAdvance}
+        disabled={!presentation.canAdvanceAi || connection !== "online"}
+        type="button"
+      >
         {observerMode ? <StepForward size={14} /> : <Bot size={14} />}
-        {observerMode ? "Einzelschritt" : mode === "manual" ? "KI-Schritt" : "KI fortsetzen"}
+        {observerMode
+          ? "Einzelschritt"
+          : mode === "manual"
+            ? "KI-Schritt"
+            : "KI fortsetzen"}
       </button>
     </section>
   );

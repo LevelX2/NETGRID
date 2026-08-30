@@ -88,20 +88,20 @@ bricht die Hand als zusammenhängender Block in eine zweite Zeile um.
 ## Akzeptanzkriterien
 
 - [x] Bei geöffneter Spielchronik überlagert kein Teil des eigenen Korp-HQ
-  die Chronik; insbesondere bleiben Chronik-Einträge sichtbar und bedienbar.
+      die Chronik; insbesondere bleiben Chronik-Einträge sichtbar und bedienbar.
 - [x] Solange die definierte Mindestfreibreite jeder Handkarte noch möglich
-  ist, bleibt die Korp-Hand einzeilig und vor dem HQ-Root beziehungsweise den
-  ICE angeordnet.
+      ist, bleibt die Korp-Hand einzeilig und vor dem HQ-Root beziehungsweise den
+      ICE angeordnet.
 - [x] Reicht der verfügbare Brettbereich dafür nicht aus, entsteht ein
-  zweizeiliger, zusammenhängender Handkartenblock; Hand und HQ-Server werden
-  nicht in unabhängige Zonen aufgetrennt.
+      zweizeiliger, zusammenhängender Handkartenblock; Hand und HQ-Server werden
+      nicht in unabhängige Zonen aufgetrennt.
 - [x] Karten bleiben mit Maus und Tastatur erreichbar; weder Überlappung noch
-  Umbruch verdecken Klick-, Fokus-, Tooltip- oder Auswahlflächen.
+      Umbruch verdecken Klick-, Fokus-, Tooltip- oder Auswahlflächen.
 - [x] Die vorhandenen kleineren responsiven Layouts und das gegnerische,
-  verdeckte Korp-HQ bleiben funktional unverändert, sofern sie nicht dieselbe
-  Ursache teilen.
+      verdeckte Korp-HQ bleiben funktional unverändert, sofern sie nicht dieselbe
+      Ursache teilen.
 - [x] Ein fokussierter Check sowie eine visuelle Desktop-Prüfung mit
-  geöffneter Chronik und großer Korp-Hand sind dokumentiert.
+      geöffneter Chronik und großer Korp-Hand sind dokumentiert.
 
 ## Umsetzungshinweise
 

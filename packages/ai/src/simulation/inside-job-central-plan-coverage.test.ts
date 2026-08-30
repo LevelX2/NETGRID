@@ -42,8 +42,7 @@ describe("Inside Job central plan-first coverage", () => {
           cardImplementationAbilityId:
             "onr_v1_094_inside-job:abilities_on_play_make_run",
           cardImplementationAbilityKey: "abilities_on_play_make_run",
-          cardImplementationCapabilityBindingKind:
-            "card_spec_capability_key",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
           serverId: "rd",
           effectKind: "run",
           bypassFirstIce: true,
@@ -87,11 +86,7 @@ describe("Inside Job central plan-first coverage", () => {
           "onr_proteus_032_misleading-access-menus",
           "Misleading Access Menus",
         ),
-        payOneToPassIce(
-          "snowbank",
-          "onr_proteus_038_snowbank",
-          "Snowbank",
-        ),
+        payOneToPassIce("snowbank", "onr_proteus_038_snowbank", "Snowbank"),
       ]),
       server("archives"),
     ];
@@ -146,9 +141,7 @@ describe("Inside Job central plan-first coverage", () => {
           expect.objectContaining({
             actionId: INSIDE_JOB_RD_ACTION_ID,
             selected: false,
-            whyNot: expect.arrayContaining([
-              "run_route_effective_score:260",
-            ]),
+            whyNot: expect.arrayContaining(["run_route_effective_score:260"]),
           }),
         ]),
       },

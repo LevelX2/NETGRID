@@ -25,11 +25,11 @@ SQLite-Evidence des parallelen Worktrees. Es wurde keine Datenbank gelöscht.
 
 ## Ergebnis wie im Programm
 
-| Partie | Standarddecks | Endergebnis | Agendapunkte | Ende | Entscheidungen |
-| ------ | ------------- | ----------: | ------------: | ---- | --------------: |
-| Seed 1 | **Last Call at R&D** gegen **The Korp Master** | Runner **10 – 6** Corp | **9:6** | Agendapunkte | 309 |
-| Seed 2 | **Last Call at R&D** gegen **The Korp Master** | Corp **10 – 6** Runner | **8:6** | Agendapunkte | 412 |
-| Seed 3 | **Last Call at R&D** gegen **The Korp Master** | Runner **10 – 0** Corp | **7:0** | Agendapunkte | 29 |
+| Partie | Standarddecks                                  |            Endergebnis | Agendapunkte | Ende         | Entscheidungen |
+| ------ | ---------------------------------------------- | ---------------------: | -----------: | ------------ | -------------: |
+| Seed 1 | **Last Call at R&D** gegen **The Korp Master** | Runner **10 – 6** Corp |      **9:6** | Agendapunkte |            309 |
+| Seed 2 | **Last Call at R&D** gegen **The Korp Master** | Corp **10 – 6** Runner |      **8:6** | Agendapunkte |            412 |
+| Seed 3 | **Last Call at R&D** gegen **The Korp Master** | Runner **10 – 0** Corp |      **7:0** | Agendapunkte |             29 |
 
 Die finalen Match-IDs lauten `match_82b93c00da356d18`,
 `match_306137f2b76a69f7` und `match_2d9a84992cb6622f`.

@@ -1,6 +1,8 @@
 import type { ApiAiPacingMode } from "@netgrid/shared";
 
-export const CARD_TOOLTIP_HOVER_DELAY_OPTIONS = [300, 500, 750, 1000, 1250, 1500] as const;
+export const CARD_TOOLTIP_HOVER_DELAY_OPTIONS = [
+  300, 500, 750, 1000, 1250, 1500,
+] as const;
 export const CARD_TOOLTIP_HOVER_OPEN_DELAY_MS = 1000;
 export const CARD_TOOLTIP_HOVER_CLOSE_DELAY_MS = 120;
 export const CARD_TOOLTIP_OUTSIDE_CARD_CLICK_CLOSE_DELAY_MS = 450;
@@ -21,7 +23,8 @@ export type ResourceStripMode = "auto" | "on" | "off";
 export type ActionPanelMode = "docked" | "floating";
 export type CueDisplayMode = "window" | "floating";
 export type CueAutoDismissMs = number;
-export type CardTooltipHoverDelayMs = (typeof CARD_TOOLTIP_HOVER_DELAY_OPTIONS)[number];
+export type CardTooltipHoverDelayMs =
+  (typeof CARD_TOOLTIP_HOVER_DELAY_OPTIONS)[number];
 export type CardTooltipMode = "simple" | "enhanced" | "image";
 
 export type CardTooltipSettings = {
@@ -43,20 +46,33 @@ export type CardScaleSettings = {
 export function normalizeCueAutoDismissMs(value: unknown): CueAutoDismissMs {
   const numeric = typeof value === "number" ? value : Number(value);
   if (!Number.isFinite(numeric) || numeric === 0) return 2500;
-  const clamped = Math.max(CUE_AUTO_DISMISS_MIN_MS, Math.min(CUE_AUTO_DISMISS_MAX_MS, numeric));
-  return Math.round(clamped / CUE_AUTO_DISMISS_STEP_MS) * CUE_AUTO_DISMISS_STEP_MS;
+  const clamped = Math.max(
+    CUE_AUTO_DISMISS_MIN_MS,
+    Math.min(CUE_AUTO_DISMISS_MAX_MS, numeric),
+  );
+  return (
+    Math.round(clamped / CUE_AUTO_DISMISS_STEP_MS) * CUE_AUTO_DISMISS_STEP_MS
+  );
 }
 
 export function normalizeCueDisplayMode(value: unknown): CueDisplayMode {
   return value === "floating" || value === "window" ? value : "window";
 }
 
-export function normalizeCardTooltipHoverDelayMs(value: unknown): CardTooltipHoverDelayMs {
-  return CARD_TOOLTIP_HOVER_DELAY_OPTIONS.includes(value as CardTooltipHoverDelayMs) ? (value as CardTooltipHoverDelayMs) : CARD_TOOLTIP_HOVER_OPEN_DELAY_MS;
+export function normalizeCardTooltipHoverDelayMs(
+  value: unknown,
+): CardTooltipHoverDelayMs {
+  return CARD_TOOLTIP_HOVER_DELAY_OPTIONS.includes(
+    value as CardTooltipHoverDelayMs,
+  )
+    ? (value as CardTooltipHoverDelayMs)
+    : CARD_TOOLTIP_HOVER_OPEN_DELAY_MS;
 }
 
 export function normalizeCardTooltipMode(value: unknown): CardTooltipMode {
-  return value === "simple" || value === "enhanced" || value === "image" ? value : "enhanced";
+  return value === "simple" || value === "enhanced" || value === "image"
+    ? value
+    : "enhanced";
 }
 
 export function normalizeCardTooltipRuleTranslation(value: unknown): boolean {
@@ -64,15 +80,23 @@ export function normalizeCardTooltipRuleTranslation(value: unknown): boolean {
 }
 
 export function normalizeCardDisplayMode(value: unknown): CardDisplayMode {
-  return value === "text-card" || value === "compact" || value === "placeholder" ? value : "placeholder";
+  return value === "text-card" || value === "compact" || value === "placeholder"
+    ? value
+    : "placeholder";
 }
 
-export function normalizeChronicleDetailMode(value: unknown): ChronicleDetailMode {
-  return value === "simple" || value === "medium" || value === "full" ? value : "full";
+export function normalizeChronicleDetailMode(
+  value: unknown,
+): ChronicleDetailMode {
+  return value === "simple" || value === "medium" || value === "full"
+    ? value
+    : "full";
 }
 
 export function normalizeAiPacingMode(value: unknown): AiPacingMode {
-  return value === "manual" || value === "paced" || value === "fast" ? value : "paced";
+  return value === "manual" || value === "paced" || value === "fast"
+    ? value
+    : "paced";
 }
 
 export function normalizeResourceStripMode(value: unknown): ResourceStripMode {
@@ -83,10 +107,15 @@ export function normalizeActionPanelMode(value: unknown): ActionPanelMode {
   return value === "floating" || value === "docked" ? value : "docked";
 }
 
-export function normalizeCardScalePercent(value: unknown, min = CARD_SCALE_PERCENT_MIN, max = CARD_SCALE_PERCENT_MAX): number {
+export function normalizeCardScalePercent(
+  value: unknown,
+  min = CARD_SCALE_PERCENT_MIN,
+  max = CARD_SCALE_PERCENT_MAX,
+): number {
   const numeric = typeof value === "number" ? value : Number(value);
   if (!Number.isFinite(numeric)) return CARD_SCALE_DEFAULT_PERCENT;
   const clamped = Math.max(min, Math.min(max, numeric));
-  const snapped = Math.round(clamped / CARD_SCALE_PERCENT_STEP) * CARD_SCALE_PERCENT_STEP;
+  const snapped =
+    Math.round(clamped / CARD_SCALE_PERCENT_STEP) * CARD_SCALE_PERCENT_STEP;
   return Math.max(min, Math.min(max, snapped));
 }

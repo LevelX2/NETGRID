@@ -66,7 +66,9 @@ describe("match 03575 runner decision checkpoints", () => {
           planExecution: {
             acceptablePlanKinds: ["runner.contest_remote"],
             acceptableCapabilities: ["contest_remote"],
-            requiredAssessmentEvidence: ["runner_direct_run_converts_now:remote_1"],
+            requiredAssessmentEvidence: [
+              "runner_direct_run_converts_now:remote_1",
+            ],
           },
         };
       },

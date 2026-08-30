@@ -24,7 +24,9 @@ export function alignRunTargetAction(
   candidate: ActionSemanticCandidate,
   target: RunTargetActionAlignmentTarget,
 ): RunTargetActionAlignment {
-  const runTargetId = normalizeServerId(target.targetServerId ?? target.targetId);
+  const runTargetId = normalizeServerId(
+    target.targetServerId ?? target.targetId,
+  );
   const candidateServers = candidateRunServers(candidate);
   const candidateServerIds = candidateServers.serverIds;
   const candidateServerIdSet = new Set(candidateServerIds);
@@ -42,7 +44,9 @@ export function alignRunTargetAction(
     aligned,
     evidence: [
       `candidate_semantic:${candidate.semanticActionType}`,
-      ...(serverId ? [`candidate_server:${serverId}`] : ["candidate_server:none"]),
+      ...(serverId
+        ? [`candidate_server:${serverId}`]
+        : ["candidate_server:none"]),
       ...(candidateServers.source
         ? [`candidate_server_source:${candidateServers.source}`]
         : ["candidate_server_source:none"]),
@@ -56,7 +60,9 @@ function candidateRunServers(candidate: ActionSemanticCandidate): {
   serverIds: string[];
   source?: ActionRunProjectionSummary["source"] | "evidence";
 } {
-  const fromSummary = normalizeServerId(candidate.runProjectionSummary?.serverId);
+  const fromSummary = normalizeServerId(
+    candidate.runProjectionSummary?.serverId,
+  );
   if (fromSummary) {
     return {
       serverIds: [fromSummary],
@@ -124,8 +130,11 @@ function stripServerPrefix(value: string): string {
 }
 
 function normalizeRemoteServerId(value: string): string | undefined {
-  const prefix =
-    value.startsWith("remote_") ? "remote_" : value.startsWith("remote-") ? "remote-" : undefined;
+  const prefix = value.startsWith("remote_")
+    ? "remote_"
+    : value.startsWith("remote-")
+      ? "remote-"
+      : undefined;
   if (!prefix) return undefined;
   const suffix = value.slice(prefix.length);
   if (suffix.length === 0 || !onlyAsciiDigits(suffix)) return undefined;

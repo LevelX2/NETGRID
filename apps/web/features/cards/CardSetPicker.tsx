@@ -48,9 +48,7 @@ export function CardSetPicker({
             type="checkbox"
             checked={original}
             disabled={originalDisabled}
-            onChange={(event) =>
-              onSetChange("original", event.target.checked)
-            }
+            onChange={(event) => onSetChange("original", event.target.checked)}
             data-testid={`${testIdPrefix}-original`}
           />
           <Layers3 size={18} aria-hidden="true" />

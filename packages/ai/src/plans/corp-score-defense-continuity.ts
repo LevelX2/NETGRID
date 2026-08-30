@@ -294,9 +294,6 @@ export function corpResidentScoreAgendaInstanceId(
   input: AiDecisionInput,
   visibleCardIsAgenda: CorpVisibleAgendaPredicate,
 ): string | undefined {
-  return corpResidentScoreDefenseBinding(
-    previous,
-    input,
-    visibleCardIsAgenda,
-  )?.agendaInstanceId;
+  return corpResidentScoreDefenseBinding(previous, input, visibleCardIsAgenda)
+    ?.agendaInstanceId;
 }

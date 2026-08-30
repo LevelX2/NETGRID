@@ -3,9 +3,7 @@
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { useTranslations } from "use-intl/react";
 
-import {
-  type StandardDeckCatalogState,
-} from "../account/standard-deck-catalog-state";
+import { type StandardDeckCatalogState } from "../account/standard-deck-catalog-state";
 
 export function StandardDeckCatalogStatus({
   state,
@@ -15,15 +13,26 @@ export function StandardDeckCatalogStatus({
   onRetry(): void;
 }) {
   const t = useTranslations("MatchStart.catalogStatus");
-  if (state.phase === "ready" && !state.refreshing && state.lastError === undefined) return null;
+  if (
+    state.phase === "ready" &&
+    !state.refreshing &&
+    state.lastError === undefined
+  )
+    return null;
 
   const error = state.lastError;
   const stale = state.hasUsableCatalog && error !== undefined;
   const title = error
-    ? stale ? t("staleTitle") : t("errorTitle")
-    : state.refreshing && state.hasUsableCatalog ? t("refreshingTitle") : t("loadingTitle");
+    ? stale
+      ? t("staleTitle")
+      : t("errorTitle")
+    : state.refreshing && state.hasUsableCatalog
+      ? t("refreshingTitle")
+      : t("loadingTitle");
   const description = error
-    ? stale ? t("staleDescription") : t("errorDescription")
+    ? stale
+      ? t("staleDescription")
+      : t("errorDescription")
     : t("loadingDescription");
   return (
     <section
@@ -86,9 +95,7 @@ export function StandardDeckCatalogStatus({
         </div>
       ) : null}
       {error !== undefined && state.attempt >= 2 ? (
-        <small>
-          {t("recoveryHint")}
-        </small>
+        <small>{t("recoveryHint")}</small>
       ) : null}
     </section>
   );

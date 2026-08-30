@@ -12,21 +12,33 @@ describe("browser leak scanner mutation witnesses", () => {
 
     await expectNoDomOrLocalStorageLeaks(page);
     await expectRecentSessionsAreSanitized(page);
-    expectNoServerPayloadLeaks({ received: ['{"type":"state_updated","stateVersion":7}'] });
+    expectNoServerPayloadLeaks({
+      received: ['{"type":"state_updated","stateVersion":7}'],
+    });
   });
 
   it("fails when a forbidden token is planted in each observed surface", async () => {
     const contaminatedPage = pageReturning("sessionToken=planted-secret");
 
-    await expect(expectNoDomOrLocalStorageLeaks(contaminatedPage)).rejects.toThrow(/sessionToken/i);
-    await expect(expectRecentSessionsAreSanitized(contaminatedPage)).rejects.toThrow(/sessionToken/i);
-    expect(() => expectNoServerPayloadLeaks({ received: ['{"privatePayload":"planted-secret"}'] })).toThrow(/privatePayload/i);
+    await expect(
+      expectNoDomOrLocalStorageLeaks(contaminatedPage),
+    ).rejects.toThrow(/sessionToken/i);
+    await expect(
+      expectRecentSessionsAreSanitized(contaminatedPage),
+    ).rejects.toThrow(/sessionToken/i);
+    expect(() =>
+      expectNoServerPayloadLeaks({
+        received: ['{"privatePayload":"planted-secret"}'],
+      }),
+    ).toThrow(/privatePayload/i);
   });
 
   it("fails when the exact hidden card title is planted without a generic token", async () => {
     const page = pageReturning("Verdeckte Karte: Project Junebug");
 
-    await expect(expectNoDomOrLocalStorageLeaks(page, ["Project Junebug"])).rejects.toThrow(/Project Junebug/);
+    await expect(
+      expectNoDomOrLocalStorageLeaks(page, ["Project Junebug"]),
+    ).rejects.toThrow(/Project Junebug/);
   });
 });
 

@@ -94,20 +94,20 @@ Nicht erlaubt:
 
 Import und Normalisierung verwenden semantische Tokens. Die UI entscheidet, ob daraus Text, Icon, Chip oder eine kombinierte Darstellung wird.
 
-| Token | Bedeutung | Sichtbarer Standard |
-| --- | --- | --- |
-| `click` | Aktion/Klick-Kosten | `1 Aktion`, `2 Aktionen` oder eckiger Aktionsslot |
-| `credit` | Credit-Kosten oder Credit-Gewinn | Zahl in generischem Credit-Symbol; Plain-Text-Fallback `1 Credit`, `2 Credits` |
-| `subroutine` | ICE-Subroutine-Marker | eigene Subroutine-Zeile mit Marker |
-| `trash` | Trash-Kosten oder Trash-Effekt | generisches Trash-Symbol oder `Trash` |
-| `mu` | Memory Unit | `MU` |
-| `link` | Link-Wert | `Link` |
-| `tag` | Tag | `Tag` / `Tags` |
-| `agenda_point` | Agendapunkt | `Agendapunkt` / `Agendapunkte` |
-| `strength` | Stärke | `Stärke` |
-| `recurring_credit` | wiederkehrender Credit | `wiederkehrender Credit` oder eigener Credit-Chip |
-| `bad_publicity` | Bad Publicity | `Bad Publicity` |
-| `virus_counter` | Virus-Counter | `Virus-Counter` |
+| Token              | Bedeutung                        | Sichtbarer Standard                                                            |
+| ------------------ | -------------------------------- | ------------------------------------------------------------------------------ |
+| `click`            | Aktion/Klick-Kosten              | `1 Aktion`, `2 Aktionen` oder eckiger Aktionsslot                              |
+| `credit`           | Credit-Kosten oder Credit-Gewinn | Zahl in generischem Credit-Symbol; Plain-Text-Fallback `1 Credit`, `2 Credits` |
+| `subroutine`       | ICE-Subroutine-Marker            | eigene Subroutine-Zeile mit Marker                                             |
+| `trash`            | Trash-Kosten oder Trash-Effekt   | generisches Trash-Symbol oder `Trash`                                          |
+| `mu`               | Memory Unit                      | `MU`                                                                           |
+| `link`             | Link-Wert                        | `Link`                                                                         |
+| `tag`              | Tag                              | `Tag` / `Tags`                                                                 |
+| `agenda_point`     | Agendapunkt                      | `Agendapunkt` / `Agendapunkte`                                                 |
+| `strength`         | Stärke                           | `Stärke`                                                                       |
+| `recurring_credit` | wiederkehrender Credit           | `wiederkehrender Credit` oder eigener Credit-Chip                              |
+| `bad_publicity`    | Bad Publicity                    | `Bad Publicity`                                                                |
+| `virus_counter`    | Virus-Counter                    | `Virus-Counter`                                                                |
 
 Offizielle NETGRID-Symbole, offizielle Card Frames, offizielle Card Backs, Logos oder externe Asset-Abhängigkeiten bleiben ausgeschlossen, solange kein späteres Asset-Gate das ausdrücklich ändert. Generische Icons und CSS-Formen sind erlaubt.
 
@@ -143,14 +143,14 @@ Die UI darf die Kostenseite zusätzlich als Chip darstellen, muss aber denselben
 
 Für normalisierte deutsche Kartentexte gelten diese kanonischen Begriffe:
 
-| Mechanik | Kanonischer Text | Nicht verwenden |
-| --- | --- | --- |
-| `break_subroutine` | `Breche 1 <ICE-Typ>-Subroutine.` | `Brich`, rohe `break_subroutine`-IDs |
-| `pump_strength` | `+1 Stärke.` | `pump`, `strength pump` |
-| `end_the_run` | `Beende den Run.` | rohes `End the run`, wenn der Text deutsch normalisiert wird |
-| `gain_credits` | `Erhalte X Credits.` | `Gain`, rohe Effekt-IDs |
-| `draw_card` | `Ziehe X Karten.` | `Draw`, rohe Effekt-IDs |
-| `do_damage` | `Verursache X <Schadenstyp>-Schaden.` | rohe Damage-IDs |
+| Mechanik           | Kanonischer Text                      | Nicht verwenden                                              |
+| ------------------ | ------------------------------------- | ------------------------------------------------------------ |
+| `break_subroutine` | `Breche 1 <ICE-Typ>-Subroutine.`      | `Brich`, rohe `break_subroutine`-IDs                         |
+| `pump_strength`    | `+1 Stärke.`                          | `pump`, `strength pump`                                      |
+| `end_the_run`      | `Beende den Run.`                     | rohes `End the run`, wenn der Text deutsch normalisiert wird |
+| `gain_credits`     | `Erhalte X Credits.`                  | `Gain`, rohe Effekt-IDs                                      |
+| `draw_card`        | `Ziehe X Karten.`                     | `Draw`, rohe Effekt-IDs                                      |
+| `do_damage`        | `Verursache X <Schadenstyp>-Schaden.` | rohe Damage-IDs                                              |
 
 Bestätigte originale englische Kartentexte dürfen separat als `originalText` erhalten bleiben. Sobald ein Text als normalisierter deutscher Regeltext ausgegeben wird, gelten die kanonischen Begriffe.
 
@@ -164,7 +164,7 @@ Plain-Text-Format:
 <Kosten>: <Effekt>
 ```
 
-Bei mehreren Kosten wird mit ` + ` verbunden:
+Bei mehreren Kosten wird mit `+` verbunden:
 
 ```txt
 1 Aktion + 2 Credits: Ziehe 2 Karten.

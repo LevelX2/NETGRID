@@ -116,8 +116,14 @@ export type SemanticShadowLeagueReport = {
     blockedByReason: Record<string, number>;
     averageScoreGap: number | null;
     pilotEligibilityRate: number | null;
-    pilotEligibilityBySide: Record<Side, SemanticShadowLeaguePilotEligibilityBySide>;
-    scopeBreakdown: Record<AiPlayStrengthPilotScope, SemanticShadowLeaguePilotScopeBreakdown>;
+    pilotEligibilityBySide: Record<
+      Side,
+      SemanticShadowLeaguePilotEligibilityBySide
+    >;
+    scopeBreakdown: Record<
+      AiPlayStrengthPilotScope,
+      SemanticShadowLeaguePilotScopeBreakdown
+    >;
     remoteContestPilotCandidateCount: number;
     remoteContestPilotCandidateScenarioIds: string[];
     rankedActionCount: number;
@@ -388,9 +394,12 @@ function segmentHasBoundedTerm(segment: string, term: string): boolean {
   const tokens = segment.split("_").filter(Boolean);
   const termTokens = term.split("_").filter(Boolean);
   if (termTokens.length <= 1) return segmentTokensInclude(tokens, term);
-  return tokens.some((token, index) =>
-    token === termTokens[0] &&
-    termTokens.every((termToken, offset) => tokens[index + offset] === termToken),
+  return tokens.some(
+    (token, index) =>
+      token === termTokens[0] &&
+      termTokens.every(
+        (termToken, offset) => tokens[index + offset] === termToken,
+      ),
   );
 }
 
@@ -407,9 +416,13 @@ function buildScenarioReport(
 ): SemanticShadowLeagueScenarioReport {
   const top = sample.trace.rankedActions[0];
   const topCandidate = top
-    ? sample.frame.actionCandidates.find((candidate) => candidate.actionId === top.actionId)
+    ? sample.frame.actionCandidates.find(
+        (candidate) => candidate.actionId === top.actionId,
+      )
     : undefined;
-  const expectedTopActionTypes = sanitizeList(expectation?.expectedTopActionTypes);
+  const expectedTopActionTypes = sanitizeList(
+    expectation?.expectedTopActionTypes,
+  );
   const expectedTopActionIds = sanitizeList(expectation?.expectedTopActionIds);
   const expectedPilotEligibleScopes = sanitizePilotScopes(
     expectation?.pilotEligibleScopes,
@@ -450,7 +463,9 @@ function buildScenarioReport(
     rankedActionCount: sample.trace.rankedActions.length,
     rejectedActionCount: sample.trace.rejectedActions.length,
     ...(top ? { topActionId: safe(top.actionId), topScore: top.score } : {}),
-    ...(topCandidate?.actionType ? { topActionType: safe(topCandidate.actionType) } : {}),
+    ...(topCandidate?.actionType
+      ? { topActionType: safe(topCandidate.actionType) }
+      : {}),
     ...(topCandidate?.semanticActionType
       ? { topSemanticActionType: safe(topCandidate.semanticActionType) }
       : {}),
@@ -503,7 +518,9 @@ function buildLeagueMetrics(
   samples: readonly RealEngineDecisionCorpusSample[],
 ): SemanticShadowLeagueReport["metrics"] {
   const compared = scenarios.filter((scenario) => scenario.agreementCompared);
-  const agreementCount = compared.filter((scenario) => scenario.agreement).length;
+  const agreementCount = compared.filter(
+    (scenario) => scenario.agreement,
+  ).length;
   const pilotEligibleCount = scenarios.filter(
     (scenario) => scenario.pilotEligibility.eligible,
   ).length;
@@ -538,7 +555,9 @@ function buildLeagueMetrics(
     agreementComparedCount: compared.length,
     agreementCount,
     agreementRate:
-      compared.length > 0 ? roundMetric(agreementCount / compared.length) : null,
+      compared.length > 0
+        ? roundMetric(agreementCount / compared.length)
+        : null,
     mistakeCount: scenarios.reduce(
       (sum, scenario) => sum + scenario.observedMistakes.length,
       0,
@@ -560,10 +579,15 @@ function buildLeagueMetrics(
     ),
     averageScoreGap:
       scoreGaps.length > 0
-        ? roundMetric(scoreGaps.reduce((sum, scoreGap) => sum + scoreGap, 0) / scoreGaps.length)
+        ? roundMetric(
+            scoreGaps.reduce((sum, scoreGap) => sum + scoreGap, 0) /
+              scoreGaps.length,
+          )
         : null,
     pilotEligibilityRate:
-      scenarios.length > 0 ? roundMetric(pilotEligibleCount / scenarios.length) : null,
+      scenarios.length > 0
+        ? roundMetric(pilotEligibleCount / scenarios.length)
+        : null,
     pilotEligibilityBySide: pilotEligibilityBySide(scenarios),
     scopeBreakdown: pilotScopeBreakdown(scenarios),
     remoteContestPilotCandidateCount: scenarios.filter(
@@ -583,7 +607,9 @@ function buildLeagueMetrics(
     ),
     topScoreAverage:
       topScores.length > 0
-        ? roundMetric(topScores.reduce((sum, score) => sum + score, 0) / topScores.length)
+        ? roundMetric(
+            topScores.reduce((sum, score) => sum + score, 0) / topScores.length,
+          )
         : null,
     topScoreMin: topScores.length > 0 ? Math.min(...topScores) : null,
     topScoreMax: topScores.length > 0 ? Math.max(...topScores) : null,
@@ -791,7 +817,9 @@ function remoteContestPilotCandidateFor(
     ...(result.pathPassability
       ? { pathPassability: safe(result.pathPassability) }
       : {}),
-    ...(result.blockedReason ? { blockedReason: safe(result.blockedReason) } : {}),
+    ...(result.blockedReason
+      ? { blockedReason: safe(result.blockedReason) }
+      : {}),
     evidence: result.evidence.map(safe),
   };
 }
@@ -984,7 +1012,9 @@ function topDisagreementReasons(
         `${scenario.scenarioId}:expected=${[
           ...(scenario.expectedTopActionTypes ?? []),
           ...(scenario.expectedTopActionIds ?? []),
-        ].join("|")}:observed=${scenario.topActionType ?? scenario.topActionId ?? "none"}`,
+        ].join(
+          "|",
+        )}:observed=${scenario.topActionType ?? scenario.topActionId ?? "none"}`,
       ),
     )
     .sort();
@@ -1015,7 +1045,9 @@ function followupCandidatesForScenario(
   const expectedScopes = scenario.expectedPilotEligibleScopes ?? [];
   if (
     expectedScopes.length > 0 &&
-    expectedScopes.some((scope) => !scenario.pilotEligibility.scopes.includes(scope))
+    expectedScopes.some(
+      (scope) => !scenario.pilotEligibility.scopes.includes(scope),
+    )
   ) {
     candidates.push(followupCandidate(scenario, "pilot_blocked"));
   }
@@ -1039,9 +1071,13 @@ function followupCandidate(
     evidence: [
       `scenario:${scenario.scenarioId}`,
       `issue_class:${issueClass}`,
-      ...(scenario.topActionType ? [`top_action_type:${scenario.topActionType}`] : []),
+      ...(scenario.topActionType
+        ? [`top_action_type:${scenario.topActionType}`]
+        : []),
       ...(scenario.topGoalId ? [`top_goal:${scenario.topGoalId}`] : []),
-      ...scenario.observedMistakes.map((mistake) => `observed_mistake:${mistake}`),
+      ...scenario.observedMistakes.map(
+        (mistake) => `observed_mistake:${mistake}`,
+      ),
     ].map(safe),
   };
 }

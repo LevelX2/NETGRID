@@ -1,4 +1,7 @@
-import { centralServerId, isRemoteServerTarget } from "../runtime/server-target";
+import {
+  centralServerId,
+  isRemoteServerTarget,
+} from "../runtime/server-target";
 import { rolesMatch } from "../runtime/role-match";
 
 export type PlanConversionDecisionEntry = {
@@ -70,8 +73,7 @@ const CORP_STRATEGIC_ACTION_TYPES = [
 export function isStrategicPlanDecision(
   entry: PlanConversionDecisionEntry,
 ): boolean {
-  if (NON_STRATEGIC_ACTION_TYPES.includes(entry.actionType ?? ""))
-    return false;
+  if (NON_STRATEGIC_ACTION_TYPES.includes(entry.actionType ?? "")) return false;
   if (entry.actionType === "resolve_choice")
     return (
       entry.advancementCountersAdded !== undefined ||
@@ -295,10 +297,7 @@ export function corpRemoteCreatedConvertsTo<
 
 export function planConversionEntryHasMeaningfulBoardProgress<
   T extends PlanConversionDecisionEntry,
->(
-  entry: T,
-  isCorpRemoteAdvancementProgress: (entry: T) => boolean,
-): boolean {
+>(entry: T, isCorpRemoteAdvancementProgress: (entry: T) => boolean): boolean {
   if (
     entry.actionType === "score_agenda" ||
     entry.actionType === "steal_agenda"
@@ -456,7 +455,9 @@ export function serverTargetsMatch(
   return first.targetServerId === second.targetServerId;
 }
 
-export function runnerRunHasFollowupValue<T extends PlanConversionDecisionEntry>(
+export function runnerRunHasFollowupValue<
+  T extends PlanConversionDecisionEntry,
+>(
   sequence: T[],
   runIndex: number,
   isMeaningfulProgress: (entry: T) => boolean,
@@ -476,9 +477,7 @@ export function runnerRunHasFollowupValue<T extends PlanConversionDecisionEntry>
   );
 }
 
-export function setupActionConvertsToRun<
-  T extends PlanConversionDecisionEntry,
->(
+export function setupActionConvertsToRun<T extends PlanConversionDecisionEntry>(
   sequence: T[],
   index: number,
   isMeaningfulProgress: (entry: T) => boolean,
@@ -630,15 +629,13 @@ export function planIntentConvertedWithin<
     return remoteContestConvertsToStealOrTrash(sequence, index);
   if (planKindMatches(planKind, ["central", "pressure"]))
     return centralPressureConvertsToSteal(sequence, index);
-  return hasMeaningfulProgressWithin(
-    sequence,
-    index,
-    3,
-    isMeaningfulProgress,
-  );
+  return hasMeaningfulProgressWithin(sequence, index, 3, isMeaningfulProgress);
 }
 
-function planKindMatches(planKind: string, needles: readonly string[]): boolean {
+function planKindMatches(
+  planKind: string,
+  needles: readonly string[],
+): boolean {
   return rolesMatch([planKind], needles);
 }
 

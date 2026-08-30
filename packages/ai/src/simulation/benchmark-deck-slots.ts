@@ -210,7 +210,9 @@ const CORE_MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefinition
 export const MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefinition[] =
   [
     ...CORE_MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS,
-    ...missingCorpStrategyPanelSlots(CORE_MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS),
+    ...missingCorpStrategyPanelSlots(
+      CORE_MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS,
+    ),
   ];
 
 function runnerArchetypeFromRole(

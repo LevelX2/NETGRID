@@ -92,23 +92,23 @@ unerreichbar werden.
 ## Akzeptanzkriterien
 
 - [ ] Auf 360 × 640 und 390 × 844 Pixel großen Portrait-Viewports bleibt die
-  Endstandsanzeige innerhalb des nutzbaren dynamischen Viewports.
+      Endstandsanzeige innerhalb des nutzbaren dynamischen Viewports.
 - [ ] Kein gerenderter Endstandsaktionsknopf wird dauerhaft unterhalb eines
-  nicht scrollbaren oder abgeschnittenen Bereichs verborgen.
+      nicht scrollbaren oder abgeschnittenen Bereichs verborgen.
 - [ ] Replay, Aufbewahrung, „Board ansehen“, gegebenenfalls „Nächstes
-  Serienspiel“ und der Match-/Serienausstieg sind in ihren jeweiligen
-  Zuständen per Touch erreichbar.
+      Serienspiel“ und der Match-/Serienausstieg sind in ihren jeweiligen
+      Zuständen per Touch erreichbar.
 - [ ] Ein notwendiger interner Scrollbereich ist sichtbar nutzbar, scrollt
-  Inhalt und Aktionen zuverlässig und berücksichtigt obere/untere Safe Areas
-  sowie mobile Browserleisten.
+      Inhalt und Aktionen zuverlässig und berücksichtigt obere/untere Safe Areas
+      sowie mobile Browserleisten.
 - [ ] Ergebnisüberschrift und primäre nächste Aktion sind auf kurzen
-  Bildschirmen ohne browserseitigen Zoom verständlich erkennbar.
+      Bildschirmen ohne browserseitigen Zoom verständlich erkennbar.
 - [ ] Einzelmatch sowie laufende und abgeschlossene Serie sind geprüft; der
-  zusätzliche Serieninhalt verursacht keine erneute Footer-Abschneidung.
+      zusätzliche Serieninhalt verursacht keine erneute Footer-Abschneidung.
 - [ ] Desktopdarstellung und bestehende Funktionen der Endstandsaktionen
-  bleiben unverändert.
+      bleiben unverändert.
 - [ ] Ein fokussierter automatisierter Test und eine visuelle Prüfung in
-  Firefox bei mindestens einem kleinen mobilen Viewport sichern den Befund ab.
+      Firefox bei mindestens einem kleinen mobilen Viewport sichern den Befund ab.
 
 ## Umsetzungshinweise
 

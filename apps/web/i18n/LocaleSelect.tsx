@@ -51,9 +51,7 @@ export function LocaleSelect({
 
   return (
     <label className={`localeSelect ${className}`.trim()}>
-      {presentation === "header" ? (
-        <LanguageGlobeIcon />
-      ) : null}
+      {presentation === "header" ? <LanguageGlobeIcon /> : null}
       <span className="srOnly">{t("groupLabel")}</span>
       <select
         value={locale}

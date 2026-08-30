@@ -29,8 +29,7 @@ describe("match 5a14 runner visible damage hand floor checkpoints", () => {
     expect(result.decision?.actionId).toBe("runner.jack_out");
     expect(result.decision?.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-      leafExecutorInstanceId:
-        "plan:runner.convert_run_window:run%3Arun_89",
+      leafExecutorInstanceId: "plan:runner.convert_run_window:run%3Arun_89",
       selectedStep: {
         planInstanceId: "plan:runner.convert_run_window:run%3Arun_89",
         parentInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",

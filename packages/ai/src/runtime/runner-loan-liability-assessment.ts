@@ -1,4 +1,8 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 
 type RunnerLoanGamePhase = "opening" | "midgame" | "late";
 type RunnerLoanLiabilitySeverity = "low" | "medium" | "high" | "critical";
@@ -169,7 +173,10 @@ export function runnerLoanLiabilityAssessment(
   dependencies: RunnerLoanLiabilityAssessmentDependencies,
 ): RunnerLoanLiabilityAssessment | undefined {
   if (input.side !== "runner" || action.side !== "runner") return undefined;
-  const loanDefinitionId = dependencies.loanDefinitionIdForAction(input, action);
+  const loanDefinitionId = dependencies.loanDefinitionIdForAction(
+    input,
+    action,
+  );
   const loanInstallAction = loanDefinitionId !== undefined;
   const installedLoan = dependencies.installedLoanCards(input)[0];
   const loanAlreadyInstalled = installedLoan !== undefined;

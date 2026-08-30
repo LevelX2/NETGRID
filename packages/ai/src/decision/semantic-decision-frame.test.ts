@@ -27,10 +27,9 @@ describe("SemanticDecisionFrame", () => {
     });
 
     expect(frame.legalActionIds).toEqual(["runner-1", "runner-2"]);
-    expect(frame.actionCandidates.map((candidate) => candidate.actionId)).toEqual([
-      "runner-1",
-      "runner-2",
-    ]);
+    expect(
+      frame.actionCandidates.map((candidate) => candidate.actionId),
+    ).toEqual(["runner-1", "runner-2"]);
     expect(frame.economyContext).toMatchObject({
       availableCredits: 5,
       clicksRemaining: 3,
@@ -237,7 +236,10 @@ function goal(goalId: string, family: string): TacticalGoalLike {
   };
 }
 
-function inputFor(side: "runner" | "corp", legalActions: LegalAction[]): AiDecisionInput {
+function inputFor(
+  side: "runner" | "corp",
+  legalActions: LegalAction[],
+): AiDecisionInput {
   return {
     side,
     playerView: playerViewFor(side, legalActions),
@@ -251,7 +253,10 @@ function inputFor(side: "runner" | "corp", legalActions: LegalAction[]): AiDecis
   };
 }
 
-function playerViewFor(side: "runner" | "corp", legalActions: LegalAction[]): PlayerView {
+function playerViewFor(
+  side: "runner" | "corp",
+  legalActions: LegalAction[],
+): PlayerView {
   return {
     side,
     stateVersion: 12,

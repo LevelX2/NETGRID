@@ -115,7 +115,8 @@ export function buildLocalDefaultPilotPolicy(): LocalDefaultPilotPolicy {
         corpusReadiness: "insufficient_for_default",
         falsePositiveRisk: "high",
         hiddenInfoRisk: "low",
-        rationale: "Corp score window remains env-gated pending broader corpus.",
+        rationale:
+          "Corp score window remains env-gated pending broader corpus.",
         evidence: [
           "assessment:corp_score_window:keep_env_gated",
           "decision:corp_score_window:keep_env_gated",

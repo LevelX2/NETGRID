@@ -64,9 +64,7 @@ describe("match ECFE3CE Broker portfolio checkpoints", () => {
         (section) => section.id === "plan_portfolio",
       )?.items ?? [];
 
-    expect(result.decision?.decisionDebug?.planKind).toBe(
-      "runner.credit_bank",
-    );
+    expect(result.decision?.decisionDebug?.planKind).toBe("runner.credit_bank");
     expect(portfolio).toEqual(
       expect.arrayContaining([
         expect.stringMatching(

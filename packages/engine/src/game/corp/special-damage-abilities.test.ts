@@ -24,7 +24,11 @@ function definition(
 function instance(
   id: string,
   definitionId: string,
-  zone: CardInstance["zone"] = { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+  zone: CardInstance["zone"] = {
+    side: "corp",
+    zone: "serverRoot",
+    serverId: "remote_1",
+  },
 ): CardInstance {
   return {
     id: id as CardInstanceId,
@@ -126,7 +130,14 @@ function makeHost(legalAction?: LegalAction) {
     },
     actions: {
       buildLegalAction: (side, type, label, source, costs, payload) => {
-        const action = { side, type, label, source, costs, payload } as LegalAction;
+        const action = {
+          side,
+          type,
+          label,
+          source,
+          costs,
+          payload,
+        } as LegalAction;
         calls.builtActions.push(action);
         return action;
       },
@@ -168,7 +179,8 @@ function makeHost(legalAction?: LegalAction) {
       randomCounter: () => state.randomCounter,
     },
     trash: {
-      trashCorpInstalledCardToArchives: (cardId) => calls.trashedCorp.push(cardId),
+      trashCorpInstalledCardToArchives: (cardId) =>
+        calls.trashedCorp.push(cardId),
     },
   };
   return { host, calls };

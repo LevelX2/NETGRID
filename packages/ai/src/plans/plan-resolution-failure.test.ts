@@ -7,24 +7,21 @@ import {
 
 describe("PlanResolutionFailure", () => {
   it("normalizes a deterministic redacted failure context", () => {
-    const failure = new PlanResolutionFailure(
-      "missing_plan_module_coverage",
-      {
-        side: "runner",
-        stateVersion: 12.9,
-        timingPoint: "runner_action.main",
-        legalActionTypes: ["draw_card", "gain_credit", "draw_card"],
-        unresolvedActionIds: [
-          "runner.draw",
-          "runner install/card",
-          "runner.draw",
-        ],
-        owner: "plan_registry",
-        removalCondition:
-          "Add a domain plan for the uncovered semantic action family.",
-        candidateCount: 2.8,
-      },
-    );
+    const failure = new PlanResolutionFailure("missing_plan_module_coverage", {
+      side: "runner",
+      stateVersion: 12.9,
+      timingPoint: "runner_action.main",
+      legalActionTypes: ["draw_card", "gain_credit", "draw_card"],
+      unresolvedActionIds: [
+        "runner.draw",
+        "runner install/card",
+        "runner.draw",
+      ],
+      owner: "plan_registry",
+      removalCondition:
+        "Add a domain plan for the uncovered semantic action family.",
+      candidateCount: 2.8,
+    });
 
     expect(failure.code).toBe("missing_plan_module_coverage");
     expect(failure.context).toEqual({

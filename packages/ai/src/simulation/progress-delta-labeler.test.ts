@@ -11,9 +11,7 @@ describe("progress delta labeler", () => {
     expect(actionLabel({ actionType: "trash_accessed_card" })).toBe(
       "progress_trash",
     );
-    expect(actionLabel({ actionType: "steal_agenda" })).toBe(
-      "progress_steal",
-    );
+    expect(actionLabel({ actionType: "steal_agenda" })).toBe("progress_steal");
     expect(actionLabel({ actionType: "score_agenda", side: "corp" })).toBe(
       "progress_score",
     );

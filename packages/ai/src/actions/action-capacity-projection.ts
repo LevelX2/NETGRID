@@ -134,12 +134,8 @@ function actionCapacityProjectionWithListedCost(
     ...(allowedActionTypes.length > 0
       ? [`allowed_action_types:${allowedActionTypes.join(",")}`]
       : []),
-    ...(allowedCardType
-      ? [`allowed_card_types:${allowedCardType}`]
-      : []),
-    ...(temporaryCredits > 0
-      ? [`temporary_credits:${temporaryCredits}`]
-      : []),
+    ...(allowedCardType ? [`allowed_card_types:${allowedCardType}`] : []),
+    ...(temporaryCredits > 0 ? [`temporary_credits:${temporaryCredits}`] : []),
     ...(gainAmountPerTurn !== undefined
       ? [`gain_amount_per_turn:${gainAmountPerTurn}`]
       : []),

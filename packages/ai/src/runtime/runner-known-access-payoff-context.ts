@@ -6,8 +6,5 @@ export function runnerRemoteHasKnownNoCurrentPayoff(
   input: AiDecisionInput,
   serverId: string,
 ): boolean {
-  return evaluateKnownRemoteAccessPayoff(
-    input,
-    serverId,
-  ).knownNoCurrentPayoff;
+  return evaluateKnownRemoteAccessPayoff(input, serverId).knownNoCurrentPayoff;
 }

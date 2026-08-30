@@ -8,12 +8,11 @@ import {
 
 describe("live strategic-intent revalidation", () => {
   it("derives an exact current-state phase trigger from the side's public mulligan completion", () => {
-    const revalidation =
-      strategicIntentRevalidationFromCurrentPublicEvents({
-        side: "corp",
-        stateVersion: 2,
-        eventTail: [setupEvent()],
-      });
+    const revalidation = strategicIntentRevalidationFromCurrentPublicEvents({
+      side: "corp",
+      stateVersion: 2,
+      eventTail: [setupEvent()],
+    });
 
     expect(revalidation).toEqual({
       observedAtStateVersion: 2,

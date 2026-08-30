@@ -4,10 +4,13 @@ export default defineConfig({
   testDir: "./tests/e2e",
   timeout: 90_000,
   expect: {
-    timeout: 12_000
+    timeout: 12_000,
   },
   fullyParallel: false,
-  reporter: [["list"], ["html", { open: "never", outputFolder: "playwright-report" }]],
+  reporter: [
+    ["list"],
+    ["html", { open: "never", outputFolder: "playwright-report" }],
+  ],
   outputDir: "test-results/e2e",
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3100",
@@ -15,14 +18,14 @@ export default defineConfig({
     navigationTimeout: 30_000,
     screenshot: "only-on-failure",
     trace: "retain-on-failure",
-    video: "retain-on-failure"
+    video: "retain-on-failure",
   },
   projects: [
     {
       name: "chromium",
       use: {
-        ...devices["Desktop Chrome"]
-      }
-    }
-  ]
+        ...devices["Desktop Chrome"],
+      },
+    },
+  ],
 });

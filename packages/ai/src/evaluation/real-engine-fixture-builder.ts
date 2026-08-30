@@ -102,7 +102,9 @@ export class RealEngineFixtureBuilder {
 
   withRunnerResourceInstalled(
     definitionId: string,
-    counters: Partial<Record<"bit" | "power" | "recurring_credit", number>> = {},
+    counters: Partial<
+      Record<"bit" | "power" | "recurring_credit", number>
+    > = {},
   ): this {
     const id = this.findCard(definitionId);
     this.removeEverywhere(id);

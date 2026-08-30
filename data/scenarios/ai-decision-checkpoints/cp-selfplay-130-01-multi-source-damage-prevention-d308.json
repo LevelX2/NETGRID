@@ -40,9 +40,7 @@
             "title": "Cloak",
             "definitionId": "onr_v1_011_cloak",
             "type": "program",
-            "subtypes": [
-              "stealth"
-            ],
+            "subtypes": ["stealth"],
             "rulesText": "Put [3] from the bank on Cloak when it is installed. Use these bits only to pay for using icebreakers during runs, but not for noisy icebreakers. If you use any of these bits, replace them at the start of your next turn.",
             "installCost": 7,
             "memoryCost": 1,
@@ -71,9 +69,7 @@
             "title": "Tycho Mem Chip",
             "definitionId": "onr_v1_144_tycho-mem-chip",
             "type": "hardware",
-            "subtypes": [
-              "chip"
-            ],
+            "subtypes": ["chip"],
             "rulesText": "Provides +3 MU.",
             "installCost": 5,
             "memoryLimitBonus": 3,
@@ -88,9 +84,7 @@
             "title": "Cloak",
             "definitionId": "onr_v1_011_cloak",
             "type": "program",
-            "subtypes": [
-              "stealth"
-            ],
+            "subtypes": ["stealth"],
             "rulesText": "Put [3] from the bank on Cloak when it is installed. Use these bits only to pay for using icebreakers during runs, but not for noisy icebreakers. If you use any of these bits, replace them at the start of your next turn.",
             "installCost": 7,
             "memoryCost": 1,
@@ -122,9 +116,7 @@
             "title": "Back Door to Hilliard",
             "definitionId": "onr_v1_152_back-door-to-hilliard",
             "type": "resource",
-            "subtypes": [
-              "base_link"
-            ],
+            "subtypes": ["base_link"],
             "rulesText": "[0]: Base link 2. [3]: +1 link. Use only one base link card for each trace attempt made against you.",
             "installCost": 0,
             "rezzed": true,
@@ -170,9 +162,7 @@
             "title": "The Short Circuit",
             "definitionId": "onr_v1_177_the-short-circuit",
             "type": "resource",
-            "subtypes": [
-              "bbs"
-            ],
+            "subtypes": ["bbs"],
             "rulesText": "A, [1]: Search your stack for a program. Show that program to the Corp, and then bring it into your hand. Reshuffle your stack afterwards.",
             "installCost": 1,
             "rezzed": true,
@@ -260,10 +250,7 @@
             "title": "Marked Accounts",
             "definitionId": "onr_proteus_005_marked-accounts",
             "type": "agenda",
-            "subtypes": [
-              "ambush",
-              "gray_ops"
-            ],
+            "subtypes": ["ambush", "gray_ops"],
             "rulesText": "When Runner accesses Marked Accounts, give Runner a tag, even if it is not installed. If Marked Accounts is accessed from R&D, Runner must show it to you.",
             "rezzed": true,
             "advancementCounters": 0,
@@ -278,9 +265,7 @@
             "title": "Bioweapons Engineering",
             "definitionId": "onr_v1_190_bioweapons-engineering",
             "type": "agenda",
-            "subtypes": [
-              "research"
-            ],
+            "subtypes": ["research"],
             "rulesText": "Each source of meat damage inflicts +1 meat damage.",
             "rezzed": true,
             "advancementCounters": 0,
@@ -312,10 +297,7 @@
             "title": "Loony Goon",
             "definitionId": "onr_v1_040_loony-goon",
             "type": "program",
-            "subtypes": [
-              "icebreaker",
-              "killer"
-            ],
+            "subtypes": ["icebreaker", "killer"],
             "rulesText": "[1]: Break sentry subroutine.\n[1]: +1 strength.",
             "installCost": 4,
             "memoryCost": 1,
@@ -331,9 +313,7 @@
             "title": "Cyfermaster™",
             "definitionId": "onr_v1_016_cyfermaster",
             "type": "program",
-            "subtypes": [
-              "icebreaker"
-            ],
+            "subtypes": ["icebreaker"],
             "rulesText": "[2]: Break code gate subroutine.\n[1]: +1 strength.",
             "installCost": 4,
             "memoryCost": 1,
@@ -349,9 +329,7 @@
             "title": "Vewy Vewy Quiet",
             "definitionId": "onr_v1_071_vewy-vewy-quiet",
             "type": "program",
-            "subtypes": [
-              "stealth"
-            ],
+            "subtypes": ["stealth"],
             "rulesText": "Put [2] from the bank on Vewy Vewy Quiet when it is installed. Use these bits only to pay for using icebreakers during runs, but not for using noisy icebreakers. If you use any of these bits, replace them at the start of your next turn.",
             "installCost": 4,
             "memoryCost": 1,
@@ -366,10 +344,7 @@
             "title": "Pile Driver",
             "definitionId": "onr_v1_047_pile-driver",
             "type": "program",
-            "subtypes": [
-              "icebreaker",
-              "noisy"
-            ],
+            "subtypes": ["icebreaker", "noisy"],
             "rulesText": "[3]: Break up to four wall subroutines on a single piece of ice. [1]: +1 strength. Whenever you use Pile Driver’s break-walls subroutine, lose a total of [3] from stealth cards.",
             "installCost": 1,
             "memoryCost": 1,
@@ -385,9 +360,7 @@
             "title": "Tycho Mem Chip",
             "definitionId": "onr_v1_144_tycho-mem-chip",
             "type": "hardware",
-            "subtypes": [
-              "chip"
-            ],
+            "subtypes": ["chip"],
             "rulesText": "Provides +3 MU.",
             "installCost": 5,
             "memoryLimitBonus": 3,
@@ -444,9 +417,7 @@
             "title": "Access to Arasaka",
             "definitionId": "onr_v1_149_access-to-arasaka",
             "type": "resource",
-            "subtypes": [
-              "base_link"
-            ],
+            "subtypes": ["base_link"],
             "rulesText": "[2]: Base link 4. [2]: +1 link. Use only one base link card for each trace attempt made against you.",
             "installCost": 2,
             "rezzed": true,
@@ -474,9 +445,7 @@
             "title": "Broker",
             "definitionId": "onr_v1_154_broker",
             "type": "resource",
-            "subtypes": [
-              "connection"
-            ],
+            "subtypes": ["connection"],
             "rulesText": "Each of your turns, you may take only one action to use Broker. A: Put [3] from the bank on Broker. A: Take all the bits from Broker.",
             "installCost": 3,
             "rezzed": true,
@@ -556,10 +525,7 @@
             "title": "Marked Accounts",
             "definitionId": "onr_proteus_005_marked-accounts",
             "type": "agenda",
-            "subtypes": [
-              "ambush",
-              "gray_ops"
-            ],
+            "subtypes": ["ambush", "gray_ops"],
             "rulesText": "When Runner accesses Marked Accounts, give Runner a tag, even if it is not installed. If Marked Accounts is accessed from R&D, Runner must show it to you.",
             "rezzed": true,
             "advancementCounters": 0,
@@ -581,12 +547,7 @@
               "title": "Brain Wash",
               "definitionId": "onr_proteus_011_brain-wash",
               "type": "ice",
-              "subtypes": [
-                "ap",
-                "black_ice",
-                "brainwipe",
-                "sentry"
-              ],
+              "subtypes": ["ap", "black_ice", "brainwipe", "sentry"],
               "rulesText": "*Do 1 brain damage.",
               "rezCost": 3,
               "rezzed": true,
@@ -650,9 +611,7 @@
               "title": "Nerve Labyrinth",
               "definitionId": "onr_v1_257_nerve-labyrinth",
               "type": "ice",
-              "subtypes": [
-                "code_gate"
-              ],
+              "subtypes": ["code_gate"],
               "rulesText": "[Subroutine] Do 2 net damage.\n[Subroutine] End the run.",
               "rezCost": 6,
               "rezzed": true,
@@ -697,9 +656,7 @@
               "title": "Laser Wire",
               "definitionId": "onr_v1_253_laser-wire",
               "type": "ice",
-              "subtypes": [
-                "wall"
-              ],
+              "subtypes": ["wall"],
               "rulesText": "[Subroutine] Do 1 net damage.\n[Subroutine] End the run.",
               "rezCost": 4,
               "rezzed": true,
@@ -746,9 +703,7 @@
               "title": "Virus Test Site",
               "definitionId": "onr_v1_348_virus-test-site",
               "type": "asset",
-              "subtypes": [
-                "ambush"
-              ],
+              "subtypes": ["ambush"],
               "rulesText": "You may advance Virus Test Site before and after you rez it. When Runner accesses Test Site, it does 2 Net damage per advancement counter on it, or 1 Net damage if it has no counters, even if it is not installed or rezzed. Ignore this effect if Runner accesses it from the Archives. If Test Site is accessed from R&D, Runner must show it to you.",
               "rezCost": 0,
               "rezzed": true,
@@ -763,9 +718,7 @@
               "title": "Virus Test Site",
               "definitionId": "onr_v1_348_virus-test-site",
               "type": "asset",
-              "subtypes": [
-                "ambush"
-              ],
+              "subtypes": ["ambush"],
               "rulesText": "You may advance Virus Test Site before and after you rez it. When Runner accesses Test Site, it does 2 Net damage per advancement counter on it, or 1 Net damage if it has no counters, even if it is not installed or rezzed. Ignore this effect if Runner accesses it from the Archives. If Test Site is accessed from R&D, Runner must show it to you.",
               "rezCost": 0,
               "rezzed": true,
@@ -780,9 +733,7 @@
               "title": "Efficiency Experts",
               "definitionId": "onr_v1_290_efficiency-experts",
               "type": "operation",
-              "subtypes": [
-                "transactions"
-              ],
+              "subtypes": ["transactions"],
               "rulesText": "Gain 3.",
               "cost": 0,
               "playCost": {
@@ -800,9 +751,7 @@
               "title": "Accounts Receivable",
               "definitionId": "onr_v1_281_accounts-receivable",
               "type": "operation",
-              "subtypes": [
-                "transactions"
-              ],
+              "subtypes": ["transactions"],
               "rulesText": "Gain [9].",
               "cost": 5,
               "playCost": {
@@ -820,9 +769,7 @@
               "title": "Accounts Receivable",
               "definitionId": "onr_v1_281_accounts-receivable",
               "type": "operation",
-              "subtypes": [
-                "transactions"
-              ],
+              "subtypes": ["transactions"],
               "rulesText": "Gain [9].",
               "cost": 5,
               "playCost": {
@@ -840,9 +787,7 @@
               "title": "TRAP!",
               "definitionId": "onr_v1_345_trap",
               "type": "asset",
-              "subtypes": [
-                "ambush"
-              ],
+              "subtypes": ["ambush"],
               "rulesText": "If you pay [4] when Runner accesses TRAP!, it does 3 Net damage and gives Runner a tag, even if TRAP! is not installed. Ignore this effect if Runner accesses it from the Archives. If TRAP! is accessed from R&D, Runner must show it to you.",
               "rezCost": 0,
               "rezzed": true,
@@ -857,9 +802,7 @@
               "title": "Setup!",
               "definitionId": "onr_v1_340_setup",
               "type": "asset",
-              "subtypes": [
-                "ambush"
-              ],
+              "subtypes": ["ambush"],
               "rulesText": "When Runner accesses Setup!, it does 2 Net damage, even if it is not installed. Ignore this effect if Runner accesses it from the Archives. If Setup! is accessed from R&D, Runner must show it to you.",
               "rezCost": 0,
               "rezzed": true,
@@ -874,9 +817,7 @@
               "title": "TRAP!",
               "definitionId": "onr_v1_345_trap",
               "type": "asset",
-              "subtypes": [
-                "ambush"
-              ],
+              "subtypes": ["ambush"],
               "rulesText": "If you pay [4] when Runner accesses TRAP!, it does 3 Net damage and gives Runner a tag, even if TRAP! is not installed. Ignore this effect if Runner accesses it from the Archives. If TRAP! is accessed from R&D, Runner must show it to you.",
               "rezCost": 0,
               "rezzed": true,
@@ -891,9 +832,7 @@
               "title": "Setup!",
               "definitionId": "onr_v1_340_setup",
               "type": "asset",
-              "subtypes": [
-                "ambush"
-              ],
+              "subtypes": ["ambush"],
               "rulesText": "When Runner accesses Setup!, it does 2 Net damage, even if it is not installed. Ignore this effect if Runner accesses it from the Archives. If Setup! is accessed from R&D, Runner must show it to you.",
               "rezCost": 0,
               "rezzed": true,
@@ -908,9 +847,7 @@
               "title": "City Surveillance",
               "definitionId": "onr_v1_313_city-surveillance",
               "type": "asset",
-              "subtypes": [
-                "gray_ops"
-              ],
+              "subtypes": ["gray_ops"],
               "rulesText": "For each card Runner draws, give Runner a tag unless Runner pays [1], in addition to any other costs, to avoid receiving that tag. You may rez City Surveillance just before the card is drawn.",
               "rezCost": 1,
               "rezzed": true,
@@ -925,9 +862,7 @@
               "title": "Accounts Receivable",
               "definitionId": "onr_v1_281_accounts-receivable",
               "type": "operation",
-              "subtypes": [
-                "transactions"
-              ],
+              "subtypes": ["transactions"],
               "rulesText": "Gain [9].",
               "cost": 5,
               "playCost": {
@@ -945,9 +880,7 @@
               "title": "City Surveillance",
               "definitionId": "onr_v1_313_city-surveillance",
               "type": "asset",
-              "subtypes": [
-                "gray_ops"
-              ],
+              "subtypes": ["gray_ops"],
               "rulesText": "For each card Runner draws, give Runner a tag unless Runner pays [1], in addition to any other costs, to avoid receiving that tag. You may rez City Surveillance just before the card is drawn.",
               "rezCost": 1,
               "rezzed": true,
@@ -968,12 +901,7 @@
               "title": "Brain Wash",
               "definitionId": "onr_proteus_011_brain-wash",
               "type": "ice",
-              "subtypes": [
-                "ap",
-                "black_ice",
-                "brainwipe",
-                "sentry"
-              ],
+              "subtypes": ["ap", "black_ice", "brainwipe", "sentry"],
               "rulesText": "*Do 1 brain damage.",
               "rezCost": 3,
               "rezzed": true,
@@ -1026,11 +954,7 @@
               "title": "Data Darts",
               "definitionId": "onr_v1_234_data-darts",
               "type": "ice",
-              "subtypes": [
-                "ap",
-                "hellbolt",
-                "sentry"
-              ],
+              "subtypes": ["ap", "hellbolt", "sentry"],
               "rulesText": "[Subroutine] Do 3 net damage.\n[Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.",
               "rezCost": 5,
               "rezzed": true,
@@ -1098,11 +1022,7 @@
           "title": "Data Darts",
           "definitionId": "onr_v1_234_data-darts",
           "type": "ice",
-          "subtypes": [
-            "ap",
-            "hellbolt",
-            "sentry"
-          ],
+          "subtypes": ["ap", "hellbolt", "sentry"],
           "rulesText": "[Subroutine] Do 3 net damage.\n[Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.",
           "rezCost": 5,
           "rezzed": true,
@@ -11283,10 +11203,7 @@
           {
             "cardId": "onr_v1_006_black-dahlia",
             "title": "Black Dahlia",
-            "coverage": [
-              "sentry",
-              "subtype_limited"
-            ],
+            "coverage": ["sentry", "subtype_limited"],
             "installCost": 10,
             "memoryCost": 1,
             "baseStrength": 5,
@@ -11295,9 +11212,7 @@
             "risks": [],
             "restrictions": [],
             "quantityKnownInDeck": 1,
-            "locations": [
-              "in_deck"
-            ],
+            "locations": ["in_deck"],
             "confidence": "high",
             "evidence": [
               "capability_source:structured",
@@ -11309,10 +11224,7 @@
           {
             "cardId": "onr_v1_014_codecracker",
             "title": "Codecracker",
-            "coverage": [
-              "code_gate",
-              "subtype_limited"
-            ],
+            "coverage": ["code_gate", "subtype_limited"],
             "installCost": 2,
             "memoryCost": 1,
             "baseStrength": 0,
@@ -11321,9 +11233,7 @@
             "risks": [],
             "restrictions": [],
             "quantityKnownInDeck": 1,
-            "locations": [
-              "in_deck"
-            ],
+            "locations": ["in_deck"],
             "confidence": "high",
             "evidence": [
               "capability_source:structured",
@@ -11335,10 +11245,7 @@
           {
             "cardId": "onr_v1_016_cyfermaster",
             "title": "Cyfermaster™",
-            "coverage": [
-              "code_gate",
-              "subtype_limited"
-            ],
+            "coverage": ["code_gate", "subtype_limited"],
             "installCost": 4,
             "memoryCost": 1,
             "baseStrength": 5,
@@ -11347,9 +11254,7 @@
             "risks": [],
             "restrictions": [],
             "quantityKnownInDeck": 0,
-            "locations": [
-              "installed"
-            ],
+            "locations": ["installed"],
             "confidence": "high",
             "evidence": [
               "capability_source:structured",
@@ -11361,10 +11266,7 @@
           {
             "cardId": "onr_v1_021_dwarf",
             "title": "Dwarf",
-            "coverage": [
-              "subtype_limited",
-              "wall"
-            ],
+            "coverage": ["subtype_limited", "wall"],
             "installCost": 6,
             "memoryCost": 1,
             "baseStrength": 3,
@@ -11373,9 +11275,7 @@
             "risks": [],
             "restrictions": [],
             "quantityKnownInDeck": 1,
-            "locations": [
-              "in_deck"
-            ],
+            "locations": ["in_deck"],
             "confidence": "high",
             "evidence": [
               "capability_source:structured",
@@ -11387,10 +11287,7 @@
           {
             "cardId": "onr_v1_040_loony-goon",
             "title": "Loony Goon",
-            "coverage": [
-              "sentry",
-              "subtype_limited"
-            ],
+            "coverage": ["sentry", "subtype_limited"],
             "installCost": 4,
             "memoryCost": 1,
             "baseStrength": 0,
@@ -11399,9 +11296,7 @@
             "risks": [],
             "restrictions": [],
             "quantityKnownInDeck": 0,
-            "locations": [
-              "installed"
-            ],
+            "locations": ["installed"],
             "confidence": "high",
             "evidence": [
               "capability_source:structured",
@@ -11413,24 +11308,16 @@
           {
             "cardId": "onr_v1_047_pile-driver",
             "title": "Pile Driver",
-            "coverage": [
-              "subtype_limited",
-              "wall"
-            ],
+            "coverage": ["subtype_limited", "wall"],
             "installCost": 1,
             "memoryCost": 1,
             "baseStrength": 7,
             "breakCost": 3,
             "pumpCost": 1,
-            "risks": [
-              "side_effect_penalty",
-              "stealth_loss"
-            ],
+            "risks": ["side_effect_penalty", "stealth_loss"],
             "restrictions": [],
             "quantityKnownInDeck": 0,
-            "locations": [
-              "installed"
-            ],
+            "locations": ["installed"],
             "confidence": "high",
             "evidence": [
               "capability_source:structured",
@@ -11442,10 +11329,7 @@
           {
             "cardId": "onr_v1_054_raptor",
             "title": "Raptor",
-            "coverage": [
-              "sentry",
-              "subtype_limited"
-            ],
+            "coverage": ["sentry", "subtype_limited"],
             "installCost": 1,
             "memoryCost": 1,
             "baseStrength": 1,
@@ -11454,9 +11338,7 @@
             "risks": [],
             "restrictions": [],
             "quantityKnownInDeck": 1,
-            "locations": [
-              "in_deck"
-            ],
+            "locations": ["in_deck"],
             "confidence": "high",
             "evidence": [
               "capability_source:structured",
@@ -11468,17 +11350,12 @@
           {
             "cardId": "onr_v1_128_green-knight-surge-buffers",
             "title": "“Green Knight” Surge Buffers",
-            "coverage": [
-              "ap"
-            ],
+            "coverage": ["ap"],
             "installCost": 0,
             "risks": [],
             "restrictions": [],
             "quantityKnownInDeck": 1,
-            "locations": [
-              "in_deck",
-              "installed"
-            ],
+            "locations": ["in_deck", "installed"],
             "confidence": "low",
             "evidence": [
               "capability_source:text_fallback",
@@ -11490,16 +11367,12 @@
           {
             "cardId": "onr_v1_140_raven-microcyb-eagle",
             "title": "Raven Microcyb Eagle",
-            "coverage": [
-              "ap"
-            ],
+            "coverage": ["ap"],
             "installCost": 6,
             "risks": [],
             "restrictions": [],
             "quantityKnownInDeck": 1,
-            "locations": [
-              "in_deck"
-            ],
+            "locations": ["in_deck"],
             "confidence": "low",
             "evidence": [
               "capability_source:text_fallback",
@@ -11511,16 +11384,12 @@
           {
             "cardId": "onr_v1_149_access-to-arasaka",
             "title": "Access to Arasaka",
-            "coverage": [
-              "trace"
-            ],
+            "coverage": ["trace"],
             "installCost": 2,
             "risks": [],
             "restrictions": [],
             "quantityKnownInDeck": 0,
-            "locations": [
-              "installed"
-            ],
+            "locations": ["installed"],
             "confidence": "low",
             "evidence": [
               "capability_source:text_fallback",
@@ -11532,16 +11401,12 @@
           {
             "cardId": "onr_v1_152_back-door-to-hilliard",
             "title": "Back Door to Hilliard",
-            "coverage": [
-              "trace"
-            ],
+            "coverage": ["trace"],
             "installCost": 0,
             "risks": [],
             "restrictions": [],
             "quantityKnownInDeck": 0,
-            "locations": [
-              "discarded"
-            ],
+            "locations": ["discarded"],
             "confidence": "low",
             "evidence": [
               "capability_source:text_fallback",
@@ -11560,10 +11425,7 @@
             "searchableNow": false,
             "drawOnly": false,
             "missing": false,
-            "bestKnownCards": [
-              "onr_v1_021_dwarf",
-              "onr_v1_047_pile-driver"
-            ],
+            "bestKnownCards": ["onr_v1_021_dwarf", "onr_v1_047_pile-driver"],
             "blockers": []
           },
           "code_gate": {
@@ -11633,9 +11495,7 @@
             "drawOnly": false,
             "missing": true,
             "bestKnownCards": [],
-            "blockers": [
-              "missing_universal_coverage"
-            ]
+            "blockers": ["missing_universal_coverage"]
           },
           "subtype_limited": {
             "coverage": "subtype_limited",
@@ -11661,9 +11521,7 @@
             "drawOnly": false,
             "missing": true,
             "bestKnownCards": [],
-            "blockers": [
-              "missing_special_coverage"
-            ]
+            "blockers": ["missing_special_coverage"]
           }
         },
         "searchAccess": {
@@ -11734,10 +11592,7 @@
           "memoryAvailable": 2,
           "memoryToolsKnown": 3,
           "missingMemoryPressure": false,
-          "evidence": [
-            "memory_available:2",
-            "memory_tools_known:3"
-          ]
+          "evidence": ["memory_available:2", "memory_tools_known:3"]
         },
         "attackPlanProfile": {
           "centralPressureToolsKnown": 3,
@@ -11755,17 +11610,13 @@
           "capabilityId": "runner.universal_coverage",
           "kind": "universal_coverage",
           "severity": "hard",
-          "evidence": [
-            "coverage_state:universal:missing"
-          ]
+          "evidence": ["coverage_state:universal:missing"]
         },
         {
           "capabilityId": "runner.special_coverage",
           "kind": "special_coverage",
           "severity": "soft",
-          "evidence": [
-            "coverage_state:special:missing"
-          ]
+          "evidence": ["coverage_state:special:missing"]
         }
       ],
       "confidence": "medium",
@@ -12017,9 +11868,7 @@
           "supportGaps": [],
           "confidence": "high",
           "runtimeStatus": "supporting",
-          "runtimeBlockers": [
-            "supporting_only:runner.economy_first"
-          ]
+          "runtimeBlockers": ["supporting_only:runner.economy_first"]
         },
         "runner.hq_pressure": {
           "anchorScore": 62,
@@ -12792,9 +12641,7 @@
               "reason": "support:searchOrDraw"
             }
           ],
-          "supportGaps": [
-            "low_threat_assessment_support"
-          ],
+          "supportGaps": ["low_threat_assessment_support"],
           "confidence": "low",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -14172,9 +14019,7 @@
           "supportGaps": [],
           "confidence": "medium",
           "runtimeStatus": "supporting",
-          "runtimeBlockers": [
-            "supporting_only:runner.survival_defense"
-          ]
+          "runtimeBlockers": ["supporting_only:runner.survival_defense"]
         }
       },
       "primaryStrategies": [
@@ -14332,9 +14177,7 @@
             "providerId": "runner.provider:onr_v1_006_black-dahlia",
             "cardId": "onr_v1_006_black-dahlia",
             "copies": 1,
-            "capabilities": [
-              "runner.coverage.breaker"
-            ],
+            "capabilities": ["runner.coverage.breaker"],
             "supportCapabilities": [],
             "persistence": "persistent",
             "additivity": "distinct_provider_first",
@@ -14349,15 +14192,11 @@
             "providerId": "runner.provider:onr_v1_011_cloak",
             "cardId": "onr_v1_011_cloak",
             "copies": 3,
-            "capabilities": [
-              "runner.economy.recurring_breaker"
-            ],
+            "capabilities": ["runner.economy.recurring_breaker"],
             "supportCapabilities": [],
             "persistence": "persistent",
             "additivity": "additive_to_compatible_demand",
-            "compatibleDemandIds": [
-              "runner.demand.breaker_credit"
-            ],
+            "compatibleDemandIds": ["runner.demand.breaker_credit"],
             "evidence": [
               "provider_card:onr_v1_011_cloak",
               "provider_copies:3",
@@ -14368,9 +14207,7 @@
             "providerId": "runner.provider:onr_v1_014_codecracker",
             "cardId": "onr_v1_014_codecracker",
             "copies": 1,
-            "capabilities": [
-              "runner.coverage.breaker"
-            ],
+            "capabilities": ["runner.coverage.breaker"],
             "supportCapabilities": [],
             "persistence": "persistent",
             "additivity": "distinct_provider_first",
@@ -14385,9 +14222,7 @@
             "providerId": "runner.provider:onr_v1_016_cyfermaster",
             "cardId": "onr_v1_016_cyfermaster",
             "copies": 1,
-            "capabilities": [
-              "runner.coverage.breaker"
-            ],
+            "capabilities": ["runner.coverage.breaker"],
             "supportCapabilities": [],
             "persistence": "persistent",
             "additivity": "distinct_provider_first",
@@ -14402,9 +14237,7 @@
             "providerId": "runner.provider:onr_v1_021_dwarf",
             "cardId": "onr_v1_021_dwarf",
             "copies": 1,
-            "capabilities": [
-              "runner.coverage.breaker"
-            ],
+            "capabilities": ["runner.coverage.breaker"],
             "supportCapabilities": [],
             "persistence": "persistent",
             "additivity": "distinct_provider_first",
@@ -14419,9 +14252,7 @@
             "providerId": "runner.provider:onr_v1_040_loony-goon",
             "cardId": "onr_v1_040_loony-goon",
             "copies": 1,
-            "capabilities": [
-              "runner.coverage.breaker"
-            ],
+            "capabilities": ["runner.coverage.breaker"],
             "supportCapabilities": [],
             "persistence": "persistent",
             "additivity": "distinct_provider_first",
@@ -14436,9 +14267,7 @@
             "providerId": "runner.provider:onr_v1_047_pile-driver",
             "cardId": "onr_v1_047_pile-driver",
             "copies": 1,
-            "capabilities": [
-              "runner.coverage.breaker"
-            ],
+            "capabilities": ["runner.coverage.breaker"],
             "supportCapabilities": [],
             "persistence": "persistent",
             "additivity": "distinct_provider_first",
@@ -14453,9 +14282,7 @@
             "providerId": "runner.provider:onr_v1_054_raptor",
             "cardId": "onr_v1_054_raptor",
             "copies": 1,
-            "capabilities": [
-              "runner.coverage.breaker"
-            ],
+            "capabilities": ["runner.coverage.breaker"],
             "supportCapabilities": [],
             "persistence": "persistent",
             "additivity": "distinct_provider_first",
@@ -14470,15 +14297,11 @@
             "providerId": "runner.provider:onr_v1_071_vewy-vewy-quiet",
             "cardId": "onr_v1_071_vewy-vewy-quiet",
             "copies": 2,
-            "capabilities": [
-              "runner.economy.recurring_breaker"
-            ],
+            "capabilities": ["runner.economy.recurring_breaker"],
             "supportCapabilities": [],
             "persistence": "persistent",
             "additivity": "additive_to_compatible_demand",
-            "compatibleDemandIds": [
-              "runner.demand.breaker_credit"
-            ],
+            "compatibleDemandIds": ["runner.demand.breaker_credit"],
             "evidence": [
               "provider_card:onr_v1_071_vewy-vewy-quiet",
               "provider_copies:2",
@@ -14489,9 +14312,7 @@
             "providerId": "runner.provider:onr_v1_079_bodyweight-synthetic-blood",
             "cardId": "onr_v1_079_bodyweight-synthetic-blood",
             "copies": 1,
-            "capabilities": [
-              "runner.throughput.draw"
-            ],
+            "capabilities": ["runner.throughput.draw"],
             "supportCapabilities": [],
             "persistence": "one_shot",
             "additivity": "distinct_provider_first",
@@ -14506,15 +14327,11 @@
             "providerId": "runner.provider:onr_v1_141_raven-microcyb-owl",
             "cardId": "onr_v1_141_raven-microcyb-owl",
             "copies": 1,
-            "capabilities": [
-              "runner.economy.recurring_breaker"
-            ],
+            "capabilities": ["runner.economy.recurring_breaker"],
             "supportCapabilities": [],
             "persistence": "persistent",
             "additivity": "additive_to_compatible_demand",
-            "compatibleDemandIds": [
-              "runner.demand.breaker_credit"
-            ],
+            "compatibleDemandIds": ["runner.demand.breaker_credit"],
             "evidence": [
               "provider_card:onr_v1_141_raven-microcyb-owl",
               "provider_copies:1",
@@ -14525,9 +14342,7 @@
             "providerId": "runner.provider:onr_v1_177_the-short-circuit",
             "cardId": "onr_v1_177_the-short-circuit",
             "copies": 2,
-            "capabilities": [
-              "runner.throughput.search"
-            ],
+            "capabilities": ["runner.throughput.search"],
             "supportCapabilities": [],
             "persistence": "persistent",
             "additivity": "distinct_provider_first",
@@ -14542,9 +14357,7 @@
         "dependencies": [
           {
             "dependencyId": "runner.dependency.breaker_coverage",
-            "requiredCapabilityIds": [
-              "runner.coverage.breaker"
-            ],
+            "requiredCapabilityIds": ["runner.coverage.breaker"],
             "providerIds": [
               "runner.provider:onr_v1_006_black-dahlia",
               "runner.provider:onr_v1_014_codecracker",
@@ -14578,15 +14391,9 @@
               "runner.provider:onr_v1_047_pile-driver",
               "runner.provider:onr_v1_054_raptor"
             ],
-            "dependencyIds": [
-              "runner.dependency.breaker_coverage"
-            ],
-            "entryConditionIds": [
-              "coverage_dependency_open"
-            ],
-            "exitConditionIds": [
-              "required_coverage_installed"
-            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "entryConditionIds": ["coverage_dependency_open"],
+            "exitConditionIds": ["required_coverage_installed"],
             "evidence": [
               "engine_line:runner.engine.persistent_rig",
               "provider_count:7",
@@ -14597,15 +14404,9 @@
             "lineId": "runner.engine.consumption_recovery",
             "status": "unsupported",
             "providerIds": [],
-            "dependencyIds": [
-              "runner.dependency.breaker_coverage"
-            ],
-            "entryConditionIds": [
-              "consumable_coverage_provider_present"
-            ],
-            "exitConditionIds": [
-              "coverage_provider_recoverable_or_replaced"
-            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "entryConditionIds": ["consumable_coverage_provider_present"],
+            "exitConditionIds": ["coverage_provider_recoverable_or_replaced"],
             "evidence": [
               "engine_line:runner.engine.consumption_recovery",
               "provider_count:0",
@@ -14624,12 +14425,8 @@
               "runner.provider:onr_v1_047_pile-driver",
               "runner.provider:onr_v1_054_raptor"
             ],
-            "dependencyIds": [
-              "runner.dependency.breaker_coverage"
-            ],
-            "entryConditionIds": [
-              "stageable_required_provider_visible"
-            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "entryConditionIds": ["stageable_required_provider_visible"],
             "exitConditionIds": [
               "staged_provider_installed_or_no_longer_required"
             ],
@@ -14654,12 +14451,8 @@
               "runner.provider:onr_v1_071_vewy-vewy-quiet",
               "runner.provider:onr_v1_141_raven-microcyb-owl"
             ],
-            "dependencyIds": [
-              "runner.dependency.breaker_coverage"
-            ],
-            "entryConditionIds": [
-              "compatible_breaker_credit_demand_present"
-            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "entryConditionIds": ["compatible_breaker_credit_demand_present"],
             "exitConditionIds": [
               "compatible_recurring_supply_meets_useful_demand"
             ],
@@ -14676,15 +14469,9 @@
               "runner.provider:onr_v1_079_bodyweight-synthetic-blood",
               "runner.provider:onr_v1_177_the-short-circuit"
             ],
-            "dependencyIds": [
-              "runner.dependency.breaker_coverage"
-            ],
-            "entryConditionIds": [
-              "required_dependency_not_ready"
-            ],
-            "exitConditionIds": [
-              "required_dependency_ready"
-            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "entryConditionIds": ["required_dependency_not_ready"],
+            "exitConditionIds": ["required_dependency_ready"],
             "evidence": [
               "engine_line:runner.engine.throughput_until_ready",
               "provider_count:2",
@@ -14697,12 +14484,8 @@
             "tendencyId": "runner.development.install_persistent_provider",
             "strength": "high",
             "ownerModuleId": "runner.rig_and_coverage",
-            "dependencyIds": [
-              "runner.dependency.breaker_coverage"
-            ],
-            "exitConditionIds": [
-              "required_coverage_installed"
-            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "exitConditionIds": ["required_coverage_installed"],
             "evidence": [
               "development_tendency:runner.development.install_persistent_provider",
               "active:true",
@@ -14713,12 +14496,8 @@
             "tendencyId": "runner.development.recover_consumed_provider",
             "strength": "low",
             "ownerModuleId": "runner.rig_and_coverage",
-            "dependencyIds": [
-              "runner.dependency.breaker_coverage"
-            ],
-            "exitConditionIds": [
-              "coverage_provider_recoverable_or_replaced"
-            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "exitConditionIds": ["coverage_provider_recoverable_or_replaced"],
             "evidence": [
               "development_tendency:runner.development.recover_consumed_provider",
               "active:false",
@@ -14729,12 +14508,8 @@
             "tendencyId": "runner.development.stage_before_overflow_draw",
             "strength": "low",
             "ownerModuleId": "runner.shell_traders_pipeline",
-            "dependencyIds": [
-              "runner.dependency.breaker_coverage"
-            ],
-            "exitConditionIds": [
-              "no_stageable_required_provider"
-            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "exitConditionIds": ["no_stageable_required_provider"],
             "evidence": [
               "development_tendency:runner.development.stage_before_overflow_draw",
               "active:false",
@@ -14745,12 +14520,8 @@
             "tendencyId": "runner.development.throughput_until_dependency_ready",
             "strength": "high",
             "ownerModuleId": "runner.develop_board_and_hand",
-            "dependencyIds": [
-              "runner.dependency.breaker_coverage"
-            ],
-            "exitConditionIds": [
-              "required_dependency_ready"
-            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "exitConditionIds": ["required_dependency_ready"],
             "evidence": [
               "development_tendency:runner.development.throughput_until_dependency_ready",
               "active:true",
@@ -14763,21 +14534,11 @@
             "contributionId": "runner.contribution.maintain_breaker_coverage",
             "ownerModuleId": "runner.rig_and_coverage",
             "objective": "maintain_required_coverage",
-            "capabilityIds": [
-              "runner.coverage.breaker"
-            ],
-            "dependencyIds": [
-              "runner.dependency.breaker_coverage"
-            ],
-            "activationConditionIds": [
-              "coverage_dependency_open"
-            ],
-            "exitConditionIds": [
-              "required_coverage_installed"
-            ],
-            "evidence": [
-              "contribution_from:runner.engine.persistent_rig"
-            ]
+            "capabilityIds": ["runner.coverage.breaker"],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "activationConditionIds": ["coverage_dependency_open"],
+            "exitConditionIds": ["required_coverage_installed"],
+            "evidence": ["contribution_from:runner.engine.persistent_rig"]
           },
           {
             "contributionId": "runner.contribution.throughput_until_ready",
@@ -14787,15 +14548,9 @@
               "runner.throughput.draw",
               "runner.throughput.search"
             ],
-            "dependencyIds": [
-              "runner.dependency.breaker_coverage"
-            ],
-            "activationConditionIds": [
-              "required_dependency_not_ready"
-            ],
-            "exitConditionIds": [
-              "required_dependency_ready"
-            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "activationConditionIds": ["required_dependency_not_ready"],
+            "exitConditionIds": ["required_dependency_ready"],
             "evidence": [
               "contribution_from:runner.engine.throughput_until_ready"
             ]
@@ -14932,9 +14687,7 @@
           "confidence": "low",
           "anchorEvidenceCount": 0,
           "supportEvidenceCount": 30,
-          "supportGaps": [
-            "low_threat_assessment_support"
-          ]
+          "supportGaps": ["low_threat_assessment_support"]
         }
       ],
       "rolesStatus": {
@@ -14962,9 +14715,7 @@
             "program",
             "safe_probe_run"
           ],
-          "functionSignals": [
-            "breaker.sentry"
-          ],
+          "functionSignals": ["breaker.sentry"],
           "strategyAnchors": [],
           "warnings": []
         },
@@ -14991,15 +14742,8 @@
           "cardId": "onr_v1_012_clown",
           "quantity": 2,
           "status": "partial",
-          "roles": [
-            "build_rig",
-            "ice_modifier",
-            "program",
-            "safe_probe_run"
-          ],
-          "functionSignals": [
-            "ice.strength_modifier"
-          ],
+          "roles": ["build_rig", "ice_modifier", "program", "safe_probe_run"],
+          "functionSignals": ["ice.strength_modifier"],
           "strategyAnchors": [],
           "warnings": []
         },
@@ -15016,9 +14760,7 @@
             "program",
             "safe_probe_run"
           ],
-          "functionSignals": [
-            "breaker.code_gate"
-          ],
+          "functionSignals": ["breaker.code_gate"],
           "strategyAnchors": [],
           "warnings": []
         },
@@ -15034,9 +14776,7 @@
             "program",
             "safe_probe_run"
           ],
-          "functionSignals": [
-            "breaker.code_gate"
-          ],
+          "functionSignals": ["breaker.code_gate"],
           "strategyAnchors": [],
           "warnings": []
         },
@@ -15053,9 +14793,7 @@
             "program",
             "safe_probe_run"
           ],
-          "functionSignals": [
-            "breaker.wall"
-          ],
+          "functionSignals": ["breaker.wall"],
           "strategyAnchors": [],
           "warnings": []
         },
@@ -15063,11 +14801,7 @@
           "cardId": "onr_v1_028_force-shield",
           "quantity": 2,
           "status": "partial",
-          "roles": [
-            "build_rig",
-            "damage_prevention",
-            "program"
-          ],
+          "roles": ["build_rig", "damage_prevention", "program"],
           "functionSignals": [
             "defense.brain_damage_prevention",
             "defense.damage_prevention",
@@ -15089,9 +14823,7 @@
             "program",
             "safe_probe_run"
           ],
-          "functionSignals": [
-            "breaker.sentry"
-          ],
+          "functionSignals": ["breaker.sentry"],
           "strategyAnchors": [],
           "warnings": []
         },
@@ -15099,14 +14831,8 @@
           "cardId": "onr_v1_042_mouse",
           "quantity": 1,
           "status": "partial",
-          "roles": [
-            "build_rig",
-            "contest_remote",
-            "expose_recon"
-          ],
-          "functionSignals": [
-            "info.expose_installed_card"
-          ],
+          "roles": ["build_rig", "contest_remote", "expose_recon"],
+          "functionSignals": ["info.expose_installed_card"],
           "strategyAnchors": [],
           "warnings": []
         },
@@ -15114,10 +14840,7 @@
           "cardId": "onr_v1_045_newsgroup-filter",
           "quantity": 1,
           "status": "partial",
-          "roles": [
-            "economy",
-            "program"
-          ],
+          "roles": ["economy", "program"],
           "functionSignals": [
             "economy.burst_credit",
             "economy.controller_credit_burst",
@@ -15138,10 +14861,7 @@
             "program",
             "run_support"
           ],
-          "functionSignals": [
-            "breaker.stealth_payment_loss",
-            "breaker.wall"
-          ],
+          "functionSignals": ["breaker.stealth_payment_loss", "breaker.wall"],
           "strategyAnchors": [],
           "warnings": []
         },
@@ -15157,9 +14877,7 @@
             "program",
             "safe_probe_run"
           ],
-          "functionSignals": [
-            "breaker.sentry"
-          ],
+          "functionSignals": ["breaker.sentry"],
           "strategyAnchors": [],
           "warnings": []
         },
@@ -15167,13 +14885,8 @@
           "cardId": "onr_v1_058_seeya",
           "quantity": 1,
           "status": "partial",
-          "roles": [
-            "build_rig",
-            "contest_remote"
-          ],
-          "functionSignals": [
-            "info.expose_installed_card"
-          ],
+          "roles": ["build_rig", "contest_remote"],
+          "functionSignals": ["info.expose_installed_card"],
           "strategyAnchors": [],
           "warnings": []
         },
@@ -15200,15 +14913,8 @@
           "cardId": "onr_v1_079_bodyweight-synthetic-blood",
           "quantity": 1,
           "status": "partial",
-          "roles": [
-            "draw",
-            "draw_for_answers",
-            "event"
-          ],
-          "functionSignals": [
-            "draw.controller_draw",
-            "setup.draw"
-          ],
+          "roles": ["draw", "draw_for_answers", "event"],
+          "functionSignals": ["draw.controller_draw", "setup.draw"],
           "strategyAnchors": [],
           "warnings": []
         },
@@ -15225,10 +14931,7 @@
             "runner.interface_closeout",
             "runner.run_event_tempo"
           ],
-          "functionSignals": [
-            "run.hq",
-            "run.make_run"
-          ],
+          "functionSignals": ["run.hq", "run.make_run"],
           "strategyAnchors": [
             "runner.hq_pressure",
             "runner.interface_closeout",
@@ -15240,25 +14943,16 @@
           "cardId": "onr_v1_093_if-you-want-it-done-right",
           "quantity": 2,
           "status": "partial",
-          "roles": [
-            "draw_for_answers",
-            "runner.search.breaker"
-          ],
+          "roles": ["draw_for_answers", "runner.search.breaker"],
           "functionSignals": [],
-          "strategyAnchors": [
-            "runner.search.breaker"
-          ],
+          "strategyAnchors": ["runner.search.breaker"],
           "warnings": []
         },
         {
           "cardId": "onr_v1_097_livewires-contacts",
           "quantity": 2,
           "status": "partial",
-          "roles": [
-            "economy",
-            "event",
-            "recover_economy"
-          ],
+          "roles": ["economy", "event", "recover_economy"],
           "functionSignals": [
             "economy.burst_credit",
             "economy.controller_credit_burst",
@@ -15271,11 +14965,7 @@
           "cardId": "onr_v1_108_score",
           "quantity": 2,
           "status": "partial",
-          "roles": [
-            "economy",
-            "event",
-            "recover_economy"
-          ],
+          "roles": ["economy", "event", "recover_economy"],
           "functionSignals": [
             "economy.burst_credit",
             "economy.controller_credit_burst",
@@ -15312,9 +15002,7 @@
             "runner.hq_pressure",
             "runner.interface_closeout"
           ],
-          "functionSignals": [
-            "access.hq_multiaccess"
-          ],
+          "functionSignals": ["access.hq_multiaccess"],
           "strategyAnchors": [
             "runner.hq_pressure",
             "runner.interface_closeout"
@@ -15325,13 +15013,8 @@
           "cardId": "onr_v1_131_microtech-backup-drive",
           "quantity": 1,
           "status": "partial",
-          "roles": [
-            "hardware",
-            "trash_prevention"
-          ],
-          "functionSignals": [
-            "defense.program_trash_prevention"
-          ],
+          "roles": ["hardware", "trash_prevention"],
+          "functionSignals": ["defense.program_trash_prevention"],
           "strategyAnchors": [],
           "warnings": []
         },
@@ -15346,9 +15029,7 @@
             "runner.interface_closeout",
             "runner.rnd_pressure"
           ],
-          "functionSignals": [
-            "access.rnd_multiaccess"
-          ],
+          "functionSignals": ["access.rnd_multiaccess"],
           "strategyAnchors": [
             "runner.interface_closeout",
             "runner.rnd_pressure"
@@ -15412,12 +15093,8 @@
           "cardId": "onr_v1_144_tycho-mem-chip",
           "quantity": 2,
           "status": "partial",
-          "roles": [
-            "build_rig"
-          ],
-          "functionSignals": [
-            "setup.memory"
-          ],
+          "roles": ["build_rig"],
+          "functionSignals": ["setup.memory"],
           "strategyAnchors": [],
           "warnings": []
         },
@@ -15425,10 +15102,7 @@
           "cardId": "onr_v1_149_access-to-arasaka",
           "quantity": 1,
           "status": "partial",
-          "roles": [
-            "build_rig",
-            "trace_bid_support"
-          ],
+          "roles": ["build_rig", "trace_bid_support"],
           "functionSignals": [
             "defense.trace_defense",
             "trace.base_link",
@@ -15441,10 +15115,7 @@
           "cardId": "onr_v1_152_back-door-to-hilliard",
           "quantity": 1,
           "status": "partial",
-          "roles": [
-            "build_rig",
-            "trace_bid_support"
-          ],
+          "roles": ["build_rig", "trace_bid_support"],
           "functionSignals": [
             "defense.trace_defense",
             "trace.base_link",
@@ -15482,15 +15153,8 @@
           "cardId": "onr_v1_161_fall-guy",
           "quantity": 2,
           "status": "partial",
-          "roles": [
-            "avoid_tags",
-            "build_rig",
-            "resource",
-            "tag_prevention"
-          ],
-          "functionSignals": [
-            "defense.tag_prevention"
-          ],
+          "roles": ["avoid_tags", "build_rig", "resource", "tag_prevention"],
+          "functionSignals": ["defense.tag_prevention"],
           "strategyAnchors": [],
           "warnings": []
         },
@@ -15498,9 +15162,7 @@
           "cardId": "onr_v1_174_rigged-investments",
           "quantity": 1,
           "status": "partial",
-          "roles": [
-            "build_economy"
-          ],
+          "roles": ["build_economy"],
           "functionSignals": [
             "economy.finite_pool",
             "economy.hosted_credit_bank",
@@ -15515,17 +15177,9 @@
           "cardId": "onr_v1_177_the-short-circuit",
           "quantity": 2,
           "status": "complete",
-          "roles": [
-            "build_rig",
-            "enabler",
-            "runner.search.breaker"
-          ],
-          "functionSignals": [
-            "setup.search"
-          ],
-          "strategyAnchors": [
-            "runner.search.breaker"
-          ],
+          "roles": ["build_rig", "enabler", "runner.search.breaker"],
+          "functionSignals": ["setup.search"],
+          "strategyAnchors": ["runner.search.breaker"],
           "warnings": []
         }
       ],
@@ -15837,10 +15491,7 @@
               "kind": "none",
               "required": 0,
               "satisfied": true,
-              "evidence": [
-                "reserve_source:runtime_context",
-                "reserve:none"
-              ]
+              "evidence": ["reserve_source:runtime_context", "reserve:none"]
             },
             "evidence": [
               "portfolio_candidate:runtime_context",
@@ -16107,10 +15758,7 @@
               "kind": "none",
               "required": 0,
               "satisfied": true,
-              "evidence": [
-                "reserve_source:runtime_context",
-                "reserve:none"
-              ]
+              "evidence": ["reserve_source:runtime_context", "reserve:none"]
             },
             "evidence": [
               "portfolio_candidate:runtime_context",
@@ -16287,10 +15935,7 @@
               "kind": "none",
               "required": 0,
               "satisfied": true,
-              "evidence": [
-                "reserve_source:runtime_context",
-                "reserve:none"
-              ]
+              "evidence": ["reserve_source:runtime_context", "reserve:none"]
             },
             "evidence": [
               "portfolio_candidate:runtime_context",
@@ -16312,9 +15957,7 @@
             "family": "runner_setup",
             "candidateRole": "blocked",
             "runtimeStatus": "supporting",
-            "runtimeBlockers": [
-              "supporting_only:runner.economy_first"
-            ],
+            "runtimeBlockers": ["supporting_only:runner.economy_first"],
             "confidence": "high",
             "score": {
               "anchor": 0,
@@ -16377,10 +16020,7 @@
               "kind": "none",
               "required": 0,
               "satisfied": true,
-              "evidence": [
-                "reserve_source:runtime_context",
-                "reserve:none"
-              ]
+              "evidence": ["reserve_source:runtime_context", "reserve:none"]
             },
             "evidence": [
               "portfolio_candidate:runtime_context",
@@ -16399,9 +16039,7 @@
             "family": "runner_survival",
             "candidateRole": "blocked",
             "runtimeStatus": "supporting",
-            "runtimeBlockers": [
-              "supporting_only:runner.survival_defense"
-            ],
+            "runtimeBlockers": ["supporting_only:runner.survival_defense"],
             "confidence": "medium",
             "score": {
               "anchor": 0,
@@ -16432,10 +16070,7 @@
               "kind": "none",
               "required": 0,
               "satisfied": true,
-              "evidence": [
-                "reserve_source:runtime_context",
-                "reserve:none"
-              ]
+              "evidence": ["reserve_source:runtime_context", "reserve:none"]
             },
             "evidence": [
               "portfolio_candidate:runtime_context",
@@ -16679,9 +16314,7 @@
           "providerId": "runner.provider:onr_v1_006_black-dahlia",
           "cardId": "onr_v1_006_black-dahlia",
           "copies": 1,
-          "capabilities": [
-            "runner.coverage.breaker"
-          ],
+          "capabilities": ["runner.coverage.breaker"],
           "supportCapabilities": [],
           "persistence": "persistent",
           "additivity": "distinct_provider_first",
@@ -16696,15 +16329,11 @@
           "providerId": "runner.provider:onr_v1_011_cloak",
           "cardId": "onr_v1_011_cloak",
           "copies": 3,
-          "capabilities": [
-            "runner.economy.recurring_breaker"
-          ],
+          "capabilities": ["runner.economy.recurring_breaker"],
           "supportCapabilities": [],
           "persistence": "persistent",
           "additivity": "additive_to_compatible_demand",
-          "compatibleDemandIds": [
-            "runner.demand.breaker_credit"
-          ],
+          "compatibleDemandIds": ["runner.demand.breaker_credit"],
           "evidence": [
             "provider_card:onr_v1_011_cloak",
             "provider_copies:3",
@@ -16715,9 +16344,7 @@
           "providerId": "runner.provider:onr_v1_014_codecracker",
           "cardId": "onr_v1_014_codecracker",
           "copies": 1,
-          "capabilities": [
-            "runner.coverage.breaker"
-          ],
+          "capabilities": ["runner.coverage.breaker"],
           "supportCapabilities": [],
           "persistence": "persistent",
           "additivity": "distinct_provider_first",
@@ -16732,9 +16359,7 @@
           "providerId": "runner.provider:onr_v1_016_cyfermaster",
           "cardId": "onr_v1_016_cyfermaster",
           "copies": 1,
-          "capabilities": [
-            "runner.coverage.breaker"
-          ],
+          "capabilities": ["runner.coverage.breaker"],
           "supportCapabilities": [],
           "persistence": "persistent",
           "additivity": "distinct_provider_first",
@@ -16749,9 +16374,7 @@
           "providerId": "runner.provider:onr_v1_021_dwarf",
           "cardId": "onr_v1_021_dwarf",
           "copies": 1,
-          "capabilities": [
-            "runner.coverage.breaker"
-          ],
+          "capabilities": ["runner.coverage.breaker"],
           "supportCapabilities": [],
           "persistence": "persistent",
           "additivity": "distinct_provider_first",
@@ -16766,9 +16389,7 @@
           "providerId": "runner.provider:onr_v1_040_loony-goon",
           "cardId": "onr_v1_040_loony-goon",
           "copies": 1,
-          "capabilities": [
-            "runner.coverage.breaker"
-          ],
+          "capabilities": ["runner.coverage.breaker"],
           "supportCapabilities": [],
           "persistence": "persistent",
           "additivity": "distinct_provider_first",
@@ -16783,9 +16404,7 @@
           "providerId": "runner.provider:onr_v1_047_pile-driver",
           "cardId": "onr_v1_047_pile-driver",
           "copies": 1,
-          "capabilities": [
-            "runner.coverage.breaker"
-          ],
+          "capabilities": ["runner.coverage.breaker"],
           "supportCapabilities": [],
           "persistence": "persistent",
           "additivity": "distinct_provider_first",
@@ -16800,9 +16419,7 @@
           "providerId": "runner.provider:onr_v1_054_raptor",
           "cardId": "onr_v1_054_raptor",
           "copies": 1,
-          "capabilities": [
-            "runner.coverage.breaker"
-          ],
+          "capabilities": ["runner.coverage.breaker"],
           "supportCapabilities": [],
           "persistence": "persistent",
           "additivity": "distinct_provider_first",
@@ -16817,15 +16434,11 @@
           "providerId": "runner.provider:onr_v1_071_vewy-vewy-quiet",
           "cardId": "onr_v1_071_vewy-vewy-quiet",
           "copies": 2,
-          "capabilities": [
-            "runner.economy.recurring_breaker"
-          ],
+          "capabilities": ["runner.economy.recurring_breaker"],
           "supportCapabilities": [],
           "persistence": "persistent",
           "additivity": "additive_to_compatible_demand",
-          "compatibleDemandIds": [
-            "runner.demand.breaker_credit"
-          ],
+          "compatibleDemandIds": ["runner.demand.breaker_credit"],
           "evidence": [
             "provider_card:onr_v1_071_vewy-vewy-quiet",
             "provider_copies:2",
@@ -16836,9 +16449,7 @@
           "providerId": "runner.provider:onr_v1_079_bodyweight-synthetic-blood",
           "cardId": "onr_v1_079_bodyweight-synthetic-blood",
           "copies": 1,
-          "capabilities": [
-            "runner.throughput.draw"
-          ],
+          "capabilities": ["runner.throughput.draw"],
           "supportCapabilities": [],
           "persistence": "one_shot",
           "additivity": "distinct_provider_first",
@@ -16853,15 +16464,11 @@
           "providerId": "runner.provider:onr_v1_141_raven-microcyb-owl",
           "cardId": "onr_v1_141_raven-microcyb-owl",
           "copies": 1,
-          "capabilities": [
-            "runner.economy.recurring_breaker"
-          ],
+          "capabilities": ["runner.economy.recurring_breaker"],
           "supportCapabilities": [],
           "persistence": "persistent",
           "additivity": "additive_to_compatible_demand",
-          "compatibleDemandIds": [
-            "runner.demand.breaker_credit"
-          ],
+          "compatibleDemandIds": ["runner.demand.breaker_credit"],
           "evidence": [
             "provider_card:onr_v1_141_raven-microcyb-owl",
             "provider_copies:1",
@@ -16872,9 +16479,7 @@
           "providerId": "runner.provider:onr_v1_177_the-short-circuit",
           "cardId": "onr_v1_177_the-short-circuit",
           "copies": 2,
-          "capabilities": [
-            "runner.throughput.search"
-          ],
+          "capabilities": ["runner.throughput.search"],
           "supportCapabilities": [],
           "persistence": "persistent",
           "additivity": "distinct_provider_first",
@@ -16889,9 +16494,7 @@
       "engineDependencies": [
         {
           "dependencyId": "runner.dependency.breaker_coverage",
-          "requiredCapabilityIds": [
-            "runner.coverage.breaker"
-          ],
+          "requiredCapabilityIds": ["runner.coverage.breaker"],
           "providerIds": [
             "runner.provider:onr_v1_006_black-dahlia",
             "runner.provider:onr_v1_014_codecracker",
@@ -16922,12 +16525,8 @@
           "tendencyId": "runner.development.install_persistent_provider",
           "strength": "high",
           "ownerModuleId": "runner.rig_and_coverage",
-          "dependencyIds": [
-            "runner.dependency.breaker_coverage"
-          ],
-          "exitConditionIds": [
-            "required_coverage_installed"
-          ],
+          "dependencyIds": ["runner.dependency.breaker_coverage"],
+          "exitConditionIds": ["required_coverage_installed"],
           "evidence": [
             "development_tendency:runner.development.install_persistent_provider",
             "active:true",
@@ -16938,12 +16537,8 @@
           "tendencyId": "runner.development.throughput_until_dependency_ready",
           "strength": "high",
           "ownerModuleId": "runner.develop_board_and_hand",
-          "dependencyIds": [
-            "runner.dependency.breaker_coverage"
-          ],
-          "exitConditionIds": [
-            "required_dependency_ready"
-          ],
+          "dependencyIds": ["runner.dependency.breaker_coverage"],
+          "exitConditionIds": ["required_dependency_ready"],
           "evidence": [
             "development_tendency:runner.development.throughput_until_dependency_ready",
             "active:true",
@@ -16956,21 +16551,11 @@
           "contributionId": "runner.contribution.maintain_breaker_coverage",
           "ownerModuleId": "runner.rig_and_coverage",
           "objective": "maintain_required_coverage",
-          "capabilityIds": [
-            "runner.coverage.breaker"
-          ],
-          "dependencyIds": [
-            "runner.dependency.breaker_coverage"
-          ],
-          "activationConditionIds": [
-            "coverage_dependency_open"
-          ],
-          "exitConditionIds": [
-            "required_coverage_installed"
-          ],
-          "evidence": [
-            "contribution_from:runner.engine.persistent_rig"
-          ]
+          "capabilityIds": ["runner.coverage.breaker"],
+          "dependencyIds": ["runner.dependency.breaker_coverage"],
+          "activationConditionIds": ["coverage_dependency_open"],
+          "exitConditionIds": ["required_coverage_installed"],
+          "evidence": ["contribution_from:runner.engine.persistent_rig"]
         },
         {
           "contributionId": "runner.contribution.throughput_until_ready",
@@ -16980,27 +16565,15 @@
             "runner.throughput.draw",
             "runner.throughput.search"
           ],
-          "dependencyIds": [
-            "runner.dependency.breaker_coverage"
-          ],
-          "activationConditionIds": [
-            "required_dependency_not_ready"
-          ],
-          "exitConditionIds": [
-            "required_dependency_ready"
-          ],
-          "evidence": [
-            "contribution_from:runner.engine.throughput_until_ready"
-          ]
+          "dependencyIds": ["runner.dependency.breaker_coverage"],
+          "activationConditionIds": ["required_dependency_not_ready"],
+          "exitConditionIds": ["required_dependency_ready"],
+          "evidence": ["contribution_from:runner.engine.throughput_until_ready"]
         }
       ],
-      "pressureVectors": [
-        "runner.central_probe_pressure"
-      ],
+      "pressureVectors": ["runner.central_probe_pressure"],
       "riskProfile": [],
-      "rejectedIntents": [
-        "runner.bad_publicity_pressure"
-      ],
+      "rejectedIntents": ["runner.bad_publicity_pressure"],
       "confidence": "medium",
       "evidence": [
         "deck_strategy_profile:present",
@@ -17039,9 +16612,7 @@
       "phase": "fund",
       "transitionStatus": "continued",
       "decisionsCommitted": 177,
-      "blockerIds": [
-        "runner.interface_closeout:reserve_shortfall"
-      ],
+      "blockerIds": ["runner.interface_closeout:reserve_shortfall"],
       "ttlDecisionsRemaining": 4,
       "updatedAtStateVersion": 307,
       "state": {
@@ -17337,10 +16908,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -17607,10 +17175,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -17787,10 +17352,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -17812,9 +17374,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "high",
               "score": {
                 "anchor": 0,
@@ -17877,10 +17437,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -17899,9 +17456,7 @@
               "family": "runner_survival",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.survival_defense"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.survival_defense"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -17932,10 +17487,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -18236,9 +17788,7 @@
                   "knownPathCost": 0,
                   "creditsAfterKnownPath": 3,
                   "unknownIceCount": 1,
-                  "unknownIcePositions": [
-                    0
-                  ],
+                  "unknownIcePositions": [0],
                   "corpRezCredits": 3,
                   "visibleCoverage": "typed_only",
                   "requiredCredits": 4,
@@ -18386,10 +17936,7 @@
               "serverId": "remote_2",
               "rootPlanInstanceId": "plan:runner.contest_remote:remote%3Aremote_2",
               "leafPlanInstanceId": "plan:runner.convert_run_window:run%3Arun_305",
-              "semanticActionTypes": [
-                "breaker.boost_strength",
-                "run.continue"
-              ],
+              "semanticActionTypes": ["breaker.boost_strength", "run.continue"],
               "purposeCode": "convert_active_run_window",
               "evidenceCode": "runner_visible_encounter_requires_mitigation:onr_v1_234_data-darts",
               "accessCommitment": {
@@ -18412,9 +17959,7 @@
                   "knownPathCost": 0,
                   "creditsAfterKnownPath": 3,
                   "unknownIceCount": 1,
-                  "unknownIcePositions": [
-                    0
-                  ],
+                  "unknownIcePositions": [0],
                   "corpRezCredits": 3,
                   "visibleCoverage": "typed_only",
                   "requiredCredits": 4,
@@ -18445,9 +17990,7 @@
                   "knownPathCost": 0,
                   "creditsAfterKnownPath": 3,
                   "unknownIceCount": 1,
-                  "unknownIcePositions": [
-                    0
-                  ],
+                  "unknownIcePositions": [0],
                   "corpRezCredits": 3,
                   "visibleCoverage": "typed_only",
                   "requiredCredits": 4,
@@ -18884,9 +18427,7 @@
                 }
               }
             ],
-            "protectedValueClaimIds": [
-              "fnv1a:f06b0cd1"
-            ],
+            "protectedValueClaimIds": ["fnv1a:f06b0cd1"],
             "transition": {
               "kind": "projected_plan_discovery_required"
             }

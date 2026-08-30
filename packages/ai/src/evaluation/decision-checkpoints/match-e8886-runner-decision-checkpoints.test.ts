@@ -87,7 +87,9 @@ describe("match E8886 runner decision checkpoints", () => {
     expect(
       result.decision?.decisionDebug?.planFirstDecision?.executionOrigin
         ?.rootPlanInstanceId,
-    ).toBe("plan:runner.develop_board_and_hand:card%3Arunner_onr_v1_165_junkyard-bbs_1");
+    ).toBe(
+      "plan:runner.develop_board_and_hand:card%3Arunner_onr_v1_165_junkyard-bbs_1",
+    );
     const portfolioItems =
       result.decision?.decisionDebug?.detailSections?.find(
         (section) => section.id === "plan_portfolio",
@@ -96,9 +98,7 @@ describe("match E8886 runner decision checkpoints", () => {
       portfolioItems.some(
         (item) =>
           item.includes("module:runner.develop_board_and_hand") &&
-          item.includes(
-            "card%3Arunner_onr_v1_165_junkyard-bbs_1",
-          ) &&
+          item.includes("card%3Arunner_onr_v1_165_junkyard-bbs_1") &&
           item.includes("phase:fund") &&
           item.includes("viability:ready"),
       ),

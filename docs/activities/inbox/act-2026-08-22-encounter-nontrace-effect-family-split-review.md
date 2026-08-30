@@ -53,7 +53,7 @@ Subroutine-Fortsetzung eindeutig bleiben.
 
 - [ ] Jede bestehende Nontrace-Familie besitzt genau einen fachlichen Owner.
 - [ ] Suspendierung, Fortsetzung, Action-Bindung und Replaydeterminismus bleiben
-  zentrale Invarianten.
+      zentrale Invarianten.
 - [ ] Eine Teilung ist mit aktuellem Importgraph und Struktur-Gate bewertet.
 - [ ] Empfohlene Umsetzung ist in kleine familienbezogene Pakete geschnitten.
 

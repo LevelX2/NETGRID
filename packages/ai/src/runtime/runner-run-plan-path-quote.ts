@@ -1444,8 +1444,7 @@ function visibleDeflectorContextForInput(input: AiDecisionInput) {
       candidate.id.startsWith("remote_"),
     ).length,
     visibleCorpCredits: input.playerView.opponent.credits,
-    traceRulesProfile:
-      input.playerView.traceRulesProfile ?? "modern_open",
+    traceRulesProfile: input.playerView.traceRulesProfile ?? "modern_open",
     netOrCoreDamagePreventionRemaining: Math.max(
       0,
       input.playerView.own.freeNetOrCoreDamagePreventionRemaining ?? 0,

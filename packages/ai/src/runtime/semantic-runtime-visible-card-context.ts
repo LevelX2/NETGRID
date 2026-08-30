@@ -11,14 +11,14 @@ export type SemanticRuntimeVisibleCardContextDependencies = {
   runtimeDefinition: (
     definitionId: string,
   ) => VisibleCardRuntimeDefinition | undefined;
-  demoDefinition: (definitionId: string) => VisibleCardDemoDefinition | undefined;
+  demoDefinition: (
+    definitionId: string,
+  ) => VisibleCardDemoDefinition | undefined;
 };
 
 export type SemanticRuntimeVisibleCardContext = {
   normalizedRulesTextForDefinition: (definitionId: string) => string;
-  semanticRuntimeVisibleCardType: (
-    card: VisibleCard,
-  ) => string | undefined;
+  semanticRuntimeVisibleCardType: (card: VisibleCard) => string | undefined;
   semanticRuntimeVisibleCardAdvancementRequirement: (
     card: VisibleCard,
   ) => number | undefined;

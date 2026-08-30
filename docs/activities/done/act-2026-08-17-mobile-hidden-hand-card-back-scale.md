@@ -91,21 +91,21 @@ demselben Skalierungswert folgen.
 ## Akzeptanzkriterien
 
 - [ ] Auf einem iPhone-14-Viewport mit 50 % Kartengröße erscheinen fünf
-  verdeckte Korp-HQ-Karten proportional und ohne überhöhte Rückseiten.
+      verdeckte Korp-HQ-Karten proportional und ohne überhöhte Rückseiten.
 - [ ] Die parallele verdeckte Runner-Grip-Vorschau verhält sich bei 50 %
-  ebenso korrekt.
+      ebenso korrekt.
 - [ ] Verwendete Kartenbreite und -höhe entsprechen in beiden Vorschauen
-  demselben Skalierungsfaktor und dem vorgesehenen Kartenformat.
+      demselben Skalierungsfaktor und dem vorgesehenen Kartenformat.
 - [ ] Korp- und Runner-Rückseitenmotiv bleiben korrekt zugeordnet; es werden
-  keinerlei verdeckte Kartendaten sichtbar.
+      keinerlei verdeckte Kartendaten sichtbar.
 - [ ] Überlappung und Overflow-Badge bleiben bei kleinen und größeren Händen
-  lesbar und ragen nicht unkontrolliert aus ihrer Zone.
+      lesbar und ragen nicht unkontrolliert aus ihrer Zone.
 - [ ] Die Darstellungen bei 100 % und maximaler zulässiger Kartengröße zeigen
-  keine Regression; andere Hidden-Back-Nutzungen behalten ihre notwendige
-  Mindestgröße.
+      keine Regression; andere Hidden-Back-Nutzungen behalten ihre notwendige
+      Mindestgröße.
 - [ ] Ein fokussierter automatisierter Test schützt den CSS-Skalierungsvertrag
-  beider Handvorschauen; eine visuelle mobile Prüfung dokumentiert den
-  reproduzierten 50-%-Fall.
+      beider Handvorschauen; eine visuelle mobile Prüfung dokumentiert den
+      reproduzierten 50-%-Fall.
 
 ## Umsetzungshinweise
 

@@ -159,7 +159,9 @@ export function runnerBadPublicityOrTraceTechCard(
   roles: readonly string[] = [],
   definition: VisibleCardHeuristicDefinition | undefined,
 ): boolean {
-  const tokens = card ? visibleTextTokens(visibleCardText(card, definition)) : [];
+  const tokens = card
+    ? visibleTextTokens(visibleCardText(card, definition))
+    : [];
   return (
     rolesMatch(roles, ["bad_publicity", "trace", "bad-publicity"]) ||
     visibleTokensIncludePhrase(tokens, ["bad", "publicity"]) ||

@@ -36,8 +36,7 @@ export function createRunnerRemoteThreatTargetingComposition(
   dependencies: RunnerRemoteThreatTargetingCompositionDependencies,
 ) {
   const {
-    bestTrueCentralCloseoutProfile:
-      bestTrueCentralCloseoutProfileForMetrics,
+    bestTrueCentralCloseoutProfile: bestTrueCentralCloseoutProfileForMetrics,
     trueCentralCloseoutProfile: trueCentralCloseoutProfileForMetrics,
   }: {
     bestTrueCentralCloseoutProfile: (

@@ -23,9 +23,7 @@ describe("corpInstalledEconomyCreditAmount", () => {
   });
 });
 
-function legalAction(
-  overrides: Partial<LegalAction> = {},
-): LegalAction {
+function legalAction(overrides: Partial<LegalAction> = {}): LegalAction {
   return {
     actionId: "corp-credit-action",
     side: "corp",

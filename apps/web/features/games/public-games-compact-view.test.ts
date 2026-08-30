@@ -24,7 +24,7 @@ describe("public games compact view contract", () => {
 
   it("uses icon-only compact actions with accessible tooltip text", () => {
     expect(panelSource).toContain('className="publicGameActionLabel"');
-    expect(panelSource).toContain('aria-label={t(`action.${entry.status}`)}');
+    expect(panelSource).toContain("aria-label={t(`action.${entry.status}`)}");
     expect(panelSource).toContain('title={t("downloadGamebook")}');
     expect(globalStyles).toMatch(
       /\.publicGameCard\.compact \.publicGameActionLabel[^}]*\{[^}]*display: none;/s,

@@ -628,7 +628,10 @@ describe("known central access payoff HQ knownness", () => {
     ];
     const publicEvents: PublicGameEvent[] = [];
     let stateVersion = 0;
-    for (const [accessIndex, cardDefinitionId] of accessedDefinitions.entries()) {
+    for (const [
+      accessIndex,
+      cardDefinitionId,
+    ] of accessedDefinitions.entries()) {
       publicEvents.push(
         publicEvent(`evt_access_${accessIndex}`, "access_card", stateVersion, {
           actor: "runner",
@@ -642,13 +645,18 @@ describe("known central access payoff HQ knownness", () => {
       stateVersion += 1;
       if (accessIndex === 1 || accessIndex === 3) {
         publicEvents.push(
-          publicEvent(`evt_steal_${accessIndex}`, "steal_agenda", stateVersion, {
-            actor: "runner",
-            actionType: "steal_agenda",
-            serverId: "rd",
-            cardDefinitionId,
-            accessIndex,
-          }),
+          publicEvent(
+            `evt_steal_${accessIndex}`,
+            "steal_agenda",
+            stateVersion,
+            {
+              actor: "runner",
+              actionType: "steal_agenda",
+              serverId: "rd",
+              cardDefinitionId,
+              accessIndex,
+            },
+          ),
         );
         stateVersion += 1;
       }

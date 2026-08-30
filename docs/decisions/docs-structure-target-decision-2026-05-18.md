@@ -11,18 +11,18 @@ Diese Entscheidung beschreibt die fachliche Zielstruktur unter `docs/`. Die Rete
 
 ## Zielbereiche
 
-| Bereich | Zweck |
-| --- | --- |
-| `docs/source/` | Primärquellen, Regelreferenzen, Spoiler und andere quellennahe Ausgangsdokumente |
-| `docs/activities/` | offenes und laufendes Arbeitsboard; `done/` nur kurzlebiger Abschluss-Slot |
-| `docs/architecture/` | aktuelle releaseübergreifende Architektur-, Schnittstellen- und Schichtverträge |
-| `docs/releases/` | aktuell relevante Release-, Requirement-, Gate- und Planungsartefakte |
-| `docs/reviews/` | aktuell benötigte Querschnittsreviews, Audits und Gate-Evidence |
-| `docs/decisions/` | dauerhafte Projekt-, Produkt-, Git- und Dokumentationsentscheidungen |
-| `docs/runbooks/` | wiederholbare Betriebs-, Diagnose- und Wartungsabläufe |
-| `docs/codex/` | aktueller Codex-Status und noch nicht konsolidierte Steuerungsartefakte |
-| `docs/ui-designsets/` | aktive UI-/Branding-Referenzen |
-| `docs/derived/` | Übergangsbereich ohne neue Dokumente; darf nach Restmigration entfallen |
+| Bereich               | Zweck                                                                            |
+| --------------------- | -------------------------------------------------------------------------------- |
+| `docs/source/`        | Primärquellen, Regelreferenzen, Spoiler und andere quellennahe Ausgangsdokumente |
+| `docs/activities/`    | offenes und laufendes Arbeitsboard; `done/` nur kurzlebiger Abschluss-Slot       |
+| `docs/architecture/`  | aktuelle releaseübergreifende Architektur-, Schnittstellen- und Schichtverträge  |
+| `docs/releases/`      | aktuell relevante Release-, Requirement-, Gate- und Planungsartefakte            |
+| `docs/reviews/`       | aktuell benötigte Querschnittsreviews, Audits und Gate-Evidence                  |
+| `docs/decisions/`     | dauerhafte Projekt-, Produkt-, Git- und Dokumentationsentscheidungen             |
+| `docs/runbooks/`      | wiederholbare Betriebs-, Diagnose- und Wartungsabläufe                           |
+| `docs/codex/`         | aktueller Codex-Status und noch nicht konsolidierte Steuerungsartefakte          |
+| `docs/ui-designsets/` | aktive UI-/Branding-Referenzen                                                   |
+| `docs/derived/`       | Übergangsbereich ohne neue Dokumente; darf nach Restmigration entfallen          |
 
 Ein separater `docs/archive/`-Zielbereich gehört nicht mehr zur Current-State-Struktur. Historie liegt in Git.
 

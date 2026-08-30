@@ -26,11 +26,11 @@ ausschließlich die lokale read-only Maintenance-Analyse-API.
 
 ## Ergebnis wie im Programm
 
-| Partie | Standarddecks | Endergebnis | Agendapunkte | Ende | Entscheidungen |
-| --- | --- | ---: | ---: | --- | ---: |
-| Seed 1 | **Krashkurs: Clown-Kreditmaschine** gegen **Chrome Rush Bureau** | Runner **10 – 3** Corp | **7:3** | Agendapunkte | 571 |
-| Seed 2 | **Krashkurs: Clown-Kreditmaschine** gegen **Chrome Rush Bureau** | Corp **10 – 3** Runner | **7:3** | Agendapunkte | 462 |
-| Seed 3 | **Krashkurs: Clown-Kreditmaschine** gegen **Chrome Rush Bureau** | Runner **10 – 3** Corp | **10:3** | Agendapunkte | 591 |
+| Partie | Standarddecks                                                    |            Endergebnis | Agendapunkte | Ende         | Entscheidungen |
+| ------ | ---------------------------------------------------------------- | ---------------------: | -----------: | ------------ | -------------: |
+| Seed 1 | **Krashkurs: Clown-Kreditmaschine** gegen **Chrome Rush Bureau** | Runner **10 – 3** Corp |      **7:3** | Agendapunkte |            571 |
+| Seed 2 | **Krashkurs: Clown-Kreditmaschine** gegen **Chrome Rush Bureau** | Corp **10 – 3** Runner |      **7:3** | Agendapunkte |            462 |
+| Seed 3 | **Krashkurs: Clown-Kreditmaschine** gegen **Chrome Rush Bureau** | Runner **10 – 3** Corp |     **10:3** | Agendapunkte |            591 |
 
 Die finalen Match-IDs sind `match_ec5b2d5b75e389b9`,
 `match_21124ba27dbaae1a` und `match_df1e2cd6549ea67d`.

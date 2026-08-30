@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest";
 
 import { runnerMultiRunEventAssessment } from "./runner-multi-run-event-assessment";
 
-function action(payload: Record<string, string | number | boolean>): LegalAction {
+function action(
+  payload: Record<string, string | number | boolean>,
+): LegalAction {
   return {
     actionId: "multi-run-action",
     side: "runner",

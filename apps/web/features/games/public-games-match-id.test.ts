@@ -14,7 +14,7 @@ const globalStyles = readFileSync(
 describe("public games match ID contract", () => {
   it("renders the complete match ID instead of shortening it", () => {
     expect(panelSource).toContain(
-      '<code title={entry.matchId}>{entry.matchId}</code>',
+      "<code title={entry.matchId}>{entry.matchId}</code>",
     );
     expect(panelSource).not.toContain("shortMatchId");
     expect(panelSource).not.toContain("matchId.slice");

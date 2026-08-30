@@ -37,13 +37,19 @@ export function resolveTraceChoice(
   playerAction: PlayerAction,
 ): void {
   bindClassicRunnerLinkStrength(host, playerAction);
-  core.resolveTraceChoice(classicAwareTraceHost(host), legalAction, playerAction);
+  core.resolveTraceChoice(
+    classicAwareTraceHost(host),
+    legalAction,
+    playerAction,
+  );
   normalizeClassicTraceChoice(host);
 }
 
 export function buildClassicRunnerLinkBidOptions(
   paymentCapacity: number,
-  modifier: Pick<ClassicBaseLinkModifier, "creditCost" | "linkDelta"> | undefined,
+  modifier:
+    | Pick<ClassicBaseLinkModifier, "creditCost" | "linkDelta">
+    | undefined,
 ): ClassicRunnerLinkBidOption[] {
   const capacity = Math.max(0, Math.floor(paymentCapacity));
   if (!modifier) return [{ paymentAmount: 0, linkDelta: 0 }];
@@ -159,7 +165,10 @@ function classicAwareTraceHost(
     cards: {
       ...host.cards,
       activatedTraceAbilities: (definition, timing) => {
-        const abilities = host.cards.activatedTraceAbilities(definition, timing);
+        const abilities = host.cards.activatedTraceAbilities(
+          definition,
+          timing,
+        );
         if (
           timing !== "trace_post_bid_link_window" ||
           !installedTraceBaseLinkCardImplementation(definition)
@@ -190,9 +199,7 @@ function classicBaseLinkModifierForTrace(
     .activatedTraceAbilities(definition, "trace_post_bid_link_window")
     .flatMap(({ ability }) => {
       const modifier = classicRepeatableLinkModifier(ability);
-      return modifier
-        ? [{ sourceTitle: definition.title, ...modifier }]
-        : [];
+      return modifier ? [{ sourceTitle: definition.title, ...modifier }] : [];
     });
   if (candidates.length > 1) {
     throw new Error(

@@ -65,7 +65,13 @@
   --card-shadow: 0 8px 18px rgb(0 0 0 / 0.28);
   --card-art-bg: linear-gradient(135deg, #213446, #2a2219);
   --card-art-text-bg: #233140;
-  --card-hidden-art-bg: repeating-linear-gradient(135deg, #17212b 0, #17212b 8px, #24313d 8px, #24313d 16px);
+  --card-hidden-art-bg: repeating-linear-gradient(
+    135deg,
+    #17212b 0,
+    #17212b 8px,
+    #24313d 8px,
+    #24313d 16px
+  );
   --tooltip-bg: #101820;
   --tooltip-shadow: 0 12px 28px rgb(0 0 0 / 0.38);
   --z-run-overlay: 210;
@@ -92,8 +98,24 @@
   --chronicle-hidden: #8c98a3;
   --cue: #f4d56c;
   --cue-soft: #15231f;
-  --board-corp-zone-bg: color-mix(in srgb, var(--corp-status-accent), var(--section-bg) 86%);
-  --board-corp-lane-bg: color-mix(in srgb, var(--corp-status-accent), var(--lane-bg) 90%);
-  --board-runner-zone-bg: color-mix(in srgb, var(--chronicle-run), var(--section-bg) 86%);
-  --board-runner-lane-bg: color-mix(in srgb, var(--chronicle-run), var(--lane-bg) 90%);
+  --board-corp-zone-bg: color-mix(
+    in srgb,
+    var(--corp-status-accent),
+    var(--section-bg) 86%
+  );
+  --board-corp-lane-bg: color-mix(
+    in srgb,
+    var(--corp-status-accent),
+    var(--lane-bg) 90%
+  );
+  --board-runner-zone-bg: color-mix(
+    in srgb,
+    var(--chronicle-run),
+    var(--section-bg) 86%
+  );
+  --board-runner-lane-bg: color-mix(
+    in srgb,
+    var(--chronicle-run),
+    var(--lane-bg) 90%
+  );
 }

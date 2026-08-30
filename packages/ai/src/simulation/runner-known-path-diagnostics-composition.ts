@@ -1,4 +1,8 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 
 import {
   createRunnerEncounterCompositionContext,
@@ -16,40 +20,41 @@ import {
   type RunnerSetupCoverageCompositionDependencies,
 } from "./runner-setup-coverage-composition";
 
-export type RunnerKnownPathDiagnosticsCompositionDependencies =
-  Omit<RunnerSetupCoverageCompositionDependencies, "findVisibleCard"> & {
-    findVisibleCard: (
+export type RunnerKnownPathDiagnosticsCompositionDependencies = Omit<
+  RunnerSetupCoverageCompositionDependencies,
+  "findVisibleCard"
+> & {
+  findVisibleCard: (
+    input: AiDecisionInput,
+    instanceId: string,
+  ) => VisibleCard | undefined;
+} & Omit<
+    RunnerEncounterCompositionContextDependencies,
+    "rolesForCardId" | "assessKnownRezzedIcePath" | "findVisibleCard"
+  > & {
+    runnerKnownPathAssessmentIsKnownNoAccess: (
+      assessment: ReturnType<typeof assessKnownRezzedIcePath>,
+    ) => boolean;
+    runnerKnownPathAssessmentIsUnbreakableNoAccess: (
+      assessment: ReturnType<typeof assessKnownRezzedIcePath>,
+    ) => boolean;
+    runnerRunTargetHasOnlyUnknownOrUnrezzedIce: (
       input: AiDecisionInput,
-      instanceId: string,
-    ) => VisibleCard | undefined;
-  } &
-    Omit<
-      RunnerEncounterCompositionContextDependencies,
-      "rolesForCardId" | "assessKnownRezzedIcePath" | "findVisibleCard"
-    > & {
-  runnerKnownPathAssessmentIsKnownNoAccess: (
-    assessment: ReturnType<typeof assessKnownRezzedIcePath>,
-  ) => boolean;
-  runnerKnownPathAssessmentIsUnbreakableNoAccess: (
-    assessment: ReturnType<typeof assessKnownRezzedIcePath>,
-  ) => boolean;
-  runnerRunTargetHasOnlyUnknownOrUnrezzedIce: (
-    input: AiDecisionInput,
-    serverId: string,
-  ) => boolean;
-  remoteServerHasScoreThreat: (
-    input: AiDecisionInput,
-    serverId: string,
-  ) => boolean;
-  runnerHasRecentRunOnServer: (
-    input: AiDecisionInput,
-    serverId: string,
-  ) => boolean;
-  runnerRemoteHasKnownRelevantTrashTarget: (
-    input: AiDecisionInput,
-    serverId: string,
-  ) => boolean;
-};
+      serverId: string,
+    ) => boolean;
+    remoteServerHasScoreThreat: (
+      input: AiDecisionInput,
+      serverId: string,
+    ) => boolean;
+    runnerHasRecentRunOnServer: (
+      input: AiDecisionInput,
+      serverId: string,
+    ) => boolean;
+    runnerRemoteHasKnownRelevantTrashTarget: (
+      input: AiDecisionInput,
+      serverId: string,
+    ) => boolean;
+  };
 
 export function createRunnerKnownPathDiagnosticsComposition(
   dependencies: RunnerKnownPathDiagnosticsCompositionDependencies,

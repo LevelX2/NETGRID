@@ -174,11 +174,7 @@ export function ActiveMatchWorkspaceNav({
           >
             {item.icon}
             <span className="workspaceLabel">{item.label}</span>
-            <span
-              className="workspaceNavTooltip"
-              id={tooltipId}
-              role="tooltip"
-            >
+            <span className="workspaceNavTooltip" id={tooltipId} role="tooltip">
               <strong>{item.label}</strong>
               <span>{item.description}</span>
             </span>

@@ -1,6 +1,9 @@
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { DeckDoctrineV2Diagnostic } from "../deck-doctrine-strategy";
-import { scoreActionGoalFit, type ActionGoalFit } from "../decision/action-goal-fit";
+import {
+  scoreActionGoalFit,
+  type ActionGoalFit,
+} from "../decision/action-goal-fit";
 import { synthesizeDoctrineTacticalGoals } from "../decision/doctrine-goal-synthesis";
 import { buildTacticalGoalUtilities } from "../decision/tactical-goal-utility";
 import { assertSemanticObjectSideSafe } from "../diagnostics/semantic-redaction";

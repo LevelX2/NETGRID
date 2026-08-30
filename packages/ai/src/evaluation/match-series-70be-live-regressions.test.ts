@@ -94,7 +94,9 @@ describe("match series 70BE real Engine regressions", () => {
       (action) => action.actionId === decision.actionId,
     );
     expect(selected?.type).toBe("install_card");
-    expect(selected?.payload).toMatchObject({ cardId: "runner_simple_decoder_1" });
+    expect(selected?.payload).toMatchObject({
+      cardId: "runner_simple_decoder_1",
+    });
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "plan_module:runner.rig_and_coverage",

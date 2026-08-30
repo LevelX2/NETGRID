@@ -12,7 +12,16 @@
     "V105K-REPLAY-001",
     "V105K-DECK-001"
   ],
-  "coversTests": ["V105K-T001", "V105K-T002", "V105K-T003", "V105K-T004", "V105K-T005", "V105K-T006", "V105K-T007", "V105K-T008"],
+  "coversTests": [
+    "V105K-T001",
+    "V105K-T002",
+    "V105K-T003",
+    "V105K-T004",
+    "V105K-T005",
+    "V105K-T006",
+    "V105K-T007",
+    "V105K-T008"
+  ],
   "coversCards": [
     "onr_v1_015_codeslinger",
     "onr_v1_052_raffles",

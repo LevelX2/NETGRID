@@ -14,7 +14,9 @@ export type TraceCardImplementationRuntimeDeps = Pick<
   TraceRuntimeDepsKey
 >;
 
-type RuntimeState = Parameters<TraceCardImplementationRuntimeDeps["startTrace"]>[0];
+type RuntimeState = Parameters<
+  TraceCardImplementationRuntimeDeps["startTrace"]
+>[0];
 
 export type TraceRuntimeDepsHost = {
   trace: {
@@ -38,9 +40,14 @@ function successEffectWithSelectedTarget(
   if (!needsResourceTarget)
     return traceSuccessEffectForCardImplementation(successEffects);
   const resolvedTargetCardId =
-    host.trace.resolveRunnerLastTurnInstalledResourceTargetId(state, targetCardId);
+    host.trace.resolveRunnerLastTurnInstalledResourceTargetId(
+      state,
+      targetCardId,
+    );
   if (!resolvedTargetCardId)
-    throw new Error("Die gewaehlte Runner-Resource ist fuer diesen Trace nicht legal.");
+    throw new Error(
+      "Die gewaehlte Runner-Resource ist fuer diesen Trace nicht legal.",
+    );
   return traceSuccessEffectForCardImplementation(successEffects, {
     targetCardInstanceId: resolvedTargetCardId,
   });

@@ -8,7 +8,9 @@ describe("deck card image fallback", () => {
       "utf8",
     );
 
-    expect(source).toContain("const [imageUnavailable, setImageUnavailable] = useState(false)");
+    expect(source).toContain(
+      "const [imageUnavailable, setImageUnavailable] = useState(false)",
+    );
     expect(source).toContain("onUnavailable={() => setImageUnavailable(true)}");
     expect(source).toContain("<CardTextPreview");
     expect(source).not.toContain("title.slice(0, 1)");
@@ -37,9 +39,15 @@ describe("deck card image fallback", () => {
       "utf8",
     );
 
-    expect(source).toContain("const [tooltipImageUnavailable, setTooltipImageUnavailable] = useState(false)");
-    expect(source).toContain('tooltipMode === "image" ? "enhanced" : tooltipMode');
-    expect(source).toContain("onUnavailable={() => setTooltipImageUnavailable(true)}");
+    expect(source).toContain(
+      "const [tooltipImageUnavailable, setTooltipImageUnavailable] = useState(false)",
+    );
+    expect(source).toContain(
+      'tooltipMode === "image" ? "enhanced" : tooltipMode',
+    );
+    expect(source).toContain(
+      "onUnavailable={() => setTooltipImageUnavailable(true)}",
+    );
     expect(source).toContain("cardTooltipType-${card.type}");
     expect(source).not.toContain("Kartenbild ${card.title");
   });

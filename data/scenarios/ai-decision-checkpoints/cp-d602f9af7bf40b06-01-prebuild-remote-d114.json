@@ -39,10 +39,7 @@
             "title": "Hunting Pack",
             "definitionId": "onr_proteus_026_hunting-pack",
             "type": "ice",
-            "subtypes": [
-              "bloodhound",
-              "sentry"
-            ],
+            "subtypes": ["bloodhound", "sentry"],
             "rulesText": "For each rezzed piece of ice installed outside Hunting Pack, Hunting Pack has one subroutine as follows: \"*Trace 5-If trace is successful, give Runner a tag.\"",
             "rezCost": 1,
             "rezzed": false,
@@ -57,10 +54,7 @@
             "title": "Marked Accounts",
             "definitionId": "onr_proteus_005_marked-accounts",
             "type": "agenda",
-            "subtypes": [
-              "ambush",
-              "gray_ops"
-            ],
+            "subtypes": ["ambush", "gray_ops"],
             "rulesText": "When Runner accesses Marked Accounts, give Runner a tag, even if it is not installed. If Marked Accounts is accessed from R&D, Runner must show it to you.",
             "rezzed": false,
             "advancementCounters": 0,
@@ -75,9 +69,7 @@
             "title": "Bioweapons Engineering",
             "definitionId": "onr_v1_190_bioweapons-engineering",
             "type": "agenda",
-            "subtypes": [
-              "research"
-            ],
+            "subtypes": ["research"],
             "rulesText": "Each source of meat damage inflicts +1 meat damage.",
             "rezzed": false,
             "advancementCounters": 0,
@@ -92,9 +84,7 @@
             "title": "Virus Test Site",
             "definitionId": "onr_v1_348_virus-test-site",
             "type": "asset",
-            "subtypes": [
-              "ambush"
-            ],
+            "subtypes": ["ambush"],
             "rulesText": "You may advance Virus Test Site before and after you rez it. When Runner accesses Test Site, it does 2 Net damage per advancement counter on it, or 1 Net damage if it has no counters, even if it is not installed or rezzed. Ignore this effect if Runner accesses it from the Archives. If Test Site is accessed from R&D, Runner must show it to you.",
             "rezCost": 0,
             "rezzed": false,
@@ -109,9 +99,7 @@
             "title": "Nerve Labyrinth",
             "definitionId": "onr_v1_257_nerve-labyrinth",
             "type": "ice",
-            "subtypes": [
-              "code_gate"
-            ],
+            "subtypes": ["code_gate"],
             "rulesText": "[Subroutine] Do 2 net damage.\n[Subroutine] End the run.",
             "rezCost": 6,
             "rezzed": false,
@@ -129,9 +117,7 @@
             "title": "Virus Test Site",
             "definitionId": "onr_v1_348_virus-test-site",
             "type": "asset",
-            "subtypes": [
-              "ambush"
-            ],
+            "subtypes": ["ambush"],
             "rulesText": "You may advance Virus Test Site before and after you rez it. When Runner accesses Test Site, it does 2 Net damage per advancement counter on it, or 1 Net damage if it has no counters, even if it is not installed or rezzed. Ignore this effect if Runner accesses it from the Archives. If Test Site is accessed from R&D, Runner must show it to you.",
             "rezCost": 0,
             "rezzed": true,
@@ -146,9 +132,7 @@
             "title": "Accounts Receivable",
             "definitionId": "onr_v1_281_accounts-receivable",
             "type": "operation",
-            "subtypes": [
-              "transactions"
-            ],
+            "subtypes": ["transactions"],
             "rulesText": "Gain [9].",
             "cost": 5,
             "playCost": {
@@ -166,9 +150,7 @@
             "title": "Efficiency Experts",
             "definitionId": "onr_v1_290_efficiency-experts",
             "type": "operation",
-            "subtypes": [
-              "transactions"
-            ],
+            "subtypes": ["transactions"],
             "rulesText": "Gain 3.",
             "cost": 0,
             "playCost": {
@@ -186,9 +168,7 @@
             "title": "City Surveillance",
             "definitionId": "onr_v1_313_city-surveillance",
             "type": "asset",
-            "subtypes": [
-              "gray_ops"
-            ],
+            "subtypes": ["gray_ops"],
             "rulesText": "For each card Runner draws, give Runner a tag unless Runner pays [1], in addition to any other costs, to avoid receiving that tag. You may rez City Surveillance just before the card is drawn.",
             "rezCost": 1,
             "rezzed": true,
@@ -203,9 +183,7 @@
             "title": "Scorched Earth",
             "definitionId": "onr_v1_302_scorched-earth",
             "type": "operation",
-            "subtypes": [
-              "black_ops"
-            ],
+            "subtypes": ["black_ops"],
             "rulesText": "Play only if Runner is tagged. Do 4 meat damage.",
             "cost": 3,
             "playCost": {
@@ -223,9 +201,7 @@
             "title": "Manhunt",
             "definitionId": "onr_proteus_050_manhunt",
             "type": "operation",
-            "subtypes": [
-              "gray_ops"
-            ],
+            "subtypes": ["gray_ops"],
             "rulesText": "Play only if Runner attempted a run during his or her last turn. Trace 6-If trace is successful, give Runner one tag for each point by which your trace exceeded his or her link.",
             "cost": 4,
             "playCost": {
@@ -243,9 +219,7 @@
             "title": "City Surveillance",
             "definitionId": "onr_v1_313_city-surveillance",
             "type": "asset",
-            "subtypes": [
-              "gray_ops"
-            ],
+            "subtypes": ["gray_ops"],
             "rulesText": "For each card Runner draws, give Runner a tag unless Runner pays [1], in addition to any other costs, to avoid receiving that tag. You may rez City Surveillance just before the card is drawn.",
             "rezCost": 1,
             "rezzed": true,
@@ -260,9 +234,7 @@
             "title": "TRAP!",
             "definitionId": "onr_v1_345_trap",
             "type": "asset",
-            "subtypes": [
-              "ambush"
-            ],
+            "subtypes": ["ambush"],
             "rulesText": "If you pay [4] when Runner accesses TRAP!, it does 3 Net damage and gives Runner a tag, even if TRAP! is not installed. Ignore this effect if Runner accesses it from the Archives. If TRAP! is accessed from R&D, Runner must show it to you.",
             "rezCost": 0,
             "rezzed": true,
@@ -277,9 +249,7 @@
             "title": "Accounts Receivable",
             "definitionId": "onr_v1_281_accounts-receivable",
             "type": "operation",
-            "subtypes": [
-              "transactions"
-            ],
+            "subtypes": ["transactions"],
             "rulesText": "Gain [9].",
             "cost": 5,
             "playCost": {
@@ -297,9 +267,7 @@
             "title": "Setup!",
             "definitionId": "onr_v1_340_setup",
             "type": "asset",
-            "subtypes": [
-              "ambush"
-            ],
+            "subtypes": ["ambush"],
             "rulesText": "When Runner accesses Setup!, it does 2 Net damage, even if it is not installed. Ignore this effect if Runner accesses it from the Archives. If Setup! is accessed from R&D, Runner must show it to you.",
             "rezCost": 0,
             "rezzed": false,
@@ -316,11 +284,7 @@
             "title": "Fetal AI",
             "definitionId": "onr_proteus_004_fetal-ai",
             "type": "agenda",
-            "subtypes": [
-              "ai",
-              "ambush",
-              "asset"
-            ],
+            "subtypes": ["ai", "ambush", "asset"],
             "rulesText": "When Runner accesses Fetal AI, do 2 Net damage, even if it is not installed. Ignore this effect if Runner accesses Fetal AI from the Archives. If Fetal AI is accessed from R&D, Runner must show it to you. Runner must pay 2 to steal Fetal AI, in addition to any other costs.",
             "rezzed": true,
             "advancementCounters": 0,
@@ -364,10 +328,7 @@
             "title": "Loony Goon",
             "definitionId": "onr_v1_040_loony-goon",
             "type": "program",
-            "subtypes": [
-              "icebreaker",
-              "killer"
-            ],
+            "subtypes": ["icebreaker", "killer"],
             "rulesText": "[1]: Break sentry subroutine.\n[1]: +1 strength.",
             "installCost": 4,
             "memoryCost": 1,
@@ -401,9 +362,7 @@
             "title": "Krash",
             "definitionId": "onr_v1_039_krash",
             "type": "program",
-            "subtypes": [
-              "icebreaker"
-            ],
+            "subtypes": ["icebreaker"],
             "rulesText": "2 credits: Break ice subroutine.\n2 credits: +1 strength.",
             "installCost": 0,
             "memoryCost": 1,
@@ -419,9 +378,7 @@
             "title": "Broker",
             "definitionId": "onr_v1_154_broker",
             "type": "resource",
-            "subtypes": [
-              "connection"
-            ],
+            "subtypes": ["connection"],
             "rulesText": "Each of your turns, you may take only one action to use Broker. A: Put [3] from the bank on Broker. A: Take all the bits from Broker.",
             "installCost": 3,
             "rezzed": true,
@@ -435,9 +392,7 @@
             "title": "Cyfermaster™",
             "definitionId": "onr_v1_016_cyfermaster",
             "type": "program",
-            "subtypes": [
-              "icebreaker"
-            ],
+            "subtypes": ["icebreaker"],
             "rulesText": "[2]: Break code gate subroutine.\n[1]: +1 strength.",
             "installCost": 4,
             "memoryCost": 1,
@@ -507,10 +462,7 @@
             "title": "Loony Goon",
             "definitionId": "onr_v1_040_loony-goon",
             "type": "program",
-            "subtypes": [
-              "icebreaker",
-              "killer"
-            ],
+            "subtypes": ["icebreaker", "killer"],
             "rulesText": "[1]: Break sentry subroutine.\n[1]: +1 strength.",
             "installCost": 4,
             "memoryCost": 1,
@@ -526,10 +478,7 @@
             "title": "Worm",
             "definitionId": "onr_v1_074_worm",
             "type": "program",
-            "subtypes": [
-              "icebreaker",
-              "worm"
-            ],
+            "subtypes": ["icebreaker", "worm"],
             "rulesText": "[0]: Break wall subroutine.\n[3]: +1 strength.",
             "installCost": 4,
             "memoryCost": 1,
@@ -653,9 +602,7 @@
             "title": "Temple Microcode Outlet",
             "definitionId": "onr_v1_114_temple-microcode-outlet",
             "type": "event",
-            "subtypes": [
-              "bbs"
-            ],
+            "subtypes": ["bbs"],
             "rulesText": "Search your stack for a program. Show that program to the Corp, and then bring it into your hand. Shuffle your stack afterwards.",
             "cost": 1,
             "playCost": {
@@ -673,9 +620,7 @@
             "title": "WuTech Mem Chip",
             "definitionId": "onr_v1_145_wutech-mem-chip",
             "type": "hardware",
-            "subtypes": [
-              "chip"
-            ],
+            "subtypes": ["chip"],
             "rulesText": "Provides +1 MU.",
             "installCost": 1,
             "memoryLimitBonus": 1,
@@ -708,10 +653,7 @@
             "title": "Dwarf",
             "definitionId": "onr_v1_021_dwarf",
             "type": "program",
-            "subtypes": [
-              "icebreaker",
-              "worm"
-            ],
+            "subtypes": ["icebreaker", "worm"],
             "rulesText": "[1]: Break wall subroutine.\n[1]: +1 strength.",
             "installCost": 6,
             "memoryCost": 1,
@@ -729,11 +671,7 @@
             "title": "Fetal AI",
             "definitionId": "onr_proteus_004_fetal-ai",
             "type": "agenda",
-            "subtypes": [
-              "ai",
-              "ambush",
-              "asset"
-            ],
+            "subtypes": ["ai", "ambush", "asset"],
             "rulesText": "When Runner accesses Fetal AI, do 2 Net damage, even if it is not installed. Ignore this effect if Runner accesses Fetal AI from the Archives. If Fetal AI is accessed from R&D, Runner must show it to you. Runner must pay 2 to steal Fetal AI, in addition to any other costs.",
             "rezzed": true,
             "advancementCounters": 0,
@@ -748,11 +686,7 @@
             "title": "Fetal AI",
             "definitionId": "onr_proteus_004_fetal-ai",
             "type": "agenda",
-            "subtypes": [
-              "ai",
-              "ambush",
-              "asset"
-            ],
+            "subtypes": ["ai", "ambush", "asset"],
             "rulesText": "When Runner accesses Fetal AI, do 2 Net damage, even if it is not installed. Ignore this effect if Runner accesses Fetal AI from the Archives. If Fetal AI is accessed from R&D, Runner must show it to you. Runner must pay 2 to steal Fetal AI, in addition to any other costs.",
             "rezzed": true,
             "advancementCounters": 0,
@@ -769,9 +703,7 @@
             "title": "Krash",
             "definitionId": "onr_v1_039_krash",
             "type": "program",
-            "subtypes": [
-              "icebreaker"
-            ],
+            "subtypes": ["icebreaker"],
             "rulesText": "2 credits: Break ice subroutine.\n2 credits: +1 strength.",
             "installCost": 0,
             "memoryCost": 1,
@@ -787,10 +719,7 @@
             "title": "Dwarf",
             "definitionId": "onr_v1_021_dwarf",
             "type": "program",
-            "subtypes": [
-              "icebreaker",
-              "worm"
-            ],
+            "subtypes": ["icebreaker", "worm"],
             "rulesText": "[1]: Break wall subroutine.\n[1]: +1 strength.",
             "installCost": 6,
             "memoryCost": 1,
@@ -815,9 +744,7 @@
               "title": "Nerve Labyrinth",
               "definitionId": "onr_v1_257_nerve-labyrinth",
               "type": "ice",
-              "subtypes": [
-                "code_gate"
-              ],
+              "subtypes": ["code_gate"],
               "rulesText": "[Subroutine] Do 2 net damage.\n[Subroutine] End the run.",
               "rezCost": 6,
               "rezzed": false,
@@ -895,11 +822,7 @@
               "title": "Data Darts",
               "definitionId": "onr_v1_234_data-darts",
               "type": "ice",
-              "subtypes": [
-                "ap",
-                "hellbolt",
-                "sentry"
-              ],
+              "subtypes": ["ap", "hellbolt", "sentry"],
               "rulesText": "[Subroutine] Do 3 net damage.\n[Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.",
               "rezCost": 5,
               "rezzed": true,
@@ -950,9 +873,7 @@
               "title": "Laser Wire",
               "definitionId": "onr_v1_253_laser-wire",
               "type": "ice",
-              "subtypes": [
-                "wall"
-              ],
+              "subtypes": ["wall"],
               "rulesText": "[Subroutine] Do 1 net damage.\n[Subroutine] End the run.",
               "rezCost": 4,
               "rezzed": true,
@@ -1008,9 +929,7 @@
               "title": "Virus Test Site",
               "definitionId": "onr_v1_348_virus-test-site",
               "type": "asset",
-              "subtypes": [
-                "ambush"
-              ],
+              "subtypes": ["ambush"],
               "rulesText": "You may advance Virus Test Site before and after you rez it. When Runner accesses Test Site, it does 2 Net damage per advancement counter on it, or 1 Net damage if it has no counters, even if it is not installed or rezzed. Ignore this effect if Runner accesses it from the Archives. If Test Site is accessed from R&D, Runner must show it to you.",
               "rezCost": 0,
               "rezzed": true,
@@ -1025,9 +944,7 @@
               "title": "Accounts Receivable",
               "definitionId": "onr_v1_281_accounts-receivable",
               "type": "operation",
-              "subtypes": [
-                "transactions"
-              ],
+              "subtypes": ["transactions"],
               "rulesText": "Gain [9].",
               "cost": 5,
               "playCost": {
@@ -1045,9 +962,7 @@
               "title": "Efficiency Experts",
               "definitionId": "onr_v1_290_efficiency-experts",
               "type": "operation",
-              "subtypes": [
-                "transactions"
-              ],
+              "subtypes": ["transactions"],
               "rulesText": "Gain 3.",
               "cost": 0,
               "playCost": {
@@ -1065,9 +980,7 @@
               "title": "City Surveillance",
               "definitionId": "onr_v1_313_city-surveillance",
               "type": "asset",
-              "subtypes": [
-                "gray_ops"
-              ],
+              "subtypes": ["gray_ops"],
               "rulesText": "For each card Runner draws, give Runner a tag unless Runner pays [1], in addition to any other costs, to avoid receiving that tag. You may rez City Surveillance just before the card is drawn.",
               "rezCost": 1,
               "rezzed": true,
@@ -1082,9 +995,7 @@
               "title": "Scorched Earth",
               "definitionId": "onr_v1_302_scorched-earth",
               "type": "operation",
-              "subtypes": [
-                "black_ops"
-              ],
+              "subtypes": ["black_ops"],
               "rulesText": "Play only if Runner is tagged. Do 4 meat damage.",
               "cost": 3,
               "playCost": {
@@ -1102,9 +1013,7 @@
               "title": "Manhunt",
               "definitionId": "onr_proteus_050_manhunt",
               "type": "operation",
-              "subtypes": [
-                "gray_ops"
-              ],
+              "subtypes": ["gray_ops"],
               "rulesText": "Play only if Runner attempted a run during his or her last turn. Trace 6-If trace is successful, give Runner one tag for each point by which your trace exceeded his or her link.",
               "cost": 4,
               "playCost": {
@@ -1122,9 +1031,7 @@
               "title": "City Surveillance",
               "definitionId": "onr_v1_313_city-surveillance",
               "type": "asset",
-              "subtypes": [
-                "gray_ops"
-              ],
+              "subtypes": ["gray_ops"],
               "rulesText": "For each card Runner draws, give Runner a tag unless Runner pays [1], in addition to any other costs, to avoid receiving that tag. You may rez City Surveillance just before the card is drawn.",
               "rezCost": 1,
               "rezzed": true,
@@ -1139,9 +1046,7 @@
               "title": "TRAP!",
               "definitionId": "onr_v1_345_trap",
               "type": "asset",
-              "subtypes": [
-                "ambush"
-              ],
+              "subtypes": ["ambush"],
               "rulesText": "If you pay [4] when Runner accesses TRAP!, it does 3 Net damage and gives Runner a tag, even if TRAP! is not installed. Ignore this effect if Runner accesses it from the Archives. If TRAP! is accessed from R&D, Runner must show it to you.",
               "rezCost": 0,
               "rezzed": true,
@@ -1156,9 +1061,7 @@
               "title": "Accounts Receivable",
               "definitionId": "onr_v1_281_accounts-receivable",
               "type": "operation",
-              "subtypes": [
-                "transactions"
-              ],
+              "subtypes": ["transactions"],
               "rulesText": "Gain [9].",
               "cost": 5,
               "playCost": {
@@ -1176,9 +1079,7 @@
               "title": "Setup!",
               "definitionId": "onr_v1_340_setup",
               "type": "asset",
-              "subtypes": [
-                "ambush"
-              ],
+              "subtypes": ["ambush"],
               "rulesText": "When Runner accesses Setup!, it does 2 Net damage, even if it is not installed. Ignore this effect if Runner accesses it from the Archives. If Setup! is accessed from R&D, Runner must show it to you.",
               "rezCost": 0,
               "rezzed": false,
@@ -1199,11 +1100,7 @@
               "title": "Fatal Attractor",
               "definitionId": "onr_v1_242_fatal-attractor",
               "type": "ice",
-              "subtypes": [
-                "ap",
-                "black_ice",
-                "sentry"
-              ],
+              "subtypes": ["ap", "black_ice", "sentry"],
               "rulesText": "[Subroutine] The next time Runner encounters a piece of ice during the run, do 3 Net damage unless Runner breaks all subroutines of that piece of ice.",
               "rezCost": 1,
               "rezzed": false,
@@ -1270,9 +1167,7 @@
               "title": "Virus Test Site",
               "definitionId": "onr_v1_348_virus-test-site",
               "type": "asset",
-              "subtypes": [
-                "ambush"
-              ],
+              "subtypes": ["ambush"],
               "rulesText": "You may advance Virus Test Site before and after you rez it. When Runner accesses Test Site, it does 2 Net damage per advancement counter on it, or 1 Net damage if it has no counters, even if it is not installed or rezzed. Ignore this effect if Runner accesses it from the Archives. If Test Site is accessed from R&D, Runner must show it to you.",
               "rezCost": 0,
               "rezzed": false,
@@ -1293,11 +1188,7 @@
               "title": "Fatal Attractor",
               "definitionId": "onr_v1_242_fatal-attractor",
               "type": "ice",
-              "subtypes": [
-                "ap",
-                "black_ice",
-                "sentry"
-              ],
+              "subtypes": ["ap", "black_ice", "sentry"],
               "rulesText": "[Subroutine] The next time Runner encounters a piece of ice during the run, do 3 Net damage unless Runner breaks all subroutines of that piece of ice.",
               "rezCost": 1,
               "rezzed": false,
@@ -1364,9 +1255,7 @@
               "title": "Setup!",
               "definitionId": "onr_v1_340_setup",
               "type": "asset",
-              "subtypes": [
-                "ambush"
-              ],
+              "subtypes": ["ambush"],
               "rulesText": "When Runner accesses Setup!, it does 2 Net damage, even if it is not installed. Ignore this effect if Runner accesses it from the Archives. If Setup! is accessed from R&D, Runner must show it to you.",
               "rezCost": 0,
               "rezzed": false,
@@ -1387,11 +1276,7 @@
               "title": "Fatal Attractor",
               "definitionId": "onr_v1_242_fatal-attractor",
               "type": "ice",
-              "subtypes": [
-                "ap",
-                "black_ice",
-                "sentry"
-              ],
+              "subtypes": ["ap", "black_ice", "sentry"],
               "rulesText": "[Subroutine] The next time Runner encounters a piece of ice during the run, do 3 Net damage unless Runner breaks all subroutines of that piece of ice.",
               "rezCost": 1,
               "rezzed": true,
@@ -1435,9 +1320,7 @@
               "title": "TRAP!",
               "definitionId": "onr_v1_345_trap",
               "type": "asset",
-              "subtypes": [
-                "ambush"
-              ],
+              "subtypes": ["ambush"],
               "rulesText": "If you pay [4] when Runner accesses TRAP!, it does 3 Net damage and gives Runner a tag, even if TRAP! is not installed. Ignore this effect if Runner accesses it from the Archives. If TRAP! is accessed from R&D, Runner must show it to you.",
               "rezCost": 0,
               "rezzed": false,
@@ -1458,12 +1341,7 @@
               "title": "Brain Wash",
               "definitionId": "onr_proteus_011_brain-wash",
               "type": "ice",
-              "subtypes": [
-                "ap",
-                "black_ice",
-                "brainwipe",
-                "sentry"
-              ],
+              "subtypes": ["ap", "black_ice", "brainwipe", "sentry"],
               "rulesText": "*Do 1 brain damage.",
               "rezCost": 3,
               "rezzed": false,
@@ -11950,10 +11828,7 @@
         "rezReserveProfile": {
           "iceKnownInDeck": 6,
           "rezEconomyToolsKnown": 4,
-          "evidence": [
-            "ice_known:6",
-            "rez_economy_tools:4"
-          ]
+          "evidence": ["ice_known:6", "rez_economy_tools:4"]
         },
         "economyBankTools": [],
         "iceTaxProfile": {
@@ -11961,17 +11836,13 @@
           "codeGateIceKnown": 1,
           "sentryIceKnown": 4,
           "taxingIceKnown": 1,
-          "evidence": [
-            "ice_records:6"
-          ]
+          "evidence": ["ice_records:6"]
         },
         "remotePlanProfile": {
           "remoteProtectionToolsKnown": 6,
           "remoteEconomyToolsKnown": 0,
           "ambushToolsKnown": 5,
-          "evidence": [
-            "corp_remote_profile:conservative"
-          ]
+          "evidence": ["corp_remote_profile:conservative"]
         }
       },
       "missingCapabilities": [],
@@ -12109,10 +11980,7 @@
               "reason": "support:boardSafety"
             }
           ],
-          "supportGaps": [
-            "low_scorePlan_support",
-            "missing_tempo_source"
-          ],
+          "supportGaps": ["low_scorePlan_support", "missing_tempo_source"],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -12403,10 +12271,7 @@
               "reason": "support:assetDensity"
             }
           ],
-          "supportGaps": [
-            "low_bait_support",
-            "weak_remote_protection"
-          ],
+          "supportGaps": ["low_bait_support", "weak_remote_protection"],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -12632,9 +12497,7 @@
               "reason": "support:ice"
             }
           ],
-          "supportGaps": [
-            "weak_remote_protection"
-          ],
+          "supportGaps": ["weak_remote_protection"],
           "confidence": "medium",
           "runtimeStatus": "supporting",
           "runtimeBlockers": [
@@ -12913,10 +12776,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "missing_draw_or_shuffle",
-            "missing_recycle_source"
-          ],
+          "supportGaps": ["missing_draw_or_shuffle", "missing_recycle_source"],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -13045,10 +12905,7 @@
               "reason": "support:safety"
             }
           ],
-          "supportGaps": [
-            "low_scorePlan_support",
-            "missing_draw_source"
-          ],
+          "supportGaps": ["low_scorePlan_support", "missing_draw_source"],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -13190,14 +13047,10 @@
               "reason": "support:ice"
             }
           ],
-          "supportGaps": [
-            "low_scorePlan_support"
-          ],
+          "supportGaps": ["low_scorePlan_support"],
           "confidence": "medium",
           "runtimeStatus": "supporting",
-          "runtimeBlockers": [
-            "supporting_only:corp.economy_rez_reserve"
-          ]
+          "runtimeBlockers": ["supporting_only:corp.economy_rez_reserve"]
         },
         "corp.fast_advance": {
           "anchorScore": 0,
@@ -13339,9 +13192,7 @@
               "reason": "support:centralDefense"
             }
           ],
-          "supportGaps": [
-            "low_scoreAcceleration_support"
-          ],
+          "supportGaps": ["low_scoreAcceleration_support"],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -13635,14 +13486,10 @@
               "reason": "support:ice"
             }
           ],
-          "supportGaps": [
-            "weak_remote_protection"
-          ],
+          "supportGaps": ["weak_remote_protection"],
           "confidence": "high",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": [
-            "hard_support_gap:weak_remote_protection"
-          ]
+          "runtimeBlockers": ["hard_support_gap:weak_remote_protection"]
         },
         "corp.overadvance_value": {
           "anchorScore": 0,
@@ -14283,10 +14130,7 @@
         "corp.tag_trace_punish",
         "corp.ambush_bluff"
       ],
-      "secondaryStrategies": [
-        "corp.remote_scoring",
-        "corp.rush_score"
-      ],
+      "secondaryStrategies": ["corp.remote_scoring", "corp.rush_score"],
       "functionSignalCounts": {
         "access.archives_safe_exception": 8,
         "access.corp_net_damage_ambush": 11,
@@ -14440,9 +14284,7 @@
           "confidence": "high",
           "anchorEvidenceCount": 7,
           "supportEvidenceCount": 32,
-          "supportGaps": [
-            "weak_remote_protection"
-          ]
+          "supportGaps": ["weak_remote_protection"]
         },
         {
           "strategyId": "corp.remote_scoring",
@@ -14475,9 +14317,7 @@
           "confidence": "medium",
           "anchorEvidenceCount": 0,
           "supportEvidenceCount": 30,
-          "supportGaps": [
-            "weak_remote_protection"
-          ]
+          "supportGaps": ["weak_remote_protection"]
         },
         {
           "strategyId": "corp.economy_rez_reserve",
@@ -14488,9 +14328,7 @@
           "confidence": "medium",
           "anchorEvidenceCount": 0,
           "supportEvidenceCount": 18,
-          "supportGaps": [
-            "low_scorePlan_support"
-          ]
+          "supportGaps": ["low_scorePlan_support"]
         },
         {
           "strategyId": "corp.asset_economy",
@@ -14501,10 +14339,7 @@
           "confidence": "low",
           "anchorEvidenceCount": 0,
           "supportEvidenceCount": 6,
-          "supportGaps": [
-            "low_bait_support",
-            "weak_remote_protection"
-          ]
+          "supportGaps": ["low_bait_support", "weak_remote_protection"]
         },
         {
           "strategyId": "corp.fast_advance",
@@ -14515,9 +14350,7 @@
           "confidence": "low",
           "anchorEvidenceCount": 0,
           "supportEvidenceCount": 19,
-          "supportGaps": [
-            "low_scoreAcceleration_support"
-          ]
+          "supportGaps": ["low_scoreAcceleration_support"]
         },
         {
           "strategyId": "corp.overadvance_value",
@@ -14528,10 +14361,7 @@
           "confidence": "low",
           "anchorEvidenceCount": 0,
           "supportEvidenceCount": 4,
-          "supportGaps": [
-            "low_scorePlan_support",
-            "missing_advancement_window"
-          ]
+          "supportGaps": ["low_scorePlan_support", "missing_advancement_window"]
         },
         {
           "strategyId": "corp.action_tempo",
@@ -14542,10 +14372,7 @@
           "confidence": "low",
           "anchorEvidenceCount": 0,
           "supportEvidenceCount": 16,
-          "supportGaps": [
-            "low_scorePlan_support",
-            "missing_tempo_source"
-          ]
+          "supportGaps": ["low_scorePlan_support", "missing_tempo_source"]
         },
         {
           "strategyId": "corp.deck_recycle_engine",
@@ -14556,10 +14383,7 @@
           "confidence": "low",
           "anchorEvidenceCount": 0,
           "supportEvidenceCount": 5,
-          "supportGaps": [
-            "missing_draw_or_shuffle",
-            "missing_recycle_source"
-          ]
+          "supportGaps": ["missing_draw_or_shuffle", "missing_recycle_source"]
         },
         {
           "strategyId": "corp.draw_engine",
@@ -14570,10 +14394,7 @@
           "confidence": "low",
           "anchorEvidenceCount": 0,
           "supportEvidenceCount": 16,
-          "supportGaps": [
-            "low_scorePlan_support",
-            "missing_draw_source"
-          ]
+          "supportGaps": ["low_scorePlan_support", "missing_draw_source"]
         }
       ],
       "rolesStatus": {
@@ -14614,10 +14435,7 @@
             "access.rnd_reveal_requirement",
             "remote.ambush"
           ],
-          "strategyAnchors": [
-            "corp.ambush_bluff",
-            "corp.damage_kill"
-          ],
+          "strategyAnchors": ["corp.ambush_bluff", "corp.damage_kill"],
           "warnings": []
         },
         {
@@ -14637,13 +14455,8 @@
             "score_next_turn",
             "score_plan"
           ],
-          "functionSignals": [
-            "access.rnd_reveal_requirement"
-          ],
-          "strategyAnchors": [
-            "corp.ambush_bluff",
-            "corp.tag_trace_punish"
-          ],
+          "functionSignals": ["access.rnd_reveal_requirement"],
+          "strategyAnchors": ["corp.ambush_bluff", "corp.tag_trace_punish"],
           "warnings": []
         },
         {
@@ -14659,12 +14472,8 @@
             "punish_payoff",
             "sentry_ice"
           ],
-          "functionSignals": [
-            "corp_ice.brain_damage"
-          ],
-          "strategyAnchors": [
-            "corp.damage_kill"
-          ],
+          "functionSignals": ["corp_ice.brain_damage"],
+          "strategyAnchors": ["corp.damage_kill"],
           "warnings": []
         },
         {
@@ -14680,43 +14489,25 @@
             "tax_tool"
           ],
           "functionSignals": [],
-          "strategyAnchors": [
-            "corp.ice_tax_glacier",
-            "corp.tag_trace_punish"
-          ],
+          "strategyAnchors": ["corp.ice_tax_glacier", "corp.tag_trace_punish"],
           "warnings": []
         },
         {
           "cardId": "onr_proteus_050_manhunt",
           "quantity": 3,
           "status": "complete",
-          "roles": [
-            "corp.tag_trace_punish",
-            "enabler"
-          ],
-          "functionSignals": [
-            "tag.source",
-            "trace.source"
-          ],
-          "strategyAnchors": [
-            "corp.tag_trace_punish"
-          ],
+          "roles": ["corp.tag_trace_punish", "enabler"],
+          "functionSignals": ["tag.source", "trace.source"],
+          "strategyAnchors": ["corp.tag_trace_punish"],
           "warnings": []
         },
         {
           "cardId": "onr_v1_190_bioweapons-engineering",
           "quantity": 2,
           "status": "complete",
-          "roles": [
-            "corp.damage_kill",
-            "enabler"
-          ],
-          "functionSignals": [
-            "damage.corp_damage_amplifier"
-          ],
-          "strategyAnchors": [
-            "corp.damage_kill"
-          ],
+          "roles": ["corp.damage_kill", "enabler"],
+          "functionSignals": ["damage.corp_damage_amplifier"],
+          "strategyAnchors": ["corp.damage_kill"],
           "warnings": []
         },
         {
@@ -14742,10 +14533,7 @@
             "damage.payoff",
             "ice.future_pressure"
           ],
-          "strategyAnchors": [
-            "corp.damage_kill",
-            "corp.ice_tax_glacier"
-          ],
+          "strategyAnchors": ["corp.damage_kill", "corp.ice_tax_glacier"],
           "warnings": []
         },
         {
@@ -14762,10 +14550,7 @@
             "sentry_ice"
           ],
           "functionSignals": [],
-          "strategyAnchors": [
-            "corp.damage_kill",
-            "corp.ice_tax_glacier"
-          ],
+          "strategyAnchors": ["corp.damage_kill", "corp.ice_tax_glacier"],
           "warnings": []
         },
         {
@@ -14854,14 +14639,8 @@
             "punish_payoff",
             "win_condition"
           ],
-          "functionSignals": [
-            "damage.payoff",
-            "tag.payoff"
-          ],
-          "strategyAnchors": [
-            "corp.damage_kill",
-            "corp.tag_trace_punish"
-          ],
+          "functionSignals": ["damage.payoff", "tag.payoff"],
+          "strategyAnchors": ["corp.damage_kill", "corp.tag_trace_punish"],
           "warnings": []
         },
         {
@@ -14873,13 +14652,8 @@
             "enabler",
             "remote_asset_modifier"
           ],
-          "functionSignals": [
-            "draw.runner_tax",
-            "tag.source"
-          ],
-          "strategyAnchors": [
-            "corp.tag_trace_punish"
-          ],
+          "functionSignals": ["draw.runner_tax", "tag.source"],
+          "strategyAnchors": ["corp.tag_trace_punish"],
           "warnings": []
         },
         {
@@ -14901,9 +14675,7 @@
             "access.rnd_reveal_requirement",
             "remote.ambush"
           ],
-          "strategyAnchors": [
-            "corp.ambush_bluff"
-          ],
+          "strategyAnchors": ["corp.ambush_bluff"],
           "warnings": []
         },
         {
@@ -14927,10 +14699,7 @@
             "access.rnd_reveal_requirement",
             "remote.ambush"
           ],
-          "strategyAnchors": [
-            "corp.ambush_bluff",
-            "corp.tag_trace_punish"
-          ],
+          "strategyAnchors": ["corp.ambush_bluff", "corp.tag_trace_punish"],
           "warnings": []
         },
         {
@@ -14954,10 +14723,7 @@
             "advance.corp_counter_bank",
             "remote.ambush"
           ],
-          "strategyAnchors": [
-            "corp.ambush_bluff",
-            "corp.damage_kill"
-          ],
+          "strategyAnchors": ["corp.ambush_bluff", "corp.damage_kill"],
           "warnings": []
         }
       ],
@@ -15079,10 +14845,7 @@
         "kind": "none",
         "required": 0,
         "satisfied": true,
-        "evidence": [
-          "reserve_source:runtime_context",
-          "reserve:none"
-        ]
+        "evidence": ["reserve_source:runtime_context", "reserve:none"]
       },
       "blockers": [],
       "transition": {
@@ -15272,10 +15035,7 @@
               "kind": "none",
               "required": 0,
               "satisfied": true,
-              "evidence": [
-                "reserve_source:runtime_context",
-                "reserve:none"
-              ]
+              "evidence": ["reserve_source:runtime_context", "reserve:none"]
             },
             "evidence": [
               "portfolio_candidate:runtime_context",
@@ -15427,9 +15187,7 @@
             "family": "corp_ice_tax",
             "candidateRole": "blocked",
             "runtimeStatus": "blocked",
-            "runtimeBlockers": [
-              "hard_support_gap:weak_remote_protection"
-            ],
+            "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
             "confidence": "high",
             "score": {
               "anchor": 75,
@@ -15522,10 +15280,7 @@
               "kind": "none",
               "required": 0,
               "satisfied": true,
-              "evidence": [
-                "reserve_source:runtime_context",
-                "reserve:none"
-              ]
+              "evidence": ["reserve_source:runtime_context", "reserve:none"]
             },
             "evidence": [
               "portfolio_candidate:runtime_context",
@@ -15544,9 +15299,7 @@
             "family": "corp_economy_reserve",
             "candidateRole": "blocked",
             "runtimeStatus": "supporting",
-            "runtimeBlockers": [
-              "supporting_only:corp.economy_rez_reserve"
-            ],
+            "runtimeBlockers": ["supporting_only:corp.economy_rez_reserve"],
             "confidence": "medium",
             "score": {
               "anchor": 0,
@@ -15577,10 +15330,7 @@
               "kind": "none",
               "required": 0,
               "satisfied": true,
-              "evidence": [
-                "reserve_source:runtime_context",
-                "reserve:none"
-              ]
+              "evidence": ["reserve_source:runtime_context", "reserve:none"]
             },
             "evidence": [
               "portfolio_candidate:runtime_context",
@@ -15634,10 +15384,7 @@
               "kind": "none",
               "required": 0,
               "satisfied": true,
-              "evidence": [
-                "reserve_source:runtime_context",
-                "reserve:none"
-              ]
+              "evidence": ["reserve_source:runtime_context", "reserve:none"]
             },
             "evidence": [
               "portfolio_candidate:runtime_context",
@@ -15830,10 +15577,7 @@
               "kind": "none",
               "required": 0,
               "satisfied": true,
-              "evidence": [
-                "reserve_source:runtime_context",
-                "reserve:none"
-              ]
+              "evidence": ["reserve_source:runtime_context", "reserve:none"]
             },
             "evidence": [
               "portfolio_candidate:runtime_context",
@@ -15893,10 +15637,7 @@
               "kind": "none",
               "required": 0,
               "satisfied": true,
-              "evidence": [
-                "reserve_source:runtime_context",
-                "reserve:none"
-              ]
+              "evidence": ["reserve_source:runtime_context", "reserve:none"]
             },
             "evidence": [
               "portfolio_candidate:runtime_context",
@@ -15946,13 +15687,8 @@
         "corp.remote_scoreline",
         "corp.rush_scoreline"
       ],
-      "defensePlan": [
-        "corp.ice_tax_glacier",
-        "corp.remote_protect"
-      ],
-      "economyPlan": [
-        "corp.rez_reserve"
-      ],
+      "defensePlan": ["corp.ice_tax_glacier", "corp.remote_protect"],
+      "economyPlan": ["corp.rez_reserve"],
       "enginePlan": [],
       "punishPlan": [
         "corp.ambush_bluff",
@@ -16119,10 +15855,7 @@
           "kind": "none",
           "required": 0,
           "satisfied": true,
-          "evidence": [
-            "reserve_source:runtime_context",
-            "reserve:none"
-          ]
+          "evidence": ["reserve_source:runtime_context", "reserve:none"]
         },
         "blockers": [],
         "transition": {
@@ -16312,10 +16045,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -16467,9 +16197,7 @@
               "family": "corp_ice_tax",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 75,
@@ -16562,10 +16290,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -16584,9 +16309,7 @@
               "family": "corp_economy_reserve",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:corp.economy_rez_reserve"
-              ],
+              "runtimeBlockers": ["supporting_only:corp.economy_rez_reserve"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -16617,10 +16340,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -16674,10 +16394,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -16870,10 +16587,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -16933,10 +16647,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -17025,9 +16736,7 @@
               "serverId": "new_remote",
               "phase": "install",
               "purposeCode": "establish_ambush:onr_proteus_005_marked-accounts:new_remote",
-              "assignedDomainPlanIds": [
-                "corp.ambush_bluff"
-              ],
+              "assignedDomainPlanIds": ["corp.ambush_bluff"],
               "duplicateAlreadyInstalled": false,
               "affordableOrSupportable": true,
               "plannedAtStateVersion": 121,
@@ -17116,9 +16825,7 @@
               "serverId": "remote_3",
               "phase": "trigger",
               "purposeCode": "wait_for_or_convert_committed_ambush_access",
-              "assignedDomainPlanIds": [
-                "corp.ambush_bluff"
-              ],
+              "assignedDomainPlanIds": ["corp.ambush_bluff"],
               "duplicateAlreadyInstalled": false,
               "affordableOrSupportable": true,
               "plannedAtStateVersion": 40,
@@ -17213,9 +16920,7 @@
               "serverId": "remote_5",
               "phase": "trigger",
               "purposeCode": "wait_for_or_convert_committed_ambush_access",
-              "assignedDomainPlanIds": [
-                "corp.ambush_bluff"
-              ],
+              "assignedDomainPlanIds": ["corp.ambush_bluff"],
               "duplicateAlreadyInstalled": false,
               "affordableOrSupportable": true,
               "plannedAtStateVersion": 240,
@@ -17307,9 +17012,7 @@
                 "defenseId": "install:hq:corp.install_card.corp_onr_v1_257_nerve-labyrinth_1.hq.corp_onr_v1_257_nerve-labyrinth_1.1",
                 "serverId": "hq",
                 "phase": "install_ice",
-                "sourceDefinitionIds": [
-                  "onr_v1_257_nerve-labyrinth"
-                ],
+                "sourceDefinitionIds": ["onr_v1_257_nerve-labyrinth"],
                 "actionIds": [
                   "corp.install_card.corp_onr_v1_257_nerve-labyrinth_1.hq.corp_onr_v1_257_nerve-labyrinth_1.1"
                 ],
@@ -17551,9 +17254,7 @@
                 "defenseId": "install:remote_2:corp.install_card.corp_onr_v1_257_nerve-labyrinth_1.remote_2.corp_onr_v1_257_nerve-labyrinth_1.1",
                 "serverId": "remote_2",
                 "phase": "install_ice",
-                "sourceDefinitionIds": [
-                  "onr_v1_257_nerve-labyrinth"
-                ],
+                "sourceDefinitionIds": ["onr_v1_257_nerve-labyrinth"],
                 "actionIds": [
                   "corp.install_card.corp_onr_v1_257_nerve-labyrinth_1.remote_2.corp_onr_v1_257_nerve-labyrinth_1.1"
                 ],
@@ -17738,9 +17439,7 @@
                 "defenseId": "install:remote_3:corp.install_card.corp_onr_v1_257_nerve-labyrinth_1.remote_3.corp_onr_v1_257_nerve-labyrinth_1.1",
                 "serverId": "remote_3",
                 "phase": "install_ice",
-                "sourceDefinitionIds": [
-                  "onr_v1_257_nerve-labyrinth"
-                ],
+                "sourceDefinitionIds": ["onr_v1_257_nerve-labyrinth"],
                 "actionIds": [
                   "corp.install_card.corp_onr_v1_257_nerve-labyrinth_1.remote_3.corp_onr_v1_257_nerve-labyrinth_1.1"
                 ],
@@ -17925,9 +17624,7 @@
                 "defenseId": "install:remote_5:corp.install_card.corp_onr_v1_257_nerve-labyrinth_1.remote_5.corp_onr_v1_257_nerve-labyrinth_1.1",
                 "serverId": "remote_5",
                 "phase": "install_ice",
-                "sourceDefinitionIds": [
-                  "onr_v1_257_nerve-labyrinth"
-                ],
+                "sourceDefinitionIds": ["onr_v1_257_nerve-labyrinth"],
                 "actionIds": [
                   "corp.install_card.corp_onr_v1_257_nerve-labyrinth_1.remote_5.corp_onr_v1_257_nerve-labyrinth_1.1"
                 ],
@@ -18112,9 +17809,7 @@
                 "defenseId": "install:remote_6:corp.install_card.corp_onr_v1_257_nerve-labyrinth_1.remote_6.corp_onr_v1_257_nerve-labyrinth_1.1",
                 "serverId": "remote_6",
                 "phase": "install_ice",
-                "sourceDefinitionIds": [
-                  "onr_v1_257_nerve-labyrinth"
-                ],
+                "sourceDefinitionIds": ["onr_v1_257_nerve-labyrinth"],
                 "actionIds": [
                   "corp.install_card.corp_onr_v1_257_nerve-labyrinth_1.remote_6.corp_onr_v1_257_nerve-labyrinth_1.1"
                 ],
@@ -18432,9 +18127,7 @@
               "currentCreditsAtRevalidation": 7,
               "gap": 4,
               "projectedCreditGain": 1,
-              "actionIds": [
-                "corp.gain_credit"
-              ],
+              "actionIds": ["corp.gain_credit"],
               "priorityClass": "P6",
               "cadence": {
                 "kind": "remaining_turn_capacity",
@@ -18516,9 +18209,7 @@
             "signal": {
               "campaignId": "corp-punish:engine-certified-payoff",
               "phase": "watch_window",
-              "sourceDefinitionIds": [
-                "onr_v1_302_scorched-earth"
-              ],
+              "sourceDefinitionIds": ["onr_v1_302_scorched-earth"],
               "feasible": false,
               "guarantee": "speculative",
               "priorityClass": "P4",
@@ -18741,10 +18432,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:22",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:22", "opening_corp_turn_ceiling:4"]
               }
             }
           },
@@ -18929,9 +18617,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "remote_has_no_ice",
-                "evidence": [
-                  "target_server:remote_1"
-                ]
+                "evidence": ["target_server:remote_1"]
               }
             }
           },
@@ -19116,10 +18802,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:12",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:12", "opening_corp_turn_ceiling:4"]
               },
               "fundingGap": 7,
               "fundingMilestone": {
@@ -19315,10 +18998,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:12",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:12", "opening_corp_turn_ceiling:4"]
               },
               "fundingGap": 7,
               "fundingMilestone": {
@@ -19514,10 +19194,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:26",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:26", "opening_corp_turn_ceiling:4"]
               }
             }
           },
@@ -19700,10 +19377,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:34",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:34", "opening_corp_turn_ceiling:4"]
               }
             }
           },
@@ -19895,10 +19569,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:34",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:34", "opening_corp_turn_ceiling:4"]
               }
             }
           },
@@ -20090,10 +19761,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:34",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:34", "opening_corp_turn_ceiling:4"]
               }
             }
           },
@@ -20285,10 +19953,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:34",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:34", "opening_corp_turn_ceiling:4"]
               }
             }
           },
@@ -20480,10 +20145,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:34",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:34", "opening_corp_turn_ceiling:4"]
               }
             }
           },
@@ -20675,10 +20337,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:34",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:34", "opening_corp_turn_ceiling:4"]
               }
             }
           },
@@ -20870,10 +20529,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:34",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:34", "opening_corp_turn_ceiling:4"]
               }
             }
           },
@@ -21065,10 +20721,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:34",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:34", "opening_corp_turn_ceiling:4"]
               }
             }
           },
@@ -21138,9 +20791,7 @@
             "kind": "capability",
             "id": "score-material:general"
           },
-          "openNeedIds": [
-            "score-material:general"
-          ],
+          "openNeedIds": ["score-material:general"],
           "phase": "select_agenda",
           "milestone": "admitted",
           "moduleState": {
@@ -31696,9 +31347,7 @@
                 }
               }
             ],
-            "protectedValueClaimIds": [
-              "fnv1a:d4b584e8:defense"
-            ],
+            "protectedValueClaimIds": ["fnv1a:d4b584e8:defense"],
             "transition": {
               "kind": "projected_plan_discovery_required"
             }

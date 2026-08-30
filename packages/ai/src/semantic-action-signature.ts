@@ -53,14 +53,17 @@ export function semanticActionSignatureFromCandidate(
     actionType: candidate.actionType,
     semanticActionType: candidate.semanticActionType,
     sourceKind: candidate.sourceKind,
-    ...(candidate.sourceDefinitionId ? { sourceDefinitionId: candidate.sourceDefinitionId } : {}),
+    ...(candidate.sourceDefinitionId
+      ? { sourceDefinitionId: candidate.sourceDefinitionId }
+      : {}),
     ...(candidate.abilityId ? { abilityId: candidate.abilityId } : {}),
     targetIdentity:
       candidate.targetContext === undefined
         ? "none"
         : candidate.targetContext.hiddenInfoPolicy === "hidden_info_blocked"
           ? "unknown_hidden_blocked"
-          : candidate.targetContext.selectedTargets[0]?.targetId ?? "target_context_unresolved",
+          : (candidate.targetContext.selectedTargets[0]?.targetId ??
+            "target_context_unresolved"),
     costClass: costClassFromCandidate(candidate),
     timingClass: timingClassFromCandidate(candidate),
     ...(serverId ? { serverId } : {}),
@@ -99,10 +102,25 @@ export function signatureInputIsRedactionSafe(
 
 function sanitizeSignatureInput(
   input: SemanticActionSignatureInput,
-): Required<Pick<SemanticActionSignatureInput, "actionType" | "semanticActionType" | "sourceKind" | "targetIdentity" | "costClass" | "timingClass">> &
+): Required<
+  Pick<
+    SemanticActionSignatureInput,
+    | "actionType"
+    | "semanticActionType"
+    | "sourceKind"
+    | "targetIdentity"
+    | "costClass"
+    | "timingClass"
+  >
+> &
   Omit<
     SemanticActionSignatureInput,
-    "actionType" | "semanticActionType" | "sourceKind" | "targetIdentity" | "costClass" | "timingClass"
+    | "actionType"
+    | "semanticActionType"
+    | "sourceKind"
+    | "targetIdentity"
+    | "costClass"
+    | "timingClass"
   > {
   if (!signatureInputIsRedactionSafe(input)) {
     return {
@@ -118,7 +136,9 @@ function sanitizeSignatureInput(
     actionType: input.actionType,
     semanticActionType: input.semanticActionType ?? "unknown",
     sourceKind: input.sourceKind ?? "unknown",
-    ...(input.sourceDefinitionId ? { sourceDefinitionId: input.sourceDefinitionId } : {}),
+    ...(input.sourceDefinitionId
+      ? { sourceDefinitionId: input.sourceDefinitionId }
+      : {}),
     ...(input.abilityId ? { abilityId: input.abilityId } : {}),
     targetIdentity: input.targetIdentity ?? "unknown_target",
     costClass: input.costClass ?? "unknown_cost",

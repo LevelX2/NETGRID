@@ -61,14 +61,14 @@ Aktueller Shared-Vertrag:
 
 Größte UI-Dateien zu Beginn:
 
-| Datei | Zeilen |
-| --- | ---: |
-| `apps/web/app/globals.css` | 11195 |
-| `apps/web/app/page.tsx` | 4168 |
-| `apps/web/app/action-board-ui.ts` | 1610 |
-| `apps/web/features/debug/AiDecisionDebugOverlay.tsx` | 1319 |
-| `apps/web/features/decks/DeckEditorPanel.tsx` | 1221 |
-| `apps/web/features/catalog/CatalogPanel.tsx` | 484 |
+| Datei                                                | Zeilen |
+| ---------------------------------------------------- | -----: |
+| `apps/web/app/globals.css`                           |  11195 |
+| `apps/web/app/page.tsx`                              |   4168 |
+| `apps/web/app/action-board-ui.ts`                    |   1610 |
+| `apps/web/features/debug/AiDecisionDebugOverlay.tsx` |   1319 |
+| `apps/web/features/decks/DeckEditorPanel.tsx`        |   1221 |
+| `apps/web/features/catalog/CatalogPanel.tsx`         |    484 |
 
 ## Paketfolge
 
@@ -100,11 +100,11 @@ Checks:
 
 Entscheidung: Die drei roten Werte werden nicht als neue `CounterType`-Werte ergänzt. Die Engine und die CardImplementation-Verträge verwenden bereits kanonische Shared-Counter:
 
-| Fachlicher Counter | Kanonischer `CounterType` | Produzent |
-| --- | --- | --- |
-| Data-Raven-Counter | `trace_tag_counter` | `packages/engine/src/card-implementations/onr-v1/corp/ice/data-raven.ts` |
-| Doppelganger-Counter | `link_reduction_counter` | `packages/engine/src/card-implementations/proteus/corp/assets/doppelganger-antibody.ts` |
-| Pattel-Counter | `breaker_strength_penalty` | `packages/engine/src/card-implementations/proteus/corp/assets/pattel-antibody.ts` |
+| Fachlicher Counter   | Kanonischer `CounterType`  | Produzent                                                                               |
+| -------------------- | -------------------------- | --------------------------------------------------------------------------------------- |
+| Data-Raven-Counter   | `trace_tag_counter`        | `packages/engine/src/card-implementations/onr-v1/corp/ice/data-raven.ts`                |
+| Doppelganger-Counter | `link_reduction_counter`   | `packages/engine/src/card-implementations/proteus/corp/assets/doppelganger-antibody.ts` |
+| Pattel-Counter       | `breaker_strength_penalty` | `packages/engine/src/card-implementations/proteus/corp/assets/pattel-antibody.ts`       |
 
 Begründung:
 
@@ -166,11 +166,11 @@ Entscheidung: Kein Big-Bang-Schnitt an `action-board-ui.ts`. Stattdessen wurden 
 
 Import-/Verantwortungsmatrix:
 
-| Alter Ort | Neuer Ort | Verantwortung | Ergebnis |
-| --- | --- | --- | --- |
-| `apps/web/app/card-image-service.ts` | `apps/web/features/cards/card-image-service.ts` | Card-Image-URL und Bildkomponente | Feature-Konsumenten importieren direkt aus `features/cards` |
-| `apps/web/app/catalog-ui.ts` | `apps/web/features/catalog/catalog-model.ts` | Catalog-Filter, Statuslabels, Set-/Rarity-Helfer | Catalog-, Cards- und Deck-Features importieren direkt aus `features/catalog` |
-| `apps/web/app/deck-editor-ui.ts` | `apps/web/features/decks/deck-editor-model.ts` | Deck-Agenda-Regel und Statusberechnung | Deck-Features importieren direkt aus `features/decks` |
+| Alter Ort                            | Neuer Ort                                       | Verantwortung                                    | Ergebnis                                                                     |
+| ------------------------------------ | ----------------------------------------------- | ------------------------------------------------ | ---------------------------------------------------------------------------- |
+| `apps/web/app/card-image-service.ts` | `apps/web/features/cards/card-image-service.ts` | Card-Image-URL und Bildkomponente                | Feature-Konsumenten importieren direkt aus `features/cards`                  |
+| `apps/web/app/catalog-ui.ts`         | `apps/web/features/catalog/catalog-model.ts`    | Catalog-Filter, Statuslabels, Set-/Rarity-Helfer | Catalog-, Cards- und Deck-Features importieren direkt aus `features/catalog` |
+| `apps/web/app/deck-editor-ui.ts`     | `apps/web/features/decks/deck-editor-model.ts`  | Deck-Agenda-Regel und Statusberechnung           | Deck-Features importieren direkt aus `features/decks`                        |
 
 Nicht geschnitten:
 

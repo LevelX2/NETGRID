@@ -2,8 +2,7 @@
 
 ## Status
 
-Technisch abgeschlossen und zur lokalen Integration freigegeben am 12. Juli
-2026.
+Technisch abgeschlossen und zur lokalen Integration freigegeben am 12. Juli 2026.
 
 ## Quelle und Vorgabe
 

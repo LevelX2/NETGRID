@@ -173,7 +173,8 @@ function inputFor(
     playerView: {
       side,
       stateVersion: 1,
-      timingPoint: side === "runner" ? "runner_action.main" : "corp_action.main",
+      timingPoint:
+        side === "runner" ? "runner_action.main" : "corp_action.main",
       activeSide: side,
       phase: side === "runner" ? "runner_action_phase" : "corp_action_phase",
       own: {

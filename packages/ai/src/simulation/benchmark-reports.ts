@@ -3,9 +3,7 @@ import type {
   AiBenchmarkDeckSlotType,
 } from "./benchmark-deck-types";
 import type { AiBenchmarkDeckSlotResult } from "./ai-match-progression-types";
-import type {
-  AiDoctrineQualityBenchmarkResult,
-} from "./doctrine-quality-benchmark-types";
+import type { AiDoctrineQualityBenchmarkResult } from "./doctrine-quality-benchmark-types";
 import type {
   AiDoctrineQualityGateResult,
   AiDoctrineQualityGateThresholds,
@@ -271,7 +269,8 @@ export function formatAiSelfplayTraceMiningReport(
     "| Side | Action Type | Count | Share |",
     "| --- | --- | ---: | ---: |",
     ...actionTypeDominance.topRows.map(
-      (row) => `| ${row.side} | ${row.actionType} | ${row.count} | ${row.share} |`,
+      (row) =>
+        `| ${row.side} | ${row.actionType} | ${row.count} | ${row.share} |`,
     ),
     "",
     "## Findings By Severity",
@@ -2010,9 +2009,7 @@ export function formatMatchProgressionBenchmarkSuiteReport(
   const nonRunnableRows = suite.slots.filter(
     (slot) => slot.status !== "runnable",
   );
-  const corpStrategyPanelRows = summarizeCorpStrategyPanelCoverage(
-    suite.slots,
-  );
+  const corpStrategyPanelRows = summarizeCorpStrategyPanelCoverage(suite.slots);
   const strategyPanelGapRows = suite.slots.filter(
     (slot) => slot.slotType === "strategy_panel_gap",
   );
@@ -2307,9 +2304,12 @@ function summarizeCorpStrategyPanelCoverage(
   ].sort();
   return archetypes.map((archetype) => {
     const matching = slots.filter((slot) => slot.corpArchetype === archetype);
-    const runnable = matching.filter((slot) => slot.status === "runnable").length;
-    const holdout = matching.filter((slot) => slot.tuningUse === "holdout_only")
-      .length;
+    const runnable = matching.filter(
+      (slot) => slot.status === "runnable",
+    ).length;
+    const holdout = matching.filter(
+      (slot) => slot.tuningUse === "holdout_only",
+    ).length;
     return [
       archetype,
       runnable,

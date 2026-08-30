@@ -227,9 +227,7 @@ export function buildCorpScoringRemoteProjectSignals(
       phase,
       maturity,
       ...(need ? { need } : {}),
-      ...(leasedConsumer
-        ? { consumerSupport: leasedConsumer.support }
-        : {}),
+      ...(leasedConsumer ? { consumerSupport: leasedConsumer.support } : {}),
       ...(scoreLeaseId ? { scoreLeaseId } : {}),
       cadence,
       feasible,
@@ -447,9 +445,7 @@ function targetServerStillAvailable(
       !claims.some((claim) => claim.serverId === serverId)
     );
   }
-  if (
-    !remoteHasEngineCertifiedVisibleAgendaTarget(input, serverId)
-  ) {
+  if (!remoteHasEngineCertifiedVisibleAgendaTarget(input, serverId)) {
     return false;
   }
   return !claims.some((claim) => claim.serverId === serverId);

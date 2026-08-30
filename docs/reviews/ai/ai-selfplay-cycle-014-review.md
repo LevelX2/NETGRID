@@ -24,11 +24,11 @@ lokale read-only Maintenance-Analyse-API.
 
 ## Ergebnis wie im Programm
 
-| Partie | Standarddecks | Endergebnis | Agendapunkte | Niederlage | Entscheidungen |
-| --- | --- | ---: | ---: | --- | ---: |
-| Seed 1 | **Proteus Runner – Breaker Lab & Virus Pressure** gegen **Manhunt Pressure Bureau** | Runner **10 – 6** Corp | **3:6** | Corp-Deck leer | 538 |
-| Seed 2 | **Proteus Runner – Breaker Lab & Virus Pressure** gegen **Manhunt Pressure Bureau** | Runner **10 – 3** Corp | **3:3** | Corp-Deck leer | 579 |
-| Seed 3 | **Proteus Runner – Breaker Lab & Virus Pressure** gegen **Manhunt Pressure Bureau** | Runner **10 – 6** Corp | **3:6** | Corp-Deck leer | 526 |
+| Partie | Standarddecks                                                                       |            Endergebnis | Agendapunkte | Niederlage     | Entscheidungen |
+| ------ | ----------------------------------------------------------------------------------- | ---------------------: | -----------: | -------------- | -------------: |
+| Seed 1 | **Proteus Runner – Breaker Lab & Virus Pressure** gegen **Manhunt Pressure Bureau** | Runner **10 – 6** Corp |      **3:6** | Corp-Deck leer |            538 |
+| Seed 2 | **Proteus Runner – Breaker Lab & Virus Pressure** gegen **Manhunt Pressure Bureau** | Runner **10 – 3** Corp |      **3:3** | Corp-Deck leer |            579 |
+| Seed 3 | **Proteus Runner – Breaker Lab & Virus Pressure** gegen **Manhunt Pressure Bureau** | Runner **10 – 6** Corp |      **3:6** | Corp-Deck leer |            526 |
 
 Die finalen Match-IDs sind `match_84ffbfd10d17e350`,
 `match_00aa4f0e62037b40` und `match_f72e37db39652eeb`.

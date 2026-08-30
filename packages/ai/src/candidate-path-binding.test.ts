@@ -39,14 +39,20 @@ describe("candidate path bindings", () => {
     };
 
     const hq = buildCandidatePathBinding({
-      signature: buildSemanticActionSignature({ ...base, targetIdentity: "server:hq" }),
+      signature: buildSemanticActionSignature({
+        ...base,
+        targetIdentity: "server:hq",
+      }),
       redactedActionRef: "redacted:run",
       stateVersion: 7,
       side: "runner",
       intentContractId: "test.run",
     });
     const rd = buildCandidatePathBinding({
-      signature: buildSemanticActionSignature({ ...base, targetIdentity: "server:rd" }),
+      signature: buildSemanticActionSignature({
+        ...base,
+        targetIdentity: "server:rd",
+      }),
       redactedActionRef: "redacted:run",
       stateVersion: 7,
       side: "runner",

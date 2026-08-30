@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 
-export function useObservedElementHeight<T extends HTMLElement>(resetKey: string) {
+export function useObservedElementHeight<T extends HTMLElement>(
+  resetKey: string,
+) {
   const elementRef = useRef<T | null>(null);
   const [heightPx, setHeightPx] = useState(0);
 
@@ -12,7 +14,8 @@ export function useObservedElementHeight<T extends HTMLElement>(resetKey: string
       setHeightPx(0);
       return;
     }
-    const updateHeight = () => setHeightPx(Math.ceil(element.getBoundingClientRect().height));
+    const updateHeight = () =>
+      setHeightPx(Math.ceil(element.getBoundingClientRect().height));
     updateHeight();
     if (typeof ResizeObserver === "undefined") {
       window.addEventListener("resize", updateHeight);

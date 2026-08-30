@@ -219,9 +219,7 @@ describe("selectedRunnerMemoryCheckpointTrashOptionIds", () => {
   it("completes a mandatory delayed-install MU continuation even when every sacrifice is protected", () => {
     const onlyFracter = program("only_fracter", 1);
     const prepared = program("prepared_killer", 1);
-    const cardsById = new Map([
-      [onlyFracter.instanceId, onlyFracter],
-    ]);
+    const cardsById = new Map([[onlyFracter.instanceId, onlyFracter]]);
     const context = createRunnerProgramInstallTrashContext({
       safeNonNegativeInteger: (value) => Math.max(0, value ?? 0),
       visibleMemoryCost: (card) => card?.memoryCost ?? 0,

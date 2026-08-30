@@ -19,7 +19,11 @@ describe("TargetRef v1", () => {
   });
 
   it("keeps ICE targets stable by server and position without private definition data", () => {
-    const ref = buildTargetRef({ kind: "ice", serverId: "remote_1", position: 2 });
+    const ref = buildTargetRef({
+      kind: "ice",
+      serverId: "remote_1",
+      position: 2,
+    });
 
     expect(ref).toMatchObject({
       kind: "ice",
@@ -31,7 +35,11 @@ describe("TargetRef v1", () => {
 
   it("keeps choice options stable when both ids are present", () => {
     expect(
-      buildTargetRef({ kind: "choice", choiceId: "choice_1", optionId: "option_a" }),
+      buildTargetRef({
+        kind: "choice",
+        choiceId: "choice_1",
+        optionId: "option_a",
+      }),
     ).toMatchObject({
       kind: "choice",
       identity: "choice:choice_1:option_a",
@@ -64,11 +72,15 @@ describe("TargetRef v1", () => {
       sideSafe: true,
       snapshotStable: true,
     });
-    expect(targetRefIsRedactionSafe({ evidence: ["privatePayloadish_evidence"] })).toBe(true);
+    expect(
+      targetRefIsRedactionSafe({ evidence: ["privatePayloadish_evidence"] }),
+    ).toBe(true);
   });
 
   it("maps ability source identities as actor-private side-safe refs", () => {
-    const ref = targetRefFromIdentity("ability:self_modifying_code:search_install");
+    const ref = targetRefFromIdentity(
+      "ability:self_modifying_code:search_install",
+    );
 
     expect(ref).toMatchObject({
       kind: "abilitySource",

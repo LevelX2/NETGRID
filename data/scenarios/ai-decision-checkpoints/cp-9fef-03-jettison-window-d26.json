@@ -4934,7 +4934,9 @@
     "planExecution": {
       "acceptablePlanKinds": ["runner.credit_bank"],
       "acceptableCapabilities": ["credit_bank_cash_out"],
-      "requiredAssessmentEvidence": ["runner_credit_bank_cashout_for_click_efficient_liquidity"]
+      "requiredAssessmentEvidence": [
+        "runner_credit_bank_cashout_for_click_efficient_liquidity"
+      ]
     }
   }
 }

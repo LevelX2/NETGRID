@@ -50,7 +50,9 @@ describe("match 20EB run revalidation follow-up checkpoints", () => {
         checkpoint.source.findingId =
           "20EB-C06-POST-SCORE-UNKNOWN-REMOTE-CONTEST";
         checkpoint.expectation = {
-          acceptableActions: [{ type: "start_run", targetServerId: "remote_1" }],
+          acceptableActions: [
+            { type: "start_run", targetServerId: "remote_1" },
+          ],
           planExecution: {
             acceptablePlanKinds: ["runner.contest_remote"],
             acceptableCapabilities: ["contest_remote"],

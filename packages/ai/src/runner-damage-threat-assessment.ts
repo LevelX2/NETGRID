@@ -250,8 +250,7 @@ export function runnerVisibleLethalIceDamageAssessment(
       input.playerView.own.maxHandSize - projectedCoreDamage;
     const cleanupFlatline = effectiveMaxHandSizeAfter < 0;
     const projectedHandAfterDamage = handCount - projectedDamage;
-    const belowRequiredHandFloor =
-      projectedHandAfterDamage < requiredHandFloor;
+    const belowRequiredHandFloor = projectedHandAfterDamage < requiredHandFloor;
     const nonLethalHandFloorViolation =
       !immediateFlatline && !cleanupFlatline && belowRequiredHandFloor;
     if (immediateFlatline || cleanupFlatline || nonLethalHandFloorViolation) {

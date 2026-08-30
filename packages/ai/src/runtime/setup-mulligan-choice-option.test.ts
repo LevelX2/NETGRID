@@ -9,7 +9,11 @@ describe("selectedSetupMulliganChoiceOptionId", () => {
       options: [{ id: "keep" }, { id: "mulligan" }],
     } as NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>;
 
-    expect(selectedSetupMulliganChoiceOptionId(choice, "mulligan")).toBe("mulligan");
-    expect(selectedSetupMulliganChoiceOptionId(choice, "unknown")).toBeUndefined();
+    expect(selectedSetupMulliganChoiceOptionId(choice, "mulligan")).toBe(
+      "mulligan",
+    );
+    expect(
+      selectedSetupMulliganChoiceOptionId(choice, "unknown"),
+    ).toBeUndefined();
   });
 });

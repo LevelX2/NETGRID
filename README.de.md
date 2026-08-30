@@ -104,12 +104,12 @@ Eigene KI-Decks werden gegen das ausgewählte Format validiert und dürfen nur K
 
 ### KI-unterstützte Kartenpools
 
-| Auswählbarer Kartenpool | Menschliches Spiel | KI-Spiel |
-| --- | ---: | ---: |
-| Originalset | Ja | Ja |
-| Originalset + Classic | Ja | Ja |
-| Originalset + Proteus | Ja | Ja |
-| Originalset + Classic + Proteus | Ja | Ja |
+| Auswählbarer Kartenpool         | Menschliches Spiel | KI-Spiel |
+| ------------------------------- | -----------------: | -------: |
+| Originalset                     |                 Ja |       Ja |
+| Originalset + Classic           |                 Ja |       Ja |
+| Originalset + Proteus           |                 Ja |       Ja |
+| Originalset + Classic + Proteus |                 Ja |       Ja |
 
 Proteus hat die aktuellen KI-Readiness-Prüfungen für kontrollierte Karten-Hints, ausgewählte Playtest-Decks, deterministische Simulationen, Replayintegrität und Hidden-Info-Schutz bestanden.
 

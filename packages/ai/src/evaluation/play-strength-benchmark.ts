@@ -71,7 +71,9 @@ export function buildPlayStrengthCalibrationBenchmark(
   const topScores = samples
     .map((sample) => sample.trace.rankedActions[0]?.score)
     .filter((score): score is number => score !== undefined);
-  const agreed = comparisons.filter((comparison) => comparison.agreement).length;
+  const agreed = comparisons.filter(
+    (comparison) => comparison.agreement,
+  ).length;
   return {
     sampleCount: samples.length,
     averageTopScore: average(topScores),
@@ -114,7 +116,8 @@ export function comparePlayStrengthCalibrationProfiles(
     return {
       snapshotId: sample.snapshotId,
       scoreChanged:
-        JSON.stringify(scoreMap(baseline)) !== JSON.stringify(scoreMap(candidate)),
+        JSON.stringify(scoreMap(baseline)) !==
+        JSON.stringify(scoreMap(candidate)),
       topActionChanged: baselineTop?.actionId !== candidateTop?.actionId,
       topScoreDelta: (candidateTop?.score ?? 0) - (baselineTop?.score ?? 0),
     };
@@ -135,7 +138,8 @@ export function comparePlayStrengthCalibrationProfiles(
     createdFromBenchmark: candidateProfile.createdFromBenchmark,
     lockedAgainstCorpus: candidateProfile.lockedAgainstCorpus,
     sampleCount: samples.length,
-    changedScoreSampleCount: scoreDiffs.filter((diff) => diff.scoreChanged).length,
+    changedScoreSampleCount: scoreDiffs.filter((diff) => diff.scoreChanged)
+      .length,
     topActionChangedCount: scoreDiffs.filter((diff) => diff.topActionChanged)
       .length,
     averageTopScoreDelta: average(scoreDiffs.map((diff) => diff.topScoreDelta)),

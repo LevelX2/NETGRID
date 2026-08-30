@@ -1,4 +1,8 @@
-import type { CardDefinition, CardInstanceId, GameState } from "@netgrid/shared";
+import type {
+  CardDefinition,
+  CardInstanceId,
+  GameState,
+} from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { buildRunnerStackSearchProgramToGripAction } from "./runner-hidden-zone-search-actions";
 

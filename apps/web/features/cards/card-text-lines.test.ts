@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { cardMetricLine, formatCardTerm, formatCardTypeLine } from "./card-text-lines";
+import {
+  cardMetricLine,
+  formatCardTerm,
+  formatCardTypeLine,
+} from "./card-text-lines";
 
 describe("card text lines", () => {
   it("formats shared type and subtype labels consistently", () => {

@@ -53,9 +53,12 @@ describe("semantic action signatures", () => {
       timingClass: "phase:main",
     });
 
-    expect(signatureInputIsRedactionSafe({ targetIdentity: "deckTop.0", actionType: "draw_card" })).toBe(
-      false,
-    );
+    expect(
+      signatureInputIsRedactionSafe({
+        targetIdentity: "deckTop.0",
+        actionType: "draw_card",
+      }),
+    ).toBe(false);
     expect(JSON.stringify(unsafe)).not.toContain("cardInstances");
     expect(unsafe.targetIdentity).toBe("unknown_hidden_blocked");
   });
@@ -70,10 +73,12 @@ describe("semantic action signatures", () => {
       timingClass: "phase:main",
     });
 
-    expect(signatureInputIsRedactionSafe({
-      actionType: "trigger_ability",
-      costClass: "privatePayloadish_cost",
-    })).toBe(true);
+    expect(
+      signatureInputIsRedactionSafe({
+        actionType: "trigger_ability",
+        costClass: "privatePayloadish_cost",
+      }),
+    ).toBe(true);
     expect(signature.targetIdentity).toBe("server:hq");
     expect(signature.costClass).toBe("privatePayloadish_cost");
   });

@@ -25,7 +25,8 @@ Dieser Ordner enthält nur die aktuell relevanten Architektur- und Strukturvertr
 9. `public-event-payload-architecture.md`
    - öffentlicher Event-/Payloadvertrag und `ResolvedGameEffect`
 10. `engine-source-structure-guard.md`
-   - ausführbar geschützte Source-, Layer- und Kompositionsgrenzen
+
+- ausführbar geschützte Source-, Layer- und Kompositionsgrenzen
 
 `packages/engine/AGENTS.md` enthält die übergeordneten Engine-Invarianten. Der Code und die ausführbaren Struktur-/Typ-/Regressionstests bleiben die letzte Wahrheit über den tatsächlich produktiven Stand.
 

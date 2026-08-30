@@ -476,9 +476,7 @@ function runTarget(
   } as RunnerRunTargetEvaluation;
 }
 
-function targetKind(
-  serverId: string,
-): RunnerRunTargetEvaluation["targetKind"] {
+function targetKind(serverId: string): RunnerRunTargetEvaluation["targetKind"] {
   if (serverId === "rd" || serverId === "hq" || serverId === "archives") {
     return serverId;
   }

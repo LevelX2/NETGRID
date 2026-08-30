@@ -11,9 +11,7 @@ import {
 type VisibleCorpServer = AiDecisionInput["playerView"]["servers"][number];
 
 export type SemanticRuntimeCorpRiskContext = {
-  semanticRuntimeCorpHasRemoteInstability: (
-    input: AiDecisionInput,
-  ) => boolean;
+  semanticRuntimeCorpHasRemoteInstability: (input: AiDecisionInput) => boolean;
   semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine: (
     input: AiDecisionInput,
     action: LegalAction,

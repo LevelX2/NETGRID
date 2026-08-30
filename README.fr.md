@@ -104,12 +104,12 @@ Les decks personnalisés destinés à l’IA sont validés par rapport au format
 
 ### Pools de cartes pris en charge par l’IA
 
-| Pool de cartes sélectionnable | Jeu humain | Jeu par l’IA |
-| --- | ---: | ---: |
-| Original Set | Oui | Oui |
-| Original Set + Classic | Oui | Oui |
-| Original Set + Proteus | Oui | Oui |
-| Original Set + Classic + Proteus | Oui | Oui |
+| Pool de cartes sélectionnable    | Jeu humain | Jeu par l’IA |
+| -------------------------------- | ---------: | -----------: |
+| Original Set                     |        Oui |          Oui |
+| Original Set + Classic           |        Oui |          Oui |
+| Original Set + Proteus           |        Oui |          Oui |
+| Original Set + Classic + Proteus |        Oui |          Oui |
 
 Proteus a franchi les contrôles actuels de préparation de l’IA concernant les hints de cartes révisés, les decks de playtest sélectionnés, les simulations déterministes, l’intégrité des replays et la protection des informations cachées.
 

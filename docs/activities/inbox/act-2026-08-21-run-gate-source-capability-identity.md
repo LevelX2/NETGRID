@@ -52,11 +52,11 @@ Ability-ID enthält.
 
 - [ ] Feldname, Typ und tatsächlicher Inhalt beschreiben dieselbe Semantik.
 - [ ] Producer und Consumer verwenden genau den strukturierten aktuellen
-  Vertrag.
+      Vertrag.
 - [ ] PlayerViews, öffentliche Payloads und Logs leaken keine verdeckten
-  Karteninformationen.
+      Karteninformationen.
 - [ ] Legalität, Replaydeterminismus, StateHash und bestehende Gate-Wirkung
-  bleiben unverändert.
+      bleiben unverändert.
 - [ ] Fokussierte Run-Gate- und Vertragschecks sind grün.
 
 ## Umsetzungshinweise

@@ -243,8 +243,7 @@ describe("Corp core plan modules", () => {
           {
             cardId: "keeper-1",
             serverId: "hq",
-            optionId:
-              "agenda_purge_keeper-1_hq_alternate_subtype:base",
+            optionId: "agenda_purge_keeper-1_hq_alternate_subtype:base",
           },
           {
             cardId: "razor-wire-1",

@@ -132,11 +132,7 @@ describe("Runner cost/penalty support plan continuation", () => {
       },
     });
 
-    const mismatchedResult = planResult(
-      91,
-      support.actionId,
-      "economy-root",
-    );
+    const mismatchedResult = planResult(91, support.actionId, "economy-root");
     mismatchedResult.portfolio.instances = structuredClone(
       supportResult.portfolio.instances,
     );
@@ -158,9 +154,7 @@ describe("Runner cost/penalty support plan continuation", () => {
     ).not.toThrow();
     expect(mismatchedResult.portfolio.instances[0]?.moduleState).toMatchObject({
       gap: {
-        directSearchChoiceBindings: [
-          { targetCardInstanceId: targetCardId },
-        ],
+        directSearchChoiceBindings: [{ targetCardInstanceId: targetCardId }],
       },
     });
 

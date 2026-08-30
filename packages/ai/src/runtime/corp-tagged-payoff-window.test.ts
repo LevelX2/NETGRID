@@ -87,8 +87,7 @@ function testContext(
       overrides.taggedRunnerPayoffProfile ?? (() => undefined),
     advanceCompletesScore: () => false,
     actionIsScoreLine: () => false,
-    visibleMeatDamagePayoff:
-      overrides.visibleMeatDamagePayoff ?? (() => false),
+    visibleMeatDamagePayoff: overrides.visibleMeatDamagePayoff ?? (() => false),
   });
 }
 
@@ -111,10 +110,7 @@ function corpInput(
   } as unknown as AiDecisionInput;
 }
 
-function action(
-  actionId: string,
-  type: LegalAction["type"],
-): LegalAction {
+function action(actionId: string, type: LegalAction["type"]): LegalAction {
   return {
     actionId,
     side: "corp",
@@ -124,4 +120,3 @@ function action(
     payload: {},
   } as unknown as LegalAction;
 }
-

@@ -105,39 +105,24 @@ export function assessRunnerRunFundingAdmission(
   };
 
   if (targetDirectlyConvertible) {
-    return result(
-      false,
-      "target_already_directly_convertible",
-      context,
-    );
+    return result(false, "target_already_directly_convertible", context);
   }
   if (concreteFundingGap <= 0) {
     return result(false, "no_concrete_funding_gap", context);
   }
   if (
-    !runnerRunTargetPathIsCreditConvertible(
-      params.target,
-      urgentScoreThreat,
-    )
+    !runnerRunTargetPathIsCreditConvertible(params.target, urgentScoreThreat)
   ) {
     return result(false, "target_not_credit_convertible", context);
   }
   if (sameServerDirectlyConvertibleActionIds.length > 0) {
-    return result(
-      false,
-      "same_server_direct_route_blocks_funding",
-      context,
-    );
+    return result(false, "same_server_direct_route_blocks_funding", context);
   }
   if (
     alternativeDirectlyConvertibleActionIds.length > 0 &&
     !urgentScoreThreat
   ) {
-    return result(
-      false,
-      "nonurgent_funding_yields_to_direct_run",
-      context,
-    );
+    return result(false, "nonurgent_funding_yields_to_direct_run", context);
   }
   return result(true, "concrete_funding_gap_admitted", context);
 }

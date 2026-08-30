@@ -1,8 +1,4 @@
-import type {
-  CardInstanceId,
-  CounterType,
-  GameState,
-} from "@netgrid/shared";
+import type { CardInstanceId, CounterType, GameState } from "@netgrid/shared";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { runnerCardImplementationAbilityLimitHost } from "../../ability-engine/card-implementation-ability-limits";
@@ -43,13 +39,15 @@ function state(): GameState {
   } as unknown as GameState;
 }
 
-function host(input: {
-  calls?: string[];
-  counterValue?: number;
-  successfulHqRun?: boolean;
-  liberatedSubtype?: boolean;
-  scoredBlackOpsLastTurn?: boolean;
-} = {}): CounterLifecycleRuntimeDepsHost {
+function host(
+  input: {
+    calls?: string[];
+    counterValue?: number;
+    successfulHqRun?: boolean;
+    liberatedSubtype?: boolean;
+    scoredBlackOpsLastTurn?: boolean;
+  } = {},
+): CounterLifecycleRuntimeDepsHost {
   return {
     counters: {
       cardCounter: (_state, _cardId, counterType) => {
@@ -120,11 +118,7 @@ describe("counter/lifecycle card implementation runtime deps", () => {
 
     expect(deps.cardCounter(gameState, sourceCardId, "virus")).toBe(7);
     expect(
-      deps.addCounterToAllInstalledRunnerIcebreakers(
-        gameState,
-        "militech",
-        2,
-      ),
+      deps.addCounterToAllInstalledRunnerIcebreakers(gameState, "militech", 2),
     ).toEqual({
       amount: 2,
       counterType: "militech",

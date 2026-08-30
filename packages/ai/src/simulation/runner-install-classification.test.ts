@@ -54,9 +54,13 @@ function drawKindForRoles(roles: string[]) {
 }
 
 function rigInstallForRoles(roles: string[]): boolean {
-  return isRunnerRigInstallActionForSimulation({} as AiDecisionInput, action("install_card"), {
-    rolesForAction: () => roles,
-  });
+  return isRunnerRigInstallActionForSimulation(
+    {} as AiDecisionInput,
+    action("install_card"),
+    {
+      rolesForAction: () => roles,
+    },
+  );
 }
 
 function installableBreakerForRoles(roles: string[]): boolean {

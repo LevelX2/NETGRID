@@ -120,36 +120,36 @@ aus, ohne den Blick auf das Board länger als nötig zu verdecken.
 ## Akzeptanzkriterien
 
 - [x] In den Optionen kann zwischen dem bisherigen vollständigen Infofenster
-  und der neuen schwebenden Einblendung gewählt werden; die Wahl ist lokal
-  gespeichert und verändert keinen Match-State.
+      und der neuen schwebenden Einblendung gewählt werden; die Wahl ist lokal
+      gespeichert und verändert keinen Match-State.
 - [x] Eine rein informative schwebende Einblendung zeigt die verständliche
-  Hauptmeldung in großer, kontrastreicher Schrift, benötigt keinen „Weiter“-Knopf
-  und blockiert keine Boardinteraktion.
+      Hauptmeldung in großer, kontrastreicher Schrift, benötigt keinen „Weiter“-Knopf
+      und blockiert keine Boardinteraktion.
 - [x] Die Einblendung besitzt eine nachvollziehbare Eintritts-, Lese- und
-  Ausblendphase und verschwindet nach der gewählten Gesamtdauer zuverlässig.
+      Ausblendphase und verschwindet nach der gewählten Gesamtdauer zuverlässig.
 - [x] Die Anzeigedauer ist per Regler von 1 bis 10 Sekunden feiner als mit den
-  bisherigen vier Zeitwerten einstellbar; der aktuelle Wert ist jederzeit
-  sichtbar und per Tastatur änderbar.
+      bisherigen vier Zeitwerten einstellbar; der aktuelle Wert ist jederzeit
+      sichtbar und per Tastatur änderbar.
 - [x] Eine Platzierungsvorschau mit Marker setzt einen klar dokumentierten
-  Ankerpunkt. Marker, Positionsvorgaben und direktes Ziehen im Spiel liefern
-  denselben gespeicherten Positionsvertrag.
+      Ankerpunkt. Marker, Positionsvorgaben und direktes Ziehen im Spiel liefern
+      denselben gespeicherten Positionsvertrag.
 - [x] Schwebende Einblendungen bleiben auf Desktop und kleinen Viewports
-  vollständig innerhalb des nutzbaren sichtbaren Bereichs und berücksichtigen
-  lange Texte sowie Safe Areas.
+      vollständig innerhalb des nutzbaren sichtbaren Bereichs und berücksichtigen
+      lange Texte sowie Safe Areas.
 - [x] Mehrere schnell aufeinanderfolgende Meldungen bleiben geordnet: Keine
-  Cue geht verloren, überlagert unlesbar eine andere oder verändert die
-  bestehende Ablauf-/Warteschlangensemantik unkontrolliert.
+      Cue geht verloren, überlagert unlesbar eine andere oder verändert die
+      bestehende Ablauf-/Warteschlangensemantik unkontrolliert.
 - [x] Im manuellen KI-Modus und bei sonstigen steuerungsrelevanten Cues bleibt
-  eine erforderliche „Weiter“- oder Bestätigungsaktion sichtbar, fokussierbar
-  und ausschließlich nutzergesteuert.
+      eine erforderliche „Weiter“- oder Bestätigungsaktion sichtbar, fokussierbar
+      und ausschließlich nutzergesteuert.
 - [x] `prefers-reduced-motion` erhält eine bewegungsarme Variante ohne Verlust
-  von Text, Anzeigedauer oder Bedienbarkeit; Screenreader werden über eine
-  geeignete Live-Region informiert, ohne dieselbe Meldung mehrfach anzusagen.
+      von Text, Anzeigedauer oder Bedienbarkeit; Screenreader werden über eine
+      geeignete Live-Region informiert, ohne dieselbe Meldung mehrfach anzusagen.
 - [x] Deutsche, englische und französische Beschriftungen sind vollständig;
-  fokussierte Tests decken Moduswahl, Normalisierung der Dauer,
-  Positionsgrenzen, Cue-Warteschlange und den manuellen KI-Ablauf ab.
+      fokussierte Tests decken Moduswahl, Normalisierung der Dauer,
+      Positionsgrenzen, Cue-Warteschlange und den manuellen KI-Ablauf ab.
 - [x] Die visuelle Prüfung in Firefox bestätigt Lesbarkeit, geringe
-  Boardverdeckung und den gewünschten kurzen „Aufpoppen–Bewegen–Ausblenden“-Eindruck.
+      Boardverdeckung und den gewünschten kurzen „Aufpoppen–Bewegen–Ausblenden“-Eindruck.
 
 ## Umsetzungshinweise
 

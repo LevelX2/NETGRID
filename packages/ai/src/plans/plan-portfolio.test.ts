@@ -344,9 +344,9 @@ describe("plan portfolio", () => {
     const remembered = rememberPlanPortfolioSnapshot(input, snapshot)!;
     (remembered.backgrounds[0] as { priority: number }).priority = -1;
 
-    expect(getPlanPortfolioMemorySnapshot(input)?.backgrounds[0]?.priority).toBe(
-      700,
-    );
+    expect(
+      getPlanPortfolioMemorySnapshot(input)?.backgrounds[0]?.priority,
+    ).toBe(700);
   });
 
   it("emits redacted bounded portfolio facts", () => {

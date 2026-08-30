@@ -17,12 +17,15 @@ export type FreeProgramInstallExecutionInput = {
   shuffleNeeded: boolean;
 };
 
-export type FreeProgramInstallExecutionResult = FreeProgramInstallExecutionInput & {
-  installedProgramId: CardInstanceId;
-};
+export type FreeProgramInstallExecutionResult =
+  FreeProgramInstallExecutionInput & {
+    installedProgramId: CardInstanceId;
+  };
 
 export type FreeProgramInstallExecutionCallbacks = {
-  installProgramForFree: (programId: CardInstanceId) => CardInstanceId | undefined;
+  installProgramForFree: (
+    programId: CardInstanceId,
+  ) => CardInstanceId | undefined;
 };
 
 export function createTemporaryProgramFreeInstallInput(
@@ -43,7 +46,9 @@ export function createRevealedStackFreeProgramInstallInput(
   plan: RevealedStackProgramInstallExecutionPlan,
 ): FreeProgramInstallExecutionInput {
   if (!plan.selectedCardId)
-    throw new Error("Der offengelegte Stack-Plan hat kein installiertes Programm im Plan.");
+    throw new Error(
+      "Der offengelegte Stack-Plan hat kein installiertes Programm im Plan.",
+    );
   return {
     selectedProgramId: plan.selectedCardId,
     sourceZone: "stack",

@@ -359,11 +359,7 @@ function visitCapabilityCombinations(params: {
         (branchSourceCounters[offTargetCardId] ?? 0) +
         (capability.offTargetAdvancementAmount ?? 0);
     }
-    const step = conversionStep(
-      params.target,
-      capability,
-      appliedAmount,
-    );
+    const step = conversionStep(params.target, capability, appliedAmount);
     if (offTargetCardId) {
       step.offTargetCardId = offTargetCardId;
       step.evidence.push(`score_conversion_off_target_card:${offTargetCardId}`);
@@ -473,10 +469,7 @@ function conversionCapabilities(
                 sourceCardId,
                 sourceOpportunityCost: advancementSourceOpportunityCost(
                   source,
-                  Math.min(
-                    maximumAmount,
-                    source.advancementCounters ?? 0,
-                  ),
+                  Math.min(maximumAmount, source.advancementCounters ?? 0),
                 ),
                 clickCost: actionCost(action, "clicks"),
                 creditCost: actionCost(action, "credits"),

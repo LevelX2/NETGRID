@@ -32,7 +32,10 @@ export function corpPurgeImpactScoreComponent(
   const affected = visibleVirusCounterCards(input);
   const runnerVirusCounters = visibleRunnerVirusCounters(input, action);
   const allAffected = [...affected, ...runnerVirusCounters];
-  const totalCounters = allAffected.reduce((sum, entry) => sum + entry.amount, 0);
+  const totalCounters = allAffected.reduce(
+    (sum, entry) => sum + entry.amount,
+    0,
+  );
   const activeRunnerVirusCounters = runnerVirusCounters.filter(
     runnerVirusCounterHasActiveEffect,
   );
@@ -47,7 +50,9 @@ export function corpPurgeImpactScoreComponent(
         visibleIceHasMaterialHazard(card)),
   );
   const pressuredCentralServers = ["hq", "rd"].filter((serverId) => {
-    const directlyAffected = allAffected.some((entry) => entry.serverId === serverId);
+    const directlyAffected = allAffected.some(
+      (entry) => entry.serverId === serverId,
+    );
     const highlighterAffectsRd =
       serverId === "rd" &&
       activeRunnerVirusCounters.some(
@@ -163,7 +168,14 @@ function visibleRunnerVirusCounters(
       if (display.displayKind !== "virus") return [];
       const amount = Math.max(0, Math.floor(display.amount ?? 0));
       return amount > 0
-        ? [{ card: input.playerView.own.identity, serverId: undefined, amount, counterType: display.counterType }]
+        ? [
+            {
+              card: input.playerView.own.identity,
+              serverId: undefined,
+              amount,
+              counterType: display.counterType,
+            },
+          ]
         : [];
     },
   );

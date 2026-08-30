@@ -126,8 +126,7 @@ export function createTagPunishWindowDiagnosticsContext(
           visiblePayoffCategories;
         diagnostics.corpVisibleTagPayoffLegalActionCards = visiblePayoffCards;
         if (visiblePunishOpportunities.length > 1)
-          diagnostics.corpVisibleTagPunishDecisionWindowWithMultiplePayoffs =
-            true;
+          diagnostics.corpVisibleTagPunishDecisionWindowWithMultiplePayoffs = true;
         const visiblePayoffCategorySet = new Set(visiblePayoffCategories);
         if (visiblePayoffCategorySet.has("damage"))
           diagnostics.corpVisibleTagDamagePunishLegalActions = true;
@@ -202,14 +201,12 @@ export function createTagPunishWindowDiagnosticsContext(
           if (
             diagnostics.corpVisibleTagPunishUnknownSkipFixGateEligible === true
           ) {
-            diagnostics.corpVisibleTagPunishFixGateEligibleWindowNormalized =
-              true;
+            diagnostics.corpVisibleTagPunishFixGateEligibleWindowNormalized = true;
             if (
               diagnostics.corpVisibleTagPunishUnknownSkipPlausibility ===
               "suspicious"
             )
-              diagnostics.corpVisibleTagPunishFixGateSuspiciousSkipNormalized =
-                true;
+              diagnostics.corpVisibleTagPunishFixGateSuspiciousSkipNormalized = true;
           }
           if (
             skippedReason === "unknown_higher_priority" ||
@@ -217,8 +214,7 @@ export function createTagPunishWindowDiagnosticsContext(
           )
             diagnostics.corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization = true;
           if (survivalContext.any)
-            diagnostics.runnerSurvivalCounterContextSuppressedPunishValue =
-              true;
+            diagnostics.runnerSurvivalCounterContextSuppressedPunishValue = true;
           if (punishOntology?.isPunishPayoff)
             diagnostics.corpPunishSkippedDespiteOntologyOpportunity = true;
         }
@@ -269,8 +265,7 @@ export function createTagPunishWindowDiagnosticsContext(
               diagnostics.corpFunnelSourceActionTakenWithVisiblePayoff = true;
             } else {
               diagnostics.corpTagSourceTakenWithoutOntologyPayoff = true;
-              diagnostics.corpFunnelSourceActionTakenWithoutVisiblePayoff =
-                true;
+              diagnostics.corpFunnelSourceActionTakenWithoutVisiblePayoff = true;
             }
           }
         } else {

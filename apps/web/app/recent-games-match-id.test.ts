@@ -5,7 +5,10 @@ const recentGamesSource = readFileSync(
   new URL("../features/recent/RecentGamesPanel.tsx", import.meta.url),
   "utf8",
 );
-const globalsCss = readFileSync(new URL("./globals.css", import.meta.url), "utf8");
+const globalsCss = readFileSync(
+  new URL("./globals.css", import.meta.url),
+  "utf8",
+);
 
 describe("recent game match IDs", () => {
   it("renders the complete standalone and series-game match IDs", () => {

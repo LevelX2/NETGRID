@@ -2862,7 +2862,8 @@ function deriveRndKnowledgeTimeline(
     freshness: {
       lastKnownAccessEventId: lastKnownAccessEventId ?? "none",
       knownToRunner:
-        knownSequenceDefinitionIds.length > 0 || Boolean(lastKnownAccessEventId),
+        knownSequenceDefinitionIds.length > 0 ||
+        Boolean(lastKnownAccessEventId),
       freshness,
       ...(knownTopDefinitionId ? { knownTopDefinitionId } : {}),
       ...(knownTopDefinitionId

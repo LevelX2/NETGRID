@@ -86,10 +86,7 @@ export function useAccountSession() {
         setState((current) => ({
           ...current,
           busy: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : t("requestFailed"),
+          error: error instanceof Error ? error.message : t("requestFailed"),
         }));
         return false;
       }
@@ -132,9 +129,7 @@ export function useAccountSession() {
           ...current,
           busy: false,
           error:
-            error instanceof Error
-              ? error.message
-              : t("passwordResetFailed"),
+            error instanceof Error ? error.message : t("passwordResetFailed"),
         }));
         return false;
       }
@@ -152,10 +147,7 @@ export function useAccountSession() {
       setState((current) => ({
         ...current,
         busy: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : t("logoutFailed"),
+        error: error instanceof Error ? error.message : t("logoutFailed"),
       }));
       return false;
     }
@@ -171,10 +163,7 @@ export function useAccountSession() {
       setState((current) => ({
         ...current,
         busy: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : t("logoutAllFailed"),
+        error: error instanceof Error ? error.message : t("logoutAllFailed"),
       }));
       return false;
     }
@@ -196,9 +185,7 @@ export function useAccountSession() {
           ...current,
           busy: false,
           error:
-            error instanceof Error
-              ? error.message
-              : t("passwordChangeFailed"),
+            error instanceof Error ? error.message : t("passwordChangeFailed"),
         }));
         return false;
       }
@@ -221,10 +208,7 @@ export function useAccountSession() {
         setState((current) => ({
           ...current,
           busy: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : t("inviteFailed"),
+          error: error instanceof Error ? error.message : t("inviteFailed"),
         }));
         return null;
       }
@@ -243,10 +227,7 @@ export function useAccountSession() {
         setState((current) => ({
           ...current,
           busy: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : t("resetLinkFailed"),
+          error: error instanceof Error ? error.message : t("resetLinkFailed"),
         }));
         return null;
       }

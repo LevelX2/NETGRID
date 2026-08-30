@@ -1091,7 +1091,8 @@ export function createTurnRunnerStartRuntimeResolvers(
         publicLabel: "Virus-Counter",
         value: `pox:${entry.serverId}`,
         metadata: {
-          targetTitle: publicServerLabel(state, entry.serverId) ?? entry.serverId,
+          targetTitle:
+            publicServerLabel(state, entry.serverId) ?? entry.serverId,
           targetServerId: entry.serverId,
           amount: entry.amount,
           optionKind: "pox",
@@ -1113,7 +1114,8 @@ export function createTurnRunnerStartRuntimeResolvers(
         publicLabel: "Virus-Counter",
         value: `fait:${entry.serverId}`,
         metadata: {
-          targetTitle: publicServerLabel(state, entry.serverId) ?? entry.serverId,
+          targetTitle:
+            publicServerLabel(state, entry.serverId) ?? entry.serverId,
           targetServerId: entry.serverId,
           amount: entry.amount,
           optionKind: "fait",

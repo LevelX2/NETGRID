@@ -166,10 +166,7 @@ export function buildReplayDecisionCaseExtractionReport(
         cases,
         (entry) => entry.decision.selectedActionType,
       ),
-      byPlanKind: countBy(
-        cases,
-        (entry) => entry.decision.planKind ?? "none",
-      ),
+      byPlanKind: countBy(cases, (entry) => entry.decision.planKind ?? "none"),
     },
     cases,
     redactionStatus: "passed",
@@ -252,7 +249,9 @@ export function extractReplayDecisionCaseFromTrace(
   return caseValue;
 }
 
-export function replayDecisionCaseSplit(matchId: string): ReplayDecisionCaseSplit {
+export function replayDecisionCaseSplit(
+  matchId: string,
+): ReplayDecisionCaseSplit {
   const bucket = (createHash("sha256").update(matchId).digest()[0] ?? 0) % 10;
   return bucket < 8 ? "discovery" : "holdout";
 }
@@ -269,7 +268,9 @@ function replayDecisionCaseId(trace: ReplayDecisionTraceInput): string {
   ).slice(0, 16)}`;
 }
 
-function rankedAlternatives(value: unknown): ReplayDecisionCaseRankedAlternative[] {
+function rankedAlternatives(
+  value: unknown,
+): ReplayDecisionCaseRankedAlternative[] {
   if (!Array.isArray(value)) return [];
   return value.slice(0, 8).flatMap((entry, index) => {
     if (!isRecord(entry)) return [];
@@ -289,7 +290,9 @@ function rankedAlternatives(value: unknown): ReplayDecisionCaseRankedAlternative
   });
 }
 
-function actionAlternatives(value: unknown): ReplayDecisionCaseActionAlternative[] {
+function actionAlternatives(
+  value: unknown,
+): ReplayDecisionCaseActionAlternative[] {
   if (!Array.isArray(value)) return [];
   return value.slice(0, 8).flatMap((entry, index) => {
     if (!isRecord(entry)) return [];

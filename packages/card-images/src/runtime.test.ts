@@ -81,10 +81,7 @@ describe("managed card image runtime", () => {
       variants: [variant("master", "first-master"), variant("full", "first")],
     });
     const second = await writer.putAssetVariants({
-      variants: [
-        variant("master", "second-master"),
-        variant("full", "second"),
-      ],
+      variants: [variant("master", "second-master"), variant("full", "second")],
     });
     await writer.applyBindings("personal", [
       { printingId: "simple_agenda", assetHash: first.assetHash },
@@ -154,10 +151,7 @@ describe("managed card image runtime", () => {
       { printingId: "simple_agenda", assetHash: asset.assetHash },
     ]);
     await resolveManagedCardImage(store, "simple_agenda", "full");
-    await writeFile(
-      path.join(root, "assets", `${asset.assetHash}.json`),
-      "{}",
-    );
+    await writeFile(path.join(root, "assets", `${asset.assetHash}.json`), "{}");
 
     const failure = await resolveManagedCardImage(
       store,

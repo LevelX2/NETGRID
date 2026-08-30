@@ -7,11 +7,11 @@ aktualisiert und validiert
 
 ## Gesamtergebnis
 
-| Arbeitsstrang | Paarungen | finale Partien | vollständig auditierte Entscheidungen | verifizierte neue Ursachenfixes |
-| --- | ---: | ---: | ---: | ---: |
-| Direkter Strang 011–015 | 5 | 15 | 5.735 | 29 |
-| Paralleler Strang 016–030 | 15 | 45 | 12.244 | 15 |
-| **Gesamt** | **20** | **60** | **17.979** | **44** |
+| Arbeitsstrang             | Paarungen | finale Partien | vollständig auditierte Entscheidungen | verifizierte neue Ursachenfixes |
+| ------------------------- | --------: | -------------: | ------------------------------------: | ------------------------------: |
+| Direkter Strang 011–015   |         5 |             15 |                                 5.735 |                              29 |
+| Paralleler Strang 016–030 |        15 |             45 |                                12.244 |                              15 |
+| **Gesamt**                |    **20** |         **60** |                            **17.979** |                          **44** |
 
 Alle finalen Serien verwendeten drei feste Seeds pro Paarung. Decisions und
 vollständige Ereignishistorien wurden getrennt paginiert; die jeweiligen

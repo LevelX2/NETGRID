@@ -194,7 +194,9 @@ describe("Action semantic invariants", () => {
 
     expect(structuralIssues).toHaveLength(1);
     expect(structuralIssues[0]?.evidence).toContain("own-subtype-only");
-    expect(JSON.stringify(structuralIssues)).not.toContain("cardinal_nameplate");
+    expect(JSON.stringify(structuralIssues)).not.toContain(
+      "cardinal_nameplate",
+    );
     expect(JSON.stringify(structuralIssues)).not.toContain("subtype_onlyish");
   });
 
@@ -325,9 +327,7 @@ describe("Action semantic invariants", () => {
   });
 
   it("stays out of runtime selection modules", () => {
-    for (const sourcePath of [
-      "packages/ai/src/index.ts",
-    ]) {
+    for (const sourcePath of ["packages/ai/src/index.ts"]) {
       const source = readFileSync(path.join(repoRoot, sourcePath), "utf8");
       expect(source).not.toContain("action-semantic-invariants");
       expect(source).not.toContain("buildActionSemanticInvariantReport");
@@ -374,7 +374,9 @@ describe("Action semantic invariants", () => {
   it("covers runner survival risk worklist package one as diagnostic semantics", () => {
     const profiles = [
       runnerRiskProfile("Arasaka Owns You", ["risk.self_brain_damage"]),
-      runnerRiskProfile("Emergency Self-Construct", ["survival.flatline_prevention"]),
+      runnerRiskProfile("Emergency Self-Construct", [
+        "survival.flatline_prevention",
+      ]),
       runnerRiskProfile("Force Shield", ["survival.damage_prevention"]),
       runnerRiskProfile("Shield", ["survival.damage_prevention"]),
       runnerRiskProfile("Armored Fridge", ["survival.damage_prevention"]),
@@ -467,10 +469,11 @@ describe("Action semantic invariants", () => {
           ),
         )
         .every((profile) =>
-        profile.abilitySemantics?.[0]?.strategySupport?.some(
-          (support) => support.strategyId === "corp.doctrine.tag_trace_punish",
+          profile.abilitySemantics?.[0]?.strategySupport?.some(
+            (support) =>
+              support.strategyId === "corp.doctrine.tag_trace_punish",
+          ),
         ),
-      ),
     ).toBe(true);
     expect(report.productiveUseAllowed).toBe(false);
   });
@@ -935,8 +938,9 @@ function corpSemanticProfile(
                 signal.startsWith("tag.") || signal === "access.tag_ambush",
             )
               ? "corp.doctrine.tag_trace_punish"
-              : tacticSignals.some((signal) =>
-                    signal.includes("damage") || signal.includes("trash"),
+              : tacticSignals.some(
+                    (signal) =>
+                      signal.includes("damage") || signal.includes("trash"),
                   )
                 ? "corp.doctrine.damage_pressure"
                 : strategyId,

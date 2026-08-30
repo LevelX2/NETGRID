@@ -8,8 +8,12 @@ describe("catalog card text fallback", () => {
       "utf8",
     );
 
-    expect(source).toContain("const [catalogImageUnavailable, setCatalogImageUnavailable] = useState(false)");
-    expect(source).toContain("onUnavailable={() => setCatalogImageUnavailable(true)}");
+    expect(source).toContain(
+      "const [catalogImageUnavailable, setCatalogImageUnavailable] = useState(false)",
+    );
+    expect(source).toContain(
+      "onUnavailable={() => setCatalogImageUnavailable(true)}",
+    );
     expect(source).toContain('catalogImageUrl ? "hasImage" : "textFallback"');
     expect(source).toContain("<CardTextPreview");
     expect(source).toContain("typeLine={formatCardTypeLine(detail)}");
@@ -25,6 +29,8 @@ describe("catalog card text fallback", () => {
     );
 
     expect(source).toContain("setCatalogImageUnavailable(false)");
-    expect(source).toContain("[detail?.catalogCardId, catalogImageSource.src, catalogImageSource.fallbackSrc]");
+    expect(source).toContain(
+      "[detail?.catalogCardId, catalogImageSource.src, catalogImageSource.fallbackSrc]",
+    );
   });
 });

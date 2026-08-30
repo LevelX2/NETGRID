@@ -68,8 +68,7 @@ export function assessRunnerRecurringEconomyRunHorizon(params: {
   }
   const finiteInvestmentHorizonRecouped =
     best !== undefined &&
-    params.realizedValue >=
-      params.installCost + params.futureValueAtRisk * 2;
+    params.realizedValue >= params.installCost + params.futureValueAtRisk * 2;
   if (finiteInvestmentHorizonRecouped) {
     return {
       decision: "allow_run",

@@ -1,7 +1,8 @@
 import localizedDeCardSkin from "../../../data/card-assets/localized/de/cards.de.json";
 
 export const LOCAL_CARD_IMAGE_VERSION = "2026-05-23-local-onr-assets-3";
-export const LOCALIZED_DE_CARD_IMAGE_VERSION = "2026-05-24-localized-de-assets-1";
+export const LOCALIZED_DE_CARD_IMAGE_VERSION =
+  "2026-05-24-localized-de-assets-1";
 
 export const GENERATED_CARD_IMAGES: Record<string, string> = {
   corp_identity_001: "generated-identities/corp_identity_001.png",
@@ -23,14 +24,17 @@ export const GENERATED_CARD_IMAGES: Record<string, string> = {
   simple_sentry_ice: "generated-ice/simple_sentry_ice.png",
   simple_setup_hardware: "generated-hardware/simple_setup_hardware.png",
   simple_tag_ice: "generated-ice/simple_tag_ice.png",
-  simple_tag_punishment_operation: "generated-operations/simple_tag_punishment_operation.png",
+  simple_tag_punishment_operation:
+    "generated-operations/simple_tag_punishment_operation.png",
   simple_taxing_barrier_ice: "generated-ice/simple_taxing_barrier_ice.png",
   simple_upgrade: "generated-assets/simple_upgrade.png",
   v08_adaptive_killer: "generated-icebreakers/v08_adaptive_killer.png",
-  v08_archive_planning_operation: "generated-operations/v08_archive_planning_operation.png",
+  v08_archive_planning_operation:
+    "generated-operations/v08_archive_planning_operation.png",
   v08_burst_credit_event: "generated-events/v08_burst_credit_event.png",
   v08_cashout_asset: "generated-assets/v08_cashout_asset.png",
-  v08_credit_surge_operation: "generated-operations/v08_credit_surge_operation.png",
+  v08_credit_surge_operation:
+    "generated-operations/v08_credit_surge_operation.png",
   v08_deep_draw_event: "generated-events/v08_deep_draw_event.png",
   v08_gate_ice: "generated-ice/v08_gate_ice.png",
   v08_memory_chip: "generated-hardware/v08_memory_chip.png",
@@ -39,33 +43,52 @@ export const GENERATED_CARD_IMAGES: Record<string, string> = {
   v08_project_agenda: "generated-agendas/v08_project_agenda.png",
   v08_steady_fracter: "generated-icebreakers/v08_steady_fracter.png",
   v08_wall_ice: "generated-ice/v08_wall_ice.png",
-  v08_watchdog_ice: "generated-ice/v08_watchdog_ice.png"
+  v08_watchdog_ice: "generated-ice/v08_watchdog_ice.png",
 };
 
-export const LOCALIZED_DE_CARD_IMAGES: Record<string, string> = localizedDeCardImages();
-export const LOCALIZED_DE_CARD_TITLES: Record<string, string> = localizedDeCardTitles();
+export const LOCALIZED_DE_CARD_IMAGES: Record<string, string> =
+  localizedDeCardImages();
+export const LOCALIZED_DE_CARD_TITLES: Record<string, string> =
+  localizedDeCardTitles();
 
 const GENERATED_CARD_IMAGE_IDS = new Set(Object.keys(GENERATED_CARD_IMAGES));
-const LOCALIZED_DE_CARD_IMAGE_IDS = new Set(Object.keys(LOCALIZED_DE_CARD_IMAGES));
+const LOCALIZED_DE_CARD_IMAGE_IDS = new Set(
+  Object.keys(LOCALIZED_DE_CARD_IMAGES),
+);
 
-export function isGeneratedCardImageId(cardId: string | undefined | null): cardId is string {
+export function isGeneratedCardImageId(
+  cardId: string | undefined | null,
+): cardId is string {
   return typeof cardId === "string" && GENERATED_CARD_IMAGE_IDS.has(cardId);
 }
 
-export function isLocalOnrCardId(cardId: string | undefined | null): cardId is string {
-  return typeof cardId === "string" && (cardId.startsWith("onr_v1_") || cardId.startsWith("onr_proteus_") || cardId.startsWith("onr_classic_"));
+export function isLocalOnrCardId(
+  cardId: string | undefined | null,
+): cardId is string {
+  return (
+    typeof cardId === "string" &&
+    (cardId.startsWith("onr_v1_") ||
+      cardId.startsWith("onr_proteus_") ||
+      cardId.startsWith("onr_classic_"))
+  );
 }
 
-export function isLocalizedDeCardImageId(cardId: string | undefined | null): cardId is string {
+export function isLocalizedDeCardImageId(
+  cardId: string | undefined | null,
+): cardId is string {
   return typeof cardId === "string" && LOCALIZED_DE_CARD_IMAGE_IDS.has(cardId);
 }
 
-export function localizedDeCardImagePath(cardId: string | undefined | null): string | undefined {
+export function localizedDeCardImagePath(
+  cardId: string | undefined | null,
+): string | undefined {
   if (!isLocalizedDeCardImageId(cardId)) return undefined;
   return LOCALIZED_DE_CARD_IMAGES[cardId];
 }
 
-export function localizedDeCardTitle(cardId: string | undefined | null): string | undefined {
+export function localizedDeCardTitle(
+  cardId: string | undefined | null,
+): string | undefined {
   if (typeof cardId !== "string") return undefined;
   return LOCALIZED_DE_CARD_TITLES[cardId];
 }
@@ -86,7 +109,12 @@ function localizedDeCardImages(): Record<string, string> {
   const skin = localizedDeCardSkin as LocalizedDeCardSkin;
   const entries: Array<[string, string]> = [];
   for (const card of skin.cards ?? []) {
-    if (typeof card.printingId !== "string" || card.displayOnly !== true || typeof card.rendered?.full !== "string") continue;
+    if (
+      typeof card.printingId !== "string" ||
+      card.displayOnly !== true ||
+      typeof card.rendered?.full !== "string"
+    )
+      continue;
     entries.push([card.printingId, card.rendered.full]);
   }
   return Object.fromEntries(entries);
@@ -96,7 +124,12 @@ function localizedDeCardTitles(): Record<string, string> {
   const skin = localizedDeCardSkin as LocalizedDeCardSkin;
   const entries: Array<[string, string]> = [];
   for (const card of skin.cards ?? []) {
-    if (typeof card.cardId !== "string" || card.displayOnly !== true || typeof card.localizedTitle !== "string") continue;
+    if (
+      typeof card.cardId !== "string" ||
+      card.displayOnly !== true ||
+      typeof card.localizedTitle !== "string"
+    )
+      continue;
     entries.push([card.cardId, card.localizedTitle]);
   }
   return Object.fromEntries(entries);

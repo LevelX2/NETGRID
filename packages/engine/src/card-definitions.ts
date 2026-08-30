@@ -2,10 +2,7 @@ import {
   cardSpecDefinitions,
   cardSpecRuntimeDefinitionIds,
 } from "@netgrid/cards/engine";
-import type {
-  CardDefinitionId,
-  ResolvedCardDefinition,
-} from "@netgrid/shared";
+import type { CardDefinitionId, ResolvedCardDefinition } from "@netgrid/shared";
 
 const definitions = cardSpecDefinitions();
 const expectedIds = cardSpecRuntimeDefinitionIds();
@@ -14,7 +11,9 @@ const definitionIds = definitions.map((definition) => definition.id);
 if (
   definitions.length !== expectedIds.length ||
   new Set(definitionIds).size !== definitionIds.length ||
-  definitionIds.some((definitionId, index) => definitionId !== expectedIds[index])
+  definitionIds.some(
+    (definitionId, index) => definitionId !== expectedIds[index],
+  )
 )
   throw new Error("card_spec_definition_authority_mismatch");
 

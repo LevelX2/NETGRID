@@ -46,10 +46,11 @@ describe("AI deck snapshot runtime validation", () => {
     });
 
     expectSnapshotError(
-      () => buildAiDecisionInput(state, "corp", {
-        difficulty: "normal",
-        ownDeckSnapshot: snapshotById("demo_runner_008_snapshot_v0_8"),
-      }),
+      () =>
+        buildAiDecisionInput(state, "corp", {
+          difficulty: "normal",
+          ownDeckSnapshot: snapshotById("demo_runner_008_snapshot_v0_8"),
+        }),
       "ai_deck_snapshot_side_mismatch",
     );
   });
@@ -59,14 +60,19 @@ describe("AI deck snapshot runtime validation", () => {
       matchId: "ai-deck-snapshot-unknown-card",
       seed: "ai-deck-snapshot-unknown-card",
     });
-    const snapshot = structuredClone(snapshotById("demo_corp_008_snapshot_v0_8"));
-    snapshot.cards = [{ cardId: "unknown_runtime_card_for_snapshot_test", quantity: 1 }];
+    const snapshot = structuredClone(
+      snapshotById("demo_corp_008_snapshot_v0_8"),
+    );
+    snapshot.cards = [
+      { cardId: "unknown_runtime_card_for_snapshot_test", quantity: 1 },
+    ];
 
     expectSnapshotError(
-      () => buildAiDecisionInput(state, "corp", {
-        difficulty: "normal",
-        ownDeckSnapshot: snapshot,
-      }),
+      () =>
+        buildAiDecisionInput(state, "corp", {
+          difficulty: "normal",
+          ownDeckSnapshot: snapshot,
+        }),
       "ai_deck_snapshot_unknown_card",
     );
   });
@@ -75,19 +81,20 @@ describe("AI deck snapshot runtime validation", () => {
     const snapshot = snapshotById("demo_corp_008_snapshot_v0_8");
 
     expectSnapshotError(
-      () => assertValidAiDeckSnapshotForRuntime(snapshot, {
-        side: "corp",
-        deckSnapshotId: `${snapshot.deckSnapshotId}_stale`,
-      }),
+      () =>
+        assertValidAiDeckSnapshotForRuntime(snapshot, {
+          side: "corp",
+          deckSnapshotId: `${snapshot.deckSnapshotId}_stale`,
+        }),
       "ai_deck_snapshot_stale",
     );
   });
 });
 
 function snapshotById(snapshotId: string): AiDeckStrategyDeckSnapshot {
-  const snapshot = (snapshotsData08.snapshots as AiDeckStrategyDeckSnapshot[]).find(
-    (candidate) => candidate.deckSnapshotId === snapshotId,
-  );
+  const snapshot = (
+    snapshotsData08.snapshots as AiDeckStrategyDeckSnapshot[]
+  ).find((candidate) => candidate.deckSnapshotId === snapshotId);
   if (!snapshot) throw new Error(`Missing test deck snapshot ${snapshotId}`);
   return structuredClone(snapshot);
 }

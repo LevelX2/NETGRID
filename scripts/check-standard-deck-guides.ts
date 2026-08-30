@@ -133,9 +133,7 @@ for (const deck of activeDecks) {
     if (
       !sameStrings(
         content.keyCards.map((keyCard) => `${keyCard.cardId}:${keyCard.title}`),
-        englishKeyCards.map(
-          (keyCard) => `${keyCard.cardId}:${keyCard.title}`,
-        ),
+        englishKeyCards.map((keyCard) => `${keyCard.cardId}:${keyCard.title}`),
       )
     ) {
       findings.push(

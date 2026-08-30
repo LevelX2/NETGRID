@@ -116,24 +116,24 @@ Choice-Schritt darf nicht als bereits abgeschlossene Installation erscheinen.
 ## Akzeptanzkriterien
 
 - [x] Der reproduzierte Loony-Goon-/Invisibility-Pfad erzeugt nach der
-  Choice-Auflösung einen sichtbaren Chronikeintrag, der beide Kartennamen und
-  den MU-bedingten Zusammenhang nennt.
+      Choice-Auflösung einen sichtbaren Chronikeintrag, der beide Kartennamen und
+      den MU-bedingten Zusammenhang nennt.
 - [x] Vor Auflösung der MU-Auswahl behauptet kein Chronikeintrag, Loony Goon
-  sei bereits abschließend installiert worden.
+      sei bereits abschließend installiert worden.
 - [x] Der abschließende Eintrag wird aus einem real projizierten öffentlichen
-  Event erzeugt; die benötigte Semantik ist in Live-Ansicht, Reconnect und
-  Replay identisch verfügbar.
+      Event erzeugt; die benötigte Semantik ist in Live-Ansicht, Reconnect und
+      Replay identisch verfügbar.
 - [x] Das öffentliche Event enthält weder private Choice-Kandidaten noch
-  verdeckte Grip-/Stack-Informationen. Der tatsächlich getrashte installierte
-  Programmname bleibt als öffentliches Spielergebnis sichtbar.
+      verdeckte Grip-/Stack-Informationen. Der tatsächlich getrashte installierte
+      Programmname bleibt als öffentliches Spielergebnis sichtbar.
 - [x] Die Chronik konsumiert kanonische strukturierte Ability-/Effect-
-  Semantik und leitet den Vorgang nicht aus `actionId`, Choice-ID, Label oder
-  privatem Ausführungsdiscriminator ab.
+      Semantik und leitet den Vorgang nicht aus `actionId`, Choice-ID, Label oder
+      privatem Ausführungsdiscriminator ab.
 - [x] Ein Engine-/Public-Event-Regressionstest belegt die Projektion des
-  side-sicheren Ausgangs; ein Web-Test belegt die kombinierte deutsche
-  Chronikmeldung und schützt gegen den generischen Choice-Fallback.
+      side-sicheren Ausgangs; ein Web-Test belegt die kombinierte deutsche
+      Chronikmeldung und schützt gegen den generischen Choice-Fallback.
 - [x] Bestehende normale Programminstallationen und andere MU-Choices bleiben
-  in Chronik und Regeln unverändert.
+      in Chronik und Regeln unverändert.
 
 ## Umsetzungshinweise
 

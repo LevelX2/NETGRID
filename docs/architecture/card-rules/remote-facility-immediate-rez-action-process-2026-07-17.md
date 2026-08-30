@@ -166,4 +166,3 @@ Die Umsetzung läuft ausschließlich im Arbeits-Worktree. Der Hauptworkspace `C:
 - Die Chronik beschreibt den Rez-Vorgang von `Remote Facility` statt eines generischen Fallbacks.
 - Alle Paketchecks sind grün.
 - Branch, Worktree und lokales `main` sind nach Integration sauber.
-

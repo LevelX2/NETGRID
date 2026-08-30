@@ -89,15 +89,12 @@ export function buildRandomBreakOrDamageRiskAssessment(params: {
     Math.floor(params.visibleSubroutinesLikely),
   );
   const worstCaseDamageEstimate =
-    randomBreakUsesLikely * maxSingleFailureDamage +
-    unbrokenTargetDamageLikely;
+    randomBreakUsesLikely * maxSingleFailureDamage + unbrokenTargetDamageLikely;
   const lethalOnAnyFailure = handAfterActionCost <= 0;
   const lethalOnHighFailure =
-    handAfterActionCost <
-    maxSingleFailureDamage + unbrokenTargetDamageLikely;
+    handAfterActionCost < maxSingleFailureDamage + unbrokenTargetDamageLikely;
   const survivesOneFailedUse =
-    handAfterActionCost >=
-    maxSingleFailureDamage + unbrokenTargetDamageLikely;
+    handAfterActionCost >= maxSingleFailureDamage + unbrokenTargetDamageLikely;
   const riskSeverity = randomBreakOrDamageRiskSeverityFor({
     handAfterActionCost,
     worstCaseDamageEstimate,

@@ -17,16 +17,16 @@ Alle Läufe verwendeten den normalen Multiplayer-/KI-Pfad mit manueller
 Einzelschrittsteuerung, einer frischen isolierten SQLite-Datenbank und der
 lokalen read-only Maintenance-Analyse-API.
 
-| Stand | Match | Ergebnis | Aktionen | finaler StateHash |
-| --- | --- | --- | ---: | --- |
-| Ausgangslauf | `match_0c33b84f66d564f9` | Runner, `corp_deck_empty` | 149 | `fnv1a:6e6123b2` |
-| nach erstem Score-Fix | `match_f605bd005514f20c` | Runner, `corp_deck_empty` | 152 | `fnv1a:a63f2c17` |
-| nach zweitem Score-Fix auf alter Basis | `match_665f42d9261b3676` | Runner, `corp_deck_empty`, 2:2 | 153 | `fnv1a:530f166a` |
-| nach Main-Abgleich, Workbranch | `match_5d3fcc740a02c228` | Abbruch bei D23: `missing_plan_module_coverage` | 22 | nicht terminal |
-| identische aktuelle Main-Basis | `match_1d9102cdac482cab` | identischer Abbruch bei D23 | 22 | nicht terminal |
-| nach Coverage-Fix | `match_c7144122aaeafb8b` | Runner, `corp_deck_empty`, 2:1 | 165 | `fnv1a:704ae165` |
-| nach Deckout-Fix | `match_161734b3d1cf1c33` | Runner, `corp_deck_empty`, 2:1 | 176 | `fnv1a:63eda744` |
-| final nach enger terminaler Parent-Bindung | `match_e17749ea32acc45e` | Runner, `corp_deck_empty`, 2:1 | 176 | `fnv1a:14153280` |
+| Stand                                      | Match                    | Ergebnis                                        | Aktionen | finaler StateHash |
+| ------------------------------------------ | ------------------------ | ----------------------------------------------- | -------: | ----------------- |
+| Ausgangslauf                               | `match_0c33b84f66d564f9` | Runner, `corp_deck_empty`                       |      149 | `fnv1a:6e6123b2`  |
+| nach erstem Score-Fix                      | `match_f605bd005514f20c` | Runner, `corp_deck_empty`                       |      152 | `fnv1a:a63f2c17`  |
+| nach zweitem Score-Fix auf alter Basis     | `match_665f42d9261b3676` | Runner, `corp_deck_empty`, 2:2                  |      153 | `fnv1a:530f166a`  |
+| nach Main-Abgleich, Workbranch             | `match_5d3fcc740a02c228` | Abbruch bei D23: `missing_plan_module_coverage` |       22 | nicht terminal    |
+| identische aktuelle Main-Basis             | `match_1d9102cdac482cab` | identischer Abbruch bei D23                     |       22 | nicht terminal    |
+| nach Coverage-Fix                          | `match_c7144122aaeafb8b` | Runner, `corp_deck_empty`, 2:1                  |      165 | `fnv1a:704ae165`  |
+| nach Deckout-Fix                           | `match_161734b3d1cf1c33` | Runner, `corp_deck_empty`, 2:1                  |      176 | `fnv1a:63eda744`  |
+| final nach enger terminaler Parent-Bindung | `match_e17749ea32acc45e` | Runner, `corp_deck_empty`, 2:1                  |      176 | `fnv1a:14153280`  |
 
 Der finale Lauf endete regulär. Er enthält 176 Decisions, 176 vollständige
 Detailtraces und 177 Events einschließlich des terminalen Events. Acht Runs,

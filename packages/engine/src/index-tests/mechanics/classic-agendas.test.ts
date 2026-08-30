@@ -278,7 +278,9 @@ describe("Classic Agenda Implementation Smokes", () => {
   });
 
   it("scores declined Theorem Proof from the same fort at the next Runner turn with replay-safe state", () => {
-    let state = classicAgendaGame("classic-theorem-proof-declined-delayed-score");
+    let state = classicAgendaGame(
+      "classic-theorem-proof-declined-delayed-score",
+    );
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state = toRunnerTurnFromCorpMain(state);
     state.runner.credits = 20;
@@ -315,7 +317,9 @@ describe("Classic Agenda Implementation Smokes", () => {
         resolveAt: "runner_start_turn",
       }),
     ]);
-    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(hiddenHqId);
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+      hiddenHqId,
+    );
 
     state = apply(state, "runner", (action) => action.type === "end_turn");
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");

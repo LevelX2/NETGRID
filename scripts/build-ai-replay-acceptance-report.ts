@@ -19,8 +19,12 @@ const clustersPath =
   optionValue("--clusters") ??
   resolve(outputDir, `${runId}-candidate-clusters.json`);
 const report = buildReplayAcceptanceHarnessReport(
-  JSON.parse(readFileSync(casesPath, "utf8")) as ReplayDecisionCaseExtractionReport,
-  JSON.parse(readFileSync(clustersPath, "utf8")) as ReplayDecisionCandidateClusterReport,
+  JSON.parse(
+    readFileSync(casesPath, "utf8"),
+  ) as ReplayDecisionCaseExtractionReport,
+  JSON.parse(
+    readFileSync(clustersPath, "utf8"),
+  ) as ReplayDecisionCandidateClusterReport,
   {
     runId,
     fixedPattern: {
@@ -46,7 +50,13 @@ writeFileSync(
   renderReplayAcceptanceHarnessMarkdown(report),
   "utf8",
 );
-console.log(JSON.stringify({ status: report.status, aggregate: report.aggregate }, null, 2));
+console.log(
+  JSON.stringify(
+    { status: report.status, aggregate: report.aggregate },
+    null,
+    2,
+  ),
+);
 
 function optionValue(name: string): string | undefined {
   const index = process.argv.indexOf(name);
@@ -82,7 +92,8 @@ function findRepoRoot(start: string): string {
       // Continue walking up.
     }
     const parent = dirname(current);
-    if (parent === current) throw new Error(`Could not find NETGRID repo root from ${start}`);
+    if (parent === current)
+      throw new Error(`Could not find NETGRID repo root from ${start}`);
     current = parent;
   }
 }

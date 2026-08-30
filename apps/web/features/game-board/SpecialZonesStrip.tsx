@@ -5,7 +5,10 @@ import type { PlayerView, Side, VisibleCard } from "@netgrid/shared";
 import { useTranslations } from "use-intl/react";
 
 import { CardView } from "../cards/CardView";
-import { enrichVisibleCard, type DisplayVisibleCard } from "../cards/card-view-model";
+import {
+  enrichVisibleCard,
+  type DisplayVisibleCard,
+} from "../cards/card-view-model";
 import { useCardScaleSettings } from "../cards/card-display-settings";
 import type { CardDisplayMode } from "../settings/settings-model";
 
@@ -32,7 +35,7 @@ export function SpecialZonesStrip({
   cardDetailsById,
   displayMode,
   compact = false,
-  onFocus
+  onFocus,
 }: {
   view: PlayerView;
   cardDetailsById: Record<string, SpecialZoneCatalogDetail>;
@@ -43,14 +46,26 @@ export function SpecialZonesStrip({
   const t = useTranslations("Board.specialZones");
   const { specialZonePercent } = useCardScaleSettings();
   const zones = view.specialZones;
-  if (!zones || (zones.setAsideCount === 0 && zones.removedFromGameCount === 0)) return null;
+  if (!zones || (zones.setAsideCount === 0 && zones.removedFromGameCount === 0))
+    return null;
   const groups = [
-    { key: "setAside" as const, count: zones.setAsideCount, cards: zones.setAside },
-    { key: "removed" as const, count: zones.removedFromGameCount, cards: zones.removedFromGame }
+    {
+      key: "setAside" as const,
+      count: zones.setAsideCount,
+      cards: zones.setAside,
+    },
+    {
+      key: "removed" as const,
+      count: zones.removedFromGameCount,
+      cards: zones.removedFromGame,
+    },
   ].filter((group) => group.count > 0);
 
   return (
-    <section className={`specialZoneStrip${compact ? " compact" : ""}`} data-testid="special-zones">
+    <section
+      className={`specialZoneStrip${compact ? " compact" : ""}`}
+      data-testid="special-zones"
+    >
       <div className="sectionTitleLine">
         <h2>{t("title")}</h2>
         <Layers3 size={16} />
@@ -63,12 +78,28 @@ export function SpecialZonesStrip({
               <span>{group.count}</span>
             </div>
             {compact ? (
-              <SpecialZoneOverlapRow cards={group.cards} cardDetailsById={cardDetailsById} displayMode={displayMode} scalePercent={specialZonePercent} {...(onFocus ? { onFocus } : {})} />
+              <SpecialZoneOverlapRow
+                cards={group.cards}
+                cardDetailsById={cardDetailsById}
+                displayMode={displayMode}
+                scalePercent={specialZonePercent}
+                {...(onFocus ? { onFocus } : {})}
+              />
             ) : (
               <div className="cards miniCards">
                 {group.cards.map((card) => {
                   const displayCard = enrichVisibleCard(card, cardDetailsById);
-                  return <CardView key={card.instanceId} card={displayCard} compact displayMode={displayMode} actions={[]} actionDisabled {...(onFocus ? { onFocus } : {})} />;
+                  return (
+                    <CardView
+                      key={card.instanceId}
+                      card={displayCard}
+                      compact
+                      displayMode={displayMode}
+                      actions={[]}
+                      actionDisabled
+                      {...(onFocus ? { onFocus } : {})}
+                    />
+                  );
                 })}
               </div>
             )}
@@ -84,7 +115,7 @@ function SpecialZoneOverlapRow({
   cardDetailsById,
   displayMode,
   scalePercent,
-  onFocus
+  onFocus,
 }: {
   cards: VisibleCard[];
   cardDetailsById: Record<string, SpecialZoneCatalogDetail>;
@@ -105,10 +136,18 @@ function SpecialZoneOverlapRow({
       const availableWidth = row.clientWidth;
       if (availableWidth <= 0) return;
 
-      const singleRowWidth = Math.floor((availableWidth - SPECIAL_ZONE_CARD_GAP * (previewCount - 1)) / previewCount);
-      const baseCardWidth = Math.max(SPECIAL_ZONE_CARD_WIDTH_MIN, Math.min(SPECIAL_ZONE_CARD_WIDTH_PREFERRED, singleRowWidth));
-      const nextCardWidth = Math.round(baseCardWidth * scalePercent / 100);
-      setCardWidth((current) => (current === nextCardWidth ? current : nextCardWidth));
+      const singleRowWidth = Math.floor(
+        (availableWidth - SPECIAL_ZONE_CARD_GAP * (previewCount - 1)) /
+          previewCount,
+      );
+      const baseCardWidth = Math.max(
+        SPECIAL_ZONE_CARD_WIDTH_MIN,
+        Math.min(SPECIAL_ZONE_CARD_WIDTH_PREFERRED, singleRowWidth),
+      );
+      const nextCardWidth = Math.round((baseCardWidth * scalePercent) / 100);
+      setCardWidth((current) =>
+        current === nextCardWidth ? current : nextCardWidth,
+      );
     };
 
     updateCardWidth();
@@ -125,16 +164,30 @@ function SpecialZoneOverlapRow({
 
   const rowStyle = {
     "--special-zone-card-width": `${cardWidth}px`,
-    "--special-zone-card-gap": `${SPECIAL_ZONE_CARD_GAP}px`
+    "--special-zone-card-gap": `${SPECIAL_ZONE_CARD_GAP}px`,
   } as CSSProperties;
 
   return (
     <div ref={rowRef} className="specialZoneOverlapRow" style={rowStyle}>
       {previewCards.map((card) => {
         const displayCard = enrichVisibleCard(card, cardDetailsById);
-        return <CardView key={card.instanceId} card={displayCard} compact displayMode={displayMode} actions={[]} actionDisabled {...(onFocus ? { onFocus } : {})} />;
+        return (
+          <CardView
+            key={card.instanceId}
+            card={displayCard}
+            compact
+            displayMode={displayMode}
+            actions={[]}
+            actionDisabled
+            {...(onFocus ? { onFocus } : {})}
+          />
+        );
       })}
-      {cards.length > SPECIAL_ZONE_PREVIEW_LIMIT ? <span className="archivesOverflowBadge">+{cards.length - SPECIAL_ZONE_PREVIEW_LIMIT}</span> : null}
+      {cards.length > SPECIAL_ZONE_PREVIEW_LIMIT ? (
+        <span className="archivesOverflowBadge">
+          +{cards.length - SPECIAL_ZONE_PREVIEW_LIMIT}
+        </span>
+      ) : null}
     </div>
   );
 }

@@ -1,4 +1,11 @@
-import { mkdir, readdir, readFile, rename, rm, writeFile } from "node:fs/promises";
+import {
+  mkdir,
+  readdir,
+  readFile,
+  rename,
+  rm,
+  writeFile,
+} from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { homedir } from "node:os";
 import type { EditableDeck } from "@netgrid/decks";
@@ -18,7 +25,9 @@ export type DeckLibraryReadResult = {
   storagePath: string;
 };
 
-export function defaultDeckLibraryPath(env: NodeJS.ProcessEnv = process.env): string {
+export function defaultDeckLibraryPath(
+  env: NodeJS.ProcessEnv = process.env,
+): string {
   const configuredPath = env.NETGRID_DECK_LIBRARY_PATH;
   if (configuredPath) return resolve(configuredPath);
   if (env.APPDATA) return join(env.APPDATA, "NetGrid", "Decks");
@@ -26,7 +35,9 @@ export function defaultDeckLibraryPath(env: NodeJS.ProcessEnv = process.env): st
   return join(homedir(), ".netgrid", "decks");
 }
 
-export async function readDeckLibrary(storagePath = defaultDeckLibraryPath()): Promise<DeckLibraryReadResult> {
+export async function readDeckLibrary(
+  storagePath = defaultDeckLibraryPath(),
+): Promise<DeckLibraryReadResult> {
   await mkdir(storagePath, { recursive: true });
   const entries = await readdir(storagePath, { withFileTypes: true });
   const decks: EditableDeck[] = [];
@@ -35,17 +46,28 @@ export async function readDeckLibrary(storagePath = defaultDeckLibraryPath()): P
     try {
       const raw = await readFile(join(storagePath, entry.name), "utf8");
       const parsed = JSON.parse(raw) as Partial<DeckLibraryFile>;
-      if (parsed.schemaVersion !== LIBRARY_SCHEMA_VERSION || !isEditableDeck(parsed.deck)) continue;
+      if (
+        parsed.schemaVersion !== LIBRARY_SCHEMA_VERSION ||
+        !isEditableDeck(parsed.deck)
+      )
+        continue;
       decks.push(markRevalidationIfNeeded(parsed.deck));
     } catch {
       continue;
     }
   }
-  decks.sort((left, right) => left.updatedAt.localeCompare(right.updatedAt) || left.name.localeCompare(right.name));
+  decks.sort(
+    (left, right) =>
+      left.updatedAt.localeCompare(right.updatedAt) ||
+      left.name.localeCompare(right.name),
+  );
   return { decks, storagePath };
 }
 
-export async function writeDeckLibrary(decks: EditableDeck[], storagePath = defaultDeckLibraryPath()): Promise<DeckLibraryReadResult> {
+export async function writeDeckLibrary(
+  decks: EditableDeck[],
+  storagePath = defaultDeckLibraryPath(),
+): Promise<DeckLibraryReadResult> {
   await mkdir(storagePath, { recursive: true });
   const normalized = normalizeDecks(decks);
   const nextFiles = new Set<string>();
@@ -55,14 +77,22 @@ export async function writeDeckLibrary(decks: EditableDeck[], storagePath = defa
     nextFiles.add(fileName);
     const target = join(storagePath, fileName);
     const temp = join(storagePath, `${fileName}.tmp`);
-    const payload: DeckLibraryFile = { schemaVersion: LIBRARY_SCHEMA_VERSION, deck };
+    const payload: DeckLibraryFile = {
+      schemaVersion: LIBRARY_SCHEMA_VERSION,
+      deck,
+    };
     await writeFile(temp, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
     await rename(temp, target);
   }
 
   const existing = await readdir(storagePath, { withFileTypes: true });
   for (const entry of existing) {
-    if (!entry.isFile() || !entry.name.endsWith(".json") || nextFiles.has(entry.name)) continue;
+    if (
+      !entry.isFile() ||
+      !entry.name.endsWith(".json") ||
+      nextFiles.has(entry.name)
+    )
+      continue;
     await rm(join(storagePath, entry.name), { force: true });
   }
 
@@ -78,13 +108,23 @@ function normalizeDecks(decks: EditableDeck[]): EditableDeck[] {
       ...revalidationFields(deck),
       name: deck.name.slice(0, 120),
       cards: deck.cards
-        .filter((entry) => typeof entry.cardId === "string" && Number.isFinite(entry.quantity))
-        .map((entry) => ({ cardId: entry.cardId, quantity: Math.max(0, Math.floor(entry.quantity)) }))
+        .filter(
+          (entry) =>
+            typeof entry.cardId === "string" && Number.isFinite(entry.quantity),
+        )
+        .map((entry) => ({
+          cardId: entry.cardId,
+          quantity: Math.max(0, Math.floor(entry.quantity)),
+        }))
         .filter((entry) => entry.quantity > 0)
-        .sort((left, right) => left.cardId.localeCompare(right.cardId))
+        .sort((left, right) => left.cardId.localeCompare(right.cardId)),
     });
   }
-  return [...byId.values()].sort((left, right) => left.updatedAt.localeCompare(right.updatedAt) || left.name.localeCompare(right.name));
+  return [...byId.values()].sort(
+    (left, right) =>
+      left.updatedAt.localeCompare(right.updatedAt) ||
+      left.name.localeCompare(right.name),
+  );
 }
 
 function markRevalidationIfNeeded(deck: EditableDeck): EditableDeck {
@@ -92,31 +132,38 @@ function markRevalidationIfNeeded(deck: EditableDeck): EditableDeck {
 }
 
 function revalidationFields(deck: EditableDeck): Partial<EditableDeck> {
-  if (deck.formatProfileId !== PRIVATE_LOCAL_PROFILE_ID) return { validationStatus: "needs_revalidation" };
-  if (deck.formatProfileVersion !== PRIVATE_LOCAL_PROFILE_VERSION || deck.cardPoolVersion !== PRIVATE_LOCAL_CARD_POOL_VERSION) {
+  if (deck.formatProfileId !== PRIVATE_LOCAL_PROFILE_ID)
+    return { validationStatus: "needs_revalidation" };
+  if (
+    deck.formatProfileVersion !== PRIVATE_LOCAL_PROFILE_VERSION ||
+    deck.cardPoolVersion !== PRIVATE_LOCAL_CARD_POOL_VERSION
+  ) {
     return {
-      formatProfileVersion: deck.formatProfileVersion ?? PRIVATE_LOCAL_PROFILE_VERSION,
+      formatProfileVersion:
+        deck.formatProfileVersion ?? PRIVATE_LOCAL_PROFILE_VERSION,
       cardPoolVersion: deck.cardPoolVersion ?? PRIVATE_LOCAL_CARD_POOL_VERSION,
-      validationStatus: "needs_revalidation"
+      validationStatus: "needs_revalidation",
     };
   }
-  return deck.validationStatus ? { validationStatus: deck.validationStatus } : {};
+  return deck.validationStatus
+    ? { validationStatus: deck.validationStatus }
+    : {};
 }
 
 function isEditableDeck(value: unknown): value is EditableDeck {
   const deck = value as Partial<EditableDeck> | null;
   return Boolean(
     deck &&
-      typeof deck.deckId === "string" &&
-      typeof deck.deckVersion === "string" &&
-      typeof deck.name === "string" &&
-      (deck.side === "runner" || deck.side === "corp") &&
-      typeof deck.identityCardId === "string" &&
-      typeof deck.cardPoolSnapshotId === "string" &&
-      typeof deck.formatProfileId === "string" &&
-      Array.isArray(deck.cards) &&
-      typeof deck.createdAt === "string" &&
-      typeof deck.updatedAt === "string"
+    typeof deck.deckId === "string" &&
+    typeof deck.deckVersion === "string" &&
+    typeof deck.name === "string" &&
+    (deck.side === "runner" || deck.side === "corp") &&
+    typeof deck.identityCardId === "string" &&
+    typeof deck.cardPoolSnapshotId === "string" &&
+    typeof deck.formatProfileId === "string" &&
+    Array.isArray(deck.cards) &&
+    typeof deck.createdAt === "string" &&
+    typeof deck.updatedAt === "string",
   );
 }
 

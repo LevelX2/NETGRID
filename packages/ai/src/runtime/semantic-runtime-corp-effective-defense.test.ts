@@ -447,9 +447,7 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
         runnerCredits: 4,
         runnerRig: [earlyWormBreaker()],
         servers: [
-          server("rd", [
-            postRezWallOfStatic("wall-of-static", "rd", 1),
-          ]),
+          server("rd", [postRezWallOfStatic("wall-of-static", "rd", 1)]),
         ],
       }),
       rezAction(
@@ -487,9 +485,7 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
         runnerCredits: 0,
         runnerRig: [earlyWormBreaker()],
         servers: [
-          server("rd", [
-            postRezWallOfStatic("wall-of-static", "rd", 1),
-          ]),
+          server("rd", [postRezWallOfStatic("wall-of-static", "rd", 1)]),
         ],
       }),
       rezAction(

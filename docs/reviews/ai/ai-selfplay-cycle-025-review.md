@@ -25,11 +25,11 @@ SQLite-Evidence des parallelen Worktrees. Es wurde keine Datenbank gelöscht.
 
 ## Ergebnis wie im Programm
 
-| Partie | Standarddecks | Endergebnis | Agendapunkte | Ende | Entscheidungen |
-| ------ | ------------- | ----------: | ------------: | ---- | --------------: |
-| Seed 1 | **Blink Pressure Rig** gegen **Universal Fast Advance** | Corp **10 – 4** Runner | **7:4** | Agendapunkte | 182 |
-| Seed 2 | **Blink Pressure Rig** gegen **Universal Fast Advance** | Corp **10 – 5** Runner | **9:5** | Agendapunkte | 271 |
-| Seed 3 | **Blink Pressure Rig** gegen **Universal Fast Advance** | Corp **10 – 2** Runner | **8:2** | Agendapunkte | 217 |
+| Partie | Standarddecks                                           |            Endergebnis | Agendapunkte | Ende         | Entscheidungen |
+| ------ | ------------------------------------------------------- | ---------------------: | -----------: | ------------ | -------------: |
+| Seed 1 | **Blink Pressure Rig** gegen **Universal Fast Advance** | Corp **10 – 4** Runner |      **7:4** | Agendapunkte |            182 |
+| Seed 2 | **Blink Pressure Rig** gegen **Universal Fast Advance** | Corp **10 – 5** Runner |      **9:5** | Agendapunkte |            271 |
+| Seed 3 | **Blink Pressure Rig** gegen **Universal Fast Advance** | Corp **10 – 2** Runner |      **8:2** | Agendapunkte |            217 |
 
 Die Match-IDs lauten `match_226e4c6674177cb3`,
 `match_ea337a3c4df41334` und `match_3e3d32db23aa4bc4`. Ihre terminalen

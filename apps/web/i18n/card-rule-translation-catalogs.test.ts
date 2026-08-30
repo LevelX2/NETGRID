@@ -42,7 +42,9 @@ describe("card rule translation catalogs", () => {
     for (const [setId, catalogs] of Object.entries(
       CARD_RULE_TRANSLATION_SET_CATALOGS,
     )) {
-      const expected = [...expectedIds[setId as keyof typeof expectedIds]].sort();
+      const expected = [
+        ...expectedIds[setId as keyof typeof expectedIds],
+      ].sort();
       for (const [locale, catalog] of Object.entries(catalogs)) {
         expect(
           Object.keys(catalog).sort(),

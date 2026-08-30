@@ -1,9 +1,18 @@
-import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  writeFileSync,
+} from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const repoRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "..",
+);
 const srcRoot = path.join(repoRoot, "packages", "ai", "src");
 const manifestPath = path.join(
   repoRoot,
@@ -25,8 +34,9 @@ const sourceFiles = collectFiles(srcRoot, isTypeScriptFile).filter(
 );
 const sourceSet = new Set(sourceFiles);
 const sourceGraph = buildGraph(sourceFiles, sourceSet);
-const testFiles = collectFiles(srcRoot, (file) =>
-  isTypeScriptFile(file) && isTestFile(file),
+const testFiles = collectFiles(
+  srcRoot,
+  (file) => isTypeScriptFile(file) && isTestFile(file),
 );
 const testGraph = buildExternalConsumerGraph(testFiles, sourceSet, "test");
 const workspaceGraph = buildExternalConsumerGraph(
@@ -49,7 +59,12 @@ const publicRuntimeExportRoots = packageRuntimeExportRoots(
 );
 
 const roots = {
-  live: [...new Set([...publicRuntimeExportRoots, "ai-runtime-public-entrypoints.ts"])],
+  live: [
+    ...new Set([
+      ...publicRuntimeExportRoots,
+      "ai-runtime-public-entrypoints.ts",
+    ]),
+  ],
   simulation: ["simulation.ts", "ai-simulation-public-entrypoints.ts"],
   legacy: [
     "tactical-plans.ts",
@@ -59,23 +74,76 @@ const roots = {
   ],
 };
 const intentionalEvaluationRoots = [
-  ["evaluation/semantic-shadow-league.ts", "historical_semantic_shadow_comparison"],
-  ["evaluation/doctrine-goal-coverage.ts", "historical_semantic_shadow_comparison"],
-  ["evaluation/play-strength-benchmark.ts", "historical_semantic_shadow_comparison"],
-  ["evaluation/real-engine-access-corpus.ts", "current_real_engine_access_corpus"],
-  ["evaluation/real-engine-decision-corpus.ts", "current_real_engine_decision_corpus"],
-  ["evaluation/real-engine-decision-corpus-fixtures.ts", "current_real_engine_decision_corpus"],
-  ["evaluation/real-engine-fixture-builder.ts", "current_real_engine_decision_corpus"],
-  ["evaluation/selfplay-decision-snapshot-mining.ts", "current_selfplay_regression_evidence"],
-  ["reports/selfplay-promotion-activity-formatters.ts", "current_selfplay_regression_evidence"],
-  ["actions/action-semantic-invariants.ts", "current_action_semantics_safety_contract"],
-  ["evaluation/proteus-random-model-readiness.ts", "current_proteus_random_readiness_evaluation"],
-  ["evaluation/replay-portable-fixtures.ts", "current_plan_first_replay_contract"],
-  ["evaluation/semantic-shadow-league-delta.ts", "historical_semantic_shadow_comparison"],
-  ["evaluation/semantic-shadow-report.ts", "historical_semantic_shadow_comparison"],
-  ["evaluation/target-choice-shadow-coverage.ts", "historical_semantic_shadow_comparison"],
-  ["evaluation/target-choice-shadow-readiness.ts", "historical_semantic_shadow_comparison"],
-].map(([entry, reason]) => ({ entry, reason, path: path.join(srcRoot, entry) }))
+  [
+    "evaluation/semantic-shadow-league.ts",
+    "historical_semantic_shadow_comparison",
+  ],
+  [
+    "evaluation/doctrine-goal-coverage.ts",
+    "historical_semantic_shadow_comparison",
+  ],
+  [
+    "evaluation/play-strength-benchmark.ts",
+    "historical_semantic_shadow_comparison",
+  ],
+  [
+    "evaluation/real-engine-access-corpus.ts",
+    "current_real_engine_access_corpus",
+  ],
+  [
+    "evaluation/real-engine-decision-corpus.ts",
+    "current_real_engine_decision_corpus",
+  ],
+  [
+    "evaluation/real-engine-decision-corpus-fixtures.ts",
+    "current_real_engine_decision_corpus",
+  ],
+  [
+    "evaluation/real-engine-fixture-builder.ts",
+    "current_real_engine_decision_corpus",
+  ],
+  [
+    "evaluation/selfplay-decision-snapshot-mining.ts",
+    "current_selfplay_regression_evidence",
+  ],
+  [
+    "reports/selfplay-promotion-activity-formatters.ts",
+    "current_selfplay_regression_evidence",
+  ],
+  [
+    "actions/action-semantic-invariants.ts",
+    "current_action_semantics_safety_contract",
+  ],
+  [
+    "evaluation/proteus-random-model-readiness.ts",
+    "current_proteus_random_readiness_evaluation",
+  ],
+  [
+    "evaluation/replay-portable-fixtures.ts",
+    "current_plan_first_replay_contract",
+  ],
+  [
+    "evaluation/semantic-shadow-league-delta.ts",
+    "historical_semantic_shadow_comparison",
+  ],
+  [
+    "evaluation/semantic-shadow-report.ts",
+    "historical_semantic_shadow_comparison",
+  ],
+  [
+    "evaluation/target-choice-shadow-coverage.ts",
+    "historical_semantic_shadow_comparison",
+  ],
+  [
+    "evaluation/target-choice-shadow-readiness.ts",
+    "historical_semantic_shadow_comparison",
+  ],
+]
+  .map(([entry, reason]) => ({
+    entry,
+    reason,
+    path: path.join(srcRoot, entry),
+  }))
   .filter((root) => sourceSet.has(root.path));
 const rootPaths = Object.fromEntries(
   Object.entries(roots).map(([kind, entries]) => [
@@ -86,7 +154,10 @@ const rootPaths = Object.fromEntries(
   ]),
 );
 const intentionalEvaluationReachability = intentionalEvaluationRoots.map(
-  (root) => ({ ...root, reachable: reachableFrom([root.path], sourceGraph.all) }),
+  (root) => ({
+    ...root,
+    reachable: reachableFrom([root.path], sourceGraph.all),
+  }),
 );
 const reachability = {
   live_runtime: reachableFrom(rootPaths.live, sourceGraph.runtime),
@@ -125,10 +196,12 @@ const audit = {
   generatedAt: new Date().toISOString(),
   roots: {
     ...roots,
-    intentionalEvaluation: intentionalEvaluationRoots.map(({ entry, reason }) => ({
-      path: entry,
-      reason,
-    })),
+    intentionalEvaluation: intentionalEvaluationRoots.map(
+      ({ entry, reason }) => ({
+        path: entry,
+        reason,
+      }),
+    ),
   },
   summary,
   rows,
@@ -147,8 +220,8 @@ if (args.has("--check")) {
 }
 
 if (args.has("--check-legacy-boundary")) {
-  const legacyRuntimeImports = rows.filter(
-    (row) => row.runtimeImports.some((entry) => entry.includes("/legacy/")),
+  const legacyRuntimeImports = rows.filter((row) =>
+    row.runtimeImports.some((entry) => entry.includes("/legacy/")),
   );
   console.log(
     JSON.stringify(
@@ -185,7 +258,8 @@ function collectFiles(root, include) {
       files.push(...collectFiles(absolute, include));
       continue;
     }
-    if (entry.isFile() && include(absolute)) files.push(path.normalize(absolute));
+    if (entry.isFile() && include(absolute))
+      files.push(path.normalize(absolute));
   }
   return files.sort();
 }
@@ -239,13 +313,27 @@ function sourceEdges(file, sourceSet, allowPackageImports = false) {
   );
   const edges = [];
   const addEdge = (moduleName, runtime) => {
-    const target = resolveImport(file, moduleName, sourceSet, allowPackageImports);
+    const target = resolveImport(
+      file,
+      moduleName,
+      sourceSet,
+      allowPackageImports,
+    );
     if (target) edges.push({ target, runtime });
   };
   for (const statement of source.statements) {
-    if (ts.isImportDeclaration(statement) || ts.isExportDeclaration(statement)) {
-      if (statement.moduleSpecifier && ts.isStringLiteral(statement.moduleSpecifier)) {
-        addEdge(statement.moduleSpecifier.text, statementHasRuntimeEdge(statement));
+    if (
+      ts.isImportDeclaration(statement) ||
+      ts.isExportDeclaration(statement)
+    ) {
+      if (
+        statement.moduleSpecifier &&
+        ts.isStringLiteral(statement.moduleSpecifier)
+      ) {
+        addEdge(
+          statement.moduleSpecifier.text,
+          statementHasRuntimeEdge(statement),
+        );
       }
     }
   }
@@ -266,7 +354,8 @@ function sourceEdges(file, sourceSet, allowPackageImports = false) {
 
 function resolveImport(file, moduleName, sourceSet, allowPackageImports) {
   if (moduleName === "@netgrid/ai") return path.join(srcRoot, "index.ts");
-  if (moduleName === "@netgrid/ai/simulation") return path.join(srcRoot, "simulation.ts");
+  if (moduleName === "@netgrid/ai/simulation")
+    return path.join(srcRoot, "simulation.ts");
   if (!moduleName.startsWith(".")) return undefined;
   const base = path.resolve(path.dirname(file), moduleName);
   for (const candidate of [
@@ -338,17 +427,28 @@ function classifyFile(file, context) {
       reached.has(file),
     ]),
   );
-  const productionRuntimeConsumers = [...(context.sourceGraph.incomingRuntime.get(file) ?? [])]
-    .filter((consumer) =>
-      context.reachability.live_runtime.has(consumer) ||
-      context.reachability.simulation_runtime.has(consumer) ||
-      context.reachability.tooling_runtime.has(consumer),
+  const productionRuntimeConsumers = [
+    ...(context.sourceGraph.incomingRuntime.get(file) ?? []),
+  ]
+    .filter(
+      (consumer) =>
+        context.reachability.live_runtime.has(consumer) ||
+        context.reachability.simulation_runtime.has(consumer) ||
+        context.reachability.tooling_runtime.has(consumer),
     )
     .map(relative);
-  const externalConsumers = collectExternalConsumers(file, context.workspaceGraph);
+  const externalConsumers = collectExternalConsumers(
+    file,
+    context.workspaceGraph,
+  );
   const testConsumers = collectExternalConsumers(file, context.testGraph);
-  const typeOnlyProductionConsumers = [...(context.sourceGraph.incomingAll.get(file) ?? [])]
-    .filter((consumer) => !context.sourceGraph.incomingRuntime.get(file)?.has(consumer))
+  const typeOnlyProductionConsumers = [
+    ...(context.sourceGraph.incomingAll.get(file) ?? []),
+  ]
+    .filter(
+      (consumer) =>
+        !context.sourceGraph.incomingRuntime.get(file)?.has(consumer),
+    )
     .map(relative);
   const classification = classify(flags, {
     productionRuntimeConsumers,
@@ -361,9 +461,13 @@ function classifyFile(file, context) {
     reachableFrom: Object.entries(flags)
       .filter(([, value]) => value)
       .map(([kind]) => kind),
-    importedByProduction: [...new Set([...productionRuntimeConsumers, ...externalConsumers])].sort(),
+    importedByProduction: [
+      ...new Set([...productionRuntimeConsumers, ...externalConsumers]),
+    ].sort(),
     importedByTests: testConsumers.sort(),
-    imports: [...(context.sourceGraph.all.get(file) ?? [])].map(relative).sort(),
+    imports: [...(context.sourceGraph.all.get(file) ?? [])]
+      .map(relative)
+      .sort(),
     runtimeImports: [...(context.sourceGraph.runtime.get(file) ?? [])]
       .map(relative)
       .sort(),
@@ -403,8 +507,8 @@ function classify(flags, consumers) {
   const test = flags.test_runtime || flags.test_type;
   const intentionalEvaluation = flags.intentional_evaluation_type;
   const productive = live || simulation || tooling;
-  const legacyAndProductive = legacy &&
-    (productive || consumers.typeOnlyProductionConsumers.length > 0);
+  const legacyAndProductive =
+    legacy && (productive || consumers.typeOnlyProductionConsumers.length > 0);
   if (legacyAndProductive) return "mixed_split_required";
   if (live && (simulation || tooling)) return "productive_shared";
   if (live) return "productive_live";
@@ -422,24 +526,31 @@ function proposedDisposition(classification) {
   if (classification === "intentional_test_evaluation") {
     return "RETAIN_INTENTIONAL_TEST_EVALUATION";
   }
-  if (classification === "legacy_test_only") return "RETIRE_AFTER_TEST_CONSUMER_REVIEW";
-  if (classification === "diagnostic_comparison") return "RETAIN_DIAGNOSTIC_OR_RETIRE";
+  if (classification === "legacy_test_only")
+    return "RETIRE_AFTER_TEST_CONSUMER_REVIEW";
+  if (classification === "diagnostic_comparison")
+    return "RETAIN_DIAGNOSTIC_OR_RETIRE";
   if (classification === "mixed_split_required") return "SPLIT_BEFORE_RETIRE";
   return "KEEP_PRODUCTIVE";
 }
 
 function blockerFor(classification, consumers) {
   if (classification === "mixed_split_required") {
-    if (consumers.productionRuntimeConsumers.length > 0 || consumers.externalConsumers.length > 0) {
+    if (
+      consumers.productionRuntimeConsumers.length > 0 ||
+      consumers.externalConsumers.length > 0
+    ) {
       return "productive runtime consumer";
     }
     return "production type-only consumer requires contract decision";
   }
-  if (classification === "legacy_test_only") return "test consumer review required";
+  if (classification === "legacy_test_only")
+    return "test consumer review required";
   if (classification === "intentional_test_evaluation") {
     return "explicit evaluation root";
   }
-  if (classification === "diagnostic_comparison") return "explicit diagnostic retention decision required";
+  if (classification === "diagnostic_comparison")
+    return "explicit diagnostic retention decision required";
   return undefined;
 }
 
@@ -448,7 +559,10 @@ function summarize(rows) {
   const byDisposition = Object.groupBy(rows, (row) => row.proposedDisposition);
   return {
     byClassification: Object.fromEntries(
-      Object.entries(byClassification).map(([kind, entries]) => [kind, entries.length]),
+      Object.entries(byClassification).map(([kind, entries]) => [
+        kind,
+        entries.length,
+      ]),
     ),
     decisions: Object.fromEntries(
       Object.entries(byDisposition).map(([kind, entries]) => [
@@ -496,7 +610,10 @@ function reachabilityCheckFailures(summary) {
   const violations = [
     ["unreferenced", summary.byClassification.unreferenced ?? 0],
     ["RETIRE_NOW", summary.decisions.RETIRE_NOW?.length ?? 0],
-    ["mixed_split_required", summary.byClassification.mixed_split_required ?? 0],
+    [
+      "mixed_split_required",
+      summary.byClassification.mixed_split_required ?? 0,
+    ],
     ["legacy_test_only", summary.byClassification.legacy_test_only ?? 0],
   ];
   return violations
@@ -510,9 +627,7 @@ function runSelfTest() {
     "./catalog": "./src/catalog-ai-hint-public.ts",
     "./simulation": "./src/simulation.ts",
   });
-  if (
-    packageRoots.join(",") !== "index.ts,catalog-ai-hint-public.ts"
-  )
+  if (packageRoots.join(",") !== "index.ts,catalog-ai-hint-public.ts")
     throw new Error("package export root self-test failed");
   const graph = new Map([
     ["live", new Set(["shared"])],
@@ -525,36 +640,70 @@ function runSelfTest() {
   if (!live.has("shared") || !legacy.has("isolated") || live.has("isolated")) {
     throw new Error("reachability self-test failed");
   }
-  if (classify({ legacy_runtime: true, test_runtime: true }, {
-    productionRuntimeConsumers: [], externalConsumers: [], typeOnlyProductionConsumers: [],
-  }) !== "legacy_test_only") {
+  if (
+    classify(
+      { legacy_runtime: true, test_runtime: true },
+      {
+        productionRuntimeConsumers: [],
+        externalConsumers: [],
+        typeOnlyProductionConsumers: [],
+      },
+    ) !== "legacy_test_only"
+  ) {
     throw new Error("classification self-test failed: test-only legacy");
   }
-  if (classify({ live_runtime: true, legacy_runtime: true, test_runtime: true }, {
-    productionRuntimeConsumers: ["consumer"], externalConsumers: [], typeOnlyProductionConsumers: [],
-  }) !== "mixed_split_required") {
+  if (
+    classify(
+      { live_runtime: true, legacy_runtime: true, test_runtime: true },
+      {
+        productionRuntimeConsumers: ["consumer"],
+        externalConsumers: [],
+        typeOnlyProductionConsumers: [],
+      },
+    ) !== "mixed_split_required"
+  ) {
     throw new Error("classification self-test failed: mixed legacy");
   }
-  if (classify({ live_type: true }, {
-    productionRuntimeConsumers: [], externalConsumers: [], typeOnlyProductionConsumers: [],
-  }) !== "productive_live") {
+  if (
+    classify(
+      { live_type: true },
+      {
+        productionRuntimeConsumers: [],
+        externalConsumers: [],
+        typeOnlyProductionConsumers: [],
+      },
+    ) !== "productive_live"
+  ) {
     throw new Error("classification self-test failed: type-only live contract");
   }
-  if (classify({ intentional_evaluation_type: true }, {
-    productionRuntimeConsumers: [], externalConsumers: [], typeOnlyProductionConsumers: [],
-  }) !== "intentional_test_evaluation") {
+  if (
+    classify(
+      { intentional_evaluation_type: true },
+      {
+        productionRuntimeConsumers: [],
+        externalConsumers: [],
+        typeOnlyProductionConsumers: [],
+      },
+    ) !== "intentional_test_evaluation"
+  ) {
     throw new Error("classification self-test failed: intentional evaluation");
   }
-  if (reachabilityCheckFailures({
-    byClassification: { intentional_test_evaluation: 1 },
-    decisions: { RETIRE_NOW: [] },
-  }).length !== 0) {
-    throw new Error("reachability self-test failed: intentional evaluation gate");
+  if (
+    reachabilityCheckFailures({
+      byClassification: { intentional_test_evaluation: 1 },
+      decisions: { RETIRE_NOW: [] },
+    }).length !== 0
+  ) {
+    throw new Error(
+      "reachability self-test failed: intentional evaluation gate",
+    );
   }
-  if (reachabilityCheckFailures({
-    byClassification: { unreferenced: 1, mixed_split_required: 1 },
-    decisions: { RETIRE_NOW: ["dead-file"] },
-  }).length !== 3) {
+  if (
+    reachabilityCheckFailures({
+      byClassification: { unreferenced: 1, mixed_split_required: 1 },
+      decisions: { RETIRE_NOW: ["dead-file"] },
+    }).length !== 3
+  ) {
     throw new Error("reachability self-test failed: retirement gate");
   }
   console.log("AI_SOURCE_REACHABILITY_AUDIT_SELFTEST OK");
@@ -567,8 +716,6 @@ function packageRuntimeExportRoots(exports) {
         subpath !== "./simulation" && typeof target === "string",
     )
     .map(([, target]) => target)
-    .filter(
-      (target) => target.startsWith("./src/") && target.endsWith(".ts"),
-    )
+    .filter((target) => target.startsWith("./src/") && target.endsWith(".ts"))
     .map((target) => target.slice("./src/".length));
 }

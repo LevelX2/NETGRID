@@ -72,20 +72,20 @@ zuordnen.
 ## Akzeptanzkriterien
 
 - [x] Ein einzelnes Ergebnis unter „Meine Spiele“ zeigt seine vollständige,
-  nicht nur verkürzte Match-ID direkt in der Oberfläche und mit eindeutiger
-  Beschriftung.
+      nicht nur verkürzte Match-ID direkt in der Oberfläche und mit eindeutiger
+      Beschriftung.
 - [x] Jedes einzelne Spiel einer angezeigten Matchserie zeigt ebenfalls seine
-  eigene vollständige Match-ID; die Serien-ID bleibt davon unterscheidbar.
+      eigene vollständige Match-ID; die Serien-ID bleibt davon unterscheidbar.
 - [x] Die Anzeige ist bewusst klein und sekundär, bleibt aber ohne Hover oder
-  Wechsel in die Maintenance vollständig lesbar beziehungsweise kopierbar.
+      Wechsel in die Maintenance vollständig lesbar beziehungsweise kopierbar.
 - [x] Lange Match-IDs verursachen weder horizontalen Overflow noch verdecken
-  sie Ergebniswerte, Replay-Link oder Protokoll-Download auf schmalen
-  Ansichten.
+      sie Ergebniswerte, Replay-Link oder Protokoll-Download auf schmalen
+      Ansichten.
 - [x] Die Anzeige gibt ausschließlich die bereits für das Ergebnis bestimmte
-  Match-ID aus und offenbart keine Tokens oder weiteren privaten
-  Match-/Spielerdaten.
+      Match-ID aus und offenbart keine Tokens oder weiteren privaten
+      Match-/Spielerdaten.
 - [x] Ein fokussierter Regressionstest deckt Einzelspiel und Serien-Einzelspiel
-  ab.
+      ab.
 
 ## Umsetzungshinweise
 

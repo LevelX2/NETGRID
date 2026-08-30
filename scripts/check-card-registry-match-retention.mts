@@ -90,9 +90,7 @@ function assertComparableFixtures(): void {
     ).sort(([left], [right]) => left.localeCompare(right));
   if (
     JSON.stringify(fixtureShape(CARD_REGISTRY_RETENTION_STRESS_IDS)) !==
-    JSON.stringify(
-      fixtureShape(CARD_REGISTRY_RETENTION_CARD_SPEC_CONTROL_IDS),
-    )
+    JSON.stringify(fixtureShape(CARD_REGISTRY_RETENTION_CARD_SPEC_CONTROL_IDS))
   )
     throw new Error("card_registry_retention_fixture_shape_mismatch");
   for (const [lane, decks] of [

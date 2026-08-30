@@ -3,7 +3,10 @@ import { mkdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const repoRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "..",
+);
 const skinRoot = path.join(repoRoot, "data", "card-assets", "localized", "de");
 const cardsPath = path.join(skinRoot, "cards.de.json");
 const framePath = path.join(skinRoot, "frames", "project-frame-v1.json");
@@ -24,18 +27,22 @@ const requestedCardId = argumentValue("--card");
 const cardsToRender = requestedCardId
   ? cardsData.cards.filter((card) => card.cardId === requestedCardId)
   : cardsData.cards;
-if (cardsToRender.length === 0) throw new Error(`Unknown localized card id: ${requestedCardId}`);
+if (cardsToRender.length === 0)
+  throw new Error(`Unknown localized card id: ${requestedCardId}`);
 
 const browser = await chromium.launch();
 try {
-  const page = await browser.newPage({ viewport: { width: WIDTH, height: HEIGHT }, deviceScaleFactor: 1 });
+  const page = await browser.newPage({
+    viewport: { width: WIDTH, height: HEIGHT },
+    deviceScaleFactor: 1,
+  });
   for (const card of cardsToRender) {
     const svg = stripTrailingWhitespace(await renderCardSvg(card));
     const outPath = path.join(skinRoot, card.rendered.full);
     await page.setViewportSize({ width: WIDTH, height: HEIGHT });
     await page.setContent(
       `<!doctype html><html><head><style>html,body{margin:0;width:${WIDTH}px;height:${HEIGHT}px;background:transparent;overflow:hidden;}svg{display:block;width:${WIDTH}px;height:${HEIGHT}px;}</style></head><body>${svg}</body></html>`,
-      { waitUntil: "load" }
+      { waitUntil: "load" },
     );
     await page.screenshot({ path: outPath, omitBackground: true });
   }
@@ -221,7 +228,10 @@ function techModuleSvg(x, y, width, height, color) {
 
 function textSvg(card, titleLayout, rulesLayout) {
   const titleText = titleLayout.lines
-    .map((line, index) => `<tspan x="${zones.title.x}" y="${titleLayout.startY + index * titleLayout.lineHeight}">${escapeXml(line)}</tspan>`)
+    .map(
+      (line, index) =>
+        `<tspan x="${zones.title.x}" y="${titleLayout.startY + index * titleLayout.lineHeight}">${escapeXml(line)}</tspan>`,
+    )
     .join("");
   const projectClass = card.localizedProjectClass.toLocaleUpperCase("de-DE");
   const classY = zones.rulesText.y + 76;
@@ -248,19 +258,31 @@ function renderRuleSymbols(layout) {
   return layout.lines
     .flatMap((line) => line.items.filter((item) => item.kind === "symbol"))
     .map((item) => {
-      if (item.symbol === "action") return actionSymbolSvg(item.x, item.y - item.size + 10, item.size);
-      if (item.symbol === "gridmark") return gridmarkSymbolSvg(item.x, item.y - item.size + 10, item.size, item.amount);
+      if (item.symbol === "action")
+        return actionSymbolSvg(item.x, item.y - item.size + 10, item.size);
+      if (item.symbol === "gridmark")
+        return gridmarkSymbolSvg(
+          item.x,
+          item.y - item.size + 10,
+          item.size,
+          item.amount,
+        );
       return "";
     })
     .join("");
 }
 
 function renderRuleTextItems(layout, fill, stroke, strokeWidth) {
-  const textItems = layout.lines.flatMap((line) => line.items.filter((item) => item.kind === "text" && item.text.trim().length > 0));
+  const textItems = layout.lines.flatMap((line) =>
+    line.items.filter(
+      (item) => item.kind === "text" && item.text.trim().length > 0,
+    ),
+  );
   if (textItems.length === 0) return "";
-  const paint = stroke === "none"
-    ? `fill="${fill}"`
-    : `fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}" stroke-linejoin="round"`;
+  const paint =
+    stroke === "none"
+      ? `fill="${fill}"`
+      : `fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}" stroke-linejoin="round"`;
   return `<g font-family="Arial, Helvetica, sans-serif" font-size="${layout.fontSize}" font-weight="800" letter-spacing="0">
     ${textItems.map((item) => `<text x="${item.x}" y="${item.y}" ${paint}>${escapeXml(item.text)}</text>`).join("")}
   </g>`;
@@ -301,7 +323,9 @@ function gridmarkSymbolSvg(x, y, size, amount) {
 
 function gridmarkTokenWidth(amount, iconSize, fontSize) {
   if (amount && amount > 1) {
-    return Math.ceil(measureText(String(amount), iconSize * 0.78, 0.58) + iconSize * 1.75);
+    return Math.ceil(
+      measureText(String(amount), iconSize * 0.78, 0.58) + iconSize * 1.75,
+    );
   }
   return Math.ceil(iconSize * 1.35);
 }
@@ -315,12 +339,17 @@ function fitTitle(title) {
         lines,
         fontSize,
         lineHeight: Math.round(fontSize * 0.94),
-        startY: lines.length > 1 ? zones.title.y + 70 : zones.title.y + 102
+        startY: lines.length > 1 ? zones.title.y + 70 : zones.title.y + 102,
       };
     }
   }
   const lines = wrapTextByWidth(title, maxWidth, 44, 2, 0.54);
-  return { lines, fontSize: 44, lineHeight: 48, startY: lines.length > 1 ? zones.title.y + 75 : zones.title.y + 104 };
+  return {
+    lines,
+    fontSize: 44,
+    lineHeight: 48,
+    startY: lines.length > 1 ? zones.title.y + 75 : zones.title.y + 104,
+  };
 }
 
 function fitTextFontSize(value, maxWidth, maxFontSize, minFontSize, factor) {
@@ -347,7 +376,10 @@ function normalizeRuleBlocks(card) {
   return String(card.localizedRulesText)
     .split(/\n+/)
     .filter(Boolean)
-    .map((line) => ({ type: "paragraph", segments: [{ type: "text", text: line }] }));
+    .map((line) => ({
+      type: "paragraph",
+      segments: [{ type: "text", text: line }],
+    }));
 }
 
 function layoutRuleBlocks(blocks, fontSize) {
@@ -361,10 +393,17 @@ function layoutRuleBlocks(blocks, fontSize) {
   let currentY = startY;
 
   for (const block of blocks) {
-    const tokens = tokenizeRuleSegments(block.segments ?? [], fontSize, iconSize);
+    const tokens = tokenizeRuleSegments(
+      block.segments ?? [],
+      fontSize,
+      iconSize,
+    );
     let currentLine = { y: currentY, items: [], width: 0 };
     for (const token of tokens) {
-      const leadingGap = token.kind === "symbol" && currentLine.items.length > 0 ? Math.round(fontSize * 0.46) : 0;
+      const leadingGap =
+        token.kind === "symbol" && currentLine.items.length > 0
+          ? Math.round(fontSize * 0.46)
+          : 0;
       const pendingWidth = currentLine.width + leadingGap + token.width;
       if (currentLine.items.length > 0 && pendingWidth > maxWidth) {
         finalizeLine(currentLine);
@@ -372,8 +411,16 @@ function layoutRuleBlocks(blocks, fontSize) {
         currentY += lineHeight;
         currentLine = { y: currentY, items: [], width: 0 };
       }
-      const effectiveGap = token.kind === "symbol" && currentLine.items.length > 0 ? leadingGap : 0;
-      const normalized = { ...token, x: startX + currentLine.width + effectiveGap, y: currentY, size: iconSize };
+      const effectiveGap =
+        token.kind === "symbol" && currentLine.items.length > 0
+          ? leadingGap
+          : 0;
+      const normalized = {
+        ...token,
+        x: startX + currentLine.width + effectiveGap,
+        y: currentY,
+        size: iconSize,
+      };
       if (normalized.kind === "text" && currentLine.items.length === 0) {
         normalized.text = normalized.text.trimStart();
         normalized.width = measureText(normalized.text, fontSize);
@@ -398,14 +445,23 @@ function tokenizeRuleSegments(segments, fontSize, iconSize) {
     if (segment.type === "text") {
       const parts = String(segment.text).match(/\S+\s*/g) ?? [];
       for (const part of parts) {
-        tokens.push({ kind: "text", text: part, width: measureText(part, fontSize) });
+        tokens.push({
+          kind: "text",
+          text: part,
+          width: measureText(part, fontSize),
+        });
       }
       continue;
     }
     if (segment.type === "symbol" && segment.symbol === "action") {
       const amount = Math.max(1, Number(segment.amount ?? 1));
       for (let i = 0; i < amount; i += 1) {
-        tokens.push({ kind: "symbol", symbol: "action", amount: 1, width: Math.round(iconSize * 1.22) });
+        tokens.push({
+          kind: "symbol",
+          symbol: "action",
+          amount: 1,
+          width: Math.round(iconSize * 1.22),
+        });
       }
       continue;
     }
@@ -414,7 +470,7 @@ function tokenizeRuleSegments(segments, fontSize, iconSize) {
         kind: "symbol",
         symbol: "gridmark",
         amount: segment.amount,
-        width: gridmarkTokenWidth(segment.amount, iconSize, fontSize)
+        width: gridmarkTokenWidth(segment.amount, iconSize, fontSize),
       });
     }
   }
@@ -435,7 +491,9 @@ function finalizeLine(line) {
   line.items = merged;
   const firstText = line.items.find((item) => item.kind === "text");
   if (firstText) firstText.text = firstText.text.trimStart();
-  const lastText = [...line.items].reverse().find((item) => item.kind === "text");
+  const lastText = [...line.items]
+    .reverse()
+    .find((item) => item.kind === "text");
   if (lastText) lastText.text = lastText.text.trimEnd();
 }
 
@@ -458,13 +516,15 @@ function wrapTextByWidth(text, maxWidth, fontSize, maxLines, factor = 0.54) {
 }
 
 function measureText(value, fontSize, factor = 0.63) {
-  return String(value).split("").reduce((width, char) => {
-    if (char === " ") return width + fontSize * 0.29;
-    if (".,;:!|".includes(char)) return width + fontSize * 0.22;
-    if ("MWÄÖÜ".includes(char)) return width + fontSize * 0.72;
-    if (char === "-") return width + fontSize * 0.32;
-    return width + fontSize * factor;
-  }, 0);
+  return String(value)
+    .split("")
+    .reduce((width, char) => {
+      if (char === " ") return width + fontSize * 0.29;
+      if (".,;:!|".includes(char)) return width + fontSize * 0.22;
+      if ("MWÄÖÜ".includes(char)) return width + fontSize * 0.72;
+      if (char === "-") return width + fontSize * 0.32;
+      return width + fontSize * factor;
+    }, 0);
 }
 
 function escapeXml(value) {
@@ -483,6 +543,7 @@ function argumentValue(name) {
   const index = process.argv.indexOf(name);
   if (index < 0) return undefined;
   const value = process.argv[index + 1];
-  if (!value || value.startsWith("--")) throw new Error(`${name} requires a value.`);
+  if (!value || value.startsWith("--"))
+    throw new Error(`${name} requires a value.`);
   return value;
 }

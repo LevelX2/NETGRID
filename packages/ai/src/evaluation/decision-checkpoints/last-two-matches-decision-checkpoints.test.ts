@@ -14,7 +14,10 @@ describe("last two matches exact decision checkpoints", () => {
     ["short-match dead Prearranged Drop", cp01Json],
     ["selfplay dead Prearranged Drop", cp02Json],
     ["movement treated as an active encounter", cp03Json],
-    ["unguaranteed Trace-Limit bid preserves the visible payoff reserve", cp04Json],
+    [
+      "unguaranteed Trace-Limit bid preserves the visible payoff reserve",
+      cp04Json,
+    ],
     ["inevitable Corp deckout not locked", cp05Json],
   ])("satisfies %s", (_label, json) => {
     const result = runAiDecisionCheckpoint(fixture(json));
@@ -33,9 +36,7 @@ describe("last two matches exact decision checkpoints", () => {
         planExecution: {
           acceptablePlanKinds: ["runner.rig_and_coverage"],
           acceptableCapabilities: ["fund_install_breaker_wall"],
-          requiredAssessmentEvidence: [
-            "deck_strategy_open_wall_coverage",
-          ],
+          requiredAssessmentEvidence: ["deck_strategy_open_wall_coverage"],
         },
       };
     });
@@ -47,7 +48,8 @@ describe("last two matches exact decision checkpoints", () => {
     const deckNotEmpty = mutateFixture(cp05Json, (fixture) => {
       const state = fixture.engine.testOnlyGameState;
       const cardId = state.corp.archives[0];
-      if (!cardId) throw new Error("Missing Corp card for deckout counterprobe");
+      if (!cardId)
+        throw new Error("Missing Corp card for deckout counterprobe");
       state.corp.archives = state.corp.archives.filter((id) => id !== cardId);
       state.corp.rd.push(cardId);
       state.cardInstances[cardId] = {

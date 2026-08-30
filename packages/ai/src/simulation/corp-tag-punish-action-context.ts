@@ -4,12 +4,8 @@ import {
   classifyTagPunishLegalActionFromOntology,
   type StructuredTagPunishLegalActionAssessment,
 } from "../tag-punish-ontology-consumer";
-import {
-  corpPunishKindFromOntologyPayoff,
-} from "../runtime/tag-punish-payoff-mapping";
-import type {
-  CorpPunishKind,
-} from "../runtime/corp-tag-punish-types";
+import { corpPunishKindFromOntologyPayoff } from "../runtime/tag-punish-payoff-mapping";
+import type { CorpPunishKind } from "../runtime/corp-tag-punish-types";
 import { rolesMatch } from "../runtime/role-match";
 
 export type CorpTagPunishActionContextDependencies = {

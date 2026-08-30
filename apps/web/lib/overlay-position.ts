@@ -1,6 +1,10 @@
-export type OverlayPositionPreference = { kind: "default" } | { kind: "custom"; xPercent: number; yPercent: number };
+export type OverlayPositionPreference =
+  | { kind: "default" }
+  | { kind: "custom"; xPercent: number; yPercent: number };
 
-export function parseOverlayPositionPreference(raw: string | null): OverlayPositionPreference {
+export function parseOverlayPositionPreference(
+  raw: string | null,
+): OverlayPositionPreference {
   if (!raw) return { kind: "default" };
   try {
     return normalizeOverlayPositionPreference(JSON.parse(raw));
@@ -9,16 +13,32 @@ export function parseOverlayPositionPreference(raw: string | null): OverlayPosit
   }
 }
 
-export function normalizeOverlayPositionPreference(value: unknown): OverlayPositionPreference {
+export function normalizeOverlayPositionPreference(
+  value: unknown,
+): OverlayPositionPreference {
   if (!value || typeof value !== "object") return { kind: "default" };
-  const candidate = value as { kind?: unknown; xPercent?: unknown; yPercent?: unknown };
-  if (candidate.kind !== "custom" || !finiteOverlayPercent(candidate.xPercent) || !finiteOverlayPercent(candidate.yPercent)) {
+  const candidate = value as {
+    kind?: unknown;
+    xPercent?: unknown;
+    yPercent?: unknown;
+  };
+  if (
+    candidate.kind !== "custom" ||
+    !finiteOverlayPercent(candidate.xPercent) ||
+    !finiteOverlayPercent(candidate.yPercent)
+  ) {
     return { kind: "default" };
   }
-  return { kind: "custom", xPercent: candidate.xPercent, yPercent: candidate.yPercent };
+  return {
+    kind: "custom",
+    xPercent: candidate.xPercent,
+    yPercent: candidate.yPercent,
+  };
 }
 
-export function serializeOverlayPositionPreference(position: OverlayPositionPreference): string {
+export function serializeOverlayPositionPreference(
+  position: OverlayPositionPreference,
+): string {
   return JSON.stringify(position);
 }
 
@@ -28,24 +48,37 @@ export function clampOverlayPosition(
   viewportWidth: number,
   viewportHeight: number,
   overlayWidth: number,
-  overlayHeight: number
+  overlayHeight: number,
 ): OverlayPositionPreference {
   const margin = 8;
   const safeWidth = Math.max(1, viewportWidth);
   const safeHeight = Math.max(1, viewportHeight);
   const maxLeft = Math.max(margin, safeWidth - overlayWidth - margin);
   const maxTop = Math.max(margin, safeHeight - overlayHeight - margin);
-  const leftPx = clampOverlayValue((xPercent / 100) * safeWidth, margin, maxLeft);
-  const topPx = clampOverlayValue((yPercent / 100) * safeHeight, margin, maxTop);
+  const leftPx = clampOverlayValue(
+    (xPercent / 100) * safeWidth,
+    margin,
+    maxLeft,
+  );
+  const topPx = clampOverlayValue(
+    (yPercent / 100) * safeHeight,
+    margin,
+    maxTop,
+  );
   return {
     kind: "custom",
     xPercent: roundOverlayPercent((leftPx / safeWidth) * 100),
-    yPercent: roundOverlayPercent((topPx / safeHeight) * 100)
+    yPercent: roundOverlayPercent((topPx / safeHeight) * 100),
   };
 }
 
 function finiteOverlayPercent(value: unknown): value is number {
-  return typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 100;
+  return (
+    typeof value === "number" &&
+    Number.isFinite(value) &&
+    value >= 0 &&
+    value <= 100
+  );
 }
 
 function clampOverlayValue(value: number, min: number, max: number): number {

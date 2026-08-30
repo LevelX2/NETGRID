@@ -18,7 +18,7 @@ export function ActiveMatchResourceStrip({
   actionCapacities,
   topOffsetPx,
   ariaHidden,
-  observerMode = false
+  observerMode = false,
 }: {
   view: PlayerView;
   agendaPointsToWin: number;
@@ -30,35 +30,67 @@ export function ActiveMatchResourceStrip({
   const t = useTranslations("Board.resources");
   const opponent = opponentSide(view.side);
   const turnSide = turnSideForView(view) ?? view.activeSide;
-  const turnClicks = turnSide === view.side ? view.own.clicks : view.opponent.clicks;
+  const turnClicks =
+    turnSide === view.side ? view.own.clicks : view.opponent.clicks;
   const turnCapacity = actionCapacities[turnSide];
-  const turnDisplay = actionSlotDisplay(turnSide, turnClicks, turnCapacity, true);
-  const stripStyle = { "--resource-strip-top": `${topOffsetPx}px` } as CSSProperties;
+  const turnDisplay = actionSlotDisplay(
+    turnSide,
+    turnClicks,
+    turnCapacity,
+    true,
+  );
+  const stripStyle = {
+    "--resource-strip-top": `${topOffsetPx}px`,
+  } as CSSProperties;
   return (
-    <section className="matchResourceStrip" style={stripStyle} aria-hidden={ariaHidden} data-testid="match-resource-strip">
+    <section
+      className="matchResourceStrip"
+      style={stripStyle}
+      aria-hidden={ariaHidden}
+      data-testid="match-resource-strip"
+    >
       <CompactResourceSide
-        label={observerMode ? t("ai", {side: t(`side.${opponent}`)}) : t("opponent")}
+        label={
+          observerMode
+            ? t("ai", { side: t(`side.${opponent}`) })
+            : t("opponent")
+        }
         side={opponent}
         credits={view.opponent.credits}
         agendaPoints={view.opponent.agendaPoints}
         agendaPointsToWin={agendaPointsToWin}
         tags={opponent === "runner" ? view.opponent.tags : 0}
-        coreDamage={opponent === "runner" ? view.opponent.coreDamage ?? 0 : 0}
+        coreDamage={opponent === "runner" ? (view.opponent.coreDamage ?? 0) : 0}
       />
-      <div className={`resourceStripTurn side-${turnSide}`} aria-label={t("turnAria", {side: t(`side.${turnSide}`), actions: turnDisplay.label})}>
+      <div
+        className={`resourceStripTurn side-${turnSide}`}
+        aria-label={t("turnAria", {
+          side: t(`side.${turnSide}`),
+          actions: turnDisplay.label,
+        })}
+      >
         <span className="resourceStripTurnLabel">{t(`side.${turnSide}`)}</span>
         <strong>{turnDisplay.available}</strong>
         <span>{t("actions")}</span>
-        <ActionSlotMeter side={turnSide} currentClicks={turnClicks} displayCapacity={turnCapacity} active compact slotsOnly />
+        <ActionSlotMeter
+          side={turnSide}
+          currentClicks={turnClicks}
+          displayCapacity={turnCapacity}
+          active
+          compact
+          slotsOnly
+        />
       </div>
       <CompactResourceSide
-        label={observerMode ? t("ai", {side: t(`side.${view.side}`)}) : t("you")}
+        label={
+          observerMode ? t("ai", { side: t(`side.${view.side}`) }) : t("you")
+        }
         side={view.side}
         credits={view.own.credits}
         agendaPoints={view.own.agendaPoints}
         agendaPointsToWin={agendaPointsToWin}
         tags={view.side === "runner" ? view.own.tags : 0}
-        coreDamage={view.side === "runner" ? view.own.coreDamage ?? 0 : 0}
+        coreDamage={view.side === "runner" ? (view.own.coreDamage ?? 0) : 0}
       />
     </section>
   );
@@ -71,7 +103,7 @@ function CompactResourceSide({
   agendaPoints,
   agendaPointsToWin,
   tags,
-  coreDamage
+  coreDamage,
 }: {
   label: string;
   side: Side;
@@ -83,15 +115,28 @@ function CompactResourceSide({
 }) {
   const t = useTranslations("Board.resources");
   return (
-    <div className={`resourceStripSide side-${side}`} aria-label={t("sideAria", {label, side: t(`side.${side}`), credits, points: agendaPoints, target: agendaPointsToWin})}>
-      <span className="resourceStripSideLabel">{label} · {t(`side.${side}`)}</span>
+    <div
+      className={`resourceStripSide side-${side}`}
+      aria-label={t("sideAria", {
+        label,
+        side: t(`side.${side}`),
+        credits,
+        points: agendaPoints,
+        target: agendaPointsToWin,
+      })}
+    >
+      <span className="resourceStripSideLabel">
+        {label} · {t(`side.${side}`)}
+      </span>
       <span className="resourceStripMetric">
         <span className="creditCoin" aria-hidden="true" />
         <strong>{credits}</strong>
       </span>
       <span className="resourceStripMetric">
         <AgendaIcon size={13} />
-        <strong>{agendaPoints}/{agendaPointsToWin}</strong>
+        <strong>
+          {agendaPoints}/{agendaPointsToWin}
+        </strong>
       </span>
       {tags > 0 ? (
         <span className="resourceStripMetric quiet">
@@ -115,7 +160,7 @@ export function ActionSlotMeter({
   displayCapacity,
   active,
   compact = false,
-  slotsOnly = false
+  slotsOnly = false,
 }: {
   side: Side;
   currentClicks: number;
@@ -125,29 +170,50 @@ export function ActionSlotMeter({
   slotsOnly?: boolean;
 }) {
   const t = useTranslations("Board.resources");
-  const display = actionSlotDisplay(side, currentClicks, displayCapacity, active);
-  const ariaLabel = t(active ? "slotsAvailable" : "slotsCurrent", {label: display.label});
+  const display = actionSlotDisplay(
+    side,
+    currentClicks,
+    displayCapacity,
+    active,
+  );
+  const ariaLabel = t(active ? "slotsAvailable" : "slotsCurrent", {
+    label: display.label,
+  });
   if (slotsOnly) {
     return (
-      <div className={`actionSlotsInline ${compact ? "compact" : ""}`} aria-label={ariaLabel} data-testid="action-slots">
+      <div
+        className={`actionSlotsInline ${compact ? "compact" : ""}`}
+        aria-label={ariaLabel}
+        data-testid="action-slots"
+      >
         <span className="srOnly">{display.label}</span>
         <div className="actionSlots" aria-hidden="true">
           {display.slots.map((slot) => (
-            <span className={`actionSlot ${slot.state} ${slot.bonus ? "bonus" : ""}`} key={slot.index} />
+            <span
+              className={`actionSlot ${slot.state} ${slot.bonus ? "bonus" : ""}`}
+              key={slot.index}
+            />
           ))}
         </div>
       </div>
     );
   }
   return (
-    <div className={`actionResource ${active ? "active" : "inactive"} ${compact ? "compact" : ""}`} aria-label={ariaLabel} data-testid="action-slots">
+    <div
+      className={`actionResource ${active ? "active" : "inactive"} ${compact ? "compact" : ""}`}
+      aria-label={ariaLabel}
+      data-testid="action-slots"
+    >
       <div className="resourceStatTop">
         <strong>{display.available}</strong>
         <span className="statLabel">{t("actions")}</span>
       </div>
       <div className="actionSlots" aria-hidden="true">
         {display.slots.map((slot) => (
-          <span className={`actionSlot ${slot.state} ${slot.bonus ? "bonus" : ""}`} key={slot.index} />
+          <span
+            className={`actionSlot ${slot.state} ${slot.bonus ? "bonus" : ""}`}
+            key={slot.index}
+          />
         ))}
       </div>
     </div>
@@ -157,11 +223,30 @@ export function ActionSlotMeter({
 export function CreditBadge({ credits }: { credits: number }) {
   const t = useTranslations("Board.resources");
   return (
-    <Stat value={credits} icon={<span className="creditCoin" aria-hidden="true" />} helpText={t("creditsHelp")} testId="credit-badge" />
+    <Stat
+      value={credits}
+      icon={<span className="creditCoin" aria-hidden="true" />}
+      helpText={t("creditsHelp")}
+      testId="credit-badge"
+    />
   );
 }
 
-export function Stat({ label, value, unit, icon, helpText, testId }: { label?: string; value: number | string; unit?: string; icon?: ReactNode; helpText?: string; testId?: string }) {
+export function Stat({
+  label,
+  value,
+  unit,
+  icon,
+  helpText,
+  testId,
+}: {
+  label?: string;
+  value: number | string;
+  unit?: string;
+  icon?: ReactNode;
+  helpText?: string;
+  testId?: string;
+}) {
   const [helpPinned, setHelpPinned] = useState(false);
   const [helpVisible, setHelpVisible] = useState(false);
   const [tooltipStyle, setTooltipStyle] = useState<CSSProperties>({});
@@ -171,9 +256,15 @@ export function Stat({ label, value, unit, icon, helpText, testId }: { label?: s
     const rect = statRef.current?.getBoundingClientRect();
     if (!rect) return;
     const width = Math.min(260, window.innerWidth - 28);
-    const left = Math.min(Math.max(14, rect.right - width), window.innerWidth - width - 14);
+    const left = Math.min(
+      Math.max(14, rect.right - width),
+      window.innerWidth - width - 14,
+    );
     const belowTop = rect.bottom + 8;
-    const top = belowTop + 96 < window.innerHeight ? belowTop : Math.max(14, rect.top - 108);
+    const top =
+      belowTop + 96 < window.innerHeight
+        ? belowTop
+        : Math.max(14, rect.top - 108);
     setTooltipStyle({ left, top, width });
   };
   useEffect(() => {
@@ -191,7 +282,11 @@ export function Stat({ label, value, unit, icon, helpText, testId }: { label?: s
       ref={statRef}
       className={`stat ${helpText ? "hasStatHelp" : ""} ${helpPinned ? "helpPinned" : ""}`}
       tabIndex={helpText ? 0 : undefined}
-      aria-label={helpText ? `${label ? `${label}: ` : ""}${value}${unit ? ` ${unit}` : ""}. ${helpText}` : undefined}
+      aria-label={
+        helpText
+          ? `${label ? `${label}: ` : ""}${value}${unit ? ` ${unit}` : ""}. ${helpText}`
+          : undefined
+      }
       data-testid={testId}
       onMouseEnter={() => {
         if (!helpText) return;
@@ -223,7 +318,17 @@ export function Stat({ label, value, unit, icon, helpText, testId }: { label?: s
         {unit ? <span className="statUnit">{unit}</span> : null}
       </strong>
       {label ? <span className="statLabel">{label}</span> : null}
-      {helpText && showHelp ? createPortal(<span className="statHelpTooltip statHelpTooltipFloating" style={tooltipStyle}>{helpText}</span>, document.body) : null}
+      {helpText && showHelp
+        ? createPortal(
+            <span
+              className="statHelpTooltip statHelpTooltipFloating"
+              style={tooltipStyle}
+            >
+              {helpText}
+            </span>,
+            document.body,
+          )
+        : null}
     </div>
   );
 }
@@ -233,7 +338,7 @@ export function ScoreAreaStat({
   open,
   highlighted,
   interactive,
-  onToggle
+  onToggle,
 }: {
   value: string;
   open: boolean;
@@ -244,7 +349,13 @@ export function ScoreAreaStat({
   const t = useTranslations("Board.resources");
   const toggleLabel = open ? t("hideAgendas") : t("showAgendas");
   const agendaHelpText = t("agendaHelp");
-  const valueStat = <Stat value={value} icon={<AgendaIcon size={14} />} helpText={agendaHelpText} />;
+  const valueStat = (
+    <Stat
+      value={value}
+      icon={<AgendaIcon size={14} />}
+      helpText={agendaHelpText}
+    />
+  );
 
   if (!interactive) {
     return valueStat;
@@ -269,7 +380,7 @@ function ScoreAreaToggleButton({
   highlighted,
   label,
   helpText,
-  onToggle
+  onToggle,
 }: {
   open: boolean;
   highlighted: boolean;
@@ -286,9 +397,15 @@ function ScoreAreaToggleButton({
     const rect = buttonRef.current?.getBoundingClientRect();
     if (!rect) return;
     const width = Math.min(260, window.innerWidth - 28);
-    const left = Math.min(Math.max(14, rect.right - width), window.innerWidth - width - 14);
+    const left = Math.min(
+      Math.max(14, rect.right - width),
+      window.innerWidth - width - 14,
+    );
     const belowTop = rect.bottom + 8;
-    const top = belowTop + 96 < window.innerHeight ? belowTop : Math.max(14, rect.top - 108);
+    const top =
+      belowTop + 96 < window.innerHeight
+        ? belowTop
+        : Math.max(14, rect.top - 108);
     setTooltipStyle({ left, top, width });
   };
   useEffect(() => {
@@ -331,12 +448,24 @@ function ScoreAreaToggleButton({
       aria-label={label}
     >
       <strong className="scoreAreaToggleGlyphs">
-        <span className="statIcon"><AgendaIcon size={14} /></span>
+        <span className="statIcon">
+          <AgendaIcon size={14} />
+        </span>
         <span className="scoreAreaOpenButtonIcon" aria-hidden="true">
           {open ? <PanelTopClose size={12} /> : <PanelTopOpen size={12} />}
         </span>
       </strong>
-      {showHelp ? createPortal(<span className="statHelpTooltip statHelpTooltipFloating" style={tooltipStyle}>{helpText}</span>, document.body) : null}
+      {showHelp
+        ? createPortal(
+            <span
+              className="statHelpTooltip statHelpTooltipFloating"
+              style={tooltipStyle}
+            >
+              {helpText}
+            </span>,
+            document.body,
+          )
+        : null}
     </button>
   );
 }

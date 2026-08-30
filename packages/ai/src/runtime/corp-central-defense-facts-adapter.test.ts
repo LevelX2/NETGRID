@@ -123,15 +123,17 @@ describe("allocateCorpCentralDefenseFromAiFacts", () => {
   });
   it("uses visible installed ICE depth for symmetric first central coverage", () => {
     const value = withSnapshot(input());
-    value.playerView.servers.find((server) => server.id === "rd")!.ice.push({
-      instanceId: "rd-data-wall",
-      definitionId: "onr_v1_237_data-wall",
-      type: "ice",
-      known: true,
-      owner: "corp",
-      controller: "corp",
-      rezzed: false,
-    });
+    value.playerView.servers
+      .find((server) => server.id === "rd")!
+      .ice.push({
+        instanceId: "rd-data-wall",
+        definitionId: "onr_v1_237_data-wall",
+        type: "ice",
+        known: true,
+        owner: "corp",
+        controller: "corp",
+        rezzed: false,
+      });
     (
       value as AiDecisionInput & {
         ownDeckSnapshot: { cards: Array<{ cardId: string; quantity: number }> };

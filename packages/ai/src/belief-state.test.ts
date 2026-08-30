@@ -99,7 +99,10 @@ describe("belief-state R&D top freshness", () => {
     ];
     const events: PublicGameEvent[] = [];
     let stateVersion = 0;
-    for (const [accessIndex, cardDefinitionId] of accessedDefinitions.entries()) {
+    for (const [
+      accessIndex,
+      cardDefinitionId,
+    ] of accessedDefinitions.entries()) {
       events.push(
         publicEvent(`evt_access_${accessIndex}`, "access_card", stateVersion, {
           actor: "runner",
@@ -113,13 +116,18 @@ describe("belief-state R&D top freshness", () => {
       stateVersion += 1;
       if (accessIndex === 1 || accessIndex === 3) {
         events.push(
-          publicEvent(`evt_steal_${accessIndex}`, "steal_agenda", stateVersion, {
-            actor: "runner",
-            actionType: "steal_agenda",
-            serverId: "rd",
-            cardDefinitionId,
-            accessIndex,
-          }),
+          publicEvent(
+            `evt_steal_${accessIndex}`,
+            "steal_agenda",
+            stateVersion,
+            {
+              actor: "runner",
+              actionType: "steal_agenda",
+              serverId: "rd",
+              cardDefinitionId,
+              accessIndex,
+            },
+          ),
         );
         stateVersion += 1;
       }
@@ -155,9 +163,9 @@ describe("belief-state R&D top freshness", () => {
         definitionId: "onr_v1_295_night-shift",
       }),
     ]);
-    expect(
-      belief.runnerOpponentModel?.hqHandMemory.knownDefinitions,
-    ).toContain("simple_economy_operation");
+    expect(belief.runnerOpponentModel?.hqHandMemory.knownDefinitions).toContain(
+      "simple_economy_operation",
+    );
     expect(
       belief.runnerOpponentModel?.hqHandMemory.knownDefinitions,
     ).not.toContain("onr_v1_295_night-shift");
@@ -210,9 +218,8 @@ describe("belief-state R&D top freshness", () => {
       cardDefinitionId: "simple_economy_asset",
     });
 
-    const freshness = reconstructBeliefState(
-      runnerInput([access, trash]),
-    ).runnerOpponentModel?.rndTopFreshness;
+    const freshness = reconstructBeliefState(runnerInput([access, trash]))
+      .runnerOpponentModel?.rndTopFreshness;
 
     expect(freshness).toMatchObject({
       freshness: "stale_known_same_top",

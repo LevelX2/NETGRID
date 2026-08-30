@@ -220,20 +220,21 @@ export function createRunnerEconomySetupDiagnosticsForSimulationAction(
     const economyOverTrash = economyTaken && remoteTrashAvailable;
     const economyPlausible =
       economyTaken &&
-      (economyNeeded || economyReserveSetup || creditsAfter < reserveTarget + 2);
+      (economyNeeded ||
+        economyReserveSetup ||
+        creditsAfter < reserveTarget + 2);
     const economySuspicious =
       economyTaken &&
       !economyPlausible &&
-      ((rich && (freshPressureAvailable || advancedRemoteContest.opportunity)) ||
+      ((rich &&
+        (freshPressureAvailable || advancedRemoteContest.opportunity)) ||
         economyOverRemoteContest ||
         economyOverTrash ||
         (debtTaken && !economyNeeded));
     const suspiciousEconomyOverPressure =
       economyOverPressure && !economyPlausible && (rich || !economyNeeded);
     const suspiciousEconomyOverRemoteContest =
-      economyOverRemoteContest &&
-      !economyPlausible &&
-      (rich || !economyNeeded);
+      economyOverRemoteContest && !economyPlausible && (rich || !economyNeeded);
     const classifications = sortedUnique([
       ...(economyWindow ? ["runner_economy_window"] : []),
       ...(economyTaken ? ["runner_economy_taken"] : []),
@@ -331,8 +332,7 @@ export function createRunnerEconomySetupDiagnosticsForSimulationAction(
           }
         : {}),
       ...(runAction &&
-      dependencies.runnerRunKnownPathCost(input, targetServerId) >
-        creditsBefore
+      dependencies.runnerRunKnownPathCost(input, targetServerId) > creditsBefore
         ? { runnerRunStartedBelowKnownPathCost: true }
         : {}),
       ...(economyOverPressure

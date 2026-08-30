@@ -17,12 +17,7 @@ describe("temporary trace credit lifecycle", () => {
   });
 
   it("rejects invalid remaining amounts before mutating Corp credits", () => {
-    for (const remaining of [
-      Number.NaN,
-      Number.POSITIVE_INFINITY,
-      -1,
-      1.5,
-    ]) {
+    for (const remaining of [Number.NaN, Number.POSITIVE_INFINITY, -1, 1.5]) {
       const current = stateWithTemporaryTraceCredits(remaining);
 
       expect(() => returnUnusedCorpTraceWindowCredits(current)).toThrow(

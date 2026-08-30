@@ -9,10 +9,12 @@ import { createCorpTagCreationDiagnosticsContext } from "./corp-tag-creation-dia
 
 describe("corp tag creation diagnostics", () => {
   it("matches trace reason codes by bounded terms", () => {
-    expect(diagnosticsForReason("corp.trace.bid_visible_amount")).toMatchObject({
-      corpTagCreatedDuringEncounter: true,
-      corpTagCreatedByTraceSuccess: true,
-    });
+    expect(diagnosticsForReason("corp.trace.bid_visible_amount")).toMatchObject(
+      {
+        corpTagCreatedDuringEncounter: true,
+        corpTagCreatedByTraceSuccess: true,
+      },
+    );
     expect(diagnosticsForReason("traceroute_noise")).not.toHaveProperty(
       "corpTagCreatedByTraceSuccess",
     );

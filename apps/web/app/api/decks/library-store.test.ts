@@ -3,7 +3,11 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { describe, expect, it } from "vitest";
 import type { EditableDeck } from "@netgrid/decks";
-import { defaultDeckLibraryPath, readDeckLibrary, writeDeckLibrary } from "./library-store";
+import {
+  defaultDeckLibraryPath,
+  readDeckLibrary,
+  writeDeckLibrary,
+} from "./library-store";
 
 const runnerDeck: EditableDeck = {
   deckId: "local_runner_test",
@@ -15,18 +19,33 @@ const runnerDeck: EditableDeck = {
   formatProfileId: "local-demo-v0.8",
   cards: [{ cardId: "v08_runner_event_easy_mark", quantity: 2 }],
   createdAt: "2026-05-07T10:00:00.000Z",
-  updatedAt: "2026-05-07T10:00:00.000Z"
+  updatedAt: "2026-05-07T10:00:00.000Z",
 };
-const runnerDeckNeedsRevalidation = { ...runnerDeck, validationStatus: "needs_revalidation" };
+const runnerDeckNeedsRevalidation = {
+  ...runnerDeck,
+  validationStatus: "needs_revalidation",
+};
 
 describe("deck file library", () => {
   it("uses the application data folder on Windows by default", () => {
-    expect(defaultDeckLibraryPath({ APPDATA: "C:\\Users\\Lui\\AppData\\Roaming" } as unknown as NodeJS.ProcessEnv)).toBe(join("C:\\Users\\Lui\\AppData\\Roaming", "NetGrid", "Decks"));
+    expect(
+      defaultDeckLibraryPath({
+        APPDATA: "C:\\Users\\Lui\\AppData\\Roaming",
+      } as unknown as NodeJS.ProcessEnv),
+    ).toBe(join("C:\\Users\\Lui\\AppData\\Roaming", "NetGrid", "Decks"));
   });
 
   it("uses the NETGRID deck library env name when set", () => {
-    expect(defaultDeckLibraryPath({ NETGRID_DECK_LIBRARY_PATH: "C:\\Decks\\Netgrid" } as unknown as NodeJS.ProcessEnv)).toBe("C:\\Decks\\Netgrid");
-    expect(defaultDeckLibraryPath({ NETGRID_DECK_LIBRARY_PATH: "C:\\Decks\\Custom" } as unknown as NodeJS.ProcessEnv)).toBe("C:\\Decks\\Custom");
+    expect(
+      defaultDeckLibraryPath({
+        NETGRID_DECK_LIBRARY_PATH: "C:\\Decks\\Netgrid",
+      } as unknown as NodeJS.ProcessEnv),
+    ).toBe("C:\\Decks\\Netgrid");
+    expect(
+      defaultDeckLibraryPath({
+        NETGRID_DECK_LIBRARY_PATH: "C:\\Decks\\Custom",
+      } as unknown as NodeJS.ProcessEnv),
+    ).toBe("C:\\Decks\\Custom");
   });
 
   it("writes editable decks as local JSON files and reads them back", async () => {
@@ -47,7 +66,9 @@ describe("deck file library", () => {
     try {
       await writeDeckLibrary([runnerDeck], dir);
       await writeFile(join(dir, "broken.json"), "{", "utf8");
-      expect((await readDeckLibrary(dir)).decks).toEqual([runnerDeckNeedsRevalidation]);
+      expect((await readDeckLibrary(dir)).decks).toEqual([
+        runnerDeckNeedsRevalidation,
+      ]);
       await writeDeckLibrary([], dir);
       expect((await readDeckLibrary(dir)).decks).toEqual([]);
     } finally {

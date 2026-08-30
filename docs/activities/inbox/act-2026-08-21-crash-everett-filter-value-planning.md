@@ -56,14 +56,14 @@ Netto-Handzuwachs, Draw Taxes oder die Engine-Regelautorität erneut abzubilden.
 
 - [ ] Der bestehende Plan/Step/Route-Owner ist vor der Umsetzung benannt.
 - [ ] Die Bewertung nutzt ausschließlich die side-sichere strukturierte
-  Runner-Draw-Projektion.
+      Runner-Draw-Projektion.
 - [ ] Netto-Handzuwachs und Brutto-Kartensichtung bleiben getrennte Signale.
 - [ ] ActionId, Executor, PlanExecutionOrigin und Choice-Ownership bleiben
-  unverändert; es entsteht keine zweite Entscheidungsautorität.
+      unverändert; es entsteht keine zweite Entscheidungsautorität.
 - [ ] Fokussierte Tests sichern sowohl nützliche als auch bewusst neutrale
-  Situationen.
+      Situationen.
 - [ ] Vorher-/Nachher-Evidence zeigt keine allgemeine Draw-Überbewertung oder
-  Verschlechterung unter sichtbaren Draw Taxes.
+      Verschlechterung unter sichtbaren Draw Taxes.
 
 ## Umsetzungshinweise
 

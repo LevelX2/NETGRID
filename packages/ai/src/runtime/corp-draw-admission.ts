@@ -203,10 +203,9 @@ export function assessCorpDrawAdmission(params: {
   } else if (cleanupExposureUncovered) {
     disposition = "blocked_cleanup_exposure";
   } else if (projectedEndTurnOverflow > 0) {
-    disposition =
-      exactCompositeScoreMaterialRotation
-        ? "admitted"
-        : exactCapacityReleaseRoutes.length > 0
+    disposition = exactCompositeScoreMaterialRotation
+      ? "admitted"
+      : exactCapacityReleaseRoutes.length > 0
         ? "defer_for_capacity_release"
         : params.purpose === "central_defense_answer_search" &&
             existingEndTurnOverflow <= 1 &&

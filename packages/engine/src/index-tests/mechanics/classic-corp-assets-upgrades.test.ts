@@ -359,7 +359,9 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
   });
 
   it("charges London City Grid once when a noisy breaker breaks multiple subroutines", () => {
-    let state = toRunnerClassic08Game("classic-08-london-city-grid-multi-break");
+    let state = toRunnerClassic08Game(
+      "classic-08-london-city-grid-multi-break",
+    );
     addRezzedCorpRootForTest(state, LONDON_CITY_GRID, "remote_1", "london");
     const laserWireId = addRezzedCorpIceForTest(
       state,
@@ -404,8 +406,14 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       breakAbilityUseCostSourceDefinitionIds: LONDON_CITY_GRID,
     });
 
-    state = apply(state, "runner", (action) => action.actionId === breakAction.actionId);
-    expect(state.run?.brokenSubroutineIndexes).toEqual(expect.arrayContaining([0, 1]));
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === breakAction.actionId,
+    );
+    expect(state.run?.brokenSubroutineIndexes).toEqual(
+      expect.arrayContaining([0, 1]),
+    );
     expect(state.runner.credits).toBe(36);
     expectValid(state);
   });
@@ -626,7 +634,9 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       "simple_decoder",
     );
     const thirdProgramId = moveRunnerCardCopyToGrip(state, "simple_fracter");
-    state.runner.grip = state.runner.grip.filter((cardId) => cardId !== thirdProgramId);
+    state.runner.grip = state.runner.grip.filter(
+      (cardId) => cardId !== thirdProgramId,
+    );
     state.runner.rig.programs.push(thirdProgramId);
     state.runner.memoryUsed += 1;
     state.cardInstances[thirdProgramId] = {
@@ -653,7 +663,8 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       maxSelections: 2,
     });
     const optionFor = (cardId: string) =>
-      state.pendingChoice?.options.find((option) => option.value === cardId)?.id;
+      state.pendingChoice?.options.find((option) => option.value === cardId)
+        ?.id;
     state = applyChoices(state, "corp", [
       String(optionFor(firstProgramId)),
       String(optionFor(thirdProgramId)),

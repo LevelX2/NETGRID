@@ -40,21 +40,21 @@ describe("benchmark deck strategy panel", () => {
   });
 
   it("classifies future benchmark roles by Corp strategy archetype", () => {
-    expect(
-      benchmarkCorpArchetypeFromRole("real_scene_corp_fast_advance"),
-    ).toBe("fast_advance");
-    expect(
-      benchmarkCorpArchetypeFromRole("real_scene_corp_net_damage"),
-    ).toBe("net_damage");
+    expect(benchmarkCorpArchetypeFromRole("real_scene_corp_fast_advance")).toBe(
+      "fast_advance",
+    );
+    expect(benchmarkCorpArchetypeFromRole("real_scene_corp_net_damage")).toBe(
+      "net_damage",
+    );
     expect(
       benchmarkCorpArchetypeFromRole("real_scene_corp_hybrid_score_punish"),
     ).toBe("hybrid_score_punish");
-    expect(
-      benchmarkCorpArchetypeFromRole("real_scene_corp_virus_damage"),
-    ).toBe("virus_damage");
-    expect(
-      benchmarkCorpArchetypeFromRole("real_scene_corp_tag_punish"),
-    ).toBe("tag_punish");
+    expect(benchmarkCorpArchetypeFromRole("real_scene_corp_virus_damage")).toBe(
+      "virus_damage",
+    );
+    expect(benchmarkCorpArchetypeFromRole("real_scene_corp_tag_punish")).toBe(
+      "tag_punish",
+    );
     expect(
       benchmarkCorpArchetypeFromRole("real_scene_corp_glacier_remote_scoring"),
     ).toBe("remote_scoring");

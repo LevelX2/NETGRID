@@ -26,11 +26,11 @@ SQLite-Evidence des parallelen Worktrees. Es wurde keine Datenbank gelöscht.
 
 ## Ergebnis wie im Programm
 
-| Partie | Standarddecks | Endergebnis | Agendapunkte | Ende | Entscheidungen |
-| ------ | ------------- | ----------: | ------------: | ---- | --------------: |
-| Seed 1 | **Purge Window** gegen **Classic Corp - Remote Lab Deflection** | Runner **10 – 0** Corp | **8:0** | Agendapunkte | 163 |
-| Seed 2 | **Purge Window** gegen **Classic Corp - Remote Lab Deflection** | Runner **10 – 3** Corp | **7:3** | Agendapunkte | 188 |
-| Seed 3 | **Purge Window** gegen **Classic Corp - Remote Lab Deflection** | Runner **10 – 1** Corp | **8:1** | Agendapunkte | 226 |
+| Partie | Standarddecks                                                   |            Endergebnis | Agendapunkte | Ende         | Entscheidungen |
+| ------ | --------------------------------------------------------------- | ---------------------: | -----------: | ------------ | -------------: |
+| Seed 1 | **Purge Window** gegen **Classic Corp - Remote Lab Deflection** | Runner **10 – 0** Corp |      **8:0** | Agendapunkte |            163 |
+| Seed 2 | **Purge Window** gegen **Classic Corp - Remote Lab Deflection** | Runner **10 – 3** Corp |      **7:3** | Agendapunkte |            188 |
+| Seed 3 | **Purge Window** gegen **Classic Corp - Remote Lab Deflection** | Runner **10 – 1** Corp |      **8:1** | Agendapunkte |            226 |
 
 Die finalen Match-IDs lauten `match_b011b722fc6bb947`,
 `match_746a33e063e6fc1a` und `match_b153b34d263aeb09`.

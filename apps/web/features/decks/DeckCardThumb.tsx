@@ -26,7 +26,7 @@ export function DeckCardThumb({
   cost,
   large = false,
   preview = false,
-  table = false
+  table = false,
 }: {
   cardId: string;
   title: string;
@@ -50,10 +50,15 @@ export function DeckCardThumb({
 
   const imageUrl = imageUnavailable ? undefined : imageSource.src;
   const hasGeneratedImage = hasGeneratedCardArt(cardId);
-  const showHardwareOverlay = Boolean(imageUrl) && isHardwareCardType(cardType) && hasGeneratedImage;
-  const showOperationOverlay = Boolean(imageUrl) && isOperationCardType(cardType) && hasGeneratedImage;
+  const showHardwareOverlay =
+    Boolean(imageUrl) && isHardwareCardType(cardType) && hasGeneratedImage;
+  const showOperationOverlay =
+    Boolean(imageUrl) && isOperationCardType(cardType) && hasGeneratedImage;
   return (
-    <span className={`deckCardThumb ${large ? "large" : ""} ${preview ? "preview" : ""} ${table ? "table" : ""} ${imageUrl ? "hasImage" : ""}`} aria-hidden="true">
+    <span
+      className={`deckCardThumb ${large ? "large" : ""} ${preview ? "preview" : ""} ${table ? "table" : ""} ${imageUrl ? "hasImage" : ""}`}
+      aria-hidden="true"
+    >
       {imageUrl ? (
         <>
           <CardImage
@@ -66,7 +71,9 @@ export function DeckCardThumb({
           {showHardwareOverlay ? (
             <HardwareImageOverlay
               title={title}
-              className={preview ? "deckHardwareOverlay preview" : "deckHardwareOverlay"}
+              className={
+                preview ? "deckHardwareOverlay preview" : "deckHardwareOverlay"
+              }
               maxLines={preview ? 2 : 1}
               {...(rulesText ? { rulesText } : {})}
               {...(installCost !== undefined ? { installCost } : {})}
@@ -74,7 +81,9 @@ export function DeckCardThumb({
           ) : showOperationOverlay ? (
             <OperationImageOverlay
               title={title}
-              className={preview ? "deckHardwareOverlay preview" : "deckHardwareOverlay"}
+              className={
+                preview ? "deckHardwareOverlay preview" : "deckHardwareOverlay"
+              }
               maxLines={preview ? 2 : 1}
               {...(rulesText ? { rulesText } : {})}
               {...(cost !== undefined ? { cost } : {})}
@@ -84,7 +93,9 @@ export function DeckCardThumb({
       ) : (
         <CardTextPreview
           title={title}
-          density={textDensity ?? (preview ? "preview" : table ? "table" : "thumb")}
+          density={
+            textDensity ?? (preview ? "preview" : table ? "table" : "thumb")
+          }
           {...(cardType ? { cardType } : {})}
           {...(typeLine ? { typeLine } : {})}
           {...(metricLine ? { metricLine } : {})}

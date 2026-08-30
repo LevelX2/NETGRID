@@ -4,7 +4,10 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 
-const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const rootDir = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "..",
+);
 const packageRoots = ["apps", "packages"];
 
 function normalizedAbsolute(filePath) {
@@ -15,13 +18,20 @@ function normalizedAbsolute(filePath) {
 function collectTestFiles(directory) {
   const files = [];
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
-    if (entry.name === "node_modules" || entry.name === ".next" || entry.name === "dist" || entry.name === "coverage") continue;
+    if (
+      entry.name === "node_modules" ||
+      entry.name === ".next" ||
+      entry.name === "dist" ||
+      entry.name === "coverage"
+    )
+      continue;
     const absolutePath = path.join(directory, entry.name);
     if (entry.isDirectory()) {
       files.push(...collectTestFiles(absolutePath));
       continue;
     }
-    if (/\.(?:test|spec)\.[cm]?[jt]sx?$/.test(entry.name)) files.push(normalizedAbsolute(absolutePath));
+    if (/\.(?:test|spec)\.[cm]?[jt]sx?$/.test(entry.name))
+      files.push(normalizedAbsolute(absolutePath));
   }
   return files;
 }
@@ -31,26 +41,43 @@ function packageDirectories() {
     const absoluteRoot = path.join(rootDir, relativeRoot);
     if (!existsSync(absoluteRoot)) return [];
     return readdirSync(absoluteRoot, { withFileTypes: true })
-      .filter((entry) => entry.isDirectory() && existsSync(path.join(absoluteRoot, entry.name, "package.json")))
+      .filter(
+        (entry) =>
+          entry.isDirectory() &&
+          existsSync(path.join(absoluteRoot, entry.name, "package.json")),
+      )
       .map((entry) => path.join(absoluteRoot, entry.name));
   });
 }
 
 function listedTestFiles(packageDirectory) {
-  const vitestEntrypoint = path.join(rootDir, "node_modules", "vitest", "vitest.mjs");
-  const output = execFileSync(process.execPath, [vitestEntrypoint, "list", "--staticParse", "--json"], {
-    cwd: packageDirectory,
-    encoding: "utf8",
-    maxBuffer: 64 * 1024 * 1024,
-    stdio: ["ignore", "pipe", "inherit"]
-  });
+  const vitestEntrypoint = path.join(
+    rootDir,
+    "node_modules",
+    "vitest",
+    "vitest.mjs",
+  );
+  const output = execFileSync(
+    process.execPath,
+    [vitestEntrypoint, "list", "--staticParse", "--json"],
+    {
+      cwd: packageDirectory,
+      encoding: "utf8",
+      maxBuffer: 64 * 1024 * 1024,
+      stdio: ["ignore", "pipe", "inherit"],
+    },
+  );
   const registrations = JSON.parse(output);
-  return new Set(registrations.map((registration) => normalizedAbsolute(registration.file)));
+  return new Set(
+    registrations.map((registration) => normalizedAbsolute(registration.file)),
+  );
 }
 
 const failures = [];
 for (const packageDirectory of packageDirectories()) {
-  const packageJson = JSON.parse(readFileSync(path.join(packageDirectory, "package.json"), "utf8"));
+  const packageJson = JSON.parse(
+    readFileSync(path.join(packageDirectory, "package.json"), "utf8"),
+  );
   if (!packageJson.scripts?.test?.includes("vitest")) continue;
 
   const physicalFiles = collectTestFiles(packageDirectory);
@@ -59,7 +86,9 @@ for (const packageDirectory of packageDirectories()) {
   if (missing.length > 0) {
     failures.push({
       packageName: packageJson.name,
-      missing: missing.map((file) => path.relative(rootDir, file).replaceAll("\\", "/"))
+      missing: missing.map((file) =>
+        path.relative(rootDir, file).replaceAll("\\", "/"),
+      ),
     });
   }
 }

@@ -67,9 +67,7 @@ export function projectMaintenanceOwnDeckSnapshot(params: {
   if (!assignment)
     return unavailable("historical_deck_assignment_not_persisted", params.side);
   const player =
-    params.side === "runner"
-      ? assignment.runnerPlayer
-      : assignment.corpPlayer;
+    params.side === "runner" ? assignment.runnerPlayer : assignment.corpPlayer;
   const snapshot =
     params.privateDeckSnapshots?.participants?.[player]?.[params.side];
   if (!snapshot)
@@ -157,9 +155,7 @@ function snapshotMatchesPersistedBinding(
 ): boolean {
   const side = snapshot.side;
   const expectedSnapshotId =
-    side === "runner"
-      ? deckSetup.runnerSnapshotId
-      : deckSetup.corpSnapshotId;
+    side === "runner" ? deckSetup.runnerSnapshotId : deckSetup.corpSnapshotId;
   const expectedMetadata =
     side === "runner" ? deckSetup.runner : deckSetup.corp;
   return (

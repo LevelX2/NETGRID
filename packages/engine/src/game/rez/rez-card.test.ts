@@ -490,8 +490,7 @@ function testHost(
       assertCorpRezCostQuoteValid: (cardId, legalAction) =>
         quote(
           cardId,
-          options.quotedRezCost ??
-            Number(definitionFor(cardId).rezCost ?? 0),
+          options.quotedRezCost ?? Number(definitionFor(cardId).rezCost ?? 0),
           legalAction,
         ),
       assertCorpRootRezCostQuoteValid: (cardId, legalAction) => {

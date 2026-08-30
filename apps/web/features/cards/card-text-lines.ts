@@ -20,7 +20,9 @@ const CARD_NUMERIC_LABELS: Record<string, string> = {
   agendaPoints: "Agenda",
 };
 
-export function cardMetricLine(detail: CardTextLineDetail | null | undefined): string {
+export function cardMetricLine(
+  detail: CardTextLineDetail | null | undefined,
+): string {
   if (!detail) return "";
   return Object.entries(CARD_NUMERIC_LABELS)
     .map(([key, label]) => {

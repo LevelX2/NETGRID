@@ -1,9 +1,17 @@
 import type { Side, VisibleCard } from "@netgrid/shared";
 
-import { researchAgendaDifficultyModifierLineForCard, scoredAgendaEffectLineForScoreArea } from "../../app/score-area-ui";
+import {
+  researchAgendaDifficultyModifierLineForCard,
+  scoredAgendaEffectLineForScoreArea,
+} from "../../app/score-area-ui";
 import type { DisplayVisibleCard } from "./card-view-model";
 
-type ScoredAgendaStateTone = "credit" | "agenda" | "action" | "effect" | "depleted";
+type ScoredAgendaStateTone =
+  | "credit"
+  | "agenda"
+  | "action"
+  | "effect"
+  | "depleted";
 
 export type ScoredAgendaStateLine = {
   key: string;
@@ -12,14 +20,28 @@ export type ScoredAgendaStateLine = {
   tone: ScoredAgendaStateTone;
 };
 
-export function ScoredAgendaStateLines({ card, side }: { card: DisplayVisibleCard; side: Side }) {
+export function ScoredAgendaStateLines({
+  card,
+  side,
+}: {
+  card: DisplayVisibleCard;
+  side: Side;
+}) {
   const lines = scoredAgendaStateLines(card, side);
   if (lines.length === 0) return null;
   return (
-    <div className="scoredAgendaStateList" aria-label={`${card.title ?? "Karte"} Status`}>
+    <div
+      className="scoredAgendaStateList"
+      aria-label={`${card.title ?? "Karte"} Status`}
+    >
       {lines.map((line) => (
-        <p className="scoredAgendaStateLine" key={`${card.instanceId}-${line.key}`}>
-          <span className={`scoredAgendaStatePill ${line.tone}`}>{line.value}</span>
+        <p
+          className="scoredAgendaStateLine"
+          key={`${card.instanceId}-${line.key}`}
+        >
+          <span className={`scoredAgendaStatePill ${line.tone}`}>
+            {line.value}
+          </span>
           <span>{line.label}</span>
         </p>
       ))}
@@ -27,14 +49,24 @@ export function ScoredAgendaStateLines({ card, side }: { card: DisplayVisibleCar
   );
 }
 
-export function scoreCardStateBadges(card: DisplayVisibleCard, corpScoreAreaCards: VisibleCard[] = []): ScoredAgendaStateLine[] {
+export function scoreCardStateBadges(
+  card: DisplayVisibleCard,
+  corpScoreAreaCards: VisibleCard[] = [],
+): ScoredAgendaStateLine[] {
   const badges: ScoredAgendaStateLine[] = [];
-  const researchDifficultyLine = researchAgendaDifficultyModifierLineForCard(card, corpScoreAreaCards);
+  const researchDifficultyLine = researchAgendaDifficultyModifierLineForCard(
+    card,
+    corpScoreAreaCards,
+  );
   if (researchDifficultyLine) badges.push(researchDifficultyLine);
   return badges;
 }
 
-export function ScoreCardStateBadges({ badges }: { badges: ScoredAgendaStateLine[] }) {
+export function ScoreCardStateBadges({
+  badges,
+}: {
+  badges: ScoredAgendaStateLine[];
+}) {
   return (
     <span className="scoreCardStateBadges" aria-hidden="true">
       {badges.map((badge) => (
@@ -46,7 +78,10 @@ export function ScoreCardStateBadges({ badges }: { badges: ScoredAgendaStateLine
   );
 }
 
-function scoredAgendaStateLines(card: DisplayVisibleCard, side: Side): ScoredAgendaStateLine[] {
+function scoredAgendaStateLines(
+  card: DisplayVisibleCard,
+  side: Side,
+): ScoredAgendaStateLine[] {
   const lines: ScoredAgendaStateLine[] = [];
   const effectLine = scoredAgendaEffectLineForScoreArea(card, side);
   if (effectLine) lines.push(effectLine);

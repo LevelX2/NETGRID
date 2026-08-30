@@ -121,7 +121,8 @@ export function createRunnerReserveDiagnosticsForSimulationAction(
     ].includes(action.type)
       ? creditsAfter - reserveTarget
       : undefined;
-    const accessTarget = targetServerId ?? input.playerView.run?.attackedServerId;
+    const accessTarget =
+      targetServerId ?? input.playerView.run?.attackedServerId;
 
     return {
       runnerCreditsBefore: creditsBefore,

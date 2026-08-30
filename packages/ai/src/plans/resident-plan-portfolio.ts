@@ -528,7 +528,9 @@ function pruneOrphanedSupportProviders(
   let retained = [...instances];
   const removed: PlanInstance[] = [];
   while (true) {
-    const residentIds = new Set(retained.map((instance) => instance.instanceId));
+    const residentIds = new Set(
+      retained.map((instance) => instance.instanceId),
+    );
     const orphans = retained.filter(
       (instance) =>
         instance.parentNeedId !== undefined &&

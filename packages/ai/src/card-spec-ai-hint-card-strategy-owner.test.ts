@@ -60,10 +60,7 @@ describe("CardSpec card-level strategy typed evidence", () => {
       ["onr_v1_194_corporate-downsizing", "hq.corp_agenda_flood_control"],
       ["onr_v1_199_employee-empowerment", "draw.corp_recurring"],
       ["onr_v1_214_project-babylon", "score.overadvance_bonus"],
-      [
-        "onr_proteus_007_project-venice",
-        "action.corp_recurring_extra_action",
-      ],
+      ["onr_proteus_007_project-venice", "action.corp_recurring_extra_action"],
       ["onr_v1_271_tko-2-0", "corp_ice.encounter_tax"],
       ["onr_v1_292_management-shake-up", "advance.counter_manipulation"],
       ["onr_v1_309_bbs-whispering-campaign", "economy.corp_installed_engine"],

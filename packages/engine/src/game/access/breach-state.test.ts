@@ -52,36 +52,52 @@ function makeHost(): BreachStateHost {
   ] as unknown as CorpServer[];
   const cardInstances: Record<string, CardInstance> = {
     rd_top: instance("rd_top", "operation_def", { side: "corp", zone: "rd" }),
-    rd_second: instance("rd_second", "agenda_def", { side: "corp", zone: "rd" }),
-    hq_card_a: instance("hq_card_a", "operation_def", { side: "corp", zone: "hq" }),
-    hq_card_b: instance("hq_card_b", "agenda_def", { side: "corp", zone: "hq" }),
+    rd_second: instance("rd_second", "agenda_def", {
+      side: "corp",
+      zone: "rd",
+    }),
+    hq_card_a: instance("hq_card_a", "operation_def", {
+      side: "corp",
+      zone: "hq",
+    }),
+    hq_card_b: instance("hq_card_b", "agenda_def", {
+      side: "corp",
+      zone: "hq",
+    }),
     hq_upgrade: instance(
       "hq_upgrade",
       "upgrade_def",
-      { side: "corp", zone: "serverRoot", serverId: "hq" } as CardInstance["zone"],
+      {
+        side: "corp",
+        zone: "serverRoot",
+        serverId: "hq",
+      } as CardInstance["zone"],
       true,
       true,
     ),
-    archive_face_down: instance(
-      "archive_face_down",
-      "operation_def",
-      { side: "corp", zone: "archives" },
-    ),
+    archive_face_down: instance("archive_face_down", "operation_def", {
+      side: "corp",
+      zone: "archives",
+    }),
     archive_face_up: instance(
       "archive_face_up",
       "agenda_def",
       { side: "corp", zone: "archives" },
       true,
     ),
-    remote_asset: instance(
-      "remote_asset",
-      "asset_def",
-      { side: "corp", zone: "serverRoot", serverId: "remote_1" } as CardInstance["zone"],
-    ),
+    remote_asset: instance("remote_asset", "asset_def", {
+      side: "corp",
+      zone: "serverRoot",
+      serverId: "remote_1",
+    } as CardInstance["zone"]),
     remote_upgrade: instance(
       "remote_upgrade",
       "upgrade_def",
-      { side: "corp", zone: "serverRoot", serverId: "remote_1" } as CardInstance["zone"],
+      {
+        side: "corp",
+        zone: "serverRoot",
+        serverId: "remote_1",
+      } as CardInstance["zone"],
       true,
       true,
     ),
@@ -110,7 +126,8 @@ function makeHost(): BreachStateHost {
         const found = Object.values(definitions).find(
           (candidate) => candidate.id === instance.definitionId,
         );
-        if (!found) throw new Error(`missing definition ${instance.definitionId}`);
+        if (!found)
+          throw new Error(`missing definition ${instance.definitionId}`);
         return found;
       },
       cardInstanceFor: (cardId) => cardInstances[cardId]!,
@@ -158,7 +175,11 @@ describe("breach state builder", () => {
     const queue = accessQueueEntries(
       host,
       server,
-      { runId: "run_hq", attackedServerId: "hq", accessCount: 1 } as NonNullable<GameState["run"]>,
+      {
+        runId: "run_hq",
+        attackedServerId: "hq",
+        accessCount: 1,
+      } as NonNullable<GameState["run"]>,
       1,
     );
 
@@ -175,7 +196,11 @@ describe("breach state builder", () => {
     host.state.cardInstances["rd_upgrade"] = instance(
       "rd_upgrade",
       "upgrade_def",
-      { side: "corp", zone: "serverRoot", serverId: "rd" } as CardInstance["zone"],
+      {
+        side: "corp",
+        zone: "serverRoot",
+        serverId: "rd",
+      } as CardInstance["zone"],
       true,
       true,
     );
@@ -194,7 +219,10 @@ describe("breach state builder", () => {
       "remote_root",
       "rd",
     ]);
-    expect(breach.queue.map((entry) => entry.hiddenInfo)).toEqual([false, true]);
+    expect(breach.queue.map((entry) => entry.hiddenInfo)).toEqual([
+      false,
+      true,
+    ]);
   });
 
   it("applies Proteus Highlighter and Vienna counters with central roots outside stored-card count", () => {
@@ -241,7 +269,10 @@ describe("breach state builder", () => {
       "archive_face_down",
       "archive_face_up",
     ]);
-    expect(archives.queue.map((entry) => entry.hiddenInfo)).toEqual([true, false]);
+    expect(archives.queue.map((entry) => entry.hiddenInfo)).toEqual([
+      true,
+      false,
+    ]);
     expect(remote.queue.map((entry) => entry.zone)).toEqual([
       "remote_root",
       "remote_root",

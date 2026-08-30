@@ -1,9 +1,6 @@
 import type { PublicGameEvent, Side } from "@netgrid/shared";
 
-export type AccessPresentationOutcomeKind =
-  | "trashed"
-  | "stolen"
-  | "declined";
+export type AccessPresentationOutcomeKind = "trashed" | "stolen" | "declined";
 
 export type AccessPresentationOutcome = {
   eventId: string;
@@ -54,14 +51,11 @@ export function observerAccessAutoDismissMs(input: {
 export function actionCueAfterAiAdvanceRequest<
   T extends { actionType: string },
 >(current: T | null): T | null {
-  if (current && isAccessPreludeActionType(current.actionType))
-    return current;
+  if (current && isAccessPreludeActionType(current.actionType)) return current;
   return null;
 }
 
-export function coalesceAccessActionCues<
-  T extends { actionType: string },
->(
+export function coalesceAccessActionCues<T extends { actionType: string }>(
   current: T | null,
   queued: T[],
   incoming: T[],
@@ -143,7 +137,10 @@ export function accessPresentationOutcomeAfter(
       )
     )
       continue;
-    if (publicAccessEventForOutcome(events, event)?.eventId !== accessEvent.eventId)
+    if (
+      publicAccessEventForOutcome(events, event)?.eventId !==
+      accessEvent.eventId
+    )
       continue;
     return accessOutcome(event, accessEvent, viewerSide);
   }
@@ -197,7 +194,12 @@ function accessOutcome(
   const actionType = outcomeEvent.publicPayload.actionType ?? "";
   const title = String(accessEvent.publicPayload.title);
   const actor = sideValue(outcomeEvent.publicPayload.actor) ?? "runner";
-  const subject = actor === viewerSide ? "Du hast" : actor === "runner" ? "Der Runner hat" : "Die Korp hat";
+  const subject =
+    actor === viewerSide
+      ? "Du hast"
+      : actor === "runner"
+        ? "Der Runner hat"
+        : "Die Korp hat";
   if (actionType === "trash_accessed_card") {
     return {
       eventId: outcomeEvent.eventId,

@@ -1,13 +1,6 @@
-import {
-  type DeckDefinition,
-  type DeckPublicMetadata,
-} from "@netgrid/shared";
+import { type DeckDefinition, type DeckPublicMetadata } from "@netgrid/shared";
 
-export type CardPoolVersion =
-  | "0.1.0"
-  | "0.4.0"
-  | "0.8.0"
-  | "0.94.0";
+export type CardPoolVersion = "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0";
 
 type CardPoolDescriptor = {
   version: CardPoolVersion;
@@ -107,7 +100,8 @@ function descriptorForDecks(
 
 function descriptorForVersion(version: CardPoolVersion): CardPoolDescriptor {
   return (
-    CARD_POOL_DESCRIPTORS.find((descriptor) => descriptor.version === version) ??
-    CARD_POOL_DESCRIPTORS[CARD_POOL_DESCRIPTORS.length - 1]!
+    CARD_POOL_DESCRIPTORS.find(
+      (descriptor) => descriptor.version === version,
+    ) ?? CARD_POOL_DESCRIPTORS[CARD_POOL_DESCRIPTORS.length - 1]!
   );
 }

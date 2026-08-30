@@ -1507,12 +1507,11 @@ describe("generic typed CardSpec AI translators", () => {
     }
 
     expect(
-      fullHint("onr_proteus_128_airport-locker")
-        .actionCapabilitySemantics?.find(
-          (semantics) =>
-            semantics.capabilityKey === "search_install_program",
-        )
-        ?.effects,
+      fullHint(
+        "onr_proteus_128_airport-locker",
+      ).actionCapabilitySemantics?.find(
+        (semantics) => semantics.capabilityKey === "search_install_program",
+      )?.effects,
     ).toContainEqual(
       expect.objectContaining({
         kind: "install",

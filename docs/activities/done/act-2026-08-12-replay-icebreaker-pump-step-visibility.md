@@ -70,17 +70,17 @@ Brechen einer Subroutine oder beim Fortsetzen weitergeht.
 ## Akzeptanzkriterien
 
 - [x] Jeder Pump-Schritt eines wiederholten `pump_breaker` ist im Replay
-  unmittelbar als eigene Aktion erkennbar, einschließlich Eisbrecher,
-  Stärkebonus und gegebenenfalls Kosten.
+      unmittelbar als eigene Aktion erkennbar, einschließlich Eisbrecher,
+      Stärkebonus und gegebenenfalls Kosten.
 - [x] Die Darstellung zeigt keine Stärke oder Karteninformation, die für die
-  gewählte Replay-Perspektive nicht sichtbar sein darf.
+      gewählte Replay-Perspektive nicht sichtbar sein darf.
 - [x] Die temporäre Stärke wird nur für die fachlich korrekte
-  Encounter-Dauer dargestellt und nach dessen Ende nicht als persistenter
-  Kartenwert ausgegeben.
+      Encounter-Dauer dargestellt und nach dessen Ende nicht als persistenter
+      Kartenwert ausgegeben.
 - [x] Ein direkt anschließendes Brechen einer Subroutine oder Fortsetzen des
-  Runs bleibt verständlich mit den vorherigen Pump-Schritten verknüpft.
+      Runs bleibt verständlich mit den vorherigen Pump-Schritten verknüpft.
 - [x] Ein fokussierter Regressionstest prüft den realen Einzel-Schritt-Pfad
-  einschließlich mehrerer Pump-Events.
+      einschließlich mehrerer Pump-Events.
 
 ## Umsetzungshinweise
 

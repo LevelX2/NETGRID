@@ -258,12 +258,12 @@ Vergleichsvertrag:
   als finale Endevidence wiederholt. Nur diese 30 post-sync Spiele gehen in
   die folgende Auswertung ein.
 
-| Paarung | Saloon gesehen | Saloon Install/Aktivierung vorher → neu | Crèche gesehen | Crèche Install/Bonus-Run vorher → neu |
-| --- | ---: | ---: | ---: | ---: |
-| Universal Fast Advance | 7/10 → 6/10 | 2/10 → 1/6 | 5/10 | 2/6 → 3/2 |
-| Cheap Bag of Tricks | 7/10 → 6/10 | 2/5 → 2/3 | 9/10 → 10/10 | 3/20 → 7/28 |
-| Siren Fortress | 8/10 | 2/12 → 2/11 | 5/10 | 1/3 → 2/4 |
-| Gesamt | 22/30 → 20/30 | 6/27 → 5/20 | 19/30 → 20/30 | 6/29 → 12/34 |
+| Paarung                | Saloon gesehen | Saloon Install/Aktivierung vorher → neu | Crèche gesehen | Crèche Install/Bonus-Run vorher → neu |
+| ---------------------- | -------------: | --------------------------------------: | -------------: | ------------------------------------: |
+| Universal Fast Advance |    7/10 → 6/10 |                              2/10 → 1/6 |           5/10 |                             2/6 → 3/2 |
+| Cheap Bag of Tricks    |    7/10 → 6/10 |                               2/5 → 2/3 |   9/10 → 10/10 |                           3/20 → 7/28 |
+| Siren Fortress         |           8/10 |                             2/12 → 2/11 |           5/10 |                             1/3 → 2/4 |
+| Gesamt                 |  22/30 → 20/30 |                             6/27 → 5/20 |  19/30 → 20/30 |                          6/29 → 12/34 |
 
 Die Stichprobe bestätigt den fachlichen Mechanismus, aber keine pauschale
 Nutzungssteigerung beider Karten: Crèche wurde in sechs zusätzlichen Spielen
@@ -330,13 +330,13 @@ Follow-up-Fund:
 
 ## Paketfolge
 
-| Paket | Titel | Ergebnis |
-| --- | --- | --- |
-| RPED-00 | Diagnose und Ist-Vertrag | Entscheidungspfad und Ursache sind reproduziert |
-| RPED-01 | Typisierte Engine-Semantik | Beide Engine-Arten werden generisch und konsumptionssicher erkannt |
-| RPED-02 | Reserve-Funding und Deck-Replacement | Zielcredits und exklusive Ersetzung sind planlokal korrekt |
-| RPED-03 | Ownership- und Regressionsevidence | Ergebnis und unveränderte Entscheidungsautorität sind getestet |
-| RPED-04 | 3×10 Vergleich und Abschluss | Verhalten ist verglichen, dokumentiert und integrationsbereit |
+| Paket   | Titel                                | Ergebnis                                                           |
+| ------- | ------------------------------------ | ------------------------------------------------------------------ |
+| RPED-00 | Diagnose und Ist-Vertrag             | Entscheidungspfad und Ursache sind reproduziert                    |
+| RPED-01 | Typisierte Engine-Semantik           | Beide Engine-Arten werden generisch und konsumptionssicher erkannt |
+| RPED-02 | Reserve-Funding und Deck-Replacement | Zielcredits und exklusive Ersetzung sind planlokal korrekt         |
+| RPED-03 | Ownership- und Regressionsevidence   | Ergebnis und unveränderte Entscheidungsautorität sind getestet     |
+| RPED-04 | 3×10 Vergleich und Abschluss         | Verhalten ist verglichen, dokumentiert und integrationsbereit      |
 
 ## Paketdetails
 

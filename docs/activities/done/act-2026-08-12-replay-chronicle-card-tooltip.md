@@ -68,14 +68,14 @@ statt lediglich Chronik- oder Regeltext erneut auszugeben.
 ## Akzeptanzkriterien
 
 - [x] Eine im Replay sichtbare Kartenreferenz der Spielchronik öffnet bei
-  Hover und Tastaturfokus einen Tooltip.
+      Hover und Tastaturfokus einen Tooltip.
 - [x] Im Bildmodus enthält der Tooltip die zur Kartenreferenz gehörende
-  Kartenansicht, wenn für die Karte eine zulässige Präsentation verfügbar ist;
-  er degradiert nicht unbegründet zu erneutem Chroniktext.
+      Kartenansicht, wenn für die Karte eine zulässige Präsentation verfügbar ist;
+      er degradiert nicht unbegründet zu erneutem Chroniktext.
 - [x] Im einfachen und erweiterten Modus bleibt die jeweilige Textansicht
-  vollständig und konsistent zum aktiven Spiel nutzbar.
+      vollständig und konsistent zum aktiven Spiel nutzbar.
 - [x] Nicht sichtbare oder im Replay redigierte Karteninformationen werden
-  weiterhin nicht über den Tooltip offengelegt.
+      weiterhin nicht über den Tooltip offengelegt.
 - [x] Ein fokussierter Regressionstest deckt den realen Replay-Pfad ab.
 
 ## Umsetzungshinweise

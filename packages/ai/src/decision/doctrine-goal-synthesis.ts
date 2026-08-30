@@ -123,11 +123,17 @@ function runnerRemoteContestGoals(
   }
   if (strategy.status === "partial" && hasCoverageGap(strategy)) {
     return [
-      goal("runner.doctrine.remote_contest_coverage", "coverage", 710, "medium", [
-        "doctrine_v2:runner.remote_contest",
-        "doctrine_status:partial",
-        "missing_breaker_coverage:doctrine_v2",
-      ]),
+      goal(
+        "runner.doctrine.remote_contest_coverage",
+        "coverage",
+        710,
+        "medium",
+        [
+          "doctrine_v2:runner.remote_contest",
+          "doctrine_status:partial",
+          "missing_breaker_coverage:doctrine_v2",
+        ],
+      ),
     ];
   }
   return [];
@@ -227,7 +233,10 @@ function corpDoctrineGoals(
   if (strategy.strategyId === "corp.ambush_bluff") {
     return corpRemoteAmbushGoals(strategy);
   }
-  if (strategy.strategyId === "corp.tag_trace_punish" && tagPunishReady(strategy)) {
+  if (
+    strategy.strategyId === "corp.tag_trace_punish" &&
+    tagPunishReady(strategy)
+  ) {
     return [
       goal("corp.doctrine.tag_trace_punish", "tag_punish", 740, "medium", [
         "doctrine_v2:corp.tag_trace_punish",
@@ -235,7 +244,10 @@ function corpDoctrineGoals(
       ]),
     ];
   }
-  if (strategy.strategyId === "corp.damage_kill" && damagePressureReady(strategy)) {
+  if (
+    strategy.strategyId === "corp.damage_kill" &&
+    damagePressureReady(strategy)
+  ) {
     return [
       goal("corp.doctrine.damage_pressure", "damage_pressure", 740, "medium", [
         "doctrine_v2:corp.damage_kill",
@@ -251,11 +263,17 @@ function corpRemoteScoringGoals(
 ): TacticalGoalLike[] {
   if (strategy.status === "complete") {
     return [
-      goal("corp.doctrine.remote_scoring_scoreline", "corp_scoreline", 810, "high", [
-        "doctrine_v2:corp.remote_scoring",
-        "doctrine_status:complete",
-        "doctrine_goal:corp_scoreline",
-      ]),
+      goal(
+        "corp.doctrine.remote_scoring_scoreline",
+        "corp_scoreline",
+        810,
+        "high",
+        [
+          "doctrine_v2:corp.remote_scoring",
+          "doctrine_status:complete",
+          "doctrine_goal:corp_scoreline",
+        ],
+      ),
       goal(
         "corp.doctrine.remote_scoring_ice_defense",
         "corp_ice_defense",
@@ -357,7 +375,10 @@ function partialCorpCentralDefenseGoals(
   const needsHq = hasCentralDefenseGap(strategy, "hq");
   const needsRnd = hasCentralDefenseGap(strategy, "rnd");
   if (!needsHq && !needsRnd) {
-    return corpPartialSetupGoal(strategy, "corp.doctrine.central_defense_setup");
+    return corpPartialSetupGoal(
+      strategy,
+      "corp.doctrine.central_defense_setup",
+    );
   }
   return [
     ...(needsHq
@@ -427,18 +448,29 @@ function corpPartialSetupGoal(
 function tagPunishReady(strategy: DeckDoctrineV2StrategyDiagnostic): boolean {
   return (
     strategy.status === "complete" &&
-    !hasAnyGap(strategy, ["low_tag_sources", "payoff_without_enablers", "low_punish_payoff_density"])
+    !hasAnyGap(strategy, [
+      "low_tag_sources",
+      "payoff_without_enablers",
+      "low_punish_payoff_density",
+    ])
   );
 }
 
-function damagePressureReady(strategy: DeckDoctrineV2StrategyDiagnostic): boolean {
+function damagePressureReady(
+  strategy: DeckDoctrineV2StrategyDiagnostic,
+): boolean {
   return (
     strategy.status === "complete" &&
-    !hasAnyGap(strategy, ["payoff_without_enablers", "low_punish_payoff_density"])
+    !hasAnyGap(strategy, [
+      "payoff_without_enablers",
+      "low_punish_payoff_density",
+    ])
   );
 }
 
-function hasStrategyAnchor(strategy: DeckDoctrineV2StrategyDiagnostic): boolean {
+function hasStrategyAnchor(
+  strategy: DeckDoctrineV2StrategyDiagnostic,
+): boolean {
   return strategy.anchorEvidenceCount > 0 || strategy.anchorScore > 0;
 }
 
@@ -471,10 +503,12 @@ function hasAnyGap(
 }
 
 function gapHasTerm(gap: string, term: string): boolean {
-  const termSet = new Set(gap
-    .toLowerCase()
-    .split(/[._:-]+/)
-    .filter(Boolean));
+  const termSet = new Set(
+    gap
+      .toLowerCase()
+      .split(/[._:-]+/)
+      .filter(Boolean),
+  );
   return termSet.has(term);
 }
 

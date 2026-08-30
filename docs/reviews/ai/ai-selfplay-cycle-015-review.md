@@ -24,11 +24,11 @@ lokale read-only Maintenance-Analyse-API.
 
 ## Ergebnis wie im Programm
 
-| Partie | Standarddecks | Endergebnis | Agendapunkte | Niederlage | Entscheidungen |
-| --- | --- | ---: | ---: | --- | ---: |
-| Seed 1 | **Inside Forgery Loop** gegen **Proteus Korp – Hidden Node & Region Trap** | Runner **10 – 0** Corp | **8:0** | Agendapunkte | 247 |
-| Seed 2 | **Inside Forgery Loop** gegen **Proteus Korp – Hidden Node & Region Trap** | Runner **10 – 0** Corp | **7:0** | Agendapunkte | 258 |
-| Seed 3 | **Inside Forgery Loop** gegen **Proteus Korp – Hidden Node & Region Trap** | Runner **10 – 0** Corp | **9:0** | Agendapunkte | 128 |
+| Partie | Standarddecks                                                              |            Endergebnis | Agendapunkte | Niederlage   | Entscheidungen |
+| ------ | -------------------------------------------------------------------------- | ---------------------: | -----------: | ------------ | -------------: |
+| Seed 1 | **Inside Forgery Loop** gegen **Proteus Korp – Hidden Node & Region Trap** | Runner **10 – 0** Corp |      **8:0** | Agendapunkte |            247 |
+| Seed 2 | **Inside Forgery Loop** gegen **Proteus Korp – Hidden Node & Region Trap** | Runner **10 – 0** Corp |      **7:0** | Agendapunkte |            258 |
+| Seed 3 | **Inside Forgery Loop** gegen **Proteus Korp – Hidden Node & Region Trap** | Runner **10 – 0** Corp |      **9:0** | Agendapunkte |            128 |
 
 Die finalen Match-IDs sind `match_e95fa67a803b0558`,
 `match_735d9780ff057a8d` und `match_6a60206b339987ef`.
