@@ -271,6 +271,6 @@ Abschlussstand vor Integration:
 - Utilities, Match-Transport und Catalog-Workspace strukturell geschnitten.
 - AI-Debug- und CSS-Schnitt bewusst als eigene Folgepakete dokumentiert.
 - Abschlussbericht: `docs/reviews/ui/web-ui-stabilization-and-structure-final-report-2026-06-24.md`.
-- Projektlog aktualisiert: `KI-Wissen-NETGRID/03 Betrieb/Log 2026-06.md`.
+- Die damalige Projektlog-Chronik wurde gemäß Current-State-Regel aus dem Arbeitsbaum entfernt; Git bleibt der Nachweis.
 
 Das Goal wird erst abgeschlossen, wenn die finalen Gates nach Dokumentation erneut grün sind, der Arbeitsbranch sauber in den lokalen `main` integriert ist und der separate Worktree entfernt wurde.

@@ -151,7 +151,7 @@ Bei einem roten Done-Gate verbleibt der Controller im aktuellen Zustand.
 - Ziel: 172 gemeldete `.md`, `.json` und `.html`-Dateien rein mechanisch
   formatieren.
 - Eingang: P2 committed.
-- Kernartefakte: `docs/`, `KI-Wissen-NETGRID/`, `data/`, Readmes und betroffene
+- Kernartefakte: `docs/`, `data/`, Readmes und betroffene
   HTML-Evidence.
 - Checks: Prettier-Check auf diesen Dateitypen, JSON-Parseprüfung aller
   geänderten JSON-Dateien, Link-/Strukturchecks nur soweit bestehende Befehle

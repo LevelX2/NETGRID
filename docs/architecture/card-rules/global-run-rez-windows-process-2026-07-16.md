@@ -247,8 +247,7 @@ Konkrete Arbeit:
 Kernartefakte:
 
 - `docs/reviews/engine/global-run-rez-windows-final-review-2026-07-16.md`
-- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- `KI-Wissen-NETGRID/03 Betrieb/Log 2026-07.md`
+- damaliger Projektstatus und Betriebslog (aus dem Arbeitsbaum entfernt; Git bleibt Nachweis)
 - dieses Prozessartefakt.
 
 Checks und Done-Gate:

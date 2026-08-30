@@ -217,7 +217,7 @@ Bei einem nicht erfüllten Done-Gate bleibt der Prozess im aktuellen Zustand.
   aktualisieren, breite risikogerechte Checks ausführen.
 - Kernartefakte: dieses Prozessartefakt,
   `docs/reviews/engine/shell-traders-install-lifecycle-final-review-2026-07-19.md`
-  und `KI-Wissen-NETGRID/03 Betrieb/Log 2026-07.md`.
+  und die historische Git-Chronik.
 - Checks: vollständige Engine-Tests, Engine-Typecheck, Format-/Boundary-Checks,
   `git diff --check`.
 - Done-Gate: erforderliche Checks sind grün oder ein vorbestehender,

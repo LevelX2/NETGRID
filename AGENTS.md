@@ -1,26 +1,21 @@
 # AGENTS.md
 
-## Projekt und Wissensbasis
+## Projekt und führende Quellen
 
 Private NETGRID-Webapplikation für regelgeführtes NETGRID-Spiel.
 
-Bei neuen Threads, neuen Aufgaben und Projektfragen zuerst wiki-first arbeiten. Die projektbezogene Wissensbasis liegt unter `KI-Wissen-NETGRID/`; falls lokal vorhanden, zusätzlich `AGENTS.local.md` lesen.
-
-Pflicht-Einstieg für projektbezogene Arbeit:
-
-1. `KI-Wissen-NETGRID/00 Projektstart.md`
-2. `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
-3. `KI-Wissen-NETGRID/02 Wissen/Prozesse/Arbeitsworkflow Wissenspflege und Projektanfragen.md`
-4. `KI-Wissen-NETGRID/00 Steuerung/Regeldatei KI-Wissenspflege.md`
-
-Die Wissensbasis nennt den jeweils gültigen Status, die verbindliche Roadmap und die relevanten Quellen. Bei Konflikten gilt das dort als aktuell führend markierte Artefakt.
+Bei neuen Threads und Projektfragen zuerst `docs/codex/CODEX_STATUS.md`, die
+einschlägigen aktuellen Architektur-, Entscheidungs- und Runbook-Artefakte
+sowie paketlokale `AGENTS.md` lesen. Falls vorhanden, zusätzlich
+`AGENTS.local.md` lesen. Bei Konflikten gelten aktuelle Verträge, Code und
+ausführbare Gates als führend.
 
 ## Arbeitsmodus und Sprache
 
-- Beantworte Projektfragen zuerst aus Wissensbasis, Status und aktiven Planungsartefakten.
-- Ziehe Rohquellen, Workspace-Dateien oder Webquellen nur hinzu, wenn die Wissensbasis Lücken hat, veraltet ist oder verifiziert werden muss.
-- Führe neue belastbare, wiederverwendbare oder entscheidungsrelevante Erkenntnisse in Wissensbasis, Runbooks oder Prozessseiten zurück.
-- Dokumentiere relevante Prozess-, Architektur-, Gate- und Abschlussentscheidungen nach der Logregel der Wissensbasis.
+- Beantworte Projektfragen zuerst aus Current-State-Dokumentation, Status und aktiven Planungsartefakten.
+- Ziehe Rohquellen, Workspace-Dateien oder Webquellen nur hinzu, wenn diese Quellen Lücken haben, veraltet sind oder verifiziert werden müssen.
+- Führe neue belastbare, wiederverwendbare oder entscheidungsrelevante Erkenntnisse in aktuelle Architektur-, Entscheidungs- oder Runbook-Artefakte zurück.
+- Dokumentiere relevante Prozess-, Architektur-, Gate- und Abschlussentscheidungen nur dort, wo sie eine aktuelle Funktion besitzen; Git bleibt der historische Nachweis.
 - Sichtbare UI-Texte und normale deutsche Wissensseiten verwenden echtes Deutsch mit Umlauten und `ß`.
 - Technische Dateinamen, Pfade, Code-Symbole, IDs, Markdown-Links und originale Quellzitate bleiben in ihrer technischen oder originalen Schreibweise.
 

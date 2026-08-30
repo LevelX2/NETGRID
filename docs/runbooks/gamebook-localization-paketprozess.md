@@ -114,7 +114,7 @@ Nur das jeweils aktuelle Paket darf Änderungen erhalten. Bei einem nicht erfül
 
 ## Controller-Prompt-Kern
 
-`/Goal Arbeite die Lokalisierung des Gamebook-Downloads vollständig und sequenziell von GB-01 bis GB-03 ab und merge den abgeschlossenen Arbeitsbranch lokal nach main. Lies zuerst AGENTS.md, die projektbezogene Wissensbasis und dieses Prozessartefakt. Arbeite ausschließlich im Worktree C:\Projekte\NETGRID_GAMEBOOK_LOCALIZATION auf Branch codex/gamebook-localization. Nutze den Hauptworkspace nur für den finalen Merge. Arbeite immer nur am aktuellen Paket, führe änderungsnahe Checks aus und committe jedes abgeschlossene Paket. Bei einem Sicherheitsblocker stoppe mit Blocker-Report und Removal Condition. Integriere danach aktuelles main, verifiziere direkt änderungsnah, merge lokal nach main und markiere das Goal erst nach verifiziertem Worktree- und Branch-Cleanup als complete.`
+`/Goal Arbeite die Lokalisierung des Gamebook-Downloads vollständig und sequenziell von GB-01 bis GB-03 ab und merge den abgeschlossenen Arbeitsbranch lokal nach main. Lies zuerst AGENTS.md, `docs/codex/CODEX_STATUS.md` und die einschlägige aktuelle Dokumentation und dieses Prozessartefakt. Arbeite ausschließlich im Worktree C:\Projekte\NETGRID_GAMEBOOK_LOCALIZATION auf Branch codex/gamebook-localization. Nutze den Hauptworkspace nur für den finalen Merge. Arbeite immer nur am aktuellen Paket, führe änderungsnahe Checks aus und committe jedes abgeschlossene Paket. Bei einem Sicherheitsblocker stoppe mit Blocker-Report und Removal Condition. Integriere danach aktuelles main, verifiziere direkt änderungsnah, merge lokal nach main und markiere das Goal erst nach verifiziertem Worktree- und Branch-Cleanup als complete.`
 
 ## Abschlusskriterien
 

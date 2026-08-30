@@ -6,12 +6,11 @@ Stand: 2026-08-21
 
 Für den aktuellen Projektstand gelten in dieser Reihenfolge:
 
-1. `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-2. `docs/architecture/README.md`
-3. `docs/architecture/engine/README.md`
-4. `docs/architecture/ai/README.md`
-5. passende `docs/runbooks/` und `docs/activities/`
-6. paketlokale `AGENTS.md`, Code, Tests und ausführbare Gates
+1. `docs/architecture/README.md`
+2. `docs/architecture/engine/README.md`
+3. `docs/architecture/ai/README.md`
+4. passende `docs/runbooks/` und `docs/activities/`
+5. paketlokale `AGENTS.md`, Code, Tests und ausführbare Gates
 
 Historische Statuschroniken, abgeschlossene Releasepakete, Prozesse und Reviews werden nicht als zweite Steuerungsschicht im Arbeitsbaum gepflegt. Dafür reicht die Git-Historie.
 

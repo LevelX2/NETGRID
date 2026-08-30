@@ -397,7 +397,7 @@ corepack pnpm --filter @netgrid/web test
 
 Références actuelles d’architecture et d’exploitation :
 
-- [État actuel du projet](KI-Wissen-NETGRID/02%20Wissen/00%20Uebersichten/Aktueller%20Projektstatus.md)
+- [État actuel Codex](docs/codex/CODEX_STATUS.md)
 - [Index de l’architecture](docs/architecture/README.md)
 - [Architecture du moteur](docs/architecture/engine/README.md)
 - [Architecture de l’IA](docs/architecture/ai/README.md)
