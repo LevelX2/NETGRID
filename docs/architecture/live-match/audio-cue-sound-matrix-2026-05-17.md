@@ -6,24 +6,24 @@ NETGRID nutzt vorerst synthetische Web-Audio-Sounds. Es werden keine externen So
 
 ## Matrix
 
-| Ereignisfamilie | Action-/Event-Typen | Soundart | Wirkung | Prioritaet |
-| --- | --- | --- | --- | --- |
-| Zugwechsel | `end_turn` | `turn` | kurzer, tiefer Statuswechsel | mittel |
-| Kartenziehen | `mandatory_draw`, `draw_card` | `draw` | Papier-/Snap-Anmutung mit kurzem Noise | hoch |
-| Credits | `gain_credit` | `credit` | dezenter Chip-/Kassenimpuls | hoch |
-| Installation verdeckt | `install_card` redacted | `install_hidden` | gedeckter mechanischer Klick ohne Kartenhinweis | hoch |
-| Installation offen / Advance | `install_card`, `advance_card` public | `install_known` | kurzer technischer Klick | mittel |
-| Karte spielen | `play_event`, `play_operation` | `play` | zweistufiger Ausspiel-Akzent | mittel |
-| Rez | `rez_ice` | `rez` | leises Power-up | hoch |
-| Run / Encounter | `start_run`, `continue_run`, `decline_rez`, `pump_breaker`, `break_subroutine` | `run` | kurzer Netzwerk-/Scanimpuls | hoch |
-| Zugriff | `access_card` | `access` | einzelner Scan-Ping | hoch |
-| Agenda | `score_agenda`, `steal_agenda` | `agenda` | heller, klarer Erfolgshinweis | hoch |
-| Trash / Purge | `trash_accessed_card`, `trash_resource`, `purge_virus_counters` | `trash` | kurzer dumpfer Abwurf | mittel |
-| Tag erhalten | öffentliche Folgeevents mit positivem `tagsAdded` oder gleichwertigem öffentlichem Tag-Zähler | `gain_tag` | unverwechselbarer Target-Lock-Alarm: drei hohe Ortungsimpulse und ein tiefer Lock-on-Abschluss | hoch |
-| Damage | öffentliche, aufgelöste Damage-Impacts mit positivem `damageAmount` | `damage` | kurzer, abwärts gleitender Synth-Laserschuss; ein Impuls je tatsächlich erlittenem Schadenspunkt | hoch |
-| Tag entfernen | `remove_tag` | `tag_or_damage` | kurzer dunkler Statusakzent | mittel |
-| Choice | `resolve_choice` | `choice` | dezenter Interface-Klick | niedrig |
-| Spielende | `game_end` und Result-Modal | `game_end` / Result-Sound | klarer Abschluss | hoch |
+| Ereignisfamilie              | Action-/Event-Typen                                                                           | Soundart                  | Wirkung                                                                                          | Prioritaet |
+| ---------------------------- | --------------------------------------------------------------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------ | ---------- |
+| Zugwechsel                   | `end_turn`                                                                                    | `turn`                    | kurzer, tiefer Statuswechsel                                                                     | mittel     |
+| Kartenziehen                 | `mandatory_draw`, `draw_card`                                                                 | `draw`                    | Papier-/Snap-Anmutung mit kurzem Noise                                                           | hoch       |
+| Credits                      | `gain_credit`                                                                                 | `credit`                  | dezenter Chip-/Kassenimpuls                                                                      | hoch       |
+| Installation verdeckt        | `install_card` redacted                                                                       | `install_hidden`          | gedeckter mechanischer Klick ohne Kartenhinweis                                                  | hoch       |
+| Installation offen / Advance | `install_card`, `advance_card` public                                                         | `install_known`           | kurzer technischer Klick                                                                         | mittel     |
+| Karte spielen                | `play_event`, `play_operation`                                                                | `play`                    | zweistufiger Ausspiel-Akzent                                                                     | mittel     |
+| Rez                          | `rez_ice`                                                                                     | `rez`                     | leises Power-up                                                                                  | hoch       |
+| Run / Encounter              | `start_run`, `continue_run`, `decline_rez`, `pump_breaker`, `break_subroutine`                | `run`                     | kurzer Netzwerk-/Scanimpuls                                                                      | hoch       |
+| Zugriff                      | `access_card`                                                                                 | `access`                  | einzelner Scan-Ping                                                                              | hoch       |
+| Agenda                       | `score_agenda`, `steal_agenda`                                                                | `agenda`                  | heller, klarer Erfolgshinweis                                                                    | hoch       |
+| Trash / Purge                | `trash_accessed_card`, `trash_resource`, `purge_virus_counters`                               | `trash`                   | kurzer dumpfer Abwurf                                                                            | mittel     |
+| Tag erhalten                 | öffentliche Folgeevents mit positivem `tagsAdded` oder gleichwertigem öffentlichem Tag-Zähler | `gain_tag`                | unverwechselbarer Target-Lock-Alarm: drei hohe Ortungsimpulse und ein tiefer Lock-on-Abschluss   | hoch       |
+| Damage                       | öffentliche, aufgelöste Damage-Impacts mit positivem `damageAmount`                           | `damage`                  | kurzer, abwärts gleitender Synth-Laserschuss; ein Impuls je tatsächlich erlittenem Schadenspunkt | hoch       |
+| Tag entfernen                | `remove_tag`                                                                                  | `tag_or_damage`           | kurzer dunkler Statusakzent                                                                      | mittel     |
+| Choice                       | `resolve_choice`                                                                              | `choice`                  | dezenter Interface-Klick                                                                         | niedrig    |
+| Spielende                    | `game_end` und Result-Modal                                                                   | `game_end` / Result-Sound | klarer Abschluss                                                                                 | hoch       |
 
 ## Bewusst still oder generisch
 

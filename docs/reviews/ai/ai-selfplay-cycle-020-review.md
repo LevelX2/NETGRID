@@ -25,8 +25,8 @@ SQLite-Evidence. Die aktive Standarddeckauswahl verwendete SHA-256 über
 
 ## Ergebnis wie im Programm
 
-| Partie | Standarddecks                                  |            Endergebnis | Agendapunkte | Ende         | Entscheidungen |
-| ------ | ---------------------------------------------- | ---------------------: | -----------: | ------------ | -------------: |
+| Partie | Standarddecks                                         |            Endergebnis | Agendapunkte | Ende         | Entscheidungen |
+| ------ | ----------------------------------------------------- | ---------------------: | -----------: | ------------ | -------------: |
 | Seed 1 | **Last Call at R&D** gegen **Universal Fast Advance** | Runner **10 – 4** Corp |      **8:4** | Agendapunkte |            289 |
 | Seed 2 | **Last Call at R&D** gegen **Universal Fast Advance** | Runner **10 – 5** Corp |      **7:5** | Agendapunkte |            210 |
 | Seed 3 | **Last Call at R&D** gegen **Universal Fast Advance** | Runner **10 – 5** Corp |      **9:5** | Agendapunkte |            627 |

@@ -92,23 +92,23 @@ Zonenlayout nebeneinander stehen und erst bei Platzmangel umbrechen.
 ## Akzeptanzkriterien
 
 - [ ] Auf einem iPhone-14-Viewport sind Stack und ein leeres Rig nur so breit
-  wie Beschriftung, Innenabstände und Inhalt es erfordern, nicht pauschal
-  viewportbreit.
+      wie Beschriftung, Innenabstände und Inhalt es erfordern, nicht pauschal
+      viewportbreit.
 - [ ] Grip, Stack, Rig und Heap folgen demselben inhaltsbreiten äußeren
-  Zonenvertrag; die Heap-Darstellung beruht nicht länger auf einem zufälligen
-  Spezifitätsvorrang.
+      Zonenvertrag; die Heap-Darstellung beruht nicht länger auf einem zufälligen
+      Spezifitätsvorrang.
 - [ ] Mehrere schmale Runnerzonen stehen nebeneinander, wenn sie gemeinsam in
-  den verfügbaren Bereich passen, und umbrechen geordnet bei Platzmangel.
+      den verfügbaren Bereich passen, und umbrechen geordnet bei Platzmangel.
 - [ ] Eine breite Grip- oder Rig-Belegung überschreitet den Viewport nicht und
-  bleibt mit dem vorgesehenen inneren Kartenlayout vollständig erreichbar.
+      bleibt mit dem vorgesehenen inneren Kartenlayout vollständig erreichbar.
 - [ ] Aufgeklappte, eingeklappte, leere und befüllte Zustände bleiben
-  verständlich und bedienbar.
+      verständlich und bedienbar.
 - [ ] 50 %, 100 % und maximale Kartengröße erzeugen weder unnötige Vollbreite
-  noch horizontales Seiten-Overflow.
+      noch horizontales Seiten-Overflow.
 - [ ] Die Desktopdarstellung bleibt unverändert.
 - [ ] Ein fokussierter automatisierter Layouttest schützt den mobilen
-  `fit-content`-/`max-width`-/Wrap-Vertrag; eine visuelle Prüfung bei
-  390 × 844 Pixel dokumentiert den reproduzierten Fall.
+      `fit-content`-/`max-width`-/Wrap-Vertrag; eine visuelle Prüfung bei
+      390 × 844 Pixel dokumentiert den reproduzierten Fall.
 
 ## Umsetzungshinweise
 

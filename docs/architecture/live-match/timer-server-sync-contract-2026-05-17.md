@@ -78,44 +78,44 @@ export type ApiTimerSnapshot = {
 
 ### Pflichtsemantik
 
-| Feld | Vertrag |
-| --- | --- |
-| `schemaVersion` | Stabiler Versionsanker für Client- und Testcode. Erste Version ist `timer-snapshot-v1`. |
-| `matchId` | Normale Matchkennung; kein Join-, Session- oder Reconnect-Token. |
-| `matchVersion` | Server-Matchversion aus dem bestehenden Multiplayer-Vertrag. Erhöht sich auch bei Lobby-, Reconnect- und Lifecycle-Änderungen. |
-| `stateVersion` | Nur vorhanden, wenn ein `GameState` existiert. Der Wert entspricht `playerView.stateVersion`; Timer-Ticks alleine erhöhen ihn nicht. |
-| `serverNowMs` | Serverzeit in Millisekunden als Driftreferenz. Clients berechnen daraus nur Anzeigeoffsets. |
-| `generatedAtIso` | Menschlich lesbarer ISO-Zeitpunkt für Debugging nach Redaction-Regel. |
-| `serverMonotonicSeq` | Pro Match monoton steigender Timer-Snapshot-Zähler. Er dient nur zur Reihenfolge alter WS-Ticks und ist kein Engine-Counter. |
-| `matchStartedAtMs` | Serverzeitpunkt des Matchstarts, falls bekannt und public-safe. Für Lobbyphasen optional. |
-| `elapsedMatchMs` | Serverberechnete sichtbare Matchlaufzeit. Muss auch ohne `matchStartedAtMs` nutzbar sein. |
-| `scope` | Grober public-/side-sicherer Timerbereich. `decision` darf nur gewählt werden, wenn eine Entscheidung als Spielflussblockade ableitbar ist. |
-| `scopeStartedAtMs` | Serverzeitpunkt des aktuellen Timerbereichs. Wird bei Scope-, Seiten-, TimingPoint- oder relevanter PendingChoice-Änderung neu gesetzt. |
-| `elapsedScopeMs` | Serverberechnetes Alter des aktuellen Bereichs. |
-| `activeSide` | Aus `PlayerView.activeSide` ableitbare aktive Seite. Keine eigene Serverlogik darf hier eine geheime Entscheidung offenlegen. |
-| `decisionOwnerSide` | Nur die Seite, die aktuell eine Entscheidung treffen muss. Bei privaten Choices sieht die Gegenseite nur die Seite, keine Optionsdetails. |
-| `timingPoint` | Nur vorhandene `TimingPointId`, wenn sie bereits über `PlayerView` side-sicher ist. |
-| `warningLevel` | Serverseitig berechnete Anzeigegruppe ohne Regelwirkung. |
-| `warningThresholdsMs` | Konfigurierte Schwellen in Millisekunden. Schwellen müssen für beide Seiten gleich oder side-sicher begründbar sein. |
-| `softLimitMs`, `graceLimitMs` | Anzeigegrenzen ohne Engine-Wirkung. |
-| `hardLimitMs`, `deadlineId` | In diesem Vertrag bewusst `never`. Harte Fristen brauchen einen späteren Engine-Vertrag. |
-| `tickIntervalMs` | Empfohlene Periodik für Live-Sync. |
-| `nextRecommendedSyncAtMs` | Serverhinweis für Client-Resync; keine Deadline. |
-| `driftPolicy` | Client-Anzeigegrenzen für Interpolation, Visibility-Resume und Driftkorrektur. |
+| Feld                          | Vertrag                                                                                                                                     |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `schemaVersion`               | Stabiler Versionsanker für Client- und Testcode. Erste Version ist `timer-snapshot-v1`.                                                     |
+| `matchId`                     | Normale Matchkennung; kein Join-, Session- oder Reconnect-Token.                                                                            |
+| `matchVersion`                | Server-Matchversion aus dem bestehenden Multiplayer-Vertrag. Erhöht sich auch bei Lobby-, Reconnect- und Lifecycle-Änderungen.              |
+| `stateVersion`                | Nur vorhanden, wenn ein `GameState` existiert. Der Wert entspricht `playerView.stateVersion`; Timer-Ticks alleine erhöhen ihn nicht.        |
+| `serverNowMs`                 | Serverzeit in Millisekunden als Driftreferenz. Clients berechnen daraus nur Anzeigeoffsets.                                                 |
+| `generatedAtIso`              | Menschlich lesbarer ISO-Zeitpunkt für Debugging nach Redaction-Regel.                                                                       |
+| `serverMonotonicSeq`          | Pro Match monoton steigender Timer-Snapshot-Zähler. Er dient nur zur Reihenfolge alter WS-Ticks und ist kein Engine-Counter.                |
+| `matchStartedAtMs`            | Serverzeitpunkt des Matchstarts, falls bekannt und public-safe. Für Lobbyphasen optional.                                                   |
+| `elapsedMatchMs`              | Serverberechnete sichtbare Matchlaufzeit. Muss auch ohne `matchStartedAtMs` nutzbar sein.                                                   |
+| `scope`                       | Grober public-/side-sicherer Timerbereich. `decision` darf nur gewählt werden, wenn eine Entscheidung als Spielflussblockade ableitbar ist. |
+| `scopeStartedAtMs`            | Serverzeitpunkt des aktuellen Timerbereichs. Wird bei Scope-, Seiten-, TimingPoint- oder relevanter PendingChoice-Änderung neu gesetzt.     |
+| `elapsedScopeMs`              | Serverberechnetes Alter des aktuellen Bereichs.                                                                                             |
+| `activeSide`                  | Aus `PlayerView.activeSide` ableitbare aktive Seite. Keine eigene Serverlogik darf hier eine geheime Entscheidung offenlegen.               |
+| `decisionOwnerSide`           | Nur die Seite, die aktuell eine Entscheidung treffen muss. Bei privaten Choices sieht die Gegenseite nur die Seite, keine Optionsdetails.   |
+| `timingPoint`                 | Nur vorhandene `TimingPointId`, wenn sie bereits über `PlayerView` side-sicher ist.                                                         |
+| `warningLevel`                | Serverseitig berechnete Anzeigegruppe ohne Regelwirkung.                                                                                    |
+| `warningThresholdsMs`         | Konfigurierte Schwellen in Millisekunden. Schwellen müssen für beide Seiten gleich oder side-sicher begründbar sein.                        |
+| `softLimitMs`, `graceLimitMs` | Anzeigegrenzen ohne Engine-Wirkung.                                                                                                         |
+| `hardLimitMs`, `deadlineId`   | In diesem Vertrag bewusst `never`. Harte Fristen brauchen einen späteren Engine-Vertrag.                                                    |
+| `tickIntervalMs`              | Empfohlene Periodik für Live-Sync.                                                                                                          |
+| `nextRecommendedSyncAtMs`     | Serverhinweis für Client-Resync; keine Deadline.                                                                                            |
+| `driftPolicy`                 | Client-Anzeigegrenzen für Interpolation, Visibility-Resume und Driftkorrektur.                                                              |
 
 ## Scope-Ableitung
 
 Die Scope-Ableitung muss konservativ sein:
 
-| Quelle | Snapshot-Scope |
-| --- | --- |
-| Pending-Lobby, Deck-Handshake, Ready-Check oder Countdown | `lobby` |
-| aktiver Setup-/Mulligan-Fluss | `setup` |
-| normale Korp-/Runner-Aktions- oder Discard-Phase ohne Run | `turn` |
-| aktiver Run ohne private Entscheidung | `run` |
-| sichtbare oder side-sicher ableitbare PendingChoice / LegalAction-Blockade | `decision` |
-| abgeschlossenes, abgebrochenes, aufgegebenes oder forfeited Match | `finished` |
-| unklarer aktiver Zustand | `match` |
+| Quelle                                                                     | Snapshot-Scope |
+| -------------------------------------------------------------------------- | -------------- |
+| Pending-Lobby, Deck-Handshake, Ready-Check oder Countdown                  | `lobby`        |
+| aktiver Setup-/Mulligan-Fluss                                              | `setup`        |
+| normale Korp-/Runner-Aktions- oder Discard-Phase ohne Run                  | `turn`         |
+| aktiver Run ohne private Entscheidung                                      | `run`          |
+| sichtbare oder side-sicher ableitbare PendingChoice / LegalAction-Blockade | `decision`     |
+| abgeschlossenes, abgebrochenes, aufgegebenes oder forfeited Match          | `finished`     |
+| unklarer aktiver Zustand                                                   | `match`        |
 
 Private Choice-Details dürfen den Scope nicht verfeinern. Beispiel: Wenn die Runnerin eine private Grip-/Stack-Choice trifft, darf die Korp höchstens `decisionOwnerSide: "runner"` und `scope: "decision"` sehen, aber keinen Choice-Typ, keine Optionsanzahl, keine Kartennamen und keine Zielzonen.
 
@@ -230,28 +230,28 @@ Offen für den Umsetzungsslice:
 
 ## Testmatrix
 
-| ID | Bereich | Erwartung |
-| --- | --- | --- |
-| TSC-T001 | Shared Contract | `ApiTimerSnapshot` ist exportiert und enthält keine `hardLimitMs`-/`deadlineId`-Werte im ersten Slice. |
-| TSC-T002 | Side Payload | Aktive Side-Payload enthält `timerSnapshot` mit `matchId`, `matchVersion`, `stateVersion`, `serverNowMs`, `elapsedMatchMs`, `scope` und `warningLevel`. |
-| TSC-T003 | Lobby Payload | Lobby-/Ready-/Countdown-Payload enthält Snapshot ohne `stateVersion`, solange kein `GameState` existiert. |
-| TSC-T004 | WebSocket Tick | `timer_snapshot` kann ohne `state_update` gesendet werden und erhöht weder `stateVersion` noch `matchVersion`. |
-| TSC-T005 | State Wechsel | Nach akzeptierter Action passt `timerSnapshot.stateVersion` zur neuen `playerView.stateVersion`. |
-| TSC-T006 | Reconnect Gleichstand | Reconnect liefert denselben side-sicheren Scope wie Live-Clients und nutzt einen frischen `serverNowMs`. |
-| TSC-T007 | Stale WS Snapshot | Client-/Server-Test verwirft Snapshots mit älterer `matchVersion` oder älterer `stateVersion`. |
-| TSC-T008 | Private Choice Redaction | Gegenseite sieht bei privater Choice keine Optionsanzahl, Kartennamen, Ziel-IDs oder Hidden-Zone-Labels im Snapshot. |
-| TSC-T009 | Token Redaction | JSON von REST-, Reconnect- und WS-Timerpayloads enthält keine Join-, Session-, Reconnect-, Account- oder TokenHash-Felder. |
-| TSC-T010 | Deckdaten Redaction | Timerpayloads enthalten keine Decklisten, Deckhashes, Cloud-Deck-IDs oder private Decksnapshot-Felder. |
-| TSC-T011 | Hidden Info Redaction | Timerpayloads enthalten keine `privatePayload`, `cardInstances`, `FullState`, Hidden-Zone-Inhalte oder verdeckte Kartentitel. |
-| TSC-T012 | AI Boundary | `AiDecisionInput` und `AiDecisionDebug` bleiben ohne `timerSnapshot`, menschliche Deadlines und Matchtimerfelder. |
-| TSC-T013 | Replay Boundary | Timer-Ticks erzeugen keine `PublicGameEvent` und erscheinen nicht im öffentlichen Replay. |
-| TSC-T014 | StateHash Boundary | Mehrere Timer-Ticks zwischen zwei Spieleraktionen lassen `hashState(gameState)` unverändert. |
-| TSC-T015 | EventTail Boundary | `eventTail` bleibt unverändert, wenn nur ein Timer-Snapshot gesendet wird. |
-| TSC-T016 | Warning Config | Warnschwellen ändern nur `warningLevel` und Anzeigegrenzen, aber keine LegalActions oder Engine-Ergebnisse. |
-| TSC-T017 | Disconnect | Bei WS-Verlust wird keine Server- oder Client-Timeout-Aktion erzeugt. |
-| TSC-T018 | Finished Match | Beendetes Match liefert `scope: "finished"` ohne Replay- oder ResultSummary-Änderung. |
-| TSC-T019 | Log Redaction | Serverlogs und Fehlertexte redigieren Timerumfeld nach der Observability-Baseline und enthalten keine verbotenen Muster. |
-| TSC-T020 | Periodik | Periodische Ticks stoppen bei fehlenden aktiven Clients oder Matchende und erzeugen keine Persistenzflut. |
+| ID       | Bereich                  | Erwartung                                                                                                                                               |
+| -------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| TSC-T001 | Shared Contract          | `ApiTimerSnapshot` ist exportiert und enthält keine `hardLimitMs`-/`deadlineId`-Werte im ersten Slice.                                                  |
+| TSC-T002 | Side Payload             | Aktive Side-Payload enthält `timerSnapshot` mit `matchId`, `matchVersion`, `stateVersion`, `serverNowMs`, `elapsedMatchMs`, `scope` und `warningLevel`. |
+| TSC-T003 | Lobby Payload            | Lobby-/Ready-/Countdown-Payload enthält Snapshot ohne `stateVersion`, solange kein `GameState` existiert.                                               |
+| TSC-T004 | WebSocket Tick           | `timer_snapshot` kann ohne `state_update` gesendet werden und erhöht weder `stateVersion` noch `matchVersion`.                                          |
+| TSC-T005 | State Wechsel            | Nach akzeptierter Action passt `timerSnapshot.stateVersion` zur neuen `playerView.stateVersion`.                                                        |
+| TSC-T006 | Reconnect Gleichstand    | Reconnect liefert denselben side-sicheren Scope wie Live-Clients und nutzt einen frischen `serverNowMs`.                                                |
+| TSC-T007 | Stale WS Snapshot        | Client-/Server-Test verwirft Snapshots mit älterer `matchVersion` oder älterer `stateVersion`.                                                          |
+| TSC-T008 | Private Choice Redaction | Gegenseite sieht bei privater Choice keine Optionsanzahl, Kartennamen, Ziel-IDs oder Hidden-Zone-Labels im Snapshot.                                    |
+| TSC-T009 | Token Redaction          | JSON von REST-, Reconnect- und WS-Timerpayloads enthält keine Join-, Session-, Reconnect-, Account- oder TokenHash-Felder.                              |
+| TSC-T010 | Deckdaten Redaction      | Timerpayloads enthalten keine Decklisten, Deckhashes, Cloud-Deck-IDs oder private Decksnapshot-Felder.                                                  |
+| TSC-T011 | Hidden Info Redaction    | Timerpayloads enthalten keine `privatePayload`, `cardInstances`, `FullState`, Hidden-Zone-Inhalte oder verdeckte Kartentitel.                           |
+| TSC-T012 | AI Boundary              | `AiDecisionInput` und `AiDecisionDebug` bleiben ohne `timerSnapshot`, menschliche Deadlines und Matchtimerfelder.                                       |
+| TSC-T013 | Replay Boundary          | Timer-Ticks erzeugen keine `PublicGameEvent` und erscheinen nicht im öffentlichen Replay.                                                               |
+| TSC-T014 | StateHash Boundary       | Mehrere Timer-Ticks zwischen zwei Spieleraktionen lassen `hashState(gameState)` unverändert.                                                            |
+| TSC-T015 | EventTail Boundary       | `eventTail` bleibt unverändert, wenn nur ein Timer-Snapshot gesendet wird.                                                                              |
+| TSC-T016 | Warning Config           | Warnschwellen ändern nur `warningLevel` und Anzeigegrenzen, aber keine LegalActions oder Engine-Ergebnisse.                                             |
+| TSC-T017 | Disconnect               | Bei WS-Verlust wird keine Server- oder Client-Timeout-Aktion erzeugt.                                                                                   |
+| TSC-T018 | Finished Match           | Beendetes Match liefert `scope: "finished"` ohne Replay- oder ResultSummary-Änderung.                                                                   |
+| TSC-T019 | Log Redaction            | Serverlogs und Fehlertexte redigieren Timerumfeld nach der Observability-Baseline und enthalten keine verbotenen Muster.                                |
+| TSC-T020 | Periodik                 | Periodische Ticks stoppen bei fehlenden aktiven Clients oder Matchende und erzeugen keine Persistenzflut.                                               |
 
 ## Abnahmekriterien für Implementierung
 

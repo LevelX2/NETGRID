@@ -96,23 +96,23 @@ nicht „1 Recurring Credits“ ausgeben.
 ## Akzeptanzkriterien
 
 - [ ] Der reproduzierte Korp-Zugbeginn mit Investment Firm erzeugt genau einen
-  sichtbaren, verständlichen Chronikvorgang für die Auszahlung von 1 Credit.
+      sichtbaren, verständlichen Chronikvorgang für die Auszahlung von 1 Credit.
 - [ ] Der Eintrag nennt Investment Firm und den erhaltenen Credit; er behauptet
-  nicht zusätzlich eine zweite Spieleraktion für die technische
-  Counter-Abnahme.
+      nicht zusätzlich eine zweite Spieleraktion für die technische
+      Counter-Abnahme.
 - [ ] Im sichtbaren Chroniktext kommt weder „1 Recurring Credits“ noch eine
-  andere falsche Singular-/Pluralform vor.
+      andere falsche Singular-/Pluralform vor.
 - [ ] Ein eventuell sichtbarer Restbestand der Karte gehört als Detail zum
-  Auszahlungsvorgang und stimmt mit dem öffentlichen `remainingCounters`-Wert
-  überein.
+      Auszahlungsvorgang und stimmt mit dem öffentlichen `remainingCounters`-Wert
+      überein.
 - [ ] Andere automatische Counterwechsel, insbesondere
-  Recurring-Credit-Auffrischungen und Shell-Traders-Counter, behalten ihre
-  bisherigen fachlich notwendigen Chronikeinträge.
+      Recurring-Credit-Auffrischungen und Shell-Traders-Counter, behalten ihre
+      bisherigen fachlich notwendigen Chronikeinträge.
 - [ ] Ein fokussierter Web-Test belegt die zusammengehörige reale Effektfolge,
-  beide Betrachterformulierungen und den Schutz vor dem doppelten Eintrag.
+      beide Betrachterformulierungen und den Schutz vor dem doppelten Eintrag.
 - [ ] Die Lösung verwendet strukturierte öffentliche Effektsemantik und leakt
-  keine privaten Karten-, Choice- oder Zustandsdaten in Live-Chronik,
-  Reconnect oder Replay.
+      keine privaten Karten-, Choice- oder Zustandsdaten in Live-Chronik,
+      Reconnect oder Replay.
 
 ## Umsetzungshinweise
 

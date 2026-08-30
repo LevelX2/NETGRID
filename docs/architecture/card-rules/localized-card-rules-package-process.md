@@ -84,27 +84,27 @@ Abschluss:
 
 ## Paketfolge
 
-| Paket | Inhalt | Ziel-Commit |
-| --- | --- | --- |
-| P00 | Verzögerte, erklärende Navigationstooltips | `feat(web): add delayed navigation tooltips` |
-| P01 | Übersetzungsvertrag, Glossar, Katalogstruktur und QA-Harness | `test(i18n): define card rule translation contract` |
-| P02 | Originalset Deutsch 001–100 | `feat(i18n): translate originalset rules de 001-100` |
-| P03 | Originalset Deutsch 101–200 | `feat(i18n): translate originalset rules de 101-200` |
-| P03A | Gegnerische Aktionshinweise in Fenster- und Floating-Darstellung lokalisieren | `fix(i18n): localize opponent action cues` |
-| P04 | Originalset Deutsch 201–300 | `feat(i18n): translate originalset rules de 201-300` |
-| P05 | Originalset Deutsch 301–374 | `feat(i18n): complete originalset rules in German` |
-| P06 | Originalset Französisch 001–100 | `feat(i18n): translate originalset rules fr 001-100` |
-| P07 | Originalset Französisch 101–200 | `feat(i18n): translate originalset rules fr 101-200` |
-| P08 | Originalset Französisch 201–300 | `feat(i18n): translate originalset rules fr 201-300` |
-| P09 | Originalset Französisch 301–374 | `feat(i18n): complete originalset rules in French` |
-| P10 | Classic Deutsch 001–054 | `feat(i18n): translate classic rules in German` |
-| P11 | Classic Französisch 001–054 | `feat(i18n): translate classic rules in French` |
-| P12 | Proteus Deutsch 001–077 | `feat(i18n): translate proteus rules de 001-077` |
-| P13 | Proteus Deutsch 078–154 | `feat(i18n): complete proteus rules in German` |
-| P14 | Proteus Französisch 001–077 | `feat(i18n): translate proteus rules fr 001-077` |
-| P15 | Proteus Französisch 078–154 | `feat(i18n): complete proteus rules in French` |
-| P16 | Vollständigkeitsprüfung, UI-Regressionen und Architekturdokumentation | `test(i18n): verify complete localized card rules` |
-| P17 | Main-Abgleich, direkt betroffene Rechecks, Merge und Cleanup | kein zusätzlicher Feature-Commit erforderlich |
+| Paket | Inhalt                                                                        | Ziel-Commit                                          |
+| ----- | ----------------------------------------------------------------------------- | ---------------------------------------------------- |
+| P00   | Verzögerte, erklärende Navigationstooltips                                    | `feat(web): add delayed navigation tooltips`         |
+| P01   | Übersetzungsvertrag, Glossar, Katalogstruktur und QA-Harness                  | `test(i18n): define card rule translation contract`  |
+| P02   | Originalset Deutsch 001–100                                                   | `feat(i18n): translate originalset rules de 001-100` |
+| P03   | Originalset Deutsch 101–200                                                   | `feat(i18n): translate originalset rules de 101-200` |
+| P03A  | Gegnerische Aktionshinweise in Fenster- und Floating-Darstellung lokalisieren | `fix(i18n): localize opponent action cues`           |
+| P04   | Originalset Deutsch 201–300                                                   | `feat(i18n): translate originalset rules de 201-300` |
+| P05   | Originalset Deutsch 301–374                                                   | `feat(i18n): complete originalset rules in German`   |
+| P06   | Originalset Französisch 001–100                                               | `feat(i18n): translate originalset rules fr 001-100` |
+| P07   | Originalset Französisch 101–200                                               | `feat(i18n): translate originalset rules fr 101-200` |
+| P08   | Originalset Französisch 201–300                                               | `feat(i18n): translate originalset rules fr 201-300` |
+| P09   | Originalset Französisch 301–374                                               | `feat(i18n): complete originalset rules in French`   |
+| P10   | Classic Deutsch 001–054                                                       | `feat(i18n): translate classic rules in German`      |
+| P11   | Classic Französisch 001–054                                                   | `feat(i18n): translate classic rules in French`      |
+| P12   | Proteus Deutsch 001–077                                                       | `feat(i18n): translate proteus rules de 001-077`     |
+| P13   | Proteus Deutsch 078–154                                                       | `feat(i18n): complete proteus rules in German`       |
+| P14   | Proteus Französisch 001–077                                                   | `feat(i18n): translate proteus rules fr 001-077`     |
+| P15   | Proteus Französisch 078–154                                                   | `feat(i18n): complete proteus rules in French`       |
+| P16   | Vollständigkeitsprüfung, UI-Regressionen und Architekturdokumentation         | `test(i18n): verify complete localized card rules`   |
+| P17   | Main-Abgleich, direkt betroffene Rechecks, Merge und Cleanup                  | kein zusätzlicher Feature-Commit erforderlich        |
 
 ## Paketdetails
 

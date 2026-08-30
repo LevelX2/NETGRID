@@ -5278,7 +5278,7 @@
         "pathPassability": "reachable",
         "pathCost": 4,
         "creditsAfterRun": 0,
-      "recommendation": "gain_credits_first"
+        "recommendation": "gain_credits_first"
       }
     ]
   }

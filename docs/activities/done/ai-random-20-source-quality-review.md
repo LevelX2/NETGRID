@@ -57,28 +57,28 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 
 ## Paketfolge
 
-| Paket | Katalog | Datei | Status |
-| --- | ---: | --- | --- |
-| AI-R01 | 141 | `packages/ai/src/plans/corp-defense-domain-signals.ts` | geprüft, angepasst |
-| AI-R02 | 106 | `packages/ai/src/evaluation/doctrine-goal-coverage.ts` | geprüft |
-| AI-R03 | 627 | `packages/ai/src/simulation/side-safe-input.ts` | geprüft, angepasst |
-| AI-R04 | 185 | `packages/ai/src/plans/turn-completion-plan-module.ts` | geprüft |
-| AI-R05 | 261 | `packages/ai/src/runtime/corp-installed-economy-credit.ts` | geprüft |
-| AI-R06 | 629 | `packages/ai/src/simulation/simulation-action-source-definition.ts` | geprüft |
-| AI-R07 | 206 | `packages/ai/src/runner-canonical-hint-semantics.ts` | geprüft |
-| AI-R08 | 98 | `packages/ai/src/evaluation/decision-checkpoints/checkpoint-runner.ts` | geprüft |
-| AI-R09 | 163 | `packages/ai/src/plans/plan-resolution-failure.ts` | geprüft |
-| AI-R10 | 207 | `packages/ai/src/runner-damage-threat-assessment.ts` | geprüft, angepasst |
-| AI-R11 | 609 | `packages/ai/src/simulation/runner-pressure-metrics.ts` | geprüft, angepasst |
-| AI-R12 | 76 | `packages/ai/src/decision/semantic-shadow-decision.ts` | geprüft |
-| AI-R13 | 189 | `packages/ai/src/plans/turn-remainder-search.ts` | geprüft, angepasst |
-| AI-R14 | 476 | `packages/ai/src/runtime/shell-traders-plan-signals.ts` | geprüft, angepasst |
-| AI-R15 | 435 | `packages/ai/src/runtime/semantic-runtime-corp-board-score-composition.ts` | geprüft, angepasst |
-| AI-R16 | 73 | `packages/ai/src/decision/semantic-decision-frame.ts` | geprüft |
-| AI-R17 | 227 | `packages/ai/src/runtime/ai-facade-foundation-context.ts` | geprüft, angepasst |
-| AI-R18 | 581 | `packages/ai/src/simulation/random-legal-decision.ts` | geprüft, angepasst |
-| AI-R19 | 644 | `packages/ai/src/simulation/tag-punish-ontology-diagnostics.ts` | geprüft |
-| AI-R20 | 516 | `packages/ai/src/simulation/belief-simulation-world.ts` | geprüft, entfernt |
+| Paket  | Katalog | Datei                                                                      | Status             |
+| ------ | ------: | -------------------------------------------------------------------------- | ------------------ |
+| AI-R01 |     141 | `packages/ai/src/plans/corp-defense-domain-signals.ts`                     | geprüft, angepasst |
+| AI-R02 |     106 | `packages/ai/src/evaluation/doctrine-goal-coverage.ts`                     | geprüft            |
+| AI-R03 |     627 | `packages/ai/src/simulation/side-safe-input.ts`                            | geprüft, angepasst |
+| AI-R04 |     185 | `packages/ai/src/plans/turn-completion-plan-module.ts`                     | geprüft            |
+| AI-R05 |     261 | `packages/ai/src/runtime/corp-installed-economy-credit.ts`                 | geprüft            |
+| AI-R06 |     629 | `packages/ai/src/simulation/simulation-action-source-definition.ts`        | geprüft            |
+| AI-R07 |     206 | `packages/ai/src/runner-canonical-hint-semantics.ts`                       | geprüft            |
+| AI-R08 |      98 | `packages/ai/src/evaluation/decision-checkpoints/checkpoint-runner.ts`     | geprüft            |
+| AI-R09 |     163 | `packages/ai/src/plans/plan-resolution-failure.ts`                         | geprüft            |
+| AI-R10 |     207 | `packages/ai/src/runner-damage-threat-assessment.ts`                       | geprüft, angepasst |
+| AI-R11 |     609 | `packages/ai/src/simulation/runner-pressure-metrics.ts`                    | geprüft, angepasst |
+| AI-R12 |      76 | `packages/ai/src/decision/semantic-shadow-decision.ts`                     | geprüft            |
+| AI-R13 |     189 | `packages/ai/src/plans/turn-remainder-search.ts`                           | geprüft, angepasst |
+| AI-R14 |     476 | `packages/ai/src/runtime/shell-traders-plan-signals.ts`                    | geprüft, angepasst |
+| AI-R15 |     435 | `packages/ai/src/runtime/semantic-runtime-corp-board-score-composition.ts` | geprüft, angepasst |
+| AI-R16 |      73 | `packages/ai/src/decision/semantic-decision-frame.ts`                      | geprüft            |
+| AI-R17 |     227 | `packages/ai/src/runtime/ai-facade-foundation-context.ts`                  | geprüft, angepasst |
+| AI-R18 |     581 | `packages/ai/src/simulation/random-legal-decision.ts`                      | geprüft, angepasst |
+| AI-R19 |     644 | `packages/ai/src/simulation/tag-punish-ontology-diagnostics.ts`            | geprüft            |
+| AI-R20 |     516 | `packages/ai/src/simulation/belief-simulation-world.ts`                    | geprüft, entfernt  |
 
 ## Paketdetails
 

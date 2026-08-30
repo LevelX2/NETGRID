@@ -7,10 +7,10 @@ Scope: privater NETGRID-Client
 
 Die aktive UI-Richtung besteht aus zwei komplementären Referenzen:
 
-| Set | Rolle | Einschätzung |
-| --- | --- | --- |
-| Design C – Clean High Contrast | Hauptstruktur | beste Basis für normale Board-, Match- und Verwaltungszustände |
-| Design D – Run Focus | Ergänzungsmodus | starke Referenz für Run-, Encounter-, Rez- und Access-Fokus |
+| Set                            | Rolle           | Einschätzung                                                   |
+| ------------------------------ | --------------- | -------------------------------------------------------------- |
+| Design C – Clean High Contrast | Hauptstruktur   | beste Basis für normale Board-, Match- und Verwaltungszustände |
+| Design D – Run Focus           | Ergänzungsmodus | starke Referenz für Run-, Encounter-, Rez- und Access-Fokus    |
 
 Frühere Design-A-/Design-B-Explorationen und ersetzte Drafts haben keinen aktuellen Implementierungsstatus mehr. Sie werden nicht im Arbeitsbaum konserviert; ihre Entwicklung bleibt in Git nachvollziehbar.
 

@@ -23,14 +23,14 @@ Je Variante wurden neun feste Vergleichsseeds und neun unabhängige
 Holdout-Seeds ausgewertet. Technische Abbrüche wurden ursachenbezogen behoben
 und danach exakt reproduziert; nur reguläre Endzustände zählen.
 
-| Variante | Agenda-Paket und strukturelle Kürzung | Gesamt | Corp-Abschlüsse | Technisch gültig |
-| --- | --- | ---: | --- | ---: |
-| v1 Access Grid | 3 Fetal / 3 Marked / 1 Headhunters / 1 Bioweapons; ohne Think Tank und Night Shift | 13:5 | 6 Flatlines, 7 Agenda-Siege | 18/18 nach Ursachenfix |
-| v2 Tag Hunt | 3 Fetal / 3 Marked / 2 Headhunters; ohne Think Tank und Night Shift | 13:5 | 9 Flatlines, 4 Agenda-Siege | 18/18 |
-| v3 Sparse Tycho | 3 Fetal / 3 Tycho; ohne Think Tank | 9:9 | 4 Flatlines, 5 Agenda-Siege | 18/18 |
-| v4 Sparse Overthrow | 3 Political Overthrow / 1 Marked; ein Think Tank weniger | 12:6 | 4 Flatlines, 8 Agenda-Siege | 18/18 nach Ursachenfix |
-| **v5 Damage Engine** | **3 Fetal / 3 Marked / 2 Bioweapons; ohne Think Tank und Night Shift** | **15:3** | **8 Flatlines, 7 Agenda-Siege** | **18/18** |
-| v6 Sparse Tycho ohne Draw | 3 Fetal / 3 Tycho; ein Think Tank und beide Night Shift weniger | 9:9 | 6 Flatlines, 3 Agenda-Siege | 18/18 |
+| Variante                  | Agenda-Paket und strukturelle Kürzung                                              |   Gesamt | Corp-Abschlüsse                 |       Technisch gültig |
+| ------------------------- | ---------------------------------------------------------------------------------- | -------: | ------------------------------- | ---------------------: |
+| v1 Access Grid            | 3 Fetal / 3 Marked / 1 Headhunters / 1 Bioweapons; ohne Think Tank und Night Shift |     13:5 | 6 Flatlines, 7 Agenda-Siege     | 18/18 nach Ursachenfix |
+| v2 Tag Hunt               | 3 Fetal / 3 Marked / 2 Headhunters; ohne Think Tank und Night Shift                |     13:5 | 9 Flatlines, 4 Agenda-Siege     |                  18/18 |
+| v3 Sparse Tycho           | 3 Fetal / 3 Tycho; ohne Think Tank                                                 |      9:9 | 4 Flatlines, 5 Agenda-Siege     |                  18/18 |
+| v4 Sparse Overthrow       | 3 Political Overthrow / 1 Marked; ein Think Tank weniger                           |     12:6 | 4 Flatlines, 8 Agenda-Siege     | 18/18 nach Ursachenfix |
+| **v5 Damage Engine**      | **3 Fetal / 3 Marked / 2 Bioweapons; ohne Think Tank und Night Shift**             | **15:3** | **8 Flatlines, 7 Agenda-Siege** |              **18/18** |
+| v6 Sparse Tycho ohne Draw | 3 Fetal / 3 Tycho; ein Think Tank und beide Night Shift weniger                    |      9:9 | 6 Flatlines, 3 Agenda-Siege     |                  18/18 |
 
 Die frühere 9-Punkte-Liste und ihre Ergebnisse sind nur Diagnoseevidence. Sie
 war nach Regel 1.4.6(b) kein legales 45-Karten-Standarddeck und wird nicht als

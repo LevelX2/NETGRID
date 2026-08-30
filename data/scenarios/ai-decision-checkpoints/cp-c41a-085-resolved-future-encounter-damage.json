@@ -711,9 +711,7 @@
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_257_nerve-labyrinth_2"
-            ],
+            "ice": ["corp_onr_v1_257_nerve-labyrinth_2"],
             "root": []
           },
           {
@@ -741,9 +739,7 @@
               "corp_onr_v1_234_data-darts_1",
               "corp_onr_v1_242_fatal-attractor_3"
             ],
-            "root": [
-              "corp_onr_proteus_005_marked-accounts_3"
-            ]
+            "root": ["corp_onr_proteus_005_marked-accounts_3"]
           }
         ]
       },
@@ -809,9 +805,7 @@
         "scoreArea": [],
         "rig": {
           "programs": [],
-          "hardware": [
-            "runner_onr_proteus_134_cortical-cybermodem_2"
-          ],
+          "hardware": ["runner_onr_proteus_134_cortical-cybermodem_2"],
           "resources": []
         }
       },
@@ -2210,9 +2204,7 @@
         "edgerunnerTempsInstallActionsRemaining": 0,
         "scoredAgendaStartDrawChoiceResolvedSourceIds": [],
         "scoredAgendaStartDrawChoiceSelectedSourceIds": [],
-        "fortActivityServerIdsSinceCorpTurnStart": [
-          "remote_1"
-        ],
+        "fortActivityServerIdsSinceCorpTurnStart": ["remote_1"],
         "corpStartOfTurnResolvedSourceIds": [],
         "pdcaUsedSourceIdsThisTurn": []
       },
@@ -4942,12 +4934,8 @@
             "support": 0,
             "final": 0
           },
-          "supportGaps": [
-            "no_strategy_anchor"
-          ],
-          "evidence": [
-            "neutral_doctrine:no_strategy_anchor"
-          ]
+          "supportGaps": ["no_strategy_anchor"],
+          "evidence": ["neutral_doctrine:no_strategy_anchor"]
         },
         "secondaryStrategies": [],
         "phase": "recover",
@@ -4963,10 +4951,7 @@
           "kind": "none",
           "required": 0,
           "satisfied": true,
-          "evidence": [
-            "reserve_source:runtime_context",
-            "reserve:none"
-          ]
+          "evidence": ["reserve_source:runtime_context", "reserve:none"]
         },
         "blockers": [
           {
@@ -4974,18 +4959,14 @@
             "severity": "hard",
             "reason": "no_strategy_anchor",
             "removalCondition": "provide a strategy profile with concrete anchor evidence",
-            "evidence": [
-              "neutral_doctrine:no_strategy_anchor"
-            ]
+            "evidence": ["neutral_doctrine:no_strategy_anchor"]
           },
           {
             "blockerId": "runner.neutral:support_gap:no_strategy_anchor",
             "severity": "soft",
             "reason": "support_gap",
             "removalCondition": "resolve support gap no_strategy_anchor",
-            "evidence": [
-              "support_gap:no_strategy_anchor"
-            ]
+            "evidence": ["support_gap:no_strategy_anchor"]
           }
         ],
         "transition": {
@@ -5084,10 +5065,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5175,10 +5153,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5266,10 +5241,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5357,10 +5329,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5510,10 +5479,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5819,9 +5785,7 @@
                   "knownPathCost": 0,
                   "creditsAfterKnownPath": 14,
                   "unknownIceCount": 1,
-                  "unknownIcePositions": [
-                    1
-                  ],
+                  "unknownIcePositions": [1],
                   "corpRezCredits": 7,
                   "visibleCoverage": "none",
                   "requiredCredits": 3,
@@ -6046,12 +6010,8 @@
               "assignedDomainPlanIds": [],
               "duplicateAlreadyInstalled": false,
               "affordableOrSupportable": true,
-              "semanticActionTypes": [
-                "draw.card"
-              ],
-              "actionIds": [
-                "runner.draw_card"
-              ],
+              "semanticActionTypes": ["draw.card"],
+              "actionIds": ["runner.draw_card"],
               "priorityClass": "P6",
               "value": 33,
               "evidenceCode": "runner_hand_capacity_accepts_immediate_option_development",
@@ -6167,9 +6127,7 @@
             "need": {
               "kind": "develop_liquidity",
               "needId": "economy-liquidity-development:runner:13",
-              "actionIds": [
-                "runner.gain_credit"
-              ],
+              "actionIds": ["runner.gain_credit"],
               "currentCreditsAtRevalidation": 14,
               "targetCredits": 18,
               "gap": 4,
@@ -6227,9 +6185,7 @@
           "moduleId": "runner.pressure_central",
           "moduleVersion": "1",
           "side": "runner",
-          "strategyLineIds": [
-            "runner.unknown"
-          ],
+          "strategyLineIds": ["runner.unknown"],
           "executionClass": "strategic_campaign",
           "viability": "blocked",
           "portfolioRole": "background",
@@ -6256,16 +6212,12 @@
               "pressureId": "central:archives",
               "serverId": "archives",
               "purpose": "information",
-              "strategyLineIds": [
-                "runner.unknown"
-              ],
+              "strategyLineIds": ["runner.unknown"],
               "priorityClass": "P6",
               "reachable": false,
               "marginalValue": 60,
               "evidenceCode": "runner_central_pressure_below_material_value:archives",
-              "runActionIds": [
-                "runner.start_run.archives"
-              ],
+              "runActionIds": ["runner.start_run.archives"],
               "runActionValues": {
                 "runner.start_run.archives": 0
               },
@@ -6419,9 +6371,7 @@
           "moduleId": "runner.pressure_central",
           "moduleVersion": "1",
           "side": "runner",
-          "strategyLineIds": [
-            "runner.unknown"
-          ],
+          "strategyLineIds": ["runner.unknown"],
           "executionClass": "strategic_campaign",
           "viability": "blocked",
           "portfolioRole": "background",
@@ -6448,9 +6398,7 @@
               "pressureId": "central:hq",
               "serverId": "hq",
               "purpose": "access",
-              "strategyLineIds": [
-                "runner.unknown"
-              ],
+              "strategyLineIds": ["runner.unknown"],
               "priorityClass": "P4",
               "reachable": false,
               "marginalValue": -320,
@@ -6599,9 +6547,7 @@
           "moduleId": "runner.pressure_central",
           "moduleVersion": "1",
           "side": "runner",
-          "strategyLineIds": [
-            "runner.unknown"
-          ],
+          "strategyLineIds": ["runner.unknown"],
           "executionClass": "strategic_campaign",
           "viability": "blocked",
           "portfolioRole": "background",
@@ -6628,9 +6574,7 @@
               "pressureId": "central:rd",
               "serverId": "rd",
               "purpose": "information",
-              "strategyLineIds": [
-                "runner.unknown"
-              ],
+              "strategyLineIds": ["runner.unknown"],
               "priorityClass": "P4",
               "reachable": false,
               "marginalValue": -340,
@@ -6696,9 +6640,7 @@
                   "knownPathCost": 0,
                   "creditsAfterKnownPath": 14,
                   "unknownIceCount": 1,
-                  "unknownIcePositions": [
-                    1
-                  ],
+                  "unknownIcePositions": [1],
                   "corpRezCredits": 7,
                   "visibleCoverage": "none",
                   "requiredCredits": 3,
@@ -7094,9 +7036,7 @@
                 "boundaryAfter": "opponent_response_window"
               }
             ],
-            "protectedValueClaimIds": [
-              "fnv1a:ff5be701"
-            ],
+            "protectedValueClaimIds": ["fnv1a:ff5be701"],
             "transition": {
               "kind": "observation_boundary"
             }
@@ -7117,12 +7057,8 @@
         "quoteIds": [],
         "valueClaimIds": [],
         "priorityCoverage": {
-          "requiredObligationIds": [
-            "priority-band:P2"
-          ],
-          "satisfiedObligationIds": [
-            "priority-band:P2"
-          ],
+          "requiredObligationIds": ["priority-band:P2"],
+          "satisfiedObligationIds": ["priority-band:P2"],
           "violatedObligationIds": [],
           "deferredObligationIds": []
         },
@@ -7180,12 +7116,8 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": [
-        "runner.convert_run_window"
-      ],
-      "acceptableCapabilities": [
-        "convert_active_run_window"
-      ],
+      "acceptablePlanKinds": ["runner.convert_run_window"],
+      "acceptableCapabilities": ["convert_active_run_window"],
       "requiredAssessmentEvidence": [
         "runner_future_encounter_damage_requires_jack_out|source:onr_v1_242_fatal-attractor|damage:3|hand:4|projected_hand:1|required_floor:4"
       ]

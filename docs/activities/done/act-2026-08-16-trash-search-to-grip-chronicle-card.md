@@ -90,21 +90,21 @@ Playtest-Fund betrifft **Gideon’s Pawnshop**.
 ## Akzeptanzkriterien
 
 - [x] Der reproduzierte Gideon’s-Pawnshop-Pfad erzeugt nach der Auswahl einen
-  sichtbaren Chronikeintrag, der **Gideon’s Pawnshop** und den Namen der
-  tatsächlich aus dem Heap in den Grip genommenen Karte nennt.
+      sichtbaren Chronikeintrag, der **Gideon’s Pawnshop** und den Namen der
+      tatsächlich aus dem Heap in den Grip genommenen Karte nennt.
 - [x] Vor Abschluss der Auswahl behauptet kein Chronikeintrag, eine konkrete
-  Karte sei bereits zurückgeholt worden; es entsteht kein irreführender
-  Doppeleintrag für denselben Ausgang.
+      Karte sei bereits zurückgeholt worden; es entsteht kein irreführender
+      Doppeleintrag für denselben Ausgang.
 - [x] Die Chronik bezieht den Kartennamen aus einem real projizierten,
-  strukturierten und side-sicheren PublicEvent; Live-Ansicht, Reconnect und
-  Replay besitzen dieselbe Information.
+      strukturierten und side-sicheren PublicEvent; Live-Ansicht, Reconnect und
+      Replay besitzen dieselbe Information.
 - [x] Das öffentliche Ereignis enthält keine nicht gewählten Heap-Optionen,
-  keine Grip-/Stack-Inhalte und keine privaten Karteninstanz-IDs.
+      keine Grip-/Stack-Inhalte und keine privaten Karteninstanz-IDs.
 - [x] Ein Engine-/Public-Event-Test sichert den öffentlichen Bewegungsausgang;
-  ein Web-Test sichert die deutsche Chronikmeldung einschließlich beider
-  Kartennamen.
+      ein Web-Test sichert die deutsche Chronikmeldung einschließlich beider
+      Kartennamen.
 - [x] Andere Hidden-Zone-Suchen, insbesondere private Stack-Suchen ohne
-  öffentliche Auswahl, bleiben redigiert und unverändert.
+      öffentliche Auswahl, bleiben redigiert und unverändert.
 
 ## Umsetzungshinweise
 

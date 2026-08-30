@@ -113,17 +113,17 @@ Ein normaler verdeckter Zugriff ohne öffentliche Folge nutzt nur `generic_acces
 
 ## R&D-Fallmatrix
 
-| Fall | Präsentation |
-| --- | --- |
-| Verdeckte normale Karte ohne Folge | Ein generischer, nicht blockierender Access-Hinweis ohne Kartenidentität |
-| Verdeckte Karte wird getrasht | Ein öffentlicher Outcome-Cue; keine vorzeitige Kartenidentität |
-| Öffentliche Reveal-Karte | Ein Access-Fenster mit Karte |
-| Reveal-Karte verursacht Damage | Dasselbe Access-Fenster zeigt eine blockierende Damage-Stufe |
-| Agenda ohne Zusatzkosten | Ein Access-Fenster mit anschließendem Steal-Ergebnis |
-| Agenda mit Stehlkosten | Dasselbe Fenster bleibt über Entscheidung und Ergebnis bestehen |
-| Korp-Reaktion oder Bezahlentscheidung | Blockierende Choice innerhalb der Access-Sequenz |
-| Mehrfachzugriff | Eine sequenzielle Präsentation pro `accessIndex`, niemals überlagert |
-| Zugriff wird ersetzt | Nur die Präsentation des Ersatzeffekts |
+| Fall                                  | Präsentation                                                             |
+| ------------------------------------- | ------------------------------------------------------------------------ |
+| Verdeckte normale Karte ohne Folge    | Ein generischer, nicht blockierender Access-Hinweis ohne Kartenidentität |
+| Verdeckte Karte wird getrasht         | Ein öffentlicher Outcome-Cue; keine vorzeitige Kartenidentität           |
+| Öffentliche Reveal-Karte              | Ein Access-Fenster mit Karte                                             |
+| Reveal-Karte verursacht Damage        | Dasselbe Access-Fenster zeigt eine blockierende Damage-Stufe             |
+| Agenda ohne Zusatzkosten              | Ein Access-Fenster mit anschließendem Steal-Ergebnis                     |
+| Agenda mit Stehlkosten                | Dasselbe Fenster bleibt über Entscheidung und Ergebnis bestehen          |
+| Korp-Reaktion oder Bezahlentscheidung | Blockierende Choice innerhalb der Access-Sequenz                         |
+| Mehrfachzugriff                       | Eine sequenzielle Präsentation pro `accessIndex`, niemals überlagert     |
+| Zugriff wird ersetzt                  | Nur die Präsentation des Ersatzeffekts                                   |
 
 ## Verifikationsregeln
 

@@ -7,9 +7,7 @@
   "copyrightNote": "Lokale fiktive Demo- und Katalogdaten; keine offiziellen Kartentexte, Artworks, Logos, Frames oder Card Backs.",
   "normalization": {
     "algorithm": "v0.5-canonical-json-fnv1a",
-    "sortOrder": [
-      "catalogCardId"
-    ],
+    "sortOrder": ["catalogCardId"],
     "textPolicy": "Kartentext ist Anzeigeinformation und niemals Parser-Input.",
     "assetPolicy": "Asset-Felder werden in V0.5 nicht importiert oder verwendet."
   },
@@ -125,12 +123,8 @@
       "implementationManifest": {
         "manifestVersion": "card-implementation-manifest-v0.1",
         "status": "playable_mvp",
-        "unitTests": [
-          "T-CARD-CORP-000"
-        ],
-        "scenarioTests": [
-          "SCN-006"
-        ],
+        "unitTests": ["T-CARD-CORP-000"],
+        "scenarioTests": ["SCN-006"],
         "visibilityTests": [],
         "replayTests": []
       }
@@ -142,10 +136,7 @@
       "title": "Efficient Fracter",
       "side": "runner",
       "type": "program",
-      "subtypes": [
-        "icebreaker",
-        "fracter"
-      ],
+      "subtypes": ["icebreaker", "fracter"],
       "faction": "neutral_demo",
       "setId": "mvp-0.4-demo",
       "setName": "MVP 0.4 Demo Cards",
@@ -175,18 +166,10 @@
       "implementationManifest": {
         "manifestVersion": "card-implementation-manifest-v0.4",
         "status": "playable_mvp",
-        "unitTests": [
-          "T-V04-CARD-001"
-        ],
-        "scenarioTests": [
-          "SCN-V04-001"
-        ],
-        "visibilityTests": [
-          "T-V04-DATA-002"
-        ],
-        "replayTests": [
-          "T-V04-CARD-001"
-        ]
+        "unitTests": ["T-V04-CARD-001"],
+        "scenarioTests": ["SCN-V04-001"],
+        "visibilityTests": ["T-V04-DATA-002"],
+        "replayTests": ["T-V04-CARD-001"]
       }
     },
     {
@@ -226,12 +209,8 @@
       "implementationManifest": {
         "manifestVersion": "card-implementation-manifest-v0.1",
         "status": "playable_mvp",
-        "unitTests": [
-          "T-CARD-RUN-000"
-        ],
-        "scenarioTests": [
-          "SCN-006"
-        ],
+        "unitTests": ["T-CARD-RUN-000"],
+        "scenarioTests": ["SCN-006"],
         "visibilityTests": [],
         "replayTests": []
       }
@@ -273,13 +252,8 @@
       "implementationManifest": {
         "manifestVersion": "card-implementation-manifest-v0.1",
         "status": "playable_mvp",
-        "unitTests": [
-          "T-CARD-CORP-001"
-        ],
-        "scenarioTests": [
-          "SCN-001",
-          "SCN-004"
-        ],
+        "unitTests": ["T-CARD-CORP-001"],
+        "scenarioTests": ["SCN-001", "SCN-004"],
         "visibilityTests": [],
         "replayTests": []
       }
@@ -291,9 +265,7 @@
       "title": "Simple Barrier ICE",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "barrier"
-      ],
+      "subtypes": ["barrier"],
       "faction": "neutral_demo",
       "setId": "mvp-0.1-demo",
       "setName": "MVP 0.1 Demo Cards",
@@ -323,13 +295,8 @@
       "implementationManifest": {
         "manifestVersion": "card-implementation-manifest-v0.1",
         "status": "playable_mvp",
-        "unitTests": [
-          "T-CARD-CORP-004"
-        ],
-        "scenarioTests": [
-          "SCN-002",
-          "SCN-003"
-        ],
+        "unitTests": ["T-CARD-CORP-004"],
+        "scenarioTests": ["SCN-002", "SCN-003"],
         "visibilityTests": [],
         "replayTests": []
       }
@@ -341,9 +308,7 @@
       "title": "Simple Code Gate ICE",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "code_gate"
-      ],
+      "subtypes": ["code_gate"],
       "faction": "neutral_demo",
       "setId": "mvp-0.1-demo",
       "setName": "MVP 0.1 Demo Cards",
@@ -373,12 +338,8 @@
       "implementationManifest": {
         "manifestVersion": "card-implementation-manifest-v0.1",
         "status": "playable_mvp",
-        "unitTests": [
-          "T-CARD-CORP-005"
-        ],
-        "scenarioTests": [
-          "SCN-002"
-        ],
+        "unitTests": ["T-CARD-CORP-005"],
+        "scenarioTests": ["SCN-002"],
         "visibilityTests": [],
         "replayTests": []
       }
@@ -390,10 +351,7 @@
       "title": "Simple Decoder",
       "side": "runner",
       "type": "program",
-      "subtypes": [
-        "icebreaker",
-        "decoder"
-      ],
+      "subtypes": ["icebreaker", "decoder"],
       "faction": "neutral_demo",
       "setId": "mvp-0.1-demo",
       "setName": "MVP 0.1 Demo Cards",
@@ -423,12 +381,8 @@
       "implementationManifest": {
         "manifestVersion": "card-implementation-manifest-v0.1",
         "status": "playable_mvp",
-        "unitTests": [
-          "T-CARD-RUN-004"
-        ],
-        "scenarioTests": [
-          "SCN-002"
-        ],
+        "unitTests": ["T-CARD-RUN-004"],
+        "scenarioTests": ["SCN-002"],
         "visibilityTests": [],
         "replayTests": []
       }
@@ -470,18 +424,10 @@
       "implementationManifest": {
         "manifestVersion": "card-implementation-manifest-v0.4",
         "status": "playable_mvp",
-        "unitTests": [
-          "T-V04-CARD-001"
-        ],
-        "scenarioTests": [
-          "SCN-V04-001"
-        ],
-        "visibilityTests": [
-          "T-V04-DATA-002"
-        ],
-        "replayTests": [
-          "T-V04-CARD-001"
-        ]
+        "unitTests": ["T-V04-CARD-001"],
+        "scenarioTests": ["SCN-V04-001"],
+        "visibilityTests": ["T-V04-DATA-002"],
+        "replayTests": ["T-V04-CARD-001"]
       }
     },
     {
@@ -521,18 +467,10 @@
       "implementationManifest": {
         "manifestVersion": "card-implementation-manifest-v0.4",
         "status": "playable_mvp",
-        "unitTests": [
-          "T-V04-CARD-001"
-        ],
-        "scenarioTests": [
-          "SCN-V04-001"
-        ],
-        "visibilityTests": [
-          "T-V04-DATA-002"
-        ],
-        "replayTests": [
-          "T-V04-CARD-001"
-        ]
+        "unitTests": ["T-V04-CARD-001"],
+        "scenarioTests": ["SCN-V04-001"],
+        "visibilityTests": ["T-V04-DATA-002"],
+        "replayTests": ["T-V04-CARD-001"]
       }
     },
     {
@@ -572,12 +510,8 @@
       "implementationManifest": {
         "manifestVersion": "card-implementation-manifest-v0.1",
         "status": "playable_mvp",
-        "unitTests": [
-          "T-CARD-CORP-003"
-        ],
-        "scenarioTests": [
-          "SCN-004"
-        ],
+        "unitTests": ["T-CARD-CORP-003"],
+        "scenarioTests": ["SCN-004"],
         "visibilityTests": [],
         "replayTests": []
       }
@@ -619,12 +553,8 @@
       "implementationManifest": {
         "manifestVersion": "card-implementation-manifest-v0.1",
         "status": "playable_mvp",
-        "unitTests": [
-          "T-CARD-RUN-001"
-        ],
-        "scenarioTests": [
-          "SCN-006"
-        ],
+        "unitTests": ["T-CARD-RUN-001"],
+        "scenarioTests": ["SCN-006"],
         "visibilityTests": [],
         "replayTests": []
       }
@@ -666,12 +596,8 @@
       "implementationManifest": {
         "manifestVersion": "card-implementation-manifest-v0.1",
         "status": "playable_mvp",
-        "unitTests": [
-          "T-CARD-CORP-002"
-        ],
-        "scenarioTests": [
-          "SCN-006"
-        ],
+        "unitTests": ["T-CARD-CORP-002"],
+        "scenarioTests": ["SCN-006"],
         "visibilityTests": [],
         "replayTests": []
       }
@@ -683,10 +609,7 @@
       "title": "Simple Fracter",
       "side": "runner",
       "type": "program",
-      "subtypes": [
-        "icebreaker",
-        "fracter"
-      ],
+      "subtypes": ["icebreaker", "fracter"],
       "faction": "neutral_demo",
       "setId": "mvp-0.1-demo",
       "setName": "MVP 0.1 Demo Cards",
@@ -716,13 +639,8 @@
       "implementationManifest": {
         "manifestVersion": "card-implementation-manifest-v0.1",
         "status": "playable_mvp",
-        "unitTests": [
-          "T-CARD-RUN-003"
-        ],
-        "scenarioTests": [
-          "SCN-002",
-          "SCN-003"
-        ],
+        "unitTests": ["T-CARD-RUN-003"],
+        "scenarioTests": ["SCN-002", "SCN-003"],
         "visibilityTests": [],
         "replayTests": []
       }
@@ -734,10 +652,7 @@
       "title": "Simple Killer",
       "side": "runner",
       "type": "program",
-      "subtypes": [
-        "icebreaker",
-        "killer"
-      ],
+      "subtypes": ["icebreaker", "killer"],
       "faction": "neutral_demo",
       "setId": "mvp-0.1-demo",
       "setName": "MVP 0.1 Demo Cards",
@@ -767,12 +682,8 @@
       "implementationManifest": {
         "manifestVersion": "card-implementation-manifest-v0.1",
         "status": "playable_mvp",
-        "unitTests": [
-          "T-CARD-RUN-005"
-        ],
-        "scenarioTests": [
-          "SCN-002"
-        ],
+        "unitTests": ["T-CARD-RUN-005"],
+        "scenarioTests": ["SCN-002"],
         "visibilityTests": [],
         "replayTests": []
       }
@@ -814,18 +725,10 @@
       "implementationManifest": {
         "manifestVersion": "card-implementation-manifest-v0.4",
         "status": "playable_mvp",
-        "unitTests": [
-          "T-V04-CARD-001"
-        ],
-        "scenarioTests": [
-          "SCN-V04-001"
-        ],
-        "visibilityTests": [
-          "T-V04-DATA-002"
-        ],
-        "replayTests": [
-          "T-V04-CARD-001"
-        ]
+        "unitTests": ["T-V04-CARD-001"],
+        "scenarioTests": ["SCN-V04-001"],
+        "visibilityTests": ["T-V04-DATA-002"],
+        "replayTests": ["T-V04-CARD-001"]
       }
     },
     {
@@ -865,12 +768,8 @@
       "implementationManifest": {
         "manifestVersion": "card-implementation-manifest-v0.1",
         "status": "playable_mvp",
-        "unitTests": [
-          "T-CARD-RUN-002"
-        ],
-        "scenarioTests": [
-          "SCN-002"
-        ],
+        "unitTests": ["T-CARD-RUN-002"],
+        "scenarioTests": ["SCN-002"],
         "visibilityTests": [],
         "replayTests": []
       }
@@ -882,9 +781,7 @@
       "title": "Simple Sentry ICE",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "sentry"
-      ],
+      "subtypes": ["sentry"],
       "faction": "neutral_demo",
       "setId": "mvp-0.1-demo",
       "setName": "MVP 0.1 Demo Cards",
@@ -914,12 +811,8 @@
       "implementationManifest": {
         "manifestVersion": "card-implementation-manifest-v0.1",
         "status": "playable_mvp",
-        "unitTests": [
-          "T-CARD-CORP-006"
-        ],
-        "scenarioTests": [
-          "SCN-002"
-        ],
+        "unitTests": ["T-CARD-CORP-006"],
+        "scenarioTests": ["SCN-002"],
         "visibilityTests": [],
         "replayTests": []
       }
@@ -961,18 +854,10 @@
       "implementationManifest": {
         "manifestVersion": "card-implementation-manifest-v0.4",
         "status": "playable_mvp",
-        "unitTests": [
-          "T-V04-CARD-002"
-        ],
-        "scenarioTests": [
-          "SCN-V04-001"
-        ],
-        "visibilityTests": [
-          "T-V04-CARD-002"
-        ],
-        "replayTests": [
-          "T-V04-CARD-002"
-        ]
+        "unitTests": ["T-V04-CARD-002"],
+        "scenarioTests": ["SCN-V04-001"],
+        "visibilityTests": ["T-V04-CARD-002"],
+        "replayTests": ["T-V04-CARD-002"]
       }
     },
     {
@@ -982,9 +867,7 @@
       "title": "Simple Tag ICE",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "sentry"
-      ],
+      "subtypes": ["sentry"],
       "faction": "neutral_demo",
       "setId": "mvp-0.4-demo",
       "setName": "MVP 0.4 Demo Cards",
@@ -1014,18 +897,10 @@
       "implementationManifest": {
         "manifestVersion": "card-implementation-manifest-v0.4",
         "status": "playable_mvp",
-        "unitTests": [
-          "T-V04-TAG-001"
-        ],
-        "scenarioTests": [
-          "SCN-V04-002"
-        ],
-        "visibilityTests": [
-          "T-V04-TAG-001"
-        ],
-        "replayTests": [
-          "T-V04-TAG-001"
-        ]
+        "unitTests": ["T-V04-TAG-001"],
+        "scenarioTests": ["SCN-V04-002"],
+        "visibilityTests": ["T-V04-TAG-001"],
+        "replayTests": ["T-V04-TAG-001"]
       }
     },
     {
@@ -1065,18 +940,10 @@
       "implementationManifest": {
         "manifestVersion": "card-implementation-manifest-v0.4",
         "status": "playable_mvp",
-        "unitTests": [
-          "T-V04-TAG-003"
-        ],
-        "scenarioTests": [
-          "SCN-V04-003"
-        ],
-        "visibilityTests": [
-          "T-V04-TAG-003"
-        ],
-        "replayTests": [
-          "T-V04-TAG-003"
-        ]
+        "unitTests": ["T-V04-TAG-003"],
+        "scenarioTests": ["SCN-V04-003"],
+        "visibilityTests": ["T-V04-TAG-003"],
+        "replayTests": ["T-V04-TAG-003"]
       }
     },
     {
@@ -1086,9 +953,7 @@
       "title": "Simple Taxing Barrier ICE",
       "side": "corp",
       "type": "ice",
-      "subtypes": [
-        "barrier"
-      ],
+      "subtypes": ["barrier"],
       "faction": "neutral_demo",
       "setId": "mvp-0.4-demo",
       "setName": "MVP 0.4 Demo Cards",
@@ -1118,18 +983,10 @@
       "implementationManifest": {
         "manifestVersion": "card-implementation-manifest-v0.4",
         "status": "playable_mvp",
-        "unitTests": [
-          "T-V04-CARD-001"
-        ],
-        "scenarioTests": [
-          "SCN-V04-001"
-        ],
-        "visibilityTests": [
-          "T-V04-DATA-002"
-        ],
-        "replayTests": [
-          "T-V04-CARD-001"
-        ]
+        "unitTests": ["T-V04-CARD-001"],
+        "scenarioTests": ["SCN-V04-001"],
+        "visibilityTests": ["T-V04-DATA-002"],
+        "replayTests": ["T-V04-CARD-001"]
       }
     },
     {
@@ -1169,18 +1026,10 @@
       "implementationManifest": {
         "manifestVersion": "card-implementation-manifest-v0.4",
         "status": "playable_mvp",
-        "unitTests": [
-          "T-V04-CARD-003"
-        ],
-        "scenarioTests": [
-          "SCN-V04-001"
-        ],
-        "visibilityTests": [
-          "T-V04-CARD-003"
-        ],
-        "replayTests": [
-          "T-V04-CARD-003"
-        ]
+        "unitTests": ["T-V04-CARD-003"],
+        "scenarioTests": ["SCN-V04-001"],
+        "visibilityTests": ["T-V04-CARD-003"],
+        "replayTests": ["T-V04-CARD-003"]
       }
     }
   ]

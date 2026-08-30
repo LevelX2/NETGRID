@@ -65,14 +65,14 @@ side-sicherer Evidence einen engen, owner-konformen Fix ableiten.
 ## Akzeptanzkriterien
 
 - [x] Der Befund ist als bestätigter Fehler oder als unbegründeter Verdacht
-  nachvollziehbar entschieden.
+      nachvollziehbar entschieden.
 - [x] Ein bestätigter Fix bleibt beim bestehenden Planowner und verbessert
-  eine generische Score-Schutz-/Score-Konversionsfähigkeit.
+      eine generische Score-Schutz-/Score-Konversionsfähigkeit.
 - [x] Bei einem Fix belegt ein fallnaher Regressionstest die Auswahl und
-  unveränderte Ownership; betroffene KI-Architekturdokumentation ist geprüft
-  und bei Vertragsänderung aktualisiert.
+      unveränderte Ownership; betroffene KI-Architekturdokumentation ist geprüft
+      und bei Vertragsänderung aktualisiert.
 - [x] Replay, StateHash, LegalAction- und Hidden-Info-Grenzen bleiben
-  erhalten.
+      erhalten.
 
 ## Umsetzungshinweise
 

@@ -112,33 +112,33 @@ und weitere Expertenfilter bei Bedarf verfügbar bleiben.
 ## Akzeptanzkriterien
 
 - [x] Beim Öffnen des Katalogs ist das Schnellsuchfeld sofort sichtbar und
-  fokussierbar, auch wenn die erweiterten Filter geschlossen sind.
+      fokussierbar, auch wenn die erweiterten Filter geschlossen sind.
 - [x] Ein kompakter Filterknopf befindet sich im oberen Werkzeugbereich des
-  Katalogs, öffnet/schließt nur die Spezialfilter und zeigt seinen offenen
-  sowie einen aktiven gefilterten Zustand verständlich an.
+      Katalogs, öffnet/schließt nur die Spezialfilter und zeigt seinen offenen
+      sowie einen aktiven gefilterten Zustand verständlich an.
 - [x] Im geöffneten Spezialfilter existiert kein zweites Suchfeld; sichtbare
-  Suche, Suchwert und Löschaktion besitzen jeweils genau eine Steuerung.
+      Suche, Suchwert und Löschaktion besitzen jeweils genau eine Steuerung.
 - [x] Fokussierte Tests belegen Treffer über Kartentitel, sichtbaren Regeltext,
-  Kartentyp und Subtyp sowie robuste Groß-/Kleinschreibung. Die vorhandenen
-  zusätzlichen Suchbegriffe dürfen bestehen bleiben, werden aber nicht
-  fälschlich als Spezialfilter dargestellt.
+      Kartentyp und Subtyp sowie robuste Groß-/Kleinschreibung. Die vorhandenen
+      zusätzlichen Suchbegriffe dürfen bestehen bleiben, werden aber nicht
+      fälschlich als Spezialfilter dargestellt.
 - [x] Suche, Set-, Seiten-, Status-, Block-, KI-Hinweis-, Raritäts- und
-  Kartentypfilter bleiben kompositorisch: Nur Karten, die alle aktiven
-  Bedingungen erfüllen, werden angezeigt.
+      Kartentypfilter bleiben kompositorisch: Nur Karten, die alle aktiven
+      Bedingungen erfüllen, werden angezeigt.
 - [x] Öffnen und Schließen des Filterbereichs erhält Suchtext, Spezialfilter
-  und aktuelle Auswahl; eine nicht mehr sichtbare Karte wird weiterhin nach
-  dem bestehenden Auswahlvertrag konsistent ersetzt.
+      und aktuelle Auswahl; eine nicht mehr sichtbare Karte wird weiterhin nach
+      dem bestehenden Auswahlvertrag konsistent ersetzt.
 - [x] Die Löschaktion des Suchfelds leert nur den Suchtext und lässt aktive
-  Spezialfilter unverändert. Ein Zurücksetzen der Spezialfilter löscht den
-  Suchtext nicht unbeabsichtigt.
+      Spezialfilter unverändert. Ein Zurücksetzen der Spezialfilter löscht den
+      Suchtext nicht unbeabsichtigt.
 - [x] Platzhalter und Hilfetext nennen den tatsächlichen Mindestumfang der
-  Suche verständlich in Deutsch, Englisch und Französisch.
+      Suche verständlich in Deutsch, Englisch und Französisch.
 - [x] Auf Desktop und kleinem Viewport bleiben Suchfeld, Löschaktion und
-  Filterknopf vollständig sichtbar; der geschlossene Filter spart gegenüber
-  dem bisherigen aufgeklappten Zustand deutlich vertikalen Platz.
+      Filterknopf vollständig sichtbar; der geschlossene Filter spart gegenüber
+      dem bisherigen aufgeklappten Zustand deutlich vertikalen Platz.
 - [x] Fokussierte Komponenten-/Modelltests und eine visuelle Firefox-Prüfung
-  sichern geschlossene, geöffnete, suchende und zusätzlich gefilterte Zustände
-  ab.
+      sichern geschlossene, geöffnete, suchende und zusätzlich gefilterte Zustände
+      ab.
 
 ## Umsetzungshinweise
 

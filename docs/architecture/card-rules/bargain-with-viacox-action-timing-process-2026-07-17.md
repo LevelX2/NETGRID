@@ -74,11 +74,11 @@ gemergt → Worktree und Branch entfernt → complete`
 
 ## Paketfolge
 
-| Paket | Ziel | Kernartefakte | Done-Gate | Commit |
-| --- | --- | --- | --- | --- |
-| P0 | Prozess und `/Goal` festschreiben | dieses Dokument | `git diff --check` sauber | `docs: define Bargain with Viacox fix process` |
-| P1 | ersten Folgezug nach echter Installation korrekt auslösen | Engine-Resolver, Engine-Regressionstest | fünf Aktionen, Wurf, Pflichtaktion, Replay/StateHash | `fix(engine): trigger Viacox on first following turn` |
-| P2 | Würfelwurf in Chronicle sichtbar machen | Chronicle-Renderer und Test | Wurf + Aktion sichtbar, keine Hidden-Info-Leaks | `fix(web): show Viacox die roll in chronicle` |
+| Paket | Ziel                                                      | Kernartefakte                           | Done-Gate                                            | Commit                                                |
+| ----- | --------------------------------------------------------- | --------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------- |
+| P0    | Prozess und `/Goal` festschreiben                         | dieses Dokument                         | `git diff --check` sauber                            | `docs: define Bargain with Viacox fix process`        |
+| P1    | ersten Folgezug nach echter Installation korrekt auslösen | Engine-Resolver, Engine-Regressionstest | fünf Aktionen, Wurf, Pflichtaktion, Replay/StateHash | `fix(engine): trigger Viacox on first following turn` |
+| P2    | Würfelwurf in Chronicle sichtbar machen                   | Chronicle-Renderer und Test             | Wurf + Aktion sichtbar, keine Hidden-Info-Leaks      | `fix(web): show Viacox die roll in chronicle`         |
 
 ## Paketdetails
 

@@ -56,7 +56,7 @@ aufgebaut werden.
   ohne installierten Icebreaker schon anhand der sichtbaren Runner-Mittel
   eine schwache Erfolgsgrundlage.
 - Kartentext: `Gain 2 credits at the start of each of your turns. Trash Top
-  Runners' Conference when you make a run.` Die Regelwerte und Trigger müssen
+Runners' Conference when you make a run.` Die Regelwerte und Trigger müssen
   aus der kanonischen Kartensemantik stammen und dürfen nicht im AI-Hint
   wiederholt werden.
 - Der unmittelbar widersprüchliche Planwechsel ist zusätzlich ein

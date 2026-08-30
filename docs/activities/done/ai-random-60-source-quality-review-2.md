@@ -50,68 +50,68 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 
 ## Paketfolge
 
-| Paket | Katalog | Datei | Status |
-| --- | ---: | --- | --- |
-| AI-R121 | 141 | `packages/ai/src/plans/corp-defense-turn-planning.ts` | committed |
-| AI-R122 | 577 | `packages/ai/src/simulation/regression/exploit-regression-fixtures.ts` | committed |
-| AI-R123 | 321 | `packages/ai/src/runtime/progression-card-target.ts` | committed |
-| AI-R124 | 181 | `packages/ai/src/plans/tactical-plan-visible-cards.ts` | committed |
-| AI-R125 | 326 | `packages/ai/src/runtime/remote-trash-target.ts` | committed |
-| AI-R126 | 396 | `packages/ai/src/runtime/runner-rig-trash-target.ts` | committed |
-| AI-R127 | 442 | `packages/ai/src/runtime/semantic-runtime-corp-passive-scoreline.ts` | committed |
-| AI-R128 | 617 | `packages/ai/src/simulation/selfplay-action-type-dominance.ts` | committed |
-| AI-R129 | 485 | `packages/ai/src/runtime/trace-context.ts` | committed |
-| AI-R130 | 243 | `packages/ai/src/runtime/corp-central-defense-facts-adapter.ts` | committed |
-| AI-R131 | 357 | `packages/ai/src/runtime/runner-hand-rotation-assessment.ts` | committed |
-| AI-R132 | 261 | `packages/ai/src/runtime/corp-opening-rush.ts` | committed |
-| AI-R133 | 580 | `packages/ai/src/simulation/regression/v143/fixture-types.ts` | committed |
-| AI-R134 | 273 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-action-families.ts` | committed |
-| AI-R135 | 60 | `packages/ai/src/decision/neutral-goal-synthesis.ts` | committed |
-| AI-R136 | 266 | `packages/ai/src/runtime/corp-score-rush-risk.ts` | committed |
-| AI-R137 | 124 | `packages/ai/src/generated-ai-hint-artifact-validation.ts` | committed |
-| AI-R138 | 573 | `packages/ai/src/simulation/progression-action-sequence.ts` | committed |
-| AI-R139 | 350 | `packages/ai/src/runtime/runner-encounter-composition-context.ts` | committed |
-| AI-R140 | 32 | `packages/ai/src/actions/conditional-defense-followup-quote.ts` | committed |
-| AI-R141 | 470 | `packages/ai/src/runtime/setup-mulligan-choice-option.ts` | committed |
-| AI-R142 | 287 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-scoring-window-runner-pressure.ts` | committed |
-| AI-R143 | 285 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-scoring-window-contracts.ts` | committed |
-| AI-R144 | 386 | `packages/ai/src/runtime/runner-no-run-economy-context.ts` | committed |
-| AI-R145 | 333 | `packages/ai/src/runtime/runner-baseline-plan-guard-context.ts` | committed |
-| AI-R146 | 589 | `packages/ai/src/simulation/runner-breaker-coverage-diagnostics.ts` | committed |
-| AI-R147 | 455 | `packages/ai/src/runtime/semantic-runtime-corp-score.ts` | committed |
-| AI-R148 | 87 | `packages/ai/src/diagnostics/debug-format.ts` | committed |
-| AI-R149 | 286 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-scoring-window-projection.ts` | committed |
-| AI-R150 | 102 | `packages/ai/src/evaluation/decision-snapshot-suite.ts` | committed |
-| AI-R151 | 627 | `packages/ai/src/simulation/simulation-league.ts` | committed |
-| AI-R152 | 592 | `packages/ai/src/simulation/runner-credit-reserve.ts` | committed |
-| AI-R153 | 434 | `packages/ai/src/runtime/semantic-runtime-corp-board.ts` | committed |
-| AI-R154 | 112 | `packages/ai/src/evaluation/real-engine-decision-corpus.ts` | committed |
-| AI-R155 | 591 | `packages/ai/src/simulation/runner-central-pressure-diagnostics.ts` | committed |
-| AI-R156 | 550 | `packages/ai/src/simulation/deck-support.ts` | committed |
-| AI-R157 | 66 | `packages/ai/src/decision/pilot/pilot-scope-common.ts` | committed |
-| AI-R158 | 224 | `packages/ai/src/runtime/ai-decision-input.ts` | committed |
-| AI-R159 | 123 | `packages/ai/src/evaluation/target-choice-shadow-readiness.ts` | committed |
-| AI-R160 | 532 | `packages/ai/src/simulation/central-run-history.ts` | committed |
-| AI-R161 | 244 | `packages/ai/src/runtime/corp-defense-package-retention.ts` | committed |
-| AI-R162 | 523 | `packages/ai/src/simulation/benchmark-deck-types.ts` | committed |
-| AI-R163 | 176 | `packages/ai/src/plans/tactical-plan-corp-score-conversion.ts` | committed |
-| AI-R164 | 602 | `packages/ai/src/simulation/runner-known-path-diagnostics-composition.ts` | committed |
-| AI-R165 | 234 | `packages/ai/src/runtime/card-title.ts` | committed |
-| AI-R166 | 428 | `packages/ai/src/runtime/semantic-runtime-choice-builder.ts` | committed |
-| AI-R167 | 269 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-board-triage-alignment.ts` | committed |
-| AI-R168 | 360 | `packages/ai/src/runtime/runner-hq-saturation-score.ts` | committed |
-| AI-R169 | 311 | `packages/ai/src/runtime/economy-score-components.ts` | committed |
-| AI-R170 | 547 | `packages/ai/src/simulation/corp-visible-tag-punish-opportunities.ts` | committed |
-| AI-R171 | 621 | `packages/ai/src/simulation/selfplay-why-coverage.ts` | committed |
-| AI-R172 | 524 | `packages/ai/src/simulation/benchmark-local-deck-data.ts` | committed |
-| AI-R173 | 158 | `packages/ai/src/plans/plan-portfolio-memory.ts` | committed |
-| AI-R174 | 513 | `packages/ai/src/simulation/benchmark-deck-format-profile.ts` | committed |
-| AI-R175 | 180 | `packages/ai/src/plans/tactical-plan-types.ts` | committed |
-| AI-R176 | 489 | `packages/ai/src/runtime/visible-card-lookup.ts` | committed |
-| AI-R177 | 37 | `packages/ai/src/actions/risk-action-projection.ts` | committed |
-| AI-R178 | 579 | `packages/ai/src/simulation/regression/v143/fixture-data.ts` | committed |
-| AI-R179 | 362 | `packages/ai/src/runtime/runner-known-access-payoff-context.ts` | committed |
-| AI-R180 | 637 | `packages/ai/src/simulation/tag-punish-card-sets.ts` | committed |
+| Paket   | Katalog | Datei                                                                                            | Status    |
+| ------- | ------: | ------------------------------------------------------------------------------------------------ | --------- |
+| AI-R121 |     141 | `packages/ai/src/plans/corp-defense-turn-planning.ts`                                            | committed |
+| AI-R122 |     577 | `packages/ai/src/simulation/regression/exploit-regression-fixtures.ts`                           | committed |
+| AI-R123 |     321 | `packages/ai/src/runtime/progression-card-target.ts`                                             | committed |
+| AI-R124 |     181 | `packages/ai/src/plans/tactical-plan-visible-cards.ts`                                           | committed |
+| AI-R125 |     326 | `packages/ai/src/runtime/remote-trash-target.ts`                                                 | committed |
+| AI-R126 |     396 | `packages/ai/src/runtime/runner-rig-trash-target.ts`                                             | committed |
+| AI-R127 |     442 | `packages/ai/src/runtime/semantic-runtime-corp-passive-scoreline.ts`                             | committed |
+| AI-R128 |     617 | `packages/ai/src/simulation/selfplay-action-type-dominance.ts`                                   | committed |
+| AI-R129 |     485 | `packages/ai/src/runtime/trace-context.ts`                                                       | committed |
+| AI-R130 |     243 | `packages/ai/src/runtime/corp-central-defense-facts-adapter.ts`                                  | committed |
+| AI-R131 |     357 | `packages/ai/src/runtime/runner-hand-rotation-assessment.ts`                                     | committed |
+| AI-R132 |     261 | `packages/ai/src/runtime/corp-opening-rush.ts`                                                   | committed |
+| AI-R133 |     580 | `packages/ai/src/simulation/regression/v143/fixture-types.ts`                                    | committed |
+| AI-R134 |     273 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-action-families.ts`          | committed |
+| AI-R135 |      60 | `packages/ai/src/decision/neutral-goal-synthesis.ts`                                             | committed |
+| AI-R136 |     266 | `packages/ai/src/runtime/corp-score-rush-risk.ts`                                                | committed |
+| AI-R137 |     124 | `packages/ai/src/generated-ai-hint-artifact-validation.ts`                                       | committed |
+| AI-R138 |     573 | `packages/ai/src/simulation/progression-action-sequence.ts`                                      | committed |
+| AI-R139 |     350 | `packages/ai/src/runtime/runner-encounter-composition-context.ts`                                | committed |
+| AI-R140 |      32 | `packages/ai/src/actions/conditional-defense-followup-quote.ts`                                  | committed |
+| AI-R141 |     470 | `packages/ai/src/runtime/setup-mulligan-choice-option.ts`                                        | committed |
+| AI-R142 |     287 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-scoring-window-runner-pressure.ts` | committed |
+| AI-R143 |     285 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-scoring-window-contracts.ts`       | committed |
+| AI-R144 |     386 | `packages/ai/src/runtime/runner-no-run-economy-context.ts`                                       | committed |
+| AI-R145 |     333 | `packages/ai/src/runtime/runner-baseline-plan-guard-context.ts`                                  | committed |
+| AI-R146 |     589 | `packages/ai/src/simulation/runner-breaker-coverage-diagnostics.ts`                              | committed |
+| AI-R147 |     455 | `packages/ai/src/runtime/semantic-runtime-corp-score.ts`                                         | committed |
+| AI-R148 |      87 | `packages/ai/src/diagnostics/debug-format.ts`                                                    | committed |
+| AI-R149 |     286 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-scoring-window-projection.ts`      | committed |
+| AI-R150 |     102 | `packages/ai/src/evaluation/decision-snapshot-suite.ts`                                          | committed |
+| AI-R151 |     627 | `packages/ai/src/simulation/simulation-league.ts`                                                | committed |
+| AI-R152 |     592 | `packages/ai/src/simulation/runner-credit-reserve.ts`                                            | committed |
+| AI-R153 |     434 | `packages/ai/src/runtime/semantic-runtime-corp-board.ts`                                         | committed |
+| AI-R154 |     112 | `packages/ai/src/evaluation/real-engine-decision-corpus.ts`                                      | committed |
+| AI-R155 |     591 | `packages/ai/src/simulation/runner-central-pressure-diagnostics.ts`                              | committed |
+| AI-R156 |     550 | `packages/ai/src/simulation/deck-support.ts`                                                     | committed |
+| AI-R157 |      66 | `packages/ai/src/decision/pilot/pilot-scope-common.ts`                                           | committed |
+| AI-R158 |     224 | `packages/ai/src/runtime/ai-decision-input.ts`                                                   | committed |
+| AI-R159 |     123 | `packages/ai/src/evaluation/target-choice-shadow-readiness.ts`                                   | committed |
+| AI-R160 |     532 | `packages/ai/src/simulation/central-run-history.ts`                                              | committed |
+| AI-R161 |     244 | `packages/ai/src/runtime/corp-defense-package-retention.ts`                                      | committed |
+| AI-R162 |     523 | `packages/ai/src/simulation/benchmark-deck-types.ts`                                             | committed |
+| AI-R163 |     176 | `packages/ai/src/plans/tactical-plan-corp-score-conversion.ts`                                   | committed |
+| AI-R164 |     602 | `packages/ai/src/simulation/runner-known-path-diagnostics-composition.ts`                        | committed |
+| AI-R165 |     234 | `packages/ai/src/runtime/card-title.ts`                                                          | committed |
+| AI-R166 |     428 | `packages/ai/src/runtime/semantic-runtime-choice-builder.ts`                                     | committed |
+| AI-R167 |     269 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-board-triage-alignment.ts`         | committed |
+| AI-R168 |     360 | `packages/ai/src/runtime/runner-hq-saturation-score.ts`                                          | committed |
+| AI-R169 |     311 | `packages/ai/src/runtime/economy-score-components.ts`                                            | committed |
+| AI-R170 |     547 | `packages/ai/src/simulation/corp-visible-tag-punish-opportunities.ts`                            | committed |
+| AI-R171 |     621 | `packages/ai/src/simulation/selfplay-why-coverage.ts`                                            | committed |
+| AI-R172 |     524 | `packages/ai/src/simulation/benchmark-local-deck-data.ts`                                        | committed |
+| AI-R173 |     158 | `packages/ai/src/plans/plan-portfolio-memory.ts`                                                 | committed |
+| AI-R174 |     513 | `packages/ai/src/simulation/benchmark-deck-format-profile.ts`                                    | committed |
+| AI-R175 |     180 | `packages/ai/src/plans/tactical-plan-types.ts`                                                   | committed |
+| AI-R176 |     489 | `packages/ai/src/runtime/visible-card-lookup.ts`                                                 | committed |
+| AI-R177 |      37 | `packages/ai/src/actions/risk-action-projection.ts`                                              | committed |
+| AI-R178 |     579 | `packages/ai/src/simulation/regression/v143/fixture-data.ts`                                     | committed |
+| AI-R179 |     362 | `packages/ai/src/runtime/runner-known-access-payoff-context.ts`                                  | committed |
+| AI-R180 |     637 | `packages/ai/src/simulation/tag-punish-card-sets.ts`                                             | committed |
 
 ## Paketdetails und Verifikationsregeln
 
@@ -138,21 +138,21 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 
 ### Umgesetzte Befunde (13/60)
 
-| Paket | Präziser Befund | Umsetzung und direkte Prüfung |
-| --- | --- | --- |
-| AI-R124 | Der Definition-ID-Fallback in `visibleCardForAction` konnte eine `known:false`-Karte als Quelle behandeln. | Definition-Match verlangt `known`; gezielter Hidden-Info-Test bestanden. |
-| AI-R126 | Corp-spezifische Rig-Trash-Helfer akzeptierten Runner-Inputs beziehungsweise Runner-Actions. | Beide Seitengrenzen fail-closed ergänzt; 3 direkte Tests bestanden. |
-| AI-R140 | Engine-Quote war an ID und StateVersion, aber nicht an Corp-Akteur und `expiresAtStateVersion` gebunden. | Akteur-, Action-Side- und Ablaufbindung ergänzt; bestehende Quote-Suite bestanden. |
-| AI-R141 | Unbekannte Mulligan-Entscheidung fiel still auf `options[0]` zurück. | Beliebige Erstoption entfernt; exakter Match oder `undefined`; 1 Regressionstest bestanden. |
-| AI-R144 | Nicht-endliche oder negative Eventbeträge konnten in die No-Run-Economy-Projektion gelangen. | Numerische Payloads auf endlich und nichtnegativ begrenzt; direkte Economy-Kontext-Suite bestanden. |
-| AI-R149 | Fehlende Serverbindung erfand `remote_1`; außerdem konnten unbekannte/nicht-Agenda-Karten Agenda-Punkte liefern. | Projektion gibt ohne Server-ID `undefined`; Agenda-Risiko nur aus bekannten Agenden; 7 direkte Projektions-Tests bestanden. |
-| AI-R151 | League-Ergebnisse gaben die globalen Tuning-/Holdout-Seed-Arrays veränderbar heraus. | Arrays werden kopiert; Mutation-Isolationstest bestanden. |
-| AI-R160 | `publicEvents` und dessen `eventTail`-Suffix wurden zusammengefügt und doppelt gezählt. | Gemeinsame deduplizierende Public-History-Autorität verwendet; 12 direkte Central-Run-Tests bestanden. |
-| AI-R161 | Das gemeinsame No-Quote-Objekt war trotz Readonly-Typ zur Laufzeit veränderbar. | Singleton mit `Object.freeze` geschützt; direkte Corp-Defense-Prüfung bestanden. |
-| AI-R169 | `NaN`/`Infinity` galten als vorhandene Netto-Liquiditätsprojektion. | `Number.isFinite` als Gate; Regressionstest bestanden. |
-| AI-R170 | Eine Corp-Auswertung konnte eine fremdseitige `LegalAction` an die Punish-Klassifikation reichen. | Vor Klassifikation auf `action.side === "corp"` gefiltert; Regressionstest bestanden. |
-| AI-R172 | Vier importierte JSON-Benchmarkregister waren modulglobal mutierbar. | Rekursiv eingefroren; vier Registry-Freeze-Prüfungen bestanden. |
-| AI-R173 | Portfolio-Memory speicherte und lieferte Snapshots per Referenz; außerdem fehlte `matchId` als primärer Speicherschlüssel. | Structured-Clone an Ein-/Ausgabe und Match-Bindung ergänzt; 22 Portfolio-Tests bestanden. |
+| Paket   | Präziser Befund                                                                                                            | Umsetzung und direkte Prüfung                                                                                               |
+| ------- | -------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| AI-R124 | Der Definition-ID-Fallback in `visibleCardForAction` konnte eine `known:false`-Karte als Quelle behandeln.                 | Definition-Match verlangt `known`; gezielter Hidden-Info-Test bestanden.                                                    |
+| AI-R126 | Corp-spezifische Rig-Trash-Helfer akzeptierten Runner-Inputs beziehungsweise Runner-Actions.                               | Beide Seitengrenzen fail-closed ergänzt; 3 direkte Tests bestanden.                                                         |
+| AI-R140 | Engine-Quote war an ID und StateVersion, aber nicht an Corp-Akteur und `expiresAtStateVersion` gebunden.                   | Akteur-, Action-Side- und Ablaufbindung ergänzt; bestehende Quote-Suite bestanden.                                          |
+| AI-R141 | Unbekannte Mulligan-Entscheidung fiel still auf `options[0]` zurück.                                                       | Beliebige Erstoption entfernt; exakter Match oder `undefined`; 1 Regressionstest bestanden.                                 |
+| AI-R144 | Nicht-endliche oder negative Eventbeträge konnten in die No-Run-Economy-Projektion gelangen.                               | Numerische Payloads auf endlich und nichtnegativ begrenzt; direkte Economy-Kontext-Suite bestanden.                         |
+| AI-R149 | Fehlende Serverbindung erfand `remote_1`; außerdem konnten unbekannte/nicht-Agenda-Karten Agenda-Punkte liefern.           | Projektion gibt ohne Server-ID `undefined`; Agenda-Risiko nur aus bekannten Agenden; 7 direkte Projektions-Tests bestanden. |
+| AI-R151 | League-Ergebnisse gaben die globalen Tuning-/Holdout-Seed-Arrays veränderbar heraus.                                       | Arrays werden kopiert; Mutation-Isolationstest bestanden.                                                                   |
+| AI-R160 | `publicEvents` und dessen `eventTail`-Suffix wurden zusammengefügt und doppelt gezählt.                                    | Gemeinsame deduplizierende Public-History-Autorität verwendet; 12 direkte Central-Run-Tests bestanden.                      |
+| AI-R161 | Das gemeinsame No-Quote-Objekt war trotz Readonly-Typ zur Laufzeit veränderbar.                                            | Singleton mit `Object.freeze` geschützt; direkte Corp-Defense-Prüfung bestanden.                                            |
+| AI-R169 | `NaN`/`Infinity` galten als vorhandene Netto-Liquiditätsprojektion.                                                        | `Number.isFinite` als Gate; Regressionstest bestanden.                                                                      |
+| AI-R170 | Eine Corp-Auswertung konnte eine fremdseitige `LegalAction` an die Punish-Klassifikation reichen.                          | Vor Klassifikation auf `action.side === "corp"` gefiltert; Regressionstest bestanden.                                       |
+| AI-R172 | Vier importierte JSON-Benchmarkregister waren modulglobal mutierbar.                                                       | Rekursiv eingefroren; vier Registry-Freeze-Prüfungen bestanden.                                                             |
+| AI-R173 | Portfolio-Memory speicherte und lieferte Snapshots per Referenz; außerdem fehlte `matchId` als primärer Speicherschlüssel. | Structured-Clone an Ein-/Ausgabe und Match-Bindung ergänzt; 22 Portfolio-Tests bestanden.                                   |
 
 ### Prüfungen ohne Codeänderung (47/60)
 

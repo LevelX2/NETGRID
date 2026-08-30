@@ -28,11 +28,11 @@ SQLite-Evidence. Es wurde keine Datenbank gelöscht.
 
 ## Ergebnis wie im Programm
 
-| Partie | Standarddecks | Endergebnis | Agendapunkte | Ende | Entscheidungen |
-| ------ | ------------- | ----------: | ------------: | ---- | --------------: |
-| Seed 1 | **Bit-Denial Lock** gegen **Rent to Own War Engine** | Corp **10 – 1** Runner | **9:1** | Agendapunkte | 186 |
-| Seed 2 | **Bit-Denial Lock** gegen **Rent to Own War Engine** | Runner **10 – 6** Corp | **8:6** | Agendapunkte | 359 |
-| Seed 3 | **Bit-Denial Lock** gegen **Rent to Own War Engine** | Corp **10 – 3** Runner | **8:3** | Agendapunkte | 198 |
+| Partie | Standarddecks                                        |            Endergebnis | Agendapunkte | Ende         | Entscheidungen |
+| ------ | ---------------------------------------------------- | ---------------------: | -----------: | ------------ | -------------: |
+| Seed 1 | **Bit-Denial Lock** gegen **Rent to Own War Engine** | Corp **10 – 1** Runner |      **9:1** | Agendapunkte |            186 |
+| Seed 2 | **Bit-Denial Lock** gegen **Rent to Own War Engine** | Runner **10 – 6** Corp |      **8:6** | Agendapunkte |            359 |
+| Seed 3 | **Bit-Denial Lock** gegen **Rent to Own War Engine** | Corp **10 – 3** Runner |      **8:3** | Agendapunkte |            198 |
 
 Die finalen integrierten Match-IDs lauten `match_d098a509079899ad`,
 `match_db81c8201df083f6` und `match_d79f5ebe7a8a903c`. Ihre terminalen

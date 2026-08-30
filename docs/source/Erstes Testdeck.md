@@ -8,14 +8,14 @@ Diese Decks sind interne Demo- und Testdecks. Sie sind nicht turnierlegal und ve
 
 Ausrichtung: Criminal-orientiert, Credits aufbauen, Runs durchführen, ICE mit Breakern überwinden, Agendas stehlen.
 
-| Karte | Anzahl | Typ | Zweck |
-|---|---:|---|---|
-| Runner Identity | 1 | Identity | Startidentität ohne aktive Sonderfähigkeit |
-| Simple Economy Event | 3 | Event | Sofortige Credits |
-| Simple Run Event | 3 | Event | Einfacher Run mit kleinem Bonus |
-| Simple Fracter | 2 | Program: Icebreaker – Fracter | Bricht Barrier-Subroutinen |
-| Simple Decoder | 2 | Program: Icebreaker – Decoder | Bricht Code-Gate-Subroutinen |
-| Simple Killer | 2 | Program: Icebreaker – Killer | Bricht Sentry-Subroutinen |
+| Karte                | Anzahl | Typ                           | Zweck                                      |
+| -------------------- | -----: | ----------------------------- | ------------------------------------------ |
+| Runner Identity      |      1 | Identity                      | Startidentität ohne aktive Sonderfähigkeit |
+| Simple Economy Event |      3 | Event                         | Sofortige Credits                          |
+| Simple Run Event     |      3 | Event                         | Einfacher Run mit kleinem Bonus            |
+| Simple Fracter       |      2 | Program: Icebreaker – Fracter | Bricht Barrier-Subroutinen                 |
+| Simple Decoder       |      2 | Program: Icebreaker – Decoder | Bricht Code-Gate-Subroutinen               |
+| Simple Killer        |      2 | Program: Icebreaker – Killer  | Bricht Sentry-Subroutinen                  |
 
 ### Kartendefinitionen
 
@@ -61,15 +61,15 @@ Fähigkeiten: „1 Credit: +1 Stärke.“ / „1 Credit: Brich 1 Sentry-Subrouti
 
 Ausrichtung: Weyland-orientiert, ICE installieren und rezzen, Remote-Server bauen, Agendas installieren, advancen und scoren.
 
-| Karte | Anzahl | Typ | Zweck |
-|---|---:|---|---|
-| Corp Identity | 1 | Identity | Startidentität ohne aktive Sonderfähigkeit |
-| Simple Agenda | 3 | Agenda | Installieren, advancen, scoren oder stehlen |
-| Simple Economy Operation | 3 | Operation | Sofortige Credits |
-| Simple Economy Asset | 3 | Asset | Remote-Installation, Rez, Trash-Kosten |
-| Simple Barrier ICE | 3 | ICE – Barrier | Einfacher Stopper |
-| Simple Code Gate ICE | 3 | ICE – Code Gate | Kleiner Tax-Effekt plus End-the-run |
-| Simple Sentry ICE | 3 | ICE – Sentry | Einfache Strafwirkung ohne Damage/Tags |
+| Karte                    | Anzahl | Typ             | Zweck                                       |
+| ------------------------ | -----: | --------------- | ------------------------------------------- |
+| Corp Identity            |      1 | Identity        | Startidentität ohne aktive Sonderfähigkeit  |
+| Simple Agenda            |      3 | Agenda          | Installieren, advancen, scoren oder stehlen |
+| Simple Economy Operation |      3 | Operation       | Sofortige Credits                           |
+| Simple Economy Asset     |      3 | Asset           | Remote-Installation, Rez, Trash-Kosten      |
+| Simple Barrier ICE       |      3 | ICE – Barrier   | Einfacher Stopper                           |
+| Simple Code Gate ICE     |      3 | ICE – Code Gate | Kleiner Tax-Effekt plus End-the-run         |
+| Simple Sentry ICE        |      3 | ICE – Sentry    | Einfache Strafwirkung ohne Damage/Tags      |
 
 ### Kartendefinitionen
 

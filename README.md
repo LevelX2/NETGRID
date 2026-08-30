@@ -104,12 +104,12 @@ Custom AI decks are validated against the selected format and must contain AI-su
 
 ### AI-supported card pools
 
-| Selectable card pool | Human play | AI play |
-| --- | ---: | ---: |
-| Original Set | Yes | Yes |
-| Original Set + Classic | Yes | Yes |
-| Original Set + Proteus | Yes | Yes |
-| Original Set + Classic + Proteus | Yes | Yes |
+| Selectable card pool             | Human play | AI play |
+| -------------------------------- | ---------: | ------: |
+| Original Set                     |        Yes |     Yes |
+| Original Set + Classic           |        Yes |     Yes |
+| Original Set + Proteus           |        Yes |     Yes |
+| Original Set + Classic + Proteus |        Yes |     Yes |
 
 Proteus has passed the current AI-readiness gates for reviewed card hints, selected playtest decks, deterministic simulations, replay integrity, and hidden-information protection.
 

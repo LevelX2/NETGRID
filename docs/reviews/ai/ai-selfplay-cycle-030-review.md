@@ -24,11 +24,11 @@ SQLite-Evidence; keine Datenbank wurde gelöscht.
 
 ## Ergebnis wie im Programm
 
-| Partie | Endergebnis | Agendapunkte | Ende | Entscheidungen |
-| ------ | ----------: | ------------: | ---- | --------------: |
-| Seed 1 | Corp **10 – 6** Runner | **7:6** | Agendapunkte | 207 |
-| Seed 2 | Corp **10 – 5** Runner | **8:5** | Agendapunkte | 347 |
-| Seed 3 | Runner **10 – 5** Corp | **7:5** | Agendapunkte | 341 |
+| Partie |            Endergebnis | Agendapunkte | Ende         | Entscheidungen |
+| ------ | ---------------------: | -----------: | ------------ | -------------: |
+| Seed 1 | Corp **10 – 6** Runner |      **7:6** | Agendapunkte |            207 |
+| Seed 2 | Corp **10 – 5** Runner |      **8:5** | Agendapunkte |            347 |
+| Seed 3 | Runner **10 – 5** Corp |      **7:5** | Agendapunkte |            341 |
 
 Finale Match-IDs und StateHashes:
 `match_186684f098822702` / `fnv1a:9def0bf0`,

@@ -250,14 +250,14 @@ nicht.
 
 ## 9. Ownership und Parent-/Need-Beziehungen
 
-| Entscheidung | Fachlicher Owner |
-| --- | --- |
-| Agenda, Score-Remote, Install/Advance/Score, Rush-Risiko | `corp.score_agenda` |
-| globale ICE-Allokation, ICE-Installation, Schutzwirkung, Rez | `corp.defend_servers` |
-| Finanzierung eines exakten fremden Bedarfs | `corp.economy` oder `runner.economy` als gebundener Support |
-| Handüberlauf und Discard | Hand-/Agenda-Management ohne Übernahme fremder Zielwahl |
-| Runner-Runziel und Runfortsetzung | zuständiger Runner-Run-/Contestplan |
-| Payload einer bereits gewählten Choice | Resolver ohne neue Domainentscheidung |
+| Entscheidung                                                 | Fachlicher Owner                                            |
+| ------------------------------------------------------------ | ----------------------------------------------------------- |
+| Agenda, Score-Remote, Install/Advance/Score, Rush-Risiko     | `corp.score_agenda`                                         |
+| globale ICE-Allokation, ICE-Installation, Schutzwirkung, Rez | `corp.defend_servers`                                       |
+| Finanzierung eines exakten fremden Bedarfs                   | `corp.economy` oder `runner.economy` als gebundener Support |
+| Handüberlauf und Discard                                     | Hand-/Agenda-Management ohne Übernahme fremder Zielwahl     |
+| Runner-Runziel und Runfortsetzung                            | zuständiger Runner-Run-/Contestplan                         |
+| Payload einer bereits gewählten Choice                       | Resolver ohne neue Domainentscheidung                       |
 
 Ein Parent formuliert einen typisierten Bedarf; der Child- oder Supportplan
 behält die fachliche Entscheidung in seinem Bereich. So darf ein Scoreplan

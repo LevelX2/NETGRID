@@ -26,32 +26,32 @@ Deckgröße strategisch neu zugeschnitten. Der Katalogtest berechnet für jedes
 aktive Corp-Deck die offizielle Spanne und verhindert eine erneute stille
 Abweichung.
 
-| Deck | Karten | Punkte | Zulässig |
-| --- | ---: | ---: | ---: |
-| Cheap Bag of Tricks | 58 | 24 | 24–25 |
-| Chrome Rush Bureau | 64 | 26 | 26–27 |
-| Classic Corp – Remote Lab Deflection | 45 | 20 | 20–21 |
-| Classic Corp – Superserum Control Grid | 45 | 20 | 20–21 |
-| CODE ROT: Bitte eintreten v2 | 45 | 20 | 20–21 |
-| Fast Advance, Baby | 45 | 20 | 20–21 |
-| Ivory Bastion | 52 | 22 | 22–23 |
-| Manhunt Pressure Bureau | 45 | 21 | 20–21 |
-| Mumie | 45 | 20 | 20–21 |
-| Neon Guillotine | 45 | 20 | 20–21 |
-| Neon Escrow | 45 | 20 | 20–21 |
-| Original Speed v1.0 | 55 | 25 | 24–25 |
-| Proteus Korp – Hidden Node & Region Trap | 45 | 21 | 20–21 |
-| Proteus Korp – Variable ICE Gauntlet | 45 | 20 | 20–21 |
-| Rent to Own War Engine | 47 | 21 | 20–21 |
-| Shadoe Tag & Bag | 48 | 20 | 20–21 |
-| Salazar Toll Road | 45 | 20 | 20–21 |
-| Siren Fortress | 45 | 21 | 20–21 |
-| Syds ICE-Pfandhaus | 45 | 20 | 20–21 |
-| The Korp Master | 45 | 20 | 20–21 |
-| Tycho Ice Stack | 45 | 20 | 20–21 |
-| Vom Tablet | 45 | 20 | 20–21 |
-| Universal Fast Advance | 45 | 20 | 20–21 |
-| Dead Channel v1.1 | 45 | 21 | 20–21 |
+| Deck                                     | Karten | Punkte | Zulässig |
+| ---------------------------------------- | -----: | -----: | -------: |
+| Cheap Bag of Tricks                      |     58 |     24 |    24–25 |
+| Chrome Rush Bureau                       |     64 |     26 |    26–27 |
+| Classic Corp – Remote Lab Deflection     |     45 |     20 |    20–21 |
+| Classic Corp – Superserum Control Grid   |     45 |     20 |    20–21 |
+| CODE ROT: Bitte eintreten v2             |     45 |     20 |    20–21 |
+| Fast Advance, Baby                       |     45 |     20 |    20–21 |
+| Ivory Bastion                            |     52 |     22 |    22–23 |
+| Manhunt Pressure Bureau                  |     45 |     21 |    20–21 |
+| Mumie                                    |     45 |     20 |    20–21 |
+| Neon Guillotine                          |     45 |     20 |    20–21 |
+| Neon Escrow                              |     45 |     20 |    20–21 |
+| Original Speed v1.0                      |     55 |     25 |    24–25 |
+| Proteus Korp – Hidden Node & Region Trap |     45 |     21 |    20–21 |
+| Proteus Korp – Variable ICE Gauntlet     |     45 |     20 |    20–21 |
+| Rent to Own War Engine                   |     47 |     21 |    20–21 |
+| Shadoe Tag & Bag                         |     48 |     20 |    20–21 |
+| Salazar Toll Road                        |     45 |     20 |    20–21 |
+| Siren Fortress                           |     45 |     21 |    20–21 |
+| Syds ICE-Pfandhaus                       |     45 |     20 |    20–21 |
+| The Korp Master                          |     45 |     20 |    20–21 |
+| Tycho Ice Stack                          |     45 |     20 |    20–21 |
+| Vom Tablet                               |     45 |     20 |    20–21 |
+| Universal Fast Advance                   |     45 |     20 |    20–21 |
+| Dead Channel v1.1                        |     45 |     21 |    20–21 |
 
 ## Strategischer Zuschnitt
 
@@ -71,10 +71,10 @@ Spielplan:
 - Überladene Listen wurden nicht nur auf das Maximum gekürzt: `Rent to Own`
   behält seinen War-/Downsizing-Kern und tauscht einen Tycho-Punkt gegen
   `On-Call`; `Siren Fortress` konzentriert sich stärker auf Olivia; `The Korp
-  Master` entfernt drei fremde Agenda-Module und investiert die freien Slots
+Master` entfernt drei fremde Agenda-Module und investiert die freien Slots
   in `Scorched Earth` und `City Surveillance` für die eigentliche Kill-Linie.
 - Die extrem unterpunkteten Listen `Chrome Rush Bureau`, `Manhunt Pressure
-  Bureau`, `Neon Escrow`, `Syds ICE-Pfandhaus` und `Tycho Ice Stack` wurden als
+Bureau`, `Neon Escrow`, `Syds ICE-Pfandhaus` und `Tycho Ice Stack` wurden als
   vollständige Agenda-Module neu balanciert, statt einzelne Slots wahllos zu
   füllen.
 

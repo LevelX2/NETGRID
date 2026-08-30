@@ -80,11 +80,7 @@
         "onr_v1_138_pk-6089a",
         "onr_v1_147_zz22-speed-chip"
       ],
-      "expectedDecisionFamilies": [
-        "install_card",
-        "gain_credit",
-        "end_turn"
-      ],
+      "expectedDecisionFamilies": ["install_card", "gain_credit", "end_turn"],
       "sideSafetyAssertions": [
         "legal_actions_only",
         "side_safe_player_view_only",

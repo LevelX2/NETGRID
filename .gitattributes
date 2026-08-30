@@ -3,8 +3,8 @@
 .gitattributes text eol=lf
 .node-version text eol=lf
 .nvmrc text eol=lf
-*.md text eol=lf
-*.mdx text eol=lf
+*.md text eol=lf whitespace=-trailing-space
+*.mdx text eol=lf whitespace=-trailing-space
 *.txt text eol=lf
 *.cjs text eol=lf
 *.css text eol=lf

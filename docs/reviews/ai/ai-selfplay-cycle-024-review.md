@@ -26,11 +26,11 @@ SQLite-Evidence des parallelen Worktrees. Es wurde keine Datenbank gelöscht.
 
 ## Ergebnis wie im Programm
 
-| Partie | Standarddecks | Endergebnis | Agendapunkte | Ende | Entscheidungen |
-| ------ | ------------- | ----------: | ------------: | ---- | --------------: |
-| Seed 1 | **Ice Destruction Runner** gegen **Proteus Korp - Variable ICE Gauntlet** | Runner **10 – 0** Corp | **8:0** | Agendapunkte | 352 |
-| Seed 2 | **Ice Destruction Runner** gegen **Proteus Korp - Variable ICE Gauntlet** | Runner **10 – 0** Corp | **8:0** | Agendapunkte | 493 |
-| Seed 3 | **Ice Destruction Runner** gegen **Proteus Korp - Variable ICE Gauntlet** | Runner **10 – 2** Corp | **7:2** | Agendapunkte | 330 |
+| Partie | Standarddecks                                                             |            Endergebnis | Agendapunkte | Ende         | Entscheidungen |
+| ------ | ------------------------------------------------------------------------- | ---------------------: | -----------: | ------------ | -------------: |
+| Seed 1 | **Ice Destruction Runner** gegen **Proteus Korp - Variable ICE Gauntlet** | Runner **10 – 0** Corp |      **8:0** | Agendapunkte |            352 |
+| Seed 2 | **Ice Destruction Runner** gegen **Proteus Korp - Variable ICE Gauntlet** | Runner **10 – 0** Corp |      **8:0** | Agendapunkte |            493 |
+| Seed 3 | **Ice Destruction Runner** gegen **Proteus Korp - Variable ICE Gauntlet** | Runner **10 – 2** Corp |      **7:2** | Agendapunkte |            330 |
 
 Die finalen Match-IDs lauten `match_4d09f57fa24da97d`,
 `match_8a138d37d89521b2` und `match_013087ac5c907d00`. Ihre terminalen

@@ -26,8 +26,8 @@ SQLite-Evidence. Die aktive Standarddeckauswahl verwendete SHA-256 über
 
 ## Ergebnis wie im Programm
 
-| Partie | Standarddecks                                           |            Endergebnis | Agendapunkte | Ende           | Entscheidungen |
-| ------ | ------------------------------------------------------- | ---------------------: | -----------: | -------------- | -------------: |
+| Partie | Standarddecks                                            |            Endergebnis | Agendapunkte | Ende           | Entscheidungen |
+| ------ | -------------------------------------------------------- | ---------------------: | -----------: | -------------- | -------------: |
 | Seed 1 | **Hidden Backdoor Sabotage** gegen **Salazar Toll Road** | Runner **10 – 0** Corp |      **9:0** | Agendapunkte   |            181 |
 | Seed 2 | **Hidden Backdoor Sabotage** gegen **Salazar Toll Road** | Runner **10 – 0** Corp |      **3:0** | Corp-Deck leer |            388 |
 | Seed 3 | **Hidden Backdoor Sabotage** gegen **Salazar Toll Road** | Runner **10 – 0** Corp |      **4:0** | Corp-Deck leer |            594 |

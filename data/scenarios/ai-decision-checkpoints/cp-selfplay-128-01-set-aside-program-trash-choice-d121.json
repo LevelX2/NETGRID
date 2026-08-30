@@ -39,9 +39,7 @@
             "title": "Reclamation Project",
             "definitionId": "onr_classic_018_reclamation-project",
             "type": "operation",
-            "subtypes": [
-              "double"
-            ],
+            "subtypes": ["double"],
             "rulesText": "Search the archives for any number of ice cards. Show those cards to Runner, then store them in HQ. Playing a double operation costs two consecutive actions this turn instead of one.",
             "cost": 0,
             "playCost": {
@@ -59,9 +57,7 @@
             "title": "Project Venice",
             "definitionId": "onr_proteus_007_project-venice",
             "type": "agenda",
-            "subtypes": [
-              "asset"
-            ],
+            "subtypes": ["asset"],
             "rulesText": "For every three advancement counters over Project Venice 's difficulty that are on Project Venice when you score it, gain an action during each of your turns.",
             "rezzed": false,
             "advancementCounters": 0,
@@ -78,9 +74,7 @@
             "title": "Data Fort Reclamation",
             "definitionId": "onr_v1_197_data-fort-reclamation",
             "type": "agenda",
-            "subtypes": [
-              "gray_ops"
-            ],
+            "subtypes": ["gray_ops"],
             "rulesText": "Gain [10] and choose up to four cards stored in HQ when you score Data Fort Reclamation. Create a new data fort using the cards chosen. Install the cards one at a time; you may rez them when you install them. Then, return to the bank any of the [10] not spent.",
             "rezzed": false,
             "advancementCounters": 0,
@@ -95,9 +89,7 @@
             "title": "Reclamation Project",
             "definitionId": "onr_classic_018_reclamation-project",
             "type": "operation",
-            "subtypes": [
-              "double"
-            ],
+            "subtypes": ["double"],
             "rulesText": "Search the archives for any number of ice cards. Show those cards to Runner, then store them in HQ. Playing a double operation costs two consecutive actions this turn instead of one.",
             "cost": 0,
             "playCost": {
@@ -118,9 +110,7 @@
             "title": "Accounts Receivable",
             "definitionId": "onr_v1_281_accounts-receivable",
             "type": "operation",
-            "subtypes": [
-              "transactions"
-            ],
+            "subtypes": ["transactions"],
             "rulesText": "Gain [9].",
             "cost": 5,
             "playCost": {
@@ -138,10 +128,7 @@
             "title": "Syd Meyer Superstores",
             "definitionId": "onr_proteus_076_syd-meyer-superstores",
             "type": "asset",
-            "subtypes": [
-              "asset",
-              "node"
-            ],
+            "subtypes": ["asset", "node"],
             "rulesText": "A: Trash a rezzed piece of ice. Gain [4].",
             "rezCost": 0,
             "rezzed": true,
@@ -156,10 +143,7 @@
             "title": "Syd Meyer Superstores",
             "definitionId": "onr_proteus_076_syd-meyer-superstores",
             "type": "asset",
-            "subtypes": [
-              "asset",
-              "node"
-            ],
+            "subtypes": ["asset", "node"],
             "rulesText": "A: Trash a rezzed piece of ice. Gain [4].",
             "rezCost": 0,
             "rezzed": true,
@@ -174,9 +158,7 @@
             "title": "Executive Boot Camp",
             "definitionId": "onr_proteus_058_executive-boot-camp",
             "type": "asset",
-            "subtypes": [
-              "node"
-            ],
+            "subtypes": ["node"],
             "rulesText": "Discard a card at random: Gain [2]. Use this ability only during a run. At the end of the run, return to the bank any of the [2] you did not spend.",
             "rezCost": 0,
             "rezzed": false,
@@ -191,10 +173,7 @@
             "title": "Syd Meyer Superstores",
             "definitionId": "onr_proteus_076_syd-meyer-superstores",
             "type": "asset",
-            "subtypes": [
-              "asset",
-              "node"
-            ],
+            "subtypes": ["asset", "node"],
             "rulesText": "A: Trash a rezzed piece of ice. Gain [4].",
             "rezCost": 0,
             "rezzed": false,
@@ -257,9 +236,7 @@
             "title": "Panzer Run",
             "definitionId": "onr_classic_042_panzer-run",
             "type": "event",
-            "subtypes": [
-              "double"
-            ],
+            "subtypes": ["double"],
             "rulesText": "Gain [4] and draw two cards. Playing a double prep costs two consecutive actions this turn instead of one.",
             "cost": 1,
             "playCost": {
@@ -277,9 +254,7 @@
             "title": "Panzer Run",
             "definitionId": "onr_classic_042_panzer-run",
             "type": "event",
-            "subtypes": [
-              "double"
-            ],
+            "subtypes": ["double"],
             "rulesText": "Gain [4] and draw two cards. Playing a double prep costs two consecutive actions this turn instead of one.",
             "cost": 1,
             "playCost": {
@@ -299,9 +274,7 @@
             "title": "Project Venice",
             "definitionId": "onr_proteus_007_project-venice",
             "type": "agenda",
-            "subtypes": [
-              "asset"
-            ],
+            "subtypes": ["asset"],
             "rulesText": "For every three advancement counters over Project Venice 's difficulty that are on Project Venice when you score it, gain an action during each of your turns.",
             "rezzed": true,
             "advancementCounters": 0,
@@ -318,9 +291,7 @@
             "title": "Project Zurich",
             "definitionId": "onr_proteus_008_project-zurich",
             "type": "agenda",
-            "subtypes": [
-              "asset"
-            ],
+            "subtypes": ["asset"],
             "rulesText": "For every two advancement counters over Project Zurich 's difficulty that are on Project Zurich when you score it, gain 1 at the start of each of your turns.",
             "rezzed": true,
             "advancementCounters": 0,
@@ -337,9 +308,7 @@
             "title": "Security Purge",
             "definitionId": "onr_v1_216_security-purge",
             "type": "agenda",
-            "subtypes": [
-              "gray_ops"
-            ],
+            "subtypes": ["gray_ops"],
             "rulesText": "Show the top three cards of R&D to Runner when you score Security Purge. If any of those cards are ice, install and rez them, at no cost. Trash the rest of those cards.",
             "rezzed": true,
             "advancementCounters": 0,
@@ -356,9 +325,7 @@
             "title": "Psychic Friend",
             "definitionId": "onr_classic_030_psychic-friend",
             "type": "program",
-            "subtypes": [
-              "icebreaker"
-            ],
+            "subtypes": ["icebreaker"],
             "rulesText": "[1]: Break code gate subroutine. [2]: +1 strength until end of turn",
             "installCost": 2,
             "memoryCost": 1,
@@ -374,9 +341,7 @@
             "title": "Rent-I-Con",
             "definitionId": "onr_classic_031_rent-i-con",
             "type": "program",
-            "subtypes": [
-              "icebreaker"
-            ],
+            "subtypes": ["icebreaker"],
             "rulesText": "[1]: Break ice subroutine. At the end of this run, trash Rent-I-Con. [1]: +1 strength",
             "installCost": 3,
             "memoryCost": 2,
@@ -401,9 +366,7 @@
               "title": "Snowbank",
               "definitionId": "onr_proteus_038_snowbank",
               "type": "ice",
-              "subtypes": [
-                "wall"
-              ],
+              "subtypes": ["wall"],
               "rulesText": "*End the run unless Runner pays [1]. Gain [3] when you rez Snowbank.",
               "rezCost": 0,
               "rezzed": true,
@@ -443,9 +406,7 @@
               "title": "Dr. Dreff",
               "definitionId": "onr_v1_358_dr-dreff",
               "type": "upgrade",
-              "subtypes": [
-                "sysop"
-              ],
+              "subtypes": ["sysop"],
               "rulesText": "Whenever the Runner passes the last piece of ice on this fort or declares a run on it when it has no ice, you may choose an ice card stored in HQ. Pay half of that card's rez cost, rounded down, to force Runner to encounter it; the run is not considered successful unless Runner passes that piece of ice. Trash that ice after the encounter ends. Use this ability only once during each run on this fort.",
               "rezCost": 0,
               "rezzed": true,
@@ -466,10 +427,7 @@
               "title": "Colonel Failure",
               "definitionId": "onr_proteus_015_colonel-failure",
               "type": "ice",
-              "subtypes": [
-                "killer",
-                "sentry"
-              ],
+              "subtypes": ["killer", "sentry"],
               "rulesText": "*Trash a program. *Trash a program. *Trash a program. *End the run. *End the run.",
               "rezCost": 17,
               "rezzed": false,
@@ -517,11 +475,7 @@
               "title": "Bug Zapper",
               "definitionId": "onr_proteus_012_bug-zapper",
               "type": "ice",
-              "subtypes": [
-                "ap",
-                "hellbolt",
-                "sentry"
-              ],
+              "subtypes": ["ap", "hellbolt", "sentry"],
               "rulesText": "*Do 2 Net damage for each rezzed piece of ice installed outside Bug Zapper. *End the run.",
               "rezCost": 6,
               "rezzed": false,
@@ -577,9 +531,7 @@
               "title": "Accounts Receivable",
               "definitionId": "onr_v1_281_accounts-receivable",
               "type": "operation",
-              "subtypes": [
-                "transactions"
-              ],
+              "subtypes": ["transactions"],
               "rulesText": "Gain [9].",
               "cost": 5,
               "playCost": {
@@ -597,10 +549,7 @@
               "title": "Syd Meyer Superstores",
               "definitionId": "onr_proteus_076_syd-meyer-superstores",
               "type": "asset",
-              "subtypes": [
-                "asset",
-                "node"
-              ],
+              "subtypes": ["asset", "node"],
               "rulesText": "A: Trash a rezzed piece of ice. Gain [4].",
               "rezCost": 0,
               "rezzed": true,
@@ -615,10 +564,7 @@
               "title": "Syd Meyer Superstores",
               "definitionId": "onr_proteus_076_syd-meyer-superstores",
               "type": "asset",
-              "subtypes": [
-                "asset",
-                "node"
-              ],
+              "subtypes": ["asset", "node"],
               "rulesText": "A: Trash a rezzed piece of ice. Gain [4].",
               "rezCost": 0,
               "rezzed": true,
@@ -633,9 +579,7 @@
               "title": "Executive Boot Camp",
               "definitionId": "onr_proteus_058_executive-boot-camp",
               "type": "asset",
-              "subtypes": [
-                "node"
-              ],
+              "subtypes": ["node"],
               "rulesText": "Discard a card at random: Gain [2]. Use this ability only during a run. At the end of the run, return to the bank any of the [2] you did not spend.",
               "rezCost": 0,
               "rezzed": false,
@@ -650,10 +594,7 @@
               "title": "Syd Meyer Superstores",
               "definitionId": "onr_proteus_076_syd-meyer-superstores",
               "type": "asset",
-              "subtypes": [
-                "asset",
-                "node"
-              ],
+              "subtypes": ["asset", "node"],
               "rulesText": "A: Trash a rezzed piece of ice. Gain [4].",
               "rezCost": 0,
               "rezzed": false,
@@ -674,10 +615,7 @@
               "title": "Coyote",
               "definitionId": "onr_proteus_016_coyote",
               "type": "ice",
-              "subtypes": [
-                "sentry",
-                "watchdog"
-              ],
+              "subtypes": ["sentry", "watchdog"],
               "rulesText": "*For the remainder of the run, all further ice is encountered at +1 strength, unless Runner pays [2] while passing Coyote. Gain [3] when you rez Coyote.",
               "rezCost": 0,
               "rezzed": false,
@@ -725,11 +663,7 @@
               "title": "Chihuahua",
               "definitionId": "onr_proteus_014_chihuahua",
               "type": "ice",
-              "subtypes": [
-                "ap",
-                "hellhound",
-                "sentry"
-              ],
+              "subtypes": ["ap", "hellhound", "sentry"],
               "rulesText": "*Trace 1-If trace is successful, do 1 Net damage. Gain [2] when you rez Chihuahua.",
               "rezCost": 0,
               "rezzed": false,
@@ -777,11 +711,7 @@
               "title": "Bug Zapper",
               "definitionId": "onr_proteus_012_bug-zapper",
               "type": "ice",
-              "subtypes": [
-                "ap",
-                "hellbolt",
-                "sentry"
-              ],
+              "subtypes": ["ap", "hellbolt", "sentry"],
               "rulesText": "*Do 2 Net damage for each rezzed piece of ice installed outside Bug Zapper. *End the run.",
               "rezCost": 6,
               "rezzed": false,
@@ -855,10 +785,7 @@
             "title": "Colonel Failure",
             "definitionId": "onr_proteus_015_colonel-failure",
             "type": "ice",
-            "subtypes": [
-              "killer",
-              "sentry"
-            ],
+            "subtypes": ["killer", "sentry"],
             "rulesText": "*Trash a program. *Trash a program. *Trash a program. *End the run. *End the run.",
             "rezCost": 17,
             "rezzed": false,
@@ -887,10 +814,7 @@
           "title": "Colonel Failure",
           "definitionId": "onr_proteus_015_colonel-failure",
           "type": "ice",
-          "subtypes": [
-            "killer",
-            "sentry"
-          ],
+          "subtypes": ["killer", "sentry"],
           "rulesText": "*Trash a program. *Trash a program. *Trash a program. *End the run. *End the run.",
           "rezCost": 17,
           "rezzed": false,
@@ -6042,10 +5966,7 @@
         "rezReserveProfile": {
           "iceKnownInDeck": 6,
           "rezEconomyToolsKnown": 3,
-          "evidence": [
-            "ice_known:6",
-            "rez_economy_tools:3"
-          ]
+          "evidence": ["ice_known:6", "rez_economy_tools:3"]
         },
         "economyBankTools": [
           {
@@ -6111,17 +6032,13 @@
           "codeGateIceKnown": 1,
           "sentryIceKnown": 4,
           "taxingIceKnown": 1,
-          "evidence": [
-            "ice_records:6"
-          ]
+          "evidence": ["ice_records:6"]
         },
         "remotePlanProfile": {
           "remoteProtectionToolsKnown": 7,
           "remoteEconomyToolsKnown": 2,
           "ambushToolsKnown": 0,
-          "evidence": [
-            "corp_remote_profile:conservative"
-          ]
+          "evidence": ["corp_remote_profile:conservative"]
         }
       },
       "missingCapabilities": [],
@@ -6304,9 +6221,7 @@
               "reason": "support:boardSafety"
             }
           ],
-          "supportGaps": [
-            "low_scorePlan_support"
-          ],
+          "supportGaps": ["low_scorePlan_support"],
           "confidence": "medium",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -6374,9 +6289,7 @@
               "reason": "support:remoteSlots"
             }
           ],
-          "supportGaps": [
-            "low_ambush_support"
-          ],
+          "supportGaps": ["low_ambush_support"],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -6449,15 +6362,10 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "low_bait_support",
-            "weak_remote_protection"
-          ],
+          "supportGaps": ["low_bait_support", "weak_remote_protection"],
           "confidence": "medium",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": [
-            "hard_support_gap:weak_remote_protection"
-          ]
+          "runtimeBlockers": ["hard_support_gap:weak_remote_protection"]
         },
         "corp.central_stabilize": {
           "anchorScore": 0,
@@ -6697,9 +6605,7 @@
               "reason": "support:ice"
             }
           ],
-          "supportGaps": [
-            "weak_remote_protection"
-          ],
+          "supportGaps": ["weak_remote_protection"],
           "confidence": "medium",
           "runtimeStatus": "supporting",
           "runtimeBlockers": [
@@ -6787,9 +6693,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "low_ambush_support"
-          ],
+          "supportGaps": ["low_ambush_support"],
           "confidence": "high",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -7047,9 +6951,7 @@
               "reason": "support:safety"
             }
           ],
-          "supportGaps": [
-            "low_scorePlan_support"
-          ],
+          "supportGaps": ["low_scorePlan_support"],
           "confidence": "low",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -7234,9 +7136,7 @@
               "reason": "support:ice"
             }
           ],
-          "supportGaps": [
-            "low_scorePlan_support"
-          ],
+          "supportGaps": ["low_scorePlan_support"],
           "confidence": "high",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -7409,9 +7309,7 @@
               "reason": "support:centralDefense"
             }
           ],
-          "supportGaps": [
-            "low_scoreAcceleration_support"
-          ],
+          "supportGaps": ["low_scoreAcceleration_support"],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -7811,14 +7709,10 @@
               "reason": "support:ice"
             }
           ],
-          "supportGaps": [
-            "weak_remote_protection"
-          ],
+          "supportGaps": ["weak_remote_protection"],
           "confidence": "high",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": [
-            "hard_support_gap:weak_remote_protection"
-          ]
+          "runtimeBlockers": ["hard_support_gap:weak_remote_protection"]
         },
         "corp.overadvance_value": {
           "anchorScore": 71,
@@ -7943,9 +7837,7 @@
           ],
           "confidence": "medium",
           "runtimeStatus": "blocked",
-          "runtimeBlockers": [
-            "hard_support_gap:missing_advancement_window"
-          ]
+          "runtimeBlockers": ["hard_support_gap:missing_advancement_window"]
         },
         "corp.remote_scoring": {
           "anchorScore": 72,
@@ -8522,9 +8414,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "low_tag_sources"
-          ],
+          "supportGaps": ["low_tag_sources"],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -8540,10 +8430,7 @@
         "corp.economy_rez_reserve",
         "corp.damage_kill"
       ],
-      "secondaryStrategies": [
-        "corp.rush_score",
-        "corp.action_tempo"
-      ],
+      "secondaryStrategies": ["corp.rush_score", "corp.action_tempo"],
       "functionSignalCounts": {
         "action.corp_extra_action_support": 2,
         "archives.corp_recovery": 2,
@@ -8684,9 +8571,7 @@
           "confidence": "high",
           "anchorEvidenceCount": 16,
           "supportEvidenceCount": 37,
-          "supportGaps": [
-            "weak_remote_protection"
-          ]
+          "supportGaps": ["weak_remote_protection"]
         },
         {
           "strategyId": "corp.remote_scoring",
@@ -8708,9 +8593,7 @@
           "confidence": "high",
           "anchorEvidenceCount": 1,
           "supportEvidenceCount": 23,
-          "supportGaps": [
-            "low_scorePlan_support"
-          ]
+          "supportGaps": ["low_scorePlan_support"]
         },
         {
           "strategyId": "corp.damage_kill",
@@ -8721,9 +8604,7 @@
           "confidence": "high",
           "anchorEvidenceCount": 2,
           "supportEvidenceCount": 8,
-          "supportGaps": [
-            "low_ambush_support"
-          ]
+          "supportGaps": ["low_ambush_support"]
         },
         {
           "strategyId": "corp.rush_score",
@@ -8745,9 +8626,7 @@
           "confidence": "medium",
           "anchorEvidenceCount": 2,
           "supportEvidenceCount": 20,
-          "supportGaps": [
-            "low_scorePlan_support"
-          ]
+          "supportGaps": ["low_scorePlan_support"]
         },
         {
           "strategyId": "corp.overadvance_value",
@@ -8758,10 +8637,7 @@
           "confidence": "medium",
           "anchorEvidenceCount": 6,
           "supportEvidenceCount": 9,
-          "supportGaps": [
-            "low_scorePlan_support",
-            "missing_advancement_window"
-          ]
+          "supportGaps": ["low_scorePlan_support", "missing_advancement_window"]
         },
         {
           "strategyId": "corp.asset_economy",
@@ -8772,10 +8648,7 @@
           "confidence": "medium",
           "anchorEvidenceCount": 1,
           "supportEvidenceCount": 7,
-          "supportGaps": [
-            "low_bait_support",
-            "weak_remote_protection"
-          ]
+          "supportGaps": ["low_bait_support", "weak_remote_protection"]
         },
         {
           "strategyId": "corp.central_stabilize",
@@ -8786,9 +8659,7 @@
           "confidence": "medium",
           "anchorEvidenceCount": 0,
           "supportEvidenceCount": 33,
-          "supportGaps": [
-            "weak_remote_protection"
-          ]
+          "supportGaps": ["weak_remote_protection"]
         },
         {
           "strategyId": "corp.deck_recycle_engine",
@@ -8810,9 +8681,7 @@
           "confidence": "low",
           "anchorEvidenceCount": 0,
           "supportEvidenceCount": 20,
-          "supportGaps": [
-            "low_scorePlan_support"
-          ]
+          "supportGaps": ["low_scorePlan_support"]
         },
         {
           "strategyId": "corp.tag_trace_punish",
@@ -8823,9 +8692,7 @@
           "confidence": "low",
           "anchorEvidenceCount": 0,
           "supportEvidenceCount": 8,
-          "supportGaps": [
-            "low_tag_sources"
-          ]
+          "supportGaps": ["low_tag_sources"]
         },
         {
           "strategyId": "corp.ambush_bluff",
@@ -8836,9 +8703,7 @@
           "confidence": "low",
           "anchorEvidenceCount": 0,
           "supportEvidenceCount": 8,
-          "supportGaps": [
-            "low_ambush_support"
-          ]
+          "supportGaps": ["low_ambush_support"]
         },
         {
           "strategyId": "corp.fast_advance",
@@ -8849,9 +8714,7 @@
           "confidence": "low",
           "anchorEvidenceCount": 0,
           "supportEvidenceCount": 23,
-          "supportGaps": [
-            "low_scoreAcceleration_support"
-          ]
+          "supportGaps": ["low_scoreAcceleration_support"]
         }
       ],
       "rolesStatus": {
@@ -8893,11 +8756,7 @@
           "cardId": "onr_classic_017_corporate-shuffle",
           "quantity": 2,
           "status": "partial",
-          "roles": [
-            "draw",
-            "draw_operation",
-            "operation"
-          ],
+          "roles": ["draw", "draw_operation", "operation"],
           "functionSignals": [
             "draw.corp_draw",
             "hq.corp_hand_refresh",
@@ -8922,9 +8781,7 @@
             "info.reveal_recovered_cards_to_runner",
             "risk.double_operation_action_cost"
           ],
-          "strategyAnchors": [
-            "corp.ice_tax_glacier"
-          ],
+          "strategyAnchors": ["corp.ice_tax_glacier"],
           "warnings": []
         },
         {
@@ -8939,14 +8796,8 @@
             "score_next_turn",
             "win_condition"
           ],
-          "functionSignals": [
-            "economy.action",
-            "score.overadvance_action"
-          ],
-          "strategyAnchors": [
-            "corp.action_tempo",
-            "corp.overadvance_value"
-          ],
+          "functionSignals": ["economy.action", "score.overadvance_action"],
+          "strategyAnchors": ["corp.action_tempo", "corp.overadvance_value"],
           "warnings": []
         },
         {
@@ -8959,12 +8810,8 @@
             "payoff_anchor",
             "score_next_turn"
           ],
-          "functionSignals": [
-            "economy.turn_start_credit"
-          ],
-          "strategyAnchors": [
-            "corp.overadvance_value"
-          ],
+          "functionSignals": ["economy.turn_start_credit"],
+          "strategyAnchors": ["corp.overadvance_value"],
           "warnings": []
         },
         {
@@ -8992,10 +8839,7 @@
             "damage.payoff",
             "ice.etr"
           ],
-          "strategyAnchors": [
-            "corp.damage_kill",
-            "corp.ice_tax_glacier"
-          ],
+          "strategyAnchors": ["corp.damage_kill", "corp.ice_tax_glacier"],
           "warnings": []
         },
         {
@@ -9045,9 +8889,7 @@
             "corp_ice.program_trash",
             "ice.etr"
           ],
-          "strategyAnchors": [
-            "corp.ice_tax_glacier"
-          ],
+          "strategyAnchors": ["corp.ice_tax_glacier"],
           "warnings": []
         },
         {
@@ -9062,13 +8904,8 @@
             "sentry_ice",
             "tax_tool"
           ],
-          "functionSignals": [
-            "corp_ice.rez_economy",
-            "economy.generic"
-          ],
-          "strategyAnchors": [
-            "corp.ice_tax_glacier"
-          ],
+          "functionSignals": ["corp_ice.rez_economy", "economy.generic"],
+          "strategyAnchors": ["corp.ice_tax_glacier"],
           "warnings": []
         },
         {
@@ -9092,9 +8929,7 @@
             "economy.generic",
             "ice.etr"
           ],
-          "strategyAnchors": [
-            "corp.ice_tax_glacier"
-          ],
+          "strategyAnchors": ["corp.ice_tax_glacier"],
           "warnings": []
         },
         {
@@ -9112,9 +8947,7 @@
             "ice.corp_temporary_rez",
             "risk.temporary_rez_liability"
           ],
-          "strategyAnchors": [
-            "corp.ice_tax_glacier"
-          ],
+          "strategyAnchors": ["corp.ice_tax_glacier"],
           "warnings": []
         },
         {
@@ -9127,24 +8960,16 @@
             "run_window_credit_reserve"
           ],
           "functionSignals": [],
-          "strategyAnchors": [
-            "corp.economy_rez_reserve"
-          ],
+          "strategyAnchors": ["corp.economy_rez_reserve"],
           "warnings": []
         },
         {
           "cardId": "onr_proteus_076_syd-meyer-superstores",
           "quantity": 3,
           "status": "partial",
-          "roles": [
-            "corp.asset_economy",
-            "find_economy",
-            "support_tool"
-          ],
+          "roles": ["corp.asset_economy", "find_economy", "support_tool"],
           "functionSignals": [],
-          "strategyAnchors": [
-            "corp.asset_economy"
-          ],
+          "strategyAnchors": ["corp.asset_economy"],
           "warnings": []
         },
         {
@@ -9166,25 +8991,16 @@
             "score.remote_fort_creation",
             "score.remote_install_budget"
           ],
-          "strategyAnchors": [
-            "corp.remote_scoring"
-          ],
+          "strategyAnchors": ["corp.remote_scoring"],
           "warnings": []
         },
         {
           "cardId": "onr_v1_216_security-purge",
           "quantity": 3,
           "status": "complete",
-          "roles": [
-            "corp.ice_tax_glacier",
-            "enabler"
-          ],
-          "functionSignals": [
-            "ice.corp_free_rez"
-          ],
-          "strategyAnchors": [
-            "corp.ice_tax_glacier"
-          ],
+          "roles": ["corp.ice_tax_glacier", "enabler"],
+          "functionSignals": ["ice.corp_free_rez"],
+          "strategyAnchors": ["corp.ice_tax_glacier"],
           "warnings": []
         },
         {
@@ -9216,14 +9032,8 @@
             "remote_upgrade_tax",
             "tax_tool"
           ],
-          "functionSignals": [
-            "ice.corp_fort_defense",
-            "tax.ice"
-          ],
-          "strategyAnchors": [
-            "corp.ice_tax_glacier",
-            "corp.remote_scoring"
-          ],
+          "functionSignals": ["ice.corp_fort_defense", "tax.ice"],
+          "strategyAnchors": ["corp.ice_tax_glacier", "corp.remote_scoring"],
           "warnings": []
         }
       ],
@@ -9285,9 +9095,7 @@
             "support": 90,
             "final": 72
           },
-          "supportGaps": [
-            "low_scorePlan_support"
-          ],
+          "supportGaps": ["low_scorePlan_support"],
           "evidence": [
             "strategy:corp.economy_rez_reserve",
             "confidence:high",
@@ -9308,9 +9116,7 @@
             "support": 85,
             "final": 66
           },
-          "supportGaps": [
-            "low_ambush_support"
-          ],
+          "supportGaps": ["low_ambush_support"],
           "evidence": [
             "strategy:corp.damage_kill",
             "confidence:high",
@@ -9331,9 +9137,7 @@
             "support": 75,
             "final": 59
           },
-          "supportGaps": [
-            "low_scorePlan_support"
-          ],
+          "supportGaps": ["low_scorePlan_support"],
           "evidence": [
             "strategy:corp.action_tempo",
             "confidence:medium",
@@ -9387,9 +9191,7 @@
         "status": "continued",
         "reason": "same_primary_strategy",
         "previousStrategyId": "corp.remote_scoring",
-        "evidence": [
-          "continued:corp.remote_scoring"
-        ]
+        "evidence": ["continued:corp.remote_scoring"]
       },
       "commitment": {
         "strategyId": "corp.remote_scoring",
@@ -9507,10 +9309,7 @@
               "kind": "none",
               "required": 0,
               "satisfied": true,
-              "evidence": [
-                "reserve_source:runtime_context",
-                "reserve:none"
-              ]
+              "evidence": ["reserve_source:runtime_context", "reserve:none"]
             },
             "evidence": [
               "portfolio_candidate:runtime_context",
@@ -9690,10 +9489,7 @@
               "kind": "none",
               "required": 0,
               "satisfied": true,
-              "evidence": [
-                "reserve_source:runtime_context",
-                "reserve:none"
-              ]
+              "evidence": ["reserve_source:runtime_context", "reserve:none"]
             },
             "evidence": [
               "portfolio_candidate:runtime_context",
@@ -9718,9 +9514,7 @@
             "family": "corp_ice_tax",
             "candidateRole": "blocked",
             "runtimeStatus": "blocked",
-            "runtimeBlockers": [
-              "hard_support_gap:weak_remote_protection"
-            ],
+            "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
             "confidence": "high",
             "score": {
               "anchor": 90,
@@ -9778,9 +9572,7 @@
             "family": "corp_overadvance",
             "candidateRole": "blocked",
             "runtimeStatus": "blocked",
-            "runtimeBlockers": [
-              "hard_support_gap:missing_advancement_window"
-            ],
+            "runtimeBlockers": ["hard_support_gap:missing_advancement_window"],
             "confidence": "medium",
             "score": {
               "anchor": 71,
@@ -9844,9 +9636,7 @@
             "family": "corp_asset_economy",
             "candidateRole": "blocked",
             "runtimeStatus": "blocked",
-            "runtimeBlockers": [
-              "hard_support_gap:weak_remote_protection"
-            ],
+            "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
             "confidence": "medium",
             "score": {
               "anchor": 49,
@@ -9877,10 +9667,7 @@
               "kind": "none",
               "required": 0,
               "satisfied": true,
-              "evidence": [
-                "reserve_source:runtime_context",
-                "reserve:none"
-              ]
+              "evidence": ["reserve_source:runtime_context", "reserve:none"]
             },
             "evidence": [
               "portfolio_candidate:runtime_context",
@@ -9934,10 +9721,7 @@
               "kind": "none",
               "required": 0,
               "satisfied": true,
-              "evidence": [
-                "reserve_source:runtime_context",
-                "reserve:none"
-              ]
+              "evidence": ["reserve_source:runtime_context", "reserve:none"]
             },
             "evidence": [
               "portfolio_candidate:runtime_context",
@@ -9992,10 +9776,7 @@
               "kind": "none",
               "required": 0,
               "satisfied": true,
-              "evidence": [
-                "reserve_source:runtime_context",
-                "reserve:none"
-              ]
+              "evidence": ["reserve_source:runtime_context", "reserve:none"]
             },
             "evidence": [
               "portfolio_candidate:runtime_context",
@@ -10050,10 +9831,7 @@
               "kind": "none",
               "required": 0,
               "satisfied": true,
-              "evidence": [
-                "reserve_source:runtime_context",
-                "reserve:none"
-              ]
+              "evidence": ["reserve_source:runtime_context", "reserve:none"]
             },
             "evidence": [
               "portfolio_candidate:runtime_context",
@@ -10172,10 +9950,7 @@
               "kind": "none",
               "required": 0,
               "satisfied": true,
-              "evidence": [
-                "reserve_source:runtime_context",
-                "reserve:none"
-              ]
+              "evidence": ["reserve_source:runtime_context", "reserve:none"]
             },
             "evidence": [
               "portfolio_candidate:runtime_context",
@@ -10225,21 +10000,10 @@
         "corp.remote_scoreline",
         "corp.rush_scoreline"
       ],
-      "defensePlan": [
-        "corp.ice_tax_glacier",
-        "corp.remote_protect"
-      ],
-      "economyPlan": [
-        "corp.asset_economy",
-        "corp.rez_reserve"
-      ],
-      "enginePlan": [
-        "corp.action_tempo_engine",
-        "corp.overadvance_engine"
-      ],
-      "punishPlan": [
-        "corp.damage_kill"
-      ],
+      "defensePlan": ["corp.ice_tax_glacier", "corp.remote_protect"],
+      "economyPlan": ["corp.asset_economy", "corp.rez_reserve"],
+      "enginePlan": ["corp.action_tempo_engine", "corp.overadvance_engine"],
+      "punishPlan": ["corp.damage_kill"],
       "riskProfile": [],
       "rejectedIntents": [
         "corp.central_stabilize_support_only",
@@ -10339,9 +10103,7 @@
               "support": 90,
               "final": 72
             },
-            "supportGaps": [
-              "low_scorePlan_support"
-            ],
+            "supportGaps": ["low_scorePlan_support"],
             "evidence": [
               "strategy:corp.economy_rez_reserve",
               "confidence:high",
@@ -10362,9 +10124,7 @@
               "support": 85,
               "final": 66
             },
-            "supportGaps": [
-              "low_ambush_support"
-            ],
+            "supportGaps": ["low_ambush_support"],
             "evidence": [
               "strategy:corp.damage_kill",
               "confidence:high",
@@ -10385,9 +10145,7 @@
               "support": 75,
               "final": 59
             },
-            "supportGaps": [
-              "low_scorePlan_support"
-            ],
+            "supportGaps": ["low_scorePlan_support"],
             "evidence": [
               "strategy:corp.action_tempo",
               "confidence:medium",
@@ -10441,9 +10199,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "corp.remote_scoring",
-          "evidence": [
-            "continued:corp.remote_scoring"
-          ]
+          "evidence": ["continued:corp.remote_scoring"]
         },
         "commitment": {
           "strategyId": "corp.remote_scoring",
@@ -10561,10 +10317,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -10744,10 +10497,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -10772,9 +10522,7 @@
               "family": "corp_ice_tax",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "high",
               "score": {
                 "anchor": 90,
@@ -10898,9 +10646,7 @@
               "family": "corp_asset_economy",
               "candidateRole": "blocked",
               "runtimeStatus": "blocked",
-              "runtimeBlockers": [
-                "hard_support_gap:weak_remote_protection"
-              ],
+              "runtimeBlockers": ["hard_support_gap:weak_remote_protection"],
               "confidence": "medium",
               "score": {
                 "anchor": 49,
@@ -10931,10 +10677,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -10988,10 +10731,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -11046,10 +10786,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -11104,10 +10841,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -11226,10 +10960,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -11316,9 +11047,7 @@
                 "serverId": "hq",
                 "phase": "decline_rez",
                 "sourceDefinitionIds": [],
-                "actionIds": [
-                  "corp.decline_rez"
-                ],
+                "actionIds": ["corp.decline_rez"],
                 "urgent": true,
                 "value": 0,
                 "evidenceCode": "visible_rez_window_decline_with_genuine_defense_threat"
@@ -11328,9 +11057,7 @@
                 "defenseId": "rez-future-encounter-support:corp_onr_v1_358_dr-dreff_2",
                 "serverId": "hq",
                 "phase": "rez_response",
-                "sourceDefinitionIds": [
-                  "onr_v1_358_dr-dreff"
-                ],
+                "sourceDefinitionIds": ["onr_v1_358_dr-dreff"],
                 "actionIds": [
                   "corp.rez_card.corp_onr_v1_358_dr-dreff_2.hq.corp_onr_v1_358_dr-dreff_2"
                 ],
@@ -11573,9 +11300,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "missing_existing_remote",
-                "evidence": [
-                  "target_server:new_remote"
-                ]
+                "evidence": ["target_server:new_remote"]
               }
             }
           },
@@ -11769,10 +11494,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:10",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:10", "opening_corp_turn_ceiling:4"]
               },
               "fundingGap": 13,
               "fundingMilestone": {
@@ -11977,10 +11699,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:10",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:10", "opening_corp_turn_ceiling:4"]
               },
               "fundingGap": 13,
               "fundingMilestone": {
@@ -17070,12 +16789,8 @@
         "quoteIds": [],
         "valueClaimIds": [],
         "priorityCoverage": {
-          "requiredObligationIds": [
-            "priority-band:P2"
-          ],
-          "satisfiedObligationIds": [
-            "priority-band:P2"
-          ],
+          "requiredObligationIds": ["priority-band:P2"],
+          "satisfiedObligationIds": ["priority-band:P2"],
           "violatedObligationIds": [],
           "deferredObligationIds": []
         },

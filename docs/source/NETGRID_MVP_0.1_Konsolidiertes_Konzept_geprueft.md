@@ -4,7 +4,7 @@
 **Stand:** 03.05.2026  
 **Primärer Fokus:** MVP 0.1 – Human Runner gegen einfache Corp-KI  
 **Dokumenttyp:** konsolidiertes Konzept-, Architektur- und Umsetzungsdokument  
-**Kontrollabgleich:** geprüft gegen die vier Ursprungskonzepte am 03.05.2026  
+**Kontrollabgleich:** geprüft gegen die vier Ursprungskonzepte am 03.05.2026
 
 Dieses Dokument konsolidiert und ersetzt die bisherigen Konzeptzwischenstände vollständig. Frühere Konzeptdateien sind nach Erstellung dieser Fassung nicht mehr verbindlich und müssen für die Entwicklung nicht parallel gepflegt werden. Entscheidungen, Scope-Grenzen, technische Vorgaben, Test-Gates und bekannte Vereinfachungen werden in dieser Fassung geführt.
 
@@ -75,14 +75,14 @@ Langfristig soll eine private Webapplikation entstehen, mit der NETGRID regelgef
 
 Langfristig sollen folgende Spielmodi möglich sein:
 
-| Spielmodus | Zielstatus | Bemerkung |
-|---|---:|---|
-| Human vs KI | MVP 0.1 startet mit Human Runner vs Corp-KI | Erste produktive Spielform. |
-| KI vs Human | Später | Erfordert Runner-KI. |
-| Human vs Human online | MVP 0.2 | Privater Einladungslink, WebSocket, PlayerViews, Reconnect. |
-| Human vs Human lokal / Hotseat | Später optional | Für Tests und Lernpartien möglich; echte Hidden Information eingeschränkt. |
-| KI vs KI | Später, als Testmodus vorbereitbar | Nützlich für Simulationen, Regressionen und KI-Stabilität. |
-| Replay / Zuschaueransicht | Replay als Testinstrument ab MVP 0.1, Zuschaueransicht später | In MVP 0.1 reicht EventLog-/Replay-Grundlage. |
+| Spielmodus                     |                                                    Zielstatus | Bemerkung                                                                  |
+| ------------------------------ | ------------------------------------------------------------: | -------------------------------------------------------------------------- |
+| Human vs KI                    |                   MVP 0.1 startet mit Human Runner vs Corp-KI | Erste produktive Spielform.                                                |
+| KI vs Human                    |                                                        Später | Erfordert Runner-KI.                                                       |
+| Human vs Human online          |                                                       MVP 0.2 | Privater Einladungslink, WebSocket, PlayerViews, Reconnect.                |
+| Human vs Human lokal / Hotseat |                                               Später optional | Für Tests und Lernpartien möglich; echte Hidden Information eingeschränkt. |
+| KI vs KI                       |                            Später, als Testmodus vorbereitbar | Nützlich für Simulationen, Regressionen und KI-Stabilität.                 |
+| Replay / Zuschaueransicht      | Replay als Testinstrument ab MVP 0.1, Zuschaueransicht später | In MVP 0.1 reicht EventLog-/Replay-Grundlage.                              |
 
 Die langfristige Plattform entsteht aus derselben Engine-Basis. MVP 0.1 muss deshalb klein sein, aber die richtigen technischen Strukturen bereits enthalten.
 
@@ -118,27 +118,27 @@ Diese Nicht-Ziele sind verbindlich. Sie schützen das Projekt vor Scope Creep un
 
 ## 5. Leitprinzipien
 
-| Prinzip | Konsequenz |
-|---|---|
-| Engine zuerst | Spielzustand, LegalActions, Invarianten und Tests entstehen vor UI-Komfort. |
-| Regelautorität nur in der Engine | UI und KI dürfen keine Regeln auslegen oder Aktionen erfinden. |
-| Server-authoritative State | Der vollständige GameState ist nicht Client-Wahrheit. |
-| Keine Hidden-Info-Leaks | PlayerViews, Events, Logs, Fehler, Replays und KI-Inputs werden gefiltert. |
-| Event-Sourcing light | Jede Engine-Transition erzeugt ein Event mit StateVersion und StateHash. |
-| Determinismus | Seeds, RandomCounter und Zufallsergebnisse werden gespeichert. |
-| Kleiner Kartenpool | Zwei feste Demo-Decks statt freier Deckbau. |
-| Kartenlogik explizit | Gedruckter Text und maschinenlesbare Engine-Logik bleiben getrennt. |
-| Tests als Gate | Kein neuer Engine-Effekt ohne Test, keine neue Karte ohne Kartentest. |
-| Erweiterbarkeit ohne Vorgriff | TimingPointIds, Manifest, PlayerActions und PlayerViews werden vorbereitet, auch wenn viele Features leer bleiben. |
+| Prinzip                          | Konsequenz                                                                                                         |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Engine zuerst                    | Spielzustand, LegalActions, Invarianten und Tests entstehen vor UI-Komfort.                                        |
+| Regelautorität nur in der Engine | UI und KI dürfen keine Regeln auslegen oder Aktionen erfinden.                                                     |
+| Server-authoritative State       | Der vollständige GameState ist nicht Client-Wahrheit.                                                              |
+| Keine Hidden-Info-Leaks          | PlayerViews, Events, Logs, Fehler, Replays und KI-Inputs werden gefiltert.                                         |
+| Event-Sourcing light             | Jede Engine-Transition erzeugt ein Event mit StateVersion und StateHash.                                           |
+| Determinismus                    | Seeds, RandomCounter und Zufallsergebnisse werden gespeichert.                                                     |
+| Kleiner Kartenpool               | Zwei feste Demo-Decks statt freier Deckbau.                                                                        |
+| Kartenlogik explizit             | Gedruckter Text und maschinenlesbare Engine-Logik bleiben getrennt.                                                |
+| Tests als Gate                   | Kein neuer Engine-Effekt ohne Test, keine neue Karte ohne Kartentest.                                              |
+| Erweiterbarkeit ohne Vorgriff    | TimingPointIds, Manifest, PlayerActions und PlayerViews werden vorbereitet, auch wenn viele Features leer bleiben. |
 
 ## 6. Zielnutzer und Nutzungsszenarien
 
-| Nutzerrolle | Bedarf | Relevanz für MVP 0.1 |
-|---|---|---|
-| Privater Spieler | NETGRID-Grundabläufe regelgeführt üben. | Primärnutzer. |
-| Entwickler | Engine-Fehler finden, Szenarien reproduzieren, Karten schrittweise implementieren. | Primärnutzer für Debugging und Tests. |
-| KI-/Simulationsnutzer | Heuristiken testen und später KI-vs-KI simulieren. | In 0.1 nur über Corp-KI und vorbereitete Teststruktur relevant. |
-| Online-Gegenspieler | Später privat über Einladungslink spielen. | Nicht in 0.1, aber Architektur vorbereitet. |
+| Nutzerrolle           | Bedarf                                                                             | Relevanz für MVP 0.1                                            |
+| --------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| Privater Spieler      | NETGRID-Grundabläufe regelgeführt üben.                                            | Primärnutzer.                                                   |
+| Entwickler            | Engine-Fehler finden, Szenarien reproduzieren, Karten schrittweise implementieren. | Primärnutzer für Debugging und Tests.                           |
+| KI-/Simulationsnutzer | Heuristiken testen und später KI-vs-KI simulieren.                                 | In 0.1 nur über Corp-KI und vorbereitete Teststruktur relevant. |
+| Online-Gegenspieler   | Später privat über Einladungslink spielen.                                         | Nicht in 0.1, aber Architektur vorbereitet.                     |
 
 ### 6.1 Kern-User-Journey MVP 0.1
 
@@ -173,13 +173,13 @@ Für MVP 0.1 wird die bereitgestellte Comprehensive-Rules-Version `26.03` als Re
 
 ```ts
 type RulesBaseline = {
-  rulesVersion: string
-  cardTextSource: "netgriddb" | "local_snapshot" | "manual"
-  cardTextSnapshotId: string
-  engineSchemaVersion: string
-  cardImplementationVersion: string
-  deviationRegistryVersion: string
-}
+  rulesVersion: string;
+  cardTextSource: "netgriddb" | "local_snapshot" | "manual";
+  cardTextSnapshotId: string;
+  engineSchemaVersion: string;
+  cardImplementationVersion: string;
+  deviationRegistryVersion: string;
+};
 ```
 
 Empfohlene MVP-Baseline:
@@ -201,98 +201,104 @@ Zusätzliche Referenz- und Prüfpunkte aus den Ursprungskonzepten:
 - Für spätere Nutzung von Namen, Texten, Logos, Kartenbildern, Frames, Rückseiten oder sonstigen visuellen Assets müssen die jeweils aktuellen NETGRIDDB-/Null-Signal-Games-/Asset-Hinweise separat geprüft werden.
 - Diese technische Referenzbasis ersetzt keine Rechtsberatung zu Urheberrecht, Markenrecht, Datenschutz oder Hostingbedingungen.
 
-
 ## 8. Abweichungsregister
 
 Der MVP ist nicht „ungefähr NETGRID“, sondern ein abgegrenzter Regelausschnitt. Jede absichtliche Vereinfachung gegenüber der vollständigen Regelbasis muss im Abweichungsregister stehen. Eine Vereinfachung darf nur bestehen bleiben, wenn sie für den aktuellen Kartenpool unschädlich ist oder in der UI klar als Einschränkung ausgewiesen wird.
 
 ```ts
 type RuleDeviation = {
-  id: string
-  area: "turn" | "run" | "access" | "card" | "deckbuilding" | "multiplayer" | "ui"
-  officialRuleRef?: string
-  simplifiedBehavior: string
-  reason: string
-  affectedCards: string[]
-  allowedInVersions: string[]
-  removalCondition: string
-  testCoverage: string[]
-}
+  id: string;
+  area:
+    | "turn"
+    | "run"
+    | "access"
+    | "card"
+    | "deckbuilding"
+    | "multiplayer"
+    | "ui";
+  officialRuleRef?: string;
+  simplifiedBehavior: string;
+  reason: string;
+  affectedCards: string[];
+  allowedInVersions: string[];
+  removalCondition: string;
+  testCoverage: string[];
+};
 ```
 
 Initiale MVP-Abweichungen:
 
-| Bereich | Vereinfachung in MVP 0.1 | Rückbau-/Erweiterungsbedingung |
-|---|---|---|
-| Deckbau | Keine freie Deckwahl, keine Format- und Einflussprüfung. | Sobald offizielle Decks oder freier Deckbau eingeführt werden. |
-| Kartenpool | Nur feste Demo-Karten mit `playable_mvp`. | Erweiterung pro Karte nur mit Manifest und Tests. |
-| Identitäten | Runner- und Corp-Identitäten haben deaktivierte Sonderfähigkeiten. | Sobald echte IDs mit getesteten Fähigkeiten genutzt werden. |
-| Timing | TimingPointIds existieren, viele Fenster bleiben leer oder bieten keine Aktionen. | Sobald Karten diese Fenster benötigen. |
-| Paid Abilities | Nur Breaker- und Demo-relevante Paid Abilities. | Sobald Karten mit weiteren Paid Abilities spielbar werden. |
-| Tags/Trace/Damage/Viren | Nicht implementiert. | Erst mit Karten, die diese Mechaniken benötigen. |
-| Prevention/Replacement/Interrupt | Nicht implementiert. | Erst bei Karten, die solche Effekte benötigen; dann Resolver erweitern. |
-| Hosting/Hosted Cards | Nicht implementiert. | Erst mit Karten, die Hosting verwenden. |
-| Multiaccess/Bypass/Run-Umleitung | Nicht implementiert. | Erst mit entsprechenden Karten oder fortgeschrittener Run-Engine. |
-| Public Replay | Nur einfacher EventLog-/Replay-Viewer, keine öffentliche Replay-Plattform. | Späteres Komfort-Feature. |
+| Bereich                          | Vereinfachung in MVP 0.1                                                          | Rückbau-/Erweiterungsbedingung                                          |
+| -------------------------------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Deckbau                          | Keine freie Deckwahl, keine Format- und Einflussprüfung.                          | Sobald offizielle Decks oder freier Deckbau eingeführt werden.          |
+| Kartenpool                       | Nur feste Demo-Karten mit `playable_mvp`.                                         | Erweiterung pro Karte nur mit Manifest und Tests.                       |
+| Identitäten                      | Runner- und Corp-Identitäten haben deaktivierte Sonderfähigkeiten.                | Sobald echte IDs mit getesteten Fähigkeiten genutzt werden.             |
+| Timing                           | TimingPointIds existieren, viele Fenster bleiben leer oder bieten keine Aktionen. | Sobald Karten diese Fenster benötigen.                                  |
+| Paid Abilities                   | Nur Breaker- und Demo-relevante Paid Abilities.                                   | Sobald Karten mit weiteren Paid Abilities spielbar werden.              |
+| Tags/Trace/Damage/Viren          | Nicht implementiert.                                                              | Erst mit Karten, die diese Mechaniken benötigen.                        |
+| Prevention/Replacement/Interrupt | Nicht implementiert.                                                              | Erst bei Karten, die solche Effekte benötigen; dann Resolver erweitern. |
+| Hosting/Hosted Cards             | Nicht implementiert.                                                              | Erst mit Karten, die Hosting verwenden.                                 |
+| Multiaccess/Bypass/Run-Umleitung | Nicht implementiert.                                                              | Erst mit entsprechenden Karten oder fortgeschrittener Run-Engine.       |
+| Public Replay                    | Nur einfacher EventLog-/Replay-Viewer, keine öffentliche Replay-Plattform.        | Späteres Komfort-Feature.                                               |
 
 ## 9. Enthaltener Regelumfang MVP 0.1
 
-| Bereich | Enthalten |
-|---|---|
-| Setup | Match-Erzeugung, feste Decks, Identitäten ohne aktive Sonderfähigkeit, Seed, Shuffle, Starthände, Startressourcen, Score Areas, Zonen. Mulligan kann in MVP 0.1 zunächst weggelassen oder als dokumentierte Abweichung optional implementiert werden. |
-| Grundaktionen | Credit nehmen, Karte ziehen, Runner-Karte installieren, Corp-Karte installieren, Event/Operation mit einfachem Effekt spielen, Agenda advancen, Zug beenden. |
-| Corp-Zug | Pflicht-Draw zu Beginn, Click-Management, Credits, Installation von ICE, Assets und Agendas, Remote-Erstellung, Agenda scoren. |
-| Runner-Zug | Click-Management, Credits, Draw, Installation von Programmen, einfache Events, Runs. |
-| Server | HQ, R&D, Archives, mindestens ein Remote, ICE vor Servern, Root-Karten für Remote. |
-| Run | Run-Initiation, Serverwahl, Approach ICE, Rez-Choice für Corp, Encounter, Break, Subroutinen, Pass ICE, Approach Server, Success, Breach, Access, Run Ends. |
-| ICE und Breaker | Einfache Barrier, Code Gate, Sentry; passende Fracter/Decoder/Killer mit Pump- und Break-Fähigkeiten. |
-| Access/Breach | HQ random access, R&D top access, Archives access, Remote root access, Agenda-Steal, Trash-Cost-Entscheidung bei Assets. |
-| Scoring | Agenda installieren, Advancement-Token legen, Score-Bedingung prüfen, Agenda scoren. |
-| Siegbedingungen | Agenda-Sieg für Runner und Corp; weitere Siegbedingungen nur, wenn im Demo-Pool benötigt. |
-| EventLog | Öffentliche und private Eventanteile, StateVersion, StateHash, RandomDrawRecords. |
-| Replay | Reproduktion einer Beispielpartie aus initialState, EventLog, Seed und RandomDrawRecords. |
-| KI | Einfache Corp-KI mit LegalAction-Zwang, Timeout und Fallback. |
-| Tests | Unit-, Integrations-, Run-, Access-, Visibility-, Replay-, KI- und Kartentests. |
+| Bereich         | Enthalten                                                                                                                                                                                                                                             |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Setup           | Match-Erzeugung, feste Decks, Identitäten ohne aktive Sonderfähigkeit, Seed, Shuffle, Starthände, Startressourcen, Score Areas, Zonen. Mulligan kann in MVP 0.1 zunächst weggelassen oder als dokumentierte Abweichung optional implementiert werden. |
+| Grundaktionen   | Credit nehmen, Karte ziehen, Runner-Karte installieren, Corp-Karte installieren, Event/Operation mit einfachem Effekt spielen, Agenda advancen, Zug beenden.                                                                                          |
+| Corp-Zug        | Pflicht-Draw zu Beginn, Click-Management, Credits, Installation von ICE, Assets und Agendas, Remote-Erstellung, Agenda scoren.                                                                                                                        |
+| Runner-Zug      | Click-Management, Credits, Draw, Installation von Programmen, einfache Events, Runs.                                                                                                                                                                  |
+| Server          | HQ, R&D, Archives, mindestens ein Remote, ICE vor Servern, Root-Karten für Remote.                                                                                                                                                                    |
+| Run             | Run-Initiation, Serverwahl, Approach ICE, Rez-Choice für Corp, Encounter, Break, Subroutinen, Pass ICE, Approach Server, Success, Breach, Access, Run Ends.                                                                                           |
+| ICE und Breaker | Einfache Barrier, Code Gate, Sentry; passende Fracter/Decoder/Killer mit Pump- und Break-Fähigkeiten.                                                                                                                                                 |
+| Access/Breach   | HQ random access, R&D top access, Archives access, Remote root access, Agenda-Steal, Trash-Cost-Entscheidung bei Assets.                                                                                                                              |
+| Scoring         | Agenda installieren, Advancement-Token legen, Score-Bedingung prüfen, Agenda scoren.                                                                                                                                                                  |
+| Siegbedingungen | Agenda-Sieg für Runner und Corp; weitere Siegbedingungen nur, wenn im Demo-Pool benötigt.                                                                                                                                                             |
+| EventLog        | Öffentliche und private Eventanteile, StateVersion, StateHash, RandomDrawRecords.                                                                                                                                                                     |
+| Replay          | Reproduktion einer Beispielpartie aus initialState, EventLog, Seed und RandomDrawRecords.                                                                                                                                                             |
+| KI              | Einfache Corp-KI mit LegalAction-Zwang, Timeout und Fallback.                                                                                                                                                                                         |
+| Tests           | Unit-, Integrations-, Run-, Access-, Visibility-, Replay-, KI- und Kartentests.                                                                                                                                                                       |
 
 Ausdrücklich zurückgestellt:
 
-| Zurückgestellter Bereich | Grund |
-|---|---|
-| Freier Deckbau, Rotation, Banlisten, Einflussvalidierung | Nicht nötig für feste Demo-Decks. |
-| Tags, Trace, Damage, Viren, Bad-Publicity-Sonderlogik | Erhöht Regel- und Timingkomplexität ohne Bedarf im Demo-Pool. |
-| Prevention, Avoid, Replacement, Interrupt | Benötigen erweiterten Resolver. |
-| Hosting, Hosted Cards, komplexe Counter-Orte | Erst für spätere Kartenpools. |
-| Forced Encounters, Bypass, Run-Umleitung, Multiaccess | Erst nach stabilem Run-/Access-Kern. |
-| Region-, Unique-, Console- und zentrale Root-Upgrade-Sonderfälle | Nicht im ersten Demo-Deck enthalten. |
-| Vollständige Paid-Ability-Struktur | Struktur vorbereitet, Aktionen nur bei Bedarf. |
-| Starke KI und LLM-KI | Erst nach stabiler LegalAction-/Visibility-Schicht. |
+| Zurückgestellter Bereich                                         | Grund                                                         |
+| ---------------------------------------------------------------- | ------------------------------------------------------------- |
+| Freier Deckbau, Rotation, Banlisten, Einflussvalidierung         | Nicht nötig für feste Demo-Decks.                             |
+| Tags, Trace, Damage, Viren, Bad-Publicity-Sonderlogik            | Erhöht Regel- und Timingkomplexität ohne Bedarf im Demo-Pool. |
+| Prevention, Avoid, Replacement, Interrupt                        | Benötigen erweiterten Resolver.                               |
+| Hosting, Hosted Cards, komplexe Counter-Orte                     | Erst für spätere Kartenpools.                                 |
+| Forced Encounters, Bypass, Run-Umleitung, Multiaccess            | Erst nach stabilem Run-/Access-Kern.                          |
+| Region-, Unique-, Console- und zentrale Root-Upgrade-Sonderfälle | Nicht im ersten Demo-Deck enthalten.                          |
+| Vollständige Paid-Ability-Struktur                               | Struktur vorbereitet, Aktionen nur bei Bedarf.                |
+| Starke KI und LLM-KI                                             | Erst nach stabiler LegalAction-/Visibility-Schicht.           |
 
 ## 10. Systemarchitektur
 
 Die Anwendung besteht aus fünf klar getrennten Schichten.
 
-| Schicht | Verantwortung |
-|---|---|
-| Rules Engine | GameState, Regeln, Phasen, Timingpunkte, Runs, Breach, Access, legale Aktionen, Siegbedingungen, Invarianten, Karteneffekte, Visibility. |
-| Backend / Match Server | Matches, Controller, Speicherung, WebSocket-Vorbereitung, Einladungslinks, Reconnect, EventLogs, Snapshots, KI-Anbindung. |
-| Frontend / Web UI | Spielbrett, Zonen, Aktionen, Run-Status, ChoiceRequests, EventLog, Replay-/Debug-Anzeige. |
-| KI-Modul | Bewertet LegalActions aus zulässiger PlayerView und wählt eine actionId. |
-| Testsystem | Unit-, Integrations-, Szenario-, Visibility-, Replay-, KI-, Karten- und Regressionstests. |
+| Schicht                | Verantwortung                                                                                                                            |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Rules Engine           | GameState, Regeln, Phasen, Timingpunkte, Runs, Breach, Access, legale Aktionen, Siegbedingungen, Invarianten, Karteneffekte, Visibility. |
+| Backend / Match Server | Matches, Controller, Speicherung, WebSocket-Vorbereitung, Einladungslinks, Reconnect, EventLogs, Snapshots, KI-Anbindung.                |
+| Frontend / Web UI      | Spielbrett, Zonen, Aktionen, Run-Status, ChoiceRequests, EventLog, Replay-/Debug-Anzeige.                                                |
+| KI-Modul               | Bewertet LegalActions aus zulässiger PlayerView und wählt eine actionId.                                                                 |
+| Testsystem             | Unit-, Integrations-, Szenario-, Visibility-, Replay-, KI-, Karten- und Regressionstests.                                                |
 
 Die Engine darf keine UI-, Netzwerk- oder Persistenzlogik enthalten. Backend, UI und KI sind Adapter um dieselbe Engine.
 
 ### 10.1 Empfohlener Stack
 
-| Bereich | Empfehlung für MVP |
-|---|---|
-| Frontend | Next.js, React, TypeScript |
-| Backend | Node.js, TypeScript |
-| Realtime | Für MVP 0.1 nur vorbereiten; später WebSocket, z. B. Socket.io oder native `ws` |
-| Engine | Eigenes TypeScript-Paket |
+| Bereich            | Empfehlung für MVP                                                                                |
+| ------------------ | ------------------------------------------------------------------------------------------------- |
+| Frontend           | Next.js, React, TypeScript                                                                        |
+| Backend            | Node.js, TypeScript                                                                               |
+| Realtime           | Für MVP 0.1 nur vorbereiten; später WebSocket, z. B. Socket.io oder native `ws`                   |
+| Engine             | Eigenes TypeScript-Paket                                                                          |
 | Persistenz Phase 1 | JSON-Dateien oder SQLite; SQLite bevorzugt, sobald mehrere Matches oder WebSocket relevant werden |
-| Persistenz später | PostgreSQL |
-| Tests | Vitest oder Jest, zusätzlich Szenario-Tests |
-| Deployment | Lokal, privater Homeserver, Docker, später optional privater VPS |
+| Persistenz später  | PostgreSQL                                                                                        |
+| Tests              | Vitest oder Jest, zusätzlich Szenario-Tests                                                       |
+| Deployment         | Lokal, privater Homeserver, Docker, später optional privater VPS                                  |
 
 ### 10.2 Projektstruktur
 
@@ -359,49 +365,49 @@ Die Engine darf keine UI-, Netzwerk- oder Persistenzlogik enthalten. Backend, UI
 
 ### 11.1 Zentrale Objekte
 
-| Objekt | Zweck |
-|---|---|
-| Match | Container für Controller, Baseline, GameState, EventLog, Snapshots und Settings. |
-| PlayerController | Beschreibt, ob eine Seite durch lokalen Menschen, Remote-Mensch, KI oder Replay gesteuert wird. |
-| GameState | Autoritativer Spielzustand mit Turn, Phase, TimingPoint, StateVersion, CorpState, RunnerState, RunState und Winner. |
-| CorpState | Identity, Credits, Clicks, Bad Publicity, HQ, R&D, Archives, Score Area, Server. |
-| RunnerState | Identity, Credits, Clicks, Tags als Zukunftsfeld, Memory, Grip, Stack, Heap, Score Area, Rig. |
-| CardDefinition | Statische Kartendaten: Titel, Typ, Subtypes, Kosten, RezCost, TrashCost, AgendaRequirement, Stärke, MVP-AbilityDefinition. |
-| CardInstance | Konkrete Karteninstanz in einer Partie mit Zone, Owner, Controller, Status, Countern, Host-Relationen und Implementierungsstatus. |
-| Server | HQ/R&D/Archives/Remote mit Root-Karten und ICE-Kette. |
-| LegalAction | Von der Engine angebotene legale Handlung. |
-| PlayerAction | Vom Client oder von der KI eingereichte konkrete Entscheidung. |
-| GameEvent | Versioniertes Event mit öffentlichen/privaten Payloads, StateVersion und StateHash. |
+| Objekt           | Zweck                                                                                                                             |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Match            | Container für Controller, Baseline, GameState, EventLog, Snapshots und Settings.                                                  |
+| PlayerController | Beschreibt, ob eine Seite durch lokalen Menschen, Remote-Mensch, KI oder Replay gesteuert wird.                                   |
+| GameState        | Autoritativer Spielzustand mit Turn, Phase, TimingPoint, StateVersion, CorpState, RunnerState, RunState und Winner.               |
+| CorpState        | Identity, Credits, Clicks, Bad Publicity, HQ, R&D, Archives, Score Area, Server.                                                  |
+| RunnerState      | Identity, Credits, Clicks, Tags als Zukunftsfeld, Memory, Grip, Stack, Heap, Score Area, Rig.                                     |
+| CardDefinition   | Statische Kartendaten: Titel, Typ, Subtypes, Kosten, RezCost, TrashCost, AgendaRequirement, Stärke, MVP-AbilityDefinition.        |
+| CardInstance     | Konkrete Karteninstanz in einer Partie mit Zone, Owner, Controller, Status, Countern, Host-Relationen und Implementierungsstatus. |
+| Server           | HQ/R&D/Archives/Remote mit Root-Karten und ICE-Kette.                                                                             |
+| LegalAction      | Von der Engine angebotene legale Handlung.                                                                                        |
+| PlayerAction     | Vom Client oder von der KI eingereichte konkrete Entscheidung.                                                                    |
+| GameEvent        | Versioniertes Event mit öffentlichen/privaten Payloads, StateVersion und StateHash.                                               |
 
 ### 11.2 Match
 
 ```ts
 type Match = {
-  id: string
-  status: "waiting" | "active" | "paused" | "finished"
-  version: number
-  baseline: RulesBaseline
-  createdAt: string
-  updatedAt: string
-  corpController: PlayerController
-  runnerController: PlayerController
-  gameState: GameState
-  eventLog: GameEvent[]
-  snapshots: StateSnapshot[]
-  settings: MatchSettings
-}
+  id: string;
+  status: "waiting" | "active" | "paused" | "finished";
+  version: number;
+  baseline: RulesBaseline;
+  createdAt: string;
+  updatedAt: string;
+  corpController: PlayerController;
+  runnerController: PlayerController;
+  gameState: GameState;
+  eventLog: GameEvent[];
+  snapshots: StateSnapshot[];
+  settings: MatchSettings;
+};
 ```
 
 ### 11.3 PlayerController
 
 ```ts
 type PlayerController = {
-  controllerId: string
-  side: "corp" | "runner"
-  type: "human_local" | "human_remote" | "ai" | "replay"
-  userId?: string
-  connected: boolean
-}
+  controllerId: string;
+  side: "corp" | "runner";
+  type: "human_local" | "human_remote" | "ai" | "replay";
+  userId?: string;
+  connected: boolean;
+};
 ```
 
 Dadurch werden alle späteren Kombinationen vorbereitet: Human vs KI, KI vs Human, Human vs Human, KI vs KI und Replay.
@@ -410,70 +416,70 @@ Dadurch werden alle späteren Kombinationen vorbereitet: Human vs KI, KI vs Huma
 
 ```ts
 type GameState = {
-  gameId: string
-  seed: string
-  randomCounter: number
-  stateVersion: number
-  turn: number
-  activeSide: "corp" | "runner"
-  phase: PhaseState
-  timingPoint: TimingPointId
-  priority: PriorityState | null
-  corp: CorpState
-  runner: RunnerState
-  run: RunState | null
-  pendingChoices: ChoiceRequest[]
-  checkpoints: CheckpointState[]
-  winner: "corp" | "runner" | "draw" | null
-}
+  gameId: string;
+  seed: string;
+  randomCounter: number;
+  stateVersion: number;
+  turn: number;
+  activeSide: "corp" | "runner";
+  phase: PhaseState;
+  timingPoint: TimingPointId;
+  priority: PriorityState | null;
+  corp: CorpState;
+  runner: RunnerState;
+  run: RunState | null;
+  pendingChoices: ChoiceRequest[];
+  checkpoints: CheckpointState[];
+  winner: "corp" | "runner" | "draw" | null;
+};
 ```
 
 ### 11.5 CorpState
 
 ```ts
 type CorpState = {
-  identity: CardInstanceRef
-  credits: number
-  clicks: number
-  maxHandSize: number
-  badPublicity: number
-  hq: CardInstanceRef[]
-  rd: CardInstanceRef[]
-  archives: CardInstanceRef[]
-  scoreArea: CardInstanceRef[]
-  servers: Server[]
-}
+  identity: CardInstanceRef;
+  credits: number;
+  clicks: number;
+  maxHandSize: number;
+  badPublicity: number;
+  hq: CardInstanceRef[];
+  rd: CardInstanceRef[];
+  archives: CardInstanceRef[];
+  scoreArea: CardInstanceRef[];
+  servers: Server[];
+};
 ```
 
 ### 11.6 RunnerState
 
 ```ts
 type RunnerState = {
-  identity: CardInstanceRef
-  credits: number
-  clicks: number
-  maxHandSize: number
-  tags: number
-  memoryUsed: number
-  memoryLimit: number
-  grip: CardInstanceRef[]
-  stack: CardInstanceRef[]
-  heap: CardInstanceRef[]
-  scoreArea: CardInstanceRef[]
-  rig: RunnerRig
-}
+  identity: CardInstanceRef;
+  credits: number;
+  clicks: number;
+  maxHandSize: number;
+  tags: number;
+  memoryUsed: number;
+  memoryLimit: number;
+  grip: CardInstanceRef[];
+  stack: CardInstanceRef[];
+  heap: CardInstanceRef[];
+  scoreArea: CardInstanceRef[];
+  rig: RunnerRig;
+};
 ```
 
 ### 11.7 Server
 
 ```ts
 type Server = {
-  id: string
-  type: "hq" | "rd" | "archives" | "remote"
-  root: CardInstanceRef[]
-  ice: CardInstanceRef[]
-  createdByEventId?: string
-}
+  id: string;
+  type: "hq" | "rd" | "archives" | "remote";
+  root: CardInstanceRef[];
+  ice: CardInstanceRef[];
+  createdByEventId?: string;
+};
 ```
 
 Die ICE-Reihenfolge muss eindeutig dokumentiert werden. Für MVP 0.1 wird empfohlen: `ice[0]` ist outermost oder die Reihenfolge wird explizit über ein Feld markiert. Die gewählte Konvention muss in Tests fixiert werden.
@@ -482,48 +488,48 @@ Die ICE-Reihenfolge muss eindeutig dokumentiert werden. Für MVP 0.1 wird empfoh
 
 ```ts
 type CardDefinition = {
-  cardId: string
-  printedCardCode?: string
-  title: string
-  side: "corp" | "runner"
-  type: CardType
-  subtypes: string[]
-  faction?: string
-  cost?: number
-  rezCost?: number
-  trashCost?: number
-  advancementRequirement?: number
-  agendaPoints?: number
-  strength?: number
-  memoryCost?: number
-  text: string
-  abilities: AbilityDefinition[]
-}
+  cardId: string;
+  printedCardCode?: string;
+  title: string;
+  side: "corp" | "runner";
+  type: CardType;
+  subtypes: string[];
+  faction?: string;
+  cost?: number;
+  rezCost?: number;
+  trashCost?: number;
+  advancementRequirement?: number;
+  agendaPoints?: number;
+  strength?: number;
+  memoryCost?: number;
+  text: string;
+  abilities: AbilityDefinition[];
+};
 ```
 
 ### 11.9 CardInstance
 
 ```ts
 type CardInstance = {
-  instanceId: string
-  cardId: string
-  printedCardCode: string
-  owner: Side
-  controller: Side
-  zone: ZoneRef
-  faceup: boolean
-  rezzed?: boolean
-  active: boolean
-  installed: boolean
-  order?: number
-  advancementTokens: number
-  counters: Record<string, number>
-  hosted: CardInstanceRef[]
-  host?: CardInstanceRef
-  temporaryModifiers: ModifierRef[]
-  lingeringEffects: LingeringEffectRef[]
-  implementationStatus: CardImplementationStatus
-}
+  instanceId: string;
+  cardId: string;
+  printedCardCode: string;
+  owner: Side;
+  controller: Side;
+  zone: ZoneRef;
+  faceup: boolean;
+  rezzed?: boolean;
+  active: boolean;
+  installed: boolean;
+  order?: number;
+  advancementTokens: number;
+  counters: Record<string, number>;
+  hosted: CardInstanceRef[];
+  host?: CardInstanceRef;
+  temporaryModifiers: ModifierRef[];
+  lingeringEffects: LingeringEffectRef[];
+  implementationStatus: CardImplementationStatus;
+};
 ```
 
 CardDefinition beschreibt eine Karte allgemein. CardInstance beschreibt eine konkrete Karte in einer laufenden Partie.
@@ -562,49 +568,49 @@ LegalAction ist das Interface zur UI und KI. PlayerAction ist die konkrete, vom 
 
 ```ts
 type LegalAction = {
-  actionId: string
-  side: Side
-  type: ActionType
-  label: string
-  source: CardInstanceRef | "basic_action" | "game_rule"
-  timingPoint: TimingPointId
-  costs: Cost[]
-  targetRequirements: TargetRequirement[]
-  choices?: ChoiceSchema
-  visibility: "public" | "private_to_actor"
-  expiresAtStateVersion: number
-}
+  actionId: string;
+  side: Side;
+  type: ActionType;
+  label: string;
+  source: CardInstanceRef | "basic_action" | "game_rule";
+  timingPoint: TimingPointId;
+  costs: Cost[];
+  targetRequirements: TargetRequirement[];
+  choices?: ChoiceSchema;
+  visibility: "public" | "private_to_actor";
+  expiresAtStateVersion: number;
+};
 
 type PlayerAction = {
-  matchId: string
-  side: Side
-  actionId: string
-  selectedTargets: Record<string, string>
-  selectedChoices: Record<string, unknown>
-  clientKnownStateVersion: number
-  idempotencyKey: string
-}
+  matchId: string;
+  side: Side;
+  actionId: string;
+  selectedTargets: Record<string, string>;
+  selectedChoices: Record<string, unknown>;
+  clientKnownStateVersion: number;
+  idempotencyKey: string;
+};
 ```
 
 Beispiele für ActionTypes:
 
-| ActionType | MVP-Relevanz |
-|---|---|
-| `gain_credit` | Basisaktion beider Seiten. |
-| `draw_card` | Basisaktion; Corp-Pflichtdraw zusätzlich im Phasenmodell. |
-| `install_card` | Runner- und Corp-Installationen. |
-| `play_operation` | Corp-Economy-Operation. |
-| `play_event` | Runner-Economy- und Run-Event. |
-| `advance_card` | Corp-Agenda-Scoring-Schleife. |
-| `run_server` | Start eines Runs. |
-| `rez_card` | Corp rezzt ICE oder Asset. |
-| `break_subroutine` | Runner nutzt passenden Breaker. |
-| `jack_out` | Struktur vorbereiten, in MVP nur anbieten, wenn erlaubt. |
-| `access_card` | Access-Sequenz. |
-| `steal_agenda` | Agenda-Steal. |
-| `trash_accessed_card` | Trashbare Assets gegen Trash Cost. |
-| `pass_priority` | Für Choice/Priority-Struktur. |
-| `end_turn` | Zug beenden. |
+| ActionType            | MVP-Relevanz                                              |
+| --------------------- | --------------------------------------------------------- |
+| `gain_credit`         | Basisaktion beider Seiten.                                |
+| `draw_card`           | Basisaktion; Corp-Pflichtdraw zusätzlich im Phasenmodell. |
+| `install_card`        | Runner- und Corp-Installationen.                          |
+| `play_operation`      | Corp-Economy-Operation.                                   |
+| `play_event`          | Runner-Economy- und Run-Event.                            |
+| `advance_card`        | Corp-Agenda-Scoring-Schleife.                             |
+| `run_server`          | Start eines Runs.                                         |
+| `rez_card`            | Corp rezzt ICE oder Asset.                                |
+| `break_subroutine`    | Runner nutzt passenden Breaker.                           |
+| `jack_out`            | Struktur vorbereiten, in MVP nur anbieten, wenn erlaubt.  |
+| `access_card`         | Access-Sequenz.                                           |
+| `steal_agenda`        | Agenda-Steal.                                             |
+| `trash_accessed_card` | Trashbare Assets gegen Trash Cost.                        |
+| `pass_priority`       | Für Choice/Priority-Struktur.                             |
+| `end_turn`            | Zug beenden.                                              |
 
 Nicht in MVP 0.1 enthaltene, aber strukturell spätere ActionTypes aus den Ursprungskonzepten sind z. B. `trash_resource`, `purge_virus_counters`, `remove_tag`, `trigger_ability`, `prevent_damage` und vergleichbare Sonderaktionen. Sie werden nicht früh implementiert, sollen aber durch das Action-/Resolver-Modell nicht ausgeschlossen werden.
 
@@ -622,7 +628,7 @@ type Phase =
   | "corp_discard_phase"
   | "runner_turn_start"
   | "runner_action_phase"
-  | "runner_discard_phase"
+  | "runner_discard_phase";
 ```
 
 Die Corp hat eine verpflichtende Draw Phase. Der Runner hat keine entsprechende verpflichtende Draw Phase. Beide Seiten haben eine Action Phase und bei Bedarf Discard/Handlimit-Verarbeitung.
@@ -652,7 +658,7 @@ type TimingPointId =
   | "access_mid_access_window"
   | "access_steal_agenda"
   | "access_trash_or_continue"
-  | "run_ends_cleanup"
+  | "run_ends_cleanup";
 ```
 
 Für MVP 0.1 dürfen viele Timingpunkte leere Durchläufe sein. Entscheidend ist, dass die Struktur existiert und später nicht neu erfunden werden muss.
@@ -661,13 +667,13 @@ Für MVP 0.1 dürfen viele Timingpunkte leere Durchläufe sein. Entscheidend ist
 
 ```ts
 type ChoiceRequest = {
-  id: string
-  side: "corp" | "runner"
-  prompt: string
-  legalActions: LegalAction[]
-  canPass: boolean
-  context: ChoiceContext
-}
+  id: string;
+  side: "corp" | "runner";
+  prompt: string;
+  legalActions: LegalAction[];
+  canPass: boolean;
+  context: ChoiceContext;
+};
 ```
 
 Ablauf:
@@ -721,27 +727,33 @@ Runs sind der komplexeste Kernbereich und müssen als eigene State Machine model
 
 ```ts
 type RunState = {
-  runId: string
-  attackedServerId: string
-  originalServerId: string
-  timingPoint: TimingPointId
-  phase: "initiation" | "approach_ice" | "encounter_ice" | "movement" | "success" | "run_ends"
+  runId: string;
+  attackedServerId: string;
+  originalServerId: string;
+  timingPoint: TimingPointId;
+  phase:
+    | "initiation"
+    | "approach_ice"
+    | "encounter_ice"
+    | "movement"
+    | "success"
+    | "run_ends";
   position:
     | { kind: "ice"; serverId: string; iceIndex: number }
     | { kind: "server"; serverId: string }
-    | null
-  approachedIceId?: string
-  encounteredIceId?: string
-  unbrokenSubroutines: SubroutineRef[]
-  passedIceThisPhase?: string
-  successfulDeclared: boolean
-  unsuccessfulDeclared: boolean
-  jackOutAllowed: boolean
-  badPublicityFund: number
-  temporaryCredits: TemporaryCredit[]
-  breach: BreachState | null
-  endRunPending: boolean
-}
+    | null;
+  approachedIceId?: string;
+  encounteredIceId?: string;
+  unbrokenSubroutines: SubroutineRef[];
+  passedIceThisPhase?: string;
+  successfulDeclared: boolean;
+  unsuccessfulDeclared: boolean;
+  jackOutAllowed: boolean;
+  badPublicityFund: number;
+  temporaryCredits: TemporaryCredit[];
+  breach: BreachState | null;
+  endRunPending: boolean;
+};
 ```
 
 ### 17.1 Run-Ablauf in MVP 0.1
@@ -761,31 +773,31 @@ type RunState = {
 
 ```ts
 type BreachState = {
-  serverId: string
-  accessLimit: number
-  candidates: AccessCandidate[]
-  accessed: CardInstanceRef[]
-  currentAccess: AccessState | null
-}
+  serverId: string;
+  accessLimit: number;
+  candidates: AccessCandidate[];
+  accessed: CardInstanceRef[];
+  currentAccess: AccessState | null;
+};
 
 type AccessState = {
-  cardRef: CardInstanceRef
-  sourceZone: ZoneRef
-  cardVisibleToRunner: boolean
-  midAccessUsed: boolean
-  stealRequired: boolean
-  trashOptionAvailable: boolean
-}
+  cardRef: CardInstanceRef;
+  sourceZone: ZoneRef;
+  cardVisibleToRunner: boolean;
+  midAccessUsed: boolean;
+  stealRequired: boolean;
+  trashOptionAvailable: boolean;
+};
 ```
 
 ### 17.3 Access-Regeln MVP 0.1
 
-| Server | Access-Regel |
-|---|---|
-| HQ | Zufälliger Zugriff auf eine Karte aus HQ; Zufallsentscheidung mit Seed und RandomCounter protokollieren. |
-| R&D | Zugriff auf oberste Karte; Reihenfolge bleibt für Runner verdeckt, außer während des erlaubten Access. |
+| Server   | Access-Regel                                                                                                                        |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| HQ       | Zufälliger Zugriff auf eine Karte aus HQ; Zufallsentscheidung mit Seed und RandomCounter protokollieren.                            |
+| R&D      | Zugriff auf oberste Karte; Reihenfolge bleibt für Runner verdeckt, außer während des erlaubten Access.                              |
 | Archives | Offene Karten sichtbar; verdeckte Karten werden beim Breach nach MVP-Regel aufgedeckt und danach nicht mehr als verdeckt behandelt. |
-| Remote | Zugriff auf Root-Karten des Servers; Agendas werden gestohlen, trashbare Assets können gegen Trash Cost getrasht werden. |
+| Remote   | Zugriff auf Root-Karten des Servers; Agendas werden gestohlen, trashbare Assets können gegen Trash Cost getrasht werden.            |
 
 Während Access muss die Engine Entscheidungen anbieten können:
 
@@ -867,16 +879,16 @@ CorpView darf nicht enthalten:
 
 ### 19.4 Sichtbarkeitsregeln pro Objekt
 
-| Objekt | Regel |
-|---|---|
-| GameState | Vollständige Informationen; nur serverseitig oder lokal im Debug. |
-| PlayerView | Nur Informationen der jeweiligen Seite. Verdeckt bedeutet keine CardId, kein Titel, keine Kosten, keine Kartentypen und keine Reihenfolge, soweit nicht offen. |
-| PublicGameEvent | Keine verdeckten CardIds, Titel oder privaten Zufallsergebnisse. |
-| PrivateGameEvent | Darf seitenbezogene Details enthalten; nur an berechtigte Seite. |
-| Replay | Zwei Modi: vollständiger Debug-Replay serverseitig und sichtgefilterter Spieler-Replay. |
-| SpectatorView | Für MVP 0.1 nicht nötig; falls später Zuschaueransicht ergänzt wird, gilt mindestens dieselbe Filterung wie beim sichtgefilterten Replay. |
-| Error Message | Keine privaten Kartennamen, internen IDs oder Debug-Dumps im Client. |
-| KI-Input | Ausschließlich PlayerView, PublicEventLog und LegalActions der KI-Seite. |
+| Objekt           | Regel                                                                                                                                                          |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GameState        | Vollständige Informationen; nur serverseitig oder lokal im Debug.                                                                                              |
+| PlayerView       | Nur Informationen der jeweiligen Seite. Verdeckt bedeutet keine CardId, kein Titel, keine Kosten, keine Kartentypen und keine Reihenfolge, soweit nicht offen. |
+| PublicGameEvent  | Keine verdeckten CardIds, Titel oder privaten Zufallsergebnisse.                                                                                               |
+| PrivateGameEvent | Darf seitenbezogene Details enthalten; nur an berechtigte Seite.                                                                                               |
+| Replay           | Zwei Modi: vollständiger Debug-Replay serverseitig und sichtgefilterter Spieler-Replay.                                                                        |
+| SpectatorView    | Für MVP 0.1 nicht nötig; falls später Zuschaueransicht ergänzt wird, gilt mindestens dieselbe Filterung wie beim sichtgefilterten Replay.                      |
+| Error Message    | Keine privaten Kartennamen, internen IDs oder Debug-Dumps im Client.                                                                                           |
+| KI-Input         | Ausschließlich PlayerView, PublicEventLog und LegalActions der KI-Seite.                                                                                       |
 
 Pflichttests prüfen, dass verbotene CardIds, Titel und verdeckte Zoneninhalte in keiner falschen Ausgabe erscheinen.
 
@@ -886,21 +898,21 @@ Pflichttests prüfen, dass verbotene CardIds, Titel und verdeckte Zoneninhalte i
 
 ```ts
 type GameEvent = {
-  eventId: string
-  eventSchemaVersion: string
-  stateVersionBefore: number
-  stateVersionAfter: number
-  timestamp: string
-  side: Side | "system"
-  actionType: string
-  timingPoint: TimingPointId
-  publicText: string
-  privateText?: Partial<Record<Side, string>>
-  publicPayload: unknown
-  privatePayload?: Partial<Record<Side, unknown>>
-  randomDraws?: RandomDrawRecord[]
-  resultingStateHash: string
-}
+  eventId: string;
+  eventSchemaVersion: string;
+  stateVersionBefore: number;
+  stateVersionAfter: number;
+  timestamp: string;
+  side: Side | "system";
+  actionType: string;
+  timingPoint: TimingPointId;
+  publicText: string;
+  privateText?: Partial<Record<Side, string>>;
+  publicPayload: unknown;
+  privatePayload?: Partial<Record<Side, unknown>>;
+  randomDraws?: RandomDrawRecord[];
+  resultingStateHash: string;
+};
 ```
 
 Jedes Event muss zwischen öffentlichen und privaten Informationen unterscheiden. PublicEventPayloads dürfen keine verdeckten CardIds oder privaten Kartennamen enthalten.
@@ -927,9 +939,9 @@ Zufällige Entscheidungen müssen reproduzierbar sein:
 
 ```ts
 type RandomState = {
-  seed: string
-  counter: number
-}
+  seed: string;
+  counter: number;
+};
 ```
 
 Jede Zufallsentscheidung wird im EventLog mit Zweck, Counter und Ergebnis dokumentiert. Für private Spiele reicht das aus. Für öffentliche kompetitive Spiele wären später zusätzliche Fairness-Mechanismen nötig.
@@ -988,10 +1000,10 @@ Die ersten festen Decks müssen:
 
 ### 22.3 Empfohlenes erstes Deckpaar
 
-| Seite | Deck | Ausrichtung | Zweck |
-|---|---|---|---|
-| Runner | Runner Demo Deck 01 – Run & Steal | Criminal-orientiert, Run & Money | Credits aufbauen, Runs durchführen, ICE mit Breakern überwinden, Agendas stehlen. |
-| Corp | Corp Demo Deck 01 – Build & Score | Weyland-orientiert, Build & Score | ICE installieren und rezzen, Remote-Server bauen, Agendas installieren, advancen und scoren. |
+| Seite  | Deck                              | Ausrichtung                       | Zweck                                                                                        |
+| ------ | --------------------------------- | --------------------------------- | -------------------------------------------------------------------------------------------- |
+| Runner | Runner Demo Deck 01 – Run & Steal | Criminal-orientiert, Run & Money  | Credits aufbauen, Runs durchführen, ICE mit Breakern überwinden, Agendas stehlen.            |
+| Corp   | Corp Demo Deck 01 – Build & Score | Weyland-orientiert, Build & Score | ICE installieren und rezzen, Remote-Server bauen, Agendas installieren, advancen und scoren. |
 
 Diese Kombination deckt die Kernschleifen des Spiels ab, ohne sofort Tags, Trace, Viren, Damage, komplexe Timingfenster oder Spezialkarten zu verlangen.
 
@@ -1005,19 +1017,19 @@ type CardImplementationStatus =
   | "stub_visible_not_playable"
   | "playable_mvp"
   | "playable_full"
-  | "blocked"
+  | "blocked";
 
 type CardImplementation = {
-  cardCode: string
-  title: string
-  rulesTextSnapshot: string
-  status: CardImplementationStatus
-  implementedAbilities: string[]
-  unsupportedAbilities: string[]
-  allowedInDecks: string[]
-  requiredTests: string[]
-  knownLimitations: string[]
-}
+  cardCode: string;
+  title: string;
+  rulesTextSnapshot: string;
+  status: CardImplementationStatus;
+  implementedAbilities: string[];
+  unsupportedAbilities: string[];
+  allowedInDecks: string[];
+  requiredTests: string[];
+  knownLimitations: string[];
+};
 ```
 
 Auswahlkriterien für `playable_mvp`:
@@ -1039,11 +1051,11 @@ Für MVP 0.1 werden nur wenige einfache Karten manuell definiert. Das Kartensyst
 
 ```ts
 type AbilityDefinition = {
-  trigger: Trigger
-  cost?: Cost[]
-  effect: Effect[]
-  timing: TimingWindow
-}
+  trigger: Trigger;
+  cost?: Cost[];
+  effect: Effect[];
+  timing: TimingWindow;
+};
 ```
 
 Beispiel für eine einfache Breaker-Fähigkeit:
@@ -1060,35 +1072,38 @@ Komplexe Karten bekommen später eigene Resolver, statt durch freie Textinterpre
 
 ```ts
 type CardResolver = {
-  cardId: string
-  getLegalActions(gameState: GameState, cardInstance: CardInstance): LegalAction[]
-  resolveAbility(gameState: GameState, action: PlayerAction): EngineResult
-}
+  cardId: string;
+  getLegalActions(
+    gameState: GameState,
+    cardInstance: CardInstance,
+  ): LegalAction[];
+  resolveAbility(gameState: GameState, action: PlayerAction): EngineResult;
+};
 ```
 
 ### 23.2 Priorisierung der Kartenimplementierung
 
 Die Implementierung erfolgt nicht nach Beliebtheit oder Vollständigkeit, sondern nach technischer Nützlichkeit.
 
-| Priorität | Kartentypen / Mechaniken |
-|---:|---|
-| 1 | Einfache Economy-Karten, einfache Agendas, einfache ICE, einfache Icebreaker, einfache Installationskarten. |
-| 2 | Assets mit Trash-Kosten, einfache Upgrades, einfache Run-Events, einfache Draw-Karten, klare Triggerbedingungen. |
-| 3 | Schaden, Tags, Prevention, Replacement-Effekte, Hosting, Virus Counter, komplexe Paid Abilities, komplexe Timingfenster. |
-| 4 | Vollständige Fraktionsmechaniken, breiter Kartenpool, Sonderfälle einzelner Karten, seltene Timingkonflikte, vollständige Turnierlegalität. |
+| Priorität | Kartentypen / Mechaniken                                                                                                                    |
+| --------: | ------------------------------------------------------------------------------------------------------------------------------------------- |
+|         1 | Einfache Economy-Karten, einfache Agendas, einfache ICE, einfache Icebreaker, einfache Installationskarten.                                 |
+|         2 | Assets mit Trash-Kosten, einfache Upgrades, einfache Run-Events, einfache Draw-Karten, klare Triggerbedingungen.                            |
+|         3 | Schaden, Tags, Prevention, Replacement-Effekte, Hosting, Virus Counter, komplexe Paid Abilities, komplexe Timingfenster.                    |
+|         4 | Vollständige Fraktionsmechaniken, breiter Kartenpool, Sonderfälle einzelner Karten, seltene Timingkonflikte, vollständige Turnierlegalität. |
 
 ## 24. Demo-Decks für MVP 0.1
 
 ### 24.1 Runner Demo Deck 01 – Run & Steal
 
-| Karte | Anzahl | Typ | Zweck |
-|---|---:|---|---|
-| Runner Identity | 1 | Identity | Startidentität ohne aktive Sonderfähigkeit. |
-| Simple Economy Event | 3 | Event | Sofortige Credits. |
-| Simple Run Event | 3 | Event | Einfacher Run mit kleinem Bonus. |
-| Simple Fracter | 2 | Program: Icebreaker – Fracter | Bricht Barrier-Subroutinen. |
-| Simple Decoder | 2 | Program: Icebreaker – Decoder | Bricht Code-Gate-Subroutinen. |
-| Simple Killer | 2 | Program: Icebreaker – Killer | Bricht Sentry-Subroutinen. |
+| Karte                | Anzahl | Typ                           | Zweck                                       |
+| -------------------- | -----: | ----------------------------- | ------------------------------------------- |
+| Runner Identity      |      1 | Identity                      | Startidentität ohne aktive Sonderfähigkeit. |
+| Simple Economy Event |      3 | Event                         | Sofortige Credits.                          |
+| Simple Run Event     |      3 | Event                         | Einfacher Run mit kleinem Bonus.            |
+| Simple Fracter       |      2 | Program: Icebreaker – Fracter | Bricht Barrier-Subroutinen.                 |
+| Simple Decoder       |      2 | Program: Icebreaker – Decoder | Bricht Code-Gate-Subroutinen.               |
+| Simple Killer        |      2 | Program: Icebreaker – Killer  | Bricht Sentry-Subroutinen.                  |
 
 #### Runner Identity
 
@@ -1154,15 +1169,15 @@ Testet Breaker-Ablauf gegen Sentries und erzeugt eine relevante Entscheidung geg
 
 ### 24.2 Corp Demo Deck 01 – Build & Score
 
-| Karte | Anzahl | Typ | Zweck |
-|---|---:|---|---|
-| Corp Identity | 1 | Identity | Startidentität ohne aktive Sonderfähigkeit. |
-| Simple Agenda | 3 | Agenda | Installieren, advancen, scoren oder stehlen. |
-| Simple Economy Operation | 3 | Operation | Sofortige Credits. |
-| Simple Economy Asset | 3 | Asset | Remote-Installation, Rez, Trash-Kosten. |
-| Simple Barrier ICE | 3 | ICE – Barrier | Einfacher Stopper. |
-| Simple Code Gate ICE | 3 | ICE – Code Gate | Kleiner Tax-Effekt plus End-the-run. |
-| Simple Sentry ICE | 3 | ICE – Sentry | Einfache Strafwirkung ohne Damage/Tags. |
+| Karte                    | Anzahl | Typ             | Zweck                                        |
+| ------------------------ | -----: | --------------- | -------------------------------------------- |
+| Corp Identity            |      1 | Identity        | Startidentität ohne aktive Sonderfähigkeit.  |
+| Simple Agenda            |      3 | Agenda          | Installieren, advancen, scoren oder stehlen. |
+| Simple Economy Operation |      3 | Operation       | Sofortige Credits.                           |
+| Simple Economy Asset     |      3 | Asset           | Remote-Installation, Rez, Trash-Kosten.      |
+| Simple Barrier ICE       |      3 | ICE – Barrier   | Einfacher Stopper.                           |
+| Simple Code Gate ICE     |      3 | ICE – Code Gate | Kleiner Tax-Effekt plus End-the-run.         |
+| Simple Sentry ICE        |      3 | ICE – Sentry    | Einfache Strafwirkung ohne Damage/Tags.      |
 
 #### Corp Identity
 
@@ -1255,11 +1270,41 @@ Die ersten Karten verwenden keine Tags, Traces, Viren, Damage-Effekte, Hosted Ca
     "abilityEnabled": false
   },
   "cards": [
-    { "cardCode": "DEMO_RUNNER_ECON_EVENT", "title": "Simple Economy Event", "quantity": 3, "implemented": true, "role": "economy" },
-    { "cardCode": "DEMO_RUN_EVENT", "title": "Simple Run Event", "quantity": 3, "implemented": true, "role": "run_event" },
-    { "cardCode": "DEMO_FRACTER", "title": "Simple Fracter", "quantity": 2, "implemented": true, "role": "icebreaker_barrier" },
-    { "cardCode": "DEMO_DECODER", "title": "Simple Decoder", "quantity": 2, "implemented": true, "role": "icebreaker_code_gate" },
-    { "cardCode": "DEMO_KILLER", "title": "Simple Killer", "quantity": 2, "implemented": true, "role": "icebreaker_sentry" }
+    {
+      "cardCode": "DEMO_RUNNER_ECON_EVENT",
+      "title": "Simple Economy Event",
+      "quantity": 3,
+      "implemented": true,
+      "role": "economy"
+    },
+    {
+      "cardCode": "DEMO_RUN_EVENT",
+      "title": "Simple Run Event",
+      "quantity": 3,
+      "implemented": true,
+      "role": "run_event"
+    },
+    {
+      "cardCode": "DEMO_FRACTER",
+      "title": "Simple Fracter",
+      "quantity": 2,
+      "implemented": true,
+      "role": "icebreaker_barrier"
+    },
+    {
+      "cardCode": "DEMO_DECODER",
+      "title": "Simple Decoder",
+      "quantity": 2,
+      "implemented": true,
+      "role": "icebreaker_code_gate"
+    },
+    {
+      "cardCode": "DEMO_KILLER",
+      "title": "Simple Killer",
+      "quantity": 2,
+      "implemented": true,
+      "role": "icebreaker_sentry"
+    }
   ],
   "developmentNotes": [
     "Dieses Deck ist ein technisches Testdeck.",
@@ -1287,12 +1332,48 @@ Die ersten Karten verwenden keine Tags, Traces, Viren, Damage-Effekte, Hosted Ca
     "abilityEnabled": false
   },
   "cards": [
-    { "cardCode": "DEMO_AGENDA", "title": "Simple Agenda", "quantity": 3, "implemented": true, "role": "agenda" },
-    { "cardCode": "DEMO_CORP_ECON_OPERATION", "title": "Simple Economy Operation", "quantity": 3, "implemented": true, "role": "economy_operation" },
-    { "cardCode": "DEMO_CORP_ECON_ASSET", "title": "Simple Economy Asset", "quantity": 3, "implemented": true, "role": "economy_asset" },
-    { "cardCode": "DEMO_BARRIER_ICE", "title": "Simple Barrier ICE", "quantity": 3, "implemented": true, "role": "ice_barrier" },
-    { "cardCode": "DEMO_CODE_GATE_ICE", "title": "Simple Code Gate ICE", "quantity": 3, "implemented": true, "role": "ice_code_gate" },
-    { "cardCode": "DEMO_SENTRY_ICE", "title": "Simple Sentry ICE", "quantity": 3, "implemented": true, "role": "ice_sentry" }
+    {
+      "cardCode": "DEMO_AGENDA",
+      "title": "Simple Agenda",
+      "quantity": 3,
+      "implemented": true,
+      "role": "agenda"
+    },
+    {
+      "cardCode": "DEMO_CORP_ECON_OPERATION",
+      "title": "Simple Economy Operation",
+      "quantity": 3,
+      "implemented": true,
+      "role": "economy_operation"
+    },
+    {
+      "cardCode": "DEMO_CORP_ECON_ASSET",
+      "title": "Simple Economy Asset",
+      "quantity": 3,
+      "implemented": true,
+      "role": "economy_asset"
+    },
+    {
+      "cardCode": "DEMO_BARRIER_ICE",
+      "title": "Simple Barrier ICE",
+      "quantity": 3,
+      "implemented": true,
+      "role": "ice_barrier"
+    },
+    {
+      "cardCode": "DEMO_CODE_GATE_ICE",
+      "title": "Simple Code Gate ICE",
+      "quantity": 3,
+      "implemented": true,
+      "role": "ice_code_gate"
+    },
+    {
+      "cardCode": "DEMO_SENTRY_ICE",
+      "title": "Simple Sentry ICE",
+      "quantity": 3,
+      "implemented": true,
+      "role": "ice_sentry"
+    }
   ],
   "developmentNotes": [
     "Dieses Deck ist ein technisches Testdeck.",
@@ -1324,19 +1405,19 @@ Die Corp-KI ist ein Controller, kein Regelakteur. Sie erhält nur PlayerView, Pu
 
 ```ts
 type AiDecisionInput = {
-  side: "corp"
-  playerView: PlayerView
-  publicEventLog: PublicGameEvent[]
-  legalActions: LegalAction[]
-  difficulty: "easy" | "normal" | "hard"
-  seed: string
-}
+  side: "corp";
+  playerView: PlayerView;
+  publicEventLog: PublicGameEvent[];
+  legalActions: LegalAction[];
+  difficulty: "easy" | "normal" | "hard";
+  seed: string;
+};
 
 type AiDecision = {
-  actionId: string
-  reason?: string
-  confidence?: number
-}
+  actionId: string;
+  reason?: string;
+  confidence?: number;
+};
 ```
 
 Die KI bekommt nicht:
@@ -1351,15 +1432,15 @@ Die KI bekommt nicht:
 
 Priorisierte Entscheidungsregeln:
 
-| Priorität | Regel |
-|---:|---|
-| 1 | Wenn eine Agenda scorebar ist und genug Clicks vorhanden sind: scoren. |
-| 2 | Wenn Credits niedrig sind: Economy-Operation spielen oder Credit nehmen. |
-| 3 | Wenn zentrale Server ungeschützt sind und ICE verfügbar ist: R&D oder HQ schützen. |
-| 4 | Wenn Agenda auf HQ und Remote-Server möglich ist: Remote vorbereiten oder Agenda installieren. |
-| 5 | Wenn Agenda in Remote liegt: advancen, sofern Schutz und Credits ausreichend sind. |
-| 6 | Wenn Runner häufig einen Server angreift: dort ICE installieren oder rezzen. |
-| Fallback | Erste legale sichere Basisaktion wählen, bevorzugt Credit nehmen oder Zug beenden. |
+| Priorität | Regel                                                                                          |
+| --------: | ---------------------------------------------------------------------------------------------- |
+|         1 | Wenn eine Agenda scorebar ist und genug Clicks vorhanden sind: scoren.                         |
+|         2 | Wenn Credits niedrig sind: Economy-Operation spielen oder Credit nehmen.                       |
+|         3 | Wenn zentrale Server ungeschützt sind und ICE verfügbar ist: R&D oder HQ schützen.             |
+|         4 | Wenn Agenda auf HQ und Remote-Server möglich ist: Remote vorbereiten oder Agenda installieren. |
+|         5 | Wenn Agenda in Remote liegt: advancen, sofern Schutz und Credits ausreichend sind.             |
+|         6 | Wenn Runner häufig einen Server angreift: dort ICE installieren oder rezzen.                   |
+|  Fallback | Erste legale sichere Basisaktion wählen, bevorzugt Credit nehmen oder Zug beenden.             |
 
 Die erste KI muss nicht stark sein. Sie muss regelkonform, stabil, deterministisch testbar und nachvollziehbar sein.
 
@@ -1396,13 +1477,13 @@ Schwierigkeitsgrade dürfen nicht dadurch entstehen, dass die KI verdeckte Karte
 
 ### 27.1 Layout
 
-| Bereich | Inhalt |
-|---|---|
-| Oben: Corp | HQ-Zähler, R&D-Zähler, Archives, Score Area, Credits, Clicks, Bad Publicity als Zukunftsfeld, Remote-Server, ICE. |
-| Unten: Runner | Grip, Stack-Zähler, Heap, Score Area, Credits, Clicks, Tags als Zukunftsfeld, Memory, Rig mit Programmen und später Hardware/Resources. |
-| Mitte: Server/Run | Serverstruktur, angegriffener Server, aktuelle ICE-Position, Run-Step, Encounter-Status, Breach/Access-Status. |
-| Rechts: Aktionen/Log | LegalActions, ChoiceRequests, EventLog, KI-Erklärung, Validierungsfehler. |
-| Debug/Lernen | TimingPoint, StateVersion, Seed, StateHash, letzte Events, Gründe für gesperrte Aktionen optional. |
+| Bereich              | Inhalt                                                                                                                                  |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Oben: Corp           | HQ-Zähler, R&D-Zähler, Archives, Score Area, Credits, Clicks, Bad Publicity als Zukunftsfeld, Remote-Server, ICE.                       |
+| Unten: Runner        | Grip, Stack-Zähler, Heap, Score Area, Credits, Clicks, Tags als Zukunftsfeld, Memory, Rig mit Programmen und später Hardware/Resources. |
+| Mitte: Server/Run    | Serverstruktur, angegriffener Server, aktuelle ICE-Position, Run-Step, Encounter-Status, Breach/Access-Status.                          |
+| Rechts: Aktionen/Log | LegalActions, ChoiceRequests, EventLog, KI-Erklärung, Validierungsfehler.                                                               |
+| Debug/Lernen         | TimingPoint, StateVersion, Seed, StateHash, letzte Events, Gründe für gesperrte Aktionen optional.                                      |
 
 ### 27.2 UX-Prinzipien
 
@@ -1417,14 +1498,14 @@ Schwierigkeitsgrade dürfen nicht dadurch entstehen, dass die KI verdeckte Karte
 
 ### 27.3 Mindest-Screens für MVP 0.1
 
-| Screen | Mindestfunktion |
-|---|---|
-| Start / Setup | Neues Demo-Spiel, Seed optional eingeben, RulesBaseline und Abweichungen anzeigen, Spiel starten. |
-| Game Board | MVP-Zonen, aktuelle Phase, LegalActions, ChoiceRequests. |
-| Run View | Serverwahl, ICE-Kette, Rez-Status, Break-Optionen, Subroutinen, Access. |
-| Card Detail | Sichtbare Kartendaten, Implementierungsstatus, bekannte Limitierungen. |
-| EventLog / Replay | Eventsequenz, StateVersion, öffentliche Texte, Replay-Start. |
-| Debug Panel | Nur lokal: StateHash, TimingPoint, Invariant-Ergebnis, letzte Engine-Fehler. |
+| Screen            | Mindestfunktion                                                                                   |
+| ----------------- | ------------------------------------------------------------------------------------------------- |
+| Start / Setup     | Neues Demo-Spiel, Seed optional eingeben, RulesBaseline und Abweichungen anzeigen, Spiel starten. |
+| Game Board        | MVP-Zonen, aktuelle Phase, LegalActions, ChoiceRequests.                                          |
+| Run View          | Serverwahl, ICE-Kette, Rez-Status, Break-Optionen, Subroutinen, Access.                           |
+| Card Detail       | Sichtbare Kartendaten, Implementierungsstatus, bekannte Limitierungen.                            |
+| EventLog / Replay | Eventsequenz, StateVersion, öffentliche Texte, Replay-Start.                                      |
+| Debug Panel       | Nur lokal: StateHash, TimingPoint, Invariant-Ergebnis, letzte Engine-Fehler.                      |
 
 ## 28. Backend und spätere Human-vs-Human-Vorbereitung
 
@@ -1473,14 +1554,14 @@ type ClientMessage =
   | { type: "join_match"; matchId: string; token: string }
   | { type: "submit_action"; matchId: string; action: PlayerAction }
   | { type: "request_undo"; matchId: string; toEventId: string }
-  | { type: "pass_priority"; matchId: string }
+  | { type: "pass_priority"; matchId: string };
 
 type ServerMessage =
   | { type: "state_update"; view: PlayerView }
   | { type: "legal_actions"; actions: LegalAction[] }
   | { type: "event_log_update"; events: PublicGameEvent[] }
   | { type: "choice_request"; choice: ChoiceRequest }
-  | { type: "error"; message: string }
+  | { type: "error"; message: string };
 ```
 
 ### 28.3 Multiplayer-Konsistenz
@@ -1522,11 +1603,11 @@ Technisch kann eine spätere Undo-Anfrage mindestens so modelliert werden:
 
 ```ts
 type UndoRequest = {
-  matchId: string
-  requestedBy: "corp" | "runner"
-  targetEventId: string
-  reason?: string
-}
+  matchId: string;
+  requestedBy: "corp" | "runner";
+  targetEventId: string;
+  reason?: string;
+};
 ```
 
 Für Phase 0/1 sind Snapshots einfacher. Event-Replay bleibt als Validierung wichtig.
@@ -1535,17 +1616,17 @@ Für Phase 0/1 sind Snapshots einfacher. Event-Replay bleibt als Validierung wic
 
 Auch eine private App braucht Mindeststandards.
 
-| Bereich | Mindeststandard |
-|---|---|
-| Transport | Localhost ohne TLS ist zulässig; außerhalb localhost HTTPS/WSS nutzen. |
-| Einladungslinks | Token mit ausreichender Entropie, nicht erratbar, optional ablaufend, serverseitig widerrufbar. |
-| Secrets | Keine Secrets im Repository; Environment Variables oder Secret Store. |
-| Logging | Keine privaten Kartendaten in allgemeinen Logs; Debug-Logs nur lokal oder geschützt. |
-| Backups | Sicherung von Matchdaten, EventLogs und Deck-Snapshots bei persistenter Nutzung. |
-| Crash Recovery | Nach Neustart aktive Matches aus Snapshot + EventLog rekonstruieren oder sauber pausieren. |
-| Rate Limits | Pragmatische Limits für Action Submit, Start Match, Join, Reconnect und optional Login/Passwortschutz. |
-| Zugriffsschutz | Für private Deployments optional einfacher Passwortschutz oder Zugriffstoken; kein umfassendes Accountsystem für MVP 0.1. |
-| Debug | Full-State-Debug niemals an normale Spieleransicht ausliefern. |
+| Bereich         | Mindeststandard                                                                                                           |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Transport       | Localhost ohne TLS ist zulässig; außerhalb localhost HTTPS/WSS nutzen.                                                    |
+| Einladungslinks | Token mit ausreichender Entropie, nicht erratbar, optional ablaufend, serverseitig widerrufbar.                           |
+| Secrets         | Keine Secrets im Repository; Environment Variables oder Secret Store.                                                     |
+| Logging         | Keine privaten Kartendaten in allgemeinen Logs; Debug-Logs nur lokal oder geschützt.                                      |
+| Backups         | Sicherung von Matchdaten, EventLogs und Deck-Snapshots bei persistenter Nutzung.                                          |
+| Crash Recovery  | Nach Neustart aktive Matches aus Snapshot + EventLog rekonstruieren oder sauber pausieren.                                |
+| Rate Limits     | Pragmatische Limits für Action Submit, Start Match, Join, Reconnect und optional Login/Passwortschutz.                    |
+| Zugriffsschutz  | Für private Deployments optional einfacher Passwortschutz oder Zugriffstoken; kein umfassendes Accountsystem für MVP 0.1. |
+| Debug           | Full-State-Debug niemals an normale Spieleransicht ausliefern.                                                            |
 
 Nicht sofort erforderlich:
 
@@ -1562,18 +1643,18 @@ Tests sind bei diesem Projekt nicht optional. NETGRID ist wegen Timing, verdeckt
 
 ### 30.1 Testarten
 
-| Testart | MVP-Abdeckung |
-|---|---|
-| Unit Tests | `createGame`, `drawCard`, `gainCredit`, `installCard`, `advanceCard`, `startRun`, `rezIce`, `accessCard`, `scoreAgenda`, `stealAgenda`, `checkWinConditions`, `getPlayerView`. |
-| State Machine Tests | Corp Draw, Corp Action, Runner Action, Discard/Handlimit soweit nötig, Turnwechsel, Click-Verbrauch. |
-| Run Tests | Ungeschützter Server, geschützter Server, Rez, Encounter, Break, ungebrochene Subroutinen, Pass ICE, Server erreichen, Run ends. |
-| Access/Breach Tests | HQ, R&D, Archives, Remote; Agenda-Steal, Trash Cost, nicht trashbare Karte, Access-Reihenfolge. |
-| Visibility Tests | Keine verdeckten Kartendetails in RunnerView, CorpView-Fremdanteilen, PublicEvents, Client Payloads, KI-Input, Fehlern, Public Replay oder späterer SpectatorView. |
-| Replay Tests | EventLog von initialState abspielen, Endzustand und StateHashes prüfen, Zufall reproduzieren. |
-| KI Tests | KI wählt nur legale Aktionen, bleibt nicht hängen, beendet 100 Testzüge ohne Invariant-Verletzung. |
-| Kartentests | Für jede `playable_mvp` Karte: Installationsbedingungen, Kosten, Timing, Effekt, Regression. |
-| Regressionstests | Bugfixes und neue Karten dürfen bestehende Demo-Decks nicht brechen. |
-| End-to-End-Tests | Spiel starten, Runner-Zug, Corp-Zug, Run, ICE brechen, Agenda stehlen, Corp scored Agenda, Spielende. |
+| Testart             | MVP-Abdeckung                                                                                                                                                                  |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Unit Tests          | `createGame`, `drawCard`, `gainCredit`, `installCard`, `advanceCard`, `startRun`, `rezIce`, `accessCard`, `scoreAgenda`, `stealAgenda`, `checkWinConditions`, `getPlayerView`. |
+| State Machine Tests | Corp Draw, Corp Action, Runner Action, Discard/Handlimit soweit nötig, Turnwechsel, Click-Verbrauch.                                                                           |
+| Run Tests           | Ungeschützter Server, geschützter Server, Rez, Encounter, Break, ungebrochene Subroutinen, Pass ICE, Server erreichen, Run ends.                                               |
+| Access/Breach Tests | HQ, R&D, Archives, Remote; Agenda-Steal, Trash Cost, nicht trashbare Karte, Access-Reihenfolge.                                                                                |
+| Visibility Tests    | Keine verdeckten Kartendetails in RunnerView, CorpView-Fremdanteilen, PublicEvents, Client Payloads, KI-Input, Fehlern, Public Replay oder späterer SpectatorView.             |
+| Replay Tests        | EventLog von initialState abspielen, Endzustand und StateHashes prüfen, Zufall reproduzieren.                                                                                  |
+| KI Tests            | KI wählt nur legale Aktionen, bleibt nicht hängen, beendet 100 Testzüge ohne Invariant-Verletzung.                                                                             |
+| Kartentests         | Für jede `playable_mvp` Karte: Installationsbedingungen, Kosten, Timing, Effekt, Regression.                                                                                   |
+| Regressionstests    | Bugfixes und neue Karten dürfen bestehende Demo-Decks nicht brechen.                                                                                                           |
+| End-to-End-Tests    | Spiel starten, Runner-Zug, Corp-Zug, Run, ICE brechen, Agenda stehlen, Corp scored Agenda, Spielende.                                                                          |
 
 ### 30.2 Szenarioformat
 
@@ -1619,35 +1700,35 @@ Tests sind bei diesem Projekt nicht optional. NETGRID ist wegen Timing, verdeckt
 
 ### 31.1 Akzeptanzkriterien für MVP 0.1
 
-| Kriterium | Pass/Fail-Bedingung |
-|---|---|
-| Setup | Ein Match mit festen Demo-Decks startet deterministisch aus einem Seed. Starthände und Deckreihenfolge sind reproduzierbar. |
-| LegalActions | UI und KI erhalten ausschließlich Aktionen, die `applyAction` akzeptiert. Manipulierte illegale Aktionen werden abgelehnt. |
-| Grundaktionen | Credits, Draw, Install, Advance, Play Event/Operation und End Turn funktionieren für unterstützte Karten. |
-| Run | Mindestens ein Run auf ungeschützten Server, ein Run auf geschützten Server mit ICE, ein gebrochener Encounter und ein ungebrochener Encounter sind getestet. |
-| Access/Breach | HQ, R&D, Archives und Remote werden korrekt gebreacht. Agenda-Steal und Trash-Entscheidung funktionieren für Demo-Karten. |
-| Scoring | Die Corp kann eine Agenda installieren, advancen und scoren. |
-| Siegbedingungen | Mindestens je ein Runner-Sieg und ein Corp-Sieg existieren als deterministische Szenariotests. |
-| Replay | Eine vollständige Beispielpartie kann aus initialState + EventLog reproduziert werden; alle StateHashes stimmen. |
-| Visibility | RunnerView, PublicEvents, Client Payloads und KI-Input enthalten keine verdeckten HQ/R&D/unrezzed/Remote-Details. |
-| KI | Die Corp-KI beendet 100 KI-Testzüge ohne ungültige Action, Endlosschleife oder State-Invariant-Verletzung. |
-| Karten | Jede `playable_mvp` Karte ist im CardImplementation-Manifest dokumentiert und getestet. |
-| CI | Alle Unit-, Integration-, Visibility-, Replay-, KI- und Kartentests für MVP-Karten bestehen. |
-| Betrieb | Die App lässt sich lokal oder per Docker privat starten. |
+| Kriterium       | Pass/Fail-Bedingung                                                                                                                                           |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Setup           | Ein Match mit festen Demo-Decks startet deterministisch aus einem Seed. Starthände und Deckreihenfolge sind reproduzierbar.                                   |
+| LegalActions    | UI und KI erhalten ausschließlich Aktionen, die `applyAction` akzeptiert. Manipulierte illegale Aktionen werden abgelehnt.                                    |
+| Grundaktionen   | Credits, Draw, Install, Advance, Play Event/Operation und End Turn funktionieren für unterstützte Karten.                                                     |
+| Run             | Mindestens ein Run auf ungeschützten Server, ein Run auf geschützten Server mit ICE, ein gebrochener Encounter und ein ungebrochener Encounter sind getestet. |
+| Access/Breach   | HQ, R&D, Archives und Remote werden korrekt gebreacht. Agenda-Steal und Trash-Entscheidung funktionieren für Demo-Karten.                                     |
+| Scoring         | Die Corp kann eine Agenda installieren, advancen und scoren.                                                                                                  |
+| Siegbedingungen | Mindestens je ein Runner-Sieg und ein Corp-Sieg existieren als deterministische Szenariotests.                                                                |
+| Replay          | Eine vollständige Beispielpartie kann aus initialState + EventLog reproduziert werden; alle StateHashes stimmen.                                              |
+| Visibility      | RunnerView, PublicEvents, Client Payloads und KI-Input enthalten keine verdeckten HQ/R&D/unrezzed/Remote-Details.                                             |
+| KI              | Die Corp-KI beendet 100 KI-Testzüge ohne ungültige Action, Endlosschleife oder State-Invariant-Verletzung.                                                    |
+| Karten          | Jede `playable_mvp` Karte ist im CardImplementation-Manifest dokumentiert und getestet.                                                                       |
+| CI              | Alle Unit-, Integration-, Visibility-, Replay-, KI- und Kartentests für MVP-Karten bestehen.                                                                  |
+| Betrieb         | Die App lässt sich lokal oder per Docker privat starten.                                                                                                      |
 
 ### 31.2 Akzeptanzkriterien für MVP 0.2
 
 MVP 0.2 beginnt erst nach erfüllten MVP-0.1-Gates. Für private Human-vs-Human-Partien gelten zusätzlich folgende Pass/Fail-Kriterien:
 
-| Kriterium | Pass/Fail-Bedingung |
-|---|---|
-| Einladung | Match-Link mit geheimem Token erlaubt Join genau der freien Seite oder eines berechtigten Reconnects. |
-| Serverautorität | Falsche Seite, falscher Token und veraltete State-Versionen werden abgelehnt. |
-| Synchronisation | Nach jeder gültigen Action erhalten beide Seiten konsistente, aber unterschiedlich gefilterte PlayerViews. |
-| Concurrency | Zwei gleichzeitig eingereichte Actions erzeugen keine doppelte Transition und keinen inkonsistenten State. |
-| Reconnect | Disconnect/Reconnect während Action Phase, Run und Access stellt korrekte PlayerView und LegalActions wieder her. |
-| Undo | Undo funktioniert vor Informationsgewinn und wird nach verdecktem Informationsgewinn blockiert oder nur nach klarer Regel freigegeben. |
-| Visibility | Automatische Leak-Tests prüfen WebSocket-Nachrichten, Events, Reconnect-Payloads und Undo-Zustände. |
+| Kriterium       | Pass/Fail-Bedingung                                                                                                                    |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Einladung       | Match-Link mit geheimem Token erlaubt Join genau der freien Seite oder eines berechtigten Reconnects.                                  |
+| Serverautorität | Falsche Seite, falscher Token und veraltete State-Versionen werden abgelehnt.                                                          |
+| Synchronisation | Nach jeder gültigen Action erhalten beide Seiten konsistente, aber unterschiedlich gefilterte PlayerViews.                             |
+| Concurrency     | Zwei gleichzeitig eingereichte Actions erzeugen keine doppelte Transition und keinen inkonsistenten State.                             |
+| Reconnect       | Disconnect/Reconnect während Action Phase, Run und Access stellt korrekte PlayerView und LegalActions wieder her.                      |
+| Undo            | Undo funktioniert vor Informationsgewinn und wird nach verdecktem Informationsgewinn blockiert oder nur nach klarer Regel freigegeben. |
+| Visibility      | Automatische Leak-Tests prüfen WebSocket-Nachrichten, Events, Reconnect-Payloads und Undo-Zustände.                                    |
 
 ## 32. Definition of Done für MVP 0.1
 
@@ -1679,51 +1760,51 @@ MVP 0.1 ist fertig, wenn alle folgenden Bedingungen erfüllt sind:
 
 ### 33.2 Arbeitspakete
 
-| Paket | Ergebnis | Gate |
-|---|---|---|
-| A. Foundation | Monorepo, Engine-Paket, Shared Types, Test Runner, CI. | `createGame` und `validateGameState` bestehen. |
-| B. Basismodell | GameState, Zonen, CardInstanceRefs, PlayerViews, Invarianten. | Visibility-Basistests bestehen. |
-| C. Aktionen/Phasen | Clicks, Credits, Draw, Install, Advance, End Turn. | State-Machine-Tests bestehen. |
-| D. Run-Kern | RunState, ICE, Rez, Encounter, Break, Subroutinen. | Run-Tests bestehen. |
-| E. Access/Scoring | Breach, Access, Steal, Trash, Score, Sieg. | Access- und Siegtests bestehen. |
-| F. Decks/Karten | Demo-Decks, CardImplementation-Manifest, Kartenresolver. | Alle Karten `playable_mvp` getestet. |
-| G. UI | Spielbrett, LegalActions, Run-Panel, EventLog. | Eine manuelle Beispielpartie spielbar. |
-| H. KI/Replay | Corp-KI, Fallback, Replay, StateHash. | Akzeptanzkriterien 0.1 bestehen. |
+| Paket              | Ergebnis                                                      | Gate                                           |
+| ------------------ | ------------------------------------------------------------- | ---------------------------------------------- |
+| A. Foundation      | Monorepo, Engine-Paket, Shared Types, Test Runner, CI.        | `createGame` und `validateGameState` bestehen. |
+| B. Basismodell     | GameState, Zonen, CardInstanceRefs, PlayerViews, Invarianten. | Visibility-Basistests bestehen.                |
+| C. Aktionen/Phasen | Clicks, Credits, Draw, Install, Advance, End Turn.            | State-Machine-Tests bestehen.                  |
+| D. Run-Kern        | RunState, ICE, Rez, Encounter, Break, Subroutinen.            | Run-Tests bestehen.                            |
+| E. Access/Scoring  | Breach, Access, Steal, Trash, Score, Sieg.                    | Access- und Siegtests bestehen.                |
+| F. Decks/Karten    | Demo-Decks, CardImplementation-Manifest, Kartenresolver.      | Alle Karten `playable_mvp` getestet.           |
+| G. UI              | Spielbrett, LegalActions, Run-Panel, EventLog.                | Eine manuelle Beispielpartie spielbar.         |
+| H. KI/Replay       | Corp-KI, Fallback, Replay, StateHash.                         | Akzeptanzkriterien 0.1 bestehen.               |
 
 ### 33.3 Minimaler Backlog
 
-| Priorität | Eintrag |
-|---|---|
-| Must | Monorepo und Engine-Paket erstellen. |
-| Must | RulesBaseline, DeviationRegistry und CardImplementation-Manifest als Datenstrukturen anlegen. |
-| Must | GameState, CardInstanceRef, Zonen, Server und PlayerViews implementieren. |
-| Must | `createGame`, `getLegalActions`, `applyAction`, `validateGameState`, `getPlayerView` implementieren. |
-| Must | Grundaktionen: `gain_credit`, `draw_card`, `install_card`, `advance_card`, `end_turn`. |
-| Must | RunState und Kernablauf für Runs auf HQ, R&D, Archives und Remote. |
-| Must | ICE-Rez, Encounter, Breaker-Fähigkeiten und Subroutinen. |
-| Must | Breach, Access, Agenda-Steal, Trash Cost und Agenda-Score. |
-| Must | EventLog, StateVersion, StateHash und Replay einer Beispielpartie. |
-| Must | Corp-KI mit Fallback und Timeout. |
-| Must | UI mit Board, LegalActions, Run-Panel und EventLog. |
-| Must | Akzeptanztests und CI. |
-| Should | Debug-Panel mit TimingPoint, StateHash und Invariant-Status. |
-| Should | Seed-Eingabe im Startscreen. |
-| Could | Einfacher Tutorial-Hinweis pro Timingphase. |
-| Could | Export des EventLogs als JSON. |
+| Priorität | Eintrag                                                                                              |
+| --------- | ---------------------------------------------------------------------------------------------------- |
+| Must      | Monorepo und Engine-Paket erstellen.                                                                 |
+| Must      | RulesBaseline, DeviationRegistry und CardImplementation-Manifest als Datenstrukturen anlegen.        |
+| Must      | GameState, CardInstanceRef, Zonen, Server und PlayerViews implementieren.                            |
+| Must      | `createGame`, `getLegalActions`, `applyAction`, `validateGameState`, `getPlayerView` implementieren. |
+| Must      | Grundaktionen: `gain_credit`, `draw_card`, `install_card`, `advance_card`, `end_turn`.               |
+| Must      | RunState und Kernablauf für Runs auf HQ, R&D, Archives und Remote.                                   |
+| Must      | ICE-Rez, Encounter, Breaker-Fähigkeiten und Subroutinen.                                             |
+| Must      | Breach, Access, Agenda-Steal, Trash Cost und Agenda-Score.                                           |
+| Must      | EventLog, StateVersion, StateHash und Replay einer Beispielpartie.                                   |
+| Must      | Corp-KI mit Fallback und Timeout.                                                                    |
+| Must      | UI mit Board, LegalActions, Run-Panel und EventLog.                                                  |
+| Must      | Akzeptanztests und CI.                                                                               |
+| Should    | Debug-Panel mit TimingPoint, StateHash und Invariant-Status.                                         |
+| Should    | Seed-Eingabe im Startscreen.                                                                         |
+| Could     | Einfacher Tutorial-Hinweis pro Timingphase.                                                          |
+| Could     | Export des EventLogs als JSON.                                                                       |
 
 ## 34. Strategische Entwicklungsstufen nach MVP 0.1
 
-| Stufe | Ziel | Inhalt |
-|---:|---|---|
-| 0 | Datenbasis und Kartenmodell | Kartendaten lokal nutzbar machen, internes Kartenmodell, Implementierungsstatus. |
-| 1 | Minimal spielbarer Prototyp | Spielstart, Deck laden, Starthand, Clicks, Credits, Draw, Install, Zugwechsel, einfache Server. |
-| 2 | Demo-Decks vollständig spielbar | Economy, Breaker, ICE, Rez, Encounter, Access, Steal, Score. |
-| 3 | Regelgenauigkeit Kernablauf | Timingpunkte, Runs, Access-Typen, Trash-Kosten, Zonen präzisieren. |
-| 4 | KI für feste Decks | Erste Corp-KI, später Runner-KI, LegalAction-Zwang, Tests. |
-| 5 | Human vs Human online | Einladungslink, Rollenverteilung, WebSocket, Reconnect, Synchronisation, Visibility, einfache Spielhistorie. |
-| 6 | Vier feste Lern-Decks | Criminal, Shaper, Weyland, Haas-Bioroid; weiterhin kontrollierter Kartenpool. |
-| 7 | Offizielle Beispieldecks | System-Gateway-/Einstiegsdecks prüfen, Manifest-Abgleich, Decklisten versionieren. |
-| 8 | Freier Deckbau | Deckbuilder, Import/Export, Fraktionen, Einfluss, Mindestdeckgröße, Agenda-Dichte, erlaubte Kartenpools, Rotation/Formate, Validierung. |
+| Stufe | Ziel                            | Inhalt                                                                                                                                  |
+| ----: | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+|     0 | Datenbasis und Kartenmodell     | Kartendaten lokal nutzbar machen, internes Kartenmodell, Implementierungsstatus.                                                        |
+|     1 | Minimal spielbarer Prototyp     | Spielstart, Deck laden, Starthand, Clicks, Credits, Draw, Install, Zugwechsel, einfache Server.                                         |
+|     2 | Demo-Decks vollständig spielbar | Economy, Breaker, ICE, Rez, Encounter, Access, Steal, Score.                                                                            |
+|     3 | Regelgenauigkeit Kernablauf     | Timingpunkte, Runs, Access-Typen, Trash-Kosten, Zonen präzisieren.                                                                      |
+|     4 | KI für feste Decks              | Erste Corp-KI, später Runner-KI, LegalAction-Zwang, Tests.                                                                              |
+|     5 | Human vs Human online           | Einladungslink, Rollenverteilung, WebSocket, Reconnect, Synchronisation, Visibility, einfache Spielhistorie.                            |
+|     6 | Vier feste Lern-Decks           | Criminal, Shaper, Weyland, Haas-Bioroid; weiterhin kontrollierter Kartenpool.                                                           |
+|     7 | Offizielle Beispieldecks        | System-Gateway-/Einstiegsdecks prüfen, Manifest-Abgleich, Decklisten versionieren.                                                      |
+|     8 | Freier Deckbau                  | Deckbuilder, Import/Export, Fraktionen, Einfluss, Mindestdeckgröße, Agenda-Dichte, erlaubte Kartenpools, Rotation/Formate, Validierung. |
 
 Empfohlene spätere Deck-Erweiterung:
 
@@ -1742,42 +1823,42 @@ Noch zurückstellen:
 
 ## 35. Versionen nach MVP 0.1
 
-| Version | Kernziel | Enthalten |
-|---|---|---|
-| 0.1 | Private NETGRID AI Prototype | Human Runner vs Corp-KI, feste Demo-Decks, Engine, EventLog, Replay, Tests. |
-| 0.2 | Private Human-vs-Human-Partie über Internet | Match-Link, WebSocket, PlayerViews, Reconnect, Pass/Priority, Undo mit Zustimmung, Visibility- und Multiplayer-Tests. |
-| 0.3 | Beide Seiten gegen KI spielbar | Runner-KI, verbesserte Corp-KI, KI-vs-KI, Erklärmodus, Simulationstests. |
-| 0.4 | Mehr Karten und stabileres Timing | Karteneffekt-System, Trigger, Paid Ability Windows, mehr Karten, Kartentests, Regressionen. |
-| 1.0 | Private stabile NETGRID-Plattform | Human-vs-KI, Human-vs-Human, KI-vs-KI, Replays, Zuschaueransicht, Deckimport, größerer Kartenpool, gute Testsuite, private Hostingfähigkeit, später tablet-optimiertes UI. |
+| Version | Kernziel                                    | Enthalten                                                                                                                                                                  |
+| ------- | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0.1     | Private NETGRID AI Prototype                | Human Runner vs Corp-KI, feste Demo-Decks, Engine, EventLog, Replay, Tests.                                                                                                |
+| 0.2     | Private Human-vs-Human-Partie über Internet | Match-Link, WebSocket, PlayerViews, Reconnect, Pass/Priority, Undo mit Zustimmung, Visibility- und Multiplayer-Tests.                                                      |
+| 0.3     | Beide Seiten gegen KI spielbar              | Runner-KI, verbesserte Corp-KI, KI-vs-KI, Erklärmodus, Simulationstests.                                                                                                   |
+| 0.4     | Mehr Karten und stabileres Timing           | Karteneffekt-System, Trigger, Paid Ability Windows, mehr Karten, Kartentests, Regressionen.                                                                                |
+| 1.0     | Private stabile NETGRID-Plattform           | Human-vs-KI, Human-vs-Human, KI-vs-KI, Replays, Zuschaueransicht, Deckimport, größerer Kartenpool, gute Testsuite, private Hostingfähigkeit, später tablet-optimiertes UI. |
 
 ## 36. Hauptrisiken und Gegenmaßnahmen
 
-| Risiko | Auswirkung | Gegenmaßnahme |
-|---|---|---|
-| Karteneffekte werden zu früh komplex | Engine instabil, Tests unklar, Scope Creep. | Feste Demo-Decks, Manifest, `playable_mvp` nur mit Tests. |
-| Timingmodell zu grob | Spätere Neuarchitektur erforderlich. | TimingPointIds und Resolver-Pipeline schon in 0.1 anlegen. |
-| Effektauflösung unklar | Kosten, Targets und spätere Replacement-/Prevention-Effekte werden schwer integrierbar. | Resolver-Pipeline mit Validate → Pay Costs → Execute Instruction → Checkpoint → PendingEffects. |
-| Hidden-Info-Leaks | Multiplayer später unsicher, KI unfair. | PlayerViews, Public/Private Events, Leak-Tests als Gate. |
-| Multiplayer-Race-Conditions | Doppelte oder widersprüchliche Transitions. | Match-Version, idempotencyKey, transaktionale Verarbeitung. |
-| KI blockiert Spiel | Partie hängt oder erzeugt illegale Actions. | Timeout, Fallback, Max-Action-Grenzen, deterministische Tests. |
-| Replay bricht bei Schemaänderungen | Regressionen nicht reproduzierbar. | Versionierte Events, Snapshots, StateHash, Migrationskonzept. |
-| UI überholt Engine | Schöne Oberfläche ohne regelstabile Basis. | Engine- und Test-Gates vor UI-Komfort. |
-| Scope Creep | MVP wird nicht fertig. | Nicht-Ziele verbindlich halten, Kartenpool klein, alte Konzepte nicht parallel pflegen. |
-| Asset-/Copyright-Unklarheit | Spätere Veröffentlichung oder Hosting riskant. | Manuelle Demo-Karten, lokale Snapshots, Attribution, keine unklaren Assets. |
+| Risiko                               | Auswirkung                                                                              | Gegenmaßnahme                                                                                   |
+| ------------------------------------ | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Karteneffekte werden zu früh komplex | Engine instabil, Tests unklar, Scope Creep.                                             | Feste Demo-Decks, Manifest, `playable_mvp` nur mit Tests.                                       |
+| Timingmodell zu grob                 | Spätere Neuarchitektur erforderlich.                                                    | TimingPointIds und Resolver-Pipeline schon in 0.1 anlegen.                                      |
+| Effektauflösung unklar               | Kosten, Targets und spätere Replacement-/Prevention-Effekte werden schwer integrierbar. | Resolver-Pipeline mit Validate → Pay Costs → Execute Instruction → Checkpoint → PendingEffects. |
+| Hidden-Info-Leaks                    | Multiplayer später unsicher, KI unfair.                                                 | PlayerViews, Public/Private Events, Leak-Tests als Gate.                                        |
+| Multiplayer-Race-Conditions          | Doppelte oder widersprüchliche Transitions.                                             | Match-Version, idempotencyKey, transaktionale Verarbeitung.                                     |
+| KI blockiert Spiel                   | Partie hängt oder erzeugt illegale Actions.                                             | Timeout, Fallback, Max-Action-Grenzen, deterministische Tests.                                  |
+| Replay bricht bei Schemaänderungen   | Regressionen nicht reproduzierbar.                                                      | Versionierte Events, Snapshots, StateHash, Migrationskonzept.                                   |
+| UI überholt Engine                   | Schöne Oberfläche ohne regelstabile Basis.                                              | Engine- und Test-Gates vor UI-Komfort.                                                          |
+| Scope Creep                          | MVP wird nicht fertig.                                                                  | Nicht-Ziele verbindlich halten, Kartenpool klein, alte Konzepte nicht parallel pflegen.         |
+| Asset-/Copyright-Unklarheit          | Spätere Veröffentlichung oder Hosting riskant.                                          | Manuelle Demo-Karten, lokale Snapshots, Attribution, keine unklaren Assets.                     |
 
 ## 37. Offene Entscheidungen
 
-| Entscheidung | Empfehlung |
-|---|---|
-| Quelle für Kartendaten | Kurzfristig manuelle Demo-Karten oder lokaler Snapshot; später API/offizielles JSON mit Versionierung. |
-| Konkrete offizielle Karten im ersten Deck | Nicht nötig für MVP 0.1; interne Demo-Karten sind sauberer. |
-| Siegpunktwert in Demo-Partien | Konfigurierbar machen oder Deck auf erreichbaren Siegwert anpassen. |
-| Paid Ability Windows im MVP | Struktur vollständig modellieren, aber nur demo-relevante Aktionen anbieten. |
-| Datenbank Phase 1 | SQLite bevorzugen, sobald WebSocket, mehrere Matches oder Reconnect relevant werden. |
-| Undo-Technik | Früh Snapshots nutzen; Event-Replay als Validierung beibehalten. |
-| LLM-KI | Nicht vor stabiler LegalAction-/Visibility-Schicht einführen. |
-| Kartenbilder und Assets | In MVP 0.1 nicht erforderlich; Text-/Platzhalterdarstellung reicht. |
-| Asset- und Kartendaten-Prüfung | Vor Nutzung externer Kartentexte, APIs oder visueller Assets die jeweils aktuellen Quellen-, Caching-, Copyright- und Asset-Bedingungen prüfen und dokumentieren. |
+| Entscheidung                              | Empfehlung                                                                                                                                                        |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Quelle für Kartendaten                    | Kurzfristig manuelle Demo-Karten oder lokaler Snapshot; später API/offizielles JSON mit Versionierung.                                                            |
+| Konkrete offizielle Karten im ersten Deck | Nicht nötig für MVP 0.1; interne Demo-Karten sind sauberer.                                                                                                       |
+| Siegpunktwert in Demo-Partien             | Konfigurierbar machen oder Deck auf erreichbaren Siegwert anpassen.                                                                                               |
+| Paid Ability Windows im MVP               | Struktur vollständig modellieren, aber nur demo-relevante Aktionen anbieten.                                                                                      |
+| Datenbank Phase 1                         | SQLite bevorzugen, sobald WebSocket, mehrere Matches oder Reconnect relevant werden.                                                                              |
+| Undo-Technik                              | Früh Snapshots nutzen; Event-Replay als Validierung beibehalten.                                                                                                  |
+| LLM-KI                                    | Nicht vor stabiler LegalAction-/Visibility-Schicht einführen.                                                                                                     |
+| Kartenbilder und Assets                   | In MVP 0.1 nicht erforderlich; Text-/Platzhalterdarstellung reicht.                                                                                               |
+| Asset- und Kartendaten-Prüfung            | Vor Nutzung externer Kartentexte, APIs oder visueller Assets die jeweils aktuellen Quellen-, Caching-, Copyright- und Asset-Bedingungen prüfen und dokumentieren. |
 
 ## 38. Konsolidierte Kernformel
 

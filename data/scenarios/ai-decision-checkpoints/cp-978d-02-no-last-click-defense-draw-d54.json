@@ -5457,7 +5457,9 @@
     "planExecution": {
       "acceptablePlanKinds": ["corp.economy"],
       "acceptableCapabilities": ["develop_or_convert_corp_economy"],
-      "requiredAssessmentEvidence": ["corp_last_click_score_install_deferred:remote_1"]
+      "requiredAssessmentEvidence": [
+        "corp_last_click_score_install_deferred:remote_1"
+      ]
     }
   }
 }

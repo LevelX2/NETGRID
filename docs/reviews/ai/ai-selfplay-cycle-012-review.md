@@ -27,11 +27,11 @@ read-only Maintenance-Analyse-API.
 
 ## Ergebnis wie im Programm
 
-| Partie | Standarddecks | Endergebnis | Agendapunkte | Ende | Entscheidungen |
-| --- | --- | ---: | ---: | --- | ---: |
-| Seed 1 | **Ice Destruction Runner** gegen **Shadoe Tag & Bag** | Runner **10 – 2** Corp | **8:2** | Agendapunkte | 227 |
-| Seed 2 | **Ice Destruction Runner** gegen **Shadoe Tag & Bag** | Runner **10 – 2** Corp | **8:2** | Agendapunkte | 420 |
-| Seed 3 | **Ice Destruction Runner** gegen **Shadoe Tag & Bag** | Runner **10 – 2** Corp | **7:2** | Agendapunkte | 206 |
+| Partie | Standarddecks                                         |            Endergebnis | Agendapunkte | Ende         | Entscheidungen |
+| ------ | ----------------------------------------------------- | ---------------------: | -----------: | ------------ | -------------: |
+| Seed 1 | **Ice Destruction Runner** gegen **Shadoe Tag & Bag** | Runner **10 – 2** Corp |      **8:2** | Agendapunkte |            227 |
+| Seed 2 | **Ice Destruction Runner** gegen **Shadoe Tag & Bag** | Runner **10 – 2** Corp |      **8:2** | Agendapunkte |            420 |
+| Seed 3 | **Ice Destruction Runner** gegen **Shadoe Tag & Bag** | Runner **10 – 2** Corp |      **7:2** | Agendapunkte |            206 |
 
 Die finalen Match-IDs sind `match_6f4d39695e628aa0`,
 `match_7e537a30680ae0d0` und `match_f27f675ebd34e4d5`.

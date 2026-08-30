@@ -58,48 +58,48 @@ Genau ein Paket ist aktiv. `geprüft` bedeutet Analyse abgeschlossen; `angepasst
 
 ## Paketfolge
 
-| Paket | Katalog | Datei | Status |
-| --- | ---: | --- | --- |
-| AI-R21 | 28 | `packages/ai/src/actions/action-target-context.ts` | geprüft |
-| AI-R22 | 424 | `packages/ai/src/runtime/runner-viral15-jack-out-context.ts` | geprüft |
-| AI-R23 | 107 | `packages/ai/src/evaluation/mistake-taxonomy.ts` | geprüft |
-| AI-R24 | 596 | `packages/ai/src/simulation/runner-ai-diagnostics-composition.ts` | geprüft |
-| AI-R25 | 372 | `packages/ai/src/runtime/runner-loan-projected-spend.ts` | angepasst |
-| AI-R26 | 539 | `packages/ai/src/simulation/central-closeout-repeat-metrics.ts` | angepasst |
-| AI-R27 | 483 | `packages/ai/src/runtime/simulation-card-target.ts` | geprüft |
-| AI-R28 | 544 | `packages/ai/src/simulation/corp-effective-remote-safety-metrics.ts` | geprüft |
-| AI-R29 | 151 | `packages/ai/src/plans/credit-demand.ts` | angepasst |
-| AI-R30 | 277 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-active-remote.ts` | geprüft |
-| AI-R31 | 647 | `packages/ai/src/simulation/tag-punish-funnel-predicates.ts` | geprüft |
-| AI-R32 | 53 | `packages/ai/src/decision/access-decision-projection.ts` | geprüft |
-| AI-R33 | 413 | `packages/ai/src/runtime/runner-semantic-card-ids.ts` | entfernt |
-| AI-R34 | 109 | `packages/ai/src/evaluation/practical-tactic-benchmark.ts` | geprüft |
-| AI-R35 | 34 | `packages/ai/src/actions/persistent-development-action.ts` | geprüft |
-| AI-R36 | 80 | `packages/ai/src/deck-doctrine-card-roles.ts` | geprüft |
-| AI-R37 | 165 | `packages/ai/src/plans/plan-scheduler.ts` | geprüft |
-| AI-R38 | 219 | `packages/ai/src/runner/hand-development/runner-persistent-install-evaluation.ts` | geprüft |
-| AI-R39 | 433 | `packages/ai/src/runtime/semantic-runtime-corp-advancement-counter-context.ts` | geprüft |
-| AI-R40 | 139 | `packages/ai/src/plans/corp-counter-bank-preparation-quote.ts` | geprüft |
-| AI-R41 | 488 | `packages/ai/src/runtime/subroutine-indexes.ts` | geprüft |
-| AI-R42 | 520 | `packages/ai/src/simulation/ai-soak-runner.ts` | angepasst |
-| AI-R43 | 49 | `packages/ai/src/card-spec-ai-hint-compiler.ts` | geprüft |
-| AI-R44 | 3 | `apps/server/src/index.ts` | geprüft |
-| AI-R45 | 617 | `packages/ai/src/simulation/runner-run-target-context.ts` | geprüft |
-| AI-R46 | 256 | `packages/ai/src/runtime/corp-exact-ice-rez-route.ts` | angepasst |
-| AI-R47 | 325 | `packages/ai/src/runtime/protection-definition.ts` | geprüft |
-| AI-R48 | 456 | `packages/ai/src/runtime/semantic-runtime-corp-score-composition.ts` | geprüft |
-| AI-R49 | 118 | `packages/ai/src/evaluation/replay-portable-fixtures.ts` | geprüft |
-| AI-R50 | 605 | `packages/ai/src/simulation/runner-hand-use-diagnostics.ts` | geprüft |
-| AI-R51 | 377 | `packages/ai/src/runtime/runner-loan-state-context.ts` | geprüft |
-| AI-R52 | 315 | `packages/ai/src/runtime/encounter-action.ts` | angepasst |
-| AI-R53 | 628 | `packages/ai/src/simulation/selfplay-trace-facts.ts` | angepasst |
-| AI-R54 | 285 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-state.ts` | angepasst |
-| AI-R55 | 395 | `packages/ai/src/runtime/runner-program-sacrifice-exclusion.ts` | geprüft |
-| AI-R56 | 205 | `packages/ai/src/runner-breaker-development.ts` | geprüft |
-| AI-R57 | 514 | `packages/ai/src/simulation/ai-simulation-action-sequence-entry.ts` | geprüft |
-| AI-R58 | 126 | `packages/ai/src/hint-ontology-doctrine.ts` | angepasst |
-| AI-R59 | 362 | `packages/ai/src/runtime/runner-hq-repeat-run-score.ts` | geprüft |
-| AI-R60 | 419 | `packages/ai/src/runtime/runner-targeted-bypass-choice.ts` | geprüft |
+| Paket  | Katalog | Datei                                                                                 | Status    |
+| ------ | ------: | ------------------------------------------------------------------------------------- | --------- |
+| AI-R21 |      28 | `packages/ai/src/actions/action-target-context.ts`                                    | geprüft   |
+| AI-R22 |     424 | `packages/ai/src/runtime/runner-viral15-jack-out-context.ts`                          | geprüft   |
+| AI-R23 |     107 | `packages/ai/src/evaluation/mistake-taxonomy.ts`                                      | geprüft   |
+| AI-R24 |     596 | `packages/ai/src/simulation/runner-ai-diagnostics-composition.ts`                     | geprüft   |
+| AI-R25 |     372 | `packages/ai/src/runtime/runner-loan-projected-spend.ts`                              | angepasst |
+| AI-R26 |     539 | `packages/ai/src/simulation/central-closeout-repeat-metrics.ts`                       | angepasst |
+| AI-R27 |     483 | `packages/ai/src/runtime/simulation-card-target.ts`                                   | geprüft   |
+| AI-R28 |     544 | `packages/ai/src/simulation/corp-effective-remote-safety-metrics.ts`                  | geprüft   |
+| AI-R29 |     151 | `packages/ai/src/plans/credit-demand.ts`                                              | angepasst |
+| AI-R30 |     277 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-active-remote.ts` | geprüft   |
+| AI-R31 |     647 | `packages/ai/src/simulation/tag-punish-funnel-predicates.ts`                          | geprüft   |
+| AI-R32 |      53 | `packages/ai/src/decision/access-decision-projection.ts`                              | geprüft   |
+| AI-R33 |     413 | `packages/ai/src/runtime/runner-semantic-card-ids.ts`                                 | entfernt  |
+| AI-R34 |     109 | `packages/ai/src/evaluation/practical-tactic-benchmark.ts`                            | geprüft   |
+| AI-R35 |      34 | `packages/ai/src/actions/persistent-development-action.ts`                            | geprüft   |
+| AI-R36 |      80 | `packages/ai/src/deck-doctrine-card-roles.ts`                                         | geprüft   |
+| AI-R37 |     165 | `packages/ai/src/plans/plan-scheduler.ts`                                             | geprüft   |
+| AI-R38 |     219 | `packages/ai/src/runner/hand-development/runner-persistent-install-evaluation.ts`     | geprüft   |
+| AI-R39 |     433 | `packages/ai/src/runtime/semantic-runtime-corp-advancement-counter-context.ts`        | geprüft   |
+| AI-R40 |     139 | `packages/ai/src/plans/corp-counter-bank-preparation-quote.ts`                        | geprüft   |
+| AI-R41 |     488 | `packages/ai/src/runtime/subroutine-indexes.ts`                                       | geprüft   |
+| AI-R42 |     520 | `packages/ai/src/simulation/ai-soak-runner.ts`                                        | angepasst |
+| AI-R43 |      49 | `packages/ai/src/card-spec-ai-hint-compiler.ts`                                       | geprüft   |
+| AI-R44 |       3 | `apps/server/src/index.ts`                                                            | geprüft   |
+| AI-R45 |     617 | `packages/ai/src/simulation/runner-run-target-context.ts`                             | geprüft   |
+| AI-R46 |     256 | `packages/ai/src/runtime/corp-exact-ice-rez-route.ts`                                 | angepasst |
+| AI-R47 |     325 | `packages/ai/src/runtime/protection-definition.ts`                                    | geprüft   |
+| AI-R48 |     456 | `packages/ai/src/runtime/semantic-runtime-corp-score-composition.ts`                  | geprüft   |
+| AI-R49 |     118 | `packages/ai/src/evaluation/replay-portable-fixtures.ts`                              | geprüft   |
+| AI-R50 |     605 | `packages/ai/src/simulation/runner-hand-use-diagnostics.ts`                           | geprüft   |
+| AI-R51 |     377 | `packages/ai/src/runtime/runner-loan-state-context.ts`                                | geprüft   |
+| AI-R52 |     315 | `packages/ai/src/runtime/encounter-action.ts`                                         | angepasst |
+| AI-R53 |     628 | `packages/ai/src/simulation/selfplay-trace-facts.ts`                                  | angepasst |
+| AI-R54 |     285 | `packages/ai/src/runtime/corp-scoreline/semantic-runtime-corp-score-state.ts`         | angepasst |
+| AI-R55 |     395 | `packages/ai/src/runtime/runner-program-sacrifice-exclusion.ts`                       | geprüft   |
+| AI-R56 |     205 | `packages/ai/src/runner-breaker-development.ts`                                       | geprüft   |
+| AI-R57 |     514 | `packages/ai/src/simulation/ai-simulation-action-sequence-entry.ts`                   | geprüft   |
+| AI-R58 |     126 | `packages/ai/src/hint-ontology-doctrine.ts`                                           | angepasst |
+| AI-R59 |     362 | `packages/ai/src/runtime/runner-hq-repeat-run-score.ts`                               | geprüft   |
+| AI-R60 |     419 | `packages/ai/src/runtime/runner-targeted-bypass-choice.ts`                            | geprüft   |
 
 ## Paketdetails
 
@@ -167,7 +167,7 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 
 ### AI-R26 – `simulation/central-closeout-repeat-metrics.ts`
 
-- **Behobener mittlerer Befund:** `substitutionLedToProgression` suchte anhand der Turnnummer in der gesamten Sequenz. Damit konnte eine Aktion, die im selben Zug bereits *vor* der No-Fresh-Central-Substitution lag, fälschlich als deren späterer Fortschritt gezählt werden.
+- **Behobener mittlerer Befund:** `substitutionLedToProgression` suchte anhand der Turnnummer in der gesamten Sequenz. Damit konnte eine Aktion, die im selben Zug bereits _vor_ der No-Fresh-Central-Substitution lag, fälschlich als deren späterer Fortschritt gezählt werden.
 - Die Suche beginnt nun am tatsächlichen Sequenzindex der Substitution und betrachtet nur diese sowie nachfolgende Einträge. Alle Dedup-Schlüssel, erlaubten Gründe und übrigen Metriken bleiben unverändert.
 - Regressionstest bildet einen früheren Rig-Install und einen späteren End-Turn-Ersatz im selben Zug ab; die Substitution wird gezählt, aber nicht als progressionserzeugend. Check: direkter Vitest grün (1 Datei, 2 Tests), `git diff --check` grün.
 
@@ -263,7 +263,7 @@ Done-Gate je Paket: Reviewbefund mit Fundstellen, begründete Änderungsentschei
 
 ### AI-R42 – `simulation/ai-soak-runner.ts`
 
-- **Behobener mittlerer Befund:** Bei explizitem Override von Runner- *und* Corp-Schwierigkeit iterierte der Runner weiterhin über alle Matrix-Schwierigkeiten, obwohl beide Werte im Callback überschrieben wurden. Jede Seed-Simulation lief dadurch identisch mehrfach und verzerrte Gewichtung sowie Laufzeit.
+- **Behobener mittlerer Befund:** Bei explizitem Override von Runner- _und_ Corp-Schwierigkeit iterierte der Runner weiterhin über alle Matrix-Schwierigkeiten, obwohl beide Werte im Callback überschrieben wurden. Jede Seed-Simulation lief dadurch identisch mehrfach und verzerrte Gewichtung sowie Laufzeit.
 - Der Runner erzeugt nun Difficulty-Paare: bei beidseitigem Override genau eines, bei keinem oder einseitigem Override weiterhin die vollständige sinnvolle Matrix. Seeds, Decks und Aggregation bleiben unverändert.
 - Regressionstest prüft exakt einen Aufruf pro Seed und beide übergebenen Schwierigkeitswerte. Check: direkter Vitest grün (1 Datei, 1 Test), `git diff --check` grün.
 

@@ -107,35 +107,35 @@ sichtbaren Hilfstexten zu überladen.
 ## Akzeptanzkriterien
 
 - [x] Die Optionsoberfläche besitzt höchstens drei klar benannte Reiter und
-  zeigt nicht mehr alle Einstellungsblöcke gleichzeitig in einer langen
-  unstrukturierten Liste.
+      zeigt nicht mehr alle Einstellungsblöcke gleichzeitig in einer langen
+      unstrukturierten Liste.
 - [x] Jede bisherige Einstellung, Sitzungsaktion, Buildinformation und jeder
-  Systemstatus ist genau einem nachvollziehbaren Reiter zugeordnet und bleibt
-  ohne Funktionsverlust erreichbar.
+      Systemstatus ist genau einem nachvollziehbaren Reiter zugeordnet und bleibt
+      ohne Funktionsverlust erreichbar.
 - [x] Ablaufautomatisierung, Darstellungsoptionen und technische
-  Sitzung/System-Informationen sind nicht mehr in derselben undifferenzierten
-  Gruppe vermischt.
+      Sitzung/System-Informationen sind nicht mehr in derselben undifferenzierten
+      Gruppe vermischt.
 - [x] Tablist und Tabpanels erfüllen die erwartete Tastatur- und
-  Screenreader-Semantik; Fokus geht beim Wechsel nicht verloren oder springt
-  unkontrolliert hinter den Dialog.
+      Screenreader-Semantik; Fokus geht beim Wechsel nicht verloren oder springt
+      unkontrolliert hinter den Dialog.
 - [x] Auf einem kleinen mobilen Viewport bleiben Reiterbeschriftungen,
-  Einstellungen und untere Inhalte vollständig erreichbar. Die Lösung erzeugt
-  keine zweite unbemerkte horizontale oder vertikale Scrollfalle.
+      Einstellungen und untere Inhalte vollständig erreichbar. Die Lösung erzeugt
+      keine zweite unbemerkte horizontale oder vertikale Scrollfalle.
 - [x] Erklärungsbedürftige Gameflow-Optionen besitzen kurze, konkrete
-  Hilfetexte, die Wirkung, Auslösezeitpunkt und lokale beziehungsweise
-  Match-State-Reichweite verständlich machen.
+      Hilfetexte, die Wirkung, Auslösezeitpunkt und lokale beziehungsweise
+      Match-State-Reichweite verständlich machen.
 - [x] Zusätzliche Tooltips/Infohinweise funktionieren per Hover, Tastaturfokus
-  und Touch und sind technisch mit dem beschriebenen Steuerelement verknüpft;
-  Warnungen bleiben auch ohne Tooltip sichtbar.
+      und Touch und sind technisch mit dem beschriebenen Steuerelement verknüpft;
+      Warnungen bleiben auch ohne Tooltip sichtbar.
 - [x] Die aktive Reiterwahl ändert keine Einstellungswerte. Ein Wechsel
-  zwischen normalem Panel und Dialog zeigt denselben logisch sortierten Inhalt
-  ohne doppelte oder widersprüchliche Steuerung.
+      zwischen normalem Panel und Dialog zeigt denselben logisch sortierten Inhalt
+      ohne doppelte oder widersprüchliche Steuerung.
 - [x] Deutsche, englische und französische Texte sind vollständig; fokussierte
-  Tests decken Tabzuordnung, Tastaturbedienung und den Erhalt vorhandener
-  Settings-Callbacks ab.
+      Tests decken Tabzuordnung, Tastaturbedienung und den Erhalt vorhandener
+      Settings-Callbacks ab.
 - [x] Die visuelle Prüfung in Firefox bestätigt auf Desktop und kleinem
-  Viewport, dass die Optionsoberfläche kürzer, übersichtlicher und die
-  Gameflow-Erklärungen leichter auffindbar sind.
+      Viewport, dass die Optionsoberfläche kürzer, übersichtlicher und die
+      Gameflow-Erklärungen leichter auffindbar sind.
 
 ## Umsetzungshinweise
 

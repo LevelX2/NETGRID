@@ -30,11 +30,11 @@ ausschließlich über die lokale read-only Maintenance-Analyse-API.
 
 ## Ergebnis wie im Programm
 
-| Partie | Standarddecks | Endergebnis | Agendapunkte | Ende | Entscheidungen |
-| --- | --- | ---: | ---: | --- | ---: |
-| Seed 1, `match_2126aaf97f192174` | **Skivviss Mill Pressure** gegen **Siren Fortress** | Runner **10 – 0** Corp | **8:0** | Agendapunkte | 183 |
-| Seed 2, `match_b919dcf4ed33e997` | **Skivviss Mill Pressure** gegen **Siren Fortress** | Runner **10 – 0** Corp | **7:0** | Agendapunkte | 169 |
-| Seed 3, `match_8f7acfff2b3351cd` | **Skivviss Mill Pressure** gegen **Siren Fortress** | Runner **10 – 6** Corp | **7:6** | Agendapunkte | 459 |
+| Partie                           | Standarddecks                                       |            Endergebnis | Agendapunkte | Ende         | Entscheidungen |
+| -------------------------------- | --------------------------------------------------- | ---------------------: | -----------: | ------------ | -------------: |
+| Seed 1, `match_2126aaf97f192174` | **Skivviss Mill Pressure** gegen **Siren Fortress** | Runner **10 – 0** Corp |      **8:0** | Agendapunkte |            183 |
+| Seed 2, `match_b919dcf4ed33e997` | **Skivviss Mill Pressure** gegen **Siren Fortress** | Runner **10 – 0** Corp |      **7:0** | Agendapunkte |            169 |
+| Seed 3, `match_8f7acfff2b3351cd` | **Skivviss Mill Pressure** gegen **Siren Fortress** | Runner **10 – 6** Corp |      **7:6** | Agendapunkte |            459 |
 
 Vor den Änderungen endete Seed 1 ebenfalls 10:0 bei 8:0 Agendapunkten. Seed 2
 endete 10:4 bei 9:4 Agendapunkten und 356 Entscheidungen. Seed 3 endete 10:2

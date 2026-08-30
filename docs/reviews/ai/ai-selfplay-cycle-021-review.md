@@ -25,11 +25,11 @@ modulo 24 Runner- beziehungsweise 23 Corp-Kandidaten.
 
 ## Ergebnis wie im Programm
 
-| Partie | Standarddecks | Endergebnis | Agendapunkte | Ende | Entscheidungen |
-| ------ | ------------- | ----------: | ------------: | ---- | --------------: |
-| Seed 1 | **Lucidrine Shell Traders** gegen **Tycho Ice Stack** | Runner **10 – 0** Corp | **8:0** | Agendapunkte | 217 |
-| Seed 2 | **Lucidrine Shell Traders** gegen **Tycho Ice Stack** | Runner **0 – 10** Corp | **0:8** | Agendapunkte | 92 |
-| Seed 3 | **Lucidrine Shell Traders** gegen **Tycho Ice Stack** | Runner **10 – 4** Corp | **8:4** | Agendapunkte | 334 |
+| Partie | Standarddecks                                         |            Endergebnis | Agendapunkte | Ende         | Entscheidungen |
+| ------ | ----------------------------------------------------- | ---------------------: | -----------: | ------------ | -------------: |
+| Seed 1 | **Lucidrine Shell Traders** gegen **Tycho Ice Stack** | Runner **10 – 0** Corp |      **8:0** | Agendapunkte |            217 |
+| Seed 2 | **Lucidrine Shell Traders** gegen **Tycho Ice Stack** | Runner **0 – 10** Corp |      **0:8** | Agendapunkte |             92 |
+| Seed 3 | **Lucidrine Shell Traders** gegen **Tycho Ice Stack** | Runner **10 – 4** Corp |      **8:4** | Agendapunkte |            334 |
 
 Die finalen Match-IDs lauten `match_ab8e254f6364e919`,
 `match_be01185bf8398789` und `match_defd9c6cc2d92735`.

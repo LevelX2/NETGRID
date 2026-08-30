@@ -59,7 +59,7 @@ die lokale Spielauswahl; sie ändern keine externen Originalquellen unter
    Link-/Trace-Fenster, etwa Signpost oder The Springboard.
 8. `corpStrength = corpBid + ausdrückliche Strength-Modifier`.
 9. `runnerStrength = baseLink + cardDerivedLinkModifier + weitere zulässige
-   Link-Modifier + postRevealLinkModifier`. `runnerBid` bezeichnet im
+Link-Modifier + postRevealLinkModifier`. `runnerBid` bezeichnet im
    Runtime-/Replayvertrag weiterhin die tatsächlich bezahlte verdeckte
    Runner-Ausgabe und ist im Classic-Profil **nicht** automatisch deren
    Linkzuwachs.

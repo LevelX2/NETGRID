@@ -30,11 +30,11 @@ lokale read-only Maintenance-Analyse-API.
 
 ## Ergebnis wie im Programm
 
-| Partie | Standarddecks | Endergebnis | Agendapunkte | Ende | Entscheidungen |
-| --- | --- | ---: | ---: | --- | ---: |
-| Seed 1 | **Skivviss Mill Pressure** gegen **Classic Corp – Superserum Control Grid** | Runner **10 – 3** Corp | **5:3** | Corp-Deck leer | 339 |
-| Seed 2 | **Skivviss Mill Pressure** gegen **Classic Corp – Superserum Control Grid** | Runner **10 – 2** Corp | **7:2** | Agendapunkte | 362 |
-| Seed 3 | **Skivviss Mill Pressure** gegen **Classic Corp – Superserum Control Grid** | Corp **10 – 3** Runner | **7:3** | Agendapunkte | 281 |
+| Partie | Standarddecks                                                               |            Endergebnis | Agendapunkte | Ende           | Entscheidungen |
+| ------ | --------------------------------------------------------------------------- | ---------------------: | -----------: | -------------- | -------------: |
+| Seed 1 | **Skivviss Mill Pressure** gegen **Classic Corp – Superserum Control Grid** | Runner **10 – 3** Corp |      **5:3** | Corp-Deck leer |            339 |
+| Seed 2 | **Skivviss Mill Pressure** gegen **Classic Corp – Superserum Control Grid** | Runner **10 – 2** Corp |      **7:2** | Agendapunkte   |            362 |
+| Seed 3 | **Skivviss Mill Pressure** gegen **Classic Corp – Superserum Control Grid** | Corp **10 – 3** Runner |      **7:3** | Agendapunkte   |            281 |
 
 Vor den Änderungen endete Seed 1 Runner 10 – Corp 0 bei 5:0
 Agendapunkten durch Corp-Deckout, Seed 2 Runner 10 – Corp 2 bei 7:2 und Seed 3

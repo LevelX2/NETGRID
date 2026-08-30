@@ -20,17 +20,17 @@ Die konsolidierte Entscheidung lautet: **V0.3 ist KI und Simulation; Kartenpool 
 
 ## Gestaffelte Roadmap
 
-| Version | Kernziel | Inhalt |
-|---|---|---|
-| V0.2.1 | Optionaler Multiplayer-Nachlauf | SQLite-/Storage-Entscheidung, UI-Smokes, private Betriebsnotizen, Log-/Token-Härtung falls nötig. |
-| V0.3 | KI und Simulation | Runner-KI, Corp-KI v2, KI-vs-KI, Controller-Modell, Erklärmodus, Simulationstests, AI-Visibility-Gates. |
-| V0.4 | Kartenpool und Regelbreite | Weitere einfache Karten und Mechaniken, größere Demo-Decks, weiterhin streng kontrolliert und testgetrieben. |
-| V0.5 | Kartenimport und Kartenkatalog | Import-Schema, lokaler Kartensnapshot, Kartenbrowser, Basis-/Starterset als Datenbestand, Importvalidierung, Manifest-Abgleich. |
-| V0.6 | Deckeditor- und Match-Setup-Fundament | Deck speichern/laden, Import/Export, Deckvalidierung, Deckauswahl beim Matchstart, spielbar/nicht-spielbar Kennzeichnung. |
-| V0.7 | UI-Neugestaltung und Designgestaltung | Neues Spielbrett, Matchfluss, Run-Flow, Action-Panel, Karten-/Deckansichten, Replay-/Log-Darstellung, KI-Erklärungen und visuelle Richtung. |
-| V0.8 | Basisset-/Starterset-Spielbarkeit | Ausgewählter spielbarer Slice aus importiertem Datenbestand; Damage, Resources, Traces und Identitäten nur als Teilgates. |
-| V0.9 | Bessere KI | Deck- und rollenbewusste Heuristiken, Schwierigkeitsgrade, Risikoabschätzung, Simulationen und bessere Reason-Codes. |
-| V1.0 | Private stabile Plattform | Human-vs-KI, Human-vs-Human, KI-vs-KI, Deckeditor, Kartenkatalog, Replays, kuratierter Kartenpool und private Hostingfähigkeit. |
+| Version | Kernziel                              | Inhalt                                                                                                                                      |
+| ------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| V0.2.1  | Optionaler Multiplayer-Nachlauf       | SQLite-/Storage-Entscheidung, UI-Smokes, private Betriebsnotizen, Log-/Token-Härtung falls nötig.                                           |
+| V0.3    | KI und Simulation                     | Runner-KI, Corp-KI v2, KI-vs-KI, Controller-Modell, Erklärmodus, Simulationstests, AI-Visibility-Gates.                                     |
+| V0.4    | Kartenpool und Regelbreite            | Weitere einfache Karten und Mechaniken, größere Demo-Decks, weiterhin streng kontrolliert und testgetrieben.                                |
+| V0.5    | Kartenimport und Kartenkatalog        | Import-Schema, lokaler Kartensnapshot, Kartenbrowser, Basis-/Starterset als Datenbestand, Importvalidierung, Manifest-Abgleich.             |
+| V0.6    | Deckeditor- und Match-Setup-Fundament | Deck speichern/laden, Import/Export, Deckvalidierung, Deckauswahl beim Matchstart, spielbar/nicht-spielbar Kennzeichnung.                   |
+| V0.7    | UI-Neugestaltung und Designgestaltung | Neues Spielbrett, Matchfluss, Run-Flow, Action-Panel, Karten-/Deckansichten, Replay-/Log-Darstellung, KI-Erklärungen und visuelle Richtung. |
+| V0.8    | Basisset-/Starterset-Spielbarkeit     | Ausgewählter spielbarer Slice aus importiertem Datenbestand; Damage, Resources, Traces und Identitäten nur als Teilgates.                   |
+| V0.9    | Bessere KI                            | Deck- und rollenbewusste Heuristiken, Schwierigkeitsgrade, Risikoabschätzung, Simulationen und bessere Reason-Codes.                        |
+| V1.0    | Private stabile Plattform             | Human-vs-KI, Human-vs-Human, KI-vs-KI, Deckeditor, Kartenkatalog, Replays, kuratierter Kartenpool und private Hostingfähigkeit.             |
 
 ## V0.3-Kern
 

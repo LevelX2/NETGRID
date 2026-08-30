@@ -81,16 +81,16 @@ MVP 0.2 ist erfolgreich, wenn eine vollständige private Partie zwischen zwei me
 
 MVP 0.1 liefert die notwendige Grundlage:
 
-| Bereich | Erwarteter Stand aus 0.1 | Bedeutung für 0.2 |
-|---|---|---|
-| Engine | `createGame`, `getLegalActions`, `applyAction`, `getPlayerView`, `validateGameState`, `hashState`, `replayEvents` | 0.2 nutzt dieselbe Engine, statt Multiplayer-Regeln in UI oder Server zu duplizieren. |
-| EventLog | Versionierte Events mit StateVersion und StateHash | Grundlage für Sync, Reconnect, Undo und Debugging. |
-| PlayerViews | Getrennte Sicht pro Seite | Sicherheitskritisch für Human-vs-Human. |
-| LegalActions | Engine liefert legale Aktionen pro Seite | UI und WebSocket-Clients wählen nur aus angebotenen Actions. |
-| Demo-Decks | Runner Demo Deck 01 und Corp Demo Deck 01 | Multiplayer startet kontrolliert mit bekanntem Kartenpool. |
-| Visibility-Tests | Keine verdeckten Daten in PlayerViews, PublicEvents, KI-Input oder Fehlern | Muss in 0.2 auf WebSocket, Reconnect und Undo erweitert werden. |
-| Replay/StateHash | Reproduzierbare Beispielpartien | Wichtig für Multiplayer-Regressionen und Debugging. |
-| Backend-Vorbereitung | Match-Struktur, Controller, Storage-Adapter optional | Wird in 0.2 konkretisiert und produktiv genutzt. |
+| Bereich              | Erwarteter Stand aus 0.1                                                                                          | Bedeutung für 0.2                                                                     |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Engine               | `createGame`, `getLegalActions`, `applyAction`, `getPlayerView`, `validateGameState`, `hashState`, `replayEvents` | 0.2 nutzt dieselbe Engine, statt Multiplayer-Regeln in UI oder Server zu duplizieren. |
+| EventLog             | Versionierte Events mit StateVersion und StateHash                                                                | Grundlage für Sync, Reconnect, Undo und Debugging.                                    |
+| PlayerViews          | Getrennte Sicht pro Seite                                                                                         | Sicherheitskritisch für Human-vs-Human.                                               |
+| LegalActions         | Engine liefert legale Aktionen pro Seite                                                                          | UI und WebSocket-Clients wählen nur aus angebotenen Actions.                          |
+| Demo-Decks           | Runner Demo Deck 01 und Corp Demo Deck 01                                                                         | Multiplayer startet kontrolliert mit bekanntem Kartenpool.                            |
+| Visibility-Tests     | Keine verdeckten Daten in PlayerViews, PublicEvents, KI-Input oder Fehlern                                        | Muss in 0.2 auf WebSocket, Reconnect und Undo erweitert werden.                       |
+| Replay/StateHash     | Reproduzierbare Beispielpartien                                                                                   | Wichtig für Multiplayer-Regressionen und Debugging.                                   |
+| Backend-Vorbereitung | Match-Struktur, Controller, Storage-Adapter optional                                                              | Wird in 0.2 konkretisiert und produktiv genutzt.                                      |
 
 MVP 0.2 darf erst beginnen, wenn die Engine-API stabil genug ist, um PlayerActions serverseitig transaktional zu verarbeiten. Falls einzelne 0.1-UI-Details noch unfertig sind, kann 0.2 trotzdem vorbereitet werden, solange Engine, PlayerViews, LegalActions und EventLog belastbar sind.
 
@@ -128,30 +128,30 @@ Optional vorbereitbar, aber nicht abnahmekritisch:
 
 ## 5. Leitprinzipien
 
-| Prinzip | Konsequenz für 0.2 |
-|---|---|
-| Engine bleibt Regelautorität | Der Server reicht PlayerActions an die Engine weiter; UI und WebSocket-Code interpretieren keine Regeln. |
-| Serverautoritativer Multiplayer | Kein Client besitzt den vollständigen GameState. Clients senden Absichten, nicht Zustände. |
-| Keine Hidden-Info-Leaks | WebSocket-Payloads, Reconnect-Payloads, Undo-Zustände, Fehler und Logs werden gefiltert. |
-| Transaktionale Actions | Pro Match wird immer nur eine Engine-Transition gleichzeitig verarbeitet. |
-| Idempotenz | Doppelte WebSocket-Sendungen dürfen keine doppelte Transition erzeugen. |
-| Versionierung | Match-Version, StateVersion, Event-Schema und PlayerView-Schema sind explizit. |
-| Reconnect statt Matchverlust | Kurzfristige Verbindungsabbrüche pausieren oder markieren das Match, zerstören aber nicht den State. |
-| Undo nur kontrolliert | Undo darf keinen unfairen Vorteil durch bereits gesehene verdeckte Information erzeugen. |
-| Tests vor Komfort | Multiplayer-Tests und Visibility-Tests sind Gates, nicht spätere Ergänzungen. |
-| Kleiner Kartenpool | 0.2 stabilisiert Human-vs-Human, nicht Karteneffekt-Komplexität. |
+| Prinzip                         | Konsequenz für 0.2                                                                                       |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Engine bleibt Regelautorität    | Der Server reicht PlayerActions an die Engine weiter; UI und WebSocket-Code interpretieren keine Regeln. |
+| Serverautoritativer Multiplayer | Kein Client besitzt den vollständigen GameState. Clients senden Absichten, nicht Zustände.               |
+| Keine Hidden-Info-Leaks         | WebSocket-Payloads, Reconnect-Payloads, Undo-Zustände, Fehler und Logs werden gefiltert.                 |
+| Transaktionale Actions          | Pro Match wird immer nur eine Engine-Transition gleichzeitig verarbeitet.                                |
+| Idempotenz                      | Doppelte WebSocket-Sendungen dürfen keine doppelte Transition erzeugen.                                  |
+| Versionierung                   | Match-Version, StateVersion, Event-Schema und PlayerView-Schema sind explizit.                           |
+| Reconnect statt Matchverlust    | Kurzfristige Verbindungsabbrüche pausieren oder markieren das Match, zerstören aber nicht den State.     |
+| Undo nur kontrolliert           | Undo darf keinen unfairen Vorteil durch bereits gesehene verdeckte Information erzeugen.                 |
+| Tests vor Komfort               | Multiplayer-Tests und Visibility-Tests sind Gates, nicht spätere Ergänzungen.                            |
+| Kleiner Kartenpool              | 0.2 stabilisiert Human-vs-Human, nicht Karteneffekt-Komplexität.                                         |
 
 ---
 
 ## 6. Zielnutzer und Nutzungsszenarien
 
-| Nutzerrolle | Bedarf | Relevanz für MVP 0.2 |
-|---|---|---|
-| Privater Host | Erstellt ein Match und verschickt den Link. | Primär. |
-| Eingeladener Spieler | Tritt per Link bei und übernimmt die freie Seite. | Primär. |
-| Entwickler | Reproduziert Multiplayer-Bugs, prüft Visibility und Reconnect. | Primär für Qualitätssicherung. |
-| Lokaler Tester | Startet zwei Browserfenster und simuliert beide Spieler. | Wichtig für Entwicklung. |
-| KI-Spieler | Nicht Ziel von 0.2, kann aber als späterer Controller weiter kompatibel bleiben. | Sekundär. |
+| Nutzerrolle          | Bedarf                                                                           | Relevanz für MVP 0.2           |
+| -------------------- | -------------------------------------------------------------------------------- | ------------------------------ |
+| Privater Host        | Erstellt ein Match und verschickt den Link.                                      | Primär.                        |
+| Eingeladener Spieler | Tritt per Link bei und übernimmt die freie Seite.                                | Primär.                        |
+| Entwickler           | Reproduziert Multiplayer-Bugs, prüft Visibility und Reconnect.                   | Primär für Qualitätssicherung. |
+| Lokaler Tester       | Startet zwei Browserfenster und simuliert beide Spieler.                         | Wichtig für Entwicklung.       |
+| KI-Spieler           | Nicht Ziel von 0.2, kann aber als späterer Controller weiter kompatibel bleiben. | Sekundär.                      |
 
 ### 6.1 Kern-User-Journey: Match erstellen und spielen
 
@@ -199,18 +199,18 @@ Optional vorbereitbar, aber nicht abnahmekritisch:
 
 MVP 0.2 sollte erst in die eigentliche Implementierung gehen, wenn folgende Punkte aus 0.1 vorhanden sind:
 
-| Voraussetzung | Mindestzustand |
-|---|---|
-| Engine-API | `applyAction` ist rein, deterministisch und validiert Actions erneut. |
-| PlayerViews | `getPlayerView(gameState, side)` ist getestet und leakt keine verdeckten Daten. |
-| LegalActions | LegalActions enthalten `side`, `actionId`, `timingPoint`, `costs`, `targetRequirements`, `expiresAtStateVersion`. |
-| PlayerActions | PlayerActions enthalten `matchId`, `side`, `actionId`, `selectedTargets`, `selectedChoices`, `clientKnownStateVersion`, `idempotencyKey`. |
-| EventLog | Jede Transition erzeugt Event mit StateVersion vorher/nachher und StateHash. |
-| StateHash | Hash ist reproduzierbar über kanonische Serialisierung. |
-| Demo-Decks | Beide Demo-Decks sind spielbar oder für Multiplayer-Spielbarkeit ausreichend stabil. |
-| Visibility-Tests | Basistests gegen Hidden-Info-Leaks bestehen. |
-| Storage-Adapter | Mindestens JSON- oder SQLite-Speicherung für Match, State, EventLog und Snapshots. |
-| UI-Basis | Game Board kann LegalActions und ChoiceRequests anzeigen. |
+| Voraussetzung    | Mindestzustand                                                                                                                            |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Engine-API       | `applyAction` ist rein, deterministisch und validiert Actions erneut.                                                                     |
+| PlayerViews      | `getPlayerView(gameState, side)` ist getestet und leakt keine verdeckten Daten.                                                           |
+| LegalActions     | LegalActions enthalten `side`, `actionId`, `timingPoint`, `costs`, `targetRequirements`, `expiresAtStateVersion`.                         |
+| PlayerActions    | PlayerActions enthalten `matchId`, `side`, `actionId`, `selectedTargets`, `selectedChoices`, `clientKnownStateVersion`, `idempotencyKey`. |
+| EventLog         | Jede Transition erzeugt Event mit StateVersion vorher/nachher und StateHash.                                                              |
+| StateHash        | Hash ist reproduzierbar über kanonische Serialisierung.                                                                                   |
+| Demo-Decks       | Beide Demo-Decks sind spielbar oder für Multiplayer-Spielbarkeit ausreichend stabil.                                                      |
+| Visibility-Tests | Basistests gegen Hidden-Info-Leaks bestehen.                                                                                              |
+| Storage-Adapter  | Mindestens JSON- oder SQLite-Speicherung für Match, State, EventLog und Snapshots.                                                        |
+| UI-Basis         | Game Board kann LegalActions und ChoiceRequests anzeigen.                                                                                 |
 
 Falls ein Punkt fehlt, wird er als 0.2-Vorarbeit eingeplant und nicht als optionaler Rest betrachtet.
 
@@ -222,15 +222,15 @@ MVP 0.2 verwendet eine eigene Baseline, die Replays, Multiplayer-Logs und späte
 
 ```ts
 type RulesBaseline = {
-  rulesVersion: string
-  cardTextSource: "netgriddb" | "local_snapshot" | "manual"
-  cardTextSnapshotId: string
-  engineSchemaVersion: string
-  cardImplementationVersion: string
-  deviationRegistryVersion: string
-  multiplayerProtocolVersion: string
-  playerViewSchemaVersion: string
-}
+  rulesVersion: string;
+  cardTextSource: "netgriddb" | "local_snapshot" | "manual";
+  cardTextSnapshotId: string;
+  engineSchemaVersion: string;
+  cardImplementationVersion: string;
+  deviationRegistryVersion: string;
+  multiplayerProtocolVersion: string;
+  playerViewSchemaVersion: string;
+};
 ```
 
 Empfohlene Baseline:
@@ -256,43 +256,43 @@ Wichtige Entscheidung: `cardImplementationVersion` darf zunächst bei `0.1.0` bl
 
 ### 9.1 Enthalten in MVP 0.2
 
-| Bereich | Umfang |
-|---|---|
-| Match-Erstellung | Neues privates Match mit fester RulesBaseline und Demo-Decks. |
-| Seitenwahl | Host wählt Corp, Runner oder Random; Joiner übernimmt freie Seite. |
-| Einladungslink | Geheimer Token-Link zum Beitritt. |
-| Join | Zweiter Spieler kann freie Seite übernehmen. |
-| Reconnect | Berechtigter Spieler kann dieselbe Seite wieder aufnehmen. |
-| WebSocket | Bidirektionale Updates für PlayerView, LegalActions, Events, Choices, Fehler und Status. |
-| Serverautorität | Server verarbeitet Actions seriell und nur über Engine. |
-| Synchronisation | Beide Spieler erhalten nach jeder Transition konsistente, gefilterte Views. |
-| Visibility | Automatische Leak-Tests für WebSocket, Reconnect, Undo und EventLog. |
-| Pass/Priority | Notwendige Pass-Actions und Priority-Fortschritt für bestehende Timingpunkte. |
-| Undo | Undo-Anfrage, Zustimmung, Ablehnung, Block nach Informationsgewinn. |
-| Persistenz | Speicherung aktiver Matches, EventLogs und Snapshots. |
-| Debug | Entwickleransicht für Match-Version, StateVersion, StateHash, Connections und letzte Events. |
-| Deployment | Privater Betrieb lokal, im LAN oder auf privatem Server mit HTTPS/WSS außerhalb localhost. |
+| Bereich          | Umfang                                                                                       |
+| ---------------- | -------------------------------------------------------------------------------------------- |
+| Match-Erstellung | Neues privates Match mit fester RulesBaseline und Demo-Decks.                                |
+| Seitenwahl       | Host wählt Corp, Runner oder Random; Joiner übernimmt freie Seite.                           |
+| Einladungslink   | Geheimer Token-Link zum Beitritt.                                                            |
+| Join             | Zweiter Spieler kann freie Seite übernehmen.                                                 |
+| Reconnect        | Berechtigter Spieler kann dieselbe Seite wieder aufnehmen.                                   |
+| WebSocket        | Bidirektionale Updates für PlayerView, LegalActions, Events, Choices, Fehler und Status.     |
+| Serverautorität  | Server verarbeitet Actions seriell und nur über Engine.                                      |
+| Synchronisation  | Beide Spieler erhalten nach jeder Transition konsistente, gefilterte Views.                  |
+| Visibility       | Automatische Leak-Tests für WebSocket, Reconnect, Undo und EventLog.                         |
+| Pass/Priority    | Notwendige Pass-Actions und Priority-Fortschritt für bestehende Timingpunkte.                |
+| Undo             | Undo-Anfrage, Zustimmung, Ablehnung, Block nach Informationsgewinn.                          |
+| Persistenz       | Speicherung aktiver Matches, EventLogs und Snapshots.                                        |
+| Debug            | Entwickleransicht für Match-Version, StateVersion, StateHash, Connections und letzte Events. |
+| Deployment       | Privater Betrieb lokal, im LAN oder auf privatem Server mit HTTPS/WSS außerhalb localhost.   |
 
 ### 9.2 Weiterhin aus 0.1 übernommen
 
-| Bereich | Verhalten in 0.2 |
-|---|---|
-| Demo-Decks | Weiterhin Runner Demo Deck 01 und Corp Demo Deck 01. |
-| Kartenpool | Nur `playable_mvp` Karten aus dem Manifest. |
+| Bereich     | Verhalten in 0.2                                                         |
+| ----------- | ------------------------------------------------------------------------ |
+| Demo-Decks  | Weiterhin Runner Demo Deck 01 und Corp Demo Deck 01.                     |
+| Kartenpool  | Nur `playable_mvp` Karten aus dem Manifest.                              |
 | Regelumfang | Kein Ausbau komplexer Regeln, außer sie sind für Multiplayer-Sync nötig. |
-| Replay | Weiterhin Qualitätsinstrument; optional UI-Export. |
-| KI | Kann für Testzwecke existieren, ist aber nicht Kern von 0.2. |
+| Replay      | Weiterhin Qualitätsinstrument; optional UI-Export.                       |
+| KI          | Kann für Testzwecke existieren, ist aber nicht Kern von 0.2.             |
 
 ### 9.3 Bewusst nicht enthalten
 
-| Bereich | Grund |
-|---|---|
-| Freier Deckbau | Würde Kartenpool, Validierung und UI stark erweitern. |
-| Öffentliches Matchmaking | Nicht nötig für private Einladungslinks. |
-| Accountsystem | Token-Links reichen für frühe private Spiele. |
-| Vollständiger Chat | Kann später ergänzt werden. |
-| Zuschaueransicht | Erhöht Visibility-Komplexität; nach stabiler Human-vs-Human-Basis. |
-| Zeitkontrolle | Nicht nötig für private Lern- und Testpartien. |
+| Bereich                  | Grund                                                              |
+| ------------------------ | ------------------------------------------------------------------ |
+| Freier Deckbau           | Würde Kartenpool, Validierung und UI stark erweitern.              |
+| Öffentliches Matchmaking | Nicht nötig für private Einladungslinks.                           |
+| Accountsystem            | Token-Links reichen für frühe private Spiele.                      |
+| Vollständiger Chat       | Kann später ergänzt werden.                                        |
+| Zuschaueransicht         | Erhöht Visibility-Komplexität; nach stabiler Human-vs-Human-Basis. |
+| Zeitkontrolle            | Nicht nötig für private Lern- und Testpartien.                     |
 
 ---
 
@@ -308,61 +308,61 @@ type MatchStatus =
   | "active"
   | "paused_disconnect"
   | "finished"
-  | "abandoned"
+  | "abandoned";
 ```
 
 ### 10.2 Statusübergänge
 
-| Von | Nach | Auslöser |
-|---|---|---|
-| `creating` | `waiting_for_second_player` | Match wurde mit Host-Seite und InviteToken erstellt. |
-| `waiting_for_second_player` | `ready` | Joiner übernimmt freie Seite. |
-| `ready` | `active` | Beide Seiten verbunden, Setup validiert, Spiel gestartet. |
-| `active` | `paused_disconnect` | Aktiver oder nichtaktiver Spieler verliert Verbindung, je nach Einstellung. |
-| `paused_disconnect` | `active` | Berechtigter Spieler reconnectet. |
-| `active` | `finished` | Engine setzt Winner. |
-| `waiting_for_second_player` | `abandoned` | Host bricht ab oder Match läuft ab. |
-| `paused_disconnect` | `abandoned` | Optional manuelles Abbrechen im privaten Betrieb. |
+| Von                         | Nach                        | Auslöser                                                                    |
+| --------------------------- | --------------------------- | --------------------------------------------------------------------------- |
+| `creating`                  | `waiting_for_second_player` | Match wurde mit Host-Seite und InviteToken erstellt.                        |
+| `waiting_for_second_player` | `ready`                     | Joiner übernimmt freie Seite.                                               |
+| `ready`                     | `active`                    | Beide Seiten verbunden, Setup validiert, Spiel gestartet.                   |
+| `active`                    | `paused_disconnect`         | Aktiver oder nichtaktiver Spieler verliert Verbindung, je nach Einstellung. |
+| `paused_disconnect`         | `active`                    | Berechtigter Spieler reconnectet.                                           |
+| `active`                    | `finished`                  | Engine setzt Winner.                                                        |
+| `waiting_for_second_player` | `abandoned`                 | Host bricht ab oder Match läuft ab.                                         |
+| `paused_disconnect`         | `abandoned`                 | Optional manuelles Abbrechen im privaten Betrieb.                           |
 
 ### 10.3 Match-Modell
 
 ```ts
 type Match = {
-  id: string
-  status: MatchStatus
-  matchVersion: number
-  baseline: RulesBaseline
-  createdAt: string
-  updatedAt: string
-  expiresAt?: string
-  settings: MatchSettings
-  corpController: PlayerController
-  runnerController: PlayerController
-  sessions: PlayerSession[]
-  inviteTokens: InviteToken[]
-  gameState: GameState
-  eventLog: GameEvent[]
-  publicEventLog: PublicGameEvent[]
-  snapshots: StateSnapshot[]
-  actionReceipts: ActionReceipt[]
-  pendingUndoRequest?: UndoRequest
-}
+  id: string;
+  status: MatchStatus;
+  matchVersion: number;
+  baseline: RulesBaseline;
+  createdAt: string;
+  updatedAt: string;
+  expiresAt?: string;
+  settings: MatchSettings;
+  corpController: PlayerController;
+  runnerController: PlayerController;
+  sessions: PlayerSession[];
+  inviteTokens: InviteToken[];
+  gameState: GameState;
+  eventLog: GameEvent[];
+  publicEventLog: PublicGameEvent[];
+  snapshots: StateSnapshot[];
+  actionReceipts: ActionReceipt[];
+  pendingUndoRequest?: UndoRequest;
+};
 ```
 
 ### 10.4 MatchSettings
 
 ```ts
 type MatchSettings = {
-  mode: "human_vs_human_private"
-  deckMode: "fixed_demo_decks"
-  allowSpectators: false
-  allowUndo: true
-  pauseOnDisconnect: true
-  autoStartWhenBothConnected: true
-  maxEventLogTailForClient: number
-  actionTimeoutMs?: number
-  inviteTokenExpiresAt?: string
-}
+  mode: "human_vs_human_private";
+  deckMode: "fixed_demo_decks";
+  allowSpectators: false;
+  allowUndo: true;
+  pauseOnDisconnect: true;
+  autoStartWhenBothConnected: true;
+  maxEventLogTailForClient: number;
+  actionTimeoutMs?: number;
+  inviteTokenExpiresAt?: string;
+};
 ```
 
 Empfohlene Defaults:
@@ -387,15 +387,15 @@ Empfohlene Defaults:
 
 ```ts
 type PlayerController = {
-  controllerId: string
-  side: "corp" | "runner"
-  type: "human_remote" | "human_local" | "ai" | "replay"
-  userId?: string
-  displayName?: string
-  connected: boolean
-  sessionId?: string
-  lastSeenAt?: string
-}
+  controllerId: string;
+  side: "corp" | "runner";
+  type: "human_remote" | "human_local" | "ai" | "replay";
+  userId?: string;
+  displayName?: string;
+  connected: boolean;
+  sessionId?: string;
+  lastSeenAt?: string;
+};
 ```
 
 Für MVP 0.2 sind `human_remote` und optional `human_local` relevant. `ai` und `replay` bleiben kompatibel, sind aber nicht Ziel.
@@ -404,17 +404,17 @@ Für MVP 0.2 sind `human_remote` und optional `human_local` relevant. `ai` und `
 
 ```ts
 type PlayerSession = {
-  sessionId: string
-  matchId: string
-  side: "corp" | "runner"
-  tokenId: string
-  connectionId?: string
-  connected: boolean
-  createdAt: string
-  lastSeenAt: string
-  userAgentHash?: string
-  ipHash?: string
-}
+  sessionId: string;
+  matchId: string;
+  side: "corp" | "runner";
+  tokenId: string;
+  connectionId?: string;
+  connected: boolean;
+  createdAt: string;
+  lastSeenAt: string;
+  userAgentHash?: string;
+  ipHash?: string;
+};
 ```
 
 Die Session ist die kurzfristige Verbindung eines Spielers zu einem Match. Sie darf nicht als Regelquelle verwendet werden. Die Engine kennt keine Sessions.
@@ -423,17 +423,17 @@ Die Session ist die kurzfristige Verbindung eines Spielers zu einem Match. Sie d
 
 ```ts
 type InviteToken = {
-  tokenId: string
-  tokenHash: string
-  matchId: string
-  allowedSide: "corp" | "runner" | "join_free_side" | "reconnect_existing_side"
-  issuedToSide?: "corp" | "runner"
-  createdAt: string
-  expiresAt?: string
-  revokedAt?: string
-  usedAt?: string
-  useCount: number
-}
+  tokenId: string;
+  tokenHash: string;
+  matchId: string;
+  allowedSide: "corp" | "runner" | "join_free_side" | "reconnect_existing_side";
+  issuedToSide?: "corp" | "runner";
+  createdAt: string;
+  expiresAt?: string;
+  revokedAt?: string;
+  usedAt?: string;
+  useCount: number;
+};
 ```
 
 Empfehlung:
@@ -447,10 +447,10 @@ Empfehlung:
 
 ### 11.4 Seitenwahl
 
-| Auswahl des Hosts | Ergebnis |
-|---|---|
-| Host wählt Runner | Host erhält Runner-Session, Joiner erhält Corp. |
-| Host wählt Corp | Host erhält Corp-Session, Joiner erhält Runner. |
+| Auswahl des Hosts | Ergebnis                                                                   |
+| ----------------- | -------------------------------------------------------------------------- |
+| Host wählt Runner | Host erhält Runner-Session, Joiner erhält Corp.                            |
+| Host wählt Corp   | Host erhält Corp-Session, Joiner erhält Runner.                            |
 | Host wählt Random | Server entscheidet per Seed, schreibt Ergebnis ins EventLog oder MatchLog. |
 
 Die Seitenwahl ist keine Engine-Action, sondern Match-Setup. Sie wird vor `createGame` oder im Match-Setup verarbeitet.
@@ -463,14 +463,14 @@ REST wird für Match-Erstellung, Join, initiale Ladezustände und optionalen Rep
 
 ### 12.1 Endpunkte
 
-| Methode | Pfad | Zweck |
-|---|---|---|
-| `POST` | `/api/matches` | Privates Match erstellen. |
-| `GET` | `/api/matches/:matchId/join-info` | Öffentliche, minimale Join-Info laden. |
-| `POST` | `/api/matches/:matchId/join` | Token validieren und freie Seite übernehmen. |
-| `POST` | `/api/matches/:matchId/reconnect` | Seitensession wiederherstellen. |
-| `GET` | `/api/matches/:matchId/bootstrap` | Initiale PlayerView nach Token-Validierung laden. |
-| `GET` | `/api/matches/:matchId/replay` | Optional: gefiltertes Replay oder Debug-Replay lokal laden. |
+| Methode | Pfad                              | Zweck                                                       |
+| ------- | --------------------------------- | ----------------------------------------------------------- |
+| `POST`  | `/api/matches`                    | Privates Match erstellen.                                   |
+| `GET`   | `/api/matches/:matchId/join-info` | Öffentliche, minimale Join-Info laden.                      |
+| `POST`  | `/api/matches/:matchId/join`      | Token validieren und freie Seite übernehmen.                |
+| `POST`  | `/api/matches/:matchId/reconnect` | Seitensession wiederherstellen.                             |
+| `GET`   | `/api/matches/:matchId/bootstrap` | Initiale PlayerView nach Token-Validierung laden.           |
+| `GET`   | `/api/matches/:matchId/replay`    | Optional: gefiltertes Replay oder Debug-Replay lokal laden. |
 
 ### 12.2 Match erstellen
 
@@ -580,48 +580,48 @@ type ClientMessage =
   | PassPriorityMessage
   | RequestUndoMessage
   | RespondUndoMessage
-  | PingMessage
+  | PingMessage;
 ```
 
 ```ts
 type JoinMatchMessage = {
-  type: "join_match"
-  matchId: string
-  sessionToken: string
-  clientProtocolVersion: string
-}
+  type: "join_match";
+  matchId: string;
+  sessionToken: string;
+  clientProtocolVersion: string;
+};
 
 type SubmitActionMessage = {
-  type: "submit_action"
-  matchId: string
-  action: PlayerAction
-}
+  type: "submit_action";
+  matchId: string;
+  action: PlayerAction;
+};
 
 type PassPriorityMessage = {
-  type: "pass_priority"
-  matchId: string
-  clientKnownStateVersion: number
-  idempotencyKey: string
-}
+  type: "pass_priority";
+  matchId: string;
+  clientKnownStateVersion: number;
+  idempotencyKey: string;
+};
 
 type RequestUndoMessage = {
-  type: "request_undo"
-  matchId: string
-  toEventId: string
-  reason?: string
-}
+  type: "request_undo";
+  matchId: string;
+  toEventId: string;
+  reason?: string;
+};
 
 type RespondUndoMessage = {
-  type: "respond_undo"
-  matchId: string
-  undoRequestId: string
-  response: "accept" | "decline"
-}
+  type: "respond_undo";
+  matchId: string;
+  undoRequestId: string;
+  response: "accept" | "decline";
+};
 
 type PingMessage = {
-  type: "ping"
-  clientTime: string
-}
+  type: "ping";
+  clientTime: string;
+};
 ```
 
 ### 13.3 ServerMessage
@@ -638,72 +638,72 @@ type ServerMessage =
   | UndoRequestMessage
   | UndoResolvedMessage
   | ErrorMessage
-  | PongMessage
+  | PongMessage;
 ```
 
 ```ts
 type MatchJoinedMessage = {
-  type: "match_joined"
-  matchId: string
-  side: "corp" | "runner"
-  matchVersion: number
-  stateVersion: number
-  protocolVersion: string
-}
+  type: "match_joined";
+  matchId: string;
+  side: "corp" | "runner";
+  matchVersion: number;
+  stateVersion: number;
+  protocolVersion: string;
+};
 
 type StateUpdateMessage = {
-  type: "state_update"
-  matchId: string
-  matchVersion: number
-  stateVersion: number
-  view: PlayerView
-}
+  type: "state_update";
+  matchId: string;
+  matchVersion: number;
+  stateVersion: number;
+  view: PlayerView;
+};
 
 type LegalActionsMessage = {
-  type: "legal_actions"
-  matchId: string
-  stateVersion: number
-  actions: LegalAction[]
-}
+  type: "legal_actions";
+  matchId: string;
+  stateVersion: number;
+  actions: LegalAction[];
+};
 
 type EventLogUpdateMessage = {
-  type: "event_log_update"
-  matchId: string
-  events: PublicOrSideFilteredGameEvent[]
-}
+  type: "event_log_update";
+  matchId: string;
+  events: PublicOrSideFilteredGameEvent[];
+};
 
 type ChoiceRequestMessage = {
-  type: "choice_request"
-  matchId: string
-  stateVersion: number
-  choice: ChoiceRequest | null
-}
+  type: "choice_request";
+  matchId: string;
+  stateVersion: number;
+  choice: ChoiceRequest | null;
+};
 
 type ActionReceiptMessage = {
-  type: "action_receipt"
-  matchId: string
-  idempotencyKey: string
-  accepted: boolean
-  stateVersionBefore?: number
-  stateVersionAfter?: number
-  resultingEventIds?: string[]
-}
+  type: "action_receipt";
+  matchId: string;
+  idempotencyKey: string;
+  accepted: boolean;
+  stateVersionBefore?: number;
+  stateVersionAfter?: number;
+  resultingEventIds?: string[];
+};
 
 type OpponentStatusMessage = {
-  type: "opponent_status"
-  matchId: string
-  corp: "connected" | "disconnected"
-  runner: "connected" | "disconnected"
-}
+  type: "opponent_status";
+  matchId: string;
+  corp: "connected" | "disconnected";
+  runner: "connected" | "disconnected";
+};
 
 type ErrorMessage = {
-  type: "error"
-  matchId?: string
-  code: MultiplayerErrorCode
-  message: string
-  stateVersion?: number
-  matchVersion?: number
-}
+  type: "error";
+  matchId?: string;
+  code: MultiplayerErrorCode;
+  message: string;
+  stateVersion?: number;
+  matchVersion?: number;
+};
 ```
 
 ### 13.4 Fehlercodes
@@ -723,7 +723,7 @@ type MultiplayerErrorCode =
   | "UNDO_NOT_AVAILABLE"
   | "UNDO_REQUIRES_OPPONENT"
   | "UNDO_BLOCKED_BY_HIDDEN_INFORMATION"
-  | "INTERNAL_VALIDATION_FAILED"
+  | "INTERNAL_VALIDATION_FAILED";
 ```
 
 Fehlermeldungen dürfen keine privaten Kartentitel, CardIds oder verdeckten Targets enthalten. Beispiel: Nicht „Du kannst unrezzed Simple Barrier ICE nicht rezzen, weil ...“ an den Runner senden, sondern „Die gewählte Aktion ist für diese Seite nicht legal.“
@@ -770,11 +770,11 @@ Der Client sendet keine Zustandsänderung, sondern eine Absicht. Der Server ents
 
 ```ts
 type MatchLock = {
-  matchId: string
-  acquiredAt: string
-  owner: string
-  expiresAt: string
-}
+  matchId: string;
+  acquiredAt: string;
+  owner: string;
+  expiresAt: string;
+};
 ```
 
 Für MVP 0.2 reicht ein In-Memory-Lock, wenn nur ein Serverprozess betrieben wird. Sobald mehrere Prozesse oder mehrere Serverinstanzen möglich sind, muss der Lock in der Datenbank oder in einem dedizierten Lock-System liegen.
@@ -789,17 +789,17 @@ Empfehlung für 0.2:
 
 ```ts
 type ActionReceipt = {
-  idempotencyKey: string
-  matchId: string
-  side: "corp" | "runner"
-  actionType: string
-  receivedAt: string
-  stateVersionBefore: number
-  stateVersionAfter?: number
-  accepted: boolean
-  errorCode?: MultiplayerErrorCode
-  resultingEventIds: string[]
-}
+  idempotencyKey: string;
+  matchId: string;
+  side: "corp" | "runner";
+  actionType: string;
+  receivedAt: string;
+  stateVersionBefore: number;
+  stateVersionAfter?: number;
+  accepted: boolean;
+  errorCode?: MultiplayerErrorCode;
+  resultingEventIds: string[];
+};
 ```
 
 Regel:
@@ -840,37 +840,37 @@ In 0.2 reicht es nicht, verdeckte Informationen in der UI auszublenden. Sie dür
 
 ### 15.2 Sichtbarkeitsbereiche
 
-| Information | Corp darf sehen | Runner darf sehen | PublicEvent darf enthalten |
-|---|---:|---:|---:|
-| Corp HQ Karten | Ja | Nein | Nein |
-| Corp R&D Karten | Ja | Nein | Nein |
-| Corp Archives faceup | Ja | Ja | Ja, falls öffentlich aufgedeckt |
-| Corp Archives facedown | Ja | Nein bis Breach-Aufdeckung | Nein |
-| Unrezzed ICE Titel | Ja | Nein | Nein |
-| Unrezzed Root-Karten im Remote | Ja | Nein | Nein |
-| Rezzed ICE Titel | Ja | Ja | Ja |
-| Rezzed Asset/Upgrade | Ja | Ja | Ja |
-| Runner Grip | Ja für Runner-Seite | Runner sieht eigene Hand; Corp nicht | Nein |
-| Runner Stack Reihenfolge | Runner nicht vollständig, Corp nein | Nein | Nein |
-| Runner Heap faceup | Ja | Ja | Ja |
-| Score Areas | Ja | Ja | Ja |
-| Credits/Clicks/Tags/Bad Publicity | Ja | Ja | Ja |
-| PendingChoice private Optionen | Nur berechtigte Seite | Nur berechtigte Seite | Nein |
+| Information                       |                     Corp darf sehen |                    Runner darf sehen |      PublicEvent darf enthalten |
+| --------------------------------- | ----------------------------------: | -----------------------------------: | ------------------------------: |
+| Corp HQ Karten                    |                                  Ja |                                 Nein |                            Nein |
+| Corp R&D Karten                   |                                  Ja |                                 Nein |                            Nein |
+| Corp Archives faceup              |                                  Ja |                                   Ja | Ja, falls öffentlich aufgedeckt |
+| Corp Archives facedown            |                                  Ja |           Nein bis Breach-Aufdeckung |                            Nein |
+| Unrezzed ICE Titel                |                                  Ja |                                 Nein |                            Nein |
+| Unrezzed Root-Karten im Remote    |                                  Ja |                                 Nein |                            Nein |
+| Rezzed ICE Titel                  |                                  Ja |                                   Ja |                              Ja |
+| Rezzed Asset/Upgrade              |                                  Ja |                                   Ja |                              Ja |
+| Runner Grip                       |                 Ja für Runner-Seite | Runner sieht eigene Hand; Corp nicht |                            Nein |
+| Runner Stack Reihenfolge          | Runner nicht vollständig, Corp nein |                                 Nein |                            Nein |
+| Runner Heap faceup                |                                  Ja |                                   Ja |                              Ja |
+| Score Areas                       |                                  Ja |                                   Ja |                              Ja |
+| Credits/Clicks/Tags/Bad Publicity |                                  Ja |                                   Ja |                              Ja |
+| PendingChoice private Optionen    |               Nur berechtigte Seite |                Nur berechtigte Seite |                            Nein |
 
 ### 15.3 PlayerView-Schema
 
 ```ts
 type PlayerViewEnvelope = {
-  schemaVersion: string
-  matchId: string
-  side: "corp" | "runner"
-  matchVersion: number
-  stateVersion: number
-  view: PlayerView
-  legalActions: LegalAction[]
-  pendingChoice: ChoiceRequest | null
-  publicEventTail: PublicOrSideFilteredGameEvent[]
-}
+  schemaVersion: string;
+  matchId: string;
+  side: "corp" | "runner";
+  matchVersion: number;
+  stateVersion: number;
+  view: PlayerView;
+  legalActions: LegalAction[];
+  pendingChoice: ChoiceRequest | null;
+  publicEventTail: PublicOrSideFilteredGameEvent[];
+};
 ```
 
 Wichtig: `LegalAction` selbst kann private Informationen enthalten, wenn sie z. B. eine Corp-Option zum Rezzen eines bestimmten unrezzed ICE beschreibt. Deshalb müssen LegalActions seitenbezogen berechnet und versendet werden.
@@ -894,7 +894,7 @@ Automatisierte Tests prüfen mindestens:
 Ein Full-State-Debug darf nur in einem lokalen Entwicklerkontext verfügbar sein. Er muss klar vom Spielerclient getrennt sein:
 
 ```ts
-type DebugAccessMode = "disabled" | "local_dev_only" | "server_console_only"
+type DebugAccessMode = "disabled" | "local_dev_only" | "server_console_only";
 ```
 
 Für private Internetspiele gilt: `disabled` oder `server_console_only`.
@@ -913,12 +913,12 @@ Ein Spieler gilt als disconnected, wenn:
 
 ```ts
 type ConnectionState = {
-  side: "corp" | "runner"
-  status: "connected" | "disconnected"
-  connectionId?: string
-  lastSeenAt: string
-  disconnectedAt?: string
-}
+  side: "corp" | "runner";
+  status: "connected" | "disconnected";
+  connectionId?: string;
+  lastSeenAt: string;
+  disconnectedAt?: string;
+};
 ```
 
 ### 16.2 Match-Verhalten bei Disconnect
@@ -975,40 +975,40 @@ Empfohlen:
 
 ```ts
 type PassPriorityAction = {
-  matchId: string
-  side: Side
-  actionId: string
-  type: "pass_priority"
-  clientKnownStateVersion: number
-  idempotencyKey: string
-}
+  matchId: string;
+  side: Side;
+  actionId: string;
+  type: "pass_priority";
+  clientKnownStateVersion: number;
+  idempotencyKey: string;
+};
 ```
 
 ### 17.3 ChoiceRequest
 
 ```ts
 type ChoiceRequest = {
-  choiceId: string
-  side: "corp" | "runner"
-  timingPoint: TimingPointId
-  prompt: string
-  options: ChoiceOption[]
-  required: boolean
-  expiresAtStateVersion: number
-}
+  choiceId: string;
+  side: "corp" | "runner";
+  timingPoint: TimingPointId;
+  prompt: string;
+  options: ChoiceOption[];
+  required: boolean;
+  expiresAtStateVersion: number;
+};
 ```
 
 ChoiceRequests müssen seitengebunden sein. Der gegnerische Client darf nur sehen, dass auf den Gegner gewartet wird, aber nicht welche verdeckten Optionen verfügbar sind.
 
 ### 17.4 UI-Wartezustände
 
-| Situation | Anzeige aktive Seite | Anzeige Gegenseite |
-|---|---|---|
-| Eigene Action erforderlich | LegalActions/Choice sichtbar | „Wartet auf Gegner“ |
-| Gegnerische Action erforderlich | „Wartet auf Gegner“ | LegalActions/Choice sichtbar |
-| Server verarbeitet Action | Kurzer Processing-Zustand | Kurzer Processing-Zustand |
-| Gegner disconnected | Disconnect-Hinweis | Reconnect-Hinweis oder eigener Status |
-| Match pausiert | Pausenhinweis | Pausenhinweis |
+| Situation                       | Anzeige aktive Seite         | Anzeige Gegenseite                    |
+| ------------------------------- | ---------------------------- | ------------------------------------- |
+| Eigene Action erforderlich      | LegalActions/Choice sichtbar | „Wartet auf Gegner“                   |
+| Gegnerische Action erforderlich | „Wartet auf Gegner“          | LegalActions/Choice sichtbar          |
+| Server verarbeitet Action       | Kurzer Processing-Zustand    | Kurzer Processing-Zustand             |
+| Gegner disconnected             | Disconnect-Hinweis           | Reconnect-Hinweis oder eigener Status |
+| Match pausiert                  | Pausenhinweis                | Pausenhinweis                         |
 
 ---
 
@@ -1026,16 +1026,16 @@ Regel:
 
 ```ts
 type UndoRequest = {
-  undoRequestId: string
-  matchId: string
-  requestedBy: "corp" | "runner"
-  targetEventId: string
-  targetStateVersion: number
-  createdAt: string
-  reason?: string
-  status: "pending" | "accepted" | "declined" | "blocked" | "expired"
-  blockReason?: UndoBlockReason
-}
+  undoRequestId: string;
+  matchId: string;
+  requestedBy: "corp" | "runner";
+  targetEventId: string;
+  targetStateVersion: number;
+  createdAt: string;
+  reason?: string;
+  status: "pending" | "accepted" | "declined" | "blocked" | "expired";
+  blockReason?: UndoBlockReason;
+};
 
 type UndoBlockReason =
   | "hidden_information_revealed"
@@ -1044,7 +1044,7 @@ type UndoBlockReason =
   | "access_card_seen"
   | "opponent_declined"
   | "snapshot_not_available"
-  | "match_finished"
+  | "match_finished";
 ```
 
 ### 18.3 Hidden-Info-Barrier
@@ -1053,14 +1053,14 @@ Die Engine oder der Match-Server muss Events markieren, nach denen Undo eingesch
 
 ```ts
 type GameEvent = {
-  eventId: string
-  stateVersionBefore: number
-  stateVersionAfter: number
-  publicText: string
-  hiddenInformationBarrier?: boolean
-  hiddenInformationBarrierReason?: string
-  resultingStateHash: string
-}
+  eventId: string;
+  stateVersionBefore: number;
+  stateVersionAfter: number;
+  publicText: string;
+  hiddenInformationBarrier?: boolean;
+  hiddenInformationBarrierReason?: string;
+  resultingStateHash: string;
+};
 ```
 
 Events mit Barrier-Beispielen:
@@ -1102,11 +1102,11 @@ In 0.1 kann eine lokale Partie notfalls im Speicher laufen. In 0.2 müssen Match
 
 ### 19.2 Empfohlene Persistenzentscheidung
 
-| Option | Bewertung |
-|---|---|
+| Option       | Bewertung                                                                                |
+| ------------ | ---------------------------------------------------------------------------------------- |
 | JSON-Dateien | Für schnelle lokale Tests ausreichend, aber fehleranfälliger bei gleichzeitigen Actions. |
-| SQLite | Empfohlen für MVP 0.2: lokal, transaktional, einfach zu sichern. |
-| PostgreSQL | Für spätere private/stabile Plattform, in 0.2 noch nicht nötig. |
+| SQLite       | Empfohlen für MVP 0.2: lokal, transaktional, einfach zu sichern.                         |
+| PostgreSQL   | Für spätere private/stabile Plattform, in 0.2 noch nicht nötig.                          |
 
 Empfehlung: SQLite als Standard für 0.2, JSON nur noch als Dev-/Debug-Adapter.
 
@@ -1209,16 +1209,16 @@ Alte 0.1-Replays können als read-only markiert werden, falls sie nicht vollstä
 
 ### 20.1 Screens
 
-| Screen | Mindestfunktion |
-|---|---|
-| Start | Neues privates Spiel erstellen, Seite wählen, Seed optional setzen. |
-| Waiting Lobby | Invite-Link anzeigen, Host-Seite anzeigen, Match-Status anzeigen. |
-| Join | Token prüfen, freie Seite anzeigen, Beitritt bestätigen. |
-| Game Board | Spieleransicht mit eigener PlayerView, LegalActions, ChoiceRequests, EventLog. |
-| Connection Status | Beide Seiten verbunden/disconnected anzeigen. |
-| Undo Dialog | Undo anfragen, akzeptieren, ablehnen, blockierte Undo-Gründe anzeigen. |
-| Reconnect | Session wieder aufnehmen, aktuellen State laden. |
-| Debug Panel | Lokal: MatchVersion, StateVersion, StateHash, TimingPoint, ConnectionIds, letzte Events. |
+| Screen            | Mindestfunktion                                                                          |
+| ----------------- | ---------------------------------------------------------------------------------------- |
+| Start             | Neues privates Spiel erstellen, Seite wählen, Seed optional setzen.                      |
+| Waiting Lobby     | Invite-Link anzeigen, Host-Seite anzeigen, Match-Status anzeigen.                        |
+| Join              | Token prüfen, freie Seite anzeigen, Beitritt bestätigen.                                 |
+| Game Board        | Spieleransicht mit eigener PlayerView, LegalActions, ChoiceRequests, EventLog.           |
+| Connection Status | Beide Seiten verbunden/disconnected anzeigen.                                            |
+| Undo Dialog       | Undo anfragen, akzeptieren, ablehnen, blockierte Undo-Gründe anzeigen.                   |
+| Reconnect         | Session wieder aufnehmen, aktuellen State laden.                                         |
+| Debug Panel       | Lokal: MatchVersion, StateVersion, StateHash, TimingPoint, ConnectionIds, letzte Events. |
 
 ### 20.2 Game Board Änderungen gegenüber 0.1
 
@@ -1237,14 +1237,14 @@ Alte 0.1-Replays können als read-only markiert werden, falls sie nicht vollstä
 
 Das LegalActions-Panel bleibt zentrale Eingabequelle. Es sollte für 0.2 folgende Zustände klar anzeigen:
 
-| Zustand | UI-Verhalten |
-|---|---|
-| Action legal | Button aktiv. |
-| Action wird gesendet | Button deaktiviert, pending Anzeige. |
-| State stale | Actions kurz deaktivieren, neue LegalActions laden. |
-| Gegner am Zug | Keine eigenen Action Buttons außer erlaubte Reactions/Pass. |
-| ChoiceRequest offen | Nur Choice-Optionen anzeigen, keine irrelevanten Grundaktionen. |
-| Disconnected | Eingaben blockieren oder als nicht sendbar markieren. |
+| Zustand              | UI-Verhalten                                                    |
+| -------------------- | --------------------------------------------------------------- |
+| Action legal         | Button aktiv.                                                   |
+| Action wird gesendet | Button deaktiviert, pending Anzeige.                            |
+| State stale          | Actions kurz deaktivieren, neue LegalActions laden.             |
+| Gegner am Zug        | Keine eigenen Action Buttons außer erlaubte Reactions/Pass.     |
+| ChoiceRequest offen  | Nur Choice-Optionen anzeigen, keine irrelevanten Grundaktionen. |
+| Disconnected         | Eingaben blockieren oder als nicht sendbar markieren.           |
 
 ### 20.4 EventLog
 
@@ -1285,17 +1285,17 @@ Eine Partie muss in zwei Browserfenstern oder auf zwei Geräten spielbar sein. O
 
 ### 21.1 Mindeststandards
 
-| Bereich | Standard für 0.2 |
-|---|---|
-| Transport | Localhost ohne TLS zulässig; außerhalb localhost HTTPS/WSS verwenden. |
-| Tokens | Hohe Entropie, nur gehasht speichern, nicht in Logs schreiben. |
-| Session | SessionToken seitenspezifisch; keine Seitenübernahme. |
-| Logs | Keine privaten Kartendaten, keine Tokens, keine Full-State-Logs im normalen Betrieb. |
-| Rate Limits | Begrenzung für Match-Erstellung, Join, Action Submit, Reconnect. |
-| CORS/Origin | Private Server sollten erlaubte Origins einschränken. |
-| Debug | Full-State-Debug nur lokal oder serverseitig. |
-| Backups | SQLite-Datei oder Matchdaten sicherbar. |
-| Crash Recovery | Match aus Snapshot + EventLog wiederherstellen oder sauber pausieren. |
+| Bereich        | Standard für 0.2                                                                     |
+| -------------- | ------------------------------------------------------------------------------------ |
+| Transport      | Localhost ohne TLS zulässig; außerhalb localhost HTTPS/WSS verwenden.                |
+| Tokens         | Hohe Entropie, nur gehasht speichern, nicht in Logs schreiben.                       |
+| Session        | SessionToken seitenspezifisch; keine Seitenübernahme.                                |
+| Logs           | Keine privaten Kartendaten, keine Tokens, keine Full-State-Logs im normalen Betrieb. |
+| Rate Limits    | Begrenzung für Match-Erstellung, Join, Action Submit, Reconnect.                     |
+| CORS/Origin    | Private Server sollten erlaubte Origins einschränken.                                |
+| Debug          | Full-State-Debug nur lokal oder serverseitig.                                        |
+| Backups        | SQLite-Datei oder Matchdaten sicherbar.                                              |
+| Crash Recovery | Match aus Snapshot + EventLog wiederherstellen oder sauber pausieren.                |
 
 ### 21.2 Token-Regeln
 
@@ -1310,13 +1310,13 @@ Eine Partie muss in zwei Browserfenstern oder auf zwei Geräten spielbar sein. O
 
 Empfohlene pragmatische Limits für private Version:
 
-| Aktion | Limit |
-|---|---:|
+| Aktion          |                                             Limit |
+| --------------- | ------------------------------------------------: |
 | Match erstellen | 10 pro Stunde/IP im privaten Betrieb ausreichend. |
-| Join-Versuche | 20 pro Stunde/Match oder IP. |
-| WebSocket Join | 30 pro Stunde/Match. |
-| Submit Action | 5 pro Sekunde/Session, plus Idempotency. |
-| Reconnect | 30 pro Stunde/Session. |
+| Join-Versuche   |                      20 pro Stunde/Match oder IP. |
+| WebSocket Join  |                              30 pro Stunde/Match. |
+| Submit Action   |          5 pro Sekunde/Session, plus Idempotency. |
+| Reconnect       |                            30 pro Stunde/Session. |
 
 Diese Limits dienen weniger dem öffentlichen Missbrauchsschutz, sondern der Vermeidung von Bugs durch Spam und versehentliche Mehrfachsendungen.
 
@@ -1324,12 +1324,12 @@ Diese Limits dienen weniger dem öffentlichen Missbrauchsschutz, sondern der Ver
 
 MVP 0.2 sollte mindestens folgende Betriebsarten unterstützen:
 
-| Betriebsart | Erwartung |
-|---|---|
-| Lokal zwei Browserfenster | Entwicklung und Tests. |
-| LAN | Zwei Geräte im lokalen Netzwerk. |
-| Privater Server | HTTPS/WSS, SQLite, Umgebungsvariablen, keine öffentlichen Plattformfunktionen. |
-| Docker | Optional, aber empfohlen für reproduzierbaren Start. |
+| Betriebsart               | Erwartung                                                                      |
+| ------------------------- | ------------------------------------------------------------------------------ |
+| Lokal zwei Browserfenster | Entwicklung und Tests.                                                         |
+| LAN                       | Zwei Geräte im lokalen Netzwerk.                                               |
+| Privater Server           | HTTPS/WSS, SQLite, Umgebungsvariablen, keine öffentlichen Plattformfunktionen. |
+| Docker                    | Optional, aber empfohlen für reproduzierbaren Start.                           |
 
 ---
 
@@ -1337,70 +1337,70 @@ MVP 0.2 sollte mindestens folgende Betriebsarten unterstützen:
 
 ### 22.1 Testarten
 
-| Testart | Ziel |
-|---|---|
-| Unit Tests | Tokenvalidierung, Session-Zuordnung, Message-Filter, Idempotency, Locking. |
+| Testart           | Ziel                                                                               |
+| ----------------- | ---------------------------------------------------------------------------------- |
+| Unit Tests        | Tokenvalidierung, Session-Zuordnung, Message-Filter, Idempotency, Locking.         |
 | Integration Tests | Match erstellen, Join, WebSocket verbinden, Action submitten, Views aktualisieren. |
-| Concurrency Tests | Gleichzeitige Actions, doppelte Messages, stale StateVersion. |
-| Visibility Tests | Keine Hidden-Info-Leaks über WebSocket, Reconnect, Undo, Error, EventLog. |
-| Reconnect Tests | Disconnect und Reconnect in Action Phase, Run, Encounter, Access. |
-| Undo Tests | Zustimmung, Ablehnung, Block nach Hidden Information, Snapshot-Restore. |
-| Replay Tests | Multiplayer-EventLog reproduziert finalen StateHash. |
-| E2E Tests | Zwei Browser-Kontexte spielen eine Beispielpartie. |
-| Regression Tests | 0.1-Demo-Decks bleiben spielbar. |
+| Concurrency Tests | Gleichzeitige Actions, doppelte Messages, stale StateVersion.                      |
+| Visibility Tests  | Keine Hidden-Info-Leaks über WebSocket, Reconnect, Undo, Error, EventLog.          |
+| Reconnect Tests   | Disconnect und Reconnect in Action Phase, Run, Encounter, Access.                  |
+| Undo Tests        | Zustimmung, Ablehnung, Block nach Hidden Information, Snapshot-Restore.            |
+| Replay Tests      | Multiplayer-EventLog reproduziert finalen StateHash.                               |
+| E2E Tests         | Zwei Browser-Kontexte spielen eine Beispielpartie.                                 |
+| Regression Tests  | 0.1-Demo-Decks bleiben spielbar.                                                   |
 
 ### 22.2 Multiplayer-Testmatrix
 
-| Szenario | Erwartung |
-|---|---|
-| Host erstellt Match als Runner | Match wartet auf Corp, Invite-Link erzeugt. |
-| Joiner tritt als freie Seite bei | Corp-Session wird erzeugt, Host bleibt Runner. |
-| Falscher Token | Join wird abgelehnt, keine Matchdetails leaken. |
-| Token versucht falsche Seite | Join/Reconnect wird abgelehnt. |
-| Beide Spieler verbinden WebSocket | Beide erhalten nur eigene PlayerView. |
-| Runner submit Action im Runner-Timing | Action wird akzeptiert und beide Views aktualisiert. |
-| Corp submit Action im Runner-only-Timing | Action wird abgelehnt. |
-| Doppelte Action mit gleichem Idempotency-Key | Nur eine Transition, zweiter Receipt identisch. |
-| Zwei Actions gleichzeitig | Nur eine Transition; zweite wird stale oder nach Lock neu bewertet. |
-| Stale StateVersion | Action wird abgelehnt, Client resynchronisiert. |
-| Runner reconnectet während Corp wartet | Runner erhält korrekte PlayerView, keine Corp-HQ-Daten. |
-| Corp reconnectet bei Rez-Choice | Corp erhält dieselbe Rez-Choice, Runner nicht. |
-| Undo vor Hidden Info | Gegner kann zustimmen; State wird zurückgesetzt. |
-| Undo nach HQ random access | Undo wird blockiert oder streng nach Regel abgelehnt. |
-| Match endet | Beide erhalten Winner und keine weiteren Actions. |
+| Szenario                                     | Erwartung                                                           |
+| -------------------------------------------- | ------------------------------------------------------------------- |
+| Host erstellt Match als Runner               | Match wartet auf Corp, Invite-Link erzeugt.                         |
+| Joiner tritt als freie Seite bei             | Corp-Session wird erzeugt, Host bleibt Runner.                      |
+| Falscher Token                               | Join wird abgelehnt, keine Matchdetails leaken.                     |
+| Token versucht falsche Seite                 | Join/Reconnect wird abgelehnt.                                      |
+| Beide Spieler verbinden WebSocket            | Beide erhalten nur eigene PlayerView.                               |
+| Runner submit Action im Runner-Timing        | Action wird akzeptiert und beide Views aktualisiert.                |
+| Corp submit Action im Runner-only-Timing     | Action wird abgelehnt.                                              |
+| Doppelte Action mit gleichem Idempotency-Key | Nur eine Transition, zweiter Receipt identisch.                     |
+| Zwei Actions gleichzeitig                    | Nur eine Transition; zweite wird stale oder nach Lock neu bewertet. |
+| Stale StateVersion                           | Action wird abgelehnt, Client resynchronisiert.                     |
+| Runner reconnectet während Corp wartet       | Runner erhält korrekte PlayerView, keine Corp-HQ-Daten.             |
+| Corp reconnectet bei Rez-Choice              | Corp erhält dieselbe Rez-Choice, Runner nicht.                      |
+| Undo vor Hidden Info                         | Gegner kann zustimmen; State wird zurückgesetzt.                    |
+| Undo nach HQ random access                   | Undo wird blockiert oder streng nach Regel abgelehnt.               |
+| Match endet                                  | Beide erhalten Winner und keine weiteren Actions.                   |
 
 ### 22.3 Visibility-Testbeispiele
 
 ```ts
 describe("multiplayer visibility", () => {
-  it("runner websocket payload does not contain corp HQ card titles", async () => {})
-  it("runner reconnect payload does not contain unrezzed ICE titles", async () => {})
-  it("corp websocket payload does not contain runner grip titles", async () => {})
-  it("public event after random HQ access does not leak non-accessed cards", async () => {})
-  it("undo request after hidden information does not reveal which card caused the block", async () => {})
-})
+  it("runner websocket payload does not contain corp HQ card titles", async () => {});
+  it("runner reconnect payload does not contain unrezzed ICE titles", async () => {});
+  it("corp websocket payload does not contain runner grip titles", async () => {});
+  it("public event after random HQ access does not leak non-accessed cards", async () => {});
+  it("undo request after hidden information does not reveal which card caused the block", async () => {});
+});
 ```
 
 ### 22.4 Concurrency-Testbeispiele
 
 ```ts
 describe("multiplayer concurrency", () => {
-  it("processes only one action per match at a time", async () => {})
-  it("rejects stale state version with fresh player view", async () => {})
-  it("returns stored receipt for duplicate idempotency key", async () => {})
-  it("does not apply two transitions for rapid double click", async () => {})
-})
+  it("processes only one action per match at a time", async () => {});
+  it("rejects stale state version with fresh player view", async () => {});
+  it("returns stored receipt for duplicate idempotency key", async () => {});
+  it("does not apply two transitions for rapid double click", async () => {});
+});
 ```
 
 ### 22.5 Reconnect-Testbeispiele
 
 ```ts
 describe("reconnect", () => {
-  it("restores current player view after disconnect during action phase", async () => {})
-  it("restores corp rez choice after reconnect", async () => {})
-  it("restores runner access choice without extra information", async () => {})
-  it("replaces old connection for same side", async () => {})
-})
+  it("restores current player view after disconnect during action phase", async () => {});
+  it("restores corp rez choice after reconnect", async () => {});
+  it("restores runner access choice without extra information", async () => {});
+  it("replaces old connection for same side", async () => {});
+});
 ```
 
 ### 22.6 E2E-Abnahmeszenario
@@ -1427,24 +1427,24 @@ Eine vollständige E2E-Beispielpartie sollte mindestens folgende Schritte enthal
 
 ## 23. Akzeptanzkriterien
 
-| Kriterium | Pass/Fail-Bedingung |
-|---|---|
-| Match-Erstellung | Ein privates Match kann erstellt werden; Host erhält seitenspezifische Session und Invite-Link. |
-| Join | Join-Link erlaubt genau den Beitritt zur freien Seite. |
-| Token-Sicherheit | Falsche, abgelaufene oder widerrufene Tokens werden abgelehnt, ohne private Informationen auszugeben. |
-| WebSocket-Verbindung | Beide Seiten können verbinden und erhalten ihre eigene PlayerView. |
-| Serverautorität | Clients können keinen GameState setzen oder Regeln umgehen. |
-| Action-Validierung | Falsche Seite, falscher Timingpunkt, illegale Action und stale StateVersion werden abgelehnt. |
-| Idempotency | Doppelte Sendung derselben Action erzeugt keine doppelte Transition. |
-| Concurrency | Gleichzeitige Actions erzeugen keinen inkonsistenten State. |
-| Synchronisation | Nach jeder gültigen Action haben beide Clients dieselbe StateVersion, aber unterschiedliche gefilterte PlayerViews. |
-| Visibility | WebSocket, Reconnect, EventLog, Undo und Errors enthalten keine verbotenen verdeckten Informationen. |
-| Reconnect | Reconnect während Action Phase, Run, Encounter und Access stellt korrekte PlayerView und LegalActions wieder her. |
-| Undo | Undo funktioniert vor Informationsgewinn mit Zustimmung und wird nach Hidden-Info-Barrier blockiert. |
-| Persistenz | Aktive Matches überleben Serverneustart oder werden aus Snapshot/EventLog sauber wiederhergestellt bzw. pausiert. |
-| UI | Zwei Menschen können über zwei Browserfenster oder Geräte eine Partie spielen. |
-| Replay | Multiplayer-Partie kann aus Snapshot/EventLog reproduziert werden; StateHashes stimmen. |
-| CI | Multiplayer-, Visibility-, Reconnect-, Undo- und Regressionstests bestehen. |
+| Kriterium            | Pass/Fail-Bedingung                                                                                                 |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Match-Erstellung     | Ein privates Match kann erstellt werden; Host erhält seitenspezifische Session und Invite-Link.                     |
+| Join                 | Join-Link erlaubt genau den Beitritt zur freien Seite.                                                              |
+| Token-Sicherheit     | Falsche, abgelaufene oder widerrufene Tokens werden abgelehnt, ohne private Informationen auszugeben.               |
+| WebSocket-Verbindung | Beide Seiten können verbinden und erhalten ihre eigene PlayerView.                                                  |
+| Serverautorität      | Clients können keinen GameState setzen oder Regeln umgehen.                                                         |
+| Action-Validierung   | Falsche Seite, falscher Timingpunkt, illegale Action und stale StateVersion werden abgelehnt.                       |
+| Idempotency          | Doppelte Sendung derselben Action erzeugt keine doppelte Transition.                                                |
+| Concurrency          | Gleichzeitige Actions erzeugen keinen inkonsistenten State.                                                         |
+| Synchronisation      | Nach jeder gültigen Action haben beide Clients dieselbe StateVersion, aber unterschiedliche gefilterte PlayerViews. |
+| Visibility           | WebSocket, Reconnect, EventLog, Undo und Errors enthalten keine verbotenen verdeckten Informationen.                |
+| Reconnect            | Reconnect während Action Phase, Run, Encounter und Access stellt korrekte PlayerView und LegalActions wieder her.   |
+| Undo                 | Undo funktioniert vor Informationsgewinn mit Zustimmung und wird nach Hidden-Info-Barrier blockiert.                |
+| Persistenz           | Aktive Matches überleben Serverneustart oder werden aus Snapshot/EventLog sauber wiederhergestellt bzw. pausiert.   |
+| UI                   | Zwei Menschen können über zwei Browserfenster oder Geräte eine Partie spielen.                                      |
+| Replay               | Multiplayer-Partie kann aus Snapshot/EventLog reproduziert werden; StateHashes stimmen.                             |
+| CI                   | Multiplayer-, Visibility-, Reconnect-, Undo- und Regressionstests bestehen.                                         |
 
 ---
 
@@ -1473,102 +1473,102 @@ MVP 0.2 ist fertig, wenn alle folgenden Bedingungen erfüllt sind:
 
 ### Paket A – 0.1-Gate-Härtung
 
-| Ergebnis | Gate |
-|---|---|
+| Ergebnis                              | Gate                                                |
+| ------------------------------------- | --------------------------------------------------- |
 | Engine-API für Multiplayer validiert. | `applyAction` akzeptiert keine manipulierte Action. |
-| PlayerViews leakfrei. | Visibility-Basistests bestehen. |
-| EventLog und StateHash stabil. | Replay-Test mit StateHash besteht. |
-| Demo-Decks spielbar genug. | Mindestens Runner-Run und Corp-Score funktionieren. |
+| PlayerViews leakfrei.                 | Visibility-Basistests bestehen.                     |
+| EventLog und StateHash stabil.        | Replay-Test mit StateHash besteht.                  |
+| Demo-Decks spielbar genug.            | Mindestens Runner-Run und Corp-Score funktionieren. |
 
 ### Paket B – Storage und Schema 0.2
 
-| Ergebnis | Gate |
-|---|---|
-| SQLite-Adapter oder stabiler JSON-Adapter. | Match kann gespeichert und geladen werden. |
-| Match-, Session-, Event- und Snapshot-Schema. | Migrationstest besteht. |
-| ActionReceipts gespeichert. | Duplicate-Action-Test besteht. |
-| Baseline um Multiplayer-Versionen ergänzt. | Snapshot enthält vollständige Baseline. |
+| Ergebnis                                      | Gate                                       |
+| --------------------------------------------- | ------------------------------------------ |
+| SQLite-Adapter oder stabiler JSON-Adapter.    | Match kann gespeichert und geladen werden. |
+| Match-, Session-, Event- und Snapshot-Schema. | Migrationstest besteht.                    |
+| ActionReceipts gespeichert.                   | Duplicate-Action-Test besteht.             |
+| Baseline um Multiplayer-Versionen ergänzt.    | Snapshot enthält vollständige Baseline.    |
 
 ### Paket C – Match-Erstellung und Einladungslinks
 
-| Ergebnis | Gate |
-|---|---|
-| REST `POST /api/matches`. | Host erhält Session und Invite-Link. |
-| Token-Erzeugung und Hash-Speicherung. | Klartexttoken nicht in DB/Logs. |
-| Seitenwahl. | Host/Joiner-Zuordnung korrekt. |
-| Join-Flow. | Joiner kann freie Seite übernehmen. |
+| Ergebnis                              | Gate                                 |
+| ------------------------------------- | ------------------------------------ |
+| REST `POST /api/matches`.             | Host erhält Session und Invite-Link. |
+| Token-Erzeugung und Hash-Speicherung. | Klartexttoken nicht in DB/Logs.      |
+| Seitenwahl.                           | Host/Joiner-Zuordnung korrekt.       |
+| Join-Flow.                            | Joiner kann freie Seite übernehmen.  |
 
 ### Paket D – WebSocket-Verbindung
 
-| Ergebnis | Gate |
-|---|---|
-| `join_match` validiert SessionToken. | Falscher Token abgelehnt. |
-| Seitenspezifische Verbindung. | Runner und Corp korrekt zugeordnet. |
-| Initiale PlayerView. | Beide Seiten erhalten gefilterte Views. |
-| OpponentStatus. | Disconnect/Connect sichtbar. |
+| Ergebnis                             | Gate                                    |
+| ------------------------------------ | --------------------------------------- |
+| `join_match` validiert SessionToken. | Falscher Token abgelehnt.               |
+| Seitenspezifische Verbindung.        | Runner und Corp korrekt zugeordnet.     |
+| Initiale PlayerView.                 | Beide Seiten erhalten gefilterte Views. |
+| OpponentStatus.                      | Disconnect/Connect sichtbar.            |
 
 ### Paket E – Action Submit und Transaktionen
 
-| Ergebnis | Gate |
-|---|---|
-| `submit_action` verarbeitet PlayerAction. | Gültige Actions ändern State. |
-| Match-Lock. | Gleichzeitige Actions verursachen keinen Konflikt. |
-| Idempotency. | Doppelklick erzeugt nur eine Transition. |
-| Stale State Handling. | Client erhält frische View. |
+| Ergebnis                                  | Gate                                               |
+| ----------------------------------------- | -------------------------------------------------- |
+| `submit_action` verarbeitet PlayerAction. | Gültige Actions ändern State.                      |
+| Match-Lock.                               | Gleichzeitige Actions verursachen keinen Konflikt. |
+| Idempotency.                              | Doppelklick erzeugt nur eine Transition.           |
+| Stale State Handling.                     | Client erhält frische View.                        |
 
 ### Paket F – PlayerView- und Event-Filterung
 
-| Ergebnis | Gate |
-|---|---|
-| Side-filtered StateUpdate. | Keine versteckten Kartendaten. |
+| Ergebnis                    | Gate                                 |
+| --------------------------- | ------------------------------------ |
+| Side-filtered StateUpdate.  | Keine versteckten Kartendaten.       |
 | Side-filtered LegalActions. | Gegner sieht keine privaten Choices. |
-| Side-filtered EventLog. | PublicEvents bleiben sauber. |
-| Error-Filter. | Fehler leaken keine CardIds. |
+| Side-filtered EventLog.     | PublicEvents bleiben sauber.         |
+| Error-Filter.               | Fehler leaken keine CardIds.         |
 
 ### Paket G – Reconnect
 
-| Ergebnis | Gate |
-|---|---|
-| Session wiederherstellen. | Spieler erhält gleiche Seite zurück. |
+| Ergebnis                  | Gate                                             |
+| ------------------------- | ------------------------------------------------ |
+| Session wiederherstellen. | Spieler erhält gleiche Seite zurück.             |
 | Alte Connection ersetzen. | Keine Doppelverbindung mit divergierenden Views. |
-| Reconnect in Run/Access. | PendingChoice korrekt wiederhergestellt. |
-| Persistenz nach Neustart. | Match wird geladen oder pausiert. |
+| Reconnect in Run/Access.  | PendingChoice korrekt wiederhergestellt.         |
+| Persistenz nach Neustart. | Match wird geladen oder pausiert.                |
 
 ### Paket H – Undo
 
-| Ergebnis | Gate |
-|---|---|
-| UndoRequest erstellen. | Gegner erhält Anfrage. |
-| Accept/Decline. | Zustimmung/Ablehnung verarbeitet. |
-| Snapshot-Restore. | StateVersion und Views korrekt. |
-| Hidden-Info-Barrier. | Undo nach Info-Gewinn blockiert. |
+| Ergebnis               | Gate                              |
+| ---------------------- | --------------------------------- |
+| UndoRequest erstellen. | Gegner erhält Anfrage.            |
+| Accept/Decline.        | Zustimmung/Ablehnung verarbeitet. |
+| Snapshot-Restore.      | StateVersion und Views korrekt.   |
+| Hidden-Info-Barrier.   | Undo nach Info-Gewinn blockiert.  |
 
 ### Paket I – UI-Anpassung
 
-| Ergebnis | Gate |
-|---|---|
-| Create-Match-Screen. | Link kopierbar. |
-| Join-Screen. | Freie Seite sichtbar, Join möglich. |
-| Multiplayer-Board. | Zwei Browserfenster spielbar. |
-| Connection-/Undo-Anzeigen. | Zustände klar sichtbar. |
+| Ergebnis                   | Gate                                |
+| -------------------------- | ----------------------------------- |
+| Create-Match-Screen.       | Link kopierbar.                     |
+| Join-Screen.               | Freie Seite sichtbar, Join möglich. |
+| Multiplayer-Board.         | Zwei Browserfenster spielbar.       |
+| Connection-/Undo-Anzeigen. | Zustände klar sichtbar.             |
 
 ### Paket J – Test- und CI-Ausbau
 
-| Ergebnis | Gate |
-|---|---|
-| Multiplayer-Integrationstests. | Match/Join/Action bestehen. |
-| Visibility-Tests. | Keine Leak-Assertions schlagen fehl. |
-| Concurrency-Tests. | Race Conditions abgefangen. |
-| E2E-Test. | Beispielpartie läuft durch. |
+| Ergebnis                       | Gate                                 |
+| ------------------------------ | ------------------------------------ |
+| Multiplayer-Integrationstests. | Match/Join/Action bestehen.          |
+| Visibility-Tests.              | Keine Leak-Assertions schlagen fehl. |
+| Concurrency-Tests.             | Race Conditions abgefangen.          |
+| E2E-Test.                      | Beispielpartie läuft durch.          |
 
 ### Paket K – Privates Deployment
 
-| Ergebnis | Gate |
-|---|---|
-| Konfiguration über Environment Variables. | Keine Secrets im Repo. |
-| Docker optional. | App privat startbar. |
-| HTTPS/WSS-Hinweis. | Betrieb außerhalb localhost dokumentiert. |
-| Backup-Hinweis. | SQLite/Storage sicherbar. |
+| Ergebnis                                  | Gate                                      |
+| ----------------------------------------- | ----------------------------------------- |
+| Konfiguration über Environment Variables. | Keine Secrets im Repo.                    |
+| Docker optional.                          | App privat startbar.                      |
+| HTTPS/WSS-Hinweis.                        | Betrieb außerhalb localhost dokumentiert. |
+| Backup-Hinweis.                           | SQLite/Storage sicherbar.                 |
 
 ---
 
@@ -1576,68 +1576,68 @@ MVP 0.2 ist fertig, wenn alle folgenden Bedingungen erfüllt sind:
 
 ### Must
 
-| Priorität | Eintrag |
-|---|---|
-| Must | Multiplayer-Baseline `0.2.0` definieren. |
-| Must | MatchStatus und MatchVersion einführen. |
-| Must | PlayerSession und InviteToken implementieren. |
-| Must | Token sicher erzeugen, hashen und validieren. |
-| Must | REST-Endpunkt zum Match-Erstellen. |
-| Must | REST-Endpunkt zum Join. |
-| Must | WebSocket `join_match`. |
-| Must | WebSocket `submit_action`. |
-| Must | Per-Match-Lock oder transaktionale Verarbeitung. |
-| Must | Idempotency-Key mit ActionReceipt. |
-| Must | Stale-State-Behandlung. |
-| Must | Seitenspezifische StateUpdates. |
-| Must | Seitenspezifische LegalActions. |
-| Must | Seitenspezifische ChoiceRequests. |
-| Must | Reconnect mit aktueller PlayerView. |
-| Must | Disconnect-Status im Match. |
-| Must | Undo Request/Accept/Decline. |
-| Must | Hidden-Info-Barrier für Undo. |
-| Must | SQLite- oder stabiler Storage-Adapter. |
-| Must | Multiplayer-Visibility-Tests. |
-| Must | Concurrency-Tests. |
-| Must | Reconnect-Tests. |
-| Must | E2E-Test für zwei Spieler. |
+| Priorität | Eintrag                                          |
+| --------- | ------------------------------------------------ |
+| Must      | Multiplayer-Baseline `0.2.0` definieren.         |
+| Must      | MatchStatus und MatchVersion einführen.          |
+| Must      | PlayerSession und InviteToken implementieren.    |
+| Must      | Token sicher erzeugen, hashen und validieren.    |
+| Must      | REST-Endpunkt zum Match-Erstellen.               |
+| Must      | REST-Endpunkt zum Join.                          |
+| Must      | WebSocket `join_match`.                          |
+| Must      | WebSocket `submit_action`.                       |
+| Must      | Per-Match-Lock oder transaktionale Verarbeitung. |
+| Must      | Idempotency-Key mit ActionReceipt.               |
+| Must      | Stale-State-Behandlung.                          |
+| Must      | Seitenspezifische StateUpdates.                  |
+| Must      | Seitenspezifische LegalActions.                  |
+| Must      | Seitenspezifische ChoiceRequests.                |
+| Must      | Reconnect mit aktueller PlayerView.              |
+| Must      | Disconnect-Status im Match.                      |
+| Must      | Undo Request/Accept/Decline.                     |
+| Must      | Hidden-Info-Barrier für Undo.                    |
+| Must      | SQLite- oder stabiler Storage-Adapter.           |
+| Must      | Multiplayer-Visibility-Tests.                    |
+| Must      | Concurrency-Tests.                               |
+| Must      | Reconnect-Tests.                                 |
+| Must      | E2E-Test für zwei Spieler.                       |
 
 ### Should
 
-| Priorität | Eintrag |
-|---|---|
-| Should | Docker-Setup für privaten Server. |
-| Should | Debug-Panel für MatchVersion, StateVersion, StateHash. |
-| Should | EventLog mit Undo-Markern. |
-| Should | Copy-Link-Komfort im Lobby-Screen. |
-| Should | Reconnect-Banner mit Status. |
-| Should | Optionaler Seed im Match-Create-Screen. |
-| Should | Snapshot alle 10 Events. |
-| Should | Export des EventLogs als JSON. |
+| Priorität | Eintrag                                                |
+| --------- | ------------------------------------------------------ |
+| Should    | Docker-Setup für privaten Server.                      |
+| Should    | Debug-Panel für MatchVersion, StateVersion, StateHash. |
+| Should    | EventLog mit Undo-Markern.                             |
+| Should    | Copy-Link-Komfort im Lobby-Screen.                     |
+| Should    | Reconnect-Banner mit Status.                           |
+| Should    | Optionaler Seed im Match-Create-Screen.                |
+| Should    | Snapshot alle 10 Events.                               |
+| Should    | Export des EventLogs als JSON.                         |
 
 ### Could
 
-| Priorität | Eintrag |
-|---|---|
-| Could | Einfacher Match-Chat. |
-| Could | Zuschauer-Link für lokale Entwickler. |
-| Could | Match-Passwort zusätzlich zum Token. |
-| Could | Manuelles Match-Abbrechen. |
-| Could | Anzeigename je Spieler. |
-| Could | Lokaler Hotseat-Modus auf gleicher Engine-Struktur. |
+| Priorität | Eintrag                                             |
+| --------- | --------------------------------------------------- |
+| Could     | Einfacher Match-Chat.                               |
+| Could     | Zuschauer-Link für lokale Entwickler.               |
+| Could     | Match-Passwort zusätzlich zum Token.                |
+| Could     | Manuelles Match-Abbrechen.                          |
+| Could     | Anzeigename je Spieler.                             |
+| Could     | Lokaler Hotseat-Modus auf gleicher Engine-Struktur. |
 
 ### Won't for 0.2
 
-| Priorität | Eintrag |
-|---|---|
-| Won't | Freier Deckbuilder. |
-| Won't | Öffentliche Lobby. |
-| Won't | Matchmaking. |
-| Won't | Ranglisten. |
-| Won't | Turniermodus. |
-| Won't | Breiter Kartenpool. |
-| Won't | Starke KI/LLM-KI. |
-| Won't | Vollständige Smartphone-Optimierung. |
+| Priorität | Eintrag                              |
+| --------- | ------------------------------------ |
+| Won't     | Freier Deckbuilder.                  |
+| Won't     | Öffentliche Lobby.                   |
+| Won't     | Matchmaking.                         |
+| Won't     | Ranglisten.                          |
+| Won't     | Turniermodus.                        |
+| Won't     | Breiter Kartenpool.                  |
+| Won't     | Starke KI/LLM-KI.                    |
+| Won't     | Vollständige Smartphone-Optimierung. |
 
 ---
 
@@ -1767,39 +1767,39 @@ Gate:
 
 ## 28. Risiken und Gegenmaßnahmen
 
-| Risiko | Auswirkung | Gegenmaßnahme |
-|---|---|---|
-| Hidden-Info-Leak über WebSocket | Multiplayer unfair oder unbrauchbar. | Payload-Filter zentralisieren, Leak-Tests für alle Message-Typen. |
-| Race Conditions | Doppelaktionen, inkonsistenter State. | Per-Match-Lock, Transaktionen, Idempotency. |
-| Stale Client State | Spieler sendet alte Action. | StateVersion erzwingen, aktuelle View zurücksenden. |
-| Undo nach Informationsgewinn | Unfairer Vorteil. | Hidden-Info-Barrier und konservative Blockregel. |
-| Reconnect verliert PendingChoice | Partie hängt. | ChoiceRequests im GameState speichern und beim Bootstrap erneut senden. |
-| Persistenz zu spät | Serverneustart zerstört Matches. | SQLite/Storage früh in 0.2 einplanen. |
-| UI zeigt Full-State im Debug | Verdeckte Information sichtbar. | Debug-Modus lokal/serverseitig trennen. |
-| Token in Logs | Seitenübernahme möglich. | Token hashen, Logging filtern. |
-| Kartenpool-Erweiterung parallel zu Multiplayer | Fehler schwer zu isolieren. | Kartenpool in 0.2 stabil halten. |
-| Zu viele Komfortfeatures | Verzögerung des Kernziels. | Chat, Zuschauer, Deckbuilder und Matchmaking zurückstellen. |
+| Risiko                                         | Auswirkung                            | Gegenmaßnahme                                                           |
+| ---------------------------------------------- | ------------------------------------- | ----------------------------------------------------------------------- |
+| Hidden-Info-Leak über WebSocket                | Multiplayer unfair oder unbrauchbar.  | Payload-Filter zentralisieren, Leak-Tests für alle Message-Typen.       |
+| Race Conditions                                | Doppelaktionen, inkonsistenter State. | Per-Match-Lock, Transaktionen, Idempotency.                             |
+| Stale Client State                             | Spieler sendet alte Action.           | StateVersion erzwingen, aktuelle View zurücksenden.                     |
+| Undo nach Informationsgewinn                   | Unfairer Vorteil.                     | Hidden-Info-Barrier und konservative Blockregel.                        |
+| Reconnect verliert PendingChoice               | Partie hängt.                         | ChoiceRequests im GameState speichern und beim Bootstrap erneut senden. |
+| Persistenz zu spät                             | Serverneustart zerstört Matches.      | SQLite/Storage früh in 0.2 einplanen.                                   |
+| UI zeigt Full-State im Debug                   | Verdeckte Information sichtbar.       | Debug-Modus lokal/serverseitig trennen.                                 |
+| Token in Logs                                  | Seitenübernahme möglich.              | Token hashen, Logging filtern.                                          |
+| Kartenpool-Erweiterung parallel zu Multiplayer | Fehler schwer zu isolieren.           | Kartenpool in 0.2 stabil halten.                                        |
+| Zu viele Komfortfeatures                       | Verzögerung des Kernziels.            | Chat, Zuschauer, Deckbuilder und Matchmaking zurückstellen.             |
 
 ---
 
 ## 29. Offene Entscheidungen
 
-| Entscheidung | Empfehlung für MVP 0.2 |
-|---|---|
-| Persistenz | SQLite als Standard, JSON nur für Dev. |
-| Token-Ablauf | Join-Link optional 24h gültig; aktive Sessions länger. |
-| Reconnect-Token | Seitenspezifisch und wiederverwendbar für private Partie. |
-| Host kann Seite wechseln? | Nein, nach Match-Erstellung fixieren. |
-| Random-Seitenwahl | Server entscheidet per Seed und speichert Ergebnis. |
-| Pause bei Disconnect | Ja, mindestens wenn aktive Seite disconnected. |
-| Automatische Niederlage bei Disconnect | Nein. |
-| Undo nach Hidden Info | Standardmäßig blockieren. |
-| Chat | Nicht für 0.2. |
-| Zuschauer | Nicht für 0.2. |
-| Accountsystem | Nicht für 0.2; Token-Link reicht. |
-| Kartenpool | Keine neuen Pflichtkarten; Demo-Decks bleiben. |
-| WebSocket-Library | Native `ws` oder Socket.io; wichtiger ist klares Protokoll. |
-| Debug-Full-State | Nur lokal oder serverseitig, nie im normalen Spielerclient. |
+| Entscheidung                           | Empfehlung für MVP 0.2                                      |
+| -------------------------------------- | ----------------------------------------------------------- |
+| Persistenz                             | SQLite als Standard, JSON nur für Dev.                      |
+| Token-Ablauf                           | Join-Link optional 24h gültig; aktive Sessions länger.      |
+| Reconnect-Token                        | Seitenspezifisch und wiederverwendbar für private Partie.   |
+| Host kann Seite wechseln?              | Nein, nach Match-Erstellung fixieren.                       |
+| Random-Seitenwahl                      | Server entscheidet per Seed und speichert Ergebnis.         |
+| Pause bei Disconnect                   | Ja, mindestens wenn aktive Seite disconnected.              |
+| Automatische Niederlage bei Disconnect | Nein.                                                       |
+| Undo nach Hidden Info                  | Standardmäßig blockieren.                                   |
+| Chat                                   | Nicht für 0.2.                                              |
+| Zuschauer                              | Nicht für 0.2.                                              |
+| Accountsystem                          | Nicht für 0.2; Token-Link reicht.                           |
+| Kartenpool                             | Keine neuen Pflichtkarten; Demo-Decks bleiben.              |
+| WebSocket-Library                      | Native `ws` oder Socket.io; wichtiger ist klares Protokoll. |
+| Debug-Full-State                       | Nur lokal oder serverseitig, nie im normalen Spielerclient. |
 
 ---
 

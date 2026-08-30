@@ -5,103 +5,697 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>NETGRID KI-Selbstspielbericht 016–020</title>
   </head>
-  <body style="margin:0;background:#f3f5f8;color:#172033;font-family:Arial,Helvetica,sans-serif;line-height:1.5">
-    <div style="max-width:1040px;margin:0 auto;padding:24px">
-      <div style="background:#172554;color:#fff;border-radius:14px;padding:28px 30px">
-        <div style="font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#bfdbfe">NETGRID · KI-vs-KI · Blockbericht</div>
-        <h1 style="margin:8px 0 6px;font-size:30px">Selbstspielzyklen 016–020</h1>
-        <p style="margin:0;color:#dbeafe">15 finale Partien, 4.184 vollständig auditierte Entscheidungen und acht generische Ursachenfixes.</p>
+  <body
+    style="
+      margin: 0;
+      background: #f3f5f8;
+      color: #172033;
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.5;
+    "
+  >
+    <div style="max-width: 1040px; margin: 0 auto; padding: 24px">
+      <div
+        style="
+          background: #172554;
+          color: #fff;
+          border-radius: 14px;
+          padding: 28px 30px;
+        "
+      >
+        <div
+          style="
+            font-size: 13px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #bfdbfe;
+          "
+        >
+          NETGRID · KI-vs-KI · Blockbericht
+        </div>
+        <h1 style="margin: 8px 0 6px; font-size: 30px">
+          Selbstspielzyklen 016–020
+        </h1>
+        <p style="margin: 0; color: #dbeafe">
+          15 finale Partien, 4.184 vollständig auditierte Entscheidungen und
+          acht generische Ursachenfixes.
+        </p>
       </div>
 
-      <div style="background:#fff;border-radius:12px;padding:22px 26px;margin-top:18px;border:1px solid #dbe2ea">
-        <p style="margin:0 0 10px">Hallo Ludwig,</p>
-        <p style="margin:0">dieser Bericht fasst den parallelen Fünferblock 016 bis 020 zusammen. Jede Paarung verwendete zwei zufällig gewählte aktive Standarddecks, drei feste Spielseeds, harte KI und den vollständigen privaten Decision-Trace. Alle finalen Replays liefen auf dem normalen Engine-/Server-/KI-Pfad und wurden lokal nach <code>main</code> integriert.</p>
+      <div
+        style="
+          background: #fff;
+          border-radius: 12px;
+          padding: 22px 26px;
+          margin-top: 18px;
+          border: 1px solid #dbe2ea;
+        "
+      >
+        <p style="margin: 0 0 10px">Hallo Ludwig,</p>
+        <p style="margin: 0">
+          dieser Bericht fasst den parallelen Fünferblock 016 bis 020 zusammen.
+          Jede Paarung verwendete zwei zufällig gewählte aktive Standarddecks,
+          drei feste Spielseeds, harte KI und den vollständigen privaten
+          Decision-Trace. Alle finalen Replays liefen auf dem normalen
+          Engine-/Server-/KI-Pfad und wurden lokal nach
+          <code>main</code> integriert.
+        </p>
       </div>
 
-      <h2 style="margin:28px 0 10px;color:#172554">1. Paarungen und Ergebnisse</h2>
-      <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #dbe2ea;font-size:14px">
-        <thead><tr style="background:#e8eefc;text-align:left"><th style="padding:10px;border:1px solid #dbe2ea">Zyklus</th><th style="padding:10px;border:1px solid #dbe2ea">Standarddecks</th><th style="padding:10px;border:1px solid #dbe2ea">Drei finale Ergebnisse</th><th style="padding:10px;border:1px solid #dbe2ea">Audit</th></tr></thead>
+      <h2 style="margin: 28px 0 10px; color: #172554">
+        1. Paarungen und Ergebnisse
+      </h2>
+      <table
+        style="
+          width: 100%;
+          border-collapse: collapse;
+          background: #fff;
+          border: 1px solid #dbe2ea;
+          font-size: 14px;
+        "
+      >
+        <thead>
+          <tr style="background: #e8eefc; text-align: left">
+            <th style="padding: 10px; border: 1px solid #dbe2ea">Zyklus</th>
+            <th style="padding: 10px; border: 1px solid #dbe2ea">
+              Standarddecks
+            </th>
+            <th style="padding: 10px; border: 1px solid #dbe2ea">
+              Drei finale Ergebnisse
+            </th>
+            <th style="padding: 10px; border: 1px solid #dbe2ea">Audit</th>
+          </tr>
+        </thead>
         <tbody>
-          <tr><td style="padding:10px;border:1px solid #dbe2ea"><strong>016</strong></td><td style="padding:10px;border:1px solid #dbe2ea"><strong style="color:#1d4ed8">Classic Runner – Cybernetics Risk Rig</strong><br />gegen <strong style="color:#9f1239">The Korp Master</strong></td><td style="padding:10px;border:1px solid #dbe2ea">Runner 10–6 (Agenda 7:6)<br />Runner 10–0 (7:0)<br />Runner 10–1 (9:1)</td><td style="padding:10px;border:1px solid #dbe2ea">504/504</td></tr>
-          <tr style="background:#fafbfc"><td style="padding:10px;border:1px solid #dbe2ea"><strong>017</strong></td><td style="padding:10px;border:1px solid #dbe2ea"><strong style="color:#1d4ed8">Mit Ansage: Der perfekte Coup</strong><br />gegen <strong style="color:#9f1239">Original Speed v1.0</strong></td><td style="padding:10px;border:1px solid #dbe2ea">Runner 10–3 (7:3)<br />Runner 10–3 (7:3)<br />Runner 10–4 (8:4)</td><td style="padding:10px;border:1px solid #dbe2ea">771/771</td></tr>
-          <tr><td style="padding:10px;border:1px solid #dbe2ea"><strong>018</strong></td><td style="padding:10px;border:1px solid #dbe2ea"><strong style="color:#1d4ed8">Proteus Runner – Hidden Backdoor Sabotage</strong><br />gegen <strong style="color:#9f1239">Chrome Rush Bureau</strong></td><td style="padding:10px;border:1px solid #dbe2ea">Corp 10–0 (7:0)<br />Runner 10–2 (7:2)<br />Corp 10–5 (7:5)</td><td style="padding:10px;border:1px solid #dbe2ea">620/620</td></tr>
-          <tr style="background:#fafbfc"><td style="padding:10px;border:1px solid #dbe2ea"><strong>019</strong></td><td style="padding:10px;border:1px solid #dbe2ea"><strong style="color:#1d4ed8">Proteus Runner – Hidden Backdoor Sabotage</strong><br />gegen <strong style="color:#9f1239">Salazar Toll Road</strong></td><td style="padding:10px;border:1px solid #dbe2ea">Runner 10–0 (9:0)<br />Runner 10–0 (3:0, Corp-Deck leer)<br />Runner 10–0 (4:0, Corp-Deck leer)</td><td style="padding:10px;border:1px solid #dbe2ea">1.163/1.163</td></tr>
-          <tr><td style="padding:10px;border:1px solid #dbe2ea"><strong>020</strong></td><td style="padding:10px;border:1px solid #dbe2ea"><strong style="color:#1d4ed8">Last Call at R&amp;D</strong><br />gegen <strong style="color:#9f1239">Universal Fast Advance</strong></td><td style="padding:10px;border:1px solid #dbe2ea">Runner 10–4 (8:4)<br />Runner 10–5 (7:5)<br />Runner 10–5 (9:5)</td><td style="padding:10px;border:1px solid #dbe2ea">1.126/1.126</td></tr>
+          <tr>
+            <td style="padding: 10px; border: 1px solid #dbe2ea">
+              <strong>016</strong>
+            </td>
+            <td style="padding: 10px; border: 1px solid #dbe2ea">
+              <strong style="color: #1d4ed8"
+                >Classic Runner – Cybernetics Risk Rig</strong
+              ><br />gegen
+              <strong style="color: #9f1239">The Korp Master</strong>
+            </td>
+            <td style="padding: 10px; border: 1px solid #dbe2ea">
+              Runner 10–6 (Agenda 7:6)<br />Runner 10–0 (7:0)<br />Runner 10–1
+              (9:1)
+            </td>
+            <td style="padding: 10px; border: 1px solid #dbe2ea">504/504</td>
+          </tr>
+          <tr style="background: #fafbfc">
+            <td style="padding: 10px; border: 1px solid #dbe2ea">
+              <strong>017</strong>
+            </td>
+            <td style="padding: 10px; border: 1px solid #dbe2ea">
+              <strong style="color: #1d4ed8"
+                >Mit Ansage: Der perfekte Coup</strong
+              ><br />gegen
+              <strong style="color: #9f1239">Original Speed v1.0</strong>
+            </td>
+            <td style="padding: 10px; border: 1px solid #dbe2ea">
+              Runner 10–3 (7:3)<br />Runner 10–3 (7:3)<br />Runner 10–4 (8:4)
+            </td>
+            <td style="padding: 10px; border: 1px solid #dbe2ea">771/771</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border: 1px solid #dbe2ea">
+              <strong>018</strong>
+            </td>
+            <td style="padding: 10px; border: 1px solid #dbe2ea">
+              <strong style="color: #1d4ed8"
+                >Proteus Runner – Hidden Backdoor Sabotage</strong
+              ><br />gegen
+              <strong style="color: #9f1239">Chrome Rush Bureau</strong>
+            </td>
+            <td style="padding: 10px; border: 1px solid #dbe2ea">
+              Corp 10–0 (7:0)<br />Runner 10–2 (7:2)<br />Corp 10–5 (7:5)
+            </td>
+            <td style="padding: 10px; border: 1px solid #dbe2ea">620/620</td>
+          </tr>
+          <tr style="background: #fafbfc">
+            <td style="padding: 10px; border: 1px solid #dbe2ea">
+              <strong>019</strong>
+            </td>
+            <td style="padding: 10px; border: 1px solid #dbe2ea">
+              <strong style="color: #1d4ed8"
+                >Proteus Runner – Hidden Backdoor Sabotage</strong
+              ><br />gegen
+              <strong style="color: #9f1239">Salazar Toll Road</strong>
+            </td>
+            <td style="padding: 10px; border: 1px solid #dbe2ea">
+              Runner 10–0 (9:0)<br />Runner 10–0 (3:0, Corp-Deck leer)<br />Runner
+              10–0 (4:0, Corp-Deck leer)
+            </td>
+            <td style="padding: 10px; border: 1px solid #dbe2ea">
+              1.163/1.163
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border: 1px solid #dbe2ea">
+              <strong>020</strong>
+            </td>
+            <td style="padding: 10px; border: 1px solid #dbe2ea">
+              <strong style="color: #1d4ed8">Last Call at R&amp;D</strong
+              ><br />gegen
+              <strong style="color: #9f1239">Universal Fast Advance</strong>
+            </td>
+            <td style="padding: 10px; border: 1px solid #dbe2ea">
+              Runner 10–4 (8:4)<br />Runner 10–5 (7:5)<br />Runner 10–5 (9:5)
+            </td>
+            <td style="padding: 10px; border: 1px solid #dbe2ea">
+              1.126/1.126
+            </td>
+          </tr>
         </tbody>
       </table>
-      <p style="font-size:13px;color:#526076">Gesamt: Runner 13 Siege, Corp 2 Siege. Zyklus 018 ist die wichtige Gegenindikation: funktionierendes Corp-Scoretempo kann zwei von drei Seeds gewinnen.</p>
+      <p style="font-size: 13px; color: #526076">
+        Gesamt: Runner 13 Siege, Corp 2 Siege. Zyklus 018 ist die wichtige
+        Gegenindikation: funktionierendes Corp-Scoretempo kann zwei von drei
+        Seeds gewinnen.
+      </p>
 
-      <h2 style="margin:28px 0 10px;color:#172554">2. Relevante Vorher-/Nachher-Replays</h2>
-      <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #dbe2ea;font-size:14px">
-        <thead><tr style="background:#e8eefc;text-align:left"><th style="padding:10px;border:1px solid #dbe2ea">Zyklus</th><th style="padding:10px;border:1px solid #dbe2ea">Vor Fix</th><th style="padding:10px;border:1px solid #dbe2ea">Nach Fix</th><th style="padding:10px;border:1px solid #dbe2ea">Materiale Änderung</th></tr></thead>
+      <h2 style="margin: 28px 0 10px; color: #172554">
+        2. Relevante Vorher-/Nachher-Replays
+      </h2>
+      <table
+        style="
+          width: 100%;
+          border-collapse: collapse;
+          background: #fff;
+          border: 1px solid #dbe2ea;
+          font-size: 14px;
+        "
+      >
+        <thead>
+          <tr style="background: #e8eefc; text-align: left">
+            <th style="padding: 10px; border: 1px solid #dbe2ea">Zyklus</th>
+            <th style="padding: 10px; border: 1px solid #dbe2ea">Vor Fix</th>
+            <th style="padding: 10px; border: 1px solid #dbe2ea">Nach Fix</th>
+            <th style="padding: 10px; border: 1px solid #dbe2ea">
+              Materiale Änderung
+            </th>
+          </tr>
+        </thead>
         <tbody>
-          <tr><td style="padding:10px;border:1px solid #dbe2ea">016</td><td style="padding:10px;border:1px solid #dbe2ea"><code>match_195e8201e42429f7</code> D150: fehlender Owner für freiwilligen Self-Trash.<br /><code>match_fb43c71debcf0637</code> State 186: transienter MU-Fehler.<br /><code>match_c9e4247a322efa9a</code> D103: Free-Rez-Fenster ohne Origin.</td><td style="padding:10px;border:1px solid #dbe2ea"><code>match_d3b1a5e4c78ebe91</code> Runner 10–6, Agenda 7:6, D237.<br />Weitere Seeds regulär 7:0 und 9:1.</td><td style="padding:10px;border:1px solid #dbe2ea">Fail-closed Pfade geschlossen; Corp scoret im repräsentativen Seed drei Agenden statt passiv auszulaufen.</td></tr>
-          <tr style="background:#fafbfc"><td style="padding:10px;border:1px solid #dbe2ea">019</td><td style="padding:10px;border:1px solid #dbe2ea"><code>match_faafeff8bf960065</code> D44: CardSpec-Runfolge ohne Planabdeckung.<br /><code>match_7288cb47af7f15c9</code> D56: Defense-Action zugleich verworfen.</td><td style="padding:10px;border:1px solid #dbe2ea"><code>match_294cecc3d7918cea</code> Runner 10–0, Agenda 3:0, Corp-Deck leer, D388.</td><td style="padding:10px;border:1px solid #dbe2ea">Credit Subversion bleibt exakt im Runfensterowner; Olivia-Salazar-Defense ist konfliktfrei materialisiert.</td></tr>
-          <tr><td style="padding:10px;border:1px solid #dbe2ea">020</td><td style="padding:10px;border:1px solid #dbe2ea"><code>match_1d2972c61a85c449</code>: Corp gewinnt 10–2, Agenda 7:2, D296. Runner nimmt 72 Basiscredits bis 100 und startet nur sieben Runs.</td><td style="padding:10px;border:1px solid #dbe2ea"><code>match_9fad13ecbda112d9</code>: Runner gewinnt 10–5, Agenda 9:5, D627.</td><td style="padding:10px;border:1px solid #dbe2ea">Bei Corp-Matchpoint gibt der Economy-Hold frei; D189 startet der zuständige Zentraldruckplan den HQ-Run. Danach 24 Runs.</td></tr>
+          <tr>
+            <td style="padding: 10px; border: 1px solid #dbe2ea">016</td>
+            <td style="padding: 10px; border: 1px solid #dbe2ea">
+              <code>match_195e8201e42429f7</code> D150: fehlender Owner für
+              freiwilligen Self-Trash.<br /><code>match_fb43c71debcf0637</code>
+              State 186: transienter MU-Fehler.<br /><code
+                >match_c9e4247a322efa9a</code
+              >
+              D103: Free-Rez-Fenster ohne Origin.
+            </td>
+            <td style="padding: 10px; border: 1px solid #dbe2ea">
+              <code>match_d3b1a5e4c78ebe91</code> Runner 10–6, Agenda 7:6,
+              D237.<br />Weitere Seeds regulär 7:0 und 9:1.
+            </td>
+            <td style="padding: 10px; border: 1px solid #dbe2ea">
+              Fail-closed Pfade geschlossen; Corp scoret im repräsentativen Seed
+              drei Agenden statt passiv auszulaufen.
+            </td>
+          </tr>
+          <tr style="background: #fafbfc">
+            <td style="padding: 10px; border: 1px solid #dbe2ea">019</td>
+            <td style="padding: 10px; border: 1px solid #dbe2ea">
+              <code>match_faafeff8bf960065</code> D44: CardSpec-Runfolge ohne
+              Planabdeckung.<br /><code>match_7288cb47af7f15c9</code> D56:
+              Defense-Action zugleich verworfen.
+            </td>
+            <td style="padding: 10px; border: 1px solid #dbe2ea">
+              <code>match_294cecc3d7918cea</code> Runner 10–0, Agenda 3:0,
+              Corp-Deck leer, D388.
+            </td>
+            <td style="padding: 10px; border: 1px solid #dbe2ea">
+              Credit Subversion bleibt exakt im Runfensterowner;
+              Olivia-Salazar-Defense ist konfliktfrei materialisiert.
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border: 1px solid #dbe2ea">020</td>
+            <td style="padding: 10px; border: 1px solid #dbe2ea">
+              <code>match_1d2972c61a85c449</code>: Corp gewinnt 10–2, Agenda
+              7:2, D296. Runner nimmt 72 Basiscredits bis 100 und startet nur
+              sieben Runs.
+            </td>
+            <td style="padding: 10px; border: 1px solid #dbe2ea">
+              <code>match_9fad13ecbda112d9</code>: Runner gewinnt 10–5, Agenda
+              9:5, D627.
+            </td>
+            <td style="padding: 10px; border: 1px solid #dbe2ea">
+              Bei Corp-Matchpoint gibt der Economy-Hold frei; D189 startet der
+              zuständige Zentraldruckplan den HQ-Run. Danach 24 Runs.
+            </td>
+          </tr>
         </tbody>
       </table>
 
-      <h2 style="margin:28px 0 10px;color:#172554">3. Acht behobene generische Fehler</h2>
-      <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #dbe2ea;font-size:14px">
-        <thead><tr style="background:#dcfce7;text-align:left"><th style="padding:9px;border:1px solid #dbe2ea">Fall</th><th style="padding:9px;border:1px solid #dbe2ea">Symptom und Ursache</th><th style="padding:9px;border:1px solid #dbe2ea">Fix / Owner / Beleg</th></tr></thead>
+      <h2 style="margin: 28px 0 10px; color: #172554">
+        3. Acht behobene generische Fehler
+      </h2>
+      <table
+        style="
+          width: 100%;
+          border-collapse: collapse;
+          background: #fff;
+          border: 1px solid #dbe2ea;
+          font-size: 14px;
+        "
+      >
+        <thead>
+          <tr style="background: #dcfce7; text-align: left">
+            <th style="padding: 9px; border: 1px solid #dbe2ea">Fall</th>
+            <th style="padding: 9px; border: 1px solid #dbe2ea">
+              Symptom und Ursache
+            </th>
+            <th style="padding: 9px; border: 1px solid #dbe2ea">
+              Fix / Owner / Beleg
+            </th>
+          </tr>
+        </thead>
         <tbody>
-          <tr><td style="padding:9px;border:1px solid #dbe2ea"><strong>SP-042</strong></td><td style="padding:9px;border:1px solid #dbe2ea">Freiwilliger Ressourcen-Self-Trash ohne Planabdeckung.</td><td style="padding:9px;border:1px solid #dbe2ea"><code>runner.resource_lifecycle</code> klassifiziert den generischen <code>trash_source_action</code>-Vertrag; Finalreplays grün.</td></tr>
-          <tr><td style="padding:9px;border:1px solid #dbe2ea"><strong>SP-043</strong></td><td style="padding:9px;border:1px solid #dbe2ea">Kanonischer Zufallseffekt fehlte in der Startfenster-Reihenfolge.</td><td style="padding:9px;border:1px solid #dbe2ea"><code>random_effect &gt; credit_loss &gt; credit_gain</code>; RNG bleibt ausschließlich Engine-Autorität.</td></tr>
-          <tr><td style="padding:9px;border:1px solid #dbe2ea"><strong>SP-044</strong></td><td style="padding:9px;border:1px solid #dbe2ea">Obligatorische Grip-Suche erzeugte vor Abschluss transient zu viel MU.</td><td style="padding:9px;border:1px solid #dbe2ea">Enges Engine-Invariant nur für den exakt gebundenen Choice; Endzustand wieder normal geprüft.</td></tr>
-          <tr><td style="padding:9px;border:1px solid #dbe2ea"><strong>SP-045</strong></td><td style="padding:9px;border:1px solid #dbe2ea">Reife Agenda blieb trotz zwei bezahlbarer Schutzlayer im Schutzloop.</td><td style="padding:9px;border:1px solid #dbe2ea"><code>corp.score_agenda</code> nutzt ein enges Zwei-Layer-Zertifikat; Ein-Layer-Gegenfall bleibt blockiert.</td></tr>
-          <tr><td style="padding:9px;border:1px solid #dbe2ea"><strong>SP-046</strong></td><td style="padding:9px;border:1px solid #dbe2ea">Priority Requisition verlor die gebundene Free-Rez-Continuation.</td><td style="padding:9px;border:1px solid #dbe2ea">Scoreowner bindet das ICE-Ziel vor; Resolver validiert nur Payload und Origin.</td></tr>
-          <tr><td style="padding:9px;border:1px solid #dbe2ea"><strong>SP-048</strong></td><td style="padding:9px;border:1px solid #dbe2ea">CardSpec-Erfolgsrun verlor Ability-/Effect-Identität und DTO-Felder.</td><td style="padding:9px;border:1px solid #dbe2ea">Engine → side-sicheres DTO → <code>runner.convert_run_window</code> durchgängig kanonisch gebunden.</td></tr>
-          <tr><td style="padding:9px;border:1px solid #dbe2ea"><strong>SP-049</strong></td><td style="padding:9px;border:1px solid #dbe2ea">Materialisierte Defense-Action erhielt zugleich eine HQ-Overflow-Ablehnung.</td><td style="padding:9px;border:1px solid #dbe2ea">Owner-Arbitration schützt zuerst exakt materialisierte Defense-Routen.</td></tr>
-          <tr><td style="padding:9px;border:1px solid #dbe2ea"><strong>SP-053</strong></td><td style="padding:9px;border:1px solid #dbe2ea">No-Run-Economy-Hold verdrängte bei gegnerischem Matchpoint alle Runowner.</td><td style="padding:9px;border:1px solid #dbe2ea">Hold gibt nur Autorität frei; Server-/Actionwahl bleibt bei Zentral-/Remote-Runplänen.</td></tr>
+          <tr>
+            <td style="padding: 9px; border: 1px solid #dbe2ea">
+              <strong>SP-042</strong>
+            </td>
+            <td style="padding: 9px; border: 1px solid #dbe2ea">
+              Freiwilliger Ressourcen-Self-Trash ohne Planabdeckung.
+            </td>
+            <td style="padding: 9px; border: 1px solid #dbe2ea">
+              <code>runner.resource_lifecycle</code> klassifiziert den
+              generischen <code>trash_source_action</code>-Vertrag; Finalreplays
+              grün.
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 9px; border: 1px solid #dbe2ea">
+              <strong>SP-043</strong>
+            </td>
+            <td style="padding: 9px; border: 1px solid #dbe2ea">
+              Kanonischer Zufallseffekt fehlte in der Startfenster-Reihenfolge.
+            </td>
+            <td style="padding: 9px; border: 1px solid #dbe2ea">
+              <code>random_effect &gt; credit_loss &gt; credit_gain</code>; RNG
+              bleibt ausschließlich Engine-Autorität.
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 9px; border: 1px solid #dbe2ea">
+              <strong>SP-044</strong>
+            </td>
+            <td style="padding: 9px; border: 1px solid #dbe2ea">
+              Obligatorische Grip-Suche erzeugte vor Abschluss transient zu viel
+              MU.
+            </td>
+            <td style="padding: 9px; border: 1px solid #dbe2ea">
+              Enges Engine-Invariant nur für den exakt gebundenen Choice;
+              Endzustand wieder normal geprüft.
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 9px; border: 1px solid #dbe2ea">
+              <strong>SP-045</strong>
+            </td>
+            <td style="padding: 9px; border: 1px solid #dbe2ea">
+              Reife Agenda blieb trotz zwei bezahlbarer Schutzlayer im
+              Schutzloop.
+            </td>
+            <td style="padding: 9px; border: 1px solid #dbe2ea">
+              <code>corp.score_agenda</code> nutzt ein enges
+              Zwei-Layer-Zertifikat; Ein-Layer-Gegenfall bleibt blockiert.
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 9px; border: 1px solid #dbe2ea">
+              <strong>SP-046</strong>
+            </td>
+            <td style="padding: 9px; border: 1px solid #dbe2ea">
+              Priority Requisition verlor die gebundene Free-Rez-Continuation.
+            </td>
+            <td style="padding: 9px; border: 1px solid #dbe2ea">
+              Scoreowner bindet das ICE-Ziel vor; Resolver validiert nur Payload
+              und Origin.
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 9px; border: 1px solid #dbe2ea">
+              <strong>SP-048</strong>
+            </td>
+            <td style="padding: 9px; border: 1px solid #dbe2ea">
+              CardSpec-Erfolgsrun verlor Ability-/Effect-Identität und
+              DTO-Felder.
+            </td>
+            <td style="padding: 9px; border: 1px solid #dbe2ea">
+              Engine → side-sicheres DTO →
+              <code>runner.convert_run_window</code> durchgängig kanonisch
+              gebunden.
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 9px; border: 1px solid #dbe2ea">
+              <strong>SP-049</strong>
+            </td>
+            <td style="padding: 9px; border: 1px solid #dbe2ea">
+              Materialisierte Defense-Action erhielt zugleich eine
+              HQ-Overflow-Ablehnung.
+            </td>
+            <td style="padding: 9px; border: 1px solid #dbe2ea">
+              Owner-Arbitration schützt zuerst exakt materialisierte
+              Defense-Routen.
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 9px; border: 1px solid #dbe2ea">
+              <strong>SP-053</strong>
+            </td>
+            <td style="padding: 9px; border: 1px solid #dbe2ea">
+              No-Run-Economy-Hold verdrängte bei gegnerischem Matchpoint alle
+              Runowner.
+            </td>
+            <td style="padding: 9px; border: 1px solid #dbe2ea">
+              Hold gibt nur Autorität frei; Server-/Actionwahl bleibt bei
+              Zentral-/Remote-Runplänen.
+            </td>
+          </tr>
         </tbody>
       </table>
 
-      <h2 style="margin:28px 0 10px;color:#172554">4. Gewinner-, Verlierer- und Metaanalyse</h2>
-      <div style="background:#fff;border:1px solid #dbe2ea;border-radius:12px;padding:18px 24px">
-        <ul style="margin:0;padding-left:20px">
-          <li><strong>Runner-Stärke:</strong> Die 13 Runner-Siege entstehen nicht nur durch einen Pfad. HQ-/Archives-Druck, R&amp;D-Multiaccess, Remote-Contest und lange Deckoutlinien treten jeweils auf. Besonders wirksam sind wenige hochwertige Zugriffe, wenn die Corp gleichzeitig Zentralen und Remotes finanzieren muss.</li>
-          <li><strong>Corp-Gegenindikation:</strong> Chrome Rush Bureau gewinnt Zyklus 018 mit 7:0 und 7:5; auch Universal Fast Advance erreicht in allen drei Seeds eigene Scores. Das widerlegt einen pauschalen „Corp kann nicht scoren“-Fix.</li>
-          <li><strong>Wiederkehrendes Risiko:</strong> Mehrere Corp-Niederlagen korrelieren mit knapper Rezliquidität oder zu breiter Verteidigung. Andere Seeds enden jedoch trotz 30 Credits oder mit funktionierender Scorelinie. Ohne exakte dominante Alternative bleibt dies ein strategisches Indiz, kein Sonderpatch.</li>
-          <li><strong>Klare Verhaltensursachen:</strong> Fixwürdig waren nur interne Vertragswidersprüche: fehlende Owner, verlorene Continuations, doppelte Dispositionen und ein höher priorisierter Economy-Hold, der zuständige Runpläne blockierte.</li>
-          <li><strong>Deck/Varianz:</strong> Unterschiedliche Enden – schnelle Agenda-Siege, knappe Matchpoints und Deckouts – zeigen, dass Deckstruktur, Ziehfolge und verborgene Zugriffe einen erheblichen Anteil behalten. Ein verlorenes Spiel allein wurde nie als Bug gewertet.</li>
+      <h2 style="margin: 28px 0 10px; color: #172554">
+        4. Gewinner-, Verlierer- und Metaanalyse
+      </h2>
+      <div
+        style="
+          background: #fff;
+          border: 1px solid #dbe2ea;
+          border-radius: 12px;
+          padding: 18px 24px;
+        "
+      >
+        <ul style="margin: 0; padding-left: 20px">
+          <li>
+            <strong>Runner-Stärke:</strong> Die 13 Runner-Siege entstehen nicht
+            nur durch einen Pfad. HQ-/Archives-Druck, R&amp;D-Multiaccess,
+            Remote-Contest und lange Deckoutlinien treten jeweils auf. Besonders
+            wirksam sind wenige hochwertige Zugriffe, wenn die Corp gleichzeitig
+            Zentralen und Remotes finanzieren muss.
+          </li>
+          <li>
+            <strong>Corp-Gegenindikation:</strong> Chrome Rush Bureau gewinnt
+            Zyklus 018 mit 7:0 und 7:5; auch Universal Fast Advance erreicht in
+            allen drei Seeds eigene Scores. Das widerlegt einen pauschalen „Corp
+            kann nicht scoren“-Fix.
+          </li>
+          <li>
+            <strong>Wiederkehrendes Risiko:</strong> Mehrere Corp-Niederlagen
+            korrelieren mit knapper Rezliquidität oder zu breiter Verteidigung.
+            Andere Seeds enden jedoch trotz 30 Credits oder mit funktionierender
+            Scorelinie. Ohne exakte dominante Alternative bleibt dies ein
+            strategisches Indiz, kein Sonderpatch.
+          </li>
+          <li>
+            <strong>Klare Verhaltensursachen:</strong> Fixwürdig waren nur
+            interne Vertragswidersprüche: fehlende Owner, verlorene
+            Continuations, doppelte Dispositionen und ein höher priorisierter
+            Economy-Hold, der zuständige Runpläne blockierte.
+          </li>
+          <li>
+            <strong>Deck/Varianz:</strong> Unterschiedliche Enden – schnelle
+            Agenda-Siege, knappe Matchpoints und Deckouts – zeigen, dass
+            Deckstruktur, Ziehfolge und verborgene Zugriffe einen erheblichen
+            Anteil behalten. Ein verlorenes Spiel allein wurde nie als Bug
+            gewertet.
+          </li>
         </ul>
       </div>
 
-      <h2 style="margin:28px 0 10px;color:#172554">5. Evidenzmatrix und weitere Entdeckungen</h2>
-      <div style="background:#fff;border:1px solid #dbe2ea;border-radius:12px;padding:18px 24px">
-        <p style="margin-top:0"><span style="display:inline-block;background:#dcfce7;color:#166534;border-radius:999px;padding:3px 9px;font-weight:bold">Behoben/verifiziert</span> SP-042 bis SP-046, SP-048, SP-049 und SP-053 wurden mit reproduzierbaren Seeds, Owner-Tests und frischen Realpfad-Replays geschlossen.</p>
-        <p><span style="display:inline-block;background:#fef3c7;color:#92400e;border-radius:999px;padding:3px 9px;font-weight:bold">Zum Blockstand offen</span> SP-047: Result-Snapshots unterschätzen erfolgreiche Runs gegenüber den vollständigen Access-Run-Snapshots. Der Block bestätigte die Abweichung mehrfach und führte bewusst keinen Berichtsfallback ein. Eine parallel laufende Ursachenarbeit war beim Erstellen dieses Berichts noch nicht Bestandteil des integrierten Stands.</p>
-        <p style="margin-bottom:0"><strong>Nächste Evidenz:</strong> Corp-Liquidität weiter gegen tatsächlich materialisierte Score-/Defense-Routen korrelieren; SP-047 nach Integration des Ursachenfixes mit denselben Seeds erneut prüfen; keine globalen Skilländerungen aus lokalen Laufzeitoptimierungen ableiten.</p>
+      <h2 style="margin: 28px 0 10px; color: #172554">
+        5. Evidenzmatrix und weitere Entdeckungen
+      </h2>
+      <div
+        style="
+          background: #fff;
+          border: 1px solid #dbe2ea;
+          border-radius: 12px;
+          padding: 18px 24px;
+        "
+      >
+        <p style="margin-top: 0">
+          <span
+            style="
+              display: inline-block;
+              background: #dcfce7;
+              color: #166534;
+              border-radius: 999px;
+              padding: 3px 9px;
+              font-weight: bold;
+            "
+            >Behoben/verifiziert</span
+          >
+          SP-042 bis SP-046, SP-048, SP-049 und SP-053 wurden mit
+          reproduzierbaren Seeds, Owner-Tests und frischen Realpfad-Replays
+          geschlossen.
+        </p>
+        <p>
+          <span
+            style="
+              display: inline-block;
+              background: #fef3c7;
+              color: #92400e;
+              border-radius: 999px;
+              padding: 3px 9px;
+              font-weight: bold;
+            "
+            >Zum Blockstand offen</span
+          >
+          SP-047: Result-Snapshots unterschätzen erfolgreiche Runs gegenüber den
+          vollständigen Access-Run-Snapshots. Der Block bestätigte die
+          Abweichung mehrfach und führte bewusst keinen Berichtsfallback ein.
+          Eine parallel laufende Ursachenarbeit war beim Erstellen dieses
+          Berichts noch nicht Bestandteil des integrierten Stands.
+        </p>
+        <p style="margin-bottom: 0">
+          <strong>Nächste Evidenz:</strong> Corp-Liquidität weiter gegen
+          tatsächlich materialisierte Score-/Defense-Routen korrelieren; SP-047
+          nach Integration des Ursachenfixes mit denselben Seeds erneut prüfen;
+          keine globalen Skilländerungen aus lokalen Laufzeitoptimierungen
+          ableiten.
+        </p>
       </div>
 
-      <h2 style="margin:28px 0 10px;color:#172554">6. Architektur, Dokumentation und Verifikation</h2>
-      <div style="background:#fff;border:1px solid #dbe2ea;border-radius:12px;padding:18px 24px">
-        <ul style="margin:0;padding-left:20px">
-          <li>Rules Engine und LegalActions blieben einzige Regel- und Aktionsautorität.</li>
-          <li>Choice-Resolver vervollständigen nur vorgebundene Payloads; keine Server-, Karten- oder Strategieentscheidung wanderte in Resolver.</li>
-          <li>Planfixes sichern Root, Leaf, Step, Executor und Action-ID; es entstand kein paralleler Planner und kein Fallback.</li>
-          <li>Fokussierte Engine-/AI-Tests und relevante Typechecks waren grün; fünf bekannte AI-Typecheck-Baselines sowie historische zustandsbehaftete Planfile-Abweichungen blieben getrennt ausgewiesen.</li>
-          <li>Alle fünf Paarungscommits wurden konfliktfrei lokal nach <code>main</code> integriert und in den persistenten Arbeitsbranch zurücksynchronisiert. Kein Push.</li>
+      <h2 style="margin: 28px 0 10px; color: #172554">
+        6. Architektur, Dokumentation und Verifikation
+      </h2>
+      <div
+        style="
+          background: #fff;
+          border: 1px solid #dbe2ea;
+          border-radius: 12px;
+          padding: 18px 24px;
+        "
+      >
+        <ul style="margin: 0; padding-left: 20px">
+          <li>
+            Rules Engine und LegalActions blieben einzige Regel- und
+            Aktionsautorität.
+          </li>
+          <li>
+            Choice-Resolver vervollständigen nur vorgebundene Payloads; keine
+            Server-, Karten- oder Strategieentscheidung wanderte in Resolver.
+          </li>
+          <li>
+            Planfixes sichern Root, Leaf, Step, Executor und Action-ID; es
+            entstand kein paralleler Planner und kein Fallback.
+          </li>
+          <li>
+            Fokussierte Engine-/AI-Tests und relevante Typechecks waren grün;
+            fünf bekannte AI-Typecheck-Baselines sowie historische
+            zustandsbehaftete Planfile-Abweichungen blieben getrennt
+            ausgewiesen.
+          </li>
+          <li>
+            Alle fünf Paarungscommits wurden konfliktfrei lokal nach
+            <code>main</code> integriert und in den persistenten Arbeitsbranch
+            zurücksynchronisiert. Kein Push.
+          </li>
         </ul>
       </div>
 
-      <h2 style="margin:28px 0 10px;color:#172554">7. Kompakter Reproduktionsanhang</h2>
-      <p style="font-size:13px;color:#526076">Alle Seeds verwenden <code>modern_open</code>, harte KI, Detailtrace und den Pool Originalset + Classic + Proteus. Auswahl: SHA-256 über <code>selectionSeed:side</code> modulo aktiver Standarddeck-Kandidaten.</p>
-      <table style="width:100%;border-collapse:collapse;background:#fff;border:1px solid #dbe2ea;font-size:12px">
-        <thead><tr style="background:#e8eefc;text-align:left"><th style="padding:7px;border:1px solid #dbe2ea">Zyklus/Seed</th><th style="padding:7px;border:1px solid #dbe2ea">Match-ID</th><th style="padding:7px;border:1px solid #dbe2ea">StateHash</th><th style="padding:7px;border:1px solid #dbe2ea">Spielseed</th></tr></thead>
+      <h2 style="margin: 28px 0 10px; color: #172554">
+        7. Kompakter Reproduktionsanhang
+      </h2>
+      <p style="font-size: 13px; color: #526076">
+        Alle Seeds verwenden <code>modern_open</code>, harte KI, Detailtrace und
+        den Pool Originalset + Classic + Proteus. Auswahl: SHA-256 über
+        <code>selectionSeed:side</code> modulo aktiver Standarddeck-Kandidaten.
+      </p>
+      <table
+        style="
+          width: 100%;
+          border-collapse: collapse;
+          background: #fff;
+          border: 1px solid #dbe2ea;
+          font-size: 12px;
+        "
+      >
+        <thead>
+          <tr style="background: #e8eefc; text-align: left">
+            <th style="padding: 7px; border: 1px solid #dbe2ea">Zyklus/Seed</th>
+            <th style="padding: 7px; border: 1px solid #dbe2ea">Match-ID</th>
+            <th style="padding: 7px; border: 1px solid #dbe2ea">StateHash</th>
+            <th style="padding: 7px; border: 1px solid #dbe2ea">Spielseed</th>
+          </tr>
+        </thead>
         <tbody>
-          <tr><td style="padding:7px;border:1px solid #dbe2ea">016/1</td><td style="padding:7px;border:1px solid #dbe2ea"><code>match_d3b1a5e4c78ebe91</code></td><td style="padding:7px;border:1px solid #dbe2ea"><code>fnv1a:651e61df</code></td><td style="padding:7px;border:1px solid #dbe2ea"><code>selfplay-016-54a3d1e334d84dbe9da0a1fe0d598cc1</code></td></tr>
-          <tr><td style="padding:7px;border:1px solid #dbe2ea">016/2</td><td style="padding:7px;border:1px solid #dbe2ea"><code>match_8c5abc8e2ad53b08</code></td><td style="padding:7px;border:1px solid #dbe2ea"><code>fnv1a:02c08ac6</code></td><td style="padding:7px;border:1px solid #dbe2ea"><code>selfplay-016-30432ef7f68144d18d945dc6ca1aa134</code></td></tr>
-          <tr><td style="padding:7px;border:1px solid #dbe2ea">016/3</td><td style="padding:7px;border:1px solid #dbe2ea"><code>match_577792f575c50a93</code></td><td style="padding:7px;border:1px solid #dbe2ea"><code>fnv1a:f1b0d96a</code></td><td style="padding:7px;border:1px solid #dbe2ea"><code>selfplay-016-7a09ffbf610047918431e3e65af8ec29</code></td></tr>
-          <tr><td style="padding:7px;border:1px solid #dbe2ea">017/1–3</td><td style="padding:7px;border:1px solid #dbe2ea"><code>match_3b813bf3dade0d63</code><br /><code>match_8a446ad66e82710e</code><br /><code>match_04886d690d3ff917</code></td><td style="padding:7px;border:1px solid #dbe2ea"><code>fnv1a:5e0e9ea8</code><br /><code>fnv1a:6d9029a9</code><br /><code>fnv1a:9edc3c8e</code></td><td style="padding:7px;border:1px solid #dbe2ea"><code>selfplay-017-02d515cff96f483b8aafdc17b1ac0b2c</code><br /><code>selfplay-017-d160b5635b274a68a2130ebf5ef34ee4</code><br /><code>selfplay-017-0c21b4a3aebd402ca6903048fb65ff44</code></td></tr>
-          <tr><td style="padding:7px;border:1px solid #dbe2ea">018/1–3</td><td style="padding:7px;border:1px solid #dbe2ea"><code>match_ee4ff3e90f1af328</code><br /><code>match_73ca95467746fde9</code><br /><code>match_8e8d8fa7b8772b55</code></td><td style="padding:7px;border:1px solid #dbe2ea"><code>fnv1a:15c1ef41</code><br /><code>fnv1a:f42e9a2c</code><br /><code>fnv1a:b0db5d6c</code></td><td style="padding:7px;border:1px solid #dbe2ea"><code>selfplay-018-9cb673d484b64e1a8d0bbc7edea3b949</code><br /><code>selfplay-018-de9648dfb15a4fbf91e7c8fdf7845ed9</code><br /><code>selfplay-018-cc0b7f510eda4eaebe48bc9312cd181a</code></td></tr>
-          <tr><td style="padding:7px;border:1px solid #dbe2ea">019/1–3</td><td style="padding:7px;border:1px solid #dbe2ea"><code>match_8f653fd3c48a0526</code><br /><code>match_294cecc3d7918cea</code><br /><code>match_387c645a776a834b</code></td><td style="padding:7px;border:1px solid #dbe2ea"><code>fnv1a:064beece</code><br /><code>fnv1a:c90e34af</code><br /><code>fnv1a:c35f659f</code></td><td style="padding:7px;border:1px solid #dbe2ea"><code>selfplay-019-7b622afdf87a451daf20aa2faa2c3471</code><br /><code>selfplay-019-5aa0c35827a0408fb0fbd5cde498da3a</code><br /><code>selfplay-019-918c8e24410847d9a72efb23eb2ac116</code></td></tr>
-          <tr><td style="padding:7px;border:1px solid #dbe2ea">020/1–3</td><td style="padding:7px;border:1px solid #dbe2ea"><code>match_6bc3bdaf2afee4e8</code><br /><code>match_0832954754829205</code><br /><code>match_9fad13ecbda112d9</code></td><td style="padding:7px;border:1px solid #dbe2ea"><code>fnv1a:535640c5</code><br /><code>fnv1a:810860a2</code><br /><code>fnv1a:c87a2687</code></td><td style="padding:7px;border:1px solid #dbe2ea"><code>selfplay-020-64e6d6e34c904b4fbd0e4f2c761d1504</code><br /><code>selfplay-020-bedb70b2ec954080bd3ba718e74f0960</code><br /><code>selfplay-020-11dde778b49a45d0a0a160ddca15d572</code></td></tr>
+          <tr>
+            <td style="padding: 7px; border: 1px solid #dbe2ea">016/1</td>
+            <td style="padding: 7px; border: 1px solid #dbe2ea">
+              <code>match_d3b1a5e4c78ebe91</code>
+            </td>
+            <td style="padding: 7px; border: 1px solid #dbe2ea">
+              <code>fnv1a:651e61df</code>
+            </td>
+            <td style="padding: 7px; border: 1px solid #dbe2ea">
+              <code>selfplay-016-54a3d1e334d84dbe9da0a1fe0d598cc1</code>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 7px; border: 1px solid #dbe2ea">016/2</td>
+            <td style="padding: 7px; border: 1px solid #dbe2ea">
+              <code>match_8c5abc8e2ad53b08</code>
+            </td>
+            <td style="padding: 7px; border: 1px solid #dbe2ea">
+              <code>fnv1a:02c08ac6</code>
+            </td>
+            <td style="padding: 7px; border: 1px solid #dbe2ea">
+              <code>selfplay-016-30432ef7f68144d18d945dc6ca1aa134</code>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 7px; border: 1px solid #dbe2ea">016/3</td>
+            <td style="padding: 7px; border: 1px solid #dbe2ea">
+              <code>match_577792f575c50a93</code>
+            </td>
+            <td style="padding: 7px; border: 1px solid #dbe2ea">
+              <code>fnv1a:f1b0d96a</code>
+            </td>
+            <td style="padding: 7px; border: 1px solid #dbe2ea">
+              <code>selfplay-016-7a09ffbf610047918431e3e65af8ec29</code>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 7px; border: 1px solid #dbe2ea">017/1–3</td>
+            <td style="padding: 7px; border: 1px solid #dbe2ea">
+              <code>match_3b813bf3dade0d63</code><br /><code
+                >match_8a446ad66e82710e</code
+              ><br /><code>match_04886d690d3ff917</code>
+            </td>
+            <td style="padding: 7px; border: 1px solid #dbe2ea">
+              <code>fnv1a:5e0e9ea8</code><br /><code>fnv1a:6d9029a9</code
+              ><br /><code>fnv1a:9edc3c8e</code>
+            </td>
+            <td style="padding: 7px; border: 1px solid #dbe2ea">
+              <code>selfplay-017-02d515cff96f483b8aafdc17b1ac0b2c</code
+              ><br /><code>selfplay-017-d160b5635b274a68a2130ebf5ef34ee4</code
+              ><br /><code>selfplay-017-0c21b4a3aebd402ca6903048fb65ff44</code>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 7px; border: 1px solid #dbe2ea">018/1–3</td>
+            <td style="padding: 7px; border: 1px solid #dbe2ea">
+              <code>match_ee4ff3e90f1af328</code><br /><code
+                >match_73ca95467746fde9</code
+              ><br /><code>match_8e8d8fa7b8772b55</code>
+            </td>
+            <td style="padding: 7px; border: 1px solid #dbe2ea">
+              <code>fnv1a:15c1ef41</code><br /><code>fnv1a:f42e9a2c</code
+              ><br /><code>fnv1a:b0db5d6c</code>
+            </td>
+            <td style="padding: 7px; border: 1px solid #dbe2ea">
+              <code>selfplay-018-9cb673d484b64e1a8d0bbc7edea3b949</code
+              ><br /><code>selfplay-018-de9648dfb15a4fbf91e7c8fdf7845ed9</code
+              ><br /><code>selfplay-018-cc0b7f510eda4eaebe48bc9312cd181a</code>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 7px; border: 1px solid #dbe2ea">019/1–3</td>
+            <td style="padding: 7px; border: 1px solid #dbe2ea">
+              <code>match_8f653fd3c48a0526</code><br /><code
+                >match_294cecc3d7918cea</code
+              ><br /><code>match_387c645a776a834b</code>
+            </td>
+            <td style="padding: 7px; border: 1px solid #dbe2ea">
+              <code>fnv1a:064beece</code><br /><code>fnv1a:c90e34af</code
+              ><br /><code>fnv1a:c35f659f</code>
+            </td>
+            <td style="padding: 7px; border: 1px solid #dbe2ea">
+              <code>selfplay-019-7b622afdf87a451daf20aa2faa2c3471</code
+              ><br /><code>selfplay-019-5aa0c35827a0408fb0fbd5cde498da3a</code
+              ><br /><code>selfplay-019-918c8e24410847d9a72efb23eb2ac116</code>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 7px; border: 1px solid #dbe2ea">020/1–3</td>
+            <td style="padding: 7px; border: 1px solid #dbe2ea">
+              <code>match_6bc3bdaf2afee4e8</code><br /><code
+                >match_0832954754829205</code
+              ><br /><code>match_9fad13ecbda112d9</code>
+            </td>
+            <td style="padding: 7px; border: 1px solid #dbe2ea">
+              <code>fnv1a:535640c5</code><br /><code>fnv1a:810860a2</code
+              ><br /><code>fnv1a:c87a2687</code>
+            </td>
+            <td style="padding: 7px; border: 1px solid #dbe2ea">
+              <code>selfplay-020-64e6d6e34c904b4fbd0e4f2c761d1504</code
+              ><br /><code>selfplay-020-bedb70b2ec954080bd3ba718e74f0960</code
+              ><br /><code>selfplay-020-11dde778b49a45d0a0a160ddca15d572</code>
+            </td>
+          </tr>
         </tbody>
       </table>
-      <p style="font-size:12px;color:#526076"><strong>Deck-Snapshots / Hashes:</strong><br />016: <code>standard_standard_classic_runner_cybernetics_risk_rig_2026_07_01_1.0.0</code> / <code>fnv1a:1e4afea4</code>; <code>standard_standard_corp_mp1ddh7c_1.0.0</code> / <code>fnv1a:0240cc26</code>; Start <code>1364e0aef</code>.<br />017: <code>standard_standard_runner_mit_ansage_der_perfekte_coup_2026_07_09_1.0.0</code> / <code>fnv1a:40d73253</code>; <code>standard_standard_corp_original_speed_v10_1.0.0</code> / <code>fnv1a:45dc454b</code>; Start <code>692a28eaa</code>.<br />018: <code>standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0</code> / <code>fnv1a:d661af9c</code>; <code>standard_standard_corp_chrome_rush_bureau_1.0.0</code> / <code>fnv1a:2ebf0f5c</code>; Start <code>058c4546f</code>.<br />019: derselbe Runner-Snapshot / <code>fnv1a:d661af9c</code>; <code>standard_standard_corp_salazar_toll_road_1.0.0</code> / <code>fnv1a:43b9832e</code>; Start <code>c5d5e0bb5</code>.<br />020: <code>standard_standard_runner_last_call_at_rd_1.0.0</code> / <code>fnv1a:61769222</code>; <code>standard_standard_corp_universal_fast_advance_1.0.0</code> / <code>fnv1a:94aba061</code>; Start <code>ab635a268</code>.</p>
+      <p style="font-size: 12px; color: #526076">
+        <strong>Deck-Snapshots / Hashes:</strong><br />016:
+        <code
+          >standard_standard_classic_runner_cybernetics_risk_rig_2026_07_01_1.0.0</code
+        >
+        / <code>fnv1a:1e4afea4</code>;
+        <code>standard_standard_corp_mp1ddh7c_1.0.0</code> /
+        <code>fnv1a:0240cc26</code>; Start <code>1364e0aef</code>.<br />017:
+        <code
+          >standard_standard_runner_mit_ansage_der_perfekte_coup_2026_07_09_1.0.0</code
+        >
+        / <code>fnv1a:40d73253</code>;
+        <code>standard_standard_corp_original_speed_v10_1.0.0</code> /
+        <code>fnv1a:45dc454b</code>; Start <code>692a28eaa</code>.<br />018:
+        <code
+          >standard_standard_proteus_runner_hidden_sabotage_2026_05_25_1.0.0</code
+        >
+        / <code>fnv1a:d661af9c</code>;
+        <code>standard_standard_corp_chrome_rush_bureau_1.0.0</code> /
+        <code>fnv1a:2ebf0f5c</code>; Start <code>058c4546f</code>.<br />019:
+        derselbe Runner-Snapshot / <code>fnv1a:d661af9c</code>;
+        <code>standard_standard_corp_salazar_toll_road_1.0.0</code> /
+        <code>fnv1a:43b9832e</code>; Start <code>c5d5e0bb5</code>.<br />020:
+        <code>standard_standard_runner_last_call_at_rd_1.0.0</code> /
+        <code>fnv1a:61769222</code>;
+        <code>standard_standard_corp_universal_fast_advance_1.0.0</code> /
+        <code>fnv1a:94aba061</code>; Start <code>ab635a268</code>.
+      </p>
 
-      <div style="margin-top:24px;padding-top:14px;border-top:1px solid #cbd5e1;font-size:12px;color:#64748b">Erstellt am 20.08.2026 aus den integrierten Zyklusreviews 016–020 und der kumulativen KI-Selbstspiel-Indizienmatrix. Keine Rohdatenbank, privaten Volltraces, Sessions oder verdeckten Karteninhalte enthalten.</div>
+      <div
+        style="
+          margin-top: 24px;
+          padding-top: 14px;
+          border-top: 1px solid #cbd5e1;
+          font-size: 12px;
+          color: #64748b;
+        "
+      >
+        Erstellt am 20.08.2026 aus den integrierten Zyklusreviews 016–020 und
+        der kumulativen KI-Selbstspiel-Indizienmatrix. Keine Rohdatenbank,
+        privaten Volltraces, Sessions oder verdeckten Karteninhalte enthalten.
+      </div>
     </div>
   </body>
 </html>

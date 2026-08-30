@@ -24,11 +24,11 @@ des primären Checkouts blieben unangetastet.
 
 ## Ergebnis wie im Programm
 
-| Partie | Endergebnis | Agendapunkte | Ende | Entscheidungen |
-| ------ | ----------: | ------------: | ---- | --------------: |
-| Seed 1 | Runner **10 – 0** Corp | **5:0** | Corp-Deck leer | 361 |
-| Seed 2 | Corp **10 – 5** Runner | **0:5** | Flatline | 165 |
-| Seed 3 | Runner **10 – 0** Corp | **9:0** | Agendapunkte | 259 |
+| Partie |            Endergebnis | Agendapunkte | Ende           | Entscheidungen |
+| ------ | ---------------------: | -----------: | -------------- | -------------: |
+| Seed 1 | Runner **10 – 0** Corp |      **5:0** | Corp-Deck leer |            361 |
+| Seed 2 | Corp **10 – 5** Runner |      **0:5** | Flatline       |            165 |
+| Seed 3 | Runner **10 – 0** Corp |      **9:0** | Agendapunkte   |            259 |
 
 Finale Match-IDs und StateHashes:
 `match_f9651a5892f72b0c` / `fnv1a:e3ee1573`,

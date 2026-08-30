@@ -12037,9 +12037,7 @@
     ],
     "planExecution": {
       "acceptablePlanKinds": ["runner.economy"],
-      "acceptableCapabilities": [
-        "gain_general_liquid_credits"
-      ],
+      "acceptableCapabilities": ["gain_general_liquid_credits"],
       "requiredAssessmentEvidence": ["runner_finite_portfolio_credit_reserve"]
     }
   }
