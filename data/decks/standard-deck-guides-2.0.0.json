@@ -3121,10 +3121,10 @@
     },
     {
       "standardDeckId": "standard_runner_adb10896",
-      "sourceDeckVersion": "1.0.0",
-      "sourceDeckHash": "standard-deck:d8fb54e8",
-      "sourceAnalysisHash": "deck-analysis:dc4b1dcd",
-      "reviewedAt": "2026-08-20",
+      "sourceDeckVersion": "1.1.0",
+      "sourceDeckHash": "standard-deck:fcf8258d",
+      "sourceAnalysisHash": "deck-analysis:4fc81c63",
+      "reviewedAt": "2026-08-30",
       "analysis": {
         "primaryStrategyIds": [
           "runner.run_event_tempo",
@@ -3132,19 +3132,19 @@
           "runner.rnd_pressure"
         ],
         "secondaryStrategyIds": [
-          "runner.search.breaker",
           "runner.rig_first",
+          "runner.search.breaker",
           "runner.interface_closeout"
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:1617b68a",
+      "sourceAnalysisInputHash": "deck-analysis-input:9b420dc6",
       "contentByLocale": {
         "en": {
-          "summary": "King of the Road primarily relies on short run event pace lines, repeated R&D pressure and targeted HQ pressure. In addition, the deck uses a multi-access closure, targeted breaker search and a reliable rig structure.",
+          "summary": "King of the Road primarily relies on short run event pace lines, repeated R&D pressure and targeted HQ pressure. Its breaker suite deliberately covers Barrier, Code Gate and Sentry ICE so that targeted search can close the currently missing route instead of merely adding redundant coverage.",
           "deckIdea": "King of the Road combines short run event pace lines, repeated R&D pressure and targeted HQ pressure. Combine run events with the right goal and use the gained speed in the same turn. Attack R&D repeatedly and turn information or multiaccess into real agenda opportunities. Keep HQ under surveillance and use appropriate access windows before the Korp exploits their hand.",
           "gamePlan": {
-            "opening": "Secure credits first, basic coverage and affordable first access. Pay particular attention to All-Nighter and Custodial Position without leaving an unbalanced starting hand.",
+            "opening": "Secure credits first, basic ICE coverage and an affordable first access. Prefer the breaker subtype that closes an actually exposed route; Hammer and Pile Driver provide the deck's dedicated Barrier coverage.",
             "midgame": "Combine run events with the right goal and use the gained speed in the same turn. Attack R&D repeatedly and turn information or multiaccess into real agenda opportunities. Keep HQ under surveillance and use appropriate access windows before the Korp exploits their hand.",
             "endgame": "Pool your remaining credits into the line with the highest agenda chance. Do not automatically repeat the same run if ICE, tags or damage risk have changed."
           },
@@ -3155,19 +3155,19 @@
               "role": "Carries run event tempo as a concrete deck line and should be saved for a suitable execution window."
             },
             {
-              "cardId": "onr_v1_081_custodial-position",
-              "title": "Custodial Position",
-              "role": "Carries R&D print as a concrete deck line and should be saved for a suitable execution window."
-            },
-            {
-              "cardId": "onr_v1_084_edited-shipping-manifests",
-              "title": "Edited Shipping Manifests",
-              "role": "Carries HQ print as a concrete deck line and should be saved for a suitable execution window."
-            },
-            {
               "cardId": "onr_v1_114_temple-microcode-outlet",
               "title": "Temple Microcode Outlet",
               "role": "Carries breaker search as a concrete deck line and should be saved for a suitable execution window."
+            },
+            {
+              "cardId": "onr_v1_031_hammer",
+              "title": "Hammer",
+              "role": "Provides the efficient everyday Barrier answer and should be installed when Wall coverage opens a concrete run route."
+            },
+            {
+              "cardId": "onr_v1_047_pile-driver",
+              "title": "Pile Driver",
+              "role": "Provides a high-strength Barrier alternative for demanding Walls and complements Hammer instead of duplicating Sentry coverage."
             },
             {
               "cardId": "onr_v1_085_executive-wiretaps",
@@ -3177,7 +3177,8 @@
           ],
           "pilotingTips": [
             "Before each move, check whether the run event tempo still matches the current board or whether an additional line is better prepared.",
-            "Plan run costs and possible punishment together; a legal run is not automatically a good run."
+            "Plan run costs and possible punishment together; a legal run is not automatically a good run.",
+            "Install memory and breakers against current plus near-term coverage demand; do not spend scarce credits or MU on redundant subtypes without a strategic route."
           ],
           "weaknesses": [
             "If All-Nighter and Custodial Position fail or come too late, the deck loses part of its clearest line.",
@@ -3185,10 +3186,10 @@
           ]
         },
         "de": {
-          "summary": "King of the Road setzt vor allem auf kurze Run-Event-Tempolinien, wiederholten R&D-Druck und gezielten HQ-Druck. Ergänzend nutzt das Deck einen Multiaccess-Abschluss, gezielte Breaker-Suche und einen verlässlichen Rig-Aufbau.",
+          "summary": "King of the Road setzt vor allem auf kurze Run-Event-Tempolinien, wiederholten R&D-Druck und gezielten HQ-Druck. Die Breaker-Suite deckt Barrieren, Code Gates und Sentry-ICE bewusst ab, damit die gezielte Suche die aktuell fehlende Route schließt statt nur redundante Coverage aufzubauen.",
           "deckIdea": "King of the Road verbindet kurze Run-Event-Tempolinien, wiederholten R&D-Druck und gezielten HQ-Druck. Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Greife R&D wiederholt an und verwandle Informationen oder Multiaccess in echte Agenda-Chancen. Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet.",
           "gamePlan": {
-            "opening": "Sichere zuerst Credits, Grund-Coverage und einen bezahlbaren ersten Zugriff. Achte besonders auf All-Nighter und Custodial Position, ohne dafür eine unausgewogene Starthand zu behalten.",
+            "opening": "Sichere zuerst Credits, grundlegende ICE-Coverage und einen bezahlbaren ersten Zugriff. Bevorzuge den Breaker-Subtyp, der eine tatsächlich sichtbare Route öffnet; Hammer und Pile Driver bilden die gezielte Barrieren-Abdeckung.",
             "midgame": "Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Greife R&D wiederholt an und verwandle Informationen oder Multiaccess in echte Agenda-Chancen. Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet.",
             "endgame": "Bündele deine verbleibenden Credits in die Linie mit der höchsten Agenda-Chance. Wiederhole nicht automatisch denselben Run, wenn sich ICE, Tags oder Schadensrisiko verändert haben."
           },
@@ -3199,19 +3200,19 @@
               "role": "Trägt Run-Event-Tempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
             },
             {
-              "cardId": "onr_v1_081_custodial-position",
-              "title": "Custodial Position",
-              "role": "Trägt R&D-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
-            },
-            {
-              "cardId": "onr_v1_084_edited-shipping-manifests",
-              "title": "Edited Shipping Manifests",
-              "role": "Trägt HQ-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
-            },
-            {
               "cardId": "onr_v1_114_temple-microcode-outlet",
               "title": "Temple Microcode Outlet",
               "role": "Trägt Breaker-Suche als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+            },
+            {
+              "cardId": "onr_v1_031_hammer",
+              "title": "Hammer",
+              "role": "Ist die effiziente Standardantwort auf Barrieren und sollte installiert werden, wenn Wall-Coverage eine konkrete Run-Route öffnet."
+            },
+            {
+              "cardId": "onr_v1_047_pile-driver",
+              "title": "Pile Driver",
+              "role": "Ist die Alternative mit hoher Grundstärke für anspruchsvolle Walls und ergänzt Hammer, statt Sentry-Coverage weiter zu verdoppeln."
             },
             {
               "cardId": "onr_v1_085_executive-wiretaps",
@@ -3221,7 +3222,8 @@
           ],
           "pilotingTips": [
             "Prüfe vor jedem Zug, ob Run-Event-Tempo noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
-            "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run."
+            "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run.",
+            "Installiere MU und Breaker nach aktuellem sowie absehbarem Coverage-Bedarf; verschwende knappe Credits oder MU nicht ohne strategische Route auf redundante Subtypen."
           ],
           "weaknesses": [
             "Fallen All-Nighter und Custodial Position aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
