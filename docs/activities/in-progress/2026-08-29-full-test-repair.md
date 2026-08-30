@@ -1,6 +1,6 @@
 # Vollständiger Test- und Fehlerbehebungsprozess 2026-08-29
 
-Status: in Arbeit  
+Status: verifiziert, Integration läuft
 Quelle/Vorgabe: Nutzerauftrag vom 2026-08-29
 
 ## Zielprüfung
@@ -201,3 +201,28 @@ abgeschlossen.
 
 - 2026-08-29: P1 gestartet; Wiki-, Agenten-, Git-, Runtime- und
   Worktree-Preflight abgeschlossen.
+- 2026-08-29: P2 abgeschlossen. Installation mit Frozen Lockfile, Lint,
+  Typecheck, `format:changed` und alle einbezogenen `check:*`-Gates sind grün.
+  Der globale historische `format:check` meldet 768 bereits vor diesem Branch
+  vorhandene Dateien. Diese Baseline wurde nicht durch einen fachfremden
+  Massenformatierungs-Commit verändert; sämtliche 92 gegenüber `main`
+  geänderten Dateien erfüllen den Formatvertrag.
+- 2026-08-29: P3 abgeschlossen. Der Root-Testlauf ist vollständig grün:
+  Shared 26, Cards 123, Catalog 26, Engine 2.159, Decks 29, Card Images 65,
+  AI 4.891, Web 978, Server 253 sowie Discovery-/Root-Tests 8. Der zusätzliche
+  AI-Gate-Lauf `test:ai:shards` bestätigt dieselben 4.891 Tests in drei Shards;
+  `test:selfplay-evidence` bestätigt 5 von 5 Registry-Tests.
+- 2026-08-30: P4 abgeschlossen. Der vollständige Workspace-Build ist grün.
+  Der finale isolierte Browserlauf bestätigt 9 von 9 E2E-Szenarien. Die
+  E2E-Verträge wurden an die aktuelle Setup-Beschriftung, den aktuellen
+  Optionen-/Darstellungsworkflow und die öffentliche Deckvalidierung
+  angeglichen. Der Installationsflow bedient überlappende Handkarten über den
+  real sichtbaren Kartenrand und anschließend den Aktionsmarker; es gibt
+  keinen erzwungenen Klick und keine Umgehung der Nutzerinteraktion.
+- 2026-08-30: P5 abgeschlossen. Root-Tests, AI-Shards, statische und
+  strukturelle Gates, Build, vollständiger E2E-Lauf, Selfplay-Evidence,
+  `format:changed` und `git diff --check` sind auf dem finalen Arbeitsbranch
+  grün. Alle Fehlerpakete und Vertragskorrekturen sind einzeln committed.
+- 2026-08-30: P6 aktiv. Als letzter Schritt folgen der Abgleich mit dem
+  aktuellen lokalen `main`, die konfliktnahe Verifikation, die lokale
+  Integration sowie der doppelt verifizierte Worktree- und Branch-Cleanup.
