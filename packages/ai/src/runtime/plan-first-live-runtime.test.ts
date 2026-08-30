@@ -676,6 +676,88 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("keeps a productive optional multi-run event inside central pressure and prefers it to the basic run", () => {
+    resetResidentPlanPortfolioMemory();
+    const allNighterCard = visibleCard(
+      "runner-all-nighter",
+      "runner",
+      "event",
+      {
+        definitionId: "onr_v1_076_all-nighter",
+        title: "All-Nighter",
+      },
+    );
+    const allNighter = legalAction(
+      "runner.play-all-nighter.hq",
+      "runner",
+      "play_event",
+      "All-Nighter auf HQ",
+      { credits: 0, clicks: 1 },
+      {
+        source: allNighterCard.instanceId,
+        payload: {
+          cardId: allNighterCard.instanceId,
+          serverId: "hq",
+          runnerEventRun: true,
+          followupRunOnEnd: "optional",
+          effectKind: "make_run",
+        },
+      },
+    );
+    const basicRun = legalAction(
+      "runner.start-run.hq",
+      "runner",
+      "start_run",
+      "Run HQ",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "hq" } },
+    );
+    const credit = legalAction(
+      "runner.gain-credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [allNighter, basicRun, credit]);
+    input.playerView.own.credits = 12;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.gripOrHq = [allNighterCard];
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    const targetFor = (actionId: string) => ({
+      ...safeRuntimeRunTarget(actionId, "hq"),
+      score: 160,
+      recommendation: "run_if_free" as const,
+      accessPayoff: "fresh" as const,
+      knownAccessState: "unknown" as const,
+      evidence: ["test_productive_hq_probe"],
+    });
+
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => [
+        targetFor(allNighter.actionId),
+        targetFor(basicRun.actionId),
+      ],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: allNighter.actionId,
+      reasonCode: "plan_first.runner.pressure_central",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
+          leafExecutorInstanceId: "plan:runner.pressure_central:central%3Ahq",
+          selectedPlan: {
+            moduleId: "runner.pressure_central",
+          },
+        },
+      },
+    });
+    expect(decision.evidence).toContain("plan_within_class_value:2160");
+    resetResidentPlanPortfolioMemory();
+  });
+
   it("keeps an HQ setup run admissible when its direct access score is negative but it opens a targeted ICE-trash window", () => {
     resetResidentPlanPortfolioMemory();
     const hqRun = legalAction(

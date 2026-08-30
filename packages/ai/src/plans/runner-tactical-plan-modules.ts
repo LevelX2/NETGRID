@@ -70,6 +70,7 @@ export type RunnerPressureSignal = {
   runActionIds?: string[];
   runActionValues?: Record<string, number>;
   runActionEvidence?: Record<string, string[]>;
+  runActionDifferentialPayoffIds?: string[];
   runActionRouteDiagnostics?: Record<string, RunnerRunActionRouteDiagnostic>;
   runActionExclusions?: Record<string, string[]>;
   preparationActionIds?: string[];
@@ -1419,6 +1420,9 @@ function pressureCandidates(
         stepValue: signal.marginalValue,
       }));
   }
+  const exactDifferentialPayoffActionIds = new Set(
+    signal.runActionDifferentialPayoffIds ?? [],
+  );
   const runCandidates = context.actionCandidates.filter(
     (candidate) =>
       (signal.runActionIds?.length
@@ -1443,6 +1447,7 @@ function pressureCandidates(
       (candidate) =>
         candidate.semanticActionType !== "play.runner_event" ||
         !directRunAvailable ||
+        exactDifferentialPayoffActionIds.has(candidate.actionId) ||
         runnerCardRunHasVisibleDifferentialPayoff(
           context.input,
           candidate,
