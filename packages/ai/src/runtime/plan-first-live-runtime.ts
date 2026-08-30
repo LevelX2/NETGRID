@@ -12074,6 +12074,16 @@ function runnerRunTargetCanConvertNow(
   evaluation: RunnerRunTargetEvaluation,
   candidates: readonly ActionSemanticCandidate[],
 ): boolean {
+  const terminalRemoteContestIsDirectlyMandatory =
+    runnerTerminalRemoteContestIsDirectlyMandatory(input, evaluation);
+  // The terminal route already converts if it can pay the known path and
+  // retain liquid credits; a generic post-run floor top-up is not run support.
+  if (
+    terminalRemoteContestIsDirectlyMandatory &&
+    evaluation.creditsAfterRun > 0
+  ) {
+    return true;
+  }
   if (evaluation.prerunReserveQuote?.status === "blocked") {
     return false;
   }
