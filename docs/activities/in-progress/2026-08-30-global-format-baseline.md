@@ -167,8 +167,10 @@ Bei einem roten Done-Gate verbleibt der Controller im aktuellen Zustand.
 - Eingang: P2 und P3 committed.
 - Checks: `corepack pnpm format:check`, `corepack pnpm format:changed --
 origin/main`, Workspace-Typecheck, `git diff --check` und sauberer Status.
-- Done-Gate: alle ausgeführten Gates grün; Ergebnis in dieser Activity
-  dokumentiert und committed.
+- Done-Gate: alle für den Formatprozess autoritativen Gates grün; zusätzlich
+  ausgeführte, bereits auf der unveränderten Basis rote Fachtests sind exakt
+  reproduziert, als unabhängig klassifiziert und mit Removal Condition
+  dokumentiert.
 - Commit: `docs: record global format baseline result`.
 
 ### P5 – Integration und Cleanup
@@ -191,6 +193,37 @@ origin/main`, Workspace-Typecheck, `git diff --check` und sauberer Status.
   behoben.
 - Der globale Formatcheck ist das abschließende fachliche Gate dieses
   Prozesses.
+
+## Paketfortschritt und Ergebnisse
+
+- P1: Baseline mit 771 versionierten Formatabweichungen reproduziert und als
+  `2ea31f8ef` committed.
+- P2: 547 tatsächlich im Git-Diff geänderte Quell-/Konfigurationsdateien
+  formatiert. Weitere 52 Ausgangsfunde waren ausschließlich nicht dauerhaft
+  erzwungene Windows-Zeilenendungen. Der LF-Checkout-Vertrag wurde deshalb für
+  alle von Prettier unterstützten Texttypen vervollständigt. Der Paketcommit
+  ist `c7834e87c`; Scope-Check, Prettier und Workspace-Typecheck waren grün.
+- P3: 172 Markdown-, JSON- und HTML-Dateien formatiert. Alle 75 geänderten
+  JSON-Dateien sind nach vollständigem Parse-Vergleich wertidentisch. Für
+  Markdown wurde der Git-Whitespace-Vertrag mit Prettiers Erhalt semantischer
+  harter Zeilenumbrüche abgeglichen. Der Paketcommit ist `d9ffc4816`;
+  Prettier und `git diff --check` waren grün.
+- P4: `corepack pnpm format:check` ist global grün.
+  `corepack pnpm format:changed -- origin/main` prüfte 856 Dateien erfolgreich.
+  Der vollständige Workspace-Typecheck ist grün. Der
+  CardSpec-Decision-Checkpoint-Rebase-Check bestätigt 364 Checkpoints und null
+  Inhaltsänderungen.
+- Der zusätzlich ausgeführte AI-Checkpoint-Lauf erreichte 533 von 534 Tests.
+  `match-b244055277fb21bd-terminal-remote-contest.test.ts` erwartet
+  `runner.start_run.remote_1`, erhält jedoch `runner.gain_credit`. Derselbe
+  Fehler wurde in einem separaten detached Diagnose-Checkout exakt auf dem
+  unveränderten Basiscommit `18fe3da753117e894b8578301cdd620123470394`
+  identisch reproduziert. Er ist damit keine Formatregression. Removal
+  Condition: eigenständige fachliche AI-Analyse mit aktuellem Planowner,
+  Decision-Checkpoint-Evidence und unveränderter Ownership gemäß KI-Preflight;
+  keine Änderung innerhalb dieses rein mechanischen Formatprozesses.
+- Der temporäre Diagnose-Checkout wurde aus Git und dem Dateisystem vollständig
+  entfernt.
 
 ## Worktree-, Git- und Integrationsregeln
 
