@@ -182,7 +182,7 @@ Abschluss:
 ```text
 /Goal Arbeite den Paketprozess „Lokalisierte Kartenregeltexte und Navigationstooltips“ vollständig und sequenziell von P00 bis P17 ab und merge den abgeschlossenen Arbeitsbranch lokal nach main.
 
-Lies zuerst AGENTS.md, die NETGRID-Wissensbasis und dieses Prozessartefakt.
+Lies zuerst AGENTS.md, `docs/codex/CODEX_STATUS.md`, die einschlägige aktuelle Dokumentation und dieses Prozessartefakt.
 Arbeite ausschließlich im Worktree C:\Projekte\NETGRID_CARD_RULE_TRANSLATIONS auf Branch codex/card-rule-translations-complete.
 Nutze den Hauptworkspace nur für Preflight und finalen Merge.
 Stelle keine Zwischenfragen, solange konservative automatische Fortsetzung möglich ist.

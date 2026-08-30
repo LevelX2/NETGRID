@@ -10,7 +10,7 @@ Goal: Setze Stufe 1 der Kartenbild-Performance- und Architektur-Härtung vollst�
 Pflichtkontext:
 1. Lies AGENTS.md und AGENTS.local.md falls vorhanden.
 2. Gib die aktive Agentenvorgabe aus: release-implementation-agent.
-3. Lies die NETGRID-Wissensbasis-Einstiegsdateien.
+3. Lies `docs/codex/CODEX_STATUS.md` sowie die einschlägigen aktuellen Architektur- und Runbook-Artefakte.
 4. Lies diese Artefakte:
    - docs/architecture/card-images/card-image-performance-architecture-requirements.md
    - docs/releases/mvp/mvp-0-91-card-images/card-image-asset-gate-spec.md

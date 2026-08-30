@@ -364,7 +364,7 @@ von IMG08.1 bis IMG08.5 ab und merge den abgeschlossenen Arbeitsbranch lokal
 nach main.
 
 Lies zuerst AGENTS.md, AGENTS.local.md, die verpflichtenden Seiten aus
-KI-Wissen-NETGRID, agents/release-implementation-agent.md, die paketlokalen
+docs/codex/CODEX_STATUS.md, agents/release-implementation-agent.md, die paketlokalen
 AGENTS.md und dieses Prozessartefakt. Arbeite ausschließlich im Worktree
 C:\Projekte\NETGRID_IMG08_LOCAL_CARD_IMAGE_MANAGEMENT auf Branch
 codex/img08-local-card-image-management. Nutze den Hauptworkspace nur für den
