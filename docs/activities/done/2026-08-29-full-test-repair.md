@@ -1,6 +1,6 @@
 # Vollständiger Test- und Fehlerbehebungsprozess 2026-08-29
 
-Status: verifiziert, Integration läuft
+Status: abgeschlossen
 Quelle/Vorgabe: Nutzerauftrag vom 2026-08-29
 
 ## Zielprüfung
@@ -223,6 +223,13 @@ abgeschlossen.
   strukturelle Gates, Build, vollständiger E2E-Lauf, Selfplay-Evidence,
   `format:changed` und `git diff --check` sind auf dem finalen Arbeitsbranch
   grün. Alle Fehlerpakete und Vertragskorrekturen sind einzeln committed.
-- 2026-08-30: P6 aktiv. Als letzter Schritt folgen der Abgleich mit dem
-  aktuellen lokalen `main`, die konfliktnahe Verifikation, die lokale
-  Integration sowie der doppelt verifizierte Worktree- und Branch-Cleanup.
+- 2026-08-30: P6 abgeschlossen. Der inzwischen um 34 Commits weitergelaufene
+  lokale `main` wurde in den Arbeitsbranch eingebunden. Vier Konflikte in
+  KI-Ownership- und Continuation-Verträgen wurden unter Erhalt beider
+  Intentionen aufgelöst. Danach waren AI-Typecheck, 325 Runtime-Tests,
+  86 Core-/Tactical-Plan-Tests, 9 Coverage-/Doctrine-Tests,
+  `format:changed`, `git diff --check` und erneut alle 9 E2E-Szenarien grün.
+  Der Arbeitsbranch wurde per Fast-Forward lokal in `main` integriert.
+  Der danach weiterhin saubere Arbeits-Worktree und der vollständig gemergte
+  Arbeitsbranch wurden entfernt und die Entfernung in Git und Dateisystem
+  verifiziert.
