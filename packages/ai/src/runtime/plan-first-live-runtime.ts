@@ -15384,8 +15384,7 @@ function buildCorpDomain(
             !(
               centralDefenseAllocation?.status === "known" &&
               centralDefenseAllocation.selectedServerId === serverId &&
-              centralDefenseAllocation.evidence[serverId].threat ===
-                "material"
+              centralDefenseAllocation.evidence[serverId].threat === "material"
             ) &&
             (() => {
               const installedIceCount =
