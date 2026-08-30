@@ -371,6 +371,19 @@ export function corpAmbushAdvanceDispositionEvidence(
   );
   if (!signal || signal.actionIds.includes(candidate.actionId))
     return undefined;
+  if (
+    signal.advancementSupportRoute &&
+    (signal.phase === "install_support" ||
+      signal.phase === "rez_support" ||
+      signal.phase === "trigger_support")
+  ) {
+    return [
+      "corp_ambush_advance_deferred_for_exact_support_route",
+      signal.sourceInstanceId,
+      signal.phase,
+      signal.advancementSupportRoute.actionId,
+    ].join(":");
+  }
   if (signal.phase !== "trigger") return undefined;
   return [
     "corp_ambush_advance_target_already_reached",

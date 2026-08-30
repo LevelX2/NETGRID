@@ -353,6 +353,88 @@ describe("Corp ambush plan signal duplicate scope", () => {
       viability: "ready",
     });
   });
+
+  it("reconciles a new-remote Vacant Soulkiller install into its exact advance route", () => {
+    const source = visibleCard(
+      "corp_onr_v1_346_vacant-soulkiller_1",
+      "corp",
+      "asset",
+      {
+        definitionId: "onr_v1_346_vacant-soulkiller",
+        title: "Vacant Soulkiller",
+        advancementCounters: 0,
+      },
+    );
+    const advance = legalAction(
+      `corp.advance_card.${source.instanceId}.${source.instanceId}`,
+      "corp",
+      "advance_card",
+      "Advance Vacant Soulkiller",
+      { credits: 1, clicks: 1 },
+      {
+        source: source.instanceId,
+        payload: { cardId: source.instanceId },
+      },
+    );
+    const input = aiInput("corp", [advance]);
+    input.playerView.own.credits = 10;
+    input.playerView.own.clicks = 2;
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_3", [], [source]),
+    ];
+    const candidates = buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "corp",
+      stateVersion: input.playerView.stateVersion,
+      visibleSourceDefinitionsByInstanceId: {
+        [source.instanceId]: source.definitionId!,
+      },
+    });
+    const previous = {
+      instances: [
+        {
+          instanceId: `plan:corp.ambush_and_bluff:ambush%3A${source.instanceId}`,
+          moduleId: "corp.ambush_and_bluff",
+          viability: "ready",
+          moduleState: {
+            kind: "ambush",
+            signal: {
+              commitmentVersion: CORP_AMBUSH_COMMITMENT_VERSION,
+              ambushId: `ambush:${source.instanceId}`,
+              sourceDefinitionId: source.definitionId,
+              sourceInstanceId: source.instanceId,
+              actionIds: [
+                `corp.install_card.${source.instanceId}.new_remote.${source.instanceId}`,
+              ],
+              serverId: "new_remote",
+              phase: "install",
+              purposeCode: `establish_ambush:${source.definitionId}:new_remote`,
+              assignedDomainPlanIds: ["corp.ambush_bluff"],
+              duplicateAlreadyInstalled: false,
+              affordableOrSupportable: true,
+              plannedAtStateVersion: input.playerView.stateVersion - 1,
+              plannedAdvancementTarget: 2,
+              value: 180,
+              evidenceCode: `corp_ambush_preplanned_exact_install:${source.definitionId}:new_remote`,
+            },
+          },
+        },
+      ],
+    } as unknown as ResidentPlanPortfolio;
+
+    expect(buildCorpAmbushPlanSignals({ input, candidates, previous })).toEqual([
+      expect.objectContaining({
+        sourceInstanceId: source.instanceId,
+        serverId: "remote_3",
+        phase: "advance",
+        actionIds: [advance.actionId],
+        plannedAdvancementTarget: 2,
+      }),
+    ]);
+  });
 });
 
 describe("Corp compromised Ambush disposition", () => {
@@ -497,7 +579,18 @@ describe("Corp Ambush advancement support ownership", () => {
         },
       },
     );
-    const input = aiInput("corp", [install]);
+    const advance = legalAction(
+      "advance-vacant-soulkiller",
+      "corp",
+      "advance_card",
+      "Advance Vacant Soulkiller",
+      { credits: 1, clicks: 1 },
+      {
+        source: trap.instanceId,
+        payload: { cardId: trap.instanceId },
+      },
+    );
+    const input = aiInput("corp", [install, advance]);
     input.playerView.own.credits = 6;
     input.playerView.own.gripOrHq = [support];
     input.playerView.servers = [
@@ -508,6 +601,14 @@ describe("Corp Ambush advancement support ownership", () => {
     ];
     setAmbushIntent(input);
 
+    const advanceCandidate = buildActionSemanticCandidates({
+      legalActions: [advance],
+      observerSide: "corp",
+      stateVersion: input.playerView.stateVersion,
+      visibleSourceDefinitionsByInstanceId: {
+        [trap.instanceId]: trap.definitionId!,
+      },
+    })[0]!;
     const [signal] = buildCorpAmbushPlanSignals({
       input,
       candidates: [
@@ -517,6 +618,7 @@ describe("Corp Ambush advancement support ownership", () => {
           support.definitionId!,
           "remote_1",
         ),
+        advanceCandidate,
       ],
       previous: ambushSupportPrevious(input, trap),
     });
@@ -535,6 +637,11 @@ describe("Corp Ambush advancement support ownership", () => {
         serverId: "remote_1",
       },
     });
+    expect(
+      corpAmbushAdvanceDispositionEvidence(advanceCandidate, [signal!]),
+    ).toBe(
+      `corp_ambush_advance_deferred_for_exact_support_route:${trap.instanceId}:install_support:${install.actionId}`,
+    );
   });
 
   it("binds the exact support trigger and Ambush target without changing the resident root", () => {

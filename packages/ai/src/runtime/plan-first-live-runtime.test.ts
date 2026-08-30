@@ -29154,6 +29154,206 @@ describe("plan-bound Trace success-cancel continuation", () => {
   });
 });
 
+describe("match_f291a822af543d48 Corp Ambush continuation", () => {
+  it("keeps the resident Vacant Soulkiller plan as owner after a new-remote install", () => {
+    resetResidentPlanPortfolioMemory();
+    const source = visibleCard(
+      "corp_onr_v1_346_vacant-soulkiller_1",
+      "corp",
+      "asset",
+      {
+        definitionId: "onr_v1_346_vacant-soulkiller",
+        title: "Vacant Soulkiller",
+        advancementCounters: 0,
+      },
+    );
+    const support = visibleCard(
+      "corp_onr_proteus_062_lesley-major_1",
+      "corp",
+      "upgrade",
+      {
+        definitionId: "onr_proteus_062_lesley-major",
+        title: "Lesley Major",
+      },
+    );
+    const install = legalAction(
+      `corp.install_card.${source.instanceId}.new_remote.${source.instanceId}`,
+      "corp",
+      "install_card",
+      "Install Vacant Soulkiller in a new remote",
+      { credits: 0, clicks: 1 },
+      {
+        source: source.instanceId,
+        payload: {
+          cardId: source.instanceId,
+          serverId: "new_remote",
+          placement: "root",
+        },
+      },
+    );
+    const first = aiInput("corp", [install]);
+    first.playerView.own.credits = 10;
+    first.playerView.own.clicks = 2;
+    first.playerView.own.gripOrHq = [source, support];
+    first.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+    ];
+    (first as AiDecisionInputWithDeckCapabilities).ownCorpStrategicIntent = {
+      schemaVersion: "corp-strategic-intent-profile-v1",
+      side: "corp",
+      source: {
+        deckStrategyProfile: "ai_internal_strategy_profile",
+        deckCapabilities: "ai_internal",
+        strategicIntentState: "strategic_intent_state_v1",
+        plannerEffect: "runtime_projection",
+      },
+      primaryWinIntent: "corp.punish_runner",
+      scorePlan: [],
+      defensePlan: [],
+      economyPlan: [],
+      enginePlan: [],
+      punishPlan: ["corp.ambush_bluff"],
+      riskProfile: [],
+      rejectedIntents: [],
+      confidence: "high",
+      evidence: ["match_f291_corp_ambush_strategy_active"],
+    } satisfies CorpStrategicIntentProfile;
+    const context = liveContext();
+
+    expect(context.chooseSemanticRuntimeAction(first, {})).toMatchObject({
+      actionId: install.actionId,
+      reasonCode: "plan_first.corp.ambush_and_bluff",
+      fallbackUsed: false,
+    });
+    const installedPortfolio = residentPlanPortfolioSnapshot(first);
+    expect(installedPortfolio).toMatchObject({
+      rootForegroundInstanceId: expect.stringContaining(
+        "plan:corp.ambush_and_bluff:",
+      ),
+      executorInstanceId: expect.stringContaining(
+        "plan:corp.ambush_and_bluff:",
+      ),
+      turnPlanExecutionLease: {
+        currentBinding: { actionId: install.actionId },
+      },
+    });
+
+    const advance = legalAction(
+      `corp.advance_card.${source.instanceId}.${source.instanceId}`,
+      "corp",
+      "advance_card",
+      "Advance Vacant Soulkiller",
+      { credits: 1, clicks: 1 },
+      {
+        source: source.instanceId,
+        payload: { cardId: source.instanceId },
+      },
+    );
+    const installSupport = legalAction(
+      `corp.install_card.${support.instanceId}.remote_3.${support.instanceId}`,
+      "corp",
+      "install_card",
+      "Install Lesley Major in Remote 3",
+      { credits: 0, clicks: 1 },
+      {
+        source: support.instanceId,
+        payload: {
+          cardId: support.instanceId,
+          serverId: "remote_3",
+          placement: "root",
+        },
+      },
+    );
+    const virusTestSite = visibleCard(
+      "corp_onr_v1_348_virus-test-site_2",
+      "corp",
+      "asset",
+      {
+        definitionId: "onr_v1_348_virus-test-site",
+        title: "Virus Test Site",
+        advancementCounters: 0,
+      },
+    );
+    const vaporOps = visibleCard(
+      "corp_onr_v1_347_vapor-ops_2",
+      "corp",
+      "asset",
+      {
+        definitionId: "onr_v1_347_vapor-ops",
+        title: "Vapor Ops",
+        advancementCounters: 0,
+      },
+    );
+    const advanceVirusTestSite = legalAction(
+      `corp.advance_card.${virusTestSite.instanceId}.${virusTestSite.instanceId}`,
+      "corp",
+      "advance_card",
+      "Advance Virus Test Site",
+      { credits: 1, clicks: 1 },
+      {
+        source: virusTestSite.instanceId,
+        payload: { cardId: virusTestSite.instanceId },
+      },
+    );
+    const advanceVaporOps = legalAction(
+      `corp.advance_card.${vaporOps.instanceId}.${vaporOps.instanceId}`,
+      "corp",
+      "advance_card",
+      "Advance Vapor Ops",
+      { credits: 1, clicks: 1 },
+      {
+        source: vaporOps.instanceId,
+        payload: { cardId: vaporOps.instanceId },
+      },
+    );
+    const second = structuredClone(first);
+    second.playerView.stateVersion = 2;
+    second.actionNumber = 2;
+    second.playerView.own.clicks = 1;
+    second.playerView.own.gripOrHq = [support];
+    second.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [], [virusTestSite]),
+      server("remote_2", [], [vaporOps]),
+      server("remote_3", [], [source]),
+    ];
+    for (const action of [
+      advance,
+      advanceVirusTestSite,
+      advanceVaporOps,
+      installSupport,
+    ]) {
+      action.expiresAtStateVersion = 2;
+    }
+    second.legalActions = [
+      advanceVirusTestSite,
+      advanceVaporOps,
+      advance,
+      installSupport,
+    ];
+    second.playerView.legalActions = second.legalActions;
+    Object.assign(second, {
+      planningStateIdentity: buildPlanningStateIdentity(second),
+    });
+
+    expect(context.chooseSemanticRuntimeAction(second, {})).toMatchObject({
+      actionId: installSupport.actionId,
+      reasonCode: "plan_first.corp.ambush_and_bluff",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId: installedPortfolio?.rootForegroundInstanceId,
+          leafExecutorInstanceId: installedPortfolio?.executorInstanceId,
+        },
+      },
+    });
+  });
+});
+
 function liveContext(overrides: Record<string, unknown> = {}) {
   const dependencies = {
     buildActionSemanticCandidates,
