@@ -758,6 +758,79 @@ describe("authoritative plan-first live runtime", () => {
     resetResidentPlanPortfolioMemory();
   });
 
+  it("keeps a successful-run economy event owned by the existing central pressure plan", () => {
+    resetResidentPlanPortfolioMemory();
+    const shippingCard = visibleCard(
+      "runner-edited-shipping",
+      "runner",
+      "event",
+      {
+        definitionId: "onr_v1_084_edited-shipping-manifests",
+        title: "Edited Shipping Manifests",
+      },
+    );
+    const shippingRun = legalAction(
+      "runner.play-edited-shipping.hq",
+      "runner",
+      "play_event",
+      "Edited Shipping Manifests auf HQ",
+      { credits: 1, clicks: 1 },
+      {
+        source: shippingCard.instanceId,
+        payload: {
+          cardId: shippingCard.instanceId,
+          sourceDefinitionId: "onr_v1_084_edited-shipping-manifests",
+          serverId: "hq",
+          runnerEventRun: true,
+          cardImplementationAbilityKey: "abilities_on_play_make_run",
+        },
+      },
+    );
+    const basicRun = legalAction(
+      "runner.start-run.hq",
+      "runner",
+      "start_run",
+      "Run HQ",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "hq" } },
+    );
+    const input = aiInput("runner", [shippingRun, basicRun]);
+    input.playerView.own.credits = 5;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.gripOrHq = [shippingCard];
+    input.playerView.opponent.credits = 5;
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    const targetFor = (actionId: string, score: number) => ({
+      ...safeRuntimeRunTarget(actionId, "hq"),
+      score,
+      recommendation: "run_now" as const,
+      accessPayoff: "access_bonus" as const,
+      knownAccessState: "unknown" as const,
+      evidence: ["test_successful_run_economy_payoff"],
+    });
+
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => [
+        targetFor(shippingRun.actionId, 240),
+        targetFor(basicRun.actionId, 160),
+      ],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: shippingRun.actionId,
+      reasonCode: "plan_first.runner.pressure_central",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId: "plan:runner.pressure_central:central%3Ahq",
+          leafExecutorInstanceId: "plan:runner.pressure_central:central%3Ahq",
+          selectedPlan: { moduleId: "runner.pressure_central" },
+        },
+      },
+    });
+    resetResidentPlanPortfolioMemory();
+  });
+
   it("keeps an HQ setup run admissible when its direct access score is negative but it opens a targeted ICE-trash window", () => {
     resetResidentPlanPortfolioMemory();
     const hqRun = legalAction(
@@ -20635,6 +20708,133 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("funds the known path before taking central last-chance pressure against a terminal remote", () => {
+    resetResidentPlanPortfolioMemory();
+    const runRd = legalAction(
+      "run-rd-terminal-funding-alternative",
+      "runner",
+      "start_run",
+      "Run R&D",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "rd" } },
+    );
+    const runRemote = legalAction(
+      "run-remote-terminal-known-path-gap",
+      "runner",
+      "start_run",
+      "Run Remote 1",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "remote_1" } },
+    );
+    const credit = legalAction(
+      "credit-terminal-known-path-gap",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [runRd, runRemote, credit]);
+    input.playerView.own.agendaPoints = 6;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.credits = 6;
+    input.playerView.opponent.agendaPoints = 4;
+    input.playerView.opponent.credits = 3;
+    input.playerView.opponent.deckCount = 8;
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "remote_1",
+        [
+          visibleCard("remote-known-ice", "corp", "ice"),
+          {
+            instanceId: "remote-hidden-ice",
+            owner: "corp",
+            controller: "corp",
+            type: "ice",
+            known: false,
+          },
+        ],
+        [
+          {
+            instanceId: "terminal-remote-root",
+            owner: "corp",
+            controller: "corp",
+            type: "agenda",
+            known: false,
+            advancementCounters: 1,
+          },
+        ],
+      ),
+    ];
+    const rdTarget = {
+      ...safeRuntimeRunTarget(runRd.actionId, "rd"),
+      accessPayoff: "unknown" as const,
+      knownAccessState: "unknown" as const,
+      recommendation: "gain_credits_first" as const,
+      score: -40,
+    };
+    const remoteTarget = {
+      ...safeRuntimeRunTarget(runRemote.actionId, "remote_1"),
+      targetKind: "remote" as const,
+      accessTargetKind: "remote" as const,
+      accessPayoff: "score_threat" as const,
+      knownAccessState: "unknown" as const,
+      pathPassability: "blocked_unpayable" as const,
+      pathCost: 7,
+      creditsAfterRun: -1,
+      unknownUnrezzedIceCount: 1,
+      scoreThreat: true,
+      recommendation: "gain_credits_first" as const,
+      score: -80,
+      routeQuote: {
+        ...safeRuntimeRunTarget(runRemote.actionId, "remote_1").routeQuote,
+        reachability: "no_access" as const,
+        knownCost: 7,
+        guaranteedKnownCost: 7,
+        availableCredits: 6,
+        fundingGap: 1,
+        unknownIceCount: 1,
+        noAccessReason: "insufficient_credits" as const,
+      },
+      fundingNeed: {
+        reason: "route_funding_gap" as const,
+        routeFundingGap: 1,
+        postRunFloorGap: 17,
+        protectedLiquidReserve: 16,
+      },
+    };
+
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => [rdTarget, remoteTarget],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.economy",
+        planFirstDecision: {
+          rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+          leafExecutorInstanceId:
+            "plan:runner.economy:run-support%3Aremote%3Aremote_1",
+          selectedStep: {
+            stepId: expect.stringContaining(
+              ":fund:run-support:remote:remote_1",
+            ),
+          },
+        },
+        evidence: expect.arrayContaining([
+          expect.stringContaining(
+            "runner_run_support_terminal_last_chance_known_path_gap:remote_1:1",
+          ),
+        ]),
+      },
+    });
+  });
+
   it("uses existing central pressure for a last-chance access when the terminal remote is unreachable", () => {
     resetResidentPlanPortfolioMemory();
     const runHq = legalAction(
@@ -24945,7 +25145,7 @@ describe("authoritative plan-first live runtime", () => {
           },
         ],
         upgradeQuote: {
-          schemaVersion: "runner-breaker-upgrade-economic-quote-v1",
+          schemaVersion: "runner-breaker-upgrade-economic-quote-v2",
           targetDefinitionId: "onr_v1_053_ramming-piston",
           currentKnownPathCost: 10,
           savingsPerRun: expect.any(Number),
@@ -24954,6 +25154,155 @@ describe("authoritative plan-first live runtime", () => {
         },
       },
     });
+  });
+
+  it("prepares the cheapest sufficient MU support for an amortizing breaker upgrade", () => {
+    resetResidentPlanPortfolioMemory();
+    const wuTech = legalAction(
+      "install-wutech-for-wall-upgrade",
+      "runner",
+      "install_card",
+      "Install WuTech Mem Chip",
+      { credits: 1, clicks: 1 },
+      {
+        source: "wutech-card",
+        payload: {
+          cardId: "wutech-card",
+          sourceDefinitionId: "onr_v1_145_wutech-mem-chip",
+        },
+      },
+    );
+    const tycho = legalAction(
+      "install-tycho-for-wall-upgrade",
+      "runner",
+      "install_card",
+      "Install Tycho Mem Chip",
+      { credits: 5, clicks: 1 },
+      {
+        source: "tycho-card",
+        payload: {
+          cardId: "tycho-card",
+          sourceDefinitionId: "onr_v1_144_tycho-mem-chip",
+        },
+      },
+    );
+    const rammingPiston = legalAction(
+      "install-ramming-piston.runner_program_trash_before_install",
+      "runner",
+      "install_card",
+      "Trash a program and install Ramming Piston",
+      { credits: 4, clicks: 1 },
+      {
+        source: "ramming-piston-card",
+        payload: {
+          cardId: "ramming-piston-card",
+          sourceDefinitionId: "onr_v1_053_ramming-piston",
+          runnerProgramTrashBeforeInstall: true,
+        },
+      },
+    );
+    const run = costIneffectiveWallRunAction();
+    const credit = costIneffectiveCoverageCreditAction();
+    const input = costIneffectiveWallInput([
+      wuTech,
+      tycho,
+      rammingPiston,
+      run,
+      credit,
+    ]);
+    input.playerView.stateVersion = 12;
+    input.playerView.turnSerial = 3;
+    input.playerView.own.credits = 22;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.memoryUsed = 4;
+    input.playerView.own.memoryLimit = 4;
+    input.playerView.own.gripOrHq = [
+      visibleCard("ramming-piston-card", "runner", "program", {
+        definitionId: "onr_v1_053_ramming-piston",
+        title: "Ramming Piston",
+        installCost: 4,
+        memoryCost: 1,
+        strength: 5,
+        subtypes: ["icebreaker", "noisy"],
+      }),
+      visibleCard("wutech-card", "runner", "hardware", {
+        definitionId: "onr_v1_145_wutech-mem-chip",
+        title: "WuTech Mem Chip",
+        installCost: 1,
+        memoryLimitBonus: 1,
+      }),
+      visibleCard("tycho-card", "runner", "hardware", {
+        definitionId: "onr_v1_144_tycho-mem-chip",
+        title: "Tycho Mem Chip",
+        installCost: 5,
+        memoryLimitBonus: 3,
+      }),
+    ];
+    for (const action of input.legalActions) action.expiresAtStateVersion = 12;
+    input.playerView.legalActions = input.legalActions;
+    const blockedTarget = costIneffectiveWallTarget(run.actionId);
+    const target = {
+      ...blockedTarget,
+      pathPassability: "reachable" as const,
+      recommendation: "run_now" as const,
+      creditsAfterRun: 12,
+      score: 220,
+      runActionProjection: {
+        ...blockedTarget.runActionProjection,
+        sourceKind: "basic_action" as const,
+      },
+      routeQuote: {
+        ...blockedTarget.routeQuote,
+        reachability: "guaranteed_access" as const,
+        availableCredits: 22,
+        fundingGap: 0,
+      },
+    };
+
+    const decision = liveContext({
+      deckCapabilitiesForInput: () =>
+        costIneffectiveCoverageCapabilities("in_hand"),
+      buildRunnerEconomyPosture: midgameUpgradeEconomyPosture,
+      evaluateRunnerRunTargets: () => [target],
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: wuTech.actionId,
+      reasonCode: "plan_first.runner.rig_and_coverage",
+      fallbackUsed: false,
+      decisionDebug: { planKind: "runner.rig_and_coverage" },
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_step_capability:prepare_breaker_wall",
+        "plan_assessment_evidence:coverage_upgrade_memory_support:onr_v1_145_wutech-mem-chip",
+      ]),
+    );
+    expect(
+      residentPlanPortfolioSnapshot(input)?.instances.find(
+        (instance) => instance.moduleId === "runner.rig_and_coverage",
+      )?.moduleState,
+    ).toMatchObject({
+      phase: "prepare_coverage",
+      gap: {
+        needKind: "coverage_upgrade",
+        memorySupportActionIds: [wuTech.actionId],
+        preparationActionIds: [wuTech.actionId],
+        upgradeQuote: {
+          schemaVersion: "runner-breaker-upgrade-economic-quote-v2",
+          targetDefinitionId: "onr_v1_053_ramming-piston",
+          memoryAvailable: 0,
+          memorySupportAdditionalMu: 1,
+          memorySupportCreditCost: 1,
+          projectedMemoryAvailable: 1,
+        },
+      },
+    });
+    expect(
+      decision.decisionDebug?.actionAlternatives?.find(
+        (alternative) => alternative.actionId === tycho.actionId,
+      )?.selected,
+    ).not.toBe(true);
   });
 
   it("does not let Central-plan priority rescue a non-amortizing upgrade", () => {

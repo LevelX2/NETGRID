@@ -27,6 +27,8 @@ const WILSON_DEFINITION_ID = "onr_v1_187_wilson-weeflerunner-apprentice";
 const ALL_HANDS_DEFINITION_ID = "onr_proteus_101_all-hands";
 const RUSH_HOUR_DEFINITION_ID = "onr_proteus_122_rush-hour";
 const ALL_NIGHTER_DEFINITION_ID = "onr_v1_076_all-nighter";
+const EDITED_SHIPPING_MANIFESTS_DEFINITION_ID =
+  "onr_v1_084_edited-shipping-manifests";
 const SHREDDER_UPLINK_PROTOCOL_DEFINITION_ID =
   "onr_v1_062_shredder-uplink-protocol";
 const KRASH_DEFINITION_ID = "onr_v1_039_krash";
@@ -2230,6 +2232,60 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       },
     });
     expect(evaluation.evidence).toContain("run_action_payoff:rd:multiaccess");
+  });
+
+  it("values bound successful-run economy only while its visible condition can pay", () => {
+    const editedShippingAction = runEventAction(
+      "edited-shipping-hq",
+      EDITED_SHIPPING_MANIFESTS_DEFINITION_ID,
+      "Edited Shipping Manifests",
+      {
+        serverId: "hq",
+        runnerEventRun: true,
+        cardImplementationAbilityKey: "abilities_on_play_make_run",
+      },
+    );
+    const eligibleInput = aiInput({
+      credits: 5,
+      opponentCredits: 5,
+      servers: [server("hq")],
+      legalActions: [editedShippingAction, runAction("basic-hq", "hq")],
+    });
+    const ineligibleInput = aiInput({
+      credits: 5,
+      opponentCredits: 0,
+      servers: [server("hq")],
+      legalActions: [editedShippingAction, runAction("basic-hq", "hq")],
+    });
+
+    const eligible = evaluateRunnerRunTargets({ input: eligibleInput });
+    const ineligible = evaluateRunnerRunTargets({ input: ineligibleInput });
+    const eligibleShipping = eligible.find(
+      (evaluation) => evaluation.actionId === "edited-shipping-hq",
+    );
+    const eligibleBasic = eligible.find(
+      (evaluation) => evaluation.actionId === "basic-hq",
+    );
+    const ineligibleShipping = ineligible.find(
+      (evaluation) => evaluation.actionId === "edited-shipping-hq",
+    );
+    const ineligibleBasic = ineligible.find(
+      (evaluation) => evaluation.actionId === "basic-hq",
+    );
+
+    expect(eligibleShipping?.score).toBeGreaterThan(eligibleBasic?.score ?? 0);
+    expect(eligibleShipping?.evidence).toEqual(
+      expect.arrayContaining([
+        "run_action_payoff:hq:successful_run_credit_gain:10",
+        "run_action_payoff:hq:successful_run_credit_gain_currently_eligible:true",
+      ]),
+    );
+    expect(ineligibleShipping?.score).toBeLessThanOrEqual(
+      ineligibleBasic?.score ?? 0,
+    );
+    expect(ineligibleShipping?.evidence).toContain(
+      "run_action_payoff:hq:successful_run_credit_gain_currently_eligible:false",
+    );
   });
 
   it("quotes a paid run event against the known path after paying the event cost", () => {

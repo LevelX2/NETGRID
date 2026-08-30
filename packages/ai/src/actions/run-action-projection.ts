@@ -68,6 +68,11 @@ export function projectInternalRunnerRunActions(
     const runnerCreditGainOnCorpRez = numberPayloadValue(action, [
       "runnerCreditGainOnCorpRez",
     ]);
+    const successfulRunRunnerCreditGain =
+      successfulRunRunnerCreditGainForRunAction(action, hint);
+    const successfulRunRunnerCreditGainRequiresOpponentCredits =
+      successfulRunRunnerCreditGain !== undefined &&
+      hint?.riskTags?.includes("corp_empty_credit_pool_whiff") === true;
     const damagePreventionPool = numberPayloadValue(action, [
       "damagePreventionPool",
     ]);
@@ -108,6 +113,12 @@ export function projectInternalRunnerRunActions(
       ...(corpRezCostSurcharge ? { corpRezCostSurcharge } : {}),
       ...(runnerCreditGainOnCorpRez !== undefined
         ? { runnerCreditGainOnCorpRez }
+        : {}),
+      ...(successfulRunRunnerCreditGain !== undefined
+        ? {
+            successfulRunRunnerCreditGain,
+            successfulRunRunnerCreditGainRequiresOpponentCredits,
+          }
         : {}),
       ...(damagePreventionPool !== undefined ? { damagePreventionPool } : {}),
       ...(booleanPayloadValue(action, "eventApproachIceExposeBeforeRez")
@@ -266,6 +277,12 @@ function runActionProjectionEvidence(
     ...(projection.runnerCreditGainOnCorpRez !== undefined
       ? [
           `run_action_projection_runner_credit_gain_on_corp_rez:${projection.runnerCreditGainOnCorpRez}`,
+        ]
+      : []),
+    ...(projection.successfulRunRunnerCreditGain !== undefined
+      ? [
+          `run_action_projection_successful_run_runner_credit_gain:${projection.successfulRunRunnerCreditGain}`,
+          `run_action_projection_successful_run_runner_credit_gain_requires_opponent_credits:${projection.successfulRunRunnerCreditGainRequiresOpponentCredits === true}`,
         ]
       : []),
     ...(projection.damagePreventionPool !== undefined
@@ -447,6 +464,36 @@ function runActionSignals(
     ...(hint?.tacticSignals ?? []),
     ...effectSignals,
   ]).filter((signal) => signal.length > 0);
+}
+
+function successfulRunRunnerCreditGainForRunAction(
+  action: LegalAction,
+  hint: AiCardHint | undefined,
+): number | undefined {
+  const capabilityKey = stringPayloadValue(
+    action,
+    "cardImplementationAbilityKey",
+  );
+  if (!capabilityKey) return undefined;
+  const capability = hint?.actionCapabilitySemantics?.find(
+    (entry) => entry.capabilityKey === capabilityKey,
+  );
+  if (!capability) return undefined;
+  const total = (capability.effects ?? []).reduce((sum, effect) => {
+    if (
+      effect.kind !== "economy" ||
+      effect.scope !== "runner" ||
+      effect.timing !== "successful_run" ||
+      effect.resource !== "credits" ||
+      typeof effect.amount !== "number" ||
+      !Number.isFinite(effect.amount) ||
+      effect.amount <= 0
+    ) {
+      return sum;
+    }
+    return sum + effect.amount;
+  }, 0);
+  return total > 0 ? total : undefined;
 }
 
 function effectTarget(

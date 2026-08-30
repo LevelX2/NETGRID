@@ -168,12 +168,21 @@ export function bindRunnerRigDemandProjectionToCoverageGaps(params: {
     }
   }
   return params.coverageGaps.map((gap) => {
-    const actionIds = params.projection.roleDemands.flatMap((demand) =>
-      demand.sourceNeedId === (gap.requesterNeedId ?? gap.gapId) &&
-      demand.capabilityId.startsWith("memory_capacity_general:")
-        ? (legalMemoryInstallIdsByDemand.get(demand.demandId) ?? [])
-        : [],
+    const projectedActionIds = params.projection.roleDemands.flatMap(
+      (demand) =>
+        demand.sourceNeedId === (gap.requesterNeedId ?? gap.gapId) &&
+        demand.capabilityId.startsWith("memory_capacity_general:")
+          ? (legalMemoryInstallIdsByDemand.get(demand.demandId) ?? [])
+          : [],
     );
+    const preAdmittedActionIds = gap.memorySupportActionIds
+      ? new Set(gap.memorySupportActionIds)
+      : undefined;
+    const actionIds = preAdmittedActionIds
+      ? projectedActionIds.filter((actionId) =>
+          preAdmittedActionIds.has(actionId),
+        )
+      : projectedActionIds;
     if (actionIds.length === 0) return gap;
     const memorySupportActionIds = [...new Set(actionIds)].sort();
     return {
@@ -201,8 +210,17 @@ function coverageProvidersForGap(
 ): RunnerRigDemandProviderInput[] {
   const runner = params.deckCapabilities.runner;
   if (!runner) return [];
+  const exactUpgradeDefinitionId =
+    gap.needKind === "coverage_upgrade"
+      ? gap.upgradeQuote?.targetDefinitionId
+      : undefined;
   const providers = runner.breakerInventory
-    .filter((breaker) => breakerCoversGap(breaker, gap.requiredRole))
+    .filter(
+      (breaker) =>
+        breakerCoversGap(breaker, gap.requiredRole) &&
+        (!exactUpgradeDefinitionId ||
+          breaker.cardId === exactUpgradeDefinitionId),
+    )
     .flatMap((breaker) => {
       const provider = breakerProvider(params, gap, breaker);
       return provider ? [provider] : [];

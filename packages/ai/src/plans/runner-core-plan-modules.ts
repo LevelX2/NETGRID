@@ -169,7 +169,7 @@ export type RunnerCoverageGapSignal = {
     | "search_known_upgrade";
   recoveryEvidenceCodes?: string[];
   upgradeQuote?: {
-    schemaVersion: "runner-breaker-upgrade-economic-quote-v1";
+    schemaVersion: "runner-breaker-upgrade-economic-quote-v2";
     targetDefinitionId: string;
     currentKnownPathCost: number;
     projectedKnownPathCost: number;
@@ -183,6 +183,10 @@ export type RunnerCoverageGapSignal = {
     projectedLiquidCreditsAfterUpgradeAndRun: number;
     desiredCreditReserve: number;
     memoryAvailable: number;
+    memorySupportAdditionalMu: number;
+    memorySupportCreditCost: number;
+    memorySupportActionClicks: number;
+    projectedMemoryAvailable: number;
     candidateMemoryCost: number;
   };
   fundingActionIds: string[];
@@ -1382,12 +1386,18 @@ function economyModule(): PlanModule {
         );
       }
       const need = economyState.need;
+      const parentMaterialValue =
+        need.kind === "parent_plan_support"
+          ? portfolio.instances
+              .map((candidate) =>
+                runnerFundingParentMaterialValue(candidate, need),
+              )
+              .find((value): value is number => value !== undefined)
+          : undefined;
       const parentIsResidentAndMaterial =
         need.kind === "portfolio_reserve" ||
         need.kind === "develop_liquidity" ||
-        portfolio.instances.some((candidate) =>
-          runnerFundingParentIsResidentAndMaterial(candidate, need),
-        );
+        parentMaterialValue !== undefined;
       const supportContractValid = validRunnerFundingNeedContract(
         need,
         context.input.playerView.stateVersion,
@@ -1400,7 +1410,9 @@ function economyModule(): PlanModule {
         instance,
         need.priorityClass,
         routeExists,
-        need.kind === "develop_liquidity" ? -9_999 : need.gap * 10,
+        need.kind === "develop_liquidity"
+          ? -9_999
+          : (parentMaterialValue ?? need.gap * 10),
         portfolio.executorInstanceId,
       );
       if (!parentIsResidentAndMaterial && need.kind === "parent_plan_support") {
@@ -1424,7 +1436,7 @@ function economyModule(): PlanModule {
       }
       return result;
     },
-    materialize: (instance, _assessment, context) => {
+    materialize: (instance, currentAssessment, context) => {
       const economyState = state<EconomyState>(instance);
       if (economyState.kind === "installed_card_liquidation_choice") {
         const signal = economyState.signal;
@@ -1446,7 +1458,17 @@ function economyModule(): PlanModule {
         };
       }
       const need = economyState.need;
-      const candidates = economyCandidates(context, need);
+      const candidates = economyCandidates(context, need).map((entry) =>
+        need.kind === "parent_plan_support"
+          ? {
+              ...entry,
+              stepValue: Math.max(
+                entry.stepValue,
+                currentAssessment.withinClassValue,
+              ),
+            }
+          : entry,
+      );
       return {
         step: {
           stepId: `${instance.instanceId}:fund:${need.needId}`,
@@ -2195,15 +2217,15 @@ export function runnerExactBasicLiquidCreditCandidate(
   );
 }
 
-function runnerFundingParentIsResidentAndMaterial(
+function runnerFundingParentMaterialValue(
   candidate: PlanInstance,
   need: Extract<RunnerFundingNeedSignal, { kind: "parent_plan_support" }>,
-): boolean {
+): number | undefined {
   if (
     candidate.instanceId !== need.parentPlanInstanceId ||
     (candidate.viability !== "ready" && candidate.viability !== "blocked")
   ) {
-    return false;
+    return undefined;
   }
   const moduleState = candidate.moduleState as
     | {
@@ -2221,14 +2243,22 @@ function runnerFundingParentIsResidentAndMaterial(
         blocker.code === "waiting_for_bound_funding_support" &&
         blocker.resumeCondition?.code === need.needId,
     );
-  return (
-    waitsOnlyForThisFunding &&
-    moduleState?.signal?.supportNeedId === need.needId &&
-    ((typeof moduleState.signal.marginalValue === "number" &&
-      moduleState.signal.marginalValue > 0) ||
-      (typeof moduleState.signal.value === "number" &&
-        moduleState.signal.value > 0))
-  );
+  if (
+    !waitsOnlyForThisFunding ||
+    moduleState?.signal?.supportNeedId !== need.needId
+  ) {
+    return undefined;
+  }
+  if (
+    typeof moduleState.signal.marginalValue === "number" &&
+    moduleState.signal.marginalValue > 0
+  ) {
+    return moduleState.signal.marginalValue;
+  }
+  return typeof moduleState.signal.value === "number" &&
+    moduleState.signal.value > 0
+    ? moduleState.signal.value
+    : undefined;
 }
 
 function shellTradersPipelineCandidates(
