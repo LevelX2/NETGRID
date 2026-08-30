@@ -42,8 +42,8 @@ describe("deck card image fallback", () => {
     expect(source).toContain(
       "const [tooltipImageUnavailable, setTooltipImageUnavailable] = useState(false)",
     );
-    expect(source).toContain(
-      'tooltipMode === "image" ? "enhanced" : tooltipMode',
+    expect(source).toMatch(
+      /tooltipMode\s*===\s*"image"\s*\?\s*"enhanced"\s*:\s*tooltipMode/,
     );
     expect(source).toContain(
       "onUnavailable={() => setTooltipImageUnavailable(true)}",
