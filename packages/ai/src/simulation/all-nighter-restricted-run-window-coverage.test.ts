@@ -44,7 +44,7 @@ describe("All-Nighter restricted run-window plan-first coverage", () => {
     if (!capture) {
       expect(
         summary.actionSequence.some((entry) =>
-          entry.actionId?.includes("onr_v1_076_all-nighter"),
+          entry.selectedActionId?.includes("onr_v1_076_all-nighter"),
         ),
       ).toBe(false);
       expect(summary.errors).toEqual([]);
