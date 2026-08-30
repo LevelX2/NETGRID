@@ -3561,7 +3561,7 @@
     },
     {
       "standardDeckId": "standard_runner_adb10896",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "active",
       "name": "King of the Road",
       "side": "runner",
@@ -3571,7 +3571,7 @@
       "cards": [
         {
           "cardId": "onr_v1_006_black-dahlia",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_016_cyfermaster",
@@ -3587,11 +3587,19 @@
         },
         {
           "cardId": "onr_v1_054_raptor",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_060_shaka",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_031_hammer",
           "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_047_pile-driver",
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_070_tinweasel",
@@ -3689,7 +3697,7 @@
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_runner_adb10896",
-        "sourceDeckVersion": "0.6.0-local"
+        "sourceDeckVersion": "0.7.0-local"
       }
     },
     {
