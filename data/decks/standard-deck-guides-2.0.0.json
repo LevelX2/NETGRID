@@ -2,7 +2,7 @@
   "schemaVersion": "netgrid-standard-deck-guides-v2",
   "guideSetId": "netgrid-standard-deck-guides-2.0.0",
   "catalogId": "netgrid-standard-decks-1.0.0",
-  "analyzedAt": "2026-08-29",
+  "analyzedAt": "2026-08-30",
   "guides": [
     {
       "standardDeckId": "standard_corp_cheap_bag_tricks",
@@ -555,10 +555,10 @@
     },
     {
       "standardDeckId": "standard_corp_mr96xg94",
-      "sourceDeckVersion": "1.1.0",
-      "sourceDeckHash": "standard-deck:b00ad3a2",
-      "sourceAnalysisHash": "deck-analysis:9cef28ad",
-      "reviewedAt": "2026-08-20",
+      "sourceDeckVersion": "1.2.0",
+      "sourceDeckHash": "standard-deck:b27802eb",
+      "sourceAnalysisHash": "deck-analysis:66ba169e",
+      "reviewedAt": "2026-08-30",
       "analysis": {
         "primaryStrategyIds": [
           "corp.overadvance_value",
@@ -566,21 +566,21 @@
           "corp.remote_scoring"
         ],
         "secondaryStrategyIds": [
-          "corp.ambush_bluff",
           "corp.action_tempo",
           "corp.fast_advance",
+          "corp.ambush_bluff",
           "corp.asset_economy",
           "corp.rush_score"
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:39d1b84b",
+      "sourceAnalysisInputHash": "deck-analysis-input:ddf6219c",
       "contentByLocale": {
         "en": {
           "summary": "Fast Advance, Baby relies primarily on taxing ICE layers, targeted overadvance values and a protected remote scoring line. Additionally, the deck uses uncertain remotes with ambush pressure, accelerated scoring, a distributed asset economy, early rush scoring windows and concrete flatline pressure.",
           "deckIdea": "Fast Advance, Baby combines taxing ICE layers, targeted overadvance value and a protected remote scoring line. Stagger ICE so that the Runner has to pay repeatedly and your scoring window actually gets bigger. Only use additional advancement counters if their bonus justifies the delayed score. Establish a credible scoring remote and only deploy agendas when protection and follow-up moves match up.",
           "gamePlan": {
-            "opening": "First secure economy, a sensible early ICE pattern and a credit reserve. Pay particular attention to Caryatid and Lesley Major without leaving an unbalanced starting hand.",
+            "opening": "First secure economy, a sensible early ICE pattern and a credit reserve. Pay particular attention to Caryatid and Vapor Ops without leaving an unbalanced starting hand.",
             "midgame": "Stagger ICE so that the Runner has to pay repeatedly and your scoring window actually gets bigger. Only use additional advancement counters if their bonus justifies the delayed score. Establish a credible scoring remote and only deploy agendas when protection and follow-up moves match up.",
             "endgame": "Complete using the safest available scoring or flatline window. Have enough reserves so that the decisive move doesn't fail due to Rez, Trace or Advancement costs."
           },
@@ -591,8 +591,8 @@
               "role": "Carries ICE tax glacier as a concrete deck line and should be saved for a suitable execution window."
             },
             {
-              "cardId": "onr_proteus_062_lesley-major",
-              "title": "Lesley Major",
+              "cardId": "onr_v1_347_vapor-ops",
+              "title": "Vapor Ops",
               "role": "Carries Fast Advance as a concrete deck line and should be saved for a suitable execution window."
             },
             {
@@ -616,7 +616,7 @@
             "Don't just rezz because you can; every expenditure should improve a specific access, tempo or score window."
           ],
           "weaknesses": [
-            "If Caryatid and Lesley Major fail or come too late, the deck loses part of its clearest line.",
+            "If Caryatid and Vapor Ops fail or come too late, the deck loses part of its clearest line.",
             "Multiple simultaneous main lines can disperse credits and actions. Decide for each turn which plan actually fits the current board."
           ]
         },
@@ -624,7 +624,7 @@
           "summary": "Fast Advance, Baby setzt vor allem auf taxierende ICE-Staffeln, gezielten Overadvance-Wert und eine geschützte Remote-Scorelinie. Ergänzend nutzt das Deck unsichere Remotes mit Ambush-Druck, beschleunigtes Scoring, eine verteilte Asset-Economy, frühe Rush-Scorefenster und konkreten Flatline-Druck.",
           "deckIdea": "Fast Advance, Baby verbindet taxierende ICE-Staffeln, gezielten Overadvance-Wert und eine geschützte Remote-Scorelinie. Staffele ICE so, dass der Runner wiederholt zahlen muss und dein Scoringfenster tatsächlich größer wird. Nutze zusätzliche Advancement Counter nur, wenn ihr Bonus den verzögerten Score rechtfertigt. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen.",
           "gamePlan": {
-            "opening": "Sichere zuerst Economy, ein sinnvolles frühes ICE-Muster und eine Creditreserve. Achte besonders auf Caryatid und Lesley Major, ohne dafür eine unausgewogene Starthand zu behalten.",
+            "opening": "Sichere zuerst Economy, ein sinnvolles frühes ICE-Muster und eine Creditreserve. Achte besonders auf Caryatid und Vapor Ops, ohne dafür eine unausgewogene Starthand zu behalten.",
             "midgame": "Staffele ICE so, dass der Runner wiederholt zahlen muss und dein Scoringfenster tatsächlich größer wird. Nutze zusätzliche Advancement Counter nur, wenn ihr Bonus den verzögerten Score rechtfertigt. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen.",
             "endgame": "Schließe über das sicherste reale Score- oder Flatlinefenster ab. Halte genug Reserve, damit der entscheidende Zug nicht an Rez-, Trace- oder Advancement-Kosten scheitert."
           },
@@ -635,8 +635,8 @@
               "role": "Trägt ICE-Tax-Glacier als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
             },
             {
-              "cardId": "onr_proteus_062_lesley-major",
-              "title": "Lesley Major",
+              "cardId": "onr_v1_347_vapor-ops",
+              "title": "Vapor Ops",
               "role": "Trägt Fast Advance als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
             },
             {
@@ -660,7 +660,7 @@
             "Rezze nicht nur, weil es möglich ist; jede Ausgabe soll ein konkretes Zugriffs-, Tempo- oder Scorefenster verbessern."
           ],
           "weaknesses": [
-            "Fallen Caryatid und Lesley Major aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+            "Fallen Caryatid und Vapor Ops aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
             "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
           ]
         }

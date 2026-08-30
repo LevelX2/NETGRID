@@ -76,7 +76,14 @@ export type CorpAmbushSignal = {
   sourceInstanceId: string;
   actionIds: string[];
   serverId: string;
-  phase: "install" | "advance" | "trigger" | "recycle";
+  phase:
+    | "install"
+    | "install_support"
+    | "advance"
+    | "rez_support"
+    | "trigger_support"
+    | "trigger"
+    | "recycle";
   patternKind?: "access_ambush" | "score_decoy";
   followupAgendaInstanceId?: string;
   runnerCreditsAtPlanStart?: number;
@@ -101,6 +108,15 @@ export type CorpAmbushSignal = {
     recyclerSourceInstanceId: string;
     recyclerSourceDefinitionId: string;
     targetCardInstanceId: string;
+  };
+  advancementSupportRoute?: {
+    phase: "install" | "rez" | "trigger";
+    actionId: string;
+    supportSourceInstanceId: string;
+    supportSourceDefinitionId: string;
+    targetCardInstanceId: string;
+    serverId: string;
+    creditCost: number;
   };
   installRoute?: {
     actionId: string;
@@ -634,7 +650,9 @@ function ambushModule(): PlanModule {
       }
       const resourceGaps = ambushRootResourceGaps(current.signal);
       const exactCurrentTrigger =
-        current.signal.phase === "trigger" &&
+        (current.signal.phase === "trigger" ||
+          current.signal.phase === "trigger_support" ||
+          current.signal.phase === "rez_support") &&
         ambushCandidates(context, current.signal).length > 0;
       return assessment(
         instance,
@@ -663,18 +681,32 @@ function ambushModule(): PlanModule {
                 : "ambush_setup"
               : `ambush_${current.signal.phase}`,
             semanticActionTypes: ambushSemanticTypes(current.signal.phase),
-            requiredSourceDefinitionIds:
-              current.signal.phase === "recycle" && current.signal.recycleRoute
+            requiredSourceDefinitionIds: current.signal.advancementSupportRoute
+              ? [
+                  current.signal.advancementSupportRoute
+                    .supportSourceDefinitionId,
+                ]
+              : current.signal.phase === "recycle" &&
+                  current.signal.recycleRoute
                 ? [current.signal.recycleRoute.recyclerSourceDefinitionId]
                 : [current.signal.sourceDefinitionId],
           },
           target:
-            current.signal.phase === "install"
+            current.signal.phase === "install" ||
+            current.signal.phase === "install_support"
               ? { kind: "server", id: current.signal.serverId }
-              : {
-                  kind: "card",
-                  id: current.signal.sourceInstanceId,
-                },
+              : (current.signal.phase === "rez_support" ||
+                    current.signal.phase === "trigger_support") &&
+                  current.signal.advancementSupportRoute
+                ? {
+                    kind: "card",
+                    id: current.signal.advancementSupportRoute
+                      .supportSourceInstanceId,
+                  }
+                : {
+                    kind: "card",
+                    id: current.signal.sourceInstanceId,
+                  },
           purpose: `Execute admitted ambush purpose ${current.signal.purposeCode ?? "domain assigned"}.`,
         },
         candidates: ambushCandidates(context, current.signal),
@@ -684,7 +716,10 @@ function ambushModule(): PlanModule {
 }
 
 function ambushPriority(signal: CorpAmbushSignal): "P3" | "P4" | "P5" {
-  if (signal.phase === "trigger") return "P3";
+  if (signal.phase === "trigger" || signal.phase === "trigger_support")
+    return "P3";
+  if (signal.phase === "rez_support") return "P3";
+  if (signal.phase === "install_support") return "P4";
   if (signal.phase === "recycle") return "P4";
   if (signal.phase === "advance") return "P4";
   return "P5";
@@ -1061,9 +1096,11 @@ function purgeCandidates(
 }
 
 function ambushSemanticTypes(phase: CorpAmbushSignal["phase"]): string[] {
-  if (phase === "install") return ["install.card"];
+  if (phase === "install" || phase === "install_support")
+    return ["install.card"];
   if (phase === "advance") return ["score.advance_card"];
   if (phase === "recycle") return ["corp_board.return_installed_card_to_hq"];
+  if (phase === "rez_support") return ["corp_window.rez"];
   return ["corp_window.rez", "card_ability.trigger"];
 }
 

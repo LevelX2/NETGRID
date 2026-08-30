@@ -59,8 +59,9 @@ const allowedCardIdUses = createAllowances([
     relativePath: "runtime/plan-first-live-runtime.ts",
     cardId: "onr_v1_358_dr-dreff",
     category: "lifecycle_binding",
+    expectedCount: 2,
     reason:
-      "The definition ID validates the visible rezzed source of Dr. Dreff's already selected resolution choice.",
+      "The definition ID validates both the resident delayed-success plan source and the visible rezzed source of Dr. Dreff's already selected resolution choice.",
   },
   {
     relativePath: "runtime/selected-choices-for-decision.ts",

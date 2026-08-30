@@ -300,6 +300,80 @@ describe("Runner targeted rezzed-ICE trash plan", () => {
     });
   });
 
+  it("binds a Corp rez-or-trash event to an unrezzed ICE on the current pressure server and values low Corp credits", () => {
+    const input = planningInput({
+      ice: [
+        blockingIce("rd-wall", "wall", 1),
+        unrezzedIce("rd-hidden-inner"),
+        unrezzedIce("rd-hidden-outer"),
+      ],
+    });
+    input.playerView.opponent.credits = 1;
+    const candidate = canonicalForgedCandidate();
+    const commitment = runnerTargetedIceTrashPlanCommitment({
+      input,
+      candidate,
+      planTargets: [
+        {
+          ownerModuleId: "runner.pressure_central",
+          ownerDedupeKey: "central:rd",
+          serverId: "rd",
+          payoffValue: 120,
+        },
+      ],
+    });
+
+    expect(runnerActionRequiresTargetedIceTrashPlan(candidate)).toBe(true);
+    expect(runnerGenericDevelopmentMayOwnAction(candidate)).toBe(false);
+    expect(commitment).toMatchObject({
+      ownerModuleId: "runner.pressure_central",
+      ownerDedupeKey: "central:rd",
+      serverId: "rd",
+      targetIceState: "rez_or_trash",
+      targetIceInstanceId: "rd-hidden-outer",
+      targetIcePosition: 2,
+      evidenceCodes: expect.arrayContaining([
+        "runner_targeted_ice_trash_corp_credits:1",
+        "runner_targeted_ice_trash_corp_credit_pressure_value:80",
+      ]),
+    });
+
+    const portfolio = pressurePortfolio(commitment!);
+    const result = {
+      lane: "plan",
+      route: {
+        planInstanceId: portfolio.executorInstanceId,
+        step: {},
+        head: {
+          planInstanceId: portfolio.executorInstanceId,
+          stepId: "force-rez-or-trash",
+          actionId: candidate.actionId,
+          actionType: candidate.actionType,
+          semanticActionType: candidate.semanticActionType,
+          stateVersion: 10,
+        },
+      },
+      portfolio,
+      diagnostics: [],
+    } as unknown as Parameters<
+      typeof bindSelectedRunnerTargetedIceTrashChoiceContinuation
+    >[1];
+    bindSelectedRunnerTargetedIceTrashChoiceContinuation(input, result, [
+      candidate,
+    ]);
+    rememberResidentPlanPortfolio(input, portfolio);
+    const choiceInput = targetedRezOrTrashChoiceInput();
+
+    expect(
+      selectedRunnerTargetedIceTrashChoiceOptionId(
+        choiceInput,
+        resolveChoiceAction(),
+        choiceInput.playerView.pendingChoice!,
+        choiceInput.playerView.pendingChoice!.options,
+      ),
+    ).toBe("ice_3");
+  });
+
   it("fails closed when generic development selects the targeted action or the planned ICE is absent", () => {
     const input = planningInput();
     const candidate = targetedTrashCandidate();
@@ -419,6 +493,44 @@ function targetedUnrezzedTrashCandidate(): ActionSemanticCandidate {
       ],
     },
   } as unknown as ActionSemanticCandidate;
+}
+
+function canonicalForgedCandidate(): ActionSemanticCandidate {
+  const action = {
+    actionId:
+      "runner.play_event.forged-1.forged-1.onr_v1_086_forged-activation-orders:abilities_on_play_corp_choice_rez_or_trash_ice",
+    type: "play_event",
+    side: "runner",
+    label: "Forged Activation Orders spielen",
+    source: "forged-1",
+    timingPoint: "runner_action.main",
+    costs: [{ clicks: 1, credits: 1 }],
+    targetRequirements: [],
+    visibility: "private_to_actor",
+    expiresAtStateVersion: 10,
+    abilityRef: {
+      sourceCardInstanceId: "forged-1",
+      sourceAbilityId:
+        "onr_v1_086_forged-activation-orders:abilities_on_play_corp_choice_rez_or_trash_ice",
+    },
+    payload: {
+      cardId: "forged-1",
+      cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+      cardImplementationAbilityKey:
+        "abilities_on_play_corp_choice_rez_or_trash_ice",
+      cardImplementationAbilityId:
+        "onr_v1_086_forged-activation-orders:abilities_on_play_corp_choice_rez_or_trash_ice",
+    },
+  } satisfies LegalAction;
+  const [candidate] = buildActionSemanticCandidates({
+    legalActions: [action],
+    observerSide: "runner",
+    stateVersion: 10,
+    cardSemanticProfilesByDefinitionId:
+      buildActionCardSemanticProfilesByDefinitionId(),
+  });
+  if (!candidate) throw new Error("Missing canonical Forged candidate");
+  return candidate;
 }
 
 function planningInput(
@@ -610,6 +722,16 @@ function targetedUnrezzedChoiceInput(): AiDecisionInput {
     ...input.playerView.pendingChoice!,
     choiceId: "trash-unrezzed-ice-11",
     source: "card_implementation.trash_unrezzed_ice:worm-1:11",
+  };
+  return input;
+}
+
+function targetedRezOrTrashChoiceInput(): AiDecisionInput {
+  const input = targetedUnrezzedChoiceInput();
+  input.playerView.pendingChoice = {
+    ...input.playerView.pendingChoice!,
+    source:
+      "card_implementation.corp_choice_rez_or_trash_ice_target:forged-1:11",
   };
   return input;
 }

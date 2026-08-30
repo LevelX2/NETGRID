@@ -710,7 +710,7 @@
     },
     {
       "standardDeckId": "standard_corp_mr96xg94",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "status": "active",
       "name": "Fast Advance, Baby",
       "side": "corp",
@@ -734,10 +734,6 @@
         },
         {
           "cardId": "onr_proteus_021_dog-pile",
-          "quantity": 1
-        },
-        {
-          "cardId": "onr_proteus_062_lesley-major",
           "quantity": 1
         },
         {
@@ -822,7 +818,7 @@
         },
         {
           "cardId": "onr_v1_347_vapor-ops",
-          "quantity": 1
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_366_red-herrings",
@@ -832,7 +828,7 @@
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_mr96xg94",
-        "sourceDeckVersion": "1.1.0-strategy-legal-2026-08-20"
+        "sourceDeckVersion": "1.2.0-user-approved-2026-08-30"
       }
     },
     {

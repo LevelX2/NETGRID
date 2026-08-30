@@ -286,9 +286,10 @@ function visibleGripAmbushSignal(
   const serverId = selected?.serverId ?? previous?.serverId ?? "new_remote";
   const plannedAtStateVersion =
     previous?.plannedAtStateVersion ?? input.playerView.stateVersion;
-  const plannedAdvancementTarget =
-    previous?.plannedAdvancementTarget ??
-    ambushAdvancementTarget(source.definitionId!);
+  const plannedAdvancementTarget = Math.max(
+    previous?.plannedAdvancementTarget ?? 0,
+    ambushAdvancementTarget(input, source.definitionId!),
+  );
   const fundingGap = selected
     ? Math.max(0, selected.creditCost - input.playerView.own.credits)
     : undefined;
@@ -576,7 +577,16 @@ function continuedAmbushSignals(params: {
         `Resident ambush ${sourceInstanceId} has ambiguous advancement actions.`,
       );
     }
+    const supportRoute = ambushAdvancementSupportRoute({
+      input: params.input,
+      candidates: params.candidates,
+      sourceInstanceId,
+      serverId: location.serverId,
+      currentCounters,
+      advancementTarget,
+    });
     const selectRecycle =
+      supportRoute === undefined &&
       exactTriggerCandidate === undefined &&
       runnerKnowledge !== undefined &&
       recycleCandidate !== undefined &&
@@ -584,6 +594,7 @@ function continuedAmbushSignals(params: {
       knownThreatWeak &&
       recycleValue > holdValue;
     const selected =
+      supportRoute?.candidate ??
       exactTriggerCandidate ??
       (selectRecycle
         ? recycleCandidate
@@ -591,47 +602,75 @@ function continuedAmbushSignals(params: {
           ? advanceCandidates[0]
           : undefined);
     const phase =
-      exactTriggerCandidate !== undefined
-        ? ("trigger" as const)
-        : selectRecycle
-          ? ("recycle" as const)
-          : currentCounters < advancementTarget
-            ? ("advance" as const)
-            : ("trigger" as const);
+      supportRoute?.phase === "install"
+        ? ("install_support" as const)
+        : supportRoute?.phase === "rez"
+          ? ("rez_support" as const)
+          : supportRoute?.phase === "trigger"
+            ? ("trigger_support" as const)
+            : exactTriggerCandidate !== undefined
+              ? ("trigger" as const)
+              : selectRecycle
+                ? ("recycle" as const)
+                : currentCounters < advancementTarget
+                  ? ("advance" as const)
+                  : ("trigger" as const);
+    const {
+      advancementSupportRoute: _previousAdvancementSupportRoute,
+      ...retainedSignal
+    } = signal as CorpAmbushSignal;
     return [
       {
-        ...(signal as CorpAmbushSignal),
+        ...retainedSignal,
         serverId: location.serverId,
         phase,
         actionIds: selected ? [selected.actionId] : [],
         purposeCode:
-          phase === "recycle"
-            ? "recycle_compromised_ambush_to_hq"
-            : phase === "advance"
-              ? `advance_committed_ambush_to:${advancementTarget}`
-              : "wait_for_or_convert_committed_ambush_access",
+          phase === "install_support"
+            ? `install_ambush_advancement_support:${sourceInstanceId}:${location.serverId}`
+            : phase === "rez_support"
+              ? `rez_ambush_advancement_support:${sourceInstanceId}:${location.serverId}`
+              : phase === "trigger_support"
+                ? `convert_ambush_advancement_support:${sourceInstanceId}:${location.serverId}`
+                : phase === "recycle"
+                  ? "recycle_compromised_ambush_to_hq"
+                  : phase === "advance"
+                    ? `advance_committed_ambush_to:${advancementTarget}`
+                    : "wait_for_or_convert_committed_ambush_access",
         duplicateAlreadyInstalled: false,
         affordableOrSupportable: selected !== undefined || phase === "trigger",
         value:
-          phase === "trigger" && selected
-            ? 800
-            : phase === "recycle"
-              ? 360
-              : phase === "advance"
-                ? runnerKnowledge
-                  ? 220
-                  : 300
-                : knownThreatMaterial
-                  ? (accessThreatProjection?.threatValue ?? 0)
-                  : 0,
+          phase === "trigger_support"
+            ? 900
+            : phase === "rez_support"
+              ? 850
+              : phase === "install_support"
+                ? 340
+                : phase === "trigger" && selected
+                  ? 800
+                  : phase === "recycle"
+                    ? 360
+                    : phase === "advance"
+                      ? runnerKnowledge
+                        ? 220
+                        : 300
+                      : knownThreatMaterial
+                        ? (accessThreatProjection?.threatValue ?? 0)
+                        : 0,
         evidenceCode:
-          phase === "recycle"
-            ? `corp_ambush_recycle_selected:${signal.sourceInstanceId}`
-            : runnerKnowledge && knownThreatMaterial
-              ? `corp_ambush_hold_selected_for_material_known_threat:${signal.sourceInstanceId}`
-              : selected
-                ? `corp_ambush_sequence_exact_${phase}:${signal.sourceInstanceId}`
-                : `corp_ambush_sequence_waiting_for_access:${signal.sourceInstanceId}`,
+          phase === "install_support"
+            ? `corp_ambush_advancement_support_exact_install:${supportRoute?.supportSourceInstanceId}:${sourceInstanceId}:${location.serverId}`
+            : phase === "rez_support"
+              ? `corp_ambush_advancement_support_exact_rez:${supportRoute?.supportSourceInstanceId}:${sourceInstanceId}:${location.serverId}`
+              : phase === "trigger_support"
+                ? `corp_ambush_advancement_support_exact_trigger:${supportRoute?.supportSourceInstanceId}:${sourceInstanceId}:${location.serverId}`
+                : phase === "recycle"
+                  ? `corp_ambush_recycle_selected:${signal.sourceInstanceId}`
+                  : runnerKnowledge && knownThreatMaterial
+                    ? `corp_ambush_hold_selected_for_material_known_threat:${signal.sourceInstanceId}`
+                    : selected
+                      ? `corp_ambush_sequence_exact_${phase}:${signal.sourceInstanceId}`
+                      : `corp_ambush_sequence_waiting_for_access:${signal.sourceInstanceId}`,
         runnerKnowledgeState: runnerKnowledge ? "known_exact" : "unknown",
         bluffCompromised: runnerKnowledge !== undefined,
         ...(runnerKnowledge
@@ -690,6 +729,20 @@ function continuedAmbushSignals(params: {
               },
             }
           : {}),
+        ...(supportRoute
+          ? {
+              advancementSupportRoute: {
+                phase: supportRoute.phase,
+                actionId: supportRoute.candidate.actionId,
+                supportSourceInstanceId: supportRoute.supportSourceInstanceId,
+                supportSourceDefinitionId:
+                  supportRoute.supportSourceDefinitionId,
+                targetCardInstanceId: sourceInstanceId,
+                serverId: location.serverId,
+                creditCost: supportRoute.creditCost,
+              },
+            }
+          : {}),
       },
     ];
   });
@@ -743,10 +796,25 @@ function corpIntentSupportsAmbush(intent: CorpStrategicIntentProfile): boolean {
 
 function definitionSupportsAmbushPlan(definitionId: string): boolean {
   const hint = AI_HINTS_BY_CARD.get(definitionId);
-  return (
+  const strategyBound =
     hint?.strategyAnchors?.includes("corp.ambush_bluff") === true ||
-    hint?.lineSupport?.includes("corp.ambush_bluff") === true
-  );
+    hint?.lineSupport?.includes("corp.ambush_bluff") === true;
+  const accessEffect =
+    hint?.conditions?.some(
+      (condition) => condition.kind === "requires_accessed_card",
+    ) === true &&
+    hint?.effects?.some(
+      (effect) =>
+        effect.timing === "on_access" &&
+        [
+          "ambush",
+          "access_punish",
+          "damage",
+          "hardware_trash",
+          "program_trash",
+        ].includes(effect.kind),
+    ) === true;
+  return strategyBound && accessEffect;
 }
 
 function ambushVisibleConditionsSatisfied(
@@ -779,13 +847,173 @@ function ambushVisibleConditionsSatisfied(
   return true;
 }
 
-function ambushAdvancementTarget(definitionId: string): number {
+function ambushAdvancementTarget(
+  input: AiDecisionInput,
+  definitionId: string,
+): number {
   const hint = AI_HINTS_BY_CARD.get(definitionId);
-  return hint?.conditions?.some(
+  const requiresCounters = hint?.conditions?.some(
     (condition) => condition.kind === "requires_advancement_counter",
+  );
+  if (!requiresCounters) return 0;
+  const scalablePayoff = hint?.requiredMechanics?.some((mechanic) =>
+    [
+      "source_advancement_counter_count",
+      "damage_from_source_advancement_counters",
+    ].includes(mechanic),
+  );
+  return scalablePayoff && corpHasAmbushAdvancementSupport(input) ? 2 : 1;
+}
+
+function corpHasAmbushAdvancementSupport(input: AiDecisionInput): boolean {
+  return [
+    ...input.playerView.own.gripOrHq,
+    ...input.playerView.servers.flatMap((server) => server.root),
+  ].some(
+    (card) =>
+      card.known === true &&
+      card.definitionId !== undefined &&
+      AI_HINTS_BY_CARD.get(card.definitionId)?.planRoles.includes(
+        "ambush_advancement_support",
+      ) === true,
+  );
+}
+
+function ambushAdvancementSupportRoute(params: {
+  input: AiDecisionInput;
+  candidates: readonly ActionSemanticCandidate[];
+  sourceInstanceId: string;
+  serverId: string;
+  currentCounters: number;
+  advancementTarget: number;
+}):
+  | {
+      phase: "install" | "rez" | "trigger";
+      candidate: ActionSemanticCandidate;
+      supportSourceInstanceId: string;
+      supportSourceDefinitionId: string;
+      creditCost: number;
+    }
+  | undefined {
+  if (params.advancementTarget - params.currentCounters < 2) return undefined;
+  const server = params.input.playerView.servers.find(
+    (entry) => entry.id === params.serverId,
+  );
+  if (!server) return undefined;
+  const supports = server.root.filter(
+    (card) =>
+      card.instanceId !== params.sourceInstanceId &&
+      card.known === true &&
+      card.definitionId !== undefined &&
+      AI_HINTS_BY_CARD.get(card.definitionId)?.planRoles.includes(
+        "ambush_advancement_support",
+      ) === true,
+  );
+  const installedSupportIds = new Set(supports.map((card) => card.instanceId));
+  const rankedTrigger = params.candidates
+    .filter((candidate) => {
+      if (
+        candidate.semanticActionType !== "card_ability.trigger" ||
+        !candidate.sourceCardInstanceId ||
+        !installedSupportIds.has(candidate.sourceCardInstanceId)
+      ) {
+        return false;
+      }
+      const action = params.input.legalActions.find(
+        (legalAction) => legalAction.actionId === candidate.actionId,
+      );
+      return (
+        action?.payload?.fortRunWindowAbility ===
+          "add_advancement_counters_after_passing_last_ice_on_this_fort" &&
+        action.payload.targetCardId === params.sourceInstanceId &&
+        action.payload.serverId === params.serverId
+      );
+    })
+    .sort((left, right) => left.actionId.localeCompare(right.actionId));
+  const trigger = rankedTrigger[0];
+  if (trigger?.sourceCardInstanceId && trigger.sourceDefinitionId) {
+    return {
+      phase: "trigger",
+      candidate: trigger,
+      supportSourceInstanceId: trigger.sourceCardInstanceId,
+      supportSourceDefinitionId: trigger.sourceDefinitionId,
+      creditCost: trigger.costProfile.creditCost ?? 0,
+    };
+  }
+  const unrezzedSupports = new Set(
+    supports
+      .filter((card) => card.rezzed !== true)
+      .map((card) => card.instanceId),
+  );
+  const rez = params.candidates
+    .filter(
+      (candidate) =>
+        candidate.semanticActionType === "corp_window.rez" &&
+        candidate.sourceCardInstanceId !== undefined &&
+        unrezzedSupports.has(candidate.sourceCardInstanceId),
+    )
+    .sort((left, right) => left.actionId.localeCompare(right.actionId))[0];
+  if (rez?.sourceCardInstanceId && rez.sourceDefinitionId) {
+    return {
+      phase: "rez",
+      candidate: rez,
+      supportSourceInstanceId: rez.sourceCardInstanceId,
+      supportSourceDefinitionId: rez.sourceDefinitionId,
+      creditCost: rez.costProfile.creditCost ?? 0,
+    };
+  }
+  if (supports.length > 0) return undefined;
+  const gripSupportIds = new Set(
+    params.input.playerView.own.gripOrHq
+      .filter(
+        (card) =>
+          card.known === true &&
+          card.definitionId !== undefined &&
+          AI_HINTS_BY_CARD.get(card.definitionId)?.planRoles.includes(
+            "ambush_advancement_support",
+          ) === true,
+      )
+      .map((card) => card.instanceId),
+  );
+  const installs = params.candidates
+    .filter(
+      (candidate) =>
+        candidate.semanticActionType === "install.card" &&
+        candidate.sourceCardInstanceId !== undefined &&
+        gripSupportIds.has(candidate.sourceCardInstanceId) &&
+        candidateTargetIds(candidate).includes(params.serverId),
+    )
+    .flatMap((candidate) => {
+      const action = params.input.legalActions.find(
+        (legalAction) => legalAction.actionId === candidate.actionId,
+      );
+      const creditCost = action
+        ? exactLegalActionCreditCost(action)
+        : undefined;
+      if (
+        creditCost === undefined ||
+        params.input.playerView.own.credits - creditCost < 5
+      ) {
+        return [];
+      }
+      return [{ candidate, creditCost }];
+    })
+    .sort((left, right) =>
+      left.candidate.actionId.localeCompare(right.candidate.actionId),
+    );
+  const install = installs[0];
+  if (
+    !install?.candidate.sourceCardInstanceId ||
+    !install.candidate.sourceDefinitionId
   )
-    ? 1
-    : 0;
+    return undefined;
+  return {
+    phase: "install",
+    candidate: install.candidate,
+    supportSourceInstanceId: install.candidate.sourceCardInstanceId,
+    supportSourceDefinitionId: install.candidate.sourceDefinitionId,
+    creditCost: install.creditCost,
+  };
 }
 
 function visibleGripCard(
