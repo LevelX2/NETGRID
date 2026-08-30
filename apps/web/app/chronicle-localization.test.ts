@@ -12,6 +12,7 @@ import {
   formatChronicleEvent,
   type ChronicleTranslate,
 } from "./chronicle";
+import { coalesceAiPumpPresentationEvents } from "./ai-pump-presentation";
 
 const messagesByLocale = { de: deMessages, en: enMessages, fr: frMessages };
 
@@ -54,6 +55,38 @@ describe("semantic chronicle localization", () => {
     expect(fr.title).toBe("Vous : avez gagné 3 crédits.");
     expect(de.category).toBe(en.category);
     expect(de.id).toBe(en.id);
+  });
+
+  it("uses the summed strength for a coalesced AI breaker pump", () => {
+    const pumpEvents = [1, 2, 3].map((strengthAfter, index) => ({
+      ...event("pump_breaker", {
+        actor: "runner",
+        title: "Loony Goon",
+        aiReasonCode: "runner.encounter.pump_breaker",
+        pumpBreakerId: "loony_goon_1",
+        pumpStrengthAmount: 1,
+        pumpBreakerCreditCost: 1,
+        breakerStrengthAfter: strengthAfter,
+      }),
+      eventId: `evt_pump_breaker_${index + 1}`,
+    }));
+    const [coalesced] = coalesceAiPumpPresentationEvents(pumpEvents);
+
+    expect(coalesced?.publicPayload).toMatchObject({
+      pumpCount: 3,
+      pumpStrengthAmount: 1,
+      pumpStrengthTotal: 3,
+    });
+    expect(
+      formatChronicleEvent(coalesced!, "corp", {
+        translate: translate("de"),
+      }).title,
+    ).toBe("Die Runner-KI: Stärke von Loony Goon um 3 erhöht.");
+    expect(
+      formatChronicleEvent(coalesced!, "corp", {
+        translate: translate("en"),
+      }).title,
+    ).toBe("The Runner AI: increased Loony Goon's strength by 3.");
   });
 
   it("uses public card semantics without changing technical identity", () => {
@@ -769,6 +802,65 @@ describe("semantic chronicle localization", () => {
     expect(en?.groupLabel).toBe("Run on a server");
     expect(`${de?.title} ${en?.title}`).not.toMatch(
       /automatischer Effekt|automatic effect/,
+    );
+  });
+
+  it("describes end-the-run subroutines with ICE, number, and outcome", () => {
+    const creditBlocks = event("continue_run", {
+      actor: "runner",
+      serverLabel: "R&D",
+      resolvedEffects: [
+        {
+          effectId: "subroutine_1",
+          kind: "resolve_subroutine",
+          visibility: "public",
+          side: "runner",
+          reason: "ice_subroutine",
+          sourceDefinitionId: "onr_proteus_017_credit-blocks",
+          sourceTitle: "Credit Blocks",
+          subroutineIndex: 0,
+          subroutineType: "end_the_run",
+          endedRun: true,
+        },
+      ],
+    });
+
+    const [de] = formatChronicleEffectItems(
+      creditBlocks,
+      "corp",
+      undefined,
+      translate("de"),
+    );
+    const [en] = formatChronicleEffectItems(
+      creditBlocks,
+      "corp",
+      undefined,
+      translate("en"),
+    );
+    const [fr] = formatChronicleEffectItems(
+      creditBlocks,
+      "corp",
+      undefined,
+      translate("fr"),
+    );
+
+    expect(de).toMatchObject({
+      title: "Credit Blocks: Subroutine 1 beendet den Run.",
+      category: "run",
+      importance: "important",
+      groupLabel: "Run auf R&D",
+      cardDefinitionId: "onr_proteus_017_credit-blocks",
+      cardTitle: "Credit Blocks",
+    });
+    expect(de?.chips).toEqual(
+      expect.arrayContaining(["Credit Blocks", "Subroutine 1", "Run beendet"]),
+    );
+    expect(en?.title).toBe("Credit Blocks: subroutine 1 ends the run.");
+    expect(fr?.title).toBe(
+      "Credit Blocks : le sous-programme 1 met fin au piratage.",
+    );
+    expect(`${de?.title} ${en?.title} ${fr?.title}`).not.toMatch(
+      /automatischer Effekt|automatic effect|effet automatique/,
     );
   });
 

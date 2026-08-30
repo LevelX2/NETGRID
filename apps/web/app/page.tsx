@@ -99,6 +99,7 @@ import {
   accessPresentationOwnsActionCue,
   coalesceAccessActionCues,
   interactionPresentationBlocksAi,
+  latestStolenAgendaAccessEvent,
   observerAccessAutoDismissMs,
 } from "./access-presentation";
 import {
@@ -127,6 +128,7 @@ import {
   aiAdvanceRequestMode,
   aiPacingFallbackDelayMs,
   aiPacingDelayMs,
+  humanCorpRunServerActionBlocksAutomaticRunnerAiAdvance,
   actionMatchesContext,
   activeRunIceInstanceId,
   approachIceExposeViewingIceId,
@@ -249,6 +251,7 @@ import { downloadTextFile } from "../lib/download";
 import { runtimeRandomId } from "../lib/runtime-id";
 import { reconnectUrlForSession } from "../lib/session-url";
 import { NETGRID_APP_STATUS_LABEL } from "../lib/app-build-info";
+import { AppRuntimeStatus } from "../features/app-shell/AppRuntimeStatus";
 import { userErrorMessageKey } from "../i18n/presentation";
 import {
   bootstrap,
@@ -311,8 +314,10 @@ import {
   deckFingerprint,
   deckMetadataFromEditable,
   type DeckCardEntry,
+  type DeckEditorMode,
   type EditableDeck,
 } from "../features/decks/deck-table-model";
+import { editableStandardDeckPreview } from "../features/decks/standard-deck-table-preview";
 import {
   DEFAULT_CORP_SNAPSHOT_ID,
   DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID,
@@ -605,6 +610,8 @@ export default function Page() {
   const [entryTab, setEntryTab] = useState<EntryTab>("play");
   const [activeMatchWorkspace, setActiveMatchWorkspace] =
     useState<ActiveMatchWorkspace>("game");
+  const [deckEditorMode, setDeckEditorMode] =
+    useState<DeckEditorMode>("list");
   const [mode, setMode] = useState<"host" | "join">("host");
   const [recoveryTabSelected, setRecoveryTabSelected] = useState(false);
   const [playMode, setPlayMode] = useState<PlayMode>("human_vs_human");
@@ -745,6 +752,12 @@ export default function Page() {
   const [accountDeckQuota, setAccountDeckQuota] =
     useState<AccountDeckQuota | null>(null);
   const [standardDecks, setStandardDecks] = useState<StandardDeck[]>([]);
+  const [standardDeckTablePreviewId, setStandardDeckTablePreviewId] = useState<
+    string | null
+  >(null);
+  const [localDeckTableEditId, setLocalDeckTableEditId] = useState<
+    string | null
+  >(null);
   const [standardDecksLoaded, setStandardDecksLoaded] = useState(false);
   const [standardDeckCatalogState, setStandardDeckCatalogState] = useState(
     INITIAL_STANDARD_DECK_CATALOG_STATE,
@@ -2467,6 +2480,22 @@ export default function Page() {
     gameMode === "ai_vs_ai" &&
     effectiveStartMatchFormat === "two_game_side_swap";
   const aiTurnPresentation = effectiveAiTurnPresentation(payload);
+  const currentCorpRunAutoPassKey =
+    session && payload?.playerView.run?.runId
+      ? `${session.matchId}:${payload.playerView.run.runId}`
+      : null;
+  const corpRunAutoPassActive = Boolean(
+    currentCorpRunAutoPassKey &&
+      corpRunAutoPassKey === currentCorpRunAutoPassKey,
+  );
+  const humanCorpRunServerActionBlocksAiPacing = Boolean(
+    humanOpponentIsAi &&
+      humanCorpRunServerActionBlocksAutomaticRunnerAiAdvance(
+        payload?.playerView,
+        payload?.legalActions ?? [],
+        corpRunAutoPassActive,
+      ),
+  );
   const hasPendingAiCue =
     currentActionCue?.source === "ai" ||
     actionCueQueue.some((cue) => cue.source === "ai");
@@ -2601,6 +2630,17 @@ export default function Page() {
   const selectedLocalDeck =
     localDecks.find((deck) => deck.deckId === selectedLocalDeckId) ?? null;
   const selectedDeck = selectedLocalDeck;
+  const standardDeckTablePreview =
+    standardDecks.find(
+      (deck) => deck.standardDeckId === standardDeckTablePreviewId,
+    ) ?? null;
+  const deckEditorContextDeck = useMemo(
+    () =>
+      standardDeckTablePreview
+        ? editableStandardDeckPreview(standardDeckTablePreview)
+        : selectedDeck,
+    [selectedDeck, standardDeckTablePreview],
+  );
   const selectedDeckDirty = selectedLocalDeck
     ? savedDeckFingerprints[selectedLocalDeck.deckId] !==
       deckFingerprint(selectedLocalDeck)
@@ -2608,9 +2648,13 @@ export default function Page() {
   const playableCatalogCards = useMemo(
     () =>
       allCatalogCards.filter((card) =>
-        catalogCardAllowedForDeckEditor(card, selectedDeck),
+        catalogCardAllowedForDeckEditor(card, deckEditorContextDeck),
       ),
-    [allCatalogCards, selectedDeck?.formatProfileId, selectedDeck?.side],
+    [
+      allCatalogCards,
+      deckEditorContextDeck?.formatProfileId,
+      deckEditorContextDeck?.side,
+    ],
   );
   const gripPreviewCard =
     activeView?.own.gripOrHq.find((card) => card.known) ?? null;
@@ -2822,7 +2866,19 @@ export default function Page() {
   const retainedAccessReveal = payload
     ? retainedAccessRevealEvent(payload.eventTail, lastDismissedAccessEventId)
     : null;
+  const runnerWonByAgendaPoints = Boolean(
+    resultSummary?.winner === "runner" &&
+    resultSummary.reason === "agenda_points",
+  );
+  const concludingAgendaAccessEvent =
+    matchEnded && runnerWonByAgendaPoints && payload
+      ? latestStolenAgendaAccessEvent(
+          payload.eventTail,
+          dismissedAccessEventIds,
+        )
+      : null;
   const queuedAccessRevealEvent =
+    concludingAgendaAccessEvent ??
     (pendingAccessContinuationRef.current &&
     latestAccessRevealEvent?.eventId !==
       pendingAccessContinuationRef.current.accessEventId
@@ -2925,9 +2981,7 @@ export default function Page() {
       Boolean(currentDamageImpact) || damageImpactQueue.length > 0,
     resultAvailable: Boolean(resultSummary && resultKey),
     resultDismissed: Boolean(resultKey && dismissedResultKey === resultKey),
-    runnerWonByAgendaPoints:
-      resultSummary?.winner === "runner" &&
-      resultSummary.reason === "agenda_points",
+    runnerWonByAgendaPoints,
     terminalAccessFlatline: accessRevealEvent?.publicPayload.flatline === true,
   });
   const showAccessReveal = overlayPresentation.showAccessReveal;
@@ -3545,12 +3599,23 @@ export default function Page() {
   ]);
 
   useEffect(() => {
-    if (entryTab !== "decks" || !selectedDeck) return;
-    const missingIds = selectedDeck.cards
+    if (entryTab !== "decks" || !deckEditorContextDeck) return;
+    const missingIds = deckEditorContextDeck.cards
       .map((entry) => entry.cardId)
       .filter((cardId) => !catalogDetailsById[cardId]);
     void ensureCatalogDetails(missingIds);
-  }, [entryTab, selectedDeck, catalogDetailsById, ensureCatalogDetails]);
+  }, [
+    entryTab,
+    deckEditorContextDeck,
+    catalogDetailsById,
+    ensureCatalogDetails,
+  ]);
+
+  useEffect(() => {
+    if (entryTab === "decks") return;
+    if (standardDeckTablePreviewId) setStandardDeckTablePreviewId(null);
+    if (localDeckTableEditId) setLocalDeckTableEditId(null);
+  }, [entryTab, localDeckTableEditId, standardDeckTablePreviewId]);
 
   useEffect(() => {
     if (entryTab !== "decks" || playableCatalogCards.length === 0) return;
@@ -3966,6 +4031,7 @@ export default function Page() {
       payload.winner ||
       connection !== "online" ||
       priorityWindowHoldEnabled ||
+      humanCorpRunServerActionBlocksAiPacing ||
       aiDecisionDebugShouldWaitForPreparation ||
       interactionPresentationBlocked
     )
@@ -4023,6 +4089,7 @@ export default function Page() {
     payload?.playerView.stateVersion,
     payload?.winner,
     priorityWindowHoldEnabled,
+    humanCorpRunServerActionBlocksAiPacing,
   ]);
 
   useEffect(() => {
@@ -4982,11 +5049,6 @@ export default function Page() {
     }
   }, [paymentSupportContinuation, session, payload, connection, submitAction]);
 
-  const currentCorpRunAutoPassKey =
-    session && payload?.playerView.run?.runId
-      ? `${session.matchId}:${payload.playerView.run.runId}`
-      : null;
-
   useEffect(() => {
     if (
       corpRunAutoPassKey &&
@@ -5508,6 +5570,7 @@ export default function Page() {
   const copyStandardToAccount = async (
     standard: StandardDeck,
     name: string,
+    draft?: EditableDeck,
   ): Promise<boolean> => {
     if (!accountSession.account) return false;
     const now = new Date().toISOString();
@@ -5527,6 +5590,7 @@ export default function Page() {
         : {}),
       validationStatus: "needs_revalidation",
       cards: standard.cards,
+      ...(draft?.tableLayout ? { tableLayout: draft.tableLayout } : {}),
       createdAt: now,
       updatedAt: now,
     };
@@ -5548,6 +5612,37 @@ export default function Page() {
     } finally {
       setAccountDeckBusy(false);
     }
+  };
+
+  const openStandardDeckOnTable = (standardDeckId: string) => {
+    if (!standardDecks.some((deck) => deck.standardDeckId === standardDeckId)) {
+      setNotice(noticeT("standardDecksUnavailable"));
+      return;
+    }
+    setLocalDeckTableEditId(null);
+    setStandardDeckTablePreviewId(standardDeckId);
+    setEntryTab("decks");
+  };
+
+  const openLocalDeckOnTable = (deckId: string) => {
+    if (!localDecks.some((deck) => deck.deckId === deckId)) {
+      setNotice(noticeT("personalDeckNotFound"));
+      return;
+    }
+    setStandardDeckTablePreviewId(null);
+    setSelectedLocalDeckId(deckId);
+    setLocalDeckTableEditId(deckId);
+    setEntryTab("decks");
+  };
+
+  const closeStandardDeckTablePreview = () => {
+    setStandardDeckTablePreviewId(null);
+    setEntryTab("play");
+  };
+
+  const finishStandardDeckTablePreviewCopy = () => {
+    setStandardDeckTablePreviewId(null);
+    setEntryTab("decks");
   };
 
   const createEmptyDeck = (side: Side) => {
@@ -6252,7 +6347,7 @@ export default function Page() {
                       wordmarkSrc={APP_WORDMARK_SRC}
                     />
                     <div className="topbarMeta">
-                      <span className="topbarVersion">{APP_STATUS_LABEL}</span>
+                      <AppRuntimeStatus statusLabel={APP_STATUS_LABEL} />
                       <ConnectionBadge text={statusText} state={connection} />
                     </div>
                   </div>
@@ -6503,6 +6598,8 @@ export default function Page() {
                               onSelectedCorpLocalDeckId={
                                 setSelectedCorpLocalDeckId
                               }
+                              onOpenStandardDeck={openStandardDeckOnTable}
+                              onOpenLocalDeck={openLocalDeckOnTable}
                               onReloadStandardDeckCatalog={
                                 reloadStandardDeckCatalog
                               }
@@ -6616,6 +6713,8 @@ export default function Page() {
                             onSelectedParticipantBCorpLocalDeckId={
                               setSelectedParticipantBCorpLocalDeckId
                             }
+                            onOpenStandardDeck={openStandardDeckOnTable}
+                            onOpenLocalDeck={openLocalDeckOnTable}
                             onJoinMatchId={setJoinMatchId}
                             onJoinToken={setJoinToken}
                             onJoinMatch={joinMatch}
@@ -6642,6 +6741,8 @@ export default function Page() {
                     ) : null}
                     {entryTab === "decks" ? (
                       <DeckEditorPanel
+                        mode={deckEditorMode}
+                        onModeChange={setDeckEditorMode}
                         localDecks={localDecks}
                         selectedDeck={selectedDeck}
                         selectedDeckDirty={selectedDeckDirty}
@@ -6664,9 +6765,7 @@ export default function Page() {
                         onExport={exportSelectedDeck}
                         onImportText={setDeckImportText}
                         onImport={importLocalDeck}
-                        standardDecks={
-                          accountSession.account ? standardDecks : []
-                        }
+                        standardDecks={standardDecks}
                         standardDeckCatalogPhase={
                           standardDeckCatalogState.phase
                         }
@@ -6674,6 +6773,17 @@ export default function Page() {
                           standardDeckCatalogState.refreshing
                         }
                         standardCopyBusy={accountDeckBusy}
+                        standardDeckPreview={standardDeckTablePreview}
+                        openLocalDeckOnTableId={localDeckTableEditId}
+                        onLocalDeckTableOpened={() =>
+                          setLocalDeckTableEditId(null)
+                        }
+                        onCloseStandardDeckPreview={
+                          closeStandardDeckTablePreview
+                        }
+                        onStandardDeckPreviewCopied={
+                          finishStandardDeckTablePreviewCopy
+                        }
                         {...(accountSession.account
                           ? { onCopyStandard: copyStandardToAccount }
                           : {})}
@@ -7019,10 +7129,7 @@ export default function Page() {
                     Boolean(payload.winner) || connection !== "online"
                   }
                   highlighted={activeCueHighlight?.kind === "run"}
-                  corpRunAutoPassActive={
-                    Boolean(currentCorpRunAutoPassKey) &&
-                    corpRunAutoPassKey === currentCorpRunAutoPassKey
-                  }
+                  corpRunAutoPassActive={corpRunAutoPassActive}
                   onAction={submitAction}
                   onChoiceOption={submitChoiceOption}
                   onCorpRunAutoPassEnabled={(enabled) => {
@@ -7497,6 +7604,8 @@ export default function Page() {
                   workspace={activeMatchWorkspace}
                   catalogPanelProps={catalogPanelProps}
                   deckEditorPanelProps={{
+                    mode: deckEditorMode,
+                    onModeChange: setDeckEditorMode,
                     localDecks,
                     selectedDeck,
                     selectedDeckDirty,
@@ -7519,11 +7628,18 @@ export default function Page() {
                     onExport: exportSelectedDeck,
                     onImportText: setDeckImportText,
                     onImport: importLocalDeck,
-                    standardDecks: accountSession.account ? standardDecks : [],
+                    standardDecks,
                     standardDeckCatalogPhase: standardDeckCatalogState.phase,
                     standardDeckCatalogRefreshing:
                       standardDeckCatalogState.refreshing,
                     standardCopyBusy: accountDeckBusy,
+                    standardDeckPreview: standardDeckTablePreview,
+                    openLocalDeckOnTableId: localDeckTableEditId,
+                    onLocalDeckTableOpened: () =>
+                      setLocalDeckTableEditId(null),
+                    onCloseStandardDeckPreview: closeStandardDeckTablePreview,
+                    onStandardDeckPreviewCopied:
+                      finishStandardDeckTablePreviewCopy,
                     ...(accountSession.account
                       ? { onCopyStandard: copyStandardToAccount }
                       : {}),

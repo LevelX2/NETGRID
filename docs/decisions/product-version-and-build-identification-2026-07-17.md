@@ -20,7 +20,12 @@ NETGRID trennt ab sofort Produktreife und technischen Quellstand:
   Produktentscheidung `V0.9`.
 - Daneben steht eine automatisch aus `git rev-list --count HEAD` ermittelte
   Buildnummer, zum Beispiel `V0.9 · Build 5527`.
-- Ein nicht sauberer Arbeitsbaum ergänzt die sichtbare Buildnummer um `-dev`.
+- Ein beim Webstart nicht sauberer Arbeitsbaum wird getrennt von der
+  Buildnummer als Badge `lokal geändert` ausgewiesen.
+- Der tatsächliche Servermodus wird über den Health-Endpunkt gemeldet. Im
+  Watch-Modus erscheint daneben das eigene Badge `Watch`.
+- Der lokale Watch-Start heißt im Desktop und im Startskript entsprechend
+  `NETGRID Watch starten` beziehungsweise `start-netgrid-watch.ps1`.
 - Die Optionen zeigen zusätzlich Buildnummer, kurzen Commit-Hash,
   Commit-Zeitpunkt und den lokalen Entwicklungsstatus.
 - Die Git-Metadaten werden beim Start beziehungsweise Build des Webclients
@@ -45,7 +50,8 @@ Produktversion ändert sich nur bei einer eigenen Produktreifeentscheidung.
 
 ## Akzeptanz
 
-- Kopfzeile zeigt `V0.9 · Build <Nummer>` beziehungsweise bei lokalen
-  Änderungen `V0.9 · Build <Nummer>-dev`.
+- Die Kopfzeile zeigt stabil `V0.9 · Build <Nummer>`.
+- Nur bei lokalen Änderungen beim Webstart erscheint zusätzlich
+  `lokal geändert`; nur beim laufenden Server-Watch erscheint `Watch`.
 - Die Optionen zeigen Produktversion, Build, Commit und Quellstand.
 - Test, Typecheck und Produktionsbuild des Webclients sind grün.

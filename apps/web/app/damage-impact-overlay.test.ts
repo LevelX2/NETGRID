@@ -10,6 +10,8 @@ describe("DamageImpactOverlay lifecycle", () => {
     );
   const pageSource = () =>
     readFileSync(new URL("./page.tsx", import.meta.url), "utf8");
+  const cssSource = () =>
+    readFileSync(new URL("./globals.css", import.meta.url), "utf8");
 
   it("requires manual confirmation instead of auto-dismissing damage impact", () => {
     const source = overlaySource();
@@ -26,14 +28,19 @@ describe("DamageImpactOverlay lifecycle", () => {
     );
   });
 
-  it("shows a zero line and overkill labels instead of an unlabeled Grip-Pool delta", () => {
+  it("shows a flatline boundary and overkill labels instead of an unlabeled Grip-Pool delta", () => {
     const source = overlaySource();
+    const meterSource = readFileSync(
+      new URL("../features/actions/DamageImpactMeter.tsx", import.meta.url),
+      "utf8",
+    );
 
-    expect(source).toContain('className="damageImpactZero"');
-    expect(source).toContain('t("zeroLine")');
+    expect(source).toContain("<DamageImpactMeter");
+    expect(meterSource).toContain('className="damageImpactFlatline"');
+    expect(meterSource).toContain('t("flatlineBoundary")');
     expect(source).toContain('t("flatlineOverkillSummary"');
     expect(source).toContain('t("overkill"');
-    expect(deMessages.Actions.damage.zeroLine).toBe("Null-Linie");
+    expect(deMessages.Actions.damage.flatlineBoundary).toBe("Flatline-Grenze");
     expect(source).not.toContain("<span>-{cue.amount}</span>");
   });
 
@@ -49,11 +56,25 @@ describe("DamageImpactOverlay lifecycle", () => {
     expect(source).toContain('t("prevented")');
   });
 
+  it("uses the defined success token for visible remaining grip segments", () => {
+    const css = cssSource();
+
+    expect(css).toMatch(
+      /\.damageImpactSegment\.remaining\s*\{[\s\S]*?var\(--ok\)/,
+    );
+    expect(css).toMatch(
+      /\.damageImpactOverlay\.is-prevented\s*\{[\s\S]*?var\(--ok\)/,
+    );
+    expect(css).not.toMatch(
+      /\.damageImpactSegment\.remaining\s*\{[\s\S]*?var\(--success\)/,
+    );
+  });
+
   it("keeps queue, flatline, and core-damage copy explicit", () => {
     const source = overlaySource();
 
     expect(source).toContain('t("queued"');
-    expect(source).toContain('cue.flatline ? t("flatline")');
+    expect(source).toMatch(/cue\.flatline\s*\?\s*t\("flatline"\)/);
     expect(source).toContain('cue.damageType === "core"');
     expect(source).toContain('t("type.core")');
     expect(source).toContain("runnerMaxHandSizeAfter");

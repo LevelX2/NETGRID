@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
-import { BookOpen, Building2, Cable } from "lucide-react";
+import { BookOpen, Building2, Cable, Move } from "lucide-react";
 import { useTranslations } from "use-intl/react";
 
 import {
@@ -40,6 +40,8 @@ export function DeckSlotSelect({
   onSource,
   onSnapshot,
   onLocalDeck,
+  onOpenStandardDeck,
+  onOpenLocalDeck,
 }: {
   label: string;
   side: DeckSlotSide;
@@ -52,6 +54,8 @@ export function DeckSlotSelect({
   onSource(value: DeckSlotSource): void;
   onSnapshot(value: string): void;
   onLocalDeck(value: string): void;
+  onOpenStandardDeck?(standardDeckId: string): void;
+  onOpenLocalDeck?(deckId: string): void;
 }) {
   const t = useTranslations("Decks.selection");
   const SideIcon = side === "runner" ? Cable : Building2;
@@ -74,11 +78,14 @@ export function DeckSlotSelect({
             snapshot.deckSnapshotId === resolvedSelection.snapshotId,
         )
       : undefined;
+  const selectedStandardDeckId = selectedStandardSnapshot?.sourceDeckId;
+  const selectedPersonalDeckId =
+    resolvedSelection?.source === "local"
+      ? resolvedSelection.localDeckId
+      : undefined;
   const guideControl = standardDeckGuideControlState({
     source: resolvedSelection?.source ?? source,
-    ...(selectedStandardSnapshot
-      ? { snapshot: selectedStandardSnapshot }
-      : {}),
+    ...(selectedStandardSnapshot ? { snapshot: selectedStandardSnapshot } : {}),
   });
   const dismissGuide = useCallback(() => {
     setGuideOpen(false);
@@ -123,7 +130,7 @@ export function DeckSlotSelect({
           <SideIcon size={17} strokeWidth={1.9} />
         </span>
         <span className="deckSlotHeadingText">
-          <small>{t("sideArea", {side: sideLabel})}</small>
+          <small>{t("sideArea", { side: sideLabel })}</small>
           <span>{label}</span>
         </span>
       </label>
@@ -159,19 +166,21 @@ export function DeckSlotSelect({
             }}
           >
             <option value="random:standard">
-              🎲 {t("randomStandard", {side: sideLabel})}
+              🎲 {t("randomStandard", { side: sideLabel })}
             </option>
             {snapshots.map((snapshot) => (
               <option
                 value={snapshot.deckSnapshotId}
                 key={snapshot.deckSnapshotId}
               >
-                {optionMark} {t("standard", {side: sideLabel, name: snapshot.name})}
+                {optionMark}{" "}
+                {t("standard", { side: sideLabel, name: snapshot.name })}
               </option>
             ))}
             {localDecks.map((deck) => (
               <option value={`local:${deck.deckId}`} key={deck.deckId}>
-                {optionMark} {t("personal", {side: sideLabel, name: deck.name})}
+                {optionMark}{" "}
+                {t("personal", { side: sideLabel, name: deck.name })}
               </option>
             ))}
           </select>
@@ -187,6 +196,30 @@ export function DeckSlotSelect({
           >
             <BookOpen size={15} aria-hidden="true" />
             {t(`guide.${guideControl.status}`)}
+          </button>
+        ) : null}
+        {selectedStandardDeckId && onOpenStandardDeck ? (
+          <button
+            className="button deckTablePreviewButton"
+            type="button"
+            disabled={disabled}
+            title={t("openOnTable")}
+            onClick={() => onOpenStandardDeck(selectedStandardDeckId)}
+          >
+            <Move size={15} aria-hidden="true" />
+            {t("openOnTable")}
+          </button>
+        ) : null}
+        {selectedPersonalDeckId && onOpenLocalDeck ? (
+          <button
+            className="button deckTablePreviewButton"
+            type="button"
+            disabled={disabled}
+            title={t("editOnTable")}
+            onClick={() => onOpenLocalDeck(selectedPersonalDeckId)}
+          >
+            <Move size={15} aria-hidden="true" />
+            {t("editOnTable")}
           </button>
         ) : null}
       </div>

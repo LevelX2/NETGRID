@@ -18637,6 +18637,114 @@ describe("authoritative plan-first live runtime", () => {
     expect(decision.evidence).toContain("plan_priority_class:P2");
   });
 
+  it("uses an exact burst-credit provider before a terminal remote contest instead of exposing two owners", () => {
+    resetResidentPlanPortfolioMemory();
+    const networking = legalAction(
+      "play-networking-for-terminal-remote",
+      "runner",
+      "play_event",
+      "Play Networking",
+      { credits: 3, clicks: 2 },
+      {
+        source: "networking-card",
+        payload: {
+          cardId: "networking-card",
+          sourceDefinitionId: "onr_classic_041_networking",
+          gainCreditsAmount: 9,
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityId:
+            "onr_classic_041_networking:on_play_gain_nine_credits",
+          cardImplementationAbilityKey: "on_play_gain_nine_credits",
+        },
+      },
+    );
+    const run = legalAction(
+      "run-funded-terminal-remote",
+      "runner",
+      "start_run",
+      "Run terminal remote",
+      { credits: 0, clicks: 1 },
+      { payload: { serverId: "remote_1" } },
+    );
+    const credit = legalAction(
+      "credit-funded-terminal-remote",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [networking, run, credit]);
+    input.playerView.own.credits = 4;
+    input.playerView.own.clicks = 4;
+    input.playerView.opponent.agendaPoints = 6;
+    input.playerView.agendaPointsToWin = 7;
+    input.playerView.own.gripOrHq = [
+      visibleCard("networking-card", "runner", "event", {
+        definitionId: "onr_classic_041_networking",
+        title: "Networking",
+      }),
+    ];
+    const terminalRemote = server("remote_1");
+    terminalRemote.root = [
+      {
+        instanceId: "advanced-funded-terminal-remote-card",
+        known: false,
+        advancementCounters: 2,
+      },
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      terminalRemote,
+    ];
+    const target = {
+      ...safeRuntimeRunTarget(run.actionId, "remote_1"),
+      targetKind: "remote" as const,
+      accessTargetKind: "remote" as const,
+      scoreThreat: false,
+      pathCost: 4,
+      creditsAfterRun: 0,
+      recommendation: "gain_credits_first" as const,
+      score: 500,
+      fundingNeed: {
+        reason: "post_run_floor_gap" as const,
+        routeFundingGap: 0,
+        postRunFloorGap: 3,
+        protectedLiquidReserve: 7,
+      },
+    };
+
+    const decision = liveContext({
+      evaluateRunnerRunTargets: () => [target],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 3,
+        desiredCreditReserve: 7,
+        fundingNeed: true,
+        buildEconomyBeforePressure: true,
+        evidence: ["test_terminal_remote_exact_funding"],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: networking.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_priority_class:P2",
+        expect.stringContaining(
+          "runner_run_support_fund_concrete_gap:remote_1",
+        ),
+      ]),
+    );
+    expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
+      rootForegroundInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      executorInstanceId: "plan:runner.economy:run-support%3Aremote%3Aremote_1",
+    });
+  });
+
   it("keeps an exact executable run above the repeated matchpoint-remote focus placeholder", () => {
     resetResidentPlanPortfolioMemory();
     const run = legalAction(
@@ -27634,7 +27742,14 @@ describe("plan-bound approach-ICE information continuation", () => {
 });
 
 describe("plan-bound Corp delayed-success continuation", () => {
-  it.each(["resident", "active", "resident_remote"] as const)(
+  it.each([
+    "resident",
+    "active",
+    "resident_remote",
+    "reactive",
+    "reactive_event",
+    "post_turn_discard",
+  ] as const)(
     "keeps Dr. Dreff on the %s defense owner across the opponent run",
     (planOrigin) => {
       resetResidentPlanPortfolioMemory();
@@ -27674,7 +27789,18 @@ describe("plan-bound Corp delayed-success continuation", () => {
         }),
       ];
       input.playerView.run = {
-        runId: `run-${attackedServerId}-dreff`,
+        runId:
+          planOrigin === "resident_remote"
+            ? "run-remote_1-dreff"
+            : planOrigin === "reactive"
+              ? "run_200"
+              : planOrigin === "reactive_event"
+                ? "run_198"
+                : planOrigin === "post_turn_discard"
+                  ? "run_199"
+                  : planOrigin === "resident"
+                    ? "run_198"
+                    : "run-hq-dreff",
         attackedServerId,
         phase: "movement",
         position: { kind: "server", serverId: attackedServerId },
@@ -27761,79 +27887,268 @@ describe("plan-bound Corp delayed-success continuation", () => {
                 "runner",
               ),
             ]
-          : [
-              event("evt-end-corp-turn", "end_turn", 196, 197, "corp"),
-              event("evt-start-hq-run", "start_run", 197, 198, "runner", {
-                serverId: attackedServerId,
-              }),
-              event("evt-decline-hq-rez", "decline_rez", 198, 199, "corp"),
-              event("evt-continue-hq-1", "continue_run", 199, 200, "runner"),
-              event("evt-continue-hq-2", "continue_run", 200, 201, "runner"),
-              event("evt-continue-hq-3", "continue_run", 201, 202, "runner"),
-            ];
+          : planOrigin === "post_turn_discard"
+            ? [
+                event("evt-end-corp-turn", "end_turn", 196, 197, "corp"),
+                event(
+                  "evt-corp-discard-choice",
+                  "resolve_choice",
+                  197,
+                  198,
+                  "corp",
+                ),
+                event("evt-start-hq-run", "start_run", 198, 199, "runner", {
+                  serverId: "hq",
+                }),
+                event(
+                  "evt-break-hq-ice",
+                  "break_subroutine",
+                  199,
+                  200,
+                  "runner",
+                ),
+                event("evt-decline-hq-rez", "decline_rez", 200, 201, "corp"),
+                event("evt-continue-hq", "continue_run", 201, 202, "runner"),
+              ]
+            : planOrigin === "reactive"
+              ? [
+                  event("evt-end-corp-turn", "end_turn", 196, 197, "corp"),
+                  event(
+                    "evt-runner-credit-1",
+                    "gain_credit",
+                    197,
+                    198,
+                    "runner",
+                  ),
+                  event(
+                    "evt-runner-credit-2",
+                    "gain_credit",
+                    198,
+                    199,
+                    "runner",
+                  ),
+                  event("evt-start-hq-run", "start_run", 199, 200, "runner", {
+                    serverId: "hq",
+                  }),
+                  event(
+                    "evt-break-hq-ice",
+                    "break_subroutine",
+                    200,
+                    201,
+                    "runner",
+                  ),
+                  event("evt-continue-hq", "continue_run", 201, 202, "runner"),
+                ]
+              : planOrigin === "reactive_event"
+                ? [
+                    event("evt-end-corp-turn", "end_turn", 196, 197, "corp"),
+                    event(
+                      "evt-play-run-event",
+                      "play_event",
+                      197,
+                      198,
+                      "runner",
+                    ),
+                    event(
+                      "evt-decline-hq-rez",
+                      "decline_rez",
+                      198,
+                      199,
+                      "corp",
+                    ),
+                    event(
+                      "evt-continue-hq-1",
+                      "continue_run",
+                      199,
+                      200,
+                      "runner",
+                    ),
+                    event(
+                      "evt-pump-breaker",
+                      "pump_breaker",
+                      200,
+                      201,
+                      "runner",
+                    ),
+                    event(
+                      "evt-break-hq-ice",
+                      "break_subroutine",
+                      201,
+                      202,
+                      "runner",
+                    ),
+                  ]
+                : [
+                    event("evt-end-corp-turn", "end_turn", 196, 197, "corp"),
+                    event("evt-start-hq-run", "start_run", 197, 198, "runner", {
+                      serverId: "hq",
+                    }),
+                    event(
+                      "evt-decline-hq-rez",
+                      "decline_rez",
+                      198,
+                      199,
+                      "corp",
+                    ),
+                    event(
+                      "evt-continue-hq-1",
+                      "continue_run",
+                      199,
+                      200,
+                      "runner",
+                    ),
+                    event(
+                      "evt-continue-hq-2",
+                      "continue_run",
+                      200,
+                      201,
+                      "runner",
+                    ),
+                    event(
+                      "evt-continue-hq-3",
+                      "continue_run",
+                      201,
+                      202,
+                      "runner",
+                    ),
+                  ];
 
       const priorInput = structuredClone(input);
-      const priorStateVersion = planOrigin === "active" ? 201 : 196;
+      const priorStateVersion =
+        planOrigin === "active"
+          ? 201
+          : planOrigin === "post_turn_discard"
+            ? 197
+            : 196;
       priorInput.playerView.stateVersion = priorStateVersion;
-      priorInput.legalActions = [];
-      priorInput.playerView.legalActions = [];
       delete priorInput.playerView.pendingChoice;
       const defensePlanInstanceId =
         "plan:corp.defend_servers:server-defense-portfolio";
       const completionPlanInstanceId =
         "plan:corp.complete_turn:standard-turn-completion";
-      rememberResidentPlanPortfolio(priorInput, {
-        schemaVersion: "resident-plan-portfolio-v2",
-        side: "corp",
-        stateVersion: priorStateVersion,
-        rootForegroundInstanceId:
-          planOrigin === "active"
-            ? defensePlanInstanceId
-            : completionPlanInstanceId,
-        executorInstanceId:
-          planOrigin === "active"
-            ? defensePlanInstanceId
-            : completionPlanInstanceId,
-        instances:
-          planOrigin === "active"
-            ? [
-                {
-                  instanceId: defensePlanInstanceId,
-                  side: "corp",
-                  moduleId: "corp.defend_servers",
-                  executionState: "executor",
-                  moduleState: {
-                    kind: "defense",
-                    signals: [{ serverId: attackedServerId }],
-                    hqHoldCadence: { turnKey: "corp:19" },
+      const handPlanInstanceId =
+        "plan:corp.hand_and_agenda_management:discard-window%3Atest";
+      if (planOrigin === "reactive" || planOrigin === "reactive_event") {
+        const endTurn = legalAction(
+          "corp.end_turn",
+          "corp",
+          "end_turn",
+          "Zug beenden",
+          { credits: 0, clicks: 0 },
+          { source: "game_rule" },
+        );
+        endTurn.expiresAtStateVersion = priorStateVersion;
+        endTurn.timingPoint = "corp_action.main";
+        priorInput.playerView.timingPoint = "corp_action.main";
+        priorInput.playerView.own.clicks = 0;
+        delete priorInput.playerView.run;
+        priorInput.eventTail = [];
+        priorInput.legalActions = [endTurn];
+        priorInput.playerView.legalActions = priorInput.legalActions;
+        expect(
+          liveContext().chooseSemanticRuntimeAction(priorInput, {}),
+        ).toMatchObject({
+          actionId: endTurn.actionId,
+          reasonCode: "plan_first.corp.complete_turn",
+        });
+        expect(
+          residentPlanPortfolioSnapshot(priorInput)?.instances.find(
+            (instance) => instance.instanceId === defensePlanInstanceId,
+          ),
+        ).toMatchObject({
+          moduleId: "corp.defend_servers",
+          executionState: "idle",
+          moduleState: {
+            kind: "defense",
+            signals: expect.arrayContaining([
+              expect.objectContaining({
+                evidenceCode:
+                  "corp_resident_delayed_success_defense_source_rezzed_on_attacked_server",
+              }),
+            ]),
+          },
+        });
+      } else {
+        priorInput.legalActions = [];
+        priorInput.playerView.legalActions = [];
+        rememberResidentPlanPortfolio(priorInput, {
+          schemaVersion: "resident-plan-portfolio-v2",
+          side: "corp",
+          stateVersion: priorStateVersion,
+          rootForegroundInstanceId:
+            planOrigin === "active"
+              ? defensePlanInstanceId
+              : planOrigin === "post_turn_discard"
+                ? handPlanInstanceId
+                : completionPlanInstanceId,
+          executorInstanceId:
+            planOrigin === "active"
+              ? defensePlanInstanceId
+              : planOrigin === "post_turn_discard"
+                ? handPlanInstanceId
+                : completionPlanInstanceId,
+          instances:
+            planOrigin === "active"
+              ? [
+                  {
+                    instanceId: defensePlanInstanceId,
+                    side: "corp",
+                    moduleId: "corp.defend_servers",
+                    executionState: "executor",
+                    moduleState: {
+                      kind: "defense",
+                      signals: [{ serverId: attackedServerId }],
+                      hqHoldCadence: { turnKey: "corp:19" },
+                    },
+                    evidenceRefs: [],
+                    blockers: [],
                   },
-                  evidenceRefs: [],
-                  blockers: [],
-                },
-              ]
-            : [
-                {
-                  instanceId: completionPlanInstanceId,
-                  side: "corp",
-                  moduleId: "corp.complete_turn",
-                  executionState: "executor",
-                  moduleState: { kind: "turn_completion" },
-                  evidenceRefs: [],
-                  blockers: [],
-                },
-                {
-                  instanceId: defensePlanInstanceId,
-                  side: "corp",
-                  moduleId: "corp.defend_servers",
-                  executionState: "idle",
-                  moduleState: { kind: "defense", signals: [] },
-                  evidenceRefs: [],
-                  blockers: [],
-                },
-              ],
-        completionHistory: [],
-        transitions: [],
-      } as never);
+                ]
+              : planOrigin === "post_turn_discard"
+                ? [
+                    {
+                      instanceId: handPlanInstanceId,
+                      side: "corp",
+                      moduleId: "corp.hand_and_agenda_management",
+                      executionState: "executor",
+                      moduleState: { kind: "hand" },
+                      evidenceRefs: [],
+                      blockers: [],
+                    },
+                    {
+                      instanceId: defensePlanInstanceId,
+                      side: "corp",
+                      moduleId: "corp.defend_servers",
+                      executionState: "idle",
+                      moduleState: { kind: "defense", signals: [] },
+                      evidenceRefs: [],
+                      blockers: [],
+                    },
+                  ]
+                : [
+                    {
+                      instanceId: completionPlanInstanceId,
+                      side: "corp",
+                      moduleId: "corp.complete_turn",
+                      executionState: "executor",
+                      moduleState: { kind: "turn_completion" },
+                      evidenceRefs: [],
+                      blockers: [],
+                    },
+                    {
+                      instanceId: defensePlanInstanceId,
+                      side: "corp",
+                      moduleId: "corp.defend_servers",
+                      executionState: "idle",
+                      moduleState: { kind: "defense", signals: [] },
+                      evidenceRefs: [],
+                      blockers: [],
+                    },
+                  ],
+          completionHistory: [],
+          transitions: [],
+        } as never);
+      }
 
       const delayedSuccessDecision = liveContext({
         selectedChoicesForDecision: (

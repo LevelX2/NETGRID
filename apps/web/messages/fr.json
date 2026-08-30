@@ -77,8 +77,8 @@
       "build": "Construire",
       "commit": "S'engager",
       "sourceDate": "Révision de la source",
-      "development": "Construction du développement local",
-      "developmentDirty": "Développement local construit avec des changements non engagés",
+      "sourceClean": "État propre au démarrage du client web",
+      "sourceDirty": "Modifications non validées au démarrage du client web",
       "unavailable": "indisponible"
     },
     "session": {
@@ -133,13 +133,13 @@
     },
     "tooltip": {
       "title": "Affichage de l’infobulle",
-      "localHelp": "Indépendant de l’affichage des cartes en jeu ; ne fait pas partie de l’état du match",
+      "localHelp": "Modifie uniquement l’aperçu au survol ; enregistré localement et sans effet sur la partie",
       "mode": "Mode",
       "simple": "Compact",
       "enhanced": "Carte textuelle",
       "image": "Image de la carte",
       "translateRules": "Traduire les règles dans la langue sélectionnée",
-      "translateRulesHelp": "S’applique aux infobulles textuelles. En l’absence de traduction confirmée, le texte anglais des règles est affiché.",
+      "translateRulesHelp": "Disponible pour Carte textuelle et Compact. En l’absence de traduction confirmée, le texte anglais des règles est affiché.",
       "hoverDelay": "Délai de survol",
       "seconds": "{seconds} secondes"
     },
@@ -232,6 +232,12 @@
     }
   },
   "AppShell": {
+    "runtimeStatus": {
+      "watch": "Watch",
+      "watchTitle": "La surveillance du serveur est active ; les modifications du backend sont rechargées automatiquement.",
+      "localChanges": "modifié localement",
+      "localChangesTitle": "Des modifications n’étaient pas validées au démarrage du client web."
+    },
     "navigation": {
       "catalog": "Catalogue",
       "decks": "Decks",
@@ -994,6 +1000,8 @@
       "randomStandard": "{side} · Deck standard aléatoire",
       "standard": "{side} · Deck standard · {name}",
       "personal": "{side} · Mon deck · {name}",
+      "openOnTable": "Voir sur la table de deck",
+      "editOnTable": "Modifier sur la table de deck",
       "guide": {
         "available": "Guide du deck",
         "stale": "Le guide doit être mis à jour",
@@ -1057,6 +1065,9 @@
       "clear": "Effacer",
       "unsaved": "Non enregistré",
       "saved": "Enregistré",
+      "standardPreview": "Deck standard · Aperçu",
+      "copyAsOwn": "Copier dans mes decks",
+      "backToMatchStart": "Retour au lancement de partie",
       "save": "Enregistrer",
       "view": "Voir",
       "back": "Retour à la liste",
@@ -1096,7 +1107,7 @@
         "agenda": "Points à l'ordre du jour"
       },
       "copy": "Copier",
-      "upToThree": "Jusqu'à 3",
+      "upToThree": "Compléter à 3",
       "remove": "Supprimer",
       "dropCard": "Déposez la carte ici"
     },
@@ -1121,6 +1132,9 @@
       "importDeck": "Importer un deck",
       "import": "Importer",
       "copyStandardDescription": "La copie est enregistrée en tant que deck personnel et peut ensuite être modifiée.",
+      "standardPreviewTitle": "Deck standard sur la table de deck",
+      "standardPreviewDescription": "La composition du deck est protégée. Vous pouvez disposer les cartes, puis copier cette disposition dans votre propre deck.",
+      "standardPreviewAccountRequired": "La composition du deck est protégée. Vous pouvez disposer les cartes ; connectez-vous pour créer une copie personnelle.",
       "side": "Côté",
       "corp": "Corp",
       "standardDeck": "Deck standard",
@@ -1452,6 +1466,7 @@
       "coreDamageValue": "Dommages au noyau : {value}",
       "handLimit": "Limite de main : {value}",
       "zeroLine": "Ligne zéro",
+      "flatlineBoundary": "Seuil de flatline",
       "damageAmount": "Dommages {amount}",
       "prevented": "Empêché",
       "queued": "{count, plural, one {Encore # notification de dégâts} other {Encore # notifications de dégâts}}",
@@ -2224,6 +2239,11 @@
       "tagsCurrentChip": "Maintenant {amount} {amount, plural, one {balise} other {balises}}",
       "runnerPaidToPassIce": "{subject} : a payé {amount, plural, one {# crédit} other {# crédits}} pour passer {source}.",
       "runnerDidNotPayToPassIce": "{subject} : n’a pas payé pour {source} ; le piratage est terminé.",
+      "numberedEndRunSubroutine": "{source} : le sous-programme {number} met fin au piratage.",
+      "endRunSubroutine": "{source} : un sous-programme met fin au piratage.",
+      "numberedSubroutineChip": "Sous-programme {number}",
+      "subroutineChip": "Sous-programme",
+      "runEndedChip": "Piratage terminé",
       "creditsPaidChip": "{amount, plural, one {# crédit payé} other {# crédits payés}}",
       "notPaidChip": "Non payé",
       "resolved": "Un effet automatique de {source} résolu.",

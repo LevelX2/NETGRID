@@ -50,6 +50,7 @@ describe("V2.7 observability redaction baseline", () => {
       rateLimitProfile: "private_internet",
       trustProxyHeaders: false,
       healthDetail: "safe",
+      runtimeMode: "normal",
       maintenanceEnabled: false,
       maintenanceBaseUrl: "https://maintenance.netgrid.example",
       maintenanceAllowedOrigins: [],

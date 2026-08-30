@@ -61,6 +61,7 @@ import { DeckCardTooltipTrigger } from "./DeckCardTooltipTrigger";
 import { DeckMetadataLine } from "./DeckSelectionControls";
 import { StandardDeckGuideDialog } from "./StandardDeckGuideDialog";
 import { standardDeckGuideControlState } from "./standard-deck-guide-ui";
+import { editableStandardDeckPreview } from "./standard-deck-table-preview";
 import { DeckStrategyProfilePanel } from "./DeckStrategyProfilePanel";
 import { DeckTableBoard } from "./DeckTableBoard";
 import { DeckValidationSummary } from "./DeckValidationSummary";
@@ -260,9 +261,11 @@ function snapshotAllowedForMatchCardPool(
   return snapshot.cardPoolSnapshotId === matchCardPool.snapshotId;
 }
 export function DeckEditorPanel({
+  mode: deckEditorMode,
+  onModeChange: setDeckEditorMode,
   localDecks,
-  selectedDeck,
-  selectedDeckDirty,
+  selectedDeck: personalSelectedDeck,
+  selectedDeckDirty: personalSelectedDeckDirty,
   storagePath,
   validation,
   validatedSnapshot,
@@ -272,9 +275,9 @@ export function DeckEditorPanel({
   exportText,
   onCreateEmpty,
   onSelectDeck,
-  onUpdateDeck,
+  onUpdateDeck: onUpdatePersonalDeck,
   onSave,
-  onUpdateQuantity,
+  onUpdateQuantity: onUpdatePersonalQuantity,
   onDuplicate,
   onDelete,
   onValidate,
@@ -287,9 +290,16 @@ export function DeckEditorPanel({
   standardDeckCatalogPhase = "ready",
   standardDeckCatalogRefreshing = false,
   standardCopyBusy = false,
+  standardDeckPreview = null,
+  openLocalDeckOnTableId = null,
+  onLocalDeckTableOpened,
   onCopyStandard,
+  onCloseStandardDeckPreview,
+  onStandardDeckPreviewCopied,
   onReloadStandardDecks,
 }: {
+  mode: DeckEditorMode;
+  onModeChange(mode: DeckEditorMode): void;
   localDecks: EditableDeck[];
   selectedDeck: EditableDeck | null;
   selectedDeckDirty: boolean;
@@ -317,10 +327,20 @@ export function DeckEditorPanel({
   standardDeckCatalogPhase?: "loading" | "ready" | "error";
   standardDeckCatalogRefreshing?: boolean;
   standardCopyBusy?: boolean;
-  onCopyStandard?(deck: StandardDeck, name: string): Promise<boolean>;
+  standardDeckPreview?: StandardDeck | null;
+  openLocalDeckOnTableId?: string | null;
+  onLocalDeckTableOpened?(): void;
+  onCopyStandard?(
+    deck: StandardDeck,
+    name: string,
+    draft?: EditableDeck,
+  ): Promise<boolean>;
+  onCloseStandardDeckPreview?(): void;
+  onStandardDeckPreviewCopied?(): void;
   onReloadStandardDecks?(): void;
 }) {
   const t = useTranslations("Decks.editor");
+  const tableT = useTranslations("Decks.table");
   const [builderSearch, setBuilderSearch] = useState("");
   const [builderTypeFilters, setBuilderTypeFilters] =
     useState<CatalogTypeFilterState>({ ...ALL_CATALOG_TYPE_FILTERS });
@@ -336,7 +356,6 @@ export function DeckEditorPanel({
   const [builderFiltersOpen, setBuilderFiltersOpen] = useState(false);
   const [deckDetailsOpen, setDeckDetailsOpen] = useState(true);
   const [deckPickerOpen, setDeckPickerOpen] = useState(true);
-  const [deckEditorMode, setDeckEditorMode] = useState<DeckEditorMode>("list");
   const [tableCardMenuKey, setTableCardMenuKey] = useState<string | null>(null);
   const [tableCardWidth, setTableCardWidth] = useState(
     DECK_TABLE_CARD_WIDTH_DEFAULT,
@@ -368,11 +387,39 @@ export function DeckEditorPanel({
   const [importOpen, setImportOpen] = useState(false);
   const [standardCopyOpen, setStandardCopyOpen] = useState(false);
   const [standardCopyGuideOpen, setStandardCopyGuideOpen] = useState(false);
+  const [standardPreviewDraft, setStandardPreviewDraft] =
+    useState<EditableDeck | null>(() =>
+      standardDeckPreview
+        ? editableStandardDeckPreview(standardDeckPreview)
+        : null,
+    );
   const [standardCopySide, setStandardCopySide] = useState<Side>("runner");
   const [standardCopyDeckId, setStandardCopyDeckId] = useState("");
   const [standardCopyName, setStandardCopyName] = useState("");
   const [deckSideFilter, setDeckSideFilter] = useState<DeckSideFilter>("all");
   const [previewCardId, setPreviewCardId] = useState<string | null>(null);
+  const standardPreviewActive = Boolean(
+    standardDeckPreview &&
+    standardPreviewDraft?.deckId ===
+      `standard-preview:${standardDeckPreview.standardDeckId}`,
+  );
+  const selectedDeck = standardPreviewActive
+    ? standardPreviewDraft
+    : personalSelectedDeck;
+  const selectedDeckDirty = standardPreviewActive
+    ? false
+    : personalSelectedDeckDirty;
+  const onUpdateDeck = (deck: EditableDeck) => {
+    if (standardPreviewActive) {
+      setStandardPreviewDraft(deck);
+      return;
+    }
+    onUpdatePersonalDeck(deck);
+  };
+  const onUpdateQuantity = (cardId: string, quantity: number) => {
+    if (standardPreviewActive) return;
+    onUpdatePersonalQuantity(cardId, quantity);
+  };
   const totalCards =
     selectedDeck?.cards.reduce((sum, entry) => sum + entry.quantity, 0) ?? 0;
   const deckQuantities = useMemo(
@@ -697,6 +744,37 @@ export function DeckEditorPanel({
   const [deckStrategyProfileLoading, setDeckStrategyProfileLoading] =
     useState(false);
   useEffect(() => {
+    if (!standardDeckPreview) {
+      setStandardPreviewDraft(null);
+      return;
+    }
+    setStandardPreviewDraft(editableStandardDeckPreview(standardDeckPreview));
+    setDeckEditorMode("table");
+    setTableCardMenuKey(null);
+    setTableSelectionMode(false);
+    setSelectedTableCardKeys([]);
+    setTableSelectionAnchor(null);
+  }, [standardDeckPreview]);
+  useEffect(() => {
+    if (
+      !openLocalDeckOnTableId ||
+      standardDeckPreview ||
+      personalSelectedDeck?.deckId !== openLocalDeckOnTableId
+    )
+      return;
+    setDeckEditorMode("table");
+    setTableCardMenuKey(null);
+    setTableSelectionMode(false);
+    setSelectedTableCardKeys([]);
+    setTableSelectionAnchor(null);
+    onLocalDeckTableOpened?.();
+  }, [
+    openLocalDeckOnTableId,
+    onLocalDeckTableOpened,
+    personalSelectedDeck?.deckId,
+    standardDeckPreview,
+  ]);
+  useEffect(() => {
     if (!selectedDeck) {
       setDeckStrategyProfileResponse(null);
       setDeckStrategyProfileLoading(false);
@@ -850,6 +928,17 @@ export function DeckEditorPanel({
         }
       },
     );
+  };
+  const copyStandardPreviewAsOwnDeck = () => {
+    if (!standardDeckPreview || !standardPreviewDraft || !onCopyStandard)
+      return;
+    void onCopyStandard(
+      standardDeckPreview,
+      `${standardDeckPreview.name} Kopie`,
+      standardPreviewDraft,
+    ).then((copied) => {
+      if (copied) onStandardDeckPreviewCopied?.();
+    });
   };
   const setVisibleBuilderTypes = (selected: boolean) => {
     setBuilderTypeFilters((current) => {
@@ -1689,8 +1778,40 @@ export function DeckEditorPanel({
           {selectedDeck ? null : deckManagementPanel}
           {selectedDeck ? (
             <>
+              {standardPreviewActive && standardDeckPreview ? (
+                <div className="deckStandardPreviewNotice" role="status">
+                  <div>
+                    <strong>{t("standardPreviewTitle")}</strong>
+                    <span>
+                      {onCopyStandard
+                        ? t("standardPreviewDescription")
+                        : t("standardPreviewAccountRequired")}
+                    </span>
+                  </div>
+                  <div className="deckStandardPreviewActions">
+                    {onCopyStandard ? (
+                      <button
+                        className="button primary"
+                        type="button"
+                        disabled={standardCopyBusy}
+                        onClick={copyStandardPreviewAsOwnDeck}
+                      >
+                        <CopyPlus size={15} />
+                        {tableT("copyAsOwn")}
+                      </button>
+                    ) : null}
+                    <button
+                      className="button"
+                      type="button"
+                      onClick={() => onCloseStandardDeckPreview?.()}
+                    >
+                      {tableT("backToMatchStart")}
+                    </button>
+                  </div>
+                </div>
+              ) : null}
               <div
-                className={`deckBuilderGrid ${deckEditorMode === "table" ? "deckBuilderGridTableMode" : ""}`}
+                className={`deckBuilderGrid ${deckEditorMode === "table" ? "deckBuilderGridTableMode" : ""} ${standardPreviewActive ? "deckBuilderGridStandardPreview" : ""}`}
                 style={deckEditorMode === "table" ? deckTableStyle : undefined}
               >
                 {deckEditorMode === "table" ? null : (
@@ -1931,6 +2052,7 @@ export function DeckEditorPanel({
                           selected={
                             previewCard?.catalogCardId === card.catalogCardId
                           }
+                          readOnly={standardPreviewActive}
                           stackIndex={index + 1}
                           onAddToFirstPile={() =>
                             tableLayout &&
@@ -2062,7 +2184,13 @@ export function DeckEditorPanel({
                       selectedCards={selectedTableCards}
                       selectionMode={tableSelectionMode}
                       agendaStatus={agendaStatus}
-                      onBack={() => setDeckEditorMode("list")}
+                      onBack={() => {
+                        if (standardPreviewActive) {
+                          onCloseStandardDeckPreview?.();
+                          return;
+                        }
+                        setDeckEditorMode("list");
+                      }}
                       onCardClick={handleTableCardClick}
                       onClearSelection={clearTableSelection}
                       onDuplicateCard={duplicateTableCard}

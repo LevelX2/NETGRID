@@ -9,9 +9,17 @@ const css = readFileSync(new URL("./globals.css", import.meta.url), "utf8").repl
   /\r\n?/g,
   "\n",
 );
+const dialogSource = readFileSync(
+  new URL("../features/app-shell/OptionsDialog.tsx", import.meta.url),
+  "utf8",
+);
+const localeSource = readFileSync(
+  new URL("../i18n/LocaleSelect.tsx", import.meta.url),
+  "utf8",
+);
 const panelBody = optionsSource.slice(
   optionsSource.indexOf("export function OptionsPanel"),
-  optionsSource.indexOf("function LocaleSettings"),
+  optionsSource.indexOf("function BuildInfoSettings"),
 );
 
 describe("options tabs", () => {
@@ -41,6 +49,21 @@ describe("options tabs", () => {
     expect(panelBody).toContain("<SessionAccessSettings");
     expect(panelBody).toContain("<BuildInfoSettings />");
     expect(panelBody).toContain("<SystemStatus />");
+  });
+
+  it("keeps the self-identifying language selector in both options headers", () => {
+    for (const source of [optionsSource, dialogSource]) {
+      expect(source).toContain('className="optionsHeaderLocaleSelect"');
+      expect(source).toContain('presentation="header"');
+    }
+    expect(optionsSource).not.toContain("<LocaleSettings />");
+    expect(localeSource).toContain("APP_LOCALE_SELF_NAMES");
+    expect(localeSource).toContain("<LanguageGlobeIcon />");
+    expect(localeSource).toContain('className="optionsHeaderLocaleIconFill"');
+    expect(localeSource).toContain('className="optionsHeaderLocaleIconGrid"');
+    expect(css).toContain(
+      ".optionsPanel > .catalogHeader > .optionsHeaderLocaleSelect",
+    );
   });
 
   it("links contextual flow help and AI descriptions to their controls", () => {

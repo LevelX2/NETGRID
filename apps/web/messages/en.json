@@ -77,8 +77,8 @@
       "build": "Build",
       "commit": "Commit",
       "sourceDate": "Source revision",
-      "development": "Local development build",
-      "developmentDirty": "Local development build with uncommitted changes",
+      "sourceClean": "Clean when the web client started",
+      "sourceDirty": "Changes were uncommitted when the web client started",
       "unavailable": "unavailable"
     },
     "session": {
@@ -133,13 +133,13 @@
     },
     "tooltip": {
       "title": "Tooltip display",
-      "localHelp": "Independent of the in-game card display; not part of match state",
+      "localHelp": "Changes hover previews only; saved locally and does not affect the match",
       "mode": "Mode",
       "simple": "Compact",
       "enhanced": "Text card",
       "image": "Card image",
       "translateRules": "Translate rules to the selected language",
-      "translateRulesHelp": "Applies to text tooltips. If no confirmed translation exists, the English rules text is shown.",
+      "translateRulesHelp": "Available for Text card and Compact tooltips. If no confirmed translation exists, the English rules text is shown.",
       "hoverDelay": "Hover delay",
       "seconds": "{seconds} seconds"
     },
@@ -232,6 +232,12 @@
     }
   },
   "AppShell": {
+    "runtimeStatus": {
+      "watch": "Watch",
+      "watchTitle": "Server watch is active; backend changes reload automatically.",
+      "localChanges": "locally changed",
+      "localChangesTitle": "Changes were uncommitted when the web client started."
+    },
     "navigation": {
       "catalog": "Catalog",
       "decks": "Decks",
@@ -964,6 +970,8 @@
       "randomStandard": "{side} · Random standard deck",
       "standard": "{side} · Standard deck · {name}",
       "personal": "{side} · My deck · {name}",
+      "openOnTable": "View on deck table",
+      "editOnTable": "Edit on deck table",
       "guide": {
         "available": "Deck guide",
         "stale": "Guide must be updated",
@@ -1027,6 +1035,9 @@
       "clear": "Clear",
       "unsaved": "Unsaved",
       "saved": "Saved",
+      "standardPreview": "Standard deck · Preview",
+      "copyAsOwn": "Copy as my deck",
+      "backToMatchStart": "Back to match setup",
       "save": "Save",
       "view": "View",
       "back": "Back to list",
@@ -1066,7 +1077,7 @@
         "agenda": "Agenda points"
       },
       "copy": "Copy",
-      "upToThree": "Up to 3",
+      "upToThree": "Fill to 3",
       "remove": "Remove",
       "dropCard": "Drop card here"
     },
@@ -1091,6 +1102,9 @@
       "importDeck": "Import deck",
       "import": "Import",
       "copyStandardDescription": "The copy is saved as a personal deck and can then be edited.",
+      "standardPreviewTitle": "Standard deck on the deck table",
+      "standardPreviewDescription": "The deck composition is protected. You can arrange its cards and then copy this table layout as your own deck.",
+      "standardPreviewAccountRequired": "The deck composition is protected. You can arrange its cards; sign in to create a personal copy.",
       "side": "Side",
       "corp": "Corp",
       "standardDeck": "Standard deck",
@@ -1410,6 +1424,7 @@
       "coreDamageValue": "Core damage: {value}",
       "handLimit": "Hand limit: {value}",
       "zeroLine": "Zero line",
+      "flatlineBoundary": "Flatline boundary",
       "damageAmount": "Damage {amount}",
       "prevented": "Prevented",
       "queued": "{count, plural, one {# more damage notification} other {# more damage notifications}}",
@@ -2140,6 +2155,11 @@
       "tagsCurrentChip": "Now {amount} {amount, plural, one {tag} other {tags}}",
       "runnerPaidToPassIce": "{subject}: paid {amount, plural, one {# credit} other {# credits}} to pass {source}.",
       "runnerDidNotPayToPassIce": "{subject}: did not pay for {source}; the run ended.",
+      "numberedEndRunSubroutine": "{source}: subroutine {number} ends the run.",
+      "endRunSubroutine": "{source}: a subroutine ends the run.",
+      "numberedSubroutineChip": "Subroutine {number}",
+      "subroutineChip": "Subroutine",
+      "runEndedChip": "Run ended",
       "creditsPaidChip": "{amount, plural, one {# credit paid} other {# credits paid}}",
       "notPaidChip": "Not paid",
       "resolved": "An automatic effect from {source} resolved.",

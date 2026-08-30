@@ -2335,6 +2335,43 @@ export function aiPacingDelayMs(
   return Math.max(autoDismissMs, minimum);
 }
 
+export function humanCorpRunServerActionBlocksAutomaticRunnerAiAdvance(
+  view: PlayerView | undefined,
+  actions: readonly LegalAction[],
+  currentRunAutoPassActive: boolean,
+): boolean {
+  if (
+    !view?.run ||
+    view.side !== "corp" ||
+    view.winner ||
+    view.pendingChoice ||
+    currentRunAutoPassActive
+  )
+    return false;
+  const attackedServer = view.servers.find(
+    (server) => server.id === view.run?.attackedServerId,
+  );
+  if (!attackedServer) return false;
+  const attackedServerCardIds = new Set(
+    [...attackedServer.ice, ...attackedServer.root].map(
+      (card) => card.instanceId,
+    ),
+  );
+  return actions.some((action) => {
+    if (action.side !== "corp" || !action.timingPoint.startsWith("run."))
+      return false;
+    const sourceCardIds = new Set<string>();
+    if (action.abilityRef?.sourceCardInstanceId)
+      sourceCardIds.add(action.abilityRef.sourceCardInstanceId);
+    if (action.source !== "basic_action" && action.source !== "game_rule")
+      sourceCardIds.add(action.source);
+    addStringRef(sourceCardIds, action.payload?.cardId);
+    return Array.from(sourceCardIds).some((cardId) =>
+      attackedServerCardIds.has(cardId),
+    );
+  });
+}
+
 export function aiPacingFallbackDelayMs(
   mode: AiPacingTriggerMode,
   hasPendingAiCue: boolean,

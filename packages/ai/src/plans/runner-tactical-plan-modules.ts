@@ -1659,6 +1659,9 @@ function developmentCandidates(
     .filter(
       (candidate) =>
         signal.actionIds.includes(candidate.actionId) &&
+        !context.actionDispositions?.some(
+          (disposition) => disposition.actionId === candidate.actionId,
+        ) &&
         (signal.phase === "fund" ||
           signal.phase === "open_restricted_sequence" ||
           signal.phase === "execute_restricted_sequence" ||

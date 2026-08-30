@@ -70,6 +70,7 @@ import {
   currentRunTimelineStep,
   groupRunnerRigCards,
   hostedOnDetailLabel,
+  humanCorpRunServerActionBlocksAutomaticRunnerAiAdvance,
   iceModifierBadgesForServer,
   identityCounterChipsForDisplays,
   inactiveCardZoneAriaSuffix,
@@ -2090,6 +2091,84 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(aiPacingDelayMs("paced", false, 2500)).toBe(650);
     expect(aiPacingDelayMs("paced", true, 0)).toBe(900);
     expect(aiPacingDelayMs("fast", true, 6000)).toBe(6000);
+  });
+
+  it("pauses automatic Runner AI only for Corp Run actions sourced from the attacked server", () => {
+    const vaporOps = card("vapor_1", "Vapor Ops", "asset");
+    const remoteTwoVaporOps = card("vapor_2", "Vapor Ops", "asset");
+    const running = view("corp", {
+      activeSide: "runner",
+      phase: "run",
+      timingPoint: "run.jack_out_window",
+      run: {
+        runId: "run_9",
+        attackedServerId: "remote_1",
+        phase: "movement",
+        position: { kind: "server", serverId: "remote_1" },
+        successful: false,
+      },
+      servers: [
+        {
+          id: "remote_1",
+          label: "Remote 1",
+          ice: [],
+          root: [vaporOps],
+        },
+        {
+          id: "remote_2",
+          label: "Remote 2",
+          ice: [],
+          root: [remoteTwoVaporOps],
+        },
+      ],
+    });
+    const attackedServerCashout = legalAction(
+      "corp",
+      "activated_card_ability",
+      "card_implementation",
+      "Vapor Ops: Advancement-Counter für 1 Credit ausgeben",
+      { cardId: vaporOps.instanceId },
+      "run.jack_out_window",
+    );
+    const otherServerCashout = legalAction(
+      "corp",
+      "activated_card_ability",
+      "card_implementation",
+      "Vapor Ops: Advancement-Counter für 1 Credit ausgeben",
+      { cardId: remoteTwoVaporOps.instanceId },
+      "run.jack_out_window",
+    );
+    const notRunning = { ...running };
+    delete notRunning.run;
+
+    expect(
+      humanCorpRunServerActionBlocksAutomaticRunnerAiAdvance(
+        running,
+        [attackedServerCashout],
+        false,
+      ),
+    ).toBe(true);
+    expect(
+      humanCorpRunServerActionBlocksAutomaticRunnerAiAdvance(
+        running,
+        [otherServerCashout],
+        false,
+      ),
+    ).toBe(false);
+    expect(
+      humanCorpRunServerActionBlocksAutomaticRunnerAiAdvance(
+        running,
+        [attackedServerCashout],
+        true,
+      ),
+    ).toBe(false);
+    expect(
+      humanCorpRunServerActionBlocksAutomaticRunnerAiAdvance(
+        notRunning,
+        [attackedServerCashout],
+        false,
+      ),
+    ).toBe(false);
   });
 
   it("debounces the AI fallback controls during automatic pacing", () => {

@@ -77,8 +77,8 @@
       "build": "Build",
       "commit": "Commit",
       "sourceDate": "Quellstand",
-      "development": "Lokaler Entwicklungsstand",
-      "developmentDirty": "Lokaler Entwicklungsstand mit nicht committeten Änderungen",
+      "sourceClean": "Beim Webstart sauber",
+      "sourceDirty": "Beim Webstart waren Änderungen nicht committet",
       "unavailable": "nicht verfügbar"
     },
     "session": {
@@ -133,13 +133,13 @@
     },
     "tooltip": {
       "title": "Tooltip-Anzeige",
-      "localHelp": "Unabhängig von der Kartenanzeige im Spiel; kein Match-State",
+      "localHelp": "Ändert nur die Vorschau beim Darüberfahren; wird lokal gespeichert und beeinflusst das Match nicht",
       "mode": "Modus",
       "simple": "Kompakt",
       "enhanced": "Textkarte",
       "image": "Kartenbild",
       "translateRules": "Regeltext in die ausgewählte Sprache übersetzen",
-      "translateRulesHelp": "Gilt für Text-Tooltips. Fehlt eine bestätigte Übersetzung, wird der englische Regeltext angezeigt.",
+      "translateRulesHelp": "Verfügbar für Textkarte und Kompakt. Fehlt eine bestätigte Übersetzung, wird der englische Regeltext angezeigt.",
       "hoverDelay": "Hover-Verzögerung",
       "seconds": "{seconds} Sekunden"
     },
@@ -232,6 +232,12 @@
     }
   },
   "AppShell": {
+    "runtimeStatus": {
+      "watch": "Watch",
+      "watchTitle": "Server-Watch ist aktiv; Backend-Änderungen werden automatisch neu geladen.",
+      "localChanges": "lokal geändert",
+      "localChangesTitle": "Beim Webstart waren Änderungen nicht committet."
+    },
     "navigation": {
       "catalog": "Katalog",
       "decks": "Decks",
@@ -968,6 +974,8 @@
       "randomStandard": "{side} · Zufälliges Standard-Deck",
       "standard": "{side} · Standard-Deck · {name}",
       "personal": "{side} · Mein Deck · {name}",
+      "openOnTable": "Im Decktisch ansehen",
+      "editOnTable": "Im Decktisch bearbeiten",
       "guide": {
         "available": "Deck-Anleitung",
         "stale": "Anleitung muss aktualisiert werden",
@@ -1031,6 +1039,9 @@
       "clear": "Lösen",
       "unsaved": "Ungespeichert",
       "saved": "Gespeichert",
+      "standardPreview": "Standard-Deck · Vorschau",
+      "copyAsOwn": "Als eigenes Deck kopieren",
+      "backToMatchStart": "Zurück zum Spielstart",
       "save": "Speichern",
       "view": "Ansicht",
       "back": "Zurück zur Liste",
@@ -1070,7 +1081,7 @@
         "agenda": "Agenda-Punkte"
       },
       "copy": "Kopie",
-      "upToThree": "Bis 3",
+      "upToThree": "Auf 3 auffüllen",
       "remove": "Entfernen",
       "dropCard": "Karte hier ablegen"
     },
@@ -1095,6 +1106,9 @@
       "importDeck": "Deck importieren",
       "import": "Importieren",
       "copyStandardDescription": "Die Kopie wird als persönliches Deck gespeichert und kann danach bearbeitet werden.",
+      "standardPreviewTitle": "Standard-Deck im Decktisch",
+      "standardPreviewDescription": "Die Deckzusammensetzung ist geschützt. Du kannst die Karten anordnen und diese Tischansicht anschließend als eigenes Deck kopieren.",
+      "standardPreviewAccountRequired": "Die Deckzusammensetzung ist geschützt. Du kannst die Karten anordnen; für eine persönliche Kopie musst du angemeldet sein.",
       "side": "Seite",
       "corp": "Korp",
       "standardDeck": "Standard-Deck",
@@ -1414,6 +1428,7 @@
       "coreDamageValue": "Core Damage: {value}",
       "handLimit": "Handlimit: {value}",
       "zeroLine": "Null-Linie",
+      "flatlineBoundary": "Flatline-Grenze",
       "damageAmount": "Damage {amount}",
       "prevented": "Verhindert",
       "queued": "{count, plural, one {# weitere Damage-Meldung} other {# weitere Damage-Meldungen}}",
@@ -2148,6 +2163,11 @@
       "tagsCurrentChip": "Jetzt {amount} {amount, plural, one {Tag} other {Tags}}",
       "runnerPaidToPassIce": "{subject}: {amount, plural, one {# Credit} other {# Credits}} bezahlt, um {source} zu passieren.",
       "runnerDidNotPayToPassIce": "{subject}: nicht für {source} bezahlt; der Run wurde beendet.",
+      "numberedEndRunSubroutine": "{source}: Subroutine {number} beendet den Run.",
+      "endRunSubroutine": "{source}: Eine Subroutine beendet den Run.",
+      "numberedSubroutineChip": "Subroutine {number}",
+      "subroutineChip": "Subroutine",
+      "runEndedChip": "Run beendet",
       "creditsPaidChip": "{amount, plural, one {# Credit bezahlt} other {# Credits bezahlt}}",
       "notPaidChip": "Nicht bezahlt",
       "resolved": "Ein automatischer Effekt von {source} wurde aufgelöst.",

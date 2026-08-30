@@ -235,7 +235,7 @@ export function buildRunnerTurnPlannerShadow(params: {
   };
 }
 
-function runnerCoverageDispositions(params: {
+export function runnerCoverageDispositions(params: {
   input: AiDecisionInput;
   existing: readonly NonNullable<
     PlanSchedulerContext["actionDispositions"]
@@ -260,14 +260,38 @@ function runnerCoverageDispositions(params: {
       action.payload?.runnerAbility === "change_icebreaker_subtype";
     const isUnboundStrategicExchange =
       runnerStrategicExchangeRequiresBoundParent(candidate);
+    const runAbilityServerId =
+      candidate.semanticActionType.startsWith("card_ability.") &&
+      (candidate.effectTargets ?? []).some(
+        (target) =>
+          target === "make_run" ||
+          target === "make_chosen_server_run" ||
+          (target.startsWith("make_") && target.endsWith("_run")),
+      )
+        ? (action?.payload?.accessServerId ??
+          action?.payload?.runServerId ??
+          action?.payload?.serverId)
+        : undefined;
+    const runAbilityOwnerModuleId =
+      typeof runAbilityServerId === "string"
+        ? runAbilityServerId.startsWith("remote_")
+          ? ("runner.contest_remote" as const)
+          : runAbilityServerId === "hq" ||
+              runAbilityServerId === "rd" ||
+              runAbilityServerId === "archives"
+            ? ("runner.pressure_central" as const)
+            : undefined
+        : undefined;
     const ownerModuleId = isUnboundStrategicExchange
       ? ("runner.economy" as const)
       : candidate.semanticActionType.startsWith("search.") ||
           isUnboundBreakerSubtypeChange
         ? ("runner.rig_and_coverage" as const)
-        : candidate.semanticActionType === "play.runner_event"
-          ? ("runner.develop_board_and_hand" as const)
-          : undefined;
+        : runAbilityOwnerModuleId
+          ? runAbilityOwnerModuleId
+          : candidate.semanticActionType === "play.runner_event"
+            ? ("runner.develop_board_and_hand" as const)
+            : undefined;
     if (!ownerModuleId) continue;
     dispositions.push({
       actionId: candidate.actionId,
@@ -277,9 +301,11 @@ function runnerCoverageDispositions(params: {
         ? "runner_strategic_exchange_requires_current_exact_parent_head"
         : isUnboundBreakerSubtypeChange
           ? "runner_breaker_subtype_change_requires_current_bound_run_coverage_head"
-          : candidate.semanticActionType.startsWith("search.")
-            ? "runner_search_has_no_current_bound_coverage_or_development_need"
-            : "runner_event_has_no_current_bound_run_or_development_route",
+          : runAbilityOwnerModuleId
+            ? `runner_card_run_ability_has_no_current_bound_route:${runAbilityServerId}`
+            : candidate.semanticActionType.startsWith("search.")
+              ? "runner_search_has_no_current_bound_coverage_or_development_need"
+              : "runner_event_has_no_current_bound_run_or_development_route",
     });
     classified.add(candidate.actionId);
   }

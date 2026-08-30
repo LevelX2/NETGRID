@@ -5060,15 +5060,15 @@
     },
     {
       "standardDeckId": "standard_corp_counter_shell",
-      "sourceDeckVersion": "1.2.0",
-      "sourceDeckHash": "standard-deck:de3a5ec8",
-      "sourceAnalysisHash": "deck-analysis:6973965d",
+      "sourceDeckVersion": "1.3.0",
+      "sourceDeckHash": "standard-deck:67fadaeb",
+      "sourceAnalysisHash": "deck-analysis:f89cd49e",
       "reviewedAt": "2026-08-29",
       "analysis": {
         "primaryStrategyIds": [
+          "corp.ambush_bluff",
           "corp.remote_scoring",
-          "corp.overadvance_value",
-          "corp.ambush_bluff"
+          "corp.overadvance_value"
         ],
         "secondaryStrategyIds": [
           "corp.fast_advance",
@@ -5077,11 +5077,11 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:7582f96c",
+      "sourceAnalysisInputHash": "deck-analysis-input:5e07c974",
       "contentByLocale": {
         "en": {
           "summary": "Counter Shell stores advancement counters on credible traps and Vapor Ops, then converts that prepared board into same-turn scores and efficient overadvance payoffs.",
-          "deckIdea": "Counter Shell treats advancement counters as flexible capital. Virus Test Site and Vacant Soulkiller make early counters dangerous to access, while Vapor Ops safely banks counters for later. Once an agenda and a transfer effect line up, Falsified-Transactions Expert or Vapor Ops moves the stored counters onto the agenda for an immediate score. Team Restructuring advances the current agenda and a second trap or bank at the same time. The nine-agenda suite preserves Project Babylon, Project Zurich and Project Venice as overadvance payoffs while Employee Empowerment and Main-Office Relocation concentrate more points in fewer cards.",
+          "deckIdea": "Counter Shell treats advancement counters as flexible capital. Three Virus Test Sites and two Vacant Soulkillers make early counters dangerous to access, while Vapor Ops safely banks counters for later. Once an agenda and a transfer effect line up, Vapor Ops or the single Falsified-Transactions Expert moves stored counters onto the agenda for an immediate score. Team Restructuring advances the current agenda and a second trap or bank at the same time. The nine-agenda suite preserves Project Babylon, Project Zurich and Project Venice as overadvance payoffs while Employee Empowerment and Main-Office Relocation concentrate more points in fewer cards.",
           "gamePlan": {
             "opening": "Protect the centrals and the first scoring remote with real stopping ICE before expanding. Quandary and Wall of Static supply affordable stops, while Fire Wall, Credit Blocks and Reinforced Wall form the durable middle and upper rez curve; Snowbank and Misleading Access Menus are supplemental economy taxes, not reliable barriers. Establish one purposeful counter remote only after the essential servers are covered.",
             "midgame": "Force the Runner to choose between testing the advanced remote and respecting it. Preserve enough credits and actions to install an agenda and complete the counter handoff in the same turn. Team Restructuring is strongest when one counter closes the agenda gap and the other improves a real trap or bank.",
@@ -5096,7 +5096,7 @@
             {
               "cardId": "onr_v1_291_falsified-transactions-expert",
               "title": "Falsified-Transactions Expert",
-              "role": "The two-copy bridge turns up to three counters from a prepared trap or bank into an immediate score conversion when that exact window appears."
+              "role": "The single-copy bridge turns up to three counters from a prepared trap or bank into an immediate score conversion when that rare exact window appears."
             },
             {
               "cardId": "onr_v1_305_team-restructuring",
@@ -5133,7 +5133,7 @@
         },
         "de": {
           "summary": "Counter Shell speichert Advancement-Counter auf glaubwürdigen Traps und Vapor Ops und verwandelt diesen vorbereiteten Boardzustand später in Same-Turn-Scores und effiziente Overadvance-Payoffs.",
-          "deckIdea": "Counter Shell behandelt Advancement-Counter als flexibles Kapital. Virus Test Site und Vacant Soulkiller machen frühe Counter beim Zugriff gefährlich, während Vapor Ops sie sicher für später lagert. Sobald Agenda und Transfer zusammenkommen, verschieben Falsified-Transactions Expert oder Vapor Ops die gespeicherten Counter auf die Agenda, die sofort gescort wird. Team Restructuring entwickelt zugleich die aktuelle Agenda und einen zweiten Trap oder eine Bank weiter. Das Neun-Agenda-Paket behält Project Babylon, Project Zurich und Project Venice als Overadvance-Payoffs; Employee Empowerment und Main-Office Relocation bündeln zugleich mehr Punkte in weniger Karten.",
+          "deckIdea": "Counter Shell behandelt Advancement-Counter als flexibles Kapital. Drei Virus Test Sites und zwei Vacant Soulkiller machen frühe Counter beim Zugriff gefährlich, während Vapor Ops sie sicher für später lagert. Sobald Agenda und Transfer zusammenkommen, verschieben Vapor Ops oder der einzelne Falsified-Transactions Expert gespeicherte Counter auf die Agenda, die sofort gescort wird. Team Restructuring entwickelt zugleich die aktuelle Agenda und einen zweiten Trap oder eine Bank weiter. Das Neun-Agenda-Paket behält Project Babylon, Project Zurich und Project Venice als Overadvance-Payoffs; Employee Empowerment und Main-Office Relocation bündeln zugleich mehr Punkte in weniger Karten.",
           "gamePlan": {
             "opening": "Schütze Zentralserver und das erste Score-Remote zuerst mit echtem Stopper-ICE. Quandary und Wall of Static liefern günstige Stopps; Fire Wall, Credit Blocks und Reinforced Wall bilden die belastbare mittlere und obere Rez-Kurve. Snowbank und Misleading Access Menus sind ergänzende Economy-Taxes, keine verlässlichen Barrieren. Errichte erst danach genau ein Counter-Remote mit klarem Zweck.",
             "midgame": "Zwinge den Runner zur Entscheidung zwischen Testen und Respektieren des advanced Remotes. Bewahre genug Credits und Aktionen, um eine Agenda zu installieren und den Counter-Transfer im selben Zug abzuschließen. Team Restructuring ist am stärksten, wenn ein Counter die Agendalücke schließt und der zweite einen echten Trap oder eine Bank verbessert.",
@@ -5148,7 +5148,7 @@
             {
               "cardId": "onr_v1_291_falsified-transactions-expert",
               "title": "Falsified-Transactions Expert",
-              "role": "Die auf zwei Exemplare reduzierte Brückenkarte verwandelt bis zu drei Counter eines vorbereiteten Traps oder einer Bank in eine unmittelbare Scorekonversion, wenn genau dieses Fenster entsteht."
+              "role": "Die einzelne Brückenkarte verwandelt bis zu drei Counter eines vorbereiteten Traps oder einer Bank in eine unmittelbare Scorekonversion, wenn dieses seltene exakte Fenster entsteht."
             },
             {
               "cardId": "onr_v1_305_team-restructuring",
