@@ -637,6 +637,125 @@ describe("plan-first Corp ambush preplanning contract", () => {
       fallbackUsed: false,
     });
   });
+
+  it("keeps Lesley install and conversion on the exact resident scalable Ambush root", () => {
+    resetResidentPlanPortfolioMemory();
+    const trap = vacantSoulkiller();
+    const lesley = visibleCard("lesley-major", "corp", "upgrade", {
+      definitionId: "onr_proteus_062_lesley-major",
+      title: "Lesley Major",
+    });
+    const installTrap = installAmbush(
+      trap,
+      "remote_1",
+      "install-scalable-ambush",
+    );
+    const gain = gainCredit();
+    const input = corpInput([installTrap, gain], [trap, lesley]);
+    input.playerView.own.credits = 6;
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [], []),
+    ];
+    setCorpIntent(input, true);
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: installTrap.actionId,
+      reasonCode: "plan_first.corp.ambush_and_bluff",
+    });
+    const rootInstanceId =
+      "plan:corp.ambush_and_bluff:ambush%3Avacant-soulkiller";
+    expect(residentPlanPortfolioSnapshot(input)?.rootForegroundInstanceId).toBe(
+      rootInstanceId,
+    );
+
+    const installedTrap = { ...trap, advancementCounters: 0 };
+    const installLesley = installAmbush(
+      lesley,
+      "remote_1",
+      "install-lesley-beside-ambush",
+    );
+    input.playerView.stateVersion = 2;
+    input.actionNumber = 2;
+    input.playerView.own.gripOrHq = [lesley];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [], [installedTrap]),
+    ];
+    input.legalActions = [installLesley, gain].map((action) => ({
+      ...action,
+      expiresAtStateVersion: 2,
+    }));
+    input.playerView.legalActions = input.legalActions;
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: installLesley.actionId,
+      reasonCode: "plan_first.corp.ambush_and_bluff",
+      decisionDebug: {
+        planFirstDecision: {
+          route: { planInstanceId: rootInstanceId },
+        },
+      },
+    });
+
+    const installedLesley = { ...lesley, rezzed: true };
+    const triggerLesley = legalAction(
+      "trigger-lesley-beside-ambush",
+      "corp",
+      "trigger_ability",
+      "Lesley Major: 2 Advancement-Counter auf Vacant Soulkiller",
+      { credits: 5, clicks: 0 },
+      {
+        source: lesley.instanceId,
+        payload: {
+          cardId: lesley.instanceId,
+          sourceDefinitionId: lesley.definitionId!,
+          targetCardId: installedTrap.instanceId,
+          targetCardDefinitionId: installedTrap.definitionId!,
+          serverId: "remote_1",
+          fortRunWindowAbility:
+            "add_advancement_counters_after_passing_last_ice_on_this_fort",
+        },
+      },
+    );
+    input.playerView.stateVersion = 3;
+    input.actionNumber = 3;
+    input.playerView.timingPoint = "run.jack_out_window";
+    input.playerView.own.gripOrHq = [];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [], [installedTrap, installedLesley]),
+    ];
+    input.playerView.run = {
+      runId: "run-lesley-ambush",
+      attackedServerId: "remote_1",
+      phase: "movement",
+      position: { kind: "server", serverId: "remote_1" },
+      successful: false,
+    };
+    input.legalActions = [triggerLesley].map((action) => ({
+      ...action,
+      timingPoint: "run.jack_out_window",
+      expiresAtStateVersion: 3,
+    }));
+    input.playerView.legalActions = input.legalActions;
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: triggerLesley.actionId,
+      reasonCode: "plan_first.corp.ambush_and_bluff",
+      decisionDebug: {
+        planFirstDecision: {
+          route: { planInstanceId: rootInstanceId },
+        },
+      },
+    });
+  });
 });
 
 function vacantSoulkiller(): VisibleCard {

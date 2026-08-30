@@ -61,7 +61,7 @@ const allowedCardIdUses = createAllowances([
     category: "lifecycle_binding",
     expectedCount: 2,
     reason:
-      "The definition ID restores Dr. Dreff's resident delayed-success defense and validates the visible rezzed source of its already selected resolution choice.",
+      "The definition ID restores Dr. Dreff's resident delayed-success plan source and validates the visible rezzed source of its already selected resolution choice.",
   },
   {
     relativePath: "runtime/selected-choices-for-decision.ts",
