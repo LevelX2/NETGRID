@@ -15381,6 +15381,12 @@ function buildCorpDomain(
           const selectedScoreProtectionPrecedesAdditionalCentralLayer =
             (serverId === "hq" || serverId === "rd") &&
             selectedScoreProtectionSignals.length > 0 &&
+            !(
+              centralDefenseAllocation?.status === "known" &&
+              centralDefenseAllocation.selectedServerId === serverId &&
+              centralDefenseAllocation.evidence[serverId].threat ===
+                "material"
+            ) &&
             (() => {
               const installedIceCount =
                 input.playerView.servers.find(
@@ -15524,7 +15530,8 @@ function buildCorpDomain(
               ? targetCentralThreat === "acute" ||
                 targetCentralThreat === "terminal" ||
                 (targetCentralThreat === "material" &&
-                  targetCentralMissingCoverage)
+                  (targetCentralMissingCoverage ||
+                    selectedCentralServerId === serverId))
                 ? targetCentralThreat
                 : boundedFallbackCoveragePressure
                   ? "material"

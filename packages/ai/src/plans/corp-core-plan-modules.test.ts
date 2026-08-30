@@ -1468,6 +1468,49 @@ describe("Corp core plan modules", () => {
     ).toBe("install-hq");
   });
 
+  it("applies the global central allocation before per-signal urgency bands", () => {
+    const installHq = {
+      ...cardAction("install-hq", "install.card", "ice-shared"),
+      sourceCardInstanceId: "ice-shared-1",
+      targetContext: targetContext("hq", "server"),
+    };
+    const installRd = {
+      ...cardAction("install-rd", "install.card", "ice-shared"),
+      sourceCardInstanceId: "ice-shared-1",
+      targetContext: targetContext("rd", "server"),
+    };
+    const allocation = knownCentralAllocation("hq");
+    const module = corpModule("corp.defend_servers");
+    const corpContext = context([installHq, installRd], {
+      centralDefenseAllocation: {
+        ...allocation,
+        evidence: {
+          hq: { ...allocation.evidence.hq, threat: "material" },
+          rd: { ...allocation.evidence.rd, threat: "acute" },
+        },
+      },
+      defenseNeeds: [
+        productiveDefenseSignal(installHq, "hq"),
+        productiveDefenseSignal(installRd, "rd", "acute"),
+      ],
+    });
+    const instance = instantiatePlanProposal(
+      module.discover(corpContext)[0]!,
+      10,
+    );
+    const materialized = module.materialize(instance, {} as never, corpContext);
+
+    expect(
+      bindBestCurrentPlanRoute({
+        side: "corp",
+        stateVersion: 10,
+        timingPoint: "corp_action.main",
+        planInstanceId: instance.instanceId,
+        ...materialized,
+      }).head.actionId,
+    ).toBe("install-hq");
+  });
+
   it("materializes exactly one canonical HQ/R&D Engine near tie only when the central fact comparator certifies it", () => {
     const actions = ["hq", "rd"].map((serverId) => ({
       ...cardAction(`install-${serverId}`, "install.card", "ice-shared"),
@@ -6011,15 +6054,18 @@ function fundingOnlyDefenseSignal(
 
 function productiveDefenseSignal(
   install: ActionSemanticCandidate,
+  serverId = "rd",
+  centralPressure?: "material" | "acute" | "terminal",
 ): CorpDefenseSignal {
   return {
     kind: "generic",
-    defenseId: `install:rd:${install.actionId}`,
-    serverId: "rd",
+    defenseId: `install:${serverId}:${install.actionId}`,
+    serverId,
     phase: "install_ice",
     sourceDefinitionIds: [install.sourceDefinitionId!],
     actionIds: [install.actionId],
     urgent: false,
+    ...(centralPressure ? { centralPressure } : {}),
     installRoute: {
       disposition: "productive",
       progressKind: "funded_structured_central_defense",
@@ -6028,7 +6074,7 @@ function productiveDefenseSignal(
         actionId: install.actionId,
         sourceCardInstanceId: install.sourceCardInstanceId!,
         sourceDefinitionId: install.sourceDefinitionId!,
-        targetServerId: "rd",
+        targetServerId: serverId,
         effect: "progress",
         probability: { numerator: 0, denominator: 1 },
         totalCredits: 0,
