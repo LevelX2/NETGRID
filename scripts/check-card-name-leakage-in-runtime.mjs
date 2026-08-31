@@ -9,6 +9,9 @@ const reportJsonPath = "scripts/card-function-abstraction-guard-baseline.json";
 
 const writeBaseline = process.argv.includes("--write-baseline");
 const selfTestNewLeak = process.argv.includes("--self-test-new-leak");
+const selfTestLocationDrift = process.argv.includes(
+  "--self-test-location-drift",
+);
 
 const scopedRoots = [
   "packages/engine/src/ability-engine",
@@ -625,12 +628,39 @@ function findOccurrences(tokens) {
 function fingerprint(finding) {
   return [
     finding.path,
-    finding.line,
-    finding.column,
     finding.token,
     finding.cardTitle,
+    finding.tokenSource,
     finding.category,
+    finding.targetAbstraction,
   ].join("|");
+}
+
+function stableFinding(finding) {
+  return {
+    path: finding.path,
+    token: finding.token,
+    cardTitle: finding.cardTitle,
+    tokenSource: finding.tokenSource,
+    category: finding.category,
+    targetAbstraction: finding.targetAbstraction,
+  };
+}
+
+function stableGuardContract(value) {
+  return {
+    ...value,
+    generatedAt: "baseline",
+    derivedCatalogGuard: {
+      ...value.derivedCatalogGuard,
+      fingerprints: [...value.derivedCatalogGuard.fingerprints].sort(),
+    },
+    findings: value.findings
+      .map(stableFinding)
+      .sort((left, right) =>
+        JSON.stringify(left).localeCompare(JSON.stringify(right)),
+      ),
+  };
 }
 
 function summary(findings) {
@@ -722,7 +752,7 @@ function renderMarkdown(report) {
 const findings = findOccurrences(knownWatchTokens());
 const derivedFindings = findOccurrences(derivedWatchTokens());
 const report = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   generatedAt: "2026-06-12",
   status: "current_guard_baseline",
   guardCharacter:
@@ -777,7 +807,29 @@ const expected = JSON.parse(
   readFileSync(`${repoRoot}/${reportJsonPath}`, "utf8"),
 );
 const normalize = (value) =>
-  JSON.stringify({ ...value, generatedAt: "baseline" }, null, 2);
+  JSON.stringify(stableGuardContract(value), null, 2);
+
+if (selfTestLocationDrift) {
+  const relocatedReport = {
+    ...report,
+    findings: report.findings.map((finding) => ({
+      ...finding,
+      line: finding.line + 100,
+      column: finding.column + 3,
+      snippet: `relocated: ${finding.snippet}`,
+    })),
+  };
+  if (normalize(relocatedReport) !== normalize(report)) {
+    console.error(
+      "Self-test failed: line, column or snippet drift changed the semantic guard contract.",
+    );
+    process.exit(1);
+  }
+  console.log(
+    "Self-test passed: location-only drift leaves the semantic guard contract unchanged.",
+  );
+  process.exit(0);
+}
 
 if (selfTestNewLeak) {
   const syntheticFinding = {

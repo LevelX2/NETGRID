@@ -29,6 +29,7 @@
     "check:proteus-ai-family-scenarios": "node scripts/build-proteus-ai-family-scenarios.mjs --check",
     "check:proteus-ai-selected-pilot": "pnpm --filter @netgrid/server exec tsx ../../scripts/run-proteus-ai-selected-pilot.ts --check",
     "check:card-function-abstraction": "node scripts/check-card-name-leakage-in-runtime.mjs",
+    "check:card-function-abstraction:selftest": "node scripts/check-card-name-leakage-in-runtime.mjs --self-test-location-drift && node scripts/check-card-name-leakage-in-runtime.mjs --self-test-new-leak",
     "check:card-asset-retention": "node scripts/check-card-asset-retention.mjs",
     "card-images:template": "pnpm --filter @netgrid/card-images cli template",
     "card-images:import": "pnpm --filter @netgrid/card-images cli import",
