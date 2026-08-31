@@ -35,13 +35,14 @@ const workerResultMarker = "NETGRID_PROTEUS_PILOT_WORKER_RESULT ";
 assert(runnerDecks.length === 2, "Expected two Proteus Runner pilot decks.");
 assert(corpDecks.length === 2, "Expected two Proteus Corp pilot decks.");
 
-if (process.argv.includes("--pair-worker")) {
+if (process.argv.includes("--game-worker")) {
   const runnerDeckId = requiredArgument("--runner-deck-id");
   const corpDeckId = requiredArgument("--corp-deck-id");
+  const seed = requiredArgument("--seed");
   const runnerDeck = requiredDeck(runnerDecks, runnerDeckId);
   const corpDeck = requiredDeck(corpDecks, corpDeckId);
   process.stdout.write(
-    `${workerResultMarker}${JSON.stringify(simulatePair(runnerDeck, corpDeck))}\n`,
+    `${workerResultMarker}${JSON.stringify(simulatePairGame(runnerDeck, corpDeck, seed))}\n`,
   );
   process.exit(0);
 }
@@ -55,9 +56,17 @@ if (process.argv.includes("--control-worker")) {
 }
 
 const pairWorkerResults = runnerDecks.flatMap((runnerDeck) =>
-  corpDecks.map((corpDeck) => runPairWorker(runnerDeck.id, corpDeck.id)),
+  corpDecks.map((corpDeck) =>
+    combinePairGameResults(
+      runnerDeck.id,
+      corpDeck.id,
+      seeds.map((seed) => runGameWorker(runnerDeck.id, corpDeck.id, seed)),
+    ),
+  ),
 );
-const pairResults = pairWorkerResults.map((result) => result.pair);
+const pairResults = pairWorkerResults.map(
+  ({ failureDiagnostics: _failureDiagnostics, ...pair }) => pair,
+);
 const pilotFailureDiagnostics = pairWorkerResults.flatMap(
   (result) => result.failureDiagnostics,
 );
@@ -78,10 +87,14 @@ function simulateControlGame(seed: string) {
   };
 }
 
-function simulatePair(runnerDeck: DeckDefinition, corpDeck: DeckDefinition) {
+function simulatePairGame(
+  runnerDeck: DeckDefinition,
+  corpDeck: DeckDefinition,
+  seed: string,
+) {
   const pairId = `${runnerDeck.id}__${corpDeck.id}`;
   const result = runAiSelfplayTraceMining({
-    seeds,
+    seeds: [seed],
     maxActions,
     runnerDeck,
     corpDeck,
@@ -89,52 +102,110 @@ function simulatePair(runnerDeck: DeckDefinition, corpDeck: DeckDefinition) {
     corpControllerMode: "current_candidate",
     maxFindings: 20,
   });
-  const failureDiagnostics = result.summaries.flatMap((summary) =>
-    summary.errors.length > 0
-      ? [
-          {
-            pairId,
-            seed: summary.seed,
-            errors: [...summary.errors],
-          },
-        ]
-      : [],
-  );
+  const summary = result.summaries[0];
+  assert(summary, `Missing Proteus pilot summary for ${pairId}/${seed}.`);
   return {
-    pair: {
-      pairId,
-      runnerDeckId: runnerDeck.id,
-      corpDeckId: corpDeck.id,
-      aggregate: result.aggregate,
-      games: result.summaries.map((summary) => ({
-        seed: summary.seed,
-        holdout: summary.seed.includes("holdout"),
-        winner: summary.winner,
-        gameEndReason: summary.gameEndReason ?? null,
-        terminationKind: summary.terminationKind,
-        actions: summary.actions,
-        turns: summary.turns,
-        finalAgendaPoints: summary.finalAgendaPoints,
-        finalStateHash: summary.finalStateHash,
-        replayOk: summary.replayOk,
-        illegalActions: summary.metrics.illegalActions,
-        fallbackRate: summary.metrics.fallbackRate,
-        noProgress:
-          summary.terminationKind === "action_limit" &&
-          summary.finalAgendaPoints.runner === 0 &&
-          summary.finalAgendaPoints.corp === 0,
-      })),
+    aggregate: result.aggregate,
+    game: {
+      seed: summary.seed,
+      holdout: summary.seed.includes("holdout"),
+      winner: summary.winner,
+      gameEndReason: summary.gameEndReason ?? null,
+      terminationKind: summary.terminationKind,
+      actions: summary.actions,
+      turns: summary.turns,
+      finalAgendaPoints: summary.finalAgendaPoints,
+      finalStateHash: summary.finalStateHash,
+      replayOk: summary.replayOk,
+      illegalActions: summary.metrics.illegalActions,
+      fallbackRate: summary.metrics.fallbackRate,
+      noProgress:
+        summary.terminationKind === "action_limit" &&
+        summary.finalAgendaPoints.runner === 0 &&
+        summary.finalAgendaPoints.corp === 0,
     },
-    failureDiagnostics,
+    failureDiagnostic:
+      summary.errors.length > 0
+        ? { pairId, seed: summary.seed, errors: [...summary.errors] }
+        : undefined,
   };
 }
 
-function runPairWorker(runnerDeckId: string, corpDeckId: string) {
-  return runWorker<ReturnType<typeof simulatePair>>([
-    "--pair-worker",
+function runGameWorker(runnerDeckId: string, corpDeckId: string, seed: string) {
+  return runWorker<ReturnType<typeof simulatePairGame>>([
+    "--game-worker",
     `--runner-deck-id=${runnerDeckId}`,
     `--corp-deck-id=${corpDeckId}`,
+    `--seed=${seed}`,
   ]);
+}
+
+function combinePairGameResults(
+  runnerDeckId: string,
+  corpDeckId: string,
+  results: Array<ReturnType<typeof simulatePairGame>>,
+) {
+  const aggregates = results.map((result) => result.aggregate);
+  const sum = (select: (aggregate: (typeof aggregates)[number]) => number) =>
+    aggregates.reduce((total, aggregate) => total + select(aggregate), 0);
+  const sumRecord = <Key extends string>(
+    select: (aggregate: (typeof aggregates)[number]) => Record<Key, number>,
+  ): Record<Key, number> => {
+    const records = aggregates.map(select);
+    return Object.fromEntries(
+      Object.keys(records[0] ?? {}).map((key) => [
+        key,
+        records.reduce((total, record) => total + (record[key as Key] ?? 0), 0),
+      ]),
+    ) as Record<Key, number>;
+  };
+  const games = sum((aggregate) => aggregate.games);
+  return {
+    pairId: `${runnerDeckId}__${corpDeckId}`,
+    runnerDeckId,
+    corpDeckId,
+    aggregate: {
+      games,
+      decisions: sum((aggregate) => aggregate.decisions),
+      findings: sum((aggregate) => aggregate.findings),
+      findingsBySeverity: sumRecord(
+        (aggregate) => aggregate.findingsBySeverity,
+      ),
+      findingsByDetector: sumRecord(
+        (aggregate) => aggregate.findingsByDetector,
+      ),
+      illegalActions: sum((aggregate) => aggregate.illegalActions),
+      replayFailures: sum((aggregate) => aggregate.replayFailures),
+      actionLimitReached: sum((aggregate) => aggregate.actionLimitReached),
+      allRedactionSafe: aggregates.every(
+        (aggregate) => aggregate.allRedactionSafe,
+      ),
+      redactionSafe: aggregates.every((aggregate) => aggregate.redactionSafe),
+      averageGameLength:
+        games === 0
+          ? 0
+          : sum((aggregate) => aggregate.averageGameLength * aggregate.games) /
+            games,
+      corpAgendaScores: sum((aggregate) => aggregate.corpAgendaScores),
+      runnerAgendaSteals: sum((aggregate) => aggregate.runnerAgendaSteals),
+      corpFlatlines: sum((aggregate) => aggregate.corpFlatlines),
+      scoreWindowMissed: sum((aggregate) => aggregate.scoreWindowMissed),
+      unsafeScoreChosen: sum((aggregate) => aggregate.unsafeScoreChosen),
+      passiveActionWithScoreLineAvailable: sum(
+        (aggregate) => aggregate.passiveActionWithScoreLineAvailable,
+      ),
+      actionLimitClusters: sumRecord(
+        (aggregate) => aggregate.actionLimitClusters,
+      ),
+      actionLimitSubclusters: sumRecord(
+        (aggregate) => aggregate.actionLimitSubclusters,
+      ),
+    },
+    games: results.map((result) => result.game),
+    failureDiagnostics: results.flatMap((result) =>
+      result.failureDiagnostic ? [result.failureDiagnostic] : [],
+    ),
+  };
 }
 
 function runControlWorker(seed: string) {
