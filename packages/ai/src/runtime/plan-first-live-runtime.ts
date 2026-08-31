@@ -2094,6 +2094,7 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
         previous,
         pending,
       );
+      bindRunnerEventInstallChoiceEngineContinuation(input, result, pending);
       result.portfolio.stateVersion = input.playerView.stateVersion;
       delete result.portfolio.pendingRunnerCostPenaltySupportOrigin;
       return;
@@ -2517,6 +2518,56 @@ function rebaseSelectedRunnerImmediateChoiceOriginForPaymentStep(
   result.portfolio!.selectedActionOrigin = {
     ...structuredClone(selectedOrigin),
     selectedAtStateVersion: input.playerView.stateVersion,
+  };
+}
+
+function bindRunnerEventInstallChoiceEngineContinuation(
+  input: AiDecisionInput,
+  result: Extract<PlanSchedulerResult, { lane: "engine_window" }>,
+  pending: NonNullable<
+    ResidentPlanPortfolio["pendingRunnerCostPenaltySupportOrigin"]
+  >,
+): void {
+  const portfolio = result.portfolio;
+  const executor = portfolio?.instances.find(
+    (instance) =>
+      instance.instanceId === pending.executorInstanceId &&
+      instance.moduleId === "runner.develop_board_and_hand" &&
+      instance.executionState === "executor",
+  );
+  const moduleState = executor?.moduleState as
+    | { kind?: unknown; signal?: RunnerDevelopmentSignal }
+    | undefined;
+  const commitment = moduleState?.signal?.eventInstallChoiceCommitment;
+  if (!commitment) return;
+  const exactContinuation =
+    portfolio !== undefined &&
+    moduleState?.kind === "development" &&
+    portfolio.rootForegroundInstanceId === pending.rootPlanInstanceId &&
+    portfolio.executorInstanceId === pending.executorInstanceId &&
+    result.origin.rootPlanInstanceId === pending.rootPlanInstanceId &&
+    result.origin.leafPlanInstanceId === pending.executorInstanceId &&
+    result.actionId === pending.originalActionId &&
+    commitment.sourceActionId === pending.originalActionId &&
+    commitment.selectedAtStateVersion === pending.selectedAtStateVersion &&
+    commitment.engineContinuationAtStateVersion === undefined;
+  if (!executor || !exactContinuation) {
+    throw new PlanResolutionFailure("window_origin_missing", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: [pending.originalActionId],
+      owner: "continuation",
+      planInstanceId: pending.executorInstanceId,
+      stepId: pending.sourceStepId,
+      removalCondition:
+        "Carry an event-install commitment through a payment window only after the exact original action, development executor and Engine continuation were validated.",
+    });
+  }
+  moduleState.signal!.eventInstallChoiceCommitment = {
+    ...commitment,
+    engineContinuationAtStateVersion: input.playerView.stateVersion,
   };
 }
 
@@ -9847,8 +9898,7 @@ function runnerEventInstallChoiceDevelopmentSignals(
       instance.moduleId === "runner.develop_board_and_hand" &&
       instance.executionState === "executor" &&
       moduleState?.kind === "development" &&
-      moduleState.signal?.eventInstallChoiceCommitment
-        ?.selectedAtStateVersion === previous.stateVersion
+      moduleState.signal?.eventInstallChoiceCommitment !== undefined
     );
   });
   const previousSignal = (
@@ -9857,6 +9907,13 @@ function runnerEventInstallChoiceDevelopmentSignals(
       | undefined
   )?.signal;
   const commitment = previousSignal?.eventInstallChoiceCommitment;
+  const commitmentReachedChoiceDirectly =
+    commitment?.selectedAtStateVersion === previous?.stateVersion &&
+    commitment?.engineContinuationAtStateVersion === undefined;
+  const commitmentReachedChoiceThroughEngineContinuation =
+    commitment?.selectedAtStateVersion !== undefined &&
+    commitment?.selectedAtStateVersion < (previous?.stateVersion ?? 0) &&
+    commitment?.engineContinuationAtStateVersion === previous?.stateVersion;
   const choiceCandidates = candidates.filter(
     (candidate) =>
       candidate.actionType === "resolve_choice" &&
@@ -9885,7 +9942,8 @@ function runnerEventInstallChoiceDevelopmentSignals(
     previousInstance !== undefined &&
     previousSignal !== undefined &&
     commitment !== undefined &&
-    commitment.selectedAtStateVersion === previous.stateVersion &&
+    (commitmentReachedChoiceDirectly ||
+      commitmentReachedChoiceThroughEngineContinuation) &&
     commitment.sourceActionId === continuation.originActionId &&
     commitment.sourceCardInstanceId === continuation.sourceCardInstanceId &&
     commitment.sourceDefinitionId === continuation.sourceCardDefinitionId &&

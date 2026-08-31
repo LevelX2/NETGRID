@@ -246,6 +246,7 @@ export type RunnerDevelopmentSignal = {
     sourceDefinitionId: string;
     sourceCapabilityKey: string;
     selectedAtStateVersion?: number;
+    engineContinuationAtStateVersion?: number;
     targetCardInstanceId: string;
     targetDefinitionId: string;
     installMemorySacrificeBinding?: {

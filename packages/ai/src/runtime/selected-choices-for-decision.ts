@@ -2195,11 +2195,16 @@ function selectedRunnerEventInstallChoiceOptionId(
         kind?: unknown;
         signal?: {
           phase?: unknown;
+          eventInstallChoiceCommitment?: {
+            selectedAtStateVersion?: unknown;
+            engineContinuationAtStateVersion?: unknown;
+          };
           eventInstallChoiceBinding?: Record<string, unknown>;
         };
       }
     | undefined;
   const binding = moduleState?.signal?.eventInstallChoiceBinding;
+  const commitment = moduleState?.signal?.eventInstallChoiceCommitment;
   const selectedOptionId = binding?.selectedOptionId;
   const selectedOption = selectableOptions.find(
     (option) => option.id === selectedOptionId,
@@ -2225,7 +2230,10 @@ function selectedRunnerEventInstallChoiceOptionId(
     binding.sourceCapabilityKey === continuation.sourceCapabilityKey &&
     binding.sourceStateVersion === input.playerView.stateVersion &&
     binding.originSelectedAtStateVersion ===
-      input.playerView.stateVersion - 1 &&
+      commitment?.selectedAtStateVersion &&
+    (commitment?.selectedAtStateVersion === input.playerView.stateVersion - 1 ||
+      commitment?.engineContinuationAtStateVersion ===
+        input.playerView.stateVersion - 1) &&
     typeof selectedOptionId === "string" &&
     selectedOption?.value === binding.targetCardInstanceId &&
     selectedTarget?.known !== false &&
