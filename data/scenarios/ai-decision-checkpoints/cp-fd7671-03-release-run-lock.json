@@ -10072,15 +10072,15 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "activated_card_ability",
-        "sourceDefinitionId": "onr_v1_154_broker"
+        "type": "play_event",
+        "sourceDefinitionId": "onr_v1_086_forged-activation-orders"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.credit_bank"],
-      "acceptableCapabilities": ["credit_bank_cash_out"],
+      "acceptablePlanKinds": ["runner.contest_remote"],
+      "acceptableCapabilities": ["contest_remote"],
       "requiredAssessmentEvidence": [
-        "runner_credit_bank_cashout_for_development_funding"
+        "runner_targeted_ice_trash_preflight:remote_1:hidden_b8e01f83"
       ]
     }
   }

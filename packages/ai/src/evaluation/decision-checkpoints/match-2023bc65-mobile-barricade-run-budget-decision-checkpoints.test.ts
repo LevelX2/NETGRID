@@ -36,7 +36,7 @@ describe("match 2023BC65 Mobile Barricade run-budget checkpoints", () => {
     expectCheckpointToPass(lowCorpCredits);
   });
 
-  it("takes current-credit-preserving HQ information while the rich-Corp remote remains unfunded", () => {
+  it("funds the bound Cybermodem while the rich-Corp remote remains unfunded", () => {
     const highCorpCredits = mutateFixture(
       fundedRemoteContestJson,
       (checkpoint) => {
@@ -47,12 +47,14 @@ describe("match 2023BC65 Mobile Barricade run-budget checkpoints", () => {
         checkpoint.source.kind = "synthetic_companion";
         checkpoint.source.findingId = "2023BC65-C02-HIGH-CORP-REZ-CAPACITY";
         checkpoint.expectation = {
-          acceptableActions: [{ actionId: "runner.start_run.hq" }],
+          acceptableActions: [{ actionId: "runner.gain_credit" }],
           forbiddenActions: [{ actionId: "runner.start_run.remote_1" }],
           planExecution: {
-            acceptablePlanKinds: ["runner.pressure_central"],
-            acceptableCapabilities: ["pressure_hq_information"],
-            requiredAssessmentEvidence: ["target:hq"],
+            acceptablePlanKinds: ["runner.economy"],
+            acceptableCapabilities: ["gain_general_liquid_credits"],
+            requiredAssessmentEvidence: [
+              "runner_development_funding:card:runner_onr_proteus_134_cortical-cybermodem_2",
+            ],
           },
         };
       },

@@ -11225,12 +11225,12 @@
     }
   },
   "expectation": {
-    "exactActionId": "runner.start_run.remote_1",
+    "exactActionId": "runner.play_event.runner_onr_v1_086_forged-activation-orders_1.runner_onr_v1_086_forged-activation-orders_1.onr_v1_086_forged-activation-orders:abilities_on_play_corp_choice_rez_or_trash_ice",
     "planExecution": {
       "acceptablePlanKinds": ["runner.contest_remote"],
       "acceptableCapabilities": ["contest_remote"],
       "requiredAssessmentEvidence": [
-        "runner_terminal_remote_contest_mandatory:remote_1:runner.start_run.remote_1"
+        "runner_targeted_ice_trash_preflight:remote_1:hidden_77be81d8"
       ]
     }
   }

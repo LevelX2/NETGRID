@@ -6318,24 +6318,16 @@
     "acceptableActions": [
       {
         "type": "install_card",
-        "sourceDefinitionId": "onr_proteus_005_marked-accounts",
-        "targetServerId": "new_remote"
-      },
-      {
-        "type": "install_card",
-        "sourceDefinitionId": "onr_v1_207_netwatch-operations-office",
-        "targetServerId": "new_remote"
-      },
-      {
-        "type": "install_card",
         "sourceDefinitionId": "onr_v1_236_data-raven",
-        "targetServerId": "new_remote"
-      },
-      {
-        "type": "install_card",
-        "sourceDefinitionId": "onr_v1_251_jack-attack",
-        "targetServerId": "new_remote"
+        "targetServerId": "rd"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["allocate_server_defense"],
+      "requiredAssessmentEvidence": [
+        "corp_agenda_capacity_defense_conversion:rd:corp.install_card.corp_onr_v1_236_data-raven_1.rd.corp_onr_v1_236_data-raven_1.1"
+      ]
+    }
   }
 }

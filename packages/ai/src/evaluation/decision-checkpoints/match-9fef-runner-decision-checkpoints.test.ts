@@ -52,7 +52,7 @@ describe("match 9FEF runner decision checkpoints", () => {
 
   it.each([
     ["the historical Fire Wall checkout at D92", jackOutFireWallD92Json],
-    ["the existing early unknown-ICE information run", earlyCheckRunJson],
+    ["the exact early unknown-ICE pressure line", earlyCheckRunJson],
   ])("keeps the positive information-run control: %s", (_label, json) => {
     expectCheckpointToPass(fixture(json));
   });

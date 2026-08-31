@@ -26,19 +26,19 @@ describe("match 5F7924 Corp agenda, defense and discard checkpoints", () => {
     expectCheckpointToPass(openingDefenseControlJson);
   });
 
-  it("starts the bound agenda-defense line with two actions after Efficiency Experts", () => {
+  it("honors the global R&D defense allocation after Efficiency Experts", () => {
     expectCheckpointToPass(turn7AgendaDefenseJson);
   });
 
-  it("continues the staged turn-7 score line in the admitted score remote", () => {
-    expectEffectiveScoreProtectionContinuation(turn7AgendaDefenseJson);
+  it("continues from the allocated R&D defense into the admitted score remote", () => {
+    expectScoreProtectionDevelopmentContinuation(turn7AgendaDefenseJson);
   });
 
   it("starts the bound agenda-defense line instead of taking three neutral credits", () => {
     expectCheckpointToPass(turn9AgendaDefenseJson);
   });
 
-  it("uses the third turn-9 action for exact score-protection discovery", () => {
+  it("uses the third turn-9 action for the globally selected R&D tax layer", () => {
     const { input, decision } = decisionsAfterBoundAgendaDefense(
       turn9AgendaDefenseJson,
       2,
@@ -46,14 +46,18 @@ describe("match 5F7924 Corp agenda, defense and discard checkpoints", () => {
     const selected = input.legalActions.find(
       (action) => action.actionId === decision.actionId,
     );
-    expect(selected?.type).toBe("draw_card");
+    expect(selected).toMatchObject({
+      type: "install_card",
+      source: "corp_onr_v1_251_jack-attack_2",
+      payload: { serverId: "rd" },
+    });
     expect(decision.decisionDebug?.planKind).toBe("corp.defend_servers");
     expect(decision.decisionDebug?.planFirstDecision?.route?.capabilityId).toBe(
-      "develop_score_protection",
+      "allocate_server_defense",
     );
     expect(
       decision.decisionDebug?.planFirstDecision?.assessmentEvidenceCodes.some(
-        (entry) => entry.includes("score_plan_requires_effective_ice_draw"),
+        (entry) => entry.includes("corp_scoreline_central_tax_allocation:rd"),
       ),
     ).toBe(true);
   });
@@ -76,7 +80,7 @@ function expectCheckpointToPass(value: unknown): void {
   expect(result.ok, diagnostic(result)).toBe(true);
 }
 
-function expectEffectiveScoreProtectionContinuation(value: unknown): void {
+function expectScoreProtectionDevelopmentContinuation(value: unknown): void {
   const checkpoint = fixture(value);
   const first = runAiDecisionCheckpoint(checkpoint);
   expect(first.ok, diagnostic(first)).toBe(true);
@@ -103,19 +107,14 @@ function expectEffectiveScoreProtectionContinuation(value: unknown): void {
             entry.actionId.includes("jack-attack"),
         ),
     }),
-  ).toMatchObject({
-    type: "install_card",
-    source: "corp_onr_proteus_005_marked-accounts_1",
-  });
-  expect(second.decisionDebug?.planKind).toBe("corp.score_agenda");
+  ).toMatchObject({ type: "draw_card", source: "basic_action" });
+  expect(second.decisionDebug?.planKind).toBe("corp.defend_servers");
   expect(second.decisionDebug?.planFirstDecision?.route?.capabilityId).toBe(
-    "install_score_agenda",
+    "develop_score_protection",
   );
   expect(
-    second.decisionDebug?.planFirstDecision?.dispositions.some(
-      (entry) =>
-        entry.actionId === "corp.draw_card" &&
-        entry.evidenceCode.includes("corp_draw_has_no_exact_parent_need"),
+    second.decisionDebug?.planFirstDecision?.assessmentEvidenceCodes.some(
+      (entry) => entry.includes("score_plan_requires_effective_ice_draw"),
     ),
   ).toBe(true);
 }

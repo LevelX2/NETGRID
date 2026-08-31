@@ -78,6 +78,10 @@ describe("match series 70BE real Engine regressions", () => {
     const state = runnerTurnState("series-70be-broker-live-input");
     RealEngineFixtureBuilder.forState(state)
       .withRunnerResourceInstalled(BROKER)
+      .withRunnerGripSize(0)
+      .withRunnerCardInGrip("simple_decoder")
+      .withRezzedCorpIceOnServer("hq", "simple_code_gate_ice")
+      .withRezzedCorpIceOnServer("rd", "simple_code_gate_ice")
       .withRunnerCredits(6);
     const input = decisionInput(state, "runner", RUNNER_DECK);
     const build = input.legalActions.find(

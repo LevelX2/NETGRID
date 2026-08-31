@@ -26,7 +26,7 @@ describe("match E8886 runner decision checkpoints", () => {
     expectCheckpointToPass(fixture(json));
   });
 
-  it("keeps the early unknown-ICE check-run before breaker installation", () => {
+  it("uses the exact remote ICE-pressure event before committing the early check-run", () => {
     expectCheckpointToPass(fixture(earlyCheckRunJson));
   });
 
