@@ -121,10 +121,12 @@ import {
 } from "../plans/corp-tactical-plan-modules";
 import {
   createRunnerCorePlanModules,
+  runnerCoverageCurrentPhase,
   runnerRolesCoverCoverageGap,
   runnerDevelopmentCardAdmission,
   runnerDevelopmentFundingMilestone,
   runnerDefenseReactionReserveIsCurrentPhase,
+  runnerDefenseTagClearFundingIsCurrentPhase,
   runnerExactBasicLiquidCreditCandidate,
   runnerTurnLiquidityCandidateIsMaterializable,
   runnerFundingRouteCandidateIsMaterializable,
@@ -1595,7 +1597,8 @@ function bindSelectedPlanActionOrigin(
     ) === true;
   const canOpenRunnerRunStartOrder =
     selectedAction?.type === "start_run" ||
-    (selectedAction?.type === "play_event" &&
+    ((selectedAction?.type === "play_event" ||
+      selectedAction?.type === "activated_card_ability") &&
       selectedCandidate?.runProjectionSummary?.serverId !== undefined);
   const canOpenRunnerVacuumLinkRewind =
     selectedAction?.type === "continue_run" &&
@@ -1689,7 +1692,11 @@ function bindSelectedPlanActionOrigin(
             immediateChoicePolicy: "resolve_runner_run_start_order",
             sourceStepId: result.route.step.stepId,
             sourceActionType:
-              selectedAction.type === "play_event" ? "play_event" : "start_run",
+              selectedAction.type === "activated_card_ability"
+                ? "activated_card_ability"
+                : selectedAction.type === "play_event"
+                  ? "play_event"
+                  : "start_run",
             continuedThroughStateVersion: input.playerView.stateVersion,
           };
 }
@@ -2247,7 +2254,8 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
         staleRunStartOrigin.rootPlanInstanceId === rootPlanInstanceId &&
         staleRunStartOrigin.executorInstanceId === executorInstanceId &&
         (staleRunStartOrigin.sourceActionType === "start_run" ||
-          staleRunStartOrigin.sourceActionType === "play_event") &&
+          staleRunStartOrigin.sourceActionType === "play_event" ||
+          staleRunStartOrigin.sourceActionType === "activated_card_ability") &&
         staleRunStartOrigin.selectedAtStateVersion <
           input.playerView.stateVersion
       ) {
@@ -5389,7 +5397,58 @@ export function runnerActionDispositions(
         : [],
     ),
   );
+  const coveragePlanningContext: PlanSchedulerContext = {
+    input,
+    actionCandidates: candidates,
+    actionDispositions: dispositions,
+    transientSignals: [],
+    turnKey: turnKey(input),
+    domain,
+  };
+  const coverageGapsByAssignedPlanId = new Map(
+    domain.coverageGaps.map((gap) => [
+      `runner.rig_and_coverage:${gap.gapId}`,
+      gap,
+    ]),
+  );
+  const deferredCoveragePreparationInstallActionIds = new Set(
+    domain.developments.flatMap((signal) => {
+      if (signal.assignedDomainPlanIds.length === 0) return [];
+      const assignedCoverageGaps = signal.assignedDomainPlanIds.flatMap(
+        (planId) => {
+          const gap = coverageGapsByAssignedPlanId.get(planId);
+          return gap ? [gap] : [];
+        },
+      );
+      if (
+        assignedCoverageGaps.length !== signal.assignedDomainPlanIds.length ||
+        !assignedCoverageGaps.every(
+          (gap) =>
+            runnerCoverageCurrentPhase({
+              context: coveragePlanningContext,
+              gap,
+              rolesForDefinitionId: rolesForDeckDoctrineCard,
+            }) === "prepare_coverage",
+        )
+      ) {
+        return [];
+      }
+      return signal.actionIds.filter(
+        (actionId) =>
+          candidates.find((candidate) => candidate.actionId === actionId)
+            ?.semanticActionType === "install.card",
+      );
+    }),
+  );
   for (const candidate of candidates) {
+    if (deferredCoveragePreparationInstallActionIds.has(candidate.actionId)) {
+      add(
+        candidate.actionId,
+        "runner.rig_and_coverage",
+        "runner_coverage_install_deferred_for_current_preparation_phase",
+      );
+      continue;
+    }
     if (deferredSameTurnCoverageInstallActionIds.has(candidate.actionId)) {
       add(
         candidate.actionId,
@@ -5550,6 +5609,37 @@ export function runnerActionDispositions(
     }
   }
   for (const candidate of candidates) {
+    const coverageDrawGaps =
+      candidate.semanticActionType === "draw.card"
+        ? domain.coverageGaps.filter(
+            (gap) =>
+              !gap.answerInHand &&
+              gap.deckHasAnswer &&
+              gap.drawForAnswerActionIds.includes(candidate.actionId),
+          )
+        : [];
+    if (
+      coverageDrawGaps.length > 0 &&
+      coverageDrawGaps.every(
+        (gap) =>
+          runnerCoverageCurrentPhase({
+            context: coveragePlanningContext,
+            gap,
+            rolesForDefinitionId: rolesForDeckDoctrineCard,
+          }) !== "draw_for_answer",
+      ) &&
+      !runnerDrawActionHasCurrentNonCoveragePlanPurpose(candidate, domain) &&
+      !dispositions.some(
+        (disposition) => disposition.actionId === candidate.actionId,
+      )
+    ) {
+      add(
+        candidate.actionId,
+        "runner.rig_and_coverage",
+        "runner_coverage_draw_deferred_for_current_preparation_phase",
+      );
+      continue;
+    }
     if (
       candidate.semanticActionType === "tag.remove" &&
       domain.defense.activeTags <= 0 &&
@@ -6694,6 +6784,18 @@ export function runnerDelegatedFundingActionIds(
     for (const actionId of gap.fundingActionIds) actionIds.add(actionId);
   }
   if (
+    runnerDefenseTagClearFundingIsCurrentPhase({
+      actionCandidates: candidates,
+      stateVersion,
+      signals: domain.defense,
+    })
+  ) {
+    for (const actionId of domain.defense.tagClearFundingNeed?.actionIds ??
+      []) {
+      actionIds.add(actionId);
+    }
+  }
+  if (
     runnerDefenseReactionReserveIsCurrentPhase({
       actionCandidates: candidates,
       stateVersion,
@@ -6743,15 +6845,32 @@ function runnerDrawActionHasCurrentPlanPurpose(
 ): boolean {
   if (candidate.semanticActionType !== "draw.card") return false;
   return (
+    runnerDrawActionHasCurrentCoveragePurpose(candidate, domain) ||
+    runnerDrawActionHasCurrentNonCoveragePlanPurpose(candidate, domain)
+  );
+}
+
+function runnerDrawActionHasCurrentCoveragePurpose(
+  candidate: ActionSemanticCandidate,
+  domain: RunnerPlanDomain,
+): boolean {
+  return domain.coverageGaps.some(
+    (gap) =>
+      !gap.answerInHand &&
+      gap.deckHasAnswer &&
+      gap.drawForAnswerActionIds.includes(candidate.actionId),
+  );
+}
+
+function runnerDrawActionHasCurrentNonCoveragePlanPurpose(
+  candidate: ActionSemanticCandidate,
+  domain: RunnerPlanDomain,
+): boolean {
+  if (candidate.semanticActionType !== "draw.card") return false;
+  return (
     (domain.defense.handSize < domain.defense.minimumHandBuffer &&
       domain.defense.handBufferActionIds?.includes(candidate.actionId) ===
         true) ||
-    domain.coverageGaps.some(
-      (gap) =>
-        !gap.answerInHand &&
-        gap.deckHasAnswer &&
-        gap.drawForAnswerActionIds.includes(candidate.actionId),
-    ) ||
     domain.developments.some((signal) =>
       signal.actionIds.includes(candidate.actionId),
     ) ||
@@ -22133,7 +22252,11 @@ function resolvePlanBoundRunnerRunStartOrderChoice(
     ((origin.sourceActionType === "start_run" &&
       origin.selectedActionId.startsWith("runner.start_run.")) ||
       (origin.sourceActionType === "play_event" &&
-        origin.selectedActionId.startsWith("runner.play_event."))) &&
+        origin.selectedActionId.startsWith("runner.play_event.")) ||
+      (origin.sourceActionType === "activated_card_ability" &&
+        origin.selectedActionId.startsWith(
+          "runner.activated_card_ability.",
+        ))) &&
     origin.sourceStepId.trim().length > 0 &&
     previous.rootForegroundInstanceId === origin.rootPlanInstanceId &&
     previous.executorInstanceId === origin.executorInstanceId &&
@@ -23659,7 +23782,8 @@ function runnerCurrentExposeInformationSignal(
     origin !== undefined &&
     origin.immediateChoicePolicy === "resolve_runner_run_start_order" &&
     (origin.sourceActionType === "start_run" ||
-      origin.sourceActionType === "play_event") &&
+      origin.sourceActionType === "play_event" ||
+      origin.sourceActionType === "activated_card_ability") &&
     previous.side === "runner" &&
     previous.stateVersion + 1 === input.playerView.stateVersion &&
     origin.selectedAtStateVersion === previous.stateVersion &&

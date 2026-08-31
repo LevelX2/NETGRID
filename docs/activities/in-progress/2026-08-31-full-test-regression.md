@@ -283,6 +283,11 @@ grünem Main-Nachweis und verifiziertem Worktree-/Branch-Cleanup als complete.
     pnpm-Trennargument `--` als Playwright-Dateimuster weitergegeben. Corepack
     wird unter Windows nun direkt über Node ohne Shell gestartet; die
     Prozessgrenze entfernt ausschließlich das führende Trennargument.
+16. **Parallel integrierte AI-Dateien waren nicht formatterkonform.** Der vor
+    P6 weitergelaufene `main`-Stand brachte drei semantisch gültige, aber nicht
+    Prettier-konforme Dateien mit. Der verpflichtende Formattercheck direkt am
+    Integrationspunkt hat sie erkannt; genau diese Dateien wurden normalisiert,
+    bevor der Merge fortgesetzt wurde.
 
 ## Finaler Gate-Nachweis vor Integration
 
