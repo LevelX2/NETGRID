@@ -470,7 +470,18 @@ describe("authoritative plan-first live runtime", () => {
       "Draw",
       { credits: 0, clicks: 1 },
     );
-    const input = aiInput("runner", [prepareMemory, draw]);
+    const deferredInstall = legalAction(
+      "runner.install_card.snowball.runner_program_trash_before_install",
+      "runner",
+      "install_card",
+      "Trash a program and install Snowball",
+      { credits: 10, clicks: 1 },
+      {
+        source: "snowball",
+        payload: { cardId: "snowball", effectKind: "install_card" },
+      },
+    );
+    const input = aiInput("runner", [prepareMemory, draw, deferredInstall]);
     input.playerView.own.gripOrHq = [
       visibleCard("memory", "runner", "hardware", {
         definitionId: "onr_v1_145_wutech-mem-chip",
@@ -482,6 +493,7 @@ describe("authoritative plan-first live runtime", () => {
       stateVersion: input.playerView.stateVersion,
       visibleSourceDefinitionsByInstanceId: {
         memory: "onr_v1_145_wutech-mem-chip",
+        snowball: "onr_v1_066_snowball",
       },
     });
 
@@ -494,7 +506,23 @@ describe("authoritative plan-first live runtime", () => {
         resourceLifecycle: [],
         shellTradersPipelines: [],
         runWindows: [],
-        developments: [],
+        developments: [
+          {
+            developmentId: "card:snowball",
+            definitionId: "onr_v1_066_snowball",
+            phase: "execute",
+            assignedDomainPlanIds: [
+              "runner.rig_and_coverage:coverage:breaker_sentry",
+            ],
+            duplicateAlreadyInstalled: false,
+            affordableOrSupportable: true,
+            semanticActionTypes: ["install.card"],
+            actionIds: [deferredInstall.actionId],
+            priorityClass: "P4",
+            value: 70,
+            evidenceCode: "runner_missing_breaker_sentry",
+          },
+        ],
         coverageGaps: [
           {
             gapId: "coverage:breaker_wall",
@@ -510,6 +538,21 @@ describe("authoritative plan-first live runtime", () => {
             installActionIds: [],
             fundingActionIds: [],
             drawForAnswerActionIds: [draw.actionId],
+          },
+          {
+            gapId: "coverage:breaker_sentry",
+            requiredRole: "breaker_sentry",
+            priorityClass: "P4",
+            evidenceCode: "runner_missing_breaker_sentry",
+            deckHasAnswer: true,
+            answerInHand: true,
+            directSearchActionIds: [],
+            searchEngineSetupActionIds: [],
+            preparationActionIds: [prepareMemory.actionId],
+            memorySupportActionIds: [prepareMemory.actionId],
+            installActionIds: [],
+            fundingActionIds: [],
+            drawForAnswerActionIds: [],
           },
         ],
         centralPressure: [],
@@ -538,6 +581,17 @@ describe("authoritative plan-first live runtime", () => {
       ownerModuleId: "runner.rig_and_coverage",
       evidenceCode:
         "runner_coverage_draw_deferred_for_current_preparation_phase",
+    });
+    expect(
+      dispositions.find(
+        (entry) => entry.actionId === deferredInstall.actionId,
+      ),
+    ).toEqual({
+      actionId: deferredInstall.actionId,
+      disposition: "explicitly_nonproductive",
+      ownerModuleId: "runner.rig_and_coverage",
+      evidenceCode:
+        "runner_coverage_install_deferred_for_current_preparation_phase",
     });
   });
 

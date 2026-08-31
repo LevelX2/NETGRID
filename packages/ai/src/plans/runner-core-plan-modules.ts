@@ -1704,17 +1704,15 @@ function coveragePhase(
               : "draw_for_answer";
 }
 
-export function runnerCoverageDrawIsCurrentPhase(params: {
+export function runnerCoverageCurrentPhase(params: {
   context: PlanSchedulerContext;
   gap: RunnerCoverageGapSignal;
   rolesForDefinitionId: (definitionId: string) => readonly string[];
-}): boolean {
-  return (
-    coveragePhase(
-      params.context,
-      params.gap,
-      params.rolesForDefinitionId,
-    ) === "draw_for_answer"
+}): CoverageState["phase"] {
+  return coveragePhase(
+    params.context,
+    params.gap,
+    params.rolesForDefinitionId,
   );
 }
 

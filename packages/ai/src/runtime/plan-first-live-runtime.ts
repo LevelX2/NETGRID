@@ -121,7 +121,7 @@ import {
 } from "../plans/corp-tactical-plan-modules";
 import {
   createRunnerCorePlanModules,
-  runnerCoverageDrawIsCurrentPhase,
+  runnerCoverageCurrentPhase,
   runnerRolesCoverCoverageGap,
   runnerDevelopmentCardAdmission,
   runnerDevelopmentFundingMilestone,
@@ -5312,7 +5312,60 @@ export function runnerActionDispositions(
         : [],
     ),
   );
+  const coveragePlanningContext: PlanSchedulerContext = {
+    input,
+    actionCandidates: candidates,
+    actionDispositions: dispositions,
+    transientSignals: [],
+    turnKey: turnKey(input),
+    domain,
+  };
+  const coverageGapsByAssignedPlanId = new Map(
+    domain.coverageGaps.map((gap) => [
+      `runner.rig_and_coverage:${gap.gapId}`,
+      gap,
+    ]),
+  );
+  const deferredCoveragePreparationInstallActionIds = new Set(
+    domain.developments.flatMap((signal) => {
+      if (signal.assignedDomainPlanIds.length === 0) return [];
+      const assignedCoverageGaps = signal.assignedDomainPlanIds.flatMap(
+        (planId) => {
+          const gap = coverageGapsByAssignedPlanId.get(planId);
+          return gap ? [gap] : [];
+        },
+      );
+      if (
+        assignedCoverageGaps.length !== signal.assignedDomainPlanIds.length ||
+        !assignedCoverageGaps.every(
+          (gap) =>
+            runnerCoverageCurrentPhase({
+              context: coveragePlanningContext,
+              gap,
+              rolesForDefinitionId: rolesForDeckDoctrineCard,
+            }) === "prepare_coverage",
+        )
+      ) {
+        return [];
+      }
+      return signal.actionIds.filter(
+        (actionId) =>
+          candidates.find((candidate) => candidate.actionId === actionId)
+            ?.semanticActionType === "install.card",
+      );
+    }),
+  );
   for (const candidate of candidates) {
+    if (
+      deferredCoveragePreparationInstallActionIds.has(candidate.actionId)
+    ) {
+      add(
+        candidate.actionId,
+        "runner.rig_and_coverage",
+        "runner_coverage_install_deferred_for_current_preparation_phase",
+      );
+      continue;
+    }
     if (deferredSameTurnCoverageInstallActionIds.has(candidate.actionId)) {
       add(
         candidate.actionId,
@@ -5486,18 +5539,11 @@ export function runnerActionDispositions(
       coverageDrawGaps.length > 0 &&
       coverageDrawGaps.every(
         (gap) =>
-          !runnerCoverageDrawIsCurrentPhase({
-            context: {
-              input,
-              actionCandidates: candidates,
-              actionDispositions: dispositions,
-              transientSignals: [],
-              turnKey: turnKey(input),
-              domain,
-            },
+          runnerCoverageCurrentPhase({
+            context: coveragePlanningContext,
             gap,
             rolesForDefinitionId: rolesForDeckDoctrineCard,
-          }),
+          }) !== "draw_for_answer",
       ) &&
       !runnerDrawActionHasCurrentNonCoveragePlanPurpose(candidate, domain) &&
       !dispositions.some(
