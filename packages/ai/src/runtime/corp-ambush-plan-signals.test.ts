@@ -425,15 +425,17 @@ describe("Corp ambush plan signal duplicate scope", () => {
       ],
     } as unknown as ResidentPlanPortfolio;
 
-    expect(buildCorpAmbushPlanSignals({ input, candidates, previous })).toEqual([
-      expect.objectContaining({
-        sourceInstanceId: source.instanceId,
-        serverId: "remote_3",
-        phase: "advance",
-        actionIds: [advance.actionId],
-        plannedAdvancementTarget: 2,
-      }),
-    ]);
+    expect(buildCorpAmbushPlanSignals({ input, candidates, previous })).toEqual(
+      [
+        expect.objectContaining({
+          sourceInstanceId: source.instanceId,
+          serverId: "remote_3",
+          phase: "advance",
+          actionIds: [advance.actionId],
+          plannedAdvancementTarget: 2,
+        }),
+      ],
+    );
   });
 });
 

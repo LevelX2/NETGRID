@@ -29195,11 +29195,7 @@ describe("match_f291a822af543d48 Corp Ambush continuation", () => {
     first.playerView.own.credits = 10;
     first.playerView.own.clicks = 2;
     first.playerView.own.gripOrHq = [source, support];
-    first.playerView.servers = [
-      server("hq"),
-      server("rd"),
-      server("archives"),
-    ];
+    first.playerView.servers = [server("hq"), server("rd"), server("archives")];
     (first as AiDecisionInputWithDeckCapabilities).ownCorpStrategicIntent = {
       schemaVersion: "corp-strategic-intent-profile-v1",
       side: "corp",

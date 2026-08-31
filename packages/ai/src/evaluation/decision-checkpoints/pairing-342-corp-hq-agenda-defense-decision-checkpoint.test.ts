@@ -19,13 +19,11 @@ describe("pairing 342 Corp HQ agenda-defense checkpoint", () => {
       },
     });
     expect(result.decision?.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId:
-        "plan:corp.defend_servers:server-defense-portfolio",
+      rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
       leafExecutorInstanceId:
         "plan:corp.defend_servers:server-defense-portfolio",
       selectedStep: {
-        stepId:
-          "plan:corp.defend_servers:server-defense-portfolio:allocate",
+        stepId: "plan:corp.defend_servers:server-defense-portfolio:allocate",
       },
     });
   });
