@@ -1,6 +1,6 @@
 # Vollständige Testregression und Fehlerbehebung 2026-08-31
 
-Status: bereit für lokale Integration
+Status: abgeschlossen
 
 ## Quelle und Zielprüfung
 
@@ -207,6 +207,13 @@ grünem Main-Nachweis und verifiziertem Worktree-/Branch-Cleanup als complete.
   `format:check`, die 998 Web-Tests, der Web-Typecheck, der Web-Build, ein
   gezielter E2E-Aufruf mit Leerzeichen und der vollständige E2E-Lauf erneut
   grün. Alle Änderungen sind einzeln committed; der Worktree ist sauber.
+- 2026-08-31: P6 abgeschlossen. Der zwischenzeitlich weitergelaufene lokale
+  `main` wurde defensiv in den Arbeitsbranch integriert. Zwei AI-Konflikte
+  wurden unter Erhalt von Activated-Ability- und Continuation-Ownership gelöst,
+  mit 350 fokussierten Tests, AI-Typecheck, AI-Strukturgates und abschließend
+  allen drei AI-Shards verifiziert. Der geprüfte Branch wurde per Fast-Forward
+  nach `main` integriert. Git-Worktree-Eintrag, physischer Worktree-Pfad und
+  Arbeitsbranch sind nachweislich entfernt. Es erfolgte kein Push.
 
 ## Ursachen und verankerte Regeln
 
