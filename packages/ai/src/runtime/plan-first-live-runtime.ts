@@ -121,10 +121,12 @@ import {
 } from "../plans/corp-tactical-plan-modules";
 import {
   createRunnerCorePlanModules,
+  runnerCoverageDrawIsCurrentPhase,
   runnerRolesCoverCoverageGap,
   runnerDevelopmentCardAdmission,
   runnerDevelopmentFundingMilestone,
   runnerDefenseReactionReserveIsCurrentPhase,
+  runnerDefenseTagClearFundingIsCurrentPhase,
   runnerExactBasicLiquidCreditCandidate,
   runnerTurnLiquidityCandidateIsMaterializable,
   runnerFundingRouteCandidateIsMaterializable,
@@ -5471,6 +5473,44 @@ export function runnerActionDispositions(
     }
   }
   for (const candidate of candidates) {
+    const coverageDrawGaps =
+      candidate.semanticActionType === "draw.card"
+        ? domain.coverageGaps.filter(
+            (gap) =>
+              !gap.answerInHand &&
+              gap.deckHasAnswer &&
+              gap.drawForAnswerActionIds.includes(candidate.actionId),
+          )
+        : [];
+    if (
+      coverageDrawGaps.length > 0 &&
+      coverageDrawGaps.every(
+        (gap) =>
+          !runnerCoverageDrawIsCurrentPhase({
+            context: {
+              input,
+              actionCandidates: candidates,
+              actionDispositions: dispositions,
+              transientSignals: [],
+              turnKey: turnKey(input),
+              domain,
+            },
+            gap,
+            rolesForDefinitionId: rolesForDeckDoctrineCard,
+          }),
+      ) &&
+      !runnerDrawActionHasCurrentNonCoveragePlanPurpose(candidate, domain) &&
+      !dispositions.some(
+        (disposition) => disposition.actionId === candidate.actionId,
+      )
+    ) {
+      add(
+        candidate.actionId,
+        "runner.rig_and_coverage",
+        "runner_coverage_draw_deferred_for_current_preparation_phase",
+      );
+      continue;
+    }
     if (
       candidate.semanticActionType === "tag.remove" &&
       domain.defense.activeTags <= 0 &&
@@ -6615,6 +6655,17 @@ export function runnerDelegatedFundingActionIds(
     for (const actionId of gap.fundingActionIds) actionIds.add(actionId);
   }
   if (
+    runnerDefenseTagClearFundingIsCurrentPhase({
+      actionCandidates: candidates,
+      stateVersion,
+      signals: domain.defense,
+    })
+  ) {
+    for (const actionId of domain.defense.tagClearFundingNeed?.actionIds ?? []) {
+      actionIds.add(actionId);
+    }
+  }
+  if (
     runnerDefenseReactionReserveIsCurrentPhase({
       actionCandidates: candidates,
       stateVersion,
@@ -6664,15 +6715,32 @@ function runnerDrawActionHasCurrentPlanPurpose(
 ): boolean {
   if (candidate.semanticActionType !== "draw.card") return false;
   return (
+    runnerDrawActionHasCurrentCoveragePurpose(candidate, domain) ||
+    runnerDrawActionHasCurrentNonCoveragePlanPurpose(candidate, domain)
+  );
+}
+
+function runnerDrawActionHasCurrentCoveragePurpose(
+  candidate: ActionSemanticCandidate,
+  domain: RunnerPlanDomain,
+): boolean {
+  return domain.coverageGaps.some(
+    (gap) =>
+      !gap.answerInHand &&
+      gap.deckHasAnswer &&
+      gap.drawForAnswerActionIds.includes(candidate.actionId),
+  );
+}
+
+function runnerDrawActionHasCurrentNonCoveragePlanPurpose(
+  candidate: ActionSemanticCandidate,
+  domain: RunnerPlanDomain,
+): boolean {
+  if (candidate.semanticActionType !== "draw.card") return false;
+  return (
     (domain.defense.handSize < domain.defense.minimumHandBuffer &&
       domain.defense.handBufferActionIds?.includes(candidate.actionId) ===
         true) ||
-    domain.coverageGaps.some(
-      (gap) =>
-        !gap.answerInHand &&
-        gap.deckHasAnswer &&
-        gap.drawForAnswerActionIds.includes(candidate.actionId),
-    ) ||
     domain.developments.some((signal) =>
       signal.actionIds.includes(candidate.actionId),
     ) ||

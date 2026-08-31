@@ -386,6 +386,161 @@ describe("authoritative plan-first live runtime", () => {
     ]);
   });
 
+  it("delegates current tag-clear funding to the defense owner", () => {
+    const gainCredit = legalAction(
+      "runner.gain_credit",
+      "runner",
+      "gain_credit",
+      "Gain a credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [gainCredit]);
+    input.playerView.own.tags = 1;
+    input.playerView.own.credits = 1;
+    input.playerView.own.gripOrHq = [
+      visibleCard("buffer-1", "runner", "resource"),
+      visibleCard("buffer-2", "runner", "resource"),
+      visibleCard("buffer-3", "runner", "resource"),
+    ];
+    const candidates = buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "runner",
+      stateVersion: input.playerView.stateVersion,
+    });
+
+    const delegated = runnerDelegatedFundingActionIds(
+      input,
+      {
+        resourceLifecycle: [],
+        developments: [],
+        coverageGaps: [],
+        centralPressure: [],
+        remoteContests: [],
+        fundingNeeds: [],
+        defense: {
+          activeTags: 1,
+          visibleTagPunish: true,
+          persistentHazardCounterRemovalAvailable: false,
+          pendingDamage: 0,
+          damagePreventionNeeded: false,
+          handSize: 3,
+          minimumHandBuffer: 5,
+          drawAllowed: true,
+          tagClearFundingNeed: {
+            needId: "runner-defense-tag-clear-funding",
+            parentPlanInstanceId: "plan:runner.defense_and_recovery:runner",
+            targetCredits: 2,
+            currentCreditsAtRevalidation: 1,
+            gap: 1,
+            actionIds: [gainCredit.actionId],
+            revalidation: {
+              stateVersion: input.playerView.stateVersion,
+              status: "defense_parent_open",
+            },
+            evidenceCode: "runner_visible_tag_punish_requires_clear_funding",
+          },
+          forgoUnsafeRunCapacity: false,
+          handBufferPriorityClass: "P5",
+          evidenceCodes: ["runner_visible_tag_punish_requires_clear_funding"],
+        },
+      },
+      candidates,
+      input.playerView.stateVersion,
+    );
+
+    expect([...delegated]).toEqual([gainCredit.actionId]);
+  });
+
+  it("dispositions a later coverage draw while memory preparation is the current coverage phase", () => {
+    const prepareMemory = legalAction(
+      "runner.install_card.memory",
+      "runner",
+      "install_card",
+      "Install memory",
+      { credits: 1, clicks: 1 },
+      {
+        source: "memory",
+        payload: { cardId: "memory", effectKind: "install_card" },
+      },
+    );
+    const draw = legalAction(
+      "runner.draw_card",
+      "runner",
+      "draw_card",
+      "Draw",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [prepareMemory, draw]);
+    input.playerView.own.gripOrHq = [
+      visibleCard("memory", "runner", "hardware", {
+        definitionId: "onr_v1_145_wutech-mem-chip",
+      }),
+    ];
+    const candidates = buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "runner",
+      stateVersion: input.playerView.stateVersion,
+      visibleSourceDefinitionsByInstanceId: {
+        memory: "onr_v1_145_wutech-mem-chip",
+      },
+    });
+
+    const dispositions = runnerActionDispositions(
+      input,
+      candidates,
+      {
+        creditBanks: [],
+        recurringEconomy: [],
+        resourceLifecycle: [],
+        shellTradersPipelines: [],
+        runWindows: [],
+        developments: [],
+        coverageGaps: [
+          {
+            gapId: "coverage:breaker_wall",
+            requiredRole: "breaker_wall",
+            priorityClass: "P4",
+            evidenceCode: "runner_missing_breaker_wall",
+            deckHasAnswer: true,
+            answerInHand: false,
+            directSearchActionIds: [],
+            searchEngineSetupActionIds: [],
+            preparationActionIds: [prepareMemory.actionId],
+            memorySupportActionIds: [prepareMemory.actionId],
+            installActionIds: [],
+            fundingActionIds: [],
+            drawForAnswerActionIds: [draw.actionId],
+          },
+        ],
+        centralPressure: [],
+        remoteContests: [],
+        installedAgendaScores: [],
+        installedCardLiquidationChoices: [],
+        fundingNeeds: [],
+        defense: {
+          activeTags: 0,
+          handSize: 5,
+          minimumHandBuffer: 4,
+          handBufferActionIds: [],
+          forgoUnsafeRunCapacity: false,
+        },
+      } as never,
+      [],
+      [],
+      () => undefined,
+    );
+
+    expect(
+      dispositions.find((entry) => entry.actionId === draw.actionId),
+    ).toEqual({
+      actionId: draw.actionId,
+      disposition: "explicitly_nonproductive",
+      ownerModuleId: "runner.rig_and_coverage",
+      evidenceCode:
+        "runner_coverage_draw_deferred_for_current_preparation_phase",
+    });
+  });
+
   it("leaves rejected trash-before-install variants with their specialized owner", () => {
     const action = legalAction(
       "runner.install_card.baedeker.runner_program_trash_before_install",

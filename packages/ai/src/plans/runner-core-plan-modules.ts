@@ -1531,21 +1531,13 @@ function coverageModule(
         );
         const draws = coverageDrawCandidates(context, gap);
         const funding = coverageFundingCandidates(context, gap);
-        const sameTurnConversionNeedsFunding =
-          gap.sameTurnRunConversion !== undefined && (gap.fundingGap ?? 0) > 0;
-        const phase = sameTurnConversionNeedsFunding
-          ? "fund_answer"
-          : preparations.length > 0
-            ? "prepare_coverage"
-            : installs.length > 0
-              ? "install_answer"
-              : gap.answerInHand && (gap.fundingGap ?? 0) > 0
-                ? "fund_answer"
-                : gap.directSearchActionIds.length > 0
-                  ? "search_answer"
-                  : gap.searchEngineSetupActionIds.length > 0
-                    ? "setup_search_engine"
-                    : "draw_for_answer";
+        const phase = coveragePhase(
+          context,
+          gap,
+          rolesForDefinitionId,
+          preparations,
+          installs,
+        );
         const routeExists =
           preparations.length > 0 ||
           installs.length > 0 ||
@@ -1686,6 +1678,44 @@ function coverageModule(
       };
     },
   };
+}
+
+function coveragePhase(
+  context: PlanSchedulerContext,
+  gap: RunnerCoverageGapSignal,
+  rolesForDefinitionId: (definitionId: string) => readonly string[],
+  preparations = coveragePreparationCandidates(context, gap),
+  installs = coverageInstallCandidates(context, gap, rolesForDefinitionId),
+): CoverageState["phase"] {
+  const sameTurnConversionNeedsFunding =
+    gap.sameTurnRunConversion !== undefined && (gap.fundingGap ?? 0) > 0;
+  return sameTurnConversionNeedsFunding
+    ? "fund_answer"
+    : preparations.length > 0
+      ? "prepare_coverage"
+      : installs.length > 0
+        ? "install_answer"
+        : gap.answerInHand && (gap.fundingGap ?? 0) > 0
+          ? "fund_answer"
+          : gap.directSearchActionIds.length > 0
+            ? "search_answer"
+            : gap.searchEngineSetupActionIds.length > 0
+              ? "setup_search_engine"
+              : "draw_for_answer";
+}
+
+export function runnerCoverageDrawIsCurrentPhase(params: {
+  context: PlanSchedulerContext;
+  gap: RunnerCoverageGapSignal;
+  rolesForDefinitionId: (definitionId: string) => readonly string[];
+}): boolean {
+  return (
+    coveragePhase(
+      params.context,
+      params.gap,
+      params.rolesForDefinitionId,
+    ) === "draw_for_answer"
+  );
 }
 
 function defenseModule(): PlanModule {
@@ -2825,6 +2855,20 @@ export function runnerDefenseReactionReserveIsCurrentPhase(params: {
       params.stateVersion,
       params.signals,
     ) === "build_reaction_reserve"
+  );
+}
+
+export function runnerDefenseTagClearFundingIsCurrentPhase(params: {
+  actionCandidates: readonly ActionSemanticCandidate[];
+  stateVersion: number;
+  signals: RunnerDefenseSignals;
+}): boolean {
+  return (
+    defensePhase(
+      params.actionCandidates,
+      params.stateVersion,
+      params.signals,
+    ) === "fund_tag_clear"
   );
 }
 
