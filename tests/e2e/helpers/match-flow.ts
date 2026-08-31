@@ -27,8 +27,7 @@ export async function openApp(page: Page): Promise<void> {
   await installE2eMatchStartSettings(page);
   await page.goto(BASE_URL);
   await expect(page.getByTestId("setup-screen")).toBeVisible();
-  const cookies = await page.context().cookies(BASE_URL);
-  if (cookies.some((cookie) => cookie.name === "ng_account_session")) {
+  if (await hasAccountSession(page)) {
     await expect(
       page.getByText(
         "Deine Matchstart-Vorbelegung wird privat im Account gespeichert.",
@@ -101,11 +100,13 @@ export async function joinHumanVsHumanLobby(
   await page.goto(joinUrl);
   await expect(page.getByTestId("setup-screen")).toBeVisible();
   const name = page.getByLabel("Name");
-  if (
-    (await name.isEditable()) &&
-    /^Teilnehmer [AB]$/.test((await name.inputValue()).trim())
-  ) {
-    await name.fill("Joiner V107");
+  if (await hasAccountSession(page)) {
+    await expect(name).not.toBeEditable();
+  } else {
+    await expect(name).toBeEditable();
+    if (/^Teilnehmer [AB]$/.test((await name.inputValue()).trim())) {
+      await name.fill("Joiner V107");
+    }
   }
   await selectE2eDecks(page, "Dein Runner-Deck", "Dein Korp-Deck");
   await expect(page.getByTestId("join-link-input")).toHaveValue(/joinToken=/);
@@ -114,6 +115,11 @@ export async function joinHumanVsHumanLobby(
     timeout: 20_000,
   });
   await expect(page.getByText("Startbereitschaftslobby")).toBeVisible();
+}
+
+async function hasAccountSession(page: Page): Promise<boolean> {
+  const cookies = await page.context().cookies(BASE_URL);
+  return cookies.some((cookie) => cookie.name === "ng_account_session");
 }
 
 export async function readyAndWaitForActive(

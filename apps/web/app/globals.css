@@ -4,6 +4,7 @@
 .app {
   min-height: 100vh;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto 1fr;
 }
 
@@ -13041,6 +13042,9 @@ select,
 
 .setup.v07Entry {
   display: grid;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
   align-content: start;
   justify-items: center;
   gap: 16px;
@@ -17199,6 +17203,17 @@ select,
     flex-direction: column;
   }
 
+  .topbarStatusGroup,
+  .topbarMeta {
+    width: 100%;
+    min-width: 0;
+    flex-wrap: wrap;
+  }
+
+  .topbarStatusGroup {
+    justify-content: center;
+  }
+
   .toolbar {
     align-items: center;
     justify-content: flex-start;
@@ -17403,6 +17418,20 @@ select,
 
   .entryTabs {
     grid-template-columns: 1fr;
+  }
+
+  .setup.v07Entry > *,
+  .entryContent,
+  .accountPanel,
+  .accountPanelHeader,
+  .accountHeaderActions {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .accountPanelHeader,
+  .accountHeaderActions {
+    width: 100%;
   }
 
   .publicGamesHeader,
