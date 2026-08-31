@@ -1,5 +1,7 @@
+import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import type { DeckDefinition } from "@netgrid/shared";
 import {
   runAiSelfplayTraceMining,
@@ -28,36 +30,78 @@ const seeds = [
   "proteus-pilot-holdout-02",
 ];
 const maxActions = 480;
+const workerResultMarker = "NETGRID_PROTEUS_PILOT_WORKER_RESULT ";
 
 assert(runnerDecks.length === 2, "Expected two Proteus Runner pilot decks.");
 assert(corpDecks.length === 2, "Expected two Proteus Corp pilot decks.");
 
-const pilotFailureDiagnostics: Array<{
-  pairId: string;
-  seed: string;
-  errors: string[];
-}> = [];
-const pairResults = runnerDecks.flatMap((runnerDeck) =>
-  corpDecks.map((corpDeck) => {
-    const pairId = `${runnerDeck.id}__${corpDeck.id}`;
-    const result = runAiSelfplayTraceMining({
-      seeds,
-      maxActions,
-      runnerDeck,
-      corpDeck,
-      runnerControllerMode: "current_candidate",
-      corpControllerMode: "current_candidate",
-      maxFindings: 20,
-    });
-    for (const summary of result.summaries) {
-      if (summary.errors.length > 0)
-        pilotFailureDiagnostics.push({
-          pairId,
-          seed: summary.seed,
-          errors: [...summary.errors],
-        });
-    }
-    return {
+if (process.argv.includes("--pair-worker")) {
+  const runnerDeckId = requiredArgument("--runner-deck-id");
+  const corpDeckId = requiredArgument("--corp-deck-id");
+  const runnerDeck = requiredDeck(runnerDecks, runnerDeckId);
+  const corpDeck = requiredDeck(corpDecks, corpDeckId);
+  process.stdout.write(
+    `${workerResultMarker}${JSON.stringify(simulatePair(runnerDeck, corpDeck))}\n`,
+  );
+  process.exit(0);
+}
+
+if (process.argv.includes("--control-worker")) {
+  const seed = requiredArgument("--seed");
+  process.stdout.write(
+    `${workerResultMarker}${JSON.stringify(simulateControlGame(seed))}\n`,
+  );
+  process.exit(0);
+}
+
+const pairWorkerResults = runnerDecks.flatMap((runnerDeck) =>
+  corpDecks.map((corpDeck) => runPairWorker(runnerDeck.id, corpDeck.id)),
+);
+const pairResults = pairWorkerResults.map((result) => result.pair);
+const pilotFailureDiagnostics = pairWorkerResults.flatMap(
+  (result) => result.failureDiagnostics,
+);
+const controlGames = seeds.map(runControlWorker);
+
+function simulateControlGame(seed: string) {
+  const summary = simulateAiGame({
+    seed: `originalset-control:${seed}`,
+    maxActions,
+  });
+  return {
+    seed: summary.seed,
+    winner: summary.winner,
+    actions: summary.actions,
+    finalStateHash: summary.finalStateHash,
+    replayOk: summary.replayOk,
+    illegalActions: summary.metrics.illegalActions,
+  };
+}
+
+function simulatePair(runnerDeck: DeckDefinition, corpDeck: DeckDefinition) {
+  const pairId = `${runnerDeck.id}__${corpDeck.id}`;
+  const result = runAiSelfplayTraceMining({
+    seeds,
+    maxActions,
+    runnerDeck,
+    corpDeck,
+    runnerControllerMode: "current_candidate",
+    corpControllerMode: "current_candidate",
+    maxFindings: 20,
+  });
+  const failureDiagnostics = result.summaries.flatMap((summary) =>
+    summary.errors.length > 0
+      ? [
+          {
+            pairId,
+            seed: summary.seed,
+            errors: [...summary.errors],
+          },
+        ]
+      : [],
+  );
+  return {
+    pair: {
       pairId,
       runnerDeckId: runnerDeck.id,
       corpDeckId: corpDeck.id,
@@ -80,24 +124,61 @@ const pairResults = runnerDecks.flatMap((runnerDeck) =>
           summary.finalAgendaPoints.runner === 0 &&
           summary.finalAgendaPoints.corp === 0,
       })),
-    };
-  }),
-);
-
-const controlGames = seeds.map((seed) => {
-  const summary = simulateAiGame({
-    seed: `originalset-control:${seed}`,
-    maxActions,
-  });
-  return {
-    seed: summary.seed,
-    winner: summary.winner,
-    actions: summary.actions,
-    finalStateHash: summary.finalStateHash,
-    replayOk: summary.replayOk,
-    illegalActions: summary.metrics.illegalActions,
+    },
+    failureDiagnostics,
   };
-});
+}
+
+function runPairWorker(runnerDeckId: string, corpDeckId: string) {
+  return runWorker<ReturnType<typeof simulatePair>>([
+    "--pair-worker",
+    `--runner-deck-id=${runnerDeckId}`,
+    `--corp-deck-id=${corpDeckId}`,
+  ]);
+}
+
+function runControlWorker(seed: string) {
+  return runWorker<ReturnType<typeof simulateControlGame>>([
+    "--control-worker",
+    `--seed=${seed}`,
+  ]);
+}
+
+function runWorker<Result>(arguments_: string[]): Result {
+  const output = execFileSync(
+    process.execPath,
+    ["--import", "tsx", fileURLToPath(import.meta.url), ...arguments_],
+    {
+      cwd: root,
+      encoding: "utf8",
+      maxBuffer: 10 * 1024 * 1024,
+    },
+  );
+  const resultLine = output
+    .split(/\r?\n/)
+    .find((line) => line.startsWith(workerResultMarker));
+  assert(
+    resultLine,
+    `Proteus pilot worker emitted no structured result: ${output.slice(-1000)}`,
+  );
+  return JSON.parse(resultLine.slice(workerResultMarker.length)) as Result;
+}
+
+function requiredArgument(name: string): string {
+  const prefix = `${name}=`;
+  const value = process.argv.find((argument) => argument.startsWith(prefix));
+  assert(value, `Missing worker argument ${name}.`);
+  return value.slice(prefix.length);
+}
+
+function requiredDeck(
+  decks: readonly DeckDefinition[],
+  deckId: string,
+): DeckDefinition {
+  const deck = decks.find((candidate) => candidate.id === deckId);
+  assert(deck, `Unknown Proteus pilot deck ${deckId}.`);
+  return deck;
+}
 
 const games = pairResults.flatMap((pair) => pair.games);
 const terminationTotals = proteusPilotTerminationTotals(games);
