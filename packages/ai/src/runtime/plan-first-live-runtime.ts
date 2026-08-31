@@ -1596,7 +1596,8 @@ function bindSelectedPlanActionOrigin(
     ) === true;
   const canOpenRunnerRunStartOrder =
     selectedAction?.type === "start_run" ||
-    (selectedAction?.type === "play_event" &&
+    ((selectedAction?.type === "play_event" ||
+      selectedAction?.type === "activated_card_ability") &&
       selectedCandidate?.runProjectionSummary?.serverId !== undefined);
   const canOpenRunnerVacuumLinkRewind =
     selectedAction?.type === "continue_run" &&
@@ -1690,7 +1691,11 @@ function bindSelectedPlanActionOrigin(
             immediateChoicePolicy: "resolve_runner_run_start_order",
             sourceStepId: result.route.step.stepId,
             sourceActionType:
-              selectedAction.type === "play_event" ? "play_event" : "start_run",
+              selectedAction.type === "activated_card_ability"
+                ? "activated_card_ability"
+                : selectedAction.type === "play_event"
+                  ? "play_event"
+                  : "start_run",
           };
 }
 
@@ -2220,7 +2225,8 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
         staleRunStartOrigin.rootPlanInstanceId === rootPlanInstanceId &&
         staleRunStartOrigin.executorInstanceId === executorInstanceId &&
         (staleRunStartOrigin.sourceActionType === "start_run" ||
-          staleRunStartOrigin.sourceActionType === "play_event") &&
+          staleRunStartOrigin.sourceActionType === "play_event" ||
+          staleRunStartOrigin.sourceActionType === "activated_card_ability") &&
         staleRunStartOrigin.selectedAtStateVersion <
           input.playerView.stateVersion
       ) {
@@ -5356,9 +5362,7 @@ export function runnerActionDispositions(
     }),
   );
   for (const candidate of candidates) {
-    if (
-      deferredCoveragePreparationInstallActionIds.has(candidate.actionId)
-    ) {
+    if (deferredCoveragePreparationInstallActionIds.has(candidate.actionId)) {
       add(
         candidate.actionId,
         "runner.rig_and_coverage",
@@ -6707,7 +6711,8 @@ export function runnerDelegatedFundingActionIds(
       signals: domain.defense,
     })
   ) {
-    for (const actionId of domain.defense.tagClearFundingNeed?.actionIds ?? []) {
+    for (const actionId of domain.defense.tagClearFundingNeed?.actionIds ??
+      []) {
       actionIds.add(actionId);
     }
   }
@@ -22133,7 +22138,11 @@ function resolvePlanBoundRunnerRunStartOrderChoice(
     ((origin.sourceActionType === "start_run" &&
       origin.selectedActionId.startsWith("runner.start_run.")) ||
       (origin.sourceActionType === "play_event" &&
-        origin.selectedActionId.startsWith("runner.play_event."))) &&
+        origin.selectedActionId.startsWith("runner.play_event.")) ||
+      (origin.sourceActionType === "activated_card_ability" &&
+        origin.selectedActionId.startsWith(
+          "runner.activated_card_ability.",
+        ))) &&
     origin.sourceStepId.trim().length > 0 &&
     previous.rootForegroundInstanceId === origin.rootPlanInstanceId &&
     previous.executorInstanceId === origin.executorInstanceId &&
@@ -23650,7 +23659,8 @@ function runnerCurrentExposeInformationSignal(
     origin !== undefined &&
     origin.immediateChoicePolicy === "resolve_runner_run_start_order" &&
     (origin.sourceActionType === "start_run" ||
-      origin.sourceActionType === "play_event") &&
+      origin.sourceActionType === "play_event" ||
+      origin.sourceActionType === "activated_card_ability") &&
     previous.side === "runner" &&
     previous.stateVersion + 1 === input.playerView.stateVersion &&
     origin.selectedAtStateVersion === previous.stateVersion &&
