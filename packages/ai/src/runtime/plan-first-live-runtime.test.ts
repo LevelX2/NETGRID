@@ -28095,6 +28095,7 @@ describe("plan-bound approach-ICE information continuation", () => {
                 selectedActionId: "runner.start_run.remote_1",
                 selectedAtStateVersion: priorStateVersion,
                 immediateChoicePolicy: "resolve_runner_run_start_order",
+                continuedThroughStateVersion: priorStateVersion,
                 sourceStepId: `${runPlanInstanceId}:contest`,
                 sourceActionType: "start_run",
               },

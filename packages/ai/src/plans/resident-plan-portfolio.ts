@@ -182,6 +182,7 @@ export type ResidentSelectedActionOrigin = Readonly<{
         immediateChoicePolicy: "resolve_runner_run_start_order";
         sourceStepId: string;
         sourceActionType: "start_run" | "play_event";
+        continuedThroughStateVersion: number;
       }>
     | Readonly<{
         immediateChoicePolicy: "resolve_runner_vacuum_link_rewind";
@@ -678,6 +679,13 @@ export function assertResidentPlanPortfolio(
       (selectedActionOrigin.immediateChoicePolicy ===
         "resolve_runner_run_start_order" &&
         selectedActionOrigin.sourceStepId.trim().length > 0 &&
+        Number.isSafeInteger(
+          selectedActionOrigin.continuedThroughStateVersion,
+        ) &&
+        selectedActionOrigin.continuedThroughStateVersion >=
+          selectedActionOrigin.selectedAtStateVersion &&
+        selectedActionOrigin.continuedThroughStateVersion ===
+          portfolio.stateVersion &&
         (selectedActionOrigin.sourceActionType === "start_run" ||
           selectedActionOrigin.sourceActionType === "play_event")) ||
       (selectedActionOrigin.immediateChoicePolicy ===
@@ -737,7 +745,11 @@ export function assertResidentPlanPortfolio(
             selectedActionOrigin.eligibleArchiveCardInstanceIds.length));
     if (
       selectedActionOrigin.selectedActionId.trim().length === 0 ||
-      selectedActionOrigin.selectedAtStateVersion !== portfolio.stateVersion ||
+      (selectedActionOrigin.immediateChoicePolicy ===
+      "resolve_runner_run_start_order"
+        ? selectedActionOrigin.selectedAtStateVersion > portfolio.stateVersion
+        : selectedActionOrigin.selectedAtStateVersion !==
+          portfolio.stateVersion) ||
       !originPolicyValid ||
       !root ||
       !executor ||

@@ -824,6 +824,7 @@ export function choosePlanFirstLiveAction(
   bindSelectedPlanActionOrigin(input, result, candidates);
   bindSelectedRunnerExposeInformationMemory(input, result);
   bindSelectedEngineWindowRunnerVacuumLinkOrigin(input, result, previous);
+  advanceSelectedRunnerRunStartOrderOrigin(input, result, previous);
   reconcileSelectedRunnerCostPenaltySupportOrigin(input, result, previous);
   bindSelectedRunnerDelayedProgramSearchChoice(
     input,
@@ -1689,7 +1690,34 @@ function bindSelectedPlanActionOrigin(
             sourceStepId: result.route.step.stepId,
             sourceActionType:
               selectedAction.type === "play_event" ? "play_event" : "start_run",
+            continuedThroughStateVersion: input.playerView.stateVersion,
           };
+}
+
+function advanceSelectedRunnerRunStartOrderOrigin(
+  input: AiDecisionInput,
+  result: PlanSchedulerResult,
+  previous: ResidentPlanPortfolio | undefined,
+): void {
+  const origin = previous?.selectedActionOrigin;
+  if (
+    input.side !== "runner" ||
+    result.lane !== "engine_window" ||
+    !result.portfolio ||
+    !input.playerView.pendingChoice?.source.startsWith(
+      "runner_run_start.order:",
+    ) ||
+    origin?.immediateChoicePolicy !== "resolve_runner_run_start_order" ||
+    result.origin.rootPlanInstanceId !== origin.rootPlanInstanceId ||
+    result.origin.leafPlanInstanceId !== origin.executorInstanceId
+  ) {
+    return;
+  }
+  result.portfolio.stateVersion = input.playerView.stateVersion;
+  result.portfolio.selectedActionOrigin = {
+    ...structuredClone(origin),
+    continuedThroughStateVersion: input.playerView.stateVersion,
+  };
 }
 
 function bindSelectedEngineWindowRunnerVacuumLinkOrigin(
@@ -22060,12 +22088,38 @@ function resolvePlanBoundRunnerRunStartOrderChoice(
   )?.[1];
   const originIsRunStartOrder =
     origin?.immediateChoicePolicy === "resolve_runner_run_start_order";
+  const continuationEvents = (context.input.eventTail ?? []).filter(
+    (event) =>
+      originIsRunStartOrder &&
+      event.stateVersionBefore >= origin.selectedAtStateVersion &&
+      event.stateVersionAfter <= context.input.playerView.stateVersion,
+  );
+  const exactRunStartContinuation =
+    originIsRunStartOrder &&
+    continuationEvents.length >= 1 &&
+    continuationEvents[0]?.stateVersionBefore ===
+      origin.selectedAtStateVersion &&
+    continuationEvents[0]?.publicPayload?.actor === "runner" &&
+    continuationEvents[0]?.publicPayload?.actionType ===
+      origin.sourceActionType &&
+    continuationEvents.every(
+      (event, index) =>
+        event.stateVersionAfter === event.stateVersionBefore + 1 &&
+        (index === 0 ||
+          (continuationEvents[index - 1]?.stateVersionAfter ===
+            event.stateVersionBefore &&
+            event.publicPayload?.actor === "runner" &&
+            event.publicPayload?.actionType === "resolve_choice")),
+    ) &&
+    continuationEvents.at(-1)?.stateVersionAfter ===
+      context.input.playerView.stateVersion;
   const exactBinding =
     originIsRunStartOrder &&
     choice.side === "runner" &&
     choice.choiceId ===
       `runner_run_start_order_${context.input.playerView.stateVersion}` &&
     sourceRunId !== undefined &&
+    sourceRunId === context.input.playerView.run?.runId &&
     choice.visibility === "hidden_info_barrier" &&
     choice.stateVersion === context.input.playerView.stateVersion &&
     choice.minSelections === 1 &&
@@ -22073,7 +22127,9 @@ function resolvePlanBoundRunnerRunStartOrderChoice(
     previous !== undefined &&
     previous.side === "runner" &&
     previous.stateVersion === context.input.playerView.stateVersion - 1 &&
-    origin.selectedAtStateVersion === previous.stateVersion &&
+    origin.selectedAtStateVersion <= previous.stateVersion &&
+    origin.continuedThroughStateVersion === previous.stateVersion &&
+    exactRunStartContinuation &&
     ((origin.sourceActionType === "start_run" &&
       origin.selectedActionId.startsWith("runner.start_run.")) ||
       (origin.sourceActionType === "play_event" &&
@@ -22107,7 +22163,7 @@ function resolvePlanBoundRunnerRunStartOrderChoice(
       owner: "continuation",
       ...(executor ? { planInstanceId: executor.instanceId } : {}),
       removalCondition:
-        "Resolve Runner run-start ordering only from the immediately preceding plan-owned start-run route, exact root and executor, active run and complete current Engine choice contract.",
+        "Resolve Runner run-start ordering only from the exact plan-owned start-run route and its contiguous same-run ordering choices, exact root and executor, active run and complete current Engine choice contract.",
     });
   }
   return {

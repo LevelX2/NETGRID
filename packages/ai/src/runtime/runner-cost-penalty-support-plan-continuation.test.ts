@@ -472,6 +472,7 @@ describe("Runner cost/penalty support plan continuation", () => {
       selectedActionId: "runner.start_run.remote_1",
       selectedAtStateVersion: 65,
       immediateChoicePolicy: "resolve_runner_run_start_order",
+      continuedThroughStateVersion: 65,
       sourceStepId: "plan:runner.contest_remote:remote%3Aremote_1:contest",
       sourceActionType: "start_run",
     };

@@ -10,7 +10,7 @@ const RUNNER_DECK_ID = "standard_runner_last_call_at_rd";
 const RUNNER_DECK_HASH = "standard-deck:76a00e66";
 
 describe("Last Call at R&D exact choice-window regressions", () => {
-  it("does not invent a run-start order window in the current MPH465DV sequence", () => {
+  it("keeps the current MPH465DV run-start order window bound to its event-run route", () => {
     const captures: AiSimulationDecisionCheckpointCapture[] = [];
     const summary = simulateStandardGame({
       seed: "meta-334-postfix-final-028",
@@ -22,20 +22,38 @@ describe("Last Call at R&D exact choice-window regressions", () => {
         ) === true,
     });
     assertRegularReplay(summary);
-    expect(captures).toEqual([]);
-    expect(
-      summary.actionSequence
-        .filter(
-          (entry) =>
-            entry.side === "runner" &&
-            entry.selectedActionId === "runner.start_run.rd",
-        )
-        .every(
-          (entry) =>
-            entry.planKind === "runner.pressure_central" &&
-            entry.fallbackUsed === false,
+    expect(captures).toHaveLength(1);
+    const choiceCapture = captures[0]!;
+    const source = summary.actionSequence.find(
+      (entry) =>
+        entry.stateVersionBefore === choiceCapture.state.stateVersion - 1,
+    );
+    const choice = summary.actionSequence.find(
+      (entry) => entry.stateVersionBefore === choiceCapture.state.stateVersion,
+    );
+    expect(source).toMatchObject({
+      side: "runner",
+      selectedActionId: "runner.play_event.hq",
+      actionType: "play_event",
+      planKind: "runner.pressure_central",
+      fallbackUsed: false,
+    });
+    expect(choice).toMatchObject({
+      side: "runner",
+      selectedActionId: "runner.resolve_choice",
+      actionType: "resolve_choice",
+      planKind: "runner.pressure_central",
+      fallbackUsed: false,
+    });
+    expect(choice?.evidence).toEqual(
+      expect.arrayContaining([
+        source?.evidence.find((entry) => entry.startsWith("plan_first_root:")),
+        source?.evidence.find((entry) =>
+          entry.startsWith("plan_first_executor:"),
         ),
-    ).toBe(true);
+        "plan_scheduler:window:plan_bound_runner_run_start_order_choice:none",
+      ]),
+    );
   }, 90_000);
 
   it("does not materialize the historical Jack 'n' Joe window in the current Cheap Bag Seed 2 sequence", () => {
@@ -61,7 +79,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
     expect(captures).toEqual([]);
   }, 90_000);
 
-  it("keeps the Fast Advance Seed 9 run-start ordering bound to its exact central-pressure start-run route", () => {
+  it("keeps consecutive Fast Advance Seed 9 run-start ordering bound to its exact remote-contest route", () => {
     const captures: AiSimulationDecisionCheckpointCapture[] = [];
     const summary = simulateStandardGame({
       seed: "last-call-panel-fast-advance-batch-01-game-09",
@@ -101,13 +119,13 @@ describe("Last Call at R&D exact choice-window regressions", () => {
 
     expect(source).toMatchObject({
       side: "runner",
-      selectedActionId: "runner.start_run.rd",
+      selectedActionId: "runner.start_run.remote_1",
       actionType: "start_run",
-      planKind: "runner.pressure_central",
+      planKind: "runner.contest_remote",
       fallbackUsed: false,
     });
     expect(source?.evidence).toContain(
-      "plan_step_id:plan:runner.pressure_central:central%3Ard:pressure:rd",
+      "plan_step_id:plan:runner.contest_remote:remote%3Aremote_1:contest",
     );
     expect(choiceCapture?.input.playerView.pendingChoice).toMatchObject({
       choiceId: `runner_run_start_order_${choiceCapture!.state.stateVersion}`,
@@ -133,7 +151,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
       side: "runner",
       selectedActionId: "runner.resolve_choice",
       actionType: "resolve_choice",
-      planKind: "runner.pressure_central",
+      planKind: "runner.contest_remote",
       fallbackUsed: false,
     });
     expect(sourceExecutor).toBeDefined();
