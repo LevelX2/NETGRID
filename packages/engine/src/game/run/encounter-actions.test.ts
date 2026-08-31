@@ -527,6 +527,68 @@ describe("runner encounter action generation", () => {
     }
   });
 
+  it("emits one canonical multi-break action per equivalent subroutine effect multiset", () => {
+    const state = makeState({
+      breakerDefinitionId: "onr_proteus_079_big-frackin-gun",
+      runnerCredits: 20,
+    });
+    const breakerDefinition = proteusTestCardDefinition(
+      "onr_proteus_079_big-frackin-gun",
+    );
+    const matchingIce = iceDefinition({
+      subroutines: Array.from({ length: 16 }, (_unused, index) => ({
+        id: `paid_end_the_run_${index + 1}`,
+        type: "end_the_run" as const,
+      })),
+    });
+
+    const result = buildRunnerEncounterActions(
+      hostFor(state, {
+        [breakerDefinition.id]: breakerDefinition,
+        [matchingIce.id]: matchingIce,
+      }),
+    );
+    const breakActions = result.legalActions.filter(
+      (action) => action.type === "break_subroutine",
+    );
+
+    expect(
+      breakActions.map((action) => action.payload?.subroutineIndexes),
+    ).toEqual(["0", "0,1", "0,1,2", "0,1,2,3", "0,1,2,3,4"]);
+  });
+
+  it("preserves multi-break choices with different subroutine effects", () => {
+    const state = makeState({
+      breakerDefinitionId: "onr_proteus_079_big-frackin-gun",
+      runnerCredits: 20,
+    });
+    const breakerDefinition = proteusTestCardDefinition(
+      "onr_proteus_079_big-frackin-gun",
+    );
+    const matchingIce = iceDefinition({
+      subroutines: [
+        { id: "end", type: "end_the_run" },
+        { id: "net_1", type: "do_damage", damageType: "net", amount: 1 },
+        { id: "net_2", type: "do_damage", damageType: "net", amount: 2 },
+      ],
+    });
+
+    const result = buildRunnerEncounterActions(
+      hostFor(state, {
+        [breakerDefinition.id]: breakerDefinition,
+        [matchingIce.id]: matchingIce,
+      }),
+    );
+    const breakActions = result.legalActions.filter(
+      (action) => action.type === "break_subroutine",
+    );
+
+    expect(breakActions).toHaveLength(7);
+    expect(
+      breakActions.map((action) => action.payload?.subroutineIndexes),
+    ).toEqual(expect.arrayContaining(["0,1", "0,2", "1,2", "0,1,2"]));
+  });
+
   it("offers paid and unpaid continue actions for pay-or-end-run subroutines", () => {
     const state = makeState({
       breakerDefinitionId: "simple_decoder",

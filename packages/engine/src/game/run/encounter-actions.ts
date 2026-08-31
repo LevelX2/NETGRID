@@ -721,47 +721,57 @@ function multiBreakSubroutineActions(
   const maxCount = Math.min(breakAbility.count ?? 4, eligibleIndexes.length);
   const actions: LegalAction[] = [];
   const selected: number[] = [];
+  const emittedEffectSelections = new Set<string>();
   const visit = (start: number): void => {
     if (selected.length > 0) {
       const subroutineIndexes = [...selected];
-      const firstIndex = subroutineIndexes[0] ?? 0;
-      const label =
-        subroutineIndexes.length === 1
-          ? `${breakerTitle}: Subroutine ${firstIndex + 1} brechen`
-          : `${breakerTitle}: ${subroutineIndexes.length} Subroutinen brechen`;
-      const breakCost = host.costs.breakSubroutineCostBreakdown(
-        breakAbility.cost.credits,
-        subroutineIndexes.length,
-        breakerId,
+      const effectSelection = JSON.stringify(
+        subroutineIndexes
+          .map((index) => subroutineBreakEffectSignature(subroutines[index]!))
+          .sort(),
       );
-      if (
-        host.payment.availableRunnerRunCredits(breakerId) < breakCost.totalCost
-      )
-        return;
-      actions.push(
-        host.actions.buildLegalAction(
-          "break_subroutine",
-          label,
+      if (!emittedEffectSelections.has(effectSelection)) {
+        emittedEffectSelections.add(effectSelection);
+        const firstIndex = subroutineIndexes[0] ?? 0;
+        const label =
+          subroutineIndexes.length === 1
+            ? `${breakerTitle}: Subroutine ${firstIndex + 1} brechen`
+            : `${breakerTitle}: ${subroutineIndexes.length} Subroutinen brechen`;
+        const breakCost = host.costs.breakSubroutineCostBreakdown(
+          breakAbility.cost.credits,
+          subroutineIndexes.length,
           breakerId,
-          [{ credits: breakCost.totalCost }],
-          {
+        );
+        if (
+          host.payment.availableRunnerRunCredits(breakerId) <
+          breakCost.totalCost
+        )
+          return;
+        actions.push(
+          host.actions.buildLegalAction(
+            "break_subroutine",
+            label,
             breakerId,
-            iceId: encounteredIceId,
-            subroutineIndexes: subroutineIndexes.join(","),
-            breakSubroutineCount: subroutineIndexes.length,
-            multiBreakSubroutines: true,
-            targetIceDefinitionId: iceDefinition.id,
-            targetIceTitle: iceDefinition.title,
-            ...breakCost.publicPayload,
-            ...icebreakerAbilityBindingPayload(breakAbility, breakerId),
-          },
-          host.actions.abilityMetadata(
-            breakerId,
-            breakAbility.id,
-            encounteredIceId,
+            [{ credits: breakCost.totalCost }],
+            {
+              breakerId,
+              iceId: encounteredIceId,
+              subroutineIndexes: subroutineIndexes.join(","),
+              breakSubroutineCount: subroutineIndexes.length,
+              multiBreakSubroutines: true,
+              targetIceDefinitionId: iceDefinition.id,
+              targetIceTitle: iceDefinition.title,
+              ...breakCost.publicPayload,
+              ...icebreakerAbilityBindingPayload(breakAbility, breakerId),
+            },
+            host.actions.abilityMetadata(
+              breakerId,
+              breakAbility.id,
+              encounteredIceId,
+            ),
           ),
-        ),
-      );
+        );
+      }
     }
     if (selected.length >= maxCount) return;
     for (let index = start; index < eligibleIndexes.length; index += 1) {
@@ -772,6 +782,11 @@ function multiBreakSubroutineActions(
   };
   visit(0);
   return actions;
+}
+
+function subroutineBreakEffectSignature(subroutine: Subroutine): string {
+  const { id: _id, ...effect } = subroutine;
+  return JSON.stringify(effect);
 }
 
 export function breakAbilityMatchesIce(
