@@ -10,6 +10,7 @@ import {
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { format as formatWithPrettier } from "prettier";
 import ts from "typescript";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
@@ -132,7 +133,7 @@ function relativeImport(outputFile, sourceFile) {
   return result;
 }
 
-export function generateCardSpecImportIndex(root) {
+export async function generateCardSpecImportIndex(root) {
   const outputFile = path.join(root, OUTPUT_RELATIVE);
   const cards = discoverFiles(
     root,
@@ -181,17 +182,17 @@ export function generateCardSpecImportIndex(root) {
     `export const GENERATED_SET_SPECS = [${sets.map((_entry, index) => `setSpec${index}`).join(", ")}] as const satisfies readonly SetSpec[];`,
     "",
   );
-  return lines.join("\n");
+  return formatWithPrettier(lines.join("\n"), { parser: "typescript" });
 }
 
-export function writeCardSpecImportIndex(root) {
+export async function writeCardSpecImportIndex(root) {
   const output = path.join(root, OUTPUT_RELATIVE);
   mkdirSync(path.dirname(output), { recursive: true });
-  writeFileSync(output, generateCardSpecImportIndex(root));
+  writeFileSync(output, await generateCardSpecImportIndex(root));
   return output;
 }
 
-export function checkCardSpecImportIndex(root) {
+export async function checkCardSpecImportIndex(root) {
   const output = path.join(root, OUTPUT_RELATIVE);
   let current = "";
   try {
@@ -199,7 +200,7 @@ export function checkCardSpecImportIndex(root) {
   } catch (error) {
     if (!error || error.code !== "ENOENT") throw error;
   }
-  return current === generateCardSpecImportIndex(root);
+  return current === (await generateCardSpecImportIndex(root));
 }
 
 function assertUnique(entries, field) {
@@ -212,7 +213,7 @@ function compareText(left, right) {
   return left < right ? -1 : left > right ? 1 : 0;
 }
 
-function runSelfTest() {
+async function runSelfTest() {
   const root = mkdtempSync(path.join(tmpdir(), "netgrid-card-index-"));
   try {
     const cards = path.join(root, "packages/cards/src/specs");
@@ -231,57 +232,63 @@ function runSelfTest() {
       path.join(sets, "base.set-spec.ts"),
       'export const setSpec = { setId: "base" };\n',
     );
-    const first = generateCardSpecImportIndex(root);
-    const second = generateCardSpecImportIndex(root);
+    const first = await generateCardSpecImportIndex(root);
+    const second = await generateCardSpecImportIndex(root);
     assert.equal(first, second);
+    assert.equal(
+      await formatWithPrettier(first, { parser: "typescript" }),
+      first,
+    );
     assert.ok(first.indexOf("a.card-spec") < first.indexOf("z.card-spec"));
-    assert.ok(first.includes("GENERATED_SET_SPECS = [setSpec0]"));
+    assert.match(
+      first,
+      /export const GENERATED_SET_SPECS = \[\s*setSpec0,\s*\] as const satisfies readonly SetSpec\[\];/,
+    );
+    assert.ok(first.includes('cardDefinitionId: "a-card"'));
     assert.ok(
-      first.includes(
-        'cardDefinitionId: "a-card", sourcePath: "packages/cards/src/specs/a.card-spec.ts"',
-      ),
+      first.includes('sourcePath: "packages/cards/src/specs/a.card-spec.ts"'),
     );
     const output = path.join(root, OUTPUT_RELATIVE);
-    assert.equal(checkCardSpecImportIndex(root), false);
-    writeCardSpecImportIndex(root);
+    assert.equal(await checkCardSpecImportIndex(root), false);
+    await writeCardSpecImportIndex(root);
     const firstWrite = readFileSync(output, "utf8");
-    writeCardSpecImportIndex(root);
+    await writeCardSpecImportIndex(root);
     assert.equal(readFileSync(output, "utf8"), firstWrite);
-    assert.equal(checkCardSpecImportIndex(root), true);
+    assert.equal(await checkCardSpecImportIndex(root), true);
     writeFileSync(output, "stale\n");
-    assert.equal(checkCardSpecImportIndex(root), false);
-    writeCardSpecImportIndex(root);
+    assert.equal(await checkCardSpecImportIndex(root), false);
+    await writeCardSpecImportIndex(root);
     writeFileSync(
       path.join(cards, "untracked.card-spec.ts"),
       'export const cardSpec = { identity: { cardDefinitionId: "m-card" } };\n',
     );
-    assert.ok(generateCardSpecImportIndex(root).includes("m-card"));
+    assert.ok((await generateCardSpecImportIndex(root)).includes("m-card"));
     assert.ok(
-      generateCardSpecImportIndex(root).includes("untracked.card-spec"),
+      (await generateCardSpecImportIndex(root)).includes("untracked.card-spec"),
     );
-    assert.equal(checkCardSpecImportIndex(root), false);
-    writeCardSpecImportIndex(root);
-    assert.equal(checkCardSpecImportIndex(root), true);
+    assert.equal(await checkCardSpecImportIndex(root), false);
+    await writeCardSpecImportIndex(root);
+    assert.equal(await checkCardSpecImportIndex(root), true);
     const invalid = path.join(cards, "invalid.card-spec.ts");
     writeFileSync(invalid, "export const other = {};\n");
-    assert.throws(
-      () => generateCardSpecImportIndex(root),
+    await assert.rejects(
+      generateCardSpecImportIndex(root),
       /expected_single_export_cardSpec/,
     );
     writeFileSync(
       invalid,
       "export const cardSpec = { identity: { cardDefinitionId: dynamicId } };\n",
     );
-    assert.throws(
-      () => generateCardSpecImportIndex(root),
+    await assert.rejects(
+      generateCardSpecImportIndex(root),
       /expected_literal_cardDefinitionId/,
     );
     writeFileSync(
       invalid,
       'export const cardSpec = { identity: { cardDefinitionId: "one" } };\nexport const cardSpec = { identity: { cardDefinitionId: "two" } };\n',
     );
-    assert.throws(
-      () => generateCardSpecImportIndex(root),
+    await assert.rejects(
+      generateCardSpecImportIndex(root),
       /expected_single_export_cardSpec/,
     );
     rmSync(invalid);
@@ -289,8 +296,8 @@ function runSelfTest() {
       path.join(cards, "duplicate.card-spec.ts"),
       'export const cardSpec = { identity: { cardDefinitionId: "a-card" } };\n',
     );
-    assert.throws(
-      () => generateCardSpecImportIndex(root),
+    await assert.rejects(
+      generateCardSpecImportIndex(root),
       /duplicate_cardDefinitionId:a-card/,
     );
     rmSync(path.join(cards, "duplicate.card-spec.ts"));
@@ -298,8 +305,8 @@ function runSelfTest() {
       path.join(sets, "duplicate.set-spec.ts"),
       'export const setSpec = { setId: "base" };\n',
     );
-    assert.throws(
-      () => generateCardSpecImportIndex(root),
+    await assert.rejects(
+      generateCardSpecImportIndex(root),
       /duplicate_setId:base/,
     );
     console.log(
@@ -312,15 +319,14 @@ function runSelfTest() {
 
 const arguments_ = process.argv.slice(2);
 if (arguments_.includes("--self-test")) {
-  runSelfTest();
+  await runSelfTest();
 } else {
-  const expected = generateCardSpecImportIndex(REPOSITORY_ROOT);
   const output = path.join(REPOSITORY_ROOT, OUTPUT_RELATIVE);
   if (arguments_.includes("--write")) {
-    writeCardSpecImportIndex(REPOSITORY_ROOT);
+    await writeCardSpecImportIndex(REPOSITORY_ROOT);
     console.log(`Wrote ${OUTPUT_RELATIVE}`);
   } else if (arguments_.includes("--check")) {
-    if (!checkCardSpecImportIndex(REPOSITORY_ROOT)) {
+    if (!(await checkCardSpecImportIndex(REPOSITORY_ROOT))) {
       console.error(
         `${OUTPUT_RELATIVE} is stale; run the generator with --write.`,
       );
