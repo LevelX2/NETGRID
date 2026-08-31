@@ -65,6 +65,11 @@ Führend:
 
 Weitere KI-Arbeit ist überwiegend Play-Strength- und Modulerweiterung. Neue Beobachtungen werden als kleine Activities und Regressionstests geführt, nicht als neue globale Heuristikschicht oder dauerhafte Reviewchronik.
 
+Historische Selfplay-Cycle-Reviews, Markdown-Matrix, Reporting-State und
+versionierte HTML-Blockberichte wurden nach dem abschließenden idempotenten
+Import vom 2026-08-30 entfernt. Führend sind die lokale SQLite-Registry, ihre
+Sicherungen und `docs/runbooks/ai-selfplay-evidence-registry.md`.
+
 ## Plattform und Betrieb
 
 Aktuelle Betriebs- und Wartungsverträge liegen unter `docs/runbooks/`:

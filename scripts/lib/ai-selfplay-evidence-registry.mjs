@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdirSync, readFileSync, readdirSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { backup, DatabaseSync } from "node:sqlite";
 
@@ -269,6 +269,25 @@ export function registerJob(db, input) {
     timestamp,
     input.completedAt ?? null,
   );
+}
+
+export function completeJob(db, input) {
+  const jobId = requireText(input?.jobId, "jobId");
+  const status = input?.status ?? "completed";
+  if (!["completed", "abandoned"].includes(status)) {
+    throw new Error("job.status must be completed or abandoned");
+  }
+  const timestamp = input?.timestamp ?? nowIso();
+  const result = db
+    .prepare(
+      `
+      UPDATE jobs
+      SET status = ?, last_heartbeat_at = ?, completed_at = ?
+      WHERE job_id = ?
+    `,
+    )
+    .run(status, timestamp, timestamp, jobId);
+  if (result.changes !== 1) throw new Error(`Unknown job: ${jobId}`);
 }
 
 export function recordReport(db, input) {
@@ -551,6 +570,24 @@ function upsertCluster(db, cluster, timestamp = nowIso()) {
 
 function upsertCase(db, evidenceCase, timestamp = nowIso()) {
   const caseId = requireText(evidenceCase.id, "case.id");
+  const clusterId = requireText(evidenceCase.clusterId, "case.clusterId");
+  const existing = db
+    .prepare(`SELECT cluster_id, side FROM evidence_cases WHERE case_id = ?`)
+    .get(caseId);
+  if (existing && existing.cluster_id !== clusterId) {
+    throw new Error(
+      `Case ${caseId} already belongs to cluster ${existing.cluster_id}; refusing reassignment to ${clusterId}`,
+    );
+  }
+  if (
+    existing?.side &&
+    evidenceCase.side &&
+    existing.side !== evidenceCase.side
+  ) {
+    throw new Error(
+      `Case ${caseId} already belongs to side ${existing.side}; refusing reassignment to ${evidenceCase.side}`,
+    );
+  }
   db.prepare(
     `
     INSERT INTO evidence_cases(
@@ -560,7 +597,7 @@ function upsertCase(db, evidenceCase, timestamp = nowIso()) {
     ON CONFLICT(case_id) DO UPDATE SET
       cluster_id = excluded.cluster_id,
       grade = excluded.grade,
-      side = excluded.side,
+      side = COALESCE(excluded.side, evidence_cases.side),
       match_context = excluded.match_context,
       symptom = excluded.symptom,
       owner_path = excluded.owner_path,
@@ -569,7 +606,7 @@ function upsertCase(db, evidenceCase, timestamp = nowIso()) {
   `,
   ).run(
     caseId,
-    requireText(evidenceCase.clusterId, "case.clusterId"),
+    clusterId,
     requireText(evidenceCase.grade, "case.grade"),
     evidenceCase.side ?? null,
     evidenceCase.matchContext ?? null,
@@ -578,7 +615,6 @@ function upsertCase(db, evidenceCase, timestamp = nowIso()) {
     evidenceCase.detailsMarkdown ?? null,
     timestamp,
   );
-  db.prepare(`DELETE FROM case_pairings WHERE case_id = ?`).run(caseId);
   const insert = db.prepare(
     `INSERT OR IGNORE INTO case_pairings(case_id, pairing_id) VALUES (?, ?)`,
   );
@@ -1015,7 +1051,7 @@ export function importLegacyArtifacts(db, input) {
       for (const pairingId of linkedPairings)
         link.run(evidenceCase.id, pairingId);
     }
-    db.exec(`
+    const upsertLegacyFix = db.prepare(`
       INSERT INTO fixes(
         fix_id, pairing_id, case_id, title, description, commit_sha, owner_path,
         tests_json, before_after_json, created_at
@@ -1032,7 +1068,8 @@ export function importLegacyArtifacts(db, input) {
         '{}',
         c.updated_at
       FROM evidence_cases c
-      WHERE LOWER(c.grade) = 'behoben/verifiziert'
+      WHERE c.case_id = ?
+        AND LOWER(c.grade) = 'behoben/verifiziert'
         AND EXISTS (SELECT 1 FROM case_pairings cp WHERE cp.case_id = c.case_id)
       ON CONFLICT(fix_id) DO UPDATE SET
         pairing_id = excluded.pairing_id,
@@ -1041,6 +1078,9 @@ export function importLegacyArtifacts(db, input) {
         description = excluded.description,
         owner_path = excluded.owner_path
     `);
+    for (const evidenceCase of matrix.cases) {
+      upsertLegacyFix.run(evidenceCase.id);
+    }
     importLegacySource(db, "matrix", input.matrixPath, matrixMarkdown);
   });
 
@@ -1159,6 +1199,93 @@ export function registryStatus(db) {
     jobs: count("jobs"),
     lastPairingId:
       lastPairing == null ? null : String(lastPairing).padStart(3, "0"),
+  };
+}
+
+export function registryCheck(db, options = {}) {
+  const integrity = db
+    .prepare(`PRAGMA integrity_check`)
+    .all()
+    .map((row) => row.integrity_check);
+  const foreignKeyIssues = db.prepare(`PRAGMA foreign_key_check`).all();
+  const activeJobs = db
+    .prepare(
+      `SELECT job_id, last_heartbeat_at, worktree_path, branch_name FROM jobs WHERE status = 'active' ORDER BY last_heartbeat_at`,
+    )
+    .all();
+  const pendingReports = db
+    .prepare(
+      `SELECT report_id, series_id, created_at FROM reports WHERE status = 'pending' ORDER BY created_at`,
+    )
+    .all();
+  const openReportingSeries = db
+    .prepare(
+      `
+      SELECT series_id, unreported_pairing_ids_json, pending_report_json, updated_at
+      FROM reporting_series
+      WHERE unreported_pairing_ids_json <> '[]' OR pending_report_json IS NOT NULL
+      ORDER BY updated_at
+    `,
+    )
+    .all();
+  const legacySources = options.verifyLegacySources
+    ? db
+        .prepare(
+          `SELECT source_key, source_path, content FROM legacy_sources ORDER BY source_key`,
+        )
+        .all()
+        .map((source) => {
+          const exists = existsSync(source.source_path);
+          return {
+            sourceKey: source.source_key,
+            sourcePath: source.source_path,
+            exists,
+            matches:
+              exists &&
+              readFileSync(source.source_path, "utf8") === source.content,
+          };
+        })
+    : [];
+  const legacySourceIssues = legacySources.filter(
+    (source) => !source.exists || !source.matches,
+  );
+  return {
+    ok:
+      integrity.length === 1 &&
+      integrity[0] === "ok" &&
+      foreignKeyIssues.length === 0 &&
+      activeJobs.length === 0 &&
+      pendingReports.length === 0 &&
+      openReportingSeries.length === 0 &&
+      legacySourceIssues.length === 0,
+    integrity,
+    foreignKeyIssues,
+    activeJobs,
+    pendingReports,
+    openReportingSeries,
+    legacySourcesChecked: legacySources.length,
+    legacySourceIssues,
+  };
+}
+
+export function getStoredReport(db, reportId) {
+  const row =
+    reportId === "latest"
+      ? db
+          .prepare(
+            `
+            SELECT * FROM reports
+            WHERE status = 'sent'
+            ORDER BY COALESCE(sent_at, created_at) DESC, created_at DESC
+            LIMIT 1
+          `,
+          )
+          .get()
+      : db.prepare(`SELECT * FROM reports WHERE report_id = ?`).get(reportId);
+  if (!row) throw new Error(`Unknown report: ${reportId}`);
+  return {
+    ...row,
+    covered_pairing_ids_json: parseJson(row.covered_pairing_ids_json, []),
   };
 }
 

@@ -1287,6 +1287,28 @@ select {
   display: block;
 }
 
+.sideSelectionControl select,
+.deckSlotControl select {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 36px;
+}
+
+.sideSelectionControl::after,
+.deckSlotControl::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  z-index: 1;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+}
+
 .sideSelectionControl select {
   width: 100%;
   min-height: 44px;
