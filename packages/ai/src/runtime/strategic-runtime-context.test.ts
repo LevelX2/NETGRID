@@ -74,8 +74,17 @@ describe("strategic runtime context", () => {
     );
   });
 
-  it("marks King of the Road's missing wall breaker as conditional instead of present", () => {
-    const snapshot = standardDeckSnapshot("King of the Road");
+  it("marks an explicitly missing wall breaker as conditional when a bounded bypass exists", () => {
+    const snapshot: AiDeckStrategyDeckSnapshot = {
+      deckSnapshotId: "conditional-wall-bypass-contract",
+      side: "runner",
+      cards: [
+        { cardId: "onr_v1_006_black-dahlia", quantity: 1 },
+        { cardId: "onr_v1_016_cyfermaster", quantity: 1 },
+        { cardId: "onr_v1_094_inside-job", quantity: 2 },
+        { cardId: "onr_v1_107_romp-through-hq", quantity: 2 },
+      ],
+    };
     const strategyProfile = buildDeckStrategyProfile(snapshot);
     const deckCapabilities = buildDeckCapabilityProfile({
       side: "runner",
