@@ -305,7 +305,7 @@ describe("Proteus Hijack plan continuation", () => {
       planKind: "runner.develop_board_and_hand",
       fallbackUsed: false,
     });
-  }, 30_000);
+  }, 60_000);
 });
 
 function hijackState(

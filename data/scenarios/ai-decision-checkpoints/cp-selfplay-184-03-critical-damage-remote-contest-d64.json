@@ -11612,6 +11612,7 @@
         "executorInstanceId": "plan:runner.contest_remote:remote%3Aremote_4",
         "selectedActionId": "runner.start_run.remote_4",
         "selectedAtStateVersion": 63,
+        "continuedThroughStateVersion": 63,
         "immediateChoicePolicy": "resolve_runner_run_start_order",
         "sourceStepId": "plan:runner.contest_remote:remote%3Aremote_4:contest",
         "sourceActionType": "start_run"

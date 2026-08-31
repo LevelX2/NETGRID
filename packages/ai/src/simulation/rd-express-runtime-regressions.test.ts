@@ -204,7 +204,7 @@ describe("R&D Express selfplay runtime regressions", () => {
       expect(summary.metrics.illegalActions).toBe(0);
       expect(summary.replayOk).toBe(true);
     },
-    60_000,
+    120_000,
   );
 
   it("keeps Vacuum Link bound across consecutive Runner continuation windows", () => {

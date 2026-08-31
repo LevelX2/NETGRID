@@ -16182,6 +16182,7 @@
         "executorInstanceId": "plan:runner.pressure_central:central%3Ard",
         "selectedActionId": "runner.start_run.rd",
         "selectedAtStateVersion": 225,
+        "continuedThroughStateVersion": 225,
         "immediateChoicePolicy": "resolve_runner_run_start_order",
         "sourceStepId": "plan:runner.pressure_central:central%3Ard:pressure:rd",
         "sourceActionType": "start_run"
