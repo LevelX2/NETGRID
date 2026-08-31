@@ -198,7 +198,7 @@ grünem Main-Nachweis und verifiziertem Worktree-/Branch-Cleanup als complete.
 - 2026-08-31: P2 abgeschlossen. Installation, Format-, Lint-, Typecheck- und
   sämtliche aktuellen read-only `check:*`-Gates sind grün.
 - 2026-08-31: P3 abgeschlossen. Der vollständige Workspace-Lauf ist mit 8.613
-  Tests grün; zusätzlich sind alle drei AI-Shards (573 Dateien, 4.923 Tests)
+  Tests grün; zusätzlich sind alle drei AI-Shards (574 Dateien, 4.926 Tests)
   und die sieben Selfplay-Evidence-Tests grün.
 - 2026-08-31: P4 abgeschlossen. Vollständiger Build und alle neun Browser-E2E-
   Szenarien sind grün. Die Läufe verwendeten freie Nicht-Standardports und
@@ -295,7 +295,8 @@ grünem Main-Nachweis und verifiziertem Worktree-/Branch-Cleanup als complete.
 - Sämtliche aufgenommenen read-only `check:*`-Gates: grün.
 - `corepack pnpm test`: 8.613 Tests über Shared, Cards, Catalog, Engine,
   Decks, Card Images, AI, Web, Server und Specs grün.
-- `corepack pnpm test:ai:shards`: 3/3 Shards, 573 Dateien und 4.923 Tests grün.
+- `corepack pnpm test:ai:shards`: nach dem finalen `main`-Abgleich 3/3 Shards,
+  574 Dateien und 4.926 Tests in 711,7 Sekunden grün.
 - `corepack pnpm test:selfplay-evidence`: 7/7 grün.
 - `corepack pnpm build`: alle Pakete und Apps einschließlich Next.js grün.
 - `corepack pnpm test:e2e`: 9/9 grün; gezielter Argumentweitergabe-Test 1/1
