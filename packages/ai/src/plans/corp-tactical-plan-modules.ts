@@ -103,6 +103,15 @@ export type CorpAmbushSignal = {
     | "recycle_to_hq"
     | "trigger_on_access";
   accessThreatProjection?: KnownCorpCardAccessEffectProjection;
+  accessProgramBounceChoiceBinding?: {
+    actionId: string;
+    choiceId: string;
+    choiceSource: string;
+    observedAtStateVersion: number;
+    selectedOptionIds: string[];
+    targetProgramInstanceIds: string[];
+    evidenceCodes: string[];
+  };
   recycleRoute?: {
     actionId: string;
     recyclerSourceInstanceId: string;
@@ -681,32 +690,41 @@ function ambushModule(): PlanModule {
                 : "ambush_setup"
               : `ambush_${current.signal.phase}`,
             semanticActionTypes: ambushSemanticTypes(current.signal.phase),
-            requiredSourceDefinitionIds: current.signal.advancementSupportRoute
-              ? [
-                  current.signal.advancementSupportRoute
-                    .supportSourceDefinitionId,
-                ]
-              : current.signal.phase === "recycle" &&
-                  current.signal.recycleRoute
-                ? [current.signal.recycleRoute.recyclerSourceDefinitionId]
-                : [current.signal.sourceDefinitionId],
+            ...(current.signal.accessProgramBounceChoiceBinding
+              ? {}
+              : {
+                  requiredSourceDefinitionIds: current.signal
+                    .advancementSupportRoute
+                    ? [
+                        current.signal.advancementSupportRoute
+                          .supportSourceDefinitionId,
+                      ]
+                    : current.signal.phase === "recycle" &&
+                        current.signal.recycleRoute
+                      ? [current.signal.recycleRoute.recyclerSourceDefinitionId]
+                      : [current.signal.sourceDefinitionId],
+                }),
           },
-          target:
-            current.signal.phase === "install" ||
-            current.signal.phase === "install_support"
-              ? { kind: "server", id: current.signal.serverId }
-              : (current.signal.phase === "rez_support" ||
-                    current.signal.phase === "trigger_support") &&
-                  current.signal.advancementSupportRoute
-                ? {
-                    kind: "card",
-                    id: current.signal.advancementSupportRoute
-                      .supportSourceInstanceId,
-                  }
-                : {
-                    kind: "card",
-                    id: current.signal.sourceInstanceId,
-                  },
+          ...(current.signal.accessProgramBounceChoiceBinding
+            ? {}
+            : {
+                target:
+                  current.signal.phase === "install" ||
+                  current.signal.phase === "install_support"
+                    ? { kind: "server" as const, id: current.signal.serverId }
+                    : (current.signal.phase === "rez_support" ||
+                          current.signal.phase === "trigger_support") &&
+                        current.signal.advancementSupportRoute
+                      ? {
+                          kind: "card" as const,
+                          id: current.signal.advancementSupportRoute
+                            .supportSourceInstanceId,
+                        }
+                      : {
+                          kind: "card" as const,
+                          id: current.signal.sourceInstanceId,
+                        },
+              }),
           purpose: `Execute admitted ambush purpose ${current.signal.purposeCode ?? "domain assigned"}.`,
         },
         candidates: ambushCandidates(context, current.signal),
@@ -1101,7 +1119,7 @@ function ambushSemanticTypes(phase: CorpAmbushSignal["phase"]): string[] {
   if (phase === "advance") return ["score.advance_card"];
   if (phase === "recycle") return ["corp_board.return_installed_card_to_hq"];
   if (phase === "rez_support") return ["corp_window.rez"];
-  return ["corp_window.rez", "card_ability.trigger"];
+  return ["corp_window.rez", "card_ability.trigger", "choice.resolve"];
 }
 
 function ambushCandidates(

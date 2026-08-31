@@ -221,6 +221,109 @@ describe("plan-first Corp card variant contracts", () => {
     expect(portfolio).toContain(`"actionIds":["${unlock.actionId}"]`);
   });
 
+  it("keeps Viral Breeding Ground program-bounce targeting inside the ambush plan", () => {
+    const source = corpCard(
+      "viral-breeding-ground",
+      VIRAL_BREEDING_GROUND,
+      "agenda",
+      {
+        title: "Viral Breeding Ground",
+        advancementCounters: 1,
+      },
+    );
+    const breaker = visibleCard("breaker", "runner", "program", {
+      title: "Breaker",
+      subtypes: ["Icebreaker"],
+      installCost: 3,
+      memoryCost: 2,
+    });
+    const expensiveUtility = visibleCard(
+      "expensive-utility",
+      "runner",
+      "program",
+      {
+        title: "Expensive Utility",
+        installCost: 5,
+        memoryCost: 2,
+      },
+    );
+    const cheapUtility = visibleCard("cheap-utility", "runner", "program", {
+      title: "Cheap Utility",
+      installCost: 1,
+      memoryCost: 1,
+    });
+    const choiceId = "proteus_return_runner_programs_1";
+    const options = [breaker, expensiveUtility, cheapUtility].map((card) => ({
+      id: `card_${card.instanceId}`,
+      label: card.title!,
+      value: card.instanceId,
+    }));
+    const resolve = legalAction(
+      "corp.resolve_choice",
+      "corp",
+      "resolve_choice",
+      "Resolve Viral Breeding Ground",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule", visibility: "public" },
+    );
+    resolve.choiceRequirements = [
+      {
+        choiceId,
+        minSelections: 0,
+        maxSelections: 2,
+        optionIds: options.map((option) => option.id),
+      },
+    ];
+    const input = aiInput("corp", [resolve]);
+    input.decisionId = "corp-card-variant:viral-breeding-ground:access-choice";
+    input.playerView.pendingChoice = {
+      choiceId,
+      side: "corp",
+      source: `proteus.return_runner_programs:${source.instanceId}:0:installed:1`,
+      prompt: "Viral Breeding Ground: Runner-Programme zurückgeben",
+      kind: "select_cards",
+      minSelections: 0,
+      maxSelections: 2,
+      stateVersion: 1,
+      visibility: "hidden_info_barrier",
+      options,
+    };
+    input.playerView.opponent.rig = [breaker, expensiveUtility, cheapUtility];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [], [source]),
+    ];
+    bindCurrentStateVersion(input);
+
+    const decision = chooseCorpAction(input);
+    const portfolio = residentPlanPortfolioSnapshot(input);
+    const executor = portfolio?.instances.find(
+      (instance) => instance.instanceId === portfolio.executorInstanceId,
+    );
+
+    expect(decision.actionId).toBe(resolve.actionId);
+    expect(decision.decisionDebug?.planKind).toBe("corp.ambush_and_bluff");
+    expect(decision.selectedChoices).toEqual({
+      choiceId,
+      selectedOptionIds: ["card_breaker", "card_expensive-utility"],
+    });
+    expect(executor?.moduleId).toBe("corp.ambush_and_bluff");
+    expect(executor?.moduleState).toMatchObject({
+      kind: "ambush",
+      signal: {
+        phase: "trigger",
+        actionIds: [resolve.actionId],
+        accessProgramBounceChoiceBinding: {
+          actionId: resolve.actionId,
+          choiceId,
+          selectedOptionIds: ["card_breaker", "card_expensive-utility"],
+        },
+      },
+    });
+  });
+
   it("marks remote-lock removal nonproductive without an exact score parent", () => {
     const unlock = precisionBriberyUnlock();
     const gain = legalAction(

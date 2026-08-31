@@ -26,7 +26,10 @@ import {
   selectedDiscardChoiceOptionIds,
   type DiscardChoiceKeepScore,
 } from "./discard-choice-selection";
-import type { CorpHandManagementSignal } from "../plans/corp-tactical-plan-modules";
+import type {
+  CorpAmbushSignal,
+  CorpHandManagementSignal,
+} from "../plans/corp-tactical-plan-modules";
 import type {
   CorpEconomyDevelopmentSignal,
   CorpEconomyStartRezChoiceSignal,
@@ -132,6 +135,68 @@ function selectedCorpDiscardOptionIdsFromResidentHandPlan(
       input,
       action,
       "The Corp hand plan must bind the exact discard choice and legal action before the resolver completes its payload.",
+    );
+  }
+  return [...binding.selectedOptionIds];
+}
+
+function selectedCorpAccessProgramBounceOptionIdsFromResidentAmbushPlan(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+  selectableOptions: PendingChoiceOptions,
+  currentPortfolio?: ResidentPlanPortfolio,
+): string[] {
+  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+  const executor = portfolio?.instances.find(
+    (instance) => instance.instanceId === portfolio.executorInstanceId,
+  );
+  const moduleState = executor?.moduleState as
+    | { kind?: unknown; signal?: CorpAmbushSignal }
+    | undefined;
+  const binding = moduleState?.signal?.accessProgramBounceChoiceBinding;
+  const requirement = action.choiceRequirements?.[0];
+  const optionIds = selectableOptions.map((option) => option.id);
+  const selectedCardIds = binding?.selectedOptionIds.flatMap((optionId) => {
+    const option = selectableOptions.find((entry) => entry.id === optionId);
+    return typeof option?.value === "string" ? [option.value] : [];
+  });
+  const exactBinding =
+    portfolio?.side === "corp" &&
+    executor?.moduleId === "corp.ambush_and_bluff" &&
+    executor.executionState === "executor" &&
+    moduleState?.kind === "ambush" &&
+    moduleState.signal?.phase === "trigger" &&
+    binding?.actionId === action.actionId &&
+    binding.choiceId === choice.choiceId &&
+    binding.choiceSource === choice.source &&
+    binding.observedAtStateVersion === input.playerView.stateVersion &&
+    selectedCardIds?.length === binding.targetProgramInstanceIds.length &&
+    selectedCardIds.every(
+      (cardId, index) => cardId === binding.targetProgramInstanceIds[index],
+    ) &&
+    choice.side === "corp" &&
+    choice.stateVersion === input.playerView.stateVersion &&
+    choice.visibility === "hidden_info_barrier" &&
+    choice.minSelections === 0 &&
+    binding.selectedOptionIds.length <= choice.maxSelections &&
+    action.side === "corp" &&
+    action.type === "resolve_choice" &&
+    action.source === "game_rule" &&
+    action.timingPoint === input.playerView.timingPoint &&
+    action.expiresAtStateVersion === input.playerView.stateVersion &&
+    action.choiceRequirements?.length === 1 &&
+    requirement?.choiceId === choice.choiceId &&
+    requirement.minSelections === choice.minSelections &&
+    requirement.maxSelections === choice.maxSelections &&
+    requirement.optionIds.length === optionIds.length &&
+    optionIds.every((optionId) => requirement.optionIds.includes(optionId)) &&
+    binding.selectedOptionIds.every((optionId) => optionIds.includes(optionId));
+  if (!exactBinding) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "The Corp ambush plan must own and bind the exact program-bounce targets before the choice resolver completes the current Engine payload.",
     );
   }
   return [...binding.selectedOptionIds];
@@ -794,6 +859,22 @@ export function selectedChoicesForDecision(
         currentPortfolio,
       ),
       "resident_corp_start_rez_economy",
+    );
+  }
+  if (
+    input.side === "corp" &&
+    choice.kind === "select_cards" &&
+    choice.source.startsWith("proteus.return_runner_programs:")
+  ) {
+    return resolved(
+      selectedCorpAccessProgramBounceOptionIdsFromResidentAmbushPlan(
+        input,
+        action,
+        choice,
+        selectableOptions,
+        currentPortfolio,
+      ),
+      "resident_corp_ambush_program_bounce",
     );
   }
   if (

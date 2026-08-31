@@ -23299,6 +23299,15 @@ function resolveEngineWindow(
   if (
     context.input.side === "corp" &&
     context.input.playerView.pendingChoice?.kind === "select_cards" &&
+    context.input.playerView.pendingChoice.source.startsWith(
+      "proteus.return_runner_programs:",
+    )
+  ) {
+    return undefined;
+  }
+  if (
+    context.input.side === "corp" &&
+    context.input.playerView.pendingChoice?.kind === "select_cards" &&
     context.input.playerView.pendingChoice.source === "discard_phase"
   ) {
     return undefined;

@@ -26,14 +26,24 @@ export function buildCorpAmbushPlanSignals(params: {
   candidates: readonly ActionSemanticCandidate[];
   previous: ResidentPlanPortfolio | undefined;
 }): CorpAmbushSignal[] {
-  const continued = continuedAmbushSignals(params);
+  const accessProgramBounce = accessProgramBounceChoiceSignal(
+    params.input,
+    params.candidates,
+  );
+  const continued = continuedAmbushSignals(params).filter(
+    (signal) =>
+      signal.sourceInstanceId !== accessProgramBounce?.sourceInstanceId,
+  );
   const continuedSourceIds = new Set(
     continued.map((signal) => signal.sourceInstanceId),
   );
   const strategicIntent = (params.input as AiDecisionInputWithDeckCapabilities)
     .ownCorpStrategicIntent;
   if (!strategicIntent || !corpIntentSupportsAmbush(strategicIntent)) {
-    return continued;
+    return [
+      ...(accessProgramBounce ? [accessProgramBounce] : []),
+      ...continued,
+    ];
   }
   const plannedDecoys = scoreDecoySignals({
     ...params,
@@ -73,7 +83,187 @@ export function buildCorpAmbushPlanSignals(params: {
     },
   );
 
-  return [...continued, ...plannedDecoys, ...planned];
+  return [
+    ...(accessProgramBounce ? [accessProgramBounce] : []),
+    ...continued,
+    ...plannedDecoys,
+    ...planned,
+  ];
+}
+
+function accessProgramBounceChoiceSignal(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+): CorpAmbushSignal | undefined {
+  const choice = input.playerView.pendingChoice;
+  if (
+    input.side !== "corp" ||
+    choice?.kind !== "select_cards" ||
+    !choice.source.startsWith("proteus.return_runner_programs:") ||
+    choice.side !== "corp" ||
+    choice.stateVersion !== input.playerView.stateVersion ||
+    choice.visibility !== "hidden_info_barrier" ||
+    choice.minSelections !== 0 ||
+    choice.maxSelections <= 0
+  ) {
+    return undefined;
+  }
+  const sourceParts = choice.source.split(":");
+  const sourceInstanceId = sourceParts[1];
+  const effectIndex = Number(sourceParts[2]);
+  const accessZone = sourceParts[3];
+  const sourceStateVersion = Number(sourceParts[4]);
+  if (
+    sourceParts.length !== 5 ||
+    !sourceInstanceId ||
+    !Number.isSafeInteger(effectIndex) ||
+    effectIndex < 0 ||
+    !accessZone ||
+    sourceStateVersion !== input.playerView.stateVersion
+  ) {
+    return undefined;
+  }
+  const location = installedCardLocation(input, sourceInstanceId);
+  const sourceDefinitionId = location?.card.definitionId;
+  if (
+    !sourceDefinitionId ||
+    location.card.known !== true ||
+    location.card.owner !== "corp" ||
+    !definitionSupportsProgramBounceAmbush(sourceDefinitionId)
+  ) {
+    return undefined;
+  }
+  const resolveCandidates = candidates.filter(
+    (candidate) =>
+      candidate.semanticActionType === "choice.resolve" &&
+      candidate.actionType === "resolve_choice",
+  );
+  if (resolveCandidates.length !== 1) return undefined;
+  const resolveCandidate = resolveCandidates[0]!;
+  const resolveAction = input.legalActions.find(
+    (action) => action.actionId === resolveCandidate.actionId,
+  );
+  const requirement = resolveAction?.choiceRequirements?.[0];
+  const selectableOptions = choice.options.filter(
+    (option) => option.selectable !== false,
+  );
+  const optionIds = selectableOptions.map((option) => option.id);
+  if (
+    !resolveAction ||
+    resolveAction.side !== "corp" ||
+    resolveAction.type !== "resolve_choice" ||
+    resolveAction.source !== "game_rule" ||
+    resolveAction.timingPoint !== input.playerView.timingPoint ||
+    resolveAction.expiresAtStateVersion !== input.playerView.stateVersion ||
+    resolveAction.choiceRequirements?.length !== 1 ||
+    requirement?.choiceId !== choice.choiceId ||
+    requirement.minSelections !== choice.minSelections ||
+    requirement.maxSelections !== choice.maxSelections ||
+    requirement.optionIds.length !== optionIds.length ||
+    !optionIds.every((optionId) => requirement.optionIds.includes(optionId))
+  ) {
+    return undefined;
+  }
+  const visiblePrograms = new Map(
+    (input.playerView.opponent.rig ?? [])
+      .filter(
+        (card) =>
+          card.known === true &&
+          card.owner === "runner" &&
+          card.controller === "runner" &&
+          card.type === "program",
+      )
+      .map((card) => [card.instanceId, card] as const),
+  );
+  const optionBindings = selectableOptions.map((option) => ({
+    optionId: option.id,
+    cardId: typeof option.value === "string" ? option.value : undefined,
+  }));
+  if (
+    optionBindings.length !== visiblePrograms.size ||
+    optionBindings.some(
+      (binding) =>
+        !binding.cardId ||
+        binding.optionId !== `card_${binding.cardId}` ||
+        !visiblePrograms.has(binding.cardId),
+    )
+  ) {
+    return undefined;
+  }
+  const selected = optionBindings
+    .map((binding) => ({
+      ...binding,
+      card: visiblePrograms.get(binding.cardId!)!,
+    }))
+    .sort(
+      (left, right) =>
+        programBounceTargetScore(right.card) -
+          programBounceTargetScore(left.card) ||
+        left.optionId.localeCompare(right.optionId),
+    )
+    .slice(0, choice.maxSelections);
+  return {
+    commitmentVersion: CORP_AMBUSH_COMMITMENT_VERSION,
+    ambushId: `access-program-bounce:${choice.choiceId}`,
+    sourceDefinitionId,
+    sourceInstanceId,
+    actionIds: [resolveAction.actionId],
+    serverId: location.serverId,
+    phase: "trigger",
+    purposeCode: `resolve_access_program_bounce:${sourceInstanceId}`,
+    assignedDomainPlanIds: ["corp.ambush_bluff"],
+    duplicateAlreadyInstalled: false,
+    affordableOrSupportable: true,
+    plannedAtStateVersion: input.playerView.stateVersion,
+    plannedAdvancementTarget: Math.max(
+      0,
+      location.card.advancementCounters ?? 0,
+    ),
+    value: 1_000,
+    evidenceCode: `corp_ambush_access_program_bounce_owned:${sourceInstanceId}`,
+    accessProgramBounceChoiceBinding: {
+      actionId: resolveAction.actionId,
+      choiceId: choice.choiceId,
+      choiceSource: choice.source,
+      observedAtStateVersion: input.playerView.stateVersion,
+      selectedOptionIds: selected.map((entry) => entry.optionId),
+      targetProgramInstanceIds: selected.map((entry) => entry.cardId!),
+      evidenceCodes: [
+        "corp_ambush_program_bounce_choice_owned_by_ambush_plan",
+        "corp_ambush_program_bounce_bound_to_current_engine_choice",
+        "corp_ambush_program_bounce_targets_ranked_by_visible_board_value",
+      ],
+    },
+  };
+}
+
+function definitionSupportsProgramBounceAmbush(definitionId: string): boolean {
+  const hint = AI_HINTS_BY_CARD.get(definitionId);
+  return (
+    (hint?.strategyAnchors?.includes("corp.ambush_bluff") === true ||
+      hint?.lineSupport?.includes("corp.ambush_bluff") === true) &&
+    hint.targetProfiles?.some(
+      (profile) =>
+        "purpose" in profile &&
+        profile.purpose === "bounce_high_value_runner_program",
+    ) === true
+  );
+}
+
+function programBounceTargetScore(card: VisibleCard): number {
+  const counters = Object.values(card.counters ?? {}).reduce(
+    (sum, value) => sum + (typeof value === "number" ? value : 0),
+    0,
+  );
+  const isIcebreaker = card.subtypes?.some(
+    (subtype) => subtype.toLocaleLowerCase() === "icebreaker",
+  );
+  return (
+    (isIcebreaker ? 100_000 : 0) +
+    counters * 1_000 +
+    Math.max(0, card.installCost ?? 0) * 10 +
+    Math.max(0, card.memoryCost ?? 0)
+  );
 }
 
 function scoreDecoySignals(params: {
