@@ -1,6 +1,6 @@
 # Lokalisierte Ausführungstexte für Kartenfähigkeiten
 
-Status: Umsetzung aktiv  
+Status: umgesetzt; Vollständigkeitsgate aktiv  
 Stand: 2026-09-01  
 Quelle: Nutzerfund zu zusammenfallenden Broker-Aktionsbezeichnungen
 
@@ -143,3 +143,18 @@ das Goal erst danach als complete.
   grün.
 - Änderungen sind lokal nach `main` integriert; Worktree und Branch sind
   verifiziert entfernt.
+
+## Umsetzung und Nachweis
+
+- Der Browserkatalog `card-capability-action-translations.ts` deckt alle 46
+  kanonischen Fähigkeitsidentitäten der 21 produktiven Mehrfachfähigkeitskarten
+  in Englisch und Französisch ab.
+- `action-board-ui.ts` wählt diese Texte ausschließlich über die konsistente
+  kanonische Bindung aus; Deutsch rendert weiterhin das CardSpec-Autorenlabel.
+- Der Vollständigkeitstest leitet die Mehrfachfähigkeitsmenge direkt aus den
+  öffentlichen CardSpec-Projektionen ab und prüft Deckung sowie erhaltene
+  Differenzierung pro Locale.
+- Die Broker-Regression sichert getrennt „3 Credits auflegen“ und „alle Credits
+  nehmen“, außerdem die Unverändertheit der `LegalAction`-Identität.
+- Verifiziert mit 137 fokussierten Webtests, dem Web-Typecheck und dem
+  I18N-Gate mit 2308 ausgerichteten Nachrichten in drei Locales.

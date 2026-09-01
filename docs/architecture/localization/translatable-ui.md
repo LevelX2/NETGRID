@@ -43,6 +43,12 @@ Action-Identität, Replay oder StateHash zu verändern.
 - Typen werden aus dem deutschen Referenzkatalog abgeleitet. Alle freigegebenen
   Locales müssen dieselbe Leaf-Key-Struktur besitzen; das finale Gate prüft
   zusätzlich ICU-Parameter und unklassifizierte sichtbare Literale.
+- Unterschiedliche ausführbare CardSpec-Fähigkeiten werden über ihre
+  kanonische `<cardDefinitionId>:<capabilityKey>`-Identität lokalisiert. Die
+  Weboberfläche darf mehrere Fähigkeiten derselben Karte nicht anhand des
+  gemeinsamen Aktionstyps oder Kartentitels auf ein generisches Label
+  reduzieren. Der aktuelle Vertrag und das vollständige Mehrfachfähigkeitsgate
+  liegen in `card-action-execution-labels.md`.
 
 ## Annahmen
 

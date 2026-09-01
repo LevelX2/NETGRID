@@ -97,6 +97,9 @@ importers:
         specifier: ^4.13.7
         version: 4.13.7(react@19.2.5)
     devDependencies:
+      '@netgrid/cards':
+        specifier: workspace:*
+        version: link:../../packages/cards
       '@types/react':
         specifier: ^19.2.14
         version: 19.2.14

@@ -25,6 +25,7 @@
     "use-intl": "^4.13.7"
   },
   "devDependencies": {
+    "@netgrid/cards": "workspace:*",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3"
   }
