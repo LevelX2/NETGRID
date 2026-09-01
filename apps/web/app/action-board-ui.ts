@@ -17,6 +17,7 @@ import {
   actionPresentationText,
   normalizeActionPresentationLocale,
 } from "../i18n/action-presentation";
+import { localizedCardCapabilityActionLabel } from "../i18n/card-capability-action-translations";
 import type { AppLocale } from "../i18n/locale";
 export {
   DEFAULT_CUE_POSITION,
@@ -1401,6 +1402,8 @@ function localizedActionButtonLabel(
   locale: Exclude<AppLocale, "de">,
   cardPresentationsById?: PublicCardPresentationsById,
 ): string {
+  const capabilityLabel = localizedCardCapabilityActionLabel(action, locale);
+  if (capabilityLabel) return capabilityLabel;
   if (
     action.type === "trigger_ability" &&
     action.payload?.runnerAbility === "boost_icebreaker_for_run"
@@ -1599,8 +1602,12 @@ export function contextualCardActionLabel(
 ): string {
   if (isRunnerProgramInstallContextAction(action))
     return runnerProgramInstallContextLabel(action, locale);
-  if (locale !== "de")
-    return localizedActionButtonLabel(action, locale, cardPresentationsById);
+  if (locale !== "de") {
+    const capabilityLabel = localizedCardCapabilityActionLabel(action, locale);
+    return capabilityLabel
+      ? stripActionSourcePrefix(capabilityLabel)
+      : localizedActionButtonLabel(action, locale, cardPresentationsById);
+  }
   switch (action.type) {
     case "gain_credit":
       return (
