@@ -4056,8 +4056,14 @@ function selectedDefensePortfolioBand(
       defensePriorityRank(scoreProtectionRoute.signal.delegatedPriorityClass) <
         defensePriorityRank(genericPriority) ||
       ((scoreProtectionRoute.signal.kind === "score_protection_install" ||
-        scoreProtectionRoute.signal.kind ===
-          "score_protection_staging_install") &&
+        // A qualitative staging backstop may inherit its parent's tie only
+        // when its own risk model supports the route. An unmodelled access
+        // path cannot displace a same-band, exact central-defense route.
+        (scoreProtectionRoute.signal.kind ===
+          "score_protection_staging_install" &&
+          scoreProtectionRoute.signal.evidenceCode.includes(
+            "development_risk_unmodeled_access_path",
+          ) === false)) &&
         defensePriorityRank(
           scoreProtectionRoute.signal.delegatedPriorityClass,
         ) === defensePriorityRank(genericPriority)))
