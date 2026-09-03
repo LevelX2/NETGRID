@@ -1,10 +1,14 @@
 import type { Side } from "@netgrid/shared";
+import {
+  PRODUCT_DEFAULT_CORP_SNAPSHOT_ID,
+  PRODUCT_DEFAULT_RUNNER_SNAPSHOT_ID,
+} from "@netgrid/runtime-data/product-default-decks";
 
 import type { MatchCardPoolSelection } from "../../app/match-start";
 import type { DeckCardEntry, EditableDeck } from "./deck-table-model";
 
-export const DEFAULT_RUNNER_SNAPSHOT_ID = "onr_origin_runner_ai_snapshot_v1";
-export const DEFAULT_CORP_SNAPSHOT_ID = "onr_origin_corp_ai_snapshot_v1";
+export const DEFAULT_RUNNER_SNAPSHOT_ID = PRODUCT_DEFAULT_RUNNER_SNAPSHOT_ID;
+export const DEFAULT_CORP_SNAPSHOT_ID = PRODUCT_DEFAULT_CORP_SNAPSHOT_ID;
 export const DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID = "card-snapshot-0.8";
 export const DEFAULT_DECK_CARD_POOL_VERSION = "private-local-onr-v1";
 export const DEFAULT_DECK_FORMAT_PROFILE_ID = "netgrid_private_local_v1";

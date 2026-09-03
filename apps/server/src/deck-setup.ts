@@ -4,6 +4,10 @@ import {
   deckFormatProfiles130Data as profilesData130,
 } from "@netgrid/runtime-data/deck-format-profiles";
 import { deckSnapshots08Data as snapshotsData } from "@netgrid/runtime-data/legacy-demo-decks";
+import {
+  PRODUCT_DEFAULT_CORP_SNAPSHOT_ID,
+  PRODUCT_DEFAULT_RUNNER_SNAPSHOT_ID,
+} from "@netgrid/runtime-data/product-default-decks";
 import { standardDeckCatalogData } from "@netgrid/runtime-data/standard-decks";
 import { createHash } from "node:crypto";
 import {
@@ -68,8 +72,8 @@ export type ResolvedParticipantDeckSetup = Record<
   ResolvedParticipantDeckPair
 >;
 
-const DEFAULT_RUNNER_SNAPSHOT_ID = "onr_origin_runner_ai_snapshot_v1";
-const DEFAULT_CORP_SNAPSHOT_ID = "onr_origin_corp_ai_snapshot_v1";
+const DEFAULT_RUNNER_SNAPSHOT_ID = PRODUCT_DEFAULT_RUNNER_SNAPSHOT_ID;
+const DEFAULT_CORP_SNAPSHOT_ID = PRODUCT_DEFAULT_CORP_SNAPSHOT_ID;
 const CLASSIC_PLAYTEST_PROFILE_ID = "netgrid_private_local_classic_playtest_v1";
 const PROTEUS_PLAYTEST_PROFILE_ID = "netgrid_private_local_proteus_playtest_v1";
 const CLASSIC_PROTEUS_PLAYTEST_PROFILE_ID =

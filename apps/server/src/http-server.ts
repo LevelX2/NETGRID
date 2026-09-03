@@ -15,6 +15,7 @@ import type {
 } from "@netgrid/shared";
 import {
   isApiUserErrorCode,
+  runtimeProfileFromEnvironment,
   testCardsEnabledFromEnvironment,
 } from "@netgrid/shared";
 import {
@@ -3127,6 +3128,18 @@ async function routeHttp(
         config.runnerDeckMetadata = deckSetup.runnerSnapshot.publicMetadata;
         config.corpDeckMetadata = deckSetup.corpSnapshot.publicMetadata;
         config.agendaPointsToWin = config.agendaPointsToWin ?? 7;
+      } else if (runtimeProfileFromEnvironment(process.env) === "release") {
+        const deckSetup = resolveDeckSetup(
+          {},
+          {
+            seed: config.seed ?? "ai-vs-ai-smoke",
+            cardPool: "originalset",
+          },
+        );
+        config.runnerDeck = deckSetup.runnerDeck;
+        config.corpDeck = deckSetup.corpDeck;
+        config.runnerDeckMetadata = deckSetup.runnerSnapshot.publicMetadata;
+        config.corpDeckMetadata = deckSetup.corpSnapshot.publicMetadata;
       } else {
         if (testCardsEnabledFromEnvironment(process.env)) {
           if (

@@ -11,6 +11,7 @@
     "./deck-format-profiles": "./src/deck-format-profiles.ts",
     "./display-assets": "./src/display-assets.ts",
     "./legacy-demo-decks": "./src/legacy-demo-decks.ts",
+    "./product-default-decks": "./src/product-default-decks.ts",
     "./release-deck-fixtures": "./src/release-deck-fixtures.ts",
     "./standard-decks": "./src/standard-decks.ts",
     "./strategy-goals": "./src/strategy-goals.ts"

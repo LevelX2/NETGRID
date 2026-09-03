@@ -1,6 +1,6 @@
 # Windows-Release-Vorbedingungen
 
-Status: `package_verified` (`WRP-06`)
+Status: `package_verified` (`WRP-07`)
 Stand: 2026-09-03
 Quelle: Nutzerauftrag zur Vorbereitung eines späteren geführten
 Windows-Installers ohne vorgezogene Installerimplementierung
@@ -357,7 +357,7 @@ markiere das Goal erst dann als complete.
 - [x] WRP-04 – Datenroot und Pfadvertrag
 - [x] WRP-05 – Installerneutraler Produktionsbuild
 - [x] WRP-06 – Positives Releasemanifest
-- [ ] WRP-07 – Isolierter Produktions-Smoke
+- [x] WRP-07 – Isolierter Produktions-Smoke
 - [ ] WRP-08 – Abschluss und Handoff
 
 ### Paketnachweise
@@ -428,3 +428,16 @@ markiere das Goal erst dann als complete.
   Runtimekonfiguration und Layoutvertrag und verifiziert Vollständigkeit sowie
   Hashes. Sein Negativ-Selbsttest erkennt eine nachträglich eingeschleuste
   SQLite-Datei; der Audit des realen optimierten Outputs ist grün.
+- WRP-07: `smoke:windows-release-output` baut und auditiert einen eigenen
+  temporären Windows-Output, startet dessen Web- und Server-Entrypoints auf
+  zwei freien Sonderports und bindet einen frischen absoluten
+  `NETGRID_DATA_ROOT`. Der reale HTTP-Smoke bestätigt SQLite-Health,
+  Web-Start, einen Katalog ohne `testset`, Deckendpunkte ohne Demo-Snapshots,
+  die gesperrte Tutorialfläche und eine deterministische KI-vs-KI-Simulation.
+  Zwei zuvor verdeckte Releasekopplungen wurden dabei ursächlich entfernt:
+  Produktdefaults verweisen jetzt zentral auf kuratierte Standarddecks statt
+  auf interne KI-Snapshots, und Next-/Web-Laufzeitabhängigkeiten werden aus
+  dem pnpm-Graph in echte Artefaktdateien materialisiert. Nach jedem Lauf
+  werden ausschließlich die eigenen Prozesse, der Smoke-Output und der
+  temporäre Datenroot entfernt. Runtime-Daten-, Server- und Web-Tests,
+  Typechecks, Releasegrenze, Paketgrenzen und Release-Kartenindex sind grün.

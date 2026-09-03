@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
+import { createRequire } from "node:module";
 import {
   cpSync,
   existsSync,
@@ -96,6 +97,7 @@ try {
     path.join(webDist, "static"),
     path.join(applicationRoot, "apps", "web", webDistName, "static"),
   );
+  materializeNextRuntimeDependencies(applicationRoot);
 
   const serverResult = await build({
     entryPoints: [path.join(repositoryRoot, "apps/server/src/index.ts")],
@@ -104,6 +106,9 @@ try {
     format: "esm",
     platform: "node",
     target: "node24",
+    banner: {
+      js: 'import { createRequire as __netgridCreateRequire } from "node:module"; const require = __netgridCreateRequire(import.meta.url);',
+    },
     treeShaking: true,
     metafile: true,
     external: ["sharp"],
@@ -240,6 +245,105 @@ function copySharpWindowsRuntime(applicationRoot) {
     if (!existsSync(source))
       throw new Error(`release_sharp_dependency_missing:${source}`);
     cpSync(source, target, { recursive: true, dereference: true });
+  }
+}
+
+function materializeNextRuntimeDependencies(applicationRoot) {
+  const nextSource = realpathSync(
+    path.join(repositoryRoot, "apps", "web", "node_modules", "next"),
+  );
+  const nextPackage = JSON.parse(
+    readFileSync(path.join(nextSource, "package.json"), "utf8"),
+  );
+  const targetNodeModules = path.join(
+    applicationRoot,
+    "apps",
+    "web",
+    "node_modules",
+  );
+  const visited = new Set();
+  for (const dependencyName of Object.keys(nextPackage.dependencies ?? {}))
+    materializePackageDependency(
+      nextSource,
+      dependencyName,
+      targetNodeModules,
+      visited,
+    );
+  const webPackage = JSON.parse(
+    readFileSync(path.join(webRoot, "package.json"), "utf8"),
+  );
+  for (const dependencyName of Object.keys(webPackage.dependencies ?? {})) {
+    if (dependencyName === "next" || dependencyName.startsWith("@netgrid/"))
+      continue;
+    materializePackageDependency(
+      webRoot,
+      dependencyName,
+      targetNodeModules,
+      visited,
+    );
+  }
+}
+
+function materializePackageDependency(
+  requiringPackageRoot,
+  dependencyName,
+  targetNodeModules,
+  visited,
+) {
+  const sourceCandidate = path.join(
+    path.dirname(requiringPackageRoot),
+    ...dependencyName.split("/"),
+  );
+  let source;
+  if (existsSync(sourceCandidate)) source = realpathSync(sourceCandidate);
+  else {
+    const requireFromPackage = createRequire(
+      path.join(requiringPackageRoot, "package.json"),
+    );
+    let resolvedEntry;
+    try {
+      resolvedEntry = requireFromPackage.resolve(dependencyName);
+    } catch (error) {
+      throw new Error(
+        `release_next_dependency_missing:${dependencyName}:${requiringPackageRoot}`,
+        { cause: error },
+      );
+    }
+    source = packageRootFor(resolvedEntry, dependencyName);
+  }
+  const target = path.join(targetNodeModules, ...dependencyName.split("/"));
+  const visitKey = `${source}\0${target}`;
+  if (visited.has(visitKey)) return;
+  visited.add(visitKey);
+  cpSync(source, target, { recursive: true, dereference: true });
+
+  const packageMetadataPath = path.join(source, "package.json");
+  if (!existsSync(packageMetadataPath)) return;
+  const packageMetadata = JSON.parse(readFileSync(packageMetadataPath, "utf8"));
+  const nestedTargetNodeModules = path.join(target, "node_modules");
+  for (const nestedDependencyName of Object.keys(
+    packageMetadata.dependencies ?? {},
+  ))
+    materializePackageDependency(
+      source,
+      nestedDependencyName,
+      nestedTargetNodeModules,
+      visited,
+    );
+}
+
+function packageRootFor(resolvedEntry, expectedName) {
+  let current = path.dirname(realpathSync(resolvedEntry));
+  while (true) {
+    const metadataPath = path.join(current, "package.json");
+    if (existsSync(metadataPath)) {
+      const metadata = JSON.parse(readFileSync(metadataPath, "utf8"));
+      if (metadata.name === expectedName) return current;
+    }
+    const parent = path.dirname(current);
+    if (parent === current)
+      throw new Error(`release_next_package_root_missing:${expectedName}`);
+    current = parent;
   }
 }
 

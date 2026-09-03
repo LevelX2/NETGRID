@@ -7,16 +7,17 @@ import {
   deckFormatProfiles08Data,
   deckFormatProfiles130Data,
 } from "./deck-format-profiles";
-import {
-  deckSnapshots08Data,
-  deckTemplates08Data,
-} from "./legacy-demo-decks";
+import { deckSnapshots08Data, deckTemplates08Data } from "./legacy-demo-decks";
 import {
   standardDeckCatalogData,
   standardDeckCurationData,
   standardDeckGuidesData,
 } from "./standard-decks";
 import { localizedDeCardSkinData } from "./display-assets";
+import {
+  PRODUCT_DEFAULT_CORP_SNAPSHOT_ID,
+  PRODUCT_DEFAULT_RUNNER_SNAPSHOT_ID,
+} from "./product-default-decks";
 import {
   deckFormatProfiles08Data as releaseProfiles08Data,
   deckSnapshots08Data as releaseSnapshots08Data,
@@ -25,6 +26,15 @@ import {
 import { strategyGoalsData } from "./strategy-goals";
 
 describe("product runtime data authority", () => {
+  it("points product defaults at curated standard snapshots", () => {
+    expect(PRODUCT_DEFAULT_RUNNER_SNAPSHOT_ID).toBe(
+      "standard_standard_runner_bit_denial_lock_1.0.0",
+    );
+    expect(PRODUCT_DEFAULT_CORP_SNAPSHOT_ID).toBe(
+      "standard_standard_corp_cheap_bag_tricks_1.0.0",
+    );
+  });
+
   it("exports the complete explicitly classified product data set", () => {
     expect(aiDeckPoolData.schemaVersion).toBeTruthy();
     expect(cardSetAiReadinessData.schemaVersion).toBeTruthy();
@@ -41,8 +51,10 @@ describe("product runtime data authority", () => {
     expect(localizedDeCardSkinData.schemaVersion).toBeTruthy();
   });
 
-  it("provides empty release substitutions for legacy demo fixtures", () => {
-    expect(releaseProfiles08Data.profiles).toEqual([]);
+  it("provides release substitutions without legacy demo decks", () => {
+    expect(
+      releaseProfiles08Data.profiles.map((profile) => profile.profileId),
+    ).toEqual(["local-demo-v0.8"]);
     expect(releaseSnapshots08Data.snapshots).toEqual([]);
     expect(releaseTemplates08Data.templates).toEqual([]);
   });
