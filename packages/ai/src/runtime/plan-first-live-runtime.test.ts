@@ -1467,6 +1467,78 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
+  it("does not let generic development reject a terminal-win-owned Runner event", () => {
+    const desperate = legalAction(
+      "play-desperate",
+      "runner",
+      "play_event",
+      "Play Desperate Competitor",
+      { credits: 0, clicks: 1 },
+      {
+        source: "desperate-card",
+        payload: {
+          cardId: "desperate-card",
+          sourceDefinitionId: "onr_v1_083_desperate-competitor",
+        },
+      },
+    );
+    const input = aiInput("runner", [desperate]);
+    const candidates = buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "runner",
+      stateVersion: input.playerView.stateVersion,
+    });
+
+    const dispositions = runnerActionDispositions(
+      input,
+      candidates,
+      {
+        terminalWins: [
+          {
+            actionIds: [desperate.actionId],
+            terminalCondition: "runner_immediate_agenda_point",
+          },
+        ],
+        creditBanks: [],
+        recurringEconomy: [],
+        resourceLifecycle: [],
+        shellTradersPipelines: [],
+        runWindows: [],
+        developments: [
+          {
+            developmentId: "hand:desperate-card",
+            definitionId: "onr_v1_083_desperate-competitor",
+            actionIds: [desperate.actionId],
+            assignedDomainPlanIds: [],
+            duplicateAlreadyInstalled: false,
+            affordableOrSupportable: true,
+          },
+        ],
+        coverageGaps: [],
+        centralPressure: [],
+        remoteContests: [],
+        installedAgendaScores: [],
+        installedCardLiquidationChoices: [],
+        fundingNeeds: [],
+        defense: {
+          activeTags: 0,
+          forgoUnsafeRunCapacity: false,
+          handBufferActionIds: [],
+          defenseSupportRejectedInstallActionIds: [],
+        },
+      } as never,
+      [],
+      [],
+      () => undefined,
+    );
+
+    expect(dispositions).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ actionId: desperate.actionId }),
+      ]),
+    );
+  });
+
   it("dispositions unbound Social Engineering instead of routing it through generic development", () => {
     resetResidentPlanPortfolioMemory();
     const social = legalAction(

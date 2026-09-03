@@ -5397,6 +5397,9 @@ export function runnerActionDispositions(
     candidates,
     domain.coverageGaps,
   );
+  const terminalWinOwnedActionIds = new Set(
+    (domain.terminalWins ?? []).flatMap((signal) => signal.actionIds ?? []),
+  );
   const deferredSameTurnCoverageInstallActionIds = new Set(
     domain.coverageGaps.flatMap((gap) =>
       gap.sameTurnRunConversion !== undefined && (gap.fundingGap ?? 0) > 0
@@ -5576,6 +5579,7 @@ export function runnerActionDispositions(
       !cardDevelopmentOwnsActionRoute &&
       !delegatedFundingActionIds.has(candidate.actionId) &&
       !coverageOwnedActionIds.has(candidate.actionId) &&
+      !terminalWinOwnedActionIds.has(candidate.actionId) &&
       !runnerCandidateIsOptionalProgramTrashInstall(input, candidate)
     ) {
       add(
