@@ -6226,6 +6226,9 @@ export function runnerActionDispositions(
     ...(domain.installedAgendaScores ?? []).flatMap(
       (signal) => signal.actionIds,
     ),
+    ...(domain.terminalWins ?? []).flatMap(
+      (signal) => signal.actionIds ?? [],
+    ),
     ...coverageRejectedActionIds,
     ...unboundOneShotSearchActionIds,
     ...optionalProgramTrashInstallDispositionActionIds,
@@ -6646,6 +6649,9 @@ export function runnerActionDispositions(
     ),
     ...(domain.installedAgendaScores ?? []).flatMap(
       (signal) => signal.actionIds,
+    ),
+    ...(domain.terminalWins ?? []).flatMap(
+      (signal) => signal.actionIds ?? [],
     ),
     ...(domain.resourceLifecycle ?? []).flatMap((signal) => signal.actionIds),
     ...(domain.shellTradersPipelines ?? []).flatMap(
@@ -7410,6 +7416,8 @@ function buildRunnerDomain(
     input,
     candidates,
   );
+  const immediateAgendaPointTerminalWins =
+    runnerImmediateAgendaPointTerminalWinSignals(input, candidates);
   const handSize = input.playerView.own.gripOrHq.length;
   const maxHandSize = Math.max(0, input.playerView.own.maxHandSize ?? 5);
   const damageThreat = runnerDamageThreatAssessment(input);
@@ -9741,17 +9749,20 @@ function buildRunnerDomain(
     installedAgendaScores,
     shellTradersPipelines,
     defense,
-    terminalWins:
-      input.playerView.opponent.deckCount === 0 &&
+    terminalWins: [
+      ...(input.playerView.opponent.deckCount === 0 &&
       candidates.some((candidate) => candidate.actionType === "end_turn")
         ? [
             {
               terminalId: "force-corp-empty-rd-draw",
               semanticActionTypes: ["turn_flow.end_turn"],
+              terminalCondition: "corp_empty_rd_mandatory_draw" as const,
               evidenceCode: "corp_visible_empty_rd_forced_mandatory_draw",
             },
           ]
-        : [],
+        : []),
+      ...immediateAgendaPointTerminalWins,
+    ],
     centralPressure,
     remoteContests,
     developments,
@@ -11051,6 +11062,45 @@ function runnerInstalledAgendaScoreSignals(
           input.playerView.own.agendaPoints + agendaPoints >=
           input.playerView.agendaPointsToWin,
         evidenceCode: "runner_installed_agenda_score_conversion",
+      },
+    ];
+  });
+}
+
+function runnerImmediateAgendaPointTerminalWinSignals(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+): RunnerPlanDomain["terminalWins"] {
+  return candidates.flatMap((candidate) => {
+    if (
+      candidate.actorSide !== "runner" ||
+      candidate.sourceKind !== "card" ||
+      candidate.actionType !== "play_event"
+    ) {
+      return [];
+    }
+    const agendaPointEffect = candidate.functionalEffects?.find(
+      (effect) =>
+        effect.kind === "scored_agenda_action" &&
+        effect.scope === "runner" &&
+        effect.resource === "agenda_points" &&
+        typeof effect.amount === "number" &&
+        effect.amount > 0,
+    );
+    if (
+      agendaPointEffect?.amount === undefined ||
+      input.playerView.own.agendaPoints + agendaPointEffect.amount <
+        input.playerView.agendaPointsToWin
+    ) {
+      return [];
+    }
+    return [
+      {
+        terminalId: `immediate-agenda-point:${candidate.actionId}`,
+        semanticActionTypes: [candidate.semanticActionType],
+        actionIds: [candidate.actionId],
+        terminalCondition: "runner_immediate_agenda_point" as const,
+        evidenceCode: "runner_legal_immediate_agenda_point_closeout",
       },
     ];
   });

@@ -368,6 +368,10 @@ export type RunnerExposeInformationSignal = {
 export type RunnerTerminalWinSignal = {
   terminalId: string;
   semanticActionTypes: string[];
+  actionIds?: string[];
+  terminalCondition?:
+    | "corp_empty_rd_mandatory_draw"
+    | "runner_immediate_agenda_point";
   evidenceCode: string;
 };
 
@@ -449,21 +453,32 @@ function terminalWinModule(): PlanModule {
     },
     materialize: (instance, _assessment, context) => {
       const current = state<TerminalWinState>(instance);
+      const forcesCorpMandatoryDraw =
+        current.signal.terminalCondition === undefined ||
+        current.signal.terminalCondition === "corp_empty_rd_mandatory_draw";
       return {
         step: {
           stepId: `${instance.instanceId}:force_terminal`,
           capability: {
-            capabilityId: "force_corp_mandatory_draw_deckout",
+            capabilityId: forcesCorpMandatoryDraw
+              ? "force_corp_mandatory_draw_deckout"
+              : "convert_immediate_runner_agenda_point",
             semanticActionTypes: current.signal.semanticActionTypes,
           },
           purpose:
-            "End the Runner turn to force the rules-proven empty-R&D mandatory draw.",
+            forcesCorpMandatoryDraw
+              ? "End the Runner turn to force the rules-proven empty-R&D mandatory draw."
+              : "Resolve the exact legal action that immediately reaches the Runner agenda-point threshold.",
         },
         candidates: terminalWinCandidates(context, current.signal),
-        earlyEndTurnJustification: {
-          kind: "rules_proven_terminal_win",
-          terminalCondition: "corp_empty_rd_mandatory_draw",
-        },
+        ...(forcesCorpMandatoryDraw
+          ? {
+              earlyEndTurnJustification: {
+                kind: "rules_proven_terminal_win" as const,
+                terminalCondition: "corp_empty_rd_mandatory_draw" as const,
+              },
+            }
+          : {}),
       };
     },
   };
@@ -512,6 +527,13 @@ export function runnerVoluntaryActionFamilyOwner(
   candidate: ActionSemanticCandidate,
   planDomain: RunnerPlanDomain,
 ): PlanModule["moduleId"] | undefined {
+  if (
+    (planDomain.terminalWins ?? []).some((signal) =>
+      signal.actionIds?.includes(candidate.actionId),
+    )
+  ) {
+    return "runner.secure_terminal_win";
+  }
   if (candidate.semanticActionType === "turn_flow.end_turn") {
     return planDomain.terminalWins.length > 0
       ? "runner.secure_terminal_win"
@@ -1902,14 +1924,23 @@ function terminalWinCandidates(
   context: PlanSchedulerContext,
   signal: RunnerTerminalWinSignal,
 ): PlanMaterialization["candidates"] {
+  const exactActionIds = new Set(signal.actionIds ?? []);
   return context.actionCandidates
     .filter(
       (candidate) =>
         signal.semanticActionTypes.includes(candidate.semanticActionType) &&
-        candidate.actionType === "end_turn" &&
-        candidate.sourceKind === "game_rule",
+        (exactActionIds.size > 0
+          ? exactActionIds.has(candidate.actionId)
+          : candidate.actionType === "end_turn" &&
+            candidate.sourceKind === "game_rule"),
     )
-    .map((candidate) => ({ candidate, stepValue: 1 }));
+    .map((candidate) => ({
+      candidate,
+      stepValue:
+        signal.terminalCondition === "runner_immediate_agenda_point"
+          ? 10_000
+          : 1,
+    }));
 }
 
 function domain(context: PlanSchedulerContext): RunnerPlanDomain {

@@ -1404,6 +1404,69 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
+  it("routes a legal immediate Runner agenda-point closeout through the terminal-win owner", () => {
+    resetResidentPlanPortfolioMemory();
+    const desperate = legalAction(
+      "play-desperate",
+      "runner",
+      "play_event",
+      "Play Desperate Competitor",
+      { credits: 0, clicks: 1 },
+      {
+        source: "desperate-card",
+        payload: {
+          cardId: "desperate-card",
+          sourceDefinitionId: "onr_v1_083_desperate-competitor",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityKey:
+            "abilities_on_play_gain_runner_event_agenda_point",
+          cardImplementationAbilityId:
+            "onr_v1_083_desperate-competitor:abilities_on_play_gain_runner_event_agenda_point",
+        },
+      },
+    );
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [desperate, credit]);
+    input.playerView.own.agendaPoints = 6;
+    input.playerView.agendaPointsToWin = 7;
+    input.playerView.own.gripOrHq = [
+      visibleCard("desperate-card", "runner", "event", {
+        definitionId: "onr_v1_083_desperate-competitor",
+      }),
+    ];
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: desperate.actionId,
+      reasonCode: "plan_first.runner.secure_terminal_win",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.secure_terminal_win",
+        planFirstDecision: {
+          rootPlanInstanceId: expect.stringContaining(
+            "plan:runner.secure_terminal_win:",
+          ),
+          leafExecutorInstanceId: expect.stringContaining(
+            "plan:runner.secure_terminal_win:",
+          ),
+        },
+      },
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_priority_class:P1",
+        "plan_assessment_evidence:runner_legal_immediate_agenda_point_closeout",
+      ]),
+    );
+  });
+
   it("dispositions unbound Social Engineering instead of routing it through generic development", () => {
     resetResidentPlanPortfolioMemory();
     const social = legalAction(
