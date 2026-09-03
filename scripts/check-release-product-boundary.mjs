@@ -87,6 +87,42 @@ export function auditTrackedFiles(files, policy) {
   };
 }
 
+export function auditRuntimeDataImports(files, policy, readSource) {
+  const findings = [];
+  const importPattern =
+    /(?:from\s+|import\s*\()["']([^"']*data\/(?:ai|card-assets|decks|scenarios)\/[^"']+\.json)["']/g;
+
+  for (const file of files.map(normalizePath)) {
+    const isRuntimeConsumer = policy.runtimeDataConsumerRoots.some((root) =>
+      file.startsWith(root),
+    );
+    const isDevelopmentSource = policy.developmentSourceRoots.some((root) =>
+      file.startsWith(root),
+    );
+    const isTestSource =
+      /\.test\.[cm]?[jt]sx?$/.test(file) ||
+      file.includes("/test-fixtures/") ||
+      file.includes(".test-support.");
+    if (
+      !isRuntimeConsumer ||
+      isDevelopmentSource ||
+      isTestSource ||
+      file.startsWith(policy.runtimeDataAuthorityRoot)
+    ) {
+      continue;
+    }
+
+    const source = readSource(file);
+    for (const match of source.matchAll(importPattern)) {
+      findings.push(
+        `${file}: direkter Produktdatenimport ${match[1]} umgeht @netgrid/runtime-data`,
+      );
+    }
+  }
+
+  return findings;
+}
+
 function loadPolicy() {
   const policy = JSON.parse(readFileSync(policyPath, "utf8"));
   if (policy.schemaVersion !== "netgrid-release-product-boundary-v1") {
@@ -131,12 +167,32 @@ function runSelfTest() {
     );
   }
 
+  const importFindings = auditRuntimeDataImports(
+    ["apps/server/src/example.ts", "packages/ai/src/simulation/example.ts"],
+    policy,
+    (file) =>
+      file.includes("server")
+        ? 'import data from "../../../data/ai/example.json";'
+        : 'import data from "../../../../data/ai/example.json";',
+  );
+  if (importFindings.length !== 1) {
+    throw new Error(
+      `Selftest: ein direkter Runtime-Datenimport erwartet, ${importFindings.length} erhalten.`,
+    );
+  }
+
   process.stdout.write("RELEASE_PRODUCT_BOUNDARY_SELFTEST_OK\n");
 }
 
 function runAudit() {
   const policy = loadPolicy();
-  const result = auditTrackedFiles(trackedFiles(), policy);
+  const files = trackedFiles();
+  const result = auditTrackedFiles(files, policy);
+  result.findings.push(
+    ...auditRuntimeDataImports(files, policy, (file) =>
+      readFileSync(resolve(repositoryRoot, file), "utf8"),
+    ),
+  );
   if (result.findings.length > 0) {
     process.stderr.write(`${result.findings.join("\n")}\n`);
     process.exitCode = 1;

@@ -59,6 +59,19 @@
     "docs/source/PrivateScans/**"
   ],
   "allowedTrackedExceptions": [".env.example"],
+  "runtimeDataConsumerRoots": [
+    "apps/server/src/",
+    "apps/web/app/",
+    "apps/web/features/",
+    "packages/ai/src/",
+    "packages/catalog/src/"
+  ],
+  "developmentSourceRoots": [
+    "packages/ai/src/evaluation/",
+    "packages/ai/src/reports/",
+    "packages/ai/src/simulation/"
+  ],
+  "runtimeDataAuthorityRoot": "packages/runtime-data/src/",
   "forbiddenArtifactPatterns": [
     ".git/**",
     ".github/**",

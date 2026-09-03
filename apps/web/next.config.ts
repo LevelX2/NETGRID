@@ -28,6 +28,7 @@ const nextConfig: NextConfig = {
     "@netgrid/engine",
     "@netgrid/ai",
     "@netgrid/card-images",
+    "@netgrid/runtime-data",
   ],
   env: {
     NEXT_PUBLIC_NETGRID_BUILD_NUMBER: gitValue(

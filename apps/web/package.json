@@ -17,6 +17,7 @@
     "@netgrid/catalog": "workspace:*",
     "@netgrid/decks": "workspace:*",
     "@netgrid/engine": "workspace:*",
+    "@netgrid/runtime-data": "workspace:*",
     "@netgrid/shared": "workspace:*",
     "lucide-react": "^1.14.0",
     "next": "^16.2.4",

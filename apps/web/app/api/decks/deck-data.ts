@@ -1,7 +1,9 @@
-import profilesData from "../../../../../data/decks/deck-format-profiles-0.8.json";
-import profilesData130 from "../../../../../data/decks/deck-format-profiles-1.3.0.json";
-import snapshotsData from "../../../../../data/decks/deck-snapshots-0.8.json";
-import templatesData from "../../../../../data/decks/deck-templates-0.8.json";
+import {
+  deckFormatProfiles08Data as profilesData,
+  deckFormatProfiles130Data as profilesData130,
+  deckSnapshots08Data as snapshotsData,
+  deckTemplates08Data as templatesData,
+} from "@netgrid/runtime-data/decks";
 import {
   assertDeckPayloadSafe,
   createDeckSnapshot,

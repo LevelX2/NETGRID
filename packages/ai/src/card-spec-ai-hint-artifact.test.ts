@@ -207,6 +207,7 @@ describe("CardSpec generated AI hint artifact", () => {
         "packages/ai/src/catalog-ai-hint-authority.ts",
         "packages/ai/src/catalog-ai-hint-public.ts",
         "packages/ai/src/generated-ai-hint-artifact-validation.ts",
+        "packages/runtime-data/src/card-spec-ai-hints.ts",
       ].sort(),
     );
   });

@@ -1,6 +1,6 @@
 # Windows-Release-Vorbedingungen
 
-Status: `package_verified` (`WRP-00`)
+Status: `package_verified` (`WRP-01`)
 Stand: 2026-09-03
 Quelle: Nutzerauftrag zur Vorbereitung eines späteren geführten
 Windows-Installers ohne vorgezogene Installerimplementierung
@@ -351,7 +351,7 @@ markiere das Goal erst dann als complete.
 ## Fortschritt
 
 - [x] WRP-00 – Prozess und Releaseinventar
-- [ ] WRP-01 – Produktive Datenautoritäten
+- [x] WRP-01 – Produktive Datenautoritäten
 - [ ] WRP-02 – Runtime-Entry-Points
 - [ ] WRP-03 – Testset- und Demo-Grenze
 - [ ] WRP-04 – Datenroot und Pfadvertrag
@@ -369,3 +369,13 @@ markiere das Goal erst dann als complete.
   SQLite-Dateien oder private Scans versioniert sind. Der zugehörige
   Negativ-Selbsttest erkennt eine verbotene Runtime-Datenbank und eine
   unklassifizierte Datendatei zuverlässig.
+- WRP-01: Das reine Paket `@netgrid/runtime-data` kapselt die zwölf
+  ausdrücklich als produktiv klassifizierten JSON-Autoritäten über kleine,
+  zweckgebundene Subpath-Exports. Normale Server-, Web-, Katalog- und
+  KI-Quellen importieren diese Daten nicht mehr direkt aus den gemischten
+  `data/`-Bereichen. Das Releasegrenzgate erkennt neue Direktimporte, während
+  Evaluation, Simulation und Reports ihre Entwicklungsdaten weiterhin
+  unmittelbar verwenden dürfen. Paketgrenzen, Runtime-Datentest, Katalogtest,
+  Server-/Web-/KI-Typechecks, KI-Struktur- und fokussierte Ownership-Gates
+  sind grün; der transitive Katalog-AI-Graph enthält weiterhin nur das exakt
+  benötigte Hint-Artefakt.

@@ -47,6 +47,9 @@ importers:
       '@netgrid/engine':
         specifier: workspace:*
         version: link:../../packages/engine
+      '@netgrid/runtime-data':
+        specifier: workspace:*
+        version: link:../../packages/runtime-data
       '@netgrid/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -78,6 +81,9 @@ importers:
       '@netgrid/engine':
         specifier: workspace:*
         version: link:../../packages/engine
+      '@netgrid/runtime-data':
+        specifier: workspace:*
+        version: link:../../packages/runtime-data
       '@netgrid/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -121,6 +127,9 @@ importers:
       '@netgrid/engine':
         specifier: workspace:*
         version: link:../engine
+      '@netgrid/runtime-data':
+        specifier: workspace:*
+        version: link:../runtime-data
       '@netgrid/shared':
         specifier: workspace:*
         version: link:../shared
@@ -158,6 +167,9 @@ importers:
       '@netgrid/cards':
         specifier: workspace:*
         version: link:../cards
+      '@netgrid/runtime-data':
+        specifier: workspace:*
+        version: link:../runtime-data
       '@netgrid/shared':
         specifier: workspace:*
         version: link:../shared
@@ -176,6 +188,8 @@ importers:
       '@netgrid/shared':
         specifier: workspace:*
         version: link:../shared
+
+  packages/runtime-data: {}
 
   packages/shared: {}
 

@@ -1,4 +1,4 @@
-import curationData from "../../../../data/decks/standard-deck-curation-2026-07-18.json";
+import { standardDeckCurationData as curationData } from "@netgrid/runtime-data/decks";
 import type { EditableDeck } from "./deck-table-model";
 
 const CURATED_LEGACY_DECK_IDS = new Set(

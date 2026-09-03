@@ -16,6 +16,7 @@ const ignoredDirectories = new Set([
 const roots = ["packages", "apps/server/src", "apps/web"];
 const packageRules = [
   { prefix: "packages/shared/", allow: new Set() },
+  { prefix: "packages/runtime-data/", allow: new Set() },
   { prefix: "packages/cards/", allow: new Set(["@netgrid/shared"]) },
   {
     prefix: "packages/card-images/",
@@ -23,7 +24,11 @@ const packageRules = [
   },
   {
     prefix: "packages/catalog/",
-    allow: new Set(["@netgrid/cards", "@netgrid/shared"]),
+    allow: new Set([
+      "@netgrid/cards",
+      "@netgrid/runtime-data",
+      "@netgrid/shared",
+    ]),
   },
   {
     prefix: "packages/decks/",
@@ -40,6 +45,7 @@ const packageRules = [
       "@netgrid/cards",
       "@netgrid/decks",
       "@netgrid/engine",
+      "@netgrid/runtime-data",
       "@netgrid/shared",
     ]),
   },
@@ -158,6 +164,16 @@ function boundaryFindings(file, source) {
 }
 
 function allowedWorkspaceSubpath(file, specifier) {
+  if (specifier.startsWith("@netgrid/runtime-data/"))
+    return [
+      "@netgrid/runtime-data/ai-deck-pool",
+      "@netgrid/runtime-data/card-set-ai-readiness",
+      "@netgrid/runtime-data/card-spec-ai-hints",
+      "@netgrid/runtime-data/card-support",
+      "@netgrid/runtime-data/decks",
+      "@netgrid/runtime-data/display-assets",
+      "@netgrid/runtime-data/strategy-goals",
+    ].includes(specifier);
   if (specifier.startsWith("@netgrid/cards/"))
     return (
       (file.startsWith("packages/engine/") &&
@@ -283,6 +299,16 @@ function runSelfTest() {
       "packages/ai/src/valid-cards-planning.ts",
       'import type { PlanningCardView } from "@netgrid/cards/planning";',
       0,
+    ],
+    [
+      "packages/ai/src/valid-runtime-data.ts",
+      'import { aiDeckPoolData } from "@netgrid/runtime-data/ai-deck-pool";',
+      0,
+    ],
+    [
+      "packages/ai/src/invalid-runtime-data-subpath.ts",
+      'import { value } from "@netgrid/runtime-data/private";',
+      1,
     ],
     [
       "packages/ai/src/invalid-cards-root.ts",

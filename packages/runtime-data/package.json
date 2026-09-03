@@ -1,0 +1,22 @@
+{
+  "name": "@netgrid/runtime-data",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./ai-deck-pool": "./src/ai-deck-pool.ts",
+    "./card-set-ai-readiness": "./src/card-set-ai-readiness.ts",
+    "./card-spec-ai-hints": "./src/card-spec-ai-hints.ts",
+    "./card-support": "./src/card-support.ts",
+    "./decks": "./src/decks.ts",
+    "./display-assets": "./src/display-assets.ts",
+    "./strategy-goals": "./src/strategy-goals.ts"
+  },
+  "types": "./src/ai-deck-pool.ts",
+  "scripts": {
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "build": "tsc -p tsconfig.json --noEmit"
+  }
+}

@@ -1,4 +1,4 @@
-import localizedDeCardSkin from "../../../data/card-assets/localized/de/cards.de.json";
+import { localizedDeCardSkinData as localizedDeCardSkin } from "@netgrid/runtime-data/display-assets";
 
 export const LOCAL_CARD_IMAGE_VERSION = "2026-05-23-local-onr-assets-3";
 export const LOCALIZED_DE_CARD_IMAGE_VERSION =

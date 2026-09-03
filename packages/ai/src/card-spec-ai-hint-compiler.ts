@@ -1,4 +1,4 @@
-import aiSupportScenarioData from "../../../data/scenarios/card-support-ai-supported-current.json";
+import { cardSupportAiSupportedData as aiSupportScenarioData } from "@netgrid/runtime-data/card-support";
 import {
   KNOWN_HINT_LINE_SUPPORT,
   KNOWN_HINT_BREAKER_COVERAGES,

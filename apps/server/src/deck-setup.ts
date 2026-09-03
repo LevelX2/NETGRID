@@ -1,8 +1,10 @@
-import profilesData from "../../../data/decks/deck-format-profiles-0.8.json";
-import profilesData130 from "../../../data/decks/deck-format-profiles-1.3.0.json";
-import snapshotsData from "../../../data/decks/deck-snapshots-0.8.json";
-import standardDeckCatalogData from "../../../data/decks/standard-deck-catalog-1.0.0.json";
-import aiDeckPoolData from "../../../data/ai/ai-deck-pool-1.1.0.json";
+import { aiDeckPoolData } from "@netgrid/runtime-data/ai-deck-pool";
+import {
+  deckFormatProfiles08Data as profilesData,
+  deckFormatProfiles130Data as profilesData130,
+  deckSnapshots08Data as snapshotsData,
+  standardDeckCatalogData,
+} from "@netgrid/runtime-data/decks";
 import { createHash } from "node:crypto";
 import {
   aiSupportStageReady,
