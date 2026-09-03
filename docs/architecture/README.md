@@ -16,6 +16,7 @@ Zu den aktuellen Fachbereichen gehören unter anderem:
 - `deck-library/`: lokale Deckbibliothek und Storage-Verträge;
 - `localization/`: Locale-, Übersetzungs- und Präsentationsverträge der
   normalen Spieleroberfläche;
+- `windows/`: installerneutrale Windows-Release- und Produktgrenzen;
 - weitere fachlich benannte Bereiche für aktuelle Architekturthemen.
 
 ## Current-State-Regel

@@ -1,6 +1,6 @@
 # CODEX_STATUS
 
-Stand: 2026-08-21
+Stand: 2026-09-03
 
 ## Einstieg
 
@@ -77,6 +77,17 @@ Aktuelle Betriebs- und Wartungsverträge liegen unter `docs/runbooks/`:
 - `account-alpha-operations.md`
 - `maintenance-control-plane.md`
 - `netgrid-local-transfer.md`
+- `windows-release-output.md`
+
+Ein installerneutraler Windows-x64-Produktoutput ist vorbereitet. Er trennt
+statische Produktdaten, Entwicklungs-/Testbestände und veränderliche lokale
+Daten durch einen positiven Releasevertrag. Web und Server laufen aus dem
+geprüften Output mit einem externen `NETGRID_DATA_ROOT`; interne Testkarten,
+Demo-Snapshots, Testspiele, Selfplay-Evidence und Entwicklungsdatenbanken
+werden nicht ausgeliefert. Führend sind
+`docs/architecture/windows/windows-release-boundary.md` und das zugehörige
+Runbook. Ein eigentlicher Windows-Installer, Dienst, Launcher, Firewallsetup,
+Codesigning und Updatekanal sind noch nicht implementiert.
 
 Der persönliche Kartenbildimport besitzt einen persistenten lokalen Store,
 lokale und explizite gehärtete HTTPS-Quellen sowie drei private
@@ -108,6 +119,9 @@ Je nach Änderungsscope sind insbesondere relevant:
 - `corepack pnpm check:engine-source-structure`;
 - `corepack pnpm check:engine-source-structure:selftest` bei Strukturguard-Arbeit;
 - `corepack pnpm check:ai` und die einschlägigen AI-Struktur-/Hint-Gates bei KI-Änderungen;
+- Releasegrenzen über `check:release-boundary`,
+  `build:windows-release-output` und den isolierten
+  `smoke:windows-release-output` bei Änderungen am Produktoutput;
 - Replay-, StateHash-, Hidden-Info- und deterministische Zufallstests bei betroffenen Enginepfaden;
 - `git diff --check` vor Abschluss eines Änderungsschnitts.
 
