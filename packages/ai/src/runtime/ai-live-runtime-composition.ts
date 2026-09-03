@@ -116,7 +116,7 @@ export function createAiLiveRuntimeComposition(
       breakAccessPathAssessment: contextDiagnostics.breakAccessPathAssessment,
     });
 
-  return createSemanticRuntimeOrchestrationComposition({
+  const runtimeEntrypoints = createSemanticRuntimeOrchestrationComposition({
     buildActionSemanticCandidates: dependencies.buildActionSemanticCandidates,
     deckCapabilitiesForInput: runnerBaseline.deckCapabilitiesForInput,
     runnerStrategicIntentForInput: runnerBaseline.runnerStrategicIntentForInput,
@@ -131,4 +131,9 @@ export function createAiLiveRuntimeComposition(
       runnerBaseline.runnerProgramInstallTrashAssessmentForCard,
     runnerEncounterActionExclusion,
   });
+
+  return {
+    ...runtimeEntrypoints,
+    selectedChoicesForDecision: runnerBaseline.selectedChoicesForDecision,
+  };
 }

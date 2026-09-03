@@ -9,7 +9,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { WebSocket, WebSocketServer } from "ws";
 import { isAiDeckSnapshotRuntimeError } from "@netgrid/ai";
-import { simulateAiGame } from "@netgrid/ai/simulation";
+import { simulateAiGame } from "@netgrid/ai/product-simulation";
 import type {
   ApiAccountActivePublicMatchIds,
   ApiMatchCardPool,

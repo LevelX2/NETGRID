@@ -6,6 +6,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./catalog": "./src/catalog-ai-hint-public.ts",
+    "./product-simulation": "./src/product-simulation.ts",
     "./simulation": "./src/simulation.ts"
   },
   "types": "./src/index.ts",

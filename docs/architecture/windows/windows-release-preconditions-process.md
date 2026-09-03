@@ -1,6 +1,6 @@
 # Windows-Release-Vorbedingungen
 
-Status: `package_verified` (`WRP-01`)
+Status: `package_verified` (`WRP-02`)
 Stand: 2026-09-03
 Quelle: Nutzerauftrag zur Vorbereitung eines späteren geführten
 Windows-Installers ohne vorgezogene Installerimplementierung
@@ -352,7 +352,7 @@ markiere das Goal erst dann als complete.
 
 - [x] WRP-00 – Prozess und Releaseinventar
 - [x] WRP-01 – Produktive Datenautoritäten
-- [ ] WRP-02 – Runtime-Entry-Points
+- [x] WRP-02 – Runtime-Entry-Points
 - [ ] WRP-03 – Testset- und Demo-Grenze
 - [ ] WRP-04 – Datenroot und Pfadvertrag
 - [ ] WRP-05 – Installerneutraler Produktionsbuild
@@ -379,3 +379,13 @@ markiere das Goal erst dann als complete.
   Server-/Web-/KI-Typechecks, KI-Struktur- und fokussierte Ownership-Gates
   sind grün; der transitive Katalog-AI-Graph enthält weiterhin nur das exakt
   benötigte Hint-Artefakt.
+- WRP-02: `@netgrid/ai/product-simulation` stellt dem Produktserver nur
+  `simulateAiGame`, die zugehörigen Typen und die Side-Safety-Prüfung bereit.
+  Die bisherige Fassade `@netgrid/ai/simulation` bleibt der explizite
+  Entwicklungseinstieg für Benchmarks, Soaks, Mining, Leagues und Reports.
+  Das Paketgrenzgate verbietet dem Produktserver den alten Import. Ein
+  esbuild-Metafile-Test belegt, dass der Produktgraph keine der
+  Entwicklungs-Entrypoints transitiv lädt; ein deterministischer
+  Ergebnisvergleich belegt identisches Simulationsverhalten. KI-Typecheck,
+  KI-Strukturgates, Side-Safety-Tests, Server-Typecheck und alle 155
+  Multiplayer-Tests sind grün.

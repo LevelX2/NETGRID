@@ -21,7 +21,7 @@ import {
   type ResidentPlanPortfolio,
   type RunnerOpponentModel,
 } from "@netgrid/ai";
-import { assertAiInputIsSideSafe } from "@netgrid/ai/simulation";
+import { assertAiInputIsSideSafe } from "@netgrid/ai/product-simulation";
 import {
   gamebookMessages,
   type GamebookLocale,

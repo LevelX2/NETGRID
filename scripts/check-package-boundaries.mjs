@@ -91,6 +91,13 @@ function boundaryFindings(file, source) {
     }
     const imported = entry.specifier;
     if (!imported) continue;
+    if (
+      file.startsWith("apps/server/src/") &&
+      imported === "@netgrid/ai/simulation"
+    )
+      findings.push(
+        `${file}: Produktserver darf die Entwicklungs-Simulationsfassade nicht laden`,
+      );
     if (rule && imported.startsWith("@netgrid/")) {
       const packageName = workspacePackageName(imported);
       if (!rule.allow.has(packageName))
@@ -376,6 +383,16 @@ function runSelfTest() {
       "apps/server/src/cards.ts",
       'import { listPublicCardViews } from "@netgrid/cards/server";',
       0,
+    ],
+    [
+      "apps/server/src/product-simulation.ts",
+      'import { simulateAiGame } from "@netgrid/ai/product-simulation";',
+      0,
+    ],
+    [
+      "apps/server/src/invalid-simulation.ts",
+      'import { simulateAiGame } from "@netgrid/ai/simulation";',
+      1,
     ],
     [
       "apps/web/features/game/invalid-cards-server.tsx",
