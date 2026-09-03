@@ -992,8 +992,15 @@ export async function startNetgridServer(
       options.accountStatistics ?? createConfiguredAccountStatistics(),
   });
   await handle.accountStatisticsReady;
-  const port = options.port ?? Number(process.env.PORT ?? 8787);
-  const host = (options.host ?? process.env.HOST ?? "0.0.0.0").trim();
+  const port =
+    options.port ??
+    Number(process.env.NETGRID_SERVER_PORT ?? process.env.PORT ?? 8787);
+  const host = (
+    options.host ??
+    process.env.NETGRID_SERVER_HOST ??
+    process.env.HOST ??
+    "0.0.0.0"
+  ).trim();
   await new Promise<void>((resolveListen) =>
     handle.server.listen(port, host, resolveListen),
   );

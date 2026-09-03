@@ -1,6 +1,6 @@
 # Windows-Release-Vorbedingungen
 
-Status: `package_verified` (`WRP-04`)
+Status: `package_verified` (`WRP-05`)
 Stand: 2026-09-03
 Quelle: Nutzerauftrag zur Vorbereitung eines späteren geführten
 Windows-Installers ohne vorgezogene Installerimplementierung
@@ -355,7 +355,7 @@ markiere das Goal erst dann als complete.
 - [x] WRP-02 – Runtime-Entry-Points
 - [x] WRP-03 – Testset- und Demo-Grenze
 - [x] WRP-04 – Datenroot und Pfadvertrag
-- [ ] WRP-05 – Installerneutraler Produktionsbuild
+- [x] WRP-05 – Installerneutraler Produktionsbuild
 - [ ] WRP-06 – Positives Releasemanifest
 - [ ] WRP-07 – Isolierter Produktions-Smoke
 - [ ] WRP-08 – Abschluss und Handoff
@@ -410,3 +410,13 @@ markiere das Goal erst dann als complete.
   Pfadtests belegen vollständige und paarweise isolierte Roots;
   Maintenance-, Storage-Hardening- und Kartenbildpfadtests sowie Server-,
   Web- und Paket-Typechecks sind grün.
+- WRP-05: `build:windows-release-output` erzeugt unter
+  `output/windows-release` einen Next-Standalone-Webserver und einen mit
+  esbuild gebündelten Produktserver für Windows x64. Beide Entrypoints werden
+  direkt mit Node 24 gestartet; Git, pnpm, `tsx`, Workspacequellen und ein
+  schreibbarer Repositorybaum sind zur Laufzeit nicht erforderlich. Der Build
+  bindet ausschließlich den temporären Release-Kartenindex sowie die leeren
+  Legacy-Demo-Substitutionen ein, übernimmt die benötigte native
+  Sharp-Windows-Runtime und liefert einen installerlesbaren Layoutvertrag mit
+  `de`, `en` und `fr`. Der vollständige optimierte Next-Build, TypeScript,
+  statische Seitengenerierung und Serverbundle sind erfolgreich durchgelaufen.
