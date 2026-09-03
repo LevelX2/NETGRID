@@ -7422,6 +7422,12 @@ function buildRunnerDomain(
   );
   const immediateAgendaPointTerminalWins =
     runnerImmediateAgendaPointTerminalWinSignals(input, candidates);
+  const immediateAgendaPointDevelopments =
+    runnerImmediateAgendaPointDevelopmentSignals(
+      input,
+      candidates,
+      immediateAgendaPointTerminalWins,
+    );
   const handSize = input.playerView.own.gripOrHq.length;
   const maxHandSize = Math.max(0, input.playerView.own.maxHandSize ?? 5);
   const damageThreat = runnerDamageThreatAssessment(input);
@@ -9168,6 +9174,12 @@ function buildRunnerDomain(
           ...(signal.rejectedActionIds ?? []),
         ]),
         ...(installedAgendaScores ?? []).flatMap((signal) => signal.actionIds),
+        ...immediateAgendaPointTerminalWins.flatMap(
+          (signal) => signal.actionIds ?? [],
+        ),
+        ...immediateAgendaPointDevelopments.flatMap(
+          (signal) => signal.actionIds,
+        ),
         ...shellTradersPipelines.flatMap((signal) => [
           ...signal.actionIds,
           ...(signal.rejectedActionIds ?? []),
@@ -9580,6 +9592,7 @@ function buildRunnerDomain(
     runnerRestrictedProgramInstallSequenceSignals(input, candidates, previous);
   const developments = [
     ...runnerEventInstallChoiceDevelopmentSignals(input, candidates, previous),
+    ...immediateAgendaPointDevelopments,
     ...cardDevelopments,
     ...restrictedProgramInstallSequenceDevelopments,
     ...runnerProgramSearchStrategyDevelopmentSignals(
@@ -11076,24 +11089,10 @@ function runnerImmediateAgendaPointTerminalWinSignals(
   candidates: readonly ActionSemanticCandidate[],
 ): RunnerPlanDomain["terminalWins"] {
   return candidates.flatMap((candidate) => {
+    const agendaPointAmount = runnerImmediateAgendaPointGain(candidate);
     if (
-      candidate.actorSide !== "runner" ||
-      candidate.sourceKind !== "card" ||
-      candidate.actionType !== "play_event"
-    ) {
-      return [];
-    }
-    const agendaPointEffect = candidate.functionalEffects?.find(
-      (effect) =>
-        effect.kind === "scored_agenda_action" &&
-        effect.scope === "runner" &&
-        effect.resource === "agenda_points" &&
-        typeof effect.amount === "number" &&
-        effect.amount > 0,
-    );
-    if (
-      agendaPointEffect?.amount === undefined ||
-      input.playerView.own.agendaPoints + agendaPointEffect.amount <
+      agendaPointAmount === undefined ||
+      input.playerView.own.agendaPoints + agendaPointAmount <
         input.playerView.agendaPointsToWin
     ) {
       return [];
@@ -11105,6 +11104,74 @@ function runnerImmediateAgendaPointTerminalWinSignals(
         actionIds: [candidate.actionId],
         terminalCondition: "runner_immediate_agenda_point" as const,
         evidenceCode: "runner_legal_immediate_agenda_point_closeout",
+      },
+    ];
+  });
+}
+
+function runnerImmediateAgendaPointGain(
+  candidate: ActionSemanticCandidate,
+): number | undefined {
+  if (
+    candidate.actorSide !== "runner" ||
+    candidate.sourceKind !== "card" ||
+    candidate.actionType !== "play_event"
+  ) {
+    return undefined;
+  }
+  const effect = candidate.functionalEffects?.find(
+    (entry) =>
+      entry.kind === "scored_agenda_action" &&
+      entry.scope === "runner" &&
+      entry.resource === "agenda_points" &&
+      typeof entry.amount === "number" &&
+      entry.amount > 0,
+  );
+  return effect?.amount;
+}
+
+function runnerImmediateAgendaPointDevelopmentSignals(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  terminalWins: RunnerPlanDomain["terminalWins"],
+): RunnerPlanDomain["developments"] {
+  const terminalActionIds = new Set(
+    (terminalWins ?? []).flatMap((signal) => signal.actionIds ?? []),
+  );
+  return candidates.flatMap((candidate) => {
+    const agendaPointGain = runnerImmediateAgendaPointGain(candidate);
+    if (
+      agendaPointGain === undefined ||
+      terminalActionIds.has(candidate.actionId)
+    ) {
+      return [];
+    }
+    if (!candidate.sourceDefinitionId || !candidate.sourceCardInstanceId) {
+      throw new PlanResolutionFailure("missing_action_semantics", {
+        side: input.side,
+        stateVersion: input.playerView.stateVersion,
+        timingPoint: input.playerView.timingPoint,
+        legalActionTypes: input.legalActions.map((action) => action.type),
+        unresolvedActionIds: [candidate.actionId],
+        owner: "action_semantics",
+        removalCondition:
+          "Every legal immediate Runner agenda-point conversion must expose its exact source definition and card instance.",
+      });
+    }
+    return [
+      {
+        developmentId: `agenda-point:${candidate.sourceCardInstanceId}`,
+        definitionId: candidate.sourceDefinitionId,
+        phase: "execute" as const,
+        purposeCode: "convert_legal_agenda_point",
+        assignedDomainPlanIds: [],
+        duplicateAlreadyInstalled: false,
+        affordableOrSupportable: true,
+        semanticActionTypes: [candidate.semanticActionType],
+        actionIds: [candidate.actionId],
+        priorityClass: "P3" as const,
+        value: 900 + agendaPointGain * 100,
+        evidenceCode: "runner_legal_immediate_agenda_point_conversion",
       },
     ];
   });

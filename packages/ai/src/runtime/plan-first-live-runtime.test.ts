@@ -1467,6 +1467,63 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
+  it("converts a legal nonterminal Runner agenda point through card development", () => {
+    resetResidentPlanPortfolioMemory();
+    const desperate = legalAction(
+      "play-desperate",
+      "runner",
+      "play_event",
+      "Play Desperate Competitor",
+      { credits: 0, clicks: 1 },
+      {
+        source: "desperate-card",
+        payload: {
+          cardId: "desperate-card",
+          sourceDefinitionId: "onr_v1_083_desperate-competitor",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityKey:
+            "abilities_on_play_gain_runner_event_agenda_point",
+          cardImplementationAbilityId:
+            "onr_v1_083_desperate-competitor:abilities_on_play_gain_runner_event_agenda_point",
+        },
+      },
+    );
+    const credit = legalAction(
+      "credit",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [desperate, credit]);
+    input.playerView.own.agendaPoints = 3;
+    input.playerView.agendaPointsToWin = 7;
+    input.playerView.own.gripOrHq = [
+      visibleCard("desperate-card", "runner", "event", {
+        definitionId: "onr_v1_083_desperate-competitor",
+      }),
+    ];
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: desperate.actionId,
+      reasonCode: "plan_first.runner.develop_board_and_hand",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.develop_board_and_hand",
+      },
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_priority_class:P3",
+        expect.stringContaining(
+          "runner_legal_immediate_agenda_point_conversion",
+        ),
+      ]),
+    );
+  });
+
   it("does not let generic development reject a terminal-win-owned Runner event", () => {
     const desperate = legalAction(
       "play-desperate",
