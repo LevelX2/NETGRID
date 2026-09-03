@@ -713,7 +713,47 @@ function formatSemanticChronicleEvent(
     actionType === "continue_run" &&
     payload.encounterContinue === true
   ) {
-    titleKey = "event.icePassed";
+    const unbrokenSubroutineCount = numberValue(
+      payload.unbrokenSubroutineCount,
+    );
+    if (stringValue(payload.result) === "ended") {
+      const resolvedEffects = resolvedEffectsFromPayload(
+        payload.resolvedEffects,
+      );
+      const endRunEffectIndex = resolvedEffects.findIndex((effect) => {
+        if (
+          stringValue(effect.kind) !== "resolve_subroutine" ||
+          effect.endedRun !== true
+        )
+          return false;
+        const subroutineType = stringValue(effect.subroutineType);
+        return (
+          subroutineType === "end_the_run" ||
+          subroutineType === "end_the_run_unless_runner_pays"
+        );
+      });
+      const endRunEffect = resolvedEffects[endRunEffectIndex];
+      if (endRunEffect) {
+        const endRunItem = formatSemanticChronicleEffect(
+          event,
+          endRunEffect,
+          endRunEffectIndex,
+          side,
+          translate,
+          context.cardPresentationsById,
+        );
+        explicitTitle = endRunItem.title;
+        detailChips = endRunItem.chips.filter(
+          (chip) => !actor || chip !== translate(`side.${actor}`),
+        );
+      } else {
+        titleKey = "event.runEnded";
+      }
+    } else if (unbrokenSubroutineCount === 0) {
+      titleKey = "event.icePassed";
+    } else {
+      titleKey = "event.runContinued";
+    }
   } else if (actionType === "access_card") {
     if (numberedAccess && accessNumber !== undefined) {
       explicitTitle = translate(

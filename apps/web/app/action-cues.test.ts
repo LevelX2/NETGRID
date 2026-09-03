@@ -406,6 +406,47 @@ describe("deriveOpponentActionCues", () => {
     expect(cueHasHiddenLeak(corpCues[0]!)).toBe(false);
   });
 
+  it("shows an ending ICE subroutine instead of an ICE-passed flyover", () => {
+    const endRunEvent = event("evt_end_run_subroutine", "continue_run", {
+      actor: "runner",
+      result: "ended",
+      encounterContinue: true,
+      encounterWillEndRun: true,
+      unbrokenSubroutineCount: 1,
+      sourceDefinitionId: "test_kipa",
+      resolvedEffects: [
+        {
+          effectId: "subroutine_1",
+          kind: "resolve_subroutine",
+          visibility: "public",
+          side: "runner",
+          sourceDefinitionId: "test_kipa",
+          sourceTitle: "Kipa",
+          subroutineIndex: 0,
+          subroutineType: "end_the_run",
+          endedRun: true,
+        },
+      ],
+    });
+    const cues = deriveOpponentActionCues({
+      viewerSide: "corp",
+      playerView: view("corp"),
+      events: [endRunEvent],
+      translate: testTranslate({
+        "side.runner": "Runner",
+        "category.run": "Run",
+        "effect.numberedEndRunSubroutine":
+          "{source}: Subroutine {number} beendet den Run.",
+        "effect.numberedSubroutineChip": "Subroutine {number}",
+        "effect.runEndedChip": "Run beendet",
+      }),
+    });
+
+    expect(cues).toHaveLength(1);
+    expect(cues[0]?.title).toBe("Kipa: Subroutine 1 beendet den Run.");
+    expect(cues[0]?.title).not.toContain("passiert");
+  });
+
   it("keeps Vacuum Link die roll cues visible for both players", () => {
     const vacuumEvent = event("evt_vacuum", "continue_run", {
       actor: "runner",

@@ -864,6 +864,50 @@ describe("semantic chronicle localization", () => {
     );
   });
 
+  it("uses the ending ICE subroutine instead of claiming that the ICE was passed", () => {
+    const kipa = event("continue_run", {
+      actor: "runner",
+      result: "ended",
+      encounterContinue: true,
+      encounterWillEndRun: true,
+      unbrokenSubroutineCount: 1,
+      sourceDefinitionId: "test_kipa",
+      resolvedEffects: [
+        {
+          effectId: "subroutine_1",
+          kind: "resolve_subroutine",
+          visibility: "public",
+          side: "runner",
+          reason: "ice_subroutine",
+          sourceDefinitionId: "test_kipa",
+          sourceTitle: "Kipa",
+          subroutineIndex: 0,
+          subroutineType: "end_the_run",
+          endedRun: true,
+        },
+      ],
+    });
+
+    const de = formatChronicleEvent(kipa, "corp", {
+      translate: translate("de"),
+    });
+    const en = formatChronicleEvent(kipa, "corp", {
+      translate: translate("en"),
+    });
+    const fr = formatChronicleEvent(kipa, "corp", {
+      translate: translate("fr"),
+    });
+
+    expect(de.title).toBe("Kipa: Subroutine 1 beendet den Run.");
+    expect(en.title).toBe("Kipa: subroutine 1 ends the run.");
+    expect(fr.title).toBe(
+      "Kipa\u00a0: le sous-programme 1 met fin au piratage.",
+    );
+    expect(`${de.title} ${en.title} ${fr.title}`).not.toMatch(
+      /passiert|passed|passé/,
+    );
+  });
+
   it("numbers multiaccess cards and combines access with steal or trash outcomes", () => {
     const firstAccess = {
       ...event("access_card", {
