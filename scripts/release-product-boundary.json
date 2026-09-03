@@ -1,0 +1,81 @@
+{
+  "schemaVersion": "netgrid-release-product-boundary-v1",
+  "classifications": [
+    {
+      "id": "product_runtime",
+      "description": "Statische Daten, die ein normaler Produktpfad direkt benötigt.",
+      "paths": [
+        "data/ai/ai-deck-pool-1.1.0.json",
+        "data/ai/card-set-ai-readiness-v1.json",
+        "data/ai/card-spec-ai-hints-generated.json",
+        "data/ai/strategy-goals-v1.json",
+        "data/decks/deck-format-profiles-0.8.json",
+        "data/decks/deck-format-profiles-1.3.0.json",
+        "data/decks/deck-snapshots-0.8.json",
+        "data/decks/deck-templates-0.8.json",
+        "data/decks/standard-deck-catalog-1.0.0.json",
+        "data/decks/standard-deck-curation-2026-07-18.json",
+        "data/decks/standard-deck-guides-2.0.0.json",
+        "data/scenarios/card-support-ai-supported-current.json"
+      ]
+    },
+    {
+      "id": "product_optional",
+      "description": "Eigene redistribuierbare Anzeigeassets, die nur über einen ausdrücklichen Produktentscheid ausgeliefert werden.",
+      "patterns": ["data/card-assets/localized/de/**"]
+    },
+    {
+      "id": "development_gate",
+      "description": "Versionierte Entwicklungs-, Benchmark-, Test- und Freigabeevidence; kein Releaseinhalt.",
+      "patterns": [
+        "data/ai/**",
+        "data/card-assets/*.json",
+        "data/card-import/**",
+        "data/decks/**",
+        "data/local-assets/card-images/generated-*/**",
+        "data/reports/**",
+        "data/scenarios/**",
+        "data/schemas/**"
+      ]
+    },
+    {
+      "id": "local_runtime",
+      "description": "Lokale veränderliche Laufzeit- und Analyseevidence; nie versionieren oder ausliefern.",
+      "patterns": ["data/local/**", "data/runtime/**"]
+    },
+    {
+      "id": "private_asset",
+      "description": "Private Quellen, Scans und Kartenbildpakete; nie im Hauptrelease.",
+      "patterns": ["data/local-assets/**", "docs/source/PrivateScans/**"]
+    }
+  ],
+  "forbiddenTrackedPatterns": [
+    ".env",
+    ".env.*",
+    "**/*.sqlite",
+    "**/*.sqlite-*",
+    "data/local/**",
+    "data/runtime/**",
+    "docs/source/PrivateScans/**"
+  ],
+  "allowedTrackedExceptions": [".env.example"],
+  "forbiddenArtifactPatterns": [
+    ".git/**",
+    ".github/**",
+    ".codex/**",
+    ".env",
+    ".env.*",
+    "**/*.sqlite",
+    "**/*.sqlite-*",
+    "**/*.test.*",
+    "**/test-fixtures/**",
+    "coverage/**",
+    "data/local/**",
+    "data/runtime/**",
+    "docs/source/PrivateScans/**",
+    "node_modules/.pnpm/@playwright+test*/**",
+    "output/**",
+    "playwright-report/**",
+    "test-results/**"
+  ]
+}
