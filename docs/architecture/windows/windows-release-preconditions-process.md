@@ -1,6 +1,6 @@
 # Windows-Release-Vorbedingungen
 
-Status: `package_verified` (`WRP-02`)
+Status: `package_verified` (`WRP-03`)
 Stand: 2026-09-03
 Quelle: Nutzerauftrag zur Vorbereitung eines späteren geführten
 Windows-Installers ohne vorgezogene Installerimplementierung
@@ -353,7 +353,7 @@ markiere das Goal erst dann als complete.
 - [x] WRP-00 – Prozess und Releaseinventar
 - [x] WRP-01 – Produktive Datenautoritäten
 - [x] WRP-02 – Runtime-Entry-Points
-- [ ] WRP-03 – Testset- und Demo-Grenze
+- [x] WRP-03 – Testset- und Demo-Grenze
 - [ ] WRP-04 – Datenroot und Pfadvertrag
 - [ ] WRP-05 – Installerneutraler Produktionsbuild
 - [ ] WRP-06 – Positives Releasemanifest
@@ -389,3 +389,14 @@ markiere das Goal erst dann als complete.
   Ergebnisvergleich belegt identisches Simulationsverhalten. KI-Typecheck,
   KI-Strukturgates, Side-Safety-Tests, Server-Typecheck und alle 155
   Multiplayer-Tests sind grün.
+- WRP-03: `NETGRID_RUNTIME_PROFILE=release` ist ein zentraler fail-closed
+  Produktmodus: Weder die Umgebungsvariable noch ein interner Override kann
+  darin Testkarten freischalten. Der CardSpec-Generator erzeugt für den
+  späteren Build deterministisch einen Releaseindex ohne `testset`, ohne eine
+  zweite versionierte Kartenregistrierung zu pflegen. Legacy-Demo-Deckdaten
+  besitzen getrennte Runtime-Subpaths und eine kleine leere
+  Releasesubstitution; Standarddecks und aktuelle Profile bleiben separat
+  erhalten. Das positive Releaseprofil verbietet Testset-Quellen,
+  Demo-Deckquellen und die alten Demo-JSON-Dateien. Generator-Selbsttest,
+  Releaseindex-Gate, Shared-Vertragstests, Deck-Setup-Tests, Katalog- und
+  Web-API-Tests sowie Paket- und Releasegrenzgates sind grün.

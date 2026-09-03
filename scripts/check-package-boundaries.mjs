@@ -177,8 +177,10 @@ function allowedWorkspaceSubpath(file, specifier) {
       "@netgrid/runtime-data/card-set-ai-readiness",
       "@netgrid/runtime-data/card-spec-ai-hints",
       "@netgrid/runtime-data/card-support",
-      "@netgrid/runtime-data/decks",
+      "@netgrid/runtime-data/deck-format-profiles",
       "@netgrid/runtime-data/display-assets",
+      "@netgrid/runtime-data/legacy-demo-decks",
+      "@netgrid/runtime-data/standard-decks",
       "@netgrid/runtime-data/strategy-goals",
     ].includes(specifier);
   if (specifier.startsWith("@netgrid/cards/"))

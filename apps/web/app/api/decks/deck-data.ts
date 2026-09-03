@@ -1,9 +1,11 @@
 import {
   deckFormatProfiles08Data as profilesData,
   deckFormatProfiles130Data as profilesData130,
+} from "@netgrid/runtime-data/deck-format-profiles";
+import {
   deckSnapshots08Data as snapshotsData,
   deckTemplates08Data as templatesData,
-} from "@netgrid/runtime-data/decks";
+} from "@netgrid/runtime-data/legacy-demo-decks";
 import {
   assertDeckPayloadSafe,
   createDeckSnapshot,

@@ -59,6 +59,7 @@
     "check:i18n": "node scripts/check-web-i18n.mjs",
     "check:release-boundary": "node scripts/check-release-product-boundary.mjs",
     "check:release-boundary:selftest": "node scripts/check-release-product-boundary.mjs --self-test",
+    "check:release-card-index": "node scripts/check-release-card-index.mjs",
     "check:ai-deck-doctrine-strategy": "pnpm --filter @netgrid/server exec tsx ../../scripts/check-ai-deck-doctrine-strategy.ts",
     "check:standard-deck-guides": "pnpm --filter @netgrid/server exec tsx ../../scripts/check-standard-deck-guides.ts",
     "analyze:standard-deck-guides": "pnpm --filter @netgrid/server exec tsx ../../scripts/analyze-standard-deck-guides.ts",

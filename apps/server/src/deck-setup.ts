@@ -2,9 +2,9 @@ import { aiDeckPoolData } from "@netgrid/runtime-data/ai-deck-pool";
 import {
   deckFormatProfiles08Data as profilesData,
   deckFormatProfiles130Data as profilesData130,
-  deckSnapshots08Data as snapshotsData,
-  standardDeckCatalogData,
-} from "@netgrid/runtime-data/decks";
+} from "@netgrid/runtime-data/deck-format-profiles";
+import { deckSnapshots08Data as snapshotsData } from "@netgrid/runtime-data/legacy-demo-decks";
+import { standardDeckCatalogData } from "@netgrid/runtime-data/standard-decks";
 import { createHash } from "node:crypto";
 import {
   aiSupportStageReady,
@@ -23,7 +23,7 @@ import {
 } from "@netgrid/decks";
 import {
   TEST_CARD_SET_ID,
-  testCardsEnabledFromEnvironment,
+  resolveTestCardAvailability,
   type ApiMatchCardPool,
   type StandardDeckGuideRef,
 } from "@netgrid/shared";
@@ -492,7 +492,7 @@ function cardPoolIncludesProteus(cardPool: MatchCardPool): boolean {
 }
 
 function testCardAvailability(override: boolean | undefined): boolean {
-  return override ?? testCardsEnabledFromEnvironment(process.env);
+  return resolveTestCardAvailability(process.env, override);
 }
 
 function deterministicSnapshotId(

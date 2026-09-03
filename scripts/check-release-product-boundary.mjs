@@ -143,6 +143,7 @@ function runSelfTest() {
   const policy = loadPolicy();
   const expected = new Map([
     ["data/ai/card-set-ai-readiness-v1.json", "product_runtime"],
+    ["data/decks/deck-snapshots-0.8.json", "development_gate"],
     ["data/scenarios/ai-vs-ai-smoke-replay.json", "development_gate"],
     ["data/local/example.json", "local_runtime"],
     ["data/local-assets/private/source.png", "private_asset"],

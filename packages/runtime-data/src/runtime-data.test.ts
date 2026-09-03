@@ -6,13 +6,22 @@ import { cardSupportAiSupportedData } from "./card-support";
 import {
   deckFormatProfiles08Data,
   deckFormatProfiles130Data,
+} from "./deck-format-profiles";
+import {
   deckSnapshots08Data,
   deckTemplates08Data,
+} from "./legacy-demo-decks";
+import {
   standardDeckCatalogData,
   standardDeckCurationData,
   standardDeckGuidesData,
-} from "./decks";
+} from "./standard-decks";
 import { localizedDeCardSkinData } from "./display-assets";
+import {
+  deckFormatProfiles08Data as releaseProfiles08Data,
+  deckSnapshots08Data as releaseSnapshots08Data,
+  deckTemplates08Data as releaseTemplates08Data,
+} from "./release-deck-fixtures";
 import { strategyGoalsData } from "./strategy-goals";
 
 describe("product runtime data authority", () => {
@@ -30,5 +39,11 @@ describe("product runtime data authority", () => {
     expect(standardDeckCurationData.schemaVersion).toBeTruthy();
     expect(standardDeckGuidesData.schemaVersion).toBeTruthy();
     expect(localizedDeCardSkinData.schemaVersion).toBeTruthy();
+  });
+
+  it("provides empty release substitutions for legacy demo fixtures", () => {
+    expect(releaseProfiles08Data.profiles).toEqual([]);
+    expect(releaseSnapshots08Data.snapshots).toEqual([]);
+    expect(releaseTemplates08Data.templates).toEqual([]);
   });
 });

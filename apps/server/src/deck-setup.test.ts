@@ -1,10 +1,18 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 
 import {
   resolveParticipantDeckPair,
   resolveParticipantDeckSetup,
   standardDeckGuideRefForSnapshot,
 } from "./deck-setup";
+
+const previousRuntimeProfile = process.env.NETGRID_RUNTIME_PROFILE;
+
+afterEach(() => {
+  if (previousRuntimeProfile === undefined)
+    delete process.env.NETGRID_RUNTIME_PROFILE;
+  else process.env.NETGRID_RUNTIME_PROFILE = previousRuntimeProfile;
+});
 
 describe("AI deck readiness stages", () => {
   it("rejects test-card snapshots unless the backend explicitly enables them", () => {
@@ -20,6 +28,20 @@ describe("AI deck readiness stages", () => {
       resolveParticipantDeckPair(input, { allowTestCards: true }).runnerSnapshot
         .deckSnapshotId,
     ).toBe("demo_runner_008_snapshot_v0_8");
+  });
+
+  it("cannot activate test-card snapshots in the release profile", () => {
+    process.env.NETGRID_RUNTIME_PROFILE = "release";
+
+    expect(() =>
+      resolveParticipantDeckPair(
+        {
+          runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+          corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8",
+        },
+        { allowTestCards: true },
+      ),
+    ).toThrow("test_content_forbidden_in_release_profile");
   });
 
   it("resolves curated standard decks for match start", () => {

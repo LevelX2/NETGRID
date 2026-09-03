@@ -8,8 +8,11 @@
     "./card-set-ai-readiness": "./src/card-set-ai-readiness.ts",
     "./card-spec-ai-hints": "./src/card-spec-ai-hints.ts",
     "./card-support": "./src/card-support.ts",
-    "./decks": "./src/decks.ts",
+    "./deck-format-profiles": "./src/deck-format-profiles.ts",
     "./display-assets": "./src/display-assets.ts",
+    "./legacy-demo-decks": "./src/legacy-demo-decks.ts",
+    "./release-deck-fixtures": "./src/release-deck-fixtures.ts",
+    "./standard-decks": "./src/standard-decks.ts",
     "./strategy-goals": "./src/strategy-goals.ts"
   },
   "types": "./src/ai-deck-pool.ts",

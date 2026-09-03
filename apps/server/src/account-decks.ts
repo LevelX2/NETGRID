@@ -1,9 +1,11 @@
 import {
   deckFormatProfiles08Data as profilesData,
   deckFormatProfiles130Data as profilesData130,
+} from "@netgrid/runtime-data/deck-format-profiles";
+import {
   standardDeckCatalogData,
   standardDeckGuidesData as standardDeckGuideData,
-} from "@netgrid/runtime-data/decks";
+} from "@netgrid/runtime-data/standard-decks";
 import { randomBytes } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";

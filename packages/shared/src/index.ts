@@ -71,9 +71,13 @@ export {
 export { DEMO_DECKS } from "./demo-decks";
 export { ORIGINALSET_DEFAULT_DECKS } from "./originalset-default-decks";
 export {
+  RUNTIME_PROFILE_ENVIRONMENT_VARIABLE,
   TEST_CARD_ENVIRONMENT_VARIABLE,
   TEST_CARD_SET_ID,
+  resolveTestCardAvailability,
+  runtimeProfileFromEnvironment,
   testCardsEnabledFromEnvironment,
+  type RuntimeProfile,
 } from "./test-card-availability";
 export { CURRENT_RULES_BASELINE, type RulesBaseline } from "./baselines";
 import type { RulesBaseline } from "./baselines";
