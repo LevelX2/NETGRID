@@ -204,5 +204,10 @@ function runAudit() {
   );
 }
 
-if (process.argv.includes("--self-test")) runSelfTest();
-else runAudit();
+const isMain =
+  process.argv[1] !== undefined &&
+  resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isMain) {
+  if (process.argv.includes("--self-test")) runSelfTest();
+  else runAudit();
+}

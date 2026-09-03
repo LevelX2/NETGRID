@@ -69,6 +69,16 @@
     "packages/ai/src/simulation/"
   ],
   "runtimeDataAuthorityRoot": "packages/runtime-data/src/",
+  "artifactAllowedPatterns": [
+    "app/apps/web/**",
+    "app/data/**",
+    "app/node_modules/**",
+    "app/package.json",
+    "app/server.mjs",
+    "config/runtime.env.example",
+    "product-layout.json",
+    "product-manifest.json"
+  ],
   "forbiddenArtifactPatterns": [
     ".git/**",
     ".github/**",
@@ -77,7 +87,7 @@
     ".env.*",
     "**/*.sqlite",
     "**/*.sqlite-*",
-    "**/*.test.*",
+    "app/packages/**/*.test.*",
     "**/test-fixtures/**",
     "packages/cards/src/sets/testset.set-spec.ts",
     "packages/cards/src/specs/testset/**",

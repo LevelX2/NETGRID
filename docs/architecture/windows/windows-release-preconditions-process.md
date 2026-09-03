@@ -1,6 +1,6 @@
 # Windows-Release-Vorbedingungen
 
-Status: `package_verified` (`WRP-05`)
+Status: `package_verified` (`WRP-06`)
 Stand: 2026-09-03
 Quelle: Nutzerauftrag zur Vorbereitung eines späteren geführten
 Windows-Installers ohne vorgezogene Installerimplementierung
@@ -356,7 +356,7 @@ markiere das Goal erst dann als complete.
 - [x] WRP-03 – Testset- und Demo-Grenze
 - [x] WRP-04 – Datenroot und Pfadvertrag
 - [x] WRP-05 – Installerneutraler Produktionsbuild
-- [ ] WRP-06 – Positives Releasemanifest
+- [x] WRP-06 – Positives Releasemanifest
 - [ ] WRP-07 – Isolierter Produktions-Smoke
 - [ ] WRP-08 – Abschluss und Handoff
 
@@ -420,3 +420,11 @@ markiere das Goal erst dann als complete.
   Sharp-Windows-Runtime und liefert einen installerlesbaren Layoutvertrag mit
   `de`, `en` und `fr`. Der vollständige optimierte Next-Build, TypeScript,
   statische Seitengenerierung und Serverbundle sind erfolgreich durchgelaufen.
+- WRP-06: Jeder Build erzeugt `product-manifest.json` mit relativem Pfad,
+  Byteanzahl und SHA-256 für jede ausgelieferte Datei. Der unabhängige
+  `check:windows-release-output` akzeptiert nur die positiven Artefaktroots,
+  nur ausdrücklich produktive oder optionale statische Daten und keine
+  Symlinks. Er verlangt beide Node-Entrypoints, die Windows-x64-Sharp-Runtime,
+  Runtimekonfiguration und Layoutvertrag und verifiziert Vollständigkeit sowie
+  Hashes. Sein Negativ-Selbsttest erkennt eine nachträglich eingeschleuste
+  SQLite-Datei; der Audit des realen optimierten Outputs ist grün.

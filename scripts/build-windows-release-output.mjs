@@ -1,9 +1,11 @@
 import { spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import {
   cpSync,
   existsSync,
   mkdirSync,
   readFileSync,
+  readdirSync,
   realpathSync,
   rmSync,
   writeFileSync,
@@ -153,6 +155,7 @@ try {
     )}\n`,
     "utf8",
   );
+  writeProductManifest(outputRoot);
   writeFileSync(
     path.join(temporaryRoot, "server-metafile.json"),
     `${JSON.stringify(serverResult.metafile, null, 2)}\n`,
@@ -238,6 +241,42 @@ function copySharpWindowsRuntime(applicationRoot) {
       throw new Error(`release_sharp_dependency_missing:${source}`);
     cpSync(source, target, { recursive: true, dereference: true });
   }
+}
+
+function writeProductManifest(root) {
+  const manifestPath = path.join(root, "product-manifest.json");
+  const files = collectFiles(root)
+    .filter((file) => file !== manifestPath)
+    .map((file) => {
+      const content = readFileSync(file);
+      return {
+        path: slash(path.relative(root, file)),
+        bytes: content.byteLength,
+        sha256: createHash("sha256").update(content).digest("hex"),
+      };
+    });
+  writeFileSync(
+    manifestPath,
+    `${JSON.stringify(
+      {
+        schemaVersion: "netgrid-product-manifest-v1",
+        hashAlgorithm: "sha256",
+        files,
+      },
+      null,
+      2,
+    )}\n`,
+    "utf8",
+  );
+}
+
+function collectFiles(directory) {
+  return readdirSync(directory, { withFileTypes: true })
+    .sort((left, right) => left.name.localeCompare(right.name))
+    .flatMap((entry) => {
+      const target = path.join(directory, entry.name);
+      return entry.isDirectory() ? collectFiles(target) : [target];
+    });
 }
 
 function optionValue(name) {
