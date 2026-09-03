@@ -1,7 +1,7 @@
 import { appendFile, mkdir } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import type { Side } from "@netgrid/shared";
+import { resolveServerRuntimePaths } from "./runtime-paths";
 
 export type ConnectionAuditEventName =
   | "server_start"
@@ -69,7 +69,9 @@ export function createConnectionAuditLoggerFromEnv(
     return noopConnectionAuditLogger;
   if (env.VITEST === "true" || env.NODE_ENV === "test")
     return noopConnectionAuditLogger;
-  return createFileConnectionAuditLogger(env.NETGRID_CONNECTION_AUDIT_LOG_PATH);
+  return createFileConnectionAuditLogger(
+    resolveServerRuntimePaths({ env }).connectionAuditLogPath,
+  );
 }
 
 function sanitizeConnectionAuditEvent(
@@ -83,6 +85,5 @@ function sanitizeConnectionAuditEvent(
 }
 
 function defaultConnectionAuditLogPath(): string {
-  const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-  return resolve(root, "data/runtime/logs/connection-audit.ndjson");
+  return resolveServerRuntimePaths().connectionAuditLogPath;
 }

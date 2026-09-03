@@ -1,25 +1,15 @@
 import { existsSync } from "node:fs";
-import { basename, dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
-import { envValue } from "./internet-hardening";
+import { basename, resolve } from "node:path";
 import {
-  DEFAULT_SQLITE_STORAGE_PATH,
-  DEFAULT_STORAGE_BACKUP_DIR,
   SqliteMatchStorage,
   inspectSqliteStorage,
   restoreSqliteStorageBackup,
 } from "./storage-sqlite";
+import { resolveServerRuntimePaths } from "./runtime-paths";
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const command = process.argv[2] ?? "inspect";
-const dbPath = resolve(
-  envValue(process.env, "NETGRID_SQLITE_STORAGE_PATH") ??
-    resolve(root, DEFAULT_SQLITE_STORAGE_PATH),
-);
-const backupDir = resolve(
-  envValue(process.env, "NETGRID_STORAGE_BACKUP_DIR") ??
-    resolve(root, DEFAULT_STORAGE_BACKUP_DIR),
-);
+const { matchSqlitePath: dbPath, storageBackupDir: backupDir } =
+  resolveServerRuntimePaths();
 
 try {
   if (command === "backup") {

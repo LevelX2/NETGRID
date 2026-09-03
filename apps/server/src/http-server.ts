@@ -5,8 +5,6 @@ import {
   type ServerResponse,
 } from "node:http";
 import { networkInterfaces } from "node:os";
-import { fileURLToPath } from "node:url";
-import { dirname, resolve } from "node:path";
 import { WebSocket, WebSocketServer } from "ws";
 import { isAiDeckSnapshotRuntimeError } from "@netgrid/ai";
 import { simulateAiGame } from "@netgrid/ai/product-simulation";
@@ -41,12 +39,7 @@ import {
   gamebookDownloadFilename,
   normalizeGamebookLocale,
 } from "./gamebook-localization";
-import {
-  DEFAULT_SQLITE_STORAGE_PATH,
-  DEFAULT_STORAGE_BACKUP_DIR,
-  SqliteMatchStorage,
-  StorageError,
-} from "./storage-sqlite";
+import { SqliteMatchStorage, StorageError } from "./storage-sqlite";
 import type {
   StorageMaintenanceCleanupApplyInput,
   StorageMaintenanceCleanupFilters,
@@ -122,11 +115,8 @@ import {
   PRIVATE_CARD_IMAGE_PACK_PROFILES,
   type PrivateCardImagePackProfileId,
 } from "@netgrid/card-images";
+import { resolveServerRuntimePaths } from "./runtime-paths";
 
-const NETGRID_REPOSITORY_ROOT = resolve(
-  dirname(fileURLToPath(import.meta.url)),
-  "../../..",
-);
 const MAINTENANCE_ANALYSIS_BUNDLE_ROUTE =
   /^\/api\/storage\/maintenance\/analysis\/matches\/([^/]+)\/bundle$/;
 const MAINTENANCE_DECISION_ANALYSIS_ROUTE =
@@ -136,33 +126,22 @@ const MAINTENANCE_AI_TRACE_INDEX_ROUTE =
 const CARD_IMAGE_MAINTENANCE_JOB_ROUTE =
   /^\/api\/storage\/maintenance\/card-images\/jobs\/([^/]+)$/;
 
-function resolveRepositoryStoragePath(path: string): string {
-  return resolve(NETGRID_REPOSITORY_ROOT, path);
-}
-
 export function resolveConfiguredMatchSqlitePath(
   env: NodeJS.ProcessEnv = process.env,
 ): string {
-  return resolveRepositoryStoragePath(
-    envValue(env, "NETGRID_SQLITE_STORAGE_PATH") ?? DEFAULT_SQLITE_STORAGE_PATH,
-  );
+  return resolveServerRuntimePaths({ env }).matchSqlitePath;
 }
 
 export function resolveConfiguredAccountSqlitePath(
   env: NodeJS.ProcessEnv = process.env,
 ): string {
-  const accountPath = envValue(env, "NETGRID_ACCOUNT_SQLITE_PATH");
-  return accountPath
-    ? resolveRepositoryStoragePath(accountPath)
-    : resolveConfiguredMatchSqlitePath(env);
+  return resolveServerRuntimePaths({ env }).accountSqlitePath;
 }
 
 function resolveConfiguredStorageBackupDir(
   env: NodeJS.ProcessEnv = process.env,
 ): string {
-  return resolveRepositoryStoragePath(
-    envValue(env, "NETGRID_STORAGE_BACKUP_DIR") ?? DEFAULT_STORAGE_BACKUP_DIR,
-  );
+  return resolveServerRuntimePaths({ env }).storageBackupDir;
 }
 
 type ClientWsMessage =

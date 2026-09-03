@@ -1,6 +1,6 @@
 # Windows-Release-Vorbedingungen
 
-Status: `package_verified` (`WRP-03`)
+Status: `package_verified` (`WRP-04`)
 Stand: 2026-09-03
 Quelle: Nutzerauftrag zur Vorbereitung eines späteren geführten
 Windows-Installers ohne vorgezogene Installerimplementierung
@@ -354,7 +354,7 @@ markiere das Goal erst dann als complete.
 - [x] WRP-01 – Produktive Datenautoritäten
 - [x] WRP-02 – Runtime-Entry-Points
 - [x] WRP-03 – Testset- und Demo-Grenze
-- [ ] WRP-04 – Datenroot und Pfadvertrag
+- [x] WRP-04 – Datenroot und Pfadvertrag
 - [ ] WRP-05 – Installerneutraler Produktionsbuild
 - [ ] WRP-06 – Positives Releasemanifest
 - [ ] WRP-07 – Isolierter Produktions-Smoke
@@ -400,3 +400,13 @@ markiere das Goal erst dann als complete.
   Demo-Deckquellen und die alten Demo-JSON-Dateien. Generator-Selbsttest,
   Releaseindex-Gate, Shared-Vertragstests, Deck-Setup-Tests, Katalog- und
   Web-API-Tests sowie Paket- und Releasegrenzgates sind grün.
+- WRP-04: `resolveServerRuntimePaths` bindet Match- und Account-SQLite,
+  Backups, Verbindungs-Auditlog und Maintenance-Authentifizierung an die
+  bestehende zentrale `NETGRID_DATA_ROOT`-Autorität der Kartenbildpfade. Im
+  Entwicklungsprofil bleiben die bisherigen Repositorypfade erhalten; im
+  Releaseprofil ist ein absoluter externer Root Pflicht und jeder relative
+  Einzeloverride wird abgewiesen. Die Beispielkonfiguration lässt
+  Einzelpfade leer, damit sie den Root nicht unbeabsichtigt übersteuern.
+  Pfadtests belegen vollständige und paarweise isolierte Roots;
+  Maintenance-, Storage-Hardening- und Kartenbildpfadtests sowie Server-,
+  Web- und Paket-Typechecks sind grün.
