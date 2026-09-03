@@ -18,9 +18,20 @@ import {
   runnerStartOfTurnOptionalInstalledCardConversionProfileFromPlanningCard,
   runnerStartOfTurnRandomEffectProfile,
   runnerStartOfTurnRandomEffectProfileFromPlanningCard,
+  runnerVoluntarySelfTrashLifecycleProfile,
 } from "./runner-canonical-card-facts";
 
 describe("Runner canonical card facts", () => {
+  it("derives the voluntary self-trash tradeoff from the complete lifecycle", () => {
+    expect(
+      runnerVoluntarySelfTrashLifecycleProfile("onr_classic_044_crash-space"),
+    ).toEqual({
+      turnStartCreditGain: 1,
+      leavePlayCreditLoss: 2,
+      exposesRunnerToAutomaticTraceSuccess: true,
+    });
+  });
+
   it("recognizes only a complete run-start random-strength breaker", () => {
     expect(
       runnerRunStartRandomStrengthSourceProfile("onr_v1_002_ai-boon"),

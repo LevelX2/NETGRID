@@ -147,16 +147,15 @@ describe("activatedAbilityPayload advancement semantics", () => {
     const ability: ActivatedCardAbilityImplementation = {
       kind: "activated",
       timing: "corp_main",
-      costs: [{ kind: "action", amount: 1 }],
+      costs: [
+        { kind: "action", amount: 1 },
+        { kind: "trash_source", amount: 1 },
+      ],
       effects: [
         {
           kind: "gain_credits_per_advancement_counter_on_source",
           recipient: "corp",
           amountPerCounter: 4,
-          visibility: "public",
-        },
-        {
-          kind: "trash_source",
           visibility: "public",
         },
       ],
@@ -180,7 +179,29 @@ describe("activatedAbilityPayload advancement semantics", () => {
       cardImplementationEconomyKind:
         "gain_credits_per_advancement_counter_on_source",
       cardImplementationAmountPerAdvancementCounter: 4,
-      cardImplementationTrashesSource: true,
+      cardImplementationTrashSourceCost: true,
+      cardImplementationTrashesSource: false,
+    });
+    const zeroCounterState = {
+      cardInstances: {
+        source: { controller: "corp", advancementCounters: 0 },
+      },
+    } as unknown as GameState;
+    expect(
+      activatedAbilityPayload(
+        "source" as never,
+        ability,
+        binding(ability),
+        zeroCounterState,
+      ),
+    ).toMatchObject({
+      gainCreditsAmount: 0,
+      advancementCounterCount: 0,
+      cardImplementationEconomyKind:
+        "gain_credits_per_advancement_counter_on_source",
+      cardImplementationAmountPerAdvancementCounter: 4,
+      cardImplementationTrashSourceCost: true,
+      cardImplementationTrashesSource: false,
     });
   });
 
