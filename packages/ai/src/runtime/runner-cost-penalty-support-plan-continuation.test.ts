@@ -405,6 +405,73 @@ describe("Runner cost/penalty support plan continuation", () => {
     });
   });
 
+  it("advances a run-start order origin through payment support without changing its owner", () => {
+    const originalAction = paymentAction(90);
+    const previous = directRunRootPortfolio(90);
+    const rootPlanInstanceId = previous.rootForegroundInstanceId!;
+    const executorInstanceId = previous.executorInstanceId!;
+    previous.selectedActionOrigin = {
+      rootPlanInstanceId,
+      executorInstanceId,
+      selectedActionId: originalAction.actionId,
+      selectedAtStateVersion: 90,
+      immediateChoicePolicy: "resolve_runner_run_start_order",
+      continuedThroughStateVersion: 90,
+      sourceStepId: `${rootPlanInstanceId}:contest`,
+      sourceActionType: "play_event",
+    };
+    previous.pendingRunnerCostPenaltySupportOrigin = {
+      rootPlanInstanceId,
+      executorInstanceId,
+      sourceStepId: `${rootPlanInstanceId}:contest`,
+      originalActionId: originalAction.actionId,
+      selectedAtStateVersion: 90,
+    };
+    const support = supportAction(91, originalAction.actionId);
+    const result: Extract<PlanSchedulerResult, { lane: "engine_window" }> = {
+      lane: "engine_window",
+      actionId: support.actionId,
+      origin: {
+        rootPlanInstanceId,
+        leafPlanInstanceId: executorInstanceId,
+        side: "runner",
+        windowKind: "optional_ability",
+        windowId: "runner_cost_penalty_support.91",
+        stateVersion: 91,
+        timingPoint: "runner_action.main",
+      },
+      portfolio: structuredClone(previous),
+      diagnostics: [
+        {
+          stage: "window",
+          code: "plan_bound_runner_cost_penalty_support_action",
+        },
+      ],
+    };
+
+    reconcileSelectedRunnerCostPenaltySupportOrigin(
+      input(91, [support]),
+      result,
+      previous,
+    );
+
+    expect(result.portfolio).toMatchObject({
+      stateVersion: 91,
+      rootForegroundInstanceId: rootPlanInstanceId,
+      executorInstanceId,
+      selectedActionOrigin: {
+        rootPlanInstanceId,
+        executorInstanceId,
+        selectedActionId: originalAction.actionId,
+        selectedAtStateVersion: 91,
+        continuedThroughStateVersion: 91,
+        immediateChoicePolicy: "resolve_runner_run_start_order",
+        sourceStepId: `${rootPlanInstanceId}:contest`,
+        sourceActionType: "play_event",
+      },
+    });
+  });
+
   it("preserves the run-plan owner when a trace bid opens payment support", () => {
     const originalAction = traceBidAction(225);
     const previous = runPortfolio(223);

@@ -2551,10 +2551,17 @@ function rebaseSelectedRunnerImmediateChoiceOriginForPaymentStep(
         "Advance a possible immediate Runner choice only with the exact original payment action, root, executor and consecutive Engine state.",
     });
   }
-  result.portfolio!.selectedActionOrigin = {
-    ...structuredClone(selectedOrigin),
-    selectedAtStateVersion: input.playerView.stateVersion,
-  };
+  result.portfolio!.selectedActionOrigin =
+    selectedOrigin.immediateChoicePolicy === "resolve_runner_run_start_order"
+      ? {
+          ...structuredClone(selectedOrigin),
+          selectedAtStateVersion: input.playerView.stateVersion,
+          continuedThroughStateVersion: input.playerView.stateVersion,
+        }
+      : {
+          ...structuredClone(selectedOrigin),
+          selectedAtStateVersion: input.playerView.stateVersion,
+        };
 }
 
 function bindRunnerEventInstallChoiceEngineContinuation(
