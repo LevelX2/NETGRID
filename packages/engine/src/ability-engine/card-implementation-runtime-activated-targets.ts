@@ -109,21 +109,20 @@ export function activatedAbilityPayload(
   const moveTopTrashEffect = moveTopTrashToGripEffect(ability);
   const exactEndRunEffect =
     ability.effects.length === 1 && ability.effects[0]?.kind === "end_run";
+  const totalImmediateCreditGain =
+    hostedCreditTakeAmount +
+    directCreditGain +
+    (advancementCounterCreditGain ?? 0);
   return {
     cardId,
     cardImplementationAbility: "activated",
     ...activatedAbilityBindingPayload(binding),
     cardImplementationAbilityTiming: offeredTiming,
     ...(ability.label ? { cardImplementationAbilityLabel: ability.label } : {}),
-    ...(hostedCreditTakeAmount +
-      directCreditGain +
-      (advancementCounterCreditGain ?? 0) >
-    0
+    ...(totalImmediateCreditGain > 0 ||
+    advancementCounterCreditGain !== undefined
       ? {
-          gainCreditsAmount:
-            hostedCreditTakeAmount +
-            directCreditGain +
-            (advancementCounterCreditGain ?? 0),
+          gainCreditsAmount: totalImmediateCreditGain,
         }
       : {}),
     ...(directCardDraw > 0 ? { drawCardsAmount: directCardDraw } : {}),

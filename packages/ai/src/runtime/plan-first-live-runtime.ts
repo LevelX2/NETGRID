@@ -63,6 +63,7 @@ import {
   runnerDebtFinancingProfile,
   runnerInstalledDebtFinancingLiability,
   runnerNoRunRecurringEconomyProfile,
+  runnerVoluntarySelfTrashLifecycleProfile,
 } from "./runner-canonical-card-facts";
 import { rememberStrategicIntentState } from "../strategic-intent-memory";
 import { runnerDrawTaxLiabilityProjection } from "./runner-draw-tax-liability-score";
@@ -6230,9 +6231,7 @@ export function runnerActionDispositions(
     ...(domain.installedAgendaScores ?? []).flatMap(
       (signal) => signal.actionIds,
     ),
-    ...(domain.terminalWins ?? []).flatMap(
-      (signal) => signal.actionIds ?? [],
-    ),
+    ...(domain.terminalWins ?? []).flatMap((signal) => signal.actionIds ?? []),
     ...coverageRejectedActionIds,
     ...unboundOneShotSearchActionIds,
     ...optionalProgramTrashInstallDispositionActionIds,
@@ -6654,9 +6653,7 @@ export function runnerActionDispositions(
     ...(domain.installedAgendaScores ?? []).flatMap(
       (signal) => signal.actionIds,
     ),
-    ...(domain.terminalWins ?? []).flatMap(
-      (signal) => signal.actionIds ?? [],
-    ),
+    ...(domain.terminalWins ?? []).flatMap((signal) => signal.actionIds ?? []),
     ...(domain.resourceLifecycle ?? []).flatMap((signal) => signal.actionIds),
     ...(domain.shellTradersPipelines ?? []).flatMap(
       (signal) => signal.actionIds,
@@ -20367,14 +20364,16 @@ function corpVisibleCardEconomyWithdrawals(
         "gain_credits_per_advancement_counter_on_source" &&
       typeof advancementCounterCount === "number" &&
       Number.isSafeInteger(advancementCounterCount) &&
-      advancementCounterCount > 0 &&
+      advancementCounterCount >= 0 &&
       advancementCounterCount === (sourceCard.advancementCounters ?? 0) &&
       typeof amountPerAdvancementCounter === "number" &&
       Number.isSafeInteger(amountPerAdvancementCounter) &&
       amountPerAdvancementCounter > 0 &&
       Number.isSafeInteger(
         advancementCounterCount * amountPerAdvancementCounter,
-      )
+      ) &&
+      action.payload?.gainCreditsAmount ===
+        advancementCounterCount * amountPerAdvancementCounter
         ? {
             payoutSource: "advancement_counter_cashout" as const,
             expectedGrossCreditGain:
@@ -20403,7 +20402,7 @@ function corpVisibleCardEconomyWithdrawals(
         unresolvedActionIds: [candidate.actionId],
         owner: "rules_contract",
         removalCondition:
-          "Project the current advancement-counter count and exact per-counter payout on the Engine LegalAction before the Corp economy plan may assess this cashout.",
+          "Project the current advancement-counter count and exact total payout on the Engine LegalAction before the Corp economy plan may assess this cashout.",
       });
     }
     const admittedPayout = hostedCreditPayout ?? advancementCounterPayout;
@@ -26381,7 +26380,62 @@ function runnerResourceLifecycleSignals(
   const leavePlayPaymentActions = candidates.filter((candidate) =>
     runnerCandidateIsLeavePlayPaymentLifecycleAction(input, candidate),
   );
-  if (leavePlayPaymentActions.length === 0) return [];
+  const voluntarySelfTrashSignals = candidates.flatMap((candidate) => {
+    const sourceCardInstanceId = candidate.sourceCardInstanceId;
+    const definitionId = candidate.sourceDefinitionId;
+    const action = input.legalActions.find(
+      (entry) => entry.actionId === candidate.actionId,
+    );
+    const profile = runnerVoluntarySelfTrashLifecycleProfile(definitionId);
+    const visibleSource = sourceCardInstanceId
+      ? (input.playerView.own.rig ?? []).find(
+          (card) => card.instanceId === sourceCardInstanceId,
+        )
+      : undefined;
+    const visibleTraceThreat = input.playerView.servers.some((server) =>
+      [...server.ice, ...server.root].some(
+        (card) =>
+          card.known === true &&
+          corpDefinitionHasTraceSource(card.definitionId),
+      ),
+    );
+    if (
+      !sourceCardInstanceId ||
+      !definitionId ||
+      !profile ||
+      !visibleSource ||
+      visibleSource.definitionId !== definitionId ||
+      action?.side !== "runner" ||
+      action.type !== "activated_card_ability" ||
+      action.source !== sourceCardInstanceId ||
+      action.expiresAtStateVersion !== input.playerView.stateVersion ||
+      action.payload?.cardId !== sourceCardInstanceId ||
+      action.payload?.cardImplementationCapabilityBindingKind !==
+        "card_spec_capability_key" ||
+      action.payload?.cardImplementationAbilityKey !== "trash_source_action" ||
+      action.payload?.cardImplementationTrashesSource !== true ||
+      (profile.exposesRunnerToAutomaticTraceSuccess && visibleTraceThreat)
+    ) {
+      return [];
+    }
+    return [
+      {
+        lifecycleId: `voluntary-self-trash:${definitionId}:${sourceCardInstanceId}`,
+        sourceCardInstanceId,
+        definitionId,
+        phase: "retain" as const,
+        actionIds: [],
+        rejectedActionIds: [candidate.actionId],
+        priorityClass: "P5" as const,
+        value: 0,
+        evidenceCodes: [
+          "runner_resource_self_trash_deferred_without_visible_hazard",
+          `runner_resource_retained_start_turn_credit_gain:${profile.turnStartCreditGain}`,
+          `runner_resource_avoided_leave_play_credit_loss:${profile.leavePlayCreditLoss}`,
+        ],
+      },
+    ];
+  });
   const visibleRemainingRunnerTurnCeiling = input.playerView.opponent.deckCount;
   const actionsBySourceInstance = new Map<string, ActionSemanticCandidate[]>();
   for (const candidate of leavePlayPaymentActions) {
@@ -26391,7 +26445,7 @@ function runnerResourceLifecycleSignals(
     actions.push(candidate);
     actionsBySourceInstance.set(sourceCardInstanceId, actions);
   }
-  return [...actionsBySourceInstance.entries()]
+  const leavePlayPaymentSignals = [...actionsBySourceInstance.entries()]
     .map(([sourceCardInstanceId, actions]) => {
       const definitionId = actions[0]?.sourceDefinitionId;
       if (
@@ -26509,6 +26563,10 @@ function runnerResourceLifecycleSignals(
         RunnerCorePlanDomain["resourceLifecycle"]
       >[number] => signal !== undefined,
     );
+  return uniqueBy(
+    [...leavePlayPaymentSignals, ...voluntarySelfTrashSignals],
+    (signal) => signal.lifecycleId,
+  );
 }
 
 function runnerCandidateIsLeavePlayPaymentLifecycleAction(

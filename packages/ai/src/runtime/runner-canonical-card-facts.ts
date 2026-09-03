@@ -21,6 +21,75 @@ export type RunnerNoRunRecurringEconomyProfile = Readonly<{
   invalidatingActionType: "start_run";
 }>;
 
+export type RunnerVoluntarySelfTrashLifecycleProfile = Readonly<{
+  turnStartCreditGain: number;
+  leavePlayCreditLoss: number;
+  exposesRunnerToAutomaticTraceSuccess: boolean;
+}>;
+
+export function runnerVoluntarySelfTrashLifecycleProfile(
+  definitionId: string | undefined,
+): RunnerVoluntarySelfTrashLifecycleProfile | undefined {
+  if (!definitionId) return undefined;
+  const planning = cardSpecPlanningCardByDefinitionId(definitionId)?.planning;
+  if (planning?.side !== "runner") return undefined;
+  const abilities = planning.engine.abilities ?? [];
+  const pureVoluntarySelfTrashAbilities = abilities.filter(
+    (ability) =>
+      ability.kind === "activated" &&
+      ability.timing === "runner_main" &&
+      ability.costs.length === 1 &&
+      ability.costs[0]?.kind === "action" &&
+      ability.costs[0].amount > 0 &&
+      ability.effects.length === 1 &&
+      ability.effects[0]?.kind === "trash_source",
+  );
+  if (pureVoluntarySelfTrashAbilities.length !== 1) return undefined;
+  const startTurnEffects = (
+    planning.engine.lifecycle?.start_of_runner_turn ?? []
+  ).flatMap((ability) => ability.effects);
+  const startTurnCreditAmounts = startTurnEffects.flatMap((effect) =>
+    effect.kind === "gain_credits" &&
+    (effect.recipient === "runner" || effect.recipient === "controller") &&
+    positiveSafeInteger(effect.amount)
+      ? [effect.amount]
+      : [],
+  );
+  if (
+    startTurnCreditAmounts.length === 0 ||
+    startTurnCreditAmounts.length !== startTurnEffects.length
+  ) {
+    return undefined;
+  }
+  const leavePlayEffects = planning.engine.lifecycle?.on_leave_play ?? [];
+  const leavePlayCreditLossAmounts = leavePlayEffects.flatMap((effect) =>
+    effect.kind === "lose_credits" &&
+    (effect.recipient === "runner" || effect.recipient === "controller") &&
+    positiveSafeInteger(effect.amount)
+      ? [effect.amount]
+      : [],
+  );
+  if (
+    leavePlayCreditLossAmounts.length === 0 ||
+    leavePlayCreditLossAmounts.length !== leavePlayEffects.length
+  ) {
+    return undefined;
+  }
+  return {
+    turnStartCreditGain: startTurnCreditAmounts.reduce(
+      (sum, amount) => sum + amount,
+      0,
+    ),
+    leavePlayCreditLoss: leavePlayCreditLossAmounts.reduce(
+      (sum, amount) => sum + amount,
+      0,
+    ),
+    exposesRunnerToAutomaticTraceSuccess:
+      planning.engine.runnerUtilityLongtail?.kind ===
+      "trace_attempts_auto_success_add_tag",
+  };
+}
+
 export function runnerRestrictedRunCreditProfile(
   definitionId: string | undefined,
 ): RunnerRestrictedRunCreditProfile | undefined {

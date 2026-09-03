@@ -15995,6 +15995,64 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("retains a positive-lifecycle self-trash resource and completes the turn when no visible hazard exists", () => {
+    resetResidentPlanPortfolioMemory();
+    const selfTrash = legalAction(
+      "runner.crash-space.self-trash",
+      "runner",
+      "activated_card_ability",
+      "Crash Space trashen",
+      { credits: 0, clicks: 1 },
+      {
+        source: "crash-space",
+        payload: {
+          cardId: "crash-space",
+          sourceDefinitionId: "onr_classic_044_crash-space",
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityKey: "trash_source_action",
+          cardImplementationAbilityId:
+            "onr_classic_044_crash-space:trash_source_action",
+          cardImplementationAbilityTiming: "runner_main",
+          cardImplementationTrashesSource: true,
+        },
+      },
+    );
+    const standardEnd = legalAction(
+      "runner.end_turn",
+      "runner",
+      "end_turn",
+      "End turn",
+      { credits: 0, clicks: 0 },
+      { source: "game_rule" },
+    );
+    const input = aiInput("runner", [selfTrash, standardEnd]);
+    input.playerView.own.clicks = 3;
+    input.playerView.own.credits = 11;
+    input.playerView.opponent.deckCount = 19;
+    input.playerView.own.rig = [
+      visibleCard("crash-space", "runner", "resource", {
+        definitionId: "onr_classic_044_crash-space",
+      }),
+    ];
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: standardEnd.actionId,
+      fallbackUsed: false,
+    });
+    expect(
+      decision.decisionDebug?.actionAlternatives?.find(
+        (alternative) => alternative.actionId === selfTrash.actionId,
+      ),
+    ).toMatchObject({
+      excluded: true,
+      whyNot: expect.arrayContaining([
+        "explicitly_nonproductive:runner.resource_lifecycle:runner_resource_self_trash_deferred_without_visible_hazard",
+      ]),
+    });
+  });
+
   it("retains a payable Loan while spending its remaining productive click", () => {
     resetResidentPlanPortfolioMemory();
     const loanEnd = legalAction(

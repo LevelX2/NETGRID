@@ -197,6 +197,7 @@ describe("AI input DTO score-conversion contract", () => {
         "gain_credits_per_advancement_counter_on_source",
       cardImplementationAmountPerAdvancementCounter: 4,
       advancementCounterCount: 2,
+      cardImplementationTrashSourceCost: true,
       gainCreditsAmount: 8,
     };
     const input = buildAiDecisionInputDto({
@@ -216,6 +217,7 @@ describe("AI input DTO score-conversion contract", () => {
         "gain_credits_per_advancement_counter_on_source",
       cardImplementationAmountPerAdvancementCounter: 4,
       advancementCounterCount: 2,
+      cardImplementationTrashSourceCost: true,
       gainCreditsAmount: 8,
     });
   });

@@ -251,6 +251,26 @@ function contributeCorpActionDispositionForCandidate(
   ) => void,
   facts: CorpActionDispositionContributorFacts,
 ): void {
+  const action = input.legalActions.find(
+    (entry) => entry.actionId === candidate.actionId,
+  );
+  if (
+    action?.side === "corp" &&
+    action.type === "activated_card_ability" &&
+    action.payload?.cardImplementationEconomyKind ===
+      "gain_credits_per_advancement_counter_on_source" &&
+    (action.payload?.cardImplementationTrashSourceCost === true ||
+      action.payload?.cardImplementationTrashesSource === true) &&
+    action.payload?.advancementCounterCount === 0 &&
+    action.payload?.gainCreditsAmount === 0
+  ) {
+    add(
+      candidate.actionId,
+      "corp.economy",
+      "corp_counter_cashout_zero_payout_is_nonproductive",
+    );
+    return;
+  }
   const optionalActionCapacitySignal = domain.economyNeeds.find(
     (signal) =>
       signal.kind === "resolve_optional_action_capacity_offer" &&
