@@ -17525,6 +17525,7 @@ function scoreProjectForCandidate(
     const deadlinePressure =
       scorelineFeasibility?.deadline === "last_draw_window" ||
       scorelineFeasibility?.deadline === "current_turn_only" ||
+      corpDeckoutAgendaFloodRequiresScoreDevelopment(input) ||
       corpCentralDefenseHqAgendaExposureIsDeadline(centralDefenseAllocation);
     const matchpointTarget =
       input.playerView.own.agendaPoints + agendaPoints >=
@@ -17597,6 +17598,10 @@ function scoreProjectForCandidate(
       input.playerView.own.gripOrHq.filter((card) =>
         visibleCardIsAgenda(input, card),
       ).length >= 2;
+    const deckoutAgendaFloodScoreWindow =
+      !sameTurnCloseout &&
+      scorelineFeasibility?.deadline !== "current_turn_only" &&
+      corpDeckoutAgendaFloodRequiresScoreDevelopment(input);
     const accessPunishingScoreDeceptionWindow =
       !sameTurnCloseout &&
       serverId === "new_remote" &&
@@ -17643,7 +17648,8 @@ function scoreProjectForCandidate(
       certifiedMatureRemoteScoreHorizon ||
       boundedStagedScoreWindow ||
       lastViableDeckoutMatchpointWindow ||
-      lastDrawAgendaRecycleWindow;
+      lastDrawAgendaRecycleWindow ||
+      deckoutAgendaFloodScoreWindow;
     const remoteRequiresNearMatchpointMaturity =
       !sameTurnCloseout &&
       serverId !== undefined &&
@@ -17659,6 +17665,7 @@ function scoreProjectForCandidate(
       sameTurnCloseout ||
       lastViableDeckoutMatchpointWindow ||
       lastDrawAgendaRecycleWindow ||
+      deckoutAgendaFloodScoreWindow ||
       accessPunishingScoreDeceptionWindow ||
       corpScoreProtectionNeedIsSatisfied(
         input,
@@ -17673,6 +17680,7 @@ function scoreProjectForCandidate(
       serverId !== "new_remote" &&
       recentlyCompromisedRemoteIds.has(serverId) &&
       !sameTurnCloseout &&
+      !deckoutAgendaFloodScoreWindow &&
       !corpScoreProtectionNeedIsSatisfied(
         input,
         protectionNeed,
@@ -17682,6 +17690,7 @@ function scoreProjectForCandidate(
     const fundingGap =
       lastViableDeckoutMatchpointWindow ||
       lastDrawAgendaRecycleWindow ||
+      deckoutAgendaFloodScoreWindow ||
       certifiedMatureRemoteScoreHorizon ||
       accessPunishingScoreDeceptionWindow
         ? 0
@@ -17746,6 +17755,8 @@ function scoreProjectForCandidate(
               ? `corp_recently_compromised_score_remote_requires_reprotection:${serverId}`
               : lastDrawAgendaRecycleWindow
                 ? `corp_last_draw_hq_agenda_recycle_install:${serverId ?? "unbound"}`
+                : deckoutAgendaFloodScoreWindow
+                  ? `corp_deckout_agenda_flood_score_install:${serverId ?? "unbound"}`
                 : accessPunishingScoreDeceptionWindow
                   ? `corp_access_punishing_agenda_deception_score_install:${serverId ?? "unbound"}`
                   : !scoreActionSemanticsKnown
@@ -17985,6 +17996,28 @@ function corpAgendaRecyclesHqAgendasIntoRd(
         support.evidence.includes("rnd.corp_agenda_recycle"),
     ) === true
   );
+}
+
+function corpDeckoutAgendaFloodRequiresScoreDevelopment(
+  input: AiDecisionInput,
+): boolean {
+  const remainingDeckCards = input.playerView.own.stackOrRdCount;
+  if (
+    typeof remainingDeckCards !== "number" ||
+    !Number.isSafeInteger(remainingDeckCards) ||
+    remainingDeckCards < 0 ||
+    remainingDeckCards > 6
+  ) {
+    return false;
+  }
+  const agendas = input.playerView.own.gripOrHq.filter((card) =>
+    visibleCardIsAgenda(input, card),
+  );
+  const visibleAgendaPoints = agendas.reduce(
+    (sum, agenda) => sum + requireVisibleAgendaPoints(input, agenda),
+    0,
+  );
+  return agendas.length >= 2 || visibleAgendaPoints >= 4;
 }
 
 function corpAgendaInstallHasCertifiedNearTermScoreHorizon(

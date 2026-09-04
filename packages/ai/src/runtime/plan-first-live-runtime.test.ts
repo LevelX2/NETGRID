@@ -14129,6 +14129,83 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
+  it("starts the existing score plan before an agenda-flood deckout becomes the last draw", () => {
+    resetResidentPlanPortfolioMemory();
+    const installAgenda = legalAction(
+      "install-deckout-flood-agenda",
+      "corp",
+      "install_card",
+      "Install Black Ice Quality Assurance in Remote 1",
+      { credits: 0, clicks: 1 },
+      {
+        source: "deckout-flood-agenda",
+        payload: {
+          cardId: "deckout-flood-agenda",
+          sourceDefinitionId: "onr_v1_191_black-ice-quality-assurance",
+          serverId: "remote_1",
+          placement: "root",
+        },
+      },
+    );
+    const credit = legalAction(
+      "deckout-flood-credit",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      { payload: { gainCreditsAmount: 1 } },
+    );
+    const input = aiInput("corp", [credit, installAgenda]);
+    input.playerView.own.agendaPoints = 6;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.credits = 6;
+    input.playerView.own.stackOrRdCount = 6;
+    input.playerView.own.gripOrHq = [
+      visibleCard("deckout-flood-agenda", "corp", "agenda", {
+        definitionId: "onr_v1_191_black-ice-quality-assurance",
+        title: "Black Ice Quality Assurance",
+        advancementRequirement: 5,
+        agendaPoints: 2,
+      }),
+      visibleCard("second-deckout-flood-agenda", "corp", "agenda", {
+        definitionId: "onr_v1_191_black-ice-quality-assurance",
+        title: "Black Ice Quality Assurance",
+        advancementRequirement: 5,
+        agendaPoints: 2,
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1"),
+    ];
+    attachOwnDeckSnapshot(input, {
+      deckSnapshotId: "deckout-flood-scoreline",
+      side: "corp",
+      cards: [
+        {
+          cardId: "onr_v1_191_black-ice-quality-assurance",
+          quantity: 4,
+        },
+      ],
+    });
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: installAgenda.actionId,
+      reasonCode: "plan_first.corp.score_agenda",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_step_capability:install_score_agenda",
+        "plan_assessment_evidence:corp_deckout_agenda_flood_score_install:remote_1",
+      ]),
+    );
+  });
+
   it("continues a certified score-protection assessment with a near-term-fundable additional ICE layer", () => {
     const stateVersion = 1;
     const installAgenda = legalAction(
