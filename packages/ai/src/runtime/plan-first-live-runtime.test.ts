@@ -17389,6 +17389,112 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("lets the recurring-economy owner install a declared killer-credit engine", () => {
+    resetResidentPlanPortfolioMemory();
+    const corolla = visibleCard("corolla-declared", "runner", "hardware", {
+      definitionId: "onr_v1_124_corolla-speed-chip",
+      title: "Corolla Speed Chip",
+      installCost: 1,
+    });
+    const installCorolla = legalAction(
+      "install-declared-corolla",
+      "runner",
+      "install_card",
+      "Corolla Speed Chip installieren",
+      { credits: 1, clicks: 1 },
+      {
+        source: corolla.instanceId,
+        payload: { cardId: corolla.instanceId },
+      },
+    );
+    const input = aiInput("runner", [
+      installCorolla,
+      legalAction(
+        "credit-after-declared-corolla",
+        "runner",
+        "gain_credit",
+        "Gain 1 Credit",
+        { credits: 0, clicks: 1 },
+      ),
+    ]);
+    input.playerView.own.credits = 8;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.stackOrRdCount = 30;
+    input.playerView.own.gripOrHq = [corolla];
+    input.playerView.own.rig = [
+      visibleCard("loony-goon-declared", "runner", "program", {
+        definitionId: "onr_v1_040_loony-goon",
+        subtypes: ["icebreaker", "killer"],
+      }),
+    ];
+    attachOwnDeckSnapshot(input, {
+      deckSnapshotId: "declared-killer-credit-engine",
+      side: "runner",
+      cards: [
+        { cardId: "onr_v1_040_loony-goon", quantity: 2 },
+        { cardId: "onr_v1_124_corolla-speed-chip", quantity: 1 },
+      ],
+    });
+
+    const decision = liveContext({
+      runnerStrategicIntentForInput: () => ({
+        ...recurringProgramSearchIntent(),
+        engineProviders: [
+          ...recurringProgramSearchIntent().engineProviders,
+          {
+            providerId: "runner.provider:onr_v1_124_corolla-speed-chip",
+            cardId: "onr_v1_124_corolla-speed-chip",
+            copies: 1,
+            capabilities: ["runner.economy.recurring_breaker"],
+            supportCapabilities: [],
+            persistence: "persistent",
+            additivity: "additive_to_compatible_demand",
+            compatibleDemandIds: ["runner.demand.breaker_credit"],
+            evidence: ["test:declared_killer_credit_provider"],
+          },
+        ],
+      }),
+      evaluateRunnerHandDevelopment: () => [
+        handEvaluation({
+          cardInstanceId: corolla.instanceId,
+          definitionId: "onr_v1_124_corolla-speed-chip",
+          legalActionId: installCorolla.actionId,
+          priority: 0,
+          duplicateRole: "none",
+          finalInstallFit: 0,
+          cardType: "hardware",
+          installCost: 1,
+          creditsAfterInstall: 7,
+          currentNeed: "none",
+          developmentRole: "generic_persistent",
+          strategicFit: "neutral",
+        }),
+      ],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 3,
+        desiredCreditReserve: 5,
+        fundingNeed: false,
+        evidence: [],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: installCorolla.actionId,
+      reasonCode: "plan_first.runner.recurring_economy",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.recurring_economy",
+        planFirstDecision: {
+          selectedPlan: {
+            moduleId: "runner.recurring_economy",
+            phase: "install",
+          },
+          route: { actionId: installCorolla.actionId },
+        },
+      },
+    });
+  });
+
   it("leaves an undeclared restricted-credit card with the development owner", () => {
     resetResidentPlanPortfolioMemory();
     const corolla = visibleCard("corolla-in-grip", "runner", "hardware", {

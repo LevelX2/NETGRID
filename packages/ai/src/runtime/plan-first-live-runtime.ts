@@ -26571,7 +26571,6 @@ function runnerRecurringEconomySignals(
       const handRouteReady =
         handEvaluation.availability === "legal_now" &&
         handEvaluation.deferReason === "none" &&
-        handEvaluation.currentNeed !== "none" &&
         handEvaluation.persistentInstallEvaluation?.duplicateRole !==
           "redundant_duplicate";
       const installReady = investment.decision === "install" && handRouteReady;
