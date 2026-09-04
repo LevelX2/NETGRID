@@ -12462,8 +12462,7 @@ describe("authoritative plan-first live runtime", () => {
             targetCardId: "credit-blocks",
             targetDefinitionId: "onr_proteus_017_credit-blocks",
             selectedVariantId: "alternate_subtype:base",
-            selectedOptionId:
-              "rez_credit-blocks_alternate_subtype:base",
+            selectedOptionId: "rez_credit-blocks_alternate_subtype:base",
           },
         },
       },
@@ -13605,7 +13604,7 @@ describe("authoritative plan-first live runtime", () => {
     ).not.toContain("missing_action_semantics");
   });
 
-  it("lets the score plan reuse a mature remote whose two Engine-certified layers tax or damage without changing exact access probability", () => {
+  it("lets the score plan reuse a mature remote only when two Engine-certified layers deny exact access", () => {
     const stateVersion = 1;
     const installAgenda = legalAction(
       "install-agenda-in-mature-remote",
@@ -14009,15 +14008,9 @@ describe("authoritative plan-first live runtime", () => {
     expect(
       liveContext().chooseSemanticRuntimeAction(liquidityBindingRemote, {}),
     ).toMatchObject({
-      actionId: installAgenda.actionId,
-      reasonCode: "plan_first.corp.score_agenda",
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
-      decisionDebug: {
-        planKind: "corp.score_agenda",
-        planFirstDecision: {
-          route: { actionId: installAgenda.actionId },
-        },
-      },
     });
 
     const terminalLiquidityBindingRemote = structuredClone(

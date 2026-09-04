@@ -318,6 +318,7 @@ import {
   corpAmbushAdvanceDispositionEvidence,
   corpCandidateIsAmbushInstall,
 } from "./corp-ambush-plan-signals";
+import { projectKnownCorpCardAccessEffect } from "./known-corp-card-access-effect-projection";
 import {
   corpScorelineActionCanCloseThisTurn,
   corpScorelineFeasibilityForDecisionInput,
@@ -3647,9 +3648,7 @@ function corpScoredAgendaHqShuffleChoiceBinding(params: {
   };
 }
 
-function corpScoredAgendaFreeRezTarget(
-  input: AiDecisionInput,
-):
+function corpScoredAgendaFreeRezTarget(input: AiDecisionInput):
   | Readonly<{
       card: VisibleCard;
       selectedVariantId: string;
@@ -17603,6 +17602,7 @@ function scoreProjectForCandidate(
       serverId === "new_remote" &&
       certifiedNearTermScoreHorizon &&
       corpCandidateIsAmbushInstall(candidate) &&
+      corpAgendaAccessPunishPreventsSteal(input, agenda) &&
       input.playerView.opponent.agendaPoints + agendaPoints <
         input.playerView.agendaPointsToWin &&
       protectionNeed?.baseline.knowledge === "known" &&
@@ -17633,8 +17633,6 @@ function scoreProjectForCandidate(
             input,
             candidate,
             serverId,
-            input.playerView.opponent.agendaPoints + agendaPoints >=
-              input.playerView.agendaPointsToWin,
           )
         : undefined;
     const certifiedMatureRemoteScoreHorizon =
@@ -17863,8 +17861,6 @@ function scoreProjectForCandidate(
             input,
             candidate,
             serverId,
-            input.playerView.opponent.agendaPoints + agendaPoints >=
-              input.playerView.agendaPointsToWin,
           )
         : undefined;
     const certifiedMatureRemoteScoreHorizon =
@@ -18113,7 +18109,6 @@ function corpMatureRemoteAffordableDefenseLayerCertification(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
   serverId: string,
-  opponentStealWouldWin: boolean,
 ): CorpScoreProjectSignal["scoreHorizonCertification"] | undefined {
   const server = input.playerView.servers.find(
     (candidateServer) => candidateServer.id === serverId,
@@ -18143,7 +18138,6 @@ function corpMatureRemoteAffordableDefenseLayerCertification(
           server,
           [layers[left]!.iceInstanceId, layers[right]!.iceInstanceId],
           availableCredits,
-          opponentStealWouldWin,
         )
       ) {
         return {
@@ -18169,7 +18163,6 @@ function corpCertifiedDefenseLayerPairProvidesMatureRunnerPath(
   server: AiDecisionInput["playerView"]["servers"][number],
   financedLayerInstanceIds: readonly [string, string],
   visibleCorpCredits: number,
-  opponentStealWouldWin: boolean,
 ): boolean {
   const runnerRig = input.playerView.opponent.rig ?? [];
   const runnerCredits = input.playerView.opponent.credits;
@@ -18193,21 +18186,23 @@ function corpCertifiedDefenseLayerPairProvidesMatureRunnerPath(
       ).length,
     },
   );
-  if (!assessment.canReachAccess) return true;
+  return !assessment.canReachAccess;
+}
 
-  const generalCreditsSpent = Math.max(
-    0,
-    runnerCredits - assessment.creditsAfterPath,
-  );
-  const drainsAtLeastHalfOfGeneralLiquidity =
-    generalCreditsSpent > 0 && assessment.creditsAfterPath * 2 <= runnerCredits;
-  const leavesUnavoidableMaterialHazard =
-    (assessment.unavoidableVisibleIceHazardCount ?? 0) > 0 ||
-    (assessment.futureClicksLost ?? 0) > 0 ||
-    assessment.visibleTraceTagHazardUnavoidable === true;
+function corpAgendaAccessPunishPreventsSteal(
+  input: AiDecisionInput,
+  agenda: VisibleCard,
+): boolean {
+  if (!agenda.definitionId) return false;
+  const projection = projectKnownCorpCardAccessEffect({
+    input,
+    sourceDefinitionId: agenda.definitionId,
+    sourceCard: agenda,
+  });
   return (
-    leavesUnavoidableMaterialHazard ||
-    (!opponentStealWouldWin && drainsAtLeastHalfOfGeneralLiquidity)
+    projection.status === "complete" &&
+    projection.corpCanPayActivation !== false &&
+    projection.damage?.runnerSurvivable === false
   );
 }
 
