@@ -26570,7 +26570,8 @@ function runnerRecurringEconomySignals(
       });
       const handRouteReady =
         handEvaluation.availability === "legal_now" &&
-        handEvaluation.deferReason === "none" &&
+        (handEvaluation.deferReason === "none" ||
+          handEvaluation.deferReason === "no_current_need") &&
         handEvaluation.persistentInstallEvaluation?.duplicateRole !==
           "redundant_duplicate";
       const installReady = investment.decision === "install" && handRouteReady;

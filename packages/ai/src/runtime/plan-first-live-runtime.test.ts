@@ -17465,6 +17465,7 @@ describe("authoritative plan-first live runtime", () => {
           cardType: "hardware",
           installCost: 1,
           creditsAfterInstall: 7,
+          deferReason: "no_current_need",
           currentNeed: "none",
           developmentRole: "generic_persistent",
           strategicFit: "neutral",
@@ -30817,6 +30818,7 @@ function handEvaluation(params: {
     | "none"
     | "duplicate"
     | "missing_credits"
+    | "no_current_need"
     | "preserve_credit_floor"
     | "stronger_override";
   duplicateRole?: "none" | "useful_backup" | "redundant_duplicate";
