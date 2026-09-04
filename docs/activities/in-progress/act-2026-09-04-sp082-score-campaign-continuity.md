@@ -20,7 +20,46 @@ checks: []
 
 ## Status
 
-Aktiv. Genau ein Paket wird sequenziell von SP082-A bis SP082-D bearbeitet.
+SP082-A abgeschlossen. SP082-B ist als nächstes aktiv.
+
+## Paketprotokoll
+
+### SP082-A – erster Verlustpunkt
+
+Die Seeds `meta-357-final-034` und `meta-357-final-036` wurden auf dem
+festgehaltenen lokalen Basisstand deterministisch erneut ausgeführt. Beide
+Replays waren state-hash-stabil und ohne Runtime-Fallback, Timeout oder
+Enginefehler. Der aktuelle Stand reproduziert nicht den historischen
+Nullscore-Endstand, aber denselben frühen Kontinuitätsverlust.
+
+Der erste belegte Verlust liegt vor der Head-Erzeugung:
+
+- In Spiel 36, StateVersion 107, existiert der konkrete residente
+  `corp.score_agenda`-Parent für Marked Accounts auf `remote_1`. Er ist wegen
+  `corp_score_protection_required:remote_1` blockiert. Bei null Credits ist
+  keine ICE-Installation in diesen bereits geschützten Remote aktuell legal.
+- Die bekannte Schutzquote des Parents weist damit einen Fundingbedarf aus;
+  `corpScoreProtectionInstallRouteScan` durchsucht jedoch nur aktuell legale
+  ICE-Installationen. Ohne eine solche Action veröffentlicht der Score-Parent
+  kein Funding-Milestone und kein `score-support`-Need.
+- Die exakt legale Kreditaktion wird deshalb von einem eigenständigen
+  P6-Economy-Parent gewählt. Der Score-Parent hat `openNeedIds: []`, keinen
+  Parent-gebundenen Support-Head und keinen produktiven Progress-Root.
+- Spiel 34, StateVersion 121, bestätigt dieselbe Vertragslücke beim
+  nahe-Matchpoint-blockierten Charity-Takeover-Parent: Die Kreditaktion gehört
+  einer allgemeinen Accounts-Receivable-Economy-Linie; beide konkrete
+  Score-Parents bleiben ohne veröffentlichten Supportbedarf.
+
+Die Gegenlinie ändert nicht Engine-Legalität oder den aktuellen Action-Typ:
+Dieselbe aktuelle `corp.gain_credit`-Action muss als exakt gebundener
+`corp.economy`-Leaf den bekannten Fundingbedarf des bestehenden
+`corp.score_agenda`-Parents erfüllen. Erst nach geschlossenem Gap wird der
+nächste Defense- oder Agenda-Meilenstein erneut materialisiert.
+
+Der engste Änderungsschnitt liegt damit in der vorhandenen Score-
+Schutzassessment-/Funding-Milestone-Ableitung und ihrer bestehenden
+Economy-Supportkonversion. Es ist weder ein pauschaler Scorebonus noch eine
+zweite Kampagnenstruktur erforderlich.
 
 ## Quelle und Zielprüfung
 
