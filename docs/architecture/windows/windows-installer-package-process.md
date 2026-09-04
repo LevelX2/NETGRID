@@ -1,8 +1,7 @@
 # Paketprozess: Windows-Installer und Launcher
 
 Stand: 2026-09-04  
-Status: umsetzungsbereit geplant; Produktvoraussetzungen WIN-P00 bis WIN-P05
-werden vorgeschaltet umgesetzt
+Status: umsetzungsbereit geplant; Produktvoraussetzungen sind abgeschlossen
 
 ## Quelle und Zielprüfung
 
@@ -10,8 +9,8 @@ Führend sind `windows-release-boundary.md`,
 `windows-installer-product-contract.md`, `product-layout.json` und
 `product-manifest.json`. Ziel, Produktgrenze, Defaults, Sicherheitsgrenzen,
 Abnahmekriterien und Paketfolge sind bestimmbar. Die installerunabhängigen
-Produktvoraussetzungen werden zuvor gemäß
-`windows-installer-prerequisites-process.md` umgesetzt. Die konkrete WiX-Version,
+Produktvoraussetzungen sind in Anwendung, Releasekonfiguration, Tests und
+aktuellen Runbooks umgesetzt. Die konkrete WiX-Version,
 Launcher-Technologie und spätere Codesigning-Beschaffung dürfen innerhalb der
 jeweiligen Pakete entschieden werden, ohne den Produktvertrag zu verändern.
 
@@ -76,7 +75,7 @@ Cleanup- oder Versionsautorität.
 | WIN-I02 Installations- und Datenvertrag | Sichere per-machine Installation | Program Files, wählbarer lokaler Datenroot, ACLs, Secret-Erzeugung, Node-Runtime, Reparatur/Uninstall und Datenerhalt | Clean-install-, ACL-, Pfad-, Repair- und Uninstall-Tests | Normalbetrieb ohne Adminrechte; Daten bleiben standardmäßig erhalten | `feat(installer): implement installation and data layout` |
 | WIN-I03 Launcher und Windows-Integration | Bedarfsgesteuerter Betrieb | Single Instance, Server/Web-Start, Healthcheck, Tray, Startmenü, Desktopoption, kontrolliertes Beenden, einmaliger Recovery, Icons | Launcher-Komponententests und Windows-Integrationssmoke | Kein Autostart/Dienst; alle Einstiegspunkte verwenden dieselbe Instanz | `feat(launcher): add managed NETGRID desktop runtime` |
 | WIN-I04 Geführtes Setup und Netzwerk | Empfohlenen und benutzerdefinierten Weg liefern | Setupmodus, Local/LAN-Wahl, Portprüfung, Private-Firewallregel, Cleanup-Default und Abschlussstart | UI-Flow-, Portkonflikt- und Firewallprofiltests | Empfohlener Weg fragt nur Pflichtwerte; LAN wird nie still aktiviert | `feat(installer): add guided setup and private network mode` |
-| WIN-I05 First Run, Profile und Maintenance | Kontomodi sicher einrichten | Maintenance-Passwort über sicheren Bootstrap, direkte Profilanlage, einfacher/geschützter Modus, Moduswechsel, Reset und Sessionwiderruf | Auth-, Origin-, Loopback-, Moduswechsel- und Sitzungsregressionen | Maintenance bleibt separat geschützt; beide Kontomodi erfüllen Vertrag | `feat(accounts): add installed-product onboarding modes` |
+| WIN-I05 First Run, Profile und Maintenance | Bestehende Kontomodi sicher konfigurieren | Maintenance-Passwort über sicheren Bootstrap, Auswahl der vorhandenen `simple`-/`protected`-Policy und geführter Erstzugang | First-Run-, Secret-, Policy- und Wiederanlauftests | Installer nutzt die bestehende Accountautorität; Maintenance bleibt separat geschützt | `feat(installer): configure installed-product onboarding` |
 | WIN-I06 GitHub-Updater und Rollback | Zustimmungsbasiertes Update | Startprüfung, Stable/Prerelease, Download/Integritätsprüfung, Backup, laufende Matches, kontrollierter Neustart und Rollback | API-Fixtures, Offline-, Tamper-, Backup-/Restore- und Upgrade-Tests | Kein stilles Update; Fehler hinterlässt alten oder sicher gestoppten Stand | `feat(updater): add verified GitHub release updates` |
 | WIN-I07 Lokalisierung, Branding und Diagnose | Veröffentlichungsfähige Oberfläche | `de`/`en`/`fr`, Terminologie, NETGRID-Icons/Grafiken, DPI-/Kontrastprüfung, redigierter Diagnoseexport, Drittanbieterhinweise | String-Vollständigkeit, Screenshotmatrix, Diagnose-Leak-Gate, Lizenzcheck | Keine Platzhalter/Clips/rohen Fehler; alle Oberflächen visuell abgenommen | `feat(installer): finalize localization branding and diagnostics` |
 | WIN-I08 End-to-End-Releasegate | Saubere Maschine beweisen | Frischinstallation, Custom-Setup, Update, Prerelease, Rollback, Repair, Uninstall, Retention und Datenlöschung auf Windows 11 x64 | vollständige Installer-E2E-Matrix plus bestehende Releaseoutput-Gates | reproduzierbares GitHub-Releaseartefakt samt Prüfsumme; alle Gates grün | `test(installer): certify Windows release workflow` |

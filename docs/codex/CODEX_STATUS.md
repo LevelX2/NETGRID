@@ -92,7 +92,13 @@ Demo-Snapshots, Testspiele, Selfplay-Evidence und Entwicklungsdatenbanken
 werden nicht ausgeliefert. Führend sind
 `docs/architecture/windows/windows-release-boundary.md` und das zugehörige
 Runbook. Ein eigentlicher Windows-Installer, Launcher, Firewallsetup und
-Updater ist noch nicht implementiert. Das beschlossene Zielbild umfasst einen
+Updater ist noch nicht implementiert. Die installerunabhängigen
+Produktvoraussetzungen sind umgesetzt: Releasebuilds tragen `V1.0` plus
+fortlaufende Git-Buildnummer, die gespeicherte Retention-Policy wird beim
+Backend-Start sofort asynchron geprüft, und lokale Installationen können ohne
+zweites Accountmodell zwischen einfachem und geschütztem Spielerzugang
+wechseln. Der Entwicklungsstart bleibt standardmäßig `invite_only`; der
+Windows-Releaseoutput erhält `simple` als Ausgangswert. Das beschlossene Zielbild umfasst einen
 klassischen per-machine Installer mit empfohlenem und benutzerdefiniertem
 Setupweg, mitgelieferter Node-Laufzeit, bedarfsgestartetem Tray-Launcher,
 lokalem oder Private-LAN-Betrieb, getrennten einfachen/geschützten

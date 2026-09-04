@@ -1,7 +1,8 @@
 # Windows-Installer-Produktvertrag
 
 Stand: 2026-09-04  
-Status: beschlossenes Zielbild; noch nicht implementiert
+Status: beschlossenes Zielbild; Anwendungsvoraussetzungen umgesetzt,
+Installer/Launcher/Updater noch nicht implementiert
 
 ## Zweck und Grenze
 

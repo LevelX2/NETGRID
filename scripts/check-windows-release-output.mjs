@@ -125,6 +125,8 @@ export function auditArtifact(root, releasePolicy) {
       findings.push("runtime.env.example: Releaseprofil fehlt");
     if (!source.includes("NETGRID_DATA_ROOT="))
       findings.push("runtime.env.example: externer Datenroot fehlt");
+    if (!source.includes("NETGRID_ACCOUNT_ACCESS_MODE=simple"))
+      findings.push("runtime.env.example: lokaler Kontomodus fehlt");
   }
   return findings;
 }
@@ -164,7 +166,7 @@ function runSelfTest() {
       "app/node_modules/sharp/package.json": "{}\n",
       "app/node_modules/@img/sharp-win32-x64/package.json": "{}\n",
       "config/runtime.env.example":
-        "NETGRID_RUNTIME_PROFILE=release\nNETGRID_DATA_ROOT=C:\\\\ProgramData\\\\NETGRID\n",
+        "NETGRID_RUNTIME_PROFILE=release\nNETGRID_DATA_ROOT=C:\\\\ProgramData\\\\NETGRID\nNETGRID_ACCOUNT_ACCESS_MODE=simple\n",
       "product-layout.json": "{}\n",
     };
     for (const [relative, content] of Object.entries(minimalFiles)) {
