@@ -12,10 +12,16 @@ import {
 
 export const ACCOUNT_SESSION_COOKIE_NAME = "ng_account_session";
 export const ACCOUNT_SESSION_MAX_AGE_DAYS = 14;
+export const ACCOUNT_ACCESS_MODE_META_KEY = "account_access_mode";
 
 export type AccountStatus = "active" | "disabled" | "deleted";
 export type AccountRole = "user" | "admin";
-export type AccountAuthStrength = "password" | "passkey" | "mfa";
+export type AccountAccessMode = "invite_only" | "simple" | "protected";
+export type AccountAuthStrength =
+  | "local_profile"
+  | "password"
+  | "passkey"
+  | "mfa";
 
 export type AccountRecord = {
   accountId: string;
@@ -125,6 +131,14 @@ export type AccountStorage = {
     loginNameNormalized: string,
   ): Promise<AccountRecord | undefined>;
   countAccounts(): Promise<number>;
+  listAccounts(): Promise<AccountRecord[]>;
+  loadAccessMode(): Promise<AccountAccessMode | undefined>;
+  applyAccessModeChange(input: {
+    mode: "simple" | "protected";
+    expectedActiveAccountIds: string[];
+    credentials: AccountPasswordCredentialRecord[];
+    changedAt: string;
+  }): Promise<void>;
   savePasswordCredential(
     credential: AccountPasswordCredentialRecord,
   ): Promise<void>;
@@ -188,6 +202,7 @@ export class InMemoryAccountStorage implements AccountStorage {
   private readonly sessions = new Map<string, AccountSessionRecord>();
   private readonly invites = new Map<string, AccountInviteRecord>();
   private readonly resetTokens = new Map<string, AccountResetTokenRecord>();
+  private accessMode?: AccountAccessMode;
 
   async saveAccount(account: AccountRecord): Promise<void> {
     this.accounts.set(account.accountId, clone(account));
@@ -209,6 +224,58 @@ export class InMemoryAccountStorage implements AccountStorage {
 
   async countAccounts(): Promise<number> {
     return this.accounts.size;
+  }
+
+  async listAccounts(): Promise<AccountRecord[]> {
+    return [...this.accounts.values()].map(clone);
+  }
+
+  async loadAccessMode(): Promise<AccountAccessMode | undefined> {
+    return this.accessMode;
+  }
+
+  async applyAccessModeChange(input: {
+    mode: "simple" | "protected";
+    expectedActiveAccountIds: string[];
+    credentials: AccountPasswordCredentialRecord[];
+    changedAt: string;
+  }): Promise<void> {
+    const active = [...this.accounts.values()]
+      .filter((account) => account.status === "active")
+      .map((account) => account.accountId)
+      .sort();
+    if (!sameStrings(active, [...input.expectedActiveAccountIds].sort()))
+      throw new Error("account_access_mode_accounts_changed");
+    const credentials = new Map(
+      input.credentials.map((credential) => [credential.accountId, credential]),
+    );
+    if (
+      input.mode === "protected" &&
+      active.some((accountId) => !credentials.has(accountId))
+    )
+      throw new Error("account_access_mode_credentials_incomplete");
+    for (const accountId of active) {
+      const account = this.accounts.get(accountId)!;
+      this.accounts.set(accountId, {
+        ...account,
+        credentialVersion: account.credentialVersion + 1,
+        updatedAt: input.changedAt,
+      });
+      if (input.mode === "simple") this.passwordCredentials.delete(accountId);
+      else
+        this.passwordCredentials.set(
+          accountId,
+          clone(credentials.get(accountId)!),
+        );
+    }
+    for (const [sessionId, session] of this.sessions) {
+      if (active.includes(session.accountId) && !session.revokedAt)
+        this.sessions.set(sessionId, {
+          ...session,
+          revokedAt: input.changedAt,
+        });
+    }
+    this.accessMode = input.mode;
   }
 
   async savePasswordCredential(
@@ -413,6 +480,119 @@ export class SqliteAccountStorage implements AccountStorage {
         }
       ).count,
     );
+  }
+
+  async listAccounts(): Promise<AccountRecord[]> {
+    return (
+      this.db
+        .prepare("SELECT * FROM accounts ORDER BY created_at ASC")
+        .all() as AccountRow[]
+    ).map(accountFromRow);
+  }
+
+  async loadAccessMode(): Promise<AccountAccessMode | undefined> {
+    const row = this.db
+      .prepare("SELECT value FROM storage_meta WHERE key = ?")
+      .get(ACCOUNT_ACCESS_MODE_META_KEY) as { value: string } | undefined;
+    if (!row) return undefined;
+    if (!isAccountAccessMode(row.value))
+      throw new Error("account_access_mode_invalid");
+    return row.value;
+  }
+
+  async applyAccessModeChange(input: {
+    mode: "simple" | "protected";
+    expectedActiveAccountIds: string[];
+    credentials: AccountPasswordCredentialRecord[];
+    changedAt: string;
+  }): Promise<void> {
+    runSqliteTransaction(this.db, () => {
+      const active = (
+        this.db
+          .prepare(
+            "SELECT account_id FROM accounts WHERE status = 'active' ORDER BY account_id ASC",
+          )
+          .all() as Array<{ account_id: string }>
+      ).map((row) => row.account_id);
+      if (!sameStrings(active, [...input.expectedActiveAccountIds].sort()))
+        throw new Error("account_access_mode_accounts_changed");
+      const credentials = new Map(
+        input.credentials.map((credential) => [
+          credential.accountId,
+          credential,
+        ]),
+      );
+      if (
+        input.mode === "protected" &&
+        active.some((accountId) => !credentials.has(accountId))
+      )
+        throw new Error("account_access_mode_credentials_incomplete");
+      for (const accountId of active) {
+        if (input.mode === "simple") {
+          this.db
+            .prepare(
+              "DELETE FROM account_password_credentials WHERE account_id = ?",
+            )
+            .run(accountId);
+        } else {
+          const credential = credentials.get(accountId)!;
+          this.db
+            .prepare(
+              `INSERT INTO account_password_credentials (
+                account_id, algorithm, parameters_version, salt, password_hash,
+                key_length, cost, block_size, parallelization, max_memory,
+                changed_at, must_change
+              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+              ON CONFLICT(account_id) DO UPDATE SET
+                algorithm = excluded.algorithm,
+                parameters_version = excluded.parameters_version,
+                salt = excluded.salt,
+                password_hash = excluded.password_hash,
+                key_length = excluded.key_length,
+                cost = excluded.cost,
+                block_size = excluded.block_size,
+                parallelization = excluded.parallelization,
+                max_memory = excluded.max_memory,
+                changed_at = excluded.changed_at,
+                must_change = excluded.must_change`,
+            )
+            .run(
+              credential.accountId,
+              credential.algorithm,
+              credential.parametersVersion,
+              credential.salt,
+              credential.passwordHash,
+              credential.keyLength,
+              credential.cost,
+              credential.blockSize,
+              credential.parallelization,
+              credential.maxMemory,
+              credential.changedAt,
+              credential.mustChange ? 1 : 0,
+            );
+        }
+      }
+      if (active.length > 0) {
+        const placeholders = active.map(() => "?").join(", ");
+        this.db
+          .prepare(
+            `UPDATE accounts SET credential_version = credential_version + 1,
+              updated_at = ? WHERE account_id IN (${placeholders})`,
+          )
+          .run(input.changedAt, ...active);
+        this.db
+          .prepare(
+            `UPDATE account_sessions SET revoked_at = ?
+              WHERE revoked_at IS NULL AND account_id IN (${placeholders})`,
+          )
+          .run(input.changedAt, ...active);
+      }
+      this.db
+        .prepare(
+          "INSERT OR REPLACE INTO storage_meta (key, value, updated_at) VALUES (?, ?, ?)",
+        )
+        .run(ACCOUNT_ACCESS_MODE_META_KEY, input.mode, input.changedAt);
+    });
   }
 
   async savePasswordCredential(
@@ -1192,6 +1372,20 @@ function safeEqual(left: string, right: string): boolean {
   return (
     leftBuffer.length === rightBuffer.length &&
     timingSafeEqual(leftBuffer, rightBuffer)
+  );
+}
+
+function isAccountAccessMode(value: unknown): value is AccountAccessMode {
+  return value === "invite_only" || value === "simple" || value === "protected";
+}
+
+function sameStrings(
+  left: readonly string[],
+  right: readonly string[],
+): boolean {
+  return (
+    left.length === right.length &&
+    left.every((value, index) => value === right[index])
   );
 }
 
