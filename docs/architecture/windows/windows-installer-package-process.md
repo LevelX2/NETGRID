@@ -1,7 +1,7 @@
 # Paketprozess: Windows-Installer und Launcher
 
 Stand: 2026-09-04  
-Status: in Umsetzung; WIN-I00 verifiziert, nächstes Paket WIN-I01
+Status: in Umsetzung; WIN-I00 und WIN-I01 verifiziert, nächstes Paket WIN-I02
 
 ## Quelle und Zielprüfung
 
@@ -11,9 +11,11 @@ Führend sind `windows-release-boundary.md`,
 Abnahmekriterien und Paketfolge sind bestimmbar. Die installerunabhängigen
 Produktvoraussetzungen sind in Anwendung, Releasekonfiguration, Tests und
 aktuellen Runbooks umgesetzt. Für die private Alpha ist WiX Toolset 7.0.0
-unter ausdrücklicher Annahme der OSMF-EULA als Installerbasis bestätigt. Die
-Launcher-Technologie wird in WIN-I01 festgelegt; die spätere
-Codesigning-Beschaffung bleibt ein eigenes Release-Gate.
+unter ausdrücklicher Annahme der OSMF-EULA als Installerbasis bestätigt. Der
+Launcher und der First Run werden als selbst enthaltene .NET-10-Windows-
+Desktopanwendung umgesetzt; dadurch benötigt das Zielsystem keine separat
+installierte .NET-Laufzeit. Die spätere Codesigning-Beschaffung bleibt ein
+eigenes Release-Gate.
 
 ## Gesamtziel
 
@@ -100,6 +102,19 @@ eigene Account-, Cleanup- oder Versionsautorität.
   SQLite und private Daten jeweils null Treffer.
 - Fokussierte Runtimepfad-/Maintenance-Tests, Boundary-Gates,
   Releaseoutput-Build und isolierter Release-Smoke sind grün.
+- WIN-I01 pinnt .NET SDK 10.0.302, WiX Toolset 7.0.0 und die
+  Bootstrapper-Erweiterung 7.0.0. Produktlayout und Installer-Metadaten tragen
+  Buildnummer, Commit und Dirty-Zustand; MSI und Burn-Setup entstehen nur aus
+  dem zuvor auditierten Releaseoutput.
+- Der Installer-Audit extrahiert das MSI administrativ, vergleicht 10.891
+  Dateien vollständig gegen Größe und SHA-256 des Produktmanifests, bestätigt
+  die beiden Rechtstexte und bindet das in Burn eingebettete MSI per Hash.
+  Das Lizenzinventar umfasst aktuell 37 eindeutige Runtimepakete.
+- WiX 7 erzeugt trotz identischer Eingaben derzeit keinen byteidentischen MSI-
+  oder Bundle-Output, weil Paketcode und Zeitfelder nicht steuerbar sind. Die
+  Reproduzierbarkeit bedeutet deshalb eine gepinnte, wiederholbare Buildstrecke
+  mit manifestgebundener Payload und Prüfsummen je erzeugtem Artefakt; eine
+  behauptete Byte-Reproduzierbarkeit wäre sachlich falsch.
 
 ## Verifikationsregeln
 

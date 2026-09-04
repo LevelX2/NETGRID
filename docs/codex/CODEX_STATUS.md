@@ -91,8 +91,11 @@ geprüften Output mit einem externen `NETGRID_DATA_ROOT`; interne Testkarten,
 Demo-Snapshots, Testspiele, Selfplay-Evidence und Entwicklungsdatenbanken
 werden nicht ausgeliefert. Führend sind
 `docs/architecture/windows/windows-release-boundary.md` und das zugehörige
-Runbook. Ein eigentlicher Windows-Installer, Launcher, Firewallsetup und
-Updater ist noch nicht implementiert. Die installerunabhängigen
+Runbook. Ein auf .NET SDK 10.0.302 und WiX 7.0.0 gepinntes MSI-/Burn-
+Installerskelett baut ausschließlich den auditierten Produktoutput, erfasst
+die Runtime-Lizenzen und prüft die extrahierte Payload vollständig gegen das
+Produktmanifest. Launcher, Daten-/ACL-Einrichtung, Firewallsetup und Updater
+sind noch nicht implementiert. Die installerunabhängigen
 Produktvoraussetzungen sind umgesetzt: Releasebuilds tragen `V1.0` plus
 fortlaufende Git-Buildnummer, die gespeicherte Retention-Policy wird beim
 Backend-Start sofort asynchron geprüft, und lokale Installationen können ohne
@@ -106,7 +109,7 @@ Spielerprofilen, sicherer Maintenance-Ersteinrichtung, GitHub-Updates nach
 Zustimmung, Datensicherung/Rollback sowie vollständigem `de`/`en`/`fr`-
 Branding. Führend sind
 `docs/architecture/windows/windows-installer-product-contract.md` und der
-Paketprozess WIN-I01 bis WIN-I08. GitHub Releases bleibt der einzige Kanal;
+Paketprozess WIN-I00 bis WIN-I08. GitHub Releases bleibt der einzige Kanal;
 bis zur Umsetzung des Updaters erfolgen Download und Upgrade manuell.
 
 Der persönliche Kartenbildimport besitzt einen persistenten lokalen Store,

@@ -20,13 +20,13 @@ der einzige Veröffentlichungs- und Updatekanal.
 `scripts/release-product-boundary.json` ist die maschinenlesbare positive
 Klassifikation:
 
-| Klasse | Bedeutung im Release |
-| --- | --- |
-| `product_runtime` | statische, unmittelbar benötigte Produktdaten |
-| `product_optional` | eigene redistribuierbare Anzeigeassets nach ausdrücklichem Produktentscheid |
-| `development_gate` | Tests, Benchmarks, Freigabe- und Analyseevidence; nie ausliefern |
-| `local_runtime` | veränderliche Datenbanken, Logs und lokale Analyseevidence; nie ausliefern |
-| `private_asset` | private Quellen, Scans und persönliche Kartenbildpakete; nie im Hauptrelease |
+| Klasse             | Bedeutung im Release                                                         |
+| ------------------ | ---------------------------------------------------------------------------- |
+| `product_runtime`  | statische, unmittelbar benötigte Produktdaten                                |
+| `product_optional` | eigene redistribuierbare Anzeigeassets nach ausdrücklichem Produktentscheid  |
+| `development_gate` | Tests, Benchmarks, Freigabe- und Analyseevidence; nie ausliefern             |
+| `local_runtime`    | veränderliche Datenbanken, Logs und lokale Analyseevidence; nie ausliefern   |
+| `private_asset`    | private Quellen, Scans und persönliche Kartenbildpakete; nie im Hauptrelease |
 
 Normale Produktquellen beziehen statische Daten über die kleinen Subpath-
 Exports von `@netgrid/runtime-data`. Evaluation, Selfplay und Reports dürfen
@@ -74,8 +74,9 @@ app/server.mjs
 app/apps/web/server.js
 ```
 
-`product-layout.json` nennt Plattform, Node-Anforderung, Entrypoints,
-Defaultports, `de`/`en`/`fr` und die externe Datenablage. Das Manifest enthält
+`product-layout.json` nennt Produktversion, fortlaufende Buildnummer,
+Commitbindung, Plattform, Node-Anforderung, Entrypoints, Defaultports,
+`de`/`en`/`fr` und die externe Datenablage. Das Manifest enthält
 für jede ausgelieferte Datei Pfad, Größe und SHA-256. Symlinks und nicht
 positiv zugelassene Pfade werden vom Audit abgewiesen.
 

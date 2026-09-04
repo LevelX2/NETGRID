@@ -31,6 +31,7 @@ const temporaryRoot = path.join(outputBase, ".windows-release-build");
 const webRoot = path.join(repositoryRoot, "apps", "web");
 const webDistName = ".next-release";
 const webDist = path.join(webRoot, webDistName);
+const releaseIdentity = resolveReleaseIdentity();
 const releaseCardIndex = path.join(temporaryRoot, "card-spec-release-index.ts");
 const releaseDeckFixtures = path.join(
   repositoryRoot,
@@ -145,7 +146,8 @@ try {
     path.join(outputRoot, "product-layout.json"),
     `${JSON.stringify(
       {
-        schemaVersion: "netgrid-product-layout-v1",
+        schemaVersion: "netgrid-product-layout-v2",
+        product: releaseIdentity,
         platform: "windows-x64",
         runtime: { node: ">=24 <25" },
         entrypoints: {
@@ -206,6 +208,44 @@ function runCorepack(arguments_, env) {
   if (result.error) throw result.error;
   if (result.status !== 0)
     throw new Error(`release_build_command_failed:${result.status}`);
+}
+
+function resolveReleaseIdentity() {
+  const buildNumber = Number.parseInt(
+    runGit(["rev-list", "--count", "HEAD"]),
+    10,
+  );
+  if (!Number.isInteger(buildNumber) || buildNumber < 1 || buildNumber > 65535)
+    throw new Error(`release_build_number_invalid:${buildNumber}`);
+  const commit = runGit(["rev-parse", "HEAD"]);
+  const commitShort = runGit(["rev-parse", "--short=10", "HEAD"]);
+  const commitTimestamp = runGit(["show", "-s", "--format=%cI", "HEAD"]);
+  const sourceDirty = runGit(["status", "--porcelain"], true).length > 0;
+  return Object.freeze({
+    displayVersion: "V1.0",
+    productVersion: "1.0",
+    installerVersion: `1.0.${buildNumber}`,
+    buildNumber,
+    commit,
+    commitShort,
+    commitTimestamp,
+    sourceDirty,
+  });
+}
+
+function runGit(arguments_, allowEmpty = false) {
+  const result = spawnSync("git", arguments_, {
+    cwd: repositoryRoot,
+    encoding: "utf8",
+    windowsHide: true,
+  });
+  if (result.error) throw result.error;
+  if (result.status !== 0)
+    throw new Error(`release_git_command_failed:${arguments_.join(":")}`);
+  const value = result.stdout.trim();
+  if (!allowEmpty && !value)
+    throw new Error(`release_git_value_missing:${arguments_.join(":")}`);
+  return value;
 }
 
 function copyIfPresent(source, target) {

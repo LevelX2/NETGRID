@@ -1,8 +1,8 @@
 # Windows-Installer-Produktvertrag
 
 Stand: 2026-09-04  
-Status: beschlossenes Zielbild; Anwendungsvoraussetzungen umgesetzt,
-Installer/Launcher/Updater noch nicht implementiert
+Status: beschlossenes Zielbild; Anwendungsvoraussetzungen und
+Installerskelett umgesetzt, Launcher/First Run/Updater noch offen
 
 ## Zweck und Grenze
 
@@ -13,9 +13,10 @@ Entwicklungsdatenbanken, Testspiele, Demo- und Selfplay-Daten, private
 Kartenbilder, Secrets und sonstige Entwicklungsartefakte bleiben gemäß
 `windows-release-boundary.md` ausgeschlossen.
 
-Der Vertrag ist eine Vorbedingung für die spätere Umsetzung. Er führt kein
-zweites fachliches Datenmodell ein und implementiert noch keinen Installer,
-Launcher oder Updater.
+Der Vertrag führt kein zweites fachliches Datenmodell ein. Das gepinnte
+WiX-7-Installerskelett setzt bereits Produktgrenze, Buildidentität,
+Lizenzinventar und vollständigen Payload-Audit um; Launcher, First Run,
+geführte Konfiguration und Updater folgen im Paketprozess.
 
 ## Installationsprodukt
 
@@ -53,18 +54,18 @@ werden können.
 
 ### Empfohlene Defaults
 
-| Bereich | Vorauswahl |
-| --- | --- |
-| Setupweg | Empfohlene Installation |
-| Betriebsart | Nur dieser Rechner |
-| Kontomodus | Einfach, ohne Spielerpasswörter |
-| Programmordner | `C:\Program Files\NETGRID` |
-| Datenordner | `C:\ProgramData\NETGRID` |
-| Web-/Serverport | `3100` / `8787` |
-| Spielaufbewahrung | automatische Bereinigung nach 30 Tagen |
-| Desktopverknüpfung | aktiviert, abwählbar |
-| Abschlussaktion | „NETGRID jetzt starten“ aktiviert |
-| Updatekanal | nur stabile GitHub Releases |
+| Bereich            | Vorauswahl                             |
+| ------------------ | -------------------------------------- |
+| Setupweg           | Empfohlene Installation                |
+| Betriebsart        | Nur dieser Rechner                     |
+| Kontomodus         | Einfach, ohne Spielerpasswörter        |
+| Programmordner     | `C:\Program Files\NETGRID`             |
+| Datenordner        | `C:\ProgramData\NETGRID`               |
+| Web-/Serverport    | `3100` / `8787`                        |
+| Spielaufbewahrung  | automatische Bereinigung nach 30 Tagen |
+| Desktopverknüpfung | aktiviert, abwählbar                   |
+| Abschlussaktion    | „NETGRID jetzt starten“ aktiviert      |
+| Updatekanal        | nur stabile GitHub Releases            |
 
 ## Datenablage und Lebenszyklus
 

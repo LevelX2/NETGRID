@@ -4,6 +4,8 @@
 AGENTS.local.md
 .codex/
 .codex-runlogs/
+.tools/
+.wix/
 
 node_modules/
 .pnpm-store/

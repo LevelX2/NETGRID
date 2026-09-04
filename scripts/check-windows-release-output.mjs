@@ -128,6 +128,23 @@ export function auditArtifact(root, releasePolicy) {
     if (!source.includes("NETGRID_ACCOUNT_ACCESS_MODE=simple"))
       findings.push("runtime.env.example: lokaler Kontomodus fehlt");
   }
+  const productLayoutPath = path.join(root, "product-layout.json");
+  if (filePaths.has("product-layout.json")) {
+    const layout = JSON.parse(readFileSync(productLayoutPath, "utf8"));
+    if (layout.schemaVersion !== "netgrid-product-layout-v2")
+      findings.push("product-layout.json: unbekannte Schemaversion");
+    if (
+      layout.product?.displayVersion !== "V1.0" ||
+      layout.product?.productVersion !== "1.0" ||
+      !/^1\.0\.\d+$/.test(layout.product?.installerVersion ?? "") ||
+      !Number.isInteger(layout.product?.buildNumber) ||
+      !/^[0-9a-f]{40}$/i.test(layout.product?.commit ?? "") ||
+      !/^[0-9a-f]{10}$/i.test(layout.product?.commitShort ?? "") ||
+      typeof layout.product?.commitTimestamp !== "string" ||
+      typeof layout.product?.sourceDirty !== "boolean"
+    )
+      findings.push("product-layout.json: Produktidentität ist unvollständig");
+  }
   return findings;
 }
 
@@ -167,7 +184,19 @@ function runSelfTest() {
       "app/node_modules/@img/sharp-win32-x64/package.json": "{}\n",
       "config/runtime.env.example":
         "NETGRID_RUNTIME_PROFILE=release\nNETGRID_DATA_ROOT=C:\\\\ProgramData\\\\NETGRID\nNETGRID_ACCOUNT_ACCESS_MODE=simple\n",
-      "product-layout.json": "{}\n",
+      "product-layout.json": `${JSON.stringify({
+        schemaVersion: "netgrid-product-layout-v2",
+        product: {
+          displayVersion: "V1.0",
+          productVersion: "1.0",
+          installerVersion: "1.0.123",
+          buildNumber: 123,
+          commit: "0123456789abcdef0123456789abcdef01234567",
+          commitShort: "0123456789",
+          commitTimestamp: "2026-09-04T12:00:00+02:00",
+          sourceDirty: false,
+        },
+      })}\n`,
     };
     for (const [relative, content] of Object.entries(minimalFiles)) {
       const target = path.join(root, relative);

@@ -4,9 +4,10 @@ Stand: 2026-09-04
 
 ## Zweck
 
-Dieses Runbook erzeugt den installerneutralen NETGRID-Produktoutput. Es baut
-keinen MSI-/MSIX-Installer und verändert keine Windows-Dienste,
-Firewallregeln oder lokalen Hauptinstanzen.
+Dieses Runbook erzeugt den installerneutralen NETGRID-Produktoutput und kann
+ihn anschließend in das Windows-MSI und ein Burn-Setup verpacken. Die aktuelle
+Stufe verändert keine Windows-Dienste, Firewallregeln oder lokalen
+Hauptinstanzen.
 
 ## Voraussetzungen
 
@@ -42,6 +43,30 @@ Ein grüner Audit bestätigt positive Pfade, Manifestvollständigkeit, Hashes,
 Windows-Sharp-Runtime und das Fehlen verbotener Daten. Er ist noch kein
 Codesigning- oder Installer-Nachweis.
 
+## Installer bauen und prüfen
+
+Die Toolchain ist auf .NET SDK 10.0.302, WiX Toolset 7.0.0 und die
+Bootstrapper-Erweiterung 7.0.0 festgelegt. WiX 7 wird unter der bestätigten
+OSMF-EULA verwendet. Auf einem Buildrechner mit dem gepinnten SDK genügt:
+
+```powershell
+corepack pnpm build:windows-installer
+```
+
+Der Befehl baut und auditiert zuerst `output/windows-release`, erzeugt das
+Runtime-Lizenzinventar und schreibt danach MSI, Setup, Release-Metadaten und
+SHA-256-Prüfsummen nach `output/windows-installer`. Für eine erneute
+Paketierung eines unveränderten, bereits geprüften Outputs kann diagnostisch
+`scripts/build-windows-installer.ps1 -SkipReleaseBuild` verwendet werden.
+
+Der Installer-Audit extrahiert das MSI über Windows Installer in einen bewusst
+kurzen temporären Pfad, vergleicht jede Produktdatei gegen das Manifest und
+prüft das in Burn eingebettete MSI anhand seines Hashes. WiX 7 schreibt aktuell
+nicht steuerbare Paketcodes und Zeitfelder; wiederholte Builds sind deshalb
+inhaltlich und über Manifest/Prüfsummen verifizierbar, aber nicht
+byteidentisch (siehe [WiX-Issue #8978](https://github.com/wixtoolset/issues/issues/8978)). Release-Metadaten müssen für eine Veröffentlichung
+`sourceDirty: false` ausweisen.
+
 ## Isolierten Frischstart prüfen
 
 ```powershell
@@ -63,7 +88,7 @@ Eigene Prozesse, temporärer Output und Datenroot werden anschließend
 entfernt. Die Standardports `3100` und `8787` sowie die Daten der
 Hauptinstanz bleiben unangetastet.
 
-## Übergabe an einen späteren Installer
+## Installationsvertrag für die nächsten Pakete
 
 Der Installer erhält ausschließlich den erfolgreich auditierten Ordner
 `output/windows-release`. Er liest `product-layout.json`, verifiziert vor dem

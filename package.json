@@ -61,6 +61,7 @@
     "check:release-boundary:selftest": "node scripts/check-release-product-boundary.mjs --self-test",
     "check:release-card-index": "node scripts/check-release-card-index.mjs",
     "build:windows-release-output": "node scripts/build-windows-release-output.mjs && node scripts/check-windows-release-output.mjs",
+    "build:windows-installer": "powershell -ExecutionPolicy Bypass -File scripts/build-windows-installer.ps1",
     "check:windows-release-output": "node scripts/check-windows-release-output.mjs",
     "check:windows-release-output:selftest": "node scripts/check-windows-release-output.mjs --self-test",
     "smoke:windows-release-output": "node scripts/smoke-windows-release-output.mjs",

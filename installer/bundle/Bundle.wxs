@@ -1,0 +1,23 @@
+<Wix
+  xmlns="http://wixtoolset.org/schemas/v4/wxs"
+  xmlns:bal="http://wixtoolset.org/schemas/v4/wxs/bal">
+  <Bundle
+    Name="NETGRID Setup"
+    Manufacturer="LevelX2"
+    Version="$(ProductVersion)"
+    UpgradeCode="8ADF9A12-9C1B-4130-96BA-60A5F4A58B9D"
+    IconSourceFile="$(NetgridIcon)"
+    Compressed="yes">
+    <BootstrapperApplication>
+      <bal:WixStandardBootstrapperApplication
+        Theme="hyperlinkLargeLicense"
+        LicenseUrl="https://github.com/LevelX2/NETGRID/blob/main/LICENSE"
+        ShowVersion="yes"
+        SuppressRepair="no"
+        SuppressOptionsUI="no" />
+    </BootstrapperApplication>
+    <Chain>
+      <MsiPackage SourceFile="$(ProductMsi)" Visible="no" Vital="yes" />
+    </Chain>
+  </Bundle>
+</Wix>

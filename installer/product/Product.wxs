@@ -1,0 +1,32 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package
+    Name="NETGRID"
+    Manufacturer="LevelX2"
+    Version="$(ProductVersion)"
+    UpgradeCode="D8271ACB-E70F-4CD5-9832-DEFE6A052B9F"
+    Scope="perMachine"
+    InstallerVersion="500"
+    Language="1033">
+    <SummaryInformation Description="NETGRID private alpha" />
+    <MajorUpgrade DowngradeErrorMessage="Eine neuere NETGRID-Version ist bereits installiert." />
+    <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="NETGRID">
+        <Directory Id="LEGALFOLDER" Name="legal" />
+      </Directory>
+    </StandardDirectory>
+
+    <Files Include="$(ReleaseRoot)\**" Directory="INSTALLFOLDER" />
+
+    <Component Directory="LEGALFOLDER">
+      <File Id="NetgridLicense" Source="$(LegalRoot)\NETGRID-LICENSE.txt" />
+    </Component>
+    <Component Directory="LEGALFOLDER">
+      <File Id="ThirdPartyNotices" Source="$(LegalRoot)\THIRD-PARTY-NOTICES.txt" />
+    </Component>
+
+    <Icon Id="NetgridIcon" SourceFile="$(NetgridIcon)" />
+    <Property Id="ARPPRODUCTICON" Value="NetgridIcon" />
+  </Package>
+</Wix>
