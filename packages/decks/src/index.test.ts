@@ -263,15 +263,15 @@ describe("deck validation and snapshots", () => {
     );
 
     expect(entry).toMatchObject({
-      version: "1.4.0",
+      version: "1.5.0",
       name: "Lucidrine Lockdown",
       side: "corp",
       cardPoolVersion: "private-local-onr-v1-plus-proteus-playtest",
       formatProfileId: "netgrid_private_local_proteus_playtest_v1",
     });
     expect(entry?.cards).toEqual([
-      { cardId: "onr_proteus_008_project-zurich", quantity: 3 },
-      { cardId: "onr_v1_194_corporate-downsizing", quantity: 3 },
+      { cardId: "onr_proteus_004_fetal-ai", quantity: 3 },
+      { cardId: "onr_v1_212_priority-requisition", quantity: 1 },
       { cardId: "onr_v1_196_corporate-war", quantity: 3 },
       { cardId: "onr_v1_347_vapor-ops", quantity: 3 },
       { cardId: "onr_v1_297_overtime-incentives", quantity: 1 },
@@ -282,8 +282,8 @@ describe("deck validation and snapshots", () => {
       { cardId: "onr_v1_295_night-shift", quantity: 3 },
       { cardId: "onr_v1_281_accounts-receivable", quantity: 3 },
       { cardId: "onr_proteus_039_sphinx-2006", quantity: 3 },
-      { cardId: "onr_proteus_040_sumo-2008", quantity: 2 },
-      { cardId: "onr_proteus_013_caryatid", quantity: 2 },
+      { cardId: "onr_proteus_032_misleading-access-menus", quantity: 3 },
+      { cardId: "onr_proteus_038_snowbank", quantity: 3 },
       { cardId: "onr_v1_261_quandary", quantity: 3 },
       { cardId: "onr_proteus_017_credit-blocks", quantity: 3 },
       { cardId: "onr_v1_245_fire-wall", quantity: 3 },

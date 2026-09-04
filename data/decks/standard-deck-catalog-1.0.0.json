@@ -5708,7 +5708,7 @@
     },
     {
       "standardDeckId": "standard_corp_lucidrine_lockdown",
-      "version": "1.4.0",
+      "version": "1.5.0",
       "status": "active",
       "name": "Lucidrine Lockdown",
       "side": "corp",
@@ -5719,12 +5719,12 @@
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
-          "cardId": "onr_proteus_008_project-zurich",
+          "cardId": "onr_proteus_004_fetal-ai",
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_194_corporate-downsizing",
-          "quantity": 3
+          "cardId": "onr_v1_212_priority-requisition",
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_196_corporate-war",
@@ -5767,12 +5767,12 @@
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_040_sumo-2008",
-          "quantity": 2
+          "cardId": "onr_proteus_032_misleading-access-menus",
+          "quantity": 3
         },
         {
-          "cardId": "onr_proteus_013_caryatid",
-          "quantity": 2
+          "cardId": "onr_proteus_038_snowbank",
+          "quantity": 3
         },
         {
           "cardId": "onr_v1_261_quandary",
@@ -5790,7 +5790,7 @@
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_lucidrine_lockdown",
-        "sourceDeckVersion": "1.4.0-direct-central-stoppers-2026-09-04"
+        "sourceDeckVersion": "1.5.0-low-density-access-denial-2026-09-04"
       }
     }
   ]
