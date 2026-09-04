@@ -5189,24 +5189,25 @@
     },
     {
       "standardDeckId": "standard_corp_lucidrine_lockdown",
-      "sourceDeckVersion": "1.1.0",
-      "sourceDeckHash": "standard-deck:98695688",
-      "sourceAnalysisHash": "deck-analysis:5cf111a1",
+      "sourceDeckVersion": "1.2.0",
+      "sourceDeckHash": "standard-deck:1eae6e44",
+      "sourceAnalysisHash": "deck-analysis:9356d687",
       "reviewedAt": "2026-09-04",
       "analysis": {
         "primaryStrategyIds": [
           "corp.fast_advance",
+          "corp.ambush_bluff",
           "corp.remote_scoring",
           "corp.rush_score"
         ],
         "secondaryStrategyIds": [],
         "reviewStatus": "observe"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:e46ef5c3",
+      "sourceAnalysisInputHash": "deck-analysis-input:faa0f089",
       "contentByLocale": {
         "en": {
           "summary": "Lucidrine Lockdown converts central-server taxation into short scoring windows. Its revised ICE suite is built to contest repeated R&D multiaccess without leaving HQ as a free fallback.",
-          "deckIdea": "Lucidrine Lockdown removes low-impact one-credit taxes and remote-only traps in favor of fifteen pieces of live ICE, Simon Francisco access compression, and a single Pattel Antibody punishment slot. Ball and Chain and Virizz make repeated breaker use expensive, while Quandary, Credit Blocks, and Fire Wall provide real end-the-run coverage. The objective is not to make R&D permanently impenetrable: tax the Runner on both R&D and HQ, then convert the lost tempo through Vapor Ops and the advancement operations before the Runner can rebuild.",
+          "deckIdea": "Lucidrine Lockdown removes low-impact one-credit taxes in favor of thirteen pieces of live ICE and Simon Francisco access compression while preserving three Virus Test Sites as its active remote threat. Ball and Chain and Virizz make repeated breaker use expensive, while Quandary, Credit Blocks, and Fire Wall provide real end-the-run coverage. The objective is not to make R&D permanently impenetrable: tax the Runner on both R&D and HQ, then convert the lost tempo through a dangerous remote, Vapor Ops, and the advancement operations before the Runner can rebuild.",
           "gamePlan": {
             "opening": "Install a rez-ready stopper on R&D and cover HQ before expanding. If the Runner reveals R&D Interface or repeats R&D runs, give R&D the next meaningful layer, but do not abandon HQ. Establish economy early enough to rez the ICE you install.",
             "midgame": "Layer different ICE types across R&D and HQ so one breaker cannot solve both centrals cheaply. Place Simon Francisco on the central with the highest current multiaccess count. Use the resulting credit and action gap to build one scoring remote and convert Vapor Ops counters rather than continuing to stack ICE without a scoring plan.",
@@ -5229,9 +5230,9 @@
               "role": "Diversifies the central tax into sentry pressure and makes every later subroutine break more expensive when encountered unbroken."
             },
             {
-              "cardId": "onr_proteus_068_pattel-antibody",
-              "title": "Pattel Antibody",
-              "role": "Turns a central access into persistent breaker-strength pressure when the Corp preserves three credits for the trigger."
+              "cardId": "onr_v1_348_virus-test-site",
+              "title": "Virus Test Site",
+              "role": "Preserves the active remote threat that turns the central tax window into bluff pressure and potential damage."
             },
             {
               "cardId": "onr_v1_347_vapor-ops",
@@ -5252,7 +5253,7 @@
         },
         "de": {
           "summary": "Lucidrine Lockdown verwandelt Zentralserver-Tax in kurze Scorefenster. Die überarbeitete ICE-Suite soll wiederholten R&D-Multiaccess abfangen, ohne HQ als kostenlosen Ausweichweg offenzulassen.",
-          "deckIdea": "Lucidrine Lockdown ersetzt schwache Ein-Credit-Taxes und reine Remote-Traps durch fünfzehn tatsächlich relevante ICE, Zugriffskompression über Simon Francisco und einen einzelnen Pattel-Antibody-Bestrafungsslot. Ball and Chain und Virizz verteuern wiederholte Breakernutzung; Quandary, Credit Blocks und Fire Wall liefern echte End-the-Run-Abdeckung. R&D soll nicht für immer undurchdringlich werden: Besteuere den Runner auf R&D und HQ und verwandle das verlorene Tempo mit Vapor Ops und den Advancement-Operationen in Scores, bevor der Runner sich erholt.",
+          "deckIdea": "Lucidrine Lockdown ersetzt schwache Ein-Credit-Taxes durch dreizehn tatsächlich relevante ICE und Zugriffskompression über Simon Francisco, behält aber drei Virus Test Sites als aktive Remote-Drohung. Ball and Chain und Virizz verteuern wiederholte Breakernutzung; Quandary, Credit Blocks und Fire Wall liefern echte End-the-Run-Abdeckung. R&D soll nicht für immer undurchdringlich werden: Besteuere den Runner auf R&D und HQ und verwandle das verlorene Tempo mit einem gefährlichen Remote, Vapor Ops und den Advancement-Operationen in Scores, bevor der Runner sich erholt.",
           "gamePlan": {
             "opening": "Installiere ein bezahlbar rezzbares Stopper-ICE auf R&D und decke HQ ab, bevor du expandierst. Zeigt der Runner R&D Interface oder läuft wiederholt auf R&D, erhält R&D die nächste relevante Schicht; HQ darf dabei nicht aufgegeben werden. Baue die Economy früh genug auf, um das installierte ICE auch wirklich zu rezzen.",
             "midgame": "Staffele unterschiedliche ICE-Typen über R&D und HQ, damit ein einzelner Breaker nicht beide Zentralen günstig löst. Lege Simon Francisco auf die Zentrale mit dem aktuell höchsten Multiaccess. Nutze die gewonnene Credit- und Aktionslücke für genau ein Score-Remote und die Konversion von Vapor-Ops-Countern, statt ohne Scoreplan immer weiter ICE zu stapeln.",
@@ -5275,9 +5276,9 @@
               "role": "Ergänzt die Zentralserver-Tax um Sentry-Druck und verteuert nach ungebrochener Begegnung jede spätere Subroutine."
             },
             {
-              "cardId": "onr_proteus_068_pattel-antibody",
-              "title": "Pattel Antibody",
-              "role": "Verwandelt einen Zentralserver-Zugriff in anhaltenden Breaker-Stärkedruck, wenn die Corp drei Credits für den Trigger zurückhält."
+              "cardId": "onr_v1_348_virus-test-site",
+              "title": "Virus Test Site",
+              "role": "Bewahrt die aktive Remote-Drohung, die das Zentralserver-Taxfenster in Bluffdruck und möglichen Schaden verwandelt."
             },
             {
               "cardId": "onr_v1_347_vapor-ops",

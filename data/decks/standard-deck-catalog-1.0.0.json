@@ -5708,7 +5708,7 @@
     },
     {
       "standardDeckId": "standard_corp_lucidrine_lockdown",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "status": "active",
       "name": "Lucidrine Lockdown",
       "side": "corp",
@@ -5747,12 +5747,12 @@
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_068_pattel-antibody",
-          "quantity": 1
-        },
-        {
           "cardId": "onr_proteus_073_simon-francisco",
           "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_348_virus-test-site",
+          "quantity": 3
         },
         {
           "cardId": "onr_v1_290_efficiency-experts",
@@ -5768,11 +5768,11 @@
         },
         {
           "cardId": "onr_v1_222_ball-and-chain",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_277_virizz",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_261_quandary",
@@ -5790,7 +5790,7 @@
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_lucidrine_lockdown",
-        "sourceDeckVersion": "1.1.0-rd-multiaccess-counter-2026-09-04"
+        "sourceDeckVersion": "1.2.0-rd-multiaccess-counter-2026-09-04"
       }
     }
   ]
