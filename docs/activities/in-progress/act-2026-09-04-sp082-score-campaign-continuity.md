@@ -20,7 +20,7 @@ checks: []
 
 ## Status
 
-SP082-A abgeschlossen. SP082-B ist als nächstes aktiv.
+SP082-A und SP082-B abgeschlossen. SP082-C ist als nächstes aktiv.
 
 ## Paketprotokoll
 
@@ -60,6 +60,28 @@ Der engste Änderungsschnitt liegt damit in der vorhandenen Score-
 Schutzassessment-/Funding-Milestone-Ableitung und ihrer bestehenden
 Economy-Supportkonversion. Es ist weder ein pauschaler Scorebonus noch eine
 zweite Kampagnenstruktur erforderlich.
+
+### SP082-B – progressabler Score-Vertrag
+
+`CorpScoreFundingMilestone` berücksichtigt nun neben dem bereits
+veröffentlichten Routengap auch zwei vorhandene, voneinander getrennte
+Engine-nahe Belege: den bekannten Schutzgap und den exakten
+Score-Konversionsfloor. Der verwendete Beleg wird typisiert im Milestone
+festgehalten. Ein Schutzgap ist nur zulässig, wenn Parent, Need und aktuelle
+StateVersion zusammenpassen.
+
+Damit erhält Spiel 36 bei null Credits einen stabilen Zielwert von vier
+Credits aus der bekannten Agenda-Konversion. Die aktuelle Kreditaktion wird
+als `corp.economy`-Leaf unter dem residenten Score-Parent und dessen
+`score-support`-Need ausgewählt. Ein unbekannter Schutzpfad erzeugt weiterhin
+keinen erfundenen Schutzgap; ein davon unabhängiger bekannter
+Konversionsfloor darf jedoch progressabel bleiben.
+
+Der Checkpoint zeigt zugleich den nächsten vertikalen Verlustpunkt für
+SP082-C: Der produktive Head und seine Phase sind korrekt Parent-/Need-
+gebunden, aber der Progress-Root sucht wegen der weiterhin offenen
+Schutzfrage vorrangig nach `score-protection:*` und meldet fälschlich Replan,
+statt den tatsächlich gewählten `score-support:*`-Witness anzuerkennen.
 
 ## Quelle und Zielprüfung
 

@@ -21,6 +21,7 @@ import {
   corpEconomyActionIsOwned,
   assessCorpSpendAgainstScoreFundingMilestones,
   corpScoreFundingMilestone,
+  knownScoreProtectionFundingGap,
   corpGenericDefensePriorityClass,
   corpScorePriorityClass,
   createCorpCorePlanModules,
@@ -4945,6 +4946,7 @@ describe("Corp core plan modules", () => {
     const nextMilestone = corpScoreFundingMilestone(next, 3);
 
     expect(firstMilestone).toMatchObject({
+      basis: { kind: "score_route_gap" },
       targetCredits: 5,
       observedCredits: 2,
       remainingGap: 3,
@@ -4956,6 +4958,111 @@ describe("Corp core plan modules", () => {
       targetCredits: 5,
       observedCredits: 3,
       remainingGap: 2,
+    });
+  });
+
+  it("publishes the known installed protection gap even without a currently legal ICE-install head", () => {
+    const project = scoreProject(
+      "agenda:agenda-1:remote_1",
+      "P4",
+      "corp_score_protection_required:remote_1",
+    );
+    project.phase = "install_agenda";
+    project.feasible = false;
+    project.protectionNeed = knownProtectionNeed({
+      projectId: project.projectId,
+      needId: `score-protection:${project.projectId}`,
+      observedAtStateVersion: 10,
+      minimumAdditionalCreditsToSatisfy: 6,
+    });
+
+    expect(knownScoreProtectionFundingGap(project)).toBe(6);
+    expect(corpScoreFundingMilestone(project, 0)).toMatchObject({
+      basis: {
+        kind: "score_protection_gap",
+        needId: `score-protection:${project.projectId}`,
+        observedAtStateVersion: 10,
+      },
+      targetCredits: 6,
+      observedCredits: 0,
+      remainingGap: 6,
+    });
+  });
+
+  it("does not turn an unknown protection future into a score funding objective", () => {
+    const project = scoreProject(
+      "agenda:agenda-unknown:remote_1",
+      "P4",
+      "corp_score_protection_unknown:remote_1",
+    );
+    project.phase = "install_agenda";
+    project.feasible = false;
+    project.protectionNeed = {
+      ...knownProtectionNeed({
+        projectId: project.projectId,
+        needId: `score-protection:${project.projectId}`,
+        observedAtStateVersion: 10,
+        minimumAdditionalCreditsToSatisfy: 6,
+      }),
+      baseline: {
+        knowledge: "unknown",
+        availableCorpCredits: 0,
+        availableCorpClicks: 3,
+        availableCorpAgendaPoints: 0,
+        totalScoreReserveCredits: 0,
+        hardClickReserve: 0,
+        fundedProtection: false,
+        unknownReason: "missing_rez_cost_quote",
+        evidence: [],
+      },
+    };
+
+    expect(knownScoreProtectionFundingGap(project)).toBeUndefined();
+    expect(corpScoreFundingMilestone(project, 0)).toBeUndefined();
+  });
+
+  it("keeps independently known score-conversion funding progress when protection remains unknown", () => {
+    const project = scoreProject(
+      "agenda:agenda-unknown-with-conversion:remote_1",
+      "P4",
+      "corp_score_protection_unknown:remote_1",
+    );
+    project.phase = "install_agenda";
+    project.feasible = false;
+    project.conversion = {
+      remainingAdvancementClicks: 4,
+      remainingScoreCredits: 4,
+      existingRemoteIceCount: 1,
+      existingRemoteRezzedIceCount: 0,
+      residentParent: false,
+      runnerStealPoints: 2,
+      runnerStealIsMatchpoint: false,
+      realizedStrategySupportCount: 0,
+    };
+    project.protectionNeed = {
+      ...knownProtectionNeed({
+        projectId: project.projectId,
+        needId: `score-protection:${project.projectId}`,
+        observedAtStateVersion: 10,
+        minimumAdditionalCreditsToSatisfy: 6,
+      }),
+      baseline: {
+        knowledge: "unknown",
+        availableCorpCredits: 0,
+        availableCorpClicks: 3,
+        availableCorpAgendaPoints: 0,
+        totalScoreReserveCredits: 0,
+        hardClickReserve: 0,
+        fundedProtection: false,
+        unknownReason: "missing_rez_cost_quote",
+        evidence: [],
+      },
+    };
+
+    expect(corpScoreFundingMilestone(project, 0)).toMatchObject({
+      basis: { kind: "score_conversion_floor" },
+      targetCredits: 4,
+      remainingGap: 4,
     });
   });
 
@@ -6096,6 +6203,43 @@ function emptyPortfolio(): ResidentPlanPortfolio {
     instances: [],
     completionHistory: [],
     transitions: [],
+  };
+}
+
+function knownProtectionNeed(params: {
+  projectId: string;
+  needId: string;
+  observedAtStateVersion: number;
+  minimumAdditionalCreditsToSatisfy: number;
+}): NonNullable<CorpCorePlanDomain["scoreProjects"][number]["protectionNeed"]> {
+  const projection = knownInstallProjection({
+    actionId: "not-currently-legal-install",
+    sourceCardInstanceId: "ice-1",
+    sourceDefinitionId: "ice-def",
+    targetServerId: "remote_1",
+    effect: "no_progress",
+    probability: { numerator: 1, denominator: 1 },
+    totalCredits: params.minimumAdditionalCreditsToSatisfy,
+    availableCredits: 0,
+    availableClicks: 3,
+    preservesReserves: false,
+    minimumAdditionalCreditsToSatisfy: params.minimumAdditionalCreditsToSatisfy,
+  });
+  return {
+    needId: params.needId,
+    parentProjectId: params.projectId,
+    targetServerId: "remote_1",
+    observedAtStateVersion: params.observedAtStateVersion,
+    objective: {
+      kind: "funded_remote_access_risk",
+      maximumRunnerAccessSuccessProbability: {
+        numerator: 1,
+        denominator: 2,
+      },
+      policySource: "test",
+    },
+    scoreReserve: { creditBreakdown: [], hardClickReserve: 0 },
+    baseline: projection.after,
   };
 }
 

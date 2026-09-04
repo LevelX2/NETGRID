@@ -6,43 +6,66 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 
 describe("SP-082 score-campaign loss-point checkpoints", () => {
-  it.each([
-    ["game 36", game36Json],
-    ["game 34", game34Json],
-  ])(
-    "reproduces the unbound economy head while a concrete score parent is blocked in %s",
-    (_label, json) => {
-      const result = runAiDecisionCheckpoint(
-        structuredClone(json) as AiDecisionCheckpointV1,
-      );
+  it("binds game 36's exact current funding step to the known score-conversion floor", () => {
+    const result = runAiDecisionCheckpoint(fixture(game36Json));
 
-      expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
-      expect(result.selectedAction?.type).toBe("gain_credit");
+    expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+    expect(result.selectedAction?.type).toBe("gain_credit");
 
-      const planFirst = result.decision?.decisionDebug?.planFirstDecision;
-      expect(planFirst?.rootPlanInstanceId).toMatch(
-        /^plan:corp\.economy:economy-(visible-liquidity-development|immediate-operation)/,
-      );
-      const blockedScoreParent = planFirst?.portfolio.find(
-        (instance) =>
-          instance.moduleId === "corp.score_agenda" &&
-          instance.phase === "install_agenda" &&
-          instance.viability === "blocked",
-      );
-      expect(blockedScoreParent).toBeDefined();
-      expect(blockedScoreParent?.openNeedIds).toEqual([]);
-      expect(blockedScoreParent?.blockers).toContain(
-        "corp_score_route_unavailable",
-      );
+    const planFirst = result.decision?.decisionDebug?.planFirstDecision;
+    const scoreParent = planFirst?.portfolio.find(
+      (instance) =>
+        instance.moduleId === "corp.score_agenda" &&
+        instance.phase === "install_agenda" &&
+        instance.target?.id === "rules_legal_score_action",
+    );
+    const supportLeaf = planFirst?.selectedPlan;
+    expect(scoreParent).toMatchObject({
+      viability: "ready",
+      portfolioRole: "foreground",
+      openNeedIds: [
+        "score-support:agenda:corp_onr_proteus_005_marked-accounts_1:remote_1",
+      ],
+    });
+    expect(planFirst?.rootPlanInstanceId).toBe(scoreParent?.instanceId);
+    expect(supportLeaf).toMatchObject({
+      moduleId: "corp.economy",
+      parentInstanceId: scoreParent?.instanceId,
+      parentNeedId:
+        "score-support:agenda:corp_onr_proteus_005_marked-accounts_1:remote_1",
+      executionState: "executor",
+    });
+    expect(planFirst?.leafExecutorInstanceId).toBe(supportLeaf?.instanceId);
+    expect(
+      planFirst?.turnPlanning?.selectedLine.phases[0]?.supportBindings[0],
+    ).toMatchObject({
+      planInstanceId: supportLeaf?.instanceId,
+      parentNeedId: supportLeaf?.parentNeedId,
+    });
+  });
 
-      expect(
-        planFirst?.turnPlanning?.heads.some(
-          (head) =>
-            head.executorParentPlanInstanceId ===
-            blockedScoreParent?.instanceId,
-        ),
-      ).toBe(false);
-      expect(planFirst?.turnPlanning?.coverage.progressRoots).toEqual([]);
-    },
-  );
+  it("retains game 34 as the remaining maturity-support loss point", () => {
+    const result = runAiDecisionCheckpoint(fixture(game34Json));
+
+    expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+    expect(result.selectedAction?.type).toBe("gain_credit");
+    const planFirst = result.decision?.decisionDebug?.planFirstDecision;
+    expect(planFirst?.rootPlanInstanceId).toMatch(
+      /^plan:corp\.economy:economy-immediate-operation/,
+    );
+    const blockedScoreParents = planFirst?.portfolio.filter(
+      (instance) =>
+        instance.moduleId === "corp.score_agenda" &&
+        instance.phase === "install_agenda" &&
+        instance.viability === "blocked",
+    );
+    expect(blockedScoreParents).toHaveLength(2);
+    expect(
+      blockedScoreParents?.every((parent) => parent.openNeedIds.length === 0),
+    ).toBe(true);
+  });
 });
+
+function fixture(value: unknown): AiDecisionCheckpointV1 {
+  return structuredClone(value) as AiDecisionCheckpointV1;
+}
