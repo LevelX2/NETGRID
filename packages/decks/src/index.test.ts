@@ -114,12 +114,12 @@ describe("deck validation and snapshots", () => {
     const localCuration = standardDeckCurationData.localDeckLibrary;
     const projectCuration = standardDeckCurationData.projectSnapshots;
 
-    expect(entries).toHaveLength(49);
+    expect(entries).toHaveLength(50);
     expect(new Set(entries.map((entry) => entry.standardDeckId)).size).toBe(
       entries.length,
     );
     expect(localCuration.counts).toEqual({
-      standard: 49,
+      standard: 50,
       internal_ai: 2,
       retire: 1,
       test_fixture: 10,
@@ -251,6 +251,54 @@ describe("deck validation and snapshots", () => {
         0,
       ),
     ).toBe(20);
+  });
+
+  it("keeps Lucidrine Lockdown on its exact 45-card and 21-point counter list", () => {
+    const runtimeCardsById = createRuntimeCardsById();
+    const entry = (
+      standardDeckCatalogData.decks as StandardDeckCatalogEntry[]
+    ).find(
+      (candidate) =>
+        candidate.standardDeckId === "standard_corp_lucidrine_lockdown",
+    );
+
+    expect(entry).toMatchObject({
+      version: "1.0.0",
+      name: "Lucidrine Lockdown",
+      side: "corp",
+      cardPoolVersion: "private-local-onr-v1-plus-proteus-playtest",
+      formatProfileId: "netgrid_private_local_proteus_playtest_v1",
+    });
+    expect(entry?.cards).toEqual([
+      { cardId: "onr_proteus_008_project-zurich", quantity: 3 },
+      { cardId: "onr_v1_194_corporate-downsizing", quantity: 3 },
+      { cardId: "onr_v1_196_corporate-war", quantity: 3 },
+      { cardId: "onr_v1_347_vapor-ops", quantity: 3 },
+      { cardId: "onr_v1_297_overtime-incentives", quantity: 2 },
+      { cardId: "onr_v1_292_management-shake-up", quantity: 2 },
+      { cardId: "onr_v1_304_systematic-layoffs", quantity: 2 },
+      { cardId: "onr_v1_348_virus-test-site", quantity: 3 },
+      { cardId: "onr_v1_290_efficiency-experts", quantity: 3 },
+      { cardId: "onr_v1_295_night-shift", quantity: 3 },
+      { cardId: "onr_v1_281_accounts-receivable", quantity: 3 },
+      { cardId: "onr_proteus_038_snowbank", quantity: 3 },
+      { cardId: "onr_proteus_032_misleading-access-menus", quantity: 3 },
+      { cardId: "onr_v1_261_quandary", quantity: 3 },
+      { cardId: "onr_proteus_017_credit-blocks", quantity: 3 },
+      { cardId: "onr_v1_245_fire-wall", quantity: 3 },
+    ]);
+    expect(entry?.cards.reduce((total, card) => total + card.quantity, 0)).toBe(
+      45,
+    );
+    expect(
+      entry?.cards.reduce(
+        (total, card) =>
+          total +
+          card.quantity *
+            (runtimeCardsById[card.cardId]?.numeric.agendaPoints ?? 0),
+        0,
+      ),
+    ).toBe(21);
   });
 
   it("keeps Ghost Circuit v2 on its exact Originalset stealth recon list", () => {

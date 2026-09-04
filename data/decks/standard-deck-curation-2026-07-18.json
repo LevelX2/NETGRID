@@ -9,7 +9,7 @@
   },
   "localDeckLibrary": {
     "counts": {
-      "standard": 49,
+      "standard": 50,
       "internal_ai": 2,
       "retire": 1,
       "test_fixture": 10
@@ -469,6 +469,14 @@
         "classification": "standard",
         "reason": "curated_user_deck",
         "standardDeckId": "standard_corp_counter_shell"
+      },
+      {
+        "sourceDeckId": "local_corp_lucidrine_lockdown",
+        "name": "Lucidrine Lockdown",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_corp_lucidrine_lockdown"
       },
       {
         "sourceDeckId": "local_runner_unused_resource_cybernetics_lab",
