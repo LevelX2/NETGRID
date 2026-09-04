@@ -263,7 +263,7 @@ describe("deck validation and snapshots", () => {
     );
 
     expect(entry).toMatchObject({
-      version: "1.5.0",
+      version: "1.6.0",
       name: "Lucidrine Lockdown",
       side: "corp",
       cardPoolVersion: "private-local-onr-v1-plus-proteus-playtest",
@@ -274,10 +274,10 @@ describe("deck validation and snapshots", () => {
       { cardId: "onr_v1_212_priority-requisition", quantity: 1 },
       { cardId: "onr_v1_196_corporate-war", quantity: 3 },
       { cardId: "onr_v1_347_vapor-ops", quantity: 3 },
-      { cardId: "onr_v1_297_overtime-incentives", quantity: 1 },
-      { cardId: "onr_v1_292_management-shake-up", quantity: 2 },
+      { cardId: "onr_v1_292_management-shake-up", quantity: 1 },
       { cardId: "onr_v1_304_systematic-layoffs", quantity: 2 },
       { cardId: "onr_v1_366_red-herrings", quantity: 3 },
+      { cardId: "onr_proteus_073_simon-francisco", quantity: 2 },
       { cardId: "onr_v1_290_efficiency-experts", quantity: 3 },
       { cardId: "onr_v1_295_night-shift", quantity: 3 },
       { cardId: "onr_v1_281_accounts-receivable", quantity: 3 },
