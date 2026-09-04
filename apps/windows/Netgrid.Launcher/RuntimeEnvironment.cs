@@ -28,6 +28,15 @@ internal sealed class RuntimeEnvironment
         return uri;
     }
 
+    public Uri OptionalUri(string name, string fallbackName)
+    {
+        if (!_values.TryGetValue(name, out var value) || string.IsNullOrWhiteSpace(value))
+            return RequiredUri(fallbackName);
+        if (!Uri.TryCreate(value, UriKind.Absolute, out var uri) || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+            throw new InvalidOperationException($"launcher_environment_uri_invalid:{name}");
+        return uri;
+    }
+
     public static RuntimeEnvironment Load(string path)
     {
         if (!File.Exists(path)) throw new InvalidOperationException("launcher_environment_missing");

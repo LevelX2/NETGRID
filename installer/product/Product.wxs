@@ -63,10 +63,15 @@
     </Component>
 
     <Property Id="NETGRID_DATA_ROOT" Secure="yes" />
+    <Property Id="NETGRID_DEPLOYMENT_PROFILE" Value="local" Secure="yes" />
+    <Property Id="NETGRID_LAN_ADDRESS" Secure="yes" />
+    <Property Id="NETGRID_WEB_PORT" Value="3100" Secure="yes" />
+    <Property Id="NETGRID_SERVER_PORT" Value="8787" Secure="yes" />
+    <Property Id="NETGRID_RETENTION_DAYS" Value="30" Secure="yes" />
     <Property Id="INSTALLDESKTOPSHORTCUT" Value="1" Secure="yes" />
     <SetProperty
       Id="InitializeNetgridRuntime"
-      Value='initialize --data-root "[NETGRID_DATA_ROOT]"'
+      Value='initialize --data-root "[NETGRID_DATA_ROOT]" --deployment-profile "[NETGRID_DEPLOYMENT_PROFILE]" --lan-address "[NETGRID_LAN_ADDRESS]" --web-port "[NETGRID_WEB_PORT]" --server-port "[NETGRID_SERVER_PORT]" --retention-days "[NETGRID_RETENTION_DAYS]" --configure-firewall "true"'
       Before="InitializeNetgridRuntime"
       Sequence="execute"
       Condition='NOT REMOVE~="ALL"' />
@@ -78,8 +83,23 @@
       Impersonate="no"
       Return="check"
       HideTarget="yes" />
+    <SetProperty
+      Id="RemoveNetgridFirewall"
+      Value="remove-firewall"
+      Before="RemoveNetgridFirewall"
+      Sequence="execute"
+      Condition='REMOVE~="ALL"' />
+    <CustomAction
+      Id="RemoveNetgridFirewall"
+      FileRef="NetgridRuntimeConfig"
+      ExeCommand="[CustomActionData]"
+      Execute="deferred"
+      Impersonate="no"
+      Return="check"
+      HideTarget="yes" />
     <InstallExecuteSequence>
       <Custom Action="InitializeNetgridRuntime" After="InstallFiles" Condition='NOT REMOVE~="ALL"' />
+      <Custom Action="RemoveNetgridFirewall" Before="RemoveFiles" Condition='REMOVE~="ALL"' />
     </InstallExecuteSequence>
 
     <Icon Id="NetgridIcon" SourceFile="$(NetgridIcon)" />

@@ -1,6 +1,7 @@
 using System.Security.AccessControl;
 using System.Security.Cryptography;
 using System.Security.Principal;
+using System.Net;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Win32;
@@ -19,6 +20,12 @@ internal static class Program
         {
             Console.OutputEncoding = Encoding.UTF8;
             var command = CommandLine.Parse(args);
+            if (string.Equals(command.Name, "remove-firewall", StringComparison.OrdinalIgnoreCase))
+            {
+                FirewallConfigurator.RemoveRules();
+                Console.WriteLine("NETGRID_FIREWALL_REMOVE_OK");
+                return 0;
+            }
             if (!string.Equals(command.Name, "initialize", StringComparison.OrdinalIgnoreCase))
             {
                 throw new RuntimeConfigException(
@@ -31,13 +38,19 @@ internal static class Program
             var programRoot = ResolveProgramRoot(command.Optional("--program-root"));
             var templatePath = ResolveTemplatePath(command.Optional("--template"), programRoot);
             ValidateDataRoot(dataRoot, programRoot);
+            var network = NetworkSettings.FromCommand(command);
 
             var state = RuntimeInitializer.Initialize(
                 dataRoot,
                 programRoot,
                 templatePath,
-                command.Optional("--state-file")
+                command.Optional("--state-file"),
+                network
             );
+            if (command.Optional("--configure-firewall") == "true")
+            {
+                FirewallConfigurator.Apply(state.Network, programRoot);
+            }
             Console.WriteLine(
                 $"NETGRID_RUNTIME_CONFIG_OK dataRoot={state.DataRoot} preserved={state.PreservedExistingConfiguration.ToString().ToLowerInvariant()}"
             );
@@ -223,7 +236,21 @@ internal static class Program
                     throw new RuntimeConfigException("argument_duplicate", $"Das Argument {args[index]} wurde mehrfach angegeben.");
                 }
             }
-            var allowed = new HashSet<string>(["--data-root", "--program-root", "--template", "--state-file"], StringComparer.OrdinalIgnoreCase);
+            var allowed = new HashSet<string>(
+                [
+                    "--data-root",
+                    "--program-root",
+                    "--template",
+                    "--state-file",
+                    "--deployment-profile",
+                    "--lan-address",
+                    "--web-port",
+                    "--server-port",
+                    "--retention-days",
+                    "--configure-firewall",
+                ],
+                StringComparer.OrdinalIgnoreCase
+            );
             var unknown = options.Keys.FirstOrDefault(option => !allowed.Contains(option));
             if (unknown is not null)
             {
@@ -238,7 +265,85 @@ internal static class Program
         public string Code { get; } = code;
     }
 
-    private sealed record InitializationResult(string DataRoot, bool PreservedExistingConfiguration);
+    private sealed record InitializationResult(
+        string DataRoot,
+        bool PreservedExistingConfiguration,
+        NetworkSettings Network
+    );
+
+    private sealed record NetworkSettings(
+        string DeploymentProfile,
+        string? LanAddress,
+        int WebPort,
+        int ServerPort,
+        string RetentionDays
+    )
+    {
+        private static readonly HashSet<string> RetentionValues = ["7", "30", "90", "180", "365", "never"];
+
+        public bool IsPrivateLan => DeploymentProfile == "private_lan";
+        public string PublicHost => IsPrivateLan ? LanAddress! : "127.0.0.1";
+
+        public static NetworkSettings FromCommand(CommandLine command)
+        {
+            var profile = command.Optional("--deployment-profile") ?? "local";
+            if (profile is not ("local" or "private_lan"))
+            {
+                throw new RuntimeConfigException("deployment_profile_invalid", "Die Betriebsart ist ungültig.");
+            }
+            var webPort = ParsePort(command.Optional("--web-port") ?? "3100", "web_port_invalid");
+            var serverPort = ParsePort(command.Optional("--server-port") ?? "8787", "server_port_invalid");
+            if (webPort == serverPort)
+            {
+                throw new RuntimeConfigException("ports_conflict", "Web- und Serverport müssen verschieden sein.");
+            }
+            var retention = command.Optional("--retention-days") ?? "30";
+            if (!RetentionValues.Contains(retention))
+            {
+                throw new RuntimeConfigException("retention_invalid", "Die Spielaufbewahrung ist ungültig.");
+            }
+            var lanAddress = command.Optional("--lan-address");
+            if (profile == "private_lan" && !IsPrivateIpv4(lanAddress))
+            {
+                throw new RuntimeConfigException("lan_address_invalid", "Das private Netzwerk benötigt eine private IPv4-Adresse.");
+            }
+            return new NetworkSettings(profile, profile == "private_lan" ? lanAddress : null, webPort, serverPort, retention);
+        }
+
+        public static NetworkSettings FromEnvironment(string path)
+        {
+            var values = ReadEnvironment(path);
+            var profile = values.GetValueOrDefault("NETGRID_DEPLOYMENT_PROFILE") ?? "local";
+            var lanAddress = profile == "private_lan"
+                ? new Uri(values.GetValueOrDefault("NETGRID_WEB_BASE_URL") ?? throw new RuntimeConfigException("existing_network_invalid", "Die vorhandene LAN-Konfiguration ist unvollständig.")).Host
+                : null;
+            return new NetworkSettings(
+                profile,
+                lanAddress,
+                ParsePort(values.GetValueOrDefault("PORT") ?? "3100", "existing_network_invalid"),
+                ParsePort(values.GetValueOrDefault("NETGRID_SERVER_PORT") ?? "8787", "existing_network_invalid"),
+                values.GetValueOrDefault("NETGRID_INITIAL_CLEANUP_RETENTION_DAYS") ?? "30"
+            );
+        }
+
+        private static int ParsePort(string value, string code)
+        {
+            if (!int.TryParse(value, out var port) || port is < 1 or > 65535)
+            {
+                throw new RuntimeConfigException(code, "Der Port muss zwischen 1 und 65535 liegen.");
+            }
+            return port;
+        }
+
+        private static bool IsPrivateIpv4(string? value)
+        {
+            if (!IPAddress.TryParse(value, out var address) || address.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork) return false;
+            var bytes = address.GetAddressBytes();
+            return bytes[0] == 10 ||
+                (bytes[0] == 172 && bytes[1] is >= 16 and <= 31) ||
+                (bytes[0] == 192 && bytes[1] == 168);
+        }
+    }
 
     private static class RuntimeInitializer
     {
@@ -255,7 +360,13 @@ internal static class Program
             "card-images",
         ];
 
-        public static InitializationResult Initialize(string dataRoot, string programRoot, string templatePath, string? stateFile)
+        public static InitializationResult Initialize(
+            string dataRoot,
+            string programRoot,
+            string templatePath,
+            string? stateFile,
+            NetworkSettings requestedNetwork
+        )
         {
             Directory.CreateDirectory(dataRoot);
             var configRoot = Path.Combine(dataRoot, "config");
@@ -275,16 +386,23 @@ internal static class Program
             else
             {
                 var template = File.ReadAllText(templatePath, Encoding.UTF8);
-                var configured = MaterializeEnvironment(template, dataRoot, CreateSecret());
+                var configured = MaterializeEnvironment(template, dataRoot, CreateSecret(), requestedNetwork);
                 WriteTextAtomically(environmentPath, configured);
                 ApplyFileAcl(environmentPath);
             }
+            var effectiveNetwork = preserved
+                ? NetworkSettings.FromEnvironment(environmentPath)
+                : requestedNetwork;
 
             var installationState = new
             {
                 schemaVersion = "netgrid-windows-install-state-v1",
                 dataRoot,
                 programRoot,
+                deploymentProfile = effectiveNetwork.DeploymentProfile,
+                webPort = effectiveNetwork.WebPort,
+                serverPort = effectiveNetwork.ServerPort,
+                retentionDays = effectiveNetwork.RetentionDays,
             };
             var localStatePath = Path.Combine(configRoot, "install-state.json");
             var localState = JsonSerializer.Serialize(installationState, new JsonSerializerOptions { WriteIndented = true }) + Environment.NewLine;
@@ -316,10 +434,15 @@ internal static class Program
             ApplyDirectoryAcl(configRoot, FileSystemRights.ReadAndExecute, inheritToChildren: true);
             ApplyDirectoryAcl(dataRoot, FileSystemRights.ReadAndExecute, inheritToChildren: false);
 
-            return new InitializationResult(dataRoot, preserved);
+            return new InitializationResult(dataRoot, preserved, effectiveNetwork);
         }
 
-        private static string MaterializeEnvironment(string template, string dataRoot, string secret)
+        private static string MaterializeEnvironment(
+            string template,
+            string dataRoot,
+            string secret,
+            NetworkSettings network
+        )
         {
             if (!template.Contains($"NETGRID_TOKEN_SALT={PlaceholderSecret}", StringComparison.Ordinal))
             {
@@ -330,39 +453,49 @@ internal static class Program
                 throw new RuntimeConfigException("runtime_template_data_root_missing", "Die Runtimevorlage enthält keinen Datenpfad.");
             }
             var lines = template.Replace("\r\n", "\n", StringComparison.Ordinal).Split('\n');
-            var dataRootAssignments = 0;
-            var secretAssignments = 0;
-            for (var index = 0; index < lines.Length; index++)
+            var publicHost = network.PublicHost;
+            var loopbackWeb = $"http://127.0.0.1:{network.WebPort}";
+            var loopbackServer = $"http://127.0.0.1:{network.ServerPort}";
+            var publicWeb = $"http://{publicHost}:{network.WebPort}";
+            var publicServer = $"http://{publicHost}:{network.ServerPort}";
+            var assignments = new Dictionary<string, string>(StringComparer.Ordinal)
             {
-                if (lines[index].StartsWith("NETGRID_DATA_ROOT=", StringComparison.Ordinal))
-                {
-                    lines[index] = $"NETGRID_DATA_ROOT=\"{dataRoot}\"";
-                    dataRootAssignments++;
-                }
-                if (lines[index].StartsWith("NETGRID_TOKEN_SALT=", StringComparison.Ordinal))
-                {
-                    lines[index] = $"NETGRID_TOKEN_SALT={secret}";
-                    secretAssignments++;
-                }
-            }
-            if (dataRootAssignments != 1 || secretAssignments != 1)
+                ["NETGRID_DATA_ROOT"] = $"\"{dataRoot}\"",
+                ["NETGRID_SERVER_HOST"] = network.IsPrivateLan ? "0.0.0.0" : "127.0.0.1",
+                ["NETGRID_SERVER_PORT"] = network.ServerPort.ToString(),
+                ["HOSTNAME"] = network.IsPrivateLan ? "0.0.0.0" : "127.0.0.1",
+                ["PORT"] = network.WebPort.ToString(),
+                ["NETGRID_DEPLOYMENT_PROFILE"] = network.DeploymentProfile,
+                ["NETGRID_WEB_BASE_URL"] = publicWeb,
+                ["NETGRID_SERVER_BASE_URL"] = publicServer,
+                ["NETGRID_ALLOWED_ORIGINS"] = network.IsPrivateLan ? $"{publicWeb},{loopbackWeb}" : loopbackWeb,
+                ["NEXT_PUBLIC_NETGRID_SERVER_URL"] = publicServer,
+                ["NETGRID_LAUNCHER_WEB_URL"] = loopbackWeb,
+                ["NETGRID_LAUNCHER_SERVER_URL"] = loopbackServer,
+                ["NETGRID_TOKEN_SALT"] = secret,
+                ["NETGRID_RATE_LIMIT_PROFILE"] = network.IsPrivateLan ? "private_internet" : "local",
+                ["NETGRID_MAINTENANCE_BASE_URL"] = loopbackWeb,
+                ["NETGRID_MAINTENANCE_ALLOWED_ORIGINS"] = loopbackWeb,
+                ["NETGRID_INITIAL_CLEANUP_RETENTION_DAYS"] = network.RetentionDays,
+            };
+            foreach (var (name, value) in assignments)
             {
-                throw new RuntimeConfigException("runtime_template_ambiguous", "Die Runtimevorlage enthält mehrdeutige Pflichtwerte.");
+                var indexes = lines.Select((line, index) => (line, index))
+                    .Where(item => item.line.StartsWith($"{name}=", StringComparison.Ordinal))
+                    .Select(item => item.index)
+                    .ToArray();
+                if (indexes.Length != 1)
+                {
+                    throw new RuntimeConfigException("runtime_template_ambiguous", $"Die Runtimevorlage enthält den Pflichtwert {name} nicht eindeutig.");
+                }
+                lines[indexes[0]] = $"{name}={value}";
             }
             return string.Join(Environment.NewLine, lines).TrimEnd() + Environment.NewLine;
         }
 
         private static void ValidateExistingEnvironment(string environmentPath, string expectedDataRoot)
         {
-            var values = new Dictionary<string, string>(StringComparer.Ordinal);
-            foreach (var rawLine in File.ReadAllLines(environmentPath, Encoding.UTF8))
-            {
-                var line = rawLine.Trim();
-                if (line.Length == 0 || line.StartsWith('#')) continue;
-                var separator = line.IndexOf('=');
-                if (separator <= 0) continue;
-                values[line[..separator]] = line[(separator + 1)..].Trim().Trim('"');
-            }
+            var values = ReadEnvironment(environmentPath);
             if (!values.TryGetValue("NETGRID_DATA_ROOT", out var configuredRoot) || !PathsEqual(configuredRoot, expectedDataRoot))
             {
                 throw new RuntimeConfigException("existing_data_root_mismatch", "Die vorhandene Runtimekonfiguration gehört zu einem anderen Datenordner.");
@@ -415,6 +548,86 @@ internal static class Program
             security.AddAccessRule(new FileSystemAccessRule(Administrators, FileSystemRights.FullControl, AccessControlType.Allow));
             security.AddAccessRule(new FileSystemAccessRule(Users, FileSystemRights.Read, AccessControlType.Allow));
             new FileInfo(path).SetAccessControl(security);
+        }
+    }
+
+    private static Dictionary<string, string> ReadEnvironment(string path)
+    {
+        var values = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var rawLine in File.ReadAllLines(path, Encoding.UTF8))
+        {
+            var line = rawLine.Trim();
+            if (line.Length == 0 || line.StartsWith('#')) continue;
+            var separator = line.IndexOf('=');
+            if (separator <= 0 || !values.TryAdd(line[..separator], line[(separator + 1)..].Trim().Trim('"')))
+            {
+                throw new RuntimeConfigException("existing_environment_invalid", "Die vorhandene Runtimekonfiguration enthält mehrdeutige Werte.");
+            }
+        }
+        return values;
+    }
+
+    private static class FirewallConfigurator
+    {
+        private const int PrivateProfile = 2;
+        private const int InboundDirection = 1;
+        private const int AllowAction = 1;
+        private const int TcpProtocol = 6;
+        private static readonly string[] RuleNames = ["NETGRID Web (Private)", "NETGRID Server (Private)"];
+
+        public static void Apply(NetworkSettings network, string programRoot)
+        {
+            RemoveRules();
+            if (!network.IsPrivateLan) return;
+            var nodePath = Path.Combine(programRoot, "runtime", "node", "node.exe");
+            if (!File.Exists(nodePath))
+            {
+                throw new RuntimeConfigException("firewall_program_missing", "Die installierte Node-Laufzeit für die Firewallregel fehlt.");
+            }
+            AddRule(RuleNames[0], nodePath, network.WebPort);
+            AddRule(RuleNames[1], nodePath, network.ServerPort);
+        }
+
+        public static void RemoveRules()
+        {
+            dynamic policy = CreateCom("HNetCfg.FwPolicy2", "firewall_policy_unavailable");
+            foreach (var name in RuleNames)
+            {
+                var exists = false;
+                foreach (dynamic rule in policy.Rules)
+                {
+                    if (string.Equals((string)rule.Name, name, StringComparison.Ordinal))
+                    {
+                        exists = true;
+                        break;
+                    }
+                }
+                if (exists) policy.Rules.Remove(name);
+            }
+        }
+
+        private static void AddRule(string name, string applicationPath, int port)
+        {
+            dynamic policy = CreateCom("HNetCfg.FwPolicy2", "firewall_policy_unavailable");
+            dynamic rule = CreateCom("HNetCfg.FWRule", "firewall_rule_unavailable");
+            rule.Name = name;
+            rule.Description = "Erlaubt NETGRID ausschließlich in privaten Windows-Netzwerken.";
+            rule.ApplicationName = applicationPath;
+            rule.Protocol = TcpProtocol;
+            rule.LocalPorts = port.ToString();
+            rule.Direction = InboundDirection;
+            rule.Profiles = PrivateProfile;
+            rule.Action = AllowAction;
+            rule.Enabled = true;
+            policy.Rules.Add(rule);
+        }
+
+        private static dynamic CreateCom(string programId, string code)
+        {
+            var type = Type.GetTypeFromProgID(programId)
+                ?? throw new RuntimeConfigException(code, "Die Windows-Firewallverwaltung ist nicht verfügbar.");
+            return Activator.CreateInstance(type)
+                ?? throw new RuntimeConfigException(code, "Die Windows-Firewallverwaltung konnte nicht geöffnet werden.");
         }
     }
 }

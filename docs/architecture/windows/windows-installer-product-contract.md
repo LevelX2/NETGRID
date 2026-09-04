@@ -2,7 +2,7 @@
 
 Stand: 2026-09-04  
 Status: beschlossenes Zielbild; Anwendungsvoraussetzungen, Installerbasis,
-Datenvertrag und Launcher umgesetzt, Setupführung/First Run/Updater noch offen
+Datenvertrag, Launcher und Setupführung umgesetzt, First Run/Updater noch offen
 
 ## Zweck und Grenze
 
@@ -185,6 +185,33 @@ vom Benutzer eingerichtetes VPN kann den privaten LAN-Weg nutzen. Die
 Standardports `3100` und `8787` werden vorab geprüft; bei Konflikten bietet
 das Setup einen freien Alternativsatz beziehungsweise in der
 benutzerdefinierten Installation eine gültige manuelle Auswahl an.
+
+### Umgesetzte Setupführung und LAN-Grenze
+
+- `NETGRID-Setup-<Version>-x64.exe` ist ein selbstenthaltener .NET-10-
+  Setup-Assistent. Er bettet genau das separat veröffentlichte WiX-MSI ein,
+  bindet es an dessen SHA-256 und prüft den Hash vor jeder Extraktion.
+- Der vorausgewählte empfohlene Weg zeigt die unvermeidbare Wahl zwischen
+  lokalem Betrieb und privatem LAN sowie Desktop- und Abschlussoption. Der
+  benutzerdefinierte Weg schaltet Programm-/Datenpfad, beide Ports und die
+  freigegebenen Aufbewahrungswerte frei.
+- Belegte Standardports führen im empfohlenen Weg zu einem bestätigungspflichtigen
+  freien Alternativpaar. Im benutzerdefinierten Weg muss der Nutzer den
+  Konflikt selbst korrigieren. Vor der Bestätigung findet keine Erhöhung und
+  keine Systemänderung statt.
+- `private_lan` ist ein eigener Anwendungs-Vertrag und nicht das vorhandene
+  HTTPS-Profil `private_internet`: öffentliche Spiel-URLs müssen eine private
+  IPv4-Adresse verwenden, Wildcards und öffentliche Adressen werden
+  fail-closed abgewiesen. Launcher-Health und Maintenance bleiben auf
+  Loopback.
+- Die erhöht angelegte Windows-Firewallfreigabe bindet ausschließlich die
+  mitgelieferte Node-Laufzeit, TCP und die gewählten Ports an das Profil
+  „Privat“. Für „Öffentlich“ wird keine Regel angelegt; lokaler Betrieb und
+  Deinstallation entfernen die beiden bekannten NETGRID-Regeln.
+- Der gewählte Aufbewahrungswert initialisiert die bestehende Storage-Policy
+  nur, wenn noch keine Policy gespeichert ist. Danach bleibt Maintenance die
+  einzige Autorität; Reparatur und erneuter Setupstart überschreiben die
+  gespeicherte Auswahl nicht.
 
 ## Spielerprofile und Maintenance
 

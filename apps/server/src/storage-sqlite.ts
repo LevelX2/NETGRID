@@ -84,6 +84,7 @@ export type StorageHealth = {
 export type SqliteMatchStorageOptions = {
   dbPath: string;
   backupDir?: string;
+  initialCleanupPolicy?: { enabled: boolean; olderThanDays: number };
 };
 
 export type BackupManifest = {
@@ -509,6 +510,7 @@ export class StorageError extends Error {
   constructor(
     readonly code:
       | "storage_corrupt"
+      | "storage_config_invalid"
       | "schema_too_new"
       | "schema_missing"
       | "stored_match_invalid"
@@ -620,6 +622,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       this.db = openedDb;
       configureSqliteConnection(this.db, { enableWal: true });
       this.ensureSchema();
+      this.initializeCleanupPolicy(options.initialCleanupPolicy);
       this.backfillExistingMatchesAsPublic();
     } catch (error) {
       openedDb?.close();
@@ -629,6 +632,19 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         "Storage konnte nicht geöffnet werden. Bitte aus einem lokalen Backup wiederherstellen.",
       );
     }
+  }
+
+  private initializeCleanupPolicy(
+    initial: SqliteMatchStorageOptions["initialCleanupPolicy"],
+  ): void {
+    if (!initial || this.meta("maintenance_cleanup_policy_json")) return;
+    const now = new Date().toISOString();
+    const policy = normalizeCleanupPolicy(initial, now);
+    this.setMeta(
+      "maintenance_cleanup_policy_json",
+      JSON.stringify(policy),
+      now,
+    );
   }
 
   async load(

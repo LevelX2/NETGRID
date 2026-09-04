@@ -91,7 +91,7 @@ geprüften Output mit einem externen `NETGRID_DATA_ROOT`; interne Testkarten,
 Demo-Snapshots, Testspiele, Selfplay-Evidence und Entwicklungsdatenbanken
 werden nicht ausgeliefert. Führend sind
 `docs/architecture/windows/windows-release-boundary.md` und das zugehörige
-Runbook. Ein auf .NET SDK 10.0.302 und WiX 7.0.0 gepinntes MSI-/Burn-
+Runbook. Ein auf .NET SDK 10.0.302 und WiX 7.0.0 gepinntes MSI-/Setup-
 Installerskelett baut ausschließlich den auditierten Produktoutput, erfasst
 die Runtime-Lizenzen und prüft die extrahierte Payload vollständig gegen das
 Produktmanifest. Die offizielle Node.js-24.20.0-x64-Laufzeit und eine
@@ -102,8 +102,13 @@ Daten. Der selbstenthaltene Tray-Launcher startet Server und Webclient bei
 Bedarf, verwendet eine Instanz, öffnet Spiel oder Maintenance, stoppt den
 Server geordnet und versucht nach einem Prozessabbruch genau eine
 Wiederherstellung. Startmenü und optionale Desktopverknüpfung sind im MSI
-gebunden. Geführte Setupoberfläche, Firewallsetup und Updater sind noch nicht
-implementiert. Die installerunabhängigen
+gebunden. Der selbstenthaltene Setup-Assistent bindet das eingebettete MSI per
+SHA-256, führt durch empfohlenen oder benutzerdefinierten Weg und fragt die
+Local-/Private-LAN-Freigabe ausdrücklich ab. Ports werden vor der Erhöhung
+geprüft; LAN-Firewallregeln gelten ausschließlich im Windows-Profil „Privat“.
+Die gewählte Spielaufbewahrung initialisiert die bestehende Storage-Policy
+einmalig, ohne spätere Maintenance-Änderungen zu überschreiben. First Run und
+Updater sind noch nicht implementiert. Die installerunabhängigen
 Produktvoraussetzungen sind umgesetzt: Releasebuilds tragen `V1.0` plus
 fortlaufende Git-Buildnummer, die gespeicherte Retention-Policy wird beim
 Backend-Start sofort asynchron geprüft, und lokale Installationen können ohne

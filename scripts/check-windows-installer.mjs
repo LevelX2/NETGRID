@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
+import { createServer } from "node:net";
 import {
   existsSync,
   mkdtempSync,
@@ -124,7 +125,20 @@ try {
     ) ||
     !authoring.includes('<Property Id="NETGRID_DATA_ROOT" Secure="yes" />') ||
     !authoring.includes(
+      '<Property Id="NETGRID_DEPLOYMENT_PROFILE" Value="local" Secure="yes" />',
+    ) ||
+    !authoring.includes(
+      '<Property Id="NETGRID_RETENTION_DAYS" Value="30" Secure="yes" />',
+    ) ||
+    !authoring.includes(
       '<Property Id="INSTALLDESKTOPSHORTCUT" Value="1" Secure="yes" />',
+    ) ||
+    !authoring.includes("--configure-firewall &quot;true&quot;") ||
+    !authoring.includes(
+      '<CustomAction Id="RemoveNetgridFirewall" HideTarget="yes" Impersonate="no" Execute="deferred"',
+    ) ||
+    !authoring.includes(
+      '<Custom Action="RemoveNetgridFirewall" Condition="REMOVE~=&quot;ALL&quot;" Before="RemoveFiles"',
     ) ||
     !authoring.includes('Condition="INSTALLDESKTOPSHORTCUT = 1"') ||
     !authoring.includes('Name="NETGRID Maintenance"') ||
@@ -132,28 +146,33 @@ try {
   )
     throw new Error("installer_runtime_initialization_contract_invalid");
 
-  const bundleRoot = path.join(scratch, "bundle");
-  run(dotnetPath, [
-    "tool",
-    "run",
-    "wix",
-    "--",
-    "burn",
-    "extract",
-    "-acceptEula",
-    "wix7",
-    setupPath,
-    "-o",
-    bundleRoot,
-  ]);
-  // Burn assigns opaque container names (for example `a0`) to extracted
-  // payloads, so bind the embedded MSI by its exact release hash.
+  const embeddedMsi = path.join(scratch, "embedded.msi");
+  run(setupPath, ["--extract-msi", embeddedMsi]);
   const expectedMsiHash = sha256(msiPath);
-  const embeddedMsi = collectFiles(bundleRoot).filter(
-    (file) => sha256(file) === expectedMsiHash,
-  );
-  if (embeddedMsi.length !== 1)
-    throw new Error("installer_bundle_msi_mismatch");
+  if (sha256(embeddedMsi) !== expectedMsiHash)
+    throw new Error("installer_setup_msi_mismatch");
+  const contractPath = path.join(scratch, "setup-contract.json");
+  run(setupPath, ["--audit-contract", contractPath]);
+  const setupContract = JSON.parse(readFileSync(contractPath, "utf8"));
+  if (
+    setupContract.schemaVersion !== "netgrid-guided-setup-contract-v1" ||
+    JSON.stringify(setupContract.setupModes) !==
+      JSON.stringify(["recommended", "custom"]) ||
+    setupContract.defaultSetupMode !== "recommended" ||
+    JSON.stringify(setupContract.deploymentProfiles) !==
+      JSON.stringify(["local", "private_lan"]) ||
+    setupContract.defaultDeploymentProfile !== "local" ||
+    JSON.stringify(setupContract.retentionValues) !==
+      JSON.stringify(["7", "30", "90", "180", "365", "never"]) ||
+    setupContract.defaultRetention !== "30" ||
+    setupContract.desktopShortcutDefault !== true ||
+    setupContract.launchAfterInstallDefault !== true ||
+    JSON.stringify(setupContract.firewallProfiles) !==
+      JSON.stringify(["private"]) ||
+    setupContract.publicFirewallProfileEnabled !== false
+  )
+    throw new Error("installer_guided_setup_contract_invalid");
+  await checkPortConflict(setupPath);
   process.stdout.write(
     `WINDOWS_INSTALLER_CHECK_OK files=${installedFiles.length} msi=${msiPath} setup=${setupPath}\n`,
   );
@@ -211,4 +230,32 @@ function sha256(file) {
 
 function slash(value) {
   return value.replaceAll(path.sep, "/");
+}
+
+async function checkPortConflict(setup) {
+  const busy = createServer();
+  const free = createServer();
+  await Promise.all([
+    new Promise((resolve, reject) =>
+      busy.once("error", reject).listen(0, "127.0.0.1", resolve),
+    ),
+    new Promise((resolve, reject) =>
+      free.once("error", reject).listen(0, "127.0.0.1", resolve),
+    ),
+  ]);
+  const busyPort = busy.address().port;
+  const freePort = free.address().port;
+  free.close();
+  try {
+    const result = spawnSync(
+      setup,
+      ["--probe-ports", "local", String(busyPort), String(freePort)],
+      { encoding: "utf8", windowsHide: true },
+    );
+    if (result.error) throw result.error;
+    if (result.status !== 2)
+      throw new Error(`installer_setup_port_conflict_missed:${result.status}`);
+  } finally {
+    busy.close();
+  }
 }

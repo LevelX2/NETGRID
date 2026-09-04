@@ -21,8 +21,8 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
     {
         _programRoot = programRoot;
         _environment = environment;
-        _serverUrl = environment.RequiredUri("NETGRID_SERVER_BASE_URL");
-        _webUrl = environment.RequiredUri("NETGRID_WEB_BASE_URL");
+        _serverUrl = environment.OptionalUri("NETGRID_LAUNCHER_SERVER_URL", "NETGRID_SERVER_BASE_URL");
+        _webUrl = environment.OptionalUri("NETGRID_LAUNCHER_WEB_URL", "NETGRID_WEB_BASE_URL");
     }
 
     public event EventHandler<string>? FatalFailure;

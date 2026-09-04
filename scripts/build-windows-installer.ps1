@@ -22,6 +22,7 @@ $legalRoot = Join-Path $installerInputRoot "legal"
 $nodeRoot = Join-Path $installerInputRoot "runtime\node"
 $runtimeConfigRoot = Join-Path $installerInputRoot "runtime-config"
 $launcherRoot = Join-Path $installerInputRoot "launcher"
+$setupHostRoot = Join-Path $installerInputRoot "setup-host"
 $localDotnet = Join-Path $projectRoot ".tools\dotnet\dotnet.exe"
 $dotnet = if (Test-Path -LiteralPath $localDotnet -PathType Leaf) {
   $localDotnet
@@ -129,8 +130,6 @@ try {
 
   & $dotnet tool restore
   if ($LASTEXITCODE -ne 0) { throw "WiX Toolset 7.0.0 konnte nicht wiederhergestellt werden." }
-  & $dotnet tool run wix -- -acceptEula wix7 extension add WixToolset.BootstrapperApplications.wixext/7.0.0
-  if ($LASTEXITCODE -ne 0) { throw "Die gepinnte WiX-Bootstrapper-Erweiterung konnte nicht wiederhergestellt werden." }
 
   if ($usesDefaultOutputRoot) {
     Reset-BuildDirectory -Path $OutputRoot -ProjectRoot $projectRoot
@@ -156,16 +155,20 @@ try {
     installer/product/Product.wxs
   if ($LASTEXITCODE -ne 0) { throw "NETGRID-MSI konnte nicht gebaut werden." }
 
-  & $dotnet tool run wix -- build -acceptEula wix7 -arch x64 `
-    -ext WixToolset.BootstrapperApplications.wixext/7.0.0 `
-    -d "ProductVersion=$productVersion" `
-    -d "ProductMsi=$msiPath" `
-    -d "NetgridIcon=$iconPath" `
-    -intermediateFolder (Join-Path $intermediateRoot "bundle") `
-    -pdbtype none `
-    -o $setupPath `
-    installer/bundle/Bundle.wxs
-  if ($LASTEXITCODE -ne 0) { throw "NETGRID-Setup konnte nicht gebaut werden." }
+  $msiSha256 = (Get-FileHash -LiteralPath $msiPath -Algorithm SHA256).Hash.ToLowerInvariant()
+  & $dotnet publish apps/windows/Netgrid.SetupHost/Netgrid.SetupHost.csproj `
+    -c Release -r win-x64 --self-contained true `
+    -p:DebugType=None -p:DebugSymbols=false `
+    "-p:EmbeddedMsiPath=$msiPath" `
+    "-p:EmbeddedMsiSha256=$msiSha256" `
+    "-p:NetgridProductVersion=$productVersion" `
+    -o $setupHostRoot
+  if ($LASTEXITCODE -ne 0) { throw "Der geführte NETGRID-Setuphost konnte nicht gebaut werden." }
+  $setupHostExecutable = Join-Path $setupHostRoot "NETGRID.Setup.exe"
+  if (-not (Test-Path -LiteralPath $setupHostExecutable -PathType Leaf)) {
+    throw "Der selbst enthaltene NETGRID-Setuphost fehlt."
+  }
+  Copy-Item -LiteralPath $setupHostExecutable -Destination $setupPath -Force
 
   & node scripts/check-windows-installer.mjs --release $ReleaseRoot --installer-input $installerInputRoot --msi $msiPath --setup $setupPath --dotnet $dotnet
   if ($LASTEXITCODE -ne 0) { throw "Installer-Payloadprüfung ist fehlgeschlagen." }
@@ -180,6 +183,7 @@ try {
       nodeArchiveSha256 = [string]$nodeDefinition.sha256
       runtimeConfigSha256 = (Get-FileHash -LiteralPath $runtimeConfigExecutable -Algorithm SHA256).Hash.ToLowerInvariant()
       launcherSha256 = (Get-FileHash -LiteralPath $launcherExecutable -Algorithm SHA256).Hash.ToLowerInvariant()
+      setupHostSha256 = (Get-FileHash -LiteralPath $setupHostExecutable -Algorithm SHA256).Hash.ToLowerInvariant()
     }
     dataContract = [ordered]@{
       defaultRoot = "C:\ProgramData\NETGRID"

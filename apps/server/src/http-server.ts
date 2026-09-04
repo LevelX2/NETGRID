@@ -940,7 +940,7 @@ export function createNetgridHttpServer(
   );
   realtime.attach(server);
   const cleanupTimer =
-    deploymentConfig.profile === "local"
+    deploymentConfig.profile !== "private_internet"
       ? startMaintenanceCleanupTimer(activeService, server)
       : undefined;
   return {
@@ -1137,7 +1137,8 @@ async function routeHttp(
       sendJson(response, 200, {
         ...policy,
         selfServiceEnabled:
-          deploymentConfig.profile === "local" && policy.mode !== "invite_only",
+          isLocalProductProfile(deploymentConfig) &&
+          policy.mode !== "invite_only",
       });
       return;
     }
@@ -4098,10 +4099,12 @@ function defaultService(
 export function createConfiguredStorage(env: NodeJS.ProcessEnv = process.env) {
   const sqlitePath = resolveConfiguredMatchSqlitePath(env);
   const backupDir = resolveConfiguredStorageBackupDir(env);
+  const initialCleanupPolicy = initialCleanupPolicyFromEnvironment(env);
   try {
     return new SqliteMatchStorage({
       dbPath: sqlitePath,
       backupDir,
+      ...(initialCleanupPolicy ? { initialCleanupPolicy } : {}),
     });
   } catch (error) {
     if (error instanceof StorageError) throw error;
@@ -4110,6 +4113,22 @@ export function createConfiguredStorage(env: NodeJS.ProcessEnv = process.env) {
       "Storage konnte nicht geöffnet werden. Bitte aus einem lokalen Backup wiederherstellen.",
     );
   }
+}
+
+function initialCleanupPolicyFromEnvironment(
+  env: NodeJS.ProcessEnv,
+): { enabled: boolean; olderThanDays: number } | undefined {
+  const raw = envValue(env, "NETGRID_INITIAL_CLEANUP_RETENTION_DAYS");
+  if (!raw) return undefined;
+  if (raw === "never") return { enabled: false, olderThanDays: 30 };
+  const days = Number(raw);
+  if (![7, 30, 90, 180, 365].includes(days)) {
+    throw new StorageError(
+      "storage_config_invalid",
+      "Die initiale Spielaufbewahrung ist ungültig.",
+    );
+  }
+  return { enabled: true, olderThanDays: days };
 }
 
 function advertisedServerHost(bindHost: string): string {
@@ -4573,7 +4592,7 @@ function ensureLocalAccountSelfService(
   response: ServerResponse,
   deploymentConfig: DeploymentConfig,
 ): boolean {
-  if (deploymentConfig.profile === "local") return true;
+  if (isLocalProductProfile(deploymentConfig)) return true;
   sendJson(response, 403, accountFlowUnavailablePayload());
   return false;
 }
@@ -4585,7 +4604,7 @@ function ensureLocalAccountPolicyMaintenanceAccess(
 ): boolean {
   const address = normalizeClientAddress(request.socket.remoteAddress);
   if (
-    deploymentConfig.profile === "local" &&
+    isLocalProductProfile(deploymentConfig) &&
     (address === "127.0.0.1" || address === "::1")
   )
     return true;
@@ -4980,7 +4999,7 @@ function ensureMaintenanceTransport(
     return false;
   }
   if (
-    deploymentConfig.profile === "local" &&
+    isLocalProductProfile(deploymentConfig) &&
     isMaintenanceClientAddressAllowed(request.socket.remoteAddress)
   )
     return true;
@@ -5003,7 +5022,7 @@ function ensureLocalCardImageMaintenanceAccess(
   deploymentConfig: DeploymentConfig,
 ): boolean {
   if (
-    deploymentConfig.profile === "local" &&
+    isLocalProductProfile(deploymentConfig) &&
     isMaintenanceClientAddressAllowed(request.socket.remoteAddress)
   )
     return true;
@@ -5113,9 +5132,16 @@ export function mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(
 ): boolean {
   if (request.method !== "GET") return false;
   if (!isExplicitLocalReadOnlyAnalysisRoute(pathname)) return false;
-  if (deploymentConfig.profile !== "local") return false;
+  if (!isLocalProductProfile(deploymentConfig)) return false;
   const address = normalizeClientAddress(request.socket.remoteAddress);
   return address === "127.0.0.1" || address === "::1";
+}
+
+function isLocalProductProfile(deploymentConfig: DeploymentConfig): boolean {
+  return (
+    deploymentConfig.profile === "local" ||
+    deploymentConfig.profile === "private_lan"
+  );
 }
 
 function isExplicitLocalReadOnlyAnalysisRoute(pathname: string): boolean {

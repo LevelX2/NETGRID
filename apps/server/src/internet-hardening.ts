@@ -1,5 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { createHash } from "node:crypto";
+import { isIPv4 } from "node:net";
 import type { StorageHealth } from "./storage-sqlite";
 
 export const LOCAL_DEFAULT_TOKEN_SALT = "local-dev-netgrid-token-salt";
@@ -7,7 +8,7 @@ export const LOCAL_DEFAULT_WEB_BASE_URL = "http://127.0.0.1:3100";
 export const LOCAL_DEFAULT_SERVER_BASE_URL = "http://127.0.0.1:8787";
 export const LOCAL_DEFAULT_MAINTENANCE_BASE_URL = "http://127.0.0.1:3100";
 
-export type DeploymentProfile = "local" | "private_internet";
+export type DeploymentProfile = "local" | "private_lan" | "private_internet";
 export type RateLimitProfile = "off" | "local" | "private_internet" | "test";
 export type HealthDetail = "safe" | "local_diagnostics";
 export type ServerRuntimeMode = "normal" | "watch";
@@ -46,9 +47,11 @@ export class DeploymentConfigError extends Error {
 export function loadDeploymentConfig(
   env: NodeJS.ProcessEnv = process.env,
 ): DeploymentConfig {
+  const requestedProfile = envValue(env, "NETGRID_DEPLOYMENT_PROFILE");
   const profile =
-    envValue(env, "NETGRID_DEPLOYMENT_PROFILE") === "private_internet"
-      ? "private_internet"
+    requestedProfile === "private_lan" ||
+    requestedProfile === "private_internet"
+      ? requestedProfile
       : "local";
   const webBaseUrl = trimTrailingSlash(
     envValue(env, "NETGRID_WEB_BASE_URL") ?? LOCAL_DEFAULT_WEB_BASE_URL,
@@ -60,7 +63,7 @@ export function loadDeploymentConfig(
     envValue(env, "NETGRID_ALLOWED_ORIGINS"),
   );
   const maintenanceEnabled =
-    profile === "local"
+    profile === "local" || profile === "private_lan"
       ? envValue(env, "NETGRID_MAINTENANCE_ENABLED") !== "false"
       : envValue(env, "NETGRID_MAINTENANCE_ENABLED") === "true";
   const maintenanceBaseUrl = trimTrailingSlash(
@@ -123,6 +126,41 @@ export function validateDeploymentConfig(
   config: DeploymentConfig,
   env: NodeJS.ProcessEnv = process.env,
 ): void {
+  if (config.profile === "private_lan") {
+    if (
+      !hasEnvValue(env, "NETGRID_WEB_BASE_URL") ||
+      !hasEnvValue(env, "NETGRID_SERVER_BASE_URL") ||
+      !hasEnvValue(env, "NETGRID_ALLOWED_ORIGINS") ||
+      config.allowedOrigins.length === 0
+    ) {
+      throw new DeploymentConfigError(
+        "insecure_deployment_config",
+        "Privates LAN verlangt explizite Web- und Server-URLs sowie eine Origin-Allowlist.",
+      );
+    }
+    const lanUrls = [
+      config.webBaseUrl,
+      config.serverBaseUrl,
+      ...config.allowedOrigins,
+    ];
+    if (
+      lanUrls.some(
+        (value) =>
+          value === "*" || value.includes("*") || !isPrivateLanHttpUrl(value),
+      )
+    ) {
+      throw new DeploymentConfigError(
+        "unsafe_base_url",
+        "Privates LAN erlaubt nur HTTP-URLs mit einer privaten IPv4-Adresse und keine Wildcards.",
+      );
+    }
+    if (!config.tokenSalt || config.tokenSalt === LOCAL_DEFAULT_TOKEN_SALT) {
+      throw new DeploymentConfigError(
+        "missing_required_secret",
+        "Privates LAN verlangt einen eigenen NETGRID_TOKEN_SALT.",
+      );
+    }
+  }
   if (config.profile === "private_internet") {
     if (
       !hasEnvValue(env, "NETGRID_WEB_BASE_URL") ||
@@ -168,7 +206,7 @@ export function validateDeploymentConfig(
   if (!config.maintenanceEnabled) return;
   if (
     isLoopbackHttpUrl(config.maintenanceBaseUrl) &&
-    config.profile === "local"
+    (config.profile === "local" || config.profile === "private_lan")
   )
     return;
   if (
@@ -197,6 +235,21 @@ export function validateDeploymentConfig(
       "proxy_not_trusted",
       "Remote Maintenance verlangt mindestens eine exakt benannte vertrauenswürdige Proxy-Adresse.",
     );
+  }
+}
+
+function isPrivateLanHttpUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "http:" || !isIPv4(url.hostname)) return false;
+    const octets = url.hostname.split(".").map(Number);
+    return (
+      octets[0] === 10 ||
+      (octets[0] === 172 && (octets[1] ?? 0) >= 16 && (octets[1] ?? 0) <= 31) ||
+      (octets[0] === 192 && octets[1] === 168)
+    );
+  } catch {
+    return false;
   }
 }
 
@@ -643,7 +696,7 @@ function rateLimitProfileFromEnv(
     value === "test"
   )
     return value;
-  return profile === "private_internet" ? "private_internet" : "local";
+  return profile === "local" ? "local" : "private_internet";
 }
 
 function firstHeaderValue(

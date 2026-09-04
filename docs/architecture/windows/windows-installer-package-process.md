@@ -1,7 +1,7 @@
 # Paketprozess: Windows-Installer und Launcher
 
 Stand: 2026-09-04  
-Status: in Umsetzung; WIN-I00 bis WIN-I03 verifiziert, nächstes Paket WIN-I04
+Status: in Umsetzung; WIN-I00 bis WIN-I04 verifiziert, nächstes Paket WIN-I05
 
 ## Quelle und Zielprüfung
 
@@ -102,13 +102,14 @@ eigene Account-, Cleanup- oder Versionsautorität.
   SQLite und private Daten jeweils null Treffer.
 - Fokussierte Runtimepfad-/Maintenance-Tests, Boundary-Gates,
   Releaseoutput-Build und isolierter Release-Smoke sind grün.
-- WIN-I01 pinnt .NET SDK 10.0.302, WiX Toolset 7.0.0 und die
-  Bootstrapper-Erweiterung 7.0.0. Produktlayout und Installer-Metadaten tragen
-  Buildnummer, Commit und Dirty-Zustand; MSI und Burn-Setup entstehen nur aus
-  dem zuvor auditierten Releaseoutput.
+- WIN-I01 pinnt .NET SDK 10.0.302 und WiX Toolset 7.0.0. Produktlayout und
+  Installer-Metadaten tragen Buildnummer, Commit und Dirty-Zustand; MSI und
+  Setup entstehen nur aus dem zuvor auditierten Releaseoutput. Der zunächst
+  verwendete Standard-Burn-Host wurde in WIN-I04 durch die benötigte geführte
+  NETGRID-Oberfläche ersetzt.
 - Der Installer-Audit extrahiert das MSI administrativ, vergleicht 10.891
   Dateien vollständig gegen Größe und SHA-256 des Produktmanifests, bestätigt
-  die beiden Rechtstexte und bindet das in Burn eingebettete MSI per Hash.
+  die Rechtstexte und bindet das im Setup-Host eingebettete MSI per Hash.
   Das Lizenzinventar umfasst aktuell 37 eindeutige Runtimepakete.
 - WiX 7 erzeugt trotz identischer Eingaben derzeit keinen byteidentischen MSI-
   oder Bundle-Output, weil Paketcode und Zeitfelder nicht steuerbar sind. Die
@@ -148,6 +149,21 @@ eigene Account-, Cleanup- oder Versionsautorität.
   aktivierte, per MSI-Eigenschaft abwählbare Desktopverknüpfung sind im Paket
   gebunden. Der isolierte Smoke hat Health, kontrollierten Stopp, genau einen
   Recovery-Versuch, SQLite-Anlage und geschlossene Testports nachgewiesen.
+- WIN-I04 ersetzt die generische Burn-Außenoberfläche durch einen
+  selbstenthaltenen NETGRID-Setuphost; das WiX-MSI bleibt alleinige
+  Installationsautorität. Der Host bettet genau dieses MSI ein und prüft es
+  vor der Extraktion gegen die beim Build gebundene SHA-256-Prüfsumme.
+- Empfohlener und benutzerdefinierter Weg, explizite Local-/Private-LAN-Wahl,
+  Programm-/Datenpfad, Ports, Aufbewahrung, Desktopoption und Abschlussstart
+  sind im geführten Vertrag abgebildet. Ein echter belegter Port wird erkannt;
+  der empfohlene Weg bietet nur nach Bestätigung ein freies Alternativpaar.
+- `private_lan` akzeptiert ausschließlich private IPv4-URLs, verwendet die
+  bestehende CORS-/Rate-Limit-Härtung und hält Launcher sowie Maintenance auf
+  Loopback. Zwei erhöhte Firewallregeln gelten nur für das Windows-Profil
+  „Privat“ und werden bei lokalem Betrieb oder Deinstallation entfernt.
+- Der Setupwert für 7, 30, 90, 180, 365 Tage oder „nie“ initialisiert nur eine
+  noch nicht gespeicherte Cleanup-Policy. Spätere Maintenance-Änderungen
+  werden weder bei Repair noch beim Wiederanlauf überschrieben.
 
 ## Verifikationsregeln
 

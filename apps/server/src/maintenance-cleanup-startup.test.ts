@@ -44,6 +44,23 @@ describe("maintenance cleanup startup schedule", () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(cleanup).not.toHaveBeenCalled();
   });
+
+  it("runs the local cleanup schedule in private LAN mode", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "startup-cleanup-private-lan-test",
+    });
+    const cleanup = vi
+      .spyOn(service, "runStorageMaintenanceCleanupPolicy")
+      .mockResolvedValue(undefined);
+    const local = loadDeploymentConfig({} as NodeJS.ProcessEnv);
+    const handle = createNetgridHttpServer(service, {
+      deploymentConfig: { ...local, profile: "private_lan" },
+    });
+    handles.push(handle);
+
+    await listen(handle);
+    await vi.waitFor(() => expect(cleanup).toHaveBeenCalledTimes(1));
+  });
 });
 
 async function listen(

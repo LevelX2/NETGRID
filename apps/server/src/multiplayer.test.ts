@@ -637,7 +637,7 @@ describe("V1.0.9 private internet hardening", () => {
     expect(created.webSocketUrl).toBe("ws://192.0.2.10:8787/ws");
   });
 
-  it("validates local and private internet deployment profiles", () => {
+  it("validates local, private LAN, and private internet deployment profiles", () => {
     const local = loadDeploymentConfig({
       NETGRID_DEPLOYMENT_PROFILE: "local",
     } as NodeJS.ProcessEnv);
@@ -653,6 +653,33 @@ describe("V1.0.9 private internet hardening", () => {
       NETGRID_SERVER_RUNTIME_MODE: "watch",
     } as NodeJS.ProcessEnv);
     expect(watch.runtimeMode).toBe("watch");
+
+    const privateLan = loadDeploymentConfig({
+      NETGRID_DEPLOYMENT_PROFILE: "private_lan",
+      NETGRID_WEB_BASE_URL: "http://192.168.1.20:3100",
+      NETGRID_SERVER_BASE_URL: "http://192.168.1.20:8787",
+      NETGRID_ALLOWED_ORIGINS: "http://192.168.1.20:3100",
+      NETGRID_TOKEN_SALT: "private-lan-test-salt",
+      NETGRID_MAINTENANCE_BASE_URL: "http://127.0.0.1:3100",
+      NETGRID_MAINTENANCE_ALLOWED_ORIGINS: "http://127.0.0.1:3100",
+    } as NodeJS.ProcessEnv);
+    expect(privateLan).toMatchObject({
+      profile: "private_lan",
+      webBaseUrl: "http://192.168.1.20:3100",
+      serverBaseUrl: "http://192.168.1.20:8787",
+      rateLimitProfile: "private_internet",
+      maintenanceEnabled: true,
+      maintenanceBaseUrl: "http://127.0.0.1:3100",
+    });
+    expect(() =>
+      loadDeploymentConfig({
+        NETGRID_DEPLOYMENT_PROFILE: "private_lan",
+        NETGRID_WEB_BASE_URL: "http://203.0.113.20:3100",
+        NETGRID_SERVER_BASE_URL: "http://203.0.113.20:8787",
+        NETGRID_ALLOWED_ORIGINS: "http://203.0.113.20:3100",
+        NETGRID_TOKEN_SALT: "private-lan-test-salt",
+      } as NodeJS.ProcessEnv),
+    ).toThrow(/privaten IPv4-Adresse/);
 
     expect(() =>
       loadDeploymentConfig({

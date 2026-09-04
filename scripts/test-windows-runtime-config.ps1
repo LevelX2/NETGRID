@@ -48,7 +48,22 @@ try {
 NODE_ENV=production
 NETGRID_RUNTIME_PROFILE=release
 NETGRID_DATA_ROOT=C:\ProgramData\NETGRID
+NETGRID_SERVER_HOST=127.0.0.1
+NETGRID_SERVER_PORT=8787
+HOSTNAME=127.0.0.1
+PORT=3100
+NETGRID_DEPLOYMENT_PROFILE=local
+NETGRID_WEB_BASE_URL=http://127.0.0.1:3100
+NETGRID_SERVER_BASE_URL=http://127.0.0.1:8787
+NETGRID_ALLOWED_ORIGINS=http://127.0.0.1:3100
+NEXT_PUBLIC_NETGRID_SERVER_URL=http://127.0.0.1:8787
+NETGRID_LAUNCHER_WEB_URL=http://127.0.0.1:3100
+NETGRID_LAUNCHER_SERVER_URL=http://127.0.0.1:8787
 NETGRID_TOKEN_SALT=<installer-generated-secret>
+NETGRID_RATE_LIMIT_PROFILE=local
+NETGRID_MAINTENANCE_BASE_URL=http://127.0.0.1:3100
+NETGRID_MAINTENANCE_ALLOWED_ORIGINS=http://127.0.0.1:3100
+NETGRID_INITIAL_CLEANUP_RETENTION_DAYS=30
 "@, [System.Text.UTF8Encoding]::new($false))
 
   $arguments = @(
@@ -56,7 +71,12 @@ NETGRID_TOKEN_SALT=<installer-generated-secret>
     "--data-root", $dataRoot,
     "--program-root", $programRoot,
     "--template", $templatePath,
-    "--state-file", $stateFile
+    "--state-file", $stateFile,
+    "--deployment-profile", "private_lan",
+    "--lan-address", "192.168.50.20",
+    "--web-port", "3110",
+    "--server-port", "8797",
+    "--retention-days", "90"
   )
   Invoke-RuntimeConfig -Arguments $arguments
   $runtimeEnvironment = Join-Path $dataRoot "config\runtime.env"
@@ -64,7 +84,11 @@ NETGRID_TOKEN_SALT=<installer-generated-secret>
   $source = [System.IO.File]::ReadAllText($runtimeEnvironment)
   if ($source -match [regex]::Escape("<installer-generated-secret>") -or
       $source -notmatch "(?m)^NETGRID_TOKEN_SALT=[A-Za-z0-9_-]{43}\r?$" -or
-      $source -notmatch '(?m)^NETGRID_DATA_ROOT=".+"\r?$') {
+      $source -notmatch '(?m)^NETGRID_DATA_ROOT=".+"\r?$' -or
+      $source -notmatch '(?m)^NETGRID_DEPLOYMENT_PROFILE=private_lan\r?$' -or
+      $source -notmatch '(?m)^NETGRID_WEB_BASE_URL=http://192\.168\.50\.20:3110\r?$' -or
+      $source -notmatch '(?m)^NETGRID_LAUNCHER_WEB_URL=http://127\.0\.0\.1:3110\r?$' -or
+      $source -notmatch '(?m)^NETGRID_INITIAL_CLEANUP_RETENTION_DAYS=90\r?$') {
     throw "Die materialisierte Runtimekonfiguration enthält ungültige Pflichtwerte."
   }
   foreach ($relative in @("runtime\multiplayer", "runtime\backups", "runtime\logs", "runtime\maintenance", "card-images")) {

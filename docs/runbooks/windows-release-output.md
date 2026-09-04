@@ -5,9 +5,10 @@ Stand: 2026-09-04
 ## Zweck
 
 Dieses Runbook erzeugt den installerneutralen NETGRID-Produktoutput und kann
-ihn anschließend in das Windows-MSI und ein Burn-Setup verpacken. Die aktuelle
-Stufe verändert keine Windows-Dienste, Firewallregeln oder lokalen
-Hauptinstanzen.
+ihn anschließend in das Windows-MSI und den geführten Setup-Host verpacken.
+Der Build selbst verändert keine Windows-Dienste, Firewallregeln oder lokalen
+Hauptinstanzen; erst eine bestätigte erhöhte Installation konfiguriert das
+gewählte Zielsystem.
 
 ## Voraussetzungen
 
@@ -45,9 +46,9 @@ Codesigning- oder Installer-Nachweis.
 
 ## Installer bauen und prüfen
 
-Die Toolchain ist auf .NET SDK 10.0.302, WiX Toolset 7.0.0 und die
-Bootstrapper-Erweiterung 7.0.0 festgelegt. WiX 7 wird unter der bestätigten
-OSMF-EULA verwendet. Auf einem Buildrechner mit dem gepinnten SDK genügt:
+Die Toolchain ist auf .NET SDK 10.0.302 und WiX Toolset 7.0.0 festgelegt. WiX
+7 wird unter der bestätigten OSMF-EULA verwendet. Auf einem Buildrechner mit
+dem gepinnten SDK genügt:
 
 ```powershell
 corepack pnpm build:windows-installer
@@ -61,7 +62,9 @@ Paketierung eines unveränderten, bereits geprüften Outputs kann diagnostisch
 
 Der Installer-Audit extrahiert das MSI über Windows Installer in einen bewusst
 kurzen temporären Pfad, vergleicht jede Produktdatei gegen das Manifest und
-prüft das in Burn eingebettete MSI anhand seines Hashes. WiX 7 schreibt aktuell
+prüft das im Setup-Host eingebettete MSI anhand seines Hashes. Der Host gibt
+außerdem seinen maschinenlesbaren Führungsvertrag für den Audit aus, und die
+Prüfung belegt die Erkennung eines real belegten Loopbackports. WiX 7 schreibt aktuell
 nicht steuerbare Paketcodes und Zeitfelder; wiederholte Builds sind deshalb
 inhaltlich und über Manifest/Prüfsummen verifizierbar, aber nicht
 byteidentisch (siehe [WiX-Issue #8978](https://github.com/wixtoolset/issues/issues/8978)). Release-Metadaten müssen für eine Veröffentlichung
@@ -124,6 +127,20 @@ startet ausschließlich dessen Prozesse und prüft:
 Eigene Prozesse, temporärer Output und Datenroot werden anschließend
 entfernt. Die Standardports `3100` und `8787` sowie die Daten der
 Hauptinstanz bleiben unangetastet.
+
+## Geführtes Setup
+
+`NETGRID-Setup-<Version>-x64.exe` zeigt den empfohlenen und den
+benutzerdefinierten Weg. Local/LAN, Desktopverknüpfung und Start nach Abschluss
+sind sichtbar; im benutzerdefinierten Weg kommen Pfade, Ports und
+Spielaufbewahrung hinzu. Erst „Installieren“ fordert Administratorrechte an.
+Das Setup übergibt ausschließlich nicht geheime, validierte MSI-Eigenschaften.
+
+Private-LAN-Installationen benötigen eine erkannte private IPv4-Adresse. Die
+Spielports werden ausschließlich im Windows-Netzwerkprofil „Privat“ geöffnet;
+Maintenance und Launcher-Health bleiben Loopback-only. Der Standard ist lokal,
+und LAN wird nie still aktiviert. Die vollständige erhöhte Firewall- und
+Installationsmatrix folgt im WIN-I08-Releasegate.
 
 ## Installationsvertrag für die nächsten Pakete
 

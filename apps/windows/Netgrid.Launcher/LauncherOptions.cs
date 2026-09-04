@@ -56,7 +56,7 @@ internal sealed record LauncherOptions(
         return Path.Combine(Path.GetFullPath(dataRoot), "config", "runtime.env");
     }
 
-    public string ResolveWebUrl() => RuntimeEnvironment.Load(ResolveEnvironmentFile()).RequiredUri("NETGRID_WEB_BASE_URL").ToString().TrimEnd('/');
+    public string ResolveWebUrl() => RuntimeEnvironment.Load(ResolveEnvironmentFile()).OptionalUri("NETGRID_LAUNCHER_WEB_URL", "NETGRID_WEB_BASE_URL").ToString().TrimEnd('/');
 
     public string ResolveMaintenanceUrl() => $"{ResolveWebUrl()}/maintenance";
 }
