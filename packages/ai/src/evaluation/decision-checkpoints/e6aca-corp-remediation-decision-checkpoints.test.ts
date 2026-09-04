@@ -35,7 +35,7 @@ describe("e6aca Corp remediation decision checkpoints", () => {
       continueZurichScoreJson,
     ],
     [
-      "owns the Vapor Ops install as a typed decoy route",
+      "puts Red Herrings on pressured HQ instead of opening a decoy remote",
       bindVaporDecoyRouteJson,
     ],
     [

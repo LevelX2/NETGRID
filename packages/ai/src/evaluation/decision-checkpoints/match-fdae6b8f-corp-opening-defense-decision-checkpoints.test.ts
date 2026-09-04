@@ -18,13 +18,13 @@ describe("match fdae6b8f Corp opening and central defense regressions", () => {
       rezHqEncounterDisruptionJson,
     ],
     [
-      "installs known encounter ICE on the protected remote",
+      "installs known encounter ICE on pressured R&D",
       installRdEncounterIceJson,
     ],
   ])("%s", (_label, checkpointJson) => {
     const result = runAiDecisionCheckpoint(
       checkpointJson as AiDecisionCheckpointV1,
     );
-    expect(result).toMatchObject({ ok: true });
+    expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 });

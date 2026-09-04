@@ -55,7 +55,7 @@ describe("Proteus Fetal AI install plan coverage", () => {
     });
   }
 
-  it("installs Fetal AI only through score ownership after certified defense and economy routes", () => {
+  it("does not donate Fetal AI while the score remote still lacks certified defense", () => {
     const summary = simulateAiGame({
       seed: "proteus-pilot-qualifier-10",
       maxActions: 23,
@@ -87,14 +87,7 @@ describe("Proteus Fetal AI install plan coverage", () => {
         entry.reasonCode === "plan_first.corp.score_agenda" &&
         entry.selectedActionId === "corp.install_card.new_remote",
     );
-    expect(selectedAmbushIndex, fetalDiagnostic(summary)).toBeGreaterThan(5);
-    expect(
-      summary.actionSequence[selectedAmbushIndex],
-      fetalDiagnostic(summary),
-    ).toMatchObject({
-      reasonCode: "plan_first.corp.score_agenda",
-      selectedActionId: "corp.install_card.new_remote",
-    });
+    expect(selectedAmbushIndex, fetalDiagnostic(summary)).toBe(-1);
   }, 30_000);
 
   function requireDeck(deckId: string): DeckDefinition {

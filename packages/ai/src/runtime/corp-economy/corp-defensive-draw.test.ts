@@ -515,6 +515,20 @@ describe("Corp defensive draw context", () => {
       ]),
     });
 
+    const unfundedPreInstallNeed: CorpFundedRemoteAccessRiskNeed = {
+      ...preInstallNeed,
+      baseline: {
+        ...preInstallNeed.baseline,
+        totalScoreReserveCredits: 14,
+      },
+    };
+    expect(
+      corpMissingConcreteScoreDefenseDrawNeed({
+        ...preInstallSetup.args,
+        protectionNeed: unfundedPreInstallNeed,
+      }),
+    ).toBeUndefined();
+
     const reservedNeed: CorpFundedRemoteAccessRiskNeed = {
       ...lastClickNeed,
       scoreReserve: {

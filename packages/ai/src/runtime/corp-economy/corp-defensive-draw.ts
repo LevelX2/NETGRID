@@ -196,6 +196,8 @@ export function corpMissingConcreteScoreDefenseDrawNeed(
     !exposedAgendaParent &&
     hardClickReserve === 0 &&
     clicks >= drawActionProjection.clickCost &&
+    input.playerView.own.credits >=
+      protectionNeed.baseline.totalScoreReserveCredits &&
     projectedHandAfterDraw <= maxHandSize;
   if (!sameTurnFollowupAvailable && !safeMultiTurnProgressAvailable) {
     return undefined;

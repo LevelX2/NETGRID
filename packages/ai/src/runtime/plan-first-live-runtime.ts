@@ -15243,12 +15243,15 @@ function buildCorpDomain(
   const recentlyCompromisedRemoteIds = new Set(
     recentlyCompromisedCorpRemoteIds(input, previous?.stateVersion),
   );
+  const preferredDeckoutAgendaRecycleRouteAvailable =
+    corpPreferredDeckoutAgendaRecycleRouteAvailable(input, candidates);
   const directScoreProjects = candidates.flatMap((candidate) =>
     scoreProjectForCandidate(
       input,
       candidate,
       scorelineFeasibility,
       centralDefenseAllocation,
+      preferredDeckoutAgendaRecycleRouteAvailable,
       residentScoreDefenseBinding,
       recentlyCompromisedRemoteIds,
     ),
@@ -17427,6 +17430,7 @@ function scoreProjectForCandidate(
   candidate: ActionSemanticCandidate,
   scorelineFeasibility: CorpScorelineFeasibility | undefined,
   centralDefenseAllocation: CorpCentralDefenseAllocation | undefined,
+  preferredDeckoutAgendaRecycleRouteAvailable: boolean,
   residentScoreDefenseBinding?: Readonly<{
     agendaInstanceId: string;
     serverId: string;
@@ -17607,7 +17611,9 @@ function scoreProjectForCandidate(
     const deckoutAgendaFloodScoreWindow =
       !sameTurnCloseout &&
       scorelineFeasibility?.deadline !== "current_turn_only" &&
-      corpDeckoutAgendaFloodRequiresScoreDevelopment(input);
+      corpDeckoutAgendaFloodRequiresScoreDevelopment(input) &&
+      (!preferredDeckoutAgendaRecycleRouteAvailable ||
+        corpAgendaRecyclesHqAgendasIntoRd(agendaDefinitionId));
     const accessPunishingScoreDeceptionWindow =
       !sameTurnCloseout &&
       serverId === "new_remote" &&
@@ -18024,6 +18030,36 @@ function corpDeckoutAgendaFloodRequiresScoreDevelopment(
     0,
   );
   return agendas.length >= 2 || visibleAgendaPoints >= 4;
+}
+
+function corpPreferredDeckoutAgendaRecycleRouteAvailable(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+): boolean {
+  if (!corpDeckoutAgendaFloodRequiresScoreDevelopment(input)) return false;
+  return candidates.some((candidate) => {
+    if (
+      candidate.semanticActionType !== "install.card" ||
+      !candidate.sourceDefinitionId ||
+      !corpAgendaRecyclesHqAgendasIntoRd(candidate.sourceDefinitionId)
+    ) {
+      return false;
+    }
+    const action = input.legalActions.find(
+      (legalAction) => legalAction.actionId === candidate.actionId,
+    );
+    const serverId = action?.payload?.serverId;
+    return (
+      action?.type === "install_card" &&
+      action.payload?.placement === "root" &&
+      typeof serverId === "string" &&
+      corpAgendaInstallHasCertifiedNearTermScoreHorizon(
+        input,
+        candidate,
+        serverId,
+      )
+    );
+  });
 }
 
 function corpAgendaInstallHasCertifiedNearTermScoreHorizon(

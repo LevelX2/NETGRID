@@ -9239,14 +9239,14 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "corp.install_card.corp_onr_v1_347_vapor-ops_1.remote_1.corp_onr_v1_347_vapor-ops_1"
+        "actionId": "corp.install_card.corp_onr_v1_366_red-herrings_1.hq.corp_onr_v1_366_red-herrings_1"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.ambush_and_bluff"],
-      "acceptableCapabilities": ["decoy_setup"],
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["allocate_server_defense"],
       "requiredAssessmentEvidence": [
-        "corp_score_decoy_preplanned_exact_install:corp_onr_v1_347_vapor-ops_1:remote_1:corp_onr_proteus_008_project-zurich_1:assigned_domain_plan"
+        "corp_defense_support_install:hq:corp_upgrade_install_placement_fit:reserve_after_action:0"
       ]
     }
   }
