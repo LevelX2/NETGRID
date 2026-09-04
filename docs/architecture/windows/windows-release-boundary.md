@@ -1,6 +1,6 @@
 # Windows-Releasegrenze
 
-Stand: 2026-09-03
+Stand: 2026-09-04
 
 ## Zweck
 
@@ -9,11 +9,11 @@ Entwicklung, Tests und lokalen Daten. Ein späterer Windows-Installer darf nur
 den geprüften Output von `build:windows-release-output` konsumieren. Er darf
 weder das Repository noch beliebige Unterverzeichnisse daraus paketieren.
 
-Die Vorarbeit implementiert bewusst keinen Installer. WiX/MSI/MSIX,
-Launcher, Dienst, Autostart, Firewallregeln und Signatur bleiben eine eigene
-Produktentscheidung. Als Veröffentlichungs- und Updatekanal sind für die
-aktuelle Phase ausschließlich manuell bereitgestellte GitHub Releases
-festgelegt.
+Die Vorarbeit implementiert bewusst keinen Installer. Das beschlossene
+Installer-, Launcher- und Updatezielbild steht in
+`windows-installer-product-contract.md`; der sequenzielle spätere
+Umsetzungsweg in `windows-installer-package-process.md`. GitHub Releases ist
+der einzige Veröffentlichungs- und Updatekanal.
 
 ## Produkt- und Datengrenze
 
@@ -99,47 +99,23 @@ versionierter Bestand gepflegt.
 
 ## Grenze des späteren Installerprojekts
 
-Vor der Installerimplementierung sind folgende Entscheidungen explizit zu
-treffen:
-
-| Thema | Noch zu entscheidender Vertrag |
-| --- | --- |
-| Paketformat | WiX/MSI, MSIX oder Bootstrapper; Upgrade- und Rollbackmodell |
-| Node-Laufzeit | signierte eingebettete Node-24-x64-Laufzeit oder geprüfte Voraussetzung |
-| Prozessmodell | Benutzerlauncher, Windows-Dienst oder beides; Start-/Stop- und Recovery-Verhalten |
-| Identität und Rechte | Installationsscope, Program-Files-/ProgramData-ACLs, Dienstkonto |
-| Netzwerk | Loopback als Default; LAN und Firewall nur als bewusst gewählte Option |
-| Geheimnisse | kryptografische Erzeugung und geschützte Ablage von `NETGRID_TOKEN_SALT` |
-| Signatur | Codesigning-Zertifikat, Timestamping und SmartScreen-Strategie |
-| Updates | manueller Download neuer Installer aus GitHub Releases; kein Auto-Updater und keine Hintergrundprüfung |
-| Datenlebenszyklus | Upgrade, Backup, Deinstallation und ausdrückliche Datenlöschung |
-| Support | Logpfad, Healthcheck, Diagnoseexport und reparierende Neuinstallation |
-
-Der spätere geführte Ablauf muss mindestens Betriebssystem und x64 prüfen,
-das signierte Produkt installieren, `ProgramData` mit minimalen Rechten
-anlegen, Secret und Runtimekonfiguration erzeugen, Prozesse registrieren,
-optional LAN/Firewall konfigurieren, Health und Webstart prüfen und bei
-Fehlern transaktional zurückrollen. Deinstallation entfernt standardmäßig nur
-Programmdateien; Nutzerdaten werden nur nach ausdrücklicher, lokalisierter
-Bestätigung gelöscht.
-
-Alle sichtbaren Installations-, Fehler-, Reparatur- und
-Deinstallationstexte müssen Deutsch, Englisch und Französisch vollständig
-abdecken. Die Sprachauswahl darf technische Pfade, IDs und Logschlüssel nicht
-lokalisieren.
+Der Installer konsumiert ausschließlich den auditierten Releaseoutput. Seine
+beschlossenen Produkt-, Daten-, Netzwerk-, Konto-, Update-, Support-,
+Lokalisierungs- und Brandingverträge sowie die zurückgestellten Punkte stehen
+vollständig in `windows-installer-product-contract.md`. Der Paketprozess
+WIN-I01 bis WIN-I08 ist der umsetzungsreife Handoff; er ersetzt keine Gates
+dieser Releasegrenze.
 
 ## Veröffentlichungs- und Updatekanal
 
 GitHub Releases ist in der aktuellen Phase der einzige Distributionskanal.
 Eine neue Version wird dort bewusst als Release mit Installer, Versionsangabe,
-Änderungshinweisen und Prüfsumme veröffentlicht. Nutzer laden den neuen
-Installer manuell herunter und starten das Upgrade selbst.
-
-NETGRID fragt GitHub weder beim Start noch im Hintergrund ab, lädt keine
-Updates selbstständig herunter und installiert nichts automatisch. Es gibt
-vorerst keinen zusätzlichen Paketfeed, Store-Kanal oder eigenen
-Updateserver. Ein späterer Auto-Updater wäre eine neue Produkt-, Sicherheits-
-und Datenschutzentscheidung und nicht Teil des aktuellen Installerumfangs.
+Änderungshinweisen und Prüfsumme veröffentlicht. Der beschlossene spätere
+Launcher prüft einmal beim Start, bietet stabile Releases standardmäßig und
+GitHub-Pre-Releases nach Opt-in an und lädt beziehungsweise installiert erst
+nach ausdrücklicher Zustimmung. Bis WIN-I06 umgesetzt ist, bleibt der reale
+Produktstand beim manuellen Download ohne Updateprüfung. Es gibt keinen
+zusätzlichen Paketfeed, Store-Kanal oder eigenen Updateserver.
 
 ## Führende Gates
 
