@@ -141,9 +141,9 @@ describe("Corp agenda turn-planning vertical slice", () => {
 
   it("excludes an infeasible non-opening agenda head instead of publishing a false complete rush line", () => {
     const input = decisionInput();
+    const { openingRush: _openingRush, ...nonOpeningProject } = project(2);
     const blocked = {
-      ...project(2),
-      openingRush: undefined,
+      ...nonOpeningProject,
       feasible: false,
       evidenceCode: "corp_score_horizon_unbounded:new_remote",
     } satisfies CorpScoreProjectSignal;

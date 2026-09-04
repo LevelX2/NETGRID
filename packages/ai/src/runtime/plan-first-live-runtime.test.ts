@@ -12298,11 +12298,35 @@ describe("authoritative plan-first live runtime", () => {
           definitionId: "onr_v1_273_triggerman",
           rezzed: false,
           rezCost: 7,
+          effectiveRezCostQuote: {
+            context: "installed",
+            cardId: "expensive-ice",
+            targetServerId: "hq",
+            projectedServerId: "hq",
+            expiresAtStateVersion: 11,
+            complete: true,
+            costKind: "fixed",
+            baseCredits: 7,
+            finalCredits: 7,
+            mandatoryAdditionalCosts: { agendaPoints: 0 },
+          },
         }),
         visibleCard("cheaper-ice", "corp", "ice", {
           definitionId: "onr_v1_279_wall-of-static",
           rezzed: false,
           rezCost: 5,
+          effectiveRezCostQuote: {
+            context: "installed",
+            cardId: "cheaper-ice",
+            targetServerId: "hq",
+            projectedServerId: "hq",
+            expiresAtStateVersion: 11,
+            complete: true,
+            costKind: "fixed",
+            baseCredits: 5,
+            finalCredits: 5,
+            mandatoryAdditionalCosts: { agendaPoints: 0 },
+          },
         }),
       ]),
       server(
@@ -12341,6 +12365,105 @@ describe("authoritative plan-first live runtime", () => {
             targetPurpose: "rez_best_defensive_ice",
             targetCardId: "expensive-ice",
             targetDefinitionId: "onr_v1_273_triggerman",
+            selectedVariantId: "fixed",
+            selectedOptionId: "rez_expensive-ice_fixed",
+          },
+        },
+      },
+    });
+  });
+
+  it("prebinds the unbreakable no-surcharge subtype variant for a variable free-rez ICE", () => {
+    const scoreAgenda = legalAction(
+      "score-priority-requisition",
+      "corp",
+      "score_agenda",
+      "Score Priority Requisition",
+      { credits: 0, clicks: 0 },
+      {
+        source: "priority-requisition",
+        payload: { cardId: "priority-requisition" },
+      },
+    );
+    const input = aiInput("corp", [scoreAgenda]);
+    input.playerView.stateVersion = 11;
+    input.playerView.own.credits = 1;
+    scoreAgenda.expiresAtStateVersion = 11;
+    input.decisionId = "score-priority-requisition-variable:11";
+    input.playerView.opponent.rig = [
+      visibleCard("codecracker", "runner", "program", {
+        definitionId: "onr_v1_014_codecracker",
+        strength: 0,
+        subtypes: ["icebreaker", "codecracker"],
+      }),
+    ];
+    input.playerView.servers = [
+      server("rd", [
+        visibleCard("credit-blocks", "corp", "ice", {
+          definitionId: "onr_proteus_017_credit-blocks",
+          rezzed: false,
+          rezCost: 6,
+          subtypes: ["sentry"],
+          effectiveRezCostQuote: {
+            context: "installed",
+            cardId: "credit-blocks",
+            targetServerId: "rd",
+            projectedServerId: "rd",
+            expiresAtStateVersion: 11,
+            complete: true,
+            costKind: "variable",
+            baseCredits: 6,
+            finalCredits: 6,
+            mandatoryAdditionalCosts: { agendaPoints: 0 },
+            variableParameter: {
+              kind: "alternate_subtype",
+              baseSubtypes: ["sentry"],
+              baseSubtypesFinalCredits: 6,
+              alternateSubtypes: ["wall"],
+              alternateSubtypesAdditionalCredits: 1,
+              alternateSubtypesFinalCredits: 7,
+            },
+          },
+        }),
+      ]),
+      server(
+        "remote_1",
+        [],
+        [
+          visibleCard("priority-requisition", "corp", "agenda", {
+            definitionId: "onr_v1_212_priority-requisition",
+            advancementCounters: 5,
+            advancementRequirement: 5,
+            agendaPoints: 3,
+          }),
+        ],
+      ),
+    ];
+
+    resetResidentPlanPortfolioMemory();
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: scoreAgenda.actionId,
+      reasonCode: "plan_first.corp.score_agenda",
+      fallbackUsed: false,
+    });
+    const portfolio = residentPlanPortfolioSnapshot(input);
+    const executor = portfolio?.instances.find(
+      (instance) => instance.instanceId === portfolio.executorInstanceId,
+    );
+    expect(executor).toMatchObject({
+      moduleId: "corp.score_agenda",
+      executionState: "executor",
+      moduleState: {
+        choiceContinuation: {
+          family: "corp_scored_agenda_on_score",
+          selectedActionId: scoreAgenda.actionId,
+          targetCardId: "priority-requisition",
+          freeRezChoiceBinding: {
+            targetCardId: "credit-blocks",
+            targetDefinitionId: "onr_proteus_017_credit-blocks",
+            selectedVariantId: "alternate_subtype:base",
+            selectedOptionId:
+              "rez_credit-blocks_alternate_subtype:base",
           },
         },
       },

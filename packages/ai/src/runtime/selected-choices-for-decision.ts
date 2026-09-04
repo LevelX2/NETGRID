@@ -4224,6 +4224,8 @@ function selectedCorpScoredAgendaFreeRezOptionId(
             targetPurpose?: unknown;
             targetCardId?: unknown;
             targetDefinitionId?: unknown;
+            selectedVariantId?: unknown;
+            selectedOptionId?: unknown;
           };
         };
       }
@@ -4243,8 +4245,9 @@ function selectedCorpScoredAgendaFreeRezOptionId(
     .find((ice) => ice.instanceId === binding?.targetCardId);
   const matchingTargetOptions = selectableOptions.filter(
     (option) =>
-      typeof option.value === "string" &&
-      option.value.split("|")[0] === binding?.targetCardId,
+      option.id === binding?.selectedOptionId &&
+      option.value ===
+        `${binding?.targetCardId}|${binding?.selectedVariantId}`,
   );
   const [requirement] = action.choiceRequirements ?? [];
   const exactContinuation =
@@ -4281,6 +4284,8 @@ function selectedCorpScoredAgendaFreeRezOptionId(
     targetCard.type === "ice" &&
     targetCard.rezzed === false &&
     targetCard.definitionId === binding.targetDefinitionId &&
+    binding.selectedOptionId ===
+      `rez_${binding.targetCardId}_${binding.selectedVariantId}` &&
     matchingTargetOptions.length === 1 &&
     action.side === "corp" &&
     action.type === "resolve_choice" &&
@@ -4305,7 +4310,7 @@ function selectedCorpScoredAgendaFreeRezOptionId(
       unresolvedActionIds: [action.actionId],
       owner: "continuation",
       removalCondition:
-        "Bind the scored-agenda free-rez target to the immediately preceding resident Corp score executor, canonical source capability, exact visible ICE and current Engine choice contract.",
+        "Bind the scored-agenda free-rez target and exact rez variant to the immediately preceding resident Corp score executor, canonical source capability, exact visible ICE and current Engine choice contract.",
       ...(executor ? { planInstanceId: executor.instanceId } : {}),
     });
   }
