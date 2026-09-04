@@ -10278,6 +10278,61 @@ describe("authoritative plan-first live runtime", () => {
       reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
+
+    const fetalInstall = legalAction(
+      "install-fetal-ai",
+      "corp",
+      "install_card",
+      "Install Fetal AI",
+      { credits: 0, clicks: 1 },
+      {
+        source: "fetal-ai",
+        payload: {
+          cardId: "fetal-ai",
+          serverId: "new_remote",
+          placement: "root",
+          agendaInstallScoreHorizonQuoteSchemaVersion:
+            "corp-agenda-install-score-horizon-quote-v1",
+          agendaInstallScoreHorizonQuoteCardId: "fetal-ai",
+          agendaInstallScoreHorizonQuoteTargetServerId: "new_remote",
+          agendaInstallScoreHorizonQuoteExpiresAtStateVersion: 1,
+          agendaInstallScoreHorizonQuoteAdvancementRequirement: 5,
+          agendaInstallScoreHorizonQuoteMaximumCurrentTurnAdvances: 1,
+          agendaInstallScoreHorizonQuoteRemainingAdvancesAfterCurrentTurn: 4,
+          agendaInstallScoreHorizonQuoteNextCorpTurnGuaranteedFlexibleClicks: 3,
+          agendaInstallScoreHorizonQuoteComplete: false,
+          agendaInstallScoreHorizonQuoteReason:
+            "not_completable_by_next_corp_turn",
+        },
+      },
+    );
+    resetResidentPlanPortfolioMemory();
+    const blockedFiveAdvance = aiInput("corp", [
+      fetalInstall,
+      efficiency,
+      credit,
+      draw,
+    ]);
+    blockedFiveAdvance.playerView.own.clicks = 2;
+    blockedFiveAdvance.playerView.own.credits = 5;
+    blockedFiveAdvance.playerView.own.stackOrRdCount = 12;
+    blockedFiveAdvance.playerView.own.gripOrHq = [
+      visibleCard("fetal-ai", "corp", "agenda", {
+        definitionId: "onr_proteus_004_fetal-ai",
+        advancementRequirement: 5,
+        agendaPoints: 3,
+      }),
+      visibleCard("efficiency-card", "corp", "operation", {
+        definitionId: "onr_v1_290_efficiency-experts",
+      }),
+    ];
+    expect(
+      liveContext().chooseSemanticRuntimeAction(blockedFiveAdvance, {}),
+    ).toMatchObject({
+      actionId: "efficiency",
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
   });
 
   it("limits score-material observation to one exact basic draw per Corp turn", () => {

@@ -138,6 +138,28 @@ describe("Corp agenda turn-planning vertical slice", () => {
       "agenda_slice_missing_exact_agenda_head",
     );
   });
+
+  it("excludes an infeasible non-opening agenda head instead of publishing a false complete rush line", () => {
+    const input = decisionInput();
+    const blocked = {
+      ...project(2),
+      openingRush: undefined,
+      feasible: false,
+      evidenceCode: "corp_score_horizon_unbounded:new_remote",
+    } satisfies CorpScoreProjectSignal;
+
+    const slice = buildSlice(input, blocked, [
+      agendaCandidate(),
+      economyCandidate(),
+    ]);
+
+    expect(slice.lines).toEqual([]);
+    expect(slice.selectionReason).toBe("no_complete_line");
+    expect(slice.campaignDisposition).toBe("blocked_replan");
+    expect(slice.evidenceCodes).toContain(
+      "agenda_slice_infeasible_agenda_head_excluded",
+    );
+  });
 });
 
 function buildSlice(
