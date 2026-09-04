@@ -11669,6 +11669,63 @@ describe("authoritative plan-first live runtime", () => {
       reasonCode: "plan_first.corp.defend_servers",
       fallbackUsed: false,
     });
+
+    const hqRez = legalAction(
+      "rez-red-herrings-hq",
+      "corp",
+      "rez_card",
+      "Rez Red Herrings in HQ",
+      { credits: 1, clicks: 0 },
+      {
+        source: "red-herrings-hq",
+        payload: { cardId: "red-herrings-hq", serverId: "hq" },
+      },
+    );
+    const hqWindow = aiInput("corp", [hqRez]);
+    hqWindow.playerView.timingPoint = "run.approach_ice";
+    hqWindow.playerView.own.credits = 20;
+    hqWindow.playerView.own.gripOrHq = [
+      visibleCard("hq-agenda", "corp", "agenda", {
+        definitionId: "onr_v1_195_corporate-retreat",
+        title: "Corporate Retreat",
+        advancementRequirement: 4,
+      }),
+    ];
+    hqWindow.playerView.run = {
+      attackedServerId: "hq",
+      phase: "approach_ice",
+      position: { kind: "ice", serverId: "hq", iceIndex: 0 },
+      successful: false,
+    };
+    hqWindow.playerView.servers = [
+      server(
+        "hq",
+        [
+          visibleCard("hq-ice", "corp", "ice", {
+            definitionId: "onr_v1_237_data-wall",
+            title: "Data Wall",
+            rezzed: true,
+          }),
+        ],
+        [
+          visibleCard("red-herrings-hq", "corp", "upgrade", {
+            definitionId: "onr_v1_366_red-herrings",
+            title: "Red Herrings",
+            rezzed: false,
+          }),
+        ],
+      ),
+      server("rd"),
+      server("archives"),
+    ];
+    resetResidentPlanPortfolioMemory();
+    expect(
+      liveContext().chooseSemanticRuntimeAction(hqWindow, {}),
+    ).toMatchObject({
+      actionId: hqRez.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+    });
   });
 
   it("routes an explicit fortified-server defense upgrade through the global defense plan", () => {

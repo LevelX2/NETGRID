@@ -31608,7 +31608,9 @@ function corpExactCardRezSupportAssessment(
     const canContainAgenda =
       serverId === "rd"
         ? input.playerView.own.stackOrRdCount > 0
-        : visibleKnownAgendaOnServer(input, serverId);
+        : serverId === "hq"
+          ? input.playerView.own.gripOrHq.some((card) => card.type === "agenda")
+          : visibleKnownAgendaOnServer(input, serverId);
     if (!canContainAgenda) {
       return {
         productive: false,
