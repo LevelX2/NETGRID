@@ -228,7 +228,7 @@ test("records crash-safe report state and creates a consistent backup", async ()
       coveredPairingIds: ["041", "042", "043", "044", "045"],
       recipient: "me",
       subject: "Testbericht",
-      htmlBody: "<html><body>Test</body></html>",
+      htmlBody: "<html><body>Test</body></html>\n",
       series: {
         id: "series-1",
         recipient: "me",
@@ -243,7 +243,7 @@ test("records crash-safe report state and creates a consistent backup", async ()
       coveredPairingIds: ["041", "042", "043", "044", "045"],
       recipient: "me",
       subject: "Testbericht",
-      htmlBody: "<html><body>Test</body></html>",
+      htmlBody: "<html><body>Test</body></html>\n",
       sentAt: "2026-08-20T16:00:00.000Z",
       series: {
         id: "series-1",
@@ -257,7 +257,7 @@ test("records crash-safe report state and creates a consistent backup", async ()
     assert.equal(getStoredReport(db, "latest").report_id, "report-041-045");
     assert.equal(
       getStoredReport(db, "report-041-045").html_body,
-      "<html><body>Test</body></html>",
+      "<html><body>Test</body></html>\n",
     );
     await backupEvidenceRegistry(db, backupPath);
     const { db: backupDb } = openEvidenceRegistry(backupPath);
