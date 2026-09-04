@@ -1,7 +1,7 @@
 # Produktversion und fortlaufende Build-Kennung
 
 Status: `accepted`
-Datum: 2026-07-17
+Datum: 2026-09-04
 Primärer Agent: `release-implementation-agent`
 
 ## Ausgangslage
@@ -16,10 +16,10 @@ noch den weiterhin gültigen Version-0-Reifegrad zuverlässig.
 
 NETGRID trennt ab sofort Produktreife und technischen Quellstand:
 
-- Die sichtbare Produktversion lautet bis zu einer neuen ausdrücklichen
-  Produktentscheidung `V0.9`.
+- Die sichtbare Produktversion lautet seit der ausdrücklichen
+  Produktentscheidung vom 2026-09-04 `V1.0`.
 - Daneben steht eine automatisch aus `git rev-list --count HEAD` ermittelte
-  Buildnummer, zum Beispiel `V0.9 · Build 5527`.
+  Buildnummer, zum Beispiel `V1.0 · Build 8090`.
 - Ein beim Webstart nicht sauberer Arbeitsbaum wird getrennt von der
   Buildnummer als Badge `lokal geändert` ausgewiesen.
 - Der tatsächliche Servermodus wird über den Health-Endpunkt gemeldet. Im
@@ -40,6 +40,19 @@ werden nicht mehr automatisch als sichtbare Produktversion verwendet. Ein
 Final Review dokumentiert weiterhin seinen Zielrelease-Stand; die sichtbare
 Produktversion ändert sich nur bei einer eigenen Produktreifeentscheidung.
 
+Ein veröffentlichter GitHub- und Installerstand bildet die beiden
+Informationen als technische Dreierkennung `1.0.<Buildnummer>` ab, zum
+Beispiel `1.0.8090`; die sichtbare Oberfläche bleibt bei der lesbaren Form
+`V1.0 · Build 8090`. Die Buildnummer wird bei einem neuen Produktmeilenstein
+wie `1.1` oder `2.0` nicht zurückgesetzt. Vorab- und Entwicklungsstände
+ergänzen diese technische Kennung um einen eindeutigen Vorabbezeichner und
+das GitHub-Pre-Release-Flag.
+
+Die Bezeichnung `1.0` ist zunächst eine Produkt- und Installationskennung der
+privaten Vorproduktionsumgebung. Sie begründet ohne eine gesonderte
+Releaseentscheidung keine öffentliche Betriebs-, Support- oder
+Rückwärtskompatibilitätszusage.
+
 ## Technischer Vertrag
 
 - Produktversion: `apps/web/lib/app-build-info.ts`
@@ -50,7 +63,7 @@ Produktversion ändert sich nur bei einer eigenen Produktreifeentscheidung.
 
 ## Akzeptanz
 
-- Die Kopfzeile zeigt stabil `V0.9 · Build <Nummer>`.
+- Die Kopfzeile zeigt stabil `V1.0 · Build <Nummer>`.
 - Nur bei lokalen Änderungen beim Webstart erscheint zusätzlich
   `lokal geändert`; nur beim laufenden Server-Watch erscheint `Watch`.
 - Die Optionen zeigen Produktversion, Build, Commit und Quellstand.

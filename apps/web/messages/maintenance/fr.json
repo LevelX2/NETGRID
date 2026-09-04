@@ -35,6 +35,8 @@
     "m033": "Backend 0.5 · vue de maintenance du stockage privé",
     "m034": "Gérer les images de cartes locales",
     "m035": "Images de cartes",
+    "accountAccess": "Accès des joueurs",
+    "accountAccessTitle": "Gérer les profils locaux et les mots de passe",
     "m036": "Mise à jour",
     "m037": "Chargement",
     "m038": "Taille de la base de données",
@@ -220,6 +222,34 @@
     "nonTerminalOption": "Non terminal",
     "terminalOption": "Terminal",
     "loadedCount": "Chargés : {count}"
+  },
+  "accounts": {
+    "title": "Accès des joueurs",
+    "subtitle": "Gérer les profils locaux, le mode protégé et les mots de passe oubliés.",
+    "back": "Retour à la maintenance",
+    "loading": "Chargement du mode d'accès…",
+    "loadFailed": "Impossible de charger les accès des joueurs.",
+    "changeFailed": "Impossible de modifier le mode d'accès.",
+    "resetFailed": "Impossible de réinitialiser le mot de passe.",
+    "modeTitle": "Mode d'accès",
+    "mode": {
+      "invite_only": "Mode d'invitation existant. Un nouveau mode peut être choisi pour une installation locale.",
+      "simple": "Mode simple : les joueurs choisissent leur profil sans mot de passe.",
+      "protected": "Mode protégé : les joueurs se connectent avec un identifiant et un mot de passe."
+    },
+    "protectedHelp": "Chaque profil existant nécessite son propre mot de passe. Toutes les sessions des joueurs seront fermées.",
+    "initialPassword": "Mot de passe pour {name}",
+    "enableProtected": "Activer le mode protégé",
+    "simpleWarning": "En mode simple, toute personne sur le réseau privé accessible peut utiliser un profil sans mot de passe. Toutes les sessions des joueurs seront fermées.",
+    "enableSimple": "Activer le mode simple",
+    "modeChanged": "Mode d'accès modifié. Toutes les sessions des joueurs ont été fermées.",
+    "passwordsTitle": "Mots de passe des joueurs",
+    "passwordsHelp": "Un nouveau mot de passe ferme toutes les sessions du joueur, mais conserve son profil, ses decks et son historique.",
+    "newPassword": "Nouveau mot de passe",
+    "newPasswordFor": "Nouveau mot de passe pour {name}",
+    "resetFor": "Réinitialiser le mot de passe de {name}",
+    "reset": "Réinitialiser",
+    "passwordReset": "Le mot de passe de {name} a été réinitialisé."
   },
   "cardImages": {
     "m001": "La gestion des images de carte n'a pas pu être chargée.",

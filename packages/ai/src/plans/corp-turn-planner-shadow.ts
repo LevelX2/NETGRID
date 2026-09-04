@@ -145,6 +145,7 @@ export function buildCorpTurnPlannerShadow(params: {
           project,
           candidates: params.context.actionCandidates,
           defenseNeeds: domain.defenseNeeds,
+          economyNeeds: domain.economyNeeds,
           rulesContext,
           stateIdentity,
         }),
@@ -435,35 +436,54 @@ export function corpPlanProgressRoots(params: {
       const selectedLine = slice?.lines.find(
         (line) => line.lineId === slice.selectedLineId,
       );
+      const selectedLineIsSupport =
+        selectedLine?.parentNeedId !== undefined &&
+        selectedLine.providerModuleId !== undefined;
+      const currentSupportHeads = params.heads
+        .filter(
+          (head) =>
+            head.executorParentPlanInstanceId === planInstanceId &&
+            head.executorParentNeedId !== undefined,
+        )
+        .sort((left, right) =>
+          left.candidateId.localeCompare(right.candidateId),
+        );
+      const selectedHead = selectedLine
+        ? params.heads.find(
+            (head) =>
+              head.currentBinding.actionId === selectedLine.currentActionId &&
+              (selectedLineIsSupport
+                ? head.executorParentPlanInstanceId === planInstanceId &&
+                  head.executorParentNeedId === selectedLine.parentNeedId &&
+                  (!selectedLine.providerPlanInstanceId ||
+                    head.executorPlanInstanceId ===
+                      selectedLine.providerPlanInstanceId)
+                : head.moduleId === "corp.score_agenda" &&
+                  (head.executorPlanInstanceId === planInstanceId ||
+                    head.rootPlanInstanceId === planInstanceId)),
+          )
+        : undefined;
+      const selectedSupportHead = selectedLineIsSupport
+        ? selectedHead
+        : currentSupportHeads[0];
       const blocked =
         !project.feasible || slice?.selectionReason === "no_complete_line";
       const requiredNeedId =
-        selectedLine?.family === "safe_setup" && selectedLine.parentNeedId
+        selectedLineIsSupport && selectedLine.parentNeedId
           ? selectedLine.parentNeedId
-          : blocked
-            ? (project.setupNeed?.needId ??
-              project.protectionNeed?.needId ??
-              ((project.fundingGap ?? 0) > 0
-                ? `score-support:${project.projectId}`
-                : undefined))
-            : undefined;
+          : selectedSupportHead?.executorParentNeedId
+            ? selectedSupportHead.executorParentNeedId
+            : blocked
+              ? (project.setupNeed?.needId ??
+                ((project.fundingMilestone?.remainingGap ?? 0) > 0
+                  ? `score-support:${project.projectId}`
+                  : project.protectionNeed?.needId))
+              : undefined;
       const boundSupportHead = requiredNeedId
         ? params.heads.find(
             (head) =>
               head.executorParentPlanInstanceId === planInstanceId &&
               head.executorParentNeedId === requiredNeedId,
-          )
-        : undefined;
-      const selectedHead = selectedLine
-        ? params.heads.find(
-            (head) =>
-              head.currentBinding.actionId === selectedLine.currentActionId &&
-              (selectedLine.family === "safe_setup"
-                ? head.executorParentPlanInstanceId === planInstanceId &&
-                  head.executorParentNeedId === selectedLine.parentNeedId
-                : head.moduleId === "corp.score_agenda" &&
-                  (head.executorPlanInstanceId === planInstanceId ||
-                    head.rootPlanInstanceId === planInstanceId)),
           )
         : undefined;
       const effectiveCampaignDisposition =
@@ -474,7 +494,8 @@ export function corpPlanProgressRoots(params: {
         effectiveCampaignDisposition,
       );
       const witness =
-        selectedLine?.family === "safe_setup" &&
+        selectedLineIsSupport &&
+        selectedLine &&
         selectedLine.parentNeedId &&
         selectedHead?.executorPlanInstanceId
           ? ({
@@ -781,6 +802,17 @@ function includeSpecializedCurrentRoutes(params: {
       const ownerModuleId = line.nodes[0]?.ownerModuleId;
       if (line.currentActionId && ownerModuleId === "corp.score_agenda") {
         addRoute(line.currentActionId, ownerModuleId, projectId);
+      } else if (
+        line.currentActionId &&
+        ownerModuleId === "corp.economy" &&
+        line.providerPlanInstanceId
+      ) {
+        addRoute(
+          line.currentActionId,
+          ownerModuleId,
+          undefined,
+          line.providerPlanInstanceId,
+        );
       }
     }
   }
@@ -998,7 +1030,22 @@ function specializedVariants(
     route.instance.moduleId === "corp.defend_servers" ||
     route.instance.moduleId === "corp.economy"
   ) {
-    return (
+    const agendaSupportLines = agendaSlices.flatMap(({ slice }) =>
+      slice.lines.filter(
+        (line) =>
+          line.providerPlanInstanceId === route.instance.instanceId &&
+          specializedPlanningLineMatchesRoute({
+            routeActionId: route.candidate.actionId,
+            routeModuleId: route.instance.moduleId,
+            routePlanInstanceId: route.instance.instanceId,
+            routeDedupeKey: route.instance.dedupeKey,
+            lineActionId: line.currentActionId,
+            lineOwnerModuleId: line.nodes[0]?.ownerModuleId,
+            linePlanInstanceId: line.providerPlanInstanceId,
+          }),
+      ),
+    );
+    const defenseLines =
       defenseSlice?.lines
         .filter((line) =>
           specializedPlanningLineMatchesRoute({
@@ -1011,8 +1058,11 @@ function specializedVariants(
             linePlanInstanceId: line.nodes[0]?.planInstanceId,
           }),
         )
-        .map((line) => defenseVariant(line, route)) ?? []
-    );
+        .map((line) => defenseVariant(line, route)) ?? [];
+    return [
+      ...agendaSupportLines.map((line) => agendaVariant(line, route)),
+      ...defenseLines,
+    ];
   }
   return [];
 }
@@ -1054,11 +1104,15 @@ function agendaVariant(
     instanceHorizon: "multi_turn",
     campaignQuote: structuredClone(line.campaignQuote),
     evaluationValues: {
-      agenda_progress: boundedUtility(
-        line.evaluation.agendaProgress + route.stepValue,
-      ),
+      agenda_progress:
+        line.family === "fund_setup"
+          ? 0
+          : boundedUtility(line.evaluation.agendaProgress + route.stepValue),
       defense: line.evaluation.defense,
-      economy: line.evaluation.economy,
+      economy:
+        line.family === "fund_setup"
+          ? boundedUtility(line.evaluation.economy + route.stepValue)
+          : line.evaluation.economy,
       continuity: line.evaluation.continuity,
       risk: line.evaluation.risk,
     },

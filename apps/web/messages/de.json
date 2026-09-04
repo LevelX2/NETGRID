@@ -353,7 +353,16 @@
       "inviteHelp": "Accounts werden in dieser Alpha nur durch eine Admin-Einladung angelegt.",
       "resetPassword": "Passwort zurücksetzen",
       "resetCode": "Resetcode",
-      "setNewPassword": "Neues Passwort setzen"
+      "setNewPassword": "Neues Passwort setzen",
+      "localProfile": "Lokales Profil ohne Passwort",
+      "simpleMode": "Einfacher lokaler Modus",
+      "chooseProfile": "Profil auswählen",
+      "simpleModeHelp": "Dieses Gerät merkt sich das zuletzt verwendete Profil. Auf gemeinsam genutzten Geräten kannst du das Profil jederzeit wechseln.",
+      "noProfiles": "Noch kein Spielerprofil vorhanden.",
+      "createProfile": "Neues Spielerprofil",
+      "createAndUseProfile": "Profil anlegen und verwenden",
+      "createProtectedAccount": "Geschützten Account anlegen",
+      "protectedRegistrationHelp": "Jeder im erreichbaren privaten Netzwerk darf einen eigenen Account anlegen. Das Passwort muss mindestens 15 Zeichen lang sein."
     },
     "session": {
       "requestFailed": "Die Account-Anfrage ist fehlgeschlagen.",

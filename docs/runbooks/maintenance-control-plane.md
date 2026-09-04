@@ -1,6 +1,6 @@
 # Maintenance-Control-Plane betreiben
 
-Stand: 2026-07-11  
+Stand: 2026-09-04  
 Status: verbindlicher ARC-001-Betriebspfad
 
 ## Zweck
@@ -138,6 +138,23 @@ Nach dem Lauf die App wieder ausschließlich über `scripts/start-netgrid.ps1` s
 7. Der automatische Cleanup akzeptiert weiterhin ausschließlich terminale Matchzustände. Andere nicht-terminale Zustände bleiben generell ausgeschlossen.
 8. Passwortänderung oder lokaler Reset meldet alle Geräte ab.
 9. Direkter LAN-Aufruf von Port `8787` bleibt für Maintenance geschlossen.
+
+## Lokale Spielerzugänge
+
+`/maintenance/accounts` verwaltet die lokale Spieler-Zugangsrichtlinie. Die
+Seite und ihre API bleiben auch bei anderweitig freigeschalteter Remote-
+Maintenance zwingend auf Deploymentprofil `local` und eine direkte
+Loopback-Verbindung beschränkt. Lesen benötigt eine gültige
+Maintenance-Sitzung; Moduswechsel und Spielerpasswort-Reset verlangen
+zusätzlich eine frische Passwortbestätigung.
+
+Der Wechsel nach `protected` nimmt genau ein neues Passwort für jedes aktive
+Profil an und schreibt Credentials, Policy und Sitzungswiderruf atomar. Der
+Wechsel nach `simple` entfernt die Spielercredentials und beendet ebenfalls
+alle Spielersitzungen. Der Passwort-Reset erhält Account, Decks und Historie,
+erhöht aber die Credential-Version und widerruft alle Sitzungen des Accounts.
+Fehlende Profile, unvollständige Passwortmengen und ungültige Policywerte
+werden ohne Teiländerung abgewiesen.
 
 ## Lokale Kartenbildverwaltung
 

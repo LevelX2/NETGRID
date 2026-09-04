@@ -4,7 +4,7 @@ import { createAppBuildInfo } from "../lib/app-build-info";
 import { serverRuntimeModeFromHealth } from "../lib/server-runtime-mode";
 
 describe("web client release status", () => {
-  it("shows product version V0.9 with the current clean build number", () => {
+  it("shows product version V1.0 with the current clean build number", () => {
     const pageSource = readFileSync(
       new URL("./page.tsx", import.meta.url),
       "utf8",
@@ -22,7 +22,7 @@ describe("web client release status", () => {
     expect(pageSource).toContain(
       "<AppRuntimeStatus statusLabel={APP_STATUS_LABEL} />",
     );
-    expect(buildInfo.statusLabel).toBe("V0.9 · Build 5527");
+    expect(buildInfo.statusLabel).toBe("V1.0 · Build 5527");
     expect(buildInfo.sourceDate).toBe("17.07.2026, 07:41 Uhr");
     expect(buildInfo.sourceDateIso).toBe("2026-07-17T07:41:53+02:00");
     expect(buildInfo.sourceStatus).toBe("Beim Webstart sauber");
@@ -36,7 +36,7 @@ describe("web client release status", () => {
       dirty: "true",
     });
 
-    expect(buildInfo.statusLabel).toBe("V0.9 · Build 5527");
+    expect(buildInfo.statusLabel).toBe("V1.0 · Build 5527");
     expect(buildInfo.sourceStatus).toBe(
       "Beim Webstart waren Änderungen nicht committet",
     );

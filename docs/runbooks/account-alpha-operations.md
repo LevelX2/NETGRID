@@ -1,6 +1,6 @@
 # Account-Alpha betreiben
 
-Stand: 2026-07-19
+Stand: 2026-09-04
 
 ## Voraussetzungen
 
@@ -17,6 +17,33 @@ Stand: 2026-07-19
   lokalen Start wird deshalb die vom Startskript ausgegebene gemeinsame
   LAN- oder Loopback-Hostvariante verwendet; im Internet übernimmt ein
   HTTPS-Reverse-Proxy die beiden Pfade unter der freigegebenen Origin.
+
+## Zugangsmodi
+
+Die Accountdaten besitzen genau eine Autorität und eine persistente
+Zugangsrichtlinie. `NETGRID_ACCOUNT_ACCESS_MODE` setzt nur den Ausgangswert,
+solange noch keine persistierte Auswahl existiert:
+
+- `invite_only` ist der unveränderte Standard des Entwicklungsbetriebs und
+  erhält den bestehenden Admin-, Einladungs- und Resetablauf.
+- `simple` ist der empfohlene lokale Produktmodus. Jeder erreichbare lokale
+  Nutzer darf ein Profil mit Anzeigenamen anlegen oder auswählen; NETGRID
+  merkt das aktive Profil über eine nicht erratbare HttpOnly-Sitzung je
+  Browser. Ein Spielerpasswort existiert in diesem Modus nicht.
+- `protected` erlaubt ebenfalls die direkte Profilanlage, verlangt aber
+  Anmeldename und mindestens 15 Zeichen langes Passwort.
+
+Selbstregistrierung und Profilwahl sind ausschließlich im Deploymentprofil
+`local` verfügbar. `private_internet` bleibt unabhängig vom konfigurierten
+Zugangsmodus geschlossen. Ein Wechsel zwischen `simple` und `protected`
+erfolgt nur lokal unter `/maintenance/accounts`, verlangt eine frische
+Maintenance-Passwortbestätigung und beendet alle Spielersitzungen. Beim
+Wechsel nach `protected` muss jedes aktive Profil ein Passwort erhalten.
+Vergessene Spielerpasswörter werden dort zurückgesetzt; Profil, Decks und
+Spielhistorie bleiben erhalten.
+
+Der installierbare Releaseoutput setzt `simple` als Ausgangswert. Das normale
+Startskript setzt die Variable nicht und bleibt dadurch bei `invite_only`.
 
 ## Ersten Admin lokal anlegen
 
@@ -49,7 +76,8 @@ liegt nur sein HMAC-Hash. Ein Invite ist standardmäßig 72 Stunden, ein Reset
 
 ## Sicherheitsverhalten
 
-- Keine öffentliche Registrierung und keine E-Mail-Erhebung in dieser Stufe.
+- Keine Registrierung im Deploymentprofil `private_internet` und keine
+  E-Mail-Erhebung in dieser Stufe.
 - Browser erhalten den Session-Rohwert ausschließlich als `HttpOnly`-Cookie.
 - Login-, Invite- und Resetmutationen verlangen eine erlaubte Origin;
   eingeloggte Mutationen zusätzlich `X-NETGRID-CSRF`.
@@ -172,7 +200,7 @@ Größenwerte ausweisen. Vollständige Statistikantworten gehören nicht in Logs
 ## Noch nicht enthalten
 
 Diese Alpha versendet keine E-Mails und besitzt weder E-Mail-Verifikation noch
-Self-Service-Recovery, Passkeys oder Zwei-Faktor-Authentisierung. Ein verlorenes
-Passwort wird durch einen Admin-Reset behandelt. Eine öffentliche
-Selbstregistrierung darf erst in einer späteren, separat gegateten Stufe
-aktiviert werden.
+Self-Service-Recovery, Passkeys oder Zwei-Faktor-Authentisierung. Ein
+verlorenes Spielerpasswort wird lokal durch Maintenance zurückgesetzt. Eine
+Selbstregistrierung außerhalb des lokalen Deploymentprofils darf erst in
+einer späteren, separat gegateten Stufe aktiviert werden.

@@ -353,7 +353,16 @@
       "inviteHelp": "In this alpha, accounts can only be created through an admin invitation.",
       "resetPassword": "Reset password",
       "resetCode": "Reset code",
-      "setNewPassword": "Set new password"
+      "setNewPassword": "Set new password",
+      "localProfile": "Local profile without password",
+      "simpleMode": "Simple local mode",
+      "chooseProfile": "Choose profile",
+      "simpleModeHelp": "This device remembers the last profile used. On shared devices, you can switch profiles at any time.",
+      "noProfiles": "No player profile exists yet.",
+      "createProfile": "New player profile",
+      "createAndUseProfile": "Create and use profile",
+      "createProtectedAccount": "Create protected account",
+      "protectedRegistrationHelp": "Anyone on the reachable private network may create an account. The password must be at least 15 characters long."
     },
     "session": {
       "requestFailed": "The account request failed.",

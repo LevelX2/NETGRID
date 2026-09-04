@@ -8,10 +8,17 @@ import {
   changeAccountPassword,
   createAccountInvite,
   createAccountReset,
+  loadAccountAccessPolicy,
+  loadLocalAccountProfiles,
   loginAccount,
   logoutAccount,
+  registerLocalProfile,
+  registerProtectedAccount,
   restoreAccountSession,
   revokeAllAccountSessions,
+  selectLocalProfile,
+  type AccountAccessPolicy,
+  type LocalAccountProfile,
   type AccountSelf,
   type AccountSessionSelf,
 } from "./account-client";
@@ -22,6 +29,8 @@ export type AccountSessionState = {
   session: AccountSessionSelf | null;
   error: string;
   busy: boolean;
+  accessPolicy: AccountAccessPolicy | null;
+  profiles: LocalAccountProfile[];
 };
 
 export function useAccountSession() {
@@ -32,24 +41,41 @@ export function useAccountSession() {
     session: null,
     error: "",
     busy: false,
+    accessPolicy: null,
+    profiles: [],
   });
   const [csrfToken, setCsrfToken] = useState("");
 
   const becomeGuest = useCallback((error = "") => {
     setCsrfToken("");
-    setState({
+    setState((current) => ({
+      ...current,
       status: "guest",
       account: null,
       session: null,
       error,
       busy: false,
-    });
+    }));
   }, []);
 
   useEffect(() => {
     let active = true;
-    void restoreAccountSession()
-      .then((payload) => {
+    void Promise.allSettled([
+      loadAccountAccessPolicy(),
+      restoreAccountSession(),
+    ]).then(async ([policyResult, sessionResult]) => {
+      if (!active) return;
+      const accessPolicy =
+        policyResult.status === "fulfilled" ? policyResult.value : null;
+      const profiles =
+        accessPolicy?.mode === "simple"
+          ? await loadLocalAccountProfiles()
+              .then((payload) => payload.profiles)
+              .catch(() => [])
+          : [];
+      if (!active) return;
+      if (sessionResult.status === "fulfilled") {
+        const payload = sessionResult.value;
         if (!active) return;
         setCsrfToken(payload.csrfToken);
         setState({
@@ -58,11 +84,21 @@ export function useAccountSession() {
           session: payload.session,
           error: "",
           busy: false,
+          accessPolicy,
+          profiles,
         });
-      })
-      .catch(() => {
-        if (active) becomeGuest();
-      });
+      } else {
+        setState({
+          status: "guest",
+          account: null,
+          session: null,
+          error: "",
+          busy: false,
+          accessPolicy,
+          profiles,
+        });
+      }
+    });
     return () => {
       active = false;
     };
@@ -80,6 +116,8 @@ export function useAccountSession() {
           session: payload.session,
           error: "",
           busy: false,
+          accessPolicy: state.accessPolicy,
+          profiles: state.profiles,
         });
         return true;
       } catch (error) {
@@ -91,7 +129,42 @@ export function useAccountSession() {
         return false;
       }
     },
-    [t],
+    [state.accessPolicy, state.profiles, t],
+  );
+
+  const registerProfile = useCallback(
+    (displayName: string) =>
+      runSessionStart(() =>
+        registerLocalProfile({
+          displayName,
+          deviceLabel: browserDeviceLabel(t("unknownDevice")),
+        }),
+      ),
+    [runSessionStart, t],
+  );
+
+  const selectProfile = useCallback(
+    (accountId: string) =>
+      runSessionStart(() =>
+        selectLocalProfile({
+          accountId,
+          deviceLabel: browserDeviceLabel(t("unknownDevice")),
+        }),
+      ),
+    [runSessionStart, t],
+  );
+
+  const registerProtected = useCallback(
+    (loginName: string, displayName: string, password: string) =>
+      runSessionStart(() =>
+        registerProtectedAccount({
+          loginName,
+          displayName,
+          password,
+          deviceLabel: browserDeviceLabel(t("unknownDevice")),
+        }),
+      ),
+    [runSessionStart, t],
   );
 
   const login = useCallback(
@@ -239,6 +312,9 @@ export function useAccountSession() {
     ...state,
     csrfToken,
     login,
+    registerProfile,
+    selectProfile,
+    registerProtected,
     acceptInvite,
     acceptReset,
     logout,

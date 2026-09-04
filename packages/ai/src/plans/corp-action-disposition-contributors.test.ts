@@ -220,6 +220,7 @@ describe("corp action disposition contributors", () => {
           },
           fundingMilestone: {
             kind: "score_credit_milestone" as const,
+            basis: { kind: "score_continuation_floor" as const },
             targetCredits: 3,
             observedCredits: 1,
             remainingGap: 2,

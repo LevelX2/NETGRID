@@ -4520,12 +4520,16 @@ export type AiTurnPlanningDebug = {
   };
   agendaComparison?: {
     opportunityKey: string;
-    selectedFamily?: "pure_rush" | "combined_rush" | "safe_setup";
+    selectedFamily?:
+      | "pure_rush"
+      | "combined_rush"
+      | "safe_setup"
+      | "fund_setup";
     selectionReason: string;
     randomizationEligible: boolean;
     lines: Array<{
       lineId: string;
-      family: "pure_rush" | "combined_rush" | "safe_setup";
+      family: "pure_rush" | "combined_rush" | "safe_setup" | "fund_setup";
       actionCount: number;
       agendaProgress: number;
       defense: number;
@@ -6118,7 +6122,7 @@ function isAiTurnPlanningAgendaComparison(value: unknown): boolean {
     ]) &&
     typeof candidate.opportunityKey === "string" &&
     (candidate.selectedFamily === undefined ||
-      ["pure_rush", "combined_rush", "safe_setup"].includes(
+      ["pure_rush", "combined_rush", "safe_setup", "fund_setup"].includes(
         String(candidate.selectedFamily),
       )) &&
     typeof candidate.selectionReason === "string" &&
@@ -6141,7 +6145,7 @@ function isAiTurnPlanningAgendaComparison(value: unknown): boolean {
           "expectedValue",
         ]) &&
         typeof line.lineId === "string" &&
-        ["pure_rush", "combined_rush", "safe_setup"].includes(
+        ["pure_rush", "combined_rush", "safe_setup", "fund_setup"].includes(
           String(line.family),
         ) &&
         [

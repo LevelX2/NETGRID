@@ -61,6 +61,15 @@ export type CorpScorePhase =
 
 export type CorpScoreFundingMilestone = Readonly<{
   kind: "score_credit_milestone";
+  basis:
+    | Readonly<{ kind: "score_route_gap" }>
+    | Readonly<{
+        kind: "score_protection_gap";
+        needId: string;
+        observedAtStateVersion: number;
+      }>
+    | Readonly<{ kind: "score_conversion_floor" }>
+    | Readonly<{ kind: "score_continuation_floor" }>;
   targetCredits: number;
   observedCredits: number;
   remainingGap: number;
@@ -1235,12 +1244,18 @@ export function corpScoreFundingMilestone(
   ) {
     return undefined;
   }
-  const fundingGap =
+  const routeFundingGap =
     typeof signal.fundingGap === "number" &&
     Number.isSafeInteger(signal.fundingGap) &&
     signal.fundingGap > 0
       ? signal.fundingGap
       : 0;
+  const protectionFundingGap = knownScoreProtectionFundingGap(signal);
+  const fundingOptions = [routeFundingGap, protectionFundingGap ?? 0].filter(
+    (gap) => gap > 0,
+  );
+  const fundingGap =
+    fundingOptions.length > 0 ? Math.min(...fundingOptions) : 0;
   const continuationTarget =
     signal.continuationReserve &&
     Number.isSafeInteger(
@@ -1249,14 +1264,39 @@ export function corpScoreFundingMilestone(
     signal.continuationReserve.requiredCreditsBeforeNextCorpTurn >= 0
       ? signal.continuationReserve.requiredCreditsBeforeNextCorpTurn
       : 0;
+  const conversionTarget =
+    signal.conversion &&
+    Number.isSafeInteger(signal.conversion.remainingScoreCredits) &&
+    signal.conversion.remainingScoreCredits >= 0
+      ? signal.conversion.remainingScoreCredits
+      : 0;
+  const incrementalFundingTarget =
+    fundingGap > 0 ? observedCredits + fundingGap : 0;
   const targetCredits = Math.max(
-    fundingGap > 0 ? observedCredits + fundingGap : 0,
+    incrementalFundingTarget,
+    conversionTarget,
     continuationTarget,
   );
   if (targetCredits <= 0) return undefined;
   const priorityClass = corpScorePriorityClass(signal);
+  const protectionNeed = signal.protectionNeed;
+  const basis: CorpScoreFundingMilestone["basis"] =
+    targetCredits === incrementalFundingTarget &&
+    protectionFundingGap === fundingGap &&
+    protectionNeed
+      ? {
+          kind: "score_protection_gap",
+          needId: protectionNeed.needId,
+          observedAtStateVersion: protectionNeed.observedAtStateVersion,
+        }
+      : targetCredits === incrementalFundingTarget
+        ? { kind: "score_route_gap" }
+        : targetCredits === conversionTarget
+          ? { kind: "score_conversion_floor" }
+          : { kind: "score_continuation_floor" };
   return {
     kind: "score_credit_milestone",
+    basis,
     targetCredits,
     observedCredits,
     remainingGap: Math.max(0, targetCredits - observedCredits),
@@ -1269,6 +1309,29 @@ export function corpScoreFundingMilestone(
         : "multi_turn",
     releaseCondition: "parent_invalidated_or_higher_priority_preemption",
   };
+}
+
+/**
+ * Returns only the current, Engine-quoted credit delta that makes an already
+ * installed score-defense portfolio satisfy its parent's protection policy.
+ * Unknown protection futures remain local and never manufacture a funding
+ * objective.
+ */
+export function knownScoreProtectionFundingGap(
+  signal: Pick<CorpScoreProjectSignal, "projectId" | "protectionNeed">,
+): number | undefined {
+  const need = signal.protectionNeed;
+  if (
+    !need ||
+    need.parentProjectId !== signal.projectId ||
+    need.baseline.knowledge !== "known"
+  ) {
+    return undefined;
+  }
+  const gap = need.baseline.minimumAdditionalCreditsToSatisfy;
+  return typeof gap === "number" && Number.isSafeInteger(gap) && gap > 0
+    ? gap
+    : undefined;
 }
 
 export type CorpScoreFundingSpendAssessment = Readonly<{
@@ -3745,7 +3808,13 @@ function scoreResourceGaps(
           signal.fundingMilestone.targetCredits -
             signal.fundingMilestone.observedCredits,
         ) ||
-      signal.fundingMilestone.priorityClass !== corpScorePriorityClass(signal))
+      signal.fundingMilestone.priorityClass !==
+        corpScorePriorityClass(signal) ||
+      (signal.fundingMilestone.basis.kind === "score_protection_gap" &&
+        (signal.fundingMilestone.basis.needId !==
+          signal.protectionNeed?.needId ||
+          signal.fundingMilestone.basis.observedAtStateVersion !==
+            context.input.playerView.stateVersion)))
   ) {
     throw new PlanResolutionFailure("invalid_support_graph", {
       side: context.input.side,

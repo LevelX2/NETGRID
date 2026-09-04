@@ -1,4 +1,4 @@
-export const NETGRID_PRODUCT_VERSION = "0.9";
+export const NETGRID_PRODUCT_VERSION = "1.0";
 
 export type AppBuildInfo = {
   productVersion: string;

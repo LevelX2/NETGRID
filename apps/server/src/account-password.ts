@@ -1,6 +1,7 @@
 import { randomBytes, scrypt, timingSafeEqual } from "node:crypto";
 import type {
   AccountInviteRecord,
+  AccountAccessMode,
   AccountPasswordCredentialRecord,
   AccountResetTokenRecord,
   AccountRole,
@@ -53,10 +54,31 @@ export type AccountInvitePublicView = {
   expiresAt: string;
 };
 
+export type AccountAccessPolicyView = {
+  mode: AccountAccessMode;
+  source: "configured_default" | "persisted";
+};
+
+export type LocalAccountProfileView = {
+  accountId: string;
+  displayName: string;
+};
+
+export function accountAccessModeFromEnvironment(
+  env: NodeJS.ProcessEnv = process.env,
+): AccountAccessMode {
+  const value = env.NETGRID_ACCOUNT_ACCESS_MODE?.trim();
+  if (!value) return "invite_only";
+  if (value === "invite_only" || value === "simple" || value === "protected")
+    return value;
+  throw new Error("account_access_mode_invalid");
+}
+
 export class AccountAuthService {
   readonly sessions: AccountSessionService;
   private readonly now: () => string;
   private readonly passwordKdf: AccountPasswordKdfParameters;
+  private readonly defaultAccessMode: AccountAccessMode;
 
   constructor(
     private readonly storage: AccountStorage,
@@ -65,10 +87,12 @@ export class AccountAuthService {
       now?: () => string;
       maxSessionAgeDays?: number;
       passwordKdf?: AccountPasswordKdfParameters;
+      defaultAccessMode?: AccountAccessMode;
     } = {},
   ) {
     this.now = options.now ?? (() => new Date().toISOString());
     this.passwordKdf = options.passwordKdf ?? DEFAULT_ACCOUNT_PASSWORD_KDF;
+    this.defaultAccessMode = options.defaultAccessMode ?? "invite_only";
     this.sessions = new AccountSessionService(storage, {
       ...(options.tokenSalt ? { tokenSalt: options.tokenSalt } : {}),
       now: this.now,
@@ -76,6 +100,145 @@ export class AccountAuthService {
         ? { maxSessionAgeDays: options.maxSessionAgeDays }
         : {}),
     });
+  }
+
+  async accessPolicy(): Promise<AccountAccessPolicyView> {
+    const persisted = await this.storage.loadAccessMode();
+    return persisted
+      ? { mode: persisted, source: "persisted" }
+      : { mode: this.defaultAccessMode, source: "configured_default" };
+  }
+
+  async listLocalProfiles(): Promise<LocalAccountProfileView[]> {
+    if ((await this.accessPolicy()).mode !== "simple")
+      throw new Error("account_profile_selection_disabled");
+    return (await this.storage.listAccounts())
+      .filter((account) => account.status === "active")
+      .map((account) => ({
+        accountId: account.accountId,
+        displayName: account.displayName,
+      }));
+  }
+
+  async listAccountsForMaintenance(): Promise<AccountSelfView[]> {
+    return (await this.storage.listAccounts())
+      .filter((account) => account.status !== "deleted")
+      .map(accountSelfView);
+  }
+
+  async registerLocalProfile(input: {
+    displayName: string;
+    deviceLabel?: string;
+  }): Promise<{
+    account: AccountSelfView;
+    session: CreateAccountSessionResult;
+  }> {
+    if ((await this.accessPolicy()).mode !== "simple")
+      throw new Error("account_simple_registration_disabled");
+    const account = await this.sessions.createAccount({
+      loginName: `local_${randomBytes(12).toString("hex")}`,
+      displayName: input.displayName,
+      role: "user",
+    });
+    const session = await this.sessions.createSession({
+      accountId: account.accountId,
+      authStrength: "local_profile",
+      ...(input.deviceLabel ? { deviceLabel: input.deviceLabel } : {}),
+    });
+    return { account, session };
+  }
+
+  async selectLocalProfile(input: {
+    accountId: string;
+    deviceLabel?: string;
+  }): Promise<
+    | {
+        account: AccountSelfView;
+        session: CreateAccountSessionResult;
+      }
+    | undefined
+  > {
+    if ((await this.accessPolicy()).mode !== "simple")
+      throw new Error("account_profile_selection_disabled");
+    const account = await this.storage.loadAccount(input.accountId);
+    if (!account || account.status !== "active") return undefined;
+    const session = await this.sessions.createSession({
+      accountId: account.accountId,
+      authStrength: "local_profile",
+      ...(input.deviceLabel ? { deviceLabel: input.deviceLabel } : {}),
+    });
+    return { account: accountSelfView(account), session };
+  }
+
+  async registerProtectedAccount(input: {
+    loginName: string;
+    displayName: string;
+    password: string;
+    deviceLabel?: string;
+  }): Promise<{
+    account: AccountSelfView;
+    session: CreateAccountSessionResult;
+  }> {
+    if ((await this.accessPolicy()).mode !== "protected")
+      throw new Error("account_protected_registration_disabled");
+    return this.createAccountWithPassword({ ...input, role: "user" });
+  }
+
+  async changeLocalAccessMode(input: {
+    mode: "simple" | "protected";
+    credentials?: Array<{ accountId: string; password: string }>;
+  }): Promise<{ mode: "simple" | "protected"; sessionsRevoked: true }> {
+    const current = await this.accessPolicy();
+    if (current.mode === input.mode)
+      throw new Error("account_access_mode_unchanged");
+    const activeAccounts = (await this.storage.listAccounts()).filter(
+      (account) => account.status === "active",
+    );
+    const expectedActiveAccountIds = activeAccounts
+      .map((account) => account.accountId)
+      .sort();
+    const supplied = new Map(
+      (input.credentials ?? []).map((entry) => [
+        entry.accountId,
+        entry.password,
+      ]),
+    );
+    if (
+      input.mode === "protected" &&
+      (supplied.size !== activeAccounts.length ||
+        activeAccounts.some((account) => !supplied.has(account.accountId)))
+    )
+      throw new Error("account_access_mode_credentials_incomplete");
+    const changedAt = this.now();
+    const credentials =
+      input.mode === "protected"
+        ? await Promise.all(
+            activeAccounts.map(async (account) =>
+              createPasswordCredential({
+                accountId: account.accountId,
+                password: supplied.get(account.accountId) ?? "",
+                changedAt,
+                parameters: this.passwordKdf,
+              }),
+            ),
+          )
+        : [];
+    await this.storage.applyAccessModeChange({
+      mode: input.mode,
+      expectedActiveAccountIds,
+      credentials,
+      changedAt,
+    });
+    return { mode: input.mode, sessionsRevoked: true };
+  }
+
+  async resetProtectedAccountPassword(input: {
+    accountId: string;
+    newPassword: string;
+  }): Promise<boolean> {
+    if ((await this.accessPolicy()).mode !== "protected")
+      throw new Error("account_password_reset_disabled");
+    return this.replacePassword(input);
   }
 
   async bootstrapAdmin(input: {

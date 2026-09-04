@@ -1,6 +1,6 @@
 # CODEX_STATUS
 
-Stand: 2026-09-03
+Stand: 2026-09-04
 
 ## Einstieg
 
@@ -18,7 +18,12 @@ Historische Statuschroniken, abgeschlossene Releasepakete, Prozesse und Reviews 
 
 NETGRID ist eine private Version-0-Webanwendung mit deterministischer Rules Engine, lokalem/private-LAN-Multiplayer, SQLite-Storage, Deckbibliothek, Kartenkatalog, Replay-/Undo-Grundlage, Human-vs-Human, Human-vs-KI und KI-vs-KI-Analysepfaden.
 
-Die sichtbare Produktreife ist `V0.9`; die technische Buildkennung wird aus Git ermittelt. Führend ist `docs/decisions/product-version-and-build-identification-2026-07-17.md`.
+Die sichtbare Produktversion ist `V1.0`; die fortlaufende technische
+Buildkennung wird aus `git rev-list --count HEAD` ermittelt. Veröffentlichte
+Stände verwenden technisch `1.0.<Buildnummer>`. Die private
+Vorproduktionsumgebung erhält dadurch allein noch keine öffentliche Support-
+oder Rückwärtskompatibilitätszusage. Führend ist
+`docs/decisions/product-version-and-build-identification-2026-07-17.md`.
 
 Es gibt derzeit keine dauerhaft führende monolithische Release-Roadmap. Aktuelle Arbeit wird über `docs/activities/inbox/`, `docs/activities/in-progress/`, den Current-State-Status und bei Bedarf einen explizit aktuellen Scope-/Releaseplan gesteuert. Nach Abschluss wird die historische Release-Evidence entfernt.
 
@@ -86,8 +91,23 @@ geprüften Output mit einem externen `NETGRID_DATA_ROOT`; interne Testkarten,
 Demo-Snapshots, Testspiele, Selfplay-Evidence und Entwicklungsdatenbanken
 werden nicht ausgeliefert. Führend sind
 `docs/architecture/windows/windows-release-boundary.md` und das zugehörige
-Runbook. Ein eigentlicher Windows-Installer, Dienst, Launcher, Firewallsetup,
-Codesigning und Updatekanal sind noch nicht implementiert.
+Runbook. Ein eigentlicher Windows-Installer, Launcher, Firewallsetup und
+Updater ist noch nicht implementiert. Die installerunabhängigen
+Produktvoraussetzungen sind umgesetzt: Releasebuilds tragen `V1.0` plus
+fortlaufende Git-Buildnummer, die gespeicherte Retention-Policy wird beim
+Backend-Start sofort asynchron geprüft, und lokale Installationen können ohne
+zweites Accountmodell zwischen einfachem und geschütztem Spielerzugang
+wechseln. Der Entwicklungsstart bleibt standardmäßig `invite_only`; der
+Windows-Releaseoutput erhält `simple` als Ausgangswert. Das beschlossene Zielbild umfasst einen
+klassischen per-machine Installer mit empfohlenem und benutzerdefiniertem
+Setupweg, mitgelieferter Node-Laufzeit, bedarfsgestartetem Tray-Launcher,
+lokalem oder Private-LAN-Betrieb, getrennten einfachen/geschützten
+Spielerprofilen, sicherer Maintenance-Ersteinrichtung, GitHub-Updates nach
+Zustimmung, Datensicherung/Rollback sowie vollständigem `de`/`en`/`fr`-
+Branding. Führend sind
+`docs/architecture/windows/windows-installer-product-contract.md` und der
+Paketprozess WIN-I01 bis WIN-I08. GitHub Releases bleibt der einzige Kanal;
+bis zur Umsetzung des Updaters erfolgen Download und Upgrade manuell.
 
 Der persönliche Kartenbildimport besitzt einen persistenten lokalen Store,
 lokale und explizite gehärtete HTTPS-Quellen sowie drei private
