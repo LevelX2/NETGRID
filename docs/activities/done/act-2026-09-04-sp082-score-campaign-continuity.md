@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-09-04-sp082-score-campaign-continuity
-status: in_progress
+status: done
 kind: implementation
 area: ai
 priority: high
@@ -8,19 +8,32 @@ primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-09-04
 startedAt: 2026-09-04
-completedAt:
+completedAt: 2026-09-04
 branch: codex/sp082-score-campaign-continuity
 releaseTarget: local-main
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/plans/corp-agenda-turn-planning.ts
+  - packages/ai/src/plans/corp-core-plan-modules.ts
+  - packages/ai/src/plans/corp-turn-planner.ts
+  - packages/ai/src/evaluation/decision-checkpoints/sp082-score-campaign-continuity.test.ts
+  - packages/ai/src/simulation/sp082-score-campaign-continuity.test.ts
+  - local-evidence-registry-pairing-385
+checks:
+  - focused-sp082-tests
+  - ai-package-typecheck
+  - 40-seed-control-series
+  - evidence-registry-check
+  - git-diff-check
 ---
 
 # SP-082 Score-Kampagnenkontinuität
 
 ## Status
 
-SP082-A bis SP082-C abgeschlossen. SP082-D ist als nächstes aktiv.
+SP082-A bis SP082-D abgeschlossen. Die nachgewiesene Bindungsursache ist
+behoben und als Pairing 385 kontrolliert; die unveränderte Matchup-Dominanz
+wird ausdrücklich nicht als gelöst bewertet.
 
 ## Paketprotokoll
 
@@ -106,6 +119,41 @@ finanziert, aber keine sichtbare zweite ICE-Option erfüllt die aktuelle
 strenge Near-Matchpoint-Schutzquote. Eine allgemeine Economy-Aktion ist daher
 kein nachgewiesener kausaler Scorefortschritt und wird nicht künstlich an den
 Score-Parent gehängt.
+
+### SP082-D – Mehrschritt- und Serienverifikation
+
+Zwei neue replaybare Checkpoints sichern den entscheidenden Übergang in Spiel
+36. Bei StateVersion 117 bleibt derselbe `corp.economy`-Provider nach dem
+Gegnerzug unter dem ursprünglichen `corp.score_agenda`-Root und dem konkreten
+`score-support`-Need gebunden. Derselbe vollständige Planungskontext erzeugt
+idempotent dieselbe Entscheidung. Bei StateVersion 118 ist der exakte
+Finanzierungsbedarf geschlossen; die folgende Kreditaktion gehört wieder zum
+eigenständigen Economy-Restpfad und trägt kein Score-Support-Label mehr.
+
+Eine Vollspiel-Regression mit `meta-357-final-036` verfolgt den produktiven
+Chooser weiter: gebundenes Funding bei StateVersion 107 bis 109, erneute
+gebundene Fortsetzung bei 117, Supportfreigabe bei 118, Defense-Übergabe bei
+148 und Agenda-Installation bei 149. Das Spiel endet deterministisch mit
+demselben lokalen Simulationshash, ohne Fallback, Runtimefehler oder
+Replayabweichung. Die Checkpoint-Validierung bestätigt side-sicheren Input und
+den Ausschluss der privaten gegnerischen Hand.
+
+Der unveränderte 40-Seed-Kontrolllauf wurde als Pairing 385 mit denselben
+Deck-Snapshots und Seeds wie Pairing 357 ausgeführt. Alle 40 Spiele sind
+terminal und technisch sauber, bei 7.613 lückenlos erfassten Entscheidungen
+und null Flags, Fallbacks, Timeouts oder Selection Mismatches. Die neue
+Bindung trat als 391 exakt Score-Parent-gebundene Fundingaktionen in 37
+Spielen auf. Das Endergebnis blieb dennoch 40:0 für den Runner. Damit ist der
+konkrete SP-082-Bindungsdefekt behoben und verifiziert; ein allgemeiner
+Spielstärkegewinn oder die Lösung aller Score-Stillstände ist nicht belegt.
+
+Der kanonisch gerenderte und verifizierte HTML-Bericht wurde als generierter
+Checkpoint zusammen mit Pairing 385, dem Fix und der präzisierten SP-082-
+Klassifikation in der lokalen zentralen Evidence-Registry gespeichert. Es
+erfolgte keine automatische Karten-, Deck- oder Namensänderung. Der
+Registry-Check bestätigt SQLite-Integrität, Fremdschlüssel und den Abschluss
+dieses Jobs; sein globales `ok` bleibt ausschließlich wegen des unabhängigen,
+noch aktiven Jobs `lucidrine-rd-optimization-20260904-001` false.
 
 ## Quelle und Zielprüfung
 
@@ -380,4 +428,11 @@ und markiere das Goal erst dann als complete.`
 
 ## Ergebnisnotiz
 
-Noch offen.
+SP-082 wurde ursachenorientiert geschlossen. Der Score-Owner veröffentlicht
+einen stabilen, belegten Funding-Meilenstein; Economy führt den aktuellen
+Leaf-Head mit vollständiger Parent-/Need-/Provider-/Invocation-Bindung aus;
+`fund_setup` bleibt explizit Nicht-Rush und gibt nach geschlossenem Gap an den
+nächsten realen Meilenstein zurück. Fokussierte Checkpoints, Vollspiel,
+AI-Typecheck und eine saubere 40-Seed-Kontrollserie sichern den Stand. Die
+unveränderte 40:0-Verteilung bleibt als getrennte Matchup- und Deck-Evidence
+bestehen.
