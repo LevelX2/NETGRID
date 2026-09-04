@@ -5708,7 +5708,7 @@
     },
     {
       "standardDeckId": "standard_corp_lucidrine_lockdown",
-      "version": "1.6.0",
+      "version": "1.5.0",
       "status": "active",
       "name": "Lucidrine Lockdown",
       "side": "corp",
@@ -5735,8 +5735,12 @@
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_292_management-shake-up",
+          "cardId": "onr_v1_297_overtime-incentives",
           "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_292_management-shake-up",
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_304_systematic-layoffs",
@@ -5745,10 +5749,6 @@
         {
           "cardId": "onr_v1_366_red-herrings",
           "quantity": 3
-        },
-        {
-          "cardId": "onr_proteus_073_simon-francisco",
-          "quantity": 2
         },
         {
           "cardId": "onr_v1_290_efficiency-experts",
@@ -5790,7 +5790,7 @@
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_lucidrine_lockdown",
-        "sourceDeckVersion": "1.6.0-central-multiaccess-reduction-2026-09-04"
+        "sourceDeckVersion": "1.5.0-low-density-access-denial-2026-09-04"
       }
     }
   ]
