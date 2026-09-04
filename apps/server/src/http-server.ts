@@ -938,7 +938,7 @@ export function createNetgridHttpServer(
   realtime.attach(server);
   const cleanupTimer =
     deploymentConfig.profile === "local"
-      ? startMaintenanceCleanupTimer(activeService)
+      ? startMaintenanceCleanupTimer(activeService, server)
       : undefined;
   return {
     server,
@@ -1056,22 +1056,26 @@ export function createConfiguredAccountMatchStartPreferences(
 
 function startMaintenanceCleanupTimer(
   service: MultiplayerService,
+  server: Server,
 ): ReturnType<typeof setInterval> | undefined {
   if (!service.runStorageMaintenanceCleanupPolicy) return undefined;
+  server.once("listening", () => runMaintenanceCleanupPolicy(service));
   const timer = setInterval(
-    () => {
-      void service.runStorageMaintenanceCleanupPolicy().catch((error) => {
-        const code =
-          error instanceof Error ? error.message : "cleanup_policy_failed";
-        console.warn(
-          `maintenance_cleanup_policy_failed:${redactSensitiveText(code)}`,
-        );
-      });
-    },
+    () => runMaintenanceCleanupPolicy(service),
     60 * 60 * 1000,
   );
   timer.unref?.();
   return timer;
+}
+
+function runMaintenanceCleanupPolicy(service: MultiplayerService): void {
+  void service.runStorageMaintenanceCleanupPolicy().catch((error) => {
+    const code =
+      error instanceof Error ? error.message : "cleanup_policy_failed";
+    console.warn(
+      `maintenance_cleanup_policy_failed:${redactSensitiveText(code)}`,
+    );
+  });
 }
 
 async function routeHttp(
