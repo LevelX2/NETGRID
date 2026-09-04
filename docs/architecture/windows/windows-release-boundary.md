@@ -71,6 +71,7 @@ product-layout.json
 product-manifest.json
 config/runtime.env.example
 app/server.mjs
+app/maintenance-auth.mjs
 app/apps/web/server.js
 ```
 
@@ -82,7 +83,9 @@ positiv zugelassene Pfade werden vom Audit abgewiesen.
 
 Der Installer ergänzt diese unveränderte Produktmenge nur um die gepinnte
 Node.js-x64-Laufzeit, den selbstenthaltenen Windows-Runtimekonfigurator, den
-selbstenthaltenen Tray-Launcher und die zugehörigen Rechtsdateien. Der
+selbstenthaltenen Tray-Launcher, First Run, Setup-Host und die zugehörigen
+Rechtsdateien. `app/maintenance-auth.mjs` ist der eng gebündelte bestehende
+Bootstrap-Entrypoint für First Run und keine zweite Authentifizierungsautorität. Der
 Installer-Audit bindet jede dieser Dateien
 ebenfalls durch Größe und SHA-256 an den Buildinput. npm, Corepack,
 Entwickler-SDKs, Symbole und sonstige Inhalte der Runtimearchive werden nicht

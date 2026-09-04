@@ -354,6 +354,64 @@ describe("local account access policy", () => {
     expect(response.status).toBe(403);
     expect(await accountAuth.listAccountsForMaintenance()).toEqual([]);
   });
+
+  it("allows protected self-service in private LAN while Maintenance stays on loopback", async () => {
+    const accountAuth = new AccountAuthService(new InMemoryAccountStorage(), {
+      tokenSalt: "private-lan-account-test",
+      defaultAccessMode: "protected",
+      passwordKdf: TEST_ACCOUNT_PASSWORD_KDF,
+    });
+    const maintenanceAuth = new MaintenanceAuthService(
+      new InMemoryMaintenanceCredentialStore(),
+      { passwordKdf: TEST_ACCOUNT_PASSWORD_KDF },
+    );
+    await maintenanceAuth.bootstrapPassword(MAINTENANCE_PASSWORD);
+    const deploymentConfig = loadDeploymentConfig({
+      NETGRID_DEPLOYMENT_PROFILE: "private_lan",
+      NETGRID_WEB_BASE_URL: "http://192.168.10.25:3100",
+      NETGRID_SERVER_BASE_URL: "http://192.168.10.25:8787",
+      NETGRID_ALLOWED_ORIGINS:
+        "http://192.168.10.25:3100,http://127.0.0.1:3100",
+      NETGRID_TOKEN_SALT: "private-lan-account-test",
+      NETGRID_MAINTENANCE_BASE_URL: ORIGIN,
+      NETGRID_MAINTENANCE_ALLOWED_ORIGINS: ORIGIN,
+    } as NodeJS.ProcessEnv);
+    const handle = createNetgridHttpServer(
+      new MultiplayerService(new InMemoryMatchStorage()),
+      { deploymentConfig, accountAuth, maintenanceAuth },
+    );
+    handles.push(handle);
+    const baseUrl = await listen(handle);
+    const policy = await fetch(`${baseUrl}/api/account/access-policy`, {
+      headers: { origin: "http://192.168.10.25:3100" },
+    });
+    expect(await policy.json()).toMatchObject({
+      mode: "protected",
+      selfServiceEnabled: true,
+    });
+    const created = await fetch(`${baseUrl}/api/account/register`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        origin: "http://192.168.10.25:3100",
+      },
+      body: JSON.stringify({
+        loginName: "lan.spieler",
+        displayName: "LAN Spieler",
+        password: FIRST_PASSWORD,
+      }),
+    });
+    expect(created.status).toBe(201);
+    const maintenanceLogin = await fetch(
+      `${baseUrl}/api/storage/maintenance/auth/login`,
+      {
+        method: "POST",
+        headers: jsonHeaders(),
+        body: JSON.stringify({ password: MAINTENANCE_PASSWORD }),
+      },
+    );
+    expect(maintenanceLogin.status).toBe(200);
+  });
 });
 
 function jsonHeaders(

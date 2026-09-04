@@ -107,8 +107,13 @@ SHA-256, führt durch empfohlenen oder benutzerdefinierten Weg und fragt die
 Local-/Private-LAN-Freigabe ausdrücklich ab. Ports werden vor der Erhöhung
 geprüft; LAN-Firewallregeln gelten ausschließlich im Windows-Profil „Privat“.
 Die gewählte Spielaufbewahrung initialisiert die bestehende Storage-Policy
-einmalig, ohne spätere Maintenance-Änderungen zu überschreiben. First Run und
-Updater sind noch nicht implementiert. Die installerunabhängigen
+einmalig, ohne spätere Maintenance-Änderungen zu überschreiben. Der
+selbstenthaltene First-Run-Assistent übergibt das zweimal verdeckt eingegebene
+Maintenance-Passwort nur per stdin an die bestehende Authentifizierungs-CLI
+und verweigert jede Überschreibung vorhandener Credentials. `simple` und
+`protected` bleiben die einzige Account-Policy-Autorität; Private-LAN-
+Self-Service ist freigegeben, während Maintenance und Policyverwaltung auf
+Loopback bleiben. Der Updater ist noch nicht implementiert. Die installerunabhängigen
 Produktvoraussetzungen sind umgesetzt: Releasebuilds tragen `V1.0` plus
 fortlaufende Git-Buildnummer, die gespeicherte Retention-Policy wird beim
 Backend-Start sofort asynchron geprüft, und lokale Installationen können ohne

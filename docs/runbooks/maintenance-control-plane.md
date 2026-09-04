@@ -10,7 +10,7 @@ Dieses Runbook beschreibt Bootstrap, Anmeldung, Passwortänderung, Reset und HTT
 ## Sichere Defaults
 
 - `scripts/start-netgrid.ps1` startet den normalen lokalen Spielbetrieb unverändert.
-- Im Profil `local` ist Maintenance standardmäßig aktiviert, aber unverschlüsselt ausschließlich über Loopback (`http://127.0.0.1:3100/maintenance`) erreichbar.
+- In den Produktprofilen `local` und `private_lan` ist Maintenance standardmäßig aktiviert, aber unverschlüsselt ausschließlich über Loopback (`http://127.0.0.1:3100/maintenance`) erreichbar.
 - Eine private LAN-Adresse allein gewährt keinen Zugriff.
 - Im Profil `private_internet` ist Maintenance standardmäßig deaktiviert.
 - Remote-/Tablet-Zugriff verlangt eine explizite HTTPS-Origin und einen exakt benannten Reverse Proxy.
@@ -148,9 +148,9 @@ Nach dem Lauf die App wieder ausschließlich über `scripts/start-netgrid.ps1` s
 ## Lokale Spielerzugänge
 
 `/maintenance/accounts` verwaltet die lokale Spieler-Zugangsrichtlinie. Die
-Seite und ihre API bleiben auch bei anderweitig freigeschalteter Remote-
-Maintenance zwingend auf Deploymentprofil `local` und eine direkte
-Loopback-Verbindung beschränkt. Lesen benötigt eine gültige
+Seite und ihre API bleiben in `local` und `private_lan` zwingend auf eine
+direkte Loopback-Verbindung beschränkt; `private_internet` benötigt weiterhin
+den expliziten sicheren Remote-Vertrag. Lesen benötigt eine gültige
 Maintenance-Sitzung; Moduswechsel und Spielerpasswort-Reset verlangen
 zusätzlich eine frische Passwortbestätigung.
 
@@ -166,9 +166,9 @@ werden ohne Teiländerung abgewiesen.
 
 Die Kartenbildverwaltung ist unter `/maintenance/card-images` aus der
 Maintenance-Seite erreichbar. Anders als die übrige optional über HTTPS
-freigeschaltete Control Plane bleibt dieser Bereich immer auf das Profil
-`local` und eine direkte Loopback-Verbindung beschränkt. Ein Remote- oder
-LAN-Aufruf wird auch mit gültiger Maintenance-Sitzung abgelehnt.
+freigeschaltete Control Plane bleibt dieser Bereich in `local` und
+`private_lan` immer auf eine direkte Loopback-Verbindung beschränkt. Ein
+Remote- oder LAN-Aufruf wird auch mit gültiger Maintenance-Sitzung abgelehnt.
 
 Vor der Bedienung werden Zuordnungstabellen, Quellbilder oder übertragene
 IMG07-Paketverzeichnisse beziehungsweise ZIP-Pakete unter

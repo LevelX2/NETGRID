@@ -119,6 +119,21 @@ try {
     },
     plugins: [releaseCardIndexPlugin()],
   });
+  const maintenanceAuthResult = await build({
+    entryPoints: [
+      path.join(repositoryRoot, "apps/server/src/maintenance-auth-cli.ts"),
+    ],
+    outfile: path.join(applicationRoot, "maintenance-auth.mjs"),
+    bundle: true,
+    format: "esm",
+    platform: "node",
+    target: "node24",
+    banner: {
+      js: 'import { createRequire as __netgridCreateRequire } from "node:module"; const require = __netgridCreateRequire(import.meta.url);',
+    },
+    treeShaking: true,
+    metafile: true,
+  });
   const serverSource = readFileSync(
     path.join(applicationRoot, "server.mjs"),
     "utf8",
@@ -153,6 +168,7 @@ try {
         entrypoints: {
           web: "app/apps/web/server.js",
           server: "app/server.mjs",
+          maintenanceAuth: "app/maintenance-auth.mjs",
         },
         defaultPorts: { web: 3100, server: 8787 },
         locales: ["de", "en", "fr"],
@@ -167,6 +183,11 @@ try {
   writeFileSync(
     path.join(temporaryRoot, "server-metafile.json"),
     `${JSON.stringify(serverResult.metafile, null, 2)}\n`,
+    "utf8",
+  );
+  writeFileSync(
+    path.join(temporaryRoot, "maintenance-auth-metafile.json"),
+    `${JSON.stringify(maintenanceAuthResult.metafile, null, 2)}\n`,
     "utf8",
   );
   process.stdout.write(`WINDOWS_RELEASE_OUTPUT_OK ${outputRoot}\n`);

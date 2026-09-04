@@ -33,17 +33,19 @@ solange noch keine persistierte Auswahl existiert:
 - `protected` erlaubt ebenfalls die direkte Profilanlage, verlangt aber
   Anmeldename und mindestens 15 Zeichen langes Passwort.
 
-Selbstregistrierung und Profilwahl sind ausschließlich im Deploymentprofil
-`local` verfügbar. `private_internet` bleibt unabhängig vom konfigurierten
-Zugangsmodus geschlossen. Ein Wechsel zwischen `simple` und `protected`
-erfolgt nur lokal unter `/maintenance/accounts`, verlangt eine frische
+Selbstregistrierung und Profilwahl sind in den installierten Produktprofilen
+`local` und `private_lan` verfügbar. `private_internet` bleibt unabhängig vom
+konfigurierten Zugangsmodus geschlossen. Ein Wechsel zwischen `simple` und
+`protected` erfolgt nur über eine direkte Loopback-Verbindung unter
+`/maintenance/accounts`, verlangt eine frische
 Maintenance-Passwortbestätigung und beendet alle Spielersitzungen. Beim
 Wechsel nach `protected` muss jedes aktive Profil ein Passwort erhalten.
 Vergessene Spielerpasswörter werden dort zurückgesetzt; Profil, Decks und
 Spielhistorie bleiben erhalten.
 
-Der installierbare Releaseoutput setzt `simple` als Ausgangswert. Das normale
-Startskript setzt die Variable nicht und bleibt dadurch bei `invite_only`.
+Der empfohlene Installerweg setzt `simple` als Ausgangswert; der
+benutzerdefinierte Weg darf `protected` wählen. Das normale Startskript setzt
+die Variable nicht und bleibt dadurch bei `invite_only`.
 
 ## Ersten Admin lokal anlegen
 

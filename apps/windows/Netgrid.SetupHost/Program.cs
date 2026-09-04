@@ -80,6 +80,7 @@ internal sealed class SetupForm : Form
     private readonly NumericUpDown _webPort = new() { Minimum = 1, Maximum = 65535, Value = 3100, Width = 90 };
     private readonly NumericUpDown _serverPort = new() { Minimum = 1, Maximum = 65535, Value = 8787, Width = 90 };
     private readonly ComboBox _retention = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 210 };
+    private readonly ComboBox _accountMode = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 310 };
     private readonly CheckBox _desktop = new() { Text = "Desktopverknüpfung erstellen", Checked = true, AutoSize = true };
     private readonly CheckBox _launch = new() { Text = "NETGRID nach Abschluss starten", Checked = true, AutoSize = true };
     private readonly Label _lanAddress = new() { AutoSize = true };
@@ -102,6 +103,12 @@ internal sealed class SetupForm : Form
         _dataRoot.Text = ExistingDataRoot() ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "NETGRID");
         _retention.Items.AddRange(SetupContract.RetentionChoices.Cast<object>().ToArray());
         _retention.SelectedIndex = 1;
+        _accountMode.Items.AddRange(new object[]
+        {
+            new AccountModeChoice("simple", "Einfach, ohne Spielerpasswörter (empfohlen)"),
+            new AccountModeChoice("protected", "Geschützt, mit Spielerpasswörtern"),
+        });
+        _accountMode.SelectedIndex = 0;
         _lanAddress.Text = _privateAddresses.Count > 0
             ? $"Erkannte private Adresse: {_privateAddresses[0]}"
             : "Keine private IPv4-Adresse erkannt.";
@@ -136,6 +143,8 @@ internal sealed class SetupForm : Form
         advanced.Controls.Add(Flow(_webPort, new Label { Text = "/", AutoSize = true }, _serverPort), 1, 2);
         advanced.Controls.Add(new Label { Text = "Spielaufbewahrung", AutoSize = true, Anchor = AnchorStyles.Left }, 0, 3);
         advanced.Controls.Add(_retention, 1, 3);
+        advanced.Controls.Add(new Label { Text = "Spielerprofile", AutoSize = true, Anchor = AnchorStyles.Left }, 0, 4);
+        advanced.Controls.Add(_accountMode, 1, 4);
         root.Controls.Add(Group("Erweiterte Optionen", advanced));
         root.Controls.Add(Flow(_desktop, _launch));
         root.Controls.Add(Body("Es werden keine Entwicklungsdaten, Testspiele, privaten Kartenbilder oder Zugangsdaten aus diesem Rechner übernommen."));
@@ -180,6 +189,16 @@ internal sealed class SetupForm : Form
             var result = await Task.Run(() => Installer.Run(settings));
             if (result is not (0 or 3010)) throw new SetupException("msi_failed", $"Windows Installer meldete Fehlercode {result}. Das Installationsprotokoll liegt unter {Installer.LogPath}.");
             _status.Text = "NETGRID wurde erfolgreich installiert.";
+            var firstRunResult = await Task.Run(() => Installer.RunFirstRun(settings));
+            if (firstRunResult > 1)
+            {
+                MessageBox.Show(
+                    "Die Maintenance-Ersteinrichtung konnte nicht abgeschlossen werden. Sie kann jederzeit über das Startmenü erneut geöffnet werden.",
+                    "NETGRID Setup",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+            }
             if (_launch.Checked)
             {
                 Process.Start(new ProcessStartInfo(Path.Combine(settings.ProgramRoot, "NETGRID.exe")) { UseShellExecute = true });
@@ -204,6 +223,7 @@ internal sealed class SetupForm : Form
     private SetupSettings ReadSettings()
     {
         var retention = (RetentionChoice?)_retention.SelectedItem ?? throw new SetupException("retention_missing", "Bitte wählen Sie die Spielaufbewahrung.");
+        var accountMode = (AccountModeChoice?)_accountMode.SelectedItem ?? throw new SetupException("account_mode_missing", "Bitte wählen Sie den Spielerprofilmodus.");
         return new SetupSettings(
             _lan.Checked ? "private_lan" : "local",
             _lan.Checked ? _privateAddresses.FirstOrDefault() : null,
@@ -212,6 +232,7 @@ internal sealed class SetupForm : Form
             decimal.ToInt32(_webPort.Value),
             decimal.ToInt32(_serverPort.Value),
             retention.Value,
+            accountMode.Value,
             _desktop.Checked
         );
     }
@@ -230,6 +251,7 @@ internal sealed class SetupForm : Form
         _webPort.Enabled = enabled;
         _serverPort.Enabled = enabled;
         _retention.Enabled = enabled;
+        _accountMode.Enabled = enabled;
     }
 
     private void UpdateLanState()
@@ -287,6 +309,7 @@ internal sealed record SetupSettings(
     int WebPort,
     int ServerPort,
     string RetentionDays,
+    string AccountAccessMode,
     bool DesktopShortcut
 )
 {
@@ -341,6 +364,7 @@ internal static class Installer
                 Property("NETGRID_WEB_PORT", settings.WebPort.ToString()),
                 Property("NETGRID_SERVER_PORT", settings.ServerPort.ToString()),
                 Property("NETGRID_RETENTION_DAYS", settings.RetentionDays),
+                Property("NETGRID_ACCOUNT_ACCESS_MODE", settings.AccountAccessMode),
                 Property("INSTALLDESKTOPSHORTCUT", settings.DesktopShortcut ? "1" : "0"),
             };
             var arguments = $"/i {Quote(temporaryMsi)} /qn /norestart /l*v {Quote(LogPath)} {string.Join(" ", properties)}";
@@ -358,6 +382,16 @@ internal static class Installer
         {
             if (File.Exists(temporaryMsi)) File.Delete(temporaryMsi);
         }
+    }
+
+    public static int RunFirstRun(SetupSettings settings)
+    {
+        var executable = Path.Combine(settings.ProgramRoot, "NETGRID.FirstRun.exe");
+        if (!File.Exists(executable)) return 2;
+        using var process = Process.Start(new ProcessStartInfo(executable) { UseShellExecute = true })
+            ?? throw new SetupException("first_run_start_failed", "Die NETGRID-Ersteinrichtung konnte nicht gestartet werden.");
+        process.WaitForExit();
+        return process.ExitCode;
     }
 
     private static string Property(string name, string value)
@@ -482,6 +516,11 @@ internal sealed record RetentionChoice(string Value, string Label)
     public override string ToString() => Label;
 }
 
+internal sealed record AccountModeChoice(string Value, string Label)
+{
+    public override string ToString() => Label;
+}
+
 internal static class SetupContract
 {
     public static readonly RetentionChoice[] RetentionChoices =
@@ -505,6 +544,8 @@ internal static class SetupContract
         serverPort = 8787,
         retentionValues = RetentionChoices.Select(choice => choice.Value).ToArray(),
         defaultRetention = "30",
+        accountAccessModes = new[] { "simple", "protected" },
+        defaultAccountAccessMode = "simple",
         desktopShortcutDefault = true,
         launchAfterInstallDefault = true,
         firewallProfiles = new[] { "private" },

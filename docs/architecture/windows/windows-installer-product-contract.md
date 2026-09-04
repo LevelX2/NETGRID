@@ -2,7 +2,7 @@
 
 Stand: 2026-09-04  
 Status: beschlossenes Zielbild; Anwendungsvoraussetzungen, Installerbasis,
-Datenvertrag, Launcher und Setupführung umgesetzt, First Run/Updater noch offen
+Datenvertrag, Launcher, Setupführung und First Run umgesetzt, Updater noch offen
 
 ## Zweck und Grenze
 
@@ -254,6 +254,29 @@ Das Passwort wird nicht als MSI-Eigenschaft oder Kommandozeilenargument
 First-Run-Schritt das Passwort durch zweimalige verdeckte Eingabe über den
 bestehenden sicheren Bootstrapweg ein. Die normale Spieloberfläche bleibt
 nutzbar; Maintenance bleibt bis zur Initialisierung gesperrt.
+
+### Umgesetzte Ersteinrichtung
+
+- Der benutzerdefinierte Setupweg bietet ausschließlich die vorhandenen
+  Account-Policies `simple` und `protected`; der empfohlene Weg verwendet
+  `simple`. Dieser nicht geheime Wert initialisiert die bestehende
+  Accountautorität und überschreibt keine später persistierte Policy.
+- `NETGRID.FirstRun.exe` wird nach der Installation gestartet und bleibt als
+  Startmenüpunkt wiederaufrufbar. Es liest ausschließlich die geschützte
+  installierte Runtimekonfiguration und verwendet die mitgelieferte Node-
+  Laufzeit sowie `app/maintenance-auth.mjs`.
+- Das Maintenance-Passwort wird zweimal verdeckt erfasst und nur über die
+  Standardeingabe-Pipe an den bestehenden `bootstrap`-Befehl übergeben. Es
+  erscheint weder in MSI-Eigenschaften noch Prozessargumenten, Dateien des
+  Setuphosts oder Protokollen.
+- Ein bereits vorhandener Credentialstore wird vorab erkannt; auch ein
+  konkurrierender zweiter Bootstrap wird von der Authentifizierungsautorität
+  abgewiesen. First Run besitzt absichtlich keinen Reset- oder
+  Überschreibepfad.
+- Im privaten LAN sind Selbstanlage und Anmeldung im gewählten Profilmodus
+  erlaubt. Account-Policy-Verwaltung, Maintenance und lokaler Reset bleiben
+  weiterhin an eine direkte Loopback-Verbindung auf dem Serverrechner
+  gebunden.
 
 ## Updates über GitHub Releases
 

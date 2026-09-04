@@ -59,6 +59,7 @@ try {
       "runtime-config/NETGRID.RuntimeConfig.exe",
     ],
     ["NETGRID.exe", "launcher/NETGRID.exe"],
+    ["NETGRID.FirstRun.exe", "first-run/NETGRID.FirstRun.exe"],
   ]);
   for (const [installedRelative, inputRelative] of installerFiles) {
     const input = path.join(installerInputRoot, ...inputRelative.split("/"));
@@ -131,6 +132,9 @@ try {
       '<Property Id="NETGRID_RETENTION_DAYS" Value="30" Secure="yes" />',
     ) ||
     !authoring.includes(
+      '<Property Id="NETGRID_ACCOUNT_ACCESS_MODE" Value="simple" Secure="yes" />',
+    ) ||
+    !authoring.includes(
       '<Property Id="INSTALLDESKTOPSHORTCUT" Value="1" Secure="yes" />',
     ) ||
     !authoring.includes("--configure-firewall &quot;true&quot;") ||
@@ -142,7 +146,8 @@ try {
     ) ||
     !authoring.includes('Condition="INSTALLDESKTOPSHORTCUT = 1"') ||
     !authoring.includes('Name="NETGRID Maintenance"') ||
-    !authoring.includes('Arguments="--open-maintenance"')
+    !authoring.includes('Arguments="--open-maintenance"') ||
+    !authoring.includes('Name="NETGRID Ersteinrichtung"')
   )
     throw new Error("installer_runtime_initialization_contract_invalid");
 
@@ -165,6 +170,9 @@ try {
     JSON.stringify(setupContract.retentionValues) !==
       JSON.stringify(["7", "30", "90", "180", "365", "never"]) ||
     setupContract.defaultRetention !== "30" ||
+    JSON.stringify(setupContract.accountAccessModes) !==
+      JSON.stringify(["simple", "protected"]) ||
+    setupContract.defaultAccountAccessMode !== "simple" ||
     setupContract.desktopShortcutDefault !== true ||
     setupContract.launchAfterInstallDefault !== true ||
     JSON.stringify(setupContract.firewallProfiles) !==

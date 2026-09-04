@@ -76,6 +76,7 @@
     "app/node_modules/**",
     "app/package.json",
     "app/server.mjs",
+    "app/maintenance-auth.mjs",
     "config/runtime.env.example",
     "product-layout.json",
     "product-manifest.json"

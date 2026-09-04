@@ -1,7 +1,7 @@
 # Paketprozess: Windows-Installer und Launcher
 
 Stand: 2026-09-04  
-Status: in Umsetzung; WIN-I00 bis WIN-I04 verifiziert, nächstes Paket WIN-I05
+Status: in Umsetzung; WIN-I00 bis WIN-I05 verifiziert, nächstes Paket WIN-I06
 
 ## Quelle und Zielprüfung
 
@@ -164,6 +164,21 @@ eigene Account-, Cleanup- oder Versionsautorität.
 - Der Setupwert für 7, 30, 90, 180, 365 Tage oder „nie“ initialisiert nur eine
   noch nicht gespeicherte Cleanup-Policy. Spätere Maintenance-Änderungen
   werden weder bei Repair noch beim Wiederanlauf überschrieben.
+- WIN-I05 bündelt die bestehende Maintenance-Auth-CLI als eng freigegebenen
+  Produkt-Entrypoint und installiert einen selbstenthaltenen First-Run-Host.
+  Das Passwort wird zweimal verdeckt erfasst und ausschließlich per stdin an
+  den bestehenden `bootstrap`-Befehl übertragen; MSI, Argumentlisten und Logs
+  bleiben secretfrei.
+- First Run prüft zuerst den Initialisierungsstatus und bietet keinen Reset.
+  Der isolierte Smoke belegt einen erfolgreichen Scrypt-Bootstrap und die
+  bytegleiche Erhaltung des Credentialstores bei einem zweiten abgewiesenen
+  Versuch. Ein Startmenüeintrag erlaubt den sicheren Wiederanlauf nach
+  „Später“.
+- Der benutzerdefinierte Setupweg wählt `simple` oder `protected`, während der
+  empfohlene Weg `simple` übernimmt. Der Wert initialisiert nur die vorhandene
+  Account-Policy. Persistierte Wechsel über Maintenance bleiben autoritativ;
+  im Private-LAN-Profil funktioniert Self-Service, aber Policyverwaltung und
+  Maintenance bleiben Loopback-only.
 
 ## Verifikationsregeln
 

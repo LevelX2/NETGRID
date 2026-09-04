@@ -138,15 +138,14 @@ export function validateDeploymentConfig(
         "Privates LAN verlangt explizite Web- und Server-URLs sowie eine Origin-Allowlist.",
       );
     }
-    const lanUrls = [
-      config.webBaseUrl,
-      config.serverBaseUrl,
-      ...config.allowedOrigins,
-    ];
     if (
-      lanUrls.some(
+      !isPrivateLanHttpUrl(config.webBaseUrl) ||
+      !isPrivateLanHttpUrl(config.serverBaseUrl) ||
+      config.allowedOrigins.some(
         (value) =>
-          value === "*" || value.includes("*") || !isPrivateLanHttpUrl(value),
+          value === "*" ||
+          value.includes("*") ||
+          !isPrivateLanOrLoopbackHttpUrl(value),
       )
     ) {
       throw new DeploymentConfigError(
@@ -247,6 +246,19 @@ function isPrivateLanHttpUrl(value: string): boolean {
       octets[0] === 10 ||
       (octets[0] === 172 && (octets[1] ?? 0) >= 16 && (octets[1] ?? 0) <= 31) ||
       (octets[0] === 192 && octets[1] === 168)
+    );
+  } catch {
+    return false;
+  }
+}
+
+function isPrivateLanOrLoopbackHttpUrl(value: string): boolean {
+  if (isPrivateLanHttpUrl(value)) return true;
+  try {
+    const url = new URL(value);
+    return (
+      url.protocol === "http:" &&
+      (url.hostname === "127.0.0.1" || url.hostname === "localhost")
     );
   } catch {
     return false;

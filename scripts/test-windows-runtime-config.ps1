@@ -53,6 +53,7 @@ NETGRID_SERVER_PORT=8787
 HOSTNAME=127.0.0.1
 PORT=3100
 NETGRID_DEPLOYMENT_PROFILE=local
+NETGRID_ACCOUNT_ACCESS_MODE=simple
 NETGRID_WEB_BASE_URL=http://127.0.0.1:3100
 NETGRID_SERVER_BASE_URL=http://127.0.0.1:8787
 NETGRID_ALLOWED_ORIGINS=http://127.0.0.1:3100
@@ -76,7 +77,8 @@ NETGRID_INITIAL_CLEANUP_RETENTION_DAYS=30
     "--lan-address", "192.168.50.20",
     "--web-port", "3110",
     "--server-port", "8797",
-    "--retention-days", "90"
+    "--retention-days", "90",
+    "--account-access-mode", "protected"
   )
   Invoke-RuntimeConfig -Arguments $arguments
   $runtimeEnvironment = Join-Path $dataRoot "config\runtime.env"
@@ -88,7 +90,8 @@ NETGRID_INITIAL_CLEANUP_RETENTION_DAYS=30
       $source -notmatch '(?m)^NETGRID_DEPLOYMENT_PROFILE=private_lan\r?$' -or
       $source -notmatch '(?m)^NETGRID_WEB_BASE_URL=http://192\.168\.50\.20:3110\r?$' -or
       $source -notmatch '(?m)^NETGRID_LAUNCHER_WEB_URL=http://127\.0\.0\.1:3110\r?$' -or
-      $source -notmatch '(?m)^NETGRID_INITIAL_CLEANUP_RETENTION_DAYS=90\r?$') {
+      $source -notmatch '(?m)^NETGRID_INITIAL_CLEANUP_RETENTION_DAYS=90\r?$' -or
+      $source -notmatch '(?m)^NETGRID_ACCOUNT_ACCESS_MODE=protected\r?$') {
     throw "Die materialisierte Runtimekonfiguration enthält ungültige Pflichtwerte."
   }
   foreach ($relative in @("runtime\multiplayer", "runtime\backups", "runtime\logs", "runtime\maintenance", "card-images")) {

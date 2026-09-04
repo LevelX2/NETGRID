@@ -36,9 +36,13 @@
     <Component Directory="INSTALLFOLDER">
       <File Id="NetgridLauncher" Source="$(LauncherRoot)\NETGRID.exe" />
     </Component>
+    <Component Directory="INSTALLFOLDER">
+      <File Id="NetgridFirstRun" Source="$(FirstRunRoot)\NETGRID.FirstRun.exe" />
+    </Component>
     <Component Directory="NETGRIDPROGRAMMENU">
       <Shortcut Id="NetgridStartMenuShortcut" Name="NETGRID" Target="[#NetgridLauncher]" WorkingDirectory="INSTALLFOLDER" Icon="NetgridIcon" />
       <Shortcut Id="NetgridMaintenanceStartMenuShortcut" Name="NETGRID Maintenance" Target="[#NetgridLauncher]" Arguments="--open-maintenance" WorkingDirectory="INSTALLFOLDER" Icon="NetgridIcon" />
+      <Shortcut Id="NetgridFirstRunStartMenuShortcut" Name="NETGRID Ersteinrichtung" Target="[#NetgridFirstRun]" WorkingDirectory="INSTALLFOLDER" Icon="NetgridIcon" />
       <RemoveFolder Id="RemoveNetgridProgramMenu" On="uninstall" />
       <RegistryValue Root="HKLM" Key="Software\LevelX2\NETGRID" Name="StartMenuShortcuts" Type="integer" Value="1" KeyPath="yes" />
     </Component>
@@ -68,10 +72,11 @@
     <Property Id="NETGRID_WEB_PORT" Value="3100" Secure="yes" />
     <Property Id="NETGRID_SERVER_PORT" Value="8787" Secure="yes" />
     <Property Id="NETGRID_RETENTION_DAYS" Value="30" Secure="yes" />
+    <Property Id="NETGRID_ACCOUNT_ACCESS_MODE" Value="simple" Secure="yes" />
     <Property Id="INSTALLDESKTOPSHORTCUT" Value="1" Secure="yes" />
     <SetProperty
       Id="InitializeNetgridRuntime"
-      Value='initialize --data-root "[NETGRID_DATA_ROOT]" --deployment-profile "[NETGRID_DEPLOYMENT_PROFILE]" --lan-address "[NETGRID_LAN_ADDRESS]" --web-port "[NETGRID_WEB_PORT]" --server-port "[NETGRID_SERVER_PORT]" --retention-days "[NETGRID_RETENTION_DAYS]" --configure-firewall "true"'
+      Value='initialize --data-root "[NETGRID_DATA_ROOT]" --deployment-profile "[NETGRID_DEPLOYMENT_PROFILE]" --lan-address "[NETGRID_LAN_ADDRESS]" --web-port "[NETGRID_WEB_PORT]" --server-port "[NETGRID_SERVER_PORT]" --retention-days "[NETGRID_RETENTION_DAYS]" --account-access-mode "[NETGRID_ACCOUNT_ACCESS_MODE]" --configure-firewall "true"'
       Before="InitializeNetgridRuntime"
       Sequence="execute"
       Condition='NOT REMOVE~="ALL"' />

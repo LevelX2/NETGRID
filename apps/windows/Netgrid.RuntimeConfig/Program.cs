@@ -247,6 +247,7 @@ internal static class Program
                     "--web-port",
                     "--server-port",
                     "--retention-days",
+                    "--account-access-mode",
                     "--configure-firewall",
                 ],
                 StringComparer.OrdinalIgnoreCase
@@ -276,7 +277,8 @@ internal static class Program
         string? LanAddress,
         int WebPort,
         int ServerPort,
-        string RetentionDays
+        string RetentionDays,
+        string AccountAccessMode
     )
     {
         private static readonly HashSet<string> RetentionValues = ["7", "30", "90", "180", "365", "never"];
@@ -302,12 +304,17 @@ internal static class Program
             {
                 throw new RuntimeConfigException("retention_invalid", "Die Spielaufbewahrung ist ungültig.");
             }
+            var accountAccessMode = command.Optional("--account-access-mode") ?? "simple";
+            if (accountAccessMode is not ("simple" or "protected"))
+            {
+                throw new RuntimeConfigException("account_access_mode_invalid", "Der Spielerprofilmodus ist ungültig.");
+            }
             var lanAddress = command.Optional("--lan-address");
             if (profile == "private_lan" && !IsPrivateIpv4(lanAddress))
             {
                 throw new RuntimeConfigException("lan_address_invalid", "Das private Netzwerk benötigt eine private IPv4-Adresse.");
             }
-            return new NetworkSettings(profile, profile == "private_lan" ? lanAddress : null, webPort, serverPort, retention);
+            return new NetworkSettings(profile, profile == "private_lan" ? lanAddress : null, webPort, serverPort, retention, accountAccessMode);
         }
 
         public static NetworkSettings FromEnvironment(string path)
@@ -322,7 +329,8 @@ internal static class Program
                 lanAddress,
                 ParsePort(values.GetValueOrDefault("PORT") ?? "3100", "existing_network_invalid"),
                 ParsePort(values.GetValueOrDefault("NETGRID_SERVER_PORT") ?? "8787", "existing_network_invalid"),
-                values.GetValueOrDefault("NETGRID_INITIAL_CLEANUP_RETENTION_DAYS") ?? "30"
+                values.GetValueOrDefault("NETGRID_INITIAL_CLEANUP_RETENTION_DAYS") ?? "30",
+                values.GetValueOrDefault("NETGRID_ACCOUNT_ACCESS_MODE") ?? "simple"
             );
         }
 
@@ -403,6 +411,7 @@ internal static class Program
                 webPort = effectiveNetwork.WebPort,
                 serverPort = effectiveNetwork.ServerPort,
                 retentionDays = effectiveNetwork.RetentionDays,
+                accountAccessMode = effectiveNetwork.AccountAccessMode,
             };
             var localStatePath = Path.Combine(configRoot, "install-state.json");
             var localState = JsonSerializer.Serialize(installationState, new JsonSerializerOptions { WriteIndented = true }) + Environment.NewLine;
@@ -466,6 +475,7 @@ internal static class Program
                 ["HOSTNAME"] = network.IsPrivateLan ? "0.0.0.0" : "127.0.0.1",
                 ["PORT"] = network.WebPort.ToString(),
                 ["NETGRID_DEPLOYMENT_PROFILE"] = network.DeploymentProfile,
+                ["NETGRID_ACCOUNT_ACCESS_MODE"] = network.AccountAccessMode,
                 ["NETGRID_WEB_BASE_URL"] = publicWeb,
                 ["NETGRID_SERVER_BASE_URL"] = publicServer,
                 ["NETGRID_ALLOWED_ORIGINS"] = network.IsPrivateLan ? $"{publicWeb},{loopbackWeb}" : loopbackWeb,

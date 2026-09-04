@@ -68,7 +68,8 @@ export async function runMaintenanceAuthCli(
 
 if (
   process.argv[1]?.endsWith("maintenance-auth-cli.ts") ||
-  process.argv[1]?.endsWith("maintenance-auth-cli.js")
+  process.argv[1]?.endsWith("maintenance-auth-cli.js") ||
+  process.argv[1]?.endsWith("maintenance-auth.mjs")
 ) {
   const stdin = process.argv.includes("--password-stdin")
     ? readFileSync(0, "utf8")

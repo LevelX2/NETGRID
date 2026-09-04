@@ -132,8 +132,9 @@ Hauptinstanz bleiben unangetastet.
 
 `NETGRID-Setup-<Version>-x64.exe` zeigt den empfohlenen und den
 benutzerdefinierten Weg. Local/LAN, Desktopverknüpfung und Start nach Abschluss
-sind sichtbar; im benutzerdefinierten Weg kommen Pfade, Ports und
-Spielaufbewahrung hinzu. Erst „Installieren“ fordert Administratorrechte an.
+sind sichtbar; im benutzerdefinierten Weg kommen Pfade, Ports,
+Spielaufbewahrung und die Wahl zwischen einfachem und geschütztem
+Spielerprofilmodus hinzu. Erst „Installieren“ fordert Administratorrechte an.
 Das Setup übergibt ausschließlich nicht geheime, validierte MSI-Eigenschaften.
 
 Private-LAN-Installationen benötigen eine erkannte private IPv4-Adresse. Die
@@ -141,6 +142,13 @@ Spielports werden ausschließlich im Windows-Netzwerkprofil „Privat“ geöffn
 Maintenance und Launcher-Health bleiben Loopback-only. Der Standard ist lokal,
 und LAN wird nie still aktiviert. Die vollständige erhöhte Firewall- und
 Installationsmatrix folgt im WIN-I08-Releasegate.
+
+Nach erfolgreicher MSI-Installation startet `NETGRID.FirstRun.exe`. Das
+Maintenance-Passwort wird dort zweimal verdeckt eingegeben und ausschließlich
+über eine lokale stdin-Pipe an `app/maintenance-auth.mjs` übergeben. „Später“
+lässt die Spieloberfläche nutzbar, während Maintenance gesperrt bleibt; die
+Ersteinrichtung kann über den gleichnamigen Startmenüeintrag erneut geöffnet
+werden. Ein vorhandenes Credential wird weder zurückgesetzt noch ersetzt.
 
 ## Installationsvertrag für die nächsten Pakete
 
