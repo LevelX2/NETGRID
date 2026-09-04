@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Netgrid.Windows;
 
 namespace Netgrid.Launcher;
 
@@ -31,14 +32,14 @@ internal sealed class RecoveryDialog : Form
         };
         var retry = new Button
         {
-            Text = "Wiederholen",
+            Text = UiText.Get("recovery.retry"),
             Location = new Point(176, 120),
             Size = new Size(100, 32),
             DialogResult = DialogResult.Retry,
         };
         var diagnostics = new Button
         {
-            Text = "Diagnose öffnen",
+            Text = UiText.Get("recovery.diagnostics"),
             Location = new Point(284, 120),
             Size = new Size(112, 32),
         };
@@ -46,7 +47,7 @@ internal sealed class RecoveryDialog : Form
             Process.Start(new ProcessStartInfo("explorer.exe", $"\"{logDirectory}\"") { UseShellExecute = true });
         var exit = new Button
         {
-            Text = "Beenden",
+            Text = UiText.Get("recovery.exit"),
             Location = new Point(404, 120),
             Size = new Size(92, 32),
             DialogResult = DialogResult.Abort,

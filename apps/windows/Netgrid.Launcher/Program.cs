@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Netgrid.Windows;
 
 namespace Netgrid.Launcher;
 
@@ -10,6 +11,19 @@ internal static class Program
     private static async Task<int> Main(string[] args)
     {
         var options = LauncherOptions.Parse(args);
+        if (options.DiagnosticOutput is not null)
+        {
+            try
+            {
+                await using var runtime = LauncherRuntime.Load(options);
+                DiagnosticsExporter.Export(runtime, options.DiagnosticOutput);
+                return 0;
+            }
+            catch
+            {
+                return 2;
+            }
+        }
         if (options.UpdateCheckApi is not null)
         {
             try

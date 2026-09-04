@@ -196,6 +196,18 @@ try {
   }
   Copy-Item -LiteralPath $setupHostExecutable -Destination $setupPath -Force
 
+  $uiMatrixRoot = Join-Path $projectRoot "output\windows-ui-matrix"
+  Reset-BuildDirectory -Path $uiMatrixRoot -ProjectRoot $projectRoot
+  foreach ($language in @("de", "en", "fr")) {
+    foreach ($scale in @(100, 125, 150)) {
+      $previewPath = Join-Path $uiMatrixRoot "setup-$language-$scale.png"
+      $previewProcess = Start-Process -FilePath $setupHostExecutable -ArgumentList @("--render-preview", $language, [string]$scale, $previewPath) -Wait -PassThru -WindowStyle Hidden
+      if ($previewProcess.ExitCode -ne 0) { throw "Die Windows-UI-Vorschau $language/$scale konnte nicht erzeugt werden." }
+    }
+  }
+  & node scripts/check-windows-ui.mjs --matrix $uiMatrixRoot
+  if ($LASTEXITCODE -ne 0) { throw "Die Windows-Lokalisierungs- oder Layoutmatrix ist fehlgeschlagen." }
+
   & node scripts/check-windows-installer.mjs --release $ReleaseRoot --installer-input $installerInputRoot --msi $msiPath --setup $setupPath --dotnet $dotnet
   if ($LASTEXITCODE -ne 0) { throw "Installer-Payloadprüfung ist fehlgeschlagen." }
 

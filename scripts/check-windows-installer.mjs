@@ -191,6 +191,17 @@ try {
     setupContract.installerRollback !== "msi-major-upgrade"
   )
     throw new Error("installer_guided_setup_contract_invalid");
+  const localizationPath = path.join(scratch, "localization.json");
+  run(setupPath, ["--audit-localization", localizationPath]);
+  const localization = JSON.parse(readFileSync(localizationPath, "utf8"));
+  if (
+    localization.schemaVersion !== "netgrid-windows-ui-localization-v1" ||
+    JSON.stringify(localization.languages) !== JSON.stringify(["de", "en", "fr"]) ||
+    localization.fallbackLanguage !== "en" ||
+    localization.complete !== true ||
+    localization.keyCount < 80
+  )
+    throw new Error("installer_localization_contract_invalid");
   await checkPortConflict(setupPath);
   process.stdout.write(
     `WINDOWS_INSTALLER_CHECK_OK files=${installedFiles.length} msi=${msiPath} setup=${setupPath}\n`,

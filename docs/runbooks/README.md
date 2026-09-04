@@ -8,3 +8,4 @@ Wiederholbare lokale Betriebs-, Diagnose-, Wartungs- und Arbeitsabläufe.
 - [KI-Selbstspiel-Evidenzregistrierung](ai-selfplay-evidence-registry.md)
 - [Windows-Releaseoutput erzeugen und prüfen](windows-release-output.md)
 - [Windows-Updates](windows-updates.md)
+- [Windows-Diagnosepakete](windows-diagnostics.md)

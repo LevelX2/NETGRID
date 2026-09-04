@@ -6,6 +6,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  readdirSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
@@ -114,8 +115,44 @@ try {
     throw new Error("launcher_graceful_server_stop_missing");
   await assertPortClosed(serverPort);
   await assertPortClosed(webPort);
+  const environmentPath = path.join(dataRoot, "config", "runtime.env");
+  const secret = /^NETGRID_TOKEN_SALT=(.+)$/m.exec(
+    readFileSync(environmentPath, "utf8"),
+  )?.[1];
+  if (!secret) throw new Error("launcher_diagnostics_secret_missing");
+  const logs = path.join(dataRoot, "runtime", "logs");
+  writeFileSync(
+    path.join(logs, "launcher-sensitive.log"),
+    `NETGRID_TOKEN_SALT=${secret}\nraw=${secret}\n`,
+  );
+  writeFileSync(path.join(dataRoot, "runtime", "private.sqlite"), "database");
+  mkdirSync(path.join(dataRoot, "card-images"), { recursive: true });
+  writeFileSync(path.join(dataRoot, "card-images", "private.png"), "image");
+  const diagnostics = path.join(scratch, "diagnostics.zip");
+  run(path.join(programRoot, "NETGRID.exe"), [
+    "--export-diagnostics",
+    diagnostics,
+    "--program-root",
+    programRoot,
+    "--environment-file",
+    environmentPath,
+  ]);
+  const extracted = path.join(scratch, "diagnostics");
+  mkdirSync(extracted);
+  run("tar.exe", ["-xf", diagnostics, "-C", extracted]);
+  const diagnosticFiles = collectFiles(extracted);
+  const diagnosticText = diagnosticFiles
+    .map((file) => readFileSync(file, "utf8"))
+    .join("\n");
+  if (
+    diagnosticText.includes(secret) ||
+    /\.sqlite$|private\.png$/i.test(diagnosticFiles.join("\n"))
+  )
+    throw new Error("launcher_diagnostics_leak");
+  if (!diagnosticText.includes("<redacted>"))
+    throw new Error("launcher_diagnostics_redaction_missing");
   process.stdout.write(
-    `WINDOWS_LAUNCHER_SMOKE_OK ports=${serverPort},${webPort} recoveryAttempts=1\n`,
+    `WINDOWS_LAUNCHER_SMOKE_OK ports=${serverPort},${webPort} recoveryAttempts=1 diagnostics=redacted\n`,
   );
 } finally {
   grantCleanupAccess(scratch);
@@ -127,6 +164,16 @@ function copyFile(source, target) {
     throw new Error(`launcher_smoke_input_missing:${source}`);
   mkdirSync(path.dirname(target), { recursive: true });
   cpSync(source, target);
+}
+
+function collectFiles(root) {
+  const result = [];
+  for (const entry of readdirSync(root, { withFileTypes: true })) {
+    const target = path.join(root, entry.name);
+    if (entry.isDirectory()) result.push(...collectFiles(target));
+    else if (entry.isFile()) result.push(target);
+  }
+  return result;
 }
 
 function run(command, args) {

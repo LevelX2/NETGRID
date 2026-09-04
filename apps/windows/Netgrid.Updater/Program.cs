@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text.Json;
+using Netgrid.Windows;
 
 namespace Netgrid.Updater;
 
@@ -34,9 +35,9 @@ internal static class Program
             ApplicationConfiguration.Initialize();
             return UpdateTransaction.Run(options);
         }
-        catch (Exception exception)
+        catch (Exception)
         {
-            MessageBox.Show($"NETGRID konnte nicht sicher aktualisiert werden. Die Anwendung bleibt gestoppt.\n\nUrsache: {exception.Message}", "NETGRID Update", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show(UiText.Get("updater.failed"), "NETGRID Update", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return 3;
         }
     }
@@ -97,7 +98,7 @@ internal static class UpdateTransaction
             PromoteCachedSetup(dataRoot);
             WriteLog(logPath, "update_verified");
             if (options.Restart) StartLauncher(options.ProgramRoot);
-            MessageBox.Show("NETGRID wurde erfolgreich aktualisiert.", "NETGRID Update", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show(UiText.Get("updater.success"), "NETGRID Update", MessageBoxButtons.OK, MessageBoxIcon.Information);
             return 0;
         }
 
@@ -110,7 +111,7 @@ internal static class UpdateTransaction
         if (!VerifyInstalled(options)) throw new InvalidOperationException("updater_rollback_health_failed");
         WriteLog(logPath, "rollback_verified");
         if (options.Restart) StartLauncher(options.ProgramRoot);
-        MessageBox.Show("Das Update schlug fehl. NETGRID und das geprüfte Datenbackup wurden auf den vorherigen Stand zurückgesetzt.", "NETGRID Update", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        MessageBox.Show(UiText.Get("updater.rollback"), "NETGRID Update", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         return 2;
     }
 

@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text.Json;
 using Microsoft.Win32;
+using Netgrid.Windows;
 
 namespace Netgrid.SetupHost;
 
@@ -42,6 +43,30 @@ internal static class Program
                 File.WriteAllText(Path.GetFullPath(args[1]), JsonSerializer.Serialize(SetupContract.Audit, new JsonSerializerOptions { WriteIndented = true }));
                 return 0;
             }
+            if (args.Length == 2 && args[0] == "--audit-localization")
+            {
+                File.WriteAllText(Path.GetFullPath(args[1]), JsonSerializer.Serialize(UiText.Audit));
+                return 0;
+            }
+            if (args.Length == 4 && args[0] == "--render-preview")
+            {
+                ApplicationConfiguration.Initialize();
+                UiText.Use(args[1]);
+                if (!int.TryParse(args[2], out var scale) || scale is not (100 or 125 or 150)) throw new SetupException("setup_arguments_invalid", "Die Setup-Argumente sind ungültig.");
+                using var form = new SetupForm();
+                form.ShowInTaskbar = false;
+                form.Location = new Point(-32000, -32000);
+                form.Show();
+                Application.DoEvents();
+                var factor = scale / 100f;
+                if (factor != 1f) form.Scale(new SizeF(factor, factor));
+                form.PerformLayout();
+                using var bitmap = new Bitmap(form.Width, form.Height);
+                form.DrawToBitmap(bitmap, new Rectangle(Point.Empty, bitmap.Size));
+                bitmap.Save(Path.GetFullPath(args[3]), System.Drawing.Imaging.ImageFormat.Png);
+                form.Hide();
+                return 0;
+            }
             if (args.Length == 3 && args[0] == "--install-update" && args[1] == "--program-root")
             {
                 var result = Installer.RunUpdate(Path.GetFullPath(args[2]), uninstall: false);
@@ -58,6 +83,7 @@ internal static class Program
 
             MsiPayload.Verify();
             ApplicationConfiguration.Initialize();
+            if (!LanguageDialog.SelectLanguage()) return 1;
             Application.Run(new SetupForm());
             return 0;
         }
@@ -66,7 +92,7 @@ internal static class Program
             if (Environment.UserInteractive)
             {
                 MessageBox.Show(
-                    exception is SetupException setup ? setup.Message : "NETGRID Setup konnte nicht gestartet werden.",
+                    exception is SetupException setup ? setup.Message : UiText.Get("setup.error.start"),
                     "NETGRID Setup",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error
@@ -83,21 +109,21 @@ internal static class Program
 
 internal sealed class SetupForm : Form
 {
-    private readonly RadioButton _recommended = new() { Text = "Empfohlene Installation", Checked = true, AutoSize = true };
-    private readonly RadioButton _custom = new() { Text = "Benutzerdefinierte Installation", AutoSize = true };
-    private readonly RadioButton _local = new() { Text = "Nur dieser Rechner (empfohlen)", Checked = true, AutoSize = true };
-    private readonly RadioButton _lan = new() { Text = "Privates Netzwerk", AutoSize = true };
+    private readonly RadioButton _recommended = new() { Text = UiText.Get("setup.recommended"), Checked = true, AutoSize = true };
+    private readonly RadioButton _custom = new() { Text = UiText.Get("setup.custom"), AutoSize = true };
+    private readonly RadioButton _local = new() { Text = UiText.Get("setup.local"), Checked = true, AutoSize = true };
+    private readonly RadioButton _lan = new() { Text = UiText.Get("setup.lan"), AutoSize = true };
     private readonly TextBox _programRoot = new() { Width = 410 };
     private readonly TextBox _dataRoot = new() { Width = 410 };
     private readonly NumericUpDown _webPort = new() { Minimum = 1, Maximum = 65535, Value = 3100, Width = 90 };
     private readonly NumericUpDown _serverPort = new() { Minimum = 1, Maximum = 65535, Value = 8787, Width = 90 };
     private readonly ComboBox _retention = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 210 };
-    private readonly ComboBox _accountMode = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 310 };
-    private readonly CheckBox _desktop = new() { Text = "Desktopverknüpfung erstellen", Checked = true, AutoSize = true };
-    private readonly CheckBox _launch = new() { Text = "NETGRID nach Abschluss starten", Checked = true, AutoSize = true };
+    private readonly ComboBox _accountMode = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 400 };
+    private readonly CheckBox _desktop = new() { Text = UiText.Get("setup.desktop"), Checked = true, AutoSize = true };
+    private readonly CheckBox _launch = new() { Text = UiText.Get("setup.launch"), Checked = true, AutoSize = true };
     private readonly Label _lanAddress = new() { AutoSize = true };
     private readonly Label _status = new() { AutoSize = true, ForeColor = SystemColors.GrayText };
-    private readonly Button _install = new() { Text = "Installieren", AutoSize = true, Padding = new Padding(18, 6, 18, 6) };
+    private readonly Button _install = new() { Text = UiText.Get("setup.install"), AutoSize = true, Padding = new Padding(18, 6, 18, 6) };
     private readonly IReadOnlyList<string> _privateAddresses = NetworkSelection.PrivateIpv4Addresses();
 
     public SetupForm()
@@ -106,8 +132,8 @@ internal sealed class SetupForm : Form
         Icon = Icon.ExtractAssociatedIcon(Environment.ProcessPath!);
         StartPosition = FormStartPosition.CenterScreen;
         AutoScaleMode = AutoScaleMode.Dpi;
-        MinimumSize = new Size(720, 690);
-        ClientSize = new Size(760, 720);
+        MinimumSize = new Size(760, 760);
+        ClientSize = new Size(800, 920);
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
 
@@ -117,13 +143,13 @@ internal sealed class SetupForm : Form
         _retention.SelectedIndex = 1;
         _accountMode.Items.AddRange(new object[]
         {
-            new AccountModeChoice("simple", "Einfach, ohne Spielerpasswörter (empfohlen)"),
-            new AccountModeChoice("protected", "Geschützt, mit Spielerpasswörtern"),
+            new AccountModeChoice("simple", UiText.Get("setup.account.simple")),
+            new AccountModeChoice("protected", UiText.Get("setup.account.protected")),
         });
         _accountMode.SelectedIndex = 0;
         _lanAddress.Text = _privateAddresses.Count > 0
-            ? $"Erkannte private Adresse: {_privateAddresses[0]}"
-            : "Keine private IPv4-Adresse erkannt.";
+            ? UiText.Get("setup.lan.found", _privateAddresses[0])
+            : UiText.Get("setup.lan.missing");
 
         var root = new TableLayoutPanel
         {
@@ -134,32 +160,35 @@ internal sealed class SetupForm : Form
         };
         root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         Controls.Add(root);
-        root.Controls.Add(Heading("NETGRID installieren", 18));
-        root.Controls.Add(Body("Der Assistent installiert NETGRID für alle Benutzer dieses Rechners. Administratorrechte werden erst nach Ihrer Bestätigung angefordert."));
-        root.Controls.Add(Group("Installationsweg", Flow(_recommended, _custom)));
-        root.Controls.Add(Group("Betriebsart", Flow(
+        root.Controls.Add(Flow(
+            new PictureBox { Image = Icon?.ToBitmap(), SizeMode = PictureBoxSizeMode.Zoom, Size = new Size(44, 44), Margin = new Padding(3, 0, 12, 6) },
+            Heading(UiText.Get("setup.header"), 18)
+        ));
+        root.Controls.Add(Body(UiText.Get("setup.body")));
+        root.Controls.Add(Group(UiText.Get("setup.path"), Flow(_recommended, _custom)));
+        root.Controls.Add(Group(UiText.Get("setup.profile"), Stack(
             _local,
-            Body("Spiel und Maintenance sind nur auf diesem Rechner erreichbar."),
+            Body(UiText.Get("setup.local.help")),
             _lan,
-            Body("Das Spiel wird im privaten LAN freigegeben. Maintenance bleibt nur lokal erreichbar."),
+            Body(UiText.Get("setup.lan.help")),
             _lanAddress
         )));
 
         var advanced = new TableLayoutPanel { AutoSize = true, Dock = DockStyle.Top, ColumnCount = 3 };
-        advanced.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120));
+        advanced.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 135));
         advanced.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         advanced.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        AddPathRow(advanced, 0, "Programmordner", _programRoot);
-        AddPathRow(advanced, 1, "Datenordner", _dataRoot);
-        advanced.Controls.Add(new Label { Text = "Web-/Serverport", AutoSize = true, Anchor = AnchorStyles.Left }, 0, 2);
+        AddPathRow(advanced, 0, UiText.Get("setup.program"), _programRoot);
+        AddPathRow(advanced, 1, UiText.Get("setup.data"), _dataRoot);
+        advanced.Controls.Add(new Label { Text = UiText.Get("setup.ports"), AutoSize = true, Anchor = AnchorStyles.Left }, 0, 2);
         advanced.Controls.Add(Flow(_webPort, new Label { Text = "/", AutoSize = true }, _serverPort), 1, 2);
-        advanced.Controls.Add(new Label { Text = "Spielaufbewahrung", AutoSize = true, Anchor = AnchorStyles.Left }, 0, 3);
+        advanced.Controls.Add(new Label { Text = UiText.Get("setup.retention"), AutoSize = true, Anchor = AnchorStyles.Left }, 0, 3);
         advanced.Controls.Add(_retention, 1, 3);
-        advanced.Controls.Add(new Label { Text = "Spielerprofile", AutoSize = true, Anchor = AnchorStyles.Left }, 0, 4);
+        advanced.Controls.Add(new Label { Text = UiText.Get("setup.accounts"), AutoSize = true, Anchor = AnchorStyles.Left }, 0, 4);
         advanced.Controls.Add(_accountMode, 1, 4);
-        root.Controls.Add(Group("Erweiterte Optionen", advanced));
+        root.Controls.Add(Group(UiText.Get("setup.advanced"), advanced));
         root.Controls.Add(Flow(_desktop, _launch));
-        root.Controls.Add(Body("Es werden keine Entwicklungsdaten, Testspiele, privaten Kartenbilder oder Zugangsdaten aus diesem Rechner übernommen."));
+        root.Controls.Add(Body(UiText.Get("setup.boundary")));
         root.Controls.Add(_status);
         var actions = new FlowLayoutPanel { AutoSize = true, Dock = DockStyle.Top, FlowDirection = FlowDirection.RightToLeft };
         actions.Controls.Add(_install);
@@ -178,7 +207,7 @@ internal sealed class SetupForm : Form
         try
         {
             ToggleUi(false);
-            _status.Text = "Einstellungen werden geprüft …";
+            _status.Text = UiText.Get("setup.status.validate");
             var settings = ReadSettings();
             settings.Validate();
             if (!PortPlanner.AreAvailable(settings.Profile, settings.WebPort, settings.ServerPort))
@@ -187,8 +216,8 @@ internal sealed class SetupForm : Form
                     throw new SetupException("ports_busy", "Mindestens einer der gewählten Ports ist bereits belegt. Bitte wählen Sie andere Ports.");
                 var alternative = PortPlanner.FindAlternative(settings.Profile, settings.WebPort, settings.ServerPort);
                 var answer = MessageBox.Show(
-                    $"Die Standardports sind belegt. Soll NETGRID stattdessen die freien Ports {alternative.WebPort} und {alternative.ServerPort} verwenden?",
-                    "NETGRID Setup – Portkonflikt",
+                    UiText.Get("setup.port.offer", alternative.WebPort, alternative.ServerPort),
+                    UiText.Get("setup.port.title"),
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question
                 );
@@ -197,15 +226,15 @@ internal sealed class SetupForm : Form
                 _serverPort.Value = alternative.ServerPort;
                 settings = ReadSettings();
             }
-            _status.Text = "Windows-Administratorfreigabe wird angefordert …";
+            _status.Text = UiText.Get("setup.status.elevation");
             var result = await Task.Run(() => Installer.Run(settings));
             if (result is not (0 or 3010)) throw new SetupException("msi_failed", $"Windows Installer meldete Fehlercode {result}. Das Installationsprotokoll liegt unter {Installer.LogPath}.");
-            _status.Text = "NETGRID wurde erfolgreich installiert.";
+            _status.Text = UiText.Get("setup.status.success");
             var firstRunResult = await Task.Run(() => Installer.RunFirstRun(settings));
             if (firstRunResult > 1)
             {
                 MessageBox.Show(
-                    "Die Maintenance-Ersteinrichtung konnte nicht abgeschlossen werden. Sie kann jederzeit über das Startmenü erneut geöffnet werden.",
+                    UiText.Get("setup.first_run.warning"),
                     "NETGRID Setup",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning
@@ -215,12 +244,12 @@ internal sealed class SetupForm : Form
             {
                 Process.Start(new ProcessStartInfo(Path.Combine(settings.ProgramRoot, "NETGRID.exe")) { UseShellExecute = true });
             }
-            MessageBox.Show("NETGRID wurde erfolgreich installiert.", "NETGRID Setup", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show(UiText.Get("setup.status.success"), "NETGRID Setup", MessageBoxButtons.OK, MessageBoxIcon.Information);
             Close();
         }
         catch (Win32Exception exception) when (exception.NativeErrorCode == 1223)
         {
-            _status.Text = "Die Administratorfreigabe wurde abgebrochen.";
+            _status.Text = UiText.Get("setup.status.cancelled");
             MessageBox.Show(_status.Text, "NETGRID Setup", MessageBoxButtons.OK, MessageBoxIcon.Information);
             ToggleUi(true);
         }
@@ -279,7 +308,7 @@ internal sealed class SetupForm : Form
     {
         table.Controls.Add(new Label { Text = label, AutoSize = true, Anchor = AnchorStyles.Left }, 0, row);
         table.Controls.Add(box, 1, row);
-        var browse = new Button { Text = "Auswählen …", AutoSize = true };
+        var browse = new Button { Text = UiText.Get("setup.browse"), AutoSize = true };
         browse.Click += (_, _) =>
         {
             using var dialog = new FolderBrowserDialog { SelectedPath = box.Text, ShowNewFolderButton = true };
@@ -290,15 +319,23 @@ internal sealed class SetupForm : Form
 
     private static GroupBox Group(string title, Control content)
     {
-        var group = new GroupBox { Text = title, AutoSize = true, Dock = DockStyle.Top, Padding = new Padding(14) };
+        var group = new GroupBox { Text = title, AutoSize = false, Dock = DockStyle.Top, Padding = new Padding(14) };
         group.Controls.Add(content);
         content.Dock = DockStyle.Top;
+        group.Height = content.GetPreferredSize(new Size(700, 0)).Height + 55;
         return group;
     }
 
     private static FlowLayoutPanel Flow(params Control[] controls)
     {
         var flow = new FlowLayoutPanel { AutoSize = true, Dock = DockStyle.Top, FlowDirection = FlowDirection.LeftToRight, WrapContents = true };
+        flow.Controls.AddRange(controls);
+        return flow;
+    }
+
+    private static FlowLayoutPanel Stack(params Control[] controls)
+    {
+        var flow = new FlowLayoutPanel { AutoSize = true, Dock = DockStyle.Top, FlowDirection = FlowDirection.TopDown, WrapContents = false, MaximumSize = new Size(700, 0) };
         flow.Controls.AddRange(controls);
         return flow;
     }
@@ -579,12 +616,12 @@ internal static class SetupContract
 {
     public static readonly RetentionChoice[] RetentionChoices =
     [
-        new("7", "7 Tage"),
-        new("30", "30 Tage (empfohlen)"),
-        new("90", "90 Tage"),
-        new("180", "180 Tage"),
-        new("365", "365 Tage"),
-        new("never", "Nie automatisch löschen"),
+        new("7", UiText.Get("setup.retention.days", 7)),
+        new("30", UiText.Get("setup.retention.recommended")),
+        new("90", UiText.Get("setup.retention.days", 90)),
+        new("180", UiText.Get("setup.retention.days", 180)),
+        new("365", UiText.Get("setup.retention.days", 365)),
+        new("never", UiText.Get("setup.retention.never")),
     ];
 
     public static object Audit => new
@@ -610,7 +647,7 @@ internal static class SetupContract
     };
 }
 
-internal sealed class SetupException(string code, string message) : Exception(message)
+internal sealed class SetupException(string code, string message) : Exception(UiText.Language == "de" ? message : UiText.Get("setup.operation.failed"))
 {
     public string Code { get; } = code;
 }

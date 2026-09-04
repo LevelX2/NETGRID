@@ -13,4 +13,8 @@
     <RootNamespace>Netgrid.Updater</RootNamespace>
     <ApplicationIcon>..\..\web\public\brand\netgrid.ico</ApplicationIcon>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\Common\WindowsUiStrings.cs" Link="WindowsUiStrings.cs" />
+    <EmbeddedResource Include="..\Common\windows-ui-strings.json" LogicalName="NETGRID.WindowsUiStrings.json" />
+  </ItemGroup>
 </Project>

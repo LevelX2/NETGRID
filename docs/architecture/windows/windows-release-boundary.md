@@ -125,8 +125,8 @@ Eine neue Version wird dort bewusst als Release mit Installer, Versionsangabe,
 Änderungshinweisen und Prüfsumme veröffentlicht. Der beschlossene spätere
 Launcher prüft einmal beim Start, bietet stabile Releases standardmäßig und
 GitHub-Pre-Releases nach Opt-in an und lädt beziehungsweise installiert erst
-nach ausdrücklicher Zustimmung. Bis WIN-I06 umgesetzt ist, bleibt der reale
-Produktstand beim manuellen Download ohne Updateprüfung. Es gibt keinen
+nach ausdrücklicher Zustimmung. WIN-I06 hat diese Updateprüfung und den
+abgesicherten Upgrade-/Rollbackpfad umgesetzt. Es gibt keinen
 zusätzlichen Paketfeed, Store-Kanal oder eigenen Updateserver.
 
 ## Führende Gates

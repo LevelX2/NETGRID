@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
+using Netgrid.Windows;
 
 namespace Netgrid.Launcher;
 
@@ -234,7 +235,7 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
                     // The structured fatal event below is the single recovery result.
                 }
             }
-            FatalFailure?.Invoke(this, "NETGRID konnte nach einem Prozessabbruch nicht wiederhergestellt werden.");
+            FatalFailure?.Invoke(this, UiText.Get("launcher.fatal"));
         }
         finally
         {

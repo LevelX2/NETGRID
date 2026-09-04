@@ -166,14 +166,14 @@ versionierten Vertrag und einen expliziten Upgrade-Test.
 
 ## Übergabe an Installer und spätere Veröffentlichung
 
-Der aktuelle Output wird noch manuell über GitHub Releases bereitgestellt. Das
+Der aktuelle Output wird ausschließlich über GitHub Releases bereitgestellt. Das
 Release enthält mindestens Version, Änderungshinweise, Installerdatei und
 Prüfsumme. Zielverhalten und Paketfolge für Installer, Launcher und den
-späteren zustimmungsbasierten GitHub-Updater sind in
+zustimmungsbasierten GitHub-Updater sind in
 `../architecture/windows/windows-installer-product-contract.md` und
 `../architecture/windows/windows-installer-package-process.md` festgelegt.
-Bis zum Abschluss des Updaterpakets beginnt ein Upgrade weiterhin nur durch
-einen manuell gestarteten Installer.
+Der Launcher prüft diesen Kanal beim Start; Download und Upgrade beginnen erst
+nach ausdrücklicher Zustimmung und erfolgreicher Integritätsprüfung.
 
 ## Fehlerdiagnose
 

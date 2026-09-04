@@ -13,6 +13,10 @@
     <RootNamespace>Netgrid.SetupHost</RootNamespace>
     <ApplicationIcon>..\..\web\public\brand\netgrid.ico</ApplicationIcon>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\Common\WindowsUiStrings.cs" Link="WindowsUiStrings.cs" />
+    <EmbeddedResource Include="..\Common\windows-ui-strings.json" LogicalName="NETGRID.WindowsUiStrings.json" />
+  </ItemGroup>
   <ItemGroup Condition="'$(EmbeddedMsiPath)' != ''">
     <EmbeddedResource Include="$(EmbeddedMsiPath)" LogicalName="NETGRID.Product.msi" />
     <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">

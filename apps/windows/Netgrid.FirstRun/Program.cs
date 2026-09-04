@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Text.Json;
 using Microsoft.Win32;
+using Netgrid.Windows;
 
 namespace Netgrid.FirstRun;
 
@@ -42,8 +43,8 @@ internal sealed class FirstRunForm : Form
     private readonly TextBox _confirmation = new() { Width = 390, UseSystemPasswordChar = true };
     private readonly Label _status = new() { AutoSize = true, ForeColor = SystemColors.GrayText, MaximumSize = new Size(520, 0) };
     private readonly Label _accountMode = new() { AutoSize = true, MaximumSize = new Size(520, 0) };
-    private readonly Button _complete = new() { Text = "Einrichtung abschließen", AutoSize = true, Padding = new Padding(16, 6, 16, 6) };
-    private readonly Button _later = new() { Text = "Später", AutoSize = true, Padding = new Padding(12, 6, 12, 6) };
+    private readonly Button _complete = new() { Text = UiText.Get("first.complete"), AutoSize = true, Padding = new Padding(16, 6, 16, 6) };
+    private readonly Button _later = new() { Text = UiText.Get("first.later"), AutoSize = true, Padding = new Padding(12, 6, 12, 6) };
     private FirstRunRuntime? _runtime;
     private bool _alreadyInitialized;
 
@@ -51,7 +52,7 @@ internal sealed class FirstRunForm : Form
 
     public FirstRunForm()
     {
-        Text = "NETGRID Ersteinrichtung";
+        Text = UiText.Get("first.title");
         Icon = Icon.ExtractAssociatedIcon(Environment.ProcessPath!);
         StartPosition = FormStartPosition.CenterScreen;
         AutoScaleMode = AutoScaleMode.Dpi;
@@ -64,15 +65,15 @@ internal sealed class FirstRunForm : Form
         var root = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, AutoSize = true };
         root.Controls.Add(new Label
         {
-            Text = "NETGRID sicher einrichten",
+            Text = UiText.Get("first.header"),
             AutoSize = true,
             Font = new Font(SystemFonts.DefaultFont.FontFamily, 17, FontStyle.Bold),
             Margin = new Padding(3, 3, 3, 14),
         });
-        root.Controls.Add(Body("Legen Sie jetzt das eigenständige Maintenance-Passwort fest. Es schützt Einstellungen, Datenpflege und Spielerprofile und wird weder im Setup noch in einem Protokoll gespeichert."));
+        root.Controls.Add(Body(UiText.Get("first.body")));
         root.Controls.Add(_accountMode);
-        root.Controls.Add(Field("Maintenance-Passwort (mindestens 12 Zeichen)", _password));
-        root.Controls.Add(Field("Passwort wiederholen", _confirmation));
+        root.Controls.Add(Field(UiText.Get("first.password"), _password));
+        root.Controls.Add(Field(UiText.Get("first.confirm"), _confirmation));
         root.Controls.Add(_status);
         var actions = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.RightToLeft, Dock = DockStyle.Top };
         actions.Controls.Add(_complete);
@@ -90,30 +91,30 @@ internal sealed class FirstRunForm : Form
         try
         {
             ToggleInputs(false);
-            _status.Text = "Installierte Konfiguration wird geprüft …";
+            _status.Text = UiText.Get("first.checking");
             _runtime = FirstRunRuntime.Load();
             _accountMode.Text = _runtime.AccountMode == "protected"
-                ? "Spielerprofile: Geschützt – jedes Profil verwendet ein eigenes Passwort."
-                : "Spielerprofile: Einfach – Profile können ohne Spielerpasswort gewählt werden.";
+                ? UiText.Get("first.account.protected")
+                : UiText.Get("first.account.simple");
             if (await Task.Run(_runtime.IsMaintenanceInitialized))
             {
-                _status.Text = "Maintenance ist bereits eingerichtet. Das vorhandene Passwort bleibt unverändert.";
+                _status.Text = UiText.Get("first.exists");
                 _password.Enabled = false;
                 _confirmation.Enabled = false;
-                _complete.Text = "Schließen";
+                _complete.Text = UiText.Get("common.close");
                 _alreadyInitialized = true;
                 _complete.Enabled = true;
                 _later.Visible = false;
                 return;
             }
-            _status.Text = "Das Passwort wird verdeckt über eine lokale Pipe an die bestehende NETGRID-Authentifizierung übergeben.";
+            _status.Text = UiText.Get("first.pipe");
             ToggleInputs(true);
             _password.Focus();
         }
-        catch (Exception exception)
+        catch (Exception)
         {
-            _status.Text = exception.Message;
-            MessageBox.Show(exception.Message, "NETGRID Ersteinrichtung", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            _status.Text = UiText.Get("first.runtime.error");
+            MessageBox.Show(_status.Text, UiText.Get("first.title"), MessageBoxButtons.OK, MessageBoxIcon.Error);
             _later.Enabled = true;
         }
     }
@@ -131,35 +132,35 @@ internal sealed class FirstRunForm : Form
         var confirmation = _confirmation.Text;
         if (password.Length is < 12 or > 1024)
         {
-            MessageBox.Show("Das Maintenance-Passwort muss zwischen 12 und 1024 Zeichen lang sein.", "NETGRID Ersteinrichtung", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            MessageBox.Show(UiText.Get("first.password.length"), UiText.Get("first.title"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
         if (!string.Equals(password, confirmation, StringComparison.Ordinal))
         {
-            MessageBox.Show("Die beiden Passwörter stimmen nicht überein.", "NETGRID Ersteinrichtung", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            MessageBox.Show(UiText.Get("first.password.mismatch"), UiText.Get("first.title"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
 
         try
         {
             ToggleInputs(false);
-            _status.Text = "Maintenance-Zugang wird eingerichtet …";
+            _status.Text = UiText.Get("first.setting");
             _password.Clear();
             _confirmation.Clear();
             await Task.Run(() => _runtime.BootstrapMaintenance(password, confirmation));
             password = string.Empty;
             confirmation = string.Empty;
             ResultCode = 0;
-            _status.Text = "Die Ersteinrichtung ist abgeschlossen.";
-            MessageBox.Show("Maintenance wurde eingerichtet. Sie können das Passwort später nur in Maintenance ändern oder lokal zurücksetzen.", "NETGRID Ersteinrichtung", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            _status.Text = UiText.Get("first.done");
+            MessageBox.Show(UiText.Get("first.done.help"), UiText.Get("first.title"), MessageBoxButtons.OK, MessageBoxIcon.Information);
             Close();
         }
-        catch (Exception exception)
+        catch (Exception)
         {
             password = string.Empty;
             confirmation = string.Empty;
-            _status.Text = exception.Message;
-            MessageBox.Show(exception.Message, "NETGRID Ersteinrichtung", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            _status.Text = UiText.Get("first.runtime.error");
+            MessageBox.Show(_status.Text, UiText.Get("first.title"), MessageBoxButtons.OK, MessageBoxIcon.Error);
             ToggleInputs(true);
         }
     }

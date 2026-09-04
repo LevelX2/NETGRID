@@ -1,4 +1,5 @@
 namespace Netgrid.Launcher;
+using Netgrid.Windows;
 
 internal sealed class TrayApplicationContext : ApplicationContext
 {
@@ -16,19 +17,21 @@ internal sealed class TrayApplicationContext : ApplicationContext
         _dispatcher = new Control();
         _dispatcher.CreateControl();
         var menu = new ContextMenuStrip();
-        menu.Items.Add("NETGRID öffnen", null, (_, _) => OpenGame());
-        menu.Items.Add("Maintenance öffnen", null, (_, _) => OpenMaintenance());
+        menu.Items.Add(UiText.Get("launcher.open"), null, (_, _) => OpenGame());
+        menu.Items.Add(UiText.Get("launcher.maintenance"), null, (_, _) => OpenMaintenance());
         menu.Items.Add(new ToolStripSeparator());
-        menu.Items.Add("Nach Updates suchen …", null, async (_, _) => await CheckForUpdatesAsync(manual: true));
-        _prerelease = new ToolStripMenuItem("Stabile und Vorabversionen") { CheckOnClick = true };
+        menu.Items.Add(UiText.Get("launcher.updates"), null, async (_, _) => await CheckForUpdatesAsync(manual: true));
+        _prerelease = new ToolStripMenuItem(UiText.Get("launcher.prerelease")) { CheckOnClick = true };
         _prerelease.CheckedChanged += (_, _) => SaveUpdateSetting();
         menu.Items.Add(_prerelease);
+        menu.Items.Add(UiText.Get("launcher.diagnostics"), null, (_, _) => ExportDiagnostics());
+        menu.Items.Add(UiText.Get("launcher.notices"), null, (_, _) => OpenNotices());
         menu.Items.Add(new ToolStripSeparator());
-        menu.Items.Add("NETGRID beenden", null, async (_, _) => await CloseAsync());
+        menu.Items.Add(UiText.Get("launcher.exit"), null, async (_, _) => await CloseAsync());
         _tray = new NotifyIcon
         {
             Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath) ?? SystemIcons.Application,
-            Text = "NETGRID wird gestartet …",
+            Text = UiText.Get("launcher.starting"),
             ContextMenuStrip = menu,
             Visible = true,
         };
@@ -44,21 +47,21 @@ internal sealed class TrayApplicationContext : ApplicationContext
         {
             _runtime = LauncherRuntime.Load(_options);
             _runtime.FatalFailure += RuntimeOnFatalFailure;
-            _runtime.Recovered += (_, _) => Dispatch(() => ShowInfo("NETGRID wurde einmalig neu gestartet."));
+            _runtime.Recovered += (_, _) => Dispatch(() => ShowInfo(UiText.Get("launcher.recovered")));
             await _runtime.StartAsync();
-            _tray.Text = "NETGRID läuft";
+            _tray.Text = UiText.Get("launcher.running");
             var settings = UpdateSettings.Load(_runtime.DataRoot);
             _prerelease.Checked = settings.AllowPrerelease;
             if (_options.OpenMaintenance) OpenMaintenance();
             else OpenGame();
             _ = CheckForUpdatesAsync(manual: false);
         }
-        catch (Exception exception)
+        catch (Exception)
         {
             ExitCode = 2;
-            _tray.Text = "NETGRID konnte nicht gestartet werden";
+            _tray.Text = UiText.Get("launcher.start.failed");
             MessageBox.Show(
-                $"NETGRID konnte nicht gestartet werden.\n\nUrsache: {exception.Message}",
+                $"{UiText.Get("launcher.start.failed")}\n\n{UiText.Get("launcher.error.help")}",
                 "NETGRID",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error
@@ -75,21 +78,21 @@ internal sealed class TrayApplicationContext : ApplicationContext
     private async Task HandleFatalFailureAsync(string message)
     {
         if (_closing || _runtime is null) return;
-        _tray.Text = "NETGRID wurde angehalten";
+        _tray.Text = UiText.Get("launcher.stopped");
         var action = RecoveryDialog.Show(message, _runtime.LogDirectory);
         if (action == RecoveryAction.Retry)
         {
             try
             {
-                _tray.Text = "NETGRID wird gestartet …";
+                _tray.Text = UiText.Get("launcher.starting");
                 await _runtime.StartAsync();
-                _tray.Text = "NETGRID läuft";
+                _tray.Text = UiText.Get("launcher.running");
                 OpenGame();
             }
-            catch (Exception exception)
+            catch (Exception)
             {
                 MessageBox.Show(
-                    $"NETGRID konnte nicht erneut gestartet werden.\n\nUrsache: {exception.Message}",
+                    $"{UiText.Get("launcher.retry.failed")}\n\n{UiText.Get("launcher.error.help")}",
                     "NETGRID",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error
@@ -119,6 +122,35 @@ internal sealed class TrayApplicationContext : ApplicationContext
         _tray.ShowBalloonTip(4000);
     }
 
+    private void ExportDiagnostics()
+    {
+        if (_runtime is null) return;
+        using var dialog = new SaveFileDialog
+        {
+            Filter = UiText.Get("diagnostics.filter"),
+            FileName = $"NETGRID-diagnostics-{DateTime.Now:yyyyMMdd-HHmmss}.zip",
+            AddExtension = true,
+            DefaultExt = "zip",
+        };
+        if (dialog.ShowDialog() != DialogResult.OK) return;
+        try
+        {
+            DiagnosticsExporter.Export(_runtime, dialog.FileName);
+            MessageBox.Show(UiText.Get("diagnostics.success"), "NETGRID", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        catch
+        {
+            MessageBox.Show(UiText.Get("diagnostics.failed"), "NETGRID", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    private void OpenNotices()
+    {
+        if (_runtime is null) return;
+        var path = Path.Combine(_runtime.ProgramRoot, "legal", "THIRD-PARTY-NOTICES.txt");
+        if (File.Exists(path)) System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(path) { UseShellExecute = true });
+    }
+
     private void SaveUpdateSetting()
     {
         if (_runtime is null) return;
@@ -126,9 +158,9 @@ internal sealed class TrayApplicationContext : ApplicationContext
         {
             new UpdateSettings(_prerelease.Checked).Save(_runtime.DataRoot);
         }
-        catch (Exception exception)
+        catch (Exception)
         {
-            MessageBox.Show($"Die Updateeinstellung konnte nicht gespeichert werden.\n\nUrsache: {exception.Message}", "NETGRID", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show(UiText.Get("launcher.setting.failed"), "NETGRID", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 
@@ -142,14 +174,14 @@ internal sealed class TrayApplicationContext : ApplicationContext
             var candidate = await UpdateDiscovery.CheckAsync(http, UpdateDiscovery.GitHubReleasesApi, InstalledProduct.Version(_runtime.ProgramRoot), _prerelease.Checked);
             if (candidate is null)
             {
-                if (manual) MessageBox.Show("NETGRID ist auf dem neuesten Stand.", "NETGRID Updates", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if (manual) MessageBox.Show(UiText.Get("launcher.update.current"), "NETGRID Updates", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             var prereleaseWarning = candidate.Prerelease
-                ? "\n\nDies ist eine Vorabversion. Ein späteres Downgrade ist nicht zugesichert."
+                ? UiText.Get("launcher.update.prerelease_warning")
                 : string.Empty;
             var answer = MessageBox.Show(
-                $"NETGRID {candidate.Version} ist verfügbar.\n\n{candidate.ReleaseNotes}{prereleaseWarning}\n\nJetzt herunterladen und installieren? Laufende NETGRID-Prozesse werden nach einem geprüften Backup beendet.",
+                UiText.Get("launcher.update.available", candidate.Version, candidate.ReleaseNotes, prereleaseWarning),
                 "NETGRID Update",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question
@@ -158,17 +190,17 @@ internal sealed class TrayApplicationContext : ApplicationContext
             var readiness = await _runtime.UpdateReadinessAsync();
             if (!readiness.Allowed)
             {
-                MessageBox.Show($"Das Update ist blockiert, solange {readiness.ActiveMatchCount} laufende Partie(n) aktiv sind. Beenden Sie diese zuerst.", "NETGRID Update", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(UiText.Get("launcher.update.blocked", readiness.ActiveMatchCount), "NETGRID Update", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-            _tray.Text = "NETGRID Update wird geladen …";
+            _tray.Text = UiText.Get("launcher.update.loading");
             var staging = Path.Combine(_runtime.DataRoot, "runtime", "updates", "staging");
             var setupPath = await UpdateDiscovery.DownloadVerifiedAsync(http, candidate, staging);
             readiness = await _runtime.UpdateReadinessAsync();
             if (!readiness.Allowed)
             {
-                MessageBox.Show("Während des Downloads wurde eine Partie gestartet. Das Update wurde nicht installiert.", "NETGRID Update", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                _tray.Text = "NETGRID läuft";
+                MessageBox.Show(UiText.Get("launcher.update.race"), "NETGRID Update", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                _tray.Text = UiText.Get("launcher.running");
                 return;
             }
             var installedUpdater = Path.Combine(_runtime.ProgramRoot, "NETGRID.Updater.exe");
@@ -195,10 +227,10 @@ internal sealed class TrayApplicationContext : ApplicationContext
         {
             // Offline startup is intentionally silent; NETGRID remains fully usable.
         }
-        catch (Exception exception)
+        catch (Exception)
         {
-            MessageBox.Show($"Das Update konnte nicht vorbereitet werden.\n\nUrsache: {exception.Message}", "NETGRID Update", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            if (!_closing) _tray.Text = "NETGRID läuft";
+            MessageBox.Show($"{UiText.Get("launcher.update.failed")}\n\n{UiText.Get("launcher.error.help")}", "NETGRID Update", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            if (!_closing) _tray.Text = UiText.Get("launcher.running");
         }
         finally
         {
@@ -217,7 +249,7 @@ internal sealed class TrayApplicationContext : ApplicationContext
     {
         if (_closing) return;
         _closing = true;
-        _tray.Text = "NETGRID wird beendet …";
+        _tray.Text = UiText.Get("launcher.stopping");
         if (_runtime is not null)
         {
             await _runtime.DisposeAsync();

@@ -119,7 +119,12 @@ denselben SHA-256-Wert nennen; laufende Partien blockieren die Installation.
 Nach kontrolliertem Stopp erzeugt der getrennte Updater ein geprüftes
 `pre_update`-Backup, führt das MSI-Upgrade aus und startet erst nach Healthcheck
 neu. Bei Fehlern werden Programm und Daten soweit sicher möglich zurückgerollt,
-andernfalls bleibt NETGRID klar diagnostiziert gestoppt. Die installerunabhängigen
+andernfalls bleibt NETGRID klar diagnostiziert gestoppt. Alle Windows-
+Oberflächen verwenden eine gemeinsame vollständige Sprachquelle für Deutsch,
+Englisch und Französisch sowie das NETGRID-Icon. Die 3×3-Setup-Renderprüfung
+deckt alle Sprachen bei 100, 125 und 150 Prozent ab. Der Launcher erzeugt auf
+Nutzeraktion ein lokales, redigiertes Diagnose-ZIP ohne Datenbanken, Spiele,
+Credentials, Tokens oder private Kartenbilder. Die installerunabhängigen
 Produktvoraussetzungen sind umgesetzt: Releasebuilds tragen `V1.0` plus
 fortlaufende Git-Buildnummer, die gespeicherte Retention-Policy wird beim
 Backend-Start sofort asynchron geprüft, und lokale Installationen können ohne

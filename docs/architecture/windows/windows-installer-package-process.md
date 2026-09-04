@@ -1,7 +1,7 @@
 # Paketprozess: Windows-Installer und Launcher
 
 Stand: 2026-09-04  
-Status: in Umsetzung; WIN-I00 bis WIN-I06 verifiziert, nächstes Paket WIN-I07
+Status: in Umsetzung; WIN-I00 bis WIN-I07 verifiziert, nächstes Paket WIN-I08
 
 ## Quelle und Zielprüfung
 
@@ -196,6 +196,20 @@ eigene Account-, Cleanup- oder Versionsautorität.
   ersetzt die lokal gecachte Vorversion. Bei einem nachgelagerten Fehler werden
   Programm und Backup zurückgerollt; kann das nicht sicher abgeschlossen
   werden, bleibt NETGRID mit Diagnose gestoppt.
+- WIN-I07 bündelt eine gemeinsame, beim Build auf Schlüssel- und
+  Platzhaltervollständigkeit geprüfte Windows-Sprachquelle für Deutsch,
+  Englisch und Französisch. Setup erlaubt die Sprachwahl vor dem Assistenten;
+  First Run, Launcher, Recovery und Updater folgen der Windows-Sprache mit
+  Englisch als explizitem Fallback.
+- Setup, installierte Anwendungen, Tray und Verknüpfungen verwenden das
+  NETGRID-Icon. Die Setupoberfläche wurde mit echten Renderings für alle drei
+  Sprachen bei 100, 125 und 150 Prozent geprüft; lange französische Texte
+  führten dabei zu einer korrigierten Gruppen- und Feldgeometrie.
+- Der Launcher exportiert nur auf Nutzeraktion ein lokales ZIP mit
+  Produkt-/Systemmetadaten, redigierter Runtimekonfiguration und bekannten
+  Launcher-/Updaterlogs. SQLite, Spiele, Credentials, Tokens und private
+  Kartenbilder sind ausgeschlossen; der Leak-Smoke injiziert und verwirft
+  diese Inhalte ausdrücklich.
 
 ## Verifikationsregeln
 
