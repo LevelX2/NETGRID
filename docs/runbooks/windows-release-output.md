@@ -67,6 +67,26 @@ inhaltlich und über Manifest/Prüfsummen verifizierbar, aber nicht
 byteidentisch (siehe [WiX-Issue #8978](https://github.com/wixtoolset/issues/issues/8978)). Release-Metadaten müssen für eine Veröffentlichung
 `sourceDirty: false` ausweisen.
 
+Die Laufzeitmaterialisierung lädt das fest konfigurierte offizielle
+Node.js-24-x64-Archiv nur bei fehlendem lokalen Cache unter `.tools/downloads`,
+prüft dessen SHA-256 und übernimmt ausschließlich `node.exe` und die
+Node-Lizenz. Die selbstenthaltene .NET-Runtimekonfiguration und ihre
+Rechtstexte entstehen im selben Build. Ein Netzwerk- oder Hashfehler stoppt
+die Paketierung; es gibt keinen Ersatzdownload.
+
+Der direkt ausführbare Datenvertragstest setzt voraus, dass der Installerinput
+bereits gebaut wurde:
+
+```powershell
+corepack pnpm test:windows-runtime-config
+```
+
+Er verwendet ausschließlich einen temporären Datenroot. Geprüft werden
+atomare Secret-Erzeugung, bytegleicher Repair, Benutzerrechte für veränderliche
+Daten, Schreibschutz der Konfiguration sowie das fail-closed Verhalten bei
+UNC-Pfaden, Pfadüberlappung und ungültigem vorhandenem Secret. Die erhöhte
+echte Install-/Repair-/Uninstall-Matrix folgt im Windows-11-Releasegate.
+
 ## Isolierten Frischstart prüfen
 
 ```powershell

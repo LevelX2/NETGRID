@@ -12,6 +12,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 
 const releaseRoot = requiredPath("--release");
+const installerInputRoot = requiredPath("--installer-input");
 const msiPath = requiredPath("--msi");
 const setupPath = requiredPath("--setup");
 const dotnetPath = requiredPath("--dotnet");
@@ -28,6 +29,7 @@ try {
   if (layoutMatches.length !== 1)
     throw new Error(`installer_product_root_ambiguous:${layoutMatches.length}`);
   const installedProductRoot = path.dirname(layoutMatches[0]);
+  const productLayout = JSON.parse(readFileSync(layoutMatches[0], "utf8"));
   const manifest = JSON.parse(
     readFileSync(path.join(releaseRoot, "product-manifest.json"), "utf8"),
   );
@@ -41,6 +43,29 @@ try {
     bytes: statSync(path.join(releaseRoot, "product-manifest.json")).size,
     sha256: sha256(path.join(releaseRoot, "product-manifest.json")),
   });
+  const installerFiles = new Map([
+    ["legal/NETGRID-LICENSE.txt", "legal/NETGRID-LICENSE.txt"],
+    ["legal/THIRD-PARTY-NOTICES.txt", "legal/THIRD-PARTY-NOTICES.txt"],
+    ["legal/NODE-LICENSE.txt", "legal/NODE-LICENSE.txt"],
+    ["legal/DOTNET-LICENSE.txt", "legal/DOTNET-LICENSE.txt"],
+    [
+      "legal/DOTNET-THIRD-PARTY-NOTICES.txt",
+      "legal/DOTNET-THIRD-PARTY-NOTICES.txt",
+    ],
+    ["runtime/node/node.exe", "runtime/node/node.exe"],
+    [
+      "tools/NETGRID.RuntimeConfig.exe",
+      "runtime-config/NETGRID.RuntimeConfig.exe",
+    ],
+  ]);
+  for (const [installedRelative, inputRelative] of installerFiles) {
+    const input = path.join(installerInputRoot, ...inputRelative.split("/"));
+    assertFile(input, `installer_input_missing:${inputRelative}`);
+    expected.set(installedRelative, {
+      bytes: statSync(input).size,
+      sha256: sha256(input),
+    });
+  }
   for (const [relative, metadata] of expected) {
     const installed = path.join(installedProductRoot, ...relative.split("/"));
     assertFile(installed, `installer_payload_missing:${relative}`);
@@ -50,21 +75,55 @@ try {
     )
       throw new Error(`installer_payload_mismatch:${relative}`);
   }
-  const allowedExtras = new Set([
-    "legal/NETGRID-LICENSE.txt",
-    "legal/THIRD-PARTY-NOTICES.txt",
-  ]);
   const installedFiles = collectFiles(installedProductRoot).map((file) =>
     slash(path.relative(installedProductRoot, file)),
   );
   for (const relative of installedFiles)
-    if (!expected.has(relative) && !allowedExtras.has(relative))
+    if (!expected.has(relative))
       throw new Error(`installer_payload_unexpected:${relative}`);
-  for (const relative of allowedExtras)
-    assertFile(
-      path.join(installedProductRoot, ...relative.split("/")),
-      `installer_legal_payload_missing:${relative}`,
-    );
+  const nodeRuntime = path.join(
+    installedProductRoot,
+    "runtime",
+    "node",
+    "node.exe",
+  );
+  const nodeVersion = run(nodeRuntime, ["--version"]).stdout.trim();
+  if (!/^v24\.\d+\.\d+$/.test(nodeVersion))
+    throw new Error(`installer_node_version_invalid:${nodeVersion}`);
+
+  const decompiledPath = path.join(scratch, "package.wxs");
+  run(dotnetPath, [
+    "tool",
+    "run",
+    "wix",
+    "--",
+    "-acceptEula",
+    "wix7",
+    "msi",
+    "decompile",
+    msiPath,
+    "-o",
+    decompiledPath,
+  ]);
+  const authoring = readFileSync(decompiledPath, "utf8");
+  if (
+    !authoring.includes('UpgradeCode="{D8271ACB-E70F-4CD5-9832-DEFE6A052B9F}"')
+  )
+    throw new Error("installer_upgrade_code_invalid");
+  if (
+    !authoring.includes(`Version="${productLayout.product.installerVersion}"`)
+  )
+    throw new Error("installer_product_version_invalid");
+  if (
+    !authoring.includes(
+      '<CustomAction Id="InitializeNetgridRuntime" HideTarget="yes" Impersonate="no" Execute="deferred"',
+    ) ||
+    !authoring.includes(
+      '<Custom Action="InitializeNetgridRuntime" Condition="NOT REMOVE~=&quot;ALL&quot;"',
+    ) ||
+    !authoring.includes('<Property Id="NETGRID_DATA_ROOT" Secure="yes" />')
+  )
+    throw new Error("installer_runtime_initialization_contract_invalid");
 
   const bundleRoot = path.join(scratch, "bundle");
   run(dotnetPath, [
@@ -117,6 +176,7 @@ function run(command, args) {
     throw new Error(
       `installer_command_failed:${command}:${result.status}:${result.stderr.trim()}`,
     );
+  return result;
 }
 
 function collectFiles(root) {

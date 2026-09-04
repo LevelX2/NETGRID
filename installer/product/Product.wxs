@@ -14,17 +14,55 @@
     <StandardDirectory Id="ProgramFiles64Folder">
       <Directory Id="INSTALLFOLDER" Name="NETGRID">
         <Directory Id="LEGALFOLDER" Name="legal" />
+        <Directory Id="RUNTIMEFOLDER" Name="runtime">
+          <Directory Id="NODEFOLDER" Name="node" />
+        </Directory>
+        <Directory Id="TOOLSFOLDER" Name="tools" />
       </Directory>
     </StandardDirectory>
 
     <Files Include="$(ReleaseRoot)\**" Directory="INSTALLFOLDER" />
 
+    <Component Directory="NODEFOLDER">
+      <File Id="NetgridNodeRuntime" Source="$(NodeRoot)\node.exe" />
+    </Component>
+    <Component Directory="TOOLSFOLDER">
+      <File Id="NetgridRuntimeConfig" Source="$(RuntimeConfigRoot)\NETGRID.RuntimeConfig.exe" />
+    </Component>
     <Component Directory="LEGALFOLDER">
       <File Id="NetgridLicense" Source="$(LegalRoot)\NETGRID-LICENSE.txt" />
     </Component>
     <Component Directory="LEGALFOLDER">
       <File Id="ThirdPartyNotices" Source="$(LegalRoot)\THIRD-PARTY-NOTICES.txt" />
     </Component>
+    <Component Directory="LEGALFOLDER">
+      <File Id="NodeLicense" Source="$(LegalRoot)\NODE-LICENSE.txt" />
+    </Component>
+    <Component Directory="LEGALFOLDER">
+      <File Id="DotnetLicense" Source="$(LegalRoot)\DOTNET-LICENSE.txt" />
+    </Component>
+    <Component Directory="LEGALFOLDER">
+      <File Id="DotnetThirdPartyNotices" Source="$(LegalRoot)\DOTNET-THIRD-PARTY-NOTICES.txt" />
+    </Component>
+
+    <Property Id="NETGRID_DATA_ROOT" Secure="yes" />
+    <SetProperty
+      Id="InitializeNetgridRuntime"
+      Value='initialize --data-root "[NETGRID_DATA_ROOT]"'
+      Before="InitializeNetgridRuntime"
+      Sequence="execute"
+      Condition='NOT REMOVE~="ALL"' />
+    <CustomAction
+      Id="InitializeNetgridRuntime"
+      FileRef="NetgridRuntimeConfig"
+      ExeCommand="[CustomActionData]"
+      Execute="deferred"
+      Impersonate="no"
+      Return="check"
+      HideTarget="yes" />
+    <InstallExecuteSequence>
+      <Custom Action="InitializeNetgridRuntime" After="InstallFiles" Condition='NOT REMOVE~="ALL"' />
+    </InstallExecuteSequence>
 
     <Icon Id="NetgridIcon" SourceFile="$(NetgridIcon)" />
     <Property Id="ARPPRODUCTICON" Value="NetgridIcon" />

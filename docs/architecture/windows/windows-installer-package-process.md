@@ -1,7 +1,7 @@
 # Paketprozess: Windows-Installer und Launcher
 
 Stand: 2026-09-04  
-Status: in Umsetzung; WIN-I00 und WIN-I01 verifiziert, nächstes Paket WIN-I02
+Status: in Umsetzung; WIN-I00 bis WIN-I02 verifiziert, nächstes Paket WIN-I03
 
 ## Quelle und Zielprüfung
 
@@ -115,6 +115,22 @@ eigene Account-, Cleanup- oder Versionsautorität.
   Reproduzierbarkeit bedeutet deshalb eine gepinnte, wiederholbare Buildstrecke
   mit manifestgebundener Payload und Prüfsummen je erzeugtem Artefakt; eine
   behauptete Byte-Reproduzierbarkeit wäre sachlich falsch.
+- WIN-I02 liefert ausschließlich `node.exe` aus dem per SHA-256 gepinnten
+  offiziellen Node.js-24.20.0-x64-Archiv sowie dessen Lizenz aus. Der
+  selbstenthaltene .NET-Runtimekonfigurator erzeugt das Tokensalz intern aus
+  32 kryptografisch zufälligen Bytes und übernimmt nie ein Secret aus einer
+  MSI-Eigenschaft oder Kommandozeile.
+- Der Datenroot muss absolut, lokal, fest eingebaut, von Program Files getrennt
+  und frei von Reparse-Points sein. `runtime` und `card-images` sind für lokale
+  Benutzer änderbar; `config` und die dortige `runtime.env` bleiben
+  installerverwaltet und nur lesbar. Reparatur erhält eine bestehende valide
+  Konfiguration bytegleich. Die Initialisierung läuft nicht bei
+  Deinstallation, und die Datenroot-Registrierung bleibt für eine spätere
+  Neuinstallation erhalten.
+- Der isolierte Initialisierungs-/Repair-/ACL-Test sowie der vollständige MSI-
+  Extraktions-, Decompile-, Manifest- und Bundle-Audit sind grün. Die echte
+  erhöhte Install-/Repair-/Uninstall-Matrix bleibt zusätzlich Bestandteil des
+  sauberen Windows-11-Gesamtgates in WIN-I08.
 
 ## Verifikationsregeln
 

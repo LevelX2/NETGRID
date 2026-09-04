@@ -94,8 +94,12 @@ werden nicht ausgeliefert. Führend sind
 Runbook. Ein auf .NET SDK 10.0.302 und WiX 7.0.0 gepinntes MSI-/Burn-
 Installerskelett baut ausschließlich den auditierten Produktoutput, erfasst
 die Runtime-Lizenzen und prüft die extrahierte Payload vollständig gegen das
-Produktmanifest. Launcher, Daten-/ACL-Einrichtung, Firewallsetup und Updater
-sind noch nicht implementiert. Die installerunabhängigen
+Produktmanifest. Die offizielle Node.js-24.20.0-x64-Laufzeit und eine
+selbstenthaltene .NET-Komponente richten einen validierten lokalen Datenroot,
+geschützte Runtimekonfiguration, intern erzeugtes Tokensalz und getrennte
+ACLs idempotent ein; Standarddeinstallation und Reparatur bewahren bestehende
+Daten. Launcher, geführte Setupoberfläche, Firewallsetup und Updater sind noch
+nicht implementiert. Die installerunabhängigen
 Produktvoraussetzungen sind umgesetzt: Releasebuilds tragen `V1.0` plus
 fortlaufende Git-Buildnummer, die gespeicherte Retention-Policy wird beim
 Backend-Start sofort asynchron geprüft, und lokale Installationen können ohne

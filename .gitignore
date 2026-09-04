@@ -6,6 +6,8 @@ AGENTS.local.md
 .codex-runlogs/
 .tools/
 .wix/
+apps/windows/**/bin/
+apps/windows/**/obj/
 
 node_modules/
 .pnpm-store/

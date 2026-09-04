@@ -18,6 +18,8 @@ $OutputRoot = if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
 }
 $installerInputRoot = Join-Path $projectRoot "output\windows-installer-input"
 $legalRoot = Join-Path $installerInputRoot "legal"
+$nodeRoot = Join-Path $installerInputRoot "runtime\node"
+$runtimeConfigRoot = Join-Path $installerInputRoot "runtime-config"
 $localDotnet = Join-Path $projectRoot ".tools\dotnet\dotnet.exe"
 $dotnet = if (Test-Path -LiteralPath $localDotnet -PathType Leaf) {
   $localDotnet
@@ -27,6 +29,20 @@ $dotnet = if (Test-Path -LiteralPath $localDotnet -PathType Leaf) {
     throw "Das in global.json gepinnte .NET SDK 10.0.302 ist nicht verfügbar."
   }
   $command.Source
+}
+
+function Reset-InstallerInput {
+  param([string]$Path, [string]$ProjectRoot)
+  $resolvedPath = [System.IO.Path]::GetFullPath($Path)
+  $allowedRoot = [System.IO.Path]::GetFullPath((Join-Path $ProjectRoot "output")) + [System.IO.Path]::DirectorySeparatorChar
+  if (-not $resolvedPath.StartsWith($allowedRoot, [System.StringComparison]::OrdinalIgnoreCase) -or
+      $resolvedPath -eq $allowedRoot.TrimEnd([System.IO.Path]::DirectorySeparatorChar)) {
+    throw "Der Installer-Eingabepfad liegt außerhalb des erlaubten Outputbereichs."
+  }
+  if (Test-Path -LiteralPath $resolvedPath) {
+    Remove-Item -LiteralPath $resolvedPath -Recurse -Force
+  }
+  New-Item -ItemType Directory -Path $resolvedPath -Force | Out-Null
 }
 
 Push-Location $projectRoot
@@ -44,10 +60,59 @@ try {
     throw "Ungültige Installer-Version im Produktlayout: $productVersion"
   }
 
+  Reset-InstallerInput -Path $installerInputRoot -ProjectRoot $projectRoot
   New-Item -ItemType Directory -Path $legalRoot -Force | Out-Null
   Copy-Item -LiteralPath (Join-Path $projectRoot "LICENSE") -Destination (Join-Path $legalRoot "NETGRID-LICENSE.txt") -Force
   & node scripts/build-third-party-notices.mjs --release $ReleaseRoot --output (Join-Path $legalRoot "THIRD-PARTY-NOTICES.txt")
   if ($LASTEXITCODE -ne 0) { throw "Drittanbieterhinweise konnten nicht erzeugt werden." }
+
+  $nodeDefinition = Get-Content -LiteralPath (Join-Path $projectRoot "installer\runtime\node-runtime.json") -Raw | ConvertFrom-Json
+  $downloadRoot = Join-Path $projectRoot ".tools\downloads"
+  New-Item -ItemType Directory -Path $downloadRoot -Force | Out-Null
+  $nodeArchive = Join-Path $downloadRoot ([string]$nodeDefinition.archive)
+  if (-not (Test-Path -LiteralPath $nodeArchive -PathType Leaf) -or
+      (Get-FileHash -LiteralPath $nodeArchive -Algorithm SHA256).Hash.ToLowerInvariant() -ne [string]$nodeDefinition.sha256) {
+    $partialArchive = "$nodeArchive.partial"
+    Invoke-WebRequest -UseBasicParsing -Uri ([string]$nodeDefinition.url) -OutFile $partialArchive
+    $downloadedHash = (Get-FileHash -LiteralPath $partialArchive -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($downloadedHash -ne [string]$nodeDefinition.sha256) {
+      Remove-Item -LiteralPath $partialArchive -Force
+      throw "Die heruntergeladene Node-Laufzeit stimmt nicht mit der gepinnten SHA-256-Prüfsumme überein."
+    }
+    Move-Item -LiteralPath $partialArchive -Destination $nodeArchive -Force
+  }
+  New-Item -ItemType Directory -Path $nodeRoot -Force | Out-Null
+  Add-Type -AssemblyName System.IO.Compression.FileSystem
+  $archive = [System.IO.Compression.ZipFile]::OpenRead($nodeArchive)
+  try {
+    $nodeExecutableEntry = $archive.GetEntry("$($nodeDefinition.rootDirectory)/node.exe")
+    $nodeLicenseEntry = $archive.GetEntry("$($nodeDefinition.rootDirectory)/LICENSE")
+    if (-not $nodeExecutableEntry -or -not $nodeLicenseEntry) {
+      throw "Die gepinnte Node-Laufzeit enthält nicht die erwarteten Produktdateien."
+    }
+    [System.IO.Compression.ZipFileExtensions]::ExtractToFile($nodeExecutableEntry, (Join-Path $nodeRoot "node.exe"), $true)
+    [System.IO.Compression.ZipFileExtensions]::ExtractToFile($nodeLicenseEntry, (Join-Path $legalRoot "NODE-LICENSE.txt"), $true)
+  } finally {
+    $archive.Dispose()
+  }
+  $nodeVersion = (& (Join-Path $nodeRoot "node.exe") --version).TrimStart("v")
+  if ($LASTEXITCODE -ne 0 -or $nodeVersion -ne [string]$nodeDefinition.version) {
+    throw "Die materialisierte Node-Laufzeit besitzt nicht die gepinnte Version."
+  }
+
+  Copy-Item -LiteralPath (Join-Path (Split-Path -Parent $dotnet) "LICENSE.txt") -Destination (Join-Path $legalRoot "DOTNET-LICENSE.txt") -Force
+  Copy-Item -LiteralPath (Join-Path (Split-Path -Parent $dotnet) "ThirdPartyNotices.txt") -Destination (Join-Path $legalRoot "DOTNET-THIRD-PARTY-NOTICES.txt") -Force
+  & $dotnet publish apps/windows/Netgrid.RuntimeConfig/Netgrid.RuntimeConfig.csproj `
+    -c Release -r win-x64 --self-contained true `
+    -p:DebugType=None -p:DebugSymbols=false `
+    -o $runtimeConfigRoot
+  if ($LASTEXITCODE -ne 0) { throw "Die NETGRID-Runtimekonfiguration konnte nicht gebaut werden." }
+  $runtimeConfigExecutable = Join-Path $runtimeConfigRoot "NETGRID.RuntimeConfig.exe"
+  if (-not (Test-Path -LiteralPath $runtimeConfigExecutable -PathType Leaf)) {
+    throw "Die selbst enthaltene NETGRID-Runtimekonfiguration fehlt."
+  }
+  & powershell -ExecutionPolicy Bypass -File scripts/test-windows-runtime-config.ps1 -Executable $runtimeConfigExecutable
+  if ($LASTEXITCODE -ne 0) { throw "Die NETGRID-Runtimekonfiguration hat ihre Isolationstests nicht bestanden." }
 
   & $dotnet tool restore
   if ($LASTEXITCODE -ne 0) { throw "WiX Toolset 7.0.0 konnte nicht wiederhergestellt werden." }
@@ -64,6 +129,8 @@ try {
     -d "ProductVersion=$productVersion" `
     -d "ReleaseRoot=$ReleaseRoot" `
     -d "LegalRoot=$legalRoot" `
+    -d "NodeRoot=$nodeRoot" `
+    -d "RuntimeConfigRoot=$runtimeConfigRoot" `
     -d "NetgridIcon=$iconPath" `
     -intermediateFolder (Join-Path $intermediateRoot "product") `
     -pdbtype none `
@@ -82,7 +149,7 @@ try {
     installer/bundle/Bundle.wxs
   if ($LASTEXITCODE -ne 0) { throw "NETGRID-Setup konnte nicht gebaut werden." }
 
-  & node scripts/check-windows-installer.mjs --release $ReleaseRoot --msi $msiPath --setup $setupPath --dotnet $dotnet
+  & node scripts/check-windows-installer.mjs --release $ReleaseRoot --installer-input $installerInputRoot --msi $msiPath --setup $setupPath --dotnet $dotnet
   if ($LASTEXITCODE -ne 0) { throw "Installer-Payloadprüfung ist fehlgeschlagen." }
 
   $releaseMetadata = [ordered]@{
@@ -90,6 +157,17 @@ try {
     product = $layout.product
     platform = "windows-x64"
     unsignedPrivateAlpha = $true
+    runtime = [ordered]@{
+      nodeVersion = [string]$nodeDefinition.version
+      nodeArchiveSha256 = [string]$nodeDefinition.sha256
+      runtimeConfigSha256 = (Get-FileHash -LiteralPath $runtimeConfigExecutable -Algorithm SHA256).Hash.ToLowerInvariant()
+    }
+    dataContract = [ordered]@{
+      defaultRoot = "C:\ProgramData\NETGRID"
+      mutableDirectories = @("runtime", "card-images")
+      installerManagedDirectories = @("config")
+      retainOnUninstall = $true
+    }
     artifacts = @(
       [ordered]@{ name = [System.IO.Path]::GetFileName($setupPath); sha256 = (Get-FileHash -LiteralPath $setupPath -Algorithm SHA256).Hash.ToLowerInvariant() },
       [ordered]@{ name = [System.IO.Path]::GetFileName($msiPath); sha256 = (Get-FileHash -LiteralPath $msiPath -Algorithm SHA256).Hash.ToLowerInvariant() }

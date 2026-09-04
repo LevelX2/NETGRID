@@ -1,8 +1,8 @@
 # Windows-Installer-Produktvertrag
 
 Stand: 2026-09-04  
-Status: beschlossenes Zielbild; Anwendungsvoraussetzungen und
-Installerskelett umgesetzt, Launcher/First Run/Updater noch offen
+Status: beschlossenes Zielbild; Anwendungsvoraussetzungen, Installerskelett
+und Datenbasis umgesetzt, Launcher/First Run/Updater noch offen
 
 ## Zweck und Grenze
 
@@ -87,6 +87,32 @@ werden können.
   Einstellungen, Kartenbilder und Backups standardmäßig erhalten. „Alle
   NETGRID-Daten endgültig löschen“ ist eine gesonderte, nicht vorausgewählte
   und lokalisierte Bestätigung.
+
+### Umgesetzte Installations- und Datenbasis
+
+- Der Installer liefert die offizielle Node.js-24.20.0-x64-Laufzeit als
+  minimales `runtime/node/node.exe` aus. Das Quellarchiv ist mit seiner
+  veröffentlichten SHA-256-Prüfsumme gepinnt; Node- und .NET-Lizenzen sowie
+  Drittanbieterhinweise liegen unter `legal`.
+- `NETGRID.RuntimeConfig.exe` ist eine selbstenthaltene .NET-10-Windows-
+  Komponente. Sie bestimmt ohne benutzerdefinierte Angabe
+  `C:\ProgramData\NETGRID`, bewahrt eine zuvor registrierte Auswahl und
+  speichert den gewählten Datenroot unter
+  `HKLM\SOFTWARE\LevelX2\NETGRID`.
+- Die Komponente erzeugt `config/runtime.env` atomar aus der freigegebenen
+  Vorlage. `NETGRID_TOKEN_SALT` entsteht intern aus 32 Zufallsbytes und wird
+  nie über MSI-Eigenschaften, Prozessargumente oder Ausgaben transportiert.
+  Eine vorhandene valide Konfiguration wird bei Repair nicht ersetzt; ein
+  Platzhalter oder abweichender Datenroot bricht sichtbar ab.
+- `runtime`, dessen bekannten Unterordner und `card-images` geben der lokalen
+  Benutzergruppe Änderungsrechte. Der Root ist nur durchquerbar, `config`
+  samt Runtimekonfiguration und Installationsstatus nur lesbar; Administratoren
+  und Local System behalten Vollzugriff.
+- UNC-Pfade, nicht feste Laufwerke, Laufwerkswurzeln, Reparse-Points und jede
+  Überlappung mit dem Programmordner sind fail-closed. Die MSI-
+  Initialisierung ist erhöht, als Deferred Action verborgen und für
+  vollständige Deinstallationen ausgeschlossen. Deshalb bleiben Produktdaten
+  beim Standard-Uninstall unangetastet.
 
 ### Aufbewahrung gespeicherter Spiele
 
