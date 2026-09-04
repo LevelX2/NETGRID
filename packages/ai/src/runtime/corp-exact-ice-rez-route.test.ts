@@ -124,6 +124,65 @@ describe("exact Corp ICE rez route", () => {
     });
   });
 
+  it("compares exact alternate-subtype rez variants and chooses the one that blocks the visible rig", () => {
+    resetResidentPlanPortfolioMemory();
+    const fixture = engineIceRezWindow("onr_proteus_017_credit-blocks", 0, {
+      corpCredits: 14,
+      runnerCredits: 9,
+      runnerPrograms: ["onr_v1_040_loony-goon", "onr_v1_014_codecracker"],
+      selectedSubtypesAfterRez: "wall",
+      includeAllRezVariants: true,
+      includeDecline: true,
+    });
+
+    expect(fixture.engineAction).toMatchObject({
+      costs: [{ credits: 7 }],
+      payload: {
+        variableRezKind: "alternate_subtype",
+        variableRezValue: 1,
+        selectedSubtypesAfterRez: "wall",
+      },
+    });
+    expect(
+      fixture.sourceCard.effectiveRezActionResourceExchangeQuotes?.find(
+        (entry) => entry.actionId === fixture.engineAction.actionId,
+      ),
+    ).toMatchObject({
+      quote: {
+        complete: true,
+        runnerBreakUnavailable: {
+          reason: "no_visible_eligible_breaker",
+        },
+      },
+    });
+    expect(
+      projectExactCorpIceRezRoute({
+        input: fixture.input,
+        candidate: fixture.candidate,
+        sourceCard: fixture.sourceCard,
+        targetServerId: "rd",
+      }),
+    ).toMatchObject({
+      actionId: fixture.engineAction.actionId,
+      totalRezCredits: 7,
+      routeKind: "access_reduction",
+      effect: "satisfied",
+      accessBlock: {
+        reason: "no_visible_eligible_breaker",
+      },
+    });
+    expect(
+      chooseAiAction(fixture.input, {
+        persistTacticalPlanMemory: false,
+        corpTurnPlannerMode: "legacy_compare",
+      }),
+    ).toMatchObject({
+      actionId: fixture.engineAction.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+    });
+  });
+
   it("accepts an Engine-certified Olivia Salazar rez receipt without using printed rezCost", () => {
     const fixture = engineOliviaIceRezWindow();
     const ordinaryProjection = projectExactCorpIceRezRoute({
@@ -1708,6 +1767,8 @@ function engineIceRezWindow(
     futureIceDefinitionId?: string;
     futureIceRezzed?: boolean;
     rezSubroutineCount?: number;
+    selectedSubtypesAfterRez?: string;
+    includeAllRezVariants?: boolean;
     includeDecline?: boolean;
     useEntrapmentFixtureDeck?: boolean;
     useExistingIceFromDeck?: boolean;
@@ -1835,7 +1896,10 @@ function engineIceRezWindow(
       action.payload?.cardId === iceId &&
       (options?.rezSubroutineCount === undefined ||
         action.payload.effectiveSubroutineCountAfterRez ===
-          options.rezSubroutineCount),
+          options.rezSubroutineCount) &&
+      (options?.selectedSubtypesAfterRez === undefined ||
+        action.payload.selectedSubtypesAfterRez ===
+          options.selectedSubtypesAfterRez),
   );
   if (!rezAction) {
     throw new Error("Engine did not expose a payable ICE rez action");
@@ -1846,7 +1910,12 @@ function engineIceRezWindow(
     playerView,
     eventTail: [],
     legalActions: [
-      rezAction,
+      ...(options?.includeAllRezVariants
+        ? currentActions.filter(
+            (action) =>
+              action.type === "rez_ice" && action.payload?.cardId === iceId,
+          )
+        : [rezAction]),
       ...(options?.includeDecline
         ? currentActions.filter((action) => action.type === "decline_rez")
         : []),

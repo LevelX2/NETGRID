@@ -89,11 +89,18 @@ export function buildPlayerViewProjection(
         side === "corp"
           ? legalActions.flatMap((action) => {
               const count = action.payload?.effectiveSubroutineCountAfterRez;
+              const selectedSubtypes =
+                action.payload?.variableRezKind === "alternate_subtype" &&
+                typeof action.payload.selectedSubtypesAfterRez === "string"
+                  ? action.payload.selectedSubtypesAfterRez
+                      .split(",")
+                      .filter((subtype) => subtype.length > 0)
+                  : undefined;
               if (
                 action.type !== "rez_ice" ||
                 action.source !== id ||
-                !Number.isSafeInteger(count) ||
-                (count as number) < 0
+                ((!Number.isSafeInteger(count) || (count as number) < 0) &&
+                  (!selectedSubtypes || selectedSubtypes.length === 0))
               ) {
                 return [];
               }
@@ -101,7 +108,14 @@ export function buildPlayerViewProjection(
                 state,
                 id,
                 visibleIce,
-                { hardEndTheRunSubroutineCountAfterRez: count as number },
+                {
+                  ...(Number.isSafeInteger(count)
+                    ? { hardEndTheRunSubroutineCountAfterRez: count as number }
+                    : {}),
+                  ...(selectedSubtypes
+                    ? { subtypesAfterRez: selectedSubtypes }
+                    : {}),
+                },
               );
               return quote ? [{ actionId: action.actionId, quote }] : [];
             })

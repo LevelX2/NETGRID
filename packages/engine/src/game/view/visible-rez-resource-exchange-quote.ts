@@ -43,6 +43,7 @@ export function visibleCorpIceRezResourceExchangeQuote(
   visibleIce: VisibleCard,
   options: {
     hardEndTheRunSubroutineCountAfterRez?: number;
+    subtypesAfterRez?: readonly string[];
   } = {},
 ): VisibleCorpIceRezResourceExchangeQuote | undefined {
   const server = state.corp.servers.find((candidate) =>
@@ -76,11 +77,19 @@ export function visibleCorpIceRezResourceExchangeQuote(
       reason: "not_current_approached_ice",
     };
   }
-  const projectedRunQuote = visibleEffectiveIceRunQuote(state, iceId, {
+  const projectedVisibleIce: VisibleCard = {
     ...visibleIce,
     known: true,
     rezzed: true,
-  });
+    ...(options.subtypesAfterRez
+      ? { subtypes: [...options.subtypesAfterRez] }
+      : {}),
+  };
+  const projectedRunQuote = visibleEffectiveIceRunQuote(
+    state,
+    iceId,
+    projectedVisibleIce,
+  );
   if (!projectedRunQuote)
     return {
       ...binding,
@@ -133,7 +142,7 @@ export function visibleCorpIceRezResourceExchangeQuote(
   const reads = activeRunnerRig.map((breaker) =>
     quoteRunnerBreak({
       breaker,
-      ice: visibleIce,
+      ice: projectedVisibleIce,
       endTheRunCount,
       additionalBreakCost:
         projectedRunQuote.breakSubroutineAdditionalCostPerSubroutine ?? 0,
