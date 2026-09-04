@@ -17467,8 +17467,8 @@ describe("authoritative plan-first live runtime", () => {
           creditsAfterInstall: 7,
           deferReason: "no_current_need",
           currentNeed: "none",
-          developmentRole: "generic_persistent",
-          strategicFit: "neutral",
+          developmentRole: "unknown",
+          strategicFit: "weak",
         }),
       ],
       buildRunnerEconomyPosture: () => ({
