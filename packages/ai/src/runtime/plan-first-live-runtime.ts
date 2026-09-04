@@ -26529,7 +26529,13 @@ function runnerRecurringEconomySignals(
       const profile = runnerRestrictedRunCreditProfile(
         candidate.sourceDefinitionId,
       );
-      if (!profile) return [];
+      if (
+        !profile ||
+        !recurringBreakerEngineActive ||
+        !recurringBreakerProviderIds.has(candidate.sourceDefinitionId)
+      ) {
+        return [];
+      }
       const action = input.legalActions.find(
         (legalAction) => legalAction.actionId === candidate.actionId,
       );

@@ -17389,6 +17389,83 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("leaves an undeclared restricted-credit card with the development owner", () => {
+    resetResidentPlanPortfolioMemory();
+    const corolla = visibleCard("corolla-in-grip", "runner", "hardware", {
+      definitionId: "onr_v1_124_corolla-speed-chip",
+      title: "Corolla Speed Chip",
+      installCost: 1,
+    });
+    const installCorolla = legalAction(
+      "install-corolla",
+      "runner",
+      "install_card",
+      "Corolla Speed Chip installieren",
+      { credits: 1, clicks: 1 },
+      {
+        source: corolla.instanceId,
+        payload: { cardId: corolla.instanceId },
+      },
+    );
+    const credit = legalAction(
+      "credit-after-corolla",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [installCorolla, credit]);
+    input.playerView.own.credits = 8;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.stackOrRdCount = 30;
+    input.playerView.own.gripOrHq = [corolla];
+    input.playerView.own.rig = [
+      visibleCard("loony-goon-installed", "runner", "program", {
+        definitionId: "onr_v1_040_loony-goon",
+        subtypes: ["icebreaker", "killer"],
+      }),
+    ];
+
+    const decision = liveContext({
+      runnerStrategicIntentForInput: recurringProgramSearchIntent,
+      evaluateRunnerHandDevelopment: () => [
+        handEvaluation({
+          cardInstanceId: corolla.instanceId,
+          definitionId: "onr_v1_124_corolla-speed-chip",
+          legalActionId: installCorolla.actionId,
+          priority: 250,
+          duplicateRole: "none",
+          finalInstallFit: 80,
+          cardType: "hardware",
+          installCost: 1,
+          creditsAfterInstall: 7,
+          currentNeed: "acute",
+          developmentRole: "breaker_or_rig_piece",
+          strategicFit: "strong",
+        }),
+      ],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 3,
+        desiredCreditReserve: 5,
+        fundingNeed: false,
+        evidence: [],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: installCorolla.actionId,
+      reasonCode: "plan_first.runner.develop_board_and_hand",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.develop_board_and_hand",
+        planFirstDecision: {
+          selectedPlan: { moduleId: "runner.develop_board_and_hand" },
+          route: { actionId: installCorolla.actionId },
+        },
+      },
+    });
+  });
+
   it("lets a valuable visible run preempt the resident investment after its first payout", () => {
     resetResidentPlanPortfolioMemory();
     const run = legalAction(
