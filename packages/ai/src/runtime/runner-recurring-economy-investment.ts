@@ -23,6 +23,7 @@ export function assessRunnerRestrictedRunEconomyInvestment(params: {
   clicksRemaining: number;
   runnerDeckCount: number;
   urgentRunAvailable: boolean;
+  productiveCentralRunAvailable: boolean;
 }): RunnerRestrictedRunEconomyInvestmentDecision {
   const projectedBreakEvenRuns =
     params.recurringCredits > 0
@@ -45,7 +46,8 @@ export function assessRunnerRestrictedRunEconomyInvestment(params: {
     projectedBreakEvenRuns <= 3 &&
     params.clicksRemaining >= 2 &&
     params.runnerDeckCount > projectedBreakEvenRuns &&
-    !params.urgentRunAvailable;
+    !params.urgentRunAvailable &&
+    !params.productiveCentralRunAvailable;
   if (!install) {
     return {
       decision: "hold",
@@ -62,6 +64,11 @@ export function assessRunnerRestrictedRunEconomyInvestment(params: {
           : []),
         ...(params.urgentRunAvailable
           ? ["runner_restricted_run_economy_yields_to_urgent_run"]
+          : []),
+        ...(params.productiveCentralRunAvailable
+          ? [
+              "runner_restricted_run_economy_yields_to_productive_central_run",
+            ]
           : []),
       ],
     };

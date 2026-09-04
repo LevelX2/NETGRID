@@ -26556,6 +26556,13 @@ function runnerRecurringEconomySignals(
           evaluation.pathPassability === "reachable" &&
           runnerRunHasExactUrgency(input, evaluation),
       );
+      const productiveCentralRunAvailable = runTargets.some(
+        (evaluation) =>
+          evaluation.pathPassability === "reachable" &&
+          evaluation.recommendation === "run_now" &&
+          evaluation.score >= 180 &&
+          evaluation.targetKind !== "remote",
+      );
       const investment = assessRunnerRestrictedRunEconomyInvestment({
         engineLineActive: recurringBreakerEngineActive,
         providerMatches: recurringBreakerProviderIds.has(
@@ -26567,6 +26574,7 @@ function runnerRecurringEconomySignals(
         clicksRemaining: input.playerView.own.clicks,
         runnerDeckCount: input.playerView.own.stackOrRdCount,
         urgentRunAvailable,
+        productiveCentralRunAvailable,
       });
       const handRouteReady =
         handEvaluation.availability === "legal_now" &&

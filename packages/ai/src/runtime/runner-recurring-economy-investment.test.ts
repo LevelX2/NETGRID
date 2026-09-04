@@ -17,6 +17,7 @@ describe("assessRunnerRestrictedRunEconomyInvestment", () => {
         clicksRemaining: 4,
         runnerDeckCount: 30,
         urgentRunAvailable: false,
+        productiveCentralRunAvailable: false,
       }),
     ).toMatchObject({
       decision: "install",
@@ -41,6 +42,7 @@ describe("assessRunnerRestrictedRunEconomyInvestment", () => {
         clicksRemaining: 4,
         runnerDeckCount: 30,
         urgentRunAvailable: false,
+        productiveCentralRunAvailable: false,
       }),
     ).toMatchObject({
       decision: "hold",
@@ -63,12 +65,35 @@ describe("assessRunnerRestrictedRunEconomyInvestment", () => {
         clicksRemaining: 4,
         runnerDeckCount: 30,
         urgentRunAvailable: true,
+        productiveCentralRunAvailable: false,
       }),
     ).toMatchObject({
       decision: "hold",
       priorityClass: "P5",
       evidenceCodes: expect.arrayContaining([
         "runner_restricted_run_economy_yields_to_urgent_run",
+      ]),
+    });
+  });
+
+  it("does not displace a productive central-pressure run", () => {
+    expect(
+      assessRunnerRestrictedRunEconomyInvestment({
+        engineLineActive: true,
+        providerMatches: true,
+        installedCompatibleBreakerCount: 2,
+        installCost: 4,
+        recurringCredits: 2,
+        clicksRemaining: 4,
+        runnerDeckCount: 30,
+        urgentRunAvailable: false,
+        productiveCentralRunAvailable: true,
+      }),
+    ).toMatchObject({
+      decision: "hold",
+      priorityClass: "P5",
+      evidenceCodes: expect.arrayContaining([
+        "runner_restricted_run_economy_yields_to_productive_central_run",
       ]),
     });
   });
