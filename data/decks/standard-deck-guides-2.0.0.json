@@ -2,7 +2,7 @@
   "schemaVersion": "netgrid-standard-deck-guides-v2",
   "guideSetId": "netgrid-standard-deck-guides-2.0.0",
   "catalogId": "netgrid-standard-decks-1.0.0",
-  "analyzedAt": "2026-08-30",
+  "analyzedAt": "2026-09-04",
   "guides": [
     {
       "standardDeckId": "standard_corp_cheap_bag_tricks",
@@ -557,8 +557,8 @@
       "standardDeckId": "standard_corp_mr96xg94",
       "sourceDeckVersion": "1.2.0",
       "sourceDeckHash": "standard-deck:b27802eb",
-      "sourceAnalysisHash": "deck-analysis:66ba169e",
-      "reviewedAt": "2026-08-30",
+      "sourceAnalysisHash": "deck-analysis:c4d700cf",
+      "reviewedAt": "2026-09-04",
       "analysis": {
         "primaryStrategyIds": [
           "corp.overadvance_value",
@@ -670,8 +670,8 @@
       "standardDeckId": "standard_corp_ivory_bastion",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:8bb5499b",
-      "sourceAnalysisHash": "deck-analysis:32a19380",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:b32f5806",
+      "reviewedAt": "2026-09-04",
       "analysis": {
         "primaryStrategyIds": [
           "corp.ice_tax_glacier",
@@ -1746,8 +1746,8 @@
       "standardDeckId": "standard_corp_salazar_toll_road",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:011780e8",
-      "sourceAnalysisHash": "deck-analysis:3d535fb0",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:7194eb8c",
+      "reviewedAt": "2026-09-04",
       "analysis": {
         "primaryStrategyIds": [
           "corp.ice_tax_glacier",
@@ -5189,35 +5189,38 @@
     },
     {
       "standardDeckId": "standard_corp_lucidrine_lockdown",
-      "sourceDeckVersion": "1.2.0",
-      "sourceDeckHash": "standard-deck:1eae6e44",
-      "sourceAnalysisHash": "deck-analysis:9356d687",
+      "sourceDeckVersion": "1.3.0",
+      "sourceDeckHash": "standard-deck:bbe7bfd8",
+      "sourceAnalysisHash": "deck-analysis:46c6e48e",
       "reviewedAt": "2026-09-04",
       "analysis": {
         "primaryStrategyIds": [
-          "corp.fast_advance",
-          "corp.ambush_bluff",
+          "corp.ice_tax_glacier",
           "corp.remote_scoring",
+          "corp.central_stabilize"
+        ],
+        "secondaryStrategyIds": [
+          "corp.ambush_bluff",
+          "corp.fast_advance",
           "corp.rush_score"
         ],
-        "secondaryStrategyIds": [],
         "reviewStatus": "observe"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:faa0f089",
+      "sourceAnalysisInputHash": "deck-analysis-input:9ddd398a",
       "contentByLocale": {
         "en": {
-          "summary": "Lucidrine Lockdown converts central-server taxation into short scoring windows. Its revised ICE suite is built to contest repeated R&D multiaccess without leaving HQ as a free fallback.",
-          "deckIdea": "Lucidrine Lockdown removes low-impact one-credit taxes in favor of thirteen pieces of live ICE and Simon Francisco access compression while preserving three Virus Test Sites as its active remote threat. Ball and Chain and Virizz make repeated breaker use expensive, while Quandary, Credit Blocks, and Fire Wall provide real end-the-run coverage. The objective is not to make R&D permanently impenetrable: tax the Runner on both R&D and HQ, then convert the lost tempo through a dangerous remote, Vapor Ops, and the advancement operations before the Runner can rebuild.",
+          "summary": "Lucidrine Lockdown converts central-server taxation and fort-wide steal costs into short scoring windows against repeated R&D multiaccess.",
+          "deckIdea": "Lucidrine Lockdown uses thirteen pieces of live ICE to tax the route into R&D, then makes the agenda itself expensive to take with Red Herrings. Ball and Chain and Virizz make repeated breaker use expensive, while Quandary, Credit Blocks, and Fire Wall provide real end-the-run coverage and three Virus Test Sites keep the remote threat active. The objective is not to make R&D permanently impenetrable, but to turn every successful multiaccess into a costly exchange and spend the resulting tempo on Vapor Ops and a real score line.",
           "gamePlan": {
             "opening": "Install a rez-ready stopper on R&D and cover HQ before expanding. If the Runner reveals R&D Interface or repeats R&D runs, give R&D the next meaningful layer, but do not abandon HQ. Establish economy early enough to rez the ICE you install.",
-            "midgame": "Layer different ICE types across R&D and HQ so one breaker cannot solve both centrals cheaply. Place Simon Francisco on the central with the highest current multiaccess count. Use the resulting credit and action gap to build one scoring remote and convert Vapor Ops counters rather than continuing to stack ICE without a scoring plan.",
+            "midgame": "Layer different ICE types across R&D and HQ so one breaker cannot solve both centrals cheaply. Place Red Herrings on the central selected by the current access-pressure assessment, usually R&D against Interface turns, and keep one credit available to rez it at the final relevant run window. Use the resulting credit and action gap to build one scoring remote and convert Vapor Ops counters rather than continuing to stack ICE without a scoring plan.",
             "endgame": "Shift protection with the Runner's actual pressure. If R&D is locked and attacks move to HQ, reinforce HQ before adding another redundant R&D layer. Close the game through the safest fast or rush score window while retaining enough credits for the central ICE that still matters."
           },
           "keyCards": [
             {
-              "cardId": "onr_proteus_073_simon-francisco",
-              "title": "Simon Francisco",
-              "role": "Compresses HQ or R&D multiaccess by removing one queued access and is the deck's direct answer to Interface turns."
+              "cardId": "onr_v1_366_red-herrings",
+              "title": "Red Herrings",
+              "role": "Adds five credits to every agenda steal from its fort and is the deck's direct answer to repeated R&D multiaccess."
             },
             {
               "cardId": "onr_v1_222_ball-and-chain",
@@ -5248,22 +5251,22 @@
           "weaknesses": [
             "A Runner who can alternate efficiently between R&D and HQ can exploit overcommitment to either central.",
             "The deck needs both ICE diversity and liquidity. Drawing only barriers or spending below rez thresholds leaves nominal protection inactive.",
-            "Simon Francisco reduces accesses but does not stop a run; without a taxing outer layer it only slows the loss."
+            "Red Herrings does not stop a run and can be trashed cheaply; without a taxing outer layer a rich Runner may still pay through it."
           ]
         },
         "de": {
-          "summary": "Lucidrine Lockdown verwandelt Zentralserver-Tax in kurze Scorefenster. Die überarbeitete ICE-Suite soll wiederholten R&D-Multiaccess abfangen, ohne HQ als kostenlosen Ausweichweg offenzulassen.",
-          "deckIdea": "Lucidrine Lockdown ersetzt schwache Ein-Credit-Taxes durch dreizehn tatsächlich relevante ICE und Zugriffskompression über Simon Francisco, behält aber drei Virus Test Sites als aktive Remote-Drohung. Ball and Chain und Virizz verteuern wiederholte Breakernutzung; Quandary, Credit Blocks und Fire Wall liefern echte End-the-Run-Abdeckung. R&D soll nicht für immer undurchdringlich werden: Besteuere den Runner auf R&D und HQ und verwandle das verlorene Tempo mit einem gefährlichen Remote, Vapor Ops und den Advancement-Operationen in Scores, bevor der Runner sich erholt.",
+          "summary": "Lucidrine Lockdown verwandelt Zentralserver-Tax und fortweite Stehlkosten in kurze Scorefenster gegen wiederholten R&D-Multiaccess.",
+          "deckIdea": "Lucidrine Lockdown besteuert den Weg nach R&D mit dreizehn tatsächlich relevanten ICE und verteuert anschließend den Agendadiebstahl selbst durch Red Herrings. Ball and Chain und Virizz verteuern wiederholte Breakernutzung; Quandary, Credit Blocks und Fire Wall liefern echte End-the-Run-Abdeckung, während drei Virus Test Sites die aktive Remote-Drohung bewahren. R&D soll nicht für immer undurchdringlich werden; jeder erfolgreiche Multiaccess soll zu einem teuren Tausch werden, dessen Tempo die Corp in Vapor Ops und eine echte Scorelinie investiert.",
           "gamePlan": {
             "opening": "Installiere ein bezahlbar rezzbares Stopper-ICE auf R&D und decke HQ ab, bevor du expandierst. Zeigt der Runner R&D Interface oder läuft wiederholt auf R&D, erhält R&D die nächste relevante Schicht; HQ darf dabei nicht aufgegeben werden. Baue die Economy früh genug auf, um das installierte ICE auch wirklich zu rezzen.",
-            "midgame": "Staffele unterschiedliche ICE-Typen über R&D und HQ, damit ein einzelner Breaker nicht beide Zentralen günstig löst. Lege Simon Francisco auf die Zentrale mit dem aktuell höchsten Multiaccess. Nutze die gewonnene Credit- und Aktionslücke für genau ein Score-Remote und die Konversion von Vapor-Ops-Countern, statt ohne Scoreplan immer weiter ICE zu stapeln.",
+            "midgame": "Staffele unterschiedliche ICE-Typen über R&D und HQ, damit ein einzelner Breaker nicht beide Zentralen günstig löst. Lege Red Herrings auf die von der aktuellen Zugriffsdruck-Bewertung gewählte Zentrale – gegen Interface-Züge meist R&D – und halte einen Credit für das Rezzen im letzten relevanten Runfenster bereit. Nutze die gewonnene Credit- und Aktionslücke für genau ein Score-Remote und die Konversion von Vapor-Ops-Countern, statt ohne Scoreplan immer weiter ICE zu stapeln.",
             "endgame": "Verschiebe den Schutz entlang des tatsächlichen Runnerdrucks. Ist R&D abgeriegelt und wechseln die Angriffe zu HQ, verstärke HQ vor einer weiteren redundanten R&D-Schicht. Schließe über das sicherste Fast- oder Rush-Scorefenster ab und halte genug Credits für das weiterhin relevante Zentralserver-ICE zurück."
           },
           "keyCards": [
             {
-              "cardId": "onr_proteus_073_simon-francisco",
-              "title": "Simon Francisco",
-              "role": "Komprimiert Multiaccess auf HQ oder R&D um einen ausstehenden Zugriff und ist die direkte Antwort des Decks auf Interface-Züge."
+              "cardId": "onr_v1_366_red-herrings",
+              "title": "Red Herrings",
+              "role": "Verteuert jeden Agendadiebstahl aus seinem Fort um fünf Credits und ist die direkte Antwort des Decks auf wiederholten R&D-Multiaccess."
             },
             {
               "cardId": "onr_v1_222_ball-and-chain",
@@ -5294,7 +5297,7 @@
           "weaknesses": [
             "Ein Runner, der effizient zwischen R&D und HQ wechselt, kann eine Überinvestition in eine der beiden Zentralen ausnutzen.",
             "Das Deck braucht ICE-Vielfalt und Liquidität zugleich. Nur Barriers zu ziehen oder unter Rez-Schwellen auszugeben lässt nominellen Schutz inaktiv.",
-            "Simon Francisco reduziert Zugriffe, stoppt aber keinen Run; ohne taxierende äußere Schicht verzögert er die Niederlage nur."
+            "Red Herrings stoppt keinen Run und kann günstig getrasht werden; ohne taxierende äußere Schicht kann ein reicher Runner den Aufpreis weiterhin bezahlen."
           ]
         }
       }

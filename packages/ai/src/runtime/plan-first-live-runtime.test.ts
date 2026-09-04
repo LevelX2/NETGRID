@@ -11618,6 +11618,57 @@ describe("authoritative plan-first live runtime", () => {
     ).toThrow(
       expect.objectContaining({ code: "missing_plan_module_coverage" }),
     );
+
+    const centralRez = legalAction(
+      "rez-red-herrings-rd",
+      "corp",
+      "rez_card",
+      "Rez Red Herrings in R&D",
+      { credits: 1, clicks: 0 },
+      {
+        source: "red-herrings-rd",
+        payload: { cardId: "red-herrings-rd", serverId: "rd" },
+      },
+    );
+    const centralWindow = aiInput("corp", [centralRez]);
+    centralWindow.playerView.timingPoint = "run.approach_ice";
+    centralWindow.playerView.own.credits = 20;
+    centralWindow.playerView.own.stackOrRdCount = 5;
+    centralWindow.playerView.run = {
+      attackedServerId: "rd",
+      phase: "approach_ice",
+      position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+      successful: false,
+    };
+    centralWindow.playerView.servers = [
+      server("hq"),
+      server(
+        "rd",
+        [
+          visibleCard("rd-ice", "corp", "ice", {
+            definitionId: "onr_v1_237_data-wall",
+            title: "Data Wall",
+            rezzed: true,
+          }),
+        ],
+        [
+          visibleCard("red-herrings-rd", "corp", "upgrade", {
+            definitionId: "onr_v1_366_red-herrings",
+            title: "Red Herrings",
+            rezzed: false,
+          }),
+        ],
+      ),
+      server("archives"),
+    ];
+    resetResidentPlanPortfolioMemory();
+    expect(
+      liveContext().chooseSemanticRuntimeAction(centralWindow, {}),
+    ).toMatchObject({
+      actionId: centralRez.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+    });
   });
 
   it("routes an explicit fortified-server defense upgrade through the global defense plan", () => {

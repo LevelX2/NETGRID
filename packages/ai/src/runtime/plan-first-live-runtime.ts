@@ -15776,6 +15776,7 @@ function buildCorpDomain(
           input,
           candidate,
           scoreProjects,
+          centralDefenseAllocation,
         );
         if (defensiveUpgradePlacement?.signal) {
           return [defensiveUpgradePlacement.signal];
@@ -31595,21 +31596,26 @@ function corpExactCardRezSupportAssessment(
         typeof effect.amount === "number" &&
         effect.amount > 0,
     ) === true &&
-    hint?.effects.some(
+    (hint?.effects.some(
       (effect) =>
         effect.kind === "remote_protection" &&
         effect.scope === "fort" &&
         effect.timing === "persistent" &&
         effect.target === "remote.agenda_steal_tax",
-    );
+    ) === true ||
+      hint?.functionSignals?.includes("access.agenda_steal_tax") === true);
   if (exactAgendaStealTax) {
-    if (!visibleKnownAgendaOnServer(input, serverId)) {
+    const canContainAgenda =
+      serverId === "rd"
+        ? input.playerView.own.stackOrRdCount > 0
+        : visibleKnownAgendaOnServer(input, serverId);
+    if (!canContainAgenda) {
       return {
         productive: false,
         serverId,
         value: 0,
         evidenceCode:
-          "corp_rez_agenda_steal_tax_has_no_visible_agenda_on_exact_fort",
+          "corp_rez_agenda_steal_tax_has_no_accessible_agenda_on_exact_fort",
       };
     }
     const action = input.legalActions.find(
@@ -31631,7 +31637,7 @@ function corpExactCardRezSupportAssessment(
       serverId,
       value: 180,
       evidenceCode:
-        "corp_rez_agenda_steal_tax_protects_visible_agenda_at_latest_relevant_window",
+        "corp_rez_agenda_steal_tax_protects_accessible_agenda_at_latest_relevant_window",
     };
   }
   const disablesVisibleStealthCreditsOnExactFort =
@@ -32632,6 +32638,7 @@ function corpDefensiveUpgradePlacement(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
   scoreProjects: readonly CorpScoreProjectSignal[],
+  centralAllocation?: CorpCentralDefenseAllocation,
 ): CorpDefensiveUpgradePlacement | undefined {
   if (
     candidate.semanticActionType !== "install.card" ||
@@ -32649,14 +32656,19 @@ function corpDefensiveUpgradePlacement(
         effect.target === "agenda_steal_cost" &&
         typeof effect.amount === "number" &&
         effect.amount > 0,
-    ) === true &&
-    hint?.effects.some(
+    ) === true;
+  const exactRemoteAgendaStealTax =
+    exactAgendaStealTax &&
+    hint?.effects?.some(
       (effect) =>
         effect.kind === "remote_protection" &&
         effect.scope === "fort" &&
         effect.timing === "persistent" &&
         effect.target === "remote.agenda_steal_tax",
-    );
+    ) === true;
+  const exactCentralAgendaStealTax =
+    exactAgendaStealTax &&
+    hint?.functionSignals?.includes("access.agenda_steal_tax") === true;
   const exactFortRezSupport =
     hint?.effects?.some(
       (effect) =>
@@ -32685,7 +32697,8 @@ function corpDefensiveUpgradePlacement(
   const assignedToDefense =
     exactFortRezSupport ||
     exactPassIceTax ||
-    exactAgendaStealTax ||
+    exactRemoteAgendaStealTax ||
+    exactCentralAgendaStealTax ||
     (hint?.roles?.includes("remote_support") === true &&
       hint?.remoteRole?.kind === "scoring_protection" &&
       hint.remoteRole.serverScope === "fort" &&
@@ -32730,6 +32743,21 @@ function corpDefensiveUpgradePlacement(
       removalCondition:
         "Every defensive upgrade install requires a visible source card, exact LegalAction, and exact target server before the defense portfolio may assess it.",
     });
+  }
+  if (
+    exactCentralAgendaStealTax &&
+    (serverId === "hq" || serverId === "rd") &&
+    (centralAllocation?.status !== "known" ||
+      centralAllocation.selectedServerId !== serverId ||
+      centralAllocation.evidence[serverId].threat === "none")
+  ) {
+    return {
+      evidenceCode: `corp_defense_support_rejected:${serverId}:central_allocation_${
+        centralAllocation?.status === "known"
+          ? centralAllocation.selectedServerId
+          : "unknown"
+      }`,
+    };
   }
   const roles = rolesForDeckDoctrineCard(candidate.sourceDefinitionId);
   const placement = corpUpgradePlacementAssessment({
@@ -32814,6 +32842,12 @@ function corpDefensiveUpgradePlacement(
         : `corp_defense_support_rejected:${serverId}:score_reserve:${reserveAssessment.requiredCreditsAfterAction}`,
     };
   }
+  const centralPressure =
+    exactCentralAgendaStealTax &&
+    centralAllocation?.status === "known" &&
+    (serverId === "hq" || serverId === "rd")
+      ? centralAllocation.evidence[serverId].threat
+      : undefined;
   return {
     evidenceCode: `${evidenceCode}:reserve_after_action:${reserveAssessment.requiredCreditsAfterAction}`,
     signal: {
@@ -32823,7 +32857,10 @@ function corpDefensiveUpgradePlacement(
       phase: "install_defense_support",
       sourceDefinitionIds: [candidate.sourceDefinitionId],
       actionIds: [candidate.actionId],
-      urgent: false,
+      urgent: centralPressure === "acute" || centralPressure === "terminal",
+      ...(centralPressure && centralPressure !== "none"
+        ? { centralPressure }
+        : {}),
       value: 100 + Math.max(0, component.value),
       evidenceCode: `${evidenceCode}:reserve_after_action:${reserveAssessment.requiredCreditsAfterAction}`,
     },
