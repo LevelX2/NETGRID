@@ -4263,10 +4263,10 @@ function selectedCorpScoredAgendaFreeRezOptionId(
     choice.maxSelections === 1 &&
     portfolio !== undefined &&
     portfolio.side === "corp" &&
-    // Scoring mutates the game once, then opening Priority Requisition's
-    // Engine-owned choice mutates it a second time. The resident executor is
-    // therefore bound to the exact pre-score state, two versions earlier.
-    portfolio.stateVersion === input.playerView.stateVersion - 2 &&
+    // Opening Priority Requisition's Engine-owned choice is the single
+    // committed score transition. The resident executor therefore remains
+    // bound to the exact pre-score state, one version earlier.
+    portfolio.stateVersion === input.playerView.stateVersion - 1 &&
     executor !== undefined &&
     moduleState?.kind === "score" &&
     moduleState.signal?.agendaInstanceId === sourceAgendaId &&
