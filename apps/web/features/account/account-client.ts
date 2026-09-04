@@ -19,11 +19,24 @@ export type AccountSelf = {
 export type AccountSessionSelf = {
   sessionId: string;
   accountId: string;
-  authStrength: "password" | "passkey" | "mfa";
+  authStrength: "password" | "passkey" | "mfa" | "local_profile";
   createdAt: string;
   lastSeenAt: string;
   expiresAt: string;
   deviceLabel?: string;
+};
+
+export type AccountAccessMode = "invite_only" | "simple" | "protected";
+
+export type AccountAccessPolicy = {
+  mode: AccountAccessMode;
+  source: "configured" | "persisted";
+  selfServiceEnabled: boolean;
+};
+
+export type LocalAccountProfile = {
+  accountId: string;
+  displayName: string;
 };
 
 export type AccountSessionPayload = {
@@ -49,6 +62,55 @@ export function restoreAccountSession(
   fetcher: AccountFetch = fetch,
 ): Promise<AccountSessionPayload> {
   return accountRequest(fetcher, "/api/account/session", { method: "GET" });
+}
+
+export function loadAccountAccessPolicy(
+  fetcher: AccountFetch = fetch,
+): Promise<AccountAccessPolicy> {
+  return accountRequest(fetcher, "/api/account/access-policy", {
+    method: "GET",
+  });
+}
+
+export function loadLocalAccountProfiles(
+  fetcher: AccountFetch = fetch,
+): Promise<{ profiles: LocalAccountProfile[] }> {
+  return accountRequest(fetcher, "/api/account/profiles", { method: "GET" });
+}
+
+export function registerLocalProfile(
+  input: { displayName: string; deviceLabel?: string },
+  fetcher: AccountFetch = fetch,
+): Promise<AccountSessionPayload> {
+  return accountRequest(fetcher, "/api/account/profiles", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function selectLocalProfile(
+  input: { accountId: string; deviceLabel?: string },
+  fetcher: AccountFetch = fetch,
+): Promise<AccountSessionPayload> {
+  return accountRequest(fetcher, "/api/account/profiles/select", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function registerProtectedAccount(
+  input: {
+    loginName: string;
+    displayName: string;
+    password: string;
+    deviceLabel?: string;
+  },
+  fetcher: AccountFetch = fetch,
+): Promise<AccountSessionPayload> {
+  return accountRequest(fetcher, "/api/account/register", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
 }
 
 export function loginAccount(

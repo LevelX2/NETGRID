@@ -20,6 +20,7 @@ import {
   RefreshCcw,
   ShieldCheck,
   Trash2,
+  Users,
   XCircle,
 } from "lucide-react";
 import {
@@ -1059,6 +1060,14 @@ export default function MaintenancePage() {
             </div>
           </div>
           <MaintenanceSecurityControls auth={auth}>
+            <a
+              href="/maintenance/accounts"
+              style={linkButton}
+              title={t("accountAccessTitle")}
+            >
+              <Users size={16} aria-hidden="true" />
+              {t("accountAccess")}
+            </a>
             <a
               href="/maintenance/card-images"
               style={linkButton}

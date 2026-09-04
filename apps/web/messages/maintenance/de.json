@@ -35,6 +35,8 @@
     "m033": "Backend 0.5 · private Storage-Wartungsansicht",
     "m034": "Lokale Kartenbilder verwalten",
     "m035": "Kartenbilder",
+    "accountAccess": "Spielerzugänge",
+    "accountAccessTitle": "Lokale Spielerprofile und Passwörter verwalten",
     "m036": "Aktualisieren",
     "m037": "Lädt",
     "m038": "DB-Größe",
@@ -220,6 +222,34 @@
     "nonTerminalOption": "Nicht-terminal",
     "terminalOption": "Terminal",
     "loadedCount": "Geladen: {count}"
+  },
+  "accounts": {
+    "title": "Spielerzugänge",
+    "subtitle": "Lokale Profile, Schutzmodus und vergessene Spielerpasswörter verwalten.",
+    "back": "Zur Wartung",
+    "loading": "Zugangsmodus wird geladen …",
+    "loadFailed": "Die Spielerzugänge konnten nicht geladen werden.",
+    "changeFailed": "Der Zugangsmodus konnte nicht geändert werden.",
+    "resetFailed": "Das Passwort konnte nicht zurückgesetzt werden.",
+    "modeTitle": "Zugangsmodus",
+    "mode": {
+      "invite_only": "Bestehender Einladungsmodus. Für lokale Installationen kann ein neuer Modus gewählt werden.",
+      "simple": "Einfacher Modus: Spieler wählen ihr Profil ohne Passwort.",
+      "protected": "Geschützter Modus: Spieler melden sich mit Anmeldename und Passwort an."
+    },
+    "protectedHelp": "Beim Wechsel benötigt jedes vorhandene Profil ein eigenes Passwort. Alle laufenden Spielersitzungen werden beendet.",
+    "initialPassword": "Passwort für {name}",
+    "enableProtected": "Geschützten Modus aktivieren",
+    "simpleWarning": "Im einfachen Modus kann jeder im erreichbaren privaten Netzwerk ein Profil ohne Passwort verwenden. Alle laufenden Spielersitzungen werden beendet.",
+    "enableSimple": "Einfachen Modus aktivieren",
+    "modeChanged": "Zugangsmodus geändert. Alle Spielersitzungen wurden beendet.",
+    "passwordsTitle": "Spielerpasswörter",
+    "passwordsHelp": "Ein neues Passwort beendet alle Sitzungen dieses Spielers, erhält aber Profil, Decks und Historie.",
+    "newPassword": "Neues Passwort",
+    "newPasswordFor": "Neues Passwort für {name}",
+    "resetFor": "Passwort für {name} zurücksetzen",
+    "reset": "Zurücksetzen",
+    "passwordReset": "Passwort für {name} wurde zurückgesetzt."
   },
   "cardImages": {
     "m001": "Kartenbildverwaltung konnte nicht geladen werden.",

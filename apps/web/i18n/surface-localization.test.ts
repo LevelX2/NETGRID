@@ -71,6 +71,7 @@ const localizedSurfaces = [
   "../features/cards/CardBadges.tsx",
   "../app/maintenance-auth-ui.tsx",
   "../app/maintenance/page.tsx",
+  "../app/maintenance/accounts/page.tsx",
   "../app/maintenance/card-images/page.tsx",
   "../app/maintenance/ai-traces/page.tsx",
 ] as const;

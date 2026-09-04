@@ -353,7 +353,16 @@
       "inviteHelp": "Dans cette version alpha, les comptes ne peuvent être créés que via une invitation d'administrateur.",
       "resetPassword": "Réinitialiser le mot de passe",
       "resetCode": "Réinitialiser le code",
-      "setNewPassword": "Définir un nouveau mot de passe"
+      "setNewPassword": "Définir un nouveau mot de passe",
+      "localProfile": "Profil local sans mot de passe",
+      "simpleMode": "Mode local simple",
+      "chooseProfile": "Choisir un profil",
+      "simpleModeHelp": "Cet appareil mémorise le dernier profil utilisé. Sur un appareil partagé, vous pouvez changer de profil à tout moment.",
+      "noProfiles": "Aucun profil de joueur n'existe encore.",
+      "createProfile": "Nouveau profil de joueur",
+      "createAndUseProfile": "Créer et utiliser le profil",
+      "createProtectedAccount": "Créer un compte protégé",
+      "protectedRegistrationHelp": "Toute personne sur le réseau privé accessible peut créer un compte. Le mot de passe doit comporter au moins 15 caractères."
     },
     "session": {
       "requestFailed": "La demande de compte a échoué.",

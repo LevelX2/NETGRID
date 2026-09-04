@@ -35,6 +35,8 @@
     "m033": "Backend 0.5 · private storage maintenance view",
     "m034": "Manage local card images",
     "m035": "Card images",
+    "accountAccess": "Player access",
+    "accountAccessTitle": "Manage local player profiles and passwords",
     "m036": "Update",
     "m037": "Loading",
     "m038": "DB size",
@@ -220,6 +222,34 @@
     "nonTerminalOption": "Non-terminal",
     "terminalOption": "Terminal",
     "loadedCount": "Loaded: {count}"
+  },
+  "accounts": {
+    "title": "Player access",
+    "subtitle": "Manage local profiles, protection mode, and forgotten player passwords.",
+    "back": "Back to maintenance",
+    "loading": "Loading access mode …",
+    "loadFailed": "Player access could not be loaded.",
+    "changeFailed": "The access mode could not be changed.",
+    "resetFailed": "The password could not be reset.",
+    "modeTitle": "Access mode",
+    "mode": {
+      "invite_only": "Existing invitation mode. A new mode can be chosen for a local installation.",
+      "simple": "Simple mode: players choose their profile without a password.",
+      "protected": "Protected mode: players sign in with a login name and password."
+    },
+    "protectedHelp": "Each existing profile needs its own password when switching. All active player sessions will end.",
+    "initialPassword": "Password for {name}",
+    "enableProtected": "Enable protected mode",
+    "simpleWarning": "In simple mode, anyone on the reachable private network can use a profile without a password. All active player sessions will end.",
+    "enableSimple": "Enable simple mode",
+    "modeChanged": "Access mode changed. All player sessions have ended.",
+    "passwordsTitle": "Player passwords",
+    "passwordsHelp": "A new password ends all sessions for that player while preserving their profile, decks, and history.",
+    "newPassword": "New password",
+    "newPasswordFor": "New password for {name}",
+    "resetFor": "Reset password for {name}",
+    "reset": "Reset",
+    "passwordReset": "Password for {name} was reset."
   },
   "cardImages": {
     "m001": "Card image management could not be loaded.",

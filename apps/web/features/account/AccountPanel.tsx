@@ -31,6 +31,10 @@ export function AccountPanel({
   const [adminLoginName, setAdminLoginName] = useState("");
   const [adminDisplayName, setAdminDisplayName] = useState("");
   const [issuedLink, setIssuedLink] = useState("");
+  const [profileName, setProfileName] = useState("");
+  const [registrationName, setRegistrationName] = useState("");
+  const [registrationLogin, setRegistrationLogin] = useState("");
+  const [registrationPassword, setRegistrationPassword] = useState("");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -89,9 +93,11 @@ export function AccountPanel({
               <div>
                 <dt>{t("authentication")}</dt>
                 <dd>
-                  {accountSession.session?.authStrength === "password"
-                    ? t("password")
-                    : accountSession.session?.authStrength}
+                  {accountSession.session?.authStrength === "local_profile"
+                    ? t("localProfile")
+                    : accountSession.session?.authStrength === "password"
+                      ? t("password")
+                      : accountSession.session?.authStrength}
                 </dd>
               </div>
               <div>
@@ -112,57 +118,60 @@ export function AccountPanel({
         {accountSession.error ? (
           <p className="notice">{accountSession.error}</p>
         ) : null}
-        <details className="accountSegment">
-          <summary>{t("security")}</summary>
-          <div className="accountSegmentContent">
-            <div className="accountActions">
-              <button
-                className="button"
-                disabled={accountSession.busy}
-                onClick={() => void accountSession.revokeAll()}
-                type="button"
+        {accountSession.accessPolicy?.mode !== "simple" ? (
+          <details className="accountSegment">
+            <summary>{t("security")}</summary>
+            <div className="accountSegmentContent">
+              <div className="accountActions">
+                <button
+                  className="button"
+                  disabled={accountSession.busy}
+                  onClick={() => void accountSession.revokeAll()}
+                  type="button"
+                >
+                  {t("logoutAll")}
+                </button>
+              </div>
+              <form
+                className="accountForm"
+                onSubmit={(event) => void submitPassword(event)}
               >
-                {t("logoutAll")}
-              </button>
+                <h3>{t("changePassword")}</h3>
+                <label>
+                  {t("currentPassword")}
+                  <input
+                    autoComplete="current-password"
+                    onChange={(event) => setCurrentPassword(event.target.value)}
+                    required
+                    type="password"
+                    value={currentPassword}
+                  />
+                </label>
+                <label>
+                  {t("newPassword")}
+                  <input
+                    autoComplete="new-password"
+                    minLength={15}
+                    onChange={(event) => setNewPassword(event.target.value)}
+                    required
+                    type="password"
+                    value={newPassword}
+                  />
+                </label>
+                <small>{t("passwordHelp")}</small>
+                <button
+                  className="button primary"
+                  disabled={accountSession.busy}
+                  type="submit"
+                >
+                  {t("changePassword")}
+                </button>
+              </form>
             </div>
-            <form
-              className="accountForm"
-              onSubmit={(event) => void submitPassword(event)}
-            >
-              <h3>{t("changePassword")}</h3>
-              <label>
-                {t("currentPassword")}
-                <input
-                  autoComplete="current-password"
-                  onChange={(event) => setCurrentPassword(event.target.value)}
-                  required
-                  type="password"
-                  value={currentPassword}
-                />
-              </label>
-              <label>
-                {t("newPassword")}
-                <input
-                  autoComplete="new-password"
-                  minLength={15}
-                  onChange={(event) => setNewPassword(event.target.value)}
-                  required
-                  type="password"
-                  value={newPassword}
-                />
-              </label>
-              <small>{t("passwordHelp")}</small>
-              <button
-                className="button primary"
-                disabled={accountSession.busy}
-                type="submit"
-              >
-                {t("changePassword")}
-              </button>
-            </form>
-          </div>
-        </details>
-        {accountSession.account.role === "admin" ? (
+          </details>
+        ) : null}
+        {accountSession.account.role === "admin" &&
+        accountSession.accessPolicy?.mode === "invite_only" ? (
           <details className="accountSegment">
             <summary>{t("administration")}</summary>
             <div className="accountSegmentContent accountFormGrid">
@@ -269,6 +278,79 @@ export function AccountPanel({
     if (await accountSession.acceptReset(resetToken, resetPassword))
       setResetPassword("");
   };
+  const submitProfile = async (event: FormEvent) => {
+    event.preventDefault();
+    if (await accountSession.registerProfile(profileName)) setProfileName("");
+  };
+  const submitRegistration = async (event: FormEvent) => {
+    event.preventDefault();
+    if (
+      await accountSession.registerProtected(
+        registrationLogin,
+        registrationName,
+        registrationPassword,
+      )
+    ) {
+      setRegistrationPassword("");
+    }
+  };
+
+  if (accountSession.accessPolicy?.mode === "simple") {
+    return (
+      <section className="accountPanel">
+        <div className="accountPanelHeader">
+          <div>
+            <p className="eyebrow">{t("simpleMode")}</p>
+            <h2>{t("chooseProfile")}</h2>
+          </div>
+        </div>
+        <p className="muted">{t("simpleModeHelp")}</p>
+        {accountSession.error ? (
+          <p className="notice">{accountSession.error}</p>
+        ) : null}
+        <div className="accountActions">
+          {accountSession.profiles.map((profile) => (
+            <button
+              className="button"
+              disabled={accountSession.busy}
+              key={profile.accountId}
+              onClick={() =>
+                void accountSession.selectProfile(profile.accountId)
+              }
+              type="button"
+            >
+              {profile.displayName}
+            </button>
+          ))}
+        </div>
+        {accountSession.profiles.length === 0 ? (
+          <p className="muted">{t("noProfiles")}</p>
+        ) : null}
+        <form
+          className="accountForm"
+          onSubmit={(event) => void submitProfile(event)}
+        >
+          <h3>{t("createProfile")}</h3>
+          <label>
+            {t("displayName")}
+            <input
+              autoComplete="nickname"
+              onChange={(event) => setProfileName(event.target.value)}
+              required
+              value={profileName}
+            />
+          </label>
+          <button
+            className="button primary"
+            disabled={accountSession.busy}
+            type="submit"
+          >
+            {t("createAndUseProfile")}
+          </button>
+        </form>
+      </section>
+    );
+  }
   return (
     <section className="accountPanel">
       <div className="accountPanelHeader">
@@ -337,46 +419,99 @@ export function AccountPanel({
           </form>
         </div>
       </details>
-      <details className="accountSegment" open={Boolean(inviteToken)}>
-        <summary>{t("activateAccount")}</summary>
-        <div className="accountSegmentContent">
-          <form
-            className="accountForm"
-            onSubmit={(event) => void submitInvite(event)}
-          >
-            <h3>{t("acceptInvite")}</h3>
-            <label>
-              {t("inviteCode")}
-              <input
-                autoComplete="off"
-                onChange={(event) => setInviteToken(event.target.value)}
-                required
-                value={inviteToken}
-              />
-            </label>
-            <label>
-              {t("newPassword")}
-              <input
-                autoComplete="new-password"
-                minLength={15}
-                onChange={(event) => setInvitePassword(event.target.value)}
-                required
-                type="password"
-                value={invitePassword}
-              />
-            </label>
-            <small>{t("inviteHelp")}</small>
-            <button
-              className="button primary"
-              disabled={accountSession.busy}
-              type="submit"
+      {accountSession.accessPolicy?.mode === "protected" ? (
+        <details className="accountSegment">
+          <summary>{t("createProtectedAccount")}</summary>
+          <div className="accountSegmentContent">
+            <form
+              className="accountForm"
+              onSubmit={(event) => void submitRegistration(event)}
             >
-              {t("activateAccount")}
-            </button>
-          </form>
-        </div>
-      </details>
-      {resetToken ? (
+              <label>
+                {t("displayName")}
+                <input
+                  autoComplete="nickname"
+                  onChange={(event) => setRegistrationName(event.target.value)}
+                  required
+                  value={registrationName}
+                />
+              </label>
+              <label>
+                {t("loginName")}
+                <input
+                  autoComplete="username"
+                  onChange={(event) => setRegistrationLogin(event.target.value)}
+                  required
+                  value={registrationLogin}
+                />
+              </label>
+              <label>
+                {t("password")}
+                <input
+                  autoComplete="new-password"
+                  minLength={15}
+                  onChange={(event) =>
+                    setRegistrationPassword(event.target.value)
+                  }
+                  required
+                  type="password"
+                  value={registrationPassword}
+                />
+              </label>
+              <small>{t("protectedRegistrationHelp")}</small>
+              <button
+                className="button primary"
+                disabled={accountSession.busy}
+                type="submit"
+              >
+                {t("createProtectedAccount")}
+              </button>
+            </form>
+          </div>
+        </details>
+      ) : null}
+      {accountSession.accessPolicy?.mode !== "protected" ? (
+        <details className="accountSegment" open={Boolean(inviteToken)}>
+          <summary>{t("activateAccount")}</summary>
+          <div className="accountSegmentContent">
+            <form
+              className="accountForm"
+              onSubmit={(event) => void submitInvite(event)}
+            >
+              <h3>{t("acceptInvite")}</h3>
+              <label>
+                {t("inviteCode")}
+                <input
+                  autoComplete="off"
+                  onChange={(event) => setInviteToken(event.target.value)}
+                  required
+                  value={inviteToken}
+                />
+              </label>
+              <label>
+                {t("newPassword")}
+                <input
+                  autoComplete="new-password"
+                  minLength={15}
+                  onChange={(event) => setInvitePassword(event.target.value)}
+                  required
+                  type="password"
+                  value={invitePassword}
+                />
+              </label>
+              <small>{t("inviteHelp")}</small>
+              <button
+                className="button primary"
+                disabled={accountSession.busy}
+                type="submit"
+              >
+                {t("activateAccount")}
+              </button>
+            </form>
+          </div>
+        </details>
+      ) : null}
+      {resetToken && accountSession.accessPolicy?.mode !== "protected" ? (
         <details className="accountSegment" open>
           <summary>{t("resetPassword")}</summary>
           <div className="accountSegmentContent">
