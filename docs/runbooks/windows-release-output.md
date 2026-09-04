@@ -77,6 +77,14 @@ bestehende Entwicklungsdatenbank wird nicht importiert. Falls später eine
 Produktdatenmigration erforderlich wird, braucht sie einen eigenen
 versionierten Vertrag und einen expliziten Upgrade-Test.
 
+## Spätere Veröffentlichung
+
+Der fertige und geprüfte Installer wird in der aktuellen Phase ausschließlich
+manuell über GitHub Releases veröffentlicht. Das Release enthält mindestens
+Version, Änderungshinweise, Installerdatei und Prüfsumme. NETGRID selbst führt
+keine Updateprüfung und keinen Download aus; ein Upgrade beginnt erst, wenn
+der Nutzer einen neuen Installer aus GitHub Releases herunterlädt und startet.
+
 ## Fehlerdiagnose
 
 - `RELEASE_PRODUCT_BOUNDARY_*`: Klassifikation oder verbotener

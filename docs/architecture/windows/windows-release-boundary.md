@@ -10,8 +10,10 @@ den geprüften Output von `build:windows-release-output` konsumieren. Er darf
 weder das Repository noch beliebige Unterverzeichnisse daraus paketieren.
 
 Die Vorarbeit implementiert bewusst keinen Installer. WiX/MSI/MSIX,
-Launcher, Dienst, Autostart, Firewallregeln, Signatur und Updatekanal bleiben
-eine eigene Produktentscheidung.
+Launcher, Dienst, Autostart, Firewallregeln und Signatur bleiben eine eigene
+Produktentscheidung. Als Veröffentlichungs- und Updatekanal sind für die
+aktuelle Phase ausschließlich manuell bereitgestellte GitHub Releases
+festgelegt.
 
 ## Produkt- und Datengrenze
 
@@ -109,7 +111,7 @@ treffen:
 | Netzwerk | Loopback als Default; LAN und Firewall nur als bewusst gewählte Option |
 | Geheimnisse | kryptografische Erzeugung und geschützte Ablage von `NETGRID_TOKEN_SALT` |
 | Signatur | Codesigning-Zertifikat, Timestamping und SmartScreen-Strategie |
-| Updates | manuell, Installer-Upgrade oder Updatekanal; kein stilles Selbstupdate ohne Vertrag |
+| Updates | manueller Download neuer Installer aus GitHub Releases; kein Auto-Updater und keine Hintergrundprüfung |
 | Datenlebenszyklus | Upgrade, Backup, Deinstallation und ausdrückliche Datenlöschung |
 | Support | Logpfad, Healthcheck, Diagnoseexport und reparierende Neuinstallation |
 
@@ -125,6 +127,19 @@ Alle sichtbaren Installations-, Fehler-, Reparatur- und
 Deinstallationstexte müssen Deutsch, Englisch und Französisch vollständig
 abdecken. Die Sprachauswahl darf technische Pfade, IDs und Logschlüssel nicht
 lokalisieren.
+
+## Veröffentlichungs- und Updatekanal
+
+GitHub Releases ist in der aktuellen Phase der einzige Distributionskanal.
+Eine neue Version wird dort bewusst als Release mit Installer, Versionsangabe,
+Änderungshinweisen und Prüfsumme veröffentlicht. Nutzer laden den neuen
+Installer manuell herunter und starten das Upgrade selbst.
+
+NETGRID fragt GitHub weder beim Start noch im Hintergrund ab, lädt keine
+Updates selbstständig herunter und installiert nichts automatisch. Es gibt
+vorerst keinen zusätzlichen Paketfeed, Store-Kanal oder eigenen
+Updateserver. Ein späterer Auto-Updater wäre eine neue Produkt-, Sicherheits-
+und Datenschutzentscheidung und nicht Teil des aktuellen Installerumfangs.
 
 ## Führende Gates
 

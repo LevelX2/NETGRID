@@ -87,7 +87,9 @@ Demo-Snapshots, Testspiele, Selfplay-Evidence und Entwicklungsdatenbanken
 werden nicht ausgeliefert. Führend sind
 `docs/architecture/windows/windows-release-boundary.md` und das zugehörige
 Runbook. Ein eigentlicher Windows-Installer, Dienst, Launcher, Firewallsetup,
-Codesigning und Updatekanal sind noch nicht implementiert.
+Codesigning ist noch nicht implementiert. GitHub Releases ist als einziger
+manueller Veröffentlichungs- und Updatekanal der aktuellen Phase festgelegt;
+NETGRID besitzt keinen Auto-Updater und keine Hintergrundprüfung.
 
 Der persönliche Kartenbildimport besitzt einen persistenten lokalen Store,
 lokale und explizite gehärtete HTTPS-Quellen sowie drei private
