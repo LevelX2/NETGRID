@@ -2850,7 +2850,8 @@ function rememberResidentScoreChoiceContinuation(
   },
 ): void {
   const priorInput = structuredClone(input);
-  priorInput.playerView.stateVersion = input.playerView.stateVersion - 1;
+  priorInput.playerView.stateVersion =
+    input.playerView.stateVersion - (freeRezChoiceBinding ? 2 : 1);
   delete priorInput.playerView.pendingChoice;
   rememberResidentPlanPortfolio(priorInput, {
     schemaVersion: "resident-plan-portfolio-v2",
