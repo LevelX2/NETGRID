@@ -1,6 +1,6 @@
 # Windows-Releaseoutput erzeugen und prüfen
 
-Stand: 2026-09-03
+Stand: 2026-09-04
 
 ## Zweck
 
@@ -77,13 +77,16 @@ bestehende Entwicklungsdatenbank wird nicht importiert. Falls später eine
 Produktdatenmigration erforderlich wird, braucht sie einen eigenen
 versionierten Vertrag und einen expliziten Upgrade-Test.
 
-## Spätere Veröffentlichung
+## Übergabe an Installer und spätere Veröffentlichung
 
-Der fertige und geprüfte Installer wird in der aktuellen Phase ausschließlich
-manuell über GitHub Releases veröffentlicht. Das Release enthält mindestens
-Version, Änderungshinweise, Installerdatei und Prüfsumme. NETGRID selbst führt
-keine Updateprüfung und keinen Download aus; ein Upgrade beginnt erst, wenn
-der Nutzer einen neuen Installer aus GitHub Releases herunterlädt und startet.
+Der aktuelle Output wird noch manuell über GitHub Releases bereitgestellt. Das
+Release enthält mindestens Version, Änderungshinweise, Installerdatei und
+Prüfsumme. Zielverhalten und Paketfolge für Installer, Launcher und den
+späteren zustimmungsbasierten GitHub-Updater sind in
+`../architecture/windows/windows-installer-product-contract.md` und
+`../architecture/windows/windows-installer-package-process.md` festgelegt.
+Bis zum Abschluss des Updaterpakets beginnt ein Upgrade weiterhin nur durch
+einen manuell gestarteten Installer.
 
 ## Fehlerdiagnose
 

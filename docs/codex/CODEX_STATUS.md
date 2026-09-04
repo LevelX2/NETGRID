@@ -1,6 +1,6 @@
 # CODEX_STATUS
 
-Stand: 2026-09-03
+Stand: 2026-09-04
 
 ## Einstieg
 
@@ -86,10 +86,17 @@ geprüften Output mit einem externen `NETGRID_DATA_ROOT`; interne Testkarten,
 Demo-Snapshots, Testspiele, Selfplay-Evidence und Entwicklungsdatenbanken
 werden nicht ausgeliefert. Führend sind
 `docs/architecture/windows/windows-release-boundary.md` und das zugehörige
-Runbook. Ein eigentlicher Windows-Installer, Dienst, Launcher, Firewallsetup,
-Codesigning ist noch nicht implementiert. GitHub Releases ist als einziger
-manueller Veröffentlichungs- und Updatekanal der aktuellen Phase festgelegt;
-NETGRID besitzt keinen Auto-Updater und keine Hintergrundprüfung.
+Runbook. Ein eigentlicher Windows-Installer, Launcher, Firewallsetup und
+Updater ist noch nicht implementiert. Das beschlossene Zielbild umfasst einen
+klassischen per-machine Installer mit empfohlenem und benutzerdefiniertem
+Setupweg, mitgelieferter Node-Laufzeit, bedarfsgestartetem Tray-Launcher,
+lokalem oder Private-LAN-Betrieb, getrennten einfachen/geschützten
+Spielerprofilen, sicherer Maintenance-Ersteinrichtung, GitHub-Updates nach
+Zustimmung, Datensicherung/Rollback sowie vollständigem `de`/`en`/`fr`-
+Branding. Führend sind
+`docs/architecture/windows/windows-installer-product-contract.md` und der
+Paketprozess WIN-I01 bis WIN-I08. GitHub Releases bleibt der einzige Kanal;
+bis zur Umsetzung des Updaters erfolgen Download und Upgrade manuell.
 
 Der persönliche Kartenbildimport besitzt einen persistenten lokalen Store,
 lokale und explizite gehärtete HTTPS-Quellen sowie drei private
