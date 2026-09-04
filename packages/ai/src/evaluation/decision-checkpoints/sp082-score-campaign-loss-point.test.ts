@@ -42,6 +42,39 @@ describe("SP-082 score-campaign loss-point checkpoints", () => {
       planInstanceId: supportLeaf?.instanceId,
       parentNeedId: supportLeaf?.parentNeedId,
     });
+    expect(planFirst?.turnPlanning?.agendaComparison).toMatchObject({
+      selectedFamily: "fund_setup",
+      lines: [
+        expect.objectContaining({
+          family: "fund_setup",
+          agendaProgress: 0,
+          defense: 0,
+          economy: 1,
+        }),
+      ],
+    });
+    expect(
+      planFirst?.turnPlanning?.consideredLines?.find(
+        (line) => line.rootPlanInstanceId === scoreParent?.instanceId,
+      ),
+    ).toMatchObject({
+      steps: [
+        expect.objectContaining({
+          nextMilestoneId: "score_funding_gap_reduced",
+        }),
+      ],
+      evaluationValues: expect.objectContaining({ agenda_progress: 0 }),
+    });
+    expect(planFirst?.turnPlanning?.coverage?.progressRoots).toEqual([
+      expect.objectContaining({
+        planInstanceId: scoreParent?.instanceId,
+        blocked: true,
+        needId: supportLeaf?.parentNeedId,
+        witnessKind: "support_head",
+        providerInstanceId: supportLeaf?.instanceId,
+        providerActionId: result.selectedAction?.actionId,
+      }),
+    ]);
   });
 
   it("retains game 34 as the remaining maturity-support loss point", () => {

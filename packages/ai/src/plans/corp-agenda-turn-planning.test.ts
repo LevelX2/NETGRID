@@ -3,7 +3,11 @@ import { describe, expect, it } from "vitest";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type { CorpScoreProjectSignal } from "./corp-core-plan-modules";
-import type { CorpDefenseSignal } from "./corp-core-plan-modules";
+import type {
+  CorpDefenseSignal,
+  CorpEconomyNeedSignal,
+} from "./corp-core-plan-modules";
+import { planInstanceIdForProposal } from "./plan-instance";
 import {
   buildPlanningRulesContext,
   buildPlanningStateIdentity,
@@ -138,6 +142,128 @@ describe("Corp agenda turn-planning vertical slice", () => {
       "agenda_slice_missing_exact_agenda_head",
     );
   });
+
+  it("classifies exact bound funding as neither rush nor agenda-install progress", () => {
+    const input = decisionInput();
+    const { openingRush: _openingRush, ...baseProject } = project(2);
+    const fundingMilestone = {
+      kind: "score_credit_milestone",
+      basis: { kind: "score_conversion_floor" },
+      targetCredits: 4,
+      observedCredits: 0,
+      remainingGap: 4,
+      priorityClass: "P4",
+      hardness: "soft",
+      deadline: "multi_turn",
+      releaseCondition: "parent_invalidated_or_higher_priority_preemption",
+    } as const;
+    const blocked = {
+      ...baseProject,
+      feasible: false,
+      fundingMilestone,
+    } satisfies CorpScoreProjectSignal;
+    const parentPlanInstanceId = planInstanceIdForProposal({
+      moduleId: "corp.score_agenda",
+      dedupeKey: blocked.projectId,
+    });
+    const fundingNeed = {
+      kind: "parent_funding",
+      needId: `score-support:${blocked.projectId}`,
+      gap: 4,
+      actionIds: ["economy"],
+      parentPlanInstanceId,
+      parentNeedId: `score-support:${blocked.projectId}`,
+      scoreFundingMilestone: fundingMilestone,
+      delegatedPriorityClass: "P4",
+      urgentForScore: true,
+      evidenceCode: blocked.evidenceCode,
+    } satisfies CorpEconomyNeedSignal;
+
+    const slice = buildSlice(
+      input,
+      blocked,
+      [agendaCandidate(), economyCandidate()],
+      [],
+      [fundingNeed],
+    );
+
+    expect(slice.lines).toEqual([
+      expect.objectContaining({
+        family: "fund_setup",
+        currentActionId: "economy",
+        parentNeedId: `score-support:${blocked.projectId}`,
+        providerModuleId: "corp.economy",
+        expectedNeedProgress: "net_funding_gap_reduction",
+        fundingGapBefore: 4,
+        evaluation: expect.objectContaining({
+          agendaProgress: 0,
+          defense: 0,
+          economy: 3,
+        }),
+        campaignQuote: expect.objectContaining({
+          nextMilestoneId: "score_funding_gap_reduced",
+          commitment: "soft",
+        }),
+      }),
+    ]);
+    expect(slice.lines[0]?.valueClaims).toEqual([
+      expect.objectContaining({
+        ownerModuleId: "corp.economy",
+        contributionKind: "funding_gap_reduction",
+        amount: 3,
+      }),
+    ]);
+  });
+
+  it("does not retain fund setup after the published score gap is closed", () => {
+    const input = decisionInput();
+    const { openingRush: _openingRush, ...baseProject } = project(2);
+    const completedMilestone = {
+      kind: "score_credit_milestone",
+      basis: { kind: "score_conversion_floor" },
+      targetCredits: 4,
+      observedCredits: 4,
+      remainingGap: 0,
+      priorityClass: "P4",
+      hardness: "soft",
+      deadline: "multi_turn",
+      releaseCondition: "parent_invalidated_or_higher_priority_preemption",
+    } as const;
+    const blocked = {
+      ...baseProject,
+      feasible: false,
+      fundingMilestone: completedMilestone,
+    } satisfies CorpScoreProjectSignal;
+    const parentPlanInstanceId = planInstanceIdForProposal({
+      moduleId: "corp.score_agenda",
+      dedupeKey: blocked.projectId,
+    });
+    const completedFundingNeed = {
+      kind: "parent_funding",
+      needId: `score-support:${blocked.projectId}`,
+      gap: 0,
+      actionIds: ["economy"],
+      parentPlanInstanceId,
+      parentNeedId: `score-support:${blocked.projectId}`,
+      scoreFundingMilestone: completedMilestone,
+      delegatedPriorityClass: "P4",
+      urgentForScore: true,
+      evidenceCode: blocked.evidenceCode,
+    } satisfies CorpEconomyNeedSignal;
+
+    const slice = buildSlice(
+      input,
+      blocked,
+      [agendaCandidate(), economyCandidate()],
+      [],
+      [completedFundingNeed],
+    );
+
+    expect(slice.lines).toEqual([]);
+    expect(slice.evidenceCodes).toContain(
+      "agenda_slice_missing_exact_agenda_head",
+    );
+  });
 });
 
 function buildSlice(
@@ -145,6 +271,7 @@ function buildSlice(
   scoreProject: CorpScoreProjectSignal,
   candidates: ActionSemanticCandidate[],
   defenseNeeds?: CorpDefenseSignal[],
+  economyNeeds?: CorpEconomyNeedSignal[],
 ) {
   const protectionNeedId = scoreProject.protectionNeed?.needId;
   const remoteProvider = candidates
@@ -166,6 +293,7 @@ function buildSlice(
       (protectionNeedId && remoteProvider
         ? [scoreProtectionProvider(protectionNeedId, remoteProvider.actionId)]
         : []),
+    ...(economyNeeds ? { economyNeeds } : {}),
     rulesContext: buildPlanningRulesContext({
       rulesBaseline: CURRENT_RULES_BASELINE,
       formatProfileId: "agenda-slice-test",

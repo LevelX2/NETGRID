@@ -3,8 +3,10 @@ import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type {
   CorpDefenseSignal,
+  CorpEconomyNeedSignal,
   CorpScoreProjectSignal,
 } from "./corp-core-plan-modules";
+import { planInstanceIdForProposal } from "./plan-instance";
 import {
   buildCanonicalLegalActionInvocation,
   turnPlanningFingerprint,
@@ -18,7 +20,11 @@ import {
 export const CORP_AGENDA_TURN_SLICE_VERSION =
   "corp-agenda-turn-slice-v1" as const;
 
-export type CorpAgendaLineFamily = "pure_rush" | "combined_rush" | "safe_setup";
+export type CorpAgendaLineFamily =
+  | "pure_rush"
+  | "combined_rush"
+  | "safe_setup"
+  | "fund_setup";
 
 export type CorpAgendaTurnPlanningLine = {
   lineId: string;
@@ -26,11 +32,16 @@ export type CorpAgendaTurnPlanningLine = {
   opportunityKey: string;
   currentActionId: string;
   parentNeedId?: string;
-  providerModuleId?: "corp.defend_servers";
-  expectedNeedProgress?: "monotonic_protection_improvement";
+  providerModuleId?: "corp.defend_servers" | "corp.economy";
+  providerPlanInstanceId?: string;
+  expectedNeedProgress?:
+    | "monotonic_protection_improvement"
+    | "net_funding_gap_reduction";
+  fundingGapBefore?: number;
   nodes: Array<{
     nodeId: string;
     ownerModuleId: "corp.score_agenda" | "corp.defend_servers" | "corp.economy";
+    planInstanceId?: string;
     invocation: CanonicalLegalActionInvocation;
     projectedOnly: boolean;
   }>;
@@ -87,6 +98,7 @@ export function buildCorpAgendaTurnPlanningSlice(params: {
   project: CorpScoreProjectSignal;
   candidates: readonly ActionSemanticCandidate[];
   defenseNeeds?: readonly CorpDefenseSignal[];
+  economyNeeds?: readonly CorpEconomyNeedSignal[];
   rulesContext: PlanningRulesContext;
   stateIdentity: PlanningStateIdentity;
 }): CorpAgendaTurnPlanningSlice {
@@ -94,7 +106,11 @@ export function buildCorpAgendaTurnPlanningSlice(params: {
     params.project.openingRush?.status === "qualified"
       ? params.project.openingRush.quote.opportunityKey
       : `agenda:${params.project.projectId}:${params.stateIdentity.sideSafePlanningFingerprint}`;
-  const agenda = exactAgendaHead(params.project, params.candidates);
+  const agenda =
+    params.project.feasible ||
+    params.project.openingRush?.status === "qualified"
+      ? exactAgendaHead(params.project, params.candidates)
+      : undefined;
 
   const remoteId = params.project.serverId;
   const protectionProvider = boundScoreProtectionProvider(
@@ -104,6 +120,11 @@ export function buildCorpAgendaTurnPlanningSlice(params: {
     params.candidates,
   );
   const remoteIce = protectionProvider?.candidate;
+  const fundingProviders = boundScoreFundingProviders(
+    params.project,
+    params.economyNeeds ?? [],
+    params.candidates,
+  );
   const centralIce = ["rd", "hq"]
     .map((serverId) => bestIceInstall(params.candidates, serverId))
     .filter(
@@ -153,6 +174,22 @@ export function buildCorpAgendaTurnPlanningSlice(params: {
           }),
         ]
       : []),
+    ...fundingProviders.map((provider) =>
+      createLine(params, {
+        family: "fund_setup",
+        opportunityKey,
+        current: provider.candidate,
+        actions: [provider.candidate],
+        projectedAdvance: false,
+        supportBinding: {
+          parentNeedId: provider.parentNeedId,
+          providerModuleId: "corp.economy",
+          providerPlanInstanceId: provider.providerPlanInstanceId,
+          expectedNeedProgress: "net_funding_gap_reduction",
+          fundingGapBefore: provider.fundingGapBefore,
+        },
+      }),
+    ),
   ].filter(
     (line) =>
       line.totalClickCost <= params.input.playerView.own.clicks &&
@@ -170,7 +207,9 @@ export function buildCorpAgendaTurnPlanningSlice(params: {
     });
     return false;
   });
-  const rushLines = lines.filter((line) => line.family !== "safe_setup");
+  const rushLines = lines.filter(
+    (line) => line.family === "pure_rush" || line.family === "combined_rush",
+  );
   const safeLines = lines.filter((line) => line.family === "safe_setup");
   const bestRush = [...rushLines].sort(compareLineValue)[0];
   const bestSafe = [...safeLines].sort(compareLineValue)[0];
@@ -279,8 +318,12 @@ function createLine(
     projectedAdvance: boolean;
     supportBinding?: {
       parentNeedId: string;
-      providerModuleId: "corp.defend_servers";
-      expectedNeedProgress: "monotonic_protection_improvement";
+      providerModuleId: "corp.defend_servers" | "corp.economy";
+      providerPlanInstanceId?: string;
+      expectedNeedProgress:
+        | "monotonic_protection_improvement"
+        | "net_funding_gap_reduction";
+      fundingGapBefore?: number;
     };
   },
 ): CorpAgendaTurnPlanningLine {
@@ -294,6 +337,9 @@ function createLine(
       targets: candidateTargetIds(candidate),
     }),
     ownerModuleId: ownerFor(candidate, params.project),
+    ...(index === 0 && line.supportBinding?.providerPlanInstanceId
+      ? { planInstanceId: line.supportBinding.providerPlanInstanceId }
+      : {}),
     invocation: invocationFor(params.stateIdentity, candidate),
     projectedOnly: index > 0,
   }));
@@ -341,27 +387,41 @@ function createLine(
     accessProbability.denominator > 0
       ? accessProbability.numerator / accessProbability.denominator
       : 1;
+  const fundingProgress =
+    line.family === "fund_setup"
+      ? Math.min(economyGain, line.supportBinding?.fundingGapBefore ?? 0)
+      : 0;
   const agendaProgress =
-    line.family === "safe_setup"
-      ? 8
-      : 35 +
-        Math.max(1, params.project.agendaPoints) * 10 +
-        (line.projectedAdvance ? 8 : 0);
-  const defense =
-    line.family === "combined_rush"
-      ? 25
+    line.family === "fund_setup"
+      ? 0
       : line.family === "safe_setup"
-        ? 18
-        : 6;
+        ? 8
+        : 35 +
+          Math.max(1, params.project.agendaPoints) * 10 +
+          (line.projectedAdvance ? 8 : 0);
+  const defense =
+    line.family === "fund_setup"
+      ? 0
+      : line.family === "combined_rush"
+        ? 25
+        : line.family === "safe_setup"
+          ? 18
+          : 6;
   const risk =
-    line.family === "safe_setup"
-      ? 4
-      : Math.round(accessRisk * 40) -
-        (line.family === "combined_rush" ? 10 : 0);
-  const continuity = line.family === "safe_setup" ? 12 : 16;
-  const worstCaseFloor = agendaProgress + defense + economyGain - risk - 12;
+    line.family === "fund_setup"
+      ? 0
+      : line.family === "safe_setup"
+        ? 4
+        : Math.round(accessRisk * 40) -
+          (line.family === "combined_rush" ? 10 : 0);
+  const continuity =
+    line.family === "safe_setup" || line.family === "fund_setup" ? 12 : 16;
+  const evaluatedEconomy =
+    line.family === "fund_setup" ? fundingProgress : economyGain;
+  const worstCaseFloor =
+    agendaProgress + defense + evaluatedEconomy - risk - 12;
   const expectedValue =
-    agendaProgress + defense + economyGain + continuity - risk;
+    agendaProgress + defense + evaluatedEconomy + continuity - risk;
   const lineId = turnPlanningFingerprint("agenda-line", {
     opportunityKey: line.opportunityKey,
     family: line.family,
@@ -396,37 +456,49 @@ function createLine(
     },
     currentMilestoneId: params.project.phase,
     nextMilestoneId:
-      line.family === "safe_setup"
-        ? "opening_foundation_ready"
-        : line.projectedAdvance
-          ? "agenda_advanced"
-          : "agenda_installed",
-    commitment: line.family === "safe_setup" ? "soft" : "hard",
+      line.family === "fund_setup"
+        ? fundingProgress >= (line.supportBinding?.fundingGapBefore ?? 0)
+          ? "score_funding_ready"
+          : "score_funding_gap_reduced"
+        : line.family === "safe_setup"
+          ? "opening_foundation_ready"
+          : line.projectedAdvance
+            ? "agenda_advanced"
+            : "agenda_installed",
+    commitment:
+      line.family === "safe_setup" || line.family === "fund_setup"
+        ? "soft"
+        : "hard",
     remainingValue: Math.max(0, expectedValue),
     expiresAt: "next_own_turn",
     revalidationCodes: [
       "agenda_still_present",
       "score_window_still_viable",
       "protection_quote_current",
+      ...(line.family === "fund_setup" ? ["score_funding_target_current"] : []),
     ],
   };
   const valueClaims: CampaignValueClaim[] = [
-    {
-      claimId: `${lineId}:agenda`,
-      campaignId,
-      ownerModuleId: "corp.score_agenda",
-      objectiveKey: campaignId,
-      componentKey: "score_window_progress",
-      evaluationDimensionId: "agenda_progress",
-      aggregationMode: "delta_from_previous_prefix",
-      contributionKind: "objective_payoff",
-      beforeQuoteId,
-      afterQuoteId,
-      amount: agendaProgress,
-      dependencyKeys: [],
-      conflictKeys: [`${campaignId}:score_window_progress`],
-      status: "quoted",
-    },
+    ...(agendaProgress > 0
+      ? [
+          {
+            claimId: `${lineId}:agenda`,
+            campaignId,
+            ownerModuleId: "corp.score_agenda" as const,
+            objectiveKey: campaignId,
+            componentKey: "score_window_progress",
+            evaluationDimensionId: "agenda_progress",
+            aggregationMode: "delta_from_previous_prefix" as const,
+            contributionKind: "objective_payoff" as const,
+            beforeQuoteId,
+            afterQuoteId,
+            amount: agendaProgress,
+            dependencyKeys: [],
+            conflictKeys: [`${campaignId}:score_window_progress`],
+            status: "quoted" as const,
+          },
+        ]
+      : []),
     ...(defense > 0
       ? [
           {
@@ -447,7 +519,7 @@ function createLine(
           },
         ]
       : []),
-    ...(economyGain > 0
+    ...(evaluatedEconomy > 0
       ? [
           {
             claimId: `${lineId}:economy`,
@@ -460,7 +532,7 @@ function createLine(
             contributionKind: "funding_gap_reduction" as const,
             beforeQuoteId,
             afterQuoteId,
-            amount: economyGain,
+            amount: evaluatedEconomy,
             dependencyKeys: [],
             conflictKeys: [`${campaignId}:net_liquidity_delta`],
             status: "quoted" as const,
@@ -484,7 +556,7 @@ function createLine(
     evaluation: {
       agendaProgress,
       defense,
-      economy: economyGain,
+      economy: evaluatedEconomy,
       continuity,
       risk,
       worstCaseFloor,
@@ -495,11 +567,67 @@ function createLine(
     evidenceCodes: [
       `agenda_line_family:${line.family}`,
       `agenda_line_action_count:${nodes.length}`,
-      "agenda_payoff_owned_by_score_root",
+      ...(agendaProgress > 0 ? ["agenda_payoff_owned_by_score_root"] : []),
       "defense_claim_incremental_only",
       "economy_claim_liquidity_only",
     ],
   };
+}
+
+function boundScoreFundingProviders(
+  project: CorpScoreProjectSignal,
+  economyNeeds: readonly CorpEconomyNeedSignal[],
+  candidates: readonly ActionSemanticCandidate[],
+): Array<{
+  candidate: ActionSemanticCandidate;
+  parentNeedId: string;
+  providerPlanInstanceId: string;
+  fundingGapBefore: number;
+}> {
+  const parentPlanInstanceId = planInstanceIdForProposal({
+    moduleId: "corp.score_agenda",
+    dedupeKey: project.projectId,
+  });
+  const expectedNeedId = `score-support:${project.projectId}`;
+  return economyNeeds
+    .flatMap((signal) => {
+      if (
+        signal.kind !== "parent_funding" ||
+        signal.parentPlanInstanceId !== parentPlanInstanceId ||
+        signal.parentNeedId !== expectedNeedId ||
+        signal.needId !== expectedNeedId ||
+        signal.gap <= 0 ||
+        signal.scoreFundingMilestone?.remainingGap !== signal.gap
+      ) {
+        return [];
+      }
+      const providerPlanInstanceId = planInstanceIdForProposal({
+        moduleId: "corp.economy",
+        dedupeKey: signal.needId,
+      });
+      return signal.actionIds.flatMap((actionId) => {
+        const candidate = candidates.find(
+          (entry) =>
+            entry.actionId === actionId &&
+            exactCurrentCost(entry) &&
+            entry.economyProjection?.reliability === "guaranteed" &&
+            (entry.economyProjection.netLiquidCreditGain ?? 0) > 0,
+        );
+        return candidate
+          ? [
+              {
+                candidate,
+                parentNeedId: expectedNeedId,
+                providerPlanInstanceId,
+                fundingGapBefore: signal.gap,
+              },
+            ]
+          : [];
+      });
+    })
+    .sort((left, right) =>
+      compareCandidateCost(left.candidate, right.candidate),
+    );
 }
 
 function exactAgendaHead(

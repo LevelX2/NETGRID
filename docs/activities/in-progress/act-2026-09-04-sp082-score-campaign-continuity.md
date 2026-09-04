@@ -20,7 +20,7 @@ checks: []
 
 ## Status
 
-SP082-A und SP082-B abgeschlossen. SP082-C ist als nächstes aktiv.
+SP082-A bis SP082-C abgeschlossen. SP082-D ist als nächstes aktiv.
 
 ## Paketprotokoll
 
@@ -82,6 +82,30 @@ SP082-C: Der produktive Head und seine Phase sind korrekt Parent-/Need-
 gebunden, aber der Progress-Root sucht wegen der weiterhin offenen
 Schutzfrage vorrangig nach `score-protection:*` und meldet fälschlich Replan,
 statt den tatsächlich gewählten `score-support:*`-Witness anzuerkennen.
+
+### SP082-C – vertikale Funding-Konversion
+
+Der Agenda-Linienbauer konsumiert nun die vorhandenen parentgebundenen
+Economy-Needs und erzeugt für jeden aktuell exakt belegten Provider eine
+eigene `fund_setup`-Linie. Die Familie ist an allen betroffenen Stellen
+explizit als Nicht-Rush klassifiziert. Sie erzeugt weder Agenda-Installations-
+noch Defense-Payoff, sondern ausschließlich einen auf das veröffentlichte Gap
+begrenzten Netto-Funding-Claim. Der produktive Head trägt den bestehenden
+Economy-Provider, Score-Parent, `score-support`-Need, Assignment und die
+kanonische aktuelle Invocation.
+
+Die Progress-Root-Prüfung bevorzugt nun die tatsächlich vorhandene
+Parent-/Need-Bindung eines aktuellen Support-Heads. Spiel 36 meldet damit
+keinen fälschlichen Replan mehr: Der blockierte Score-Root besitzt einen
+gültigen `support_head`-Witness für `corp.gain_credit`. Bei geschlossenem Gap
+wird keine `fund_setup`-Linie mehr veröffentlicht; der Supportbedarf gibt an
+die erneute Score-/Defense-Materialisierung zurück.
+
+Spiel 34 bleibt bewusst unverändert: Dort ist der Konversionsfloor bereits
+finanziert, aber keine sichtbare zweite ICE-Option erfüllt die aktuelle
+strenge Near-Matchpoint-Schutzquote. Eine allgemeine Economy-Aktion ist daher
+kein nachgewiesener kausaler Scorefortschritt und wird nicht künstlich an den
+Score-Parent gehängt.
 
 ## Quelle und Zielprüfung
 

@@ -24423,6 +24423,12 @@ function turnPlanningProjectionDebug(params: {
                 .defenseNeeds,
             }
           : {}),
+        ...((params.context.domain as CorpPlanDomain | undefined)?.economyNeeds
+          ? {
+              economyNeeds: (params.context.domain as CorpPlanDomain)
+                .economyNeeds,
+            }
+          : {}),
         rulesContext,
         stateIdentity,
       })
@@ -25339,7 +25345,10 @@ function decisionFromScheduler(
     }
     const familyLines = [
       randomizedAgendaSlice.lines
-        .filter((line) => line.family !== "safe_setup")
+        .filter(
+          (line) =>
+            line.family === "pure_rush" || line.family === "combined_rush",
+        )
         .sort(
           (left, right) =>
             right.evaluation.expectedValue - left.evaluation.expectedValue ||
@@ -25488,6 +25497,7 @@ function agendaSliceForRandomizedSelection(params: {
         project,
         candidates: params.context.actionCandidates,
         defenseNeeds: domain.defenseNeeds,
+        economyNeeds: domain.economyNeeds,
         rulesContext: extended.planningRulesContext!,
         stateIdentity: extended.planningStateIdentity!,
       }),
