@@ -26,6 +26,70 @@ import {
 } from "./corp-ambush-plan-signals";
 
 describe("Corp ambush plan signal duplicate scope", () => {
+  it("admits an agenda ambush only when its exact access effect prevents the steal", () => {
+    const source = visibleCard("fetal-ai-in-hq", "corp", "agenda", {
+      definitionId: "onr_proteus_004_fetal-ai",
+      title: "Fetal AI",
+      advancementRequirement: 5,
+      agendaPoints: 3,
+    });
+    const install = legalAction(
+      "install-fetal-ai-remote-1",
+      "corp",
+      "install_card",
+      "Install Fetal AI in Remote 1",
+      { credits: 0, clicks: 1 },
+      {
+        source: source.instanceId,
+        payload: {
+          cardId: source.instanceId,
+          serverId: "remote_1",
+          placement: "root",
+        },
+      },
+    );
+    const input = aiInput("corp", [install]);
+    input.playerView.own.gripOrHq = [source];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1"),
+    ];
+    setAmbushIntent(input);
+    const candidate = ambushInstallCandidate(
+      install.actionId,
+      source.instanceId,
+      source.definitionId!,
+      "remote_1",
+    );
+
+    input.playerView.opponent.handCount = 5;
+    expect(
+      buildCorpAmbushPlanSignals({
+        input,
+        candidates: [candidate],
+        previous: undefined,
+      }),
+    ).toEqual([]);
+
+    input.playerView.opponent.handCount = 1;
+    expect(
+      buildCorpAmbushPlanSignals({
+        input,
+        candidates: [candidate],
+        previous: undefined,
+      }),
+    ).toContainEqual(
+      expect.objectContaining({
+        sourceInstanceId: source.instanceId,
+        actionIds: [install.actionId],
+        serverId: "remote_1",
+        phase: "install",
+      }),
+    );
+  });
+
   it("counts only same-definition copies in active remote roots as installed duplicates", () => {
     const definitionId = "onr_v1_345_trap";
     const handCopy = visibleCard("trap-in-hq", "corp", "asset", {

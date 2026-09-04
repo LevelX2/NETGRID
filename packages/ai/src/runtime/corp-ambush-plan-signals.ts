@@ -72,6 +72,8 @@ export function buildCorpAmbushPlanSignals(params: {
       }
       if (!ambushVisibleConditionsSatisfied(params.input, source.definitionId))
         return [];
+      if (!agendaAmbushInstallHasDecisivePayoff(params.input, source))
+        return [];
       return [
         visibleGripAmbushSignal(
           params.input,
@@ -621,7 +623,11 @@ function continuedAmbushSignals(params: {
     if (visibleGripSource) {
       if (
         visibleGripSource.known !== true ||
-        visibleGripSource.definitionId !== signal.sourceDefinitionId
+        visibleGripSource.definitionId !== signal.sourceDefinitionId ||
+        !agendaAmbushInstallHasDecisivePayoff(
+          params.input,
+          visibleGripSource,
+        )
       ) {
         return [];
       }
@@ -1048,6 +1054,24 @@ function ambushVisibleConditionsSatisfied(
     return false;
   }
   return true;
+}
+
+function agendaAmbushInstallHasDecisivePayoff(
+  input: AiDecisionInput,
+  source: VisibleCard,
+): boolean {
+  if (source.type !== "agenda") return true;
+  if (!source.definitionId) return false;
+  const projection = projectKnownCorpCardAccessEffect({
+    input,
+    sourceDefinitionId: source.definitionId,
+    sourceCard: source,
+  });
+  return (
+    projection.status === "complete" &&
+    projection.corpCanPayActivation !== false &&
+    projection.damage?.runnerSurvivable === false
+  );
 }
 
 function ambushAdvancementTarget(

@@ -86,7 +86,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     });
   });
 
-  it("lets an exact Ambush plan own an agenda install while its unsafe score parent stays blocked", () => {
+  it("does not let Ambush own a nonlethal agenda install while its unsafe score parent stays blocked", () => {
     resetResidentPlanPortfolioMemory();
     const trap = fetalAi();
     const install = installAmbush(trap, "new_remote", "install-fetal-ai");
@@ -97,19 +97,18 @@ describe("plan-first Corp ambush preplanning contract", () => {
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
 
     expect(decision).toMatchObject({
-      actionId: install.actionId,
-      reasonCode: "plan_first.corp.ambush_and_bluff",
+      actionId: "gain-credit",
+      reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
-    expect(decision.evidence).toEqual(
-      expect.arrayContaining([
-        "plan_assessment_evidence:corp_ambush_preplanned_exact_install:onr_proteus_004_fetal-ai:new_remote:assigned_domain_plan",
-        "plan_first_executor:plan:corp.ambush_and_bluff:ambush%3Afetal-ai%3Asetup%3Anew_remote",
-      ]),
-    );
 
     const portfolio = residentPlanPortfolioSnapshot(input);
-    expect(portfolio?.rootForegroundInstanceId).toBe(
+    expect(
+      portfolio?.instances.some(
+        (instance) => instance.moduleId === "corp.ambush_and_bluff",
+      ),
+    ).toBe(false);
+    expect(portfolio?.rootForegroundInstanceId).not.toBe(
       "plan:corp.ambush_and_bluff:ambush%3Afetal-ai",
     );
     expect(
@@ -132,6 +131,37 @@ describe("plan-first Corp ambush preplanning contract", () => {
         }),
       ],
     });
+  });
+
+  it("lets Ambush own an agenda install when the exact access damage is lethal", () => {
+    resetResidentPlanPortfolioMemory();
+    const trap = fetalAi();
+    const install = installAmbush(
+      trap,
+      "new_remote",
+      "install-lethal-fetal-ai",
+    );
+    const input = corpInput([install, gainCredit(), endTurn()], [trap]);
+    input.playerView.own.credits = 5;
+    input.playerView.opponent.handCount = 1;
+    setCorpIntent(input, true);
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: install.actionId,
+      reasonCode: "plan_first.corp.ambush_and_bluff",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_assessment_evidence:corp_ambush_preplanned_exact_install:onr_proteus_004_fetal-ai:new_remote:assigned_domain_plan",
+        "plan_first_executor:plan:corp.ambush_and_bluff:ambush%3Afetal-ai%3Asetup%3Anew_remote",
+      ]),
+    );
+    expect(residentPlanPortfolioSnapshot(input)?.rootForegroundInstanceId).toBe(
+      "plan:corp.ambush_and_bluff:ambush%3Afetal-ai",
+    );
   });
 
   it("hands a near-term access-punishing agenda deception to the score owner", () => {
@@ -221,6 +251,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
       [trap],
     );
     input.playerView.own.credits = 1;
+    input.playerView.opponent.handCount = 1;
     input.playerView.servers = [
       server("hq"),
       server("rd"),
