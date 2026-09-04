@@ -5189,9 +5189,9 @@
     },
     {
       "standardDeckId": "standard_corp_lucidrine_lockdown",
-      "sourceDeckVersion": "1.3.0",
-      "sourceDeckHash": "standard-deck:bbe7bfd8",
-      "sourceAnalysisHash": "deck-analysis:46c6e48e",
+      "sourceDeckVersion": "1.4.0",
+      "sourceDeckHash": "standard-deck:79af3af9",
+      "sourceAnalysisHash": "deck-analysis:e70f5279",
       "reviewedAt": "2026-09-04",
       "analysis": {
         "primaryStrategyIds": [
@@ -5200,17 +5200,16 @@
           "corp.central_stabilize"
         ],
         "secondaryStrategyIds": [
-          "corp.ambush_bluff",
           "corp.fast_advance",
           "corp.rush_score"
         ],
         "reviewStatus": "observe"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:9ddd398a",
+      "sourceAnalysisInputHash": "deck-analysis-input:25e3f62c",
       "contentByLocale": {
         "en": {
           "summary": "Lucidrine Lockdown converts central-server taxation and fort-wide steal costs into short scoring windows against repeated R&D multiaccess.",
-          "deckIdea": "Lucidrine Lockdown uses thirteen pieces of live ICE to tax the route into R&D, then makes the agenda itself expensive to take with Red Herrings. Ball and Chain and Virizz make repeated breaker use expensive, while Quandary, Credit Blocks, and Fire Wall provide real end-the-run coverage and three Virus Test Sites keep the remote threat active. The objective is not to make R&D permanently impenetrable, but to turn every successful multiaccess into a costly exchange and spend the resulting tempo on Vapor Ops and a real score line.",
+          "deckIdea": "Lucidrine Lockdown uses sixteen pieces of direct end-the-run ICE to close R&D and HQ, then makes the agenda itself expensive to take with three Red Herrings. Sphinx 2006, Sumo 2008, and Caryatid combine high strength with selectable ICE types; Quandary, Credit Blocks, and Fire Wall keep the early defense affordable. The deck deliberately drops the low-conversion ambush package and indirect tax ICE: every defensive draw now either stops the run or adds the fort-wide steal tax. The resulting tempo must be converted through Vapor Ops and a real score line.",
           "gamePlan": {
             "opening": "Install a rez-ready stopper on R&D and cover HQ before expanding. If the Runner reveals R&D Interface or repeats R&D runs, give R&D the next meaningful layer, but do not abandon HQ. Establish economy early enough to rez the ICE you install.",
             "midgame": "Layer different ICE types across R&D and HQ so one breaker cannot solve both centrals cheaply. Place Red Herrings on the central selected by the current access-pressure assessment, usually R&D against Interface turns, and keep one credit available to rez it at the final relevant run window. Use the resulting credit and action gap to build one scoring remote and convert Vapor Ops counters rather than continuing to stack ICE without a scoring plan.",
@@ -5223,19 +5222,19 @@
               "role": "Adds five credits to every agenda steal from its fort and is the deck's direct answer to repeated R&D multiaccess."
             },
             {
-              "cardId": "onr_v1_222_ball-and-chain",
-              "title": "Ball and Chain",
-              "role": "Forces an expensive code-gate strength check and taxes every later ICE encounter when its first subroutine lands."
+              "cardId": "onr_proteus_039_sphinx-2006",
+              "title": "Sphinx 2006",
+              "role": "Provides a strength-five end-the-run barrier and can switch from code gate to sentry when the visible breaker mix makes that worthwhile."
             },
             {
-              "cardId": "onr_v1_277_virizz",
-              "title": "Virizz",
-              "role": "Diversifies the central tax into sentry pressure and makes every later subroutine break more expensive when encountered unbroken."
+              "cardId": "onr_proteus_040_sumo-2008",
+              "title": "Sumo 2008",
+              "role": "Adds another strength-five end-the-run layer and can become a wall instead of a sentry."
             },
             {
-              "cardId": "onr_v1_348_virus-test-site",
-              "title": "Virus Test Site",
-              "role": "Preserves the active remote threat that turns the central tax window into bluff pressure and potential damage."
+              "cardId": "onr_proteus_013_caryatid",
+              "title": "Caryatid",
+              "role": "Completes the subtype-switching package from the wall side, forcing the Runner to keep all three breaker routes funded."
             },
             {
               "cardId": "onr_v1_347_vapor-ops",
@@ -5250,13 +5249,13 @@
           ],
           "weaknesses": [
             "A Runner who can alternate efficiently between R&D and HQ can exploit overcommitment to either central.",
-            "The deck needs both ICE diversity and liquidity. Drawing only barriers or spending below rez thresholds leaves nominal protection inactive.",
+            "The deck needs both ICE diversity and liquidity. The high-strength flexible stoppers are expensive to rez, so spending below their thresholds leaves nominal protection inactive.",
             "Red Herrings does not stop a run and can be trashed cheaply; without a taxing outer layer a rich Runner may still pay through it."
           ]
         },
         "de": {
           "summary": "Lucidrine Lockdown verwandelt Zentralserver-Tax und fortweite Stehlkosten in kurze Scorefenster gegen wiederholten R&D-Multiaccess.",
-          "deckIdea": "Lucidrine Lockdown besteuert den Weg nach R&D mit dreizehn tatsächlich relevanten ICE und verteuert anschließend den Agendadiebstahl selbst durch Red Herrings. Ball and Chain und Virizz verteuern wiederholte Breakernutzung; Quandary, Credit Blocks und Fire Wall liefern echte End-the-Run-Abdeckung, während drei Virus Test Sites die aktive Remote-Drohung bewahren. R&D soll nicht für immer undurchdringlich werden; jeder erfolgreiche Multiaccess soll zu einem teuren Tausch werden, dessen Tempo die Corp in Vapor Ops und eine echte Scorelinie investiert.",
+          "deckIdea": "Lucidrine Lockdown schließt R&D und HQ mit sechzehn direkten End-the-Run-ICE und verteuert anschließend den Agendadiebstahl selbst durch drei Red Herrings. Sphinx 2006, Sumo 2008 und Caryatid verbinden hohe Stärke mit wählbaren ICE-Typen; Quandary, Credit Blocks und Fire Wall halten die frühe Verteidigung bezahlbar. Das Deck verzichtet bewusst auf das schwach konvertierende Ambush-Paket und indirekte Tax-ICE: Jede defensive Karte stoppt nun entweder den Run oder erhöht fortweit die Stehlkosten. Das gewonnene Tempo muss über Vapor Ops und eine echte Scorelinie umgesetzt werden.",
           "gamePlan": {
             "opening": "Installiere ein bezahlbar rezzbares Stopper-ICE auf R&D und decke HQ ab, bevor du expandierst. Zeigt der Runner R&D Interface oder läuft wiederholt auf R&D, erhält R&D die nächste relevante Schicht; HQ darf dabei nicht aufgegeben werden. Baue die Economy früh genug auf, um das installierte ICE auch wirklich zu rezzen.",
             "midgame": "Staffele unterschiedliche ICE-Typen über R&D und HQ, damit ein einzelner Breaker nicht beide Zentralen günstig löst. Lege Red Herrings auf die von der aktuellen Zugriffsdruck-Bewertung gewählte Zentrale – gegen Interface-Züge meist R&D – und halte einen Credit für das Rezzen im letzten relevanten Runfenster bereit. Nutze die gewonnene Credit- und Aktionslücke für genau ein Score-Remote und die Konversion von Vapor-Ops-Countern, statt ohne Scoreplan immer weiter ICE zu stapeln.",
@@ -5269,19 +5268,19 @@
               "role": "Verteuert jeden Agendadiebstahl aus seinem Fort um fünf Credits und ist die direkte Antwort des Decks auf wiederholten R&D-Multiaccess."
             },
             {
-              "cardId": "onr_v1_222_ball-and-chain",
-              "title": "Ball and Chain",
-              "role": "Erzwingt einen teuren Code-Gate-Stärketest und verteuert nach ausgelöster erster Subroutine jede spätere ICE-Begegnung."
+              "cardId": "onr_proteus_039_sphinx-2006",
+              "title": "Sphinx 2006",
+              "role": "Liefert eine End-the-Run-Barriere mit Stärke fünf und kann vom Code Gate zum Sentry wechseln, wenn die sichtbare Breaker-Verteilung das sinnvoll macht."
             },
             {
-              "cardId": "onr_v1_277_virizz",
-              "title": "Virizz",
-              "role": "Ergänzt die Zentralserver-Tax um Sentry-Druck und verteuert nach ungebrochener Begegnung jede spätere Subroutine."
+              "cardId": "onr_proteus_040_sumo-2008",
+              "title": "Sumo 2008",
+              "role": "Ergänzt eine weitere End-the-Run-Schicht mit Stärke fünf und kann statt eines Sentry zum Wall werden."
             },
             {
-              "cardId": "onr_v1_348_virus-test-site",
-              "title": "Virus Test Site",
-              "role": "Bewahrt die aktive Remote-Drohung, die das Zentralserver-Taxfenster in Bluffdruck und möglichen Schaden verwandelt."
+              "cardId": "onr_proteus_013_caryatid",
+              "title": "Caryatid",
+              "role": "Vervollständigt das Paket typflexibler Stopper von der Wall-Seite und zwingt den Runner, alle drei Breaker-Linien liquide zu halten."
             },
             {
               "cardId": "onr_v1_347_vapor-ops",
@@ -5296,7 +5295,7 @@
           ],
           "weaknesses": [
             "Ein Runner, der effizient zwischen R&D und HQ wechselt, kann eine Überinvestition in eine der beiden Zentralen ausnutzen.",
-            "Das Deck braucht ICE-Vielfalt und Liquidität zugleich. Nur Barriers zu ziehen oder unter Rez-Schwellen auszugeben lässt nominellen Schutz inaktiv.",
+            "Das Deck braucht ICE-Vielfalt und Liquidität zugleich. Die starken flexiblen Stopper sind teuer zu rezzen; unter ihren Schwellen bleibt nomineller Schutz inaktiv.",
             "Red Herrings stoppt keinen Run und kann günstig getrasht werden; ohne taxierende äußere Schicht kann ein reicher Runner den Aufpreis weiterhin bezahlen."
           ]
         }

@@ -5708,7 +5708,7 @@
     },
     {
       "standardDeckId": "standard_corp_lucidrine_lockdown",
-      "version": "1.3.0",
+      "version": "1.4.0",
       "status": "active",
       "name": "Lucidrine Lockdown",
       "side": "corp",
@@ -5736,7 +5736,7 @@
         },
         {
           "cardId": "onr_v1_297_overtime-incentives",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_292_management-shake-up",
@@ -5748,10 +5748,6 @@
         },
         {
           "cardId": "onr_v1_366_red-herrings",
-          "quantity": 2
-        },
-        {
-          "cardId": "onr_v1_348_virus-test-site",
           "quantity": 3
         },
         {
@@ -5767,11 +5763,15 @@
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_222_ball-and-chain",
+          "cardId": "onr_proteus_039_sphinx-2006",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_proteus_040_sumo-2008",
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_277_virizz",
+          "cardId": "onr_proteus_013_caryatid",
           "quantity": 2
         },
         {
@@ -5790,7 +5790,7 @@
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_lucidrine_lockdown",
-        "sourceDeckVersion": "1.3.0-rd-steal-tax-counter-2026-09-04"
+        "sourceDeckVersion": "1.4.0-direct-central-stoppers-2026-09-04"
       }
     }
   ]
