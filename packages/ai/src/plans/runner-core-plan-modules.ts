@@ -297,9 +297,9 @@ export type RunnerRecurringEconomySignal = {
   evidenceCodes: string[];
   investmentHorizon: Readonly<{
     installCost: number;
-    earliestPayout: "start_of_runner_turn";
+    earliestPayout: "start_of_runner_turn" | "next_compatible_icebreaker_use";
     projectedHoldTurns: number;
-    invalidatingActionType: "start_run";
+    invalidatingActionType: "start_run" | "none";
     realizedPayoutCount: number;
     realizedValue: number;
     futureValueAtRisk: number;

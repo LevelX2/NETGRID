@@ -63,6 +63,7 @@ import {
   runnerDebtFinancingProfile,
   runnerInstalledDebtFinancingLiability,
   runnerNoRunRecurringEconomyProfile,
+  runnerRestrictedRunCreditProfile,
   runnerVoluntarySelfTrashLifecycleProfile,
 } from "./runner-canonical-card-facts";
 import { rememberStrategicIntentState } from "../strategic-intent-memory";
@@ -282,7 +283,10 @@ import {
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 import type { RunnerProgramInstallTrashAssessment } from "./runner-program-install-trash-policy";
 import { assessRunnerAccessTrashImpact } from "./runner-access-trash-impact";
-import { assessRunnerRecurringEconomyRunHorizon } from "./runner-recurring-economy-investment";
+import {
+  assessRunnerRecurringEconomyRunHorizon,
+  assessRunnerRestrictedRunEconomyInvestment,
+} from "./runner-recurring-economy-investment";
 import {
   quoteRunnerBreakerUpgradeEconomics,
   type RunnerBreakerUpgradeEconomicQuote,
@@ -7539,6 +7543,8 @@ function buildRunnerDomain(
     candidates,
     runTargets,
     economy,
+    handDevelopment,
+    strategicIntent,
   );
   const recurringEconomyRunDeferral = recurringEconomy.find(
     (signal) =>
@@ -26351,6 +26357,8 @@ function runnerRecurringEconomySignals(
   candidates: readonly ActionSemanticCandidate[],
   runTargets: readonly RunnerRunTargetEvaluation[],
   economy: RunnerEconomyPosture,
+  handDevelopment: readonly RunnerHandDevelopmentEvaluation[],
+  strategicIntent: RunnerStrategicIntentProfile,
 ): NonNullable<RunnerCorePlanDomain["recurringEconomy"]> {
   const installedSources = (input.playerView.own.rig ?? []).filter((card) =>
     hasNoRunRecurringEconomyCommitment(card.definitionId),
@@ -26498,10 +26506,145 @@ function runnerRecurringEconomySignals(
       ];
     },
   );
+  const recurringBreakerEngineActive =
+    strategicIntent.engineLineIds?.includes(
+      "runner.engine.compatible_recurring_economy",
+    ) === true;
+  const recurringBreakerProviderIds = new Set(
+    (strategicIntent.engineProviders ?? [])
+      .filter((provider) =>
+        provider.capabilities.includes("runner.economy.recurring_breaker"),
+      )
+      .map((provider) => provider.cardId),
+  );
+  const restrictedRunCreditInstallSignals =
+    candidates.flatMap<RunnerRecurringEconomySignal>((candidate) => {
+      if (
+        candidate.semanticActionType !== "install.card" ||
+        !candidate.sourceDefinitionId ||
+        hasNoRunRecurringEconomyCommitment(candidate.sourceDefinitionId)
+      ) {
+        return [];
+      }
+      const profile = runnerRestrictedRunCreditProfile(
+        candidate.sourceDefinitionId,
+      );
+      if (!profile) return [];
+      const action = input.legalActions.find(
+        (legalAction) => legalAction.actionId === candidate.actionId,
+      );
+      const handEvaluation = handDevelopment.find(
+        (evaluation) =>
+          evaluation.definitionId === candidate.sourceDefinitionId &&
+          evaluation.cardInstanceId === candidate.sourceCardInstanceId &&
+          evaluation.legalActionId === candidate.actionId,
+      );
+      if (!action || !handEvaluation) return [];
+      const installedCompatibleBreakerCount =
+        runnerInstalledCompatibleRestrictedCreditBreakerCount(
+          input,
+          profile.uses,
+        );
+      const urgentRunAvailable = runTargets.some(
+        (evaluation) =>
+          evaluation.pathPassability === "reachable" &&
+          runnerRunHasExactUrgency(input, evaluation),
+      );
+      const investment = assessRunnerRestrictedRunEconomyInvestment({
+        engineLineActive: recurringBreakerEngineActive,
+        providerMatches: recurringBreakerProviderIds.has(
+          candidate.sourceDefinitionId,
+        ),
+        installedCompatibleBreakerCount,
+        installCost: legalActionCreditCost(action),
+        recurringCredits: profile.capacity,
+        clicksRemaining: input.playerView.own.clicks,
+        runnerDeckCount: input.playerView.own.stackOrRdCount,
+        urgentRunAvailable,
+      });
+      const handRouteReady =
+        handEvaluation.availability === "legal_now" &&
+        handEvaluation.deferReason === "none" &&
+        handEvaluation.currentNeed !== "none" &&
+        handEvaluation.persistentInstallEvaluation?.duplicateRole !==
+          "redundant_duplicate";
+      const installReady = investment.decision === "install" && handRouteReady;
+      return [
+        {
+          commitmentId:
+            candidate.sourceCardInstanceId ??
+            candidate.sourceCardId ??
+            candidate.sourceDefinitionId,
+          definitionId: candidate.sourceDefinitionId,
+          commitmentActive: false,
+          phase: installReady ? ("install" as const) : ("hold" as const),
+          actionIds: installReady ? [candidate.actionId] : [],
+          priorityClass: installReady
+            ? investment.priorityClass
+            : ("P5" as const),
+          value: installReady ? investment.value : 0,
+          investmentHorizon: {
+            installCost: legalActionCreditCost(action),
+            earliestPayout: "next_compatible_icebreaker_use" as const,
+            projectedHoldTurns: 0,
+            invalidatingActionType: "none" as const,
+            realizedPayoutCount: 0,
+            realizedValue: 0,
+            futureValueAtRisk: profile.capacity,
+            bestVisibleRunPayoff: Math.max(
+              0,
+              ...runTargets.map((evaluation) => evaluation.score),
+            ),
+            decision: installReady ? ("install" as const) : ("wait" as const),
+          },
+          evidenceCodes: [
+            ...investment.evidenceCodes,
+            `runner_restricted_run_economy_hand_route_ready:${handRouteReady}`,
+            `runner_restricted_run_economy_uses:${profile.uses.join("|")}`,
+          ],
+        },
+      ];
+    });
   return uniqueBy(
-    [...installedSignals, ...installSignals],
+    [
+      ...installedSignals,
+      ...installSignals,
+      ...restrictedRunCreditInstallSignals,
+    ],
     (signal) => signal.commitmentId,
   );
+}
+
+function runnerInstalledCompatibleRestrictedCreditBreakerCount(
+  input: AiDecisionInput,
+  uses: readonly (
+    | "using_icebreaker_during_run_non_noisy"
+    | "using_killer_during_run"
+  )[],
+): number {
+  const supportsNonNoisy = uses.includes(
+    "using_icebreaker_during_run_non_noisy",
+  );
+  const supportsKiller = uses.includes("using_killer_during_run");
+  return (input.playerView.own.rig ?? []).filter((card) => {
+    const roles = rolesForDeckDoctrineCard(card.definitionId ?? "");
+    const subtypes = new Set(
+      (card.subtypes ?? []).map((subtype) =>
+        subtype.trim().toLocaleLowerCase("en-US"),
+      ),
+    );
+    const breaker =
+      rolesHaveBreakerRole(roles) ||
+      ["icebreaker", "fracter", "decoder", "killer", "worm"].some((subtype) =>
+        subtypes.has(subtype),
+      );
+    if (!breaker) return false;
+    return (
+      (supportsNonNoisy && !subtypes.has("noisy")) ||
+      (supportsKiller &&
+        (rolesMatch(roles, ["breaker_killer"]) || subtypes.has("killer")))
+    );
+  }).length;
 }
 
 function runnerRecurringEconomyRunDecision(

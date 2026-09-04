@@ -17303,6 +17303,92 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it("installs a compatible recurring breaker-credit engine through its specialized owner", () => {
+    resetResidentPlanPortfolioMemory();
+    const vewy = visibleCard("vewy-in-grip", "runner", "program", {
+      definitionId: "onr_v1_071_vewy-vewy-quiet",
+      title: "Vewy Vewy Quiet",
+      installCost: 4,
+      memoryCost: 1,
+    });
+    const installVewy = legalAction(
+      "install-vewy",
+      "runner",
+      "install_card",
+      "Vewy Vewy Quiet installieren",
+      { credits: 4, clicks: 1 },
+      {
+        source: vewy.instanceId,
+        payload: { cardId: vewy.instanceId },
+      },
+    );
+    const credit = legalAction(
+      "credit-after-vewy",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [installVewy, credit]);
+    input.playerView.own.credits = 10;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.stackOrRdCount = 30;
+    input.playerView.own.memoryLimit = 4;
+    input.playerView.own.memoryUsed = 1;
+    input.playerView.own.gripOrHq = [vewy];
+    input.playerView.own.rig = [
+      visibleCard("codecracker-installed", "runner", "program", {
+        definitionId: "onr_v1_014_codecracker",
+        subtypes: ["icebreaker", "decoder"],
+      }),
+    ];
+
+    const decision = liveContext({
+      runnerStrategicIntentForInput: recurringProgramSearchIntent,
+      evaluateRunnerHandDevelopment: () => [
+        handEvaluation({
+          cardInstanceId: vewy.instanceId,
+          definitionId: "onr_v1_071_vewy-vewy-quiet",
+          legalActionId: installVewy.actionId,
+          priority: 80,
+          duplicateRole: "none",
+          finalInstallFit: 80,
+          cardType: "program",
+          installCost: 4,
+          memoryCost: 1,
+          creditsAfterInstall: 6,
+          currentNeed: "useful_now",
+          developmentRole: "economy_engine",
+          strategicFit: "strong",
+        }),
+      ],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 3,
+        desiredCreditReserve: 5,
+        fundingNeed: false,
+        evidence: [],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: installVewy.actionId,
+      reasonCode: "plan_first.runner.recurring_economy",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.recurring_economy",
+        planFirstDecision: {
+          selectedPlan: {
+            moduleId: "runner.recurring_economy",
+            phase: "install",
+          },
+          route: {
+            actionId: installVewy.actionId,
+          },
+        },
+      },
+    });
+  });
+
   it("lets a valuable visible run preempt the resident investment after its first payout", () => {
     resetResidentPlanPortfolioMemory();
     const run = legalAction(

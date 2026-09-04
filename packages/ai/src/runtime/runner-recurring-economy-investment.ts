@@ -6,6 +6,82 @@ export type RunnerRecurringEconomyRunDecision = Readonly<{
   evidenceCodes: string[];
 }>;
 
+export type RunnerRestrictedRunEconomyInvestmentDecision = Readonly<{
+  decision: "install" | "hold";
+  priorityClass: "P4" | "P5";
+  value: number;
+  projectedBreakEvenRuns: number;
+  evidenceCodes: string[];
+}>;
+
+export function assessRunnerRestrictedRunEconomyInvestment(params: {
+  engineLineActive: boolean;
+  providerMatches: boolean;
+  installedCompatibleBreakerCount: number;
+  installCost: number;
+  recurringCredits: number;
+  clicksRemaining: number;
+  runnerDeckCount: number;
+  urgentRunAvailable: boolean;
+}): RunnerRestrictedRunEconomyInvestmentDecision {
+  const projectedBreakEvenRuns =
+    params.recurringCredits > 0
+      ? Math.ceil(params.installCost / params.recurringCredits)
+      : Number.POSITIVE_INFINITY;
+  const evidenceCodes = [
+    `runner_restricted_run_economy_engine_line_active:${params.engineLineActive}`,
+    `runner_restricted_run_economy_provider_matches:${params.providerMatches}`,
+    `runner_restricted_run_economy_compatible_breakers:${params.installedCompatibleBreakerCount}`,
+    `runner_restricted_run_economy_install_cost:${params.installCost}`,
+    `runner_restricted_run_economy_recurring_credits:${params.recurringCredits}`,
+    `runner_restricted_run_economy_break_even_runs:${Number.isFinite(projectedBreakEvenRuns) ? projectedBreakEvenRuns : "unknown"}`,
+  ];
+  const install =
+    params.engineLineActive &&
+    params.providerMatches &&
+    params.installedCompatibleBreakerCount > 0 &&
+    params.installCost >= 0 &&
+    params.recurringCredits > 0 &&
+    projectedBreakEvenRuns <= 3 &&
+    params.clicksRemaining >= 2 &&
+    params.runnerDeckCount > projectedBreakEvenRuns &&
+    !params.urgentRunAvailable;
+  if (!install) {
+    return {
+      decision: "hold",
+      priorityClass: "P5",
+      value: 0,
+      projectedBreakEvenRuns,
+      evidenceCodes: [
+        "runner_restricted_run_economy_install_deferred",
+        ...evidenceCodes,
+        ...(params.installedCompatibleBreakerCount === 0
+          ? [
+              "runner_restricted_run_economy_requires_installed_compatible_breaker",
+            ]
+          : []),
+        ...(params.urgentRunAvailable
+          ? ["runner_restricted_run_economy_yields_to_urgent_run"]
+          : []),
+      ],
+    };
+  }
+  return {
+    decision: "install",
+    priorityClass: "P4",
+    value:
+      200 +
+      params.recurringCredits * 60 +
+      Math.min(2, params.installedCompatibleBreakerCount) * 20 -
+      params.installCost * 10,
+    projectedBreakEvenRuns,
+    evidenceCodes: [
+      "runner_restricted_run_economy_install_ready",
+      ...evidenceCodes,
+    ],
+  };
+}
+
 export function assessRunnerRecurringEconomyRunHorizon(params: {
   runTargets: readonly RunnerRunTargetEvaluation[];
   legalRunActionIds: ReadonlySet<string>;
