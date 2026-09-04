@@ -5186,6 +5186,117 @@
           ]
         }
       }
+    },
+    {
+      "standardDeckId": "standard_corp_lucidrine_lockdown",
+      "sourceDeckVersion": "1.1.0",
+      "sourceDeckHash": "standard-deck:98695688",
+      "sourceAnalysisHash": "deck-analysis:5cf111a1",
+      "reviewedAt": "2026-09-04",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.fast_advance",
+          "corp.remote_scoring",
+          "corp.rush_score"
+        ],
+        "secondaryStrategyIds": [],
+        "reviewStatus": "observe"
+      },
+      "sourceAnalysisInputHash": "deck-analysis-input:e46ef5c3",
+      "contentByLocale": {
+        "en": {
+          "summary": "Lucidrine Lockdown converts central-server taxation into short scoring windows. Its revised ICE suite is built to contest repeated R&D multiaccess without leaving HQ as a free fallback.",
+          "deckIdea": "Lucidrine Lockdown removes low-impact one-credit taxes and remote-only traps in favor of fifteen pieces of live ICE, Simon Francisco access compression, and a single Pattel Antibody punishment slot. Ball and Chain and Virizz make repeated breaker use expensive, while Quandary, Credit Blocks, and Fire Wall provide real end-the-run coverage. The objective is not to make R&D permanently impenetrable: tax the Runner on both R&D and HQ, then convert the lost tempo through Vapor Ops and the advancement operations before the Runner can rebuild.",
+          "gamePlan": {
+            "opening": "Install a rez-ready stopper on R&D and cover HQ before expanding. If the Runner reveals R&D Interface or repeats R&D runs, give R&D the next meaningful layer, but do not abandon HQ. Establish economy early enough to rez the ICE you install.",
+            "midgame": "Layer different ICE types across R&D and HQ so one breaker cannot solve both centrals cheaply. Place Simon Francisco on the central with the highest current multiaccess count. Use the resulting credit and action gap to build one scoring remote and convert Vapor Ops counters rather than continuing to stack ICE without a scoring plan.",
+            "endgame": "Shift protection with the Runner's actual pressure. If R&D is locked and attacks move to HQ, reinforce HQ before adding another redundant R&D layer. Close the game through the safest fast or rush score window while retaining enough credits for the central ICE that still matters."
+          },
+          "keyCards": [
+            {
+              "cardId": "onr_proteus_073_simon-francisco",
+              "title": "Simon Francisco",
+              "role": "Compresses HQ or R&D multiaccess by removing one queued access and is the deck's direct answer to Interface turns."
+            },
+            {
+              "cardId": "onr_v1_222_ball-and-chain",
+              "title": "Ball and Chain",
+              "role": "Forces an expensive code-gate strength check and taxes every later ICE encounter when its first subroutine lands."
+            },
+            {
+              "cardId": "onr_v1_277_virizz",
+              "title": "Virizz",
+              "role": "Diversifies the central tax into sentry pressure and makes every later subroutine break more expensive when encountered unbroken."
+            },
+            {
+              "cardId": "onr_proteus_068_pattel-antibody",
+              "title": "Pattel Antibody",
+              "role": "Turns a central access into persistent breaker-strength pressure when the Corp preserves three credits for the trigger."
+            },
+            {
+              "cardId": "onr_v1_347_vapor-ops",
+              "title": "Vapor Ops",
+              "role": "Stores advancement counters safely and converts a taxed Runner turn into an immediate agenda score."
+            }
+          ],
+          "pilotingTips": [
+            "Treat R&D Interface and repeated central accesses as current pressure signals, not as permission to neglect the other central.",
+            "Install only ICE that can be funded on the relevant horizon; an unrezzed fourth layer is less useful than a live second layer on the other attacked central.",
+            "Once the Runner is paying heavily, spend the gained tempo on an actual score line instead of defending forever."
+          ],
+          "weaknesses": [
+            "A Runner who can alternate efficiently between R&D and HQ can exploit overcommitment to either central.",
+            "The deck needs both ICE diversity and liquidity. Drawing only barriers or spending below rez thresholds leaves nominal protection inactive.",
+            "Simon Francisco reduces accesses but does not stop a run; without a taxing outer layer it only slows the loss."
+          ]
+        },
+        "de": {
+          "summary": "Lucidrine Lockdown verwandelt Zentralserver-Tax in kurze Scorefenster. Die überarbeitete ICE-Suite soll wiederholten R&D-Multiaccess abfangen, ohne HQ als kostenlosen Ausweichweg offenzulassen.",
+          "deckIdea": "Lucidrine Lockdown ersetzt schwache Ein-Credit-Taxes und reine Remote-Traps durch fünfzehn tatsächlich relevante ICE, Zugriffskompression über Simon Francisco und einen einzelnen Pattel-Antibody-Bestrafungsslot. Ball and Chain und Virizz verteuern wiederholte Breakernutzung; Quandary, Credit Blocks und Fire Wall liefern echte End-the-Run-Abdeckung. R&D soll nicht für immer undurchdringlich werden: Besteuere den Runner auf R&D und HQ und verwandle das verlorene Tempo mit Vapor Ops und den Advancement-Operationen in Scores, bevor der Runner sich erholt.",
+          "gamePlan": {
+            "opening": "Installiere ein bezahlbar rezzbares Stopper-ICE auf R&D und decke HQ ab, bevor du expandierst. Zeigt der Runner R&D Interface oder läuft wiederholt auf R&D, erhält R&D die nächste relevante Schicht; HQ darf dabei nicht aufgegeben werden. Baue die Economy früh genug auf, um das installierte ICE auch wirklich zu rezzen.",
+            "midgame": "Staffele unterschiedliche ICE-Typen über R&D und HQ, damit ein einzelner Breaker nicht beide Zentralen günstig löst. Lege Simon Francisco auf die Zentrale mit dem aktuell höchsten Multiaccess. Nutze die gewonnene Credit- und Aktionslücke für genau ein Score-Remote und die Konversion von Vapor-Ops-Countern, statt ohne Scoreplan immer weiter ICE zu stapeln.",
+            "endgame": "Verschiebe den Schutz entlang des tatsächlichen Runnerdrucks. Ist R&D abgeriegelt und wechseln die Angriffe zu HQ, verstärke HQ vor einer weiteren redundanten R&D-Schicht. Schließe über das sicherste Fast- oder Rush-Scorefenster ab und halte genug Credits für das weiterhin relevante Zentralserver-ICE zurück."
+          },
+          "keyCards": [
+            {
+              "cardId": "onr_proteus_073_simon-francisco",
+              "title": "Simon Francisco",
+              "role": "Komprimiert Multiaccess auf HQ oder R&D um einen ausstehenden Zugriff und ist die direkte Antwort des Decks auf Interface-Züge."
+            },
+            {
+              "cardId": "onr_v1_222_ball-and-chain",
+              "title": "Ball and Chain",
+              "role": "Erzwingt einen teuren Code-Gate-Stärketest und verteuert nach ausgelöster erster Subroutine jede spätere ICE-Begegnung."
+            },
+            {
+              "cardId": "onr_v1_277_virizz",
+              "title": "Virizz",
+              "role": "Ergänzt die Zentralserver-Tax um Sentry-Druck und verteuert nach ungebrochener Begegnung jede spätere Subroutine."
+            },
+            {
+              "cardId": "onr_proteus_068_pattel-antibody",
+              "title": "Pattel Antibody",
+              "role": "Verwandelt einen Zentralserver-Zugriff in anhaltenden Breaker-Stärkedruck, wenn die Corp drei Credits für den Trigger zurückhält."
+            },
+            {
+              "cardId": "onr_v1_347_vapor-ops",
+              "title": "Vapor Ops",
+              "role": "Speichert Advancement-Counter sicher und verwandelt einen taxierten Runnerzug in einen unmittelbaren Agendascore."
+            }
+          ],
+          "pilotingTips": [
+            "Behandle R&D Interface und wiederholte Zentralserver-Zugriffe als aktuelle Drucksignale, nicht als Erlaubnis, die andere Zentrale zu vernachlässigen.",
+            "Installiere nur ICE, das im relevanten Zeithorizont bezahlt werden kann; eine ungerezzte vierte Schicht ist weniger wert als eine aktive zweite Schicht auf der anderen angegriffenen Zentrale.",
+            "Sobald der Runner viel bezahlt, investiere das gewonnene Tempo in eine echte Scorelinie statt in endlose Verteidigung."
+          ],
+          "weaknesses": [
+            "Ein Runner, der effizient zwischen R&D und HQ wechselt, kann eine Überinvestition in eine der beiden Zentralen ausnutzen.",
+            "Das Deck braucht ICE-Vielfalt und Liquidität zugleich. Nur Barriers zu ziehen oder unter Rez-Schwellen auszugeben lässt nominellen Schutz inaktiv.",
+            "Simon Francisco reduziert Zugriffe, stoppt aber keinen Run; ohne taxierende äußere Schicht verzögert er die Niederlage nur."
+          ]
+        }
+      }
     }
   ]
 }
