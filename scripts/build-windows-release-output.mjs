@@ -134,6 +134,7 @@ try {
   copySharpWindowsRuntime(applicationRoot);
   if (!existsSync(path.join(applicationRoot, "node_modules", "sharp")))
     throw new Error("release_sharp_runtime_missing");
+  pruneNonRuntimeDependencyArtifacts(applicationRoot);
 
   mkdirSync(path.join(outputRoot, "config"), { recursive: true });
   cpSync(
@@ -245,6 +246,64 @@ function copySharpWindowsRuntime(applicationRoot) {
     if (!existsSync(source))
       throw new Error(`release_sharp_dependency_missing:${source}`);
     cpSync(source, target, { recursive: true, dereference: true });
+  }
+}
+
+function pruneNonRuntimeDependencyArtifacts(applicationRoot) {
+  const nonRuntimeDependencyDirectories = new Set([
+    ".github",
+    "__tests__",
+    "doc",
+    "docs",
+    "scripts",
+    "test",
+    "tests",
+  ]);
+  const nonRuntimeDocumentPrefixes = [
+    "changelog",
+    "code_of_conduct",
+    "contributing",
+    "readme",
+    "security",
+  ];
+  visit(applicationRoot, false);
+
+  function visit(directory, insideDependency) {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      const target = path.join(directory, entry.name);
+      const nextInsideDependency =
+        insideDependency || entry.name.toLowerCase() === "node_modules";
+      if (entry.isDirectory()) {
+        if (
+          insideDependency &&
+          nonRuntimeDependencyDirectories.has(entry.name.toLowerCase())
+        ) {
+          rmSync(target, { recursive: true, force: true });
+          continue;
+        }
+        visit(target, nextInsideDependency);
+        continue;
+      }
+      if (!entry.isFile()) continue;
+      const lowerName = entry.name.toLowerCase();
+      const nonRuntimeSource =
+        lowerName.endsWith(".map") ||
+        (insideDependency &&
+          (lowerName.endsWith(".d.ts") ||
+            lowerName.endsWith(".d.mts") ||
+            lowerName.endsWith(".d.cts") ||
+            lowerName.endsWith(".test.js") ||
+            lowerName.endsWith(".test.mjs") ||
+            lowerName.endsWith(".test.cjs") ||
+            lowerName.endsWith(".spec.js") ||
+            lowerName.endsWith(".spec.mjs") ||
+            lowerName.endsWith(".spec.cjs") ||
+            lowerName.endsWith(".md") ||
+            nonRuntimeDocumentPrefixes.some((prefix) =>
+              lowerName.startsWith(prefix),
+            )));
+      if (nonRuntimeSource) rmSync(target, { force: true });
+    }
   }
 }
 

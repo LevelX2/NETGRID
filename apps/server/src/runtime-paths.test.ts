@@ -9,11 +9,29 @@ describe("server runtime paths", () => {
     const paths = resolveServerRuntimePaths({ env: {}, repositoryRoot });
 
     expect(paths.matchSqlitePath).toBe(
-      path.join(repositoryRoot, "data", "runtime", "multiplayer", "netgrid.sqlite"),
+      path.join(
+        repositoryRoot,
+        "data",
+        "runtime",
+        "multiplayer",
+        "netgrid.sqlite",
+      ),
     );
     expect(paths.accountSqlitePath).toBe(paths.matchSqlitePath);
     expect(paths.storageBackupDir).toBe(
       path.join(repositoryRoot, "data", "runtime", "backups"),
+    );
+  });
+
+  it("resolves development defaults from a package-local start directory", () => {
+    const repositoryRoot = path.resolve(".");
+    const paths = resolveServerRuntimePaths({
+      env: {},
+      startDirectory: path.join(repositoryRoot, "apps", "server"),
+    });
+
+    expect(paths.maintenanceAuthPath).toBe(
+      path.join(repositoryRoot, "data", "runtime", "maintenance", "auth.json"),
     );
   });
 
@@ -56,7 +74,9 @@ describe("server runtime paths", () => {
 
   it("requires an external data root and absolute overrides in release", () => {
     expect(() =>
-      resolveServerRuntimePaths({ env: { NETGRID_RUNTIME_PROFILE: "release" } }),
+      resolveServerRuntimePaths({
+        env: { NETGRID_RUNTIME_PROFILE: "release" },
+      }),
     ).toThrowError(
       expect.objectContaining({ code: "release_data_root_required" }),
     );

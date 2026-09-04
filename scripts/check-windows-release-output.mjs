@@ -200,6 +200,29 @@ function runSelfTest() {
     writeFileSync(forbidden, "sqlite", "utf8");
     if (auditArtifact(root, policy).length === 0)
       throw new Error("release_output_selftest_negative_failed");
+    rmSync(path.join(root, "app", "data", "runtime"), {
+      recursive: true,
+      force: true,
+    });
+    const developmentArtifact = path.join(
+      root,
+      "app",
+      "apps",
+      "web",
+      "node_modules",
+      "example",
+      "docs",
+      "guide.md",
+    );
+    mkdirSync(path.dirname(developmentArtifact), { recursive: true });
+    writeFileSync(developmentArtifact, "development documentation", "utf8");
+    const developmentFindings = auditArtifact(root, policy);
+    if (
+      !developmentFindings.some((finding) =>
+        finding.includes("verletzt Artefaktverbot"),
+      )
+    )
+      throw new Error("release_output_selftest_development_artifact_failed");
     process.stdout.write("WINDOWS_RELEASE_OUTPUT_SELFTEST_OK\n");
   } finally {
     rmSync(root, { recursive: true, force: true });

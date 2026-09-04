@@ -26,6 +26,12 @@ powershell -ExecutionPolicy Bypass -File scripts/set-maintenance-password.ps1
 
 Das Script fragt das Passwort verdeckt zweimal ab. Es übergibt es nur über Standardeingabe an die lokale CLI. Ein Passwort als Kommandozeilenargument ist nicht vorgesehen.
 
+Im normalen Entwicklungsbetrieb liegt der Credentialstore kanonisch unter
+`data/runtime/maintenance/auth.json` relativ zur Projektwurzel. Der Pfad ist
+unabhängig davon, ob Server oder CLI aus der Projektwurzel oder aus
+`apps/server` gestartet werden. Ein abweichender Altpfad wird nicht als
+Fallback gelesen.
+
 Danach NETGRID normal starten:
 
 ```powershell

@@ -1,7 +1,7 @@
 # Paketprozess: Windows-Installer und Launcher
 
 Stand: 2026-09-04  
-Status: umsetzungsbereit geplant; Produktvoraussetzungen sind abgeschlossen
+Status: in Umsetzung; WIN-I00 verifiziert, nächstes Paket WIN-I01
 
 ## Quelle und Zielprüfung
 
@@ -10,9 +10,10 @@ Führend sind `windows-release-boundary.md`,
 `product-manifest.json`. Ziel, Produktgrenze, Defaults, Sicherheitsgrenzen,
 Abnahmekriterien und Paketfolge sind bestimmbar. Die installerunabhängigen
 Produktvoraussetzungen sind in Anwendung, Releasekonfiguration, Tests und
-aktuellen Runbooks umgesetzt. Die konkrete WiX-Version,
-Launcher-Technologie und spätere Codesigning-Beschaffung dürfen innerhalb der
-jeweiligen Pakete entschieden werden, ohne den Produktvertrag zu verändern.
+aktuellen Runbooks umgesetzt. Für die private Alpha ist WiX Toolset 7.0.0
+unter ausdrücklicher Annahme der OSMF-EULA als Installerbasis bestätigt. Die
+Launcher-Technologie wird in WIN-I01 festgelegt; die spätere
+Codesigning-Beschaffung bleibt ein eigenes Release-Gate.
 
 ## Gesamtziel
 
@@ -25,6 +26,9 @@ und private Daten bleiben ausgeschlossen.
 ## Annahmen und Nicht-Ziele
 
 - GitHub Releases bleibt der einzige Distributionskanal.
+- Der normale Entwicklungsstart bleibt ohne Installerkonfiguration bei
+  `invite_only`; nur das installierte Releaseprodukt erhält seinen gewählten
+  `simple`- oder `protected`-Ausgangsmodus.
 - Die erste private Alpha darf unsigniert sein; breite Veröffentlichung nicht.
 - Es gibt keine V0-Legacy-Migrationspflicht. Eine reale Produktmigration wird
   nur mit explizitem Schema- und Restorevertrag umgesetzt.
@@ -64,21 +68,38 @@ prepared -> package_active -> package_verified -> package_committed
 
 ## Paketfolge
 
-Voraussetzung für WIN-I01 ist der abgeschlossene und lokal integrierte
-Paketprozess WIN-P00 bis WIN-P05. Dadurch konsumiert der Installer nur noch
-stabile Anwendungskonfiguration und implementiert keine eigene Account-,
-Cleanup- oder Versionsautorität.
+Voraussetzung für WIN-I01 sind der abgeschlossene und lokal integrierte
+Paketprozess WIN-P00 bis WIN-P05 sowie das lokale Preflightpaket WIN-I00.
+WIN-I00 repariert den beim Zentralisieren der Runtimepfade entstandenen
+Maintenance-Credential-Pfadbruch ohne Passwortänderung und härtet den
+Releaseoutput gegen mitkopierte Entwicklungsartefakte. Dadurch konsumiert der
+Installer nur noch stabile Anwendungskonfiguration und implementiert keine
+eigene Account-, Cleanup- oder Versionsautorität.
 
-| Paket | Ziel | Kernartefakte und Arbeit | Direkte Checks | Done-Gate | Commit-Vorschlag |
-| --- | --- | --- | --- | --- | --- |
-| WIN-I01 Toolchain und Installer-Skelett | Reproduzierbares Setup-Grundgerüst | WiX-/Bootstrapper-Entscheidung, stabile Produkt-/Upgradecodes, Versionierung, Lizenzinventar, ausschließlich auditierten Output konsumieren | Setup-Build, Payload-/Manifestvergleich, Boundary-Gates | MSI und Setup bauen reproduzierbar ohne verbotene Payload | `build(installer): add Windows setup skeleton` |
-| WIN-I02 Installations- und Datenvertrag | Sichere per-machine Installation | Program Files, wählbarer lokaler Datenroot, ACLs, Secret-Erzeugung, Node-Runtime, Reparatur/Uninstall und Datenerhalt | Clean-install-, ACL-, Pfad-, Repair- und Uninstall-Tests | Normalbetrieb ohne Adminrechte; Daten bleiben standardmäßig erhalten | `feat(installer): implement installation and data layout` |
-| WIN-I03 Launcher und Windows-Integration | Bedarfsgesteuerter Betrieb | Single Instance, Server/Web-Start, Healthcheck, Tray, Startmenü, Desktopoption, kontrolliertes Beenden, einmaliger Recovery, Icons | Launcher-Komponententests und Windows-Integrationssmoke | Kein Autostart/Dienst; alle Einstiegspunkte verwenden dieselbe Instanz | `feat(launcher): add managed NETGRID desktop runtime` |
-| WIN-I04 Geführtes Setup und Netzwerk | Empfohlenen und benutzerdefinierten Weg liefern | Setupmodus, Local/LAN-Wahl, Portprüfung, Private-Firewallregel, Cleanup-Default und Abschlussstart | UI-Flow-, Portkonflikt- und Firewallprofiltests | Empfohlener Weg fragt nur Pflichtwerte; LAN wird nie still aktiviert | `feat(installer): add guided setup and private network mode` |
-| WIN-I05 First Run, Profile und Maintenance | Bestehende Kontomodi sicher konfigurieren | Maintenance-Passwort über sicheren Bootstrap, Auswahl der vorhandenen `simple`-/`protected`-Policy und geführter Erstzugang | First-Run-, Secret-, Policy- und Wiederanlauftests | Installer nutzt die bestehende Accountautorität; Maintenance bleibt separat geschützt | `feat(installer): configure installed-product onboarding` |
-| WIN-I06 GitHub-Updater und Rollback | Zustimmungsbasiertes Update | Startprüfung, Stable/Prerelease, Download/Integritätsprüfung, Backup, laufende Matches, kontrollierter Neustart und Rollback | API-Fixtures, Offline-, Tamper-, Backup-/Restore- und Upgrade-Tests | Kein stilles Update; Fehler hinterlässt alten oder sicher gestoppten Stand | `feat(updater): add verified GitHub release updates` |
-| WIN-I07 Lokalisierung, Branding und Diagnose | Veröffentlichungsfähige Oberfläche | `de`/`en`/`fr`, Terminologie, NETGRID-Icons/Grafiken, DPI-/Kontrastprüfung, redigierter Diagnoseexport, Drittanbieterhinweise | String-Vollständigkeit, Screenshotmatrix, Diagnose-Leak-Gate, Lizenzcheck | Keine Platzhalter/Clips/rohen Fehler; alle Oberflächen visuell abgenommen | `feat(installer): finalize localization branding and diagnostics` |
-| WIN-I08 End-to-End-Releasegate | Saubere Maschine beweisen | Frischinstallation, Custom-Setup, Update, Prerelease, Rollback, Repair, Uninstall, Retention und Datenlöschung auf Windows 11 x64 | vollständige Installer-E2E-Matrix plus bestehende Releaseoutput-Gates | reproduzierbares GitHub-Releaseartefakt samt Prüfsumme; alle Gates grün | `test(installer): certify Windows release workflow` |
+| Paket                                        | Ziel                                                                     | Kernartefakte und Arbeit                                                                                                                                                                                                                                                           | Direkte Checks                                                                                        | Done-Gate                                                                                                                                      | Commit-Vorschlag                                                     |
+| -------------------------------------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| WIN-I00 Preflight und Releaseinput           | Bestehendes Credential erhalten und strikt produktive Payload herstellen | Vorhandene Maintenance-Auth-Datei einmalig vom früheren paketlokalen an den kanonischen Repository-Datenpfad verschieben, Pfadauflösung absichern, rekursives Mitkopieren nicht benötigter Dependency-Dokumentation, Tests, Typdeklarationen und Source Maps ursächlich beseitigen | Maintenance-Status am alten und neuen Pfad, Runtimepfad-Tests, Boundary-Gates, Releasebuild und Smoke | Vorhandenes Passwort bleibt unverändert nutzbar; kein Legacy-Fallback; Output enthält weder private/eigene noch sonstige Entwicklungsartefakte | `fix(release): harden installer input and preserve maintenance auth` |
+| WIN-I01 Toolchain und Installer-Skelett      | Reproduzierbares Setup-Grundgerüst                                       | WiX-/Bootstrapper-Entscheidung, stabile Produkt-/Upgradecodes, Versionierung, Lizenzinventar, ausschließlich auditierten Output konsumieren                                                                                                                                        | Setup-Build, Payload-/Manifestvergleich, Boundary-Gates                                               | MSI und Setup bauen reproduzierbar ohne verbotene Payload                                                                                      | `build(installer): add Windows setup skeleton`                       |
+| WIN-I02 Installations- und Datenvertrag      | Sichere per-machine Installation                                         | Program Files, wählbarer lokaler Datenroot, ACLs, Secret-Erzeugung, Node-Runtime, Reparatur/Uninstall und Datenerhalt                                                                                                                                                              | Clean-install-, ACL-, Pfad-, Repair- und Uninstall-Tests                                              | Normalbetrieb ohne Adminrechte; Daten bleiben standardmäßig erhalten                                                                           | `feat(installer): implement installation and data layout`            |
+| WIN-I03 Launcher und Windows-Integration     | Bedarfsgesteuerter Betrieb                                               | Single Instance, Server/Web-Start, Healthcheck, Tray, Startmenü, Desktopoption, kontrolliertes Beenden, einmaliger Recovery, Icons                                                                                                                                                 | Launcher-Komponententests und Windows-Integrationssmoke                                               | Kein Autostart/Dienst; alle Einstiegspunkte verwenden dieselbe Instanz                                                                         | `feat(launcher): add managed NETGRID desktop runtime`                |
+| WIN-I04 Geführtes Setup und Netzwerk         | Empfohlenen und benutzerdefinierten Weg liefern                          | Setupmodus, Local/LAN-Wahl, Portprüfung, Private-Firewallregel, Cleanup-Default und Abschlussstart                                                                                                                                                                                 | UI-Flow-, Portkonflikt- und Firewallprofiltests                                                       | Empfohlener Weg fragt nur Pflichtwerte; LAN wird nie still aktiviert                                                                           | `feat(installer): add guided setup and private network mode`         |
+| WIN-I05 First Run, Profile und Maintenance   | Bestehende Kontomodi sicher konfigurieren                                | Maintenance-Passwort über sicheren Bootstrap, Auswahl der vorhandenen `simple`-/`protected`-Policy und geführter Erstzugang                                                                                                                                                        | First-Run-, Secret-, Policy- und Wiederanlauftests                                                    | Installer nutzt die bestehende Accountautorität; Maintenance bleibt separat geschützt                                                          | `feat(installer): configure installed-product onboarding`            |
+| WIN-I06 GitHub-Updater und Rollback          | Zustimmungsbasiertes Update                                              | Startprüfung, Stable/Prerelease, Download/Integritätsprüfung, Backup, laufende Matches, kontrollierter Neustart und Rollback                                                                                                                                                       | API-Fixtures, Offline-, Tamper-, Backup-/Restore- und Upgrade-Tests                                   | Kein stilles Update; Fehler hinterlässt alten oder sicher gestoppten Stand                                                                     | `feat(updater): add verified GitHub release updates`                 |
+| WIN-I07 Lokalisierung, Branding und Diagnose | Veröffentlichungsfähige Oberfläche                                       | `de`/`en`/`fr`, Terminologie, NETGRID-Icons/Grafiken, DPI-/Kontrastprüfung, redigierter Diagnoseexport, Drittanbieterhinweise                                                                                                                                                      | String-Vollständigkeit, Screenshotmatrix, Diagnose-Leak-Gate, Lizenzcheck                             | Keine Platzhalter/Clips/rohen Fehler; alle Oberflächen visuell abgenommen                                                                      | `feat(installer): finalize localization branding and diagnostics`    |
+| WIN-I08 End-to-End-Releasegate               | Saubere Maschine beweisen                                                | Frischinstallation, Custom-Setup, Update, Prerelease, Rollback, Repair, Uninstall, Retention und Datenlöschung auf Windows 11 x64                                                                                                                                                  | vollständige Installer-E2E-Matrix plus bestehende Releaseoutput-Gates                                 | reproduzierbares GitHub-Releaseartefakt samt Prüfsumme; alle Gates grün                                                                        | `test(installer): certify Windows release workflow`                  |
+
+## Aktueller Umsetzungsstand
+
+- WIN-I00 ist verifiziert: Der bestehende Maintenance-Credentialstore wurde
+  ohne Passwortänderung hashgleich an den kanonischen Repository-Datenpfad
+  verschoben. CLI und laufender Server erkennen ihn dort; am früheren
+  paketlokalen Pfad bleibt keine zweite Kopie.
+- Die Release-Materialisierung entfernt nicht benötigte
+  Dependency-Dokumentation, Tests, Scripts, Typdeklarationen und Source Maps.
+  Der gehärtete Output enthält in diesen Kategorien sowie für eigene Quellen,
+  SQLite und private Daten jeweils null Treffer.
+- Fokussierte Runtimepfad-/Maintenance-Tests, Boundary-Gates,
+  Releaseoutput-Build und isolierter Release-Smoke sind grün.
 
 ## Verifikationsregeln
 
@@ -93,8 +114,9 @@ sauberen Windows-11-x64-Umgebung aus.
 
 ## Worktree-, Git- und Integrationsregeln
 
-Die spätere Umsetzung verwendet einen eigenen `codex/`-Branch und einen
-eigenen Worktree. Der Hauptworkspace dient nur dem finalen lokalen Merge.
+Die Umsetzung verwendet den Branch `codex/windows-installer-v1` im Worktree
+`C:\Projekte\NETGRID_WINDOWS_INSTALLER_V1`. Der Hauptworkspace dient nur dem
+finalen lokalen Merge.
 Jedes Paket erhält einen Commit. Vor dem Abschluss wird aktuelles `main`
 defensiv integriert, die direkt betroffenen Gates werden wiederholt, der
 Arbeitsbranch lokal nach `main` gemergt und anschließend Worktree sowie
@@ -105,7 +127,7 @@ nur auf ausdrücklichen Nutzerwunsch.
 
 ```text
 /Goal Arbeite den Windows-Installer- und Launcher-Prozess vollständig und
-sequenziell von WIN-I01 bis WIN-I08 ab und merge den abgeschlossenen
+sequenziell von WIN-I00 bis WIN-I08 ab und merge den abgeschlossenen
 Arbeitsbranch lokal nach main.
 
 Lies zuerst AGENTS.md, docs/codex/CODEX_STATUS.md,
@@ -123,7 +145,7 @@ nach den vorgeschriebenen Prüfungen. Push nur auf ausdrücklichen Wunsch.
 
 ## Abschlusskriterien
 
-Der Prozess ist erst abgeschlossen, wenn alle acht Done-Gates erfüllt, alle
+Der Prozess ist erst abgeschlossen, wenn alle neun Done-Gates erfüllt, alle
 Paketcommits integriert, der Windows-11-x64-E2E-Nachweis grün, der lokale
 Main-Stand sauber sowie Arbeits-Worktree und gemergter Branch nachweislich
 entfernt sind. Codesigning darf nur für die private Alpha offen bleiben und
