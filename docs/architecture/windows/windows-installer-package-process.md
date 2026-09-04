@@ -1,14 +1,17 @@
 # Paketprozess: Windows-Installer und Launcher
 
 Stand: 2026-09-04  
-Status: umsetzungsbereit geplant; nicht gestartet
+Status: umsetzungsbereit geplant; Produktvoraussetzungen WIN-P00 bis WIN-P05
+werden vorgeschaltet umgesetzt
 
 ## Quelle und Zielprüfung
 
 Führend sind `windows-release-boundary.md`,
 `windows-installer-product-contract.md`, `product-layout.json` und
 `product-manifest.json`. Ziel, Produktgrenze, Defaults, Sicherheitsgrenzen,
-Abnahmekriterien und Paketfolge sind bestimmbar. Die konkrete WiX-Version,
+Abnahmekriterien und Paketfolge sind bestimmbar. Die installerunabhängigen
+Produktvoraussetzungen werden zuvor gemäß
+`windows-installer-prerequisites-process.md` umgesetzt. Die konkrete WiX-Version,
 Launcher-Technologie und spätere Codesigning-Beschaffung dürfen innerhalb der
 jeweiligen Pakete entschieden werden, ohne den Produktvertrag zu verändern.
 
@@ -61,6 +64,11 @@ prepared -> package_active -> package_verified -> package_committed
 ```
 
 ## Paketfolge
+
+Voraussetzung für WIN-I01 ist der abgeschlossene und lokal integrierte
+Paketprozess WIN-P00 bis WIN-P05. Dadurch konsumiert der Installer nur noch
+stabile Anwendungskonfiguration und implementiert keine eigene Account-,
+Cleanup- oder Versionsautorität.
 
 | Paket | Ziel | Kernartefakte und Arbeit | Direkte Checks | Done-Gate | Commit-Vorschlag |
 | --- | --- | --- | --- | --- | --- |
