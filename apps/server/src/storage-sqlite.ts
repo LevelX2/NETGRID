@@ -99,6 +99,7 @@ export type BackupManifest = {
   matchCount?: number;
   reason?:
     | "manual"
+    | "pre_update"
     | "pre_restore"
     | "pre_cleanup"
     | "pre_compaction"

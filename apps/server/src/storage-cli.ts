@@ -12,10 +12,12 @@ const { matchSqlitePath: dbPath, storageBackupDir: backupDir } =
   resolveServerRuntimePaths();
 
 try {
-  if (command === "backup") {
+  if (command === "backup" || command === "backup-update") {
     const storage = new SqliteMatchStorage({ dbPath, backupDir });
     try {
-      const result = await storage.backup("manual");
+      const result = await storage.backup(
+        command === "backup-update" ? "pre_update" : "manual",
+      );
       console.log(
         JSON.stringify(
           { ok: true, backupDir: result.backupDir, manifest: result.manifest },
@@ -62,7 +64,9 @@ try {
       console.log(JSON.stringify(inspectSqliteStorage(dbPath), null, 2));
     }
   } else {
-    throw new Error("Usage: storage-cli <backup|restore|inspect|optimize>");
+    throw new Error(
+      "Usage: storage-cli <backup|backup-update|restore|inspect|optimize>",
+    );
   }
 } catch (error) {
   const message =

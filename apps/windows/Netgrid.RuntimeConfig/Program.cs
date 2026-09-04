@@ -26,6 +26,16 @@ internal static class Program
                 Console.WriteLine("NETGRID_FIREWALL_REMOVE_OK");
                 return 0;
             }
+            if (string.Equals(command.Name, "cache-setup", StringComparison.OrdinalIgnoreCase))
+            {
+                SetupCache.Store(
+                    ResolveCacheDataRoot(command.Optional("--data-root"), command.Optional("--state-file")),
+                    RequireAbsoluteFile(command.Optional("--source") ?? string.Empty, "setup_cache_source_missing"),
+                    command.Optional("--sha256") ?? string.Empty
+                );
+                Console.WriteLine("NETGRID_SETUP_CACHE_OK");
+                return 0;
+            }
             if (!string.Equals(command.Name, "initialize", StringComparison.OrdinalIgnoreCase))
             {
                 throw new RuntimeConfigException(
@@ -69,6 +79,39 @@ internal static class Program
                 $"NETGRID_RUNTIME_CONFIG_ERROR code=unexpected_failure type={exception.GetType().Name}"
             );
             return 3;
+        }
+    }
+
+    private static string ResolveCacheDataRoot(string? requested, string? stateFile)
+    {
+        var resolved = ResolveDataRoot(requested, stateFile);
+        if (!string.IsNullOrWhiteSpace(stateFile)) return resolved;
+        using var key = Registry.LocalMachine.OpenSubKey(RegistryPath, writable: false);
+        var registered = key?.GetValue(RegistryDataRootName) as string;
+        if (string.IsNullOrWhiteSpace(registered) || !PathsEqual(resolved, RequireAbsolutePath(registered, "registered_data_root_invalid")))
+            throw new RuntimeConfigException("setup_cache_data_root_mismatch", "Der Setup-Cache ist nicht an den registrierten NETGRID-Datenordner gebunden.");
+        return resolved;
+    }
+
+    private static class SetupCache
+    {
+        public static void Store(string dataRoot, string source, string expectedHash)
+        {
+            if (expectedHash.Length != 64 || !expectedHash.All(Uri.IsHexDigit))
+                throw new RuntimeConfigException("setup_cache_hash_invalid", "Die Setup-Prüfsumme ist ungültig.");
+            using (var stream = File.OpenRead(source))
+            {
+                var actual = Convert.ToHexString(SHA256.HashData(stream)).ToLowerInvariant();
+                if (!actual.Equals(expectedHash, StringComparison.OrdinalIgnoreCase))
+                    throw new RuntimeConfigException("setup_cache_hash_mismatch", "Die Setup-Datei stimmt nicht mit ihrer Prüfsumme überein.");
+            }
+            var root = Path.Combine(dataRoot, "config", "updates");
+            Directory.CreateDirectory(root);
+            var current = Path.Combine(root, "NETGRID-Setup.exe");
+            var destination = File.Exists(current) ? Path.Combine(root, "NETGRID-Setup.pending.exe") : current;
+            var temporary = $"{destination}.{Guid.NewGuid():N}.tmp";
+            File.Copy(source, temporary, overwrite: true);
+            File.Move(temporary, destination, overwrite: true);
         }
     }
 
@@ -249,6 +292,8 @@ internal static class Program
                     "--retention-days",
                     "--account-access-mode",
                     "--configure-firewall",
+                    "--source",
+                    "--sha256",
                 ],
                 StringComparer.OrdinalIgnoreCase
             );

@@ -10,6 +10,21 @@ internal static class Program
     private static async Task<int> Main(string[] args)
     {
         var options = LauncherOptions.Parse(args);
+        if (options.UpdateCheckApi is not null)
+        {
+            try
+            {
+                using var http = UpdateDiscovery.CreateHttpClient();
+                var result = await UpdateDiscovery.CheckAsync(http, new Uri(options.UpdateCheckApi), options.CurrentVersionOverride!, options.AllowPrereleaseOverride);
+                await File.WriteAllTextAsync(options.UpdateCheckOutput!, System.Text.Json.JsonSerializer.Serialize(result));
+                return 0;
+            }
+            catch (Exception exception)
+            {
+                await File.WriteAllTextAsync(options.UpdateCheckOutput!, System.Text.Json.JsonSerializer.Serialize(new { ok = false, error = exception.Message }));
+                return 2;
+            }
+        }
         if (options.HeadlessSmoke)
         {
             try
@@ -17,6 +32,20 @@ internal static class Program
                 await using var runtime = LauncherRuntime.Load(options);
                 await runtime.StartAsync();
                 await runtime.VerifyRecoveryPolicyAsync();
+                await runtime.StopAsync();
+                return 0;
+            }
+            catch
+            {
+                return 2;
+            }
+        }
+        if (options.HeadlessVerify)
+        {
+            try
+            {
+                await using var runtime = LauncherRuntime.Load(options);
+                await runtime.StartAsync();
                 await runtime.StopAsync();
                 return 0;
             }

@@ -8,7 +8,7 @@
     InstallerVersion="500"
     Language="1033">
     <SummaryInformation Description="NETGRID private alpha" />
-    <MajorUpgrade DowngradeErrorMessage="Eine neuere NETGRID-Version ist bereits installiert." />
+    <MajorUpgrade AllowDowngrades="yes" />
     <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
 
     <StandardDirectory Id="ProgramFiles64Folder">
@@ -38,6 +38,9 @@
     </Component>
     <Component Directory="INSTALLFOLDER">
       <File Id="NetgridFirstRun" Source="$(FirstRunRoot)\NETGRID.FirstRun.exe" />
+    </Component>
+    <Component Directory="INSTALLFOLDER">
+      <File Id="NetgridUpdater" Source="$(UpdaterRoot)\NETGRID.Updater.exe" />
     </Component>
     <Component Directory="NETGRIDPROGRAMMENU">
       <Shortcut Id="NetgridStartMenuShortcut" Name="NETGRID" Target="[#NetgridLauncher]" WorkingDirectory="INSTALLFOLDER" Icon="NetgridIcon" />
@@ -74,6 +77,8 @@
     <Property Id="NETGRID_RETENTION_DAYS" Value="30" Secure="yes" />
     <Property Id="NETGRID_ACCOUNT_ACCESS_MODE" Value="simple" Secure="yes" />
     <Property Id="INSTALLDESKTOPSHORTCUT" Value="1" Secure="yes" />
+    <Property Id="NETGRID_SETUP_SOURCE" Secure="yes" />
+    <Property Id="NETGRID_SETUP_SHA256" Secure="yes" />
     <SetProperty
       Id="InitializeNetgridRuntime"
       Value='initialize --data-root "[NETGRID_DATA_ROOT]" --deployment-profile "[NETGRID_DEPLOYMENT_PROFILE]" --lan-address "[NETGRID_LAN_ADDRESS]" --web-port "[NETGRID_WEB_PORT]" --server-port "[NETGRID_SERVER_PORT]" --retention-days "[NETGRID_RETENTION_DAYS]" --account-access-mode "[NETGRID_ACCOUNT_ACCESS_MODE]" --configure-firewall "true"'
@@ -82,6 +87,20 @@
       Condition='NOT REMOVE~="ALL"' />
     <CustomAction
       Id="InitializeNetgridRuntime"
+      FileRef="NetgridRuntimeConfig"
+      ExeCommand="[CustomActionData]"
+      Execute="deferred"
+      Impersonate="no"
+      Return="check"
+      HideTarget="yes" />
+    <SetProperty
+      Id="CacheNetgridSetup"
+      Value='cache-setup --data-root "[NETGRID_DATA_ROOT]" --source "[NETGRID_SETUP_SOURCE]" --sha256 "[NETGRID_SETUP_SHA256]"'
+      Before="CacheNetgridSetup"
+      Sequence="execute"
+      Condition='NOT REMOVE~="ALL" AND NETGRID_SETUP_SOURCE &lt;&gt; ""' />
+    <CustomAction
+      Id="CacheNetgridSetup"
       FileRef="NetgridRuntimeConfig"
       ExeCommand="[CustomActionData]"
       Execute="deferred"
@@ -104,6 +123,7 @@
       HideTarget="yes" />
     <InstallExecuteSequence>
       <Custom Action="InitializeNetgridRuntime" After="InstallFiles" Condition='NOT REMOVE~="ALL"' />
+      <Custom Action="CacheNetgridSetup" After="InitializeNetgridRuntime" Condition='NOT REMOVE~="ALL" AND NETGRID_SETUP_SOURCE &lt;&gt; ""' />
       <Custom Action="RemoveNetgridFirewall" Before="RemoveFiles" Condition='REMOVE~="ALL"' />
     </InstallExecuteSequence>
 

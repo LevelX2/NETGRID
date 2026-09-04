@@ -60,6 +60,7 @@ try {
     ],
     ["NETGRID.exe", "launcher/NETGRID.exe"],
     ["NETGRID.FirstRun.exe", "first-run/NETGRID.FirstRun.exe"],
+    ["NETGRID.Updater.exe", "updater/NETGRID.Updater.exe"],
   ]);
   for (const [installedRelative, inputRelative] of installerFiles) {
     const input = path.join(installerInputRoot, ...inputRelative.split("/"));
@@ -117,6 +118,8 @@ try {
     !authoring.includes(`Version="${productLayout.product.installerVersion}"`)
   )
     throw new Error("installer_product_version_invalid");
+  if (!authoring.includes('<MajorUpgrade AllowDowngrades="yes"'))
+    throw new Error("installer_rollback_downgrade_contract_invalid");
   if (
     !authoring.includes(
       '<CustomAction Id="InitializeNetgridRuntime" HideTarget="yes" Impersonate="no" Execute="deferred"',
@@ -138,6 +141,8 @@ try {
       '<Property Id="INSTALLDESKTOPSHORTCUT" Value="1" Secure="yes" />',
     ) ||
     !authoring.includes("--configure-firewall &quot;true&quot;") ||
+    !authoring.includes('Id="CacheNetgridSetup" HideTarget="yes"') ||
+    !authoring.includes('NETGRID_SETUP_SOURCE &lt;&gt; &quot;&quot;') ||
     !authoring.includes(
       '<CustomAction Id="RemoveNetgridFirewall" HideTarget="yes" Impersonate="no" Execute="deferred"',
     ) ||
@@ -150,6 +155,8 @@ try {
     !authoring.includes('Name="NETGRID Ersteinrichtung"')
   )
     throw new Error("installer_runtime_initialization_contract_invalid");
+  if (!authoring.includes('File Id="NetgridUpdater"'))
+    throw new Error("installer_updater_missing");
 
   const embeddedMsi = path.join(scratch, "embedded.msi");
   run(setupPath, ["--extract-msi", embeddedMsi]);
@@ -177,7 +184,11 @@ try {
     setupContract.launchAfterInstallDefault !== true ||
     JSON.stringify(setupContract.firewallProfiles) !==
       JSON.stringify(["private"]) ||
-    setupContract.publicFirewallProfileEnabled !== false
+    setupContract.publicFirewallProfileEnabled !== false ||
+    setupContract.updateChannel !== "github-releases-only" ||
+    JSON.stringify(setupContract.updateCommands) !==
+      JSON.stringify(["install-update", "uninstall-update"]) ||
+    setupContract.installerRollback !== "msi-major-upgrade"
   )
     throw new Error("installer_guided_setup_contract_invalid");
   await checkPortConflict(setupPath);

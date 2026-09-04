@@ -113,7 +113,13 @@ Maintenance-Passwort nur per stdin an die bestehende Authentifizierungs-CLI
 und verweigert jede Überschreibung vorhandener Credentials. `simple` und
 `protected` bleiben die einzige Account-Policy-Autorität; Private-LAN-
 Self-Service ist freigegeben, während Maintenance und Policyverwaltung auf
-Loopback bleiben. Der Updater ist noch nicht implementiert. Die installerunabhängigen
+Loopback bleiben. Der Launcher prüft ausschließlich GitHub Releases und bietet
+Updates erst nach Zustimmung an. Release-Metadaten und Prüfsummendatei müssen
+denselben SHA-256-Wert nennen; laufende Partien blockieren die Installation.
+Nach kontrolliertem Stopp erzeugt der getrennte Updater ein geprüftes
+`pre_update`-Backup, führt das MSI-Upgrade aus und startet erst nach Healthcheck
+neu. Bei Fehlern werden Programm und Daten soweit sicher möglich zurückgerollt,
+andernfalls bleibt NETGRID klar diagnostiziert gestoppt. Die installerunabhängigen
 Produktvoraussetzungen sind umgesetzt: Releasebuilds tragen `V1.0` plus
 fortlaufende Git-Buildnummer, die gespeicherte Retention-Policy wird beim
 Backend-Start sofort asynchron geprüft, und lokale Installationen können ohne
@@ -128,7 +134,7 @@ Zustimmung, Datensicherung/Rollback sowie vollständigem `de`/`en`/`fr`-
 Branding. Führend sind
 `docs/architecture/windows/windows-installer-product-contract.md` und der
 Paketprozess WIN-I00 bis WIN-I08. GitHub Releases bleibt der einzige Kanal;
-bis zur Umsetzung des Updaters erfolgen Download und Upgrade manuell.
+der Updater verwendet keinen weiteren Feed, Store oder eigenen Updateserver.
 
 Der persönliche Kartenbildimport besitzt einen persistenten lokalen Store,
 lokale und explizite gehärtete HTTPS-Quellen sowie drei private

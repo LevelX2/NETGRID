@@ -83,6 +83,7 @@ export function auditArtifact(root, releasePolicy) {
     "app/apps/web/server.js",
     "app/server.mjs",
     "app/maintenance-auth.mjs",
+    "app/storage-admin.mjs",
     "app/node_modules/sharp/package.json",
     "app/node_modules/@img/sharp-win32-x64/package.json",
     "config/runtime.env.example",
@@ -182,6 +183,7 @@ function runSelfTest() {
       "app/apps/web/server.js": "web\n",
       "app/server.mjs": "server\n",
       "app/maintenance-auth.mjs": "maintenance auth\n",
+      "app/storage-admin.mjs": "storage admin\n",
       "app/node_modules/sharp/package.json": "{}\n",
       "app/node_modules/@img/sharp-win32-x64/package.json": "{}\n",
       "config/runtime.env.example":

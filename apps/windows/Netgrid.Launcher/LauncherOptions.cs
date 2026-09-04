@@ -5,6 +5,11 @@ namespace Netgrid.Launcher;
 internal sealed record LauncherOptions(
     bool OpenMaintenance,
     bool HeadlessSmoke,
+    bool HeadlessVerify,
+    string? UpdateCheckApi,
+    string? UpdateCheckOutput,
+    string? CurrentVersionOverride,
+    bool AllowPrereleaseOverride,
     string? ProgramRootOverride,
     string? EnvironmentFileOverride
 )
@@ -15,6 +20,11 @@ internal sealed record LauncherOptions(
     {
         var openMaintenance = false;
         var headlessSmoke = false;
+        var headlessVerify = false;
+        string? updateCheckApi = null;
+        string? updateCheckOutput = null;
+        string? currentVersion = null;
+        var allowPrerelease = false;
         string? programRoot = null;
         string? environmentFile = null;
         for (var index = 0; index < args.Length; index++)
@@ -27,6 +37,21 @@ internal sealed record LauncherOptions(
                 case "--headless-smoke":
                     headlessSmoke = true;
                     break;
+                case "--headless-verify":
+                    headlessVerify = true;
+                    break;
+                case "--check-update-api" when index + 1 < args.Length:
+                    updateCheckApi = args[++index];
+                    break;
+                case "--check-update-output" when index + 1 < args.Length:
+                    updateCheckOutput = Path.GetFullPath(args[++index]);
+                    break;
+                case "--current-version" when index + 1 < args.Length:
+                    currentVersion = args[++index];
+                    break;
+                case "--allow-prerelease":
+                    allowPrerelease = true;
+                    break;
                 case "--program-root" when index + 1 < args.Length:
                     programRoot = Path.GetFullPath(args[++index]);
                     break;
@@ -37,9 +62,14 @@ internal sealed record LauncherOptions(
                     throw new InvalidOperationException("launcher_argument_invalid");
             }
         }
-        if (!headlessSmoke && (programRoot is not null || environmentFile is not null))
+        var updateDiagnostic = updateCheckApi is not null || updateCheckOutput is not null || currentVersion is not null;
+        if (updateDiagnostic && (updateCheckApi is null || updateCheckOutput is null || currentVersion is null))
+            throw new InvalidOperationException("launcher_update_diagnostic_incomplete");
+        if (!headlessSmoke && !headlessVerify && (programRoot is not null || environmentFile is not null))
             throw new InvalidOperationException("launcher_diagnostic_override_forbidden");
-        return new LauncherOptions(openMaintenance, headlessSmoke, programRoot, environmentFile);
+        if ((headlessSmoke || headlessVerify) && updateDiagnostic)
+            throw new InvalidOperationException("launcher_diagnostic_mode_conflict");
+        return new LauncherOptions(openMaintenance, headlessSmoke, headlessVerify, updateCheckApi, updateCheckOutput, currentVersion, allowPrerelease, programRoot, environmentFile);
     }
 
     public string ResolveProgramRoot() => ProgramRootOverride ?? Path.TrimEndingDirectorySeparator(AppContext.BaseDirectory);

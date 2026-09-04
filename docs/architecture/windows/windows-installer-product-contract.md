@@ -2,7 +2,7 @@
 
 Stand: 2026-09-04  
 Status: beschlossenes Zielbild; Anwendungsvoraussetzungen, Installerbasis,
-Datenvertrag, Launcher, Setupführung und First Run umgesetzt, Updater noch offen
+Datenvertrag, Launcher, Setupführung, First Run und Updater umgesetzt
 
 ## Zweck und Grenze
 

@@ -5,8 +5,10 @@ internal sealed class TrayApplicationContext : ApplicationContext
     private readonly LauncherOptions _options;
     private readonly NotifyIcon _tray;
     private readonly Control _dispatcher;
+    private readonly ToolStripMenuItem _prerelease;
     private LauncherRuntime? _runtime;
     private bool _closing;
+    private bool _checkingUpdates;
 
     public TrayApplicationContext(LauncherOptions options)
     {
@@ -16,6 +18,11 @@ internal sealed class TrayApplicationContext : ApplicationContext
         var menu = new ContextMenuStrip();
         menu.Items.Add("NETGRID öffnen", null, (_, _) => OpenGame());
         menu.Items.Add("Maintenance öffnen", null, (_, _) => OpenMaintenance());
+        menu.Items.Add(new ToolStripSeparator());
+        menu.Items.Add("Nach Updates suchen …", null, async (_, _) => await CheckForUpdatesAsync(manual: true));
+        _prerelease = new ToolStripMenuItem("Stabile und Vorabversionen") { CheckOnClick = true };
+        _prerelease.CheckedChanged += (_, _) => SaveUpdateSetting();
+        menu.Items.Add(_prerelease);
         menu.Items.Add(new ToolStripSeparator());
         menu.Items.Add("NETGRID beenden", null, async (_, _) => await CloseAsync());
         _tray = new NotifyIcon
@@ -40,8 +47,11 @@ internal sealed class TrayApplicationContext : ApplicationContext
             _runtime.Recovered += (_, _) => Dispatch(() => ShowInfo("NETGRID wurde einmalig neu gestartet."));
             await _runtime.StartAsync();
             _tray.Text = "NETGRID läuft";
+            var settings = UpdateSettings.Load(_runtime.DataRoot);
+            _prerelease.Checked = settings.AllowPrerelease;
             if (_options.OpenMaintenance) OpenMaintenance();
             else OpenGame();
+            _ = CheckForUpdatesAsync(manual: false);
         }
         catch (Exception exception)
         {
@@ -107,6 +117,93 @@ internal sealed class TrayApplicationContext : ApplicationContext
         _tray.BalloonTipTitle = "NETGRID";
         _tray.BalloonTipText = message;
         _tray.ShowBalloonTip(4000);
+    }
+
+    private void SaveUpdateSetting()
+    {
+        if (_runtime is null) return;
+        try
+        {
+            new UpdateSettings(_prerelease.Checked).Save(_runtime.DataRoot);
+        }
+        catch (Exception exception)
+        {
+            MessageBox.Show($"Die Updateeinstellung konnte nicht gespeichert werden.\n\nUrsache: {exception.Message}", "NETGRID", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+    }
+
+    private async Task CheckForUpdatesAsync(bool manual)
+    {
+        if (_checkingUpdates || _closing || _runtime is null) return;
+        _checkingUpdates = true;
+        try
+        {
+            using var http = UpdateDiscovery.CreateHttpClient();
+            var candidate = await UpdateDiscovery.CheckAsync(http, UpdateDiscovery.GitHubReleasesApi, InstalledProduct.Version(_runtime.ProgramRoot), _prerelease.Checked);
+            if (candidate is null)
+            {
+                if (manual) MessageBox.Show("NETGRID ist auf dem neuesten Stand.", "NETGRID Updates", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            var prereleaseWarning = candidate.Prerelease
+                ? "\n\nDies ist eine Vorabversion. Ein späteres Downgrade ist nicht zugesichert."
+                : string.Empty;
+            var answer = MessageBox.Show(
+                $"NETGRID {candidate.Version} ist verfügbar.\n\n{candidate.ReleaseNotes}{prereleaseWarning}\n\nJetzt herunterladen und installieren? Laufende NETGRID-Prozesse werden nach einem geprüften Backup beendet.",
+                "NETGRID Update",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question
+            );
+            if (answer != DialogResult.Yes) return;
+            var readiness = await _runtime.UpdateReadinessAsync();
+            if (!readiness.Allowed)
+            {
+                MessageBox.Show($"Das Update ist blockiert, solange {readiness.ActiveMatchCount} laufende Partie(n) aktiv sind. Beenden Sie diese zuerst.", "NETGRID Update", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            _tray.Text = "NETGRID Update wird geladen …";
+            var staging = Path.Combine(_runtime.DataRoot, "runtime", "updates", "staging");
+            var setupPath = await UpdateDiscovery.DownloadVerifiedAsync(http, candidate, staging);
+            readiness = await _runtime.UpdateReadinessAsync();
+            if (!readiness.Allowed)
+            {
+                MessageBox.Show("Während des Downloads wurde eine Partie gestartet. Das Update wurde nicht installiert.", "NETGRID Update", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                _tray.Text = "NETGRID läuft";
+                return;
+            }
+            var installedUpdater = Path.Combine(_runtime.ProgramRoot, "NETGRID.Updater.exe");
+            if (!File.Exists(installedUpdater)) throw new InvalidOperationException("updater_missing");
+            var updater = Path.Combine(staging, "NETGRID.Updater.exe");
+            File.Copy(installedUpdater, updater, overwrite: true);
+            var start = new System.Diagnostics.ProcessStartInfo(updater) { UseShellExecute = true, Verb = "runas" };
+            start.ArgumentList.Add("--apply");
+            start.ArgumentList.Add("--parent-pid");
+            start.ArgumentList.Add(Environment.ProcessId.ToString());
+            start.ArgumentList.Add("--setup");
+            start.ArgumentList.Add(setupPath);
+            start.ArgumentList.Add("--sha256");
+            start.ArgumentList.Add(candidate.SetupSha256);
+            start.ArgumentList.Add("--program-root");
+            start.ArgumentList.Add(_runtime.ProgramRoot);
+            start.ArgumentList.Add("--environment-file");
+            start.ArgumentList.Add(_runtime.EnvironmentFile);
+            start.ArgumentList.Add("--restart");
+            System.Diagnostics.Process.Start(start);
+            await CloseAsync();
+        }
+        catch (Exception exception) when (!manual && exception is HttpRequestException or TaskCanceledException)
+        {
+            // Offline startup is intentionally silent; NETGRID remains fully usable.
+        }
+        catch (Exception exception)
+        {
+            MessageBox.Show($"Das Update konnte nicht vorbereitet werden.\n\nUrsache: {exception.Message}", "NETGRID Update", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            if (!_closing) _tray.Text = "NETGRID läuft";
+        }
+        finally
+        {
+            _checkingUpdates = false;
+        }
     }
 
     private void Dispatch(Action action)

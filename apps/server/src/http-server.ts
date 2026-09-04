@@ -5,6 +5,7 @@ import {
   type ServerResponse,
 } from "node:http";
 import { networkInterfaces } from "node:os";
+import { timingSafeEqual } from "node:crypto";
 import { WebSocket, WebSocketServer } from "ws";
 import { isAiDeckSnapshotRuntimeError } from "@netgrid/ai";
 import { simulateAiGame } from "@netgrid/ai/product-simulation";
@@ -1123,6 +1124,37 @@ async function routeHttp(
         200,
         redactedHealth(await service.storageHealth(), deploymentConfig),
       );
+      return;
+    }
+
+    if (
+      request.method === "GET" &&
+      url.pathname === "/api/system/update-readiness"
+    ) {
+      if (!ensureLauncherControl(request, deploymentConfig)) {
+        sendJson(response, 403, {
+          error: {
+            code: "launcher_control_required",
+            message: "Nicht verfügbar.",
+          },
+        });
+        return;
+      }
+      const summary = await service.storageMaintenanceSummary();
+      if (!summary) {
+        sendJson(response, 503, {
+          error: {
+            code: "storage_unavailable",
+            message: "Speicherstatus ist nicht verfügbar.",
+          },
+        });
+        return;
+      }
+      sendJson(response, 200, {
+        ok: true,
+        updateAllowed: summary.nonTerminalCount === 0,
+        activeMatchCount: summary.nonTerminalCount,
+      });
       return;
     }
 
@@ -4081,6 +4113,26 @@ async function routeHttp(
       error: { code: "server_error", message: "Serverfehler." },
     });
   }
+}
+
+function ensureLauncherControl(
+  request: IncomingMessage,
+  deploymentConfig: DeploymentConfig,
+): boolean {
+  if (!isLocalProductProfile(deploymentConfig)) return false;
+  if (!isMaintenanceClientAddressAllowed(request.socket.remoteAddress))
+    return false;
+  const expected = process.env.NETGRID_LAUNCHER_CONTROL_TOKEN;
+  const actual = firstHeaderValue(
+    request.headers["x-netgrid-launcher-control"],
+  );
+  if (!expected || !actual) return false;
+  const expectedBytes = Buffer.from(expected);
+  const actualBytes = Buffer.from(actual);
+  return (
+    expectedBytes.length === actualBytes.length &&
+    timingSafeEqual(expectedBytes, actualBytes)
+  );
 }
 
 function defaultService(

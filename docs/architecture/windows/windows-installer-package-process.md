@@ -1,7 +1,7 @@
 # Paketprozess: Windows-Installer und Launcher
 
 Stand: 2026-09-04  
-Status: in Umsetzung; WIN-I00 bis WIN-I05 verifiziert, nächstes Paket WIN-I06
+Status: in Umsetzung; WIN-I00 bis WIN-I06 verifiziert, nächstes Paket WIN-I07
 
 ## Quelle und Zielprüfung
 
@@ -179,6 +179,23 @@ eigene Account-, Cleanup- oder Versionsautorität.
   Account-Policy. Persistierte Wechsel über Maintenance bleiben autoritativ;
   im Private-LAN-Profil funktioniert Self-Service, aber Policyverwaltung und
   Maintenance bleiben Loopback-only.
+- WIN-I06 prüft beim Launcherstart ausschließlich die GitHub Releases von
+  `LevelX2/NETGRID`; ohne Netzwerk bleibt der Spielbetrieb unverändert. Drafts
+  werden ignoriert, Vorabversionen nur nach expliziter Einstellung angeboten
+  und jedes Update erst nach Zustimmung heruntergeladen.
+- Setup, `SHA256SUMS.txt` und `release-metadata.json` müssen im Release
+  gemeinsam vorhanden sein und denselben SHA-256-Wert ausweisen. Der Download
+  wird erneut gehasht; widersprüchliche oder manipulierte Artefakte scheitern
+  vor jeder Installation.
+- Ein zufälliges, nur an den Serverkindprozess übergebenes Launcher-Token
+  schützt die lokale Readiness-Abfrage. Nicht abgeschlossene Partien blockieren
+  das Update sowohl vor als auch nach dem Download.
+- Der getrennte Updater wartet auf den kontrollierten Launcher-Stopp, erzeugt
+  über die bestehende Storage-Autorität ein geprüftes `pre_update`-Backup und
+  führt das MSI-Major-Upgrade aus. Erst ein erfolgreicher Start-/Healthcheck
+  ersetzt die lokal gecachte Vorversion. Bei einem nachgelagerten Fehler werden
+  Programm und Backup zurückgerollt; kann das nicht sicher abgeschlossen
+  werden, bleibt NETGRID mit Diagnose gestoppt.
 
 ## Verifikationsregeln
 

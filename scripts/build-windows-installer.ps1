@@ -23,6 +23,7 @@ $nodeRoot = Join-Path $installerInputRoot "runtime\node"
 $runtimeConfigRoot = Join-Path $installerInputRoot "runtime-config"
 $launcherRoot = Join-Path $installerInputRoot "launcher"
 $firstRunRoot = Join-Path $installerInputRoot "first-run"
+$updaterRoot = Join-Path $installerInputRoot "updater"
 $setupHostRoot = Join-Path $installerInputRoot "setup-host"
 $localDotnet = Join-Path $projectRoot ".tools\dotnet\dotnet.exe"
 $dotnet = if (Test-Path -LiteralPath $localDotnet -PathType Leaf) {
@@ -139,6 +140,17 @@ try {
   }
   & node scripts/smoke-windows-first-run.mjs --release $ReleaseRoot --first-run $firstRunExecutable --node (Join-Path $nodeRoot "node.exe")
   if ($LASTEXITCODE -ne 0) { throw "Die NETGRID-Ersteinrichtung hat ihren sicheren Bootstrap-Smoke nicht bestanden." }
+  & $dotnet publish apps/windows/Netgrid.Updater/Netgrid.Updater.csproj `
+    -c Release -r win-x64 --self-contained true `
+    -p:DebugType=None -p:DebugSymbols=false `
+    -o $updaterRoot
+  if ($LASTEXITCODE -ne 0) { throw "Der NETGRID-Updater konnte nicht gebaut werden." }
+  $updaterExecutable = Join-Path $updaterRoot "NETGRID.Updater.exe"
+  if (-not (Test-Path -LiteralPath $updaterExecutable -PathType Leaf)) {
+    throw "Der selbst enthaltene NETGRID-Updater fehlt."
+  }
+  & node scripts/smoke-windows-updater.mjs --launcher $launcherExecutable --updater $updaterExecutable
+  if ($LASTEXITCODE -ne 0) { throw "Der NETGRID-Updater hat seinen isolierten Vertragssmoke nicht bestanden." }
 
   & $dotnet tool restore
   if ($LASTEXITCODE -ne 0) { throw "WiX Toolset 7.0.0 konnte nicht wiederhergestellt werden." }
@@ -161,6 +173,7 @@ try {
     -d "RuntimeConfigRoot=$runtimeConfigRoot" `
     -d "LauncherRoot=$launcherRoot" `
     -d "FirstRunRoot=$firstRunRoot" `
+    -d "UpdaterRoot=$updaterRoot" `
     -d "NetgridIcon=$iconPath" `
     -intermediateFolder (Join-Path $intermediateRoot "product") `
     -pdbtype none `
@@ -197,6 +210,7 @@ try {
       runtimeConfigSha256 = (Get-FileHash -LiteralPath $runtimeConfigExecutable -Algorithm SHA256).Hash.ToLowerInvariant()
       launcherSha256 = (Get-FileHash -LiteralPath $launcherExecutable -Algorithm SHA256).Hash.ToLowerInvariant()
       firstRunSha256 = (Get-FileHash -LiteralPath $firstRunExecutable -Algorithm SHA256).Hash.ToLowerInvariant()
+      updaterSha256 = (Get-FileHash -LiteralPath $updaterExecutable -Algorithm SHA256).Hash.ToLowerInvariant()
       setupHostSha256 = (Get-FileHash -LiteralPath $setupHostExecutable -Algorithm SHA256).Hash.ToLowerInvariant()
     }
     dataContract = [ordered]@{

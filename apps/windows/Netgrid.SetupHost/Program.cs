@@ -42,6 +42,18 @@ internal static class Program
                 File.WriteAllText(Path.GetFullPath(args[1]), JsonSerializer.Serialize(SetupContract.Audit, new JsonSerializerOptions { WriteIndented = true }));
                 return 0;
             }
+            if (args.Length == 3 && args[0] == "--install-update" && args[1] == "--program-root")
+            {
+                var result = Installer.RunUpdate(Path.GetFullPath(args[2]), uninstall: false);
+                Console.WriteLine($"NETGRID_SETUP_UPDATE_RESULT code={result}");
+                return result is 0 or 3010 ? 0 : result;
+            }
+            if (args.Length == 1 && args[0] == "--uninstall-update")
+            {
+                var result = Installer.RunUpdate(programRoot: null, uninstall: true);
+                Console.WriteLine($"NETGRID_SETUP_UNINSTALL_RESULT code={result}");
+                return result is 0 or 1605 or 3010 ? 0 : result;
+            }
             if (args.Length != 0) throw new SetupException("setup_arguments_invalid", "Die Setup-Argumente sind ungültig.");
 
             MsiPayload.Verify();
@@ -366,6 +378,8 @@ internal static class Installer
                 Property("NETGRID_RETENTION_DAYS", settings.RetentionDays),
                 Property("NETGRID_ACCOUNT_ACCESS_MODE", settings.AccountAccessMode),
                 Property("INSTALLDESKTOPSHORTCUT", settings.DesktopShortcut ? "1" : "0"),
+                Property("NETGRID_SETUP_SOURCE", Environment.ProcessPath ?? throw new SetupException("setup_path_missing", "Der Setup-Pfad ist nicht verfügbar.")),
+                Property("NETGRID_SETUP_SHA256", CurrentSetupHash()),
             };
             var arguments = $"/i {Quote(temporaryMsi)} /qn /norestart /l*v {Quote(LogPath)} {string.Join(" ", properties)}";
             using var process = Process.Start(new ProcessStartInfo("msiexec.exe")
@@ -382,6 +396,46 @@ internal static class Installer
         {
             if (File.Exists(temporaryMsi)) File.Delete(temporaryMsi);
         }
+    }
+
+    public static int RunUpdate(string? programRoot, bool uninstall)
+    {
+        var temporaryMsi = Path.Combine(Path.GetTempPath(), $"NETGRID-{Guid.NewGuid():N}.msi");
+        try
+        {
+            MsiPayload.ExtractVerified(temporaryMsi);
+            var action = uninstall ? "/x" : "/i";
+            var arguments = $"{action} {Quote(temporaryMsi)} /qn /norestart /l*v {Quote(LogPath)}";
+            if (!uninstall)
+            {
+                if (string.IsNullOrWhiteSpace(programRoot)) throw new SetupException("update_program_root_missing", "Der installierte Programmordner fehlt.");
+                using var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\LevelX2\NETGRID", writable: false);
+                var dataRoot = key?.GetValue("RuntimeDataRoot") as string;
+                if (string.IsNullOrWhiteSpace(dataRoot)) throw new SetupException("update_data_root_missing", "Der registrierte NETGRID-Datenordner fehlt.");
+                var desktop = Convert.ToInt32(key?.GetValue("DesktopShortcut") ?? 0) == 1 ? "1" : "0";
+                arguments += $" {Property("INSTALLFOLDER", Path.GetFullPath(programRoot))} {Property("NETGRID_DATA_ROOT", Path.GetFullPath(dataRoot))} {Property("INSTALLDESKTOPSHORTCUT", desktop)} {Property("NETGRID_SETUP_SOURCE", Environment.ProcessPath ?? throw new SetupException("setup_path_missing", "Der Setup-Pfad ist nicht verfügbar."))} {Property("NETGRID_SETUP_SHA256", CurrentSetupHash())}";
+            }
+            using var process = Process.Start(new ProcessStartInfo("msiexec.exe")
+            {
+                Arguments = arguments,
+                UseShellExecute = true,
+                Verb = "runas",
+                WindowStyle = ProcessWindowStyle.Hidden,
+            }) ?? throw new SetupException("msi_start_failed", "Windows Installer konnte nicht gestartet werden.");
+            process.WaitForExit();
+            return process.ExitCode;
+        }
+        finally
+        {
+            if (File.Exists(temporaryMsi)) File.Delete(temporaryMsi);
+        }
+    }
+
+    private static string CurrentSetupHash()
+    {
+        var source = Environment.ProcessPath ?? throw new SetupException("setup_path_missing", "Der Setup-Pfad ist nicht verfügbar.");
+        using var stream = File.OpenRead(source);
+        return Convert.ToHexString(SHA256.HashData(stream)).ToLowerInvariant();
     }
 
     public static int RunFirstRun(SetupSettings settings)
@@ -550,6 +604,9 @@ internal static class SetupContract
         launchAfterInstallDefault = true,
         firewallProfiles = new[] { "private" },
         publicFirewallProfileEnabled = false,
+        updateChannel = "github-releases-only",
+        updateCommands = new[] { "install-update", "uninstall-update" },
+        installerRollback = "msi-major-upgrade",
     };
 }
 

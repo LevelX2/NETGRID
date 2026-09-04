@@ -134,6 +134,20 @@ try {
     treeShaking: true,
     metafile: true,
   });
+  const storageAdminResult = await build({
+    entryPoints: [path.join(repositoryRoot, "apps/server/src/storage-cli.ts")],
+    outfile: path.join(applicationRoot, "storage-admin.mjs"),
+    bundle: true,
+    format: "esm",
+    platform: "node",
+    target: "node24",
+    banner: {
+      js: 'import { createRequire as __netgridCreateRequire } from "node:module"; const require = __netgridCreateRequire(import.meta.url);',
+    },
+    treeShaking: true,
+    metafile: true,
+    external: ["sharp"],
+  });
   const serverSource = readFileSync(
     path.join(applicationRoot, "server.mjs"),
     "utf8",
@@ -169,6 +183,7 @@ try {
           web: "app/apps/web/server.js",
           server: "app/server.mjs",
           maintenanceAuth: "app/maintenance-auth.mjs",
+          storageAdmin: "app/storage-admin.mjs",
         },
         defaultPorts: { web: 3100, server: 8787 },
         locales: ["de", "en", "fr"],
@@ -188,6 +203,11 @@ try {
   writeFileSync(
     path.join(temporaryRoot, "maintenance-auth-metafile.json"),
     `${JSON.stringify(maintenanceAuthResult.metafile, null, 2)}\n`,
+    "utf8",
+  );
+  writeFileSync(
+    path.join(temporaryRoot, "storage-admin-metafile.json"),
+    `${JSON.stringify(storageAdminResult.metafile, null, 2)}\n`,
     "utf8",
   );
   process.stdout.write(`WINDOWS_RELEASE_OUTPUT_OK ${outputRoot}\n`);

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Net.Http.Json;
+using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 
 namespace Netgrid.Launcher;
@@ -12,6 +13,7 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
     private readonly Uri _webUrl;
     private readonly SemaphoreSlim _lifecycle = new(1, 1);
     private readonly HttpClient _http = new() { Timeout = TimeSpan.FromSeconds(2) };
+    private readonly string _controlToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
     private Process? _server;
     private Process? _web;
     private bool _stopping;
@@ -30,6 +32,9 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
 
     public Uri WebUrl => _webUrl;
     public string LogDirectory => Path.Combine(_environment.Required("NETGRID_DATA_ROOT"), "runtime", "logs");
+    public string DataRoot => _environment.Required("NETGRID_DATA_ROOT");
+    public string ProgramRoot => _programRoot;
+    public string EnvironmentFile => Path.Combine(_environment.Required("NETGRID_DATA_ROOT"), "config", "runtime.env");
 
     public static LauncherRuntime Load(LauncherOptions options)
     {
@@ -67,6 +72,17 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
         {
             _lifecycle.Release();
         }
+    }
+
+    public async Task<(bool Allowed, int ActiveMatchCount)> UpdateReadinessAsync()
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Get, new Uri(_serverUrl, "/api/system/update-readiness"));
+        request.Headers.Add("x-netgrid-launcher-control", _controlToken);
+        using var response = await _http.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+        var payload = await response.Content.ReadFromJsonAsync<UpdateReadiness>()
+            ?? throw new InvalidOperationException("update_readiness_invalid");
+        return (payload.UpdateAllowed, payload.ActiveMatchCount);
     }
 
     public async Task VerifyRecoveryPolicyAsync()
@@ -145,7 +161,11 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
         }
         startInfo.Environment.Remove("NODE_OPTIONS");
         foreach (var (name, value) in _environment.Values) startInfo.Environment[name] = value;
-        if (launcherControl) startInfo.Environment["NETGRID_LAUNCHER_CONTROL"] = "stdio";
+        if (launcherControl)
+        {
+            startInfo.Environment["NETGRID_LAUNCHER_CONTROL"] = "stdio";
+            startInfo.Environment["NETGRID_LAUNCHER_CONTROL_TOKEN"] = _controlToken;
+        }
 
         RotateLog(logPath);
         var logLock = new object();
@@ -296,4 +316,6 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
 
     [GeneratedRegex(@"(?i)\b(token|password|secret|salt)\s*=\s*[^\s,;]+")]
     private static partial Regex SecretAssignment();
+
+    private sealed record UpdateReadiness(bool UpdateAllowed, int ActiveMatchCount);
 }
