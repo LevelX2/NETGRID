@@ -87,6 +87,23 @@ Daten, Schreibschutz der Konfiguration sowie das fail-closed Verhalten bei
 UNC-Pfaden, Pfadüberlappung und ungültigem vorhandenem Secret. Die erhöhte
 echte Install-/Repair-/Uninstall-Matrix folgt im Windows-11-Releasegate.
 
+## Launcher isoliert prüfen
+
+Nach gebautem Release- und Installerinput startet folgender Befehl einen
+vollständigen installierten Produktbaum auf zwei freien Nichtstandardports und
+einem temporären Datenroot:
+
+```powershell
+corepack pnpm smoke:windows-launcher
+```
+
+Der Test startet Server und Webclient ausschließlich über `NETGRID.exe`,
+prüft beide Healthflächen, beendet den Webprozess zweimal kontrolliert für den
+einmaligen Recoveryvertrag und fordert beim Server den stdin-Shutdown an.
+SQLite-Anlage, der geordnete Stoppeintrag und geschlossene Ports werden vor
+dem Entfernen der temporären Daten geprüft. Die Standardports und die
+Hauptinstanz bleiben unangetastet.
+
 ## Isolierten Frischstart prüfen
 
 ```powershell

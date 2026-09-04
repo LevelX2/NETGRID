@@ -6,6 +6,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+$usesDefaultOutputRoot = [string]::IsNullOrWhiteSpace($OutputRoot)
 $ReleaseRoot = if ([string]::IsNullOrWhiteSpace($ReleaseRoot)) {
   Join-Path $projectRoot "output\windows-release"
 } else {
@@ -20,6 +21,7 @@ $installerInputRoot = Join-Path $projectRoot "output\windows-installer-input"
 $legalRoot = Join-Path $installerInputRoot "legal"
 $nodeRoot = Join-Path $installerInputRoot "runtime\node"
 $runtimeConfigRoot = Join-Path $installerInputRoot "runtime-config"
+$launcherRoot = Join-Path $installerInputRoot "launcher"
 $localDotnet = Join-Path $projectRoot ".tools\dotnet\dotnet.exe"
 $dotnet = if (Test-Path -LiteralPath $localDotnet -PathType Leaf) {
   $localDotnet
@@ -31,13 +33,13 @@ $dotnet = if (Test-Path -LiteralPath $localDotnet -PathType Leaf) {
   $command.Source
 }
 
-function Reset-InstallerInput {
+function Reset-BuildDirectory {
   param([string]$Path, [string]$ProjectRoot)
   $resolvedPath = [System.IO.Path]::GetFullPath($Path)
   $allowedRoot = [System.IO.Path]::GetFullPath((Join-Path $ProjectRoot "output")) + [System.IO.Path]::DirectorySeparatorChar
   if (-not $resolvedPath.StartsWith($allowedRoot, [System.StringComparison]::OrdinalIgnoreCase) -or
       $resolvedPath -eq $allowedRoot.TrimEnd([System.IO.Path]::DirectorySeparatorChar)) {
-    throw "Der Installer-Eingabepfad liegt außerhalb des erlaubten Outputbereichs."
+    throw "Der Buildpfad liegt außerhalb des erlaubten Outputbereichs."
   }
   if (Test-Path -LiteralPath $resolvedPath) {
     Remove-Item -LiteralPath $resolvedPath -Recurse -Force
@@ -60,7 +62,7 @@ try {
     throw "Ungültige Installer-Version im Produktlayout: $productVersion"
   }
 
-  Reset-InstallerInput -Path $installerInputRoot -ProjectRoot $projectRoot
+  Reset-BuildDirectory -Path $installerInputRoot -ProjectRoot $projectRoot
   New-Item -ItemType Directory -Path $legalRoot -Force | Out-Null
   Copy-Item -LiteralPath (Join-Path $projectRoot "LICENSE") -Destination (Join-Path $legalRoot "NETGRID-LICENSE.txt") -Force
   & node scripts/build-third-party-notices.mjs --release $ReleaseRoot --output (Join-Path $legalRoot "THIRD-PARTY-NOTICES.txt")
@@ -113,13 +115,28 @@ try {
   }
   & powershell -ExecutionPolicy Bypass -File scripts/test-windows-runtime-config.ps1 -Executable $runtimeConfigExecutable
   if ($LASTEXITCODE -ne 0) { throw "Die NETGRID-Runtimekonfiguration hat ihre Isolationstests nicht bestanden." }
+  & $dotnet publish apps/windows/Netgrid.Launcher/Netgrid.Launcher.csproj `
+    -c Release -r win-x64 --self-contained true `
+    -p:DebugType=None -p:DebugSymbols=false `
+    -o $launcherRoot
+  if ($LASTEXITCODE -ne 0) { throw "Der NETGRID-Launcher konnte nicht gebaut werden." }
+  $launcherExecutable = Join-Path $launcherRoot "NETGRID.exe"
+  if (-not (Test-Path -LiteralPath $launcherExecutable -PathType Leaf)) {
+    throw "Der selbst enthaltene NETGRID-Launcher fehlt."
+  }
+  & node scripts/smoke-windows-launcher.mjs
+  if ($LASTEXITCODE -ne 0) { throw "Der NETGRID-Launcher hat den isolierten Windows-Smoke nicht bestanden." }
 
   & $dotnet tool restore
   if ($LASTEXITCODE -ne 0) { throw "WiX Toolset 7.0.0 konnte nicht wiederhergestellt werden." }
   & $dotnet tool run wix -- -acceptEula wix7 extension add WixToolset.BootstrapperApplications.wixext/7.0.0
   if ($LASTEXITCODE -ne 0) { throw "Die gepinnte WiX-Bootstrapper-Erweiterung konnte nicht wiederhergestellt werden." }
 
-  New-Item -ItemType Directory -Path $OutputRoot -Force | Out-Null
+  if ($usesDefaultOutputRoot) {
+    Reset-BuildDirectory -Path $OutputRoot -ProjectRoot $projectRoot
+  } else {
+    New-Item -ItemType Directory -Path $OutputRoot -Force | Out-Null
+  }
   $intermediateRoot = Join-Path $OutputRoot "obj"
   $msiPath = Join-Path $OutputRoot "NETGRID-$productVersion-x64.msi"
   $setupPath = Join-Path $OutputRoot "NETGRID-Setup-$productVersion-x64.exe"
@@ -131,6 +148,7 @@ try {
     -d "LegalRoot=$legalRoot" `
     -d "NodeRoot=$nodeRoot" `
     -d "RuntimeConfigRoot=$runtimeConfigRoot" `
+    -d "LauncherRoot=$launcherRoot" `
     -d "NetgridIcon=$iconPath" `
     -intermediateFolder (Join-Path $intermediateRoot "product") `
     -pdbtype none `
@@ -161,6 +179,7 @@ try {
       nodeVersion = [string]$nodeDefinition.version
       nodeArchiveSha256 = [string]$nodeDefinition.sha256
       runtimeConfigSha256 = (Get-FileHash -LiteralPath $runtimeConfigExecutable -Algorithm SHA256).Hash.ToLowerInvariant()
+      launcherSha256 = (Get-FileHash -LiteralPath $launcherExecutable -Algorithm SHA256).Hash.ToLowerInvariant()
     }
     dataContract = [ordered]@{
       defaultRoot = "C:\ProgramData\NETGRID"

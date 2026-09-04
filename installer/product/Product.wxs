@@ -20,6 +20,10 @@
         <Directory Id="TOOLSFOLDER" Name="tools" />
       </Directory>
     </StandardDirectory>
+    <StandardDirectory Id="ProgramMenuFolder">
+      <Directory Id="NETGRIDPROGRAMMENU" Name="NETGRID" />
+    </StandardDirectory>
+    <StandardDirectory Id="DesktopFolder" />
 
     <Files Include="$(ReleaseRoot)\**" Directory="INSTALLFOLDER" />
 
@@ -28,6 +32,19 @@
     </Component>
     <Component Directory="TOOLSFOLDER">
       <File Id="NetgridRuntimeConfig" Source="$(RuntimeConfigRoot)\NETGRID.RuntimeConfig.exe" />
+    </Component>
+    <Component Directory="INSTALLFOLDER">
+      <File Id="NetgridLauncher" Source="$(LauncherRoot)\NETGRID.exe" />
+    </Component>
+    <Component Directory="NETGRIDPROGRAMMENU">
+      <Shortcut Id="NetgridStartMenuShortcut" Name="NETGRID" Target="[#NetgridLauncher]" WorkingDirectory="INSTALLFOLDER" Icon="NetgridIcon" />
+      <Shortcut Id="NetgridMaintenanceStartMenuShortcut" Name="NETGRID Maintenance" Target="[#NetgridLauncher]" Arguments="--open-maintenance" WorkingDirectory="INSTALLFOLDER" Icon="NetgridIcon" />
+      <RemoveFolder Id="RemoveNetgridProgramMenu" On="uninstall" />
+      <RegistryValue Root="HKLM" Key="Software\LevelX2\NETGRID" Name="StartMenuShortcuts" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+    <Component Directory="DesktopFolder" Condition="INSTALLDESKTOPSHORTCUT = 1">
+      <Shortcut Id="NetgridDesktopShortcut" Name="NETGRID" Target="[#NetgridLauncher]" WorkingDirectory="INSTALLFOLDER" Icon="NetgridIcon" />
+      <RegistryValue Root="HKLM" Key="Software\LevelX2\NETGRID" Name="DesktopShortcut" Type="integer" Value="1" KeyPath="yes" />
     </Component>
     <Component Directory="LEGALFOLDER">
       <File Id="NetgridLicense" Source="$(LegalRoot)\NETGRID-LICENSE.txt" />
@@ -46,6 +63,7 @@
     </Component>
 
     <Property Id="NETGRID_DATA_ROOT" Secure="yes" />
+    <Property Id="INSTALLDESKTOPSHORTCUT" Value="1" Secure="yes" />
     <SetProperty
       Id="InitializeNetgridRuntime"
       Value='initialize --data-root "[NETGRID_DATA_ROOT]"'

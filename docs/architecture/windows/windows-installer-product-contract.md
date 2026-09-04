@@ -1,8 +1,8 @@
 # Windows-Installer-Produktvertrag
 
 Stand: 2026-09-04  
-Status: beschlossenes Zielbild; Anwendungsvoraussetzungen, Installerskelett
-und Datenbasis umgesetzt, Launcher/First Run/Updater noch offen
+Status: beschlossenes Zielbild; Anwendungsvoraussetzungen, Installerbasis,
+Datenvertrag und Launcher umgesetzt, Setupführung/First Run/Updater noch offen
 
 ## Zweck und Grenze
 
@@ -146,6 +146,29 @@ werden können.
 - Nach einem unerwarteten Prozessabbruch versucht der Launcher genau einen
   automatischen Neustart. Scheitert auch dieser, zeigt er einen verständlichen
   Dialog mit Wiederholen, Diagnose und Beenden; es gibt keine Endlosschleife.
+
+### Umgesetzter Launcherbetrieb
+
+- `NETGRID.exe` ist eine selbstenthaltene .NET-10-Windows-Desktopanwendung
+  ohne separat benötigte .NET-Laufzeit. Sie startet ausschließlich die unter
+  Program Files installierten, manifestgebundenen Entrypoints mit der
+  mitgelieferten Node-Laufzeit.
+- Eine globale Mutex begrenzt den Launcher auf eine Instanz. Weitere Aufrufe
+  öffnen die bereits konfigurierte Spiel- oder Maintenance-URL und starten
+  keine zweite Prozessgruppe.
+- Der Launcher bereinigt geerbte NETGRID- und Node-Konfigurationswerte und
+  übernimmt anschließend die geschützte `runtime.env` als Autorität. Server-
+  und Web-Health müssen innerhalb von zwei Minuten erfolgreich sein.
+- Der Server besitzt nur im Launcherbetrieb einen privaten stdin-
+  Steuerkanal für den geordneten HTTP-, WebSocket- und Storage-Shutdown. Der
+  Webclient wird danach als eigener Prozessbaum beendet. Es gibt weiterhin
+  keinen Dienst und keinen Autostart.
+- Nach dem ersten unerwarteten Prozessende wird die gesamte Prozessgruppe
+  genau einmal wiederhergestellt. Ein zweiter Fehler stoppt sie und bietet
+  Wiederholen, Öffnen des Diagnoseordners oder Beenden.
+- Launcherlogs liegen unter `runtime/logs`, rotieren bei zwei MiB und
+  redigieren sowohl das reale Tokensalz als auch erkennbare
+  Token-/Passwort-/Secret-/Salt-Zuweisungen.
 
 ### Betriebsarten
 

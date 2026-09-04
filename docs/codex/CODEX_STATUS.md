@@ -98,8 +98,12 @@ Produktmanifest. Die offizielle Node.js-24.20.0-x64-Laufzeit und eine
 selbstenthaltene .NET-Komponente richten einen validierten lokalen Datenroot,
 geschützte Runtimekonfiguration, intern erzeugtes Tokensalz und getrennte
 ACLs idempotent ein; Standarddeinstallation und Reparatur bewahren bestehende
-Daten. Launcher, geführte Setupoberfläche, Firewallsetup und Updater sind noch
-nicht implementiert. Die installerunabhängigen
+Daten. Der selbstenthaltene Tray-Launcher startet Server und Webclient bei
+Bedarf, verwendet eine Instanz, öffnet Spiel oder Maintenance, stoppt den
+Server geordnet und versucht nach einem Prozessabbruch genau eine
+Wiederherstellung. Startmenü und optionale Desktopverknüpfung sind im MSI
+gebunden. Geführte Setupoberfläche, Firewallsetup und Updater sind noch nicht
+implementiert. Die installerunabhängigen
 Produktvoraussetzungen sind umgesetzt: Releasebuilds tragen `V1.0` plus
 fortlaufende Git-Buildnummer, die gespeicherte Retention-Policy wird beim
 Backend-Start sofort asynchron geprüft, und lokale Installationen können ohne

@@ -63,6 +63,7 @@
     "build:windows-release-output": "node scripts/build-windows-release-output.mjs && node scripts/check-windows-release-output.mjs",
     "build:windows-installer": "powershell -ExecutionPolicy Bypass -File scripts/build-windows-installer.ps1",
     "test:windows-runtime-config": "powershell -ExecutionPolicy Bypass -File scripts/test-windows-runtime-config.ps1",
+    "smoke:windows-launcher": "node scripts/smoke-windows-launcher.mjs",
     "check:windows-release-output": "node scripts/check-windows-release-output.mjs",
     "check:windows-release-output:selftest": "node scripts/check-windows-release-output.mjs --self-test",
     "smoke:windows-release-output": "node scripts/smoke-windows-release-output.mjs",

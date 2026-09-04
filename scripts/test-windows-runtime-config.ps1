@@ -116,6 +116,17 @@ NETGRID_TOKEN_SALT=<installer-generated-secret>
   $allowedPrefix = [System.IO.Path]::GetFullPath([System.IO.Path]::GetTempPath())
   if ($resolvedScratch.StartsWith($allowedPrefix, [System.StringComparison]::OrdinalIgnoreCase) -and
       [System.IO.Path]::GetFileName($resolvedScratch).StartsWith("netgrid-runtime-config-test-", [System.StringComparison]::Ordinal)) {
-    Remove-Item -LiteralPath $resolvedScratch -Recurse -Force -ErrorAction SilentlyContinue
+    $currentSid = [System.Security.Principal.WindowsIdentity]::GetCurrent().User
+    $cleanupRule = [System.Security.AccessControl.FileSystemAccessRule]::new(
+      $currentSid,
+      [System.Security.AccessControl.FileSystemRights]::FullControl,
+      [System.Security.AccessControl.AccessControlType]::Allow
+    )
+    foreach ($item in @((Get-Item -LiteralPath $resolvedScratch)) + @(Get-ChildItem -LiteralPath $resolvedScratch -Recurse -Force)) {
+      $acl = $item.GetAccessControl([System.Security.AccessControl.AccessControlSections]::Access)
+      $acl.AddAccessRule($cleanupRule)
+      $item.SetAccessControl($acl)
+    }
+    Remove-Item -LiteralPath $resolvedScratch -Recurse -Force
   }
 }

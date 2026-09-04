@@ -1,7 +1,7 @@
 # Paketprozess: Windows-Installer und Launcher
 
 Stand: 2026-09-04  
-Status: in Umsetzung; WIN-I00 bis WIN-I02 verifiziert, nächstes Paket WIN-I03
+Status: in Umsetzung; WIN-I00 bis WIN-I03 verifiziert, nächstes Paket WIN-I04
 
 ## Quelle und Zielprüfung
 
@@ -131,6 +131,23 @@ eigene Account-, Cleanup- oder Versionsautorität.
   Extraktions-, Decompile-, Manifest- und Bundle-Audit sind grün. Die echte
   erhöhte Install-/Repair-/Uninstall-Matrix bleibt zusätzlich Bestandteil des
   sauberen Windows-11-Gesamtgates in WIN-I08.
+- WIN-I03 liefert `NETGRID.exe` als selbstenthaltenen .NET-10-Windows-
+  Tray-Launcher. Er übernimmt ausschließlich die geschützte `runtime.env`,
+  entfernt vererbte NETGRID-/Node-Overrides, startet die installierte Node-
+  Laufzeit ohne Konsole, wartet auf Server- und Web-Health und öffnet Spiel
+  oder Maintenance über denselben Prozess.
+- Eine globale Mutex verhindert die zweite Launcherinstanz. Server und
+  Webclient bleiben bedarfsgestartete Kindprozesse ohne Dienst oder Autostart.
+  Beim Beenden erhält der Server über seinen privaten stdin-Steuerkanal einen
+  geordneten Shutdown; verbleibende Prozesse werden begrenzt beendet.
+- Nach einem unerwarteten Kindprozessende erfolgt genau ein gemeinsamer
+  Recovery-Start. Der zweite Fehler stoppt und bietet Wiederholen,
+  Diagnoseordner oder Beenden. Rotierte Launcherlogs redigieren bekannte und
+  schematisch erkennbare Secrets.
+- Startmenüeinträge für Spiel und Maintenance sowie die standardmäßig
+  aktivierte, per MSI-Eigenschaft abwählbare Desktopverknüpfung sind im Paket
+  gebunden. Der isolierte Smoke hat Health, kontrollierten Stopp, genau einen
+  Recovery-Versuch, SQLite-Anlage und geschlossene Testports nachgewiesen.
 
 ## Verifikationsregeln
 

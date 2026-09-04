@@ -101,4 +101,39 @@ if (
   console.log(`NETGRID multiplayer server listening on ${started.url}`);
   if (started.bindUrl !== started.url)
     console.log(`NETGRID bind address ${started.bindUrl}`);
+  let shuttingDown = false;
+  const shutdown = async (reason: "launcher" | "sigint" | "sigterm") => {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    console.log(`NETGRID multiplayer server stopping (${reason})`);
+    try {
+      await started.close();
+      process.exitCode = 0;
+    } catch (error) {
+      console.error(
+        JSON.stringify({
+          event: "server_stop_failed",
+          reason,
+          errorType: error instanceof Error ? error.name : "unknown",
+        }),
+      );
+      process.exitCode = 1;
+    } finally {
+      process.stdin.pause();
+    }
+  };
+  process.once("SIGINT", () => void shutdown("sigint"));
+  process.once("SIGTERM", () => void shutdown("sigterm"));
+  if (process.env.NETGRID_LAUNCHER_CONTROL === "stdio") {
+    process.stdin.setEncoding("utf8");
+    let launcherInput = "";
+    process.stdin.on("data", (chunk: string) => {
+      launcherInput += chunk;
+      const lines = launcherInput.split(/\r?\n/);
+      launcherInput = lines.pop() ?? "";
+      if (lines.some((line) => line === "shutdown"))
+        void shutdown("launcher");
+    });
+    process.stdin.resume();
+  }
 }

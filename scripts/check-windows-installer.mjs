@@ -57,6 +57,7 @@ try {
       "tools/NETGRID.RuntimeConfig.exe",
       "runtime-config/NETGRID.RuntimeConfig.exe",
     ],
+    ["NETGRID.exe", "launcher/NETGRID.exe"],
   ]);
   for (const [installedRelative, inputRelative] of installerFiles) {
     const input = path.join(installerInputRoot, ...inputRelative.split("/"));
@@ -121,7 +122,13 @@ try {
     !authoring.includes(
       '<Custom Action="InitializeNetgridRuntime" Condition="NOT REMOVE~=&quot;ALL&quot;"',
     ) ||
-    !authoring.includes('<Property Id="NETGRID_DATA_ROOT" Secure="yes" />')
+    !authoring.includes('<Property Id="NETGRID_DATA_ROOT" Secure="yes" />') ||
+    !authoring.includes(
+      '<Property Id="INSTALLDESKTOPSHORTCUT" Value="1" Secure="yes" />',
+    ) ||
+    !authoring.includes('Condition="INSTALLDESKTOPSHORTCUT = 1"') ||
+    !authoring.includes('Name="NETGRID Maintenance"') ||
+    !authoring.includes('Arguments="--open-maintenance"')
   )
     throw new Error("installer_runtime_initialization_contract_invalid");
 

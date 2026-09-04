@@ -81,8 +81,9 @@ für jede ausgelieferte Datei Pfad, Größe und SHA-256. Symlinks und nicht
 positiv zugelassene Pfade werden vom Audit abgewiesen.
 
 Der Installer ergänzt diese unveränderte Produktmenge nur um die gepinnte
-Node.js-x64-Laufzeit, den selbstenthaltenen Windows-Runtimekonfigurator und die
-zugehörigen Rechtsdateien. Der Installer-Audit bindet jede dieser Dateien
+Node.js-x64-Laufzeit, den selbstenthaltenen Windows-Runtimekonfigurator, den
+selbstenthaltenen Tray-Launcher und die zugehörigen Rechtsdateien. Der
+Installer-Audit bindet jede dieser Dateien
 ebenfalls durch Größe und SHA-256 an den Buildinput. npm, Corepack,
 Entwickler-SDKs, Symbole und sonstige Inhalte der Runtimearchive werden nicht
 mitgeliefert.
