@@ -26598,6 +26598,9 @@ function runnerRecurringEconomySignals(
             decision: installReady ? ("install" as const) : ("wait" as const),
           },
           evidenceCodes: [
+            ...(handRouteReady
+              ? []
+              : ["runner_restricted_run_economy_hand_route_deferred"]),
             ...investment.evidenceCodes,
             `runner_restricted_run_economy_hand_route_ready:${handRouteReady}`,
             `runner_restricted_run_economy_uses:${profile.uses.join("|")}`,
