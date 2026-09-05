@@ -281,3 +281,22 @@ Sicherung liegen im primären `data/local/`, der eigene Registry-Job ist
 geschlossen. HN-H bleibt bis zum nachgewiesenen Main-/Worktree-/Branch-
 Abschluss offen. Für den alten `_DEL`-Rest wurde während der laufenden
 Verifikation eine manuelle Entfernung angefragt; er existiert weiterhin.
+
+Die lokale Integration nach `main` ist als Fast-forward auf `62c58e2d3`
+abgeschlossen. Auf Main bestehen nochmals alle 25 Contract-Regressionen und
+alle sieben Messwerkzeugtests; `git diff --check` ist grün. Fremde Änderungen
+bleiben unberührt. Der Arbeitsworktree ist aus Git deregistriert und der
+gemergte Branch `codex/hidden-node-contract-capability` gelöscht.
+
+Der physische Cleanup bleibt offen: Die lokale Richtlinie blockiert die
+rekursive Entfernung der verbliebenen Dependency-Verzeichnisse. Der neue
+Rest wurde nach Prüfung auf fehlende Git-Registrierung und fehlende relevante
+Dateien gemäß Paketprozess nichtdestruktiv mit `_DEL` markiert. Manuell zu
+entfernen sind ausschließlich:
+
+- `C:\Projekte\NETGRID-worktrees\hidden-node-character-improvement_DEL`
+- `C:\Projekte\NETGRID-worktrees\hidden-node-contract-capability_DEL`
+
+Beide sind keine aktiven Worktrees. HN-H und das Gesamtziel bleiben bis zur
+verifizierten physischen Entfernung offen; die Richtliniensperre wird nicht
+über einen anderen Löschweg umgangen.
