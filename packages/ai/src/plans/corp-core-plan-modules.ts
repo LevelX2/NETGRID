@@ -20,6 +20,11 @@ import type {
 } from "./plan-scheduler";
 import type { PlanStepCapability } from "./plan-route";
 import { PlanResolutionFailure } from "./plan-resolution-failure";
+import {
+  currentCorpRestrictedCreditBanks,
+  corpRestrictedRezPreparationCandidates,
+  type CorpRestrictedRezPreparation,
+} from "../runtime/corp-restricted-credit-reserve";
 import { createCreditDemand } from "./credit-demand";
 import {
   searchFundingRoutes,
@@ -232,6 +237,7 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
     currentCredits: number;
     requiredCredits: number;
     fundingGap: number;
+    storedRestrictedCredits?: number;
   }>;
   rezRoute?: CorpExactIceRezRouteProjection;
   restrictedRezFunding?: {
@@ -357,6 +363,7 @@ export type CorpEconomyParentFundingSignal = CorpEconomySignalBase & {
   };
   fundingRouteAssessment?: CorpEconomyFundingRouteAssessment;
   restrictedCreditFunding?: import("@netgrid/shared").CorpRestrictedCreditRouteQuote[];
+  restrictedCreditPreparations?: CorpRestrictedRezPreparation[];
 };
 
 export type CorpEconomyReserveSignal = CorpEconomySignalBase & {
@@ -2243,6 +2250,25 @@ function validatedEconomyNeeds(
           context.input.playerView.own.credits,
         )
       : undefined;
+    const expectedPreparations =
+      parentNeed?.rezReserveNeed && parentNeed.targetIceInstanceId
+        ? corpRestrictedRezPreparationCandidates(
+            context.input,
+            context.actionCandidates,
+            {
+              targetIceInstanceId: parentNeed.targetIceInstanceId,
+              targetServerId: parentNeed.serverId,
+              requiredRezCredits: parentNeed.rezReserveNeed.requiredCredits,
+            },
+          )
+        : [];
+    for (const preparation of expectedPreparations)
+      validFundingActions.add(preparation.actionId);
+    if (
+      JSON.stringify(signal.restrictedCreditPreparations ?? []) !==
+      JSON.stringify(expectedPreparations)
+    )
+      return true;
     const exactNeedId = requirement
       ? `defense-reserve:${parentNeed!.serverId}:${requirement.iceInstanceId}`
       : undefined;
@@ -3055,7 +3081,11 @@ function genericDefenseFundingAlternativeExists(
       context.actionCandidates.some(
         (candidate) =>
           candidate.actionId === actionId &&
-          immediateCorpLiquidCreditGain(candidate) > 0 &&
+          (immediateCorpLiquidCreditGain(candidate) > 0 ||
+            (need.kind === "parent_funding" &&
+              need.restrictedCreditPreparations?.some(
+                (preparation) => preparation.actionId === actionId,
+              ) === true)) &&
           corpEconomyCandidateHasExecutablePayload(context.input, candidate),
       ),
     ) === true
@@ -3101,13 +3131,17 @@ function genericDefenseFundingRequirement(
     !Number.isSafeInteger(reserve.fundingGap) ||
     reserve.currentCredits < 0 ||
     reserve.requiredCredits <= reserve.currentCredits ||
-    reserve.fundingGap !== reserve.requiredCredits - reserve.currentCredits
+    reserve.fundingGap !==
+      reserve.requiredCredits -
+        reserve.currentCredits -
+        (reserve.storedRestrictedCredits ?? 0)
   ) {
     return undefined;
   }
   return {
     gap: reserve.fundingGap,
-    targetCredits: reserve.requiredCredits,
+    targetCredits:
+      reserve.requiredCredits - (reserve.storedRestrictedCredits ?? 0),
     iceInstanceId: signal.targetIceInstanceId,
   };
 }
@@ -3140,7 +3174,8 @@ function genericDefenseFundingRequirementIsCurrent(
     signal.phase === "fund_rez_reserve" &&
     reserve?.observedAtStateVersion === context.input.playerView.stateVersion &&
     reserve.currentCredits === context.input.playerView.own.credits &&
-    reserve.requiredCredits === requirement.targetCredits &&
+    reserve.requiredCredits - (reserve.storedRestrictedCredits ?? 0) ===
+      requirement.targetCredits &&
     ice?.rezzed !== true &&
     quote?.context === "installed" &&
     quote.cardId === requirement.iceInstanceId &&
@@ -3149,7 +3184,19 @@ function genericDefenseFundingRequirementIsCurrent(
     quote.expiresAtStateVersion === context.input.playerView.stateVersion &&
     quote.complete === true &&
     quote.mandatoryAdditionalCosts.agendaPoints === 0 &&
-    quote.finalCredits === requirement.targetCredits
+    quote.finalCredits === reserve.requiredCredits &&
+    (reserve.storedRestrictedCredits ?? 0) ===
+      Math.max(
+        0,
+        ...currentCorpRestrictedCreditBanks(context.input)
+          .filter(
+            (bank) =>
+              bank.advancementCounters > 0 &&
+              bank.generalCreditsAvailable ===
+                context.input.playerView.own.credits,
+          )
+          .map((bank) => bank.creditsPerCounter),
+      )
   );
 }
 
@@ -4142,7 +4189,7 @@ function defenseResourceGaps(
     return [
       {
         needId: signal.defenseId,
-        capability: "credits",
+        capability: signal.rezReserveNeed ? "fund_corp_rez_reserve" : "credits",
         minimum: requirement.gap,
         available: 0,
         deadline: signal.urgent ? "current_turn" : "multi_turn",
@@ -5600,14 +5647,19 @@ function validCorpRezReserveNeed(value: unknown): boolean {
         "currentCredits",
         "requiredCredits",
         "fundingGap",
+        "storedRestrictedCredits",
       ]),
     ) &&
     knownNonNegativeInteger(reserve.observedAtStateVersion) &&
     knownNonNegativeInteger(reserve.currentCredits) &&
     knownNonNegativeInteger(reserve.requiredCredits) &&
     knownNonNegativeInteger(reserve.fundingGap) &&
+    (reserve.storedRestrictedCredits === undefined ||
+      knownNonNegativeInteger(reserve.storedRestrictedCredits)) &&
     (reserve.fundingGap as number) > 0 &&
-    (reserve.requiredCredits as number) - (reserve.currentCredits as number) ===
+    (reserve.requiredCredits as number) -
+      (reserve.currentCredits as number) -
+      ((reserve.storedRestrictedCredits as number | undefined) ?? 0) ===
       reserve.fundingGap
   );
 }
@@ -6006,6 +6058,25 @@ function economyCandidates(
   context: PlanSchedulerContext,
   signal: CorpEconomyNeedSignal,
 ): PlanMaterialization["candidates"] {
+  if (
+    signal.kind === "parent_funding" &&
+    signal.restrictedCreditPreparations?.length
+  ) {
+    const preparations = signal.restrictedCreditPreparations;
+    const { restrictedCreditPreparations: _preparations, ...liquidSignal } =
+      signal;
+    return [
+      ...context.actionCandidates.flatMap((candidate) => {
+        const preparation = preparations.find(
+          (preparation) => preparation.actionId === candidate.actionId,
+        );
+        return preparation
+          ? [{ candidate, stepValue: preparation.capacityGain * 10 }]
+          : [];
+      }),
+      ...economyCandidates(context, liquidSignal),
+    ];
+  }
   if (signal.kind === "parent_funding" && signal.restrictedCreditFunding) {
     return context.actionCandidates.flatMap((candidate) => {
       const quote = signal.restrictedCreditFunding!.find(
@@ -6457,7 +6528,13 @@ function economyMaterialization(
                       ? signal.decision === "accept"
                         ? `Accept the exact current optional action-capacity offer from ${signal.sourceDefinitionId}; the granted action is replanned by its normal domain owner.`
                         : `Decline the exact current optional action-capacity offer from ${signal.sourceDefinitionId} because its restricted follow-up has no admitted productive route.`
-                      : "Convert an immediate positive liquid-credit route for the bound Corp funding need.",
+                      : signal.kind === "parent_funding" &&
+                          signal.restrictedCreditPreparations?.length
+                        ? "Prepare conditional stored install/rez capacity or liquid funding for the bound installed-ICE reserve; revalidate the remaining gap after this current head."
+                        : signal.kind === "parent_funding" &&
+                            signal.restrictedCreditFunding
+                          ? "Take the exact restricted payout for the bound current install/rez consumer, then return control to its resident parent."
+                          : "Convert an immediate positive liquid-credit route for the bound Corp funding need.",
     },
     candidates,
   };

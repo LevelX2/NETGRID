@@ -180,6 +180,30 @@ Abnahme; die Engine-Gegenprobe ist bereits auf das korrekte Ergebnis umgestellt.
   AI-/Engine-Typechecks grün.
   AI-Struktur/Reachability (659, keine Zyklen), Engine-Struktur (380, keine
   Zyklen), Paketgrenzen (1998) grün. Setup/Wiederholung bleibt offen.
-- **HN-G3 offen:** Setup/Wiederholung nur mit vollständigem Kosten- und
+- **HN-G3 aktiv:** Setup/Wiederholung nur mit vollständigem Kosten- und
   Verbraucherhorizont; produktiver Chooser, Parent/Leaf, Invocation,
   Reassessment und deterministische Fortsetzung abnehmen.
+  Abgeschlossener Teilschritt: Engine projiziert die bedingte Kapazität eines
+  bereits rezzed Counter-Banks actor-privat, ohne gegenwärtige Liquidität oder
+  zukünftige Action-ID. Economy bindet das aktuelle Advancement an den
+  terminalen Defense-Rez-Bedarf und vergleicht die nutzbare Netto-Kapazität
+  mit Basic Credit. Zulässig ist ein endlicher Gap innerhalb des verbleibenden
+  Klickbudgets; nach dem aktuellen Head wird die Restfinanzierung neu erzeugt.
+  Originaldeck-Fixtures beweisen 4 Credits/1 Klick sowie 3 Credits/2 Klicks:
+  Aufladen → gegebenenfalls Basic Credit → Zugwechsel → Auszahlung →
+  Mobile-Barricade-Rez, mit demselben residenten Defense-Parent.
+  Der rote zweistufige Test zeigte den ersten Verlustpunkt am Draw-Need:
+  „kein direkt installierbares ICE“ wurde trotz vorbereitet finanzierbarem
+  installiertem Blocker als „fehlende konkrete Defense“ veröffentlicht und
+  verdrängte bereits die Funding-Provider-Erzeugung. Die Draw-Zulassung
+  berücksichtigt jetzt die aktuelle Vorbereitung mit bekannter Schutzwirkung;
+  Unknown oder sichtbar brechbares ICE unterdrücken diesen Draw nicht.
+  Kein pauschaler Prioritätsaufschlag und keine veränderte Runner-Policy.
+  Wiederholung ohne neuen Bedarf, unzureichende Klicks, Quellenverlust, Stale-,
+  Quellen-/Zweck-/DTO- und Seiten-Gegenproben sind enthalten. 326 Tests in
+  sechs direkt angrenzenden AI-Dateien, AI-/Engine-Typecheck,
+  AI-Struktur/Reachability (660), Engine-Struktur (381), Paketgrenzen (2000)
+  grün. Kein vollständiger Shard-/Workspace-/Build-/E2E-Lauf.
+  Die erste Contract-Installation und langfristige Amortisation sind damit
+  nicht eingeführt; der bereits investierte Zustand ist explizite Voraussetzung.
+  Finite-Bank-Nutzung und die Abgrenzung weiterer ursprünglicher Lücken folgen.

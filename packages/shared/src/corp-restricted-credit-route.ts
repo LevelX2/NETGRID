@@ -1,6 +1,23 @@
 export const CORP_RESTRICTED_CREDIT_ROUTE_QUOTE_VERSION =
   "corp-restricted-credit-route-v1" as const;
 
+/** Stored counters are a conditional future payment capability, never liquid credits. */
+export type CorpRestrictedCreditBankQuote = {
+  schemaVersion: "corp-restricted-credit-bank-v1";
+  sourceCardInstanceId: string;
+  serverId: string;
+  expiresAtStateVersion: number;
+  advancementCounters: number;
+  generalCreditsAvailable: number;
+  creditsPerCounter: number;
+  payoutCounterCost: 1;
+  payoutClickCost: 0;
+  payoutGeneralCreditCost: 0;
+  usableFor: "corp_install_or_rez";
+  payoutCleanup: "end_of_turn";
+  condition: "source_remains_installed_and_rezzed_at_paid_window";
+};
+
 /** A semantic consumer, never a future LegalAction ID. Its plan retains target ownership. */
 export type CorpRestrictedCreditConsumer = {
   actionType: "install_card" | "rez_card" | "rez_ice";

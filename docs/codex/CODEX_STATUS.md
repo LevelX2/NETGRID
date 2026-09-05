@@ -79,8 +79,13 @@ unverändert. Im aktiven Capability-Paket entsteht eine eng gebundene
 zweckgebundene Economy-Finanzierung mit Rückgabe an den tatsächlichen
 Verbraucher. Auszahlung → tatsächlicher Economy-Rez sowie Auszahlung →
 Defense-Rez mit erhaltenem Parent und beendetem Support sind geprüft, letzteres
-auch mit Mobile Barricade im unveränderten Original-Corpdeck. Eigenständiger
-Aufbau/Wiederholung und erneuter Seedvergleich sind noch offen; die
+auch mit Mobile Barricade im unveränderten Original-Corpdeck. Ein bereits
+rezzed und erschöpfter Contract wird für einen endlichen terminalen ICE-Rez-
+Bedarf aufgeladen, bei Bedarf um einen allgemeinen Credit ergänzt und über
+den Zugwechsel in Auszahlung/Rezzing überführt. Bedarf und Quelle werden
+nach jedem Schritt neu geprüft; gespeicherte Counter sind keine Liquidität.
+Erstinvestition, weitergehende Verbraucher und erneuter Seedvergleich sind
+noch offen; die
 Current-State-Review grenzt vorbereitete Capability-Fixtures von Spielevidence ab.
 
 Historische Selfplay-Cycle-Reviews, Markdown-Matrix, Reporting-State und

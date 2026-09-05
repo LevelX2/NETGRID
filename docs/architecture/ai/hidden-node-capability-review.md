@@ -220,6 +220,53 @@ wiederholter Zyklus, Verfall ohne Verbraucher, gegnerische Entfernung,
 Unterbrechung und unveränderte Hidden-Info-Grenzen. Das wäre eine neue
 vertikale Fähigkeit, kein kleiner Bewertungsfix auf Basis dieser Partie.
 
+## Wiederholte Contract-Vorbereitung für einen endlichen Rez-Bedarf
+
+Ein bereits rezzed, erschöpfter Government Contract kann jetzt einen
+terminalen zentralen Defense-Bedarf vorbereiten. Die Engine-Quote beschreibt
+Counter, freie Credits, Kosten/Zweck und Verfall einer bedingten Auszahlung;
+sie ist actor-privat und behauptet weder Liquidität noch eine zukünftige
+LegalAction. Die aktuelle Advancement-Action kommt aus dem echten Angebot.
+Defense besitzt das konkrete installierte ICE und seinen Kostenbedarf;
+Economy besitzt den exakt gebundenen Vorbereitungsschritt.
+
+Für Mobile Barricade bei 4 Credits/1 Klick ergibt Aufladen 3 freie Credits
+und einen Counter für 3 Rez-Credits. Bei 3 Credits/2 Klicks verbessert
+Aufladen die nutzbare Kapazität zunächst von 3 auf 5; danach beschafft eine
+neu ausgewählte Basic-Credit-Action den fehlenden Credit. Beide produktiven
+Chooser-Proben führen über den Gegnerzug zu Auszahlung und tatsächlichem
+Rez unter demselben residenten Defense-Parent. Quelle und späteres Fenster
+müssen fortbestehen; neue gegnerische Möglichkeiten bleiben ungewiss.
+
+Der zweistufige rote Test belegte eine zusätzliche Producer-Lücke: Die
+Draw-Suche leitete aus fehlender direkt installierbarer Handkarte einen
+Defense-Draw ab, obwohl bereits installiertes ICE durch die belegte
+Vorbereitung finanzierbar war. Dieser Need verdrängte die Funding-Provider
+vor dem Linienvergleich. Die Zulassung unterscheidet jetzt diesen Fall von
+wirklich fehlendem wirksamen ICE. Unbekannte oder sichtbar brechbare
+Schutzpfade löschen den Draw nicht. Der Fix ist kein globaler Fundingbonus.
+
+Gezielte Gegenproben sichern den Stopp nach geschlossenem Gap, idempotentes
+Assessment, Quellenverlust, knappe Klicks und privaten DTO-Transport. Die
+Erstinvestition ist nicht freigegeben: Installationsklick, Advance-Klick,
+Advance-Credit und zwei Rez-Credits stehen einer einzelnen Auszahlung von
+drei zweckgebundenen Credits gegenüber. Erst wiederholte nutzbare Auszahlung
+kann diese Investition rechtfertigen. Dafür fehlt weiterhin ein belastbar
+gebundener langfristiger Verbraucherhorizont; kein Kartenlistenwechsel oder
+pauschaler Zukunftsbonus ersetzt ihn.
+
+Zusätzliche Diagnosegrenze: Die aktuelle zentrale Allokation behandelt ein
+bekannt leeres HQ (`populationCardCount < 1`) als unvollständigen Kontext.
+Dadurch kann auch die unabhängige R&D-Bewertung unbekannt bleiben. Die
+vorstehenden Fixtures enthalten eine echte Originalkarte in HQ, um diese
+separate Lücke nicht mit der Finanzierung zu vermischen. Dies ist noch kein
+Nachweis einer Ursache in Spiel 34 und wurde hier nicht nebenbei geändert.
+
+Der natürliche Checkpoint `seedmeta-357-final-034` auf `2ce041525` blieb
+unverändert: Runner 8, Corp 5, 380 Actions, Replay gültig, keine Runtimefehler.
+Das Ergebnis liegt vor der hier beschriebenen Wiederholungs-Erweiterung;
+vorbereitete Capability-Proben allein belegen keine höhere Spielstärke.
+
 ## Bedingte Vorbereitung: Zonenwirkung vor Installationszahlen
 
 HN-C prüft den bestehenden Ambush-Owner, nicht einen neuen Kartenresolver.

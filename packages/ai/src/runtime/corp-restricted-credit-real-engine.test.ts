@@ -2,6 +2,7 @@ import {
   applyAction,
   createGameAfterSetup,
   getLegalActions,
+  getPlayerView,
   hashState,
   quoteCorpRestrictedCreditRoute,
 } from "@netgrid/engine";
@@ -21,6 +22,8 @@ import { buildAiDecisionInputDto } from "../input-dto";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import standardDeckCatalog from "../../../../data/decks/standard-deck-catalog-1.0.0.json";
 import { corpRestrictedRezDefenseSignals } from "./corp-restricted-rez-defense";
+import { allocateCorpCentralDefenseFromAiFacts } from "./corp-central-defense-facts-adapter";
+import { corpRestrictedRezPreparationCandidates } from "./corp-restricted-credit-reserve";
 
 const CONTRACT = "onr_proteus_059_government-contract";
 const WALL = "onr_v1_279_wall-of-static";
@@ -55,6 +58,260 @@ const CORP_DECK: DeckDefinition = {
 
 describe("Corp restricted install/rez credit real-Engine capability", () => {
   afterEach(resetResidentPlanPortfolioMemory);
+
+  it.each([
+    { credits: 4, clicks: 1 },
+    { credits: 3, clicks: 2 },
+  ])(
+    "reloads an exhausted rezzed Contract for a finite terminal rez need and converts it next turn ($credits credits)",
+    ({ credits, clicks }) => {
+      const state = preparedOriginalTerminalReserve(credits, clicks);
+      const input = decisionInput(state, ORIGINAL_DECK);
+      expect(input.playerView.opponent.agendaPoints).toBe(6);
+      const allocation = allocateCorpCentralDefenseFromAiFacts({ input });
+      expect(allocation).toMatchObject({
+        status: "known",
+        selectedServerId: "rd",
+      });
+      const choice = chooseCorpAction(input);
+      const head = input.legalActions.find(
+        (action) => action.actionId === choice.actionId,
+      )!;
+      expect(
+        head,
+        JSON.stringify(choice.decisionDebug?.planFirstDecision),
+      ).toMatchObject({ type: "advance_card", source: contractId(state) });
+      expect(
+        choice.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
+      ).toBe("corp.economy");
+      expect(
+        choice.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+      ).toContain("corp.defend_servers");
+      let next = apply(state, head);
+      expect(next.corp.credits).toBe(credits - 1);
+      expect(next.cardInstances[contractId(state)]!.advancementCounters).toBe(
+        1,
+      );
+      if (credits === 3) {
+        const followupInput = decisionInput(next, ORIGINAL_DECK);
+        const followup = chooseCorpAction(followupInput);
+        const followupHead = followupInput.legalActions.find(
+          (action) => action.actionId === followup.actionId,
+        )!;
+        expect(
+          followupHead.type,
+          JSON.stringify(followup.decisionDebug?.planFirstDecision),
+        ).toBe("gain_credit");
+        expect(
+          followup.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+        ).toBe(choice.decisionDebug?.planFirstDecision?.rootPlanInstanceId);
+        next = apply(next, followupHead);
+        expect(next.corp.credits).toBe(3);
+        expect(next.cardInstances[contractId(state)]!.advancementCounters).toBe(
+          1,
+        );
+      }
+      next = apply(
+        next,
+        getLegalActions(next, "corp").find(
+          (action) => action.type === "end_turn",
+        )!,
+      );
+      next = apply(
+        next,
+        getLegalActions(next, "runner").find(
+          (action) =>
+            action.type === "start_run" && action.payload?.serverId === "rd",
+        )!,
+      );
+      const fundingInput = decisionInput(next, ORIGINAL_DECK);
+      const funding = chooseCorpAction(fundingInput);
+      expect(funding.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
+        choice.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+      );
+      const payout = fundingInput.legalActions.find(
+        (action) => action.actionId === funding.actionId,
+      )!;
+      expect(payout.payload?.restrictedCreditGainComplete).toBe(true);
+      next = apply(next, payout);
+      const rezInput = decisionInput(next, ORIGINAL_DECK);
+      const rez = chooseCorpAction(rezInput);
+      const rezHead = rezInput.legalActions.find(
+        (action) => action.actionId === rez.actionId,
+      )!;
+      expect(rezHead.type).toBe("rez_ice");
+      next = apply(next, rezHead);
+      expect(next.corp.credits).toBe(0);
+      expect(next.cardInstances[contractId(state)]!.advancementCounters).toBe(
+        0,
+      );
+    },
+  );
+
+  it("stops loading when one stored counter already closes the bound reserve", () => {
+    const state = preparedOriginalTerminalReserve(4, 3);
+    const input = decisionInput(state, ORIGINAL_DECK);
+    const first = chooseCorpAction(input);
+    const head = input.legalActions.find(
+      (action) => action.actionId === first.actionId,
+    )!;
+    expect(head).toMatchObject({
+      type: "advance_card",
+      source: contractId(state),
+    });
+    const next = apply(state, head);
+    const nextInput = decisionInput(next, ORIGINAL_DECK);
+    const nextChoice = chooseCorpAction(nextInput);
+    const nextHead = nextInput.legalActions.find(
+      (action) => action.actionId === nextChoice.actionId,
+    )!;
+    expect(
+      nextHead.type === "advance_card" && nextHead.source === contractId(state),
+    ).toBe(false);
+    expect(preparationsForOriginal(nextInput)).toEqual([]);
+    expect(
+      nextChoice.decisionDebug?.planFirstDecision?.selectedStep?.needId ?? "",
+    ).not.toContain("defense-reserve:");
+  });
+
+  it("requires a finite useful capacity delta, exact source, and enough remaining clicks", () => {
+    const state = preparedOriginalTerminalReserve(3, 2);
+    const input = decisionInput(state, ORIGINAL_DECK);
+    expect(preparationsForOriginal(input)).toMatchObject([
+      { capacityGain: 2, remainingGeneralCreditGap: 1 },
+    ]);
+    expect(preparationsForOriginal(input)).toEqual(
+      preparationsForOriginal(input),
+    );
+    const tooLate = structuredClone(input);
+    tooLate.playerView.own.clicks = 1;
+    expect(preparationsForOriginal(tooLate)).toEqual([]);
+    const stale = structuredClone(input);
+    stale.playerView.servers.find((server) => server.id === "remote_1")!
+      .root[0]!.restrictedCreditBankQuote!.expiresAtStateVersion--;
+    expect(preparationsForOriginal(stale)).toEqual([]);
+    const missingHead = structuredClone(input);
+    missingHead.legalActions = missingHead.legalActions.filter(
+      (action) => action.type !== "advance_card",
+    );
+    expect(preparationsForOriginal(missingHead)).toEqual([]);
+    const noBasicCredit = structuredClone(input);
+    noBasicCredit.legalActions = noBasicCredit.legalActions.filter(
+      (action) => action.type !== "gain_credit",
+    );
+    expect(preparationsForOriginal(noBasicCredit)).toEqual([]);
+    const alreadyFunded = decisionInput(
+      preparedOriginalTerminalReserve(6, 2),
+      ORIGINAL_DECK,
+    );
+    expect(preparationsForOriginal(alreadyFunded)).toEqual([]);
+  });
+
+  it("does not replace defense draw with a bank preparation for visibly breakable ICE", () => {
+    const state = preparedOriginalTerminalReserve(3, 2);
+    RealEngineFixtureBuilder.forState(state)
+      .withRunnerProgramInstalled("onr_v1_036_jackhammer")
+      .withRunnerCredits(30);
+    const input = decisionInput(state, ORIGINAL_DECK);
+    const choice = chooseCorpAction(input);
+    expect(
+      input.legalActions.find((action) => action.actionId === choice.actionId)
+        ?.type,
+    ).toBe("draw_card");
+    expect(
+      choice.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
+    ).toBe("corp.defend_servers");
+  });
+
+  it("reassesses loss of the stored source instead of keeping fictitious rez capacity", () => {
+    const state = preparedOriginalTerminalReserve(4, 3);
+    const input = decisionInput(state, ORIGINAL_DECK);
+    const choice = chooseCorpAction(input);
+    const next = apply(
+      state,
+      input.legalActions.find((action) => action.actionId === choice.actionId)!,
+    );
+    const source = next.cardInstances[contractId(state)]!;
+    // Isolated opponent-removal checkpoint: no claim of a chosen Runner route.
+    const remote = next.corp.servers.find(
+      (server) => server.id === "remote_1",
+    )!;
+    remote.root = remote.root.filter((id) => id !== source.instanceId);
+    next.corp.archives.push(source.instanceId);
+    source.zone = { side: "corp", zone: "archives" };
+    source.rezzed = false;
+    source.advancementCounters = 0;
+    next.stateVersion++;
+    const nextInput = decisionInput(next, ORIGINAL_DECK);
+    expect(preparationsForOriginal(nextInput)).toEqual([]);
+    const followup = chooseCorpAction(nextInput);
+    expect(
+      nextInput.legalActions.find(
+        (action) => action.actionId === followup.actionId,
+      )?.source,
+    ).not.toBe(source.instanceId);
+  });
+
+  it("keeps restricted-bank capacity private, current, source-bound and allowlisted", () => {
+    const state = preparedOriginalTerminalReserve(3, 2);
+    const input = decisionInput(state, ORIGINAL_DECK);
+    const root = input.playerView.servers.find(
+      (server) => server.id === "remote_1",
+    )!.root[0]!;
+    const original = structuredClone(root.restrictedCreditBankQuote!);
+    const sanitizedBank = () =>
+      buildAiDecisionInputDto(input).playerView.servers.find(
+        (server) => server.id === "remote_1",
+      )!.root[0]!.restrictedCreditBankQuote;
+    Object.assign(root.restrictedCreditBankQuote!, {
+      secret: "not-transported",
+    });
+    expect(sanitizedBank()).toEqual(original);
+    for (const invalid of [
+      { expiresAtStateVersion: input.playerView.stateVersion - 1 },
+      { sourceCardInstanceId: "foreign" },
+      { serverId: "rd" },
+      { advancementCounters: 1 },
+      { payoutGeneralCreditCost: 1 },
+      { generalCreditsAvailable: -1 },
+    ]) {
+      root.restrictedCreditBankQuote = {
+        ...original,
+        ...invalid,
+      } as typeof original;
+      expect(sanitizedBank()).toBeUndefined();
+    }
+    expect(
+      getPlayerView(state, "runner")
+        .servers.flatMap((server) => server.root)
+        .every((card) => !card.restrictedCreditBankQuote),
+    ).toBe(true);
+  });
+
+  it("projects a rezzed counter bank as stored conditional capacity, not liquid payout", () => {
+    const state = preparedInstallWindow();
+    state.cardInstances[contractId(state)]!.advancementCounters = 0;
+    const bank = decisionInput(state).playerView.servers.find(
+      (server) => server.id === "remote_1",
+    )!.root[0]!.restrictedCreditBankQuote;
+    expect(bank).toMatchObject({
+      advancementCounters: 0,
+      creditsPerCounter: 3,
+      generalCreditsAvailable: 0,
+      condition: "source_remains_installed_and_rezzed_at_paid_window",
+    });
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) => action.payload?.restrictedCreditGainComplete === true,
+      ),
+    ).toBe(false);
+    state.cardInstances[contractId(state)]!.rezzed = false;
+    expect(
+      decisionInput(state).playerView.servers.find(
+        (server) => server.id === "remote_1",
+      )!.root[0]!.restrictedCreditBankQuote,
+    ).toBeUndefined();
+  });
 
   it("funds and hands back Mobile Barricade on the unchanged Hidden Node deck", () => {
     const state = preparedOriginalRun();
@@ -712,7 +969,7 @@ function decisionInput(state: GameState, deck: DeckDefinition = CORP_DECK) {
   });
 }
 
-function preparedOriginalRun(): GameState {
+function preparedOriginalCorp(): GameState {
   let state = createGameAfterSetup({
     seed: "hidden-node-prepared-defense",
     corpDeck: ORIGINAL_DECK,
@@ -736,6 +993,58 @@ function preparedOriginalRun(): GameState {
     .withCorpIceOnServer("hq", "onr_proteus_033_mobile-barricade")
     .withCorpCredits(3)
     .withRunnerCredits(0);
+  return state;
+}
+
+function preparedOriginalTerminalReserve(
+  credits: number,
+  clicks: number,
+): GameState {
+  const state = preparedOriginalCorp();
+  RealEngineFixtureBuilder.forState(state)
+    .withCorpIceOnServer("rd", "onr_proteus_033_mobile-barricade")
+    .withCorpCardInHq("onr_v1_281_accounts-receivable")
+    .withCorpCredits(credits);
+  state.cardInstances[contractId(state)]!.advancementCounters = 0;
+  state.corp.clicks = clicks;
+  const stolen = state.corp.rd.filter(
+    (id) =>
+      state.cardInstances[id]!.definitionId === "onr_proteus_004_fetal-ai",
+  );
+  expect(stolen).toHaveLength(2);
+  state.corp.rd = state.corp.rd.filter((id) => !stolen.includes(id));
+  for (const id of stolen) {
+    state.runner.scoreArea.push(id);
+    state.cardInstances[id] = {
+      ...state.cardInstances[id]!,
+      controller: "runner",
+      faceup: true,
+      rezzed: true,
+      zone: { side: "runner", zone: "scoreArea" },
+    };
+  }
+  return state;
+}
+
+function preparationsForOriginal(input: ReturnType<typeof decisionInput>) {
+  return corpRestrictedRezPreparationCandidates(
+    input,
+    buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "corp",
+    }),
+    {
+      targetIceInstanceId: input.playerView.servers.find(
+        (server) => server.id === "rd",
+      )!.ice[0]!.instanceId,
+      targetServerId: "rd",
+      requiredRezCredits: 6,
+    },
+  );
+}
+
+function preparedOriginalRun(): GameState {
+  let state = preparedOriginalCorp();
   state = apply(
     state,
     getLegalActions(state, "corp").find(

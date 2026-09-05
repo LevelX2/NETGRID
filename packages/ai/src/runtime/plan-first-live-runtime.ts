@@ -395,6 +395,10 @@ import {
 import { assessCorpScoreRushRisk } from "./corp-score-rush-risk";
 import { assessCorpExactIceRezAgainstScoreReserves } from "./corp-defense-score-reserve";
 import { corpRestrictedRezDefenseSignals } from "./corp-restricted-rez-defense";
+import {
+  currentCorpRestrictedCreditBanks,
+  corpRestrictedRezPreparationCandidates,
+} from "./corp-restricted-credit-reserve";
 import { runnerRunLockReleaseProjection } from "./runner-run-lock-release-score";
 import {
   assessRunnerRunFundingAdmission,
@@ -15655,6 +15659,19 @@ function buildCorpDomain(
       break;
     }
   }
+  const terminalRezReserveSignals = corpTerminalCentralRezReserveSignals(
+    input,
+    centralDefenseAllocation,
+  );
+  const terminalRezPreparations = terminalRezReserveSignals.flatMap((need) =>
+    need.targetIceInstanceId && need.rezReserveNeed
+      ? corpRestrictedRezPreparationCandidates(input, candidates, {
+          targetIceInstanceId: need.targetIceInstanceId,
+          targetServerId: need.serverId,
+          requiredRezCredits: need.rezReserveNeed.requiredCredits,
+        })
+      : [],
+  );
   const defenseDrawSignals: CorpDefenseSignal[] = candidates.flatMap(
     (candidate) => {
       if (defenseDrawAttemptConsumed) return [];
@@ -15669,6 +15686,7 @@ function buildCorpDomain(
         undefined,
         centralDefenseAllocation,
         selectedCentralDirectInstallRouteState,
+        terminalRezPreparations,
       );
       if (!need) return [];
       return [
@@ -15766,7 +15784,7 @@ function buildCorpDomain(
   const mergedDefenseNeeds: CorpCorePlanDomain["defenseNeeds"] =
     mergeDefenseSignals([
       ...corpResidentDelayedSuccessDefenseSignals(input),
-      ...corpTerminalCentralRezReserveSignals(input, centralDefenseAllocation),
+      ...terminalRezReserveSignals,
       ...candidates.flatMap((candidate): CorpDefenseSignal[] => {
         const postPassIceLifecycle = corpPostPassIceLifecycleDefenseSignal(
           input,
@@ -16363,6 +16381,7 @@ function buildCorpDomain(
     punishCampaigns,
     immediateFundingActionIds,
     terminalFundingActionIds,
+    candidates,
   );
   const operationThresholdPreparations =
     corpImmediateOperationThresholdPreparations(input, candidates);
@@ -16425,9 +16444,16 @@ function buildCorpDomain(
       );
       return {
         ...signal,
-        actionIds: fundingRouteAssessment.headActionId
-          ? [fundingRouteAssessment.headActionId]
-          : [],
+        actionIds: [
+          ...(fundingRouteAssessment.headActionId
+            ? [fundingRouteAssessment.headActionId]
+            : []),
+          ...(signal.kind === "parent_funding"
+            ? (signal.restrictedCreditPreparations ?? []).map(
+                (preparation) => preparation.actionId,
+              )
+            : []),
+        ],
         fundingRouteAssessment,
       };
     });
@@ -20685,6 +20711,7 @@ function corpRequiredEconomyNeeds(
   punishCampaigns: readonly CorpPunishCampaignSignal[],
   immediateFundingActionIds: string[],
   terminalFundingActionIds: string[],
+  candidates: readonly ActionSemanticCandidate[],
 ): CorpCorePlanDomain["economyNeeds"] {
   const projectsWithCurrentProtectionSupport = new Set(
     defenseNeeds.flatMap((need) =>
@@ -20742,6 +20769,7 @@ function corpRequiredEconomyNeeds(
     input,
     defenseNeeds,
     immediateFundingActionIds,
+    candidates,
   );
   const remoteFunding = remoteProjects.flatMap((project) => {
     const need = project.need;
@@ -20878,6 +20906,16 @@ function corpTerminalCentralRezReserveSignals(
     (candidate) => candidate.id === serverId,
   );
   if (!server) return [];
+  const storedRestrictedCredits = Math.max(
+    0,
+    ...currentCorpRestrictedCreditBanks(input)
+      .filter(
+        (bank) =>
+          bank.advancementCounters > 0 &&
+          bank.generalCreditsAvailable === input.playerView.own.credits,
+      )
+      .map((bank) => bank.creditsPerCounter),
+  );
   const reserveCandidate = server.ice
     .flatMap((ice) => {
       const quote = ice.effectiveRezCostQuote;
@@ -20897,7 +20935,8 @@ function corpTerminalCentralRezReserveSignals(
         quote.complete !== true ||
         quote.mandatoryAdditionalCosts.agendaPoints !== 0 ||
         !Number.isSafeInteger(quote.finalCredits) ||
-        quote.finalCredits <= input.playerView.own.credits
+        quote.finalCredits <=
+          input.playerView.own.credits + storedRestrictedCredits
       ) {
         return [];
       }
@@ -20905,7 +20944,10 @@ function corpTerminalCentralRezReserveSignals(
         {
           ice,
           requiredCredits: quote.finalCredits,
-          fundingGap: quote.finalCredits - input.playerView.own.credits,
+          fundingGap:
+            quote.finalCredits -
+            input.playerView.own.credits -
+            storedRestrictedCredits,
         },
       ];
     })
@@ -20931,6 +20973,7 @@ function corpTerminalCentralRezReserveSignals(
         currentCredits: input.playerView.own.credits,
         requiredCredits: reserveCandidate.requiredCredits,
         fundingGap: reserveCandidate.fundingGap,
+        ...(storedRestrictedCredits > 0 ? { storedRestrictedCredits } : {}),
       },
       value: 12,
       evidenceCode: `corp_terminal_central_rez_reserve_required:${serverId}:${reserveCandidate.ice.instanceId}:gap_${reserveCandidate.fundingGap}`,
@@ -20982,6 +21025,7 @@ function corpDefenseReserveNeeds(
   input: AiDecisionInput,
   defenseNeeds: readonly CorpDefenseSignal[],
   immediateFundingActionIds: string[],
+  candidates: readonly ActionSemanticCandidate[],
 ): CorpCorePlanDomain["economyNeeds"] {
   const priorityRank = { P2: 2, P3: 3, P5: 5, P6: 6 } as const;
   const productivePriorities = defenseNeeds.flatMap((need) =>
@@ -21037,7 +21081,9 @@ function corpDefenseReserveNeeds(
       installProjection?.after.minimumAdditionalCreditsToSatisfy ??
       reserve?.fundingGap;
     const targetCredits =
-      reserve?.requiredCredits ??
+      (reserve
+        ? reserve.requiredCredits - (reserve.storedRestrictedCredits ?? 0)
+        : undefined) ??
       (typeof gap === "number"
         ? input.playerView.own.credits + gap
         : undefined);
@@ -21053,12 +21099,22 @@ function corpDefenseReserveNeeds(
     ) {
       return [];
     }
+    const restrictedCreditPreparations = reserve
+      ? corpRestrictedRezPreparationCandidates(input, candidates, {
+          targetIceInstanceId: iceInstanceId,
+          targetServerId: need.serverId,
+          requiredRezCredits: reserve.requiredCredits,
+        })
+      : [];
     return [
       {
         kind: "parent_funding",
         needId: `defense-reserve:${need.serverId}:${iceInstanceId}`,
         gap,
         actionIds: immediateFundingActionIds,
+        ...(restrictedCreditPreparations.length > 0
+          ? { restrictedCreditPreparations }
+          : {}),
         immediateDefenseConversion: true,
         parentPlanInstanceId: planInstanceIdForProposal({
           moduleId: "corp.defend_servers",

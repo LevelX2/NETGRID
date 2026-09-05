@@ -1768,6 +1768,47 @@ function sanitizeVisibleCardWithOptions(
     includeCounterBankPreparationQuote && counterBankPreparationQuote
       ? sanitizeCorpCounterBankPreparationQuote(counterBankPreparationQuote)
       : undefined;
+  const restrictedBank = card.restrictedCreditBankQuote;
+  const sanitizedRestrictedBank =
+    options.allowCorpCounterBankPreparationQuote === true &&
+    options.expectedCorpCounterBankLocation === "installed_root" &&
+    card.known &&
+    card.rezzed === true &&
+    restrictedBank?.schemaVersion === "corp-restricted-credit-bank-v1" &&
+    restrictedBank.sourceCardInstanceId === card.instanceId &&
+    restrictedBank.serverId === options.expectedCorpCounterBankServerId &&
+    restrictedBank.expiresAtStateVersion ===
+      options.expectedCorpCounterBankStateVersion &&
+    restrictedBank.advancementCounters === card.advancementCounters &&
+    Number.isSafeInteger(restrictedBank.advancementCounters) &&
+    restrictedBank.advancementCounters >= 0 &&
+    Number.isSafeInteger(restrictedBank.creditsPerCounter) &&
+    restrictedBank.creditsPerCounter > 0 &&
+    Number.isSafeInteger(restrictedBank.generalCreditsAvailable) &&
+    restrictedBank.generalCreditsAvailable >= 0 &&
+    restrictedBank.payoutCounterCost === 1 &&
+    restrictedBank.payoutClickCost === 0 &&
+    restrictedBank.payoutGeneralCreditCost === 0 &&
+    restrictedBank.usableFor === "corp_install_or_rez" &&
+    restrictedBank.payoutCleanup === "end_of_turn" &&
+    restrictedBank.condition ===
+      "source_remains_installed_and_rezzed_at_paid_window"
+      ? {
+          schemaVersion: restrictedBank.schemaVersion,
+          sourceCardInstanceId: restrictedBank.sourceCardInstanceId,
+          serverId: restrictedBank.serverId,
+          expiresAtStateVersion: restrictedBank.expiresAtStateVersion,
+          advancementCounters: restrictedBank.advancementCounters,
+          creditsPerCounter: restrictedBank.creditsPerCounter,
+          generalCreditsAvailable: restrictedBank.generalCreditsAvailable,
+          payoutCounterCost: restrictedBank.payoutCounterCost,
+          payoutClickCost: restrictedBank.payoutClickCost,
+          payoutGeneralCreditCost: restrictedBank.payoutGeneralCreditCost,
+          usableFor: restrictedBank.usableFor,
+          payoutCleanup: restrictedBank.payoutCleanup,
+          condition: restrictedBank.condition,
+        }
+      : undefined;
   const sanitizedEffectiveRunQuote =
     card.known === true &&
     card.type === "ice" &&
@@ -1888,6 +1929,9 @@ function sanitizeVisibleCardWithOptions(
       ? {
           counterBankPreparationQuote: sanitizedCounterBankPreparationQuote,
         }
+      : {}),
+    ...(sanitizedRestrictedBank
+      ? { restrictedCreditBankQuote: sanitizedRestrictedBank }
       : {}),
   };
 }
