@@ -458,8 +458,11 @@ Der vollständige Build `output/windows-installer-language-persistence`
 hat 8111 aus `6d964c143` mit `sourceDirty: false` erzeugt. Alle Komponenten-
 Smokes, 27 Dialogvorschauen und der vollständige 10.901-Dateien-Audit sind
 grün; die Artefakthashes wurden unabhängig mit den Metadaten verglichen.
-Der gesonderte installierte Sprachtest für 8111 läuft nach dem erfolgreichen
-Ende der unveränderten 8106/8109-Matrix; sein Ergebnis liegt noch nicht vor.
+Der gesonderte installierte Sprachtest für 8111 ist am 2026-09-05 um
+22:45 Uhr einschließlich Cleanup erfolgreich beendet. Die drei installierten
+Folgeprogramme verwenden Französisch vor und nach ProductCode-Reparatur;
+die geschützte Runtimekonfiguration bleibt bytegleich. Das Ergebnis ist an
+die beiden 8111-Artefakthashes gebunden.
 Die im Testinput eingefrorene Scriptfassung prüft ausschließlich
 Sprachweitergabe und Reparatur, nicht die danach ergänzte Shortcutkorrektur.
 Der fest deutsche First-Run-Startmenüname wurde quellenbezogen durch drei
@@ -471,6 +474,20 @@ stehen noch aus; `-VerifyShortcuts` aktiviert diese zusätzlichen Prüfungen
 im gezielten Sprachtest. Die normale Setup-Spracherkennung bleibt erhalten;
 unmittelbare MSI-Aufrufe ohne Sprache und Registrierung folgen nun der
 englischen MSI-Paketsprache. Keine vollständige visuelle Sprachfreigabe.
+
+Der nachfolgende 8112-Build wurde vom tatsächlichen MSI-Audit abgewiesen:
+Windows PowerShell 5.1 las den UTF-8-Sprachkatalog ohne explizite Kodierung als
+ANSI, wodurch der französische Shortcutname beschädigt wurde. Explizites
+`-Encoding UTF8` behebt den Fehler am Katalogeingang; die tatsächliche
+Build-Anweisung wurde unter PowerShell 5.1 erfolgreich geprüft. Ein
+Strukturguard sichert die Kodierung, der unveränderte MSI-Audit verlangt
+weiter den exakten Katalogtext. Ein neuer vollständiger Build steht aus.
+
+Im echten 8111-Setup derselben Sandbox wurden deutsche native Tooltips per
+Tastatur am linken und rechten Bildschirmrand geprüft: vollständiger Text,
+mehrzeiliger Umbruch und Platzierung innerhalb des sichtbaren Bildschirms.
+Das ist ein nativer Tastatur-Popup-Nachweis, kein direkter Maus-Hover-Test
+und kein Ersatz für die noch offene reale DPI-/Sprach-Gesamtmatrix.
 
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.

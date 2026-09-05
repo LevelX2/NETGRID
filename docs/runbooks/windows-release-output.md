@@ -308,7 +308,8 @@ Skalierung über `Form.Scale` ersetzt keinen Test mit real geänderter
 Windows-DPI-Einstellung und entsprechend skalierten Schriften.
 
 Die drei lokalisierten First-Run-Startmenünamen stammen beim MSI-Build aus
-`first.title` derselben Sprachquelle. Bedingte, transitive MSI-Komponenten
+`first.title` derselben explizit als UTF-8 gelesenen Sprachquelle; dies ist
+auch unter Windows PowerShell 5.1 verbindlich. Bedingte, transitive MSI-Komponenten
 stellen genau die gewählte Verknüpfung bereit und entfernen bei einer
 ausdrücklichen Sprachänderung die vorherige. Die Namen sind im MSI literal
 gebunden: Die `Name`-Spalte der

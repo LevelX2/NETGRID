@@ -9,6 +9,10 @@ const catalog = JSON.parse(
   ),
 );
 const languages = ["de", "en", "fr"];
+const installerBuildSource = readFileSync(path.join(projectRoot, 'scripts/build-windows-installer.ps1'), 'utf8');
+// Windows PowerShell 5.1 otherwise reads this BOM-less UTF-8 catalog as ANSI.
+if (!/\$uiCatalog = Get-Content[^\r\n]*windows-ui-strings\.json[^\r\n]*-Encoding UTF8\b/.test(installerBuildSource))
+  throw new Error('windows_installer_catalog_utf8_required');
 const installerSource = readFileSync(path.join(projectRoot, 'installer/product/Product.wxs'), 'utf8');
 for (const [language, suffix] of [['de','De'], ['en','En'], ['fr','Fr']]) {
   if (!installerSource.includes(`Name="$(FirstRunTitle${suffix})"`) ||
