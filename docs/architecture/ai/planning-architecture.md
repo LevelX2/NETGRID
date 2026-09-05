@@ -2568,6 +2568,17 @@ validate_run_path
 Das Modul darf nicht bei jeder spielbaren Programminstallation wachsen. Es
 arbeitet auf eine konkrete Coverage- oder Rig-Fähigkeit hin.
 
+Eine exakt gebundene Upgrade-/Kosten-Recovery-Route bleibt an ihre gewählte
+Karteninstanz gebunden. Weitere Handkopien derselben Definition, die nur
+diesem Bedarf zugeordnet sind, erhalten eine ausdrückliche Zurückstellung
+beim Coverage-Owner; sie erzeugen weder einen zweiten generischen
+Entwicklungsplan noch eine Lücke in der LegalAction-Klassifikation. Lehnt ein
+exakt gebundener Zentraldruck-Parent seinen aktuellen Payoff mit einem Wert
+kleiner oder gleich null ab, bleibt auch seine Installation ausdrücklich
+zurückgestellt. Eine andere positive oder unabhängige Coverage-Bindung
+derselben Action bleibt davon unberührt. Diese Dispositionen ändern weder
+die gewählte Kopie noch Action-ID, Parent-/Need-Bindung oder Executor.
+
 Der gemeinsame Fact-Service `RunnerRigDemandProjection` bildet dafür
 ausschließlich vorhandene planlokale Bedarfe ab. Jeder Demand trägt Owner,
 Ursprung, Parent-/Need-Bindung, Horizont, Garantiegrad, Bedarfsart und

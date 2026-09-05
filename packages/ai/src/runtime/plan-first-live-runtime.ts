@@ -5595,6 +5595,40 @@ export function runnerActionDispositions(
     }),
   );
   for (const candidate of candidates) {
+    const boundCoverageInstallGaps =
+      candidate.semanticActionType === "install.card"
+        ? domain.coverageGaps.filter((gap) =>
+            gap.installActionIds?.includes(candidate.actionId),
+          )
+        : [];
+    if (
+      boundCoverageInstallGaps.length > 0 &&
+      boundCoverageInstallGaps.every(
+        (gap) =>
+          gap.requesterModuleId === "runner.pressure_central" &&
+          domain.centralPressure.some(
+            (parent) =>
+              parent.supportNeedId === gap.gapId &&
+              gap.requesterNeedId === gap.gapId &&
+              gap.requesterPlanInstanceId ===
+                planInstanceIdForProposal({
+                  moduleId: "runner.pressure_central",
+                  dedupeKey: parent.pressureId,
+                }) &&
+              parent.marginalValue <= 0,
+          ),
+      )
+    ) {
+      // A child cannot execute for a parent that currently rejects the payoff.
+      // Keep the exact installation diagnosed by its existing coverage owner;
+      // another positive or independent coverage need must remain eligible.
+      add(
+        candidate.actionId,
+        "runner.rig_and_coverage",
+        "runner_coverage_install_deferred_by_nonpositive_bound_parent",
+      );
+      continue;
+    }
     if (deferredCoveragePreparationInstallActionIds.has(candidate.actionId)) {
       add(
         candidate.actionId,
@@ -5715,6 +5749,47 @@ export function runnerActionDispositions(
     const cardDevelopmentOwnsActionRoute = cardDevelopmentAdmissions.some(
       ({ admission }) => admission.admitted,
     );
+    const alternativeToBoundCoverageCopy = cardDevelopmentAdmissions.some(
+      ({ development }) =>
+        development.assignedDomainPlanIds.length > 0 &&
+        development.assignedDomainPlanIds.every((planId) => {
+          const gap = coverageGapsByAssignedPlanId.get(planId);
+          return (
+            gap?.answerInHand === true &&
+            !gap.installActionIds?.includes(candidate.actionId) &&
+            gap.installActionIds?.some((actionId) => {
+              const bound = candidates.find(
+                (entry) => entry.actionId === actionId,
+              );
+              return (
+                bound?.semanticActionType === "install.card" &&
+                bound.sourceCardInstanceId !== candidate.sourceCardInstanceId &&
+                runnerCandidateSourceDefinitionId(input, bound) ===
+                  development.definitionId
+              );
+            }) === true
+          );
+        }),
+    );
+    if (
+      candidate.semanticActionType === "install.card" &&
+      alternativeToBoundCoverageCopy &&
+      !cardDevelopmentOwnsActionRoute &&
+      !coverageOwnedActionIds.has(candidate.actionId) &&
+      !delegatedFundingActionIds.has(candidate.actionId) &&
+      !terminalWinOwnedActionIds.has(candidate.actionId) &&
+      !runnerCandidateIsOptionalProgramTrashInstall(input, candidate)
+    ) {
+      // The coverage owner has already bound a concrete interchangeable copy.
+      // The other copy remains a deferred contribution to that same need, not
+      // a second generic development plan or an unclassified legal install.
+      add(
+        candidate.actionId,
+        "runner.rig_and_coverage",
+        "runner_coverage_install_alternative_to_bound_same_definition_answer",
+      );
+      continue;
+    }
     const unconcreteDevelopment = cardDevelopmentAdmissions.find(
       ({ admission }) => admission.reasonCode === "no_concrete_plan_purpose",
     );
@@ -17772,31 +17847,31 @@ function scoreProjectForCandidate(
                 ? `corp_last_draw_hq_agenda_recycle_install:${serverId ?? "unbound"}`
                 : deckoutAgendaFloodScoreWindow
                   ? `corp_deckout_agenda_flood_score_install:${serverId ?? "unbound"}`
-                : accessPunishingScoreDeceptionWindow
-                  ? `corp_access_punishing_agenda_deception_score_install:${serverId ?? "unbound"}`
-                  : !scoreActionSemanticsKnown
-                    ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:missing_action_semantics`
-                    : !developmentClickAvailable
-                      ? `corp_last_click_score_install_deferred:${serverId ?? "unbound"}`
-                      : protectionNeed?.baseline.knowledge === "unknown"
-                        ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:${protectionNeed.baseline.unknownReason}`
-                        : fundingGap !== undefined && fundingGap > 0
-                          ? `corp_score_protection_funding_gap:${serverId ?? "unbound"}:${fundingGap}`
-                          : remoteRequiresNearMatchpointMaturity
-                            ? `corp_near_matchpoint_remote_maturity_required:${serverId ?? "unbound"}`
-                            : lastViableDeckoutMatchpointWindow
-                              ? `corp_last_viable_deckout_matchpoint_install:${serverId ?? "unbound"}`
-                              : certifiedMatureRemoteScoreHorizon
-                                ? `corp_engine_certified_mature_remote_score_install:${serverId ?? "unbound"}`
-                                : boundedStagedScoreWindow
-                                  ? `corp_bounded_staged_score_install:${serverId ?? "unbound"}`
-                                  : !protectedScoreWindow
-                                    ? `corp_score_protection_required:${serverId ?? "unbound"}`
-                                    : !boundedScoreHorizon
-                                      ? `corp_score_horizon_unbounded:${serverId ?? "unbound"}`
-                                      : protectedScoreWindow
-                                        ? `corp_funded_protected_score_install:${serverId ?? "unbound"}`
-                                        : `corp_score_protection_required:${serverId ?? "unbound"}`,
+                  : accessPunishingScoreDeceptionWindow
+                    ? `corp_access_punishing_agenda_deception_score_install:${serverId ?? "unbound"}`
+                    : !scoreActionSemanticsKnown
+                      ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:missing_action_semantics`
+                      : !developmentClickAvailable
+                        ? `corp_last_click_score_install_deferred:${serverId ?? "unbound"}`
+                        : protectionNeed?.baseline.knowledge === "unknown"
+                          ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:${protectionNeed.baseline.unknownReason}`
+                          : fundingGap !== undefined && fundingGap > 0
+                            ? `corp_score_protection_funding_gap:${serverId ?? "unbound"}:${fundingGap}`
+                            : remoteRequiresNearMatchpointMaturity
+                              ? `corp_near_matchpoint_remote_maturity_required:${serverId ?? "unbound"}`
+                              : lastViableDeckoutMatchpointWindow
+                                ? `corp_last_viable_deckout_matchpoint_install:${serverId ?? "unbound"}`
+                                : certifiedMatureRemoteScoreHorizon
+                                  ? `corp_engine_certified_mature_remote_score_install:${serverId ?? "unbound"}`
+                                  : boundedStagedScoreWindow
+                                    ? `corp_bounded_staged_score_install:${serverId ?? "unbound"}`
+                                    : !protectedScoreWindow
+                                      ? `corp_score_protection_required:${serverId ?? "unbound"}`
+                                      : !boundedScoreHorizon
+                                        ? `corp_score_horizon_unbounded:${serverId ?? "unbound"}`
+                                        : protectedScoreWindow
+                                          ? `corp_funded_protected_score_install:${serverId ?? "unbound"}`
+                                          : `corp_score_protection_required:${serverId ?? "unbound"}`,
       },
     ];
   }
