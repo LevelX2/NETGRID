@@ -6120,7 +6120,8 @@ export function runnerActionDispositions(
   );
   for (const candidate of candidates) {
     if (
-      !runnerActionRequiresTargetedBypassPlan(candidate) ||
+      (!runnerActionRequiresTargetedBypassPlan(candidate) &&
+        !runnerActionRequiresTargetedIceTrashPlan(candidate)) ||
       centralPreparationActionIds.has(candidate.actionId) ||
       remotePreparationActionIds.has(candidate.actionId) ||
       dispositions.some(
@@ -6132,7 +6133,9 @@ export function runnerActionDispositions(
     add(
       candidate.actionId,
       "runner.pressure_central",
-      "runner_no_bound_targeted_bypass_route",
+      runnerActionRequiresTargetedIceTrashPlan(candidate)
+        ? "runner_no_bound_targeted_ice_trash_route"
+        : "runner_no_bound_targeted_bypass_route",
     );
   }
   const activeCentralRunActionIds = new Set(

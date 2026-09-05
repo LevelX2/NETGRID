@@ -999,6 +999,15 @@ fehlende beziehungsweise falsch geschnittene Planfamilie. Sie werden durch
 einen generischen Planvertrag geschlossen, nicht durch match-, karten- oder
 StateVersion-spezifische Freischaltungen.
 
+Für Runner-ICE-Sabotage umfasst dieser Vertrag sowohl Bypass als auch
+gezieltes Entfernen beziehungsweise erzwungenes Rez-oder-Trash. Bindet die
+bestehende Zentraldruck- oder Remote-Planung keine aktuelle Vorbereitungsroute,
+liefert der Zentraldruck-Owner die ausdrückliche Nichtproduktivitäts-Disposition
+für diese Action. Bereits gebundene Vorbereitungen behalten ihren jeweiligen
+Owner und werden nicht erneut disponiert. Die Disposition wählt weder ein
+anderes Ziel noch eine Ersatzaktion; die Choice bleibt an die gewählte Route
+gebunden.
+
 ### 9.6 `evaluateRoute`
 
 Vergleicht nur Routen, die denselben Step erfüllen oder eine fachlich
