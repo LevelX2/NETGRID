@@ -4666,7 +4666,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     ).toThrow(/Backup/);
   });
 
-  it("creates validated backups and restores them after a pre-restore backup", async () => {
+  it("creates validated backups and restores them after preserving the stopped target files", async () => {
     const dir = await tempStorageDir();
     const dbPath = join(dir, "netgrid.sqlite");
     const backupDir = join(dir, "backups");
@@ -4697,7 +4697,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       targetPath: dbPath,
       backupRootDir: backupDir,
     });
-    expect(restored.preRestoreBackupDir).toBeTruthy();
+    expect(restored.preRestoreSnapshotDir).toBeTruthy();
     const reopened = new SqliteMatchStorage({ dbPath, backupDir });
     expect(
       (await reopened.list()).map((record) => record.match.matchId),

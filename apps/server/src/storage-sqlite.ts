@@ -7,6 +7,7 @@ import {
   openSync,
   readFileSync,
   readSync,
+  renameSync,
   statSync,
   writeFileSync,
 } from "node:fs";
@@ -32,6 +33,7 @@ import {
   type StorageMaintenanceOwnDeckSnapshot,
 } from "./maintenance-own-deck-snapshot";
 import { SIDE_PAYLOAD_EVENT_TAIL_LIMIT } from "./multiplayer-payload";
+import { preserveStoppedSqliteTarget } from "./storage-restore-snapshot";
 
 export const SQLITE_STORAGE_SCHEMA_VERSION = 3;
 export const SQLITE_STORAGE_FORMAT = "netgrid_multiplayer_sqlite";
@@ -4375,7 +4377,7 @@ export function restoreSqliteStorageBackup(input: {
   backupDir: string;
   targetPath: string;
   backupRootDir: string;
-}): { preRestoreBackupDir?: string; restoredPath: string } {
+}): { preRestoreSnapshotDir?: string; restoredPath: string } {
   const manifestPath = join(input.backupDir, "manifest.json");
   if (!existsSync(manifestPath))
     throw new StorageError(
@@ -4415,20 +4417,28 @@ export function restoreSqliteStorageBackup(input: {
     );
   assertSqliteBackupUsable(join(input.backupDir, sqliteFile.name));
 
-  let preRestoreBackupDir: string | undefined;
-  if (existsSync(input.targetPath)) {
-    preRestoreBackupDir = createSqliteStorageBackup({
-      dbPath: input.targetPath,
-      backupDir: input.backupRootDir,
-      schemaVersion: SQLITE_STORAGE_SCHEMA_VERSION,
-      reason: "pre_restore",
-      source: "pre_restore_sqlite",
-    }).backupDir;
-  }
+  // Restore is an offline operation. Preserve the old files without opening
+  // the failed database: requiring a successful VACUUM would make a verified
+  // backup unusable precisely when the target database is corrupt.
+  const preserved = preserveStoppedSqliteTarget(
+    input.targetPath,
+    input.backupRootDir,
+  );
   mkdirSync(dirname(input.targetPath), { recursive: true });
-  copyFileSync(join(input.backupDir, sqliteFile.name), input.targetPath);
+  const stagedPath = `${input.targetPath}.restore-${randomBytes(12).toString("hex")}`;
+  copyFileSync(join(input.backupDir, sqliteFile.name), stagedPath);
+  if (sha256File(stagedPath) !== sqliteFile.sha256)
+    throw new StorageError(
+      "backup_checksum_mismatch",
+      "Die vorbereitete Wiederherstellung stimmt nicht mit dem Backup überein.",
+    );
+  assertSqliteBackupUsable(stagedPath);
+  preserved.discardPreservedSidecars();
+  renameSync(stagedPath, input.targetPath);
   return {
-    ...(preRestoreBackupDir ? { preRestoreBackupDir } : {}),
+    ...(preserved.snapshotDirectory
+      ? { preRestoreSnapshotDir: preserved.snapshotDirectory }
+      : {}),
     restoredPath: input.targetPath,
   };
 }

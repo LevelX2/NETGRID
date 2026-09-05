@@ -113,6 +113,18 @@ corepack pnpm storage:inspect
 Nach einem Restore müssen `integrity_check` und `foreign_key_check` grün sein.
 Ein Restore einzelner Accounttabellen ist kein unterstützter Betriebspfad.
 
+Restore ist ausschließlich bei gestopptem Server und geschlossenen SQLite-
+Verbindungen zulässig. Das zu ersetzende Ziel muss dabei nicht mehr als SQLite
+lesbar sein: Datenbank sowie vorhandene `-wal`, `-shm` und `-journal` werden
+zuerst bytegetreu und per SHA-256 nach
+`<Backupverzeichnis>/pre-restore-snapshots/<ID>/` gesichert. `snapshot.json`
+kennzeichnet diese Dateien ausdrücklich als ungeprüften Altbestand, nicht als
+validiertes Backup. Die CLI nennt den Pfad als `preRestoreSnapshotDir`.
+Erst nach Prüfung des ausgewählten Backups und der vorbereiteten Zieldatei
+werden die gesicherten alten Sidecars entfernt und die Datenbank ersetzt.
+Wurde der Altbestand währenddessen verändert, bricht Restore sichtbar ab.
+Diese Offline-Voraussetzung gilt auch für den Windows-Updater.
+
 Die Statistikmigration hebt SQLite auf Schema 3 an und erzeugt davor ein
 Pre-Migration-Backup. Der Restore-Probelauf muss zusätzlich bestätigen, dass
 Bindungs- und Ergebnisledger auf dem Sicherungsstand wiederhergestellt werden.
