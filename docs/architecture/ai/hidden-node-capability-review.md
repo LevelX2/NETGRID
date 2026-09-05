@@ -267,6 +267,13 @@ unverändert: Runner 8, Corp 5, 380 Actions, Replay gültig, keine Runtimefehler
 Das Ergebnis liegt vor der hier beschriebenen Wiederholungs-Erweiterung;
 vorbereitete Capability-Proben allein belegen keine höhere Spielstärke.
 
+Die anschließende Finite-Bank-Gegenprobe erzwingt keine Economy-Fortsetzung:
+Nach finanziertem Rockerboy-Rez wählt der produktive Chooser bei drei
+verbleibenden Klicks einen höher priorisierten Score-Defense-Draw. Die echte
+Bank-Auszahlung bleibt verfügbar. Dieses Ergebnis rechtfertigt keinen
+Override; es beweist auch keinen allgemeinen Fehler des Nutzungsplans.
+Rockerboy ist eine Mechanik-Gegenprobe außerhalb des Originaldecks.
+
 ## Bedingte Vorbereitung: Zonenwirkung vor Installationszahlen
 
 HN-C prüft den bestehenden Ambush-Owner, nicht einen neuen Kartenresolver.

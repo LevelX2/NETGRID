@@ -42,14 +42,14 @@ Unknown bleibt lokal. Heutiger Fortschritt und späterer Nutzen werden getrennt.
    ohne Verbraucher, mit unzulässigem Verwendungszweck und nach Verfall.
    Den ersten Verlustpunkt von Quote über Parent/Support bis zur produktiven
    Entscheidung nachweisen. Commit: fokussierter Reproduktionstest.
-2. **HN-G aktiv – nachgewiesene Fähigkeit vertikal schließen.** Fehlende Engine-
+2. **HN-G abgeschlossen – nachgewiesene Fähigkeit vertikal schließen.** Fehlende Engine-
    Quote/Semantik am erzeugenden Owner ergänzen, benötigte Economy-Route in
    bestehende Parent-/Need-/Head-/Linienverträge einbinden. Aktuelle Auszahlung
    und zweckgebundener Verbrauch, Ende des Supports und Reassessment nach
    Ablauf testen. Aufbau-/Wiederholungsfähigkeit mit allen Kosten bewerten;
    nicht die Existenz einer Auszahlung als vollständige Kampagne ausgeben.
    Keine Verhaltensänderung vor belegtem Owner und aktueller Bindung.
-3. **HN-H – Gegenvergleich und Integration.** Direkt betroffene Tests und
+3. **HN-H aktiv – Gegenvergleich und Integration.** Direkt betroffene Tests und
    bei geänderten Oberflächen deren Typ-/Strukturgates. Dieselben Original-
    Deck-/Seedkohorten gegen den bewahrten Basisstand vergleichen; Ergebnisse
    und noch fehlende Fähigkeiten transparent in der zentralen Registry sichern.
@@ -100,7 +100,7 @@ Abnahme; die Engine-Gegenprobe ist bereits auf das korrekte Ergebnis umgestellt.
   ungültige Poolwerte und angrenzende Boardpfade geprüft: 37 Engine-Tests,
   drei AI-Real-Engine-Tests grün; Engine-Strukturgate grün (379, keine Zyklen).
   Keine globale Änderung sämtlicher Zahlungen und keine neue KI-Policy.
-- **HN-G2 aktiv:** übrige aktuelle Zahlungsgegenproben und vollständige
+- **HN-G2 abgeschlossen:** übrige aktuelle Zahlungsgegenproben und vollständige
   zweck-/verfallgebundene Auszahlungsevidence am erzeugenden Engine-Owner.
   Anschließend Economy-Provider nur für exakt gebundene erlaubte aktuelle
   Verbraucher, Nichtausführung ohne nutzbaren Verbraucher und Rückgabe.
@@ -180,7 +180,7 @@ Abnahme; die Engine-Gegenprobe ist bereits auf das korrekte Ergebnis umgestellt.
   AI-/Engine-Typechecks grün.
   AI-Struktur/Reachability (659, keine Zyklen), Engine-Struktur (380, keine
   Zyklen), Paketgrenzen (1998) grün. Setup/Wiederholung bleibt offen.
-- **HN-G3 aktiv:** Setup/Wiederholung nur mit vollständigem Kosten- und
+- **HN-G3 abgeschlossen im belegten Umfang:** Setup/Wiederholung nur mit vollständigem Kosten- und
   Verbraucherhorizont; produktiver Chooser, Parent/Leaf, Invocation,
   Reassessment und deterministische Fortsetzung abnehmen.
   Abgeschlossener Teilschritt: Engine projiziert die bedingte Kapazität eines
@@ -206,4 +206,27 @@ Abnahme; die Engine-Gegenprobe ist bereits auf das korrekte Ergebnis umgestellt.
   grün. Kein vollständiger Shard-/Workspace-/Build-/E2E-Lauf.
   Die erste Contract-Installation und langfristige Amortisation sind damit
   nicht eingeführt; der bereits investierte Zustand ist explizite Voraussetzung.
-  Finite-Bank-Nutzung und die Abgrenzung weiterer ursprünglicher Lücken folgen.
+  Ergänzende produktive Gegenprobe nach finanziertem Rockerboy-Rez:
+  Bei drei verbleibenden Klicks unterbricht ein konkreter Score-Defense-Draw
+  die Economy-Nutzung. Die Bank-Auszahlung bleibt legal, wird aber nicht
+  gegen die höhere Priorität erzwungen. Dies ist kein bewiesener Nutzungsdefekt
+  und kein Grund für einen globalen Lifecycle-Override. 25 Real-Engine-Tests
+  grün. Rockerboy gehört nicht zur unveränderten Originalliste; hier endet
+  die notwendige Gegenprobe gegen unzulässige Support-Verbindlichkeit.
+  Erstinvestition und weitergehende unbekannte Verbraucher bleiben ausdrücklich
+  Grenzen, nicht implementierte Fähigkeiten und kein behaupteter Stärkengewinn.
+
+## HN-H: Vergleichsvertrag
+
+Zuerst die acht vorab bestimmten Pilot-Seeds, danach die vorhandene
+70er-Originalkohorte: 40 bekannte Krashkurs-Seeds sowie je zehn bisherige
+Holdout-Seeds gegen Krashkurs, R&D Express und Redline Riot. Originalliste
+und Deckhash bleiben identisch. Der neue Quellstand wird vor Laufstart
+committed; Runtime-/Replayfehler werden nicht als Niederlagen verwertet.
+Der alte Originalarm stammt aus der bewahrten Registry-Evidence. Frühere
+Varianten bleiben getrennte negative Experimente und werden nicht übernommen.
+Da der neue Stand bewiesene Engine-Legalitätsfehler korrigiert, ist der Vergleich
+ein End-to-End-Systemvergleich, keine isolierte Schätzung eines KI-Bewertungs-
+effekts bei unveränderten Regeln. Prepared-Fixtures und natürliche Spiele
+bleiben getrennt. Erst nach dem Lauf werden Verbesserungen/Nichtwirkungen
+und Restgrenzen aktualisiert.

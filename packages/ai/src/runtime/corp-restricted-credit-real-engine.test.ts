@@ -537,7 +537,7 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
     expect(funded.corpTemporaryInstallRezCredits?.remaining).toBe(3);
   });
 
-  it("selects a bound payout for an admitted economic consumer", () => {
+  it("selects a bound payout and permits a higher-priority interruption after the economic rez", () => {
     const state = preparedEconomyWindow();
     state.cardInstances[contractId(state)]!.advancementCounters = 2;
     const input = decisionInput(state);
@@ -608,14 +608,23 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
     expect(rezzed.cardInstances[contractId(state)]!.advancementCounters).toBe(
       1,
     );
-    // This step's acceptance ends at support hand-back and the actual rez milestone.
-    // Finite-bank withdrawal scheduling remains the following lifecycle acceptance.
-    const cashout = getLegalActions(rezzed, "corp").find(
+    const cashoutInput = decisionInput(rezzed);
+    const cashoutDecision = chooseCorpAction(cashoutInput);
+    const cashout = cashoutInput.legalActions.find(
+      (action) => action.actionId === cashoutDecision.actionId,
+    )!;
+    // Higher-priority score protection can interrupt the economy lifecycle;
+    // accepting the economic rez does not authorize overriding that need.
+    expect(cashout.type).toBe("draw_card");
+    expect(
+      cashoutDecision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+    ).toContain("corp.score_agenda");
+    const availablePayout = cashoutInput.legalActions.find(
       (action) =>
         action.source === rez.source &&
         action.type === "activated_card_ability",
     )!;
-    expect(apply(rezzed, cashout).corp.credits).toBe(3);
+    expect(apply(rezzed, availablePayout).corp.credits).toBe(3);
   });
 
   it("quotes a currently unaffordable economic root rez with mixed payment", () => {
