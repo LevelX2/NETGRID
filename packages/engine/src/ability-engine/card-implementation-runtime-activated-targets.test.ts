@@ -23,6 +23,56 @@ function binding(
 }
 
 describe("activatedAbilityPayload advancement semantics", () => {
+  it("publishes restricted grant facts without a general credit gain or future consumer", () => {
+    const ability: ActivatedCardAbilityImplementation = {
+      kind: "activated",
+      timing: "corp_paid",
+      costs: [{ kind: "advancement_counter", amount: 2, source: "source" }],
+      effects: [
+        {
+          kind: "gain_temporary_corp_credits",
+          recipient: "corp",
+          amount: 5,
+          usableFor: "install_or_rez",
+          cleanup: "end_of_turn",
+          visibility: "public",
+        },
+      ],
+    };
+    const payload = activatedAbilityPayload(
+      "arbitrary-source",
+      ability,
+      binding(ability),
+    );
+    expect(payload).toMatchObject({
+      cardId: "arbitrary-source",
+      cardImplementationEffectKind: "gain_temporary_corp_credits",
+      restrictedCreditGainAmount: 5,
+      restrictedCreditGainUsableFor: "corp_install_or_rez",
+      restrictedCreditGainCleanup: "end_of_turn",
+      restrictedCreditGainComplete: true,
+      cardImplementationAdvancementCounterCost: 2,
+    });
+    expect(payload.gainCreditsAmount).toBeUndefined();
+    expect(payload.targetCardId).toBeUndefined();
+    const compound = {
+      ...ability,
+      effects: [
+        ...ability.effects,
+        {
+          kind: "draw_cards" as const,
+          recipient: "corp" as const,
+          amount: 1,
+          visibility: "public" as const,
+        },
+      ],
+    };
+    expect(
+      activatedAbilityPayload("arbitrary-source", compound, binding(compound))
+        .restrictedCreditGainComplete,
+    ).toBeUndefined();
+  });
+
   it("publishes a deterministic controller draw for abstract action planning", () => {
     const ability: ActivatedCardAbilityImplementation = {
       kind: "activated",

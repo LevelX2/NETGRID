@@ -15,6 +15,7 @@ import { chooseCorpAction } from "../index";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInput } from "./ai-decision-input";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
+import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 
 const CONTRACT = "onr_proteus_059_government-contract";
 const WALL = "onr_v1_279_wall-of-static";
@@ -40,6 +41,22 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
         action.type === "activated_card_ability",
     );
     expect(payout).toBeDefined();
+    const projection = buildActionSemanticCandidates({
+      legalActions: [payout!],
+      observerSide: "corp",
+    })[0]?.economyProjection;
+    expect(projection).toMatchObject({
+      kind: "restricted_credit",
+      creditRestriction: "restricted",
+      reliability: "guaranteed",
+      restrictedCreditPayout: {
+        amount: 3,
+        usableFor: "corp_install_or_rez",
+        cleanup: "end_of_turn",
+        sourceAdvancementCounterCost: 1,
+      },
+    });
+    expect(projection?.netLiquidCreditGain).toBeUndefined();
     expect(hqInstall(state)).toBeUndefined();
     const funded = apply(state, payout!);
     expect(funded.corpTemporaryInstallRezCredits?.remaining).toBe(3);

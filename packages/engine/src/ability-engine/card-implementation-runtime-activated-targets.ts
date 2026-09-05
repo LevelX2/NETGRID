@@ -109,6 +109,19 @@ export function activatedAbilityPayload(
   const moveTopTrashEffect = moveTopTrashToGripEffect(ability);
   const exactEndRunEffect =
     ability.effects.length === 1 && ability.effects[0]?.kind === "end_run";
+  const restrictedCreditEffect =
+    ability.effects.length === 1 &&
+    ability.effects[0]?.kind === "gain_temporary_corp_credits"
+      ? ability.effects[0]
+      : undefined;
+  const exactRestrictedCreditEffect =
+    restrictedCreditEffect !== undefined &&
+    restrictedCreditEffect.recipient === "corp" &&
+    restrictedCreditEffect.usableFor === "install_or_rez" &&
+    restrictedCreditEffect.cleanup === "end_of_turn" &&
+    restrictedCreditEffect.visibility === "public" &&
+    Number.isSafeInteger(restrictedCreditEffect.amount) &&
+    restrictedCreditEffect.amount > 0;
   const totalImmediateCreditGain =
     hostedCreditTakeAmount +
     directCreditGain +
@@ -118,6 +131,15 @@ export function activatedAbilityPayload(
     cardImplementationAbility: "activated",
     ...activatedAbilityBindingPayload(binding),
     cardImplementationAbilityTiming: offeredTiming,
+    ...(exactRestrictedCreditEffect
+      ? {
+          cardImplementationEffectKind: "gain_temporary_corp_credits",
+          restrictedCreditGainAmount: restrictedCreditEffect.amount,
+          restrictedCreditGainUsableFor: "corp_install_or_rez",
+          restrictedCreditGainCleanup: "end_of_turn",
+          restrictedCreditGainComplete: true,
+        }
+      : {}),
     ...(ability.label ? { cardImplementationAbilityLabel: ability.label } : {}),
     ...(totalImmediateCreditGain > 0 ||
     advancementCounterCreditGain !== undefined

@@ -163,6 +163,12 @@ export type ActionEconomyProjection = {
   creditCost: number;
   grossLiquidCreditGain?: number;
   netLiquidCreditGain?: number;
+  restrictedCreditPayout?: {
+    amount: number;
+    usableFor: "corp_install_or_rez";
+    cleanup: "end_of_turn";
+    sourceAdvancementCounterCost: number;
+  };
   storedCreditsAdded?: number;
   storedCreditsTaken?: number;
   cardsDrawn: number;

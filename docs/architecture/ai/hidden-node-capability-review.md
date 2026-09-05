@@ -74,6 +74,14 @@ Creditverfügbarkeit. Zweckgebundene Credits bleiben für Installation und Rez
 erhalten; ein zusätzlicher allgemeiner Credit erlaubt weiterhin Advancement.
 37 betroffene Engine-Tests und drei Real-Engine-KI-Proben sind grün.
 
+Die Engine veröffentlicht für eine isolierte temporäre Install-/Rez-Auszahlung
+jetzt Betrag, Zweck und Zugendverfall auf der vorhandenen LegalAction.
+Der side-sichere Inputtransport und die Economy-Projektion erhalten diese
+Fakten als `restricted_credit` mit separatem `restrictedCreditPayout`;
+allgemeine Brutto-/Netto-Liquiditätsfelder bleiben leer. Unvollständige Angaben
+bleiben unbekannt, die bestehende Source-/Ability-Bindung bleibt verbindlich.
+Dies ist noch keine Auswahl- oder Kampagnenfähigkeit.
+
 Offen bleiben der KI-Owner mit exakt gebundenem aktuellem Verbraucher sowie
 Aufbau-/Wiederholungsrouten. Vor Aktivierung dieser Fähigkeit sind auch ihre
 übrigen Zahlungszwecke abzusichern. `run.approach_ice` bietet derzeit keine

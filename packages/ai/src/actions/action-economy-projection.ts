@@ -14,6 +14,7 @@ import {
   exactImmediateCreditGainAmount,
   isBasicCreditAction,
 } from "./action-effect-classification";
+import { corpRestrictedCreditProjection } from "./corp-restricted-credit-projection";
 
 export type RootRezCreditOutcomeProjectionStatus =
   | { status: "not_applicable" }
@@ -71,6 +72,8 @@ export function actionEconomyProjectionFor(
   candidate: ActionSemanticCandidate,
   action: LegalAction,
 ): ActionEconomyProjection {
+  const restrictedCredit = corpRestrictedCreditProjection(candidate, action);
+  if (restrictedCredit) return restrictedCredit;
   const rootRezOutcome = rootRezCreditOutcomeProjectionStatus(
     candidate,
     action,

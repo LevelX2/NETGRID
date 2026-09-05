@@ -103,6 +103,14 @@ Abnahme; die Engine-Gegenprobe ist bereits auf das korrekte Ergebnis umgestellt.
   zweck-/verfallgebundene Auszahlungsevidence am erzeugenden Engine-Owner.
   Anschließend Economy-Provider nur für exakt gebundene erlaubte aktuelle
   Verbraucher, Nichtausführung ohne nutzbaren Verbraucher und Rückgabe.
+  Erster abgeschlossener Teilschritt: isolierte temporäre Auszahlung am
+  Engine-Payloadproduzenten vollständig mit Betrag/Zweck/Verfall projiziert,
+  vier eng begrenzte LegalAction-DTO-Felder transportiert, vorhandene
+  Economy-Art `restricted_credit` befüllt. Kein allgemeiner Liquiditätswert,
+  keine andere Source-Bindung, keine behauptete Folgeaction, kein Bonus.
+  123 fokussierte AI- und 36 Engine-Tests, AI-/Engine-Typechecks sowie beide
+  Strukturgates einschließlich AI-Reachability grün.
+  Ownership-Charakterisierung bleibt absichtlich offen/fehlerbeweisend.
 - **HN-G3 offen:** Setup/Wiederholung nur mit vollständigem Kosten- und
   Verbraucherhorizont; produktiver Chooser, Parent/Leaf, Invocation,
   Reassessment und deterministische Fortsetzung abnehmen.
