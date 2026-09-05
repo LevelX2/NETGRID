@@ -5,6 +5,117 @@
   "analyzedAt": "2026-09-04",
   "guides": [
     {
+      "standardDeckId": "standard_corp_express_shutdown",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:01356c2e",
+      "sourceAnalysisHash": "deck-analysis:1b4ec27a",
+      "sourceAnalysisInputHash": "deck-analysis-input:6967d9ed",
+      "reviewedAt": "2026-09-05",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.tag_trace_punish",
+          "corp.ambush_bluff",
+          "corp.damage_kill"
+        ],
+        "secondaryStrategyIds": ["corp.remote_scoring", "corp.rush_score"],
+        "reviewStatus": "plausible"
+      },
+      "contentByLocale": {
+        "en": {
+          "summary": "Express Shutdown attacks fast central multiaccess through access damage and a complete tag-and-bag sequence during the Corp turn. Its primary finish is flatline; protected agenda scoring remains a secondary route.",
+          "deckIdea": "Retain a tag source and enough damage to exceed the Runner's current grip. Chance Observation follows an attempted run; Trojan Horse follows a stolen agenda. Scorched Earth plus Punitive Counterstrike delivers six meat damage for three credits after tagging. Fetal AI, Setup! and TRAP! make central accesses dangerous even when the Runner can break every ICE.",
+          "gamePlan": {
+            "opening": "Establish liquidity and affordable HQ/R&D protection. Misleading Access Menus and Snowbank provide one-time rez income; Quandary and Wall of Static buy early stopping windows.",
+            "midgame": "Keep the tag and damage components together, price the complete route and preserve its clicks. Use access damage to force recovery and create smaller lethal thresholds. Score Corporate War only with its twelve-credit threshold covered after advancement unless an immediate game win justifies otherwise.",
+            "endgame": "Execute the shortest complete lethal route in the Corp turn. If damage cannot finish, convert a protected agenda window; never wait for a tag after the Runner has already stolen the winning points."
+          },
+          "keyCards": [
+            {
+              "cardId": "onr_v1_302_scorched-earth",
+              "title": "Scorched Earth",
+              "role": "Four meat damage; combine with Punitive Counterstrike for six or a second copy for eight."
+            },
+            {
+              "cardId": "onr_v1_301_punitive-counterstrike",
+              "title": "Punitive Counterstrike",
+              "role": "A zero-credit two-damage component makes a finish against five cards affordable."
+            },
+            {
+              "cardId": "onr_v1_284_chance-observation",
+              "title": "Chance Observation",
+              "role": "Creates the tag through a trace during the Corp turn after the Runner attempted a run."
+            },
+            {
+              "cardId": "onr_v1_306_trojan-horse",
+              "title": "Trojan Horse",
+              "role": "A trace-free tag after an agenda was stolen during the previous Runner turn."
+            },
+            {
+              "cardId": "onr_v1_345_trap",
+              "title": "TRAP!",
+              "role": "Three net damage and a tag on access for four credits, including HQ and R&D."
+            }
+          ],
+          "pilotingTips": [
+            "Eight total credits and three actions fund Trojan Horse plus two Scorched Earth; Trojan Horse plus Scorched Earth plus Punitive Counterstrike needs five credits and deals six damage.",
+            "Count damage strictly above the current grip after visible prevention. Exactly five damage does not flatline five cards.",
+            "Do not spend a necessary kill click on an unrelated action or spend the reserved credits on an unnecessary rez. Open-Ended Mileage Program cannot be played in the Corp turn."
+          ],
+          "weaknesses": [
+            "The kill requires a trigger, multiple cards and enough credits at the same time; unplayed components are not automatically dead slots.",
+            "Twelve cheap ICE buy time but cannot lock out a developed rig. The seven three-point agendas still allow a fast steal victory.",
+            "Damage prevention, trace defense, large grips and avoiding the trigger can disrupt the plan. Matchup superiority is a test hypothesis, not a deck guarantee."
+          ]
+        },
+        "de": {
+          "summary": "Express Shutdown greift schnellen Zentral-Multiaccess mit Zugriffsschaden und einer vollständigen Tag-and-Bag-Folge im Corp-Zug an. Primärer Abschluss ist die Flatline; geschütztes Agenda-Scoring bleibt ein zweiter Weg.",
+          "deckIdea": "Halte eine Tagquelle und genug Schaden zusammen, um die aktuelle Runner-Hand zu übertreffen. Chance Observation folgt auf einen versuchten Run, Trojan Horse auf eine gestohlene Agenda. Scorched Earth und Punitive Counterstrike erzeugen nach dem Tag sechs Meat Damage für drei Credits. Fetal AI, Setup! und TRAP! machen Zentralzugriffe auch dann gefährlich, wenn der Runner jedes ICE brechen kann.",
+          "gamePlan": {
+            "opening": "Baue Liquidität und bezahlbaren HQ-/R&D-Schutz auf. Misleading Access Menus und Snowbank liefern einmaliges Rez-Einkommen; Quandary und Wall of Static kaufen frühe Stopfenster.",
+            "midgame": "Halte Tag- und Schadensbausteine zusammen und finanziere die gesamte Folge samt Aktionen. Zugriffsschaden erzwingt Erholung und senkt die tödliche Schadensschwelle. Score Corporate War mit zwölf verbliebenen Credits nach dem Advancement, außer ein unmittelbarer Spielsieg rechtfertigt die Ausnahme.",
+            "endgame": "Führe im Corp-Zug die kürzeste vollständige tödliche Folge aus. Ist der Schadensabschluss nicht erreichbar, nutze ein geschütztes Agenda-Fenster. Warte nicht auf einen Tag, nachdem der Runner bereits die Siegpunkte gestohlen hat."
+          },
+          "keyCards": [
+            {
+              "cardId": "onr_v1_302_scorched-earth",
+              "title": "Scorched Earth",
+              "role": "Vier Meat Damage; mit Punitive Counterstrike sechs, mit einer zweiten Kopie acht Schaden."
+            },
+            {
+              "cardId": "onr_v1_301_punitive-counterstrike",
+              "title": "Punitive Counterstrike",
+              "role": "Kostenloser Zwei-Schaden-Baustein für einen finanzierbaren Abschluss gegen eine volle Fünferhand."
+            },
+            {
+              "cardId": "onr_v1_284_chance-observation",
+              "title": "Chance Observation",
+              "role": "Erzeugt nach einem Run im Corp-Zug per Trace den Tag für die Schadensfolge."
+            },
+            {
+              "cardId": "onr_v1_306_trojan-horse",
+              "title": "Trojan Horse",
+              "role": "Tag ohne Trace nach einem Agenda-Diebstahl im vorherigen Runner-Zug."
+            },
+            {
+              "cardId": "onr_v1_345_trap",
+              "title": "TRAP!",
+              "role": "Drei Net Damage und ein Tag beim Zugriff für vier Credits, auch aus HQ und R&D."
+            }
+          ],
+          "pilotingTips": [
+            "Trojan Horse und zweimal Scorched Earth benötigen acht Credits und drei Aktionen. Trojan Horse, Scorched Earth und Punitive Counterstrike kosten fünf Credits und verursachen sechs Schaden.",
+            "Schaden muss die aktuelle Hand nach sichtbarer Prävention übertreffen. Genau fünf Schaden töten eine Fünferhand nicht.",
+            "Verbrauche keinen nötigen Kill-Klick für eine fremde Aktion und keine reservierten Credits für unnötiges Rez. Open-Ended Mileage Program ist im Corp-Zug nicht spielbar."
+          ],
+          "weaknesses": [
+            "Der Abschluss benötigt gleichzeitig einen Auslöser, mehrere Karten und ausreichend Credits. Zurückgehaltene Bausteine sind nicht automatisch tote Karten.",
+            "Zwölf günstige ICE kaufen Zeit, sperren ein fertiges Rig aber nicht dauerhaft aus. Sieben Drei-Punkte-Agenden erlauben weiterhin einen schnellen Steal-Sieg.",
+            "Schadensprävention, Trace-Abwehr, große Hände und das Vermeiden des Auslösers können den Plan stören. Überlegenheit im Matchup ist eine Testhypothese, keine Garantie."
+          ]
+        }
+      }
+    },
+    {
       "standardDeckId": "standard_corp_cheap_bag_tricks",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:ece21485",
@@ -5199,10 +5310,7 @@
           "corp.remote_scoring",
           "corp.fast_advance"
         ],
-        "secondaryStrategyIds": [
-          "corp.rush_score",
-          "corp.ambush_bluff"
-        ],
+        "secondaryStrategyIds": ["corp.rush_score", "corp.ambush_bluff"],
         "reviewStatus": "observe"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:df8d03ba",

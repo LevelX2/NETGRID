@@ -6,6 +6,89 @@
   "curatedAt": "2026-08-20",
   "decks": [
     {
+      "standardDeckId": "standard_corp_express_shutdown",
+      "version": "1.0.0",
+      "status": "active",
+      "name": "Express Shutdown",
+      "side": "corp",
+      "identityCardId": "corp_identity_001",
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
+      "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
+      "formatProfileVersion": "1.0.0",
+      "cards": [
+        {
+          "cardId": "onr_proteus_004_fetal-ai",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_196_corporate-war",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_212_priority-requisition",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_302_scorched-earth",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_301_punitive-counterstrike",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_284_chance-observation",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_306_trojan-horse",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_340_setup",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_345_trap",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_290_efficiency-experts",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_295_night-shift",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_281_accounts-receivable",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_261_quandary",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_279_wall-of-static",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_proteus_032_misleading-access-menus",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_proteus_038_snowbank",
+          "quantity": 3
+        }
+      ],
+      "source": {
+        "kind": "curated_local_deck",
+        "sourceDeckId": "local_corp_express_shutdown",
+        "sourceDeckVersion": "1.0.0-user-approved-rd-flatline-counter-2026-09-05"
+      }
+    },
+    {
       "standardDeckId": "standard_corp_cheap_bag_tricks",
       "version": "1.0.0",
       "status": "active",
