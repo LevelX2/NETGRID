@@ -6289,6 +6289,9 @@ export function runnerActionDispositions(
         candidate.semanticActionType !== "install.card" ||
         candidate.sourceDefinitionId !== signal.definitionId ||
         recurringEconomyInstallActionIds.has(candidate.actionId) ||
+        // A local income deferral cannot reject another exact purpose of
+        // the same hardware, such as the coverage owner's MU preparation.
+        coverageOwnedActionIds.has(candidate.actionId) ||
         dispositions.some(
           (disposition) => disposition.actionId === candidate.actionId,
         )

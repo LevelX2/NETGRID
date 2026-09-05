@@ -2579,6 +2579,12 @@ zurückgestellt. Eine andere positive oder unabhängige Coverage-Bindung
 derselben Action bleibt davon unberührt. Diese Dispositionen ändern weder
 die gewählte Kopie noch Action-ID, Parent-/Need-Bindung oder Executor.
 
+Eine lokale Economy-Zurückstellung von Mehrzweck-Hardware gilt nur für ihren
+Einkommenszweck. Eine bereits exakt gebundene Coverage- oder MU-Vorbereitung
+derselben Installation bleibt beim Coverage-Owner ausführbar. Andere,
+ungebundene Kopien bleiben zurückgestellt; echte globale Sicherheits- und
+Installationsausschlüsse werden dadurch nicht entfernt.
+
 Der gemeinsame Fact-Service `RunnerRigDemandProjection` bildet dafür
 ausschließlich vorhandene planlokale Bedarfe ab. Jeder Demand trägt Owner,
 Ursprung, Parent-/Need-Bindung, Horizont, Garantiegrad, Bedarfsart und
