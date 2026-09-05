@@ -276,7 +276,7 @@ ohne Entwicklungswerkzeuge.
 | GitHub-Updateauswahl und Integrität | Lokale API-Fixtures für Stable/Prerelease, Offline und manipulierte Hashes; echter Launcher-Download-Dateipfad nach reproduzierter Windows-Dateisperre korrigiert und getestet | Echter zustimmungsbasierter installierter Updatefluss; neue Artefakte mit Downloadfix |
 | Updatertransaktion und Rollback | Neuer echter Sandboxlauf 8105/8106 am 2026-09-05 grün: geprüftes Backup, MSI-Upgrade, bewusst beschädigte Testdatenbank, erkannter Healthfehler, Programmrollback auf 8105, Datenmarker und SQLite-Integrität wiederhergestellt, Konfiguration unverändert, Cleanup verifiziert | Transaktionsgate für dieses Artefaktpaar erfüllt; abschließende Benachrichtigung bleibt ein separater Dialogtest |
 | Benutzerbetrieb und Netzwerk | Standardbenutzerbetrieb und ACLs grün. Private-LAN-Test des installierten 8106: Web/Server vom Host erreichbar, Maintenance mit 403 abgewiesen; im öffentlichen Profil beide Ports bei weiterhin gesunden lokalen Diensten blockiert. Testinstallation, Ports und NETGRID-Regeln bereinigt; temporär deaktivierte pauschale Sandbox-Containerfreigabe wiederhergestellt | Für 8106 einschließlich dokumentierter Sandbox-Firewallvorbereitung erfüllt; neue Builds bleiben gesondert gebunden |
-| Sichtbare Flows | 27 Sprachauswahl-/Setup-/Uninstall-Renderings des sauberen 8111-Builds für de/en/fr und drei geometrische Skalierungen; Tooltip-Wortumbruch mit 36 Draw-Vorschauen und fokussierten Tests | Reale DPI-/Kontextprüfung und funktionale Gesamtflows einschließlich Update/Repair/Fehlern auf dem installierten Produkt; installierter Nachweis der Sprach- und Shortcutkorrektur |
+| Sichtbare Flows | 27 Sprachauswahl-/Setup-/Uninstall-Renderings des sauberen 8113-Builds; Tooltip-Wortumbruch mit 36 Draw-Vorschauen und nativen Tastatur-Popups, Setup-/Hilfesichtprüfung in de/en/fr; installierter 8113-Sprachtest samt Repair, fr → de → en, Austausch der Verknüpfungen und Cleanup am 2026-09-05 um 23:33 Uhr grün | Reale DPI-/Kontextprüfung und funktionale Gesamtflows einschließlich Update/Repair/Fehlern auf dem installierten Produkt; direkte Maus-Hover-Prüfung |
 | Saubere Windows-11-x64-Maschine | Vollständige 13-Punkte-Offline-MSI-Matrix am 2026-09-05 von 18:22 bis 18:55 Uhr einschließlich Cleanup grün: Windows 11 Enterprise x64 (26100), ohne Entwicklungswerkzeuge; alle vier Artefakthashes mit dem Hostnachweis abgeglichen | Lokaler Clean-Windows-MSI-Vertrag erfüllt. Zusätzliche Updater-, Standardbenutzer-, Netzwerk- und UI-Gates bleiben getrennt; der laufende Rollbacktest erweitert nicht rückwirkend diese Evidenz |
 
 Diese offenen Anforderungen werden nicht durch engere grüne Tests ersetzt.
@@ -518,6 +518,19 @@ der Registrierung. Der Test verwendet für die explizite Änderung nun
 ein Guard weist die fehlerhafte Kombination im Testhelfer vor jedem
 Prozessstart ab. Der erneute installierte Nachweis bleibt offen; der
 Fehlversuch ist kein Produktfreigabe-Nachweis.
+
+Der korrigierte Wiederholungslauf `1fe0d2624d20423ba0fd08d5a9a35ccf` ist
+am 2026-09-05 von 23:19 bis 23:33 Uhr vollständig grün. Die unveränderten,
+sauber commitgebundenen 8113-Artefakte bestehen französische Frischinstallation,
+ProductCode-Reparatur ohne neue Auswahl und die expliziten Wechsel nach
+Deutsch und Englisch. Alle drei installierten Folgeprogramme übernehmen
+jeweils die neue Sprache; genau die passende First-Run-Verknüpfung bleibt
+bestehen. Runtimekonfiguration und bestehende Auswahl bei Repair bleiben
+erhalten. Testinstallation, Datenordner, Startmenü und Registrierung sind
+geprüft entfernt. Der Nachweis liegt im Laufordner unter
+`language-1fe0d2624d20423ba0fd08d5a9a35ccf/result.json`; die älteren Ergebnisse
+liegen getrennt bei ihren jeweiligen Test-IDs. Kein GitHub-Upload und keine
+Main-Integration wurden vorgenommen.
 
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.
