@@ -23,6 +23,7 @@ import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 const CONTRACT = "onr_proteus_059_government-contract";
 const WALL = "onr_v1_279_wall-of-static";
 const CAMPAIGN = "onr_v1_337_rockerboy-promotion";
+const OPERATION = "onr_v1_302_scorched-earth";
 const CORP_DECK: DeckDefinition = {
   ...DEMO_DECKS.demo_corp_001,
   id: "restricted-credit-corp",
@@ -31,11 +32,32 @@ const CORP_DECK: DeckDefinition = {
     { id: CONTRACT, quantity: 1 },
     { id: WALL, quantity: 1 },
     { id: CAMPAIGN, quantity: 1 },
+    { id: OPERATION, quantity: 1 },
   ],
 };
 
 describe("Corp restricted install/rez credit real-Engine capability", () => {
   afterEach(resetResidentPlanPortfolioMemory);
+
+  it("does not offer a general-credit operation after the actual restricted payout", () => {
+    const state = preparedInstallWindow();
+    RealEngineFixtureBuilder.forState(state).withCorpCardInHq(OPERATION);
+    state.runner.tags = 1;
+    const payout = getLegalActions(state, "corp").find(
+      (action) => action.payload?.restrictedCreditGainComplete === true,
+    )!;
+    const funded = apply(state, payout);
+    const offeredOperation = (current: GameState) =>
+      getLegalActions(current, "corp").find(
+        (action) =>
+          action.type === "play_operation" &&
+          current.cardInstances[action.source]?.definitionId === OPERATION,
+      );
+    expect(offeredOperation(funded)).toBeUndefined();
+    funded.corp.credits += 3;
+    expect(offeredOperation(funded)).toBeDefined();
+    expect(funded.corpTemporaryInstallRezCredits?.remaining).toBe(3);
+  });
 
   it("selects a bound payout for an admitted economic consumer", () => {
     const state = preparedEconomyWindow();

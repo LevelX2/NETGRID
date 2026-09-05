@@ -344,7 +344,8 @@ export function buildCorpMainActions(
   assertFortCounterExposeImplementation(fortCounterExpose);
   if (
     state.corp.clicks >= fortCounterExpose.corpRemoveAbility.clicks &&
-    state.corp.credits >= fortCounterExpose.corpRemoveAbility.credits
+    corpGeneralCreditAvailability(state) >=
+      fortCounterExpose.corpRemoveAbility.credits
   ) {
     for (const server of state.corp.servers) {
       const count = spyCountersForServer(state, server.id);
@@ -373,7 +374,10 @@ export function buildCorpMainActions(
     }
   }
   actions.push(buildCorpGainCreditAction(state));
-  if (activeObligationCount(state) > 0 && state.corp.credits >= 12) {
+  if (
+    activeObligationCount(state) > 0 &&
+    corpGeneralCreditAvailability(state) >= 12
+  ) {
     actions.push(
       action(
         state,
@@ -392,7 +396,7 @@ export function buildCorpMainActions(
     );
   }
   if (state.corp.rd.length > 0) actions.push(buildCorpDrawAction(state));
-  if (state.runner.tags > 0 && state.corp.credits >= 2) {
+  if (state.runner.tags > 0 && corpGeneralCreditAvailability(state) >= 2) {
     for (const id of state.runner.rig.resources) {
       const hiddenResource = isConcealedRunnerResource(state, id);
       const resourceSlotId = hiddenResource
@@ -444,7 +448,7 @@ export function buildCorpMainActions(
       corpTrashAbility.kind !== "corp_trash_installed_runner_resource" ||
       corpTrashAbility.timing !== "corp_main" ||
       corpTrashAbility.target !== "source" ||
-      state.corp.credits < corpTrashAbility.cost.credits
+      corpGeneralCreditAvailability(state) < corpTrashAbility.cost.credits
     ) {
       continue;
     }
@@ -493,7 +497,7 @@ export function buildCorpMainActions(
     if (
       definition.type === "operation" &&
       operationMinimumPlayCost !== undefined &&
-      state.corp.credits >= operationMinimumPlayCost &&
+      corpGeneralCreditAvailability(state) >= operationMinimumPlayCost &&
       canPlayCorpOperation(state, definition)
     ) {
       const corpUtility = corpUtilityImplementationForDefinition(definition.id);

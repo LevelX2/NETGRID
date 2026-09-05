@@ -10,6 +10,7 @@ import type {
   Side,
 } from "@netgrid/shared";
 import type { ActiveNewDataFortCreationLock } from "../turn/corp-data-fort-lock";
+import { corpGeneralCreditAvailability } from "../payment/corp-general-credit-availability";
 import type { CardRunnerUtilityLongtailImplementation } from "../../ability-engine/definition-types";
 import {
   assertFortCounterExposeImplementation,
@@ -217,6 +218,13 @@ function resolveCorpRemoveSpyCounter(
     throw new Error(
       "Spy-Counter entfernen hat nicht mehr die festgelegten Kosten.",
     );
+  if (
+    corpGeneralCreditAvailability(state) <
+    implementation.corpRemoveAbility.credits
+  )
+    throw new Error(
+      "Spy-Counter entfernen benötigt ausreichend nicht zweckgebundene Credits.",
+    );
   host.actions.spendClicks(
     state,
     "corp",
@@ -311,7 +319,10 @@ function resolveCorpTrashNewDataFortCreationLockSource(
     creditCostForAction(legalAction) !== cost.credits
   )
     throw new Error("Die Lock-Quelle hat nicht die erwarteten Trash-Kosten.");
-  if (state.corp.clicks < cost.clicks || state.corp.credits < cost.credits)
+  if (
+    state.corp.clicks < cost.clicks ||
+    corpGeneralCreditAvailability(state) < cost.credits
+  )
     throw new Error("Die Korp kann die Trash-Kosten nicht bezahlen.");
   host.actions.spendClicks(state, "corp", cost.clicks);
   host.credits.spend(state, "corp", cost.credits);

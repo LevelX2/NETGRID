@@ -13,6 +13,7 @@ import {
   openRunnerCostPenaltySupportWindow,
 } from "../payment/runner-payment-support";
 import { fixedPlayCostCredits } from "../payment/play-cost";
+import { corpGeneralCreditAvailability } from "../payment/corp-general-credit-availability";
 import { restrictedHostedCredits } from "../run/run-duration-payment";
 import { definitionFor, mustInstance } from "../state/card-server-lookup";
 import {
@@ -257,6 +258,10 @@ function executePlayOperationAction(
         throw new Error("Das Operation-Ziel ist nicht mehr gueltig.");
     }
   }
+  if (corpGeneralCreditAvailability(host.state) < operationCreditCost)
+    throw new Error(
+      "Die Operation benötigt ausreichend nicht zweckgebundene Credits.",
+    );
   spendPlayClicks(host, "corp", legalAction.costs[0]?.clicks ?? 1);
   host.payment.spendCredits("corp", operationCreditCost);
   if (legalAction.payload?.cardId) {

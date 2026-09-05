@@ -164,6 +164,13 @@ Finite-Bank-Nutzungsplanung, Defense-/Score-Verbraucher sowie sämtliche
 anderen allgemeinen Zahlungswege. Ein globaler Spielstärkennachweis und
 erneuter Seedvergleich stehen weiterhin aus; keine Deckliste wird geändert.
 
+Die zusätzlich geprüften allgemeinen Corp-Main-Zahlungen (Resource-Trash,
+Operations einschließlich X-Kostengrenzen, Spy-Counter, Verpflichtungen und
+Data-Fort-Lock-Entfernung) nutzen bei Angebot und Ausführung dieselbe
+validierte freie Creditverfügbarkeit. Diese Beträge dürfen den eingeschlossenen
+Installations-/Rez-Pool nicht aufbrauchen. Das ersetzt keine pauschale
+Abnahme sämtlicher anderer Zahlungsfenster.
+
 Eine Erweiterung muss zuerst am Economy-Owner die Investitionsquote
 bereitstellen: Installationsklick, Advance-Klick und -Credit, Rez-Kosten,
 Counterbestand, erlaubtes Auszahlungsfenster und zeitlich gebundener

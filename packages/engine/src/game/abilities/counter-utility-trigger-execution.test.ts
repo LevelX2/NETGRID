@@ -123,6 +123,19 @@ describe("counter utility trigger execution", () => {
       [{ clicks: 1, credits: 4 }],
     );
 
+    state.corpTemporaryInstallRezCredits = {
+      sourceCardInstanceId: "contract",
+      sourceDefinitionId: "onr_proteus_059_government-contract",
+      remaining: 3,
+      usableFor: "corp_install_or_rez",
+      returnUnusedAtTurnEnd: true,
+    };
+    const beforeRestrictedAttempt = JSON.stringify(state);
+    expect(() =>
+      handleCounterUtilityTriggerExecution(testHost(state), action),
+    ).toThrow("nicht zweckgebundene Credits");
+    expect(JSON.stringify(state)).toBe(beforeRestrictedAttempt);
+    delete state.corpTemporaryInstallRezCredits;
     handleCounterUtilityTriggerExecution(
       testHost(state, {
         serverLabel: "R&D",
@@ -286,6 +299,27 @@ describe("counter utility trigger execution", () => {
       [{ clicks: 2, credits: 3 }],
     );
 
+    state.corpTemporaryInstallRezCredits = {
+      sourceCardInstanceId: "contract",
+      sourceDefinitionId: "onr_proteus_059_government-contract",
+      remaining: 3,
+      usableFor: "corp_install_or_rez",
+      returnUnusedAtTurnEnd: true,
+    };
+    const beforeReservedAttempt = JSON.stringify(state);
+    expect(() =>
+      handleCounterUtilityTriggerExecution(
+        testHost(state, {
+          dataFortLock: {
+            sourceDefinitionId: "lock_source_def",
+            modifier: { corpTrashSourceCost: { clicks: 2, credits: 3 } },
+          },
+        }),
+        action,
+      ),
+    ).toThrow("kann die Trash-Kosten nicht bezahlen");
+    expect(JSON.stringify(state)).toBe(beforeReservedAttempt);
+    delete state.corpTemporaryInstallRezCredits;
     handleCounterUtilityTriggerExecution(
       testHost(state, {
         dataFortLock: {

@@ -106,6 +106,10 @@ function trashResource(
 ): void {
   if (host.state.runner.tags <= 0)
     throw new Error("Der Runner ist nicht getaggt.");
+  if (corpGeneralCreditAvailability(host.state) < 2)
+    throw new Error(
+      "Resource-Trash benötigt zwei nicht zweckgebundene Credits.",
+    );
   const cardId = String(
     legalAction.payload?.resourceId ?? legalAction.payload?.cardId ?? "",
   );

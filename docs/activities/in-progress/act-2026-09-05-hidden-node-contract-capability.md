@@ -141,6 +141,19 @@ Abnahme; die Engine-Gegenprobe ist bereits auf das korrekte Ergebnis umgestellt.
   Payloadtests, AI-Typecheck, AI-Struktur/Reachability (658, keine Zyklen),
   Engine-Struktur (380, keine Zyklen), Paketgrenzen (1997) und Diff-Check.
   Kein vollständiger Shard-/Workspace-/Build-/E2E-Lauf für diesen Teilschritt.
+  Weitere bewiesene Zahlungsfehler: Standard-/kartenbezogener Resource-Trash,
+  Operations und Spy-Counter-Entfernung verbrauchten im isolierten
+  Ausführungstest den eingeschlossenen Installations-/Rez-Pool. Angebot und
+  Ausführung verwenden jetzt die gemeinsame validierte allgemeine
+  Creditverfügbarkeit. Gleichartige Verpflichtungs- und Data-Fort-Lock-
+  Zahlungen sind einschließlich Mischpool und Mutation-vor-Ablehnung geprüft.
+  Operation-X-Grenzen verwenden ebenfalls nur allgemeine Credits; Installations-
+  und Rez-Grenzen bleiben unverändert. Eine reale Contract-Auszahlung bietet
+  Scorched Earth mit nur reservierten Credits nicht an, mit drei zusätzlichen
+  allgemeinen Credits dagegen schon. 62 Tests über sieben direkt berührte
+  Engine-Dateien und zwölf Real-Engine-AI-Tests grün; Engine-Typecheck grün.
+  Andere Zahlungsfenster sind damit nicht pauschal als vollständig auditiert
+  erklärt. HN-G bleibt für die noch fehlende Fähigkeitenabnahme aktiv.
 - **HN-G3 offen:** Setup/Wiederholung nur mit vollständigem Kosten- und
   Verbraucherhorizont; produktiver Chooser, Parent/Leaf, Invocation,
   Reassessment und deterministische Fortsetzung abnehmen.

@@ -296,6 +296,28 @@ describe("board-state-action-execution", () => {
     ]);
   });
 
+  it("rejects general resource-trash payment before mutation when credits are reserved", () => {
+    const targetState = baseState();
+    targetState.corp.credits = 3;
+    targetState.corpTemporaryInstallRezCredits = {
+      sourceCardInstanceId: ADVANCED_CARD_ID,
+      sourceDefinitionId: ADVANCED_CARD_DEFINITION_ID,
+      remaining: 3,
+      usableFor: "corp_install_or_rez",
+      returnUnusedAtTurnEnd: true,
+    };
+    const calls: string[] = [];
+    const before = JSON.stringify(targetState);
+    expect(() =>
+      handleBoardStateActionExecution(
+        hostFor(targetState, calls),
+        legalAction("trash_resource", { resourceId: RESOURCE_ID }),
+      ),
+    ).toThrow("nicht zweckgebundene Credits");
+    expect(calls).toEqual([]);
+    expect(JSON.stringify(targetState)).toBe(before);
+  });
+
   it("moves a card to set aside with stable special-zone payload", () => {
     const targetState = baseState();
     targetState.cardInstances[RESOURCE_ID] = {
