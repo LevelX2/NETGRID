@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "use-intl/react";
 import {
+  AccountClientError,
   acceptAccountInvite,
   acceptAccountReset,
   changeAccountPassword,
@@ -45,6 +46,7 @@ export function useAccountSession() {
     profiles: [],
   });
   const [csrfToken, setCsrfToken] = useState("");
+  const [refreshVersion, setRefreshVersion] = useState(0);
 
   const becomeGuest = useCallback((error = "") => {
     setCsrfToken("");
@@ -59,50 +61,73 @@ export function useAccountSession() {
   }, []);
 
   useEffect(() => {
+    if (state.busy) return;
     let active = true;
-    void Promise.allSettled([
-      loadAccountAccessPolicy(),
-      restoreAccountSession(),
-    ]).then(async ([policyResult, sessionResult]) => {
-      if (!active) return;
-      const accessPolicy =
-        policyResult.status === "fulfilled" ? policyResult.value : null;
-      const profiles =
-        accessPolicy?.mode === "simple"
-          ? await loadLocalAccountProfiles()
-              .then((payload) => payload.profiles)
-              .catch(() => [])
-          : [];
-      if (!active) return;
-      if (sessionResult.status === "fulfilled") {
-        const payload = sessionResult.value;
-        if (!active) return;
-        setCsrfToken(payload.csrfToken);
-        setState({
-          status: "authenticated",
-          account: payload.account,
-          session: payload.session,
-          error: "",
+    let revision = 0;
+    const refresh = async () => {
+      const requestRevision = ++revision;
+      const isCurrent = () => active && requestRevision === revision;
+      try {
+        const [policyResult, sessionResult] = await Promise.allSettled([
+          loadAccountAccessPolicy(),
+          restoreAccountSession(),
+        ]);
+        if (!isCurrent()) return;
+        if (policyResult.status === "rejected") throw policyResult.reason;
+        if (
+          sessionResult.status === "rejected" &&
+          !(
+            sessionResult.reason instanceof AccountClientError &&
+            sessionResult.reason.status === 401
+          )
+        ) {
+          throw sessionResult.reason;
+        }
+        const accessPolicy = policyResult.value;
+        const profiles =
+          accessPolicy.mode === "simple"
+            ? (await loadLocalAccountProfiles()).profiles
+            : [];
+        if (!isCurrent()) return;
+        const payload =
+          sessionResult.status === "fulfilled" ? sessionResult.value : null;
+        setCsrfToken(payload?.csrfToken ?? "");
+        setState((current) => ({
+          status: payload ? "authenticated" : "guest",
+          account: payload?.account ?? null,
+          session: payload?.session ?? null,
+          // Preserve action feedback when refreshing after an operation.
+          error: current.error,
           busy: false,
           accessPolicy,
           profiles,
-        });
-      } else {
+        }));
+      } catch (error) {
+        if (!isCurrent()) return;
+        setCsrfToken("");
         setState({
           status: "guest",
           account: null,
           session: null,
-          error: "",
           busy: false,
-          accessPolicy,
-          profiles,
+          accessPolicy: null,
+          profiles: [],
+          error: error instanceof Error ? error.message : t("requestFailed"),
         });
       }
-    });
+    };
+    const onFocus = () => {
+      if (document.visibilityState === "visible") void refresh();
+    };
+    void refresh();
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
     return () => {
       active = false;
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
     };
-  }, [becomeGuest]);
+  }, [state.busy, refreshVersion, t]);
 
   const runSessionStart = useCallback(
     async (operation: () => ReturnType<typeof loginAccount>) => {
@@ -311,6 +336,10 @@ export function useAccountSession() {
   return {
     ...state,
     csrfToken,
+    retry: () => {
+      setState((current) => ({ ...current, error: "" }));
+      setRefreshVersion((current) => current + 1);
+    },
     login,
     registerProfile,
     selectProfile,

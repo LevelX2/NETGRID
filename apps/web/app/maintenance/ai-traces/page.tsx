@@ -22,7 +22,6 @@ import {
   mergeMaintenanceAiTraceIndex,
   mergeMaintenanceAiTraceMatches,
   modeLabel,
-  resolveMaintenanceServerHttp,
   safeStringList,
   statusLabel,
   type MaintenanceAiTraceDetail,
@@ -30,27 +29,14 @@ import {
   type MaintenanceAiTraceMatchEntry,
   type MaintenanceMatchDetail,
 } from "../../maintenance";
-import {
-  MaintenanceAuthBoundary,
-  MaintenanceSecurityControls,
-  useMaintenanceAuth,
-} from "../../maintenance-auth-ui";
+import { useMaintenanceSession } from "../../maintenance-auth-ui";
 import { formatAppDateTime } from "../../../i18n/format";
 import { normalizeAppLocale } from "../../../i18n/locale";
-
-const CONFIGURED_SERVER_HTTP =
-  process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
 
 export default function AiTraceMaintenancePage() {
   const t = useTranslations("Maintenance.aiTraces");
   const locale = normalizeAppLocale(useLocale());
-  const [serverHttp] = useState(() =>
-    resolveMaintenanceServerHttp(
-      CONFIGURED_SERVER_HTTP,
-      typeof window === "undefined" ? undefined : window.location.hostname,
-    ),
-  );
-  const auth = useMaintenanceAuth(serverHttp);
+  const auth = useMaintenanceSession();
   const [matches, setMatches] = useState<MaintenanceAiTraceMatchEntry[]>([]);
   const [selectedMatchId, setSelectedMatchId] = useState("");
   const [selectedMatchDetail, setSelectedMatchDetail] =
@@ -280,7 +266,7 @@ export default function AiTraceMaintenancePage() {
       setMatches((current) =>
         mergeMaintenanceAiTraceMatches(current, [payload.match!]),
       );
-      setNotice(t("tracingEnabled", { matchId: shortId(selectedMatchId) }));
+      setNotice(t("tracingEnabled", { matchId: selectedMatchId }));
       await Promise.allSettled([
         loadTraceMatches(payload.match),
         loadTraceIndex(selectedMatchId),
@@ -369,9 +355,6 @@ export default function AiTraceMaintenancePage() {
     };
   }, [selectedMatchId, liveFollow, followPaused, traceIndex, auth.status]);
 
-  if (auth.status !== "authenticated")
-    return <MaintenanceAuthBoundary auth={auth} title={t("m007")} />;
-
   return (
     <main style={pageShell}>
       <div style={page}>
@@ -383,10 +366,7 @@ export default function AiTraceMaintenancePage() {
               <p style={subtle}>{t("m009")}</p>
             </div>
           </div>
-          <MaintenanceSecurityControls auth={auth}>
-            <a href="/maintenance" style={linkButton}>
-              {t("m010")}
-            </a>
+          <div>
             <button
               type="button"
               style={button}
@@ -400,7 +380,7 @@ export default function AiTraceMaintenancePage() {
               )}
               {loading ? t("m011") : t("m012")}
             </button>
-          </MaintenanceSecurityControls>
+          </div>
         </header>
 
         {notice ? (
@@ -475,7 +455,7 @@ export default function AiTraceMaintenancePage() {
                   onClick={() => setSelectedMatchId(match.matchId)}
                 >
                   <span>
-                    <code>{shortId(match.matchId)}</code> ·{" "}
+                    <code>{match.matchId}</code> ·{" "}
                     {modeLabel(match.mode, locale)}
                   </span>
                   <strong>{match.traceCount}</strong>
@@ -498,7 +478,7 @@ export default function AiTraceMaintenancePage() {
                 <h2 style={h2}>{t("m018")}</h2>
                 <p style={subtle}>
                   {selectedMatchId
-                    ? `${shortId(selectedMatchId)} · ${selectedMatchDetail ? `${statusLabel(selectedMatchDetail.status, locale)} · ${modeLabel(selectedMatchDetail.mode, locale)}` : t("m019")}`
+                    ? `${selectedMatchId} · ${selectedMatchDetail ? `${statusLabel(selectedMatchDetail.status, locale)} · ${modeLabel(selectedMatchDetail.mode, locale)}` : t("m019")}`
                     : t("m020")}
                 </p>
               </div>
@@ -635,7 +615,7 @@ function AiTraceDetailView({ trace }: { trace: MaintenanceAiTraceDetail }) {
               : trace.eventId}
           </p>
         </div>
-        <code>{shortId(trace.traceId)}</code>
+        <code>{trace.traceId}</code>
       </div>
       <div style={detailGrid}>
         {aiTraceMetaRows(trace, locale).map(([label, value]) => (
@@ -829,31 +809,15 @@ function initialMatchId(): string {
   );
 }
 
-function shortId(value: string): string {
-  return value.length > 18 ? `${value.slice(0, 12)}…${value.slice(-4)}` : value;
-}
-
-const pageShell: CSSProperties = {
-  minHeight: "100vh",
-  background: "#eef3f8",
-  color: "#102033",
-  boxSizing: "border-box",
-};
-const page: CSSProperties = {
-  maxWidth: 1440,
-  margin: "0 auto",
-  padding: "1.25rem",
-  display: "grid",
-  gap: "1rem",
-  color: "#102033",
-};
+const pageShell: CSSProperties = { color: "var(--text)" };
+const page: CSSProperties = { display: "grid", gap: "1rem", minWidth: 0 };
 const header: CSSProperties = {
   display: "flex",
   justifyContent: "space-between",
   gap: "1rem",
   alignItems: "center",
   flexWrap: "wrap",
-  color: "#0f2538",
+  color: "var(--text)",
 };
 const headerTitle: CSSProperties = {
   display: "flex",
@@ -865,17 +829,17 @@ const h2: CSSProperties = {
   margin: 0,
   fontSize: "1rem",
   letterSpacing: 0,
-  color: "#0f2538",
+  color: "var(--text)",
 };
 const h3: CSSProperties = {
   margin: 0,
   fontSize: "0.95rem",
   letterSpacing: 0,
-  color: "#0f2538",
+  color: "var(--text)",
 };
 const subtle: CSSProperties = {
   margin: 0,
-  color: "#42576b",
+  color: "var(--muted)",
   fontSize: "0.92rem",
 };
 const button: CSSProperties = {
@@ -883,9 +847,9 @@ const button: CSSProperties = {
   alignItems: "center",
   justifyContent: "center",
   gap: "0.4rem",
-  border: "1px solid #9db0c3",
-  background: "#fff",
-  color: "#102033",
+  border: "1px solid var(--line)",
+  background: "var(--panel)",
+  color: "var(--text)",
   borderRadius: 6,
   padding: "0.5rem 0.7rem",
   cursor: "pointer",
@@ -904,16 +868,19 @@ const traceLayout: CSSProperties = {
   alignItems: "start",
 };
 const panel: CSSProperties = {
-  border: "1px solid #c7d4e2",
+  border: "1px solid var(--line)",
   borderRadius: 8,
   padding: "0.85rem",
-  background: "#fff",
+  background: "var(--panel)",
   display: "grid",
   gap: "0.75rem",
-  color: "#102033",
+  color: "var(--text)",
   minWidth: 0,
 };
-const detailPanel: CSSProperties = { ...panel, background: "#fbfdff" };
+const detailPanel: CSSProperties = {
+  ...panel,
+  background: "var(--panel-soft)",
+};
 const panelHeader: CSSProperties = {
   display: "flex",
   justifyContent: "space-between",
@@ -933,31 +900,31 @@ const traceItem: CSSProperties = {
   gridTemplateColumns: "1fr auto",
   gap: "0.2rem 0.75rem",
   textAlign: "left",
-  border: "1px solid #cbd8e6",
-  background: "#fff",
-  color: "#102033",
+  border: "1px solid var(--line)",
+  background: "var(--panel)",
+  color: "var(--text)",
   borderRadius: 6,
   padding: "0.55rem",
   cursor: "pointer",
 };
 const traceItemSelected: CSSProperties = {
   ...traceItem,
-  border: "1px solid #2f74b5",
-  background: "#eef6ff",
+  border: "1px solid var(--primary-bg)",
+  background: "var(--primary-bg)",
 };
 const errorBox: CSSProperties = {
   margin: 0,
-  border: "1px solid #f3b5b5",
-  background: "#fff5f5",
-  color: "#9b1c1c",
+  border: "1px solid var(--danger)",
+  background: "var(--status-danger-bg)",
+  color: "var(--danger)",
   borderRadius: 8,
   padding: "0.7rem",
 };
 const successBox: CSSProperties = {
   margin: 0,
-  border: "1px solid #9bc9b4",
-  background: "#f3fbf7",
-  color: "#155c3c",
+  border: "1px solid var(--ok)",
+  background: "var(--status-ok-bg)",
+  color: "var(--ok)",
   borderRadius: 8,
   padding: "0.7rem",
   fontSize: "0.9rem",
@@ -967,9 +934,9 @@ const successBox: CSSProperties = {
 };
 const infoBox: CSSProperties = {
   margin: 0,
-  border: "1px solid #9db0c3",
-  background: "#f6fbff",
-  color: "#153654",
+  border: "1px solid var(--line)",
+  background: "var(--panel-soft)",
+  color: "var(--primary-text)",
   borderRadius: 8,
   padding: "0.7rem",
   fontSize: "0.9rem",
@@ -979,15 +946,15 @@ const field: CSSProperties = {
   display: "grid",
   gap: "0.25rem",
   fontSize: "0.82rem",
-  color: "#42576b",
+  color: "var(--muted)",
 };
 const input: CSSProperties = {
   minHeight: 34,
-  border: "1px solid #9db0c3",
+  border: "1px solid var(--line)",
   borderRadius: 6,
   padding: "0.35rem 0.45rem",
-  background: "#fff",
-  color: "#102033",
+  background: "var(--panel)",
+  color: "var(--text)",
 };
 const jumpForm: CSSProperties = {
   display: "grid",
@@ -1001,34 +968,37 @@ const detailGrid: CSSProperties = {
   gap: "0.6rem",
 };
 const metric: CSSProperties = {
-  border: "1px solid #c7d4e2",
+  border: "1px solid var(--line)",
   borderRadius: 8,
   padding: "0.65rem",
-  background: "#fff",
+  background: "var(--panel)",
   display: "grid",
   gap: "0.25rem",
   minWidth: 0,
-  color: "#102033",
+  color: "var(--text)",
 };
-const metricLabel: CSSProperties = { color: "#42576b", fontSize: "0.8rem" };
+const metricLabel: CSSProperties = {
+  color: "var(--muted)",
+  fontSize: "0.8rem",
+};
 const metricValue: CSSProperties = {
   fontSize: "1rem",
   overflowWrap: "anywhere",
-  color: "#0f2538",
+  color: "var(--text)",
 };
 const miniRows: CSSProperties = { display: "grid", gap: "0.35rem" };
 const miniRow: CSSProperties = {
   display: "flex",
   justifyContent: "space-between",
   gap: "1rem",
-  borderBottom: "1px solid #edf1f5",
+  borderBottom: "1px solid var(--line)",
   padding: "0.2rem 0",
 };
 const traceDetails: CSSProperties = {
-  border: "1px solid #d7e1eb",
+  border: "1px solid var(--line)",
   borderRadius: 6,
   padding: "0.55rem",
-  background: "#fff",
+  background: "var(--panel)",
 };
 const traceSection: CSSProperties = { display: "grid", gap: "0.35rem" };
 const traceChips: CSSProperties = {
@@ -1038,12 +1008,12 @@ const traceChips: CSSProperties = {
 };
 const traceChipsCompact: CSSProperties = { ...traceChips, gap: "0.25rem" };
 const traceChip: CSSProperties = {
-  border: "1px solid #c7d4e2",
+  border: "1px solid var(--line)",
   borderRadius: 999,
   padding: "0.15rem 0.45rem",
-  background: "#f6f9fc",
+  background: "var(--panel-soft)",
   fontSize: "0.78rem",
-  color: "#24394d",
+  color: "var(--text)",
 };
 const traceCardGrid: CSSProperties = {
   display: "grid",
@@ -1054,16 +1024,16 @@ const traceCardGrid: CSSProperties = {
 const traceCard: CSSProperties = {
   display: "grid",
   gap: "0.35rem",
-  border: "1px solid #d7e1eb",
+  border: "1px solid var(--line)",
   borderRadius: 6,
   padding: "0.55rem",
-  background: "#fbfdff",
+  background: "var(--panel-soft)",
 };
 const traceActionCard: CSSProperties = { ...traceCard, minWidth: 0 };
 const traceActionCardSelected: CSSProperties = {
   ...traceActionCard,
-  border: "1px solid #2f74b5",
-  background: "#eef6ff",
+  border: "1px solid var(--primary-bg)",
+  background: "var(--primary-bg)",
 };
 const traceActionHeader: CSSProperties = {
   display: "flex",
@@ -1073,17 +1043,17 @@ const traceActionHeader: CSSProperties = {
   minWidth: 0,
 };
 const traceSelectedPill: CSSProperties = {
-  border: "1px solid #2f74b5",
+  border: "1px solid var(--primary-bg)",
   borderRadius: 999,
   padding: "0.1rem 0.45rem",
-  background: "#dcefff",
-  color: "#12466f",
+  background: "var(--primary-bg)",
+  color: "var(--primary-text)",
   fontSize: "0.74rem",
   fontWeight: 700,
 };
 const traceMutedPill: CSSProperties = {
   ...traceSelectedPill,
-  border: "1px solid #c7d4e2",
-  background: "#f6f9fc",
-  color: "#42576b",
+  border: "1px solid var(--line)",
+  background: "var(--panel-soft)",
+  color: "var(--muted)",
 };

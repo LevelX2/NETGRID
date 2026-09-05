@@ -25,8 +25,10 @@ describe("SQLite maintenance match sizes", () => {
     });
     const database = new DatabaseSync(dbPath);
     try {
-      const largeEnginePayload = "engine-event-payload".repeat(8_000);
-      const largeTracePayload = "ai-decision-trace-payload".repeat(8_000);
+      const largeEnginePayload = "engine-event-payload Grüße 🃏".repeat(8_000);
+      const largeTracePayload = "ai-decision-trace-payload Größe 🃏".repeat(
+        8_000,
+      );
       database
         .prepare(
           "INSERT INTO engine_events (match_id, event_id, event_index, event_json) VALUES (?, ?, ?, ?)",
@@ -93,9 +95,17 @@ describe("SQLite maintenance match sizes", () => {
           created.matchId,
         ) as Record<string, number>;
       expect(entry).toBeDefined();
-      expect(entry!.sizes.engineEventBytes).toBe(stored.engineEventBytes);
+      const engineBytes = (
+        database
+          .prepare("SELECT event_json FROM engine_events WHERE match_id = ?")
+          .all(created.matchId) as Array<{ event_json: string }>
+      ).reduce((sum, row) => sum + Buffer.byteLength(row.event_json), 0);
+      expect(entry!.sizes.engineEventBytes).toBe(engineBytes);
+      expect(entry!.sizes.engineEventBytes).toBeGreaterThan(
+        stored.engineEventBytes!,
+      );
       expect(entry!.sizes.aiDecisionTraceBytes).toBe(
-        stored.aiDecisionTraceBytes,
+        Buffer.byteLength(largeTracePayload),
       );
       expect(entry!.sizes.pendingUndoBytes).toBe(stored.pendingUndoBytes);
       expect(entry!.sizes.startLobbyBytes).toBe(stored.startLobbyBytes);
@@ -104,6 +114,17 @@ describe("SQLite maintenance match sizes", () => {
           .filter(([key]) => key !== "approximateTotalBytes")
           .reduce((sum, [, value]) => sum + value, 0),
       );
+      const summary = await storage.maintenanceSummary();
+      expect(summary.matchCount).toBe(1);
+      expect(summary.largestMatches[0]!.sizes).toEqual(entry!.sizes);
+      expect(
+        summary.tableSizes.find((table) => table.key === "engine_events")!
+          .approximatePayloadBytes,
+      ).toBe(engineBytes);
+      expect(
+        summary.tableSizes.find((table) => table.key === "ai_decision_traces")!
+          .approximatePayloadBytes,
+      ).toBe(Buffer.byteLength(largeTracePayload));
     } finally {
       database.close();
       matches.closeStorage();

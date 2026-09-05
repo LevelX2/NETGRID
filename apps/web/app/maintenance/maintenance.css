@@ -1,0 +1,104 @@
+.maintenanceShell {
+  min-height: 100vh;
+  background: var(--bg-gradient);
+  color: var(--text);
+}
+.maintenanceTopbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px 24px;
+  padding: 16px max(20px, calc((100vw - 1400px) / 2));
+  border-bottom: 1px solid var(--line);
+  background: var(--topbar-bg);
+}
+.maintenanceBrand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--text);
+  font-size: 1.15rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+.maintenanceTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 1;
+}
+.maintenanceTabs a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 12px;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  color: var(--muted);
+  text-decoration: none;
+}
+.maintenanceTabs a:hover {
+  background: var(--button-hover-bg);
+  color: var(--text);
+}
+.maintenanceTabs a[aria-current="page"] {
+  background: var(--primary-bg);
+  color: var(--primary-text);
+  border-color: var(--primary-border);
+}
+.maintenanceContent {
+  overflow-wrap: anywhere;
+  max-width: 1440px;
+  margin: auto;
+  padding: 24px 20px;
+}
+.maintenanceContent code {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.maintenanceShell input,
+.maintenanceShell select,
+.maintenanceShell textarea {
+  color: var(--text);
+  background: var(--field-bg);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+.maintenanceShell :focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+.maintenanceShell button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+@media (max-width: 700px) {
+  .maintenanceTopbar {
+    position: relative;
+    gap: 12px;
+    padding: 14px;
+  }
+  .maintenanceTabs {
+    order: 3;
+    flex-basis: 100%;
+  }
+  .maintenanceContent {
+    padding: 18px 12px;
+  }
+}
+.maintenanceBuildStatus {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 24px;
+  padding: 10px max(20px, calc((100vw - 1400px) / 2));
+  color: var(--muted);
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  font-size: 0.78rem;
+}
+.maintenanceBuildDifference {
+  color: var(--cue);
+}

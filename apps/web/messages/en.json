@@ -38,7 +38,7 @@
       "changing": "Changing …",
       "signOut": "Sign out",
       "close": "Close",
-      "confirmPassword": "Confirm password",
+      "confirmPassword": "Confirm Maintenance password",
       "cancel": "Cancel",
       "checkingPassword": "Checking …",
       "confirm": "Confirm",
@@ -315,6 +315,7 @@
   },
   "Account": {
     "panel": {
+      "retry": "Reload",
       "loading": "Checking account session …",
       "signedIn": "Signed-in account",
       "admin": "Admin",

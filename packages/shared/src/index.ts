@@ -6796,3 +6796,8 @@ export type AiDecision = AiDecisionBase &
         selectedChoices?: never;
       }
   );
+export {
+  NETGRID_PRODUCT_VERSION,
+  isServerBuildInfo,
+  type ServerBuildInfo,
+} from "./product-version";

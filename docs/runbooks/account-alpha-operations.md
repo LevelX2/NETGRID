@@ -1,6 +1,6 @@
 # Account-Alpha betreiben
 
-Stand: 2026-09-04
+Stand: 2026-09-05
 
 ## Voraussetzungen
 
@@ -44,6 +44,35 @@ Spielhistorie bleiben erhalten.
 
 Der installierbare Releaseoutput setzt `simple` als Ausgangswert. Das normale
 Startskript setzt die Variable nicht und bleibt dadurch bei `invite_only`.
+
+### Namen, Moduswechsel und Rückmeldung
+
+`displayName` ist der im Spiel gezeigte Name; `loginName` ist der eindeutige
+Anmeldename für die Passwortanmeldung. Beide bleiben beim Moduswechsel
+unverändert und werden in der Maintenance nebeneinander angezeigt. Im
+einfachen Modus angelegte Profile erhalten derzeit einen automatisch
+erzeugten `local_…`-Anmeldenamen; beim späteren Wechsel zu `protected` ist
+genau dieser in der Maintenance sichtbare Name zu verwenden.
+Das Maintenance-Passwort ist unabhängig von allen Spielerpasswörtern.
+
+Die Maintenance bietet aus `invite_only` beide lokalen Zielmodi an. Für
+`protected` werden ausschließlich aktive Profile mit Passwörtern übermittelt;
+offene Einladungen beziehungsweise deaktivierte Profile zählen nicht dazu.
+Der Client prüft 15 bis 256 Unicode-Zeichen vor der Maintenance-Bestätigung.
+Der Account-Service prüft alle Passwörter einschließlich Sperrliste vor der
+Hashberechnung und dem atomaren Schreiben. Ein ungültiges Passwort darf
+weder den Modus noch bestehende Passwörter oder Sitzungen verändern.
+Die Oberfläche meldet den Wechsel erst nach dem erneuten Lesen des
+gespeicherten Modus als erfolgreich und zeigt bei Ablehnung den konkreten
+Fehler. Die Spielseite liest Richtlinie und Sitzung bei Fokus-/Sichtbarkeits-
+Rückkehr sowie nach Accountoperationen erneut; widerrufene Sitzungen und
+die Profilauswahl bleiben dadurch nicht auf einem alten Stand. Ladefehler
+werden mit einer Wiederholungsmöglichkeit angezeigt.
+
+Fokussierte Nachweise: `apps/server/src/account-local-access.test.ts`
+(SQLite, normale Passwortberechnung, Namen, atomare Ablehnung, Persistenz
+und Sitzungswiderruf) und `tests/e2e/maintenance-accounts.spec.ts`
+(Firefox-Oberflächenabläufe mit isolierten API-Antworten).
 
 ## Ersten Admin lokal anlegen
 

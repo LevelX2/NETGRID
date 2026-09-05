@@ -1,6 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { createHash } from "node:crypto";
 import type { StorageHealth } from "./storage-sqlite";
+import { SERVER_BUILD_INFO } from "./server-build-info";
 
 export const LOCAL_DEFAULT_TOKEN_SALT = "local-dev-netgrid-token-salt";
 export const LOCAL_DEFAULT_WEB_BASE_URL = "http://127.0.0.1:3100";
@@ -415,7 +416,8 @@ export function redactedHealth(
   return {
     ok: true,
     service: "netgrid-multiplayer",
-    release: "V1.0.9",
+    release: `V${SERVER_BUILD_INFO.productVersion}`,
+    build: SERVER_BUILD_INFO,
     profile: config.profile,
     runtime: { mode: config.runtimeMode },
     realtime: { webSocketPath: "/ws", ready: true },

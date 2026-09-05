@@ -38,7 +38,7 @@
       "changing": "Modification …",
       "signOut": "Se déconnecter",
       "close": "Fermer",
-      "confirmPassword": "Confirmer le mot de passe",
+      "confirmPassword": "Confirmer le mot de passe Maintenance",
       "cancel": "Annuler",
       "checkingPassword": "Vérification …",
       "confirm": "Confirmer",
@@ -315,6 +315,7 @@
   },
   "Account": {
     "panel": {
+      "retry": "Recharger",
       "loading": "Session de compte courant…",
       "signedIn": "Compte connecté",
       "admin": "Administrateur",

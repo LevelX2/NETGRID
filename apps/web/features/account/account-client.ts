@@ -30,7 +30,7 @@ export type AccountAccessMode = "invite_only" | "simple" | "protected";
 
 export type AccountAccessPolicy = {
   mode: AccountAccessMode;
-  source: "configured" | "persisted";
+  source: "configured_default" | "persisted";
   selfServiceEnabled: boolean;
 };
 

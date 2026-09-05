@@ -4,13 +4,13 @@ import deMaintenanceMessages from "../../../messages/maintenance/de.json";
 
 const pageSource = readFileSync(new URL("./page.tsx", import.meta.url), "utf8");
 const maintenanceSource = readFileSync(
-  new URL("../page.tsx", import.meta.url),
+  new URL("../layout.tsx", import.meta.url),
   "utf8",
 );
 
 describe("IMG08 card image maintenance page contract", () => {
   it("is linked from maintenance and uses the protected card image endpoints", () => {
-    expect(maintenanceSource).toContain('href="/maintenance/card-images"');
+    expect(maintenanceSource).toContain('href: "/maintenance/card-images"');
     expect(pageSource).toContain(
       "/api/storage/maintenance/card-images/imports/preview",
     );
