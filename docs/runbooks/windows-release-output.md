@@ -322,6 +322,12 @@ vorhandene Registrierung die englische MSI-Paketsprache. Die
 Windows-Spracherkennung des Setup-Assistenten bleibt davon unverändert.
 Der gezielte Sandbox-Sprachtest prüft mit `-VerifyShortcuts` zusätzlich alle
 drei Namen, Reparatur und die Entfernung der zuvor gewählten Verknüpfung.
+Die bestehende Präferenz wird mit `/fa ProductCode` repariert. Eine neue
+Auswahl verwendet dagegen `/i ProductCode REINSTALL=ALL REINSTALLMODE=amus`
+mit `NETGRID_UI_LANGUAGE`: Die
+[`/f`-Reparaturoption](https://learn.microsoft.com/en-us/windows/win32/msi/command-line-options)
+ignoriert Kommandozeileneigenschaften und kann deshalb keine neue Sprache
+übernehmen.
 
 Beim Update ist allein die vom Installer gespeicherte Zeichenfolge
 `DesktopShortcutPreference` (`0` oder `1`) maßgeblich. Ein fehlender oder

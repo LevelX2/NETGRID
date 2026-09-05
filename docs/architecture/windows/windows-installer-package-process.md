@@ -495,6 +495,30 @@ mehrzeiliger Umbruch und Platzierung innerhalb des sichtbaren Bildschirms.
 Das ist ein nativer Tastatur-Popup-Nachweis, kein direkter Maus-Hover-Test
 und kein Ersatz für die noch offene reale DPI-/Sprach-Gesamtmatrix.
 
+Im echten 8113-Setup wurden zusätzlich die französische und englische
+Sprachauswahl, empfohlene und benutzerdefinierte Setupmaske, der native
+Tastatur-Tooltip der benutzerdefinierten Installation und der angeklickte
+Maintenance-Hilfedialog geprüft. Texte sind vollständig sichtbar und brechen
+mehrzeilig um; die Sprachauswahl stellt die Aktionsbeschriftungen unmittelbar
+um. Beide eigenen Reviewprozesse wurden ohne Installationsaktion geschlossen.
+Die vorhandene Sandbox stellt in ihren Systemeinstellungen keine
+Anzeige-/Skalierungsseite bereit; der Desktop-Eintrag „Anzeigeeinstellungen“
+führt zur Startseite. Die Systemeinstellungsseite beginnt mit „Sound“.
+Eine echte 100-/125-/150-Prozent-Abnahme ist dadurch hier noch nicht belegt.
+Es wurden keine Anzeige-, Sicherheits- oder Hosteinstellungen verändert.
+
+Der installierte 8113-Sprachtest `288854b6c7484f5d970a07780dcbf61d` endete
+um 23:17 Uhr rot, mit erfolgreichem Cleanup. Französisch und ProductCode-
+Reparatur bestanden. Der anschließende Testaufruf `/fa ProductCode
+NETGRID_UI_LANGUAGE=de` war jedoch ungültig für eine neue Auswahl: `/f`
+ignoriert laut Microsoft Kommandozeileneigenschaften. Das reale MSI-Log
+bestätigt die fehlende Übergabe und das korrekte erneute Lesen von `fr` aus
+der Registrierung. Der Test verwendet für die explizite Änderung nun
+`/i ProductCode REINSTALL=ALL REINSTALLMODE=amus NETGRID_UI_LANGUAGE=...`;
+ein Guard weist die fehlerhafte Kombination im Testhelfer vor jedem
+Prozessstart ab. Der erneute installierte Nachweis bleibt offen; der
+Fehlversuch ist kein Produktfreigabe-Nachweis.
+
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.
 Die erste Public-Prüfung war wegen der pauschalen, aktiven Sandbox-Regel

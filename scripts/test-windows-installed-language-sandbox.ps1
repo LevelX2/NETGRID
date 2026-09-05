@@ -33,6 +33,7 @@ function Quote { param([string]$Value) '"'+$Value.Replace('"','""')+'"' }
 function Assert-True { param([bool]$Value,[string]$Code) if(-not $Value){throw $Code} }
 function Invoke-Msi {
   param([string[]]$Arguments,[int[]]$Expected=@(0,3010))
+  if($Arguments[0] -match '^/f' -and @($Arguments | Where-Object { $_ -match '^NETGRID_' }).Count){throw 'language_probe_repair_properties_ignored'}
   $process=Start-Process -FilePath msiexec.exe -ArgumentList $Arguments -PassThru -Wait -WindowStyle Hidden
   Assert-True ($process.ExitCode -in $Expected) "language_probe_msi_failed:$($process.ExitCode)"
 }
@@ -65,7 +66,8 @@ try {
   Check-Language 'repaired'
   if($VerifyShortcuts){
     foreach($language in @('de','en')){
-      Invoke-Msi @('/fa',[string]$products[0].PSChildName,'/qn','/norestart',"NETGRID_UI_LANGUAGE=$language",'/l*v',(Quote (Join-Path $logRoot ("language-change-$language.log"))))
+      # /f ignores command-line properties. Reconfiguration must use /i.
+      Invoke-Msi @('/i',[string]$products[0].PSChildName,'REINSTALL=ALL','REINSTALLMODE=amus','/qn','/norestart',"NETGRID_UI_LANGUAGE=$language",'/l*v',(Quote (Join-Path $logRoot ("language-change-$language.log"))))
       Check-Language "changed-$language" $language
     }
   }
