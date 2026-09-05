@@ -4547,6 +4547,7 @@ function runnerDevelopmentSearchChoiceBinding(
             plannedAtStateVersion?: unknown;
             selectedActionId?: unknown;
             selectedAtStateVersion?: unknown;
+            engineContinuationAtStateVersion?: unknown;
           };
           recoverySearchCommitment?: {
             sourceCardInstanceId?: unknown;
@@ -4557,6 +4558,7 @@ function runnerDevelopmentSearchChoiceBinding(
             plannedAtStateVersion?: unknown;
             selectedActionId?: unknown;
             selectedAtStateVersion?: unknown;
+            engineContinuationAtStateVersion?: unknown;
           };
         };
       }
@@ -4593,8 +4595,13 @@ function runnerDevelopmentSearchChoiceBinding(
     typeof commitment.targetDefinitionId === "string" &&
     typeof commitment.selectedActionId === "string" &&
     signal.actionIds.includes(commitment.selectedActionId) &&
-    commitment.plannedAtStateVersion === portfolio?.stateVersion &&
-    commitment.selectedAtStateVersion === portfolio?.stateVersion &&
+    commitment.plannedAtStateVersion === commitment.selectedAtStateVersion &&
+    (commitment.engineContinuationAtStateVersion === undefined
+      ? commitment.selectedAtStateVersion === portfolio.stateVersion
+      : commitment.engineContinuationAtStateVersion ===
+          portfolio.stateVersion &&
+        typeof commitment.selectedAtStateVersion === "number" &&
+        commitment.selectedAtStateVersion < portfolio.stateVersion) &&
     input.playerView.stateVersion === portfolio.stateVersion + 1 &&
     choice.stateVersion === input.playerView.stateVersion &&
     choice.sourceCardInstanceId === commitment.sourceCardInstanceId &&

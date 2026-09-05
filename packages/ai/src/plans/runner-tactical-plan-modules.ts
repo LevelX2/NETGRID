@@ -304,6 +304,7 @@ export type RunnerDevelopmentSignal = {
     plannedAtStateVersion: number;
     selectedActionId?: string;
     selectedAtStateVersion?: number;
+    engineContinuationAtStateVersion?: number;
   };
   recoverySearchCommitment?: {
     sourceCardInstanceId: string;
@@ -315,6 +316,7 @@ export type RunnerDevelopmentSignal = {
     plannedAtStateVersion: number;
     selectedActionId?: string;
     selectedAtStateVersion?: number;
+    engineContinuationAtStateVersion?: number;
   };
 };
 

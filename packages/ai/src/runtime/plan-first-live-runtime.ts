@@ -2141,6 +2141,7 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
         pending,
       );
       bindRunnerEventInstallChoiceEngineContinuation(input, result, pending);
+      bindRunnerDevelopmentSearchEngineContinuation(input, result, pending);
       result.portfolio.stateVersion = input.playerView.stateVersion;
       delete result.portfolio.pendingRunnerCostPenaltySupportOrigin;
       return;
@@ -2573,6 +2574,60 @@ function rebaseSelectedRunnerImmediateChoiceOriginForPaymentStep(
           ...structuredClone(selectedOrigin),
           selectedAtStateVersion: input.playerView.stateVersion,
         };
+}
+
+function bindRunnerDevelopmentSearchEngineContinuation(
+  input: AiDecisionInput,
+  result: Extract<PlanSchedulerResult, { lane: "engine_window" }>,
+  pending: NonNullable<
+    ResidentPlanPortfolio["pendingRunnerCostPenaltySupportOrigin"]
+  >,
+): void {
+  const portfolio = result.portfolio;
+  const executor = portfolio?.instances.find(
+    (instance) =>
+      instance.instanceId === pending.executorInstanceId &&
+      instance.moduleId === "runner.develop_board_and_hand",
+  );
+  const state = executor?.moduleState as
+    | { kind?: unknown; signal?: RunnerDevelopmentSignal }
+    | undefined;
+  const commitments = [
+    state?.signal?.programSearchCommitment,
+    state?.signal?.recoverySearchCommitment,
+  ].filter((commitment) => commitment !== undefined);
+  if (commitments.length === 0) return;
+  const commitment = commitments[0]!;
+  const exactContinuation =
+    commitments.length === 1 &&
+    state?.kind === "development" &&
+    state.signal?.phase === "execute" &&
+    executor?.executionState === "executor" &&
+    portfolio?.rootForegroundInstanceId === pending.rootPlanInstanceId &&
+    portfolio?.executorInstanceId === pending.executorInstanceId &&
+    result.origin.rootPlanInstanceId === pending.rootPlanInstanceId &&
+    result.origin.leafPlanInstanceId === pending.executorInstanceId &&
+    result.actionId === pending.originalActionId &&
+    commitment.selectedActionId === pending.originalActionId &&
+    commitment.plannedAtStateVersion === pending.selectedAtStateVersion &&
+    commitment.selectedAtStateVersion === pending.selectedAtStateVersion &&
+    commitment.engineContinuationAtStateVersion === undefined &&
+    input.playerView.stateVersion > pending.selectedAtStateVersion;
+  if (!exactContinuation) {
+    throw new PlanResolutionFailure("window_origin_missing", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: [pending.originalActionId],
+      owner: "continuation",
+      planInstanceId: pending.executorInstanceId,
+      stepId: pending.sourceStepId,
+      removalCondition:
+        "Bind a development search continuation only to its unchanged selected action, source, target and executor after the exact Engine payment window.",
+    });
+  }
+  commitment.engineContinuationAtStateVersion = input.playerView.stateVersion;
 }
 
 function bindRunnerEventInstallChoiceEngineContinuation(

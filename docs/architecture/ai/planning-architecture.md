@@ -807,6 +807,12 @@ Bindungen nicht aus einer neu bewerteten Aktion rekonstruieren. Direkte
 Heap-Rückholungsereignisse erhalten Effekt und Suchfilter aus der
 deklarativen Engine-Implementierung; der zuständige Plan bindet das Ziel vor
 dem Ausspielen, bevor das Ereignis selbst in den Heap gelangt.
+Öffnet die ausgewählte Suchaktion zuvor ein Engine-Zahlungsfenster, erhält
+dieselbe Suchbindung bei der exakten Fortsetzung zusätzlich
+`engineContinuationAtStateVersion`. Ursprünglicher Planungs- und
+Auswahlzeitpunkt sowie Quelle, Ziel und Executor bleiben erhalten. Die
+anschließende Choice bindet ihre StateVersion an diese Fortsetzung; ein
+übersprungenes Zahlungsfenster darf die Versionsprüfung nicht abschwächen.
 
 ## 9. Gemeinsamer Planmodul-Vertrag
 

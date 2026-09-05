@@ -3,6 +3,9 @@ import { describe, expect, it } from "vitest";
 import { CARD_DEFINITIONS_BY_ID } from "../../../../engine/src/card-definitions";
 import { deterministicOnPlayResourcePayload } from "../../../../engine/src/ability-engine/card-implementation-runtime-shared";
 import recoveryJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-pairing-401-heap-recovery-d70.json";
+import recoveryPaymentJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-pairing-401-recovery-payment-d195.json";
+import recoveryBeforePaymentJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-pairing-401-recovery-before-payment-d194.json";
+import recoveryChoiceJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-pairing-401-recovery-choice-d196.json";
 import installJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-pairing-401-coverage-install-d308.json";
 import paymentJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-pairing-401-coverage-payment-d309.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -14,6 +17,7 @@ import {
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import {
   restoreAiRuntimeCheckpoint,
+  exportAiRuntimeCheckpoint,
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
 
@@ -37,6 +41,60 @@ function restore(json: unknown) {
 }
 
 describe("pairing 401 source-bound recovery and coverage", () => {
+  it("rejects a search choice whose origin skipped the intervening payment version", () => {
+    const input = restore(recoveryChoiceJson);
+    expect(() => chooseAiAction(input as AiDecisionInput)).toThrow(
+      "window_origin_missing",
+    );
+  });
+  it("preserves the selected recovery target across payment and binds its exact choice version", () => {
+    const before = restore(recoveryBeforePaymentJson);
+    const beforeDecision = chooseAiAction(before as AiDecisionInput);
+    const beforeRuntime = exportAiRuntimeCheckpoint(
+      before as AiDecisionInput,
+      before.ownDeckSnapshot!.deckSnapshotId,
+    );
+    const input = restore({ ...recoveryPaymentJson, runtime: beforeRuntime });
+    const decision = chooseAiAction(input as AiDecisionInput);
+    expect(decision.actionId).toBe(beforeDecision.actionId);
+    const portfolio = residentPlanPortfolioSnapshot(input)!;
+    const executor = portfolio.instances.find(
+      (instance) => instance.instanceId === portfolio.executorInstanceId,
+    )!;
+    expect(decision).toMatchObject({
+      actionId:
+        "runner.play_event.runner_onr_v1_089_gideons-pawnshop_1.runner_onr_v1_089_gideons-pawnshop_1.onr_v1_089_gideons-pawnshop:abilities_on_play_search_trash_to_grip",
+      fallbackUsed: false,
+    });
+    expect(executor.moduleState).toMatchObject({
+      signal: {
+        recoverySearchCommitment: {
+          plannedAtStateVersion: 193,
+          selectedAtStateVersion: 193,
+          selectedActionId: decision.actionId,
+          engineContinuationAtStateVersion: 194,
+          targetCardInstanceId: "runner_onr_classic_037_finders-keepers_1",
+        },
+      },
+    });
+    const runtime = exportAiRuntimeCheckpoint(
+      input as AiDecisionInput,
+      input.ownDeckSnapshot!.deckSnapshotId,
+    );
+    const choiceInput = restore({ ...recoveryChoiceJson, runtime });
+    const choice = chooseAiAction(choiceInput as AiDecisionInput);
+    expect(choice).toMatchObject({
+      actionId: "runner.resolve_choice",
+      fallbackUsed: false,
+      selectedChoices: {
+        choiceId: "p3_37_search_trash_to_grip_195",
+        selectedOptionIds: ["card_runner_onr_classic_037_finders-keepers_1"],
+      },
+    });
+    expect(residentPlanPortfolioSnapshot(choiceInput)?.executorInstanceId).toBe(
+      executor.instanceId,
+    );
+  });
   it("binds a useful heap target before the recovery event enters the heap", () => {
     const input = restore(recoveryJson);
     // Reproject only the canonical Engine facts missing from this recorded action.
