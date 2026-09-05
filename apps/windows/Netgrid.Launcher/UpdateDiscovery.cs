@@ -74,10 +74,13 @@ internal static class UpdateDiscovery
         {
             await using (var input = await http.GetStreamAsync(candidate.SetupUrl))
             await using (var output = File.Create(temporary)) await input.CopyToAsync(output);
-            await using var verify = File.OpenRead(temporary);
-            var actual = Convert.ToHexString(await SHA256.HashDataAsync(verify)).ToLowerInvariant();
-            if (!actual.Equals(candidate.SetupSha256, StringComparison.Ordinal))
-                throw new InvalidOperationException("update_download_hash_mismatch");
+            await using (var verify = File.OpenRead(temporary))
+            {
+                var actual = Convert.ToHexString(await SHA256.HashDataAsync(verify)).ToLowerInvariant();
+                if (!actual.Equals(candidate.SetupSha256, StringComparison.Ordinal))
+                    throw new InvalidOperationException("update_download_hash_mismatch");
+            }
+            // Windows must release the verification handle before publication.
             File.Move(temporary, destination, overwrite: true);
             return destination;
         }
