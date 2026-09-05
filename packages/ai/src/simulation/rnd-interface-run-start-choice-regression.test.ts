@@ -34,22 +34,28 @@ describe("R&D Interface Dig run-start choice regression", () => {
     expect(summary.replayOk).toBe(true);
     expect(summary.replayErrors).toEqual([]);
 
+    // Earlier Corp actions may change absolute versions without changing this
+    // Runner continuation. Bind the test to the actual source invocation and
+    // its immediate Engine choice, not a historical run_21 identifier.
+    const sourceIndex = summary.actionSequence.findIndex(
+      (entry) =>
+        entry.side === "runner" &&
+        entry.selectedActionId === "runner.activated_card_ability.rd",
+    );
+    expect(sourceIndex).toBeGreaterThanOrEqual(0);
+    const source = summary.actionSequence[sourceIndex];
+    const choice = summary.actionSequence[sourceIndex + 1];
     const sourceCapture = captures.find(
-      (entry) => entry.input.playerView.stateVersion === 20,
+      (entry) =>
+        entry.input.playerView.stateVersion === source?.stateVersionBefore,
     );
     const choiceCapture = captures.find(
       (entry) =>
-        entry.input.playerView.pendingChoice?.source ===
-        "runner_run_start.order:run_21",
+        entry.input.playerView.stateVersion === choice?.stateVersionBefore,
     );
     expect(sourceCapture).toBeDefined();
-    expect(choiceCapture).toBeDefined();
-
-    const source = summary.actionSequence.find(
-      (entry) => entry.stateVersionBefore === 20,
-    );
-    const choice = summary.actionSequence.find(
-      (entry) => entry.stateVersionBefore === 21,
+    expect(choiceCapture?.input.playerView.pendingChoice?.source).toMatch(
+      /^runner_run_start\.order:run_/,
     );
     expect(source).toMatchObject({
       side: "runner",
@@ -58,11 +64,21 @@ describe("R&D Interface Dig run-start choice regression", () => {
       planKind: "runner.pressure_central",
       fallbackUsed: false,
     });
-    expect(
-      sourceCapture?.input.legalActions.find(
-        (action) => action.type === "activated_card_ability",
-      )?.payload,
-    ).toMatchObject({ runServerId: "rd" });
+    const protocol = sourceCapture?.input.playerView.own.rig?.find(
+      (card) => card.definitionId === "onr_v1_050_r-and-d-protocol-files",
+    );
+    // The public simulation sequence redacts action IDs. Resolve its unique
+    // semantic route against the actor-private captured LegalAction offer.
+    const sourceActions = sourceCapture?.input.legalActions.filter(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.source === protocol?.instanceId &&
+        action.payload?.runServerId === "rd",
+    );
+    expect(sourceActions).toHaveLength(1);
+    expect(sourceActions?.[0]?.expiresAtStateVersion).toBe(
+      source?.stateVersionBefore,
+    );
     expect(sourceCapture?.input.playerView.own.rig).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -87,6 +103,17 @@ describe("R&D Interface Dig run-start choice regression", () => {
         ),
         "plan_scheduler:window:plan_bound_runner_run_start_order_choice:none",
       ]),
+    );
+    const sourceRoot = source?.evidence.find((fact) =>
+      fact.startsWith("plan_first_root:"),
+    );
+    const sourceExecutor = source?.evidence.find((fact) =>
+      fact.startsWith("plan_first_executor:"),
+    );
+    expect(sourceRoot).toBeDefined();
+    expect(sourceExecutor).toBeDefined();
+    expect(choice?.evidence).toEqual(
+      expect.arrayContaining([sourceRoot, sourceExecutor]),
     );
   }, 90_000);
 });

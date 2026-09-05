@@ -91,6 +91,11 @@ Runtimefehler. Die neue Contract-Vorbereitung wurde darin nicht ausgewählt;
 dieser kleine gemischte Systemeffekt ist kein allgemeiner Stärkennachweis.
 Die Current-State-Review grenzt vorbereitete Capability-Fixtures von
 Spielevidence und dem Integrationsstand ab.
+Der Main-Abgleich ist inhaltlich geprüft. Der breite AI-Gate-Lauf ist nicht
+vollständig grün: 18 gegengeprüfte Main-Baseline-Erwartungsfehler bleiben;
+eine zusätzliche verschobene Simulations-Testbindung wurde bei erhaltener
+Ownership korrigiert und fokussiert grün geprüft. Details und Scopegrenzen
+stehen in derselben Review. Kein als vollständig grün ausgegebener Shardlauf.
 
 Historische Selfplay-Cycle-Reviews, Markdown-Matrix, Reporting-State und
 versionierte HTML-Blockberichte wurden nach dem abschließenden idempotenten

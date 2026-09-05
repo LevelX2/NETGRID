@@ -54,6 +54,28 @@ Korrekturen machen dies zu einem Systemvergleich, nicht einem isolierten
 KI-Bewertungsexperiment. Registry-Paarungen 397–400 und Report
 `hidden-node-capability-20260905` sichern diesen getrennten Vergleich.
 
+### Integrationsprüfung und verbleibende Testgrenzen
+
+Main `9b38d1365` wurde ohne Textkonflikte eingebunden. Die eigenen
+Contract-Regressionen bleiben grün; AI-/Engine-Typechecks, Struktur/
+Reachability und Paketgrenzen bestehen. Der bewusst breitere AI-Lauf auf
+dem Merge-Stand `5cbcbd530` bestand jedoch nicht vollständig: 4989 von 5008
+Tests grün, 19 rot. 18 dieser Tests sind bereits auf Main rot und wurden
+gegengeprüft, nicht durch gelockerte Erwartungen kaschiert. Dazu gehören
+alte Score-/Checkpoint-Erwartungen, zwei Hijack-Simulationsindizes, ein
+veralteter Deckzähler und der festgeschriebene alte SP-082-Spielverlauf.
+Letzterer endet auf beiden Ständen inzwischen mit Corp 9 / Runner 5 und
+gültigem Replay statt dem historisch erwarteten Runner-Sieg.
+
+Die einzige neue Abweichung war die absolute Zustandsnummer im R&D-Interface-
+Test. Der aktuelle Run beginnt bei 21 statt 20; seine echte Choice folgt bei
+22. Der korrigierte, grüne Test bindet Quelle, eindeutiges aktuelles Angebot
+und unmittelbar folgende Choice und prüft den identischen Root/Executor.
+Es wurde kein Runner-Verhalten geändert. Nach dieser reinen Testkorrektur
+erfolgte kein weiterer vollständiger Shardlauf; die 18 Main-Baseline-Fehler
+bleiben offen. Die 70er-Ergebnisse oben werden nicht nachträglich als
+Spielstärkemessung des um fremde Main-Änderungen ergänzten Stands ausgegeben.
+
 ### Abgelehnte Deckvarianten vor dem Capability-Fix
 
 Zwei kleine Varianten wurden geprüft. Zusätzliche freie Economy kann konkrete Partien

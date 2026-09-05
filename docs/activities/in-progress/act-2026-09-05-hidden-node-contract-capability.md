@@ -247,3 +247,37 @@ Integrationskontext: `main` ist inzwischen auf `9b38d1365` weitergelaufen.
 Read-only `merge-tree` zeigt keine Textkonflikte. Vor Integration werden
 die gemeinsamen Corp-Fortsetzungs-/Schutz- und Rez-Verträge nach dem Merge
 erneut geprüft. Fremde uncommittete E2E-/AGENTS-Arbeit bleibt unberührt.
+
+Der Main-Abgleich ist auf `5cbcbd530` ohne Textkonflikte erfolgt. Die fokussierte
+Integrationsprüfung ergibt 681 bestandene Tests und drei auch auf Main
+identisch reproduzierte Score-Erwartungsfehler. 36 Engine-Projektions-/Run-
+Tests, AI-/Engine-Typecheck, beide Strukturgates/Reachability und Paketgrenzen
+sind grün.
+
+Wegen des gemeinsamen Restzug-Fortsetzungsvertrags wurde bewusst zusätzlich
+`corepack pnpm test:ai:shards` ausgeführt: 582 Dateien, 5008 Tests,
+4989 bestanden, 19 fehlgeschlagen, 536 Sekunden. Der Gate-Lauf ist damit
+**nicht grün**. 18 betroffene Tests sind bereits auf Main `9b38d1365` rot:
+die drei Live-Runtime-Scoretests, zwei Proteus-Hijack-Simulationen, die
+SP-082-Simulation mit historischer Ergebnis-/Indexbindung, der 50/51-Deck-
+Zähler und elf weitere Checkpoint-Erwartungen in e6aca, e676, 74e2369 sowie
+Rent-I-Con fünf Spiele / Zyklen drei, fünf, neun und zehn. Sie wurden eng auf
+Main gegengeprüft und nicht im Capability-Paket verändert. Unterschiedliche
+neue Spielverläufe sind nicht pauschal als identische Einzelursache bewertet.
+
+Die eine neue R&D-Interface-Abweichung ist nachgewiesen eine verschobene
+historische Zustandsnummer: Quelle 21 und Choice 22 statt 20/21. Die echte
+Run-Start-Choice bleibt am Zentraldruck-Owner. Der Test sucht jetzt die erste
+tatsächliche Protokoll-Invocation und deren unmittelbar folgende Choice,
+prüft das eindeutige aktuelle LegalAction-Angebot sowie denselben Root und
+Executor. Fokussierter vollständiger Simulations-/Replaytest grün; keine
+produktive Runner-Änderung und kein bloßes Ersetzen eines Golden Hashes.
+Der breite Lauf wird nach dieser reinen Testkorrektur nicht vollständig
+wiederholt; die 18 Baseline-Fehler bleiben ausdrücklich offen.
+
+70 Registry-Spiele und vier Pairings sind gegen die lokalen Quellresultate
+reconciliert; der HTML-Export ist bytegleich. Report und SQLite-Online-
+Sicherung liegen im primären `data/local/`, der eigene Registry-Job ist
+geschlossen. HN-H bleibt bis zum nachgewiesenen Main-/Worktree-/Branch-
+Abschluss offen. Für den alten `_DEL`-Rest wurde während der laufenden
+Verifikation eine manuelle Entfernung angefragt; er existiert weiterhin.
