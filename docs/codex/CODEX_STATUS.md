@@ -102,6 +102,20 @@ versionierte HTML-Blockberichte wurden nach dem abschließenden idempotenten
 Import vom 2026-08-30 entfernt. Führend sind die lokale SQLite-Registry, ihre
 Sicherungen und `docs/runbooks/ai-selfplay-evidence-registry.md`.
 
+Die Express-Shutdown-Metaserien (Registry-Paarungen 387, 395, 396) begründen
+keinen automatischen Standarddeck-Tausch. Der Killkern konvertiert tatsächlich;
+offene Arbeit betrifft geschützte Scorelinien, Archives-Schutz gegen sichtbare
+HQ-Umleitung und rechtzeitige Runner-Vorsorge. Eine mögliche verdeckte
+Tagabwehr ist weder eine sichere Abwehr noch ein garantierter Kill:
+Versuchskosten und alternative Gewinnlinien bleiben gemeinsam zu bewerten.
+Die verifizierten SP-251/252 korrigieren lokale Run-Dispositionsgrenzen und
+die Engine-Trennung von Ressourcenpool und gedeckeltem Ausgabenbudget;
+`planning-architecture.md` hält diese bestehenden Owner-Grenzen fest.
+Die fokussierte Integration bestätigt beide Fixes und einen vollständig
+aktions-/owner-/ressourcengleichen Exact-Replay. Drei mitgeprüfte ältere
+Score-Erwartungsfehler treten unverändert auch auf dem bisherigen Main auf;
+die oben benannte offene Baseline wird damit nicht als behoben ausgegeben.
+
 ## Plattform und Betrieb
 
 Aktuelle Betriebs- und Wartungsverträge liegen unter `docs/runbooks/`:
