@@ -2193,6 +2193,8 @@
       "iceBypassedByInsideJob": "{subject} : a automatiquement passé {ice} avec Inside Job.",
       "insideJobBypassDescription": "La première GLACE activée a été passée automatiquement ; ses routines n’ont pas été résolues.",
       "runContinued": "{subject} : poursuite de l'exécution sur {server}.",
+      "runContinuedToIce": "{subject} : poursuite de l'exécution sur {server} vers ICE {number}.",
+      "runContinuedToRoot": "{subject} : poursuite de l'exécution sur {server} vers la racine.",
       "runJackedOut": "{subject} : débranché.",
       "runEnded": "La course s'est terminée.",
       "cardAccessed": "{subject} : accès à {card}.",

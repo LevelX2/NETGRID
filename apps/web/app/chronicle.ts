@@ -772,6 +772,26 @@ function formatSemanticChronicleEvent(
       titleKey = "event.cardAccessedInServer";
     }
   }
+  if (titleKey === "event.runContinued" && !explicitTitle) {
+    const destinationIcePosition = positiveIntegerValue(
+      payload.runDestinationIcePosition,
+    );
+    if (
+      payload.runDestination === "ice" &&
+      destinationIcePosition !== undefined
+    ) {
+      explicitTitle = translate("event.runContinuedToIce", {
+        subject: titleSubject,
+        server,
+        number: destinationIcePosition,
+      });
+    } else if (payload.runDestination === "root") {
+      explicitTitle = translate("event.runContinuedToRoot", {
+        subject: titleSubject,
+        server,
+      });
+    }
+  }
   const targetIceTitle =
     stringValue(payload.targetIceTitle) ??
     publicCardTitle(
@@ -4387,6 +4407,16 @@ export function formatChronicleEvent(
         const passedIcePosition = positiveIntegerValue(
           payload.passedIcePosition,
         );
+        const destinationIcePosition = positiveIntegerValue(
+          payload.runDestinationIcePosition,
+        );
+        const destination =
+          payload.runDestination === "ice" &&
+          destinationIcePosition !== undefined
+            ? `zu ICE ${destinationIcePosition}`
+            : payload.runDestination === "root"
+              ? "zum Root"
+              : undefined;
         const passedIceTitle =
           cardTitle ??
           sourceTitle ??
@@ -4426,9 +4456,11 @@ export function formatChronicleEvent(
                   subject,
                   result === "ended"
                     ? "den Run beendet"
-                    : passedIcePosition
-                      ? `den Run nach dem Passieren von ICE ${passedIcePosition} fortgesetzt`
-                      : "den Run fortgesetzt",
+                    : destination
+                      ? `den Run${serverLabel ? ` auf ${serverLabel}` : ""} ${destination} fortgesetzt`
+                      : passedIcePosition
+                        ? `den Run nach dem Passieren von ICE ${passedIcePosition} fortgesetzt`
+                        : "den Run fortgesetzt",
                 );
           }
           chips.push(

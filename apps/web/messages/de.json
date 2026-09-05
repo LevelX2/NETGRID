@@ -2117,6 +2117,8 @@
       "iceBypassedByInsideJob": "{subject}: {ice} durch Inside Job automatisch passiert.",
       "insideJobBypassDescription": "Das erste gerezzte ICE wurde automatisch passiert; seine Subroutinen wurden nicht abgearbeitet.",
       "runContinued": "{subject}: Run auf {server} fortgesetzt.",
+      "runContinuedToIce": "{subject}: Run auf {server} zu ICE {number} fortgesetzt.",
+      "runContinuedToRoot": "{subject}: Run auf {server} zum Root fortgesetzt.",
       "runJackedOut": "{subject}: aus dem Run ausgestiegen.",
       "runEnded": "Der Run wurde beendet.",
       "cardAccessed": "{subject}: auf {card} zugegriffen.",

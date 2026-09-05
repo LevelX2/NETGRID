@@ -4953,6 +4953,9 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
     );
 
     expect(state.runner.credits).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      runDestination: "root",
+    });
     expect(
       hashState(
         apply(

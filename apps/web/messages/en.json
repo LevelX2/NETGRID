@@ -2109,6 +2109,8 @@
       "iceBypassedByInsideJob": "{subject}: automatically passed {ice} using Inside Job.",
       "insideJobBypassDescription": "The first rezzed ICE was automatically passed; its subroutines did not resolve.",
       "runContinued": "{subject}: continued the run on {server}.",
+      "runContinuedToIce": "{subject}: continued the run on {server} to ICE {number}.",
+      "runContinuedToRoot": "{subject}: continued the run on {server} to the root.",
       "runJackedOut": "{subject}: jacked out.",
       "runEnded": "The run ended.",
       "cardAccessed": "{subject}: accessed {card}.",

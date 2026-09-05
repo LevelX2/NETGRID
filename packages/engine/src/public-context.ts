@@ -774,6 +774,12 @@ export function publicContextForAction(
     context.result = state.run ? "continued" : "ended";
     if (state.run) {
       context.serverId = state.run.attackedServerId;
+      if (state.run.position.kind === "ice") {
+        context.runDestination = "ice";
+        context.runDestinationIcePosition = state.run.position.iceIndex + 1;
+      } else {
+        context.runDestination = "root";
+      }
       const attackedServerLabel = publicServerLabel(
         state,
         state.run.attackedServerId,

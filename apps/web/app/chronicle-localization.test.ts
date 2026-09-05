@@ -38,6 +38,47 @@ function event(
 }
 
 describe("semantic chronicle localization", () => {
+  it.each([
+    {
+      payload: { runDestination: "ice", runDestinationIcePosition: 2 },
+      destination: "zu ICE 2",
+    },
+    {
+      payload: { runDestination: "ice", runDestinationIcePosition: 1 },
+      destination: "zu ICE 1",
+    },
+    { payload: { runDestination: "root" }, destination: "zum Root" },
+  ])(
+    "names the next run destination $destination",
+    ({ payload, destination }) => {
+      const continued = event("continue_run", {
+        serverLabel: "Remote 1",
+        aiReasonCode: "plan_first.runner.convert_run_window",
+        ...payload,
+      });
+      expect(
+        formatChronicleEvent(continued, "corp", { translate: translate("de") })
+          .title,
+      ).toBe(`Die Runner-KI: Run auf Remote 1 ${destination} fortgesetzt.`);
+      for (const locale of ["en", "fr"] as const) {
+        const title = formatChronicleEvent(continued, "corp", {
+          translate: translate(locale),
+        }).title;
+        expect(title).toContain(locale === "fr" ? "À distance 1" : "Remote 1");
+        expect(title).toContain(
+          payload.runDestination === "ice"
+            ? `ICE ${payload.runDestinationIcePosition}`
+            : locale === "en"
+              ? "root"
+              : "racine",
+        );
+      }
+      expect(formatChronicleEvent(continued, "corp").title).toContain(
+        destination,
+      );
+    },
+  );
+
   it.each(["de", "en", "fr"] as const)(
     "keeps the Inside Job bypass on a rez pass in %s",
     (locale) => {

@@ -35,6 +35,10 @@ Stapelhöhe. Nur Hover, sichtbarer Tastaturfokus und ein geöffnetes Aktionsmen�
 heben eine Karte an; ein vorheriger Mausklick darf mittlere ICE nicht dauerhaft
 verdecken. Die lokalisierte Chronik übernimmt den öffentlichen
 Inside-Job-Bypass samt ICE-Identität auch aus dem zugehörigen Rez-Pass-Event.
+Fortsetzungsereignisse tragen mit `runDestination` und bei ICE zusätzlich
+`runDestinationIcePosition` das öffentliche Ziel aus dem Engine-Folgezustand.
+Die Chronik zeigt damit „zu ICE n“ oder „zum Root“, ohne die Position aus dem
+aktuellen Spielbrett oder der zuvor passierten ICE-Nummer zu erraten.
 
 ## Wo Ändern?
 
