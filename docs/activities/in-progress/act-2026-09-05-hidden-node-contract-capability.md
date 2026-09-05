@@ -1,0 +1,64 @@
+---
+activityId: act-2026-09-05-hidden-node-contract-capability
+status: in_progress
+kind: implementation
+area: ai
+priority: high
+primaryAgent: release-implementation-agent
+createdAt: 2026-09-05
+branch: codex/hidden-node-contract-capability
+---
+
+# Hidden Node: offene Capability-Abnahme fortsetzen
+
+## Auftrag und Korrektur des bisherigen Abschlusses
+
+Das aktive Nutzer-Goal verlangt die Verbesserung der generischen Spielfähigkeit
+und nicht nur einen abgeschlossenen Variantenvergleich. HN-A–E hat keine
+produktive Verbesserung übernommen. Der negative Erstinvestitions-Checkpoint
+96 ist keine ausreichende Abnahme für vorbereitete, wirtschaftlich sinnvolle
+Contract-Zyklen. Diese Lücke wird im selben Goal weiterbearbeitet, ohne die
+verworfenenen Deckvarianten zu übernehmen oder eine Verbesserung vorwegzunehmen.
+
+Basis: Main `822d63412a9f4c07562b687ab6db7f9c54221a25`. Die sechs fremden
+E2E-Dateiänderungen bleiben unberührt. Kein Remotezugriff, kein Versand.
+Der alte, richtlinienbedingt nicht löschbare `_DEL`-Rest bleibt unangetastet;
+er ist weiterhin eine eigene offene Cleanup-Bedingung.
+
+## Owner und Invarianten
+
+Engine stellt aktuelle LegalActions, Kosten, Verwendungen und Verfall fest.
+`corp.economy` besitzt Counter-Finanzierung; fremde Ressourcenbedarfe müssen
+an Parent, Need, Provider und aktuelle Invocation gebunden sein.
+`corp.defend_servers` behält ICE-/Server-/Rez-Entscheidungen, Score die Agenda.
+Keine allgemeine Liquiditätsbehauptung für Installations-/Rez-Credits,
+kein globaler Bonus, kein zweiter Controller oder Choice-Shortcut.
+Unknown bleibt lokal. Heutiger Fortschritt und späterer Nutzen werden getrennt.
+
+## Sequenz und Done-Gates
+
+1. **HN-F aktiv – günstigen aktuellen Fehlpfad beweisen.** Reale Engine-
+   Actions eines vorbereiteten Contracts mit nutzbarem Verbraucher; Gegenfälle
+   ohne Verbraucher, mit unzulässigem Verwendungszweck und nach Verfall.
+   Den ersten Verlustpunkt von Quote über Parent/Support bis zur produktiven
+   Entscheidung nachweisen. Commit: fokussierter Reproduktionstest.
+2. **HN-G – nachgewiesene Fähigkeit vertikal schließen.** Fehlende Engine-
+   Quote/Semantik am erzeugenden Owner ergänzen, benötigte Economy-Route in
+   bestehende Parent-/Need-/Head-/Linienverträge einbinden. Aktuelle Auszahlung
+   und zweckgebundener Verbrauch, Ende des Supports und Reassessment nach
+   Ablauf testen. Aufbau-/Wiederholungsfähigkeit mit allen Kosten bewerten;
+   nicht die Existenz einer Auszahlung als vollständige Kampagne ausgeben.
+   Keine Verhaltensänderung vor belegtem Owner und aktueller Bindung.
+3. **HN-H – Gegenvergleich und Integration.** Direkt betroffene Tests und
+   bei geänderten Oberflächen deren Typ-/Strukturgates. Dieselben Original-
+   Deck-/Seedkohorten gegen den bewahrten Basisstand vergleichen; Ergebnisse
+   und noch fehlende Fähigkeiten transparent in der zentralen Registry sichern.
+   Einzelcommits, lokaler Main-Merge, Main-Prüfung, eigener Worktree-/Branch-
+   Cleanup. Das gesamte Goal erst schließen, wenn auch seine übrigen echten
+   Abschlussbedingungen erfüllt sind.
+
+Genau ein Paket aktiv. Testläufe weiterverfolgen, nicht wegen kurzer Ausgabe-
+Zeitfenster neu starten. Kein normaler Serverbetrieb aus dem Worktree.
+Ein weiterer ungünstiger Einzelzustand ersetzt nicht die Abnahme des
+vollständigen Fähigkeitenumfangs. Echte Regeln-/Wissensgrenzen werden sichtbar
+gehalten, nicht mit einem Ersatzpfad überdeckt.
