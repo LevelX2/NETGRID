@@ -83,8 +83,9 @@ Credits, bestehendes HQ-ICE und Wall in HQ, aktuelles `corp_action.main`:
   Credits 3 und erneut einem Counter. Beide realen Aktionen wurden akzeptiert.
   HN-G muss zuerst diese falsche Zahlungsautorität korrigieren, bevor eine
   neue KI-Auszahlungsroute aktiv wird.
-- `run.approach_ice` bietet derzeit keine allgemeine `corp_paid`-Auszahlung.
-  Das ist noch kein nachgewiesener Regelverstoß und wird nicht blind geöffnet.
+- Das zunächst ungeklärte fehlende `corp_paid`-Angebot in `run.approach_ice`
+  wurde in G2 anhand der lokalen Errata-Regel Card Effects nachgewiesen
+  und am vorhandenen Run-Aktionsproduzenten korrigiert (siehe unten).
 
 Die Ownership-Regression ist zunächst ausdrücklich eine Baseline-
 Charakterisierung. HN-G ersetzt ihre Fehlererwartung durch die fachliche
@@ -154,6 +155,17 @@ Abnahme; die Engine-Gegenprobe ist bereits auf das korrekte Ergebnis umgestellt.
   Engine-Dateien und zwölf Real-Engine-AI-Tests grün; Engine-Typecheck grün.
   Andere Zahlungsfenster sind damit nicht pauschal als vollständig auditiert
   erklärt. HN-G bleibt für die noch fehlende Fähigkeitenabnahme aktiv.
+  Ergänzender G2-Regelnachweis: `docs/source/Netrunner Errata 1.70.md`,
+  Card Effects, erlaubt aktionskostenfreie Effekte in Rez-Fenstern.
+  Der Run-Aktionsproduzent ruft jetzt neben `corp_during_run` auch das
+  bereits definierte/validierte `corp_paid` ab. Keine Erweiterung der
+  Encounter-/Trace-Pfade. Der zuerst fehlgeschlagene Real-Engine-Test
+  beweist jetzt Auszahlung → tatsächlicher ICE-Rez, korrekten Verbrauch
+  und keine weitere Auszahlung im Encounter trotz restlichem Counter.
+  Die Verbraucherquote verwendet für Rez die tatsächliche Engine-Zone,
+  nicht ein bei ICE fehlendes Installationsziel-Payload. 13 Real-Engine-
+  AI-Tests, sieben Run-Builder-Tests und Engine-Typecheck grün. Die KI-
+  Defense-Bindung dieses neuen legalen Fundingpfads bleibt als Nächstes offen.
 - **HN-G3 offen:** Setup/Wiederholung nur mit vollständigem Kosten- und
   Verbraucherhorizont; produktiver Chooser, Parent/Leaf, Invocation,
   Reassessment und deterministische Fortsetzung abnehmen.

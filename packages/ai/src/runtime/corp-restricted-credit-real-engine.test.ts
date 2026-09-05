@@ -39,6 +39,73 @@ const CORP_DECK: DeckDefinition = {
 describe("Corp restricted install/rez credit real-Engine capability", () => {
   afterEach(resetResidentPlanPortfolioMemory);
 
+  it("offers the prepared payout in the run rez window and funds the actual ICE rez", () => {
+    let state = preparedInstallWindow();
+    state.cardInstances[contractId(state)]!.advancementCounters = 2;
+    RealEngineFixtureBuilder.forState(state).withCorpIceOnServer("hq", WALL);
+    state = apply(
+      state,
+      getLegalActions(state, "corp").find(
+        (action) => action.type === "end_turn",
+      )!,
+    );
+    state = apply(
+      state,
+      getLegalActions(state, "runner").find(
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "hq",
+      )!,
+    );
+    expect(state.timingPoint).toBe("run.approach_ice");
+    const payout = getLegalActions(state, "corp").find(
+      (action) =>
+        action.source === contractId(state) &&
+        action.type === "activated_card_ability",
+    );
+    expect(payout).toBeDefined();
+    const iceId = state.run!.approachedIceId!;
+    const before = hashState(state);
+    const quote = quoteCorpRestrictedCreditRoute(state, {
+      matchId: state.matchId,
+      side: "corp",
+      stateVersion: state.stateVersion,
+      timingPoint: state.timingPoint,
+      payoutActionId: payout!.actionId,
+      consumer: {
+        actionType: "rez_ice",
+        sourceCardInstanceId: iceId,
+        serverId: "hq",
+      },
+    });
+    expect(quote, JSON.stringify(quote)).toMatchObject({
+      status: "quoted",
+      quote: {
+        consumer: {
+          availableBeforePayout: false,
+          creditCost: 3,
+          restrictedCreditsApplied: 3,
+          generalCreditsRequired: 0,
+        },
+      },
+    });
+    expect(hashState(state)).toBe(before);
+    state = apply(state, payout!);
+    const rez = getLegalActions(state, "corp").find(
+      (action) => action.type === "rez_ice" && action.source === iceId,
+    )!;
+    state = apply(state, rez);
+    expect(state.cardInstances[iceId]!.rezzed).toBe(true);
+    expect(state.corp.credits).toBe(0);
+    expect(state.corpTemporaryInstallRezCredits?.remaining ?? 0).toBe(0);
+    expect(state.cardInstances[contractId(state)]!.advancementCounters).toBe(1);
+    expect(state.timingPoint).toBe("run.encounter_ice");
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) => action.source === contractId(state),
+      ),
+    ).toBe(false);
+  });
+
   it("does not offer a general-credit operation after the actual restricted payout", () => {
     const state = preparedInstallWindow();
     RealEngineFixtureBuilder.forState(state).withCorpCardInHq(OPERATION);

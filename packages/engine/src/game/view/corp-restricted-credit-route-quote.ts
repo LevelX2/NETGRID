@@ -72,11 +72,8 @@ export function quoteCorpRestrictedCreditRoute(
     projected.randomCounter !== state.randomCounter
   )
     return { status: "unavailable", reason: "payout_boundary" };
-  const matches = getLegalActions(projected, "corp").filter(
-    (action) =>
-      action.type === request.consumer.actionType &&
-      action.source === request.consumer.sourceCardInstanceId &&
-      action.payload?.serverId === request.consumer.serverId,
+  const matches = getLegalActions(projected, "corp").filter((action) =>
+    matchesConsumer(projected, action, request.consumer),
   );
   if (matches.length === 0)
     return {
@@ -146,11 +143,8 @@ export function quoteCorpRestrictedCreditRoute(
         actionType: request.consumer.actionType,
         sourceCardInstanceId: request.consumer.sourceCardInstanceId,
         serverId: request.consumer.serverId,
-        availableBeforePayout: currentActions.some(
-          (action) =>
-            action.type === request.consumer.actionType &&
-            action.source === request.consumer.sourceCardInstanceId &&
-            action.payload?.serverId === request.consumer.serverId,
+        availableBeforePayout: currentActions.some((action) =>
+          matchesConsumer(state, action, request.consumer),
         ),
         sourceCardDefinitionId: consumerSource.definitionId,
         clickCost,
@@ -165,6 +159,28 @@ export function quoteCorpRestrictedCreditRoute(
       guarantee: "exact_current_funding_prefix",
     },
   };
+}
+
+function matchesConsumer(
+  state: GameState,
+  action: LegalAction,
+  consumer: CorpRestrictedCreditRouteRequest["consumer"],
+): boolean {
+  if (
+    action.type !== consumer.actionType ||
+    action.source !== consumer.sourceCardInstanceId
+  )
+    return false;
+  if (action.type === "install_card")
+    return action.payload?.serverId === consumer.serverId;
+  // Rez acts on an already installed source. Its authoritative server binding
+  // is the Engine zone; rez_ice does not carry an installation target payload.
+  const zone = state.cardInstances[action.source]?.zone;
+  return (
+    zone?.side === "corp" &&
+    zone.zone === (action.type === "rez_ice" ? "serverIce" : "serverRoot") &&
+    zone.serverId === consumer.serverId
+  );
 }
 
 function positiveInteger(value: unknown): value is number {

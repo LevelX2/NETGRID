@@ -84,9 +84,17 @@ Dies ist noch keine Auswahl- oder Kampagnenfähigkeit.
 
 Offen bleiben der KI-Owner mit exakt gebundenem aktuellem Verbraucher sowie
 Aufbau-/Wiederholungsrouten. Vor Aktivierung dieser Fähigkeit sind auch ihre
-übrigen Zahlungszwecke abzusichern. `run.approach_ice` bietet derzeit keine
-allgemeine `corp_paid`-Auszahlung; eine Timingänderung ist ohne gesonderten
-Regelnachweis nicht freigegeben. Kein pauschales Payout-/Score-Gewicht und
+übrigen Zahlungszwecke abzusichern. Der inzwischen belegte Run-Timingfehler
+ist korrigiert: Die lokale `docs/source/Netrunner Errata 1.70.md`, Abschnitt
+Card Effects, erlaubt aktionskostenfreie Effekte in Rez-Fenstern; CardSpec
+und bestehende Ausführungsvalidierung ordnen Contract bereits `corp_paid`
+zu. Der Run-Angebotsproduzent hatte ausschließlich `corp_during_run`
+abgerufen. Er berücksichtigt nun beide Timings in seinen bestehenden
+Rez-Fenstern, ohne Encounter-/Trace-Erzeugung zu erweitern. Die reale
+Gegenprobe Auszahlung → Wall-of-Static-Rez besteht einschließlich
+Counter-/Poolverbrauch und fehlender Encounter-Auszahlung. Die Fundingquote
+bindet installierte Rez-Verbraucher über ihre Engine-Zone statt über ein bei
+ICE nicht vorhandenes Installationsziel-Payload. Kein pauschales Payout-/Score-Gewicht und
 keine Gleichsetzung mit freier Economy.
 
 ### Bisherige Aufbau- und Vergleichsevidence

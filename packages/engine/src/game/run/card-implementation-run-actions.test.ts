@@ -327,7 +327,7 @@ describe("corp encounter CardImplementation actions", () => {
 });
 
 describe("corp during-run CardImplementation actions", () => {
-  it("delegates scored corp agendas with corp_during_run timing", () => {
+  it("delegates scored corp agendas with both during-run and paid timings", () => {
     const state = makeState();
     state.corp.scoreArea = [
       "agenda_b" as CardInstanceId,
@@ -376,10 +376,12 @@ describe("corp during-run CardImplementation actions", () => {
 
     expect(calls).toEqual([
       "corp:agenda_a:agenda_a_definition:corp_during_run",
+      "corp:agenda_a:agenda_a_definition:corp_paid",
       "corp:agenda_b:agenda_b_definition:corp_during_run",
+      "corp:agenda_b:agenda_b_definition:corp_paid",
     ]);
     expect(
       result.legalActions.map((legalAction) => legalAction.source),
-    ).toEqual(["agenda_a", "agenda_b"]);
+    ).toEqual(["agenda_a", "agenda_a", "agenda_b", "agenda_b"]);
   });
 });
