@@ -86,5 +86,23 @@ Credits, bestehendes HQ-ICE und Wall in HQ, aktuelles `corp_action.main`:
 - `run.approach_ice` bietet derzeit keine allgemeine `corp_paid`-Auszahlung.
   Das ist noch kein nachgewiesener Regelverstoß und wird nicht blind geöffnet.
 
-Die drei Regressionen sind zunächst ausdrücklich Baseline-Charakterisierungen;
-HN-G ersetzt Fehlererwartungen durch die richtige fachliche Abnahme.
+Die Ownership-Regression ist zunächst ausdrücklich eine Baseline-
+Charakterisierung. HN-G ersetzt ihre Fehlererwartung durch die fachliche
+Abnahme; die Engine-Gegenprobe ist bereits auf das korrekte Ergebnis umgestellt.
+
+## HN-G: sequenzielle Teilschritte
+
+- **HN-G1 abgeschlossen:** `advance_card` prüft bei Angebot und Ausführung
+  dieselbe validierte allgemeine Creditverfügbarkeit. Der reservierte
+  Installations-/Rez-Pool wird nicht ausgegeben. Ausführung verweigert vor
+  Click-/Credit-/Countermutation. Mischpool, reale Installation/Verfall,
+  ungültige Poolwerte und angrenzende Boardpfade geprüft: 37 Engine-Tests,
+  drei AI-Real-Engine-Tests grün; Engine-Strukturgate grün (379, keine Zyklen).
+  Keine globale Änderung sämtlicher Zahlungen und keine neue KI-Policy.
+- **HN-G2 aktiv:** übrige aktuelle Zahlungsgegenproben und vollständige
+  zweck-/verfallgebundene Auszahlungsevidence am erzeugenden Engine-Owner.
+  Anschließend Economy-Provider nur für exakt gebundene erlaubte aktuelle
+  Verbraucher, Nichtausführung ohne nutzbaren Verbraucher und Rückgabe.
+- **HN-G3 offen:** Setup/Wiederholung nur mit vollständigem Kosten- und
+  Verbraucherhorizont; produktiver Chooser, Parent/Leaf, Invocation,
+  Reassessment und deterministische Fortsetzung abnehmen.

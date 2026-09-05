@@ -11,6 +11,7 @@ import {
   onPlayAbilityBindingPayload,
 } from "../../ability-engine/card-capability-binding";
 import { canInstallCorpIceInServer } from "../install/corp-ice-install-restrictions";
+import { corpGeneralCreditAvailability } from "../payment/corp-general-credit-availability";
 import {
   fixedPlayCostCredits,
   minimumPlayCostCredits,
@@ -654,7 +655,7 @@ export function buildCorpMainActions(
     for (const id of server.root) {
       const definition = definitionFor(state, id);
       if (isInstalledCorpCardAdvanceable(state, id, definition)) {
-        if (state.corp.credits >= 1)
+        if (corpGeneralCreditAvailability(state) >= 1)
           actions.push(
             action(
               state,

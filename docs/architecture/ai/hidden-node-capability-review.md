@@ -2,13 +2,14 @@
 
 Stand: 2026-09-05. Auftrag: charaktererhaltende Verbesserung von
 `standard_proteus_corp_hidden_node_control_2026_05_25`.
-Die Paketfolge HN-A–E ist fachlich abgeschlossen. Führende Ergebnisse liegen
+Die Variantenprüfung HN-A–E ist abgeschlossen; die Fähigkeitenabnahme wird
+in HN-F–H fortgesetzt. Führende Vergleichsergebnisse liegen
 in der lokalen [Evidenzregistrierung](../../runbooks/ai-selfplay-evidence-registry.md),
 Paarungen 388–394, Report `hidden-node-character-20260905`.
 
 ## Aktuelle Entscheidung
 
-**Originaldeck beibehalten; keine produktive KI-Policy geändert.** Zwei kleine
+**Originaldeck beibehalten; noch keine produktive KI-Policy geändert.** Zwei kleine
 Varianten wurden geprüft. Zusätzliche freie Economy kann konkrete Partien
 verbessern, ist im geprüften Satz aber keine konsistente Verbesserung des
 Decks. Ein höherer Scorebonus oder lockerere Schutzgrenzen sind aus den
@@ -53,6 +54,34 @@ sind offen; dieses Ergebnis behauptet weder ihre Implementierung noch eine
 gelöste Deckschwäche.
 
 ## Finanzierung und Schutz: kein pauschaler KI-Bonus
+
+### Aktueller reproduzierter Contract-Befund
+
+Ein bereits rezzter Contract mit einem Counter und null allgemeinen Credits
+besitzt in `corp_action.main` eine legale Auszahlung. Diese ermöglicht
+nachweislich eine zuvor unbezahlbare HQ-ICE-Installation für einen Credit;
+ungenutzte Credits verfallen korrekt. Im produktiven Chooser fehlt der
+Auszahlung jedoch der Planowner (`productive_action_without_owner`,
+Coverage 87,5 % im fokussierten Real-Engine-Fixture). Diese Lücke liegt vor
+Auswahl und Bewertung. Der ungünstige Aufbau-Checkpoint 96 unten widerlegt
+sie nicht. Der Nachweis ist ein Fähigkeiten-Test, keine neue Matchup-Evidence.
+
+Die Gegenprobe fand einen Engine-Zahlungsfehler: Advancement konnte aus dem
+Installations-/Rez-Pool bezahlt werden und dadurch den reservierten Betrag
+über den verbliebenen Gesamtpool erhöhen. Angebot und Ausführung von
+`advance_card` verwenden jetzt dieselbe validierte allgemeine
+Creditverfügbarkeit. Zweckgebundene Credits bleiben für Installation und Rez
+erhalten; ein zusätzlicher allgemeiner Credit erlaubt weiterhin Advancement.
+37 betroffene Engine-Tests und drei Real-Engine-KI-Proben sind grün.
+
+Offen bleiben der KI-Owner mit exakt gebundenem aktuellem Verbraucher sowie
+Aufbau-/Wiederholungsrouten. Vor Aktivierung dieser Fähigkeit sind auch ihre
+übrigen Zahlungszwecke abzusichern. `run.approach_ice` bietet derzeit keine
+allgemeine `corp_paid`-Auszahlung; eine Timingänderung ist ohne gesonderten
+Regelnachweis nicht freigegeben. Kein pauschales Payout-/Score-Gewicht und
+keine Gleichsetzung mit freier Economy.
+
+### Bisherige Aufbau- und Vergleichsevidence
 
 Government Contract ist keine frei verfügbare Drei-Credit-Economy.
 Der CardSpec definiert einen Advancement-Counter als Auszahlungskosten,

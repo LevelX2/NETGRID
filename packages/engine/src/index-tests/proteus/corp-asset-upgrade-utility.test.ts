@@ -681,6 +681,28 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
     expect(state.corp.credits).toBe(3);
     expect(state.corpTemporaryInstallRezCredits?.remaining).toBe(3);
     expect(
+      getLegalActions(state, "corp").some(
+        (action) => action.type === "advance_card",
+      ),
+    ).toBe(false);
+    const mixedPoolState = structuredClone(state);
+    mixedPoolState.corp.credits += 1;
+    const advancedWithGeneralCredit = apply(
+      mixedPoolState,
+      "corp",
+      (action) =>
+        action.type === "advance_card" && action.source === governmentId,
+    );
+    expect(advancedWithGeneralCredit.corp.credits).toBe(3);
+    expect(
+      advancedWithGeneralCredit.corpTemporaryInstallRezCredits?.remaining,
+    ).toBe(3);
+    expect(
+      getLegalActions(advancedWithGeneralCredit, "corp").some(
+        (action) => action.type === "advance_card",
+      ),
+    ).toBe(false);
+    expect(
       state.eventLog.at(-1)?.publicPayload.cardImplementationAbilityTiming,
     ).toBe("corp_paid");
 

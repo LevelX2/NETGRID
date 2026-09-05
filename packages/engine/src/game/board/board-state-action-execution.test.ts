@@ -221,6 +221,30 @@ describe("board-state-action-execution", () => {
     ]);
   });
 
+  it("rejects advancement paid only by install/rez credits before any mutation", () => {
+    const targetState = baseState();
+    targetState.corp.credits = 3;
+    targetState.corpTemporaryInstallRezCredits = {
+      sourceCardInstanceId: ADVANCED_CARD_ID,
+      sourceDefinitionId: ADVANCED_CARD_DEFINITION_ID,
+      remaining: 3,
+      usableFor: "corp_install_or_rez",
+      returnUnusedAtTurnEnd: true,
+    };
+    const calls: string[] = [];
+    expect(() =>
+      handleBoardStateActionExecution(
+        hostFor(targetState, calls),
+        legalAction("advance_card", { cardId: ADVANCED_CARD_ID }),
+      ),
+    ).toThrow("Advancement benötigt einen nicht zweckgebundenen Credit");
+    expect(calls).toEqual([]);
+    expect(targetState.corp.credits).toBe(3);
+    expect(
+      targetState.cardInstances[ADVANCED_CARD_ID]?.advancementCounters,
+    ).toBe(0);
+  });
+
   it("marks Fort-Run-Gate activity when an authorized advance action targets ICE", () => {
     const calls: string[] = [];
     const targetState = baseState();
