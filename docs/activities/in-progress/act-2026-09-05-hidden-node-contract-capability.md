@@ -37,12 +37,12 @@ Unknown bleibt lokal. Heutiger Fortschritt und späterer Nutzen werden getrennt.
 
 ## Sequenz und Done-Gates
 
-1. **HN-F aktiv – günstigen aktuellen Fehlpfad beweisen.** Reale Engine-
+1. **HN-F abgeschlossen – günstigen aktuellen Fehlpfad beweisen.** Reale Engine-
    Actions eines vorbereiteten Contracts mit nutzbarem Verbraucher; Gegenfälle
    ohne Verbraucher, mit unzulässigem Verwendungszweck und nach Verfall.
    Den ersten Verlustpunkt von Quote über Parent/Support bis zur produktiven
    Entscheidung nachweisen. Commit: fokussierter Reproduktionstest.
-2. **HN-G – nachgewiesene Fähigkeit vertikal schließen.** Fehlende Engine-
+2. **HN-G aktiv – nachgewiesene Fähigkeit vertikal schließen.** Fehlende Engine-
    Quote/Semantik am erzeugenden Owner ergänzen, benötigte Economy-Route in
    bestehende Parent-/Need-/Head-/Linienverträge einbinden. Aktuelle Auszahlung
    und zweckgebundener Verbrauch, Ende des Supports und Reassessment nach
@@ -62,3 +62,29 @@ Zeitfenster neu starten. Kein normaler Serverbetrieb aus dem Worktree.
 Ein weiterer ungünstiger Einzelzustand ersetzt nicht die Abnahme des
 vollständigen Fähigkeitenumfangs. Echte Regeln-/Wissensgrenzen werden sichtbar
 gehalten, nicht mit einem Ersatzpfad überdeckt.
+
+## HN-F: nachgewiesene Verlustpunkte
+
+Real-Engine-Fixture `restricted-credit-rez`, Demo-Corp mit Contract und Wall
+of Static, Contract installiert/rezzed mit einem Counter, null allgemeinen
+Credits, bestehendes HQ-ICE und Wall in HQ, aktuelles `corp_action.main`:
+
+- Aktuelle Contract-Auszahlung ist legal. Danach ist die vorher unbezahlbare
+  HQ-Installation für einen Credit legal und ausführbar; Restbetrag verfällt
+  am Zugende. Dies beweist eine zulässige Verwendung, nicht deren strategische
+  Überlegenheit gegenüber allen Alternativen.
+- Der produktive Chooser scheitert schon bei 87,5 % Coverage:
+  `productive_action_without_owner` für die Auszahlung. Der Verlust liegt
+  vor Linienvergleich und Prioritätsbewertung. Allgemeine Liquidität ist
+  korrekt kein Owner-Nachweis für zweckgebundene Credits.
+- Gegenprobe offenbart einen vorgeschalteten Engine-Defekt: `advance_card`
+  prüft den Gesamtpool statt den frei verfügbaren Pool und bezahlt ebenfalls
+  daraus. Nach Auszahlung/Advancement entstehen Gesamtcredits 2 bei reservierten
+  Credits 3 und erneut einem Counter. Beide realen Aktionen wurden akzeptiert.
+  HN-G muss zuerst diese falsche Zahlungsautorität korrigieren, bevor eine
+  neue KI-Auszahlungsroute aktiv wird.
+- `run.approach_ice` bietet derzeit keine allgemeine `corp_paid`-Auszahlung.
+  Das ist noch kein nachgewiesener Regelverstoß und wird nicht blind geöffnet.
+
+Die drei Regressionen sind zunächst ausdrücklich Baseline-Charakterisierungen;
+HN-G ersetzt Fehlererwartungen durch die richtige fachliche Abnahme.
