@@ -1,4 +1,4 @@
-param([Parameter(Mandatory=$true)][string]$ArtifactRoot,[switch]$VerifyShortcuts)
+﻿param([Parameter(Mandatory=$true)][string]$ArtifactRoot,[switch]$VerifyShortcuts)
 $ErrorActionPreference='Stop'
 if($env:USERNAME -ne 'WDAGUtilityAccount' -or $PSScriptRoot -ne 'C:\NETGRID-TestInput'){throw 'language_probe_requires_disposable_guest'}
 $ArtifactRoot=[IO.Path]::GetFullPath($ArtifactRoot)

@@ -481,7 +481,13 @@ ANSI, wodurch der französische Shortcutname beschädigt wurde. Explizites
 `-Encoding UTF8` behebt den Fehler am Katalogeingang; die tatsächliche
 Build-Anweisung wurde unter PowerShell 5.1 erfolgreich geprüft. Ein
 Strukturguard sichert die Kodierung, der unveränderte MSI-Audit verlangt
-weiter den exakten Katalogtext. Ein neuer vollständiger Build steht aus.
+weiter den exakten Katalogtext. Der vollständige Neubau 8113 aus `48695e306`
+ist grün: Komponenten-Smokes, 27 Dialogvorschauen und der vollständige Audit
+aller 10.901 Payload-Dateien. Die drei Shortcutnamen sind zusätzlich direkt
+im dekompilierten MSI exakt gegen den Katalog geprüft. Der gezielte
+installierte Shortcut-/Sprachwechseltest bleibt offen. Sein PowerShell-5.1-
+Testhelfer trägt jetzt einen UTF-8-BOM, damit auch sein französischer
+Erwartungswert unverändert geparst wird.
 
 Im echten 8111-Setup derselben Sandbox wurden deutsche native Tooltips per
 Tastatur am linken und rechten Bildschirmrand geprüft: vollständiger Text,
