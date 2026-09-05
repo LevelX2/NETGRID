@@ -137,6 +137,31 @@ No-change-Ergebnis, **kein implementierter Government-Contract-Controller**.
 
 ## Aktuelle erste Contract-Fähigkeit und verbleibender Vertrag
 
+Zusätzlich ist jetzt ein eng begrenzter Defense-Verbraucher produktiv:
+Die Engine bindet eine aktuell legale Auszahlung an den konkreten folgenden
+ICE-Rez und liefert aus ihrem bestehenden sichtbaren Break-Quote-Produzenten
+eine optionale aktuelle Access-Blockierung. Das ist keine garantierte Wirkung
+gegen unbekannte spätere Runner-Entscheidungen. Unvollständige Wirkung entfernt
+nur diese Defense-Admission, nicht die unabhängig exakte Finanzierungsquote.
+
+`corp.defend_servers` veröffentlicht dafür im vorhandenen residenten Portfolio
+einen aktuellen zweckgebundenen Bedarf. `corp.economy` erhält Parent, Need,
+Quelle, Ability und aktuelle Invocation; Defense übernimmt keine Auszahlung.
+Nach der Auszahlung fällt der Bedarf weg und das echte neue `rez_ice` geht
+an denselben Defense-Parent zurück. Kein erfundener zukünftiger Action-Kandidat
+und keine zweite persistente Kampagne. Die genaue allgemeine Restliquidität
+nach dem Verbraucher wird von der Engine geliefert und schützt separate
+Score-Reserven; unverbrauchte temporäre Credits zählen dafür nicht als Reserve.
+
+Der produktive Real-Engine-Test verwendet das unveränderte Hidden-Node-Corpdeck
+mit vorbereitetem Contract und Mobile Barricade, aber einen kontrollierten
+Test-Runner und gesetzten vorbereiteten Spielzustand. Er beweist Finanzierung
+und Rückgabe, weder den eigenständigen Aufbau dieses Zustands noch Spielstärke.
+Weitere Proben prüfen bezahlbare sichtbare Breaker, lokale Unknowns,
+Score-Reserven, Hidden-Zonen-Invarianz und wiederholte Auswahl aus demselben
+vollständigen Kontext. Aufbau und Wiederholung bleiben der nächste offene
+Fähigkeitenumfang; die Kartenliste bleibt unverändert.
+
 HN-G ergänzt einen bewusst engen produktiven Pfad: Eine vorbereitete,
 aktuell Engine-gequotete Installations-/Rez-Auszahlung kann den echten
 Finanzierungsbedarf eines bereits installierten, positiv amortisierten

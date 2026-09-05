@@ -394,6 +394,7 @@ import {
 } from "./corp-exact-ice-rez-route";
 import { assessCorpScoreRushRisk } from "./corp-score-rush-risk";
 import { assessCorpExactIceRezAgainstScoreReserves } from "./corp-defense-score-reserve";
+import { corpRestrictedRezDefenseSignals } from "./corp-restricted-rez-defense";
 import { runnerRunLockReleaseProjection } from "./runner-run-lock-release-score";
 import {
   assessRunnerRunFundingAdmission,
@@ -16310,6 +16311,7 @@ function buildCorpDomain(
         return [];
       }),
       ...selectedScoreProtectionSignals,
+      ...corpRestrictedRezDefenseSignals(input, scoreProjects),
       ...defenseDrawSignals,
       ...consumedDefenseDrawSignals,
       ...(agendaPurgeDefenseChoice ? [agendaPurgeDefenseChoice] : []),
@@ -20989,8 +20991,30 @@ function corpDefenseReserveNeeds(
       ? [corpGenericDefensePriorityClass([need])]
       : [],
   );
-  return defenseNeeds.flatMap((need) => {
+  return defenseNeeds.flatMap((need): CorpCorePlanDomain["economyNeeds"] => {
     if (need.kind !== "generic") return [];
+    if (need.restrictedRezFunding) {
+      return [
+        {
+          kind: "parent_funding" as const,
+          needId: `defense-restricted-funding:${need.defenseId}`,
+          parentNeedId: need.defenseId,
+          parentPlanInstanceId: planInstanceIdForProposal({
+            moduleId: "corp.defend_servers",
+            dedupeKey: "server-defense-portfolio",
+          }),
+          gap: need.restrictedRezFunding.gap,
+          actionIds: need.restrictedRezFunding.quotes.map(
+            (quote) => quote.request.payoutActionId,
+          ),
+          restrictedCreditFunding: need.restrictedRezFunding.quotes,
+          parentPriorityClass: corpGenericDefensePriorityClass([need]),
+          immediateDefenseConversion: true,
+          urgentForScore: false,
+          evidenceCode: need.evidenceCode,
+        },
+      ];
+    }
     const fundingPriority = corpGenericDefensePriorityClass([need]);
     if (
       productivePriorities.some(

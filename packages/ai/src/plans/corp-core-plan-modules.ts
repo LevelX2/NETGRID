@@ -1,5 +1,9 @@
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
-import type { AiDecisionInput, VisibleCorpRezCostQuote } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  VisibleCorpRezCostQuote,
+  CorpRestrictedCreditRouteQuote,
+} from "@netgrid/shared";
 import type {
   GuaranteeLevel,
   PlanAssessment,
@@ -230,6 +234,10 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
     fundingGap: number;
   }>;
   rezRoute?: CorpExactIceRezRouteProjection;
+  restrictedRezFunding?: {
+    gap: number;
+    quotes: CorpRestrictedCreditRouteQuote[];
+  };
   value: number;
   choiceResolution?:
     | {
@@ -2197,6 +2205,33 @@ function validatedEconomyNeeds(
       (need): need is CorpGenericDefenseSignal =>
         need.kind === "generic" && need.defenseId === signal.parentNeedId,
     );
+    if (signal.restrictedCreditFunding || parentNeed?.restrictedRezFunding) {
+      const quotes = parentNeed?.restrictedRezFunding?.quotes;
+      return (
+        !parentNeed ||
+        !quotes?.length ||
+        signal.needId !==
+          `defense-restricted-funding:${parentNeed.defenseId}` ||
+        signal.parentPlanInstanceId !== expectedDefenseParent ||
+        signal.parentPriorityClass !==
+          corpGenericDefensePriorityClass([parentNeed]) ||
+        signal.evidenceCode !== parentNeed.evidenceCode ||
+        signal.gap !== parentNeed.restrictedRezFunding?.gap ||
+        signal.immediateDefenseConversion !== true ||
+        signal.incrementalDefenseReserve !== undefined ||
+        JSON.stringify(signal.restrictedCreditFunding) !==
+          JSON.stringify(quotes) ||
+        JSON.stringify(signal.actionIds) !==
+          JSON.stringify(quotes.map((quote) => quote.request.payoutActionId)) ||
+        quotes.some(
+          (quote) =>
+            !(context.input.corpRestrictedCreditRouteQuotes ?? []).some(
+              (current) => JSON.stringify(current) === JSON.stringify(quote),
+            ),
+        ) ||
+        economyCandidates(context, signal).length === 0
+      );
+    }
     const validFundingActions = new Set(
       context.actionCandidates
         .filter(immediateCorpLiquidCreditGain)
@@ -2976,6 +3011,22 @@ function genericDefenseFundingAlternativeExists(
   context: PlanSchedulerContext,
   signal: CorpGenericDefenseSignal,
 ): boolean {
+  if (signal.restrictedRezFunding) {
+    const provider = corpDomainIfAvailable(context)?.economyNeeds.find(
+      (need) =>
+        need.kind === "parent_funding" &&
+        need.parentNeedId === signal.defenseId &&
+        need.parentPlanInstanceId ===
+          planInstanceIdForProposal({
+            moduleId: "corp.defend_servers",
+            dedupeKey: "server-defense-portfolio",
+          }) &&
+        need.restrictedCreditFunding !== undefined,
+    );
+    return (
+      provider !== undefined && economyCandidates(context, provider).length > 0
+    );
+  }
   const requirement = genericDefenseFundingRequirement(
     signal,
     context.input.playerView.own.credits,
@@ -4076,6 +4127,16 @@ function defenseResourceGaps(
   if (selectedBand.kind !== "generic" || selectedBand.candidates.length > 0)
     return [];
   return selectedBand.eligibleSignals.flatMap((signal) => {
+    if (signal.restrictedRezFunding)
+      return [
+        {
+          needId: signal.defenseId,
+          capability: "fund_corp_install_or_rez",
+          minimum: signal.restrictedRezFunding.gap,
+          available: 0,
+          deadline: "current_turn",
+        } satisfies ResourceGap,
+      ];
     const requirement = genericDefenseFundingRequirement(signal);
     if (!requirement) return [];
     return [
@@ -5209,6 +5270,25 @@ function isValidDefenseSignal(
     return (
       hasOnlyKeys(value, GENERIC_DEFENSE_SIGNAL_KEYS) &&
       genericDefensePhase(value.phase) &&
+      (value.restrictedRezFunding === undefined ||
+        (value.phase === "rez_response" &&
+          value.rezWindowVerdict === "productive" &&
+          signal.kind === "generic" &&
+          signal.restrictedRezFunding !== undefined &&
+          knownNonNegativeInteger(signal.restrictedRezFunding.gap) &&
+          signal.restrictedRezFunding.gap > 0 &&
+          Array.isArray(signal.restrictedRezFunding.quotes) &&
+          signal.restrictedRezFunding.quotes.length > 0 &&
+          signal.restrictedRezFunding.quotes.every(
+            (quote) =>
+              quote.consumer?.actionType === "rez_ice" &&
+              quote.consumer.currentRunAccessBlock !== undefined &&
+              quote.consumer.availableBeforePayout === false &&
+              quote.consumer.sourceCardInstanceId ===
+                signal.targetIceInstanceId &&
+              quote.consumer.serverId === signal.serverId,
+          ) &&
+          signal.actionIds?.length === 0)) &&
       Array.isArray(value.sourceDefinitionIds) &&
       value.sourceDefinitionIds.every(nonEmptyString) &&
       (value.actionIds === undefined ||
@@ -5721,6 +5801,7 @@ const GENERIC_DEFENSE_SIGNAL_KEYS = new Set([
   "installRoute",
   "rezReserveNeed",
   "rezRoute",
+  "restrictedRezFunding",
   "value",
   "evidenceCode",
   "choiceResolution",

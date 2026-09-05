@@ -165,7 +165,21 @@ Abnahme; die Engine-Gegenprobe ist bereits auf das korrekte Ergebnis umgestellt.
   Die Verbraucherquote verwendet für Rez die tatsächliche Engine-Zone,
   nicht ein bei ICE fehlendes Installationsziel-Payload. 13 Real-Engine-
   AI-Tests, sieben Run-Builder-Tests und Engine-Typecheck grün. Die KI-
-  Defense-Bindung dieses neuen legalen Fundingpfads bleibt als Nächstes offen.
+  Defense-Bindung dieses neuen legalen Fundingpfads war der nächste Teilschritt.
+  Diese Bindung ist jetzt für einen exakten aktuellen Access-Block produktiv:
+  Der Engine-Vertrag liefert die sichtbare Break-Evidence und allgemeine
+  Restliquidität; Defense besitzt den Verbraucher, Economy ausschließlich
+  seinen exakt zugeordneten Auszahlungsbedarf. Nach Auszahlung übernimmt
+  derselbe residente Defense-Parent den echten Rez und der Support endet.
+  Geprüft mit Mobile Barricade im unveränderten Original-Corpdeck gegen einen
+  kontrollierten Test-Runner; dies ist eine vorbereitete Capability-Fixture,
+  keine Reproduktion eines natürlichen Matchverlaufs und kein Stärkenachweis.
+  Unknown, bezahlbarer sichtbarer Breaker, separate Score-Reserve und Hidden-
+  Zonen-Gegenproben sind enthalten. 257 Tests über vier angrenzende
+  Defense-/Rez-/Core-Dateien einschließlich 17 Real-Engine-Proben grün;
+  AI-/Engine-Typechecks grün.
+  AI-Struktur/Reachability (659, keine Zyklen), Engine-Struktur (380, keine
+  Zyklen), Paketgrenzen (1998) grün. Setup/Wiederholung bleibt offen.
 - **HN-G3 offen:** Setup/Wiederholung nur mit vollständigem Kosten- und
   Verbraucherhorizont; produktiver Chooser, Parent/Leaf, Invocation,
   Reassessment und deterministische Fortsetzung abnehmen.

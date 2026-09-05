@@ -8,6 +8,8 @@ import {
 import { applyAction } from "../apply-action";
 import { getLegalActions } from "../legal-actions";
 import { corpGeneralCreditAvailability } from "../payment/corp-general-credit-availability";
+import { visibleCorpCard } from "./card-view";
+import { visibleCorpIceRezResourceExchangeQuote } from "./visible-rez-resource-exchange-quote";
 
 /** Read-only one-payout funding prefix. No strategic selection and no future action authority. */
 export function quoteCorpRestrictedCreditRoute(
@@ -112,6 +114,7 @@ export function quoteCorpRestrictedCreditRoute(
       reason: "consumer_has_no_restricted_payment",
     };
   const generalCreditsRequired = creditCost - restrictedCreditsApplied;
+  const currentRunAccessBlock = quoteCurrentRunAccessBlock(projected, consumer);
   if (generalCreditsRequired > corpGeneralCreditAvailability(projected))
     throw new Error(
       "Restricted-credit consumer disagrees with Engine payment availability.",
@@ -152,6 +155,9 @@ export function quoteCorpRestrictedCreditRoute(
         restrictedCreditsApplied,
         newlyProvidedCreditsApplied,
         generalCreditsRequired,
+        generalCreditsRemainingAfterConsumer:
+          corpGeneralCreditAvailability(projected) - generalCreditsRequired,
+        ...(currentRunAccessBlock ? { currentRunAccessBlock } : {}),
       },
       remainingRestrictedCreditsAfterConsumer:
         restricted - restrictedCreditsApplied,
@@ -159,6 +165,34 @@ export function quoteCorpRestrictedCreditRoute(
       guarantee: "exact_current_funding_prefix",
     },
   };
+}
+
+function quoteCurrentRunAccessBlock(state: GameState, consumer: LegalAction) {
+  if (consumer.type !== "rez_ice" || !state.run) return undefined;
+  const count = consumer.payload?.effectiveSubroutineCountAfterRez;
+  const exchange = visibleCorpIceRezResourceExchangeQuote(
+    state,
+    consumer.source,
+    visibleCorpCard(state, consumer.source, "corp", "ice"),
+    typeof count === "number"
+      ? { hardEndTheRunSubroutineCountAfterRez: count }
+      : {},
+  );
+  if (exchange?.complete !== true || exchange.hardEndTheRunSubroutineCount <= 0)
+    return undefined;
+  const reason =
+    exchange.runnerBreakUnavailable?.reason === "no_visible_eligible_breaker"
+      ? ("no_visible_eligible_breaker" as const)
+      : exchange.runnerBreak?.canPayFromCurrentCredits === false
+        ? ("visible_break_route_unaffordable" as const)
+        : undefined;
+  return reason
+    ? {
+        runId: state.run.runId,
+        hardEndTheRunSubroutineCount: exchange.hardEndTheRunSubroutineCount,
+        reason,
+      }
+    : undefined;
 }
 
 function matchesConsumer(

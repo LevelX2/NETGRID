@@ -19,11 +19,28 @@ import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfol
 import { buildAiDecisionInput } from "./ai-decision-input";
 import { buildAiDecisionInputDto } from "../input-dto";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
+import standardDeckCatalog from "../../../../data/decks/standard-deck-catalog-1.0.0.json";
+import { corpRestrictedRezDefenseSignals } from "./corp-restricted-rez-defense";
 
 const CONTRACT = "onr_proteus_059_government-contract";
 const WALL = "onr_v1_279_wall-of-static";
 const CAMPAIGN = "onr_v1_337_rockerboy-promotion";
 const OPERATION = "onr_v1_302_scorched-earth";
+const ORIGINAL_ENTRY = standardDeckCatalog.decks.find(
+  (deck) =>
+    deck.standardDeckId ===
+    "standard_proteus_corp_hidden_node_control_2026_05_25",
+)!;
+const ORIGINAL_DECK: DeckDefinition = {
+  id: ORIGINAL_ENTRY.standardDeckId,
+  name: ORIGINAL_ENTRY.name,
+  side: "corp",
+  identity: ORIGINAL_ENTRY.identityCardId,
+  cards: ORIGINAL_ENTRY.cards.map((card) => ({
+    id: card.cardId,
+    quantity: card.quantity,
+  })),
+};
 const CORP_DECK: DeckDefinition = {
   ...DEMO_DECKS.demo_corp_001,
   id: "restricted-credit-corp",
@@ -38,6 +55,120 @@ const CORP_DECK: DeckDefinition = {
 
 describe("Corp restricted install/rez credit real-Engine capability", () => {
   afterEach(resetResidentPlanPortfolioMemory);
+
+  it("funds and hands back Mobile Barricade on the unchanged Hidden Node deck", () => {
+    const state = preparedOriginalRun();
+    const input = decisionInput(state, ORIGINAL_DECK);
+    const funding = input.corpRestrictedCreditRouteQuotes!.find(
+      (quote) => quote.consumer.actionType === "rez_ice",
+    )!;
+    expect(funding.consumer).toMatchObject({
+      sourceCardDefinitionId: "onr_proteus_033_mobile-barricade",
+      creditCost: 6,
+      generalCreditsRequired: 3,
+      generalCreditsRemainingAfterConsumer: 0,
+    });
+    const decision = chooseCorpAction(input);
+    expect(decision.actionId).toBe(funding.request.payoutActionId);
+    const root = decision.decisionDebug!.planFirstDecision!.rootPlanInstanceId;
+    expect(root).toContain("corp.defend_servers");
+    expect(
+      decision.decisionDebug!.planFirstDecision!.selectedPlan?.moduleId,
+    ).toBe("corp.economy");
+    const funded = apply(
+      state,
+      input.legalActions.find(
+        (action) => action.actionId === decision.actionId,
+      )!,
+    );
+    const nextInput = decisionInput(funded, ORIGINAL_DECK);
+    const next = chooseCorpAction(nextInput);
+    expect(next.decisionDebug!.planFirstDecision!.rootPlanInstanceId).toBe(
+      root,
+    );
+    expect(next.decisionDebug!.planFirstDecision!.leafExecutorInstanceId).toBe(
+      root,
+    );
+    expect(
+      next.decisionDebug!.planFirstDecision!.selectedStep?.needId,
+    ).toBeUndefined();
+    const rez = nextInput.legalActions.find(
+      (action) => action.actionId === next.actionId,
+    )!;
+    expect(rez.type).toBe("rez_ice");
+    expect(rez.source).toBe(funding.consumer.sourceCardInstanceId);
+    expect(apply(funded, rez).cardInstances[rez.source]!.rezzed).toBe(true);
+    resetResidentPlanPortfolioMemory();
+    expect(chooseCorpAction(decisionInput(state, ORIGINAL_DECK)).actionId).toBe(
+      decision.actionId,
+    );
+  });
+
+  it("keeps unknown access evidence local and does not execute unproven restricted defense funding", () => {
+    const input = decisionInput(preparedOriginalRun(), ORIGINAL_DECK);
+    for (const quote of input.corpRestrictedCreditRouteQuotes ?? [])
+      delete quote.consumer.currentRunAccessBlock;
+    const decision = chooseCorpAction(input);
+    expect(
+      input.legalActions.find((action) => action.actionId === decision.actionId)
+        ?.type,
+    ).toBe("decline_rez");
+  });
+
+  it("does not treat an affordable visible break route as an access block", () => {
+    const state = preparedOriginalRun();
+    RealEngineFixtureBuilder.forState(state)
+      .withRunnerProgramInstalled("onr_v1_036_jackhammer")
+      .withRunnerCredits(30);
+    const input = decisionInput(state, ORIGINAL_DECK);
+    expect(input.corpRestrictedCreditRouteQuotes).toHaveLength(1);
+    expect(
+      input.corpRestrictedCreditRouteQuotes![0]!.consumer.currentRunAccessBlock,
+    ).toBeUndefined();
+    expect(corpRestrictedRezDefenseSignals(input, [])).toEqual([]);
+  });
+
+  it("preserves a separate score reserve and ignores hidden opponent zone permutations", () => {
+    const state = preparedOriginalRun();
+    const input = decisionInput(state, ORIGINAL_DECK);
+    expect(corpRestrictedRezDefenseSignals(input, [])).toHaveLength(1);
+    expect(
+      corpRestrictedRezDefenseSignals(input, [
+        {
+          projectId: "agenda:reserve",
+          agendaPoints: 2,
+          serverId: "remote_2",
+          phase: "advance_agenda",
+          sameTurnCloseout: false,
+          terminalScore: false,
+          feasible: true,
+          evidenceCode: "test",
+          continuationReserve: {
+            agendaCardId: "reserve",
+            serverId: "remote_2",
+            requiredCreditsBeforeNextCorpTurn: 1,
+            remainingAdvancementCounters: 1,
+            nextCorpTurnGuaranteedFlexibleClicks: 3,
+            certifiedCreditGainFromFreeClicks: 2,
+          },
+        },
+      ]),
+    ).toEqual([]);
+    const decision = chooseCorpAction(input);
+    resetResidentPlanPortfolioMemory();
+    const other = structuredClone(state);
+    const a = other.runner.grip[0]!;
+    const b = other.runner.stack[0]!;
+    other.runner.grip[0] = b;
+    other.runner.stack[0] = a;
+    other.cardInstances[a]!.zone = { side: "runner", zone: "stack" };
+    other.cardInstances[b]!.zone = { side: "runner", zone: "grip" };
+    const counterInput = decisionInput(other, ORIGINAL_DECK);
+    expect(counterInput.corpRestrictedCreditRouteQuotes).toEqual(
+      input.corpRestrictedCreditRouteQuotes,
+    );
+    expect(chooseCorpAction(counterInput).actionId).toBe(decision.actionId);
+  });
 
   it("offers the prepared payout in the run rez window and funds the actual ICE rez", () => {
     let state = preparedInstallWindow();
@@ -89,10 +220,33 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
       },
     });
     expect(hashState(state)).toBe(before);
+    const fundingDecision = chooseCorpAction(decisionInput(state));
+    expect(fundingDecision.actionId).toBe(payout!.actionId);
+    expect(
+      fundingDecision.decisionDebug?.planFirstDecision?.selectedStep,
+    ).toMatchObject({
+      parentInstanceId:
+        fundingDecision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+      needId: expect.stringContaining("restricted-rez:"),
+      supportAssignmentId: expect.any(String),
+    });
     state = apply(state, payout!);
     const rez = getLegalActions(state, "corp").find(
       (action) => action.type === "rez_ice" && action.source === iceId,
     )!;
+    const rezDecision = chooseCorpAction(decisionInput(state));
+    expect(rezDecision.actionId).toBe(rez.actionId);
+    expect(
+      rezDecision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+    ).toBe(
+      fundingDecision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+    );
+    expect(
+      rezDecision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
+    ).toBe("corp.defend_servers");
+    expect(
+      rezDecision.decisionDebug?.planFirstDecision?.selectedStep?.needId,
+    ).toBeUndefined();
     state = apply(state, rez);
     expect(state.cardInstances[iceId]!.rezzed).toBe(true);
     expect(state.corp.credits).toBe(0);
@@ -544,18 +698,57 @@ function preparedEconomyWindow(): GameState {
   return state;
 }
 
-function decisionInput(state: GameState) {
+function decisionInput(state: GameState, deck: DeckDefinition = CORP_DECK) {
   return buildAiDecisionInput(state, "corp", {
     difficulty: "hard",
     ownDeckSnapshot: {
-      deckSnapshotId: "restricted-credit-corp-snapshot",
+      deckSnapshotId: `restricted-credit:${deck.id}`,
       side: "corp",
-      cards: CORP_DECK.cards.map((card) => ({
+      cards: deck.cards.map((card) => ({
         cardId: card.id,
         quantity: card.quantity,
       })),
     },
   });
+}
+
+function preparedOriginalRun(): GameState {
+  let state = createGameAfterSetup({
+    seed: "hidden-node-prepared-defense",
+    corpDeck: ORIGINAL_DECK,
+    runnerDeck: {
+      ...DEMO_DECKS.demo_runner_001,
+      cards: [
+        ...DEMO_DECKS.demo_runner_001.cards,
+        { id: "onr_v1_036_jackhammer", quantity: 1 },
+      ],
+    },
+  });
+  state = apply(
+    state,
+    getLegalActions(state, "corp").find(
+      (action) => action.type === "mandatory_draw",
+    )!,
+  );
+  RealEngineFixtureBuilder.forState(state)
+    .withCorpHqSize(0)
+    .withCorpRemoteRoot("remote_1", CONTRACT, 2, { faceup: true, rezzed: true })
+    .withCorpIceOnServer("hq", "onr_proteus_033_mobile-barricade")
+    .withCorpCredits(3)
+    .withRunnerCredits(0);
+  state = apply(
+    state,
+    getLegalActions(state, "corp").find(
+      (action) => action.type === "end_turn",
+    )!,
+  );
+  return apply(
+    state,
+    getLegalActions(state, "runner").find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
+    )!,
+  );
 }
 
 function apply(state: GameState, action: LegalAction) {

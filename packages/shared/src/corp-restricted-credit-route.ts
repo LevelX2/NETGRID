@@ -34,6 +34,15 @@ export type CorpRestrictedCreditRouteQuote = {
     restrictedCreditsApplied: number;
     newlyProvidedCreditsApplied: number;
     generalCreditsRequired: number;
+    generalCreditsRemainingAfterConsumer: number;
+    /** Current visible break route only, not a guarantee against later Runner choices. */
+    currentRunAccessBlock?: {
+      runId: string;
+      hardEndTheRunSubroutineCount: number;
+      reason:
+        | "no_visible_eligible_breaker"
+        | "visible_break_route_unaffordable";
+    };
   };
   remainingRestrictedCreditsAfterConsumer: number;
   cleanup: "end_of_turn";

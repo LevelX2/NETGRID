@@ -11,8 +11,8 @@ type QuoteContext = Pick<
   "matchId" | "side" | "playerView" | "legalActions"
 >;
 
-/** Enumerates visible root consumers only. The Economy owner still admits or rejects each project. */
-export function collectCorpRestrictedCreditRootQuotes(
+/** Enumerates visible installed consumers. Their domain owners admit each project. */
+export function collectCorpRestrictedCreditInstalledQuotes(
   input: QuoteContext,
   quote: (
     request: CorpRestrictedCreditRouteRequest,
@@ -30,25 +30,31 @@ export function collectCorpRestrictedCreditRootQuotes(
   const results: CorpRestrictedCreditRouteQuote[] = [];
   for (const payout of payouts) {
     for (const server of input.playerView.servers) {
-      for (const card of server.root) {
-        if (!card.known || !card.definitionId || card.rezzed === true) continue;
-        const result = quote({
-          matchId: input.matchId,
-          side: "corp",
-          stateVersion: input.playerView.stateVersion,
-          timingPoint: input.playerView.timingPoint,
-          payoutActionId: payout.actionId,
-          consumer: {
-            actionType: "rez_card",
-            sourceCardInstanceId: card.instanceId,
-            serverId: server.id,
-          },
-        });
-        if (result.status === "failed")
-          throw new Error(
-            `corp_restricted_credit_quote_failed:${result.reason}`,
-          );
-        if (result.status === "quoted") results.push(result.quote);
+      for (const [actionType, cards] of [
+        ["rez_card", server.root],
+        ["rez_ice", server.ice],
+      ] as const) {
+        for (const card of cards) {
+          if (!card.known || !card.definitionId || card.rezzed === true)
+            continue;
+          const result = quote({
+            matchId: input.matchId,
+            side: "corp",
+            stateVersion: input.playerView.stateVersion,
+            timingPoint: input.playerView.timingPoint,
+            payoutActionId: payout.actionId,
+            consumer: {
+              actionType,
+              sourceCardInstanceId: card.instanceId,
+              serverId: server.id,
+            },
+          });
+          if (result.status === "failed")
+            throw new Error(
+              `corp_restricted_credit_quote_failed:${result.reason}`,
+            );
+          if (result.status === "quoted") results.push(result.quote);
+        }
       }
     }
   }
@@ -68,11 +74,12 @@ export function sanitizeCorpRestrictedCreditRouteQuotes(
     const action = input.legalActions.find(
       (entry) => entry.actionId === request.payoutActionId,
     );
-    const card = input.playerView.servers
-      .find((server) => server.id === consumer.serverId)
-      ?.root.find(
-        (entry) => entry.instanceId === consumer.sourceCardInstanceId,
-      );
+    const server = input.playerView.servers.find(
+      (server) => server.id === consumer.serverId,
+    );
+    const card = (
+      consumer.actionType === "rez_ice" ? server?.ice : server?.root
+    )?.find((entry) => entry.instanceId === consumer.sourceCardInstanceId);
     const numbers = [
       q.payoutCredits,
       q.payoutClickCost,
@@ -83,6 +90,7 @@ export function sanitizeCorpRestrictedCreditRouteQuotes(
       consumer.restrictedCreditsApplied,
       consumer.newlyProvidedCreditsApplied,
       consumer.generalCreditsRequired,
+      consumer.generalCreditsRemainingAfterConsumer,
       q.remainingRestrictedCreditsAfterConsumer,
     ];
     if (
@@ -91,7 +99,8 @@ export function sanitizeCorpRestrictedCreditRouteQuotes(
       request.matchId !== input.matchId ||
       request.stateVersion !== input.playerView.stateVersion ||
       request.timingPoint !== input.playerView.timingPoint ||
-      consumer.actionType !== "rez_card" ||
+      (consumer.actionType !== "rez_card" &&
+        consumer.actionType !== "rez_ice") ||
       request.consumer?.actionType !== consumer.actionType ||
       request.consumer.sourceCardInstanceId !== consumer.sourceCardInstanceId ||
       request.consumer.serverId !== consumer.serverId ||
@@ -136,6 +145,27 @@ export function sanitizeCorpRestrictedCreditRouteQuotes(
       sourceCardInstanceId: consumer.sourceCardInstanceId,
       serverId: consumer.serverId,
     };
+    const block = consumer.currentRunAccessBlock;
+    const run = input.playerView.run;
+    const boundBlock =
+      block &&
+      consumer.actionType === "rez_ice" &&
+      block.runId === run?.runId &&
+      run?.attackedServerId === consumer.serverId &&
+      run.phase === "approach_ice" &&
+      run.position?.kind === "ice" &&
+      server?.ice[run.position.iceIndex]?.instanceId ===
+        consumer.sourceCardInstanceId &&
+      Number.isSafeInteger(block.hardEndTheRunSubroutineCount) &&
+      block.hardEndTheRunSubroutineCount > 0 &&
+      (block.reason === "no_visible_eligible_breaker" ||
+        block.reason === "visible_break_route_unaffordable")
+        ? {
+            runId: block.runId,
+            hardEndTheRunSubroutineCount: block.hardEndTheRunSubroutineCount,
+            reason: block.reason,
+          }
+        : undefined;
     return [
       {
         schemaVersion: CORP_RESTRICTED_CREDIT_ROUTE_QUOTE_VERSION,
@@ -162,6 +192,9 @@ export function sanitizeCorpRestrictedCreditRouteQuotes(
           restrictedCreditsApplied: consumer.restrictedCreditsApplied,
           newlyProvidedCreditsApplied: consumer.newlyProvidedCreditsApplied,
           generalCreditsRequired: consumer.generalCreditsRequired,
+          generalCreditsRemainingAfterConsumer:
+            consumer.generalCreditsRemainingAfterConsumer,
+          ...(boundBlock ? { currentRunAccessBlock: boundBlock } : {}),
         },
         remainingRestrictedCreditsAfterConsumer:
           q.remainingRestrictedCreditsAfterConsumer,

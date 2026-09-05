@@ -77,8 +77,11 @@ charaktererhaltende Hidden-Node-Vergleich begründet derzeit weder einen
 Standarddeck-Tausch noch pauschale KI-Boni; die Originalliste bleibt
 unverändert. Im aktiven Capability-Paket entsteht eine eng gebundene
 zweckgebundene Economy-Finanzierung mit Rückgabe an den tatsächlichen
-Verbraucher. Mehrschritt-Abnahme und erneuter Seedvergleich sind noch offen;
-die Current-State-Review grenzt den bereits getesteten Pfad davon ab.
+Verbraucher. Auszahlung → tatsächlicher Economy-Rez sowie Auszahlung →
+Defense-Rez mit erhaltenem Parent und beendetem Support sind geprüft, letzteres
+auch mit Mobile Barricade im unveränderten Original-Corpdeck. Eigenständiger
+Aufbau/Wiederholung und erneuter Seedvergleich sind noch offen; die
+Current-State-Review grenzt vorbereitete Capability-Fixtures von Spielevidence ab.
 
 Historische Selfplay-Cycle-Reviews, Markdown-Matrix, Reporting-State und
 versionierte HTML-Blockberichte wurden nach dem abschließenden idempotenten
