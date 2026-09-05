@@ -58,7 +58,7 @@ Blocker nennt Ursache und Removal Condition.
 
 ## Paketfolge
 
-`HN-A aktiv -> HN-B -> HN-C -> HN-D -> HN-E -> Main -> Cleanup`
+`HN-A fertig -> HN-B aktiv -> HN-C -> HN-D -> HN-E -> Main -> Cleanup`
 
 ### HN-A: Identität, Messung und reproduzierbare Ausgangslage
 
@@ -147,4 +147,33 @@ als complete.`
 
 ## Fortschritt
 
-HN-A aktiv. Preflight und Worktree angelegt; keine Verhaltensänderung.
+### HN-A abgeschlossen
+
+Die Scripts `create-hidden-node-evaluation-config.ts`,
+`evaluate-hidden-node.ts` und `inspect-hidden-node-checkpoints.ts` sichern
+vorab 40 bekannte und 30 neue Seeds, formatvalidierte Snapshots und
+Einzelergebnisse. Kein Ergebnis fließt in die KI zurück. Der 70er-Basislauf
+läuft bereits mit vor Änderungen geladenem Code; die ersten 40 Partien sind
+sauber beendet. Fünf vollständige Input-/Runtime-Captures stammen aus dem
+gleichen Evaluationsaufbau, Seed `meta-357-final-034`:
+
+| StateVersion | Beobachtung | Einordnung des ersten Verlustpunkts |
+| --- | --- | --- |
+| 69 | Null Credits, Government Contract in HQ; Basisfinanzierung gewählt | Kein bezahlbarer sofortiger Contract-Zyklus belegt. |
+| 84 | Mobile Barricade in neuen Remote, Defense als Leaf des Remote-Parents | Parent-/Supportbindung funktioniert hier bereits. |
+| 96 | Contract installiert, unrezzed, null Counter; zwei Credits, ein Klick | Kein Economy-Entwicklungsplan für diesen zweckgebundenen Countertyp; bessere aktuelle Auszahlung aber nicht belegt. |
+| 267 | Acht Credits, zwei Remotes, acht blockierte Scorelinien; Restklick-Finanzierung | Schutzquote/zulässige Route fehlt vor Linienauswahl; keine bewiesene sichere Alternative. |
+| 278 | Elf Credits, Corporate Headhunters wird im reifen Remote installiert | Konversion funktioniert nach Finanzierung; fehlende frühere Beschleunigung bleibt zu beweisen. |
+
+Prüfungen: alle fünf Chooser-Aufrufe mit wiederhergestelltem Runtime-Kontext
+jeweils zweimal identisch. Wiederholung der vollständigen Partie entspricht
+dem Basislauf: 380 Actions, Runner 8 / Corp 5,
+`fnv1a:011f527e`, deterministisches Replay, keine Runtimefehler.
+Der ältere Audit-Aufbau verwendet andere Snapshot-/Match-Metadaten und
+teilweise andere Remote-IDs; dessen Hash wird ausdrücklich nicht als
+identischer Evaluationskontext verwendet. Lokale Captures liegen unter
+`tmp/hidden-node/checkpoint-original`, Roh-Audit unter
+`tmp/hidden-node/audit-baseline-034.json`. HN-E sichert die benötigte Evidence
+außerhalb des zu entfernenden Worktrees.
+
+HN-B aktiv. Noch keine produktive Verhaltensänderung.
