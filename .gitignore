@@ -8,6 +8,8 @@ AGENTS.local.md
 .wix/
 apps/windows/**/bin/
 apps/windows/**/obj/
+tests/windows/**/bin/
+tests/windows/**/obj/
 
 node_modules/
 .pnpm-store/

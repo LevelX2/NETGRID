@@ -75,6 +75,19 @@ internal static class UpdateTransaction
         var logDirectory = Path.Combine(dataRoot, "runtime", "logs");
         Directory.CreateDirectory(logDirectory);
         var logPath = Path.Combine(logDirectory, $"updater-{DateTime.UtcNow:yyyyMMdd-HHmmss}.log");
+        try
+        {
+            return RunVerifiedTransaction(options, environment, dataRoot, logPath);
+        }
+        catch (Exception exception)
+        {
+            WriteFailure(logPath, exception, environment);
+            throw;
+        }
+    }
+
+    private static int RunVerifiedTransaction(UpdateOptions options, IReadOnlyDictionary<string, string> environment, string dataRoot, string logPath)
+    {
         var previousSetup = Path.Combine(dataRoot, "config", "updates", "NETGRID-Setup.exe");
         if (!File.Exists(previousSetup)) throw new InvalidOperationException("updater_previous_setup_missing");
         var previousHash = Hash(previousSetup);
@@ -184,7 +197,16 @@ internal static class UpdateTransaction
             if (line.Length == 0 || line.StartsWith('#')) continue;
             var separator = line.IndexOf('=');
             if (separator <= 0) throw new InvalidOperationException("updater_environment_invalid");
-            values.Add(line[..separator], line[(separator + 1)..]);
+            var name = line[..separator].Trim();
+            var value = line[(separator + 1)..].Trim();
+            if (value.StartsWith('"') || value.EndsWith('"'))
+            {
+                if (value.Length < 2 || value[0] != '"' || value[^1] != '"')
+                    throw new InvalidOperationException("updater_environment_quotes_invalid");
+                value = value[1..^1];
+            }
+            if (!values.TryAdd(name, value))
+                throw new InvalidOperationException($"updater_environment_duplicate:{name}");
         }
         return values;
     }
@@ -219,4 +241,6 @@ internal static class UpdateTransaction
         return redacted;
     }
     private static void WriteLog(string path, string message) => File.AppendAllText(path, $"{DateTimeOffset.Now:O} {message}{Environment.NewLine}");
+    private static void WriteFailure(string path, Exception exception, IReadOnlyDictionary<string, string> environment) =>
+        WriteLog(path, $"transaction_failed:{exception.GetType().Name}:{SafeError(Redact(exception.Message, environment))}");
 }
