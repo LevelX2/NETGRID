@@ -13277,6 +13277,23 @@ describe("MVP 0.2 multiplayer service", () => {
                 removalCondition:
                   "Provide at least one ready assessed plan for the legal voluntary actions.",
                 candidateCount: input.legalActions.length,
+                portfolioBinding: {
+                  schemaVersion: "resident-portfolio-binding-failure-v1",
+                  operation: "read",
+                  expected: {
+                    schemaVersion: "resident-plan-portfolio-v2",
+                    side: "runner",
+                    stateVersion: input.playerView.stateVersion,
+                    relation: "at_most",
+                  },
+                  actual: {
+                    schemaVersion: "resident-plan-portfolio-v2",
+                    side: "runner",
+                    stateVersion: input.playerView.stateVersion + 1,
+                  },
+                  violations: ["future_state_version"],
+                  privateCardPayload: "must-not-be-copied",
+                },
               },
             },
           );
@@ -13448,10 +13465,24 @@ describe("MVP 0.2 multiplayer service", () => {
               owner: "scheduler",
               removalCondition:
                 "Provide at least one ready assessed plan for the legal voluntary actions.",
+              portfolioBinding: {
+                schemaVersion: "resident-portfolio-binding-failure-v1",
+                operation: "read",
+                expected: {
+                  stateVersion: beforeFailure.gameState.stateVersion,
+                  relation: "at_most",
+                },
+                actual: {
+                  stateVersion: beforeFailure.gameState.stateVersion + 1,
+                },
+                violations: ["future_state_version"],
+              },
             },
           },
         },
       });
+      expect(JSON.stringify(bundle)).not.toContain("must-not-be-copied");
+      expect(JSON.stringify(failed.error)).not.toContain("portfolioBinding");
       expect(bundle?.decisions.at(-1)?.auditAvailability).toMatchObject({
         historicalLegalActions: { status: "persisted" },
         engineEvidence: { status: "persisted" },

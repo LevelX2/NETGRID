@@ -7576,6 +7576,9 @@ function structuredPlanResolutionFailure(
   const candidateCount = finiteNumber(context.candidateCount);
   const assessmentCount = finiteNumber(context.assessmentCount);
   const routeCount = finiteNumber(context.routeCount);
+  const portfolioBinding = structuredPortfolioBindingFailure(
+    context.portfolioBinding,
+  );
   if (!code || !side || !timingPoint || !owner || stateVersion === undefined)
     return undefined;
   return {
@@ -7592,6 +7595,57 @@ function structuredPlanResolutionFailure(
     ...(candidateCount !== undefined ? { candidateCount } : {}),
     ...(assessmentCount !== undefined ? { assessmentCount } : {}),
     ...(routeCount !== undefined ? { routeCount } : {}),
+    ...(portfolioBinding ? { portfolioBinding } : {}),
+  };
+}
+
+function structuredPortfolioBindingFailure(
+  value: unknown,
+): Record<string, unknown> | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value))
+    return undefined;
+  const binding = value as Record<string, unknown>;
+  if (
+    binding.schemaVersion !== "resident-portfolio-binding-failure-v1" ||
+    !["read", "remember", "restore"].includes(String(binding.operation))
+  )
+    return undefined;
+  const expected = binding.expected as Record<string, unknown> | undefined;
+  const actual = binding.actual as Record<string, unknown> | undefined;
+  if (
+    !expected ||
+    !actual ||
+    !["runner", "corp"].includes(String(expected.side)) ||
+    !["runner", "corp"].includes(String(actual.side)) ||
+    !["equal", "at_most"].includes(String(expected.relation)) ||
+    !stringValue(expected.schemaVersion) ||
+    !stringValue(actual.schemaVersion) ||
+    finiteNumber(expected.stateVersion) === undefined ||
+    finiteNumber(actual.stateVersion) === undefined
+  )
+    return undefined;
+  return {
+    schemaVersion: binding.schemaVersion,
+    operation: binding.operation,
+    expected: {
+      schemaVersion: expected.schemaVersion,
+      side: expected.side,
+      stateVersion: expected.stateVersion,
+      relation: expected.relation,
+    },
+    actual: {
+      schemaVersion: actual.schemaVersion,
+      side: actual.side,
+      stateVersion: actual.stateVersion,
+    },
+    violations: stringArray(binding.violations).filter((code) =>
+      [
+        "schema_version_mismatch",
+        "side_mismatch",
+        "future_state_version",
+        "stale_state_version",
+      ].includes(code),
+    ),
   };
 }
 
