@@ -1,6 +1,6 @@
 # CODEX_STATUS
 
-Stand: 2026-09-04
+Stand: 2026-09-05
 
 ## Einstieg
 
