@@ -58,7 +58,7 @@ Blocker nennt Ursache und Removal Condition.
 
 ## Paketfolge
 
-`HN-A fertig -> HN-B aktiv -> HN-C -> HN-D -> HN-E -> Main -> Cleanup`
+`HN-A fertig -> HN-B fertig -> HN-C aktiv -> HN-D -> HN-E -> Main -> Cleanup`
 
 ### HN-A: Identität, Messung und reproduzierbare Ausgangslage
 
@@ -176,4 +176,16 @@ identischer Evaluationskontext verwendet. Lokale Captures liegen unter
 `tmp/hidden-node/audit-baseline-034.json`. HN-E sichert die benötigte Evidence
 außerhalb des zu entfernenden Worktrees.
 
-HN-B aktiv. Noch keine produktive Verhaltensänderung.
+### HN-B abgeschlossen: begründetes No-change
+
+Die [Fähigkeitsanalyse](../../architecture/ai/hidden-node-capability-review.md)
+belegt die fehlende Contract-Kampagnenabdeckung und deren richtige fachliche
+Grenzen. Checkpoint 96 besitzt keinen heute finanzierbaren Contract-Zyklus;
+kein nachweislich besserer aktueller Head ist verloren gegangen. Schutz- und
+SP-082-Finanzierungsbindung funktionieren in den positiven Gegenproben.
+Keine neue Policy und kein vermeintlicher `+3`-Liquiditätsbonus.
+
+Checks: Engine `corp-asset-upgrade-utility.test.ts -t "restricts Government
+Contract"` (1 grün), beide SP-082-Checkpoint-Dateien (4 grün),
+`git diff --check`. Kein breiter Testlauf erforderlich, da kein produktiver
+Code oder Vertrag geändert wurde. HN-C aktiv.
