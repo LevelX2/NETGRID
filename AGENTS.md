@@ -21,17 +21,7 @@ ausführbare Gates als führend.
 
 ## Coordinator und Rollenrouting
 
-Bei jeder neuen projektbezogenen Anfrage klassifiziert der Coordinator die Anfrage, wählt genau einen primären Agenten aus und gibt die aktive Agentenvorgabe kurz aus:
-
-```text
-Aktiver Agent: <agent> (agents/<agent>.md)
-```
-
-Danach arbeitet Codex direkt nach dieser Agentendatei. Es ist keine separate Bestätigung nötig.
-
-Wenn die Intention unklar ist oder mehrere Rollen mit nicht offensichtlichen Folgen passen, stellt der Coordinator genau eine kurze Klärungsfrage. Bei gemischten Anfragen wird ein primärer Agent gewählt; optionale Folgeagenten werden nur empfohlen.
-
-Es gibt keine automatische Agent-Kette, keine implizite Übergabe an Folgeagenten und keine automatische Rollenumstellung während einer laufenden Aufgabe. Der Nutzer kann jederzeit einen anderen Agenten nennen oder zu `AGENTS.md` als Coordinator zurückwechseln.
+Bei klarer Aufgabe direkt arbeiten. Die folgende Rollenübersicht dient als Navigation zu Spezialwissen; eine Rolle nur laden, wenn der Auftrag sie verlangt oder ihre zusätzlichen Regeln fachlich nötig sind. Dann die verwendete Agentendatei kurz nennen. Gemischte Aufgaben rechtfertigen keinen automatischen Stopp; nur eine entscheidungsrelevante Unklarheit gezielt klären. Keine automatische Agent-Kette oder Delegation allein durch Rollenwahl.
 
 ## Agentenrouting
 
@@ -84,47 +74,9 @@ Eine kompakte Rollenübersicht liegt in `agents/README.md`.
 - Ein Fallback ist nur zulässig, wenn er ausdrücklich Teil des fachlichen
   Produktverhaltens ist oder vom Nutzer für den konkreten Fall genehmigt wurde.
 
-### Verbindlicher KI-Architektur-Preflight
+### KI-Architektur-Preflight
 
-Vor jeder Änderung an KI-Verhalten, KI-Entscheidungen, Choice-Auflösung,
-Planung, Bewertung oder `packages/ai/` sind zusätzlich und vor dem ersten
-Codepatch zu lesen:
-
-1. `packages/ai/AGENTS.md`
-2. vollständig
-   `docs/architecture/ai/change-compass.md`
-3. `docs/architecture/ai/README.md`
-4. die für den betroffenen Owner relevanten Abschnitte aus
-   `docs/architecture/ai/planning-architecture.md`
-
-Der Änderungskompass ist das verbindliche Agenten-Konzentrat aus dem
-allgemeinen KI-Zielbild und dem detaillierten Planebenen-Konzept. Bei
-Unklarheit, Kerneländerungen oder neuen Modulgrenzen sind zusätzlich die dort
-verlinkten Gesamtdokumente selbst zu lesen.
-
-Vor der Implementierung muss feststehen:
-
-- welcher bestehende Plan oder Controller fachlicher Owner der Entscheidung
-  ist;
-- ob die Änderung eine Planwahl, eine planinterne Route, eine
-  Engine-Fortsetzung oder nur die Payload einer bereits gewählten Action
-  betrifft;
-- welche bestehende Planinstanz, Continuation beziehungsweise
-  `PlanExecutionOrigin` erhalten oder erweitert werden muss;
-- welche Parallel-, Override-, Fallback- oder Resolverlogik dadurch gerade
-  **nicht** neu entstehen darf.
-
-Ein Choice-Resolver darf ausschließlich die Payload einer bereits vom
-zuständigen Plan gewählten und exakt gebundenen `LegalAction` vervollständigen.
-Er darf keine Server-, Ziel-, Karten-, Ressourcen- oder Strategieentscheidung
-duplizieren, die einem Planmodul gehört. Benötigt eine Choice solche
-Domainlogik, wird zuerst der zuständige Plan erweitert und die Choice daran
-gebunden. Ein lokaler Resolver-Shortcut ist unzulässig, auch wenn er legal und
-deterministisch wäre.
-
-Bei KI-Fixes müssen Tests neben dem Ergebnis auch die Ownership sichern:
-zuständiger Plan/Step/Route bleibt gleich, die Choice ändert weder `actionId`
-noch Executor, und es entsteht keine zweite Entscheidungsautorität.
+Für jede Änderung an produktivem KI-Verhalten, Entscheidungen, Choice-Auflösung, Planung oder Bewertung gelten die Quellen, Owner-Grenzen und Nachweise in `packages/ai/AGENTS.md`, unabhängig davon, in welcher Datei der Patch liegt. Diese Datei vor dem ersten Verhaltenspatch lesen; unveränderten Kontext wiederverwenden. Reine Dokumentations-, Format- oder Testtextkorrekturen lösen keinen vollständigen Architektur-Lesestapel aus.
 
 ## Version-0-Umgebung und Legacy-Stand
 

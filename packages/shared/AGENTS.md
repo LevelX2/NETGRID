@@ -7,4 +7,4 @@
   deprecated aliases, or preservation of historical local data unless the
   user explicitly requests it.
 - Prefer explicit discriminated unions for actions, events, phases, sides, zones, messages, and errors.
-- Any schema change must be reflected in derived docs and tests.
+- Reflect a schema change in the docs and tests whose contracts or consumers it actually affects; retain determinism and visibility coverage at those boundaries.
