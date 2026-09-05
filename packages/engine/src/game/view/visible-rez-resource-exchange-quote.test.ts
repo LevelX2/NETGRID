@@ -20,6 +20,57 @@ const CONCEALED_RESOURCE_ID =
   "resource_exchange_concealed_resource" as CardInstanceId;
 
 describe("visible Corp ICE rez resource exchange quote", () => {
+  it.each([0, 2, 3])(
+    "keeps a run spending cap separate from normal credit holdings (spent: %s)",
+    (spent) => {
+      const { state, visibleIce } = resourceExchangeState();
+      state.runner.credits = 11;
+      state.run!.runActionSpendingCap = {
+        sourceCardInstanceId: RENT_I_CON_ID,
+        limit: 3,
+        spent,
+      };
+
+      expect(
+        visibleCorpIceRezResourceExchangeQuote(state, FILTER_ID, visibleIce),
+      ).toMatchObject({
+        complete: true,
+        runnerBreak: {
+          requiredCredits: 1,
+          normalCreditsRequired: 1,
+          nonNormalRunCreditsApplied: 0,
+          canPayFromCurrentCredits: spent < 3,
+        },
+      });
+    },
+  );
+
+  it("retains eligible restricted pools when a run spending cap is below normal holdings", () => {
+    const { state, visibleIce } = resourceExchangeState();
+    state.runner.credits = 11;
+    state.run!.runnerRunTemporaryCredits = {
+      sourceDefinitionId: "onr_v1_098_lucidrine-booster-drug",
+      remaining: 2,
+      returnUnusedAtRunEnd: true,
+    };
+    state.run!.runActionSpendingCap = {
+      sourceCardInstanceId: RENT_I_CON_ID,
+      limit: 3,
+      spent: 2,
+    };
+    expect(
+      visibleCorpIceRezResourceExchangeQuote(state, FILTER_ID, visibleIce),
+    ).toMatchObject({
+      complete: true,
+      runnerBreak: {
+        requiredCredits: 1,
+        normalCreditsRequired: 0,
+        nonNormalRunCreditsApplied: 1,
+        canPayFromCurrentCredits: true,
+      },
+    });
+  });
+
   it("certifies the visible Filter/Rent-I-Con current-run exchange", () => {
     const { state, visibleIce } = resourceExchangeState();
 

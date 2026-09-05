@@ -6,6 +6,7 @@ import type {
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
+  availableRunnerRunCreditPool,
   availableRunnerRunCredits,
   availableRunnerRunStartCredits,
   payEncounterSubroutineRunCost,
@@ -132,6 +133,7 @@ describe("run duration payment", () => {
     const host = runDurationPaymentHost(state);
 
     expect(availableRunnerRunCredits(host)).toBe(13);
+    expect(availableRunnerRunCreditPool(host, "breaker")).toBe(15);
     expect(availableRunnerRunCredits(host, "breaker")).toBe(1);
     recordRunActionSpendingCapSpend(host, 1);
     expect(state.run?.runActionSpendingCap?.spent).toBe(3);

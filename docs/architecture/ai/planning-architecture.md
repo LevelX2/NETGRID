@@ -4889,6 +4889,13 @@ Jedes Modul testet:
   belegte monotone Untergrenze einer unbezahlbaren direkten Breakroute nicht
   verdecken; sobald die direkte Route bezahlbar ist, bleibt die unvollständige
   Gesamtwirkung weiterhin fail-closed;
+- die Engine trennt dafür den zahlungsfähigen Ressourcenpool von einem
+  unabhängigen Run-Ausgabenlimit: normale und zulässige Spezialcredits
+  bestimmen die Zahlungszusammensetzung, das verbleibende Limit bestimmt
+  zusätzlich die Bezahlbarkeit. Ein kleineres Ausgabenlimit als der normale
+  Creditbestand ist kein unbekannter Zustand. Ein dadurch nicht bezahlbarer
+  Break bleibt eine exakte Stop-Evidence für `corp.defend_servers`, ohne
+  neue Rez-Heuristik oder zweite Zahlungsautorität;
 - ein Scoreparent darf eine aktuelle, server- und `stateVersion`-gebundene
   Zertifizierung mehrerer bezahlbarer Engine-gequoteter Schutzlayer an seinen
   bestehenden Defense-Support weitergeben; der Support bewahrt diese Evidence,

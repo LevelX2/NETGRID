@@ -26,6 +26,43 @@ import { readKnownCorpCentralAgendaThreat } from "./corp-central-defense-facts-a
 import { assessCorpScoreProtection } from "./corp-score-protection-assessment";
 
 describe("exact Corp ICE rez route", () => {
+  it("keeps Corp defense ownership for a visible run-cap block despite abundant Runner credits", () => {
+    resetResidentPlanPortfolioMemory();
+    const fixture = engineIceRezWindow("onr_v1_279_wall-of-static", 0, {
+      corpCredits: 27,
+      runnerCredits: 11,
+      runnerPrograms: ["onr_v1_039_krash"],
+      runnerRunOnlyAction: true,
+      includeDecline: true,
+    });
+    expect(fixture.sourceCard.effectiveRezResourceExchangeQuote).toMatchObject({
+      complete: true,
+      runnerBreak: { requiredCredits: 6, canPayFromCurrentCredits: false },
+    });
+    const decision = chooseAiAction(fixture.input, {
+      persistTacticalPlanMemory: false,
+      corpTurnPlannerMode: "legacy_compare",
+    });
+    expect(decision).toMatchObject({
+      actionId: fixture.engineAction.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId:
+            "plan:corp.defend_servers:server-defense-portfolio",
+          leafExecutorInstanceId:
+            "plan:corp.defend_servers:server-defense-portfolio",
+          selectedStep: {
+            planInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+            stepId:
+              "plan:corp.defend_servers:server-defense-portfolio:allocate",
+          },
+        },
+      },
+    });
+  });
+
   it("accepts the Engine's ordinary rez_ice action without an optional server payload", () => {
     const { input, candidate, sourceCard, engineAction } = engineIceRezWindow(
       "simple_barrier_ice",
@@ -1760,6 +1797,7 @@ function engineIceRezWindow(
   options?: {
     corpCredits?: number;
     runnerCredits?: number;
+    runnerRunOnlyAction?: boolean;
     runnerScoredAgendaPoints?: number;
     runnerPrograms?: readonly string[];
     runnerProgramStrengthModifiers?: readonly number[];
@@ -1875,9 +1913,26 @@ function engineIceRezWindow(
   } else {
     addUnrezzedIce(state, iceId, definitionId, "rd");
   }
+  if (options?.runnerRunOnlyAction) {
+    const resourceId = "exact_run_only_source" as CardInstanceId;
+    state.runner.rig.resources.push(resourceId);
+    state.cardInstances[resourceId] = {
+      instanceId: resourceId,
+      definitionId: "onr_v1_187_wilson-weeflerunner-apprentice",
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "rig" },
+      faceup: true,
+      rezzed: true,
+      advancementCounters: 0,
+      strengthModifier: 0,
+    };
+  }
   const startRun = getLegalActions(state, "runner").find(
     (action) =>
-      action.type === "start_run" && action.payload?.serverId === "rd",
+      action.type === "start_run" &&
+      action.payload?.serverId === "rd" &&
+      (!options?.runnerRunOnlyAction || action.payload?.runOnlyAction === true),
   );
   if (!startRun) throw new Error("Engine did not expose the R&D run");
   const result = applyAction(state, {

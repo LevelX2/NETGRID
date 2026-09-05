@@ -13,6 +13,7 @@ import {
 import { visibleRunnerRigCardForViewer } from "./card-view";
 import { visibleEffectiveIceRunQuote } from "./visible-run-quote";
 import {
+  availableRunnerRunCreditPool,
   availableRunnerRunCredits,
   hostedPaymentCredits,
   runDurationPaymentHost,
@@ -147,7 +148,11 @@ export function visibleCorpIceRezResourceExchangeQuote(
       additionalBreakCost:
         projectedRunQuote.breakSubroutineAdditionalCostPerSubroutine ?? 0,
       runnerCredits: state.runner.credits,
-      runnerAvailableCredits: availableRunnerRunCredits(
+      runnerAvailableCredits: availableRunnerRunCreditPool(
+        runDurationPaymentHost(state),
+        breaker.instanceId,
+      ),
+      runnerSpendableCredits: availableRunnerRunCredits(
         runDurationPaymentHost(state),
         breaker.instanceId,
       ),
@@ -227,6 +232,7 @@ function quoteRunnerBreak(params: {
   additionalBreakCost: number;
   runnerCredits: number;
   runnerAvailableCredits: number;
+  runnerSpendableCredits: number;
   runnerStealthCreditsAvailable: number;
 }): BreakRead {
   const {
@@ -236,6 +242,7 @@ function quoteRunnerBreak(params: {
     additionalBreakCost,
     runnerCredits,
     runnerAvailableCredits,
+    runnerSpendableCredits,
     runnerStealthCreditsAvailable,
   } = params;
   if (!breaker.definitionId || !ice.definitionId) return { kind: "unknown" };
@@ -278,6 +285,7 @@ function quoteRunnerBreak(params: {
       additionalBreakCost,
       runnerCredits,
       runnerAvailableCredits,
+      runnerSpendableCredits,
       runnerStealthCreditsAvailable,
     });
     if (quote.kind === "unknown") return quote;
@@ -325,6 +333,7 @@ function quoteBreakAbility(params: {
   additionalBreakCost: number;
   runnerCredits: number;
   runnerAvailableCredits: number;
+  runnerSpendableCredits: number;
   runnerStealthCreditsAvailable: number;
 }): BreakRead {
   const {
@@ -336,6 +345,7 @@ function quoteBreakAbility(params: {
     additionalBreakCost,
     runnerCredits,
     runnerAvailableCredits,
+    runnerSpendableCredits,
     runnerStealthCreditsAvailable,
   } = params;
   const breakCount = ability.count;
@@ -370,6 +380,8 @@ function quoteBreakAbility(params: {
   if (
     !nonNegativeSafeInteger(runnerCredits) ||
     !nonNegativeSafeInteger(runnerAvailableCredits) ||
+    !nonNegativeSafeInteger(runnerSpendableCredits) ||
+    runnerSpendableCredits > runnerAvailableCredits ||
     runnerAvailableCredits < runnerCredits
   ) {
     return { kind: "unknown" };
@@ -381,7 +393,7 @@ function quoteBreakAbility(params: {
   // consequence can be represented as part of the exchange.
   if (
     ability.postBreakStealthLoss !== undefined &&
-    runnerAvailableCredits >= requiredCredits &&
+    runnerSpendableCredits >= requiredCredits &&
     !(
       ability.postBreakStealthLossSourceMode !== undefined &&
       ability.postBreakStealthLossOptionalIfUnavailable === true &&
@@ -390,6 +402,9 @@ function quoteBreakAbility(params: {
   ) {
     return { kind: "unknown" };
   }
+  // The eligible pool determines payment composition. A separate spending cap
+  // limits affordability, but cannot remove money from the Runner's holdings
+  // or turn a fully known current-run payment into an unknown quote.
   const nonNormalRunCreditsAvailable = runnerAvailableCredits - runnerCredits;
   const nonNormalRunCreditsApplied = Math.min(
     requiredCredits,
@@ -407,7 +422,7 @@ function quoteBreakAbility(params: {
       breakUses,
       normalCreditsRequired,
       nonNormalRunCreditsApplied,
-      canPayFromCurrentCredits: runnerAvailableCredits >= requiredCredits,
+      canPayFromCurrentCredits: runnerSpendableCredits >= requiredCredits,
       paymentEvidenceSource: "engine_icebreaker_ability",
       consumedCards: ability.specialEffects?.some(
         (effect) => effect.kind === "run_end_trash_source_if_used",
