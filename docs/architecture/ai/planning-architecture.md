@@ -2523,6 +2523,16 @@ Der Plan muss unterscheiden:
 - Ambush-/Damage-Risiko;
 - deckstrategisch begründeten wiederholten Remote-Druck.
 
+Die Runpfad-Projektion trennt einen nicht tödlichen Handpufferverstoß von
+unmittelbarer beziehungsweise Cleanup-Flatline. Ein bekannter Zugriff bleibt
+bei überlebbarem Schaden grundsätzlich abfangbar; der bestehende
+Contest-Owner entscheidet weiterhin, ob sein terminales Letztchancenfenster
+den normalen Handpuffer überstimmen darf. Die Schadensprojektion summiert dazu
+alle bekannten Folgequellen einschließlich Zugriffsschaden auch nach einer
+ersten Reservewarnung weiter. Eine Reservewarnung allein darf weder
+`accessPayoffContestable` noch die bekannte Überlebbarkeit auf `false` setzen.
+Es entsteht keine zusätzliche Runwahl oder Ausnahme im Choice-Resolver.
+
 `draw_for_answer` ist nur zulässig, wenn:
 
 - eine konkrete fehlende Antwort benannt ist;
