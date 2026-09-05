@@ -12,4 +12,7 @@
     <AssemblyName>NETGRID.RuntimeConfig</AssemblyName>
     <RootNamespace>Netgrid.RuntimeConfig</RootNamespace>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\Common\WindowsUiLanguage.cs" Link="WindowsUiLanguage.cs" />
+  </ItemGroup>
 </Project>

@@ -14,6 +14,20 @@ var catalog = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, s
 var previewRoot = args.Length == 2 && args[0] == "--render-to" ? Path.GetFullPath(args[1]) : null;
 if (previewRoot is not null) Directory.CreateDirectory(previewRoot);
 var checks = 0;
+var languagePolicy = assembly.GetType("Netgrid.Windows.WindowsUiLanguage", throwOnError: true)!;
+var resolveLanguage = languagePolicy.GetMethod("Resolve")!;
+foreach (var chosen in new[] { "de", "en", "fr" })
+{
+    Assert((string)resolveLanguage.Invoke(null, [chosen, "en"])! == chosen, "installed_language_overrides_windows_language");
+    Assert((string)resolveLanguage.Invoke(null, [null, chosen])! == chosen, "unconfigured_language_uses_windows_language");
+}
+Assert((string)resolveLanguage.Invoke(null, [null, "es"])! == "en", "unsupported_windows_language_uses_product_default");
+foreach (var invalid in new object[] { "", "es", 1031, false })
+{
+    try { resolveLanguage.Invoke(null, [invalid, "en"]); throw new Exception("invalid_language_preference_accepted"); }
+    catch (TargetInvocationException exception) when (exception.InnerException is InvalidOperationException)
+    { Assert(exception.InnerException.Message == "windows_ui_language_preference_invalid", "invalid_language_preference_fail_closed"); }
+}
 foreach (var language in new[] { "de", "en", "fr" })
 {
     text.GetMethod("Use")!.Invoke(null, [language]);

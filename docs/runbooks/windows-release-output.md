@@ -285,7 +285,15 @@ Die Sprachauswahl ordnet ihre Aktionen über Layoutcontainer statt fester
 Koordinaten an. „Weiter“ und „Abbrechen“ erscheinen ausschließlich in der
 gerade ausgewählten Sprache und wechseln unmittelbar mit der Auswahl.
 Komponententests sichern freie Schaltflächen ohne Überlappung sowie den
-Sprachwechsel. Die Build-Vorschauen umfassen Sprachauswahl, Setup und
+Sprachwechsel. Das Setup übergibt die Auswahl als `NETGRID_UI_LANGUAGE` an
+die erhöhte Runtimekonfiguration. Nur diese schreibt die Installationspräferenz
+`UiLanguage`; eine leere MSI-Eigenschaft bedeutet bei Repair/Update ausdrücklich
+keine neue Auswahl. Alle vier Windows-Oberflächen laden denselben Wert.
+`--audit-localization <JSON-Datei>` gibt ihre tatsächlich gewählte Sprache
+ohne Fenster, Passwortdialog oder Serverstart aus. Der E2E-Test prüft die
+französische Auswahl gegen alle installierten Folgeprogramme; rein lokale
+Komponententests verändern dafür keine Host-Registrierung.
+Die Build-Vorschauen umfassen Sprachauswahl, Setup und
 Deinstallation in drei Sprachen und drei geometrischen Skalierungen. Diese
 Skalierung über `Form.Scale` ersetzt keinen Test mit real geänderter
 Windows-DPI-Einstellung und entsprechend skalierten Schriften.

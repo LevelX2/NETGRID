@@ -322,6 +322,12 @@ nutzbar; Maintenance bleibt bis zur Initialisierung gesperrt.
   Französisch verfügbar.
 - Die Windows-Sprache wird erkannt; `de`, `en` und `fr` werden direkt gewählt,
   sonst Englisch. Die Sprache kann am Setupbeginn geändert werden.
+- Die ausdrücklich gewählte Setupsprache wird pro Installation unter
+  `HKLM\SOFTWARE\LevelX2\NETGRID\UiLanguage` gespeichert. Setup,
+  Ersteinrichtung, Launcher und Updater verwenden dieselbe Präferenz;
+  Reparatur und Update ohne neue Auswahl behalten sie bei. Ohne gespeicherte
+  Auswahl gilt die Windows-Sprache. Ungültige gespeicherte Werte werden nicht
+  durch einen stillen Ersatzwert verdeckt.
 - Sichtbare Texte verwenden natürliche, korrekt formatierte Sprache, echte
   Umlaute und `ß` im Deutschen, konsistente Terminologie, verständliche
   Fehlerursachen und handlungsorientierte Schaltflächen. Abgeschnittene Texte,

@@ -10,6 +10,11 @@ internal static class Program
     [STAThread]
     public static int Main(string[] args)
     {
+        if (args.Length == 2 && args[0] == "--audit-localization")
+        {
+            File.WriteAllText(Path.GetFullPath(args[1]), JsonSerializer.Serialize(UiText.Audit));
+            return 0;
+        }
         if (args.Length > 0) return RunHeadless(args);
         ApplicationConfiguration.Initialize();
         using var form = new FirstRunForm();

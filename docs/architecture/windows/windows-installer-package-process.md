@@ -435,6 +435,25 @@ bei der erneuten CLI-Abfrage bereits beendet; es wurde weder eine neue
 Sandbox geöffnet noch eine Installation gestartet. Die native Hover-
 Sichtprüfung benötigt deshalb eine neue Testsitzung.
 
+Die isolierte E2E-Teststrecke ist unter `aa148864e` gesichert. Der neue
+Offline-Sandboxlauf `9d17bc6835d74f11918ab7fe2a823061` bindet 8106 als Basis
+und den Tooltip-Teststand 8109 als Update. Die VM
+`0a6030a3-a7a0-4a18-a780-e87bc9db6714` und ihr Gastcontroller 6128 sind live
+bestätigt; ein terminales Gesamtergebnis steht noch aus. Eingaben sind
+schreibgeschützt, Entwicklungswerkzeuge fehlen, die Hauptinstanz bleibt
+unberührt. Der Lauf wird nicht nachträglich auf neue Quellen umgebunden.
+
+Der anschließende UI-Vertragsabgleich zeigte, dass die gewählte Setupsprache
+bisher nicht an Folgeprogramme weitergegeben wurde. Eine gemeinsame
+Installationspräferenz und ihre MSI-Bindung beheben diesen Prozessübergang.
+1.649 Setup-Assertions, isolierte Runtimekonfigurationstests, vier erfolgreiche
+Komponentenbuilds und deren fensterlose Sprachaudits sind grün. Der E2E-Helfer
+prüft künftig die explizite französische Wahl gegen Ersteinrichtung, Launcher
+und Updater. Diese Quellenänderung benötigt einen neuen Installer und einen
+eigenen installierten Nachweis; 8109 enthält sie noch nicht. Die reale
+GitHub-Releaseprüfung ist weiterhin offen: der read-only Abruf liefert keine
+Releases; Veröffentlichungsfreigabe wurde angefragt, nichts hochgeladen.
+
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.
 Die erste Public-Prüfung war wegen der pauschalen, aktiven Sandbox-Regel

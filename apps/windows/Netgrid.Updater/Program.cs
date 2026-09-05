@@ -12,6 +12,11 @@ internal static class Program
     {
         try
         {
+            if (args.Length == 2 && args[0] == "--audit-localization")
+            {
+                File.WriteAllText(Path.GetFullPath(args[1]), JsonSerializer.Serialize(UiText.Audit));
+                return 0;
+            }
             if (args.Length == 2 && args[0] == "--audit-contract")
             {
                 File.WriteAllText(Path.GetFullPath(args[1]), JsonSerializer.Serialize(new

@@ -713,6 +713,7 @@ internal static class Installer
                 Property("NETGRID_RETENTION_DAYS", settings.RetentionDays),
                 Property("NETGRID_ACCOUNT_ACCESS_MODE", settings.AccountAccessMode),
                 Property("INSTALLDESKTOPSHORTCUT", settings.DesktopShortcut ? "1" : "0"),
+                Property("NETGRID_UI_LANGUAGE", UiText.Language),
                 Property("NETGRID_SETUP_SOURCE", Environment.ProcessPath ?? throw new SetupException("setup_path_missing")),
                 Property("NETGRID_SETUP_SHA256", CurrentSetupHash()),
             };

@@ -5,6 +5,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Win32;
+using Netgrid.Windows;
 
 namespace Netgrid.RuntimeConfig;
 
@@ -69,6 +70,11 @@ internal static class Program
             ValidateDataRoot(dataRoot, programRoot);
             var network = NetworkSettings.FromCommand(command);
             var desktopShortcut = ValidateDesktopShortcut(command.Optional("--desktop-shortcut"));
+            var uiLanguage = command.Optional("--ui-language");
+            if (!string.IsNullOrEmpty(uiLanguage) && !WindowsUiLanguage.IsSupported(uiLanguage))
+                throw new RuntimeConfigException("ui_language_invalid", "Die gewählte Oberflächensprache ist ungültig.");
+            if (!string.IsNullOrEmpty(uiLanguage) && command.Optional("--state-file") is not null)
+                throw new RuntimeConfigException("ui_language_requires_registry", "Die Spracheinstellung benötigt die echte Installationsregistrierung.");
 
             var state = RuntimeInitializer.Initialize(
                 dataRoot,
@@ -82,6 +88,14 @@ internal static class Program
                 using var key = Registry.LocalMachine.CreateSubKey(RegistryPath, writable: true)
                     ?? throw new RuntimeConfigException("registry_write_failed", "Die Installationspräferenz konnte nicht gespeichert werden.");
                 key.SetValue("DesktopShortcutPreference", desktopShortcut, RegistryValueKind.String);
+            }
+            // Empty MSI property means no new choice: repairs and updates retain
+            // the existing preference. Only the elevated installer writes it.
+            if (!string.IsNullOrEmpty(uiLanguage))
+            {
+                using var key = Registry.LocalMachine.CreateSubKey(WindowsUiLanguage.RegistryPath, writable: true)
+                    ?? throw new RuntimeConfigException("registry_write_failed", "Die Spracheinstellung konnte nicht gespeichert werden.");
+                key.SetValue(WindowsUiLanguage.RegistryValue, uiLanguage, RegistryValueKind.String);
             }
             if (command.Optional("--configure-firewall") == "true")
             {
@@ -398,6 +412,7 @@ internal static class Program
                     "--account-access-mode",
                     "--configure-firewall",
                     "--desktop-shortcut",
+                    "--ui-language",
                     "--source",
                     "--product-code",
                     "--sha256",

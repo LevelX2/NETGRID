@@ -97,8 +97,14 @@ try {
   Invoke-Msi @(
     "/i", (Quote-Msi $updateMsi), "/qn", "/norestart", "/l*v", (Quote-Msi (Join-Path $logRoot "recommended-reinstall.log")),
     "INSTALLFOLDER=$(Quote-Msi $programRoot)", "NETGRID_DATA_ROOT=$(Quote-Msi $dataRoot)",
-    "NETGRID_SETUP_SOURCE=$(Quote-Msi $updateSetup)", "NETGRID_SETUP_SHA256=$(Setup-Hash $updateSetup)"
+    "NETGRID_SETUP_SOURCE=$(Quote-Msi $updateSetup)", "NETGRID_SETUP_SHA256=$(Setup-Hash $updateSetup)", "NETGRID_UI_LANGUAGE=fr"
   ) | Out-Null
+  Assert-True ((Get-ItemPropertyValue -LiteralPath 'HKLM:\SOFTWARE\LevelX2\NETGRID' -Name UiLanguage) -eq 'fr') 'selected_ui_language_not_registered'
+  foreach ($component in @('NETGRID.exe','NETGRID.FirstRun.exe','NETGRID.Updater.exe')) {
+    $languageAudit = Join-Path $logRoot ($component + '.ui.json')
+    Invoke-GuiExecutable (Join-Path $programRoot $component) @('--audit-localization', $languageAudit) | Out-Null
+    Assert-True ((Get-Content -LiteralPath $languageAudit -Raw | ConvertFrom-Json).selectedLanguage -eq 'fr') "selected_ui_language_not_inherited:$component"
+  }
   Assert-True (Test-Path -LiteralPath (Join-Path $startMenuRoot "NETGRID Setup.lnk") -PathType Leaf) "setup_start_menu_shortcut_missing"
   Invoke-Msi @("/x", (Quote-Msi $updateMsi), "/qn", "/norestart", "/l*v", (Quote-Msi (Join-Path $logRoot "recommended-delete.log")), "NETGRID_DATA_ROOT=$(Quote-Msi $dataRoot)", "DELETEUSERDATA=1") | Out-Null
   Assert-True (-not (Test-Path -LiteralPath $programRoot)) "recommended_delete_left_program"

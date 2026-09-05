@@ -10,6 +10,11 @@ internal static class Program
     [STAThread]
     private static async Task<int> Main(string[] args)
     {
+        if (args.Length == 2 && args[0] == "--audit-localization")
+        {
+            await File.WriteAllTextAsync(Path.GetFullPath(args[1]), System.Text.Json.JsonSerializer.Serialize(UiText.Audit));
+            return 0;
+        }
         var options = LauncherOptions.Parse(args);
         if (options.DiagnosticOutput is not null)
         {

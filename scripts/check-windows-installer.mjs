@@ -159,6 +159,7 @@ try {
     ) ||
     !authoring.includes("--configure-firewall &quot;true&quot;") ||
     !authoring.includes("--desktop-shortcut &quot;[INSTALLDESKTOPSHORTCUT]&quot;") ||
+    !authoring.includes("--ui-language &quot;[NETGRID_UI_LANGUAGE]&quot;") ||
     !authoring.includes('Id="CacheNetgridSetup" HideTarget="yes"') ||
     !authoring.includes("NETGRID_SETUP_SOURCE &lt;&gt; &quot;&quot;") ||
     !authoring.includes(

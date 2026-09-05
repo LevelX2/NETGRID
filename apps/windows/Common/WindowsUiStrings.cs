@@ -8,7 +8,7 @@ internal static class UiText
     private const string ResourceName = "NETGRID.WindowsUiStrings.json";
     private static readonly string[] SupportedLanguages = ["de", "en", "fr"];
     private static readonly IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> Catalog = Load();
-    private static string _language = Normalize(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
+    private static string _language = WindowsUiLanguage.Resolve(WindowsUiLanguage.ReadPreference(), CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
 
     public static string Language => _language;
     public static IReadOnlyList<string> Languages => SupportedLanguages;
@@ -24,6 +24,7 @@ internal static class UiText
     public static object Audit => new
     {
         schemaVersion = "netgrid-windows-ui-localization-v1",
+        selectedLanguage = Language,
         languages = Languages,
         fallbackLanguage = "en",
         keyCount = Catalog["en"].Count,

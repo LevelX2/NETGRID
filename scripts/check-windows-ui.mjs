@@ -28,7 +28,12 @@ for (const project of [
     )
   )
     throw new Error(`windows_ui_project_icon_missing:${project}`);
+  if (!source.includes('Common\\WindowsUiLanguage.cs'))
+    throw new Error(`windows_ui_language_policy_missing:${project}`);
 }
+const commonUiSource = readFileSync(path.join(projectRoot, 'apps/windows/Common/WindowsUiStrings.cs'), 'utf8');
+if (!commonUiSource.includes('WindowsUiLanguage.Resolve(WindowsUiLanguage.ReadPreference()'))
+  throw new Error('windows_ui_installed_preference_not_loaded');
 for (const language of languages) {
   const keys = Object.keys(catalog[language] ?? {}).sort();
   if (JSON.stringify(keys) !== JSON.stringify(reference))
@@ -58,6 +63,8 @@ const setupErrorCodes = new Set(
     (match) => match[1],
   ),
 );
+if (!setupSource.includes('Property("NETGRID_UI_LANGUAGE", UiText.Language)'))
+  throw new Error('windows_setup_language_choice_not_forwarded');
 for (const code of setupErrorCodes)
   for (const language of languages)
     if (!catalog[language][`setup.failure.${code}`])

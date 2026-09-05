@@ -88,6 +88,7 @@
     <Property Id="NETGRID_SERVER_PORT" Value="8787" Secure="yes" />
     <Property Id="NETGRID_RETENTION_DAYS" Value="30" Secure="yes" />
     <Property Id="NETGRID_ACCOUNT_ACCESS_MODE" Value="simple" Secure="yes" />
+    <Property Id="NETGRID_UI_LANGUAGE" Secure="yes" />
     <Property Id="INSTALLDESKTOPSHORTCUT" Value="1" Secure="yes" />
     <Property Id="NETGRID_PREVIOUS_DESKTOP_SHORTCUT" Secure="yes">
       <RegistrySearch Id="NetgridDesktopShortcutPreference" Root="HKLM" Key="SOFTWARE\LevelX2\NETGRID" Name="DesktopShortcutPreference" Type="raw" Bitness="always64" />
@@ -103,7 +104,7 @@
     <Property Id="DELETEUSERDATA" Value="0" Secure="yes" />
     <SetProperty
       Id="InitializeNetgridRuntime"
-      Value='initialize --data-root "[NETGRID_DATA_ROOT]" --deployment-profile "[NETGRID_DEPLOYMENT_PROFILE]" --lan-address "[NETGRID_LAN_ADDRESS]" --web-port "[NETGRID_WEB_PORT]" --server-port "[NETGRID_SERVER_PORT]" --retention-days "[NETGRID_RETENTION_DAYS]" --account-access-mode "[NETGRID_ACCOUNT_ACCESS_MODE]" --desktop-shortcut "[INSTALLDESKTOPSHORTCUT]" --configure-firewall "true"'
+      Value='initialize --data-root "[NETGRID_DATA_ROOT]" --deployment-profile "[NETGRID_DEPLOYMENT_PROFILE]" --lan-address "[NETGRID_LAN_ADDRESS]" --web-port "[NETGRID_WEB_PORT]" --server-port "[NETGRID_SERVER_PORT]" --retention-days "[NETGRID_RETENTION_DAYS]" --account-access-mode "[NETGRID_ACCOUNT_ACCESS_MODE]" --desktop-shortcut "[INSTALLDESKTOPSHORTCUT]" --ui-language "[NETGRID_UI_LANGUAGE]" --configure-firewall "true"'
       Before="InitializeNetgridRuntime"
       Sequence="execute"
       Condition='NOT REMOVE~="ALL"' />

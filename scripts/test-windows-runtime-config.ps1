@@ -81,6 +81,8 @@ NETGRID_INITIAL_CLEANUP_RETENTION_DAYS=30
     "--account-access-mode", "protected"
   )
   Invoke-RuntimeConfig -Arguments $arguments
+  Invoke-RuntimeConfig -Arguments ($arguments + @('--ui-language', 'es')) -ExpectedExitCode 2
+  Invoke-RuntimeConfig -Arguments ($arguments + @('--ui-language', 'fr')) -ExpectedExitCode 2
   $runtimeEnvironment = Join-Path $dataRoot "config\runtime.env"
   $firstHash = (Get-FileHash -LiteralPath $runtimeEnvironment -Algorithm SHA256).Hash
   $source = [System.IO.File]::ReadAllText($runtimeEnvironment)
