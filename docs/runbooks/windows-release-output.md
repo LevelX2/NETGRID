@@ -307,6 +307,41 @@ Deinstallation in drei Sprachen und drei geometrischen Skalierungen. Diese
 Skalierung über `Form.Scale` ersetzt keinen Test mit real geänderter
 Windows-DPI-Einstellung und entsprechend skalierten Schriften.
 
+### Verbleibende native UI-Abnahme
+
+Diese Checkliste ist ein Prüfablauf, kein bereits erbrachter Nachweis.
+Jede Abnahme bindet Setup/MSI per SHA-256, Windows-Version, gewählte Sprache,
+tatsächliche Windows-Anzeigeskalierung und hellen bzw. dunklen Kontext.
+Die sichtbaren Flows müssen in `de`, `en` und `fr` funktional geprüft werden;
+die visuelle Prüfung umfasst echte 100 %, 125 % und 150 %. Eine skalierte
+Bilddatei, Viewer-Zoom oder `Form.Scale` zählt nicht als Windows-DPI-Wechsel.
+
+| Oberfläche | Zu prüfen |
+| --- | --- |
+| Sprachauswahl und Setup | Sprachwechsel samt Aktionsbeschriftungen; empfohlene und benutzerdefinierte Optionen; vollständige Texte, Fokusreihenfolge, Maus- und Tastaturhilfen; Tooltips an beiden Bildschirmrändern |
+| Validierung | Ungültige Pfade, belegte Testports und unzureichender Speicher führen zu verständlichen lokalisierten Meldungen vor der Installation; keine rohen Ausnahmetexte |
+| Ersteinrichtung | Verdeckte doppelte Eingabe, verständliche Rückmeldung, „Später“ und unveränderter vorhandener Zugang; Passwort-/Authentifizierungsschritte bedient der Nutzer selbst |
+| Launcher und Tray | Spiel, Maintenance, zweite Instanz, geordnetes Beenden, Wiederherstellung und Diagnose; vollständige lokalisierte Menüs und Meldungen |
+| Update und Reparatur | Tatsächlicher GitHub-Releaseabruf, Stable-/Prerelease-Auswahl, ausdrückliche Zustimmung, laufendes Spiel als Sperre, Erfolg und Fehler samt Reparaturweg; reine API-Fixtures reichen nicht |
+| Deinstallation | Datenerhalt als Standard; Datenlöschung ausdrücklich und getrennt bestätigt; vollständige lokalisierte Warnung sowie Erfolg und Fehler |
+
+Installationen und funktionale Tests bleiben auf einer ausdrücklich
+freigegebenen sauberen Testmaschine, mit isolierten Daten und freien Testports.
+Ein ergänzender Host-DPI-Test darf ohne gesonderte Installationsfreigabe nur
+das Setupfenster zeigen: keine Installation, keine Ersteinrichtung und kein
+Launcherstart. Änderungen der Host-Anzeige erfolgen nur nach Zustimmung;
+der ursprüngliche Wert wird dokumentiert und anschließend wiederhergestellt.
+Die laufende Entwicklungsinstanz und ihre Daten bleiben unangetastet.
+Bei Windows-UI-Automation werden Installations- und Löschaktionen unmittelbar
+vor Ausführung bestätigt; Authentifizierungs- und UAC-Dialoge übernimmt der
+Nutzer. Eine für den echten Updatepfad nötige GitHub-Veröffentlichung benötigt
+eine eigene Freigabe und bestandene lokale Release-Gates.
+
+Fehlt der Testumgebung die Windows-Skalierungsseite oder verlangt ein Schritt
+noch Zustimmung, bleibt genau dieser Nachweis offen. Vorhandene grüne
+Komponenten- und MSI-Tests werden weder verworfen noch als Ersatz für den
+fehlenden UI-Nachweis umgedeutet.
+
 Die drei lokalisierten First-Run-Startmenünamen stammen beim MSI-Build aus
 `first.title` derselben explizit als UTF-8 gelesenen Sprachquelle; dies ist
 auch unter Windows PowerShell 5.1 verbindlich. Bedingte, transitive MSI-Komponenten
