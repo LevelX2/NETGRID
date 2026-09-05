@@ -26,6 +26,70 @@ import {
 } from "./corp-ambush-plan-signals";
 
 describe("Corp ambush plan signal duplicate scope", () => {
+  it.each([
+    ["onr_proteus_054_bel-digmo-antibody", false],
+    ["onr_proteus_075_stereogram-antibody", false],
+    ["onr_proteus_004_fetal-ai", true],
+  ] as const)(
+    "does not confuse access-zone identity with remote preparation: %s",
+    (definitionId, remotePreparation) => {
+      const source = visibleCard(
+        "access-source",
+        "corp",
+        definitionId.includes("fetal") ? "agenda" : "asset",
+        {
+          definitionId,
+        },
+      );
+      const install = legalAction(
+        "bound-install",
+        "corp",
+        "install_card",
+        "Install",
+        { credits: 0, clicks: 1 },
+        {
+          source: source.instanceId,
+          payload: {
+            cardId: source.instanceId,
+            serverId: "remote_1",
+            placement: "root",
+          },
+        },
+      );
+      const input = aiInput("corp", [install]);
+      input.playerView.own.credits = 5;
+      input.playerView.own.gripOrHq = [source];
+      input.playerView.servers = [server("remote_1")];
+      setAmbushIntent(input);
+      const candidate = ambushInstallCandidate(
+        install.actionId,
+        source.instanceId,
+        definitionId,
+        "remote_1",
+      );
+      const signals = buildCorpAmbushPlanSignals({
+        input,
+        candidates: [candidate],
+        previous: undefined,
+      });
+      if (remotePreparation) {
+        expect(signals).toEqual([
+          expect.objectContaining({
+            sourceInstanceId: source.instanceId,
+            actionIds: [install.actionId],
+            phase: "install",
+            serverId: "remote_1",
+            assignedDomainPlanIds: ["corp.ambush_bluff"],
+          }),
+        ]);
+      } else {
+        // Bel-Digmo hurts on R&D access; Stereogram on Archives access.
+        // An unknown opponent response does not turn either into a remote trap.
+        expect(signals).toEqual([]);
+      }
+    },
+  );
+
   it("counts only same-definition copies in active remote roots as installed duplicates", () => {
     const definitionId = "onr_v1_345_trap";
     const handCopy = visibleCard("trap-in-hq", "corp", "asset", {

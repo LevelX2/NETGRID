@@ -59,3 +59,33 @@ garantierte zukünftige Ersparnis. Zu beweisen sind außerdem ein günstiger
 wiederholter Zyklus, Verfall ohne Verbraucher, gegnerische Entfernung,
 Unterbrechung und unveränderte Hidden-Info-Grenzen. Das wäre eine neue
 vertikale Fähigkeit, kein kleiner Bewertungsfix auf Basis dieser Partie.
+
+## Bedingte Vorbereitung: Zonenwirkung vor Installationszahlen
+
+HN-C prüft den bestehenden Ambush-Owner, nicht einen neuen Kartenresolver.
+Die frische Discovery über 110 Corp-Main-Entscheidungen der Detailpartie
+findet in vier Zuständen konkrete Fetal-AI-Installationssignale; der
+produktive Chooser installiert bei StateVersion 5 tatsächlich eine Fetal AI.
+Bei 13 und 32 entstehen jeweils zwei Net Damage auf Zugriff, ohne Flatline.
+Ungewisser späterer Schaden verhindert Vorbereitung also nicht grundsätzlich.
+
+100 Zustände enthalten eine Karte mit Ambush-Subtyp in HQ. Diese Zahl ist
+kein Nenner für verpasste Remote-Installationen: Bel-Digmo schädigt aus R&D,
+Stereogram ausschließlich aus Archives. Beide nur wegen ihres Subtyps in
+Remotes zu installieren würde ihre Wirkung nicht aktivieren. Pattel und
+Doppelganger können bereits uninstalled aus HQ/R&D wirken. Ihre aktuelle
+Fresh-Discovery-Abdeckung ist begrenzt; daraus folgt ohne Vergleich von
+Zugriffswahrscheinlichkeit, Zahlung und Opportunitätskosten kein Vorteil
+einer zusätzlichen Installation. Die Discovery-Diagnose rekonstruiert
+ausdrücklich keine residente Fortsetzung und ist keine Chooser-Evidence.
+
+Cybertech benötigt einen konkreten Meat-Damage-Verbraucher; ein allgemeiner
+Schadensbonus beweist diese Verbindung nicht. Department of Misinformation
+hilft gegen Expose, nicht gegen gewöhnlichen Zugriff. Fehlende Aktivierung
+beweist daher weder defekte Regeln noch generell nutzlose Karten.
+
+HN-C ergänzt drei fokussierte Zonen-/Owner-Regressionen und erhält die
+bestehenden Ambush-Tests für Installation, Fortsetzung, Zugriff, Ignorieren
+beziehungsweise Hold, Recycling und Hidden-Info-Äquivalenz. Keine gelockerte
+Expositionsregel und keine behauptete sichere Killsequenz. Eine umfassende
+Bluff- oder Counter-Punish-Verbesserung ist damit nicht implementiert.

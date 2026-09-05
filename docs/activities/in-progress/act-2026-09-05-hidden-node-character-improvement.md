@@ -58,7 +58,7 @@ Blocker nennt Ursache und Removal Condition.
 
 ## Paketfolge
 
-`HN-A fertig -> HN-B fertig -> HN-C aktiv -> HN-D -> HN-E -> Main -> Cleanup`
+`HN-A fertig -> HN-B fertig -> HN-C fertig -> HN-D aktiv -> HN-E -> Main -> Cleanup`
 
 ### HN-A: Identität, Messung und reproduzierbare Ausgangslage
 
@@ -189,3 +189,13 @@ Checks: Engine `corp-asset-upgrade-utility.test.ts -t "restricts Government
 Contract"` (1 grün), beide SP-082-Checkpoint-Dateien (4 grün),
 `git diff --check`. Kein breiter Testlauf erforderlich, da kein produktiver
 Code oder Vertrag geändert wurde. HN-C aktiv.
+
+### HN-C abgeschlossen: kein pauschaler Vorbereitungsfix
+
+Der vollständige Detailverlauf zeigt gewählte Vorbereitung und tatsächlich
+ausgelösten Fetal-AI-Schaden. Eine generelle Sperre durch unbekannte Zukunft
+ist widerlegt. Bel-Digmo/Stereogram sind zonenspezifische Wirkungen; zusätzliche
+Remote-Installation wäre kein belastbarer Fortschritt. Drei neue
+Zonen-/Owner-Gegenproben ergänzen die 13 vorhandenen Ambush-Regressionen.
+Die genaue Fähigkeitsgrenze und die Grenzen der Fresh-Discovery-Diagnose
+stehen im Review. HN-D aktiv; produktive KI weiterhin unverändert.
