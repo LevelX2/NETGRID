@@ -84,9 +84,13 @@ rezzed und erschöpfter Contract wird für einen endlichen terminalen ICE-Rez-
 Bedarf aufgeladen, bei Bedarf um einen allgemeinen Credit ergänzt und über
 den Zugwechsel in Auszahlung/Rezzing überführt. Bedarf und Quelle werden
 nach jedem Schritt neu geprüft; gespeicherte Counter sind keine Liquidität.
-Erstinvestition, weitergehende Verbraucher und erneuter Seedvergleich sind
-noch offen; die
-Current-State-Review grenzt vorbereitete Capability-Fixtures von Spielevidence ab.
+Erstinvestition und weitergehende Verbraucher bleiben begrenzt. Der 70er-
+Vergleich vor dem abschließenden Main-Abgleich ergibt 0→1 Corp-Siege,
+42→45 Corp-Punkte und 57→56 Nullscore-Niederlagen bei gültigen Replays ohne
+Runtimefehler. Die neue Contract-Vorbereitung wurde darin nicht ausgewählt;
+dieser kleine gemischte Systemeffekt ist kein allgemeiner Stärkennachweis.
+Die Current-State-Review grenzt vorbereitete Capability-Fixtures von
+Spielevidence und dem Integrationsstand ab.
 
 Historische Selfplay-Cycle-Reviews, Markdown-Matrix, Reporting-State und
 versionierte HTML-Blockberichte wurden nach dem abschließenden idempotenten

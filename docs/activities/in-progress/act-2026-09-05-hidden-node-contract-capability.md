@@ -230,3 +230,20 @@ ein End-to-End-Systemvergleich, keine isolierte Schätzung eines KI-Bewertungs-
 effekts bei unveränderten Regeln. Prepared-Fixtures und natürliche Spiele
 bleiben getrennt. Erst nach dem Lauf werden Verbesserungen/Nichtwirkungen
 und Restgrenzen aktualisiert.
+
+Der Lauf auf `e9562364c` ist abgeschlossen: 70 terminale/replaykorrekte Spiele,
+keine Runtimefehler/Fallbacks/Timeouts; Siege 0→1, Punkte 42→45,
+Nullscore-Niederlagen 57→56, Score-Actions 17→18, 50 identische End-StateHashes.
+Alle acht Pilotwiederholungen sind hashgleich zum Kandidatenarm. Die neue
+Contract-Vorbereitung wurde in den natürlichen Meilensteinen nicht ausgewählt;
+die Capability-Abnahme bleibt von diesem kleinen gemischten Systemeffekt getrennt.
+Registry-Job `hidden-node-capability-20260905`, reservierte IDs 397–400.
+Die Registry-Extraktion reconciliert Original-Metadaten, Source/Deckhash,
+Seedmenge, Ergebnisse und StateHash vor dem Vergleich; sieben fokussierte
+Messwerkzeugtests grün. Kein behaupteter reiner KI-Effekt bei geänderter
+Engine-Legalität und kein neuer unabhängiger Holdout.
+
+Integrationskontext: `main` ist inzwischen auf `9b38d1365` weitergelaufen.
+Read-only `merge-tree` zeigt keine Textkonflikte. Vor Integration werden
+die gemeinsamen Corp-Fortsetzungs-/Schutz- und Rez-Verträge nach dem Merge
+erneut geprüft. Fremde uncommittete E2E-/AGENTS-Arbeit bleibt unberührt.
