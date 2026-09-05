@@ -345,7 +345,10 @@ import {
   visibleRunnerRunPathCreditBudgetForRig,
   visibleDeflectorSubroutineCanResolve,
 } from "../visible-run-analysis";
-import { runnerRemoteHasKnownNoCurrentPayoff } from "./runner-known-access-payoff-context";
+import {
+  runnerCurrentRunHasSafeCompletionReward,
+  runnerRemoteHasKnownNoCurrentPayoff,
+} from "./runner-known-access-payoff-context";
 import {
   runnerStrategicExchangeHardExclusion,
   runnerStrategicExchangeKinds,
@@ -30605,7 +30608,8 @@ function currentRunAbortAssessment(
   ) {
     if (
       runnerRemoteHasKnownNoCurrentPayoff(input, run.attackedServerId) &&
-      !runnerRunOriginCommittedPayoff(runOrigin)
+      !runnerRunOriginCommittedPayoff(runOrigin) &&
+      !runnerCurrentRunHasSafeCompletionReward(input)
     ) {
       return {
         evidenceCode: `runner_current_run_known_no_payoff:${run.attackedServerId}`,

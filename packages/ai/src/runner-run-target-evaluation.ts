@@ -466,10 +466,14 @@ function evaluateRunnerRunTarget(
     routeQuote,
     creditsAfterRun,
     economyPosture,
-    consumeUrgentContestReserve:
-      scoreThreat &&
-      economyPosture.creditReservePolicy.remoteScoreThreat === "urgent" &&
-      creditsAfterRun >= economyPosture.minimumCreditFloor,
+    consumeCurrentGoalReserve:
+      (scoreThreat &&
+        economyPosture.creditReservePolicy.remoteScoreThreat === "urgent" &&
+        creditsAfterRun >= economyPosture.minimumCreditFloor) ||
+      // A matchpoint central access spends its run budget. With no current
+      // remote threat, the desired refill target is not a post-run liability.
+      (runnerMatchpointCentralAccess &&
+        economyPosture.creditReservePolicy.remoteScoreThreat === "none"),
   });
   const recommendation = recommendationForRunTarget({
     targetKind: accessTargetKind,
@@ -1647,13 +1651,13 @@ function runnerRunTargetFundingNeed(params: {
   routeQuote: NonNullable<RunnerRunTargetEvaluation["routeQuote"]>;
   creditsAfterRun: number;
   economyPosture: RunnerEconomyPosture;
-  consumeUrgentContestReserve: boolean;
+  consumeCurrentGoalReserve: boolean;
 }): RunnerRunTargetFundingNeed {
   const routeFundingGap = Math.max(0, params.routeQuote.fundingGap ?? 0);
   const liquidCreditsSpent =
     params.creditsAfterRun <
     params.economyPosture.creditReservePolicy.currentCredits;
-  const protectedLiquidReserve = params.consumeUrgentContestReserve
+  const protectedLiquidReserve = params.consumeCurrentGoalReserve
     ? params.economyPosture.minimumCreditFloor
     : liquidCreditsSpent
       ? params.economyPosture.creditReservePolicy.phase === "opening"

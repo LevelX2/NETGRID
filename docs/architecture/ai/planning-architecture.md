@@ -2495,6 +2495,12 @@ Eine HQ- und eine R&D-Instanz dürfen gleichzeitig Kandidaten sein. Nur eine
 ist Executor. Ein Zielwechsel verlangt Planarbitration, nicht bloß eine andere
 Run-Action.
 
+Ein Zentralzugriff am Runner-Matchpoint darf ohne aktuelle Remote-Scorebedrohung
+das vorhandene Runbudget verbrauchen. Die allgemeine gewünschte Auffüllreserve
+ist dann keine zusätzliche Restguthabenpflicht; der Sicherheitsfloor, reale
+Pfadkosten und die Reserve für unbekanntes ICE bleiben verbindlich. Eine
+vorhandene Remote-Bedrohung behält ihre Reserve.
+
 Ist eine aktuelle Basis-Run-Action nach exakter Runbewertung zwar legal, aber
 erst nach einem gebundenen Funding- oder Vorbereitungsschritt sinnvoll,
 bleibt sie eine ausdrücklich dispositionierte Alternative von
@@ -2912,6 +2918,13 @@ Verantwortung:
 
 Das Modul besitzt kein unabhängiges langfristiges Ziel. Es gehört logisch zum
 auslösenden Run-/Contest-Plan und kehrt anschließend dorthin zurück.
+
+Ein fehlender Steal-/Trash-Ertrag allein rechtfertigt keinen Abbruch nach dem
+letzten ICE: Eine aus der eigenen sichtbaren CardSpec belegte Belohnung am
+Ende eines erfolgreichen Runs bleibt ein eigenständiger Ertrag. Die aktuelle
+Fortsetzungsprüfung berücksichtigt diesen nur bei kostenloser Fortsetzung,
+vollständig bekannten Root-Karten und ohne projizierte Zugriffsgefahr; sie
+hebt weder Pfad- noch Risikosperren auf.
 
 Jede aktuell legale Run-/Access-/Jack-out-/Pump-/Break-Action erhält eine
 planlokale `RunnerRunWindowActionAssessment`. Nur

@@ -3529,7 +3529,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     );
   });
 
-  it("funds an ordinary paid matchpoint R&D run before spending the liquid reserve", () => {
+  it("spends the matchpoint R&D budget while preserving the safety floor without a remote threat", () => {
     const fracter = visibleCard("runner-efficient-fracter", {
       definitionId: "efficient_fracter",
       title: "Efficient Fracter",
@@ -3552,6 +3552,22 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       targetServerId: "rd",
       pathCost: 4,
       creditsAfterRun: 8,
+      recommendation: "run_now",
+      fundingNeed: {
+        reason: "none",
+        postRunFloorGap: 0,
+        protectedLiquidReserve: 2,
+      },
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "run_target_funding_need:none",
+        "run_target_post_run_floor_gap:0",
+        "run_target_protected_liquid_reserve:2",
+      ]),
+    );
+    input.playerView.own.agendaPoints = 3;
+    expect(evaluateRunnerRunTargets({ input })[0]).toMatchObject({
       recommendation: "gain_credits_first",
       fundingNeed: {
         reason: "post_run_floor_gap",
@@ -3559,13 +3575,6 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         protectedLiquidReserve: 10,
       },
     });
-    expect(evaluation?.evidence).toEqual(
-      expect.arrayContaining([
-        "run_target_funding_need:post_run_floor_gap",
-        "run_target_post_run_floor_gap:2",
-        "run_target_protected_liquid_reserve:10",
-      ]),
-    );
   });
 
   it("treats bank credits as click-bounded assets, not as the liquid midgame reserve", () => {
