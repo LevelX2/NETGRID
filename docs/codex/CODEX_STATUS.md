@@ -1,6 +1,6 @@
 # CODEX_STATUS
 
-Stand: 2026-09-04
+Stand: 2026-09-05
 
 ## Einstieg
 
@@ -69,6 +69,13 @@ Führend:
 - `packages/ai/AGENTS.md`
 
 Weitere KI-Arbeit ist überwiegend Play-Strength- und Modulerweiterung. Neue Beobachtungen werden als kleine Activities und Regressionstests geführt, nicht als neue globale Heuristikschicht oder dauerhafte Reviewchronik.
+
+Die aktuellen Grenzen von zweckgebundener Corp-Finanzierung und
+zonenspezifischer Fallen-Vorbereitung sind in
+`docs/architecture/ai/hidden-node-capability-review.md` abgegrenzt. Der
+charaktererhaltende Hidden-Node-Vergleich begründet derzeit weder einen
+Standarddeck-Tausch noch pauschale KI-Boni; Originalliste und produktive
+Policy bleiben unverändert.
 
 Historische Selfplay-Cycle-Reviews, Markdown-Matrix, Reporting-State und
 versionierte HTML-Blockberichte wurden nach dem abschließenden idempotenten
