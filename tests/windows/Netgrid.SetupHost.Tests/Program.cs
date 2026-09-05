@@ -1,6 +1,8 @@
 using System.Reflection;
 using System.Text.Json;
 
+ApplicationConfiguration.Initialize();
+
 // Exercise the real setup assembly without showing or operating a window.
 var assembly = Assembly.Load("NETGRID.Setup");
 var text = assembly.GetType("Netgrid.Windows.UiText", throwOnError: true)!;
@@ -9,6 +11,8 @@ var presenter = assembly.GetType("Netgrid.SetupHost.SetupFailure", throwOnError:
 var settings = assembly.GetType("Netgrid.SetupHost.SetupSettings", throwOnError: true)!;
 using var stream = assembly.GetManifestResourceStream("NETGRID.WindowsUiStrings.json")!;
 var catalog = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(stream)!;
+var previewRoot = args.Length == 2 && args[0] == "--render-to" ? Path.GetFullPath(args[1]) : null;
+if (previewRoot is not null) Directory.CreateDirectory(previewRoot);
 var checks = 0;
 foreach (var language in new[] { "de", "en", "fr" })
 {
@@ -138,6 +142,43 @@ foreach (var language in new[] { "de", "en", "fr" })
             var tips = (ToolTip)form.GetType().GetField("_helpToolTip", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(form)!;
             var helpButtons = Descendants(form).OfType<Button>().Where(button => button.Name.StartsWith("setup.help.", StringComparison.Ordinal)).ToArray();
             Assert(helpButtons.Length == 11, "each_option_has_help");
+            var popupHandler = typeof(ToolTip).GetMethod("OnPopup", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            var drawHandler = typeof(ToolTip).GetMethod("OnDraw", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            var tooltipLayout = assembly.GetType("Netgrid.SetupHost.SetupHelpToolTip", true)!;
+            var measureTip = tooltipLayout.GetMethod("Measure")!;
+            var textFlags = (TextFormatFlags)tooltipLayout.GetField("TextFlags")!.GetValue(null)!;
+            Assert(tips.OwnerDraw && !tips.IsBalloon, "tooltip_uses_wrapped_drawing");
+            foreach (var button in helpButtons.Cast<Control>().Append(Descendants(form).OfType<LinkLabel>().Single()))
+            {
+                var content = tips.GetToolTip(button)!;
+                var unwrapped = TextRenderer.MeasureText(content, button.Font);
+                var popup = new PopupEventArgs(button, button, false, unwrapped);
+                popupHandler.Invoke(tips, [popup]);
+                Assert(popup.ToolTipSize.Width <= (int)Math.Ceiling(440 * button.DeviceDpi / 96d), "tooltip_width_is_bounded");
+                Assert(popup.ToolTipSize.Height > unwrapped.Height, "tooltip_wraps_into_multiple_lines");
+                foreach (var dpi in new[] { 96, 120, 144 })
+                foreach (var screenWidth in new[] { 640, 1280, 1920 })
+                {
+                    using var scaledFont = new Font(button.Font.FontFamily, button.Font.SizeInPoints * dpi / 96f);
+                    var size = (Size)measureTip.Invoke(null, [content, scaledFont, dpi, screenWidth])!;
+                    var padding = (int)tooltipLayout.GetMethod("Padding")!.Invoke(null, [dpi])!;
+                    var measured = TextRenderer.MeasureText(content, scaledFont, new Size(size.Width - 2 * padding, int.MaxValue), textFlags);
+                    Assert(size.Width <= screenWidth - 4 * padding, "tooltip_respects_work_area_width");
+                    Assert(measured.Width <= size.Width - 2 * padding, "tooltip_line_not_clipped");
+                    Assert(measured.Height + 2 * padding == size.Height, "tooltip_all_lines_fit_height");
+                }
+                if (previewRoot is not null)
+                {
+                    if (button is LinkLabel) Console.WriteLine($"TOOLTIP_RENDER_FONT {button.Font.Name} {button.Font.SizeInPoints} {button.Font.Style} dpi={button.DeviceDpi}");
+                    using var bitmap = new Bitmap(popup.ToolTipSize.Width, popup.ToolTipSize.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                    using var graphics = Graphics.FromImage(bitmap);
+                    graphics.Clear(SystemColors.Info);
+                    var draw = new DrawToolTipEventArgs(graphics, button, button, new Rectangle(Point.Empty, popup.ToolTipSize), content, SystemColors.Info, SystemColors.InfoText, button.Font);
+                    drawHandler.Invoke(tips, [draw]);
+                    var name = button is LinkLabel ? "maintenance" : button.Name["setup.help.".Length..];
+                    bitmap.Save(Path.Combine(previewRoot, $"tooltip-{language}-{name}.png"), System.Drawing.Imaging.ImageFormat.Png);
+                }
+            }
             foreach (var button in helpButtons)
             {
                 Assert(tips.GetToolTip(button) == catalog[language][button.Name], "tooltip_matches_language");

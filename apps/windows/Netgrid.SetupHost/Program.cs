@@ -337,7 +337,7 @@ internal static class UninstallWorker
 
 internal sealed class SetupForm : Form
 {
-    private readonly ToolTip _helpToolTip = new() { AutoPopDelay = 20000, InitialDelay = 400, ReshowDelay = 100, ShowAlways = true };
+    private readonly ToolTip _helpToolTip = SetupHelpToolTip.Create();
     private readonly RadioButton _recommended = new() { Text = UiText.Get("setup.recommended"), Checked = true, AutoSize = true };
     private readonly RadioButton _custom = new() { Text = UiText.Get("setup.custom"), AutoSize = true };
     private readonly RadioButton _local = new() { Text = UiText.Get("setup.local"), Checked = true, AutoSize = true };

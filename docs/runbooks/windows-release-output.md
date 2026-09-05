@@ -272,6 +272,14 @@ weder die Zustimmung im Tray noch einen echten GitHub-Releaseabruf.
 Alle Optionen besitzen lokalisierte „?“-Hilfen: Tooltip bei Mauszeigerkontakt,
 ausführlicher Dialog per Klick oder Tastatur sowie zugängliche Beschreibung.
 Maintenance wird zusätzlich über einen sichtbaren Erklärlink eingeführt.
+Tooltips besitzen eine DPI-skalierte Maximalbreite von 440 logischen Pixeln,
+zusätzlich begrenzt durch die Arbeitsfläche des jeweiligen Bildschirms.
+Größenberechnung und Darstellung verwenden dieselbe Schrift, Innenabstände
+und Wortumbruch-Flags; vollständiger Text und zugängliche Beschreibung bleiben
+erhalten. Der tatsächliche Popup- und Draw-Handler wird fensterlos getestet.
+Mit `--render-to <absoluter Ausgabeordner>` erzeugt der Setup-Komponententest
+zusätzlich die zwölf Hilfetexte in allen drei Sprachen als PNG-Vorschauen.
+Diese Prüfung ersetzt nicht die native Popup-Positionierung am Bildschirmrand.
 
 Die Sprachauswahl ordnet ihre Aktionen über Layoutcontainer statt fester
 Koordinaten an. „Weiter“ und „Abbrechen“ erscheinen ausschließlich in der

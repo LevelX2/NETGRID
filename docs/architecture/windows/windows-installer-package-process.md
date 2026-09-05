@@ -411,6 +411,20 @@ dabei geometrische Skalierung, nicht reale Windows-DPI-/Schriftskalierung;
 dieser Unterschied bleibt im offenen visuellen Abnahmeumfang ausdrücklich
 berücksichtigt. Kein dieser Testbuilds ist die finale Releasefreigabe.
 
+Nach Neuverbindung mit derselben Sandbox war die zuvor eingefrorene Viewer-
+Ansicht wieder aktuell. Weiter öffnete die Setupmaske; der angeklickte
+Maintenance-Hilfedialog war lesbar und mehrzeilig. Der anschließende
+Nutzerbefund betrifft dagegen die Hover-Tooltips: Ihre unbeschränkte Breite
+ließ lange Texte über den Bildschirm hinausragen. Ein Test des tatsächlichen
+Popup-Ereignisses reproduzierte die fehlende Breitenbegrenzung. Der Tooltip-
+Owner berechnet und zeichnet nun denselben Wortumbruch mit DPI-skalierter,
+zusätzlich arbeitsflächenbegrenzter Breite. 1.638 Setup-Assertions sind grün,
+darunter alle zwölf Hilfen in drei Sprachen, drei Schrift-/DPI-Skalierungen
+und drei Bildschirmbreiten. Die echten Draw-Handler erzeugen 36 Vorschauen;
+lange deutsche und französische Texte wurden vollständig sichtbar geprüft.
+Native Hover-Positionierung und der neue Paketstand in der Sandbox stehen
+noch aus. WIN-I08 bleibt aktiv.
+
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.
 Die erste Public-Prüfung war wegen der pauschalen, aktiven Sandbox-Regel
