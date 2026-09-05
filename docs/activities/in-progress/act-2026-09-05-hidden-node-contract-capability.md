@@ -111,6 +111,36 @@ Abnahme; die Engine-Gegenprobe ist bereits auf das korrekte Ergebnis umgestellt.
   123 fokussierte AI- und 36 Engine-Tests, AI-/Engine-Typechecks sowie beide
   Strukturgates einschließlich AI-Reachability grün.
   Ownership-Charakterisierung bleibt absichtlich offen/fehlerbeweisend.
+  Zweiter Teilschritt: versionierte Engine-Quote für eine aktuelle Auszahlung
+  und einen konkret benannten Installations-/Rez-Verbraucher. Die Engine
+  prüft die Auszahlung auf ihrer isolierten Zustandskopie und ermittelt das
+  tatsächliche folgende LegalAction-Angebot. Herausgegeben werden ausschließlich
+  semantische Verbraucherbindung, vollständige Zahlung und Restverfall, keine
+  zukünftige Action-ID und kein strategischer Nutzen. Bereits verfügbare
+  Verbraucher bleiben von echten Finanzierungslücken unterscheidbar.
+  Gegenproben sichern Stale-/Fremdquellen, falschen Zweck, Nullverbrauch,
+  unnötige zweite Auszahlung, Hidden-Info-Invarianz und unveränderten StateHash.
+  Ein realer Root-Rez-Mischpool ergänzt die Installationsprobe (acht Tests).
+  Zusätzliche unprojizierte Auszahlungskosten erhalten keinen Complete-Vertrag.
+  Vertikale erste Umsetzung: Actor-privater DTO-Transport, bestehendes
+  positives Economy-Rez-Projekt als residenter Parent, genau ein Provider
+  je Bedarf mit konkurrierenden aktuellen Auszahlungen, kein pauschaler
+  Funding-Readiness-Aufschlag. Die produktive Auswahl bindet Parent/Leaf,
+  Need/Assignment und aktuelle Invocation. Nach Auszahlung verschwindet der
+  Bedarf und derselbe Parent wählt seine neue echte Rez-Action; ein weiterer
+  vorhandener Counter wird nicht ausgegeben. Elf Real-Engine-Tests sichern
+  auch DTO-Gegenfälle, lokale Unknown-Disposition und Determinismus.
+  Ein dabei bewiesener generischer Rückgabefehler wurde an seinem Erzeuger
+  korrigiert: `CorpTurnPlannerShadowResult` transportiert sämtliche bereits
+  geprüften Suchlinien an die bestehende Commitment-Fortsetzung, nicht nur
+  den neuen Gesamtsieger. Die bisherige Ersatzansicht entfällt. Ownership-,
+  Interrupt- und Commitment-Regeln selbst bleiben unverändert.
+  Die Finite-Bank-Abnahme endet in diesem Teilschritt am echten Rez-Meilenstein;
+  die anschließende Nutzungsplanung bleibt ausdrücklich Bestandteil von G3.
+  Verifiziert: 194 Tests in vier direkt betroffenen AI-Dateien, 22 Engine-
+  Payloadtests, AI-Typecheck, AI-Struktur/Reachability (658, keine Zyklen),
+  Engine-Struktur (380, keine Zyklen), Paketgrenzen (1997) und Diff-Check.
+  Kein vollständiger Shard-/Workspace-/Build-/E2E-Lauf für diesen Teilschritt.
 - **HN-G3 offen:** Setup/Wiederholung nur mit vollständigem Kosten- und
   Verbraucherhorizont; produktiver Chooser, Parent/Leaf, Invocation,
   Reassessment und deterministische Fortsetzung abnehmen.

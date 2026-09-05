@@ -74,8 +74,11 @@ Die aktuellen Grenzen von zweckgebundener Corp-Finanzierung und
 zonenspezifischer Fallen-Vorbereitung sind in
 `docs/architecture/ai/hidden-node-capability-review.md` abgegrenzt. Der
 charaktererhaltende Hidden-Node-Vergleich begründet derzeit weder einen
-Standarddeck-Tausch noch pauschale KI-Boni; Originalliste und produktive
-Policy bleiben unverändert.
+Standarddeck-Tausch noch pauschale KI-Boni; die Originalliste bleibt
+unverändert. Im aktiven Capability-Paket entsteht eine eng gebundene
+zweckgebundene Economy-Finanzierung mit Rückgabe an den tatsächlichen
+Verbraucher. Mehrschritt-Abnahme und erneuter Seedvergleich sind noch offen;
+die Current-State-Review grenzt den bereits getesteten Pfad davon ab.
 
 Historische Selfplay-Cycle-Reviews, Markdown-Matrix, Reporting-State und
 versionierte HTML-Blockberichte wurden nach dem abschließenden idempotenten

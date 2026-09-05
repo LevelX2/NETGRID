@@ -59,6 +59,18 @@ export function applyActionEconomyProjection(
   const economyProjection = actionEconomyProjectionFor(candidate, action);
   return {
     ...candidate,
+    ...(economyProjection.restrictedCreditPayout &&
+    economyProjection.reliability === "guaranteed"
+      ? {
+          semanticActionType: "economy.gain_restricted_credit",
+          costProfile: {
+            ...candidate.costProfile,
+            clickCost: economyProjection.clickCost,
+            creditCost: economyProjection.creditCost,
+            costKnownStatus: "known" as const,
+          },
+        }
+      : {}),
     economyProjection,
     evidence: [
       ...candidate.evidence,

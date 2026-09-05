@@ -40,8 +40,10 @@ import {
   assertAbilityRefIdentity,
   parseCanonicalCapabilityId,
 } from "@netgrid/cards/planning";
+import { sanitizeCorpRestrictedCreditRouteQuotes } from "./runtime/corp-restricted-credit-quote-input";
 
 export type BuildAiDecisionInputDtoParams = {
+  corpRestrictedCreditRouteQuotes?: AiDecisionInput["corpRestrictedCreditRouteQuotes"];
   matchId?: string;
   side: Side;
   playerView: PlayerView;
@@ -614,6 +616,15 @@ export function buildAiDecisionInputDto(
   );
   return {
     ...(params.matchId !== undefined ? { matchId: params.matchId } : {}),
+    ...(params.corpRestrictedCreditRouteQuotes?.length
+      ? {
+          corpRestrictedCreditRouteQuotes:
+            sanitizeCorpRestrictedCreditRouteQuotes(
+              params,
+              params.corpRestrictedCreditRouteQuotes,
+            ),
+        }
+      : {}),
     side: params.side,
     playerView: sanitizePlayerView(params.playerView, sanitizedPublicEvents),
     eventTail: sanitizeEventTail(

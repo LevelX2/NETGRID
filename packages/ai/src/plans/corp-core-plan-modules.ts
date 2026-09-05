@@ -348,6 +348,7 @@ export type CorpEconomyParentFundingSignal = CorpEconomySignalBase & {
     iceInstanceId: string;
   };
   fundingRouteAssessment?: CorpEconomyFundingRouteAssessment;
+  restrictedCreditFunding?: import("@netgrid/shared").CorpRestrictedCreditRouteQuote[];
 };
 
 export type CorpEconomyReserveSignal = CorpEconomySignalBase & {
@@ -388,6 +389,11 @@ export type CorpEconomyDevelopmentSignal = CorpEconomySignalBase & {
   sourceDefinitionId: string;
   phase: "install" | "advance" | "rez";
   actionIds: string[];
+  restrictedCreditNeed?: {
+    needId: string;
+    gap: number;
+    quotes: import("@netgrid/shared").CorpRestrictedCreditRouteQuote[];
+  };
   startRezChoiceBinding?: {
     actionId: string;
     choiceId: string;
@@ -1904,6 +1910,9 @@ function economyModule(): PlanModule {
                 ? { kind: "card", id: signal.sourceInstanceId }
                 : { kind: "capability", id: signal.needId },
             routeExists: economyCandidates(context, signal).length > 0,
+            supportable:
+              signal.kind === "develop_campaign" &&
+              signal.restrictedCreditNeed !== undefined,
             evidenceCode: signal.evidenceCode,
             ...(signal.kind === "parent_funding" && signal.parentPlanInstanceId
               ? {
@@ -1928,6 +1937,18 @@ function economyModule(): PlanModule {
           economyCandidates(context, currentSignal).length > 0,
         economyAssessmentValue(currentSignal ?? current.signal),
         portfolio.executorInstanceId,
+        currentSignal?.kind === "develop_campaign" &&
+          currentSignal.restrictedCreditNeed
+          ? [
+              {
+                needId: currentSignal.restrictedCreditNeed.needId,
+                capability: "fund_corp_install_or_rez",
+                minimum: currentSignal.restrictedCreditNeed.gap,
+                available: 0,
+                deadline: "current_turn",
+              },
+            ]
+          : [],
       );
     },
     materialize: (instance, _assessment, context) => ({
@@ -2264,6 +2285,9 @@ export function corpEconomyPriorityClass(
 }
 
 function economyAssessmentValue(signal: CorpEconomyNeedSignal): number {
+  if (signal.kind === "parent_funding" && signal.restrictedCreditFunding) {
+    return signal.gap * 20;
+  }
   if (signal.kind === "develop_liquidity") return -9_999;
   if (signal.kind === "convert_immediate_operation") {
     return (
@@ -5901,6 +5925,32 @@ function economyCandidates(
   context: PlanSchedulerContext,
   signal: CorpEconomyNeedSignal,
 ): PlanMaterialization["candidates"] {
+  if (signal.kind === "parent_funding" && signal.restrictedCreditFunding) {
+    return context.actionCandidates.flatMap((candidate) => {
+      const quote = signal.restrictedCreditFunding!.find(
+        (entry) => entry.request.payoutActionId === candidate.actionId,
+      );
+      const payout = candidate.economyProjection?.restrictedCreditPayout;
+      if (
+        !quote ||
+        !payout ||
+        quote.request.stateVersion !== context.input.playerView.stateVersion ||
+        candidate.sourceCardInstanceId !== quote.payoutSourceCardInstanceId ||
+        candidate.abilityId !== quote.payoutSourceAbilityId ||
+        payout.amount !== quote.payoutCredits ||
+        !corpEconomyCandidateHasExecutablePayload(context.input, candidate)
+      )
+        return [];
+      return [
+        {
+          candidate,
+          stepValue:
+            Math.min(signal.gap, quote.consumer.newlyProvidedCreditsApplied) *
+            10,
+        },
+      ];
+    });
+  }
   const exactFundingHead =
     signal.kind === "develop_campaign" ||
     signal.kind === "convert_immediate_operation" ||

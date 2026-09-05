@@ -1,4 +1,9 @@
-import { getLegalActions, getPlayerView } from "@netgrid/engine";
+import {
+  getLegalActions,
+  getPlayerView,
+  quoteCorpRestrictedCreditRoute,
+} from "@netgrid/engine";
+import { collectCorpRestrictedCreditRootQuotes } from "./corp-restricted-credit-quote-input";
 import {
   type AiDecisionInput,
   type AiDifficulty,
@@ -148,6 +153,10 @@ export function buildAiDecisionInput(
     eventTail:
       options?.eventTail ?? aiDecisionEventTail(playerView.publicEvents),
     legalActions,
+    corpRestrictedCreditRouteQuotes: collectCorpRestrictedCreditRootQuotes(
+      { matchId: state.matchId, side, playerView, legalActions },
+      (request) => quoteCorpRestrictedCreditRoute(state, request),
+    ),
     difficulty,
     seed: state.seed,
     decisionId,

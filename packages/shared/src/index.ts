@@ -1,4 +1,12 @@
 export {
+  CORP_RESTRICTED_CREDIT_ROUTE_QUOTE_VERSION,
+  type CorpRestrictedCreditConsumer,
+  type CorpRestrictedCreditRouteRequest,
+  type CorpRestrictedCreditRouteQuote,
+  type CorpRestrictedCreditRouteResult,
+} from "./corp-restricted-credit-route";
+import type { CorpRestrictedCreditRouteQuote } from "./corp-restricted-credit-route";
+export {
   ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
   type AbilityPayloadDiscriminatorField,
   type AbilityPayloadDiscriminators,
@@ -4098,6 +4106,8 @@ export type CorpCentralAccessQuote = {
 };
 
 export type AiDecisionInput = {
+  /** Actor-private, current Engine funding facts; never future action authority. */
+  corpRestrictedCreditRouteQuotes?: CorpRestrictedCreditRouteQuote[];
   /** Actor-private match binding used only for Engine-certified commands. */
   matchId?: string;
   side: Side;

@@ -55,6 +55,17 @@ describe("activatedAbilityPayload advancement semantics", () => {
     });
     expect(payload.gainCreditsAmount).toBeUndefined();
     expect(payload.targetCardId).toBeUndefined();
+    const additionalCost: ActivatedCardAbilityImplementation = {
+      ...ability,
+      costs: [...ability.costs, { kind: "trash_source", amount: 1 }],
+    };
+    expect(
+      activatedAbilityPayload(
+        "arbitrary-source",
+        additionalCost,
+        binding(additionalCost),
+      ).restrictedCreditGainComplete,
+    ).toBeUndefined();
     const compound = {
       ...ability,
       effects: [

@@ -127,7 +127,42 @@ gezielte Engine-Test zu Zweckbindung/Verfall und vier bestehende
 SP-082-Chooser-/Ownership-Regressionen sind grün. Das ist ein überprüftes
 No-change-Ergebnis, **kein implementierter Government-Contract-Controller**.
 
-## Vertrag für eine spätere Contract-Fähigkeit
+## Aktuelle erste Contract-Fähigkeit und verbleibender Vertrag
+
+HN-G ergänzt einen bewusst engen produktiven Pfad: Eine vorbereitete,
+aktuell Engine-gequotete Installations-/Rez-Auszahlung kann den echten
+Finanzierungsbedarf eines bereits installierten, positiv amortisierten
+Economy-Rez-Projekts erfüllen. Das Projekt bleibt resident; ein eigener
+`corp.economy`-Provider bindet Parent, Need und aktuelle Source-/Ability-
+Invocation. Mehrere Auszahlungsvarianten gehören zum selben Provider.
+Die zweckgebundene Lückenverringerung verwendet keinen pauschalen
+Readiness-Aufschlag und erzeugt keine allgemeine Liquidität.
+
+Die neue `corp-restricted-credit-route-v1`-Engine-Quote prüft den aktuellen
+Auszahlungsschritt auf einer isolierten Zustandskopie und ermittelt die
+danach tatsächlich angebotenen Verbraucher-Kosten. Sie liefert keine
+zukünftige Action-ID. Actor-private DTO-Prüfung bindet aktuelle Version,
+Quelle, Ability, Server und Verbrauch; Unknown-Teilpfade bleiben lokal.
+Bereits ohne weitere Auszahlung verfügbare Verbraucher erzeugen keinen
+Pflichtbedarf. Nach Gap-Schluss endet dieser Support auch dann, wenn ein
+weiterer Counter vorhanden ist. Der Verbraucher rematerialisiert seine
+neue echte Action beim nächsten Aufruf.
+
+Dabei wurde ein generischer Fortsetzungsfehler nachgewiesen: Der Corp-
+Planner berechnete mehrere gültige Restzuglinien, gab an die vorhandene
+Commitment-Fortsetzung aber ausschließlich die neue Siegerlinie zurück.
+Ein weiterhin ausführbarer bisheriger Root erschien dadurch als verloren.
+Der Rückgabevertrag enthält jetzt die bereits geprüften Suchlinien; der
+bestehende Root-/Interrupt-Vertrag entscheidet unverändert über Fortsetzung.
+Das ist keine neue Hysterese oder zweite Auswahlregel.
+
+Die Real-Engine-Abnahme umfasst Auszahlung → Rückgabe an denselben Parent →
+Rez, tatsächliche Zahlung/Verfall, keinen zweiten Fundingbedarf,
+deterministische aktuelle Bindung und Hidden-Info-Gegenprobe. Noch nicht
+abgenommen sind vollständige Erstinvestition, Wiederholung und anschließende
+Finite-Bank-Nutzungsplanung, Defense-/Score-Verbraucher sowie sämtliche
+anderen allgemeinen Zahlungswege. Ein globaler Spielstärkennachweis und
+erneuter Seedvergleich stehen weiterhin aus; keine Deckliste wird geändert.
 
 Eine Erweiterung muss zuerst am Economy-Owner die Investitionsquote
 bereitstellen: Installationsklick, Advance-Klick und -Credit, Rez-Kosten,

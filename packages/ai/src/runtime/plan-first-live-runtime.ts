@@ -16401,6 +16401,8 @@ function buildCorpDomain(
   );
   const economyNeeds: CorpCorePlanDomain["economyNeeds"] =
     unboundEconomyNeeds.map((signal) => {
+      if (signal.kind === "parent_funding" && signal.restrictedCreditFunding)
+        return signal;
       if (
         signal.kind === "develop_campaign" ||
         signal.kind === "convert_immediate_operation" ||
@@ -19962,9 +19964,31 @@ function corpEconomyDevelopmentCampaigns(
         Number.isSafeInteger(candidate.costProfile.clickCost) &&
         candidate.costProfile.additionalCosts.length === 0,
     );
-    for (const candidate of campaignCandidates) {
+    const restrictedQuotes =
+      phase === "rez" && currentServerId && !startRezChoiceBinding
+        ? (input.corpRestrictedCreditRouteQuotes ?? []).filter(
+            (quote) =>
+              quote.consumer.actionType === "rez_card" &&
+              !quote.consumer.availableBeforePayout &&
+              quote.consumer.sourceCardInstanceId === card.instanceId &&
+              quote.consumer.serverId === currentServerId &&
+              quote.request.stateVersion === input.playerView.stateVersion,
+          )
+        : [];
+    // A projected consumer is a descriptor, not a fabricated current LegalAction.
+    const routes = [
+      ...campaignCandidates.map((candidate) => ({
+        candidate,
+        quote: undefined,
+      })),
+      ...restrictedQuotes.map((quote) => ({ candidate: undefined, quote })),
+    ];
+    for (const { candidate, quote } of routes) {
       const targetServerId =
-        currentServerId ?? corpEconomyCampaignTargetServerId(input, candidate);
+        currentServerId ??
+        (candidate
+          ? corpEconomyCampaignTargetServerId(input, candidate)
+          : undefined);
       if (!targetServerId) continue;
       if (phase === "install" && reservedScoreServerIds.has(targetServerId)) {
         continue;
@@ -19972,7 +19996,9 @@ function corpEconomyDevelopmentCampaigns(
       const setupCreditCost =
         (startRezChoiceBinding
           ? (startRezOption!.metadata!.creditCost as number)
-          : (candidate.costProfile.creditCost as number)) +
+          : quote
+            ? quote.consumer.creditCost + quote.payoutGeneralCreditCost
+            : (candidate!.costProfile.creditCost as number)) +
         (phase === "install" ? (definition.rezCost ?? 0) : 0);
       const payback = assessCorpEconomyAssetPayback({
         input,
@@ -19989,7 +20015,9 @@ function corpEconomyDevelopmentCampaigns(
             ? (hostedCreditProfile?.payoutActionCost ?? 0)
             : 0,
         setupCreditCost,
-        setupActionCost: candidate.costProfile.clickCost as number,
+        setupActionCost: quote
+          ? quote.consumer.clickCost + quote.payoutClickCost
+          : (candidate!.costProfile.clickCost as number),
       });
       if (!payback || payback.projectedNetCredits <= 0) continue;
       signals.push({
@@ -19998,7 +20026,16 @@ function corpEconomyDevelopmentCampaigns(
         sourceInstanceId: card.instanceId,
         sourceDefinitionId: card.definitionId,
         phase,
-        actionIds: [candidate.actionId],
+        actionIds: candidate ? [candidate.actionId] : [],
+        ...(quote
+          ? {
+              restrictedCreditNeed: {
+                needId: `economy-rez-funding:${card.instanceId}:${targetServerId}`,
+                gap: quote.consumer.creditCost - input.playerView.own.credits,
+                quotes: [quote],
+              },
+            }
+          : {}),
         ...(startRezChoiceBinding ? { startRezChoiceBinding } : {}),
         cadence: {
           kind: cadence,
@@ -20092,12 +20129,62 @@ function corpEconomyDevelopmentCampaigns(
     }
   }
   const admitted: CorpCorePlanDomain["economyNeeds"] = [];
-  for (const signal of uniqueBy(signals, (entry) => entry.needId)) {
+  const groupedSignals = new Map<
+    string,
+    CorpCorePlanDomain["economyNeeds"][number]
+  >();
+  for (const signal of signals) {
+    const existing = groupedSignals.get(signal.needId);
+    if (
+      existing?.kind === "develop_campaign" &&
+      signal.kind === "develop_campaign" &&
+      existing.restrictedCreditNeed &&
+      signal.restrictedCreditNeed
+    ) {
+      existing.restrictedCreditNeed.quotes.push(
+        ...signal.restrictedCreditNeed.quotes,
+      );
+    } else if (!existing) groupedSignals.set(signal.needId, signal);
+  }
+  for (const signal of groupedSignals.values()) {
     if (signal.kind !== "develop_campaign") {
       admitted.push(signal);
       continue;
     }
     const actionPriorityClass = corpEconomyPriorityClass(signal);
+    if (signal.restrictedCreditNeed) {
+      const quotes = signal.restrictedCreditNeed.quotes.filter(
+        (quote) =>
+          assessCorpSpendAgainstScoreFundingMilestones({
+            currentCredits: input.playerView.own.credits,
+            actionCreditCost:
+              quote.consumer.generalCreditsRequired +
+              quote.payoutGeneralCreditCost,
+            actionPriorityClass,
+            scoreProjects,
+          }).preservesMilestone,
+      );
+      if (quotes.length > 0 && signal.restrictedCreditNeed.gap > 0) {
+        const need = { ...signal.restrictedCreditNeed, quotes };
+        admitted.push({ ...signal, restrictedCreditNeed: need });
+        admitted.push({
+          kind: "parent_funding",
+          needId: need.needId,
+          gap: need.gap,
+          actionIds: quotes.map((quote) => quote.request.payoutActionId),
+          parentPlanInstanceId: planInstanceIdForProposal({
+            moduleId: "corp.economy",
+            dedupeKey: signal.needId,
+          }),
+          parentNeedId: need.needId,
+          parentPriorityClass: actionPriorityClass,
+          restrictedCreditFunding: quotes,
+          urgentForScore: false,
+          evidenceCode: "corp_exact_restricted_credit_economy_rez_funding",
+        });
+      }
+      continue;
+    }
     const actionIds = signal.actionIds.filter((actionId) => {
       const candidate = candidates.find((entry) => entry.actionId === actionId);
       if (!candidate) return false;

@@ -116,6 +116,12 @@ export function activatedAbilityPayload(
       : undefined;
   const exactRestrictedCreditEffect =
     restrictedCreditEffect !== undefined &&
+    ability.costs.every(
+      (cost) =>
+        cost.kind === "action" ||
+        cost.kind === "credit" ||
+        (cost.kind === "advancement_counter" && cost.source === "source"),
+    ) &&
     restrictedCreditEffect.recipient === "corp" &&
     restrictedCreditEffect.usableFor === "install_or_rez" &&
     restrictedCreditEffect.cleanup === "end_of_turn" &&
