@@ -4720,6 +4720,64 @@ export class MultiplayerService {
     return this.storage.maintenanceMatchAnalysis?.(matchId, filters);
   }
 
+  async storageMaintenanceCurrentAiInput(matchId: string) {
+    const record = await this.storage.load(matchId, {
+      includeStateSnapshots: false,
+    });
+    if (!record?.gameState) return undefined;
+    const state = record.gameState;
+    const side = selectAiDecisionSideForState(state).side;
+    const context = {
+      schemaVersion: "netgrid-current-ai-input-v1",
+      provenance: "current_persisted_state",
+      matchId,
+      stateVersion: state.stateVersion,
+      stateHash: hashState(state),
+      matchVersion: record.match.matchVersion,
+    };
+    if (!side || !this.isAiSide(record, side))
+      return { ...context, status: "unavailable", reason: "no_active_ai" };
+    try {
+      const ownDeckSnapshot = assertRecordAiDeckSnapshotForRuntime(
+        record,
+        side,
+      );
+      const controller = record.match.aiControllers?.[side];
+      const input = this.buildAiDecisionInput(state, side, {
+        difficulty: controller?.difficulty ?? "normal",
+        profileId:
+          controller?.profileId ??
+          `${side}-server-ai-v0.9-${controller?.difficulty ?? "normal"}`,
+        decisionId: `${matchId}:${state.stateVersion}:${side}`,
+        actionNumber: state.stateVersion,
+        ownDeckSnapshot,
+        expectedDeckSnapshot: aiDeckSnapshotExpectationFor(record, side),
+      });
+      if (!assertAiInputIsSideSafe(input))
+        throw new Error("current_ai_input_not_side_safe");
+      return {
+        ...context,
+        status: "available",
+        actor: side,
+        input,
+        runtime: exportAiRuntimeCheckpoint(
+          input,
+          requiredCheckpointDeckSnapshotId(input),
+        ),
+        persistedPortfolio:
+          record.aiPlanRuntime?.residentPlanPortfolioBySide?.[side],
+      };
+    } catch (error) {
+      return {
+        ...context,
+        status: "failed",
+        actor: side,
+        phase: "input",
+        ...structuredAiDecisionFailure(error),
+      };
+    }
+  }
+
   async storageMaintenanceDecisionAnalysis(
     matchId: string,
     decisionIndex: number,

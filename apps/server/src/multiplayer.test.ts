@@ -13364,6 +13364,27 @@ describe("MVP 0.2 multiplayer service", () => {
       const beforeFailure = await service.loadForTest(created.matchId);
       if (!beforeFailure?.gameState)
         throw new Error("Missing match before failed AI choose attempt");
+      const currentInput = await service.storageMaintenanceCurrentAiInput(
+        created.matchId,
+      );
+      expect(currentInput).toMatchObject({
+        status: "available",
+        actor: "runner",
+        stateVersion: beforeFailure.gameState.stateVersion,
+        stateHash: hashState(beforeFailure.gameState),
+        input: {
+          playerView: {
+            side: "runner",
+            opponent: { handCount: beforeFailure.gameState.corp.hq.length },
+          },
+        },
+      });
+      expect(
+        currentInput &&
+          "input" in currentInput &&
+          currentInput.input.playerView.opponent,
+      ).not.toHaveProperty("gripOrHq");
+      expect(await service.loadForTest(created.matchId)).toEqual(beforeFailure);
       const eventAnchorId = beforeFailure.eventLog.at(-1)?.eventId;
       if (!eventAnchorId) throw new Error("Missing failure event anchor");
       const failureDecisionIndex =

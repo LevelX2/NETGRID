@@ -1735,8 +1735,11 @@
         "complete": "Terminé"
       },
       "opportunity": {
+        "target": "Choisir la cible du piratage",
+        "complete": "Terminer le piratage",
         "choice": "Décision",
-        "rez": "Rez",
+        "ice_rez": "Activer une GLACE",
+        "card_rez": "Activer d’autres cartes",
         "breaker": "Augmenter la force ou casser",
         "ability": "Capacité de la carte",
         "access": "Accès",
@@ -1745,6 +1748,7 @@
         "pass": "Passer"
       },
       "currentlyPossible": "Actuellement possible : {actions}",
+      "stagePossibility": "Repère pour cette étape : {actions} – non proposé actuellement",
       "optionCost": "{option}, coût : {cost}",
       "runActions": "Exécuter des actions",
       "rezOtherServers": "Rez sur d'autres serveurs",
@@ -2186,6 +2190,8 @@
       "agendaScored": "{subject} : noté {card}.",
       "agendaStolen": "{subject} : étole {card}.",
       "runStarted": "{subject} : démarrage d'une exécution sur {server}.",
+      "iceBypassedByInsideJob": "{subject} : a automatiquement passé {ice} avec Inside Job.",
+      "insideJobBypassDescription": "La première GLACE activée a été passée automatiquement ; ses routines n’ont pas été résolues.",
       "runContinued": "{subject} : poursuite de l'exécution sur {server}.",
       "runJackedOut": "{subject} : débranché.",
       "runEnded": "La course s'est terminée.",

@@ -31,7 +31,9 @@ export type RunCardImplementationActionHost = {
       side: Side,
       sourceCardId: CardInstanceId,
       definition: CardDefinition,
-      timing: ActivatedCardAbilityImplementation["timing"],
+      timing:
+        | ActivatedCardAbilityImplementation["timing"]
+        | readonly ActivatedCardAbilityImplementation["timing"][],
     ) => void;
   };
 };
@@ -54,14 +56,7 @@ export function buildRunnerDuringRunCardImplementationActions(
       "runner",
       cardId,
       definition,
-      "during_run",
-    );
-    host.runtime.pushActivatedActionsForTiming(
-      legalActions,
-      "runner",
-      cardId,
-      definition,
-      "runner_paid",
+      ["during_run", "runner_paid"],
     );
     const boost = host.cards.cardImplementationForDefinitionId?.(
       definition.id,
@@ -237,13 +232,6 @@ export function buildCorpDuringRunCardImplementationActions(
     ...rezzedCorpRootCardIds(host.state),
     ...scoredCorpAgendaIds(host.state),
   ]) {
-    host.runtime.pushActivatedActionsForTiming(
-      legalActions,
-      "corp",
-      cardId,
-      host.cards.definitionFor(cardId),
-      "corp_during_run",
-    );
     // The callers expose this list at the existing run rez windows (or probe
     // whether to open one). General paid effects also belong to those windows.
     // Encounter and trace action generation remain separate.
@@ -252,7 +240,7 @@ export function buildCorpDuringRunCardImplementationActions(
       "corp",
       cardId,
       host.cards.definitionFor(cardId),
-      "corp_paid",
+      ["corp_during_run", "corp_paid"],
     );
   }
   return { handled: true, legalActions };

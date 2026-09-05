@@ -38,6 +38,64 @@ function event(
 }
 
 describe("semantic chronicle localization", () => {
+  it.each(["de", "en", "fr"] as const)(
+    "keeps the Inside Job bypass on a rez pass in %s",
+    (locale) => {
+      const bypass = event("decline_rez", {
+        actor: "corp",
+        runApproachRootRezPass: true,
+        runStartBypassAutoPassedIce: true,
+        runStartBypassPassedIceDefinitionId: "onr_v1_261_quandary",
+        passedIcePosition: 3,
+        serverLabel: "Remote 1",
+      });
+      const items = formatChronicleEffectItems(
+        bypass,
+        "corp",
+        {
+          onr_v1_261_quandary: { title: "Quandary", type: "ice" },
+        },
+        translate(locale),
+      );
+      expect(items).toHaveLength(1);
+      expect(items[0]?.title).toContain("Quandary");
+      expect(items[0]?.title).toContain("Inside Job");
+      expect(items[0]?.actor).toBe("runner");
+    },
+  );
+
+  it.each(["de", "en", "fr"] as const)(
+    "names Misleading Access Menus and its paid credit in %s",
+    (locale) => {
+      const paid = event("continue_run", {
+        encounterContinue: true,
+        resolvedEffects: [
+          {
+            effectId: "subroutine_1",
+            kind: "resolve_subroutine",
+            visibility: "public",
+            side: "runner",
+            sourceDefinitionId: "onr_proteus_032_misleading-access-menus",
+            sourceTitle: "Misleading Access Menus",
+            subroutineIndex: 0,
+            subroutineType: "end_the_run_unless_runner_pays",
+            amount: 1,
+            paidCredits: 1,
+          },
+        ],
+      });
+      const items = formatChronicleEffectItems(
+        paid,
+        "corp",
+        undefined,
+        translate(locale),
+      );
+      expect(items).toHaveLength(1);
+      expect(items[0]?.title).toContain("Misleading Access Menus");
+      expect(items[0]?.title).toContain("1");
+    },
+  );
+
   it("renders the same public event independently in every locale", () => {
     const gained = event("gain_credits", { amount: 3 });
     const de = formatChronicleEvent(gained, "runner", {

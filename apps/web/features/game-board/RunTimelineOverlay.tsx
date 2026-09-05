@@ -7,6 +7,9 @@ import {
   FastForward,
   Hammer,
   Power,
+  Shield,
+  Flag,
+  Crosshair,
   Route,
   Search,
   Sparkles,
@@ -41,6 +44,7 @@ import {
   runWindowActionInstanceDetail,
   runWindowStatusLabel,
   runPhaseOpportunityKinds,
+  runStepOpportunities,
   serverDisplayLabel,
   serverTargetIdForChoiceOption,
   splitRunWindowActionsByServer,
@@ -216,11 +220,6 @@ export function RunTimelineOverlay({
           amount ? t("creditCount", { count: amount }) : t("credits"),
       })
     : null;
-  const phaseOpportunities = runPhaseOpportunityKinds(runActions);
-  const phaseOpportunityLabel = phaseOpportunities
-    .map((kind) => t(`opportunity.${kind}`))
-    .join(", ");
-
   const overlay = (
     <div
       ref={overlayRef}
@@ -255,36 +254,40 @@ export function RunTimelineOverlay({
         <div className="runSteps">
           {verticalSteps.map((step) => {
             const current = currentStep === step.id;
+            const opportunities = runStepOpportunities(
+              step.id,
+              currentStep,
+              runActions,
+            );
             return (
               <span className={current ? "current" : ""} key={step.id}>
                 {t(`step.${step.id}`)}
-                {current && phaseOpportunities.length > 0 ? (
-                  <small
-                    className="runStepOpportunities"
-                    aria-label={t("currentlyPossible", {
-                      actions: phaseOpportunityLabel,
-                    })}
-                    data-testid="run-phase-opportunities"
-                  >
-                    {phaseOpportunities.map((kind) => {
-                      const opportunity = RUN_PHASE_OPPORTUNITY_META[kind];
-                      const Icon = opportunity.icon;
-                      return (
-                        <i
-                          className={`runStepOpportunity ${kind}`}
-                          title={t(`opportunity.${kind}`)}
-                          key={kind}
-                        >
-                          <Icon
-                            size={14}
-                            strokeWidth={2.2}
-                            aria-hidden="true"
-                          />
-                        </i>
-                      );
-                    })}
-                  </small>
-                ) : null}
+                <small
+                  className="runStepOpportunities"
+                  data-testid="run-phase-opportunities"
+                >
+                  {opportunities.map(({ kind, active }) => {
+                    const opportunity = RUN_PHASE_OPPORTUNITY_META[kind];
+                    const Icon = opportunity.icon;
+                    const label = t(
+                      active ? "currentlyPossible" : "stagePossibility",
+                      {
+                        actions: t(`opportunity.${kind}`),
+                      },
+                    );
+                    return (
+                      <i
+                        className={`runStepOpportunity ${kind}${active ? " available" : ""}`}
+                        title={label}
+                        aria-label={label}
+                        role="img"
+                        key={kind}
+                      >
+                        <Icon size={14} strokeWidth={2.2} aria-hidden="true" />
+                      </i>
+                    );
+                  })}
+                </small>
               </span>
             );
           })}
@@ -498,8 +501,11 @@ const RUN_PHASE_OPPORTUNITY_META: Record<
   ReturnType<typeof runPhaseOpportunityKinds>[number],
   { icon: LucideIcon }
 > = {
+  target: { icon: Crosshair },
+  complete: { icon: Flag },
   choice: { icon: CircleHelp },
-  rez: { icon: Power },
+  ice_rez: { icon: Shield },
+  card_rez: { icon: Power },
   breaker: { icon: Hammer },
   ability: { icon: Sparkles },
   access: { icon: Search },

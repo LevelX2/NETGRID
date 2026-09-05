@@ -19,6 +19,23 @@
 - Normale Player-UI darf keinen FullState bekommen.
 - `page.tsx` soll nicht wieder neue Sammelbereiche für Card-, Action-, Recent-, Storage- oder Overlay-Helfer aufnehmen.
 
+## Run-Stufen und Aktionssymbole
+
+`RunTimelineOverlay` zeigt in jeder Stufe dauerhaft blasse Orientierungssymbole.
+Sie erklären typische Möglichkeiten und sind keine Legalitätsanzeige. Nur
+Symbole für aktuell angebotene `LegalActions` in der aktiven Stufe werden
+kräftig mit einem Leuchtrand dargestellt. Besondere angebotene Aktionen
+ergänzen die Orientierungssymbole dynamisch. Tooltips unterscheiden beide
+Zustände. ICE-Rezzen (Schild) und das Rezzen anderer Karten (Power-Symbol)
+bleiben getrennt; insbesondere kündigt das Power-Symbol in „Bewegung“ kein
+ICE-Rezfenster an. Die eigentlichen Aktionen bleiben in den Aktionsbuttons.
+
+Im ICE-Stapel verändert der Marker für die aktuelle Run-Position nicht die
+Stapelhöhe. Nur Hover, sichtbarer Tastaturfokus und ein geöffnetes Aktionsmenü
+heben eine Karte an; ein vorheriger Mausklick darf mittlere ICE nicht dauerhaft
+verdecken. Die lokalisierte Chronik übernimmt den öffentlichen
+Inside-Job-Bypass samt ICE-Identität auch aus dem zugehörigen Rez-Pass-Event.
+
 ## Wo Ändern?
 
 - Spielbrett-/Ressourcenanzeige: `features/game-board/`.

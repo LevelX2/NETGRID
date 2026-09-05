@@ -8514,9 +8514,8 @@ section[data-testid="legal-actions"].cueHighlight {
 }
 
 .iceLane .iceCardSlot:hover,
-.iceLane .iceCardSlot:focus-within,
-.iceLane .iceCardSlot.actionMenuOpen,
-.iceLane .iceCardSlot.runPositionActiveSlot {
+.iceLane .iceCardSlot:has(:focus-visible),
+.iceLane .iceCardSlot.actionMenuOpen {
   z-index: 38;
 }
 
@@ -15172,7 +15171,9 @@ select,
   min-height: 28px;
   place-items: center;
   text-align: center;
-  padding: 0 8px;
+  padding: 5px 8px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
   position: relative;
 }
 
@@ -15183,8 +15184,6 @@ select,
 }
 
 .runStepOpportunities {
-  position: absolute;
-  right: 7px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -15200,6 +15199,18 @@ select,
   border-radius: 999px;
   background: color-mix(in srgb, currentColor 14%, transparent);
   font-style: normal;
+  opacity: 0.4;
+  transition:
+    opacity 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.runStepOpportunity.available {
+  opacity: 1;
+  background: color-mix(in srgb, currentColor 22%, transparent);
+  box-shadow:
+    0 0 0 1px currentColor,
+    0 0 7px color-mix(in srgb, currentColor 40%, transparent);
 }
 
 .encounterFocus {

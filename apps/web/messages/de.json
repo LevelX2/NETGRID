@@ -1674,8 +1674,11 @@
         "complete": "Abschluss"
       },
       "opportunity": {
+        "target": "Run-Ziel wählen",
+        "complete": "Run abschließen",
         "choice": "Entscheidung",
-        "rez": "Rezzen",
+        "ice_rez": "ICE rezzen",
+        "card_rez": "Andere Karten rezzen",
         "breaker": "Stärke erhöhen oder brechen",
         "ability": "Kartenfähigkeit",
         "access": "Zugriff",
@@ -1684,6 +1687,7 @@
         "pass": "Passen"
       },
       "currentlyPossible": "Aktuell möglich: {actions}",
+      "stagePossibility": "Orientierung für diese Stufe: {actions} – aktuell nicht angeboten",
       "optionCost": "{option}, Kosten: {cost}",
       "runActions": "Run-Aktionen",
       "rezOtherServers": "Auf anderen Servern rezzen",
@@ -2110,6 +2114,8 @@
       "agendaScored": "{subject}: {card} gescort.",
       "agendaStolen": "{subject}: {card} gestohlen.",
       "runStarted": "{subject}: Run auf {server} gestartet.",
+      "iceBypassedByInsideJob": "{subject}: {ice} durch Inside Job automatisch passiert.",
+      "insideJobBypassDescription": "Das erste gerezzte ICE wurde automatisch passiert; seine Subroutinen wurden nicht abgearbeitet.",
       "runContinued": "{subject}: Run auf {server} fortgesetzt.",
       "runJackedOut": "{subject}: aus dem Run ausgestiegen.",
       "runEnded": "Der Run wurde beendet.",

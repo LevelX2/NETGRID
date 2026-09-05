@@ -5386,6 +5386,12 @@ export function formatChronicleEffectItems(
     translate,
   );
   if (translate) {
+    const insideJobAutoPassItem = insideJobAutoPassChronicleItem(
+      event,
+      side,
+      cardPresentationsById,
+      translate,
+    );
     const effectItems = effects
       .filter(
         (effect) =>
@@ -5412,6 +5418,7 @@ export function formatChronicleEffectItems(
     );
     const terminalItem = terminalFlatlineChronicleItem(event, side, translate);
     return [
+      ...(insideJobAutoPassItem ? [insideJobAutoPassItem] : []),
       ...(successfulRunCreditItem ? [successfulRunCreditItem] : []),
       ...(tagGainItem ? [tagGainItem] : []),
       ...effectItems,
@@ -5712,6 +5719,7 @@ function insideJobAutoPassChronicleItem(
   event: PublicGameEvent,
   side: Side,
   cardPresentationsById?: PublicCardPresentationsById,
+  translate?: ChronicleTranslate,
 ): ChronicleItem | undefined {
   const payload = event.publicPayload ?? {};
   if (payload.runStartBypassAutoPassedIce !== true) return undefined;
@@ -5731,9 +5739,15 @@ function insideJobAutoPassChronicleItem(
     importance: "important",
     visibility: "public",
     actor: "runner",
-    title: `${subject}${passedIcePosition ? ` ICE ${passedIcePosition} (${passedIceTitle})` : ` ${passedIceTitle}`} durch Inside Job automatisch passiert.`,
-    description:
-      "Das war das erste gerezzte ICE, dem der Runner in diesem Run begegnet ist; seine Subroutinen wurden nicht abgearbeitet.",
+    title: translate
+      ? translate("event.iceBypassedByInsideJob", {
+          subject: semanticChronicleSubject("runner", side, false, translate),
+          ice: passedIceTitle,
+        })
+      : `${subject}${passedIcePosition ? ` ICE ${passedIcePosition} (${passedIceTitle})` : ` ${passedIceTitle}`} durch Inside Job automatisch passiert.`,
+    description: translate
+      ? translate("event.insideJobBypassDescription")
+      : "Das war das erste gerezzte ICE, dem der Runner in diesem Run begegnet ist; seine Subroutinen wurden nicht abgearbeitet.",
     chips: uniqueChips([
       ...baseChips("runner", false),
       "Inside Job",

@@ -93,6 +93,7 @@ import {
   runnerProgramInstallTrashChoiceInfo,
   runPositionStatusLabel,
   runPhaseOpportunityKinds,
+  runStepOpportunities,
   runTargetServerIds,
   runWindowActionButtonLabel,
   runWindowActionInstanceDetail,
@@ -451,6 +452,27 @@ describe("localized action presentation", () => {
 });
 
 describe("V1.0.5 action board UI helpers", () => {
+  it("keeps stage cues dim and highlights only the current offered actions", () => {
+    const actions = [{ type: "rez_card" }, { type: "decline_rez" }] as const;
+    expect(runStepOpportunities("movement", "movement", actions)).toEqual([
+      { kind: "card_rez", active: true },
+      { kind: "ability", active: false },
+      { kind: "continue", active: false },
+      { kind: "jack_out", active: false },
+      { kind: "pass", active: true },
+    ]);
+    const approach = runStepOpportunities("approach_ice", "movement", actions);
+    expect(approach).toContainEqual({ kind: "ice_rez", active: false });
+    expect(approach.every((cue) => !cue.active)).toBe(true);
+    expect(runPhaseOpportunityKinds([{ type: "rez_ice" }])).toEqual([
+      "ice_rez",
+    ]);
+    expect(runStepOpportunities("movement", "movement", [])).toHaveLength(5);
+    expect(
+      runStepOpportunities("access", "access", [{ type: "resolve_choice" }]),
+    ).toContainEqual({ kind: "choice", active: true });
+  });
+
   it("formats persisted card state as readable card detail labels", () => {
     expect(selectedSubtypeDetailLabel({ selectedSubtypeLabel: "Sentry" })).toBe(
       "Gewählter Typ: Sentry",
@@ -1099,7 +1121,7 @@ describe("V1.0.5 action board UI helpers", () => {
           "run.movement_rez_window",
         ),
       ]),
-    ).toEqual(["rez", "continue", "jack_out", "pass"]);
+    ).toEqual(["card_rez", "continue", "jack_out", "pass"]);
     expect(
       runAwareActionButtonLabel(
         running,

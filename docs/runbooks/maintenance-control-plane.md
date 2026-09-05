@@ -258,6 +258,32 @@ Paketprofilen stehen in
 
 ## Laufende Matchanalyse
 
+Die Matchanalyse erfasst gespeicherte Events, KI-Entscheidungen und die im
+KI-Ausführungspfad erfassten fehlgeschlagenen Input-, Choose- und Apply-Versuche.
+Ein erfolgreich gespeichertes Rez-Event beweist nur die Ausführung dieser
+Aktion. Eine Ausnahme in nachfolgenden Schritten, etwa beim Erzeugen beider
+Spieleransichten oder beim Synchronisieren der Spieleruhr, kann vor der
+Persistenz der nächsten Entscheidung auftreten. `server_operation_failed`
+allein erlaubt daher keine Zuordnung zum Karten- oder KI-Pfad.
+
+`GET /api/storage/maintenance/analysis/matches/:matchId/current-ai-input`
+liefert für die aktive KI einen neu aufgebauten, actor-sicheren Input aus dem
+aktuell gespeicherten Zustand, gebunden an StateVersion, StateHash und
+MatchVersion (`netgrid-current-ai-input-v1`, `current_persisted_state`). Der
+eigene Decksnapshot wird validiert; die private Hand des menschlichen Gegners
+wird nicht exportiert. `runtime` beschreibt den aktuellen Prozessspeicher,
+`persistedPortfolio` den gespeicherten Planstand. Beides ist keine historische
+Fehleraufnahme. Der Zugriff wählt und spielt keine Aktion und verändert das
+Match nicht. Ohne aktive KI antwortet er mit `unavailable`; beim Inputaufbau
+mit einem strukturierten Fehler. Die bestehenden lokalen Read-only-Regeln
+gelten auch für diese Route.
+
+Bei Fehlern nach einer KI-Aktion muss eine Reproduktion neben der Actor-Seite
+auch die gegnerischen LegalActions und Spieleransichten des Folgezustands
+prüfen. Eine erfolgreiche KI-Auswahl oder Engine-Anwendung allein genügt
+nicht. Rohe Exceptions und private Kartendaten gehören weiterhin nicht in die
+Fehlermeldung der Spieleroberfläche.
+
 Für normale Analyse laufender NETGRID-Matches sollen Codex und andere
 Diagnosewerkzeuge nicht direkt `data/runtime/multiplayer/netgrid.sqlite`
 öffnen. Sie verwenden die authentifizierte lokale Maintenance-API
