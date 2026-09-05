@@ -373,7 +373,16 @@ corepack pnpm typecheck
 corepack pnpm test
 corepack pnpm build
 corepack pnpm e2e
+corepack pnpm test:e2e:multiplayer
+corepack pnpm test:e2e:multiplayer:chrome-edge
 ```
+
+`test:e2e:multiplayer` startet zwei voneinander getrennte Browserprozesse mit
+isolierten Sitzungen. Die Variante `:chrome-edge` verwendet das lokal
+installierte Google Chrome als Host und Microsoft Edge als beitretenden
+Browser. Beide Befehle starten Webclient und Multiplayer-Backend auf freien
+Ports mit einer eigenen temporären SQLite-Datenbank und räumen die Laufzeit
+danach wieder auf.
 
 Important architecture-specific checks include:
 

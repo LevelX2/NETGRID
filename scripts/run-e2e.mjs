@@ -21,6 +21,26 @@ const corepackPrefix =
     : [];
 const playwrightArgs = process.argv.slice(2);
 if (playwrightArgs[0] === "--") playwrightArgs.shift();
+const browserPairArgumentIndex = playwrightArgs.findIndex((argument) =>
+  argument.startsWith("--browser-pair="),
+);
+const browserPair =
+  browserPairArgumentIndex >= 0
+    ? playwrightArgs.splice(browserPairArgumentIndex, 1)[0]?.split("=", 2)[1]
+    : undefined;
+const browserPairEnvironment =
+  browserPair === undefined
+    ? {}
+    : browserPair === "chrome-edge"
+      ? {
+          NETGRID_E2E_HOST_BROWSER_CHANNEL: "chrome",
+          NETGRID_E2E_JOINER_BROWSER_CHANNEL: "msedge",
+        }
+      : (() => {
+          throw new Error(
+            `Unsupported browser pair '${browserPair}'. Supported: chrome-edge`,
+          );
+        })();
 const started = [];
 
 const serverPort = await freePort();
@@ -112,6 +132,7 @@ try {
       PLAYWRIGHT_BASE_URL: webUrl,
       NETGRID_E2E_SERVER_URL: serverUrl,
       NETGRID_E2E_RUNTIME_PATH: runtimePath,
+      ...browserPairEnvironment,
     },
   );
   process.exitCode = result;

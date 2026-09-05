@@ -10,6 +10,8 @@
   "scripts": {
     "e2e": "node scripts/run-e2e.mjs",
     "test:e2e": "node scripts/run-e2e.mjs",
+    "test:e2e:multiplayer": "node scripts/run-e2e.mjs tests/e2e/netgrid-multiplayer-two-browser.spec.ts",
+    "test:e2e:multiplayer:chrome-edge": "node scripts/run-e2e.mjs --browser-pair=chrome-edge tests/e2e/netgrid-multiplayer-two-browser.spec.ts",
     "check:ai": "pnpm check:ai-hint-metadata-contracts && pnpm check:ai-source-structure && pnpm check:ai-generic-card-id-guards",
     "build:proteus-ai-readiness-inventory": "pnpm exec tsx scripts/build-proteus-ai-readiness-inventory.mjs --write",
     "build:proteus-ai-family-scenarios": "node scripts/build-proteus-ai-family-scenarios.mjs --write",
