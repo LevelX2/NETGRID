@@ -771,6 +771,10 @@ function deriveGenericTypedHintOverlay(
       );
     }
     if (modifier.kind === "steal_cost") {
+      const isSameFortAgendaStealTax =
+        modifier.side === "corp" &&
+        modifier.sourceZone === "corp_root" &&
+        modifier.sameServerAsSource === true;
       overlay.effects.push(
         {
           kind: "run_tax",
@@ -793,6 +797,7 @@ function deriveGenericTypedHintOverlay(
         "remote.agenda_steal_tax",
         "remote.scoring_protection",
         "tax.runner_credit",
+        ...(isSameFortAgendaStealTax ? ["access.agenda_steal_tax"] : []),
       );
     }
     if (modifier.kind === "ice_strength") {

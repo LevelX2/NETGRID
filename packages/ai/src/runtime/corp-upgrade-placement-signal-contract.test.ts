@@ -112,6 +112,16 @@ describe("Corp upgrade placement signal contract", () => {
     );
   });
 
+  it("recognizes a same-fort agenda-steal tax as useful on central servers", () => {
+    expect(placementComponent("onr_v1_366_red-herrings", "rd")).toEqual(
+      expect.objectContaining({
+        key: "corp_upgrade_install_placement_fit",
+        value: 1700,
+        reason: expect.stringContaining("fit:central_agenda_steal_tax"),
+      }),
+    );
+  });
+
   it("keeps Panic Button as an HQ-only counterexample", () => {
     expect(placementComponent("onr_proteus_067_panic-button", "hq")).toEqual(
       expect.objectContaining({

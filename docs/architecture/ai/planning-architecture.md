@@ -999,6 +999,15 @@ fehlende beziehungsweise falsch geschnittene Planfamilie. Sie werden durch
 einen generischen Planvertrag geschlossen, nicht durch match-, karten- oder
 StateVersion-spezifische Freischaltungen.
 
+Für Runner-ICE-Sabotage umfasst dieser Vertrag sowohl Bypass als auch
+gezieltes Entfernen beziehungsweise erzwungenes Rez-oder-Trash. Bindet die
+bestehende Zentraldruck- oder Remote-Planung keine aktuelle Vorbereitungsroute,
+liefert der Zentraldruck-Owner die ausdrückliche Nichtproduktivitäts-Disposition
+für diese Action. Bereits gebundene Vorbereitungen behalten ihren jeweiligen
+Owner und werden nicht erneut disponiert. Die Disposition wählt weder ein
+anderes Ziel noch eine Ersatzaktion; die Choice bleibt an die gewählte Route
+gebunden.
+
 ### 9.6 `evaluateRoute`
 
 Vergleicht nur Routen, die denselben Step erfüllen oder eine fachlich
@@ -2514,6 +2523,16 @@ Der Plan muss unterscheiden:
 - Ambush-/Damage-Risiko;
 - deckstrategisch begründeten wiederholten Remote-Druck.
 
+Die Runpfad-Projektion trennt einen nicht tödlichen Handpufferverstoß von
+unmittelbarer beziehungsweise Cleanup-Flatline. Ein bekannter Zugriff bleibt
+bei überlebbarem Schaden grundsätzlich abfangbar; der bestehende
+Contest-Owner entscheidet weiterhin, ob sein terminales Letztchancenfenster
+den normalen Handpuffer überstimmen darf. Die Schadensprojektion summiert dazu
+alle bekannten Folgequellen einschließlich Zugriffsschaden auch nach einer
+ersten Reservewarnung weiter. Eine Reservewarnung allein darf weder
+`accessPayoffContestable` noch die bekannte Überlebbarkeit auf `false` setzen.
+Es entsteht keine zusätzliche Runwahl oder Ausnahme im Choice-Resolver.
+
 `draw_for_answer` ist nur zulässig, wenn:
 
 - eine konkrete fehlende Antwort benannt ist;
@@ -2548,6 +2567,23 @@ validate_run_path
 
 Das Modul darf nicht bei jeder spielbaren Programminstallation wachsen. Es
 arbeitet auf eine konkrete Coverage- oder Rig-Fähigkeit hin.
+
+Eine exakt gebundene Upgrade-/Kosten-Recovery-Route bleibt an ihre gewählte
+Karteninstanz gebunden. Weitere Handkopien derselben Definition, die nur
+diesem Bedarf zugeordnet sind, erhalten eine ausdrückliche Zurückstellung
+beim Coverage-Owner; sie erzeugen weder einen zweiten generischen
+Entwicklungsplan noch eine Lücke in der LegalAction-Klassifikation. Lehnt ein
+exakt gebundener Zentraldruck-Parent seinen aktuellen Payoff mit einem Wert
+kleiner oder gleich null ab, bleibt auch seine Installation ausdrücklich
+zurückgestellt. Eine andere positive oder unabhängige Coverage-Bindung
+derselben Action bleibt davon unberührt. Diese Dispositionen ändern weder
+die gewählte Kopie noch Action-ID, Parent-/Need-Bindung oder Executor.
+
+Eine lokale Economy-Zurückstellung von Mehrzweck-Hardware gilt nur für ihren
+Einkommenszweck. Eine bereits exakt gebundene Coverage- oder MU-Vorbereitung
+derselben Installation bleibt beim Coverage-Owner ausführbar. Andere,
+ungebundene Kopien bleiben zurückgestellt; echte globale Sicherheits- und
+Installationsausschlüsse werden dadurch nicht entfernt.
 
 Der gemeinsame Fact-Service `RunnerRigDemandProjection` bildet dafür
 ausschließlich vorhandene planlokale Bedarfe ab. Jeder Demand trägt Owner,

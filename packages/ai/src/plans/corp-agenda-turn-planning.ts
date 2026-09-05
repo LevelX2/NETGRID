@@ -106,10 +106,11 @@ export function buildCorpAgendaTurnPlanningSlice(params: {
     params.project.openingRush?.status === "qualified"
       ? params.project.openingRush.quote.opportunityKey
       : `agenda:${params.project.projectId}:${params.stateIdentity.sideSafePlanningFingerprint}`;
+  const exactAgenda = exactAgendaHead(params.project, params.candidates);
   const agenda =
     params.project.feasible ||
     params.project.openingRush?.status === "qualified"
-      ? exactAgendaHead(params.project, params.candidates)
+      ? exactAgenda
       : undefined;
 
   const remoteId = params.project.serverId;
@@ -264,9 +265,11 @@ export function buildCorpAgendaTurnPlanningSlice(params: {
         : ["agenda_rush_randomization_not_admissible"]),
       ...(!agenda && protectionProvider
         ? ["agenda_slice_safe_setup_without_agenda_head"]
-        : !agenda
+        : !exactAgenda
           ? ["agenda_slice_missing_exact_agenda_head"]
-          : []),
+          : !agenda
+            ? ["agenda_slice_infeasible_agenda_head_excluded"]
+            : []),
     ],
   };
 }

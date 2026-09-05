@@ -25,8 +25,8 @@ describe("deck strategy completeness gate", () => {
     cards: Array<{ cardId: string; quantity: number }>;
   }>;
 
-  it("classifies all 49 active standard decks and exposes under-equipped lists deterministically", () => {
-    expect(activeDecks).toHaveLength(49);
+  it("classifies all 50 active standard decks and exposes under-equipped lists deterministically", () => {
+    expect(activeDecks).toHaveLength(50);
     const neutralDeckNames: string[] = [];
 
     for (const deck of activeDecks) {

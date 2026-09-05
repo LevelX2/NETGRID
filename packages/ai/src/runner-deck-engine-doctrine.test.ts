@@ -150,6 +150,7 @@ describe("runner deck engine doctrine", () => {
   it("binds recovery and compatible recurring economy only from structured facts", () => {
     const recoveryId = "test-structured-top-trash-recovery";
     const breakerCreditId = "test-structured-non-noisy-breaker-credit";
+    const killerCreditId = "test-structured-killer-credit";
     const legacyOnlyId = "test-legacy-runner-support-signals";
     const doctrine = withAiHints(
       [
@@ -171,6 +172,15 @@ describe("runner deck engine doctrine", () => {
           amount: 2,
           repeatable: true,
         }),
+        structuredHint(killerCreditId, "hardware", {
+          kind: "recurring_economy",
+          timing: "persistent",
+          scope: "runner",
+          resource: "credits",
+          target: "killer",
+          amount: 1,
+          repeatable: true,
+        }),
         {
           ...structuredHint(legacyOnlyId, "resource"),
           roles: ["trash_recovery", "icebreaker_support"],
@@ -181,10 +191,12 @@ describe("runner deck engine doctrine", () => {
         buildRunnerDeckEngineDoctrine({
           deckSnapshotId: "structured-runner-provider-witnesses",
           side: "runner",
-          cards: [recoveryId, breakerCreditId, legacyOnlyId].map((cardId) => ({
-            cardId,
-            quantity: 1,
-          })),
+          cards: [
+            recoveryId,
+            breakerCreditId,
+            killerCreditId,
+            legacyOnlyId,
+          ].map((cardId) => ({ cardId, quantity: 1 })),
         }),
     );
 
@@ -197,6 +209,10 @@ describe("runner deck engine doctrine", () => {
         (provider) => provider.cardId === breakerCreditId,
       )?.capabilities,
     ).toContain("runner.economy.recurring_breaker");
+    expect(
+      doctrine?.providers.find((provider) => provider.cardId === killerCreditId)
+        ?.capabilities,
+    ).toContain("runner.economy.recurring_breaker");
     const legacyOnlyProvider = doctrine?.providers.find(
       (provider) => provider.cardId === legacyOnlyId,
     );
@@ -206,6 +222,23 @@ describe("runner deck engine doctrine", () => {
     expect(legacyOnlyProvider?.capabilities).not.toContain(
       "runner.economy.recurring_breaker",
     );
+  });
+
+  it("declares every compatible recurring-credit provider in R&D Express", () => {
+    const doctrine = buildRunnerDeckEngineDoctrine(
+      standardDeck("standard_runner_rd_express"),
+    );
+
+    expect(
+      doctrine?.providers
+        .filter((provider) =>
+          provider.capabilities.includes("runner.economy.recurring_breaker"),
+        )
+        .map((provider) => provider.cardId),
+    ).toEqual([
+      "onr_v1_071_vewy-vewy-quiet",
+      "onr_v1_124_corolla-speed-chip",
+    ]);
   });
 
   it("keeps sparse throughput support below high-strength development", () => {

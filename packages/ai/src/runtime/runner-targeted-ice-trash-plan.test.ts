@@ -9,6 +9,7 @@ import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
 import { withEffectiveRunQuote } from "../effective-run-quote.test-support";
+import { aiInput } from "../semantic-ai-runtime-cutover.test-support";
 import type { ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
 import {
   rememberResidentPlanPortfolio,
@@ -26,7 +27,10 @@ import {
   type RunnerTargetedIceTrashCommitment,
   type RunnerTargetedIceTrashChoiceContinuation,
 } from "./runner-targeted-ice-trash-plan";
-import { bindSelectedRunnerTargetedIceTrashChoiceContinuation } from "./plan-first-live-runtime";
+import {
+  bindSelectedRunnerTargetedIceTrashChoiceContinuation,
+  runnerActionDispositions,
+} from "./plan-first-live-runtime";
 import { selectedChoicesForDecision } from "./selected-choices-for-decision";
 
 afterEach(() => {
@@ -34,6 +38,70 @@ afterEach(() => {
 });
 
 describe("Runner targeted rezzed-ICE trash plan", () => {
+  it.each([
+    ["rezzed removal", targetedTrashCandidate],
+    ["unrezzed removal", targetedUnrezzedTrashCandidate],
+    ["rez-or-trash", canonicalForgedCandidate],
+  ])(
+    "gives unbound %s an explicit pressure-owner disposition without overriding a bound route",
+    (_label, buildCandidate) => {
+      const candidate = { ...canonicalForgedCandidate(), ...buildCandidate() };
+      const input = aiInput("runner", []);
+      const domain = {
+        creditBanks: [],
+        recurringEconomy: [],
+        resourceLifecycle: [],
+        shellTradersPipelines: [],
+        runWindows: [],
+        developments: [],
+        coverageGaps: [],
+        centralPressure: [],
+        remoteContests: [],
+        installedAgendaScores: [],
+        installedCardLiquidationChoices: [],
+        fundingNeeds: [],
+        defense: {
+          activeTags: 0,
+          forgoUnsafeRunCapacity: false,
+          handBufferActionIds: [],
+        },
+      };
+      const dispositions = (overrides = {}) =>
+        runnerActionDispositions(
+          input,
+          [candidate],
+          { ...domain, ...overrides } as never,
+          [],
+          [],
+          () => undefined,
+        );
+      expect(dispositions()).toEqual([
+        {
+          actionId: candidate.actionId,
+          disposition: "explicitly_nonproductive",
+          ownerModuleId: "runner.pressure_central",
+          evidenceCode: "runner_no_bound_targeted_ice_trash_route",
+        },
+      ]);
+      for (const owner of ["centralPressure", "remoteContests"]) {
+        expect(
+          dispositions({
+            [owner]: [
+              {
+                preparationActionIds: [candidate.actionId],
+                runActionAssessments: {},
+              },
+            ],
+          }),
+        ).not.toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ actionId: candidate.actionId }),
+          ]),
+        );
+      }
+    },
+  );
+
   it("keeps the effect family out of generic development and binds the exact ICE whose removal opens the path", () => {
     const candidate = targetedTrashCandidate();
     const commitment = runnerTargetedIceTrashPlanCommitment({

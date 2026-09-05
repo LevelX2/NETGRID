@@ -10278,6 +10278,61 @@ describe("authoritative plan-first live runtime", () => {
       reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
+
+    const fetalInstall = legalAction(
+      "install-fetal-ai",
+      "corp",
+      "install_card",
+      "Install Fetal AI",
+      { credits: 0, clicks: 1 },
+      {
+        source: "fetal-ai",
+        payload: {
+          cardId: "fetal-ai",
+          serverId: "new_remote",
+          placement: "root",
+          agendaInstallScoreHorizonQuoteSchemaVersion:
+            "corp-agenda-install-score-horizon-quote-v1",
+          agendaInstallScoreHorizonQuoteCardId: "fetal-ai",
+          agendaInstallScoreHorizonQuoteTargetServerId: "new_remote",
+          agendaInstallScoreHorizonQuoteExpiresAtStateVersion: 1,
+          agendaInstallScoreHorizonQuoteAdvancementRequirement: 5,
+          agendaInstallScoreHorizonQuoteMaximumCurrentTurnAdvances: 1,
+          agendaInstallScoreHorizonQuoteRemainingAdvancesAfterCurrentTurn: 4,
+          agendaInstallScoreHorizonQuoteNextCorpTurnGuaranteedFlexibleClicks: 3,
+          agendaInstallScoreHorizonQuoteComplete: false,
+          agendaInstallScoreHorizonQuoteReason:
+            "not_completable_by_next_corp_turn",
+        },
+      },
+    );
+    resetResidentPlanPortfolioMemory();
+    const blockedFiveAdvance = aiInput("corp", [
+      fetalInstall,
+      efficiency,
+      credit,
+      draw,
+    ]);
+    blockedFiveAdvance.playerView.own.clicks = 2;
+    blockedFiveAdvance.playerView.own.credits = 5;
+    blockedFiveAdvance.playerView.own.stackOrRdCount = 12;
+    blockedFiveAdvance.playerView.own.gripOrHq = [
+      visibleCard("fetal-ai", "corp", "agenda", {
+        definitionId: "onr_proteus_004_fetal-ai",
+        advancementRequirement: 5,
+        agendaPoints: 3,
+      }),
+      visibleCard("efficiency-card", "corp", "operation", {
+        definitionId: "onr_v1_290_efficiency-experts",
+      }),
+    ];
+    expect(
+      liveContext().chooseSemanticRuntimeAction(blockedFiveAdvance, {}),
+    ).toMatchObject({
+      actionId: "efficiency",
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
   });
 
   it("limits score-material observation to one exact basic draw per Corp turn", () => {
@@ -11618,6 +11673,114 @@ describe("authoritative plan-first live runtime", () => {
     ).toThrow(
       expect.objectContaining({ code: "missing_plan_module_coverage" }),
     );
+
+    const centralRez = legalAction(
+      "rez-red-herrings-rd",
+      "corp",
+      "rez_card",
+      "Rez Red Herrings in R&D",
+      { credits: 1, clicks: 0 },
+      {
+        source: "red-herrings-rd",
+        payload: { cardId: "red-herrings-rd", serverId: "rd" },
+      },
+    );
+    const centralWindow = aiInput("corp", [centralRez]);
+    centralWindow.playerView.timingPoint = "run.approach_ice";
+    centralWindow.playerView.own.credits = 20;
+    centralWindow.playerView.own.stackOrRdCount = 5;
+    centralWindow.playerView.run = {
+      attackedServerId: "rd",
+      phase: "approach_ice",
+      position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+      successful: false,
+    };
+    centralWindow.playerView.servers = [
+      server("hq"),
+      server(
+        "rd",
+        [
+          visibleCard("rd-ice", "corp", "ice", {
+            definitionId: "onr_v1_237_data-wall",
+            title: "Data Wall",
+            rezzed: true,
+          }),
+        ],
+        [
+          visibleCard("red-herrings-rd", "corp", "upgrade", {
+            definitionId: "onr_v1_366_red-herrings",
+            title: "Red Herrings",
+            rezzed: false,
+          }),
+        ],
+      ),
+      server("archives"),
+    ];
+    resetResidentPlanPortfolioMemory();
+    expect(
+      liveContext().chooseSemanticRuntimeAction(centralWindow, {}),
+    ).toMatchObject({
+      actionId: centralRez.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+    });
+
+    const hqRez = legalAction(
+      "rez-red-herrings-hq",
+      "corp",
+      "rez_card",
+      "Rez Red Herrings in HQ",
+      { credits: 1, clicks: 0 },
+      {
+        source: "red-herrings-hq",
+        payload: { cardId: "red-herrings-hq", serverId: "hq" },
+      },
+    );
+    const hqWindow = aiInput("corp", [hqRez]);
+    hqWindow.playerView.timingPoint = "run.approach_ice";
+    hqWindow.playerView.own.credits = 20;
+    hqWindow.playerView.own.gripOrHq = [
+      visibleCard("hq-agenda", "corp", "agenda", {
+        definitionId: "onr_v1_195_corporate-retreat",
+        title: "Corporate Retreat",
+        advancementRequirement: 4,
+      }),
+    ];
+    hqWindow.playerView.run = {
+      attackedServerId: "hq",
+      phase: "approach_ice",
+      position: { kind: "ice", serverId: "hq", iceIndex: 0 },
+      successful: false,
+    };
+    hqWindow.playerView.servers = [
+      server(
+        "hq",
+        [
+          visibleCard("hq-ice", "corp", "ice", {
+            definitionId: "onr_v1_237_data-wall",
+            title: "Data Wall",
+            rezzed: true,
+          }),
+        ],
+        [
+          visibleCard("red-herrings-hq", "corp", "upgrade", {
+            definitionId: "onr_v1_366_red-herrings",
+            title: "Red Herrings",
+            rezzed: false,
+          }),
+        ],
+      ),
+      server("rd"),
+      server("archives"),
+    ];
+    resetResidentPlanPortfolioMemory();
+    expect(
+      liveContext().chooseSemanticRuntimeAction(hqWindow, {}),
+    ).toMatchObject({
+      actionId: hqRez.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+    });
   });
 
   it("routes an explicit fortified-server defense upgrade through the global defense plan", () => {
@@ -12135,11 +12298,35 @@ describe("authoritative plan-first live runtime", () => {
           definitionId: "onr_v1_273_triggerman",
           rezzed: false,
           rezCost: 7,
+          effectiveRezCostQuote: {
+            context: "installed",
+            cardId: "expensive-ice",
+            targetServerId: "hq",
+            projectedServerId: "hq",
+            expiresAtStateVersion: 11,
+            complete: true,
+            costKind: "fixed",
+            baseCredits: 7,
+            finalCredits: 7,
+            mandatoryAdditionalCosts: { agendaPoints: 0 },
+          },
         }),
         visibleCard("cheaper-ice", "corp", "ice", {
           definitionId: "onr_v1_279_wall-of-static",
           rezzed: false,
           rezCost: 5,
+          effectiveRezCostQuote: {
+            context: "installed",
+            cardId: "cheaper-ice",
+            targetServerId: "hq",
+            projectedServerId: "hq",
+            expiresAtStateVersion: 11,
+            complete: true,
+            costKind: "fixed",
+            baseCredits: 5,
+            finalCredits: 5,
+            mandatoryAdditionalCosts: { agendaPoints: 0 },
+          },
         }),
       ]),
       server(
@@ -12178,6 +12365,104 @@ describe("authoritative plan-first live runtime", () => {
             targetPurpose: "rez_best_defensive_ice",
             targetCardId: "expensive-ice",
             targetDefinitionId: "onr_v1_273_triggerman",
+            selectedVariantId: "fixed",
+            selectedOptionId: "rez_expensive-ice_fixed",
+          },
+        },
+      },
+    });
+  });
+
+  it("prebinds the unbreakable no-surcharge subtype variant for a variable free-rez ICE", () => {
+    const scoreAgenda = legalAction(
+      "score-priority-requisition",
+      "corp",
+      "score_agenda",
+      "Score Priority Requisition",
+      { credits: 0, clicks: 0 },
+      {
+        source: "priority-requisition",
+        payload: { cardId: "priority-requisition" },
+      },
+    );
+    const input = aiInput("corp", [scoreAgenda]);
+    input.playerView.stateVersion = 11;
+    input.playerView.own.credits = 1;
+    scoreAgenda.expiresAtStateVersion = 11;
+    input.decisionId = "score-priority-requisition-variable:11";
+    input.playerView.opponent.rig = [
+      visibleCard("codecracker", "runner", "program", {
+        definitionId: "onr_v1_014_codecracker",
+        strength: 0,
+        subtypes: ["icebreaker", "codecracker"],
+      }),
+    ];
+    input.playerView.servers = [
+      server("rd", [
+        visibleCard("credit-blocks", "corp", "ice", {
+          definitionId: "onr_proteus_017_credit-blocks",
+          rezzed: false,
+          rezCost: 6,
+          subtypes: ["sentry"],
+          effectiveRezCostQuote: {
+            context: "installed",
+            cardId: "credit-blocks",
+            targetServerId: "rd",
+            projectedServerId: "rd",
+            expiresAtStateVersion: 11,
+            complete: true,
+            costKind: "variable",
+            baseCredits: 6,
+            finalCredits: 6,
+            mandatoryAdditionalCosts: { agendaPoints: 0 },
+            variableParameter: {
+              kind: "alternate_subtype",
+              baseSubtypes: ["sentry"],
+              baseSubtypesFinalCredits: 6,
+              alternateSubtypes: ["wall"],
+              alternateSubtypesAdditionalCredits: 1,
+              alternateSubtypesFinalCredits: 7,
+            },
+          },
+        }),
+      ]),
+      server(
+        "remote_1",
+        [],
+        [
+          visibleCard("priority-requisition", "corp", "agenda", {
+            definitionId: "onr_v1_212_priority-requisition",
+            advancementCounters: 5,
+            advancementRequirement: 5,
+            agendaPoints: 3,
+          }),
+        ],
+      ),
+    ];
+
+    resetResidentPlanPortfolioMemory();
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: scoreAgenda.actionId,
+      reasonCode: "plan_first.corp.score_agenda",
+      fallbackUsed: false,
+    });
+    const portfolio = residentPlanPortfolioSnapshot(input);
+    const executor = portfolio?.instances.find(
+      (instance) => instance.instanceId === portfolio.executorInstanceId,
+    );
+    expect(executor).toMatchObject({
+      moduleId: "corp.score_agenda",
+      executionState: "executor",
+      moduleState: {
+        choiceContinuation: {
+          family: "corp_scored_agenda_on_score",
+          selectedActionId: scoreAgenda.actionId,
+          targetCardId: "priority-requisition",
+          freeRezChoiceBinding: {
+            targetCardId: "credit-blocks",
+            targetDefinitionId: "onr_proteus_017_credit-blocks",
+            selectedVariantId: "alternate_subtype:base",
+            selectedOptionId: "rez_credit-blocks_alternate_subtype:base",
           },
         },
       },
@@ -13319,7 +13604,7 @@ describe("authoritative plan-first live runtime", () => {
     ).not.toContain("missing_action_semantics");
   });
 
-  it("lets the score plan reuse a mature remote whose two Engine-certified layers tax or damage without changing exact access probability", () => {
+  it("lets the score plan reuse a mature remote only when two Engine-certified layers deny exact access", () => {
     const stateVersion = 1;
     const installAgenda = legalAction(
       "install-agenda-in-mature-remote",
@@ -13723,15 +14008,9 @@ describe("authoritative plan-first live runtime", () => {
     expect(
       liveContext().chooseSemanticRuntimeAction(liquidityBindingRemote, {}),
     ).toMatchObject({
-      actionId: installAgenda.actionId,
-      reasonCode: "plan_first.corp.score_agenda",
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
-      decisionDebug: {
-        planKind: "corp.score_agenda",
-        planFirstDecision: {
-          route: { actionId: installAgenda.actionId },
-        },
-      },
     });
 
     const terminalLiquidityBindingRemote = structuredClone(
@@ -13846,6 +14125,83 @@ describe("authoritative plan-first live runtime", () => {
       expect.arrayContaining([
         "plan_step_capability:install_score_agenda",
         "plan_assessment_evidence:corp_last_viable_deckout_matchpoint_install:remote_1",
+      ]),
+    );
+  });
+
+  it("starts the existing score plan before an agenda-flood deckout becomes the last draw", () => {
+    resetResidentPlanPortfolioMemory();
+    const installAgenda = legalAction(
+      "install-deckout-flood-agenda",
+      "corp",
+      "install_card",
+      "Install Black Ice Quality Assurance in Remote 1",
+      { credits: 0, clicks: 1 },
+      {
+        source: "deckout-flood-agenda",
+        payload: {
+          cardId: "deckout-flood-agenda",
+          sourceDefinitionId: "onr_v1_191_black-ice-quality-assurance",
+          serverId: "remote_1",
+          placement: "root",
+        },
+      },
+    );
+    const credit = legalAction(
+      "deckout-flood-credit",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      { payload: { gainCreditsAmount: 1 } },
+    );
+    const input = aiInput("corp", [credit, installAgenda]);
+    input.playerView.own.agendaPoints = 6;
+    input.playerView.own.clicks = 3;
+    input.playerView.own.credits = 6;
+    input.playerView.own.stackOrRdCount = 6;
+    input.playerView.own.gripOrHq = [
+      visibleCard("deckout-flood-agenda", "corp", "agenda", {
+        definitionId: "onr_v1_191_black-ice-quality-assurance",
+        title: "Black Ice Quality Assurance",
+        advancementRequirement: 5,
+        agendaPoints: 2,
+      }),
+      visibleCard("second-deckout-flood-agenda", "corp", "agenda", {
+        definitionId: "onr_v1_191_black-ice-quality-assurance",
+        title: "Black Ice Quality Assurance",
+        advancementRequirement: 5,
+        agendaPoints: 2,
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1"),
+    ];
+    attachOwnDeckSnapshot(input, {
+      deckSnapshotId: "deckout-flood-scoreline",
+      side: "corp",
+      cards: [
+        {
+          cardId: "onr_v1_191_black-ice-quality-assurance",
+          quantity: 4,
+        },
+      ],
+    });
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: installAgenda.actionId,
+      reasonCode: "plan_first.corp.score_agenda",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_step_capability:install_score_agenda",
+        "plan_assessment_evidence:corp_deckout_agenda_flood_score_install:remote_1",
       ]),
     );
   });
@@ -16943,6 +17299,276 @@ describe("authoritative plan-first live runtime", () => {
       fallbackUsed: false,
       decisionDebug: {
         planKind: "runner.economy",
+      },
+    });
+  });
+
+  it("installs a compatible recurring breaker-credit engine through its specialized owner", () => {
+    resetResidentPlanPortfolioMemory();
+    const vewy = visibleCard("vewy-in-grip", "runner", "program", {
+      definitionId: "onr_v1_071_vewy-vewy-quiet",
+      title: "Vewy Vewy Quiet",
+      installCost: 4,
+      memoryCost: 1,
+    });
+    const installVewy = legalAction(
+      "install-vewy",
+      "runner",
+      "install_card",
+      "Vewy Vewy Quiet installieren",
+      { credits: 4, clicks: 1 },
+      {
+        source: vewy.instanceId,
+        payload: { cardId: vewy.instanceId },
+      },
+    );
+    const credit = legalAction(
+      "credit-after-vewy",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [installVewy, credit]);
+    input.playerView.own.credits = 10;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.stackOrRdCount = 30;
+    input.playerView.own.memoryLimit = 4;
+    input.playerView.own.memoryUsed = 1;
+    input.playerView.own.gripOrHq = [vewy];
+    input.playerView.own.rig = [
+      visibleCard("codecracker-installed", "runner", "program", {
+        definitionId: "onr_v1_014_codecracker",
+        subtypes: ["icebreaker", "decoder"],
+      }),
+    ];
+
+    const decision = liveContext({
+      runnerStrategicIntentForInput: recurringProgramSearchIntent,
+      evaluateRunnerHandDevelopment: () => [
+        handEvaluation({
+          cardInstanceId: vewy.instanceId,
+          definitionId: "onr_v1_071_vewy-vewy-quiet",
+          legalActionId: installVewy.actionId,
+          priority: 80,
+          duplicateRole: "none",
+          finalInstallFit: 80,
+          cardType: "program",
+          installCost: 4,
+          memoryCost: 1,
+          creditsAfterInstall: 6,
+          currentNeed: "useful_now",
+          developmentRole: "economy_engine",
+          strategicFit: "strong",
+        }),
+      ],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 3,
+        desiredCreditReserve: 5,
+        fundingNeed: false,
+        evidence: [],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: installVewy.actionId,
+      reasonCode: "plan_first.runner.recurring_economy",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.recurring_economy",
+        planFirstDecision: {
+          selectedPlan: {
+            moduleId: "runner.recurring_economy",
+            phase: "install",
+          },
+          route: {
+            actionId: installVewy.actionId,
+          },
+        },
+      },
+    });
+  });
+
+  it("lets the recurring-economy owner install a declared killer-credit engine", () => {
+    resetResidentPlanPortfolioMemory();
+    const corolla = visibleCard("corolla-declared", "runner", "hardware", {
+      definitionId: "onr_v1_124_corolla-speed-chip",
+      title: "Corolla Speed Chip",
+      installCost: 1,
+    });
+    const installCorolla = legalAction(
+      "install-declared-corolla",
+      "runner",
+      "install_card",
+      "Corolla Speed Chip installieren",
+      { credits: 1, clicks: 1 },
+      {
+        source: corolla.instanceId,
+        payload: { cardId: corolla.instanceId },
+      },
+    );
+    const input = aiInput("runner", [
+      installCorolla,
+      legalAction(
+        "credit-after-declared-corolla",
+        "runner",
+        "gain_credit",
+        "Gain 1 Credit",
+        { credits: 0, clicks: 1 },
+      ),
+    ]);
+    input.playerView.own.credits = 8;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.stackOrRdCount = 30;
+    input.playerView.own.gripOrHq = [corolla];
+    input.playerView.own.rig = [
+      visibleCard("loony-goon-declared", "runner", "program", {
+        definitionId: "onr_v1_040_loony-goon",
+        subtypes: ["icebreaker", "killer"],
+      }),
+    ];
+    attachOwnDeckSnapshot(input, {
+      deckSnapshotId: "declared-killer-credit-engine",
+      side: "runner",
+      cards: [
+        { cardId: "onr_v1_040_loony-goon", quantity: 2 },
+        { cardId: "onr_v1_124_corolla-speed-chip", quantity: 1 },
+      ],
+    });
+
+    const decision = liveContext({
+      runnerStrategicIntentForInput: () => ({
+        ...recurringProgramSearchIntent(),
+        engineProviders: [
+          ...recurringProgramSearchIntent().engineProviders,
+          {
+            providerId: "runner.provider:onr_v1_124_corolla-speed-chip",
+            cardId: "onr_v1_124_corolla-speed-chip",
+            copies: 1,
+            capabilities: ["runner.economy.recurring_breaker"],
+            supportCapabilities: [],
+            persistence: "persistent",
+            additivity: "additive_to_compatible_demand",
+            compatibleDemandIds: ["runner.demand.breaker_credit"],
+            evidence: ["test:declared_killer_credit_provider"],
+          },
+        ],
+      }),
+      evaluateRunnerHandDevelopment: () => [
+        handEvaluation({
+          cardInstanceId: corolla.instanceId,
+          definitionId: "onr_v1_124_corolla-speed-chip",
+          legalActionId: installCorolla.actionId,
+          priority: 0,
+          duplicateRole: "none",
+          finalInstallFit: 0,
+          cardType: "hardware",
+          installCost: 1,
+          creditsAfterInstall: 7,
+          deferReason: "no_current_need",
+          currentNeed: "none",
+          developmentRole: "unknown",
+          strategicFit: "weak",
+        }),
+      ],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 3,
+        desiredCreditReserve: 5,
+        fundingNeed: false,
+        evidence: [],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: installCorolla.actionId,
+      reasonCode: "plan_first.runner.recurring_economy",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.recurring_economy",
+        planFirstDecision: {
+          selectedPlan: {
+            moduleId: "runner.recurring_economy",
+            phase: "install",
+          },
+          route: { actionId: installCorolla.actionId },
+        },
+      },
+    });
+  });
+
+  it("leaves an undeclared restricted-credit card with the development owner", () => {
+    resetResidentPlanPortfolioMemory();
+    const corolla = visibleCard("corolla-in-grip", "runner", "hardware", {
+      definitionId: "onr_v1_124_corolla-speed-chip",
+      title: "Corolla Speed Chip",
+      installCost: 1,
+    });
+    const installCorolla = legalAction(
+      "install-corolla",
+      "runner",
+      "install_card",
+      "Corolla Speed Chip installieren",
+      { credits: 1, clicks: 1 },
+      {
+        source: corolla.instanceId,
+        payload: { cardId: corolla.instanceId },
+      },
+    );
+    const credit = legalAction(
+      "credit-after-corolla",
+      "runner",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+    );
+    const input = aiInput("runner", [installCorolla, credit]);
+    input.playerView.own.credits = 8;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.stackOrRdCount = 30;
+    input.playerView.own.gripOrHq = [corolla];
+    input.playerView.own.rig = [
+      visibleCard("loony-goon-installed", "runner", "program", {
+        definitionId: "onr_v1_040_loony-goon",
+        subtypes: ["icebreaker", "killer"],
+      }),
+    ];
+
+    const decision = liveContext({
+      runnerStrategicIntentForInput: recurringProgramSearchIntent,
+      evaluateRunnerHandDevelopment: () => [
+        handEvaluation({
+          cardInstanceId: corolla.instanceId,
+          definitionId: "onr_v1_124_corolla-speed-chip",
+          legalActionId: installCorolla.actionId,
+          priority: 250,
+          duplicateRole: "none",
+          finalInstallFit: 80,
+          cardType: "hardware",
+          installCost: 1,
+          creditsAfterInstall: 7,
+          currentNeed: "acute",
+          developmentRole: "breaker_or_rig_piece",
+          strategicFit: "strong",
+        }),
+      ],
+      buildRunnerEconomyPosture: () => ({
+        minimumCreditFloor: 3,
+        desiredCreditReserve: 5,
+        fundingNeed: false,
+        evidence: [],
+      }),
+    }).chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: installCorolla.actionId,
+      reasonCode: "plan_first.runner.develop_board_and_hand",
+      fallbackUsed: false,
+      decisionDebug: {
+        planKind: "runner.develop_board_and_hand",
+        planFirstDecision: {
+          selectedPlan: { moduleId: "runner.develop_board_and_hand" },
+          route: { actionId: installCorolla.actionId },
+        },
       },
     });
   });
@@ -30192,6 +30818,7 @@ function handEvaluation(params: {
     | "none"
     | "duplicate"
     | "missing_credits"
+    | "no_current_need"
     | "preserve_credit_floor"
     | "stronger_override";
   duplicateRole?: "none" | "useful_backup" | "redundant_duplicate";

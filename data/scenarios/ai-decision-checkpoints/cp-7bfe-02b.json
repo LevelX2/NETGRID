@@ -6613,7 +6613,7 @@
       "acceptablePlanKinds": ["corp.score_agenda"],
       "acceptableCapabilities": ["advance_score_agenda"],
       "requiredAssessmentEvidence": [
-        "corp_engine_certified_mature_remote_score_advance:remote_1"
+        "corp_exposed_agenda_progress_preserves_conversion_clock:remote_1"
       ]
     }
   }

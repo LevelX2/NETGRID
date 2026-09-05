@@ -2,7 +2,7 @@
   "schemaVersion": "netgrid-standard-deck-guides-v2",
   "guideSetId": "netgrid-standard-deck-guides-2.0.0",
   "catalogId": "netgrid-standard-decks-1.0.0",
-  "analyzedAt": "2026-08-30",
+  "analyzedAt": "2026-09-04",
   "guides": [
     {
       "standardDeckId": "standard_corp_express_shutdown",
@@ -668,8 +668,8 @@
       "standardDeckId": "standard_corp_mr96xg94",
       "sourceDeckVersion": "1.2.0",
       "sourceDeckHash": "standard-deck:b27802eb",
-      "sourceAnalysisHash": "deck-analysis:66ba169e",
-      "reviewedAt": "2026-08-30",
+      "sourceAnalysisHash": "deck-analysis:c4d700cf",
+      "reviewedAt": "2026-09-04",
       "analysis": {
         "primaryStrategyIds": [
           "corp.overadvance_value",
@@ -781,8 +781,8 @@
       "standardDeckId": "standard_corp_ivory_bastion",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:8bb5499b",
-      "sourceAnalysisHash": "deck-analysis:32a19380",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:b32f5806",
+      "reviewedAt": "2026-09-04",
       "analysis": {
         "primaryStrategyIds": [
           "corp.ice_tax_glacier",
@@ -1857,8 +1857,8 @@
       "standardDeckId": "standard_corp_salazar_toll_road",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:011780e8",
-      "sourceAnalysisHash": "deck-analysis:3d535fb0",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:7194eb8c",
+      "reviewedAt": "2026-09-04",
       "analysis": {
         "primaryStrategyIds": [
           "corp.ice_tax_glacier",
@@ -2643,7 +2643,7 @@
       "standardDeckId": "standard_classic_runner_cybernetics_risk_rig_2026_07_01",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:afcb633a",
-      "sourceAnalysisHash": "deck-analysis:a594643d",
+      "sourceAnalysisHash": "deck-analysis:da4799fe",
       "reviewedAt": "2026-08-20",
       "analysis": {
         "primaryStrategyIds": [
@@ -3347,7 +3347,7 @@
       "standardDeckId": "standard_runner_krashkurs_clown_kreditmaschine_2026_07_11",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:99165f80",
-      "sourceAnalysisHash": "deck-analysis:c20dc9d6",
+      "sourceAnalysisHash": "deck-analysis:e12dee99",
       "reviewedAt": "2026-08-20",
       "analysis": {
         "primaryStrategyIds": [],
@@ -3755,7 +3755,7 @@
       "standardDeckId": "standard_proteus_runner_breaker_lab_2026_05_25",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:3c6d47c9",
-      "sourceAnalysisHash": "deck-analysis:8d986207",
+      "sourceAnalysisHash": "deck-analysis:92b3ddfe",
       "reviewedAt": "2026-08-20",
       "analysis": {
         "primaryStrategyIds": [
@@ -3978,7 +3978,7 @@
       "standardDeckId": "standard_runner_rd_express",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:0cb00588",
-      "sourceAnalysisHash": "deck-analysis:16814a4e",
+      "sourceAnalysisHash": "deck-analysis:af7356f0",
       "reviewedAt": "2026-08-20",
       "analysis": {
         "primaryStrategyIds": [
@@ -4103,7 +4103,7 @@
       "standardDeckId": "standard_runner_rd_express_v2",
       "sourceDeckVersion": "2.0.0",
       "sourceDeckHash": "standard-deck:cc6565ae",
-      "sourceAnalysisHash": "deck-analysis:5af362f2",
+      "sourceAnalysisHash": "deck-analysis:f6ee5aae",
       "reviewedAt": "2026-08-18",
       "analysis": {
         "primaryStrategyIds": [
@@ -4448,7 +4448,7 @@
       "standardDeckId": "standard_runner_rent_i_con_shellspiel_2026_07_17",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:0697af2f",
-      "sourceAnalysisHash": "deck-analysis:4000dd24",
+      "sourceAnalysisHash": "deck-analysis:ce513776",
       "reviewedAt": "2026-08-20",
       "analysis": {
         "primaryStrategyIds": [],
@@ -4749,7 +4749,7 @@
       "standardDeckId": "standard_runner_stealth_interface_starter",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:a657c8a8",
-      "sourceAnalysisHash": "deck-analysis:cb93529f",
+      "sourceAnalysisHash": "deck-analysis:21f6ed83",
       "reviewedAt": "2026-08-20",
       "analysis": {
         "primaryStrategyIds": [
@@ -5294,6 +5294,127 @@
             "Dreizehn ICE sind deutlich stabiler, aber nur neun davon stoppen unbedingt. Schütze zuerst HQ, R&D und genau ein Score-Remote; unbedachte Remote-Ausbreitung kann das Deck weiterhin öffnen.",
             "Der Verzicht auf Annual Reviews tauscht Kartenauswahl gegen rohe Economy. Night Shift und Employee Empowerment ziehen Karten, doch Traps, Banken und Transferoperationen können weiterhin in der falschen Reihenfolge erscheinen.",
             "Aggressiver Runnerdruck kann erzwingen, dass Counter Schadensdrohung statt Punktressource bleiben; ein vorschneller Cashout entfernt dagegen die stärkste Scorekonversion."
+          ]
+        }
+      }
+    },
+    {
+      "standardDeckId": "standard_corp_lucidrine_lockdown",
+      "sourceDeckVersion": "1.5.0",
+      "sourceDeckHash": "standard-deck:e47da3f0",
+      "sourceAnalysisHash": "deck-analysis:100fb621",
+      "reviewedAt": "2026-09-04",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring",
+          "corp.fast_advance"
+        ],
+        "secondaryStrategyIds": ["corp.rush_score", "corp.ambush_bluff"],
+        "reviewStatus": "observe"
+      },
+      "sourceAnalysisInputHash": "deck-analysis-input:df8d03ba",
+      "contentByLocale": {
+        "en": {
+          "summary": "Lucidrine Lockdown combines minimum agenda density, access punishment, central taxation, and fort-wide steal costs against repeated R&D multiaccess.",
+          "deckIdea": "Lucidrine Lockdown carries only seven three-point agendas, the legal minimum for twenty-one agenda points. Three Fetal AI punish every HQ or R&D hit with damage and an additional steal cost, while Red Herrings adds a fort-wide tax. Eighteen ICE include six zero-cost, credit-positive tax layers plus direct end-the-run ICE. Sphinx 2006 is the only expensive flexible stopper, so the Corp can protect both centrals without waiting for an unrealistic all-layers rez reserve.",
+          "gamePlan": {
+            "opening": "Install a zero-cost tax layer or an affordable stopper on R&D and cover HQ before expanding. If the Runner reveals R&D Interface or repeats R&D runs, give R&D the next meaningful layer, but do not abandon HQ. Fetal AI and the lower agenda density make early blind accesses less reliable even before both centrals are fully built.",
+            "midgame": "Layer different ICE types across R&D and HQ so one breaker cannot solve both centrals cheaply. Place Red Herrings on the central selected by the current access-pressure assessment, usually R&D against Interface turns, and keep one credit available to rez it at the final relevant run window. Use the resulting credit and action gap to build one scoring remote and convert Vapor Ops counters rather than continuing to stack ICE without a scoring plan.",
+            "endgame": "Shift protection with the Runner's actual pressure. If R&D is locked and attacks move to HQ, reinforce HQ before adding another redundant R&D layer. Close the game through the safest fast or rush score window while retaining enough credits for the central ICE that still matters."
+          },
+          "keyCards": [
+            {
+              "cardId": "onr_proteus_004_fetal-ai",
+              "title": "Fetal AI",
+              "role": "Reduces agenda density while punishing central access with two net damage and two additional steal credits."
+            },
+            {
+              "cardId": "onr_v1_366_red-herrings",
+              "title": "Red Herrings",
+              "role": "Adds five credits to every agenda steal from its fort and is the deck's direct answer to repeated R&D multiaccess."
+            },
+            {
+              "cardId": "onr_proteus_039_sphinx-2006",
+              "title": "Sphinx 2006",
+              "role": "Provides a strength-five end-the-run barrier and can switch from code gate to sentry when the visible breaker mix makes that worthwhile."
+            },
+            {
+              "cardId": "onr_proteus_032_misleading-access-menus",
+              "title": "Misleading Access Menus",
+              "role": "Rezzes for zero, gains three credits, and forces the Runner to pay or end the run."
+            },
+            {
+              "cardId": "onr_proteus_038_snowbank",
+              "title": "Snowbank",
+              "role": "Provides the same credit-positive tax from the wall axis and keeps both centrals live at low Corp credits."
+            },
+            {
+              "cardId": "onr_v1_347_vapor-ops",
+              "title": "Vapor Ops",
+              "role": "Stores advancement counters safely and converts a taxed Runner turn into an immediate agenda score."
+            }
+          ],
+          "pilotingTips": [
+            "Treat R&D Interface and repeated central accesses as current pressure signals, not as permission to neglect the other central.",
+            "Install only ICE that can be funded on the relevant horizon; an unrezzed fourth layer is less useful than a live second layer on the other attacked central.",
+            "Once the Runner is paying heavily, spend the gained tempo on an actual score line instead of defending forever."
+          ],
+          "weaknesses": [
+            "A Runner who can alternate efficiently between R&D and HQ can exploit overcommitment to either central.",
+            "Fetal AI and Priority Requisition require five advancements, so Corporate War remains the preferred fast scoring payload and Vapor Ops is important for the slower agendas.",
+            "The zero-cost ICE taxes only one credit per encounter. A rich Runner with complete breakers can still pay through repeated layers, so their credit gain must become a score window rather than endless defense."
+          ]
+        },
+        "de": {
+          "summary": "Lucidrine Lockdown verbindet minimale Agendadichte, Zugriffsschaden, Zentralserver-Tax und fortweite Stehlkosten gegen wiederholten R&D-Multiaccess.",
+          "deckIdea": "Lucidrine Lockdown spielt nur sieben 3-Punkte-Agenden und damit die regelkonforme Mindestzahl für ein Deck mit 21 Agendapunkten. Drei Fetal AI bestrafen jeden Treffer in HQ oder R&D mit Schaden und zusätzlichen Stehlkosten, während Red Herrings den gesamten Server verteuert. Achtzehn ICE enthalten sechs kostenlose, kreditpositive Tax-Schichten sowie direkte End-the-Run-ICE. Sphinx 2006 bleibt der einzige teure flexible Stopper, damit die Corp beide Zentralen schützen kann, ohne zuerst eine unrealistische Reserve für sämtliche ICE-Schichten anzusparen.",
+          "gamePlan": {
+            "opening": "Installiere eine kostenlose Tax-Schicht oder ein bezahlbares Stopper-ICE auf R&D und decke HQ ab, bevor du expandierst. Zeigt der Runner R&D Interface oder läuft wiederholt auf R&D, erhält R&D die nächste relevante Schicht; HQ darf dabei nicht aufgegeben werden. Fetal AI und die niedrigere Agendadichte machen frühe Blindzugriffe bereits riskanter, bevor beide Zentralen vollständig aufgebaut sind.",
+            "midgame": "Staffele unterschiedliche ICE-Typen über R&D und HQ, damit ein einzelner Breaker nicht beide Zentralen günstig löst. Lege Red Herrings auf die von der aktuellen Zugriffsdruck-Bewertung gewählte Zentrale – gegen Interface-Züge meist R&D – und halte einen Credit für das Rezzen im letzten relevanten Runfenster bereit. Nutze die gewonnene Credit- und Aktionslücke für genau ein Score-Remote und die Konversion von Vapor-Ops-Countern, statt ohne Scoreplan immer weiter ICE zu stapeln.",
+            "endgame": "Verschiebe den Schutz entlang des tatsächlichen Runnerdrucks. Ist R&D abgeriegelt und wechseln die Angriffe zu HQ, verstärke HQ vor einer weiteren redundanten R&D-Schicht. Schließe über das sicherste Fast- oder Rush-Scorefenster ab und halte genug Credits für das weiterhin relevante Zentralserver-ICE zurück."
+          },
+          "keyCards": [
+            {
+              "cardId": "onr_proteus_004_fetal-ai",
+              "title": "Fetal AI",
+              "role": "Senkt die Agendadichte und bestraft Zentralserver-Zugriffe mit zwei Netzwerkschaden sowie zwei zusätzlichen Stehl-Credits."
+            },
+            {
+              "cardId": "onr_v1_366_red-herrings",
+              "title": "Red Herrings",
+              "role": "Verteuert jeden Agendadiebstahl aus seinem Fort um fünf Credits und ist die direkte Antwort des Decks auf wiederholten R&D-Multiaccess."
+            },
+            {
+              "cardId": "onr_proteus_039_sphinx-2006",
+              "title": "Sphinx 2006",
+              "role": "Liefert eine End-the-Run-Barriere mit Stärke fünf und kann vom Code Gate zum Sentry wechseln, wenn die sichtbare Breaker-Verteilung das sinnvoll macht."
+            },
+            {
+              "cardId": "onr_proteus_032_misleading-access-menus",
+              "title": "Misleading Access Menus",
+              "role": "Wird für null Credits gerezzt, erzeugt drei Credits und zwingt den Runner zum Zahlen oder beendet den Run."
+            },
+            {
+              "cardId": "onr_proteus_038_snowbank",
+              "title": "Snowbank",
+              "role": "Liefert dieselbe kreditpositive Tax auf der Wall-Achse und hält beide Zentralen auch bei niedrigen Corp-Credits aktiv."
+            },
+            {
+              "cardId": "onr_v1_347_vapor-ops",
+              "title": "Vapor Ops",
+              "role": "Speichert Advancement-Counter sicher und verwandelt einen taxierten Runnerzug in einen unmittelbaren Agendascore."
+            }
+          ],
+          "pilotingTips": [
+            "Behandle R&D Interface und wiederholte Zentralserver-Zugriffe als aktuelle Drucksignale, nicht als Erlaubnis, die andere Zentrale zu vernachlässigen.",
+            "Installiere nur ICE, das im relevanten Zeithorizont bezahlt werden kann; eine ungerezzte vierte Schicht ist weniger wert als eine aktive zweite Schicht auf der anderen angegriffenen Zentrale.",
+            "Sobald der Runner viel bezahlt, investiere das gewonnene Tempo in eine echte Scorelinie statt in endlose Verteidigung."
+          ],
+          "weaknesses": [
+            "Ein Runner, der effizient zwischen R&D und HQ wechselt, kann eine Überinvestition in eine der beiden Zentralen ausnutzen.",
+            "Fetal AI und Priority Requisition benötigen fünf Advancements. Corporate War bleibt deshalb die bevorzugte schnelle Score-Nutzlast, während Vapor Ops die langsameren Agenden vorbereitet.",
+            "Die kostenlosen ICE-Schichten taxieren pro Begegnung nur einen Credit. Ein reicher Runner mit vollständigen Breakern kann weiter durchzahlen; der Creditgewinn muss deshalb in ein Scorefenster statt in endlose Verteidigung umgesetzt werden."
           ]
         }
       }

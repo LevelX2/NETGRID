@@ -156,6 +156,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "variableRezAdditionalCost",
   "variableRezValue",
   "effectiveSubroutineCountAfterRez",
+  "selectedSubtypesAfterRez",
   "rezCostPaid",
   "rezCostReductionAmount",
   "rezCostReductionSourceDefinitionIds",

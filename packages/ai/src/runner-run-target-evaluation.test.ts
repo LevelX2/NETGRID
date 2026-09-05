@@ -2995,6 +2995,66 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     );
   });
 
+  it("keeps survivable known access damage contestable below the normal hand floor", () => {
+    const eventTail = [
+      syntheticPublicEvent("confirmed-damage", 8, "play_operation", {
+        actor: "corp",
+        damageResolved: true,
+        damageType: "meat",
+        damageAmount: 2,
+        sourceDefinitionId: "onr_v1_301_punitive-counterstrike",
+      }),
+      syntheticPublicEvent("known-access", 9, "access_card", {
+        actor: "runner",
+        actionType: "access_card",
+        serverId: "remote_1",
+        cardDefinitionId: "onr_proteus_004_fetal-ai",
+        accessedCardPositionKey: "root:0",
+        damageResolved: true,
+        damageType: "net",
+        damageAmount: 2,
+      }),
+    ];
+    const input = aiInput({
+      credits: 2,
+      stateVersion: 11,
+      eventTail,
+      grip: Array.from({ length: 4 }, (_, i) => visibleCard(`buffer-${i}`)),
+      servers: [
+        server("remote_1", {
+          root: [
+            visibleCard("known-agenda", {
+              definitionId: "onr_proteus_004_fetal-ai",
+              type: "agenda",
+              advancementCounters: 4,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [runAction("run-remote-1", "remote_1")],
+    });
+    const [evaluation] = evaluateRunnerRunTargets({
+      input,
+      beliefState: beliefWithKnownRemoteRoot(
+        "remote_1",
+        "root:0",
+        "onr_proteus_004_fetal-ai",
+        "known-access",
+      ),
+    });
+    expect(evaluation).toMatchObject({
+      accessPayoffContestable: true,
+      pathPassability: "blocked_by_visible_damage_hand_buffer",
+      recommendation: "draw_for_damage_buffer",
+    });
+    expect(evaluation?.evidence).toContain(
+      "known_remote_access_damage_survivable_after_action:true",
+    );
+    expect(evaluation?.evidence).not.toContain(
+      "runner_visible_ice_and_known_access_damage_blocks_run_start:remote_1",
+    );
+  });
+
   it("reconsiders a no-progress remote after the remote visibly changes", () => {
     const input = aiInput({
       credits: 6,

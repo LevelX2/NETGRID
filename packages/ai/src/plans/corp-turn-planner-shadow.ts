@@ -488,8 +488,12 @@ export function corpPlanProgressRoots(params: {
               head.executorParentNeedId === requiredNeedId,
           )
         : undefined;
+      const effectiveCampaignDisposition =
+        blocked && selectedLine && !selectedHead && !boundSupportHead
+          ? ("blocked_replan" as const)
+          : slice?.campaignDisposition;
       const dispositionWitness = scoreDispositionWitness(
-        slice?.campaignDisposition,
+        effectiveCampaignDisposition,
       );
       const witness =
         selectedLineIsSupport &&
@@ -532,8 +536,8 @@ export function corpPlanProgressRoots(params: {
         blocked,
         ...(blockerCode ? { blockerCode } : {}),
         ...(requiredNeedId ? { requiredNeedId } : {}),
-        ...(slice?.campaignDisposition
-          ? { campaignDisposition: slice.campaignDisposition }
+        ...(effectiveCampaignDisposition
+          ? { campaignDisposition: effectiveCampaignDisposition }
           : {}),
         ...(witness ? { witness } : {}),
       };

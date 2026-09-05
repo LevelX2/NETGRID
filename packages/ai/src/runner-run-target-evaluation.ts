@@ -270,7 +270,10 @@ function evaluateRunnerRunTarget(
     },
   );
   const cumulativeVisibleAndKnownAccessDamageLethal = Boolean(
-    payoff.knownAccessDamage && visibleLethalIceDamage,
+    payoff.knownAccessDamage &&
+      visibleLethalIceDamage?.evidenceCode.startsWith(
+        "runner_visible_lethal_ice_damage|",
+      ),
   );
   const effectiveAccessPayoffContestable =
     cumulativeVisibleAndKnownAccessDamageLethal

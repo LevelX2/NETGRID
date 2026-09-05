@@ -83,6 +83,65 @@ describe("Corp TurnPlanner selected-head binding", () => {
     ]);
   });
 
+  it("replans a blocked score route whose selected line has no executable head", () => {
+    const projectId = "agenda:priority-requisition:new_remote";
+    const planInstanceId =
+      "plan:corp.score_agenda:agenda%3Apriority-requisition%3Anew_remote";
+    const actionId = "corp.install_card.priority-requisition.new_remote";
+    const needId = "score-protection:priority-requisition:new_remote";
+    const roots = corpPlanProgressRoots({
+      domain: {
+        scoreProjects: [
+          {
+            projectId,
+            feasible: false,
+            evidenceCode: "corp_score_protection_required:new_remote",
+            protectionNeed: { needId },
+          },
+        ],
+        remoteProjects: [],
+        defenseNeeds: [],
+        economyNeeds: [],
+        virusPressure: [],
+        punishCampaigns: [],
+        ambushes: [],
+        handManagement: [],
+      } as unknown as CorpPlanDomain,
+      agendaSlices: [
+        {
+          projectId,
+          slice: {
+            selectedLineId: "install-priority-requisition",
+            selectionReason: "best_expected_value",
+            campaignDisposition: "continue",
+            lines: [
+              {
+                lineId: "install-priority-requisition",
+                family: "pure_rush",
+                currentActionId: actionId,
+              },
+            ],
+          } as CorpAgendaTurnPlanningSlice,
+        },
+      ],
+      heads: [],
+      foregroundPlanInstanceId: planInstanceId,
+    });
+
+    expect(roots).toEqual([
+      expect.objectContaining({
+        planInstanceId,
+        blocked: true,
+        requiredNeedId: needId,
+        campaignDisposition: "blocked_replan",
+        witness: {
+          kind: "replan",
+          reasonCode: "score_campaign_has_no_complete_current_line",
+        },
+      }),
+    ]);
+  });
+
   it("keeps an urgent same-turn score head inside its exact agenda root", () => {
     const scoreRoot =
       "plan:corp.score_agenda:agenda%3Ahostile-takeover%3Aremote_1";

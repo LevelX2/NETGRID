@@ -5791,7 +5791,7 @@
     },
     {
       "standardDeckId": "standard_corp_lucidrine_lockdown",
-      "version": "1.0.0",
+      "version": "1.5.0",
       "status": "active",
       "name": "Lucidrine Lockdown",
       "side": "corp",
@@ -5802,12 +5802,12 @@
       "formatProfileVersion": "1.0.0",
       "cards": [
         {
-          "cardId": "onr_proteus_008_project-zurich",
+          "cardId": "onr_proteus_004_fetal-ai",
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_194_corporate-downsizing",
-          "quantity": 3
+          "cardId": "onr_v1_212_priority-requisition",
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_196_corporate-war",
@@ -5819,7 +5819,7 @@
         },
         {
           "cardId": "onr_v1_297_overtime-incentives",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_292_management-shake-up",
@@ -5830,7 +5830,7 @@
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_348_virus-test-site",
+          "cardId": "onr_v1_366_red-herrings",
           "quantity": 3
         },
         {
@@ -5846,11 +5846,15 @@
           "quantity": 3
         },
         {
-          "cardId": "onr_proteus_038_snowbank",
+          "cardId": "onr_proteus_039_sphinx-2006",
           "quantity": 3
         },
         {
           "cardId": "onr_proteus_032_misleading-access-menus",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_proteus_038_snowbank",
           "quantity": 3
         },
         {
@@ -5869,7 +5873,7 @@
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_lucidrine_lockdown",
-        "sourceDeckVersion": "1.0.0-user-requested-meta-counter-2026-09-04"
+        "sourceDeckVersion": "1.5.0-low-density-access-denial-2026-09-04"
       }
     }
   ]

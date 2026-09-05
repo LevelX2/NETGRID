@@ -143,6 +143,28 @@ describe("Corp agenda turn-planning vertical slice", () => {
     );
   });
 
+  it("excludes an infeasible non-opening agenda head instead of publishing a false complete rush line", () => {
+    const input = decisionInput();
+    const { openingRush: _openingRush, ...nonOpeningProject } = project(2);
+    const blocked = {
+      ...nonOpeningProject,
+      feasible: false,
+      evidenceCode: "corp_score_horizon_unbounded:new_remote",
+    } satisfies CorpScoreProjectSignal;
+
+    const slice = buildSlice(input, blocked, [
+      agendaCandidate(),
+      economyCandidate(),
+    ]);
+
+    expect(slice.lines).toEqual([]);
+    expect(slice.selectionReason).toBe("no_complete_line");
+    expect(slice.campaignDisposition).toBe("blocked_replan");
+    expect(slice.evidenceCodes).toContain(
+      "agenda_slice_infeasible_agenda_head_excluded",
+    );
+  });
+
   it("classifies exact bound funding as neither rush nor agenda-install progress", () => {
     const input = decisionInput();
     const { openingRush: _openingRush, ...baseProject } = project(2);
@@ -261,7 +283,7 @@ describe("Corp agenda turn-planning vertical slice", () => {
 
     expect(slice.lines).toEqual([]);
     expect(slice.evidenceCodes).toContain(
-      "agenda_slice_missing_exact_agenda_head",
+      "agenda_slice_infeasible_agenda_head_excluded",
     );
   });
 });

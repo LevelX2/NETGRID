@@ -841,6 +841,38 @@ function ordinaryRezActionQuote(
     }
     return { ...quote, finalCredits: actionCredits };
   }
+  if (
+    quote.costKind === "variable" &&
+    quote.variableParameter.kind === "alternate_subtype"
+  ) {
+    const value = payload?.variableRezValue;
+    const additionalCredits = payload?.variableRezAdditionalCost;
+    const alternate = value === 1;
+    const expectedAdditionalCredits = alternate
+      ? quote.variableParameter.alternateSubtypesAdditionalCredits
+      : 0;
+    const expectedFinalCredits = alternate
+      ? quote.variableParameter.alternateSubtypesFinalCredits
+      : quote.variableParameter.baseSubtypesFinalCredits;
+    const expectedSubtypes = (
+      alternate
+        ? quote.variableParameter.alternateSubtypes
+        : quote.variableParameter.baseSubtypes
+    ).join(",");
+    if (
+      payload?.variableRezKind !== "alternate_subtype" ||
+      (value !== 0 && value !== 1) ||
+      !nonNegativeSafeInteger(additionalCredits) ||
+      additionalCredits !== expectedAdditionalCredits ||
+      payload.baseRezCost !== quote.finalCredits ||
+      payload.rezCostPaid !== actionCredits ||
+      payload.selectedSubtypesAfterRez !== expectedSubtypes ||
+      actionCredits !== expectedFinalCredits
+    ) {
+      return undefined;
+    }
+    return { ...quote, finalCredits: actionCredits };
+  }
   return quote;
 }
 

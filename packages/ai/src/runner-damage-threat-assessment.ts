@@ -112,6 +112,9 @@ export function runnerVisibleLethalIceDamageAssessment(
   );
   let projectedDamage = 0;
   let projectedCoreDamage = 0;
+  let handFloorAssessment:
+    | RunnerFutureEncounterDamageJackOutAssessment
+    | undefined;
 
   for (const ice of remainingIce.slice().reverse()) {
     const quote = ice.effectiveRunQuote;
@@ -186,7 +189,7 @@ export function runnerVisibleLethalIceDamageAssessment(
       }
       const sourceDefinitionId =
         subroutine.sourceDefinitionId ?? ice.definitionId;
-      return {
+      const assessment = {
         sourceDefinitionId,
         projectedDamage,
         ...(subroutine.damageType ? { damageType: subroutine.damageType } : {}),
@@ -215,6 +218,10 @@ export function runnerVisibleLethalIceDamageAssessment(
           "affordable_break:false",
         ].join("|"),
       };
+      if (immediateFlatline || cleanupFlatline) return assessment;
+      // A reserve warning is not a terminal projection. Continue accounting
+      // for later known damage before deciding whether this route is lethal.
+      handFloorAssessment = assessment;
     }
   }
   const postPathDamage = options.postPathDamage;
@@ -284,7 +291,7 @@ export function runnerVisibleLethalIceDamageAssessment(
       };
     }
   }
-  return undefined;
+  return handFloorAssessment;
 }
 
 export function runnerVisibleLethalIceDamageJackOutAssessment(
