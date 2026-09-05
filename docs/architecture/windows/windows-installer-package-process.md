@@ -272,11 +272,11 @@ ohne Entwicklungswerkzeuge.
 | Nachweis | Aktuelle belastbare Evidenz | Noch erforderlich |
 | --- | --- | --- |
 | Produktgrenze und Installer-Payload | Vollständiger Manifestvergleich; 10.901 Dateien auch nach dem Updaterfix | Für den aktuellen Build erfüllt; nach weiteren Payloadänderungen erneut prüfen |
-| Installation, Upgrade und Repair | Vollständiger erhöhter 13-Punkte-Lauf am 2026-09-05, einschließlich ProductCode-Repair und geprüftem Cleanup | Lokaler MSI-Vertrag erfüllt; funktionale UI- und Clean-Windows-Gates bleiben getrennt |
+| Installation, Upgrade und Repair | Vollständiger 13-Punkte-Offline-Sandboxlauf 8106 → 8109 am 2026-09-05, 22:06–22:38 Uhr, einschließlich ProductCode-Repair und geprüftem Cleanup; alle vier Artefakthashes erneut verglichen | Für dieses Artefaktpaar erfüllt; folgende Sprach-/Shortcutänderungen sowie funktionale UI-Gates bleiben getrennt |
 | GitHub-Updateauswahl und Integrität | Lokale API-Fixtures für Stable/Prerelease, Offline und manipulierte Hashes; echter Launcher-Download-Dateipfad nach reproduzierter Windows-Dateisperre korrigiert und getestet | Echter zustimmungsbasierter installierter Updatefluss; neue Artefakte mit Downloadfix |
 | Updatertransaktion und Rollback | Neuer echter Sandboxlauf 8105/8106 am 2026-09-05 grün: geprüftes Backup, MSI-Upgrade, bewusst beschädigte Testdatenbank, erkannter Healthfehler, Programmrollback auf 8105, Datenmarker und SQLite-Integrität wiederhergestellt, Konfiguration unverändert, Cleanup verifiziert | Transaktionsgate für dieses Artefaktpaar erfüllt; abschließende Benachrichtigung bleibt ein separater Dialogtest |
 | Benutzerbetrieb und Netzwerk | Standardbenutzerbetrieb und ACLs grün. Private-LAN-Test des installierten 8106: Web/Server vom Host erreichbar, Maintenance mit 403 abgewiesen; im öffentlichen Profil beide Ports bei weiterhin gesunden lokalen Diensten blockiert. Testinstallation, Ports und NETGRID-Regeln bereinigt; temporär deaktivierte pauschale Sandbox-Containerfreigabe wiederhergestellt | Für 8106 einschließlich dokumentierter Sandbox-Firewallvorbereitung erfüllt; neue Builds bleiben gesondert gebunden |
-| Sichtbare Flows | 18 Setup-/Uninstall-Renderings für de/en/fr und drei Skalierungen | Funktionale Gesamtflows einschließlich Update/Repair/Fehlern auf dem installierten Produkt |
+| Sichtbare Flows | 27 Sprachauswahl-/Setup-/Uninstall-Renderings des sauberen 8111-Builds für de/en/fr und drei geometrische Skalierungen; Tooltip-Wortumbruch mit 36 Draw-Vorschauen und fokussierten Tests | Reale DPI-/Kontextprüfung und funktionale Gesamtflows einschließlich Update/Repair/Fehlern auf dem installierten Produkt; installierter Nachweis der Sprach- und Shortcutkorrektur |
 | Saubere Windows-11-x64-Maschine | Vollständige 13-Punkte-Offline-MSI-Matrix am 2026-09-05 von 18:22 bis 18:55 Uhr einschließlich Cleanup grün: Windows 11 Enterprise x64 (26100), ohne Entwicklungswerkzeuge; alle vier Artefakthashes mit dem Hostnachweis abgeglichen | Lokaler Clean-Windows-MSI-Vertrag erfüllt. Zusätzliche Updater-, Standardbenutzer-, Netzwerk- und UI-Gates bleiben getrennt; der laufende Rollbacktest erweitert nicht rückwirkend diese Evidenz |
 
 Diese offenen Anforderungen werden nicht durch engere grüne Tests ersetzt.
@@ -437,11 +437,12 @@ Sichtprüfung benötigt deshalb eine neue Testsitzung.
 
 Die isolierte E2E-Teststrecke ist unter `aa148864e` gesichert. Der neue
 Offline-Sandboxlauf `9d17bc6835d74f11918ab7fe2a823061` bindet 8106 als Basis
-und den Tooltip-Teststand 8109 als Update. Die VM
-`0a6030a3-a7a0-4a18-a780-e87bc9db6714` und ihr Gastcontroller 6128 sind live
-bestätigt; ein terminales Gesamtergebnis steht noch aus. Eingaben sind
-schreibgeschützt, Entwicklungswerkzeuge fehlen, die Hauptinstanz bleibt
-unberührt. Der Lauf wird nicht nachträglich auf neue Quellen umgebunden.
+und den Tooltip-Teststand 8109 als Update. Alle 13 Prüfungen samt Cleanup
+sind um 22:38 Uhr erfolgreich beendet; die vier Artefakthashes wurden erneut
+unabhängig geprüft. Die VM `0a6030a3-a7a0-4a18-a780-e87bc9db6714` wird für
+den getrennten Folgetest weiterverwendet. Eingaben sind schreibgeschützt,
+Entwicklungswerkzeuge fehlen, die Hauptinstanz bleibt unberührt. Der
+abgeschlossene Lauf wird nicht nachträglich auf neue Quellen umgebunden.
 
 Der anschließende UI-Vertragsabgleich zeigte, dass die gewählte Setupsprache
 bisher nicht an Folgeprogramme weitergegeben wurde. Eine gemeinsame
@@ -453,6 +454,23 @@ und Updater. Diese Quellenänderung benötigt einen neuen Installer und einen
 eigenen installierten Nachweis; 8109 enthält sie noch nicht. Die reale
 GitHub-Releaseprüfung ist weiterhin offen: der read-only Abruf liefert keine
 Releases; Veröffentlichungsfreigabe wurde angefragt, nichts hochgeladen.
+Der vollständige Build `output/windows-installer-language-persistence`
+hat 8111 aus `6d964c143` mit `sourceDirty: false` erzeugt. Alle Komponenten-
+Smokes, 27 Dialogvorschauen und der vollständige 10.901-Dateien-Audit sind
+grün; die Artefakthashes wurden unabhängig mit den Metadaten verglichen.
+Der gesonderte installierte Sprachtest für 8111 läuft nach dem erfolgreichen
+Ende der unveränderten 8106/8109-Matrix; sein Ergebnis liegt noch nicht vor.
+Die im Testinput eingefrorene Scriptfassung prüft ausschließlich
+Sprachweitergabe und Reparatur, nicht die danach ergänzte Shortcutkorrektur.
+Der fest deutsche First-Run-Startmenüname wurde quellenbezogen durch drei
+sprachgebundene, transitive MSI-Komponenten ersetzt. Die Namen stammen aus
+dem bestehenden Sprachkatalog. WiX-7-Authoring-Kompilation und der vorher
+rote Sprach-Strukturtest sind grün. Paketierung und installierter Nachweis
+einschließlich Wechsel fr → de → en und Entfernung alter Verknüpfungen
+stehen noch aus; `-VerifyShortcuts` aktiviert diese zusätzlichen Prüfungen
+im gezielten Sprachtest. Die normale Setup-Spracherkennung bleibt erhalten;
+unmittelbare MSI-Aufrufe ohne Sprache und Registrierung folgen nun der
+englischen MSI-Paketsprache. Keine vollständige visuelle Sprachfreigabe.
 
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.

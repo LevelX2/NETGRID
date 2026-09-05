@@ -45,7 +45,6 @@
     <Component Directory="NETGRIDPROGRAMMENU">
       <Shortcut Id="NetgridStartMenuShortcut" Name="NETGRID" Target="[#NetgridLauncher]" WorkingDirectory="INSTALLFOLDER" Icon="NetgridIcon" />
       <Shortcut Id="NetgridMaintenanceStartMenuShortcut" Name="NETGRID Maintenance" Target="[#NetgridLauncher]" Arguments="--open-maintenance" WorkingDirectory="INSTALLFOLDER" Icon="NetgridIcon" />
-      <Shortcut Id="NetgridFirstRunStartMenuShortcut" Name="NETGRID Ersteinrichtung" Target="[#NetgridFirstRun]" WorkingDirectory="INSTALLFOLDER" Icon="NetgridIcon" />
       <Shortcut Id="NetgridSetupStartMenuShortcut" Name="NETGRID Setup" Target="[NETGRID_DATA_ROOT]\config\updates\NETGRID-Setup.exe" Arguments="--uninstall" WorkingDirectory="INSTALLFOLDER" Icon="NetgridIcon" />
       <RemoveFolder Id="RemoveNetgridProgramMenu" On="uninstall" />
       <RegistryValue Root="HKLM" Key="Software\LevelX2\NETGRID" Name="StartMenuShortcuts" Type="integer" Value="1" KeyPath="yes" />
@@ -54,6 +53,18 @@
     <Component Directory="DesktopFolder" Condition="INSTALLDESKTOPSHORTCUT = 1">
       <Shortcut Id="NetgridDesktopShortcut" Name="NETGRID" Target="[#NetgridLauncher]" WorkingDirectory="INSTALLFOLDER" Icon="NetgridIcon" />
       <RegistryValue Root="HKLM" Key="Software\LevelX2\NETGRID" Name="DesktopShortcut" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+    <Component Directory="NETGRIDPROGRAMMENU" Condition='NETGRID_UI_LANGUAGE = "de"' Transitive="yes">
+      <Shortcut Id="NetgridFirstRunShortcutDe" Name="$(FirstRunTitleDe)" Target="[#NetgridFirstRun]" WorkingDirectory="INSTALLFOLDER" Icon="NetgridIcon" />
+      <RegistryValue Root="HKLM" Key="Software\LevelX2\NETGRID" Name="FirstRunShortcutDe" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+    <Component Directory="NETGRIDPROGRAMMENU" Condition='NETGRID_UI_LANGUAGE = "en"' Transitive="yes">
+      <Shortcut Id="NetgridFirstRunShortcutEn" Name="$(FirstRunTitleEn)" Target="[#NetgridFirstRun]" WorkingDirectory="INSTALLFOLDER" Icon="NetgridIcon" />
+      <RegistryValue Root="HKLM" Key="Software\LevelX2\NETGRID" Name="FirstRunShortcutEn" Type="integer" Value="1" KeyPath="yes" />
+    </Component>
+    <Component Directory="NETGRIDPROGRAMMENU" Condition='NETGRID_UI_LANGUAGE = "fr"' Transitive="yes">
+      <Shortcut Id="NetgridFirstRunShortcutFr" Name="$(FirstRunTitleFr)" Target="[#NetgridFirstRun]" WorkingDirectory="INSTALLFOLDER" Icon="NetgridIcon" />
+      <RegistryValue Root="HKLM" Key="Software\LevelX2\NETGRID" Name="FirstRunShortcutFr" Type="integer" Value="1" KeyPath="yes" />
     </Component>
     <Component Directory="LEGALFOLDER">
       <File Id="NetgridLicense" Source="$(LegalRoot)\NETGRID-LICENSE.txt" />
@@ -89,6 +100,11 @@
     <Property Id="NETGRID_RETENTION_DAYS" Value="30" Secure="yes" />
     <Property Id="NETGRID_ACCOUNT_ACCESS_MODE" Value="simple" Secure="yes" />
     <Property Id="NETGRID_UI_LANGUAGE" Secure="yes" />
+    <Property Id="NETGRID_REGISTERED_UI_LANGUAGE" Secure="yes">
+      <RegistrySearch Id="NetgridRegisteredUiLanguage" Root="HKLM" Key="SOFTWARE\LevelX2\NETGRID" Name="UiLanguage" Type="raw" Bitness="always64" />
+    </Property>
+    <SetProperty Id="NETGRID_UI_LANGUAGE" Action="ResolveNetgridUiLanguage" Value="[NETGRID_REGISTERED_UI_LANGUAGE]" Before="DefaultNetgridUiLanguage" Sequence="both" Condition='NETGRID_UI_LANGUAGE = "" AND NETGRID_REGISTERED_UI_LANGUAGE &lt;&gt; ""' />
+    <SetProperty Id="NETGRID_UI_LANGUAGE" Action="DefaultNetgridUiLanguage" Value="en" Before="CostFinalize" Sequence="both" Condition='NETGRID_UI_LANGUAGE = ""' />
     <Property Id="INSTALLDESKTOPSHORTCUT" Value="1" Secure="yes" />
     <Property Id="NETGRID_PREVIOUS_DESKTOP_SHORTCUT" Secure="yes">
       <RegistrySearch Id="NetgridDesktopShortcutPreference" Root="HKLM" Key="SOFTWARE\LevelX2\NETGRID" Name="DesktopShortcutPreference" Type="raw" Bitness="always64" />

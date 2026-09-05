@@ -110,6 +110,16 @@ try {
     decompiledPath,
   ]);
   const authoring = readFileSync(decompiledPath, "utf8");
+  const uiCatalog = JSON.parse(readFileSync(path.resolve(import.meta.dirname, '../apps/windows/Common/windows-ui-strings.json'), 'utf8'));
+  if (!authoring.includes('Name="UiLanguage"') ||
+      !authoring.includes('Id="ResolveNetgridUiLanguage"') ||
+      !authoring.includes('Id="DefaultNetgridUiLanguage"'))
+    throw new Error('installer_shortcut_language_not_bound');
+  for (const language of ['de', 'en', 'fr']) {
+    const title = uiCatalog[language]['first.title'];
+    if (!authoring.includes(`Name="${title}"`) || !authoring.includes(`Condition="NETGRID_UI_LANGUAGE = &quot;${language}&quot;"`))
+      throw new Error(`installer_shortcut_translation_missing:${language}`);
+  }
   // EXE actions have no MSI session: their argument string must be resolved
   // from the prepared property while Windows Installer schedules the action.
   for (const action of ["InitializeNetgridRuntime", "CacheNetgridMsi", "CacheNetgridSetup", "RemoveNetgridFirewall", "DeleteNetgridData"]) {

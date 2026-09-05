@@ -170,6 +170,13 @@ try {
   $msiPath = Join-Path $OutputRoot "NETGRID-$productVersion-x64.msi"
   $setupPath = Join-Path $OutputRoot "NETGRID-Setup-$productVersion-x64.exe"
   $iconPath = Join-Path $projectRoot "apps\web\public\brand\netgrid.ico"
+  $uiCatalog = Get-Content -LiteralPath (Join-Path $projectRoot 'apps\windows\Common\windows-ui-strings.json') -Raw | ConvertFrom-Json
+  foreach ($language in @('de','en','fr')) {
+    $shortcutTitle = [string]$uiCatalog.$language.'first.title'
+    if ([string]::IsNullOrWhiteSpace($shortcutTitle) -or $shortcutTitle.IndexOfAny([IO.Path]::GetInvalidFileNameChars()) -ge 0) {
+      throw "Ungültiger lokalisierter Startmenüname: $language"
+    }
+  }
 
   & $dotnet tool run wix -- build -acceptEula wix7 -arch x64 `
     -d "ProductVersion=$productVersion" `
@@ -181,6 +188,9 @@ try {
     -d "FirstRunRoot=$firstRunRoot" `
     -d "UpdaterRoot=$updaterRoot" `
     -d "NetgridIcon=$iconPath" `
+    -d "FirstRunTitleDe=$($uiCatalog.de.'first.title')" `
+    -d "FirstRunTitleEn=$($uiCatalog.en.'first.title')" `
+    -d "FirstRunTitleFr=$($uiCatalog.fr.'first.title')" `
     -intermediateFolder (Join-Path $intermediateRoot "product") `
     -pdbtype none `
     -o $msiPath `

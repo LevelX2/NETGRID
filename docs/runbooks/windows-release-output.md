@@ -293,10 +293,34 @@ keine neue Auswahl. Alle vier Windows-Oberflächen laden denselben Wert.
 ohne Fenster, Passwortdialog oder Serverstart aus. Der E2E-Test prüft die
 französische Auswahl gegen alle installierten Folgeprogramme; rein lokale
 Komponententests verändern dafür keine Host-Registrierung.
+Für eine bereits erfolgreich abgearbeitete, weiter geöffnete Test-Sandbox
+steht zusätzlich `test-windows-installed-language-sandbox.ps1` bereit. Er
+akzeptiert ausschließlich einen schreibgeschützt bereitgestellten, sauber
+commitgebundenen Artefaktsatz unter `C:\NETGRID-TestInput\language-review-<Build>`.
+Französische Frischinstallation, Sprachübernahme der drei Folgeprogramme und
+ProductCode-Reparatur werden getrennt vom allgemeinen MSI-Lauf geprüft.
+`language-result.json` zählt nur bei Erfolg einschließlich Entfernung der
+eigenen Testinstallation; der Test bedient keine Passwort- oder sonstigen
+Authentifizierungsdialoge und ersetzt keine visuelle Abnahme.
 Die Build-Vorschauen umfassen Sprachauswahl, Setup und
 Deinstallation in drei Sprachen und drei geometrischen Skalierungen. Diese
 Skalierung über `Form.Scale` ersetzt keinen Test mit real geänderter
 Windows-DPI-Einstellung und entsprechend skalierten Schriften.
+
+Die drei lokalisierten First-Run-Startmenünamen stammen beim MSI-Build aus
+`first.title` derselben Sprachquelle. Bedingte, transitive MSI-Komponenten
+stellen genau die gewählte Verknüpfung bereit und entfernen bei einer
+ausdrücklichen Sprachänderung die vorherige. Die Namen sind im MSI literal
+gebunden: Die `Name`-Spalte der
+[Shortcut-Tabelle](https://learn.microsoft.com/en-us/windows/win32/msi/shortcut-table)
+ist kein zur Laufzeit formatierter Eigenschaftstext.
+Reparatur und Update lesen die registrierte Sprache. Das geführte Setup
+übergibt immer seine erkannte bzw. gewählte Sprache; direkte MSI-Aufrufe
+können `NETGRID_UI_LANGUAGE=de|en|fr` setzen und verwenden ohne Angabe oder
+vorhandene Registrierung die englische MSI-Paketsprache. Die
+Windows-Spracherkennung des Setup-Assistenten bleibt davon unverändert.
+Der gezielte Sandbox-Sprachtest prüft mit `-VerifyShortcuts` zusätzlich alle
+drei Namen, Reparatur und die Entfernung der zuvor gewählten Verknüpfung.
 
 Beim Update ist allein die vom Installer gespeicherte Zeichenfolge
 `DesktopShortcutPreference` (`0` oder `1`) maßgeblich. Ein fehlender oder

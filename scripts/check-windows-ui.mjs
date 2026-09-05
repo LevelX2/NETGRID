@@ -9,6 +9,12 @@ const catalog = JSON.parse(
   ),
 );
 const languages = ["de", "en", "fr"];
+const installerSource = readFileSync(path.join(projectRoot, 'installer/product/Product.wxs'), 'utf8');
+for (const [language, suffix] of [['de','De'], ['en','En'], ['fr','Fr']]) {
+  if (!installerSource.includes(`Name="$(FirstRunTitle${suffix})"`) ||
+      !installerSource.includes(`Condition='NETGRID_UI_LANGUAGE = "${language}"' Transitive="yes"`))
+    throw new Error(`windows_first_run_shortcut_not_localized:${language}`);
+}
 const reference = Object.keys(catalog.en).sort();
 if (!existsSync(path.join(projectRoot, "apps/web/public/brand/netgrid.ico")))
   throw new Error("windows_ui_icon_missing");
