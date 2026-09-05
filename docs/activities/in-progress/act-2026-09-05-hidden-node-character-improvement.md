@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-09-05-hidden-node-character-improvement
-status: in_progress
+status: done
 kind: implementation
 area: ai
 priority: high
@@ -58,7 +58,7 @@ Blocker nennt Ursache und Removal Condition.
 
 ## Paketfolge
 
-`HN-A fertig -> HN-B fertig -> HN-C fertig -> HN-D fertig -> HN-E aktiv -> Main -> Cleanup`
+`HN-A fertig -> HN-B fertig -> HN-C fertig -> HN-D fertig -> HN-E fertig -> Main -> Cleanup`
 
 ### HN-A: Identität, Messung und reproduzierbare Ausgangslage
 
@@ -232,3 +232,33 @@ Basis-KI/Original und aktuelle KI/Original identische Kontrollbedingungen;
 sie werden nicht als zwei unabhängige Stichproben ausgegeben.
 
 HN-E aktiv. Noch keine Standardliste geändert.
+
+### HN-E abgeschlossen: Original behalten
+
+70 Original- und 70 Economy-Spiele vollständig verglichen, dazu der getrennte
+Balanced-Pilot. Economy: zwei Siege statt null, aber 34 statt 42 Scorepunkte
+und 58 statt 57 Nullscore-Verluste; Rückschritt insbesondere gegen Redline.
+Kein belastbar konsistenter Vorteil, deshalb keine Standardlistenänderung.
+Der gewonnene Nullscore-Flatlinefall wird korrekt als Erfolg geführt.
+Alle 148 unterschiedlichen Ergebnisse sauber, acht Economy-Pilotwiederholungen
+mit identischem Hash. Vollständige Ergebnisaggregation verweigert fehlende,
+doppelte, quellfremde oder fehlerhafte Spiele und unmatched Seedmengen.
+
+Quellen und offene Capability-Verträge sind in das lebende Review übertragen.
+Registry-IDs 388–394 wurden für die sieben getrennten Kombinationen reserviert.
+Vier neue Aggregationstests und insgesamt 16 Ambush-Tests grün; zusätzlich
+vier SP-082- und ein Engine-Contract-Test grün. Kein breiter Gate-Lauf, weil
+produktive Policy, gemeinsame Typen und Engine unverändert blieben.
+
+Nach Registry-Sicherung und den finalen fokussierten Checks wird dieses
+abgeschlossene Prozessartefakt gemäß Activity-Retention entfernt. Der
+verbleibende Abschluss besteht ausschließlich aus lokalem Main-Merge und
+verifiziertem Worktree-/Branch-Cleanup; kein Push und kein Versand.
+
+Finaler fachlicher Check: 20 AI-Regressionen und 4 Aggregationstests grün;
+alle 148 Registry-Spiele stimmen nach Seed, StateHash, Corp-Punkten und
+Gewinner exakt mit den importierten Bundles überein. Eigener Registry-Job
+geschlossen, Report nur lokal `generated`, Online-Sicherung erstellt.
+SQLite-Integrität und Fremdschlüssel sind sauber. Der globale Registry-Check
+meldet ausschließlich den fremden aktiven Job
+`express-shutdown-3cycles-20260905-001`; er wird nicht verändert.

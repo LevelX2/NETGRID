@@ -2,7 +2,55 @@
 
 Stand: 2026-09-05. Auftrag: charaktererhaltende Verbesserung von
 `standard_proteus_corp_hidden_node_control_2026_05_25`.
-Prozess: [HN-A–E](../../activities/in-progress/act-2026-09-05-hidden-node-character-improvement.md).
+Die Paketfolge HN-A–E ist fachlich abgeschlossen. Führende Ergebnisse liegen
+in der lokalen [Evidenzregistrierung](../../runbooks/ai-selfplay-evidence-registry.md),
+Paarungen 388–394, Report `hidden-node-character-20260905`.
+
+## Aktuelle Entscheidung
+
+**Originaldeck beibehalten; keine produktive KI-Policy geändert.** Zwei kleine
+Varianten wurden geprüft. Zusätzliche freie Economy kann konkrete Partien
+verbessern, ist im geprüften Satz aber keine konsistente Verbesserung des
+Decks. Ein höherer Scorebonus oder lockerere Schutzgrenzen sind aus den
+geprüften Zuständen ebenfalls nicht begründet.
+
+Economy tauscht je einen Bel-Digmo und Stereogram gegen insgesamt zwei
+zusätzliche Accounts Receivable: 45 Karten, 21 Agendapunkte, 41 Proteus-Karten,
+sämtliche thematischen Funktionen und alle fünf benannten Kernkarten bleiben.
+Die Balanced-Variante tauscht zusätzlich je einen Credit Blocks und Sumo 2008
+gegen zwei Data Wall; sie scheitert bereits im achtteiligen Pilot.
+
+| Vorab festgelegte Kohorte | Siege Original / Economy | Corp-Punkte Original / Economy | Verluste ohne Score Original / Economy |
+| --- | ---: | ---: | ---: |
+| Krashkurs, bekannte 40 Seeds | 0/40 / 1/40 | 25 / 21 | 33 / 34 |
+| Krashkurs, 10 frische Seeds | 0/10 / 0/10 | 2 / 2 | 9 / 9 |
+| R&D Express, 10 frische Seeds | 0/10 / 1/10 | 5 / 8 | 8 / 6 |
+| Redline Riot, 10 frische Seeds | 0/10 / 0/10 | 10 / 3 | 7 / 9 |
+| Gesamt | 0/70 / 2/70 | 42 / 34 | 57 / 58 |
+
+Der Economy-Sieg gegen Krashkurs in Seed 025 erreicht acht Scorepunkte;
+erster Score in Zug 23 statt 47 im Original. Drei Economy-Operations werden
+ausgeführt statt einer, darunter eine Defense-gebundene Finanzierung. Das
+ist echte Konversion in dieser Partie, aber kein isolierter kausaler
+Credit-Effekt: Die andere Liste verändert auch Ziehfolge und Entscheidungen.
+Der zweite Sieg, R&D-Holdout 01, ist eine Flatline ohne Score. Er zählt
+ausdrücklich nicht als Nullscore-Verlust. Gegen Redline bleiben weniger
+Scorefortschritt und mehr Nullscore-Verluste; nur zwei Siege insgesamt tragen
+keinen allgemeinen Spielstärkenachweis.
+
+Alle 148 unterschiedlichen Konfigurations-/Seed-Ergebnisse (70 Original,
+70 Economy, 8 Balanced) sind terminal und replaykorrekt, ohne Runtimefehler,
+Fallbacks oder Timeouts. Acht Economy-Pilotwiederholungen stimmen exakt mit
+den späteren Kontroll-StateHashes überein und werden nicht doppelt gezählt.
+Die ursprüngliche 40er-Paarung und die gezielt ausgewählten Pilotseeds sind
+keine zufällige Stichprobe der gesamten Meta. Die 30 neuen Seeds wurden vor
+den Variantenläufen festgelegt. Ohne produktiven KI-Patch sind alte/neue
+KI mit Originaldeck derselbe Kontrollarm, keine zusätzliche Stichprobe.
+
+Behalten werden die Messwerkzeuge, drei zusätzliche Ambush-Zonenregressionen
+und vier Prüfungen der Ergebnisaggregation. Die folgenden Fähigkeitslücken
+sind offen; dieses Ergebnis behauptet weder ihre Implementierung noch eine
+gelöste Deckschwäche.
 
 ## Finanzierung und Schutz: kein pauschaler KI-Bonus
 
@@ -89,3 +137,31 @@ bestehenden Ambush-Tests für Installation, Fortsetzung, Zugriff, Ignorieren
 beziehungsweise Hold, Recycling und Hidden-Info-Äquivalenz. Keine gelockerte
 Expositionsregel und keine behauptete sichere Killsequenz. Eine umfassende
 Bluff- oder Counter-Punish-Verbesserung ist damit nicht implementiert.
+
+## Reproduktion und nächste belastbare Erweiterung
+
+`scripts/create-hidden-node-evaluation-config.ts` erzeugt Original, beide
+Varianten, Pilot und fünf Checkpoints. `scripts/evaluate-hidden-node.ts`
+validiert Snapshots und erfasst jedes Spiel einzeln; `--config` und `--out`
+binden den Lauf. `compare-hidden-node-evaluations.mjs` prüft Vollständigkeit,
+Quellstand, Deckhash, Seedgleichheit und Runtimeintegrität, bevor Zahlen
+zusammengeführt werden. Snapshot-ID **und** Deckhash gehören zusammen: Die
+isolierten Experimentlisten verwenden den Originalnamen/-ID, sind aber über
+ihre unterschiedlichen Hashes und Labels eindeutig; sie wurden nie als
+veränderte Standard-Snapshots veröffentlicht.
+
+Die Registry erhält kompakte Ergebnisse, Manifeste, Meilensteine und den
+vollständigen Bericht. Große temporäre Audits/Captures werden nach Sicherung
+entfernt und können am dokumentierten Quellstand erneut erzeugt werden.
+Der Registry-Job wurde erst vor der Speicherung registriert; die Auswahl war
+vom Nutzer fest vorgegeben, nicht zufällig. Alle sieben IDs wurden vor dem
+ersten Upsert atomar reserviert.
+
+Sinnvoller nächster Implementierungsgegenstand ist die vertikale,
+zweckgebundene Economy-Fähigkeit am bestehenden Owner, zunächst an einem
+günstigen wiederholten Contract-Zyklus mit exakt gebundenem Verbraucher.
+Daneben benötigt Remote-Maturity einen nachgewiesenen besseren Supportpfad;
+das bloße Bestehen blockierter Score-Parents reicht nicht. Zusätzliche
+Counter-Punish-Vorbereitung muss den Mehrwert gegenüber bereits wirksamen
+HQ-/R&D-Fallen belegen. Keine dieser Erweiterungen wird durch weitere
+Kartenkopien oder einen globalen Bewertungsaufschlag ersetzt.
