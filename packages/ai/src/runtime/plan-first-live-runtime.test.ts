@@ -20070,7 +20070,7 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
-  it("spends the full affordable reserve on a reused matchpoint remote instead of saving for a later turn", () => {
+  it.each([false, true])("spends the full affordable reserve on a reused matchpoint remote instead of saving for a later turn (restricted capacity: %s)", (restrictedCapacity) => {
     resetResidentPlanPortfolioMemory();
     const run = legalAction(
       "run-affordable-matchpoint-remote",
@@ -20078,19 +20078,36 @@ describe("authoritative plan-first live runtime", () => {
       "start_run",
       "Run affordable matchpoint remote",
       { credits: 0, clicks: 1 },
-      { payload: { serverId: "remote_1" } },
+      {
+        payload: {
+          serverId: "remote_1",
+          ...(restrictedCapacity
+            ? {
+                restrictedActionGrantActionType: "start_run",
+                restrictedActionGrantCostProfile: "extra_click",
+                restrictedActionGrantRemainingActions: 1,
+                actionCapacitySelfFinancing: true,
+                gainActionsAmount: 1,
+              }
+            : {}),
+        },
+      },
     );
     const credit = legalAction(
       "credit-affordable-matchpoint-remote",
       "runner",
-      "gain_credit",
-      "Gain 1 Credit",
-      { credits: 0, clicks: 1 },
+      restrictedCapacity ? "end_turn" : "gain_credit",
+      restrictedCapacity ? "End turn" : "Gain 1 Credit",
+      { credits: 0, clicks: restrictedCapacity ? 0 : 1 },
     );
     const input = aiInput("runner", [run, credit]);
     input.playerView.own.credits = 10;
-    input.playerView.own.clicks = 3;
+    input.playerView.own.clicks = restrictedCapacity ? 0 : 3;
+    input.playerView.own.gripOrHq = Array.from({ length: 4 }, (_, index) =>
+      visibleCard(`reserve-contest-grip-${index}`, "runner", "event"),
+    );
     input.playerView.opponent.agendaPoints = 6;
+    input.playerView.opponent.deckCount = 20;
     input.playerView.agendaPointsToWin = 7;
     const reusedRemote = server("remote_1");
     reusedRemote.root = [
@@ -20169,6 +20186,23 @@ describe("authoritative plan-first live runtime", () => {
         expect.stringContaining("runner_terminal_remote_contest_mandatory"),
       ]),
     );
+    expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
+      rootForegroundInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      executorInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+    });
+    if (restrictedCapacity) {
+      expect(
+        residentPlanPortfolioSnapshot(input)?.instances.find(
+          (instance) => instance.moduleId === "runner.convert_run_window",
+        ),
+      ).toMatchObject({
+        moduleState: {
+          signal: {
+            actionAssessments: { [run.actionId]: { admissible: false } },
+          },
+        },
+      });
+    }
   });
 
   it("keeps a probe-limited event run contest-owned when it has an exact affordable trash payoff", () => {

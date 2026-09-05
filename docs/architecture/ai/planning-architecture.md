@@ -2905,6 +2905,15 @@ ohne noch vorhandenen `playerView.run`-Snapshot planbezogen aufgelöst werden,
 wenn LegalAction, Fenstersemantik und auslösender Planursprung vollständig
 gebunden sind.
 
+Bei optionaler Restricted-Run-Kapazität ohne aktiven Run ist eine lokale
+Reserve-/Wertablehnung dieses Moduls keine globale Action-Sperre, wenn
+`runner.contest_remote` dieselbe exakte Start-Run-Action bereits als
+`executable` zertifiziert hat. Die Routen-, Kosten- und Schadensprüfung bleibt
+beim Remote-Owner; dessen Planinstanz und Executor bleiben erhalten. Andere
+Actions, nicht ausführbare Remote-Routen und aktive Run-Fortsetzungen erhalten
+dadurch keine Freigabe. Das Run-Window materialisiert weiterhin nur seine
+eigenen ausdrücklich zugelassenen Actions.
+
 Aktuelle, für den Actor sichtbare Zustände flexibler Breaker gehören zur
 Runpfad-Evidence. Ein gewählter ICE-Typ muss deshalb durch den AI-DTO bis zur
 planlokalen Encounterbewertung erhalten bleiben; private oder gegnerisch

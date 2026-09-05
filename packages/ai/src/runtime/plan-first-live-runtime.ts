@@ -6837,6 +6837,24 @@ export function runnerActionDispositions(
       window.actionAssessments ?? {},
     )) {
       if (assessment.admissible) continue;
+      // An optional restricted run can already be an exact executable Remote
+      // route. The run-window's local reserve/value rejection is not a global
+      // veto of that owner-certified route (for example a matchpoint contest).
+      // Actual route safety remains part of the Remote action assessment.
+      if (
+        !input.playerView.run &&
+        candidates.some(
+          (candidate) =>
+            candidate.actionId === actionId &&
+            runnerRestrictedRunSequenceAction(input, candidate) !== undefined,
+        ) &&
+        domain.remoteContests.some(
+          (signal) =>
+            signal.runActionAssessments[actionId]?.verdict === "executable",
+        )
+      ) {
+        continue;
+      }
       add(
         actionId,
         "runner.convert_run_window",
