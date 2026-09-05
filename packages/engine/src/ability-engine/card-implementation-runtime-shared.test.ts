@@ -4,6 +4,21 @@ import { describe, expect, it } from "vitest";
 import { deterministicOnPlayResourcePayload } from "./card-implementation-runtime-shared";
 
 describe("deterministic on-play action-capacity payload", () => {
+  it.each([
+    ["onr_v1_089_gideons-pawnshop", "any_card"],
+    ["onr_v1_087_forgotten-backup-chip", "program"],
+  ])("publishes the canonical heap recovery filter for %s", (id, filter) => {
+    expect(
+      deterministicOnPlayResourcePayload(
+        CARD_DEFINITIONS_BY_ID[id!]!,
+        "runner",
+      ),
+    ).toMatchObject({
+      cardImplementationEffectKind: "search_trash_to_grip",
+      cardImplementationSearchFilter: filter,
+    });
+  });
+
   it("publishes Valu-Pak's exact restricted program-install bundle", () => {
     const definition =
       CARD_DEFINITIONS_BY_ID["onr_v1_117_valu-pak-software-bundle"];

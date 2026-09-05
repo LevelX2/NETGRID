@@ -1,0 +1,127 @@
+import type { AiDecisionInput } from "@netgrid/shared";
+import { describe, expect, it } from "vitest";
+import { CARD_DEFINITIONS_BY_ID } from "../../../../engine/src/card-definitions";
+import { deterministicOnPlayResourcePayload } from "../../../../engine/src/ability-engine/card-implementation-runtime-shared";
+import recoveryJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-pairing-401-heap-recovery-d70.json";
+import installJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-pairing-401-coverage-install-d308.json";
+import paymentJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-pairing-401-coverage-payment-d309.json";
+import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
+import {
+  resetResidentPlanPortfolioMemory,
+  residentPlanPortfolioSnapshot,
+  restoreResidentPlanPortfolioMemorySnapshot,
+} from "../../plans/resident-plan-portfolio-memory";
+import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
+import {
+  restoreAiRuntimeCheckpoint,
+  type AiRuntimeCheckpointV1,
+} from "./runtime-checkpoint";
+
+type Capture = {
+  input: AiDecisionInputWithDeckCapabilities;
+  runtime: AiRuntimeCheckpointV1;
+};
+function restore(json: unknown) {
+  const capture = structuredClone(json) as Capture;
+  resetResidentPlanPortfolioMemory();
+  restoreAiRuntimeCheckpoint(
+    capture.input,
+    capture.input.ownDeckSnapshot!.deckSnapshotId,
+    capture.runtime,
+  );
+  restoreResidentPlanPortfolioMemorySnapshot(
+    capture.input,
+    capture.runtime.residentPlanPortfolio,
+  );
+  return capture.input;
+}
+
+describe("pairing 401 source-bound recovery and coverage", () => {
+  it("binds a useful heap target before the recovery event enters the heap", () => {
+    const input = restore(recoveryJson);
+    // Reproject only the canonical Engine facts missing from this recorded action.
+    for (const action of input.legalActions) {
+      if (action.source !== "runner_onr_v1_089_gideons-pawnshop_1") continue;
+      Object.assign(
+        action.payload!,
+        deterministicOnPlayResourcePayload(
+          CARD_DEFINITIONS_BY_ID["onr_v1_089_gideons-pawnshop"]!,
+          "runner",
+        ),
+      );
+    }
+    const decision = chooseAiAction(input as AiDecisionInput);
+    const portfolio = residentPlanPortfolioSnapshot(input)!;
+    const executor = portfolio.instances.find(
+      (instance) => instance.instanceId === portfolio.executorInstanceId,
+    )!;
+    expect(decision).toMatchObject({
+      actionId:
+        "runner.play_event.runner_onr_v1_089_gideons-pawnshop_1.runner_onr_v1_089_gideons-pawnshop_1.onr_v1_089_gideons-pawnshop:abilities_on_play_search_trash_to_grip",
+      reasonCode: "plan_first.runner.develop_board_and_hand",
+      fallbackUsed: false,
+    });
+    expect(executor.moduleState).toMatchObject({
+      signal: {
+        recoverySearchCommitment: {
+          selectedActionId: decision.actionId,
+          selectedAtStateVersion: 69,
+          sourceCardInstanceId: "runner_onr_v1_089_gideons-pawnshop_1",
+          targetCardInstanceId: "runner_onr_v1_110_sneak-preview_2",
+          targetPurpose: "generic_heap_recovery",
+        },
+      },
+    });
+  });
+
+  it("carries the exact setup-coverage installation through its payment window", () => {
+    const input = restore(installJson);
+    chooseAiAction(input as AiDecisionInput);
+    const installActionId =
+      "runner.install_card.runner_onr_classic_031_rent-i-con_3.runner_onr_classic_031_rent-i-con_3";
+    const portfolio = residentPlanPortfolioSnapshot(input)!;
+    const executorId =
+      "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate";
+    const executor = portfolio.instances.find(
+      (instance) => instance.instanceId === executorId,
+    )!;
+    expect(executor.moduleState).toMatchObject({
+      kind: "coverage",
+      phase: "install_answer",
+      gap: { installActionIds: expect.arrayContaining([installActionId]) },
+    });
+    const paymentCapture = structuredClone(paymentJson) as Capture;
+    // Keep the observed selected origin, supplying its gap from the production
+    // producer above; restarting D308 can instead select the Shell Traders plan.
+    paymentCapture.runtime.residentPlanPortfolio!.instances.find(
+      (instance) => instance.instanceId === executorId,
+    )!.moduleState = structuredClone(executor.moduleState);
+    const payment = restore(paymentCapture);
+    const continuation = chooseAiAction(payment as AiDecisionInput);
+    expect(continuation.fallbackUsed).toBe(false);
+    const selected = payment.legalActions.find(
+      (action) => action.actionId === continuation.actionId,
+    )!;
+    expect(selected.source).toBe("runner_onr_proteus_133_chiba-bank-account_1");
+    expect(selected.payload).toMatchObject({
+      costPenaltySupportWindowId: "runner_cost_penalty_support.308",
+      costPenaltySupportOriginalActionId: installActionId,
+    });
+    const continued = residentPlanPortfolioSnapshot(payment)!;
+    expect(
+      continued.instances.find(
+        (instance) => instance.instanceId === executor.instanceId,
+      )?.moduleState,
+    ).toMatchObject({
+      kind: "coverage",
+      gap: { installActionIds: expect.arrayContaining([installActionId]) },
+    });
+  });
+
+  it("fails closed when the persisted coverage origin has no install binding", () => {
+    const payment = restore(paymentJson);
+    expect(() => chooseAiAction(payment as AiDecisionInput)).toThrow(
+      "invalid_support_graph",
+    );
+  });
+});

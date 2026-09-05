@@ -27877,6 +27877,12 @@ function uniqueCoverageGaps(
         state.inDeckKnown ||
         state.inHand ||
         cadenceBoundSupportActions.directSearchActionIds.length > 0;
+      const installActionValues = runnerCoverageInstallActionValues(
+        input,
+        candidates,
+        undefined,
+        role,
+      );
       result.set(role, {
         gapId: `coverage:${role}`,
         requiredRole: role,
@@ -27900,12 +27906,8 @@ function uniqueCoverageGaps(
           fundingGap,
           true,
         ),
-        installActionValues: runnerCoverageInstallActionValues(
-          input,
-          candidates,
-          undefined,
-          role,
-        ),
+        installActionValues,
+        installActionIds: Object.keys(installActionValues),
         ...(!coverageDrawCadence.drawAvailable
           ? {
               recoveryEvidenceCodes: [coverageDrawCadence.evidenceCode],

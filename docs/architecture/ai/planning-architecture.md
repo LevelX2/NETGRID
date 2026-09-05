@@ -798,6 +798,16 @@ Der Ursprung verändert weder Engine-Regeln noch LegalActions. Er bindet
 optionale Ability-, Run-, Access- und Trace-Entscheidungen an das auslösende
 Vorhaben und ermöglicht Outcome-basierte Fortschrittsprüfung.
 
+Auch ein allgemeines `runner.rig_and_coverage`-Aufbauvorhaben bindet seine
+konkreten Installationsaktionen über `gap.installActionIds`, unabhängig von
+einem benannten Run-Ziel. Diese IDs entstehen zusammen mit den
+Installationsbewertungen am Coverage-Producer. Ein anschließendes
+Zahlungsfenster bewahrt den bereits gewählten Auftrag und darf fehlende
+Bindungen nicht aus einer neu bewerteten Aktion rekonstruieren. Direkte
+Heap-Rückholungsereignisse erhalten Effekt und Suchfilter aus der
+deklarativen Engine-Implementierung; der zuständige Plan bindet das Ziel vor
+dem Ausspielen, bevor das Ereignis selbst in den Heap gelangt.
+
 ## 9. Gemeinsamer Planmodul-Vertrag
 
 Der folgende Typ ist konzeptionell. Die endgültigen TypeScript-Namen werden im

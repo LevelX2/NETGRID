@@ -906,6 +906,15 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
     };
     const gideonInitial = structuredClone(gideon);
     const gideonReplayStart = gideon.eventLog.length;
+    expect(
+      getLegalActions(gideon, "runner").find(
+        (action) =>
+          action.type === "play_event" && action.payload?.cardId === gideonId,
+      )?.payload,
+    ).toMatchObject({
+      cardImplementationEffectKind: "search_trash_to_grip",
+      cardImplementationSearchFilter: "any_card",
+    });
     gideon = apply(
       gideon,
       "runner",

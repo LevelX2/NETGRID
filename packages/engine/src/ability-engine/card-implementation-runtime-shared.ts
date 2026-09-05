@@ -106,6 +106,9 @@ export function deterministicOnPlayResourcePayload(
   const removeTagsEffect = implementation?.effects.find(
     (effect) => effect.kind === "remove_tags",
   );
+  const heapRecoveryEffect = implementation?.effects.find(
+    (effect) => effect.kind === "search_trash_to_grip",
+  );
   const advancementDistribution = implementation?.effects.find(
     (effect) => effect.kind === "distribute_advancement_counters",
   );
@@ -149,6 +152,12 @@ export function deterministicOnPlayResourcePayload(
     ...(drawCardsAmount > 0 ? { drawCardsAmount } : {}),
     ...(badPublicityAdded > 0 ? { badPublicityAdded } : {}),
     ...(selfDamage?.damageAmount ? selfDamage : {}),
+    ...(heapRecoveryEffect
+      ? {
+          cardImplementationEffectKind: "search_trash_to_grip",
+          cardImplementationSearchFilter: heapRecoveryEffect.filter,
+        }
+      : {}),
     ...(removeTagsEffect
       ? {
           cardImplementationEffectKind: "remove_tags",
