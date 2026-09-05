@@ -46,8 +46,10 @@
       <Shortcut Id="NetgridStartMenuShortcut" Name="NETGRID" Target="[#NetgridLauncher]" WorkingDirectory="INSTALLFOLDER" Icon="NetgridIcon" />
       <Shortcut Id="NetgridMaintenanceStartMenuShortcut" Name="NETGRID Maintenance" Target="[#NetgridLauncher]" Arguments="--open-maintenance" WorkingDirectory="INSTALLFOLDER" Icon="NetgridIcon" />
       <Shortcut Id="NetgridFirstRunStartMenuShortcut" Name="NETGRID Ersteinrichtung" Target="[#NetgridFirstRun]" WorkingDirectory="INSTALLFOLDER" Icon="NetgridIcon" />
+      <Shortcut Id="NetgridSetupStartMenuShortcut" Name="NETGRID Setup" Target="[NETGRID_DATA_ROOT]\config\updates\NETGRID-Setup.exe" Arguments="--uninstall" WorkingDirectory="INSTALLFOLDER" Icon="NetgridIcon" />
       <RemoveFolder Id="RemoveNetgridProgramMenu" On="uninstall" />
       <RegistryValue Root="HKLM" Key="Software\LevelX2\NETGRID" Name="StartMenuShortcuts" Type="integer" Value="1" KeyPath="yes" />
+      <RegistryValue Root="HKLM" Key="Software\LevelX2\NETGRID" Name="InstallDirectory" Type="string" Value="[INSTALLFOLDER]" />
     </Component>
     <Component Directory="DesktopFolder" Condition="INSTALLDESKTOPSHORTCUT = 1">
       <Shortcut Id="NetgridDesktopShortcut" Name="NETGRID" Target="[#NetgridLauncher]" WorkingDirectory="INSTALLFOLDER" Icon="NetgridIcon" />
@@ -70,6 +72,16 @@
     </Component>
 
     <Property Id="NETGRID_DATA_ROOT" Secure="yes" />
+    <Property Id="NETGRID_REGISTERED_DATA_ROOT" Secure="yes">
+      <RegistrySearch Id="NetgridRegisteredDataRoot" Root="HKLM" Key="SOFTWARE\LevelX2\NETGRID" Name="RuntimeDataRoot" Type="raw" Bitness="always64" />
+    </Property>
+    <Property Id="NETGRID_REGISTERED_INSTALL_FOLDER" Secure="yes">
+      <RegistrySearch Id="NetgridRegisteredInstallFolder" Root="HKLM" Key="SOFTWARE\LevelX2\NETGRID" Name="InstallDirectory" Type="raw" Bitness="always64" />
+    </Property>
+    <SetProperty Id="INSTALLFOLDER" Value="[NETGRID_REGISTERED_INSTALL_FOLDER]" Before="CostFinalize" Sequence="both" Condition='INSTALLFOLDER = "" AND NETGRID_REGISTERED_INSTALL_FOLDER &lt;&gt; ""' />
+    <SetProperty Id="NETGRID_DATA_ROOT" Action="ResolveNetgridDataRoot" Value="[NETGRID_REGISTERED_DATA_ROOT]" Before="DefaultNetgridDataRoot" Sequence="both" Condition='NETGRID_DATA_ROOT = "" AND NETGRID_REGISTERED_DATA_ROOT &lt;&gt; ""' />
+    <SetProperty Id="NETGRID_DATA_ROOT" Action="DefaultNetgridDataRoot" Value="[CommonAppDataFolder]NETGRID" Before="CostFinalize" Sequence="both" Condition='NETGRID_DATA_ROOT = ""' />
+    <SetProperty Id="SOURCELIST" Value="[NETGRID_DATA_ROOT]\config\installer\[ProductCode]" After="CostFinalize" Sequence="execute" Condition="NOT Installed" />
     <Property Id="NETGRID_DEPLOYMENT_PROFILE" Value="local" Secure="yes" />
     <Property Id="NETGRID_LAN_ADDRESS" Secure="yes" />
     <Property Id="NETGRID_WEB_PORT" Value="3100" Secure="yes" />
@@ -77,18 +89,42 @@
     <Property Id="NETGRID_RETENTION_DAYS" Value="30" Secure="yes" />
     <Property Id="NETGRID_ACCOUNT_ACCESS_MODE" Value="simple" Secure="yes" />
     <Property Id="INSTALLDESKTOPSHORTCUT" Value="1" Secure="yes" />
+    <Property Id="NETGRID_PREVIOUS_DESKTOP_SHORTCUT" Secure="yes">
+      <RegistrySearch Id="NetgridDesktopShortcutPreference" Root="HKLM" Key="SOFTWARE\LevelX2\NETGRID" Name="DesktopShortcutPreference" Type="raw" Bitness="always64" />
+    </Property>
+    <SetProperty
+      Id="INSTALLDESKTOPSHORTCUT"
+      Value="[NETGRID_PREVIOUS_DESKTOP_SHORTCUT]"
+      Before="CostFinalize"
+      Sequence="both"
+      Condition='NETGRID_PREVIOUS_DESKTOP_SHORTCUT &lt;&gt; ""' />
     <Property Id="NETGRID_SETUP_SOURCE" Secure="yes" />
     <Property Id="NETGRID_SETUP_SHA256" Secure="yes" />
+    <Property Id="DELETEUSERDATA" Value="0" Secure="yes" />
     <SetProperty
       Id="InitializeNetgridRuntime"
-      Value='initialize --data-root "[NETGRID_DATA_ROOT]" --deployment-profile "[NETGRID_DEPLOYMENT_PROFILE]" --lan-address "[NETGRID_LAN_ADDRESS]" --web-port "[NETGRID_WEB_PORT]" --server-port "[NETGRID_SERVER_PORT]" --retention-days "[NETGRID_RETENTION_DAYS]" --account-access-mode "[NETGRID_ACCOUNT_ACCESS_MODE]" --configure-firewall "true"'
+      Value='initialize --data-root "[NETGRID_DATA_ROOT]" --deployment-profile "[NETGRID_DEPLOYMENT_PROFILE]" --lan-address "[NETGRID_LAN_ADDRESS]" --web-port "[NETGRID_WEB_PORT]" --server-port "[NETGRID_SERVER_PORT]" --retention-days "[NETGRID_RETENTION_DAYS]" --account-access-mode "[NETGRID_ACCOUNT_ACCESS_MODE]" --desktop-shortcut "[INSTALLDESKTOPSHORTCUT]" --configure-firewall "true"'
       Before="InitializeNetgridRuntime"
       Sequence="execute"
       Condition='NOT REMOVE~="ALL"' />
     <CustomAction
       Id="InitializeNetgridRuntime"
       FileRef="NetgridRuntimeConfig"
-      ExeCommand="[CustomActionData]"
+      ExeCommand="[InitializeNetgridRuntime]"
+      Execute="deferred"
+      Impersonate="no"
+      Return="check"
+      HideTarget="yes" />
+    <SetProperty
+      Id="CacheNetgridMsi"
+      Value='cache-msi --data-root "[NETGRID_DATA_ROOT]" --source "[OriginalDatabase]" --product-code "[ProductCode]"'
+      Before="CacheNetgridMsi"
+      Sequence="execute"
+      Condition='NOT Installed AND NOT REMOVE~="ALL"' />
+    <CustomAction
+      Id="CacheNetgridMsi"
+      FileRef="NetgridRuntimeConfig"
+      ExeCommand="[CacheNetgridMsi]"
       Execute="deferred"
       Impersonate="no"
       Return="check"
@@ -102,7 +138,7 @@
     <CustomAction
       Id="CacheNetgridSetup"
       FileRef="NetgridRuntimeConfig"
-      ExeCommand="[CustomActionData]"
+      ExeCommand="[CacheNetgridSetup]"
       Execute="deferred"
       Impersonate="no"
       Return="check"
@@ -116,15 +152,31 @@
     <CustomAction
       Id="RemoveNetgridFirewall"
       FileRef="NetgridRuntimeConfig"
-      ExeCommand="[CustomActionData]"
+      ExeCommand="[RemoveNetgridFirewall]"
+      Execute="deferred"
+      Impersonate="no"
+      Return="check"
+      HideTarget="yes" />
+    <SetProperty
+      Id="DeleteNetgridData"
+      Value='delete-data --data-root "[NETGRID_DATA_ROOT]" --confirmation "DELETE_NETGRID_DATA"'
+      Before="DeleteNetgridData"
+      Sequence="execute"
+      Condition='REMOVE~="ALL" AND DELETEUSERDATA = 1' />
+    <CustomAction
+      Id="DeleteNetgridData"
+      FileRef="NetgridRuntimeConfig"
+      ExeCommand="[DeleteNetgridData]"
       Execute="deferred"
       Impersonate="no"
       Return="check"
       HideTarget="yes" />
     <InstallExecuteSequence>
       <Custom Action="InitializeNetgridRuntime" After="InstallFiles" Condition='NOT REMOVE~="ALL"' />
-      <Custom Action="CacheNetgridSetup" After="InitializeNetgridRuntime" Condition='NOT REMOVE~="ALL" AND NETGRID_SETUP_SOURCE &lt;&gt; ""' />
-      <Custom Action="RemoveNetgridFirewall" Before="RemoveFiles" Condition='REMOVE~="ALL"' />
+      <Custom Action="CacheNetgridMsi" After="InitializeNetgridRuntime" Condition='NOT Installed AND NOT REMOVE~="ALL"' />
+      <Custom Action="CacheNetgridSetup" After="CacheNetgridMsi" Condition='NOT REMOVE~="ALL" AND NETGRID_SETUP_SOURCE &lt;&gt; ""' />
+      <Custom Action="RemoveNetgridFirewall" Before="SetDeleteNetgridData" Condition='REMOVE~="ALL"' />
+      <Custom Action="DeleteNetgridData" Before="RemoveRegistryValues" Condition='REMOVE~="ALL" AND DELETEUSERDATA = 1' />
     </InstallExecuteSequence>
 
     <Icon Id="NetgridIcon" SourceFile="$(NetgridIcon)" />

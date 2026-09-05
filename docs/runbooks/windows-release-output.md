@@ -177,6 +177,158 @@ nach ausdrücklicher Zustimmung und erfolgreicher Integritätsprüfung.
 
 ## Fehlerdiagnose
 
+Die echte Windows-Installationsprüfung läuft über
+`corepack pnpm test:windows-installer:e2e`. Sie benötigt eine bestätigte
+Windows-UAC-Abfrage und zwei zuvor gebaute, prüfsummengebundene Artefaktsätze.
+`output/windows-installer-e2e/base` enthält das Vergleichspaket,
+`output/windows-installer` den zu prüfenden neuen Stand. Der Test verwendet
+eigene `NETGRID-E2E-*`-Programm-/Datenordner und die vorher auf freie Belegung
+geprüften Ports `32141`/`32142`; die Betriebsports der Entwicklungsinstanz
+bleiben reserviert. Für die Default-Prüfung werden nur die Testpfade und Ports
+abweichend gesetzt.
+
+`corepack pnpm certify:windows-release` verbindet Releasegrenzenprüfung,
+Installer-Build und diesen erhöhten Lauf. Das Ergebnis unter
+`output/windows-installer-e2e/windows-11-x64-result.json` bindet die geprüften
+MSI-/Setup-Dateien per SHA-256. Ein fehlendes Ergebnis oder ein Fehler gilt
+nicht als Abnahme. Ein Lauf auf dem Entwicklungsrechner belegt die lokale
+Installationsmatrix, ersetzt aber keinen Nachweis auf einer sauberen
+Windows-11-x64-Umgebung ohne Entwicklungswerkzeuge.
+
+Nach einmaliger Windows-Sandbox-Aktivierung und dem erforderlichen Host-Neustart
+kann `powershell -NoProfile -ExecutionPolicy Bypass -File
+scripts/run-windows-installer-sandbox.ps1` diese Matrix ohne weitere Host-UAC-
+Abfragen in einer wegwerfbaren Windows-11-Umgebung ausführen. Das Script lässt
+bereits vorhandene Sandboxen unangetastet. Es übergibt nur die vier per
+Metadaten und Prüfsummen geprüften MSI-/Setup-Artefakte sowie Testhelfer; das
+Repository und private Daten werden nicht freigegeben. Die Eingabefreigabe ist
+nur lesbar. Netzwerk, Zwischenablage, Audio, Video und Drucker sind deaktiviert.
+Ergebnisse landen im ausgewiesenen `output/windows-sandbox-e2e/<ID>/result`.
+Ein gestarteter Sandboxprozess ist noch kein bestandenes Gate; maßgeblich ist
+das terminale, prüfsummengebundene `result.json` einschließlich Cleanup.
+`suite-result.json` beschreibt den gesamten beauftragten Lauf einschließlich
+optionaler Zusatztests; ein später fehlgeschlagener Zusatztest überschreibt
+nicht den getrennten MSI-Nachweis. `-EnableNetwork` aktiviert ausdrücklich die
+Netzwerkanbindung einer neuen Test-Sandbox und kennzeichnet deren Ergebnis
+entsprechend; allein dadurch gilt noch kein Private-LAN-/Firewall-Gate als
+bestanden. Der Host und seine Firewallregeln bleiben unverändert.
+
+`-IncludeRollback` ergänzt einen echten Updatertransaktionstest und einen
+installierten Standardbenutzertest. Dafür wird der Testhelfer vorher mit
+`.tools/dotnet/dotnet.exe publish
+tests/windows/Netgrid.Updater.FaultFixture/Netgrid.Updater.FaultFixture.csproj
+-c Release -r win-x64 --self-contained true -p:DebugType=None -p:DebugSymbols=false
+-o output/windows-updater-fault-fixture` gebaut. Dieser Helfer ist niemals
+Releasepayload. Er verweigert den Hostbetrieb und darf nur die registrierte
+zufällige `NETGRID-E2E-*`-Testdatenbank nach dem echten MSI-Upgrade beschädigen.
+Der unveränderte, an die aktuellen Releasemetadaten gebundene Updater muss
+daraufhin die Vorversion und das Backup wiederherstellen. Geprüft werden
+SQLite-Integrität, ein zuvor gesetzter Datenbankmarker und die unveränderte
+Runtimekonfiguration. Die abschließende Meldungsbox ist eine getrennte UI-
+Abnahme; ihr bloßes Stoppen nach verifizierter Transaktion zählt nicht als
+Dialogtest. Der Standardbenutzertest verwendet nur ein temporäres Sandboxkonto
+und prüft reale Launcher-/SQLite-Funktion sowie verweigerte Schreibzugriffe auf
+Programm und geschützte Konfiguration.
+
+Für einen anschließenden Private-LAN-Test in derselben netzwerkfähigen Sandbox
+stehen `test-windows-private-lan-sandbox.ps1` (Gast) und
+`test-windows-private-lan-host.ps1` (Host) bereit. Der Gast erlaubt `Start` erst
+nach erfolgreichem `suite-result.json`, ohne verbleibende Installation und mit
+freien Testports. Der Test installiert in neue zufällige Testordner und startet
+die installierten Node-Entrypoints gezielt ohne Tray oder Browser. Dies ist nur
+der isolierte Netzwerktest, kein Ersatz für den normalen Launcherbetrieb.
+Nach `Start` prüft der Host mit `-RunRoot <Laufordner> -Profile Private`
+Web/Server-Erreichbarkeit und die Abweisung von Maintenance. Gastaktion
+`Public`, danach `Loopback`, bereiten die Hostprüfung `-Profile Public` vor:
+Remotezugriffe müssen blockiert sein, während die Dienste lokal weiterlaufen.
+`Stop` beendet nur anhand Pfad und Startzeit identifizierte eigene Testprozesse
+und prüft Deinstallation, Datenlöschung, Firewallbereinigung und freie Ports.
+Eine pauschale Sandbox-Regel „Container: allow inbound“ kann sonst die
+Private-/Public-Grenze überlagern. Der Gasthelfer deaktiviert für die Messung
+nur eine anhand Name und vollständiger Allow-All-Form identifizierte
+Containerregel und protokolliert sie. Der Hosthelfer verlangt diesen Preflight.
+Nach Stop wird die Regel wieder aktiviert; Hostregeln bleiben unangetastet.
+Es wird keine testseitige Blockregel hinzugefügt. Nur die erfolgreich
+abgeschlossenen, artefaktgebundenen Ergebnisse einschließlich dieser
+Umgebungsvorbereitung und ihrer Rücknahme gelten als Netzwerknachweis.
+
+Der Installerbuild führt auch
+`tests/windows/Netgrid.SetupHost.Tests` gegen die tatsächliche Setup-Assembly
+aus. Diese fensterlosen Tests prüfen spezifische Fehlerübersetzungen in allen
+drei Sprachen, die Abweisung ungültiger/relativer Ordnerangaben und den Schutz
+vor rohen Ausnahmetexten. Sie ersetzen keine visuelle oder funktionale
+Dialogabnahme. Ein unerwarteter Setupfehler zeigt Typ und HRESULT zur Diagnose;
+bekannte Fehler behalten ihre spezifische übersetzte Meldung.
+
+`tests/windows/Netgrid.Launcher.Tests` ergänzt den tatsächlichen Download-
+Dateipfad: Nach SHA-256-Prüfung muss der Prüfstream geschlossen sein, bevor
+Windows die temporäre Datei an ihren endgültigen Namen verschieben kann.
+Hashfehler dürfen eine vorhandene geprüfte Datei nicht ersetzen und keine
+Teil-Downloads hinterlassen. Dieser fensterlose Komponententest ersetzt
+weder die Zustimmung im Tray noch einen echten GitHub-Releaseabruf.
+
+### Hilfen und Platzprüfung im Setup
+
+Alle Optionen besitzen lokalisierte „?“-Hilfen: Tooltip bei Mauszeigerkontakt,
+ausführlicher Dialog per Klick oder Tastatur sowie zugängliche Beschreibung.
+Maintenance wird zusätzlich über einen sichtbaren Erklärlink eingeführt.
+
+Die Sprachauswahl ordnet ihre Aktionen über Layoutcontainer statt fester
+Koordinaten an. „Weiter“ und „Abbrechen“ erscheinen ausschließlich in der
+gerade ausgewählten Sprache und wechseln unmittelbar mit der Auswahl.
+Komponententests sichern freie Schaltflächen ohne Überlappung sowie den
+Sprachwechsel. Die Build-Vorschauen umfassen Sprachauswahl, Setup und
+Deinstallation in drei Sprachen und drei geometrischen Skalierungen. Diese
+Skalierung über `Form.Scale` ersetzt keinen Test mit real geänderter
+Windows-DPI-Einstellung und entsprechend skalierten Schriften.
+
+Beim Update ist allein die vom Installer gespeicherte Zeichenfolge
+`DesktopShortcutPreference` (`0` oder `1`) maßgeblich. Ein fehlender oder
+ungültiger Wert stoppt mit einer lokalisierten Reparaturmeldung; weder die
+Existenzmarkierung einer Shortcut-Komponente noch ein stiller Standardwert
+ersetzen die ursprüngliche Auswahl.
+
+`read-windows-msi-footprint.ps1` liest ausschließlich die tatsächliche
+MSI-File-Tabelle. Dateigröße, Anzahl und MSI-Größe werden im Setup eingebettet
+und beim Installer-Audit gegen die extrahierte Payload verglichen. Die
+Platzprüfung reserviert den vollständigen neuen Programmstand samt
+Allokationspuffer, geschützte Setup-/MSI-Caches, eine vollständige Payload als
+temporären Puffer und 512 MiB als anfängliche Datenreserve. Mehrere Ziele auf
+demselben Laufwerk zählen zusammen. Das ist ein konservativer Installations-
+Platzplan, keine Zusage über späteren Speicherbedarf der Spielhistorie.
+Fehlt Kapazität oder lässt sie sich nicht sicher prüfen, startet die
+Installation nicht; die lokalisierte Meldung nennt einzuplanenden und freien
+Platz pro betroffenem Laufwerk. Auch Updates verwenden diese Prüfung vor dem
+Entpacken. Eine zwischenzeitliche Belegung durch andere Programme kann nicht
+ausgeschlossen werden und bleibt zusätzlich Aufgabe der MSI-Fehlerbehandlung.
+
+Die Runtimekonfiguration wird als EXE-Custom-Action aufgerufen. Ihre
+Argumente werden beim Einplanen aus der jeweils vorbereiteten Action-Property
+formatiert (`[InitializeNetgridRuntime]`, `[CacheNetgridSetup]` usw.).
+`[CustomActionData]` ist hier kein verfügbarer EXE-Sitzungszugriff. Der
+MSI-Decompile-Audit prüft deshalb ausdrücklich die Argumentbindung;
+Build-/Extraktionserfolg allein beweist keine funktionierende Installation.
+
+Die Installation speichert ihr vollständiges Quell-MSI bytegleich unter
+`<Datenroot>/config/installer/<ProductCode>/` und registriert dieses Verzeichnis
+über die Windows-Installer-Eigenschaft `SOURCELIST`. Der Dateiname bleibt der
+ursprüngliche MSI-Quellname. Dies ist die dauerhafte Reparaturquelle, nicht der
+vom Setup anschließend entfernte temporäre Extraktionspfad. Normale Benutzer
+besitzen dort nur Leserechte. Programm- und Datenpfad werden für Reparaturen
+aus der Installationsregistrierung aufgelöst; ausdrücklich übergebene Pfade
+haben Vorrang. Der E2E-Test repariert den neuen Stand nur über seinen
+ProductCode, ohne externes MSI oder erneut übergebene Installationspfade.
+Führend sind Microsofts Verträge zu
+[`SOURCELIST`](https://learn.microsoft.com/en-us/windows/win32/msi/sourcelist)
+und [`OriginalDatabase`](https://learn.microsoft.com/en-us/windows/win32/msi/originaldatabase).
+
+Der lokale MSI-Test unterscheidet einen abgewiesenen Upgradeversuch, ein
+erfolgreiches Upgrade und einen eigenständigen Downgrade. Diese Prüfungen
+beweisen für sich allein noch keinen vom Updater ausgelösten vollständigen
+Programm-/Datenrollback nach fehlgeschlagenem Healthcheck. Auch die Bereinigung
+fließt in das E2E-Ergebnis ein; zurückgebliebene Testinstallationen oder
+Bereinigungsfehler verhindern ein erfolgreiches Ergebnis.
+
 - `RELEASE_PRODUCT_BOUNDARY_*`: Klassifikation oder verbotener
   Repositoryinhalt korrigieren.
 - `WINDOWS_RELEASE_AUDIT_*`: Output nicht verteilen; Manifest- oder

@@ -41,9 +41,9 @@ internal static class UiText
 
 internal sealed class LanguageDialog : Form
 {
-    private readonly ComboBox _languages = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 250 };
+    private readonly ComboBox _languages = new() { DropDownStyle = ComboBoxStyle.DropDownList, Dock = DockStyle.Top };
 
-    private LanguageDialog()
+    internal LanguageDialog()
     {
         Text = "NETGRID Setup";
         Icon = Icon.ExtractAssociatedIcon(Environment.ProcessPath!);
@@ -52,14 +52,36 @@ internal sealed class LanguageDialog : Form
         MinimizeBox = false;
         MaximizeBox = false;
         AutoScaleMode = AutoScaleMode.Dpi;
-        ClientSize = new Size(390, 155);
-        var label = new Label { Text = "Sprache / Language / Langue", AutoSize = true, Location = new Point(28, 24) };
+        ClientSize = new Size(390, 180);
+        var layout = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 3, Padding = new Padding(24),
+        };
+        layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+        var label = new Label { Text = "Sprache / Language / Langue", AutoSize = true, Margin = new Padding(3, 0, 3, 10) };
+        var proceed = new Button { AutoSize = true, MinimumSize = new Size(100, 32), DialogResult = DialogResult.OK };
+        var cancel = new Button { AutoSize = true, MinimumSize = new Size(100, 32), DialogResult = DialogResult.Cancel };
+        var actions = new FlowLayoutPanel
+        {
+            Dock = DockStyle.Bottom, AutoSize = true, WrapContents = false,
+            FlowDirection = FlowDirection.RightToLeft, Margin = new Padding(0, 16, 0, 0),
+        };
+        actions.Controls.AddRange([proceed, cancel]);
+        _languages.SelectedIndexChanged += (_, _) =>
+        {
+            UiText.Use(_languages.SelectedIndex switch { 0 => "de", 2 => "fr", _ => "en" });
+            proceed.Text = UiText.Get("setup.language.continue");
+            cancel.Text = UiText.Get("setup.language.cancel");
+        };
         _languages.Items.AddRange(["Deutsch", "English", "Français"]);
         _languages.SelectedIndex = UiText.Language switch { "de" => 0, "fr" => 2, _ => 1 };
-        _languages.Location = new Point(28, 54);
-        var proceed = new Button { Text = "Weiter / Continue / Continuer", AutoSize = true, Location = new Point(205, 105), DialogResult = DialogResult.OK };
-        var cancel = new Button { Text = "Abbrechen / Cancel / Annuler", AutoSize = true, Location = new Point(105, 105), DialogResult = DialogResult.Cancel };
-        Controls.AddRange([label, _languages, proceed, cancel]);
+        layout.Controls.Add(label, 0, 0);
+        layout.Controls.Add(_languages, 0, 1);
+        layout.Controls.Add(actions, 0, 2);
+        Controls.Add(layout);
         AcceptButton = proceed;
         CancelButton = cancel;
     }

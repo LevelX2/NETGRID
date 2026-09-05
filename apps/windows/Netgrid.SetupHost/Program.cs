@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text.Json;
 using Microsoft.Win32;
@@ -16,6 +17,7 @@ internal static class Program
     [STAThread]
     public static int Main(string[] args)
     {
+        var interactiveCommand = args.Length == 0 || args[0] is "--uninstall" or "--uninstall-product";
         try
         {
             if (args.Length == 2 && args[0] == "--extract-msi")
@@ -48,13 +50,14 @@ internal static class Program
                 File.WriteAllText(Path.GetFullPath(args[1]), JsonSerializer.Serialize(UiText.Audit));
                 return 0;
             }
-            if (args.Length == 4 && args[0] == "--render-preview")
+            if (args.Length == 4 && args[0] is "--render-preview" or "--render-language-preview")
             {
                 ApplicationConfiguration.Initialize();
                 UiText.Use(args[1]);
-                if (!int.TryParse(args[2], out var scale) || scale is not (100 or 125 or 150)) throw new SetupException("setup_arguments_invalid", "Die Setup-Argumente sind ungültig.");
-                using var form = new SetupForm();
+                if (!int.TryParse(args[2], out var scale) || scale is not (100 or 125 or 150)) throw new SetupException("setup_arguments_invalid");
+                using Form form = args[0] == "--render-language-preview" ? new LanguageDialog() : new SetupForm();
                 form.ShowInTaskbar = false;
+                form.StartPosition = FormStartPosition.Manual;
                 form.Location = new Point(-32000, -32000);
                 form.Show();
                 Application.DoEvents();
@@ -66,6 +69,50 @@ internal static class Program
                 bitmap.Save(Path.GetFullPath(args[3]), System.Drawing.Imaging.ImageFormat.Png);
                 form.Hide();
                 return 0;
+            }
+            if (args.Length == 4 && args[0] == "--render-uninstall-preview")
+            {
+                ApplicationConfiguration.Initialize();
+                UiText.Use(args[1]);
+                if (!int.TryParse(args[2], out var scale) || scale is not (100 or 125 or 150)) throw new SetupException("setup_arguments_invalid");
+                using var form = new UninstallForm();
+                form.ShowInTaskbar = false;
+                form.StartPosition = FormStartPosition.Manual;
+                form.Location = new Point(-32000, -32000);
+                form.Show();
+                Application.DoEvents();
+                var factor = scale / 100f;
+                if (factor != 1f) form.Scale(new SizeF(factor, factor));
+                form.PerformLayout();
+                using var bitmap = new Bitmap(form.Width, form.Height);
+                form.DrawToBitmap(bitmap, new Rectangle(Point.Empty, bitmap.Size));
+                bitmap.Save(Path.GetFullPath(args[3]), System.Drawing.Imaging.ImageFormat.Png);
+                form.Hide();
+                return 0;
+            }
+            if (args.Length == 6 && args[0] == "--uninstall-product" && args[2] == "--language" && args[4] == "--wait-pid")
+            {
+                ApplicationConfiguration.Initialize();
+                UiText.Use(args[3]);
+                var deleteData = args[1] switch
+                {
+                    "retain" => false,
+                    "delete" => true,
+                    _ => throw new SetupException("uninstall_mode_invalid"),
+                };
+                if (!int.TryParse(args[5], out var waitPid) || waitPid <= 0) throw new SetupException("uninstall_parent_invalid");
+                UninstallWorker.ValidateAndWait(waitPid);
+                try
+                {
+                    var result = Installer.RunUpdate(programRoot: null, uninstall: true, deleteData: deleteData);
+                    if (result is not (0 or 3010)) throw new SetupException("uninstall_failed", result);
+                    MessageBox.Show(UiText.Get("uninstall.status.success"), UiText.Get("uninstall.title"), MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return 0;
+                }
+                finally
+                {
+                    UninstallWorker.ScheduleSelfRemoval();
+                }
             }
             if (args.Length == 3 && args[0] == "--install-update" && args[1] == "--program-root")
             {
@@ -79,7 +126,15 @@ internal static class Program
                 Console.WriteLine($"NETGRID_SETUP_UNINSTALL_RESULT code={result}");
                 return result is 0 or 1605 or 3010 ? 0 : result;
             }
-            if (args.Length != 0) throw new SetupException("setup_arguments_invalid", "Die Setup-Argumente sind ungültig.");
+            if (args.Length == 1 && args[0] == "--uninstall")
+            {
+                MsiPayload.Verify();
+                ApplicationConfiguration.Initialize();
+                if (!LanguageDialog.SelectLanguage()) return 1;
+                Application.Run(new UninstallForm());
+                return 0;
+            }
+            if (args.Length != 0) throw new SetupException("setup_arguments_invalid");
 
             MsiPayload.Verify();
             ApplicationConfiguration.Initialize();
@@ -89,10 +144,10 @@ internal static class Program
         }
         catch (Exception exception)
         {
-            if (Environment.UserInteractive)
+            if (Environment.UserInteractive && interactiveCommand)
             {
                 MessageBox.Show(
-                    exception is SetupException setup ? setup.Message : UiText.Get("setup.error.start"),
+                    SetupFailure.Message(exception),
                     "NETGRID Setup",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error
@@ -107,14 +162,188 @@ internal static class Program
     }
 }
 
+internal sealed class UninstallForm : Form
+{
+    private readonly CheckBox _deleteData = new()
+    {
+        Text = UiText.Get("uninstall.delete_data"),
+        AutoSize = true,
+        MaximumSize = new Size(520, 0),
+    };
+    private readonly Label _status = new() { AutoSize = true, ForeColor = SystemColors.GrayText };
+    private readonly Button _uninstall = new() { Text = UiText.Get("uninstall.action"), AutoSize = true, Padding = new Padding(15, 5, 15, 5) };
+    private readonly Button _cancel = new() { Text = UiText.Get("uninstall.cancel"), AutoSize = true, Padding = new Padding(15, 5, 15, 5) };
+
+    public UninstallForm()
+    {
+        Text = UiText.Get("uninstall.title");
+        Icon = Icon.ExtractAssociatedIcon(Environment.ProcessPath!);
+        StartPosition = FormStartPosition.CenterScreen;
+        AutoScaleMode = AutoScaleMode.Dpi;
+        ClientSize = new Size(620, 390);
+        MinimumSize = new Size(620, 390);
+        FormBorderStyle = FormBorderStyle.FixedDialog;
+        MaximizeBox = false;
+
+        var root = new TableLayoutPanel
+        {
+            Dock = DockStyle.Fill,
+            AutoScroll = true,
+            ColumnCount = 1,
+            Padding = new Padding(28),
+        };
+        root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        Controls.Add(root);
+        root.Controls.Add(new Label
+        {
+            Text = UiText.Get("uninstall.header"),
+            AutoSize = true,
+            Font = new Font(SystemFonts.DefaultFont.FontFamily, 18, FontStyle.Bold),
+        });
+        root.Controls.Add(Body(UiText.Get("uninstall.body")));
+        root.Controls.Add(_deleteData);
+        root.Controls.Add(Body(UiText.Get("uninstall.delete_help")));
+        root.Controls.Add(_status);
+        var actions = new FlowLayoutPanel { AutoSize = true, Dock = DockStyle.Top, FlowDirection = FlowDirection.RightToLeft };
+        actions.Controls.Add(_uninstall);
+        actions.Controls.Add(_cancel);
+        root.Controls.Add(actions);
+        AcceptButton = _uninstall;
+        CancelButton = _cancel;
+
+        _cancel.Click += (_, _) => Close();
+        _uninstall.Click += (_, _) => StartUninstall();
+    }
+
+    private void StartUninstall()
+    {
+        try
+        {
+            if (_deleteData.Checked)
+            {
+                var answer = MessageBox.Show(
+                    UiText.Get("uninstall.delete_confirm"),
+                    UiText.Get("uninstall.delete_confirm_title"),
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning,
+                    MessageBoxDefaultButton.Button2
+                );
+                if (answer != DialogResult.Yes) return;
+            }
+            _uninstall.Enabled = false;
+            _cancel.Enabled = false;
+            _status.Text = UiText.Get("uninstall.status.elevation");
+            UninstallWorker.Start(_deleteData.Checked, UiText.Language);
+            Close();
+        }
+        catch (Win32Exception exception) when (exception.NativeErrorCode == 1223)
+        {
+            _status.Text = UiText.Get("uninstall.status.cancelled");
+            _uninstall.Enabled = true;
+            _cancel.Enabled = true;
+        }
+        catch (Exception exception)
+        {
+            _status.Text = UiText.Get("uninstall.status.failed");
+            MessageBox.Show($"{_status.Text}\n\n{UiText.Get("common.cause", SetupFailure.Message(exception))}", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            _uninstall.Enabled = true;
+            _cancel.Enabled = true;
+        }
+    }
+
+    private static Label Body(string text) => new()
+    {
+        Text = text,
+        AutoSize = true,
+        MaximumSize = new Size(540, 0),
+        Margin = new Padding(3, 10, 3, 12),
+    };
+}
+
+internal static class UninstallWorker
+{
+    private const int MoveFileDelayUntilReboot = 0x4;
+
+    public static void Start(bool deleteData, string language)
+    {
+        var source = Environment.ProcessPath ?? throw new SetupException("setup_path_missing");
+        var destination = Path.Combine(Path.GetTempPath(), $"NETGRID-Uninstall-{Guid.NewGuid():N}.exe");
+        File.Copy(source, destination, overwrite: false);
+        if (!HashesEqual(source, destination))
+        {
+            File.Delete(destination);
+            throw new SetupException("uninstall_worker_hash_mismatch");
+        }
+        var start = new ProcessStartInfo(destination) { UseShellExecute = true, Verb = "runas", WindowStyle = ProcessWindowStyle.Hidden };
+        foreach (var argument in new[] { "--uninstall-product", deleteData ? "delete" : "retain", "--language", language, "--wait-pid", Environment.ProcessId.ToString() })
+            start.ArgumentList.Add(argument);
+        try
+        {
+            Process.Start(start)?.Dispose();
+        }
+        catch
+        {
+            File.Delete(destination);
+            throw;
+        }
+    }
+
+    public static void ValidateAndWait(int processId)
+    {
+        var executable = Path.GetFullPath(Environment.ProcessPath ?? string.Empty);
+        var temporaryRoot = Path.GetFullPath(Path.GetTempPath()).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+        if (!executable.StartsWith(temporaryRoot, StringComparison.OrdinalIgnoreCase) || !Path.GetFileName(executable).StartsWith("NETGRID-Uninstall-", StringComparison.Ordinal) || !executable.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+            throw new SetupException("uninstall_worker_location_invalid");
+        if (processId == Environment.ProcessId) throw new SetupException("uninstall_parent_invalid");
+        try
+        {
+            using var parent = Process.GetProcessById(processId);
+            if (!parent.WaitForExit(30_000)) throw new SetupException("uninstall_parent_running");
+        }
+        catch (ArgumentException)
+        {
+            // The initiating setup process has already exited.
+        }
+    }
+
+    public static void ScheduleSelfRemoval()
+    {
+        var executable = Environment.ProcessPath;
+        if (string.IsNullOrWhiteSpace(executable)) return;
+        try
+        {
+            File.Delete(executable);
+        }
+        catch (IOException)
+        {
+            _ = MoveFileEx(executable, null, MoveFileDelayUntilReboot);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            _ = MoveFileEx(executable, null, MoveFileDelayUntilReboot);
+        }
+    }
+
+    private static bool HashesEqual(string left, string right)
+    {
+        using var leftStream = File.OpenRead(left);
+        using var rightStream = File.OpenRead(right);
+        return CryptographicOperations.FixedTimeEquals(SHA256.HashData(leftStream), SHA256.HashData(rightStream));
+    }
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern bool MoveFileEx(string existingFileName, string? newFileName, int flags);
+}
+
 internal sealed class SetupForm : Form
 {
+    private readonly ToolTip _helpToolTip = new() { AutoPopDelay = 20000, InitialDelay = 400, ReshowDelay = 100, ShowAlways = true };
     private readonly RadioButton _recommended = new() { Text = UiText.Get("setup.recommended"), Checked = true, AutoSize = true };
     private readonly RadioButton _custom = new() { Text = UiText.Get("setup.custom"), AutoSize = true };
     private readonly RadioButton _local = new() { Text = UiText.Get("setup.local"), Checked = true, AutoSize = true };
     private readonly RadioButton _lan = new() { Text = UiText.Get("setup.lan"), AutoSize = true };
-    private readonly TextBox _programRoot = new() { Width = 410 };
-    private readonly TextBox _dataRoot = new() { Width = 410 };
+    private readonly TextBox _programRoot = new() { Dock = DockStyle.Fill };
+    private readonly TextBox _dataRoot = new() { Dock = DockStyle.Fill };
     private readonly NumericUpDown _webPort = new() { Minimum = 1, Maximum = 65535, Value = 3100, Width = 90 };
     private readonly NumericUpDown _serverPort = new() { Minimum = 1, Maximum = 65535, Value = 8787, Width = 90 };
     private readonly ComboBox _retention = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 210 };
@@ -165,30 +394,48 @@ internal sealed class SetupForm : Form
             Heading(UiText.Get("setup.header"), 18)
         ));
         root.Controls.Add(Body(UiText.Get("setup.body")));
-        root.Controls.Add(Group(UiText.Get("setup.path"), Flow(_recommended, _custom)));
-        root.Controls.Add(Group(UiText.Get("setup.profile"), Stack(
-            _local,
-            Body(UiText.Get("setup.local.help")),
-            _lan,
-            Body(UiText.Get("setup.lan.help")),
-            _lanAddress
-        )));
+        root.Controls.Add(Group(UiText.Get("setup.path"), Flow(
+            _recommended, Help("setup.recommended", "setup.help.recommended", _recommended),
+            _custom, Help("setup.custom", "setup.help.custom", _custom))));
+        var network = new TableLayoutPanel { AutoSize = true, Dock = DockStyle.Top, ColumnCount = 2 };
+        network.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        network.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+        // Keep both radio buttons under one parent so Windows maintains exclusivity.
+        network.Controls.Add(_local, 0, 0);
+        network.Controls.Add(Help("setup.local", "setup.help.local", _local), 1, 0);
+        var localHelp = Body(UiText.Get("setup.local.help"));
+        network.Controls.Add(localHelp, 0, 1);
+        network.SetColumnSpan(localHelp, 2);
+        network.Controls.Add(_lan, 0, 2);
+        network.Controls.Add(Help("setup.lan", "setup.help.lan", _lan), 1, 2);
+        var lanHelp = Body(UiText.Get("setup.lan.help"));
+        network.Controls.Add(lanHelp, 0, 3);
+        network.SetColumnSpan(lanHelp, 2);
+        network.Controls.Add(_lanAddress, 0, 4);
+        network.SetColumnSpan(_lanAddress, 2);
+        var maintenanceHelp = new LinkLabel { Text = UiText.Get("setup.maintenance.help_link"), AutoSize = true, Margin = new Padding(3, 7, 3, 5), AccessibleDescription = UiText.Get("setup.help.maintenance") };
+        maintenanceHelp.LinkClicked += (_, _) => ShowHelp("setup.maintenance.help_link", "setup.help.maintenance");
+        _helpToolTip.SetToolTip(maintenanceHelp, UiText.Get("setup.help.maintenance"));
+        network.Controls.Add(maintenanceHelp, 0, 5);
+        network.SetColumnSpan(maintenanceHelp, 2);
+        root.Controls.Add(Group(UiText.Get("setup.profile"), network));
 
         var advanced = new TableLayoutPanel { AutoSize = true, Dock = DockStyle.Top, ColumnCount = 3 };
-        advanced.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 135));
+        advanced.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
         advanced.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         advanced.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        AddPathRow(advanced, 0, UiText.Get("setup.program"), _programRoot);
-        AddPathRow(advanced, 1, UiText.Get("setup.data"), _dataRoot);
-        advanced.Controls.Add(new Label { Text = UiText.Get("setup.ports"), AutoSize = true, Anchor = AnchorStyles.Left }, 0, 2);
+        AddPathRow(advanced, 0, "setup.program", "setup.help.program", _programRoot);
+        AddPathRow(advanced, 1, "setup.data", "setup.help.data", _dataRoot);
+        advanced.Controls.Add(OptionLabel("setup.ports", "setup.help.ports", _webPort, _serverPort), 0, 2);
         advanced.Controls.Add(Flow(_webPort, new Label { Text = "/", AutoSize = true }, _serverPort), 1, 2);
-        advanced.Controls.Add(new Label { Text = UiText.Get("setup.retention"), AutoSize = true, Anchor = AnchorStyles.Left }, 0, 3);
+        advanced.Controls.Add(OptionLabel("setup.retention", "setup.help.retention", _retention), 0, 3);
         advanced.Controls.Add(_retention, 1, 3);
-        advanced.Controls.Add(new Label { Text = UiText.Get("setup.accounts"), AutoSize = true, Anchor = AnchorStyles.Left }, 0, 4);
+        advanced.Controls.Add(OptionLabel("setup.accounts", "setup.help.accounts", _accountMode), 0, 4);
         advanced.Controls.Add(_accountMode, 1, 4);
+        advanced.SetColumnSpan(_accountMode, 2);
         root.Controls.Add(Group(UiText.Get("setup.advanced"), advanced));
-        root.Controls.Add(Flow(_desktop, _launch));
-        root.Controls.Add(Body(UiText.Get("setup.boundary")));
+        root.Controls.Add(Flow(_desktop, Help("setup.desktop", "setup.help.desktop", _desktop), _launch, Help("setup.launch", "setup.help.launch", _launch)));
+        root.Controls.Add(Body(UiText.Get("setup.data.help")));
         root.Controls.Add(_status);
         var actions = new FlowLayoutPanel { AutoSize = true, Dock = DockStyle.Top, FlowDirection = FlowDirection.RightToLeft };
         actions.Controls.Add(_install);
@@ -210,10 +457,11 @@ internal sealed class SetupForm : Form
             _status.Text = UiText.Get("setup.status.validate");
             var settings = ReadSettings();
             settings.Validate();
+            await Task.Run(() => InstallationSpace.Check(settings.ProgramRoot, settings.DataRoot));
             if (!PortPlanner.AreAvailable(settings.Profile, settings.WebPort, settings.ServerPort))
             {
                 if (!_recommended.Checked)
-                    throw new SetupException("ports_busy", "Mindestens einer der gewählten Ports ist bereits belegt. Bitte wählen Sie andere Ports.");
+                    throw new SetupException("ports_busy");
                 var alternative = PortPlanner.FindAlternative(settings.Profile, settings.WebPort, settings.ServerPort);
                 var answer = MessageBox.Show(
                     UiText.Get("setup.port.offer", alternative.WebPort, alternative.ServerPort),
@@ -221,14 +469,14 @@ internal sealed class SetupForm : Form
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question
                 );
-                if (answer != DialogResult.Yes) throw new SetupException("ports_busy", "Die Installation wurde wegen des Portkonflikts nicht gestartet.");
+                if (answer != DialogResult.Yes) throw new SetupException("ports_declined");
                 _webPort.Value = alternative.WebPort;
                 _serverPort.Value = alternative.ServerPort;
                 settings = ReadSettings();
             }
             _status.Text = UiText.Get("setup.status.elevation");
             var result = await Task.Run(() => Installer.Run(settings));
-            if (result is not (0 or 3010)) throw new SetupException("msi_failed", $"Windows Installer meldete Fehlercode {result}. Das Installationsprotokoll liegt unter {Installer.LogPath}.");
+            if (result is not (0 or 3010)) throw new SetupException("msi_failed", result, Installer.LogPath);
             _status.Text = UiText.Get("setup.status.success");
             var firstRunResult = await Task.Run(() => Installer.RunFirstRun(settings));
             if (firstRunResult > 1)
@@ -255,21 +503,21 @@ internal sealed class SetupForm : Form
         }
         catch (Exception exception)
         {
-            _status.Text = exception.Message;
-            MessageBox.Show(exception.Message, "NETGRID Setup", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            _status.Text = SetupFailure.Message(exception);
+            MessageBox.Show(_status.Text, "NETGRID Setup", MessageBoxButtons.OK, MessageBoxIcon.Error);
             ToggleUi(true);
         }
     }
 
     private SetupSettings ReadSettings()
     {
-        var retention = (RetentionChoice?)_retention.SelectedItem ?? throw new SetupException("retention_missing", "Bitte wählen Sie die Spielaufbewahrung.");
-        var accountMode = (AccountModeChoice?)_accountMode.SelectedItem ?? throw new SetupException("account_mode_missing", "Bitte wählen Sie den Spielerprofilmodus.");
+        var retention = (RetentionChoice?)_retention.SelectedItem ?? throw new SetupException("retention_missing");
+        var accountMode = (AccountModeChoice?)_accountMode.SelectedItem ?? throw new SetupException("account_mode_missing");
         return new SetupSettings(
             _lan.Checked ? "private_lan" : "local",
             _lan.Checked ? _privateAddresses.FirstOrDefault() : null,
-            Path.GetFullPath(_programRoot.Text.Trim()),
-            Path.GetFullPath(_dataRoot.Text.Trim()),
+            SetupSettings.ReadRoot(_programRoot.Text.Trim(), UiText.Get("setup.program")),
+            SetupSettings.ReadRoot(_dataRoot.Text.Trim(), UiText.Get("setup.data")),
             decimal.ToInt32(_webPort.Value),
             decimal.ToInt32(_serverPort.Value),
             retention.Value,
@@ -299,14 +547,14 @@ internal sealed class SetupForm : Form
     {
         _lanAddress.Visible = _lan.Checked;
         if (_lan.Checked && _privateAddresses.Count == 0)
-            _status.Text = "Für den LAN-Betrieb muss eine private IPv4-Adresse verfügbar sein.";
-        else if (_status.Text.StartsWith("Für den LAN-Betrieb", StringComparison.Ordinal))
+            _status.Text = UiText.Get("setup.failure.lan_address_missing");
+        else if (_status.Text == UiText.Get("setup.failure.lan_address_missing"))
             _status.Text = string.Empty;
     }
 
-    private void AddPathRow(TableLayoutPanel table, int row, string label, TextBox box)
+    private void AddPathRow(TableLayoutPanel table, int row, string labelKey, string helpKey, TextBox box)
     {
-        table.Controls.Add(new Label { Text = label, AutoSize = true, Anchor = AnchorStyles.Left }, 0, row);
+        table.Controls.Add(OptionLabel(labelKey, helpKey, box), 0, row);
         table.Controls.Add(box, 1, row);
         var browse = new Button { Text = UiText.Get("setup.browse"), AutoSize = true };
         browse.Click += (_, _) =>
@@ -315,6 +563,44 @@ internal sealed class SetupForm : Form
             if (dialog.ShowDialog(this) == DialogResult.OK) box.Text = dialog.SelectedPath;
         };
         table.Controls.Add(browse, 2, row);
+    }
+
+    private Button Help(string labelKey, string helpKey, params Control[] targets)
+    {
+        var description = UiText.Get(helpKey);
+        var button = new Button
+        {
+            Name = helpKey, Text = "?", Size = new Size(26, 26), TabStop = true,
+            AccessibleName = UiText.Get("setup.help.title", UiText.Get(labelKey)),
+            AccessibleDescription = description,
+            Margin = new Padding(3, 0, 8, 0),
+        };
+        _helpToolTip.SetToolTip(button, description);
+        foreach (var target in targets)
+        {
+            _helpToolTip.SetToolTip(target, description);
+            target.AccessibleDescription = description;
+        }
+        button.Click += (_, _) => ShowHelp(labelKey, helpKey);
+        return button;
+    }
+
+    private Control OptionLabel(string labelKey, string helpKey, params Control[] targets)
+    {
+        var panel = new FlowLayoutPanel { AutoSize = true, WrapContents = false, Anchor = AnchorStyles.Left, Margin = Padding.Empty };
+        panel.Controls.Add(new Label { Text = UiText.Get(labelKey), AutoSize = true, Margin = new Padding(3, 5, 3, 0) });
+        panel.Controls.Add(Help(labelKey, helpKey, targets));
+        return panel;
+    }
+
+    private void ShowHelp(string labelKey, string helpKey) => MessageBox.Show(this,
+        UiText.Get(helpKey), UiText.Get("setup.help.title", UiText.Get(labelKey)),
+        MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing) _helpToolTip.Dispose();
+        base.Dispose(disposing);
     }
 
     private static GroupBox Group(string title, Control content)
@@ -364,27 +650,38 @@ internal sealed record SetupSettings(
 {
     public void Validate()
     {
-        if (Profile == "private_lan" && LanAddress is null) throw new SetupException("lan_address_missing", "Es wurde keine private IPv4-Adresse erkannt.");
-        if (WebPort == ServerPort) throw new SetupException("ports_conflict", "Web- und Serverport müssen verschieden sein.");
-        ValidateRoot(ProgramRoot, "Programmordner");
-        ValidateRoot(DataRoot, "Datenordner");
+        if (Profile == "private_lan" && LanAddress is null) throw new SetupException("lan_address_missing");
+        if (WebPort == ServerPort) throw new SetupException("ports_conflict");
+        ValidateRoot(ProgramRoot, UiText.Get("setup.program"));
+        ValidateRoot(DataRoot, UiText.Get("setup.data"));
         if (Contains(ProgramRoot, DataRoot) || Contains(DataRoot, ProgramRoot))
-            throw new SetupException("path_overlap", "Programm- und Datenordner dürfen sich nicht überlappen.");
-        var drive = new DriveInfo(Path.GetPathRoot(DataRoot)!);
-        if (drive.AvailableFreeSpace < 512L * 1024 * 1024)
-            throw new SetupException("disk_space_low", "Am Datenziel sind weniger als 512 MiB frei.");
+            throw new SetupException("path_overlap");
+    }
+
+    public static string ReadRoot(string path, string label)
+    {
+        try
+        {
+            if (!Path.IsPathFullyQualified(path) || path.StartsWith(@"\\", StringComparison.Ordinal))
+                throw new SetupException("path_invalid", label);
+            return Path.GetFullPath(path);
+        }
+        catch (Exception exception) when (exception is ArgumentException or NotSupportedException or PathTooLongException)
+        {
+            throw new SetupException("path_invalid", label);
+        }
     }
 
     private static void ValidateRoot(string path, string label)
     {
         if (!Path.IsPathFullyQualified(path) || path.StartsWith(@"\\", StringComparison.Ordinal))
-            throw new SetupException("path_invalid", $"{label}: Es ist nur ein absoluter lokaler Pfad zulässig.");
+            throw new SetupException("path_invalid", label);
         var root = Path.GetPathRoot(path);
         if (string.IsNullOrWhiteSpace(root) || string.Equals(Path.TrimEndingDirectorySeparator(path), Path.TrimEndingDirectorySeparator(root), StringComparison.OrdinalIgnoreCase))
-            throw new SetupException("path_too_broad", $"{label}: Eine Laufwerkswurzel ist nicht zulässig.");
+            throw new SetupException("path_too_broad", label);
         var drive = new DriveInfo(root);
         if (!drive.IsReady || drive.DriveType != DriveType.Fixed)
-            throw new SetupException("path_drive_invalid", $"{label}: Das Laufwerk muss lokal, fest eingebaut und verfügbar sein.");
+            throw new SetupException("path_drive_invalid", label);
     }
 
     private static bool Contains(string parent, string candidate)
@@ -400,6 +697,7 @@ internal static class Installer
 
     public static int Run(SetupSettings settings)
     {
+        InstallationSpace.Check(settings.ProgramRoot, settings.DataRoot);
         var temporaryMsi = Path.Combine(Path.GetTempPath(), $"NETGRID-{Guid.NewGuid():N}.msi");
         try
         {
@@ -415,7 +713,7 @@ internal static class Installer
                 Property("NETGRID_RETENTION_DAYS", settings.RetentionDays),
                 Property("NETGRID_ACCOUNT_ACCESS_MODE", settings.AccountAccessMode),
                 Property("INSTALLDESKTOPSHORTCUT", settings.DesktopShortcut ? "1" : "0"),
-                Property("NETGRID_SETUP_SOURCE", Environment.ProcessPath ?? throw new SetupException("setup_path_missing", "Der Setup-Pfad ist nicht verfügbar.")),
+                Property("NETGRID_SETUP_SOURCE", Environment.ProcessPath ?? throw new SetupException("setup_path_missing")),
                 Property("NETGRID_SETUP_SHA256", CurrentSetupHash()),
             };
             var arguments = $"/i {Quote(temporaryMsi)} /qn /norestart /l*v {Quote(LogPath)} {string.Join(" ", properties)}";
@@ -425,7 +723,7 @@ internal static class Installer
                 UseShellExecute = true,
                 Verb = "runas",
                 WindowStyle = ProcessWindowStyle.Hidden,
-            }) ?? throw new SetupException("msi_start_failed", "Windows Installer konnte nicht gestartet werden.");
+            }) ?? throw new SetupException("msi_start_failed");
             process.WaitForExit();
             return process.ExitCode;
         }
@@ -435,30 +733,32 @@ internal static class Installer
         }
     }
 
-    public static int RunUpdate(string? programRoot, bool uninstall)
+    public static int RunUpdate(string? programRoot, bool uninstall, bool deleteData = false)
     {
         var temporaryMsi = Path.Combine(Path.GetTempPath(), $"NETGRID-{Guid.NewGuid():N}.msi");
         try
         {
-            MsiPayload.ExtractVerified(temporaryMsi);
             var action = uninstall ? "/x" : "/i";
             var arguments = $"{action} {Quote(temporaryMsi)} /qn /norestart /l*v {Quote(LogPath)}";
+            if (uninstall && deleteData) arguments += " DELETEUSERDATA=1";
             if (!uninstall)
             {
-                if (string.IsNullOrWhiteSpace(programRoot)) throw new SetupException("update_program_root_missing", "Der installierte Programmordner fehlt.");
+                if (string.IsNullOrWhiteSpace(programRoot)) throw new SetupException("update_program_root_missing");
                 using var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\LevelX2\NETGRID", writable: false);
                 var dataRoot = key?.GetValue("RuntimeDataRoot") as string;
-                if (string.IsNullOrWhiteSpace(dataRoot)) throw new SetupException("update_data_root_missing", "Der registrierte NETGRID-Datenordner fehlt.");
-                var desktop = Convert.ToInt32(key?.GetValue("DesktopShortcut") ?? 0) == 1 ? "1" : "0";
-                arguments += $" {Property("INSTALLFOLDER", Path.GetFullPath(programRoot))} {Property("NETGRID_DATA_ROOT", Path.GetFullPath(dataRoot))} {Property("INSTALLDESKTOPSHORTCUT", desktop)} {Property("NETGRID_SETUP_SOURCE", Environment.ProcessPath ?? throw new SetupException("setup_path_missing", "Der Setup-Pfad ist nicht verfügbar."))} {Property("NETGRID_SETUP_SHA256", CurrentSetupHash())}";
+                if (string.IsNullOrWhiteSpace(dataRoot)) throw new SetupException("update_data_root_missing");
+                InstallationSpace.Check(programRoot, dataRoot);
+                var desktop = ReadDesktopShortcutPreference(key?.GetValue("DesktopShortcutPreference"));
+                arguments += $" {Property("INSTALLFOLDER", Path.GetFullPath(programRoot))} {Property("NETGRID_DATA_ROOT", Path.GetFullPath(dataRoot))} {Property("INSTALLDESKTOPSHORTCUT", desktop)} {Property("NETGRID_SETUP_SOURCE", Environment.ProcessPath ?? throw new SetupException("setup_path_missing"))} {Property("NETGRID_SETUP_SHA256", CurrentSetupHash())}";
             }
+            MsiPayload.ExtractVerified(temporaryMsi);
             using var process = Process.Start(new ProcessStartInfo("msiexec.exe")
             {
                 Arguments = arguments,
                 UseShellExecute = true,
                 Verb = "runas",
                 WindowStyle = ProcessWindowStyle.Hidden,
-            }) ?? throw new SetupException("msi_start_failed", "Windows Installer konnte nicht gestartet werden.");
+            }) ?? throw new SetupException("msi_start_failed");
             process.WaitForExit();
             return process.ExitCode;
         }
@@ -468,9 +768,12 @@ internal static class Installer
         }
     }
 
+    public static string ReadDesktopShortcutPreference(object? value) => value is "0" or "1"
+        ? (string)value : throw new SetupException("update_desktop_preference_invalid");
+
     private static string CurrentSetupHash()
     {
-        var source = Environment.ProcessPath ?? throw new SetupException("setup_path_missing", "Der Setup-Pfad ist nicht verfügbar.");
+        var source = Environment.ProcessPath ?? throw new SetupException("setup_path_missing");
         using var stream = File.OpenRead(source);
         return Convert.ToHexString(SHA256.HashData(stream)).ToLowerInvariant();
     }
@@ -480,14 +783,14 @@ internal static class Installer
         var executable = Path.Combine(settings.ProgramRoot, "NETGRID.FirstRun.exe");
         if (!File.Exists(executable)) return 2;
         using var process = Process.Start(new ProcessStartInfo(executable) { UseShellExecute = true })
-            ?? throw new SetupException("first_run_start_failed", "Die NETGRID-Ersteinrichtung konnte nicht gestartet werden.");
+            ?? throw new SetupException("first_run_start_failed");
         process.WaitForExit();
         return process.ExitCode;
     }
 
     private static string Property(string name, string value)
     {
-        if (value.IndexOfAny(['"', '\r', '\n']) >= 0) throw new SetupException("msi_property_invalid", "Eine Setup-Einstellung enthält ungültige Zeichen.");
+        if (value.IndexOfAny(['"', '\r', '\n']) >= 0) throw new SetupException("msi_property_invalid");
         return $"{name}=\"{value}\"";
     }
 
@@ -502,6 +805,12 @@ internal static class MsiPayload
         .ToDictionary(attribute => attribute.Key, attribute => attribute.Value ?? string.Empty, StringComparer.Ordinal);
 
     public static string ProductVersion => Metadata.GetValueOrDefault("NetgridProductVersion") ?? "";
+    public static InstallationFootprint Footprint => new(
+        PositiveMetadata("NetgridPayloadBytes"), PositiveMetadata("NetgridPayloadFileCount"), PositiveMetadata("NetgridMsiBytes"));
+
+    private static long PositiveMetadata(string key) =>
+        Metadata.TryGetValue(key, out var value) && long.TryParse(value, out var number) && number > 0
+            ? number : throw new SetupException("disk_space_metadata_invalid");
 
     public static void Verify()
     {
@@ -511,7 +820,7 @@ internal static class MsiPayload
 
     public static void ExtractVerified(string target)
     {
-        Directory.CreateDirectory(Path.GetDirectoryName(target) ?? throw new SetupException("payload_target_invalid", "Das MSI-Ziel ist ungültig."));
+        Directory.CreateDirectory(Path.GetDirectoryName(target) ?? throw new SetupException("payload_target_invalid"));
         var temporary = $"{target}.{Guid.NewGuid():N}.tmp";
         try
         {
@@ -527,14 +836,14 @@ internal static class MsiPayload
     }
 
     private static Stream Open() => Assembly.GetExecutingAssembly().GetManifestResourceStream(ResourceName)
-        ?? throw new SetupException("payload_missing", "Das eingebettete NETGRID-MSI fehlt.");
+        ?? throw new SetupException("payload_missing");
 
     private static void VerifyHash(Stream stream)
     {
         var expected = Metadata.GetValueOrDefault("NetgridMsiSha256");
-        if (string.IsNullOrWhiteSpace(expected) || expected.Length != 64) throw new SetupException("payload_hash_missing", "Die MSI-Prüfsumme fehlt.");
+        if (string.IsNullOrWhiteSpace(expected) || expected.Length != 64) throw new SetupException("payload_hash_missing");
         var actual = Convert.ToHexString(SHA256.HashData(stream)).ToLowerInvariant();
-        if (!string.Equals(actual, expected, StringComparison.Ordinal)) throw new SetupException("payload_hash_mismatch", "Das eingebettete NETGRID-MSI ist beschädigt.");
+        if (!string.Equals(actual, expected, StringComparison.Ordinal)) throw new SetupException("payload_hash_mismatch");
     }
 }
 
@@ -561,7 +870,7 @@ internal static class PortPlanner
 {
     public static int ParsePort(string value)
     {
-        if (!int.TryParse(value, out var port) || port is < 1 or > 65535) throw new SetupException("port_invalid", "Der Port muss zwischen 1 und 65535 liegen.");
+        if (!int.TryParse(value, out var port) || port is < 1 or > 65535) throw new SetupException("port_invalid");
         return port;
     }
 
@@ -598,7 +907,7 @@ internal static class PortPlanner
             var server = preferredServer + offset;
             if (web <= 65535 && server <= 65535 && AreAvailable(profile, web, server)) return (web, server);
         }
-        throw new SetupException("ports_unavailable", "Es konnte kein freies alternatives Portpaar gefunden werden.");
+        throw new SetupException("ports_unavailable");
     }
 }
 
@@ -614,7 +923,7 @@ internal sealed record AccountModeChoice(string Value, string Label)
 
 internal static class SetupContract
 {
-    public static readonly RetentionChoice[] RetentionChoices =
+    public static RetentionChoice[] RetentionChoices =>
     [
         new("7", UiText.Get("setup.retention.days", 7)),
         new("30", UiText.Get("setup.retention.recommended")),
@@ -643,11 +952,27 @@ internal static class SetupContract
         publicFirewallProfileEnabled = false,
         updateChannel = "github-releases-only",
         updateCommands = new[] { "install-update", "uninstall-update" },
+        uninstall = new { defaultMode = "retain-data", explicitMode = "delete-data", localizedConfirmation = true },
         installerRollback = "msi-major-upgrade",
+        installationSpace = new
+        {
+            footprint = MsiPayload.Footprint,
+            initialDataReserveBytes = InstallationSpace.InitialDataReserveBytes,
+            includesTemporaryPayloadReserve = true,
+            aggregatesSharedDrives = true,
+        },
     };
 }
 
-internal sealed class SetupException(string code, string message) : Exception(UiText.Language == "de" ? message : UiText.Get("setup.operation.failed"))
+internal sealed class SetupException(string code, params object[] arguments) : Exception(UiText.Get($"setup.failure.{code}", arguments))
 {
     public string Code { get; } = code;
+}
+
+
+internal static class SetupFailure
+{
+    public static string Message(Exception exception) => exception is SetupException setup
+        ? setup.Message
+        : $"{UiText.Get("setup.operation.failed")}\n\n{UiText.Get("common.cause", $"{exception.GetType().Name} (0x{exception.HResult:X8})")}";
 }

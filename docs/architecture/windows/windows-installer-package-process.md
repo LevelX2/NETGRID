@@ -1,7 +1,7 @@
 # Paketprozess: Windows-Installer und Launcher
 
 Stand: 2026-09-04  
-Status: in Umsetzung; WIN-I00 bis WIN-I07 verifiziert, nächstes Paket WIN-I08
+Status: in Umsetzung; WIN-I00 bis WIN-I07 verifiziert, WIN-I08 aktiv
 
 ## Quelle und Zielprüfung
 
@@ -212,6 +212,214 @@ eigene Account-, Cleanup- oder Versionsautorität.
   diese Inhalte ausdrücklich.
 
 ## Verifikationsregeln
+
+### Offene Windows-Installationsprüfung (2026-09-05)
+
+Der erste erhöhte Lauf scheiterte in `InitializeNetgridRuntime` mit Exitcode 2
+(MSI 1603/1722); Windows Installer rollte die Installation zurück. Die
+EXE-Custom-Actions verwendeten fälschlich `[CustomActionData]`. Ihre Argumente
+sind jetzt an die jeweils vorbereitete Action-Property gebunden, und der
+Decompile-Audit prüft diese Bindung ausdrücklich.
+
+Das Vergleichslayout 1.0.8103 wurde manifestgetreu aus seinem MSI rekonstruiert
+und mit der korrigierten Installer-Hülle neu paketiert; das neue Paket trägt
+1.0.8104. Beide haben den vollständigen Build-/Payload-Audit mit 10.901 Dateien
+bestanden. Die korrigierten Vergleichsartefakte liegen unter
+`output/windows-installer-e2e/base`, der neue Stand unter
+`output/windows-installer`. Das ursprünglich fehlgeschlagene Vergleichspaket
+liegt separat unter `base-initialization-failed` und ist keine Testfreigabe.
+
+Nach erneuter Benutzerbestätigung startete der erhöhte Wiederholungslauf.
+Empfohlene Installation, Launcher-Health, Datenbehalt, explizite Datenlöschung,
+Custom-Installation, Backup, Reparatur des Ausgangsstands, abgewiesener
+Upgradeversuch und reguläres Upgrade erreichten ihre Assertions. Die Reparatur
+des aktualisierten Stands scheiterte anschließend mit MSI 1706/1603: Als
+Installationsquelle war nur das bereits gelöschte temporäre MSI des Setuphosts
+registriert. Die Testinstallation wurde danach entfernt.
+
+Die Ursachen-Korrektur speichert das vollständige MSI unter dem geschützten
+`config/installer/<ProductCode>` und bindet es über `SOURCELIST`; der
+Regressionstest repariert über ProductCode ohne externe Quelldatei und ohne
+wiederholte Pfadangaben. Runtimekonfigurations-/Cachetests, Installerneubau,
+18 UI-Renderings und der vollständige Audit aller 10.901 Payload-Dateien sind
+grün. Der am 2026-09-05 von 15:54 bis 16:07 Uhr bestätigte erhöhte Lauf ist mit
+allen 13 Assertions und Exitcode 0 abgeschlossen. Insbesondere funktioniert
+die Reparatur des aktualisierten Produkts allein über den ProductCode aus der
+geschützten Quelle. Die Testprogramm-/Datenordner und NETGRID-Registrierung
+sind entfernt; auf den Testports 32141/32142 verbleibt kein Listener.
+
+Die zusätzliche Prüfung des Updatertransaktionspfads reproduzierte einen
+Parserfehler: Der vom Runtimekonfigurator korrekt zitierte `NETGRID_DATA_ROOT`
+wurde einschließlich Anführungszeichen als Windows-Pfad verarbeitet. Der
+Updater entfernt nun genau ein vollständiges äußeres Anführungszeichenpaar,
+bewahrt Gleichheitszeichen in Werten und weist unvollständige Quotes sowie
+doppelte Schlüssel strukturiert ab. Der neue Test unter
+`tests/windows/Netgrid.Updater.Tests` scheiterte zunächst am echten Parser und
+ist nach dem Fix grün; er ist im Installerbuild als Gate eingebunden. Der
+Artefaktneubau mit diesem zusätzlichen Fix ist ebenfalls grün, einschließlich
+der 18 Renderings und des vollständigen 10.901-Dateien-Payload-Audits. Der
+aktuelle Stand liegt weiterhin unter `output/windows-installer`; sein lokaler
+MSI-E2E-Nachweis liegt prüfsummengebunden unter
+`output/windows-installer-e2e/windows-11-x64-result.json`.
+WIN-I08-Commit und lokale Integration bleiben gesperrt, bis die ausdrücklich
+geforderten Gates bestanden sind. Der eigenständige MSI-Downgrade ersetzt
+keinen echten Updater-Healthfehler mit Programm-/Datenrollback, und ein Lauf auf
+diesem Entwicklungsrechner ersetzt keinen Nachweis auf einer sauberen Maschine
+ohne Entwicklungswerkzeuge.
+
+### Verbleibender Abnahmeumfang
+
+| Nachweis | Aktuelle belastbare Evidenz | Noch erforderlich |
+| --- | --- | --- |
+| Produktgrenze und Installer-Payload | Vollständiger Manifestvergleich; 10.901 Dateien auch nach dem Updaterfix | Für den aktuellen Build erfüllt; nach weiteren Payloadänderungen erneut prüfen |
+| Installation, Upgrade und Repair | Vollständiger erhöhter 13-Punkte-Lauf am 2026-09-05, einschließlich ProductCode-Repair und geprüftem Cleanup | Lokaler MSI-Vertrag erfüllt; funktionale UI- und Clean-Windows-Gates bleiben getrennt |
+| GitHub-Updateauswahl und Integrität | Lokale API-Fixtures für Stable/Prerelease, Offline und manipulierte Hashes; echter Launcher-Download-Dateipfad nach reproduzierter Windows-Dateisperre korrigiert und getestet | Echter zustimmungsbasierter installierter Updatefluss; neue Artefakte mit Downloadfix |
+| Updatertransaktion und Rollback | Neuer echter Sandboxlauf 8105/8106 am 2026-09-05 grün: geprüftes Backup, MSI-Upgrade, bewusst beschädigte Testdatenbank, erkannter Healthfehler, Programmrollback auf 8105, Datenmarker und SQLite-Integrität wiederhergestellt, Konfiguration unverändert, Cleanup verifiziert | Transaktionsgate für dieses Artefaktpaar erfüllt; abschließende Benachrichtigung bleibt ein separater Dialogtest |
+| Benutzerbetrieb und Netzwerk | Standardbenutzerbetrieb und ACLs grün. Private-LAN-Test des installierten 8106: Web/Server vom Host erreichbar, Maintenance mit 403 abgewiesen; im öffentlichen Profil beide Ports bei weiterhin gesunden lokalen Diensten blockiert. Testinstallation, Ports und NETGRID-Regeln bereinigt; temporär deaktivierte pauschale Sandbox-Containerfreigabe wiederhergestellt | Für 8106 einschließlich dokumentierter Sandbox-Firewallvorbereitung erfüllt; neue Builds bleiben gesondert gebunden |
+| Sichtbare Flows | 18 Setup-/Uninstall-Renderings für de/en/fr und drei Skalierungen | Funktionale Gesamtflows einschließlich Update/Repair/Fehlern auf dem installierten Produkt |
+| Saubere Windows-11-x64-Maschine | Vollständige 13-Punkte-Offline-MSI-Matrix am 2026-09-05 von 18:22 bis 18:55 Uhr einschließlich Cleanup grün: Windows 11 Enterprise x64 (26100), ohne Entwicklungswerkzeuge; alle vier Artefakthashes mit dem Hostnachweis abgeglichen | Lokaler Clean-Windows-MSI-Vertrag erfüllt. Zusätzliche Updater-, Standardbenutzer-, Netzwerk- und UI-Gates bleiben getrennt; der laufende Rollbacktest erweitert nicht rückwirkend diese Evidenz |
+
+Diese offenen Anforderungen werden nicht durch engere grüne Tests ersetzt.
+
+Der verifizierte Storage-Ursachenfix liegt als lokaler Zwischencommit
+`b1b2b26b4` vor (Git-Buildnummer 8105); WIN-I08 bleibt aktiv und ist damit
+nicht abgeschlossen. Der neue Vergleichsinstaller wird aus diesem Stand
+gebaut. Ein Rollback führt die Storage-CLI der rückinstallierten Vorversion
+aus: Deshalb muss auch der neue Vergleichsstand den Restore-Fix enthalten.
+Die bisherigen 8103-/8104-Artefakte bleiben als getrennte Fehler- und
+MSI-Evidence erhalten, sind aber kein Nachweis für den korrigierten Datenrestore.
+
+Vergleichsbuild 8105 und Updatebuild 8106 sind einschließlich Komponenten-
+Smokes, 18 Renderings und vollständigem 10.901-Dateien-Audit gebaut. 8106
+enthält zusätzlich den lokal getesteten Zwischencommit `7bb74118e`: Der
+Updater protokolliert Transaktionsfehler mit begrenzter, redigierter Ursache.
+Die neue Clean-Windows-MSI-Matrix gegen dieses Paar ist am 2026-09-05 um
+20:18 Uhr einschließlich Bereinigung mit allen 13 Prüfpunkten grün beendet.
+Alle vier Ergebnis-Hashes wurden anschließend erneut gegen die tatsächlichen
+Hostartefakte und deren Releasemetadaten verifiziert. Der Nachweis liegt unter
+`output/windows-sandbox-e2e/793526b6b355460798f2aae4aef5c9be/result/result.json`.
+Der nachgeschaltete Standardbenutzer- und Rollbacktest ist um 20:31 Uhr
+ebenfalls vollständig grün beendet. `rollback-result.json` belegt anhand
+derselben Artefakthashes sowie des tatsächlichen Updaterhashes Backup,
+echtes Upgrade, Datenbankfehler, Rückinstallation von 8105, wiederhergestellten
+SQLite-Marker und Integrität, unveränderte Konfiguration und geprüften Cleanup.
+`suite-result.json` bestätigt beide Teilprüfungen. Die abschließende Meldungsbox
+wurde dabei nicht bedient und ist keine bestandene Dialogabnahme.
+Die Netzwerkanbindung
+dieser separaten Sandbox ist für den folgenden Private-LAN-Test ausdrücklich
+aktiviert; sie ersetzt nicht den separat bestandenen Offline-Nachweis.
+Die Artefakte tragen ihren tatsächlichen Dirty-Buildstatus und sind noch keine
+finale, aus einem sauberen Integrationsstand erzeugte Releasefreigabe.
+
+Die anschließende Prüfung der Setup-Fehlerpfade hat einen fest deutschen
+LAN-Hinweis, generische englische/französische Setupfehler sowie direkt
+angezeigte .NET-Ausnahmetexte gefunden. Alle 31 bekannten Fehlercodes werden
+jetzt über die gemeinsame Sprachquelle aufgelöst. Unerwartete Fehler zeigen
+eine übersetzte Meldung mit technischem Typ/HRESULT, nicht den möglicherweise
+sensitiven rohen Ausnahmetext. Relative und ungültige Ordnerangaben werden
+vor der Pfadnormalisierung strukturiert abgewiesen. Die tatsächliche Setup-
+Assembly besteht 330 fensterlose Assertions für de/en/fr; der String-Audit
+prüft außerdem jeden im Quellcode verwendeten Setupfehler auf Übersetzung.
+Diese nachträglichen Änderungen sind noch nicht in den eingefrorenen
+8105-/8106-Sandboxartefakten enthalten; deren Ergebnis gilt ausschließlich
+für die jeweils gebundenen Hashes. Die neue Setupoberfläche benötigt weiterhin
+ihren erneuten Render- und funktionalen Abnahmenachweis.
+
+Der direkte Test von `UpdateDiscovery.DownloadVerifiedAsync` in der echten
+Launcher-Assembly reproduzierte außerdem eine Windows-Dateisperre: Der
+Prüfstream war bei `File.Move` noch geöffnet. Der Stream wird jetzt vor der
+Veröffentlichung des geprüften Downloads geschlossen. Der Regressionstest
+war zuvor rot und belegt jetzt erfolgreichen Downloadabschluss, exklusiven
+Dateizugriff danach, Ablehnung eines falschen Hashes ohne Überschreiben der
+vorhandenen gültigen Datei sowie Entfernung temporärer Teil-Downloads.
+Er ist als `tests/windows/Netgrid.Launcher.Tests` im Installerbuild gebunden.
+Ursachenfix und Regressionstest sind im lokalen Zwischencommit `3c2f104d3`
+(Git-Buildnummer 8107) gesichert; WIN-I08 bleibt aktiv.
+Der übersetzte Zustimmungstext beschreibt nun die tatsächliche Reihenfolge
+Stopp, geprüftes Backup, Installation. Auch diese Korrektur benötigt neue
+Releaseartefakte; der laufende Rollbacktest bleibt an 8105/8106 gebunden.
+
+Der Nutzerreview der geöffneten 8106-Maske zeigte einen Wortumbruch im Label
+„Spielaufbewahrung“ und einen unverständlichen entwicklungsinternen Hinweis.
+Die Beschriftung lautet nun „Spiele behalten“; die Labelspalte ist inhalts-
+statt fest pixelbasiert breit, die Pfadfelder füllen ihre verbleibende Spalte.
+Der untere Hinweis erklärt jetzt Datenordner und Datenerhalt bei normaler
+Deinstallation. Alle drei Sprachen sind aktualisiert. Die getrennte deutsche
+und französische Render-Vorschau bestätigt die lesbare Beschriftung; die
+offene 8106-Maske enthält diese Änderungen noch nicht.
+
+Auf weiteren Nutzerwunsch besitzt jede Setupoption eine „?“-Hilfe mit
+Tooltip, tastaturbedienbarem Hilfedialog und zugänglicher Beschreibung.
+„Was ist Maintenance?“ erklärt den getrennten lokalen Verwaltungsbereich und
+sein eigenes Passwort. Radio-Auswahlgruppen behalten denselben gemeinsamen
+Parent; Regressionen sichern die gegenseitige Auswahl und die Übersetzungen.
+
+Die pauschale 512-MiB-Prüfung am Datenziel ist durch einen paketgebundenen
+Platzplan ersetzt. Der Build liest Größe und Anzahl der Dateien aus der
+tatsächlichen MSI-File-Tabelle; die Setup-Metadaten werden im Payload-Audit
+gegen die vollständig extrahierten Dateien geprüft. Der Plan umfasst die
+Programmdateien mit Dateisystem-Allokationspuffer, Setup-/MSI-Caches,
+temporären vollständigen Payloadpuffer und 512 MiB anfängliche Datenreserve.
+Gleiche Laufwerke werden zusammengezählt. Die Prüfung läuft vor Entpacken und
+UAC in Installation und Update; fehlende Metadaten, unbekannte Kapazität oder
+Platzmangel scheitern sichtbar. Die Meldung nennt den konservativ einzuplanenden
+und den verfügbaren Platz je betroffenem Laufwerk. 543 fokussierte Assertions
+für Fehlertexte, Hilfen, Auswahlgruppen und Platzberechnung sind grün.
+
+Der neue Testbuild unter `output/windows-installer-ui-review` (8107) hat
+Komponententests, 18 Vorschauen und den vollständigen 10.901-Dateien-Audit
+einschließlich der MSI-gebundenen Platzmetadaten bestanden. Die anschließende
+Sandbox-Sichtprüfung und der Nutzerbefund zeigten überlappende Schaltflächen
+in der Sprachauswahl. Ein Regressionstest reproduzierte die Überlappung.
+Layoutcontainer und ausschließlich in der gewählten Sprache angezeigte
+Aktionen beheben sie; der Test prüft zusätzlich den unmittelbaren Sprachwechsel.
+Die neuen deutschen und französischen Vorschauen sind visuell geprüft.
+Der weitere Testbuild unter `output/windows-installer-language-review`
+enthält diese letzte Korrektur. Sein Build ist einschließlich 543 Setup-
+Assertions, Komponenten-Smokes, 27 Vorschauen und vollständigem Audit aller
+10.901 Dateien grün. Die Setup-Prüfsumme lautet
+`922765b192930821a808cbe8d0940c51bcaec2e447c006b9bb12915719f53eba`.
+Genau diese Datei wurde in die bestehende Sandbox kopiert und dort erneut
+gehasht. Die Sprachauswahl ist sichtbar ohne überlappende oder abgeschnittene
+Aktionen. Weitere automatisierte Klicks wurden wegen erkannter Benutzereingabe
+angehalten; der neue Installations-/Hilfedialogfluss ist noch nicht abgenommen.
+Die gestartete Instanz ist unter `result/ui-review-language-process.json`
+im genannten Sandboxlauf dokumentiert. Es wurde noch keine Installation aus
+dieser Maske gestartet.
+Die erneute Abfrage um 21:35 Uhr bestätigt einen reaktionsfähigen Setup-Prozess
+und keine Registrierung unter `HKLM\SOFTWARE\LevelX2\NETGRID`. Ein separater
+fensterloser Test des tatsächlichen Button-Ereignisses bestätigt `OK` für
+Weiter, `Cancel` für Abbrechen und die korrekte Enter-/Escape-Zuordnung;
+der Setup-Komponentenstand umfasst damit 555 Assertions. Die automatisierte
+Sandbox-Eingabe hat den sichtbaren Sprachdialog bisher dennoch nicht verlassen.
+Ein normaler Nutzerklick ist als Abgleich angefragt; daraus folgt noch keine
+bestandene UI-Abnahme und kein belegter Fehler im Produkt-Ereignispfad.
+
+Die anschließende Prüfung des Updatevertrags reproduzierte eine stille
+Ersatzwertentscheidung bei fehlender Desktop-Präferenz. Der Setuphost liest
+jetzt ausschließlich `DesktopShortcutPreference` als exakte Zeichenfolge
+`0` oder `1`. Fehlende oder ungültige Werte stoppen vor der MSI-Extraktion
+mit einer spezifischen Reparaturmeldung in allen drei Sprachen. Der vorher
+rote Regressionstest ist grün; die Setup-Komponenten umfassen nun 591
+Assertions. Diese letzte Quellenkorrektur ist noch nicht in der geöffneten
+8107-Sandboxdatei enthalten und wird im nächsten Artefaktstand gebunden.
+Die geprüften Produktkorrekturen werden als lokaler Zwischenstand gesichert;
+die getrennte E2E-Teststrecke und WIN-I08 bleiben aktiv, ohne Main-Integration
+oder Releasefreigabe.
+Die Vorschauen werden um die Sprachauswahl erweitert. `Form.Scale` prüft
+dabei geometrische Skalierung, nicht reale Windows-DPI-/Schriftskalierung;
+dieser Unterschied bleibt im offenen visuellen Abnahmeumfang ausdrücklich
+berücksichtigt. Kein dieser Testbuilds ist die finale Releasefreigabe.
+
+Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
+unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.
+Die erste Public-Prüfung war wegen der pauschalen, aktiven Sandbox-Regel
+„Container: allow inbound“ nicht aussagekräftig: Diese erlaubte alle Ports
+in allen Profilen trotz inaktiver NETGRID-Regeln. Nach ausschließlich temporärer
+Deaktivierung dieser eindeutig identifizierten Gastregel wurden Public und
+Private erneut geprüft, ohne neue Blockregeln anzulegen. Beide Prüfungen
+bestanden; Cleanup und Wiederherstellung der Gastregel sind um 20:45 Uhr
+bestätigt. Host-Firewall und Produkt-Firewalllogik blieben unverändert.
 
 Nach jedem Paket laufen nur die direkt betroffenen Tests, anschließend
 `git diff --check`, ein paketbezogener Commit und die Aktualisierung des

@@ -110,6 +110,13 @@ try {
     decompiledPath,
   ]);
   const authoring = readFileSync(decompiledPath, "utf8");
+  // EXE actions have no MSI session: their argument string must be resolved
+  // from the prepared property while Windows Installer schedules the action.
+  for (const action of ["InitializeNetgridRuntime", "CacheNetgridMsi", "CacheNetgridSetup", "RemoveNetgridFirewall", "DeleteNetgridData"]) {
+    const definition = authoring.match(new RegExp(`<CustomAction Id="${action}"[^>]+>`))?.[0];
+    if (!definition?.includes(`ExeCommand="[${action}]"`))
+      throw new Error(`installer_exe_arguments_unbound:${action}`);
+  }
   if (
     !authoring.includes('UpgradeCode="{D8271ACB-E70F-4CD5-9832-DEFE6A052B9F}"')
   )
@@ -120,6 +127,12 @@ try {
     throw new Error("installer_product_version_invalid");
   if (!authoring.includes('<MajorUpgrade AllowDowngrades="yes"'))
     throw new Error("installer_rollback_downgrade_contract_invalid");
+  if (!authoring.includes('Property="SOURCELIST"') ||
+      !authoring.includes('[NETGRID_DATA_ROOT]\\config\\installer\\[ProductCode]') ||
+      !authoring.includes('--source &quot;[OriginalDatabase]&quot;') ||
+      !authoring.includes('Name="RuntimeDataRoot"') ||
+      !authoring.includes('Name="InstallDirectory"'))
+    throw new Error("installer_persistent_repair_source_missing");
   if (
     !authoring.includes(
       '<CustomAction Id="InitializeNetgridRuntime" HideTarget="yes" Impersonate="no" Execute="deferred"',
@@ -140,19 +153,34 @@ try {
     !authoring.includes(
       '<Property Id="INSTALLDESKTOPSHORTCUT" Value="1" Secure="yes" />',
     ) ||
+    !authoring.includes('Name="DesktopShortcutPreference"') ||
+    !authoring.includes(
+      '<Custom Action="SetINSTALLDESKTOPSHORTCUT" Condition="NETGRID_PREVIOUS_DESKTOP_SHORTCUT &lt;&gt; &quot;&quot;" Before="CostFinalize"',
+    ) ||
     !authoring.includes("--configure-firewall &quot;true&quot;") ||
+    !authoring.includes("--desktop-shortcut &quot;[INSTALLDESKTOPSHORTCUT]&quot;") ||
     !authoring.includes('Id="CacheNetgridSetup" HideTarget="yes"') ||
-    !authoring.includes('NETGRID_SETUP_SOURCE &lt;&gt; &quot;&quot;') ||
+    !authoring.includes("NETGRID_SETUP_SOURCE &lt;&gt; &quot;&quot;") ||
+    !authoring.includes(
+      '<Property Id="DELETEUSERDATA" Value="0" Secure="yes" />',
+    ) ||
+    !authoring.includes('Id="DeleteNetgridData" HideTarget="yes"') ||
+    !authoring.includes("DELETEUSERDATA = 1") ||
     !authoring.includes(
       '<CustomAction Id="RemoveNetgridFirewall" HideTarget="yes" Impersonate="no" Execute="deferred"',
     ) ||
     !authoring.includes(
-      '<Custom Action="RemoveNetgridFirewall" Condition="REMOVE~=&quot;ALL&quot;" Before="RemoveFiles"',
+      '<Custom Action="RemoveNetgridFirewall" Condition="REMOVE~=&quot;ALL&quot;" Before="SetDeleteNetgridData"',
+    ) ||
+    !authoring.includes(
+      '<Custom Action="DeleteNetgridData" Condition="REMOVE~=&quot;ALL&quot; AND DELETEUSERDATA = 1" Before="RemoveRegistryValues"',
     ) ||
     !authoring.includes('Condition="INSTALLDESKTOPSHORTCUT = 1"') ||
     !authoring.includes('Name="NETGRID Maintenance"') ||
     !authoring.includes('Arguments="--open-maintenance"') ||
-    !authoring.includes('Name="NETGRID Ersteinrichtung"')
+    !authoring.includes('Name="NETGRID Ersteinrichtung"') ||
+    !authoring.includes('Name="NETGRID Setup"') ||
+    !authoring.includes('Arguments="--uninstall"')
   )
     throw new Error("installer_runtime_initialization_contract_invalid");
   if (!authoring.includes('File Id="NetgridUpdater"'))
@@ -166,6 +194,15 @@ try {
   const contractPath = path.join(scratch, "setup-contract.json");
   run(setupPath, ["--audit-contract", contractPath]);
   const setupContract = JSON.parse(readFileSync(contractPath, "utf8"));
+  const footprint = setupContract.installationSpace?.footprint;
+  if (
+    footprint?.PayloadBytes !== [...expected.values()].reduce((total, file) => total + file.bytes, 0) ||
+    footprint?.PayloadFileCount !== installedFiles.length ||
+    footprint?.MsiBytes !== statSync(msiPath).size ||
+    setupContract.installationSpace.initialDataReserveBytes !== 512 * 1024 * 1024 ||
+    setupContract.installationSpace.includesTemporaryPayloadReserve !== true ||
+    setupContract.installationSpace.aggregatesSharedDrives !== true
+  ) throw new Error("installer_disk_space_footprint_unbound");
   if (
     setupContract.schemaVersion !== "netgrid-guided-setup-contract-v1" ||
     JSON.stringify(setupContract.setupModes) !==
@@ -188,6 +225,9 @@ try {
     setupContract.updateChannel !== "github-releases-only" ||
     JSON.stringify(setupContract.updateCommands) !==
       JSON.stringify(["install-update", "uninstall-update"]) ||
+    setupContract.uninstall?.defaultMode !== "retain-data" ||
+    setupContract.uninstall?.explicitMode !== "delete-data" ||
+    setupContract.uninstall?.localizedConfirmation !== true ||
     setupContract.installerRollback !== "msi-major-upgrade"
   )
     throw new Error("installer_guided_setup_contract_invalid");
@@ -196,7 +236,8 @@ try {
   const localization = JSON.parse(readFileSync(localizationPath, "utf8"));
   if (
     localization.schemaVersion !== "netgrid-windows-ui-localization-v1" ||
-    JSON.stringify(localization.languages) !== JSON.stringify(["de", "en", "fr"]) ||
+    JSON.stringify(localization.languages) !==
+      JSON.stringify(["de", "en", "fr"]) ||
     localization.fallbackLanguage !== "en" ||
     localization.complete !== true ||
     localization.keyCount < 80

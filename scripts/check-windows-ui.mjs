@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 
 const projectRoot = path.resolve(import.meta.dirname, "..");
@@ -48,13 +48,43 @@ for (const language of languages) {
   }
 }
 
+const setupDirectory = path.join(projectRoot, "apps/windows/Netgrid.SetupHost");
+const setupSource = readdirSync(setupDirectory)
+  .filter((file) => file.endsWith(".cs"))
+  .map((file) => readFileSync(path.join(setupDirectory, file), "utf8"))
+  .join("\n");
+const setupErrorCodes = new Set(
+  [...setupSource.matchAll(/new SetupException\("([a-z_]+)"/g)].map(
+    (match) => match[1],
+  ),
+);
+for (const code of setupErrorCodes)
+  for (const language of languages)
+    if (!catalog[language][`setup.failure.${code}`])
+      throw new Error(`windows_setup_error_untranslated:${language}:${code}`);
+if (setupSource.includes("exception.Message"))
+  throw new Error("windows_setup_raw_exception_message");
+if (setupSource.includes('GetValue("DesktopShortcut")'))
+  throw new Error("windows_setup_desktop_preference_second_authority");
+
 const matrixRoot = option("--matrix");
 if (matrixRoot) {
   for (const language of languages)
     for (const scale of [100, 125, 150]) {
+      const languageFile = path.join(matrixRoot, `language-${language}-${scale}.png`);
+      if (!existsSync(languageFile) || statSync(languageFile).size < 2_000)
+        throw new Error(`windows_ui_language_preview_invalid:${language}:${scale}`);
       const file = path.join(matrixRoot, `setup-${language}-${scale}.png`);
       if (!existsSync(file) || statSync(file).size < 10_000)
         throw new Error(`windows_ui_preview_invalid:${language}:${scale}`);
+      const uninstallFile = path.join(
+        matrixRoot,
+        `uninstall-${language}-${scale}.png`,
+      );
+      if (!existsSync(uninstallFile) || statSync(uninstallFile).size < 10_000)
+        throw new Error(
+          `windows_ui_uninstall_preview_invalid:${language}:${scale}`,
+        );
     }
 }
 process.stdout.write(

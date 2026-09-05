@@ -134,6 +134,34 @@ NETGRID_INITIAL_CLEANUP_RETENTION_DAYS=30
   }
   Invoke-RuntimeConfig -Arguments @("cache-setup", "--data-root", (Join-Path $scratch "bad-cache"), "--state-file", (Join-Path $scratch "bad-cache-state.json"), "--source", $setupFixture, "--sha256", ("0" * 64)) -ExpectedExitCode 2
 
+  $msiFixture = Join-Path $scratch "source-fixture.msi"
+  [System.IO.File]::WriteAllText($msiFixture, "installer-source-fixture")
+  # This non-elevated unit test grants only its own identity the installer
+  # role on its temporary config fixture; the Users-group ACL stays read-only.
+  $fixtureConfig = Join-Path $dataRoot "config"
+  $fixtureDirectory = Get-Item -LiteralPath $fixtureConfig
+  $fixtureAcl = $fixtureDirectory.GetAccessControl([System.Security.AccessControl.AccessControlSections]::Access)
+  $fixtureAcl.AddAccessRule([System.Security.AccessControl.FileSystemAccessRule]::new(
+    [System.Security.Principal.WindowsIdentity]::GetCurrent().User,
+    [System.Security.AccessControl.FileSystemRights]::FullControl,
+    [System.Security.AccessControl.InheritanceFlags]"ContainerInherit, ObjectInherit",
+    [System.Security.AccessControl.PropagationFlags]::None,
+    [System.Security.AccessControl.AccessControlType]::Allow
+  ))
+  $fixtureDirectory.SetAccessControl($fixtureAcl)
+  $productCode = "{8C89EFBC-5725-44A1-B8D2-849D1F0E74C0}"
+  $msiArguments = @("cache-msi", "--data-root", $dataRoot, "--program-root", $programRoot, "--state-file", $stateFile, "--source", $msiFixture, "--product-code", $productCode)
+  Invoke-RuntimeConfig -Arguments $msiArguments
+  $cachedMsi = Join-Path $dataRoot "config\installer\$productCode\source-fixture.msi"
+  if ((Get-FileHash -LiteralPath $cachedMsi -Algorithm SHA256).Hash -ne (Get-FileHash -LiteralPath $msiFixture -Algorithm SHA256).Hash) {
+    throw "Die dauerhafte MSI-Reparaturquelle ist nicht bytegleich."
+  }
+  if (((Get-AllowRightsForUsers -Path $cachedMsi) -band $modifyRights) -eq $modifyRights) {
+    throw "Lokale Benutzer dürfen die Reparaturquelle nicht verändern."
+  }
+  Invoke-RuntimeConfig -Arguments $msiArguments
+  Invoke-RuntimeConfig -Arguments @("cache-msi", "--data-root", $dataRoot, "--program-root", $programRoot, "--state-file", $stateFile, "--source", $msiFixture, "--product-code", "..\outside") -ExpectedExitCode 2
+
   Invoke-RuntimeConfig -Arguments @(
     "initialize", "--data-root", $programRoot, "--program-root", $programRoot,
     "--template", $templatePath, "--state-file", (Join-Path $scratch "invalid-overlap.json")

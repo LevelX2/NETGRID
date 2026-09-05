@@ -20,6 +20,18 @@
   <ItemGroup Condition="'$(EmbeddedMsiPath)' != ''">
     <EmbeddedResource Include="$(EmbeddedMsiPath)" LogicalName="NETGRID.Product.msi" />
     <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>NetgridPayloadBytes</_Parameter1>
+      <_Parameter2>$(NetgridPayloadBytes)</_Parameter2>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>NetgridPayloadFileCount</_Parameter1>
+      <_Parameter2>$(NetgridPayloadFileCount)</_Parameter2>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>NetgridMsiBytes</_Parameter1>
+      <_Parameter2>$(NetgridMsiBytes)</_Parameter2>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
       <_Parameter1>NetgridMsiSha256</_Parameter1>
       <_Parameter2>$(EmbeddedMsiSha256)</_Parameter2>
     </AssemblyAttribute>

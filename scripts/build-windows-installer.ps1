@@ -58,6 +58,12 @@ try {
   }
   & node scripts/check-windows-release-output.mjs --artifact $ReleaseRoot
   if ($LASTEXITCODE -ne 0) { throw "Windows-Releaseoutput ist nicht freigegeben." }
+  & $dotnet run --project tests/windows/Netgrid.Updater.Tests/Netgrid.Updater.Tests.csproj -c Release
+  if ($LASTEXITCODE -ne 0) { throw "Die Windows-Updater-Regressionstests sind fehlgeschlagen." }
+  & $dotnet run --project tests/windows/Netgrid.SetupHost.Tests/Netgrid.SetupHost.Tests.csproj -c Release
+  if ($LASTEXITCODE -ne 0) { throw "Die Windows-Setup-Regressionstests sind fehlgeschlagen." }
+  & $dotnet run --project tests/windows/Netgrid.Launcher.Tests/Netgrid.Launcher.Tests.csproj -c Release
+  if ($LASTEXITCODE -ne 0) { throw "Die Windows-Launcher-Downloadtests sind fehlgeschlagen." }
 
   $layout = Get-Content -LiteralPath (Join-Path $ReleaseRoot "product-layout.json") -Raw | ConvertFrom-Json
   $productVersion = [string]$layout.product.installerVersion
@@ -182,12 +188,16 @@ try {
   if ($LASTEXITCODE -ne 0) { throw "NETGRID-MSI konnte nicht gebaut werden." }
 
   $msiSha256 = (Get-FileHash -LiteralPath $msiPath -Algorithm SHA256).Hash.ToLowerInvariant()
+  $footprint = & (Join-Path $PSScriptRoot 'read-windows-msi-footprint.ps1') -MsiPath $msiPath
   & $dotnet publish apps/windows/Netgrid.SetupHost/Netgrid.SetupHost.csproj `
     -c Release -r win-x64 --self-contained true `
     -p:DebugType=None -p:DebugSymbols=false `
     "-p:EmbeddedMsiPath=$msiPath" `
     "-p:EmbeddedMsiSha256=$msiSha256" `
     "-p:NetgridProductVersion=$productVersion" `
+    "-p:NetgridPayloadBytes=$($footprint.payloadBytes)" `
+    "-p:NetgridPayloadFileCount=$($footprint.payloadFileCount)" `
+    "-p:NetgridMsiBytes=$($footprint.msiBytes)" `
     -o $setupHostRoot
   if ($LASTEXITCODE -ne 0) { throw "Der geführte NETGRID-Setuphost konnte nicht gebaut werden." }
   $setupHostExecutable = Join-Path $setupHostRoot "NETGRID.Setup.exe"
@@ -203,6 +213,12 @@ try {
       $previewPath = Join-Path $uiMatrixRoot "setup-$language-$scale.png"
       $previewProcess = Start-Process -FilePath $setupHostExecutable -ArgumentList @("--render-preview", $language, [string]$scale, $previewPath) -Wait -PassThru -WindowStyle Hidden
       if ($previewProcess.ExitCode -ne 0) { throw "Die Windows-UI-Vorschau $language/$scale konnte nicht erzeugt werden." }
+      $languagePreviewPath = Join-Path $uiMatrixRoot "language-$language-$scale.png"
+      $languagePreviewProcess = Start-Process -FilePath $setupHostExecutable -ArgumentList @("--render-language-preview", $language, [string]$scale, $languagePreviewPath) -Wait -PassThru -WindowStyle Hidden
+      if ($languagePreviewProcess.ExitCode -ne 0) { throw "Die Windows-Sprachauswahl-Vorschau $language/$scale konnte nicht erzeugt werden." }
+      $uninstallPreviewPath = Join-Path $uiMatrixRoot "uninstall-$language-$scale.png"
+      $uninstallPreviewProcess = Start-Process -FilePath $setupHostExecutable -ArgumentList @("--render-uninstall-preview", $language, [string]$scale, $uninstallPreviewPath) -Wait -PassThru -WindowStyle Hidden
+      if ($uninstallPreviewProcess.ExitCode -ne 0) { throw "Die Windows-Deinstallationsvorschau $language/$scale konnte nicht erzeugt werden." }
     }
   }
   & node scripts/check-windows-ui.mjs --matrix $uiMatrixRoot

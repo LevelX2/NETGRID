@@ -36,6 +36,25 @@ internal static class Program
                 Console.WriteLine("NETGRID_SETUP_CACHE_OK");
                 return 0;
             }
+            if (string.Equals(command.Name, "cache-msi", StringComparison.OrdinalIgnoreCase))
+            {
+                MsiCache.Store(
+                    ResolveCacheDataRoot(command.Optional("--data-root"), command.Optional("--state-file")),
+                    ResolveProgramRoot(command.Optional("--program-root")),
+                    RequireAbsoluteFile(command.Required("--source"), "msi_cache_source_missing"),
+                    command.Required("--product-code")
+                );
+                Console.WriteLine("NETGRID_MSI_CACHE_OK");
+                return 0;
+            }
+            if (string.Equals(command.Name, "delete-data", StringComparison.OrdinalIgnoreCase))
+            {
+                if (command.Optional("--confirmation") != "DELETE_NETGRID_DATA")
+                    throw new RuntimeConfigException("data_delete_confirmation_missing", "Die ausdrückliche Bestätigung zur Datenlöschung fehlt.");
+                DataRemoval.DeleteRegisteredData(ResolveDataRoot(command.Optional("--data-root"), stateFile: null));
+                Console.WriteLine("NETGRID_DATA_DELETE_OK");
+                return 0;
+            }
             if (!string.Equals(command.Name, "initialize", StringComparison.OrdinalIgnoreCase))
             {
                 throw new RuntimeConfigException(
@@ -49,6 +68,7 @@ internal static class Program
             var templatePath = ResolveTemplatePath(command.Optional("--template"), programRoot);
             ValidateDataRoot(dataRoot, programRoot);
             var network = NetworkSettings.FromCommand(command);
+            var desktopShortcut = ValidateDesktopShortcut(command.Optional("--desktop-shortcut"));
 
             var state = RuntimeInitializer.Initialize(
                 dataRoot,
@@ -57,6 +77,12 @@ internal static class Program
                 command.Optional("--state-file"),
                 network
             );
+            if (desktopShortcut is not null)
+            {
+                using var key = Registry.LocalMachine.CreateSubKey(RegistryPath, writable: true)
+                    ?? throw new RuntimeConfigException("registry_write_failed", "Die Installationspräferenz konnte nicht gespeichert werden.");
+                key.SetValue("DesktopShortcutPreference", desktopShortcut, RegistryValueKind.String);
+            }
             if (command.Optional("--configure-firewall") == "true")
             {
                 FirewallConfigurator.Apply(state.Network, programRoot);
@@ -82,6 +108,14 @@ internal static class Program
         }
     }
 
+    private static string? ValidateDesktopShortcut(string? value)
+    {
+        if (value is null) return null;
+        if (value is not ("0" or "1"))
+            throw new RuntimeConfigException("desktop_shortcut_invalid", "Die Desktopverknüpfungs-Einstellung ist ungültig.");
+        return value;
+    }
+
     private static string ResolveCacheDataRoot(string? requested, string? stateFile)
     {
         var resolved = ResolveDataRoot(requested, stateFile);
@@ -91,6 +125,41 @@ internal static class Program
         if (string.IsNullOrWhiteSpace(registered) || !PathsEqual(resolved, RequireAbsolutePath(registered, "registered_data_root_invalid")))
             throw new RuntimeConfigException("setup_cache_data_root_mismatch", "Der Setup-Cache ist nicht an den registrierten NETGRID-Datenordner gebunden.");
         return resolved;
+    }
+
+    private static class MsiCache
+    {
+        public static void Store(string dataRoot, string programRoot, string source, string productCode)
+        {
+            if (!Guid.TryParseExact(productCode, "B", out var product) || Path.GetExtension(source) != ".msi")
+                throw new RuntimeConfigException("msi_cache_source_invalid", "Die Installationsquelle ist ungültig.");
+            var root = Path.Combine(dataRoot, "config", "installer", product.ToString("B").ToUpperInvariant());
+            ValidateDataRoot(root, programRoot);
+            if (!File.Exists(Path.Combine(dataRoot, "config", "runtime.env")))
+                throw new RuntimeConfigException("msi_cache_configuration_missing", "Die geschützte Runtimekonfiguration fehlt.");
+            Directory.CreateDirectory(root);
+            var destination = Path.Combine(root, Path.GetFileName(source));
+            if (PathsEqual(source, destination)) return;
+            var temporary = Path.Combine(root, $"{Guid.NewGuid():N}.tmp");
+            try
+            {
+                // Keep the MSI source immutable while copying. Only the MSI session
+                // schedules this command, bound to its own OriginalDatabase.
+                using var input = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read);
+                var expectedHash = SHA256.HashData(input);
+                input.Position = 0;
+                using (var output = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+                    input.CopyTo(output);
+                using (var verify = File.OpenRead(temporary))
+                    if (!CryptographicOperations.FixedTimeEquals(expectedHash, SHA256.HashData(verify)))
+                        throw new RuntimeConfigException("msi_cache_hash_mismatch", "Die gespeicherte Installationsquelle ist beschädigt.");
+                File.Move(temporary, destination, overwrite: true);
+            }
+            finally
+            {
+                if (File.Exists(temporary)) File.Delete(temporary);
+            }
+        }
     }
 
     private static class SetupCache
@@ -112,6 +181,42 @@ internal static class Program
             var temporary = $"{destination}.{Guid.NewGuid():N}.tmp";
             File.Copy(source, temporary, overwrite: true);
             File.Move(temporary, destination, overwrite: true);
+        }
+    }
+
+    private static class DataRemoval
+    {
+        public static void DeleteRegisteredData(string dataRoot)
+        {
+            using (var key = Registry.LocalMachine.OpenSubKey(RegistryPath, writable: false))
+            {
+                var registered = key?.GetValue(RegistryDataRootName) as string;
+                if (string.IsNullOrWhiteSpace(registered) || !PathsEqual(dataRoot, RequireAbsolutePath(registered, "registered_data_root_invalid")))
+                    throw new RuntimeConfigException("data_delete_root_mismatch", "Der Löschpfad stimmt nicht mit dem registrierten NETGRID-Datenordner überein.");
+            }
+            var root = Path.GetPathRoot(dataRoot);
+            if (string.IsNullOrWhiteSpace(root) || PathsEqual(root, dataRoot) || !Directory.Exists(Path.Combine(dataRoot, "config")) || File.GetAttributes(dataRoot).HasFlag(FileAttributes.ReparsePoint))
+                throw new RuntimeConfigException("data_delete_root_invalid", "Der registrierte NETGRID-Datenordner ist für die Löschung ungültig.");
+            DeleteDirectory(dataRoot, isRoot: true);
+            Registry.LocalMachine.DeleteSubKeyTree(RegistryPath, throwOnMissingSubKey: false);
+        }
+
+        private static void DeleteDirectory(string path, bool isRoot = false)
+        {
+            var directory = new DirectoryInfo(path);
+            if (!directory.Exists) return;
+            if (!isRoot && directory.Attributes.HasFlag(FileAttributes.ReparsePoint))
+            {
+                directory.Delete();
+                return;
+            }
+            foreach (var file in directory.EnumerateFiles())
+            {
+                file.Attributes &= ~FileAttributes.ReadOnly;
+                file.Delete();
+            }
+            foreach (var child in directory.EnumerateDirectories()) DeleteDirectory(child.FullName);
+            directory.Delete();
         }
     }
 
@@ -292,8 +397,11 @@ internal static class Program
                     "--retention-days",
                     "--account-access-mode",
                     "--configure-firewall",
+                    "--desktop-shortcut",
                     "--source",
+                    "--product-code",
                     "--sha256",
+                    "--confirmation",
                 ],
                 StringComparer.OrdinalIgnoreCase
             );
