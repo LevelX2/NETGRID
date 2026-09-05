@@ -49,3 +49,40 @@ writeFileSync(
     2,
   ),
 );
+
+// Two predeclared candidates. Both preserve every named thematic core card,
+// all agendas and the complete set of Node/Region/punish functions.
+const economy = [
+  { cardId: "onr_proteus_054_bel-digmo-antibody", delta: -1 },
+  { cardId: "onr_proteus_075_stereogram-antibody", delta: -1 },
+  { cardId: "onr_v1_281_accounts-receivable", delta: 2 },
+];
+const balanced = [
+  ...economy,
+  { cardId: "onr_proteus_017_credit-blocks", delta: -1 },
+  { cardId: "onr_proteus_040_sumo-2008", delta: -1 },
+  { cardId: "onr_v1_237_data-wall", delta: 2 },
+];
+for (const [label, changes] of [
+  ["economy", economy],
+  ["balanced", balanced],
+] as const) {
+  for (const pilot of [true, false]) {
+    writeFileSync(
+      resolve(out, `${label}${pilot ? "-pilot" : ""}.json`),
+      JSON.stringify(
+        {
+          label,
+          changes,
+          games: pilot
+            ? games.filter((_, i) =>
+                [4, 11, 19, 21, 24, 33, 35, 38].includes(i),
+              )
+            : games,
+        },
+        null,
+        2,
+      ),
+    );
+  }
+}

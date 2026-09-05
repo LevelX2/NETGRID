@@ -58,7 +58,7 @@ Blocker nennt Ursache und Removal Condition.
 
 ## Paketfolge
 
-`HN-A fertig -> HN-B fertig -> HN-C fertig -> HN-D aktiv -> HN-E -> Main -> Cleanup`
+`HN-A fertig -> HN-B fertig -> HN-C fertig -> HN-D fertig -> HN-E aktiv -> Main -> Cleanup`
 
 ### HN-A: Identität, Messung und reproduzierbare Ausgangslage
 
@@ -199,3 +199,36 @@ Remote-Installation wäre kein belastbarer Fortschritt. Drei neue
 Zonen-/Owner-Gegenproben ergänzen die 13 vorhandenen Ambush-Regressionen.
 Die genaue Fähigkeitsgrenze und die Grenzen der Fresh-Discovery-Diagnose
 stehen im Review. HN-D aktiv; produktive KI weiterhin unverändert.
+
+### HN-D abgeschlossen: Economy-Kandidat für die Kontrolle
+
+Zwei vor den Pilotläufen festgelegte Varianten verwenden dieselben acht
+diagnostischen Seeds (005, 012, 020, 022, 025, 034, 036, 039) und dieselbe KI:
+
+- Economy: je ein Bel-Digmo und Stereogram weniger, zwei Accounts Receivable
+  mehr. Zwei Slots, 41/45 Proteus-Karten; jede thematische Funktion bleibt.
+- Balanced: zusätzlich je ein Credit Blocks und Sumo 2008 weniger, zwei Data
+  Wall mehr. Vier Slots, 39/45 Proteus-Karten; günstigere frühe ETR, geringere
+  späte Stärke. Keine Gleichsetzung von niedrigem gedrucktem Rez-Preis mit
+  wirksamem Schutz bei variablen ICE.
+
+Alle Snapshots sind formatvalidiert, 45 Karten, gleiche Agenda-Mischung und
+unveränderte Mengen von Bug Zapper, Fetal AI, Networked Center, Corporate
+Headhunters und Government Contract. Alle 16 Partien: saubere Terminale,
+Replay korrekt, null Fallbacks/Timeouts/Runtimefehler.
+
+| Pilot | Corp-Siege | Corp-Punkte gesamt | Spiele mit Scorepunkten |
+| --- | ---: | ---: | ---: |
+| Original | 0/8 | 25 | 7/8 |
+| Economy | 1/8 | 11 | 2/8 |
+| Balanced | 0/8 | 6 | 3/8 |
+
+Economy gewinnt Seed 025 durch acht Scorepunkte, verliert aber auf den
+anderen diagnostischen Seeds deutlich an Teilfortschritt. Das ist noch keine
+Freigabe als Verbesserung. Balanced wird verworfen; kein Nutzen des zweiten
+Eingriffs belegt. HN-E prüft ausschließlich den Economy-Kandidaten auf dem
+vorab fixierten vollständigen 70er-Satz. Ohne produktiven KI-Patch sind
+Basis-KI/Original und aktuelle KI/Original identische Kontrollbedingungen;
+sie werden nicht als zwei unabhängige Stichproben ausgegeben.
+
+HN-E aktiv. Noch keine Standardliste geändert.
