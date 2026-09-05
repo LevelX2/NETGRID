@@ -314,6 +314,72 @@ describe("semantic chronicle localization", () => {
     );
   });
 
+  it.each(["de", "en", "fr"] as const)(
+    "distinguishes Broker loading from taking all hosted credits in %s",
+    (locale) => {
+      const presentations = {
+        onr_v1_154_broker: { title: "Broker", type: "resource" as const },
+      };
+      for (const take of [false, true]) {
+        const amount = take ? 6 : 3;
+        const broker = event("activated_card_ability", {
+          actor: "runner",
+          cardDefinitionId: "onr_v1_154_broker",
+          cardImplementationAbility: "activated",
+          ...(take
+            ? { hostedCreditsTaken: amount, gainedCredits: amount }
+            : { hostedCreditsAdded: amount }),
+          hostedCreditsAfter: take ? 0 : 6,
+          aiReasonCode: take
+            ? "runner_credit_bank_cash_out"
+            : "runner_credit_bank_build",
+          resolvedEffects: [
+            {
+              effectId: "broker.hosted-credits",
+              kind: take ? "take_hosted_credits" : "add_hosted_credits",
+              visibility: "public",
+              side: "runner",
+              amount,
+              remainingCounters: take ? 0 : 6,
+              sourceDefinitionId: "onr_v1_154_broker",
+              sourceTitle: "Broker",
+              reason: "card_resolver",
+            },
+          ],
+        });
+        const item = formatChronicleEvent(broker, "corp", {
+          translate: translate(locale),
+          cardPresentationsById: presentations,
+        });
+        const expected = {
+          de: take
+            ? "Die Runner-KI: alle Credits (6) von Broker genommen."
+            : "Die Runner-KI: 3 Credits auf Broker gelegt.",
+          en: take
+            ? "The Runner AI: took all credits (6) from Broker."
+            : "The Runner AI: placed 3 credits on Broker.",
+          fr: take
+            ? "L'IA Runner : a pris tous les crédits (6) de Broker."
+            : "L'IA Runner : a placé 3 crédits sur Broker.",
+        };
+        expect(item).toMatchObject({
+          title: expected[locale],
+          category: "economy",
+          visibility: "public",
+          cardTitle: "Broker",
+        });
+        expect(
+          formatChronicleEffectItems(
+            broker,
+            "corp",
+            presentations,
+            translate(locale),
+          ),
+        ).toEqual([]);
+      }
+    },
+  );
+
   it("shows credits taken with Short-Term Contract instead of a generic ability", () => {
     const contract = event("activated_card_ability", {
       actor: "runner",

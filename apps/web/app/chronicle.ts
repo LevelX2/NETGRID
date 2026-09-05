@@ -515,10 +515,9 @@ function formatSemanticChronicleEvent(
     ? stringValue(payload.publicRevealDefinitionId)
     : undefined;
   const hostedCreditsTaken = positiveIntegerValue(payload.hostedCreditsTaken);
+  const hostedCreditsAdded = positiveIntegerValue(payload.hostedCreditsAdded);
   const hostedCreditAbility =
-    (actionType === "trigger_ability" ||
-      actionType === "activated_card_ability") &&
-    hostedCreditsTaken !== undefined;
+    actionType === "trigger_ability" || actionType === "activated_card_ability";
   let category = semanticChronicleCategory(actionType);
   const isAi = Boolean(
     stringValue(payload.aiExplanation) || stringValue(payload.aiReasonCode),
@@ -588,13 +587,22 @@ function formatSemanticChronicleEvent(
     );
     detailChips = [sourceTitle, cardTitle];
     category = "card";
-  } else if (hostedCreditAbility) {
-    explicitTitle = translate("effect.hostedCreditsTaken", {
+  } else if (hostedCreditAbility && hostedCreditsTaken !== undefined) {
+    explicitTitle = translate(
+      payload.hostedCreditsAfter === 0
+        ? "effect.allHostedCreditsTaken"
+        : "effect.hostedCreditsTaken",
+      { subject, amount: hostedCreditsTaken, source: cardTitle },
+    );
+    detailChips = [cardTitle, `+${hostedCreditsTaken}`];
+    category = "economy";
+  } else if (hostedCreditAbility && hostedCreditsAdded !== undefined) {
+    explicitTitle = translate("effect.hostedCreditsAdded", {
       subject,
-      amount: hostedCreditsTaken,
+      amount: hostedCreditsAdded,
       source: cardTitle,
     });
-    detailChips = [cardTitle, `+${hostedCreditsTaken}`];
+    detailChips = [cardTitle];
     category = "economy";
   } else if (
     context.accessContext &&

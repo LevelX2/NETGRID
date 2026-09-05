@@ -40,6 +40,12 @@ Fortsetzungsereignisse tragen mit `runDestination` und bei ICE zusätzlich
 Die Chronik zeigt damit „zu ICE n“ oder „zum Root“, ohne die Position aus dem
 aktuellen Spielbrett oder der zuvor passierten ICE-Nummer zu erraten.
 
+Bei Kartenfähigkeiten beschreibt die lokalisierte Chronik das Auflegen und
+Entnehmen gespeicherter Credits aus `hostedCreditsAdded` beziehungsweise
+`hostedCreditsTaken`. Nur wenn `hostedCreditsAfter` ausdrücklich null Credits
+ausweist, nennt sie die Entnahme „alle Credits“ samt Menge. Der aktuelle
+Kartenstand ist dafür keine Quelle.
+
 ## Wo Ändern?
 
 - Spielbrett-/Ressourcenanzeige: `features/game-board/`.
