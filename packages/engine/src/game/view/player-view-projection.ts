@@ -37,6 +37,7 @@ import {
 import { quoteCorpCentralAccesses } from "./corp-central-access-quotes";
 import { visibleCorpScoreContinuationQuote } from "./visible-corp-score-continuation-quote";
 import { visibleCorpCounterBankPreparationQuote } from "./visible-corp-counter-bank-preparation-quote";
+import { visibleCorpRestrictedCreditBankQuote } from "./visible-corp-restricted-credit-bank-quote";
 import { visibleServerStatuses } from "./server-status-view";
 import {
   visibleRunnerTraceBidCapacity,
@@ -150,6 +151,10 @@ export function buildPlayerViewProjection(
                 side === "corp"
                   ? visibleCorpCounterBankPreparationQuote(state, id)
                   : undefined;
+              const restrictedCreditBankQuote =
+                side === "corp"
+                  ? visibleCorpRestrictedCreditBankQuote(state, id)
+                  : undefined;
               return {
                 ...visibleRoot,
                 ...(continuationQuote
@@ -157,6 +162,9 @@ export function buildPlayerViewProjection(
                   : {}),
                 ...(counterBankPreparationQuote
                   ? { counterBankPreparationQuote }
+                  : {}),
+                ...(restrictedCreditBankQuote
+                  ? { restrictedCreditBankQuote }
                   : {}),
               };
             }),

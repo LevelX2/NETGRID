@@ -100,6 +100,7 @@ export type CorpTurnPlannerShadowResult = {
   shadowActionId?: string;
   agreement: boolean;
   heads: TurnPlanningHeadCandidate[];
+  lines: TurnRemainderSearchLine[];
   selectedLine?: TurnRemainderSearchLine;
   selectedHead?: TurnPlanningHeadCandidate;
   selectedPlanInstanceId?: string;
@@ -382,6 +383,7 @@ export function buildCorpTurnPlannerShadow(params: {
     ...(shadowActionId ? { shadowActionId } : {}),
     agreement: shadowActionId === liveActionId,
     heads: structuredClone(heads),
+    lines: structuredClone(search.lines),
     ...(selectedLine ? { selectedLine: structuredClone(selectedLine) } : {}),
     ...(shadowHead ? { selectedHead: structuredClone(shadowHead) } : {}),
     ...(selectedPlanInstanceId ? { selectedPlanInstanceId } : {}),

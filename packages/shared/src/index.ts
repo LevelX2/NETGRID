@@ -1,4 +1,16 @@
 export {
+  CORP_RESTRICTED_CREDIT_ROUTE_QUOTE_VERSION,
+  type CorpRestrictedCreditConsumer,
+  type CorpRestrictedCreditRouteRequest,
+  type CorpRestrictedCreditRouteQuote,
+  type CorpRestrictedCreditRouteResult,
+  type CorpRestrictedCreditBankQuote,
+} from "./corp-restricted-credit-route";
+import type {
+  CorpRestrictedCreditRouteQuote,
+  CorpRestrictedCreditBankQuote,
+} from "./corp-restricted-credit-route";
+export {
   ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
   type AbilityPayloadDiscriminatorField,
   type AbilityPayloadDiscriminators,
@@ -3923,6 +3935,7 @@ export type VisibleCard = {
   scoreContinuationQuote?: VisibleCorpScoreContinuationQuote;
   /** Present only in the Corp's own HQ or on an own installed root card. */
   counterBankPreparationQuote?: VisibleCorpCounterBankPreparationQuote;
+  restrictedCreditBankQuote?: CorpRestrictedCreditBankQuote;
   /** Present only when the installed agenda identity is known to the Runner. */
   effectiveStealCostQuote?: VisibleAgendaStealCostQuote;
 };
@@ -4098,6 +4111,8 @@ export type CorpCentralAccessQuote = {
 };
 
 export type AiDecisionInput = {
+  /** Actor-private, current Engine funding facts; never future action authority. */
+  corpRestrictedCreditRouteQuotes?: CorpRestrictedCreditRouteQuote[];
   /** Actor-private match binding used only for Engine-certified commands. */
   matchId?: string;
   side: Side;

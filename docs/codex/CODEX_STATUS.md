@@ -74,8 +74,28 @@ Die aktuellen Grenzen von zweckgebundener Corp-Finanzierung und
 zonenspezifischer Fallen-Vorbereitung sind in
 `docs/architecture/ai/hidden-node-capability-review.md` abgegrenzt. Der
 charaktererhaltende Hidden-Node-Vergleich begründet derzeit weder einen
-Standarddeck-Tausch noch pauschale KI-Boni; Originalliste und produktive
-Policy bleiben unverändert.
+Standarddeck-Tausch noch pauschale KI-Boni; die Originalliste bleibt
+unverändert. Im aktiven Capability-Paket entsteht eine eng gebundene
+zweckgebundene Economy-Finanzierung mit Rückgabe an den tatsächlichen
+Verbraucher. Auszahlung → tatsächlicher Economy-Rez sowie Auszahlung →
+Defense-Rez mit erhaltenem Parent und beendetem Support sind geprüft, letzteres
+auch mit Mobile Barricade im unveränderten Original-Corpdeck. Ein bereits
+rezzed und erschöpfter Contract wird für einen endlichen terminalen ICE-Rez-
+Bedarf aufgeladen, bei Bedarf um einen allgemeinen Credit ergänzt und über
+den Zugwechsel in Auszahlung/Rezzing überführt. Bedarf und Quelle werden
+nach jedem Schritt neu geprüft; gespeicherte Counter sind keine Liquidität.
+Erstinvestition und weitergehende Verbraucher bleiben begrenzt. Der 70er-
+Vergleich vor dem abschließenden Main-Abgleich ergibt 0→1 Corp-Siege,
+42→45 Corp-Punkte und 57→56 Nullscore-Niederlagen bei gültigen Replays ohne
+Runtimefehler. Die neue Contract-Vorbereitung wurde darin nicht ausgewählt;
+dieser kleine gemischte Systemeffekt ist kein allgemeiner Stärkennachweis.
+Die Current-State-Review grenzt vorbereitete Capability-Fixtures von
+Spielevidence und dem Integrationsstand ab.
+Der Main-Abgleich ist inhaltlich geprüft. Der breite AI-Gate-Lauf ist nicht
+vollständig grün: 18 gegengeprüfte Main-Baseline-Erwartungsfehler bleiben;
+eine zusätzliche verschobene Simulations-Testbindung wurde bei erhaltener
+Ownership korrigiert und fokussiert grün geprüft. Details und Scopegrenzen
+stehen in derselben Review. Kein als vollständig grün ausgegebener Shardlauf.
 
 Historische Selfplay-Cycle-Reviews, Markdown-Matrix, Reporting-State und
 versionierte HTML-Blockberichte wurden nach dem abschließenden idempotenten

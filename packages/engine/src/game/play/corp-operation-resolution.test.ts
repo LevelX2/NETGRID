@@ -256,6 +256,24 @@ function hostFor(
 }
 
 describe("corp-operation-resolution", () => {
+  it.each([5, 6])(
+    "uses general credits for a printed-cost operation offer (total %s)",
+    (total) => {
+      const targetState = state();
+      targetState.corp.credits = total;
+      targetState.corpTemporaryInstallRezCredits = {
+        sourceCardInstanceId: "contract",
+        sourceDefinitionId: "onr_proteus_059_government-contract",
+        remaining: 3,
+        usableFor: "corp_install_or_rez",
+        returnUnusedAtTurnEnd: true,
+      };
+      const card = canonicalDefinition("onr_v1_302_scorched-earth");
+      expect(canPlayCorpOperation(hostFor(targetState), card)).toBe(
+        total === 6,
+      );
+    },
+  );
   it("does not import from index or contain public event wiring", () => {
     const source = readFileSync(
       new URL("./corp-operation-resolution.ts", import.meta.url),

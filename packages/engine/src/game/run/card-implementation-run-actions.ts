@@ -244,6 +244,16 @@ export function buildCorpDuringRunCardImplementationActions(
       host.cards.definitionFor(cardId),
       "corp_during_run",
     );
+    // The callers expose this list at the existing run rez windows (or probe
+    // whether to open one). General paid effects also belong to those windows.
+    // Encounter and trace action generation remain separate.
+    host.runtime.pushActivatedActionsForTiming(
+      legalActions,
+      "corp",
+      cardId,
+      host.cards.definitionFor(cardId),
+      "corp_paid",
+    );
   }
   return { handled: true, legalActions };
 }

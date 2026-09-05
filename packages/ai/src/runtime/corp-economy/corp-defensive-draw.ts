@@ -11,6 +11,7 @@ import type { AiDeckStrategyDeckSnapshot } from "../../deck-strategy-snapshot";
 import type { CorpBoardTriage } from "../semantic-runtime-corp-board-triage";
 import type { CorpFundedRemoteAccessRiskNeed } from "../corp-funded-score-protection";
 import type { CorpCentralDefenseAllocation } from "../corp-central-defense-allocation";
+import type { CorpRestrictedRezPreparation } from "../corp-restricted-credit-reserve";
 import {
   assessCorpScoreProtection,
   compareExactProbabilities,
@@ -636,6 +637,7 @@ export function corpMissingConcreteDefenseDrawNeed(
   capacity = corpOptionalDrawCapacity(input, action),
   centralAllocation?: CorpCentralDefenseAllocation,
   directInstallRouteState?: CorpCentralDefenseDirectInstallRouteState,
+  installedRezPreparations: readonly CorpRestrictedRezPreparation[] = [],
 ): CorpMissingConcreteDefenseDrawNeed | undefined {
   const boundedOverflowSearch =
     capacity.maxHandSize > 2 &&
@@ -659,6 +661,43 @@ export function corpMissingConcreteDefenseDrawNeed(
     directInstallRouteState,
   );
   if (!target) return undefined;
+  // Missing current liquidity does not imply missing ICE. A current, exactly
+  // bound preparation for an already installed blocker needs no speculative
+  // draw. Unknown or ineffective projected protection does not suppress draw.
+  const server = input.playerView.servers.find(
+    (entry) => entry.id === target.serverId,
+  )!;
+  for (const preparation of installedRezPreparations) {
+    if (
+      preparation.targetServerId !== target.serverId ||
+      preparation.bank.expiresAtStateVersion !==
+        input.playerView.stateVersion ||
+      !input.legalActions.some(
+        (head) =>
+          head.actionId === preparation.actionId &&
+          head.source === preparation.bank.sourceCardInstanceId,
+      ) ||
+      !server.ice.some(
+        (ice) => ice.instanceId === preparation.targetIceInstanceId,
+      )
+    )
+      continue;
+    const projectedProtection = assessCorpScoreProtection({
+      serverIce: server.ice.map((ice) =>
+        ice.instanceId === preparation.targetIceInstanceId
+          ? { ...ice, rezzed: true }
+          : ice,
+      ),
+      runnerRig: input.playerView.opponent.rig!,
+      runnerCredits: input.playerView.opponent.credits,
+      maximumRunnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
+    });
+    if (
+      projectedProtection.knowledge === "known" &&
+      projectedProtection.protectsScore
+    )
+      return undefined;
+  }
   return {
     serverId: target.serverId,
     planValue: 1_000 + CORP_MISSING_CONCRETE_DEFENSE_DRAW_VALUE,

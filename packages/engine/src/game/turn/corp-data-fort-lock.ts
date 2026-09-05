@@ -5,6 +5,7 @@ import {
 } from "../../ability-engine/card-implementation-modifiers";
 import type { CardModifierImplementation } from "../../ability-engine/definition-types";
 import { buildLegalAction } from "./action-builders";
+import { corpGeneralCreditAvailability } from "../payment/corp-general-credit-availability";
 
 type NewDataFortCreationLockModifier = Extract<
   CardModifierImplementation,
@@ -45,7 +46,10 @@ export function buildCorpTrashNewDataFortCreationLockActions(
   const actions: LegalAction[] = [];
   for (const match of activeNewDataFortCreationLocks(state)) {
     const cost = match.modifier.corpTrashSourceCost;
-    if (state.corp.clicks < cost.clicks || state.corp.credits < cost.credits)
+    if (
+      state.corp.clicks < cost.clicks ||
+      corpGeneralCreditAvailability(state) < cost.credits
+    )
       continue;
     actions.push(
       buildLegalAction(
