@@ -424,6 +424,16 @@ und drei Bildschirmbreiten. Die echten Draw-Handler erzeugen 36 Vorschauen;
 lange deutsche und französische Texte wurden vollständig sichtbar geprüft.
 Native Hover-Positionierung und der neue Paketstand in der Sandbox stehen
 noch aus. WIN-I08 bleibt aktiv.
+Der Ursachenfix ist als `cb4ed5037` gesichert. Der anschließende vollständige
+Build unter `output/windows-installer-tooltip-review` erzeugt Version
+`1.0.8109` aus diesem Commit. Komponentenprüfungen, 27 Dialogvorschauen und
+der vollständige Audit aller 10.901 Payload-Dateien sind grün; die beiden
+Artefakthashes wurden danach unabhängig mit den Metadaten verglichen.
+Der Stand ist weiterhin ein Testbuild (`sourceDirty: true` wegen der noch
+offenen E2E-Teststrecke), keine Releasefreigabe. Die bisherige Sandbox war
+bei der erneuten CLI-Abfrage bereits beendet; es wurde weder eine neue
+Sandbox geöffnet noch eine Installation gestartet. Die native Hover-
+Sichtprüfung benötigt deshalb eine neue Testsitzung.
 
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.

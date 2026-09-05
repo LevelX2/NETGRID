@@ -62,6 +62,8 @@
     "check:release-card-index": "node scripts/check-release-card-index.mjs",
     "build:windows-release-output": "node scripts/build-windows-release-output.mjs && node scripts/check-windows-release-output.mjs",
     "build:windows-installer": "powershell -ExecutionPolicy Bypass -File scripts/build-windows-installer.ps1",
+    "test:windows-installer:e2e": "powershell -ExecutionPolicy Bypass -File scripts/run-windows-installer-e2e.ps1 -BaseRoot output/windows-installer-e2e/base -UpdateRoot output/windows-installer",
+    "certify:windows-release": "powershell -ExecutionPolicy Bypass -File scripts/certify-windows-release.ps1",
     "test:windows-runtime-config": "powershell -ExecutionPolicy Bypass -File scripts/test-windows-runtime-config.ps1",
     "smoke:windows-launcher": "node scripts/smoke-windows-launcher.mjs",
     "check:windows-release-output": "node scripts/check-windows-release-output.mjs",
