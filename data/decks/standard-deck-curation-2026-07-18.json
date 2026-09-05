@@ -9,12 +9,20 @@
   },
   "localDeckLibrary": {
     "counts": {
-      "standard": 50,
+      "standard": 51,
       "internal_ai": 2,
       "retire": 1,
       "test_fixture": 10
     },
     "entries": [
+      {
+        "sourceDeckId": "local_corp_express_shutdown",
+        "name": "Express Shutdown",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "user_requested_flatline_counter",
+        "standardDeckId": "standard_corp_express_shutdown"
+      },
       {
         "sourceDeckId": "local_corp_cheap_bag_tricks",
         "name": "Cheap Bag of Tricks",
