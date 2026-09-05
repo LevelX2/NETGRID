@@ -1107,7 +1107,9 @@ export function createCardRuntimeDepsHosts(
           side: Side,
           sourceCardId: CardInstanceId,
           definition: CardDefinition,
-          timing: ActivatedCardAbilityImplementation["timing"],
+          timing:
+            | ActivatedCardAbilityImplementation["timing"]
+            | readonly ActivatedCardAbilityImplementation["timing"][],
         ) =>
           pushActivatedCardImplementationActionsForTiming(
             deps.cardImplementationRuntimeDeps,

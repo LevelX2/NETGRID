@@ -1670,8 +1670,11 @@
         "complete": "Complete"
       },
       "opportunity": {
+        "target": "Choose run target",
+        "complete": "Finish run",
         "choice": "Decision",
-        "rez": "Rez",
+        "ice_rez": "Rez ICE",
+        "card_rez": "Rez other cards",
         "breaker": "Boost strength or break",
         "ability": "Card ability",
         "access": "Access",
@@ -1680,6 +1683,7 @@
         "pass": "Pass"
       },
       "currentlyPossible": "Currently possible: {actions}",
+      "stagePossibility": "Stage guide: {actions} – not currently offered",
       "optionCost": "{option}, cost: {cost}",
       "runActions": "Run actions",
       "rezOtherServers": "Rez on other servers",
@@ -2102,6 +2106,8 @@
       "agendaScored": "{subject}: scored {card}.",
       "agendaStolen": "{subject}: stole {card}.",
       "runStarted": "{subject}: started a run on {server}.",
+      "iceBypassedByInsideJob": "{subject}: automatically passed {ice} using Inside Job.",
+      "insideJobBypassDescription": "The first rezzed ICE was automatically passed; its subroutines did not resolve.",
       "runContinued": "{subject}: continued the run on {server}.",
       "runJackedOut": "{subject}: jacked out.",
       "runEnded": "The run ended.",

@@ -134,8 +134,11 @@ export const RUN_TIMELINE_STEPS = [
 export type RunTimelineStepId = (typeof RUN_TIMELINE_STEPS)[number]["id"];
 
 export type RunPhaseOpportunityKind =
+  | "target"
+  | "complete"
   | "choice"
-  | "rez"
+  | "ice_rez"
+  | "card_rez"
   | "breaker"
   | "ability"
   | "access"
@@ -144,8 +147,11 @@ export type RunPhaseOpportunityKind =
   | "pass";
 
 const RUN_PHASE_OPPORTUNITY_ORDER: readonly RunPhaseOpportunityKind[] = [
+  "target",
+  "complete",
   "choice",
-  "rez",
+  "ice_rez",
+  "card_rez",
   "breaker",
   "ability",
   "access",
@@ -154,18 +160,50 @@ const RUN_PHASE_OPPORTUNITY_ORDER: readonly RunPhaseOpportunityKind[] = [
   "pass",
 ];
 
+// Learning cues only. Availability always comes from the current LegalActions.
+const RUN_STEP_OPPORTUNITIES: Record<
+  RunTimelineStepId,
+  readonly RunPhaseOpportunityKind[]
+> = {
+  target: ["target"],
+  approach_ice: ["ice_rez", "card_rez", "ability", "pass"],
+  encounter_ice: ["choice", "ability", "continue"],
+  break: ["breaker", "ability", "continue"],
+  movement: ["card_rez", "ability", "continue", "jack_out", "pass"],
+  access: ["access", "choice", "ability"],
+  complete: ["complete"],
+};
+
+export function runStepOpportunities(
+  step: RunTimelineStepId,
+  currentStep: RunTimelineStepId | null,
+  actions: readonly Pick<LegalAction, "type">[],
+): { kind: RunPhaseOpportunityKind; active: boolean }[] {
+  const available =
+    step === currentStep ? runPhaseOpportunityKinds(actions) : [];
+  const kinds = new Set([...RUN_STEP_OPPORTUNITIES[step], ...available]);
+  return RUN_PHASE_OPPORTUNITY_ORDER.filter((kind) => kinds.has(kind)).map(
+    (kind) => ({ kind, active: available.includes(kind) }),
+  );
+}
+
 export function runPhaseOpportunityKinds(
   actions: readonly Pick<LegalAction, "type">[],
 ): RunPhaseOpportunityKind[] {
   const available = new Set<RunPhaseOpportunityKind>();
   for (const action of actions) {
     switch (action.type) {
+      case "start_run":
+        available.add("target");
+        break;
       case "resolve_choice":
         available.add("choice");
         break;
       case "rez_ice":
+        available.add("ice_rez");
+        break;
       case "rez_card":
-        available.add("rez");
+        available.add("card_rez");
         break;
       case "pump_breaker":
       case "break_subroutine":

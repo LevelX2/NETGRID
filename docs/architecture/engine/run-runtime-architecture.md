@@ -49,6 +49,13 @@ ihnen aber nicht zurückimportiert.
   abgeleitet. Die Registry und der persistierte Run-Zustand bleiben Autorität.
 - Fort-Pass- und Root-Rez-Fenster teilen nur einen deklarativen Port. Dadurch
   kann keines der Fenster die Implementierung des anderen zurückimportieren.
+- Gleichzeitig offene Aktivierungstimings werden gemeinsam an die
+  CardImplementation-Aktionserzeugung übergeben. Jede gebundene Fähigkeit
+  wird einmal über ihr erstes zulässiges Timing angeboten, einschließlich
+  dessen Zusatzbedingung. `additionalTimings` erzeugt keine zweite
+  Fähigkeitsidentität; die globale Prüfung auf doppelte LegalAction-IDs bleibt
+  bestehen. Das gilt insbesondere für `corp_during_run` zusammen mit
+  `corp_paid` und für `during_run` zusammen mit `runner_paid`.
 - Run-End-Cleanup ist geordnet: Trigger und Zahlungen lesen Run-Marker, bevor
   diese entfernt oder temporäre Werte zurückgesetzt werden.
 - Eine Tag-Prevention-Continuation setzt den Cleanup an der gespeicherten
