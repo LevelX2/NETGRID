@@ -1011,6 +1011,38 @@ veröffentlichtes Testartefakt kann der echte GitHub-Download-/Updatefluss nicht
 abgenommen werden; lokale Fixtures ersetzen diesen Nachweis nicht. Weder
 Releaseveröffentlichung noch Push, Main-Integration oder Cleanup sind erfolgt.
 
+Nach der Nutzerfreigabe aller angefragten Punkte wurde am 6. September um
+20:00:47 UTC ausschließlich im Sandbox-Benutzerkonto der fehlende ProgID
+`HKCU\Software\Classes\MSEdgeHTM` mit URL-Kennzeichnung, Icon und dem
+Öffnungsbefehl des vorhandenen Edge ergänzt. Vorbedingungen waren eine gültige
+Microsoft-Signatur der vorhandenen EXE, die unveränderte Auswahl `MSEdgeHTM`
+und das vollständige Fehlen der Klasse; vorhandene Registrierungen werden
+nicht überschrieben. UserChoice einschließlich Hash wurde davor/danach
+auf Unverändertheit geprüft. Nachweis:
+`result/edge-http-registration-repair.json`. Keine Browserinstallation,
+Änderung von Sicherheitsoptionen oder NETGRID-Produktänderung war erforderlich.
+
+Danach öffneten sowohl „NETGRID öffnen“ im Tray um 20:02 UTC als auch die
+Desktopverknüpfung um 20:04 UTC jeweils einen neuen Edge-Tab mit der Spielseite
+von Build 8136 ohne Windows-Fehlermeldung. Anders als der frühere direkte
+Edge-Diagnoseaufruf verwendeten beide Tests den normalen Produktpfad über
+Windows ShellExecute. Die erneute installierte Identitätsprüfung ist mit Exit
+0 grün; der Launcher blieb die einzelne Instanz PID `6264`. Der Browserblocker
+dieses Sandboxlaufs ist damit geschlossen. Die Gastvorbereitung ist nicht
+Bestandteil des NETGRID-Installers und wird nicht als unverändertes frisches
+Windows-Ausgangsimage ausgegeben.
+
+Die GitHub-Testfreigabe ist erteilt; der fortgeltende ursprüngliche Auftrag
+„Kein Push“ ist aber noch nicht ausdrücklich aufgehoben. Die read-only
+GitHub-CLI-Prüfung ist authentifiziert als `LevelX2`; für den Quellcommit des
+8136-Artefakts `63c3e59a93c9719c6f6c5a46e67924a71d5bd4c6` liefert GitHub
+422 „No commit found“. Ein Release-Tag soll auf den tatsächlichen Quellstand
+zeigen, nicht auf ein unbeteiligtes Remote-Main. Deshalb wurde die konkrete
+Freigabe für Testbranch-/Tag-Übertragung separat angefragt. Bis zur Antwort
+erfolgt keine solche Übertragung oder Veröffentlichung. Ein Updateziel muss
+zudem regulär mit einer höheren Buildversion als 8136 erzeugt werden; Versions-
+oder Prüfsummenmetadaten vorhandener Artefakte werden dafür nicht umgeschrieben.
+
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.
 Die erste Public-Prüfung war wegen der pauschalen, aktiven Sandbox-Regel
