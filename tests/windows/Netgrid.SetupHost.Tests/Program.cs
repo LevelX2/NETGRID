@@ -242,6 +242,20 @@ foreach (var language in new[] { "de", "en", "fr" })
                     Thread.Sleep(1000); // Let the native progress transition settle before capture.
                     Application.DoEvents();
                     form.PerformLayout();
+                    foreach (var size in new[] { form.Size, form.MinimumSize })
+                    {
+                        var originalSize = form.Size;
+                        form.Size = size;
+                        form.PerformLayout();
+                        foreach (var feedback in new Control[] { Field<Label>("_status"), progress, Field<Button>("_install") })
+                            Assert(form.ClientRectangle.Contains(form.RectangleToClient(feedback.RectangleToScreen(feedback.ClientRectangle))), "feedback_and_action_inside_window");
+                        var options = Field<RadioButton>("_recommended");
+                        Control optionsRoot = options;
+                        while (optionsRoot.Parent != form) optionsRoot = optionsRoot.Parent!;
+                        Assert(optionsRoot.Bottom <= progress.Parent!.Top, "scrollable_options_do_not_overlap_footer");
+                        form.Size = originalSize;
+                        form.PerformLayout();
+                    }
                     using var bitmap = new Bitmap(form.Width, form.Height);
                     form.DrawToBitmap(bitmap, new Rectangle(Point.Empty, bitmap.Size));
                     bitmap.Save(Path.Combine(previewRoot, $"progress-{language}-{phase}.png"), System.Drawing.Imaging.ImageFormat.Png);

@@ -41,13 +41,13 @@ geführte Konfiguration und Updater folgen im Paketprozess.
 
 Die erste fachliche Auswahl des Setups lautet:
 
-1. **Empfohlene Installation**: zeigt nur unvermeidbare Entscheidungen und
+1. **Voreingestellte Werte verwenden**: zeigt nur unvermeidbare Entscheidungen und
    übernimmt alle übrigen Werte aus diesem Vertrag. Sie ist vorausgewählt.
 2. **Benutzerdefinierte Installation**: führt verständlich durch alle
    freigegebenen Optionen, erklärt Folgen und zeigt jeweils den empfohlenen
    Wert. Sie schaltet keine internen Entwicklerparameter frei.
 
-Auch die empfohlene Installation muss mindestens die Betriebsart abfragen,
+Auch der Weg mit voreingestellten Werten muss mindestens die Betriebsart abfragen,
 weil eine Netzwerkfreigabe nicht stillschweigend erfolgen darf. Notwendige
 Ersteinrichtungen können nach Abschluss in einem sicheren First-Run-Assistenten
 erfolgen, wenn Geheimnisse nicht gefahrlos über MSI-Eigenschaften verarbeitet
@@ -57,7 +57,7 @@ werden können.
 
 | Bereich            | Vorauswahl                             |
 | ------------------ | -------------------------------------- |
-| Setupweg           | Empfohlene Installation                |
+| Setupweg           | Voreingestellte Werte verwenden        |
 | Betriebsart        | Nur dieser Rechner                     |
 | Kontomodus         | Einfach, ohne Spielerpasswörter        |
 | Programmordner     | `C:\Program Files\NETGRID`             |

@@ -439,11 +439,22 @@ internal sealed class SetupForm : Form
         root.Controls.Add(Group(UiText.Get("setup.advanced"), advanced));
         root.Controls.Add(Flow(_desktop, Help("setup.desktop", "setup.help.desktop", _desktop), _launch, Help("setup.launch", "setup.help.launch", _launch)));
         root.Controls.Add(Body(UiText.Get("setup.data.help")));
-        root.Controls.Add(_status);
-        root.Controls.Add(_progress);
+        // Keep feedback and the primary action visible even when translated
+        // options need to scroll in a smaller window.
+        var footer = new TableLayoutPanel
+        {
+            AutoSize = true,
+            Dock = DockStyle.Bottom,
+            ColumnCount = 1,
+            Padding = new Padding(28, 0, 28, 20),
+        };
+        footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        footer.Controls.Add(_status);
+        footer.Controls.Add(_progress);
         var actions = new FlowLayoutPanel { AutoSize = true, Dock = DockStyle.Top, FlowDirection = FlowDirection.RightToLeft };
         actions.Controls.Add(_install);
-        root.Controls.Add(actions);
+        footer.Controls.Add(actions);
+        Controls.Add(footer);
 
         _recommended.CheckedChanged += (_, _) => UpdateAdvancedState();
         _custom.CheckedChanged += (_, _) => UpdateAdvancedState();

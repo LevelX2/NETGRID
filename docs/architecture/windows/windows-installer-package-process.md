@@ -597,6 +597,21 @@ die längeren deutschen und französischen Beschriftungen passen in die
 geprüften Layoutvorschauen. Das offene 8119-Setup enthält diese nachfolgende
 Textänderung noch nicht. Der Installationsklick bleibt unangetastet.
 
+Die anschließende Textprüfung trennt Windows-Administratorfreigabe und
+NETGRID-Maintenance-Passwort jetzt ausdrücklich in Setup und Ersteinrichtung
+(DE/EN/FR). Der benutzerdefinierte Hilfetext erklärt außerdem, dass einzelne
+Werte geändert und andere Vorgaben beibehalten werden können. Der längere
+Setuphinweis machte in der französischen Fortschrittsansicht einen bisher
+nicht erfassten abgeschnittenen Installationsknopf sichtbar. Status, Balken
+und Aktion liegen deshalb nun außerhalb der scrollbaren Optionen in einem
+festen unteren Bereich. 1.808 Setup-Assertions einschließlich Fenstergrenzen
+und Überlappungsprüfung bei normaler und minimaler Fenstergröße, 51 First-Run-
+Assertions und das Sprachgate sind grün. Die Komponentenansichten unter
+`output/windows-admin-copy-review` wurden in allen drei Sprachen geprüft;
+dies ersetzt keine native DPI- oder Installationsabnahme. Das offene
+8119-Setup enthält diese Quelländerungen noch nicht. Keine Installation,
+Passworteingabe oder Änderung bestehender Zugangsdaten wurde dadurch ausgelöst.
+
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.
 Die erste Public-Prüfung war wegen der pauschalen, aktiven Sandbox-Regel

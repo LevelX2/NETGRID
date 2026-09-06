@@ -134,7 +134,10 @@ Hauptinstanz bleiben unangetastet.
 „Benutzerdefinierte Installation“. Local/LAN, Desktopverknüpfung und Start nach Abschluss
 sind sichtbar; im benutzerdefinierten Weg kommen Pfade, Ports,
 Spielaufbewahrung und die Wahl zwischen einfachem und geschütztem
-Spielerprofilmodus hinzu. Erst „Installieren“ fordert Administratorrechte an.
+Spielerprofilmodus hinzu. Erst „Installieren“ fordert Windows-Administratorrechte
+an. Der Hinweis unterscheidet diese Windows-Freigabe ausdrücklich vom separaten
+Passwort für die NETGRID-Verwaltung; der First-Run-Dialog fordert ein neues
+NETGRID-Passwort an, nicht das Windows-Passwort.
 Das Setup übergibt ausschließlich nicht geheime, validierte MSI-Eigenschaften.
 
 Private-LAN-Installationen benötigen eine erkannte private IPv4-Adresse. Die
@@ -285,7 +288,10 @@ Phase. Es behauptet keine Prozentwerte aus Laufzeit oder Dateianzahl.
 Nach erfolgreichem MSI-Ende stoppt die Animation; der Hinweis verweist auf
 die separate Ersteinrichtung. Fehler und abgebrochene Administratorfreigaben
 stoppen den Balken und geben die Eingaben wieder frei. Status und Balken
-bleiben aktiv und lesbar, während die Optionen gesperrt sind.
+bleiben aktiv und lesbar, während die Optionen gesperrt sind. Status, Balken
+und Installationsknopf liegen in einem festen unteren Bereich außerhalb der
+scrollbaren Optionen, damit längere Übersetzungen die Rückmeldung und Aktion
+nicht aus dem Fenster schieben.
 Die normalen Ordner sind `C:\Program Files\NETGRID` und
 `C:\ProgramData\NETGRID`; bei bestehender Installation wird deren registrierter
 Datenordner angeboten. `NETGRID-E2E-<ID>` gehört ausschließlich zur gezielt
