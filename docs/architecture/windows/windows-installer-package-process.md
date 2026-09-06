@@ -639,6 +639,18 @@ Datenordner, kein MSI-Prozess und freie Gastports `3100`/`8787`.
 Die weitere native Abnahme und GitHub-Updatefreigabe bleiben offen; WIN-I08
 ist nicht abgeschlossen, Main-Integration und Cleanup erfolgen noch nicht.
 
+Die anschließende native Vorinstallationsprüfung von 8123 erfasst auch
+Englisch und Französisch: Auswahl über den echten Sprachdialog, dazu passend
+wechselnde Weiter-/Abbrechen-Beschriftungen, vollständige Setuptexte und
+umgebrochene benutzerdefinierte Hilfedialoge; beide Hilfedialoge ließen sich
+per Eingabetaste schließen. Geprüfte Gastprozesse: EN `5452`, FR `4980`.
+Danach wurde Deutsch mit unveränderten Standardwerten wieder geöffnet:
+PID `6944`, Startzeit `2026-09-06T05:41:36.7804510Z`, dokumentiert in
+`result/ui-review-8123-current-process.json`. Es blieb bei einem Viewer
+derselben VM; kein Installationsklick. Diese Prüfung deckt die genannten
+Vorinstallationsansichten ab, nicht First Run, installierte Gesamtflows,
+Hoverpositionierung oder unterschiedliche native Windows-DPI-Kontexte.
+
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.
 Die erste Public-Prüfung war wegen der pauschalen, aktiven Sandbox-Regel
