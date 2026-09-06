@@ -22,6 +22,22 @@ describe("R&D Express selfplay runtime regressions", () => {
   it.each([
     {
       label:
+        "keeps a restricted run's exact target and access purpose through Vacuum Link",
+      runnerDeckId: "standard_runner_blink_pressure_rig",
+      corpDeckId: "standard_corp_original_speed_v10",
+      seed: "meta-402-round-2-008",
+      maxActions: 75,
+    },
+    {
+      label:
+        "releases the superseded coverage requester when a targeted bypass becomes executable",
+      runnerDeckId: "standard_runner_blink_pressure_rig",
+      corpDeckId: "standard_corp_original_speed_v10",
+      seed: "meta-402-round-2-024",
+      maxActions: 305,
+    },
+    {
+      label:
         "keeps an event-started run bound through the Vacuum Link rewind choice",
       runnerDeckId: "standard_runner_blink_pressure_rig",
       corpDeckId: "standard_corp_original_speed_v10",

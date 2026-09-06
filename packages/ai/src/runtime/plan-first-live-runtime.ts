@@ -514,6 +514,7 @@ type RunnerRunOrigin = {
 
 type ActiveRunnerRunRoot = RunnerRunOrigin & {
   instanceId: string;
+  restrictedRunBinding?: RunnerPlanDomain["runWindows"][number];
   parentBinding?:
     | {
         moduleId: "runner.pressure_central";
@@ -1787,6 +1788,16 @@ function bindSelectedEngineWindowRunnerVacuumLinkOrigin(
     interveningEvents[0]?.stateVersionAfter === input.playerView.stateVersion &&
     interveningEvents[0]?.publicPayload?.actor === "runner" &&
     interveningEvents[0]?.publicPayload?.actionType === lease?.actionType;
+  const committedPhase = commitment?.phases?.[commitment.cursor.phaseIndex];
+  const exactCommittedRunExecutor =
+    committedPhase !== undefined &&
+    executorInstanceId !== undefined &&
+    commitment?.sequenceRootPlanInstanceId === executorInstanceId &&
+    committedPhase?.root.planInstanceId === executorInstanceId &&
+    committedPhase.phaseId === lease?.phaseId &&
+    committedPhase.nodes[commitment!.cursor.nodeIndex]?.nodeId ===
+      lease?.nodeId &&
+    executor?.parentInstanceId === rootPlanInstanceId;
   const exactInheritedRunPlan =
     previous !== undefined &&
     currentPortfolio !== undefined &&
@@ -1809,7 +1820,8 @@ function bindSelectedEngineWindowRunnerVacuumLinkOrigin(
       executorState?.kind === "remote_contest") &&
     executorState.signal?.serverId === input.playerView.run?.attackedServerId &&
     commitment?.status === "active" &&
-    commitment.sequenceRootPlanInstanceId === rootPlanInstanceId &&
+    (commitment.sequenceRootPlanInstanceId === rootPlanInstanceId ||
+      exactCommittedRunExecutor) &&
     lease !== undefined &&
     lease.commitmentId === commitment.commitmentId &&
     lease.sourcePlanId === commitment.sourcePlanId &&
@@ -10000,55 +10012,116 @@ function buildRunnerDomain(
           (restrictedRunSequenceServerIds.length === 1
             ? restrictedRunSequenceServerIds[0]
             : undefined);
+        const signal = {
+          windowId: `run:${input.playerView.run?.runId ?? input.playerView.stateVersion}`,
+          ...(windowServerId ? { serverId: windowServerId } : {}),
+          rootPlanInstanceId:
+            activeRunRoot?.instanceId ??
+            (restrictedRunSequence
+              ? "rules.restricted_action_sequence"
+              : "rules.access_window"),
+          leafPlanInstanceId: `plan:runner.convert_run_window:run%3A${input.playerView.run?.runId ?? input.playerView.stateVersion}`,
+          semanticActionTypes: [
+            ...new Set(
+              candidates
+                .filter((candidate) =>
+                  isRunnerRunWindowCandidate(input, candidate),
+                )
+                .map((candidate) => candidate.semanticActionType),
+            ),
+          ],
+          purposeCode: restrictedRunSequence
+            ? "continue_engine_restricted_run_sequence"
+            : "convert_active_run_window",
+          evidenceCode: restrictedRunSequence
+            ? "runner_engine_restricted_run_sequence_continuation"
+            : (safetyAssessment?.evidenceCode ??
+              encounterMitigation ??
+              (input.playerView.run
+                ? "visible_active_run"
+                : "legal_access_window_without_run_snapshot")),
+          ...(accessWindowCommitment
+            ? { accessCommitment: accessWindowCommitment }
+            : {}),
+          ...(runRiskReassessment ? { runRiskReassessment } : {}),
+          ...(safetyAssessment
+            ? {
+                safetyIntent: "jack_out" as const,
+                safetyEvidenceCode: safetyAssessment.evidenceCode,
+              }
+            : {}),
+          ...(encounterMitigation
+            ? {
+                encounterIntent: "mitigate_threat" as const,
+                encounterEvidenceCode: encounterMitigation,
+              }
+            : {}),
+          ...(Object.keys(exactPhaseActionAssessments).length > 0
+            ? { actionAssessments: exactPhaseActionAssessments }
+            : {}),
+        };
+        if (!restrictedRunSequence) {
+          return [
+            ...(activeRunRoot?.restrictedRunBinding
+              ? [
+                  {
+                    ...activeRunRoot.restrictedRunBinding,
+                    semanticActionTypes: [],
+                    actionAssessments: {},
+                  },
+                ]
+              : []),
+            signal,
+          ];
+        }
+        const boundSignals = restrictedRunSequenceActions.map((action) => {
+          const evaluation = runTargets.find(
+            (entry) => entry.actionId === action.actionId,
+          );
+          const assessment = exactPhaseActionAssessments[action.actionId];
+          if (
+            !evaluation ||
+            !assessment ||
+            evaluation.targetServerId !== action.payload?.serverId
+          ) {
+            throw new PlanResolutionFailure("invalid_plan_identity", {
+              side: input.side,
+              stateVersion: input.playerView.stateVersion,
+              timingPoint: input.playerView.timingPoint,
+              legalActionTypes: [action.type],
+              unresolvedActionIds: [action.actionId],
+              owner: "plan_registry",
+              removalCondition:
+                "Bind each restricted run action to its exact current target evaluation and run-window assessment before plan selection.",
+            });
+          }
+          const windowId = `${signal.windowId}:${action.actionId}`;
+          return {
+            ...signal,
+            windowId,
+            serverId: evaluation.targetServerId,
+            leafPlanInstanceId: planInstanceIdForProposal({
+              moduleId: "runner.convert_run_window",
+              dedupeKey: windowId,
+            }),
+            semanticActionTypes: ["run.start"],
+            accessCommitment: accessCommitmentForEvaluation(evaluation),
+            actionAssessments: { [action.actionId]: assessment },
+          };
+        });
+        const restrictedActionIds = new Set(
+          restrictedRunSequenceActions.map((action) => action.actionId),
+        );
+        const remainingAssessments = Object.fromEntries(
+          Object.entries(exactPhaseActionAssessments).filter(
+            ([id]) => !restrictedActionIds.has(id),
+          ),
+        );
         return [
-          {
-            windowId: `run:${input.playerView.run?.runId ?? input.playerView.stateVersion}`,
-            ...(windowServerId ? { serverId: windowServerId } : {}),
-            rootPlanInstanceId:
-              activeRunRoot?.instanceId ??
-              (restrictedRunSequence
-                ? "rules.restricted_action_sequence"
-                : "rules.access_window"),
-            leafPlanInstanceId: `plan:runner.convert_run_window:run%3A${input.playerView.run?.runId ?? input.playerView.stateVersion}`,
-            semanticActionTypes: [
-              ...new Set(
-                candidates
-                  .filter((candidate) =>
-                    isRunnerRunWindowCandidate(input, candidate),
-                  )
-                  .map((candidate) => candidate.semanticActionType),
-              ),
-            ],
-            purposeCode: restrictedRunSequence
-              ? "continue_engine_restricted_run_sequence"
-              : "convert_active_run_window",
-            evidenceCode: restrictedRunSequence
-              ? "runner_engine_restricted_run_sequence_continuation"
-              : (safetyAssessment?.evidenceCode ??
-                encounterMitigation ??
-                (input.playerView.run
-                  ? "visible_active_run"
-                  : "legal_access_window_without_run_snapshot")),
-            ...(accessWindowCommitment
-              ? { accessCommitment: accessWindowCommitment }
-              : {}),
-            ...(runRiskReassessment ? { runRiskReassessment } : {}),
-            ...(safetyAssessment
-              ? {
-                  safetyIntent: "jack_out" as const,
-                  safetyEvidenceCode: safetyAssessment.evidenceCode,
-                }
-              : {}),
-            ...(encounterMitigation
-              ? {
-                  encounterIntent: "mitigate_threat" as const,
-                  encounterEvidenceCode: encounterMitigation,
-                }
-              : {}),
-            ...(Object.keys(exactPhaseActionAssessments).length > 0
-              ? { actionAssessments: exactPhaseActionAssessments }
-              : {}),
-          },
+          ...boundSignals,
+          ...(Object.keys(remainingAssessments).length > 0
+            ? [{ ...signal, actionAssessments: remainingAssessments }]
+            : []),
         ];
       })()
     : [];
@@ -10701,6 +10774,7 @@ function runnerTargetedBypassCentralPreparationSignals(
         (signal) => signal.pressureId === commitment.ownerDedupeKey,
       );
       if (!owner) return [];
+      const { supportNeedId: _supersededSupportNeed, ...preparedOwner } = owner;
       const payoffValue =
         planTargets.find(
           (target) =>
@@ -10709,7 +10783,7 @@ function runnerTargetedBypassCentralPreparationSignals(
         )?.payoffValue ?? 0;
       return [
         {
-          ...owner,
+          ...preparedOwner,
           reachable: true,
           marginalValue: payoffValue,
           evidenceCode: `runner_targeted_bypass_preflight:${commitment.serverId}:${commitment.icePosition}`,
@@ -11047,6 +11121,7 @@ function runnerTargetedBypassRemotePreparationSignals(
         (signal) => signal.contestId === commitment.ownerDedupeKey,
       );
       if (!owner) return [];
+      const { supportNeedId: _supersededSupportNeed, ...preparedOwner } = owner;
       const payoffValue =
         planTargets.find(
           (target) =>
@@ -11055,7 +11130,7 @@ function runnerTargetedBypassRemotePreparationSignals(
         )?.payoffValue ?? 0;
       return [
         {
-          ...owner,
+          ...preparedOwner,
           reachable: true,
           marginalValue: payoffValue,
           evidenceCode: `runner_targeted_bypass_preflight:${commitment.serverId}:${commitment.icePosition}`,
@@ -13332,6 +13407,13 @@ function activeRunRootPlan(
         instance.target?.kind === "server" &&
         instance.target.id === serverId,
     ),
+    previous.instances.find(
+      (instance) =>
+        instance.instanceId === previous.rootForegroundInstanceId &&
+        instance.moduleId === "runner.convert_run_window" &&
+        instance.target?.kind === "server" &&
+        instance.target.id === serverId,
+    ),
     ...previous.instances.filter(
       (instance) =>
         instance.target?.kind === "server" &&
@@ -13348,6 +13430,15 @@ function activeRunRootPlan(
     kind?: unknown;
     signal?: unknown;
   };
+  const restrictedRunBinding =
+    root.moduleId === "runner.convert_run_window" &&
+    moduleState.kind === "run_window" &&
+    (moduleState.signal as { purposeCode?: unknown } | undefined)
+      ?.purposeCode === "continue_engine_restricted_run_sequence"
+      ? (structuredClone(
+          moduleState.signal,
+        ) as RunnerPlanDomain["runWindows"][number])
+      : undefined;
   const parentBinding =
     root.moduleId === "runner.pressure_central" &&
     moduleState.kind === "central_pressure" &&
@@ -13373,6 +13464,7 @@ function activeRunRootPlan(
     ...runOrigin,
     ...(accessCommitment ? { accessCommitment } : {}),
     ...(parentBinding ? { parentBinding } : {}),
+    ...(restrictedRunBinding ? { restrictedRunBinding } : {}),
   };
 }
 

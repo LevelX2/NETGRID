@@ -467,10 +467,9 @@ function terminalWinModule(): PlanModule {
               : "convert_immediate_runner_agenda_point",
             semanticActionTypes: current.signal.semanticActionTypes,
           },
-          purpose:
-            forcesCorpMandatoryDraw
-              ? "End the Runner turn to force the rules-proven empty-R&D mandatory draw."
-              : "Resolve the exact legal action that immediately reaches the Runner agenda-point threshold.",
+          purpose: forcesCorpMandatoryDraw
+            ? "End the Runner turn to force the rules-proven empty-R&D mandatory draw."
+            : "Resolve the exact legal action that immediately reaches the Runner agenda-point threshold.",
         },
         candidates: terminalWinCandidates(context, current.signal),
         ...(forcesCorpMandatoryDraw
@@ -1174,7 +1173,10 @@ function runWindowModule(): PlanModule {
           { kind: "run_window", signal } satisfies RunWindowState,
           "P3",
           [],
-          { kind: "window", id: signal.windowId },
+          signal.serverId &&
+            signal.purposeCode === "continue_engine_restricted_run_sequence"
+            ? { kind: "server", id: signal.serverId }
+            : { kind: "window", id: signal.windowId },
           runWindowCandidates(context, signal).length > 0,
           signal.evidenceCode,
           signal.rootPlanInstanceId,
@@ -1182,11 +1184,18 @@ function runWindowModule(): PlanModule {
       ),
     assess: (instance, context, portfolio) => {
       const current = state<RunWindowState>(instance);
+      const candidates = runWindowCandidates(context, current.signal);
+      const value =
+        current.signal.purposeCode === "continue_engine_restricted_run_sequence"
+          ? candidates.length > 0
+            ? Math.max(...candidates.map((entry) => entry.stepValue))
+            : 0
+          : 100;
       return assessment(
         instance,
         "P3",
-        runWindowCandidates(context, current.signal).length > 0,
-        100,
+        candidates.length > 0,
+        value,
         portfolio.executorInstanceId,
       );
     },
@@ -1890,6 +1899,8 @@ function runWindowCandidateValue(
     if (candidate.actionType === "continue_run") return 0;
   }
   if (candidate.actionType === "steal_agenda") return 400;
+  if (candidate.actionType === "start_run" && assessedValue !== undefined)
+    return assessedValue;
   if (!commitment) return assessedValue ?? 100;
   if (commitment.intendedAction === "decline") {
     if (candidate.actionType === "decline_trash")

@@ -6013,315 +6013,355 @@ describe("authoritative plan-first live runtime", () => {
     expect(decision.evidence).toContain("plan_first_lane:engine_window");
   });
 
-  it("keeps Vacuum Link bound to the active run plan after a failed Blink break", () => {
-    resetResidentPlanPortfolioMemory();
-    const startRun = legalAction(
-      "runner.start_run.rd",
-      "runner",
-      "start_run",
-      "Run R&D",
-      { credits: 0, clicks: 1 },
-      { payload: { serverId: "rd" } },
-    );
-    const breakVacuumLink = legalAction(
-      "runner.break_subroutine.blink.vacuum-link",
-      "runner",
-      "break_subroutine",
-      "Blink: Subroutine brechen",
-      { credits: 0, clicks: 0 },
-      {
-        source: "blink",
-        payload: {
-          breakerId: "blink",
-          iceId: "vacuum-link",
-          subroutineIndex: 0,
-          subroutineIndexes: "0",
-          breakSubroutineCount: 1,
-          cardId: "blink",
-          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-          cardImplementationAbilityKey: "icebreaker_abilities_break_subroutine",
-          cardImplementationAbilityId:
-            "onr_v1_007_blink:icebreaker_abilities_break_subroutine",
+  it.each(["foreground_root", "executor_phase", "wrong_phase", "wrong_node"])(
+    "keeps Vacuum Link bound to the exact active run plan after a failed Blink break: %s",
+    (bindingMode) => {
+      resetResidentPlanPortfolioMemory();
+      const startRun = legalAction(
+        "runner.start_run.rd",
+        "runner",
+        "start_run",
+        "Run R&D",
+        { credits: 0, clicks: 1 },
+        { payload: { serverId: "rd" } },
+      );
+      const breakVacuumLink = legalAction(
+        "runner.break_subroutine.blink.vacuum-link",
+        "runner",
+        "break_subroutine",
+        "Blink: Subroutine brechen",
+        { credits: 0, clicks: 0 },
+        {
+          source: "blink",
+          payload: {
+            breakerId: "blink",
+            iceId: "vacuum-link",
+            subroutineIndex: 0,
+            subroutineIndexes: "0",
+            breakSubroutineCount: 1,
+            cardId: "blink",
+            cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+            cardImplementationAbilityKey:
+              "icebreaker_abilities_break_subroutine",
+            cardImplementationAbilityId:
+              "onr_v1_007_blink:icebreaker_abilities_break_subroutine",
+          },
         },
-      },
-    );
-    const continueVacuumLink = legalAction(
-      "runner.continue_run.vacuum-link",
-      "runner",
-      "continue_run",
-      "Subroutinen auslösen",
-      { credits: 0, clicks: 0 },
-      {
-        source: "game_rule",
-        payload: {
-          encounterContinue: true,
-          encounterWillEndRun: false,
-          sourceDefinitionId: "onr_v1_275_vacuum-link",
-          unbrokenSubroutineCount: 1,
-          encounterSubroutineIds:
-            "printed_subroutines_random_resume_from_rezzed_ice_back_or_jack_out",
-        },
-      },
-    );
-    for (const action of [breakVacuumLink, continueVacuumLink]) {
-      action.timingPoint = "run.encounter_ice";
-    }
-    const input = aiInput("runner", [breakVacuumLink, continueVacuumLink]);
-    input.playerView.stateVersion = 2;
-    for (const action of input.legalActions) action.expiresAtStateVersion = 2;
-    input.playerView.timingPoint = "run.encounter_ice";
-    input.playerView.own.credits = 3;
-    input.playerView.own.rig = [
-      visibleCard("blink", "runner", "program", {
-        definitionId: "onr_v1_007_blink",
-        title: "Blink",
-        strength: 5,
-        subtypes: ["icebreaker", "random"],
-      }),
-    ];
-    const vacuumLink = withEffectiveRunQuote(
-      visibleCard("vacuum-link", "corp", "ice", {
-        definitionId: "onr_v1_275_vacuum-link",
-        title: "Vacuum Link",
-        rezzed: true,
-        strength: 5,
-        subtypes: ["random", "sentry"],
-      }),
-      {
-        effectiveStrength: 5,
-        subroutines: [
-          {
-            id: "printed_subroutines_random_resume_from_rezzed_ice_back_or_jack_out",
-            type: "rewind_run_to_rezzed_ice_by_die",
+      );
+      const continueVacuumLink = legalAction(
+        "runner.continue_run.vacuum-link",
+        "runner",
+        "continue_run",
+        "Subroutinen auslösen",
+        { credits: 0, clicks: 0 },
+        {
+          source: "game_rule",
+          payload: {
+            encounterContinue: true,
+            encounterWillEndRun: false,
             sourceDefinitionId: "onr_v1_275_vacuum-link",
-            sourceTitle: "Vacuum Link",
+            unbrokenSubroutineCount: 1,
+            encounterSubroutineIds:
+              "printed_subroutines_random_resume_from_rezzed_ice_back_or_jack_out",
           },
+        },
+      );
+      for (const action of [breakVacuumLink, continueVacuumLink]) {
+        action.timingPoint = "run.encounter_ice";
+      }
+      const input = aiInput("runner", [breakVacuumLink, continueVacuumLink]);
+      input.playerView.stateVersion = 2;
+      for (const action of input.legalActions) action.expiresAtStateVersion = 2;
+      input.playerView.timingPoint = "run.encounter_ice";
+      input.playerView.own.credits = 3;
+      input.playerView.own.rig = [
+        visibleCard("blink", "runner", "program", {
+          definitionId: "onr_v1_007_blink",
+          title: "Blink",
+          strength: 5,
+          subtypes: ["icebreaker", "random"],
+        }),
+      ];
+      const vacuumLink = withEffectiveRunQuote(
+        visibleCard("vacuum-link", "corp", "ice", {
+          definitionId: "onr_v1_275_vacuum-link",
+          title: "Vacuum Link",
+          rezzed: true,
+          strength: 5,
+          subtypes: ["random", "sentry"],
+        }),
+        {
+          effectiveStrength: 5,
+          subroutines: [
+            {
+              id: "printed_subroutines_random_resume_from_rezzed_ice_back_or_jack_out",
+              type: "rewind_run_to_rezzed_ice_by_die",
+              sourceDefinitionId: "onr_v1_275_vacuum-link",
+              sourceTitle: "Vacuum Link",
+            },
+          ],
+        },
+      );
+      input.playerView.run = {
+        runId: "run-vacuum",
+        attackedServerId: "rd",
+        phase: "encounter_ice",
+        position: { kind: "ice", serverId: "rd", iceIndex: 1 },
+        encounteredIce: vacuumLink,
+        successful: false,
+      };
+      const innerWall = withEffectiveRunQuote(
+        visibleCard("inner-wall", "corp", "ice", {
+          definitionId: "onr_v1_279_wall-of-static",
+          title: "Wall of Static",
+          rezzed: true,
+          strength: 2,
+          subtypes: ["wall"],
+        }),
+        {
+          effectiveStrength: 2,
+          subroutines: [
+            {
+              id: "printed_subroutines_end_the_run",
+              type: "end_the_run",
+              sourceDefinitionId: "onr_v1_279_wall-of-static",
+              sourceTitle: "Wall of Static",
+            },
+          ],
+        },
+      );
+      input.playerView.servers = [
+        server("hq"),
+        server("rd", [innerWall, vacuumLink]),
+        server("archives"),
+      ];
+      input.eventTail = [
+        {
+          eventId: "evt-start-vacuum-run",
+          type: "start_run",
+          stateVersionBefore: 1,
+          stateVersionAfter: 2,
+          stateHashAfter: "fnv1a:start-vacuum-run",
+          visibilityClass: "private_to_side",
+          publicPayload: {
+            actor: "runner",
+            actionType: "start_run",
+            serverId: "rd",
+          },
+        },
+      ];
+      const startInput = aiInput("runner", [startRun]);
+      startInput.playerView.servers = structuredClone(input.playerView.servers);
+      startInput.playerView.own.credits = input.playerView.own.credits;
+      startInput.playerView.own.rig = structuredClone(input.playerView.own.rig);
+      const runtime = liveContext({
+        evaluateRunnerRunTargets: () => [
+          safeRuntimeRunTarget(startRun.actionId, "rd"),
         ],
-      },
-    );
-    input.playerView.run = {
-      runId: "run-vacuum",
-      attackedServerId: "rd",
-      phase: "encounter_ice",
-      position: { kind: "ice", serverId: "rd", iceIndex: 1 },
-      encounteredIce: vacuumLink,
-      successful: false,
-    };
-    const innerWall = withEffectiveRunQuote(
-      visibleCard("inner-wall", "corp", "ice", {
-        definitionId: "onr_v1_279_wall-of-static",
-        title: "Wall of Static",
-        rezzed: true,
-        strength: 2,
-        subtypes: ["wall"],
-      }),
-      {
-        effectiveStrength: 2,
-        subroutines: [
+        selectedChoicesForDecision: (
+          decisionInput: Parameters<typeof selectedChoicesForDecision>[0],
+          selectedAction: Parameters<typeof selectedChoicesForDecision>[1],
+          portfolio: Parameters<typeof selectedChoicesForDecision>[3],
+        ) =>
+          selectedChoicesForDecision(
+            decisionInput,
+            selectedAction,
+            {
+              evaluateCorpOpeningHand: () => ({ decision: "keep" }),
+              evaluateRunnerOpeningHand: () => ({ decision: "keep" }),
+              discardKeepScore: () => ({ total: 0 }),
+              selectedRunnerProgramInstallTrashOptionIds: () => [],
+              selectedRunnerForcedProgramTrashOptionIds: () => [],
+              selectedRunnerMemoryCheckpointTrashOptionIds: () => [],
+              extractAiFeatures: () => ({
+                credits: 0,
+                memoryRemaining: 4,
+                hasInstalledNonNoisyIcebreaker: false,
+                rigRoles: new Set(),
+                rigDefinitionIds: new Set(),
+              }),
+              rolesForCardId: () => [],
+              effectsForCardId: () => [],
+            } as Parameters<typeof selectedChoicesForDecision>[2],
+            portfolio,
+          ),
+      });
+
+      const startDecision = runtime.chooseSemanticRuntimeAction(startInput, {});
+      expect(startDecision).toMatchObject({
+        actionId: startRun.actionId,
+        reasonCode: "plan_first.runner.pressure_central",
+        decisionDebug: { planKind: "runner.pressure_central" },
+      });
+      const breakDecision = runtime.chooseSemanticRuntimeAction(input, {});
+      expect(breakDecision).toMatchObject({
+        actionId: breakVacuumLink.actionId,
+        reasonCode: "plan_first.runner.convert_run_window",
+        decisionDebug: { planKind: "runner.convert_run_window" },
+      });
+      const runOwner = residentPlanPortfolioSnapshot(input);
+      const rootPlanInstanceId = runOwner?.rootForegroundInstanceId;
+      const executorInstanceId = runOwner?.executorInstanceId;
+
+      if (bindingMode !== "foreground_root") {
+        const commitment = runOwner!.turnPlanCommitment!;
+        const lease = runOwner!.turnPlanExecutionLease!;
+        commitment.sequenceRootPlanInstanceId = executorInstanceId!;
+        commitment.cursor = { phaseIndex: 0, nodeIndex: 0 };
+        commitment.phases = [
           {
-            id: "printed_subroutines_end_the_run",
-            type: "end_the_run",
-            sourceDefinitionId: "onr_v1_279_wall-of-static",
-            sourceTitle: "Wall of Static",
+            phaseId:
+              bindingMode === "wrong_phase" ? "unrelated-phase" : lease.phaseId,
+            root: { planInstanceId: executorInstanceId },
+            nodes: [
+              {
+                nodeId:
+                  bindingMode === "wrong_node"
+                    ? "unrelated-node"
+                    : lease.nodeId,
+              },
+            ],
           },
-        ],
-      },
-    );
-    input.playerView.servers = [
-      server("hq"),
-      server("rd", [innerWall, vacuumLink]),
-      server("archives"),
-    ];
-    input.eventTail = [
-      {
-        eventId: "evt-start-vacuum-run",
-        type: "start_run",
-        stateVersionBefore: 1,
-        stateVersionAfter: 2,
-        stateHashAfter: "fnv1a:start-vacuum-run",
+        ] as never;
+        rememberResidentPlanPortfolio(input, runOwner!);
+      }
+
+      const forcedContinueInput = structuredClone(input);
+      forcedContinueInput.playerView.stateVersion = 3;
+      forcedContinueInput.legalActions = [structuredClone(continueVacuumLink)];
+      forcedContinueInput.legalActions[0]!.expiresAtStateVersion = 3;
+      forcedContinueInput.playerView.legalActions =
+        forcedContinueInput.legalActions;
+      forcedContinueInput.eventTail.push({
+        eventId: "evt-blink-break-attempt",
+        type: "break_subroutine",
+        stateVersionBefore: 2,
+        stateVersionAfter: 3,
+        stateHashAfter: "fnv1a:blink-break-attempt",
         visibilityClass: "private_to_side",
         publicPayload: {
           actor: "runner",
-          actionType: "start_run",
-          serverId: "rd",
+          actionType: "break_subroutine",
         },
-      },
-    ];
-    const startInput = aiInput("runner", [startRun]);
-    startInput.playerView.servers = structuredClone(input.playerView.servers);
-    startInput.playerView.own.credits = input.playerView.own.credits;
-    startInput.playerView.own.rig = structuredClone(input.playerView.own.rig);
-    const runtime = liveContext({
-      evaluateRunnerRunTargets: () => [
-        safeRuntimeRunTarget(startRun.actionId, "rd"),
-      ],
-      selectedChoicesForDecision: (
-        decisionInput: Parameters<typeof selectedChoicesForDecision>[0],
-        selectedAction: Parameters<typeof selectedChoicesForDecision>[1],
-        portfolio: Parameters<typeof selectedChoicesForDecision>[3],
-      ) =>
-        selectedChoicesForDecision(
-          decisionInput,
-          selectedAction,
-          {
-            evaluateCorpOpeningHand: () => ({ decision: "keep" }),
-            evaluateRunnerOpeningHand: () => ({ decision: "keep" }),
-            discardKeepScore: () => ({ total: 0 }),
-            selectedRunnerProgramInstallTrashOptionIds: () => [],
-            selectedRunnerForcedProgramTrashOptionIds: () => [],
-            selectedRunnerMemoryCheckpointTrashOptionIds: () => [],
-            extractAiFeatures: () => ({
-              credits: 0,
-              memoryRemaining: 4,
-              hasInstalledNonNoisyIcebreaker: false,
-              rigRoles: new Set(),
-              rigDefinitionIds: new Set(),
-            }),
-            rolesForCardId: () => [],
-            effectsForCardId: () => [],
-          } as Parameters<typeof selectedChoicesForDecision>[2],
-          portfolio,
-        ),
-    });
+      });
+      const forcedDecision = runtime.chooseSemanticRuntimeAction(
+        forcedContinueInput,
+        {},
+      );
+      const forcedPortfolio =
+        residentPlanPortfolioSnapshot(forcedContinueInput);
+      expect(forcedDecision).toMatchObject({
+        actionId: continueVacuumLink.actionId,
+        reasonCode: "plan_first.engine_window",
+      });
+      if (bindingMode === "wrong_phase" || bindingMode === "wrong_node") {
+        expect(forcedPortfolio?.selectedActionOrigin).toBeUndefined();
+      } else
+        expect(forcedPortfolio).toMatchObject({
+          rootForegroundInstanceId: rootPlanInstanceId,
+          executorInstanceId,
+          selectedActionOrigin: {
+            rootPlanInstanceId,
+            executorInstanceId,
+            selectedActionId: continueVacuumLink.actionId,
+            selectedAtStateVersion: 3,
+            immediateChoicePolicy: "resolve_runner_vacuum_link_rewind",
+            sourceActionType: "continue_run",
+          },
+        });
 
-    const startDecision = runtime.chooseSemanticRuntimeAction(startInput, {});
-    expect(startDecision).toMatchObject({
-      actionId: startRun.actionId,
-      reasonCode: "plan_first.runner.pressure_central",
-      decisionDebug: { planKind: "runner.pressure_central" },
-    });
-    const breakDecision = runtime.chooseSemanticRuntimeAction(input, {});
-    expect(breakDecision).toMatchObject({
-      actionId: breakVacuumLink.actionId,
-      reasonCode: "plan_first.runner.convert_run_window",
-      decisionDebug: { planKind: "runner.convert_run_window" },
-    });
-    const runOwner = residentPlanPortfolioSnapshot(input);
-    const rootPlanInstanceId = runOwner?.rootForegroundInstanceId;
-    const executorInstanceId = runOwner?.executorInstanceId;
-
-    const forcedContinueInput = structuredClone(input);
-    forcedContinueInput.playerView.stateVersion = 3;
-    forcedContinueInput.legalActions = [structuredClone(continueVacuumLink)];
-    forcedContinueInput.legalActions[0]!.expiresAtStateVersion = 3;
-    forcedContinueInput.playerView.legalActions =
-      forcedContinueInput.legalActions;
-    forcedContinueInput.eventTail.push({
-      eventId: "evt-blink-break-attempt",
-      type: "break_subroutine",
-      stateVersionBefore: 2,
-      stateVersionAfter: 3,
-      stateHashAfter: "fnv1a:blink-break-attempt",
-      visibilityClass: "private_to_side",
-      publicPayload: {
-        actor: "runner",
-        actionType: "break_subroutine",
-      },
-    });
-    const forcedDecision = runtime.chooseSemanticRuntimeAction(
-      forcedContinueInput,
-      {},
-    );
-    const forcedPortfolio = residentPlanPortfolioSnapshot(forcedContinueInput);
-    expect(forcedDecision).toMatchObject({
-      actionId: continueVacuumLink.actionId,
-      reasonCode: "plan_first.engine_window",
-    });
-    expect(forcedPortfolio).toMatchObject({
-      rootForegroundInstanceId: rootPlanInstanceId,
-      executorInstanceId,
-      selectedActionOrigin: {
-        rootPlanInstanceId,
-        executorInstanceId,
-        selectedActionId: continueVacuumLink.actionId,
-        selectedAtStateVersion: 3,
-        immediateChoicePolicy: "resolve_runner_vacuum_link_rewind",
-        sourceActionType: "continue_run",
-      },
-    });
-
-    const choiceId = "card_implementation.vacuum_link_rewind:run-vacuum:4";
-    const resolveChoice = legalAction(
-      "runner.resolve_choice",
-      "runner",
-      "resolve_choice",
-      "Vacuum Link: Run fortsetzen oder ausstöpseln",
-      { credits: 0, clicks: 0 },
-      { source: "game_rule" },
-    );
-    resolveChoice.timingPoint = "run.encounter_ice";
-    resolveChoice.expiresAtStateVersion = 4;
-    resolveChoice.choiceRequirements = [
-      {
+      const choiceId = "card_implementation.vacuum_link_rewind:run-vacuum:4";
+      const resolveChoice = legalAction(
+        "runner.resolve_choice",
+        "runner",
+        "resolve_choice",
+        "Vacuum Link: Run fortsetzen oder ausstöpseln",
+        { credits: 0, clicks: 0 },
+        { source: "game_rule" },
+      );
+      resolveChoice.timingPoint = "run.encounter_ice";
+      resolveChoice.expiresAtStateVersion = 4;
+      resolveChoice.choiceRequirements = [
+        {
+          choiceId,
+          minSelections: 1,
+          maxSelections: 1,
+          optionIds: ["resume_from_rezzed_ice_back", "jack_out"],
+        },
+      ];
+      const choiceInput = structuredClone(forcedContinueInput);
+      choiceInput.playerView.stateVersion = 4;
+      choiceInput.legalActions = [resolveChoice];
+      choiceInput.playerView.legalActions = choiceInput.legalActions;
+      choiceInput.playerView.pendingChoice = {
         choiceId,
+        side: "runner",
+        source: "card_implementation.vacuum_link_rewind",
+        sourceCardInstanceId: "vacuum-link",
+        sourceCardDefinitionId: "onr_v1_275_vacuum-link",
+        prompt: "Run fortsetzen oder ausstöpseln?",
+        kind: "select_option",
+        options: [
+          {
+            id: "resume_from_rezzed_ice_back",
+            label: "Run beim zurückliegenden Ice fortsetzen",
+            value: "resume_from_rezzed_ice_back",
+          },
+          { id: "jack_out", label: "Ausstöpseln", value: "jack_out" },
+        ],
         minSelections: 1,
         maxSelections: 1,
-        optionIds: ["resume_from_rezzed_ice_back", "jack_out"],
-      },
-    ];
-    const choiceInput = structuredClone(forcedContinueInput);
-    choiceInput.playerView.stateVersion = 4;
-    choiceInput.legalActions = [resolveChoice];
-    choiceInput.playerView.legalActions = choiceInput.legalActions;
-    choiceInput.playerView.pendingChoice = {
-      choiceId,
-      side: "runner",
-      source: "card_implementation.vacuum_link_rewind",
-      sourceCardInstanceId: "vacuum-link",
-      sourceCardDefinitionId: "onr_v1_275_vacuum-link",
-      prompt: "Run fortsetzen oder ausstöpseln?",
-      kind: "select_option",
-      options: [
-        {
-          id: "resume_from_rezzed_ice_back",
-          label: "Run beim zurückliegenden Ice fortsetzen",
-          value: "resume_from_rezzed_ice_back",
+        stateVersion: 4,
+        visibility: "public",
+      };
+      choiceInput.eventTail.push({
+        eventId: "evt-vacuum-link-choice",
+        type: "continue_run",
+        stateVersionBefore: 3,
+        stateVersionAfter: 4,
+        stateHashAfter: "fnv1a:vacuum-link-choice",
+        visibilityClass: "private_to_side",
+        publicPayload: {
+          actor: "runner",
+          actionType: "continue_run",
+          resolvedEffects: [
+            {
+              effectId: "vacuum-link-rewind",
+              kind: "resolve_subroutine",
+              sourceDefinitionId: "onr_v1_275_vacuum-link",
+              visibility: "public",
+            },
+          ],
         },
-        { id: "jack_out", label: "Ausstöpseln", value: "jack_out" },
-      ],
-      minSelections: 1,
-      maxSelections: 1,
-      stateVersion: 4,
-      visibility: "public",
-    };
-    choiceInput.eventTail.push({
-      eventId: "evt-vacuum-link-choice",
-      type: "continue_run",
-      stateVersionBefore: 3,
-      stateVersionAfter: 4,
-      stateHashAfter: "fnv1a:vacuum-link-choice",
-      visibilityClass: "private_to_side",
-      publicPayload: {
-        actor: "runner",
-        actionType: "continue_run",
-        resolvedEffects: [
-          {
-            effectId: "vacuum-link-rewind",
-            kind: "resolve_subroutine",
-            sourceDefinitionId: "onr_v1_275_vacuum-link",
-            visibility: "public",
-          },
-        ],
-      },
-    });
+      });
 
-    const choiceDecision = runtime.chooseSemanticRuntimeAction(choiceInput, {});
-    expect(choiceDecision).toMatchObject({
-      actionId: resolveChoice.actionId,
-      reasonCode: "plan_first.runner.convert_run_window",
-      selectedChoices: {
-        choiceId,
-        selectedOptionIds: ["resume_from_rezzed_ice_back"],
-      },
-      decisionDebug: {
-        planKind: "runner.convert_run_window",
-        planFirstDecision: {
-          rootPlanInstanceId,
-          leafExecutorInstanceId: executorInstanceId,
+      if (bindingMode === "wrong_phase" || bindingMode === "wrong_node") {
+        expect(() =>
+          runtime.chooseSemanticRuntimeAction(choiceInput, {}),
+        ).toThrow(expect.objectContaining({ code: "window_origin_missing" }));
+        return;
+      }
+      const choiceDecision = runtime.chooseSemanticRuntimeAction(
+        choiceInput,
+        {},
+      );
+      expect(choiceDecision).toMatchObject({
+        actionId: resolveChoice.actionId,
+        reasonCode: "plan_first.runner.convert_run_window",
+        selectedChoices: {
+          choiceId,
+          selectedOptionIds: ["resume_from_rezzed_ice_back"],
         },
-      },
-    });
-  });
+        decisionDebug: {
+          planKind: "runner.convert_run_window",
+          planFirstDecision: {
+            rootPlanInstanceId,
+            leafExecutorInstanceId: executorInstanceId,
+          },
+        },
+      });
+    },
+  );
 
   it("keeps an exact scored-card run-end ability inside corp.defend_servers", () => {
     resetResidentPlanPortfolioMemory();
@@ -20070,140 +20110,144 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
-  it.each([false, true])("spends the full affordable reserve on a reused matchpoint remote instead of saving for a later turn (restricted capacity: %s)", (restrictedCapacity) => {
-    resetResidentPlanPortfolioMemory();
-    const run = legalAction(
-      "run-affordable-matchpoint-remote",
-      "runner",
-      "start_run",
-      "Run affordable matchpoint remote",
-      { credits: 0, clicks: 1 },
-      {
-        payload: {
-          serverId: "remote_1",
-          ...(restrictedCapacity
-            ? {
-                restrictedActionGrantActionType: "start_run",
-                restrictedActionGrantCostProfile: "extra_click",
-                restrictedActionGrantRemainingActions: 1,
-                actionCapacitySelfFinancing: true,
-                gainActionsAmount: 1,
-              }
-            : {}),
-        },
-      },
-    );
-    const credit = legalAction(
-      "credit-affordable-matchpoint-remote",
-      "runner",
-      restrictedCapacity ? "end_turn" : "gain_credit",
-      restrictedCapacity ? "End turn" : "Gain 1 Credit",
-      { credits: 0, clicks: restrictedCapacity ? 0 : 1 },
-    );
-    const input = aiInput("runner", [run, credit]);
-    input.playerView.own.credits = 10;
-    input.playerView.own.clicks = restrictedCapacity ? 0 : 3;
-    input.playerView.own.gripOrHq = Array.from({ length: 4 }, (_, index) =>
-      visibleCard(`reserve-contest-grip-${index}`, "runner", "event"),
-    );
-    input.playerView.opponent.agendaPoints = 6;
-    input.playerView.opponent.deckCount = 20;
-    input.playerView.agendaPointsToWin = 7;
-    const reusedRemote = server("remote_1");
-    reusedRemote.root = [
-      {
-        instanceId: "unknown-affordable-matchpoint-root",
-        known: false,
-        advancementCounters: 0,
-      },
-    ];
-    input.playerView.servers = [
-      server("hq"),
-      server("rd"),
-      server("archives"),
-      reusedRemote,
-    ];
-    input.playerView.publicEvents = [
-      {
-        eventId: "corp-score-affordable-matchpoint-remote",
-        type: "score_agenda",
-        stateVersionBefore: 8,
-        stateVersionAfter: 9,
-        turnSerial: 3,
-        stateHashAfter: "fnv1a:corp-score-affordable-matchpoint-remote",
-        publicPayload: {
-          actor: "corp",
-          actionType: "score_agenda",
-          targets: { scoredFromServerId: "remote_1" },
-        },
-      },
-    ];
-    input.eventTail = input.playerView.publicEvents;
-    const target = {
-      ...safeRuntimeRunTarget(run.actionId, "remote_1"),
-      targetKind: "remote" as const,
-      accessTargetKind: "remote" as const,
-      knownAccessState: "unknown" as const,
-      accessPayoff: "unknown" as const,
-      scoreThreat: false,
-      pathCost: 10,
-      creditsAfterRun: 0,
-      recommendation: "gain_credits_first" as const,
-      score: -690,
-      fundingNeed: {
-        reason: "post_run_floor_gap" as const,
-        routeFundingGap: 0,
-        postRunFloorGap: 10,
-        protectedLiquidReserve: 10,
-      },
-      routeQuote: {
-        ...safeRuntimeRunTarget(run.actionId, "remote_1").routeQuote!,
-        knownCost: 10,
-        guaranteedKnownCost: 10,
-        availableCredits: 10,
-        fundingGap: 0,
-      },
-    };
-
-    const decision = liveContext({
-      evaluateRunnerRunTargets: () => [target],
-      buildRunnerEconomyPosture: () => ({
-        minimumCreditFloor: 3,
-        desiredCreditReserve: 10,
-        fundingNeed: true,
-        evidence: [],
-      }),
-    }).chooseSemanticRuntimeAction(input, {});
-
-    expect(decision).toMatchObject({
-      actionId: run.actionId,
-      reasonCode: "plan_first.runner.contest_remote",
-      fallbackUsed: false,
-    });
-    expect(decision.evidence).toEqual(
-      expect.arrayContaining([
-        "plan_priority_class:P2",
-        expect.stringContaining("runner_terminal_remote_contest_mandatory"),
-      ]),
-    );
-    expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
-      rootForegroundInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-      executorInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-    });
-    if (restrictedCapacity) {
-      expect(
-        residentPlanPortfolioSnapshot(input)?.instances.find(
-          (instance) => instance.moduleId === "runner.convert_run_window",
-        ),
-      ).toMatchObject({
-        moduleState: {
-          signal: {
-            actionAssessments: { [run.actionId]: { admissible: false } },
+  it.each([false, true])(
+    "spends the full affordable reserve on a reused matchpoint remote instead of saving for a later turn (restricted capacity: %s)",
+    (restrictedCapacity) => {
+      resetResidentPlanPortfolioMemory();
+      const run = legalAction(
+        "run-affordable-matchpoint-remote",
+        "runner",
+        "start_run",
+        "Run affordable matchpoint remote",
+        { credits: 0, clicks: 1 },
+        {
+          payload: {
+            serverId: "remote_1",
+            ...(restrictedCapacity
+              ? {
+                  restrictedActionGrantActionType: "start_run",
+                  restrictedActionGrantCostProfile: "extra_click",
+                  restrictedActionGrantRemainingActions: 1,
+                  actionCapacitySelfFinancing: true,
+                  gainActionsAmount: 1,
+                }
+              : {}),
           },
         },
+      );
+      const credit = legalAction(
+        "credit-affordable-matchpoint-remote",
+        "runner",
+        restrictedCapacity ? "end_turn" : "gain_credit",
+        restrictedCapacity ? "End turn" : "Gain 1 Credit",
+        { credits: 0, clicks: restrictedCapacity ? 0 : 1 },
+      );
+      const input = aiInput("runner", [run, credit]);
+      input.playerView.own.credits = 10;
+      input.playerView.own.clicks = restrictedCapacity ? 0 : 3;
+      input.playerView.own.gripOrHq = Array.from({ length: 4 }, (_, index) =>
+        visibleCard(`reserve-contest-grip-${index}`, "runner", "event"),
+      );
+      input.playerView.opponent.agendaPoints = 6;
+      input.playerView.opponent.deckCount = 20;
+      input.playerView.agendaPointsToWin = 7;
+      const reusedRemote = server("remote_1");
+      reusedRemote.root = [
+        {
+          instanceId: "unknown-affordable-matchpoint-root",
+          known: false,
+          advancementCounters: 0,
+        },
+      ];
+      input.playerView.servers = [
+        server("hq"),
+        server("rd"),
+        server("archives"),
+        reusedRemote,
+      ];
+      input.playerView.publicEvents = [
+        {
+          eventId: "corp-score-affordable-matchpoint-remote",
+          type: "score_agenda",
+          stateVersionBefore: 8,
+          stateVersionAfter: 9,
+          turnSerial: 3,
+          stateHashAfter: "fnv1a:corp-score-affordable-matchpoint-remote",
+          publicPayload: {
+            actor: "corp",
+            actionType: "score_agenda",
+            targets: { scoredFromServerId: "remote_1" },
+          },
+        },
+      ];
+      input.eventTail = input.playerView.publicEvents;
+      const target = {
+        ...safeRuntimeRunTarget(run.actionId, "remote_1"),
+        targetKind: "remote" as const,
+        accessTargetKind: "remote" as const,
+        knownAccessState: "unknown" as const,
+        accessPayoff: "unknown" as const,
+        scoreThreat: false,
+        pathCost: 10,
+        creditsAfterRun: 0,
+        recommendation: "gain_credits_first" as const,
+        score: -690,
+        fundingNeed: {
+          reason: "post_run_floor_gap" as const,
+          routeFundingGap: 0,
+          postRunFloorGap: 10,
+          protectedLiquidReserve: 10,
+        },
+        routeQuote: {
+          ...safeRuntimeRunTarget(run.actionId, "remote_1").routeQuote!,
+          knownCost: 10,
+          guaranteedKnownCost: 10,
+          availableCredits: 10,
+          fundingGap: 0,
+        },
+      };
+
+      const decision = liveContext({
+        evaluateRunnerRunTargets: () => [target],
+        buildRunnerEconomyPosture: () => ({
+          minimumCreditFloor: 3,
+          desiredCreditReserve: 10,
+          fundingNeed: true,
+          evidence: [],
+        }),
+      }).chooseSemanticRuntimeAction(input, {});
+
+      expect(decision).toMatchObject({
+        actionId: run.actionId,
+        reasonCode: "plan_first.runner.contest_remote",
+        fallbackUsed: false,
       });
-    }
-  });
+      expect(decision.evidence).toEqual(
+        expect.arrayContaining([
+          "plan_priority_class:P2",
+          expect.stringContaining("runner_terminal_remote_contest_mandatory"),
+        ]),
+      );
+      expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
+        rootForegroundInstanceId:
+          "plan:runner.contest_remote:remote%3Aremote_1",
+        executorInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      });
+      if (restrictedCapacity) {
+        expect(
+          residentPlanPortfolioSnapshot(input)?.instances.find(
+            (instance) => instance.moduleId === "runner.convert_run_window",
+          ),
+        ).toMatchObject({
+          moduleState: {
+            signal: {
+              actionAssessments: { [run.actionId]: { admissible: false } },
+            },
+          },
+        });
+      }
+    },
+  );
 
   it("keeps a probe-limited event run contest-owned when it has an exact affordable trash payoff", () => {
     resetResidentPlanPortfolioMemory();

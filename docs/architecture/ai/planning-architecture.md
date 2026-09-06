@@ -2149,6 +2149,30 @@ bloß fehlendem Nutzen übernimmt `runner.complete_turn` P6. Der
 regelbewiesene Corp-Deckout-Zugabschluss bleibt ein eigener terminaler
 P1-Plan und ist kein allgemeiner EndTurn-Sonderwert.
 
+Vor dem Start eines eingeschränkten Zusatzruns erzeugt
+`runner.convert_run_window` für jede konkrete Run-Action ein zielgenaues
+Signal aus ihrer aktuellen Targetevaluation. Server, Access-Commitment und
+Action-Assessment werden gemeinsam gebunden; ein Signal darf keine Route
+eines anderen angebotenen Servers übernehmen. Die aktuelle Runstart-Bewertung
+bleibt sowohl am Route Head als auch beim Vergleich der getrennten Instanzen
+erhalten; der künftige Access-Zweck ersetzt sie nicht durch einen Pauschalwert.
+Die ausgewählte Instanz bleibt
+als Root ihrer nachfolgenden Runfenster erkennbar, auch wenn ein Child den
+aktuellen Encounter ausführt. Ein etwaiges Ablehnungsfenster behält seinen
+eigenen vollständigen Actionvertrag.
+
+Beginnt die aktive Encounter-Phase beim Run-Executor, unterscheidet die
+Bindung einer verpflichtenden Vacuum-Link-Fortsetzung diese Sequenzwurzel
+vom übergeordneten residenten Run-Auftrag. Sie prüft dafür zusätzlich die
+konkrete Phasenwurzel, Phase und den aktuellen Knoten gegen die Execution
+Lease sowie die direkte Parent-Beziehung; fremde Phasen oder Knoten dürfen
+keinen Choice-Origin erzeugen.
+
+Ersetzt eine ausführbare gezielte Bypass-Vorbereitung eine blockierte Zentral-
+oder Remote-Runroute, erbt sie deren überholte `supportNeedId` nicht. Die
+bestehende Coverage-Reconciliation löst den nicht mehr angeforderten
+Requester; unabhängig sinnvolle Coverage bleibt beim eigenen Coverage-Owner.
+
 `runner.defense_and_recovery` darf außerdem normale Runner-Klickkapazität nur
 in zwei vollständig belegten Zuständen verfallen lassen: bei leerem Stack
 oder am Runner-Matchpoint in einem günstigen Deckrennen. Dafür müssen alle
