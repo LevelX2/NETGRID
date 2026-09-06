@@ -699,8 +699,35 @@ Renderlauf mit 2.090 Assertions prüft auch die Mindestfenstergeometrie und
 21 Offscreen-Ansichten; DE-Prozentanzeige und FR-Zustand ohne berechenbaren
 Umfang wurden visuell kontrolliert. 144 First-Run-Assertions bleiben grün.
 Diese Änderungen sind noch nicht im installierten 8123 enthalten. Neuer
-Paketbuild und native Prüfung einschließlich UAC-/MSI-Übergang, messbarem
-Verlauf und Fehlerpfad stehen aus. WIN-I08 bleibt offen; keine Main-Integration.
+Paketbuild ist inzwischen grün; die native Prüfung einschließlich UAC-/MSI-
+Übergang, messbarem Verlauf und Fehlerpfad steht aus. WIN-I08 bleibt offen;
+keine Main-Integration.
+
+Aktuelles neues Abnahmepaket: `1.0.8128` unter
+`output/windows-installer-measured-progress-review`, gebaut aus dem sauberen
+Commit `193a262720fa6c08ac4bb6cea6fd0d53e25a52f6` (`sourceDirty=false`).
+Releaseoutput, Setup-/First-Run-/Launcher-/Updater-Tests, isolierte Runtime-
+und Bootstrap-Smokes, DE/EN/FR-UI-Matrix sowie 10.901-Dateien-Payloadaudit sind
+grün. Setup-SHA-256:
+`f595de356c752de19d105f04003d65457140a938bb0b70261d2f2d9f039ef02f`;
+MSI-SHA-256:
+`7d1c7b71cf855fae4b432a1de679bd1fc6b56259c813813667f0d1fe9c2f64b5`.
+Beide unabhängigen Dateihashes stimmen mit `release-metadata.json` und
+`SHA256SUMS.txt` überein. Das Paket enthält die zweistufige Ersteinrichtung,
+den festen Datenhinweis und den gemessenen MSI-Fortschritt; es wurde noch
+nicht in der Sandbox installiert.
+
+Die bestehende VM `2450080a-5aa1-44c0-a576-9b6fe463c102` läuft weiter, ohne
+einen zweiten Viewer zu öffnen oder die Testinstallation zu verändern.
+Die reine installierte `NETGRID.FirstRun.exe --status`-Abfrage meldet am
+6. September um 06:38:38 UTC Code `0` beziehungsweise
+`maintenanceInitialized=true`; `result/ui-first-run-8123-status.json` im
+Laufordner `6dae9bd7feb14b849baba0f826ea0228` bindet den Nachweis. Passwort-
+inhalte wurden dabei nicht ausgegeben, und Credentials wurden nicht geändert.
+Setup und First Run sind geschlossen; der Launcher läuft als PID `5928`.
+Für eine erneute native Erstinstallation samt vorgeschalteter Einrichtungs-
+entscheidung ist eine frische Sandbox erforderlich. Die bestehende VM und
+ihr eingerichteter Zugang werden bis zur Entscheidung des Nutzers bewahrt.
 
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.
