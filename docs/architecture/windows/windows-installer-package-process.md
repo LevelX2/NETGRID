@@ -797,8 +797,21 @@ zeigte bei der erneuten Prüfung am 6. September um 07:13 UTC weiterhin keine
 Releases. Eine Veröffentlichung wurde nicht vorgenommen. Damit bleiben die
 frische native Erstinstallation einschließlich neuer Dialoge und messbarem
 MSI-Verlauf, die vollständigen Sprach-/DPI-/Kontextprüfungen und der echte
-GitHub-Updatetest offen. Die Entscheidung zum Ersetzen der bestehenden
-Sandbox steht weiterhin aus. WIN-I08 ist nicht abgeschlossen; Main-Merge,
+GitHub-Updatetest offen. Die inzwischen erteilte Freigabe zum Ersetzen der
+Sandbox und ihrer Testdaten wurde am 6. September um 07:41 UTC umgesetzt:
+VM `2450080a-5aa1-44c0-a576-9b6fe463c102` wurde beendet und ihre Abwesenheit
+vor dem Neustart per `wsb list` geprüft. Die alten Host-Testprotokolle bleiben
+erhalten. Genau eine neue, weiterhin netzwerkisolierte VM
+`4710465f-f845-4713-a399-8d4529ea49ef` läuft mit dem unveränderten, erneut
+hashgeprüften Setup 8131. Der Laufordner
+`output/windows-sandbox-e2e/c250d4b94f9c4ff391f76456d008d472` enthält unter
+`result/ui-review-start.json` den Startnachweis (Setup-PID `6436`). Die
+native deutsche Sprachwahl und das neue Setupfenster wurden erreicht;
+Standardordner sind `C:\Program Files\NETGRID` und `C:\ProgramData\NETGRID`.
+Die Installation wurde noch nicht ausgelöst; für den UI-Klick auf
+„Installieren“ bleibt die separate Bestätigung unmittelbar vor der Aktion
+gemäß Computer-Use-Regeln erforderlich. Authentifizierung und etwaige UAC-
+Dialoge werden nicht automatisiert. WIN-I08 ist nicht abgeschlossen; Main-Merge,
 Worktree-Cleanup und Push erfolgen nicht.
 
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
