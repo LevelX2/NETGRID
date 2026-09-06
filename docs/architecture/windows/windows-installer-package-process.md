@@ -564,6 +564,29 @@ der vorhandene Credentialstore des Smokes blieb beim zweiten Bootstrap
 unverändert. Das sind Komponentenprüfungen, kein erneuter installierter
 First-Run-Nachweis. Die Fortschrittskorrektur ist unter `d7054c714` gesichert.
 
+Der vollständige Neubau `output/windows-installer-onboarding-review` erzeugt
+`1.0.8119` aus dem sauberen Commit `82476bd3d`. Komponenten-Smokes,
+1.757 Setup-Assertions, 36 fensterlose First-Run-Assertions, Sprach-/Layoutgate
+und der tatsächliche Audit aller 10.901 Payload-Dateien sind grün. Die
+sechs off-screen Fortschrittsvorschauen und drei First-Run-Vorschauen sind
+getrennte Layoutprüfungen; der First-Run-Vorschaulauf umfasst 51 Assertions
+und startet keine Runtime. Beide Artefakthashes wurden unabhängig gegen
+Metadaten und `SHA256SUMS.txt` geprüft.
+
+Auf die ausdrückliche Klarstellung, die Sandbox weiter zu verwenden, wurde
+eine neue Offline-Sandbox `2450080a-5aa1-44c0-a576-9b6fe463c102` mit genau
+einem Viewer gestartet. Laufordner:
+`output/windows-sandbox-e2e/6dae9bd7feb14b849baba0f826ea0228`.
+Der Logon-Auftrag öffnet ausschließlich das hashgeprüfte 8119-Setup; er startet
+keine automatische MSI-Matrix. Für die native Prüfung des empfohlenen Wegs
+stehen diesmal die normalen Gastordner `C:\Program Files\NETGRID` und
+`C:\ProgramData\NETGRID` sowie die im Gast freien Ports `3100`/`8787` bereit.
+Das ist eine frische, netzwerkisolierte VM und kein Worktree-Server auf den
+Hostports. Hostdienste und Hostdaten bleiben unverändert. Der neue
+Installationsklick ist noch nicht erfolgt; dafür wird die unmittelbare
+Bestätigung eingeholt. WIN-I08 bleibt offen, insbesondere native Gesamtflows,
+reale DPI-/Kontexte und GitHub-Updateabnahme. Kein Push oder Main-Merge.
+
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.
 Die erste Public-Prüfung war wegen der pauschalen, aktiven Sandbox-Regel
