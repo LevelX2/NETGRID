@@ -914,9 +914,44 @@ Der neue native Dialog „NETGRID-Verwaltung jetzt einrichten?“ ist erreicht
 „Jetzt einrichten“/„Später“, erklärt Maintenance und nennt den späteren
 Startmenü-Einstieg; es sind noch keine Passwortfelder geöffnet. Die
 Einrichtungsentscheidung und Passwortbedienung werden dem Nutzer überlassen.
-Der eigentliche MSI-Lauf ist beendet; First Run wartet auf diese Entscheidung.
+Der eigentliche MSI-Lauf war beendet; First Run wartete bei dieser Aufnahme
+auf die Entscheidung.
 Keine Zugangsdaten wurden durch den Agenten geändert. Weitere native
 Sprach-/DPI-/Kontext-, Launcher- und GitHub-Updategates bleiben offen.
+
+Die anschließende Identitätsprüfung (`result/installed-8136-identity.json`,
+zuletzt am 6. September um 19:40 UTC erneut mit Exit 0 ausgeführt) bestätigt
+die vier installierten Binärdateien gegen die Release-Metadaten sowie Desktop-
+und vier Startmenüverknüpfungen. First Run und Setup sind geschlossen, der
+Launcher läuft. Welche Einrichtungsentscheidung der Nutzer getroffen hat,
+ist damit nicht belegt; vorhandene Zugangsdaten werden nicht verändert.
+
+Der native deutsche Launcher-Test um 19:36–19:40 UTC bestätigt den korrigierten
+STA-Pfad: „Diagnosepaket erstellen …“ öffnet den Windows-Speicherdialog; nach
+Speichern erscheint die Erfolgsmeldung. Automatisierte Texteingabe kam im
+Sandbox-Dateifeld auch nach erneuter Fokusprüfung nicht an. Dieser Versuch
+wurde abgebrochen und der Dialog mit seinem vorgeschlagenen Dateinamen erneut
+geöffnet. Die Sandbox-Sicherheitseinstellungen blieben unverändert.
+Das lokal erzeugte Archiv `NETGRID-diagnostics-20260906-213807.zip` wurde
+hashgleich in den Laufordner kopiert:
+`result/native-diagnostics-8136-20260906-193807.zip`, SHA-256
+`5fa4356f7935c0d7fceebde98bc38da23f36d8178d0c63c6a9e7639396f9136b`.
+`result/native-diagnostics-8136-verification.json` bindet die fünf Einträge:
+`diagnostics.json`, drei Launcher-Logs einschließlich `launcher-update.log`
+und `runtime.env.redacted`. Die Metadaten nennen 1.0.8136, Windows x64 und
+de-DE; Datenbank-/Zugangsdaten-Dateien sind nicht enthalten. Die eine sensible
+Konfigurationszuweisung ist redigiert. Das ist keine Behauptung über jede
+mögliche künftige Logfüllung; deren Schutz bleibt zusätzlich testgebunden.
+Es fand kein Upload statt.
+
+Die manuelle native Updatesuche in derselben netzlosen Sandbox zeigt nun
+den Informationsdialog zur nicht erreichbaren GitHub-Updatequelle mit
+Hinweis auf Internetverbindung, späteren Versuch und weitere Nutzbarkeit
+von NETGRID. Der Dialog wurde geschlossen; keine Updateinstallation wurde
+gestartet. Damit sind deutscher Diagnoseexport und manuelle Offline-Rückmeldung
+auf dem installierten 8136-Stand nativ belegt. Ein echter GitHub-Release-
+Download/Update sowie die übrigen Sprach-/DPI-/Einrichtungsabnahmen bleiben
+offen; WIN-I08, Main-Integration und Worktree-Cleanup sind nicht abgeschlossen.
 
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.
