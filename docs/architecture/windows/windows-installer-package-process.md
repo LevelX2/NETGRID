@@ -623,10 +623,21 @@ MSI-SHA-256:
 `8901d849fc0122b36a85c3ab7c1ac4b67f458e39904547c4def0b8a5c5f7f494`.
 Beide Dateien wurden unabhängig gegen Metadaten und `SHA256SUMS.txt` geprüft.
 Dieser Build enthält die gesammelten Textkorrekturen und den festen
-Fortschritts-/Aktionsbereich, wurde aber noch nicht in der Sandbox geöffnet
-oder installiert. Die native Abnahme und GitHub-Updatefreigabe bleiben offen;
-WIN-I08 ist nicht abgeschlossen, Main-Integration und Cleanup erfolgen noch
-nicht. Der zuvor gestartete Sandbox-Viewer bleibt unverändert.
+Fortschritts-/Aktionsbereich. Am 6. September um 05:34 UTC wurde das noch
+nicht installierende 8119-Fenster geschlossen und durch das hashgeprüfte
+8123-Setup in derselben VM ersetzt, ohne einen weiteren Viewer zu öffnen.
+Gast: Windows 11 Enterprise `10.0.26100`; Setup-PID `5332`, Startzeit
+`2026-09-06T05:34:14.5032103Z`. Die deutsche Sprachauswahl, vollständig
+angezeigte neue Texte, der benutzerdefinierte Hilfedialog und der reversible
+Wechsel zwischen Vorgaben und eigenen Werten wurden nativ geprüft. Danach
+sind wieder die Vorgaben und „Nur dieser Rechner“ ausgewählt.
+`result/ui-review-8123-start.json` und `result/ui-review-8123-preflight.json`
+im bestehenden Laufordner `6dae9bd7feb14b849baba0f826ea0228` binden den Start
+und bestätigen um 05:36 UTC: keine NETGRID-Registrierung, keine Produkt-/
+Datenordner, kein MSI-Prozess und freie Gastports `3100`/`8787`.
+„Installieren“ wurde nicht betätigt; die unmittelbare Bestätigung steht aus.
+Die weitere native Abnahme und GitHub-Updatefreigabe bleiben offen; WIN-I08
+ist nicht abgeschlossen, Main-Integration und Cleanup erfolgen noch nicht.
 
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.
