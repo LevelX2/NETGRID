@@ -953,6 +953,27 @@ auf dem installierten 8136-Stand nativ belegt. Ein echter GitHub-Release-
 Download/Update sowie die übrigen Sprach-/DPI-/Einrichtungsabnahmen bleiben
 offen; WIN-I08, Main-Integration und Worktree-Cleanup sind nicht abgeschlossen.
 
+Der native Desktop-Starttest am 6. September um 19:41 UTC erreicht eine
+Windows-Meldung, dass der `http`-Link nicht geöffnet werden kann. Die
+read-only Gastdiagnose `result/browser-health-8136.json` grenzt dies ein:
+Webclient auf `127.0.0.1:3100` liefert 200, Server auf `127.0.0.1:8787/health`
+liefert 200 mit `ok=true`, der einzige Launcher bleibt PID `6264`.
+Edge ist installiert und über sein vorhandenes Desktopsymbol startbar;
+der generische `HKCR\http\shell\open\command` fehlt, während eine
+benutzerspezifische HTTP-Auswahl existiert. Daraus wird keine vollständige
+Diagnose des konkreten UserChoice-ProgID abgeleitet. Belegt ist der
+fehlgeschlagene Windows-Linkstart bei gesunder NETGRID-Laufzeit.
+
+Ein ausdrücklich diagnostischer Aufruf des vorhandenen Edge mit
+`http://127.0.0.1:3100/` zeigt die deutsche Spielstartseite, sichtbare Version
+„V1.0 · Build 8136“, Matchauswahl und Gastnamenfeld. Gebundener Startnachweis:
+`result/browser-diagnostic-start-8136.json`. Dieser direkte Browseraufruf ist
+kein eingebauter Launcher-Ersatzpfad und ersetzt nicht die noch offene Abnahme
+des normalen Browserstarts. Browserzuordnung, Authentifizierung und
+Sicherheitseinstellungen wurden nicht verändert. Für den normalen Starttest
+ist zunächst eine funktionierende HTTP-Standardbrowserzuordnung im Gast
+erforderlich; der Hauptrechner bleibt unverändert.
+
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.
 Die erste Public-Prüfung war wegen der pauschalen, aktiven Sandbox-Regel
