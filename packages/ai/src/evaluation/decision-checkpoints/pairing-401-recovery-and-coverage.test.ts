@@ -48,13 +48,24 @@ describe("pairing 401 source-bound recovery and coverage", () => {
     );
   });
   it("preserves the selected recovery target across payment and binds its exact choice version", () => {
-    const before = restore(recoveryBeforePaymentJson);
+    // This checkpoint has six cards before playing Pawnshop. Give the
+    // continuation scenario room to retain its target: the recorded five-card
+    // limit now correctly rejects this recovery before any payment is opened.
+    const withRetentionCapacity = (json: unknown) => {
+      const capture = structuredClone(json) as Capture;
+      capture.input.playerView.own.maxHandSize = 6;
+      return capture;
+    };
+    const before = restore(withRetentionCapacity(recoveryBeforePaymentJson));
     const beforeDecision = chooseAiAction(before as AiDecisionInput);
     const beforeRuntime = exportAiRuntimeCheckpoint(
       before as AiDecisionInput,
       before.ownDeckSnapshot!.deckSnapshotId,
     );
-    const input = restore({ ...recoveryPaymentJson, runtime: beforeRuntime });
+    const input = restore({
+      ...withRetentionCapacity(recoveryPaymentJson),
+      runtime: beforeRuntime,
+    });
     const decision = chooseAiAction(input as AiDecisionInput);
     expect(decision.actionId).toBe(beforeDecision.actionId);
     const portfolio = residentPlanPortfolioSnapshot(input)!;
@@ -81,7 +92,10 @@ describe("pairing 401 source-bound recovery and coverage", () => {
       input as AiDecisionInput,
       input.ownDeckSnapshot!.deckSnapshotId,
     );
-    const choiceInput = restore({ ...recoveryChoiceJson, runtime });
+    const choiceInput = restore({
+      ...withRetentionCapacity(recoveryChoiceJson),
+      runtime,
+    });
     const choice = chooseAiAction(choiceInput as AiDecisionInput);
     expect(choice).toMatchObject({
       actionId: "runner.resolve_choice",
@@ -94,6 +108,15 @@ describe("pairing 401 source-bound recovery and coverage", () => {
     expect(residentPlanPortfolioSnapshot(choiceInput)?.executorInstanceId).toBe(
       executor.instanceId,
     );
+  });
+  it("does not open the recorded recovery payment when its target would be discarded", () => {
+    const input = restore(recoveryBeforePaymentJson);
+    expect(input.playerView.own.gripOrHq).toHaveLength(6);
+    expect(input.playerView.own.maxHandSize).toBe(5);
+    expect(chooseAiAction(input as AiDecisionInput)).toMatchObject({
+      actionId: "runner.gain_credit",
+      fallbackUsed: false,
+    });
   });
   it("binds a useful heap target before the recovery event enters the heap", () => {
     const input = restore(recoveryJson);

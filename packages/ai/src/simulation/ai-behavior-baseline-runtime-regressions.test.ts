@@ -93,13 +93,26 @@ describe("AI behavior baseline runtime regressions", () => {
     const result = runCapturedSeed(
       "strategy_panel_hybrid_score_punish_cheap_bag",
       "ai-behavior-baseline-v1-08",
-      184,
+      111,
     );
 
     expect(
       result.summary.errors,
       JSON.stringify(captureDiagnostic(result.capture), undefined, 2),
     ).toEqual([]);
+    // The current deterministic line reaches the terminal punish earlier than
+    // the old checkpoint. Verify the completed game as well as its last owner.
+    expect(result.summary).toMatchObject({
+      terminationKind: "game_result",
+      winner: "corp",
+      gameEndReason: "flatline",
+      replayOk: true,
+    });
+    expect(result.summary.actionSequence.at(-1)).toMatchObject({
+      side: "corp",
+      planKind: "corp.execute_punish_sequence",
+      fallbackUsed: false,
+    });
   }, 20_000);
 });
 
