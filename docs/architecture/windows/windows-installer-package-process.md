@@ -849,6 +849,30 @@ geöffnet (`result/corrected-setup-start.json`); die deutsche Sprachwahl und
 das Installationsformular wurden erreicht. Die erneute native Installation
 ist noch nicht ausgelöst und bleibt der nächste Abnahmeschritt.
 
+Der anschließend ausdrücklich freigegebene UI-Test von 8134 scheiterte am
+6. September um 13:43 UTC erneut mit Worker-Stufe 4 und MSI-Code 1602 vor
+Produktregistrierung. Die gezielte native Diagnose belegte einen zweiten
+Fall: einen gültigen Fortschrittsrecord mit Feldanzahl 0 (nicht `hRecord=0`).
+8134 ist deshalb weiterhin kein bestandener nativer Abnahmestand. Der Reader
+bestätigt jetzt beide datenlosen Formen ohne Zähleränderung; vorhandene
+fehlerhafte numerische Records werden unverändert abgewiesen.
+
+Ein zusätzlicher direkter MSI-Test mit dem neuen Reader und den unveränderten,
+hashgeprüften 8134-Paketdateien installierte ausschließlich in
+`C:\Program Files\NETGRID-Progress-Probe` und
+`C:\ProgramData\NETGRID-Progress-Probe` innerhalb derselben Sandbox und
+deinstallierte danach mit expliziter Testdatenbereinigung. Installation und
+Cleanup lieferten jeweils 0, beide Testordner sind entfernt, der Reader hatte
+keinen Fehler. Verarbeitet wurden 57.977 Progress-Nachrichten (darunter 838
+datenlose) und 68.034 Zähleraktualisierungen einschließlich ActionData. Echte
+MSI-Prozente von 0 bis 100 sowie Vorbereitung und abschließender Nullumfang
+sind belegt. Der Nachweis liegt unter
+`result/msi-progress-full-diagnostic.json`, der isolierte Diagnosequelltext
+unter `output/msi-progress-diagnostic`; Authentifizierung und Spielstart
+wurden nicht ausgeführt. Dieser Test prüft den nativen MSI-Reader, nicht den
+vollständigen Setup-/Pipe-/Onboarding-UI-Pfad. Für dessen Abnahme bleiben ein
+neuer Paketbuild und ein erneuter sichtbarer Setup-Test erforderlich.
+
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.
 Die erste Public-Prüfung war wegen der pauschalen, aktiven Sandbox-Regel

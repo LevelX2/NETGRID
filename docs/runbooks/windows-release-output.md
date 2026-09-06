@@ -491,8 +491,9 @@ MSI-Decompile-Audit prüft deshalb ausdrücklich die Argumentbindung;
 Build-/Extraktionserfolg allein beweist keine funktionierende Installation.
 
 Der native Fortschrittscallback bestätigt auch datensatzlose
-`INSTALLMESSAGE_PROGRESS`-Benachrichtigungen:
-Windows Installer kann sie bereits beim Öffnen eines Pakets senden. Sie
+`INSTALLMESSAGE_PROGRESS`-Benachrichtigungen sowie gültige Records mit null
+Feldern: Windows Installer sendet beide Formen beim Öffnen beziehungsweise
+Installieren eines Pakets. Sie
 ändern keinen Zähler und erzeugen keine Prozentanzeige. Ein vorhandener,
 aber ungültiger numerischer Fortschrittsrecord bleibt dagegen ein Fehler;
 auch eine unterbrochene Fortschrittsübertragung bricht weiterhin ab.

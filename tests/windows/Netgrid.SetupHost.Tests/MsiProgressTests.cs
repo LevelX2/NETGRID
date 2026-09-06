@@ -67,11 +67,28 @@ internal static class MsiProgressTests
             _observed = null;
             Assert(Handle(0x0A000000, 0) == 1 && _observed is null && readerType.GetProperty("Failure")!.GetValue(reader) is null,
                 "native_empty_progress_notification_is_not_cancellation_or_measured_work");
+            var emptyRecord = MsiCreateRecord(0);
+            if (emptyRecord == 0) throw new Exception("msi_empty_test_record_creation_failed");
+            try
+            {
+                Assert(Handle(0x0A000000, emptyRecord) == 1 && _observed is null && readerType.GetProperty("Failure")!.GetValue(reader) is null,
+                    "native_zero_field_progress_record_is_not_cancellation_or_measured_work");
+            }
+            finally { MsiCloseHandle(emptyRecord); }
             foreach (var (field, value) in new[] { (1u, 0), (2u, 500), (3u, 0), (4u, 0) })
                 if (MsiRecordSetInteger(record, field, value) != 0) throw new Exception("msi_test_record_write_failed");
             _observed = null;
             Assert(Handle(0x0A000030, record) == 1 && _observed is not null, "native_record_decoded_with_message_flags");
             Assert(Value<long>(_observed!, "Total") == 500, "native_total_matches_record");
+            var emptyAfterReset = MsiCreateRecord(0);
+            if (emptyAfterReset == 0) throw new Exception("msi_empty_test_record_creation_failed");
+            try
+            {
+                var beforeEmpty = _observed;
+                Assert(Handle(0x0A000000, emptyAfterReset) == 1 && ReferenceEquals(_observed, beforeEmpty), "zero_field_notification_preserves_measured_progress");
+                Assert(MsiRecordGetFieldCount(emptyAfterReset) == 0, "empty_installer_owned_record_is_not_closed");
+            }
+            finally { MsiCloseHandle(emptyAfterReset); }
             Assert(MsiRecordGetInteger(record, 2) == 500, "callback_does_not_close_installer_owned_record");
             Assert(Handle(0x04000000, 0) == 0, "other_messages_not_intercepted");
             var previousSnapshot = _observed;
@@ -120,6 +137,7 @@ internal static class MsiProgressTests
     [DllImport("msi.dll", ExactSpelling = true)] private static extern uint MsiCreateRecord(uint fields);
     [DllImport("msi.dll", ExactSpelling = true)] private static extern uint MsiRecordSetInteger(uint record, uint field, int value);
     [DllImport("msi.dll", ExactSpelling = true)] private static extern int MsiRecordGetInteger(uint record, uint field);
+    [DllImport("msi.dll", ExactSpelling = true)] private static extern uint MsiRecordGetFieldCount(uint record);
     [DllImport("msi.dll", ExactSpelling = true)] private static extern uint MsiCloseHandle(uint record);
     [DllImport("msi.dll", ExactSpelling = true)] private static extern uint MsiSetExternalUIRecord(IntPtr handler, uint filter, IntPtr context, out IntPtr previous);
 }

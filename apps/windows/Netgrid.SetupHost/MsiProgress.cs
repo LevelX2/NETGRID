@@ -100,11 +100,13 @@ internal sealed class MsiProgressReader(Action<MsiProgressSnapshot> report)
                         update = _counter.ActionData();
                         break;
                     case ProgressMessage:
-                        // Windows Installer also sends a recordless progress
-                        // notification when opening a package, before any ticks.
+                        // Windows Installer also sends progress notifications
+                        // with no record or a valid zero-field record, before
+                        // any ticks (package opening and server-side startup).
                         // Acknowledge it without changing/reporting the counter.
                         // It is not a malformed numeric record or a cancellation.
                         if (record == 0) return 1;
+                        if (MsiRecordGetFieldCount(record) == 0) return 1;
                         update = _counter.Progress(MsiRecordGetInteger(record, 1), MsiRecordGetInteger(record, 2),
                             MsiRecordGetInteger(record, 3), MsiRecordGetInteger(record, 4));
                         break;
@@ -125,4 +127,6 @@ internal sealed class MsiProgressReader(Action<MsiProgressSnapshot> report)
 
     [DllImport("msi.dll", ExactSpelling = true)]
     private static extern int MsiRecordGetInteger(uint record, uint field);
+    [DllImport("msi.dll", ExactSpelling = true)]
+    private static extern uint MsiRecordGetFieldCount(uint record);
 }
