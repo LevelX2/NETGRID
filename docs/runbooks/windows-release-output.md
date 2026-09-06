@@ -269,6 +269,18 @@ weder die Zustimmung im Tray noch einen echten GitHub-Releaseabruf.
 
 ### Hilfen und Platzprüfung im Setup
 
+Während Prüfung, Vorbereitung, Administratorfreigabe und MSI-Installation
+zeigt das Setup einen animierten Fortschrittsbalken mit der tatsächlichen
+Phase. Es behauptet keine Prozentwerte aus Laufzeit oder Dateianzahl.
+Nach erfolgreichem MSI-Ende stoppt die Animation; der Hinweis verweist auf
+die separate Ersteinrichtung. Fehler und abgebrochene Administratorfreigaben
+stoppen den Balken und geben die Eingaben wieder frei. Status und Balken
+bleiben aktiv und lesbar, während die Optionen gesperrt sind.
+Die normalen Ordner sind `C:\Program Files\NETGRID` und
+`C:\ProgramData\NETGRID`; bei bestehender Installation wird deren registrierter
+Datenordner angeboten. `NETGRID-E2E-<ID>` gehört ausschließlich zur gezielt
+vorbereiteten Testinstallation, nicht zum normalen Namensvorschlag.
+
 Alle Optionen besitzen lokalisierte „?“-Hilfen: Tooltip bei Mauszeigerkontakt,
 ausführlicher Dialog per Klick oder Tastatur sowie zugängliche Beschreibung.
 Maintenance wird zusätzlich über einen sichtbaren Erklärlink eingeführt.

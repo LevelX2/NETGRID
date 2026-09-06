@@ -335,6 +335,8 @@ internal static class UninstallWorker
     private static extern bool MoveFileEx(string existingFileName, string? newFileName, int flags);
 }
 
+internal enum InstallationPhase { Validating, Preparing, Elevation, Installing, FirstRun, Completed }
+
 internal sealed class SetupForm : Form
 {
     private readonly ToolTip _helpToolTip = SetupHelpToolTip.Create();
@@ -351,7 +353,8 @@ internal sealed class SetupForm : Form
     private readonly CheckBox _desktop = new() { Text = UiText.Get("setup.desktop"), Checked = true, AutoSize = true };
     private readonly CheckBox _launch = new() { Text = UiText.Get("setup.launch"), Checked = true, AutoSize = true };
     private readonly Label _lanAddress = new() { AutoSize = true };
-    private readonly Label _status = new() { AutoSize = true, ForeColor = SystemColors.GrayText };
+    private readonly Label _status = new() { AutoSize = true, MaximumSize = new Size(660, 0), ForeColor = SystemColors.GrayText };
+    private readonly ProgressBar _progress = new() { Dock = DockStyle.Top, Height = 20, Visible = false, MarqueeAnimationSpeed = 0 };
     private readonly Button _install = new() { Text = UiText.Get("setup.install"), AutoSize = true, Padding = new Padding(18, 6, 18, 6) };
     private readonly IReadOnlyList<string> _privateAddresses = NetworkSelection.PrivateIpv4Addresses();
 
@@ -437,6 +440,7 @@ internal sealed class SetupForm : Form
         root.Controls.Add(Flow(_desktop, Help("setup.desktop", "setup.help.desktop", _desktop), _launch, Help("setup.launch", "setup.help.launch", _launch)));
         root.Controls.Add(Body(UiText.Get("setup.data.help")));
         root.Controls.Add(_status);
+        root.Controls.Add(_progress);
         var actions = new FlowLayoutPanel { AutoSize = true, Dock = DockStyle.Top, FlowDirection = FlowDirection.RightToLeft };
         actions.Controls.Add(_install);
         root.Controls.Add(actions);
@@ -454,7 +458,7 @@ internal sealed class SetupForm : Form
         try
         {
             ToggleUi(false);
-            _status.Text = UiText.Get("setup.status.validate");
+            SetInstallationPhase(InstallationPhase.Validating);
             var settings = ReadSettings();
             settings.Validate();
             await Task.Run(() => InstallationSpace.Check(settings.ProgramRoot, settings.DataRoot));
@@ -474,10 +478,10 @@ internal sealed class SetupForm : Form
                 _serverPort.Value = alternative.ServerPort;
                 settings = ReadSettings();
             }
-            _status.Text = UiText.Get("setup.status.elevation");
-            var result = await Task.Run(() => Installer.Run(settings));
+            var progress = new Progress<InstallationPhase>(SetInstallationPhase);
+            var result = await Task.Run(() => Installer.Run(settings, progress));
             if (result is not (0 or 3010)) throw new SetupException("msi_failed", result, Installer.LogPath);
-            _status.Text = UiText.Get("setup.status.success");
+            SetInstallationPhase(InstallationPhase.FirstRun);
             var firstRunResult = await Task.Run(() => Installer.RunFirstRun(settings));
             if (firstRunResult > 1)
             {
@@ -492,17 +496,20 @@ internal sealed class SetupForm : Form
             {
                 Process.Start(new ProcessStartInfo(Path.Combine(settings.ProgramRoot, "NETGRID.exe")) { UseShellExecute = true });
             }
+            SetInstallationPhase(InstallationPhase.Completed);
             MessageBox.Show(UiText.Get("setup.status.success"), "NETGRID Setup", MessageBoxButtons.OK, MessageBoxIcon.Information);
             Close();
         }
         catch (Win32Exception exception) when (exception.NativeErrorCode == 1223)
         {
+            StopProgress();
             _status.Text = UiText.Get("setup.status.cancelled");
             MessageBox.Show(_status.Text, "NETGRID Setup", MessageBoxButtons.OK, MessageBoxIcon.Information);
             ToggleUi(true);
         }
         catch (Exception exception)
         {
+            StopProgress();
             _status.Text = SetupFailure.Message(exception);
             MessageBox.Show(_status.Text, "NETGRID Setup", MessageBoxButtons.OK, MessageBoxIcon.Error);
             ToggleUi(true);
@@ -528,8 +535,40 @@ internal sealed class SetupForm : Form
 
     private void ToggleUi(bool enabled)
     {
-        foreach (Control control in Controls) control.Enabled = enabled;
-        _status.Enabled = true;
+        // Keep the feedback's parent enabled so the label stays legible and the
+        // native marquee can animate while the interactive sections are locked.
+        foreach (Control root in Controls)
+            foreach (Control control in root.Controls)
+                if (control != _status && control != _progress) control.Enabled = enabled;
+        if (enabled) UpdateAdvancedState();
+    }
+
+    internal void SetInstallationPhase(InstallationPhase phase)
+    {
+        var key = phase switch
+        {
+            InstallationPhase.Validating => "setup.status.validate",
+            InstallationPhase.Preparing => "setup.status.prepare",
+            InstallationPhase.Elevation => "setup.status.elevation",
+            InstallationPhase.Installing => "setup.status.installing",
+            InstallationPhase.FirstRun => "setup.status.first_run",
+            InstallationPhase.Completed => "setup.status.success",
+            _ => throw new ArgumentOutOfRangeException(nameof(phase)),
+        };
+        var running = phase is not (InstallationPhase.FirstRun or InstallationPhase.Completed);
+        _status.Text = UiText.Get(key);
+        _status.ForeColor = SystemColors.ControlText;
+        _progress.AccessibleName = _status.Text;
+        _progress.Style = running ? ProgressBarStyle.Marquee : ProgressBarStyle.Continuous;
+        _progress.MarqueeAnimationSpeed = running ? 30 : 0;
+        _progress.Value = running ? 0 : _progress.Maximum;
+        _progress.Visible = true;
+    }
+
+    private void StopProgress()
+    {
+        _progress.MarqueeAnimationSpeed = 0;
+        _progress.Visible = false;
     }
 
     private void UpdateAdvancedState()
@@ -695,12 +734,13 @@ internal static class Installer
 {
     public static string LogPath { get; } = Path.Combine(Path.GetTempPath(), $"NETGRID-install-{DateTime.UtcNow:yyyyMMdd-HHmmss}.log");
 
-    public static int Run(SetupSettings settings)
+    public static int Run(SetupSettings settings, IProgress<InstallationPhase> progress)
     {
         InstallationSpace.Check(settings.ProgramRoot, settings.DataRoot);
         var temporaryMsi = Path.Combine(Path.GetTempPath(), $"NETGRID-{Guid.NewGuid():N}.msi");
         try
         {
+            progress.Report(InstallationPhase.Preparing);
             MsiPayload.ExtractVerified(temporaryMsi);
             var properties = new[]
             {
@@ -718,6 +758,7 @@ internal static class Installer
                 Property("NETGRID_SETUP_SHA256", CurrentSetupHash()),
             };
             var arguments = $"/i {Quote(temporaryMsi)} /qn /norestart /l*v {Quote(LogPath)} {string.Join(" ", properties)}";
+            progress.Report(InstallationPhase.Elevation);
             using var process = Process.Start(new ProcessStartInfo("msiexec.exe")
             {
                 Arguments = arguments,
@@ -725,6 +766,7 @@ internal static class Installer
                 Verb = "runas",
                 WindowStyle = ProcessWindowStyle.Hidden,
             }) ?? throw new SetupException("msi_start_failed");
+            progress.Report(InstallationPhase.Installing);
             process.WaitForExit();
             return process.ExitCode;
         }

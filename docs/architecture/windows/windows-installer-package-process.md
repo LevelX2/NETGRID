@@ -532,6 +532,27 @@ geprüft entfernt. Der Nachweis liegt im Laufordner unter
 liegen getrennt bei ihren jeweiligen Test-IDs. Kein GitHub-Upload und keine
 Main-Integration wurden vorgenommen.
 
+Die am 2026-09-06 ausdrücklich bestätigte native Installation des 8113-Setups
+in derselben Sandbox endet um 06:46 Uhr mit MSI-Code 0. Der Prüfpfad
+`manual-setup-8113-installed.json` bindet Setuphash und Test-ID
+`b9b5b463cbb6488dae94e4f2b3a025c7`; 10.901 Programmdateien, deutscher
+registrierter Sprachwert, isolierter Datenroot und die sichtbare
+Desktopverknüpfung sind nachgewiesen. Die deutsche Ersteinrichtung ist geöffnet;
+Passworteingabe und Abschluss wurden dem Nutzer übergeben. Das ist noch kein
+vollständiger First-Run- oder Cleanup-Nachweis. Es läuft eine Sandbox mit
+mehreren Viewerfenstern, nicht mehrere getrennte Testmaschinen.
+
+Der dabei beobachtete unveränderte Freigabetext während des bereits laufenden
+MSI und die Nutzeranforderung an eine Fortschrittsanzeige führen zu einer
+gezielten Setupkorrektur: animierter Balken und phasengebundene Meldungen für
+Prüfung, Vorbereitung, Freigabe und Installation; keine geschätzten Prozente.
+Nach MSI-Erfolg endet die Animation, während der Text auf die Ersteinrichtung
+verweist. Die Statuszeile bleibt trotz gesperrter Optionen lesbar und bricht um.
+1.757 fokussierte Assertions einschließlich Phasen, Sprachtexten, deaktivierten
+Eingaben, Retry und Fehlerstopp sind grün. Layoutvorschauen werden getrennt
+von echten Installerabläufen erzeugt. Die Änderung ist noch nicht im
+geöffneten 8113-Setup enthalten und braucht einen neuen artefaktgebundenen Lauf.
+
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.
 Die erste Public-Prüfung war wegen der pauschalen, aktiven Sandbox-Regel

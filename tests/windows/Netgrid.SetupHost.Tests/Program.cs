@@ -14,6 +14,7 @@ var catalog = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, s
 var previewRoot = args.Length == 2 && args[0] == "--render-to" ? Path.GetFullPath(args[1]) : null;
 if (previewRoot is not null) Directory.CreateDirectory(previewRoot);
 var checks = 0;
+var previewWindowsShown = 0;
 var languagePolicy = assembly.GetType("Netgrid.Windows.WindowsUiLanguage", throwOnError: true)!;
 var resolveLanguage = languagePolicy.GetMethod("Resolve")!;
 foreach (var chosen in new[] { "de", "en", "fr" })
@@ -200,6 +201,51 @@ foreach (var language in new[] { "de", "en", "fr" })
                 Assert(button.TabStop && !string.IsNullOrWhiteSpace(button.AccessibleName), "help_keyboard_accessible");
             }
             T Field<T>(string name) => (T)form.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(form)!;
+            var setPhase = form.GetType().GetMethod("SetInstallationPhase", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            var phaseType = assembly.GetType("Netgrid.SetupHost.InstallationPhase", true)!;
+            var toggleUi = form.GetType().GetMethod("ToggleUi", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            toggleUi.Invoke(form, [false]);
+            var progress = Field<ProgressBar>("_progress");
+            Assert(progress.Parent!.Enabled && progress.Enabled && Field<Label>("_status").Enabled, "busy_feedback_not_disabled_with_options");
+            Assert(!Field<Button>("_install").Enabled && !Field<TextBox>("_programRoot").Enabled, "installation_options_locked");
+            foreach (var (phase, key, running) in new[]
+            {
+                ("Validating", "validate", true), ("Preparing", "prepare", true),
+                ("Elevation", "elevation", true), ("Installing", "installing", true),
+                ("FirstRun", "first_run", false), ("Completed", "success", false),
+            })
+            {
+                setPhase.Invoke(form, [Enum.Parse(phaseType, phase)]);
+                Assert(Field<Label>("_status").Text == catalog[language][$"setup.status.{key}"], "installation_phase_localized");
+                Assert(progress.Style == (running ? ProgressBarStyle.Marquee : ProgressBarStyle.Continuous), "progress_matches_actual_phase");
+                Assert(progress.MarqueeAnimationSpeed == (running ? 30 : 0), "progress_stops_when_waiting_for_user");
+                if (!running) Assert(progress.Value == progress.Maximum, "completed_msi_progress_is_full");
+                form.PerformLayout();
+                Assert(Field<Label>("_status").Width <= 660, "installation_status_wraps");
+                Assert(progress.Parent!.ClientRectangle.Contains(progress.Bounds), "progress_inside_layout");
+                if (previewRoot is not null && phase is "Installing" or "FirstRun")
+                {
+                    // DrawToBitmap alone does not create hidden child handles.
+                    // Use the same off-screen window lifecycle as setup previews.
+                    form.ShowInTaskbar = false;
+                    form.StartPosition = FormStartPosition.Manual;
+                    form.Location = new Point(-32000, -32000);
+                    form.Show();
+                    previewWindowsShown++;
+                    Application.DoEvents();
+                    Thread.Sleep(1000); // Let the native progress transition settle before capture.
+                    Application.DoEvents();
+                    form.PerformLayout();
+                    using var bitmap = new Bitmap(form.Width, form.Height);
+                    form.DrawToBitmap(bitmap, new Rectangle(Point.Empty, bitmap.Size));
+                    bitmap.Save(Path.Combine(previewRoot, $"progress-{language}-{phase}.png"), System.Drawing.Imaging.ImageFormat.Png);
+                    form.Hide();
+                }
+            }
+            form.GetType().GetMethod("StopProgress", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(form, []);
+            Assert(progress.MarqueeAnimationSpeed == 0, "progress_stops_on_failure_or_cancellation");
+            toggleUi.Invoke(form, [true]);
+            Assert(Field<Button>("_install").Enabled && !Field<TextBox>("_programRoot").Enabled, "retry_restores_recommended_field_state");
             Assert(Field<ComboBox>("_retention").SelectedItem!.ToString() == catalog[language]["setup.retention.recommended"], "retention_labels_use_current_language");
             var local = Field<RadioButton>("_local");
             var lan = Field<RadioButton>("_lan");
@@ -219,7 +265,7 @@ foreach (var language in new[] { "de", "en", "fr" })
     uiThread.Join();
     if (uiFailure is not null) throw uiFailure;
 }
-Console.WriteLine($"SETUP_HOST_TESTS_OK checks={checks} languages=de,en,fr windowsShown=0");
+Console.WriteLine($"SETUP_HOST_TESTS_OK checks={checks} languages=de,en,fr offscreenPreviewWindows={previewWindowsShown}");
 
 static IEnumerable<Control> Descendants(Control parent)
 {
