@@ -974,6 +974,26 @@ Sicherheitseinstellungen wurden nicht verändert. Für den normalen Starttest
 ist zunächst eine funktionierende HTTP-Standardbrowserzuordnung im Gast
 erforderlich; der Hauptrechner bleibt unverändert.
 
+Die hashgebundene reine First-Run-Statusabfrage vom 6. September um 19:45:58 UTC
+bestätigt inzwischen `initialized=true` mit Exit 0
+(`result/first-run-status-8136.json`). Es wurde ausschließlich `--status`
+ausgeführt, kein Bootstrap oder Reset. Das beweist den eingerichteten Zustand,
+nicht die unbeobachteten einzelnen Passwort-/Zurück-Schritte des Nutzers.
+
+Von 19:46 bis 19:50 UTC wurden außerdem die nativen englischen und französischen
+Setupoberflächen von 8136 geprüft: Sprachwahl mit unmittelbar übersetzten,
+getrennten Aktionsschaltflächen, Standardwerte, benutzerdefinierte Optionen
+und deren angeklickter Hilfedialog. Sichtbare Beschriftungen, Standardordner,
+Datenhinweis und mehrzeilige Hilfe sind vollständig und ohne Überlagerungen
+dargestellt. Die Reviewprozesse `6340` und `7028` wurden jeweils über das
+Fensterkreuz ohne Installationsaktion geschlossen. Startbindungen liegen in
+`result/language-review-8136-start.json` und
+`result/language-review-8136-start-7028.json`. Die Sprachauswahl änderte nur
+den jeweiligen Reviewprozess, nicht die installierte Sprachpräferenz.
+Dies ist eine Sichtprüfung im vorhandenen Sandboxkontext, keine zusätzliche
+reale DPI-Stufe, kein Hovernachweis und keine funktionale Sprachabnahme von
+Installation, Update oder Ersteinrichtung. Diese übrigen Gates bleiben offen.
+
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.
 Die erste Public-Prüfung war wegen der pauschalen, aktiven Sandbox-Regel
