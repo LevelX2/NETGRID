@@ -353,6 +353,7 @@ internal sealed class SetupForm : Form
     private readonly CheckBox _desktop = new() { Text = UiText.Get("setup.desktop"), Checked = true, AutoSize = true };
     private readonly CheckBox _launch = new() { Text = UiText.Get("setup.launch"), Checked = true, AutoSize = true };
     private readonly Label _lanAddress = new() { AutoSize = true };
+    private readonly Label _dataNotice = Body(UiText.Get("setup.data.help"));
     private readonly Label _status = new() { AutoSize = true, MaximumSize = new Size(660, 0), ForeColor = SystemColors.GrayText };
     private readonly ProgressBar _progress = new() { Dock = DockStyle.Top, Height = 20, Visible = false, MarqueeAnimationSpeed = 0 };
     private readonly Button _install = new() { Text = UiText.Get("setup.install"), AutoSize = true, Padding = new Padding(18, 6, 18, 6) };
@@ -438,7 +439,6 @@ internal sealed class SetupForm : Form
         advanced.SetColumnSpan(_accountMode, 2);
         root.Controls.Add(Group(UiText.Get("setup.advanced"), advanced));
         root.Controls.Add(Flow(_desktop, Help("setup.desktop", "setup.help.desktop", _desktop), _launch, Help("setup.launch", "setup.help.launch", _launch)));
-        root.Controls.Add(Body(UiText.Get("setup.data.help")));
         // Keep feedback and the primary action visible even when translated
         // options need to scroll in a smaller window.
         var footer = new TableLayoutPanel
@@ -446,9 +446,10 @@ internal sealed class SetupForm : Form
             AutoSize = true,
             Dock = DockStyle.Bottom,
             ColumnCount = 1,
-            Padding = new Padding(28, 0, 28, 20),
+            Padding = new Padding(28, 8, 28, 20),
         };
         footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        footer.Controls.Add(_dataNotice);
         footer.Controls.Add(_status);
         footer.Controls.Add(_progress);
         var actions = new FlowLayoutPanel { AutoSize = true, Dock = DockStyle.Top, FlowDirection = FlowDirection.RightToLeft };
@@ -550,7 +551,7 @@ internal sealed class SetupForm : Form
         // native marquee can animate while the interactive sections are locked.
         foreach (Control root in Controls)
             foreach (Control control in root.Controls)
-                if (control != _status && control != _progress) control.Enabled = enabled;
+                if (control != _dataNotice && control != _status && control != _progress) control.Enabled = enabled;
         if (enabled) UpdateAdvancedState();
     }
 

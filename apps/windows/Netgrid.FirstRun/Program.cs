@@ -52,10 +52,17 @@ internal sealed class FirstRunForm : Form
     private readonly Label _laterHelp = Body(UiText.Get("first.later.help", UiText.Get("first.title")));
     private readonly Label _status = new() { AutoSize = true, ForeColor = SystemColors.GrayText, MaximumSize = new Size(520, 0) };
     private readonly Label _accountMode = new() { AutoSize = true, MaximumSize = new Size(520, 0) };
+    private readonly Label _heading = new() { AutoSize = true, Font = new Font(SystemFonts.DefaultFont.FontFamily, 17, FontStyle.Bold), MaximumSize = new Size(580, 0), Margin = new Padding(3, 3, 3, 14) };
+    private readonly Label _intro = Body(string.Empty);
+    private readonly TableLayoutPanel _passwordFields = new() { AutoSize = true, Dock = DockStyle.Top, ColumnCount = 1 };
     private readonly Button _complete = new() { Text = UiText.Get("first.complete"), AutoSize = true, Padding = new Padding(16, 6, 16, 6) };
     private readonly Button _later = new() { Text = UiText.Get("first.later"), AutoSize = true, Padding = new Padding(12, 6, 12, 6) };
+    private readonly Button _begin = new() { Text = UiText.Get("first.begin"), AutoSize = true, Padding = new Padding(16, 6, 16, 6) };
+    private readonly Button _back = new() { Text = UiText.Get("first.back"), AutoSize = true, Padding = new Padding(12, 6, 12, 6) };
+    private readonly FlowLayoutPanel _actions = new() { AutoSize = true, FlowDirection = FlowDirection.RightToLeft, Dock = DockStyle.Top };
     private FirstRunRuntime? _runtime;
     private bool _alreadyInitialized;
+    private bool _enteringPassword;
 
     public int ResultCode { get; private set; } = 1;
 
@@ -72,31 +79,46 @@ internal sealed class FirstRunForm : Form
         Padding = new Padding(28);
 
         var root = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, AutoSize = true };
-        root.Controls.Add(new Label
-        {
-            Text = UiText.Get("first.header"),
-            AutoSize = true,
-            Font = new Font(SystemFonts.DefaultFont.FontFamily, 17, FontStyle.Bold),
-            Margin = new Padding(3, 3, 3, 14),
-        });
-        root.Controls.Add(Body(UiText.Get("first.body")));
+        root.Controls.Add(_heading);
+        root.Controls.Add(_intro);
         root.Controls.Add(_accountMode);
         _passwordVisibility = new PasswordVisibilityButton(_password, UiText.Get("first.password"));
         _confirmationVisibility = new PasswordVisibilityButton(_confirmation, UiText.Get("first.confirm"));
-        root.Controls.Add(Field(UiText.Get("first.password"), _password, _passwordVisibility));
-        root.Controls.Add(Field(UiText.Get("first.confirm"), _confirmation, _confirmationVisibility));
+        _passwordFields.Controls.Add(Field(UiText.Get("first.password"), _password, _passwordVisibility));
+        _passwordFields.Controls.Add(Field(UiText.Get("first.confirm"), _confirmation, _confirmationVisibility));
+        root.Controls.Add(_passwordFields);
         root.Controls.Add(_status);
         root.Controls.Add(_laterHelp);
-        var actions = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.RightToLeft, Dock = DockStyle.Top };
-        actions.Controls.Add(_complete);
-        actions.Controls.Add(_later);
-        root.Controls.Add(actions);
+        _actions.Controls.Add(_complete);
+        _actions.Controls.Add(_back);
+        _actions.Controls.Add(_begin);
+        _actions.Controls.Add(_later);
+        root.Controls.Add(_actions);
         Controls.Add(root);
 
         Deactivate += (_, _) => HidePasswords();
         FormClosed += (_, _) => { _password.Clear(); _confirmation.Clear(); };
         _complete.Click += async (_, _) => await CompleteAsync();
         _later.Click += (_, _) => Close();
+        _begin.Click += (_, _) =>
+        {
+            if (!_begin.Enabled || _alreadyInitialized) return;
+            _enteringPassword = true;
+            UpdateStep();
+            _password.Focus();
+        };
+        _back.Click += (_, _) =>
+        {
+            if (!_back.Enabled) return;
+            _password.Clear();
+            _confirmation.Clear();
+            HidePasswords();
+            _enteringPassword = false;
+            UpdateStep();
+            _begin.Focus();
+        };
+        UpdateStep();
+        ToggleInputs(false);
     }
 
     internal async Task InitializeAsync()
@@ -109,21 +131,7 @@ internal sealed class FirstRunForm : Form
             _accountMode.Text = _runtime.AccountMode == "protected"
                 ? UiText.Get("first.account.protected")
                 : UiText.Get("first.account.simple");
-            if (await Task.Run(_runtime.IsMaintenanceInitialized))
-            {
-                _status.Text = UiText.Get("first.exists");
-                _password.Enabled = false;
-                _confirmation.Enabled = false;
-                _complete.Text = UiText.Get("common.close");
-                _alreadyInitialized = true;
-                _complete.Enabled = true;
-                _later.Visible = false;
-                _laterHelp.Visible = false;
-                return;
-            }
-            _status.Text = UiText.Get("first.pipe");
-            ToggleInputs(true);
-            _password.Focus();
+            ConfigurationChecked(await Task.Run(_runtime.IsMaintenanceInitialized));
         }
         catch (Exception)
         {
@@ -133,15 +141,48 @@ internal sealed class FirstRunForm : Form
         }
     }
 
+    internal void ConfigurationChecked(bool initialized)
+    {
+        _alreadyInitialized = initialized;
+        _enteringPassword = false;
+        UpdateStep();
+        ToggleInputs(!initialized);
+        if (initialized) _complete.Enabled = true;
+        else _begin.Focus();
+    }
+
+    private void UpdateStep()
+    {
+        _actions.SuspendLayout();
+        var choice = !_alreadyInitialized && !_enteringPassword;
+        _heading.Text = UiText.Get(choice ? "first.choice.header" : "first.header");
+        _intro.Text = UiText.Get(choice ? "first.choice.body" : "first.body");
+        _intro.Visible = !_alreadyInitialized;
+        _passwordFields.Visible = _enteringPassword && !_alreadyInitialized;
+        _laterHelp.Visible = choice;
+        _later.Visible = choice;
+        _begin.Visible = choice;
+        _back.Visible = _enteringPassword && !_alreadyInitialized;
+        _complete.Visible = !choice;
+        _complete.Text = UiText.Get(_alreadyInitialized ? "common.close" : "first.complete");
+        _status.Text = _alreadyInitialized ? UiText.Get("first.exists") : _enteringPassword ? UiText.Get("first.pipe") : string.Empty;
+        AcceptButton = choice ? _begin : _complete;
+        // Restoring a previously hidden default button can change the child
+        // order. Keep the primary action at the right edge on either step.
+        _actions.Controls.SetChildIndex(choice ? _begin : _complete, 0);
+        _actions.ResumeLayout(performLayout: true);
+    }
+
     private async Task CompleteAsync()
     {
-        if (_runtime is null) return;
+        if (_runtime is null || !_complete.Enabled) return;
         if (_alreadyInitialized)
         {
             ResultCode = 0;
             Close();
             return;
         }
+        if (!_enteringPassword) return;
         var password = _password.Text;
         var confirmation = _confirmation.Text;
         if (password.Length is < 12 or > 1024)
@@ -188,6 +229,8 @@ internal sealed class FirstRunForm : Form
         _confirmationVisibility.Enabled = enabled;
         _complete.Enabled = enabled;
         _later.Enabled = enabled;
+        _begin.Enabled = enabled;
+        _back.Enabled = enabled;
     }
 
     private void HidePasswords()

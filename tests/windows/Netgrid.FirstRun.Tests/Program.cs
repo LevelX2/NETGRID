@@ -24,6 +24,15 @@ var thread = new Thread(() =>
             var showPassword = Field<Button>("_passwordVisibility");
             var showConfirmation = Field<Button>("_confirmationVisibility");
             var click = typeof(Button).GetMethod("OnClick", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            var configurationChecked = form.GetType().GetMethod("ConfigurationChecked", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            var begin = Field<Button>("_begin");
+            var back = Field<Button>("_back");
+            Assert(!begin.Enabled, "choice_waits_for_configuration_check");
+            configurationChecked.Invoke(form, [false]);
+            Assert(!Field<bool>("_enteringPassword") && ReferenceEquals(form.AcceptButton, begin), "first_step_asks_before_password_entry");
+            if (previewRoot is not null) Render("choice", [begin, Field<Button>("_later")]);
+            click.Invoke(begin, [EventArgs.Empty]);
+            Assert(Field<bool>("_enteringPassword") && ReferenceEquals(form.AcceptButton, Field<Button>("_complete")), "only_explicit_choice_opens_password_step");
             Assert(password.UseSystemPasswordChar && confirmation.UseSystemPasswordChar, "both_passwords_masked_by_default");
             // Synthetic component data only: no runtime, credential file or auth CLI.
             password.Text = "component-only-example";
@@ -49,10 +58,29 @@ var thread = new Thread(() =>
             Assert((int)form.GetType().GetProperty("ResultCode")!.GetValue(form)! == 1, "skip_does_not_report_bootstrap_success");
             password.Clear();
             confirmation.Clear();
+            password.Text = confirmation.Text = "discarded-component-example";
+            click.Invoke(back, [EventArgs.Empty]);
+            Assert(!Field<bool>("_enteringPassword") && password.Text.Length == 0 && confirmation.Text.Length == 0, "back_returns_to_choice_and_clears_inputs");
+            Assert(password.UseSystemPasswordChar && confirmation.UseSystemPasswordChar, "back_remasks_both_inputs");
+            click.Invoke(begin, [EventArgs.Empty]);
             if (previewRoot is not null)
             {
                 Field<Label>("_accountMode").Text = catalog[language]["first.account.protected"];
-                Field<Label>("_status").Text = catalog[language]["first.pipe"];
+                Render("password", [showPassword, showConfirmation, back, Field<Button>("_complete")]);
+            }
+            configurationChecked.Invoke(form, [true]);
+            Assert(!begin.Enabled && !password.Enabled && Field<Button>("_complete").Enabled, "existing_credential_allows_close_not_bootstrap");
+            Assert(Field<Label>("_status").Text == catalog[language]["first.exists"], "existing_credential_explained");
+            if (previewRoot is not null) Render("existing", [Field<Button>("_complete")]);
+            using var deferred = (Form)Activator.CreateInstance(form.GetType())!;
+            var later = (Button)form.GetType().GetField("_later", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(deferred)!;
+            configurationChecked.Invoke(deferred, [false]);
+            click.Invoke(later, [EventArgs.Empty]);
+            Assert((int)form.GetType().GetProperty("ResultCode")!.GetValue(deferred)! == 1, "defer_closes_without_success_or_password");
+            Assert(form.GetType().GetField("_runtime", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(deferred) is null, "defer_component_never_loads_runtime");
+
+            void Render(string step, Button[] buttons)
+            {
                 form.ShowInTaskbar = false;
                 form.StartPosition = FormStartPosition.Manual;
                 form.Location = new Point(-32000, -32000);
@@ -60,11 +88,18 @@ var thread = new Thread(() =>
                 Application.DoEvents();
                 form.PerformLayout();
                 Assert(Field<object?>("_runtime") is null, "view_preview_never_loads_installed_runtime");
-                foreach (var button in new[] { showPassword, showConfirmation, Field<Button>("_later"), Field<Button>("_complete") })
+                foreach (var button in buttons)
+                {
+                    Assert(button.Visible, "step_action_is_visible");
                     Assert(form.ClientRectangle.Contains(form.RectangleToClient(button.RectangleToScreen(button.ClientRectangle))), "button_inside_dialog");
+                }
+                Assert(password.Visible == (step == "password"), "password_fields_only_on_password_step");
+                Assert(Field<Button>("_later").Visible == (step == "choice"), "defer_only_before_password_entry");
+                Assert(Field<Label>("_laterHelp").Visible == (step == "choice"), "defer_explanation_only_on_choice_step");
+                if (step == "password") Assert(back.Right <= Field<Button>("_complete").Left, "back_precedes_completion_visually");
                 using var bitmap = new Bitmap(form.Width, form.Height);
                 form.DrawToBitmap(bitmap, new Rectangle(Point.Empty, bitmap.Size));
-                bitmap.Save(Path.Combine(previewRoot, $"first-run-{language}.png"), System.Drawing.Imaging.ImageFormat.Png);
+                bitmap.Save(Path.Combine(previewRoot!, $"first-run-{language}-{step}.png"), System.Drawing.Imaging.ImageFormat.Png);
                 form.Hide();
             }
         }

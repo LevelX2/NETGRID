@@ -651,6 +651,40 @@ derselben VM; kein Installationsklick. Diese Prüfung deckt die genannten
 Vorinstallationsansichten ab, nicht First Run, installierte Gesamtflows,
 Hoverpositionierung oder unterschiedliche native Windows-DPI-Kontexte.
 
+Nach ausdrücklicher aktueller Freigabe wurde 8123 am 6. September um
+05:55 UTC über den nativen Installationsknopf mit den Standardwerten in
+derselben Sandbox installiert. Der animierte Balken und der tatsächliche
+Installationsstatus waren sichtbar. `result/ui-install-8123-state.json`
+bindet den Setuphash und das Log
+`C:\Users\WDAGUtilityAccount\AppData\Local\Temp\NETGRID-install-20260906-055537.log`:
+MSI-Ende um 05:58:16 UTC erfolgreich, Client- und Servercode `0`, danach
+First Run PID `6940` aus `C:\Program Files\NETGRID\NETGRID.FirstRun.exe`.
+Die Passworteinrichtung bleibt beim Nutzer; daraus wird noch keine
+abgeschlossene First-Run-Abnahme abgeleitet.
+
+Zwei weitere Nutzerbefunde sind im Quellstand ursächlich korrigiert:
+Der Datenhinweis liegt nun vollständig im festen Fußbereich vor Status und
+Balken und bleibt lesbar. Der ergänzte Test scheiterte zuvor genau an seiner
+falschen Zuordnung zum Scrollbereich; danach sind 1.850 Setup-Assertions grün.
+Die Ersteinrichtung fragt zuerst nach „Jetzt einrichten“ oder „Später“ und
+erklärt den späteren Startmenüweg. Erst danach erscheinen Passwortfelder mit
+„Zurück“ und „Einrichtung abschließen“. Zurück leert und verdeckt die Eingaben;
+bestehende Credentials führen nur zum Schließen, nicht zur Neuerstellung.
+144 UI-Assertions, neun Komponentenansichten und der isolierte First-Run-Smoke
+mit unverändertem vorhandenem Credential sind grün. Diese Änderungen sind
+noch nicht im installierten 8123-Paket enthalten.
+
+Der Nutzer fordert zusätzlich messbaren Fortschritt statt bloßer Aktivität.
+Das ist noch offen: Der aktuelle `msiexec /qn`-Aufruf liefert dem Setup nur
+den Abschlusscode. Die nächste Umsetzung muss echte MSI-Fortschrittsmeldungen
+auswerten, etwa über `MsiSetExternalUIRecord`, nicht Laufzeit oder eine
+willkürliche Schrittzählung als Prozentfortschritt ausgeben. Microsofts
+[Callback-Vertrag](https://learn.microsoft.com/en-us/windows/win32/msi/monitoring-an-installation-using-msisetexternaluirecord)
+und [Fortschrittsbehandlung](https://learn.microsoft.com/en-us/windows/win32/msi/handling-progress-messages-using-msisetexternalui)
+sind dafür geprüft. Erhöhte Ausführung, verifizierte Payload und sichere
+Prozessgrenzen müssen erhalten bleiben; neue Anbindung braucht eigene Tests
+und eine erneute native Abnahme.
+
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.
 Die erste Public-Prüfung war wegen der pauschalen, aktiven Sandbox-Regel

@@ -146,8 +146,12 @@ Maintenance und Launcher-Health bleiben Loopback-only. Der Standard ist lokal,
 und LAN wird nie still aktiviert. Die vollständige erhöhte Firewall- und
 Installationsmatrix folgt im WIN-I08-Releasegate.
 
-Nach erfolgreicher MSI-Installation startet `NETGRID.FirstRun.exe`. Das
-Maintenance-Passwort wird dort zweimal verdeckt eingegeben und ausschließlich
+Nach erfolgreicher MSI-Installation startet `NETGRID.FirstRun.exe`. Zuerst
+fragt der Dialog, ob die NETGRID-Verwaltung jetzt eingerichtet werden soll.
+Nur „Jetzt einrichten“ öffnet die Passwortfelder. Dort stehen „Zurück“ und
+„Einrichtung abschließen“, nicht mehr „Später“. „Zurück“ leert und verdeckt
+beide Eingaben und führt zur ersten Entscheidung zurück. Das
+Maintenance-Passwort wird im zweiten Schritt zweimal verdeckt eingegeben und ausschließlich
 über eine lokale stdin-Pipe an `app/maintenance-auth.mjs` übergeben. „Später“
 lässt die Spieloberfläche nutzbar, während Maintenance gesperrt bleibt; die
 Ersteinrichtung kann über den gleichnamigen Startmenüeintrag erneut geöffnet
@@ -155,7 +159,7 @@ werden. Ein vorhandenes Credential wird weder zurückgesetzt noch ersetzt.
 Beide Passwortfelder besitzen getrennte Augen-Schaltflächen mit lokalisierten
 „Anzeigen“-/„Verbergen“-Aktionen. Standardmäßig, beim Verlassen des Dialogs
 und vor dem Abschicken sind beide Eingaben verdeckt. Die Umschaltung verändert
-weder den Eingabetext noch den sicheren Bootstrapweg. Direkt im Dialog erklärt
+weder den Eingabetext noch den sicheren Bootstrapweg. Im ersten Schritt erklärt
 „Später“, dass noch kein Passwort eingerichtet wird und Maintenance gesperrt
 bleibt, und nennt den sprachabhängigen Startmenüeintrag zum Nachholen.
 Die Ansicht selbst startet keine Runtime; der interaktive Programmeinstieg
@@ -289,9 +293,12 @@ Nach erfolgreichem MSI-Ende stoppt die Animation; der Hinweis verweist auf
 die separate Ersteinrichtung. Fehler und abgebrochene Administratorfreigaben
 stoppen den Balken und geben die Eingaben wieder frei. Status und Balken
 bleiben aktiv und lesbar, während die Optionen gesperrt sind. Status, Balken
-und Installationsknopf liegen in einem festen unteren Bereich außerhalb der
+und Installationsknopf liegen zusammen mit dem Datenaufbewahrungshinweis in
+einem festen unteren Bereich außerhalb der
 scrollbaren Optionen, damit längere Übersetzungen die Rückmeldung und Aktion
-nicht aus dem Fenster schieben.
+nicht aus dem Fenster schieben. Der Datenhinweis bleibt während der Installation
+lesbar und hat einen eigenen Abstand zum Status; er darf nicht an der Grenze
+der scrollbaren Optionen abgeschnitten werden.
 Die normalen Ordner sind `C:\Program Files\NETGRID` und
 `C:\ProgramData\NETGRID`; bei bestehender Installation wird deren registrierter
 Datenordner angeboten. `NETGRID-E2E-<ID>` gehört ausschließlich zur gezielt

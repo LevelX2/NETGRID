@@ -212,6 +212,9 @@ foreach (var language in new[] { "de", "en", "fr" })
             var toggleUi = form.GetType().GetMethod("ToggleUi", BindingFlags.Instance | BindingFlags.NonPublic)!;
             toggleUi.Invoke(form, [false]);
             var progress = Field<ProgressBar>("_progress");
+            var dataNotice = Descendants(form).OfType<Label>().Single(label => label.Text == catalog[language]["setup.data.help"]);
+            Assert(dataNotice.Parent == progress.Parent, "data_notice_outside_scrollable_options");
+            Assert(dataNotice.Enabled, "data_notice_remains_legible_during_installation");
             Assert(progress.Parent!.Enabled && progress.Enabled && Field<Label>("_status").Enabled, "busy_feedback_not_disabled_with_options");
             Assert(!Field<Button>("_install").Enabled && !Field<TextBox>("_programRoot").Enabled, "installation_options_locked");
             foreach (var (phase, key, running) in new[]
@@ -247,8 +250,10 @@ foreach (var language in new[] { "de", "en", "fr" })
                         var originalSize = form.Size;
                         form.Size = size;
                         form.PerformLayout();
-                        foreach (var feedback in new Control[] { Field<Label>("_status"), progress, Field<Button>("_install") })
+                        foreach (var feedback in new Control[] { dataNotice, Field<Label>("_status"), progress, Field<Button>("_install") })
                             Assert(form.ClientRectangle.Contains(form.RectangleToClient(feedback.RectangleToScreen(feedback.ClientRectangle))), "feedback_and_action_inside_window");
+                        Assert(dataNotice.Bottom + dataNotice.Margin.Bottom <= Field<Label>("_status").Top, "data_notice_separated_from_installation_status");
+                        Assert(Field<Label>("_status").Bottom <= progress.Top, "status_does_not_overlap_progress");
                         var options = Field<RadioButton>("_recommended");
                         Control optionsRoot = options;
                         while (optionsRoot.Parent != form) optionsRoot = optionsRoot.Parent!;
