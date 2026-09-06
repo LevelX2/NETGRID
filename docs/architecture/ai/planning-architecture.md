@@ -3080,6 +3080,12 @@ auch eine Nullquote. Die Action-Economy-Projektion trennt diesen tatsächlichen
 Bezug vom Verbrauch der Eventkarte. `runner.develop_board_and_hand` erzeugt
 für ein Draw-Event mit Nullbezug keinen Entwicklungsbedarf.
 
+Generische Heap-Recovery bewertet die nach der Aktion tatsächlich behaltene
+Hand mit dem bestehenden Discard-Vertrag. Bei vollem Handlimit muss das Ziel
+die schwächste behaltene Karte strikt verbessern; eine bloß gleichwertige
+Rücknahme eröffnet keinen Entwicklungsplan. Gespielte Recovery-Events werden
+vor dieser Projektion aus der Hand entfernt.
+
 Der endliche P6-Restkapazitätsvertrag von `runner.economy` lässt nach
 erreichter Reserve weiterhin exakt gequotete, kostenfreie Kreditaktionen
 installierter Werkzeuge zu. Sie dürfen außer dem Klick weder Handkarten noch
@@ -3089,6 +3095,13 @@ nicht aus. Höhere Parent-Needs, Zuggrenze und Abschlussbedingung bleiben
 bindend.
 
 ## 28. Corp-Zielmodule
+
+Die Liquidation einer Engine-gequoteten Counter-Bank respektiert den aktuell
+revalidierten Score-Decoy-Claim auf genau derselben verdeckten Instanz und
+demselben Server. Ein aufgestellter Bluff wird nicht allein wegen fehlender
+Remote-Sicherheit sofort aufgedeckt und ausgezahlt. Bereits aufgedeckte Banken
+und echte Agenda-Handoffs behalten ihre jeweiligen Score-Routen. Die Ambush-
+Signale werden einmal erzeugt und den betroffenen Ownern gemeinsam übergeben.
 
 ### 28.1 `corp.opening_and_board_foundation`
 

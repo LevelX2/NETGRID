@@ -10939,16 +10939,46 @@ function runnerRecoverySearchCommitment(
         (recoveryContract.exactTargetCardId === undefined ||
           card.instanceId === recoveryContract.exactTargetCardId),
     )
-    .map((card) => ({
-      card,
-      score: discardKeepScore(runnerRecoveryScoringInput(input, card), card),
-    }))
+    .map((card) => {
+      const scoringInput = runnerRecoveryScoringInput(input, card, candidate);
+      return {
+        card,
+        scoringInput,
+        score: discardKeepScore(scoringInput, card),
+      };
+    })
     .filter(
       (entry) =>
         Number.isFinite(entry.score.total) &&
         (entry.score.total > 0 ||
           recoveryContract.exactTargetCardId !== undefined),
     )
+    .filter((entry) => {
+      const own = entry.scoringInput.playerView.own;
+      if (own.gripOrHq.length <= own.maxHandSize) return true;
+      if (own.maxHandSize <= 0) return false;
+      const retainedThreshold = own.gripOrHq
+        .filter((card) => card.instanceId !== entry.card.instanceId)
+        .map((card) => ({
+          card,
+          score: discardKeepScore(entry.scoringInput, card),
+        }))
+        .sort(compareRunnerRecoverySearchTargets)[own.maxHandSize - 1];
+      if (!retainedThreshold) return false;
+      const targetRank = runnerRecoveryPlanDispositionRank(
+        entry.score.planDisposition,
+      );
+      const retainedRank = runnerRecoveryPlanDispositionRank(
+        retainedThreshold.score.planDisposition,
+      );
+      // A generic recovery must improve the retained hand, not pay to recover
+      // a card that the same retention owner will discard again at cleanup.
+      return (
+        targetRank > retainedRank ||
+        (targetRank === retainedRank &&
+          entry.score.total > retainedThreshold.score.total)
+      );
+    })
     .sort(compareRunnerRecoverySearchTargets)[0]?.card;
   if (!target?.definitionId) return undefined;
   return {
@@ -10965,6 +10995,7 @@ function runnerRecoverySearchCommitment(
 function runnerRecoveryScoringInput(
   input: AiDecisionInput,
   target: VisibleCard,
+  candidate: ActionSemanticCandidate,
 ): AiDecisionInput {
   return {
     ...input,
@@ -10972,7 +11003,14 @@ function runnerRecoveryScoringInput(
       ...input.playerView,
       own: {
         ...input.playerView.own,
-        gripOrHq: [...input.playerView.own.gripOrHq, target],
+        gripOrHq: [
+          ...input.playerView.own.gripOrHq.filter(
+            (card) =>
+              candidate.actionType !== "play_event" ||
+              card.instanceId !== candidate.sourceCardInstanceId,
+          ),
+          target,
+        ],
         heapOrArchives: input.playerView.own.heapOrArchives.filter(
           (card) => card.instanceId !== target.instanceId,
         ),
@@ -15540,9 +15578,15 @@ function buildCorpDomain(
       recentlyCompromisedRemoteIds,
     ),
   );
+  const proposedAmbushes = buildCorpAmbushPlanSignals({
+    input,
+    candidates,
+    previous,
+  });
   const counterBankScoreProjects = corpCounterBankScoreProjects(
     input,
     candidates,
+    proposedAmbushes,
   );
   const remoteCreationUnlockScoreProjects = candidates.flatMap((candidate) =>
     corpRemoteCreationUnlockScoreProjects(input, candidate),
@@ -15773,11 +15817,7 @@ function buildCorpDomain(
         : [],
     ),
   );
-  const ambushes: CorpPlanDomain["ambushes"] = buildCorpAmbushPlanSignals({
-    input,
-    candidates,
-    previous,
-  }).filter(
+  const ambushes: CorpPlanDomain["ambushes"] = proposedAmbushes.filter(
     (signal) =>
       !scoreOwnedAgendaInstallInstanceIds.has(signal.sourceInstanceId),
   );

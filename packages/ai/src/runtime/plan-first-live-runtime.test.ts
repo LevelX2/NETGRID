@@ -21789,6 +21789,73 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
+  it.each([20, 50, 80])(
+    "requires generic heap recovery to improve a full retained hand: %s",
+    (targetValue) => {
+      resetResidentPlanPortfolioMemory();
+      const recovery = legalAction(
+        "recover-top",
+        "runner",
+        "activated_card_ability",
+        "Recover top card",
+        { credits: 1, clicks: 1 },
+        {
+          source: "bbs",
+          payload: {
+            cardId: "bbs",
+            sourceDefinitionId: "onr_v1_165_junkyard-bbs",
+            cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+            cardImplementationAbilityKey: "abilities_activated_runner_main_move_top_trash_to_grip",
+            cardImplementationAbilityId: "onr_v1_165_junkyard-bbs:abilities_activated_runner_main_move_top_trash_to_grip",
+            cardImplementationEffectKind: "move_top_trash_to_grip",
+            cardImplementationTopTrashTargetId: "target",
+            targetCardId: "target",
+          },
+        },
+      );
+      const credit = legalAction(
+        "credit",
+        "runner",
+        "gain_credit",
+        "Gain credit",
+        { credits: 0, clicks: 1 },
+      );
+      const input = aiInput("runner", [recovery, credit]);
+      input.playerView.own.credits = 15;
+      input.playerView.own.clicks = 3;
+      input.playerView.own.maxHandSize = 5;
+      input.playerView.opponent.deckCount = 10;
+      input.playerView.own.gripOrHq = Array.from({ length: 5 }, (_, i) =>
+        visibleCard(`held-${i}`, "runner", "event", {
+          definitionId: "onr_v1_099_mantis-fixer-at-large",
+        }),
+      );
+      input.playerView.own.rig = [
+        visibleCard("bbs", "runner", "resource", {
+          definitionId: "onr_v1_165_junkyard-bbs",
+        }),
+      ];
+      input.playerView.own.heapOrArchives = [
+        visibleCard("target", "runner", "hardware", {
+          definitionId: "onr_v1_121_armored-fridge",
+        }),
+      ];
+      const decision = liveContext({
+        discardKeepScore: (_input: AiDecisionInput, card: VisibleCard) => ({
+          total: card.instanceId === "target" ? targetValue : 50,
+        }),
+      }).chooseSemanticRuntimeAction(input, {});
+      expect(decision.actionId).toBe(
+        targetValue > 50 ? recovery.actionId : credit.actionId,
+      );
+      expect(decision.reasonCode).toBe(
+        targetValue > 50
+          ? "plan_first.runner.develop_board_and_hand"
+          : "plan_first.runner.economy",
+      );
+    },
+  );
+
   it("dispositions top-heap recovery when the exact defense hand-buffer route is closed at maximum hand size", () => {
     resetResidentPlanPortfolioMemory();
     const run = legalAction(
