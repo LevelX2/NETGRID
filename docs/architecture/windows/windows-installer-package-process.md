@@ -776,6 +776,31 @@ eingefrorenen Binärdateien wurden nicht nachträglich verändert. Ein neuer
 gemeinsamer Build muss die STA-Korrektur einschließen; bestehende Sandbox,
 Credentials, Main-Betrieb und GitHub-Veröffentlichungen bleiben unberührt.
 
+Der neue gemeinsame Abnahmestand ist `1.0.8131` unter
+`output/windows-installer-launcher-sta-review`, gebaut aus dem sauberen
+Commit `fbe770215ac1edf80e1dffbb9a6c4e6ba32e16ce`. Er enthält jetzt auch den
+realen STA-Einstieg. Vollständige Buildstrecke, 1.935 Setup-Assertions,
+63 First-Run-Assertions ohne Renderfenster, Eintrittspunkt- und 35 neue
+Updatefehler-Prüfungen, Downloadtests, Runtime-/Launcher-/Bootstrap-/Updater-
+Smokes, 173-Schlüssel-Sprachmatrix und 10.901-Dateien-Payloadaudit sind grün.
+Der Launcher-Smoke verwendete isoliert die Ports `58112`/`58113`.
+Setup-SHA-256:
+`0325ee88824aeca0458f740627e37921b056c7423c1001e9056a8b51a68cee9c`;
+MSI-SHA-256:
+`497aeadef0bbc836ad74b8b9573f72716499febbe9dd8c61ea3323634eaccc51`.
+Die Dateien wurden unabhängig gegen Metadaten und `SHA256SUMS.txt` geprüft.
+Dieser Stand ist noch nicht nativ installiert; weder 8130 noch 8131 ersetzt
+stillschweigend die bisherige 8123-Sandboxinstallation.
+
+Die [öffentliche GitHub-Releases-Seite](https://github.com/LevelX2/NETGRID/releases)
+zeigte bei der erneuten Prüfung am 6. September um 07:13 UTC weiterhin keine
+Releases. Eine Veröffentlichung wurde nicht vorgenommen. Damit bleiben die
+frische native Erstinstallation einschließlich neuer Dialoge und messbarem
+MSI-Verlauf, die vollständigen Sprach-/DPI-/Kontextprüfungen und der echte
+GitHub-Updatetest offen. Die Entscheidung zum Ersetzen der bestehenden
+Sandbox steht weiterhin aus. WIN-I08 ist nicht abgeschlossen; Main-Merge,
+Worktree-Cleanup und Push erfolgen nicht.
+
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.
 Die erste Public-Prüfung war wegen der pauschalen, aktiven Sandbox-Regel
