@@ -14,6 +14,8 @@ var catalog = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, s
 var previewRoot = args.Length == 2 && args[0] == "--render-to" ? Path.GetFullPath(args[1]) : null;
 if (previewRoot is not null) Directory.CreateDirectory(previewRoot);
 var checks = 0;
+checks += MsiProgressTests.Run(assembly);
+checks += InstallationWorkerTests.Run(assembly);
 var previewWindowsShown = 0;
 var languagePolicy = assembly.GetType("Netgrid.Windows.WindowsUiLanguage", throwOnError: true)!;
 var resolveLanguage = languagePolicy.GetMethod("Resolve")!;
@@ -50,6 +52,8 @@ foreach (var language in new[] { "de", "en", "fr" })
         object[] arguments = code switch
         {
             "msi_failed" => [1603, @"C:\Test\installer.log"],
+            "install_worker_failed" => [3, 1603, @"C:\Windows\Temp\NETGRID-install-test\install.log"],
+            "install_channel_failed" => [@"C:\Windows\Temp\NETGRID-install-test\install.log"],
             "uninstall_failed" => [1603],
             "path_invalid" or "path_too_broad" or "path_drive_invalid" => [catalog[language]["setup.data"]],
             "disk_space_low" => [@"C:\: 1500 / 500 MiB"],
@@ -217,6 +221,44 @@ foreach (var language in new[] { "de", "en", "fr" })
             Assert(dataNotice.Enabled, "data_notice_remains_legible_during_installation");
             Assert(progress.Parent!.Enabled && progress.Enabled && Field<Label>("_status").Enabled, "busy_feedback_not_disabled_with_options");
             Assert(!Field<Button>("_install").Enabled && !Field<TextBox>("_programRoot").Enabled, "installation_options_locked");
+            var setMeasured = form.GetType().GetMethod("SetMsiProgress", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            var snapshotType = assembly.GetType("Netgrid.SetupHost.MsiProgressSnapshot", true)!;
+            foreach (var (position, total, preparing, backward, key, percent) in new[]
+            {
+                (25L, 100L, false, false, "measured", 25), (75L, 100L, false, true, "measured_reverse", 75),
+                (150L, 100L, true, false, "measuring", -1), (150L, 100L, false, false, "unmeasured", -1),
+                (0L, 0L, false, false, "unmeasured", -1), (100L, 100L, false, false, "measured", 100),
+            })
+            {
+                setMeasured.Invoke(form, [Activator.CreateInstance(snapshotType, [position, total, preparing, backward])]);
+                Assert(Field<Label>("_status").Text == string.Format(catalog[language]["setup.status." + key], percent), "measured_status_is_localized_and_phase_scoped");
+                Assert(progress.Style == (percent >= 0 ? ProgressBarStyle.Continuous : ProgressBarStyle.Marquee), "numeric_bar_only_with_actual_total");
+                Assert(progress.Value == (percent >= 0 ? percent : 0), "numeric_bar_matches_msi_not_a_timer");
+                Assert(progress.AccessibleName == Field<Label>("_status").Text, "measured_progress_accessible");
+                if (previewRoot is not null && key is "measured" or "measured_reverse" or "unmeasured")
+                {
+                    form.ShowInTaskbar = false;
+                    form.StartPosition = FormStartPosition.Manual;
+                    form.Location = new Point(-32000, -32000);
+                    form.Show(); previewWindowsShown++;
+                    Application.DoEvents();
+                    Thread.Sleep(1000);
+                    Application.DoEvents();
+                    var originalSize = form.Size;
+                    form.Size = form.MinimumSize;
+                    form.PerformLayout();
+                    var status = Field<Label>("_status");
+                    foreach (var feedback in new Control[] { dataNotice, status, progress, Field<Button>("_install") })
+                        Assert(form.ClientRectangle.Contains(form.RectangleToClient(feedback.RectangleToScreen(feedback.ClientRectangle))), "measured_feedback_fits_minimum_window");
+                    Assert(dataNotice.Bottom + dataNotice.Margin.Bottom <= status.Top && status.Bottom <= progress.Top,
+                        "measured_status_does_not_overlap_notice_or_bar");
+                    using var bitmap = new Bitmap(form.Width, form.Height);
+                    form.DrawToBitmap(bitmap, new Rectangle(Point.Empty, bitmap.Size));
+                    bitmap.Save(Path.Combine(previewRoot, $"progress-{language}-{key}-{percent}.png"), System.Drawing.Imaging.ImageFormat.Png);
+                    form.Size = originalSize;
+                    form.Hide();
+                }
+            }
             foreach (var (phase, key, running) in new[]
             {
                 ("Validating", "validate", true), ("Preparing", "prepare", true),

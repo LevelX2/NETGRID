@@ -11,10 +11,10 @@ internal static class InstallationSpace
     private const long MiB = 1024L * 1024;
     public const long InitialDataReserveBytes = 512 * MiB;
 
-    public static void Check(string programRoot, string dataRoot)
+    public static void Check(string programRoot, string dataRoot, string? temporaryRoot = null)
     {
         var executable = Environment.ProcessPath ?? throw new SetupException("setup_path_missing");
-        var plan = Plan(programRoot, dataRoot, Path.GetTempPath(),
+        var plan = Plan(programRoot, dataRoot, temporaryRoot ?? Path.GetTempPath(),
             Environment.GetFolderPath(Environment.SpecialFolder.Windows),
             MsiPayload.Footprint, new FileInfo(executable).Length, AllocationUnit);
         var drives = Assess(plan, root =>

@@ -20,6 +20,8 @@ internal static class Program
         var interactiveCommand = args.Length == 0 || args[0] is "--uninstall" or "--uninstall-product";
         try
         {
+            if (args.Length == 2 && args[0] == "--install-worker")
+                return InstallationWorker.Run(InstallationRequest.Decode(args[1])).GetAwaiter().GetResult();
             if (args.Length == 2 && args[0] == "--extract-msi")
             {
                 MsiPayload.ExtractVerified(Path.GetFullPath(args[1]));
@@ -473,7 +475,7 @@ internal sealed class SetupForm : Form
             SetInstallationPhase(InstallationPhase.Validating);
             var settings = ReadSettings();
             settings.Validate();
-            await Task.Run(() => InstallationSpace.Check(settings.ProgramRoot, settings.DataRoot));
+            await Task.Run(() => InstallationSpace.Check(settings.ProgramRoot, settings.DataRoot, InstallationWorker.TemporaryRoot));
             if (!PortPlanner.AreAvailable(settings.Profile, settings.WebPort, settings.ServerPort))
             {
                 if (!_recommended.Checked)
@@ -491,8 +493,9 @@ internal sealed class SetupForm : Form
                 settings = ReadSettings();
             }
             var progress = new Progress<InstallationPhase>(SetInstallationPhase);
-            var result = await Task.Run(() => Installer.Run(settings, progress));
-            if (result is not (0 or 3010)) throw new SetupException("msi_failed", result, Installer.LogPath);
+            var measured = new Progress<MsiProgressSnapshot>(SetMsiProgress);
+            var result = await Task.Run(() => Installer.Run(settings, progress, measured));
+            if (result.Code is not (0 or 3010)) throw new SetupException("msi_failed", result.Code, result.LogPath);
             SetInstallationPhase(InstallationPhase.FirstRun);
             var firstRunResult = await Task.Run(() => Installer.RunFirstRun(settings));
             if (firstRunResult > 1)
@@ -574,6 +577,20 @@ internal sealed class SetupForm : Form
         _progress.Style = running ? ProgressBarStyle.Marquee : ProgressBarStyle.Continuous;
         _progress.MarqueeAnimationSpeed = running ? 30 : 0;
         _progress.Value = running ? 0 : _progress.Maximum;
+        _progress.Visible = true;
+    }
+
+    internal void SetMsiProgress(MsiProgressSnapshot snapshot)
+    {
+        var percent = snapshot.Percent;
+        _status.Text = percent is int value
+            ? UiText.Get(snapshot.Backward ? "setup.status.measured_reverse" : "setup.status.measured", value)
+            : UiText.Get(snapshot.Preparing ? "setup.status.measuring" : "setup.status.unmeasured");
+        _status.ForeColor = SystemColors.ControlText;
+        _progress.AccessibleName = _status.Text;
+        _progress.Style = percent.HasValue ? ProgressBarStyle.Continuous : ProgressBarStyle.Marquee;
+        _progress.MarqueeAnimationSpeed = percent.HasValue ? 0 : 30;
+        _progress.Value = percent ?? 0;
         _progress.Visible = true;
     }
 
@@ -701,7 +718,14 @@ internal sealed record SetupSettings(
 {
     public void Validate()
     {
+        if (Profile is not ("local" or "private_lan") || AccountAccessMode is not ("simple" or "protected") ||
+            RetentionDays is not ("7" or "30" or "90" or "180" or "365" or "never") ||
+            (Profile == "local" && LanAddress is not null))
+            throw new SetupException("setup_arguments_invalid");
         if (Profile == "private_lan" && LanAddress is null) throw new SetupException("lan_address_missing");
+        if (LanAddress is not null && (!IPAddress.TryParse(LanAddress, out var address) || !NetworkSelection.IsPrivate(address)))
+            throw new SetupException("lan_address_missing");
+        if (WebPort is < 1 or > 65535 || ServerPort is < 1 or > 65535) throw new SetupException("port_invalid");
         if (WebPort == ServerPort) throw new SetupException("ports_conflict");
         ValidateRoot(ProgramRoot, UiText.Get("setup.program"));
         ValidateRoot(DataRoot, UiText.Get("setup.data"));
@@ -746,16 +770,21 @@ internal static class Installer
 {
     public static string LogPath { get; } = Path.Combine(Path.GetTempPath(), $"NETGRID-install-{DateTime.UtcNow:yyyyMMdd-HHmmss}.log");
 
-    public static int Run(SetupSettings settings, IProgress<InstallationPhase> progress)
+    public static Task<InstallationResult> Run(SetupSettings settings, IProgress<InstallationPhase> progress,
+        IProgress<MsiProgressSnapshot> measured)
     {
-        InstallationSpace.Check(settings.ProgramRoot, settings.DataRoot);
-        var temporaryMsi = Path.Combine(Path.GetTempPath(), $"NETGRID-{Guid.NewGuid():N}.msi");
-        try
+        settings.Validate();
+        InstallationSpace.Check(settings.ProgramRoot, settings.DataRoot, InstallationWorker.TemporaryRoot);
+        progress.Report(InstallationPhase.Preparing);
+        MsiPayload.Verify();
+        return InstallationWorker.Start(settings, progress, measured);
+    }
+
+    internal static string Properties(SetupSettings settings)
+    {
+        settings.Validate();
+        return string.Join(" ", new[]
         {
-            progress.Report(InstallationPhase.Preparing);
-            MsiPayload.ExtractVerified(temporaryMsi);
-            var properties = new[]
-            {
                 Property("INSTALLFOLDER", settings.ProgramRoot),
                 Property("NETGRID_DATA_ROOT", settings.DataRoot),
                 Property("NETGRID_DEPLOYMENT_PROFILE", settings.Profile),
@@ -768,24 +797,7 @@ internal static class Installer
                 Property("NETGRID_UI_LANGUAGE", UiText.Language),
                 Property("NETGRID_SETUP_SOURCE", Environment.ProcessPath ?? throw new SetupException("setup_path_missing")),
                 Property("NETGRID_SETUP_SHA256", CurrentSetupHash()),
-            };
-            var arguments = $"/i {Quote(temporaryMsi)} /qn /norestart /l*v {Quote(LogPath)} {string.Join(" ", properties)}";
-            progress.Report(InstallationPhase.Elevation);
-            using var process = Process.Start(new ProcessStartInfo("msiexec.exe")
-            {
-                Arguments = arguments,
-                UseShellExecute = true,
-                Verb = "runas",
-                WindowStyle = ProcessWindowStyle.Hidden,
-            }) ?? throw new SetupException("msi_start_failed");
-            progress.Report(InstallationPhase.Installing);
-            process.WaitForExit();
-            return process.ExitCode;
-        }
-        finally
-        {
-            if (File.Exists(temporaryMsi)) File.Delete(temporaryMsi);
-        }
+        });
     }
 
     public static int RunUpdate(string? programRoot, bool uninstall, bool deleteData = false)
@@ -914,8 +926,9 @@ internal static class NetworkSelection
         .OrderBy(address => address, StringComparer.Ordinal)
         .ToArray();
 
-    private static bool IsPrivate(IPAddress address)
+    internal static bool IsPrivate(IPAddress address)
     {
+        if (address.AddressFamily != AddressFamily.InterNetwork) return false;
         var bytes = address.GetAddressBytes();
         return bytes[0] == 10 || (bytes[0] == 172 && bytes[1] is >= 16 and <= 31) || (bytes[0] == 192 && bytes[1] == 168);
     }

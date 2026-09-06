@@ -286,9 +286,38 @@ weder die Zustimmung im Tray noch einen echten GitHub-Releaseabruf.
 
 ### Hilfen und Platzprüfung im Setup
 
-Während Prüfung, Vorbereitung, Administratorfreigabe und MSI-Installation
-zeigt das Setup einen animierten Fortschrittsbalken mit der tatsächlichen
-Phase. Es behauptet keine Prozentwerte aus Laufzeit oder Dateianzahl.
+Während Prüfung, Vorbereitung und Administratorfreigabe zeigt das Setup einen
+Aktivitätsbalken mit der tatsächlichen Phase. Für die interaktive Installation
+startet es erst nach dem Installationsklick eine erhöhte Instanz desselben
+Setuphosts. Diese installiert ausschließlich die eigene hashgeprüfte MSI-Payload
+über `MsiInstallProductW` und wertet `MsiSetExternalUIRecord` aus. Sobald MSI
+einen berechenbaren Ausführungsumfang meldet, zeigt der Balken dessen echten
+Prozentwert als **aktuellen Installationsabschnitt**, nicht als Restzeit oder
+Fortschritt der gesamten Ersteinrichtung. Rückwärtslauf wird ausdrücklich als
+solcher beschriftet. Vorbereitung, fehlender Umfang und nicht berechenbare
+Zwischenstände bleiben als solche erkennbar; es entstehen keine erfundenen
+Aufgaben-, Datei- oder Zeitprozente.
+
+Die Rückmeldung verwendet feste numerische Frames auf einer lokalen Pipe mit
+geschützter ACL, Netzwerksperre und beidseitiger Kernel-PID-Prüfung. Die erhöhte
+Instanz prüft zusätzlich Startzeit und ausführbare Datei des Elternprozesses.
+Anonyme Impersonation verhindert, dass der nicht erhöhte Setuphost das
+Administratortoken übernimmt; eine Freigabe durch ein anderes Windows-
+Administratorkonto ist im ACL-Vertrag berücksichtigt. Nur typisierte,
+nicht geheime Setupwerte werden übergeben, keine beliebigen MSI-Pfade,
+MSI-Eigenschaftslisten, Logziele oder Passwörter. Ausführbare Datei und
+MSI-Quelle bleiben gegen Austausch geschützt. Die MSI-Payload wird in einem
+atomar neu angelegten, ausschließlich für Administratoren und SYSTEM
+zugänglichen Unterordner von `%WINDIR%\Temp` entpackt. Die Platzprüfung
+berücksichtigt dieses Laufwerk. Nach MSI-Ende wird nur die temporäre
+MSI-Datei gelöscht; das dortige `install.log` bleibt zur Diagnose erhalten
+und benötigt zum Öffnen Windows-Administratorrechte.
+
+Ein Verbindungsfehler bricht den Callback ab; der Setuphost beendet den
+Installer nicht gewaltsam und wartet sein Ende beziehungsweise Rollback ab,
+bevor er die Eingaben wieder freigibt. Erfolg setzt sowohl einen gültigen
+Abschlussframe als auch den passenden Prozess-Exitcode voraus. Update- und
+Deinstallationsaufrufe bleiben auf ihrem bestehenden getrennten Pfad.
 Nach erfolgreichem MSI-Ende stoppt die Animation; der Hinweis verweist auf
 die separate Ersteinrichtung. Fehler und abgebrochene Administratorfreigaben
 stoppen den Balken und geben die Eingaben wieder frei. Status und Balken
@@ -299,6 +328,11 @@ scrollbaren Optionen, damit längere Übersetzungen die Rückmeldung und Aktion
 nicht aus dem Fenster schieben. Der Datenhinweis bleibt während der Installation
 lesbar und hat einen eigenen Abstand zum Status; er darf nicht an der Grenze
 der scrollbaren Optionen abgeschnitten werden.
+
+Der neue messbare Pfad ist komponentengeprüft, aber noch nicht als neu
+gebautes Paket nativ abgenommen. Das bereits installierte Testpaket `1.0.8123`
+enthält weiterhin den früheren Aktivitätsbalken und den einstufigen
+Passwortdialog. Eine Komponentenansicht ersetzt diese Sandbox-Abnahme nicht.
 Die normalen Ordner sind `C:\Program Files\NETGRID` und
 `C:\ProgramData\NETGRID`; bei bestehender Installation wird deren registrierter
 Datenordner angeboten. `NETGRID-E2E-<ID>` gehört ausschließlich zur gezielt

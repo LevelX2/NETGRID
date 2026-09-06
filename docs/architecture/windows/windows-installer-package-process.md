@@ -674,16 +674,33 @@ bestehende Credentials führen nur zum Schließen, nicht zur Neuerstellung.
 mit unverändertem vorhandenem Credential sind grün. Diese Änderungen sind
 noch nicht im installierten 8123-Paket enthalten.
 
-Der Nutzer fordert zusätzlich messbaren Fortschritt statt bloßer Aktivität.
-Das ist noch offen: Der aktuelle `msiexec /qn`-Aufruf liefert dem Setup nur
-den Abschlusscode. Die nächste Umsetzung muss echte MSI-Fortschrittsmeldungen
-auswerten, etwa über `MsiSetExternalUIRecord`, nicht Laufzeit oder eine
-willkürliche Schrittzählung als Prozentfortschritt ausgeben. Microsofts
+Der zusätzlich gewünschte messbare Fortschritt ist nun im Quellstand
+angebunden: Ein erst nach dem Installationsklick erhöhter Setupworker ruft
+`MsiInstallProductW` mit der eigenen verifizierten MSI auf und verarbeitet
+numerische `MsiSetExternalUIRecord`-Meldungen. Der Fortschritt beschreibt den
+aktuellen MSI-Ausführungsabschnitt; Vorbereitung und fehlender berechenbarer
+Umfang erhalten ausdrücklich keine Prozentbehauptung. Auch Rückwärtslauf und
+nachträglich geänderter Gesamtumfang bleiben erhalten. Microsofts
 [Callback-Vertrag](https://learn.microsoft.com/en-us/windows/win32/msi/monitoring-an-installation-using-msisetexternaluirecord)
 und [Fortschrittsbehandlung](https://learn.microsoft.com/en-us/windows/win32/msi/handling-progress-messages-using-msisetexternalui)
-sind dafür geprüft. Erhöhte Ausführung, verifizierte Payload und sichere
-Prozessgrenzen müssen erhalten bleiben; neue Anbindung braucht eigene Tests
-und eine erneute native Abnahme.
+sind dafür führend. Eine ACL-geschützte, netzwerkgesperrte Pipe mit beidseitiger
+Kernel-PID-Prüfung überträgt ausschließlich feste numerische Frames; Startzeit
+und identischer Setup-Pfad binden den Worker an seinen Elternprozess. Die
+erhöhte Seite akzeptiert nur die typisierten nicht geheimen Setupwerte, keine
+beliebigen MSI-, Log- oder Kommandopfade. Source-Locks und eine atomar neu
+angelegte Administrator-/SYSTEM-Tempstruktur schützen die Quellen gegen
+Austausch; die Platzprüfung berücksichtigt den geänderten Entpackort.
+
+1.935 fokussierte Assertions prüfen einschließlich echter MSI-Record- und
+Callbackregistrierungs-APIs (ohne Produktinstallation), realer Windows-Pipe,
+Peer-/ACL-Prüfung, fragmentierter Frames, ungültiger Eingaben, Kanalabbruch,
+Zählergrenzen und lokalisierter numerischer Anzeige. Der vorausgehende
+Renderlauf mit 2.090 Assertions prüft auch die Mindestfenstergeometrie und
+21 Offscreen-Ansichten; DE-Prozentanzeige und FR-Zustand ohne berechenbaren
+Umfang wurden visuell kontrolliert. 144 First-Run-Assertions bleiben grün.
+Diese Änderungen sind noch nicht im installierten 8123 enthalten. Neuer
+Paketbuild und native Prüfung einschließlich UAC-/MSI-Übergang, messbarem
+Verlauf und Fehlerpfad stehen aus. WIN-I08 bleibt offen; keine Main-Integration.
 
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.

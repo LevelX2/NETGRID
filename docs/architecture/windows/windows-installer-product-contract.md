@@ -266,6 +266,12 @@ nutzbar; Maintenance bleibt bis zur Initialisierung gesperrt.
   Startmenüpunkt wiederaufrufbar. Es liest ausschließlich die geschützte
   installierte Runtimekonfiguration und verwendet die mitgelieferte Node-
   Laufzeit sowie `app/maintenance-auth.mjs`.
+- Bei noch nicht eingerichtetem Zugang entscheidet der Nutzer zuerst zwischen
+  „Jetzt einrichten“ und „Später“. Die Auswahl erklärt den Zweck der
+  NETGRID-Verwaltung und den späteren Startmenüweg. Nur „Jetzt einrichten“
+  öffnet die Passwortfelder mit „Zurück“ und „Einrichtung abschließen“;
+  dort gibt es keinen konkurrierenden „Später“-Knopf. „Zurück“ löscht und
+  verdeckt die Eingaben und kehrt zur Entscheidung zurück.
 - Das Maintenance-Passwort wird zweimal verdeckt erfasst und nur über die
   Standardeingabe-Pipe an den bestehenden `bootstrap`-Befehl übergeben. Es
   erscheint weder in MSI-Eigenschaften noch Prozessargumenten, Dateien des
