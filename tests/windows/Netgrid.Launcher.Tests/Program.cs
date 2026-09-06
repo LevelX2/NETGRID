@@ -4,6 +4,8 @@ using System.Security.Cryptography;
 using System.Text;
 
 var assembly = Assembly.Load("NETGRID");
+var updateFailureChecks = await UpdateFailureTests.Run(assembly);
+Console.WriteLine($"LAUNCHER_UPDATE_FAILURE_TESTS_OK checks={updateFailureChecks} installationStarted=false");
 var discovery = assembly.GetType("Netgrid.Launcher.UpdateDiscovery", throwOnError: true)!;
 var candidateType = assembly.GetType("Netgrid.Launcher.UpdateCandidate", throwOnError: true)!;
 var scratch = Path.Combine(Path.GetTempPath(), $"NETGRID-Download-Test-{Guid.NewGuid():N}");

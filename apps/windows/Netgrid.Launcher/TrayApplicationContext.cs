@@ -168,6 +168,7 @@ internal sealed class TrayApplicationContext : ApplicationContext
     {
         if (_checkingUpdates || _closing || _runtime is null) return;
         _checkingUpdates = true;
+        var stage = UpdateStage.Checking;
         try
         {
             using var http = UpdateDiscovery.CreateHttpClient();
@@ -187,6 +188,7 @@ internal sealed class TrayApplicationContext : ApplicationContext
                 MessageBoxIcon.Question
             );
             if (answer != DialogResult.Yes) return;
+            stage = UpdateStage.Preparing;
             var readiness = await _runtime.UpdateReadinessAsync();
             if (!readiness.Allowed)
             {
@@ -195,7 +197,9 @@ internal sealed class TrayApplicationContext : ApplicationContext
             }
             _tray.Text = UiText.Get("launcher.update.loading");
             var staging = Path.Combine(_runtime.DataRoot, "runtime", "updates", "staging");
+            stage = UpdateStage.Downloading;
             var setupPath = await UpdateDiscovery.DownloadVerifiedAsync(http, candidate, staging);
+            stage = UpdateStage.Preparing;
             readiness = await _runtime.UpdateReadinessAsync();
             if (!readiness.Allowed)
             {
@@ -223,13 +227,25 @@ internal sealed class TrayApplicationContext : ApplicationContext
             System.Diagnostics.Process.Start(start);
             await CloseAsync();
         }
-        catch (Exception exception) when (!manual && exception is HttpRequestException or TaskCanceledException)
+        catch (Exception exception)
         {
-            // Offline startup is intentionally silent; NETGRID remains fully usable.
-        }
-        catch (Exception)
-        {
-            MessageBox.Show($"{UiText.Get("launcher.update.failed")}\n\n{UiText.Get("launcher.error.help")}", "NETGRID Update", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            var failure = UpdateFailure.Classify(exception, stage, manual);
+            try { failure.Record(_runtime.LogDirectory); }
+            catch (Exception logException) when (logException is IOException or UnauthorizedAccessException)
+            {
+                // Surface both failures. Never direct the user to a diagnostic
+                // file that could not be written or silently discard the cause.
+                MessageBox.Show($"{UiText.Get(failure.MessageKey)}\n\n" +
+                    UiText.Get("launcher.update.diagnostic_failed", failure.Diagnostic,
+                        $"{logException.GetType().Name} (0x{logException.HResult:X8})"),
+                    "NETGRID Update", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                if (!_closing) _tray.Text = UiText.Get("launcher.running");
+                return;
+            }
+            if (!failure.Quiet)
+                MessageBox.Show(UiText.Get(failure.MessageKey) +
+                    (failure.Unavailable ? string.Empty : $"\n\n{UiText.Get("launcher.error.help")}"),
+                    "NETGRID Update", MessageBoxButtons.OK, failure.Unavailable ? MessageBoxIcon.Information : MessageBoxIcon.Error);
             if (!_closing) _tray.Text = UiText.Get("launcher.running");
         }
         finally

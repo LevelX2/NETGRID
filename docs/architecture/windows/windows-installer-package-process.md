@@ -729,6 +729,30 @@ Für eine erneute native Erstinstallation samt vorgeschalteter Einrichtungs-
 entscheidung ist eine frische Sandbox erforderlich. Die bestehende VM und
 ihr eingerichteter Zugang werden bis zur Entscheidung des Nutzers bewahrt.
 
+Eine ergänzende native Sichtprüfung am 6. September um 06:49–06:50 UTC
+erreichte in derselben installierten 8123-VM das deutsche NETGRID-Traymenü.
+Die manuelle Updateprüfung zeigte ohne Installationszustimmung den generischen
+Fehler „Das Update konnte nicht vorbereitet werden“ samt Diagnoseverweis.
+Die VM ist weiterhin netzwerkisoliert. Eine zusätzliche headless Gastdiagnose
+wurde vom Ausführungswerkzeug abgewiesen; daraus wird kein konkreter DNS-
+oder HTTP-Fehler als nachgewiesen abgeleitet. Der Dialog wurde geschlossen;
+keine Installation, kein Update und keine Änderung von Zugängen oder
+Windows-Einstellungen wurden ausgelöst.
+
+Die Codeprüfung belegte zwei Lücken im gemeinsamen Catch-Pfad: Bei manueller
+Suche erhielt auch eine unerreichbare Quelle die irreführende Meldung zur
+Updatevorbereitung, und nach Zustimmung zu einem beim Start entdeckten
+Update wurden spätere Transportfehler weiterhin als stiller Offline-Start
+behandelt. Außerdem wurde trotz Diagnoseverweis die Ursache nicht protokolliert.
+Der Quellstand unterscheidet jetzt Suche, Download und Vorbereitung und
+protokolliert ausschließlich strukturierte, nicht geheime Diagnosedaten.
+35 neue fokussierte Assertions sowie die bestehenden Downloadtests und der
+173-Schlüssel-Sprachkatalogcheck sind grün. Dies ist ein separater enger
+UI-/Fehlerpfad-Fix; das bereits gebaute Paket 8128 enthält ihn noch nicht.
+Für den gemeinsamen neuen Abnahmestand sind ein neuer Paketbuild und die
+native Prüfung weiterhin nötig. Die bestehende Sandbox bleibt erhalten;
+die Frage nach ihrem Ersetzen ist noch unbeantwortet.
+
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.
 Die erste Public-Prüfung war wegen der pauschalen, aktiven Sandbox-Regel

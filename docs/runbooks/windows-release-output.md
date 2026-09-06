@@ -439,6 +439,25 @@ ungültiger Wert stoppt mit einer lokalisierten Reparaturmeldung; weder die
 Existenzmarkierung einer Shortcut-Komponente noch ein stiller Standardwert
 ersetzen die ursprüngliche Auswahl.
 
+Die Updateoberfläche unterscheidet Suche, Download und Vorbereitung.
+DNS-/Verbindungsfehler ohne HTTP-Status sowie das HTTP-Zeitlimit gelten nur
+während der Suche als derzeit nicht erreichbare Updatequelle. Die manuelle
+Suche erklärt diesen Zustand und lässt NETGRID weiter nutzbar; die Prüfung
+beim Start bleibt dabei wie vorgesehen still. HTTP-Statusfehler, TLS-Fehler,
+ungültige Metadaten und Integritätsfehler werden weder als Offlinezustand
+noch als „auf dem neuesten Stand“ ausgegeben. Nach einer Updatezustimmung
+werden Fehler beim Download oder der Vorbereitung auch dann angezeigt,
+wenn die ursprüngliche Suche automatisch beim Start ausgelöst wurde.
+
+`launcher-update.log` hält Owner, Phase, freigegebenen Fehlercode, Ausnahmetyp,
+HRESULT und gegebenenfalls HTTP-Status/-Fehlerart fest. Ausnahmetexte,
+innere Ausnahmen, URLs, Header und Geheimnisse werden nicht übernommen.
+Das Protokoll rotiert bei 64 KiB mit genau einer Vorgängerdatei und gehört
+über den bestehenden `launcher-`-Filter zum lokalen Diagnoseexport. Kann
+die Diagnose nicht gespeichert werden, zeigt die Oberfläche beide
+strukturierten Fehler an, statt auf ein nicht vorhandenes Protokoll zu
+verweisen. Es findet keine automatische Übermittlung statt.
+
 `read-windows-msi-footprint.ps1` liest ausschließlich die tatsächliche
 MSI-File-Tabelle. Dateigröße, Anzahl und MSI-Größe werden im Setup eingebettet
 und beim Installer-Audit gegen die extrahierte Payload verglichen. Die
