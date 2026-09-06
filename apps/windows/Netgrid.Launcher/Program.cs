@@ -8,7 +8,13 @@ internal static class Program
     private const string MutexName = @"Global\LevelX2.NETGRID.Launcher.V1";
 
     [STAThread]
-    private static async Task<int> Main(string[] args)
+    private static int Main(string[] args) => RunAsync(args).GetAwaiter().GetResult();
+
+    // C# synthesizes an unannotated entry point for an async Main. Keep the
+    // real Windows entry point synchronous so native SaveFileDialog/OLE calls
+    // run on STA. The interactive branch below reaches Application.Run without
+    // awaiting; only the separate headless branches yield before returning.
+    private static async Task<int> RunAsync(string[] args)
     {
         if (args.Length == 2 && args[0] == "--audit-localization")
         {

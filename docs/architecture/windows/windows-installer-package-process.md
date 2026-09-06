@@ -753,6 +753,29 @@ Für den gemeinsamen neuen Abnahmestand sind ein neuer Paketbuild und die
 native Prüfung weiterhin nötig. Die bestehende Sandbox bleibt erhalten;
 die Frage nach ihrem Ersetzen ist noch unbeantwortet.
 
+Beim anschließenden nativen Aufruf „Diagnosepaket erstellen …“ erschien kein
+Speicherdialog; ein Export wurde deshalb nicht als bestanden gewertet. Die
+reine Prozessprüfung um 07:07:58 UTC bestätigte weiterhin Launcher PID `5928`,
+also keinen nachgewiesenen Prozessabsturz. Die lokale PE-Metadatenprüfung
+belegte jedoch eine konkrete Eintrittspunktlücke: Der aus `async Main`
+generierte reale CLR-Einstieg `<Main>` hatte keine Attribute und
+`hasStaThread=false`. Der neue Test auf `Assembly.EntryPoint` scheiterte
+zunächst genau daran. Ein synchrones `[STAThread] Main`, das den bestehenden
+asynchronen Ablauf aufruft, korrigiert diese Windows-Dateidialog-Voraussetzung.
+Danach sind Eintrittspunkt-, Updatefehler- und Downloadtests sowie ein
+isolierter Launcher-Smoke auf Ports `51033`/`51034` einschließlich Recovery,
+Stopp und redigiertem Diagnoseexport grün. Der native Speicherdialog selbst
+bleibt bis zum Test der neuen Installation offen.
+
+Der parallel fertig gewordene Build `1.0.8130` unter
+`output/windows-installer-update-feedback-review` stammt noch aus Commit
+`f3ae44c3623571c615ae48ac63f8a7ec43ddb282` und enthält den Updatefehler-Fix,
+aber **nicht** die danach bestätigte STA-Korrektur. Trotz grüner Build- und
+Payload-Gates ist er deshalb kein abschließender Abnahmestand. Seine
+eingefrorenen Binärdateien wurden nicht nachträglich verändert. Ein neuer
+gemeinsamer Build muss die STA-Korrektur einschließen; bestehende Sandbox,
+Credentials, Main-Betrieb und GitHub-Veröffentlichungen bleiben unberührt.
+
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.
 Die erste Public-Prüfung war wegen der pauschalen, aktiven Sandbox-Regel

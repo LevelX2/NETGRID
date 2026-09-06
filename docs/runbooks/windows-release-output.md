@@ -92,6 +92,17 @@ echte Install-/Repair-/Uninstall-Matrix folgt im Windows-11-Releasegate.
 
 ## Launcher isoliert prüfen
 
+Der reale CLR-Einstieg des Launchers ist ein synchrones `[STAThread] Main`.
+Er übergibt an den bestehenden asynchronen Ablauf; der interaktive Zweig
+erreicht `Application.Run` ohne vorheriges `await`. Ein direktes `async Main`
+ist hier nicht zulässig: Beim nachgewiesenen Build trug dessen generierter
+`<Main>`-Einstieg kein STA-Attribut. Der Regressionstest prüft deshalb
+`Assembly.EntryPoint`, nicht nur den sichtbaren C#-Quelltext. Windows-
+Dateidialoge und andere COM-Oberflächen benötigen den
+[STA-Vertrag am tatsächlichen Einstieg](https://learn.microsoft.com/en-us/dotnet/api/system.stathreadattribute?view=net-10.0).
+Headless-Smokes bleiben asynchron; der synchrone Einstieg ersetzt keine
+native Prüfung des Diagnose-Speicherdialogs.
+
 Nach gebautem Release- und Installerinput startet folgender Befehl einen
 vollständigen installierten Produktbaum auf zwei freien Nichtstandardports und
 einem temporären Datenroot:

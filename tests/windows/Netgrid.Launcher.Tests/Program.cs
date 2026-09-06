@@ -4,6 +4,11 @@ using System.Security.Cryptography;
 using System.Text;
 
 var assembly = Assembly.Load("NETGRID");
+Assert(assembly.EntryPoint?.IsDefined(typeof(STAThreadAttribute), inherit: false) == true,
+    "actual_windows_entrypoint_has_sta_for_native_file_dialogs");
+Assert(assembly.EntryPoint!.Name == "Main" && assembly.EntryPoint.ReturnType == typeof(int),
+    "windows_entrypoint_is_not_an_unannotated_async_bridge");
+Console.WriteLine("LAUNCHER_ENTRYPOINT_TEST_OK nativeDialogs=STA headlessAsync=preserved");
 var updateFailureChecks = await UpdateFailureTests.Run(assembly);
 Console.WriteLine($"LAUNCHER_UPDATE_FAILURE_TESTS_OK checks={updateFailureChecks} installationStarted=false");
 var discovery = assembly.GetType("Netgrid.Launcher.UpdateDiscovery", throwOnError: true)!;
