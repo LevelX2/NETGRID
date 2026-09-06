@@ -829,7 +829,25 @@ Setup-Assertions. Die Gastdiagnosen liegen im aktuellen Laufordner unter
 `result/install-8131-probe.json` und `result/msi-progress-open-before.json`.
 8131 ist damit kein bestandener nativer Abnahmestand. Ein korrigierter Build
 und dessen erneute native Installation sind erforderlich; das vorherige
-Setup zeigt noch seinen Fehlerdialog. Es wurden keine Zugangsdaten geändert.
+Setup wurde nach Bestätigung des Fehlerdialogs geschlossen. Es wurden keine
+Zugangsdaten geändert.
+
+Der korrigierte Build `1.0.8134` aus sauberem Commit
+`9424a988411ad50ec0dee5bc7b9be9472aca15d5` liegt unter
+`output/windows-installer-empty-progress-review`. Die vollständige Buildstrecke
+ist mit Exit 0 beendet: 1.937 Setup-Assertions, 63 First-Run-Assertions,
+Launcher-/Updater-Prüfungen, isolierte Runtime-/Bootstrap-Smokes,
+173-Schlüssel-Sprachmatrix und 10.901-Dateien-Payloadaudit sind grün.
+Der Launcher-Smoke verwendete die isolierten Ports `52458`/`52459`.
+Setup-SHA-256:
+`6ff88fefe5b2d95fbab4caa3173126f10a4a5cd7025675a226b8cba06552a2d3`;
+MSI-SHA-256:
+`cb26cbe82aacab2557f826b9f589174e75e69609f5818493913cfc3a7188c7eb`.
+Originale und Gast-Eingangskopien wurden gegen Metadaten und Prüfsummendatei
+geprüft. In derselben VM wurde um 12:09:37 UTC das neue Setup als PID `2584`
+geöffnet (`result/corrected-setup-start.json`); die deutsche Sprachwahl und
+das Installationsformular wurden erreicht. Die erneute native Installation
+ist noch nicht ausgelöst und bleibt der nächste Abnahmeschritt.
 
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.

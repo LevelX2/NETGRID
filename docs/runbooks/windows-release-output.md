@@ -490,9 +490,8 @@ formatiert (`[InitializeNetgridRuntime]`, `[CacheNetgridSetup]` usw.).
 MSI-Decompile-Audit prüft deshalb ausdrücklich die Argumentbindung;
 Build-/Extraktionserfolg allein beweist keine funktionierende Installation.
 
-Die Installation speichert ihr vollständiges Quell-MSI bytegleich unter
-dem nachfolgend beschriebenen Cachepfad. Der native Fortschrittscallback
-bestätigt auch datensatzlose `INSTALLMESSAGE_PROGRESS`-Benachrichtigungen:
+Der native Fortschrittscallback bestätigt auch datensatzlose
+`INSTALLMESSAGE_PROGRESS`-Benachrichtigungen:
 Windows Installer kann sie bereits beim Öffnen eines Pakets senden. Sie
 ändern keinen Zähler und erzeugen keine Prozentanzeige. Ein vorhandener,
 aber ungültiger numerischer Fortschrittsrecord bleibt dagegen ein Fehler;
