@@ -994,6 +994,23 @@ Dies ist eine Sichtprüfung im vorhandenen Sandboxkontext, keine zusätzliche
 reale DPI-Stufe, kein Hovernachweis und keine funktionale Sprachabnahme von
 Installation, Update oder Ersteinrichtung. Diese übrigen Gates bleiben offen.
 
+Die vertiefte read-only Browserdiagnose um 19:52:33 UTC
+(`result/http-association-8136.json`) belegt die konkrete Inkonsistenz:
+HTTP-UserChoice ist bereits `MSEdgeHTM`, aber diese Klasse und ihr
+`shell\open\command` fehlen vollständig in HKCR. Edge ist damit ausgewählt,
+jedoch nicht als HTTP-Handler registriert. Die bisher angefragte bloße
+Standardbrowserzuordnung ist deshalb nicht als ausreichende Reparatur belegt.
+Es wurden keine Registrywerte geschrieben und kein Browser repariert oder
+neu installiert. Der nächste Umgebungsschritt benötigt die Freigabe zur
+Reparatur der Edge-Browserregistrierung ausschließlich im Gast.
+
+Auch die erneute read-only Prüfung der öffentlichen
+[GitHub-Releases-Seite](https://github.com/LevelX2/NETGRID/releases) am
+6. September um 19:52 UTC zeigt weiterhin keine Releases. Ohne freigegebenes
+veröffentlichtes Testartefakt kann der echte GitHub-Download-/Updatefluss nicht
+abgenommen werden; lokale Fixtures ersetzen diesen Nachweis nicht. Weder
+Releaseveröffentlichung noch Push, Main-Integration oder Cleanup sind erfolgt.
+
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.
 Die erste Public-Prüfung war wegen der pauschalen, aktiven Sandbox-Regel
