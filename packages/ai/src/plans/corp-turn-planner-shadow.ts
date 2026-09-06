@@ -1358,9 +1358,33 @@ function choiceBindings(
   selectedChoices: AiDecision["selectedChoices"] | undefined,
 ): CanonicalChoiceBinding[] | undefined {
   const requirements = action.choiceRequirements ?? [];
-  if (requirements.length === 0) return [];
-  if (!selectedChoices) return undefined;
   const bindings: CanonicalChoiceBinding[] = [];
+  const paymentSourceIds = action.payload?.runnerInstallPaymentSourceIds;
+  const paymentSourceAmounts =
+    action.payload?.runnerInstallPaymentSourceAmounts;
+  if (
+    action.type === "install_card" &&
+    typeof paymentSourceIds === "string" &&
+    typeof paymentSourceAmounts === "string"
+  ) {
+    const amounts = paymentSourceAmounts.split(",");
+    for (const [index, sourceId] of paymentSourceIds.split(",").entries()) {
+      bindings.push({
+        choiceId: `runner_install_payment:${sourceId}`,
+        role: "route_defining",
+        value: { kind: "number", value: Number(amounts[index]) },
+      });
+    }
+  }
+  if (action.payload?.runnerProgramTrashBeforeInstall === true) {
+    bindings.push({
+      choiceId: "runner_program_trash_before_install",
+      role: "route_defining",
+      value: { kind: "boolean", value: true },
+    });
+  }
+  if (requirements.length === 0) return bindings;
+  if (!selectedChoices) return undefined;
   for (const requirement of requirements) {
     const value =
       selectedChoices.choiceId === requirement.choiceId &&

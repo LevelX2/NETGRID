@@ -929,6 +929,18 @@ function boundaryForRunnerCandidate(
     remainingActionCapacity,
   );
   if (delayedInstallBoundary) return delayedInstallBoundary;
+  if ((candidate.costProfile.hostedCreditCost ?? 0) > 0) {
+    return assessTurnObservationBoundary({
+      boundaryKind: "projected_plan_discovery_required",
+      remainingActionCapacity,
+      residualTurnValueBasis: "remaining_capacity",
+      immediateOutcomeCodes: ["runner_install_payment_pool_consumed"],
+      uncertainty: [
+        { code: "post_install_payment_pool_revalidation_required" },
+      ],
+      assumptionIds: ["current_engine_install_payment_binding_exact"],
+    });
+  }
   if (
     candidate.randomBadPublicityModel?.randomOutcome ||
     candidate.actionCapacityProjection?.reliability === "random"
@@ -956,7 +968,8 @@ function commutativeGroupKey(
   }
   if (
     candidate.semanticActionType === "install.card" &&
-    candidate.costProfile.costKnownStatus === "known"
+    candidate.costProfile.costKnownStatus === "known" &&
+    (candidate.costProfile.hostedCreditCost ?? 0) === 0
   ) {
     return "runner-independent-current-install";
   }

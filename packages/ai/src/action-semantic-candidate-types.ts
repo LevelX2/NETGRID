@@ -105,6 +105,7 @@ export type DamageAmount = {
 export type ActionCostProfile = {
   clickCost?: number;
   creditCost?: number;
+  hostedCreditCost?: number;
   trashCost?: number;
   agendaPointCost?: number;
   temporaryCredits?: {

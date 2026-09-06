@@ -10,6 +10,43 @@ import {
 import { buildAiDecisionInputDto } from "./input-dto";
 
 describe("AI input DTO score-conversion contract", () => {
+  it("preserves the exact actor-owned program-install payment and trash choice", () => {
+    const action = conversionAction();
+    action.side = "runner";
+    action.type = "install_card";
+    action.payload = {
+      cardId: "program",
+      runnerInstallPaymentSourceIds: "installer",
+      runnerInstallPaymentSourceAmounts: "2",
+      runnerInstallPaymentHostedCredits: 2,
+      runnerProgramTrashBeforeInstall: true,
+      privateProbe: "discard",
+    };
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: playerView(action, "runner"),
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "install-payment-dto",
+      decisionId: "install-payment-dto:1",
+      actionNumber: 1,
+      profileId: "test",
+    });
+    for (const projected of [
+      input.legalActions[0],
+      input.playerView.legalActions[0],
+    ]) {
+      expect(projected?.payload).toMatchObject({
+        runnerInstallPaymentSourceIds: "installer",
+        runnerInstallPaymentSourceAmounts: "2",
+        runnerInstallPaymentHostedCredits: 2,
+        runnerProgramTrashBeforeInstall: true,
+      });
+      expect(projected?.payload).not.toHaveProperty("privateProbe");
+    }
+  });
+
   it("preserves the actor-private Runner draw projection without changing its action binding", () => {
     const action = conversionAction();
     action.actionId = "runner.draw_card";

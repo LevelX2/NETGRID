@@ -47,12 +47,20 @@ export function costProfileForAction(action: LegalAction): ActionCostProfile {
     numberPayload(action, "rezCostPaid") ??
     numberPayload(action, "corpCreditsSpent") ??
     numberPayload(action, "runnerCreditsSpent");
-  const creditCost =
+  const grossCreditCost =
     creditCostDimension.status === "known"
       ? creditCostDimension.explicit
         ? creditCostDimension.value
         : (payloadCreditCost ?? creditCostDimension.value)
       : payloadCreditCost;
+  const hostedCreditCost = runnerInstallHostedCreditCost(
+    action,
+    grossCreditCost,
+  );
+  const creditCost =
+    hostedCreditCost === undefined
+      ? grossCreditCost
+      : grossCreditCost! - hostedCreditCost;
   const trashCost = numberPayload(action, "accessTrashTotalCost");
   const agendaPointCost =
     numberPayload(action, "agendaPointCost") ??
@@ -80,6 +88,7 @@ export function costProfileForAction(action: LegalAction): ActionCostProfile {
   return {
     ...(clickCost !== undefined ? { clickCost } : {}),
     ...(creditCost !== undefined ? { creditCost } : {}),
+    ...(hostedCreditCost !== undefined ? { hostedCreditCost } : {}),
     ...(trashCost !== undefined ? { trashCost } : {}),
     ...(agendaPointCost !== undefined ? { agendaPointCost } : {}),
     ...(temporaryCredits !== undefined ? { temporaryCredits } : {}),
@@ -98,6 +107,59 @@ export function costProfileForAction(action: LegalAction): ActionCostProfile {
     ...(variableCost !== undefined ? { variableCost } : {}),
     additionalCosts: additionalCostFields(action),
   };
+}
+
+function runnerInstallHostedCreditCost(
+  action: LegalAction,
+  grossCreditCost: number | undefined,
+): number | undefined {
+  const ids = action.payload?.runnerInstallPaymentSourceIds;
+  const amounts = action.payload?.runnerInstallPaymentSourceAmounts;
+  const total = action.payload?.runnerInstallPaymentHostedCredits;
+  if (ids === undefined && amounts === undefined && total === undefined)
+    return undefined;
+  const fail = (): never => {
+    throw Object.assign(
+      new Error(
+        "AI040: Invalid Engine-bound program-install payment projection.",
+      ),
+      {
+        name: "ActionCostProjectionError",
+        code: "invalid_runner_install_payment",
+        owner: "action_semantics",
+        actionId: action.actionId,
+      },
+    );
+  };
+  if (
+    action.side !== "runner" ||
+    action.type !== "install_card" ||
+    typeof ids !== "string" ||
+    typeof amounts !== "string" ||
+    typeof total !== "number" ||
+    !Number.isSafeInteger(total) ||
+    total < 0 ||
+    grossCreditCost === undefined ||
+    !Number.isSafeInteger(grossCreditCost) ||
+    total > grossCreditCost
+  )
+    return fail();
+  const sourceIds = ids.split(",");
+  const sourceAmounts = amounts.split(",");
+  if (
+    sourceIds.length !== sourceAmounts.length ||
+    sourceIds.some((id) => id.length === 0) ||
+    new Set(sourceIds).size !== sourceIds.length ||
+    sourceAmounts.some(
+      (amount) =>
+        !/^(0|[1-9][0-9]*)$/.test(amount) ||
+        !Number.isSafeInteger(Number(amount)),
+    )
+  )
+    return fail();
+  const sum = sourceAmounts.reduce((sum, amount) => sum + Number(amount), 0);
+  if (!Number.isSafeInteger(sum) || sum !== total) return fail();
+  return total;
 }
 
 function exactCostDimension(

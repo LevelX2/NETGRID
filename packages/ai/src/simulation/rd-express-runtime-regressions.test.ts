@@ -19,6 +19,42 @@ import { simulateAiGame } from "../simulation";
 const RUNNER_DECK_ID = "standard_runner_rd_express";
 
 describe("R&D Express selfplay runtime regressions", () => {
+  it("uses the renewing program-install pool before liquid credits in the captured coverage line", () => {
+    const captures: AiSimulationDecisionCheckpointCapture[] = [];
+    const summary = simulateStandardGame({
+      runnerDeckId: "standard_runner_blink_pressure_rig",
+      corpDeckId: "standard_corp_original_speed_v10",
+      seed: "meta-402-round-3-002",
+      difficulty: "hard",
+      maxActions: 53,
+      captures,
+    });
+    expect(summary.errors).toEqual([]);
+    const installed = (capture: AiSimulationDecisionCheckpointCapture) =>
+      capture.input.playerView.own.rig?.some(
+        (card) => card.definitionId === "onr_v1_007_blink",
+      ) === true;
+    const afterIndex = captures.findIndex(installed);
+    expect(afterIndex).toBeGreaterThan(0);
+    const before = captures[afterIndex - 1]!.input.playerView.own;
+    const after = captures[afterIndex]!.input.playerView.own;
+    const pool = (rig: typeof before.rig) =>
+      rig?.find(
+        (card) =>
+          card.definitionId === "onr_v1_075_zetatech-software-installer",
+      )?.counters?.bit;
+    expect(pool(before.rig)).toBeGreaterThan(0);
+    expect(
+      after.rig?.some(
+        (card) =>
+          card.definitionId === "onr_v1_075_zetatech-software-installer",
+      ),
+    ).toBe(true);
+    expect(pool(after.rig)).toBeUndefined();
+    expect(after.credits).toBe(before.credits - 5 + pool(before.rig)!);
+    expect(summary.replayOk).toBe(true);
+  }, 120_000);
+
   it.each([
     {
       label:
@@ -337,6 +373,7 @@ type StandardDeck = {
 };
 
 function simulateStandardGame(params: {
+  difficulty?: "hard";
   runnerDeckId?: string;
   corpDeckId: string;
   seed: string;
@@ -346,6 +383,12 @@ function simulateStandardGame(params: {
   const runner = standardSnapshot(params.runnerDeckId ?? RUNNER_DECK_ID);
   const corp = standardSnapshot(params.corpDeckId);
   return simulateAiGame({
+    ...(params.difficulty
+      ? {
+          runnerDifficulty: params.difficulty,
+          corpDifficulty: params.difficulty,
+        }
+      : {}),
     seed: params.seed,
     maxActions: params.maxActions,
     runnerDeck: buildEngineDeck(runner),

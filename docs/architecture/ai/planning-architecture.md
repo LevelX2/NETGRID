@@ -631,6 +631,21 @@ eigene Kartensemantik und Deckfähigkeiten
       Ergebnis-/Fortschritts-Revalidierung
 ```
 
+Die KI-Input-Projektion erhält die von der Engine gebundene
+Programminstallations-Zahlungsaufteilung und den optionalen Programmtrash.
+Die Action-Semantik prüft Quellen, Beträge und Gesamtsumme, trennt liquide
+`creditCost` von `hostedCreditCost` und weist unvollständige oder widersprüchliche
+Aufteilungen mit `invalid_runner_install_payment` beim Owner
+`action_semantics` zurück. Der Plan bewertet damit die tatsächliche
+Liquiditätsbelastung; er rekonstruiert keine Zahlung aus Action-IDs oder Labels.
+
+Zahlungsquellen mit ihren konkreten Beträgen und optionaler Programmtrash
+gehören als `route_defining`-Bindings zur kanonischen Invocation. Eine
+poolbezahlte Installation ist nicht mit einer weiteren Installation frei
+vertauschbar. Nach ihr verlangt der TurnPlanner die bestehende
+`projected_plan_discovery_required`-Revalidierung am aktuellen Engine-Zustand,
+bevor er einen weiteren Zugriff auf denselben Kartenpool plant.
+
 Der Rückkanal zum Strategic Intent ist ebenso ausdrücklich begrenzt:
 
 ```text
