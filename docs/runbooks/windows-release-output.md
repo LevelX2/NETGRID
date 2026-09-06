@@ -149,6 +149,16 @@ Maintenance-Passwort wird dort zweimal verdeckt eingegeben und ausschließlich
 lässt die Spieloberfläche nutzbar, während Maintenance gesperrt bleibt; die
 Ersteinrichtung kann über den gleichnamigen Startmenüeintrag erneut geöffnet
 werden. Ein vorhandenes Credential wird weder zurückgesetzt noch ersetzt.
+Beide Passwortfelder besitzen getrennte Augen-Schaltflächen mit lokalisierten
+„Anzeigen“-/„Verbergen“-Aktionen. Standardmäßig, beim Verlassen des Dialogs
+und vor dem Abschicken sind beide Eingaben verdeckt. Die Umschaltung verändert
+weder den Eingabetext noch den sicheren Bootstrapweg. Direkt im Dialog erklärt
+„Später“, dass noch kein Passwort eingerichtet wird und Maintenance gesperrt
+bleibt, und nennt den sprachabhängigen Startmenüeintrag zum Nachholen.
+Die Ansicht selbst startet keine Runtime; der interaktive Programmeinstieg
+bindet die Initialisierung an das geöffnete Fenster. Dadurch prüfen die
+UI-Komponententests Darstellung und Umschaltung ohne installierte Runtime
+oder Zugriff auf echte Credentials.
 
 ## Installationsvertrag für die nächsten Pakete
 

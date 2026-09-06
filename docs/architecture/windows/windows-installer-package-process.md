@@ -553,6 +553,17 @@ Eingaben, Retry und Fehlerstopp sind grün. Layoutvorschauen werden getrennt
 von echten Installerabläufen erzeugt. Die Änderung ist noch nicht im
 geöffneten 8113-Setup enthalten und braucht einen neuen artefaktgebundenen Lauf.
 
+Nach dem Schließen der Sandboxfenster durch den Nutzer liefert `wsb list`
+am 2026-09-06 keine laufende Sandbox mehr. Die VM wurde nicht erneut gestartet.
+Die MSI-Erfolgsevidence bleibt erhalten; ob die anschließende Ersteinrichtung
+vom Nutzer beendet wurde, ist nicht bestätigt. Auf Nutzerwunsch erhalten
+beide Passwortfelder eigene Augen-Schaltflächen und der Dialog eine klare
+„Später“-Erklärung samt lokalisiertem Startmenüpfad. 51 UI-Assertions in drei
+Sprachen, die Layoutvorschauen und der isolierte Bootstrap-Smoke sind grün;
+der vorhandene Credentialstore des Smokes blieb beim zweiten Bootstrap
+unverändert. Das sind Komponentenprüfungen, kein erneuter installierter
+First-Run-Nachweis. Die Fortschrittskorrektur ist unter `d7054c714` gesichert.
+
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.
 Die erste Public-Prüfung war wegen der pauschalen, aktiven Sandbox-Regel

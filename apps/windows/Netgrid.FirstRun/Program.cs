@@ -18,6 +18,7 @@ internal static class Program
         if (args.Length > 0) return RunHeadless(args);
         ApplicationConfiguration.Initialize();
         using var form = new FirstRunForm();
+        form.Shown += async (_, _) => await form.InitializeAsync();
         Application.Run(form);
         return form.ResultCode;
     }
@@ -46,6 +47,9 @@ internal sealed class FirstRunForm : Form
 {
     private readonly TextBox _password = new() { Width = 390, UseSystemPasswordChar = true };
     private readonly TextBox _confirmation = new() { Width = 390, UseSystemPasswordChar = true };
+    private readonly PasswordVisibilityButton _passwordVisibility;
+    private readonly PasswordVisibilityButton _confirmationVisibility;
+    private readonly Label _laterHelp = Body(UiText.Get("first.later.help", UiText.Get("first.title")));
     private readonly Label _status = new() { AutoSize = true, ForeColor = SystemColors.GrayText, MaximumSize = new Size(520, 0) };
     private readonly Label _accountMode = new() { AutoSize = true, MaximumSize = new Size(520, 0) };
     private readonly Button _complete = new() { Text = UiText.Get("first.complete"), AutoSize = true, Padding = new Padding(16, 6, 16, 6) };
@@ -64,7 +68,7 @@ internal sealed class FirstRunForm : Form
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
         MinimizeBox = false;
-        ClientSize = new Size(610, 470);
+        ClientSize = new Size(650, 580);
         Padding = new Padding(28);
 
         var root = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, AutoSize = true };
@@ -77,21 +81,25 @@ internal sealed class FirstRunForm : Form
         });
         root.Controls.Add(Body(UiText.Get("first.body")));
         root.Controls.Add(_accountMode);
-        root.Controls.Add(Field(UiText.Get("first.password"), _password));
-        root.Controls.Add(Field(UiText.Get("first.confirm"), _confirmation));
+        _passwordVisibility = new PasswordVisibilityButton(_password, UiText.Get("first.password"));
+        _confirmationVisibility = new PasswordVisibilityButton(_confirmation, UiText.Get("first.confirm"));
+        root.Controls.Add(Field(UiText.Get("first.password"), _password, _passwordVisibility));
+        root.Controls.Add(Field(UiText.Get("first.confirm"), _confirmation, _confirmationVisibility));
         root.Controls.Add(_status);
+        root.Controls.Add(_laterHelp);
         var actions = new FlowLayoutPanel { AutoSize = true, FlowDirection = FlowDirection.RightToLeft, Dock = DockStyle.Top };
         actions.Controls.Add(_complete);
         actions.Controls.Add(_later);
         root.Controls.Add(actions);
         Controls.Add(root);
 
-        Shown += async (_, _) => await InitializeAsync();
+        Deactivate += (_, _) => HidePasswords();
+        FormClosed += (_, _) => { _password.Clear(); _confirmation.Clear(); };
         _complete.Click += async (_, _) => await CompleteAsync();
         _later.Click += (_, _) => Close();
     }
 
-    private async Task InitializeAsync()
+    internal async Task InitializeAsync()
     {
         try
         {
@@ -110,6 +118,7 @@ internal sealed class FirstRunForm : Form
                 _alreadyInitialized = true;
                 _complete.Enabled = true;
                 _later.Visible = false;
+                _laterHelp.Visible = false;
                 return;
             }
             _status.Text = UiText.Get("first.pipe");
@@ -172,19 +181,34 @@ internal sealed class FirstRunForm : Form
 
     private void ToggleInputs(bool enabled)
     {
+        if (!enabled) HidePasswords();
         _password.Enabled = enabled;
         _confirmation.Enabled = enabled;
+        _passwordVisibility.Enabled = enabled;
+        _confirmationVisibility.Enabled = enabled;
         _complete.Enabled = enabled;
         _later.Enabled = enabled;
     }
 
+    private void HidePasswords()
+    {
+        _passwordVisibility.HidePassword();
+        _confirmationVisibility.HidePassword();
+    }
+
     private static Label Body(string text) => new() { Text = text, AutoSize = true, MaximumSize = new Size(520, 0), Margin = new Padding(3, 3, 3, 15) };
 
-    private static Control Field(string label, TextBox textBox)
+    private static Control Field(string label, TextBox textBox, Button visibility)
     {
         var panel = new TableLayoutPanel { AutoSize = true, Dock = DockStyle.Top, ColumnCount = 1, Margin = new Padding(3, 8, 3, 8) };
         panel.Controls.Add(new Label { Text = label, AutoSize = true });
-        panel.Controls.Add(textBox);
+        var row = new TableLayoutPanel { AutoSize = true, Dock = DockStyle.Top, ColumnCount = 2 };
+        row.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        row.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+        textBox.Dock = DockStyle.Fill;
+        row.Controls.Add(textBox, 0, 0);
+        row.Controls.Add(visibility, 1, 0);
+        panel.Controls.Add(row);
         return panel;
     }
 }

@@ -62,6 +62,8 @@ try {
   if ($LASTEXITCODE -ne 0) { throw "Die Windows-Updater-Regressionstests sind fehlgeschlagen." }
   & $dotnet run --project tests/windows/Netgrid.SetupHost.Tests/Netgrid.SetupHost.Tests.csproj -c Release
   if ($LASTEXITCODE -ne 0) { throw "Die Windows-Setup-Regressionstests sind fehlgeschlagen." }
+  & $dotnet run --project tests/windows/Netgrid.FirstRun.Tests/Netgrid.FirstRun.Tests.csproj -c Release
+  if ($LASTEXITCODE -ne 0) { throw "Die Windows-Ersteinrichtungs-UI-Tests sind fehlgeschlagen." }
   & $dotnet run --project tests/windows/Netgrid.Launcher.Tests/Netgrid.Launcher.Tests.csproj -c Release
   if ($LASTEXITCODE -ne 0) { throw "Die Windows-Launcher-Downloadtests sind fehlgeschlagen." }
 
