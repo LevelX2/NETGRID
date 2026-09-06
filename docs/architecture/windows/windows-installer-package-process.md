@@ -612,6 +612,22 @@ dies ersetzt keine native DPI- oder Installationsabnahme. Das offene
 8119-Setup enthält diese Quelländerungen noch nicht. Keine Installation,
 Passworteingabe oder Änderung bestehender Zugangsdaten wurde dadurch ausgelöst.
 
+Der anschließende vollständige Installerbuild **1.0.8123** aus dem sauberen
+Quellcommit `714561a748c427bf84681e4e69e718ef7e0e2f92` ist erfolgreich:
+`output/windows-installer-admin-copy-review`. Releaseoutput, Komponenten,
+isolierter Launcher-Smoke (Ports `57839`/`57840`), First-Run-Smoke mit
+unverändertem Credential, Updater-Smoke, Sprach-/Layoutmatrix und der Audit
+aller 10.901 Payload-Dateien sind grün. Setup-SHA-256:
+`4e50ef5f617632215f3da8caa442f6f0ea05365a1f5ce84dc87544ca68e71ce0`;
+MSI-SHA-256:
+`8901d849fc0122b36a85c3ab7c1ac4b67f458e39904547c4def0b8a5c5f7f494`.
+Beide Dateien wurden unabhängig gegen Metadaten und `SHA256SUMS.txt` geprüft.
+Dieser Build enthält die gesammelten Textkorrekturen und den festen
+Fortschritts-/Aktionsbereich, wurde aber noch nicht in der Sandbox geöffnet
+oder installiert. Die native Abnahme und GitHub-Updatefreigabe bleiben offen;
+WIN-I08 ist nicht abgeschlossen, Main-Integration und Cleanup erfolgen noch
+nicht. Der zuvor gestartete Sandbox-Viewer bleibt unverändert.
+
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.
 Die erste Public-Prüfung war wegen der pauschalen, aktiven Sandbox-Regel
