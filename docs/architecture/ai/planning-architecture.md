@@ -3039,6 +3039,25 @@ einen ausführbaren Pressure-/Informationsplan mit Target, Risiko und
 erwarteter Konversion. Fehlt eine solche Planroute, wird die Lücke sichtbar
 fail-closed behandelt.
 
+Nach einer Informationsgrenze quotiert der bestehende Run-Parent den
+verbleibenden sichtbaren Pfad erneut. Neben der deterministischen
+Breaker-Abdeckung berücksichtigt er dieselbe kanonische
+Random-Break-/Damage-Risikobewertung wie Run-Start und Abbruchprüfung.
+Ein ausreichend gepufferter probabilistischer Pfad darf deshalb nach dem
+letzten unbekannten ICE zu Zugriff konvertieren; fehlende sichere Coverage
+allein beweist keine unerreichbare Route. Die Diagnose kennzeichnet diese
+bedingte Erreichbarkeit ausdrücklich. Aktueller Handpuffer, Funding,
+unvermeidbare Gefahren und konkrete Engine-LegalActions bleiben bindend;
+eine tödliche oder bereits verbrauchte Break-Option wird dadurch nicht
+freigegeben. Parent, Executor und Action-ID bleiben beim aktuellen Runplan.
+Die Zweckänderung zu Zugriff erzwingt allein keinen Break: Die konkrete
+Engine-Fortsetzung muss den Run beenden oder eine andere separat bewertete
+Gefahr muss den Break verlangen. Ein Break gegen ausschließlich auf das
+nächste Encounter wirkende Subroutinen besitzt am innersten ICE keinen
+Zweck, sofern dessen Quote keine Umleitung oder Rückversetzung enthält.
+Diese Zielprüfung gehört zur Encounter-Action-Admission und bleibt von der
+Wahl eines bestimmten Breakers unabhängig.
+
 ## 28. Corp-Zielmodule
 
 ### 28.1 `corp.opening_and_board_foundation`

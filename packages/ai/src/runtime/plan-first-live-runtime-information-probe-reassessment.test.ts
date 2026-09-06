@@ -18,6 +18,150 @@ import { createSemanticRuntimeDecisionContext } from "./semantic-runtime-decisio
 import type { SemanticRuntimeDecisionContextDependencies } from "./semantic-runtime-decision-context";
 
 describe("plan-first information-probe reassessment", () => {
+  it.each([4, 1])(
+    "requotes a revealed probabilistic path with %i grip cards before retaining the information purpose",
+    (handCount) => {
+      resetResidentPlanPortfolioMemory();
+      const startRun = legalAction(
+        "probe-hq",
+        "runner",
+        "start_run",
+        "Run HQ",
+        { credits: 0, clicks: 1 },
+        { payload: { serverId: "hq" } },
+      );
+      const target = {
+        ...safeRuntimeRunTarget(startRun.actionId, "hq"),
+        knownAccessState: "unknown" as const,
+        accessPayoff: "unknown" as const,
+        runCommitment: "probe_only" as const,
+        recommendation: "run_now" as const,
+        pathCost: 0,
+        score: 20,
+      };
+      const context = liveContext({
+        evaluateRunnerRunTargets: (params: {
+          input: { legalActions: Array<{ type: string }> };
+        }) =>
+          params.input.legalActions.some(
+            (action) => action.type === "start_run",
+          )
+            ? [target]
+            : [],
+      });
+      const startInput = aiInput("runner", [startRun]);
+      startInput.playerView.own.credits = 5;
+      startInput.playerView.servers = [
+        server("hq"),
+        server("rd"),
+        server("archives"),
+      ];
+      context.chooseSemanticRuntimeAction(startInput, {});
+      const parent = residentPlanPortfolioSnapshot(startInput)?.instances.find(
+        (instance) => instance.moduleId === "runner.pressure_central",
+      );
+      expect(parent).toMatchObject({
+        moduleState: { signal: { purpose: "information" } },
+      });
+
+      const breakIce = legalAction(
+        "break-quandary",
+        "runner",
+        "break_subroutine",
+        "Blink: Break ETR",
+        { credits: 0, clicks: 0 },
+        {
+          source: "blink",
+          payload: {
+            breakerId: "blink",
+            iceId: "quandary",
+            subroutineIndex: 0,
+          },
+        },
+      );
+      const endEncounter = encounterAction(
+        "fire-quandary-etr",
+        "continue_run",
+        0,
+        {
+          encounterContinue: true,
+          encounterWillEndRun: true,
+          unbrokenSubroutineCount: 1,
+        },
+      );
+      const input = aiInput("runner", [breakIce, endEncounter]);
+      input.playerView.stateVersion = 2;
+      input.playerView.timingPoint = "run.encounter_ice";
+      input.playerView.own.credits = 5;
+      input.playerView.own.gripOrHq = Array.from(
+        { length: handCount },
+        (_, index) => visibleCard(`grip-${index}`, "runner", "event"),
+      );
+      input.playerView.own.rig = [
+        visibleCard("blink", "runner", "program", {
+          definitionId: "onr_v1_007_blink",
+          title: "Blink",
+          subtypes: ["icebreaker"],
+          strength: 5,
+        }),
+      ];
+      const quandary = withEffectiveRunQuote(
+        visibleCard("quandary", "corp", "ice", {
+          definitionId: "onr_v1_261_quandary",
+          title: "Quandary",
+          subtypes: ["code_gate"],
+          rezzed: true,
+          strength: 2,
+        }),
+        {
+          effectiveStrength: 2,
+          subroutines: [
+            {
+              id: "quandary-etr",
+              type: "end_the_run",
+              sourceDefinitionId: "onr_v1_261_quandary",
+              sourceTitle: "Quandary",
+            },
+          ],
+        },
+      );
+      input.playerView.servers = [
+        server("hq", [quandary]),
+        server("rd"),
+        server("archives"),
+      ];
+      input.playerView.run = {
+        runId: "probe-hq-run",
+        attackedServerId: "hq",
+        phase: "encounter_ice",
+        position: { kind: "ice", serverId: "hq", iceIndex: 0 },
+        encounteredIce: quandary,
+        successful: false,
+      };
+      for (const action of input.legalActions) {
+        action.expiresAtStateVersion = 2;
+        action.timingPoint = "run.encounter_ice";
+      }
+      const decision = context.chooseSemanticRuntimeAction(input, {});
+      expect(decision.actionId).toBe(
+        handCount === 4 ? breakIce.actionId : endEncounter.actionId,
+      );
+      const root = residentPlanPortfolioSnapshot(input)?.instances.find(
+        (instance) => instance.instanceId === parent?.instanceId,
+      );
+      expect(root).toMatchObject({
+        moduleState: {
+          signal: {
+            informationBoundaryReassessment: {
+              decision:
+                handCount === 4 ? "convert_to_access" : "retain_information",
+            },
+          },
+        },
+      });
+    },
+  );
+
   it("converts the same Remote parent after a revealed affordable path and binds the current pump route", () => {
     resetResidentPlanPortfolioMemory();
     const startRun = legalAction(

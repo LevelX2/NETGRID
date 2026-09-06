@@ -9974,6 +9974,17 @@ function buildRunnerDomain(
             activeRunRoot,
             runRiskReassessment,
           );
+        const informationConversionRequiresEncounterBreak =
+          (activeRunRoot?.informationBoundaryReassessment?.decision ===
+            "convert_to_access" ||
+            activeRunRoot?.informationBoundaryReassessment?.decision ===
+              "convert_to_contest") &&
+          input.legalActions.some(
+            (action) =>
+              action.type === "continue_run" &&
+              action.payload?.encounterContinue === true &&
+              action.payload?.encounterWillEndRun === true,
+          );
         const exactPhaseActionIds = runnerExactRunWindowPhaseActionIds(
           input,
           candidates,
@@ -9983,10 +9994,7 @@ function buildRunnerDomain(
             informationProbeRequiresEncounterBreak ||
             currentEncounterHasUnbrokenResolvableDeflector(input) ||
             fullPathEncounterRequiresBreak ||
-            activeRunRoot?.informationBoundaryReassessment?.decision ===
-              "convert_to_access" ||
-            activeRunRoot?.informationBoundaryReassessment?.decision ===
-              "convert_to_contest",
+            informationConversionRequiresEncounterBreak,
         );
         const exactPhaseActionAssessments = runnerBindExactRunWindowPhaseRoute(
           runWindowActionAssessments,
@@ -13562,6 +13570,22 @@ function reassessActiveInformationRunParent(
   const parentSignal = root.parentBinding.signal;
   const marginalValue = Number(parentSignal.marginalValue);
   const payoff = root.accessCommitment?.payoff;
+  const conditionalRiskRoute = assessRandomBreakOrDamageRiskForVisibleRunPath(
+    input,
+    {
+      targetServerId: run.attackedServerId,
+      visibleIce: remainingIce,
+      ...(payoff ? { accessPayoff: payoff } : {}),
+      scoreThreat: payoff === "score_threat",
+    },
+  );
+  // The same canonical damage-risk quote that admits the run also owns
+  // conditional reachability after an information boundary. A deterministic
+  // breaker quote alone cannot disprove an admissible probabilistic route.
+  const probabilisticPathReachable =
+    randomBreakOrDamageRiskCanCarryRunPath(conditionalRiskRoute);
+  const knownPathReachable =
+    knownPath.canReachAccess || probabilisticPathReachable;
   const hasConcretePayoff =
     payoff === "agenda" ||
     payoff === "score_threat" ||
@@ -13573,7 +13597,7 @@ function reassessActiveInformationRunParent(
     knownPath.creditsAfterPath > 0;
   const hasMaterialPayoff = hasConcretePayoff || hasSpeculativeInformationValue;
   const convert =
-    knownPath.canReachAccess &&
+    knownPathReachable &&
     unknownIceCount === 0 &&
     fundingGap === 0 &&
     unavoidableHazardCount === 0 &&
@@ -13593,7 +13617,7 @@ function reassessActiveInformationRunParent(
     root.runRiskContract?.reserveQuote.requiredCredits ?? 0,
   );
   const knownEncounterPathFitsBoundRunBudget =
-    knownPath.canReachAccess &&
+    knownPathReachable &&
     fundingGap === 0 &&
     knownPath.creditsAfterPath >= preservedRunReserve;
   const encounterBudget =
@@ -13609,7 +13633,9 @@ function reassessActiveInformationRunParent(
     `runner_information_boundary_next_purpose:${nextPurpose}`,
     `runner_information_boundary_decision:${decision}`,
     `runner_information_boundary_known_path_cost:${knownPathCost}`,
-    `runner_information_boundary_known_path_reachable:${knownPath.canReachAccess}`,
+    `runner_information_boundary_known_path_reachable:${knownPathReachable}`,
+    `runner_information_boundary_probabilistic_path_reachable:${probabilisticPathReachable}`,
+    ...(conditionalRiskRoute?.evidence ?? []),
     `runner_information_boundary_unknown_ice:${unknownIceCount}`,
     `runner_information_boundary_credits_after_path:${knownPath.creditsAfterPath}`,
     `runner_information_boundary_reserved_credits:${reservedCredits}`,
@@ -13629,7 +13655,7 @@ function reassessActiveInformationRunParent(
     observedAtStateVersion: input.playerView.stateVersion,
     observedIceInstanceId: encounteredIce.instanceId,
     knownPathCost,
-    knownPathReachable: knownPath.canReachAccess,
+    knownPathReachable,
     unknownIceCount,
     runnerCreditsBeforeQuote: input.playerView.own.credits,
     creditsAfterKnownPath: knownPath.creditsAfterPath,
