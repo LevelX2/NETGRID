@@ -21,6 +21,14 @@ const RUNNER_DECK_ID = "standard_runner_rd_express";
 describe("R&D Express selfplay runtime regressions", () => {
   it.each([
     {
+      label:
+        "keeps an event-started run bound through the Vacuum Link rewind choice",
+      runnerDeckId: "standard_runner_blink_pressure_rig",
+      corpDeckId: "standard_corp_original_speed_v10",
+      seed: "meta-402-round-1-035",
+      maxActions: 15,
+    },
+    {
       label: "keeps the opening Cheap Bag match plan-covered",
       corpDeckId: "standard_corp_cheap_bag_tricks",
       seed: "rd-express-corp-panel-01",

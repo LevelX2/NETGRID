@@ -814,6 +814,12 @@ Auswahlzeitpunkt sowie Quelle, Ziel und Executor bleiben erhalten. Die
 anschließende Choice bindet ihre StateVersion an diese Fortsetzung; ein
 übersprungenes Zahlungsfenster darf die Versionsprüfung nicht abschwächen.
 
+Eine Vacuum-Link-Fortsetzung akzeptiert auch einen durch Karte gestarteten
+Run, wenn dessen vorhandener `resolve_runner_run_start_order`-Ursprung exakt
+an die ausgeführte TurnPlanner-Action, Root und Executor gebunden ist. Die
+lückenlose Ereigniskette vom Runstart über zulässige Run-/Rez-Fenster bis
+zur Subroutine und der aktuelle Engine-Choice-Vertrag bleiben verpflichtend.
+
 ## 9. Gemeinsamer Planmodul-Vertrag
 
 Der folgende Typ ist konzeptionell. Die endgültigen TypeScript-Namen werden im
@@ -3132,6 +3138,14 @@ die diesem Parent zugerechnet wird, verbraucht dieselbe Doctrine-Cadence;
 gegnerzugseitige Rez-Responses und höherpriorisierte Score-Schritte zählen
 nicht dazu. Ob ein solcher P6-Schritt den Zug erhält, entscheidet allein der
 TurnPlanner aus vollständigen Restzuglinien und Prioritäten.
+
+Die Rückbindung eines neu angelegten Remotes und der Cadence-Verbrauch
+beobachten die ausgeführte `turnPlanExecutionLease`, den zugehörigen
+Commitment-Knoten, den Remote-Parent und das unmittelbar erfolgreiche
+side-sichere Engine-Event. Bei einer ICE-Installation müssen der tatsächliche
+Event-Server und die dort sichtbare eigene ICE-Instanz zur gebundenen
+Supportaktion passen. `selectedActionOrigin` ist ein Choice-Vertrag und
+belegt gewöhnliche Corp-Installationsaktionen nicht.
 
 Ein an `corp.score_agenda` verleastes Remote verliert seinen eigenen
 Lifecycle-Need nicht. `feasible` bezeichnet ausschließlich einen aktuell

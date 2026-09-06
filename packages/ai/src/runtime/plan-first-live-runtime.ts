@@ -23704,6 +23704,15 @@ function resolvePlanBoundRunnerVacuumLinkChoice(
     origin.rootPlanInstanceId === previous?.rootForegroundInstanceId &&
     origin.executorInstanceId === previous?.executorInstanceId;
   const executionLease = previous?.turnPlanExecutionLease;
+  const cardRunStartOriginMatches =
+    origin?.immediateChoicePolicy === "resolve_runner_run_start_order" &&
+    origin.selectedAtStateVersion === previous?.stateVersion &&
+    origin.rootPlanInstanceId === previous?.rootForegroundInstanceId &&
+    origin.executorInstanceId === previous?.executorInstanceId &&
+    origin.selectedActionId === executionLease?.currentBinding.actionId &&
+    origin.sourceActionType === executionLease?.actionType &&
+    (origin.sourceActionType === "play_event" ||
+      origin.sourceActionType === "activated_card_ability");
   const turnPlanContinuationMatches =
     previous?.turnPlanCommitment?.status === "active" &&
     previous.turnPlanCommitment.sequenceRootPlanInstanceId ===
@@ -23711,7 +23720,8 @@ function resolvePlanBoundRunnerVacuumLinkChoice(
     executionLease !== undefined &&
     executionLease.currentBinding.stateVersion === previous.stateVersion &&
     (executionLease.actionType === "continue_run" ||
-      executionLease.actionType === "start_run");
+      executionLease.actionType === "start_run" ||
+      cardRunStartOriginMatches);
   const exactBinding =
     (immediateOriginMatches ||
       (turnPlanContinuationMatches && exactContinuationChain)) &&
