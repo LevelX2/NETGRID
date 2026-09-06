@@ -587,6 +587,16 @@ Installationsklick ist noch nicht erfolgt; dafür wird die unmittelbare
 Bestätigung eingeholt. WIN-I08 bleibt offen, insbesondere native Gesamtflows,
 reale DPI-/Kontexte und GitHub-Updateabnahme. Kein Push oder Main-Merge.
 
+Der Nutzer hat die neue Maske nur angesehen und noch keine Installation
+gestartet. Auf seinen Textbefund heißt die erste Setupoption nun
+„Voreingestellte Werte verwenden“ statt „Empfohlene Installation“, in allen
+drei Sprachen entsprechend angepasst. Der Hilfetext erklärt Übernahme bzw.
+Änderung der angezeigten Werte und die in beiden Wegen freie Betriebsartwahl.
+Keine Verhaltensänderung. 1.760 Setup-Assertions und das Sprachgate sind grün;
+die längeren deutschen und französischen Beschriftungen passen in die
+geprüften Layoutvorschauen. Das offene 8119-Setup enthält diese nachfolgende
+Textänderung noch nicht. Der Installationsklick bleibt unangetastet.
+
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.
 Die erste Public-Prüfung war wegen der pauschalen, aktiven Sandbox-Regel

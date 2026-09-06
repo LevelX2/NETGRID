@@ -130,8 +130,8 @@ Hauptinstanz bleiben unangetastet.
 
 ## Geführtes Setup
 
-`NETGRID-Setup-<Version>-x64.exe` zeigt den empfohlenen und den
-benutzerdefinierten Weg. Local/LAN, Desktopverknüpfung und Start nach Abschluss
+`NETGRID-Setup-<Version>-x64.exe` bietet „Voreingestellte Werte verwenden“ und
+„Benutzerdefinierte Installation“. Local/LAN, Desktopverknüpfung und Start nach Abschluss
 sind sichtbar; im benutzerdefinierten Weg kommen Pfade, Ports,
 Spielaufbewahrung und die Wahl zwischen einfachem und geschütztem
 Spielerprofilmodus hinzu. Erst „Installieren“ fordert Administratorrechte an.
@@ -340,7 +340,7 @@ Bilddatei, Viewer-Zoom oder `Form.Scale` zählt nicht als Windows-DPI-Wechsel.
 
 | Oberfläche | Zu prüfen |
 | --- | --- |
-| Sprachauswahl und Setup | Sprachwechsel samt Aktionsbeschriftungen; empfohlene und benutzerdefinierte Optionen; vollständige Texte, Fokusreihenfolge, Maus- und Tastaturhilfen; Tooltips an beiden Bildschirmrändern |
+| Sprachauswahl und Setup | Sprachwechsel samt Aktionsbeschriftungen; voreingestellte und benutzerdefinierte Werte; vollständige Texte, Fokusreihenfolge, Maus- und Tastaturhilfen; Tooltips an beiden Bildschirmrändern |
 | Validierung | Ungültige Pfade, belegte Testports und unzureichender Speicher führen zu verständlichen lokalisierten Meldungen vor der Installation; keine rohen Ausnahmetexte |
 | Ersteinrichtung | Verdeckte doppelte Eingabe, verständliche Rückmeldung, „Später“ und unveränderter vorhandener Zugang; Passwort-/Authentifizierungsschritte bedient der Nutzer selbst |
 | Launcher und Tray | Spiel, Maintenance, zweite Instanz, geordnetes Beenden, Wiederherstellung und Diagnose; vollständige lokalisierte Menüs und Meldungen |

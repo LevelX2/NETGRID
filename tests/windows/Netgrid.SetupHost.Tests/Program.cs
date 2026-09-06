@@ -201,6 +201,12 @@ foreach (var language in new[] { "de", "en", "fr" })
                 Assert(button.TabStop && !string.IsNullOrWhiteSpace(button.AccessibleName), "help_keyboard_accessible");
             }
             T Field<T>(string name) => (T)form.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(form)!;
+            Assert(Field<RadioButton>("_recommended").Text == (language switch
+            {
+                "de" => "Voreingestellte Werte verwenden",
+                "en" => "Use default settings",
+                _ => "Utiliser les valeurs par défaut",
+            }), "preset_mode_describes_values_instead_of_recommendation");
             var setPhase = form.GetType().GetMethod("SetInstallationPhase", BindingFlags.Instance | BindingFlags.NonPublic)!;
             var phaseType = assembly.GetType("Netgrid.SetupHost.InstallationPhase", true)!;
             var toggleUi = form.GetType().GetMethod("ToggleUi", BindingFlags.Instance | BindingFlags.NonPublic)!;
