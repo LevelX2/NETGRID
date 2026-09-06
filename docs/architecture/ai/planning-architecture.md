@@ -3058,6 +3058,14 @@ Zweck, sofern dessen Quote keine Umleitung oder Rückversetzung enthält.
 Diese Zielprüfung gehört zur Encounter-Action-Admission und bleibt von der
 Wahl eines bestimmten Breakers unabhängig.
 
+Eine spätere Vacuum-Link-Choice darf ebenso aus einer exakt gebundenen
+Run-Executor-Phase hervorgehen, deren Root ein übergeordneter Restricted-Run-
+Plan ist. Der bestehende Continuation-Owner prüft Commitment, Source-Plan,
+Phase, Node, Lease, Parent und die lückenlose Run-/Rez-Ereigniskette. Die
+letzte freiwillige Entscheidung muss dabei nicht unmittelbar vor dem
+auslösenden Subroutinenfenster liegen; verpflichtende Engine-Fenster eröffnen
+keinen neuen strategischen Owner.
+
 Die Zufallsbruchquote addiert zum Fehlschaden den direkten Schaden aller
 noch offenen Encounter-Subroutinen. Maßgeblich sind die exakten
 `encounterSubroutineIds` der Engine-Continue-Action, die das AI-DTO erhält.

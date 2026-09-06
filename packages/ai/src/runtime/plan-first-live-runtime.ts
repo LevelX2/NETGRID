@@ -23835,11 +23835,26 @@ function resolvePlanBoundRunnerVacuumLinkChoice(
     origin.sourceActionType === executionLease?.actionType &&
     (origin.sourceActionType === "play_event" ||
       origin.sourceActionType === "activated_card_ability");
+  const commitment = previous?.turnPlanCommitment;
+  const committedPhase = commitment?.phases?.[commitment.cursor.phaseIndex];
+  const exactCommittedRunExecutor =
+    executor !== undefined &&
+    root !== undefined &&
+    executor.parentInstanceId === root.instanceId &&
+    commitment?.sequenceRootPlanInstanceId === executor.instanceId &&
+    committedPhase?.root.planInstanceId === executor.instanceId &&
+    committedPhase.phaseId === executionLease?.phaseId &&
+    committedPhase.nodes[commitment.cursor.nodeIndex]?.nodeId ===
+      executionLease?.nodeId;
   const turnPlanContinuationMatches =
-    previous?.turnPlanCommitment?.status === "active" &&
-    previous.turnPlanCommitment.sequenceRootPlanInstanceId ===
-      previous.rootForegroundInstanceId &&
+    previous !== undefined &&
+    commitment?.status === "active" &&
+    (commitment.sequenceRootPlanInstanceId ===
+      previous.rootForegroundInstanceId ||
+      exactCommittedRunExecutor) &&
     executionLease !== undefined &&
+    executionLease.commitmentId === commitment.commitmentId &&
+    executionLease.sourcePlanId === commitment.sourcePlanId &&
     executionLease.currentBinding.stateVersion === previous.stateVersion &&
     (executionLease.actionType === "continue_run" ||
       executionLease.actionType === "start_run" ||

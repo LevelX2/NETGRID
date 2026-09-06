@@ -6013,7 +6013,13 @@ describe("authoritative plan-first live runtime", () => {
     expect(decision.evidence).toContain("plan_first_lane:engine_window");
   });
 
-  it.each(["foreground_root", "executor_phase", "wrong_phase", "wrong_node"])(
+  it.each([
+    "foreground_root",
+    "executor_phase",
+    "executor_phase_delayed_choice",
+    "wrong_phase",
+    "wrong_node",
+  ])(
     "keeps Vacuum Link bound to the exact active run plan after a failed Blink break: %s",
     (bindingMode) => {
       resetResidentPlanPortfolioMemory();
@@ -6335,6 +6341,75 @@ describe("authoritative plan-first live runtime", () => {
         },
       });
 
+      if (bindingMode === "executor_phase_delayed_choice") {
+        const delayedPortfolio = structuredClone(forcedPortfolio!);
+        delete delayedPortfolio.selectedActionOrigin;
+        delayedPortfolio.turnPlanExecutionLease!.currentBinding.stateVersion = 3;
+        delayedPortfolio.turnPlanExecutionLease!.currentBinding.actionId =
+          continueVacuumLink.actionId;
+        delayedPortfolio.turnPlanExecutionLease!.actionType = "continue_run";
+        rememberResidentPlanPortfolio(forcedContinueInput, delayedPortfolio);
+        choiceInput.playerView.stateVersion = 6;
+        choiceInput.playerView.pendingChoice!.stateVersion = 6;
+        const delayedChoiceId =
+          "card_implementation.vacuum_link_rewind:run-vacuum:6";
+        choiceInput.playerView.pendingChoice!.choiceId = delayedChoiceId;
+        resolveChoice.expiresAtStateVersion = 6;
+        resolveChoice.choiceRequirements![0]!.choiceId = delayedChoiceId;
+        choiceInput.eventTail = choiceInput.eventTail.filter(
+          (event) => event.stateVersionAfter <= 3,
+        );
+        for (const [index, actor, actionType] of [
+          [3, "runner", "continue_run"],
+          [4, "corp", "rez_ice"],
+          [5, "runner", "continue_run"],
+        ] as const) {
+          choiceInput.eventTail.push({
+            eventId: `delayed-rez-${index}`,
+            type: actionType,
+            stateVersionBefore: index,
+            stateVersionAfter: index + 1,
+            stateHashAfter: `fnv1a:delayed-${index}`,
+            visibilityClass: "public",
+            publicPayload: {
+              actor,
+              actionType,
+              abilityFamily: "run-access",
+              serverId: "rd",
+              ...(index === 5
+                ? {
+                    resolvedEffects: [
+                      {
+                        effectId: "vacuum-link-rewind",
+                        kind: "resolve_subroutine",
+                        sourceDefinitionId: "onr_v1_275_vacuum-link",
+                        visibility: "public",
+                      },
+                    ],
+                  }
+                : {}),
+            },
+          });
+        }
+        const delayedDecision = runtime.chooseSemanticRuntimeAction(
+          choiceInput,
+          {},
+        );
+        expect(delayedDecision).toMatchObject({
+          actionId: resolveChoice.actionId,
+          selectedChoices: {
+            choiceId: delayedChoiceId,
+            selectedOptionIds: ["resume_from_rezzed_ice_back"],
+          },
+          decisionDebug: {
+            planFirstDecision: {
+              rootPlanInstanceId,
+              leafExecutorInstanceId: executorInstanceId,
+            },
+          },
+        });
+        return;
+      }
       if (bindingMode === "wrong_phase" || bindingMode === "wrong_node") {
         expect(() =>
           runtime.chooseSemanticRuntimeAction(choiceInput, {}),
