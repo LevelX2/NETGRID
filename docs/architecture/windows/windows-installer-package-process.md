@@ -894,6 +894,30 @@ Fortsetzungsanweisung angehalten. Die Installation von 8136 und ihre native
 Abnahme sind damit weiterhin offen. Es läuft kein Build oder MSI-Test mehr.
 WIN-I08 bleibt offen; kein Main-Merge, Worktree-Cleanup oder Push.
 
+Nach ausdrücklicher Fortsetzungs- und Installationsfreigabe wurde 8136 am
+6. September um 14:12 UTC über das native deutsche Setup gestartet. Der
+erhöhte Worker (PID `2784`) durchlief MSI und Pipe ohne den bisherigen
+Callbackfehler. MSI-Client und -Server meldeten um 14:14:39 UTC jeweils 0;
+die anschließende read-only Prüfung bestätigt Produktregistrierung und
+installierte Version `1.0.8136`. Log:
+`C:\Windows\Temp\NETGRID-install-94845b82b8e746df847a1c1eb3e522d2\install.log`;
+gebundener Nachweis: `result/install-8136-probe.json` im aktuellen Laufordner.
+Native Screenshots zeigen die Vorbereitung mit Aktivitätsbalken, den weiterhin
+lesbaren, getrennten Datenhinweis und den fertigen Balken nach MSI-Erfolg.
+Die kurze messbare Ausführungsphase lag zwischen zwei Aufnahmen; sichtbare
+Zwischenprozente sind deshalb noch nicht als beobachtet abgenommen. Der
+vorherige direkte MSI-Test beweist die numerischen Counterdaten, nicht diese
+fehlende Zwischenaufnahme der Setupoberfläche.
+
+Der neue native Dialog „NETGRID-Verwaltung jetzt einrichten?“ ist erreicht
+(First-Run-PID `5284`, Setup-PID `2896`). Er zeigt zunächst die Entscheidung
+„Jetzt einrichten“/„Später“, erklärt Maintenance und nennt den späteren
+Startmenü-Einstieg; es sind noch keine Passwortfelder geöffnet. Die
+Einrichtungsentscheidung und Passwortbedienung werden dem Nutzer überlassen.
+Der eigentliche MSI-Lauf ist beendet; First Run wartet auf diese Entscheidung.
+Keine Zugangsdaten wurden durch den Agenten geändert. Weitere native
+Sprach-/DPI-/Kontext-, Launcher- und GitHub-Updategates bleiben offen.
+
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.
 Die erste Public-Prüfung war wegen der pauschalen, aktiven Sandbox-Regel
