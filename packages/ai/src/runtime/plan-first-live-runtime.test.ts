@@ -2039,7 +2039,7 @@ describe("authoritative plan-first live runtime", () => {
       "runner",
       "install_card",
       "Install R&D Interface",
-      { credits: 1, clicks: 1 },
+      { credits: 4, clicks: 1 },
       {
         source: "rd-interface-card",
         payload: {
@@ -2069,7 +2069,7 @@ describe("authoritative plan-first live runtime", () => {
         "runner",
         "install_card",
         "Install R&D Interface with one hosted credit",
-        { credits: 1, clicks: 1 },
+        { credits: 4, clicks: 1 },
         {
           source: "rd-interface-card",
           payload: {
@@ -2086,7 +2086,7 @@ describe("authoritative plan-first live runtime", () => {
         "runner",
         "install_card",
         "Install R&D Interface with two hosted credits",
-        { credits: 1, clicks: 1 },
+        { credits: 4, clicks: 1 },
         {
           source: "rd-interface-card",
           payload: {
@@ -2103,7 +2103,7 @@ describe("authoritative plan-first live runtime", () => {
         "runner",
         "install_card",
         "Trash a program and install R&D Interface with a hosted credit",
-        { credits: 1, clicks: 1 },
+        { credits: 4, clicks: 1 },
         {
           source: "rd-interface-card",
           payload: {
@@ -16778,6 +16778,51 @@ describe("authoritative plan-first live runtime", () => {
     expect(
       JSON.stringify(residentPlanPortfolioSnapshot(reserveSatisfied)),
     ).toContain('"kind":"develop_liquidity"');
+  });
+
+  it("keeps a stronger cost-free installed credit action after the reserve is satisfied", () => {
+    resetResidentPlanPortfolioMemory();
+    const credit = legalAction("credit", "runner", "gain_credit", "1 Credit", {
+      credits: 0,
+      clicks: 1,
+    });
+    const tool = legalAction(
+      "installed-credit-tool",
+      "runner",
+      "activated_card_ability",
+      "2 Credits",
+      { credits: 0, clicks: 1 },
+      {
+        source: "installed-tool",
+        payload: {
+          cardId: "installed-tool",
+          gainCreditsAmount: 2,
+          effectKind: "gain_credits",
+        },
+      },
+    );
+    const end = legalAction(
+      "end",
+      "runner",
+      "end_turn",
+      "End turn",
+      { credits: 0 },
+      { source: "game_rule" },
+    );
+    const input = aiInput("runner", [credit, tool, end]);
+    input.playerView.own.credits = 20;
+    input.playerView.own.clicks = 3;
+    input.playerView.opponent.deckCount = 10;
+    input.playerView.own.rig = [
+      visibleCard("installed-tool", "runner", "program", {
+        definitionId: "onr_v1_045_newsgroup-filter",
+      }),
+    ];
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: tool.actionId,
+      reasonCode: "plan_first.runner.economy",
+      fallbackUsed: false,
+    });
   });
 
   it("opens one bounded option-development draw after a saturated all-liquidity Runner turn", () => {

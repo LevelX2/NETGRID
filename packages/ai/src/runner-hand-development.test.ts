@@ -33,6 +33,31 @@ import {
 } from "./runner-hand-development.test-support";
 
 describe("RunnerHandDevelopmentEvaluation", () => {
+  it.each([0, 2])(
+    "uses the current Engine draw yield for a draw event: %s",
+    (drawCardsAmount) => {
+      const card = visibleCard("jack", {
+        definitionId: "onr_v1_095_jack-n-joe",
+        title: "Jack ’n’ Joe",
+        type: "event",
+        cost: 0,
+      });
+      const action = playEventAction("play-jack", card, 0);
+      action.payload = { ...action.payload, drawCardsAmount };
+      const input = runnerInput({
+        credits: 15,
+        hand: [card],
+        legalActions: [action],
+      });
+      input.playerView.own.stackOrRdCount = drawCardsAmount;
+      const evaluation = findByInstance(
+        evaluateRunnerHandDevelopment({ input }),
+        card.instanceId,
+      );
+      expect(evaluation?.currentNeed === "none").toBe(drawCardsAmount === 0);
+    },
+  );
+
   it("prefers a legal hosted program route over an optional program-trash install", () => {
     const program = visibleCard("pattels-virus", {
       definitionId: "onr_v1_046_pattels-virus",

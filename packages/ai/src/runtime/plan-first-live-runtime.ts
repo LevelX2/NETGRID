@@ -7573,9 +7573,13 @@ function buildRunnerDomain(
           const candidate = candidates.find(
             (entry) => entry.actionId === actionId,
           );
-          return candidate
-            ? runnerExactBasicLiquidCreditCandidate(candidate)
-            : false;
+          // The remaining-click contract may use any exact cost-free liquid
+          // route without spending a hand card or another resource. Requiring
+          // the basic-action identity would discard stronger installed tools.
+          return (
+            candidate?.economyProjection?.cardsConsumed === 0 &&
+            candidate.economyProjection.netHandDelta === 0
+          );
         });
   const residentTurnLiquidityTarget = runnerResidentTurnLiquidityTarget(
     previous,

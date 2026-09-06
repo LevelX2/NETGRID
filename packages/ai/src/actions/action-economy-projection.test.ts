@@ -255,6 +255,21 @@ describe("action economy projection", () => {
     });
   });
 
+  it("preserves an Engine-quoted zero draw yield as hand consumption", () => {
+    expect(
+      project(
+        legalAction("empty-stack-draw", "play_event", {
+          payload: { drawCardsAmount: 0 },
+        }),
+      ),
+    ).toMatchObject({
+      cardsDrawn: 0,
+      cardsConsumed: 1,
+      netHandDelta: -1,
+      source: "legal_action_payload",
+    });
+  });
+
   it("projects Corporate Shuffle from the complete Engine zone quote", () => {
     const projection = project(corporateShuffleAction(true));
 

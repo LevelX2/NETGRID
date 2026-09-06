@@ -678,6 +678,13 @@ function currentNeedForCard(
   if (rigDemandNeed !== undefined) return rigDemandNeed;
   if (
     role === "draw_or_search_engine" &&
+    context.legalAction?.type === "play_event" &&
+    context.legalAction.payload?.drawCardsAmount === 0
+  ) {
+    return "none";
+  }
+  if (
+    role === "draw_or_search_engine" &&
     recoveryOnlySearchHasNoVisibleTarget(params.input, context) &&
     !doctrineSupportsProspectiveRecoveryInfrastructure(params, context)
   ) {

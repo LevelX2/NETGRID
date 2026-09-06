@@ -10,6 +10,39 @@ import {
 import { buildAiDecisionInputDto } from "./input-dto";
 
 describe("AI input DTO score-conversion contract", () => {
+  it("preserves the Engine's exact remaining encounter subroutine identities", () => {
+    const action = conversionAction();
+    action.side = "runner";
+    action.type = "continue_run";
+    action.payload = {
+      encounterContinue: true,
+      unbrokenSubroutineCount: 2,
+      encounterSubroutineIds: "damage,next-lock",
+      privateProbe: "discard",
+    };
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: playerView(action, "runner"),
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "hard",
+      seed: "remaining-encounter",
+      decisionId: "remaining-encounter:1",
+      actionNumber: 1,
+      profileId: "test",
+    });
+    for (const projected of [
+      input.legalActions[0],
+      input.playerView.legalActions[0],
+    ]) {
+      expect(projected?.payload).toMatchObject({
+        encounterSubroutineIds: "damage,next-lock",
+        unbrokenSubroutineCount: 2,
+      });
+      expect(projected?.payload).not.toHaveProperty("privateProbe");
+    }
+  });
+
   it("preserves the exact actor-owned program-install payment and trash choice", () => {
     const action = conversionAction();
     action.side = "runner";

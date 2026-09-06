@@ -121,7 +121,11 @@ export function actionEconomyProjectionFor(
   const payloadCardsDrawn =
     corpZoneProjection?.grossDrawCount ??
     runnerDrawProjection?.projectedGrossDrawCount ??
-    firstPositiveNumber(action, ["drawCardsAmount", "drawAmount", "drawCount"]);
+    firstNonNegativeNumber(action, [
+      "drawCardsAmount",
+      "drawAmount",
+      "drawCount",
+    ]);
   const basicActionCardsDrawn =
     runnerDrawProjection === undefined && isBasicDrawAction(action)
       ? 1
@@ -623,13 +627,13 @@ function exactListedCreditCost(action: LegalAction): number | undefined {
   return total;
 }
 
-function firstPositiveNumber(
+function firstNonNegativeNumber(
   action: LegalAction,
   keys: readonly string[],
 ): number | undefined {
   for (const key of keys) {
-    const value = positiveNumber(action.payload?.[key]);
-    if (value !== undefined) return value;
+    const value = action.payload?.[key];
+    if (isExactNonNegativeInteger(value)) return value;
   }
   return undefined;
 }

@@ -3058,6 +3058,28 @@ Zweck, sofern dessen Quote keine Umleitung oder Rückversetzung enthält.
 Diese Zielprüfung gehört zur Encounter-Action-Admission und bleibt von der
 Wahl eines bestimmten Breakers unabhängig.
 
+Die Zufallsbruchquote addiert zum Fehlschaden den direkten Schaden aller
+noch offenen Encounter-Subroutinen. Maßgeblich sind die exakten
+`encounterSubroutineIds` der Engine-Continue-Action, die das AI-DTO erhält.
+Bereits gebrochene oder aufgelöste Subroutinen werden nicht erneut gezählt;
+eine fehlende oder widersprüchliche Restquote scheitert strukturiert.
+`unbrokenEncounterDamageLikely` beschreibt diese gesamte Restmenge, nicht
+nur den gewählten Break-Target.
+
+Die Engine begrenzt den unmittelbar gequoteten Kartenbezug eines
+Runner-Draw-Events auf den aktuellen Stackbestand und erhält ausdrücklich
+auch eine Nullquote. Die Action-Economy-Projektion trennt diesen tatsächlichen
+Bezug vom Verbrauch der Eventkarte. `runner.develop_board_and_hand` erzeugt
+für ein Draw-Event mit Nullbezug keinen Entwicklungsbedarf.
+
+Der endliche P6-Restkapazitätsvertrag von `runner.economy` lässt nach
+erreichter Reserve weiterhin exakt gequotete, kostenfreie Kreditaktionen
+installierter Werkzeuge zu. Sie dürfen außer dem Klick weder Handkarten noch
+weitere Ressourcen verbrauchen. Die vorhandene Funding-Auswahl vergleicht
+ihren Ertrag mit der Basisaktion; der Quellenname schließt stärkere Routen
+nicht aus. Höhere Parent-Needs, Zuggrenze und Abschlussbedingung bleiben
+bindend.
+
 ## 28. Corp-Zielmodule
 
 ### 28.1 `corp.opening_and_board_foundation`

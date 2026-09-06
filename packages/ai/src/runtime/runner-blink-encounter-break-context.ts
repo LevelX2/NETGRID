@@ -28,7 +28,7 @@ export type RunnerRandomBreakOrDamageEncounterContextDependencies = {
     stableCoverageAvailable: boolean;
     context: "encounter_break";
     riskProfile: RandomBreakOrDamageRiskProfile;
-    unbrokenTargetDamageLikely?: number;
+    unbrokenEncounterDamageLikely?: number;
     evidence?: readonly string[];
   }) => RandomBreakOrDamageRiskAssessment;
   isImmediateSafetyThreatSubroutine: (
@@ -80,7 +80,11 @@ export function createRunnerRandomBreakOrDamageEncounterContext(
       input,
       targetSubroutines,
     );
-    const unbrokenTargetDamageLikely = targetSubroutines.reduce(
+    const unbrokenEncounterDamageLikely = unbrokenEncounterSubroutines(
+      input,
+      action,
+      encounteredSubroutines,
+    ).reduce(
       (sum, subroutine) => sum + visibleDirectDamageAmount(subroutine),
       0,
     );
@@ -94,13 +98,13 @@ export function createRunnerRandomBreakOrDamageEncounterContext(
       stableCoverageAvailable,
       context: "encounter_break",
       riskProfile,
-      unbrokenTargetDamageLikely,
+      unbrokenEncounterDamageLikely,
       evidence: [
         "randomBreakDamageAction:true",
         `randomBreakDamageSubroutineCount:${visibleSubroutinesLikely}`,
         `randomBreakDamageStableAlternative:${stableCoverageAvailable}`,
         `randomBreakDamagePayoffOverride:${payoffOverride}`,
-        `randomBreakDamageUnbrokenTargetDamageLikely:${unbrokenTargetDamageLikely}`,
+        `randomBreakDamageUnbrokenEncounterDamageLikely:${unbrokenEncounterDamageLikely}`,
         ...(input.playerView.run?.position?.serverId
           ? [
               `randomBreakDamageServer:${input.playerView.run.position.serverId}`,
@@ -167,6 +171,49 @@ export function createRunnerRandomBreakOrDamageEncounterContext(
   }
 
   return { randomBreakOrDamageRiskAssessmentForEncounterBreak };
+}
+
+function unbrokenEncounterSubroutines(
+  input: AiDecisionInput,
+  action: LegalAction,
+  subroutines: readonly VisibleEncounterSubroutine[],
+): readonly VisibleEncounterSubroutine[] {
+  // A failed attempt leaves every currently open subroutine unresolved, not
+  // only its selected target. The Engine's continuation quote identifies that
+  // exact remainder; printed ICE text would count previously broken damage.
+  if (
+    !subroutines.some((subroutine) => visibleDirectDamageAmount(subroutine) > 0)
+  )
+    return [];
+  const continuation = input.legalActions.find(
+    (candidate) =>
+      candidate.type === "continue_run" &&
+      candidate.payload?.encounterContinue === true,
+  );
+  const quotedIds = continuation?.payload?.encounterSubroutineIds;
+  const ids =
+    typeof quotedIds === "string" ? quotedIds.split(",").filter(Boolean) : [];
+  if (
+    typeof quotedIds !== "string" ||
+    new Set(ids).size !== ids.length ||
+    ids.length !== continuation?.payload?.unbrokenSubroutineCount ||
+    ids.some((id) => !subroutines.some((subroutine) => subroutine.id === id))
+  ) {
+    throw Object.assign(
+      new Error(
+        "Invalid Engine-bound remaining encounter subroutines for random-break risk.",
+      ),
+      {
+        name: "EncounterRiskProjectionError",
+        code: "invalid_remaining_encounter_subroutines",
+        owner: "runner.convert_run_window",
+        actionId: action.actionId,
+        stateVersion: input.playerView.stateVersion,
+      },
+    );
+  }
+  const unbroken = new Set(ids);
+  return subroutines.filter((subroutine) => unbroken.has(subroutine.id));
 }
 
 function visibleDirectDamageAmount(
