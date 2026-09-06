@@ -846,8 +846,7 @@ MSI-SHA-256:
 Originale und Gast-Eingangskopien wurden gegen Metadaten und Prüfsummendatei
 geprüft. In derselben VM wurde um 12:09:37 UTC das neue Setup als PID `2584`
 geöffnet (`result/corrected-setup-start.json`); die deutsche Sprachwahl und
-das Installationsformular wurden erreicht. Die erneute native Installation
-ist noch nicht ausgelöst und bleibt der nächste Abnahmeschritt.
+das Installationsformular wurden zunächst ohne Installationsstart erreicht.
 
 Der anschließend ausdrücklich freigegebene UI-Test von 8134 scheiterte am
 6. September um 13:43 UTC erneut mit Worker-Stufe 4 und MSI-Code 1602 vor
@@ -870,8 +869,30 @@ sind belegt. Der Nachweis liegt unter
 `result/msi-progress-full-diagnostic.json`, der isolierte Diagnosequelltext
 unter `output/msi-progress-diagnostic`; Authentifizierung und Spielstart
 wurden nicht ausgeführt. Dieser Test prüft den nativen MSI-Reader, nicht den
-vollständigen Setup-/Pipe-/Onboarding-UI-Pfad. Für dessen Abnahme bleiben ein
-neuer Paketbuild und ein erneuter sichtbarer Setup-Test erforderlich.
+vollständigen Setup-/Pipe-/Onboarding-UI-Pfad. Für dessen Abnahme bleibt ein
+erneuter sichtbarer Setup-Test erforderlich.
+
+Der neue gemeinsame Kandidat `1.0.8136` unter
+`output/windows-installer-zero-field-progress-review` stammt aus sauberem
+Commit `63c3e59a93c9719c6f6c5a46e67924a71d5bd4c6`. Seine vollständige
+Buildstrecke ist mit Exit 0 abgeschlossen: 1.940 Setup-Assertions,
+63 First-Run-Assertions, Launcher-/Updater-Prüfungen, isolierte Runtime-,
+Bootstrap- und Launcher-Smokes (Ports `60772`/`60773`), 173-Schlüssel-
+Sprachmatrix sowie 10.901-Dateien-Payloadaudit sind grün.
+Setup-SHA-256:
+`30676d7ec7b46bbc3c7520caea4032ae7375bc3560c2f5dd04fc46730959a827`;
+MSI-SHA-256:
+`23ec2c9fe2d57bffb02777e92eecbbfccc4c6b4398154e2b8f1f5c08668c041e`.
+Originale und Eingangskopien wurden gegen Metadaten und Prüfsummendatei
+verifiziert. Das alte 8134-Setup ist nach Bestätigung seines Fehlerdialogs
+geschlossen. 8136 wurde am 6. September um 14:03:33 UTC in derselben VM als
+PID `2896` gestartet; `result/zero-field-setup-start.json` bindet Pfad und
+Hash. Ein Installationsklick wurde nicht ausgeführt. Der Nutzer stoppte
+Computer Use beim anschließenden Erfassungsversuch mit der physischen
+Escape-Taste; die UI-Steuerung bleibt bis zu seiner ausdrücklichen
+Fortsetzungsanweisung angehalten. Die Installation von 8136 und ihre native
+Abnahme sind damit weiterhin offen. Es läuft kein Build oder MSI-Test mehr.
+WIN-I08 bleibt offen; kein Main-Merge, Worktree-Cleanup oder Push.
 
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.
