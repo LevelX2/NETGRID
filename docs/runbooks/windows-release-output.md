@@ -491,6 +491,14 @@ MSI-Decompile-Audit prüft deshalb ausdrücklich die Argumentbindung;
 Build-/Extraktionserfolg allein beweist keine funktionierende Installation.
 
 Die Installation speichert ihr vollständiges Quell-MSI bytegleich unter
+dem nachfolgend beschriebenen Cachepfad. Der native Fortschrittscallback
+bestätigt auch datensatzlose `INSTALLMESSAGE_PROGRESS`-Benachrichtigungen:
+Windows Installer kann sie bereits beim Öffnen eines Pakets senden. Sie
+ändern keinen Zähler und erzeugen keine Prozentanzeige. Ein vorhandener,
+aber ungültiger numerischer Fortschrittsrecord bleibt dagegen ein Fehler;
+auch eine unterbrochene Fortschrittsübertragung bricht weiterhin ab.
+
+Die Installation speichert ihr vollständiges Quell-MSI bytegleich unter
 `<Datenroot>/config/installer/<ProductCode>/` und registriert dieses Verzeichnis
 über die Windows-Installer-Eigenschaft `SOURCELIST`. Der Dateiname bleibt der
 ursprüngliche MSI-Quellname. Dies ist die dauerhafte Reparaturquelle, nicht der

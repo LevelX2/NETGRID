@@ -100,7 +100,11 @@ internal sealed class MsiProgressReader(Action<MsiProgressSnapshot> report)
                         update = _counter.ActionData();
                         break;
                     case ProgressMessage:
-                        if (record == 0) throw new InvalidDataException("msi_progress_record_missing");
+                        // Windows Installer also sends a recordless progress
+                        // notification when opening a package, before any ticks.
+                        // Acknowledge it without changing/reporting the counter.
+                        // It is not a malformed numeric record or a cancellation.
+                        if (record == 0) return 1;
                         update = _counter.Progress(MsiRecordGetInteger(record, 1), MsiRecordGetInteger(record, 2),
                             MsiRecordGetInteger(record, 3), MsiRecordGetInteger(record, 4));
                         break;

@@ -814,6 +814,23 @@ gemäß Computer-Use-Regeln erforderlich. Authentifizierung und etwaige UAC-
 Dialoge werden nicht automatisiert. WIN-I08 ist nicht abgeschlossen; Main-Merge,
 Worktree-Cleanup und Push erfolgen nicht.
 
+Die ausdrücklich freigegebene native Installation von 8131 wurde am
+6. September um 11:54 UTC ausgelöst und scheiterte noch vor der Registrierung
+des Produkts. Der Worker meldete Stufe 4; MSI-Client und -Server beendeten
+sich mit 1602. Die read-only Gastprüfung bestätigt `installed=false`.
+Eine isolierte Diagnose mit `MsiOpenPackageExW` (nur Öffnen, keine Installation)
+reproduzierte den konkreten Callback: `INSTALLMESSAGE_PROGRESS`, `hRecord=0`.
+Der bisherige Reader wandelte diese datensatzlose Windows-Benachrichtigung
+in `msi_progress_record_missing` und `IDCANCEL` um. Er bestätigt sie jetzt
+ohne Zähleränderung oder erfundene Messwerte. Vorhandene ungültige numerische
+Records sowie Übertragungsfehler bleiben abbrechende Fehler.
+Der neue Regressionstest war vor dem Fix rot; danach bestehen 1.937
+Setup-Assertions. Die Gastdiagnosen liegen im aktuellen Laufordner unter
+`result/install-8131-probe.json` und `result/msi-progress-open-before.json`.
+8131 ist damit kein bestandener nativer Abnahmestand. Ein korrigierter Build
+und dessen erneute native Installation sind erforderlich; das vorherige
+Setup zeigt noch seinen Fehlerdialog. Es wurden keine Zugangsdaten geändert.
+
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.
 Die erste Public-Prüfung war wegen der pauschalen, aktiven Sandbox-Regel

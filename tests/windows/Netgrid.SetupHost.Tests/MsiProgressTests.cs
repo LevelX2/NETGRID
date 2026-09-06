@@ -64,6 +64,9 @@ internal static class MsiProgressTests
         if (record == 0) throw new Exception("msi_test_record_creation_failed");
         try
         {
+            _observed = null;
+            Assert(Handle(0x0A000000, 0) == 1 && _observed is null && readerType.GetProperty("Failure")!.GetValue(reader) is null,
+                "native_empty_progress_notification_is_not_cancellation_or_measured_work");
             foreach (var (field, value) in new[] { (1u, 0), (2u, 500), (3u, 0), (4u, 0) })
                 if (MsiRecordSetInteger(record, field, value) != 0) throw new Exception("msi_test_record_write_failed");
             _observed = null;
@@ -71,8 +74,12 @@ internal static class MsiProgressTests
             Assert(Value<long>(_observed!, "Total") == 500, "native_total_matches_record");
             Assert(MsiRecordGetInteger(record, 2) == 500, "callback_does_not_close_installer_owned_record");
             Assert(Handle(0x04000000, 0) == 0, "other_messages_not_intercepted");
-            Assert(Handle(0x0A000000, 0) == 2 && readerType.GetProperty("Failure")!.GetValue(reader) is InvalidDataException, "invalid_native_record_cancels_without_throwing_across_callback");
+            var previousSnapshot = _observed;
+            Assert(Handle(0x0A000000, 0) == 1 && ReferenceEquals(_observed, previousSnapshot), "empty_progress_preserves_existing_counter");
+            MsiRecordSetInteger(record, 1, 4);
+            Assert(Handle(0x0A000000, record) == 2 && readerType.GetProperty("Failure")!.GetValue(reader) is InvalidDataException, "invalid_native_record_cancels_without_throwing_across_callback");
             Assert(Handle(0x0A000000, record) == 2, "failure_is_sticky");
+            MsiRecordSetInteger(record, 1, 0);
             var failingCallback = Delegate.CreateDelegate(typeof(Action<>).MakeGenericType(snapshotType),
                 typeof(MsiProgressTests).GetMethod(nameof(FailReport), BindingFlags.Static | BindingFlags.NonPublic)!.MakeGenericMethod(snapshotType));
             var failingReader = Activator.CreateInstance(readerType, [failingCallback])!;
