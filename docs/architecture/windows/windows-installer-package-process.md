@@ -277,7 +277,7 @@ ohne Entwicklungswerkzeuge.
 | Updatertransaktion und Rollback | Echter Sandboxlauf 8145/8150 am 2026-09-07 grün: geprüftes Backup, MSI-Upgrade, bewusst beschädigte Testdatenbank, erkannter Healthfehler, Programmrollback auf 8145, Datenmarker und SQLite-Integrität wiederhergestellt, Konfiguration unverändert, Cleanup verifiziert | Transaktionsgate für 8145/8150 erfüllt; abschließende Benachrichtigung bleibt ein separater Dialogtest |
 | Benutzerbetrieb und Netzwerk | Standardbenutzerbetrieb und ACLs für installierten 8145-Basisstand im neuen Rollbacklauf grün. Private-LAN-Test des installierten 8150: Web/Server vom Host erreichbar, Maintenance mit 403 abgewiesen; im öffentlichen Profil beide Ports bei weiterhin gesunden lokalen Diensten blockiert. Testinstallation, Ports und NETGRID-Regeln bereinigt; temporär deaktivierte pauschale Sandbox-Containerfreigabe wiederhergestellt | Netzwerkbeleg für 8150 einschließlich dokumentierter Sandbox-Firewallvorbereitung erfüllt; Standardbenutzerbeleg ausdrücklich auf Basis 8145 gebunden |
 | Nativer Setup-/Fortschrittsworker | 8150 über deutschen Setup-Host im sauberen Gast installiert, MSI-Client/Server jeweils 0; echter Abschnittsfortschritt von 51 Prozent um 15:21:32 UTC sichtbar aufgenommen, Datenhinweis und Status/Balken getrennt. Direkter MSI-Countertest grün | Nativer deutscher Fortschrittsnachweis erfüllt; Windows-UAC mit alternativem Administrator und weitere native Fehler-/Abbruchpfade bleiben getrennte Prüfungen |
-| Launcher, Browser und Diagnose | 8150: normaler Desktopstart zeigt Spielseite mit Build 8150, Web/Server HTTP 200, einzelne Launcherinstanz; nativer SaveFileDialog und redigierter ZIP-Export grün. Beenden über Tray schließt alle drei Prozesse und beide Ports; erneuter Desktopstart grün. Die fehlende Edge-ProgID wurde ausschließlich im Gast ergänzt | Gastvorbereitung transparent erhalten; dies ersetzt nicht sämtliche Sprach-/Kontext- und funktionalen Gesamtflows oder die Wiederherstellung nach Prozessabbruch |
+| Launcher, Browser und Diagnose | 8150: normaler Desktopstart, einzelne Instanz, nativer SaveFileDialog und redigierter ZIP-Export grün. Tray-Beenden und Desktop-Neustart grün. Erster Serverabbruch wird automatisch wiederhergestellt; zweiter stoppt beide Dienste mit nativem deutschen Recovery-Dialog, „Wiederholen“ startet erfolgreich. Fehlende Edge-ProgID ausschließlich im Gast ergänzt | Gastvorbereitung transparent erhalten; dies ersetzt nicht sämtliche Sprach-/DPI-/Kontextvarianten oder alle Aktionen des Recovery-Dialogs |
 | First Run | Nativer deutscher vorgeschalteter Entscheidungsdialog auf 8150 beobachtet; Nutzer bestätigt Abschluss, Setup beendet mit Exitcode 0. Hashgebundene reine Statusabfrage bestätigt eingerichteten Maintenance-Zugang, kein Agent-Bootstrap/Reset | Unbeobachtete Passwort-/Zurück-/Sichtbarkeitsschritte nicht nachträglich als abgenommen ausgeben; Authentifizierungsbedienung durch Nutzer, vorhandene Zugangsdaten erhalten |
 | Sichtbare Flows | 8150: Sprachauswahl und Setup-Hauptformular in allen 18 Kombinationen de/en/fr × echte 100/125/150 Prozent × heller/dunkler Systemkontext nativ geprüft. 8145: installierter Sprachwechsel fr → de → en, Repair, Sprachübernahme aller drei Komponenten und Austausch lokalisierter Shortcutnamen mit sieben Prüfungen grün; Tooltip-Renderings und native Tastatur-Popups vorhanden | Übrige Komponentendialoge, funktionale Gesamtflows und Hover-/Tastatur-Randfälle bleiben offen; Hovereingabe ist im verfügbaren Computer-Use-API nicht vorhanden und benötigt Nutzerbedienung |
 | Saubere Windows-11-x64-Maschine | Vollständige 13-Punkte-MSI-Matrix 8145 → 8150 einschließlich Cleanup grün: Windows 11 Enterprise x64 (26100), ohne Entwicklungswerkzeuge; Standardbenutzer-/Rollback- und Private-LAN-Test zusätzlich grün. Native Frischinstallation 8136 und installierter Sprachwechsel 8145 separat bestanden | Artefaktgebundene Nachweise nicht pauschal auf spätere Builds übertragen; finale Abnahme bleibt offen bis alle obigen Ergänzungen vorliegen |
@@ -615,6 +615,41 @@ HTTP 200. Die Runtime bleibt für weitere Abnahmen geöffnet. Diese Prüfung
 belegt den normalen Menü-Stopp und anschließenden Start, nicht das separate
 Recovery-Verhalten nach einem Prozessabbruch. Bestehende Zugangsdaten und
 Hauptbetrieb des Hosts bleiben unverändert; WIN-I08 bleibt aktiv.
+
+### Native Recovery-Prüfung 8150
+
+Am 7. September wurde im vorhandenen Sandboxlauf die installierte Runtime
+unter Launcher 980 geprüft. Vor jedem Schritt bestätigt eine strikt lesende
+SQLite-Abfrage null Partien und Startlobbys. Der Fehlerhelfer bindet den
+Abbruch an den exakten installierten Node-Pfad, Launcher-Parent, Startzeit
+und Gastlistener 8787; er beendet nur diesen Serverprozess. Die ursprüngliche
+Millisekunden-Zeit aus der PowerShell-JSON-Ausgabe war für einen exakten
+CIM-Vergleich zu grob. Der Helfer brach deshalb vor jeder Mutation ab.
+Nach read-only Prüfung wurden die tatsächliche Mikrosekunden-CIM-Zeit und
+die entsprechende Präzision von `Get-Process` korrekt verglichen; die
+Produktprogramme wurden nicht geändert.
+
+Der erste gezielte Abbruch von Server 3676 um 17:22:14 UTC wird vom
+unveränderten Launcher automatisch behandelt. Neue Kinder 5604/8076 ersetzen
+das alte Paar 3676/6396; Web und Server liefern HTTP 200. Die kurze
+Ballonbenachrichtigung wurde nicht sichtbar aufgenommen und wird nicht als
+abgenommen ausgegeben. Nach dem zweiten Abbruch bleibt Launcher 980 bestehen,
+aber beide Node-Prozesse und Listener sind weg. Der native deutsche Dialog
+„NETGRID konnte nach einem Prozessabbruch nicht wiederhergestellt werden.“
+ist über die Taskleiste erreichbar und vollständig lesbar. „Wiederholen“,
+„Diagnose öffnen“ und „Beenden“ sind sichtbar; nur „Wiederholen“ wurde bedient.
+
+Nach dem Klick startet derselbe Launcher neue Kinder 3416/5388, öffnet die
+Spielseite mit Build 8150 und erreicht beide Healthziele erneut mit HTTP 200.
+Der Hash der Runtimekonfiguration bleibt über alle fünf Schritte identisch.
+Der bestehende reine Maintenance-Statuspfad bestätigt abschließend weiterhin
+den eingerichteten Zugang; kein Bootstrap, Reset oder Passwortzugriff durch
+den Agenten. Führend sind die fünf erfolgreichen
+`result/native-8150-recovery-{failfirst,verifyfirst,failsecond,verifystopped,verifyretry}.json`.
+Die initiale Prüfhelferdiagnose bleibt davon getrennt. NETGRID läuft danach
+wieder in der Sandbox. Damit sind automatische Einmal-Wiederherstellung,
+sicherer Stopp nach erneutem Abbruch und der native deutsche Retry-Pfad
+artefaktgebunden bestätigt; andere Sprach-/Kontextvarianten bleiben offen.
 
 ### Aktueller Updatekandidat und Teststart vom 7. September 2026
 
