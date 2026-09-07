@@ -863,6 +863,22 @@ Run-Credits ersetzen keine Aktivierungscredits. `runner.convert_run_window`
 bindet die konkrete Bankaktion an das aktuelle Zahlungsfenster, bevor dessen
 Engine-quotiertes Cash-Ziel die Aktivierungsliquidität aufbrauchen würde.
 Der Fensterresolver erhält dabei ausschließlich den bestehenden Auftrag.
+
+Eine solche Quelle in der eigenen sichtbaren Hand kann `runner.economy` als
+Installationsschritt für einen exakt gebundenen Run vorbereiten. Der Compiler
+`runner-payment-install-planning.ts` verlangt aktuelle Installationslegalität,
+bekannte Kosten und eine bedingungsfreie einmalige Zahlungsfähigkeit aus dem
+kanonischen PlanningCard-Vertrag. Der bekannte vollständige Pfad muss ein
+positives Zahlungsfenster ohne ungeklärte ICE oder unvermeidbare Gefahren
+belegen. Installation, Aktivierungsliquidität und der reservierte Run-Klick
+müssen vollständig passen. Der zukünftige Zahlungsgewinn beendet ausschließlich
+die Finanzierung dieses Runs; er finanziert keine vorherigen Setup-Aktionen
+und zählt nicht als liquide Reserve. Nach jedem Engine-Schritt wird der Auftrag
+mit aktuellen LegalActions erneut materialisiert. Bei mehreren Run-Aktionen
+zum selben Server zählt deren konkrete Finanzierbarkeit vor ihrem bloßen
+Bewertungsvorteil. Ein finanzierbarer terminaler Angriff mit vorhandenen
+Breakern benötigt keine vorgeschaltete Suche nach einem günstigeren Breaker.
+
 Die Pump-Viabilität führt vorhandene Run-Credits separat vom liquiden Pool,
 verbraucht sie vor Credits aus dem Pool und reicht nur ihren verbleibenden
 Betrag an die Restpfadquote weiter. Sie zählen nicht als verbleibende liquide

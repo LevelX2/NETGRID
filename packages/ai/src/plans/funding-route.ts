@@ -79,8 +79,23 @@ export type SearchFundingRoutesParams = {
   candidates: readonly FundingActionCandidate[];
   remainingClicks: number;
   futureProjections?: readonly FutureFundingProjection[];
+  paymentWindowSetups?: readonly PaymentWindowFundingSetup[];
   maxSteps?: number;
   maxRoutes?: number;
+};
+
+/** A quoted install followed by a single-use payment inside the bound run.
+ * Its benefit is never liquid money for a preceding setup action. */
+export type PaymentWindowFundingSetup = {
+  actionId: string;
+  sourceCardInstanceId: string;
+  sourceDefinitionId: string;
+  capabilityId: string;
+  installClickCost: number;
+  installCreditCost: number;
+  activationCreditCost: number;
+  netPaymentGain: number;
+  evidence: string[];
 };
 
 export type FundingRouteSearchResult = {
@@ -100,6 +115,7 @@ type RouteOption = {
   reliability: FundingRouteReliability;
   maximumTurnOffset: 0 | 1 | 2 | 3;
   maximumUses: number;
+  completesDemandOnly?: boolean;
 };
 
 type SearchState = {
@@ -138,7 +154,33 @@ export function searchFundingRoutes(
       futureFundingOption(projection, params.candidates, params.demand),
     )
     .filter((option): option is RouteOption => option !== undefined);
-  const options = [...currentOptions, ...futureOptions].sort(compareOptions);
+  const paymentOptions =
+    params.demand.side === "runner" &&
+    params.demand.purpose === "current_run" &&
+    params.demand.acceptedCreditRestrictions.includes("restricted")
+      ? (params.paymentWindowSetups ?? []).flatMap((setup) => {
+          const candidate = params.candidates.find(
+            (entry) =>
+              entry.actionId === setup.actionId &&
+              entry.sourceCardInstanceId === setup.sourceCardInstanceId &&
+              entry.sourceDefinitionId === setup.sourceDefinitionId,
+          );
+          return candidate &&
+            [
+              setup.installClickCost,
+              setup.installCreditCost,
+              setup.activationCreditCost,
+              setup.netPaymentGain,
+            ].every((value) => Number.isSafeInteger(value) && value >= 0) &&
+            setup.installClickCost > 0 &&
+            setup.netPaymentGain > setup.installCreditCost
+            ? [paymentWindowFundingOption(setup)]
+            : [];
+        })
+      : [];
+  const options = [...currentOptions, ...futureOptions, ...paymentOptions].sort(
+    compareOptions,
+  );
   const maxSteps = Math.max(1, Math.min(8, params.maxSteps ?? 4));
   const maxRoutes = Math.max(1, Math.min(32, params.maxRoutes ?? 8));
   const queue: SearchState[] = [
@@ -163,6 +205,12 @@ export function searchFundingRoutes(
       if (optionUseCount >= option.maximumUses) continue;
       if (option.currentTurnClickCost > state.remainingClicks) continue;
       if (option.creditCost > state.generalCredits) continue;
+      if (
+        option.completesDemandOnly &&
+        state.eligibleCredits + option.eligibleCreditDelta <
+          params.demand.targetCredits
+      )
+        continue;
       if (!deadlineAllows(params.demand.deadline, option.maximumTurnOffset)) {
         continue;
       }
@@ -202,6 +250,53 @@ export function searchFundingRoutes(
     routes.push(uncoveredRoute(params.demand));
   }
   return result(params.demand, routes);
+}
+
+function paymentWindowFundingOption(
+  setup: PaymentWindowFundingSetup,
+): RouteOption {
+  return {
+    optionId: `payment_setup:${setup.sourceCardInstanceId}`,
+    steps: [
+      {
+        stepId: `legal_action:${setup.actionId}`,
+        kind: "legal_action",
+        actionId: setup.actionId,
+        ownTurnOffset: 0,
+        clickCost: setup.installClickCost,
+        creditCost: setup.installCreditCost,
+        netLiquidCreditGain: 0,
+        creditRestriction: "general",
+        reliability: "guaranteed",
+        sourceDefinitionId: setup.sourceDefinitionId,
+        evidence: setup.evidence,
+      },
+      {
+        stepId: `payment_window:${setup.sourceCardInstanceId}:${setup.capabilityId}`,
+        kind: "future_projection",
+        projectionId: setup.capabilityId,
+        ownTurnOffset: 0,
+        clickCost: 0,
+        creditCost: setup.activationCreditCost,
+        netLiquidCreditGain: setup.netPaymentGain,
+        creditRestriction: "restricted",
+        reliability: "guaranteed",
+        sourceDefinitionId: setup.sourceDefinitionId,
+        evidence: [
+          ...setup.evidence,
+          "payment_window_requires_current_engine_quote",
+        ],
+      },
+    ],
+    currentTurnClickCost: setup.installClickCost,
+    eligibleCreditDelta: setup.netPaymentGain - setup.installCreditCost,
+    generalCreditDelta: -setup.installCreditCost,
+    creditCost: setup.installCreditCost + setup.activationCreditCost,
+    reliability: "guaranteed",
+    maximumTurnOffset: 0,
+    maximumUses: 1,
+    completesDemandOnly: true,
+  };
 }
 
 export function creditDemandHardBlockerIsResolved(

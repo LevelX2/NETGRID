@@ -27,6 +27,7 @@ import type {
   FundingRouteHorizon,
   FundingRouteReliability,
   FundingRouteStatus,
+  PaymentWindowFundingSetup,
 } from "./funding-route";
 import type { ProjectedHandDisposition } from "./turn-projection";
 import type { RunnerCreditBankProspectivePlan } from "./runner-credit-bank-prospective-planning";
@@ -45,6 +46,10 @@ export type RunnerFundingRouteAssessment = {
   projectedGap: number;
   totalClickCost: number;
   firstStepActionId?: string;
+  paymentInstall?: PaymentWindowFundingSetup & {
+    targetServerId: string;
+    runActionId: string;
+  };
   evidenceCodes: string[];
 };
 
@@ -2088,6 +2093,24 @@ function economyCandidates(
   const routeActionIds = new Set(
     need.kind === "develop_liquidity" ? need.actionIds : need.routeActionIds,
   );
+  const paymentInstall =
+    need.kind === "parent_plan_support" &&
+    (need.driver.kind === "contest" || need.driver.kind === "run")
+      ? need.routeAssessment.paymentInstall
+      : undefined;
+  const isPaymentInstall = (candidate: ActionSemanticCandidate) =>
+    paymentInstall?.actionId === candidate.actionId &&
+    need.kind === "parent_plan_support" &&
+    need.driver.targetId === paymentInstall.targetServerId &&
+    context.actionCandidates.some(
+      (entry) => entry.actionId === paymentInstall.runActionId,
+    ) &&
+    paymentInstall.sourceCardInstanceId === candidate.sourceCardInstanceId &&
+    paymentInstall.sourceDefinitionId === candidate.sourceDefinitionId &&
+    candidate.semanticActionType === "install.card" &&
+    candidate.costProfile.costKnownStatus === "known" &&
+    candidate.costProfile.clickCost === paymentInstall.installClickCost &&
+    candidate.costProfile.creditCost === paymentInstall.installCreditCost;
   return context.actionCandidates
     .filter(
       (candidate) =>
@@ -2097,11 +2120,13 @@ function economyCandidates(
         routeActionIds.has(candidate.actionId) &&
         (need.kind === "develop_liquidity"
           ? runnerTurnLiquidityCandidateIsMaterializable(candidate)
-          : runnerFundingRouteCandidateIsMaterializable(candidate)),
+          : runnerFundingRouteCandidateIsMaterializable(candidate) ||
+            isPaymentInstall(candidate)),
     )
     .map((candidate) => {
-      const netLiquidCreditGain =
-        candidate.economyProjection!.netLiquidCreditGain!;
+      const netLiquidCreditGain = isPaymentInstall(candidate)
+        ? paymentInstall!.netPaymentGain - paymentInstall!.installCreditCost
+        : candidate.economyProjection!.netLiquidCreditGain!;
       const fundingGapProgress = Math.min(need.gap, netLiquidCreditGain);
       return {
         candidate,

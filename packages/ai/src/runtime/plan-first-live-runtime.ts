@@ -162,6 +162,7 @@ import {
   type CreateSideCreditDemandParams,
 } from "../plans/credit-demand";
 import { searchFundingRoutes } from "../plans/funding-route";
+import { runnerPaymentInstallSetups } from "../plans/runner-payment-install-planning";
 import {
   createSidePlanRegistry,
   runPlanScheduler,
@@ -12226,6 +12227,7 @@ type RunnerExactFundingRouteRequest = Pick<
   remainingClicks: number;
   allowIncrementalProgress?: boolean;
   allowStrategicExchange?: boolean;
+  paymentWindowTarget?: RunnerRunTargetEvaluation;
   debtFinancingParent?: Readonly<{
     planInstanceId: string;
     runActionId: string;
@@ -12265,11 +12267,47 @@ function runnerExactFundingRouteContract(
       : {}),
     ...(request.evidence !== undefined ? { evidence: request.evidence } : {}),
   });
-  const result = searchFundingRoutes({
+  const paymentTarget = request.paymentWindowTarget;
+  const runCandidate = candidates.find(
+    (entry) => entry.actionId === paymentTarget?.actionId,
+  );
+  const paymentSetups =
+    request.purpose === "current_run" &&
+    request.sourcePlanId &&
+    paymentTarget?.runActionProjection.structure === "direct_start_run" &&
+    paymentTarget.routeQuote &&
+    paymentTarget.routeQuote.knownCost > 0 &&
+    paymentTarget.routeQuote?.knownCost ===
+      paymentTarget.routeQuote?.guaranteedKnownCost &&
+    paymentTarget.routeQuote?.unknownIceCount === 0 &&
+    paymentTarget.routeQuote?.conditionalReasons.length === 0 &&
+    (paymentTarget.unavoidableVisibleIceHazardCount ?? 0) === 0 &&
+    !paymentTarget.visibleTraceTagHazardUnavoidable &&
+    runCandidate?.costProfile.costKnownStatus === "known" &&
+    runCandidate.costProfile.creditCost === 0
+      ? runnerPaymentInstallSetups(input, candidates)
+      : [];
+  const routeCandidates = runnerExactFundingRouteCandidates(
+    candidates,
+    request,
     demand,
-    candidates: runnerExactFundingRouteCandidates(candidates, request, demand),
+  );
+  const result = searchFundingRoutes({
+    demand: paymentSetups.length
+      ? { ...demand, acceptedCreditRestrictions: ["general", "restricted"] }
+      : demand,
+    candidates: [
+      ...routeCandidates,
+      ...candidates.filter((candidate) =>
+        paymentSetups.some((setup) => setup.actionId === candidate.actionId),
+      ),
+    ],
+    paymentWindowSetups: paymentSetups,
     remainingClicks: request.remainingClicks,
-    maxSteps: Math.max(1, request.remainingClicks),
+    maxSteps: Math.max(
+      1,
+      request.remainingClicks + (paymentSetups.length ? 1 : 0),
+    ),
     maxRoutes: 8,
   });
   const bestRoute = result.bestRoute;
@@ -12285,6 +12323,9 @@ function runnerExactFundingRouteContract(
             step.actionId !== undefined,
         )?.actionId
       : undefined;
+  const paymentInstall = paymentSetups.find(
+    (setup) => setup.actionId === firstStepActionId,
+  );
   return {
     routeActionIds: firstStepActionId === undefined ? [] : [firstStepActionId],
     routeAssessment: {
@@ -12296,6 +12337,15 @@ function runnerExactFundingRouteContract(
       projectedGap: bestRoute.projectedGap,
       totalClickCost: bestRoute.totalClickCost,
       ...(firstStepActionId !== undefined ? { firstStepActionId } : {}),
+      ...(paymentInstall && paymentTarget
+        ? {
+            paymentInstall: {
+              ...paymentInstall,
+              targetServerId: paymentTarget.targetServerId,
+              runActionId: paymentTarget.actionId,
+            },
+          }
+        : {}),
       evidenceCodes: [...new Set([...result.evidence, ...bestRoute.evidence])],
     },
   };
@@ -12849,6 +12899,7 @@ function runnerRunFundingSupport(
     targetCredits: input.playerView.own.credits + conservativeGap,
     remainingClicks: Math.max(0, input.playerView.own.clicks - 1),
     allowStrategicExchange: true,
+    paymentWindowTarget: evaluation,
     debtFinancingParent: {
       planInstanceId: parentPlanInstanceId,
       runActionId: evaluation.actionId,
@@ -12883,6 +12934,7 @@ function runnerRunFundingSupport(
       targetCredits: input.playerView.own.credits + terminalKnownPathGap,
       remainingClicks: Math.max(0, input.playerView.own.clicks - 1),
       allowStrategicExchange: true,
+      paymentWindowTarget: evaluation,
       debtFinancingParent: {
         planInstanceId: parentPlanInstanceId,
         runActionId: evaluation.actionId,
@@ -27820,6 +27872,30 @@ function uniqueCoverageGaps(
       evaluation.recommendation !== "find_breaker_first" &&
       evaluation.pathPassability !== "blocked_missing_coverage" &&
       evaluation.pathPassability !== "blocked_unbreakable";
+    // A terminal contest needs the existing path funded before it needs a
+    // cheaper future breaker. Check every exact same-server run, since an
+    // expensive event can otherwise hide a feasible basic-run setup.
+    if (
+      outsideMissingCoverageScope &&
+      runnerCoverageGapIsTerminalRemoteThreat(input, evaluation) &&
+      runTargets.some(
+        (target) =>
+          target.targetServerId === evaluation.targetServerId &&
+          target.routeQuote?.unknownIceCount === 0 &&
+          target.routeQuote.conditionalReasons.length === 0 &&
+          (target.unavoidableVisibleIceHazardCount ?? 0) === 0 &&
+          !target.visibleTraceTagHazardUnavoidable &&
+          (runnerRunTargetCanConvertNow(input, economy, target, candidates) ||
+            (runnerRunFundingSupport(
+              input,
+              economy,
+              target,
+              runTargets,
+              candidates,
+            )?.routeActionIds.length ?? 0) > 0),
+      )
+    )
+      continue;
     const preciseCoverage = missingBreakerCoverageKind(
       input.playerView,
       evaluation.targetServerId,
@@ -30160,17 +30236,33 @@ function bestRunTargetsByServer(
   candidates: readonly ActionSemanticCandidate[],
 ): RunnerRunTargetEvaluation[] {
   const byServer = new Map<string, RunnerRunTargetEvaluation>();
-  for (const evaluation of evaluations) {
-    const previous = byServer.get(evaluation.targetServerId);
-    const evaluationConvertsNow = runnerRunTargetCanConvertNow(
+  const ranks = new Map<string, number>();
+  const conversionRank = (evaluation: RunnerRunTargetEvaluation): number => {
+    const existing = ranks.get(evaluation.actionId);
+    if (existing !== undefined) return existing;
+    const rank = runnerRunTargetCanConvertNow(
       input,
       economy,
       evaluation,
       candidates,
-    );
-    const previousConvertsNow =
-      previous !== undefined &&
-      runnerRunTargetCanConvertNow(input, economy, previous, candidates);
+    )
+      ? 2
+      : (runnerRunFundingSupport(
+            input,
+            economy,
+            evaluation,
+            evaluations,
+            candidates,
+          )?.routeActionIds.length ?? 0) > 0
+        ? 1
+        : 0;
+    ranks.set(evaluation.actionId, rank);
+    return rank;
+  };
+  for (const evaluation of evaluations) {
+    const previous = byServer.get(evaluation.targetServerId);
+    const evaluationConversionRank = conversionRank(evaluation);
+    const previousConversionRank = previous ? conversionRank(previous) : 0;
     const evaluationIsMandatoryTerminalContest =
       runnerTerminalRemoteContestIsDirectlyMandatory(input, evaluation);
     const previousIsMandatoryTerminalContest =
@@ -30180,10 +30272,10 @@ function bestRunTargetsByServer(
       !previous ||
       (evaluationIsMandatoryTerminalContest &&
         !previousIsMandatoryTerminalContest) ||
-      (evaluationConvertsNow && !previousConvertsNow) ||
+      evaluationConversionRank > previousConversionRank ||
       (evaluationIsMandatoryTerminalContest ===
         previousIsMandatoryTerminalContest &&
-        evaluationConvertsNow === previousConvertsNow &&
+        evaluationConversionRank === previousConversionRank &&
         evaluation.score > previous.score)
     ) {
       byServer.set(evaluation.targetServerId, evaluation);
