@@ -356,6 +356,13 @@ function compareKnownPathAssessments(
 ): number {
   return (
     Number(right.canReachAccess) - Number(left.canReachAccess) ||
+    // Losing an affordable hazard response is not a cheaper equivalent path.
+    // In particular, a paid subtype change must not win merely because its
+    // reduced budget makes the old avoidance cost disappear from the quote.
+    (left.visibleIceRunHazards ?? []).filter((hazard) => hazard.unavoidable)
+      .length -
+      (right.visibleIceRunHazards ?? []).filter((hazard) => hazard.unavoidable)
+        .length ||
     (left.visibleBreakCost ?? 0) - (right.visibleBreakCost ?? 0) ||
     right.creditsAfterPath - left.creditsAfterPath
   );
