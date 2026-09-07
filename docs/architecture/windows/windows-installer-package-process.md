@@ -279,6 +279,7 @@ ohne Entwicklungswerkzeuge.
 | Nativer Setup-/Fortschrittsworker | 8150 über deutschen Setup-Host im sauberen Gast installiert, MSI-Client/Server jeweils 0; echter Abschnittsfortschritt von 51 Prozent um 15:21:32 UTC sichtbar aufgenommen, Datenhinweis und Status/Balken getrennt. Direkter MSI-Countertest grün | Nativer deutscher Fortschrittsnachweis erfüllt; Windows-UAC mit alternativem Administrator und weitere native Fehler-/Abbruchpfade bleiben getrennte Prüfungen |
 | Launcher, Browser und Diagnose | 8150: normaler Desktopstart, einzelne Instanz, nativer SaveFileDialog und redigierter ZIP-Export grün. Tray-Beenden und Desktop-Neustart grün. Erster Serverabbruch wird automatisch wiederhergestellt; zweiter stoppt beide Dienste mit nativem deutschen Recovery-Dialog, „Wiederholen“ startet erfolgreich. Fehlende Edge-ProgID ausschließlich im Gast ergänzt | Gastvorbereitung transparent erhalten; dies ersetzt nicht sämtliche Sprach-/DPI-/Kontextvarianten oder alle Aktionen des Recovery-Dialogs |
 | First Run | Nativer deutscher vorgeschalteter Entscheidungsdialog auf 8150 beobachtet; Nutzer bestätigt Abschluss, Setup beendet mit Exitcode 0. Hashgebundene reine Statusabfrage bestätigt eingerichteten Maintenance-Zugang, kein Agent-Bootstrap/Reset | Unbeobachtete Passwort-/Zurück-/Sichtbarkeitsschritte nicht nachträglich als abgenommen ausgeben; Authentifizierungsbedienung durch Nutzer, vorhandene Zugangsdaten erhalten |
+| Native Deinstallation bei laufendem Launcher | 8150: de/en/fr-Ansicht und Abbrechen grün. Freigegebene deutsche Entfernung am 7. September meldet MSI-Erfolg; Konfiguration und Maintenance-Credentialdatei bleiben bytegleich, Datenbank erhalten. Launcher und neu gestartete Kindprozesse bleiben jedoch mit offenen Ports zurück | **Produktfehler offen:** Installer-Lebenszyklus muss vor Dateientfernung die zuständige Runtime geordnet stoppen und Recovery während der Transaktion verhindern; manueller Test-Cleanup ersetzt den Fix nicht |
 | Sichtbare Flows | 8150: Sprachauswahl und Setup-Hauptformular in allen 18 Kombinationen de/en/fr × echte 100/125/150 Prozent × heller/dunkler Systemkontext nativ geprüft. 8145: installierter Sprachwechsel fr → de → en, Repair, Sprachübernahme aller drei Komponenten und Austausch lokalisierter Shortcutnamen mit sieben Prüfungen grün; Tooltip-Renderings und native Tastatur-Popups vorhanden | Übrige Komponentendialoge, funktionale Gesamtflows und Hover-/Tastatur-Randfälle bleiben offen; Hovereingabe ist im verfügbaren Computer-Use-API nicht vorhanden und benötigt Nutzerbedienung |
 | Saubere Windows-11-x64-Maschine | Vollständige 13-Punkte-MSI-Matrix 8145 → 8150 einschließlich Cleanup grün: Windows 11 Enterprise x64 (26100), ohne Entwicklungswerkzeuge; Standardbenutzer-/Rollback- und Private-LAN-Test zusätzlich grün. Native Frischinstallation 8136 und installierter Sprachwechsel 8145 separat bestanden | Artefaktgebundene Nachweise nicht pauschal auf spätere Builds übertragen; finale Abnahme bleibt offen bis alle obigen Ergänzungen vorliegen |
 
@@ -744,6 +745,48 @@ weiterhin vorhandene Datenbank sowie entfernte Programm-EXE und gestoppte
 Runtime. Für die im Betrieb veränderliche SQLite-Datei wird ausdrücklich
 keine Bytegleichheit aus diesem laufenden Ausgangsstand behauptet.
 Diese Vorbereitung ist kein bestandener Deinstallationsnachweis.
+
+### Offener Ursachen-Fix: laufende Runtime bei nativer Deinstallation 8150
+
+Nach unmittelbarer Nutzerbestätigung wurde am 7. September um 18:24:08 UTC
+der deutsche Deinstallationsknopf ohne ausgewählte Datenlöschung betätigt.
+Vorher bestätigte die schreibgeschützte SQLite-Prüfung null Matches und
+Startlobbys. Die native Erfolgsmeldung wurde gesehen und geschlossen.
+Das MSI-Protokoll `NETGRID-install-20260907-182408.log` im temporären
+Gastbenutzerordner enthält sowohl für Client als auch Server
+`MainEngineThread is returning 0`; die Programm-EXE ist entfernt.
+
+Die anschließende tatsächliche Abnahme scheitert trotzdem: Launcher 980 und
+seine während der Transaktion um 18:24:21 UTC neu gestarteten Kinder 4088
+und 8020 laufen weiterhin; 8787 und 3100 lauschen noch auf Loopback.
+`result/native-8150-retention-failure.json` bindet diese Prozessidentitäten
+und bestätigt zugleich bytegleiche Konfiguration und Maintenance-Credential-
+datei sowie die weiterhin vorhandene Spieldatenbank. Die erste
+`VerifyRetained`-Prüfung endet deshalb korrekt mit Exitcode 1.
+
+Die Codeprüfung zeigt die fehlende Lifecycle-Koordination: Der
+Deinstallationsworker startet direkt die MSI-Entfernung. Der Launcher behält
+dabei seinen normalen Recoverypfad und kann Kindprozesse nach deren Ende
+neu starten. Vor der Dateientfernung fehlt ein mit dem laufenden Launcher
+abgestimmter, bestätigter Stopp einschließlich Recovery-Unterdrückung und
+Schutz gegen einen konkurrierenden Neustart. Dieser Owner-Vertrag muss
+ursächlich ergänzt und mit laufendem Launcher regressionsgesichert werden;
+ein alleiniger Dateilöschtest oder manuelles Vorab-Beenden genügt nicht.
+
+Als ausdrücklich temporäre Testbereinigung wurden um 18:29:43 UTC nur die
+drei gegen Pfad, Startzeit und Elternbeziehung verifizierten eigenen
+Gastprozesse beendet. Das Tray war nach der Entfernung nicht mehr erreichbar.
+`result/native-8150-uninstall-orphan-cleanup.json` markiert deshalb ausdrücklich
+`nativeUninstallGatePassed: false`. Ein initialer Fehler beim Lesen des
+PowerShell-JSON-Zeitformats stoppte den Helfer vor jeder Prozessänderung;
+nach korrekter DateTime-Auswertung bestand die Identitätsprüfung.
+Die anschließende `native-8150-retention-verifyretained.json` bestätigt um
+18:29:48 UTC erhaltene geschützte Dateien und Datenbank sowie geschlossene
+Ports und keine Produktprozesse. Dieses Ergebnis gilt **nach manuellem
+Cleanup**, nicht als grüner nativer Deinstallationsablauf. Es wurde kein
+Passwort geändert, keine Nutzerdaten gelöscht und nichts neu installiert.
+Removal Condition der temporären Bereinigung: neuer Installer mit dem oben
+genannten Lifecycle-Fix und erneutem nativen Uninstall-Nachweis ohne Eingriff.
 
 ### Aktueller Updatekandidat und Teststart vom 7. September 2026
 
