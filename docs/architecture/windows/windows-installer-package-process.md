@@ -896,6 +896,24 @@ bei der aktuellen Standardplanung bereits vor der Deferred-Phase des neuen
 MSI entfernt. Ein nativer Standalone-Uninstall-Nachweis würde diese separaten
 Upgradefragen nicht beantworten und darf nicht als solcher ausgegeben werden.
 
+Die weitere Codeprüfung konkretisiert auch im GitHub-Weg eine Zeitlücke:
+Nach der zweiten lesenden Readiness-Abfrage folgen Dateikopie und erhöhter
+Updaterstart einschließlich Windows-Bestätigung, erst danach `CloseAsync`.
+Eine zwischenzeitliche Spielanlage wird nicht gesperrt. Der offene Fix
+benötigt eine serverseitig atomare Freigabe mit Startsperre und kontrollierter
+Rücknahme bei Abbruch, nicht bloß eine dritte Momentaufnahme.
+
+Die fokussierte Suite `update-readiness.test.ts` besteht mit fünf Tests,
+darunter jetzt der echte SQLite-/HTTP-Pfad für alle elf Matchstatuswerte
+und die Ablehnung eines nicht verfügbaren Speicherstatus. Die Datenbank und
+Backups liegen in einem eigenen temporären Fixtureordner, der Listener auf
+einem dynamisch vergebenen Loopbackport. Der Credentialstore ist ausschließlich
+im Speicher; produktive Daten und Zugangsdaten werden nicht verwendet.
+Die Statusfixtures prüfen Klassifikation, nicht künstliche Engine-Übergänge.
+Damit ist die bisher nur gemockte Zählung zusätzlich abgesichert, nicht die
+offene Start-/Stopp-Race geschlossen. Kandidat 8169 bleibt unverändert an
+seinen ursprünglichen Quellcommit gebunden und weiterhin ungestartet.
+
 Vor der Freigabe bleiben die Prozess-Ende-Raceprüfung,
 die direkten MSI-Updatepfade hinsichtlich
 laufender Spiele, verständliche lokalisierte Fehler, die vollständige
