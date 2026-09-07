@@ -30,6 +30,37 @@ einer dokumentierten Laufzeit-, RAM- und Stabilitätsmessung zum neuen Standard.
 
 Tests mit Timeout oder abgebrochene Prozesse gelten nicht als bestanden.
 
+## Stabiler Testvertrag statt historischer Momentaufnahme
+
+Regressionstests müssen die fachlich oder technisch garantierte Eigenschaft
+prüfen. Sie dürfen eine bei der Erstellung lediglich beobachtete Ausprägung
+nicht stillschweigend zum Vertrag erklären.
+
+- Wachsende Kataloge prüfen eine fachlich begründete Mindestmenge und danach
+  die Vollständigkeit, Eindeutigkeit und Gültigkeit jedes aktuell enthaltenen
+  Eintrags. Eine exakte Anzahl ist nur zulässig, wenn gerade die Kardinalität
+  selbst ein versionierter Vertrag ist.
+- Verhaltenssimulationen binden sich an semantische Ereignisse, Plan-Owner,
+  Executor, Capability, Evidence und relative Reihenfolgen. Absolute
+  Aktionsindizes, `stateVersion`, Endstände und `StateHash` gehören nur in
+  Tests, deren ausdrücklicher Gegenstand Replay-, Zustands- oder
+  Determinismusidentität ist.
+- Decision-Checkpoints dürfen eine exakte Aktion verlangen, wenn diese Aktion
+  fachlich zwingend ist. Delegiert ein Root-Plan einen zulässigen
+  Finanzierung-, Schutz- oder Choice-Schritt, prüft der Test zusätzlich die
+  Root-/Executor-Bindung und nicht den historisch vorher direkten Einzelschritt.
+- Berechnete Scores, Reserven und Diagnosewerte werden nur exakt fixiert, wenn
+  ihre konkrete Berechnung Vertragsgegenstand ist. Sonst wird die stabile
+  Klassifikation oder der verantwortliche Pfad geprüft.
+- Funktionale Langsimulationen sind keine impliziten Performance-Gates. Ihre
+  Timeouts erhalten ausreichenden, am parallelen Gate-Betrieb gemessenen
+  Spielraum; Laufzeitgrenzen werden in gesonderten Performance-Tests geprüft.
+
+Eine rote Erwartung wird erst geändert, nachdem Legalität, Runtime-/Replay-
+Fehlerfreiheit und der aktuelle Fachvertrag das beobachtete Verhalten gemeinsam
+tragen. Andernfalls bleibt der Test rot und der Produktfehler wird an seiner
+Ursprungsschicht behoben.
+
 ## Abhängigkeitsrichtung
 
 `corepack pnpm check:package-boundaries` prüft die produktiven TypeScript- und
