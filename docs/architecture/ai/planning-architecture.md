@@ -1403,6 +1403,17 @@ Ein-Root-Phasen bis Zugende, Informationsgrenze,
 Kampagnenwerte sind prefixgebundene inkrementelle Claims. Spätere
 Phasenroots müssen resident oder admission-geprüft sein.
 
+Jeder projizierte Step muss seine exakten liquiden Kosten bereits vor dem
+Effekt bezahlen können. Ein positiver Nettoerlös ersetzt diese
+Brutto-Zahlungsvoraussetzung nicht. Entstehende Aktionsschuld stammt aus dem
+Engine-Vertrag und verbraucht die danach im aktuellen Zug verfügbare
+Kapazität. Sie ist keine vorauszuzahlende Aktionsgebühr. Eine separat
+gequotete Mindestkapazität für das Starten einer solchen Action wird vor
+deren Projektion geprüft, ohne sie zusätzlich zu verbrauchen. Fehlende oder
+ungültige Schuldquotes zertifizieren keine Fortsetzung. Die Engine führt
+Schuldüberträge und obligatorische Tilgungsaktionen aus; die Restzugplanung
+behauptet keine schuldlose Kapazität im nächsten Zug.
+
 ### Phase 9 – Linie, Root-Foreground und Leaf-Executor wählen
 
 Die beste zulässige vollständige Linie bestimmt die Phasenfolge und den

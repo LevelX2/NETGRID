@@ -451,7 +451,10 @@ function applyOffer(params: {
   if (!capacity.ok) return capacity;
   const currentCredits = frame.ownCredits.minimum;
   const creditDelta = exactCreditDelta(candidate);
-  if (currentCredits + creditDelta < 0) {
+  if (
+    currentCredits < wholeNonNegative(candidate.costProfile.creditCost ?? 0) ||
+    currentCredits + creditDelta < 0
+  ) {
     return { ok: false, reasonCode: "insufficient_credits" };
   }
   const mergedCoverage = mergePriorityCoverage(
@@ -696,6 +699,12 @@ function capacityApplication(
 ): CapacityApplication {
   const projection = candidate.actionCapacityProjection;
   if (
+    projection?.kind === "action_debt" &&
+    projection.reliability !== "guaranteed"
+  ) {
+    return { ok: false, reasonCode: "capacity_projection_not_guaranteed" };
+  }
+  if (
     projection &&
     ["immediate_unrestricted_gain", "immediate_restricted_gain"].includes(
       projection.kind,
@@ -708,6 +717,12 @@ function capacityApplication(
   const preExistingActionCost = wholeNonNegative(
     projection?.preExistingActionCost ?? candidate.costProfile.clickCost ?? 0,
   );
+  if (
+    frame.actionCapacityLedger.unrestricted.minimum <
+    (projection?.minimumAvailableActions ?? 0)
+  ) {
+    return { ok: false, reasonCode: "insufficient_action_capacity" };
+  }
   const consumed = consumeActionCapacity(
     frame.actionCapacityLedger.unrestricted.minimum,
     frame.actionCapacityLedger.restrictedTokens,
@@ -748,7 +763,16 @@ function capacityApplication(
     projection?.kind === "action_debt" &&
     projection.reliability === "guaranteed"
   ) {
-    unrestrictedDelta -= wholeNonNegative(projection.actionDebt);
+    // Debt is created by the legal action, not an upfront click cost. Only
+    // the part payable in this turn removes remainder capacity; the Engine
+    // owns any debt carried into the next turn and its mandatory forgo steps.
+    unrestrictedDelta -= Math.min(
+      wholeNonNegative(projection.actionDebt),
+      Math.max(
+        0,
+        frame.actionCapacityLedger.unrestricted.minimum + unrestrictedDelta,
+      ),
+    );
   }
   return {
     ok: true,

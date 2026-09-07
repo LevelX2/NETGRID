@@ -10,6 +10,17 @@ import {
   type EditableDeck,
 } from "@netgrid/decks";
 import { describe, expect, it } from "vitest";
+import {
+  applyAction,
+  createGameAfterSetup,
+  getLegalActions,
+  hashState,
+  replayEvents,
+} from "@netgrid/engine";
+import type { LegalAction } from "@netgrid/shared";
+import { buildAiDecisionInput } from "../runtime/ai-decision-input";
+import { chooseAiAction } from "../ai-runtime-public-entrypoints";
+import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import type { AiSimulationDecisionCheckpointCapture } from "./ai-simulation-config";
 
 import { simulateAiGame } from "../simulation";
@@ -293,63 +304,108 @@ describe("R&D Express selfplay runtime regressions", () => {
   }, 120_000);
 
   it("keeps the next R&D multiaccess target current after declining trash", () => {
-    const captures: AiSimulationDecisionCheckpointCapture[] = [];
-    const summary = simulateStandardGame({
-      corpDeckId: "standard_corp_original_speed_v10",
-      seed: "rd-express-corp-panel-08",
-      maxActions: 266,
-      captures,
+    // Freeze the access preconditions, not a numeric turn in a changing game.
+    // The Engine creates the breach; the live AI retains one resident run
+    // owner through both accesses and the intervening decline.
+    const runner = standardSnapshot(RUNNER_DECK_ID);
+    const corp = standardSnapshot("standard_corp_original_speed_v10");
+    let state = createGameAfterSetup({
+      seed: "rd-decline-continuation-fixture",
+      runnerDeck: buildEngineDeck(runner),
+      corpDeck: buildEngineDeck(corp),
     });
-    expect(
-      summary.errors,
-      JSON.stringify(
-        {
-          captures: captures
-            .filter((capture) => capture.state.stateVersion >= 263)
-            .map(captureDiagnostic),
-        },
-        undefined,
-        2,
-      ),
-    ).toEqual([]);
-    expect(summary.runtimeFailures).toEqual([]);
-    expect(summary.metrics.illegalActions).toBe(0);
-    expect(summary.replayOk).toBe(true);
-    // Assert the live transition, with its original resident continuation.
-    // A fixed numeric checkpoint may now be a different, origin-bound window.
-    const actionsByState = new Map(
-      summary.actionSequence.map((action) => [
-        action.stateVersionBefore,
-        action,
-      ]),
+    state.activeSide = "runner";
+    state.phase = "runner_action_phase";
+    state.timingPoint = "runner_action.main";
+    state.runner.clicks = 4;
+    state.runner.credits = 0;
+    const hardware = Object.values(state.cardInstances).find(
+      (card) => card.definitionId === "onr_v1_139_r-and-d-interface",
+    )!;
+    state.runner.grip = state.runner.grip.filter(
+      (id) => id !== hardware.instanceId,
     );
-    const transitions = captures.flatMap((capture, index) => {
-      const run = capture.input.playerView.run;
-      const next = captures[index + 1];
-      if (
-        !next ||
-        run?.attackedServerId !== "rd" ||
-        actionsByState.get(capture.state.stateVersion)?.actionType !==
-          "decline_trash" ||
-        next.input.playerView.run?.runId !== run.runId
-      )
-        return [];
-      const access = next.input.legalActions.find(
-        (action) => action.type === "access_card",
-      );
-      return access ? [{ capture, next, access }] : [];
+    state.runner.stack = state.runner.stack.filter(
+      (id) => id !== hardware.instanceId,
+    );
+    state.runner.rig.hardware.push(hardware.instanceId);
+    Object.assign(hardware, {
+      zone: { side: "runner", zone: "rig" },
+      faceup: true,
+      rezzed: true,
     });
-    expect(transitions.length).toBeGreaterThan(0);
-    for (const { capture, next, access } of transitions) {
-      expect(
-        actionsByState.get(next.state.stateVersion)?.selectedActionId,
-      ).toBe(access.actionId);
-      expect(
-        capture.input.playerView.run?.accessedCard?.instanceId,
-      ).toBeDefined();
-      expect(next.input.playerView.run?.accessedCard).toBeUndefined();
+    const asset = Object.values(state.cardInstances).find(
+      (card) => card.definitionId === "onr_v1_320_encoder-inc",
+    )!;
+    state.corp.hq = state.corp.hq.filter((id) => id !== asset.instanceId);
+    state.corp.rd = state.corp.rd.filter((id) => id !== asset.instanceId);
+    state.corp.rd.unshift(asset.instanceId);
+    Object.assign(asset, {
+      zone: { side: "corp", zone: "rd" },
+      faceup: false,
+      rezzed: false,
+    });
+    const initial = structuredClone(state);
+    const apply = (action: LegalAction) => {
+      const result = applyAction(state, {
+        matchId: state.matchId,
+        side: action.side,
+        actionId: action.actionId,
+        clientKnownStateVersion: state.stateVersion,
+      });
+      expect(result.ok).toBe(true);
+      if (!result.ok) throw new Error(result.error.message);
+      state = result.state;
+    };
+    apply(
+      getLegalActions(state, "runner").find(
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "rd",
+      )!,
+    );
+    expect(state.run?.breach?.queue).toHaveLength(2);
+    const runId = state.run!.runId;
+    const root = `plan:runner.convert_run_window:run%3A${runId}`;
+    resetResidentPlanPortfolioMemory();
+    for (const actionType of [
+      "access_card",
+      "decline_trash",
+      "access_card",
+    ] as const) {
+      const input = buildAiDecisionInput(state, "runner", {
+        ownDeckSnapshot: { ...runner, side: "runner" },
+      });
+      expect(input.playerView.run?.runId).toBe(runId);
+      expect(input.playerView.run?.accessedCard?.instanceId).toBe(
+        actionType === "decline_trash" ? asset.instanceId : undefined,
+      );
+      const decision = chooseAiAction(input);
+      const action = input.legalActions.find(
+        (candidate) => candidate.actionId === decision.actionId,
+      )!;
+      expect(action.type).toBe(actionType);
+      expect(decision).toMatchObject({
+        fallbackUsed: false,
+        timeoutUsed: false,
+        decisionDebug: {
+          planFirstDecision: {
+            rootPlanInstanceId: root,
+            leafExecutorInstanceId: root,
+            route: {
+              actionId: action.actionId,
+              stateVersion: state.stateVersion,
+              planInstanceId: root,
+            },
+          },
+        },
+      });
+      apply(action);
     }
-  }, 30_000);
+    expect(
+      replayEvents(initial, state.eventLog.slice(initial.eventLog.length))
+        .actualFinalStateHash,
+    ).toBe(hashState(state));
+  });
 
   it("finishes the former Manhunt action-limit seed", () => {
     const summary = simulateStandardGame({

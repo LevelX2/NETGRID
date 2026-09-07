@@ -224,6 +224,8 @@ export type ActionCapacityProjection = {
   temporaryCredits?: number;
   listedActionCost: number;
   preExistingActionCost: number;
+  /** Availability prerequisite; unlike the cost, it is not consumed. */
+  minimumAvailableActions?: number;
   grossActionsGained: number;
   generatedActionsConsumedByCurrentAction: number;
   followupActionCapacity: number;

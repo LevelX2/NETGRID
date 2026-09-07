@@ -78,6 +78,7 @@ export function createLegalActionHostComposition(
       {
         purgeModel: "future_action_debt",
         actionDebtAdded: 3,
+        actionCapacityMinimumAvailableActions: window ? 0 : 1,
         ...(window
           ? {
               timingWindowId: window.windowId,
