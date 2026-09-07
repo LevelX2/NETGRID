@@ -847,6 +847,11 @@ Run-Credits ersetzen keine Aktivierungscredits. `runner.convert_run_window`
 bindet die konkrete Bankaktion an das aktuelle Zahlungsfenster, bevor dessen
 Engine-quotiertes Cash-Ziel die Aktivierungsliquidität aufbrauchen würde.
 Der Fensterresolver erhält dabei ausschließlich den bestehenden Auftrag.
+Die Pump-Viabilität führt vorhandene Run-Credits separat vom liquiden Pool,
+verbraucht sie vor Credits aus dem Pool und reicht nur ihren verbleibenden
+Betrag an die Restpfadquote weiter. Sie zählen nicht als verbleibende liquide
+Reserve. Runstart, Pumpfolge und anschließender Break müssen dadurch dieselbe
+bezahlbare Engine-Folge anerkennen.
 
 Ein reiner Austausch „rezzed ICE des letzten erfolgreichen Forts entfernen
 und Tags erhalten“ benötigt vor der Entwicklung die aktuelle
