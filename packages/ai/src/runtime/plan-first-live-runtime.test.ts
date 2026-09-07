@@ -12736,7 +12736,7 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
-  it("fails closed when an advance has missing cost semantics", () => {
+  it("fails closed when an advance has malformed cost semantics", () => {
     resetResidentPlanPortfolioMemory();
     const advanceAgenda = legalAction(
       "advance-agenda-without-cost",
@@ -12749,7 +12749,7 @@ describe("authoritative plan-first live runtime", () => {
         payload: { cardId: "agenda-unknown-cost" },
       },
     );
-    advanceAgenda.costs = [];
+    advanceAgenda.costs = [{ clicks: Number.NaN, credits: Number.NaN }];
     const installEconomy = legalAction(
       "install-bbs",
       "corp",
@@ -12794,7 +12794,7 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
-  it("keeps an advance with unknown score facts unresolved instead of declaring it nonproductive", () => {
+  it("keeps an advance with malformed cost facts unresolved instead of declaring it nonproductive", () => {
     resetResidentPlanPortfolioMemory();
     const advanceAgenda = legalAction(
       "advance-agenda-without-cost",
@@ -12807,7 +12807,7 @@ describe("authoritative plan-first live runtime", () => {
         payload: { cardId: "agenda-unknown-cost" },
       },
     );
-    advanceAgenda.costs = [];
+    advanceAgenda.costs = [{ clicks: Number.NaN, credits: Number.NaN }];
     advanceAgenda.expiresAtStateVersion = 1;
     const input = aiInput("corp", [advanceAgenda]);
     input.playerView.own.credits = 4;
@@ -21805,8 +21805,10 @@ describe("authoritative plan-first live runtime", () => {
             cardId: "bbs",
             sourceDefinitionId: "onr_v1_165_junkyard-bbs",
             cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-            cardImplementationAbilityKey: "abilities_activated_runner_main_move_top_trash_to_grip",
-            cardImplementationAbilityId: "onr_v1_165_junkyard-bbs:abilities_activated_runner_main_move_top_trash_to_grip",
+            cardImplementationAbilityKey:
+              "abilities_activated_runner_main_move_top_trash_to_grip",
+            cardImplementationAbilityId:
+              "onr_v1_165_junkyard-bbs:abilities_activated_runner_main_move_top_trash_to_grip",
             cardImplementationEffectKind: "move_top_trash_to_grip",
             cardImplementationTopTrashTargetId: "target",
             targetCardId: "target",
@@ -23196,7 +23198,7 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
-  it("keeps the verified post-pass continuation as an exclusive run-plan route at the server", () => {
+  it("keeps the exactly paid post-pass derez inside its exclusive run-plan route at the server", () => {
     resetResidentPlanPortfolioMemory();
     const derez = legalAction(
       "runner.trigger_ability.post-pass-at-server",
@@ -23249,14 +23251,14 @@ describe("authoritative plan-first live runtime", () => {
 
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
     expect(decision).toMatchObject({
-      actionId: continueRun.actionId,
+      actionId: derez.actionId,
       fallbackUsed: false,
       reasonCode: "plan_first.runner.convert_run_window",
       decisionDebug: {
         planKind: "runner.convert_run_window",
         planFirstDecision: {
           route: {
-            actionId: continueRun.actionId,
+            actionId: derez.actionId,
             stepId: expect.any(String),
           },
           turnPlanning: {
@@ -24275,7 +24277,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("declines a high-impact stored-economy trash that would break the current reserve", () => {
+  it("trashes a high-impact stored campaign whose visible value justifies the liquid-credit cost", () => {
     resetResidentPlanPortfolioMemory();
     const trash = legalAction(
       "trash-visible-campaign",
@@ -24314,13 +24316,13 @@ describe("authoritative plan-first live runtime", () => {
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
 
     expect(decision).toMatchObject({
-      actionId: decline.actionId,
+      actionId: trash.actionId,
       reasonCode: "plan_first.runner.convert_run_window",
       fallbackUsed: false,
       decisionDebug: {
         planKind: "runner.convert_run_window",
         planFirstDecision: {
-          route: { actionId: decline.actionId },
+          route: { actionId: trash.actionId },
           leafExecutorInstanceId: expect.stringContaining(
             "runner.convert_run_window",
           ),

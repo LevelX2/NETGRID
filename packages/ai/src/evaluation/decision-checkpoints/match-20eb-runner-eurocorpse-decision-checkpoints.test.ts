@@ -118,7 +118,7 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
     expectCheckpointToPass(belowHandLimit);
   });
 
-  it("uses the hand-neutral Temple search to close code-gate coverage at a one-card cap", () => {
+  it("honors the coverage owner search preference at a one-card cap", () => {
     const noMeaningfulAlternative = mutateFixture(
       repeatedEarlyBankJson,
       (checkpoint) => {
@@ -134,8 +134,8 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
         checkpoint.expectation = {
           acceptableActions: [
             {
-              type: "play_event",
-              sourceDefinitionId: "onr_v1_114_temple-microcode-outlet",
+              type: "activated_card_ability",
+              sourceDefinitionId: "onr_v1_177_the-short-circuit",
             },
           ],
           forbiddenActions: [

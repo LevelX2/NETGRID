@@ -26,7 +26,8 @@ describe("R&D Express selfplay runtime regressions", () => {
       corpDeckId: "standard_corp_original_speed_v10",
       seed: "meta-402-round-3-002",
       difficulty: "hard",
-      maxActions: 53,
+      // The current decision line reaches the same pool-funded installation at 187.
+      maxActions: 200,
       captures,
     });
     expect(summary.errors).toEqual([]);

@@ -5,6 +5,7 @@ import type {
   VisibleEffectiveIceRunQuote,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import { costProfileForAction } from "../actions/action-cost-timing";
 import type {
   CorpCorePlanDomain,
   CorpDefenseSignal,
@@ -376,6 +377,7 @@ export function corpQualitativeIceStagingSignal(
       input,
       centralAllocation,
       creditsAfterInstall,
+      input.playerView.own.clicks - candidate.costProfile.clickCost,
     )
   ) {
     return undefined;
@@ -555,6 +557,7 @@ function additionalIceInstallConsumesKnownCentralRezReserve(
   input: AiDecisionInput,
   centralAllocation: CorpCorePlanDomain["centralDefenseAllocation"],
   creditsAfterInstall: number,
+  clicksAfterInstall: number,
 ): boolean {
   if (centralAllocation?.status !== "known") return false;
   const serverId = centralAllocation.selectedServerId;
@@ -573,6 +576,31 @@ function additionalIceInstallConsumesKnownCentralRezReserve(
     (candidate) => candidate.id === serverId,
   );
   if (!server) return false;
+  const basicFunding = input.legalActions.flatMap((action) => {
+    if (
+      action.side !== "corp" ||
+      action.type !== "gain_credit" ||
+      action.source !== "basic_action" ||
+      action.expiresAtStateVersion !== input.playerView.stateVersion ||
+      action.payload?.effectKind !== "gain_credits"
+    )
+      return [];
+    const gain = action.payload.gainCreditsAmount;
+    const costs = costProfileForAction(action);
+    if (
+      typeof gain !== "number" ||
+      !Number.isSafeInteger(gain) ||
+      gain <= 0 ||
+      costs.costKnownStatus !== "known" ||
+      costs.additionalCosts.length !== 0 ||
+      costs.creditCost !== 0 ||
+      typeof costs.clickCost !== "number" ||
+      !Number.isSafeInteger(costs.clickCost) ||
+      costs.clickCost <= 0
+    )
+      return [];
+    return [{ gain, clicks: costs.clickCost }];
+  });
   return server.ice.some((ice) => {
     const quote = ice.effectiveRezCostQuote;
     const defense = visibleCorpIceDefenseProfile(ice);
@@ -590,8 +618,19 @@ function additionalIceInstallConsumesKnownCentralRezReserve(
       quote.complete === true &&
       quote.mandatoryAdditionalCosts.agendaPoints === 0 &&
       Number.isSafeInteger(quote.finalCredits) &&
-      quote.finalCredits <= input.playerView.own.credits &&
-      quote.finalCredits > creditsAfterInstall
+      ((quote.finalCredits <= input.playerView.own.credits &&
+        quote.finalCredits > creditsAfterInstall) ||
+        basicFunding.some(
+          (funding) =>
+            quote.finalCredits <=
+              input.playerView.own.credits +
+                Math.floor(input.playerView.own.clicks / funding.clicks) *
+                  funding.gain &&
+            quote.finalCredits >
+              creditsAfterInstall +
+                Math.floor(Math.max(0, clicksAfterInstall) / funding.clicks) *
+                  funding.gain,
+        ))
     );
   });
 }
@@ -665,6 +704,7 @@ export function corpGlobalDefenseInstallRouteAssessment(
       input,
       centralAllocation,
       input.playerView.own.credits - projectedInstallCredits,
+      input.playerView.own.clicks - projectedInstallClicks,
     )
   ) {
     return {

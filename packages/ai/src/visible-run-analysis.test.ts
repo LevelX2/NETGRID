@@ -1732,7 +1732,7 @@ describe("visible run analysis trace hazards", () => {
     });
   });
 
-  it("does not reuse Replicator break credits across multiple traces", () => {
+  it("pumps Replicator once before breaking both traces for free", () => {
     const assessment = assessKnownRezzedIcePath(
       [doubleTraceTagIce("rd-double-trace")],
       [replicator("runner-replicator")],
@@ -1744,8 +1744,6 @@ describe("visible run analysis trace hazards", () => {
       canReachAccess: true,
       visibleIceHazardAvoidanceCost: 3,
       creditsAfterAvoidingVisibleIceHazards: 0,
-      visibleTraceTagHazardUnavoidable: true,
-      unavoidableVisibleIceHazardCount: 1,
     });
     expect(assessment.visibleIceRunHazards).toHaveLength(2);
     expect(assessment.visibleIceRunHazards?.[0]).toMatchObject({
@@ -1758,8 +1756,9 @@ describe("visible run analysis trace hazards", () => {
     expect(assessment.visibleIceRunHazards?.[1]).toMatchObject({
       kind: "trace_tag",
       runnerTraceCapacity: 0,
-      breakAvoidanceCost: 3,
-      unavoidable: true,
+      breakAvoidanceCost: 0,
+      minimumAvoidanceCost: 0,
+      unavoidable: false,
     });
   });
 

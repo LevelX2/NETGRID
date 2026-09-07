@@ -8799,7 +8799,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.trash_accessed_card.corp_onr_v1_337_rockerboy-promotion_1.3"
+        "actionId": "runner.decline_trash"
       }
     ],
     "planExecution": {

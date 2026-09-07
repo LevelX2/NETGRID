@@ -310,12 +310,12 @@ describe("plan-first Central information-action ownership", () => {
     }).chooseSemanticRuntimeAction(input, {});
 
     expect(decision).toMatchObject({
-      actionId: secondInstall.actionId,
+      actionId: firstInstall.actionId,
       reasonCode: "plan_first.runner.expose_information",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
-          route: { actionId: secondInstall.actionId },
+          route: { actionId: firstInstall.actionId },
           dispositions: expect.not.arrayContaining([
             expect.objectContaining({ actionId: firstInstall.actionId }),
             expect.objectContaining({ actionId: secondInstall.actionId }),

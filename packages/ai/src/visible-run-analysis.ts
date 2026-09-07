@@ -424,15 +424,17 @@ function assessKnownRezzedIcePathInternal(
     ),
     pendingFreeBreaks: [],
   };
-  const breakerStrengths = breakerState.strengthByBreakerInstanceId;
+  const carriedBreakerStrengths = breakerState.strengthByBreakerInstanceId;
   if (initialBreakerStrengths) {
     for (const [instanceId, strength] of initialBreakerStrengths) {
-      breakerStrengths.set(instanceId, strength);
+      carriedBreakerStrengths.set(instanceId, strength);
     }
   }
   for (const { ice, iceIndex } of iceCards
     .map((ice, iceIndex) => ({ ice, iceIndex }))
     .reverse()) {
+    // Encounter pumps serve every subroutine here, but expire before the next ICE.
+    const breakerStrengths = new Map(carriedBreakerStrengths);
     const iceDefinitionId = ice.definitionId;
     if (
       !iceDefinitionId ||
@@ -542,12 +544,11 @@ function assessKnownRezzedIcePathInternal(
         futureClicksLost += breakAssessment.futureClicksLost ?? 0;
         spendBreakerCreditsAndApplySideEffects(creditBudget, breakAssessment);
         firstKnownIceBreakable = true;
-        if (breakAssessment.carriesStrengthAcrossIce) {
-          breakerStrengths.set(
-            breakAssessment.breakerInstanceId,
-            breakAssessment.endingStrength,
-          );
-        }
+        recordProjectedBreakerStrength(
+          breakAssessment,
+          breakerStrengths,
+          carriedBreakerStrengths,
+        );
       } else {
         visibleBreakCost += lossAmount;
         // A clamped loss is not a purchase. Do not withdraw a bank after
@@ -629,12 +630,11 @@ function assessKnownRezzedIcePathInternal(
       }
       creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
       firstKnownIceBreakable = true;
-      if (breakAssessment.carriesStrengthAcrossIce) {
-        breakerStrengths.set(
-          breakAssessment.breakerInstanceId,
-          breakAssessment.endingStrength,
-        );
-      }
+      recordProjectedBreakerStrength(
+        breakAssessment,
+        breakerStrengths,
+        carriedBreakerStrengths,
+      );
     }
     const payOrEndSubroutines =
       quote?.subroutines.filter(isVisiblePayEndRunSubroutine) ?? [];
@@ -684,10 +684,11 @@ function assessKnownRezzedIcePathInternal(
       }
       creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
       firstKnownIceBreakable = true;
-      if (payment.breakAssessment?.carriesStrengthAcrossIce) {
-        breakerStrengths.set(
-          payment.breakAssessment.breakerInstanceId,
-          payment.breakAssessment.endingStrength,
+      if (payment.breakAssessment) {
+        recordProjectedBreakerStrength(
+          payment.breakAssessment,
+          breakerStrengths,
+          carriedBreakerStrengths,
         );
       }
     }
@@ -719,12 +720,11 @@ function assessKnownRezzedIcePathInternal(
           spendBreakerCreditsAndApplySideEffects(creditBudget, breakAssessment);
           creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
           firstKnownIceBreakable = true;
-          if (breakAssessment.carriesStrengthAcrossIce) {
-            breakerStrengths.set(
-              breakAssessment.breakerInstanceId,
-              breakAssessment.endingStrength,
-            );
-          }
+          recordProjectedBreakerStrength(
+            breakAssessment,
+            breakerStrengths,
+            carriedBreakerStrengths,
+          );
           continue;
         }
         conditionalAccessReasons.add("visible_secret_spend_end_run");
@@ -757,12 +757,11 @@ function assessKnownRezzedIcePathInternal(
           creditBudget,
           payment.breakAssessment,
         );
-        if (payment.breakAssessment.carriesStrengthAcrossIce) {
-          breakerStrengths.set(
-            payment.breakAssessment.breakerInstanceId,
-            payment.breakAssessment.endingStrength,
-          );
-        }
+        recordProjectedBreakerStrength(
+          payment.breakAssessment,
+          breakerStrengths,
+          carriedBreakerStrengths,
+        );
       } else {
         spendGeneralCredits(creditBudget, payment.cost);
       }
@@ -811,12 +810,11 @@ function assessKnownRezzedIcePathInternal(
           creditBudget,
           avoidancePayment.assessment,
         );
-        if (avoidancePayment.assessment.carriesStrengthAcrossIce) {
-          breakerStrengths.set(
-            avoidancePayment.assessment.breakerInstanceId,
-            avoidancePayment.assessment.endingStrength,
-          );
-        }
+        recordProjectedBreakerStrength(
+          avoidancePayment.assessment,
+          breakerStrengths,
+          carriedBreakerStrengths,
+        );
       } else if (avoidancePayment?.kind === "general") {
         visibleBreakCost += avoidancePayment.cost;
         spendGeneralCredits(creditBudget, avoidancePayment.cost);
@@ -911,12 +909,11 @@ function assessKnownRezzedIcePathInternal(
           spendBreakerCreditsAndApplySideEffects(creditBudget, breakAssessment);
           creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
           firstKnownIceBreakable = true;
-          if (breakAssessment.carriesStrengthAcrossIce) {
-            breakerStrengths.set(
-              breakAssessment.breakerInstanceId,
-              breakAssessment.endingStrength,
-            );
-          }
+          recordProjectedBreakerStrength(
+            breakAssessment,
+            breakerStrengths,
+            carriedBreakerStrengths,
+          );
           continue;
         }
         const blockedAssessment = hardUnbrokenEffectBlockedPathAssessment({
@@ -967,6 +964,7 @@ function assessKnownRezzedIcePathInternal(
             visibleCorpBidCapacity: visibleCorpCreditsThroughPath,
             deflectorContext,
             breakerStrengths,
+            carriedBreakerStrengths,
             additionalBreakCostPerSubroutine,
           })
         : undefined;
@@ -976,12 +974,11 @@ function assessKnownRezzedIcePathInternal(
         spendBreakerCreditsAndApplySideEffects(creditBudget, breakAssessment);
         creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
         firstKnownIceBreakable = true;
-        if (breakAssessment.carriesStrengthAcrossIce) {
-          breakerStrengths.set(
-            breakAssessment.breakerInstanceId,
-            breakAssessment.endingStrength,
-          );
-        }
+        recordProjectedBreakerStrength(
+          breakAssessment,
+          breakerStrengths,
+          carriedBreakerStrengths,
+        );
       } else {
         activeRunPathEffects = [...activeRunPathEffects, effect];
       }
@@ -1154,6 +1151,23 @@ export function visibleDeflectorSubroutineCanResolve(
   return true;
 }
 
+function recordProjectedBreakerStrength(
+  assessment: BreakAssessment,
+  encounterStrengths: Map<string, number>,
+  carriedStrengths: Map<string, number>,
+): void {
+  encounterStrengths.set(
+    assessment.breakerInstanceId,
+    assessment.endingStrength,
+  );
+  if (assessment.carriesStrengthAcrossIce) {
+    carriedStrengths.set(
+      assessment.breakerInstanceId,
+      assessment.endingStrength,
+    );
+  }
+}
+
 function advanceVisibleRunBreakerState(
   state: VisibleRunBreakerState,
   assessment: BreakAssessment,
@@ -1217,6 +1231,7 @@ function runPathEffectBreakAssessment(params: {
   visibleCorpBidCapacity: number;
   deflectorContext: VisibleDeflectorContext;
   breakerStrengths: Map<string, number>;
+  carriedBreakerStrengths: Map<string, number>;
   additionalBreakCostPerSubroutine: number;
 }): BreakAssessment | undefined {
   if (!runPathProjectionEffectCanMatter(params.effect)) return undefined;
@@ -1246,7 +1261,7 @@ function runPathEffectBreakAssessment(params: {
     params.visibleCorpBidCapacity,
     params.activeRunPathEffects,
     { allowBreakingRunPathEffects: false },
-    new Map(params.breakerStrengths),
+    new Map(params.carriedBreakerStrengths),
     params.deflectorContext,
   );
   const futureWithEffect = assessKnownRezzedIcePathInternal(
@@ -1257,10 +1272,10 @@ function runPathEffectBreakAssessment(params: {
     params.visibleCorpBidCapacity,
     [...params.activeRunPathEffects, params.effect],
     { allowBreakingRunPathEffects: false },
-    new Map(params.breakerStrengths),
+    new Map(params.carriedBreakerStrengths),
     params.deflectorContext,
   );
-  const breakerStrengthsAfterBreak = new Map(params.breakerStrengths);
+  const breakerStrengthsAfterBreak = new Map(params.carriedBreakerStrengths);
   if (breakAssessment.carriesStrengthAcrossIce) {
     breakerStrengthsAfterBreak.set(
       breakAssessment.breakerInstanceId,

@@ -1448,7 +1448,11 @@ describe("buildActionSemanticCandidates", () => {
       rezWindow: true,
     });
 
-    expect(endTurn.costProfile.costKnownStatus).toBe("not_applicable");
+    expect(endTurn.costProfile).toMatchObject({
+      costKnownStatus: "known",
+      clickCost: 0,
+      creditCost: 0,
+    });
     expect(endTurn.timingProfile).toMatchObject({
       phase: "corp_action_phase",
       turnSide: "corp",
@@ -1473,7 +1477,6 @@ describe("buildActionSemanticCandidates", () => {
         "temporaryCreditsSpent",
         "temporaryCreditsRemaining",
         "temporaryCreditsReturned",
-        "corpCreditsSpent",
       ]),
     );
     expect(dataFortSequence.timingProfile).toMatchObject({
@@ -1515,7 +1518,11 @@ describe("buildActionSemanticCandidates", () => {
     );
 
     expect(corpDamage.costProfile.selfDamage).toBeUndefined();
-    expect(corpDamage.costProfile.costKnownStatus).toBe("not_applicable");
+    expect(corpDamage.costProfile).toMatchObject({
+      costKnownStatus: "known",
+      clickCost: 0,
+      creditCost: 0,
+    });
   });
 
   it("joins card semantics only when source and ability binding are side-safe", () => {

@@ -105,7 +105,7 @@ export function costProfileForAction(action: LegalAction): ActionCostProfile {
         ? "not_applicable"
         : "unknown",
     ...(variableCost !== undefined ? { variableCost } : {}),
-    additionalCosts: additionalCostFields(action),
+    additionalCosts: additionalCostFields(action, grossCreditCost),
   };
 }
 
@@ -166,9 +166,10 @@ function exactCostDimension(
   action: LegalAction,
   key: "clicks" | "credits",
 ):
-  | { status: "not_applicable" | "invalid" }
+  | { status: "invalid" }
   | { status: "known"; value: number; explicit: boolean } {
-  if (action.costs.length === 0) return { status: "not_applicable" };
+  // The Engine's complete empty cost list certifies zero expenditure.
+  // Preserve that fact for planners which require exact resource dimensions.
   let value = 0;
   let explicit = false;
   for (const cost of action.costs) {
@@ -337,7 +338,18 @@ function beneficiaryForAction(
   return "unknown";
 }
 
-function additionalCostFields(action: LegalAction): string[] {
+function additionalCostFields(
+  action: LegalAction,
+  normalizedGrossCredits: number | undefined,
+): string[] {
+  const normalizedCreditFields = new Set([
+    "accessTrashTotalCost",
+    "stealCost",
+    "paymentAmount",
+    "rezCostPaid",
+    "corpCreditsSpent",
+    "runnerCreditsSpent",
+  ]);
   const fields = [
     "accessTrashTotalCost",
     "stealCost",
@@ -381,7 +393,19 @@ function additionalCostFields(action: LegalAction): string[] {
     "creditsRemainingAfterCost",
     "postActionCredits",
   ];
-  return fields.filter((field) => action.payload?.[field] !== undefined);
+  return fields.filter((field) => {
+    const value = action.payload?.[field];
+    if (value === undefined) return false;
+    // Keep unsupported or conflicting facts explicit. A matching Engine cash
+    // quote is already represented by creditCost, not an additional payment.
+    return !(
+      normalizedCreditFields.has(field) &&
+      typeof value === "number" &&
+      Number.isSafeInteger(value) &&
+      value >= 0 &&
+      value === normalizedGrossCredits
+    );
+  });
 }
 
 function numberPayload(action: LegalAction, key: string): number | undefined {

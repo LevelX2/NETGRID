@@ -170,6 +170,12 @@ folgenden Punkte:
   Scoreboni und die frühere produktive Zentralreserve sind keine
   Entscheidungsautorität mehr. `funding_only` erzeugt Economy-Support
   desselben Parents und niemals Targeted Draw.
+  Zusätzliche ICE-Installationen dürfen auch ein noch erreichbares
+  Zentral-Rezbudget nicht zerstören: Bei materiellem Agendadruck vergleicht
+  der Defense-Owner die aktuelle, Engine-gequotete Rezroute mit den vor und
+  nach der Installation verbleibenden legalen Basic-Credit-Schritten.
+  Ein bereits unerreichbares Budget oder eine weiterhin finanzierbare Route
+  begründet diese Sperre nicht.
 - Die HQ-/R&D-Allokation konsumiert vollständige, Corp-bekannte
   Agendaanzahl/-punkte, wichtige trashbare Karten, serverspezifischen
   Multiaccess und Zugriffsfakten. Der einmalige belegte HQ-Hold-/Blufffall
@@ -190,6 +196,16 @@ folgenden Punkte:
   dimensionsgenau gelesen; ein nur mit Klickkosten ausgewiesener Advance-
   Step kostet exakt null Credits und bleibt eine reguläre
   Planfortentwicklung.
+  Auch eine vollständige leere Engine-Kostenliste zertifiziert exakt null
+  Klicks und Credits. Die Semantik darf diese Information nicht als
+  `not_applicable` verlieren und damit kostenlose Score-Aktionen aus der
+  Restzugplanung ausschließen.
+  Ein Engine-Payload-Feld, das denselben bereits normalisierten Creditbetrag
+  wiederholt, ist keine zusätzliche ungeklärte Zahlung. Abweichende Beträge
+  und andere Kostenarten bleiben ausdrücklich sichtbar und prüfpflichtig.
+  Bei gleichem Linienwert bleibt die bestehende Modulpräferenz im
+  Runner-TurnPlanner vor dem technischen ID-Tiebreak erhalten; sie verändert
+  weder Prioritätsklassen noch den Vergleich unterschiedlich wertvoller Linien.
 - Loan from Chiba besitzt keinen globalen Sonderplan: Erwerb und
   Kartenentwicklung nutzen Economy-Support, während Halten, Verlassen und die
   Engine-gequotete End-of-turn-Zahlung ein instanzgenauer Child-Step von
@@ -852,6 +868,11 @@ verbraucht sie vor Credits aus dem Pool und reicht nur ihren verbleibenden
 Betrag an die Restpfadquote weiter. Sie zählen nicht als verbleibende liquide
 Reserve. Runstart, Pumpfolge und anschließender Break müssen dadurch dieselbe
 bezahlbare Engine-Folge anerkennen.
+Die Pfadquote trennt aktuelle Encounter-Stärke von über das ICE hinaus
+gültiger Stärke. Ein bezahlter Encounter-Pump gilt für alle weiteren
+Subroutinen desselben ICE, einschließlich aufeinanderfolgender Trace-Breaks,
+und wird dort nicht erneut berechnet. Am nächsten ICE sowie in dessen
+Vorausberechnung bleibt nur ausdrücklich länger gültige Stärke erhalten.
 Ein Runstart-Choice-Ursprung entsteht nur aus einer echten Runstart-Aktion
 oder einer entsprechend gebundenen Engine-Runfähigkeit. Ein projizierter
 Serverkontext innerhalb eines laufenden Runs genügt nicht: Eine Bankaktivierung

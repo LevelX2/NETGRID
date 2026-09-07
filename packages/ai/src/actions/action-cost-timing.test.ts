@@ -6,6 +6,34 @@ import {
 } from "./action-cost-timing";
 
 describe("action cost and timing profiles", () => {
+  it.each([0, 3])(
+    "does not classify an exactly normalized %i-credit payment twice",
+    (credits) => {
+      const profile = costProfileForAction({
+        ...action("trigger_ability", { paymentAmount: credits }),
+        costs: [{ credits }],
+      });
+      expect(profile).toMatchObject({
+        creditCost: credits,
+        costKnownStatus: "known",
+        additionalCosts: [],
+      });
+    },
+  );
+
+  it("retains conflicting cash evidence and noncash requirements for explicit resolution", () => {
+    const profile = costProfileForAction({
+      ...action("trigger_ability", {
+        paymentAmount: 1,
+        cardImplementationTapSourceCost: true,
+      }),
+      costs: [{ credits: 3 }],
+    });
+    expect(profile.additionalCosts).toEqual([
+      "paymentAmount",
+      "cardImplementationTapSourceCost",
+    ]);
+  });
   it.each([
     { runnerInstallPaymentSourceAmounts: undefined },
     { runnerInstallPaymentSourceAmounts: "1" },

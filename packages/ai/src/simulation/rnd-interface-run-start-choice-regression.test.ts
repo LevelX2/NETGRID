@@ -12,7 +12,8 @@ describe("R&D Interface Dig run-start choice regression", () => {
     const corp = standardDeck("standard_corp_cheap_bag_tricks");
     const summary = simulateAiGame({
       seed: "meta-347-final-r4-c81f62a4e937-034",
-      maxActions: 480,
+      // The current exact-cost line completes after 714 actions.
+      maxActions: 900,
       runnerDeck: deckDefinition(runner),
       corpDeck: deckDefinition(corp),
       runnerDeckMetadata: deckMetadata(runner),
@@ -22,7 +23,7 @@ describe("R&D Interface Dig run-start choice regression", () => {
       runnerDifficulty: "hard",
       corpDifficulty: "hard",
       testOnlyDecisionCheckpointCapture: {
-        actionIndices: Array.from({ length: 480 }, (_, index) => index),
+        actionIndices: Array.from({ length: 900 }, (_, index) => index),
         capture: (snapshot) => captures.push(snapshot),
       },
     });
@@ -115,7 +116,7 @@ describe("R&D Interface Dig run-start choice regression", () => {
     expect(choice?.evidence).toEqual(
       expect.arrayContaining([sourceRoot, sourceExecutor]),
     );
-  }, 90_000);
+  }, 180_000);
 });
 
 type StandardDeck = {

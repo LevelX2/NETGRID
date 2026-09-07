@@ -28,9 +28,30 @@ describe("two latest Corp matches 2026-07-31 remediation checkpoints", () => {
     },
   );
 
-  it("starts the exact score conversion when the agenda can score this turn", () => {
-    const result = runAiDecisionCheckpoint(fixture(sameTurnScoreD34Json));
+  it("preserves the same-turn score head while keeping the central rez reserve reachable", () => {
+    // Liche needs 14 credits; 12 credits and three actions can fund it.
+    // The rejected extra HQ installation would leave at most 13 credits.
+    const checkpoint = fixture(sameTurnScoreD34Json);
+    checkpoint.expectation = {
+      acceptableActions: [{ actionId: "corp.draw_card" }],
+      planExecution: {
+        acceptablePlanKinds: ["corp.defend_servers"],
+        acceptableCapabilities: ["allocate_server_defense"],
+        requiredAssessmentEvidence: ["corp_missing_concrete_defense_draw:rd"],
+      },
+    };
+    const result = runAiDecisionCheckpoint(checkpoint);
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+    expect(
+      result.decision?.decisionDebug?.planFirstDecision?.turnPlanning?.heads,
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          moduleId: "corp.score_agenda",
+          witnessValid: true,
+        }),
+      ]),
+    );
   });
 
   it.each([

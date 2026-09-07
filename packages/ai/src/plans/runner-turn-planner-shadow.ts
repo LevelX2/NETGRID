@@ -170,6 +170,7 @@ export function buildRunnerTurnPlannerShadow(params: {
   const urgentPriorityClass = highestUrgentPriorityClass(heads);
   const offers = offersForHeads({
     input,
+    moduleSelectedActionId: params.runtimeResult.route.head.actionId,
     records,
     candidates: params.context.actionCandidates,
     urgentPriorityClass,
@@ -770,6 +771,7 @@ function deduplicateHeadRecords<
 
 function offersForHeads(params: {
   input: AiDecisionInput;
+  moduleSelectedActionId: string;
   records: readonly RunnerPlanningHeadRecord[];
   candidates: readonly ActionSemanticCandidate[];
   urgentPriorityClass: string | undefined;
@@ -813,7 +815,10 @@ function offersForHeads(params: {
       return {
         head,
         candidate,
-        moduleCandidatePreferenceRank: 0,
+        moduleCandidatePreferenceRank:
+          head.currentBinding.actionId === params.moduleSelectedActionId
+            ? 1
+            : 0,
         obligationSignature:
           priorityCoverage.requiredObligationIds.join(",") || "no_urgent",
         priorityCoverage,
