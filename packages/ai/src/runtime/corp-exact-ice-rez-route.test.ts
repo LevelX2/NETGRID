@@ -26,6 +26,64 @@ import { readKnownCorpCentralAgendaThreat } from "./corp-central-defense-facts-a
 import { assessCorpScoreProtection } from "./corp-score-protection-assessment";
 
 describe("exact Corp ICE rez route", () => {
+  it("declines future-only encounter tax at the innermost ICE", () => {
+    resetResidentPlanPortfolioMemory();
+    const fixture = engineIceRezWindow("onr_v1_222_ball-and-chain", 0, {
+      corpCredits: 5,
+      includeDecline: true,
+    });
+    expect(fixture.input.playerView.run?.position).toMatchObject({
+      iceIndex: 0,
+    });
+    expect(fixture.sourceCard.effectivePostRezRunQuote).toMatchObject({
+      complete: true,
+      effectiveRunQuote: {
+        subroutines: [
+          expect.objectContaining({ type: "set_run_encounter_tax" }),
+        ],
+      },
+    });
+    expect(
+      projectExactCorpIceRezRoute({ ...fixture, targetServerId: "rd" }),
+    ).toBeUndefined();
+    const decline = fixture.input.legalActions.find(
+      (action) => action.type === "decline_rez",
+    )!;
+    expect(
+      chooseAiAction(fixture.input, {
+        persistTacticalPlanMemory: false,
+        corpTurnPlannerMode: "legacy_compare",
+      }),
+    ).toMatchObject({
+      actionId: decline.actionId,
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId:
+            "plan:corp.defend_servers:server-defense-portfolio",
+          leafExecutorInstanceId:
+            "plan:corp.defend_servers:server-defense-portfolio",
+        },
+      },
+    });
+  });
+
+  it("keeps future encounter tax when an inner ICE remains on the same run", () => {
+    const fixture = engineIceRezWindow("onr_v1_222_ball-and-chain", 0, {
+      futureIceDefinitionId: "simple_barrier_ice",
+      futureIceRezzed: true,
+      includeDecline: true,
+    });
+    expect(fixture.input.playerView.run?.position).toMatchObject({
+      iceIndex: 1,
+    });
+    expect(
+      projectExactCorpIceRezRoute({ ...fixture, targetServerId: "rd" }),
+    ).toMatchObject({
+      routeKind: "qualitative_encounter_defense",
+    });
+  });
+
   it("keeps Corp defense ownership for a visible run-cap block despite abundant Runner credits", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineIceRezWindow("onr_v1_279_wall-of-static", 0, {

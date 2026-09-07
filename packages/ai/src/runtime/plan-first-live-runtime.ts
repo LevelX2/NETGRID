@@ -27905,7 +27905,6 @@ function uniqueCoverageGaps(
       input,
       candidates,
       evaluation,
-      role,
       deckCapabilities,
     );
     const coverageUpgrade = costRecovery
@@ -27921,7 +27920,7 @@ function uniqueCoverageGaps(
     if (outsideMissingCoverageScope && !coverageDevelopment) {
       continue;
     }
-    const requiredRole = coverageUpgrade?.requiredRole ?? role;
+    const requiredRole = coverageDevelopment?.requiredRole ?? role;
     const terminalRemoteCoverageThreat =
       runnerCoverageGapIsTerminalRemoteThreat(input, evaluation);
     const terminalRemotePatternThreat =
@@ -28861,6 +28860,8 @@ function runnerBreakerUpgradeSignalQuote(
 }
 
 type RunnerCostEffectiveCoverageRecovery = Readonly<{
+  requiredRole: RunnerCoverageGapSignal["requiredRole"];
+  totalRecoveryCost: number;
   visibleAnswer?: VisibleCard;
   deckHasAlternative: boolean;
   targetDefinitionId?: string;
@@ -28872,6 +28873,38 @@ type RunnerCostEffectiveCoverageRecovery = Readonly<{
 }>;
 
 function runnerCostEffectiveCoverageRecovery(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  evaluation: RunnerRunTargetEvaluation,
+  deckCapabilities: DeckCapabilityProfile,
+): RunnerCostEffectiveCoverageRecovery | undefined {
+  // Missing coverage identifies one blocking role. Cost recovery instead
+  // compares every role against the entire known path: a cheaper answer to
+  // another ICE can make that same path payable. Preserve the existing
+  // visible-answer/search/draw order, then compare the complete cost.
+  const modeOrder = {
+    install_visible_answer: 0,
+    search_known_alternative: 1,
+    draw_for_known_role: 2,
+  };
+  return RUNNER_BREAKER_COVERAGE_ROLES.flatMap((role) => {
+    const recovery = runnerCostEffectiveCoverageRecoveryForRole(
+      input,
+      candidates,
+      evaluation,
+      role,
+      deckCapabilities,
+    );
+    return recovery ? [recovery] : [];
+  }).sort(
+    (left, right) =>
+      modeOrder[left.recoveryMode] - modeOrder[right.recoveryMode] ||
+      left.totalRecoveryCost - right.totalRecoveryCost ||
+      left.requiredRole.localeCompare(right.requiredRole),
+  )[0];
+}
+
+function runnerCostEffectiveCoverageRecoveryForRole(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   evaluation: RunnerRunTargetEvaluation,
@@ -28914,6 +28947,17 @@ function runnerCostEffectiveCoverageRecovery(
     .filter(
       (card) =>
         card.known &&
+        candidates.some(
+          (candidate) =>
+            candidate.semanticActionType === "install.card" &&
+            candidate.costProfile.costKnownStatus === "known" &&
+            input.legalActions.some(
+              (action) =>
+                action.actionId === candidate.actionId &&
+                runnerInstallSourceInstanceId(candidate, action) ===
+                  card.instanceId,
+            ),
+        ) &&
         Number.isSafeInteger(card.installCost) &&
         (card.installCost ?? -1) >= 0 &&
         visibleCardCoversRequiredCoverage(card, role, (definitionId) =>
@@ -28986,6 +29030,9 @@ function runnerCostEffectiveCoverageRecovery(
       : "draw_for_known_role";
   const deckAlternativeOperatingCost = deckAlternative?.breakCost;
   return {
+    requiredRole: role,
+    totalRecoveryCost:
+      visibleAnswer?.totalRecoveryCost ?? deckAlternative!.totalCost,
     ...(visibleAnswer ? { visibleAnswer: visibleAnswer.card } : {}),
     deckHasAlternative: deckAlternative !== undefined,
     ...(deckAlternative

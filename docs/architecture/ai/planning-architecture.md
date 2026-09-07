@@ -2730,6 +2730,14 @@ zurückgestellt. Eine andere positive oder unabhängige Coverage-Bindung
 derselben Action bleibt davon unberührt. Diese Dispositionen ändern weder
 die gewählte Kopie noch Action-ID, Parent-/Need-Bindung oder Executor.
 
+Bei vollständig bekannter, bereits abgedeckter, aber zu teurer ICE-Kette
+vergleicht die Kosten-Recovery alle Breaker-Rollen gegen die Kosten des
+gesamten Pfads. Die erste ICE-Rolle darf die Suche nicht auf diese Rolle
+verengen. Aktuell legal installierbare Handantworten stehen wie bisher vor
+Such- und Draw-Routen; innerhalb dieser Klassen entscheidet die gesamte
+Installations- und Pfadkostensumme. Der gewählte Rollenbedarf, die konkrete
+Installation und der anschließende Run bleiben an denselben Parent gebunden.
+
 Eine lokale Economy-Zurückstellung von Mehrzweck-Hardware gilt nur für ihren
 Einkommenszweck. Eine bereits exakt gebundene Coverage- oder MU-Vorbereitung
 derselben Installation bleibt beim Coverage-Owner ausführbar. Andere,
@@ -3753,6 +3761,13 @@ Defense-Modus eine exakte, aktuell produktive Rez-Action als Route
 materialisiert. Gibt es keine solche Rez-Route, ist Decline die regelkonforme
 fenstergebundene Entscheidung und darf nicht durch eine bloße
 Rez-Kartenfamilie oder einen allgemeinen Defensebedarf verdrängt werden.
+
+Eine vollständige Enginequote mit ausschließlich zukünftigen
+Encounter-Effekten begründet am innersten ICE keinen aktuellen Rez-Nutzen.
+Der qualitative Rez-Consumer prüft diesen fehlenden Folgezustand, bevor
+allgemeine Tax-/Disruption-Signale die Route freigeben. Zusätzliche sofortige
+Wirkungen und quotierte bezahlte Encounter-Abwehr bleiben eigenständig
+bewertbar; eine noch vorhandene innere ICE-Schicht bleibt ein mögliches Ziel.
 
 Konditionale Rez-Supportkarten benötigen einen kartenspezifischen
 Folgevertrag. Chester Mix darf nur gerezzt werden, wenn bereits vor dem Rezzen
