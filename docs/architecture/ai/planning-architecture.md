@@ -3597,6 +3597,14 @@ Auch ein HQ-Overflow macht Handmanagement nicht zum ICE-Owner:
 installieren noch die Serverwahl treffen. Es meldet nur den Overflow-Bedarf;
 jede ICE-Installation bleibt eine Route von `corp.defend_servers`.
 
+Auch ein bekannter Zielserverkonflikt eines Upgrades bleibt unter Handdruck
+verbindlich. Agenda-Schwierigkeitsrabatte erhalten auf Zentralen bereits im
+gemeinsamen Platzierungsvertrag `defer`; eine negative Bewertung allein
+genügt nicht. Der bestehende Defense-Consumer dispositioniert diese exakte
+Installation, bevor Handmanagement sie als Overflow-Konversion beanspruchen
+kann. Vorbereitete oder aktive Score-Remotes bleiben nach ihren bisherigen
+Wert- und Ressourcenverträgen bewertbar.
+
 Dasselbe Ownership-Prinzip schützt eine bereits für einen exakten
 `corp.score_agenda`-Parent vorbereitete Remote: Ist die Agenda-Installation
 nur wegen des letzten Klicks auf den nächsten Corpzug verschoben, darf

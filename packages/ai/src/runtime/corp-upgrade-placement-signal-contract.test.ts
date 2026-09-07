@@ -36,6 +36,20 @@ describe("Corp upgrade placement signal contract", () => {
         }),
       );
       expect(component?.reason).toContain(`card:${definitionId}`);
+      for (const serverId of ["hq", "rd"] as const) {
+        for (const regionReplacementWarning of [false, true]) {
+          expect(
+            corpUpgradePlacementAssessment(
+              placementScenario(definitionId, serverId, {
+                regionReplacementWarning,
+              }),
+            ),
+          ).toMatchObject({
+            recommendation: "defer",
+            reason: "agenda_difficulty_requires_remote_scoring_fort",
+          });
+        }
+      }
     },
   );
 
@@ -55,6 +69,13 @@ describe("Corp upgrade placement signal contract", () => {
           ),
         }),
       );
+      expect(
+        corpUpgradePlacementAssessment(
+          placementScenario(definitionId, "remote_1", {
+            remoteIce: [visibleCard("remote-ice", "simple_ice", "ice")],
+          }),
+        )?.recommendation,
+      ).toBe("allow");
     },
   );
 
