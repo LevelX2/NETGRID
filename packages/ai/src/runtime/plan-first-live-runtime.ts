@@ -18208,9 +18208,12 @@ function scoreProjectForCandidate(
       sameTurnCloseout &&
       input.playerView.opponent.agendaPoints + agendaPoints >=
         input.playerView.agendaPointsToWin;
+    const deckoutAgendaFloodScoreWindow =
+      corpDeckoutAgendaFloodRequiresScoreDevelopment(input);
     const scorelineDeadlinePressure =
       scorelineFeasibility?.deadline === "last_draw_window" ||
-      scorelineFeasibility?.deadline === "current_turn_only";
+      scorelineFeasibility?.deadline === "current_turn_only" ||
+      deckoutAgendaFloodScoreWindow;
     const scoreActionSemanticsKnown =
       candidate.semanticActionType !== "score.advance_card" ||
       hasExactNonNegativeCostProfile(candidate);
@@ -18232,6 +18235,7 @@ function scoreProjectForCandidate(
     const fundedWindowProtected =
       sameTurnCloseout ||
       lastViableDeckoutMatchpointWindow ||
+      deckoutAgendaFloodScoreWindow ||
       corpScoreProtectionNeedIsSatisfied(
         input,
         protectionNeed,
@@ -18258,7 +18262,9 @@ function scoreProjectForCandidate(
     const deadlinePressure =
       scorelineDeadlinePressure || exposedInstalledAgenda;
     const fundingGap =
-      lastViableDeckoutMatchpointWindow || certifiedMatureRemoteScoreHorizon
+      lastViableDeckoutMatchpointWindow ||
+      deckoutAgendaFloodScoreWindow ||
+      certifiedMatureRemoteScoreHorizon
         ? 0
         : protectionNeed?.baseline.knowledge === "known"
           ? protectionNeed.baseline.minimumAdditionalCreditsToSatisfy
@@ -18336,24 +18342,26 @@ function scoreProjectForCandidate(
           scorelineFeasibility?.deadline === "current_turn_only" &&
           !sameTurnCloseout
             ? `corp_current_turn_scoreline_unreachable:${serverId ?? "unbound"}`
-            : exposedAgendaProgressRoute
-              ? `corp_exposed_agenda_progress_preserves_conversion_clock:${serverId ?? "unbound"}`
-              : !scoreActionSemanticsKnown
-                ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:missing_action_semantics`
-                : protectionNeed?.baseline.knowledge === "unknown"
-                  ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:${protectionNeed.baseline.unknownReason}`
-                  : fundingGap !== undefined && fundingGap > 0
-                    ? `corp_score_protection_funding_gap:${serverId ?? "unbound"}:${fundingGap}`
-                    : certifiedMatureRemoteScoreHorizon
-                      ? `corp_engine_certified_mature_remote_score_advance:${serverId ?? "unbound"}`
-                      : lastViableDeckoutMatchpointWindow
-                        ? `corp_last_viable_deckout_matchpoint_advance:${serverId ?? "unbound"}`
-                        : fundedWindowProtected
-                          ? `corp_funded_protected_score_advance:${serverId ?? "unbound"}`
-                          : candidate.semanticActionType ===
-                              "score.advance_card"
-                            ? `corp_score_protection_required:${serverId ?? "unbound"}`
-                            : "visible_legal_score_conversion",
+            : deckoutAgendaFloodScoreWindow
+              ? `corp_deckout_agenda_flood_score_advance:${serverId ?? "unbound"}`
+              : exposedAgendaProgressRoute
+                ? `corp_exposed_agenda_progress_preserves_conversion_clock:${serverId ?? "unbound"}`
+                : !scoreActionSemanticsKnown
+                  ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:missing_action_semantics`
+                  : protectionNeed?.baseline.knowledge === "unknown"
+                    ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:${protectionNeed.baseline.unknownReason}`
+                    : fundingGap !== undefined && fundingGap > 0
+                      ? `corp_score_protection_funding_gap:${serverId ?? "unbound"}:${fundingGap}`
+                      : certifiedMatureRemoteScoreHorizon
+                        ? `corp_engine_certified_mature_remote_score_advance:${serverId ?? "unbound"}`
+                        : lastViableDeckoutMatchpointWindow
+                          ? `corp_last_viable_deckout_matchpoint_advance:${serverId ?? "unbound"}`
+                          : fundedWindowProtected
+                            ? `corp_funded_protected_score_advance:${serverId ?? "unbound"}`
+                            : candidate.semanticActionType ===
+                                "score.advance_card"
+                              ? `corp_score_protection_required:${serverId ?? "unbound"}`
+                              : "visible_legal_score_conversion",
       },
     ];
   }

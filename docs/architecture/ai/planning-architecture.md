@@ -4003,6 +4003,13 @@ und den bestehenden Agenda-Flood-Deckoutpfad. Außerhalb dieser Fenster bleibt
 die normale Remote-Reifeprüfung bestehen; die Prioritätswahl erfolgt weiter
 im Scheduler aus den zugelassenen Planrouten.
 
+Der aktuelle Agenda-Flood-Deckoutdruck gilt gleichermaßen für Installation
+und Fortschritt bereits installierter Agenden. Ausreichender Remote-Schutz
+hebt diese Frist nicht auf: Sonst verdrängt jedes neue Installationsprojekt
+mit P3 die geschützte Advance-Fortsetzung mit P4, obwohl letztere den
+früheren Abschluss ermöglicht. Die vorhandenen Feasibility- und
+Prioritätsverträge bleiben die Entscheidungsautorität.
+
 Ungewöhnliche Midgame-Utility-, Action-Engine- oder Boardtransformationskarten
 werden zuerst bestehenden Domainplänen als Route oder Admission-geprüfte
 kartenbezogene Instanz zugeordnet. Ein breiter
