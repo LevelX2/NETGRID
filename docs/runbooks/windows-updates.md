@@ -165,6 +165,46 @@ Installation. Der Lauf ist in den Installerbuild aufgenommen. Die separate
 Freigabe durch ein anderes Windows-Administratorkonto bleibt eine native
 Abnahme, die diese unelevierten Komponentenprüfungen nicht ersetzen.
 
+## Vorbereitete updateweite Installersperre
+
+`Common/InstallationLease.cs` ist der einzige Writer der bestehenden
+Installersperre und wird von MSI-Aktionen und Updater gemeinsam verwendet.
+Der Updater ruft die neuen Phasen noch nicht im Produktablauf auf. Launcher
+und First Run binden weiterhin ausschließlich den Reader ein.
+
+Der atomare Registrywert `Lease` enthält acht Felder:
+`2|lease|phase|cutoffTicks|parentId|parentStartTicks|ownerId|ownerStartTicks`.
+Die Startzeiten sind UTC-Ticks. `preparing` hält die Sperre für alle neuen
+Starts, nimmt aber exakt den ursprünglichen Launcher anhand PID und
+Startzeit aus. Der aufrufende Updater muss diese Identitäten zuvor am echten
+Prozess binden; die Registryvalidierung allein beweist sie nicht.
+`StopPrepared` verlangt denselben Lease-Owner und entfernt die Ausnahme in
+der Phase `stopping`. Der Standalone-MSI-Pfad beginnt direkt mit `stopping`.
+
+Beim Abbruch von `preparing` bleibt nur dieser ursprüngliche Launcher
+ausgenommen. Alle anderen bis zum Abschlusszeitpunkt geborenen Prozesse
+bleiben gesperrt; ein verspäteter Start erhält durch den Abbruch keine
+Freigabe. Der ursprüngliche Launcher kann erneut vorbereiten. Ein vorher
+bereits gesperrter anderer Launcher kann sich diese Ausnahme nicht erwerben.
+Der Abschluss einer Stopptransaktion bewahrt keine Prozessausnahme. Der
+Cutoff sinkt auch bei rückwärts verstellter Uhr nicht.
+
+Eine pro Programmroot benannte globale Mutex serialisiert nur die kurzen
+Read/Modify/Write-Abschnitte. Timeout oder verlassene Mutex ergeben eine
+sichtbare Diagnose ohne Registryänderung. Sie ersetzt nicht die gehaltene
+Transaktionssperre. Alle Phasen und Prozessidentitäten werden zusammen als
+ein Registrywert veröffentlicht. Unbekannte Phasen, unvollständige
+Identitäten und alte Zweifeldrecords sind fail-closed; es gibt weder
+Dual-Read noch automatische Löschung einer bestehenden Sperre. Kandidat
+8169 enthält noch das frühere Format und ist kein Beleg für diesen neuen
+Quellstand.
+
+`Netgrid.InstallerLifecycle.Tests` prüft diese Phasen einschließlich
+Abbruch, PID-Wiederverwendung, Cutoff, fehlerhaften Records und acht
+konkurrierenden Schreibern ausschließlich in einem temporären HKCU-Testbaum.
+Das ersetzt noch nicht den nativen Nachweis des Backup-/MSI-/Healthablaufs
+oder die Prüfung mit einem anderen Windows-Administratorkonto.
+
 ## Fehlschlag und Rollback
 
 Scheitert Windows Installer, greift zunächst seine Transaktionsrücknahme; der

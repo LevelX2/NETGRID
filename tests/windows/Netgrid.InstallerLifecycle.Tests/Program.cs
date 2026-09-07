@@ -1,6 +1,5 @@
 using Microsoft.Win32;
 using Netgrid.Windows;
-using Netgrid.InstallerActions;
 using System.Xml.Linq;
 
 var checks = 0;
@@ -61,6 +60,7 @@ try
     }
     corrupt.SetValue("Lease", 1, RegistryValueKind.DWord);
     Reject(() => InstallationGate.Read(fixture, key), "installation_gate_lease_invalid");
+    PreparationLeaseTests.Run(fixture, program, Assert, Reject);
 }
 finally
 {

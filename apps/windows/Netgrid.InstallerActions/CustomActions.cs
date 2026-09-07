@@ -5,6 +5,7 @@ using System.IO;
 using System.Threading;
 using Microsoft.Win32;
 using WixToolset.Dtf.WindowsInstaller;
+using Netgrid.Windows;
 
 namespace Netgrid.InstallerActions
 {

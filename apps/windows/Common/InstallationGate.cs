@@ -32,21 +32,27 @@ namespace Netgrid.Windows
                 return Read(machine, KeyFor(programRoot))?.Active == true;
         }
 
-        public static bool IsStartBlocked(string programRoot, DateTime processStartedUtc)
+        public static bool IsStartBlocked(string programRoot, DateTime processStartedUtc, int processId = 0)
         {
             using (var machine = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
-                return BlocksStart(Read(machine, KeyFor(programRoot)), processStartedUtc);
+                return BlocksStart(Read(machine, KeyFor(programRoot)), processStartedUtc, processId);
         }
 
-        private static readonly DateTime ProcessStartedUtc = ReadProcessStart();
-        public static bool IsCurrentProcessBlocked(string programRoot) => IsStartBlocked(programRoot, ProcessStartedUtc);
-        private static DateTime ReadProcessStart()
+        private static readonly ProcessStamp CurrentProcess = ReadProcessStart();
+        public static bool IsCurrentProcessBlocked(string programRoot) => IsStartBlocked(programRoot, CurrentProcess.StartedUtc, CurrentProcess.Id);
+        private static ProcessStamp ReadProcessStart()
         {
-            using (var process = Process.GetCurrentProcess()) return process.StartTime.ToUniversalTime();
+            using (var process = Process.GetCurrentProcess()) return new ProcessStamp(process.Id, process.StartTime.ToUniversalTime());
         }
 
-        internal static bool BlocksStart(GateState? state, DateTime processStartedUtc) =>
-            state != null && (state.Active || processStartedUtc.ToUniversalTime().Ticks <= state.CompletedUtcTicks);
+        internal static bool BlocksStart(GateState? state, DateTime processStartedUtc, int processId = 0)
+        {
+            if (state == null) return false;
+            var started = processStartedUtc.ToUniversalTime().Ticks;
+            if (state.AllowedParentId > 0 && state.AllowedParentId == processId && state.AllowedParentStart == started)
+                return false;
+            return state.Active || started <= state.CompletedUtcTicks;
+        }
 
         internal static GateState? Read(RegistryKey root, string keyPath)
         {
@@ -58,11 +64,14 @@ namespace Netgrid.Windows
                 if (!(value is string record) || key.GetValueKind("Lease") != RegistryValueKind.String)
                     throw new InvalidOperationException("installation_gate_lease_invalid");
                 var fields = record.Split('|');
-                if (fields.Length != 2 || !long.TryParse(fields[1], NumberStyles.None, CultureInfo.InvariantCulture, out var completed) ||
-                    completed < 0 || completed > DateTime.MaxValue.Ticks)
+                if (fields.Length != 8 || fields[0] != "2" ||
+                    !long.TryParse(fields[3], NumberStyles.None, CultureInfo.InvariantCulture, out var completed) ||
+                    !int.TryParse(fields[4], NumberStyles.None, CultureInfo.InvariantCulture, out var parentId) ||
+                    !long.TryParse(fields[5], NumberStyles.None, CultureInfo.InvariantCulture, out var parentStart) ||
+                    !int.TryParse(fields[6], NumberStyles.None, CultureInfo.InvariantCulture, out var ownerId) ||
+                    !long.TryParse(fields[7], NumberStyles.None, CultureInfo.InvariantCulture, out var ownerStart))
                     throw new InvalidOperationException("installation_gate_lease_invalid");
-                ValidateLease(fields[0]);
-                return new GateState(fields[0], completed);
+                return new GateState(fields[1], fields[2], completed, parentId, parentStart, ownerId, ownerStart);
             }
         }
 
@@ -74,10 +83,47 @@ namespace Netgrid.Windows
 
         internal sealed class GateState
         {
-            public GateState(string lease, long completedUtcTicks) { Lease = lease; CompletedUtcTicks = completedUtcTicks; }
+            public const string Preparing = "preparing";
+            public const string Stopping = "stopping";
+            public const string Completed = "completed";
+            public GateState(string lease, string phase, long completedUtcTicks,
+                int allowedParentId = 0, long allowedParentStart = 0, int ownerId = 0, long ownerStart = 0)
+            {
+                ValidateLease(lease);
+                if ((phase != Preparing && phase != Stopping && phase != Completed) ||
+                    completedUtcTicks < 0 || completedUtcTicks > DateTime.MaxValue.Ticks ||
+                    !ValidIdentity(allowedParentId, allowedParentStart) || !ValidIdentity(ownerId, ownerStart) ||
+                    (phase == Preparing && (allowedParentId == 0 || ownerId == 0 || ownerId == allowedParentId)) ||
+                    (phase == Stopping && allowedParentId != 0) ||
+                    (phase == Completed && (completedUtcTicks == 0 || ownerId != 0)))
+                    throw new InvalidOperationException("installation_gate_lease_invalid");
+                Lease = lease; Phase = phase; CompletedUtcTicks = completedUtcTicks;
+                AllowedParentId = allowedParentId; AllowedParentStart = allowedParentStart;
+                OwnerId = ownerId; OwnerStart = ownerStart;
+            }
             public string Lease { get; }
+            public string Phase { get; }
             public long CompletedUtcTicks { get; }
-            public bool Active => CompletedUtcTicks == 0;
+            public int AllowedParentId { get; }
+            public long AllowedParentStart { get; }
+            public int OwnerId { get; }
+            public long OwnerStart { get; }
+            public bool Active => Phase != Completed;
+
+            public string Encode() => string.Join("|", new[] { "2", Lease, Phase,
+                CompletedUtcTicks.ToString(CultureInfo.InvariantCulture), AllowedParentId.ToString(CultureInfo.InvariantCulture),
+                AllowedParentStart.ToString(CultureInfo.InvariantCulture), OwnerId.ToString(CultureInfo.InvariantCulture),
+                OwnerStart.ToString(CultureInfo.InvariantCulture) });
+
+            private static bool ValidIdentity(int id, long start) =>
+                (id == 0 && start == 0) || (id > 0 && start > 0 && start <= DateTime.MaxValue.Ticks);
+        }
+
+        private sealed class ProcessStamp
+        {
+            public ProcessStamp(int id, DateTime startedUtc) { Id = id; StartedUtc = startedUtc; }
+            public int Id { get; }
+            public DateTime StartedUtc { get; }
         }
     }
 }

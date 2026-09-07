@@ -981,6 +981,22 @@ transaktionsweite Startsperre einschließlich Backup und Healthcheck,
 deren Eigentümerschaft gegenüber den MSI-Teiltransaktionen sowie die
 konkrete Anbindung der sicheren Übergabe offen.
 
+Der gemeinsame Writer der bestehenden Installersperre unterstützt jetzt
+explizit Vorbereitung, Stopp und Abschluss. Die Vorbereitung bewahrt exakt
+den ursprünglichen Launcher (PID plus Startzeit), ihr Abbruch erhält diese
+Ausnahme, und der Stopp entfernt sie. Die atomare Version-2-Registrybindung
+bewahrt den Abschluss-Cutoff und serialisiert konkurrierende Writer. Es gibt
+keinen zweiten Sperrowner und keine stillschweigende Altformatkonvertierung.
+157 Lifecyclechecks bestehen in isoliertem HKCU, einschließlich acht
+konkurrierender Schreiber und der verspäteten/recycelten Prozessidentitäten.
+Launcher-, Updater- und First-Run-Tests sowie der geänderte net48-MSI-
+Komponentenbuild bestehen ebenfalls (Build: null Warnungen und Fehler).
+Der Writer wurde aus der MSI-Komponente nach `Common` verschoben; die alte
+Datei bleibt über Git wiederherstellbar. Die updateweite Phasenanbindung,
+MSI-Teiltransaktionen und Healthfreigabe sind weiterhin offen. Dieser
+Quellstand wurde nicht als Installer gebaut oder installiert; der bereits
+bereitgestellte Kandidat 8169 bleibt unverändert.
+
 Vor der Freigabe bleiben die Prozess-Ende-Raceprüfung,
 die direkten MSI-Updatepfade hinsichtlich
 laufender Spiele, verständliche lokalisierte Fehler, die vollständige

@@ -119,7 +119,9 @@ werden können.
 
 Die MSI-Transaktion besitzt eine pro Programmordner gebundene Installersperre
 unter `HKLM\SOFTWARE\LevelX2\NETGRID.InstallerLifecycle` (64-Bit-Ansicht).
-Nur die erhöhte MSI-Aktion schreibt sie; der Launcher liest ausschließlich.
+Der gemeinsame Writer ist nur in erhöhte MSI-Aktion und Updater eingebunden;
+Launcher und First Run lesen ausschließlich. Die MSI-Aktion verwendet die
+Sperre bereits, die updateweite Nutzung durch den Updater ist noch offen.
 Der bestehende Launcher bleibt Owner des geordneten Runtime-Stopps. Während
 der Sperre sind neue Starts und Recovery ausgeschlossen. Die MSI-Aktion
 verändert erst Dateien, wenn die exakt zugehörigen Produktprozesse beendet
@@ -135,6 +137,17 @@ ausgeführte Komponente benötigt das Windows-11-Framework .NET 4.8 oder höher;
 die normalen selbstenthaltenen NETGRID-Anwendungen bleiben davon getrennt.
 Der aktuelle native Abnahmestand steht im Paketprozess, nicht in dieser
 Architekturbeschreibung.
+
+Der aktuelle Quellstand verwendet einen atomaren, versionierten Datensatz
+mit den Phasen `preparing`, `stopping` und `completed`. Die vorbereitete
+Updatephase lässt ausschließlich den ursprünglichen Launcher mit exakt
+gebundener PID und Prozessstartzeit weiterlaufen, während neue Starts
+gesperrt sind. Ihr Abbruch bewahrt diese Ausnahme; der Übergang zum Stopp
+entfernt sie. Eine kurze Writer-Mutex serialisiert Änderungen, während der
+persistente Datensatz die längerlebige Sperre besitzt. Ungültige oder alte
+Datensatzformate werden nicht still konvertiert. Die Anbindung dieser
+Vorbereitung an den echten Updateablauf und dessen MSI-Teiltransaktionen
+bleibt ein offenes Abnahmegate.
 
 ### Aufbewahrung gespeicherter Spiele
 
