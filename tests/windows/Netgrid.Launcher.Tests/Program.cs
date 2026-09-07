@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 
 if (await TransferPeerFixture.TryChildAsync(args)) return;
+if (await MsiPeerFixture.TryChildAsync(args)) return;
 
 if (args is ["--update-stop-child-fails"])
 {

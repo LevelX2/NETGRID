@@ -8,6 +8,13 @@ using Netgrid.Windows;
 
 if (await VerificationTests.TryChildAsync(args)) return;
 if (await SessionTests.TryChildAsync(args)) return;
+if (args is ["--query-peer-child"])
+{
+    Console.WriteLine("READY");
+    await Console.In.ReadLineAsync();
+    Environment.ExitCode = 259;
+    return;
+}
 if (args is ["--restart-token-child"])
 {
     Console.WriteLine("READY");
@@ -35,6 +42,7 @@ if (args is ["--peer-child", var childSession, var parentId, var parentStart])
 }
 
 var checks = 0;
+Console.WriteLine($"QUERY_ONLY_PEER_TESTS_OK checks={await QueriedProcessTests.RunAsync()} elevation=false");
 using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 var cancellation = deadline.Token;
 using var current = Process.GetCurrentProcess();

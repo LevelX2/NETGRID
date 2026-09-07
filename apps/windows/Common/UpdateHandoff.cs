@@ -1,4 +1,8 @@
-using System.Buffers.Binary;
+#nullable enable
+using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO.Pipes;
@@ -26,6 +30,7 @@ internal static class UpdateHandoff
         return "NETGRID-update-handoff-" + session;
     }
 
+#if !NETFRAMEWORK
     public static NamedPipeServerStream CreateServer(string session)
     {
         using var identity = WindowsIdentity.GetCurrent();
@@ -37,15 +42,19 @@ internal static class UpdateHandoff
             PipeAccessRights.FullControl, AccessControlType.Allow));
         security.AddAccessRule(new PipeAccessRule(new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null),
             PipeAccessRights.ReadWrite, AccessControlType.Allow));
+        security.AddAccessRule(new PipeAccessRule(new SecurityIdentifier(WellKnownSidType.LocalSystemSid, null),
+            PipeAccessRights.ReadWrite, AccessControlType.Allow));
         return NamedPipeServerStreamAcl.Create(PipeName(session), PipeDirection.InOut, 1, PipeTransmissionMode.Byte,
             PipeOptions.Asynchronous | PipeOptions.FirstPipeInstance, 512, 512, security);
     }
+#endif
 
     // The elevated consumer obtains and retains this actual process handle.
     // Missing/reused PIDs or a different image fail before connecting.
     public static Process OpenParent(int pid, long startedUtcTicks, string expectedImage)
     {
-        if (pid <= 0 || startedUtcTicks <= 0 || !Path.IsPathFullyQualified(expectedImage))
+        if (pid <= 0 || startedUtcTicks <= 0 || string.IsNullOrWhiteSpace(expectedImage) ||
+            !string.Equals(Path.GetFullPath(expectedImage), expectedImage, StringComparison.OrdinalIgnoreCase))
             throw new InvalidDataException("update_handoff_parent_invalid");
         var parent = Process.GetProcessById(pid);
         try
@@ -66,6 +75,51 @@ internal static class UpdateHandoff
         await pipe.WaitForConnectionAsync(cancellationToken);
         RequirePeer(pipe, worker, serverSide: true);
         return new Endpoint(pipe, serverSide: true);
+    }
+
+    // MSI may run as SYSTEM or a different administrator. The normal launcher
+    // must not request Process.Handle's all-access rights to that process.
+    internal static async Task<Endpoint> AcceptReadOnlyPeerAsync(NamedPipeServerStream pipe, QueriedProcess worker, CancellationToken cancellationToken)
+    {
+        await pipe.WaitForConnectionAsync(cancellationToken);
+        if (!GetNamedPipeClientProcessId(pipe.SafePipeHandle, out var actual))
+            throw new Win32Exception(Marshal.GetLastWin32Error());
+        if (actual != worker.Id) throw new InvalidDataException("update_handoff_peer_mismatch");
+        worker.RequireAlive();
+        return new Endpoint(pipe, serverSide: true);
+    }
+
+    internal sealed class QueriedProcess : IDisposable
+    {
+        private readonly SafeProcessHandle _handle;
+        private readonly long _started;
+        public int Id { get; }
+        private QueriedProcess(int id, long started, SafeProcessHandle handle) { Id = id; _started = started; _handle = handle; }
+        public static QueriedProcess Open(int id, long started)
+        {
+            if (id <= 0 || started <= 0) throw new InvalidOperationException("installation_gate_msi_owner_invalid");
+            var handle = OpenProcess(0x101000, false, id); // Query limited + synchronize; no mutation rights.
+            if (handle.IsInvalid)
+            {
+                var error = Marshal.GetLastWin32Error(); handle.Dispose();
+                throw new Win32Exception(error, "installation_gate_msi_owner_query_failed");
+            }
+            var result = new QueriedProcess(id, started, handle);
+            try { result.RequireAlive(); return result; }
+            catch { result.Dispose(); throw; }
+        }
+        public void RequireAlive()
+        {
+            if (!GetProcessTimes(_handle, out var created, out _, out _, out _))
+                throw new Win32Exception(Marshal.GetLastWin32Error(), "installation_gate_msi_owner_query_failed");
+            // Exit time is undefined while running; exit code 259 can also be a
+            // real exit code. Query the retained process object's signaled state.
+            var state = WaitForSingleObject(_handle, 0);
+            if (state == uint.MaxValue) throw new Win32Exception(Marshal.GetLastWin32Error(), "installation_gate_msi_owner_query_failed");
+            if (state != 258 || DateTime.FromFileTimeUtc(created).Ticks != _started)
+                throw new InvalidOperationException("installation_gate_msi_owner_exited_or_reused");
+        }
+        public void Dispose() => _handle.Dispose();
     }
 
     public static async Task<Endpoint> ConnectAsync(string session, Process parent, CancellationToken cancellationToken)
@@ -96,21 +150,27 @@ internal static class UpdateHandoff
     {
         if (frame is < Frame.Ready or > Frame.AckCancel) throw new InvalidDataException("update_handoff_frame_invalid");
         var bytes = new byte[FrameSize];
-        BinaryPrimitives.WriteInt32LittleEndian(bytes, Magic);
-        BinaryPrimitives.WriteInt32LittleEndian(bytes.AsSpan(4), 1);
-        BinaryPrimitives.WriteInt32LittleEndian(bytes.AsSpan(8), (int)frame);
+        WriteInt(bytes, 0, Magic);
+        WriteInt(bytes, 4, 1);
+        WriteInt(bytes, 8, (int)frame);
         return bytes;
     }
 
     internal static Frame Decode(byte[] bytes)
     {
-        if (bytes.Length != FrameSize || BinaryPrimitives.ReadInt32LittleEndian(bytes) != Magic ||
-            BinaryPrimitives.ReadInt32LittleEndian(bytes.AsSpan(4)) != 1)
+        if (bytes.Length != FrameSize || ReadInt(bytes, 0) != Magic || ReadInt(bytes, 4) != 1)
             throw new InvalidDataException("update_handoff_frame_invalid");
-        var frame = (Frame)BinaryPrimitives.ReadInt32LittleEndian(bytes.AsSpan(8));
+        var frame = (Frame)ReadInt(bytes, 8);
         return frame is >= Frame.Ready and <= Frame.AckCancel ? frame
             : throw new InvalidDataException("update_handoff_frame_invalid");
     }
+
+    private static void WriteInt(byte[] bytes, int offset, int value)
+    {
+        for (var index = 0; index < 4; index++) bytes[offset + index] = (byte)(value >> (index * 8));
+    }
+    private static int ReadInt(byte[] bytes, int offset) => bytes[offset] | (bytes[offset + 1] << 8) |
+        (bytes[offset + 2] << 16) | (bytes[offset + 3] << 24);
 
     internal sealed class Endpoint(PipeStream pipe, bool serverSide) : IDisposable
     {
@@ -151,13 +211,20 @@ internal static class UpdateHandoff
         private async Task<Frame> Read(CancellationToken cancellationToken)
         {
             var bytes = new byte[FrameSize];
-            await pipe.ReadExactlyAsync(bytes, cancellationToken);
+            var offset = 0;
+            while (offset < bytes.Length)
+            {
+                var count = await pipe.ReadAsync(bytes, offset, bytes.Length - offset, cancellationToken);
+                if (count == 0) throw new EndOfStreamException("update_handoff_frame_incomplete");
+                offset += count;
+            }
             return Decode(bytes);
         }
 
         private async Task Write(Frame frame, CancellationToken cancellationToken)
         {
-            await pipe.WriteAsync(Encode(frame), cancellationToken);
+            var bytes = Encode(frame);
+            await pipe.WriteAsync(bytes, 0, bytes.Length, cancellationToken);
         }
 
         public void Dispose() => pipe.Dispose();
@@ -167,4 +234,10 @@ internal static class UpdateHandoff
     [return: MarshalAs(UnmanagedType.Bool)] private static extern bool GetNamedPipeClientProcessId(SafePipeHandle pipe, out uint processId);
     [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)] private static extern bool GetNamedPipeServerProcessId(SafePipeHandle pipe, out uint processId);
+    [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
+    private static extern SafeProcessHandle OpenProcess(uint access, [MarshalAs(UnmanagedType.Bool)] bool inheritHandle, int processId);
+    [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)] private static extern bool GetProcessTimes(SafeProcessHandle process, out long created, out long exited, out long kernel, out long user);
+    [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
+    private static extern uint WaitForSingleObject(SafeProcessHandle process, uint milliseconds);
 }

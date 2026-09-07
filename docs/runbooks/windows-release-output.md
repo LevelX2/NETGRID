@@ -89,6 +89,25 @@ Launcher- und First-Run-Gates prüfen zusätzlich ihre tatsächliche letzte
 Startstelle. Ein grünes Ergebnis ist keine native Freigabe direkter MSI-
 Updates bei laufenden Spielen und kein erhöhtes Mehrbenutzer-Testat.
 
+Direkte MSI-Versionswechsel verwenden inzwischen die gebundene
+`preparing-msi`-Anforderung an den ursprünglichen Launcher. Ohne Launcher
+läuft `storage-admin.mjs update-readiness` unter der Installersperre als reine
+SQLite-Leseprüfung. `installation_gate_active_games` bricht vor Dateiaustausch
+ab und erhält bei erfolgreicher Preparation-Absage den laufenden Launcher.
+`installation_gate_readiness_*` und `installation_gate_msi_*` sind keine
+Freigabe zur manuellen Sperrentfernung. Die eigentliche Nativevidence muss
+beide Wege, Absage, Verbindungsende und Prozessstopp getrennt nachweisen.
+
+`installation_gate_protocol_unsupported` weist einen installierten Stand ohne
+`InstallerLifecycleProtocol=msi-preparation-v1` vor der neuen Sperrphase ab.
+Alte Testbuilds dürfen deshalb nicht als Basis der neuen Zwei-Versionen-
+Matrix verwendet werden. `installation_gate_upgrade_root_changed` verhindert
+einen stillen Ordnerwechsel. Gleiche-Version-Reparatur ohne aktive Runtime
+muss auch bei fehlender Node-/CLI-Datei möglich bleiben; sie verwendet nicht
+den Offline-Versionswechselcheck. Für einen vollständigen Releaseabschluss
+ist neben diesen Komponententests insbesondere die Backup-/Health-/Restore-
+Absicherung direkter MSI-Versionswechsel noch offen.
+
 ```powershell
 .\.tools\dotnet\dotnet.exe run --project tests/windows/Netgrid.InstallerLifecycle.Tests/Netgrid.InstallerLifecycle.Tests.csproj -c Release
 .\.tools\dotnet\dotnet.exe run --project tests/windows/Netgrid.Launcher.Tests/Netgrid.Launcher.Tests.csproj -c Release -- --check-installation-stop

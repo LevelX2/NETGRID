@@ -51,6 +51,7 @@
     </Component>
     <Component Directory="INSTALLFOLDER">
       <File Id="NetgridLauncher" Source="$(LauncherRoot)\NETGRID.exe" />
+      <RegistryValue Root="HKLM" Key="Software\LevelX2\NETGRID" Name="InstallerLifecycleProtocol" Type="string" Value="msi-preparation-v1" />
     </Component>
     <Component Directory="INSTALLFOLDER">
       <File Id="NetgridFirstRun" Source="$(FirstRunRoot)\NETGRID.FirstRun.exe" />

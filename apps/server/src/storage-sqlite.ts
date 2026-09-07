@@ -4482,6 +4482,66 @@ export function inspectSqliteStorage(dbPath: string): StorageHealth {
   }
 }
 
+// Installer use only after excluding all runtime writers with the installation
+// lease. Do not construct SqliteMatchStorage here: its initialization may write.
+export function inspectSqliteUpdateReadiness(dbPath: string): {
+  ok: true;
+  updateAllowed: boolean;
+  activeMatchCount: number;
+} {
+  if (!statSync(dbPath, { throwIfNoEntry: false }))
+    return { ok: true, updateAllowed: true, activeMatchCount: 0 };
+  const db = new DatabaseSync(resolve(dbPath), { open: true, readOnly: true });
+  try {
+    const integrity = db.prepare("PRAGMA quick_check").all();
+    if (integrity.length !== 1 || integrity[0]?.quick_check !== "ok")
+      throw new StorageError(
+        "storage_corrupt",
+        "Updateprüfung: SQLite ist beschädigt.",
+      );
+    const meta = (key: string) =>
+      db.prepare("SELECT value FROM storage_meta WHERE key = ?").get(key)
+        ?.value;
+    if (
+      meta("storage_format") !== SQLITE_STORAGE_FORMAT ||
+      Number(meta("schema_version")) !== SQLITE_STORAGE_SCHEMA_VERSION
+    )
+      throw new StorageError(
+        "stored_match_invalid",
+        "Updateprüfung: unbekanntes Speicherformat.",
+      );
+    let activeMatchCount = 0;
+    for (const row of db
+      .prepare("SELECT status, COUNT(*) AS count FROM matches GROUP BY status")
+      .all()) {
+      if (
+        !isMatchStatus(row.status) ||
+        typeof row.count !== "number" ||
+        !Number.isSafeInteger(row.count) ||
+        row.count < 0
+      )
+        throw new StorageError(
+          "stored_match_invalid",
+          "Updateprüfung: ungültiger Spielstatus.",
+        );
+      if (!isTerminalMaintenanceStatus(row.status))
+        activeMatchCount += row.count;
+    }
+    if (!Number.isSafeInteger(activeMatchCount))
+      throw new StorageError(
+        "stored_match_invalid",
+        "Updateprüfung: ungültige Spielanzahl.",
+      );
+    return {
+      ok: true,
+      updateAllowed: activeMatchCount === 0,
+      activeMatchCount,
+    };
+  } finally {
+    db.close();
+  }
+}
+
 export function validateStoredMatch(
   value: unknown,
 ): asserts value is StoredMatch {

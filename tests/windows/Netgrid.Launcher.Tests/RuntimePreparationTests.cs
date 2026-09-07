@@ -134,6 +134,7 @@ internal static partial class RuntimePreparationTests
             await Reject(fixture.CallRuntime("StartAsync"), "launcher_installation_stopping");
         }
         await TransferChecks(assembly, Assert, Reject);
+        await MsiChecks(assembly, Assert);
         return checks;
     }
 

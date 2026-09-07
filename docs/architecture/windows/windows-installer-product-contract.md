@@ -5,7 +5,7 @@ Status: beschlossenes Zielbild; Anwendungsvoraussetzungen, Installerbasis,
 Datenvertrag, Launcher, Setupführung, First Run, Updater, Lokalisierung,
 Branding und Diagnose als Komponenten umgesetzt; gebundene Updateanbindung
 und ursprünglicher Benutzer-Neustart implementiert; direkter
-MSI-Aktivspielschutz und native Abnahme noch offen
+MSI-Aktivspielschutz als Komponentenpfad umgesetzt, native Abnahme offen
 
 ## Zweck und Grenze
 
@@ -142,7 +142,7 @@ Der aktuelle native Abnahmestand steht im Paketprozess, nicht in dieser
 Architekturbeschreibung.
 
 Der aktuelle Quellstand verwendet einen atomaren, versionierten Datensatz
-mit den Phasen `preparing`, `stopping`, `verifying` und `completed`. Die vorbereitete
+mit den Phasen `preparing`, `preparing-msi`, `stopping`, `verifying` und `completed`. Die vorbereitete
 Updatephase lässt ausschließlich den ursprünglichen Launcher mit exakt
 gebundener PID und Prozessstartzeit weiterlaufen, während neue Starts
 gesperrt sind. Ihr Abbruch bewahrt diese Ausnahme; der Übergang zum Stopp
@@ -180,8 +180,54 @@ Abandonment und fünf Sekunden Wartezeitüberschreitung verhindern die Aktion.
 Die Implementierung verwendet
 [`CreateMutexExW`](https://learn.microsoft.com/en-us/windows/win32/api/synchapi/nf-synchapi-createmutexexw)
 mit expliziten Minimalrechten auch beim Öffnen eines vorhandenen Objekts.
-Der Aktivspielschutz eines direkt gestarteten MSI ist damit noch nicht
-implementiert; er bleibt ein eigenes offenes Gate vor Produktfreigabe.
+Der Aktivspielschutz eines direkt gestarteten MSI ist anschließend an diese
+Grenze angebunden; seine native Abnahme bleibt ein eigenes offenes Gate.
+
+Bei direktem Versionswechsel oder Reparatur bindet das MSI unter der Start-
+Mutex den exakt zugehörigen ursprünglichen Launcher. `preparing-msi` enthält
+dessen PID/Startzeit, den MSI-Prozess und die eigene ProductCode-/Lease-
+Bindung. Nur der ursprüngliche Launcher bleibt startberechtigt. Sein
+bestehender Watcher beantwortet die Anforderung über den gemeinsamen
+`UpdateHandoff`-Pipevertrag. Beide Endpunkte prüfen den tatsächlichen
+Windows-Pipepartner; der normale Launcher hält für den MSI-Prozess lediglich
+einen Handle mit Query-Limited-/Synchronize-Rechten, keinen Vollzugriff.
+Startzeit und signalisierter Prozesszustand werden getrennt geprüft. Ein
+Exitcode 259 wird nicht mit einem laufenden Prozess verwechselt; ein noch
+laufender Prozess hat laut
+[`GetProcessTimes`](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-getprocesstimes)
+keinen definierten Exitzeitwert.
+
+Der Launcher verwendet ausschließlich seinen vorhandenen
+`PrepareUpdateAsync`-/`PreparedUpdate`-Owner: atomare Serversperre und
+SQLite-Spielanzahl, bestätigter Abbruch bei nicht abgeschlossenen Spielen
+oder geordneter Serverstopp mit Exitcode 0. Nur danach darf `Proceed`
+gesendet werden. Fehler, Verbindungsende und fehlende Bestätigung sind keine
+Freigabe. Eine Absage erhält den ursprünglichen Launcher; eine unbestätigte
+Vorbereitung kann nur der passende Rollback, nicht ein erfolgreicher
+MSI-Commit abschließen. Erst nach `stopping` und nachgewiesener Abwesenheit
+der Produktprozesse darf das MSI Dateien verändern.
+
+Ohne laufenden Launcher prüft ein Versionswechsel unter der gehaltenen
+Installersperre über `storage-admin.mjs update-readiness` ausschließlich
+lesend die vorhandene SQLite-Datei. Die Statusklassifikation gehört dem
+bestehenden Storage-/Maintenance-Modul. Unbekannte Statuswerte, Formatfehler,
+beschädigte Daten, fehlende Prüfdateien oder ungültige Antworten scheitern
+sichtbar. Eine nie angelegte Datenbank wird nicht dafür erzeugt. Eine
+Reparatur desselben Produkts ohne laufende Runtime darf fehlende Node-/CLI-
+Dateien wiederherstellen und benötigt diesen Offline-Versionswechselcheck
+nicht. Ein expliziter Uninstall bleibt eine autorisierte Stoppoperation.
+
+Der zum Launcher gehörende MSI-Component registriert den aktuellen Vertrag
+`InstallerLifecycleProtocol=msi-preparation-v1`. Fehlt dieser bei einem
+vorhandenen Produkt, wird vor Veröffentlichung der neuen Sperrphase
+abgebrochen. Es entsteht kein Legacy- oder Ersatzprotokoll. Die native
+Upgrade-/Downgrade-Abnahme benötigt daher zwei aktuelle Builds; alte
+Testkandidaten sind keine gültige Basis. Der Versionswechsel behält den
+registrierten Programmordner bei. Vollständige native Transaktions-,
+Reparatur- und Mehrbenutzerprüfungen bleiben offen. Ein updaterweites
+Backup/Health-/Restore-Protokoll wird weiterhin nur vom Updater bereitgestellt;
+die Transaktionsparität direkter MSI-Versionswechsel ist damit noch nicht
+als vollständig umgesetzt oder abgenommen erklärt.
 
 ### Aufbewahrung gespeicherter Spiele
 

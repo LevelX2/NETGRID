@@ -8,6 +8,46 @@ namespace Netgrid.Windows
     // Runtime components link the read-only InstallationGate, never this file.
     internal static class InstallationLease
     {
+        public static void BeginMsiPreparation(RegistryKey root, string programRoot, string lease, string productCode,
+            int parentId, long parentStart, int ownerId, long ownerStart)
+        {
+            Mutate(programRoot, () =>
+            {
+                var current = InstallationGate.Read(root, InstallationGate.KeyFor(programRoot));
+                if (current?.Active == true) throw new InvalidOperationException("installation_gate_already_owned");
+                var next = new InstallationGate.GateState(lease, InstallationGate.GateState.PreparingMsi,
+                    current?.CompletedUtcTicks ?? 0, parentId, parentStart, ownerId, ownerStart, lease, productCode);
+                if (InstallationGate.BlocksStart(current, new DateTime(parentStart, DateTimeKind.Utc), parentId))
+                    throw new InvalidOperationException("installation_gate_parent_already_blocked");
+                Write(root, programRoot, next);
+                return true;
+            });
+        }
+
+        public static void StopMsiPrepared(RegistryKey root, string programRoot, string lease, string productCode)
+        {
+            Mutate(programRoot, () =>
+            {
+                var current = RequireMsiPreparation(root, programRoot, lease, productCode);
+                // The preparation owner is MSI itself, not an outer updater.
+                // Commit/rollback must therefore complete the standalone lease.
+                Write(root, programRoot, new InstallationGate.GateState(lease, InstallationGate.GateState.Stopping,
+                    current.CompletedUtcTicks, msiLease: lease, msiProductCode: productCode));
+                return true;
+            });
+        }
+
+        private static InstallationGate.GateState RequireMsiPreparation(RegistryKey root, string programRoot, string lease, string productCode)
+        {
+            InstallationGate.ValidateLease(lease);
+            InstallationGate.ValidateProductCode(productCode);
+            var current = InstallationGate.Read(root, InstallationGate.KeyFor(programRoot));
+            if (current == null || current.Phase != InstallationGate.GateState.PreparingMsi ||
+                current.Lease != lease || current.MsiLease != lease || current.MsiProductCode != productCode)
+                throw new InvalidOperationException("installation_gate_msi_preparation_owner_missing");
+            return current;
+        }
+
         public static void BeginMsi(RegistryKey root, string programRoot, string msiLease, string productCode, string outerLease)
         {
             Mutate(programRoot, () =>
@@ -47,14 +87,27 @@ namespace Netgrid.Windows
         }
 
         public static bool CompleteMsi(RegistryKey root, string programRoot, string msiLease, string productCode)
+            => FinishMsi(root, programRoot, msiLease, productCode, allowPreparationCancel: false);
+
+        public static bool RollbackMsi(RegistryKey root, string programRoot, string msiLease, string productCode)
+            => FinishMsi(root, programRoot, msiLease, productCode, allowPreparationCancel: true);
+
+        private static bool FinishMsi(RegistryKey root, string programRoot, string msiLease, string productCode, bool allowPreparationCancel)
         {
             return Mutate(programRoot, () =>
             {
                 InstallationGate.ValidateLease(msiLease);
                 InstallationGate.ValidateProductCode(productCode);
                 var current = InstallationGate.Read(root, InstallationGate.KeyFor(programRoot));
-                if (current == null || current.Phase != InstallationGate.GateState.Stopping ||
+                if (current == null || (current.Phase != InstallationGate.GateState.Stopping &&
+                    !(allowPreparationCancel && current.Phase == InstallationGate.GateState.PreparingMsi)) ||
                     current.MsiLease != msiLease || current.MsiProductCode != productCode) return false;
+                if (current.Phase == InstallationGate.GateState.PreparingMsi)
+                {
+                    Write(root, programRoot, new InstallationGate.GateState(current.Lease, InstallationGate.GateState.Completed,
+                        Math.Max(DateTime.UtcNow.Ticks, current.CompletedUtcTicks), current.AllowedParentId, current.AllowedParentStart));
+                    return true;
+                }
                 if (current.OwnerId > 0) Write(root, programRoot, current.WithMsi("", ""));
                 else Write(root, programRoot, new InstallationGate.GateState(current.Lease, InstallationGate.GateState.Completed,
                     Math.Max(DateTime.UtcNow.Ticks, current.CompletedUtcTicks)));

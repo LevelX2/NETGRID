@@ -1160,11 +1160,49 @@ Checks prüfen die tatsächlichen letzten Guardstellen unter der Mutex, ohne
 Runtime oder Credentialzugriff. Launcher-, Handoff- und First-Run-Regressionen
 sind grün, die Framework-4.8-MSI-Komponente baut ohne Warnungen. Dies ersetzt
 keinen erhöhten Mehrbenutzer- oder vollständigen MSI-Lauf; 8169 und die Sandbox
-bleiben unverändert. Der direkte MSI-Aktivspielschutz ist noch nicht umgesetzt.
+bleiben unverändert.
+
+Der direkte MSI-Aktivspielschutz ist inzwischen im Quellpfad angebunden:
+geschützte `preparing-msi`-Phase, exakt gebundener ursprünglicher Launcher,
+derselbe atomare Server-Preparation-Owner und derselbe Pipevertrag wie beim
+Updater. Nur ein bestätigter geordneter Stopp erlaubt den Übergang zum
+Dateiaustausch; aktive Spiele, verlorene Verbindung und Stopfehler tun dies
+nicht. Ein passender Rollback darf eine Vorbereitung abbrechen und den
+ursprünglichen Launcher erhalten; ein Commit darf die unbestätigte Phase
+nicht als Erfolg abschließen. Der normale Launcher benötigt zum Prüfen des
+MSI-Prozesses nur Lese-/Warterechte. Alte installierte Teststände ohne den
+aktuellen registrierten Protokollvertrag werden vor der neuen Phase abgewiesen.
+
+Ein Versionswechsel ohne Launcher liest SQLite über den neuen vorhandenen
+Storage-CLI-Entrypoint, ohne Storageinitialisierung oder Credentialzugriff.
+Alle elf gespeicherten Statuswerte werden gegen die bestehende Maintenance-
+Definition geprüft. Die Reparatur desselben Produkts ohne aktive Runtime
+kann fehlende Prüfbinärdateien wiederherstellen; bei laufender Runtime gilt
+auch dort die Launcher-Vorbereitung. Expliziter Uninstall bleibt autorisiert.
+
+Aktuelle Komponenten-Evidence: 306 Lifecyclechecks inklusive echter Pipe-
+Partner, Absage/EOF/Prozessende, Offline-Readiness-Parser, Protokollregistrierung
+und tatsächlichem isoliertem Node-Probeaufruf mit Umlaut-/Leerzeichenpfaden;
+118 Runtime-Preparation-Checks inklusive fünf neuer MSI-Antwortszenarien;
+fünf Read-only-Prozessidentitätschecks einschließlich Exitcode 259. Die
+bisherigen Handoff-, Healthpermit-, Session-, Request-, Neustart- und
+Updater-Komponentengates bleiben grün. Vier neue Storage-/CLI-Tests, fünf
+bestehende HTTP-Readiness-Tests und der Server-Typecheck sind grün. Die elf
+SQLite-Zustandsfälle benötigen zusammen ein eigenes 30-Sekunden-Testfenster;
+ein zuvor überschrittenes Fünf-Sekunden-Limit wurde nicht als fachlicher
+Erfolg gewertet. Die Framework-MSI-Komponente baut ohne Warnungen.
+
+Kein Installer wurde in diesem Schritt neu gebaut oder ausgeführt; kein
+UAC-/SYSTEM-/anderes Administratorkonto-Test wurde behauptet. Der aktuelle
+Quellpfad ersetzt weder die Zwei-Build-MSI-Abnahme noch Payload- oder
+Uninstall-Nachweise. Außerdem bleibt zu klären und umzusetzen, wie direkte
+MSI-Versionswechsel den vollständigen Backup-/Health-/Restore-Vertrag des
+Updaters erfüllen; die Aktivspielprüfung allein ist kein vollständiges
+Transaktions- oder Release-Done. Sandbox, 8169 und Zugangsdaten sind unverändert.
 
 Vor der Freigabe bleiben die vollständige Prozess-Ende-Raceprüfung,
-die direkten MSI-Updatepfade hinsichtlich
-laufender Spiele, verständliche lokalisierte Fehler, die vollständige
+die native Abnahme direkter MSI-Updatepfade hinsichtlich
+laufender Spiele und vollständiger Transaktionsabsicherung, verständliche lokalisierte Fehler, die vollständige
 Build-/Payloadprüfung und der native Uninstall-Nachweis offen. Eine nach
 hartem Abbruch stehengebliebene fremde aktive Lease wird absichtlich nicht
 automatisch gelöscht. Das Uninstall-Gate bleibt rot; kein Main-Merge,

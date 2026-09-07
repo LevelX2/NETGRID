@@ -3,6 +3,7 @@ using Netgrid.Windows;
 using System.Xml.Linq;
 
 if (LaunchFenceTests.TryChild(args)) return;
+if (await DirectMsiPreparationTests.TryChildAsync(args)) return;
 
 var checks = 0;
 void Assert(bool condition, string name)
@@ -66,6 +67,9 @@ try
     MsiLeaseTests.Run(fixture, program, Assert, Reject);
     UpdateOwnerTests.Run(fixture, program, Assert, Reject);
     LaunchFenceTests.Run(fixture, Assert, Reject);
+    MsiPreparationLeaseTests.Run(fixture, Assert, Reject);
+    await DirectMsiPreparationTests.RunAsync(fixture, Assert);
+    MsiOfflineProcessTests.Run(fixture, Assert, Reject);
 }
 finally
 {
@@ -79,6 +83,10 @@ Assert(user.OpenSubKey(fixturePath) is null, "own_registry_fixture_removed");
 var authoring = XDocument.Load(Path.Combine("installer", "product", "Product.wxs"));
 XNamespace wix = "http://wixtoolset.org/schemas/v4/wxs";
 var package = authoring.Root!.Element(wix + "Package")!;
+Assert(package.Descendants(wix + "Component").Any(component =>
+    component.Elements(wix + "File").Any(file => (string?)file.Attribute("Id") == "NetgridLauncher") &&
+    component.Elements(wix + "RegistryValue").Any(value => (string?)value.Attribute("Name") == "InstallerLifecycleProtocol" &&
+        (string?)value.Attribute("Value") == "msi-preparation-v1")), "installed_protocol_bound_to_launcher_component");
 var sequence = package.Element(wix + "InstallExecuteSequence")!;
 Assert((string?)package.Element(wix + "MajorUpgrade")!.Attribute("Schedule") == "afterInstallExecute", "old_product_removed_inside_guarded_transaction");
 Assert(package.Elements(wix + "Property").Any(x => (string?)x.Attribute("Id") == "NETGRID_UPDATE_LEASE" &&

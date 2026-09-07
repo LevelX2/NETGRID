@@ -16,6 +16,9 @@
     <Compile Include="..\Common\InstallationLaunchFence.cs" Link="InstallationLaunchFence.cs" />
     <Compile Include="..\Common\InstallationLease.cs" Link="InstallationLease.cs" />
     <Compile Include="..\Common\ProductProcesses.cs" Link="ProductProcesses.cs" />
+    <Compile Include="..\Common\UpdateHandoff.cs" Link="UpdateHandoff.cs" />
+    <Compile Include="..\Common\DirectMsiPreparation.cs" Link="DirectMsiPreparation.cs" />
+    <Compile Include="..\Common\MsiOfflineReadiness.cs" Link="MsiOfflineReadiness.cs" />
     <Content Include="CustomAction.config" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

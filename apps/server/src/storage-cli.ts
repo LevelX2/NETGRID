@@ -3,6 +3,7 @@ import { basename, resolve } from "node:path";
 import {
   SqliteMatchStorage,
   inspectSqliteStorage,
+  inspectSqliteUpdateReadiness,
   restoreSqliteStorageBackup,
 } from "./storage-sqlite";
 import { resolveServerRuntimePaths } from "./runtime-paths";
@@ -12,7 +13,9 @@ const { matchSqlitePath: dbPath, storageBackupDir: backupDir } =
   resolveServerRuntimePaths();
 
 try {
-  if (command === "backup" || command === "backup-update") {
+  if (command === "update-readiness") {
+    console.log(JSON.stringify(inspectSqliteUpdateReadiness(dbPath)));
+  } else if (command === "backup" || command === "backup-update") {
     const storage = new SqliteMatchStorage({ dbPath, backupDir });
     try {
       const result = await storage.backup(
@@ -65,7 +68,7 @@ try {
     }
   } else {
     throw new Error(
-      "Usage: storage-cli <backup|backup-update|restore|inspect|optimize>",
+      "Usage: storage-cli <backup|backup-update|restore|inspect|optimize|update-readiness>",
     );
   }
 } catch (error) {

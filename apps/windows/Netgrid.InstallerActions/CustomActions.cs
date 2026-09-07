@@ -18,6 +18,9 @@ namespace Netgrid.InstallerActions
                 throw new InvalidOperationException("installation_gate_requires_rollback");
             var root = Path.GetFullPath(session["INSTALLFOLDER"]);
             Netgrid.Windows.InstallationGate.KeyFor(root);
+            var installed = session.EvaluateCondition("Installed");
+            var replacing = session.EvaluateCondition("WIX_UPGRADE_DETECTED") || File.Exists(Path.Combine(root, "NETGRID.exe"));
+            var removing = session.EvaluateCondition("REMOVE~=\"ALL\"");
             var data = new CustomActionData
             {
                 ["ProgramRoot"] = root,
@@ -25,9 +28,22 @@ namespace Netgrid.InstallerActions
                 ["ProductCode"] = session["ProductCode"],
                 ["OuterLease"] = session["NETGRID_UPDATE_LEASE"],
                 ["Nested"] = "0",
+                ["ProtectGames"] = !removing && (installed || replacing) ? "1" : "0",
+                ["InspectOfflineGames"] = !installed && !removing && replacing ? "1" : "0",
+                ["Language"] = session["NETGRID_UI_LANGUAGE"],
             };
             InstallationGate.ValidateProductCode(data["ProductCode"]);
             if (data["OuterLease"] != "") InstallationGate.ValidateLease(data["OuterLease"]);
+            if (data["ProtectGames"] == "1")
+                using (var product = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
+                using (var registered = product.OpenSubKey(@"SOFTWARE\LevelX2\NETGRID", writable: false))
+                {
+                    var installedRoot = registered?.GetValue("InstallDirectory") as string;
+                    if (installedRoot == null || InstallationGate.KeyFor(installedRoot) != InstallationGate.KeyFor(root))
+                        throw new InvalidOperationException("installation_gate_upgrade_root_changed");
+                    if (registered?.GetValue("InstallerLifecycleProtocol") as string != "msi-preparation-v1")
+                        throw new InvalidOperationException("installation_gate_protocol_unsupported");
+                }
             var upgradingProduct = session["UPGRADINGPRODUCTCODE"];
             if (upgradingProduct != "")
             {
@@ -56,11 +72,18 @@ namespace Netgrid.InstallerActions
             var lease = session.CustomActionData["Lease"];
             using (var machine = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
             {
+                if (!IsNested(session) && session.CustomActionData["OuterLease"] == "")
+                {
+                    DirectMsiPreparation.BeginAsync(machine, root, lease, session.CustomActionData["ProductCode"],
+                        session.CustomActionData["ProtectGames"] == "1", () => ProductProcesses.FindLauncher(root),
+                        () => ProductProcessesRemain(root), () => MsiOfflineReadiness.Read(machine, root),
+                        inspectOffline: session.CustomActionData["InspectOfflineGames"] == "1").GetAwaiter().GetResult();
+                    session.Log("NETGRID_LIFECYCLE_STOPPED runtime=absent lease=held readiness=checked_when_required");
+                    return;
+                }
                 InstallationLaunchFence.Execute(root, () =>
                 {
                     if (IsNested(session)) InstallationLease.RequireMsi(machine, root, lease, session.CustomActionData["ProductCode"]);
-                    else if (session.CustomActionData["OuterLease"] == "")
-                        InstallationLease.BeginMsi(machine, root, lease, session.CustomActionData["ProductCode"], "");
                     else
                         using (var owner = InstallationGate.OpenUpdateOwner(machine, root, session.CustomActionData["OuterLease"]))
                             InstallationLease.BeginMsi(machine, root, lease, session.CustomActionData["ProductCode"], session.CustomActionData["OuterLease"]);
@@ -95,7 +118,7 @@ namespace Netgrid.InstallerActions
             // rollback has already completed its transaction record.
             if (IsNested(session)) { session.Log("NETGRID_LIFECYCLE_ROLLBACK nested=true released=false"); return; }
             using (var machine = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
-                session.Log("NETGRID_LIFECYCLE_ROLLBACK released={0}", InstallationLease.CompleteMsi(
+                session.Log("NETGRID_LIFECYCLE_ROLLBACK released={0}", InstallationLease.RollbackMsi(
                     machine, session.CustomActionData["ProgramRoot"], session.CustomActionData["Lease"], session.CustomActionData["ProductCode"]));
         });
 
@@ -119,6 +142,18 @@ namespace Netgrid.InstallerActions
                 var code = error is InvalidOperationException && error.Message.StartsWith("installation_gate_", StringComparison.Ordinal)
                     ? error.Message : error.GetType().Name;
                 session.Log("NETGRID_LIFECYCLE_ERROR code={0}", code);
+                if (code == "installation_gate_active_games")
+                {
+                    var language = session.CustomActionData["Language"];
+                    var message = language == "de" ? "NETGRID kann noch nicht aktualisiert werden: Es gibt laufende oder noch nicht abgeschlossene Spiele. Beenden oder verwerfen Sie diese Spiele in NETGRID und starten Sie die Installation erneut. Die Installation wurde nicht verändert."
+                        : language == "fr" ? "NETGRID ne peut pas encore être mis à jour : des parties sont en cours ou ne sont pas terminées. Terminez ou abandonnez ces parties dans NETGRID, puis relancez l'installation. L'installation n'a pas été modifiée."
+                        : "NETGRID cannot be updated yet: games are running or unfinished. Finish or discard these games in NETGRID, then run the installer again. The installation has not been changed.";
+                    using (var record = new Record(1))
+                    {
+                        record.SetString(0, "[1]"); record.SetString(1, message);
+                        session.Message(InstallMessage.Error, record);
+                    }
+                }
                 return ActionResult.Failure;
             }
         }

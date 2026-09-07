@@ -40,6 +40,18 @@ namespace Netgrid.Windows
 
         private static readonly ProcessStamp CurrentProcess = ReadProcessStart();
         public static bool IsCurrentProcessBlocked(string programRoot) => IsStartBlocked(programRoot, CurrentProcess.StartedUtc, CurrentProcess.Id);
+        internal static GateState? CurrentMsiPreparation(RegistryKey machine, string programRoot)
+        {
+            var state = Read(machine, KeyFor(programRoot));
+            return state?.Phase == GateState.PreparingMsi && state.AllowedParentId == CurrentProcess.Id &&
+                state.AllowedParentStart == CurrentProcess.StartedUtc.Ticks ? state : null;
+        }
+
+        public static GateState? CurrentMsiPreparation(string programRoot)
+        {
+            using (var machine = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
+                return CurrentMsiPreparation(machine, programRoot);
+        }
         private static ProcessStamp ReadProcessStart()
         {
             using (var process = Process.GetCurrentProcess()) return new ProcessStamp(process.Id, process.StartTime.ToUniversalTime());
@@ -140,6 +152,7 @@ namespace Netgrid.Windows
         internal sealed class GateState
         {
             public const string Preparing = "preparing";
+            public const string PreparingMsi = "preparing-msi";
             public const string Stopping = "stopping";
             public const string Verifying = "verifying";
             public const string Completed = "completed";
@@ -152,13 +165,15 @@ namespace Netgrid.Windows
                 {
                     ValidateLease(msiLease);
                     ValidateProductCode(msiProductCode);
-                    if (phase != Stopping) throw new InvalidOperationException("installation_gate_msi_phase_invalid");
+                    if (phase != Stopping && phase != PreparingMsi) throw new InvalidOperationException("installation_gate_msi_phase_invalid");
                     if (ownerId == 0 && msiLease != lease) throw new InvalidOperationException("installation_gate_msi_owner_invalid");
                 }
-                if ((phase != Preparing && phase != Stopping && phase != Verifying && phase != Completed) ||
+                if (phase == PreparingMsi && (msiLease != lease || msiProductCode == ""))
+                    throw new InvalidOperationException("installation_gate_msi_owner_invalid");
+                if ((phase != Preparing && phase != PreparingMsi && phase != Stopping && phase != Verifying && phase != Completed) ||
                     completedUtcTicks < 0 || completedUtcTicks > DateTime.MaxValue.Ticks ||
                     !ValidIdentity(allowedParentId, allowedParentStart) || !ValidIdentity(ownerId, ownerStart) ||
-                    ((phase == Preparing || phase == Verifying) && (allowedParentId == 0 || ownerId == 0 || ownerId == allowedParentId)) ||
+                    ((phase == Preparing || phase == PreparingMsi || phase == Verifying) && (allowedParentId == 0 || ownerId == 0 || ownerId == allowedParentId)) ||
                     (phase == Stopping && allowedParentId != 0) ||
                     (phase == Completed && (completedUtcTicks == 0 || ownerId != 0)))
                     throw new InvalidOperationException("installation_gate_lease_invalid");

@@ -39,6 +39,7 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
     public event EventHandler<string>? FatalFailure;
     public event EventHandler? Recovered;
     public event EventHandler<string?>? InstallationStopped;
+    public event EventHandler<string>? InstallationPreparationFailed;
 
     public Uri WebUrl => _webUrl;
     public string LogDirectory => Path.Combine(_environment.Required("NETGRID_DATA_ROOT"), "runtime", "logs");
@@ -122,12 +123,37 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
     private async Task WatchInstallationAsync()
     {
         string? failure = null;
+        string? handledMsiLease = null;
         try
         {
             while (true)
             {
                 await Task.Delay(200, _installationWatchCancellation.Token);
-                if (!_installationBlocked()) continue;
+                if (!_installationBlocked())
+                {
+                    var preparation = InstallationGate.CurrentMsiPreparation(_programRoot);
+                    if (preparation != null && preparation.Lease != handledMsiLease)
+                    {
+                        handledMsiLease = preparation.Lease;
+                        try { await MsiPreparationResponder.RunAsync(this, preparation, _installationWatchCancellation.Token); }
+                        catch (OperationCanceledException) when (_installationWatchCancellation.IsCancellationRequested) { return; }
+                        catch (Exception error)
+                        {
+                            // Rejected/lost preparation is not permission to
+                            // stop active games. The MSI fails; cancellation is
+                            // resolved by the existing PreparedUpdate owner.
+                            var message = UiText.Get("launcher.update.failed");
+                            try { UpdateFailure.Classify(error, UpdateStage.Preparing, manual: true).Record(LogDirectory); }
+                            catch (Exception diagnostic)
+                            {
+                                message = UiText.Get("launcher.update.diagnostic_failed", error.GetType().Name, diagnostic.GetType().Name);
+                            }
+                            InstallationPreparationFailed?.Invoke(this, message);
+                        }
+                        if (InstallationStopping) break;
+                    }
+                    continue;
+                }
                 break;
             }
         }
