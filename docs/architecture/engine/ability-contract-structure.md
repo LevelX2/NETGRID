@@ -28,6 +28,17 @@ Die Abhängigkeitsrichtung verläuft von den Blattverträgen zu Effekten und
 Modifikatoren, anschließend zu Ability-/Domänenverträgen und zuletzt zu den
 obersten Card-Unions. Zwischen den Familien existiert kein Importzyklus.
 
+## Verfügbarkeit gebundener Effektziele
+
+`canResolveOnPlayCardImplementationAbility` prüft vor dem Erzeugen einer
+LegalAction, ob der deklarierte Effekt seine erforderlichen aktuellen Ziele
+noch auflösen kann. Ein erfolgreicher Run bleibt Turnhistorie, auch wenn der
+betroffene Remote beim anschließenden Trash seiner letzten Karte verschwindet.
+Der Effekt `trash_rezzed_ice_on_last_successful_run_fort_and_add_tags` benötigt
+dagegen weiterhin einen existierenden Fort. Ein existierender Fort ohne rezzed
+ICE erfüllt diese Zielbindung; dessen leere Zielmenge wird regulär gequotet.
+Quote und Ausführung behalten ihre strikten Bindungsprüfungen.
+
 ## Gleichzeitige Lifecycle-Fähigkeiten
 
 `CardLifecycleTriggeredAbilityImplementation.simultaneousResolution` ist eine

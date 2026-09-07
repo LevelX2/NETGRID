@@ -969,6 +969,62 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     }
   });
 
+  it("keeps Remote Detonator unavailable after the successful remote disappears", () => {
+    let state = runnerMain("meta-403-removed-successful-fort");
+    const rootId = addRezzedCorpRootForTest(
+      state,
+      "onr_v1_312_chicago-branch",
+      "remote_1",
+      "removed_successful_fort",
+    );
+    const eventId = addRunnerCardToGripForTest(
+      state,
+      "onr_proteus_121_remote-detonator",
+      "draw_after_removed_fort",
+    );
+    state.runner.grip = state.runner.grip.filter((id) => id !== eventId);
+    state.runner.stack.unshift(eventId);
+    state.cardInstances[eventId]!.zone = { side: "runner", zone: "stack" };
+    state.cardInstances[eventId]!.faceup = false;
+    state.cardInstances[eventId]!.rezzed = false;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "trash_accessed_card",
+    );
+    expect(state.corp.archives).toContain(rootId);
+    expect(state.corp.servers.some((server) => server.id === "remote_1")).toBe(
+      false,
+    );
+    expect(state.runnerTurnFlags).toMatchObject({
+      successfulRunThisTurn: true,
+      lastSuccessfulRunServerId: "remote_1",
+    });
+    state = apply(state, "runner", (action) => action.type === "draw_card");
+    expect(state.runner.grip).toContain(eventId);
+    const actions = getLegalActions(state, "runner");
+    expect(actions.some((action) => action.type === "draw_card")).toBe(true);
+    expect(
+      actions.some(
+        (action) =>
+          action.type === "play_event" && action.payload?.cardId === eventId,
+      ),
+    ).toBe(false);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("offers Disgruntled Ice Technician post-pass derez from the run event source", () => {
     let state = runnerMain("proteus-pro008-disgruntled");
     const iceId = addRezzedCorpIceForTest(
