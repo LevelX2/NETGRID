@@ -80,13 +80,21 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
         }
     }
 
-    public async Task StopAsync()
+    public Task StopAsync() => StopOwnedAsync(requireGracefulServer: false);
+
+    public Task StopForVerificationAsync()
+    {
+        Interlocked.Exchange(ref _installationStopping, 1);
+        return StopOwnedAsync(requireGracefulServer: true);
+    }
+
+    private async Task StopOwnedAsync(bool requireGracefulServer)
     {
         await _lifecycle.WaitAsync();
         try
         {
             _stopping = true;
-            await StopProcessesAsync();
+            await StopProcessesAsync(requireGracefulServer);
         }
         finally
         {

@@ -1080,6 +1080,24 @@ Die Setupprüfungen erzeugen nur Offscreen-Vorschauen, keinen installierten
 Produktstand. Die echte Updater-/Tray-Anbindung einschließlich Healthpermit
 und die nativen Gates bleiben offen. 8169 ist unverändert und nicht gestartet.
 
+Die Healthprüfung besitzt nun eine vorbereitete, ausschließlich für den
+gebundenen Prüfkindprozess gültige `verifying`-Phase. Sie verwendet dieselbe
+Installersperre, prüft zusätzlich den lebenden Updater-Owner und öffnet keinen
+allgemeinen Startpfad. Der Updater widerruft die Ausnahme nach Erfolg oder
+Fehler und wartet auf das echte Kindprozessende. Ein fehlgeschlagener
+Widerruf überspringt die Prozessverfolgung nicht; ungeklärtes Ende bleibt ein
+Fehler mit gehaltener äußerer Sperre. Der Launcher verlangt für einen
+erfolgreichen Healthlauf jetzt einen geordneten Server-Stopp mit Exitcode 0.
+
+45 neue Prüfprozesschecks verwenden echte lokale Pipes, ausschließlich eigene
+inerte Prozesse und isolierte HKCU-Testbäume. 24 Launcher-Argumentchecks und
+14 zusätzliche Runtimechecks sichern vollständige Freigabeparameter und
+strikten Stopp. Die bestehenden 49 Pipe- und 214 Lifecyclechecks bleiben
+grün; die Runtime-Vorbereitungssuite umfasst jetzt 53 Checks. Dies ist ein
+Komponentennachweis, keine Installation. `UpdateTransaction` und Tray rufen
+die neue Prüffreigabe noch nicht auf. Diese Anbindung sowie die nativen Gates
+bleiben offen; Kandidat 8169 ist unverändert.
+
 Vor der Freigabe bleiben die Prozess-Ende-Raceprüfung,
 die direkten MSI-Updatepfade hinsichtlich
 laufender Spiele, verständliche lokalisierte Fehler, die vollständige

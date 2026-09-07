@@ -253,6 +253,44 @@ konkurrierenden Schreibern ausschließlich in einem temporären HKCU-Testbaum.
 Das ersetzt noch nicht den nativen Nachweis des Backup-/MSI-/Healthablaufs
 oder die Prüfung mit einem anderen Windows-Administratorkonto.
 
+### Gebundener Prüfprozess unter gehaltener Sperre
+
+Die vorbereitete Phase `verifying` verwendet denselben atomaren Registrywert.
+Ihre einzige Prozessausnahme gilt für PID und Startzeit des konkreten
+Prüfkindes, nicht mehr für den ursprünglichen Launcher. Die Ausnahme ist nur
+gültig, solange auch der anhand PID, Startzeit und Prozesshandle geprüfte
+Updater lebt. Sein Ende oder eine abweichende Startzeit entzieht die Freigabe,
+ohne die äußere Installersperre zu löschen. Unlesbare Prozess-/Registrydaten
+bleiben fail-closed. Andere Launcher und MSI-Teiltransaktionen sind weiterhin
+gesperrt; `ReleaseOwned` darf eine laufende Prüfphase nicht abschließen.
+
+`UpdateVerifier` startet ausschließlich `NETGRID.exe --headless-verify` mit
+explizitem Programmroot, Environmentpfad, Update-Lease und neuer Pipesitzung.
+Das Kind bindet zuerst den lebenden Owner der ruhenden Stopp-Lease. Erst nach
+kernelgeprüfter Pipeverbindung trägt der Updater dessen konkrete Identität
+als Ausnahme ein und sendet `Proceed`. Das Kind prüft die eigene Freigabe vor
+dem normalen Runtime-Start. Es besitzt keinen Registrywriter und umgeht den
+gewöhnlichen Launcher-Guard nicht.
+
+Ein erfolgreicher Healthlauf verlangt anschließend den strikten eigenen
+Server-Shutdown mit Exitcode 0, das Ende des Webprozesses und eine noch gültige
+Freigabe. Fehler oder Kill gelten nicht als erfolgreicher Flush. Der
+Updater wartet maximal drei Minuten, nimmt die Ausnahme anschließend über
+`EndVerification` zurück und verfolgt ein noch laufendes Prüfkind weitere
+45 Sekunden. Er beendet es nicht zwangsweise, um daraus Rollbacksicherheit
+abzuleiten. Unbewiesenes Prozessende sowie Fehler bei Rücknahme oder Prüfung
+bleiben als strukturierte Fehler erhalten; auch ein Rücknahmefehler darf die
+Verfolgung des eigenen Kindes nicht überspringen. Die äußere Lease bleibt in
+diesem Fall gehalten. Der künftige Transaktionsaufrufer darf nach einem
+solchen Fehler weder Rollback noch normalen Betrieb behaupten.
+
+Die Komponentenprüfungen verwenden echte lokale Pipes und ausschließlich
+eigene inerte Kindprozesse sowie zufällige HKCU-Testbäume. Sie belegen
+Identitätsbindung, Owner-Ende, Rücknahme, Exitcodeauswertung und strikten
+Runtime-Stopp, aber keinen installierten Healthlauf. Der tatsächliche
+`UpdateTransaction`-/Tray-Pfad ruft diese Komponente noch nicht auf; seine
+zusammenhängende Anbindung und die native Abnahme bleiben Releaseblocker.
+
 ### MSI-Teiltransaktionen und Major-Upgrade
 
 Eine Standalone-MSI-Transaktion besitzt eine eigene zufällige Lease und

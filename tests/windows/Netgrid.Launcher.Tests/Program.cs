@@ -24,6 +24,7 @@ if (args is ["--installation-stop-child"])
 }
 
 var assembly = Assembly.Load("NETGRID");
+Console.WriteLine($"LAUNCHER_VERIFICATION_OPTIONS_TESTS_OK checks={VerificationOptionsTests.Run(assembly)}");
 if (args is ["--check-update-preparation"])
 {
     Console.WriteLine($"LAUNCHER_UPDATE_PREPARATION_TESTS_OK checks={await UpdatePreparationTests.Run(assembly)}");

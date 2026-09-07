@@ -10,5 +10,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../../../apps/windows/Common/UpdateHandoff.cs" Link="UpdateHandoff.cs" />
+    <Compile Include="../../../apps/windows/Common/InstallationGate.cs" Link="InstallationGate.cs" />
+    <Compile Include="../../../apps/windows/Common/InstallationLease.cs" Link="InstallationLease.cs" />
+    <Compile Include="../../../apps/windows/Common/UpdateVerification.cs" Link="UpdateVerification.cs" />
+    <Compile Include="../../../apps/windows/Netgrid.Updater/UpdateVerifier.cs" Link="UpdateVerifier.cs" />
   </ItemGroup>
 </Project>

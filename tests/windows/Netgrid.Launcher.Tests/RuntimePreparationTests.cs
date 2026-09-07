@@ -114,6 +114,25 @@ internal static class RuntimePreparationTests
             Assert(!(bool)prepared.GetType().GetProperty("Stopped")!.GetValue(prepared)!, "even_exit_zero_before_owned_stop_is_not_handoff_proof");
             await ((IAsyncDisposable)prepared).DisposeAsync();
         }
+        foreach (var mode in new[] { "--installation-stop-child", "--update-stop-child-fails", "--update-stop-child-ignore" })
+        {
+            await using var fixture = await Fixture.Create(assembly, mode);
+            if (mode.EndsWith("ignore", StringComparison.Ordinal)) fixture.Server.StandardInput.Dispose();
+            if (mode == "--installation-stop-child")
+            {
+                await fixture.CallRuntime("StopForVerificationAsync");
+                Assert(fixture.ServerObserver.HasExited && fixture.ServerObserver.ExitCode == 0, "verification_requires_graceful_exit_zero");
+            }
+            else
+            {
+                await Reject(fixture.CallRuntime("StopForVerificationAsync"), "launcher_runtime_stop_failed");
+                Assert(mode.EndsWith("ignore", StringComparison.Ordinal) ? !fixture.ServerObserver.HasExited : fixture.ServerObserver.ExitCode == 7,
+                    "verification_stop_does_not_convert_failed_flush_to_success");
+            }
+            Assert(fixture.WebObserver.HasExited, "verification_stop_tracks_web_exit");
+            Assert(fixture.Handler.Methods.Count == 0, "verification_does_not_acquire_second_server_preparation");
+            await Reject(fixture.CallRuntime("StartAsync"), "launcher_installation_stopping");
+        }
         return checks;
     }
 

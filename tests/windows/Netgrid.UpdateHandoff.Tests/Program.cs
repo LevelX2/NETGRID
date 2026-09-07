@@ -6,6 +6,8 @@ using System.Security.AccessControl;
 using System.Security.Principal;
 using Netgrid.Windows;
 
+if (await VerificationTests.TryChildAsync(args)) return;
+
 if (args is ["--peer-child", var childSession, var parentId, var parentStart])
 {
     try
@@ -155,6 +157,7 @@ foreach (var proceed in new[] { true, false })
     await RejectAsync(async () => { await client.ReceiveDecisionAsync(shortDeadline.Token); }, "timeout_is_not_permission");
 }
 Console.WriteLine($"UPDATE_HANDOFF_TESTS_OK checks={checks} nativePipes=true elevation=false installationStarted=false");
+await VerificationTests.RunAsync();
 
 void Assert(bool value, string name)
 {

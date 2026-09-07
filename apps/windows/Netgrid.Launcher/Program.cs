@@ -69,9 +69,13 @@ internal static class Program
         {
             try
             {
+                if (options.VerificationSession is not null)
+                    await UpdateVerification.AcceptPermitAsync(options.ResolveProgramRoot(), options.UpdateLease!, options.VerificationSession);
                 await using var runtime = LauncherRuntime.Load(options);
                 await runtime.StartAsync();
-                await runtime.StopAsync();
+                await runtime.StopForVerificationAsync();
+                if (options.UpdateLease is not null && !InstallationGate.IsCurrentVerificationAllowed(options.ResolveProgramRoot(), options.UpdateLease))
+                    throw new InvalidOperationException("launcher_verification_revoked");
                 return 0;
             }
             catch

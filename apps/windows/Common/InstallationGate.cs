@@ -50,7 +50,7 @@ namespace Netgrid.Windows
             if (state == null) return false;
             var started = processStartedUtc.ToUniversalTime().Ticks;
             if (state.AllowedParentId > 0 && state.AllowedParentId == processId && state.AllowedParentStart == started)
-                return false;
+                return state.Phase == GateState.Verifying && !OwnerIsAlive(state);
             return state.Active || started <= state.CompletedUtcTicks;
         }
 
@@ -110,10 +110,38 @@ namespace Netgrid.Windows
             catch { owner.Dispose(); throw; }
         }
 
+        private static bool OwnerIsAlive(GateState state)
+        {
+            Process owner;
+            try { owner = Process.GetProcessById(state.OwnerId); }
+            catch (ArgumentException) { return false; } // Owner exit revokes verification.
+            using (owner)
+            {
+                var handle = owner.Handle;
+                return !owner.HasExited && owner.StartTime.ToUniversalTime().Ticks == state.OwnerStart;
+            }
+        }
+
+        internal static bool IsCurrentVerificationAllowed(RegistryKey machine, string root, string lease)
+        {
+            ValidateLease(lease);
+            var state = Read(machine, KeyFor(root));
+            return state != null && state.Lease == lease && state.Phase == GateState.Verifying &&
+                state.AllowedParentId == CurrentProcess.Id && state.AllowedParentStart == CurrentProcess.StartedUtc.Ticks &&
+                !BlocksStart(state, CurrentProcess.StartedUtc, CurrentProcess.Id);
+        }
+
+        public static bool IsCurrentVerificationAllowed(string root, string lease)
+        {
+            using (var machine = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
+                return IsCurrentVerificationAllowed(machine, root, lease);
+        }
+
         internal sealed class GateState
         {
             public const string Preparing = "preparing";
             public const string Stopping = "stopping";
+            public const string Verifying = "verifying";
             public const string Completed = "completed";
             public GateState(string lease, string phase, long completedUtcTicks,
                 int allowedParentId = 0, long allowedParentStart = 0, int ownerId = 0, long ownerStart = 0,
@@ -127,10 +155,10 @@ namespace Netgrid.Windows
                     if (phase != Stopping) throw new InvalidOperationException("installation_gate_msi_phase_invalid");
                     if (ownerId == 0 && msiLease != lease) throw new InvalidOperationException("installation_gate_msi_owner_invalid");
                 }
-                if ((phase != Preparing && phase != Stopping && phase != Completed) ||
+                if ((phase != Preparing && phase != Stopping && phase != Verifying && phase != Completed) ||
                     completedUtcTicks < 0 || completedUtcTicks > DateTime.MaxValue.Ticks ||
                     !ValidIdentity(allowedParentId, allowedParentStart) || !ValidIdentity(ownerId, ownerStart) ||
-                    (phase == Preparing && (allowedParentId == 0 || ownerId == 0 || ownerId == allowedParentId)) ||
+                    ((phase == Preparing || phase == Verifying) && (allowedParentId == 0 || ownerId == 0 || ownerId == allowedParentId)) ||
                     (phase == Stopping && allowedParentId != 0) ||
                     (phase == Completed && (completedUtcTicks == 0 || ownerId != 0)))
                     throw new InvalidOperationException("installation_gate_lease_invalid");
@@ -143,6 +171,8 @@ namespace Netgrid.Windows
             public string Phase { get; }
             public long CompletedUtcTicks { get; }
             public int AllowedParentId { get; }
+            // The single process exception: original launcher in Preparing,
+            // explicitly bound verifier child in Verifying. Never both.
             public long AllowedParentStart { get; }
             public int OwnerId { get; }
             public long OwnerStart { get; }

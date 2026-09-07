@@ -113,12 +113,43 @@ namespace Netgrid.Windows
                 var current = InstallationGate.Read(root, InstallationGate.KeyFor(programRoot));
                 if (current == null || !current.Active || current.Lease != lease) return false;
                 if (current.MsiLease != "") throw new InvalidOperationException("installation_gate_msi_still_active");
+                if (current.Phase == InstallationGate.GateState.Verifying)
+                    throw new InvalidOperationException("installation_gate_verification_still_active");
                 // Cancelling preparation preserves exactly the original live
                 // launcher, not every executable born before this timestamp.
                 var preserveParent = current.Phase == InstallationGate.GateState.Preparing;
                 Write(root, programRoot, new InstallationGate.GateState(lease, InstallationGate.GateState.Completed,
                     Math.Max(DateTime.UtcNow.Ticks, current.CompletedUtcTicks),
                     preserveParent ? current.AllowedParentId : 0, preserveParent ? current.AllowedParentStart : 0));
+                return true;
+            });
+        }
+
+        public static void BeginVerification(RegistryKey root, string programRoot, string lease, int verifierId, long verifierStart)
+        {
+            Mutate(programRoot, () =>
+            {
+                InstallationGate.ValidateLease(lease);
+                var current = InstallationGate.Read(root, InstallationGate.KeyFor(programRoot));
+                if (current == null || current.Lease != lease || current.Phase != InstallationGate.GateState.Stopping ||
+                    current.OwnerId == 0 || current.MsiLease != "")
+                    throw new InvalidOperationException("installation_gate_verification_owner_missing");
+                Write(root, programRoot, new InstallationGate.GateState(lease, InstallationGate.GateState.Verifying,
+                    current.CompletedUtcTicks, verifierId, verifierStart, current.OwnerId, current.OwnerStart));
+                return true;
+            });
+        }
+
+        public static void EndVerification(RegistryKey root, string programRoot, string lease)
+        {
+            Mutate(programRoot, () =>
+            {
+                InstallationGate.ValidateLease(lease);
+                var current = InstallationGate.Read(root, InstallationGate.KeyFor(programRoot));
+                if (current == null || current.Lease != lease || current.Phase != InstallationGate.GateState.Verifying)
+                    throw new InvalidOperationException("installation_gate_verification_owner_missing");
+                Write(root, programRoot, new InstallationGate.GateState(lease, InstallationGate.GateState.Stopping,
+                    current.CompletedUtcTicks, ownerId: current.OwnerId, ownerStart: current.OwnerStart));
                 return true;
             });
         }
