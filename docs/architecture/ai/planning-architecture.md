@@ -2735,7 +2735,10 @@ vergleicht die Kosten-Recovery alle Breaker-Rollen gegen die Kosten des
 gesamten Pfads. Die erste ICE-Rolle darf die Suche nicht auf diese Rolle
 verengen. Aktuell legal installierbare Handantworten stehen wie bisher vor
 Such- und Draw-Routen; innerhalb dieser Klassen entscheidet die gesamte
-Installations- und Pfadkostensumme. Der gewählte Rollenbedarf, die konkrete
+Installations- und Pfadkostensumme. Noch unbezahlbare bekannte Handantworten
+dürfen weiterhin ihren bestehenden Installations-Finanzierungsbedarf erzeugen;
+bei gleicher Antwort und gleichen Kosten bleibt die kanonische Rollenreihenfolge
+stabil. Der gewählte Rollenbedarf, die konkrete
 Installation und der anschließende Run bleiben an denselben Parent gebunden.
 
 Eine lokale Economy-Zurückstellung von Mehrzweck-Hardware gilt nur für ihren

@@ -28900,7 +28900,12 @@ function runnerCostEffectiveCoverageRecovery(
     (left, right) =>
       modeOrder[left.recoveryMode] - modeOrder[right.recoveryMode] ||
       left.totalRecoveryCost - right.totalRecoveryCost ||
-      left.requiredRole.localeCompare(right.requiredRole),
+      RUNNER_BREAKER_COVERAGE_ROLES.findIndex(
+        (role) => role === left.requiredRole,
+      ) -
+        RUNNER_BREAKER_COVERAGE_ROLES.findIndex(
+          (role) => role === right.requiredRole,
+        ),
   )[0];
 }
 
@@ -28947,17 +28952,20 @@ function runnerCostEffectiveCoverageRecoveryForRole(
     .filter(
       (card) =>
         card.known &&
-        candidates.some(
-          (candidate) =>
-            candidate.semanticActionType === "install.card" &&
-            candidate.costProfile.costKnownStatus === "known" &&
-            input.legalActions.some(
-              (action) =>
-                action.actionId === candidate.actionId &&
-                runnerInstallSourceInstanceId(candidate, action) ===
-                  card.instanceId,
-            ),
-        ) &&
+        // An unaffordable visible answer may still create its existing
+        // fund-install need. Once affordable, bind only a legal installation.
+        ((card.installCost ?? 0) > input.playerView.own.credits ||
+          candidates.some(
+            (candidate) =>
+              candidate.semanticActionType === "install.card" &&
+              candidate.costProfile.costKnownStatus === "known" &&
+              input.legalActions.some(
+                (action) =>
+                  action.actionId === candidate.actionId &&
+                  runnerInstallSourceInstanceId(candidate, action) ===
+                    card.instanceId,
+              ),
+          )) &&
         Number.isSafeInteger(card.installCost) &&
         (card.installCost ?? -1) >= 0 &&
         visibleCardCoversRequiredCoverage(card, role, (definitionId) =>
