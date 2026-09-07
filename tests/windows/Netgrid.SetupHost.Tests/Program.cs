@@ -343,13 +343,18 @@ foreach (var language in new[] { "de", "en", "fr" })
                 Control optionsRoot = lastOption;
                 while (optionsRoot.Parent != form) optionsRoot = optionsRoot.Parent!;
                 var scroll = (ScrollableControl)optionsRoot;
-                scroll.AutoScrollPosition = new Point(0, int.MaxValue);
+                // Finish the explicit minimum-size relayout before scrolling.
+                // Relayout after the scroll changes the extent (at 125% DPI
+                // by 41 px) and would no longer test the actual scroll end.
                 form.PerformLayout();
                 Application.DoEvents();
+                scroll.AutoScrollPosition = new Point(0, int.MaxValue);
+                Application.DoEvents();
+                Assert(-scroll.AutoScrollPosition.Y == Math.Max(0, scroll.VerticalScroll.Maximum - scroll.VerticalScroll.LargeChange + 1), "scroll_end_is_current_extent_end");
                 foreach (var option in lastOption.Parent!.Controls.Cast<Control>())
                 {
                     var bounds = scroll.RectangleToClient(option.RectangleToScreen(option.ClientRectangle));
-                    Assert(scroll.ClientRectangle.Contains(bounds), $"last_options_fully_visible_at_scroll_end:{language}:{bounds}:{scroll.ClientRectangle}");
+                    Assert(scroll.ClientRectangle.Contains(bounds), $"last_options_fully_visible_at_scroll_end:{language}:{bounds}:{scroll.ClientRectangle}:position={scroll.AutoScrollPosition}:display={scroll.DisplayRectangle}:maximum={scroll.VerticalScroll.Maximum}:large={scroll.VerticalScroll.LargeChange}:root={scroll.Controls[0].Bounds}:preferred={scroll.Controls[0].PreferredSize}:row={option.Parent!.Bounds}:rowPreferred={option.Parent.PreferredSize}");
                     Assert(option.Parent!.ClientRectangle.Contains(option.Bounds), "last_option_row_does_not_clip_children");
                 }
                 Assert(scroll.Bottom <= dataNotice.Parent!.Top, "scroll_viewport_excludes_fixed_footer");

@@ -811,18 +811,70 @@ Produktdaten, Registry noch NETGRID-Serverports verwendet. Der paketnahe
 Launcher-Testlauf besteht zusätzlich mit den bisherigen STA-, 35 Update-
 Fehler- und Download-/Tamper-Prüfungen; `git diff --check` ist grün.
 
-Dies ist bewusst nur der Launcher-Teil: Noch kein Installerpfad ruft die neue
-Methode auf. Erforderlich bleiben die autorisierte pro-Installation-
-Koordination aus der MSI-Transaktion, die Sperre konkurrierender neuer
-Launcherprozesse bis zum Transaktionsende, Rollback-/Fehlerbehandlung und
-der erneute native Nachweis. Ein ausschließlich im sichtbaren Setuphost
-eingebauter Stopp würde direkte MSI-Reparatur-/Entfernungswege nicht sichern.
-Die weitere MSI-Anbindung muss die dokumentierten
+Die MSI-Anbindung ist inzwischen als weiterer, noch nicht nativ abgenommener
+Implementierungsschritt ergänzt: Eine erhöhte Deferred Action setzt eine
+pro Programmordner gehashte HKLM-64-Bit-Lease. Der Launcher beobachtet diese
+Sperre, übergibt an `StopForInstallationAsync` und schließt danach sein Tray.
+Neue Launcherstarts prüfen dieselbe Autorität. Commit und Rollback geben nur
+die eigene Transaktions-ID frei; ein persistenter Abschlusszeitpunkt verhindert
+auch den verspäteten Start eines während der Installation erzeugten Prozesses.
+Eine unlesbare Sperre wird nicht als Freigabe behandelt. Ein offener First-Run-
+Prozess wird nicht zwangsweise geschlossen: Die MSI-Aktion wartet höchstens
+45 Sekunden auf das Ende aller exakt zum Programmordner gehörenden Prozesse
+und bricht andernfalls vor den Dateiänderungen ab. Restart Manager ist kein
+zweiter Shutdown-Owner (`DisableShutdown`). Die Anbindung berücksichtigt die
+dokumentierten
 [Rollback-Aktionsgrenzen](https://learn.microsoft.com/en-us/windows/win32/msi/rollback-custom-actions)
 und [Commit-Aktionsgrenzen](https://learn.microsoft.com/en-us/windows/win32/msi/commit-custom-actions)
-berücksichtigen; diese Aktionen laufen insbesondere nicht bei deaktiviertem
-Rollback. Es wurde noch kein neues Setup gebaut oder installiert und das
-Uninstall-Gate bleibt rot.
+und verweigert deaktiviertes Rollback.
+
+Die neue `Netgrid.InstallerActions`-Komponente verwendet gepinntes WiX DTF
+7.0.0 unter der bereits akzeptierten WiX-EULA und .NET Framework 4.8 des
+Windows-11-Zielsystems; das Framework wird vorab geprüft. Locked Restore,
+64-Bit-PE-/Exportprüfung, vollständige Lizenzhinweise mit konkretem Upstream-
+Quellverweis und die SHA-256-Bindung der eingebetteten MSI-Binary sind in der
+Buildstrecke ergänzt. Die rechtlich vollständige Bereitstellung des
+korrespondierenden WiX-Quellcodes bleibt vor einer Weitergabe zu prüfen;
+der Quellverweis allein wird hier nicht als abgeschlossene Lizenzabnahme
+gewertet. Es wurden keine NETGRID-Quellen in eine Produktpayload aufgenommen.
+
+Aktueller Prüfnachweis: 47 isolierte HKCU-/Owner-/Sequenz-Checks sowie 14
+Launcher-Stoppchecks bestehen; auch die bisherigen STA-, 35 Updatefehler-
+und Download-/Tamper-Tests bleiben grün. Das ausschließlich zur Paketprüfung
+gebaute `output/lifecycle-msi-probe-5513f99c627b478295464cb4b89fdfa0/PROBE-NOT-FOR-INSTALLATION.msi`
+verwendet absichtlich `1.0.0` und ältere Produktpayloads: Es ist **kein**
+Installations- oder Releasekandidat und wurde nicht installiert. Seine reale
+MSI-Tabelle bestätigt `Rollback=1501`, `Begin=1502`, `Commit=1503` vor
+`RemoveRegistryValues=2600`, `RemoveFiles=3500`, `InstallFiles=4000`.
+Die vier CustomAction-Typflags und die exportierte Lifecycle-Binary bestanden
+die Prüfung. Nachfolgende Codeänderungen benötigen einen neuen Binärnachweis.
+
+Der nachfolgende Komponentenbuild (korrekt als beendet erkannte
+Prozessabgänge während der Image-Abfrage; alle Prozesshandles werden auch
+bei frühem Rücksprung freigegeben) besteht ohne Warnungen. Drei zusätzliche
+Audit-Regressionstests verwerfen x86-/falsche PE-Header, fehlende Exporte,
+bedingte Lifecycle-Aktionen und fremde Binary-Bindungen. Das Diagnose-MSI
+enthält diesen nachfolgenden Prozessabfrage-Fix noch nicht.
+
+Der volle Setup-Test meldete bei der aktuellen Hostskalierung von 120 DPI
+zunächst zwei abgeschnittene Pixel am letzten Hilfezeichen. Die ergänzte
+Diagnose zeigte jedoch: Der Test führte **nach** dem Scrollen ein explizites
+Relayout aus. Dadurch wuchs der Scrollbereich um 41 Pixel; die Position lag
+noch bei 206 statt am neuen Ende 247. Das Relayout erfolgt nun vor der
+Scrollaktion, und eine zusätzliche Assertion sichert das tatsächliche
+aktuelle Ende (`Maximum - LargeChange + 1`). Die bisherigen vollständigen
+Bounds-Assertions bleiben unverändert streng. Es wurde kein Produktlayout
+geändert oder um einen Ersatzabstand ergänzt. Ergebnis: 2.042 Setupchecks
+bei 125 % und 63 First-Run-UI-Checks in allen drei Sprachen grün, ohne
+Installation oder Credentialzugriff.
+
+Vor einem neuen Installationskandidaten bleiben die Prozess-Ende-Raceprüfung,
+konkurrierende First-Run-Aufrufe, die direkten MSI-Updatepfade hinsichtlich
+laufender Spiele, verständliche lokalisierte Fehler, die vollständige
+Build-/Payloadprüfung und der native Uninstall-Nachweis offen. Eine nach
+hartem Abbruch stehengebliebene fremde aktive Lease wird absichtlich nicht
+automatisch gelöscht. Das Uninstall-Gate bleibt rot; kein Main-Merge,
+kein Push und kein Release.
 
 ### Aktueller Updatekandidat und Teststart vom 7. September 2026
 

@@ -1,0 +1,39 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { mkdtempSync, readFileSync, writeFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { checkLifecycleBinary, checkLifecycleAuthoring } from "./check-windows-installer-lifecycle.mjs";
+
+const binary = path.resolve("apps/windows/Netgrid.InstallerActions/bin/x64/Release/net48/NETGRID.InstallerActions.CA.dll");
+test("built x64 custom action exports all lifecycle entrypoints", () => checkLifecycleBinary(binary));
+test("managed-only, x86 and missing-entrypoint binaries fail closed", () => {
+  const scratch = mkdtempSync(path.join(tmpdir(), "netgrid-ca-audit-"));
+  try {
+    const original = readFileSync(binary);
+    const pe = original.readUInt32LE(0x3c);
+    const variants = [
+      bytes => bytes.writeUInt16LE(0x014c, pe + 4),
+      bytes => bytes.writeUInt16LE(0x010b, pe + 24),
+      bytes => {
+        const at = bytes.indexOf(Buffer.from("BeginNetgridLifecycle\0", "ascii"));
+        assert.ok(at > 0);
+        bytes[at] = "X".charCodeAt(0);
+      },
+    ];
+    for (const [index, mutate] of variants.entries()) {
+      const bytes = Buffer.from(original);
+      mutate(bytes);
+      const candidate = path.join(scratch, `${index}.dll`);
+      writeFileSync(candidate, bytes);
+      assert.throws(() => checkLifecycleBinary(candidate), /installer_lifecycle_/);
+    }
+  } finally { rmSync(scratch, { recursive: true, force: true }); }
+});
+test("all unconditional MSI entrypoints must bind to the embedded lifecycle owner", () => {
+  const source = readFileSync("installer/product/Product.wxs", "utf8");
+  checkLifecycleAuthoring(source);
+  assert.throws(() => checkLifecycleAuthoring(source.replace('Action="BeginNetgridLifecycle" After=', 'Action="BeginNetgridLifecycle" Condition="NOT Installed" After=')), /not_unconditional/);
+  assert.throws(() => checkLifecycleAuthoring(source.replaceAll('BinaryRef="NetgridLifecycleActions"', 'BinaryRef="Other"')), /action_unbound/);
+  assert.throws(() => checkLifecycleAuthoring(source.replace('Value="DisableShutdown"', 'Value="0"')), /owner_conflict/);
+});

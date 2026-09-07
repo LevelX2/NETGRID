@@ -60,6 +60,25 @@ SHA-256-Prüfsummen nach `output/windows-installer`. Für eine erneute
 Paketierung eines unveränderten, bereits geprüften Outputs kann diagnostisch
 `scripts/build-windows-installer.ps1 -SkipReleaseBuild` verwendet werden.
 
+Die MSI-Lifecycle-Komponente wird separat mit exakt gepinntem WiX DTF 7.0.0
+und Locked Restore gebaut. Sie wird nicht als Programmdatei installiert,
+sondern im MSI-Binary-Stream ausgeführt. Der Installer-Audit prüft ihre
+64-Bit-Architektur, vier exportierte Einstiegspunkte, den eingebetteten Hash
+und die tatsächlichen MSI-Sequenznummern einschließlich Commit-/Rollback-
+Typflags. Eng begrenzte Prüfungen ohne Installation:
+
+```powershell
+.\.tools\dotnet\dotnet.exe run --project tests/windows/Netgrid.InstallerLifecycle.Tests/Netgrid.InstallerLifecycle.Tests.csproj -c Release
+.\.tools\dotnet\dotnet.exe run --project tests/windows/Netgrid.Launcher.Tests/Netgrid.Launcher.Tests.csproj -c Release -- --check-installation-stop
+.\scripts\check-windows-msi-lifecycle.ps1 -MsiPath <konkretes-geprüftes-MSI>
+```
+
+Der erste Test verwendet nur einen eindeutig eigenen HKCU-Fixture-Key und
+verifiziert dessen Entfernung. Keiner dieser Checks ersetzt den nativen
+Uninstall-Test bei laufendem Launcher. Eine aktive Installersperre in HKLM
+wird bei Diagnose nicht pauschal gelöscht; Eigentümer, MSI-Endzustand und
+Produktprozesse müssen zuerst geklärt werden.
+
 Der Installer-Audit extrahiert das MSI über Windows Installer in einen bewusst
 kurzen temporären Pfad, vergleicht jede Produktdatei gegen das Manifest und
 prüft das im Setup-Host eingebettete MSI anhand seines Hashes. Der Host gibt

@@ -1,0 +1,55 @@
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
+
+const actions = ["PrepareNetgridLifecycle", "BeginNetgridLifecycle", "CommitNetgridLifecycle", "RollbackNetgridLifecycle"];
+
+export function checkLifecycleBinary(file) {
+  const bytes = readFileSync(file);
+  if (bytes.readUInt16LE(0) !== 0x5a4d) throw new Error("installer_lifecycle_not_pe");
+  const pe = bytes.readUInt32LE(0x3c);
+  if (bytes.readUInt32LE(pe) !== 0x4550 || bytes.readUInt16LE(pe + 4) !== 0x8664 || bytes.readUInt16LE(pe + 24) !== 0x20b)
+    throw new Error("installer_lifecycle_not_native_x64");
+  const sectionCount = bytes.readUInt16LE(pe + 6);
+  const sections = pe + 24 + bytes.readUInt16LE(pe + 20);
+  function offset(rva) {
+    for (let index = 0; index < sectionCount; index++) {
+      const section = sections + index * 40;
+      const start = bytes.readUInt32LE(section + 12);
+      const size = bytes.readUInt32LE(section + 16);
+      if (rva >= start && rva < start + size) return bytes.readUInt32LE(section + 20) + rva - start;
+    }
+    throw new Error("installer_lifecycle_pe_rva_invalid");
+  }
+  const exports = offset(bytes.readUInt32LE(pe + 24 + 112));
+  const count = bytes.readUInt32LE(exports + 24);
+  const names = offset(bytes.readUInt32LE(exports + 32));
+  const exported = new Set();
+  for (let index = 0; index < count; index++) {
+    const start = offset(bytes.readUInt32LE(names + index * 4));
+    const end = bytes.indexOf(0, start);
+    if (end < 0) throw new Error("installer_lifecycle_export_invalid");
+    exported.add(bytes.toString("ascii", start, end));
+  }
+  for (const action of actions)
+    if (!exported.has(action)) throw new Error(`installer_lifecycle_export_missing:${action}`);
+}
+
+export function checkLifecycleAuthoring(authoring) {
+  for (const action of actions) {
+    const definition = authoring.match(new RegExp(`<CustomAction Id="${action}"[^>]+>`))?.[0];
+    if (!definition?.includes('BinaryRef="NetgridLifecycleActions"') || !definition.includes(`DllEntry="${action}"`))
+      throw new Error(`installer_lifecycle_action_unbound:${action}`);
+    const scheduled = authoring.match(new RegExp(`<Custom Action="${action}"[^>]+>`))?.[0];
+    if (!scheduled || scheduled.includes('Condition=')) throw new Error(`installer_lifecycle_action_not_unconditional:${action}`);
+  }
+  if (!authoring.includes('<Property Id="MSIRESTARTMANAGERCONTROL" Value="DisableShutdown"'))
+    throw new Error("installer_lifecycle_restart_manager_owner_conflict");
+}
+
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  const index = process.argv.indexOf("--binary");
+  if (index < 0 || !process.argv[index + 1]) throw new Error("installer_lifecycle_binary_required");
+  checkLifecycleBinary(path.resolve(process.argv[index + 1]));
+  process.stdout.write("INSTALLER_LIFECYCLE_BINARY_OK architecture=x64 exports=4\n");
+}

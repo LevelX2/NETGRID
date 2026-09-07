@@ -80,6 +80,20 @@ internal static class Program
             }
         }
 
+        try
+        {
+            if (InstallationGate.IsCurrentProcessBlocked(options.ResolveProgramRoot()))
+            {
+                MessageBox.Show(UiText.Get("launcher.installation.busy"), "NETGRID", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return 2;
+            }
+        }
+        catch (Exception)
+        {
+            MessageBox.Show(UiText.Get("launcher.installation.guard_failed"), "NETGRID", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            return 2;
+        }
+
         using var mutex = new Mutex(initiallyOwned: true, MutexName, out var ownsMutex);
         if (!ownsMutex)
         {

@@ -11,6 +11,20 @@
     <MajorUpgrade AllowDowngrades="yes" />
     <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
 
+    <!-- The lifecycle owner performs graceful shutdown before file changes.
+         Restart Manager must not independently terminate/restart Node. -->
+    <Property Id="MSIRESTARTMANAGERCONTROL" Value="DisableShutdown" />
+    <Property Id="NETGRID_DOTNET_FRAMEWORK_RELEASE">
+      <RegistrySearch Id="NetgridFrameworkRelease" Root="HKLM" Key="SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full" Name="Release" Type="raw" Bitness="always64" />
+    </Property>
+    <Launch Condition="NETGRID_DOTNET_FRAMEWORK_RELEASE &gt;= 528040" Message="NETGRID requires the .NET Framework 4.8 Windows component." />
+    <Launch Condition="NOT RollbackDisabled" Message="NETGRID setup requires Windows Installer rollback to be enabled." />
+    <Binary Id="NetgridLifecycleActions" SourceFile="$(LifecycleActionsPath)" />
+    <CustomAction Id="PrepareNetgridLifecycle" BinaryRef="NetgridLifecycleActions" DllEntry="PrepareNetgridLifecycle" Execute="immediate" Return="check" />
+    <CustomAction Id="RollbackNetgridLifecycle" BinaryRef="NetgridLifecycleActions" DllEntry="RollbackNetgridLifecycle" Execute="rollback" Impersonate="no" Return="check" HideTarget="yes" />
+    <CustomAction Id="BeginNetgridLifecycle" BinaryRef="NetgridLifecycleActions" DllEntry="BeginNetgridLifecycle" Execute="deferred" Impersonate="no" Return="check" HideTarget="yes" />
+    <CustomAction Id="CommitNetgridLifecycle" BinaryRef="NetgridLifecycleActions" DllEntry="CommitNetgridLifecycle" Execute="commit" Impersonate="no" Return="check" HideTarget="yes" />
+
     <StandardDirectory Id="ProgramFiles64Folder">
       <Directory Id="INSTALLFOLDER" Name="NETGRID">
         <Directory Id="LEGALFOLDER" Name="legal" />
@@ -80,6 +94,9 @@
     </Component>
     <Component Directory="LEGALFOLDER">
       <File Id="DotnetThirdPartyNotices" Source="$(LegalRoot)\DOTNET-THIRD-PARTY-NOTICES.txt" />
+    </Component>
+    <Component Directory="LEGALFOLDER">
+      <File Id="WixDtfNotices" Source="$(LegalRoot)\WIX-DTF-NOTICES.txt" />
     </Component>
 
     <Property Id="NETGRID_DATA_ROOT" Secure="yes" />
@@ -189,6 +206,10 @@
       Return="check"
       HideTarget="yes" />
     <InstallExecuteSequence>
+      <Custom Action="PrepareNetgridLifecycle" After="CostFinalize" />
+      <Custom Action="RollbackNetgridLifecycle" After="InstallInitialize" />
+      <Custom Action="BeginNetgridLifecycle" After="RollbackNetgridLifecycle" />
+      <Custom Action="CommitNetgridLifecycle" After="BeginNetgridLifecycle" />
       <Custom Action="InitializeNetgridRuntime" After="InstallFiles" Condition='NOT REMOVE~="ALL"' />
       <Custom Action="CacheNetgridMsi" After="InitializeNetgridRuntime" Condition='NOT Installed AND NOT REMOVE~="ALL"' />
       <Custom Action="CacheNetgridSetup" After="CacheNetgridMsi" Condition='NOT REMOVE~="ALL" AND NETGRID_SETUP_SOURCE &lt;&gt; ""' />

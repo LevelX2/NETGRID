@@ -46,6 +46,13 @@ internal sealed class TrayApplicationContext : ApplicationContext
         try
         {
             _runtime = LauncherRuntime.Load(_options);
+            _runtime.InstallationStopped += (_, messageKey) => Dispatch(async () =>
+            {
+                if (_closing) return;
+                if (messageKey is not null)
+                    MessageBox.Show(UiText.Get(messageKey), "NETGRID", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                await CloseAsync();
+            });
             _runtime.FatalFailure += RuntimeOnFatalFailure;
             _runtime.Recovered += (_, _) => Dispatch(() => ShowInfo(UiText.Get("launcher.recovered")));
             await _runtime.StartAsync();

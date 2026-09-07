@@ -20,9 +20,16 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
     private bool _stopping;
     private int _installationStopping;
     private int _recoveryAttempts;
+    private readonly Func<bool> _installationBlocked;
+    private readonly CancellationTokenSource _installationWatchCancellation = new();
+    private Task? _installationWatch;
 
     private LauncherRuntime(string programRoot, RuntimeEnvironment environment)
+        : this(programRoot, environment, () => InstallationGate.IsCurrentProcessBlocked(programRoot)) { }
+
+    private LauncherRuntime(string programRoot, RuntimeEnvironment environment, Func<bool> installationBlocked)
     {
+        _installationBlocked = installationBlocked;
         _programRoot = programRoot;
         _environment = environment;
         _serverUrl = environment.OptionalUri("NETGRID_LAUNCHER_SERVER_URL", "NETGRID_SERVER_BASE_URL");
@@ -31,6 +38,7 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
 
     public event EventHandler<string>? FatalFailure;
     public event EventHandler? Recovered;
+    public event EventHandler<string?>? InstallationStopped;
 
     public Uri WebUrl => _webUrl;
     public string LogDirectory => Path.Combine(_environment.Required("NETGRID_DATA_ROOT"), "runtime", "logs");
@@ -51,6 +59,12 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
         try
         {
             ThrowIfInstallationStopping();
+            if (_installationBlocked())
+            {
+                Interlocked.Exchange(ref _installationStopping, 1);
+                ThrowIfInstallationStopping();
+            }
+            _installationWatch ??= WatchInstallationAsync();
             if (_server is { HasExited: false } && _web is { HasExited: false }) return;
             _stopping = false;
             _recoveryAttempts = 0;
@@ -91,6 +105,29 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
     private void ThrowIfInstallationStopping()
     {
         if (InstallationStopping) throw new InvalidOperationException("launcher_installation_stopping");
+    }
+
+    private async Task WatchInstallationAsync()
+    {
+        try
+        {
+            while (true)
+            {
+                await Task.Delay(200, _installationWatchCancellation.Token);
+                if (!_installationBlocked()) continue;
+                await StopForInstallationAsync();
+                InstallationStopped?.Invoke(this, null);
+                return;
+            }
+        }
+        catch (OperationCanceledException) when (_installationWatchCancellation.IsCancellationRequested) { }
+        catch (Exception)
+        {
+            // An unreadable/corrupt coordination state is not "no installer".
+            // Stop through the owner and close instead of recovering blindly.
+            await StopForInstallationAsync();
+            InstallationStopped?.Invoke(this, "launcher.installation.guard_failed");
+        }
     }
 
     public async Task<(bool Allowed, int ActiveMatchCount)> UpdateReadinessAsync()
@@ -331,7 +368,10 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+        await _installationWatchCancellation.CancelAsync();
+        if (_installationWatch is not null) await _installationWatch;
         await StopAsync();
+        _installationWatchCancellation.Dispose();
         _http.Dispose();
         _lifecycle.Dispose();
     }

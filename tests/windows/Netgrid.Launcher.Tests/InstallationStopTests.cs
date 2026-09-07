@@ -10,7 +10,7 @@ internal static class InstallationStopTests
             ?? throw new Exception("installation_stop_test_failed:terminal_installer_stop_missing");
         var start = type.GetMethod("StartAsync")!;
         var checks = 0;
-        object NewRuntime()
+        object NewRuntime(Func<bool>? gate = null)
         {
             var environmentType = assembly.GetType("Netgrid.Launcher.RuntimeEnvironment", true)!;
             var environment = Activator.CreateInstance(environmentType, BindingFlags.Instance | BindingFlags.NonPublic,
@@ -21,7 +21,7 @@ internal static class InstallationStopTests
                 }], null)!;
             // No real program files, database, listener or registry is touched.
             return Activator.CreateInstance(type, BindingFlags.Instance | BindingFlags.NonPublic,
-                null, [Path.Combine(Path.GetTempPath(), "NETGRID-inert-installation-stop-fixture"), environment], null)!;
+                null, [Path.Combine(Path.GetTempPath(), "NETGRID-inert-installation-stop-fixture"), environment, gate ?? (() => false)], null)!;
         }
         async Task RejectStart(object runtime)
         {
@@ -147,6 +147,36 @@ internal static class InstallationStopTests
                 }
             }
         }
+        foreach (var unreadable in new[] { false, true })
+        {
+            var blocked = 0;
+            var firstRead = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            var watched = NewRuntime(() =>
+            {
+                firstRead.TrySetResult();
+                if (unreadable) throw new InvalidOperationException("installation_gate_lease_invalid");
+                return Volatile.Read(ref blocked) == 1;
+            });
+            try
+            {
+                var stopped = new TaskCompletionSource<string?>(TaskCreationOptions.RunContinuationsAsynchronously);
+                EventHandler<string?> handler = (_, code) => stopped.TrySetResult(code);
+                type.GetEvent("InstallationStopped")!.AddEventHandler(watched, handler);
+                var watching = (Task)type.GetMethod("WatchInstallationAsync", BindingFlags.NonPublic | BindingFlags.Instance)!.Invoke(watched, null)!;
+                type.GetField("_installationWatch", BindingFlags.NonPublic | BindingFlags.Instance)!.SetValue(watched, watching);
+                await firstRead.Task.WaitAsync(TimeSpan.FromSeconds(3));
+                Interlocked.Exchange(ref blocked, 1);
+                var code = await stopped.Task.WaitAsync(TimeSpan.FromSeconds(3));
+                if (code != (unreadable ? "launcher.installation.guard_failed" : null))
+                    throw new Exception("installation_watch_result_incorrect");
+                checks++;
+                await RejectStart(watched);
+            }
+            finally { await ((IAsyncDisposable)watched).DisposeAsync(); }
+        }
+        var alreadyBlocked = NewRuntime(() => true);
+        try { await RejectStart(alreadyBlocked); }
+        finally { await ((IAsyncDisposable)alreadyBlocked).DisposeAsync(); }
         return checks;
     }
 }

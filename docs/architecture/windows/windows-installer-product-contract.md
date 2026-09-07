@@ -115,6 +115,27 @@ werden können.
   vollständige Deinstallationen ausgeschlossen. Deshalb bleiben Produktdaten
   beim Standard-Uninstall unangetastet.
 
+### Installer-/Launcher-Koordination (in nativer Abnahme)
+
+Die MSI-Transaktion besitzt eine pro Programmordner gebundene Installersperre
+unter `HKLM\SOFTWARE\LevelX2\NETGRID.InstallerLifecycle` (64-Bit-Ansicht).
+Nur die erhöhte MSI-Aktion schreibt sie; der Launcher liest ausschließlich.
+Der bestehende Launcher bleibt Owner des geordneten Runtime-Stopps. Während
+der Sperre sind neue Starts und Recovery ausgeschlossen. Die MSI-Aktion
+verändert erst Dateien, wenn die exakt zugehörigen Produktprozesse beendet
+sind. Ein Timeout scheitert sichtbar statt Prozesse fremd zu beenden.
+
+Commit und Rollback dürfen nur ihre eigene Transaktions-ID abschließen.
+Ein Abschlusszeitpunkt bleibt als Installationsmetadatum in der
+Registry erhalten, auch nach Deinstallation: Er blockiert alte, erst nach
+Transaktionsende zum Zuge kommende Launcherprozesse. Diese Metadaten
+enthalten weder Nutzerdaten noch Zugangsdaten. Unlesbare oder fremde aktive
+Sperren werden nicht stillschweigend gelöscht. Die aus dem MSI-Binary-Stream
+ausgeführte Komponente benötigt das Windows-11-Framework .NET 4.8 oder höher;
+die normalen selbstenthaltenen NETGRID-Anwendungen bleiben davon getrennt.
+Der aktuelle native Abnahmestand steht im Paketprozess, nicht in dieser
+Architekturbeschreibung.
+
 ### Aufbewahrung gespeicherter Spiele
 
 - Automatische Bereinigung ist standardmäßig aktiv und entfernt ungeschützte,

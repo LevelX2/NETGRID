@@ -11,6 +11,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { checkLifecycleBinary, checkLifecycleAuthoring } from "./check-windows-installer-lifecycle.mjs";
 
 const releaseRoot = requiredPath("--release");
 const installerInputRoot = requiredPath("--installer-input");
@@ -24,6 +25,7 @@ const scratch = mkdtempSync(path.join(tmpdir(), "ngi-"));
 try {
   assertFile(msiPath, "installer_msi_missing");
   assertFile(setupPath, "installer_setup_missing");
+  run("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", path.join(import.meta.dirname, "check-windows-msi-lifecycle.ps1"), "-MsiPath", msiPath]);
   const administrativeRoot = path.join(scratch, "a");
   run("msiexec.exe", ["/a", msiPath, "/qn", `TARGETDIR=${administrativeRoot}`]);
   const layoutMatches = findFiles(administrativeRoot, "product-layout.json");
@@ -49,6 +51,7 @@ try {
     ["legal/THIRD-PARTY-NOTICES.txt", "legal/THIRD-PARTY-NOTICES.txt"],
     ["legal/NODE-LICENSE.txt", "legal/NODE-LICENSE.txt"],
     ["legal/DOTNET-LICENSE.txt", "legal/DOTNET-LICENSE.txt"],
+    ["legal/WIX-DTF-NOTICES.txt", "legal/WIX-DTF-NOTICES.txt"],
     [
       "legal/DOTNET-THIRD-PARTY-NOTICES.txt",
       "legal/DOTNET-THIRD-PARTY-NOTICES.txt",
@@ -108,8 +111,16 @@ try {
     msiPath,
     "-o",
     decompiledPath,
+    "-x",
+    path.join(scratch, "embedded"),
   ]);
   const authoring = readFileSync(decompiledPath, "utf8");
+  checkLifecycleAuthoring(authoring);
+  const lifecycleInput = path.join(installerInputRoot, "lifecycle", "NETGRID.InstallerActions.CA.dll");
+  checkLifecycleBinary(lifecycleInput);
+  const lifecycleExport = path.join(scratch, "embedded", "Binary", "NetgridLifecycleActions");
+  assertFile(lifecycleExport, "installer_lifecycle_embedded_binary_missing");
+  if (sha256(lifecycleExport) !== sha256(lifecycleInput)) throw new Error("installer_lifecycle_embedded_binary_mismatch");
   const uiCatalog = JSON.parse(readFileSync(path.resolve(import.meta.dirname, '../apps/windows/Common/windows-ui-strings.json'), 'utf8'));
   if (!authoring.includes('Name="UiLanguage"') ||
       !authoring.includes('Id="ResolveNetgridUiLanguage"') ||

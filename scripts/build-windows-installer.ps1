@@ -25,6 +25,7 @@ $launcherRoot = Join-Path $installerInputRoot "launcher"
 $firstRunRoot = Join-Path $installerInputRoot "first-run"
 $updaterRoot = Join-Path $installerInputRoot "updater"
 $setupHostRoot = Join-Path $installerInputRoot "setup-host"
+$lifecycleRoot = Join-Path $installerInputRoot "lifecycle"
 $localDotnet = Join-Path $projectRoot ".tools\dotnet\dotnet.exe"
 $dotnet = if (Test-Path -LiteralPath $localDotnet -PathType Leaf) {
   $localDotnet
@@ -66,6 +67,8 @@ try {
   if ($LASTEXITCODE -ne 0) { throw "Die Windows-Ersteinrichtungs-UI-Tests sind fehlgeschlagen." }
   & $dotnet run --project tests/windows/Netgrid.Launcher.Tests/Netgrid.Launcher.Tests.csproj -c Release
   if ($LASTEXITCODE -ne 0) { throw "Die Windows-Launcher-Downloadtests sind fehlgeschlagen." }
+  & $dotnet run --project tests/windows/Netgrid.InstallerLifecycle.Tests/Netgrid.InstallerLifecycle.Tests.csproj -c Release
+  if ($LASTEXITCODE -ne 0) { throw "Die Windows-Installer-Lifecycle-Tests sind fehlgeschlagen." }
 
   $layout = Get-Content -LiteralPath (Join-Path $ReleaseRoot "product-layout.json") -Raw | ConvertFrom-Json
   $productVersion = [string]$layout.product.installerVersion
@@ -76,6 +79,7 @@ try {
   Reset-BuildDirectory -Path $installerInputRoot -ProjectRoot $projectRoot
   New-Item -ItemType Directory -Path $legalRoot -Force | Out-Null
   Copy-Item -LiteralPath (Join-Path $projectRoot "LICENSE") -Destination (Join-Path $legalRoot "NETGRID-LICENSE.txt") -Force
+  Copy-Item -LiteralPath (Join-Path $projectRoot "installer\legal\WIX-DTF-NOTICES.txt") -Destination (Join-Path $legalRoot "WIX-DTF-NOTICES.txt") -Force
   & node scripts/build-third-party-notices.mjs --release $ReleaseRoot --output (Join-Path $legalRoot "THIRD-PARTY-NOTICES.txt")
   if ($LASTEXITCODE -ne 0) { throw "Drittanbieterhinweise konnten nicht erzeugt werden." }
 
@@ -115,6 +119,16 @@ try {
 
   Copy-Item -LiteralPath (Join-Path (Split-Path -Parent $dotnet) "LICENSE.txt") -Destination (Join-Path $legalRoot "DOTNET-LICENSE.txt") -Force
   Copy-Item -LiteralPath (Join-Path (Split-Path -Parent $dotnet) "ThirdPartyNotices.txt") -Destination (Join-Path $legalRoot "DOTNET-THIRD-PARTY-NOTICES.txt") -Force
+  & $dotnet build apps/windows/Netgrid.InstallerActions/Netgrid.InstallerActions.csproj `
+    -c Release -p:AcceptEula=wix7 -p:RestoreLockedMode=true
+  if ($LASTEXITCODE -ne 0) { throw "Die NETGRID-MSI-Lifecycle-Komponente konnte nicht gebaut werden." }
+  & node --test scripts/check-windows-installer-lifecycle.test.mjs
+  if ($LASTEXITCODE -ne 0) { throw "Die MSI-Lifecycle-Audit-Regressionstests sind fehlgeschlagen." }
+  New-Item -ItemType Directory -Path $lifecycleRoot -Force | Out-Null
+  $lifecycleActionsPath = Join-Path $lifecycleRoot "NETGRID.InstallerActions.CA.dll"
+  Copy-Item -LiteralPath (Join-Path $projectRoot "apps\windows\Netgrid.InstallerActions\bin\x64\Release\net48\NETGRID.InstallerActions.CA.dll") -Destination $lifecycleActionsPath
+  & node scripts/check-windows-installer-lifecycle.mjs --binary $lifecycleActionsPath
+  if ($LASTEXITCODE -ne 0) { throw "Die NETGRID-MSI-Lifecycle-Binärprüfung ist fehlgeschlagen." }
   & $dotnet publish apps/windows/Netgrid.RuntimeConfig/Netgrid.RuntimeConfig.csproj `
     -c Release -r win-x64 --self-contained true `
     -p:DebugType=None -p:DebugSymbols=false `
@@ -189,6 +203,7 @@ try {
     -d "LauncherRoot=$launcherRoot" `
     -d "FirstRunRoot=$firstRunRoot" `
     -d "UpdaterRoot=$updaterRoot" `
+    -d "LifecycleActionsPath=$lifecycleActionsPath" `
     -d "NetgridIcon=$iconPath" `
     -d "FirstRunTitleDe=$($uiCatalog.de.'first.title')" `
     -d "FirstRunTitleEn=$($uiCatalog.en.'first.title')" `
@@ -252,6 +267,7 @@ try {
       firstRunSha256 = (Get-FileHash -LiteralPath $firstRunExecutable -Algorithm SHA256).Hash.ToLowerInvariant()
       updaterSha256 = (Get-FileHash -LiteralPath $updaterExecutable -Algorithm SHA256).Hash.ToLowerInvariant()
       setupHostSha256 = (Get-FileHash -LiteralPath $setupHostExecutable -Algorithm SHA256).Hash.ToLowerInvariant()
+      installerLifecycleSha256 = (Get-FileHash -LiteralPath $lifecycleActionsPath -Algorithm SHA256).Hash.ToLowerInvariant()
     }
     dataContract = [ordered]@{
       defaultRoot = "C:\ProgramData\NETGRID"
