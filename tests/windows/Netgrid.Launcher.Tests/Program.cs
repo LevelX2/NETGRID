@@ -3,7 +3,20 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 
+if (args is ["--installation-stop-child"])
+{
+    Console.WriteLine("READY");
+    Environment.ExitCode = await Console.In.ReadLineAsync() == "shutdown" ? 0 : 2;
+    return;
+}
+
 var assembly = Assembly.Load("NETGRID");
+if (args is ["--check-installation-stop"])
+{
+    Console.WriteLine($"LAUNCHER_INSTALLATION_STOP_TESTS_OK checks={await InstallationStopTests.Run(assembly)}");
+    return;
+}
+Console.WriteLine($"LAUNCHER_INSTALLATION_STOP_TESTS_OK checks={await InstallationStopTests.Run(assembly)}");
 Assert(assembly.EntryPoint?.IsDefined(typeof(STAThreadAttribute), inherit: false) == true,
     "actual_windows_entrypoint_has_sta_for_native_file_dialogs");
 Assert(assembly.EntryPoint!.Name == "Main" && assembly.EntryPoint.ReturnType == typeof(int),

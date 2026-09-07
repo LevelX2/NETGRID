@@ -18,6 +18,7 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
     private Process? _server;
     private Process? _web;
     private bool _stopping;
+    private int _installationStopping;
     private int _recoveryAttempts;
 
     private LauncherRuntime(string programRoot, RuntimeEnvironment environment)
@@ -49,6 +50,7 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
         await _lifecycle.WaitAsync();
         try
         {
+            ThrowIfInstallationStopping();
             if (_server is { HasExited: false } && _web is { HasExited: false }) return;
             _stopping = false;
             _recoveryAttempts = 0;
@@ -73,6 +75,22 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
         {
             _lifecycle.Release();
         }
+    }
+
+    // The installer owns a terminal stop, unlike an ordinary recoverable stop.
+    // Publish it before waiting for the owner lock so already queued retries
+    // cannot acquire the lock first and reset _stopping/start another pair.
+    public Task StopForInstallationAsync()
+    {
+        Interlocked.Exchange(ref _installationStopping, 1);
+        return StopAsync();
+    }
+
+    private bool InstallationStopping => Volatile.Read(ref _installationStopping) != 0;
+
+    private void ThrowIfInstallationStopping()
+    {
+        if (InstallationStopping) throw new InvalidOperationException("launcher_installation_stopping");
     }
 
     public async Task<(bool Allowed, int ActiveMatchCount)> UpdateReadinessAsync()
@@ -112,6 +130,7 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
 
     private async Task StartPairAndWaitAsync()
     {
+        ThrowIfInstallationStopping();
         ValidateFiles();
         var logRoot = Path.Combine(_environment.Required("NETGRID_DATA_ROOT"), "runtime", "logs");
         Directory.CreateDirectory(logRoot);
@@ -184,6 +203,7 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
         var deadline = DateTimeOffset.UtcNow.AddMinutes(2);
         while (DateTimeOffset.UtcNow < deadline)
         {
+            ThrowIfInstallationStopping();
             if (server.HasExited) throw new InvalidOperationException($"launcher_server_exited:{server.ExitCode}");
             if (web.HasExited) throw new InvalidOperationException($"launcher_web_exited:{web.ExitCode}");
             if (await IsHealthyAsync(new Uri(_serverUrl, "/health"), requireJsonOk: true) && await IsHealthyAsync(_webUrl, requireJsonOk: false)) return;
@@ -215,11 +235,11 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
     private async Task MonitorAsync(Process server, Process web)
     {
         await Task.WhenAny(server.WaitForExitAsync(), web.WaitForExitAsync());
-        if (_stopping || server != _server || web != _web) return;
+        if (InstallationStopping || _stopping || server != _server || web != _web) return;
         await _lifecycle.WaitAsync();
         try
         {
-            if (_stopping || server != _server || web != _web) return;
+            if (InstallationStopping || _stopping || server != _server || web != _web) return;
             await StopProcessesAsync();
             if (_recoveryAttempts++ == 0)
             {
@@ -232,6 +252,7 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
                 }
                 catch
                 {
+                    if (InstallationStopping) return;
                     // The structured fatal event below is the single recovery result.
                 }
             }

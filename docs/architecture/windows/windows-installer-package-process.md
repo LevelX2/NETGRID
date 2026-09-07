@@ -788,6 +788,42 @@ Passwort geändert, keine Nutzerdaten gelöscht und nichts neu installiert.
 Removal Condition der temporären Bereinigung: neuer Installer mit dem oben
 genannten Lifecycle-Fix und erneutem nativen Uninstall-Nachweis ohne Eingriff.
 
+#### Ursachen-Fix in Arbeit: terminaler Launcher-Stopp
+
+Der erste Implementierungsschritt ergänzt im bestehenden `LauncherRuntime`
+`StopForInstallationAsync`. Anders als ein gewöhnlicher Stopp ist dieser
+Zustand für die betreffende Runtimeinstanz endgültig. Die Anforderung wird
+vor dem Warten auf den bestehenden Lifecycle-Lock veröffentlicht; dadurch
+können bereits wartende Start-/Retry-Aufrufe den Stopp nicht zurücksetzen.
+Start, Health-Wartepfad und Recovery prüfen denselben Zustand. Ein während
+des Installer-Stopps endender Kindprozess erzeugt weder Recovery noch einen
+irreführenden Fatal-Dialog. Der vorhandene geordnete Prozess-Stopp bleibt
+Owner; es entsteht keine zweite Prozessbeendigungslogik.
+
+`InstallationStopTests.cs` war vor der Änderung rot
+(`terminal_installer_stop_missing`) und besteht danach mit neun Checks.
+Geprüft werden erneuter Start nach Stopp, Erhalt der Sperre über gewöhnliches
+Stoppen hinweg, wiederholter Installer-Stopp, vor dem Stopp eingereihter
+Retry sowie das Ende eines echten, isolierten Testkindprozesses während der
+gesperrten Lifecycle-Phase. Beide Testkinder müssen nach dem Stopp beendet
+sein; der Fixture-Cleanup ersetzt diese Assertion nicht. Es werden weder
+Produktdaten, Registry noch NETGRID-Serverports verwendet. Der paketnahe
+Launcher-Testlauf besteht zusätzlich mit den bisherigen STA-, 35 Update-
+Fehler- und Download-/Tamper-Prüfungen; `git diff --check` ist grün.
+
+Dies ist bewusst nur der Launcher-Teil: Noch kein Installerpfad ruft die neue
+Methode auf. Erforderlich bleiben die autorisierte pro-Installation-
+Koordination aus der MSI-Transaktion, die Sperre konkurrierender neuer
+Launcherprozesse bis zum Transaktionsende, Rollback-/Fehlerbehandlung und
+der erneute native Nachweis. Ein ausschließlich im sichtbaren Setuphost
+eingebauter Stopp würde direkte MSI-Reparatur-/Entfernungswege nicht sichern.
+Die weitere MSI-Anbindung muss die dokumentierten
+[Rollback-Aktionsgrenzen](https://learn.microsoft.com/en-us/windows/win32/msi/rollback-custom-actions)
+und [Commit-Aktionsgrenzen](https://learn.microsoft.com/en-us/windows/win32/msi/commit-custom-actions)
+berücksichtigen; diese Aktionen laufen insbesondere nicht bei deaktiviertem
+Rollback. Es wurde noch kein neues Setup gebaut oder installiert und das
+Uninstall-Gate bleibt rot.
+
 ### Aktueller Updatekandidat und Teststart vom 7. September 2026
 
 `1.0.8145` wurde regulär aus dem sauberen Commit
