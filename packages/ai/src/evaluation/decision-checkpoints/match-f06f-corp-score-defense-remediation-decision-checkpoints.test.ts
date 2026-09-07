@@ -24,14 +24,33 @@ describe("match f06f Corp score and defense remediation checkpoints", () => {
       "does not expose Encryption Breakthrough as immediate Runner matchpoint",
       avoidEncryptionBreakthroughJson,
     ],
-    [
-      "funds existing R&D defense instead of buying an unfunded seventh layer",
-      fundExistingRdDefenseJson,
-    ],
   ])("passes the corrected historical behavior: %s", (_label, json) => {
     const result = runAiDecisionCheckpoint(fixture(json));
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+  });
+
+  it("takes two certified campaign credits instead of searching for already installed R&D defense", () => {
+    const checkpoint = fixture(fundExistingRdDefenseJson);
+    checkpoint.expectation = {
+      acceptableActions: [{
+        type: "activated_card_ability",
+        sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+      }],
+      forbiddenActions: [{
+        type: "install_card",
+        sourceDefinitionId: "onr_v1_266_scramble",
+        targetServerId: "rd",
+      }],
+      planExecution: {
+        acceptablePlanKinds: ["corp.economy"],
+        acceptableCapabilities: ["develop_or_convert_corp_economy"],
+        requiredAssessmentEvidence: ["corp_engine_certified_visible_card_payout:onr_v1_309_bbs-whispering-campaign"],
+      },
+    };
+    const result = runAiDecisionCheckpoint(checkpoint);
+    expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+    expect(result.selectedAction?.payload?.gainCreditsAmount).toBe(2);
   });
 
   it("still starts a protected agenda line that can finish in the same turn", () => {

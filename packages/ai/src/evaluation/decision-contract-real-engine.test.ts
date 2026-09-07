@@ -166,11 +166,18 @@ describe("hardened decision contracts on real Engine inputs", () => {
       )?.type,
     ).toBe("draw_card");
     expect(eligible.actionId).not.toBe(rasminWithIce.actionId);
+    // Existing funded central ICE is not a missing-ICE search reason.
+    // Rasmin is eligible, while the global portfolio may still prefer draw.
+    expect(
+      corpUpgradePlacementExclusion(
+        upgradePlacementParams(withIceInput, rasminWithIce),
+      ),
+    ).toBeUndefined();
     expect(
       eligible.decisionDebug?.detailSections?.find(
         (section) => section.id === "plan_portfolio",
       )?.items,
-    ).toContain(
+    ).not.toContain(
       "plan:corp.defend_servers:server-defense-portfolio|evidence:corp_missing_concrete_defense_draw:rd|source:visible_state",
     );
   });

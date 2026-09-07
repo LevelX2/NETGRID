@@ -12,8 +12,9 @@ describe("R&D Interface Dig run-start choice regression", () => {
     const corp = standardDeck("standard_corp_cheap_bag_tricks");
     const summary = simulateAiGame({
       seed: "meta-347-final-r4-c81f62a4e937-034",
-      // The current exact-cost line completes after 714 actions.
-      maxActions: 900,
+      // Reachable Corp funding changes the game length; this exact replay
+      // now terminates legally after 944 actions.
+      maxActions: 1000,
       runnerDeck: deckDefinition(runner),
       corpDeck: deckDefinition(corp),
       runnerDeckMetadata: deckMetadata(runner),
