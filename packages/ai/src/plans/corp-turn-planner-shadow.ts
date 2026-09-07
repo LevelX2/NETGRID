@@ -468,14 +468,15 @@ export function corpPlanProgressRoots(params: {
       const selectedSupportHead = selectedLineIsSupport
         ? selectedHead
         : currentSupportHeads[0];
-      const blocked =
+      const projectBlocked =
         !project.feasible || slice?.selectionReason === "no_complete_line";
+      const selectedLineHasNoHead = selectedLine !== undefined && !selectedHead;
       const requiredNeedId =
         selectedLineIsSupport && selectedLine.parentNeedId
           ? selectedLine.parentNeedId
           : selectedSupportHead?.executorParentNeedId
             ? selectedSupportHead.executorParentNeedId
-            : blocked
+            : projectBlocked || selectedLineHasNoHead
               ? (project.setupNeed?.needId ??
                 ((project.fundingMilestone?.remainingGap ?? 0) > 0
                   ? `score-support:${project.projectId}`
@@ -488,10 +489,15 @@ export function corpPlanProgressRoots(params: {
               head.executorParentNeedId === requiredNeedId,
           )
         : undefined;
-      const effectiveCampaignDisposition =
-        blocked && selectedLine && !selectedHead && !boundSupportHead
-          ? ("blocked_replan" as const)
-          : slice?.campaignDisposition;
+      // Domain feasibility does not certify the selected line's current
+      // executor. Global Defense allocation can withhold that exact provider
+      // while leaving the agenda itself feasible and other roots executable.
+      const selectedLineUnavailable =
+        selectedLineHasNoHead && !boundSupportHead;
+      const blocked = projectBlocked || selectedLineUnavailable;
+      const effectiveCampaignDisposition = selectedLineUnavailable
+        ? ("blocked_replan" as const)
+        : slice?.campaignDisposition;
       const dispositionWitness = scoreDispositionWitness(
         effectiveCampaignDisposition,
       );
@@ -524,8 +530,9 @@ export function corpPlanProgressRoots(params: {
                     actionId: selectedLine.currentActionId,
                   } as const)
                 : dispositionWitness;
-      const blockerCode =
-        slice?.selectionReason === "no_complete_line"
+      const blockerCode = selectedLineUnavailable
+        ? "selected_line_without_executable_provider"
+        : slice?.selectionReason === "no_complete_line"
           ? "no_complete_line"
           : !project.feasible
             ? project.evidenceCode

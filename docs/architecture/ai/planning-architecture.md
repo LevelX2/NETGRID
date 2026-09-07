@@ -3398,6 +3398,14 @@ strukturelle Coverage-Fehler; die fachliche Runtime löst solche Zustände über
 Replan, Retarget, Warten oder Abandon und nicht über einen allgemeinen Crash-
 oder Credit-Fallback.
 
+Die Machbarkeit eines Scoreprojekts zertifiziert noch keinen ausführbaren
+Provider seiner ausgewählten Linie. Lehnt die globale Defense-Allokation
+diesen konkreten Support ab, markiert der Progress-Root-Produzent die Linie
+mit `selected_line_without_executable_provider` und einem expliziten
+Replan-Beleg. Ein anderer Need desselben Agenda-Parents ersetzt die fehlende
+Bindung nicht. Aktuelle eigene und exakt gebundene Support-Heads bleiben
+unverändert ausführbar; die Coverage-Prüfung wird nicht abgeschwächt.
+
 Die Agenda-Linienbildung trennt Rush und Blockerauflösung. `pure_rush` und
 `combined_rush` benötigen einen exakten Agenda-Head. `safe_setup` darf gerade
 ohne Agenda-Head entstehen, bindet dann aber Score-Parent, Need,
