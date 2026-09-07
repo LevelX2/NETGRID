@@ -2127,6 +2127,15 @@ Beispiele:
 - derselbe HQ-Run ohne neue Information, Payoff oder Strategienutzen:
   möglicherweise Sättigung.
 
+Für Remote-Zugriffe konsumiert `access-outcome-memory` neben aktuell sichtbaren
+Roots das gültige, positionsgebundene Wissen aus `BeliefState`. Eine nach dem
+Zugriff wieder verdeckte Karte verliert dadurch nicht ihre beobachtete
+Identität. Ein bereits abgelehnter Zugriff kann nur dann den gesamten Remote
+als unverändert ohne Fortschritt kennzeichnen, wenn alle aktuellen
+Root-Positionen bekannt sind und keine Agenda darunter ist. Zusätzliche
+unbekannte Positionen bleiben offene Informationsziele; die bestehende
+Run-Zielbewertung und ihre Planowner behalten die Entscheidungsautorität.
+
 ### 19.3 Marginaler Nutzen
 
 Planmodule definieren selbst, wann der nächste gleichartige Step keinen

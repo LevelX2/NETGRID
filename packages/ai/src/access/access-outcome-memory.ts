@@ -1,4 +1,6 @@
 import type { AiDecisionInput, PublicGameEvent } from "@netgrid/shared";
+import { reconstructBeliefState } from "../belief-state";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import type {
   AccessDecisionReason,
   AccessIntent,
@@ -184,7 +186,12 @@ export function deriveObservedRemoteNoProgressAccessMemory(
     serverId,
   );
   if (currentKnownRootDefinitionIds.length === 0) return undefined;
-  if (currentKnownRemoteHasAgenda(input, serverId)) return undefined;
+  if (
+    currentKnownRootDefinitionIds.some(
+      (definitionId) => CARD_DEFINITIONS_BY_ID[definitionId]?.type === "agenda",
+    )
+  )
+    return undefined;
   const history = mergedPublicHistory(input);
   const lastAccessIndex = findLastIndex(
     history,
@@ -295,23 +302,24 @@ function currentKnownRemoteRootDefinitionIds(
   const server = input.playerView.servers.find(
     (candidate) => candidate.id === serverId,
   );
-  if (!server) return [];
-  return server.root
-    .filter((card) => card.known && card.definitionId)
-    .map((card) => card.definitionId!)
-    .sort();
-}
-
-function currentKnownRemoteHasAgenda(
-  input: AiDecisionInput,
-  serverId: string,
-): boolean {
-  const server = input.playerView.servers.find(
-    (candidate) => candidate.id === serverId,
+  if (!server || server.root.length === 0) return [];
+  const rememberedRoots = new Map(
+    reconstructBeliefState(input)
+      .runnerOpponentModel?.knownPositionMemory.filter(
+        (entry) => entry.zone === serverId && entry.invalidatedBy.length === 0,
+      )
+      .map((entry) => [entry.positionKey, entry.definitionId]),
   );
-  return (
-    server?.root.some((card) => card.known && card.type === "agenda") ?? false
-  );
+  const definitions: string[] = [];
+  for (const [index, card] of server.root.entries()) {
+    const definitionId = card.known
+      ? card.definitionId
+      : rememberedRoots.get(`root:${index}`);
+    // A remembered declined card does not answer a different unknown position.
+    if (!definitionId) return [];
+    definitions.push(definitionId);
+  }
+  return definitions.sort();
 }
 
 function mergedPublicHistory(input: AiDecisionInput): PublicGameEvent[] {
