@@ -277,7 +277,7 @@ ohne Entwicklungswerkzeuge.
 | Updatertransaktion und Rollback | Echter Sandboxlauf 8145/8150 am 2026-09-07 grün: geprüftes Backup, MSI-Upgrade, bewusst beschädigte Testdatenbank, erkannter Healthfehler, Programmrollback auf 8145, Datenmarker und SQLite-Integrität wiederhergestellt, Konfiguration unverändert, Cleanup verifiziert | Transaktionsgate für 8145/8150 erfüllt; abschließende Benachrichtigung bleibt ein separater Dialogtest |
 | Benutzerbetrieb und Netzwerk | Standardbenutzerbetrieb und ACLs für installierten 8145-Basisstand im neuen Rollbacklauf grün. Private-LAN-Test des installierten 8150: Web/Server vom Host erreichbar, Maintenance mit 403 abgewiesen; im öffentlichen Profil beide Ports bei weiterhin gesunden lokalen Diensten blockiert. Testinstallation, Ports und NETGRID-Regeln bereinigt; temporär deaktivierte pauschale Sandbox-Containerfreigabe wiederhergestellt | Netzwerkbeleg für 8150 einschließlich dokumentierter Sandbox-Firewallvorbereitung erfüllt; Standardbenutzerbeleg ausdrücklich auf Basis 8145 gebunden |
 | Nativer Setup-/Fortschrittsworker | 8150 über deutschen Setup-Host im sauberen Gast installiert, MSI-Client/Server jeweils 0; echter Abschnittsfortschritt von 51 Prozent um 15:21:32 UTC sichtbar aufgenommen, Datenhinweis und Status/Balken getrennt. Direkter MSI-Countertest grün | Nativer deutscher Fortschrittsnachweis erfüllt; Windows-UAC mit alternativem Administrator und weitere native Fehler-/Abbruchpfade bleiben getrennte Prüfungen |
-| Launcher, Browser und Diagnose | 8150: normaler Desktopstart zeigt Spielseite mit Build 8150, Web/Server HTTP 200, derselbe einzelne Launcher nach erneutem Start. Die fehlende Edge-ProgID wurde wie im früheren Lauf ausschließlich im Gast ergänzt. 8136: Tray-Einstieg, nativer SaveFileDialog und lokaler redigierter ZIP-Export grün | Gastvorbereitung transparent erhalten; dies ersetzt nicht sämtliche Sprach-/Kontext- und funktionalen Gesamtflows |
+| Launcher, Browser und Diagnose | 8150: normaler Desktopstart zeigt Spielseite mit Build 8150, Web/Server HTTP 200, einzelne Launcherinstanz; nativer SaveFileDialog und redigierter ZIP-Export grün. Beenden über Tray schließt alle drei Prozesse und beide Ports; erneuter Desktopstart grün. Die fehlende Edge-ProgID wurde ausschließlich im Gast ergänzt | Gastvorbereitung transparent erhalten; dies ersetzt nicht sämtliche Sprach-/Kontext- und funktionalen Gesamtflows oder die Wiederherstellung nach Prozessabbruch |
 | First Run | Nativer deutscher vorgeschalteter Entscheidungsdialog auf 8150 beobachtet; Nutzer bestätigt Abschluss, Setup beendet mit Exitcode 0. Hashgebundene reine Statusabfrage bestätigt eingerichteten Maintenance-Zugang, kein Agent-Bootstrap/Reset | Unbeobachtete Passwort-/Zurück-/Sichtbarkeitsschritte nicht nachträglich als abgenommen ausgeben; Authentifizierungsbedienung durch Nutzer, vorhandene Zugangsdaten erhalten |
 | Sichtbare Flows | 8150: Sprachauswahl und Setup-Hauptformular in allen 18 Kombinationen de/en/fr × echte 100/125/150 Prozent × heller/dunkler Systemkontext nativ geprüft. 8145: installierter Sprachwechsel fr → de → en, Repair, Sprachübernahme aller drei Komponenten und Austausch lokalisierter Shortcutnamen mit sieben Prüfungen grün; Tooltip-Renderings und native Tastatur-Popups vorhanden | Übrige Komponentendialoge, funktionale Gesamtflows und Hover-/Tastatur-Randfälle bleiben offen; Hovereingabe ist im verfügbaren Computer-Use-API nicht vorhanden und benötigt Nutzerbedienung |
 | Saubere Windows-11-x64-Maschine | Vollständige 13-Punkte-MSI-Matrix 8145 → 8150 einschließlich Cleanup grün: Windows 11 Enterprise x64 (26100), ohne Entwicklungswerkzeuge; Standardbenutzer-/Rollback- und Private-LAN-Test zusätzlich grün. Native Frischinstallation 8136 und installierter Sprachwechsel 8145 separat bestanden | Artefaktgebundene Nachweise nicht pauschal auf spätere Builds übertragen; finale Abnahme bleibt offen bis alle obigen Ergänzungen vorliegen |
@@ -572,12 +572,49 @@ nicht geändert (`result/edge-http-registration-repair.json`).
 
 Der erneute Desktop-Doppelklick öffnet um 17:09 UTC über den normalen
 ShellExecute-Pfad Edge mit `127.0.0.1:3100` und sichtbar „V1.0 · Build 8150“.
-`result/native-8150-browser.json` bestätigt anschließend Web/Server HTTP 200
+`result/native-8150-browser-first-start.json` bestätigt anschließend Web/Server HTTP 200
 und denselben einzelnen Launcher PID 7000. Die Sandbox und diese installierte
 Runtime bleiben für weitere Tests geöffnet. Dies ist keine unveränderte
 Browserausstattung des Ausgangsimages und kein NETGRID-Fallback; die
 Gastvorbereitung bleibt Bestandteil der Nachweisbedingungen. Der
 Hauptbetrieb auf dem Host wurde nicht berührt.
+
+### Native Tray-Prüfung 8150: Diagnoseexport, Beenden und Neustart
+
+Der deutsche Tray-Einstieg „Diagnosepaket erstellen …“ öffnet am 7. September
+den nativen Speicherdialog. Die Dateinameneingabe über das Automatisierungs-
+werkzeug wird in der Sandbox nicht übernommen; mit Strg+Z wurde der
+vorgeschlagene Name wiederhergestellt. Gespeichert wurde ausschließlich das
+neue lokale `NETGRID-diagnostics-20260907-191244.zip` in den Gastdokumenten.
+Die native Erfolgsmeldung ist sichtbar bestätigt. Es wurde weder eine
+vorhandene Datei überschrieben noch ein ZIP hochgeladen.
+
+Der unabhängige Prüfer bestätigt vier erlaubte Einträge: `diagnostics.json`,
+`runtime.env.redacted`, `launcher-server.log` und `launcher-web.log`.
+Versionsmetadaten binden 1.0.8150; Datenbank-/Credential-/Uploadflags sind
+false. Alle geheimen Werte aus der Runtimekonfiguration wurden intern gegen
+sämtliche ZIP-Texte geprüft, ohne diese Werte auszugeben; die Redaktion ist
+grün. Erst danach wurde die Datei bytegleich in den eigenen Ergebnisordner
+kopiert. Hosthash und Gastnachweis stimmen überein:
+`a0faece194e4fb59dcc1902813287991f881d204aa2bca17e965cbd10c224e18`.
+Führend: `result/native-diagnostics-8150-verification.json` und
+`result/native-diagnostics-8150-20260907-171244.zip`.
+
+Vor dem Beenden bestätigt eine strikt lesende SQLite-Abfrage null Partien
+und null Startlobbys. Prozess-/Portbindung sind geprüft: Launcher 7000 mit
+seinen beiden installierten Node-Kindprozessen 3960/2968 besitzt ausschließlich
+die Gastlistener 8787/3100. Der native Menüpunkt „NETGRID beenden“ wird um
+17:16:52 UTC ausgeführt. `result/native-8150-stop-after.json` bestätigt drei
+Sekunden später keine dieser installierten Prozesse und keine Listener mehr;
+der Agent hat keine Prozesse erzwungen beendet.
+
+Der anschließende Desktop-Doppelklick startet um 17:17 UTC eine neue einzelne
+Launcherinstanz 980 und öffnet wieder die Spielseite mit Build 8150.
+`result/native-8150-browser-restart.json` bestätigt Web und Server mit
+HTTP 200. Die Runtime bleibt für weitere Abnahmen geöffnet. Diese Prüfung
+belegt den normalen Menü-Stopp und anschließenden Start, nicht das separate
+Recovery-Verhalten nach einem Prozessabbruch. Bestehende Zugangsdaten und
+Hauptbetrieb des Hosts bleiben unverändert; WIN-I08 bleibt aktiv.
 
 ### Aktueller Updatekandidat und Teststart vom 7. September 2026
 
