@@ -65,7 +65,10 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
                 ThrowIfInstallationStopping();
             }
             _installationWatch ??= WatchInstallationAsync();
-            if (_server is { HasExited: false } && _web is { HasExited: false }) return;
+            if (!_stopping && _server is { HasExited: false } && _web is { HasExited: false }) return;
+            // A previous failed stop still owns its handles. Never overwrite
+            // them with a fresh pair, even when a user explicitly retries.
+            if (_server is not null || _web is not null) await StopProcessesAsync();
             _stopping = false;
             _recoveryAttempts = 0;
             await StartPairAndWaitAsync();
@@ -109,25 +112,32 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
 
     private async Task WatchInstallationAsync()
     {
+        string? failure = null;
         try
         {
             while (true)
             {
                 await Task.Delay(200, _installationWatchCancellation.Token);
                 if (!_installationBlocked()) continue;
-                await StopForInstallationAsync();
-                InstallationStopped?.Invoke(this, null);
-                return;
+                break;
             }
         }
-        catch (OperationCanceledException) when (_installationWatchCancellation.IsCancellationRequested) { }
+        catch (OperationCanceledException) when (_installationWatchCancellation.IsCancellationRequested) { return; }
         catch (Exception)
         {
             // An unreadable/corrupt coordination state is not "no installer".
             // Stop through the owner and close instead of recovering blindly.
-            await StopForInstallationAsync();
-            InstallationStopped?.Invoke(this, "launcher.installation.guard_failed");
+            failure = "launcher.installation.guard_failed";
         }
+        try { await StopForInstallationAsync(); }
+        catch (Exception)
+        {
+            // Do not publish a successful installer stop or discard the owner
+            // after a shutdown failure. A later explicit stop may retry.
+            FatalFailure?.Invoke(this, UiText.Get("launcher.stop.failure"));
+            return;
+        }
+        InstallationStopped?.Invoke(this, failure);
     }
 
     public async Task<(bool Allowed, int ActiveMatchCount)> UpdateReadinessAsync()
@@ -171,21 +181,21 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
         ValidateFiles();
         var logRoot = Path.Combine(_environment.Required("NETGRID_DATA_ROOT"), "runtime", "logs");
         Directory.CreateDirectory(logRoot);
-        _server = StartNode(
-            Path.Combine(_programRoot, "app", "server.mjs"),
-            Path.Combine(_programRoot, "app"),
-            Path.Combine(logRoot, "launcher-server.log"),
-            launcherControl: true
-        );
-        _web = StartNode(
-            Path.Combine(_programRoot, "app", "apps", "web", "server.js"),
-            Path.Combine(_programRoot, "app", "apps", "web"),
-            Path.Combine(logRoot, "launcher-web.log"),
-            launcherControl: false
-        );
         try
         {
-            await WaitForReadyAsync(_server, _web);
+            StartNode(
+                Path.Combine(_programRoot, "app", "server.mjs"),
+                Path.Combine(_programRoot, "app"),
+                Path.Combine(logRoot, "launcher-server.log"),
+                launcherControl: true
+            );
+            StartNode(
+                Path.Combine(_programRoot, "app", "apps", "web", "server.js"),
+                Path.Combine(_programRoot, "app", "apps", "web"),
+                Path.Combine(logRoot, "launcher-web.log"),
+                launcherControl: false
+            );
+            await WaitForReadyAsync(_server!, _web!);
         }
         catch
         {
@@ -194,7 +204,7 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
         }
     }
 
-    private Process StartNode(string entrypoint, string workingDirectory, string logPath, bool launcherControl)
+    private void StartNode(string entrypoint, string workingDirectory, string logPath, bool launcherControl)
     {
         var nodePath = Path.Combine(_programRoot, "runtime", "node", "node.exe");
         var startInfo = new ProcessStartInfo(nodePath)
@@ -229,10 +239,17 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
         var process = new Process { StartInfo = startInfo, EnableRaisingEvents = true };
         process.OutputDataReceived += (_, eventArgs) => WriteLog(logPath, logLock, eventArgs.Data);
         process.ErrorDataReceived += (_, eventArgs) => WriteLog(logPath, logLock, eventArgs.Data);
-        if (!process.Start()) throw new InvalidOperationException("launcher_process_start_failed");
+        try
+        {
+            if (!process.Start()) throw new InvalidOperationException("launcher_process_start_failed");
+        }
+        catch { process.Dispose(); throw; }
+        // Publish ownership immediately after creation, before asynchronous
+        // log setup can throw. StartPairAndWaitAsync owns failure cleanup.
+        if (launcherControl) _server = process;
+        else _web = process;
         process.BeginOutputReadLine();
         process.BeginErrorReadLine();
-        return process;
     }
 
     private async Task WaitForReadyAsync(Process server, Process web)
@@ -277,7 +294,12 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
         try
         {
             if (InstallationStopping || _stopping || server != _server || web != _web) return;
-            await StopProcessesAsync();
+            try { await StopProcessesAsync(); }
+            catch (Exception)
+            {
+                FatalFailure?.Invoke(this, UiText.Get("launcher.stop.failure"));
+                return;
+            }
             if (_recoveryAttempts++ == 0)
             {
                 try
@@ -303,27 +325,51 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
 
     private async Task StopProcessesAsync()
     {
-        var server = _server;
-        var web = _web;
-        _server = null;
-        _web = null;
-        if (server is { HasExited: false })
+        // Each slot remains owned until that exact Process handle has proved
+        // exit. Failure in one child must not prevent stopping the other one.
+        var failures = new List<Exception>();
+        await StopOwnedAsync(_server, "server", graceful: true);
+        await StopOwnedAsync(_web, "web", graceful: false);
+        if (failures.Count > 0)
         {
+            _stopping = true;
+            throw new AggregateException("launcher_runtime_stop_failed", failures);
+        }
+
+        async Task StopOwnedAsync(Process? process, string role, bool graceful)
+        {
+            if (process is null) return;
             try
             {
-                await server.StandardInput.WriteLineAsync("shutdown");
-                await server.StandardInput.FlushAsync();
-                using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-                await server.WaitForExitAsync(timeout.Token);
+                if (!process.HasExited && graceful)
+                {
+                    try
+                    {
+                        using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                        await process.StandardInput.WriteLineAsync("shutdown".AsMemory(), timeout.Token);
+                        await process.StandardInput.FlushAsync(timeout.Token);
+                        await process.WaitForExitAsync(timeout.Token);
+                    }
+                    catch (Exception error) when (error is IOException or InvalidOperationException or OperationCanceledException)
+                    {
+                        // Existing bounded shutdown policy: only our retained
+                        // child is eligible for forced termination.
+                        Kill(process);
+                    }
+                }
+                if (!process.HasExited) Kill(process);
+                using var exitTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                await process.WaitForExitAsync(exitTimeout.Token);
+                if (!process.HasExited) throw new InvalidOperationException("launcher_child_exit_unverified");
+                if (role == "server") _server = null;
+                else _web = null;
+                process.Dispose();
             }
-            catch (Exception exception) when (exception is IOException or InvalidOperationException or OperationCanceledException)
+            catch (Exception error)
             {
-                Kill(server);
+                failures.Add(new InvalidOperationException("launcher_child_stop_failed:" + role, error));
             }
         }
-        if (web is { HasExited: false }) Kill(web);
-        server?.Dispose();
-        web?.Dispose();
     }
 
     private void ValidateFiles()
@@ -363,7 +409,7 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
         {
             if (!process.HasExited) process.Kill(entireProcessTree: true);
         }
-        catch (InvalidOperationException) { }
+        catch (InvalidOperationException) when (process.HasExited) { }
     }
 
     public async ValueTask DisposeAsync()

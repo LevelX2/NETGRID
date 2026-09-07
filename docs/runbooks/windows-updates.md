@@ -159,6 +159,26 @@ normalen Betrieb oder einen zweiten Updateversuch freizugeben. Der Transport
 beweist selbst weder geordneten Runtime-Stopp noch die updateweite Sperre;
 beides bleibt Aufgabe der noch ausstehenden Transaktionsanbindung.
 
+Der Launcher gibt seine beiden Runtime-Prozessslots inzwischen erst frei,
+nachdem das Ende des jeweils gehaltenen Prozesshandles nachgewiesen ist.
+Auch auf einen erzwungenen Stopp seines eigenen Webprozesses folgt ein
+begrenztes Warten auf das Ende. Ein Fehler beim Serverstopp verhindert nicht
+den unabhängigen Webstopp; ungeklärte Handles bleiben beim Launcher. Ein
+erneuter Start muss diese alten Prozesse zuerst erfolgreich stoppen und
+darf die Slots nicht überschreiben. Die Installerbeobachtung meldet in
+diesem Fehlerfall keinen erfolgreichen Stopp; ein fehlgeschlagenes Beenden
+des Tray-Launchers lässt dessen Owner für einen ausdrücklichen erneuten
+Stopp erhalten und zeigt eine Erklärung in `de`/`en`/`fr`.
+
+Die bestehende begrenzte Abschaltpolicy kann den eigenen Server bei einem
+fehlgeschlagenen stdin-Shutdown weiterhin zwangsweise beenden. Der neue
+Prozess-Ende-Nachweis allein ist deshalb ausdrücklich kein Nachweis eines
+erfolgreichen Storage-Flushs oder eines sicheren Backups. Die vollständige
+Updateübergabe muss diese Bedingungen zusätzlich prüfen. Die neuen
+`StopOwnershipTests` verwenden ausschließlich eigene inert laufende
+Kindprozesse sowie einen absichtlich ungebundenen Testhandle und öffnen
+weder Produktdaten noch Listener.
+
 `Netgrid.UpdateHandoff.Tests` prüft unter Windows die echten Pipes, ACLs,
 Prozessbindung und getrennte eigene Testprozesse, ohne Erhöhung oder
 Installation. Der Lauf ist in den Installerbuild aufgenommen. Die separate

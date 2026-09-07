@@ -19,9 +19,11 @@ if (args is ["--check-update-preparation"])
 if (args is ["--check-installation-stop"])
 {
     Console.WriteLine($"LAUNCHER_INSTALLATION_STOP_TESTS_OK checks={await InstallationStopTests.Run(assembly)}");
+    Console.WriteLine($"LAUNCHER_STOP_OWNERSHIP_TESTS_OK checks={await StopOwnershipTests.Run(assembly)}");
     return;
 }
 Console.WriteLine($"LAUNCHER_INSTALLATION_STOP_TESTS_OK checks={await InstallationStopTests.Run(assembly)}");
+Console.WriteLine($"LAUNCHER_STOP_OWNERSHIP_TESTS_OK checks={await StopOwnershipTests.Run(assembly)}");
 Console.WriteLine($"LAUNCHER_UPDATE_PREPARATION_TESTS_OK checks={await UpdatePreparationTests.Run(assembly)}");
 Assert(assembly.EntryPoint?.IsDefined(typeof(STAThreadAttribute), inherit: false) == true,
     "actual_windows_entrypoint_has_sta_for_native_file_dialogs");

@@ -997,6 +997,26 @@ MSI-Teiltransaktionen und Healthfreigabe sind weiterhin offen. Dieser
 Quellstand wurde nicht als Installer gebaut oder installiert; der bereits
 bereitgestellte Kandidat 8169 bleibt unverändert.
 
+Im vorhandenen Launcher-Stopp wurde anschließend eine tatsächliche
+Ownership-Lücke geschlossen: Die Prozessslots werden nicht mehr vor dem
+Stopp gelöscht, und auch nach dem eigenen Web-Kill wird das Prozessende
+abgewartet. Fehler behalten den ungeklärten Handle, stoppen das andere Kind
+trotzdem und verhindern einen überschreibenden Neustart. Watcher und Tray
+melden fehlgeschlagene Stopps sichtbar, statt einen erfolgreichen Abschluss
+anzunehmen oder den Owner wegzuwerfen. Der Startpfad räumt auch einen schon
+gestarteten Server auf, wenn der nachfolgende Webstart scheitert.
+
+18 neue Ownershipchecks mit eigenen Testprozessen bestehen, daneben alle
+14 bisherigen Installationsstoppchecks, 44 Vorbereitungsklientchecks,
+35 Fehlerchecks sowie STA-/Download-Regressionen. Der Sprachkatalog ist für
+179 Strings in drei Sprachen vollständig; dies ist keine neue native
+Darstellungsabnahme. Die 157 Lifecyclechecks bleiben grün. Ein erster
+Testlauf scheiterte am nicht rechtzeitig gehaltenen Beobachterhandle; der
+korrigierte Test bindet ihn vor dem Stopp und prüft das Ende ohne nachträglich
+darauf zu warten. Der bestehende erzwungene Serverstopp bei fehlgeschlagenem
+stdin-Shutdown belegt weiterhin keinen sauberen Storage-Flush; die atomare
+Updateübergabe bleibt offen. Keine Installation oder Credentialänderung.
+
 Vor der Freigabe bleiben die Prozess-Ende-Raceprüfung,
 die direkten MSI-Updatepfade hinsichtlich
 laufender Spiele, verständliche lokalisierte Fehler, die vollständige

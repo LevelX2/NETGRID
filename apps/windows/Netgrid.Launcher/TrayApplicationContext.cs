@@ -275,7 +275,17 @@ internal sealed class TrayApplicationContext : ApplicationContext
         _tray.Text = UiText.Get("launcher.stopping");
         if (_runtime is not null)
         {
-            await _runtime.DisposeAsync();
+            try { await _runtime.DisposeAsync(); }
+            catch (Exception)
+            {
+                // Keep the runtime owner and its retained handles available
+                // for an explicit retry; closing is not proof of child exit.
+                ExitCode = 2;
+                _closing = false;
+                _tray.Text = UiText.Get("launcher.stop.failed");
+                MessageBox.Show(UiText.Get("launcher.stop.failure"), "NETGRID", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
             _runtime = null;
         }
         _tray.Visible = false;
