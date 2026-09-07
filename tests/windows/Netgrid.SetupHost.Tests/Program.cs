@@ -6,6 +6,11 @@ ApplicationConfiguration.Initialize();
 // Exercise the real setup assembly without injecting input. Layout checks
 // create only off-screen windows; they never start an installation.
 var assembly = Assembly.Load("NETGRID.Setup");
+if (args is ["--check-native-dpi-layout"])
+{
+    Console.WriteLine($"NATIVE_DPI_LAYOUT_TESTS_OK checks={NativeDpiLayoutTests.Run(assembly)}");
+    return;
+}
 var text = assembly.GetType("Netgrid.Windows.UiText", throwOnError: true)!;
 var failure = assembly.GetType("Netgrid.SetupHost.SetupException", throwOnError: true)!;
 var presenter = assembly.GetType("Netgrid.SetupHost.SetupFailure", throwOnError: true)!;
@@ -15,6 +20,7 @@ var catalog = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, s
 var previewRoot = args.Length == 2 && args[0] == "--render-to" ? Path.GetFullPath(args[1]) : null;
 if (previewRoot is not null) Directory.CreateDirectory(previewRoot);
 var checks = 0;
+checks += NativeDpiLayoutTests.Run(assembly);
 checks += MsiProgressTests.Run(assembly);
 checks += InstallationWorkerTests.Run(assembly);
 var previewWindowsShown = 0;

@@ -178,6 +178,7 @@ internal sealed class UninstallForm : Form
 
     public UninstallForm()
     {
+        SuspendLayout();
         Text = UiText.Get("uninstall.title");
         Icon = Icon.ExtractAssociatedIcon(Environment.ProcessPath!);
         StartPosition = FormStartPosition.CenterScreen;
@@ -215,6 +216,8 @@ internal sealed class UninstallForm : Form
 
         _cancel.Click += (_, _) => Close();
         _uninstall.Click += (_, _) => StartUninstall();
+        AutoScaleDimensions = new SizeF(96, 96);
+        ResumeLayout(performLayout: true);
     }
 
     private void StartUninstall()
@@ -363,6 +366,7 @@ internal sealed class SetupForm : Form
 
     public SetupForm()
     {
+        SuspendLayout();
         Text = $"NETGRID Setup {MsiPayload.ProductVersion}";
         Icon = Icon.ExtractAssociatedIcon(Environment.ProcessPath!);
         StartPosition = FormStartPosition.CenterScreen;
@@ -471,6 +475,34 @@ internal sealed class SetupForm : Form
         _install.Click += async (_, _) => await InstallAsync();
         UpdateAdvancedState();
         UpdateLanState();
+        // All fixed dimensions above are authored at 96 DPI. Without this
+        // baseline WinForms treats them as already scaled on a high-DPI PC.
+        AutoScaleDimensions = new SizeF(96, 96);
+        ResumeLayout(performLayout: true);
+        _retention.FontChanged += (_, _) => FitChoiceWidths();
+        _accountMode.FontChanged += (_, _) => FitChoiceWidths();
+    }
+
+    protected override void OnLoad(EventArgs e)
+    {
+        base.OnLoad(e);
+        var available = Screen.FromControl(this).WorkingArea.Size;
+        MinimumSize = new Size(Math.Min(MinimumSize.Width, available.Width), Math.Min(MinimumSize.Height, available.Height));
+        MaximumSize = available;
+        FitChoiceWidths();
+    }
+
+    private void FitChoiceWidths()
+    {
+        foreach (var choice in new[] { _retention, _accountMode })
+        {
+            var textWidth = choice.Items.Cast<object>().Max(item => TextRenderer.MeasureText(item.ToString(), choice.Font).Width);
+            // Include the native arrow and text insets in the current DPI.
+            var requiredWidth = textWidth + choice.LogicalToDeviceUnits(24);
+            choice.MinimumSize = new Size(requiredWidth, 0);
+            choice.Width = requiredWidth;
+            choice.DropDownWidth = requiredWidth;
+        }
     }
 
     private async Task InstallAsync()

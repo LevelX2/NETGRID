@@ -46,6 +46,7 @@ internal sealed class LanguageDialog : Form
 
     internal LanguageDialog()
     {
+        SuspendLayout();
         Text = "NETGRID Setup";
         Icon = Icon.ExtractAssociatedIcon(Environment.ProcessPath!);
         StartPosition = FormStartPosition.CenterScreen;
@@ -85,6 +86,8 @@ internal sealed class LanguageDialog : Form
         Controls.Add(layout);
         AcceptButton = proceed;
         CancelButton = cancel;
+        AutoScaleDimensions = new SizeF(96, 96);
+        ResumeLayout(performLayout: true);
     }
 
     public static bool SelectLanguage()

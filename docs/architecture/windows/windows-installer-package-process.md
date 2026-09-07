@@ -310,11 +310,11 @@ Frisch geöffnete deutsche Formulare wurden zusätzlich bei echten 125 Prozent
 (einschließlich Custom-Auswahl und aktivierter Felder) sowie 100 Prozent
 geprüft; Abschlussoptionen und Fußbereich waren sichtbar.
 
-Die vollständige visuelle Freigabe bleibt dennoch offen: Bei 150 Prozent
-werden längere ausgewählte Aufbewahrungs-/Spielerprofiltexte im geschlossenen
-Auswahlfeld teilweise abgeschnitten, insbesondere in en/fr. Die
-anfängliche DPI-Skalierung und die tatsächlich benötigte Textbreite sind
-ursächlich zu prüfen; bloß breitere Vorschaubilder sind kein Nachweis.
+Die vollständige visuelle Freigabe von 8148 bleibt dennoch offen: Bei
+150 Prozent werden längere ausgewählte Aufbewahrungs-/Spielerprofiltexte im
+geschlossenen Auswahlfeld teilweise abgeschnitten, insbesondere in en/fr.
+Die anschließende Ursachenprüfung und Quellkorrektur sind unten beschrieben;
+sie verändern das bereits gebaute Artefakt 8148 nicht.
 Diese Prüfung hat weder sämtliche Kombinationen aus Sprache, DPI und Design
 noch die weiteren funktionalen Installerflows abgenommen. Dunkles Design
 wurde in diesem Lauf nicht erneut aktiviert. Ein GitHub-Testrelease wurde
@@ -325,6 +325,36 @@ Apps und Windows hell. Nachtmodus blieb eingeschaltet; Bildschirmzuordnung
 und sonstige Einstellungen wurden nicht verändert. Alle eigenen
 8148-Setupfenster sind nachweislich geschlossen. Baseline und strukturierte
 Prüfnotizen: `output/host-display-review-8148`.
+
+### DPI-Referenz und Auswahlbreiten: Quellprüfung vom 7. September
+
+Ein neuer Test öffnet die tatsächlichen WinForms außerhalb des sichtbaren
+Bildschirms und misst ihre native `DeviceDpi`, statt `Form.Scale` aufzurufen.
+Vor der Korrektur blieb das 90-Pixel-Portfeld bei echten 144 DPI nur
+90 statt 135 Pixel breit. Bereits bei 96 DPI benötigte die längste
+französische Aufbewahrungsoption 239 Pixel, das Feld bot nur 210 Pixel.
+Die fehlende 96-DPI-Designreferenz und die nicht aus dem vollständigen
+Sprachinhalt bestimmte Auswahlbreite waren damit getrennt reproduziert.
+
+Sprachauswahl, Setup und Deinstallation setzen nun ihre Designreferenz nach
+dem vollständigen Layoutaufbau. Das Setup begrenzt seine Größe auf die
+Arbeitsfläche und bestimmt die Breite beider Auswahlfelder aus sämtlichen
+Texten, aktueller Schrift und DPI-skalierten Bedienelementrändern.
+Die benötigte Breite ist auch als Mindestbreite verankert. Das verhindert
+die im ersten 125-Prozent-Lauf aufgedeckte vorübergehende Nullbreite während
+der Layoutneuberechnung; UI-Callbackfehler scheitern im Test unmittelbar
+statt in einem unbeaufsichtigten .NET-Fehlerdialog zu warten.
+
+Der endgültige Quellstand besteht je 72 native Layoutprüfungen bei realen
+96, 120 und 144 DPI in de/en/fr: initiale Skalierung, Bildschirmgrenze,
+vollständige Auswahltexte, Tabellenbegrenzung und letzte Optionszeile am
+Scroll-Ende. Bei wiederhergestellten 100 Prozent bestehen außerdem Setup
+2.039 Assertions, First Run 63 sowie Launcher- und Updatertests. Diese
+Offscreen-Tests starten weder Installation noch Deinstallation oder Runtime;
+sie ersetzen nicht die sichtbare Abnahme des neu zu bauenden Installers und
+nicht die offenen funktionalen WIN-I08-Gates. Die Hostanzeige wurde wieder
+auf 100 Prozent, 1920 × 1200 und hellen Windows-/App-Kontext geprüft;
+Nachtmodus blieb eingeschaltet. Der neue Artefaktbuild steht noch aus.
 
 ### Aktueller Updatekandidat und Teststart vom 7. September 2026
 

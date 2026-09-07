@@ -406,6 +406,20 @@ Scrollgrenzenfehlers. Der Renderlauf prüft zusätzlich Status, Hinweis und
 Fortschrittsbalken. Beide Checks ersetzen weiterhin keine native DPI-Abnahme
 des neu gebauten Artefakts.
 
+Zusätzlich enthält derselbe Setup-Test einen echten DPI-Layoutpfad:
+`dotnet run --project tests/windows/Netgrid.SetupHost.Tests/Netgrid.SetupHost.Tests.csproj -c Release -- --check-native-dpi-layout`.
+Er öffnet die tatsächliche Sprachauswahl, das Setup und den
+Deinstallationsdialog außerhalb des sichtbaren Bildschirms, protokolliert
+`DeviceDpi` und prüft Skalierung, Arbeitsfläche, vollständige Auswahltexte
+und Scroll-Ende in de/en/fr. Es werden keine Aktionen injiziert und keine
+Installation, Deinstallation oder Runtime gestartet. Der Pfad ist auch im
+normalen Komponententest enthalten. Für die 100-/125-/150-Prozent-Matrix muss
+Windows selbst nach ausdrücklicher Freigabe umgestellt und der Testprozess
+jeweils neu gestartet werden; anschließend sind die ursprünglichen
+Anzeigeeinstellungen wiederherzustellen. Ein künstlich skaliertes Rendering
+ist kein Ersatz. UI-Callbackfehler brechen den Test ab, statt einen modalen
+.NET-Weiter-Dialog zu öffnen.
+
 ### Verbleibende native UI-Abnahme
 
 Diese Checkliste ist ein Prüfablauf, kein bereits erbrachter Nachweis.
