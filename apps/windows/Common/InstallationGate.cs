@@ -88,6 +88,28 @@ namespace Netgrid.Windows
                 throw new InvalidOperationException("installation_gate_product_code_invalid");
         }
 
+        // Read-only identity binding for an updater-owned child operation.
+        // A present registry record is not proof that its process still lives.
+        internal static Process OpenUpdateOwner(RegistryKey machine, string root, string lease)
+        {
+            ValidateLease(lease);
+            var current = Read(machine, KeyFor(root));
+            if (current == null || current.Lease != lease || current.Phase != GateState.Stopping ||
+                current.OwnerId <= 0 || current.MsiLease != "")
+                throw new InvalidOperationException("installation_gate_update_owner_missing");
+            Process owner;
+            try { owner = Process.GetProcessById(current.OwnerId); }
+            catch (ArgumentException) { throw new InvalidOperationException("installation_gate_update_owner_missing"); }
+            try
+            {
+                var handle = owner.Handle;
+                if (owner.HasExited || owner.StartTime.ToUniversalTime().Ticks != current.OwnerStart)
+                    throw new InvalidOperationException("installation_gate_update_owner_missing");
+                return owner;
+            }
+            catch { owner.Dispose(); throw; }
+        }
+
         internal sealed class GateState
         {
             public const string Preparing = "preparing";

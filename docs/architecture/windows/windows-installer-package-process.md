@@ -1042,8 +1042,8 @@ Version 3 des atomaren Records ergänzt MSI-Lease und ProductCode; alte
 Formate werden nicht automatisch konvertiert. Ein MSI-Abschluss löst die
 äußere Updatesperre nicht, und ihr Owner kann sie nicht während einer aktiven
 MSI-Teiltransaktion freigeben. Ein vom Updater beauftragter MSI-Lauf prüft
-zusätzlich dessen noch lebende PID/Startzeit. Der Setuphost/Updater übergibt
-die äußere Lease noch nicht im realen Produktablauf.
+zusätzlich dessen noch lebende PID/Startzeit. Der Aufruf durch den echten
+Updater bleibt noch anzubinden; der vorbereitete Setuphost-Modus folgt unten.
 
 Die neue Reihenfolge `afterInstallExecute` wird in einem ausdrücklich nicht
 installierbaren Diagnosepaket tatsächlich als `6500 < 6501 < 6600`
@@ -1063,6 +1063,22 @@ Installer-/Payloadaudit behauptet. Native Zwei-Versionen-Upgrades,
 Rollback, Aktivspielschutz und Komponentenreferenzzählung bleiben offen.
 Die Diagnoseprobe ist im Runbook gebunden; 8169 und dessen Sandbox bleiben
 unverändert. Kein Main-Merge, Push oder Release.
+
+Der Setuphost bietet nun explizite updatergebundene Installations- und
+Deinstallationsbefehle mit validierter Lease und Programmroot. Er bindet
+vor Extraktion/Start den registrierten Installationsort und den lebenden
+Updateprozess und reicht die Lease an MSI weiter. Setuphost und MSI nutzen
+dabei dieselbe read-only Prozessbindung; PID-Wiederverwendung, fehlender
+Owner, falsche Phase und schon aktive MSI-Teiltransaktion werden abgewiesen.
+Standalone-Operationen bleiben getrennt und übernehmen keine vorhandene
+Sperre. Insbesondere gilt MSI-Code 1605 im gebundenen Rollback nicht als Erfolg.
+
+52 neue Setup-Argument-/Ergebnischecks und neun zusätzliche Ownerchecks
+bestehen. Insgesamt sind 2.103 Setupchecks, 214 Lifecyclechecks, 180
+Sprachstrings in `de`/`en`/`fr` sowie die geänderten Setup-/net48-Builds grün.
+Die Setupprüfungen erzeugen nur Offscreen-Vorschauen, keinen installierten
+Produktstand. Die echte Updater-/Tray-Anbindung einschließlich Healthpermit
+und die nativen Gates bleiben offen. 8169 ist unverändert und nicht gestartet.
 
 Vor der Freigabe bleiben die Prozess-Ende-Raceprüfung,
 die direkten MSI-Updatepfade hinsichtlich

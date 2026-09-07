@@ -263,8 +263,29 @@ Die Eigenschaft wird als `Secure` und `Hidden` geführt. Eine noch aktive
 Vorbereitung, eine fremde Sperre oder eine schon laufende MSI-Teiltransaktion
 wird nicht übernommen. Teiltransaktionen besitzen jeweils zusätzlich eine
 eigene zufällige `msiLease`; verspätete Rollbacks können keinen späteren
-MSI-Lauf freigeben. Der Setuphost/Updater übergibt diese äußere Lease noch
-nicht im echten Produktablauf.
+MSI-Lauf freigeben. Der Setuphost kann die äußere Lease inzwischen explizit
+übergeben; der Updater ruft diesen gebundenen Modus noch nicht auf.
+
+Für einen updatergebundenen Aufruf akzeptiert der Setuphost ausschließlich
+`--install-update --program-root <root> --update-lease <lease>` beziehungsweise
+dieselbe Form mit `--uninstall-update`. Die Lease ist eine kanonische,
+nichtleere GUID ohne Trennzeichen, der Programmroot ein absoluter lokaler
+Pfad. Zusätzliche, doppelte oder unvollständige Argumente werden abgewiesen.
+Vor Extraktion und MSI-Start muss der Root zum registrierten Installationsort
+passen. Der gemeinsame read-only Reader bindet die aktive Stopp-Lease und
+den noch lebenden Owner anhand PID und Startzeit; der Setuphost hält diesen
+Handle durch den gesamten MSI-Aufruf. Eine noch aktive MSI-Teiltransaktion
+blockiert diesen Einstieg. Datenlöschung ist in diesem gebundenen Modus
+nicht zulässig. Die erhöhte MSI-Aktion prüft den Owner nochmals unabhängig.
+
+Standalone-Setupoperationen bleiben ausdrücklich ohne äußere Lease und
+dürfen keine vorhandene Updatesperre automatisch übernehmen. Nur der
+Standalone-Uninstall ist bei MSI-Code 1605 (Produkt nicht installiert)
+idempotent. Ein updatergebundener Rollback reicht diesen Fehler unverändert
+zurück; er darf keine nicht erfolgte Deinstallation als Erfolg ausgeben.
+Die Argument-/Ergebnisprüfungen starten keinen Installer, die Ownerprüfungen
+verwenden ausschließlich eine temporäre HKCU-Fixture und den eigenen
+Testprozess.
 
 Der MSI-Commit beziehungsweise -Rollback beendet nur die exakt passende
 MSI-Bindung. Gehört der Gesamtvorgang dem Updater, bleiben dessen Phase,

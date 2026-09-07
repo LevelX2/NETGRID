@@ -62,6 +62,7 @@ try
     Reject(() => InstallationGate.Read(fixture, key), "installation_gate_lease_invalid");
     PreparationLeaseTests.Run(fixture, program, Assert, Reject);
     MsiLeaseTests.Run(fixture, program, Assert, Reject);
+    UpdateOwnerTests.Run(fixture, program, Assert, Reject);
 }
 finally
 {

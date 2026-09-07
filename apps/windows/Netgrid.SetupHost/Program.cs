@@ -116,17 +116,14 @@ internal static class Program
                     UninstallWorker.ScheduleSelfRemoval();
                 }
             }
-            if (args.Length == 3 && args[0] == "--install-update" && args[1] == "--program-root")
+            if (args.Length > 0 && args[0] is "--install-update" or "--uninstall-update")
             {
-                var result = Installer.RunUpdate(Path.GetFullPath(args[2]), uninstall: false);
-                Console.WriteLine($"NETGRID_SETUP_UPDATE_RESULT code={result}");
-                return result is 0 or 3010 ? 0 : result;
-            }
-            if (args.Length == 1 && args[0] == "--uninstall-update")
-            {
-                var result = Installer.RunUpdate(programRoot: null, uninstall: true);
-                Console.WriteLine($"NETGRID_SETUP_UNINSTALL_RESULT code={result}");
-                return result is 0 or 1605 or 3010 ? 0 : result;
+                var command = UpdateCommand.Parse(args);
+                var result = Installer.RunUpdate(command.ProgramRoot, command.Uninstall, updateLease: command.Lease);
+                Console.WriteLine($"{(command.Uninstall ? "NETGRID_SETUP_UNINSTALL_RESULT" : "NETGRID_SETUP_UPDATE_RESULT")} code={result}");
+                // Only a standalone removal is idempotent for an absent MSI.
+                // An updater-owned rollback must observe its exact result.
+                return command.ExitCode(result);
             }
             if (args.Length == 1 && args[0] == "--uninstall")
             {
@@ -838,13 +835,21 @@ internal static class Installer
         });
     }
 
-    public static int RunUpdate(string? programRoot, bool uninstall, bool deleteData = false)
+    public static int RunUpdate(string? programRoot, bool uninstall, bool deleteData = false, string? updateLease = null)
     {
         var temporaryMsi = Path.Combine(Path.GetTempPath(), $"NETGRID-{Guid.NewGuid():N}.msi");
         try
         {
+            // Keep the real updater handle through MSI completion. Neither a
+            // guessed nonce nor a recycled PID authorizes joining its lease.
+            using var updateOwner = updateLease is null ? null : BindUpdateOwner(programRoot, updateLease, deleteData);
             var action = uninstall ? "/x" : "/i";
             var arguments = $"{action} {Quote(temporaryMsi)} /qn /norestart /l*v {Quote(LogPath)}";
+            if (updateLease is not null)
+            {
+                arguments += " " + UpdateLeaseProperty(updateLease);
+                if (uninstall) arguments += " " + Property("INSTALLFOLDER", programRoot!);
+            }
             if (uninstall && deleteData) arguments += " DELETEUSERDATA=1";
             if (!uninstall)
             {
@@ -871,6 +876,25 @@ internal static class Installer
         {
             if (File.Exists(temporaryMsi)) File.Delete(temporaryMsi);
         }
+    }
+
+    internal static string UpdateLeaseProperty(string lease)
+    {
+        try { InstallationGate.ValidateLease(lease); }
+        catch (InvalidOperationException) { throw new SetupException("update_context_invalid"); }
+        return Property("NETGRID_UPDATE_LEASE", lease);
+    }
+
+    private static Process BindUpdateOwner(string? programRoot, string lease, bool deleteData)
+    {
+        if (programRoot is null || deleteData) throw new SetupException("update_context_invalid");
+        using var machine = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
+        using var registration = machine.OpenSubKey(@"SOFTWARE\LevelX2\NETGRID", writable: false);
+        var installedRoot = registration?.GetValue("InstallDirectory") as string;
+        if (installedRoot is null || !Path.TrimEndingDirectorySeparator(Path.GetFullPath(installedRoot))
+            .Equals(Path.TrimEndingDirectorySeparator(Path.GetFullPath(programRoot)), StringComparison.OrdinalIgnoreCase))
+            throw new SetupException("update_context_invalid");
+        return InstallationGate.OpenUpdateOwner(machine, programRoot, lease);
     }
 
     public static string ReadDesktopShortcutPreference(object? value) => value is "0" or "1"

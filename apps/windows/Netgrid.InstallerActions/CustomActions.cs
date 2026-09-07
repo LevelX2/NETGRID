@@ -60,7 +60,7 @@ namespace Netgrid.InstallerActions
                 else if (session.CustomActionData["OuterLease"] == "")
                     InstallationLease.BeginMsi(machine, root, lease, session.CustomActionData["ProductCode"], "");
                 else
-                    using (var owner = OpenUpdateOwner(machine, root, session.CustomActionData["OuterLease"]))
+                    using (var owner = InstallationGate.OpenUpdateOwner(machine, root, session.CustomActionData["OuterLease"]))
                         InstallationLease.BeginMsi(machine, root, lease, session.CustomActionData["ProductCode"], session.CustomActionData["OuterLease"]);
             }
             // The launcher observes the lease, disables recovery and performs
@@ -103,23 +103,6 @@ namespace Netgrid.InstallerActions
             return value == "1";
         }
 
-        private static Process OpenUpdateOwner(RegistryKey machine, string root, string lease)
-        {
-            var current = InstallationGate.Read(machine, InstallationGate.KeyFor(root));
-            if (current == null || current.Lease != lease || current.Phase != InstallationGate.GateState.Stopping || current.OwnerId <= 0)
-                throw new InvalidOperationException("installation_gate_update_owner_missing");
-            Process owner;
-            try { owner = Process.GetProcessById(current.OwnerId); }
-            catch (ArgumentException) { throw new InvalidOperationException("installation_gate_update_owner_missing"); }
-            try
-            {
-                var handle = owner.Handle;
-                if (owner.HasExited || owner.StartTime.ToUniversalTime().Ticks != current.OwnerStart)
-                    throw new InvalidOperationException("installation_gate_update_owner_missing");
-                return owner;
-            }
-            catch { owner.Dispose(); throw; }
-        }
 
         private static bool ProductProcessesRemain(string programRoot)
         {
