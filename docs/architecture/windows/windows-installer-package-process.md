@@ -271,7 +271,7 @@ ohne Entwicklungswerkzeuge.
 
 | Nachweis | Aktuelle belastbare Evidenz | Noch erforderlich |
 | --- | --- | --- |
-| Produktgrenze und Installer-Payload | Build 8136 aus sauberem Commit `63c3e59a9`, 10.901-Dateien-Audit, SHA-256-Abgleich von Setup/MSI und den vier installierten Binärdateien grün | Für 8136 erfüllt; neues Updateartefakt wieder regulär bauen und prüfen, keine Versions-/Hash-Umetikettierung |
+| Produktgrenze und Installer-Payload | Builds 8136 und 8145 regulär aus sauberen Quellständen gebaut, jeweils 10.901-Dateien-Audit und Setup-/MSI-Prüfsummen grün; installierte Binärdateien zusätzlich für 8136 gebunden | Für beide Builds erfüllt; Installation und Update auf 8145 noch nicht ausgeführt |
 | Installation, Upgrade und Repair | Vollständiger 13-Punkte-Offline-Sandboxlauf 8106 → 8109 am 2026-09-05, 22:06–22:38 Uhr, einschließlich ProductCode-Repair und geprüftem Cleanup; alle vier Artefakthashes erneut verglichen | Für dieses Artefaktpaar erfüllt; folgende Sprach-/Shortcutänderungen sowie funktionale UI-Gates bleiben getrennt |
 | GitHub-Updateauswahl und Integrität | Aktueller Downloadfix und Stable-/Prerelease-/Tamper-Fixtures grün; native deutsche Offline-Rückmeldung auf 8136 bestätigt | Echter zustimmungsbasierter GitHub-Download/Update; GitHub-Übertragung am 7. September freigegeben, Testrelease erst nach Abschluss der übrigen Prüfungen; höheres reguläres Updateartefakt und netzfähige isolierte Testumgebung erforderlich |
 | Updatertransaktion und Rollback | Neuer echter Sandboxlauf 8105/8106 am 2026-09-05 grün: geprüftes Backup, MSI-Upgrade, bewusst beschädigte Testdatenbank, erkannter Healthfehler, Programmrollback auf 8105, Datenmarker und SQLite-Integrität wiederhergestellt, Konfiguration unverändert, Cleanup verifiziert | Transaktionsgate für dieses Artefaktpaar erfüllt; abschließende Benachrichtigung bleibt ein separater Dialogtest |
@@ -283,6 +283,42 @@ ohne Entwicklungswerkzeuge.
 | Saubere Windows-11-x64-Maschine | Vollständige ältere 13-Punkte-Offline-MSI-Matrix einschließlich Cleanup grün: Windows 11 Enterprise x64 (26100), ohne Entwicklungswerkzeuge; neue native Frischinstallation 8136 zusätzlich bestanden | Artefaktgebundene Nachweise nicht pauschal auf spätere Builds übertragen; finale Abnahme bleibt offen bis alle obigen Ergänzungen vorliegen |
 
 Diese offenen Anforderungen werden nicht durch engere grüne Tests ersetzt.
+
+### Aktueller Updatekandidat und Teststart vom 7. September 2026
+
+`1.0.8145` wurde regulär aus dem sauberen Commit
+`130eb076cb2d893ae3f07b3328943bf94db9b02a` gebaut. Der vollständige
+Buildaufruf endete mit Exitcode 0: Setup 1.940 Assertions, First Run 63,
+Launcher-STA-/Download-/Updatefehlerprüfungen, Komponenten-Smokes,
+173 Sprachstrings, 27 Renderings und 10.901-Dateien-Payload-Audit bestanden.
+Die Renderings ersetzen weiterhin keine echte Windows-DPI-Abnahme.
+Artefakte unter `output/windows-installer-acceptance-8145`:
+
+- Setup-SHA-256: `1391a1e25fce94330d2d2bdc621fd2e94412aed67c1dd93aa741299fc9f065cc`
+- MSI-SHA-256: `1219fa5d2136640c8e3a263711920fb0b969866757abaf7852d2240bdc8f3c11`
+
+Der getrennte Offline-Test 8136 → 8145 mit nachgeschaltetem Standardbenutzer-
+und Rollbacktest ist unter
+`output/windows-sandbox-e2e/075b9347473543a59004da12fe908f5a` vorbereitet.
+Alle vier Eingangsartefakte wurden gegen Metadaten und `SHA256SUMS.txt`
+geprüft; die Test-Fault-Fixture wurde neu gebaut und gehört nicht zum Produkt.
+Ihr Hash ist `eb35cf460a827e4e17d016d93154ca5a77f52a5de59e698ea3444b4a76e9418c`.
+
+Der tatsächliche Start einer zusätzlichen Sandbox wurde von Windows mit
+`0x800401F6 (CO_E_APPSINGLEUSE)` abgewiesen. Vor und nach dem Versuch existierte
+ausschließlich Gast `4710465f-f845-4713-a399-8d4529ea49ef`; dessen installierter
+8136-Stand und eingerichteter Maintenance-Zugang wurden nicht verändert.
+Der Ergebnisordner des neuen Laufs ist leer: Die neue Matrix ist ausdrücklich
+noch nicht gestartet oder bestanden. Für den Start muss der vorhandene Gast
+ausdrücklich zum Verwerfen freigegeben oder ein anderer geeigneter Testrechner
+bereitgestellt werden. Es wurde kein GitHub-Release erstellt.
+
+Der Testcontroller erlaubt jetzt `-PrepareOnly` neben einer bestehenden
+Sandbox, da dieser Pfad ausschließlich neue isolierte Host-Testeingaben
+erzeugt. Der normale automatische Start bleibt bei vorhandenen Gästen
+gesperrt. Beide Pfade wurden konkret geprüft: Schutzfehler ohne Schalter,
+erfolgreiche Vorbereitung mit Schalter. Diese reine Testhilfe wurde erst
+nach Abschluss des sauberen 8145-Produktbuilds geändert.
 
 Der verifizierte Storage-Ursachenfix liegt als lokaler Zwischencommit
 `b1b2b26b4` vor (Git-Buildnummer 8105); WIN-I08 bleibt aktiv und ist damit

@@ -12,7 +12,9 @@ $sandboxExecutable = Join-Path $env:WINDIR 'System32\WindowsSandbox.exe'
 if (-not (Test-Path -LiteralPath $sandboxExecutable)) { throw 'windows_sandbox_unavailable' }
 $sandboxCli = (Get-Command wsb.exe -ErrorAction Stop).Source
 $sandboxList = & $sandboxCli list --raw | ConvertFrom-Json
-if (@($sandboxList.WindowsSandboxEnvironments).Count) { throw 'existing_sandbox_must_remain_untouched' }
+# Preparing isolated host inputs never connects to or changes a running guest.
+# Automatic launch still requires an empty Sandbox inventory.
+if (@($sandboxList.WindowsSandboxEnvironments).Count -and -not $PrepareOnly) { throw 'existing_sandbox_must_remain_untouched' }
 $runRoot = Join-Path $projectRoot ('output\windows-sandbox-e2e\' + [guid]::NewGuid().ToString('N'))
 $inputRoot = Join-Path $runRoot 'input'
 $resultRoot = Join-Path $runRoot 'result'

@@ -232,6 +232,15 @@ Metadaten und Prüfsummen geprüften MSI-/Setup-Artefakte sowie Testhelfer; das
 Repository und private Daten werden nicht freigegeben. Die Eingabefreigabe ist
 nur lesbar. Netzwerk, Zwischenablage, Audio, Video und Drucker sind deaktiviert.
 Ergebnisse landen im ausgewiesenen `output/windows-sandbox-e2e/<ID>/result`.
+`-PrepareOnly` darf auch bei vorhandenen Sandboxen die isolierten Hosteingaben
+und die Konfiguration vorbereiten; es startet, verbindet oder verändert keinen
+Gast. Der automatische Start ohne diesen Schalter bleibt bei vorhandenen
+Sandboxen gesperrt. Ein gezielter neuer Start über die
+[Windows-Sandbox-CLI](https://learn.microsoft.com/en-us/windows/security/application-security/application-isolation/windows-sandbox/windows-sandbox-cli)
+kann zusätzlich an `CO_E_APPSINGLEUSE` scheitern. Dann bleibt die bestehende
+Sandbox unangetastet; es braucht eine ausdrückliche Freigabe zum Verwerfen
+dieses Gasts oder einen anderen Testrechner. Ein vorbereitetes Testverzeichnis
+ist kein ausgeführter Test.
 Ein gestarteter Sandboxprozess ist noch kein bestandenes Gate; maßgeblich ist
 das terminale, prüfsummengebundene `result.json` einschließlich Cleanup.
 `suite-result.json` beschreibt den gesamten beauftragten Lauf einschließlich
