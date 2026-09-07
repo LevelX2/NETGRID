@@ -89,4 +89,7 @@ Assert((string?)Scheduled("BeginNetgridLifecycle").Attribute("After") == "Rollba
 Assert((string?)Scheduled("CommitNetgridLifecycle").Attribute("After") == "BeginNetgridLifecycle", "commit_registered_after_begin");
 Assert(package.Elements(wix + "Launch").Any(x => (string?)x.Attribute("Condition") == "NOT RollbackDisabled"), "rollback_cannot_be_disabled");
 Assert(package.Elements(wix + "Property").Any(x => (string?)x.Attribute("Id") == "MSIRESTARTMANAGERCONTROL" && (string?)x.Attribute("Value") == "DisableShutdown"), "restart_manager_not_second_process_owner");
+var frameworkCondition = package.Elements(wix + "Launch").Select(x => (string)x.Attribute("Condition")!)
+    .Single(x => x.Contains("NETGRID_DOTNET_FRAMEWORK_RELEASE", StringComparison.Ordinal));
+Assert(frameworkCondition == "NETGRID_DOTNET_FRAMEWORK_RELEASE >= \"#528040\"", "framework_condition_uses_raw_dword_representation");
 Console.WriteLine($"INSTALLER_LIFECYCLE_TESTS_OK checks={checks} registry=isolated_HKCU fixtureCleanup=verified installed=false");

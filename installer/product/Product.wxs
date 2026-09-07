@@ -17,7 +17,8 @@
     <Property Id="NETGRID_DOTNET_FRAMEWORK_RELEASE">
       <RegistrySearch Id="NetgridFrameworkRelease" Root="HKLM" Key="SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full" Name="Release" Type="raw" Bitness="always64" />
     </Property>
-    <Launch Condition="NETGRID_DOTNET_FRAMEWORK_RELEASE &gt;= 528040" Message="NETGRID requires the .NET Framework 4.8 Windows component." />
+    <!-- RegLocator raw DWORD properties include the '#' type prefix. -->
+    <Launch Condition='NETGRID_DOTNET_FRAMEWORK_RELEASE &gt;= "#528040"' Message="NETGRID requires the .NET Framework 4.8 Windows component." />
     <Launch Condition="NOT RollbackDisabled" Message="NETGRID setup requires Windows Installer rollback to be enabled." />
     <Binary Id="NetgridLifecycleActions" SourceFile="$(LifecycleActionsPath)" />
     <CustomAction Id="PrepareNetgridLifecycle" BinaryRef="NetgridLifecycleActions" DllEntry="PrepareNetgridLifecycle" Execute="immediate" Return="check" />

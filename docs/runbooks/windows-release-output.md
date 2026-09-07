@@ -70,6 +70,12 @@ Zusätzlich wird die innere CAB-Payload der Lifecycle-Binary auf genau drei
 erlaubte Dateien und identische Buildinput-Hashes geprüft; Quellen und
 Debugsymbole sind auch dort verboten.
 
+Die Framework-LaunchCondition wird zusätzlich mit dem echten MSI-Auswerter
+in einer isolierten Paketsitzung geprüft. Die fünf Fälle berücksichtigen
+das `#`-Präfix roher Registry-DWORD-Werte. Dabei wird keine Installation
+oder MSI-Aktion ausgeführt; eine alleinige Quelltextprüfung reicht dafür
+nicht aus.
+
 Eng begrenzte Prüfungen ohne Installation:
 
 ```powershell

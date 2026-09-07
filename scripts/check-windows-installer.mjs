@@ -26,6 +26,7 @@ try {
   assertFile(msiPath, "installer_msi_missing");
   assertFile(setupPath, "installer_setup_missing");
   run("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", path.join(import.meta.dirname, "check-windows-msi-lifecycle.ps1"), "-MsiPath", msiPath]);
+  run("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", path.join(import.meta.dirname, "check-windows-msi-framework.ps1"), "-MsiPath", msiPath]);
   const administrativeRoot = path.join(scratch, "a");
   run("msiexec.exe", ["/a", msiPath, "/qn", `TARGETDIR=${administrativeRoot}`]);
   const layoutMatches = findFiles(administrativeRoot, "product-layout.json");

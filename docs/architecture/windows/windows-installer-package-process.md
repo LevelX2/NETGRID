@@ -904,6 +904,47 @@ hartem Abbruch stehengebliebene fremde aktive Lease wird absichtlich nicht
 automatisch gelöscht. Das Uninstall-Gate bleibt rot; kein Main-Merge,
 kein Push und kein Release.
 
+#### Kandidat 8168 und nachgezogene Framework-Prüfung
+
+Der saubere Commit `ab6f87db5` wurde vollständig als `1.0.8168` unter
+`output/windows-installer-lifecycle-8168` gebaut. Produktoutput, 2.042
+Setupchecks, 68 First-Run-Checks, Launcher-/Updater-Tests und -Smokes,
+47 Lifecycle-Checks, drei Binäraudit-Regressionstests, innere CA-Payload,
+177 Sprachstrings, 27 Darstellungsrenderings und der vollständige Audit von
+10.902 installierten Dateien bestanden. Der Build ist terminal mit Exitcode 0.
+
+**Dieser Kandidat ist dennoch nicht zur Installation freigegeben.** Eine
+zusätzliche Voraussetzungenprüfung fand einen Fehler in der neuen .NET-
+Framework-Bedingung: `RegistrySearch Type="raw"` liefert DWORD-Werte mit
+`#`-Präfix, während die Bedingung bisher gegen die ungekennzeichnete Zahl
+`528040` verglich. Der echte MSI-Auswerter bestätigt am gebauten 8168-MSI
+für `#528040` fälschlich `false`. Die Bedingung wurde auf den dokumentierten
+Rohwertvergleich mit `"#528040"` korrigiert. Führend ist das
+[RegLocator-Rohwertformat](https://learn.microsoft.com/en-us/windows/win32/msi/reglocator-table).
+
+`check-windows-msi-framework.ps1` öffnet eine isolierte MSI-Paketsitzung mit
+`IGNOREMACHINESTATE`, setzt nur deren temporäre Testeigenschaft und wertet
+die tatsächliche LaunchCondition aus. Es ruft keine Installationsaktion,
+keinen AppSearch und keine ExecuteSequence auf. Fehlender Wert und zwei zu
+alte Versionen müssen abgewiesen, .NET 4.8 sowie der tatsächliche
+Sandboxstand .NET 4.8.1 angenommen werden. Eine ausschließlich zu dieser
+Diagnose geänderte Kopie unter
+`output/framework-condition-probe-c93f67905b994b1a8115d2cce94dd229/PROBE-NOT-FOR-INSTALLATION.msi`
+besteht alle fünf Fälle; die Quellautorisierung besteht mit 48 Lifecyclechecks.
+Die neue Prüfung ist vor dem Payload-Audit in der Buildstrecke gebunden.
+Der korrigierte Quellstand benötigt noch einen eigenen, neuen Kandidaten.
+
+Die bestehende Sandbox `8d4881be-5836-42a6-b4b5-48ebea3aa95f` wurde um
+19:30:52 UTC lesend geprüft: kein installiertes NETGRID-Programm, keine
+Produktprozesse, keine Listener auf 3100/8787, Konfiguration und vorhandene
+Maintenance-Credentials weiterhin hashidentisch, Framework-Releasewert
+533320. Der vom Nutzer bestätigte Installationsversuch wurde wegen des
+nachgewiesenen Kandidatenfehlers noch nicht ausgeführt. Es wurde nur der
+Explorer in dieser Sandbox geöffnet; weder Installation noch UAC- oder
+Passworteingabe erfolgten. Die vorbereiteten 8168-Staging-/Fortschrittshelfer
+wurden nicht ausgeführt und dürfen nicht versehentlich für den Nachfolger
+verwendet werden.
+
 ### Aktueller Updatekandidat und Teststart vom 7. September 2026
 
 `1.0.8145` wurde regulär aus dem sauberen Commit
