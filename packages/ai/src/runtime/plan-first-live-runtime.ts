@@ -9974,7 +9974,10 @@ function buildRunnerDomain(
               ));
         const encounterMitigation = visibleEncounterMitigation(input);
         const currentEncounterRequiresDamageBreak =
-          runnerCurrentEncounterRequiresDamagePreservingBreak(input);
+          runnerCurrentEncounterRequiresDamagePreservingBreak(
+            input,
+            activeRunRoot,
+          );
         const informationProbeRequiresEncounterBreak =
           runnerInformationProbeRequiresEncounterBreak(input, activeRunRoot);
         const fullPathEncounterRequiresBreak =
@@ -30495,6 +30498,7 @@ function runnerRunPaymentSupportAction(
 function runnerRunPaymentSupportAssessment(
   input: AiDecisionInput,
   action: LegalAction,
+  runOrigin: RunnerRunOrigin | undefined,
 ): RunnerRunWindowActionAssessment {
   const original = input.legalActions.find(
     (entry) =>
@@ -30516,7 +30520,7 @@ function runnerRunPaymentSupportAssessment(
       admissible: false,
       evidenceCodes: ["runner_run_payment_support_cash_target_quote_missing"],
     };
-  const preservesActivationCash =
+  const validPositivePaymentSource =
     original !== undefined &&
     ability !== undefined &&
     ability.trashesSource &&
@@ -30524,17 +30528,34 @@ function runnerRunPaymentSupportAssessment(
     ability.creditCost <= cash &&
     ability.gainCredits > ability.creditCost &&
     legalActionCreditCost(action) === ability.creditCost &&
-    action.payload?.gainCreditsAmount === ability.gainCredits &&
+    action.payload?.gainCreditsAmount === ability.gainCredits;
+  const preservesActivationCash =
+    validPositivePaymentSource &&
     cash - Number(cashTarget) < ability.creditCost;
+  const contract = runOrigin?.runRiskContract;
+  const remainingUnknownIce = currentRunRemainingIce(input).some(
+    (ice) => ice.known !== true || ice.rezzed !== true,
+  );
+  const requiredReserve =
+    remainingUnknownIce &&
+    contract?.serverId === input.playerView.run?.attackedServerId
+      ? (contract?.reserveQuote.requiredCredits ?? 0)
+      : 0;
+  const fundsBoundRunReserve =
+    validPositivePaymentSource &&
+    cash - Number(cashTarget) < requiredReserve &&
+    cash - Number(cashTarget) + ability.gainCredits - ability.creditCost >=
+      requiredReserve;
+  const usePaymentSource = preservesActivationCash || fundsBoundRunReserve;
   return {
-    admissible: preservesActivationCash,
-    value: preservesActivationCash
-      ? ability.gainCredits - ability.creditCost
-      : 0,
+    admissible: usePaymentSource,
+    value: usePaymentSource ? ability.gainCredits - ability.creditCost : 0,
     evidenceCodes: [
       preservesActivationCash
         ? "runner_run_payment_support_before_activation_cash_is_spent"
-        : "runner_run_payment_support_activation_cash_preserved",
+        : fundsBoundRunReserve
+          ? "runner_run_payment_support_funds_bound_unknown_ice_reserve"
+          : "runner_run_payment_support_activation_cash_preserved",
     ],
   };
 }
@@ -30987,7 +31008,7 @@ function runnerRunWindowActionAssessment(
 ): RunnerRunWindowActionAssessment {
   const paymentSupport = runnerRunPaymentSupportAction(input, candidate);
   if (paymentSupport)
-    return runnerRunPaymentSupportAssessment(input, paymentSupport);
+    return runnerRunPaymentSupportAssessment(input, paymentSupport, runOrigin);
   const additionalAccessAssessment =
     assessRunnerAdditionalAccessRunWindowAction({
       candidate,
@@ -31683,7 +31704,7 @@ function runnerRunWindowPlanStepExclusion(
     (action.type === "pump_breaker" || action.type === "break_subroutine") &&
     runOrigin?.purpose === "information" &&
     runOrigin.encounterCreditSpendLimit !== undefined &&
-    !runnerCurrentEncounterRequiresDamagePreservingBreak(input) &&
+    !runnerCurrentEncounterRequiresDamagePreservingBreak(input, runOrigin) &&
     legalActionCreditCost(action) > runOrigin.encounterCreditSpendLimit
   ) {
     return {
@@ -31804,6 +31825,7 @@ function runnerInformationProbeRequiresEncounterBreak(
 
 function runnerCurrentEncounterRequiresDamagePreservingBreak(
   input: AiDecisionInput,
+  runOrigin: RunnerRunOrigin | undefined,
 ): boolean {
   const encounteredIce = currentEncounteredIceCard(input);
   if (!encounteredIce?.effectiveRunQuote) return false;
@@ -31813,7 +31835,15 @@ function runnerCurrentEncounterRequiresDamagePreservingBreak(
       // subroutine unbroken. Affordability is evaluated by the exact
       // pump/break LegalActions, not by this consequence check.
       generalCredits: 0,
-      requiredHandFloor: runnerConfirmedDamageRequiredHandFloor(input),
+      // An information run already reserved a hand buffer for the unknown
+      // remainder. Its encounter budget cannot discard that bound reserve
+      // merely because the immediate damage is not itself a flatline.
+      requiredHandFloor: Math.max(
+        runnerConfirmedDamageRequiredHandFloor(input),
+        runOrigin?.purpose === "information"
+          ? (runOrigin.runRiskContract?.reserveQuote.requiredHandBuffer ?? 0)
+          : 0,
+      ),
     }) !== undefined
   );
 }

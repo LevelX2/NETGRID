@@ -464,6 +464,30 @@ function evaluateRunnerRunTarget(
     riskyUniversalCoverage,
     visibleDuringRunRezSupport,
   });
+  // The unknown remainder requires both liquid credits and a surviving grip.
+  // Known damage avoidance may spend only the money outside that same reserve.
+  const visibleDamageViolatesPrerunReserve =
+    unknownUnrezzedIceCount > 0 && prerunReserveQuote.requiredHandBuffer > 0
+      ? runnerVisibleLethalIceDamageAssessment(
+          params.input,
+          projectedServerIce,
+          {
+            generalCredits: Math.max(
+              0,
+              path.creditsAfterPath - prerunReserveQuote.requiredCredits,
+            ),
+            runDamagePreventionRemaining: Math.max(
+              0,
+              projection.damagePreventionPool ?? 0,
+            ),
+            handCount: projectedGripAfterRunAction,
+            requiredHandFloor: prerunReserveQuote.requiredHandBuffer,
+          },
+        )
+      : undefined;
+  if (visibleDamageViolatesPrerunReserve && pathPassability === "reachable") {
+    pathPassability = "blocked_by_visible_damage_hand_buffer";
+  }
   const unrezzedIceRiskUnderfunded = prerunReserveQuote.creditGap > 0;
   const targetFundingNeed = runnerRunTargetFundingNeed({
     routeQuote,
@@ -611,6 +635,12 @@ function evaluateRunnerRunTarget(
       `known_access_state:${payoff.knownAccessState}`,
       `central_access_novelty_ratio:${payoff.accessNoveltyRatio}`,
       `path_passability:${pathPassability}`,
+      ...(visibleDamageViolatesPrerunReserve
+        ? [
+            `runner_visible_damage_violates_prerun_reserve:${targetServerId}`,
+            visibleDamageViolatesPrerunReserve.evidenceCode,
+          ]
+        : []),
       ...(visibleLethalIceDamage
         ? [
             `runner_visible_lethal_ice_damage_blocks_run_start:${targetServerId}`,

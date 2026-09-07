@@ -3096,6 +3096,16 @@ Zweck, sofern dessen Quote keine Umleitung oder Rückversetzung enthält.
 Diese Zielprüfung gehört zur Encounter-Action-Admission und bleibt von der
 Wahl eines bestimmten Breakers unabhängig.
 
+Die vorab gebundene Reserve für unbekanntes ICE gilt auch vor dessen
+Informationsgrenze: Bekannter Schaden darf den reservierten Handpuffer nicht
+verbrauchen; seine Vermeidung darf nur aus Credits außerhalb derselben
+Reserve finanziert werden. Im laufenden Informations-Encounter schützt der
+bestehende Schadens-Break-Owner diesen Handpuffer auch dann, wenn der Schaden
+allein noch nicht tödlich wäre. Eine bereits gequotete einmalige Zahlungsquelle
+wird im exakten Kostenfenster verwendet, wenn sie die nach der Zahlung fehlende
+Creditreserve für den weiterhin unbekannten Restpfad vollständig finanziert.
+Plan, Quelle, ursprüngliche Action und Engine-Fenster bleiben dabei gebunden.
+
 Eine spätere Vacuum-Link-Choice darf ebenso aus einer exakt gebundenen
 Run-Executor-Phase hervorgehen, deren Root ein übergeordneter Restricted-Run-
 Plan ist. Der bestehende Continuation-Owner prüft Commitment, Source-Plan,
