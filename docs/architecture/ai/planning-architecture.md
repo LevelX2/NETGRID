@@ -2813,6 +2813,20 @@ solchen konkreten Runbedarf wird die Umstellung ausdrücklich als unproduktiv
 klassifiziert; sie darf weder ownerlos bleiben noch vorsorglich auf Verdacht
 ausgeführt werden.
 
+Die Zulassung einer solchen Vorbereitung verwendet auch die
+Informationsprobe-Regel ihres Run-Parents. Eine Mode-Umstellung darf keinen
+Runbedarf vortäuschen, dessen bekannte Pfadkosten nach der Vorbereitung die
+zugelassene Informationsprobe weiterhin ausschließen. Terminale oder
+nachweislich anders verwertbare Runlinien behalten ihre vorhandenen Ausnahmen.
+
+Bei einer noch nicht installierten konfigurierbaren Breakerkarte berücksichtigt
+derselbe Coverage-Owner die typisierten `coverageCandidates` des kanonischen
+Hints. Sie sind mögliche zukünftige Modi und keine gleichzeitig aktive
+Rig-Abdeckung. Der konkrete Installationspfad bleibt an Quelle, LegalAction,
+Rolle und Parent gebunden; die Engine-basierte Pfadprüfung wahrt Moduskosten
+und die Bindung einer einmaligen Moduswahl. Feste Deckdoktrin-Rollen dürfen
+diesen nachgewiesenen Installationspfad nicht erneut verwerfen.
+
 ### 27.5 `runner.develop_board_and_hand`
 
 **Klasse:** `bounded_sequence` oder `development_project`

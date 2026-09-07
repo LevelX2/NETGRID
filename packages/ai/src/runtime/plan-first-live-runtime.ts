@@ -125,6 +125,7 @@ import {
   createRunnerCorePlanModules,
   runnerCoverageCurrentPhase,
   runnerRolesCoverCoverageGap,
+  runnerInstallDefinitionCoversCoverageGap,
   runnerDevelopmentCardAdmission,
   runnerDevelopmentFundingMilestone,
   runnerDefenseReactionReserveIsCurrentPhase,
@@ -4990,7 +4991,8 @@ function runnerCoverageOwnedActionIds(
             );
             return (
               sourceDefinitionId !== undefined &&
-              runnerRolesCoverCoverageGap(
+              runnerInstallDefinitionCoversCoverageGap(
+                sourceDefinitionId,
                 rolesForDeckDoctrineCard(sourceDefinitionId),
                 gap.requiredRole,
               )
@@ -27856,6 +27858,25 @@ function uniqueCoverageGaps(
     ) {
       continue;
     }
+    // A coverage child may prepare only a route its parent would admit.
+    // Reuse the parent's information-probe policy on the prepared path;
+    // the setup cost is already paid at that future run-start boundary.
+    const preparedEvaluation = {
+      ...evaluation,
+      pathCost: Math.max(0, evaluation.pathCost - preparation.credits),
+    };
+    if (
+      runPurposeForEvaluation(evaluation) === "information" &&
+      !runnerInformationProbeCanUseQuotedPath(
+        preparedEvaluation,
+        runnerRunTargetCanConvertNow(input, economy, evaluation, candidates),
+        evaluation.targetKind !== "remote" &&
+          input.playerView.own.agendaPoints >=
+            input.playerView.agendaPointsToWin - 1,
+      )
+    ) {
+      continue;
+    }
     const requesterModuleId =
       evaluation.targetKind === "remote"
         ? ("runner.contest_remote" as const)
@@ -29254,7 +29275,11 @@ function runnerCoverageInstallActionValues(
     const definitionId = runnerCandidateSourceDefinitionId(input, candidate);
     if (
       !definitionId ||
-      !runnerRolesCoverCoverageGap(rolesForDeckDoctrineCard(definitionId), role)
+      !runnerInstallDefinitionCoversCoverageGap(
+        definitionId,
+        rolesForDeckDoctrineCard(definitionId),
+        role,
+      )
     )
       continue;
     const sourceInstanceId = candidate.sourceCardInstanceId;

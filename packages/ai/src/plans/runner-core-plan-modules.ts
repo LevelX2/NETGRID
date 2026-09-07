@@ -1,6 +1,7 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
 import { rolesForDeckDoctrineCard } from "../deck-doctrine-card-roles";
+import { AI_HINTS_BY_CARD } from "../ai-hints";
 import type { AiDeckStrategyProfile } from "../deck-doctrine-strategy";
 import { rolesMatch } from "../runtime/role-match";
 import { runnerEffectsProvideDamagePrevention } from "../runner-canonical-hint-semantics";
@@ -2511,7 +2512,14 @@ function coverageInstallCandidates(
     );
     if (!sourceDefinitionId) return [];
     const roles = rolesForDefinitionId(sourceDefinitionId);
-    if (!runnerRolesCoverCoverageGap(roles, gap.requiredRole)) return [];
+    if (
+      !runnerInstallDefinitionCoversCoverageGap(
+        sourceDefinitionId,
+        roles,
+        gap.requiredRole,
+      )
+    )
+      return [];
     return [
       {
         candidate,
@@ -2618,6 +2626,24 @@ export function runnerRolesCoverCoverageGap(
   return (
     rolesMatch(roles, runnerCoverageRoleNeedles(requiredRole)) ||
     rolesMatch(roles, ["universal_breaker", "breaker_universal"])
+  );
+}
+
+/** Prospective installation coverage; never use this as active rig coverage.
+ * Configurable modes remain alternatives, with their costs and single-mode
+ * limits evaluated by the existing Engine-backed run-path assessment. */
+export function runnerInstallDefinitionCoversCoverageGap(
+  definitionId: string,
+  roles: readonly string[],
+  requiredRole: RunnerCoverageGapSignal["requiredRole"],
+): boolean {
+  if (runnerRolesCoverCoverageGap(roles, requiredRole)) return true;
+  const profile = AI_HINTS_BY_CARD.get(definitionId)?.breakerProfile;
+  return (
+    profile?.configurableCoverage === true &&
+    (profile.coverageCandidates ?? []).some(
+      (coverage) => `breaker_${coverage}` === requiredRole,
+    )
   );
 }
 
