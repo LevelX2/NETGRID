@@ -8,12 +8,13 @@
     InstallerVersion="500"
     Language="1033">
     <SummaryInformation Description="NETGRID private alpha" />
-    <MajorUpgrade AllowDowngrades="yes" />
+    <MajorUpgrade AllowDowngrades="yes" Schedule="afterInstallExecute" />
     <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
 
     <!-- The lifecycle owner performs graceful shutdown before file changes.
          Restart Manager must not independently terminate/restart Node. -->
     <Property Id="MSIRESTARTMANAGERCONTROL" Value="DisableShutdown" />
+    <Property Id="NETGRID_UPDATE_LEASE" Secure="yes" Hidden="yes" />
     <Property Id="NETGRID_DOTNET_FRAMEWORK_RELEASE">
       <RegistrySearch Id="NetgridFrameworkRelease" Root="HKLM" Key="SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full" Name="Release" Type="raw" Bitness="always64" />
     </Property>
@@ -183,7 +184,7 @@
       Value="remove-firewall"
       Before="RemoveNetgridFirewall"
       Sequence="execute"
-      Condition='REMOVE~="ALL"' />
+      Condition='REMOVE~="ALL" AND NOT UPGRADINGPRODUCTCODE' />
     <CustomAction
       Id="RemoveNetgridFirewall"
       FileRef="NetgridRuntimeConfig"
@@ -197,7 +198,7 @@
       Value='delete-data --data-root "[NETGRID_DATA_ROOT]" --confirmation "DELETE_NETGRID_DATA"'
       Before="DeleteNetgridData"
       Sequence="execute"
-      Condition='REMOVE~="ALL" AND DELETEUSERDATA = 1' />
+      Condition='REMOVE~="ALL" AND DELETEUSERDATA = 1 AND NOT UPGRADINGPRODUCTCODE' />
     <CustomAction
       Id="DeleteNetgridData"
       FileRef="NetgridRuntimeConfig"
@@ -214,8 +215,8 @@
       <Custom Action="InitializeNetgridRuntime" After="InstallFiles" Condition='NOT REMOVE~="ALL"' />
       <Custom Action="CacheNetgridMsi" After="InitializeNetgridRuntime" Condition='NOT Installed AND NOT REMOVE~="ALL"' />
       <Custom Action="CacheNetgridSetup" After="CacheNetgridMsi" Condition='NOT REMOVE~="ALL" AND NETGRID_SETUP_SOURCE &lt;&gt; ""' />
-      <Custom Action="RemoveNetgridFirewall" Before="SetDeleteNetgridData" Condition='REMOVE~="ALL"' />
-      <Custom Action="DeleteNetgridData" Before="RemoveRegistryValues" Condition='REMOVE~="ALL" AND DELETEUSERDATA = 1' />
+      <Custom Action="RemoveNetgridFirewall" Before="SetDeleteNetgridData" Condition='REMOVE~="ALL" AND NOT UPGRADINGPRODUCTCODE' />
+      <Custom Action="DeleteNetgridData" Before="RemoveRegistryValues" Condition='REMOVE~="ALL" AND DELETEUSERDATA = 1 AND NOT UPGRADINGPRODUCTCODE' />
     </InstallExecuteSequence>
 
     <Icon Id="NetgridIcon" SourceFile="$(NetgridIcon)" />

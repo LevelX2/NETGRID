@@ -22,7 +22,29 @@ namespace Netgrid.InstallerActions
             {
                 ["ProgramRoot"] = root,
                 ["Lease"] = Guid.NewGuid().ToString("N"),
+                ["ProductCode"] = session["ProductCode"],
+                ["OuterLease"] = session["NETGRID_UPDATE_LEASE"],
+                ["Nested"] = "0",
             };
+            InstallationGate.ValidateProductCode(data["ProductCode"]);
+            if (data["OuterLease"] != "") InstallationGate.ValidateLease(data["OuterLease"]);
+            var upgradingProduct = session["UPGRADINGPRODUCTCODE"];
+            if (upgradingProduct != "")
+            {
+                InstallationGate.ValidateProductCode(upgradingProduct);
+                if (upgradingProduct == data["ProductCode"] || data["OuterLease"] != "")
+                    throw new InvalidOperationException("installation_gate_nested_context_invalid");
+                using (var machine = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
+                {
+                    var current = InstallationGate.Read(machine, InstallationGate.KeyFor(root));
+                    if (current == null || current.MsiProductCode != upgradingProduct)
+                        throw new InvalidOperationException("installation_gate_msi_owner_missing");
+                    InstallationLease.RequireMsi(machine, root, current.MsiLease, upgradingProduct);
+                    data["Lease"] = current.MsiLease;
+                    data["ProductCode"] = upgradingProduct;
+                    data["Nested"] = "1";
+                }
+            }
             foreach (var action in new[] { "BeginNetgridLifecycle", "CommitNetgridLifecycle", "RollbackNetgridLifecycle" })
                 session[action] = data.ToString();
         });
@@ -33,7 +55,14 @@ namespace Netgrid.InstallerActions
             var root = session.CustomActionData["ProgramRoot"];
             var lease = session.CustomActionData["Lease"];
             using (var machine = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
-                InstallationLease.Begin(machine, root, lease);
+            {
+                if (IsNested(session)) InstallationLease.RequireMsi(machine, root, lease, session.CustomActionData["ProductCode"]);
+                else if (session.CustomActionData["OuterLease"] == "")
+                    InstallationLease.BeginMsi(machine, root, lease, session.CustomActionData["ProductCode"], "");
+                else
+                    using (var owner = OpenUpdateOwner(machine, root, session.CustomActionData["OuterLease"]))
+                        InstallationLease.BeginMsi(machine, root, lease, session.CustomActionData["ProductCode"], session.CustomActionData["OuterLease"]);
+            }
             // The launcher observes the lease, disables recovery and performs
             // its existing stdin shutdown. Never kill it or arbitrary Node
             // processes from the installer as a substitute for that handshake.
@@ -51,17 +80,46 @@ namespace Netgrid.InstallerActions
         public static ActionResult CommitNetgridLifecycle(Session session) => Run(session, () =>
         {
             using (var machine = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
-                if (!InstallationLease.ReleaseOwned(machine, session.CustomActionData["ProgramRoot"], session.CustomActionData["Lease"]))
+                if (IsNested(session)) InstallationLease.RequireMsi(machine, session.CustomActionData["ProgramRoot"], session.CustomActionData["Lease"], session.CustomActionData["ProductCode"]);
+                else if (!InstallationLease.CompleteMsi(machine, session.CustomActionData["ProgramRoot"], session.CustomActionData["Lease"], session.CustomActionData["ProductCode"]))
                     throw new InvalidOperationException("installation_gate_commit_owner_missing");
         });
 
         [CustomAction]
         public static ActionResult RollbackNetgridLifecycle(Session session) => Run(session, () =>
         {
+            // A nested rollback owns no release, including when the top-level
+            // rollback has already completed its transaction record.
+            if (IsNested(session)) { session.Log("NETGRID_LIFECYCLE_ROLLBACK nested=true released=false"); return; }
             using (var machine = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
-                session.Log("NETGRID_LIFECYCLE_ROLLBACK released={0}", InstallationLease.ReleaseOwned(
-                    machine, session.CustomActionData["ProgramRoot"], session.CustomActionData["Lease"]));
+                session.Log("NETGRID_LIFECYCLE_ROLLBACK released={0}", InstallationLease.CompleteMsi(
+                    machine, session.CustomActionData["ProgramRoot"], session.CustomActionData["Lease"], session.CustomActionData["ProductCode"]));
         });
+
+        private static bool IsNested(Session session)
+        {
+            var value = session.CustomActionData["Nested"];
+            if (value != "0" && value != "1") throw new InvalidOperationException("installation_gate_nested_context_invalid");
+            return value == "1";
+        }
+
+        private static Process OpenUpdateOwner(RegistryKey machine, string root, string lease)
+        {
+            var current = InstallationGate.Read(machine, InstallationGate.KeyFor(root));
+            if (current == null || current.Lease != lease || current.Phase != InstallationGate.GateState.Stopping || current.OwnerId <= 0)
+                throw new InvalidOperationException("installation_gate_update_owner_missing");
+            Process owner;
+            try { owner = Process.GetProcessById(current.OwnerId); }
+            catch (ArgumentException) { throw new InvalidOperationException("installation_gate_update_owner_missing"); }
+            try
+            {
+                var handle = owner.Handle;
+                if (owner.HasExited || owner.StartTime.ToUniversalTime().Ticks != current.OwnerStart)
+                    throw new InvalidOperationException("installation_gate_update_owner_missing");
+                return owner;
+            }
+            catch { owner.Dispose(); throw; }
+        }
 
         private static bool ProductProcessesRemain(string programRoot)
         {

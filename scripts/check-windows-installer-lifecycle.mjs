@@ -45,6 +45,28 @@ export function checkLifecycleAuthoring(authoring) {
   }
   if (!authoring.includes('<Property Id="MSIRESTARTMANAGERCONTROL" Value="DisableShutdown"'))
     throw new Error("installer_lifecycle_restart_manager_owner_conflict");
+  const upgrade = authoring.match(/<MajorUpgrade\b[^>]*>/)?.[0];
+  if (!upgrade?.includes('AllowDowngrades="yes"'))
+    throw new Error("installer_lifecycle_rollback_downgrade_invalid");
+  // Do not infer executable scheduling from decompiled MajorUpgrade: the
+  // observed WiX 7 reconstruction says afterInstallFinalize even when the
+  // real table is 6500 < 6501 < 6600. The artifact gate reads that table via
+  // check-windows-msi-lifecycle.ps1 before using this structural projection.
+  const outerLease = authoring.match(/<Property Id="NETGRID_UPDATE_LEASE"[^>]*>/)?.[0];
+  if (!outerLease?.includes('Secure="yes"') || !outerLease.includes('Hidden="yes"'))
+    throw new Error("installer_lifecycle_outer_lease_property_invalid");
+  for (const action of ["RemoveNetgridFirewall", "DeleteNetgridData"]) {
+    const scheduled = authoring.match(new RegExp(`<Custom Action="${action}"[^>]+>`))?.[0];
+    if (!scheduled?.includes('NOT UPGRADINGPRODUCTCODE'))
+      throw new Error(`installer_lifecycle_nested_cleanup_unsafe:${action}`);
+  }
+}
+
+export function checkLifecycleSource(authoring) {
+  checkLifecycleAuthoring(authoring);
+  const upgrade = authoring.match(/<MajorUpgrade\b[^>]*>/)?.[0];
+  if (!upgrade?.includes('Schedule="afterInstallExecute"'))
+    throw new Error("installer_lifecycle_upgrade_sequence_invalid");
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

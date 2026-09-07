@@ -151,8 +151,8 @@ try {
     !authoring.includes(`Version="${productLayout.product.installerVersion}"`)
   )
     throw new Error("installer_product_version_invalid");
-  if (!authoring.includes('<MajorUpgrade AllowDowngrades="yes"'))
-    throw new Error("installer_rollback_downgrade_contract_invalid");
+  // Scheduling is verified from the real MSI sequence table at entry;
+  // downgrade support is checked by checkLifecycleAuthoring above.
   if (!authoring.includes('Property="SOURCELIST"') ||
       !authoring.includes('[NETGRID_DATA_ROOT]\\config\\installer\\[ProductCode]') ||
       !authoring.includes('--source &quot;[OriginalDatabase]&quot;') ||
@@ -197,10 +197,10 @@ try {
       '<CustomAction Id="RemoveNetgridFirewall" HideTarget="yes" Impersonate="no" Execute="deferred"',
     ) ||
     !authoring.includes(
-      '<Custom Action="RemoveNetgridFirewall" Condition="REMOVE~=&quot;ALL&quot;" Before="SetDeleteNetgridData"',
+      '<Custom Action="RemoveNetgridFirewall" Condition="REMOVE~=&quot;ALL&quot; AND NOT UPGRADINGPRODUCTCODE" Before="SetDeleteNetgridData"',
     ) ||
     !authoring.includes(
-      '<Custom Action="DeleteNetgridData" Condition="REMOVE~=&quot;ALL&quot; AND DELETEUSERDATA = 1" Before="RemoveRegistryValues"',
+      '<Custom Action="DeleteNetgridData" Condition="REMOVE~=&quot;ALL&quot; AND DELETEUSERDATA = 1 AND NOT UPGRADINGPRODUCTCODE" Before="RemoveRegistryValues"',
     ) ||
     !authoring.includes('Condition="INSTALLDESKTOPSHORTCUT = 1"') ||
     !authoring.includes('Name="NETGRID Maintenance"') ||

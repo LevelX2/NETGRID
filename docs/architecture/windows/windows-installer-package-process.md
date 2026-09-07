@@ -984,7 +984,7 @@ konkrete Anbindung der sicheren Übergabe offen.
 Der gemeinsame Writer der bestehenden Installersperre unterstützt jetzt
 explizit Vorbereitung, Stopp und Abschluss. Die Vorbereitung bewahrt exakt
 den ursprünglichen Launcher (PID plus Startzeit), ihr Abbruch erhält diese
-Ausnahme, und der Stopp entfernt sie. Die atomare Version-2-Registrybindung
+Ausnahme, und der Stopp entfernt sie. Die atomare Registrybindung
 bewahrt den Abschluss-Cutoff und serialisiert konkurrierende Writer. Es gibt
 keinen zweiten Sperrowner und keine stillschweigende Altformatkonvertierung.
 157 Lifecyclechecks bestehen in isoliertem HKCU, einschließlich acht
@@ -1035,6 +1035,34 @@ Der gesamte Launcher-Komponententest bleibt grün; sein geänderter Build
 hat null Warnungen und Fehler. Die echte Tray-/Updater-Anbindung sowie
 MSI-Teiltransaktionen und die Healthfreigabe bleiben weiterhin offen.
 Kandidat 8169 wurde dabei weder ersetzt noch installiert.
+
+Die MSI-Seite bindet jetzt Standalone- und Updater-Teiltransaktionen sowie
+den verschachtelten Altversions-Uninstall an denselben Registryowner.
+Version 3 des atomaren Records ergänzt MSI-Lease und ProductCode; alte
+Formate werden nicht automatisch konvertiert. Ein MSI-Abschluss löst die
+äußere Updatesperre nicht, und ihr Owner kann sie nicht während einer aktiven
+MSI-Teiltransaktion freigeben. Ein vom Updater beauftragter MSI-Lauf prüft
+zusätzlich dessen noch lebende PID/Startzeit. Der Setuphost/Updater übergibt
+die äußere Lease noch nicht im realen Produktablauf.
+
+Die neue Reihenfolge `afterInstallExecute` wird in einem ausdrücklich nicht
+installierbaren Diagnosepaket tatsächlich als `6500 < 6501 < 6600`
+(`InstallExecute`, `RemoveExistingProducts`, `InstallFinalize`) gespeichert.
+Die ursprüngliche Quelle und die wirkliche MSI-Tabelle sind getrennt geprüft,
+weil die WiX-7-Rückübersetzung dieser Probe fälschlich
+`afterInstallFinalize` ausgibt. Der Paketchecker darf diese Rückübersetzung
+nicht als Sequenznachweis verwenden. Firewall-/Daten-Cleanup und ihre
+Parameterbereitstellung sind im verschachtelten Uninstall ausgeschlossen.
+
+205 Lifecyclechecks, vier Binär-/Authoring-Regressionstests, der net48-Build
+mit null Warnungen/Fehlern und die echten MSI-Tabellen-/Strukturprüfungen
+bestehen. Launcher-, First-Run- und Updater-Komponententests bleiben grün.
+Der letzte zusätzliche Record-Invariantencheck wurde nach der Probe nur
+als Komponentenbuild geprüft; es wird kein vollständiger aktueller
+Installer-/Payloadaudit behauptet. Native Zwei-Versionen-Upgrades,
+Rollback, Aktivspielschutz und Komponentenreferenzzählung bleiben offen.
+Die Diagnoseprobe ist im Runbook gebunden; 8169 und dessen Sandbox bleiben
+unverändert. Kein Main-Merge, Push oder Release.
 
 Vor der Freigabe bleiben die Prozess-Ende-Raceprüfung,
 die direkten MSI-Updatepfade hinsichtlich

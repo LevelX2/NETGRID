@@ -26,7 +26,7 @@ try {
   foreach ($row in (Read-InstallerRows 'SELECT `Action`, `Condition`, `Sequence` FROM `InstallExecuteSequence`' 3)) {
     $sequence[$row[0]] = @{ Condition = $row[1]; Number = [int]$row[2] }
   }
-  $ordered = @('CostFinalize', 'PrepareNetgridLifecycle', 'InstallInitialize', 'RollbackNetgridLifecycle', 'BeginNetgridLifecycle', 'CommitNetgridLifecycle', 'RemoveRegistryValues', 'RemoveFiles', 'InstallFiles', 'InstallFinalize')
+  $ordered = @('CostFinalize', 'PrepareNetgridLifecycle', 'InstallInitialize', 'RollbackNetgridLifecycle', 'BeginNetgridLifecycle', 'CommitNetgridLifecycle', 'RemoveRegistryValues', 'RemoveFiles', 'InstallFiles', 'InstallExecute', 'RemoveExistingProducts', 'InstallFinalize')
   $previous = -1
   foreach ($action in $ordered) {
     if (-not $sequence.ContainsKey($action) -or $sequence[$action].Number -le $previous) { throw "installer_lifecycle_sequence_invalid:$action" }
@@ -46,6 +46,12 @@ try {
   $properties = @{}
   foreach ($row in (Read-InstallerRows 'SELECT `Property`, `Value` FROM `Property`' 2)) { $properties[$row[0]] = $row[1] }
   if ($properties['MSIRESTARTMANAGERCONTROL'] -ne 'DisableShutdown') { throw 'installer_lifecycle_restart_manager_conflict' }
+  foreach ($propertyList in @('SecureCustomProperties', 'MsiHiddenProperties')) {
+    if (-not (([string]$properties[$propertyList]).Split(';') -ccontains 'NETGRID_UPDATE_LEASE')) { throw "installer_lifecycle_outer_lease_property_invalid:$propertyList" }
+  }
+  foreach ($action in @('SetRemoveNetgridFirewall', 'RemoveNetgridFirewall', 'SetDeleteNetgridData', 'DeleteNetgridData')) {
+    if (-not $sequence.ContainsKey($action) -or $sequence[$action].Condition -notmatch '\bNOT UPGRADINGPRODUCTCODE\b') { throw "installer_lifecycle_nested_cleanup_unsafe:$action" }
+  }
   $conditions = @(Read-InstallerRows 'SELECT `Condition` FROM `LaunchCondition`' 1)
   if (-not ($conditions | Where-Object { $_[0] -eq 'NOT RollbackDisabled' })) { throw 'installer_lifecycle_rollback_not_required' }
   Write-Output ('MSI_LIFECYCLE_CHECK_OK actions=4 sequence=' + (($ordered | ForEach-Object { $_ + ':' + $sequence[$_].Number }) -join ','))

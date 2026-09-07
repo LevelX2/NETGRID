@@ -147,8 +147,15 @@ gesperrt sind. Ihr Abbruch bewahrt diese Ausnahme; der Übergang zum Stopp
 entfernt sie. Eine kurze Writer-Mutex serialisiert Änderungen, während der
 persistente Datensatz die längerlebige Sperre besitzt. Ungültige oder alte
 Datensatzformate werden nicht still konvertiert. Die Anbindung dieser
-Vorbereitung an den echten Updateablauf und dessen MSI-Teiltransaktionen
-bleibt ein offenes Abnahmegate.
+Vorbereitung an den echten Updateablauf bleibt ein offenes Abnahmegate.
+Die aktuelle MSI-Bindung ergänzt denselben atomaren Datensatz um eine
+Teiltransaktions-Lease und den ProductCode. Ein MSI-Commit oder -Rollback
+darf nur diese eigene Bindung abschließen; eine übergeordnete Updatesperre
+bleibt gehalten. Die Entfernung der alten Version liegt nach
+`InstallExecute` innerhalb der neuen Transaktion. Der verschachtelte
+Altversions-Uninstall prüft die Bindung an den neuen ProductCode und löst
+weder die Sperre noch Daten-/Firewall-Löschaktionen aus. Die echte
+Zwei-Versionen- und Rollback-Abnahme bleibt offen.
 
 ### Aufbewahrung gespeicherter Spiele
 

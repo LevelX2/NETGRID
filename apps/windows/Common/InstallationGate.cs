@@ -64,14 +64,14 @@ namespace Netgrid.Windows
                 if (!(value is string record) || key.GetValueKind("Lease") != RegistryValueKind.String)
                     throw new InvalidOperationException("installation_gate_lease_invalid");
                 var fields = record.Split('|');
-                if (fields.Length != 8 || fields[0] != "2" ||
+                if (fields.Length != 10 || fields[0] != "3" ||
                     !long.TryParse(fields[3], NumberStyles.None, CultureInfo.InvariantCulture, out var completed) ||
                     !int.TryParse(fields[4], NumberStyles.None, CultureInfo.InvariantCulture, out var parentId) ||
                     !long.TryParse(fields[5], NumberStyles.None, CultureInfo.InvariantCulture, out var parentStart) ||
                     !int.TryParse(fields[6], NumberStyles.None, CultureInfo.InvariantCulture, out var ownerId) ||
                     !long.TryParse(fields[7], NumberStyles.None, CultureInfo.InvariantCulture, out var ownerStart))
                     throw new InvalidOperationException("installation_gate_lease_invalid");
-                return new GateState(fields[1], fields[2], completed, parentId, parentStart, ownerId, ownerStart);
+                return new GateState(fields[1], fields[2], completed, parentId, parentStart, ownerId, ownerStart, fields[8], fields[9]);
             }
         }
 
@@ -81,15 +81,30 @@ namespace Netgrid.Windows
                 throw new InvalidOperationException("installation_gate_lease_invalid");
         }
 
+        internal static void ValidateProductCode(string productCode)
+        {
+            if (!Guid.TryParseExact(productCode, "B", out var id) || id == Guid.Empty ||
+                id.ToString("B").ToUpperInvariant() != productCode)
+                throw new InvalidOperationException("installation_gate_product_code_invalid");
+        }
+
         internal sealed class GateState
         {
             public const string Preparing = "preparing";
             public const string Stopping = "stopping";
             public const string Completed = "completed";
             public GateState(string lease, string phase, long completedUtcTicks,
-                int allowedParentId = 0, long allowedParentStart = 0, int ownerId = 0, long ownerStart = 0)
+                int allowedParentId = 0, long allowedParentStart = 0, int ownerId = 0, long ownerStart = 0,
+                string msiLease = "", string msiProductCode = "")
             {
                 ValidateLease(lease);
+                if (msiLease != "" || msiProductCode != "")
+                {
+                    ValidateLease(msiLease);
+                    ValidateProductCode(msiProductCode);
+                    if (phase != Stopping) throw new InvalidOperationException("installation_gate_msi_phase_invalid");
+                    if (ownerId == 0 && msiLease != lease) throw new InvalidOperationException("installation_gate_msi_owner_invalid");
+                }
                 if ((phase != Preparing && phase != Stopping && phase != Completed) ||
                     completedUtcTicks < 0 || completedUtcTicks > DateTime.MaxValue.Ticks ||
                     !ValidIdentity(allowedParentId, allowedParentStart) || !ValidIdentity(ownerId, ownerStart) ||
@@ -100,6 +115,7 @@ namespace Netgrid.Windows
                 Lease = lease; Phase = phase; CompletedUtcTicks = completedUtcTicks;
                 AllowedParentId = allowedParentId; AllowedParentStart = allowedParentStart;
                 OwnerId = ownerId; OwnerStart = ownerStart;
+                MsiLease = msiLease; MsiProductCode = msiProductCode;
             }
             public string Lease { get; }
             public string Phase { get; }
@@ -108,12 +124,17 @@ namespace Netgrid.Windows
             public long AllowedParentStart { get; }
             public int OwnerId { get; }
             public long OwnerStart { get; }
+            public string MsiLease { get; }
+            public string MsiProductCode { get; }
             public bool Active => Phase != Completed;
 
-            public string Encode() => string.Join("|", new[] { "2", Lease, Phase,
+            public string Encode() => string.Join("|", new[] { "3", Lease, Phase,
                 CompletedUtcTicks.ToString(CultureInfo.InvariantCulture), AllowedParentId.ToString(CultureInfo.InvariantCulture),
                 AllowedParentStart.ToString(CultureInfo.InvariantCulture), OwnerId.ToString(CultureInfo.InvariantCulture),
-                OwnerStart.ToString(CultureInfo.InvariantCulture) });
+                OwnerStart.ToString(CultureInfo.InvariantCulture), MsiLease, MsiProductCode });
+
+            public GateState WithMsi(string lease, string product) => new GateState(Lease, Phase, CompletedUtcTicks,
+                AllowedParentId, AllowedParentStart, OwnerId, OwnerStart, lease, product);
 
             private static bool ValidIdentity(int id, long start) =>
                 (id == 0 && start == 0) || (id > 0 && start > 0 && start <= DateTime.MaxValue.Ticks);

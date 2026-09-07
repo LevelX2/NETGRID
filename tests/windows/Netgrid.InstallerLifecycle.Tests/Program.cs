@@ -61,6 +61,7 @@ try
     corrupt.SetValue("Lease", 1, RegistryValueKind.DWord);
     Reject(() => InstallationGate.Read(fixture, key), "installation_gate_lease_invalid");
     PreparationLeaseTests.Run(fixture, program, Assert, Reject);
+    MsiLeaseTests.Run(fixture, program, Assert, Reject);
 }
 finally
 {
@@ -75,8 +76,19 @@ var authoring = XDocument.Load(Path.Combine("installer", "product", "Product.wxs
 XNamespace wix = "http://wixtoolset.org/schemas/v4/wxs";
 var package = authoring.Root!.Element(wix + "Package")!;
 var sequence = package.Element(wix + "InstallExecuteSequence")!;
+Assert((string?)package.Element(wix + "MajorUpgrade")!.Attribute("Schedule") == "afterInstallExecute", "old_product_removed_inside_guarded_transaction");
+Assert(package.Elements(wix + "Property").Any(x => (string?)x.Attribute("Id") == "NETGRID_UPDATE_LEASE" &&
+    (string?)x.Attribute("Secure") == "yes" && (string?)x.Attribute("Hidden") == "yes"), "outer_update_lease_forwarded_without_logging");
 XElement Definition(string name) => package.Elements(wix + "CustomAction").Single(x => (string?)x.Attribute("Id") == name);
 XElement Scheduled(string name) => sequence.Elements(wix + "Custom").Single(x => (string?)x.Attribute("Action") == name);
+foreach (var action in new[] { "RemoveNetgridFirewall", "DeleteNetgridData" })
+{
+    Assert(((string?)Scheduled(action).Attribute("Condition"))?.Contains("NOT UPGRADINGPRODUCTCODE", StringComparison.Ordinal) == true,
+        action + "_never_runs_in_nested_old_uninstall");
+    Assert(package.Elements(wix + "SetProperty").Where(x => (string?)x.Attribute("Id") == action)
+        .All(x => ((string?)x.Attribute("Condition"))?.Contains("NOT UPGRADINGPRODUCTCODE", StringComparison.Ordinal) == true),
+        action + "_nested_arguments_not_prepared");
+}
 foreach (var (name, execution) in new[] { ("BeginNetgridLifecycle", "deferred"), ("CommitNetgridLifecycle", "commit"), ("RollbackNetgridLifecycle", "rollback") })
 {
     var action = Definition(name);

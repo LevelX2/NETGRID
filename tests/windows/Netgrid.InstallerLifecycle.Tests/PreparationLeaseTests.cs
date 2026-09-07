@@ -78,6 +78,7 @@ internal static class PreparationLeaseTests
             }
             var valid = preparing.Encode().Split('|');
             var invalidRecords = new List<string> { lease + "|0", lease + "|" + futureCutoff, preparing.Encode() + "|extra" };
+            invalidRecords.Add("2|" + string.Join('|', valid.Skip(1).Take(7)));
             foreach (var (field, value) in new (int, string)[] {
                 (0, "1"), (1, Guid.Empty.ToString("N")), (2, "unknown"), (2, "stopping"), (2, "completed"),
                 (3, "-1"), (3, "3155378976000000000"), (4, "0"), (4, "202"), (4, "-1"),

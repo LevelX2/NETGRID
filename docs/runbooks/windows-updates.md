@@ -220,8 +220,8 @@ Installersperre und wird von MSI-Aktionen und Updater gemeinsam verwendet.
 Der Updater ruft die neuen Phasen noch nicht im Produktablauf auf. Launcher
 und First Run binden weiterhin ausschließlich den Reader ein.
 
-Der atomare Registrywert `Lease` enthält acht Felder:
-`2|lease|phase|cutoffTicks|parentId|parentStartTicks|ownerId|ownerStartTicks`.
+Der atomare Registrywert `Lease` enthält zehn Felder:
+`3|lease|phase|cutoffTicks|parentId|parentStartTicks|ownerId|ownerStartTicks|msiLease|msiProductCode`.
 Die Startzeiten sind UTC-Ticks. `preparing` hält die Sperre für alle neuen
 Starts, nimmt aber exakt den ursprünglichen Launcher anhand PID und
 Startzeit aus. Der aufrufende Updater muss diese Identitäten zuvor am echten
@@ -242,7 +242,7 @@ Read/Modify/Write-Abschnitte. Timeout oder verlassene Mutex ergeben eine
 sichtbare Diagnose ohne Registryänderung. Sie ersetzt nicht die gehaltene
 Transaktionssperre. Alle Phasen und Prozessidentitäten werden zusammen als
 ein Registrywert veröffentlicht. Unbekannte Phasen, unvollständige
-Identitäten und alte Zweifeldrecords sind fail-closed; es gibt weder
+Identitäten und alte Recordformate sind fail-closed; es gibt weder
 Dual-Read noch automatische Löschung einer bestehenden Sperre. Kandidat
 8169 enthält noch das frühere Format und ist kein Beleg für diesen neuen
 Quellstand.
@@ -252,6 +252,58 @@ Abbruch, PID-Wiederverwendung, Cutoff, fehlerhaften Records und acht
 konkurrierenden Schreibern ausschließlich in einem temporären HKCU-Testbaum.
 Das ersetzt noch nicht den nativen Nachweis des Backup-/MSI-/Healthablaufs
 oder die Prüfung mit einem anderen Windows-Administratorkonto.
+
+### MSI-Teiltransaktionen und Major-Upgrade
+
+Eine Standalone-MSI-Transaktion besitzt eine eigene zufällige Lease und
+bindet ihren ProductCode. Innerhalb eines Updaterlaufs verlangt sie dagegen
+die ausdrücklich übergebene `NETGRID_UPDATE_LEASE`, dieselbe aktive
+Stopp-Lease sowie den noch lebenden Updater mit passender PID/Startzeit.
+Die Eigenschaft wird als `Secure` und `Hidden` geführt. Eine noch aktive
+Vorbereitung, eine fremde Sperre oder eine schon laufende MSI-Teiltransaktion
+wird nicht übernommen. Teiltransaktionen besitzen jeweils zusätzlich eine
+eigene zufällige `msiLease`; verspätete Rollbacks können keinen späteren
+MSI-Lauf freigeben. Der Setuphost/Updater übergibt diese äußere Lease noch
+nicht im echten Produktablauf.
+
+Der MSI-Commit beziehungsweise -Rollback beendet nur die exakt passende
+MSI-Bindung. Gehört der Gesamtvorgang dem Updater, bleiben dessen Phase,
+Identität und Startverbot unverändert bestehen. Der Updater kann umgekehrt
+seine Sperre nicht abschließen, solange noch eine MSI-Bindung aktiv ist.
+Bei einer Standalone-Transaktion schließt ausschließlich ihr äußerer MSI-
+Owner auch die gesamte Sperre ab.
+
+`MajorUpgrade` verwendet jetzt `afterInstallExecute`: Erst wird die neue
+Dateitransaktion unter der Sperre ausgeführt, dann die alte Version innerhalb
+derselben Transaktion entfernt. Das erfordert stabile Komponentenidentitäten
+und Referenzzählung und ist noch nativ mit zwei aktuellen Builds abzunehmen.
+Maßgeblich sind die [WiX-Sequenzregeln](https://docs.firegiant.com/wix/schema/wxs/majorupgrade/)
+und die [Windows-Installer-Reihenfolge](https://learn.microsoft.com/en-us/windows/win32/msi/removeexistingproducts-action).
+Die verschachtelte Deinstallation bindet `UPGRADINGPRODUCTCODE` an den
+aktiven neuen ProductCode und dessen konkrete MSI-Lease; sie darf diese
+Sperre weder neu anlegen noch freigeben. Ihre Daten- und Firewall-Löschaktionen
+sind ausgeschlossen, damit sie die soeben eingerichtete Version nicht
+beschädigen. Alte Alpha-MSI-Dateien enthalten diesen Vertrag nicht und sind
+kein geeigneter Altstand für dessen Zwei-Versionen-Abnahme.
+
+`check-windows-msi-lifecycle.ps1` prüft im kompilierten Paket insbesondere
+`InstallFiles < InstallExecute < RemoveExistingProducts < InstallFinalize`,
+die geschützte Weitergabe der äußeren Lease und die Bedingungen beider
+Cleanup-Aktionen samt Parameterbereitstellung. Die Registrytests prüfen
+separat Standalone-Besitz, verschachtelte Bindung, fremde/verspätete Abschlüsse
+und das unveränderte äußere Startverbot nach MSI-Commit oder -Rollback.
+
+Die reine Diagnosekompilierung unter
+`output/msi-ownership-probe-0afaa24b96a8473ab29ddf76b13ba5a6/NOT-FOR-INSTALLATION.msi`
+bestätigt die Tabellenwerte `InstallExecute=6500`,
+`RemoveExistingProducts=6501` und `InstallFinalize=6600`. WiX 7 rekonstruiert
+in der zugehörigen `probe.wxs` dagegen `Schedule="afterInstallFinalize"`.
+Deshalb prüft `checkLifecycleSource` die ursprüngliche Vorgabe; für das
+ausführbare Artefakt bleibt ausschließlich die echte MSI-Sequenztabelle
+maßgeblich. `checkLifecycleAuthoring` verwendet die Rückübersetzung nur für
+Struktur-, Binding- und Cleanup-Prüfungen, nicht für die Upgrade-Reihenfolge.
+Der Diagnosebuild kombiniert vorhandene Buildressourcen mit der geänderten
+MSI-Autorisierung und ist weder Releasekandidat noch Installationstest.
 
 ## Fehlschlag und Rollback
 

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtempSync, readFileSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { checkLifecycleBinary, checkLifecycleAuthoring } from "./check-windows-installer-lifecycle.mjs";
+import { checkLifecycleBinary, checkLifecycleAuthoring, checkLifecycleSource } from "./check-windows-installer-lifecycle.mjs";
 
 const binary = path.resolve("apps/windows/Netgrid.InstallerActions/bin/x64/Release/net48/NETGRID.InstallerActions.CA.dll");
 test("built x64 custom action exports all lifecycle entrypoints", () => checkLifecycleBinary(binary));
@@ -32,8 +32,17 @@ test("managed-only, x86 and missing-entrypoint binaries fail closed", () => {
 });
 test("all unconditional MSI entrypoints must bind to the embedded lifecycle owner", () => {
   const source = readFileSync("installer/product/Product.wxs", "utf8");
-  checkLifecycleAuthoring(source);
+  checkLifecycleSource(source);
   assert.throws(() => checkLifecycleAuthoring(source.replace('Action="BeginNetgridLifecycle" After=', 'Action="BeginNetgridLifecycle" Condition="NOT Installed" After=')), /not_unconditional/);
   assert.throws(() => checkLifecycleAuthoring(source.replaceAll('BinaryRef="NetgridLifecycleActions"', 'BinaryRef="Other"')), /action_unbound/);
   assert.throws(() => checkLifecycleAuthoring(source.replace('Value="DisableShutdown"', 'Value="0"')), /owner_conflict/);
+});
+test("upgrade order, nested cleanup and outer lease forwarding are mandatory", () => {
+  const source = readFileSync("installer/product/Product.wxs", "utf8");
+  for (const mutate of [
+    value => value.replace('Schedule="afterInstallExecute"', 'Schedule="afterInstallValidate"'),
+    value => value.replace('Id="NETGRID_UPDATE_LEASE" Secure="yes"', 'Id="NETGRID_UPDATE_LEASE" Secure="no"'),
+    value => value.replace('Id="NETGRID_UPDATE_LEASE" Secure="yes" Hidden="yes"', 'Id="NETGRID_UPDATE_LEASE" Secure="yes" Hidden="no"'),
+    value => value.replaceAll(' AND NOT UPGRADINGPRODUCTCODE', ''),
+  ]) assert.throws(() => checkLifecycleSource(mutate(source)), /installer_lifecycle_/);
 });
