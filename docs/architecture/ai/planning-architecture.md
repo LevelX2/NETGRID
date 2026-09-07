@@ -2791,6 +2791,13 @@ Cleanup-Tausch eingehen; Owner, Parent-Need und Draw-Action bleiben dabei exakt
 gebunden. Der tatsächliche Draw ist eine private Beobachtungsgrenze und führt
 danach zur Neuplanung statt zu einer vorweggenommenen Folgekarte.
 
+Eine bereits überfüllte Hand sperrt weiterhin generischen Draw. Eine an eine
+sichtbare terminale Remote-Bedrohung gebundene Coverage-Suche darf dagegen
+auch dann eine legale Basiskarte ziehen, wenn eine passende Antwort im eigenen
+Stack verbleibt. Das Handlimit darf diesen bereits begründeten P2-Bedarf nicht
+in zweckloses Credit-Sammeln umwandeln. Weder der gegnerische verdeckte Root
+noch die Reihenfolge des eigenen Stacks werden dafür vorausgesetzt.
+
 Required- und preferred-gebundene Rigkarten sind keine generischen
 Rotationsziele. Handdruck verändert ihren Installationswert nur als begrenzter
 Gegenfaktualvergleich: Eine bereits legal installierbare Karte kann früher
@@ -3371,6 +3378,16 @@ ohne Agenda-Head entstehen, bindet dann aber Score-Parent, Need,
 Engine-/Assessment-gequoteten monotonen Schutzfortschritt. Die
 ICE-/Serverauswahl bleibt vollständig bei `corp.defend_servers`; Remote und
 Score wählen keine konkrete ICE-Karte.
+
+Eine `combined_rush`-Linie darf Schutz nur aus aktuell gebundenen,
+finanzierten Defense-Projektionen übernehmen. Gestagte Installation allein
+belegt keinen finanzierten Schutz. Der zentrale Teil benötigt ebenfalls
+eine konkrete Allokation von `corp.defend_servers`. Die gemeinsame Linie
+verbraucht jede Handkarte höchstens einmal und muss Installation, gequotete
+Rez-Kosten und verbleibende Score-Reserve zusammen finanzieren können.
+Ohne diesen Beleg wird die kombinierte Linie mit einer Diagnose verworfen;
+die eigenständigen Score- und gebundenen Vorbereitungsrouten bleiben separat
+bewertet.
 
 Die Remote-Reife verwendet den Engine-zertifizierten geordneten Runpfad und
 trennt aktuell finanzierbare von nur gestagten Rez-Teilmengen. Allgemeine,

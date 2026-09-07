@@ -126,13 +126,71 @@ export function buildCorpAgendaTurnPlanningSlice(params: {
     params.economyNeeds ?? [],
     params.candidates,
   );
-  const centralIce = ["rd", "hq"]
-    .map((serverId) => bestIceInstall(params.candidates, serverId))
+  // Defense owns the allocation. An arbitrary legal central install is not
+  // evidence that this agenda's projected suffix provides funded protection.
+  const centralProvider = (params.defenseNeeds ?? [])
     .filter(
-      (candidate): candidate is ActionSemanticCandidate =>
-        candidate !== undefined,
+      (signal) =>
+        signal.kind === "generic" &&
+        signal.phase === "install_ice" &&
+        (signal.serverId === "rd" || signal.serverId === "hq") &&
+        signal.installRoute?.disposition === "productive" &&
+        signal.installRoute.projection.funded &&
+        signal.installRoute.projection.preservesReserves,
     )
-    .sort(compareCandidateCost)[0];
+    .flatMap((signal) => {
+      if (signal.kind !== "generic" || !signal.installRoute) return [];
+      const projection = signal.installRoute.projection;
+      const candidate = params.candidates.find(
+        (candidate) =>
+          signal.actionIds?.includes(candidate.actionId) &&
+          candidate.actionId === projection.actionId &&
+          candidate.sourceCardInstanceId === projection.sourceCardInstanceId &&
+          candidate.sourceCardInstanceId !== remoteIce?.sourceCardInstanceId &&
+          candidateTargetIds(candidate).includes(signal.serverId) &&
+          exactCurrentCost(candidate),
+      );
+      return candidate ? [{ candidate, projection }] : [];
+    })
+    .sort((left, right) =>
+      compareCandidateCost(left.candidate, right.candidate),
+    )[0];
+  const centralIce = centralProvider?.candidate;
+  const fundedProtection =
+    protectionProvider?.signal.kind === "score_protection_install"
+      ? protectionProvider.signal.projection
+      : undefined;
+  const combinedActions =
+    agenda && remoteIce && centralIce ? [agenda, remoteIce, centralIce] : [];
+  const combinedAdvance =
+    combinedActions.length > 0 &&
+    params.input.playerView.own.clicks >
+      combinedActions.reduce((sum, action) => sum + clickCost(action), 0);
+  const combinedProtectionCredits =
+    fundedProtection && centralProvider
+      ? [
+          ...fundedProtection.selectedRezCosts,
+          ...centralProvider.projection.selectedRezCosts,
+        ].reduce((sum, cost) => sum + cost.credits, 0)
+      : undefined;
+  const scoreReserve =
+    params.project.protectionNeed?.scoreReserve.creditBreakdown.reduce(
+      (sum, reserve) => sum + reserve.credits,
+      0,
+    );
+  const combinedExecutable =
+    combinedActions.length === 3 &&
+    new Set(combinedActions.map((action) => action.sourceCardInstanceId))
+      .size === 3 &&
+    fundedProtection?.funded === true &&
+    fundedProtection.preservesReserves &&
+    combinedProtectionCredits !== undefined &&
+    scoreReserve !== undefined &&
+    combinedActions.reduce((sum, action) => sum + creditCost(action), 0) +
+      Number(combinedAdvance) +
+      combinedProtectionCredits +
+      Math.max(0, scoreReserve - Number(combinedAdvance)) <=
+      params.input.playerView.own.credits;
   const lineCandidates = [
     ...(agenda
       ? [
@@ -146,16 +204,14 @@ export function buildCorpAgendaTurnPlanningSlice(params: {
           }),
         ]
       : []),
-    ...(agenda && remoteIce && centralIce
+    ...(agenda && combinedExecutable
       ? [
           createLine(params, {
             family: "combined_rush",
             opportunityKey,
             current: agenda,
-            actions: [agenda, remoteIce, centralIce],
-            projectedAdvance:
-              params.input.playerView.own.clicks >
-              clickCost(agenda) + clickCost(remoteIce) + clickCost(centralIce),
+            actions: combinedActions,
+            projectedAdvance: combinedAdvance,
           }),
         ]
       : []),
@@ -260,6 +316,9 @@ export function buildCorpAgendaTurnPlanningSlice(params: {
     evidenceCodes: [
       `agenda_line_count:${lines.length}`,
       `agenda_pruned_count:${pruned.length}`,
+      ...(agenda && remoteIce && !combinedExecutable
+        ? ["agenda_slice_combined_protection_not_jointly_certified"]
+        : []),
       ...(randomizationEligible
         ? ["agenda_rush_randomization_admissible"]
         : ["agenda_rush_randomization_not_admissible"]),
@@ -647,21 +706,6 @@ function exactAgendaHead(
   );
 }
 
-function bestIceInstall(
-  candidates: readonly ActionSemanticCandidate[],
-  serverId: string,
-): ActionSemanticCandidate | undefined {
-  return candidates
-    .filter(
-      (candidate) =>
-        (candidate.semanticActionType === "install.card" ||
-          candidate.semanticActionType === "install.ice") &&
-        candidateTargetIds(candidate).includes(serverId) &&
-        exactCurrentCost(candidate),
-    )
-    .sort(compareCandidateCost)[0];
-}
-
 function boundScoreProtectionProvider(
   input: AiDecisionInput,
   project: CorpScoreProjectSignal,
@@ -671,6 +715,12 @@ function boundScoreProtectionProvider(
   | {
       candidate: ActionSemanticCandidate;
       parentNeedId: string;
+      signal: Extract<
+        CorpDefenseSignal,
+        {
+          kind: "score_protection_install" | "score_protection_staging_install";
+        }
+      >;
     }
   | undefined {
   const need = project.protectionNeed;
@@ -707,7 +757,9 @@ function boundScoreProtectionProvider(
         candidateTargetIds(entry).includes(signal.serverId) &&
         exactCurrentCost(entry),
     );
-    return candidate ? [{ candidate, parentNeedId: signal.parentNeedId }] : [];
+    return candidate
+      ? [{ candidate, parentNeedId: signal.parentNeedId, signal }]
+      : [];
   });
   return providers.sort((left, right) =>
     compareCandidateCost(left.candidate, right.candidate),

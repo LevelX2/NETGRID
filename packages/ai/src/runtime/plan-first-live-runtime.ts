@@ -27909,6 +27909,7 @@ function uniqueCoverageGaps(
             }
           : {}),
         handRotation,
+        terminalRemoteCoverageThreat,
       },
     );
     const supportActionsBeforeCadence = coverageUpgrade
@@ -29571,6 +29572,7 @@ function coverageSupportActionIds(
     deckHasStackAnswerOverride?: boolean;
     targetDefinitionIdOverride?: string;
     handRotation?: RunnerHandRotationAssessment;
+    terminalRemoteCoverageThreat?: boolean;
   }> = {},
 ): Pick<
   RunnerCorePlanDomain["coverageGaps"][number],
@@ -29692,7 +29694,9 @@ function coverageSupportActionIds(
     : [];
   const sideSafeRoleBasicDraws =
     deckHasStackAnswer &&
-    options.handRotation?.exactKnownNeedDrawAdmissible === true &&
+    (options.handRotation?.exactKnownNeedDrawAdmissible === true ||
+      (options.terminalRemoteCoverageThreat === true &&
+        options.handRotation?.stackHasCards === true)) &&
     directSearchCandidates.length === 0 &&
     searchEngineSetupCandidates.length === 0
       ? candidates.filter((candidate) => {

@@ -14,16 +14,23 @@ import {
 } from "./turn-planning-contracts";
 import { buildCorpAgendaTurnPlanningSlice } from "./corp-agenda-turn-planning";
 import { campaignDisposition } from "./corp-agenda-turn-planning";
+import type { KnownCorpFundedIceInstallRouteProjection } from "../runtime/corp-funded-score-protection";
 
 describe("Corp agenda turn-planning vertical slice", () => {
   it("builds pure rush, combined rush, and safe setup without duplicate payoff ownership", () => {
     const input = decisionInput();
-    const slice = buildSlice(input, project(2), [
-      agendaCandidate(),
-      iceCandidate("remote-ice", "remote_1"),
-      iceCandidate("rd-ice", "rd"),
-      economyCandidate(),
-    ]);
+    const scoreProject = project(2);
+    const slice = buildSlice(
+      input,
+      scoreProject,
+      [
+        agendaCandidate(),
+        iceCandidate("remote-ice", "remote_1"),
+        iceCandidate("rd-ice", "rd"),
+        economyCandidate(),
+      ],
+      fundedProviders(scoreProject),
+    );
 
     expect(slice.lines.map((line) => line.family).sort()).toEqual([
       "combined_rush",
@@ -53,6 +60,73 @@ describe("Corp agenda turn-planning vertical slice", () => {
       ).toBe(true);
     }
   });
+
+  it.each([
+    "same_card",
+    "staging",
+    "unfunded",
+    "joint_credit_gap",
+    "unbound_central",
+    "mismatched_action",
+  ])(
+    "excludes combined protection without a jointly executable Defense witness: %s",
+    (kind) => {
+      const input = decisionInput();
+      const scoreProject = project(2);
+      const candidates = [
+        agendaCandidate(),
+        iceCandidate("remote-ice", "remote_1"),
+        iceCandidate("rd-ice", "rd"),
+      ];
+      const providers = fundedProviders(scoreProject);
+      const remote = providers[0]!;
+      const central = providers[1]!;
+      if (
+        remote.kind !== "score_protection_install" ||
+        central.kind !== "generic" ||
+        !central.installRoute
+      )
+        throw new Error("invalid test witness");
+      if (kind === "same_card") {
+        candidates[2]!.sourceCardInstanceId = "remote-ice";
+        central.installRoute = {
+          ...central.installRoute,
+          projection: {
+            ...central.installRoute.projection,
+            sourceCardInstanceId: "remote-ice",
+          },
+        };
+      }
+      if (kind === "staging")
+        providers[0] = scoreProtectionProvider(
+          scoreProject.protectionNeed!.needId,
+          "remote-ice",
+        );
+      if (kind === "unfunded")
+        remote.projection = { ...remote.projection, funded: false };
+      // Each install+rez costs 4 and individually preserves the 3-credit score reserve.
+      // The combined 8-credit defense cannot preserve that reserve from 10 credits.
+      if (kind === "joint_credit_gap") {
+        remote.projection = protectionProjection("remote-ice", "remote_1", 4);
+        central.installRoute = {
+          ...central.installRoute,
+          projection: protectionProjection("rd-ice", "rd", 4),
+        };
+      }
+      if (kind === "unbound_central") providers.pop();
+      if (kind === "mismatched_action") central.actionIds = ["unrelated"];
+      const slice = buildSlice(input, scoreProject, candidates, providers);
+      expect(slice.lines.some((line) => line.family === "combined_rush")).toBe(
+        false,
+      );
+      expect(slice.lines.some((line) => line.family === "pure_rush")).toBe(
+        true,
+      );
+      expect(slice.lines.some((line) => line.family === "safe_setup")).toBe(
+        true,
+      );
+    },
+  );
 
   it("admits a bounded rush-versus-safe mix for the Engine RNG domain", () => {
     const input = decisionInput();
@@ -109,6 +183,7 @@ describe("Corp agenda turn-planning vertical slice", () => {
       actionIds: undefined,
       feasible: false,
       protectionNeed: {
+        ...project(2).protectionNeed,
         needId: "score-protection:agenda-1:remote_1:revision-2",
         parentProjectId: "agenda:agenda-1:remote_1",
         targetServerId: "remote_1",
@@ -338,6 +413,10 @@ function project(agendaPoints: number): CorpScoreProjectSignal {
     terminalScore: false,
     feasible: false,
     protectionNeed: {
+      scoreReserve: {
+        creditBreakdown: [{ reserveId: "agenda", credits: 3 }],
+        hardClickReserve: 0,
+      },
       needId: "score-protection:agenda:agenda-1:remote_1:revision-1",
       parentProjectId: "agenda:agenda-1:remote_1",
       targetServerId: "remote_1",
@@ -394,6 +473,68 @@ function scoreProtectionProvider(
     sourceDefinitionId: `${actionId}-definition`,
     evidenceCode: "score_protection_staging_install:test",
   };
+}
+
+function protectionProjection(
+  actionId: string,
+  serverId: string,
+  credits = 2,
+): KnownCorpFundedIceInstallRouteProjection & { effect: "satisfied" } {
+  return {
+    actionId,
+    sourceCardInstanceId: actionId,
+    sourceDefinitionId: `${actionId}-definition`,
+    targetServerId: serverId,
+    knowledge: "known",
+    effect: "satisfied",
+    funded: true,
+    preservesReserves: true,
+    selectedRezCosts: [
+      {
+        iceInstanceId: actionId,
+        iceDefinitionId: `${actionId}-definition`,
+        credits,
+        source: "engine_rez_cost_quote",
+      },
+    ],
+  } as unknown as KnownCorpFundedIceInstallRouteProjection & {
+    effect: "satisfied";
+  };
+}
+
+function fundedProviders(
+  scoreProject: CorpScoreProjectSignal,
+): CorpDefenseSignal[] {
+  return [
+    {
+      ...scoreProtectionProvider(
+        scoreProject.protectionNeed!.needId,
+        "remote-ice",
+      ),
+      kind: "score_protection_install",
+      effect: "satisfied",
+      totalInstallAndRezCredits: 2,
+      runnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
+      projection: protectionProjection("remote-ice", "remote_1"),
+    } as CorpDefenseSignal,
+    {
+      kind: "generic",
+      phase: "install_ice",
+      defenseId: "central:rd",
+      serverId: "rd",
+      sourceDefinitionIds: ["rd-ice-definition"],
+      sourceCardInstanceId: "rd-ice",
+      actionIds: ["rd-ice"],
+      urgent: false,
+      value: 20,
+      evidenceCode: "funded_central_test",
+      installRoute: {
+        disposition: "productive",
+        progressKind: "engine_certified_access",
+        projection: protectionProjection("rd-ice", "rd"),
+      },
+    },
+  ];
 }
 
 function agendaCandidate(): ActionSemanticCandidate {
