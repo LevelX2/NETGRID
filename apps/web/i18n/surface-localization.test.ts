@@ -7,6 +7,7 @@ import frMessages from "../messages/fr.json";
 import deMaintenanceMessages from "../messages/maintenance/de.json";
 import enMaintenanceMessages from "../messages/maintenance/en.json";
 import frMaintenanceMessages from "../messages/maintenance/fr.json";
+import { buildMaintenanceFilterOptions } from "../app/maintenance/maintenance-filter-options";
 
 const localizedSurfaces = [
   "../features/app-shell/AppShell.tsx",
@@ -171,14 +172,22 @@ describe("localized app shell, settings, and account surfaces", () => {
   });
 
   it("derives maintenance dropdown labels from the active locale", () => {
-    const source = readFileSync(
-      new URL("../app/maintenance/page.tsx", import.meta.url),
-      "utf8",
-    );
-    expect(source).toContain("statusLabel(status, locale)");
-    expect(source).toContain("modeLabel(mode, locale)");
-    expect(source).toContain('t("allOption")');
-    expect(source).not.toContain('["", "Alle"]');
+    const options = buildMaintenanceFilterOptions("fr", {
+      allOption: "Tous",
+      nonTerminalOption: "Non terminaux",
+      terminalOption: "Terminaux",
+    });
+    expect(options.statusOptions).toContainEqual(["active", "Actif"]);
+    expect(options.modeOptions).toContainEqual([
+      "human_vs_human",
+      "Humain contre humain",
+    ]);
+    expect(options.statusOptions[0]).toEqual(["", "Tous"]);
+    expect(options.terminalOptions).toEqual([
+      ["all", "Tous"],
+      ["false", "Non terminaux"],
+      ["true", "Terminaux"],
+    ]);
     expect(deMaintenanceMessages.storage.loadedCount).toBe("Geladen: {count}");
     expect(enMaintenanceMessages.storage.loadedCount).toBe("Loaded: {count}");
     expect(frMaintenanceMessages.storage.loadedCount).toBe("Chargés : {count}");
