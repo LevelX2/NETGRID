@@ -496,6 +496,30 @@ Releases (`gh release list`: leere Liste). Der echte Release-Downloadtest
 kann daher nicht gegen einen bereits vorhandenen Kandidaten erfolgen;
 es wurde weder veröffentlicht noch gepusht.
 
+### Native Fortsetzung 8150: Hilfen geprüft, Installation wartet auf Klickfreigabe
+
+Am 7. September wurde danach derselbe hashgebundene 8150-Setup-Host im
+bereinigten Gast nativ geöffnet. In der deutschen Custom-Ansicht erreicht
+Tab die Custom-Hilfe und zeigt ihren vollständigen mehrzeiligen Text;
+der nächste Tab wechselt zur lokalen Betriebsart, entfernt den vorherigen
+Hilfetext und zeigt die passende lokale Hilfe. Der angeklickte Link
+„Was ist Maintenance?“ öffnet eine vollständig sichtbare Erklärung mit
+Abgrenzung zum Spiel, lokalem Verwaltungszugriff, eigenständigem Passwort
+und späteren Einstiegspunkten. Der Informationsdialog wurde geschlossen.
+Dies ist ein gezielter Tastatur-/Hilfenachweis, keine vollständige
+Fokusreihenfolge-, Hover- oder Installationsabnahme.
+
+Das Hauptformular steht anschließend auf voreingestellten Werten,
+„Nur dieser Rechner“, Desktopverknüpfung an und Abschlussstart aus.
+`result/native-8150-preflight.json` bestätigt um 15:15:16 UTC den eindeutigen
+Setup-Prozess 5576, dessen bekannten Hash, fehlende Produktregistrierung,
+noch nicht vorhandene Standardzielpfade und freie Gastports 3100/8787.
+Diese Ports und Pfade liegen ausschließlich im Gast; die Hauptinstanz des
+Hosts bleibt unberührt. Es wurde noch nicht auf „Installieren“ geklickt.
+Die native Installation zur sichtbaren Fortschrittsprüfung benötigt die
+unmittelbare Klickbestätigung nach dem Computer-Use-Skill; Authentifizierung
+und Windows-UAC bleiben Nutzeraktionen. WIN-I08 bleibt aktiv.
+
 ### Aktueller Updatekandidat und Teststart vom 7. September 2026
 
 `1.0.8145` wurde regulär aus dem sauberen Commit
