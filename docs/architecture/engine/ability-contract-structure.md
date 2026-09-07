@@ -39,6 +39,16 @@ dagegen weiterhin einen existierenden Fort. Ein existierender Fort ohne rezzed
 ICE erfüllt diese Zielbindung; dessen leere Zielmenge wird regulär gequotet.
 Quote und Ausführung behalten ihre strikten Bindungsprüfungen.
 
+## Agenda-Anforderung
+
+`effectiveAgendaDifficulty` verbindet die gedruckte Anforderung mit aktiven
+deklarierten `agenda_difficulty`-Modifikatoren und dem ausdrücklich gebundenen
+Server-Run-Counter-Zuschlag. PlayerView, Installations-/Score-Quotes,
+LegalActions und Ausführung verwenden diese gemeinsame Berechnung.
+`fortRunWindows` beschreibt ausschließlich Run-Zulässigkeit; daraus wird kein
+Agenda-Rabatt abgeleitet. Ein Regionsrabatt wie Washington wird nur einmal über
+den deklarierten Modifikator angewendet.
+
 ## Gleichzeitige Lifecycle-Fähigkeiten
 
 `CardLifecycleTriggeredAbilityImplementation.simultaneousResolution` ist eine
