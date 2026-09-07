@@ -555,7 +555,7 @@ describe("discard keep score", () => {
     const search = runnerCard("runner-program-search", "event");
     const unavailableBreaker = score(
       search,
-      ["program_search"],
+      [],
       "runner",
       [],
       {},
@@ -563,7 +563,7 @@ describe("discard keep score", () => {
     );
     const installedBreaker = score(
       search,
-      ["program_search"],
+      [],
       "runner",
       [],
       {},
@@ -1011,6 +1011,16 @@ function input(
       ownDeckCapabilities: {
         side: "runner",
         runner: {
+          searchAccess: {
+            tools: [
+              {
+                cardId: card.definitionId,
+                canSearchBreakers: true,
+                legalNow: false,
+                status: "in_hand",
+              },
+            ],
+          },
           breakerCoverageMatrix: {
             wall: {
               inDeckKnown: true,

@@ -10004,6 +10004,7 @@ function buildRunnerDomain(
           runWindowActionAssessments,
           safetyAssessment !== undefined,
           currentEncounterRequiresDamageBreak ||
+            runnerCurrentEncounterRequiresProgramPreservingBreak(input) ||
             informationProbeRequiresEncounterBreak ||
             currentEncounterHasUnbrokenResolvableDeflector(input) ||
             fullPathEncounterRequiresBreak ||
@@ -18022,6 +18023,9 @@ function scoreProjectForCandidate(
       deckoutAgendaFloodScoreWindow;
     const remoteRequiresNearMatchpointMaturity =
       !sameTurnCloseout &&
+      !lastViableDeckoutMatchpointWindow &&
+      !lastDrawAgendaRecycleWindow &&
+      !deckoutAgendaFloodScoreWindow &&
       serverId !== undefined &&
       serverId !== "new_remote" &&
       input.playerView.opponent.agendaPoints + agendaPoints >=
@@ -31682,6 +31686,7 @@ function runnerRunWindowPlanStepExclusion(
     (action.type === "pump_breaker" || action.type === "break_subroutine") &&
     informationReassessment?.decision === "retain_information" &&
     !runnerInformationProbeRequiresEncounterBreak(input, runOrigin) &&
+    !runnerCurrentEncounterRequiresProgramPreservingBreak(input) &&
     (!informationReassessment.knownPathReachable ||
       informationReassessment.fundingGap > 0 ||
       informationReassessment.unavoidableHazardCount > 0)
@@ -31705,6 +31710,7 @@ function runnerRunWindowPlanStepExclusion(
     runOrigin?.purpose === "information" &&
     runOrigin.encounterCreditSpendLimit !== undefined &&
     !runnerCurrentEncounterRequiresDamagePreservingBreak(input, runOrigin) &&
+    !runnerCurrentEncounterRequiresProgramPreservingBreak(input) &&
     legalActionCreditCost(action) > runOrigin.encounterCreditSpendLimit
   ) {
     return {
@@ -31821,6 +31827,62 @@ function runnerInformationProbeRequiresEncounterBreak(
       action.type === "pump_breaker" || action.type === "break_subroutine",
   );
   return encounterWouldEndRun && encounterBreakAvailable;
+}
+
+function runnerCurrentEncounterRequiresProgramPreservingBreak(
+  input: AiDecisionInput,
+): boolean {
+  if (
+    input.playerView.run?.phase !== "encounter_ice" ||
+    !input.playerView.own.rig?.some((card) => card.type === "program")
+  ) {
+    return false;
+  }
+  const subroutines =
+    currentEncounteredIceCard(input)?.effectiveRunQuote?.subroutines;
+  if (
+    !subroutines?.some(
+      (subroutine) => subroutine.type === "trash_installed_program",
+    )
+  ) {
+    return false;
+  }
+  return input.legalActions.some((action) => {
+    if (
+      action.type !== "continue_run" ||
+      action.payload?.encounterContinue !== true
+    ) {
+      return false;
+    }
+    const quotedIds = action.payload.encounterSubroutineIds;
+    const ids =
+      typeof quotedIds === "string" ? quotedIds.split(",").filter(Boolean) : [];
+    if (
+      typeof quotedIds !== "string" ||
+      new Set(ids).size !== ids.length ||
+      ids.length !== action.payload.unbrokenSubroutineCount ||
+      ids.some((id) => !subroutines.some((subroutine) => subroutine.id === id))
+    ) {
+      throw new PlanResolutionFailure("missing_action_semantics", {
+        side: input.side,
+        stateVersion: input.playerView.stateVersion,
+        timingPoint: input.playerView.timingPoint,
+        legalActionTypes: input.legalActions.map((candidate) => candidate.type),
+        unresolvedActionIds: [action.actionId],
+        owner: "rules_contract",
+        removalCondition:
+          "Program-preserving encounter admission requires the Engine's exact remaining subroutine IDs and count.",
+      });
+    }
+    const remaining = new Set(ids);
+    return (
+      subroutines.some(
+        (subroutine) =>
+          remaining.has(subroutine.id) &&
+          subroutine.type === "trash_installed_program",
+      ) === true
+    );
+  });
 }
 
 function runnerCurrentEncounterRequiresDamagePreservingBreak(

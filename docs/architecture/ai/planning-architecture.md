@@ -2979,6 +2979,14 @@ Das Modul besitzt eine gemeinsame Threat-Priorisierung für:
   Rules Engine hierfür Runner-Aktionen anbietet;
 - notwendige Damage-Prävention oder Recovery.
 
+Die gebundene Runner-Discard-Choice erhält ihre Keep-Wertung aus demselben
+Owner. Liegt fehlende Breaker-Abdeckung nachweislich nur im eigenen Stack,
+erkennt die Wertung deren Suchzugang über die exakte Kartenbindung in
+`ownDeckCapabilities.runner.searchAccess.tools`. Alte Rollenlabels und die
+momentane Aktivierbarkeit im verpflichtenden Discard-Fenster sind dafür keine
+Voraussetzung. Ohne passende Breaker-Suchfähigkeit oder bei bereits verfügbarer
+Abdeckung entsteht dieser Keep-Bedarf nicht.
+
 Mögliche Phasen:
 
 ```text
@@ -3135,6 +3143,13 @@ allein noch nicht tödlich wäre. Eine bereits gequotete einmalige Zahlungsquell
 wird im exakten Kostenfenster verwendet, wenn sie die nach der Zahlung fehlende
 Creditreserve für den weiterhin unbekannten Restpfad vollständig finanziert.
 Plan, Quelle, ursprüngliche Action und Engine-Fenster bleiben dabei gebunden.
+
+Das Informationsbudget darf ebenso einen bereits zugelassenen bezahlbaren
+Break gegen die unmittelbare Zerstörung eines installierten Programms nicht
+sperren. Der bestehende Run-Executor bindet diese Schutzroute an die exakten
+verbleibenden Subroutinen der Engine-Continue-Action. Bereits gebrochene
+Programmzerstörung begründet keine weitere Ausgabe gegen bloßes End-the-run;
+fehlende oder widersprüchliche Restquoten scheitern strukturiert.
 
 Eine spätere Vacuum-Link-Choice darf ebenso aus einer exakt gebundenen
 Run-Executor-Phase hervorgehen, deren Root ein übergeordneter Restricted-Run-
@@ -3980,6 +3995,13 @@ Advance-/Score-Phase des residenten Projekts erhalten, solange die gebundene
 Linie noch vor dem fehlgeschlagenen Pflicht-Draw schließen kann. Eine
 gewöhnliche erneute Schutzbedarfsprüfung darf das bereits zugelassene Projekt
 nicht nach dem ersten Schritt in garantiertes Deckout-Abwarten überführen.
+
+Ein bereits zertifiziertes Deckout-Scorefenster bleibt auch gegenüber der
+gewöhnlichen Mindestzahl an ICE nahe dem gegnerischen Matchpoint gültig.
+Dies gilt für das letzte Matchpointfenster, die gebundene Agenda-Rückführung
+und den bestehenden Agenda-Flood-Deckoutpfad. Außerhalb dieser Fenster bleibt
+die normale Remote-Reifeprüfung bestehen; die Prioritätswahl erfolgt weiter
+im Scheduler aus den zugelassenen Planrouten.
 
 Ungewöhnliche Midgame-Utility-, Action-Engine- oder Boardtransformationskarten
 werden zuerst bestehenden Domainplänen als Route oder Admission-geprüfte
