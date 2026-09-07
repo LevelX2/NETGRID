@@ -879,6 +879,7 @@ function deriveKnownPositionMemory(
     ) {
       continue;
     }
+    reconcileObservedRootRemoval(memory, classification, eventsById);
     for (const key of [...memory.keys()]) {
       if (positionInvalidatesKey(key, classification)) memory.delete(key);
     }
@@ -1670,6 +1671,50 @@ function positionInvalidatesKey(
   return false;
 }
 
+/** Keep positional observations aligned when a publicly identified sibling leaves. */
+function reconcileObservedRootRemoval(
+  memory: Map<string, KnownPositionMemory>,
+  event: BeliefEventClassification,
+  eventsById: Map<string, PublicGameEvent>,
+): void {
+  if (
+    !event.serverId ||
+    !event.installedPositionKey ||
+    !["move", "trash", "steal", "score"].includes(event.family)
+  )
+    return;
+  const roots = [...memory.entries()].filter(
+    ([, entry]) =>
+      entry.zone === event.serverId && /^root:\d+$/.test(entry.positionKey),
+  );
+  if (roots.length === 0) return;
+  const removed = roots.find(
+    ([, entry]) =>
+      eventsById.get(entry.sourceEventId)?.publicPayload
+        .installedPositionKey === event.installedPositionKey,
+  );
+  // Without a witnessed position, a root removal cannot preserve its indices.
+  if (!removed) {
+    const raw = eventsById.get(event.eventId);
+    if (raw?.publicPayload.installPlacement !== "ice") {
+      for (const [key] of roots) memory.delete(key);
+    }
+    return;
+  }
+  const removedIndex = Number(removed[1].positionKey.slice(5));
+  for (const [key, entry] of roots) {
+    if (Number(entry.positionKey.slice(5)) >= removedIndex) memory.delete(key);
+  }
+  for (const [key, entry] of roots) {
+    const index = Number(entry.positionKey.slice(5));
+    if (index < removedIndex) continue;
+    if (index > removedIndex) {
+      const positionKey = `root:${index - 1}`;
+      memory.set(`${entry.zone}:${positionKey}`, { ...entry, positionKey });
+    }
+  }
+}
+
 function corpDrawsFromRd(event: BeliefEventClassification): boolean {
   return (
     event.actor === "corp" &&
@@ -1922,6 +1967,16 @@ function knownDefinitionsFromEvent(
   );
   if (rndTopDefinition)
     return [{ definitionId: rndTopDefinition, positionKey: "top" }];
+  const accessedRootPosition = stringValue(
+    event.publicPayload.accessedCardPositionKey,
+  );
+  if (
+    definitionId &&
+    classification.family === "access" &&
+    accessedRootPosition?.startsWith("root:")
+  ) {
+    return [{ definitionId, positionKey: accessedRootPosition }];
+  }
   if (definitionId && classification.installedPositionKey) {
     return [
       {

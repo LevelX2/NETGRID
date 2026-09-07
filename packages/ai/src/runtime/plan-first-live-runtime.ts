@@ -303,7 +303,10 @@ import {
   buildBoundedCorpPunishRouteRequests,
   withDecisionLocalCorpPunishRouteQuotes,
 } from "./corp-punish-route-quote-input";
-import { corpPurgeHasVisibleStrategicPressure } from "./corp-purge-impact";
+import {
+  corpPurgeHasVisibleStrategicPressure,
+  corpPurgeRecurringActionLoss,
+} from "./corp-purge-impact";
 import {
   buildCorpHandInventoryFacts,
   corpHandDuplicateCount,
@@ -16999,8 +17002,12 @@ function buildCorpDomain(
         {
           pressureId: "visible-virus-pressure",
           virusCounters: visibleVirusCounters,
-          strategicDamage: visibleVirusCounters,
-          critical: visibleVirusCounters >= 3,
+          strategicDamage:
+            visibleVirusCounters +
+            corpPurgeRecurringActionLoss(input, purgeAction) * 3,
+          critical:
+            visibleVirusCounters >= 3 ||
+            corpPurgeRecurringActionLoss(input, purgeAction) > 0,
           purgeUseful: corpPurgeHasVisibleStrategicPressure(input, purgeAction),
           evidenceCode: "visible_runner_virus_counters",
         },

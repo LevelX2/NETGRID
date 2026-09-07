@@ -667,6 +667,59 @@ export function corpMissingConcreteDefenseDrawNeed(
   const server = input.playerView.servers.find(
     (entry) => entry.id === target.serverId,
   )!;
+  const basicFunding = input.legalActions.find(
+    (head) =>
+      head.side === "corp" &&
+      head.type === "gain_credit" &&
+      head.source === "basic_action" &&
+      head.expiresAtStateVersion === input.playerView.stateVersion &&
+      head.payload?.effectKind === "gain_credits" &&
+      positiveSafeInteger(head.payload.gainCreditsAmount) &&
+      exactLegalActionClickCost(head) !== undefined &&
+      exactLegalActionClickCost(head)! > 0 &&
+      head.costs.every((cost) =>
+        Object.entries(cost).every(
+          ([key, value]) => key === "clicks" || value === 0,
+        ),
+      ),
+  );
+  if (basicFunding) {
+    const availableAfterFunding =
+      input.playerView.own.credits +
+      Math.floor(
+        input.playerView.own.clicks / exactLegalActionClickCost(basicFunding)!,
+      ) *
+        (basicFunding.payload!.gainCreditsAmount as number);
+    for (const ice of server.ice) {
+      const quote = ice.effectiveRezCostQuote;
+      if (
+        ice.rezzed ||
+        !quote?.complete ||
+        quote.context !== "installed" ||
+        quote.cardId !== ice.instanceId ||
+        quote.targetServerId !== server.id ||
+        quote.projectedServerId !== server.id ||
+        quote.expiresAtStateVersion !== input.playerView.stateVersion ||
+        quote.mandatoryAdditionalCosts.agendaPoints !== 0 ||
+        !nonNegativeSafeInteger(quote.finalCredits) ||
+        quote.finalCredits > availableAfterFunding
+      )
+        continue;
+      const projectedProtection = assessCorpScoreProtection({
+        serverIce: server.ice.map((card) =>
+          card.instanceId === ice.instanceId ? { ...card, rezzed: true } : card,
+        ),
+        runnerRig: input.playerView.opponent.rig!,
+        runnerCredits: input.playerView.opponent.credits,
+        maximumRunnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
+      });
+      if (
+        projectedProtection.knowledge === "known" &&
+        projectedProtection.protectsScore
+      )
+        return undefined;
+    }
+  }
   for (const preparation of installedRezPreparations) {
     if (
       preparation.targetServerId !== target.serverId ||

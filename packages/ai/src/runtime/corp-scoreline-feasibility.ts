@@ -150,7 +150,7 @@ export function assessCorpScorelineFeasibility(
   };
 }
 
-function currentCorpMandatoryDrawCardsPerWindow(
+export function currentCorpMandatoryDrawCardsPerWindow(
   playerView: PlayerView,
 ): number {
   for (let index = playerView.publicEvents.length - 1; index >= 0; index -= 1) {

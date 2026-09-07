@@ -2163,6 +2163,15 @@ Root-Positionen bekannt sind und keine Agenda darunter ist. Zusätzliche
 unbekannte Positionen bleiben offene Informationsziele; die bestehende
 Run-Zielbewertung und ihre Planowner behalten die Entscheidungsautorität.
 
+Der DTO erhält die von der Engine ausgegebene öffentliche
+`installedPositionKey`. `BeliefState` bindet diese undurchsichtige Identität an
+die beobachtete Root-Position. Verlässt eine eindeutig identifizierte Karte
+den Server, wird nur ihre Beobachtung entfernt; höhere Root-Indizes rücken
+nach. Ohne eindeutige Positionsbindung bleibt die Erinnerung unsicher. Der
+Access-Consumer prüft die letzte Beobachtung eines noch vorhandenen Roots:
+Der Steal einer benachbarten Agenda macht den bereits abgelehnten Restinhalt
+nicht zu einem neuen Informationsziel.
+
 ### 19.3 Marginaler Nutzen
 
 Planmodule definieren selbst, wann der nächste gleichartige Step keinen
@@ -3872,9 +3881,16 @@ Verantwortung:
 - Purge gegen Score, Remote-Härtung, Economy und Terminalpfade vergleichen;
 - nach Wirkung zum vorherigen Root-Foreground zurückkehren.
 
-Ob der Purge in NETGRID exakt drei Aktionen aufgibt oder anders modelliert
-wird, folgt ausschließlich dem noch festzulegenden normativen Regelvertrag.
-Das Modul erzeugt keine eigene Purge-Legalität.
+Der Purge folgt der aktuellen Engine-LegalAction samt Action-Debt-Quote.
+Das Modul erzeugt keine eigene Purge-Legalität. Die Nutzenbewertung trennt
+Counter-Zahl von Effekt: Ein einzelner Pipe-Counter verursacht bereits
+wiederkehrenden Aktionsverlust. Dessen Beseitigung wird gegen die Purge-Kosten
+über einen begrenzten Horizont von höchstens vier verbleibenden Corp-Zügen
+bewertet; die bekannte Pflichtziehrate begrenzt den Horizont zusätzlich.
+Ein positiver dauerhafter Aktionsverlust wird dem bestehenden Virus-Owner als
+kritischer Druck gemeldet. Sofortige Score-Konversion und eine zu kurze
+Restlaufzeit bleiben Gegenargumente, ohne den Counter als wirkungslos zu
+klassifizieren.
 
 ### 28.6 `corp.economy`
 
@@ -3900,6 +3916,13 @@ cash_out_bank
 `fund_rez_reserve` ist ausschließlich Economy-Support für einen exakten,
 Engine-gequoteten Defense-/Score-/Remote-Parent-Need. Der Modus erzeugt weder
 eine allgemeine Central-Reserve noch eigene Defense-Ownership.
+
+Die Suche nach fehlender zentraler ICE prüft auch die exakt erreichbare
+Basic-Credit-Finanzierung bereits installierter ICE. Eine aktuelle vollständige
+Rez-Quote und bekannte wirksame Schutzprojektion unterscheiden fehlende
+Liquidität von fehlender ICE. Reichen die verbleibenden legalen Credit-Aktionen
+für den Schutz, erzeugt Defense keinen spekulativen ICE-Suchbedarf; abgelaufene
+Quotes oder unzureichende Mittel unterdrücken die Suche nicht.
 
 Das Modul kennt:
 

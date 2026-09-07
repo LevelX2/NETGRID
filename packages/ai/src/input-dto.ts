@@ -414,6 +414,7 @@ const PUBLIC_PAYLOAD_PRIMITIVE_KEYS = new Set<string>([
   "knownRndCardCount",
   "knownRndTopDefinitionId",
   "accessedCardPositionKey",
+  "installedPositionKey",
   "accessedArea",
   "accessedIndex",
   "stealCost",
