@@ -354,7 +354,38 @@ Offscreen-Tests starten weder Installation noch Deinstallation oder Runtime;
 sie ersetzen nicht die sichtbare Abnahme des neu zu bauenden Installers und
 nicht die offenen funktionalen WIN-I08-Gates. Die Hostanzeige wurde wieder
 auf 100 Prozent, 1920 × 1200 und hellen Windows-/App-Kontext geprüft;
-Nachtmodus blieb eingeschaltet. Der neue Artefaktbuild steht noch aus.
+Nachtmodus blieb eingeschaltet.
+
+Der reguläre Neubau `1.0.8150` aus dem sauberen Commit
+`88a47a0031ad288418ac533dc0488c186d9266ca` ist anschließend mit Exitcode 0
+abgeschlossen (`output/windows-installer-dpi-review-8150`). Setup-/First-Run-
+und Launcher-/Updatertests, sämtliche Komponenten-Smokes, 173 Sprachtexte,
+27 geometrische Vorschauen und der 10.901-Dateien-Payload-Audit sind grün.
+Die Releasemetadaten melden `sourceDirty: false`; beide Artefakte wurden
+unabhängig erneut gehasht:
+
+- Setup: `56dce16b31bfe7f99986eb7e6b18afdee36193dc30350c4904095dee8b0de1a1`
+- MSI: `6df5184ad7db4dcb29962237bd1cee5c305ec822d0480db70b44bff7718598ad`
+
+Der hashgleiche Setup-Host wurde danach bei echten 150 Prozent in de/en/fr
+jeweils frisch gestartet. Sprachauswahl, Standard-/Custom-Auswahl und die
+aktivierten Felder am maximalen Scroll-Ende sind nativ geprüft. Die längste
+französische Aufbewahrungsoption „Ne jamais supprimer automatiquement“ wurde
+ausgewählt und ist nun vollständig im geschlossenen Feld sichtbar;
+die Standardtexte beider Auswahlfelder in en/de und die französische
+Spielerprofil-Auswahl sind ebenfalls vollständig. Abschlussoptionen samt
+Hilfen bleiben oberhalb des festen Fußbereichs. Die angeklickte deutsche
+Abschlussstart-Hilfe ist mehrzeilig und vollständig auf dem Bildschirm.
+Der konkrete Auswahlbreitenfehler von 8148 ist damit auch für das neue
+Artefakt nativ korrigiert nachgewiesen.
+
+Keine Hostinstallation wurde gestartet. Alle drei eigenen Setup-Prozesse und
+deren Fenster wurden geschlossen und ihre Abwesenheit geprüft. Die Anzeige
+steht wieder auf 100 Prozent, 1920 × 1200 und hellem Windows-/App-Kontext;
+Nachtmodus blieb eingeschaltet. Strukturierte Prüfnachweise:
+`output/host-display-review-8150/review.json`. Sichtbare 100-/125-Prozent-
+und Dunkel-Kontexte des Artefakts 8150 sowie die übrigen funktionalen
+WIN-I08-Gates bleiben offen. Kein GitHub-Testrelease, Push oder Main-Merge.
 
 ### Aktueller Updatekandidat und Teststart vom 7. September 2026
 
