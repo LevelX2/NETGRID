@@ -3,6 +3,8 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 
+if (await TransferPeerFixture.TryChildAsync(args)) return;
+
 if (args is ["--update-stop-child-fails"])
 {
     Console.WriteLine("READY");
@@ -25,6 +27,7 @@ if (args is ["--installation-stop-child"])
 
 var assembly = Assembly.Load("NETGRID");
 Console.WriteLine($"LAUNCHER_VERIFICATION_OPTIONS_TESTS_OK checks={VerificationOptionsTests.Run(assembly)}");
+Console.WriteLine($"LAUNCHER_UPDATER_STAGING_TESTS_OK checks={await StagedUpdaterTests.Run(assembly)} installationStarted=false");
 if (args is ["--check-update-preparation"])
 {
     Console.WriteLine($"LAUNCHER_UPDATE_PREPARATION_TESTS_OK checks={await UpdatePreparationTests.Run(assembly)}");

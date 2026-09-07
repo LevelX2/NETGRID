@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Reflection;
 
-internal static class RuntimePreparationTests
+internal static partial class RuntimePreparationTests
 {
     public static async Task<int> Run(Assembly assembly)
     {
@@ -133,6 +133,7 @@ internal static class RuntimePreparationTests
             Assert(fixture.Handler.Methods.Count == 0, "verification_does_not_acquire_second_server_preparation");
             await Reject(fixture.CallRuntime("StartAsync"), "launcher_installation_stopping");
         }
+        await TransferChecks(assembly, Assert, Reject);
         return checks;
     }
 

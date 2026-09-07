@@ -35,6 +35,14 @@ function Invoke-Executable {
   Assert-True ($process.ExitCode -eq 0) "rollback_executable_failed:$([IO.Path]::GetFileName($Path)):$($process.ExitCode)"
 }
 function Write-Status { param([string]$State) [ordered]@{ state=$State; startedUtc=$startedUtc; sampledUtc=[DateTime]::UtcNow.ToString('O'); testId=$testId } | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $resultRoot 'rollback-status.json') -Encoding utf8 }
+# This harness used a synthetic parent for the earlier unbound updater.
+# Reject the new protocol before installing a baseline or creating test users;
+# its replacement must exercise the actual launcher-owned handoff.
+Assert-True ((Hash (Join-Path $PSScriptRoot 'NETGRID.Updater.exe')) -eq $updateMetadata.runtime.updaterSha256) 'rollback_updater_hash_mismatch'
+$contractPath = Join-Path $resultRoot "rollback-updater-contract-$testId.json"
+Invoke-Executable (Join-Path $PSScriptRoot 'NETGRID.Updater.exe') @('--audit-contract',$contractPath)
+$updaterContract = Get-Content -LiteralPath $contractPath -Raw | ConvertFrom-Json
+if ($updaterContract.requiresBoundParentAndProceed) { throw 'rollback_harness_requires_actual_launcher_handoff' }
 try {
   foreach ($pair in @(@($baseRoot,$baseMetadata),@($updateRoot,$updateMetadata))) {
     foreach ($artifact in $pair[1].artifacts) { Assert-True ((Hash (Join-Path $pair[0] $artifact.name)) -eq $artifact.sha256) 'rollback_product_hash_mismatch' }

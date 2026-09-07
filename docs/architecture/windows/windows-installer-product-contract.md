@@ -3,8 +3,9 @@
 Stand: 2026-09-04  
 Status: beschlossenes Zielbild; Anwendungsvoraussetzungen, Installerbasis,
 Datenvertrag, Launcher, Setupführung, First Run, Updater, Lokalisierung,
-Branding und Diagnose als Komponenten umgesetzt; sichere Updateanbindung
-und native Abnahme noch offen
+Branding und Diagnose als Komponenten umgesetzt; gebundene Updateanbindung
+implementiert, Benutzer-Neustart, direkter MSI-Aktivspielschutz und native
+Abnahme noch offen
 
 ## Zweck und Grenze
 

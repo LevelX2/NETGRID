@@ -104,29 +104,7 @@ namespace Netgrid.InstallerActions
         }
 
 
-        private static bool ProductProcessesRemain(string programRoot)
-        {
-            var root = Path.GetFullPath(programRoot).TrimEnd(Path.DirectorySeparatorChar);
-            var names = new[] { "NETGRID", "node", "NETGRID.FirstRun" };
-            foreach (var name in names)
-            {
-                var processes = Process.GetProcessesByName(name);
-                try
-                {
-                    foreach (var process in processes)
-                    {
-                        string image;
-                        try { image = process.MainModule.FileName; }
-                        catch (InvalidOperationException) when (process.HasExited) { continue; }
-                        catch (Win32Exception) when (process.HasExited) { continue; }
-                        var expected = name == "node" ? Path.Combine(root, "runtime", "node", "node.exe") : Path.Combine(root, name + ".exe");
-                        if (string.Equals(Path.GetFullPath(image), expected, StringComparison.OrdinalIgnoreCase)) return true;
-                    }
-                }
-                finally { foreach (var process in processes) process.Dispose(); }
-            }
-            return false;
-        }
+        private static bool ProductProcessesRemain(string programRoot) => ProductProcesses.Remain(programRoot);
 
         private static ActionResult Run(Session session, Action action)
         {

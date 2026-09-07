@@ -174,6 +174,7 @@ internal sealed class TrayApplicationContext : ApplicationContext
     private async Task CheckForUpdatesAsync(bool manual)
     {
         if (_checkingUpdates || _closing || _runtime is null) return;
+        var runtime = _runtime;
         _checkingUpdates = true;
         var stage = UpdateStage.Checking;
         try
@@ -207,37 +208,17 @@ internal sealed class TrayApplicationContext : ApplicationContext
             stage = UpdateStage.Downloading;
             var setupPath = await UpdateDiscovery.DownloadVerifiedAsync(http, candidate, staging);
             stage = UpdateStage.Preparing;
-            readiness = await _runtime.UpdateReadinessAsync();
-            if (!readiness.Allowed)
-            {
-                MessageBox.Show(UiText.Get("launcher.update.race"), "NETGRID Update", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                _tray.Text = UiText.Get("launcher.running");
-                return;
-            }
-            var installedUpdater = Path.Combine(_runtime.ProgramRoot, "NETGRID.Updater.exe");
-            if (!File.Exists(installedUpdater)) throw new InvalidOperationException("updater_missing");
-            var updater = Path.Combine(staging, "NETGRID.Updater.exe");
-            File.Copy(installedUpdater, updater, overwrite: true);
-            var start = new System.Diagnostics.ProcessStartInfo(updater) { UseShellExecute = true, Verb = "runas" };
-            start.ArgumentList.Add("--apply");
-            start.ArgumentList.Add("--parent-pid");
-            start.ArgumentList.Add(Environment.ProcessId.ToString());
-            start.ArgumentList.Add("--setup");
-            start.ArgumentList.Add(setupPath);
-            start.ArgumentList.Add("--sha256");
-            start.ArgumentList.Add(candidate.SetupSha256);
-            start.ArgumentList.Add("--program-root");
-            start.ArgumentList.Add(_runtime.ProgramRoot);
-            start.ArgumentList.Add("--environment-file");
-            start.ArgumentList.Add(_runtime.EnvironmentFile);
-            start.ArgumentList.Add("--restart");
-            System.Diagnostics.Process.Start(start);
-            await CloseAsync();
+            if (_closing) return;
+            var activeMatches = await UpdateTransfer.RunAsync(runtime, setupPath, candidate.SetupSha256);
+            if (activeMatches is > 0)
+                MessageBox.Show(UiText.Get("launcher.update.blocked", activeMatches.Value), "NETGRID Update", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            if (runtime.IsTerminallyStopping) await CloseAsync();
+            else if (!_closing) _tray.Text = UiText.Get("launcher.running");
         }
         catch (Exception exception)
         {
             var failure = UpdateFailure.Classify(exception, stage, manual);
-            try { failure.Record(_runtime.LogDirectory); }
+            try { failure.Record(runtime.LogDirectory); }
             catch (Exception logException) when (logException is IOException or UnauthorizedAccessException)
             {
                 // Surface both failures. Never direct the user to a diagnostic
@@ -246,18 +227,19 @@ internal sealed class TrayApplicationContext : ApplicationContext
                     UiText.Get("launcher.update.diagnostic_failed", failure.Diagnostic,
                         $"{logException.GetType().Name} (0x{logException.HResult:X8})"),
                     "NETGRID Update", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                if (!_closing) _tray.Text = UiText.Get("launcher.running");
+                if (!_closing && !runtime.IsTerminallyStopping) _tray.Text = UiText.Get("launcher.running");
                 return;
             }
             if (!failure.Quiet)
                 MessageBox.Show(UiText.Get(failure.MessageKey) +
                     (failure.Unavailable ? string.Empty : $"\n\n{UiText.Get("launcher.error.help")}"),
                     "NETGRID Update", MessageBoxButtons.OK, failure.Unavailable ? MessageBoxIcon.Information : MessageBoxIcon.Error);
-            if (!_closing) _tray.Text = UiText.Get("launcher.running");
+            if (!_closing && !runtime.IsTerminallyStopping) _tray.Text = UiText.Get("launcher.running");
         }
         finally
         {
             _checkingUpdates = false;
+            if (runtime.IsTerminallyStopping && !_closing) await CloseAsync();
         }
     }
 

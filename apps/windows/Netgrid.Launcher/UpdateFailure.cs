@@ -21,7 +21,9 @@ internal sealed record UpdateFailure(string MessageKey, bool Quiet, bool Unavail
         {
             "update_download_hash_mismatch" or "update_integrity_sources_disagree" or "update_metadata_invalid" or
             "update_checksum_missing" or "update_release_response_invalid" or "update_asset_origin_invalid" or
-            "update_current_version_invalid" or "installed_version_missing" or "updater_missing" => exception.Message,
+            "update_current_version_invalid" or "installed_version_missing" or "updater_missing" or
+            "updater_staging_hash_mismatch" or "updater_start_failed" or "updater_preparation_binding_invalid" or
+            "updater_cancel_unresolved" or "updater_handoff_worker_exited" or "updater_transfer_cancel_unresolved" => exception.Message,
             _ => "exception_without_public_code",
         };
         // Never copy exception messages, URLs, headers, paths or inner exceptions.

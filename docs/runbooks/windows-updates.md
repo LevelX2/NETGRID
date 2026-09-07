@@ -20,39 +20,58 @@ Integritätsangaben werden nicht installiert.
 
 1. Der Nutzer stimmt Download und Installation ausdrücklich zu; eine
    Vorabversion zeigt eine zusätzliche Warnung.
-2. Der Launcher fragt den Server über ein zufälliges, nur an diesen
-   Kindprozess übergebenes Control-Token ab. Mindestens eine nicht beendete
-   Partie blockiert das Update. Nach dem Download wird erneut geprüft.
-3. Eine Kopie des Updaters läuft aus `runtime/updates/staging`, wartet auf den
-   vollständigen Launcher-Stopp und öffnet die Datenbank erst danach.
-4. `app/storage-admin.mjs backup-update` erzeugt und prüft ein vollständiges
+2. Eine Readiness-Abfrage vor dem Download weist früh auf nicht beendete
+   Partien hin. Sie ist ausdrücklich keine spätere Installationsfreigabe.
+3. Der Launcher kopiert den installierten Updater in einen eigenen zufälligen
+   Versuchspfad unter `runtime/updates/staging`, verifiziert den Hash und hält
+   Quell- und Zieldatei bis zum Abschluss der Übergabe gegen Schreiben und
+   Ersetzen gesperrt. Danach fordert er die Windows-Freigabe an.
+4. Der erhöhte Updater bindet registrierte Pfade, ursprüngliche Launcher-PID,
+   Startzeit und Image, hält die äußere `preparing`-Lease und verbindet die
+   konkrete Pipe. Erst danach reserviert der Launcher atomar den spielfreien
+   Zustand über `PrepareUpdateAsync`. Nichtterminale Partien führen zur
+   quittierten Rücknahme und zum Ende dieses Updaterversuchs, ohne den
+   laufenden Spielbetrieb zu stoppen.
+5. Bei Freigabe stoppt der Launcher seine Runtime strikt und sendet erst
+   danach `Proceed`. Der Updater entfernt die Launcher-Ausnahme, wartet auf
+   dessen tatsächliches Prozessende und prüft bis zu 45 Sekunden die Abwesenheit
+   weiterer Produktprozesse am konkreten Installationsort. Erst dann darf er
+   Produktdaten öffnen. Fremde Prozesse werden nicht beendet.
+6. `app/storage-admin.mjs backup-update` erzeugt und prüft ein vollständiges
    Backup mit Grund `pre_update`.
-5. Der heruntergeladene Setuphost führt ein erhöhtes MSI-Major-Upgrade aus.
+7. Der heruntergeladene Setuphost führt unter der explizit weitergereichten
+   äußeren Lease ein erhöhtes MSI-Major-Upgrade aus.
    Das vorhandene `runtime.env`, Maintenance-Credentials, Kontopolicy und der
    Datenroot bleiben autoritativ.
-6. `NETGRID.exe --headless-verify` startet Server und Webclient, prüft beide
-   Healthpfade und beendet sie kontrolliert. Erst danach wird der neue
+8. Der konkret gebundene `NETGRID.exe --headless-verify` startet unter der
+   eigenen Prüfausnahme Server und Webclient, prüft beide Healthpfade und
+   beendet sie kontrolliert. Erst danach wird der neue
    Setuphost aus dem installerverwalteten Cache als neue Vorversion
    übernommen und NETGRID neu gestartet. Der Cache liegt unter `config`, ist
    für normale Benutzer schreibgeschützt und hält bis zu diesem Healthcheck
    die alte Version unverändert.
 
-### Noch offene Schutzlücke vor der Freigabe
+### Noch offene Abnahmen vor der Freigabe
 
-Die beiden Readiness-Abfragen sind momentan nur lesende Momentaufnahmen,
-keine Reservierung des spielfreien Zustands. Insbesondere kann nach der
-zweiten Abfrage während der Windows-Administratorbestätigung eine neue
-Partie angelegt werden, bevor der Launcher tatsächlich stoppt. Der Ablauf
-oben ist deshalb noch kein abgeschlossener Nachweis eines lückenlosen
-Aktivspielschutzes. Eine weitere Statusabfrage allein löst diesen Wettlauf
-nicht.
+Die zusammenhängende Tray-/Updater-Anbindung ersetzt inzwischen die zweite
+Readiness-Momentaufnahme durch atomare Vorbereitung, Prozessbindung und
+explizite Übergabe. Windows-Abbruchcode 1223 beendet den Versuch vor dieser
+Vorbereitung. Echte unelevierte Prozess-, Pipe-, Registry- und Runtimefixtures
+prüfen die beteiligten Owner; der vollständige erhöhte Produktlauf mit zwei
+aktuellen Installern ist damit noch nicht nativ bewiesen.
 
-Die serverseitige Grundlage des Ursachenfixes ist inzwischen umgesetzt;
-ihre Anbindung im Windows-Launcher steht noch aus. Ablehnung oder Abbruch der
-Windows-Bestätigung müssen die Freigabe kontrolliert zurücknehmen. Direkte
-MSI-Upgrades benötigen denselben Schutz vor dem Entfernen der bisherigen
-Version; die vorhandene Installer-/Launcher-Stoppkoordination allein ersetzt
-ihn nicht. Diese Punkte bleiben WIN-I08-Releaseblocker.
+Direkte MSI-Upgrades benötigen weiterhin den Aktivspielschutz vor dem
+Entfernen der bisherigen Version. Außerdem startet der abschließende
+Neustartpfad noch direkt aus dem erhöhten Updater und erfüllt deshalb noch
+nicht den Vertrag eines normalen Benutzerlaunchers, insbesondere bei einer
+Freigabe über ein anderes Administratorkonto. Dieser Pfad muss vor der
+Freigabe ursächlich an den ursprünglichen Benutzerkontext gebunden werden;
+ein stiller Verzicht auf Neustart oder ein erhöht weiterlaufendes NETGRID ist
+kein abgeschlossener Fix. Als Referenz beschreibt Microsoft den Neustart
+über den ursprünglichen Explorer-Benutzer, ausdrücklich auch für die Freigabe
+mit einem anderen Administratorkonto:
+[Unelevierter Prozessstart](https://devblogs.microsoft.com/oldnewthing/20131118-00/?p=2643).
+Diese Punkte bleiben WIN-I08-Releaseblocker.
 
 `apps/server/src/update-readiness.test.ts` prüft die aktuelle Zählung über den
 echten SQLite-/HTTP-Pfad für sämtliche elf gespeicherten Matchzustände:
@@ -77,7 +96,7 @@ zurück. Wiederholte Abbrüche desselben Versuchs sind idempotent; ein anderer
 Owner darf eine bestehende Sperre nicht lösen. Eine quittierte Rücknahme
 verhindert auch eine verspätete Vorbereitung mit derselben Nonce. Diese
 Versuchsmetadaten liegen ausschließlich im Arbeitsspeicher des Servers.
-Der künftige Launcher muss bei unklarem Vorbereitungsergebnis denselben
+Der Launcher muss bei unklarem Vorbereitungsergebnis denselben
 Versuch explizit abbrechen und die Quittierung prüfen, bevor er normalen
 Betrieb behauptet.
 
@@ -114,8 +133,8 @@ Sekunden und 4.096 Bytes begrenzt. Erfolg verlangt exakt die vereinbarten
 JSON-Felder, `ok=true`, eine nichtnegative ganzzahlige Matchanzahl und eine
 dazu konsistente Freigabe. Doppelte Felder, fehlende Werte und zusätzliche
 Felder werden abgewiesen. `Dispose` des HTTP-Clients ersetzt ausdrücklich
-keine quittierte Rücknahme. Der Client ist inzwischen in den Runtime-Owner
-integriert, aber noch nicht im Tray-Updatepfad aufgerufen.
+keine quittierte Rücknahme. Der Client ist im Runtime-Owner integriert und
+wird nun über `UpdateTransfer` aus dem Tray-Updatepfad aufgerufen.
 
 `LauncherRuntime.PrepareUpdateAsync` hält die bestehende Lifecycle-Sperre
 von vor dem POST bis zur quittierten Rücknahme oder zum geprüften Stopp.
@@ -138,28 +157,34 @@ Exitcode 0 und wartet auf beide eigenen Prozessenden. Ein schon zuvor
 beendeter Server, Schreibfehler, Timeout oder Fehlerexit darf nicht durch
 Kill in einen erfolgreichen Update-Stopp umgedeutet werden. `Stopped=true`
 wird ausschließlich nach vollständigem Erfolg gesetzt. Dies berechtigt
-für sich allein noch nicht zum Backup: Der künftige Aufrufer muss zusätzlich
+für sich allein noch nicht zum Backup: Der Aufrufer muss zusätzlich
 die updateweite Installersperre und die gebundene Updater-Übergabe halten.
 
-### Offene Übergabe- und Stoppreihenfolge
+### Gebundene Übergabe- und Stoppreihenfolge
 
-Der bisherige Updater startet die Transaktion nach `WaitForParent`: Er
-wartet höchstens 30 Sekunden auf das Ende der angegebenen Launcher-PID und
-akzeptiert auch eine bereits fehlende PID. Das allein beweist weder einen
-quittierten geordneten Stopp noch die Zustimmung zur konkreten Übergabe.
-Zudem liegt zwischen dem Launcher-Ende und dem späteren MSI-Beginn bereits
-das Datenbackup. Die jetzige MSI-Sperre schützt dieses frühere Zeitfenster
-noch nicht vor einem neuen Launcherstart.
+`WaitForParent` und die Annahme, eine fehlende PID autorisiere ein Update,
+sind entfernt. `UpdateRequest` verlangt sämtliche Bindungsparameter;
+doppelte, unbekannte, unvollständige oder nicht kanonische Identitäten
+scheitern vor dem Produktlauf. `UpdateSession` nimmt ausschließlich eine
+explizite Übergabe entgegen und hält die äußere Sperre über Backup, MSI,
+Prüfung und gegebenenfalls Rollback. `Dispose` gibt eine nach `Proceed`
+gehaltene Sperre niemals implizit frei. Nur der nachweislich gesunde
+Transaktionspfad darf `Complete` aufrufen.
 
-Die Windows-Anbindung muss deshalb die bestätigte Servervorbereitung,
-zugehörige Prozesse, geordneten Stopp und den gesamten exklusiven Update-
-Abschnitt bis zur geprüften Wiederaufnahme verbinden. Ein bloßes Hinzufügen
-von `PrepareAsync` vor den bisherigen UAC-Aufruf reicht nicht. Erfolgreiche
-HTTP-Komponententests werden nicht als Nachweis dieser noch offenen
-Prozessübergabe oder der Major-Upgrade-Reihenfolge ausgegeben.
+`UpdateTransfer` prüft nach der Pipeverbindung zusätzlich den kompletten
+Registrybezug auf ursprünglichen Launcher und konkreten Updater. Bei
+blockierenden Partien verlangt es zuerst die DELETE-Quittierung, dann
+Pipe-Cancel, Updater-Ende und den passenden abgeschlossenen Registryrecord.
+Die bloße Ausnahme des ursprünglichen Launchers in einer noch aktiven
+`preparing`-Lease gilt nicht als erfolgreiche Rücknahme. Ein vor Verbindung
+beendeter Worker wird sofort erkannt. Vor-Übergabe-Fehler werden vom
+ursprünglichen Launcher angezeigt; der Updater beendet diesen Fehlversuch
+ohne blockierenden zweiten Dialog. Seine Diagnose wird nur unter dem zuvor
+registrierungsgeprüften Datenroot geschrieben, ohne freie Fehlertexte oder
+Zugangsdaten. Fehler beim Schreiben bleiben als Fehler erhalten.
 
-Als gemeinsame, noch nicht in den Produktablauf eingebundene Grundlage
-liegt `apps/windows/Common/UpdateHandoff.cs` vor. Die lokale Duplex-Pipe
+Die gemeinsame Grundlage ist `apps/windows/Common/UpdateHandoff.cs`.
+Die lokale Duplex-Pipe
 besitzt eine geschützte DACL für den aufrufenden Benutzer und explizit
 bestätigte Windows-Administratoren; Netzwerkzugriffe sind ausgeschlossen.
 Der zufällige Pipename allein ist keine Identitätsprüfung: Beide Seiten
@@ -178,11 +203,13 @@ aufrufende Transaktionsowner einen begrenzten CancellationToken setzen.
 
 Nach Beginn der `Proceed`-Übertragung ist ein fehlendes Ack hingegen ein
 unklarer Ausgang, keine sicher zurückgenommene Freigabe. Dafür bleibt
-`ProceedMayHaveBeenDelivered=true` erhalten. Der künftige Aufrufer muss dann
-die Exklusivität bewahren und den genau gebundenen Worker verfolgen, statt
-normalen Betrieb oder einen zweiten Updateversuch freizugeben. Der Transport
-beweist selbst weder geordneten Runtime-Stopp noch die updateweite Sperre;
-beides bleibt Aufgabe der noch ausstehenden Transaktionsanbindung.
+`ProceedMayHaveBeenDelivered=true` erhalten. Der bereits terminal gestoppte
+Launcher darf dann weder normalen Betrieb noch einen zweiten Updateversuch
+freigeben. Er beendet sich; nur der gebundene Updater kann die gehaltene
+Transaktion fortsetzen und nach Verifikation abschließen. Ein Fehler gibt
+diese Sperre nicht implizit frei. Der Transport allein beweist weder
+geordneten Runtime-Stopp noch die updateweite Sperre; beides wird deshalb
+vom jeweiligen Runtime- beziehungsweise Transaktionsowner geprüft.
 
 Der Launcher gibt seine beiden Runtime-Prozessslots inzwischen erst frei,
 nachdem das Ende des jeweils gehaltenen Prozesshandles nachgewiesen ist.
@@ -217,8 +244,9 @@ Abnahme, die diese unelevierten Komponentenprüfungen nicht ersetzen.
 
 `Common/InstallationLease.cs` ist der einzige Writer der bestehenden
 Installersperre und wird von MSI-Aktionen und Updater gemeinsam verwendet.
-Der Updater ruft die neuen Phasen noch nicht im Produktablauf auf. Launcher
-und First Run binden weiterhin ausschließlich den Reader ein.
+Der Updater ruft die Phasen über `UpdateSession` und `UpdateVerifier` im
+Produktablauf auf. Launcher und First Run binden weiterhin ausschließlich
+den Reader ein.
 
 Der atomare Registrywert `Lease` enthält zehn Felder:
 `3|lease|phase|cutoffTicks|parentId|parentStartTicks|ownerId|ownerStartTicks|msiLease|msiProductCode`.
@@ -255,7 +283,7 @@ oder die Prüfung mit einem anderen Windows-Administratorkonto.
 
 ### Gebundener Prüfprozess unter gehaltener Sperre
 
-Die vorbereitete Phase `verifying` verwendet denselben atomaren Registrywert.
+Die Phase `verifying` verwendet denselben atomaren Registrywert.
 Ihre einzige Prozessausnahme gilt für PID und Startzeit des konkreten
 Prüfkindes, nicht mehr für den ursprünglichen Launcher. Die Ausnahme ist nur
 gültig, solange auch der anhand PID, Startzeit und Prozesshandle geprüfte
@@ -281,15 +309,15 @@ Updater wartet maximal drei Minuten, nimmt die Ausnahme anschließend über
 abzuleiten. Unbewiesenes Prozessende sowie Fehler bei Rücknahme oder Prüfung
 bleiben als strukturierte Fehler erhalten; auch ein Rücknahmefehler darf die
 Verfolgung des eigenen Kindes nicht überspringen. Die äußere Lease bleibt in
-diesem Fall gehalten. Der künftige Transaktionsaufrufer darf nach einem
+diesem Fall gehalten. Der Transaktionsaufrufer darf nach einem
 solchen Fehler weder Rollback noch normalen Betrieb behaupten.
 
 Die Komponentenprüfungen verwenden echte lokale Pipes und ausschließlich
 eigene inerte Kindprozesse sowie zufällige HKCU-Testbäume. Sie belegen
 Identitätsbindung, Owner-Ende, Rücknahme, Exitcodeauswertung und strikten
 Runtime-Stopp, aber keinen installierten Healthlauf. Der tatsächliche
-`UpdateTransaction`-/Tray-Pfad ruft diese Komponente noch nicht auf; seine
-zusammenhängende Anbindung und die native Abnahme bleiben Releaseblocker.
+`UpdateTransaction`-/Tray-Pfad ruft diese Komponente jetzt auf. Die native
+Abnahme des zusammenhängenden Ablaufs bleibt ein Releaseblocker.
 
 ### MSI-Teiltransaktionen und Major-Upgrade
 
@@ -301,8 +329,8 @@ Die Eigenschaft wird als `Secure` und `Hidden` geführt. Eine noch aktive
 Vorbereitung, eine fremde Sperre oder eine schon laufende MSI-Teiltransaktion
 wird nicht übernommen. Teiltransaktionen besitzen jeweils zusätzlich eine
 eigene zufällige `msiLease`; verspätete Rollbacks können keinen späteren
-MSI-Lauf freigeben. Der Setuphost kann die äußere Lease inzwischen explizit
-übergeben; der Updater ruft diesen gebundenen Modus noch nicht auf.
+MSI-Lauf freigeben. Der Setuphost übergibt die äußere Lease explizit;
+der Updater verwendet diesen gebundenen Modus für Upgrade und Downgrade.
 
 Für einen updatergebundenen Aufruf akzeptiert der Setuphost ausschließlich
 `--install-update --program-root <root> --update-lease <lease>` beziehungsweise
@@ -368,9 +396,22 @@ MSI-Autorisierung und ist weder Releasekandidat noch Installationstest.
 
 Scheitert Windows Installer, greift zunächst seine Transaktionsrücknahme; der
 Updater startet nur einen weiterhin verifizierbaren alten Stand. Scheitert der
-nachgelagerte Healthcheck, deinstalliert der neue Setuphost seine MSI-Version,
-installiert den vor dem Update gecachten Setuphost und stellt das unmittelbar
-zuvor erzeugte Backup über die bestehende Storage-Restore-Autorität wieder her.
+nachgelagerte Healthcheck, installiert der vor dem Update gecachte Setuphost
+den vorherigen Stand als ausdrücklich erlaubtes MSI-Downgrade unter derselben
+äußeren Lease. Das Entfernen der neuen Version bleibt Teil dieser einen
+MSI-Transaktion; eine vorgeschaltete Deinstallation würde die noch benötigte
+registrierte Installationsidentität entfernen. Danach stellt der Updater das
+unmittelbar zuvor erzeugte Backup über die bestehende Storage-Restore-Autorität
+wieder her und verlangt erneut den gebundenen Healthcheck.
+
+Der bisherige `test-windows-updater-rollback-sandbox.ps1`-Lauf mit synthetischer
+Parent-PID belegt ausschließlich die früher getesteten Builds. Sein ungebundener
+`--apply`-Aufruf wird vom aktuellen Updater abgewiesen. Der Harness prüft jetzt
+vor MSI- oder Benutzeranlage den auditierten Übergabevertrag und lehnt den
+neuen gebundenen Modus ausdrücklich ab. Er muss für die neue
+native Abnahme durch einen produktgebundenen Launcher-/Pipe-Lauf ersetzt
+werden; alte Testergebnisse oder ein direkter Entwickleraufruf sind kein
+Nachweis des neuen Übergabevertrags.
 
 Kann Programm- oder Datenrollback nicht vollständig verifiziert werden, bleibt
 NETGRID gestoppt. Maßgebliche Diagnose liegt unter

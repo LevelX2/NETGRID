@@ -15,6 +15,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\Common\UpdateHandoff.cs" Link="UpdateHandoff.cs" />
+    <Compile Include="..\Common\UpdateRequest.cs" Link="UpdateRequest.cs" />
+    <Compile Include="..\Common\ProductProcesses.cs" Link="ProductProcesses.cs" />
     <Compile Include="..\Common\UpdateVerification.cs" Link="UpdateVerification.cs" />
     <Compile Include="..\Common\InstallationGate.cs" Link="InstallationGate.cs" />
     <Compile Include="..\Common\InstallationLease.cs" Link="InstallationLease.cs" />

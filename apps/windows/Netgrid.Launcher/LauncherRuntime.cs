@@ -45,6 +45,7 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
     public string DataRoot => _environment.Required("NETGRID_DATA_ROOT");
     public string ProgramRoot => _programRoot;
     public string EnvironmentFile => Path.Combine(_environment.Required("NETGRID_DATA_ROOT"), "config", "runtime.env");
+    public bool IsTerminallyStopping => InstallationStopping;
 
     public static LauncherRuntime Load(LauncherOptions options)
     {

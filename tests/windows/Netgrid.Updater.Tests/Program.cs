@@ -6,6 +6,14 @@ Directory.CreateDirectory(scratch);
 try
 {
     var updater = Assembly.Load("NETGRID.Updater");
+    var contractPath = Path.Combine(scratch, "contract.json");
+    var main = updater.GetType("Netgrid.Updater.Program", throwOnError: true)!.GetMethod("Main", BindingFlags.NonPublic | BindingFlags.Static)!;
+    Assert((int)main.Invoke(null, [new[] { "--audit-contract", contractPath }])! == 0, "contract_audit_failed");
+    using (var contract = System.Text.Json.JsonDocument.Parse(File.ReadAllText(contractPath)))
+    {
+        Assert(contract.RootElement.GetProperty("requiresBoundParentAndProceed").GetBoolean(), "unbound_harness_not_rejected_by_contract");
+        Assert(contract.RootElement.GetProperty("holdsLeaseThroughBackupAndHealth").GetBoolean(), "outer_lease_contract_missing");
+    }
     var transaction = updater.GetType("Netgrid.Updater.UpdateTransaction", throwOnError: true)!;
     var readEnvironment = transaction.GetMethod("ReadEnvironment", BindingFlags.NonPublic | BindingFlags.Static)!;
     var fixture = Path.Combine(scratch, "runtime.env");

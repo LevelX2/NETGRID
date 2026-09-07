@@ -24,6 +24,8 @@ internal static class Program
                     schemaVersion = "netgrid-update-transaction-v1",
                     source = "github-releases-only",
                     requiresExplicitConsent = true,
+                    requiresBoundParentAndProceed = true,
+                    holdsLeaseThroughBackupAndHealth = true,
                     blocksActiveMatches = true,
                     reverifiesSetupAfterLauncherExit = true,
                     stages = new[] { "verified-download", "controlled-stop", "verified-backup", "msi-major-upgrade", "post-install-health", "program-and-data-rollback", "restart" },
@@ -36,9 +38,15 @@ internal static class Program
                 var actual = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(Path.GetFullPath(args[1])))).ToLowerInvariant();
                 return actual.Equals(args[2], StringComparison.OrdinalIgnoreCase) ? 0 : 2;
             }
-            var options = UpdateOptions.Parse(args);
+            var options = UpdateRequest.Parse(args);
             ApplicationConfiguration.Initialize();
             return UpdateTransaction.Run(options);
+        }
+        catch (UpdateHandoffFailure)
+        {
+            // The original launcher is still the UI owner before handoff.
+            // Exit lets it resolve cancellation; never claim it is stopped.
+            return 3;
         }
         catch (Exception)
         {
@@ -48,32 +56,18 @@ internal static class Program
     }
 }
 
-internal sealed record UpdateOptions(int ParentPid, string SetupPath, string SetupSha256, string ProgramRoot, string EnvironmentFile, bool Restart)
-{
-    public static UpdateOptions Parse(string[] args)
-    {
-        if (args.Length < 11 || args[0] != "--apply") throw new InvalidOperationException("updater_arguments_invalid");
-        string Required(string name)
-        {
-            var index = Array.IndexOf(args, name);
-            if (index < 0 || index + 1 >= args.Length) throw new InvalidOperationException($"updater_argument_missing:{name}");
-            return args[index + 1];
-        }
-        if (!int.TryParse(Required("--parent-pid"), out var parentPid) || parentPid <= 0) throw new InvalidOperationException("updater_parent_invalid");
-        var setup = Path.GetFullPath(Required("--setup"));
-        var program = Path.GetFullPath(Required("--program-root"));
-        var environment = Path.GetFullPath(Required("--environment-file"));
-        var hash = Required("--sha256").ToLowerInvariant();
-        if (hash.Length != 64 || !hash.All(Uri.IsHexDigit)) throw new InvalidOperationException("updater_hash_invalid");
-        return new(parentPid, setup, hash, program, environment, args.Contains("--restart", StringComparer.Ordinal));
-    }
-}
-
 internal static class UpdateTransaction
 {
-    public static int Run(UpdateOptions options)
+    public static int Run(UpdateRequest options)
     {
-        WaitForParent(options.ParentPid);
+        using var session = UpdateSession.AcceptAsync(options).GetAwaiter().GetResult();
+        if (session is null) return 0; // Quittierter Abbruch, keine Installation.
+        var stopped = Stopwatch.StartNew();
+        while (ProductProcesses.Remain(options.ProgramRoot))
+        {
+            if (stopped.Elapsed > TimeSpan.FromSeconds(45)) throw new InvalidOperationException("updater_product_processes_remain");
+            Thread.Sleep(100);
+        }
         var environment = ReadEnvironment(options.EnvironmentFile);
         var dataRoot = Required(environment, "NETGRID_DATA_ROOT");
         ValidateScope(options, dataRoot);
@@ -82,7 +76,7 @@ internal static class UpdateTransaction
         var logPath = Path.Combine(logDirectory, $"updater-{DateTime.UtcNow:yyyyMMdd-HHmmss}.log");
         try
         {
-            return RunVerifiedTransaction(options, environment, dataRoot, logPath);
+            return RunVerifiedTransaction(options, session, environment, dataRoot, logPath);
         }
         catch (Exception exception)
         {
@@ -91,7 +85,7 @@ internal static class UpdateTransaction
         }
     }
 
-    private static int RunVerifiedTransaction(UpdateOptions options, IReadOnlyDictionary<string, string> environment, string dataRoot, string logPath)
+    private static int RunVerifiedTransaction(UpdateRequest options, UpdateSession session, IReadOnlyDictionary<string, string> environment, string dataRoot, string logPath)
     {
         var previousSetup = Path.Combine(dataRoot, "config", "updates", "NETGRID-Setup.exe");
         if (!File.Exists(previousSetup)) throw new InvalidOperationException("updater_previous_setup_missing");
@@ -104,54 +98,46 @@ internal static class UpdateTransaction
             ?? throw new InvalidOperationException("updater_backup_invalid");
         WriteLog(logPath, "backup_verified");
 
-        var installCode = RunVerified(options.SetupPath, options.SetupSha256, ["--install-update", "--program-root", options.ProgramRoot]);
+        var installCode = RunVerified(options.SetupPath, options.SetupSha256, ["--install-update", "--program-root", options.ProgramRoot, "--update-lease", options.Lease]);
         if (installCode != 0)
         {
             WriteLog(logPath, $"install_failed:{installCode}");
-            RestartIfHealthy(options, logPath);
+            RestartIfHealthy(options, session, logPath);
             throw new InvalidOperationException($"updater_install_failed:{installCode}");
         }
         if (VerifyInstalled(options))
         {
             PromoteCachedSetup(dataRoot);
             WriteLog(logPath, "update_verified");
+            session.Complete();
             if (options.Restart) StartLauncher(options.ProgramRoot);
             MessageBox.Show(UiText.Get("updater.success"), "NETGRID Update", MessageBoxButtons.OK, MessageBoxIcon.Information);
             return 0;
         }
 
         WriteLog(logPath, "post_install_health_failed:rollback_started");
-        var uninstallCode = RunVerified(options.SetupPath, options.SetupSha256, ["--uninstall-update"]);
-        var reinstallCode = uninstallCode == 0 ? RunVerified(previousSetup, previousHash, ["--install-update", "--program-root", options.ProgramRoot]) : uninstallCode;
-        if (uninstallCode != 0 || reinstallCode != 0)
-            throw new InvalidOperationException($"updater_program_rollback_failed:uninstall={uninstallCode}:install={reinstallCode}");
+        // The authored downgrade replaces the new product inside one MSI
+        // transaction. A separate uninstall would remove the registered
+        // install identity before the bound old Setup can validate it.
+        var reinstallCode = RunVerified(previousSetup, previousHash, ["--install-update", "--program-root", options.ProgramRoot, "--update-lease", options.Lease]);
+        if (reinstallCode != 0)
+            throw new InvalidOperationException($"updater_program_rollback_failed:install={reinstallCode}");
         RunStorage(options.ProgramRoot, environment, "restore", backupDirectory);
         if (!VerifyInstalled(options)) throw new InvalidOperationException("updater_rollback_health_failed");
         WriteLog(logPath, "rollback_verified");
+        session.Complete();
         if (options.Restart) StartLauncher(options.ProgramRoot);
         MessageBox.Show(UiText.Get("updater.rollback"), "NETGRID Update", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         return 2;
     }
 
-    private static void WaitForParent(int pid)
-    {
-        try
-        {
-            using var parent = Process.GetProcessById(pid);
-            if (!parent.WaitForExit(30_000)) throw new InvalidOperationException("updater_launcher_stop_timeout");
-        }
-        catch (ArgumentException)
-        {
-            // The launcher already exited between process creation and lookup.
-        }
-    }
+    private static bool VerifyInstalled(UpdateRequest options) => UpdateVerifier.RunAsync(options.ProgramRoot, options.EnvironmentFile, options.Lease).GetAwaiter().GetResult();
 
-    private static bool VerifyInstalled(UpdateOptions options) => Run(Path.Combine(options.ProgramRoot, "NETGRID.exe"), ["--headless-verify", "--program-root", options.ProgramRoot, "--environment-file", options.EnvironmentFile]) == 0;
-
-    private static void RestartIfHealthy(UpdateOptions options, string logPath)
+    private static void RestartIfHealthy(UpdateRequest options, UpdateSession session, string logPath)
     {
         if (!VerifyInstalled(options)) return;
         WriteLog(logPath, "previous_install_verified_after_failure");
+        session.Complete();
         if (options.Restart) StartLauncher(options.ProgramRoot);
     }
 
@@ -216,7 +202,7 @@ internal static class UpdateTransaction
         return values;
     }
 
-    private static void ValidateScope(UpdateOptions options, string dataRoot)
+    private static void ValidateScope(UpdateRequest options, string dataRoot)
     {
         var expectedEnvironment = Path.GetFullPath(Path.Combine(dataRoot, "config", "runtime.env"));
         if (!options.EnvironmentFile.Equals(expectedEnvironment, StringComparison.OrdinalIgnoreCase)) throw new InvalidOperationException("updater_environment_scope_invalid");

@@ -1098,6 +1098,32 @@ Komponentennachweis, keine Installation. `UpdateTransaction` und Tray rufen
 die neue Prüffreigabe noch nicht auf. Diese Anbindung sowie die nativen Gates
 bleiben offen; Kandidat 8169 ist unverändert.
 
+Am 8. September ist die zusammenhängende Anbindung im tatsächlichen
+Tray-/Updaterpfad umgesetzt: hashgeprüfte und gesperrte Updaterkopie je
+Versuch, eindeutige Requestparameter, registrierte Pfad- und Prozessbindung,
+`preparing` vor atomarer Servervorbereitung, strikter Stopp vor `Proceed`,
+echtes Parent-Ende und Prüfung verbleibender Produktprozesse vor Backup.
+MSI und beide Healthläufe nutzen dieselbe äußere Lease. Der Programmrollback
+verwendet das erlaubte MSI-Downgrade statt einer vorgelagerten Deinstallation,
+die die noch benötigte Installationsregistrierung entfernen würde.
+
+32 neue Sessionchecks mit tatsächlich endendem Parent, 44 Requestchecks,
+16 Stagingchecks einschließlich ausgeführter inerter Windows-CLI unter
+gehaltenem Dateilock und 42 neue Runtime-/Übergabechecks bestehen. Die
+Runtime-Vorbereitungssuite umfasst jetzt 95 Checks. Unter anderem sind aktive
+Partien, fehlender Cancel-Abschluss, falsche Ownerbindung, vorzeitig
+beendeter Worker, fehlgeschlagener Serverstopp und verlorenes Ack abgedeckt.
+Die bestehenden 49 Pipe-, 45 Healthpermit- und 214 Lifecyclechecks sowie
+Updater-Umgebungs-/Logtests und vier MSI-Strukturgates bleiben grün.
+
+Dies sind keine erhöhten Installationsnachweise. Der direkte Neustart aus
+dem erhöhten Updater ist noch auf den ursprünglichen normalen Benutzer zu
+binden. Der bisherige Rollback-Sandboxharness mit synthetischer Parent-PID
+kann den neuen Vertrag nicht mehr prüfen und muss durch einen gebundenen
+Produktlauf ersetzt werden. Direkter MSI-Aktivspielschutz, aktuelle
+Zwei-Versionen-Upgrades und die übrigen nativen Gates bleiben offen. 8169,
+Sandbox, Main und vorhandene Maintenance-Zugangsdaten wurden nicht verändert.
+
 Vor der Freigabe bleiben die Prozess-Ende-Raceprüfung,
 die direkten MSI-Updatepfade hinsichtlich
 laufender Spiele, verständliche lokalisierte Fehler, die vollständige

@@ -7,6 +7,7 @@ using System.Security.Principal;
 using Netgrid.Windows;
 
 if (await VerificationTests.TryChildAsync(args)) return;
+if (await SessionTests.TryChildAsync(args)) return;
 
 if (args is ["--peer-child", var childSession, var parentId, var parentStart])
 {
@@ -158,6 +159,8 @@ foreach (var proceed in new[] { true, false })
 }
 Console.WriteLine($"UPDATE_HANDOFF_TESTS_OK checks={checks} nativePipes=true elevation=false installationStarted=false");
 await VerificationTests.RunAsync();
+await SessionTests.RunAsync();
+RequestTests.Run();
 
 void Assert(bool value, string name)
 {
