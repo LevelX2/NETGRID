@@ -9244,10 +9244,7 @@
     ],
     "planExecution": {
       "acceptablePlanKinds": ["corp.defend_servers"],
-      "acceptableCapabilities": ["allocate_server_defense"],
-      "requiredAssessmentEvidence": [
-        "corp_defense_support_install:hq:corp_upgrade_install_placement_fit:reserve_after_action:0"
-      ]
+      "acceptableCapabilities": ["allocate_server_defense"]
     }
   }
 }

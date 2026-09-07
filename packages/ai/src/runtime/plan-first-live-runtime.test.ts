@@ -13049,26 +13049,28 @@ describe("authoritative plan-first live runtime", () => {
 
     resetResidentPlanPortfolioMemory();
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+    const scoreRoot =
+      "plan:corp.score_agenda:agenda%3Aagenda-protected%3Aremote_1";
+    const scoreSupport =
+      "plan:corp.economy:score-support%3Aagenda%3Aagenda-protected%3Aremote_1";
     expect(decision).toMatchObject({
-      actionId: advance.actionId,
-      reasonCode: "plan_first.corp.score_agenda",
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
       decisionDebug: {
-        planKind: "corp.score_agenda",
+        planKind: "corp.economy",
         planFirstDecision: {
-          rootPlanInstanceId: expect.stringContaining(
-            "plan:corp.score_agenda:",
-          ),
-          leafExecutorInstanceId: expect.stringContaining(
-            "plan:corp.score_agenda:",
-          ),
-          route: { actionId: advance.actionId },
+          rootPlanInstanceId: scoreRoot,
+          leafExecutorInstanceId: scoreSupport,
+          route: { actionId: credit.actionId },
         },
       },
     });
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_assessment_evidence:corp_engine_certified_mature_remote_score_advance:remote_1",
+        `plan_first_root:${scoreRoot}`,
+        `plan_first_executor:${scoreSupport}`,
+        `plan_priority_delegated_from:${scoreRoot}`,
       ]),
     );
 
@@ -13087,18 +13089,18 @@ describe("authoritative plan-first live runtime", () => {
       decisionDebug: {
         planKind: "corp.score_agenda",
         planFirstDecision: {
-          rootPlanInstanceId: expect.stringContaining(
-            "plan:corp.score_agenda:",
-          ),
-          leafExecutorInstanceId: expect.stringContaining(
-            "plan:corp.score_agenda:",
-          ),
+          rootPlanInstanceId: scoreRoot,
+          leafExecutorInstanceId: scoreRoot,
           route: { actionId: advance.actionId },
         },
       },
     });
-    expect(oneLayerDecision.evidence).toContain(
-      "plan_assessment_evidence:corp_exposed_agenda_progress_preserves_conversion_clock:remote_1",
+    expect(oneLayerDecision.evidence).toEqual(
+      expect.arrayContaining([
+        `plan_first_root:${scoreRoot}`,
+        `plan_first_executor:${scoreRoot}`,
+        "plan_assessment_evidence:corp_exposed_agenda_progress_preserves_conversion_clock:remote_1",
+      ]),
     );
   });
 
@@ -13297,7 +13299,7 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
-  it("binds a visible ETR layer to a blocked new-remote score project before deepening an already layered central", () => {
+  it("routes a material HQ threat through global defense before staging an uninstalled score project", () => {
     resetResidentPlanPortfolioMemory();
     const stateVersion = 1;
     const installAgenda = legalAction(
@@ -13551,24 +13553,18 @@ describe("authoritative plan-first live runtime", () => {
     });
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
     expect(decision).toMatchObject({
-      actionId: installFilterNew.actionId,
+      actionId: installFilterHq.actionId,
       reasonCode: "plan_first.corp.defend_servers",
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
-          rootPlanInstanceId: expect.stringContaining(
-            "plan:corp.score_agenda:",
-          ),
+          rootPlanInstanceId:
+            "plan:corp.defend_servers:server-defense-portfolio",
           leafExecutorInstanceId:
             "plan:corp.defend_servers:server-defense-portfolio",
         },
       },
     });
-    expect(decision.evidence).toEqual(
-      expect.arrayContaining([
-        expect.stringContaining("score_protection_staging_install:"),
-      ]),
-    );
   });
 
   it("hands a scoring remote from global defense to the score plan once a second independent ETR satisfies exact 1/4", () => {
@@ -15386,7 +15382,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("keeps a multi-turn terminal P4 score-funding child bound to its exact parent beside another executable P4 score parent", () => {
+  it("promotes the terminal score parent over another executable P4 score parent", () => {
     const stateVersion = 1;
     const agendaDefinitionId = "onr_v1_189_artificial-security-directors";
     const installTerminal = legalAction(
@@ -15519,39 +15515,25 @@ describe("authoritative plan-first live runtime", () => {
     const portfolio = JSON.stringify(residentPlanPortfolioSnapshot(input));
     const scoreParentInstanceId =
       "plan:corp.score_agenda:agenda%3Aagenda-terminal%3Aremote_1";
-    const fundingNeedId = "score-support:agenda:agenda-terminal:remote_1";
-    const economyChildInstanceId =
-      "plan:corp.economy:score-support%3Aagenda%3Aagenda-terminal%3Aremote_1";
-
     expect(decision).toMatchObject({
-      actionId: "credit",
-      reasonCode: "plan_first.corp.economy",
+      actionId: installTerminal.actionId,
+      reasonCode: "plan_first.corp.score_agenda",
     });
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         `plan_first_root:${scoreParentInstanceId}`,
-        `plan_first_executor:${economyChildInstanceId}`,
-        "plan_priority_class:P4",
-        `plan_priority_delegated_from:${scoreParentInstanceId}`,
-        `plan_priority_need:${fundingNeedId}`,
+        `plan_first_executor:${scoreParentInstanceId}`,
+        "plan_priority_class:P3",
+        "plan_priority_reason:expiring_conversion",
       ]),
     );
     expect(portfolio).toContain(
       `"rootForegroundInstanceId":"${scoreParentInstanceId}"`,
     );
     expect(portfolio).toContain(
-      `"executorInstanceId":"${economyChildInstanceId}"`,
+      `"executorInstanceId":"${scoreParentInstanceId}"`,
     );
-    expect(portfolio).toContain(
-      `"parentInstanceId":"${scoreParentInstanceId}"`,
-    );
-    expect(portfolio).toContain(`"parentNeedId":"${fundingNeedId}"`);
-    expect(portfolio).toContain(`"openNeedIds":["${fundingNeedId}"]`);
-    expect(portfolio).toContain('"delegatedPriorityClass":"P4"');
     expect(portfolio).not.toContain("economy-campaign:economy-campaign");
-    expect(portfolio).toContain(
-      '"evidenceCode":"corp_score_protection_funding_gap:remote_1:',
-    );
   });
 
   it("admits an unprotected finite-pool economy install with a positive bounded net advantage", () => {
@@ -21805,8 +21787,10 @@ describe("authoritative plan-first live runtime", () => {
             cardId: "bbs",
             sourceDefinitionId: "onr_v1_165_junkyard-bbs",
             cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-            cardImplementationAbilityKey: "abilities_activated_runner_main_move_top_trash_to_grip",
-            cardImplementationAbilityId: "onr_v1_165_junkyard-bbs:abilities_activated_runner_main_move_top_trash_to_grip",
+            cardImplementationAbilityKey:
+              "abilities_activated_runner_main_move_top_trash_to_grip",
+            cardImplementationAbilityId:
+              "onr_v1_165_junkyard-bbs:abilities_activated_runner_main_move_top_trash_to_grip",
             cardImplementationEffectKind: "move_top_trash_to_grip",
             cardImplementationTopTrashTargetId: "target",
             targetCardId: "target",

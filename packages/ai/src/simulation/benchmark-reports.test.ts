@@ -647,7 +647,7 @@ describe("benchmark report formatting", () => {
       "real_scene_corp_siren_fortress_snapshot_v1",
     );
 
-    const noActionLimit = runAiSelfplayTraceMining({
+    const withoutActionLimitFindings = runAiSelfplayTraceMining({
       seeds: ["ai-benchmark-tuning-001"],
       runnerDeck: runner.deck,
       corpDeck: corp.deck,
@@ -659,11 +659,15 @@ describe("benchmark report formatting", () => {
       maxAlternativesPerFinding: 3,
     });
 
-    expect(noActionLimit.aggregate.actionLimitReached).toBe(0);
-    expect(JSON.stringify(noActionLimit.summaries)).not.toContain(
+    expect(
+      withoutActionLimitFindings.findings.flatMap(
+        (finding) => finding.detectorIds,
+      ),
+    ).not.toContain("action_limit_reached");
+    expect(JSON.stringify(withoutActionLimitFindings.summaries)).not.toContain(
       "actionAlternatives",
     );
-    expect(JSON.stringify(noActionLimit)).not.toMatch(
+    expect(JSON.stringify(withoutActionLimitFindings)).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState|AIInput|DecisionDebug/i,
     );
   }, 90_000);

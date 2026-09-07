@@ -12,7 +12,7 @@ const FIXTURES = [
   ],
   ["uses the tagged payoff instead of extending a stale remote", tagPayoffJson],
   [
-    "starts the resident score project without extending stale remote sprawl",
+    "funds the resident score project without extending stale remote sprawl",
     avoidStaleRemoteJson,
   ],
 ] as const;

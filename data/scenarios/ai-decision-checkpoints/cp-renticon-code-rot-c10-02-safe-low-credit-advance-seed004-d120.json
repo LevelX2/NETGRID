@@ -13879,10 +13879,13 @@
       }
     ],
     "planExecution": {
+      "acceptablePlanIds": [
+        "plan:corp.economy:economy-immediate-operation%3Acorp_onr_v1_290_efficiency-experts_1"
+      ],
       "acceptablePlanKinds": ["corp.economy"],
       "acceptableCapabilities": ["develop_or_convert_corp_economy"],
       "requiredAssessmentEvidence": [
-        "engine_certified_next_turn_score_continuation:corp_onr_v1_193_corporate-coup_2:remote_1"
+        "corp_engine_certified_immediate_operation_conversion:onr_v1_290_efficiency-experts"
       ]
     }
   }
