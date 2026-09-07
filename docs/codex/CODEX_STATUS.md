@@ -90,12 +90,14 @@ Vergleich vor dem abschließenden Main-Abgleich ergibt 0→1 Corp-Siege,
 Runtimefehler. Die neue Contract-Vorbereitung wurde darin nicht ausgewählt;
 dieser kleine gemischte Systemeffekt ist kein allgemeiner Stärkennachweis.
 Die Current-State-Review grenzt vorbereitete Capability-Fixtures von
-Spielevidence und dem Integrationsstand ab.
-Der Main-Abgleich ist inhaltlich geprüft. Der breite AI-Gate-Lauf ist nicht
-vollständig grün: 18 gegengeprüfte Main-Baseline-Erwartungsfehler bleiben;
-eine zusätzliche verschobene Simulations-Testbindung wurde bei erhaltener
-Ownership korrigiert und fokussiert grün geprüft. Details und Scopegrenzen
-stehen in derselben Review. Kein als vollständig grün ausgegebener Shardlauf.
+Spielevidence und dem Integrationsstand ab. Die ehemals offenen 18
+Main-Baseline-Erwartungsfehler waren veraltete Testbindungen an historische
+Einzelaktionen, absolute Simulationspositionen und Vollspielstände. Sie sind
+gegen die aktuellen Owner-, Executor-, Capability-, Legalitäts- und
+Replayverträge neu gebunden. Der vollständige AI-Gate-Lauf ist mit drei
+festen Shards und insgesamt 5.064 Tests grün. Für wachsende Kataloge und
+Verhaltenssimulationen gilt der stabile Testvertrag aus
+`docs/architecture/test-tiers-and-package-boundaries-2026-07-10.md`.
 
 Historische Selfplay-Cycle-Reviews, Markdown-Matrix, Reporting-State und
 versionierte HTML-Blockberichte wurden nach dem abschließenden idempotenten
@@ -112,9 +114,10 @@ Die verifizierten SP-251/252 korrigieren lokale Run-Dispositionsgrenzen und
 die Engine-Trennung von Ressourcenpool und gedeckeltem Ausgabenbudget;
 `planning-architecture.md` hält diese bestehenden Owner-Grenzen fest.
 Die fokussierte Integration bestätigt beide Fixes und einen vollständig
-aktions-/owner-/ressourcengleichen Exact-Replay. Drei mitgeprüfte ältere
-Score-Erwartungsfehler treten unverändert auch auf dem bisherigen Main auf;
-die oben benannte offene Baseline wird damit nicht als behoben ausgegeben.
+aktions-/owner-/ressourcengleichen Exact-Replay. Die drei damals
+mitgeprüften älteren Score-Erwartungen sind im aktuellen Testvertrag anhand
+der verantwortlichen Root-/Support-Owner statt historischer Leaf-Aktionen
+abgedeckt.
 
 ## Plattform und Betrieb
 

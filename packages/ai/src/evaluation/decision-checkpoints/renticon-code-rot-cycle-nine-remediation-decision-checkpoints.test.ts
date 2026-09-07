@@ -43,8 +43,14 @@ describe("Rent-I-Con versus CODE ROT cycle-nine remediation checkpoint", () => {
     });
 
     const portfolio = residentPlanPortfolioSnapshot(result.input);
-    expect(portfolio?.executorInstanceId).toMatch(
-      /^plan:corp\.economy:economy-residual-capacity%3Acorp%3A24$/,
+    const scoreParent =
+      "plan:corp.score_agenda:agenda%3Acorp_onr_v1_197_data-fort-reclamation_2%3Aremote_1";
+    expect(portfolio?.rootForegroundInstanceId).toBe(scoreParent);
+    expect(portfolio?.executorInstanceId).toBe(
+      "plan:corp.economy:score-support%3Aagenda%3Acorp_onr_v1_197_data-fort-reclamation_2%3Aremote_1",
+    );
+    expect(result.decision?.evidence).toContain(
+      `plan_priority_delegated_from:${scoreParent}`,
     );
     expect(portfolio).toMatchObject({
       turnPlanCommitment: { status: "active" },

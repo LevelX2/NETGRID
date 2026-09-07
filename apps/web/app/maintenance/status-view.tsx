@@ -63,6 +63,7 @@ import {
 import { copyTextToClipboard } from "../../lib/clipboard";
 import { formatAppDateTime } from "../../i18n/format";
 import { normalizeAppLocale } from "../../i18n/locale";
+import { buildMaintenanceFilterOptions } from "./maintenance-filter-options";
 
 type MaintenanceLoadStepId = "summary" | "matches" | "aiTraces" | "policy";
 
@@ -91,23 +92,12 @@ type CleanupPolicyDraft = {
 export default function MaintenancePage() {
   const t = useTranslations("Maintenance.storage");
   const locale = normalizeAppLocale(useLocale());
-  const statusOptions: Array<[string, string]> = [
-    ["", t("allOption")],
-    ...matchStatusValues.map(
-      (status) => [status, statusLabel(status, locale)] as [string, string],
-    ),
-  ];
-  const terminalOptions: Array<[string, string]> = [
-    ["all", t("allOption")],
-    ["false", t("nonTerminalOption")],
-    ["true", t("terminalOption")],
-  ];
-  const modeOptions: Array<[string, string]> = [
-    ["", t("allOption")],
-    ...matchModeValues.map(
-      (mode) => [mode, modeLabel(mode, locale)] as [string, string],
-    ),
-  ];
+  const { statusOptions, terminalOptions, modeOptions } =
+    buildMaintenanceFilterOptions(locale, {
+      allOption: t("allOption"),
+      nonTerminalOption: t("nonTerminalOption"),
+      terminalOption: t("terminalOption"),
+    });
   const initialLoadSteps = (): MaintenanceLoadStep[] => [
     { id: "summary", label: t("loadStepSummary"), status: "pending" },
     { id: "matches", label: t("loadStepMatches"), status: "pending" },
@@ -2466,20 +2456,6 @@ function Input({
   );
 }
 
-const matchStatusValues = [
-  "pending",
-  "waiting_for_runner",
-  "waiting_for_corp",
-  "waiting_for_joiner_decks",
-  "ready_check",
-  "countdown",
-  "active",
-  "cancelled",
-  "abandoned",
-  "forfeited",
-  "finished",
-] as const;
-
 const automaticCleanupStatusValues = [
   "cancelled",
   "abandoned",
@@ -2490,12 +2466,6 @@ const automaticCleanupStatusValues = [
 const manualCleanupStatusValues = [
   "active",
   ...automaticCleanupStatusValues,
-] as const;
-
-const matchModeValues = [
-  "human_vs_human",
-  "human_runner_vs_corp_ai",
-  "human_corp_vs_runner_ai",
 ] as const;
 
 const pageShell: CSSProperties = { color: "var(--text)" };

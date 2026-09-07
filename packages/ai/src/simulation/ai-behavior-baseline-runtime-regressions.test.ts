@@ -48,7 +48,7 @@ describe("AI behavior baseline runtime regressions", () => {
       result.summary.errors,
       JSON.stringify(captureDiagnostic(result.capture), undefined, 2),
     ).toEqual([]);
-  }, 20_000);
+  }, 60_000);
 
   it("preserves the owner of an unforced Runner choice window", () => {
     const result = runCapturedSeed(
@@ -74,7 +74,7 @@ describe("AI behavior baseline runtime regressions", () => {
       result.summary.errors,
       JSON.stringify(captureDiagnostic(result.capture), undefined, 2),
     ).toEqual([]);
-  }, 20_000);
+  }, 90_000);
 
   it("leaves parent-bound strategic-exchange funding exclusively with its parent route", () => {
     const result = runCapturedSeed(

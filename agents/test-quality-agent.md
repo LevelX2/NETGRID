@@ -27,6 +27,13 @@ Stärkt Regression-Sicherheit durch gezielte Testanalyse und priorisierte Testem
 
 - Kein Umbau des Testframeworks ohne expliziten Auftrag.
 - Keine unnötig breiten oder brittle Tests vorschlagen.
+- Vor exakten Kataloggrößen, Simulationsindizes, `stateVersion`-Werten,
+  Endständen, Hashes oder berechneten Diagnosewerten nachweisen, dass genau
+  dieser Wert selbst Vertragsgegenstand ist.
+- Bei wachsenden Katalogen Mindestmenge plus vollständige Prüfung aller
+  aktuellen Einträge verwenden; bei Verhaltenssimulationen semantische
+  Ereignisse, Owner/Executor, Capability, Evidence und relative Reihenfolge
+  bevorzugen.
 - Risiken priorisieren statt unstrukturierte Testlisten zu erzeugen.
 - Ergebnisse müssen direkt in Release-Gates überführbar sein.
 

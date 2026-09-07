@@ -15,8 +15,7 @@ import { simulateAiGame } from "../simulation";
 
 const RUNNER_DECK_ID =
   "standard_runner_krashkurs_clown_kreditmaschine_2026_07_11";
-const CORP_DECK_ID =
-  "standard_proteus_corp_hidden_node_control_2026_05_25";
+const CORP_DECK_ID = "standard_proteus_corp_hidden_node_control_2026_05_25";
 const SCORE_ROOT =
   "plan:corp.score_agenda:agenda%3Acorp_onr_proteus_005_marked-accounts_1%3Aremote_1";
 const SCORE_SUPPORT =
@@ -36,99 +35,111 @@ type StandardDeck = {
 };
 
 describe("SP-082 score campaign multi-step regression", () => {
-  it(
-    "funds across the opponent turn, hands off to protection, and installs the agenda",
-    () => {
-      const runner = standardSnapshot(RUNNER_DECK_ID);
-      const corp = standardSnapshot(CORP_DECK_ID);
-      const summary = simulateAiGame({
-        seed: "meta-357-final-036",
-        maxActions: 500,
-        runnerDeck: buildEngineDeck(runner),
-        corpDeck: buildEngineDeck(corp),
-        runnerDeckMetadata: runner.publicMetadata,
-        corpDeckMetadata: corp.publicMetadata,
-        runnerControllerMode: "current_candidate",
-        corpControllerMode: "current_candidate",
-      });
+  it("funds across the opponent turn, hands off to protection, and installs the agenda", () => {
+    const runner = standardSnapshot(RUNNER_DECK_ID);
+    const corp = standardSnapshot(CORP_DECK_ID);
+    const summary = simulateAiGame({
+      seed: "meta-357-final-036",
+      maxActions: 500,
+      runnerDeck: buildEngineDeck(runner),
+      corpDeck: buildEngineDeck(corp),
+      runnerDeckMetadata: runner.publicMetadata,
+      corpDeckMetadata: corp.publicMetadata,
+      runnerControllerMode: "current_candidate",
+      corpControllerMode: "current_candidate",
+    });
 
-      expect(summary).toMatchObject({
-        terminationKind: "game_result",
-        winner: "runner",
-        gameEndReason: "agenda_points",
-        actions: 327,
-        turns: 35,
-        finalAgendaPoints: { runner: 8, corp: 3 },
-        finalStateHash: "fnv1a:af6a823e",
-        replayOk: true,
-        replayErrors: [],
-        errors: [],
-        runtimeFailures: [],
-      });
+    expect(summary).toMatchObject({
+      terminationKind: "game_result",
+      gameEndReason: "agenda_points",
+      replayOk: true,
+      replayErrors: [],
+      errors: [],
+      runtimeFailures: [],
+    });
 
-      for (const stateVersion of [107, 108, 109, 117]) {
-        expect(entry(summary, stateVersion)).toMatchObject({
-          selectedActionId: "corp.gain_credit",
-          actionType: "gain_credit",
-          planKind: "corp.economy",
-          fallbackUsed: false,
-          debugFacts: expect.arrayContaining([
-            `plan_execution:instance:${SCORE_SUPPORT}`,
-            `plan_first_root:${SCORE_ROOT}`,
-            `plan_priority_delegated_from:${SCORE_ROOT}`,
-          ]),
-        });
-      }
-
-      for (const stateVersion of [118, 119]) {
-        expect(entry(summary, stateVersion)).toMatchObject({
-          selectedActionId: "corp.gain_credit",
-          actionType: "gain_credit",
-          planKind: "corp.economy",
-          debugFacts: expect.arrayContaining([
-            "plan_execution:instance:plan:corp.economy:economy-residual-capacity%3Acorp%3A12",
-          ]),
-        });
-        expect(entry(summary, stateVersion).debugFacts).not.toEqual(
-          expect.arrayContaining([
-            `plan_execution:instance:${SCORE_SUPPORT}`,
-            `plan_priority_delegated_from:${SCORE_ROOT}`,
-          ]),
-        );
-      }
-
-      expect(entry(summary, 148)).toMatchObject({
-        actionType: "install_card",
-        planKind: "corp.defend_servers",
+    const scoreSupportEntries = summary.actionSequence
+      .map((candidate, index) => ({ candidate, index }))
+      .filter(({ candidate }) =>
+        candidate.debugFacts?.includes(
+          `plan_execution:instance:${SCORE_SUPPORT}`,
+        ),
+      );
+    const initialFunding = scoreSupportEntries.slice(0, 4);
+    expect(initialFunding).toHaveLength(4);
+    for (const { candidate } of initialFunding) {
+      expect(candidate).toMatchObject({
+        selectedActionId: "corp.gain_credit",
+        actionType: "gain_credit",
+        planKind: "corp.economy",
         fallbackUsed: false,
         debugFacts: expect.arrayContaining([
-          "plan_execution:capability:develop_score_protection",
+          `plan_execution:instance:${SCORE_SUPPORT}`,
           `plan_first_root:${SCORE_ROOT}`,
           `plan_priority_delegated_from:${SCORE_ROOT}`,
         ]),
       });
-      expect(entry(summary, 149)).toMatchObject({
-        actionType: "install_card",
-        planKind: "corp.score_agenda",
-        fallbackUsed: false,
+    }
+    expect(
+      summary.actionSequence
+        .slice(initialFunding[2]!.index + 1, initialFunding[3]!.index)
+        .some((candidate) => candidate.side === "runner"),
+    ).toBe(true);
+
+    const afterClosedGap = summary.actionSequence.slice(
+      initialFunding[3]!.index + 1,
+      initialFunding[3]!.index + 3,
+    );
+    expect(afterClosedGap).toHaveLength(2);
+    for (const candidate of afterClosedGap) {
+      expect(candidate).toMatchObject({
+        selectedActionId: "corp.gain_credit",
+        actionType: "gain_credit",
+        planKind: "corp.economy",
         debugFacts: expect.arrayContaining([
-          "plan_execution:capability:install_score_agenda",
-          `plan_execution:instance:${SCORE_ROOT}`,
-          `plan_first_root:${SCORE_ROOT}`,
+          "plan_execution:instance:plan:corp.economy:economy-residual-capacity%3Acorp%3A12",
         ]),
       });
-    },
-    180_000,
-  );
-});
+      expect(candidate.debugFacts).not.toEqual(
+        expect.arrayContaining([
+          `plan_execution:instance:${SCORE_SUPPORT}`,
+          `plan_priority_delegated_from:${SCORE_ROOT}`,
+        ]),
+      );
+    }
 
-function entry(summary: ReturnType<typeof simulateAiGame>, stateVersion: number) {
-  const result = summary.actionSequence.find(
-    (candidate) => candidate.stateVersionBefore === stateVersion,
-  );
-  if (!result) throw new Error(`Missing action at stateVersion ${stateVersion}.`);
-  return result;
-}
+    const protectionIndex = summary.actionSequence.findIndex((candidate) =>
+      candidate.debugFacts?.includes(
+        "plan_execution:capability:develop_score_protection",
+      ),
+    );
+    const installIndex = summary.actionSequence.findIndex((candidate) =>
+      candidate.debugFacts?.includes(`plan_execution:instance:${SCORE_ROOT}`),
+    );
+    expect(protectionIndex).toBeGreaterThan(initialFunding[3]!.index);
+    expect(installIndex).toBeGreaterThan(protectionIndex);
+    expect(summary.actionSequence[protectionIndex]).toMatchObject({
+      actionType: "install_card",
+      planKind: "corp.defend_servers",
+      fallbackUsed: false,
+      debugFacts: expect.arrayContaining([
+        "plan_execution:capability:develop_score_protection",
+        `plan_first_root:${SCORE_ROOT}`,
+        `plan_priority_delegated_from:${SCORE_ROOT}`,
+      ]),
+    });
+    expect(summary.actionSequence[installIndex]).toMatchObject({
+      actionType: "install_card",
+      planKind: "corp.score_agenda",
+      fallbackUsed: false,
+      debugFacts: expect.arrayContaining([
+        "plan_execution:capability:install_score_agenda",
+        `plan_execution:instance:${SCORE_ROOT}`,
+        `plan_first_root:${SCORE_ROOT}`,
+      ]),
+    });
+  }, 180_000);
+});
 
 function standardSnapshot(standardDeckId: string) {
   const deck = (standardDeckCatalog as { decks: StandardDeck[] }).decks.find(

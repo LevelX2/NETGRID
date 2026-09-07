@@ -1399,10 +1399,11 @@ function aiShellTradersPlanRows(
 }
 
 function aiAgendaLineFamilyLabel(
-  family: "pure_rush" | "combined_rush" | "safe_setup",
+  family: "pure_rush" | "combined_rush" | "safe_setup" | "fund_setup",
 ): string {
   if (family === "pure_rush") return "Reiner Rush";
   if (family === "combined_rush") return "Kombinierter Rush";
+  if (family === "fund_setup") return "Finanzierungsaufbau";
   return "Sicherer Aufbau";
 }
 
