@@ -1124,6 +1124,29 @@ Produktlauf ersetzt werden. Direkter MSI-Aktivspielschutz, aktuelle
 Zwei-Versionen-Upgrades und die übrigen nativen Gates bleiben offen. 8169,
 Sandbox, Main und vorhandene Maintenance-Zugangsdaten wurden nicht verändert.
 
+Der anschließende Benutzer-Neustart ist inzwischen im Transaktionsowner
+angebunden. Vor Lease-Erwerb prüft der Updater sein vorhandenes
+Prozessstartrecht und hält ausschließlich den nicht vererbbaren Token und
+Environmentblock des bereits gebundenen ursprünglichen normalen Launchers.
+Benutzer, Sitzung, Anmeldevorgang und nicht erhöhte Rechte müssen vor der
+Freigabe des neu erzeugten angehaltenen Kindes erneut übereinstimmen. Es
+gibt weder einen erhöhten Ersatzstart noch eine gespeicherte Anmeldung.
+Ein nicht gelungener Neustart nach gesundem Update erhält eine eigene Meldung
+und Exitcode 4; eine verifizierte alte Version nach MSI-Fehler wird ebenfalls
+zutreffend gemeldet.
+
+39 neue Kontext-/Neustartchecks sind grün, darunter x64-Interoplayouts, echte Windows-Token- und
+Environmentabfragen, Parent-Ende, nicht vererbbare Handles sowie die geprüfte
+Bereinigung eines eigenen angehaltenen inerten Prozesses. Der lokale Host ist
+uneleviert: Die CreateProcessWithTokenW-Prüfung bestätigt hier erwartungsgemäß
+Fehler 1314, nicht einen erfolgreichen erhöhten Start. Die 49 Pipe-, 45
+Healthpermit-, 32 Session- und 44 Requestchecks bleiben grün; das
+Updater-Vertrags-/Umgebungs-/Loggate und 182 UI-Strings in drei Sprachen
+bestehen. Kein neuer Installer, keine UAC-Ausführung und kein nativer
+Benutzerwechsel wurden in diesem Schritt gestartet. Der erfolgreiche
+erhöhte Neustart einschließlich anderer Administratorkonto-Freigabe bleibt
+ein konkretes natives Gate, kein als erledigt ausgewiesener Komponentencheck.
+
 Vor der Freigabe bleiben die Prozess-Ende-Raceprüfung,
 die direkten MSI-Updatepfade hinsichtlich
 laufender Spiele, verständliche lokalisierte Fehler, die vollständige

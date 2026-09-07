@@ -15,6 +15,7 @@
     <Compile Include="../../../apps/windows/Common/UpdateVerification.cs" Link="UpdateVerification.cs" />
     <Compile Include="../../../apps/windows/Netgrid.Updater/UpdateVerifier.cs" Link="UpdateVerifier.cs" />
     <Compile Include="../../../apps/windows/Netgrid.Updater/UpdateSession.cs" Link="UpdateSession.cs" />
+    <Compile Include="../../../apps/windows/Netgrid.Updater/OriginalUserRestart.cs" Link="OriginalUserRestart.cs" />
     <Compile Include="../../../apps/windows/Common/UpdateRequest.cs" Link="UpdateRequest.cs" />
   </ItemGroup>
 </Project>

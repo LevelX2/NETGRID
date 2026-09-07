@@ -26,6 +26,7 @@ internal static class Program
                     requiresExplicitConsent = true,
                     requiresBoundParentAndProceed = true,
                     holdsLeaseThroughBackupAndHealth = true,
+                    restartsAsOriginalUnelevatedUser = true,
                     blocksActiveMatches = true,
                     reverifiesSetupAfterLauncherExit = true,
                     stages = new[] { "verified-download", "controlled-stop", "verified-backup", "msi-major-upgrade", "post-install-health", "program-and-data-rollback", "restart" },
@@ -47,6 +48,11 @@ internal static class Program
             // The original launcher is still the UI owner before handoff.
             // Exit lets it resolve cancellation; never claim it is stopped.
             return 3;
+        }
+        catch (UpdateRestartFailure)
+        {
+            MessageBox.Show(UiText.Get("updater.restart_failed"), "NETGRID Update", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return 4;
         }
         catch (Exception)
         {
@@ -102,7 +108,11 @@ internal static class UpdateTransaction
         if (installCode != 0)
         {
             WriteLog(logPath, $"install_failed:{installCode}");
-            RestartIfHealthy(options, session, logPath);
+            if (RestartIfHealthy(options, session, logPath))
+            {
+                MessageBox.Show(UiText.Get("updater.previous_ready"), "NETGRID Update", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return 2;
+            }
             throw new InvalidOperationException($"updater_install_failed:{installCode}");
         }
         if (VerifyInstalled(options))
@@ -110,7 +120,7 @@ internal static class UpdateTransaction
             PromoteCachedSetup(dataRoot);
             WriteLog(logPath, "update_verified");
             session.Complete();
-            if (options.Restart) StartLauncher(options.ProgramRoot);
+            if (options.Restart) session.RestartLauncher();
             MessageBox.Show(UiText.Get("updater.success"), "NETGRID Update", MessageBoxButtons.OK, MessageBoxIcon.Information);
             return 0;
         }
@@ -126,19 +136,20 @@ internal static class UpdateTransaction
         if (!VerifyInstalled(options)) throw new InvalidOperationException("updater_rollback_health_failed");
         WriteLog(logPath, "rollback_verified");
         session.Complete();
-        if (options.Restart) StartLauncher(options.ProgramRoot);
+        if (options.Restart) session.RestartLauncher();
         MessageBox.Show(UiText.Get("updater.rollback"), "NETGRID Update", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         return 2;
     }
 
     private static bool VerifyInstalled(UpdateRequest options) => UpdateVerifier.RunAsync(options.ProgramRoot, options.EnvironmentFile, options.Lease).GetAwaiter().GetResult();
 
-    private static void RestartIfHealthy(UpdateRequest options, UpdateSession session, string logPath)
+    private static bool RestartIfHealthy(UpdateRequest options, UpdateSession session, string logPath)
     {
-        if (!VerifyInstalled(options)) return;
+        if (!VerifyInstalled(options)) return false;
         WriteLog(logPath, "previous_install_verified_after_failure");
         session.Complete();
-        if (options.Restart) StartLauncher(options.ProgramRoot);
+        if (options.Restart) session.RestartLauncher();
+        return true;
     }
 
     private static string RunStorage(string programRoot, IReadOnlyDictionary<string, string> environment, params string[] arguments)
@@ -176,8 +187,6 @@ internal static class UpdateTransaction
         if (!actual.Equals(expectedHash, StringComparison.OrdinalIgnoreCase)) throw new InvalidOperationException("updater_setup_hash_changed");
         return Run(executable, arguments);
     }
-
-    private static void StartLauncher(string programRoot) => Process.Start(new ProcessStartInfo(Path.Combine(programRoot, "NETGRID.exe")) { UseShellExecute = true });
 
     private static IReadOnlyDictionary<string, string> ReadEnvironment(string path)
     {

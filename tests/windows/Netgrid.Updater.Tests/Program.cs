@@ -13,6 +13,7 @@ try
     {
         Assert(contract.RootElement.GetProperty("requiresBoundParentAndProceed").GetBoolean(), "unbound_harness_not_rejected_by_contract");
         Assert(contract.RootElement.GetProperty("holdsLeaseThroughBackupAndHealth").GetBoolean(), "outer_lease_contract_missing");
+        Assert(contract.RootElement.GetProperty("restartsAsOriginalUnelevatedUser").GetBoolean(), "original_user_restart_contract_missing");
     }
     var transaction = updater.GetType("Netgrid.Updater.UpdateTransaction", throwOnError: true)!;
     var readEnvironment = transaction.GetMethod("ReadEnvironment", BindingFlags.NonPublic | BindingFlags.Static)!;

@@ -5,6 +5,8 @@ using Netgrid.Windows;
 namespace Netgrid.Updater;
 
 internal sealed class UpdateHandoffFailure(Exception cause) : Exception("updater_handoff_failed", cause);
+internal sealed class UpdateRestartFailure(Exception cause) : Exception(
+    $"updater_restart_failed:{cause.GetType().Name}:{(cause is System.ComponentModel.Win32Exception native ? native.NativeErrorCode : cause.HResult)}", cause);
 
 // The sole outer update owner. Failure never implicitly completes a session
 // that received Proceed. Only a verified transaction may call Complete.
@@ -13,8 +15,10 @@ internal sealed class UpdateSession : IDisposable
     private readonly RegistryKey _machine;
     private readonly UpdateRequest _request;
     private readonly bool _ownsRegistry;
-    private UpdateSession(RegistryKey machine, UpdateRequest request, bool ownsRegistry)
-    { _machine = machine; _request = request; _ownsRegistry = ownsRegistry; }
+    private readonly OriginalUserRestart? _restart;
+    private bool _completed;
+    private UpdateSession(RegistryKey machine, UpdateRequest request, bool ownsRegistry, OriginalUserRestart? restart)
+    { _machine = machine; _request = request; _ownsRegistry = ownsRegistry; _restart = restart; }
 
     public static async Task<UpdateSession?> AcceptAsync(UpdateRequest request)
     {
@@ -44,9 +48,9 @@ internal sealed class UpdateSession : IDisposable
                 try
                 {
                     Directory.CreateDirectory(logDirectory);
-                    var code = error is InvalidOperationException && error.Message.StartsWith("installation_gate_", StringComparison.Ordinal)
-                        ? error.Message : error.GetType().Name;
-                    File.AppendAllText(Path.Combine(logDirectory, "updater-handoff.log"), $"{DateTimeOffset.UtcNow:O} owner=updater-handoff code={code} hresult=0x{error.HResult:X8}{Environment.NewLine}");
+                    var code = DiagnosticCode(error);
+                    var nativeCode = error is System.ComponentModel.Win32Exception native ? native.NativeErrorCode.ToString(System.Globalization.CultureInfo.InvariantCulture) : "none";
+                    File.AppendAllText(Path.Combine(logDirectory, "updater-handoff.log"), $"{DateTimeOffset.UtcNow:O} owner=updater-handoff code={code} hresult=0x{error.HResult:X8} native={nativeCode}{Environment.NewLine}");
                 }
                 catch (Exception diagnostic) { throw new UpdateHandoffFailure(new AggregateException("updater_handoff_diagnostic_failed", error, diagnostic)); }
             }
@@ -58,11 +62,20 @@ internal sealed class UpdateSession : IDisposable
     {
         using var parent = UpdateHandoff.OpenParent(request.ParentPid, request.ParentStart, parentImage);
         using var owner = Process.GetCurrentProcess();
-        InstallationLease.BeginPreparing(machine, request.ProgramRoot, request.Lease, parent.Id,
-            parent.StartTime.ToUniversalTime().Ticks, owner.Id, owner.StartTime.ToUniversalTime().Ticks);
+        OriginalUserRestart? restart = null;
+        var acquired = false;
+        var transferred = false;
         var proceeded = false;
         try
         {
+            if (request.Restart)
+            {
+                OriginalUserRestart.RequireLaunchPrivilege();
+                restart = OriginalUserRestart.Capture(parent);
+            }
+            InstallationLease.BeginPreparing(machine, request.ProgramRoot, request.Lease, parent.Id,
+                parent.StartTime.ToUniversalTime().Ticks, owner.Id, owner.StartTime.ToUniversalTime().Ticks);
+            acquired = true;
             using var deadline = new CancellationTokenSource(TimeSpan.FromMinutes(2));
             using var peer = await UpdateHandoff.ConnectAsync(request.Session, parent, deadline.Token);
             proceeded = await peer.ReceiveDecisionAsync(deadline.Token);
@@ -75,11 +88,13 @@ internal sealed class UpdateSession : IDisposable
             InstallationLease.StopPrepared(machine, request.ProgramRoot, request.Lease);
             using var stopDeadline = new CancellationTokenSource(TimeSpan.FromSeconds(30));
             await parent.WaitForExitAsync(stopDeadline.Token);
-            return new(machine, request, ownsRegistry);
+            var result = new UpdateSession(machine, request, ownsRegistry, restart);
+            transferred = true;
+            return result;
         }
         catch (Exception operation)
         {
-            if (!proceeded)
+            if (acquired && !proceeded)
             {
                 try
                 {
@@ -92,12 +107,26 @@ internal sealed class UpdateSession : IDisposable
             }
             throw;
         }
+        finally { if (!transferred) restart?.Dispose(); }
     }
 
     public void Complete()
     {
         if (!InstallationLease.ReleaseOwned(_machine, _request.ProgramRoot, _request.Lease))
             throw new InvalidOperationException("updater_completion_lease_unresolved");
+        _completed = true;
     }
-    public void Dispose() { if (_ownsRegistry) _machine.Dispose(); }
+    public void RestartLauncher()
+    {
+        if (!_completed || !_request.Restart || _restart is null) throw new InvalidOperationException("updater_restart_not_authorized");
+        try { _restart.StartLauncher(_request.ProgramRoot); }
+        catch (Exception error) { throw new UpdateRestartFailure(error); }
+    }
+    internal static string DiagnosticCode(Exception error)
+    {
+        var message = error.Message;
+        return message.Length <= 120 && (message.StartsWith("installation_gate_", StringComparison.Ordinal) || message.StartsWith("updater_restart_", StringComparison.Ordinal)) &&
+            message.All(character => character is >= 'a' and <= 'z' or >= '0' and <= '9' or '_') ? message : error.GetType().Name;
+    }
+    public void Dispose() { try { _restart?.Dispose(); } finally { if (_ownsRegistry) _machine.Dispose(); } }
 }

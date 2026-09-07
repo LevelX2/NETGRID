@@ -61,17 +61,12 @@ prüfen die beteiligten Owner; der vollständige erhöhte Produktlauf mit zwei
 aktuellen Installern ist damit noch nicht nativ bewiesen.
 
 Direkte MSI-Upgrades benötigen weiterhin den Aktivspielschutz vor dem
-Entfernen der bisherigen Version. Außerdem startet der abschließende
-Neustartpfad noch direkt aus dem erhöhten Updater und erfüllt deshalb noch
-nicht den Vertrag eines normalen Benutzerlaunchers, insbesondere bei einer
-Freigabe über ein anderes Administratorkonto. Dieser Pfad muss vor der
-Freigabe ursächlich an den ursprünglichen Benutzerkontext gebunden werden;
-ein stiller Verzicht auf Neustart oder ein erhöht weiterlaufendes NETGRID ist
-kein abgeschlossener Fix. Als Referenz beschreibt Microsoft den Neustart
-über den ursprünglichen Explorer-Benutzer, ausdrücklich auch für die Freigabe
-mit einem anderen Administratorkonto:
-[Unelevierter Prozessstart](https://devblogs.microsoft.com/oldnewthing/20131118-00/?p=2643).
-Diese Punkte bleiben WIN-I08-Releaseblocker.
+Entfernen der bisherigen Version. Der Neustart verwendet inzwischen den unten
+beschriebenen ursprünglichen Benutzerkontext, nicht mehr den direkten
+Prozessstart aus dem erhöhten Updater. Die erfolgreiche erhöhte Ausführung
+und die Freigabe über ein anderes Administratorkonto sind jedoch noch nativ
+abzunehmen. Ein stiller Verzicht auf Neustart oder ein erhöht weiterlaufendes
+NETGRID ist kein abgeschlossener Fix. Diese Punkte bleiben WIN-I08-Releaseblocker.
 
 `apps/server/src/update-readiness.test.ts` prüft die aktuelle Zählung über den
 echten SQLite-/HTTP-Pfad für sämtliche elf gespeicherten Matchzustände:
@@ -391,6 +386,56 @@ maßgeblich. `checkLifecycleAuthoring` verwendet die Rückübersetzung nur für
 Struktur-, Binding- und Cleanup-Prüfungen, nicht für die Upgrade-Reihenfolge.
 Der Diagnosebuild kombiniert vorhandene Buildressourcen mit der geänderten
 MSI-Autorisierung und ist weder Releasekandidat noch Installationstest.
+
+## Neustart im ursprünglichen Benutzerkontext
+
+`UpdateSession` bereitet bei angefordertem Neustart den Kontext vor dem Erwerb
+der Installersperre vor. `OriginalUserRestart` verlangt zuerst das bereits
+verfügbare Windows-Prozessstartrecht `SeImpersonatePrivilege`; es aktiviert
+keine zusätzlichen Rechte und weicht bei Fehlen nicht auf einen anderen
+Startpfad aus. Erst dann dupliziert es den Token des schon durch Image, PID
+und Startzeit gebundenen ursprünglichen Launchers. Das ist ausschließlich ein
+nicht vererbbarer Handle im Arbeitsspeicher, keine gespeicherte Anmeldung und
+kein Passwort. Bei Abbruch oder Sessionende werden Token und Environmentblock
+freigegeben. Die [Windows-Token-Duplizierung](https://learn.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-duplicatetokenex)
+erhält dessen vorhandenen Sicherheitskontext; ein Explorerprozess oder das
+erhöhte Administratorkonto wird nicht als Ersatzbenutzer ausgewählt.
+
+Der Kontext muss ein nicht erhöhter primärer Token mit mittlerer
+Integritätsstufe in derselben interaktiven Windows-Sitzung sein. System- und
+Dienstkonten, AppContainer und UIAccess werden abgewiesen. Benutzer-SID und
+Anmeldevorgang bleiben neben Sitzung und Rechtestatus exakt gebunden. Diese
+Identitäten werden weder in Requests noch Logs gespeichert. Der
+[Benutzer-Environmentblock](https://learn.microsoft.com/en-us/windows/win32/api/userenv/nf-userenv-createenvironmentblock)
+entsteht ohne Übernahme der Updater-Prozessumgebung und bleibt ebenfalls nur
+im Arbeitsspeicher. Das Benutzerprofil stammt vom bereits laufenden Launcher.
+
+Erst nach erfolgreichem Healthcheck und explizitem Abschluss der äußeren Lease
+darf `RestartLauncher` genau einmal starten. Der explizite Programmpfad wird
+über [CreateProcessWithTokenW](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
+mit Benutzerprofil, eigenem Unicode-Environment und zunächst angehaltenem
+Hauptthread ausgeführt. Vor dessen Freigabe wird der tatsächliche Kindtoken
+gegen den ursprünglichen Kontext geprüft. Nur bei vollständiger Übereinstimmung
+wird der Thread fortgesetzt. Bei fehlgeschlagener Prüfung wird ausschließlich
+dieser eigene noch nicht freigegebene Prozess beendet und sein Ende geprüft;
+das ist keine erzwungene Abschaltung einer laufenden NETGRID-Runtime. Ein
+unbewiesener Abbruch bleibt ein strukturierter Fehler.
+
+Ein gescheiterter Neustart nach gesundem Installationsabschluss erhält den
+eigenen Exitcode 4 und einen Hinweis in `de`/`en`/`fr`, NETGRID aus dem Startmenü
+zu öffnen. Ein fehlgeschlagenes MSI-Update mit erneut verifizierter alter
+Version meldet ebenfalls ausdrücklich diesen Zustand, statt fälschlich eine
+gestoppte oder erfolgreich aktualisierte Anwendung zu behaupten.
+
+Die 39 `OriginalUserRestartTests` prüfen x64-Interoplayouts, echte Tokenabfragen, Duplizierung,
+nicht vererbbare Handles, ursprüngliches Profil, Ausschluss der
+Updater-Prozessumgebung, Fortbestand nach Parent-Ende, einmalige Verwendung
+und die native Bereinigung eines eigenen angehaltenen inerten Prozesses.
+Der unelevierte Hostlauf besitzt kein `SeImpersonatePrivilege`: Er belegt
+Fehler 1314 und die Ablehnung vor Lease-Erwerb, **nicht** den erfolgreichen
+erhöhten Benutzerstart. Dieser positive Nachweis, die andere
+Administratorkonto-Freigabe und anschließend normal privilegierte
+Launcher-/Runtimeprozesse bleiben Teil der nativen Abnahme.
 
 ## Fehlschlag und Rollback
 

@@ -24,12 +24,19 @@ internal static class SessionTests
                 if (session is null) fixture.SetValue("Outcome", "cancelled");
                 else
                 {
+                    try { session.RestartLauncher(); throw new Exception("restart_without_completion_accepted"); }
+                    catch (InvalidOperationException error) when (error.Message == "updater_restart_not_authorized") { }
                     Assert(!ProcessExists(request.ParentPid, request.ParentStart), "parent_exit_required_for_admission");
                     var state = InstallationGate.Read(fixture, InstallationGate.KeyFor(request.ProgramRoot))!;
                     Assert(state.Phase == InstallationGate.GateState.Stopping && state.AllowedParentId == 0 && state.OwnerId == Environment.ProcessId,
                         "admission_owns_stopping_lease");
                     fixture.SetValue("Outcome", "admitted");
-                    if (mode == "proceed") session.Complete();
+                    if (mode == "proceed")
+                    {
+                        session.Complete();
+                        try { session.RestartLauncher(); throw new Exception("restart_without_request_accepted"); }
+                        catch (InvalidOperationException error) when (error.Message == "updater_restart_not_authorized") { }
+                    }
                     // abandon intentionally disposes without completing.
                 }
                 fixture.Flush();

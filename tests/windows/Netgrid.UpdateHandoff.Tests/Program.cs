@@ -8,6 +8,12 @@ using Netgrid.Windows;
 
 if (await VerificationTests.TryChildAsync(args)) return;
 if (await SessionTests.TryChildAsync(args)) return;
+if (args is ["--restart-token-child"])
+{
+    Console.WriteLine("READY");
+    await Console.In.ReadLineAsync();
+    return;
+}
 
 if (args is ["--peer-child", var childSession, var parentId, var parentStart])
 {
@@ -161,6 +167,7 @@ Console.WriteLine($"UPDATE_HANDOFF_TESTS_OK checks={checks} nativePipes=true ele
 await VerificationTests.RunAsync();
 await SessionTests.RunAsync();
 RequestTests.Run();
+await OriginalUserRestartTests.RunAsync();
 
 void Assert(bool value, string name)
 {
