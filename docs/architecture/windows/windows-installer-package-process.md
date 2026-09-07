@@ -730,6 +730,21 @@ zu starten. Dieser Nachweis gilt für den vorhandenen hellen Gastkontext;
 andere DPI-/Kontrastkontexte und die tatsächlichen Lösch-/Uninstall-Flows
 werden dadurch nicht als bestanden markiert.
 
+Für die anschließend angefragte echte native Deinstallation mit Datenerhalt
+ist die unmittelbare Nutzerbestätigung noch offen. Der vorbereitende,
+ausschließlich lesende Gastlauf `probe-native-8150-retention.ps1 -Phase
+Baseline` endete mit Exitcode 0 und erzeugte
+`result/native-8150-retention-baseline.json`. Er bindet Konfiguration und
+Maintenance-Credentialdatei über Größe und SHA-256, bestätigt die vorhandene
+Spieldatenbank und den initialisierten Zugang über die hashgebundene
+First-Run-Statusabfrage. Keine Credentialinhalte wurden ausgegeben und keine
+Dateien des Produkts geändert. Der vorbereitete Modus `VerifyRetained` ist
+noch nicht ausgeführt: Er verlangt identische geschützte Dateien, eine
+weiterhin vorhandene Datenbank sowie entfernte Programm-EXE und gestoppte
+Runtime. Für die im Betrieb veränderliche SQLite-Datei wird ausdrücklich
+keine Bytegleichheit aus diesem laufenden Ausgangsstand behauptet.
+Diese Vorbereitung ist kein bestandener Deinstallationsnachweis.
+
 ### Aktueller Updatekandidat und Teststart vom 7. September 2026
 
 `1.0.8145` wurde regulär aus dem sauberen Commit
