@@ -829,6 +829,27 @@ Auswahlzeitpunkt sowie Quelle, Ziel und Executor bleiben erhalten. Die
 anschließende Choice bindet ihre StateVersion an diese Fortsetzung; ein
 übersprungenes Zahlungsfenster darf die Versionsprüfung nicht abschwächen.
 
+Auch eine zunächst kostenlose `continue_run`-Aktion bewahrt diesen Ursprung:
+Der Encounter-Eintritt kann erst danach eine Zahlung auslösen. Die exakte
+Engine-Fortsetzung behält Action-ID, Root, Executor und Step; ein fehlender
+Ursprung wird nicht aus der einzigen verbleibenden Bankaktion geraten.
+
+Bekannte installierte `runnerPaymentSupportAbilities` gehen als bedingte,
+einmalige Quellen in die Restpfadquote ein. Die Quote benötigt ausdrücklich
+den liquiden Creditbestand für ihre Aktivierung, zählt alternative Fähigkeiten
+derselben Trashquelle nur einmal und gibt sie erst an einem positiven
+Zahlungsschritt frei. Die Quellen werden im fortgeschriebenen Ledger verbraucht.
+Run-Credits ersetzen keine Aktivierungscredits. `runner.convert_run_window`
+bindet die konkrete Bankaktion an das aktuelle Zahlungsfenster, bevor dessen
+Engine-quotiertes Cash-Ziel die Aktivierungsliquidität aufbrauchen würde.
+Der Fensterresolver erhält dabei ausschließlich den bestehenden Auftrag.
+
+Ein reiner Austausch „rezzed ICE des letzten erfolgreichen Forts entfernen
+und Tags erhalten“ benötigt vor der Entwicklung die aktuelle
+`runner-fort-ice-trash-quote-v1` aus der Engine. Fehlende oder veraltete Quotes
+und null tatsächliche Ziele erhalten am bestehenden Entwicklungs-Owner eine
+explizite nichtproduktive Disposition. Die Regellegalität bleibt unverändert.
+
 Eine Vacuum-Link-Fortsetzung akzeptiert auch einen durch Karte gestarteten
 Run, wenn dessen vorhandener `resolve_runner_run_start_order`-Ursprung exakt
 an die ausgeführte TurnPlanner-Action, Root und Executor gebunden ist. Die
@@ -2599,6 +2620,9 @@ alle bekannten Folgequellen einschließlich Zugriffsschaden auch nach einer
 ersten Reservewarnung weiter. Eine Reservewarnung allein darf weder
 `accessPayoffContestable` noch die bekannte Überlebbarkeit auf `false` setzen.
 Es entsteht keine zusätzliche Runwahl oder Ausnahme im Choice-Resolver.
+Die Letztchancen-Ausnahme betrifft ausschließlich den normalen Schadenspuffer.
+Eine zusätzlich bekannte ETR-Sperre ohne passende Coverage oder eine offene
+Finanzierungslücke bleibt auch bei diesem terminalen Contest verbindlich.
 
 `draw_for_answer` ist nur zulässig, wenn:
 

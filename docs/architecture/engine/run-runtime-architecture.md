@@ -58,6 +58,11 @@ ihnen aber nicht zurückimportiert.
   `corp_paid` und für `during_run` zusammen mit `runner_paid`.
 - Run-End-Cleanup ist geordnet: Trigger und Zahlungen lesen Run-Marker, bevor
   diese entfernt oder temporäre Werte zurückgesetzt werden.
+- Encounter-Eintrittskosten werden vor dem Verbrauch der Next-Encounter-Marker
+  bezahlt. Öffnet die Zahlung ein Supportfenster, bewahrt
+  `pendingEncounterEntryIceId` die konkrete Eintrittsstelle. Die Engine bietet
+  dieselbe gebundene `runner.continue_run`-Fortsetzung an und setzt erst nach
+  Zahlung den Encounter samt Markern; die Bewegung wird nicht erneut gespielt.
 - Eine Tag-Prevention-Continuation setzt den Cleanup an der gespeicherten
   Stelle fort; bereits ausgeführte Schritte dürfen nicht wiederholt werden.
 - Successful-Run-Interventionen werden vor Access abgeschlossen. Verzögerte

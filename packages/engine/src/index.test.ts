@@ -889,6 +889,21 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
       successfulRunThisTurn: true,
       lastSuccessfulRunServerId: "rd",
     };
+    const emptyFortAction = mustAction(
+      state,
+      "runner",
+      (candidate) =>
+        candidate.type === "play_event" &&
+        sourceDefinition(state, candidate) ===
+          "onr_proteus_121_remote-detonator",
+    );
+    expect(emptyFortAction.payload).toMatchObject({
+      runnerFortIceTrashQuoteSchemaVersion: "runner-fort-ice-trash-quote-v1",
+      runnerFortIceTrashQuoteStateVersion: state.stateVersion,
+      runnerFortIceTrashServerId: "rd",
+      runnerFortIceTrashRezzedIceCount: 0,
+      runnerFortIceTrashTagsAdded: 3,
+    });
     const iceId = addRezzedCorpIceForTest(
       state,
       "onr_v1_232_crystal-wall",
@@ -903,6 +918,7 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
         sourceDefinition(state, candidate) ===
           "onr_proteus_121_remote-detonator",
     );
+    expect(action.payload?.runnerFortIceTrashRezzedIceCount).toBe(1);
     const stale = applyAction(state, {
       matchId: state.matchId,
       side: "runner",

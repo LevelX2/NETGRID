@@ -550,7 +550,9 @@ function assessKnownRezzedIcePathInternal(
         }
       } else {
         visibleBreakCost += lossAmount;
-        spendGeneralCredits(creditBudget, lossAmount);
+        // A clamped loss is not a purchase. Do not withdraw a bank after
+        // clamping the loss to the old cash total and thereby invent profit.
+        spendGeneralCredits(creditBudget, lossAmount, false);
       }
       creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
     }

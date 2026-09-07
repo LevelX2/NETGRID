@@ -10,6 +10,10 @@ import {
 } from "../visible-run-analysis";
 import { actionCreditCost } from "./action-cost";
 import { breakerIdForEncounterAction } from "./encounter-action";
+import {
+  fundRunnerRunPathPayment,
+  runnerPaymentSupportBudgetForRig,
+} from "../run-analysis/visible-run-credit-budget";
 
 type EncounterCreditBudget = RunnerRunPathCreditBudget & {
   runOnlyCredits?: number;
@@ -17,8 +21,17 @@ type EncounterCreditBudget = RunnerRunPathCreditBudget & {
 
 type MutableEncounterCreditBudget = Omit<
   Required<RunnerRunPathCreditBudget>,
-  "hostedIcebreakerCreditsByBreakerInstanceId" | "stealthCreditsBySourceId"
+  | "hostedIcebreakerCreditsByBreakerInstanceId"
+  | "stealthCreditsBySourceId"
+  | "paymentSupportSources"
+  | "paymentSupportLiquidCredits"
+  | "paymentSupportCreditsGained"
 > & {
+  paymentSupportSources?: NonNullable<
+    RunnerRunPathCreditBudget["paymentSupportSources"]
+  >;
+  paymentSupportLiquidCredits?: number;
+  paymentSupportCreditsGained?: number;
   hostedIcebreakerCreditsByBreakerInstanceId: Record<string, number>;
   stealthCreditsBySourceId: Record<string, number>;
   runOnlyCredits: number;
@@ -41,6 +54,10 @@ export function runnerEncounterCreditBudgetForInput(
   );
   return {
     credits: normalizeCreditAmount(input.playerView.own.credits),
+    ...runnerPaymentSupportBudgetForRig(
+      input.playerView.own.credits,
+      input.playerView.own.rig ?? [],
+    ),
     runOnlyCredits: normalizeCreditAmount(
       input.playerView.run?.badPublicityCredits ?? 0,
     ),
@@ -108,6 +125,7 @@ export function spendRunnerEncounterGeneralCost(
 ): RunnerEncounterPaymentProjection {
   const nextBudget = normalizeBudget(budget);
   const totalCost = normalizeCreditAmount(cost);
+  fundRunnerRunPathPayment(nextBudget, totalCost);
   let remaining = totalCost;
   const runOnlySpent = Math.min(nextBudget.runOnlyCredits, remaining);
   nextBudget.runOnlyCredits -= runOnlySpent;
@@ -149,6 +167,7 @@ export function spendRunnerEncounterBreakerCost(params: {
 }): RunnerEncounterPaymentProjection {
   const budget = normalizeBudget(params.budget);
   const totalCost = normalizeCreditAmount(params.cost);
+  fundRunnerRunPathPayment(budget, totalCost);
   let remaining = totalCost;
   let restrictedSpent = 0;
   const runOnlySpent = Math.min(budget.runOnlyCredits, remaining);
@@ -227,6 +246,23 @@ function normalizeBudget(
 ): MutableEncounterCreditBudget {
   return {
     credits: normalizeCreditAmount(budget.credits),
+    ...(budget.paymentSupportSources
+      ? {
+          paymentSupportSources: budget.paymentSupportSources.map((source) => ({
+            ...source,
+          })),
+          ...(budget.paymentSupportLiquidCredits !== undefined
+            ? {
+                paymentSupportLiquidCredits: budget.paymentSupportLiquidCredits,
+              }
+            : {}),
+          ...(budget.paymentSupportCreditsGained !== undefined
+            ? {
+                paymentSupportCreditsGained: budget.paymentSupportCreditsGained,
+              }
+            : {}),
+        }
+      : {}),
     runOnlyCredits: normalizeCreditAmount(budget.runOnlyCredits ?? 0),
     icebreakerCredits: normalizeCreditAmount(budget.icebreakerCredits ?? 0),
     nonNoisyIcebreakerCredits: normalizeCreditAmount(

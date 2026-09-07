@@ -273,6 +273,46 @@ describe("selfplay cycle 184 decision checkpoints", () => {
     const capture = structuredClone(
       terminalRemoteNonlethalDamageJson,
     ) as ReconstructedDecisionCapture;
+    // The historical Nerve Labyrinth also had an unbreakable ETR. Use a
+    // canonical damage-only final ICE so this test isolates the floor waiver.
+    const server = capture.input.playerView.servers.find(
+      (s) => s.id === "remote_1",
+    )!;
+    const ice = server.ice[0]!;
+    server.ice = [
+      {
+        ...ice,
+        definitionId: "onr_v1_234_data-darts",
+        title: "Data Darts",
+        rulesText:
+          "[Subroutine] Do 3 net damage.\n[Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.",
+        subtypes: ["ap", "hellbolt", "sentry"],
+        strength: 3,
+        rezCost: 5,
+        effectiveRunQuote: {
+          iceInstanceId: ice.instanceId,
+          iceDefinitionId: "onr_v1_234_data-darts",
+          effectiveStrength: 3,
+          subroutines: [
+            {
+              id: "printed_subroutines_damage_net",
+              type: "do_damage",
+              damageType: "net",
+              amount: 3,
+              sourceDefinitionId: "onr_v1_234_data-darts",
+              sourceTitle: "Data Darts",
+              unbrokenRunEffect: { causesDamageOrProgramTrash: true },
+            },
+            {
+              id: "printed_subroutines_prohibit_break_next_ice",
+              type: "set_next_encounter_no_break_subroutines",
+              sourceDefinitionId: "onr_v1_234_data-darts",
+              sourceTitle: "Data Darts",
+            },
+          ],
+        },
+      },
+    ];
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
     expect(deckSnapshotId).toBeDefined();
     resetResidentPlanPortfolioMemory();

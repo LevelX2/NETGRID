@@ -271,6 +271,8 @@ export function activatedAbilityPayload(
             state.runnerCostPenaltySupportWindow.originalActionId,
           costPenaltySupportAmountDue:
             state.runnerCostPenaltySupportWindow.amountDue,
+          costPenaltySupportRunnerCreditTarget:
+            state.runnerCostPenaltySupportWindow.runnerCreditTarget,
           costPenaltySupportKind: state.runnerCostPenaltySupportWindow.kind,
         }
       : {}),

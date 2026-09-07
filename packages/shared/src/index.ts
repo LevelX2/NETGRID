@@ -1543,6 +1543,7 @@ export type RunState = {
     | { kind: "server"; serverId: Exclude<ServerId, "new_remote"> };
   approachedIceId?: CardInstanceId;
   encounteredIceId?: CardInstanceId;
+  pendingEncounterEntryIceId?: CardInstanceId;
   encounteredBlackIceCount?: number;
   rezzedBlackOpsCount?: number;
   liberatedBlackOpsAgendaCount?: number;
@@ -2639,6 +2640,9 @@ export const CORP_ZONE_TRANSITION_PROJECTION_SCHEMA_VERSION =
 export const RUNNER_AGENDA_POINT_TRANSFER_QUOTE_SCHEMA_VERSION =
   "runner-agenda-point-transfer-quote-v1" as const;
 
+export const RUNNER_FORT_ICE_TRASH_QUOTE_SCHEMA_VERSION =
+  "runner-fort-ice-trash-quote-v1" as const;
+
 /**
  * Actor-private planning projection for one currently legal basic Runner draw.
  * It separates gross draws from the post-draw disposition so consumers do not
@@ -2734,6 +2738,11 @@ export type LegalActionPayload = Record<string, string | number | boolean> &
     runnerAgendaPointTransferQuoteStateVersion?: number;
     runnerAgendaPointsTransferredToCorp?: number;
     corpAgendaPointsAfterRunnerTransfer?: number;
+    runnerFortIceTrashQuoteSchemaVersion?: typeof RUNNER_FORT_ICE_TRASH_QUOTE_SCHEMA_VERSION;
+    runnerFortIceTrashQuoteStateVersion?: number;
+    runnerFortIceTrashServerId?: ServerId;
+    runnerFortIceTrashRezzedIceCount?: number;
+    runnerFortIceTrashTagsAdded?: number;
   };
 
 export type PlayerAction = {

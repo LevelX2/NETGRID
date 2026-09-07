@@ -160,9 +160,6 @@ export function quoteRunnerRunPath(
       Math.min(restrictedCreditPotential, availableRestrictedCredits),
   );
   const reserveTarget = runnerRunPlanReserveTarget(plan);
-  const expectedRemainingCredits =
-    input.playerView.own.credits - totalKnownCost;
-  const reserveViolation = expectedRemainingCredits < reserveTarget;
   const unknownVisibleIce = serverIce.some(
     (ice) => !ice.known || ice.rezzed === false,
   );
@@ -200,6 +197,7 @@ export function quoteRunnerRunPath(
       sharedPathGeneralCredits,
       input.playerView.own.rig ?? [],
       {
+        liquidCredits: input.playerView.own.credits,
         excludeStealthCredits:
           server?.statuses?.some(
             (status) =>
@@ -218,6 +216,12 @@ export function quoteRunnerRunPath(
     unknownIceCount,
     runnerGripCount: input.playerView.own.gripOrHq.length,
   });
+  const expectedRemainingCredits =
+    input.playerView.own.credits -
+    totalKnownCost +
+    (sharedPathAssessment.creditBudgetAfterPath?.paymentSupportCreditsGained ??
+      0);
+  const reserveViolation = expectedRemainingCredits < reserveTarget;
   const canReachAccess =
     !blockedQuote &&
     !reserveViolation &&

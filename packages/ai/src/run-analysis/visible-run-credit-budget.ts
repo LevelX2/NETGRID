@@ -8,10 +8,87 @@ import type {
 } from "./visible-run-analysis-contracts";
 import { subtypeKey } from "./visible-run-breaker-path";
 
+export function runnerPaymentSupportBudgetForRig(
+  liquidCredits: number,
+  rigCards: readonly VisibleCard[],
+): Pick<
+  RunnerRunPathCreditBudget,
+  "paymentSupportSources" | "paymentSupportLiquidCredits"
+> {
+  const sources = rigCards
+    .filter((card) => card.known !== false)
+    .flatMap((card) =>
+      (card.runnerPaymentSupportAbilities ?? [])
+        .filter(
+          (ability) =>
+            ability.timing === "runner_cost_penalty_support" &&
+            ability.trashesSource &&
+            ability.gainCredits > ability.creditCost,
+        )
+        .map((ability) => ({
+          cardInstanceId: card.instanceId,
+          sourceAbilityId: ability.sourceAbilityId,
+          creditCost: ability.creditCost,
+          gainCredits: ability.gainCredits,
+        })),
+    );
+  return sources.length > 0
+    ? {
+        paymentSupportSources: sources,
+        paymentSupportLiquidCredits: normalizeCreditAmount(liquidCredits),
+      }
+    : {};
+}
+
+/** Existential funding quote: withdraw once, before the first paid step.
+ * The run owner must bind those withdrawals to actual Engine payment windows.
+ * Multiple abilities on a trashed source are alternatives, never extra pools.
+ */
+export function fundRunnerRunPathPayment(
+  budget: Pick<
+    RunnerRunPathCreditBudget,
+    | "credits"
+    | "paymentSupportSources"
+    | "paymentSupportLiquidCredits"
+    | "paymentSupportCreditsGained"
+  >,
+  cost: number,
+): void {
+  if (cost <= 0 || !budget.paymentSupportSources?.length) return;
+  if (budget.paymentSupportLiquidCredits === undefined)
+    throw new Error("runner_payment_support_missing_liquid_credit_basis");
+  let liquid = budget.paymentSupportLiquidCredits;
+  const sources = budget.paymentSupportSources;
+  for (const cardId of [
+    ...new Set(sources.map((entry) => entry.cardInstanceId)),
+  ].sort()) {
+    const ability = sources
+      .filter(
+        (entry) =>
+          entry.cardInstanceId === cardId && entry.creditCost <= liquid,
+      )
+      .sort(
+        (a, b) =>
+          b.gainCredits - b.creditCost - (a.gainCredits - a.creditCost) ||
+          a.sourceAbilityId.localeCompare(b.sourceAbilityId),
+      )[0];
+    if (!ability) continue;
+    const net = ability.gainCredits - ability.creditCost;
+    liquid += net;
+    budget.credits += net;
+    budget.paymentSupportCreditsGained =
+      (budget.paymentSupportCreditsGained ?? 0) + net;
+  }
+  // The quoted sequence has passed its first payment window. Sources that
+  // could not be activated there do not become a recurring source of money.
+  budget.paymentSupportSources = [];
+  budget.paymentSupportLiquidCredits = liquid;
+}
+
 export function runnerRunPathCreditBudgetWithVisiblePools(
   credits: number,
   rigCards: readonly VisibleCard[],
-  options: { excludeStealthCredits?: boolean } = {},
+  options: { excludeStealthCredits?: boolean; liquidCredits?: number } = {},
 ): RunnerRunPathCreditBudget {
   const rigBudget = visibleRunnerRunPathCreditBudgetForRig(rigCards);
   const stealthCreditsBySourceId = options.excludeStealthCredits
@@ -25,6 +102,9 @@ export function runnerRunPathCreditBudgetWithVisiblePools(
     stealthNonNoisyIcebreakerCredits;
   return {
     credits: normalizeCreditAmount(credits),
+    ...(options.liquidCredits !== undefined
+      ? runnerPaymentSupportBudgetForRig(options.liquidCredits, rigCards)
+      : {}),
     ...(rigBudget.icebreakerCredits > 0
       ? { icebreakerCredits: rigBudget.icebreakerCredits }
       : {}),
@@ -58,7 +138,13 @@ export function runnerRunPathCreditBudgetWithVisiblePools(
 
 export function visibleRunnerRunPathCreditBudgetForRig(
   rigCards: readonly VisibleCard[],
-): Omit<Required<RunnerRunPathCreditBudget>, "credits"> {
+): Omit<
+  Required<RunnerRunPathCreditBudget>,
+  | "credits"
+  | "paymentSupportSources"
+  | "paymentSupportLiquidCredits"
+  | "paymentSupportCreditsGained"
+> {
   const budget = {
     icebreakerCredits: 0,
     nonNoisyIcebreakerCredits: 0,
@@ -179,6 +265,23 @@ export function normalizeRunnerRunPathCreditBudget(
   }
   return {
     credits: normalizeCreditAmount(budget.credits),
+    ...(budget.paymentSupportSources
+      ? {
+          paymentSupportSources: budget.paymentSupportSources.map((source) => ({
+            ...source,
+          })),
+          ...(budget.paymentSupportLiquidCredits !== undefined
+            ? {
+                paymentSupportLiquidCredits: budget.paymentSupportLiquidCredits,
+              }
+            : {}),
+          ...(budget.paymentSupportCreditsGained !== undefined
+            ? {
+                paymentSupportCreditsGained: budget.paymentSupportCreditsGained,
+              }
+            : {}),
+        }
+      : {}),
     icebreakerCredits: normalizeCreditAmount(budget.icebreakerCredits ?? 0),
     nonNoisyIcebreakerCredits,
     nonStealthNonNoisyIcebreakerCredits,
@@ -201,6 +304,13 @@ export function cloneRunnerRunPathCreditBudget(
 ): MutableRunnerRunPathCreditBudget {
   return {
     ...budget,
+    ...(budget.paymentSupportSources
+      ? {
+          paymentSupportSources: budget.paymentSupportSources.map((source) => ({
+            ...source,
+          })),
+        }
+      : {}),
     hostedIcebreakerCreditsByBreakerInstanceId: {
       ...budget.hostedIcebreakerCreditsByBreakerInstanceId,
     },
@@ -217,7 +327,9 @@ export function projectGeneralCreditPayment(
   cost: number,
 ): CreditPaymentProjection {
   const normalizedCost = normalizeCreditAmount(cost);
-  const creditsAfterPath = budget.credits - normalizedCost;
+  const projected = cloneRunnerRunPathCreditBudget(budget);
+  fundRunnerRunPathPayment(projected, normalizedCost);
+  const creditsAfterPath = projected.credits - normalizedCost;
   return {
     affordable: creditsAfterPath >= 0,
     cost: normalizedCost,
@@ -229,8 +341,15 @@ export function projectGeneralCreditPayment(
 export function spendGeneralCredits(
   budget: MutableRunnerRunPathCreditBudget,
   cost: number,
+  allowPaymentSupport = true,
 ): void {
+  if (allowPaymentSupport) fundRunnerRunPathPayment(budget, cost);
   budget.credits -= normalizeCreditAmount(cost);
+  if (budget.paymentSupportLiquidCredits !== undefined)
+    budget.paymentSupportLiquidCredits = Math.min(
+      budget.paymentSupportLiquidCredits,
+      Math.max(0, budget.credits),
+    );
 }
 
 export function projectBreakerCreditPayment(
@@ -243,8 +362,9 @@ export function projectBreakerCreditPayment(
     breakAssessment,
   );
   const cashNeeded = Math.max(0, cost - restrictedCredits);
-  const creditsAfterPath = budget.credits - cashNeeded;
   const budgetAfterPayment = cloneRunnerRunPathCreditBudget(budget);
+  fundRunnerRunPathPayment(budgetAfterPayment, cost);
+  const creditsAfterPath = budgetAfterPayment.credits - cashNeeded;
   spendBreakerCredits(budgetAfterPayment, breakAssessment);
   return {
     affordable:
@@ -260,6 +380,7 @@ export function spendBreakerCredits(
   budget: MutableRunnerRunPathCreditBudget,
   breakAssessment: BreakAssessment,
 ): void {
+  fundRunnerRunPathPayment(budget, breakAssessment.cost);
   let remainingCost = normalizeCreditAmount(breakAssessment.cost);
   const hostedCredits = Math.min(
     budget.hostedIcebreakerCreditsByBreakerInstanceId[

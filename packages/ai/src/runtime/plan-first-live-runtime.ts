@@ -2348,7 +2348,9 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
     selectedAction?.side === "runner" &&
     selectedAction.expiresAtStateVersion === input.playerView.stateVersion &&
     Number.isFinite(creditCost) &&
-    Number(creditCost) > 0
+    (Number(creditCost) > 0 ||
+      (selectedAction.type === "continue_run" &&
+        input.playerView.run !== undefined))
   ) {
     result.portfolio.pendingRunnerCostPenaltySupportOrigin = {
       rootPlanInstanceId: result.portfolio.rootForegroundInstanceId!,
@@ -29219,6 +29221,10 @@ function runnerTerminalRemoteContestIsNonlethalDamageFloorLastChance(
 ): boolean {
   return (
     evaluation.pathPassability === "blocked_by_visible_damage_hand_buffer" &&
+    evaluation.routeQuote !== undefined &&
+    (evaluation.routeQuote.reachability !== "no_access" ||
+      evaluation.routeQuote.noAccessReason === "harmful_unbroken_run_effect") &&
+    evaluation.routeQuote.fundingGap <= 0 &&
     evaluation.evidence.some(
       (entry) =>
         entry.startsWith(
@@ -30453,6 +30459,7 @@ function isRunnerRunWindowCandidate(
   candidate: ActionSemanticCandidate,
 ): boolean {
   return (
+    runnerRunPaymentSupportAction(input, candidate) !== undefined ||
     isRunWindowSemantic(candidate) ||
     (input.playerView.run !== undefined &&
       candidate.sourceKind === "card" &&
@@ -30465,6 +30472,67 @@ function isRunnerRunWindowCandidate(
     runnerPostPassDerezAndEndRunAction(input, candidate) !== undefined ||
     runnerRunRemainderStrengthBoostAction(input, candidate) !== undefined
   );
+}
+
+function runnerRunPaymentSupportAction(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+): LegalAction | undefined {
+  if (!input.playerView.run) return undefined;
+  return input.legalActions.find(
+    (action) =>
+      action.actionId === candidate.actionId &&
+      action.type === "activated_card_ability" &&
+      typeof action.payload?.costPenaltySupportWindowId === "string" &&
+      typeof action.payload.costPenaltySupportOriginalActionId === "string",
+  );
+}
+
+function runnerRunPaymentSupportAssessment(
+  input: AiDecisionInput,
+  action: LegalAction,
+): RunnerRunWindowActionAssessment {
+  const original = input.legalActions.find(
+    (entry) =>
+      entry.actionId === action.payload?.costPenaltySupportOriginalActionId &&
+      entry.payload?.runnerCostPenaltySupportContinuation === true &&
+      entry.payload.runnerCostPenaltySupportWindowId ===
+        action.payload?.costPenaltySupportWindowId,
+  );
+  const source = (input.playerView.own.rig ?? []).find(
+    (card) => card.instanceId === action.source,
+  );
+  const ability = source?.runnerPaymentSupportAbilities?.find(
+    (entry) => entry.sourceAbilityId === action.abilityRef?.sourceAbilityId,
+  );
+  const cash = input.playerView.own.credits;
+  const cashTarget = action.payload?.costPenaltySupportRunnerCreditTarget;
+  if (!Number.isSafeInteger(cashTarget) || Number(cashTarget) < 0)
+    return {
+      admissible: false,
+      evidenceCodes: ["runner_run_payment_support_cash_target_quote_missing"],
+    };
+  const preservesActivationCash =
+    original !== undefined &&
+    ability !== undefined &&
+    ability.trashesSource &&
+    ability.creditCost > 0 &&
+    ability.creditCost <= cash &&
+    ability.gainCredits > ability.creditCost &&
+    legalActionCreditCost(action) === ability.creditCost &&
+    action.payload?.gainCreditsAmount === ability.gainCredits &&
+    cash - Number(cashTarget) < ability.creditCost;
+  return {
+    admissible: preservesActivationCash,
+    value: preservesActivationCash
+      ? ability.gainCredits - ability.creditCost
+      : 0,
+    evidenceCodes: [
+      preservesActivationCash
+        ? "runner_run_payment_support_before_activation_cash_is_spent"
+        : "runner_run_payment_support_activation_cash_preserved",
+    ],
+  };
 }
 
 function runnerSuccessfulRunBeforeAccessEffectAction(
@@ -30690,6 +30758,7 @@ function runnerRunRiskContractReassessment(
     runnerRunPathCreditBudgetWithVisiblePools(
       generalCredits,
       input.playerView.own.rig ?? [],
+      { liquidCredits: input.playerView.own.credits },
     ),
     server.root,
     input.playerView.opponent.credits,
@@ -30814,6 +30883,7 @@ function currentRunAbortAssessment(
     runnerRunPathCreditBudgetWithVisiblePools(
       generalCredits,
       input.playerView.own.rig ?? [],
+      { liquidCredits: input.playerView.own.credits },
     ),
     server.root,
     input.playerView.opponent.credits,
@@ -30911,6 +30981,9 @@ function runnerRunWindowActionAssessment(
   runOrigin: RunnerRunOrigin | undefined,
   runRiskReassessment: RunnerRunRiskReassessmentSignal | undefined,
 ): RunnerRunWindowActionAssessment {
+  const paymentSupport = runnerRunPaymentSupportAction(input, candidate);
+  if (paymentSupport)
+    return runnerRunPaymentSupportAssessment(input, paymentSupport);
   const additionalAccessAssessment =
     assessRunnerAdditionalAccessRunWindowAction({
       candidate,
@@ -31423,6 +31496,12 @@ function runnerExactRunWindowPhaseActionIds(
       .filter((candidate) => candidate.actionType === "jack_out")
       .map((candidate) => candidate.actionId);
   }
+  const paymentSupport = admissibleRunWindowCandidates.filter(
+    (candidate) =>
+      runnerRunPaymentSupportAction(input, candidate) !== undefined,
+  );
+  if (paymentSupport.length > 0)
+    return paymentSupport.map((candidate) => candidate.actionId);
   const exactPayOrEndRunRouteActionIds =
     runnerExactPayOrEndRunAccessRouteActionIds(
       input,

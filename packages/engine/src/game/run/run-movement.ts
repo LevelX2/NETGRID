@@ -105,6 +105,26 @@ export function handleRunMovementAction(
 ): RunMovementActionResult {
   if (
     legalAction.type === "continue_run" &&
+    host.state.run?.pendingEncounterEntryIceId
+  ) {
+    const window = host.state.runnerCostPenaltySupportWindow;
+    if (
+      legalAction.side !== "runner" ||
+      window?.originalActionId !== legalAction.actionId ||
+      legalAction.payload?.runnerCostPenaltySupportContinuation !== true ||
+      legalAction.payload.runnerCostPenaltySupportWindowId !== window.windowId
+    )
+      throw new Error(
+        "Die Encounter-Fortsetzung passt nicht zum offenen Zahlungsfenster.",
+      );
+    host.encounter.beginEncounter(
+      host.state.run.pendingEncounterEntryIceId,
+      legalAction,
+    );
+    return { handled: true, runContinues: true, stateChanged: true };
+  }
+  if (
+    legalAction.type === "continue_run" &&
     legalAction.payload?.hiddenRunnerResourceAccessStartContinue === true
   )
     return continueHiddenRunnerResourceAccessStart(host, legalAction);

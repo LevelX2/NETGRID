@@ -193,7 +193,10 @@ function evaluateRunnerRunTarget(
     runnerRunPathCreditBudgetWithVisiblePools(
       creditsAvailableDuringRun,
       params.input.playerView.own.rig ?? [],
-      { excludeStealthCredits: stealthCreditsBlocked },
+      {
+        excludeStealthCredits: stealthCreditsBlocked,
+        liquidCredits: creditsAfterAction,
+      },
     ),
     server?.root ?? [],
     params.input.playerView.opponent.credits,
@@ -271,9 +274,9 @@ function evaluateRunnerRunTarget(
   );
   const cumulativeVisibleAndKnownAccessDamageLethal = Boolean(
     payoff.knownAccessDamage &&
-      visibleLethalIceDamage?.evidenceCode.startsWith(
-        "runner_visible_lethal_ice_damage|",
-      ),
+    visibleLethalIceDamage?.evidenceCode.startsWith(
+      "runner_visible_lethal_ice_damage|",
+    ),
   );
   const effectiveAccessPayoffContestable =
     cumulativeVisibleAndKnownAccessDamageLethal

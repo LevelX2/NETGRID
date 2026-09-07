@@ -4,6 +4,25 @@ type RunnerPlanningCard = NonNullable<
   ReturnType<typeof cardSpecPlanningCardByDefinitionId>
 >;
 
+export function runnerSoleFortIceTrashTagAmount(
+  definitionId: string | undefined,
+): number | undefined {
+  if (!definitionId) return undefined;
+  const planning = cardSpecPlanningCardByDefinitionId(definitionId)?.planning;
+  if (planning?.side !== "runner") return undefined;
+  const abilities = (planning.engine.abilities ?? []).filter(
+    (entry) => entry.kind === "on_play",
+  );
+  if (abilities.length !== 1) return undefined;
+  const effects = abilities[0]!.effects;
+  if (effects.length !== 1) return undefined;
+  const effect = effects[0]!;
+  return effect.kind ===
+    "trash_rezzed_ice_on_last_successful_run_fort_and_add_tags"
+    ? effect.tagAmount
+    : undefined;
+}
+
 export type RunnerRestrictedRunCreditUse =
   | "using_icebreaker_during_run_non_noisy"
   | "using_killer_during_run";
