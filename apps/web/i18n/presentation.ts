@@ -55,6 +55,7 @@ export const USER_ERROR_MESSAGE_KEYS = {
   series_next_exists: "seriesNextExists",
   series_not_available: "seriesNotAvailable",
   server_operation_failed: "serverOperationFailed",
+  server_update_preparing: "serverUpdatePreparing",
   side_taken: "sideTaken",
   side_unavailable: "sideUnavailable",
   stale_match: "staleMatch",

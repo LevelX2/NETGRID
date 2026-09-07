@@ -2341,6 +2341,7 @@
     "seriesNextExists": "Le prochain jeu de la série a déjà été créé.",
     "seriesNotAvailable": "Cette série de matchs n'est pas disponible.",
     "serverOperationFailed": "L'action du serveur n'a pas pu être traitée. Veuillez réessayer.",
+    "serverUpdatePreparing": "NETGRID prépare une mise à jour. Le lancement des parties et les modifications sont temporairement bloqués. Veuillez attendre la fin ou l'annulation de la mise à jour.",
     "sideTaken": "Ce côté est déjà pris.",
     "sideUnavailable": "Ce côté n'est pas disponible.",
     "timeExpired": "Le chronomètre des joueurs a expiré.",

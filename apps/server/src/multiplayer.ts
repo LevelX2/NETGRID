@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
+import { UpdateAdmission } from "./update-admission";
 import {
   assertValidAiDeckSnapshotForRuntime,
   beliefStateInvariantSignature,
@@ -1130,6 +1131,7 @@ export class InMemoryMatchStorage implements MultiplayerStorage {
 }
 
 export class MultiplayerService {
+  private readonly updateAdmission = new UpdateAdmission();
   private readonly locks = new Map<string, Promise<void>>();
   private readonly tokenSalt: string;
   private readonly webBaseUrl: string;
@@ -1346,6 +1348,12 @@ export class MultiplayerService {
       aiTraceMode?: AiDecisionTraceMode;
       isPublic?: boolean;
     } & MatchDeckSelectionInput,
+  ): Promise<CreateMatchResult> {
+    return this.updateAdmission.run(() => this.createAdmittedMatch(input));
+  }
+
+  private async createAdmittedMatch(
+    input: Parameters<MultiplayerService["createMatch"]>[0],
   ): Promise<CreateMatchResult> {
     const seed = input.seed?.trim() || `match-${randomId("seed")}`;
     const matchId = randomId("match");
@@ -2104,6 +2112,15 @@ export class MultiplayerService {
       identityKind?: Exclude<ApiPlayerIdentityKind, "ai">;
     } & ParticipantDeckPairInput,
   ): Promise<JoinMatchResult | { error: SafeErrorPayload }> {
+    return this.updateAdmission.run(() =>
+      this.joinAdmittedMatch(matchId, input),
+    );
+  }
+
+  private async joinAdmittedMatch(
+    matchId: string,
+    input: Parameters<MultiplayerService["joinMatch"]>[1],
+  ): Promise<JoinMatchResult | { error: SafeErrorPayload }> {
     const record = await this.mustLoad(matchId);
     if (!record)
       return {
@@ -2299,6 +2316,15 @@ export class MultiplayerService {
       reconnectToken: string;
     },
   ): Promise<ReconnectResult | { error: SafeErrorPayload }> {
+    return this.updateAdmission.run(() =>
+      this.reconnectAdmittedMatch(matchId, input),
+    );
+  }
+
+  private async reconnectAdmittedMatch(
+    matchId: string,
+    input: Parameters<MultiplayerService["reconnectMatch"]>[1],
+  ): Promise<ReconnectResult | { error: SafeErrorPayload }> {
     const record = await this.mustLoad(matchId);
     if (!record)
       return {
@@ -2386,6 +2412,15 @@ export class MultiplayerService {
   async recoverMatch(
     matchId: string,
     input: { side: Side; reconnectToken: string; displayName?: string },
+  ): Promise<ReconnectResult | { error: SafeErrorPayload }> {
+    return this.updateAdmission.run(() =>
+      this.recoverAdmittedMatch(matchId, input),
+    );
+  }
+
+  private async recoverAdmittedMatch(
+    matchId: string,
+    input: Parameters<MultiplayerService["recoverMatch"]>[1],
   ): Promise<ReconnectResult | { error: SafeErrorPayload }> {
     const record = await this.mustLoad(matchId);
     if (!record)
@@ -2491,6 +2526,15 @@ export class MultiplayerService {
   }
 
   async rejoinBoundAccountMatch(
+    matchId: string,
+    participantSlot: ApiSeriesPlayerSlot,
+  ): Promise<ReconnectResult | { error: SafeErrorPayload }> {
+    return this.updateAdmission.run(() =>
+      this.rejoinAdmittedAccountMatch(matchId, participantSlot),
+    );
+  }
+
+  private async rejoinAdmittedAccountMatch(
     matchId: string,
     participantSlot: ApiSeriesPlayerSlot,
   ): Promise<ReconnectResult | { error: SafeErrorPayload }> {
@@ -3100,6 +3144,14 @@ export class MultiplayerService {
   }
 
   async activateLobbyCountdown(matchId: string): Promise<LobbyActionResult> {
+    return this.updateAdmission.runWhenOpen(() =>
+      this.activateAdmittedLobbyCountdown(matchId),
+    );
+  }
+
+  private async activateAdmittedLobbyCountdown(
+    matchId: string,
+  ): Promise<LobbyActionResult> {
     return this.withMatchLock(matchId, async () => {
       const record = await this.mustLoad(matchId);
       if (!record)
@@ -4680,6 +4732,17 @@ export class MultiplayerService {
     StorageMaintenanceSummary | undefined
   > {
     return this.storage.maintenanceSummary?.();
+  }
+
+  prepareUpdate(owner: string) {
+    return this.updateAdmission.prepare(
+      owner,
+      async () => (await this.storageMaintenanceSummary())?.nonTerminalCount,
+    );
+  }
+
+  cancelPreparedUpdate(owner: string): void {
+    this.updateAdmission.cancel(owner);
   }
 
   async storageMaintenanceMatches(
@@ -6539,6 +6602,17 @@ export class MultiplayerService {
   }
 
   private async withMatchLock<T>(
+    matchId: string,
+    work: () => Promise<T>,
+  ): Promise<T> {
+    // Count queued as well as executing transitions. Nested series creation
+    // remains part of the already admitted operation, not a second owner.
+    return this.updateAdmission.run(() =>
+      this.withAdmittedMatchLock(matchId, work),
+    );
+  }
+
+  private async withAdmittedMatchLock<T>(
     matchId: string,
     work: () => Promise<T>,
   ): Promise<T> {

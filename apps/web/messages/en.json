@@ -2257,6 +2257,7 @@
     "seriesNextExists": "The next series game has already been created.",
     "seriesNotAvailable": "This match series is not available.",
     "serverOperationFailed": "The server action could not be processed. Please try again.",
+    "serverUpdatePreparing": "NETGRID is preparing an update. Starting games and making changes are temporarily unavailable. Please wait until the update finishes or is cancelled.",
     "sideTaken": "This side is already taken.",
     "sideUnavailable": "This side is not available.",
     "timeExpired": "The player clock has expired.",

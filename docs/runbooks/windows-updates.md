@@ -47,13 +47,12 @@ oben ist deshalb noch kein abgeschlossener Nachweis eines lückenlosen
 Aktivspielschutzes. Eine weitere Statusabfrage allein löst diesen Wettlauf
 nicht.
 
-Der Ursachenfix muss die Freigabe und das Verhindern neuer Spielstarts beim
-Server als fachlichem Owner zusammenführen und bereits laufende asynchrone
-Spielstarts berücksichtigen. Ablehnung oder Abbruch der Windows-Bestätigung
-müssen die Freigabe kontrolliert zurücknehmen. Direkte MSI-Upgrades benötigen
-denselben Schutz vor dem Entfernen der bisherigen Version; die vorhandene
-Installer-/Launcher-Stoppkoordination allein ersetzt ihn nicht. Diese Punkte
-bleiben WIN-I08-Releaseblocker.
+Die serverseitige Grundlage des Ursachenfixes ist inzwischen umgesetzt;
+ihre Anbindung im Windows-Launcher steht noch aus. Ablehnung oder Abbruch der
+Windows-Bestätigung müssen die Freigabe kontrolliert zurücknehmen. Direkte
+MSI-Upgrades benötigen denselben Schutz vor dem Entfernen der bisherigen
+Version; die vorhandene Installer-/Launcher-Stoppkoordination allein ersetzt
+ihn nicht. Diese Punkte bleiben WIN-I08-Releaseblocker.
 
 `apps/server/src/update-readiness.test.ts` prüft die aktuelle Zählung über den
 echten SQLite-/HTTP-Pfad für sämtliche elf gespeicherten Matchzustände:
@@ -61,6 +60,50 @@ nichtterminale Lobbys, Countdown und aktive Spiele blockieren auch ohne
 verbundene Spieler; ausschließlich terminale Zustände erlauben ein Update.
 Ein nicht verfügbarer Speicherstatus wird mit 503 abgewiesen. Dieser Test
 belegt bewusst weder eine atomare Freigabe noch den nativen Updateablauf.
+
+### Serverseitige Vorbereitungsschnittstelle
+
+`POST /api/system/update-preparation` schließt die Zulassung neuer
+Matchoperationen synchron, wartet auf bereits zugelassene Operationen und
+liest erst danach die aktuelle nichtterminale Matchanzahl. Nur bei null
+bleibt die Sperre gehalten und die Antwort enthält `updateAllowed=true`.
+Der Aufruf braucht auf direktem Loopback das vorhandene flüchtige
+Launcher-Control-Token sowie `x-netgrid-update-owner`: eine neue 32-stellige,
+kleingeschriebene Hex-Nonce je Versuch. Im Internetprofil ist der Pfad
+gesperrt. Es werden keine Maintenance-Credentials verwendet.
+
+`DELETE` auf derselben Route mit derselben Nonce nimmt die Vorbereitung
+zurück. Wiederholte Abbrüche desselben Versuchs sind idempotent; ein anderer
+Owner darf eine bestehende Sperre nicht lösen. Eine quittierte Rücknahme
+verhindert auch eine verspätete Vorbereitung mit derselben Nonce. Diese
+Versuchsmetadaten liegen ausschließlich im Arbeitsspeicher des Servers.
+Der künftige Launcher muss bei unklarem Vorbereitungsergebnis denselben
+Versuch explizit abbrechen und die Quittierung prüfen, bevor er normalen
+Betrieb behauptet.
+
+Der fachliche Owner ist `MultiplayerService`; die bestehende Match-Lock-
+Reihenfolge und alle Engine-/KI-Entscheidungen bleiben unverändert.
+Spielanlage, Beitritt, Reconnect, Recovery und kontogebundener Wiedereinstieg
+sowie die bestehende Match-Lock-Strecke nehmen an der Sperre teil. Schon
+zugelassene verschachtelte Vorgänge, insbesondere das nächste Serienspiel,
+dürfen zu Ende laufen und werden vollständig abgewartet. Spätere Aufrufe
+scheitern mit dem sprachneutralen Spielerfehler `server_update_preparing`,
+den Webclients in `de`/`en`/`fr` erklären. Countdown-Fortsetzungen warten auf
+die Wiederfreigabe, statt verloren zu gehen oder einen zweiten Timer-Owner
+zu erzeugen.
+
+Die Akquisition ist auf 30 Sekunden begrenzt. Timeout, fehlender oder
+ungültiger Speicherstatus autorisieren kein Update und lösen ausschließlich
+die eigene noch nicht erfolgreiche Akquisition. Eine erfolgreich gehaltene
+Sperre läuft nicht stillschweigend ab: Sie bleibt bis zur expliziten
+Rücknahme oder zum Prozessende bestehen. Health und die lesende
+Readiness-Momentaufnahme bleiben erreichbar; letztere ist weiterhin kein
+Ersatz für die Vorbereitung. Beide Control-Antworten sind `no-store`.
+
+`update-admission.test.ts` und `update-preparation.test.ts` prüfen die
+Sperrautorität, verzögerte Speicheroperationen, Verschachtelung, veraltete
+Fortsetzungen, Abbruch und HTTP-Zugriffsschutz. Der native Launcher-/MSI-
+Integrationsnachweis ist damit ausdrücklich noch nicht erbracht.
 
 ## Fehlschlag und Rollback
 

@@ -42,6 +42,7 @@ import {
   normalizeGamebookLocale,
 } from "./gamebook-localization";
 import { SqliteMatchStorage, StorageError } from "./storage-sqlite";
+import { UpdateAdmissionError } from "./update-admission";
 import type {
   StorageMaintenanceCleanupApplyInput,
   StorageMaintenanceCleanupFilters,
@@ -299,7 +300,9 @@ export class NetgridRealtimeServer {
       socket.on(
         "close",
         (code, reason) =>
-          void this.handleClose(socket, code, reason.toString("utf8")),
+          void this.handleClose(socket, code, reason.toString("utf8")).catch(
+            (error) => this.handleMessageFailure(socket, error),
+          ),
       );
       socket.on("error", (error) => this.handleSocketError(socket, error));
     });
@@ -634,12 +637,23 @@ export class NetgridRealtimeServer {
   async refreshSide(matchId: string, side: Side): Promise<void> {
     const connection = this.connection(matchId, side);
     if (!connection) return;
-    const payload = await this.service.bootstrap(
-      matchId,
-      side,
-      connection.context.sessionToken,
-      { allowLobby: true },
-    );
+    let payload: Awaited<ReturnType<MultiplayerService["bootstrap"]>>;
+    try {
+      payload = await this.service.bootstrap(
+        matchId,
+        side,
+        connection.context.sessionToken,
+        { allowLobby: true },
+      );
+    } catch (error) {
+      if (
+        !(error instanceof UpdateAdmissionError) ||
+        error.code !== "update_preparing"
+      )
+        throw error;
+      sendUserError(connection.socket, { code: "server_update_preparing" });
+      return;
+    }
     if ("error" in payload) return;
     sendBootstrap(connection.socket, payload);
     this.scheduleCountdownFromPayload(payload);
@@ -744,7 +758,13 @@ export class NetgridRealtimeServer {
           ? error.name
           : "message_handler_failure",
     });
-    sendUserError(socket, { code: "server_operation_failed" });
+    sendUserError(socket, {
+      code:
+        error instanceof UpdateAdmissionError &&
+        error.code === "update_preparing"
+          ? "server_update_preparing"
+          : "server_operation_failed",
+    });
   }
 
   private recordConnectionAudit(
@@ -1128,9 +1148,33 @@ async function routeHttp(
     }
 
     if (
+      (request.method === "POST" || request.method === "DELETE") &&
+      url.pathname === "/api/system/update-preparation"
+    ) {
+      response.setHeader("cache-control", "no-store");
+      if (!ensureLauncherControl(request, deploymentConfig)) {
+        sendJson(response, 403, {
+          error: { code: "launcher_control_required" },
+        });
+        return;
+      }
+      const owner =
+        firstHeaderValue(request.headers["x-netgrid-update-owner"]) ?? "";
+      if (request.method === "DELETE") {
+        service.cancelPreparedUpdate(owner);
+        sendJson(response, 200, { ok: true });
+      } else {
+        const result = await service.prepareUpdate(owner);
+        sendJson(response, 200, { ok: true, ...result });
+      }
+      return;
+    }
+
+    if (
       request.method === "GET" &&
       url.pathname === "/api/system/update-readiness"
     ) {
+      response.setHeader("cache-control", "no-store");
       if (!ensureLauncherControl(request, deploymentConfig)) {
         sendJson(response, 403, {
           error: {
@@ -3392,6 +3436,7 @@ async function routeHttp(
         }
         sendJson(response, 201, created);
       } catch (error) {
+        if (error instanceof UpdateAdmissionError) throw error;
         sendJson(response, 400, {
           error: {
             code: "join_deck_invalid",
@@ -4064,6 +4109,17 @@ async function routeHttp(
       error: { code: "not_found", message: "Route nicht gefunden." },
     });
   } catch (error) {
+    if (error instanceof UpdateAdmissionError) {
+      sendJson(response, error.code === "update_owner_invalid" ? 400 : 503, {
+        error: {
+          code:
+            error.code === "update_preparing"
+              ? "server_update_preparing"
+              : error.code,
+        },
+      });
+      return;
+    }
     if (error instanceof SyntaxError) {
       sendJson(response, 400, {
         error: {

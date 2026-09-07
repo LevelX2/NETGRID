@@ -53,6 +53,7 @@ export const API_USER_ERROR_CODES = [
   "series_next_exists",
   "series_not_available",
   "server_operation_failed",
+  "server_update_preparing",
   "side_taken",
   "side_unavailable",
   "stale_match",

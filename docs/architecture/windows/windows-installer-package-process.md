@@ -914,6 +914,33 @@ Damit ist die bisher nur gemockte Zählung zusätzlich abgesichert, nicht die
 offene Start-/Stopp-Race geschlossen. Kandidat 8169 bleibt unverändert an
 seinen ursprünglichen Quellcommit gebunden und weiterhin ungestartet.
 
+Die serverseitige Vorbereitung ist anschließend umgesetzt: `UpdateAdmission`
+schließt die Zulassung synchron, wartet auf zugelassene und verschachtelte
+Vorgänge und liest dann den bestehenden SQLite-Matchstatus. Die Integration
+umfasst Matchanlage, Join, Reconnect, Recovery, Account-Wiedereinstieg und die
+bisherige Match-Lock-Strecke. Die bestehende Engine-/KI-Entscheidungsautorität
+wurde nicht geändert. Timergebundene Countdown-Fortsetzungen warten auf eine
+Rücknahme der Sperre, statt verloren zu gehen. Die neue token- und
+loopbackgeschützte POST-/DELETE-Schnittstelle, Nonce-Bindung, Abbruchsemantik
+und 30-Sekunden-Akquisitionsgrenze sind im Update-Runbook beschrieben.
+
+35 fokussierte Tests in vier Dateien bestehen, einschließlich 17
+Admission-Owner-Tests, elf realer SQLite-/HTTP-Vorbereitungstests, der fünf
+Readiness-Tests und zwei Präsentationsprüfungen. Zusätzlich bestehen sechs
+ausgewählte vorhandene Multiplayer-Regressionen für Host-Abbruch,
+Lobbyerhalt, Reconnect, Undo, nächstes Serienspiel und den Zwei-Tab-Lobbyweg.
+Server-, Shared- und Web-Typechecks sind grün. Das Sprachgate besteht mit
+2.344 ausgerichteten Meldungen in drei Sprachen und 64 Oberflächen; es wurde
+aus dem Repositoryroot gestartet, da der vorhandene Paketalias fälschlich
+einen paketrelativen Arbeitsordner voraussetzt. Dieser unabhängige Aliasfehler
+wurde nicht nebenbei verändert.
+
+Der Windows-Launcher ruft die neue Vorbereitung noch nicht auf; seine
+Anbindung, Abbruch-/Recovery-Koordination und direkte MSI-Upgrades bleiben
+offen. Deshalb ist dies ein geprüfter Server-Teilschritt, keine vollständige
+Schließung des Updategates. Es wurde kein neuer Installer gebaut, kein
+vorhandenes Artefakt verändert und keine Sandbox-Installation gestartet.
+
 Vor der Freigabe bleiben die Prozess-Ende-Raceprüfung,
 die direkten MSI-Updatepfade hinsichtlich
 laufender Spiele, verständliche lokalisierte Fehler, die vollständige

@@ -2265,6 +2265,7 @@
     "seriesNextExists": "Das nächste Serienspiel wurde bereits erstellt.",
     "seriesNotAvailable": "Diese Matchserie ist nicht verfügbar.",
     "serverOperationFailed": "Die Serveraktion konnte nicht verarbeitet werden. Bitte versuche es erneut.",
+    "serverUpdatePreparing": "NETGRID bereitet ein Update vor. Spielstarts und Änderungen sind vorübergehend gesperrt. Bitte warte, bis das Update abgeschlossen oder abgebrochen wurde.",
     "sideTaken": "Diese Seite ist bereits vergeben.",
     "sideUnavailable": "Diese Seite ist nicht verfügbar.",
     "timeExpired": "Die Spielerzeit ist abgelaufen.",
