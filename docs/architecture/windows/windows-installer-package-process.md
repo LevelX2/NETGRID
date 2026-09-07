@@ -276,7 +276,7 @@ ohne Entwicklungswerkzeuge.
 | GitHub-Updateauswahl und Integrität | Aktueller Downloadfix und Stable-/Prerelease-/Tamper-Fixtures grün; native deutsche Offline-Rückmeldung auf 8136 bestätigt; höherer regulärer Kandidat 8145 gebaut und lokal geprüft | Echter zustimmungsbasierter GitHub-Download/Update; GitHub-Übertragung am 7. September freigegeben, Testrelease erst nach Abschluss der übrigen Prüfungen; netzfähige isolierte Testumgebung erforderlich |
 | Updatertransaktion und Rollback | Echter Sandboxlauf 8145/8150 am 2026-09-07 grün: geprüftes Backup, MSI-Upgrade, bewusst beschädigte Testdatenbank, erkannter Healthfehler, Programmrollback auf 8145, Datenmarker und SQLite-Integrität wiederhergestellt, Konfiguration unverändert, Cleanup verifiziert | Transaktionsgate für 8145/8150 erfüllt; abschließende Benachrichtigung bleibt ein separater Dialogtest |
 | Benutzerbetrieb und Netzwerk | Standardbenutzerbetrieb und ACLs für installierten 8145-Basisstand im neuen Rollbacklauf grün. Private-LAN-Test des installierten 8150: Web/Server vom Host erreichbar, Maintenance mit 403 abgewiesen; im öffentlichen Profil beide Ports bei weiterhin gesunden lokalen Diensten blockiert. Testinstallation, Ports und NETGRID-Regeln bereinigt; temporär deaktivierte pauschale Sandbox-Containerfreigabe wiederhergestellt | Netzwerkbeleg für 8150 einschließlich dokumentierter Sandbox-Firewallvorbereitung erfüllt; Standardbenutzerbeleg ausdrücklich auf Basis 8145 gebunden |
-| Nativer Setup-/Fortschrittsworker | 8136 über deutschen Setup-Host installiert, MSI-Client/Server jeweils 0; recordlose und Nullfeld-Progress-Meldungen ursächlich korrigiert; echter direkter MSI-Countertest grün, Datenhinweis im Setup nicht überlagert | Sichtbare Zwischenprozente der kurzen Ausführungsphase noch nicht aufgenommen; Windows-UAC mit alternativem Administrator und weitere native Fehler-/Abbruchpfade bleiben getrennte Prüfungen |
+| Nativer Setup-/Fortschrittsworker | 8150 über deutschen Setup-Host im sauberen Gast installiert, MSI-Client/Server jeweils 0; echter Abschnittsfortschritt von 51 Prozent um 15:21:32 UTC sichtbar aufgenommen, Datenhinweis und Status/Balken getrennt. Direkter MSI-Countertest grün | Nativer deutscher Fortschrittsnachweis erfüllt; Windows-UAC mit alternativem Administrator und weitere native Fehler-/Abbruchpfade bleiben getrennte Prüfungen |
 | Launcher, Browser und Diagnose | 8136: einzelner Launcher, normale Desktop-/Tray-Einstiege zeigen Spielseite nach ausdrücklich freigegebener Reparatur der fehlenden Edge-ProgID im Gast; nativer SaveFileDialog und lokaler redigierter ZIP-Export grün | Gastvorbereitung transparent erhalten; dies ersetzt nicht sämtliche Sprach-/Kontext- und funktionalen Gesamtflows |
 | First Run | Nativer deutscher vorgeschalteter Entscheidungsdialog auf 8136 beobachtet; spätere hashgebundene reine Statusabfrage bestätigt eingerichteten Maintenance-Zugang, kein Agent-Bootstrap/Reset | Unbeobachtete Passwort-/Zurück-Schritte nicht nachträglich als abgenommen ausgeben; Authentifizierungsbedienung durch Nutzer, vorhandene Zugangsdaten erhalten |
 | Sichtbare Flows | 8150: Sprachauswahl und Setup-Hauptformular in allen 18 Kombinationen de/en/fr × echte 100/125/150 Prozent × heller/dunkler Systemkontext nativ geprüft. 8145: installierter Sprachwechsel fr → de → en, Repair, Sprachübernahme aller drei Komponenten und Austausch lokalisierter Shortcutnamen mit sieben Prüfungen grün; Tooltip-Renderings und native Tastatur-Popups vorhanden | Übrige Komponentendialoge, funktionale Gesamtflows und Hover-/Tastatur-Randfälle bleiben offen; Hovereingabe ist im verfügbaren Computer-Use-API nicht vorhanden und benötigt Nutzerbedienung |
@@ -496,7 +496,7 @@ Releases (`gh release list`: leere Liste). Der echte Release-Downloadtest
 kann daher nicht gegen einen bereits vorhandenen Kandidaten erfolgen;
 es wurde weder veröffentlicht noch gepusht.
 
-### Native Fortsetzung 8150: Hilfen geprüft, Installation wartet auf Klickfreigabe
+### Native Fortsetzung 8150: Hilfen und Installationsfortschritt geprüft
 
 Am 7. September wurde danach derselbe hashgebundene 8150-Setup-Host im
 bereinigten Gast nativ geöffnet. In der deutschen Custom-Ansicht erreicht
@@ -519,6 +519,36 @@ Hosts bleibt unberührt. Es wurde noch nicht auf „Installieren“ geklickt.
 Die native Installation zur sichtbaren Fortschrittsprüfung benötigt die
 unmittelbare Klickbestätigung nach dem Computer-Use-Skill; Authentifizierung
 und Windows-UAC bleiben Nutzeraktionen. WIN-I08 bleibt aktiv.
+
+Die anschließende ausdrückliche Nutzerbestätigung „Ja, jetzt installieren“
+wurde nach erneuter Sichtprüfung des unveränderten Formulars ausgeführt.
+Der Installationsklick erfolgte um 15:18:57 UTC. Zunächst waren die
+Dateivorbereitung und danach „Windows Installer bereitet die Installation
+vor und ermittelt den Arbeitsumfang …“ sichtbar. Um 15:21:32 UTC zeigte
+der native Setup-Host „Aktueller Installationsabschnitt: 51 %. Weitere
+Abschnitte können folgen.“ mit entsprechend gefülltem kontinuierlichem
+Balken. Datenhinweis, Status und Balken blieben getrennt und lesbar.
+Dieser Nachweis belegt echte sichtbare Zwischenprozente des MSI-Abschnitts,
+keine zeitbasierte Gesamtfortschrittsschätzung.
+
+Um 15:21:45 UTC erschien der vorgeschaltete First-Run-Entscheidungsdialog
+„NETGRID-Verwaltung jetzt einrichten?“. Das Setup meldet dahinter
+„NETGRID ist installiert. Bitte schließen Sie die Ersteinrichtung im
+geöffneten Fenster ab.“ und einen vollständig gefüllten Balken.
+`result/native-8150-installed.json` bestätigt unabhängig die registrierte
+Version 1.0.8150, Standardspeicherorte ohne Test-ID, Sprache de,
+Desktopverknüpfung und die vier installierten Komponentenprüfsummen gegen
+die 8150-Releasemetadaten. Das zu diesem Lauf gehörende MSI-Protokoll
+bestätigt Client und Server jeweils mit `MainEngineThread is returning 0`.
+Der reine Prüfhilfer verwendete zunächst einen falschen Launcherdateinamen;
+nach Abgleich mit dem Installervertrag wurde ausschließlich der Hilfer auf
+`NETGRID.exe` korrigiert und vollständig erfolgreich erneut ausgeführt.
+
+Es wurde weder „Später“ noch „Jetzt einrichten“ automatisiert betätigt.
+Passwörter wurden nicht gelesen oder geändert; die Nutzerentscheidung zur
+Ersteinrichtung steht noch aus. Kein UAC-Dialog wurde durch den Agenten
+bedient. Der erfolgreiche native Installations-/Fortschrittsnachweis ersetzt
+nicht die übrigen Sprach-, Authentifizierungs-, UAC- und GitHub-Updategates.
 
 ### Aktueller Updatekandidat und Teststart vom 7. September 2026
 
