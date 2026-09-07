@@ -383,9 +383,40 @@ Keine Hostinstallation wurde gestartet. Alle drei eigenen Setup-Prozesse und
 deren Fenster wurden geschlossen und ihre Abwesenheit geprüft. Die Anzeige
 steht wieder auf 100 Prozent, 1920 × 1200 und hellem Windows-/App-Kontext;
 Nachtmodus blieb eingeschaltet. Strukturierte Prüfnachweise:
-`output/host-display-review-8150/review.json`. Sichtbare 100-/125-Prozent-
-und Dunkel-Kontexte des Artefakts 8150 sowie die übrigen funktionalen
-WIN-I08-Gates bleiben offen. Kein GitHub-Testrelease, Push oder Main-Merge.
+`output/host-display-review-8150/review.json`. Die anschließende Erweiterung
+dieser Setup-Matrix ist nachfolgend beschrieben. Kein GitHub-Testrelease,
+Push oder Main-Merge.
+
+### Setup-Hauptformular: vollständige Sprach-/DPI-/Kontextmatrix 8150
+
+Der hashgleiche Installer 8150 wurde am 7. September anschließend in den
+15 noch fehlenden Kombinationen erneut nativ geöffnet. Damit sind für
+Sprachauswahl und Setup-Hauptformular alle 18 Kombinationen aus de/en/fr,
+echten 100/125/150 Prozent und hellem/dunklem Windows-/App-Kontext geprüft.
+Jede Kombination verwendete einen frischen Prozess und umfasste die
+voreingestellte sowie die aktivierte benutzerdefinierte Ansicht. Auswahltexte,
+Abschlussoptionen und getrennter Fußbereich sind vollständig sichtbar;
+bei 125 und 150 Prozent wurde das maximale Scroll-Ende zusätzlich bedient.
+Die längste französische Aufbewahrungsoption ist auch bei 100 und 125 Prozent
+im geschlossenen Feld nativ vollständig bestätigt.
+
+Windows und Apps wurden über die Farbeinstellungen tatsächlich auf Dunkel
+umgestellt; die beiden Theme-Werte waren dabei 0. Das Setup behält seine
+helle WinForms-Oberfläche bei und zeigt keinen zusätzlichen beobachteten
+Kontrastfehler. Dies ist eine Prüfung im dunklen Systemkontext, keine
+Behauptung einer eigenen Dunkelansicht. Alle 15 eigenen Folgeprozesse wurden
+geschlossen; die abschließende Fenster- und Prozessprüfung ist leer.
+100 Prozent, 1920 × 1200, heller Windows-/App-Modus (beide Werte 1),
+eingeschalteter Nachtmodus und allein aktiver Bildschirm 1 sind wieder
+verifiziert. Die Einzelkombinationen und geprüften Prozess-IDs stehen im
+obigen lokalen Prüfnachweis.
+
+Dieses Ergebnis schließt die beschriebene **Setup-Hauptformularmatrix**, nicht
+die vollständige UI- oder Releaseabnahme: übrige Komponentendialoge,
+Hover-/Tastatur-Randfälle, funktionale Installations-/Fehler-/Abbruchflows,
+nutzerbediente Authentifizierung/UAC und echter GitHub-Updatepfad bleiben
+separat offen. Auf dem Host wurde nichts installiert und kein NETGRID-
+Runtimeprozess gestartet; bestehende Zugangsdaten blieben unangetastet.
 
 ### Aktueller Updatekandidat und Teststart vom 7. September 2026
 
