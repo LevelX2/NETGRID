@@ -670,7 +670,8 @@ Der erneute Abgleich mit dem Produktvertrag bewahrt den vollständigen Scope:
   oder aller übrigen Dialoge bei 100/125/150 Prozent und hellem/dunklem
   Windows-Kontext. Die abgeschlossene 18er-Matrix betrifft nur Sprachwahl
   und Setup-Hauptformular.
-- Native Validierungs-, Abbruch-, Reparatur-/Deinstallationsdialoge,
+- Native Validierungs-, Abbruch-, Reparatur-/Deinstallationsdialoge
+  (außer dem unten gebundenen deutschen Öffnen-/Abbrechen-Pfad),
   die abschließende Updater-Rollbackbenachrichtigung und die noch fehlenden
   Sprach-/Kontextvarianten bleiben anhand der Runbook-Checkliste zu prüfen.
   Erfolgreiche MSI-/Komponententests ersetzen diese sichtbaren Flows nicht.
@@ -689,6 +690,26 @@ Der erneute Abgleich mit dem Produktvertrag bewahrt den vollständigen Scope:
   Paketprozess-Skills erlauben Main-Abgleich, Merge und verifizierten
   Worktree-/Branch-Cleanup erst nach dem letzten Paket; diese Schritte
   wurden nicht vorgezogen.
+
+### Native Deinstallationsansicht und Abbrechen 8150
+
+Am 7. September um 17:35–17:36 UTC wurde im bestehenden Gast ausschließlich
+der SHA-256-gebundene Setuphost 8150 mit `--uninstall` geöffnet. Nach der
+deutschen Sprachwahl zeigt das native Fenster vollständig lesbar den
+standardmäßigen Erhalt von Konten, Profilen, Decks, Spielen, Einstellungen,
+Kartenbildern und Backups. „Alle NETGRID-Daten endgültig löschen“ ist sichtbar
+nicht ausgewählt; der Zusatztext erklärt den betroffenen Datenordner.
+Der Agent klickte ausschließlich „Abbrechen“, nicht „Deinstallieren“.
+Der Setupaufruf endete mit Exitcode 0.
+
+Die schreibgeschützten Vorher-/Nachher-Prüfungen
+`result/native-8150-uninstall-cancel-{before,after}.json` bestätigen dieselben
+Prozesse einschließlich Startzeiten (Launcher 980, Server 3416, Web 5388),
+bytegleiche Runtimekonfiguration, weiterhin eingerichtete Maintenance sowie
+HTTP 200 für Server und Spielseite. Der Prüfhelfer änderte keine Zugangsdaten.
+Damit ist nur dieser deutsche Ansichts-/Abbruchpfad bestätigt; tatsächliche
+native Entfernung, zusätzliche Löschbestätigung und en/fr-Varianten bleiben
+offen. Keine Deinstallation oder Datenlöschung wurde ausgelöst.
 
 ### Aktueller Updatekandidat und Teststart vom 7. September 2026
 
