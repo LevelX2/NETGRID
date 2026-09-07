@@ -277,8 +277,8 @@ ohne Entwicklungswerkzeuge.
 | Updatertransaktion und Rollback | Echter Sandboxlauf 8145/8150 am 2026-09-07 grün: geprüftes Backup, MSI-Upgrade, bewusst beschädigte Testdatenbank, erkannter Healthfehler, Programmrollback auf 8145, Datenmarker und SQLite-Integrität wiederhergestellt, Konfiguration unverändert, Cleanup verifiziert | Transaktionsgate für 8145/8150 erfüllt; abschließende Benachrichtigung bleibt ein separater Dialogtest |
 | Benutzerbetrieb und Netzwerk | Standardbenutzerbetrieb und ACLs für installierten 8145-Basisstand im neuen Rollbacklauf grün. Private-LAN-Test des installierten 8150: Web/Server vom Host erreichbar, Maintenance mit 403 abgewiesen; im öffentlichen Profil beide Ports bei weiterhin gesunden lokalen Diensten blockiert. Testinstallation, Ports und NETGRID-Regeln bereinigt; temporär deaktivierte pauschale Sandbox-Containerfreigabe wiederhergestellt | Netzwerkbeleg für 8150 einschließlich dokumentierter Sandbox-Firewallvorbereitung erfüllt; Standardbenutzerbeleg ausdrücklich auf Basis 8145 gebunden |
 | Nativer Setup-/Fortschrittsworker | 8150 über deutschen Setup-Host im sauberen Gast installiert, MSI-Client/Server jeweils 0; echter Abschnittsfortschritt von 51 Prozent um 15:21:32 UTC sichtbar aufgenommen, Datenhinweis und Status/Balken getrennt. Direkter MSI-Countertest grün | Nativer deutscher Fortschrittsnachweis erfüllt; Windows-UAC mit alternativem Administrator und weitere native Fehler-/Abbruchpfade bleiben getrennte Prüfungen |
-| Launcher, Browser und Diagnose | 8136: einzelner Launcher, normale Desktop-/Tray-Einstiege zeigen Spielseite nach ausdrücklich freigegebener Reparatur der fehlenden Edge-ProgID im Gast; nativer SaveFileDialog und lokaler redigierter ZIP-Export grün | Gastvorbereitung transparent erhalten; dies ersetzt nicht sämtliche Sprach-/Kontext- und funktionalen Gesamtflows |
-| First Run | Nativer deutscher vorgeschalteter Entscheidungsdialog auf 8136 beobachtet; spätere hashgebundene reine Statusabfrage bestätigt eingerichteten Maintenance-Zugang, kein Agent-Bootstrap/Reset | Unbeobachtete Passwort-/Zurück-Schritte nicht nachträglich als abgenommen ausgeben; Authentifizierungsbedienung durch Nutzer, vorhandene Zugangsdaten erhalten |
+| Launcher, Browser und Diagnose | 8150: normaler Desktopstart zeigt Spielseite mit Build 8150, Web/Server HTTP 200, derselbe einzelne Launcher nach erneutem Start. Die fehlende Edge-ProgID wurde wie im früheren Lauf ausschließlich im Gast ergänzt. 8136: Tray-Einstieg, nativer SaveFileDialog und lokaler redigierter ZIP-Export grün | Gastvorbereitung transparent erhalten; dies ersetzt nicht sämtliche Sprach-/Kontext- und funktionalen Gesamtflows |
+| First Run | Nativer deutscher vorgeschalteter Entscheidungsdialog auf 8150 beobachtet; Nutzer bestätigt Abschluss, Setup beendet mit Exitcode 0. Hashgebundene reine Statusabfrage bestätigt eingerichteten Maintenance-Zugang, kein Agent-Bootstrap/Reset | Unbeobachtete Passwort-/Zurück-/Sichtbarkeitsschritte nicht nachträglich als abgenommen ausgeben; Authentifizierungsbedienung durch Nutzer, vorhandene Zugangsdaten erhalten |
 | Sichtbare Flows | 8150: Sprachauswahl und Setup-Hauptformular in allen 18 Kombinationen de/en/fr × echte 100/125/150 Prozent × heller/dunkler Systemkontext nativ geprüft. 8145: installierter Sprachwechsel fr → de → en, Repair, Sprachübernahme aller drei Komponenten und Austausch lokalisierter Shortcutnamen mit sieben Prüfungen grün; Tooltip-Renderings und native Tastatur-Popups vorhanden | Übrige Komponentendialoge, funktionale Gesamtflows und Hover-/Tastatur-Randfälle bleiben offen; Hovereingabe ist im verfügbaren Computer-Use-API nicht vorhanden und benötigt Nutzerbedienung |
 | Saubere Windows-11-x64-Maschine | Vollständige 13-Punkte-MSI-Matrix 8145 → 8150 einschließlich Cleanup grün: Windows 11 Enterprise x64 (26100), ohne Entwicklungswerkzeuge; Standardbenutzer-/Rollback- und Private-LAN-Test zusätzlich grün. Native Frischinstallation 8136 und installierter Sprachwechsel 8145 separat bestanden | Artefaktgebundene Nachweise nicht pauschal auf spätere Builds übertragen; finale Abnahme bleibt offen bis alle obigen Ergänzungen vorliegen |
 
@@ -549,6 +549,35 @@ Passwörter wurden nicht gelesen oder geändert; die Nutzerentscheidung zur
 Ersteinrichtung steht noch aus. Kein UAC-Dialog wurde durch den Agenten
 bedient. Der erfolgreiche native Installations-/Fortschrittsnachweis ersetzt
 nicht die übrigen Sprach-, Authentifizierungs-, UAC- und GitHub-Updategates.
+
+Nach der Nutzerbestätigung des Abschlusses ist der ursprüngliche
+Setup-Aufruf terminal mit Exitcode 0. Die erneute installierte Identitäts-
+prüfung um 17:05:53 UTC bleibt grün. `result/native-8150-completion.json`
+bestätigt geschlossene Setup-/First-Run-Prozesse und über den bestehenden
+hashgeprüften `--status`-Pfad einen eingerichteten Verwaltungszugang.
+Die Abfrage liefert ausschließlich den booleschen Status; sie bootstrapped
+oder überschreibt keine Credentials. Welche Passwort-, Zurück- oder
+Sichtbarkeitsschritte der Nutzer bedient hat, wurde nicht beobachtet.
+
+Beim anschließenden normalen Desktopstart des installierten 8150 erscheint
+zunächst die Windows-Meldung zum nicht öffnungsfähigen HTTP-Link.
+`result/native-8150-browser-before-repair.json` grenzt den Fehler auf die
+frische Sandbox ein: Web und Server antworten mit HTTP 200, ein einzelner
+Launcher läuft, HTTP-UserChoice lautet `MSEdgeHTM`, dessen HKCR-Klasse fehlt
+jedoch. Die vorhandene Edge-Datei besitzt eine gültige Microsoft-Signatur.
+Die bereits freigegebene Sandbox-Vorbereitung ergänzt nur diese fehlende
+HKCU-Klasse mit dem bestehenden, geprüften Reparaturhelfer. UserChoice und
+Hash bleiben unverändert; Browserdaten, Sicherheitsoptionen und Host werden
+nicht geändert (`result/edge-http-registration-repair.json`).
+
+Der erneute Desktop-Doppelklick öffnet um 17:09 UTC über den normalen
+ShellExecute-Pfad Edge mit `127.0.0.1:3100` und sichtbar „V1.0 · Build 8150“.
+`result/native-8150-browser.json` bestätigt anschließend Web/Server HTTP 200
+und denselben einzelnen Launcher PID 7000. Die Sandbox und diese installierte
+Runtime bleiben für weitere Tests geöffnet. Dies ist keine unveränderte
+Browserausstattung des Ausgangsimages und kein NETGRID-Fallback; die
+Gastvorbereitung bleibt Bestandteil der Nachweisbedingungen. Der
+Hauptbetrieb auf dem Host wurde nicht berührt.
 
 ### Aktueller Updatekandidat und Teststart vom 7. September 2026
 
