@@ -396,6 +396,16 @@ Deinstallation in drei Sprachen und drei geometrischen Skalierungen. Diese
 Skalierung über `Form.Scale` ersetzt keinen Test mit real geänderter
 Windows-DPI-Einstellung und entsprechend skalierten Schriften.
 
+Der Setup-Layouttest prüft zusätzlich ohne Eingabeinjektion in einem
+Offscreen-Fenster die kleinste Fenstergröße: Am maximalen Scroll-Ende müssen
+Desktop-/Abschlussoption und ihre Hilfeschaltflächen vollständig innerhalb
+des Viewports liegen. Die sichtbare Fortschritts- und Aktionsfläche bleibt
+getrennt davon. Dieser Check läuft auch ohne `--render-to` und verhindert
+eine Wiederholung des bei echter 150-Prozent-Skalierung in 8145 gefundenen
+Scrollgrenzenfehlers. Der Renderlauf prüft zusätzlich Status, Hinweis und
+Fortschrittsbalken. Beide Checks ersetzen weiterhin keine native DPI-Abnahme
+des neu gebauten Artefakts.
+
 ### Verbleibende native UI-Abnahme
 
 Diese Checkliste ist ein Prüfablauf, kein bereits erbrachter Nachweis.

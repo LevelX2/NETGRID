@@ -335,9 +335,37 @@ Testinstallation, Produktregistrierung, Verknüpfung, Testlistener,
 NETGRID-Prozesse oder Testkonten (`final-cleanup.json`). Danach wurde ausschließlich
 der selbst erzeugte Gast `841a55be-606f-435c-9ae4-b574e91f40f0` beendet und eine
 leere Sandboxliste verifiziert. Hostseitige Testartefakte und Ergebnisse bleiben
-erhalten. Für die noch offene echte Host-Anzeigeprüfung wurde die gesonderte
-Freigabe zu vorübergehender Skalierungs-/Designänderung angefragt; ohne Antwort
-wurden keine Host-Anzeigeeinstellungen geändert.
+erhalten. Die anschließend ausdrücklich freigegebene Host-Anzeigeprüfung
+verwendete den hashgleichen Setup-Host 8145 ohne Installation. Windows wurde
+tatsächlich von 100 auf 125 und 150 Prozent umgestellt; die Sprachauswahl und
+das deutsche Hauptformular wurden je Stufe frisch geöffnet. Bei 100 Prozent
+waren die Standard-/Custom-Maske und angeklickte Custom-Hilfe lesbar. Bei
+150 Prozent blieben am Scroll-Ende die Kontrollkästchen für Desktop und
+Abschlussstart abgeschnitten. Dieser Befund blockiert die visuelle Freigabe
+von 8145; der vorherige geometrische Rendernachweis hatte ihn nicht erfasst.
+Ein Wechsel auf dunklen Windows-Kontext bei 150 Prozent zeigte weiterhin
+ein helles Setup ohne zusätzlichen erkennbaren Kontrastfehler; dies ist
+keine vollständige Sprach-/Designmatrix.
+
+Die Ursache liegt im zugleich füllenden und scrollenden `TableLayoutPanel`:
+seine letzte automatisch bemessene Zeile lag außerhalb der erreichbaren
+Scrollgrenze. Ein echter Offscreen-Layouttest reproduzierte dies auch bei
+minimaler Fenstergröße unter 100 Prozent (letzte Option Y=586, Höhe=19,
+Viewporthöhe=584). Das Setup trennt nun den scrollenden `Panel`-Viewport
+von einer oben angedockten, vollständig automatisch bemessenen Tabelle.
+Der feste Fußbereich bleibt außerhalb des Viewports. Der neue Standardtest
+prüft in de/en/fr am Scroll-Ende alle Elemente der letzten Optionszeile auf
+vollständige Sichtbarkeit und die Trennung vom Fußbereich. 1.967 Assertions
+sind grün; der ergänzende Renderlauf nach dem Layoutfix bestand mit 2.123
+Assertions. Diese Codekorrektur ist noch nicht im unveränderten Artefakt
+8145 enthalten und braucht einen neuen regulären Build samt nativer
+DPI-/Sprachabnahme.
+
+Die Ausgangseinstellungen wurden nach der Prüfung wiederhergestellt und
+verifiziert: 100 Prozent, Apps und Windows hell, 1920 × 1200. Nachtmodus
+blieb eingeschaltet und die Zuordnung „Nur auf 1 anzeigen“ unverändert.
+Das eigene Setupfenster wurde ohne Installation geschlossen. Baseline und
+Prüfnotizen liegen unter `output/host-display-review-8145`.
 Die normale Hostinstallation und ihre Zugangsdaten bleiben außerhalb dieser
 Freigabe und wurden nicht verändert. Es wurde kein GitHub-Release erstellt.
 

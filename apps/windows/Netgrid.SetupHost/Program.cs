@@ -386,15 +386,21 @@ internal sealed class SetupForm : Form
             ? UiText.Get("setup.lan.found", _privateAddresses[0])
             : UiText.Get("setup.lan.missing");
 
+        // The viewport scrolls the table's complete preferred height. A filling
+        // TableLayoutPanel with AutoScroll can leave its final auto-sized row
+        // beyond the scroll extent when the available height is constrained.
+        var viewport = new Panel { Dock = DockStyle.Fill, AutoScroll = true };
         var root = new TableLayoutPanel
         {
-            Dock = DockStyle.Fill,
-            AutoScroll = true,
+            Dock = DockStyle.Top,
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
             ColumnCount = 1,
             Padding = new Padding(28),
         };
         root.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        Controls.Add(root);
+        viewport.Controls.Add(root);
+        Controls.Add(viewport);
         root.Controls.Add(Flow(
             new PictureBox { Image = Icon?.ToBitmap(), SizeMode = PictureBoxSizeMode.Zoom, Size = new Size(44, 44), Margin = new Padding(3, 0, 12, 6) },
             Heading(UiText.Get("setup.header"), 18)

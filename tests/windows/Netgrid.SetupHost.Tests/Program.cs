@@ -3,7 +3,8 @@ using System.Text.Json;
 
 ApplicationConfiguration.Initialize();
 
-// Exercise the real setup assembly without showing or operating a window.
+// Exercise the real setup assembly without injecting input. Layout checks
+// create only off-screen windows; they never start an installation.
 var assembly = Assembly.Load("NETGRID.Setup");
 var text = assembly.GetType("Netgrid.Windows.UiText", throwOnError: true)!;
 var failure = assembly.GetType("Netgrid.SetupHost.SetupException", throwOnError: true)!;
@@ -323,6 +324,31 @@ foreach (var language in new[] { "de", "en", "fr" })
             Assert(local.Checked && !lan.Checked, "network_choice_reversible");
             Field<RadioButton>("_custom").Checked = true;
             Assert(!Field<RadioButton>("_recommended").Checked && Field<TextBox>("_programRoot").Enabled, "custom_choice_and_fields");
+            // Always exercise the real scroll extent, including the default
+            // build gate. Bitmap previews previously checked only the footer.
+            {
+                form.ShowInTaskbar = false;
+                form.StartPosition = FormStartPosition.Manual;
+                form.Location = new Point(-32000, -32000);
+                form.Size = form.MinimumSize;
+                form.Show(); previewWindowsShown++;
+                Application.DoEvents();
+                var lastOption = Field<CheckBox>("_launch");
+                Control optionsRoot = lastOption;
+                while (optionsRoot.Parent != form) optionsRoot = optionsRoot.Parent!;
+                var scroll = (ScrollableControl)optionsRoot;
+                scroll.AutoScrollPosition = new Point(0, int.MaxValue);
+                form.PerformLayout();
+                Application.DoEvents();
+                foreach (var option in lastOption.Parent!.Controls.Cast<Control>())
+                {
+                    var bounds = scroll.RectangleToClient(option.RectangleToScreen(option.ClientRectangle));
+                    Assert(scroll.ClientRectangle.Contains(bounds), $"last_options_fully_visible_at_scroll_end:{language}:{bounds}:{scroll.ClientRectangle}");
+                    Assert(option.Parent!.ClientRectangle.Contains(option.Bounds), "last_option_row_does_not_clip_children");
+                }
+                Assert(scroll.Bottom <= dataNotice.Parent!.Top, "scroll_viewport_excludes_fixed_footer");
+                form.Hide();
+            }
             Assert(!form.Visible, "help_tests_show_no_window");
         }
         catch (Exception exception) { uiFailure = exception; }
