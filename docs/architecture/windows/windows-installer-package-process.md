@@ -651,6 +651,45 @@ wieder in der Sandbox. Damit sind automatische Einmal-Wiederherstellung,
 sicherer Stopp nach erneutem Abbruch und der native deutsche Retry-Pfad
 artefaktgebunden bestätigt; andere Sprach-/Kontextvarianten bleiben offen.
 
+### Native Updatesuche 8150 und verbleibende Abschlussgrenzen
+
+Die manuelle deutsche Tray-Aktion „Nach Updates suchen …“ zeigt am
+7. September um 17:26:44 UTC im netzfähigen Gast den vollständig lesbaren
+Informationsdialog „NETGRID ist auf dem neuesten Stand.“. Der Dialog wurde
+geschlossen; weder Updatezustimmung noch Download oder Installation wurden
+ausgelöst. Die unabhängige aktuelle GitHub-Abfrage für `LevelX2/NETGRID`
+liefert weiterhin eine leere Releaseliste. Dieser Nachweis gilt damit für
+die reguläre Suche ohne angebotenen Kandidaten, ausdrücklich nicht für den
+erforderlichen tatsächlichen Stable-/Prerelease-Download samt Zustimmung.
+
+Der erneute Abgleich mit dem Produktvertrag bewahrt den vollständigen Scope:
+
+- Die deutschen nativen Installations-, Fortschritts-, Desktop-, Diagnose-,
+  Stopp-/Neustart- und Recoverypfade sind für 8150 inzwischen gebunden.
+  Daraus folgt keine pauschale funktionale Abnahme aller Flows in en/fr
+  oder aller übrigen Dialoge bei 100/125/150 Prozent und hellem/dunklem
+  Windows-Kontext. Die abgeschlossene 18er-Matrix betrifft nur Sprachwahl
+  und Setup-Hauptformular.
+- Native Validierungs-, Abbruch-, Reparatur-/Deinstallationsdialoge,
+  die abschließende Updater-Rollbackbenachrichtigung und die noch fehlenden
+  Sprach-/Kontextvarianten bleiben anhand der Runbook-Checkliste zu prüfen.
+  Erfolgreiche MSI-/Komponententests ersetzen diese sichtbaren Flows nicht.
+- Passwortanzeige, Zurück-Navigation und Authentifizierung werden nicht
+  automatisiert. Zum bereits nutzerbedienten deutschen First Run wurde
+  gezielt nach den tatsächlich ausprobierten Sichtbarkeits-/Zurück-Schritten
+  gefragt; solange keine Antwort vorliegt, entsteht kein zusätzlicher
+  manueller Nachweis. Windows-UAC mit alternativem Administrator und
+  Maus-Hover-Randfälle benötigen ebenfalls Nutzerbedienung.
+- Ein echter GitHub-Updatekandidat ist weiterhin nicht veröffentlicht.
+  Die bedingte Testreleasefreigabe ersetzt weder die vorher verlangte
+  übrige Abnahme noch den aktuell fortgeltenden Auftrag „Kein Push“.
+  Es wird kein Tag auf einen unbeteiligten Quellstand gesetzt und kein
+  lokales Artefakt als bereits veröffentlichter Updatekandidat ausgegeben.
+- WIN-I08 ist nicht abgeschlossen. Die gelesenen Integrationsregeln des
+  Paketprozess-Skills erlauben Main-Abgleich, Merge und verifizierten
+  Worktree-/Branch-Cleanup erst nach dem letzten Paket; diese Schritte
+  wurden nicht vorgezogen.
+
 ### Aktueller Updatekandidat und Teststart vom 7. September 2026
 
 `1.0.8145` wurde regulär aus dem sauberen Commit
