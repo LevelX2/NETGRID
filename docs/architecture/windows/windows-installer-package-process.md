@@ -961,6 +961,26 @@ einschließlich Abbruch und Wiederaufnahme abdecken. Die aktuelle Vorbereitung
 wird deshalb noch nicht in den unsicheren bisherigen Übergabepfad eingebaut.
 WIN-I08 bleibt aktiv und der vorbereitete Installer 8169 unverändert.
 
+Der gemeinsame Übergabetransport ist anschließend als `UpdateHandoff`
+ergänzt und in Launcher sowie Updater als gemeinsame Quelle eingebunden.
+49 Checks bestehen mit echten Windows-Pipes, geschützter DACL,
+Netzwerkausschluss, Kernel-Peerprüfung, PID-/Startzeit-/Imagebindung und
+getrennten, ausschließlich selbst gestarteten Testprozessen. Explizite
+Freigabe und Abbruch sind quittiert; falscher Gegenprozess, ungültige
+Nachrichten, EOF vor einer Entscheidung und Empfangstimeout werden
+abgewiesen. Ein nach möglicher `Proceed`-Zustellung fehlendes oder falsches
+Ack bleibt ausdrücklich ein unklarer Ausgang und setzt die Freigabe nicht
+stillschweigend zurück. Die zugehörige Caller-Pflicht ist im Runbook gesichert.
+
+Die bisherigen Launcher- und Updater-Komponententests bestehen weiterhin;
+das geänderte Buildscript besteht die PowerShell-Syntaxprüfung. Kein
+vollständiger Installerbuild, keine Erhöhung und keine native
+Installationsaktion wurden ausgeführt. Der Transport wird noch nicht im
+realen Tray-/Updater-Startpfad aufgerufen. Insbesondere bleiben die
+transaktionsweite Startsperre einschließlich Backup und Healthcheck,
+deren Eigentümerschaft gegenüber den MSI-Teiltransaktionen sowie die
+konkrete Anbindung der sicheren Übergabe offen.
+
 Vor der Freigabe bleiben die Prozess-Ende-Raceprüfung,
 die direkten MSI-Updatepfade hinsichtlich
 laufender Spiele, verständliche lokalisierte Fehler, die vollständige

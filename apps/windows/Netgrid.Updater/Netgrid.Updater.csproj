@@ -14,6 +14,7 @@
     <ApplicationIcon>..\..\web\public\brand\netgrid.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\Common\UpdateHandoff.cs" Link="UpdateHandoff.cs" />
     <Compile Include="..\Common\WindowsUiStrings.cs" Link="WindowsUiStrings.cs" />
     <Compile Include="..\Common\WindowsUiLanguage.cs" Link="WindowsUiLanguage.cs" />
     <EmbeddedResource Include="..\Common\windows-ui-strings.json" LogicalName="NETGRID.WindowsUiStrings.json" />

@@ -133,6 +133,38 @@ von `PrepareAsync` vor den bisherigen UAC-Aufruf reicht nicht. Erfolgreiche
 HTTP-Komponententests werden nicht als Nachweis dieser noch offenen
 Prozessübergabe oder der Major-Upgrade-Reihenfolge ausgegeben.
 
+Als gemeinsame, noch nicht in den Produktablauf eingebundene Grundlage
+liegt `apps/windows/Common/UpdateHandoff.cs` vor. Die lokale Duplex-Pipe
+besitzt eine geschützte DACL für den aufrufenden Benutzer und explizit
+bestätigte Windows-Administratoren; Netzwerkzugriffe sind ausgeschlossen.
+Der zufällige Pipename allein ist keine Identitätsprüfung: Beide Seiten
+prüfen den Gegenprozess über Windows-Kernel-Pipeabfragen und halten die
+zugehörigen Prozesshandles. Der erhöhte Empfänger muss zusätzlich PID,
+Startzeit und erwartetes Launcherimage mit `OpenParent` binden. Eine bereits
+fehlende PID ist dabei kein Erfolg.
+
+Der einmalige Kanal verwendet ausschließlich feste 12-Byte-Nachrichten mit
+Protokollkennung, Version und typisiertem Entscheidungs-/Quittierungscode.
+Weder Pfade noch Befehle, Konfiguration oder Zugangsdaten werden als Payload
+übertragen. Ein Empfänger darf nur nach der expliziten `Proceed`-Entscheidung
+weiterarbeiten; EOF, ungültige Reihenfolge oder ein Timeout beim Warten auf
+die Entscheidung ersetzen sie nicht. Für alle Wartephasen muss der
+aufrufende Transaktionsowner einen begrenzten CancellationToken setzen.
+
+Nach Beginn der `Proceed`-Übertragung ist ein fehlendes Ack hingegen ein
+unklarer Ausgang, keine sicher zurückgenommene Freigabe. Dafür bleibt
+`ProceedMayHaveBeenDelivered=true` erhalten. Der künftige Aufrufer muss dann
+die Exklusivität bewahren und den genau gebundenen Worker verfolgen, statt
+normalen Betrieb oder einen zweiten Updateversuch freizugeben. Der Transport
+beweist selbst weder geordneten Runtime-Stopp noch die updateweite Sperre;
+beides bleibt Aufgabe der noch ausstehenden Transaktionsanbindung.
+
+`Netgrid.UpdateHandoff.Tests` prüft unter Windows die echten Pipes, ACLs,
+Prozessbindung und getrennte eigene Testprozesse, ohne Erhöhung oder
+Installation. Der Lauf ist in den Installerbuild aufgenommen. Die separate
+Freigabe durch ein anderes Windows-Administratorkonto bleibt eine native
+Abnahme, die diese unelevierten Komponentenprüfungen nicht ersetzen.
+
 ## Fehlschlag und Rollback
 
 Scheitert Windows Installer, greift zunächst seine Transaktionsrücknahme; der
