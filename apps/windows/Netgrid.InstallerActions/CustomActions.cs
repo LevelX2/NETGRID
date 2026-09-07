@@ -56,12 +56,15 @@ namespace Netgrid.InstallerActions
             var lease = session.CustomActionData["Lease"];
             using (var machine = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
             {
-                if (IsNested(session)) InstallationLease.RequireMsi(machine, root, lease, session.CustomActionData["ProductCode"]);
-                else if (session.CustomActionData["OuterLease"] == "")
-                    InstallationLease.BeginMsi(machine, root, lease, session.CustomActionData["ProductCode"], "");
-                else
-                    using (var owner = InstallationGate.OpenUpdateOwner(machine, root, session.CustomActionData["OuterLease"]))
-                        InstallationLease.BeginMsi(machine, root, lease, session.CustomActionData["ProductCode"], session.CustomActionData["OuterLease"]);
+                InstallationLaunchFence.Execute(root, () =>
+                {
+                    if (IsNested(session)) InstallationLease.RequireMsi(machine, root, lease, session.CustomActionData["ProductCode"]);
+                    else if (session.CustomActionData["OuterLease"] == "")
+                        InstallationLease.BeginMsi(machine, root, lease, session.CustomActionData["ProductCode"], "");
+                    else
+                        using (var owner = InstallationGate.OpenUpdateOwner(machine, root, session.CustomActionData["OuterLease"]))
+                            InstallationLease.BeginMsi(machine, root, lease, session.CustomActionData["ProductCode"], session.CustomActionData["OuterLease"]);
+                });
             }
             // The launcher observes the lease, disables recovery and performs
             // its existing stdin shutdown. Never kill it or arbitrary Node

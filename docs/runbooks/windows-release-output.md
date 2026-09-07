@@ -78,6 +78,17 @@ nicht aus.
 
 Eng begrenzte Prüfungen ohne Installation:
 
+Die gemeinsame `InstallationLaunchFence` schützt die letzte Gateprüfung samt
+Kindstart gegen gleichzeitigen MSI-/Updater-Lease-Erwerb. Das Lifecycle-Gate
+prüft dafür echte Prozesskonkurrenz, Rechte und Fehlerpfade ausschließlich
+mit eigenen Fixtures. `installation_gate_launch_fence_timeout`,
+`installation_gate_launch_fence_abandoned` und
+`installation_gate_launch_fence_open_failed` sind abbrechende Diagnosen;
+vorhandene Installersperren werden dabei nicht automatisch gelöscht.
+Launcher- und First-Run-Gates prüfen zusätzlich ihre tatsächliche letzte
+Startstelle. Ein grünes Ergebnis ist keine native Freigabe direkter MSI-
+Updates bei laufenden Spielen und kein erhöhtes Mehrbenutzer-Testat.
+
 ```powershell
 .\.tools\dotnet\dotnet.exe run --project tests/windows/Netgrid.InstallerLifecycle.Tests/Netgrid.InstallerLifecycle.Tests.csproj -c Release
 .\.tools\dotnet\dotnet.exe run --project tests/windows/Netgrid.Launcher.Tests/Netgrid.Launcher.Tests.csproj -c Release -- --check-installation-stop

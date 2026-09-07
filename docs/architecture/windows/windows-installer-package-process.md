@@ -1147,7 +1147,22 @@ Benutzerwechsel wurden in diesem Schritt gestartet. Der erfolgreiche
 erhöhte Neustart einschließlich anderer Administratorkonto-Freigabe bleibt
 ein konkretes natives Gate, kein als erledigt ausgewiesener Komponentencheck.
 
-Vor der Freigabe bleiben die Prozess-Ende-Raceprüfung,
+Die gemeinsame Start-Mutex ist im Launcher-Start-/Recovery-Owner, First Run,
+MSI-Lease-Erwerb und Updater-Vorbereitung eingebunden. Die letzte Gateprüfung
+und der Kindstart können nicht mehr durch den Lease-Erwerb getrennt werden;
+der gebundene Updater prüft den ursprünglichen Parent unter derselben Mutex
+erneut. Die kurze Mutex wird nicht über Health-/Pipe-/Prozesswartezeiten
+gehalten und gibt normalen Benutzern keine Registry-Schreibrechte.
+Die Lifecycle-Prüfung umfasst jetzt 239 Checks einschließlich echter
+Zwei-Prozess-Konkurrenz, DACL, Abandonment, Timeout und Start-/Lease-Reihenfolge
+in isoliertem HKCU. Vier neue Launcherchecks und zwei zusätzliche First-Run-
+Checks prüfen die tatsächlichen letzten Guardstellen unter der Mutex, ohne
+Runtime oder Credentialzugriff. Launcher-, Handoff- und First-Run-Regressionen
+sind grün, die Framework-4.8-MSI-Komponente baut ohne Warnungen. Dies ersetzt
+keinen erhöhten Mehrbenutzer- oder vollständigen MSI-Lauf; 8169 und die Sandbox
+bleiben unverändert. Der direkte MSI-Aktivspielschutz ist noch nicht umgesetzt.
+
+Vor der Freigabe bleiben die vollständige Prozess-Ende-Raceprüfung,
 die direkten MSI-Updatepfade hinsichtlich
 laufender Spiele, verständliche lokalisierte Fehler, die vollständige
 Build-/Payloadprüfung und der native Uninstall-Nachweis offen. Eine nach

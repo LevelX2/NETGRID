@@ -7,6 +7,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../../../apps/windows/Common/InstallationGate.cs" Link="InstallationGate.cs" />
+    <Compile Include="../../../apps/windows/Common/InstallationLaunchFence.cs" Link="InstallationLaunchFence.cs" />
     <Compile Include="../../../apps/windows/Common/InstallationLease.cs" Link="InstallationLease.cs" />
   </ItemGroup>
 </Project>

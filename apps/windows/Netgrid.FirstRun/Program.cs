@@ -260,13 +260,15 @@ internal sealed class FirstRunForm : Form
 
 internal sealed class FirstRunRuntime
 {
+    private readonly string _programRoot;
     private readonly string _nodePath;
     private readonly string _cliPath;
     private readonly IReadOnlyDictionary<string, string> _environment;
     private readonly Func<bool> _installationBlocked;
 
-    private FirstRunRuntime(string nodePath, string cliPath, IReadOnlyDictionary<string, string> environment, Func<bool> installationBlocked)
+    private FirstRunRuntime(string programRoot, string nodePath, string cliPath, IReadOnlyDictionary<string, string> environment, Func<bool> installationBlocked)
     {
+        _programRoot = programRoot;
         _nodePath = nodePath;
         _cliPath = cliPath;
         _environment = environment;
@@ -295,7 +297,7 @@ internal sealed class FirstRunRuntime
         var cliPath = Path.Combine(programRoot, "app", "maintenance-auth.mjs");
         if (!File.Exists(nodePath) || !File.Exists(cliPath))
             throw new FirstRunException("Die installierte Maintenance-Laufzeit ist unvollständig.");
-        return new FirstRunRuntime(nodePath, cliPath, environment, installationBlocked);
+        return new FirstRunRuntime(programRoot, nodePath, cliPath, environment, installationBlocked);
     }
 
     public bool IsMaintenanceInitialized()
@@ -343,7 +345,11 @@ internal sealed class FirstRunRuntime
         foreach (var key in start.Environment.Keys.Where(key => key.StartsWith("NETGRID_", StringComparison.Ordinal) || key is "NODE_OPTIONS" or "NODE_PATH").ToArray())
             start.Environment.Remove(key);
         foreach (var (name, value) in _environment) start.Environment[name] = value;
-        using var process = Process.Start(start) ?? throw new FirstRunException("Die Maintenance-Laufzeit konnte nicht gestartet werden.");
+        using var process = InstallationLaunchFence.Execute(_programRoot, () =>
+        {
+            EnsureInstallationIdle(_installationBlocked);
+            return Process.Start(start) ?? throw new FirstRunException("Die Maintenance-Laufzeit konnte nicht gestartet werden.");
+        });
         if (standardInput is not null)
         {
             process.StandardInput.Write(standardInput);

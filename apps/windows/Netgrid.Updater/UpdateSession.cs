@@ -73,9 +73,13 @@ internal sealed class UpdateSession : IDisposable
                 OriginalUserRestart.RequireLaunchPrivilege();
                 restart = OriginalUserRestart.Capture(parent);
             }
-            InstallationLease.BeginPreparing(machine, request.ProgramRoot, request.Lease, parent.Id,
-                parent.StartTime.ToUniversalTime().Ticks, owner.Id, owner.StartTime.ToUniversalTime().Ticks);
-            acquired = true;
+            InstallationLaunchFence.Execute(request.ProgramRoot, () =>
+            {
+                if (parent.HasExited) throw new InvalidOperationException("installation_gate_parent_exited");
+                InstallationLease.BeginPreparing(machine, request.ProgramRoot, request.Lease, parent.Id,
+                    parent.StartTime.ToUniversalTime().Ticks, owner.Id, owner.StartTime.ToUniversalTime().Ticks);
+                acquired = true;
+            });
             using var deadline = new CancellationTokenSource(TimeSpan.FromMinutes(2));
             using var peer = await UpdateHandoff.ConnectAsync(request.Session, parent, deadline.Token);
             proceeded = await peer.ReceiveDecisionAsync(deadline.Token);

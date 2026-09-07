@@ -19,6 +19,7 @@
     <Compile Include="..\Common\ProductProcesses.cs" Link="ProductProcesses.cs" />
     <Compile Include="..\Common\UpdateVerification.cs" Link="UpdateVerification.cs" />
     <Compile Include="..\Common\InstallationGate.cs" Link="InstallationGate.cs" />
+    <Compile Include="..\Common\InstallationLaunchFence.cs" Link="InstallationLaunchFence.cs" />
     <Compile Include="..\Common\InstallationLease.cs" Link="InstallationLease.cs" />
     <Compile Include="..\Common\WindowsUiStrings.cs" Link="WindowsUiStrings.cs" />
     <Compile Include="..\Common\WindowsUiLanguage.cs" Link="WindowsUiLanguage.cs" />

@@ -123,7 +123,8 @@ Die MSI-Transaktion besitzt eine pro Programmordner gebundene Installersperre
 unter `HKLM\SOFTWARE\LevelX2\NETGRID.InstallerLifecycle` (64-Bit-Ansicht).
 Der gemeinsame Writer ist nur in erhöhte MSI-Aktion und Updater eingebunden;
 Launcher und First Run lesen ausschließlich. Die MSI-Aktion verwendet die
-Sperre bereits, die updateweite Nutzung durch den Updater ist noch offen.
+Sperre bereits; der Updater hält seine übergeordnete Lease über Backup,
+MSI-Teiltransaktion, Healthprüfung und gegebenenfalls Rollback hinweg.
 Der bestehende Launcher bleibt Owner des geordneten Runtime-Stopps. Während
 der Sperre sind neue Starts und Recovery ausgeschlossen. Die MSI-Aktion
 verändert erst Dateien, wenn die exakt zugehörigen Produktprozesse beendet
@@ -141,14 +142,14 @@ Der aktuelle native Abnahmestand steht im Paketprozess, nicht in dieser
 Architekturbeschreibung.
 
 Der aktuelle Quellstand verwendet einen atomaren, versionierten Datensatz
-mit den Phasen `preparing`, `stopping` und `completed`. Die vorbereitete
+mit den Phasen `preparing`, `stopping`, `verifying` und `completed`. Die vorbereitete
 Updatephase lässt ausschließlich den ursprünglichen Launcher mit exakt
 gebundener PID und Prozessstartzeit weiterlaufen, während neue Starts
 gesperrt sind. Ihr Abbruch bewahrt diese Ausnahme; der Übergang zum Stopp
 entfernt sie. Eine kurze Writer-Mutex serialisiert Änderungen, während der
 persistente Datensatz die längerlebige Sperre besitzt. Ungültige oder alte
-Datensatzformate werden nicht still konvertiert. Die Anbindung dieser
-Vorbereitung an den echten Updateablauf bleibt ein offenes Abnahmegate.
+Datensatzformate werden nicht still konvertiert. Die Vorbereitung ist an den
+Updateablauf angebunden; dessen vollständige native Abnahme bleibt offen.
 Die aktuelle MSI-Bindung ergänzt denselben atomaren Datensatz um eine
 Teiltransaktions-Lease und den ProductCode. Ein MSI-Commit oder -Rollback
 darf nur diese eigene Bindung abschließen; eine übergeordnete Updatesperre
@@ -157,6 +158,30 @@ bleibt gehalten. Die Entfernung der alten Version liegt nach
 Altversions-Uninstall prüft die Bindung an den neuen ProductCode und löst
 weder die Sperre noch Daten-/Firewall-Löschaktionen aus. Die echte
 Zwei-Versionen- und Rollback-Abnahme bleibt offen.
+
+Eine zweite, kurze und pro Programmordner benannte Windows-Mutex
+`InstallationLaunchFence` schließt die Lücke zwischen letzter Sperrprüfung
+und Kindprozessstart. Launcher (einschließlich Recovery) und First Run lesen
+die Installersperre unter dieser Mutex erneut und starten ihre Kinder noch
+im selben synchronen Abschnitt. MSI-Lease-Erwerb und Updater-Vorbereitung
+verwenden dieselbe Mutex; der Updater prüft dort zusätzlich, ob sein bereits
+gebundener ursprünglicher Launcher noch lebt. Health-, Pipe- und
+Prozessende-Wartezeiten liegen außerhalb dieses Abschnitts. Die Lockreihenfolge
+lautet lokale Launcher-Lifecycle-Sperre, Start-Mutex, Registry-Writer-Mutex;
+es wird keine Mutex über ein `await` hinweg gehalten.
+
+Die Start-Mutex ist keine zusätzliche Installationsautorität. Der ACL-Eintrag
+für authentifizierte Benutzer gewährt nur Warten und Freigeben, keine
+DACL-Änderungsrechte; Windows-Eigentümerrechte bleiben davon unberührt. Eine explizite
+Medium-Integritätsmarkierung ermöglicht den normalen Launcherzugriff auch
+nach Erstellung durch einen erhöhten Teilnehmer. Netzwerk-Anmeldungen sind
+ausgeschlossen; Admin und SYSTEM erhalten Vollzugriff. Öffnungsfehler,
+Abandonment und fünf Sekunden Wartezeitüberschreitung verhindern die Aktion.
+Die Implementierung verwendet
+[`CreateMutexExW`](https://learn.microsoft.com/en-us/windows/win32/api/synchapi/nf-synchapi-createmutexexw)
+mit expliziten Minimalrechten auch beim Öffnen eines vorhandenen Objekts.
+Der Aktivspielschutz eines direkt gestarteten MSI ist damit noch nicht
+implementiert; er bleibt ein eigenes offenes Gate vor Produktfreigabe.
 
 ### Aufbewahrung gespeicherter Spiele
 

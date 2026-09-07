@@ -187,23 +187,28 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
     private async Task StartPairAndWaitAsync()
     {
         ThrowIfInstallationStopping();
-        ValidateFiles();
         var logRoot = Path.Combine(_environment.Required("NETGRID_DATA_ROOT"), "runtime", "logs");
         Directory.CreateDirectory(logRoot);
         try
         {
-            StartNode(
-                Path.Combine(_programRoot, "app", "server.mjs"),
-                Path.Combine(_programRoot, "app"),
-                Path.Combine(logRoot, "launcher-server.log"),
-                launcherControl: true
-            );
-            StartNode(
-                Path.Combine(_programRoot, "app", "apps", "web", "server.js"),
-                Path.Combine(_programRoot, "app", "apps", "web"),
-                Path.Combine(logRoot, "launcher-web.log"),
-                launcherControl: false
-            );
+            InstallationLaunchFence.Execute(_programRoot, () =>
+            {
+                if (_installationBlocked()) Interlocked.Exchange(ref _installationStopping, 1);
+                ThrowIfInstallationStopping();
+                ValidateFiles();
+                StartNode(
+                    Path.Combine(_programRoot, "app", "server.mjs"),
+                    Path.Combine(_programRoot, "app"),
+                    Path.Combine(logRoot, "launcher-server.log"),
+                    launcherControl: true
+                );
+                StartNode(
+                    Path.Combine(_programRoot, "app", "apps", "web", "server.js"),
+                    Path.Combine(_programRoot, "app", "apps", "web"),
+                    Path.Combine(logRoot, "launcher-web.log"),
+                    launcherControl: false
+                );
+            });
             await WaitForReadyAsync(_server!, _web!);
         }
         catch

@@ -2,6 +2,8 @@ using Microsoft.Win32;
 using Netgrid.Windows;
 using System.Xml.Linq;
 
+if (LaunchFenceTests.TryChild(args)) return;
+
 var checks = 0;
 void Assert(bool condition, string name)
 {
@@ -63,6 +65,7 @@ try
     PreparationLeaseTests.Run(fixture, program, Assert, Reject);
     MsiLeaseTests.Run(fixture, program, Assert, Reject);
     UpdateOwnerTests.Run(fixture, program, Assert, Reject);
+    LaunchFenceTests.Run(fixture, Assert, Reject);
 }
 finally
 {
