@@ -272,15 +272,15 @@ ohne Entwicklungswerkzeuge.
 | Nachweis | Aktuelle belastbare Evidenz | Noch erforderlich |
 | --- | --- | --- |
 | Produktgrenze und Installer-Payload | Builds 8136 und 8145 regulär aus sauberen Quellständen gebaut, jeweils 10.901-Dateien-Audit und Setup-/MSI-Prüfsummen grün; installierte Binärdateien zusätzlich für 8136 gebunden | Für beide Builds erfüllt; keine Versions-/Hash-Umetikettierung |
-| Installation, Upgrade und Repair | Vollständiger 13-Punkte-Offline-Sandboxlauf 8136 → 8145 am 2026-09-07, 10:58–11:30 UTC, einschließlich ProductCode-Repair und geprüftem Cleanup; alle vier Artefakthashes erneut verglichen. Zusätzlicher installierter Sprachwechsel-/Shortcut-/Repairtest 8145 grün | Für dieses Artefaktpaar erfüllt; native funktionale UI-Gates bleiben getrennt |
+| Installation, Upgrade und Repair | Vollständiger 13-Punkte-Sandboxlauf 8145 → 8150 am 2026-09-07 einschließlich ProductCode-Repair und geprüftem Cleanup grün; alle vier Artefakthashes erneut verglichen. Zusätzlicher installierter Sprachwechsel-/Shortcut-/Repairtest 8145 grün | Für 8145 → 8150 erfüllt; native funktionale UI-Gates bleiben getrennt |
 | GitHub-Updateauswahl und Integrität | Aktueller Downloadfix und Stable-/Prerelease-/Tamper-Fixtures grün; native deutsche Offline-Rückmeldung auf 8136 bestätigt; höherer regulärer Kandidat 8145 gebaut und lokal geprüft | Echter zustimmungsbasierter GitHub-Download/Update; GitHub-Übertragung am 7. September freigegeben, Testrelease erst nach Abschluss der übrigen Prüfungen; netzfähige isolierte Testumgebung erforderlich |
-| Updatertransaktion und Rollback | Echter Sandboxlauf 8136/8145 am 2026-09-07 grün: geprüftes Backup, MSI-Upgrade, bewusst beschädigte Testdatenbank, erkannter Healthfehler, Programmrollback auf 8136, Datenmarker und SQLite-Integrität wiederhergestellt, Konfiguration unverändert, Cleanup verifiziert | Transaktionsgate für dieses Artefaktpaar erfüllt; abschließende Benachrichtigung bleibt ein separater Dialogtest |
-| Benutzerbetrieb und Netzwerk | Standardbenutzerbetrieb und ACLs erneut für installierten 8136-Basisstand im aktuellen Rollbacklauf grün. Private-LAN-Test des installierten 8106: Web/Server vom Host erreichbar, Maintenance mit 403 abgewiesen; im öffentlichen Profil beide Ports bei weiterhin gesunden lokalen Diensten blockiert. Testinstallation, Ports und NETGRID-Regeln bereinigt; temporär deaktivierte pauschale Sandbox-Containerfreigabe wiederhergestellt | Netzwerkbeleg für 8106 einschließlich dokumentierter Sandbox-Firewallvorbereitung erfüllt; neue Builds bleiben gesondert gebunden |
+| Updatertransaktion und Rollback | Echter Sandboxlauf 8145/8150 am 2026-09-07 grün: geprüftes Backup, MSI-Upgrade, bewusst beschädigte Testdatenbank, erkannter Healthfehler, Programmrollback auf 8145, Datenmarker und SQLite-Integrität wiederhergestellt, Konfiguration unverändert, Cleanup verifiziert | Transaktionsgate für 8145/8150 erfüllt; abschließende Benachrichtigung bleibt ein separater Dialogtest |
+| Benutzerbetrieb und Netzwerk | Standardbenutzerbetrieb und ACLs für installierten 8145-Basisstand im neuen Rollbacklauf grün. Private-LAN-Test des installierten 8150: Web/Server vom Host erreichbar, Maintenance mit 403 abgewiesen; im öffentlichen Profil beide Ports bei weiterhin gesunden lokalen Diensten blockiert. Testinstallation, Ports und NETGRID-Regeln bereinigt; temporär deaktivierte pauschale Sandbox-Containerfreigabe wiederhergestellt | Netzwerkbeleg für 8150 einschließlich dokumentierter Sandbox-Firewallvorbereitung erfüllt; Standardbenutzerbeleg ausdrücklich auf Basis 8145 gebunden |
 | Nativer Setup-/Fortschrittsworker | 8136 über deutschen Setup-Host installiert, MSI-Client/Server jeweils 0; recordlose und Nullfeld-Progress-Meldungen ursächlich korrigiert; echter direkter MSI-Countertest grün, Datenhinweis im Setup nicht überlagert | Sichtbare Zwischenprozente der kurzen Ausführungsphase noch nicht aufgenommen; Windows-UAC mit alternativem Administrator und weitere native Fehler-/Abbruchpfade bleiben getrennte Prüfungen |
 | Launcher, Browser und Diagnose | 8136: einzelner Launcher, normale Desktop-/Tray-Einstiege zeigen Spielseite nach ausdrücklich freigegebener Reparatur der fehlenden Edge-ProgID im Gast; nativer SaveFileDialog und lokaler redigierter ZIP-Export grün | Gastvorbereitung transparent erhalten; dies ersetzt nicht sämtliche Sprach-/Kontext- und funktionalen Gesamtflows |
 | First Run | Nativer deutscher vorgeschalteter Entscheidungsdialog auf 8136 beobachtet; spätere hashgebundene reine Statusabfrage bestätigt eingerichteten Maintenance-Zugang, kein Agent-Bootstrap/Reset | Unbeobachtete Passwort-/Zurück-Schritte nicht nachträglich als abgenommen ausgeben; Authentifizierungsbedienung durch Nutzer, vorhandene Zugangsdaten erhalten |
-| Sichtbare Flows | 8136: native englische/französische Sprachwahl, Standard-/Custom-Masken und angeklickte Custom-Hilfe lesbar; 8145: installierter Sprachwechsel fr → de → en, Repair, Sprachübernahme aller drei Komponenten und Austausch lokalisierter Shortcutnamen mit sieben Prüfungen grün; Tooltip-Renderings und native Tastatur-Popups vorhanden | Reale 100-/125-/150-Prozent- und Hell-/Dunkel-Kontexte sowie native funktionale Gesamtflows in de/en/fr; Sandbox bietet keine nutzbare Skalierungsseite, Hovereingabe ist im verfügbaren Computer-Use-API nicht vorhanden; diese Nachweise brauchen einen geeigneten Testkontext bzw. Nutzerbedienung |
-| Saubere Windows-11-x64-Maschine | Vollständige 13-Punkte-Offline-MSI-Matrix 8136 → 8145 einschließlich Cleanup grün: Windows 11 Enterprise x64 (26100), ohne Entwicklungswerkzeuge; Standardbenutzer-/Rollback- und installierter Sprachwechseltest zusätzlich grün. Native Frischinstallation 8136 separat bestanden | Artefaktgebundene Nachweise nicht pauschal auf spätere Builds übertragen; finale Abnahme bleibt offen bis alle obigen Ergänzungen vorliegen |
+| Sichtbare Flows | 8150: Sprachauswahl und Setup-Hauptformular in allen 18 Kombinationen de/en/fr × echte 100/125/150 Prozent × heller/dunkler Systemkontext nativ geprüft. 8145: installierter Sprachwechsel fr → de → en, Repair, Sprachübernahme aller drei Komponenten und Austausch lokalisierter Shortcutnamen mit sieben Prüfungen grün; Tooltip-Renderings und native Tastatur-Popups vorhanden | Übrige Komponentendialoge, funktionale Gesamtflows und Hover-/Tastatur-Randfälle bleiben offen; Hovereingabe ist im verfügbaren Computer-Use-API nicht vorhanden und benötigt Nutzerbedienung |
+| Saubere Windows-11-x64-Maschine | Vollständige 13-Punkte-MSI-Matrix 8145 → 8150 einschließlich Cleanup grün: Windows 11 Enterprise x64 (26100), ohne Entwicklungswerkzeuge; Standardbenutzer-/Rollback- und Private-LAN-Test zusätzlich grün. Native Frischinstallation 8136 und installierter Sprachwechsel 8145 separat bestanden | Artefaktgebundene Nachweise nicht pauschal auf spätere Builds übertragen; finale Abnahme bleibt offen bis alle obigen Ergänzungen vorliegen |
 
 Diese offenen Anforderungen werden nicht durch engere grüne Tests ersetzt.
 
@@ -418,7 +418,7 @@ nutzerbediente Authentifizierung/UAC und echter GitHub-Updatepfad bleiben
 separat offen. Auf dem Host wurde nichts installiert und kein NETGRID-
 Runtimeprozess gestartet; bestehende Zugangsdaten blieben unangetastet.
 
-### Erneute Sandbox-Abnahme 8145 → 8150: MSI-Matrix grün, Zusatztests laufen
+### Erneute Sandbox-Abnahme 8145 → 8150: MSI, Rollback und Private LAN grün
 
 Am 7. September um 14:16:59 UTC wurde nach verifiziert leerer Sandboxliste
 der Gast `8d4881be-5836-42a6-b4b5-48ebea3aa95f` gestartet. Der bestehende
@@ -444,17 +444,53 @@ erneut gegen die tatsächlichen Hostartefakte und ihre Releasemetadaten
 verglichen; sie stimmen vollständig überein. Der äußere Abschlusszeitpunkt
 liegt nach der Bereinigung, der innere Installerzeitpunkt davor.
 
-Der gesamte Lauf ist **noch nicht abgenommen**: Der separate
-Standardbenutzer-/Updater-Rollbacktest wurde um 14:49:31 UTC gestartet;
-dessen Baselineinstallation ist nachweislich aktiv. Für ihn fehlen noch die
-terminalen `rollback-result.json` und `suite-result.json` einschließlich
-Cleanup. Auch der anschließende Private-LAN-Test ist noch nicht ausgeführt.
-Ein zusätzlicher Prozess-Snapshot bestätigt
-regelmäßig die laufenden Gastprozesse, ohne deren Kommandozeilen oder
-Konfigurationsgeheimnisse auszugeben. Der bereits laufende Test wird nicht
-aufgrund eines kurzen Beobachtungsfensters neu gestartet. Ein erfolgreicher
-MSI-/Rollbacklauf wird nicht als nativer Dialog-, Authentifizierungs- oder
-GitHub-Downloadnachweis umgedeutet. Eine reine GitHub-Abfrage am selben Tag
+Der separate Standardbenutzer-/Updater-Rollbacktest ist von 14:49:31 bis
+15:02:17 UTC vollständig einschließlich Cleanup grün abgeschlossen.
+`result/standard-user-result.json` bestätigt fünf Prüfungen ohne Erhöhung
+auf der installierten Basis 8145: Programm und Konfiguration sind nicht
+beschreibbar, Laufzeitdaten dagegen schon; Launcher-Health und SQLite-Anlage
+funktionieren ohne Administratorrechte. `result/rollback-result.json`
+bestätigt das echte Upgrade auf 8150 mit anschließend absichtlich beschädigter
+Testdatenbank, erkanntem Healthfehler und Programmrollback auf 8145.
+Datenbankmarker und SQLite-Integrität wurden wiederhergestellt, die
+Konfiguration blieb unverändert. Alle sieben Transaktionsprüfungen und
+`cleanupVerified` sind grün. `result/suite-result.json` beendet die gesamte
+MSI-/Rollbackstrecke erfolgreich um 15:02:17 UTC. Die vier Artefakthashes
+sowie Updater- und Fault-Fixture-Hash wurden unabhängig erneut gegen die
+tatsächlichen Eingangsdateien geprüft. Der abschließende native
+Benachrichtigungsdialog ist ausdrücklich nicht Bestandteil dieses Nachweises.
+
+Der anschließende Netzwerk-Nachweis installiert genau den hashgebundenen
+8150-Stand im selben Gast mit eigenen zufälligen Programm-/Datenpfaden und
+den Testports 32141/32142. Der isolierte Testhelfer startet die installierten
+Node-Programme ohne Tray oder Browser. Nur im Wegwerfgast wird die exakt
+identifizierte pauschale Container-Inbound-Freigabe vorübergehend deaktiviert,
+damit sie die Produktregeln nicht überdeckt; die Host-Firewall bleibt
+unverändert. Die beiden NETGRID-Regeln sind an die installierte Node-Datei,
+ihren jeweiligen Port und ausschließlich das Profil „Privat“ gebunden.
+
+`result/lan-host-private.json` bestätigt um 15:07:08 UTC Web und Server vom
+Host mit HTTP 200; Maintenance wird mit HTTP 403 und
+`maintenance_unavailable` abgewiesen. Nach Wechsel des Gastprofils auf
+„Öffentlich“ bestätigt `result/lan-host-public.json` um 15:07:50 UTC beide
+Remoteports als unerreichbar. Die unmittelbar vorher im Gast geprüften
+Loopbackdienste bleiben jeweils HTTP 200; die lokale noch nicht eingerichtete
+Maintenance meldet erwartungsgemäß HTTP 503. Beide Hostproben binden die
+Gastadresse an die Sandbox-ID und dieselben erneut geprüften 8150-Hashes.
+
+Die LAN-Bereinigung endet um 15:08:59 UTC mit Exitcode 0 und
+`result/lan-state.json: state=cleaned, sandboxFirewallRestored=true`.
+Eigene Laufzeitprozesse, Testprogramm/-daten, Produktregistrierung,
+NETGRID-Firewallregeln und Testlistener sind entfernt; die ursprüngliche
+Containerfreigabe ist verifiziert wieder eingeschaltet. Die Sandbox bleibt
+für die gesonderten nativen Prüfungen geöffnet; es läuft kein MSI-/LAN-Test
+mehr. Main-Betrieb und vorhandene Maintenance-Zugangsdaten sind unberührt.
+
+Damit sind diese automatisierten, artefaktgebundenen Zusatzgates erfüllt;
+die verbleibende native UI- und Releaseabnahme bleibt separat offen.
+Ein erfolgreicher MSI-/Rollback-/Netzwerklauf wird nicht als nativer Dialog-,
+Authentifizierungs- oder GitHub-Downloadnachweis umgedeutet.
+Eine reine GitHub-Abfrage am selben Tag
 bestätigt das öffentliche Repository `LevelX2/NETGRID`, aber noch keine
 Releases (`gh release list`: leere Liste). Der echte Release-Downloadtest
 kann daher nicht gegen einen bereits vorhandenen Kandidaten erfolgen;
