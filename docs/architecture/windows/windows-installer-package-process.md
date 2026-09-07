@@ -932,7 +932,8 @@ Diagnose geänderte Kopie unter
 `output/framework-condition-probe-c93f67905b994b1a8115d2cce94dd229/PROBE-NOT-FOR-INSTALLATION.msi`
 besteht alle fünf Fälle; die Quellautorisierung besteht mit 48 Lifecyclechecks.
 Die neue Prüfung ist vor dem Payload-Audit in der Buildstrecke gebunden.
-Der korrigierte Quellstand benötigt noch einen eigenen, neuen Kandidaten.
+Der korrigierte Quellstand wurde anschließend als eigener Kandidat 8169
+gebaut; dessen konkreter Nachweis folgt unten.
 
 Die bestehende Sandbox `8d4881be-5836-42a6-b4b5-48ebea3aa95f` wurde um
 19:30:52 UTC lesend geprüft: kein installiertes NETGRID-Programm, keine
@@ -944,6 +945,31 @@ Explorer in dieser Sandbox geöffnet; weder Installation noch UAC- oder
 Passworteingabe erfolgten. Die vorbereiteten 8168-Staging-/Fortschrittshelfer
 wurden nicht ausgeführt und dürfen nicht versehentlich für den Nachfolger
 verwendet werden.
+
+#### Korrigierter Kandidat 8169 bereit zur nativen Abnahme
+
+`1.0.8169` wurde aus dem sauberen Commit
+`88b381b82a351b1990dcf6e9a7aeb2f370e36f49` unter
+`output/windows-installer-lifecycle-8169` vollständig gebaut (Exitcode 0,
+`sourceDirty=false`). Die fünf Frameworkfälle bestehen am tatsächlichen
+MSI, ebenso die MSI-Sequenz-/Typprüfung, 48 Lifecyclechecks, die übrigen
+Komponentenprüfungen und Smokes sowie der vollständige Audit von 10.902
+Payload-Dateien. Setup-SHA-256:
+`284eee31524946ecaaabba534ae0be62c54bfb8271677f8c69c59f6ea54d9c44`;
+MSI-SHA-256:
+`3266eac0e84311fcca58eb0279e3125fdea42af22d0ff325e35ddc8cbedaf8a1`.
+
+Am 7. September um 20:00:55 UTC wurden ausschließlich Setup und Metadaten
+hashgeprüft nach `C:\NETGRID-Test\lifecycle-8169` in der bestehenden Sandbox
+kopiert. `result/native-8169-staged.json` bindet Pfad und Hash. Die anschließende
+rein lesende Prüfung `result/native-8169-preinstall.json` bestätigt erneut:
+kein installiertes Programm, keine Produktprozesse oder Gastlistener auf
+3100/8787, Konfiguration und Maintenance-Credentials unverändert,
+Framework-Releasewert 533320. Das Setup wurde noch nicht gestartet oder
+installiert. Die Bestätigung zum verworfenen 8168-Versuch wird nicht auf
+den neuen Kandidaten übertragen; die unmittelbare Freigabe für 8169 ist
+noch einzuholen. Native Deinstallation ohne übrig gebliebene Prozesse und
+die übrigen WIN-I08-Gates bleiben offen. Kein Main-Merge oder Release.
 
 ### Aktueller Updatekandidat und Teststart vom 7. September 2026
 
