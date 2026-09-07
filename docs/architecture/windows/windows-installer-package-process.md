@@ -671,7 +671,7 @@ Der erneute Abgleich mit dem Produktvertrag bewahrt den vollständigen Scope:
   Windows-Kontext. Die abgeschlossene 18er-Matrix betrifft nur Sprachwahl
   und Setup-Hauptformular.
 - Native Validierungs-, Abbruch-, Reparatur-/Deinstallationsdialoge
-  (außer dem unten gebundenen deutschen Öffnen-/Abbrechen-Pfad),
+  (außer den unten gebundenen de/en/fr-Öffnen-/Abbrechen-Pfaden),
   die abschließende Updater-Rollbackbenachrichtigung und die noch fehlenden
   Sprach-/Kontextvarianten bleiben anhand der Runbook-Checkliste zu prüfen.
   Erfolgreiche MSI-/Komponententests ersetzen diese sichtbaren Flows nicht.
@@ -710,6 +710,25 @@ HTTP 200 für Server und Spielseite. Der Prüfhelfer änderte keine Zugangsdaten
 Damit ist nur dieser deutsche Ansichts-/Abbruchpfad bestätigt; tatsächliche
 native Entfernung, zusätzliche Löschbestätigung und en/fr-Varianten bleiben
 offen. Keine Deinstallation oder Datenlöschung wurde ausgelöst.
+
+Die anschließenden nativen en/fr-Läufe desselben Artefakts schließen die
+Sprachvarianten dieses Ansichts-/Abbruchpfads: Englisch zeigt alle Texte und
+Schaltflächen vollständig und schließt per Escape. Französisch zeigt auch
+die lange Überschrift und den zweizeiligen Erklärungstext vollständig;
+Sprachwahl per Tastatur, Weiter per Enter sowie sichtbarer Tab-Fokus auf
+„Désinstaller“ und anschließend „Annuler“ wurden geprüft. Enter auf dem
+beobachteten Fokus „Annuler“ schließt nur das Fenster. Die Löschoption blieb
+in beiden Dialogen nicht ausgewählt; kein destruktiver Knopf wurde betätigt.
+
+Beide Setupaufrufe endeten mit Exitcode 0. Die vier Ergebnisdateien
+`result/native-8150-uninstall-cancel-{en,fr}-{before,after}.json` bestätigen
+um 17:40:31 beziehungsweise 17:42:26 UTC unveränderte Prozessidentitäten,
+bytegleiche Konfiguration, eingerichtete Maintenance und beide HTTP-200-
+Antworten. Die aus dem CLI gestartete Sprachwahl lag zunächst hinter dem
+Browser und wurde mit Alt+Tab sichtbar gemacht, ohne den Setupaufruf neu
+zu starten. Dieser Nachweis gilt für den vorhandenen hellen Gastkontext;
+andere DPI-/Kontrastkontexte und die tatsächlichen Lösch-/Uninstall-Flows
+werden dadurch nicht als bestanden markiert.
 
 ### Aktueller Updatekandidat und Teststart vom 7. September 2026
 
