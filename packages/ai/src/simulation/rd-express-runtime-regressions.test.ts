@@ -11,8 +11,6 @@ import {
 } from "@netgrid/decks";
 import { describe, expect, it } from "vitest";
 import type { AiSimulationDecisionCheckpointCapture } from "./ai-simulation-config";
-import { chooseAiAction } from "../index";
-import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 
 import { simulateAiGame } from "../simulation";
 
@@ -302,16 +300,6 @@ describe("R&D Express selfplay runtime regressions", () => {
       maxActions: 266,
       captures,
     });
-    const failingCapture = captures.find(
-      (capture) => capture.state.stateVersion === 265,
-    );
-    resetResidentPlanPortfolioMemory();
-    const failingDecision = failingCapture
-      ? chooseAiAction(failingCapture.input, {
-          persistTacticalPlanMemory: false,
-        })
-      : undefined;
-
     expect(
       summary.errors,
       JSON.stringify(
@@ -319,7 +307,6 @@ describe("R&D Express selfplay runtime regressions", () => {
           captures: captures
             .filter((capture) => capture.state.stateVersion >= 263)
             .map(captureDiagnostic),
-          failingDecision,
         },
         undefined,
         2,
@@ -328,6 +315,39 @@ describe("R&D Express selfplay runtime regressions", () => {
     expect(summary.runtimeFailures).toEqual([]);
     expect(summary.metrics.illegalActions).toBe(0);
     expect(summary.replayOk).toBe(true);
+    // Assert the live transition, with its original resident continuation.
+    // A fixed numeric checkpoint may now be a different, origin-bound window.
+    const actionsByState = new Map(
+      summary.actionSequence.map((action) => [
+        action.stateVersionBefore,
+        action,
+      ]),
+    );
+    const transitions = captures.flatMap((capture, index) => {
+      const run = capture.input.playerView.run;
+      const next = captures[index + 1];
+      if (
+        run?.attackedServerId !== "rd" ||
+        actionsByState.get(capture.state.stateVersion)?.actionType !==
+          "decline_trash" ||
+        next?.input.playerView.run?.runId !== run.runId
+      )
+        return [];
+      const access = next.input.legalActions.find(
+        (action) => action.type === "access_card",
+      );
+      return access ? [{ capture, next, access }] : [];
+    });
+    expect(transitions.length).toBeGreaterThan(0);
+    for (const { capture, next, access } of transitions) {
+      expect(
+        actionsByState.get(next.state.stateVersion)?.selectedActionId,
+      ).toBe(access.actionId);
+      expect(
+        capture.input.playerView.run?.accessedCard?.instanceId,
+      ).toBeDefined();
+      expect(next.input.playerView.run?.accessedCard).toBeUndefined();
+    }
   }, 30_000);
 
   it("finishes the former Manhunt action-limit seed", () => {

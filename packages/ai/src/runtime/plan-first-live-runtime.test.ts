@@ -8759,6 +8759,8 @@ describe("authoritative plan-first live runtime", () => {
     ]);
     input.playerView.own.clicks = 3;
     input.playerView.own.credits = 10;
+    // This exercises ordinary server reservation, before the deckout window.
+    input.playerView.own.stackOrRdCount = 20;
     input.playerView.opponent.agendaPoints = 2;
     input.playerView.own.gripOrHq = [
       pacificaCard("pacifica"),
@@ -8880,6 +8882,7 @@ describe("authoritative plan-first live runtime", () => {
     ]);
     input.playerView.own.clicks = 3;
     input.playerView.own.credits = 10;
+    input.playerView.own.stackOrRdCount = 20;
     input.playerView.opponent.agendaPoints = 2;
     input.playerView.own.gripOrHq = [
       visibleCard("bbs-card", "corp", "asset", {
