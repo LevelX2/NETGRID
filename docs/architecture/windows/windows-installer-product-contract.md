@@ -3,7 +3,8 @@
 Stand: 2026-09-04  
 Status: beschlossenes Zielbild; Anwendungsvoraussetzungen, Installerbasis,
 Datenvertrag, Launcher, Setupführung, First Run, Updater, Lokalisierung,
-Branding und Diagnose umgesetzt
+Branding und Diagnose als Komponenten umgesetzt; sichere Updateanbindung
+und native Abnahme noch offen
 
 ## Zweck und Grenze
 

@@ -1017,6 +1017,25 @@ darauf zu warten. Der bestehende erzwungene Serverstopp bei fehlgeschlagenem
 stdin-Shutdown belegt weiterhin keinen sauberen Storage-Flush; die atomare
 Updateübergabe bleibt offen. Keine Installation oder Credentialänderung.
 
+Der Vorbereitungsklient ist jetzt an `LauncherRuntime` gebunden: Ein
+`PreparedUpdate` hält die bereits vorhandene Lifecycle-Sperre durch POST,
+quittierte Rücknahme oder strikten Stopp. Ein unklarer Abbruch setzt ein
+terminales Startverbot und stoppt über denselben Owner; es entsteht keine
+zweite Prozess- oder Recoveryautorität. Der Update-Stopp verlangt einen
+noch laufenden Server, erfolgreichen stdin-Shutdown und Exitcode 0 sowie
+das nachgewiesene Ende beider eigenen Prozesse. Ein erzwungenes Beenden,
+ein vorheriges Prozessende oder fehlgeschlagene Quittierungen ergeben keine
+Updatefreigabe. Normaler Betrieb behält seine bestehende Abschaltpolicy.
+
+39 neue Runtime-Vorbereitungschecks bestehen mit verzögerten Antworten,
+konkurrierendem Start/Abschluss, aktivem Spiel, fehlerhaftem POST/DELETE,
+erfolgreichem Stopp, Server-Fehlerexit und unbrauchbarer stdin-Pipe. Tests
+verwenden nur synthetische HTTP-Antworten und eigene inerte Kindprozesse.
+Der gesamte Launcher-Komponententest bleibt grün; sein geänderter Build
+hat null Warnungen und Fehler. Die echte Tray-/Updater-Anbindung sowie
+MSI-Teiltransaktionen und die Healthfreigabe bleiben weiterhin offen.
+Kandidat 8169 wurde dabei weder ersetzt noch installiert.
+
 Vor der Freigabe bleiben die Prozess-Ende-Raceprüfung,
 die direkten MSI-Updatepfade hinsichtlich
 laufender Spiele, verständliche lokalisierte Fehler, die vollständige

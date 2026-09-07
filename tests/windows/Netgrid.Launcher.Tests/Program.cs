@@ -3,6 +3,19 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 
+if (args is ["--update-stop-child-fails"])
+{
+    Console.WriteLine("READY");
+    await Console.In.ReadLineAsync();
+    Environment.ExitCode = 7;
+    return;
+}
+if (args is ["--update-stop-child-ignore"])
+{
+    Console.WriteLine("READY");
+    await Task.Delay(Timeout.Infinite);
+    return;
+}
 if (args is ["--installation-stop-child"])
 {
     Console.WriteLine("READY");
@@ -14,6 +27,7 @@ var assembly = Assembly.Load("NETGRID");
 if (args is ["--check-update-preparation"])
 {
     Console.WriteLine($"LAUNCHER_UPDATE_PREPARATION_TESTS_OK checks={await UpdatePreparationTests.Run(assembly)}");
+    Console.WriteLine($"LAUNCHER_RUNTIME_PREPARATION_TESTS_OK checks={await RuntimePreparationTests.Run(assembly)}");
     return;
 }
 if (args is ["--check-installation-stop"])
@@ -25,6 +39,7 @@ if (args is ["--check-installation-stop"])
 Console.WriteLine($"LAUNCHER_INSTALLATION_STOP_TESTS_OK checks={await InstallationStopTests.Run(assembly)}");
 Console.WriteLine($"LAUNCHER_STOP_OWNERSHIP_TESTS_OK checks={await StopOwnershipTests.Run(assembly)}");
 Console.WriteLine($"LAUNCHER_UPDATE_PREPARATION_TESTS_OK checks={await UpdatePreparationTests.Run(assembly)}");
+Console.WriteLine($"LAUNCHER_RUNTIME_PREPARATION_TESTS_OK checks={await RuntimePreparationTests.Run(assembly)}");
 Assert(assembly.EntryPoint?.IsDefined(typeof(STAThreadAttribute), inherit: false) == true,
     "actual_windows_entrypoint_has_sta_for_native_file_dialogs");
 Assert(assembly.EntryPoint!.Name == "Main" && assembly.EntryPoint.ReturnType == typeof(int),

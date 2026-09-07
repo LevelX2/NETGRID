@@ -113,8 +113,33 @@ weder Weiterleitungen noch einem Proxy. Die gesamte Antwort ist auf 35
 Sekunden und 4.096 Bytes begrenzt. Erfolg verlangt exakt die vereinbarten
 JSON-Felder, `ok=true`, eine nichtnegative ganzzahlige Matchanzahl und eine
 dazu konsistente Freigabe. Doppelte Felder, fehlende Werte und zusätzliche
-Felder werden abgewiesen. `Dispose` ersetzt ausdrücklich keine quittierte
-Rücknahme. Dieser Client ist noch nicht im Tray-Updatepfad aufgerufen.
+Felder werden abgewiesen. `Dispose` des HTTP-Clients ersetzt ausdrücklich
+keine quittierte Rücknahme. Der Client ist inzwischen in den Runtime-Owner
+integriert, aber noch nicht im Tray-Updatepfad aufgerufen.
+
+`LauncherRuntime.PrepareUpdateAsync` hält die bestehende Lifecycle-Sperre
+von vor dem POST bis zur quittierten Rücknahme oder zum geprüften Stopp.
+Sie verlangt die eigene laufende Prozessgruppe; Start, Recovery und
+gewöhnlicher Stopp können währenddessen nicht dazwischenlaufen. Ein
+ungültiges oder verlorenes Vorbereitungsergebnis wird mit derselben Nonce
+explizit zurückgenommen. Erst nach gültiger DELETE-Quittierung wird normaler
+Betrieb wieder zugelassen. Scheitert die Quittierung, wird die Runtime über
+denselben Owner terminal gestoppt; ein zusätzlich scheiternder Prozessstopp
+bleibt als strukturierter Fehler erhalten. Die Sperre wird dann gelöst,
+ohne das terminale Startverbot zurückzunehmen.
+
+Das zurückgegebene `PreparedUpdate` ist ein explizit abzuschließender Scope.
+Sein `DisposeAsync` führt gegebenenfalls die quittierte Rücknahme aus und
+kann daher scheitern. Konkurrierende Abschlüsse sind ungültig, wiederholtes
+Dispose eines abgeschlossenen Scopes ist unschädlich. Nur eine erfolgreiche
+Vorbereitung erlaubt `StopAsync`: Dieser setzt das terminale Startverbot,
+verlangt für den eigenen Server einen erfolgreichen stdin-Shutdown mit
+Exitcode 0 und wartet auf beide eigenen Prozessenden. Ein schon zuvor
+beendeter Server, Schreibfehler, Timeout oder Fehlerexit darf nicht durch
+Kill in einen erfolgreichen Update-Stopp umgedeutet werden. `Stopped=true`
+wird ausschließlich nach vollständigem Erfolg gesetzt. Dies berechtigt
+für sich allein noch nicht zum Backup: Der künftige Aufrufer muss zusätzlich
+die updateweite Installersperre und die gebundene Updater-Übergabe halten.
 
 ### Offene Übergabe- und Stoppreihenfolge
 
@@ -174,7 +199,10 @@ Die bestehende begrenzte Abschaltpolicy kann den eigenen Server bei einem
 fehlgeschlagenen stdin-Shutdown weiterhin zwangsweise beenden. Der neue
 Prozess-Ende-Nachweis allein ist deshalb ausdrücklich kein Nachweis eines
 erfolgreichen Storage-Flushs oder eines sicheren Backups. Die vollständige
-Updateübergabe muss diese Bedingungen zusätzlich prüfen. Die neuen
+Updateübergabe muss diese Bedingungen zusätzlich prüfen. Ihr vorbereiteter
+Runtime-Scope verwendet deshalb den oben beschriebenen strikten Stopp;
+der normale Beenden-/Recoverypfad behält seine bestehende Abschaltpolicy.
+Die neuen
 `StopOwnershipTests` verwenden ausschließlich eigene inert laufende
 Kindprozesse sowie einen absichtlich ungebundenen Testhandle und öffnen
 weder Produktdaten noch Listener.

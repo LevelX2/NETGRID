@@ -323,11 +323,13 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
         }
     }
 
-    private async Task StopProcessesAsync()
+    private async Task StopProcessesAsync(bool requireGracefulServer = false)
     {
         // Each slot remains owned until that exact Process handle has proved
         // exit. Failure in one child must not prevent stopping the other one.
         var failures = new List<Exception>();
+        if (requireGracefulServer && _server is null)
+            failures.Add(new InvalidOperationException("launcher_update_server_missing"));
         await StopOwnedAsync(_server, "server", graceful: true);
         await StopOwnedAsync(_web, "web", graceful: false);
         if (failures.Count > 0)
@@ -341,6 +343,8 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
             if (process is null) return;
             try
             {
+                if (requireGracefulServer && graceful && process.HasExited)
+                    throw new InvalidOperationException("launcher_update_server_already_exited");
                 if (!process.HasExited && graceful)
                 {
                     try
@@ -350,7 +354,7 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
                         await process.StandardInput.FlushAsync(timeout.Token);
                         await process.WaitForExitAsync(timeout.Token);
                     }
-                    catch (Exception error) when (error is IOException or InvalidOperationException or OperationCanceledException)
+                    catch (Exception error) when (!requireGracefulServer && error is IOException or InvalidOperationException or OperationCanceledException)
                     {
                         // Existing bounded shutdown policy: only our retained
                         // child is eligible for forced termination.
@@ -361,6 +365,8 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
                 using var exitTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
                 await process.WaitForExitAsync(exitTimeout.Token);
                 if (!process.HasExited) throw new InvalidOperationException("launcher_child_exit_unverified");
+                if (requireGracefulServer && graceful && process.ExitCode != 0)
+                    throw new InvalidOperationException("launcher_update_server_shutdown_failed");
                 if (role == "server") _server = null;
                 else _web = null;
                 process.Dispose();
