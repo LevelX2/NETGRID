@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import checkpointJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-403-run-bank-funding-d188.json";
 import paymentJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-403-run-bank-payment-d186.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
+import { buildAiDecisionInputDto } from "../../input-dto";
 import {
   assessKnownRezzedIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,
@@ -21,6 +22,28 @@ function checkpoint() {
 }
 
 describe("meta 403 installed payment source funds the remaining run", () => {
+  it("preserves only owner-visible installed payment abilities through the live DTO", () => {
+    const { input } = checkpoint();
+    const bank = input.playerView.own.rig!.find(
+      (card) => card.runnerPaymentSupportAbilities?.length,
+    )!;
+    input.playerView.opponent.rig = [structuredClone(bank)];
+    const dto = buildAiDecisionInputDto(input);
+    expect(
+      dto.playerView.own.rig!.find(
+        (card) => card.instanceId === bank.instanceId,
+      )?.runnerPaymentSupportAbilities,
+    ).toEqual(bank.runnerPaymentSupportAbilities);
+    expect(
+      dto.playerView.opponent.rig![0]!.runnerPaymentSupportAbilities,
+    ).toBeUndefined();
+    bank.known = false;
+    expect(
+      buildAiDecisionInputDto(input).playerView.own.rig!.find(
+        (card) => card.instanceId === bank.instanceId,
+      )?.runnerPaymentSupportAbilities,
+    ).toBeUndefined();
+  });
   it.each([2, 5])(
     "retains activation liquidity in the current bound payment window: %i",
     (credits) => {
@@ -61,6 +84,10 @@ describe("meta 403 installed payment source funds the remaining run", () => {
     "retains the exact remote run only with its available bank: %s",
     (withBank) => {
       const capture = checkpoint();
+      capture.input = {
+        ...capture.input,
+        ...buildAiDecisionInputDto(capture.input),
+      };
       if (!withBank)
         capture.input.playerView.own.rig =
           capture.input.playerView.own.rig!.filter(

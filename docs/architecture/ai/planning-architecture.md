@@ -633,6 +633,10 @@ eigene Kartensemantik und Deckfähigkeiten
 
 Die KI-Input-Projektion erhält die von der Engine gebundene
 Programminstallations-Zahlungsaufteilung und den optionalen Programmtrash.
+Sie erhält außerdem die `runnerPaymentSupportAbilities` bekannter Karten im
+eigenen Runner-Rig. Diese privaten Finanzierungsfakten werden feldweise durch
+die Live-DTO-Grenze getragen; gegnerische und unbekannte Karten erhalten sie
+nicht. Finanzierungsregressionen müssen diesen produktiven DTO-Pfad abdecken.
 Die Action-Semantik prüft Quellen, Beträge und Gesamtsumme, trennt liquide
 `creditCost` von `hostedCreditCost` und weist unvollständige oder widersprüchliche
 Aufteilungen mit `invalid_runner_install_payment` beim Owner

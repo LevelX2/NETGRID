@@ -724,7 +724,15 @@ function sanitizePlayerView(
       stackOrRdCount: view.own.stackOrRdCount,
       heapOrArchives: view.own.heapOrArchives.map(sanitizeVisibleCard),
       scoreArea: view.own.scoreArea.map(sanitizeVisibleCard),
-      ...(view.own.rig ? { rig: view.own.rig.map(sanitizeVisibleCard) } : {}),
+      ...(view.own.rig
+        ? {
+            rig: view.own.rig.map((card) =>
+              sanitizeVisibleCardWithOptions(card, {
+                allowRunnerPaymentSupport: view.side === "runner",
+              }),
+            ),
+          }
+        : {}),
       ...(view.own.memoryUsed !== undefined
         ? { memoryUsed: view.own.memoryUsed }
         : {}),
@@ -1678,6 +1686,7 @@ function sanitizeVisibleCard(card: VisibleCard): VisibleCard {
 function sanitizeVisibleCardWithOptions(
   card: VisibleCard,
   options: {
+    allowRunnerPaymentSupport?: boolean;
     allowCorpRezCostQuote?: boolean;
     allowCorpPostRezRunQuote?: boolean;
     expectedCorpRezServerId?: PlayerView["servers"][number]["id"];
@@ -1898,6 +1907,23 @@ function sanitizeVisibleCardWithOptions(
     ...(card.concealed !== undefined ? { concealed: card.concealed } : {}),
     ...(card.hiddenRunnerResource !== undefined
       ? { hiddenRunnerResource: card.hiddenRunnerResource }
+      : {}),
+    ...(options.allowRunnerPaymentSupport &&
+    card.known &&
+    card.runnerPaymentSupportAbilities
+      ? {
+          runnerPaymentSupportAbilities: card.runnerPaymentSupportAbilities.map(
+            (ability) => ({
+              sourceAbilityId: ability.sourceAbilityId,
+              capabilityKey: ability.capabilityKey,
+              timing: ability.timing,
+              label: ability.label,
+              creditCost: ability.creditCost,
+              gainCredits: ability.gainCredits,
+              trashesSource: ability.trashesSource,
+            }),
+          ),
+        }
       : {}),
     ...(card.hostedOn !== undefined ? { hostedOn: card.hostedOn } : {}),
     ...(card.owner !== undefined ? { owner: card.owner } : {}),
