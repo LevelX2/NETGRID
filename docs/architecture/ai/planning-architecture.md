@@ -3712,6 +3712,13 @@ Planverträge; sie werden nicht zu einem pauschalen numerischen
 ist starke HQ-Evidence, aber kein absolutes Gebot, ungeachtet der aktuellen
 Runnerlinie sofort HQ-ICE zu installieren.
 
+Das residuale Corp-Deckinventar folgt dem sichtbaren Kartenbesitzer, nicht
+dem Controller einer Zone: Runner-eigene Bonuspunktkarten im Runner-Scorebereich
+werden nicht vom Corp-Snapshot abgezogen. Corp-eigene Karten im öffentlichen
+Runner-Rig oder Runner-Scorebereich werden dagegen genau einmal berücksichtigt.
+Unbekannte Karten, doppelte Instanzen und eine nicht aufgehende R&D-Restmenge
+bleiben Gründe für eine unbekannte Inventarbewertung.
+
 Zeigt die side-sichere Runhistorie eine belastbare Konzentration auf R&D und
 liegen keine terminale HQ-Gefahr, kein höherklassiger Score-Parent und keine
 andere harte HQ-Evidence vor, darf `corp.defend_servers` HQ bewusst ohne
