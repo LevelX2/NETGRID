@@ -273,7 +273,7 @@ ohne Entwicklungswerkzeuge.
 | --- | --- | --- |
 | Produktgrenze und Installer-Payload | Build 8136 aus sauberem Commit `63c3e59a9`, 10.901-Dateien-Audit, SHA-256-Abgleich von Setup/MSI und den vier installierten Binärdateien grün | Für 8136 erfüllt; neues Updateartefakt wieder regulär bauen und prüfen, keine Versions-/Hash-Umetikettierung |
 | Installation, Upgrade und Repair | Vollständiger 13-Punkte-Offline-Sandboxlauf 8106 → 8109 am 2026-09-05, 22:06–22:38 Uhr, einschließlich ProductCode-Repair und geprüftem Cleanup; alle vier Artefakthashes erneut verglichen | Für dieses Artefaktpaar erfüllt; folgende Sprach-/Shortcutänderungen sowie funktionale UI-Gates bleiben getrennt |
-| GitHub-Updateauswahl und Integrität | Aktueller Downloadfix und Stable-/Prerelease-/Tamper-Fixtures grün; native deutsche Offline-Rückmeldung auf 8136 bestätigt | Echter zustimmungsbasierter GitHub-Download/Update; Testveröffentlichung freigegeben, Ausnahme von „Kein Push“ für korrekt quellgebundenen Branch/Tag noch unbeantwortet; höheres reguläres Updateartefakt und netzfähige isolierte Testumgebung erforderlich |
+| GitHub-Updateauswahl und Integrität | Aktueller Downloadfix und Stable-/Prerelease-/Tamper-Fixtures grün; native deutsche Offline-Rückmeldung auf 8136 bestätigt | Echter zustimmungsbasierter GitHub-Download/Update; GitHub-Übertragung am 7. September freigegeben, Testrelease erst nach Abschluss der übrigen Prüfungen; höheres reguläres Updateartefakt und netzfähige isolierte Testumgebung erforderlich |
 | Updatertransaktion und Rollback | Neuer echter Sandboxlauf 8105/8106 am 2026-09-05 grün: geprüftes Backup, MSI-Upgrade, bewusst beschädigte Testdatenbank, erkannter Healthfehler, Programmrollback auf 8105, Datenmarker und SQLite-Integrität wiederhergestellt, Konfiguration unverändert, Cleanup verifiziert | Transaktionsgate für dieses Artefaktpaar erfüllt; abschließende Benachrichtigung bleibt ein separater Dialogtest |
 | Benutzerbetrieb und Netzwerk | Standardbenutzerbetrieb und ACLs grün. Private-LAN-Test des installierten 8106: Web/Server vom Host erreichbar, Maintenance mit 403 abgewiesen; im öffentlichen Profil beide Ports bei weiterhin gesunden lokalen Diensten blockiert. Testinstallation, Ports und NETGRID-Regeln bereinigt; temporär deaktivierte pauschale Sandbox-Containerfreigabe wiederhergestellt | Für 8106 einschließlich dokumentierter Sandbox-Firewallvorbereitung erfüllt; neue Builds bleiben gesondert gebunden |
 | Nativer Setup-/Fortschrittsworker | 8136 über deutschen Setup-Host installiert, MSI-Client/Server jeweils 0; recordlose und Nullfeld-Progress-Meldungen ursächlich korrigiert; echter direkter MSI-Countertest grün, Datenhinweis im Setup nicht überlagert | Sichtbare Zwischenprozente der kurzen Ausführungsphase noch nicht aufgenommen; Windows-UAC mit alternativem Administrator und weitere native Fehler-/Abbruchpfade bleiben getrennte Prüfungen |
@@ -1045,6 +1045,18 @@ Freigabe für Testbranch-/Tag-Übertragung separat angefragt. Bis zur Antwort
 erfolgt keine solche Übertragung oder Veröffentlichung. Ein Updateziel muss
 zudem regulär mit einer höheren Buildversion als 8136 erzeugt werden; Versions-
 oder Prüfsummenmetadaten vorhandener Artefakte werden dafür nicht umgeschrieben.
+
+Am 7. September hat der Nutzer die GitHub-Übernahme ausdrücklich freigegeben
+und ein Testrelease für einen anderen PC gewünscht, jedoch nur unter der
+Bedingung, dass der übrige Stand fertig geprüft ist. Die zuvor ausstehende
+GitHub-Freigabe ist damit erteilt; die übrigen offenen Abnahmen sind dadurch
+nicht erlassen. Noch keine Veröffentlichung oder Übertragung ist erfolgt.
+Vor dem Testrelease müssen die nicht von GitHub abhängigen Abnahmen geschlossen
+werden. Der echte GitHub-Download-/Update-Nachweis folgt anschließend mit dem
+Testrelease und bleibt Voraussetzung für den vollständigen WIN-I08-Abschluss.
+Ein solcher Testkandidat wird nicht als bereits vollständig zertifiziertes
+Release bezeichnet. Die geplante Probe auf dem anderen PC ersetzt noch keinen
+tatsächlich ausgeführten Nachweis.
 
 Der Private-LAN-Nachweis liegt im Laufordner `793526b6b355460798f2aae4aef5c9be`
 unter `lan-host-private.json`, `lan-host-public.json` und `lan-state.json`.
