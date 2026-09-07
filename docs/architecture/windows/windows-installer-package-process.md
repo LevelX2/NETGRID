@@ -418,7 +418,7 @@ nutzerbediente Authentifizierung/UAC und echter GitHub-Updatepfad bleiben
 separat offen. Auf dem Host wurde nichts installiert und kein NETGRID-
 Runtimeprozess gestartet; bestehende Zugangsdaten blieben unangetastet.
 
-### Laufende erneute Sandbox-Abnahme 8145 → 8150
+### Erneute Sandbox-Abnahme 8145 → 8150: MSI-Matrix grün, Zusatztests laufen
 
 Am 7. September um 14:16:59 UTC wurde nach verifiziert leerer Sandboxliste
 der Gast `8d4881be-5836-42a6-b4b5-48ebea3aa95f` gestartet. Der bestehende
@@ -433,14 +433,32 @@ und alle vier Eingangsartefakthashes.
 
 Führender Laufordner:
 `output/windows-sandbox-e2e/bb8eccf05f4747369da2d3c3806c1f85`.
-Der Lauf ist **noch nicht abgenommen**: Maßgeblich sind erst das terminale
-`result/result.json`, `rollback-result.json` und `suite-result.json`
-einschließlich Cleanup. Ein zusätzlicher Prozess-Snapshot bestätigt
+Die vollständige 13-Punkte-MSI-Matrix ist um 14:49:29 UTC einschließlich
+Cleanup grün abgeschlossen (`result/result.json`). Geprüft sind Defaults,
+Frischinstallation, Custom-Pfade/-Policy, Verknüpfungen, Launcher-Health,
+Backup, Reparatur, fehlgeschlagenes Upgrade mit erhaltener Vorversion,
+Upgrade auf 8150, ProductCode-Reparatur aus dem geschützten Cache,
+eigenständiger Downgrade, Datenerhalt bei normaler Deinstallation und
+ausdrückliche Testdatenlöschung. Alle vier Ergebnis-Hashes wurden danach
+erneut gegen die tatsächlichen Hostartefakte und ihre Releasemetadaten
+verglichen; sie stimmen vollständig überein. Der äußere Abschlusszeitpunkt
+liegt nach der Bereinigung, der innere Installerzeitpunkt davor.
+
+Der gesamte Lauf ist **noch nicht abgenommen**: Der separate
+Standardbenutzer-/Updater-Rollbacktest wurde um 14:49:31 UTC gestartet;
+dessen Baselineinstallation ist nachweislich aktiv. Für ihn fehlen noch die
+terminalen `rollback-result.json` und `suite-result.json` einschließlich
+Cleanup. Auch der anschließende Private-LAN-Test ist noch nicht ausgeführt.
+Ein zusätzlicher Prozess-Snapshot bestätigt
 regelmäßig die laufenden Gastprozesse, ohne deren Kommandozeilen oder
 Konfigurationsgeheimnisse auszugeben. Der bereits laufende Test wird nicht
 aufgrund eines kurzen Beobachtungsfensters neu gestartet. Ein erfolgreicher
 MSI-/Rollbacklauf wird nicht als nativer Dialog-, Authentifizierungs- oder
-GitHub-Downloadnachweis umgedeutet.
+GitHub-Downloadnachweis umgedeutet. Eine reine GitHub-Abfrage am selben Tag
+bestätigt das öffentliche Repository `LevelX2/NETGRID`, aber noch keine
+Releases (`gh release list`: leere Liste). Der echte Release-Downloadtest
+kann daher nicht gegen einen bereits vorhandenen Kandidaten erfolgen;
+es wurde weder veröffentlicht noch gepusht.
 
 ### Aktueller Updatekandidat und Teststart vom 7. September 2026
 
