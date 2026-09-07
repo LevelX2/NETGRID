@@ -1614,7 +1614,11 @@ function bindSelectedPlanActionOrigin(
     selectedAction?.type === "start_run" ||
     ((selectedAction?.type === "play_event" ||
       selectedAction?.type === "activated_card_ability") &&
-      selectedCandidate?.runProjectionSummary?.serverId !== undefined);
+      (selectedAction.payload?.runnerEventRun === true ||
+        selectedAction.payload?.runActionKind === "make_run" ||
+        selectedAction.payload?.cardImplementationEffectKind === "make_run" ||
+        selectedAction.payload?.cardImplementationEffectKind ===
+          "secret_spend_guess_then_targeted_bypass_run"));
   const canOpenRunnerVacuumLinkRewind =
     selectedAction?.type === "continue_run" &&
     selectedAction.payload?.sourceDefinitionId === "onr_v1_275_vacuum-link" &&

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import checkpointJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-403-run-bank-funding-d188.json";
 import paymentJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-403-run-bank-payment-d186.json";
+import originJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-403-run-bank-origin-d26.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import {
@@ -22,6 +23,34 @@ function checkpoint() {
 }
 
 describe("meta 403 installed payment source funds the remaining run", () => {
+  it("preserves the original break across a voluntarily selected run-owner bank action", () => {
+    const capture = structuredClone(originJson) as unknown as ReturnType<
+      typeof checkpoint
+    > & { nextInput: AiDecisionInputWithDeckCapabilities };
+    resetResidentPlanPortfolioMemory();
+    restoreAiRuntimeCheckpoint(
+      capture.input,
+      capture.input.ownDeckSnapshot!.deckSnapshotId,
+      capture.runtime,
+    );
+    const support = chooseAiAction(capture.input);
+    expect(
+      capture.input.legalActions.find(
+        (action) => action.actionId === support.actionId,
+      )?.type,
+    ).toBe("activated_card_ability");
+    const continuation = chooseAiAction(capture.nextInput);
+    expect(continuation.actionId).toBe(
+      capture.nextInput.legalActions[0]!.actionId,
+    );
+    expect(continuation.fallbackUsed).toBe(false);
+    expect(
+      continuation.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+    ).toBe(support.decisionDebug?.planFirstDecision?.rootPlanInstanceId);
+    expect(
+      continuation.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+    ).toBe(support.decisionDebug?.planFirstDecision?.leafExecutorInstanceId);
+  });
   it("preserves only owner-visible installed payment abilities through the live DTO", () => {
     const { input } = checkpoint();
     const bank = input.playerView.own.rig!.find(

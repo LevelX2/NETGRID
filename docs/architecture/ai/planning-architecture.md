@@ -852,6 +852,11 @@ verbraucht sie vor Credits aus dem Pool und reicht nur ihren verbleibenden
 Betrag an die Restpfadquote weiter. Sie zählen nicht als verbleibende liquide
 Reserve. Runstart, Pumpfolge und anschließender Break müssen dadurch dieselbe
 bezahlbare Engine-Folge anerkennen.
+Ein Runstart-Choice-Ursprung entsteht nur aus einer echten Runstart-Aktion
+oder einer entsprechend gebundenen Engine-Runfähigkeit. Ein projizierter
+Serverkontext innerhalb eines laufenden Runs genügt nicht: Eine Bankaktivierung
+oder ein anderer Fenstereffekt darf dadurch keinen neuen Runstart-Ursprung
+erhalten und die anschließende Originalfortsetzung verdrängen.
 
 Ein reiner Austausch „rezzed ICE des letzten erfolgreichen Forts entfernen
 und Tags erhalten“ benötigt vor der Entwicklung die aktuelle
