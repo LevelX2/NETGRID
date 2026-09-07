@@ -327,10 +327,11 @@ describe("R&D Express selfplay runtime regressions", () => {
       const run = capture.input.playerView.run;
       const next = captures[index + 1];
       if (
+        !next ||
         run?.attackedServerId !== "rd" ||
         actionsByState.get(capture.state.stateVersion)?.actionType !==
           "decline_trash" ||
-        next?.input.playerView.run?.runId !== run.runId
+        next.input.playerView.run?.runId !== run.runId
       )
         return [];
       const access = next.input.legalActions.find(

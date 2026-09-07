@@ -184,6 +184,8 @@ export type CorpScoreProjectSignal = {
   };
   terminalScore: boolean;
   preventsTerminalSteal?: boolean;
+  /** Exact installation horizon closes a winning score before unavoidable deckout. */
+  lastDrawScoreSurvival?: boolean;
   feasible: boolean;
   evidenceCode: string;
 };
@@ -1246,7 +1248,12 @@ export function corpScorePriorityClass(
   signal: CorpScoreProjectSignal,
 ): CorpScorePriorityClass {
   if (signal.terminalScore && signal.sameTurnCloseout) return "P1";
-  if (signal.preventsTerminalSteal) return "P2";
+  if (
+    signal.preventsTerminalSteal ||
+    (signal.lastDrawScoreSurvival && signal.terminalScore && signal.feasible)
+  ) {
+    return "P2";
+  }
   if (signal.sameTurnCloseout || signal.deadlinePressure) return "P3";
   return "P4";
 }

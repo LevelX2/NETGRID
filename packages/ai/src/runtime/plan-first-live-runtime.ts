@@ -18095,6 +18095,11 @@ function scoreProjectForCandidate(
         phase: "install_agenda",
         sameTurnCloseout,
         deadlinePressure,
+        ...(lastViableDeckoutMatchpointWindow &&
+        certifiedNearTermScoreHorizon &&
+        feasible
+          ? { lastDrawScoreSurvival: true }
+          : {}),
         ...(protectionNeed ? { protectionNeed } : {}),
         ...(matureRemoteScoreHorizonCertification
           ? {

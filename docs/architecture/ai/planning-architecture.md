@@ -4010,6 +4010,16 @@ mit P3 die geschützte Advance-Fortsetzung mit P4, obwohl letztere den
 früheren Abschluss ermöglicht. Die vorhandenen Feasibility- und
 Prioritätsverträge bleiben die Entscheidungsautorität.
 
+Für die Agenda-Installation im letzten Drawfenster veröffentlicht der
+Score-Owner einen P2-Überlebensnachweis, wenn die konkrete Agenda den Sieg
+erreicht und die aktuelle, an Karte, Server und StateVersion gebundene
+Engine-Horizontquote den Abschluss spätestens im nächsten Corp-Zug bestätigt.
+Eine allgemeine Frist oder bloß genügend verbleibende Agendapunkte reicht
+dafür nicht. So verbraucht eine konkurrierende Rez-Finanzierung nicht die
+für diese letzte Linie zwingend benötigten Klicks. Die folgenden Advance-
+Phasen behalten ihren bestehenden Fristvertrag und werden aus dem neuen
+Zustand erneut bewertet; der Installationsnachweis wird nicht blind vererbt.
+
 Ungewöhnliche Midgame-Utility-, Action-Engine- oder Boardtransformationskarten
 werden zuerst bestehenden Domainplänen als Route oder Admission-geprüfte
 kartenbezogene Instanz zugeordnet. Ein breiter
