@@ -94,8 +94,17 @@ Spielevidence und dem Integrationsstand ab. Die ehemals offenen 18
 Main-Baseline-Erwartungsfehler waren veraltete Testbindungen an historische
 Einzelaktionen, absolute Simulationspositionen und Vollspielstände. Sie sind
 gegen die aktuellen Owner-, Executor-, Capability-, Legalitäts- und
-Replayverträge neu gebunden. Der vollständige AI-Gate-Lauf ist mit drei
-festen Shards und insgesamt 5.064 Tests grün. Für wachsende Kataloge und
+Replayverträge neu gebunden. Der aktuelle Integrationscheckpoint nach der
+Metaserie 403 umfasst 5.181 Tests in drei festen AI-Shards: 5.174 bestanden,
+sieben fehlgeschlagen. Fünf veraltete Erwartungen wurden anschließend ohne
+produktive Änderung an die aktuellen Finanzierungs- und Replayverträge
+gebunden; alle 32 Tests der fünf betroffenen Dateien bestehen. Zwei bekannte
+Erwartungsfehler bleiben offen: SP-082-Scorekontinuität und die
+Proteus-TestSpin-Vollspielsequenz. Ein vollständig grüner Gesamtlauf ist für
+diesen Stand daher nicht belegt. Die finale unveränderte 40-Spiele-Population
+der Metaserie enthält 10.851 Entscheidungen ohne technische Audit-Flags;
+die 707 angewandten Choices sind gegen die LegalActions geprüft.
+Für wachsende Kataloge und
 Verhaltenssimulationen gilt der stabile Testvertrag aus
 `docs/architecture/test-tiers-and-package-boundaries-2026-07-10.md`.
 
