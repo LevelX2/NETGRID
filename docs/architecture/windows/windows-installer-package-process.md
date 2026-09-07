@@ -284,6 +284,48 @@ ohne Entwicklungswerkzeuge.
 
 Diese offenen Anforderungen werden nicht durch engere grüne Tests ersetzt.
 
+### Scroll-Fix: Artefakt- und native Nachprüfung 8148
+
+Am 7. September wurde `1.0.8148` regulär aus dem sauberen Commit
+`c09bd9816243b515d32620c998305c202e9aa50e` nach
+`output/windows-installer-scroll-review` gebaut. Der vollständige Build
+endete mit Exitcode 0: Produktoutput, Setup 1.967 Assertions, First Run 63,
+Launcher-/Updatertests, Runtime-/Launcher-/First-Run-/Updater-Smokes,
+173 Sprachtexte, 27 geometrische Vorschauen und 10.901-Dateien-Payload-Audit
+sind grün. Metadaten bestätigen `sourceDirty: false`; die tatsächlichen
+Artefakte wurden danach erneut gehasht:
+
+- Setup: `c1c7a9c9bcccb5b2dd878e51129b2d52054ad1a4a51aa5ba471c0c1bf3ba0d45`
+- MSI: `14a90d4cf88026b928c1d8d37d694b80310c881f2331bb616c436fc785310669`
+
+Die freigegebene Hostprüfung zeigte ausschließlich den Setup-Host, ohne
+Installation, First Run oder Launcher. Unter echter Windows-Skalierung
+150 Prozent wurden de/en/fr jeweils frisch über die Sprachauswahl geöffnet.
+Alle drei Formulare zeigen am maximalen Scroll-Ende jetzt die vollständigen
+Desktop-/Abschlussoptionen samt Hilfeschaltflächen oberhalb des festen
+Fußbereichs. Die angeklickte deutsche Abschlussstart-Hilfe ist erreichbar,
+mehrzeilig und innerhalb des Bildschirms. Damit ist der konkrete
+Scrollgrenzenfehler von 8145 nativ für 8148 behoben nachgewiesen.
+Frisch geöffnete deutsche Formulare wurden zusätzlich bei echten 125 Prozent
+(einschließlich Custom-Auswahl und aktivierter Felder) sowie 100 Prozent
+geprüft; Abschlussoptionen und Fußbereich waren sichtbar.
+
+Die vollständige visuelle Freigabe bleibt dennoch offen: Bei 150 Prozent
+werden längere ausgewählte Aufbewahrungs-/Spielerprofiltexte im geschlossenen
+Auswahlfeld teilweise abgeschnitten, insbesondere in en/fr. Die
+anfängliche DPI-Skalierung und die tatsächlich benötigte Textbreite sind
+ursächlich zu prüfen; bloß breitere Vorschaubilder sind kein Nachweis.
+Diese Prüfung hat weder sämtliche Kombinationen aus Sprache, DPI und Design
+noch die weiteren funktionalen Installerflows abgenommen. Dunkles Design
+wurde in diesem Lauf nicht erneut aktiviert. Ein GitHub-Testrelease wurde
+nicht erstellt; die gesonderten übrigen WIN-I08-Gates bleiben bestehen.
+
+Die Hostanzeige ist abschließend verifiziert auf 100 Prozent, 1920 × 1200,
+Apps und Windows hell. Nachtmodus blieb eingeschaltet; Bildschirmzuordnung
+und sonstige Einstellungen wurden nicht verändert. Alle eigenen
+8148-Setupfenster sind nachweislich geschlossen. Baseline und strukturierte
+Prüfnotizen: `output/host-display-review-8148`.
+
 ### Aktueller Updatekandidat und Teststart vom 7. September 2026
 
 `1.0.8145` wurde regulär aus dem sauberen Commit
