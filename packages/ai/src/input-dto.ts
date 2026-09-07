@@ -955,6 +955,12 @@ function sanitizePlayerView(
             ...(view.run.prohibitNoisyIcebreakers
               ? { prohibitNoisyIcebreakers: true }
               : {}),
+            ...(view.run.nextEncounterNoBreakSubroutines === true
+              ? { nextEncounterNoBreakSubroutines: true }
+              : {}),
+            ...(view.run.noBreakSubroutinesActive === true
+              ? { noBreakSubroutinesActive: true }
+              : {}),
             ...(view.run.runnerCreditGainOnCorpRez !== undefined
               ? {
                   runnerCreditGainOnCorpRez: view.run.runnerCreditGainOnCorpRez,
@@ -3030,6 +3036,25 @@ function sanitizeVisibleChoiceRequest(
         ownRig,
         servers,
       );
+      if (
+        metadata &&
+        playerViewSide === "corp" &&
+        choice.side === "corp" &&
+        choice.source.startsWith("p3_54.delayed_success:") &&
+        option.metadata
+      ) {
+        const kinds = option.metadata.temporaryEncounterSubroutineTypes;
+        const additional =
+          option.metadata.temporaryEncounterHasAdditionalMechanics;
+        if (
+          Array.isArray(kinds) &&
+          kinds.every((kind) => typeof kind === "string") &&
+          typeof additional === "boolean"
+        ) {
+          metadata.temporaryEncounterSubroutineTypes = [...kinds];
+          metadata.temporaryEncounterHasAdditionalMechanics = additional;
+        }
+      }
       const hqInstallRezOptionQuote = sanitizeCorpOptionalRezChoiceQuote(
         option.hqInstallRezOptionQuote,
         {

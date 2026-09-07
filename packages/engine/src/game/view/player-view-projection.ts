@@ -272,6 +272,12 @@ export function buildPlayerViewProjection(
         ...(state.run.prohibitNoisyIcebreakers
           ? { prohibitNoisyIcebreakers: true }
           : {}),
+        ...(state.run.nextEncounterNoBreakSubroutines
+          ? { nextEncounterNoBreakSubroutines: true }
+          : {}),
+        ...(state.run.noBreakSubroutinesActive
+          ? { noBreakSubroutinesActive: true }
+          : {}),
         ...(state.run.runnerCreditGainOnCorpRez !== undefined
           ? { runnerCreditGainOnCorpRez: state.run.runnerCreditGainOnCorpRez }
           : {}),

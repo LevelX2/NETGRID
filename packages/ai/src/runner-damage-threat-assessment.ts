@@ -139,16 +139,18 @@ export function runnerVisibleLethalIceDamageAssessment(
       ) {
         continue;
       }
-      const affordableBreak = rig.some((breaker) => {
-        const assessment = creditsToBreakVisibleSubroutinesWithBreaker(
-          breaker,
-          { ...ice, strength: quote.effectiveStrength },
-          [subroutine],
-          breaker.strength,
-          quote.breakSubroutineAdditionalCostPerSubroutine ?? 0,
-        );
-        return assessment !== undefined && assessment.cost <= generalCredits;
-      });
+      const affordableBreak =
+        !visibleEncounterBreakingProhibited(input, ice) &&
+        rig.some((breaker) => {
+          const assessment = creditsToBreakVisibleSubroutinesWithBreaker(
+            breaker,
+            { ...ice, strength: quote.effectiveStrength },
+            [subroutine],
+            breaker.strength,
+            quote.breakSubroutineAdditionalCostPerSubroutine ?? 0,
+          );
+          return assessment !== undefined && assessment.cost <= generalCredits;
+        });
       if (affordableBreak) continue;
       const typedPreventionAvailable =
         subroutine.damageType === "net" || subroutine.damageType === "core"
@@ -292,6 +294,34 @@ export function runnerVisibleLethalIceDamageAssessment(
     }
   }
   return handFloorAssessment;
+}
+
+function visibleEncounterBreakingProhibited(
+  input: AiDecisionInput,
+  ice: VisibleCard,
+): boolean {
+  const run = input.playerView.run;
+  if (!run) return false;
+  if (
+    run.noBreakSubroutinesActive === true &&
+    run.encounteredIce?.instanceId === ice.instanceId
+  )
+    return true;
+  // In the movement/approach window the Engine position names the next ICE.
+  // During an encounter it still names the current ICE, so the queued lock
+  // must not be applied there. Nor does an Engine-certified auto-pass consume it.
+  if (
+    run.nextEncounterNoBreakSubroutines !== true ||
+    run.phase === "encounter_ice" ||
+    run.position?.kind !== "ice" ||
+    run.pendingAutoPassIceId === ice.instanceId
+  )
+    return false;
+  return (
+    input.playerView.servers.find(
+      (server) => server.id === run.position!.serverId,
+    )?.ice[run.position.iceIndex]?.instanceId === ice.instanceId
+  );
 }
 
 export function runnerVisibleLethalIceDamageJackOutAssessment(

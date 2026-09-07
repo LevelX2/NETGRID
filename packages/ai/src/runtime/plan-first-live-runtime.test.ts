@@ -29600,7 +29600,14 @@ describe("plan-bound Corp delayed-success continuation", () => {
             id: "ice_banpei",
             label: "Banpei",
             value: "banpei",
-            metadata: { creditCost: 2 },
+            metadata: {
+              creditCost: 2,
+              temporaryEncounterSubroutineTypes: [
+                "trash_installed_program",
+                "end_the_run",
+              ],
+              temporaryEncounterHasAdditionalMechanics: false,
+            },
           },
         ],
         minSelections: 1,

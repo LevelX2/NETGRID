@@ -380,21 +380,14 @@ function isQualitativeEncounterDefenseOnCurrentRun(params: {
   // progress on this run. A complete quote containing only future-encounter
   // effects has no target after the innermost ICE. Keep mixed immediate
   // effects and Engine-quoted paid encounter defenses independently useful.
-  const futureEncounterOnlyTypes = new Set([
-    "set_run_encounter_tax",
-    "set_run_future_end_the_run_subroutine",
-    "set_run_future_strength_bonus",
-    "set_next_encounter_unless_fully_break_damage",
-    "set_next_encounter_lock",
-    "set_next_encounter_no_break_subroutines",
-  ]);
   if (
     postRezQuote.complete === true &&
     run.position.iceIndex === 0 &&
     !hasEngineQuotedPaidEncounterEtr &&
-    postRezQuote.effectiveRunQuote.subroutines.length > 0 &&
-    postRezQuote.effectiveRunQuote.subroutines.every((subroutine) =>
-      futureEncounterOnlyTypes.has(subroutine.type),
+    corpIceEffectsOnlyReachFutureEncounters(
+      postRezQuote.effectiveRunQuote.subroutines.map(
+        (subroutine) => subroutine.type,
+      ),
     )
   ) {
     return false;
@@ -419,6 +412,20 @@ function isQualitativeEncounterDefenseOnCurrentRun(params: {
     activationCredits !== undefined &&
     totalRezCredits + activationCredits <= input.playerView.own.credits
   );
+}
+
+export function corpIceEffectsOnlyReachFutureEncounters(
+  types: readonly string[],
+): boolean {
+  const futureTypes = new Set([
+    "set_run_encounter_tax",
+    "set_run_future_end_the_run_subroutine",
+    "set_run_future_strength_bonus",
+    "set_next_encounter_unless_fully_break_damage",
+    "set_next_encounter_lock",
+    "set_next_encounter_no_break_subroutines",
+  ]);
+  return types.length > 0 && types.every((type) => futureTypes.has(type));
 }
 
 export function corpEffectiveDefenseActivationCredits(

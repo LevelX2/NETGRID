@@ -3790,6 +3790,27 @@ fortabhängigen ICE-Installationskosten. Dr.-Dreff-Kostenregeln dürfen nicht
 auf Jenny übertragen werden; weitere Karten derselben groben Effektfamilie
 benötigen ebenfalls ein eigenes Modell.
 
+Die nachfolgende Dr.-Dreff-Choice bleibt an `corp.defend_servers` gebunden.
+Die Engine liefert zu jedem angebotenen HQ-ICE die effektiven
+Subroutinentypen seines temporären Encounters und kennzeichnet zusätzliche
+mechanische Effektfamilien. Die AI-DTO erhält diese privaten Choice-Facts.
+Der Defense-Owner verwirft ausschließlich Optionen ohne aktuelle Wirkung:
+Leere oder reine Zukunfts-Subroutinen ohne zusätzliche Mechanik können nach
+dem letzten ICE nichts mehr bewirken. Sind alle Optionen so eingeordnet,
+bindet der Owner die legale `decline`-Option. Gemischter sofortiger Schaden,
+ETR und zusätzliche Mechaniken bleiben bewertbar. Fehlende Facts scheitern
+strukturiert; der Payload-Resolver vervollständigt nur die gewählte Option.
+
+Öffentlich aufgelöste Breaksperren werden getrennt als
+`nextEncounterNoBreakSubroutines` und `noBreakSubroutinesActive` von der Engine
+in die PlayerView und AI-DTO projiziert. Die gemeinsame sichtbare
+Schadensbewertung darf beim exakt betroffenen nächsten beziehungsweise
+aktuellen ICE keinen verbotenen Break als Schadensvermeidung anrechnen.
+Der bestehende `runner.convert_run_window`-Owner bindet bei tödlichem Schaden
+die vorhandene Jack-out-Action. Eine noch nicht verbrauchte nächste Sperre
+wird weder auf das aktuelle ICE noch auf ein Engine-zertifiziertes Auto-Pass
+übertragen; echte Schadensprävention bleibt unabhängig wirksam.
+
 #### Ownership zwischen Score, Remote und Defense
 
 | Verantwortung                                                                                             | fachlicher Owner                              |

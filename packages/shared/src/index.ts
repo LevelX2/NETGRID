@@ -1024,6 +1024,9 @@ export type ChoiceOption = {
     paymentSources?: Array<{ title?: string; amount: number }>;
     postBidTraceLinkDelta?: number;
     delayedInstallRemainingCounters?: number;
+    /** Corp-private facts on an exact temporary HQ-ICE encounter option. */
+    temporaryEncounterSubroutineTypes?: SubroutineType[];
+    temporaryEncounterHasAdditionalMechanics?: boolean;
     targetServerId?: ServerId;
     targetIcePosition?: number;
     sourceCardInstanceId?: CardInstanceId;
@@ -4080,6 +4083,10 @@ export type PlayerView = {
     };
     eventApproachIceExposeBeforeRez?: boolean;
     prohibitNoisyIcebreakers?: boolean;
+    /** Public resolved restriction, consumed by the next actual encounter. */
+    nextEncounterNoBreakSubroutines?: boolean;
+    /** Public restriction applying only to the currently encountered ICE. */
+    noBreakSubroutinesActive?: boolean;
     runnerCreditGainOnCorpRez?: number;
     damagePreventionPool?: {
       sourceDefinitionId: CardDefinitionId;

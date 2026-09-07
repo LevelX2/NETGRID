@@ -3606,13 +3606,14 @@ function selectedCorpDelayedSuccessOptionId(
     choice.maxSelections === 1 &&
     selectedOption !== undefined &&
     typeof selectedOption.value === "string" &&
-    selectedOption.id === `ice_${selectedOption.value}` &&
-    input.playerView.own.gripOrHq.some(
-      (card) =>
-        card.instanceId === selectedOption.value &&
-        card.known &&
-        card.type === "ice",
-    ) &&
+    ((selectedOption.id === "decline" && selectedOption.value === "decline") ||
+      (selectedOption.id === `ice_${selectedOption.value}` &&
+        input.playerView.own.gripOrHq.some(
+          (card) =>
+            card.instanceId === selectedOption.value &&
+            card.known &&
+            card.type === "ice",
+        ))) &&
     action.side === "corp" &&
     action.type === "resolve_choice" &&
     action.source === "game_rule" &&
@@ -3628,7 +3629,7 @@ function selectedCorpDelayedSuccessOptionId(
     throw unresolvedChoiceFailure(
       input,
       action,
-      "Complete Dr. Dreff only from the exact current corp.defend_servers choice binding on the attacked fort and visible HQ-ICE payload.",
+      "Complete Dr. Dreff only from the exact current corp.defend_servers choice binding on the attacked fort and its legal decline or visible HQ-ICE payload.",
     );
   }
   return [selectedOption.id];
@@ -4246,8 +4247,7 @@ function selectedCorpScoredAgendaFreeRezOptionId(
   const matchingTargetOptions = selectableOptions.filter(
     (option) =>
       option.id === binding?.selectedOptionId &&
-      option.value ===
-        `${binding?.targetCardId}|${binding?.selectedVariantId}`,
+      option.value === `${binding?.targetCardId}|${binding?.selectedVariantId}`,
   );
   const [requirement] = action.choiceRequirements ?? [];
   const exactContinuation =

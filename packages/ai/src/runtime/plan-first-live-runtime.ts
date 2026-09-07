@@ -399,6 +399,7 @@ import {
 import { compareExactProbabilities } from "./corp-score-protection-assessment";
 import {
   corpEffectiveDefenseActivationCredits,
+  corpIceEffectsOnlyReachFutureEncounters,
   projectExactCorpIceRezRoute,
 } from "./corp-exact-ice-rez-route";
 import { assessCorpScoreRushRisk } from "./corp-score-rush-risk";
@@ -24146,7 +24147,16 @@ function resolvePlanBoundCorpDelayedSuccessChoice(
         left.creditCost - right.creditCost ||
         left.option.id.localeCompare(right.option.id),
     );
-  const selectedOption = pricedIceOptions[0]?.option;
+  const exactEffectFacts = iceOptions.every(
+    (option) =>
+      delayedSuccessOptionHasCurrentEffect(option.metadata) !== undefined,
+  );
+  const productiveIceOptions = pricedIceOptions.filter(
+    (entry) =>
+      delayedSuccessOptionHasCurrentEffect(entry.option.metadata) === true,
+  );
+  const selectedOption =
+    productiveIceOptions.length > 0 ? productiveIceOptions[0]?.option : decline;
   const choiceActions = context.input.legalActions.filter(
     (action) => action.type === "resolve_choice",
   );
@@ -24264,6 +24274,8 @@ function resolvePlanBoundCorpDelayedSuccessChoice(
     choice.maxSelections === 1 &&
     decline !== undefined &&
     selectedOption !== undefined &&
+    exactEffectFacts &&
+    pricedIceOptions.length === iceOptions.length &&
     iceOptions.length > 0 &&
     iceOptions.length === choice.options.length - 1 &&
     previous !== undefined &&
@@ -24301,6 +24313,8 @@ function resolvePlanBoundCorpDelayedSuccessChoice(
     ],
     ["decline", decline !== undefined],
     ["selected_option", selectedOption !== undefined],
+    ["exact_effect_facts", exactEffectFacts],
+    ["priced_options", pricedIceOptions.length === iceOptions.length],
     ["ice_options", iceOptions.length > 0],
     ["option_set", iceOptions.length === choice.options.length - 1],
     ["previous", previous !== undefined && previous.side === "corp"],
@@ -24349,7 +24363,7 @@ function resolvePlanBoundCorpDelayedSuccessChoice(
       ),
       owner: "continuation",
       ...(executor ? { planInstanceId: executor.instanceId } : {}),
-      removalCondition: `Resolve Dr. Dreff only from the resident corp.defend_servers owner, exact rezzed source on the attacked fort, continuous matching run event chain and the cheapest affordable Engine-priced visible HQ-ICE option. Failed=${delayedSuccessFailedChecks || "unknown"}.`,
+      removalCondition: `Resolve Dr. Dreff only from the resident corp.defend_servers owner, exact rezzed source on the attacked fort, continuous matching run event chain and complete Engine-priced effect facts. Choose the cheapest current-effect option or the bound legal decline when every option only affects later encounters. Failed=${delayedSuccessFailedChecks || "unknown"}.`,
     });
   }
   moduleState.delayedSuccessChoiceBinding = {
@@ -24383,6 +24397,25 @@ function delayedSuccessOptionCreditCost(metadata: unknown): number | undefined {
     creditCost >= 0
     ? creditCost
     : undefined;
+}
+
+function delayedSuccessOptionHasCurrentEffect(
+  metadata: unknown,
+): boolean | undefined {
+  if (!metadata || typeof metadata !== "object") return undefined;
+  const facts = metadata as Record<string, unknown>;
+  const types = facts.temporaryEncounterSubroutineTypes;
+  const additional = facts.temporaryEncounterHasAdditionalMechanics;
+  if (
+    !Array.isArray(types) ||
+    !types.every((type) => typeof type === "string") ||
+    typeof additional !== "boolean"
+  )
+    return undefined;
+  return (
+    additional ||
+    (types.length > 0 && !corpIceEffectsOnlyReachFutureEncounters(types))
+  );
 }
 
 function resolveEngineWindow(
