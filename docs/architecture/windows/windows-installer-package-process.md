@@ -271,16 +271,16 @@ ohne Entwicklungswerkzeuge.
 
 | Nachweis | Aktuelle belastbare Evidenz | Noch erforderlich |
 | --- | --- | --- |
-| Produktgrenze und Installer-Payload | Builds 8136 und 8145 regulär aus sauberen Quellständen gebaut, jeweils 10.901-Dateien-Audit und Setup-/MSI-Prüfsummen grün; installierte Binärdateien zusätzlich für 8136 gebunden | Für beide Builds erfüllt; Installation und Update auf 8145 noch nicht ausgeführt |
-| Installation, Upgrade und Repair | Vollständiger 13-Punkte-Offline-Sandboxlauf 8106 → 8109 am 2026-09-05, 22:06–22:38 Uhr, einschließlich ProductCode-Repair und geprüftem Cleanup; alle vier Artefakthashes erneut verglichen | Für dieses Artefaktpaar erfüllt; folgende Sprach-/Shortcutänderungen sowie funktionale UI-Gates bleiben getrennt |
-| GitHub-Updateauswahl und Integrität | Aktueller Downloadfix und Stable-/Prerelease-/Tamper-Fixtures grün; native deutsche Offline-Rückmeldung auf 8136 bestätigt | Echter zustimmungsbasierter GitHub-Download/Update; GitHub-Übertragung am 7. September freigegeben, Testrelease erst nach Abschluss der übrigen Prüfungen; höheres reguläres Updateartefakt und netzfähige isolierte Testumgebung erforderlich |
-| Updatertransaktion und Rollback | Neuer echter Sandboxlauf 8105/8106 am 2026-09-05 grün: geprüftes Backup, MSI-Upgrade, bewusst beschädigte Testdatenbank, erkannter Healthfehler, Programmrollback auf 8105, Datenmarker und SQLite-Integrität wiederhergestellt, Konfiguration unverändert, Cleanup verifiziert | Transaktionsgate für dieses Artefaktpaar erfüllt; abschließende Benachrichtigung bleibt ein separater Dialogtest |
-| Benutzerbetrieb und Netzwerk | Standardbenutzerbetrieb und ACLs grün. Private-LAN-Test des installierten 8106: Web/Server vom Host erreichbar, Maintenance mit 403 abgewiesen; im öffentlichen Profil beide Ports bei weiterhin gesunden lokalen Diensten blockiert. Testinstallation, Ports und NETGRID-Regeln bereinigt; temporär deaktivierte pauschale Sandbox-Containerfreigabe wiederhergestellt | Für 8106 einschließlich dokumentierter Sandbox-Firewallvorbereitung erfüllt; neue Builds bleiben gesondert gebunden |
+| Produktgrenze und Installer-Payload | Builds 8136 und 8145 regulär aus sauberen Quellständen gebaut, jeweils 10.901-Dateien-Audit und Setup-/MSI-Prüfsummen grün; installierte Binärdateien zusätzlich für 8136 gebunden | Für beide Builds erfüllt; keine Versions-/Hash-Umetikettierung |
+| Installation, Upgrade und Repair | Vollständiger 13-Punkte-Offline-Sandboxlauf 8136 → 8145 am 2026-09-07, 10:58–11:30 UTC, einschließlich ProductCode-Repair und geprüftem Cleanup; alle vier Artefakthashes erneut verglichen. Zusätzlicher installierter Sprachwechsel-/Shortcut-/Repairtest 8145 grün | Für dieses Artefaktpaar erfüllt; native funktionale UI-Gates bleiben getrennt |
+| GitHub-Updateauswahl und Integrität | Aktueller Downloadfix und Stable-/Prerelease-/Tamper-Fixtures grün; native deutsche Offline-Rückmeldung auf 8136 bestätigt; höherer regulärer Kandidat 8145 gebaut und lokal geprüft | Echter zustimmungsbasierter GitHub-Download/Update; GitHub-Übertragung am 7. September freigegeben, Testrelease erst nach Abschluss der übrigen Prüfungen; netzfähige isolierte Testumgebung erforderlich |
+| Updatertransaktion und Rollback | Echter Sandboxlauf 8136/8145 am 2026-09-07 grün: geprüftes Backup, MSI-Upgrade, bewusst beschädigte Testdatenbank, erkannter Healthfehler, Programmrollback auf 8136, Datenmarker und SQLite-Integrität wiederhergestellt, Konfiguration unverändert, Cleanup verifiziert | Transaktionsgate für dieses Artefaktpaar erfüllt; abschließende Benachrichtigung bleibt ein separater Dialogtest |
+| Benutzerbetrieb und Netzwerk | Standardbenutzerbetrieb und ACLs erneut für installierten 8136-Basisstand im aktuellen Rollbacklauf grün. Private-LAN-Test des installierten 8106: Web/Server vom Host erreichbar, Maintenance mit 403 abgewiesen; im öffentlichen Profil beide Ports bei weiterhin gesunden lokalen Diensten blockiert. Testinstallation, Ports und NETGRID-Regeln bereinigt; temporär deaktivierte pauschale Sandbox-Containerfreigabe wiederhergestellt | Netzwerkbeleg für 8106 einschließlich dokumentierter Sandbox-Firewallvorbereitung erfüllt; neue Builds bleiben gesondert gebunden |
 | Nativer Setup-/Fortschrittsworker | 8136 über deutschen Setup-Host installiert, MSI-Client/Server jeweils 0; recordlose und Nullfeld-Progress-Meldungen ursächlich korrigiert; echter direkter MSI-Countertest grün, Datenhinweis im Setup nicht überlagert | Sichtbare Zwischenprozente der kurzen Ausführungsphase noch nicht aufgenommen; Windows-UAC mit alternativem Administrator und weitere native Fehler-/Abbruchpfade bleiben getrennte Prüfungen |
 | Launcher, Browser und Diagnose | 8136: einzelner Launcher, normale Desktop-/Tray-Einstiege zeigen Spielseite nach ausdrücklich freigegebener Reparatur der fehlenden Edge-ProgID im Gast; nativer SaveFileDialog und lokaler redigierter ZIP-Export grün | Gastvorbereitung transparent erhalten; dies ersetzt nicht sämtliche Sprach-/Kontext- und funktionalen Gesamtflows |
 | First Run | Nativer deutscher vorgeschalteter Entscheidungsdialog auf 8136 beobachtet; spätere hashgebundene reine Statusabfrage bestätigt eingerichteten Maintenance-Zugang, kein Agent-Bootstrap/Reset | Unbeobachtete Passwort-/Zurück-Schritte nicht nachträglich als abgenommen ausgeben; Authentifizierungsbedienung durch Nutzer, vorhandene Zugangsdaten erhalten |
-| Sichtbare Flows | 8136: native englische/französische Sprachwahl, Standard-/Custom-Masken und angeklickte Custom-Hilfe lesbar; ältere 8113-Evidenz für installierten Sprachwechsel, Repair und Shortcutnamen bleibt separat gebunden; Tooltip-Renderings und native Tastatur-Popups vorhanden | Reale 100-/125-/150-Prozent- und Hell-/Dunkel-Kontexte sowie funktionale Gesamtflows in de/en/fr; Sandbox bietet keine nutzbare Skalierungsseite, Hovereingabe ist im verfügbaren Computer-Use-API nicht vorhanden; diese Nachweise brauchen einen geeigneten Testkontext bzw. Nutzerbedienung |
-| Saubere Windows-11-x64-Maschine | Vollständige ältere 13-Punkte-Offline-MSI-Matrix einschließlich Cleanup grün: Windows 11 Enterprise x64 (26100), ohne Entwicklungswerkzeuge; neue native Frischinstallation 8136 zusätzlich bestanden | Artefaktgebundene Nachweise nicht pauschal auf spätere Builds übertragen; finale Abnahme bleibt offen bis alle obigen Ergänzungen vorliegen |
+| Sichtbare Flows | 8136: native englische/französische Sprachwahl, Standard-/Custom-Masken und angeklickte Custom-Hilfe lesbar; 8145: installierter Sprachwechsel fr → de → en, Repair, Sprachübernahme aller drei Komponenten und Austausch lokalisierter Shortcutnamen mit sieben Prüfungen grün; Tooltip-Renderings und native Tastatur-Popups vorhanden | Reale 100-/125-/150-Prozent- und Hell-/Dunkel-Kontexte sowie native funktionale Gesamtflows in de/en/fr; Sandbox bietet keine nutzbare Skalierungsseite, Hovereingabe ist im verfügbaren Computer-Use-API nicht vorhanden; diese Nachweise brauchen einen geeigneten Testkontext bzw. Nutzerbedienung |
+| Saubere Windows-11-x64-Maschine | Vollständige 13-Punkte-Offline-MSI-Matrix 8136 → 8145 einschließlich Cleanup grün: Windows 11 Enterprise x64 (26100), ohne Entwicklungswerkzeuge; Standardbenutzer-/Rollback- und installierter Sprachwechseltest zusätzlich grün. Native Frischinstallation 8136 separat bestanden | Artefaktgebundene Nachweise nicht pauschal auf spätere Builds übertragen; finale Abnahme bleibt offen bis alle obigen Ergänzungen vorliegen |
 
 Diese offenen Anforderungen werden nicht durch engere grüne Tests ersetzt.
 
@@ -308,10 +308,38 @@ Der tatsächliche Start einer zusätzlichen Sandbox wurde von Windows mit
 `0x800401F6 (CO_E_APPSINGLEUSE)` abgewiesen. Vor und nach dem Versuch existierte
 ausschließlich Gast `4710465f-f845-4713-a399-8d4529ea49ef`; dessen installierter
 8136-Stand und eingerichteter Maintenance-Zugang wurden nicht verändert.
-Der Ergebnisordner des neuen Laufs ist leer: Die neue Matrix ist ausdrücklich
-noch nicht gestartet oder bestanden. Für den Start muss der vorhandene Gast
-ausdrücklich zum Verwerfen freigegeben oder ein anderer geeigneter Testrechner
-bereitgestellt werden. Es wurde kein GitHub-Release erstellt.
+Nach ausdrücklicher Nutzerfreigabe wurde dieser Gast samt Testdaten und dem
+dort eingerichteten Maintenance-Passwort verworfen; die danach leere
+Sandboxliste wurde geprüft. Der vorbereitete Lauf wurde anschließend in Gast
+`841a55be-606f-435c-9ae4-b574e91f40f0` gestartet. Die Gastvorprüfung meldet
+seit 10:58 UTC Windows 11 Enterprise (26100), keine Entwicklungswerkzeuge und
+korrekte Artefakthashes. Die 13-Punkte-Matrix einschließlich Bereinigung ist
+um 11:30:24 UTC grün abgeschlossen (`result/result.json`); alle vier
+Ergebnis-Hashes wurden erneut gegen Hostartefakte und Releasemetadaten geprüft.
+Der nachgeschaltete Standardbenutzer-/Rollbacktest ist um 11:43:07 UTC ebenfalls
+grün abgeschlossen (`rollback-result.json`, `standard-user-result.json`,
+`suite-result.json`). Der echte Updater bestätigt geprüftes Backup, erkannten
+Healthfehler und Programmrollback auf 8136; der unabhängige Test bestätigt
+wiederhergestellten Datenmarker und SQLite-Integrität, unveränderte Konfiguration
+sowie Cleanup von Installation, Testkonto und Testports. Vier Artefakthashes,
+Updaterhash und Fault-Fixture sind gebunden. Der abschließende Benachrichtigungs-
+dialog wurde dabei ausdrücklich nicht als UI-Abnahme gezählt.
+Der zusätzliche installierte Sprachwechseltest für 8145 ist um 11:57:35 UTC
+mit sieben Prüfungen und verifiziertem Cleanup grün abgeschlossen
+(`language-result.json`): explizites Französisch, gemeinsame Sprachübernahme,
+Repair mit Erhalt der Sprache, unveränderte Konfiguration sowie korrekter
+Austausch der französischen, deutschen und englischen Verknüpfungen. Beide
+Ergebnis-Hashes wurden erneut gegen die tatsächlichen 8145-Artefakte geprüft.
+Die unabhängige Schlussprüfung um 11:58:43 UTC bestätigt keine verbliebene
+Testinstallation, Produktregistrierung, Verknüpfung, Testlistener,
+NETGRID-Prozesse oder Testkonten (`final-cleanup.json`). Danach wurde ausschließlich
+der selbst erzeugte Gast `841a55be-606f-435c-9ae4-b574e91f40f0` beendet und eine
+leere Sandboxliste verifiziert. Hostseitige Testartefakte und Ergebnisse bleiben
+erhalten. Für die noch offene echte Host-Anzeigeprüfung wurde die gesonderte
+Freigabe zu vorübergehender Skalierungs-/Designänderung angefragt; ohne Antwort
+wurden keine Host-Anzeigeeinstellungen geändert.
+Die normale Hostinstallation und ihre Zugangsdaten bleiben außerhalb dieser
+Freigabe und wurden nicht verändert. Es wurde kein GitHub-Release erstellt.
 
 Der Testcontroller erlaubt jetzt `-PrepareOnly` neben einer bestehenden
 Sandbox, da dieser Pfad ausschließlich neue isolierte Host-Testeingaben
