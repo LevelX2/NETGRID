@@ -8854,20 +8854,16 @@
     }
   },
   "expectation": {
-    "planExecution": {
-      "acceptablePlanKinds": ["runner.rig_and_coverage"],
-      "acceptableCapabilities": ["prepare_breaker_wall"]
-    },
-    "forbiddenActions": [
-      {
-        "actionId": "runner.trigger_ability.runner_onr_proteus_092_morphing-tool_1.sentry.runner_onr_proteus_092_morphing-tool_1.change_icebreaker_subtype"
-      }
-    ],
     "contractKind": "correctness",
-    "acceptableActions": [
+    "forbiddenActions": [
       {
         "actionId": "runner.trigger_ability.runner_onr_proteus_092_morphing-tool_1.wall.runner_onr_proteus_092_morphing-tool_1.change_icebreaker_subtype"
       }
-    ]
+    ],
+    "planExecution": {
+      "forbiddenCapabilities": [
+        "prepare_breaker_wall"
+      ]
+    }
   }
 }
