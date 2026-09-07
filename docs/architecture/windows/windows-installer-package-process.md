@@ -418,6 +418,30 @@ nutzerbediente Authentifizierung/UAC und echter GitHub-Updatepfad bleiben
 separat offen. Auf dem Host wurde nichts installiert und kein NETGRID-
 Runtimeprozess gestartet; bestehende Zugangsdaten blieben unangetastet.
 
+### Laufende erneute Sandbox-Abnahme 8145 → 8150
+
+Am 7. September um 14:16:59 UTC wurde nach verifiziert leerer Sandboxliste
+der Gast `8d4881be-5836-42a6-b4b5-48ebea3aa95f` gestartet. Der bestehende
+Runner verwendet die hashgeprüften Artefakte aus
+`output/windows-installer-acceptance-8145` und
+`output/windows-installer-dpi-review-8150`, einschließlich echtem
+Updater-Rollbacktest. Netzwerk ist für die anschließende getrennte
+Private-LAN-Prüfung aktiviert; Repository, private Daten, Zwischenablage,
+Audio, Video und Drucker werden nicht freigegeben. Die Gastvorprüfung
+bestätigt Windows 11 Enterprise x64 (26100), keine Entwicklungswerkzeuge
+und alle vier Eingangsartefakthashes.
+
+Führender Laufordner:
+`output/windows-sandbox-e2e/bb8eccf05f4747369da2d3c3806c1f85`.
+Der Lauf ist **noch nicht abgenommen**: Maßgeblich sind erst das terminale
+`result/result.json`, `rollback-result.json` und `suite-result.json`
+einschließlich Cleanup. Ein zusätzlicher Prozess-Snapshot bestätigt
+regelmäßig die laufenden Gastprozesse, ohne deren Kommandozeilen oder
+Konfigurationsgeheimnisse auszugeben. Der bereits laufende Test wird nicht
+aufgrund eines kurzen Beobachtungsfensters neu gestartet. Ein erfolgreicher
+MSI-/Rollbacklauf wird nicht als nativer Dialog-, Authentifizierungs- oder
+GitHub-Downloadnachweis umgedeutet.
+
 ### Aktueller Updatekandidat und Teststart vom 7. September 2026
 
 `1.0.8145` wurde regulär aus dem sauberen Commit
