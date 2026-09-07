@@ -105,6 +105,34 @@ Sperrautorität, verzögerte Speicheroperationen, Verschachtelung, veraltete
 Fortsetzungen, Abbruch und HTTP-Zugriffsschutz. Der native Launcher-/MSI-
 Integrationsnachweis ist damit ausdrücklich noch nicht erbracht.
 
+Der vorbereitete `UpdatePreparationClient` im Windows-Launcher besitzt eine
+Nonce je Versuch und verwendet sie auch nach einer verlorenen oder
+fehlerhaften Antwort für den expliziten Abbruch. Er akzeptiert nur HTTP-
+Loopbackziele ohne Benutzerinformationen; sein eigener HTTP-Handler folgt
+weder Weiterleitungen noch einem Proxy. Die gesamte Antwort ist auf 35
+Sekunden und 4.096 Bytes begrenzt. Erfolg verlangt exakt die vereinbarten
+JSON-Felder, `ok=true`, eine nichtnegative ganzzahlige Matchanzahl und eine
+dazu konsistente Freigabe. Doppelte Felder, fehlende Werte und zusätzliche
+Felder werden abgewiesen. `Dispose` ersetzt ausdrücklich keine quittierte
+Rücknahme. Dieser Client ist noch nicht im Tray-Updatepfad aufgerufen.
+
+### Offene Übergabe- und Stoppreihenfolge
+
+Der bisherige Updater startet die Transaktion nach `WaitForParent`: Er
+wartet höchstens 30 Sekunden auf das Ende der angegebenen Launcher-PID und
+akzeptiert auch eine bereits fehlende PID. Das allein beweist weder einen
+quittierten geordneten Stopp noch die Zustimmung zur konkreten Übergabe.
+Zudem liegt zwischen dem Launcher-Ende und dem späteren MSI-Beginn bereits
+das Datenbackup. Die jetzige MSI-Sperre schützt dieses frühere Zeitfenster
+noch nicht vor einem neuen Launcherstart.
+
+Die Windows-Anbindung muss deshalb die bestätigte Servervorbereitung,
+zugehörige Prozesse, geordneten Stopp und den gesamten exklusiven Update-
+Abschnitt bis zur geprüften Wiederaufnahme verbinden. Ein bloßes Hinzufügen
+von `PrepareAsync` vor den bisherigen UAC-Aufruf reicht nicht. Erfolgreiche
+HTTP-Komponententests werden nicht als Nachweis dieser noch offenen
+Prozessübergabe oder der Major-Upgrade-Reihenfolge ausgegeben.
+
 ## Fehlschlag und Rollback
 
 Scheitert Windows Installer, greift zunächst seine Transaktionsrücknahme; der

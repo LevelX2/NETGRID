@@ -941,6 +941,26 @@ offen. Deshalb ist dies ein geprüfter Server-Teilschritt, keine vollständige
 Schließung des Updategates. Es wurde kein neuer Installer gebaut, kein
 vorhandenes Artefakt verändert und keine Sandbox-Installation gestartet.
 
+Der nächste Teilschritt ergänzt den noch nicht aufgerufenen
+`UpdatePreparationClient` für den Launcher. 44 fokussierte Checks belegen
+exakte Antwortvalidierung, konsistente Freigabe/Matchanzahl, dieselbe
+Versuchs-Nonce bei der Rücknahme nach ungültiger Antwort, Ablehnung
+fehlgeschlagener Rücknahme-Quittierungen sowie die 4.096-Byte-Grenze und
+Loopbackbeschränkung. Der vollständige paketnahe Launcher-Testlauf besteht
+auch weiterhin mit 14 Installationsstoppchecks, STA-Einstieg, 35
+Updatefehlerchecks und Download-/Tamper-Regressionen. Keine Installation
+oder native Dialogaktion wurde dabei ausgeführt.
+
+Die Prüfung des bestehenden Updaters zeigt zusätzlich, weshalb die
+Tray-Anbindung noch nicht abschließend erfolgen kann: `WaitForParent`
+akzeptiert bloß das Ende beziehungsweise Fehlen einer PID. Eine explizite,
+prozessgebundene Übergabebestätigung fehlt; vor dem MSI-Beginn liegt bereits
+das Backup, während die MSI-Sperre noch keinen neuen Launcherstart blockiert.
+Die Ursachenfix-Arbeit muss diesen gesamten exklusiven Updateabschnitt
+einschließlich Abbruch und Wiederaufnahme abdecken. Die aktuelle Vorbereitung
+wird deshalb noch nicht in den unsicheren bisherigen Übergabepfad eingebaut.
+WIN-I08 bleibt aktiv und der vorbereitete Installer 8169 unverändert.
+
 Vor der Freigabe bleiben die Prozess-Ende-Raceprüfung,
 die direkten MSI-Updatepfade hinsichtlich
 laufender Spiele, verständliche lokalisierte Fehler, die vollständige
