@@ -16,6 +16,7 @@
   <ItemGroup>
     <Compile Include="..\Common\WindowsUiStrings.cs" Link="WindowsUiStrings.cs" />
     <Compile Include="..\Common\WindowsUiLanguage.cs" Link="WindowsUiLanguage.cs" />
+    <Compile Include="..\Common\InstallationGate.cs" Link="InstallationGate.cs" />
     <EmbeddedResource Include="..\Common\windows-ui-strings.json" LogicalName="NETGRID.WindowsUiStrings.json" />
   </ItemGroup>
 </Project>

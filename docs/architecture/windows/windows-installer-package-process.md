@@ -868,8 +868,36 @@ geändert oder um einen Ersatzabstand ergänzt. Ergebnis: 2.042 Setupchecks
 bei 125 % und 63 First-Run-UI-Checks in allen drei Sprachen grün, ohne
 Installation oder Credentialzugriff.
 
-Vor einem neuen Installationskandidaten bleiben die Prozess-Ende-Raceprüfung,
-konkurrierende First-Run-Aufrufe, die direkten MSI-Updatepfade hinsichtlich
+Konkurrierende First-Run-Aufrufe prüfen inzwischen dieselbe Installersperre
+beim Laden und unmittelbar vor jedem Status-/Bootstrap-Kindprozess. Ein
+bereits offenes Passwortfenster wird weder automatisch bestätigt noch
+geschlossen. Die Sperre sowie ein unlesbarer Status führen zu eigenen
+lokalisierten Meldungen in `de`/`en`/`fr`; vorhandene Credentials werden nicht
+angefasst. Fünf zusätzliche Tests injizieren ausschließlich eine Sperrabfrage
+und verwenden absichtlich nicht vorhandene Programmpfade: Sperre und
+Lesefehler müssen vor jeglichem CLI-/Dateizugriff scheitern. Zusammen mit den
+bisherigen First-Run-UI-Tests bestehen 68 Checks.
+
+Auch die innere CAB-Payload der Lifecycle-Binary wird nun positiv auditiert:
+genau `NETGRID.InstallerActions.dll`, `WixToolset.Dtf.WindowsInstaller.dll`
+und `CustomAction.config`, ohne Unterpfade oder weitere Dateien. Alle drei
+extrahierten Dateien müssen ihre Buildinputs per SHA-256 treffen. Der Audit
+lief aus Windows PowerShell erfolgreich; sein ausschließlich eigener
+temporärer Ordner wurde entfernt. Buildstrecke und vollständiger
+MSI-Payloadprüfer rufen denselben Audit auf. NETGRID-Quellen, PDBs oder weitere
+Buildartefakte sind auch innerhalb dieser eingebetteten Binary nicht erlaubt.
+
+Die Prüfung des aktiven-Spiel-Schutzes bestätigt eine verbleibende Lücke:
+Der GitHub-Updater prüft `/api/system/update-readiness` vor und nach dem
+Download; die neue direkte MSI-Lifecycle-Aktion stoppt dagegen bislang ohne
+diese Abfrage. Das gilt nicht als bestandenes Updategate. Zusätzlich muss
+die Reihenfolge des Major-Upgrades berücksichtigt werden: Das alte MSI wird
+bei der aktuellen Standardplanung bereits vor der Deferred-Phase des neuen
+MSI entfernt. Ein nativer Standalone-Uninstall-Nachweis würde diese separaten
+Upgradefragen nicht beantworten und darf nicht als solcher ausgegeben werden.
+
+Vor der Freigabe bleiben die Prozess-Ende-Raceprüfung,
+die direkten MSI-Updatepfade hinsichtlich
 laufender Spiele, verständliche lokalisierte Fehler, die vollständige
 Build-/Payloadprüfung und der native Uninstall-Nachweis offen. Eine nach
 hartem Abbruch stehengebliebene fremde aktive Lease wird absichtlich nicht

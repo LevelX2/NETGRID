@@ -133,9 +133,10 @@ internal sealed class FirstRunForm : Form
                 : UiText.Get("first.account.simple");
             ConfigurationChecked(await Task.Run(_runtime.IsMaintenanceInitialized));
         }
-        catch (Exception)
+        catch (Exception error)
         {
-            _status.Text = UiText.Get("first.runtime.error");
+            _status.Text = error is FirstRunInstallationException installation
+                ? UiText.Get(installation.MessageKey) : UiText.Get("first.runtime.error");
             MessageBox.Show(_status.Text, UiText.Get("first.title"), MessageBoxButtons.OK, MessageBoxIcon.Error);
             _later.Enabled = true;
         }
@@ -210,11 +211,12 @@ internal sealed class FirstRunForm : Form
             MessageBox.Show(UiText.Get("first.done.help"), UiText.Get("first.title"), MessageBoxButtons.OK, MessageBoxIcon.Information);
             Close();
         }
-        catch (Exception)
+        catch (Exception error)
         {
             password = string.Empty;
             confirmation = string.Empty;
-            _status.Text = UiText.Get("first.runtime.error");
+            _status.Text = error is FirstRunInstallationException installation
+                ? UiText.Get(installation.MessageKey) : UiText.Get("first.runtime.error");
             MessageBox.Show(_status.Text, UiText.Get("first.title"), MessageBoxButtons.OK, MessageBoxIcon.Error);
             ToggleInputs(true);
         }
@@ -261,12 +263,14 @@ internal sealed class FirstRunRuntime
     private readonly string _nodePath;
     private readonly string _cliPath;
     private readonly IReadOnlyDictionary<string, string> _environment;
+    private readonly Func<bool> _installationBlocked;
 
-    private FirstRunRuntime(string nodePath, string cliPath, IReadOnlyDictionary<string, string> environment)
+    private FirstRunRuntime(string nodePath, string cliPath, IReadOnlyDictionary<string, string> environment, Func<bool> installationBlocked)
     {
         _nodePath = nodePath;
         _cliPath = cliPath;
         _environment = environment;
+        _installationBlocked = installationBlocked;
     }
 
     public string AccountMode => _environment.GetValueOrDefault("NETGRID_ACCOUNT_ACCESS_MODE") ?? "simple";
@@ -274,6 +278,7 @@ internal sealed class FirstRunRuntime
     public static FirstRunRuntime Load()
     {
         var programRoot = AppContext.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar);
+        EnsureInstallationIdle(() => InstallationGate.IsCurrentProcessBlocked(programRoot));
         using var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\LevelX2\NETGRID", writable: false);
         var dataRoot = key?.GetValue("RuntimeDataRoot") as string;
         if (string.IsNullOrWhiteSpace(dataRoot) || !Path.IsPathFullyQualified(dataRoot))
@@ -283,12 +288,14 @@ internal sealed class FirstRunRuntime
 
     public static FirstRunRuntime Load(string programRoot, string environmentPath)
     {
+        Func<bool> installationBlocked = () => InstallationGate.IsCurrentProcessBlocked(programRoot);
+        EnsureInstallationIdle(installationBlocked);
         var environment = ReadEnvironment(environmentPath);
         var nodePath = Path.Combine(programRoot, "runtime", "node", "node.exe");
         var cliPath = Path.Combine(programRoot, "app", "maintenance-auth.mjs");
         if (!File.Exists(nodePath) || !File.Exists(cliPath))
             throw new FirstRunException("Die installierte Maintenance-Laufzeit ist unvollständig.");
-        return new FirstRunRuntime(nodePath, cliPath, environment);
+        return new FirstRunRuntime(nodePath, cliPath, environment, installationBlocked);
     }
 
     public bool IsMaintenanceInitialized()
@@ -319,6 +326,10 @@ internal sealed class FirstRunRuntime
 
     private CliResult RunCli(string[] arguments, string? standardInput)
     {
+        // Check immediately before every child start as well as at Load.
+        // An already open password form must not launch an old CLI while MSI
+        // is replacing/removing files; never close it or submit its inputs.
+        EnsureInstallationIdle(_installationBlocked);
         var start = new ProcessStartInfo(_nodePath)
         {
             UseShellExecute = false,
@@ -348,6 +359,14 @@ internal sealed class FirstRunRuntime
         return new CliResult(process.ExitCode, output, error);
     }
 
+    private static void EnsureInstallationIdle(Func<bool> installationBlocked)
+    {
+        bool blocked;
+        try { blocked = installationBlocked(); }
+        catch (Exception) { throw new FirstRunInstallationException("first.installation.guard_failed"); }
+        if (blocked) throw new FirstRunInstallationException("first.installation.busy");
+    }
+
     private static IReadOnlyDictionary<string, string> ReadEnvironment(string path)
     {
         if (!File.Exists(path)) throw new FirstRunException("Die geschützte Runtimekonfiguration fehlt.");
@@ -371,3 +390,7 @@ internal sealed class FirstRunRuntime
 }
 
 internal sealed class FirstRunException(string message) : Exception(message);
+internal sealed class FirstRunInstallationException(string messageKey) : Exception(messageKey)
+{
+    public string MessageKey { get; } = messageKey;
+}

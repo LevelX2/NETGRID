@@ -65,7 +65,12 @@ und Locked Restore gebaut. Sie wird nicht als Programmdatei installiert,
 sondern im MSI-Binary-Stream ausgeführt. Der Installer-Audit prüft ihre
 64-Bit-Architektur, vier exportierte Einstiegspunkte, den eingebetteten Hash
 und die tatsächlichen MSI-Sequenznummern einschließlich Commit-/Rollback-
-Typflags. Eng begrenzte Prüfungen ohne Installation:
+Typflags.
+Zusätzlich wird die innere CAB-Payload der Lifecycle-Binary auf genau drei
+erlaubte Dateien und identische Buildinput-Hashes geprüft; Quellen und
+Debugsymbole sind auch dort verboten.
+
+Eng begrenzte Prüfungen ohne Installation:
 
 ```powershell
 .\.tools\dotnet\dotnet.exe run --project tests/windows/Netgrid.InstallerLifecycle.Tests/Netgrid.InstallerLifecycle.Tests.csproj -c Release

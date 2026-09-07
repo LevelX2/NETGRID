@@ -124,6 +124,13 @@ try {
   if ($LASTEXITCODE -ne 0) { throw "Die NETGRID-MSI-Lifecycle-Komponente konnte nicht gebaut werden." }
   & node --test scripts/check-windows-installer-lifecycle.test.mjs
   if ($LASTEXITCODE -ne 0) { throw "Die MSI-Lifecycle-Audit-Regressionstests sind fehlgeschlagen." }
+  $dtfPackageRoot = & $dotnet msbuild apps/windows/Netgrid.InstallerActions/Netgrid.InstallerActions.csproj -nologo -getProperty:PkgWixToolset_Dtf_CustomAction
+  if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($dtfPackageRoot)) { throw "Der gepinnte DTF-Paketpfad fehlt." }
+  & powershell -NoProfile -ExecutionPolicy Bypass -File scripts/check-windows-installer-action-payload.ps1 `
+    -Binary (Join-Path $projectRoot "apps\windows\Netgrid.InstallerActions\bin\x64\Release\net48\NETGRID.InstallerActions.CA.dll") `
+    -ExpectedBuildDirectory (Join-Path $projectRoot "apps\windows\Netgrid.InstallerActions\bin\x64\Release\net48") `
+    -DtfToolRoot (Join-Path $dtfPackageRoot.Trim() "tools")
+  if ($LASTEXITCODE -ne 0) { throw "Die eingebettete MSI-Aktionspayload ist nicht freigegeben." }
   New-Item -ItemType Directory -Path $lifecycleRoot -Force | Out-Null
   $lifecycleActionsPath = Join-Path $lifecycleRoot "NETGRID.InstallerActions.CA.dll"
   Copy-Item -LiteralPath (Join-Path $projectRoot "apps\windows\Netgrid.InstallerActions\bin\x64\Release\net48\NETGRID.InstallerActions.CA.dll") -Destination $lifecycleActionsPath

@@ -118,6 +118,10 @@ try {
   checkLifecycleAuthoring(authoring);
   const lifecycleInput = path.join(installerInputRoot, "lifecycle", "NETGRID.InstallerActions.CA.dll");
   checkLifecycleBinary(lifecycleInput);
+  const dtfPackageRoot = run(dotnetPath, ["msbuild", "apps/windows/Netgrid.InstallerActions/Netgrid.InstallerActions.csproj", "-nologo", "-getProperty:PkgWixToolset_Dtf_CustomAction"]).stdout.trim();
+  if (!dtfPackageRoot) throw new Error("installer_action_dtf_package_path_missing");
+  run("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", path.join(import.meta.dirname, "check-windows-installer-action-payload.ps1"),
+    "-Binary", lifecycleInput, "-ExpectedBuildDirectory", path.resolve("apps/windows/Netgrid.InstallerActions/bin/x64/Release/net48"), "-DtfToolRoot", path.join(dtfPackageRoot, "tools")]);
   const lifecycleExport = path.join(scratch, "embedded", "Binary", "NetgridLifecycleActions");
   assertFile(lifecycleExport, "installer_lifecycle_embedded_binary_missing");
   if (sha256(lifecycleExport) !== sha256(lifecycleInput)) throw new Error("installer_lifecycle_embedded_binary_mismatch");

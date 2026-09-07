@@ -9,6 +9,7 @@ var catalog = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, s
 var previewRoot = args.Length == 2 && args[0] == "--render-to" ? Path.GetFullPath(args[1]) : null;
 if (previewRoot is not null) Directory.CreateDirectory(previewRoot);
 var checks = 0;
+checks += InstallationGuardTests.Run(assembly);
 Exception? testFailure = null;
 var thread = new Thread(() =>
 {
