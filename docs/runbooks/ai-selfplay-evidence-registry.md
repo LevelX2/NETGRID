@@ -101,6 +101,21 @@ kompakten Registry erstellt. Erst danach werden ausschließlich die großen
 blockeigenen Matchdatenbanken samt WAL-/SHM-Dateien gelöscht. Die Registry und
 ihre Sicherung gehören nie zu diesem Cleanup.
 
+## Exakte Engine-Gegenproben
+
+Ein aus Traces rekonstruierter Präfix muss auch die aufgezeichneten atomaren
+Engine-Zufallsauswahlen ausführen. Nur die ausgewählte `PlayerAction` erneut
+anzuwenden lässt deren RNG-Verbrauch aus und kann erst bei späterem Schaden
+oder Zugriff sichtbar abweichen. Bei ICE-Near-Ties enthalten der aufgezeichnete
+Selection-Purpose und sein längencodierter Kandidaten-Fingerprint die exakte
+Anfrage. Diese wird über `quoteRandomizedIceInstallSelection` erneut quotiert
+und mit `applyRandomizedIceInstallSelection` angewendet; die ausgewählte Action
+muss dem Trace entsprechen. Kein Zufallszähler wird von Hand angepasst.
+
+Vor einer alternativen Folge müssen StateVersion und vollständiger StateHash
+exakt zum gespeicherten Checkpoint passen. Eine abweichende Rekonstruktion ist
+keine Gegenprobe des ursprünglichen Zustands.
+
 ## Abgeschlossene Legacy-Migration
 
 Die Migration der Cycle-Reviews 002–036, Evidence-Matrix, Reporting-State- und

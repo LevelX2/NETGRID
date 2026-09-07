@@ -80,6 +80,16 @@ describe("meta 403 reachable central rez reserve", () => {
       runtime: AiRuntimeCheckpointV1;
     };
     const { input, runtime } = capture;
+    // Restore the Engine's current explicit debt quote in this older capture.
+    const purge = input.legalActions.find(
+      (action) => action.type === "purge_runner_virus_counters",
+    )!;
+    purge.payload = {
+      ...purge.payload,
+      purgeModel: "future_action_debt",
+      actionDebtAdded: 3,
+      actionCapacityMinimumAvailableActions: 1,
+    };
     resetResidentPlanPortfolioMemory();
     restoreStrategicIntentMemorySnapshot(
       input,
@@ -91,15 +101,21 @@ describe("meta 403 reachable central rez reserve", () => {
       runtime.residentPlanPortfolio,
     );
     const result = chooseAiAction(input);
-    // The independent virus owner now selects its legal purge; Defense must
-    // not admit the extra ICE layer which destroys its own funding window.
-    expect(result.actionId).toBe("corp.purge_runner_virus_counters");
+    // Purge now correctly consumes action capacity. The reserve contract is
+    // that Defense rejects the extra HQ layer, regardless of a sibling winner.
+    const reserveDestroyingInstalls = input.legalActions.filter(
+      (action) =>
+        action.type === "install_card" &&
+        action.actionId.includes("bolter-cluster") &&
+        action.payload?.serverId === "hq",
+    );
+    expect(reserveDestroyingInstalls.length).toBeGreaterThan(0);
+    expect(
+      reserveDestroyingInstalls.map((action) => action.actionId),
+    ).not.toContain(result.actionId);
     expect(result.fallbackUsed).toBe(false);
     expect(input.legalActions.some((a) => a.actionId === result.actionId)).toBe(
       true,
     );
-    expect(
-      result.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
-    ).toBe("corp.respond_to_virus_pressure");
   });
 });

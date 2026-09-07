@@ -15655,7 +15655,7 @@ function buildCorpDomain(
     corpRemoteCreationUnlockScoreProjects(input, candidate),
   );
   const nextTurnScoreContinuationProjects =
-    corpNextTurnScoreContinuationProjects(input);
+    corpNextTurnScoreContinuationProjects(input, candidates);
   const proposedScoreProjects = [
     ...directScoreProjects,
     ...counterBankScoreProjects,
@@ -17729,12 +17729,13 @@ function corpRemoteCreationLockRemovalAction(
 }
 
 /**
- * The score plan is the single owner of the next-turn score budget. It accepts
- * only the Engine's private continuation receipt and publishes the resulting
- * cash floor for sibling plans to preserve.
+ * The score plan owns the installed agenda's conversion budget. A next-turn
+ * reserve can be zero even while a current-turn closeout still needs funding.
+ * Keep those horizons separate using the Engine's exact continuation costs.
  */
 function corpNextTurnScoreContinuationProjects(
   input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
 ): CorpScoreProjectSignal[] {
   return input.playerView.servers.flatMap((server) =>
     server.root.flatMap((agenda) => {
@@ -17760,6 +17761,35 @@ function corpNextTurnScoreContinuationProjects(
         return [];
       }
       const agendaPoints = requireVisibleAgendaPoints(input, agenda);
+      const currentScoreCredits =
+        quote.remainingAdvancementCounters *
+          quote.advancementCreditCostPerCounter +
+        quote.scoreActionCreditCost;
+      const currentScoreClicks =
+        quote.remainingAdvancementCounters *
+          quote.advancementClickCostPerCounter +
+        quote.scoreActionClickCost;
+      const currentFundingGap = Math.max(
+        0,
+        currentScoreCredits - input.playerView.own.credits,
+      );
+      const exactBasicCreditAvailable = candidates.some((candidate) =>
+        corpExactCurrentBasicLiquidCreditCandidate(input, candidate),
+      );
+      const sameTurnCloseout =
+        input.side === "corp" &&
+        input.playerView.activeSide === "corp" &&
+        input.playerView.timingPoint === "corp_action.main" &&
+        [
+          quote.advancementCreditCostPerCounter,
+          quote.advancementClickCostPerCounter,
+          quote.scoreActionCreditCost,
+          quote.scoreActionClickCost,
+          currentScoreCredits,
+          currentScoreClicks,
+        ].every(isFiniteNonNegativeInteger) &&
+        (currentFundingGap === 0 || exactBasicCreditAvailable) &&
+        currentScoreClicks + currentFundingGap <= input.playerView.own.clicks;
       return [
         {
           projectId: corpScoreProjectId(agenda.instanceId, server.id),
@@ -17771,7 +17801,10 @@ function corpNextTurnScoreContinuationProjects(
             quote.remainingAdvancementCounters === 0
               ? ("score_agenda" as const)
               : ("advance_agenda" as const),
-          sameTurnCloseout: false,
+          sameTurnCloseout,
+          ...(sameTurnCloseout && currentFundingGap > 0
+            ? { fundingGap: currentFundingGap }
+            : {}),
           ...(quote.terminalScore ? { deadlinePressure: true } : {}),
           terminalScore: quote.terminalScore,
           conversion: corpScoreConversionFacts({
@@ -17779,7 +17812,9 @@ function corpNextTurnScoreContinuationProjects(
             agenda,
             serverId: server.id,
             remainingAdvancementClicks: quote.remainingAdvancementCounters,
-            remainingScoreCredits: quote.creditsRequiredBeforeNextCorpTurn,
+            remainingScoreCredits: sameTurnCloseout
+              ? currentScoreCredits
+              : quote.creditsRequiredBeforeNextCorpTurn,
             residentParent: true,
             realizedStrategySupportCount: 0,
           }),

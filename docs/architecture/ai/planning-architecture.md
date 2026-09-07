@@ -3260,6 +3260,17 @@ Deckstrategie, Hand, Agendaexposition und erwarteter früher Run-Gefahr.
 
 ### 28.2 `corp.score_agenda`
 
+Für eine installierte Agenda unterscheidet der Scoreowner die vollständigen
+Kosten der aktuellen Konversion von der bis zum nächsten Corp-Zug nötigen
+Reserve. Eine Engine-Quote mit `creditsRequiredBeforeNextCorpTurn: 0` bedeutet
+nicht, dass der nächste Advance ohne Finanzierung ausführbar wäre. Passen die
+gequoteten Advances, der Score und die fehlenden Basiscredit-Aktionen gemeinsam
+in den aktuellen Zug, veröffentlicht derselbe Parent den aktuellen Geldbedarf
+und `sameTurnCloseout`. `corp.economy` führt den gebundenen Funding-Schritt aus;
+ein terminaler Abschluss erhält P1. Ohne aktuelle Quote, ausreichende Klicks
+oder exakte Basiscredit-Route entsteht dieser Nachweis nicht. Die Reserve für
+den nächsten Zug bleibt ein eigener, unveränderter Horizont.
+
 **Klasse:** `bounded_sequence` oder `strategic_campaign`
 **Rolle:** Vordergrund, Closeout P1
 **Status:** Weiterentwicklung von `corp.create_score_window`
