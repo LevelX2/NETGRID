@@ -190,7 +190,15 @@ try {
   Assert-True ((Get-FileHash -LiteralPath $environmentPath -Algorithm SHA256).Hash -eq $configHash) "failed_upgrade_changed_configuration"
 
   # Standalone MSI matrix: do not call the SetupHost's lease-bound updater entrypoint.
-  Invoke-Msi @('/i', (Quote-Msi $updateMsi), '/qn', '/norestart', '/l*v', (Quote-Msi (Join-Path $logRoot 'upgrade.log')),
+  # Install from an owned disposable copy so the later repair cannot silently
+  # reuse the download. Never move or delete the caller's input artifacts.
+  $upgradeSourceRoot = Join-Path $logRoot 'upgrade-source'
+  Assert-True (-not (Test-Path -LiteralPath $upgradeSourceRoot)) 'upgrade_source_already_exists'
+  New-Item -ItemType Directory -Path $upgradeSourceRoot | Out-Null
+  $upgradeMsiSource = Join-Path $upgradeSourceRoot ([IO.Path]::GetFileName($updateMsi))
+  Copy-Item -LiteralPath $updateMsi -Destination $upgradeMsiSource
+  Assert-True ((Setup-Hash $upgradeMsiSource) -ceq (Setup-Hash $updateMsi)) 'upgrade_source_copy_mismatch'
+  Invoke-Msi @('/i', (Quote-Msi $upgradeMsiSource), '/qn', '/norestart', '/l*v', (Quote-Msi (Join-Path $logRoot 'upgrade.log')),
     "INSTALLFOLDER=$(Quote-Msi $programRoot)", "NETGRID_DATA_ROOT=$(Quote-Msi $dataRoot)",
     "NETGRID_SETUP_SOURCE=$(Quote-Msi $updateSetup)", "NETGRID_SETUP_SHA256=$(Setup-Hash $updateSetup)") | Out-Null
   Assert-InstalledIdentity $updateMsi $updateSetup
@@ -205,8 +213,19 @@ try {
   Assert-True ($cachedMsi.Count -eq 1) "updated_repair_source_missing"
   Assert-True ((Setup-Hash $cachedMsi[0].FullName) -eq (Setup-Hash $updateMsi)) "updated_repair_source_hash_mismatch"
   # Product-code repair receives no source, program root or data root arguments.
-  # The separately verified protected MSI cache supplies the durable source.
-  Invoke-Msi @("/fa", $productCode, "/qn", "/norestart", "/l*v", (Quote-Msi (Join-Path $logRoot "repair-updated.log"))) | Out-Null
+  # Remove only this test's verified copy, then prove the protected MSI cache
+  # was actually resolved. Merely passing /fa ProductCode is not that proof.
+  $resolvedSource = [IO.Path]::GetFullPath($upgradeMsiSource)
+  Assert-True ($resolvedSource.StartsWith([IO.Path]::GetFullPath($logRoot).TrimEnd('\') + '\upgrade-source\', [StringComparison]::OrdinalIgnoreCase)) 'upgrade_source_cleanup_scope_invalid'
+  Assert-True (-not (Get-Item -LiteralPath $upgradeSourceRoot).Attributes.HasFlag([IO.FileAttributes]::ReparsePoint) -and -not (Get-Item -LiteralPath $resolvedSource).Attributes.HasFlag([IO.FileAttributes]::ReparsePoint)) 'upgrade_source_cleanup_reparse'
+  Assert-True ((Setup-Hash $resolvedSource) -ceq (Setup-Hash $updateMsi)) 'upgrade_source_changed_before_cleanup'
+  Remove-Item -LiteralPath $resolvedSource
+  Assert-True (-not (Test-Path -LiteralPath $upgradeMsiSource)) 'repair_download_source_still_present'
+  $repairLog = Join-Path $logRoot 'repair-updated.log'
+  Invoke-Msi @("/fa", $productCode, "/qn", "/norestart", "/l*v", (Quote-Msi $repairLog)) | Out-Null
+  $protectedSource = (Split-Path $cachedMsi[0].FullName).TrimEnd('\') + '\'
+  $resolvedProtectedSource = @(Select-String -LiteralPath $repairLog -Pattern 'Resolved source to:' | Where-Object { $_.Line.Contains($protectedSource) })
+  Assert-True ($resolvedProtectedSource.Count -gt 0) 'repair_protected_source_not_used'
   Assert-True ((Product-Version $programRoot) -eq $updateVersion) "updated_repair_changed_program_path"
   Assert-True ((Get-FileHash -LiteralPath $environmentPath -Algorithm SHA256).Hash -eq $configHash) "updated_repair_changed_configuration"
   Assert-True (-not (Test-Path -LiteralPath $desktopShortcut)) "updated_repair_changed_desktop_preference"

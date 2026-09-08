@@ -833,8 +833,11 @@ vollständiges Log liegen unter
 `output/windows-sandbox-e2e/4e3eb1bf3ede4e27bcf4278dcc097dde/result/native-bundle-8206/`.
 Nach Rollback fehlen Programmordner und registriertes MSI; Runtime und
 Testports sind frei. Der von der Initialisierung erzeugte eigene Testdatenroot
-und dessen `RuntimeDataRoot`-Registrierung bleiben erhalten. Sie sind keine
-erfolgreiche Installation und vor einem neuen Frischtest gezielt zu bereinigen.
+und dessen `RuntimeDataRoot`-Registrierung blieben zunächst erhalten. Um
+07:22:29 UTC wurden ausschließlich diese eigenen frischen Testdaten über den
+hashgebundenen Produktbefehl `delete-data` entfernt und ihre Abwesenheit geprüft
+(`failed-cleanup.json`). MSI-/Ergebnislogs bleiben auf dem Host erhalten.
+Diese Bereinigung ist kein erfolgreicher MSI-Deinstallationsnachweis.
 
 Ursache ist die neu eingeführte Übergabe `--program-root "[INSTALLFOLDER]"`:
 Windows Installer liefert den Ordner mit abschließendem Backslash. Dieser
@@ -851,8 +854,67 @@ Kommandozeilenformatierung aus, einschließlich leerer Setupquelle/-hash.
 Nur der isolierte Test-State wird ergänzt. Mit dem unveränderten 8206-MSI ist
 dieser neue Regressionstest reproduzierbar rot (`--product-code` fehlt);
 die sieben fokussierten Lifecycle-/Authoringtests sind nach der Korrektur grün.
-Der nächste reguläre Build und dessen native Wiederholung stehen noch aus.
-WIN-I08 bleibt aktiv; kein Main-Merge und kein Push.
+Der anschließende reguläre Build 8207 und seine native Wiederholung sind unten
+getrennt belegt. WIN-I08 bleibt aktiv; kein Main-Merge und kein Push.
+
+### Build 8207: MSI-Alleininstallation und echte Offline-Reparatur
+
+`output/windows-installer-msi-command-8207` enthält den vollständig regulär
+gebauten Stand `a968ad9e5be2b79fc62d450198ad1d7002545006` mit
+`sourceDirty=false`. UI-, Komponenten-, Laufzeit- und vollständiger
+10.903-Dateien-Audit sind grün, einschließlich der aus der tatsächlichen
+MSI-Datenbank ausgeführten Cache-Kommandozeile. Der unveränderte 8206-Container
+fällt durch denselben neuen Test; Schutzprüfungen wurden nicht abgeschwächt.
+Setup-SHA-256: `645dc0907b8a73db12a2511729dc19d5ae4f257ec313b5ab9f5ae747485e55fc`;
+MSI-SHA-256: `e3df7815583b2d364313fab38d98f3e353175a5581186008d01cc7f25c60b5a5`.
+Die deutschen Setup-/Sprachauswahl-Renderings bei 150 Prozent wurden zusätzlich
+visuell geprüft; das ersetzt keine native GUI-Abnahme.
+
+Native Ergebnisse liegen im selben Sandbox-Runroot unter
+`result/native-bundle-8207`. Die MSI-Alleininstallation ohne externe
+Setupquelle endet um 07:34:48 UTC mit Exit 0. Die getrennte Prüfung bestätigt
+alle 10.890 Manifestdateien, fünf native Programmhashes/PE-Versionen,
+ProductCode `{1040E1C7-005F-450D-AFE2-3668EFB5F6B5}`, ursprüngliches MSI im
+geschützten Cache, bytegleiche rekonstruierte Setup-EXE, deren
+Startmenübindung sowie echten Headless-Start/Healthcheck.
+
+Die erste ProductCode-Reparatur ist grün und erhält Konfigurationshash sowie
+Setupcachehash/-zeit. Ihr MSI-Log zeigt aber noch die ursprüngliche Testquelle;
+sie allein beweist keinen Betrieb nach Entfernen des Downloads. Deshalb wurden
+beide unveränderten Downloadkopien vor einer zweiten Reparatur außerhalb der
+Sandbox-Mappings gehalten. Die zweite `/fa ProductCode`-Operation bekommt
+keine Quellen-/Rootargumente und endet um 07:46:06 UTC einschließlich vollem
+erneutem Dateivergleich grün. Das Log belegt tatsächlich
+`Resolved source to:` für `config/installer/<ProductCode>/`; beide Original-
+Downloads waren im Gast abwesend. Anschließend wurden die Host-Testkopien
+hashgleich zurückgelegt. Dieser zweite Lauf (`repairoffline.json`) ist der
+native Nachweis der geschützten Reparaturquelle.
+
+Der dauerhafte E2E-Harness installiert das Upgrade künftig aus einer eigenen
+hashgeprüften Testkopie, entfernt vor Reparatur ausschließlich diese eng
+geprüfte Kopie und verlangt ebenfalls die tatsächliche Cacheauflösung im
+MSI-Log. Eingabeartefakte des Aufrufers bleiben unangetastet. Sieben fokussierte
+Harnesschecks einschließlich Windows-PowerShell-Parse sind grün; die geänderte
+Zwei-Versionen-Matrix selbst ist noch auszuführen.
+
+Der native Standardbenutzerlauf endet um 07:47:57 UTC grün: Nichtadministratives
+Testkonto, Schreibzugriff auf Laufzeitdaten, verweigerte Schreibzugriffe auf
+Programm und Runtimekonfiguration sowie Headless-Healthcheck sind belegt.
+Das eigens angelegte Testkonto ist entfernt. SQLite bestand hier bereits aus
+dem vorherigen SYSTEM-Healthcheck; der alte Ergebnisname
+`sqlite-created-without-admin` darf nicht als erstmalige Datenbankanlage
+gelesen werden. Der Helper protokolliert künftig den Vorbestand und verwendet
+den korrekten Namen `sqlite-present-after-standard-user-health`.
+Die abschließende MSI-Deinstallation mit expliziter Löschung der eigenen
+Testdaten endet um 07:50:29 UTC grün: Programm-/Datenroot, Startmenü und
+Produktregistrierung sind entfernt, Runtime und Testports frei. Die separate
+Beobachtung um 07:51:09 UTC bestätigt keine registrierten NETGRID-Produkte oder
+laufenden Produkt-/Matrixprozesse. Native Ergebnisdateien und MSI-Logs bleiben
+auf dem Host erhalten; es wurden nur Wegwerfdaten des eigenen Tests gelöscht.
+Ein Erststart mit ganz neuer SQLite unter Standarduser,
+nativer Tray-Updater, ursprünglicher Benutzer-Neustart mit anderer Admin-
+Freigabe, Aktivspielschutz, Prozessverlust-Reparatur und die übrigen WIN-I08-
+Gates bleiben gesondert offen. Kein Main-Merge, Worktree-Cleanup oder Push.
 
 ### Regulärer Build 8199: Installation, Repair und Headless nativ grün
 

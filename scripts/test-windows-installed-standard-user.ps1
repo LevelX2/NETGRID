@@ -16,10 +16,12 @@ try {
   $mutable=Join-Path $dataRoot 'runtime\standard-user-write-test.txt'
   [IO.File]::WriteAllText($mutable,'disposable standard-user write probe')
   $environmentFile=Join-Path $dataRoot 'config\runtime.env'
+  $databasePath=Join-Path $dataRoot 'runtime\multiplayer\netgrid.sqlite'
+  $databaseExistedBefore=Test-Path -LiteralPath $databasePath
   $process=Start-Process -FilePath (Join-Path $programRoot 'NETGRID.exe') -ArgumentList @('--headless-verify','--program-root',('"'+$programRoot+'"'),'--environment-file',('"'+$environmentFile+'"')) -PassThru -Wait -WindowStyle Hidden
   if ($process.ExitCode -ne 0) { throw "standard_user_launcher_failed:$($process.ExitCode)" }
-  if (-not (Test-Path -LiteralPath (Join-Path $dataRoot 'runtime\multiplayer\netgrid.sqlite'))) { throw 'standard_user_database_missing' }
-  $result=[ordered]@{ ok=$true; elevated=$false; checks=@('program-file-write-denied','runtime-config-write-denied','runtime-write-allowed','installed-launcher-health-without-admin','sqlite-created-without-admin') }
+  if (-not (Test-Path -LiteralPath $databasePath)) { throw 'standard_user_database_missing' }
+  $result=[ordered]@{ ok=$true; elevated=$false; databaseExistedBefore=$databaseExistedBefore; checks=@('program-file-write-denied','runtime-config-write-denied','runtime-write-allowed','installed-launcher-health-without-admin','sqlite-present-after-standard-user-health') }
 } catch { $result=[ordered]@{ ok=$false; error=$_.Exception.Message } }
 $result | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $resultFile -Encoding utf8
 if (-not $result.ok) { exit 2 }

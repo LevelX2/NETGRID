@@ -53,6 +53,23 @@ test('a second higher artifact version is required before installation', () => {
   assert.match(source, /\[version\]\$updateVersion -gt \[version\]\$baseVersion/);
 });
 
+test('product-code repair proves its protected source after removing only an owned download copy', () => {
+  assert.match(source, /Copy-Item -LiteralPath \$updateMsi -Destination \$upgradeMsiSource/);
+  assert.match(source, /Invoke-Msi @\('\/i', \(Quote-Msi \$upgradeMsiSource\)/);
+  const copyGuard = source.indexOf("'upgrade_source_copy_mismatch'");
+  const scopeGuard = source.indexOf("'upgrade_source_cleanup_scope_invalid'");
+  const remove = source.indexOf('Remove-Item -LiteralPath $resolvedSource');
+  const missing = source.indexOf("'repair_download_source_still_present'");
+  const repair = source.indexOf('Invoke-Msi @("/fa", $productCode');
+  const proof = source.indexOf("'repair_protected_source_not_used'");
+  assert.ok(copyGuard > 0 && scopeGuard > copyGuard && remove > scopeGuard && missing > remove && repair > missing && proof > repair);
+  assert.match(source, /upgrade_source_cleanup_reparse/);
+  assert.match(source, /upgrade_source_changed_before_cleanup/);
+  assert.match(source, /Select-String -LiteralPath \$repairLog -Pattern 'Resolved source to:'/);
+  assert.match(source, /\$_.Line.Contains\(\$protectedSource\)/);
+  assert.doesNotMatch(source, /(?:Remove|Move)-Item -LiteralPath \$(?:baseMsi|baseSetup|updateMsi|updateSetup)\b/);
+});
+
 test('Windows PowerShell parses the harness without executing any operation', { skip: process.platform !== 'win32' }, () => {
   const command = `$t=$null; $e=$null; [Management.Automation.Language.Parser]::ParseFile('${script.replaceAll("'", "''")}',[ref]$t,[ref]$e) | Out-Null; if ($e.Count) { $e | Out-String | Write-Output; exit 1 }`;
   const result = spawnSync('powershell.exe', ['-NoProfile', '-Command', command], { encoding: 'utf8' });

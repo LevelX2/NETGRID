@@ -701,8 +701,13 @@ nicht die reduzierte MSI-Datenbank unter Windows Installer. Ein fehlender oder
 mehrdeutiger Cache bricht sichtbar ab. Der Reader akzeptiert nur das neue
 Format, keine Legacy-Ressource als Ersatz. Der reguläre Extraktionsaudit ruft
 `test-windows-setup-reconstruction.ps1` auf und verlangt Bytegleichheit,
-idempotenten Cache und Ablehnung falscher Bestätigungen. Diese Komponenten-
-und Fixturechecks ersetzen nicht die noch ausstehende neue Sandbox-Abnahme.
+idempotenten Cache und Ablehnung falscher Bestätigungen. Native
+MSI-Alleininstallation und ProductCode-Reparatur von 8207 einschließlich
+Reparatur bei abwesenden ursprünglichen Download-Dateien sind grün. Das
+MSI-Log bestätigt dabei die tatsächlich aufgelöste geschützte Quelle; ein
+bloßer Aufruf ohne Quellenargument ist kein Nachweis dafür, weil Windows
+sonst noch den letzten Downloadpfad verwenden kann. Die neue Zwei-Versionen-
+Matrix und der vollständige Tray-Updater bleiben gesonderte offene Gates.
 Der Audit führt hierfür den tatsächlichen `SetCacheNetgridSetup`-Target aus
 der MSI-Datenbank als rohe Windows-Kommandozeile aus. Argument-Arrays allein
 decken die MSI-Quote-Bindung nicht ab: Ein direkt zitiertes `[INSTALLFOLDER]`
