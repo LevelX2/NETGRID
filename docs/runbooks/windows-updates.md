@@ -89,7 +89,19 @@ fehl. Der validierte Code wird beispielsweise als
 `installation_gate_verification_stop_server_timeout_cleanup_ok` bis zum
 MSI-Helfer weitergereicht. Echte Kindprozess-/Pipe-/HKCU-Fixtures prüfen die
 Weitergabe und behalten auch im Fehlerfall den Nachweis von Prozessende und
-Lease-Rücknahme bei. Die native Abnahme des neuen Releasebuilds steht aus.
+Lease-Rücknahme bei. Die native Weitergabe in einer tatsächlichen MSI-
+Versionstransaktion bleibt zusätzlich abzunehmen.
+
+Der reguläre Build 1.0.8199 enthält beide Korrekturen und die neue Diagnose.
+Seine Neuinstallation über erhaltene Sandboxdaten, vollständige
+Datei-/Versions-/Cacheprüfung und anschließende ProductCode-Reparatur sind
+nativ grün. Fünf echte installierte Headless-Läufe enden jeweils mit Exit 0
+und leerem stderr; Konfiguration und Credentials bleiben unverändert.
+Eine absichtlich fehlende, separate Konfigurationsdatei führt im installierten
+Launcher zu Exit 2 und genau dem erwarteten begrenzten `load`-Fehlerdatensatz.
+Diese Prüfungen liefen unter Sandbox-SYSTEM, nicht als Standardbenutzer.
+Der Versionswechsel zwischen zwei korrigierten Builds, native MSI-
+Fehlerweitergabe und vollständiger Updater-/Rollbacklauf bleiben offen.
 
 Die Builds 8195/8196 enthalten im Snapshotvertrag noch nicht den Ausschluss
 des separaten MSI-Reparaturcaches. Der aktuelle Quellstand korrigiert dies am

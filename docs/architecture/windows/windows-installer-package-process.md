@@ -547,6 +547,60 @@ decken gültige, ungültige, 64-KiB-lange und mit Erfolg widersprüchliche
 stderr-Ausgabe sowohl für normale Update- als auch direkte MSI-Leases ab.
 Ein neues Installerbuild und dessen native Installation bleiben erforderlich.
 
+### Regulärer Build 8199: Installation, Repair und Headless nativ grün
+
+`output/windows-installer-stop-diagnostic-8199` ist regulär aus dem sauberen
+Commit `e5b86f6e268505160ef241746d74468f9551209f` gebaut. Der Lauf endet mit
+Exit 0 einschließlich Produktoutput, 122 Snapshotprüfungen, 42
+Diagnosecodecprüfungen, 139 nativen Verifierchecks, Setup-/First-Run-/Launcher-
+und Lifecycle-Gates, Laufzeitsmokes, 185 Sprachtexten in de/en/fr,
+Layoutmatrix 100/125/150 Prozent und dem vollständigen 10.902-Dateien-
+Installer-Payloadaudit. Die Quellfixes für HTTP-Drain und MSI-Cacheausschluss
+sind enthalten; die offizielle Node-Laufzeit bleibt 24.20.0.
+
+- Setup-SHA-256: `ab54d80ab7f26320f4e76fbd42b42c0d4ba57e57ef75ac37d5d53f288c7192e2`
+- MSI-SHA-256: `a8e6d73808a543ac979c5b38bfd04757a13ef780da205f587a731ca82b8054b9`
+- Produktmanifest-SHA-256: `046f655b8b4ed7ac0bef51a5f71feeb4eade68d68bc5636ae72989065f55d8c7`
+
+Die Dateien und Metadaten liegen zusätzlich hashgleich im bestehenden
+Sandboxeingang `candidate-8199`. Das explizite Fixture `test-native-8199.ps1`
+wurde mit Windows PowerShell 5.1 geparst und prüft den SYSTEM-SID, die
+Artefakt-/Quellidentität, ruhende Produktprozesse und beide geschützten
+Dateien gegen die bestehende Retentionbaseline. Es nimmt keine manuellen
+Programm-, Konfigurations-, Kennwort- oder Registryänderungen vor.
+
+`native-8199-removeold.json` und `native-8199-verifyretained.json` belegen
+die normale ProductCode-Deinstallation von 8195 mit erhaltenen Daten um
+04:22:43 UTC. `native-8199-install.json` belegt die Neuinstallation von 8199
+um 04:25:52 UTC, MSI-Client und -Server jeweils 0. Der Schritt ist ausdrücklich
+kein Upgradebeleg: Er ersetzt die alte Basis mit abweichendem Snapshotvertrag.
+`native-8199-verify.json` prüft danach sämtliche 10.890 Manifestdateien,
+die tatsächlichen vier nativen Dateiversionen und -Hashes, den registrierten
+ProductCode `{3F1D49C5-F6B2-401C-9422-4F255152227D}`, den Setupcache und die
+darauf gebundene Setup-Verknüpfung.
+
+Die ProductCode-Reparatur `/fa` ohne Quellen-/Rootargumente endet um
+04:30:33 UTC mit MSI 0. `native-8199-verifyrepair.json` bestätigt erneut alle
+Dateien sowie denselben Cacheinhalt und dessen unveränderte Schreibzeit
+`2026-09-08T04:25:49.7670920Z`. Die fünf anschließenden echten installierten
+`NETGRID.exe --headless-verify`-Läufe in `native-8199-health.json` enden alle
+mit Exit 0 und leerem stderr. Ihre gesamten Prozesslaufzeiten sind 2437,
+1484, 1467, 1450 und 1461 ms; nach jedem Lauf sind Produktprozesse und beide
+Listener nachweislich beendet. Das ist kein Standardbenutzer-Testat.
+
+`native-8199-diagnostic.json` bestätigt um 04:32:38 UTC den negativen
+Diagnosepfad des tatsächlich installierten Launchers: Eine ausdrücklich
+nicht vorhandene separate Runtime-Datei führt ohne Runtime-Start nach
+159 ms zu Exit 2 und genau
+`NETGRID_VERIFICATION_ERROR stage=load code=invalid_state cleanup=ok`.
+In allen Phasen bleiben `runtime.env` und bestehende Maintenance-Credentials
+bytegleich. Die native Weitergabe eines solchen Fehlers durch den MSI-/
+Updaterprozess ist damit noch nicht zusätzlich bewiesen. Der Hostbetrieb
+bleibt unverändert (Web 3100, PID 25276); kein fremder Prozess wird beendet.
+Eine zweite korrigierte Installer-Version und deren native Versionswechsel,
+Rollback sowie die übrigen WIN-I08-Gates bleiben erforderlich. Kein Push,
+Main-Merge oder Worktree-Cleanup.
+
 | Nachweis | Aktuelle belastbare Evidenz | Noch erforderlich |
 | --- | --- | --- |
 | Produktgrenze und Installer-Payload | Builds 8136 und 8145 regulär aus sauberen Quellständen gebaut, jeweils 10.901-Dateien-Audit und Setup-/MSI-Prüfsummen grün; installierte Binärdateien zusätzlich für 8136 gebunden | Für beide Builds erfüllt; keine Versions-/Hash-Umetikettierung |
