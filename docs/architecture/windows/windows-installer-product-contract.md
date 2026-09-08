@@ -320,7 +320,12 @@ den vollständigen Sicherungsnachweis und erlaubt nur den anschließenden
 regulären MSI-Rollback. Ein Fehlerexit bleibt ein Fehler; selbst Exit 0 ohne
 reguläre Helper-Rückgabe gilt nicht als erfolgreiche Datenoperation.
 Bei Timeout, weiterlaufenden Prozessen, fremdem Owner oder Verlust des
-MSI-Aufrufers bleibt die Bindung bestehen. Die normale Updater-Absturzreparatur
+Custom-Action-Aufrufers bleibt die Bindung bestehen. Der davon getrennte
+`msiexec /i`-Client ist nicht der Halter des Helper-Prozesshandles. Sein
+nativer Abbruch während eines Versionswechsels ist inzwischen mit fortgesetzter
+erfolgreicher Installer-Ausführung belegt; er beweist weder einen Ausfall
+des Custom-Action-Hosts noch eine verwaiste MSI-Transaktion. Umfang und
+unabhängige Abschlussnachweise stehen im Update-Runbook. Die normale Updater-Absturzreparatur
 darf sie weiterhin nicht löschen. Same-Product-Repair, Erstinstallation,
 Uninstall, verschachtelte Altproduktentfernung und bereits außen abgesicherte
 Updater-MSI-Teiltransaktionen erzeugen keine zweite Datensicherung.

@@ -238,10 +238,34 @@ unverändert, vorherige MSI-Caches erhalten, Runtime gestoppt und Testports
 frei. Der aktuelle Sandboxstand ist damit 8219, nicht einer der absichtlich
 zurückgerollten Zwischenstände.
 
-Offen bleibt der andere Fall, dass der MSI-Aufrufer selbst verloren geht:
-Ohne seinen erhaltenen Prozesshandle wird keine pauschale verwaiste Bindung
-gelöscht. Die beiden Crashläufe ersetzen weder diesen Nachweis noch den
-vollständigen Tray-/GitHub-Updater.
+Der zusätzliche native Client-Crashlauf 8217→8219 am 8. September trennt
+den `msiexec /i`-Client vom ausführenden Custom-Action-Host. Nur Client PID
+5260 wird während des gebundenen Healthchecks abrupt beendet (Exit -1).
+Helper, Verifier, Custom-Action-Host und Installer-Dienst bleiben erhalten.
+Die Ausführung schließt das Upgrade erfolgreich ab: MsiInstaller-Ereignis
+1033 bestätigt 1.0.8219 mit Status 0, Ereignis 1042 beendet dieselbe
+Clienttransaktion. Der unabhängige Nachtest prüft die abgeschlossene Lease
+mit genau dem gebundenen verifizierten Snapshot, die native Produktregistrierung,
+sämtliche Manifest-/Native-/Cache-/Shortcutidentitäten, erhaltene frühere
+MSI-Caches und einen weiteren tatsächlichen Headless-Healthlauf mit Exit 0.
+Konfiguration und Credentials sind unverändert; um 13:01:28 UTC sind Runtime
+und Testports frei. Führend ist `native-msi-client-loss-terminal-8219.json`
+im aktiven Sandboxlauf; Beweishashes stehen im Paketprozess.
+
+Zwei rote Testberichte bleiben als Diagnosen erhalten: Der erste Versuch
+verweigerte jede Fehlerauslösung wegen eines abschließenden Leerzeichens in
+der Windows-Kommandozeile; der korrigierte Test vergleicht vollständige
+Windows-Argumentlisten statt roher Textsuffixe. Beim tatsächlichen Crash
+fehlte anschließend ein erwarteter Helper-Logmarker im Client-Protokoll.
+Dieser fehlende Logmarker ist kein Produktfehlernachweis; Abschluss und
+Funktionsfähigkeit wurden unabhängig über Ereignisse, geschützte Bindung,
+vollständige installierte Identität und realen Start/Stopp geprüft. Kein roter
+Bericht wurde umgeschrieben und kein Produktgate abgeschwächt.
+
+Offen bleibt der Verlust des synchronen Custom-Action-Hosts selbst oder des
+ausführenden Installer-Dienstes. Ohne den erhaltenen Helper-Prozesshandle
+wird keine pauschale verwaiste Bindung gelöscht. Ein Client-Crash ersetzt
+weder diesen weitergehenden Nachweis noch den vollständigen Tray-/GitHub-Updater.
 
 Offen sind weiterhin der vollständige GUI-/Tray-Updater mit gebundener Pipe, ursprünglichem
 Benutzerneustart und anderer UAC-Administratorfreigabe sowie

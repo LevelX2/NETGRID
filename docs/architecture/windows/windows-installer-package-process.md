@@ -190,6 +190,61 @@ erhalten. Abschluss: 12:37:43.3990304 UTC. Aktuell ist in der Sandbox 8219
 installiert; Runtime gestoppt und 32141/32142 frei. Ein neues UAC-/GUI-Gate
 oder vollständiger GitHub-/Tray-Updater wird dadurch nicht behauptet.
 
+### Aktiver Prüfpunkt: MSI-Clientverlust und verbleibender Ausführungsabbruch
+
+Am 8. September wurde der Verlust des direkten `msiexec /i`-Clients getrennt
+vom Verlust des Custom-Action-Hosts geprüft. Windows Installer trennt
+[Aufruf und erhöhte Ausführung](https://learn.microsoft.com/en-us/windows/win32/msi/installation-mechanism);
+ein gestorbener Client beweist deshalb keinen abgebrochenen Serverlauf.
+
+Der erste Versuch 8219→8217 löste keine Fehlerfixture aus: Der rohe
+Kommandozeilenvergleich verweigerte das Beenden mit
+`owned_msi_client_identity_invalid`. Die native Kommandozeile enthält ein
+zusätzliches abschließendes Leerzeichen. Die Installation lief regulär mit Server-/Client-Exit 0
+zu Ende; der vollständige 8217-Datei-/Cache-Abgleich bestand im Preflight des
+Folgeversuchs. Dieser erste Versuch ist kein Crashnachweis und bleibt als
+`native-8219-8217-msi-client-crash.json` mit `ok=false` erhalten.
+
+Der Folgetest vergleicht mittels `CommandLineToArgvW` die vollständige
+Argumentliste und weiterhin den tatsächlichen Prozesshandle, Image und
+Startzeit. `native-msi-client-v2-identity.json` bestätigt identische Argumente,
+Image und Startzeit bei abweichendem rohem Textsuffix. Während des echten
+8217→8219-Verify-Laufs beendet der Test nur seinen Client PID 5260
+(Start 12:56:17.1182222 UTC, Exit -1). Der gebundene Helper PID 6724,
+sein Custom-Action-Elternprozess PID 1888 und der Verifier PID 448 bleiben
+unangetastet. Der Abbruch erfolgt bei `verifying`, Lease
+`7ca165223ed1423ab06deb69a426fc68`, Snapshot
+`3b694991d35641bab1e456c157403439`, Manifest-SHA-256
+`f6203377857e8d507e0e3d8036cff9e61f588f244a1a6d077b6036c2cc9e06f4`.
+`native-8217-8219-msi-client-v2-crashed.json`, SHA-256
+`019d78c2ebd4d17c4abfd95e0a2d7a88cd2cc2e9736f4fad610419648ead38c5`,
+bindet diese Fehlerauslösung.
+
+Das abgebrochene Client-Protokoll enthält den erwarteten abschließenden
+Helper-Logmarker nicht. Deshalb bleibt auch der ursprüngliche Testbericht
+`native-8217-8219-msi-client-crash-v2.json` mit `verify_marker_missing` und
+SHA-256 `110a02f67aaa4fffe9d55c29649b29f9b916aa20d99d35051a4ed0bb96c95d13`
+unverändert rot. Das ist kein Beleg für einen fehlgeschlagenen Produktcheck.
+Der unabhängige Nachtest `native-msi-client-loss-terminal-8219.json`, SHA-256
+`b7b372edd2a32dcf0dcfe5676d55dfaca87cd39e172d5ed011e68b3517fc9d44`,
+prüft denselben gebundenen Snapshot als `verified` und dieselbe abgeschlossene
+Lease, alle 10.890 Manifestdateien, fünf native Images, MSI-/Setupcache,
+Verknüpfung und native Windows-Installer-Produktregistrierung (State 5).
+MsiInstaller-Ereignis 1033 meldet Version 1.0.8219 mit Status 0 um
+13:00:01.6756483 UTC; Ereignis 1042 beendet dieselbe Transaktion für Client
+5260. Der zusätzliche tatsächliche Headless-Healthlauf endet mit Exit 0.
+Alle vorherigen MSI-Caches, Konfiguration und Credentials bleiben unverändert.
+Abschluss 13:01:28.9863918 UTC: 8219 installiert, Runtime gestoppt, Testports
+32141/32142 frei. Keine Vordergrundeingaben, kein Host-Installer und keine
+Registry-Freigabe wurden dafür verwendet.
+
+Der Verlust des MSI-Clients ist damit in diesem nativen Versionswechsel
+nachgewiesen: Die erhöhte Ausführung beendet das Upgrade gesund, nicht per
+Rollback. Der Verlust des synchronen Custom-Action-Hosts beziehungsweise
+des ausführenden Installer-Dienstes und eine dadurch tatsächlich verwaiste
+MSI-Transaktion bleiben offen. Dieser Befund ersetzt weder diese Gates noch
+die vollständige Tray-/GitHub-/UAC-Abnahme; WIN-I08 bleibt aktiv.
+
 ### Aktiver Prüfpunkt: Setup-Reparaturquelle und Archivschutz
 
 WIN-I08 bleibt aktiv. Der Sandboxlauf
