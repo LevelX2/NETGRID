@@ -94,8 +94,8 @@ eigene Account-, Cleanup- oder Versionsautorität.
 
 ### Aktiver Prüfpunkt: beendeter MSI-Helfer und Fehlerrollback
 
-Die installierte Sandbox bleibt unverändert auf dem abgenommenen 8217-Stand.
-Der folgende Ursachenfix ist zunächst ausschließlich komponentengeprüft:
+Ausgangsstand der folgenden nativen Prüfungen ist die abgenommene
+8217-Sandboxinstallation. Die komponentenweise reproduzierte Ursache:
 Ein echter beendeter Kindprozess hinterließ seine direkte MSI-Operationsrolle;
 der nächste Helper wurde daraufhin mit
 `installation_gate_msi_operation_already_owned` abgewiesen. Der neue
@@ -120,10 +120,75 @@ Sein eigener UTF-8-Steuerkanal ist ausdrücklich dekodiert; die zunächst rote
 Fixture hatte das Framework-UTF-8-Präfix mit der geerbten OEM-Codepage gelesen.
 Produktprotokolle wurden dafür nicht verändert.
 
-Noch kein neues Bundle und kein nativer MSI-Crash-/Rollback-Nachweis für diese
-Korrektur. Ein Verlust des MSI-Aufrufers selbst ist davon nicht abgedeckt;
-die explizite verwaiste MSI-Abnahme bleibt offen. WIN-I08, Integration und
-Cleanup sind weiter offen; keine Remoteübertragung.
+Der reguläre Build 8219 aus dem sauberen Quellcommit
+`502f4f7ace78c613ef253b32735486f34e13fcf0` liegt unter
+`output/windows-installer-helper-exit-8219`. Vollständige Windows-Komponentengates
+einschließlich des neuen Framework-Gates, 2.291 Setupchecks, 191 Sprachschlüssel,
+27 Renderbilder und Audit aller 10.903 Payload-Dateien sind grün.
+Setup: 353.126.987 Bytes, SHA-256
+`0f93fcca8f7176b5601512ce6ac8b475463cbd38e4641c4185d415973e77a339`.
+MSI: 300.933.980 Bytes, SHA-256
+`096057a032523029e1850656a46a934d62650d636398a0e8ef9d450389e33398`.
+ProductCode `{5E17630B-3396-487F-89E8-FFA978847097}`. Metadaten und
+Gastkopien wurden gegen die Originalartefakte geprüft, nicht umgeschrieben.
+
+Im bestehenden Laufordner
+`output/windows-sandbox-e2e/32fb2f4eff424959a9d41c29b9adadd3/result`
+liegen zwei unabhängige native MSI-Crashnachweise:
+
+- `native-8217-8219-helper-crash.json`, SHA-256
+  `fce3b6909209353e96b14b79dcf3c01eb4c2b3d8e32b3c7c4eebb844eb3b42aa`:
+  tatsächlicher abrupter Abbruch des gebundenen 8219-Prüfhelpers PID 5276,
+  Exit -1 in `stopping`, vor Verifierstart. Der native MSI-Aufrufer gibt die
+  Helper-Rolle zurück und führt Fehlerrollback samt Datenrestore durch.
+  Snapshot `57e22842c60e45c6a6cdbf78912edcaa`, separater Fehlerstand
+  `51a79a475ead48628bd472c3d7aff891`. Nachprüfung 12:24:41.8177583 UTC grün.
+  Crashbindungs-SHA-256:
+  `6e388b7aea01b8a853fb6cde1a26b7f66dfd3780d54857214760994f0baf9eac`;
+  MSI-Log-SHA-256:
+  `f978bb01f43083f8592d5c802e3454d7218e147da224caaeb811810f80734f62`.
+- `native-8217-8219-helper-verifier-crash.json`, SHA-256
+  `a0e65f0347b034df251ccc4819546de5f5f7ccba4f76f01435ba035b2b80ffd2`:
+  Abbruch des Helpers PID 3796 bei `verifying`, mit tatsächlich lebendem
+  gebundenem Verifier PID 5592. Dieser beendet sich nach Ownerverlust selbst
+  mit Exit 2. Nur der Helper wird als Fehlerfixture beendet, nicht der
+  Verifier, MSI oder fremde Produktprozesse. Anschließend regulärer Restore
+  aus `3fda5f0f9c194b28bfe1337ea64237cd`; Fehlerstand
+  `206234f02c694289832994419696bcae` bleibt erhalten. Abschlussprüfung
+  12:31:34.3054655 UTC grün. Crashbindungs-SHA-256:
+  `2b471480f0b744a72db5bfdf6a7a36d8951e223fb971003ecda742bb7f04a963`;
+  MSI-Log-SHA-256:
+  `bf27a8f34636cceb5eadc784701f956ff948e032321b61275d5ae69f1e39d2e2`.
+
+Beide Gesamtbelege verlangen MSI-Exit 1603 als erwarteten injizierten Fehler,
+`NETGRID_MSI_HELPER_RETURNED`, tatsächlichen `restore` und abgeschlossenen
+Rollback. Danach werden sämtliche 10.890 Manifestdateien und fünf nativen
+PE-Dateien des zurückgestellten 8217-Stands, Registrierung, Cache und Shortcut
+geprüft. Nach Capture veränderte eigene Testdateien und DACLs sind exakt
+zurückgestellt, neue Testdateien entfernt und deren fehlgeschlagene Bytes
+separat erhalten. Der alte Setupcache ist hash- und zeitgleich. Konfiguration
+und bestehende Credentials bleiben unverändert. Der jeweilige anschließende
+Headless-Healthlauf endet mit Exit 0; Runtime beendet und Testports frei.
+Die eigene Registry wurde nicht zur Freigabe umgeschrieben, keine Windows-
+oder Authentifizierungsdialoge automatisiert. Der native Helper-Abbruchpfad
+ist damit geschlossen. Ein Verlust des MSI-Aufrufers selbst ist nicht
+abgedeckt; dessen verwaiste MSI-Abnahme bleibt offen. WIN-I08, Integration
+und Cleanup bleiben offen; keine Remoteübertragung.
+
+Danach bestand auch der normale Setup-Upgradeweg 8217→8219 auf denselben
+Originalartefakten. `native-8217-8219-upgrade.json` (SHA-256
+`5afd55bfb8fa7cd0ac16d8cafa6ee752a7302a54fbb8963b08ab052250ae7f5b`)
+bestätigt Setup-Exit 0, Capture und gebundenen Healthcheck.
+`native-8217-8219-verifyupgrade.json` (SHA-256
+`f79d4114fac935d9b6d73589966faac01ea53621f302d9133eec44856cca892d`)
+bestätigt den vollständigen installierten Manifest-/Native-/Cache-/Shortcut-
+Abgleich und die abgeschlossene verifizierte MSI-Lease. Snapshot
+`2826e80d25f647b3ac8c444100b36c5f`, Manifest-SHA-256
+`57feb967a5fa5ffb1d1e139cd965b6fddaccced61aa4fc7703c56538a4718737`.
+Konfiguration und Credentials bleiben unverändert, vorherige MSI-Caches
+erhalten. Abschluss: 12:37:43.3990304 UTC. Aktuell ist in der Sandbox 8219
+installiert; Runtime gestoppt und 32141/32142 frei. Ein neues UAC-/GUI-Gate
+oder vollständiger GitHub-/Tray-Updater wird dadurch nicht behauptet.
 
 ### Aktiver Prüfpunkt: Setup-Reparaturquelle und Archivschutz
 
@@ -168,7 +233,7 @@ MSI: 300.938.076 Bytes, SHA-256
 Metadaten, Originaldateien und Gastkopien sind hashgebunden; keine
 Versions-/Prüfsummenmetadaten wurden nachträglich umgeschrieben.
 
-Die bestehende Sandbox ist jetzt regulär auf 8217 installiert,
+Für diesen MSI-Quellnamennachweis wurde die Sandbox regulär auf 8217 installiert,
 ProductCode `{268656CD-6328-40FF-9F19-26BD1E4475D6}`. Neue Belege im selben
 Laufordner:
 

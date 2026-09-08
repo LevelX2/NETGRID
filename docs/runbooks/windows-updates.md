@@ -213,9 +213,35 @@ nur eigene HKCU-Schlüssel; kein MSI und keine Produktinstallation wurde durch
 diese Komponententests gestartet. Der Framework-Prüfer ist nun ein festes
 Gate im regulären Installerbuild.
 
-Der native MSI-Lauf mit abrupt beendetem Helper steht noch aus. Ebenso offen
-bleibt der andere Fall, dass der MSI-Aufrufer selbst verloren geht: Ohne
-seinen erhaltenen Prozesshandle wird keine pauschale verwaiste Bindung gelöscht.
+Zwei native MSI-Crashläufe mit dem regulären Kandidaten 8219 schließen
+inzwischen den Helper-Nachweis: Einmal stirbt der exakt gebundene Prüfhelper
+in `stopping` vor Start des Verifiers, einmal in `verifying` mit tatsächlich
+laufendem Verifier. Im zweiten Lauf endet der Verifier nach Ownerverlust
+selbstständig mit Exit 2; er wird nicht beendet. Beide Male gibt der echte
+MSI-Aufrufer nur die Helper-Rolle zurück, meldet erwartungsgemäß 1603 und
+führt seinen regulären Datenrestore und Rollback bis zur abgeschlossenen
+Lease aus. Die installierten 10.890 Manifestdateien und fünf nativen Programme
+entsprechen danach wieder 8217. MSI-/Setupcache und Shortcut stimmen; der
+alte Setupcache bleibt auch zeitgleich. Nach Capture veränderte eigene
+Testdateien werden inklusive DACL zurückgestellt, nachträglich hinzugefügte
+Dateien entfernt und der fehlgeschlagene Datenstand separat erhalten.
+Konfiguration und Credentials bleiben bytegleich. Beide anschließenden
+Headless-Start-/Stoppchecks enden mit Exit 0, danach sind Runtime und Testports
+frei (8. September, 12:24:41 und 12:31:34 UTC). Artefakt- und Beweishashes
+stehen im aktiven Paketprozess.
+
+Der anschließende ungestörte Setup-Lauf auf denselben Artefakten installiert
+8217→8219 mit Exit 0. Capture, gebundener Verifier und MSI-Abschluss gelingen;
+die vollständige installierte Manifest-/Native-/Cache-/Shortcutprüfung ist
+am 8. September um 12:37:43 UTC grün. Konfiguration und Credentials sind
+unverändert, vorherige MSI-Caches erhalten, Runtime gestoppt und Testports
+frei. Der aktuelle Sandboxstand ist damit 8219, nicht einer der absichtlich
+zurückgerollten Zwischenstände.
+
+Offen bleibt der andere Fall, dass der MSI-Aufrufer selbst verloren geht:
+Ohne seinen erhaltenen Prozesshandle wird keine pauschale verwaiste Bindung
+gelöscht. Die beiden Crashläufe ersetzen weder diesen Nachweis noch den
+vollständigen Tray-/GitHub-Updater.
 
 Offen sind weiterhin der vollständige GUI-/Tray-Updater mit gebundener Pipe, ursprünglichem
 Benutzerneustart und anderer UAC-Administratorfreigabe sowie
