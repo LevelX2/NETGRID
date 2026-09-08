@@ -29,6 +29,18 @@ festen Parallelprozesse oder mehr als ein Worker je Shard werden erst nach
 einer dokumentierten Laufzeit-, RAM- und Stabilitätsmessung zum neuen Standard.
 
 Tests mit Timeout oder abgebrochene Prozesse gelten nicht als bestanden.
+Die GitHub-CI führt die serielle AI-Paketsuite und die übrigen Workspace-Pakete
+in unabhängigen Jobs aus. `fail-fast: false` und `pnpm -r --no-bail` lassen
+andere Testgruppen beziehungsweise Pakete auch nach einem Fehler auswerten;
+kein Fehler wird dabei ignoriert. Discovery und Spec-Tests laufen auch nach
+einem Paketfehler, sofern die Installation erfolgreich war. Der unveränderte
+Gesamtcheck `Test suite` wird nur grün, wenn beide Gruppen erfolgreich sind.
+So verdeckt ein früher AI- oder Webfehler nicht mehr die nachgelagerte
+Serverdiagnose. Lokale Testbefehle und die AI-Workergrenze bleiben unverändert.
+Der gefilterte Workspace-Job schließt auch das Root-Paket `netgrid-app`
+explizit aus: Ein negativer pnpm-Filter würde dessen rekursives `test`-Script
+sonst mit auswählen und die AI-Suite unbeabsichtigt nochmals starten.
+
 Ein grüner Testzähler reicht nicht: Auch der Sammelbefehl einschließlich
 Prozessende und Cleanup muss erfolgreich abschließen. Temporäre Dateisperren
 dürfen nach beendetem Testprozess begrenzt abgewartet werden; dauerhaft
@@ -93,6 +105,13 @@ nicht stillschweigend zum Vertrag erklären.
 - Funktionale Langsimulationen sind keine impliziten Performance-Gates. Ihre
   Timeouts erhalten ausreichenden, am parallelen Gate-Betrieb gemessenen
   Spielraum; Laufzeitgrenzen werden in gesonderten Performance-Tests geprüft.
+  Der funktionale SQLite-Lasttest mit 25 Match-Fixtures und kumulativ 36
+  Aktionsbelegen behält alle drei Laststufen. Seine auf Linux CI gemessenen
+  6,74 Sekunden überschritten nur den impliziten Vitest-Default von fünf
+  Sekunden; ein explizites 30-Sekunden-Fenster begrenzt nun Setup, I/O und
+  Prüfung ohne eine unbeauftragte Performance-SLA. Datenbankhandles und das
+  eigene temporäre Verzeichnis werden auch bei Assertionsfehlern geschlossen
+  beziehungsweise entfernt.
 
 Eine rote Erwartung wird erst geändert, nachdem Legalität, Runtime-/Replay-
 Fehlerfreiheit und der aktuelle Fachvertrag das beobachtete Verhalten gemeinsam
