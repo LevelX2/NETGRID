@@ -44,6 +44,14 @@ nicht stillschweigend zum Vertrag erklären.
   die Vollständigkeit, Eindeutigkeit und Gültigkeit jedes aktuell enthaltenen
   Eintrags. Eine exakte Anzahl ist nur zulässig, wenn gerade die Kardinalität
   selbst ein versionierter Vertrag ist.
+  Für den aktiven CardSpec-/KI-Hint-Bestand ist 618 die etablierte Mindestmenge,
+  keine Obergrenze. Compiler-, Artefakt- und Review-Partitionsprüfungen sichern
+  daneben die exakte aktuelle ID-Menge, Eindeutigkeit und vollständige Abbildung;
+  fehlende, fremde oder doppelte IDs bleiben Fehler.
+  Eine Vollinventar-Prüfung unabhängiger API-Antworten erhält einen benannten
+  parametrisierten Test je aktuellem Eintrag statt einer Schleife unter einem
+  gemeinsamen Zeitlimit. Der gesamte Bestand bleibt geprüft, ohne dass allein
+  Wachstum oder CI-Last einen funktionalen Vertrag zum Performance-Gate machen.
 - Verhaltenssimulationen binden sich an semantische Ereignisse, Plan-Owner,
   Executor, Capability, Evidence und relative Reihenfolgen. Absolute
   Aktionsindizes, `stateVersion`, Endstände und `StateHash` gehören nur in
