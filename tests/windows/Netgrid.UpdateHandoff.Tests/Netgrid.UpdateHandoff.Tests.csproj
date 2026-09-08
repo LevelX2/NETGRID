@@ -17,9 +17,12 @@
     <Compile Include="../../../apps/windows/Common/InstallationGate.cs" Link="InstallationGate.cs" />
     <Compile Include="../../../apps/windows/Common/InstallationLaunchFence.cs" Link="InstallationLaunchFence.cs" />
     <Compile Include="../../../apps/windows/Common/InstallationLease.cs" Link="InstallationLease.cs" />
+    <Compile Include="../../../apps/windows/Common/InstallationLease.MsiData.cs" Link="InstallationLease.MsiData.cs" />
+    <Compile Include="../../../apps/windows/Common/MsiDataBinding.cs" Link="MsiDataBinding.cs" />
     <Compile Include="../../../apps/windows/Common/UpdateRecoveryBinding.cs" Link="UpdateRecoveryBinding.cs" />
     <Compile Include="../../../apps/windows/Common/UpdateVerification.cs" Link="UpdateVerification.cs" />
     <Compile Include="../../../apps/windows/Netgrid.Updater/UpdateVerifier.cs" Link="UpdateVerifier.cs" />
+    <Compile Include="../../../apps/windows/Netgrid.Updater/MsiDataTransaction.cs" Link="MsiDataTransaction.cs" />
     <Compile Include="../../../apps/windows/Netgrid.Updater/UpdateSession.cs" Link="UpdateSession.cs" />
     <Compile Include="../../../apps/windows/Netgrid.Updater/OriginalUserRestart.cs" Link="OriginalUserRestart.cs" />
     <Compile Include="../../../apps/windows/Common/UpdateRequest.cs" Link="UpdateRequest.cs" />

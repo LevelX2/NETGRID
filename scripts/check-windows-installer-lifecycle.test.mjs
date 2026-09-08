@@ -44,5 +44,7 @@ test("upgrade order, nested cleanup and outer lease forwarding are mandatory", (
     value => value.replace('Id="NETGRID_UPDATE_LEASE" Secure="yes"', 'Id="NETGRID_UPDATE_LEASE" Secure="no"'),
     value => value.replace('Id="NETGRID_UPDATE_LEASE" Secure="yes" Hidden="yes"', 'Id="NETGRID_UPDATE_LEASE" Secure="yes" Hidden="no"'),
     value => value.replaceAll(' AND NOT UPGRADINGPRODUCTCODE', ''),
+    value => value.replace('Action="VerifyNetgridLifecycle" Before="InstallFinalize"', 'Action="VerifyNetgridLifecycle" After="InstallFinalize"'),
+    value => value.replace('DllEntry="VerifyNetgridLifecycle" Execute="deferred"', 'DllEntry="VerifyNetgridLifecycle" Execute="commit"'),
   ]) assert.throws(() => checkLifecycleSource(mutate(source)), /installer_lifecycle_/);
 });

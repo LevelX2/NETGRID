@@ -25,6 +25,7 @@
     <CustomAction Id="PrepareNetgridLifecycle" BinaryRef="NetgridLifecycleActions" DllEntry="PrepareNetgridLifecycle" Execute="immediate" Return="check" />
     <CustomAction Id="RollbackNetgridLifecycle" BinaryRef="NetgridLifecycleActions" DllEntry="RollbackNetgridLifecycle" Execute="rollback" Impersonate="no" Return="check" HideTarget="yes" />
     <CustomAction Id="BeginNetgridLifecycle" BinaryRef="NetgridLifecycleActions" DllEntry="BeginNetgridLifecycle" Execute="deferred" Impersonate="no" Return="check" HideTarget="yes" />
+    <CustomAction Id="VerifyNetgridLifecycle" BinaryRef="NetgridLifecycleActions" DllEntry="VerifyNetgridLifecycle" Execute="deferred" Impersonate="no" Return="check" HideTarget="yes" />
     <CustomAction Id="CommitNetgridLifecycle" BinaryRef="NetgridLifecycleActions" DllEntry="CommitNetgridLifecycle" Execute="commit" Impersonate="no" Return="check" HideTarget="yes" />
 
     <StandardDirectory Id="ProgramFiles64Folder">
@@ -51,7 +52,7 @@
     </Component>
     <Component Directory="INSTALLFOLDER">
       <File Id="NetgridLauncher" Source="$(LauncherRoot)\NETGRID.exe" />
-      <RegistryValue Root="HKLM" Key="Software\LevelX2\NETGRID" Name="InstallerLifecycleProtocol" Type="string" Value="msi-preparation-v1" />
+      <RegistryValue Root="HKLM" Key="Software\LevelX2\NETGRID" Name="InstallerLifecycleProtocol" Type="string" Value="msi-data-v1" />
     </Component>
     <Component Directory="INSTALLFOLDER">
       <File Id="NetgridFirstRun" Source="$(FirstRunRoot)\NETGRID.FirstRun.exe" />
@@ -213,6 +214,7 @@
       <Custom Action="RollbackNetgridLifecycle" After="InstallInitialize" />
       <Custom Action="BeginNetgridLifecycle" After="RollbackNetgridLifecycle" />
       <Custom Action="CommitNetgridLifecycle" After="BeginNetgridLifecycle" />
+      <Custom Action="VerifyNetgridLifecycle" Before="InstallFinalize" />
       <Custom Action="InitializeNetgridRuntime" After="InstallFiles" Condition='NOT REMOVE~="ALL"' />
       <Custom Action="CacheNetgridMsi" After="InitializeNetgridRuntime" Condition='NOT Installed AND NOT REMOVE~="ALL"' />
       <Custom Action="CacheNetgridSetup" After="CacheNetgridMsi" Condition='NOT REMOVE~="ALL" AND NETGRID_SETUP_SOURCE &lt;&gt; ""' />

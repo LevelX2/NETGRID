@@ -99,7 +99,7 @@ Freigabe zur manuellen Sperrentfernung. Die eigentliche Nativevidence muss
 beide Wege, Absage, Verbindungsende und Prozessstopp getrennt nachweisen.
 
 `installation_gate_protocol_unsupported` weist einen installierten Stand ohne
-`InstallerLifecycleProtocol=msi-preparation-v1` vor der neuen Sperrphase ab.
+`InstallerLifecycleProtocol=msi-data-v1` vor der neuen Sperrphase ab.
 Alte Testbuilds dürfen deshalb nicht als Basis der neuen Zwei-Versionen-
 Matrix verwendet werden. `installation_gate_upgrade_root_changed` verhindert
 einen stillen Ordnerwechsel. Gleiche-Version-Reparatur ohne aktive Runtime
@@ -138,9 +138,35 @@ normalen Rollback. Ein Archiv darf seine eigene Prüfsumme nicht als
 Wiederherstellungsfreigabe liefern. Das vorherige Setup liegt zusätzlich
 prüfsummengebunden im Snapshot, unabhängig vom inzwischen ersetzten Cache.
 Der explizite Reparatureinstieg ist komponentenweise implementiert; seine
-native erhöhte Abnahme und die direkte MSI-Anbindung bleiben offen.
+native erhöhte Abnahme bleibt offen. Direkte MSI-Versionswechsel verwenden
+inzwischen ebenfalls Snapshot, gebundene Prüfung und Datenrestore; die
+vollständige native Transaktion ist noch nicht abgenommen.
 Archive nicht manuell in eine laufende Runtime
 kopieren; insbesondere darf dabei kein Credentialstore überschrieben werden.
+
+Der direkte MSI-Pfad ruft den installierten Updater ausschließlich synchron
+für `capture`, `verify` und bei Rollback `restore` auf. Diese internen
+`--msi-data`-Befehle sind keine manuelle Reparaturfreigabe. Der geschützte
+`MsiData`-Wert im Lifecycle-Key bindet Programmtransaktion, ProductCode,
+Datenroot, Snapshot und Prüfergebnis; Commit und Rollback verweigern die
+Freigabe ohne passenden Nachweis. Ein Timeout beendet keinen schreibenden
+Helper gewaltsam. Bleibt eine Helper-/MSI-Bindung nach Prozessverlust zurück,
+müssen Ursache und tatsächlicher MSI-Zustand geprüft werden; nicht manuell
+Registrywerte entfernen oder die normale Absturzreparatur erzwingen.
+
+Die reale MSI-Sequenz lässt sich ohne Installation prüfen:
+
+```powershell
+.\scripts\test-windows-msi-authoring.ps1
+```
+
+Voraussetzungen sind der aktuell gebaute DTF-Wrapper und die lokalen
+Installer-Lizenzinputs. Das Script baut mit WiX 7 eine eindeutig als
+`AUTHORING-PROBE-NOT-FOR-INSTALL.msi` benannte Fixture mit inerten
+Ersatzdateien und prüft die echten MSI-Tabellen read-only. Es startet keine
+Installation und ist weder ein Produktoutput noch ein auszulieferndes Artefakt.
+Die Prüfung muss `RemoveExistingProducts < VerifyNetgridLifecycle <
+InstallFinalize` sowie fünf korrekt gebundene Lifecycle-Exporte nachweisen.
 
 Für die kontrollierte Reparatur eines abgebrochenen Updater-Laufs lautet der
 Einstieg bei Standardinstallation:

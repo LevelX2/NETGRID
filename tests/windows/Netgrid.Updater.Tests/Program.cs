@@ -9,6 +9,7 @@ try
     Console.WriteLine($"WINDOWS_UPDATE_RECOVERY_TEST_OK checks={RecoveryTests.Run(updater)} execution=isolated-callbacks UAC=not-started");
     var contractPath = Path.Combine(scratch, "contract.json");
     var main = updater.GetType("Netgrid.Updater.Program", throwOnError: true)!.GetMethod("Main", BindingFlags.NonPublic | BindingFlags.Static)!;
+    Assert((int)main.Invoke(null, [new[] { "--msi-data", "invalid" }])! == 3, "malformed_msi_request_must_exit_without_native_dialog");
     Assert((int)main.Invoke(null, [new[] { "--audit-contract", contractPath }])! == 0, "contract_audit_failed");
     using (var contract = System.Text.Json.JsonDocument.Parse(File.ReadAllText(contractPath)))
     {

@@ -122,7 +122,9 @@ Sidecars und Kartenbildern; historische Backups und Installer-Caches sind
 ausgeschlossen. Credentials und Runtimekonfiguration werden beim Restore
 nicht überschrieben. Der Updater führt das MSI-Upgrade aus und startet erst
 nach Healthcheck neu. Der neue Sicherungspfad ist komponentenweise geprüft;
-direkte MSI-Anbindung und native Abnahme bleiben offen. Ein expliziter
+direkte MSI-Versionswechsel sind inzwischen an denselben Snapshot-/Restore-
+Owner und den gebundenen Verifier angeschlossen. Ihre Prüfung liegt vor dem
+MSI-Transaktionsabschluss; die native Gesamt-Abnahme bleibt offen. Ein expliziter
 Reparatureinstieg nach Prozessverlust ist mit geschützter Snapshot-/Setup-
 Bindung und geprüfter Übernahme der verwaisten Lease komponentenweise
 implementiert, aber noch nicht nativ abgenommen. Bei Fehlern werden Programm und Daten soweit sicher möglich zurückgerollt,

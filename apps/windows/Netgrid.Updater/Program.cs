@@ -10,6 +10,7 @@ internal static class Program
     [STAThread]
     private static int Main(string[] args)
     {
+        if (args.Length > 0 && args[0] == "--msi-data") return MsiDataEntry.Run(args);
         try
         {
             if (args.Length == 2 && args[0] == "--audit-localization")

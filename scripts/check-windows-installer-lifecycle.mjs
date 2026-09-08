@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
-const actions = ["PrepareNetgridLifecycle", "BeginNetgridLifecycle", "CommitNetgridLifecycle", "RollbackNetgridLifecycle"];
+const actions = ["PrepareNetgridLifecycle", "BeginNetgridLifecycle", "VerifyNetgridLifecycle", "CommitNetgridLifecycle", "RollbackNetgridLifecycle"];
 
 export function checkLifecycleBinary(file) {
   const bytes = readFileSync(file);
@@ -67,11 +67,17 @@ export function checkLifecycleSource(authoring) {
   const upgrade = authoring.match(/<MajorUpgrade\b[^>]*>/)?.[0];
   if (!upgrade?.includes('Schedule="afterInstallExecute"'))
     throw new Error("installer_lifecycle_upgrade_sequence_invalid");
+  const verification = authoring.match(/<Custom Action="VerifyNetgridLifecycle"[^>]+>/)?.[0];
+  if (!verification?.includes('Before="InstallFinalize"'))
+    throw new Error("installer_lifecycle_verification_sequence_invalid");
+  const definition = authoring.match(/<CustomAction Id="VerifyNetgridLifecycle"[^>]+>/)?.[0];
+  if (!definition?.includes('Execute="deferred"') || !definition.includes('Impersonate="no"') || !definition.includes('Return="check"'))
+    throw new Error("installer_lifecycle_verification_execution_invalid");
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const index = process.argv.indexOf("--binary");
   if (index < 0 || !process.argv[index + 1]) throw new Error("installer_lifecycle_binary_required");
   checkLifecycleBinary(path.resolve(process.argv[index + 1]));
-  process.stdout.write("INSTALLER_LIFECYCLE_BINARY_OK architecture=x64 exports=4\n");
+  process.stdout.write("INSTALLER_LIFECYCLE_BINARY_OK architecture=x64 exports=5\n");
 }

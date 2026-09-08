@@ -176,6 +176,7 @@ await VerificationTests.RunAsync();
 await SessionTests.RunAsync();
 RequestTests.Run();
 await OriginalUserRestartTests.RunAsync();
+MsiDataTests.Run();
 
 void Assert(bool value, string name)
 {

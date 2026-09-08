@@ -224,17 +224,17 @@ Dateien wiederherstellen und benötigt diesen Offline-Versionswechselcheck
 nicht. Ein expliziter Uninstall bleibt eine autorisierte Stoppoperation.
 
 Der zum Launcher gehörende MSI-Component registriert den aktuellen Vertrag
-`InstallerLifecycleProtocol=msi-preparation-v1`. Fehlt dieser bei einem
+`InstallerLifecycleProtocol=msi-data-v1`. Fehlt dieser bei einem
 vorhandenen Produkt, wird vor Veröffentlichung der neuen Sperrphase
 abgebrochen. Es entsteht kein Legacy- oder Ersatzprotokoll. Die native
 Upgrade-/Downgrade-Abnahme benötigt daher zwei aktuelle Builds; alte
 Testkandidaten sind keine gültige Basis. Der Versionswechsel behält den
 registrierten Programmordner bei. Vollständige native Transaktions-,
-Reparatur- und Mehrbenutzerprüfungen bleiben offen. Nur der Updater bindet
-bislang Backup, Healthcheck und Restore als Ablauf zusammen. Er verwendet
-inzwischen den vollständigen Live-Datenroot-Snapshot aus `UpdateDataSnapshot`,
+Reparatur- und Mehrbenutzerprüfungen bleiben offen. Updater und direkte
+MSI-Versionswechsel binden Backup, Healthcheck und Restore als Ablauf zusammen.
+Beide verwenden den vollständigen Live-Datenroot-Snapshot aus `UpdateDataSnapshot`,
 nicht mehr das reine Match-SQLite-Backup aus `storage-admin.mjs backup-update`.
-Die Transaktionsparität direkter MSI-Versionswechsel und die native Abnahme
+Die native Transaktionsparität direkter MSI-Versionswechsel und die Abnahme
 des vollständigen Ablaufs bleiben offen; ein Komponentencheck allein erfüllt
 das Release-Gate nicht.
 
@@ -253,8 +253,40 @@ Operationsowner darf sie vergeben, widerrufen und seine Rolle zurückgeben.
 Ein Commit oder Rollback kann die MSI-Lease während einer aktiven Operation
 nicht freigeben. Nach Rückgabe bleibt die MSI-Sperre aktiv; weder ein
 fehlgeschlagener Healthcheck noch ein Helper-Ende beweist einen erfolgreichen
-Datenrestore. Diese Ownership- und Verifierpfade sind isoliert geprüft,
-aber noch nicht durch die MSI-Custom-Actions aufgerufen.
+Datenrestore. Diese Ownership- und Verifierpfade sind isoliert geprüft
+und inzwischen durch die MSI-Custom-Actions aufgerufen.
+
+Für direkte Versionswechsel startet `BeginNetgridLifecycle` nach dem geordneten
+Stopp synchron den installierten Updater mit dem engen `--msi-data capture`-
+Vertrag. Der Helper prüft Administratorrechte, registrierten Programm-/Datenroot
+und sein installiertes Image. Er verwendet keine beliebigen Archivpfade und
+öffnet keine Dialoge, auch nicht im SYSTEM-Kontext. Vor Snapshot-Erzeugung
+schreibt der einzige Lease-Writer den geschützten `MsiData`-Nachweis; nach
+vollständiger Prüfung bindet er Snapshot-ID und Manifest-SHA-256 an dieselbe
+MSI-Lease und denselben ProductCode. Ein Exitcode allein ersetzt diesen
+Nachweis nicht.
+
+`VerifyNetgridLifecycle` ist eine synchrone Deferred-Aktion. Ihr Helper öffnet
+das gebundene Archiv erneut, prüft weiterhin unveränderte Konfiguration und
+Credentials und führt den vorhandenen Headless-Verifier aus. Nur dessen
+Erfolg und tatsächliches Ende erlauben den Zustand `verified`. Beim Rollback
+öffnet der zurückgekehrte Helper der Vorversion dieselbe Sicherung, erhält
+zuerst den fehlgeschlagenen Datenstand in einem separaten Snapshot und führt
+Restore plus Healthcheck aus. Erst `restored` erlaubt die Rollback-Freigabe.
+Ein Abbruch noch während der vorbereitenden Sicherung darf ohne Restore
+beendet werden, weil die Begin-Aktion dann keine MSI-Dateiänderung freigegeben
+hat. Fehlende, beschädigte oder fremde Nachweise werden nicht ersetzt.
+
+Zwischen den synchronen Helper-Aufrufen hält die MSI-Lease den Produktstart
+gesperrt; jeder neue Helper prüft und sperrt die Snapshot- und geschützten
+Live-Dateien erneut. Dateisperren werden nicht über ein beendetes Prozessobjekt
+hinweg behauptet. Ein noch lebender Verifier, eine fehlgeschlagene Rücksicherung
+oder eine durch Prozessverlust verwaiste Helper-Operation bewirkt keine
+automatische Freigabe. Insbesondere ein abgebrochener Helper mit aktiver
+MSI-Bindung benötigt weiterhin Diagnose; die normale Updater-Absturzreparatur
+darf diese Bindung nicht löschen. Same-Product-Repair, Erstinstallation,
+Uninstall, verschachtelte Altproduktentfernung und bereits außen abgesicherte
+Updater-MSI-Teiltransaktionen erzeugen keine zweite Datensicherung.
 
 Für die verbleibende Anbindung gilt: Die Prüfung der neuen Version muss als
 synchrone Deferred-Aktion vor `InstallFinalize` und nach dem Dateiaustausch
@@ -360,7 +392,7 @@ Verknüpfung; der Reparaturhelfer startet keine erhöhte Runtime.
 
 Wiederöffnen nach Ende eines separaten Snapshot-Erzeugers, Lease-Übernahme,
 Reparaturreihenfolge und Staging-Sperren sind komponentenweise geprüft.
-Die tatsächliche erhöhte Reparatur, direkte MSI-Anbindung, erhöhte
+Die tatsächliche erhöhte Reparatur, native direkte MSI-Transaktion, erhöhte
 Archivberechtigungen und die vollständige native Zwei-Build-Abnahme bleiben
 Release-Gates. Eine noch gebundene MSI-Teiltransaktion wird auch nach dem
 Owner-Ende nicht automatisch gelöscht. Ein Fehler

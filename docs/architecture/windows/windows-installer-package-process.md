@@ -1306,12 +1306,12 @@ Benutzer-Neustart-Gates bleiben grün. Der net48-DTF-Build hat keine Warnungen
 oder Fehler; vier Lifecycle-Strukturtests und 185 UI-Sprachschlüssel in
 de/en/fr sind geprüft. Die Sprachquellenprüfung ersetzt keinen nativen Renderlauf.
 
-Die native erhöhte Reparatur, direkte MSI-Transaktionsparität, erhöhte
+Die native erhöhte Reparatur, native direkte MSI-Transaktionsparität, erhöhte
 Rechteprüfung und die native Gesamtmatrix bleiben offen. Keine Installation,
 UAC-Aktion oder bestehende Zugangsdaten wurden bei diesen Prüfungen berührt;
 der Prozess behauptet kein Release-Done.
 
-### Direkte MSI-Verifikation: Ownership vorbereitet, Datenanbindung offen
+### Direkte MSI-Verifikation und Datenanbindung: native Abnahme offen
 
 Der bestehende Verifier kann jetzt innerhalb einer exakt gebundenen direkten
 MSI-Operation arbeiten. Die zentrale Lease-Autorität bindet den Helper an
@@ -1330,11 +1330,38 @@ Prozessende geprüft und die MSI-Bindung erhalten. Die bestehenden Handoff-,
 Session-, Request-, Neustart- und Launcher-Gates sind grün. Die gemeinsame
 DTF-Komponente baut für net48 ohne Warnungen oder Fehler.
 
-Noch keine native Installation oder vollständige MSI-Datentransaktion ist
-damit nachgewiesen. Nächster Implementierungsschritt ist die Bindung von
-Snapshot/Verify/Restore an die Custom Actions mit Verify vor `InstallFinalize`
-und Datenrestore nach der MSI-Programmrollback-Reihenfolge. Die reine
-Operationsfreigabe darf nicht als Ersatz für dieses offene Done-Gate gelten.
+Snapshot/Verify/Restore sind inzwischen an die Custom Actions angebunden.
+Direkte Versionswechsel starten vor den MSI-Dateiänderungen den installierten
+Updater synchron zur Sicherung. Ein geschützter `MsiData`-Wert bindet
+Lease/ProductCode, Datenroot, Snapshot-ID/Hash und die Zustände `preparing`,
+`captured`, `verified`, `restored`. Nur geprüfte neue Daten erlauben Commit;
+nur geprüfte Rücksicherung erlaubt Rollback-Freigabe. Ein bereits gescheiterter
+Snapshot vor Dateimutationen darf abgebrochen werden. Fehler oder Prozessverlust
+mit aktiver Operation lösen die Sperre nicht automatisch. Bestehende
+Credentials und Konfiguration werden bei jedem Wiederöffnen geprüft und
+niemals überschrieben.
+
+`VerifyNetgridLifecycle` ist ein fünfter, synchroner SYSTEM-Deferred-Export.
+Er wird vor `InstallFinalize` ausgeführt; die zuerst registrierte
+Rollback-Aktion stellt nach MSI-Programmrollback die Daten wieder her und
+prüft die Vorversion. Der Code verlangt jetzt `msi-data-v1` beim Ausgangsprodukt;
+zwei neu gebaute Stände sind nötig. Alte Testinstaller bleiben ungeeignet.
+
+71 Transaktionstests mit echten temporären Snapshotdateien prüfen Erfolg,
+Healthfehler, Commit-Rollback, Sicherungs-/Restorefehler, geschützte Credentials,
+Archivbindung und strikte Argumente. 407 Lifecyclechecks, 75 Verifierchecks,
+die übrigen Handoff-/Session-/Request-/Neustart-Gates und Updater-Unitchecks
+sind grün. Ein ungültiger `--msi-data`-Aufruf endet geprüft ohne nativen Dialog.
+Der net48-DTF-Build ist warnungsfrei; vier Strukturtests sichern fünf Exporte.
+
+Die aktuelle Product.wxs wurde zusätzlich mit WiX 7.0.0 und inerten Dateien
+in `output/msi-authoring-probe-277f5295418249e0a480d151cd4bf921/`
+kompiliert. Die tatsächliche MSI-Tabelle ist geprüft: `InstallExecute=6500`,
+`RemoveExistingProducts=6501`, `VerifyNetgridLifecycle=6599`,
+`InstallFinalize=6600`. Das Prüf-MSI wurde nicht installiert und ist kein
+Releaseoutput. Neue vollständige Payloads, echte MSI-Rollback-Ausführung,
+SYSTEM-/Mehrbenutzerverhalten und die native Sandbox-Gesamtmatrix bleiben
+offen. Diese Evidence behauptet keine vollständige native Datentransaktion.
 
 Vor der Freigabe bleiben die vollständige Prozess-Ende-Raceprüfung,
 die native Abnahme direkter MSI-Updatepfade hinsichtlich

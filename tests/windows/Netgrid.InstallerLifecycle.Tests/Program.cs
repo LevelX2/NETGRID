@@ -87,7 +87,7 @@ var package = authoring.Root!.Element(wix + "Package")!;
 Assert(package.Descendants(wix + "Component").Any(component =>
     component.Elements(wix + "File").Any(file => (string?)file.Attribute("Id") == "NetgridLauncher") &&
     component.Elements(wix + "RegistryValue").Any(value => (string?)value.Attribute("Name") == "InstallerLifecycleProtocol" &&
-        (string?)value.Attribute("Value") == "msi-preparation-v1")), "installed_protocol_bound_to_launcher_component");
+        (string?)value.Attribute("Value") == "msi-data-v1")), "installed_protocol_bound_to_launcher_component");
 var sequence = package.Element(wix + "InstallExecuteSequence")!;
 Assert((string?)package.Element(wix + "MajorUpgrade")!.Attribute("Schedule") == "afterInstallExecute", "old_product_removed_inside_guarded_transaction");
 Assert(package.Elements(wix + "Property").Any(x => (string?)x.Attribute("Id") == "NETGRID_UPDATE_LEASE" &&
@@ -102,7 +102,7 @@ foreach (var action in new[] { "RemoveNetgridFirewall", "DeleteNetgridData" })
         .All(x => ((string?)x.Attribute("Condition"))?.Contains("NOT UPGRADINGPRODUCTCODE", StringComparison.Ordinal) == true),
         action + "_nested_arguments_not_prepared");
 }
-foreach (var (name, execution) in new[] { ("BeginNetgridLifecycle", "deferred"), ("CommitNetgridLifecycle", "commit"), ("RollbackNetgridLifecycle", "rollback") })
+foreach (var (name, execution) in new[] { ("BeginNetgridLifecycle", "deferred"), ("VerifyNetgridLifecycle", "deferred"), ("CommitNetgridLifecycle", "commit"), ("RollbackNetgridLifecycle", "rollback") })
 {
     var action = Definition(name);
     Assert((string?)action.Attribute("Execute") == execution && (string?)action.Attribute("Impersonate") == "no" && (string?)action.Attribute("Return") == "check", name + "_authority_and_failure");
@@ -112,6 +112,7 @@ foreach (var (name, execution) in new[] { ("BeginNetgridLifecycle", "deferred"),
 Assert((string?)Scheduled("RollbackNetgridLifecycle").Attribute("After") == "InstallInitialize", "rollback_scheduled_before_mutation");
 Assert((string?)Scheduled("BeginNetgridLifecycle").Attribute("After") == "RollbackNetgridLifecycle", "begin_before_file_changes");
 Assert((string?)Scheduled("CommitNetgridLifecycle").Attribute("After") == "BeginNetgridLifecycle", "commit_registered_after_begin");
+Assert((string?)Scheduled("VerifyNetgridLifecycle").Attribute("Before") == "InstallFinalize", "verify_inside_rollback_boundary");
 Assert(package.Elements(wix + "Launch").Any(x => (string?)x.Attribute("Condition") == "NOT RollbackDisabled"), "rollback_cannot_be_disabled");
 Assert(package.Elements(wix + "Property").Any(x => (string?)x.Attribute("Id") == "MSIRESTARTMANAGERCONTROL" && (string?)x.Attribute("Value") == "DisableShutdown"), "restart_manager_not_second_process_owner");
 var frameworkCondition = package.Elements(wix + "Launch").Select(x => (string)x.Attribute("Condition")!)

@@ -8,7 +8,7 @@ namespace Netgrid.Windows
 {
     // The only lease writer, shared by the elevated updater and MSI actions.
     // Runtime components link the read-only InstallationGate, never this file.
-    internal static class InstallationLease
+    internal static partial class InstallationLease
     {
         public static void TakeOverRecovery(RegistryKey root, string programRoot, InstallationGate.GateState expected,
             Func<bool> productProcessesRemain)
@@ -230,6 +230,14 @@ namespace Netgrid.Windows
                 }
                 if (current.OwnerId > 0 && current.Lease == current.MsiLease)
                     throw new InvalidOperationException("installation_gate_msi_operation_still_active");
+                if (current.OwnerId == 0)
+                {
+                    var data = ReadMsiData(root, programRoot, msiLease, productCode);
+                    if (data != null && (allowPreparationCancel
+                        ? data.Phase != MsiDataBinding.Preparing && data.Phase != MsiDataBinding.Restored
+                        : data.Phase != MsiDataBinding.Verified))
+                        throw new InvalidOperationException("installation_gate_msi_data_completion_unverified");
+                }
                 if (current.OwnerId > 0) Write(root, programRoot, current.WithMsi("", ""));
                 else Write(root, programRoot, new InstallationGate.GateState(current.Lease, InstallationGate.GateState.Completed,
                     Math.Max(DateTime.UtcNow.Ticks, current.CompletedUtcTicks)));

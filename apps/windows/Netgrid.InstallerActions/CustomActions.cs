@@ -41,7 +41,7 @@ namespace Netgrid.InstallerActions
                     var installedRoot = registered?.GetValue("InstallDirectory") as string;
                     if (installedRoot == null || InstallationGate.KeyFor(installedRoot) != InstallationGate.KeyFor(root))
                         throw new InvalidOperationException("installation_gate_upgrade_root_changed");
-                    if (registered?.GetValue("InstallerLifecycleProtocol") as string != "msi-preparation-v1")
+                    if (registered?.GetValue("InstallerLifecycleProtocol") as string != "msi-data-v1")
                         throw new InvalidOperationException("installation_gate_protocol_unsupported");
                 }
             var upgradingProduct = session["UPGRADINGPRODUCTCODE"];
@@ -61,7 +61,7 @@ namespace Netgrid.InstallerActions
                     data["Nested"] = "1";
                 }
             }
-            foreach (var action in new[] { "BeginNetgridLifecycle", "CommitNetgridLifecycle", "RollbackNetgridLifecycle" })
+            foreach (var action in new[] { "BeginNetgridLifecycle", "VerifyNetgridLifecycle", "CommitNetgridLifecycle", "RollbackNetgridLifecycle" })
                 session[action] = data.ToString();
         });
 
@@ -79,6 +79,12 @@ namespace Netgrid.InstallerActions
                         () => ProductProcessesRemain(root), () => MsiOfflineReadiness.Read(machine, root),
                         inspectOffline: session.CustomActionData["InspectOfflineGames"] == "1").GetAwaiter().GetResult();
                     session.Log("NETGRID_LIFECYCLE_STOPPED runtime=absent lease=held readiness=checked_when_required");
+                    if (NeedsDataTransaction(session))
+                    {
+                        MsiDataInvocation.Run(session, "capture");
+                        if (InstallationLease.ReadMsiData(machine, root, lease, session.CustomActionData["ProductCode"])?.Phase != MsiDataBinding.Captured)
+                            throw new InvalidOperationException("installation_gate_msi_data_capture_unproven");
+                    }
                     return;
                 }
                 InstallationLaunchFence.Execute(root, () =>
@@ -103,12 +109,23 @@ namespace Netgrid.InstallerActions
         });
 
         [CustomAction]
+        public static ActionResult VerifyNetgridLifecycle(Session session) => Run(session, () =>
+        {
+            if (NeedsDataTransaction(session)) MsiDataInvocation.Run(session, "verify");
+        });
+
+        [CustomAction]
         public static ActionResult CommitNetgridLifecycle(Session session) => Run(session, () =>
         {
             using (var machine = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
+            {
+                if (NeedsDataTransaction(session) && InstallationLease.ReadMsiData(machine, session.CustomActionData["ProgramRoot"],
+                    session.CustomActionData["Lease"], session.CustomActionData["ProductCode"])?.Phase != MsiDataBinding.Verified)
+                    throw new InvalidOperationException("installation_gate_msi_data_completion_unverified");
                 if (IsNested(session)) InstallationLease.RequireMsi(machine, session.CustomActionData["ProgramRoot"], session.CustomActionData["Lease"], session.CustomActionData["ProductCode"]);
                 else if (!InstallationLease.CompleteMsi(machine, session.CustomActionData["ProgramRoot"], session.CustomActionData["Lease"], session.CustomActionData["ProductCode"]))
                     throw new InvalidOperationException("installation_gate_commit_owner_missing");
+            }
         });
 
         [CustomAction]
@@ -118,9 +135,23 @@ namespace Netgrid.InstallerActions
             // rollback has already completed its transaction record.
             if (IsNested(session)) { session.Log("NETGRID_LIFECYCLE_ROLLBACK nested=true released=false"); return; }
             using (var machine = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
+            {
+                var root = session.CustomActionData["ProgramRoot"];
+                var current = InstallationGate.Read(machine, InstallationGate.KeyFor(root));
+                if (NeedsDataTransaction(session) && current?.Phase == InstallationGate.GateState.Stopping &&
+                    current.MsiLease == session.CustomActionData["Lease"] && current.MsiProductCode == session.CustomActionData["ProductCode"])
+                {
+                    var data = InstallationLease.ReadMsiData(machine, root, current.MsiLease, current.MsiProductCode);
+                    if (data?.Phase == MsiDataBinding.Captured || data?.Phase == MsiDataBinding.Verified)
+                        MsiDataInvocation.Run(session, "restore");
+                }
                 session.Log("NETGRID_LIFECYCLE_ROLLBACK released={0}", InstallationLease.RollbackMsi(
                     machine, session.CustomActionData["ProgramRoot"], session.CustomActionData["Lease"], session.CustomActionData["ProductCode"]));
+            }
         });
+
+        private static bool NeedsDataTransaction(Session session) => !IsNested(session) &&
+            session.CustomActionData["OuterLease"] == "" && session.CustomActionData["InspectOfflineGames"] == "1";
 
         private static bool IsNested(Session session)
         {
