@@ -116,9 +116,14 @@ Self-Service ist freigegeben, während Maintenance und Policyverwaltung auf
 Loopback bleiben. Der Launcher prüft ausschließlich GitHub Releases und bietet
 Updates erst nach Zustimmung an. Release-Metadaten und Prüfsummendatei müssen
 denselben SHA-256-Wert nennen; laufende Partien blockieren die Installation.
-Nach kontrolliertem Stopp erzeugt der getrennte Updater ein geprüftes
-`pre_update`-Backup, führt das MSI-Upgrade aus und startet erst nach Healthcheck
-neu. Bei Fehlern werden Programm und Daten soweit sicher möglich zurückgerollt,
+Nach kontrolliertem Stopp erzeugt der getrennte Updater inzwischen einen
+geprüften Live-Datenroot-Snapshot einschließlich Decks, getrennter Kontendaten,
+Sidecars und Kartenbildern; historische Backups und Installer-Caches sind
+ausgeschlossen. Credentials und Runtimekonfiguration werden beim Restore
+nicht überschrieben. Der Updater führt das MSI-Upgrade aus und startet erst
+nach Healthcheck neu. Der neue Sicherungspfad ist komponentenweise geprüft;
+direkte MSI-Anbindung, Wiederaufnahme nach Prozessverlust und native Abnahme
+bleiben offen. Bei Fehlern werden Programm und Daten soweit sicher möglich zurückgerollt,
 andernfalls bleibt NETGRID klar diagnostiziert gestoppt. Alle Windows-
 Oberflächen verwenden eine gemeinsame vollständige Sprachquelle für Deutsch,
 Englisch und Französisch sowie das NETGRID-Icon. Die 3×3-Setup-Renderprüfung

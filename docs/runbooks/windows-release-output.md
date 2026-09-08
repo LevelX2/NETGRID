@@ -108,12 +108,30 @@ den Offline-Versionswechselcheck. Für einen vollständigen Releaseabschluss
 ist neben diesen Komponententests insbesondere die Backup-/Health-/Restore-
 Absicherung direkter MSI-Versionswechsel noch offen.
 
-Auch im Updater ist das bestehende `backup-update` derzeit nur ein geprüftes
-Match-SQLite-Backup. Es ist kein vollständiges Datenroot-Backup und darf nicht
-als solches abgenommen werden. Konfiguration, separate Kontendatenbanken,
-Maintenance-Credentials, Deckdateien und persönliche Kartenbilder benötigen
-noch einen gemeinsamen gesicherten Snapshot-/Restore-Vertrag. Bestehende
-Zugangsdaten dürfen dabei nicht überschrieben werden.
+Der Updater verwendet nun `UpdateDataSnapshot` für den vollständigen
+Live-Datenroot; der alte Storage-CLI-Befehl `backup-update` ist weiterhin nur
+ein Match-SQLite-Backup und nicht mehr seine Sicherungsautorität. Die neuen
+Archive liegen geschützt unter `config/update-backups/<ID>`. Historische
+Storagebackups und Installer-Caches sind ausdrücklich ausgeschlossen.
+Konfiguration und vorhandene Maintenance-Credentials werden nur auf
+Unverändertheit geprüft, niemals zurückgeschrieben. Vor einem Restore wird
+auch der fehlgeschlagene Datenstand separat gesichert. Genau entfernte neue
+Dateien sind dort wiederauffindbar; Archive werden nicht automatisch gelöscht.
+
+Enger, in der Installer-Buildstrecke gebundener Regressionstest:
+
+```powershell
+.\.tools\dotnet\dotnet.exe run --project tests/windows/Netgrid.UpdateData.Tests/Netgrid.UpdateData.Tests.csproj -c Release
+```
+
+Die Prüfung nutzt ausschließlich eigene temporäre Dateien mit einer expliziten
+Fixture-DACL. Sie prüft unter anderem zwei echte SQLite-Dateien samt WAL,
+beschädigte Daten, Pfadgrenzen, Hardlinks/Junctions, parallele Schreiber,
+veränderte Backups, wiederhergestellte DACLs und unveränderte Credentials.
+Sie beweist noch keine tatsächlich erhöhte Archivbereitstellung oder native
+MSI-Transaktion. Die Wiederaufnahme nach Updater-Prozessverlust und die direkte
+MSI-Anbindung sind noch offen. Archive nicht manuell in eine laufende Runtime
+kopieren; insbesondere darf dabei kein Credentialstore überschrieben werden.
 
 Die Deckbibliothek liegt im Releaseprofil nun unter
 `NETGRID_DATA_ROOT/runtime/decks`; ein expliziter Bibliothekspfad muss innerhalb

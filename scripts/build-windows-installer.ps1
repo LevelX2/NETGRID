@@ -61,6 +61,8 @@ try {
   if ($LASTEXITCODE -ne 0) { throw "Windows-Releaseoutput ist nicht freigegeben." }
   & $dotnet run --project tests/windows/Netgrid.Updater.Tests/Netgrid.Updater.Tests.csproj -c Release
   if ($LASTEXITCODE -ne 0) { throw "Die Windows-Updater-Regressionstests sind fehlgeschlagen." }
+  & $dotnet run --project tests/windows/Netgrid.UpdateData.Tests/Netgrid.UpdateData.Tests.csproj -c Release
+  if ($LASTEXITCODE -ne 0) { throw "Die vollständige Windows-Updatesicherung hat ihre Regressionstests nicht bestanden." }
   & $dotnet run --project tests/windows/Netgrid.UpdateHandoff.Tests/Netgrid.UpdateHandoff.Tests.csproj -c Release
   if ($LASTEXITCODE -ne 0) { throw "Die Windows-Update-Übergabetests sind fehlgeschlagen." }
   & $dotnet run --project tests/windows/Netgrid.SetupHost.Tests/Netgrid.SetupHost.Tests.csproj -c Release

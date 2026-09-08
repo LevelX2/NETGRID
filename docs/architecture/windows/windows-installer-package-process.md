@@ -1204,9 +1204,10 @@ Die anschließende Prüfung der Sicherungsquelle zeigt eine weitere konkrete
 Lücke innerhalb dieses Vertrags: Auch der vorhandene Updater sichert mit
 `backup-update` nur die Match-SQLite-Datei. Separate Kontendatenbanken,
 Konfiguration, Credentials, Deckdateien und Kartenbilder sind nicht enthalten.
-Ein vollständiges Datenbackup ist deshalb für beide Updatewege noch offen.
 Der alte SQLite-Backupnachweis bleibt gültig, wird aber nicht als Nachweis
-für den vollständigen Datenbestand gewertet.
+für den vollständigen Datenbestand gewertet. Die unten beschriebene neue
+Updater-Anbindung schließt die Dateiabdeckung im Komponentenpfad; direkte
+MSI-Anbindung und native Gesamtprüfung bleiben offen.
 
 Als notwendige Korrektur der Datenablage verwendet die Web-Deckbibliothek im
 Releaseprofil nun `NETGRID_DATA_ROOT/runtime/decks` statt des Windows-
@@ -1216,6 +1217,37 @@ Tests einschließlich tatsächlicher Standardpfad-I/O, simuliertem Wechsel von
 `APPDATA` und unveränderter Entwicklungsbibliothek sowie der Web-Typecheck sind
 grün. Das ist keine Windows-Identitäts-/ACL-Abnahme. Es wurde kein neuer
 Installer gebaut oder gestartet und kein bestehender Datenbestand migriert.
+
+Der Updater verwendet inzwischen den neuen vollständigen Live-Datenroot-
+Snapshot statt des Match-SQLite-CLI-Backups. Gesichert werden auch getrennte
+Kontendatenbanken, Sidecars, Decks, Kartenbilder, Import-/Paketdateien,
+Konfiguration und Logs. Historische Backups und Installer-Caches sind klar
+ausgeschlossen; alle konfigurierten Live-Pfade müssen im erfassten Root liegen.
+Private Archiv-DACL und Administratoren-Eigentümer sind verbindlich. Der
+Restore sichert zuerst den fehlgeschlagenen aktuellen Bestand, prüft ihn
+erneut gegen Veränderungen und ersetzt dann nur die gebundenen Dateien.
+Auch nach einem fehlgeschlagenen MSI erfolgt dies vor dem Healthcheck und
+Wiederanlauf. Credentials und Runtimekonfiguration werden niemals überschrieben.
+
+85 fokussierte Assertions sind grün: vollständige Datei-/Leerordnerabdeckung,
+Pfad- und Ausschlussgrenzen, DACL-Policy, echte Hardlinks/Junctions,
+Umbenennungs- und Schreibsperren, manipulierte Backups, unveränderte
+Zugangsdaten, Original-Abwesenheit einer Datenbank und ein Restore zweier
+echter SQLite-Dateien mit noch nicht in die Hauptdatei übernommenen WAL-Daten.
+Der Rücksicherungstest verändert auch Verzeichnisrechte; Datei-, Verzeichnis-
+und Root-DACLs werden nach dem Restore geprüft. Die initiale reine
+Attribut-Verzeichnissperre ließ Umbenennen zu; erst die korrigierte
+`FILE_LIST_DIRECTORY`-Bindung besteht diesen nativen Fixture-Test. Kein roter
+Vorläuferlauf wurde als Nachweis gewertet. Die Updater-Regressionstests sind
+ebenfalls grün; das neue Snapshot-Gate ist an die Installer-Buildstrecke gebunden.
+
+Die Archivtests verwenden nur eigene temporäre Fixture-DACLs und sind keine
+erhöhte SYSTEM-/Administratoren-Abnahme. Eine Rücksicherung nach Verlust des
+Updaterprozesses benötigt noch einen gebundenen Wiederaufnahme-/Reparaturweg;
+der aktuelle Restore arbeitet mit der gehaltenen Snapshotinstanz. Direkte
+MSI-Versionswechsel, neue Payloads und die native Gesamtmatrix sind weiterhin
+nicht freigegeben. Es wurde kein Installer gestartet, keine Sandbox verändert
+und kein bestehendes Maintenance-Kennwort angefasst. WIN-I08 bleibt aktiv.
 
 Vor der Freigabe bleiben die vollständige Prozess-Ende-Raceprüfung,
 die native Abnahme direkter MSI-Updatepfade hinsichtlich

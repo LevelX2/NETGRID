@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../../apps/windows/Common/UpdateDataLayout.cs" Link="UpdateDataLayout.cs" />
+    <Compile Include="../../../apps/windows/Common/UpdateDataFiles.cs" Link="UpdateDataFiles.cs" />
+    <Compile Include="../../../apps/windows/Common/UpdateDataSnapshot.cs" Link="UpdateDataSnapshot.cs" />
+  </ItemGroup>
+</Project>

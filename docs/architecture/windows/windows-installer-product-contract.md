@@ -231,14 +231,64 @@ Upgrade-/Downgrade-Abnahme benötigt daher zwei aktuelle Builds; alte
 Testkandidaten sind keine gültige Basis. Der Versionswechsel behält den
 registrierten Programmordner bei. Vollständige native Transaktions-,
 Reparatur- und Mehrbenutzerprüfungen bleiben offen. Nur der Updater bindet
-bislang Backup, Healthcheck und Restore als Ablauf zusammen. Sein
-`storage-admin.mjs backup-update` sichert jedoch ausschließlich die
-Match-SQLite-Datei, nicht den vollständigen Datenroot. Insbesondere separate
-Kontendatenbanken, Deckdateien, Konfiguration, Maintenance-Credentials und
-Kartenbilder sind darin nicht erfasst. Der vollständige Datenbackupvertrag
-und die Transaktionsparität direkter MSI-Versionswechsel sind deshalb noch
-nicht umgesetzt oder abgenommen; eine erfolgreiche SQLite-Sicherung allein
-erfüllt das Release-Gate nicht.
+bislang Backup, Healthcheck und Restore als Ablauf zusammen. Er verwendet
+inzwischen den vollständigen Live-Datenroot-Snapshot aus `UpdateDataSnapshot`,
+nicht mehr das reine Match-SQLite-Backup aus `storage-admin.mjs backup-update`.
+Die Transaktionsparität direkter MSI-Versionswechsel und die native Abnahme
+des vollständigen Ablaufs bleiben offen; ein Komponentencheck allein erfüllt
+das Release-Gate nicht.
+
+### Vollständige Updatesicherung im Updater
+
+- Nach gehaltenem Installationslease und nachgewiesener Abwesenheit aller
+  Produktprozesse sichert `UpdateDataSnapshot` die Dateiinhalte, relativen
+  Pfade, leeren Verzeichnisse und DACLs des registrierten Datenroots. Das
+  umfasst insbesondere beide SQLite-Dateien bei getrennter Kontenablage,
+  vorhandene SQLite-Sidecars, Decks, Kartenbilder, Import-/Paketdateien,
+  Einstellungen und lokale Logs. Es ist kein Volume-/NTFS-Abbild.
+- Die ausdrücklich ausgeschlossenen Bereiche sind historische Storagebackups
+  (`NETGRID_STORAGE_BACKUP_DIR`, sonst `runtime/backups`),
+  `config/update-backups` für diese Snapshots sowie die getrennt behandelten
+  Installer-Caches `config/updates` und `runtime/updates`. Ein Live-Datenpfad
+  außerhalb des Roots oder unter einem ausgeschlossenen Bereich bricht ab.
+  Eine überlappende Backupwurzel wird nicht stillschweigend akzeptiert.
+- Snapshots liegen unter `config/update-backups/<zufällige-ID>` mit
+  geschützter DACL ausschließlich für Administratoren und SYSTEM; Eigentümer
+  ist die Administratorengruppe. Ein vorhandener Archivordner mit abweichenden
+  Rechten oder Eigentümer wird abgewiesen. Das Manifest enthält Größen,
+  SHA-256 und DACLs, keine Datei- oder Credentialinhalte. Der Updater protokolliert
+  nur Snapshot-ID und Manifestprüfsumme.
+- Quellverzeichnisse und ihre Vorfahren bleiben gegen Umbenennen gehalten;
+  Datei-Lesehandles erlauben keine parallelen Schreiber oder Löschungen.
+  Reparse Points und Hardlinks werden abgewiesen. Die Inventare vor und nach
+  dem Kopieren müssen übereinstimmen. Ein Attribut-Handle allein genügt nicht
+  als Verzeichnissperre; der native Regressionstest erfordert tatsächlich
+  verweigertes Umbenennen mit `FILE_LIST_DIRECTORY` und ohne
+  `FILE_SHARE_DELETE` ([Windows-Dateizugriff](https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilea)).
+- `config/runtime.env` und der aufgelöste Maintenance-Credentialpfad werden
+  gesichert, aber niemals vom Restore beschrieben. Vorhandene Dateien bleiben
+  während der Transaktion lesend gesperrt; Inhalte und DACLs werden vor
+  Freigabe geprüft. Auch eine zuvor fehlende und inzwischen neu angelegte
+  Credentialdatei führt zum sichtbaren Abbruch statt zu einer Überschreibung.
+- Vor jeder Rücksicherung wird der fehlgeschlagene aktuelle Datenzustand
+  separat vollständig gesichert. Erst nachdem Quellsnapshot und aktueller
+  Zustand geprüft sind, werden Dateien einzeln über gleichverzeichnisige
+  Stagingdateien ersetzt. Neu entstandene Dateien werden nur nach dieser
+  Sicherung gezielt entfernt; zusätzliche leere Verzeichnisse bleiben stehen.
+  Eine zuvor nie angelegte Datenbank wird nicht für das Backup initialisiert.
+- Auch bei einem fehlgeschlagenen MSI wird vor dem Wiederanlauf der vorige
+  Datenstand zurückgesichert. Erst erfolgreiche Datenprüfung, Healthcheck,
+  erneute Prozessabwesenheit und unveränderte geschützte Dateien erlauben die
+  Lease-Freigabe. Datei- und Verzeichnisrechte werden wiederhergestellt und
+  geprüft. Die Dateisperren enden vor dem normalen Benutzer-Neustart.
+
+Die Rücksicherung ist bisher an die gehaltene Snapshotinstanz desselben
+Updaters gebunden. Eine prozessübergreifende Wiederaufnahme aus einem
+gespeicherten Manifest ist damit nicht freigegeben. Direkte MSI-Anbindung,
+Abbruch-/Reparaturweg nach Prozessverlust, tatsächlich erhöhte
+Archivberechtigungen und vollständige native Zwei-Build-Abnahme bleiben
+Release-Gates. Ein Fehler erhält die Sicherungen und lässt die
+Installationssperre bestehen; er wird nicht als erfolgreiche Reparatur gewertet.
 
 ### Aufbewahrung gespeicherter Spiele
 
