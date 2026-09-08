@@ -1,4 +1,5 @@
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { currentCorpCreditObligation } from "../plans/corp-credit-obligation";
 import {
   AI_DECISION_DEBUG_SCHEMA_VERSION,
   AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
@@ -1793,11 +1794,44 @@ function bindSelectedEngineWindowRunnerVacuumLinkOrigin(
       event.stateVersionAfter <= input.playerView.stateVersion,
   );
   const exactPriorActionChain =
-    interveningEvents.length === 1 &&
+    interveningEvents.length >= 1 &&
     interveningEvents[0]?.stateVersionBefore === previous?.stateVersion &&
-    interveningEvents[0]?.stateVersionAfter === input.playerView.stateVersion &&
+    interveningEvents.at(-1)?.stateVersionAfter ===
+      input.playerView.stateVersion &&
     interveningEvents[0]?.publicPayload?.actor === "runner" &&
-    interveningEvents[0]?.publicPayload?.actionType === lease?.actionType;
+    interveningEvents[0]?.publicPayload?.actionType === lease?.actionType &&
+    interveningEvents.every(
+      (event, index) =>
+        event.stateVersionAfter === event.stateVersionBefore + 1 &&
+        (index === 0 ||
+          interveningEvents[index - 1]?.stateVersionAfter ===
+            event.stateVersionBefore),
+    ) &&
+    interveningEvents.slice(1).every((event) => {
+      const payload = event.publicPayload;
+      // Forced run windows preserve the existing execution owner. Only the
+      // continuous, same-server run chain may connect its last chosen action
+      // to this choice-producing Engine action.
+      const passedUnrezzedIce =
+        payload?.actor === "corp" &&
+        payload.actionType === "decline_rez" &&
+        payload.runPhase === "movement" &&
+        typeof payload.passedIcePosition === "number" &&
+        Number.isSafeInteger(payload.passedIcePosition) &&
+        payload.passedIcePosition >= 0;
+      // The Engine's pass transition carries the ICE position, not a server
+      // field. In this continuous run-only chain it cannot change the run.
+      return (
+        passedUnrezzedIce ||
+        (payload?.abilityFamily === "run-access" &&
+          payload.serverId === input.playerView.run?.attackedServerId &&
+          ((payload.actor === "corp" &&
+            (payload.actionType === "rez_ice" ||
+              payload.actionType === "decline_rez")) ||
+            (payload.actor === "runner" &&
+              payload.actionType === "continue_run")))
+      );
+    });
   const committedPhase = commitment?.phases?.[commitment.cursor.phaseIndex];
   const exactCommittedRunExecutor =
     committedPhase !== undefined &&
@@ -1812,7 +1846,7 @@ function bindSelectedEngineWindowRunnerVacuumLinkOrigin(
     previous !== undefined &&
     currentPortfolio !== undefined &&
     previous.side === "runner" &&
-    previous.stateVersion + 1 === input.playerView.stateVersion &&
+    previous.stateVersion < input.playerView.stateVersion &&
     rootPlanInstanceId !== undefined &&
     executorInstanceId !== undefined &&
     currentPortfolio.rootForegroundInstanceId === rootPlanInstanceId &&
@@ -15671,6 +15705,7 @@ function buildCorpDomain(
         input,
         candidate,
         directScoreProjects,
+        candidates,
       );
       return conversion ? [conversion] : [];
     }),
@@ -16947,6 +16982,32 @@ function buildCorpDomain(
   const unboundEconomyNeeds: CorpCorePlanDomain["economyNeeds"] = uniqueBy(
     [
       ...requiredEconomyNeeds,
+      ...((): CorpCorePlanDomain["economyNeeds"] => {
+        const due = currentCorpCreditObligation(input);
+        if (due === undefined || input.playerView.own.credits >= due) return [];
+        return [
+          {
+            kind: "reserve",
+            needId: `mandatory-credit-obligation:${currentTurnKey}`,
+            targetCredits: due,
+            gap: due - input.playerView.own.credits,
+            actionIds: terminalFundingActionIds.filter((id) =>
+              candidates.some(
+                (candidate) =>
+                  candidate.actionId === id &&
+                  candidate.economyProjection?.reliability === "guaranteed",
+              ),
+            ),
+            priorityClass: "P1",
+            mandatoryCreditObligation: {
+              creditsDue: due,
+              stateVersion: input.playerView.stateVersion,
+            },
+            urgentForScore: false,
+            evidenceCode: "corp_engine_quoted_terminal_credit_obligation",
+          },
+        ];
+      })(),
       ...(turnLiquidityDevelopment ? [turnLiquidityDevelopment] : []),
       ...operationThresholdPreparations,
       ...corpImmediateOperationEconomyConversions(input, candidates),
@@ -18840,9 +18901,13 @@ function sameTurnScoreConversionProjectForCandidate(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
   directScoreProjects: readonly CorpScoreProjectSignal[],
+  fundingCandidates: readonly ActionSemanticCandidate[],
 ): CorpScoreProjectSignal | undefined {
   const matchingProjects: CorpScoreProjectSignal[] = [];
-  for (const path of corpSameTurnScoreConversionPaths(input)) {
+  for (const path of corpSameTurnScoreConversionPaths(
+    input,
+    fundingCandidates,
+  )) {
     const step = path.steps[0];
     if (!step || !candidateMatchesScoreConversionStep(input, candidate, step))
       continue;
@@ -18882,6 +18947,17 @@ function sameTurnScoreConversionProjectForCandidate(
       routeSemanticActionTypes: [candidate.semanticActionType],
       phase: scorePhaseForConversionStep(step),
       sameTurnCloseout: true,
+      ...(path.fundingPrefix
+        ? {
+            fundingGap: Math.max(
+              0,
+              path.creditsRequired -
+                path.fundingPrefix.creditCost -
+                input.playerView.own.credits,
+            ),
+            sameTurnFundingActionIds: [path.fundingPrefix.actionId],
+          }
+        : {}),
       terminalScore:
         input.playerView.own.agendaPoints + path.agendaPoints >=
         input.playerView.agendaPointsToWin,
@@ -18890,7 +18966,9 @@ function sameTurnScoreConversionProjectForCandidate(
         agenda,
         serverId: path.targetServerId,
         remainingAdvancementClicks: 0,
-        remainingScoreCredits: 0,
+        remainingScoreCredits: path.fundingPrefix
+          ? path.creditsRequired - path.fundingPrefix.creditCost
+          : 0,
         residentParent: false,
         realizedStrategySupportCount: candidate.strategySupport.length,
       }),
@@ -21401,10 +21479,11 @@ function corpRequiredEconomyNeeds(
             needId: `score-support:${project.projectId}`,
             gap: project.fundingMilestone.remainingGap,
             actionIds:
-              project.feasible &&
+              project.sameTurnFundingActionIds ??
+              (project.feasible &&
               (project.sameTurnCloseout || project.terminalScore)
                 ? terminalFundingActionIds
-                : immediateFundingActionIds,
+                : immediateFundingActionIds),
             parentPlanInstanceId: planInstanceIdForProposal({
               moduleId: "corp.score_agenda",
               dedupeKey: project.projectId,

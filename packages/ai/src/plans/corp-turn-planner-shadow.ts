@@ -13,6 +13,9 @@ import type {
   LegalTargetSummary,
 } from "../action-semantic-candidate-types";
 import type { CorpPlanDomain } from "./corp-tactical-plan-modules";
+import { currentCorpCreditObligation } from "./corp-credit-obligation";
+import { PlanResolutionFailure } from "./plan-resolution-failure";
+import { candidatePreservesMandatoryCreditObligation } from "./turn-remainder-search";
 import {
   buildCorpAgendaTurnPlanningSlice,
   type CorpAgendaTurnPlanningLine,
@@ -266,7 +269,21 @@ export function buildCorpTurnPlannerShadow(params: {
     stateIdentity,
     turnKey: params.context.turnKey,
   });
-  const urgentPriorityClass = highestUrgentPriorityClass(heads);
+  const urgentPriorityClass = highestUrgentPriorityClass(
+    heads.filter((head) => {
+      const candidate = params.context.actionCandidates.find(
+        (c) => c.actionId === head.currentBinding.actionId,
+      );
+      return (
+        candidate !== undefined &&
+        candidatePreservesMandatoryCreditObligation(
+          candidate,
+          input.playerView.own.credits,
+          creditObligationAfterHead(input, head, candidate),
+        )
+      );
+    }),
+  );
   const offers = offersForHeads({
     input,
     heads,
@@ -287,6 +304,17 @@ export function buildCorpTurnPlannerShadow(params: {
   const selectedSearchLine = search.lines.find(
     (line) => line.lineId === search.selectedLineId,
   );
+  if (!selectedSearchLine && currentCorpCreditObligation(input) !== undefined) {
+    throw new PlanResolutionFailure("missing_plan_module_coverage", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((a) => a.type),
+      owner: "plan_module",
+      removalCondition:
+        "Materialize a turn-plan route that preserves the current mandatory credit obligation or a certified same-turn terminal win.",
+    });
+  }
   const plannerBaselineRecord = [...headRecords].sort(
     (left, right) =>
       compareValidatedPlanAssessments(
@@ -1444,6 +1472,30 @@ function canonicalChoiceValue(
   return undefined;
 }
 
+function creditObligationAfterHead(
+  input: AiDecisionInput,
+  head: TurnPlanningHeadCandidate,
+  candidate: ActionSemanticCandidate,
+): number | undefined {
+  const due = currentCorpCreditObligation(input);
+  // P1 Score roots certify a same-turn terminal win before the payment deadline.
+  if (
+    due === undefined ||
+    (head.priorityClass === "P1" &&
+      (head.rootPlanModuleId ?? head.moduleId) === "corp.score_agenda")
+  )
+    return undefined;
+  const action = input.legalActions.find(
+    (a) => a.actionId === candidate.actionId,
+  );
+  const repays =
+    action?.type === "trigger_ability" &&
+    action.source === "game_rule" &&
+    action.payload?.obligationDebtAbility === "remove_obligation" &&
+    action.payload.obligationDebtCountBefore === due;
+  return repays ? due - 1 : due;
+}
+
 function offersForHeads(params: {
   input: AiDecisionInput;
   heads: readonly TurnPlanningHeadCandidate[];
@@ -1477,6 +1529,11 @@ function offersForHeads(params: {
       (entry) => entry.actionId === head.currentBinding.actionId,
     );
     if (!candidate) return [];
+    const mandatoryCredits = creditObligationAfterHead(
+      params.input,
+      head,
+      candidate,
+    );
     const dependencyVariants =
       params.urgentPriorityClass &&
       head.priorityClass !== params.urgentPriorityClass
@@ -1509,6 +1566,9 @@ function offersForHeads(params: {
         obligationSignature:
           priorityCoverage.requiredObligationIds.join(",") || "no_urgent",
         priorityCoverage,
+        ...(mandatoryCredits !== undefined
+          ? { creditObligationAfterAction: mandatoryCredits }
+          : {}),
         ...(dependencyCandidateIds.length > 0
           ? { dependencyCandidateIds, rootEligible: false }
           : {}),

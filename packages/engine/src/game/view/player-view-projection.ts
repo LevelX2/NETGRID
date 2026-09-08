@@ -448,6 +448,17 @@ export function buildPlayerViewProjection(
           ),
           maxHandSize: maxHandSize(state, "corp"),
           tags: state.runner.tags,
+          ...(state.activeObligationDebtCount !== undefined &&
+          state.activeObligationDebtCount > 0
+            ? {
+                corpEndTurnCreditObligation: {
+                  creditsDue: state.activeObligationDebtCount,
+                  expiresAtStateVersion: state.stateVersion,
+                  deadline: "end_of_corp_turn" as const,
+                  consequence: "lose_game" as const,
+                },
+              }
+            : {}),
         },
     opponent: runnerSide
       ? {

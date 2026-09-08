@@ -702,6 +702,18 @@ function sanitizePlayerView(
   publicEvents: PublicGameEvent[],
 ): PlayerView {
   const corpPunishRouteQuoteSet = sanitizeCorpPunishRouteQuoteSet(view);
+  const obligation = view.own.corpEndTurnCreditObligation;
+  if (
+    obligation !== undefined &&
+    (view.side !== "corp" ||
+      !Number.isSafeInteger(obligation.creditsDue) ||
+      obligation.creditsDue <= 0 ||
+      obligation.expiresAtStateVersion !== view.stateVersion ||
+      obligation.deadline !== "end_of_corp_turn" ||
+      obligation.consequence !== "lose_game")
+  ) {
+    throw new Error("Invalid current Corp end-turn credit obligation quote.");
+  }
   return {
     side: view.side,
     stateVersion: view.stateVersion,
@@ -714,6 +726,16 @@ function sanitizePlayerView(
     own: {
       identity: sanitizeVisibleCard(view.own.identity),
       credits: view.own.credits,
+      ...(obligation
+        ? {
+            corpEndTurnCreditObligation: {
+              creditsDue: obligation.creditsDue,
+              expiresAtStateVersion: obligation.expiresAtStateVersion,
+              deadline: obligation.deadline,
+              consequence: obligation.consequence,
+            },
+          }
+        : {}),
       clicks: view.own.clicks,
       agendaPoints: view.own.agendaPoints,
       gripOrHq: view.own.gripOrHq.map((card) =>

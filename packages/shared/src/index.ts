@@ -4009,6 +4009,13 @@ export type PlayerView = {
     tags: number;
     /** Runner-private, currently available free Net/Core prevention. */
     freeNetOrCoreDamagePreventionRemaining?: number;
+    /** Corp-private current mandatory payment; insufficient credits lose the game. */
+    corpEndTurnCreditObligation?: {
+      creditsDue: number;
+      expiresAtStateVersion: number;
+      deadline: "end_of_corp_turn";
+      consequence: "lose_game";
+    };
     /** Runner-private, authoritative trace payment and base-link choices. */
     runnerTraceSupportQuote?: VisibleRunnerTraceSupportQuote;
     /** Public Bad Publicity converted into run-only credits at run start. */

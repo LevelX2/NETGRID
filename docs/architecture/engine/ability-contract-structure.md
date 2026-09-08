@@ -39,6 +39,16 @@ dagegen weiterhin einen existierenden Fort. Ein existierender Fort ohne rezzed
 ICE erfüllt diese Zielbindung; dessen leere Zielmenge wird regulär gequotet.
 Quote und Ausführung behalten ihre strikten Bindungsprüfungen.
 
+## Verpflichtende Kreditzahlungen
+
+Aktive verpflichtende Corp-Kreditzahlungen stammen aus dem aktuellen
+Engine-Zustand, nicht aus Karten im Archiv oder historischen Kreditaufnahmen.
+Die eigene Corp-PlayerView trägt bei aktiver Verpflichtung
+`corpEndTurnCreditObligation` mit aktuellem Betrag, StateVersion,
+Corp-Zugende als Deadline und Niederlage bei Nichtzahlung. Die Runner-Sicht
+erhält dieses private Planungsfeld nicht. Projektion und Anwendung verändern
+die bestehende Zahlungs- und Ablöseregel nicht.
+
 ## Agenda-Anforderung
 
 `effectiveAgendaDifficulty` verbindet die gedruckte Anforderung mit aktiven

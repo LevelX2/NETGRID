@@ -1,4 +1,5 @@
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import { currentCorpCreditObligation } from "./corp-credit-obligation";
 import type {
   AiDecisionInput,
   VisibleCorpRezCostQuote,
@@ -121,6 +122,7 @@ export type CorpScoreProjectSignal = {
     currentActionScope: "exact_install_only";
   };
   fundingGap?: number;
+  sameTurnFundingActionIds?: string[];
   /**
    * Published by corp.score_agenda for its exact current credit objective.
    * Support leaves may advance it and lower-priority siblings may preserve it,
@@ -373,7 +375,8 @@ export type CorpEconomyReserveSignal = CorpEconomySignalBase & {
   targetCredits: number;
   gap: number;
   actionIds: string[];
-  priorityClass?: "P5" | "P6";
+  priorityClass?: "P1" | "P5" | "P6";
+  mandatoryCreditObligation?: { creditsDue: number; stateVersion: number };
   fundingRouteAssessment?: CorpEconomyFundingRouteAssessment;
 };
 
@@ -1987,6 +1990,44 @@ function validatedEconomyNeeds(
   context: PlanSchedulerContext,
 ): CorpCorePlanDomain {
   const currentDomain = domain(context);
+  const requiredCredits = currentCorpCreditObligation(context.input);
+  const invalidObligation = currentDomain.economyNeeds.find((signal) => {
+    if (
+      signal.kind !== "reserve" ||
+      (signal.priorityClass !== "P1" &&
+        signal.mandatoryCreditObligation === undefined)
+    )
+      return false;
+    return (
+      signal.priorityClass !== "P1" ||
+      requiredCredits === undefined ||
+      signal.mandatoryCreditObligation?.creditsDue !== requiredCredits ||
+      signal.mandatoryCreditObligation.stateVersion !==
+        context.input.playerView.stateVersion ||
+      signal.targetCredits !== requiredCredits ||
+      signal.gap !== requiredCredits - context.input.playerView.own.credits ||
+      signal.gap <= 0 ||
+      signal.actionIds.some(
+        (id) =>
+          !context.actionCandidates.some(
+            (candidate) =>
+              candidate.actionId === id &&
+              immediateCorpLiquidCreditGain(candidate) > 0 &&
+              candidate.economyProjection?.reliability === "guaranteed",
+          ),
+      )
+    );
+  });
+  if (invalidObligation)
+    throw new PlanResolutionFailure("missing_plan_module_coverage", {
+      side: context.input.side,
+      stateVersion: context.input.playerView.stateVersion,
+      timingPoint: context.input.playerView.timingPoint,
+      legalActionTypes: context.input.legalActions.map((a) => a.type),
+      owner: "plan_module",
+      removalCondition:
+        "Bind mandatory P1 credit funding to the current Engine obligation and guaranteed liquid funding actions.",
+    });
   const invalidScoreParent = currentDomain.economyNeeds.find((signal) => {
     if (signal.kind !== "parent_funding") return false;
     const scoreFundingNeed = signal.needId.startsWith("score-support:");
@@ -2707,6 +2748,11 @@ function scoreCandidates(
   signal: CorpScoreProjectSignal,
 ): PlanMaterialization["candidates"] {
   if (signal.phase === "select_agenda") return [];
+  if (
+    signal.sameTurnFundingActionIds !== undefined &&
+    (signal.fundingMilestone?.remainingGap ?? signal.fundingGap ?? 0) > 0
+  )
+    return [];
   const semantic = scoreCapability(signal).semanticActionTypes;
   return context.actionCandidates
     .filter((candidate) => {
@@ -3972,6 +4018,7 @@ function scoreResourceGaps(
     scoreCandidates(context, signal).length > 0;
   const hasExactCurrentScopedInstallHead =
     signal.phase === "install_agenda" &&
+    signal.sameTurnFundingActionIds === undefined &&
     signal.feasible &&
     signal.uncertainty?.currentActionScope === "exact_install_only" &&
     scoreCandidates(context, signal).length > 0;

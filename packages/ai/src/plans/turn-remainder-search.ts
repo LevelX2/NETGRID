@@ -43,6 +43,8 @@ export type TurnRemainderSearchOffer = {
   rootEligible?: boolean;
   continuationScope?: "portfolio" | "same_root";
   boundaryAfter?: BoundaryActionAssessment;
+  /** Validated mandatory payment reserve after this action, allowing funding progress. */
+  creditObligationAfterAction?: number;
 };
 
 export type TurnRemainderSearchStep = {
@@ -451,6 +453,16 @@ function applyOffer(params: {
   if (!capacity.ok) return capacity;
   const currentCredits = frame.ownCredits.minimum;
   const creditDelta = exactCreditDelta(candidate);
+  const obligation = params.offer.creditObligationAfterAction;
+  if (
+    !candidatePreservesMandatoryCreditObligation(
+      candidate,
+      currentCredits,
+      obligation,
+    )
+  ) {
+    return { ok: false, reasonCode: "priority_obligation_violated" };
+  }
   if (
     currentCredits < wholeNonNegative(candidate.costProfile.creditCost ?? 0) ||
     currentCredits + creditDelta < 0
@@ -635,6 +647,21 @@ function applyOffer(params: {
         : {}),
     },
   };
+}
+
+export function candidatePreservesMandatoryCreditObligation(
+  candidate: ActionSemanticCandidate,
+  currentCredits: number,
+  requiredCredits: number | undefined,
+): boolean {
+  if (requiredCredits === undefined) return true;
+  return (
+    candidateCostsAreExact(candidate) &&
+    Number.isSafeInteger(requiredCredits) &&
+    requiredCredits >= 0 &&
+    currentCredits + exactCreditDelta(candidate) >=
+      Math.min(currentCredits, requiredCredits)
+  );
 }
 
 function boundaryAtProjectedCapacity(

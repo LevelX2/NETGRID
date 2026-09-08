@@ -833,6 +833,13 @@ Der Ursprung verändert weder Engine-Regeln noch LegalActions. Er bindet
 optionale Ability-, Run-, Access- und Trace-Entscheidungen an das auslösende
 Vorhaben und ermöglicht Outcome-basierte Fortschrittsprüfung.
 
+Eine verpflichtende Run-Fortsetzung bewahrt diesen Ursprung auch über mehrere
+zusammenhängende Engine-Fenster. Die Bindung beginnt an der exakten aktuellen
+Execution Lease; jeder weitere Übergang muss lückenlos, um genau eine
+StateVersion fortschreitend und demselben angegriffenen Server zugeordnet
+sein. Zulässig sind hier nur Runner-Runfortsetzungen und Corp-Rez-/Pass-Fenster.
+Eine feste Nachbarschaftsgrenze darf diese belegte Herkunft nicht abschneiden.
+
 Auch ein allgemeines `runner.rig_and_coverage`-Aufbauvorhaben bindet seine
 konkreten Installationsaktionen über `gap.installActionIds`, unabhängig von
 einem benannten Run-Ziel. Diese IDs entstehen zusammen mit den
@@ -1775,6 +1782,28 @@ Mehrplannutzen:
 - wird nur bei realer Zustandsannäherung vergeben.
 
 ## 17. Ressourcen und Reservierungen
+
+Die Engine projiziert eine aktive verpflichtende Corp-Zahlung als
+`own.corpEndTurnCreditObligation` mit Betrag, StateVersion, Deadline und
+terminaler Ausfallfolge. `corp.economy` finanziert einen aktuellen Fehlbetrag
+als belegte P1-Pflicht. Der Corp-TurnPlanner schützt bereits verfügbare
+Zahlungscredits in jedem projizierten Prefix; anfänglich unterfinanzierte
+Linien dürfen die Finanzierung schrittweise verbessern. Die Prüfung verwendet
+den exakten Nettocredit-Effekt, berücksichtigt vollständige Ablösung und lässt
+einen vom Score-Owner zertifizierten Sieg vor der Zahlungsdeadline zu.
+Eine dadurch unzulässige Aktionsvariante darf keine Prioritätsabhängigkeit für
+andere, zahlungsfähige Varianten erzeugen. Die aktuelle Corp-Deadline wird
+nicht auf Rezentscheidungen während des Runnerzugs übertragen.
+
+Ein Same-Turn-Score darf einen einzelnen aktuell legalen, garantiert liquiden
+Economy-Burst vor seiner Installations-/Advancementfolge zertifizieren. Der
+Score-Owner prüft Vorabkosten, verbleibende Aktionen und vollständige Konversion
+und veröffentlicht die genaue aktuelle Funding-Action als Supportbedarf.
+`corp.economy` führt diese aus; bis zur Finanzierung bleibt die spätere
+Scoreaktion blockiert. Ein separat zulässiger Installationsschritt hebt diese
+Reihenfolgebindung nicht auf. Zufallsgewinn, Draw, eingeschränkte Credits und
+unbelegte Kombinationen mit zusätzlichen Action-Capacity-Präfixen gehören
+nicht zu dieser Garantie.
 
 Der Scheduler verwaltet mindestens:
 
