@@ -1,5 +1,6 @@
 {
   "de": {
+    "setup.failure.msi_source_unavailable": "Die registrierte Windows-Installationsquelle konnte nicht sicher ermittelt werden. Es wurde keine Ersatzquelle gewählt. Lassen Sie die Installation prüfen und versuchen Sie es anschließend erneut.",
     "setup.existing.values": "Vorhandene Einstellungen verwenden",
     "setup.existing.notice": "Die angezeigten Installationswerte werden beibehalten. Programm- und Datenordner einer vorhandenen Installation bleiben unverändert. Aufbewahrung und Spielerprofile können Sie später in Maintenance verwalten; vorhandene Passwörter bleiben erhalten.",
     "setup.retained.notice": "In diesem Datenordner liegen bereits NETGRID-Einstellungen. Netzwerk, Ports und Anfangswerte werden daraus übernommen. Für eine neue Konfiguration wählen Sie einen anderen, leeren Datenordner. Vorhandene Passwörter bleiben erhalten.",
@@ -192,6 +193,7 @@
     "updater.repair_failed": "Das abgebrochene Update konnte nicht sicher wiederhergestellt werden. Starten Sie NETGRID nicht und entfernen Sie keine Installationssperren von Hand. Prüfen Sie, ob noch ein Setup oder Updater läuft. Für die Diagnose stehen die lokalen Updaterprotokolle und gesicherten Daten bereit."
   },
   "en": {
+    "setup.failure.msi_source_unavailable": "The registered Windows Installer source could not be determined safely. No replacement source was selected. Have the installation checked, then try again.",
     "setup.existing.values": "Use existing settings",
     "setup.existing.notice": "The displayed installation settings will be preserved. An existing installation keeps its program and data folders. You can manage retention and player profiles later in Maintenance; existing passwords are preserved.",
     "setup.retained.notice": "This data folder already contains NETGRID settings. Its network, ports and initial settings will be reused. To create a new configuration, choose a different, empty data folder. Existing passwords are preserved.",
@@ -384,6 +386,7 @@
     "updater.repair_failed": "The interrupted update could not be restored safely. Do not start NETGRID or manually remove installation locks. Check whether a setup or updater is still running. The local updater logs and data backups are available for diagnosis."
   },
   "fr": {
+    "setup.failure.msi_source_unavailable": "La source enregistrée de Windows Installer n’a pas pu être déterminée de manière sûre. Aucune source de remplacement n’a été choisie. Faites vérifier l’installation, puis réessayez.",
     "setup.existing.values": "Utiliser les paramètres existants",
     "setup.existing.notice": "Les paramètres d’installation affichés seront conservés. Les dossiers du programme et des données d’une installation existante restent inchangés. Vous pourrez gérer la conservation et les profils dans Maintenance ; les mots de passe existants sont conservés.",
     "setup.retained.notice": "Ce dossier de données contient déjà des paramètres NETGRID. Le réseau, les ports et les paramètres initiaux seront réutilisés. Pour une nouvelle configuration, choisissez un autre dossier de données vide. Les mots de passe existants sont conservés.",

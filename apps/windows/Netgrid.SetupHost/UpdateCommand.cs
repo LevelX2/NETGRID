@@ -1,10 +1,34 @@
 using Netgrid.Windows;
+using System.Diagnostics;
 
 namespace Netgrid.SetupHost;
 
 internal sealed record UpdateCommand(bool Uninstall, string? ProgramRoot, string? Lease)
 {
     public int ExitCode(int result) => result is 0 or 3010 || (Uninstall && Lease is null && result == 1605) ? 0 : result;
+
+    public bool RequiresElevation(bool isAdministrator)
+    {
+        if (isAdministrator) return false;
+        // An updater-bound command must already be elevated by its real owner.
+        // Reparenting it through a second UAC hop would break that binding.
+        if (Lease is not null) throw new SetupException("update_context_invalid");
+        return true;
+    }
+
+    public ProcessStartInfo ElevationStartInfo(string executable)
+    {
+        if (Lease is not null) throw new SetupException("update_context_invalid");
+        var start = new ProcessStartInfo(executable)
+        { UseShellExecute = true, Verb = "runas", WindowStyle = ProcessWindowStyle.Hidden };
+        start.ArgumentList.Add(Uninstall ? "--uninstall-update" : "--install-update");
+        if (!Uninstall)
+        {
+            start.ArgumentList.Add("--program-root");
+            start.ArgumentList.Add(ProgramRoot ?? throw new SetupException("update_program_root_missing"));
+        }
+        return start;
+    }
 
     // Standalone setup operations and updater-owned operations are explicit
     // command modes, not an automatic takeover of an existing registry lease.

@@ -28,10 +28,25 @@ internal static class UpdateCommandTests
             Assert((bool)type.GetProperty("Uninstall")!.GetValue(command)! == uninstall, "action_preserved");
             Assert((string)type.GetProperty("ProgramRoot")!.GetValue(command)! == root, "root_normalized_without_losing_spaces");
             Assert((string)type.GetProperty("Lease")!.GetValue(command)! == lease, "exact_outer_lease_preserved");
+            Assert(!(bool)type.GetMethod("RequiresElevation")!.Invoke(command, [true])!, "bound_elevated_owner_unchanged");
+            try { type.GetMethod("RequiresElevation")!.Invoke(command, [false]); throw new Exception("bound_command_reparented"); }
+            catch (TargetInvocationException error) when (error.InnerException?.GetType().Name == "SetupException") { checks++; }
+            try { type.GetMethod("ElevationStartInfo")!.Invoke(command, [@"C:\NETGRID-Setup.exe"]); throw new Exception("bound_command_reparented"); }
+            catch (TargetInvocationException error) when (error.InnerException?.GetType().Name == "SetupException") { checks++; }
             foreach (var result in new[] { 0, 3010, 1605, 1603, 5, -1 })
                 Assert((int)type.GetMethod("ExitCode")!.Invoke(command, [result])! == (result is 0 or 3010 ? 0 : result), "owned_msi_result_not_silently_reclassified");
         }
         Assert((string)forward.Invoke(null, [lease])! == "NETGRID_UPDATE_LEASE=\"" + lease + "\"", "msi_property_is_exactly_bound");
+        foreach (var uninstall in new[] { false, true })
+        {
+            var command = uninstall ? Parse("--uninstall-update") : Parse("--install-update", "--program-root", root);
+            Assert((bool)type.GetMethod("RequiresElevation")!.Invoke(command, [false])!, "standalone_asks_windows_before_protected_staging");
+            Assert(!(bool)type.GetMethod("RequiresElevation")!.Invoke(command, [true])!, "already_elevated_does_not_relaunch");
+            var start = (System.Diagnostics.ProcessStartInfo)type.GetMethod("ElevationStartInfo")!.Invoke(command, [@"C:\Setup With Spaces.exe"])!;
+            Assert(start.FileName == @"C:\Setup With Spaces.exe" && start.UseShellExecute && start.Verb == "runas" &&
+                start.WindowStyle == System.Diagnostics.ProcessWindowStyle.Hidden, "same_setup_uses_normal_windows_approval");
+            Assert(start.ArgumentList.SequenceEqual(uninstall ? new[] { "--uninstall-update" } : new[] { "--install-update", "--program-root", root }), "standalone_arguments_remain_exact_no_lease_or_delete");
+        }
         Assert(type.GetProperty("Lease")!.GetValue(Parse("--install-update", "--program-root", root)) is null, "standalone_install_never_infers_an_outer_lease");
         Assert(type.GetProperty("Lease")!.GetValue(Parse("--uninstall-update")) is null, "standalone_remove_never_infers_an_outer_lease");
         Assert((int)type.GetMethod("ExitCode")!.Invoke(Parse("--uninstall-update"), [1605])! == 0, "standalone_remove_is_explicitly_idempotent");

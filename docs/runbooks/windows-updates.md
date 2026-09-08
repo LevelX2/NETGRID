@@ -133,6 +133,40 @@ Belastbar nachgewiesen sind bislang:
   sind sämtliche Testprozesse beendet und die Testports frei
   (8. September, 11:02:53 UTC).
 
+- Archivschutz unter einem echten Standardbenutzer ist für die tatsächliche
+  8209→8212-Sicherung nativ geprüft: 30 Rechteprüfungen auf Archivwurzel,
+  Snapshot, Manifest und Payload verweigern Lesen, Schreiben, Löschen sowie
+  Rechte-/Owneränderung mit Win32-Code 5. Drei positive Kontrollen auf einer
+  eigenen Testdatei gelingen. Der Probeprozess liest oder schreibt keine
+  Inhaltsbytes; Hashes und ACLs bleiben gleich, das Testkonto ist entfernt
+  (8. September, 11:09:27 UTC). Das schließt den Archiv-ACL-Nachweis,
+  nicht die noch offene Absturzreparatur.
+
+### MSI-Quellname bei Wiederholung und Reparatur
+
+Windows Installer erwartet bei SecureRepair den registrierten `PackageName`
+im angegebenen Quellordner. Der Setuphost liest diesen Namen für denselben
+per-machine ProductCode über `MsiSourceListGetInfoW`; nur bei einem tatsächlich
+unregistrierten ProductCode verwendet er den regulären Distributionsnamen.
+Unlesbare oder ungültige registrierte Namen scheitern mit
+`msi_source_unavailable`. Die Quellenregistrierung wird nicht umgeschrieben.
+Beide Setupwege extrahieren weiterhin ausschließlich das hashgeprüfte MSI.
+Der CLI-Weg verwendet einen atomar angelegten Administrators/SYSTEM-Ordner
+und entfernt anschließend nur sein MSI und den leeren eigenen Ordner.
+Ein eigenständiger, noch nicht erhöhter CLI-Aufruf fordert die normale
+Windows-Freigabe vor dieser Extraktion an. Ein bereits updatergebundener
+Aufruf darf nicht durch einen weiteren UAC-Prozess umgehängt werden.
+
+Der native Gegenvergleich auf 8212 belegt die Ursache: Das bisherige
+`--install-update` mit zufälligem MSI-Basisnamen endet mit SecureRepair-
+Quellenfehler 1316 und Exit 1603 vor dem Lifecycle. Dasselbe originale MSI
+unter seinem registrierten Namen stellt dagegen die gezielt entfernte eigene
+Lizenzdatei wieder her, Exit 0, ohne zusätzliche `REINSTALL`-Eigenschaft.
+Konfiguration und bestehende Credentials bleiben in beiden Versuchen gleich;
+die Fehlerfixture wurde aus ihrer exakten Sicherung zurückgestellt.
+24 Dateinamen- und 66 Kommando-/Elevationsassertions sind grün. Der native
+Reparaturlauf eines neu gebauten korrigierten Setuphosts bleibt noch offen.
+
 Offen sind weiterhin der vollständige GUI-/Tray-Updater mit gebundener Pipe, ursprünglichem
 Benutzerneustart und anderer UAC-Administratorfreigabe sowie
 Absturzreparatur. Keine Releasefreigabe durch Zusammenzählen

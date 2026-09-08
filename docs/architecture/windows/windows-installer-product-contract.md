@@ -422,9 +422,11 @@ Verknüpfung; der Reparaturhelfer startet keine erhöhte Runtime.
 
 Wiederöffnen nach Ende eines separaten Snapshot-Erzeugers, Lease-Übernahme,
 Reparaturreihenfolge und Staging-Sperren sind komponentenweise geprüft.
-Die tatsächliche erhöhte Absturzreparatur, verwaiste direkte MSI-Transaktion,
-erhöhte Archivberechtigungen gegenüber Standardbenutzern und die vollständige
-native Zwei-Build-Abnahme bleiben Release-Gates. Eine noch gebundene
+Die tatsächliche erhöhte Absturzreparatur, verwaiste direkte MSI-Transaktion
+und vollständige native Updater-Abnahme bleiben Release-Gates. Die erhöhten
+Archivberechtigungen gegenüber Standardbenutzern und die direkte native
+Zwei-Build-MSI-Matrix sind inzwischen nachgewiesen; Umfang und Grenzen stehen
+im aktiven Paketprozess und im Update-Runbook. Eine noch gebundene
 MSI-Teiltransaktion wird auch nach dem
 Owner-Ende nicht automatisch gelöscht. Ein Fehler
 erhält die Sicherungen und lässt die Installationssperre bestehen; er wird

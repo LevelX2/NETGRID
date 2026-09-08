@@ -200,7 +200,7 @@ internal static class InstallationWorker
             InstallationSpace.Check(request.Settings.ProgramRoot, request.Settings.DataRoot, TemporaryRoot);
             stage = 2;
             CreateProtectedDirectory(request.DirectoryPath());
-            msi = Path.Combine(request.DirectoryPath(), "product.msi");
+            msi = Path.Combine(request.DirectoryPath(), MsiPayload.FileName);
             MsiPayload.ExtractVerified(msi);
             stage = 3;
             MsiProgressSnapshot? displayed = null;
@@ -244,7 +244,7 @@ internal static class InstallationWorker
         await pipe.WriteAsync(frame.Encode(), deadline.Token);
     }
 
-    private static void CreateProtectedDirectory(string path)
+    internal static void CreateProtectedDirectory(string path)
     {
         var security = new DirectorySecurity();
         var administrators = new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null);

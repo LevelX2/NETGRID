@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Security.Principal;
 using System.Text.Json;
 using Microsoft.Win32;
 using Netgrid.Windows;
@@ -119,6 +120,17 @@ internal static class Program
             if (args.Length > 0 && args[0] is "--install-update" or "--uninstall-update")
             {
                 var command = UpdateCommand.Parse(args);
+                using var identity = WindowsIdentity.GetCurrent();
+                if (command.RequiresElevation(new WindowsPrincipal(identity).IsInRole(WindowsBuiltInRole.Administrator)))
+                {
+                    // Stage only after the user's normal Windows approval, so
+                    // the MSI source can remain Administrators/SYSTEM-only.
+                    using var elevated = Process.Start(command.ElevationStartInfo(
+                        Environment.ProcessPath ?? throw new SetupException("setup_path_missing")))
+                        ?? throw new SetupException("msi_start_failed");
+                    elevated.WaitForExit();
+                    return elevated.ExitCode;
+                }
                 var result = Installer.RunUpdate(command.ProgramRoot, command.Uninstall, updateLease: command.Lease);
                 Console.WriteLine($"{(command.Uninstall ? "NETGRID_SETUP_UNINSTALL_RESULT" : "NETGRID_SETUP_UPDATE_RESULT")} code={result}");
                 // Only a standalone removal is idempotent for an absent MSI.
@@ -900,12 +912,18 @@ internal static class Installer
 
     public static int RunUpdate(string? programRoot, bool uninstall, bool deleteData = false, string? updateLease = null)
     {
-        var temporaryMsi = Path.Combine(Path.GetTempPath(), $"NETGRID-{Guid.NewGuid():N}.msi");
+        var temporaryDirectory = Path.Combine(InstallationWorker.TemporaryRoot, $"NETGRID-SetupMsi-{Guid.NewGuid():N}");
+        string? temporaryMsi = null;
+        var directoryCreated = false;
         try
         {
             // Keep the real updater handle through MSI completion. Neither a
             // guessed nonce nor a recycled PID authorizes joining its lease.
             using var updateOwner = updateLease is null ? null : BindUpdateOwner(programRoot, updateLease, deleteData);
+            var fileName = MsiPayload.FileName;
+            InstallationWorker.CreateProtectedDirectory(temporaryDirectory);
+            directoryCreated = true;
+            temporaryMsi = Path.Combine(temporaryDirectory, fileName);
             var action = uninstall ? "/x" : "/i";
             var arguments = $"{action} {Quote(temporaryMsi)} /qn /norestart /l*v {Quote(LogPath)}";
             if (updateLease is not null)
@@ -937,7 +955,10 @@ internal static class Installer
         }
         finally
         {
-            if (File.Exists(temporaryMsi)) File.Delete(temporaryMsi);
+            if (temporaryMsi is not null && File.Exists(temporaryMsi)) File.Delete(temporaryMsi);
+            // Only our own extracted MSI and then its empty private directory.
+            // Never recurse into a source/cache or remove installer logs.
+            if (directoryCreated) Directory.Delete(temporaryDirectory);
         }
     }
 
@@ -992,6 +1013,15 @@ internal static class Installer
 internal static class MsiPayload
 {
     public static string ProductVersion => Assembly.GetExecutingAssembly().GetName().Version!.ToString(3);
+    public static string FileName
+    {
+        get
+        {
+            using var input = Open();
+            var product = Read(input).Product;
+            return MsiSourceName.Resolve(product.ProductCode, product.ProductVersion);
+        }
+    }
     public static InstallationFootprint Footprint
     {
         get

@@ -92,6 +92,41 @@ eigene Account-, Cleanup- oder Versionsautorität.
 
 ## Aktueller Umsetzungsstand
 
+### Aktiver Prüfpunkt: Setup-Reparaturquelle und Archivschutz
+
+WIN-I08 bleibt aktiv. Der Sandboxlauf
+`output/windows-sandbox-e2e/32fb2f4eff424959a9d41c29b9adadd3/result`
+enthält drei am 8. September unabhängig hashgeprüfte neue Belege:
+
+- `native-archive-access-8212.json`, SHA-256
+  `7882b5b7762813a83cfccb32ffaa9e98160db9ab2b5ff831c2b6d8a739915757`:
+  30 verweigerte Standardbenutzer-Zugriffsrechte auf das echte erhöhte Archiv,
+  drei erfolgreiche eigene Kontrollen, keine Inhalts- oder ACL-Änderung.
+  Native Archivberechtigung bestanden, Testkonto entfernt, Runtime gestoppt.
+- `native-same-version-setup-repair-8212.json`, SHA-256
+  `27b4e98c76b5b259b3c8084eb25af807184ae59159d92d12d6e2239644f8fe49`:
+  Diagnose abgeschlossen, **Reparatur nicht bestanden**. Der alte Setuphost
+  liefert durch seinen zufälligen MSI-Dateinamen SecureRepair-Fehler 1316
+  und Exit 1603. Die ausschließlich eigene entfernte Lizenzdatei ist durch
+  Fixture-Cleanup wiederhergestellt; Credentials und Konfiguration gleich.
+- `native-same-version-direct-install-8212.json`, SHA-256
+  `03f8a482f7ead77cc12a5872b63aba1d960a6c1ed8ddbc24633f601fecfc6706`:
+  Gegenprobe mit unverändertem originalem MSI und richtigem Basisnamen
+  repariert dieselbe fehlende Datei erfolgreich, ohne `REINSTALL=ALL`.
+  Exit 0, exakter Lizenzhash, geschützte Dateien unverändert.
+
+Der Ursachenfix liest den per-machine `PackageName` aus Windows Installer
+und verwendet ihn in beiden Extraktionspfaden. Neue ProductCodes erhalten
+den regulären Distributionsnamen; ungültige Quellen scheitern sichtbar.
+Die CLI-Extraktion erfolgt erst erhöht im atomar angelegten geschützten
+Ordner; eigenständige Aufrufe behalten ihre normale Windows-Rechteabfrage,
+gebundene Updater-Aufrufe behalten ihren tatsächlichen Owner. 24 fokussierte
+Dateinamenchecks, 66 Kommando-/Elevationschecks und der de/en/fr-Katalog mit
+191 Schlüsseln sind grün. Noch kein korrigierter Bundlebuild oder nativer
+Setup-Reparaturbeleg. Keine Releasefreigabe, Integration oder Übertragung.
+
+### Paketstand
+
 - WIN-I00 ist verifiziert: Der bestehende Maintenance-Credentialstore wurde
   ohne Passwortänderung hashgleich an den kanonischen Repository-Datenpfad
   verschoben. CLI und laufender Server erkennen ihn dort; am früheren
