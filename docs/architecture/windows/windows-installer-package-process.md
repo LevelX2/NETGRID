@@ -1005,6 +1005,72 @@ Programm und eigene Testdaten bleiben in dieser Sandbox für die folgenden
 Versionswechsel-/Rollbackprüfungen installiert. Die normale Hostinstanz auf
 Port 3100 bleibt unverändert. Kein Main-Merge, Worktree-Cleanup oder Push.
 
+### Zweiter aktueller Bundlekandidat 8210 und native Rollbackbasis
+
+Der reguläre Build 8210 aus dem sauberen Commit
+`5105dddb2ba00960660372ed03d9a4b3d05dc95b` endet mit Exit 0,
+`WINDOWS_INSTALLER_CHECK_OK files=10903` und `WINDOWS_INSTALLER_BUILD_OK`.
+`output/windows-installer-rollback-pair-8210` enthält Setup, MSI, reguläre
+Release-Metadaten und Prüfsummen. Komponenten-, Laufzeitsmoke- und
+UI-Prüfungen (`de`/`en`/`fr`, 100/125/150 Prozent) sind grün.
+ProductCode: `{C7EEAA45-CEF0-46A0-8D27-341C982BBC3F}`.
+Setup-SHA-256:
+`9959e6bd3f1510ecb6d82bd2e5d2d94069708dfc56b12c803152e1fafcffe5c2`;
+MSI-SHA-256:
+`73d4596ee9c14dc401d53303a707e2a65d4ad4f2b40f7f72ef9f922ce8326924`.
+Beide Kandidaten und ihre Produktmanifeste sind im bestehenden isolierten
+Sandboxinput hashgebunden erhalten. Keine nachträgliche Umetikettierung.
+
+Die native Ausgangsbasis ist weiterhin der eigene installierte 8209-Stand
+unter `NETGRID-E2E-7b2efaa938bb2767af8721b42573d8f0`, Ports 32141/32142.
+Vor einem Versionswechsel wurden vollständige Dateiidentität, Registrierung,
+Konfiguration und unveränderlicher Setupcache erneut geprüft. Eine neue,
+zuvor nachweislich fehlende Maintenance-Testauthentifizierung wurde über den
+installierten First-Run-CLI-Einstieg eingerichtet. Das Zufallspasswort bleibt
+nur im Arbeitsspeicher und im stdin-Transport; bestehende Credentials werden
+vor jedem Bootstrap ausdrücklich ausgeschlossen. Der Baselinebeleg
+`result/native-8209-rollback-baseline.json` endet am 8. September um
+09:17:25 UTC mit `ok=true`, SHA-256
+`5105ca89931e09bb38dc5b8be785e1ea06c7243d2b2a2bfc2c93a329cefd6094`.
+
+Die anfänglich fehlgeschlagene Testvorbereitung war ein Transportfehler des
+PowerShell-5.1-Harness: `Process.StandardInput` schreibt in diesem Gast einen
+UTF-8-BOM vor die erste Zeile; der inerte Node-Prüfer bestätigt U+FEFF und
+ungleiche Zeilen. Auch der Zugriff auf den Basestream des bereits erzeugten
+Writers verhindert dessen vorangegangenen BOM nicht. Der korrigierte Harness
+verwendet denselben expliziten Node-zu-FirstRun-UTF-8-Pipevertrag wie der
+bestehende First-Run-Smoke. Das Produkt bleibt unverändert; weder BOM-
+Ignorieren noch eine abgeschwächte Passwortbestätigung wurden eingebaut.
+Die fehlgeschlagenen Vorbereitungsbelege bleiben separat erhalten.
+
+Die sequenzielle native Prüfung 8209/8210 ist mit allen sechs Phasen grün:
+Upgrade, installierte Identität, Downgrade, installierte Identität,
+gezielter Integritätsfehler nach Datencapture und physische Rollbackprüfung.
+Der Test bindet den tatsächlichen Snapshot vor seiner eigenen Dateimutation;
+eine absichtlich falsche Setup-Prüfsummenangabe führt danach zu MSI 1603 und
+`CacheNetgridSetup`-Fehler 2. Capture, Restore und Freigabe der eigenen
+Installersperre sind im echten MSI-Log nachgewiesen. Programmbytes und alle
+fünf nativen PE-Versionen entsprechen anschließend wieder 8209. Ursprüngliche
+Testdatei und DACL sind wiederhergestellt; die erst nach Capture hinzugefügte
+Datei ist entfernt und zusammen mit dem fehlgeschlagenen Datenstand im
+separaten Fehlersnapshot erhalten. Konfiguration, Testauthentifizierung,
+alter Setupcache einschließlich Änderungszeit und beide Original-MSI-Caches
+bleiben unverändert. Die MSI-Caches sind nachweislich vom Snapshot ausgeschlossen.
+Der anschließende installierte Headless-Healthlauf endet mit Exit 0 und ohne
+verbleibende Produktprozesse oder Listener auf 32141/32142.
+
+Gesamtabschluss: 8. September, 09:34:22 UTC. Die sechs JSON-Ergebnisse und
+drei vollständigen MSI-Logs liegen unter demselben gemappten Ergebnisroot
+`output/windows-sandbox-e2e/32fb2f4eff424959a9d41c29b9adadd3/result/`.
+Fehlerlaufbeleg SHA-256:
+`960c7c0939c26040823c4fd5e00996401003825b6d956034ca8fd644026938b1`;
+Rollback-/Healthbeleg SHA-256:
+`4aaee14d625f3109b23764abd84c94eb7a05c0ea209d9aaa78fbd292c4920ebc`.
+Das schließt den nativen Fehlerrollback des neuen Bundleformats für den
+direkten MSI-Weg. Es ersetzt weder Tray-/Pipe-Updater, Aktivspiel-/Mehrbenutzer-
+schutz, UAC-Kontowechsel noch die Absturzreparatur. WIN-I08 bleibt aktiv;
+kein Main-Merge, Worktree-Cleanup oder Push.
+
 ### Regulärer Build 8199: Installation, Repair und Headless nativ grün
 
 `output/windows-installer-stop-diagnostic-8199` ist regulär aus dem sauberen

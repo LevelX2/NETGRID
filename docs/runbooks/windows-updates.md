@@ -72,11 +72,15 @@ Belastbar nachgewiesen sind bislang:
   Gesamtabschluss einschließlich Cleanup: 8. September, 08:49:07 UTC.
   Alle 13 MSI-Logs sind auf den Host kopiert und dort erneut hashgeprüft.
 - Direkte MSI-Upgrades, Downgrades und physischer Fehlerrollback unter
-  Sandbox-SYSTEM mit 8201/8202. Programmhashes/-versionen, Registrierung,
-  Cache-/Shortcutbindung, Dateninhalte und Berechtigungen sind geprüft.
-  Nach dem Capture veränderte eigene Testdaten wurden zurückgestellt und
-  zusätzlich im separaten Fehlerstand erhalten. Das ist noch kein
-  Fehlerrollbacknachweis für das neue Bundleformat.
+  Sandbox-SYSTEM mit dem aktuellen Bundlepaar 8209/8210. Alle sechs Phasen
+  enden am 8. September um 09:34:22 UTC grün. Programmhashes/-versionen,
+  Registrierung, Cache-/Shortcutbindung, Dateninhalte und Berechtigungen
+  sind geprüft. Nach Capture veränderte eigene Testdaten wurden zurückgestellt
+  und zusätzlich im separaten Fehlerstand erhalten. Konfiguration und zuvor
+  frisch eingerichtete Testauthentifizierung bleiben bytegleich. Der
+  wiederhergestellte installierte 8209-Stand besteht den Headless-Healthlauf
+  mit Exit 0, anschließend sind eigene Runtimeprozesse und Testports frei.
+  Dies ist ein Nachweis des direkten MSI-Wegs, nicht des Tray-Updaters.
 - MSI-Alleininstallation, vollständige installierte Dateiidentität und
   ProductCode-Reparatur von 8207. Eine weitere Reparatur bei tatsächlich
   entfernten Downloadkopien verwendet nachweislich den geschützten
@@ -98,8 +102,7 @@ Belastbar nachgewiesen sind bislang:
   Kindtokenprüfung vor Resume. Details und Grenzen stehen im
   [Neustartvertrag](#neustart-im-ursprünglichen-benutzerkontext).
 
-Offen sind weiterhin nativer Fehlerrollback mit dem neuen Bundle,
-Aktivspiel-/Mehrbenutzerschutz,
+Offen sind weiterhin Aktivspiel-/Mehrbenutzerschutz,
 vollständiger GUI-/Tray-Updater mit gebundener Pipe, ursprünglichem
 Benutzerneustart und anderer UAC-Administratorfreigabe sowie
 Absturzreparatur. Keine Releasefreigabe durch Zusammenzählen
@@ -126,6 +129,32 @@ deshalb noch nicht heruntergeladen und geprüft werden. Fixturetests für
 Stable, Prerelease, Offlinebetrieb und Integritätsfehler bleiben davon
 getrennt. Die laufenden Tests begründen weder einen Push noch eine
 Veröffentlichung.
+
+### Korrespondierende WiX-Quellen vor Weitergabe
+
+Die verwendeten NuGet-Pakete `WixToolset.Dtf.CustomAction` und
+`WixToolset.Dtf.WindowsInstaller` 7.0.0 binden in ihren Nuspec-Dateien denselben
+Upstreamcommit `b8977d6f88e7b68e000bac226a2814f236770570`. Die bereits
+angenommene OSMF-EULA ersetzt nicht die Bereitstellungsbedingungen der
+[MS-RL dieses Quellstands](https://github.com/wixtoolset/wix/blob/b8977d6f88e7b68e000bac226a2814f236770570/LICENSE.TXT).
+
+Das vollständige unveränderte Upstreamarchiv wurde am 8. September separat
+unter `output/wix-corresponding-source-b8977d6f88e7b68e000bac226a2814f236770570`
+bereitgestellt: 12.882.294 Bytes, 6.305 ZIP-Einträge, SHA-256
+`7383d9b68f9ad31188566d0e6cb0b0d59b0056e55b8959e736cd83bc38eb548f`.
+`source-audit.json` bestätigt die Bindung beider Binärpakete, sichere
+Archivpfade, enthaltene SfxCA-/WindowsInstaller-/DUtil-Quellen und die
+Übereinstimmung aller nichtleeren Lizenztextzeilen mit den ausgelieferten
+Hinweisen. Es wurde weder entpackt noch ausgeführt oder installiert.
+
+Dies ist eine vorbereitete technische Quellenbereitstellung, noch keine
+erfolgte Weitergabe oder vollständige Releasefreigabe. Vor Veröffentlichung
+muss die Mitbereitstellung des Archivs samt Prüfsumme und Hinweisen im
+Release geprüft werden. Das Herstellerquellarchiv bleibt ein separates
+Lizenzartefakt außerhalb der installierbaren NETGRID-Payload; NETGRID-
+Repositoryquellen und Entwicklungsdaten bleiben ausgeschlossen. Die beiden
+bereits gebauten Installerartefakte und ihre Metadaten werden dafür nicht
+nachträglich umgeschrieben.
 
 ### Serverseitige Vorbereitungsschnittstelle
 
