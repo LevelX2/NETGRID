@@ -772,9 +772,10 @@ kein MSI installiert; dies ist kein reguläres neues Releaseartefakt.
 `test-windows-setup-reconstruction.ps1` führt diesen echten Cachebefehl künftig
 im regulären Extraktionsaudit aus. Die neue Matrix lässt bei der ersten
 Installation Setupquelle und -hash weg und prüft zusätzlich den installierten
-Stub. Regulärer Build, vollständiger Payload-Audit und native
-Offline-MSI-Alleininstallation einschließlich Reparatur/Update/Rollback
-stehen für diesen neuen Quellstand noch aus.
+Stub. Der reguläre Build 8206 und vollständige Payload-Audit sind inzwischen
+grün; die native Offline-MSI-Alleininstallation scheiterte am unten
+beschriebenen MSI-Kommandozeilenfehler. Reparatur/Update/Rollback stehen für
+den korrigierten Quellstand noch aus.
 Keine zweite Installationsteuerung oder Legacy-Dual-Reader einführen.
 Die bytegleiche Rekonstruktion eines später außen Authenticode-signierten
 Setups ist damit noch nicht gelöst; dieser Versuch betrifft ausschließlich
@@ -812,8 +813,46 @@ Aufrufer. Der Test verwendet dafür den angemeldeten WDAG-Administrator und
 ein neu erzeugtes lokales Testkonto ohne Administratorrechte; MSI-Phasen
 bleiben SYSTEM. Dies folgt dem
 [Windows-Vertrag für CreateProcessWithLogonW](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithlogonw).
-Das Fixture ist noch nicht ausgeführt; bestehende Credentials werden dabei
-nicht übernommen, gelesen oder geändert.
+Der erste Installationsschritt ist inzwischen ausgeführt, aber fehlgeschlagen;
+Reparatur und Standardbenutzerprüfung wurden deshalb nicht gestartet.
+Bestehende Credentials wurden nicht übernommen, gelesen oder geändert.
+
+### Aktueller nativer Befund: MSI-Kommandozeile der Cache-Rekonstruktion
+
+Build 8206 aus `4d40e4783c170b7eff2b8218ec7cf3bdf070097e` endet regulär mit
+Exit 0, vollständigem 10.903-Dateien-Audit und UI-Gate (185 Texte, de/en/fr,
+100/125/150 Prozent). Metadaten nennen `sourceDirty=false`; beide Artefakte
+sind gegen `SHA256SUMS.txt` und nach Kopie in den Sandbox-Input geprüft.
+Setup-SHA-256: `adfba233d82749a35a0befd43242b330af841d330b806b41b24c185b5a632538`;
+MSI-SHA-256: `def6d6811929cfdbdb6bf3677c3652bbbd6dca9cd7f0eaee025fb93589308bf3`.
+
+Die Offline-MSI-Alleininstallation in Sandbox
+`59413984-bfbe-4480-a66e-aa73e4a70477` endet am 8. September um
+07:15:14 UTC mit MSI 1603: `CacheNetgridSetup` liefert Exit 2. Ergebnis und
+vollständiges Log liegen unter
+`output/windows-sandbox-e2e/4e3eb1bf3ede4e27bcf4278dcc097dde/result/native-bundle-8206/`.
+Nach Rollback fehlen Programmordner und registriertes MSI; Runtime und
+Testports sind frei. Der von der Initialisierung erzeugte eigene Testdatenroot
+und dessen `RuntimeDataRoot`-Registrierung bleiben erhalten. Sie sind keine
+erfolgreiche Installation und vor einem neuen Frischtest gezielt zu bereinigen.
+
+Ursache ist die neu eingeführte Übergabe `--program-root "[INSTALLFOLDER]"`:
+Windows Installer liefert den Ordner mit abschließendem Backslash. Dieser
+verändert die Anführungszeichenbindung; der Runtimekonfigurator erhält kein
+separates `--product-code` mehr. Der tatsächliche native Kommandozeilenaufruf
+reproduziert `argument_missing`, ohne Installation oder Registryänderung.
+Die Cache-Aktion verwendet jetzt wie Initialisierung und MSI-Cache den
+bereits vorhandenen Programmroot-Owner aus dem Ort ihrer installierten EXE.
+Kein Parser-Fallback und keine zweite Pfadermittlung wurden ergänzt.
+
+Der Extraktionsaudit liest nun den tatsächlichen Target-String von
+`SetCacheNetgridSetup` aus dem MSI und führt ihn mit Windows-
+Kommandozeilenformatierung aus, einschließlich leerer Setupquelle/-hash.
+Nur der isolierte Test-State wird ergänzt. Mit dem unveränderten 8206-MSI ist
+dieser neue Regressionstest reproduzierbar rot (`--product-code` fehlt);
+die sieben fokussierten Lifecycle-/Authoringtests sind nach der Korrektur grün.
+Der nächste reguläre Build und dessen native Wiederholung stehen noch aus.
+WIN-I08 bleibt aktiv; kein Main-Merge und kein Push.
 
 ### Regulärer Build 8199: Installation, Repair und Headless nativ grün
 

@@ -703,6 +703,15 @@ Format, keine Legacy-Ressource als Ersatz. Der reguläre Extraktionsaudit ruft
 `test-windows-setup-reconstruction.ps1` auf und verlangt Bytegleichheit,
 idempotenten Cache und Ablehnung falscher Bestätigungen. Diese Komponenten-
 und Fixturechecks ersetzen nicht die noch ausstehende neue Sandbox-Abnahme.
+Der Audit führt hierfür den tatsächlichen `SetCacheNetgridSetup`-Target aus
+der MSI-Datenbank als rohe Windows-Kommandozeile aus. Argument-Arrays allein
+decken die MSI-Quote-Bindung nicht ab: Ein direkt zitiertes `[INSTALLFOLDER]`
+endet mit einem Backslash und kann das nächste Argument verschlucken.
+Die Cache-Aktion bestimmt den Programmroot deshalb wie Initialisierung und
+MSI-Cache über die bereits vorhandene Auflösung aus ihrer installierten EXE,
+nicht über ein zusätzlich formatiertes Ordnerargument. Der native Erstlauf
+8206 scheiterte an genau dieser Übergabe; Build-/Komponentenerfolg ist kein
+Beleg für einen erfolgreichen MSI-Custom-Action-Aufruf.
 Die Rekonstruktion einer später außen Authenticode-signierten EXE ist kein
 Teil dieses Formats; breite signierte Veröffentlichung bleibt gesperrt.
 

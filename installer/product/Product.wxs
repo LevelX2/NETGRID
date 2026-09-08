@@ -176,7 +176,7 @@
       HideTarget="yes" />
     <SetProperty
       Id="CacheNetgridSetup"
-      Value='cache-setup --data-root "[NETGRID_DATA_ROOT]" --program-root "[INSTALLFOLDER]" --product-code "[ProductCode]" --source "[NETGRID_SETUP_SOURCE]" --sha256 "[NETGRID_SETUP_SHA256]"'
+      Value='cache-setup --data-root "[NETGRID_DATA_ROOT]" --product-code "[ProductCode]" --source "[NETGRID_SETUP_SOURCE]" --sha256 "[NETGRID_SETUP_SHA256]"'
       Before="CacheNetgridSetup"
       Sequence="execute"
       Condition='NOT REMOVE~="ALL"' />

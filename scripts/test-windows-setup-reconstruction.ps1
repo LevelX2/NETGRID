@@ -21,6 +21,16 @@ try {
   $record=$view.Fetch()
   if ($null -eq $record) { throw 'setup_reconstruction_product_code_missing' }
   $productCode=[string]$record.StringData(1)
+  [Runtime.InteropServices.Marshal]::FinalReleaseComObject($record) | Out-Null
+  $record=$null
+  $view.Close() | Out-Null
+  [Runtime.InteropServices.Marshal]::FinalReleaseComObject($view) | Out-Null
+  $view=$null
+  $view=$database.OpenView('SELECT `Target` FROM `CustomAction` WHERE `Action` = ''SetCacheNetgridSetup''')
+  $view.Execute() | Out-Null
+  $record=$view.Fetch()
+  if ($null -eq $record) { throw 'setup_reconstruction_msi_command_missing' }
+  $msiCommand=[string]$record.StringData(1)
 } finally {
   if($record){[Runtime.InteropServices.Marshal]::FinalReleaseComObject($record) | Out-Null}
   if($view){$view.Close() | Out-Null; [Runtime.InteropServices.Marshal]::FinalReleaseComObject($view) | Out-Null}
@@ -32,6 +42,29 @@ function Invoke-Fixture {
   & $executable @Values | Out-Null
   if ($LASTEXITCODE -ne $Expected) { throw "setup_reconstruction_exit_invalid:$LASTEXITCODE/$Expected" }
 }
+function Invoke-MsiCommandFixture {
+  # Exercise the actual MSI-authored raw command, including empty source/hash
+  # values and directory formatting. Argument-array invocation hides quoting
+  # bugs caused by the trailing separator of an MSI directory property.
+  $arguments=$msiCommand.Replace('[NETGRID_DATA_ROOT]',$dataRoot).Replace('[INSTALLFOLDER]',($ProgramRoot.TrimEnd('\')+'\')).Replace('[ProductCode]',$productCode).Replace('[NETGRID_SETUP_SOURCE]','').Replace('[NETGRID_SETUP_SHA256]','')
+  if ($arguments.Contains('[') -or $arguments.Contains(']')) { throw 'setup_reconstruction_msi_command_unbound' }
+  $start=New-Object Diagnostics.ProcessStartInfo
+  $start.FileName=$executable
+  if (-not $arguments.StartsWith('cache-setup ')) { throw 'setup_reconstruction_msi_command_invalid' }
+  $start.Arguments='cache-setup --state-file "'+$stateFile+'" '+$arguments.Substring('cache-setup '.Length)
+  $start.UseShellExecute=$false
+  $start.CreateNoWindow=$true
+  $start.RedirectStandardOutput=$true
+  $start.RedirectStandardError=$true
+  $process=[Diagnostics.Process]::Start($start)
+  try {
+    $stdout=$process.StandardOutput.ReadToEnd()
+    $stderr=$process.StandardError.ReadToEnd()
+    $process.WaitForExit()
+    if ($process.ExitCode -ne 0) { throw "setup_reconstruction_msi_command_failed:$($process.ExitCode):$stderr" }
+    if ($stdout.Trim() -cne 'NETGRID_SETUP_CACHE_OK') { throw 'setup_reconstruction_msi_command_result_invalid' }
+  } finally { $process.Dispose() }
+}
 try {
   $dataRoot=Join-Path $scratch 'data'
   $config=Join-Path $dataRoot 'config'
@@ -41,18 +74,18 @@ try {
   $binding=@('--data-root',$dataRoot,'--program-root',$ProgramRoot,'--state-file',$stateFile,'--product-code',$productCode)
   Invoke-Fixture (@('cache-msi') + $binding + @('--source',$MsiPath))
   # No setup source/hash is provided: the first entry must be generated offline.
-  Invoke-Fixture (@('cache-setup') + $binding)
+  Invoke-MsiCommandFixture
   $cached=Join-Path $config "updates\$productCode\NETGRID-Setup.exe"
   $expectedHash=(Get-FileHash -LiteralPath $SetupPath -Algorithm SHA256).Hash
   if ((Get-FileHash -LiteralPath $cached -Algorithm SHA256).Hash -cne $expectedHash) { throw 'setup_reconstruction_not_byte_identical' }
   $modified=(Get-Item -LiteralPath $cached).LastWriteTimeUtc
-  Invoke-Fixture (@('cache-setup') + $binding)
+  Invoke-MsiCommandFixture
   Invoke-Fixture (@('cache-setup') + $binding + @('--source',$SetupPath,'--sha256',$expectedHash))
   Invoke-Fixture (@('cache-setup') + $binding + @('--source',$SetupPath,'--sha256',('0'*64))) -Expected 2
   Invoke-Fixture (@('cache-setup') + $binding + @('--sha256',$expectedHash)) -Expected 2
   if ((Get-FileHash -LiteralPath $cached -Algorithm SHA256).Hash -cne $expectedHash -or (Get-Item -LiteralPath $cached).LastWriteTimeUtc -ne $modified) { throw 'setup_reconstruction_rewrote_immutable_cache' }
   if (@(Get-ChildItem -LiteralPath $config -File -Filter '*.setup.tmp').Count) { throw 'setup_reconstruction_stage_leftover' }
-  Write-Output 'WINDOWS_SETUP_RECONSTRUCTION_TEST_OK byteIdentical=true noSetupSource=true immutableRepair=true invalidAttestationRejected=true installationStarted=false'
+  Write-Output 'WINDOWS_SETUP_RECONSTRUCTION_TEST_OK byteIdentical=true noSetupSource=true msiCommandLine=true immutableRepair=true invalidAttestationRejected=true installationStarted=false'
 } finally {
   $resolved=[IO.Path]::GetFullPath($scratch)
   $allowed=[IO.Path]::GetFullPath([IO.Path]::GetTempPath()).TrimEnd('\') + '\'
