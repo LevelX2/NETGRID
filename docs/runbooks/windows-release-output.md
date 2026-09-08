@@ -362,6 +362,20 @@ geprüften Ports `32141`/`32142`; die Betriebsports der Entwicklungsinstanz
 bleiben reserviert. Für die Default-Prüfung werden nur die Testpfade und Ports
 abweichend gesetzt.
 
+Die Standalone-Matrix verwendet direkte MSI-Installations-, Reparatur- und
+Deinstallationsbefehle. Sie ruft keine internen, an eine Updater-Lease
+gebundenen Setupoptionen auf und ersetzt nicht den echten Tray-/Pipe-
+Updaterlauf. Nach Installationen, Reparaturen und Versionswechseln prüft sie
+zusätzlich den Quellcommit, sämtliche Manifestdateien, vier native EXE-Hashes
+und Dateiversionen sowie den registrierten
+Setupcache und das tatsächliche Ziel der Setup-Verknüpfung. Der negative
+Ordnerwechsel muss explizit `installation_gate_upgrade_root_changed` liefern;
+eine Ablehnung vor Änderungen ist kein Rollback-Nachweis.
+`node --test scripts/check-windows-installer-e2e-harness.test.mjs` prüft diese
+Harnessverträge und die Windows-PowerShell-Syntax ohne Installation. Der
+überarbeitete Gesamtlauf benötigt weiterhin zwei aktuelle, regulär gebaute
+Artefaktsätze und ist noch nativ auszuführen.
+
 `corepack pnpm certify:windows-release` verbindet Releasegrenzenprüfung,
 Installer-Build und diesen erhöhten Lauf. Das Ergebnis unter
 `output/windows-installer-e2e/windows-11-x64-result.json` bindet die geprüften

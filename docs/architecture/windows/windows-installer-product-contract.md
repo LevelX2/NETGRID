@@ -144,7 +144,9 @@ Updater und Reparatur wählen über diese Registrierung, nicht über globale
 „aktuell“-/„pending“-Dateien. Die Rückkehrdatei bleibt zusätzlich im
 geschützten Updatesnapshot gehalten. Nach Erfolg oder Rücknahme wird der
 selektierte Cachehash vor Freigabe gegen den erwarteten Stand geprüft.
-Die Komponenten- und MSI-Tabellenprüfungen sind grün; der native Nachweis
+Die Komponenten- und MSI-Tabellenprüfungen sowie die native Wiederinstallation
+und ProductCode-Reparatur von 8195 mit korrektem Cache-/Shortcutziel sind grün.
+Der native Nachweis
 dieser Cacheänderung mit zwei aktuellen Produktbuilds ist noch offen.
 
 Die MSI-Transaktion besitzt eine pro Programmordner gebundene Installersperre

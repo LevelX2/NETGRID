@@ -14,9 +14,7 @@ $logRoot = Join-Path ([System.IO.Path]::GetTempPath()) "NETGRID-E2E-$testId"
 $startMenuRoot = Join-Path $env:ProgramData "Microsoft\Windows\Start Menu\Programs\NETGRID"
 $desktopShortcut = Join-Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::CommonDesktopDirectory)) "NETGRID.lnk"
 $startedUtc = [DateTime]::UtcNow.ToString("O")
-$unavailableDrive = @('Z','Y','X','W','V','U','T','S','R','Q','P','O','N','M','L','K','J','I','H','G','F','E','D') | Where-Object { -not (Test-Path -LiteralPath "${_}:\") } | Select-Object -First 1
-if ([string]::IsNullOrWhiteSpace($unavailableDrive)) { throw "unavailable_drive_missing" }
-$failedProgramRoot = "${unavailableDrive}:\NETGRID-E2E-unavailable-$testId"
+$failedProgramRoot = Join-Path $env:ProgramFiles "NETGRID-E2E-rejected-$testId"
 
 function Assert-True { param([bool]$Condition, [string]$Code) if (-not $Condition) { throw $Code } }
 function Invoke-Msi {
@@ -35,6 +33,43 @@ function Invoke-GuiExecutable {
 function Quote-Msi { param([string]$Value) return '"' + $Value.Replace('"', '""') + '"' }
 function Product-Version { param([string]$Root) return [string](Get-Content -LiteralPath (Join-Path $Root "product-layout.json") -Raw | ConvertFrom-Json).product.installerVersion }
 function Setup-Hash { param([string]$Path) return (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.ToLowerInvariant() }
+function Assert-InstalledIdentity {
+  param([string]$MsiPath, [string]$SetupPath)
+  $metadata = Get-Content -LiteralPath (Join-Path (Split-Path $MsiPath) 'release-metadata.json') -Raw | ConvertFrom-Json
+  $version = [string]$metadata.product.installerVersion
+  Assert-True ((Product-Version $programRoot) -eq $version) 'installed_layout_version_mismatch'
+  $layout = Get-Content -LiteralPath (Join-Path $programRoot 'product-layout.json') -Raw | ConvertFrom-Json
+  Assert-True ($layout.product.commit -eq $metadata.product.commit -and $layout.product.sourceDirty -eq $false) 'installed_source_identity_mismatch'
+  $manifest = Get-Content -LiteralPath (Join-Path $programRoot 'product-manifest.json') -Raw | ConvertFrom-Json
+  Assert-True (@($manifest.files | Where-Object path -eq 'product-layout.json').Count -eq 1) 'installed_manifest_layout_missing'
+  foreach ($entry in $manifest.files) {
+    $target = [IO.Path]::GetFullPath((Join-Path $programRoot $entry.path))
+    Assert-True ($target.StartsWith($programRoot + '\', [StringComparison]::OrdinalIgnoreCase)) 'installed_manifest_path_outside_product'
+    Assert-True ((Get-Item -LiteralPath $target).Length -eq $entry.bytes -and (Setup-Hash $target) -eq $entry.sha256) "installed_manifest_file_mismatch:$($entry.path)"
+  }
+  $files = @{
+    'NETGRID.exe' = $metadata.runtime.launcherSha256
+    'NETGRID.FirstRun.exe' = $metadata.runtime.firstRunSha256
+    'NETGRID.Updater.exe' = $metadata.runtime.updaterSha256
+    'tools\NETGRID.RuntimeConfig.exe' = $metadata.runtime.runtimeConfigSha256
+  }
+  foreach ($relative in $files.Keys) {
+    $target = Join-Path $programRoot $relative
+    Assert-True ((Setup-Hash $target) -eq $files[$relative]) "installed_native_hash_mismatch:$relative"
+    Assert-True ([Diagnostics.FileVersionInfo]::GetVersionInfo($target).FileVersion -eq "$version.0") "installed_native_version_mismatch:$relative"
+  }
+  $products = @(Get-ItemProperty HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\* -ErrorAction SilentlyContinue | Where-Object DisplayName -eq 'NETGRID')
+  Assert-True ($products.Count -eq 1 -and $products[0].DisplayVersion -eq $version) 'installed_product_identity_mismatch'
+  $registry = Get-ItemProperty 'HKLM:\SOFTWARE\LevelX2\NETGRID'
+  Assert-True ($registry.CurrentProductCode -ceq $products[0].PSChildName -and $registry.InstallerLifecycleProtocol -eq 'msi-data-v1') 'installed_cache_selector_mismatch'
+  $cachePath = Join-Path $dataRoot ("config\updates\" + $registry.CurrentProductCode + '\NETGRID-Setup.exe')
+  Assert-True ((Setup-Hash $cachePath) -eq (Setup-Hash $SetupPath)) 'installed_setup_cache_hash_mismatch'
+  $shell = New-Object -ComObject WScript.Shell
+  try {
+    $shortcut = $shell.CreateShortcut((Join-Path $startMenuRoot 'NETGRID Setup.lnk'))
+    Assert-True ($shortcut.TargetPath -eq $cachePath) 'installed_setup_shortcut_mismatch'
+  } finally { [Runtime.InteropServices.Marshal]::FinalReleaseComObject($shell) | Out-Null }
+}
 function Set-RuntimeEnvironment {
   param([string]$Path)
   foreach ($line in Get-Content -LiteralPath $Path) {
@@ -66,6 +101,7 @@ Assert-True (-not (Test-Path -LiteralPath $desktopShortcut)) "existing_netgrid_d
 Assert-True (-not (Test-Path -LiteralPath 'HKLM:\SOFTWARE\LevelX2\NETGRID')) "existing_netgrid_data_registration_detected"
 $baseVersion = [string](Get-Content -LiteralPath (Join-Path (Split-Path $baseMsi) "release-metadata.json") -Raw | ConvertFrom-Json).product.installerVersion
 $updateVersion = [string](Get-Content -LiteralPath (Join-Path (Split-Path $updateMsi) "release-metadata.json") -Raw | ConvertFrom-Json).product.installerVersion
+Assert-True ([version]$updateVersion -gt [version]$baseVersion) 'two_ordered_product_versions_required'
 
 try {
   Assert-True ([Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) "elevation_required"
@@ -81,6 +117,7 @@ try {
     "NETGRID_SETUP_SOURCE=$(Quote-Msi $baseSetup)", "NETGRID_SETUP_SHA256=$(Setup-Hash $baseSetup)"
   ) | Out-Null
   Assert-True ((Product-Version $programRoot) -eq $baseVersion) "recommended_install_version_invalid"
+  Assert-InstalledIdentity $baseMsi $baseSetup
   $environmentPath = Join-Path $dataRoot "config\runtime.env"
   $recommendedEnvironment = Get-Content -LiteralPath $environmentPath -Raw
   Assert-True ($recommendedEnvironment -match "NETGRID_DEPLOYMENT_PROFILE=local") "recommended_profile_invalid"
@@ -90,7 +127,7 @@ try {
   Assert-True (Test-Path -LiteralPath (Join-Path $startMenuRoot "NETGRID.lnk") -PathType Leaf) "recommended_start_menu_shortcut_missing"
   Invoke-GuiExecutable (Join-Path $programRoot "NETGRID.exe") @("--headless-verify", "--program-root", $programRoot, "--environment-file", $environmentPath) | Out-Null
   [System.IO.File]::WriteAllText((Join-Path $dataRoot "runtime\recommended-retention-sentinel.txt"), "retain-on-standard-uninstall")
-  Invoke-GuiExecutable $baseSetup @("--uninstall-update") | Out-Null
+  Invoke-Msi @('/x', (Quote-Msi $baseMsi), '/qn', '/norestart', '/l*v', (Quote-Msi (Join-Path $logRoot 'recommended-uninstall.log'))) | Out-Null
   Assert-True (-not (Test-Path -LiteralPath $programRoot)) "recommended_uninstall_left_program"
   Assert-True (Test-Path -LiteralPath (Join-Path $dataRoot "runtime\recommended-retention-sentinel.txt")) "recommended_uninstall_removed_data"
 
@@ -100,6 +137,7 @@ try {
     "NETGRID_SETUP_SOURCE=$(Quote-Msi $updateSetup)", "NETGRID_SETUP_SHA256=$(Setup-Hash $updateSetup)", "NETGRID_UI_LANGUAGE=fr"
   ) | Out-Null
   Assert-True ((Get-ItemPropertyValue -LiteralPath 'HKLM:\SOFTWARE\LevelX2\NETGRID' -Name UiLanguage) -eq 'fr') 'selected_ui_language_not_registered'
+  Assert-InstalledIdentity $updateMsi $updateSetup
   foreach ($component in @('NETGRID.exe','NETGRID.FirstRun.exe','NETGRID.Updater.exe')) {
     $languageAudit = Join-Path $logRoot ($component + '.ui.json')
     Invoke-GuiExecutable (Join-Path $programRoot $component) @('--audit-localization', $languageAudit) | Out-Null
@@ -119,6 +157,7 @@ try {
     "NETGRID_SETUP_SOURCE=$(Quote-Msi $baseSetup)", "NETGRID_SETUP_SHA256=$(Setup-Hash $baseSetup)"
   ) | Out-Null
   Assert-True ((Product-Version $programRoot) -eq $baseVersion) "fresh_install_version_invalid"
+  Assert-InstalledIdentity $baseMsi $baseSetup
   $environmentPath = Join-Path $dataRoot "config\runtime.env"
   Assert-True (Test-Path -LiteralPath $environmentPath -PathType Leaf) "fresh_install_environment_missing"
   Assert-True ((Get-Content -LiteralPath $environmentPath -Raw) -match "NETGRID_INITIAL_CLEANUP_RETENTION_DAYS=7") "custom_retention_missing"
@@ -138,13 +177,23 @@ try {
   Invoke-Msi @("/fa", (Quote-Msi $baseMsi), "/qn", "/norestart", "/l*v", (Quote-Msi (Join-Path $logRoot "repair.log")), "INSTALLFOLDER=$(Quote-Msi $programRoot)", "NETGRID_DATA_ROOT=$(Quote-Msi $dataRoot)", "INSTALLDESKTOPSHORTCUT=0") | Out-Null
   Assert-True ((Get-FileHash -LiteralPath $environmentPath -Algorithm SHA256).Hash -eq $configHash) "repair_changed_configuration"
   Assert-True (-not (Test-Path -LiteralPath $desktopShortcut)) "repair_changed_desktop_preference"
+  Assert-InstalledIdentity $baseMsi $baseSetup
 
-  $failed = Start-Process -FilePath $updateSetup -ArgumentList @("--install-update", "--program-root", $failedProgramRoot) -Wait -PassThru -WindowStyle Hidden
-  Assert-True ($failed.ExitCode -ne 0) "failed_upgrade_was_not_rejected"
-  Assert-True ((Product-Version $programRoot) -eq $baseVersion) "failed_upgrade_did_not_rollback"
+  # This is an explicit pre-mutation root-change rejection, not rollback proof.
+  $rejectedLog = Join-Path $logRoot 'rejected-root-change.log'
+  Invoke-Msi @('/i', (Quote-Msi $updateMsi), '/qn', '/norestart', '/l*v', (Quote-Msi $rejectedLog),
+    "INSTALLFOLDER=$(Quote-Msi $failedProgramRoot)", "NETGRID_DATA_ROOT=$(Quote-Msi $dataRoot)",
+    "NETGRID_SETUP_SOURCE=$(Quote-Msi $updateSetup)", "NETGRID_SETUP_SHA256=$(Setup-Hash $updateSetup)") -Expected @(1603) | Out-Null
+  Assert-True ([bool](Select-String -LiteralPath $rejectedLog -SimpleMatch 'installation_gate_upgrade_root_changed' -Quiet)) 'root_change_rejection_cause_not_proven'
+  Assert-True (-not (Test-Path -LiteralPath $failedProgramRoot)) 'rejected_root_created'
+  Assert-InstalledIdentity $baseMsi $baseSetup
   Assert-True ((Get-FileHash -LiteralPath $environmentPath -Algorithm SHA256).Hash -eq $configHash) "failed_upgrade_changed_configuration"
 
-  Invoke-GuiExecutable $updateSetup @("--install-update", "--program-root", $programRoot) | Out-Null
+  # Standalone MSI matrix: do not call the SetupHost's lease-bound updater entrypoint.
+  Invoke-Msi @('/i', (Quote-Msi $updateMsi), '/qn', '/norestart', '/l*v', (Quote-Msi (Join-Path $logRoot 'upgrade.log')),
+    "INSTALLFOLDER=$(Quote-Msi $programRoot)", "NETGRID_DATA_ROOT=$(Quote-Msi $dataRoot)",
+    "NETGRID_SETUP_SOURCE=$(Quote-Msi $updateSetup)", "NETGRID_SETUP_SHA256=$(Setup-Hash $updateSetup)") | Out-Null
+  Assert-InstalledIdentity $updateMsi $updateSetup
   Assert-True ((Product-Version $programRoot) -eq $updateVersion) "upgrade_version_invalid"
   Assert-True ((Get-FileHash -LiteralPath $environmentPath -Algorithm SHA256).Hash -eq $configHash) "upgrade_changed_configuration"
   Assert-True (Test-Path -LiteralPath (Join-Path $dataRoot "runtime\e2e-sentinel.txt")) "upgrade_lost_data"
@@ -155,19 +204,23 @@ try {
   $cachedMsi = @(Get-ChildItem -LiteralPath (Join-Path $dataRoot "config\installer\$productCode") -Filter '*.msi' -File)
   Assert-True ($cachedMsi.Count -eq 1) "updated_repair_source_missing"
   Assert-True ((Setup-Hash $cachedMsi[0].FullName) -eq (Setup-Hash $updateMsi)) "updated_repair_source_hash_mismatch"
-  # Product-code repair must resolve both source and custom paths on its own,
-  # after Setup has already removed its temporary extracted MSI.
+  # Product-code repair receives no source, program root or data root arguments.
+  # The separately verified protected MSI cache supplies the durable source.
   Invoke-Msi @("/fa", $productCode, "/qn", "/norestart", "/l*v", (Quote-Msi (Join-Path $logRoot "repair-updated.log"))) | Out-Null
   Assert-True ((Product-Version $programRoot) -eq $updateVersion) "updated_repair_changed_program_path"
   Assert-True ((Get-FileHash -LiteralPath $environmentPath -Algorithm SHA256).Hash -eq $configHash) "updated_repair_changed_configuration"
   Assert-True (-not (Test-Path -LiteralPath $desktopShortcut)) "updated_repair_changed_desktop_preference"
+  Assert-InstalledIdentity $updateMsi $updateSetup
   Invoke-GuiExecutable (Join-Path $programRoot "NETGRID.exe") @("--headless-verify", "--program-root", $programRoot, "--environment-file", $environmentPath) | Out-Null
 
-  Invoke-GuiExecutable $baseSetup @("--install-update", "--program-root", $programRoot) | Out-Null
+  Invoke-Msi @('/i', (Quote-Msi $baseMsi), '/qn', '/norestart', '/l*v', (Quote-Msi (Join-Path $logRoot 'standalone-downgrade.log')),
+    "INSTALLFOLDER=$(Quote-Msi $programRoot)", "NETGRID_DATA_ROOT=$(Quote-Msi $dataRoot)",
+    "NETGRID_SETUP_SOURCE=$(Quote-Msi $baseSetup)", "NETGRID_SETUP_SHA256=$(Setup-Hash $baseSetup)") | Out-Null
+  Assert-InstalledIdentity $baseMsi $baseSetup
   Assert-True ((Product-Version $programRoot) -eq $baseVersion) "rollback_version_invalid"
   Assert-True ((Get-FileHash -LiteralPath $environmentPath -Algorithm SHA256).Hash -eq $configHash) "rollback_changed_configuration"
 
-  Invoke-GuiExecutable $baseSetup @("--uninstall-update") | Out-Null
+  Invoke-Msi @('/x', (Quote-Msi $baseMsi), '/qn', '/norestart', '/l*v', (Quote-Msi (Join-Path $logRoot 'standard-uninstall.log'))) | Out-Null
   Assert-True (-not (Test-Path -LiteralPath $programRoot)) "standard_uninstall_left_program"
   Assert-True (Test-Path -LiteralPath (Join-Path $dataRoot "runtime\e2e-sentinel.txt")) "standard_uninstall_removed_data"
 
@@ -196,7 +249,7 @@ try {
       updateMsiSha256 = Setup-Hash $updateMsi
       updateSetupSha256 = Setup-Hash $updateSetup
     }
-    checks = @("recommended-install-defaults", "fresh-install", "custom-paths-and-policy", "start-menu-and-desktop-preference", "launcher-health", "pre-update-backup", "repair", "failed-upgrade-preserves-version", "upgrade", "product-code-repair-from-protected-cache", "standalone-downgrade", "standard-uninstall-retains-data", "explicit-data-delete")
+    checks = @("recommended-install-defaults", "fresh-install", "custom-paths-and-policy", "start-menu-and-desktop-preference", "launcher-health", "pre-update-backup", "repair", "root-change-rejection-preserves-version", "standalone-msi-upgrade", "product-code-repair-from-protected-cache", "standalone-downgrade", "native-file-hashes-and-versions", "product-bound-setup-cache-and-shortcut", "standard-uninstall-retains-data", "explicit-data-delete")
     logRoot = $logRoot
   }
 } catch {

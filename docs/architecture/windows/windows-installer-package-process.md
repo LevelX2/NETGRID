@@ -269,7 +269,7 @@ ohne Entwicklungswerkzeuge.
 
 ### Verbleibender Abnahmeumfang
 
-Aktueller Kandidat vom 8. September: `output/windows-installer-msidata-8190`
+Vorheriger Kandidat vom 8. September: `output/windows-installer-msidata-8190`
 enthält Setup und MSI 1.0.8190 aus dem sauberen Quellcommit
 `5b4b84eddfd9e67b720b4ed0c0fff9a2c4bfd17b`. Der separat wiederholte vollständige
 Installer-Audit endet nach Korrektur der PowerShell-Modulbindung mit
@@ -329,8 +329,9 @@ Fixture wurde gezielt bereinigt. Der MSI-Autorisierungsprobe unter
 `output/msi-authoring-probe-ea6bcb2896654c56829257a47f42e3d1` und dessen
 WiX-Rückübersetzung bestätigen Registry-Owner, Shortcutbindung und Sequenz.
 Diese Probe enthält inerte Dateien und wurde nicht installiert.
-Ein vollständiger neuer Produktbuild und native Cacheabnahme stehen aus.
-Vor dem Zweiversionslauf zusätzlich die Dateiversionierung prüfen:
+Der darauf folgende Produktbuild und die erste native Cacheabnahme sind
+unten für 8195 gebunden. Vor dem Zweiversionslauf war zusätzlich die
+Dateiversionierung zu korrigieren:
 Die produktgebundenen EXEs von 8190 tragen trotz unterschiedlicher
 Git-Buildkennung noch durchgehend `FileVersion=1.0.0.0`; unveränderte
 Dateiversionen dürfen keinen unbemerkten Verbleib alter Programmbytes erlauben.
@@ -343,7 +344,58 @@ abgewiesen. Eine ausschließlich lokale RuntimeConfig-Versionsprobe mit
 Das MSI definiert zusätzlich `REINSTALLMODE=amus` für seinen unveränderlichen
 Programmoutput einschließlich Rückkehr auf ältere Dateiversionen. Fünf
 Authoringtests inklusive negativer Austauschpolicy sind grün. Der neue
-Gesamtbuild und seine nativen Upgrade-/Downgrade-Hashnachweise stehen noch aus.
+Gesamtbuild ist inzwischen grün; native Upgrade-/Downgrade-Hashnachweise
+stehen noch aus.
+
+Aktueller Kandidat: `output/windows-installer-cache-version-8195`, Version
+1.0.8195, sauberer Quellcommit `eb610097458601b477527b3d060e44c3fed497cc`.
+Der vollständige Build ohne `SkipReleaseBuild` endet mit Exit 0,
+`WINDOWS_INSTALLER_CHECK_OK files=10902` und `WINDOWS_INSTALLER_BUILD_OK`.
+Release-Metadaten und `SHA256SUMS.txt` sind regulär erzeugt. Setup-SHA-256:
+`4c35f8475b4a818ba3520c0a1ceb2ba502c86c06aef06f807e63dc95db144ff2`,
+MSI-SHA-256:
+`efff406345bb26a6743ad9e7763c490ab282a747ceaeca62620b97898c963a6c`.
+
+Die native Wiederinstallation über erhaltene Daten im bestehenden Sandboxlauf
+`bb8eccf05f4747369da2d3c3806c1f85` besteht am 8. September um 03:04:54 UTC.
+`native-8195-cache-install.json` und `native-8195-cache-verify.json` belegen
+MSI-Exit 0, 10.890 Manifestdateien, vier identische native Buildhashes mit
+Dateiversion 1.0.8195.0 und unveränderte Konfigurations-/Credentialdateien.
+Der registrierte ProductCode `{CCC80DA0-D45B-44DF-92C9-6D98C0670511}` wählt
+den passenden Setupcachehash; die tatsächliche Setup-Verknüpfung zeigt auf
+genau diesen Eintrag. Alte globale Cachedateien wurden nicht umbenannt.
+Der erste Probeaufruf hatte die absichtlich erhaltenen Registry-Präferenzen
+fälschlich als installierte Anwendung behandelt. Die reine Diagnose belegt
+nur `RuntimeDataRoot`, Desktoppräferenz und Sprache ohne ProductCode,
+Programmregistrierung oder Launcher. Der korrigierte Preflight lässt genau
+diese erhaltenen Werte zu; der fehlgeschlagene Probebericht bleibt erhalten.
+
+Die nachfolgende Reparatur ausschließlich per ProductCode, ohne übergebene
+Programm-/Datenpfade oder Setupquelle, endet um 03:09:47 UTC mit Exit 0.
+`native-8195-cache-repair.json` und `native-8195-cache-verifyrepair.json`
+belegen danach erneut alle Manifestdateien, nativen Hashes und Versionen,
+denselben Cache-/Shortcutselektor und unveränderte geschützte Dateien.
+Auch der Änderungszeitpunkt des unveränderlichen Setupcacheeintrags bleibt
+identisch. Diese Nachweise gelten für den SYSTEM-MSI-Lauf in dieser Sandbox,
+nicht für eine Standardbenutzer-/UAC-Abnahme.
+
+`native-8195-cache-health.json` bestätigt anschließend um 03:11:25 UTC den
+installierten Headless-Healthcheck mit Exit 0 und striktem Prozess-/Listener-
+Stopp. Konfiguration und Credentials bleiben bytegleich. Das WDAG-Konto
+besitzt weiterhin einen Administratortoken; normal privilegierter Neustart
+nach echter Updater-Erhöhung ist damit nicht nachgewiesen. 8195 bleibt in
+der Sandbox als gestoppte, geprüfte Basis für den nächsten Versionswechsel
+installiert. Die Host-Hauptinstanz bleibt unangetastet.
+
+Der Standalone-E2E-Harness verwendet jetzt echte MSI-Aufrufe statt veralteter,
+ungebundener Setup-Updateroptionen. Seine Negativprobe verlangt die konkrete
+Diagnose des verbotenen Programmordnerwechsels, nicht irgendeinen Fehlercode,
+und wird nicht als Rollback bezeichnet. Nach Install-/Repair-/Versionsschritten
+prüft er Quellcommit, Manifestdateien, native Hashes und Dateiversionen sowie
+Setupcache und Shortcutziel.
+Fünf Harness-Vertrags-/PowerShell-Syntaxchecks bestehen ohne Installation.
+Die neue vollständige Zweiversionsmatrix und der getrennte produktgebundene
+Tray-/Updaterlauf sind dadurch nicht bereits nativ abgenommen.
 
 | Nachweis | Aktuelle belastbare Evidenz | Noch erforderlich |
 | --- | --- | --- |

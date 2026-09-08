@@ -37,8 +37,9 @@ Integritätsangaben werden nicht installiert.
    dessen tatsächliches Prozessende und prüft bis zu 45 Sekunden die Abwesenheit
    weiterer Produktprozesse am konkreten Installationsort. Erst dann darf er
    Produktdaten öffnen. Fremde Prozesse werden nicht beendet.
-6. `app/storage-admin.mjs backup-update` erzeugt und prüft ein vollständiges
-   Backup mit Grund `pre_update`.
+6. `UpdateDataSnapshot` erzeugt und prüft den vollständigen Live-Datenroot-
+   Snapshot. Der bestehende Storage-CLI-Befehl `backup-update` sichert nur
+   Match-SQLite und ist nicht die Sicherungsautorität dieses Updatewegs.
 7. Der heruntergeladene Setuphost führt unter der explizit weitergereichten
    äußeren Lease ein erhöhtes MSI-Major-Upgrade aus.
    Das vorhandene `runtime.env`, Maintenance-Credentials, Kontopolicy und der
@@ -72,9 +73,15 @@ Ein direktes MSI ohne mitgelieferte, passende Setupquelle erzeugt weiterhin
 keinen nutzbaren Setupcache für diese Produktkennung; diesen Fall nicht als
 vollständig updatefähige Installation abnehmen.
 Die 21 Cachetests verwenden eigene Dateien und HKCU-Fixtures, keine echte
-MSI-Rücknahme. Reale Wiederinstallation, Versionswechsel, Repair,
+MSI-Rücknahme. Die native Wiederinstallation von 8195 über erhaltene
+Sandboxdaten ist inzwischen grün: installierte EXE-Hashes/-Versionen, alle
+Manifestdateien, registrierter ProductCode, Setupcachehash und Setup-
+Verknüpfung stimmen überein. Konfiguration und bestehende Credentials sind
+bytegleich erhalten. Auch die anschließende ProductCode-Reparatur besteht;
+Cacheinhalt und Änderungszeitpunkt bleiben unverändert. Versionswechsel,
 GUI-Uninstall und Updater-Rollback mit zwei neuen Cache-Ständen bleiben
-vor der Releasefreigabe nativ abzunehmen. Den 8190-Cache nicht manuell
+vor der Releasefreigabe nativ
+abzunehmen. Den 8190-Cache nicht manuell
 umbenennen und dessen frühere native Ergebnisse nicht auf den Fix übertragen.
 
 Die zusammenhängende Tray-/Updater-Anbindung ersetzt inzwischen die zweite
