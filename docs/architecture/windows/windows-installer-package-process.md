@@ -284,6 +284,39 @@ nicht; Release-Metadaten und Prüfsummendatei fehlen noch. Der Paket-Audit
 ersetzt weder diese Fertigstellung noch die native Abnahme von 8190.
 Es wurde in diesem Prüfschritt keine Produktinstallation gestartet.
 
+Die anschließende native Prüfung von 8190 am 8. September ist getrennt davon
+unter `output/windows-sandbox-e2e/bb8eccf05f4747369da2d3c3806c1f85/result/`
+belegt: `native-8190-retained-install.json` bestätigt den SYSTEM-MSI-Lauf
+mit Exit 0 und bytegleich erhaltenen Konfigurations-/Credentialdateien;
+`native-8190-retained-verify.json` bindet 10.890 Manifestdateien und die vier
+Installerprogramme an den Kandidaten. `native-8190-health-corrected.json`
+belegt den installierten Headless-Healthcheck samt striktem Stopp mit Exit 0,
+ohne verbleibende Produktprozesse oder Listener. Der erste Health-Aufruf
+verwendete im Testskript irrtümlich `--environment` statt
+`--environment-file` und wurde vor dem Runtime-Start abgewiesen; er bleibt
+als fehlgeschlagener Testaufruf erhalten, nicht als Produkt-Healthfehler.
+Das vorhandene WDAG-Konto besitzt einen Administratortoken; diese Prüfung
+ersetzt keinen Standardbenutzer- oder alternativen Administrator-Nachweis.
+
+`native-8190-uninstall-start.json` bindet den tatsächlich laufenden Launcher
+5872 an seine Startzeit und bestätigt Web 200 sowie Server-Health.
+Der anschließende SYSTEM-MSI-Uninstall endet mit Exit 0.
+`native-8190-uninstall-verify.json` bestätigt um 02:27:54 UTC: keine
+Produktprozesse, keine Listener auf 3100/8787, keine Produktregistrierung,
+keine Launcherdatei, erhaltene SQLite-Datei und unveränderte geschützte
+Dateien. Es gab keinen manuellen Prozess-Cleanup. Das ist ein nativer
+MSI-Lifecycle-Nachweis auf 8190, keine GUI-Uninstall-Abnahme.
+
+Offener Produktfehler, inzwischen ebenfalls nativ belegt: Bei der erneuten
+Installation über erhaltene Daten bleibt `config/updates/NETGRID-Setup.exe`
+auf einem alten Stand; nur `NETGRID-Setup.pending.exe` entspricht 8190.
+Der direkte MSI-/Setupweg besitzt bisher keine Übernahme nach erfolgreichem
+Abschluss. Der normale Updater und die Setup-Startmenüverknüpfung verwenden
+jedoch die alte aktuelle Datei. Ein manuelles Umbenennen wäre kein Fix.
+Benötigt wird eine transaktionsgebundene Cache-Zuordnung einschließlich
+Fehlschlag, Repair, direktem Versionswechsel und Updater-Rollback.
+Der Test hat keine Cachedatei zur Kaschierung dieses Fehlers umgeschrieben.
+
 | Nachweis | Aktuelle belastbare Evidenz | Noch erforderlich |
 | --- | --- | --- |
 | Produktgrenze und Installer-Payload | Builds 8136 und 8145 regulär aus sauberen Quellständen gebaut, jeweils 10.901-Dateien-Audit und Setup-/MSI-Prüfsummen grün; installierte Binärdateien zusätzlich für 8136 gebunden | Für beide Builds erfüllt; keine Versions-/Hash-Umetikettierung |
@@ -294,7 +327,7 @@ Es wurde in diesem Prüfschritt keine Produktinstallation gestartet.
 | Nativer Setup-/Fortschrittsworker | 8150 über deutschen Setup-Host im sauberen Gast installiert, MSI-Client/Server jeweils 0; echter Abschnittsfortschritt von 51 Prozent um 15:21:32 UTC sichtbar aufgenommen, Datenhinweis und Status/Balken getrennt. Direkter MSI-Countertest grün | Nativer deutscher Fortschrittsnachweis erfüllt; Windows-UAC mit alternativem Administrator und weitere native Fehler-/Abbruchpfade bleiben getrennte Prüfungen |
 | Launcher, Browser und Diagnose | 8150: normaler Desktopstart, einzelne Instanz, nativer SaveFileDialog und redigierter ZIP-Export grün. Tray-Beenden und Desktop-Neustart grün. Erster Serverabbruch wird automatisch wiederhergestellt; zweiter stoppt beide Dienste mit nativem deutschen Recovery-Dialog, „Wiederholen“ startet erfolgreich. Fehlende Edge-ProgID ausschließlich im Gast ergänzt | Gastvorbereitung transparent erhalten; dies ersetzt nicht sämtliche Sprach-/DPI-/Kontextvarianten oder alle Aktionen des Recovery-Dialogs |
 | First Run | Nativer deutscher vorgeschalteter Entscheidungsdialog auf 8150 beobachtet; Nutzer bestätigt Abschluss, Setup beendet mit Exitcode 0. Hashgebundene reine Statusabfrage bestätigt eingerichteten Maintenance-Zugang, kein Agent-Bootstrap/Reset | Unbeobachtete Passwort-/Zurück-/Sichtbarkeitsschritte nicht nachträglich als abgenommen ausgeben; Authentifizierungsbedienung durch Nutzer, vorhandene Zugangsdaten erhalten |
-| Native Deinstallation bei laufendem Launcher | 8150: de/en/fr-Ansicht und Abbrechen grün. Freigegebene deutsche Entfernung am 7. September meldet MSI-Erfolg; Konfiguration und Maintenance-Credentialdatei bleiben bytegleich, Datenbank erhalten. Launcher und neu gestartete Kindprozesse bleiben jedoch mit offenen Ports zurück | **Produktfehler offen:** Installer-Lebenszyklus muss vor Dateientfernung die zuständige Runtime geordnet stoppen und Recovery während der Transaktion verhindern; manueller Test-Cleanup ersetzt den Fix nicht |
+| Native Deinstallation bei laufendem Launcher | 8190: SYSTEM-MSI-Uninstall bei laufendem Launcher nativ grün; anschließend keine Produktprozesse, Listener oder Produktregistrierung, Datenbank und geschützte Dateien erhalten, kein manueller Prozess-Cleanup. 8150: frühere de/en/fr-Ansicht und Abbrechen grün | Direkter MSI-Lifecycle für diesen Kontext belegt. GUI-Setup-Uninstall erst nach Korrektur der nativ nachgewiesenen veralteten Setup-Cache-Zuordnung; andere Windows-Benutzerkontexte bleiben getrennt |
 | Sichtbare Flows | 8150: Sprachauswahl und Setup-Hauptformular in allen 18 Kombinationen de/en/fr × echte 100/125/150 Prozent × heller/dunkler Systemkontext nativ geprüft. 8145: installierter Sprachwechsel fr → de → en, Repair, Sprachübernahme aller drei Komponenten und Austausch lokalisierter Shortcutnamen mit sieben Prüfungen grün; Tooltip-Renderings und native Tastatur-Popups vorhanden | Übrige Komponentendialoge, funktionale Gesamtflows und Hover-/Tastatur-Randfälle bleiben offen; Hovereingabe ist im verfügbaren Computer-Use-API nicht vorhanden und benötigt Nutzerbedienung |
 | Saubere Windows-11-x64-Maschine | Vollständige 13-Punkte-MSI-Matrix 8145 → 8150 einschließlich Cleanup grün: Windows 11 Enterprise x64 (26100), ohne Entwicklungswerkzeuge; Standardbenutzer-/Rollback- und Private-LAN-Test zusätzlich grün. Native Frischinstallation 8136 und installierter Sprachwechsel 8145 separat bestanden | Artefaktgebundene Nachweise nicht pauschal auf spätere Builds übertragen; finale Abnahme bleibt offen bis alle obigen Ergänzungen vorliegen |
 

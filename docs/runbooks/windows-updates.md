@@ -53,6 +53,18 @@ Integritätsangaben werden nicht installiert.
 
 ### Noch offene Abnahmen vor der Freigabe
 
+Die native Wiederinstallation 8190 über erhaltene Sandboxdaten belegt einen
+offenen Cachefehler: `config/updates/NETGRID-Setup.exe` bleibt auf dem alten
+Stand, während nur `NETGRID-Setup.pending.exe` der installierten Version
+entspricht. Im direkten MSI-/Setupweg fehlt die transaktionsgebundene
+Übernahme. Deshalb sind die alte Datei als Updater-Rückkehrversion und die
+darauf zeigende Setup-Startmenüverknüpfung derzeit nicht verlässlich.
+Die Cachedateien nicht manuell umbenennen und diesen Zustand nicht als
+Release freigeben. Der Ursachen-Fix muss Cacheidentität, erfolgreichen
+Abschluss und Rücknahme zusammen binden; die grüne native Installation,
+Headless-Healthprüfung und direkte MSI-Deinstallation von 8190 ersetzen
+diesen offenen Nachweis nicht.
+
 Die zusammenhängende Tray-/Updater-Anbindung ersetzt inzwischen die zweite
 Readiness-Momentaufnahme durch atomare Vorbereitung, Prozessbindung und
 explizite Übergabe. Windows-Abbruchcode 1223 beendet den Versuch vor dieser
