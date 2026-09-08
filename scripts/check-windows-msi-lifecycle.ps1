@@ -53,6 +53,7 @@ try {
   $properties = @{}
   foreach ($row in (Read-InstallerRows 'SELECT `Property`, `Value` FROM `Property`' 2)) { $properties[$row[0]] = $row[1] }
   if ($properties['MSIRESTARTMANAGERCONTROL'] -ne 'DisableShutdown') { throw 'installer_lifecycle_restart_manager_conflict' }
+  if ($properties['REINSTALLMODE'] -ne 'amus') { throw 'installer_lifecycle_exact_payload_replacement_missing' }
   foreach ($propertyList in @('SecureCustomProperties', 'MsiHiddenProperties')) {
     if (-not (([string]$properties[$propertyList]).Split(';') -ccontains 'NETGRID_UPDATE_LEASE')) { throw "installer_lifecycle_outer_lease_property_invalid:$propertyList" }
   }

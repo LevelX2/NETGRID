@@ -98,6 +98,10 @@ try {
   const nodeVersion = run(nodeRuntime, ["--version"]).stdout.trim();
   if (!/^v24\.\d+\.\d+$/.test(nodeVersion))
     throw new Error(`installer_node_version_invalid:${nodeVersion}`);
+  for (const executable of [setupPath, ...["NETGRID.exe", "NETGRID.FirstRun.exe", "NETGRID.Updater.exe", "tools/NETGRID.RuntimeConfig.exe"]
+    .map(relative => path.join(installedProductRoot, relative))])
+    run("powershell.exe", ["-NoProfile", "-File", path.join(import.meta.dirname, "check-windows-native-version.ps1"),
+      "-Executable", executable, "-Version", productLayout.product.installerVersion]);
 
   const decompiledPath = path.join(scratch, "package.wxs");
   run(dotnetPath, [

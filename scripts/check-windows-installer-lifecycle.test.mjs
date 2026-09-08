@@ -46,6 +46,7 @@ test("upgrade order, nested cleanup and outer lease forwarding are mandatory", (
     value => value.replaceAll(' AND NOT UPGRADINGPRODUCTCODE', ''),
     value => value.replace('Action="VerifyNetgridLifecycle" Before="InstallFinalize"', 'Action="VerifyNetgridLifecycle" After="InstallFinalize"'),
     value => value.replace('DllEntry="VerifyNetgridLifecycle" Execute="deferred"', 'DllEntry="VerifyNetgridLifecycle" Execute="commit"'),
+    value => value.replace('Id="REINSTALLMODE" Value="amus"', 'Id="REINSTALLMODE" Value="omus"'),
   ]) assert.throws(() => checkLifecycleSource(mutate(source)), /installer_lifecycle_/);
 });
 

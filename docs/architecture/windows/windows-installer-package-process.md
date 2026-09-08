@@ -335,6 +335,16 @@ Die produktgebundenen EXEs von 8190 tragen trotz unterschiedlicher
 Git-Buildkennung noch durchgehend `FileVersion=1.0.0.0`; unveränderte
 Dateiversionen dürfen keinen unbemerkten Verbleib alter Programmbytes erlauben.
 
+Die Buildstrecke setzt inzwischen die native NETGRID-Version aus dem
+Produktlayout; der Extraktionsaudit prüft alle fünf EXE-Versionsressourcen.
+Das ursprüngliche 8190-Launcherbinary wird vom neuen Gate wie erwartet
+abgewiesen. Eine ausschließlich lokale RuntimeConfig-Versionsprobe mit
+`Version=1.0.8194` besteht den Positivfall; sie ist kein Releasekandidat.
+Das MSI definiert zusätzlich `REINSTALLMODE=amus` für seinen unveränderlichen
+Programmoutput einschließlich Rückkehr auf ältere Dateiversionen. Fünf
+Authoringtests inklusive negativer Austauschpolicy sind grün. Der neue
+Gesamtbuild und seine nativen Upgrade-/Downgrade-Hashnachweise stehen noch aus.
+
 | Nachweis | Aktuelle belastbare Evidenz | Noch erforderlich |
 | --- | --- | --- |
 | Produktgrenze und Installer-Payload | Builds 8136 und 8145 regulär aus sauberen Quellständen gebaut, jeweils 10.901-Dateien-Audit und Setup-/MSI-Prüfsummen grün; installierte Binärdateien zusätzlich für 8136 gebunden | Für beide Builds erfüllt; keine Versions-/Hash-Umetikettierung |

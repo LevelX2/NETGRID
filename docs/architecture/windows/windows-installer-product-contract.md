@@ -38,6 +38,13 @@ geführte Konfiguration und Updater folgen im Paketprozess.
 - Die erste private Alpha darf unsigniert sein. Codesigning, Timestamping und
   die Beschaffung eines öffentlich vertrauenswürdigen Zertifikats bleiben vor
   einer breiteren Veröffentlichung ein eigenes Release-Gate.
+- Die nativen NETGRID-Dateiversionen sind an die technische Produktversion
+  gebunden. Das MSI verwendet für seinen unveränderlichen Programmoutput
+  `REINSTALLMODE=amus`, damit auch eine ausdrücklich gewählte Rückkehrversion
+  die vorhandenen Programmbytes ersetzt. Datenroot und Credentials gehören
+  nicht zu dieser Dateimenge. Releaseprüfungen kontrollieren PE-Versionen,
+  MSI-Policy und anschließend die installierten Hashes; ein Versionslabel
+  allein ist kein Beleg für den tatsächlichen Austausch.
 
 ## Zwei geführte Installationswege
 

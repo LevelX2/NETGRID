@@ -79,6 +79,7 @@ try {
   if ($productVersion -notmatch '^1\.0\.\d+$') {
     throw "Ungültige Installer-Version im Produktlayout: $productVersion"
   }
+  $nativeVersionProperty = "-p:Version=$productVersion"
 
   Reset-BuildDirectory -Path $installerInputRoot -ProjectRoot $projectRoot
   New-Item -ItemType Directory -Path $legalRoot -Force | Out-Null
@@ -124,7 +125,7 @@ try {
   Copy-Item -LiteralPath (Join-Path (Split-Path -Parent $dotnet) "LICENSE.txt") -Destination (Join-Path $legalRoot "DOTNET-LICENSE.txt") -Force
   Copy-Item -LiteralPath (Join-Path (Split-Path -Parent $dotnet) "ThirdPartyNotices.txt") -Destination (Join-Path $legalRoot "DOTNET-THIRD-PARTY-NOTICES.txt") -Force
   & $dotnet build apps/windows/Netgrid.InstallerActions/Netgrid.InstallerActions.csproj `
-    -c Release -p:AcceptEula=wix7 -p:RestoreLockedMode=true
+    -c Release -p:AcceptEula=wix7 -p:RestoreLockedMode=true $nativeVersionProperty
   if ($LASTEXITCODE -ne 0) { throw "Die NETGRID-MSI-Lifecycle-Komponente konnte nicht gebaut werden." }
   & node --test scripts/check-windows-installer-lifecycle.test.mjs
   if ($LASTEXITCODE -ne 0) { throw "Die MSI-Lifecycle-Audit-Regressionstests sind fehlgeschlagen." }
@@ -141,7 +142,7 @@ try {
   & node scripts/check-windows-installer-lifecycle.mjs --binary $lifecycleActionsPath
   if ($LASTEXITCODE -ne 0) { throw "Die NETGRID-MSI-Lifecycle-Binärprüfung ist fehlgeschlagen." }
   & $dotnet publish apps/windows/Netgrid.RuntimeConfig/Netgrid.RuntimeConfig.csproj `
-    -c Release -r win-x64 --self-contained true `
+    -c Release -r win-x64 --self-contained true $nativeVersionProperty `
     -p:DebugType=None -p:DebugSymbols=false `
     -o $runtimeConfigRoot
   if ($LASTEXITCODE -ne 0) { throw "Die NETGRID-Runtimekonfiguration konnte nicht gebaut werden." }
@@ -152,7 +153,7 @@ try {
   & powershell -ExecutionPolicy Bypass -File scripts/test-windows-runtime-config.ps1 -Executable $runtimeConfigExecutable
   if ($LASTEXITCODE -ne 0) { throw "Die NETGRID-Runtimekonfiguration hat ihre Isolationstests nicht bestanden." }
   & $dotnet publish apps/windows/Netgrid.Launcher/Netgrid.Launcher.csproj `
-    -c Release -r win-x64 --self-contained true `
+    -c Release -r win-x64 --self-contained true $nativeVersionProperty `
     -p:DebugType=None -p:DebugSymbols=false `
     -o $launcherRoot
   if ($LASTEXITCODE -ne 0) { throw "Der NETGRID-Launcher konnte nicht gebaut werden." }
@@ -163,7 +164,7 @@ try {
   & node scripts/smoke-windows-launcher.mjs
   if ($LASTEXITCODE -ne 0) { throw "Der NETGRID-Launcher hat den isolierten Windows-Smoke nicht bestanden." }
   & $dotnet publish apps/windows/Netgrid.FirstRun/Netgrid.FirstRun.csproj `
-    -c Release -r win-x64 --self-contained true `
+    -c Release -r win-x64 --self-contained true $nativeVersionProperty `
     -p:DebugType=None -p:DebugSymbols=false `
     -o $firstRunRoot
   if ($LASTEXITCODE -ne 0) { throw "Die NETGRID-Ersteinrichtung konnte nicht gebaut werden." }
@@ -174,7 +175,7 @@ try {
   & node scripts/smoke-windows-first-run.mjs --release $ReleaseRoot --first-run $firstRunExecutable --node (Join-Path $nodeRoot "node.exe")
   if ($LASTEXITCODE -ne 0) { throw "Die NETGRID-Ersteinrichtung hat ihren sicheren Bootstrap-Smoke nicht bestanden." }
   & $dotnet publish apps/windows/Netgrid.Updater/Netgrid.Updater.csproj `
-    -c Release -r win-x64 --self-contained true `
+    -c Release -r win-x64 --self-contained true $nativeVersionProperty `
     -p:DebugType=None -p:DebugSymbols=false `
     -o $updaterRoot
   if ($LASTEXITCODE -ne 0) { throw "Der NETGRID-Updater konnte nicht gebaut werden." }
@@ -228,7 +229,7 @@ try {
   $msiSha256 = (Get-FileHash -LiteralPath $msiPath -Algorithm SHA256).Hash.ToLowerInvariant()
   $footprint = & (Join-Path $PSScriptRoot 'read-windows-msi-footprint.ps1') -MsiPath $msiPath
   & $dotnet publish apps/windows/Netgrid.SetupHost/Netgrid.SetupHost.csproj `
-    -c Release -r win-x64 --self-contained true `
+    -c Release -r win-x64 --self-contained true $nativeVersionProperty `
     -p:DebugType=None -p:DebugSymbols=false `
     "-p:EmbeddedMsiPath=$msiPath" `
     "-p:EmbeddedMsiSha256=$msiSha256" `

@@ -36,6 +36,8 @@ export function checkLifecycleBinary(file) {
 }
 
 export function checkLifecycleAuthoring(authoring) {
+  if (!authoring.includes('<Property Id="REINSTALLMODE" Value="amus"'))
+    throw new Error("installer_lifecycle_exact_payload_replacement_missing");
   const selector = authoring.match(/<RegistryValue\b[^>]*\bName="CurrentProductCode"[^>]*>/)?.[0];
   const shortcut = authoring.match(/<Shortcut\b[^>]*\bId="NetgridSetupStartMenuShortcut"[^>]*>/)?.[0];
   const cacheArguments = [...authoring.matchAll(/<(?:SetProperty|CustomAction)\b[^>]*>/g)]

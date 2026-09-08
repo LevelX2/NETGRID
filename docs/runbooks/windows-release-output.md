@@ -698,6 +698,22 @@ Programm-/Datenrollback nach fehlgeschlagenem Healthcheck. Auch die Bereinigung
 fließt in das E2E-Ergebnis ein; zurückgebliebene Testinstallationen oder
 Bereinigungsfehler verhindern ein erfolgreiches Ergebnis.
 
+Die selbstenthaltenen NETGRID-Komponenten und der Setuphost erhalten beim
+Build dieselbe `Version=1.0.<Buildnummer>` wie das Produktlayout und MSI.
+`check-windows-native-version.ps1` kontrolliert nach der MSI-Extraktion die
+echten PE-Dateiversionen aller vier installierten NETGRID-Programme und des
+Setups; die frühere konstante Dateiversion `1.0.0.0` besteht dieses Gate
+nicht mehr. Node behält seine unabhängig gepinnte Herstellerversion.
+
+Das MSI setzt `REINSTALLMODE=amus`. Der unveränderliche Programmoutput muss
+bei Installation und expliziter Versionsrücknahme exakt dem gewählten Paket
+entsprechen, auch bei zuvor gleichen oder höheren Dateiversionen. Nutzerdaten
+liegen außerhalb der MSI-Dateimenge und bleiben dem bestehenden Datenvertrag
+unterstellt. Die tatsächliche Eigenschaft wird aus der MSI-Tabelle geprüft.
+Diese Policy nutzt die dokumentierten
+[REINSTALLMODE-Regeln](https://learn.microsoft.com/en-us/windows/win32/msi/reinstallmode),
+ersetzt aber keinen nativen Hashvergleich nach Upgrade und Downgrade.
+
 - `RELEASE_PRODUCT_BOUNDARY_*`: Klassifikation oder verbotener
   Repositoryinhalt korrigieren.
 - `Get-FileHash` fehlt nur im Node-gestarteten Windows-PowerShell-Prüfprozess:

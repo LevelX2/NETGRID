@@ -14,6 +14,9 @@
     <!-- The lifecycle owner performs graceful shutdown before file changes.
          Restart Manager must not independently terminate/restart Node. -->
     <Property Id="MSIRESTARTMANAGERCONTROL" Value="DisableShutdown" />
+    <!-- The program payload is immutable, separate from retained user data.
+         A selected version must also replace equal/newer files on rollback. -->
+    <Property Id="REINSTALLMODE" Value="amus" />
     <Property Id="NETGRID_UPDATE_LEASE" Secure="yes" Hidden="yes" />
     <Property Id="NETGRID_DOTNET_FRAMEWORK_RELEASE">
       <RegistrySearch Id="NetgridFrameworkRelease" Root="HKLM" Key="SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full" Name="Release" Type="raw" Bitness="always64" />
