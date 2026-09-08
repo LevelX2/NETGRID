@@ -1088,11 +1088,64 @@ vollständige Releaseoutput-Smoke besteht mit zur Buildadresse abweichenden
 Laufzeitports 54157/54158, explizitem Origin-HTML-Nachweis und Ausschluss des
 Test-Tokensalzes aus dem HTML. Seine eigenen Testdaten/Prozesse sind bereinigt.
 Account-/Deck-, Spiel-, Replay-, Spectator-, Diagnose- und
-Maintenance-Aufrufer teilen diese Autorität. Der installierte Browsernachweis
-des Fixes steht noch aus; keine neue Partie wurde im fehlerhaften Browser
-angelegt. Die Gastvorbereitung reparierte ausschließlich die fehlende Klasse
+Maintenance-Aufrufer teilen diese Autorität. Im fehlerhaften 8209-Browser wurde
+keine neue Partie angelegt. Die Gastvorbereitung reparierte ausschließlich die fehlende Klasse
 des bereits ausgewählten, Microsoft-signierten Edge; UserChoice blieb
 unverändert (`edge-http-registration-repair.json`).
+
+Der reguläre saubere Build 8212 aus
+`58db3d9e5ef6ad6cf608bb2c1fdd3b3e2733caee` ist vollständig grün, einschließlich
+aller nativen Tests, Sprach-/DPI-Prüfungen und des 10.903-Dateien-Payloadaudits.
+Artefakte unter `output/windows-installer-runtime-origin-8212`:
+
+- Setup-SHA-256: `1c2a93520f1317e90f8a6c1788d2b6599af9206685c232dcbbf76bf09be75d97`
+- MSI-SHA-256: `058c7886ea589668bb3059f94aebe3cf3c3de7247ba189c2f00ae4f3f53facc2`
+- Installierter ProductCode: `{E85498BF-0BEA-4D29-8526-747F549B176F}`
+
+Das native Upgrade 8209 → 8212 endet um 10:12:43 UTC mit MSI Exit 0;
+Datei-/PE-/Cache-/Snapshotverifikation folgt grün um 10:13:56 UTC.
+Konfiguration und Maintenance-Testzugang bleiben bytegleich. Der gewöhnliche
+Gast-Launcher startet anschließend als PID 5096. Edge zeigt Build 8212,
+beide Standarddeck-Auswahlen und nach „Lobby erstellen“ eine verbundene
+Startbereitschaftslobby. Der ergänzende HTTP-Nachweis liest die Adresse aus
+dem tatsächlich ausgelieferten HTML: Web 32141 → Server 32142,
+24 Runner-/26 Korp-Standarddecks, HTTP 200 und passende CORS-Origin.
+`result/native-browser-origin-8212.json`, SHA-256
+`cc558e494369cd73ff6547c3f8b976624403cd25bb14cc4b382ddd415645dc15`,
+bindet diesen Nachweis an den bestehenden Sandboxlauf. Die Browser-Portlücke
+ist damit für den lokalen Custom-Port-Produktpfad geschlossen; ein neuer
+Private-LAN-Browsertest ist dadurch nicht ersetzt.
+
+Der erste native Spielschutztest verwendet genau die im Browser erstellte
+Lobby `match_6bc55493a2e03baf`, keine künstliche SQLite-Statusänderung. Die
+installierte read-only Storage-CLI meldet eine nichtterminale Partie und
+`updateAllowed=false`. Der anschließende echte MSI-Versionswechsel 8212 →
+8210 scheitert wie erwartet mit 1603 und dem belegten Grund
+`installation_gate_active_games`, bevor Datencapture stattfindet. Alle
+10.890 Manifestdateien, fünf nativen Binärdateien, Konfiguration und
+Maintenance-Credentials bleiben gleich; dieselben drei Runtimeprozesse
+laufen gesund weiter. Abschluss: 10:19:14 UTC, Beleg
+`result/native-active-game-8212.json`, SHA-256
+`2da4b61f481ea432f0ce0548a75d8ce6c71dbac506dfc2a19a0f3a6fe82136f5`.
+Das belegt den echten MSI-/Launcher-Pipe-Schutz einer offenen Lobby,
+nicht einen vollständigen GitHub-Tray-Updater oder mehrere Windowsbenutzer.
+
+Der zweite Lauf schließt anschließend die eigene Runtime regulär über den
+Tray, erhält dieselbe offene Lobby und belegt die installierte Offlineprüfung:
+eine nichtterminale Partie, `updateAllowed=false`, tatsächlicher
+MSI-Versionswechsel erneut mit 1603 / `installation_gate_active_games`
+abgewiesen, kein Capture, Runtime bleibt gestoppt, installierte Bytes und
+geschützte Dateien unverändert. Abschluss 10:23:47 UTC,
+`result/native-offline-game-8212.json`, SHA-256
+`9c0f5922bafa96edc64b12614445a2a51be7849e1eb3eeb3bd988765580a8780`.
+Nach gewöhnlichem Benutzerstart als Launcher PID 5924 verbindet Edge dieselbe
+Lobby erneut. „Match abbrechen“ beendet sie regulär vor Spielstart; der
+Datensatz wird nicht gelöscht. Der Abschlusscheck um 10:24:48 UTC bestätigt
+`activeMatchCount=0`, `updateAllowed=true`, Backend gesund, genau drei eigene
+Runtimeprozesse und weiterhin gleiche Konfiguration/Credentials
+(`result/native-ui-game-cleanup-8212.json`). Damit sind die beiden direkten
+MSI-Spielschutzwege für eine echte nichtterminale Lobby nativ belegt. Ein
+mehrbenutzerübergreifender Lauf und der vollständige GitHub-Updater bleiben offen.
 
 Separater offener Setupfund: Wiederöffnen des gecachten Setups zeigt zwar den
 beibehaltenen Datenordner, aber den Standardprogrammordner und 3100/8787
@@ -1106,6 +1159,20 @@ Windows-App-Auswahl für `.txt`: Im aktuellen Sandboximage fehlt eine
 Textdateizuordnung. Die Auswahl wurde ohne Zuordnungsänderung geschlossen.
 Das ist kein erfolgreicher visueller Lesenachweis der Hinweise; die
 manifestgebundenen Lizenzdateien selbst sind weiterhin auditiert.
+
+Weitere echte Tray-Abnahmen in 8209: Der lokale Diagnoseexport erzeugt über
+den Speicherdialog ein 2.185-Byte-ZIP mit ausschließlich `diagnostics.json`,
+drei erlaubten Launcher-Logs und `runtime.env.redacted`; Tokensalz und weitere
+sensitive Konfigurationszuweisungen sind redigiert. Es enthält keine
+Datenbank, Credentials oder Bilder. ZIP-SHA-256:
+`8653736892b7fc51848dddc4c6c698c175142a4bfb8e241b6f38713b58059930`.
+Die zunächst zu breite Testharness-Dateifilterung hatte auch die fachlich
+vorgesehene `.redacted`-Datei abgewiesen; der korrigierte positive
+Inventar-/Redaktionscheck besteht. Die vorherigen Fehlbelege bleiben erhalten.
+Die manuelle Updateprüfung zeigt bei ausgeschaltetem Sandboxnetz die
+vorgesehene deutsche Offlineinformation ohne Betriebsabbruch. Anschließend
+wurde die Runtime regulär über „NETGRID beenden“ geschlossen und vor dem
+Upgrade ohne verbleibende Prozesse oder Testlistener verifiziert.
 
 ### Regulärer Build 8199: Installation, Repair und Headless nativ grün
 

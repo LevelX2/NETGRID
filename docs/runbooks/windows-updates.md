@@ -101,12 +101,34 @@ Belastbar nachgewiesen sind bislang:
   vor und nach Ende des ursprünglichen Benutzerprozesses, einschließlich
   Kindtokenprüfung vor Resume. Details und Grenzen stehen im
   [Neustartvertrag](#neustart-im-ursprünglichen-benutzerkontext).
+- Reguläres Upgrade auf 8212 mit vollständiger Datei-/Cachebindung und
+  anschließend tatsächlichem Edge-Betrieb auf Custom-Ports: Standarddecks
+  werden geladen, eine Lobby lässt sich anlegen und verbindet sich. Die
+  Browseradresse wird jetzt zur Laufzeit aus `NETGRID_SERVER_BASE_URL`
+  projiziert statt aus einer eingefrorenen `NEXT_PUBLIC_`-Buildvariable.
+  Reine Web-HTML-/Backend-Healthchecks hatten diesen Fehler nicht erkannt.
+- Echter direkter MSI-Versionswechsel bei laufendem 8212-Launcher und einer
+  über Edge erstellten offenen Lobby: Die installierte Pipe-/Prepare-Strecke
+  lehnt mit `installation_gate_active_games` vor Datencapture ab. Dateien,
+  Credentials und die drei laufenden Runtimeprozesse bleiben unverändert.
+  Das ist ein nativer Nichtterminal-Lobbybeleg, kein Mehrbenutzernachweis.
+- Derselbe native Schutz bei regulär geschlossener Runtime: Die persistierte
+  offene Lobby verhindert den Versionswechsel über die installierte read-only
+  Offlineprüfung, wiederum vor Capture und ohne veränderte Produkt- oder
+  Zugangsdaten. Anschließend normaler Benutzerstart, Wiederverbindung im
+  Browser und regulärer Lobbyabbruch. Der Abschlusscheck meldet null offene
+  Partien und erlaubte Updates (8. September, 10:24:48 UTC).
 
-Offen sind weiterhin Aktivspiel-/Mehrbenutzerschutz,
+Offen sind weiterhin der mehrbenutzerübergreifende Schutztest,
 vollständiger GUI-/Tray-Updater mit gebundener Pipe, ursprünglichem
 Benutzerneustart und anderer UAC-Administratorfreigabe sowie
 Absturzreparatur. Keine Releasefreigabe durch Zusammenzählen
 engerer oder früherer Komponentenbelege.
+
+Zusätzlicher offener UI-Fund: Wiederöffnen des Setups muss den vorhandenen
+Programmordner und die installierten Ports korrekt anzeigen. Der bisherige
+Dialog lädt nur den Datenordner und zeigt ansonsten Neuanlage-Defaults; er
+darf keine Konfigurationsänderungen suggerieren, die der Datenerhalt ignoriert.
 
 Die Behauptung, ein direktes MSI könne keinen Setupcache herstellen, gilt
 nicht mehr: Der installierte Setupstub und der geschützte vollständige
