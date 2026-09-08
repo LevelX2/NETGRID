@@ -1145,7 +1145,57 @@ Datensatz wird nicht gelöscht. Der Abschlusscheck um 10:24:48 UTC bestätigt
 Runtimeprozesse und weiterhin gleiche Konfiguration/Credentials
 (`result/native-ui-game-cleanup-8212.json`). Damit sind die beiden direkten
 MSI-Spielschutzwege für eine echte nichtterminale Lobby nativ belegt. Ein
-mehrbenutzerübergreifender Lauf und der vollständige GitHub-Updater bleiben offen.
+mehrbenutzerübergreifender Prozessschutz ist inzwischen zusätzlich wie unten
+beschrieben belegt; der vollständige GitHub-Updater bleibt offen.
+
+### Nativer MSI-Prozessschutz über Windows-Benutzergrenzen
+
+Am 8. September prüft derselbe Sandboxlauf den registrierten 8212-Stand mit
+dem unveränderten regulären 8214-Ziel-MSI. Ein temporärer echter
+Standardbenutzer startet die tatsächlich installierte Node-EXE mit einer
+inerten eigenen Wartefixture, ohne Ports oder Produktdaten zu benutzen.
+Prozessimage, PID, Startzeit und abweichender Benutzer gegenüber dem laufenden
+Launcher werden vor dem MSI-Aufruf gebunden. Das direkte MSI lässt den
+Launcher seine eigenen Dienste geordnet stoppen, wartet aber auf den
+weiterlaufenden anderen Benutzerprozess und bricht nach dem vorgesehenen
+Zeitfenster mit `installation_gate_runtime_stop_timeout` / Exit 1603 ab.
+Es erfolgt weder Snapshot-Capture noch Austausch der Programmdateien.
+
+`result/native-other-user-process-8212.json` ist grün, Abschluss 11:01:51 UTC,
+SHA-256 `fecd952fbc3fb9bb7aa1bcfecc8b4208c14b20583d7100882e097aee91a4ed09`.
+Der fremde Prozess besitzt nach dem MSI-Abbruch dieselbe PID, Startzeit und
+Imageidentität. Die 10.890 Produktmanifestdateien, fünf nativen Komponenten,
+registrierte Version/ProductCode, Setup-/MSI-Caches und Shortcutbindung sind
+weiterhin vollständig auf 8212 geprüft; `runtime.env` und die bestehende
+Authentifizierung bleiben bytegleich. Die Fixture endet anschließend über
+ihren eigenen Dateistoppschalter mit Exit 0, nicht durch erzwungenes Beenden.
+Das temporäre Testkonto wird entfernt.
+
+Die separate Abschlussprüfung
+`result/native-other-user-process-health-8212.json` bestätigt den erfolgreichen
+Headless-Start und geordneten Stopp des unveränderten 8212-Produkts (Exit 0),
+weiterhin identische geschützte Dateien, keine verbleibenden Produktprozesse
+und freie Ports 32141/32142. Abschluss 11:02:53 UTC, SHA-256
+`6239ef9eeda24d98a473667658ee07f262f6ab487d86dc3acb2e5b8b30f75213`.
+Die installierte Sandboxanwendung bleibt danach bewusst gestoppt; weder
+Browser noch Vordergrundoberfläche werden für den Neustart beansprucht.
+
+Ein vorangegangener separater .NET-Framework-Probeprozess unter einem anderen
+Standardbenutzer öffnet außerdem die tatsächliche globale Launcher-Mutex mit
+dem gleichen Konstruktorvertrag (`createdNew=false`), ohne Launcher oder
+Browser zu starten. Nachweis `result/native-launcher-mutex-other-user-8212.json`,
+SHA-256 `d5bc296ceb127a664696ef50a6a82e0c5d79112f7a8a45c7d61e84796472d7e7`;
+ursprüngliche Runtimeprozesse bleiben identisch und gesund, Testkonto entfernt.
+Das ist ein nativer Objektzugriffsbeleg, keine vollständige zweite
+Launcher-/Browsersitzung.
+
+Der MSI-Prozessschutz über Benutzergrenzen ist damit belegt. Gleichzeitige
+interaktive Desktop-Sitzungen, vollständiger Tray-Updater und anderer
+UAC-Administrator im vollständigen Produktablauf werden dadurch nicht als
+abgenommen erklärt. Hauptbetrieb, Host-Sicherheitskonfiguration und
+Maintenance-Zugangsdaten bleiben unangetastet.
+
+### Bestehende Setupkonfiguration und Bundle 8214
 
 Separater Setupfund in 8209: Wiederöffnen des gecachten Setups zeigt zwar den
 beibehaltenen Datenordner, aber den Standardprogrammordner und 3100/8787

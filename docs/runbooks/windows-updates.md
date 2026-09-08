@@ -119,11 +119,30 @@ Belastbar nachgewiesen sind bislang:
   Browser und regulärer Lobbyabbruch. Der Abschlusscheck meldet null offene
   Partien und erlaubte Updates (8. September, 10:24:48 UTC).
 
-Offen sind weiterhin der mehrbenutzerübergreifende Schutztest,
-vollständiger GUI-/Tray-Updater mit gebundener Pipe, ursprünglichem
+- Der direkte MSI-Prozessschutz über Windows-Benutzergrenzen ist mit
+  installiertem 8212 und unverändertem Ziel-MSI 8214 nativ belegt:
+  Der normale Launcher darf seine eigenen Dienste geordnet stoppen, ein
+  zusätzlicher Prozess der installierten Node-Laufzeit unter einem anderen
+  echten Standardbenutzer bleibt jedoch unverändert am Leben. Das MSI
+  verweigert den Wechsel mit `installation_gate_runtime_stop_timeout`, vor
+  Snapshot und Dateiänderungen. Vollständige Programm-/Cachehashes und
+  geschützte Konfiguration bleiben gleich. Der fremde Prozess führt nur eine
+  inerte eigene Testdatei aus, keine zweite Spielruntime. Er beendet sich
+  danach über seinen eigenen Stoppschalter; Testkonto entfernt. Der alte
+  8212-Stand besteht den anschließenden Headless-Start-/Stoppcheck, danach
+  sind sämtliche Testprozesse beendet und die Testports frei
+  (8. September, 11:02:53 UTC).
+
+Offen sind weiterhin der vollständige GUI-/Tray-Updater mit gebundener Pipe, ursprünglichem
 Benutzerneustart und anderer UAC-Administratorfreigabe sowie
 Absturzreparatur. Keine Releasefreigabe durch Zusammenzählen
 engerer oder früherer Komponentenbelege.
+
+Der native Prozessschutztest ist kein Nachweis gleichzeitiger interaktiver
+Desktop-Sitzungen oder des vollständigen Updaters unter anderer
+UAC-Administratorfreigabe. Ein separater read-only Mutex-Probeprozess unter
+einem anderen Standardbenutzer kann die bestehende globale Launcher-Mutex
+öffnen, ohne sie neu anzulegen; er startet weder Launcher noch Browser.
 
 Der Setup-Quellenfix lädt beim Wiederöffnen registrierte Pfade und vorhandene
 öffentliche Installationswerte aus `runtime.env`. Bei installierter Anwendung
