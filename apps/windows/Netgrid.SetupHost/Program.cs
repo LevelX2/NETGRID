@@ -360,9 +360,15 @@ internal sealed class SetupForm : Form
     private readonly ProgressBar _progress = new() { Dock = DockStyle.Top, Height = 20, Visible = false, MarqueeAnimationSpeed = 0 };
     private readonly Button _install = new() { Text = UiText.Get("setup.install"), AutoSize = true, Padding = new Padding(18, 6, 18, 6) };
     private readonly IReadOnlyList<string> _privateAddresses = NetworkSelection.PrivateIpv4Addresses();
+    private readonly ExistingSetupRegistration _registration;
+    private ExistingSetupConfiguration? _existingConfiguration;
+    private bool _configurationInvalid;
 
-    public SetupForm()
+    public SetupForm() : this(ExistingSetupRegistration.Read()) { }
+
+    internal SetupForm(ExistingSetupRegistration registration)
     {
+        _registration = registration;
         SuspendLayout();
         Text = $"NETGRID Setup {MsiPayload.ProductVersion}";
         Icon = Icon.ExtractAssociatedIcon(Environment.ProcessPath!);
@@ -373,8 +379,9 @@ internal sealed class SetupForm : Form
         FormBorderStyle = FormBorderStyle.FixedDialog;
         MaximizeBox = false;
 
-        _programRoot.Text = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "NETGRID");
-        _dataRoot.Text = ExistingDataRoot() ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "NETGRID");
+        _programRoot.Text = registration.ProgramRoot ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "NETGRID");
+        _dataRoot.Text = registration.DataRoot ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "NETGRID");
+        _desktop.Checked = registration.DesktopShortcut;
         _retention.Items.AddRange(SetupContract.RetentionChoices.Cast<object>().ToArray());
         _retention.SelectedIndex = 1;
         _accountMode.Items.AddRange(new object[]
@@ -470,8 +477,8 @@ internal sealed class SetupForm : Form
         _custom.CheckedChanged += (_, _) => UpdateAdvancedState();
         _lan.CheckedChanged += (_, _) => UpdateLanState();
         _install.Click += async (_, _) => await InstallAsync();
-        UpdateAdvancedState();
-        UpdateLanState();
+        _dataRoot.Leave += (_, _) => RefreshExistingConfiguration();
+        RefreshExistingConfiguration();
         // All fixed dimensions above are authored at 96 DPI. Without this
         // baseline WinForms treats them as already scaled on a high-DPI PC.
         AutoScaleDimensions = new SizeF(96, 96);
@@ -506,14 +513,17 @@ internal sealed class SetupForm : Form
     {
         try
         {
+            if (!RefreshExistingConfiguration()) return;
             ToggleUi(false);
             SetInstallationPhase(InstallationPhase.Validating);
             var settings = ReadSettings();
             settings.Validate();
             await Task.Run(() => InstallationSpace.Check(settings.ProgramRoot, settings.DataRoot, InstallationWorker.TemporaryRoot));
-            if (!PortPlanner.AreAvailable(settings.Profile, settings.WebPort, settings.ServerPort))
+            // Existing installations use the native lifecycle handshake, which
+            // distinguishes the owned runtime from unrelated port listeners.
+            if (!_registration.Installed && !PortPlanner.AreAvailable(settings.Profile, settings.WebPort, settings.ServerPort))
             {
-                if (!_recommended.Checked)
+                if (!_recommended.Checked || _existingConfiguration is not null)
                     throw new SetupException("ports_busy");
                 var alternative = PortPlanner.FindAlternative(settings.Profile, settings.WebPort, settings.ServerPort);
                 var answer = MessageBox.Show(
@@ -572,7 +582,7 @@ internal sealed class SetupForm : Form
         var accountMode = (AccountModeChoice?)_accountMode.SelectedItem ?? throw new SetupException("account_mode_missing");
         return new SetupSettings(
             _lan.Checked ? "private_lan" : "local",
-            _lan.Checked ? _privateAddresses.FirstOrDefault() : null,
+            _lan.Checked ? _existingConfiguration?.LanAddress ?? _privateAddresses.FirstOrDefault() : null,
             SetupSettings.ReadRoot(_programRoot.Text.Trim(), UiText.Get("setup.program")),
             SetupSettings.ReadRoot(_dataRoot.Text.Trim(), UiText.Get("setup.data")),
             decimal.ToInt32(_webPort.Value),
@@ -637,19 +647,72 @@ internal sealed class SetupForm : Form
 
     private void UpdateAdvancedState()
     {
-        var enabled = _custom.Checked;
-        _programRoot.Enabled = enabled;
-        _dataRoot.Enabled = enabled;
-        _webPort.Enabled = enabled;
-        _serverPort.Enabled = enabled;
-        _retention.Enabled = enabled;
-        _accountMode.Enabled = enabled;
+        var editablePaths = _custom.Checked && !_registration.Installed;
+        var editableConfiguration = _existingConfiguration is null && !_configurationInvalid;
+        _recommended.Enabled = !_registration.Installed;
+        _custom.Enabled = !_registration.Installed;
+        _programRoot.Enabled = editablePaths;
+        _dataRoot.Enabled = editablePaths;
+        _local.Enabled = editableConfiguration;
+        _lan.Enabled = editableConfiguration;
+        _webPort.Enabled = _custom.Checked && editableConfiguration;
+        _serverPort.Enabled = _custom.Checked && editableConfiguration;
+        _retention.Enabled = _custom.Checked && editableConfiguration;
+        _accountMode.Enabled = _custom.Checked && editableConfiguration;
+    }
+
+    private bool RefreshExistingConfiguration()
+    {
+        try
+        {
+            var existing = ExistingSetupConfiguration.Read(_dataRoot.Text, _registration.Installed);
+            if (existing is not null)
+            {
+                _local.Checked = existing.Profile == "local";
+                _lan.Checked = existing.Profile == "private_lan";
+                _webPort.Value = existing.WebPort;
+                _serverPort.Value = existing.ServerPort;
+                _retention.SelectedIndex = Array.FindIndex(SetupContract.RetentionChoices, choice => choice.Value == existing.RetentionDays);
+                _accountMode.SelectedIndex = existing.AccountAccessMode == "simple" ? 0 : 1;
+            }
+            else if (_existingConfiguration is not null)
+            {
+                // Choosing a genuinely new data folder explicitly starts a new
+                // configuration; never present retained values as fresh defaults.
+                _local.Checked = true;
+                _webPort.Value = 3100;
+                _serverPort.Value = 8787;
+                _retention.SelectedIndex = 1;
+                _accountMode.SelectedIndex = 0;
+            }
+            _existingConfiguration = existing;
+            if (_configurationInvalid) _status.Text = string.Empty;
+            _configurationInvalid = false;
+            _install.Enabled = true;
+            _recommended.Text = UiText.Get(existing is null ? "setup.recommended" : "setup.existing.values");
+            _dataNotice.Text = UiText.Get(_registration.Installed ? "setup.existing.notice" :
+                existing is not null ? "setup.retained.notice" : "setup.data.help");
+            UpdateAdvancedState();
+            UpdateLanState();
+            return true;
+        }
+        catch (Exception error) when (error is SetupException or IOException or UnauthorizedAccessException)
+        {
+            _configurationInvalid = true;
+            _install.Enabled = false;
+            _status.Text = SetupFailure.Message(error);
+            UpdateAdvancedState();
+            return false;
+        }
     }
 
     private void UpdateLanState()
     {
         _lanAddress.Visible = _lan.Checked;
-        if (_lan.Checked && _privateAddresses.Count == 0)
+        _lanAddress.Text = _existingConfiguration?.LanAddress is string address
+            ? UiText.Get("setup.lan.found", address)
+            : _privateAddresses.Count > 0 ? UiText.Get("setup.lan.found", _privateAddresses[0]) : UiText.Get("setup.lan.missing");
+        if (_lan.Checked && _existingConfiguration is null && _privateAddresses.Count == 0)
             _status.Text = UiText.Get("setup.failure.lan_address_missing");
         else if (_status.Text == UiText.Get("setup.failure.lan_address_missing"))
             _status.Text = string.Empty;
@@ -659,11 +722,16 @@ internal sealed class SetupForm : Form
     {
         table.Controls.Add(OptionLabel(labelKey, helpKey, box), 0, row);
         table.Controls.Add(box, 1, row);
-        var browse = new Button { Text = UiText.Get("setup.browse"), AutoSize = true };
+        var browse = new Button { Name = labelKey + ".browse", Text = UiText.Get("setup.browse"), AutoSize = true };
+        box.EnabledChanged += (_, _) => browse.Enabled = box.Enabled;
         browse.Click += (_, _) =>
         {
             using var dialog = new FolderBrowserDialog { SelectedPath = box.Text, ShowNewFolderButton = true };
-            if (dialog.ShowDialog(this) == DialogResult.OK) box.Text = dialog.SelectedPath;
+            if (dialog.ShowDialog(this) == DialogResult.OK)
+            {
+                box.Text = dialog.SelectedPath;
+                if (box == _dataRoot) RefreshExistingConfiguration();
+            }
         };
         table.Controls.Add(browse, 2, row);
     }
@@ -732,11 +800,6 @@ internal sealed class SetupForm : Form
     private static Label Heading(string text, float size) => new() { Text = text, AutoSize = true, Font = new Font(SystemFonts.DefaultFont.FontFamily, size, FontStyle.Bold) };
     private static Label Body(string text) => new() { Text = text, AutoSize = true, MaximumSize = new Size(660, 0), Margin = new Padding(3, 5, 3, 10) };
 
-    private static string? ExistingDataRoot()
-    {
-        using var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\LevelX2\NETGRID", writable: false);
-        return key?.GetValue("RuntimeDataRoot") as string;
-    }
 }
 
 internal sealed record SetupSettings(

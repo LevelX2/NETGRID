@@ -1150,9 +1150,16 @@ mehrbenutzerübergreifender Lauf und der vollständige GitHub-Updater bleiben of
 Separater offener Setupfund: Wiederöffnen des gecachten Setups zeigt zwar den
 beibehaltenen Datenordner, aber den Standardprogrammordner und 3100/8787
 statt der registrierten Installation mit eigenen Pfaden und 32141/32142.
-Es wurde nicht auf „Installieren“ gedrückt. Die UI muss vorhandene Werte
-korrekt darstellen und darf keine Änderungen anbieten, die der
-Konfigurationserhalt anschließend ignoriert. Dieser Ursachenfix ist noch offen.
+Es wurde nicht auf „Installieren“ gedrückt. Der Quellenfix liest jetzt die
+registrierten Pfade/Shortcutpräferenz sowie eine ausdrücklich öffentliche
+Projektion der bestehenden `runtime.env`. Bestehende Installation: Pfade,
+Netzwerk, Ports und Anfangspolicies sichtbar, aber nicht als änderbar angeboten.
+Erhaltene Daten nach Deinstallation: dieselbe Konfiguration bleibt maßgeblich;
+erst ein anderer neuer Datenordner aktiviert eine frische Konfiguration.
+Fehlende/inkonsistente Bestandswerte blockieren sichtbar, ohne Defaults darüber
+zu schreiben oder Zugangsdaten zu lesen/ändern. Die nativen Setup-Unit-/UI-
+Tests decken diese Fälle in de/en/fr ohne Installation oder Registrymutation
+ab. Die Abnahme des neuen vollständigen Bundles steht noch aus.
 
 Der normale Tray-Aufruf der Drittanbieterhinweise erreicht um 09:58 UTC die
 Windows-App-Auswahl für `.txt`: Im aktuellen Sandboximage fehlt eine

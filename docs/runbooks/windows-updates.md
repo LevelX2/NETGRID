@@ -125,10 +125,15 @@ Benutzerneustart und anderer UAC-Administratorfreigabe sowie
 Absturzreparatur. Keine Releasefreigabe durch Zusammenzählen
 engerer oder früherer Komponentenbelege.
 
-Zusätzlicher offener UI-Fund: Wiederöffnen des Setups muss den vorhandenen
-Programmordner und die installierten Ports korrekt anzeigen. Der bisherige
-Dialog lädt nur den Datenordner und zeigt ansonsten Neuanlage-Defaults; er
-darf keine Konfigurationsänderungen suggerieren, die der Datenerhalt ignoriert.
+Der Setup-Quellenfix lädt beim Wiederöffnen registrierte Pfade und vorhandene
+öffentliche Installationswerte aus `runtime.env`. Bei installierter Anwendung
+bleiben Pfade und Konfigurationswerte gesperrt; der native MSI-Lifecycle klärt
+laufende Produktprozesse, statt deren eigene belegte Ports als neue Portwahl
+zu behandeln. Bei erhaltenem Datenordner nach Deinstallation bleiben dessen
+Konfigurationswerte ebenfalls gesperrt; ein anderer neuer Datenordner aktiviert
+eine frische Konfiguration. Zugangsdaten werden weder gelesen noch geändert.
+Fehlende oder widersprüchliche Bestandskonfiguration blockiert das Setup.
+Fokussierte Tests sind vorhanden; die neue Bundle-/Sandboxabnahme bleibt offen.
 
 Die Behauptung, ein direktes MSI könne keinen Setupcache herstellen, gilt
 nicht mehr: Der installierte Setupstub und der geschützte vollständige

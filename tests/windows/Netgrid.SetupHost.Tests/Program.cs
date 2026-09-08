@@ -30,6 +30,7 @@ checks += NativeDpiLayoutTests.Run(assembly);
 checks += MsiProgressTests.Run(assembly);
 checks += InstallationWorkerTests.Run(assembly);
 checks += BundleFailureTests.Run(assembly);
+checks += ExistingSetupTests.Run(assembly);
 var previewWindowsShown = 0;
 var languagePolicy = assembly.GetType("Netgrid.Windows.WindowsUiLanguage", throwOnError: true)!;
 var resolveLanguage = languagePolicy.GetMethod("Resolve")!;

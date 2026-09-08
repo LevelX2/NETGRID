@@ -1,5 +1,10 @@
 {
   "de": {
+    "setup.existing.values": "Vorhandene Einstellungen verwenden",
+    "setup.existing.notice": "Die angezeigten Installationswerte werden beibehalten. Programm- und Datenordner einer vorhandenen Installation bleiben unverändert. Aufbewahrung und Spielerprofile können Sie später in Maintenance verwalten; vorhandene Passwörter bleiben erhalten.",
+    "setup.retained.notice": "In diesem Datenordner liegen bereits NETGRID-Einstellungen. Netzwerk, Ports und Anfangswerte werden daraus übernommen. Für eine neue Konfiguration wählen Sie einen anderen, leeren Datenordner. Vorhandene Passwörter bleiben erhalten.",
+    "setup.failure.existing_configuration_invalid": "Die vorhandenen Installationswerte sind unvollständig oder widersprüchlich. Es wurden keine Werte ersetzt. Prüfen Sie die Installation und ihre Konfiguration, bevor Sie fortfahren.",
+    "setup.failure.existing_configuration_missing": "Die Konfiguration der vorhandenen Installation fehlt. Das Setup legt darüber keine neue Konfiguration an. Stellen Sie die vorhandene Konfiguration wieder her, bevor Sie fortfahren.",
     "setup.language.continue": "Weiter",
     "setup.language.cancel": "Abbrechen",
     "setup.help.title": "Hilfe: {0}",
@@ -187,6 +192,11 @@
     "updater.repair_failed": "Das abgebrochene Update konnte nicht sicher wiederhergestellt werden. Starten Sie NETGRID nicht und entfernen Sie keine Installationssperren von Hand. Prüfen Sie, ob noch ein Setup oder Updater läuft. Für die Diagnose stehen die lokalen Updaterprotokolle und gesicherten Daten bereit."
   },
   "en": {
+    "setup.existing.values": "Use existing settings",
+    "setup.existing.notice": "The displayed installation settings will be preserved. An existing installation keeps its program and data folders. You can manage retention and player profiles later in Maintenance; existing passwords are preserved.",
+    "setup.retained.notice": "This data folder already contains NETGRID settings. Its network, ports and initial settings will be reused. To create a new configuration, choose a different, empty data folder. Existing passwords are preserved.",
+    "setup.failure.existing_configuration_invalid": "The existing installation settings are incomplete or inconsistent. No values have been replaced. Check the installation and its configuration before continuing.",
+    "setup.failure.existing_configuration_missing": "The existing installation configuration is missing. Setup will not replace it with a new configuration. Restore the existing configuration before continuing.",
     "setup.language.continue": "Continue",
     "setup.language.cancel": "Cancel",
     "setup.help.title": "Help: {0}",
@@ -374,6 +384,11 @@
     "updater.repair_failed": "The interrupted update could not be restored safely. Do not start NETGRID or manually remove installation locks. Check whether a setup or updater is still running. The local updater logs and data backups are available for diagnosis."
   },
   "fr": {
+    "setup.existing.values": "Utiliser les paramètres existants",
+    "setup.existing.notice": "Les paramètres d’installation affichés seront conservés. Les dossiers du programme et des données d’une installation existante restent inchangés. Vous pourrez gérer la conservation et les profils dans Maintenance ; les mots de passe existants sont conservés.",
+    "setup.retained.notice": "Ce dossier de données contient déjà des paramètres NETGRID. Le réseau, les ports et les paramètres initiaux seront réutilisés. Pour une nouvelle configuration, choisissez un autre dossier de données vide. Les mots de passe existants sont conservés.",
+    "setup.failure.existing_configuration_invalid": "Les paramètres de l’installation existante sont incomplets ou incohérents. Aucune valeur n’a été remplacée. Vérifiez l’installation et sa configuration avant de continuer.",
+    "setup.failure.existing_configuration_missing": "La configuration de l’installation existante est absente. L’assistant ne la remplacera pas par une nouvelle configuration. Restaurez la configuration existante avant de continuer.",
     "setup.language.continue": "Continuer",
     "setup.language.cancel": "Annuler",
     "setup.help.title": "Aide : {0}",
