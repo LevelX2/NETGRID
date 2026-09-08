@@ -328,8 +328,15 @@ seinen regulären Datenrestore und Rollback aus. Eine pauschale Übernahme
 einer verwaisten Transaktion findet dabei nicht statt. Der davon getrennte
 `msiexec /i`-Client ist nicht der Halter des Helper-Prozesshandles. Sein
 nativer Abbruch während eines Versionswechsels ist inzwischen mit fortgesetzter
-erfolgreicher Installer-Ausführung belegt. Beide Nachweise ersetzen weder
-den Verlust des nativen MSI-Ausführers noch eine verwaiste MSI-Transaktion.
+erfolgreicher Installer-Ausführung belegt. Zusätzlich ist der Verlust des
+ausführenden Installer-Dienstes bei regulär endendem Helper nativ geprüft:
+Die aktive Bindung verhindert zunächst einen Produktstart. Beim erneuten
+normalen Setupaufruf nimmt Windows sein erhaltenes Rollbackskript wieder auf,
+stellt Programm und Daten wieder her und beendet dieselbe Lease. Erst der
+danach erneut gestartete Upgrade-Lauf installiert die neue Version erfolgreich.
+Eine allgemeine NETGRID-Übernahme verwaister MSI-Transaktionen, gleichzeitiger
+Gesamtausfall oder beschädigte native Rollbackinformationen sind damit nicht
+abgenommen.
 Umfang und unabhängige Abschlussnachweise stehen im Update-Runbook. Die normale
 Updater-Absturzreparatur darf eine bestehende MSI-Bindung weiterhin nicht
 löschen. Same-Product-Repair, Erstinstallation,
@@ -442,8 +449,9 @@ Verknüpfung; der Reparaturhelfer startet keine erhöhte Runtime.
 
 Wiederöffnen nach Ende eines separaten Snapshot-Erzeugers, Lease-Übernahme,
 Reparaturreihenfolge und Staging-Sperren sind komponentenweise geprüft.
-Die tatsächliche erhöhte Absturzreparatur, verwaiste direkte MSI-Transaktion
-und vollständige native Updater-Abnahme bleiben Release-Gates. Die erhöhten
+Die tatsächliche erhöhte äußere Updater-Absturzreparatur und vollständige
+native Updater-Abnahme bleiben Release-Gates. Der direkte MSI-Dienstverlust
+ist für die oben begrenzte native Wiederaufnahme nachgewiesen. Die erhöhten
 Archivberechtigungen gegenüber Standardbenutzern und die direkte native
 Zwei-Build-MSI-Matrix sind inzwischen nachgewiesen; Umfang und Grenzen stehen
 im aktiven Paketprozess und im Update-Runbook. Eine noch gebundene

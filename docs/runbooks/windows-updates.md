@@ -299,12 +299,39 @@ erhalten. Er ist kein Produktfehler und kein Crashnachweis. Weder die
 Korrektur dieser Testbindung noch der erfolgreiche Folgelauf verändern
 Produktcode, Sicherungen, Credentials oder geschützte Lease-Werte manuell.
 
-Offen bleiben weitergehende Ausfälle des nativen MSI-Custom-Action-Servers
-oder des ausführenden Installer-Dienstes sowie eine tatsächlich verwaiste
-Transaktion ohne verbleibenden regulären Rollback-Aufrufer. Ohne gehaltenen
-Helper-Prozesshandle wird keine pauschale verwaiste Bindung gelöscht.
-Die getrennten Client- und verwalteten Host-Crashnachweise ersetzen diese
-Fälle und den vollständigen Tray-/GitHub-Updater nicht.
+### Wiederaufnahme nach Verlust des Windows-Installer-Dienstes
+
+Der native 8217→8219-Test beendet ausschließlich den gebundenen
+Installer-Dienstprozess während des Healthchecks. Helper und Verifier enden
+regulär; der MSI-Client meldet 1601. NETGRID bleibt zunächst sicher gestoppt:
+Ein neuer tatsächlicher Launcherstart wird mit `invalid_state` und Exit 2
+abgewiesen, ohne die aktive MSI-Bindung oder den geprüften Snapshot zu ändern.
+
+Nach dem automatischen Dienstneustart durch Windows nimmt ein normaler
+erneuter Aufruf des originalen Setups die unterbrochene MSI-Transaktion wieder
+auf. Das Protokoll nennt `Suspended install detected. Resuming.` Windows
+stellt die Programmdateien über sein ursprüngliches Rollbackskript zurück;
+die NETGRID-Rollback-Aktion stellt anschließend die Daten wieder her und gibt
+erst danach die Lease frei. Dieser Aufruf liefert weiterhin Fehler 1603 für
+die zurückgenommene Installation. Er ist nicht als erfolgreiches neues
+Upgrade zu behandeln. Erst der folgende neue Setupaufruf installiert 8219
+erfolgreich mit Exit 0.
+
+Die unabhängigen Nachprüfungen bestätigen zuerst 8217 samt vollständigen
+Datei-/Cache-/Shortcutidentitäten, Datenbytes und DACLs, separater Sicherung
+des Fehlerstands und zusätzlichem Healthcheck mit Exit 0; danach bestätigen
+sie den regulären Upgradeabschluss und die vollständige installierte
+8219-Identität. Konfiguration und Credentials bleiben unverändert. Abschluss
+8. September, 14:02:42 UTC: Runtime gestoppt, Testports frei. Belege und die
+erhaltenen roten Testannahmen stehen im aktiven Paketprozess. Keine manuelle
+Registryfreigabe und kein manueller Dienststart waren nötig.
+
+Dieser Nachweis setzt regulär endende Helper und erhaltene native
+Rollbackinformationen voraus. Er beweist keinen gleichzeitigen Gesamtausfall,
+Stromausfall oder Restore beschädigter Windows-Rollbackdateien. Eine verwaiste
+MSI-Bindung wird weiterhin nicht pauschal gelöscht. Die eigenständige äußere
+Updater-Absturzreparatur und der vollständige Tray-/GitHub-Updater sind damit
+nicht abgenommen.
 
 Offen sind weiterhin der vollständige GUI-/Tray-Updater mit gebundener Pipe, ursprünglichem
 Benutzerneustart und anderer UAC-Administratorfreigabe sowie

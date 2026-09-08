@@ -299,10 +299,77 @@ gestoppt und 32141/32142 frei. Keine Vordergrund-/UAC-Eingabe,
 Hostinstallation, manuelle Lease-Freigabe oder Produktcodeänderung.
 
 Damit ist dieser verwaltete Host-Abbruch mit weiterlaufendem Helper und
-erhaltenem nativem MSI-Rollback-Aufrufer nachgewiesen. Ausfälle des nativen
-Custom-Action-Servers oder Installer-Dienstes sowie eine tatsächlich verwaiste
-MSI-Transaktion ohne regulären Rollback-Aufrufer bleiben offen. WIN-I08,
+erhaltenem nativem MSI-Rollback-Aufrufer nachgewiesen. Der getrennte Ausfall
+des Installer-Dienstes ist im folgenden Prüfpunkt belegt. WIN-I08,
 GitHub-/Tray-/UAC-Abnahme, Integration und Cleanup sind nicht abgeschlossen.
+
+### Aktiver Prüfpunkt: Installer-Dienstverlust und native Wiederaufnahme
+
+Im selben isolierten Sandboxlauf wird beim regulären Wechsel 8217→8219 nur
+der tatsächlich zugehörige Windows-Installer-Dienstprozess PID 5728 beendet
+(Start 13:36:56.7069759 UTC, Image `System32\msiexec.exe`, `/V`, Exit -1).
+Handle, Startzeit, Dienst-PID und native Aufruferkette sind vor dem Eingriff
+gebunden. NETGRID-Helper 3524 und Verifier 2664 enden selbstständig mit Exit 0.
+Der MSI-Client endet mit 1601. Die MSI-Lease bleibt aktiv, der originale
+Snapshot `ebb9724606c748f38a5b365f6c0bc50e` bleibt gebunden und `verified`.
+Ein tatsächlicher ungebundener Launcherstart wird mit Exit 2 und
+`stage=start code=invalid_state cleanup=ok` abgewiesen, ohne Lease oder
+Sicherungsnachweis zu verändern. Keine Produktprozesse oder Testlistener
+bleiben zurück. Das ist zunächst ein sicher gestoppter, nicht reparierter
+Stand, kein erfolgreiches Upgrade.
+
+Windows startet seinen Installer-Dienst anschließend selbst neu. Der erneut
+normal aufgerufene originale Setuphost erkennt die unterbrochene Installation:
+`Suspended install detected. Resuming.` Windows nimmt sein ursprüngliches
+Rollbackskript wieder auf, stellt Programmdateien aus `C:\Config.Msi` zurück
+und ruft danach `RollbackNetgridLifecycle` auf. `operation=restore` und
+`NETGRID_LIFECYCLE_ROLLBACK released=True` belegen den regulären Abschluss
+derselben Transaktion. Setup liefert dabei 1603 für die fehlgeschlagene
+Installation, nicht Erfolg für eine neue Installation.
+
+Zwei rote Diagnoseberichte bleiben unverändert erhalten: Die erste
+Retry-Fixture verweigerte den Setupstart wegen des inzwischen von Windows
+neu gestarteten, untätigen Dienstes. Die korrigierte Bindung erlaubt nur genau
+diesen Dienst, keine anderen MSI-Clients oder Custom-Action-Hosts. Die zweite
+Fixture erwartete bei Setup-Exit 1603 fälschlich eine unveränderte verwaiste
+Bindung und meldete deshalb `failed_retry_changed_orphan_binding`. Tatsächlich
+hatte Windows bereits zurückgerollt. Der unabhängige Nachtest bestätigt am
+8. September um 13:52:48 UTC sämtliche 10.890 Manifestdateien und fünf nativen
+Programme von 8217, Registrierung, Cache, Shortcut, ursprüngliche Testdatei
+samt DACL und entfernte nachträgliche Testdatei. Der Fehlerstand ist separat
+in `10e8744f160a449da4c0ba5db790ff23` erhalten. Der ursprüngliche Snapshot ist
+`restored`, dieselbe Lease abgeschlossen; native Produktzustände sind 5 für
+8217 und -1 für 8219. Zusätzlicher Headless-Healthcheck: Exit 0. Konfiguration
+und Credentials bleiben bytegleich. Die drei nativen `End(Checksum=0)`-
+Rollbackwarnungen `Return: 5` sind auch in früheren erfolgreich unabhängig
+geprüften Rücknahmen vorhanden; ihre Ursache ist damit nicht erklärt.
+
+Ein weiterer normaler Setupaufruf installiert danach 8217→8219 mit Exit 0.
+Die unabhängige Abschlusskontrolle um 14:02:42 UTC bestätigt die vollständige
+installierte Identität, Caches und Verknüpfung sowie den neuen verifizierten
+Snapshot `a78526fa19ca45729a704b1d1dc5ff8d` mit abgeschlossener Lease.
+Geschützte Dateien und frühere MSI-Caches bleiben erhalten, Runtime und
+32141/32142 sind frei. Kein Vordergrundinput, keine manuelle Registryfreigabe,
+kein manueller Dienststart und keine Produktcodeänderung waren erforderlich.
+
+SHA-256 der unveränderten Belege unter dem oben genannten `result`-Ordner:
+
+| Beleg | SHA-256 |
+| --- | --- |
+| `native-8217-8219-service-crash.json` | `8e9e26d7a2aa91bd06c1fa8a2ede11c9e386cab6c7c5118bde2b98f36f09cd3f` |
+| `native-service-orphan-setup-retry-8219.json` | `37f4714dbc37ff10bfc57e04b4dd5f9b8a219167fabf675f6dc800ddf4800309` |
+| `native-service-orphan-setup-retry-v2-8219.json` | `65895d0263d5f78724bbb8a4767fe416a07c85a3d349a0a6e52d2885a4a3b216` |
+| `native-service-orphan-setup-retry-v2-8219.log` | `d2ad0d40db720a3554fe98d2d964ebbe82d9ad98bf6aecaf6d4b34280c566f9a` |
+| `native-service-loss-resumed-rollback-verified-8217.json` | `7bf28dab1a52efa8e9d00ceae80c13c89df3ab31767eaa76bda6e36c885d1d2c` |
+| `native-post-service-recovery-8217-8219-upgrade.json` | `d18ac7317ddaf71c8a5c7ff1a340e015693c280eb17e6d6ecd9821a3f5e47493` |
+| `native-post-service-recovery-8217-8219-verifyupgrade.json` | `e4819789426b8411feee2c5d5cfba753001d6210cae8d7d3878644413b2739d2` |
+
+Dieser Nachweis gilt für Dienstverlust bei regulär endendem Helper und
+erhaltener Windows-Rollbackinformation. Gleichzeitiger Verlust sämtlicher
+Prozesse, Stromausfall oder beschädigte Windows-Rollbackdateien sind dadurch
+nicht bewiesen; daraus entstehen keine stillschweigend zusätzlichen
+Pflichtpakete. Die eigenständige äußere Updater-Absturzreparatur und die
+vollständigen GUI-/GitHub-/UAC-Abnahmen bleiben offen.
 
 ### Aktiver Prüfpunkt: Setup-Reparaturquelle und Archivschutz
 
