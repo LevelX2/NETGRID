@@ -360,8 +360,21 @@ registrierten Ordner und 32141/32142. Prozessidentitäten, Konfiguration und
 Credentials bleiben unverändert, Health ist grün. Die Sitzung-0-Vorschauen
 sind kein vollständiger visueller Bedien- oder echter Monitor-DPI-Nachweis:
 ihr begrenzter Viewport zeigt nicht alle unteren Optionen gleichzeitig.
-Der neue Setupformular-Installationslauf und die interaktive Scrollprüfung
-bleiben offen. 8214 wurde dabei nicht installiert.
+Die spätere native deutsche Bestandsmaske des tatsächlich installierten
+Setupcaches 8219 zeigt am 8. September um 21:48 UTC die registrierten Werte
+korrekt gesperrt. Der echte Scrolllauf erreicht die letzte Optionszeile;
+Datenhinweis und Installationsknopf bleiben separat sichtbar. Der
+Setupformular-Installationslauf bleibt offen. 8214 wurde durch die oben
+genannten Vorschauen nicht installiert.
+
+Die Bestandsmaske zeigte allerdings noch die Neuinstallationshilfe unter der
+umbenannten Modusauswahl. Der Quellfix aktualisiert beide Modushilfen zusammen
+mit der Bestandskonfiguration. Dialog, Tooltip und Screenreadertext erhalten
+dieselben kontextgerechten Hinweise; bei einem frischen Datenordner kehren
+die Neuinstallationshilfen zurück. 171 gezielte und insgesamt 2.345
+Setupprüfungen sind grün. Das unveränderte installierte 8219-Bundle enthält
+diesen nachträglichen UI-Fix noch nicht; die native Prüfung des nächsten
+regulären Bundles bleibt erforderlich.
 
 Die Behauptung, ein direktes MSI könne keinen Setupcache herstellen, gilt
 nicht mehr: Der installierte Setupstub und der geschützte vollständige

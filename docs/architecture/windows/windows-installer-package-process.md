@@ -92,6 +92,39 @@ eigene Account-, Cleanup- oder Versionsautorität.
 
 ## Aktueller Umsetzungsstand
 
+### Aktiver Prüfpunkt: native Bestandsmaske und kontextabhängige Modushilfe
+
+Nach erneuter Freigabe des Desktops wird am 8. September um 21:47:37 UTC
+der tatsächlich installierte, hashgeprüfte Setupcache 8219 als normaler
+Sandboxbenutzer gestartet (PID 2956). `native-ui-8219-setup-start.json`
+bindet Image, Quellcommit und ProductCode und bestätigt die unveränderten
+geschützten Dateien. Die deutsche Maske zeigt die registrierten Testordner
+und Ports 32141/32142; Modus, Netzwerk und Bestandskonfiguration sind gesperrt.
+Der echte Scrolllauf erreicht die letzte Optionszeile einschließlich
+Desktop-/Startoptionen und Hilfen. Der feste Datenhinweis und Installationsknopf
+bleiben getrennt vom Scrollbereich sichtbar. Das ist ein nativer Nachweis
+dieses Bestandsdialogs, keine Installation und keine zusätzliche DPI-Matrix.
+
+Die angeklickte Modushilfe deckt einen Textbindungsfehler auf: Unter der
+Beschriftung „Vorhandene Einstellungen verwenden“ zeigte sie weiterhin Titel
+und Anleitung der Neuinstallation und verwies auf die gesperrte Custom-Wahl.
+Der gezielte Regressionstest scheitert zunächst mit
+`mode_help_title_matches_current_context`. Die Korrektur aktualisiert beide
+Modushilfen beim Laden der Bestandskonfiguration: Titel, Screenreadertext,
+Tooltip und angeklickter Dialog verwenden dieselben aktuellen Texte.
+Installierter Bestand verwendet den bestehenden Installationshinweis,
+erhaltene Daten den Hinweis zur Datenordnerwahl; ein ausdrücklich gewählter
+frischer Datenordner stellt die regulären Neuinstallationshilfen wieder her.
+Es entstehen keine neuen Konfigurationswerte, Freigaben oder Übersetzungen.
+
+171 gezielte Bestandsprüfungen in de/en/fr sowie die vollständige Setup-Suite
+mit 2.345 Assertions sind grün. Der Quellfix ist noch nicht Bestandteil des
+unveränderten Bundles 8219 und benötigt dessen spätere native Nachprüfung
+im nächsten regulären Bundle. Der GUI-Installationsklick wartet auf die nach
+Computer-Use-Regeln gesondert angefragte unmittelbare Zustimmung. Keine
+Installation, UAC-Eingabe, Credentialänderung oder Hostkonfiguration durch
+diese Sichtprüfung.
+
 ### Aktiver Prüfpunkt: beendeter MSI-Helfer und Fehlerrollback
 
 Ausgangsstand der folgenden nativen Prüfungen ist die abgenommene

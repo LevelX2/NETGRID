@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Security.Cryptography;
+using System.Text.Json;
 
 internal static class ExistingSetupTests
 {
@@ -16,6 +17,8 @@ internal static class ExistingSetupTests
         var program = Path.Combine(root, "program");
         var environment = Path.Combine(data, "config", "runtime.env");
         var checks = 0;
+        using var strings = assembly.GetManifestResourceStream("NETGRID.WindowsUiStrings.json")!;
+        var catalog = JsonSerializer.Deserialize<Dictionary<string, Dictionary<string, string>>>(strings)!;
         void Assert(bool value, string code) { if (!value) throw new Exception(code); checks++; }
         object Property(object value, string name) => value.GetType().GetProperty(name)!.GetValue(value)!;
         T Field<T>(Form form, string name) => (T)formType.GetField(name, BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(form)!;
@@ -79,8 +82,21 @@ internal static class ExistingSetupTests
             foreach (var language in new[] { "de", "en", "fr" })
             {
                 assembly.GetType("Netgrid.Windows.UiText", true)!.GetMethod("Use")!.Invoke(null, [language]);
+                void CheckHelp(Form form, string targetName, string labelKey, string descriptionKey)
+                {
+                    var name = targetName == "_recommended" ? "setup.help.recommended" : "setup.help.custom";
+                    var button = (Button)form.Controls.Find(name, true).Single();
+                    var target = Field<RadioButton>(form, targetName);
+                    var tooltip = Field<ToolTip>(form, "_helpToolTip");
+                    var expected = catalog[language][descriptionKey];
+                    Assert(button.AccessibleName == string.Format(catalog[language]["setup.help.title"], catalog[language][labelKey]), "mode_help_title_matches_current_context");
+                    Assert(button.AccessibleDescription == expected && target.AccessibleDescription == expected, "mode_help_description_matches_current_context");
+                    Assert(tooltip.GetToolTip(button) == expected && tooltip.GetToolTip(target) == expected, "mode_tooltip_matches_current_context");
+                }
                 using (var form = Form(installed))
                 {
+                    CheckHelp(form, "_recommended", "setup.existing.values", "setup.existing.notice");
+                    CheckHelp(form, "_custom", "setup.custom", "setup.existing.notice");
                     Assert(Field<TextBox>(form, "_programRoot").Text == program && Field<TextBox>(form, "_dataRoot").Text == data, "installed_paths_displayed");
                     Assert(Field<NumericUpDown>(form, "_webPort").Value == 32141 && Field<NumericUpDown>(form, "_serverPort").Value == 32142, "installed_ui_ports_displayed");
                     Assert(Field<RadioButton>(form, "_lan").Checked && !Field<RadioButton>(form, "_lan").Enabled, "installed_network_preserved");
@@ -97,11 +113,15 @@ internal static class ExistingSetupTests
                 }
                 using (var form = Form(retained))
                 {
+                    CheckHelp(form, "_recommended", "setup.existing.values", "setup.retained.notice");
+                    CheckHelp(form, "_custom", "setup.custom", "setup.retained.notice");
                     Field<RadioButton>(form, "_custom").Checked = true;
                     Assert(Field<TextBox>(form, "_programRoot").Enabled && Field<TextBox>(form, "_dataRoot").Enabled, "retained_data_allows_new_program_or_data_folder");
                     Assert(!Field<NumericUpDown>(form, "_webPort").Enabled, "retained_configuration_not_silently_overridden");
                     Field<TextBox>(form, "_dataRoot").Text = Path.Combine(root, "fresh");
                     Assert((bool)formType.GetMethod("RefreshExistingConfiguration", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(form, null)!, "new_data_folder_allowed");
+                    CheckHelp(form, "_recommended", "setup.recommended", "setup.help.recommended");
+                    CheckHelp(form, "_custom", "setup.custom", "setup.help.custom");
                     Assert(Field<NumericUpDown>(form, "_webPort").Enabled && Field<NumericUpDown>(form, "_webPort").Value == 3100, "new_configuration_uses_explicit_defaults");
                     Assert(Field<RadioButton>(form, "_local").Checked && Field<RadioButton>(form, "_local").Enabled, "new_configuration_network_editable");
                     Assert(form.Controls.Find("setup.program.browse", true).Single().Enabled &&

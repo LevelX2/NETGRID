@@ -356,6 +356,8 @@ internal sealed class SetupForm : Form
     private readonly ToolTip _helpToolTip = SetupHelpToolTip.Create();
     private readonly RadioButton _recommended = new() { Text = UiText.Get("setup.recommended"), Checked = true, AutoSize = true };
     private readonly RadioButton _custom = new() { Text = UiText.Get("setup.custom"), AutoSize = true };
+    private readonly Button _recommendedHelp;
+    private readonly Button _customHelp;
     private readonly RadioButton _local = new() { Text = UiText.Get("setup.local"), Checked = true, AutoSize = true };
     private readonly RadioButton _lan = new() { Text = UiText.Get("setup.lan"), AutoSize = true };
     private readonly TextBox _programRoot = new() { Dock = DockStyle.Fill };
@@ -426,9 +428,10 @@ internal sealed class SetupForm : Form
             Heading(UiText.Get("setup.header"), 18)
         ));
         root.Controls.Add(Body(UiText.Get("setup.body")));
+        _recommendedHelp = Help("setup.recommended", "setup.help.recommended", _recommended);
+        _customHelp = Help("setup.custom", "setup.help.custom", _custom);
         root.Controls.Add(Group(UiText.Get("setup.path"), Flow(
-            _recommended, Help("setup.recommended", "setup.help.recommended", _recommended),
-            _custom, Help("setup.custom", "setup.help.custom", _custom))));
+            _recommended, _recommendedHelp, _custom, _customHelp)));
         var network = new TableLayoutPanel { AutoSize = true, Dock = DockStyle.Top, ColumnCount = 2 };
         network.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         network.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
@@ -702,6 +705,11 @@ internal sealed class SetupForm : Form
             _configurationInvalid = false;
             _install.Enabled = true;
             _recommended.Text = UiText.Get(existing is null ? "setup.recommended" : "setup.existing.values");
+            var existingHelp = _registration.Installed ? "setup.existing.notice" :
+                existing is not null ? "setup.retained.notice" : null;
+            ConfigureHelp(_recommendedHelp, existing is null ? "setup.recommended" : "setup.existing.values",
+                existingHelp ?? "setup.help.recommended", _recommended);
+            ConfigureHelp(_customHelp, "setup.custom", existingHelp ?? "setup.help.custom", _custom);
             _dataNotice.Text = UiText.Get(_registration.Installed ? "setup.existing.notice" :
                 existing is not null ? "setup.retained.notice" : "setup.data.help");
             UpdateAdvancedState();
@@ -750,22 +758,30 @@ internal sealed class SetupForm : Form
 
     private Button Help(string labelKey, string helpKey, params Control[] targets)
     {
-        var description = UiText.Get(helpKey);
         var button = new Button
         {
             Name = helpKey, Text = "?", Size = new Size(26, 26), TabStop = true,
-            AccessibleName = UiText.Get("setup.help.title", UiText.Get(labelKey)),
-            AccessibleDescription = description,
             Margin = new Padding(3, 0, 8, 0),
         };
+        ConfigureHelp(button, labelKey, helpKey, targets);
+        // The dialog uses the same current text as accessibility and hover help;
+        // it must not retain the fresh-install keys after loading existing data.
+        button.Click += (_, _) => MessageBox.Show(this, button.AccessibleDescription,
+            button.AccessibleName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+        return button;
+    }
+
+    private void ConfigureHelp(Button button, string labelKey, string helpKey, params Control[] targets)
+    {
+        var description = UiText.Get(helpKey);
+        button.AccessibleName = UiText.Get("setup.help.title", UiText.Get(labelKey));
+        button.AccessibleDescription = description;
         _helpToolTip.SetToolTip(button, description);
         foreach (var target in targets)
         {
             _helpToolTip.SetToolTip(target, description);
             target.AccessibleDescription = description;
         }
-        button.Click += (_, _) => ShowHelp(labelKey, helpKey);
-        return button;
     }
 
     private Control OptionLabel(string labelKey, string helpKey, params Control[] targets)

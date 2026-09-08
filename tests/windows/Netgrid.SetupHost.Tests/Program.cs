@@ -6,6 +6,11 @@ ApplicationConfiguration.Initialize();
 // Exercise the real setup assembly without injecting input. Layout checks
 // create only off-screen windows; they never start an installation.
 var assembly = Assembly.Load("NETGRID.Setup");
+if (args is ["--check-existing-setup"])
+{
+    Console.WriteLine($"EXISTING_SETUP_TESTS_OK checks={ExistingSetupTests.Run(assembly)} installationStarted=false visibleWindows=0");
+    return;
+}
 if (args is ["--check-msi-source-name"])
 {
     Console.WriteLine($"MSI_SOURCE_NAME_TESTS_OK checks={MsiSourceNameTests.Run(assembly)} installationStarted=false windowsCreated=0");
