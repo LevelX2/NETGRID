@@ -59,6 +59,26 @@ Integritätsangaben werden nicht installiert.
 
 ### Noch offene Abnahmen vor der Freigabe
 
+Der native Healthabschluss von 8195/8196 kann am HTTP-Stopp hängen: Eine
+vorab geöffnete TCP-Verbindung ohne vollständige Anfrage bleibt nach
+`server.close()` bestehen und kann anschließend weiterverwendet werden.
+Der neue `HttpConnectionDrain` am HTTP-Owner schließt solche Verbindungen,
+lässt bereits angenommene Antworten einschließlich Pipelining vollständig
+auslaufen und weist spätere HTTP-Anfragen mit `503 server_stopping` ab.
+Upgegradete Verbindungen bleiben beim Realtime-Owner. Weder der strikte
+Launcher-Timeout noch dessen Fehlerentscheidung werden abgeschwächt.
+
+Die beiden ursprünglichen Reproduktionstests scheitern vor dem Fix; danach
+bestehen zehn fokussierte HTTP-/Drain-/Readiness-Tests und der Server-Typecheck.
+Fünf Sandbox-Quellfixtureläufe mit tatsächlicher Node-Laufzeit, installiertem
+Webclient und absichtlich offener Vorabverbindung bestehen den unveränderten
+strikten Launcher-Stopp in 22–33 ms, Server-Exit jeweils 0. Konfiguration und
+Credentials bleiben bytegleich; keine Produktprozesse oder Listener bleiben
+zurück. Das ist noch kein Testat eines neu installierten Releasebuilds.
+Neue Installerbuilds und der native Versionswechsel bleiben erforderlich.
+Der Headless-Einstieg verschluckt die konkrete Stoppausnahme bisher hinter
+Exit 2; die dauerhafte, geheimnisfreie Produktdiagnose bleibt ebenfalls offen.
+
 Die Builds 8195/8196 enthalten im Snapshotvertrag noch nicht den Ausschluss
 des separaten MSI-Reparaturcaches. Der aktuelle Quellstand korrigiert dies am
 gemeinsamen `UpdateDataLayout`-Owner: `config/installer` wird weder gesichert

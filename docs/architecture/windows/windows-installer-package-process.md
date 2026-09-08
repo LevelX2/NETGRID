@@ -431,7 +431,8 @@ Produktprozesse oder Listener. Die ursprüngliche Snapshot-ID
 `b0ccd814d901babf7cb2c4302f0627f4da105f765f3416a3d41062b3bcd0e995` gebunden.
 Es gab keine manuelle Prozessbeendigung oder Registryreparatur.
 
-Die Ursache des fehlgeschlagenen Verifier-Abschlusses ist noch nicht bewiesen.
+Zum Zeitpunkt dieses MSI-Laufs war die Ursache des fehlgeschlagenen
+Verifier-Abschlusses noch nicht bewiesen; die anschließende Eingrenzung folgt unten.
 Die erhaltene Fehlstand-Sicherung
 `f378dc7ef9984bbf93624774aaa0f02d` zeigt Webbereitschaft um 03:31:10 UTC,
 Serverbereitschaft kurz danach und den angeforderten Serverstopp um
@@ -460,6 +461,61 @@ Die Builds 8195/8196 enthalten diesen Fix nicht. Ihre native Rücknahme ist
 daher kein vollständiges Testat des korrigierten Snapshotvertrags; neue
 Builds und native Wiederholung bleiben nötig. Alte Snapshots werden nicht
 konvertiert. WIN-I08 bleibt aktiv, Main und Remote bleiben unverändert.
+
+### Eingegrenzter HTTP-Stoppfehler und Ursachen-Fix (2026-09-08)
+
+`native-8195-stop-repeat.json` reproduziert den Fehler bereits beim ersten
+unveränderten Headless-Lauf von 8195 ohne MSI: Exit 2 nach 21.537 ms.
+`native-launcher-stop-diagnostic.json` bindet den Timeout an den Server:
+`launcher_child_stop_failed:server` mit innerer `TaskCanceledException` nach
+zehn Sekunden; der Webprozess beendet sich. Die gewöhnliche nachfolgende
+Dispose-Bereinigung benötigt weitere zehn Sekunden. Sie ist kein erfolgreicher
+strikter Stopp und darf nicht als solcher gewertet werden.
+
+Der gesonderte Node-Vorabimport in der Sandbox protokolliert ausschließlich
+Lebenszyklusereignisse, Ressourcenarten und Byte-/Anfragezähler, keine URLs,
+Header, Inhalte oder Zugangsdaten. `native-launcher-stop-sockets-events.json`
+zeigt am 08.09. um 03:56:51 UTC drei angenommene TCP-Verbindungen. Zwei
+abgeschlossene HTTP-Verbindungen schließen sofort; die dritte hat zunächst
+null gelesene/geschriebene Bytes und keine Anfrage. Sie bleibt offen und
+bearbeitet anschließend im Abstand mehrerer Sekunden weitere Anfragen.
+Der HTTP-Close-Callback wird nicht erreicht. Damit liegt die belegte Ursache
+im HTTP-Verbindungsabschluss, nicht in `stdin.pause()` oder einer
+nachgewiesenen WebSocket-Verbindung. Direkte Server-/Webstarts ohne diese
+Vorabverbindung hatten den Hänger nicht reproduziert.
+
+`HttpConnectionDrain` besitzt jetzt am HTTP-Einstieg die angenommenen
+Verbindungen und noch nicht abgeschlossenen Antworten. Beim Stopp schließt
+er Vorabverbindungen und unvollständige Header ohne angenommene Anfrage;
+bereits angenommene, auch gepipelinete Antworten laufen vollständig aus.
+Spätere HTTP-Anfragen gelangen nicht mehr zur Anwendung und erhalten 503
+mit `server_stopping`. Upgrades verlassen diese Ownership zugunsten von
+Realtime. Kein Prozess-Kill, längerer Timeout oder Fehler-Fallback ersetzt
+den strikten Abschluss.
+
+Checks: Die zwei echten HTTP-Reproduktionen scheitern vor dem Codepatch mit
+`timeout` statt `stopped`. Anschließend bestehen zehn Tests aus
+`http-shutdown.test.ts`, `http-connection-drain.test.ts` und
+`update-readiness.test.ts`, einschließlich vollständiger Antworten trotz
+Pipelining, spätem Request und separater Upgrade-Ownership. Der
+Server-Typecheck und `git diff --check` sind grün.
+
+`native-fixed-server-stop.json` und dessen Binding belegen fünf sequenzielle
+Sandboxläufe um 04:03:33–04:03:38 UTC. Der neue Server wird als separate
+Quellfixture gebündelt; Sharp ist ausdrücklich auf die bereits installierte
+Abhängigkeit gebunden. Installierte Programmdateien werden nicht ersetzt.
+Der reale Node-Prozess, installierte Webclient und unveränderte
+Launcher-Laufzeit führen Start, Health und `StopForVerificationAsync` aus;
+eine zusätzliche TCP-Vorabverbindung bleibt bis zum erfolgreichen Stopp
+absichtlich im Prüfer offen. Gemessene Stoppzeiten: 31, 23, 27, 22 und 33 ms;
+Server-Exit jeweils 0, beide Prozesse bereits nachweislich beendet.
+Fixture-SHA-256:
+`6c9e5b03d3e9f9e3daf313af315044ce905a3a35f30984f0d4868faf4d0fa5a0`.
+Das Binding bestätigt unveränderte `runtime.env`/Maintenance-Credentials,
+null verbleibende Produktprozesse und null Listener. Die installierte
+Version bleibt 8195. Diese Diagnosefixture ersetzt nicht die Abnahme neuer
+MSIs; auch die dauerhafte Headless-Fehlerdiagnose bleibt offen. WIN-I08,
+Main-Integration und Remote bleiben unverändert offen.
 
 | Nachweis | Aktuelle belastbare Evidenz | Noch erforderlich |
 | --- | --- | --- |

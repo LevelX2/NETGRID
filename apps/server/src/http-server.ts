@@ -5,6 +5,7 @@ import {
   type ServerResponse,
 } from "node:http";
 import { networkInterfaces } from "node:os";
+import { HttpConnectionDrain } from "./http-connection-drain";
 import { timingSafeEqual } from "node:crypto";
 import { WebSocket, WebSocketServer } from "ws";
 import { isAiDeckSnapshotRuntimeError } from "@netgrid/ai";
@@ -943,7 +944,8 @@ export function createNetgridHttpServer(
     connectionAudit,
   );
   const server = createServer(
-    (request, response) =>
+    (request, response) => {
+      if (!httpDrain.accept(request, response)) return;
       void routeHttp(
         activeService,
         realtime,
@@ -957,8 +959,10 @@ export function createNetgridHttpServer(
         cardImageMaintenance,
         request,
         response,
-      ),
+      );
+    },
   );
+  const httpDrain = new HttpConnectionDrain(server);
   realtime.attach(server);
   const cleanupTimer =
     deploymentConfig.profile !== "private_internet"
@@ -972,6 +976,7 @@ export function createNetgridHttpServer(
     accountStatisticsReady,
     close: () =>
       new Promise<void>((resolve, reject) => {
+        httpDrain.begin();
         connectionAudit.record({
           event: "server_stop",
           profile: deploymentConfig.profile,
