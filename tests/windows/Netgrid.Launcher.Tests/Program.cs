@@ -27,6 +27,7 @@ if (args is ["--installation-stop-child"])
 }
 
 var assembly = Assembly.Load("NETGRID");
+Console.WriteLine($"LAUNCHER_HEADLESS_VERIFICATION_TESTS_OK checks={await HeadlessVerificationTests.Run(assembly)} runtimeStarted=false");
 Console.WriteLine($"LAUNCHER_LAUNCH_FENCE_TESTS_OK checks={await LaunchFenceTests.Run(assembly)} runtimeStarted=false");
 Console.WriteLine($"LAUNCHER_VERIFICATION_OPTIONS_TESTS_OK checks={VerificationOptionsTests.Run(assembly)}");
 Console.WriteLine($"LAUNCHER_UPDATER_STAGING_TESTS_OK checks={await StagedUpdaterTests.Run(assembly)} installationStarted=false");

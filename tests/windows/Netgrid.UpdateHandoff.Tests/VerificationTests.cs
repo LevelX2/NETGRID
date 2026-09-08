@@ -32,6 +32,12 @@ internal static class VerificationTests
             Console.WriteLine("REVOKED");
             Environment.ExitCode = 2;
         }
+        else if (mode is "diagnostic" or "success-diagnostic" or "malformed" or "oversized")
+        {
+            Console.Error.WriteLine(mode == "malformed" ? "private-text-not-forwarded" : mode == "oversized" ? new string('x', 65536) :
+                UpdateVerification.FormatFailure("stop", new InvalidOperationException("launcher_child_stop_failed:server", new TaskCanceledException("private-text-not-forwarded")), false));
+            Environment.ExitCode = mode == "success-diagnostic" ? 0 : 2;
+        }
         else if (mode == "unhealthy") Environment.ExitCode = 7;
         else if (mode != "healthy") throw new InvalidOperationException("fixture_mode_invalid");
         return true;
@@ -39,6 +45,7 @@ internal static class VerificationTests
 
     internal static async Task RunAsync()
     {
+        Console.WriteLine($"UPDATE_VERIFICATION_DIAGNOSTIC_TESTS_OK checks={await VerificationDiagnosticTests.RunAsync()}");
         var fixturePath = Prefix + Guid.NewGuid().ToString("N");
         try
         {
@@ -83,7 +90,7 @@ internal static class VerificationTests
                 Reject(() => new InstallationGate.GateState(lease, InstallationGate.GateState.Verifying, 0, fields.Item1, fields.Item2, fields.Item3, fields.Item4), "invalid_verification_identity");
 
             await OwnerExitAsync(fixture, root + "-owner-exit", lease);
-            foreach (var mode in new[] { "healthy", "unhealthy", "revoked" })
+            foreach (var mode in new[] { "healthy", "unhealthy", "revoked", "diagnostic", "success-diagnostic", "malformed", "oversized" })
             {
                 await VerifierAsync(fixture, fixturePath, root + "-" + mode, lease, mode, owner);
                 await VerifierAsync(fixture, fixturePath, root + "-msi-" + mode, lease, mode, owner, directMsi: true);
@@ -136,7 +143,7 @@ internal static class VerificationTests
         {
             async Task<bool> Run() => await UpdateVerifier.RunAsync(fixture, root, Path.Combine(root, "runtime.env"), lease, requested =>
             {
-                Assert(requested.FileName == Path.Combine(root, "NETGRID.exe") && !requested.UseShellExecute && requested.CreateNoWindow,
+                Assert(requested.FileName == Path.Combine(root, "NETGRID.exe") && !requested.UseShellExecute && requested.CreateNoWindow && requested.RedirectStandardError,
                     "exact_headless_image_and_start_mode");
                 Assert(requested.ArgumentList.Count == 9 && requested.ArgumentList[0] == "--headless-verify" &&
                     requested.ArgumentList[5] == "--update-lease" && requested.ArgumentList[6] == lease &&
@@ -153,9 +160,16 @@ internal static class VerificationTests
                 try { await Run(); throw new Exception("verification_expected_timeout_missing"); }
                 catch (OperationCanceledException) { checks++; }
             }
+            else if (mode is "diagnostic" or "success-diagnostic" or "malformed" or "oversized")
+            {
+                var expected = mode == "diagnostic" ? "installation_gate_verification_stop_server_timeout_cleanup_ok" :
+                    mode == "success-diagnostic" ? "installation_gate_verification_diagnostic_success_conflict" : "installation_gate_verification_diagnostic_invalid";
+                try { await Run(); throw new Exception("verification_expected_diagnostic_missing"); }
+                catch (InvalidOperationException error) { Assert(error.Message == expected, "bounded_diagnostic_from_actual_child_" + mode); }
+            }
             else Assert(await Run() == (mode == "healthy"), "health_exit_classification_" + mode);
             Assert(observer is not null && observer.HasExited, "actual_child_exit_proven_" + mode);
-            Assert(observer!.ExitCode == (mode == "healthy" ? 0 : mode == "unhealthy" ? 7 : 2), "exact_child_exit_" + mode);
+            Assert(observer!.ExitCode == (mode is "healthy" or "success-diagnostic" ? 0 : mode == "unhealthy" ? 7 : 2), "exact_child_exit_" + mode);
             var state = InstallationGate.Read(fixture, InstallationGate.KeyFor(root))!;
             Assert(state.Phase == InstallationGate.GateState.Stopping && state.Lease == lease && state.OwnerId == owner.Id,
                 "outer_lease_retained_after_" + mode);

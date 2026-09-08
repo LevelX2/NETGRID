@@ -514,8 +514,38 @@ Fixture-SHA-256:
 Das Binding bestätigt unveränderte `runtime.env`/Maintenance-Credentials,
 null verbleibende Produktprozesse und null Listener. Die installierte
 Version bleibt 8195. Diese Diagnosefixture ersetzt nicht die Abnahme neuer
-MSIs; auch die dauerhafte Headless-Fehlerdiagnose bleibt offen. WIN-I08,
+MSIs; die anschließende Headless-Fehlerdiagnose ist unten beschrieben. WIN-I08,
 Main-Integration und Remote bleiben unverändert offen.
+
+### Dauerhafte Headless-Fehlerdiagnose (2026-09-08)
+
+Der tatsächliche Headless-Einstieg verwendet jetzt `HeadlessVerification`.
+Er erfasst die fehlgeschlagene Phase und führt die Runtime-Bereinigung
+separat aus. Primärfehler bleiben auch bei einem zweiten Dispose-Fehler
+erhalten; Bereinigungsfehler verhindern weiterhin Erfolg. Nur fest
+klassifizierte Felder werden nach Abschluss als einzelne stderr-Zeile
+ausgegeben. Kennwörter, Umgebungswerte, Pfade und rohe Exception-Nachrichten
+bleiben ausgeschlossen.
+
+`UpdateVerification` besitzt den gemeinsamen begrenzten Wire-Vertrag.
+`UpdateVerifier` fordert stderr-Umleitung ausdrücklich an, liest parallel
+zum laufenden Kind und hält höchstens 256 Zeichen im Diagnosepuffer. Er
+prüft die vollständige Ausgabe gegen die feste Grammatik und gibt nur einen
+validierten `installation_gate_verification_*`-Code an den bestehenden
+MSI-/Updater-Fehlerpfad. Fehlende Ausgabe bei einem fehlerhaften Prozessende
+bleibt ein generischer negativer Healthausgang; beliebige, mehrzeilige,
+überlange oder mit Exit 0 widersprüchliche Ausgabe wird abgewiesen.
+
+Die fokussierten Launcher-Gates bestehen, einschließlich 15 neuer
+Headless-Prüfungen mit echter Program-Dispatch-Prüfung, Phasenerhalt,
+primärem Server-Timeout und zusätzlichem Bereinigungsfehler. Die
+Übergabesuite besteht einschließlich 139 nativer Verifierprüfungen gegen
+isolierte HKCU-/Prozess-/Pipe-Fixtures und 71 MSI-Datentransaktionschecks.
+Die Diagnosefixtures prüfen feste Formatfelder, Geheimnisschutz und die
+unveränderte Weitergabe durch `UpdateSession.DiagnosticCode`; echte Kinder
+decken gültige, ungültige, 64-KiB-lange und mit Erfolg widersprüchliche
+stderr-Ausgabe sowohl für normale Update- als auch direkte MSI-Leases ab.
+Ein neues Installerbuild und dessen native Installation bleiben erforderlich.
 
 | Nachweis | Aktuelle belastbare Evidenz | Noch erforderlich |
 | --- | --- | --- |

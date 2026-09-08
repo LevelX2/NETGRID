@@ -76,8 +76,20 @@ strikten Launcher-Stopp in 22–33 ms, Server-Exit jeweils 0. Konfiguration und
 Credentials bleiben bytegleich; keine Produktprozesse oder Listener bleiben
 zurück. Das ist noch kein Testat eines neu installierten Releasebuilds.
 Neue Installerbuilds und der native Versionswechsel bleiben erforderlich.
-Der Headless-Einstieg verschluckt die konkrete Stoppausnahme bisher hinter
-Exit 2; die dauerhafte, geheimnisfreie Produktdiagnose bleibt ebenfalls offen.
+Der Headless-Einstieg liefert jetzt nach seiner Bereinigung zusätzlich zu
+Exit 2 genau einen begrenzten Fehlerdatensatz auf stderr. Er enthält nur die
+Phase (`permit`, `load`, `start`, `stop`, `recheck`, `cleanup`), einen fest
+klassifizierten Fehlercode und den Bereinigungsstatus. Rohe Ausnahmetexte,
+Pfade, Konfiguration und Credentials werden nicht ausgegeben. Ein
+Bereinigungsfehler überschreibt die ursprüngliche Fehlerursache nicht.
+Der gebundene Updater liest höchstens 256 Zeichen in den Diagnosepuffer,
+leert die Pipe weiter und akzeptiert ausschließlich das festgelegte Format.
+Ungültige/überlange Ausgabe oder Fehlerausgabe bei Exit 0 schlägt sichtbar
+fehl. Der validierte Code wird beispielsweise als
+`installation_gate_verification_stop_server_timeout_cleanup_ok` bis zum
+MSI-Helfer weitergereicht. Echte Kindprozess-/Pipe-/HKCU-Fixtures prüfen die
+Weitergabe und behalten auch im Fehlerfall den Nachweis von Prozessende und
+Lease-Rücknahme bei. Die native Abnahme des neuen Releasebuilds steht aus.
 
 Die Builds 8195/8196 enthalten im Snapshotvertrag noch nicht den Ausschluss
 des separaten MSI-Reparaturcaches. Der aktuelle Quellstand korrigiert dies am

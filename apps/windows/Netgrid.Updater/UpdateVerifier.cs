@@ -23,6 +23,7 @@ internal static class UpdateVerifier
         using var pipe = UpdateHandoff.CreateServer(session);
         using var deadline = new CancellationTokenSource(timeout);
         using var child = startProcess(UpdateVerification.CreateStart(programRoot, environmentFile, lease, session));
+        var diagnostic = UpdateVerification.ReadFailureAsync(child.StandardError, deadline.Token);
         var granted = false;
         var healthy = false;
         var failures = new List<Exception>();
@@ -60,6 +61,18 @@ internal static class UpdateVerifier
                     throw new InvalidOperationException("update_verifier_exit_unproven", error);
                 }
             }
+        }
+        catch (Exception error) { failures.Add(error); }
+        try
+        {
+            var code = await diagnostic;
+            if (code is not null)
+                failures.Add(new InvalidOperationException(healthy ? "installation_gate_verification_diagnostic_success_conflict" : code));
+        }
+        catch (Exception error) when (error is OperationCanceledException && deadline.IsCancellationRequested)
+        {
+            // The operation/exit checks above retain the authoritative timeout.
+            if (failures.Count == 0) failures.Add(error);
         }
         catch (Exception error) { failures.Add(error); }
         if (failures.Count == 1) ExceptionDispatchInfo.Capture(failures[0]).Throw();
