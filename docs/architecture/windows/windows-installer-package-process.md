@@ -92,6 +92,39 @@ eigene Account-, Cleanup- oder Versionsautorität.
 
 ## Aktueller Umsetzungsstand
 
+### Aktiver Prüfpunkt: beendeter MSI-Helfer und Fehlerrollback
+
+Die installierte Sandbox bleibt unverändert auf dem abgenommenen 8217-Stand.
+Der folgende Ursachenfix ist zunächst ausschließlich komponentengeprüft:
+Ein echter beendeter Kindprozess hinterließ seine direkte MSI-Operationsrolle;
+der nächste Helper wurde daraufhin mit
+`installation_gate_msi_operation_already_owned` abgewiesen. Der neue
+Regressionstest reproduzierte dies vor der Korrektur.
+
+`MsiDataInvocation` erhält jetzt Handle und Startzeit seines eigenen Kindes.
+Nach tatsächlichem Ende und regulärem Stopp verbleibender Produktprozesse
+gibt ausschließlich der gemeinsame Lease-Writer die exakt passende
+Helper-Rolle zurück. Die aktive MSI-Lease, ProductCode und Snapshotbindung
+bleiben erhalten. Fremde/lebende Helper, lebende Verifier, andere
+Updater-Leases und widersprüchliche Prozessidentitäten bleiben gesperrt.
+MSI-Fehlerexit und eine fehlende geordnete Rückgabe trotz Exit 0 bleiben
+Fehler. Kein Timeout-Kill und kein Registry-Clearing als Ersatz für Rollback.
+
+74 enge Prüfungen mit echten eigenen Kindprozessen laufen grün unter .NET 10
+und unter dem zur MSI-Aktion passenden x64-net48-Ziel; darunter tatsächlicher
+abrupter Child-Abbruch, erhaltener Snapshotnachweis und Weiterführung des
+Rollbacks unter derselben MSI-Lease. Die gesamte Lifecycle-Suite hat 481
+Prüfungen. WiX-7-Custom-Action-Build mit der bereits akzeptierten OSMF-EULA:
+0 Fehler, 0 Warnungen. Der Framework-Prüfer ist im normalen Buildgate gebunden.
+Sein eigener UTF-8-Steuerkanal ist ausdrücklich dekodiert; die zunächst rote
+Fixture hatte das Framework-UTF-8-Präfix mit der geerbten OEM-Codepage gelesen.
+Produktprotokolle wurden dafür nicht verändert.
+
+Noch kein neues Bundle und kein nativer MSI-Crash-/Rollback-Nachweis für diese
+Korrektur. Ein Verlust des MSI-Aufrufers selbst ist davon nicht abgedeckt;
+die explizite verwaiste MSI-Abnahme bleibt offen. WIN-I08, Integration und
+Cleanup sind weiter offen; keine Remoteübertragung.
+
 ### Aktiver Prüfpunkt: Setup-Reparaturquelle und Archivschutz
 
 WIN-I08 bleibt aktiv. Der Sandboxlauf

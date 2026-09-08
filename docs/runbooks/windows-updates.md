@@ -188,6 +188,35 @@ kein Produktgate wurde dafür abgeschwächt. Die interaktive Windows-Freigabe
 des eigenständigen CLI-Aufrufs und der GUI-Worker sind durch den erhöhten
 CLI-Nachweis weiterhin nicht nativ abgenommen.
 
+### Unerwartetes Ende eines direkten MSI-Helfers
+
+`MsiDataInvocation` hält den selbst gestarteten Helper vom Prozessstart bis
+zum tatsächlichen Ende über seinen Handle und die erfasste Startzeit gebunden.
+Ein Timeout beendet ihn nicht und gibt nichts frei. Nach Ende wartet der
+MSI-Aufrufer höchstens 45 Sekunden auf das reguläre Ende verbleibender
+Produktprozesse; er beendet keine fremden Prozesse. Der gemeinsame Writer
+`ReturnExitedMsiOperation` gibt unter Start-/Schreibsperre ausschließlich die
+exakt passende Helper-Zuständigkeit zurück. Ein lebender Verifier oder
+abweichende Lease, ProductCode, PID oder Startzeit blockiert die Rückgabe.
+Die MSI-Transaktion bleibt aktiv, der Snapshotnachweis bleibt unverändert.
+Auch ein Helper-Exit 0 ohne eigene geordnete Rückgabe löst Fehlerrollback aus;
+eine erfolgreiche Datenoperation wird daraus nicht konstruiert.
+
+Das behebt die zuvor reproduzierte Rücknahmeblockade: Der beendete Helper
+ließ seine Owner-ID zurück, sodass der nächste Rollback-Helper derselben
+MSI-Transaktion keine Operationsrolle mehr übernehmen konnte. 74 Prüfungen
+mit realen isolierten Kindprozessen, darunter ein tatsächlicher abrupter
+Prozessabbruch, bestehen sowohl unter .NET 10 als auch x64 .NET Framework
+(Ziel net48). Die vollständige Lifecycle-Suite besteht 481 Prüfungen; der
+WiX-7-Custom-Action-Quellstand kompiliert ohne Warnungen. Alle Fixtures nutzen
+nur eigene HKCU-Schlüssel; kein MSI und keine Produktinstallation wurde durch
+diese Komponententests gestartet. Der Framework-Prüfer ist nun ein festes
+Gate im regulären Installerbuild.
+
+Der native MSI-Lauf mit abrupt beendetem Helper steht noch aus. Ebenso offen
+bleibt der andere Fall, dass der MSI-Aufrufer selbst verloren geht: Ohne
+seinen erhaltenen Prozesshandle wird keine pauschale verwaiste Bindung gelöscht.
+
 Offen sind weiterhin der vollständige GUI-/Tray-Updater mit gebundener Pipe, ursprünglichem
 Benutzerneustart und anderer UAC-Administratorfreigabe sowie
 Absturzreparatur. Keine Releasefreigabe durch Zusammenzählen

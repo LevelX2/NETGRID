@@ -76,6 +76,8 @@ try {
   if ($LASTEXITCODE -ne 0) { throw "Die Windows-Launcher-Downloadtests sind fehlgeschlagen." }
   & $dotnet run --project tests/windows/Netgrid.InstallerLifecycle.Tests/Netgrid.InstallerLifecycle.Tests.csproj -c Release
   if ($LASTEXITCODE -ne 0) { throw "Die Windows-Installer-Lifecycle-Tests sind fehlgeschlagen." }
+  & $dotnet run --project tests/windows/Netgrid.MsiHelperExit.Framework.Tests/Netgrid.MsiHelperExit.Framework.Tests.csproj -c Release -p:RestoreLockedMode=true
+  if ($LASTEXITCODE -ne 0) { throw "Die MSI-Helfer-Rückgabe unter .NET Framework ist fehlgeschlagen." }
 
   $layout = Get-Content -LiteralPath (Join-Path $ReleaseRoot "product-layout.json") -Raw | ConvertFrom-Json
   $productVersion = [string]$layout.product.installerVersion

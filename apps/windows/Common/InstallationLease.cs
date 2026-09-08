@@ -179,7 +179,8 @@ namespace Netgrid.Windows
 
         // A synchronous direct-MSI helper borrows operation ownership without
         // releasing or replacing the MSI transaction. Only its exact process
-        // can return ownership; an interrupted helper leaves the MSI blocked.
+        // can normally return ownership. Its synchronous MSI caller may return
+        // an exited child's permit using the retained real process handle.
         public static void BeginMsiOperation(RegistryKey root, string programRoot, string msiLease, string productCode)
         {
             InstallationLaunchFence.Execute(programRoot, () => Mutate(programRoot, () =>
@@ -207,6 +208,51 @@ namespace Netgrid.Windows
                     current.CompletedUtcTicks, msiLease: current.MsiLease, msiProductCode: current.MsiProductCode));
                 return true;
             });
+        }
+
+        public static bool ReturnExitedMsiOperation(RegistryKey root, string programRoot, string msiLease, string productCode,
+            Process helper, long helperStart, Func<bool> productProcessesRemain)
+        {
+            // The invoking MSI retains this handle from Process.Start through
+            // WaitForExit. This is not a PID-only orphan-recovery entrypoint.
+            var handle = helper.Handle;
+            if (!helper.HasExited) throw new InvalidOperationException("installation_gate_msi_helper_alive");
+            if (helperStart <= 0 || helper.StartTime.ToUniversalTime().Ticks != helperStart)
+                throw new InvalidOperationException("installation_gate_msi_helper_identity_invalid");
+            return InstallationLaunchFence.Execute(programRoot, () => Mutate(programRoot, () =>
+            {
+                InstallationGate.ValidateLease(msiLease);
+                InstallationGate.ValidateProductCode(productCode);
+                var current = InstallationGate.Read(root, InstallationGate.KeyFor(programRoot));
+                if (current == null || current.Lease != msiLease || current.MsiLease != msiLease || current.MsiProductCode != productCode ||
+                    (current.Phase != InstallationGate.GateState.Stopping && current.Phase != InstallationGate.GateState.Verifying))
+                    throw new InvalidOperationException("installation_gate_msi_helper_scope_invalid");
+                if (productProcessesRemain()) throw new InvalidOperationException("installation_gate_msi_data_products_remain");
+                if (current.OwnerId == 0) return false; // Child already returned its own permit normally.
+                if (current.OwnerId != helper.Id || current.OwnerStart != helperStart)
+                    throw new InvalidOperationException("installation_gate_msi_helper_identity_invalid");
+                if (current.Phase == InstallationGate.GateState.Verifying)
+                {
+                    Process? verifier = null;
+                    try
+                    {
+                        try { verifier = Process.GetProcessById(current.AllowedParentId); }
+                        catch (ArgumentException) { } // Exact verifier PID no longer exists.
+                        if (verifier != null)
+                        {
+                            var verifierHandle = verifier.Handle;
+                            if (!verifier.HasExited && verifier.StartTime.ToUniversalTime().Ticks == current.AllowedParentStart)
+                                throw new InvalidOperationException("installation_gate_msi_verifier_alive");
+                        }
+                    }
+                    finally { verifier?.Dispose(); }
+                }
+                // Return only operation/verifier permissions. Keep the SAME
+                // active MSI lease and all snapshot evidence for MSI rollback.
+                Write(root, programRoot, new InstallationGate.GateState(current.Lease, InstallationGate.GateState.Stopping,
+                    current.CompletedUtcTicks, msiLease: current.MsiLease, msiProductCode: current.MsiProductCode));
+                return true;
+            }));
         }
 
         public static bool RollbackMsi(RegistryKey root, string programRoot, string msiLease, string productCode)

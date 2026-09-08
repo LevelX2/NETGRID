@@ -4,7 +4,13 @@ using System.Xml.Linq;
 
 if (LaunchFenceTests.TryChild(args)) return;
 if (RecoveryTakeoverTests.TryChild(args)) return;
+if (MsiHelperExitTests.TryChild(args)) return;
 if (await DirectMsiPreparationTests.TryChildAsync(args)) return;
+if (args is ["--check-msi-helper-exit"])
+{
+    Console.WriteLine($"MSI_HELPER_EXIT_TESTS_OK checks={MsiHelperExitTests.Run()} registry=isolated_HKCU MSI=not-started");
+    return;
+}
 
 var checks = 0;
 void Assert(bool condition, string name)
@@ -121,4 +127,5 @@ Assert(frameworkCondition == "NETGRID_DOTNET_FRAMEWORK_RELEASE >= \"#528040\"", 
 checks += RecoveryBindingTests.Run();
 checks += RecoveryTakeoverTests.Run();
 checks += MsiOperationTests.Run();
+checks += MsiHelperExitTests.Run();
 Console.WriteLine($"INSTALLER_LIFECYCLE_TESTS_OK checks={checks} registry=isolated_HKCU fixtureCleanup=verified installed=false");

@@ -277,7 +277,7 @@ auch innerhalb dieser direkten MSI-Operation. `OpenUpdateOwner` bleibt enger
 und erlaubt weiterhin keine aktive MSI-Teiltransaktion.
 
 Die Verifierfreigabe erhält MSI-Lease und ProductCode. Nur der genaue
-Operationsowner darf sie vergeben, widerrufen und seine Rolle zurückgeben.
+Operationsowner darf sie vergeben, widerrufen und seine Rolle regulär zurückgeben.
 Ein Commit oder Rollback kann die MSI-Lease während einer aktiven Operation
 nicht freigeben. Nach Rückgabe bleibt die MSI-Sperre aktiv; weder ein
 fehlgeschlagener Healthcheck noch ein Helper-Ende beweist einen erfolgreichen
@@ -310,9 +310,18 @@ gesperrt; jeder neue Helper prüft und sperrt die Snapshot- und geschützten
 Live-Dateien erneut. Dateisperren werden nicht über ein beendetes Prozessobjekt
 hinweg behauptet. Ein noch lebender Verifier, eine fehlgeschlagene Rücksicherung
 oder eine durch Prozessverlust verwaiste Helper-Operation bewirkt keine
-automatische Freigabe. Insbesondere ein abgebrochener Helper mit aktiver
-MSI-Bindung benötigt weiterhin Diagnose; die normale Updater-Absturzreparatur
-darf diese Bindung nicht löschen. Same-Product-Repair, Erstinstallation,
+automatische Freigabe der MSI-Transaktion. Der noch laufende synchrone
+MSI-Aufrufer hält den echten Kindprozesshandle und dessen Startzeit. Nach
+nachgewiesenem Kindprozessende und Abwesenheit aller Produktprozesse darf
+er ausschließlich die passende Helper-Rolle zurückgeben. Ein noch lebender
+gebundener Verifier verhindert auch dies. Die Rückgabe läuft unter Startfence
+und Registry-Schreibsperre, erhält dieselbe aktive MSI-Lease, ProductCode und
+den vollständigen Sicherungsnachweis und erlaubt nur den anschließenden
+regulären MSI-Rollback. Ein Fehlerexit bleibt ein Fehler; selbst Exit 0 ohne
+reguläre Helper-Rückgabe gilt nicht als erfolgreiche Datenoperation.
+Bei Timeout, weiterlaufenden Prozessen, fremdem Owner oder Verlust des
+MSI-Aufrufers bleibt die Bindung bestehen. Die normale Updater-Absturzreparatur
+darf sie weiterhin nicht löschen. Same-Product-Repair, Erstinstallation,
 Uninstall, verschachtelte Altproduktentfernung und bereits außen abgesicherte
 Updater-MSI-Teiltransaktionen erzeugen keine zweite Datensicherung.
 
