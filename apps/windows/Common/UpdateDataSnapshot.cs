@@ -8,10 +8,10 @@ namespace Netgrid.Windows;
 // Offline byte-for-byte data-root snapshot. The transaction owner must keep
 // its installation lease and prove product-process absence before calling.
 // Config/credentials are verified and held read-only, never restored over.
-internal sealed class UpdateDataSnapshot : IDisposable
+internal sealed partial class UpdateDataSnapshot : IDisposable
 {
     private sealed record Entry(string Path, bool Directory, long Size, string Sha256, string Dacl);
-    private sealed record Manifest(int Version, string DataRoot, string RootDacl, string[] Excluded, Entry[] Entries);
+    private sealed record Manifest(int Version, string DataRoot, string RootDacl, string[] Excluded, string[] ProtectedFiles, Entry[] Entries);
     private readonly UpdateDataLayout _layout;
     private readonly Entry[] _entries;
     private readonly string _rootDacl;
@@ -83,8 +83,10 @@ internal sealed class UpdateDataSnapshot : IDisposable
             // mixed inventory. All copied source files are still locked.
             var finalInventory = Inventory(layout, held);
             if (!inventory.SequenceEqual(finalInventory)) throw new InvalidOperationException("update_data_source_changed");
-            var manifest = new Manifest(1, layout.Root, rootDacl, layout.Excluded.ToArray(), entries.ToArray());
+            var manifest = new Manifest(2, layout.Root, rootDacl, layout.Excluded.ToArray(), layout.ProtectedFiles.ToArray(), entries.ToArray());
+            ValidateManifest(manifest, layout);
             var bytes = JsonSerializer.SerializeToUtf8Bytes(manifest);
+            if (bytes.Length > MaxManifestBytes) throw new InvalidOperationException("update_data_manifest_excessive");
             var manifestPath = Path.Combine(directory, "manifest.json");
             using (var file = new FileStream(manifestPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
             { file.Write(bytes); file.Flush(true); }
@@ -173,23 +175,33 @@ internal sealed class UpdateDataSnapshot : IDisposable
                     throw new InvalidOperationException("update_data_restore_target_changed");
                 liveLocks.Add(entry.Path, current);
             }
-            // Original directories are pinned throughout the update. A type
-            // conflict or removed original directory is an error, not a guess.
+            // After process loss original directories can be missing. Recreate
+            // only manifest-bound directories, parent first, with their DACL
+            // present from creation. A file at that path is not overwritten.
             foreach (var entry in _entries.Where(entry => entry.Directory))
-                if (!Directory.Exists(_layout.Target(entry.Path))) throw new InvalidOperationException("update_data_directory_missing");
+            {
+                var target = _layout.Target(entry.Path);
+                if (File.Exists(target)) throw new InvalidOperationException("update_data_target_type_changed");
+                if (!Directory.Exists(target))
+                {
+                    var security = new DirectorySecurity();
+                    security.SetSecurityDescriptorSddlForm(entry.Dacl, AccessControlSections.Access);
+                    new DirectoryInfo(target).Create(security);
+                    _held.Add(UpdateDataFiles.PinDirectory(target));
+                }
+            }
             foreach (var entry in _entries.Where(entry => !entry.Directory))
             {
                 var target = _layout.Target(entry.Path);
                 if (_layout.IsProtected(target)) continue;
                 if (Directory.Exists(target)) throw new InvalidOperationException("update_data_target_type_changed");
                 var stage = target + ".restore-" + Guid.NewGuid().ToString("N");
-                using (var output = new FileStream(stage, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+                // The original DACL is installed atomically, before copying
+                // bytes, rather than briefly exposing them via the parent ACL.
+                using (var output = UpdateDataFiles.CreateRestoreStage(stage, entry.Dacl))
                 { byPath[entry.Path].CopyTo(output); output.Flush(true); }
                 using (var check = UpdateDataFiles.ReadLocked(stage))
                     if (check.Length != entry.Size || Hash(check) != entry.Sha256) throw new InvalidOperationException("update_data_restore_copy_mismatch");
-                var security = new FileSecurity();
-                security.SetSecurityDescriptorSddlForm(entry.Dacl, AccessControlSections.Access);
-                new FileInfo(stage).SetAccessControl(security);
                 // Same-directory replacement never writes through an existing
                 // hardlink. No recursive deletion or broad data-root move.
                 if (liveLocks.TryGetValue(entry.Path, out var prior)) prior.Dispose();
@@ -218,6 +230,14 @@ internal sealed class UpdateDataSnapshot : IDisposable
                 var security = new DirectorySecurity();
                 security.SetSecurityDescriptorSddlForm(entry.Dacl, AccessControlSections.Access);
                 new DirectoryInfo(_layout.Target(entry.Path)).SetAccessControl(security);
+            }
+            // Restore original inheritance only after the original parent
+            // DACLs are back; credentials/config are still never written.
+            foreach (var entry in _entries.Where(entry => !entry.Directory && !_layout.IsProtected(_layout.Target(entry.Path))))
+            {
+                var security = new FileSecurity();
+                security.SetSecurityDescriptorSddlForm(entry.Dacl, AccessControlSections.Access);
+                new FileInfo(_layout.Target(entry.Path)).SetAccessControl(security);
             }
             AssertProtectedFilesUnchanged();
             foreach (var entry in _entries.Where(entry => !entry.Directory))

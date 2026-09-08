@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using System.Diagnostics;
 using Microsoft.Win32;
 
 namespace Netgrid.Windows
@@ -8,6 +9,50 @@ namespace Netgrid.Windows
     // Runtime components link the read-only InstallationGate, never this file.
     internal static class InstallationLease
     {
+        public static void BindRecovery(RegistryKey root, string programRoot, UpdateRecoveryBinding binding)
+        {
+            Mutate(programRoot, () =>
+            {
+                var current = InstallationGate.Read(root, InstallationGate.KeyFor(programRoot));
+                using (var owner = Process.GetCurrentProcess())
+                    if (current == null || current.Lease != binding.Lease || current.Phase != InstallationGate.GateState.Stopping ||
+                        current.MsiLease != "" || current.OwnerId != owner.Id || current.OwnerStart != owner.StartTime.ToUniversalTime().Ticks)
+                        throw new InvalidOperationException("installation_gate_recovery_owner_missing");
+                using (var key = root.OpenSubKey(InstallationGate.KeyFor(programRoot), writable: true))
+                {
+                    if (key == null) throw new InvalidOperationException("installation_gate_recovery_owner_missing");
+                    var prior = key.GetValue("Recovery");
+                    if (prior != null)
+                    {
+                        if (!(prior is string encoded) || key.GetValueKind("Recovery") != RegistryValueKind.String)
+                            throw new InvalidOperationException("installation_gate_recovery_binding_invalid");
+                        var previous = UpdateRecoveryBinding.Decode(encoded);
+                        if (previous.Lease == binding.Lease && encoded != binding.Encode())
+                            throw new InvalidOperationException("installation_gate_recovery_already_bound");
+                    }
+                    key.SetValue("Recovery", binding.Encode(), RegistryValueKind.String);
+                    key.Flush();
+                }
+                return true;
+            });
+        }
+
+        public static UpdateRecoveryBinding ReadRecovery(RegistryKey root, string programRoot, string lease)
+        {
+            InstallationGate.ValidateLease(lease);
+            var current = InstallationGate.Read(root, InstallationGate.KeyFor(programRoot));
+            if (current == null || !current.Active || current.Lease != lease)
+                throw new InvalidOperationException("installation_gate_recovery_owner_missing");
+            using (var key = root.OpenSubKey(InstallationGate.KeyFor(programRoot), writable: false))
+            {
+                if (!(key?.GetValue("Recovery") is string encoded) || key.GetValueKind("Recovery") != RegistryValueKind.String)
+                    throw new InvalidOperationException("installation_gate_recovery_binding_missing");
+                var binding = UpdateRecoveryBinding.Decode(encoded);
+                if (binding.Lease != lease) throw new InvalidOperationException("installation_gate_recovery_binding_mismatch");
+                return binding;
+            }
+        }
+
         public static void BeginMsiPreparation(RegistryKey root, string programRoot, string lease, string productCode,
             int parentId, long parentStart, int ownerId, long ownerStart)
         {

@@ -54,6 +54,16 @@ internal sealed class UpdateDataLayout
     public string Target(string relative)
     {
         if (string.IsNullOrEmpty(relative) || Path.IsPathRooted(relative)) throw new InvalidOperationException("update_data_entry_invalid");
+        foreach (var part in relative.Split(Path.DirectorySeparatorChar))
+        {
+            if (part.Length == 0 || part is "." or ".." || part.EndsWith(' ') || part.EndsWith('.') ||
+                part.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+                throw new InvalidOperationException("update_data_entry_invalid");
+            var stem = part.Split('.')[0].ToUpperInvariant();
+            if (stem is "CON" or "PRN" or "AUX" or "NUL" ||
+                (stem.Length == 4 && (stem.StartsWith("COM") || stem.StartsWith("LPT")) && stem[3] is >= '1' and <= '9'))
+                throw new InvalidOperationException("update_data_entry_invalid");
+        }
         var target = Path.GetFullPath(Path.Combine(Root, relative));
         RequireChild(target);
         if (IsExcluded(target) || !string.Equals(Path.GetRelativePath(Root, target), relative, StringComparison.Ordinal))

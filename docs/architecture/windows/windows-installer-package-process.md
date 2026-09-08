@@ -1243,11 +1243,44 @@ ebenfalls grün; das neue Snapshot-Gate ist an die Installer-Buildstrecke gebund
 
 Die Archivtests verwenden nur eigene temporäre Fixture-DACLs und sind keine
 erhöhte SYSTEM-/Administratoren-Abnahme. Eine Rücksicherung nach Verlust des
-Updaterprozesses benötigt noch einen gebundenen Wiederaufnahme-/Reparaturweg;
-der aktuelle Restore arbeitet mit der gehaltenen Snapshotinstanz. Direkte
+Updaterprozesses benötigt noch einen autorisierten Reparatureinstieg mit
+geprüfter Owner-Übernahme. Direkte
 MSI-Versionswechsel, neue Payloads und die native Gesamtmatrix sind weiterhin
 nicht freigegeben. Es wurde kein Installer gestartet, keine Sandbox verändert
 und kein bestehendes Maintenance-Kennwort angefasst. WIN-I08 bleibt aktiv.
+
+Die gespeicherte Sicherung kann inzwischen anhand einer separat vertrauenswürdig
+gebundenen ID und Manifestprüfsumme erneut geöffnet werden. Manifestversion 2
+bindet zusätzlich die geschützten Pfade; alte, doppelte, mehrdeutige oder
+unvollständige Felder, Pfadtraversal, Windows-Dateialiasse, falsche Hashes und
+abweichende Rechte werden abgewiesen. Fehlende normale Verzeichnisse werden
+beim Restore mit ihren ursprünglichen DACLs angelegt. Stagingdateien erhalten
+ihre effektiven Rechte atomar vor dem ersten kopierten Byte; eine zwischenzeitlich
+erweiterte Eltern-DACL darf keine zusätzlichen Leser hinzufügen.
+
+Vor jedem MSI-Start speichert der Updater seine Snapshot- und vorherige
+Setup-Prüfsumme zusammen mit Lease und Datenroot als atomaren `Recovery`-Wert
+im bestehenden geschützten Lifecycle-Key. Der einzige Lease-Writer prüft
+aktuellen Prozess, Startzeit, Phase und fehlende MSI-Teiltransaktion.
+Der normale Updater-Rollback öffnet das Archiv bereits über diese Referenz
+erneut, statt ausschließlich dem gehaltenen Objekt zu vertrauen. Abweichende
+Neubindungen, fremde/abgeschlossene Leases und beschädigte Registrywerte werden
+nicht automatisch ersetzt oder freigegeben.
+
+Aktuelle gezielte Evidence: 111 Snapshot-/Restore-Assertions, einschließlich
+eines tatsächlich beendeten separaten Snapshot-Erzeugerprozesses, erneuter
+Öffnung, Wiederherstellung eines gelöschten Datenverzeichnisses und
+Staging-ACL-Prüfung vor dem ersten Byte. 331 Lifecyclechecks sind grün,
+darunter 25 neue Tests der geschützten Recovery-Bindung in einem eigenen
+HKCU-Fixture. Die echte Updater-Sitzungsprüfung bindet ihre Recovery-Referenz
+ebenfalls; Handoff-, Verifier-, Session-, Request- und ursprüngliche
+Benutzer-Neustart-Gates bleiben grün. Die DTF-Komponente baut unter .NET
+Framework 4.8 ohne Warnungen. Keine native Installation wurde ausgeführt.
+
+Eine neue Instanz darf deshalb noch nicht eigenständig eine verwaiste Lease
+übernehmen oder den Rechner reparieren. Dieser Reparatureinstieg, direkte
+MSI-Transaktionsparität, erhöhte Rechteprüfung und die native Gesamtmatrix
+bleiben offen; der Prozess behauptet kein Release-Done.
 
 Vor der Freigabe bleiben die vollständige Prozess-Ende-Raceprüfung,
 die native Abnahme direkter MSI-Updatepfade hinsichtlich

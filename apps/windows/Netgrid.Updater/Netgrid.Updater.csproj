@@ -17,6 +17,7 @@
     <Compile Include="..\Common\UpdateDataLayout.cs" Link="UpdateDataLayout.cs" />
     <Compile Include="..\Common\UpdateDataFiles.cs" Link="UpdateDataFiles.cs" />
     <Compile Include="..\Common\UpdateDataSnapshot.cs" Link="UpdateDataSnapshot.cs" />
+    <Compile Include="..\Common\UpdateDataSnapshot.Reopen.cs" Link="UpdateDataSnapshot.Reopen.cs" />
     <Compile Include="..\Common\UpdateHandoff.cs" Link="UpdateHandoff.cs" />
     <Compile Include="..\Common\UpdateRequest.cs" Link="UpdateRequest.cs" />
     <Compile Include="..\Common\ProductProcesses.cs" Link="ProductProcesses.cs" />
@@ -24,6 +25,7 @@
     <Compile Include="..\Common\InstallationGate.cs" Link="InstallationGate.cs" />
     <Compile Include="..\Common\InstallationLaunchFence.cs" Link="InstallationLaunchFence.cs" />
     <Compile Include="..\Common\InstallationLease.cs" Link="InstallationLease.cs" />
+    <Compile Include="..\Common\UpdateRecoveryBinding.cs" Link="UpdateRecoveryBinding.cs" />
     <Compile Include="..\Common\WindowsUiStrings.cs" Link="WindowsUiStrings.cs" />
     <Compile Include="..\Common\WindowsUiLanguage.cs" Link="WindowsUiLanguage.cs" />
     <EmbeddedResource Include="..\Common\windows-ui-strings.json" LogicalName="NETGRID.WindowsUiStrings.json" />

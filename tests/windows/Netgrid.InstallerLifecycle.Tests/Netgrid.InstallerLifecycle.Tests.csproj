@@ -9,6 +9,7 @@
     <Compile Include="../../../apps/windows/Common/InstallationGate.cs" Link="InstallationGate.cs" />
     <Compile Include="../../../apps/windows/Common/InstallationLaunchFence.cs" Link="InstallationLaunchFence.cs" />
     <Compile Include="../../../apps/windows/Common/InstallationLease.cs" Link="InstallationLease.cs" />
+    <Compile Include="../../../apps/windows/Common/UpdateRecoveryBinding.cs" Link="UpdateRecoveryBinding.cs" />
     <Compile Include="../../../apps/windows/Common/MsiOfflineReadiness.cs" Link="MsiOfflineReadiness.cs" />
     <Compile Include="../../../apps/windows/Common/UpdateHandoff.cs" Link="UpdateHandoff.cs" />
     <Compile Include="../../../apps/windows/Common/DirectMsiPreparation.cs" Link="DirectMsiPreparation.cs" />

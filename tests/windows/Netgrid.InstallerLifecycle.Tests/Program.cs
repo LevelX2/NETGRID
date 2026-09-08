@@ -116,4 +116,5 @@ Assert(package.Elements(wix + "Property").Any(x => (string?)x.Attribute("Id") ==
 var frameworkCondition = package.Elements(wix + "Launch").Select(x => (string)x.Attribute("Condition")!)
     .Single(x => x.Contains("NETGRID_DOTNET_FRAMEWORK_RELEASE", StringComparison.Ordinal));
 Assert(frameworkCondition == "NETGRID_DOTNET_FRAMEWORK_RELEASE >= \"#528040\"", "framework_condition_uses_raw_dword_representation");
+checks += RecoveryBindingTests.Run();
 Console.WriteLine($"INSTALLER_LIFECYCLE_TESTS_OK checks={checks} registry=isolated_HKCU fixtureCleanup=verified installed=false");

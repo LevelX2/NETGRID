@@ -6,6 +6,8 @@ using System.Security.Principal;
 using System.Text.Json;
 using Netgrid.Windows;
 
+if (ReopenTests.TryChild(args)) return;
+
 var scratch = Path.Combine(Path.GetTempPath(), "netgrid-update-data-" + Guid.NewGuid().ToString("N"));
 Directory.CreateDirectory(scratch);
 var assertions = 0;
@@ -194,7 +196,8 @@ try
         assertions += 4; // integrity and committed row from each independent database
     }
 
-    Console.WriteLine($"WINDOWS_UPDATE_DATA_TEST_OK assertions={assertions} snapshot=full-live-files restore=verified protectedFiles=unchanged fixtures=isolated nativeElevation=not-tested");
+    assertions += ReopenTests.Run(scratch);
+    Console.WriteLine($"WINDOWS_UPDATE_DATA_TEST_OK assertions={assertions} snapshot=full-live-files restore=verified reopen=separate-process protectedFiles=unchanged fixtures=isolated nativeElevation=not-tested");
 }
 finally
 {

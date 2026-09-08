@@ -1,11 +1,23 @@
 using System.ComponentModel;
 using System.Runtime.InteropServices;
+using System.Security.AccessControl;
 using Microsoft.Win32.SafeHandles;
 
 namespace Netgrid.Windows;
 
 internal static class UpdateDataFiles
 {
+    public static FileStream CreateRestoreStage(string path, string originalDacl)
+    {
+        var security = new FileSecurity();
+        security.SetSecurityDescriptorSddlForm(originalDacl, AccessControlSections.Access);
+        // Freeze the original effective ACEs while bytes are staged. A parent
+        // whose ACL was broadened by the failed update must not add new readers.
+        security.SetAccessRuleProtection(true, preserveInheritance: true);
+        return new FileInfo(path).Create(FileMode.CreateNew, FileSystemRights.Write,
+            FileShare.None, 81920, FileOptions.SequentialScan, security);
+    }
+
     // Pin directories against renaming/reparse replacement while traversing.
     // Files are opened without following reparse points and without allowing
     // concurrent writers/deleters. No backup/restore privilege is enabled.

@@ -273,7 +273,11 @@ das Release-Gate nicht.
 - Vor jeder Rücksicherung wird der fehlgeschlagene aktuelle Datenzustand
   separat vollständig gesichert. Erst nachdem Quellsnapshot und aktueller
   Zustand geprüft sind, werden Dateien einzeln über gleichverzeichnisige
-  Stagingdateien ersetzt. Neu entstandene Dateien werden nur nach dieser
+  Stagingdateien ersetzt. Deren ursprüngliche wirksame DACL wird bereits
+  beim Anlegen gesetzt und bis zur Wiederherstellung der ursprünglichen
+  Elternrechte gegen zusätzliche Vererbung geschützt
+  ([.NET-Dateierstellung mit ACL](https://learn.microsoft.com/en-us/dotnet/api/system.io.filesystemaclextensions?view=net-10.0)).
+  Neu entstandene Dateien werden nur nach dieser
   Sicherung gezielt entfernt; zusätzliche leere Verzeichnisse bleiben stehen.
   Eine zuvor nie angelegte Datenbank wird nicht für das Backup initialisiert.
 - Auch bei einem fehlgeschlagenen MSI wird vor dem Wiederanlauf der vorige
@@ -282,13 +286,36 @@ das Release-Gate nicht.
   Lease-Freigabe. Datei- und Verzeichnisrechte werden wiederhergestellt und
   geprüft. Die Dateisperren enden vor dem normalen Benutzer-Neustart.
 
-Die Rücksicherung ist bisher an die gehaltene Snapshotinstanz desselben
-Updaters gebunden. Eine prozessübergreifende Wiederaufnahme aus einem
-gespeicherten Manifest ist damit nicht freigegeben. Direkte MSI-Anbindung,
-Abbruch-/Reparaturweg nach Prozessverlust, tatsächlich erhöhte
-Archivberechtigungen und vollständige native Zwei-Build-Abnahme bleiben
-Release-Gates. Ein Fehler erhält die Sicherungen und lässt die
-Installationssperre bestehen; er wird nicht als erfolgreiche Reparatur gewertet.
+Vor dem MSI-Start bindet der aktuelle Updater-Owner Snapshot-ID,
+Manifest-SHA-256, Datenroot und Prüfsumme des vorherigen Setups an seine
+Lease. Diese Referenz liegt als einzelner `Recovery`-Wert im geschützten
+HKLM-Lifecycle-Key; sie stammt weder aus dem Archiv noch aus einer frei
+angegebenen Restore-Datei. Nur der aktuelle Prozess mit exakt gebundener
+Startzeit in `stopping` ohne laufende MSI-Teiltransaktion darf sie schreiben.
+Eine abweichende zweite Referenz derselben Lease wird abgewiesen; eine
+abgeschlossene Referenz berechtigt weder zur Wiederholung noch zur Freigabe
+einer neuen Transaktion.
+
+Der Updater öffnet seine Rücksicherung inzwischen erneut über diese Referenz.
+`UpdateDataSnapshot.Reopen` prüft Manifestversion 2, ID, erwartete Prüfsumme,
+Archiv-DACL/Eigentümer, Datenroot, Ausnahmen, geschützte Dateien, vollständige
+Feldstruktur, eindeutige relative Pfade, Elternreihenfolge, Dateigrößen,
+Dateihashes und DACLs. Pfadtraversal, Windows-Dateialiasse, fehlende/zusätzliche
+oder doppelte Felder und alte Manifestversionen scheitern sichtbar. Es gibt
+keinen Legacy- oder Archiv-selbstautorisierten Restore. Beim Wiederöffnen
+werden sämtliche Archivinhalte sowie vorhandene Konfiguration und Credentials
+erneut lesend gesperrt. Fehlende normale Datenverzeichnisse können anhand des
+Manifests mit ihren ursprünglichen Rechten neu angelegt werden; geschützte
+Dateien werden weiterhin niemals ersetzt.
+
+Das erneute Öffnen und Wiederherstellen nach Ende eines separaten
+Snapshot-Erzeugerprozesses ist komponentenweise geprüft. Es übernimmt aber
+keine verwaiste Installationslease und startet keine Reparatur von selbst.
+Der autorisierte Reparatureinstieg samt Owner-Übernahme nach Prozessverlust,
+direkte MSI-Anbindung, tatsächlich erhöhte Archivberechtigungen und die
+vollständige native Zwei-Build-Abnahme bleiben Release-Gates. Ein Fehler
+erhält die Sicherungen und lässt die Installationssperre bestehen; er wird
+nicht als erfolgreiche Reparatur gewertet.
 
 ### Aufbewahrung gespeicherter Spiele
 

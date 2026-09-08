@@ -15,6 +15,7 @@ try
         Assert(contract.RootElement.GetProperty("holdsLeaseThroughBackupAndHealth").GetBoolean(), "outer_lease_contract_missing");
         Assert(contract.RootElement.GetProperty("backupScope").GetString() == "full-live-data-root", "sqlite_only_update_backup");
         Assert(contract.RootElement.GetProperty("protectedFilesPolicy").GetString() == "verify-never-overwrite", "credential_restore_overwrite_allowed");
+        Assert(contract.RootElement.GetProperty("requiresProtectedRecoveryBinding").GetBoolean(), "archive_self_authorizes_restore");
         Assert(contract.RootElement.GetProperty("restartsAsOriginalUnelevatedUser").GetBoolean(), "original_user_restart_contract_missing");
     }
     var transaction = updater.GetType("Netgrid.Updater.UpdateTransaction", throwOnError: true)!;

@@ -114,6 +114,21 @@ internal sealed class UpdateSession : IDisposable
         finally { if (!transferred) restart?.Dispose(); }
     }
 
+    public void BindRecovery(string dataRoot, string snapshotId, string manifestSha256, string previousSetupSha256) =>
+        InstallationLease.BindRecovery(_machine, _request.ProgramRoot,
+            new UpdateRecoveryBinding(_request.Lease, dataRoot, snapshotId, manifestSha256, previousSetupSha256));
+
+    public UpdateDataSnapshot OpenRecoverySnapshot(UpdateDataLayout layout)
+    {
+        using var owner = InstallationGate.OpenUpdateOwner(_machine, _request.ProgramRoot, _request.Lease);
+        if (owner.Id != Environment.ProcessId) throw new InvalidOperationException("updater_recovery_owner_mismatch");
+        var binding = InstallationLease.ReadRecovery(_machine, _request.ProgramRoot, _request.Lease);
+        if (!UpdateDataLayout.Same(binding.DataRoot, layout.Root) ||
+            !UpdateDataLayout.Same(Path.Combine(binding.DataRoot, "config", "runtime.env"), _request.EnvironmentFile))
+            throw new InvalidOperationException("updater_recovery_data_root_mismatch");
+        return UpdateDataSnapshot.Reopen(layout, binding.SnapshotId, binding.ManifestSha256);
+    }
+
     public void Complete()
     {
         if (!InstallationLease.ReleaseOwned(_machine, _request.ProgramRoot, _request.Lease))

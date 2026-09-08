@@ -31,6 +31,10 @@ internal static class SessionTests
                     Assert(state.Phase == InstallationGate.GateState.Stopping && state.AllowedParentId == 0 && state.OwnerId == Environment.ProcessId,
                         "admission_owns_stopping_lease");
                     fixture.SetValue("Outcome", "admitted");
+                    var snapshotId = Guid.NewGuid().ToString("N");
+                    session.BindRecovery(Path.Combine(request.ProgramRoot, "data"), snapshotId, new string('a', 64), new string('b', 64));
+                    Assert(InstallationLease.ReadRecovery(fixture, request.ProgramRoot, request.Lease).SnapshotId == snapshotId,
+                        "session_persists_exact_recovery_binding");
                     if (mode == "proceed")
                     {
                         session.Complete();

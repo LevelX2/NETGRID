@@ -129,8 +129,15 @@ Fixture-DACL. Sie prüft unter anderem zwei echte SQLite-Dateien samt WAL,
 beschädigte Daten, Pfadgrenzen, Hardlinks/Junctions, parallele Schreiber,
 veränderte Backups, wiederhergestellte DACLs und unveränderte Credentials.
 Sie beweist noch keine tatsächlich erhöhte Archivbereitstellung oder native
-MSI-Transaktion. Die Wiederaufnahme nach Updater-Prozessverlust und die direkte
-MSI-Anbindung sind noch offen. Archive nicht manuell in eine laufende Runtime
+MSI-Transaktion. Das Wiederöffnen eines gebundenen Archivs nach dem Ende seines
+Erzeugerprozesses ist inzwischen ebenfalls geprüft: Manifestversion 2,
+gespeicherte Prüfsumme, Pfad-/ACL-Grenzen und unveränderte Credentials bleiben
+Pflicht. Der aktive Updater bezieht die Referenz aus dem geschützten
+`Recovery`-Wert seiner Installationslease und verwendet diesen Weg auch im
+normalen Rollback. Ein Archiv darf seine eigene Prüfsumme nicht als
+Wiederherstellungsfreigabe liefern. Der tatsächliche Reparatureinstieg mit
+geprüfter Übernahme einer verwaisten Lease und die direkte MSI-Anbindung sind
+noch offen. Archive nicht manuell in eine laufende Runtime
 kopieren; insbesondere darf dabei kein Credentialstore überschrieben werden.
 
 Die Deckbibliothek liegt im Releaseprofil nun unter

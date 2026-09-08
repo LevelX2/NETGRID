@@ -28,6 +28,7 @@ internal static class Program
                     holdsLeaseThroughBackupAndHealth = true,
                     backupScope = "full-live-data-root",
                     protectedFilesPolicy = "verify-never-overwrite",
+                    requiresProtectedRecoveryBinding = true,
                     restartsAsOriginalUnelevatedUser = true,
                     blocksActiveMatches = true,
                     reverifiesSetupAfterLauncherExit = true,
@@ -104,6 +105,7 @@ internal static class UpdateTransaction
         RequireProductAbsent(options.ProgramRoot);
         using var backup = UpdateDataSnapshot.Capture(new UpdateDataLayout(dataRoot, environment));
         backup.Verify();
+        session.BindRecovery(dataRoot, Path.GetFileName(backup.DirectoryPath), backup.ManifestSha256, previousHash);
         WriteLog(logPath, $"backup_verified:{Path.GetFileName(backup.DirectoryPath)}:{backup.ManifestSha256}");
         RequireProductAbsent(options.ProgramRoot);
 
@@ -112,7 +114,8 @@ internal static class UpdateTransaction
         {
             WriteLog(logPath, $"install_failed:{installCode}");
             RequireProductAbsent(options.ProgramRoot);
-            var preserved = backup.Restore();
+            string preserved;
+            using (var recovery = session.OpenRecoverySnapshot(new UpdateDataLayout(dataRoot, environment))) preserved = recovery.Restore();
             WriteLog(logPath, $"failed_install_data_restored:preserved={Path.GetFileName(preserved)}");
             if (RestartIfHealthy(options, session, backup, logPath))
             {
@@ -143,7 +146,8 @@ internal static class UpdateTransaction
         if (reinstallCode != 0)
             throw new InvalidOperationException($"updater_program_rollback_failed:install={reinstallCode}");
         RequireProductAbsent(options.ProgramRoot);
-        var failedSnapshot = backup.Restore();
+        string failedSnapshot;
+        using (var recovery = session.OpenRecoverySnapshot(new UpdateDataLayout(dataRoot, environment))) failedSnapshot = recovery.Restore();
         WriteLog(logPath, $"rollback_data_restored:preserved={Path.GetFileName(failedSnapshot)}");
         if (!VerifyInstalled(options)) throw new InvalidOperationException("updater_rollback_health_failed");
         RequireProductAbsent(options.ProgramRoot);
