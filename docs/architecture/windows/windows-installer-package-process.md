@@ -269,6 +269,21 @@ ohne Entwicklungswerkzeuge.
 
 ### Verbleibender Abnahmeumfang
 
+Aktueller Kandidat vom 8. September: `output/windows-installer-msidata-8190`
+enthält Setup und MSI 1.0.8190 aus dem sauberen Quellcommit
+`5b4b84eddfd9e67b720b4ed0c0fff9a2c4bfd17b`. Der separat wiederholte vollständige
+Installer-Audit endet nach Korrektur der PowerShell-Modulbindung mit
+`WINDOWS_INSTALLER_CHECK_OK files=10902` und Exitcode 0. Die Korrektur
+`2f55d8494` betrifft ausschließlich Prüfskript und Runbook; die Binärdateien
+wurden nicht neu gebaut oder umetikettiert. Setup-SHA-256:
+`b0415526f98dfcbb2e5009e846efc2ce7697edb940f5bfb63dedc1479a8cb4bd`,
+MSI-SHA-256:
+`960177b25595e8dd91f3bef71b9e9e509161f5e3ec90a048756ee12d8bd0bc42`.
+Der ursprüngliche Buildlauf erreichte seine abschließende Metadaten-Ausgabe
+nicht; Release-Metadaten und Prüfsummendatei fehlen noch. Der Paket-Audit
+ersetzt weder diese Fertigstellung noch die native Abnahme von 8190.
+Es wurde in diesem Prüfschritt keine Produktinstallation gestartet.
+
 | Nachweis | Aktuelle belastbare Evidenz | Noch erforderlich |
 | --- | --- | --- |
 | Produktgrenze und Installer-Payload | Builds 8136 und 8145 regulär aus sauberen Quellständen gebaut, jeweils 10.901-Dateien-Audit und Setup-/MSI-Prüfsummen grün; installierte Binärdateien zusätzlich für 8136 gebunden | Für beide Builds erfüllt; keine Versions-/Hash-Umetikettierung |
