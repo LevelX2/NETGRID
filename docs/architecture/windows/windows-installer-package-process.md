@@ -727,12 +727,12 @@ kein Push oder Release.
 
 ### Offene MSI-Alleininstallation: Setup-Cache ohne externe Setupquelle
 
-Die Quellprüfung zeigt eine bislang nicht geschlossene Produktlücke:
-`CacheNetgridSetup` läuft nur mit gesetztem `NETGRID_SETUP_SOURCE`.
-Der vollständige Setup-Host wird erst nach dem MSI gebaut und enthält dieses
+Die Quellprüfung des Stands bis 8202 zeigte eine Produktlücke:
+`CacheNetgridSetup` lief nur mit gesetztem `NETGRID_SETUP_SOURCE`.
+Der vollständige Setup-Host wurde erst nach dem MSI gebaut und enthielt dieses
 als Managed Resource. Eine frische MSI-Alleininstallation erhält deshalb
 keine vollständige gecachte Setup-EXE für Setup-Verknüpfung und späteren
-Updater-Rückkehrpfad. Die laufende Matrix übergibt die Setupquelle und belegt
+Updater-Rückkehrpfad. Die abgeschlossene 8201/8202-Matrix übergab die Setupquelle und belegt
 diesen Sonderfall ausdrücklich nicht. Er darf nicht durch Entfernen des
 MSI-Produkts aus dem zugesagten Scope als erledigt gelten.
 
@@ -779,6 +779,41 @@ Keine zweite Installationsteuerung oder Legacy-Dual-Reader einführen.
 Die bytegleiche Rekonstruktion eines später außen Authenticode-signierten
 Setups ist damit noch nicht gelöst; dieser Versuch betrifft ausschließlich
 die bereits freigegebene unsignierte private Alpha.
+
+Der reguläre Build 8205 aus `fa4a546131382f3c939d1bdec8fe17ac34b395c5`
+erzeugte MSI und Setup, stoppte aber vor dem vollständigen Artefaktaudit und
+den Release-Metadaten an `windows_setup_raw_exception_message`.
+Die Quellprüfung erkannte die neue Klassifizierung anhand von
+`exception.Message`; der Text selbst wurde nicht an die UI durchgereicht.
+Der Ursachen-Fix verwendet jetzt einen eigenen `SetupBundleException` mit
+strukturiertem Code und einen typisierten Catch. Die Schutzprüfung wurde
+nicht abgeschwächt. Sechs zusätzliche Tests prüfen die tatsächliche
+Übersetzung beschädigter Container in de/en/fr; 2.109 Setupchecks und 82
+Codecchecks sind grün. Die mit 8205 erzeugte Vorschau-Matrix besteht die
+unveränderte Prüfung auf 185 Texte und 100/125/150 Prozent Skalierung.
+
+Der separate diagnostische Audit der unveränderten 8205-Dateien erreichte
+die neue Rekonstruktionsprüfung und fand dort die bereits bekannte
+PowerShell-Modulpfad-Falle im Node-Kindprozess: `Get-FileHash` fehlte.
+Die Prüfdatei importiert nun wie der DTF-Audit ihr Utility-Modul aus dem
+eigenen `$PSHOME`; Hostkonfiguration und globaler Modulsuchpfad bleiben
+unverändert. 8205 wurde weder installiert noch durch nachträglich erzeugte
+Metadaten zu einem vollständigen Release erklärt. Der nächste reguläre
+Build muss beide Korrekturen enthalten. Die gezielte Wiederholung des
+Node → Windows-PowerShell-5.1 → RuntimeConfig-Pfads mit dem isolierten
+Bundlefixture endet nach der Modulbindung mit Exit 0 und bestätigt erneut
+Bytegleichheit, unveränderte Cachezeit und Ablehnung falscher Bestätigungen.
+
+Für die anschließende native MSI-Alleininstallation, ProductCode-Reparatur
+und Standardbenutzerprüfung ist ein phasengetrenntes Gastfixture vorbereitet.
+Der Betrieb unter dem Standardbenutzer wird nicht aus einem SYSTEM-Token
+heraus per Credential-Start erzeugt: Dieser benötigt einen Logon-SID im
+Aufrufer. Der Test verwendet dafür den angemeldeten WDAG-Administrator und
+ein neu erzeugtes lokales Testkonto ohne Administratorrechte; MSI-Phasen
+bleiben SYSTEM. Dies folgt dem
+[Windows-Vertrag für CreateProcessWithLogonW](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithlogonw).
+Das Fixture ist noch nicht ausgeführt; bestehende Credentials werden dabei
+nicht übernommen, gelesen oder geändert.
 
 ### Regulärer Build 8199: Installation, Repair und Headless nativ grün
 

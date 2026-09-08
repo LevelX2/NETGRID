@@ -76,7 +76,7 @@ internal static class MsiBundleMetadata
     {
         if (status != 0) throw Invalid("read_failed_" + status);
     }
-    private static InvalidOperationException Invalid(string code) => new("setup_bundle_msi_" + code);
+    private static SetupBundleException Invalid(string code) => new("setup_bundle_msi_" + code);
 
     [DllImport("msi.dll", EntryPoint = "MsiOpenDatabaseW", CharSet = CharSet.Unicode, ExactSpelling = true)]
     private static extern uint MsiOpenDatabase(string path, IntPtr persist, out uint database);

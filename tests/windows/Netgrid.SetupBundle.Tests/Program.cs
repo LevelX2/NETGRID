@@ -102,7 +102,7 @@ void RejectRead(byte[] bytes, string label)
 void Reject(Action action, string label)
 {
     try { action(); }
-    catch (InvalidOperationException exception) when (exception.Message.StartsWith("setup_bundle_", StringComparison.Ordinal)) { checks++; return; }
+    catch (SetupBundleException exception) when (exception.Code.StartsWith("setup_bundle_", StringComparison.Ordinal)) { checks++; return; }
     throw new Exception("accepted_invalid_bundle:" + label);
 }
 void Assert(bool value, string label)

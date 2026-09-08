@@ -115,7 +115,12 @@ internal static class Program
             );
             return 2;
         }
-        catch (InvalidOperationException exception) when (exception.Message.StartsWith("setup_cache_", StringComparison.Ordinal) || exception.Message.StartsWith("setup_bundle_", StringComparison.Ordinal))
+        catch (SetupBundleException exception)
+        {
+            Console.Error.WriteLine($"NETGRID_RUNTIME_CONFIG_ERROR code={exception.Code}");
+            return 2;
+        }
+        catch (InvalidOperationException exception) when (exception.Message.StartsWith("setup_cache_", StringComparison.Ordinal))
         {
             Console.Error.WriteLine($"NETGRID_RUNTIME_CONFIG_ERROR code={exception.Message}");
             return 2;

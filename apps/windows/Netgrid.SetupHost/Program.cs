@@ -956,7 +956,7 @@ internal static class MsiPayload
             {
                 Read(input);
                 try { SetupBundle.ExtractVerified(input, output); }
-                catch (InvalidOperationException exception) when (exception.Message.StartsWith("setup_bundle_", StringComparison.Ordinal))
+                catch (SetupBundleException)
                 { throw new SetupException("payload_hash_mismatch"); }
                 output.Flush(flushToDisk: true);
             }
@@ -979,7 +979,7 @@ internal static class MsiPayload
             if (contents.Product.ProductVersion.ToString(3) != ProductVersion) throw new SetupException("payload_hash_mismatch");
             return contents;
         }
-        catch (InvalidOperationException exception) when (exception.Message.StartsWith("setup_bundle_", StringComparison.Ordinal))
+        catch (SetupBundleException)
         { throw new SetupException("payload_hash_mismatch"); }
     }
 }

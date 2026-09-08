@@ -149,5 +149,10 @@ internal static class SetupBundle
         if (stub < 64 || msi < 8 || CombinedLength(stub, msi) != total) throw Invalid("length_invalid");
     }
     private static string Hex(byte[] bytes) => Convert.ToHexString(bytes).ToLowerInvariant();
-    private static InvalidOperationException Invalid(string code) => new("setup_bundle_" + code);
+    private static SetupBundleException Invalid(string code) => new("setup_bundle_" + code);
+}
+
+internal sealed class SetupBundleException(string code) : InvalidOperationException(code)
+{
+    public string Code { get; } = code;
 }

@@ -761,7 +761,8 @@ ersetzt aber keinen nativen Hashvergleich nach Upgrade und Downgrade.
   Repositoryinhalt korrigieren.
 - `Get-FileHash` fehlt nur im Node-gestarteten Windows-PowerShell-Prüfprozess:
   Der Zwischenprozess kann den Modulsuchpfad von PowerShell 7 unverändert
-  an Windows PowerShell 5.1 weiterreichen. Der DTF-Payload-Audit importiert
+  an Windows PowerShell 5.1 weiterreichen. DTF-Payload-Audit und Setup-
+  Rekonstruktionsprüfung importieren
   deshalb `Microsoft.PowerShell.Utility` explizit aus `$PSHOME` des
   ausführenden Engines. Keine globale Änderung des Modulsuchpfads und kein
   Überspringen der Hashprüfung. Der direkte PowerShell-Aufruf allein ist

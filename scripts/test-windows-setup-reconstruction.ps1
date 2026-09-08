@@ -4,6 +4,9 @@ param(
   [Parameter(Mandatory=$true)][string]$SetupPath
 )
 $ErrorActionPreference = 'Stop'
+# Node can inherit PowerShell 7's module path before starting Windows
+# PowerShell 5.1. Bind the hash cmdlet to the executing Desktop engine.
+Import-Module -Name (Join-Path $PSHOME 'Modules\Microsoft.PowerShell.Utility\Microsoft.PowerShell.Utility.psd1') -ErrorAction Stop
 $ProgramRoot = (Resolve-Path -LiteralPath $ProgramRoot).Path
 $MsiPath = (Resolve-Path -LiteralPath $MsiPath).Path
 $SetupPath = (Resolve-Path -LiteralPath $SetupPath).Path
