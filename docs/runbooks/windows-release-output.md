@@ -112,7 +112,11 @@ Der Updater verwendet nun `UpdateDataSnapshot` für den vollständigen
 Live-Datenroot; der alte Storage-CLI-Befehl `backup-update` ist weiterhin nur
 ein Match-SQLite-Backup und nicht mehr seine Sicherungsautorität. Die neuen
 Archive liegen geschützt unter `config/update-backups/<ID>`. Historische
-Storagebackups und Installer-Caches sind ausdrücklich ausgeschlossen.
+Storagebackups und Installer-Caches sind ausdrücklich ausgeschlossen,
+einschließlich des MSI-Reparaturcaches `config/installer`. Die ersten
+Snapshotbuilds bis 8196 ließen diesen Cache noch irrtümlich im Dateninventar;
+der korrigierte gemeinsame Owner wird durch 122 Snapshot-/Restore-Prüfungen
+abgedeckt und benötigt eine neue native Buildabnahme.
 Konfiguration und vorhandene Maintenance-Credentials werden nur auf
 Unverändertheit geprüft, niemals zurückgeschrieben. Vor einem Restore wird
 auch der fehlgeschlagene Datenstand separat gesichert. Genau entfernte neue

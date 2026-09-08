@@ -20,7 +20,9 @@ internal sealed class UpdateDataLayout
             throw new InvalidOperationException("update_data_environment_scope_invalid");
         ArchiveRoot = Path.Combine(Root, "config", "update-backups");
         var backups = Resolve("NETGRID_STORAGE_BACKUP_DIR", "runtime", "backups");
-        Excluded = [ArchiveRoot, Path.Combine(Root, "config", "updates"), Path.Combine(Root, "runtime", "updates"), backups];
+        string[] installerOwned = [ArchiveRoot, Path.Combine(Root, "config", "updates"),
+            Path.Combine(Root, "config", "installer"), Path.Combine(Root, "runtime", "updates")];
+        Excluded = [.. installerOwned, backups];
         var match = Resolve("NETGRID_SQLITE_STORAGE_PATH", "runtime", "multiplayer", "netgrid.sqlite");
         var account = environment.TryGetValue("NETGRID_ACCOUNT_SQLITE_PATH", out var accountPath) && !string.IsNullOrWhiteSpace(accountPath)
             ? Absolute(accountPath.Trim()) : match;
@@ -37,7 +39,7 @@ internal sealed class UpdateDataLayout
                 throw new InvalidOperationException("update_data_exclusion_overlaps_live_data");
         }
         // A custom backup directory must not swallow the archive/cache owner.
-        if (Excluded.Take(3).Any(other => Within(backups, other) || Within(other, backups)))
+        if (installerOwned.Any(other => Within(backups, other) || Within(other, backups)))
             throw new InvalidOperationException("update_data_backup_scope_invalid");
 
         string Resolve(string key, params string[] parts) => environment.TryGetValue(key, out var value) && !string.IsNullOrWhiteSpace(value)

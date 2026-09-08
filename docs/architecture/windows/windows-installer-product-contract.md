@@ -333,7 +333,9 @@ und [Rollback-Custom-Action-Vertrag](https://learn.microsoft.com/en-us/windows/w
 - Die ausdrücklich ausgeschlossenen Bereiche sind historische Storagebackups
   (`NETGRID_STORAGE_BACKUP_DIR`, sonst `runtime/backups`),
   `config/update-backups` für diese Snapshots sowie die getrennt behandelten
-  Installer-Caches `config/updates` und `runtime/updates`. Ein Live-Datenpfad
+  Installer-Caches `config/updates`, `config/installer` und `runtime/updates`.
+  Auch der MSI-Reparaturcache bleibt dadurch im Besitz des Installers und
+  wird von einem Datenrestore weder ersetzt noch entfernt. Ein Live-Datenpfad
   außerhalb des Roots oder unter einem ausgeschlossenen Bereich bricht ab.
   Eine überlappende Backupwurzel wird nicht stillschweigend akzeptiert.
 - Snapshots liegen unter `config/update-backups/<zufällige-ID>` mit

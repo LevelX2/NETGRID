@@ -40,6 +40,8 @@ Integritätsangaben werden nicht installiert.
 6. `UpdateDataSnapshot` erzeugt und prüft den vollständigen Live-Datenroot-
    Snapshot. Der bestehende Storage-CLI-Befehl `backup-update` sichert nur
    Match-SQLite und ist nicht die Sicherungsautorität dieses Updatewegs.
+   Installerarchive und -caches bleiben außerhalb dieses Restores, insbesondere
+   auch der MSI-Reparaturcache unter `config/installer`.
 7. Der heruntergeladene Setuphost führt unter der explizit weitergereichten
    äußeren Lease ein erhöhtes MSI-Major-Upgrade aus.
    Das vorhandene `runtime.env`, Maintenance-Credentials, Kontopolicy und der
@@ -56,6 +58,15 @@ Integritätsangaben werden nicht installiert.
    Der alte Cacheeintrag bleibt unabhängig vom Selektor erhalten.
 
 ### Noch offene Abnahmen vor der Freigabe
+
+Die Builds 8195/8196 enthalten im Snapshotvertrag noch nicht den Ausschluss
+des separaten MSI-Reparaturcaches. Der aktuelle Quellstand korrigiert dies am
+gemeinsamen `UpdateDataLayout`-Owner: `config/installer` wird weder gesichert
+noch zurückgeschrieben oder entfernt. Live-Datenpfade und benutzerdefinierte
+Backupordner dürfen diesen Bereich nicht überlappen. Der reproduzierende
+Negativtest und anschließend 122 Snapshot-/Restore-Prüfungen sind belegt;
+die native Abnahme benötigt neue Builds. Bestehende Archive mit abweichender
+Ausschlussmenge werden weiterhin sichtbar abgewiesen, nicht konvertiert.
 
 Die native Wiederinstallation 8190 über erhaltene Sandboxdaten belegt den
 Cachefehler des bisherigen Stands: `config/updates/NETGRID-Setup.exe` bleibt auf dem alten

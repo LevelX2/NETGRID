@@ -42,6 +42,9 @@ try
     Reject(() => layout.Target(@"..\outside"), "manifest_traversal_accepted");
     Reject(() => layout.Target(@"runtime\..\config\runtime.env"), "manifest_alias_accepted");
     Reject(() => layout.Target(@"config\update-backups\anything"), "manifest_archive_target_accepted");
+    Reject(() => layout.Target(@"config\installer\product\cached.msi"), "manifest_msi_cache_target_accepted");
+    foreach (var key in new[] { "NETGRID_SQLITE_STORAGE_PATH", "NETGRID_ACCOUNT_SQLITE_PATH", "NETGRID_MAINTENANCE_AUTH_PATH", "NETGRID_DECK_LIBRARY_PATH", "NETGRID_CONNECTION_AUDIT_LOG_PATH", "NETGRID_STORAGE_BACKUP_DIR" })
+        Reject(() => new UpdateDataLayout(root, new Dictionary<string, string>(env) { [key] = Path.Combine(root, "config", "installer", "overlap") }), "live_or_backup_msi_cache_overlap_accepted");
     Reject(() => new UpdateDataLayout(root, new Dictionary<string, string>(env) { ["NETGRID_RUNTIME_PROFILE"] = "development" }), "development_snapshot_accepted");
 
     var originals = new Dictionary<string, string>
@@ -60,6 +63,7 @@ try
     foreach (var pair in originals) Write(root, pair.Key, pair.Value);
     Directory.CreateDirectory(Path.Combine(root, "runtime", "empty"));
     var cache = Write(root, @"config\updates\NETGRID-Setup.exe", "cached-setup");
+    var msiCache = Write(root, @"config\installer\base-product\base.msi", "cached-msi-before");
     var historic = Write(root, @"runtime\backups\old\database", "historic-backup");
     var staging = Write(root, @"runtime\updates\staging\candidate.exe", "staged-candidate");
     env["NETGRID_ACCOUNT_SQLITE_PATH"] = Path.Combine(root, "runtime", "accounts", "separate.sqlite");
@@ -77,6 +81,7 @@ try
             Assert(File.ReadAllText(Path.Combine(snapshot.DirectoryPath, "files", pair.Key)) == pair.Value, "snapshot_bytes_changed");
         Assert(!Directory.Exists(Path.Combine(snapshot.DirectoryPath, "files", "runtime", "backups")), "recursive_backup_copied");
         Assert(!Directory.Exists(Path.Combine(snapshot.DirectoryPath, "files", "config", "updates")), "setup_cache_copied");
+        Assert(!Directory.Exists(Path.Combine(snapshot.DirectoryPath, "files", "config", "installer")), "msi_cache_copied");
         Assert(!Directory.Exists(Path.Combine(snapshot.DirectoryPath, "files", "runtime", "updates")), "staging_copied");
         Reject(() => File.WriteAllText(Path.Combine(root, "runtime", "maintenance", "auth.json"), "changed"), "credential_not_locked");
         Reject(() => File.Delete(Path.Combine(root, "config", "runtime.env")), "configuration_not_locked");
@@ -88,6 +93,8 @@ try
         File.Delete(Path.Combine(root, "runtime", "multiplayer", "netgrid.sqlite-wal"));
         var added = Write(root, @"runtime\new-data\created.json", "created-by-failed-upgrade");
         File.WriteAllText(cache, "pending-cache-owner-state");
+        File.WriteAllText(msiCache, "installer-owned-msi-state");
+        var newMsiCache = Write(root, @"config\installer\new-product\new.msi", "new-installer-owned-msi");
         using var failed = UpdateDataSnapshot.Capture(layout, fixtureSecurity);
         var preserved = snapshot.RestoreWithPreserved(failed);
         Assert(preserved == failed.DirectoryPath, "failed_state_location_missing");
@@ -96,6 +103,7 @@ try
         Assert(!File.Exists(added), "new_upgrade_file_survived_rollback");
         Assert(File.ReadAllText(Path.Combine(preserved, "files", "runtime", "new-data", "created.json")) == "created-by-failed-upgrade", "added_file_not_recoverable");
         Assert(File.ReadAllText(cache) == "pending-cache-owner-state" && File.ReadAllText(historic) == "historic-backup" && File.ReadAllText(staging) == "staged-candidate", "excluded_owner_changed");
+        Assert(File.ReadAllText(msiCache) == "installer-owned-msi-state" && File.ReadAllText(newMsiCache) == "new-installer-owned-msi", "restore_changed_msi_cache_owner_state");
         Assert(Directory.Exists(Path.Combine(root, "runtime", "empty")), "empty_directory_lost");
         snapshot.AssertProtectedFilesUnchanged();
     }

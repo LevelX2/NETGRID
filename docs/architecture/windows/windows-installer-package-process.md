@@ -397,6 +397,70 @@ Fünf Harness-Vertrags-/PowerShell-Syntaxchecks bestehen ohne Installation.
 Die neue vollständige Zweiversionsmatrix und der getrennte produktgebundene
 Tray-/Updaterlauf sind dadurch nicht bereits nativ abgenommen.
 
+Der reguläre Gegenbuild 1.0.8196 unter
+`output/windows-installer-msi-matrix-8196` stammt aus dem sauberen Commit
+`4ade46c0646abf432595569bffa860c0e95bd154`. Vollständiger Build ohne
+`SkipReleaseBuild`, Komponenten-/UI-Gates und 10.902-Dateien-Audit bestehen;
+Metadaten und Prüfsummen sind regulär erzeugt. Setup-SHA-256:
+`41d81af3eb3a2134ae845c10c24fe40a685c2b9aa14cc2c5a970377a9bc5e764`,
+MSI-SHA-256:
+`a5bc24ef7e04fbc343fad7ebbb00eea7752f911d19dbd6f0db465c16694e7695`.
+Der Kandidat ist gebaut, aber wegen des folgenden nativen Fehlers nicht
+freigegeben.
+
+Im selben Sandboxlauf belegt `native-8195-upgrade-readiness.json` rein lesend
+null offene Partien. `native-8195-8196-rejectroot.json` bestätigt die konkrete
+Ablehnung `installation_gate_upgrade_root_changed` mit MSI-Exit 1603 und
+anschließend unveränderten 8195-Dateien, Cache und geschützten Daten.
+Der danach gestartete echte Standalone-MSI-Versionswechsel 8195 → 8196
+scheitert jedoch am gebundenen Healthcheck:
+`NETGRID_MSI_DATA_ERROR code=installation_gate_msi_data_health_failed`.
+Dies war kein injizierter Fehler. Der Upgrade-Test bleibt rot.
+
+Windows Installer führt danach seine tatsächliche Rücknahme einschließlich
+`NETGRID_MSI_DATA_OK operation=restore` und
+`NETGRID_LIFECYCLE_ROLLBACK released=True` aus. Der MSI-Prozess endet um
+03:32:25 UTC mit 1603. `native-8195-8196-verifyfailedupgrade.json` bestätigt
+anschließend um 03:38:49 UTC den vollständig zurückgekehrten 8195-Stand:
+10.890 Manifestdateien, vier native Hashes/Versionen, ursprünglicher
+ProductCode, unveränderter Setupcache einschließlich Änderungszeitpunkt,
+korrektes Shortcutziel, bytegleiche Konfiguration und Credentials sowie keine
+Produktprozesse oder Listener. Die ursprüngliche Snapshot-ID
+`a5ca54e69f184b938b0228beb6aa04d1` ist über die abgeschlossene Lease mit
+`restored` und Manifesthash
+`b0ccd814d901babf7cb2c4302f0627f4da105f765f3416a3d41062b3bcd0e995` gebunden.
+Es gab keine manuelle Prozessbeendigung oder Registryreparatur.
+
+Die Ursache des fehlgeschlagenen Verifier-Abschlusses ist noch nicht bewiesen.
+Die erhaltene Fehlstand-Sicherung
+`f378dc7ef9984bbf93624774aaa0f02d` zeigt Webbereitschaft um 03:31:10 UTC,
+Serverbereitschaft kurz danach und den angeforderten Serverstopp um
+03:31:11 UTC. Der Verifier meldet erst um 03:31:31 UTC Fehler. Der normale
+Headless-Pfad verschluckt die konkrete Ausnahme bisher hinter Exit 2; diese
+Diagnoselücke muss vor einer belastbaren Ursachenbehebung geschlossen werden.
+Die rein gefilterte Verbindungsevidence `native-8196-websocket-audit.json`
+enthält in diesem Zeitfenster nur Serverstart/-stopp, keine WebSocketöffnung.
+Ein WebSocket-Stoppfehler ist damit nicht als Ursache belegt. Die ältere
+Diagnose-JSON enthält versehentlich PowerShell-Stringmetadaten und ist sehr
+groß; nur ihre Stringwerte beziehungsweise die gefilterte Folgeevidence lesen.
+Keine fehlgeschlagene Installation erneut starten, bevor Ursache und
+Reproduktionspfad eingegrenzt sind. Standalone-Downgrade und geplante
+Prüfsummen-Fehlerinjektion wurden nicht ausgeführt.
+
+Unabhängig davon wurde eine konkrete Snapshot-Abgrenzungslücke reproduziert:
+`config/installer` gehörte bis 8196 irrtümlich zum Live-Dateninventar.
+Der gemeinsame `UpdateDataLayout`-Owner schließt jetzt auch diesen
+MSI-Reparaturcache aus; Snapshot und Restore verändern seine eigenen oder
+neu hinzugekommenen Cachedateien nicht. Überschneidungen mit Live-Daten- oder
+Backup-Overrides werden abgewiesen. Der neue Test scheitert zuerst mit
+`manifest_msi_cache_target_accepted`; nach dem Ursachen-Fix bestehen alle
+122 Snapshot-/Restore-Prüfungen, die Updater-/Cache-/Recoveryprüfungen und
+die Übergabe-/Verifier-Suite einschließlich 71 MSI-Datentransaktionschecks.
+Die Builds 8195/8196 enthalten diesen Fix nicht. Ihre native Rücknahme ist
+daher kein vollständiges Testat des korrigierten Snapshotvertrags; neue
+Builds und native Wiederholung bleiben nötig. Alte Snapshots werden nicht
+konvertiert. WIN-I08 bleibt aktiv, Main und Remote bleiben unverändert.
+
 | Nachweis | Aktuelle belastbare Evidenz | Noch erforderlich |
 | --- | --- | --- |
 | Produktgrenze und Installer-Payload | Builds 8136 und 8145 regulär aus sauberen Quellständen gebaut, jeweils 10.901-Dateien-Audit und Setup-/MSI-Prüfsummen grün; installierte Binärdateien zusätzlich für 8136 gebunden | Für beide Builds erfüllt; keine Versions-/Hash-Umetikettierung |
