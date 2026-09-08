@@ -4,6 +4,10 @@ param(
   [Parameter(Mandatory=$true)][string]$DtfToolRoot
 )
 $ErrorActionPreference = 'Stop'
+# Node inherits PowerShell 7's module search path unchanged when it launches
+# Windows PowerShell 5.1. Bind this script's utility dependency to the executing
+# engine, so a Core module cannot shadow the Desktop Get-FileHash function.
+Import-Module -Name (Join-Path $PSHOME 'Modules\Microsoft.PowerShell.Utility\Microsoft.PowerShell.Utility.psd1') -ErrorAction Stop
 $Binary = (Resolve-Path -LiteralPath $Binary).Path
 $ExpectedBuildDirectory = (Resolve-Path -LiteralPath $ExpectedBuildDirectory).Path
 $DtfToolRoot = (Resolve-Path -LiteralPath $DtfToolRoot).Path
