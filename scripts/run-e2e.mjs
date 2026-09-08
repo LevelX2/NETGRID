@@ -140,8 +140,17 @@ try {
   await Promise.allSettled(
     started.reverse().map((child) => stopProcessTree(child)),
   );
-  await rm(runtimeDir, { recursive: true, force: true });
-  await rm(webDistDir, { recursive: true, force: true });
+  // Windows can release SQLite/WAL and Next file handles shortly after the
+  // process tree exits. Wait only for these transient filesystem errors;
+  // persistent locks still reject and fail the E2E command (no swallowed cleanup).
+  const cleanupOptions = {
+    recursive: true,
+    force: true,
+    maxRetries: 10,
+    retryDelay: 100,
+  };
+  await rm(runtimeDir, cleanupOptions);
+  await rm(webDistDir, cleanupOptions);
 }
 
 function start(label, args, env) {

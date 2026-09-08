@@ -49,6 +49,23 @@ nicht stillschweigend zum Vertrag erklären.
   fachlich zwingend ist. Delegiert ein Root-Plan einen zulässigen
   Finanzierung-, Schutz- oder Choice-Schritt, prüft der Test zusätzlich die
   Root-/Executor-Bindung und nicht den historisch vorher direkten Einzelschritt.
+- Semantische Suche allein macht eine Vollspiel-Regression nicht stabil:
+  Auch das Erreichen der gesuchten Karte, Choice oder Zuggrenze darf nicht von
+  unabhängiger Spielstrategie, Draw-Reihenfolge oder einem historischen
+  Aktionslimit abhängen. Eng umrissene Fortsetzungsfehler erhalten einen
+  kontrollierten Engine-Zustand oder validierten Decision-Checkpoint und
+  durchlaufen anschließend echte `LegalActions`/`applyAction`-Schritte.
+  Trigger-Voraussetzung und erwartete Wirkung werden beide positiv geprüft;
+  wesentliche Bindungen zusätzlich mit einem fehlenden/fremden Ursprung negativ.
+  Vollspiele bleiben breite Systemtests, ersetzen aber nicht diesen gezielten
+  Regressionsschutz. Eine bloße relative Indexverschiebung oder ein erhöhtes
+  Aktions-/Zeitlimit ist kein Ursachenfix für einen nicht erreichten Trigger.
+- Fokussierte LegalAction-Angebote dürfen unabhängige Strategieentscheidungen
+  ausklammern, müssen aber den für den Pfad erforderlichen Planungskontext
+  erhalten und seine Planning-State-Identität neu berechnen. Nach der
+  Quellaktion werden aktuelle vollständige Engine-Angebote verwendet. Ein
+  Finanzierungscheckpoint garantiert nur seinen gebundenen Bedarf, nicht eine
+  spätere Schutz-/Installationsfolge ohne deren eigene Voraussetzungen.
 - Berechnete Scores, Reserven und Diagnosewerte werden nur exakt fixiert, wenn
   ihre konkrete Berechnung Vertragsgegenstand ist. Sonst wird die stabile
   Klassifikation oder der verantwortliche Pfad geprüft.

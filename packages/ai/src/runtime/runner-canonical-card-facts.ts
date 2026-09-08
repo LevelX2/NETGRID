@@ -4,6 +4,18 @@ type RunnerPlanningCard = NonNullable<
   ReturnType<typeof cardSpecPlanningCardByDefinitionId>
 >;
 
+export function runnerEventStartsRunAfterProgramSearch(
+  definitionId: string | undefined,
+): boolean {
+  if (!definitionId) return false;
+  const planning = cardSpecPlanningCardByDefinitionId(definitionId)?.planning;
+  return (
+    planning?.side === "runner" &&
+    planning.engine.runnerEventLongtail?.kind ===
+      "search_stack_install_program_free_then_run_return_or_penalty"
+  );
+}
+
 export function runnerSoleFortIceTrashTagAmount(
   definitionId: string | undefined,
 ): number | undefined {

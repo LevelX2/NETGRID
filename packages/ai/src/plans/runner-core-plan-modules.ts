@@ -201,6 +201,11 @@ export type RunnerCoverageGapSignal = {
     actionId: string;
     sourceCardInstanceId: string;
     sourceDefinitionId: string;
+    resolvedSearchChoice?: {
+      choiceId: string;
+      choiceSource: string;
+      stateVersion: number;
+    };
     targetCardInstanceId?: string;
     targetDefinitionId?: string;
     installMemorySacrificeBinding?: {

@@ -902,6 +902,19 @@ Serverkontext innerhalb eines laufenden Runs genügt nicht: Eine Bankaktivierung
 oder ein anderer Fenstereffekt darf dadurch keinen neuen Runstart-Ursprung
 erhalten und die anschließende Originalfortsetzung verdrängen.
 
+Für kanonische Run-Ereignisse mit vorgeschalteter Programmsuche entsteht der
+Ursprung bereits beim direkten Ausspielen, nicht erst in einem optionalen
+Zahlungsfenster. Such-Choice, erforderliche MU-Freigabe und Runstart-Ordering
+bleiben beim ausgewählten Entwicklungs- oder Coverage-Executor. Coverage bindet
+die tatsächlich aufgelöste Such-Choice mit ID, Source und StateVersion zusätzlich
+an sein bereits gewähltes Ziel und den vorab bewerteten Opfer-Satz. Eine MU-Choice
+darf keinen neuen Ziel- oder Opfer-Chooser eröffnen. Der fortgesetzte Ursprung
+wird erst nach erfolgreicher Payload-Materialisierung auf die aktuelle Version
+fortgeschrieben; die Prüfung selbst benötigt den vorherigen gebundenen Stand.
+Die Runstart-Ereigniskette besteht aus echten Zustandstransitionen. Ein
+`game_created`-Snapshot ohne Versionsfortschritt ist keine Quellaktion;
+fehlende, fremde oder nicht zusammenhängende Aktionstransitionen bleiben Fehler.
+
 Ein reiner Austausch „rezzed ICE des letzten erfolgreichen Forts entfernen
 und Tags erhalten“ benötigt vor der Entwicklung die aktuelle
 `runner-fort-ice-trash-quote-v1` aus der Engine. Fehlende oder veraltete Quotes

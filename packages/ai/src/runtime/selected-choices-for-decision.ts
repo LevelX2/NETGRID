@@ -2007,6 +2007,12 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
   const targetCardInstanceId = sourceParts[2];
   const automaticFreedMemory = Number(sourceParts[3]);
   const originalChoiceSource = decodeChoiceSourcePart(sourceParts[5]);
+  const originalChoiceId = decodeChoiceSourcePart(sourceParts[4]);
+  const delayedSearch =
+    sourceParts[1] === "nonsearch" &&
+    originalChoiceSource?.startsWith(
+      "card_implementation.pro018_stack_install_run_cleanup:",
+    ) === true;
   const originalSourceBinding = originalChoiceSource
     ? runnerHiddenSearchProgramInstallSourceBinding(originalChoiceSource)
     : undefined;
@@ -2030,6 +2036,11 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
             actionId?: unknown;
             sourceCardInstanceId?: unknown;
             sourceDefinitionId?: unknown;
+            resolvedSearchChoice?: {
+              choiceId?: unknown;
+              choiceSource?: unknown;
+              stateVersion?: unknown;
+            };
             targetCardInstanceId?: unknown;
             targetDefinitionId?: unknown;
             installMemorySacrificeBinding?: {
@@ -2048,10 +2059,14 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
   const bindings = moduleState?.gap?.directSearchChoiceBindings?.filter(
     (binding) =>
       binding.actionId === moduleState.selectedSearchActionId &&
-      binding.sourceCardInstanceId ===
-        originalSourceBinding?.sourceCardInstanceId &&
-      binding.sourceDefinitionId ===
-        originalSourceBinding?.sourceDefinitionId &&
+      (delayedSearch
+        ? binding.resolvedSearchChoice?.choiceId === originalChoiceId &&
+          binding.resolvedSearchChoice?.choiceSource === originalChoiceSource &&
+          binding.resolvedSearchChoice?.stateVersion === portfolio?.stateVersion
+        : binding.sourceCardInstanceId ===
+            originalSourceBinding?.sourceCardInstanceId &&
+          binding.sourceDefinitionId ===
+            originalSourceBinding?.sourceDefinitionId) &&
       binding.targetCardInstanceId === targetCardInstanceId &&
       binding.installMemorySacrificeBinding?.targetCardInstanceId ===
         targetCardInstanceId,
@@ -2124,10 +2139,12 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
       moduleState.gap.requesterNeedId === executor.parentNeedId);
   const exactBinding =
     sourceParts.length === 6 &&
-    sourceParts[1] === "hidden_search" &&
-    originalSourceBinding !== undefined &&
-    originalSourceBinding.selectedAtStateVersion + 1 ===
-      input.playerView.stateVersion &&
+    (delayedSearch
+      ? portfolio?.stateVersion === input.playerView.stateVersion - 1
+      : sourceParts[1] === "hidden_search" &&
+        originalSourceBinding !== undefined &&
+        originalSourceBinding.selectedAtStateVersion + 1 ===
+          input.playerView.stateVersion) &&
     Number.isInteger(automaticFreedMemory) &&
     automaticFreedMemory >= 0 &&
     input.side === "runner" &&
@@ -2339,6 +2356,23 @@ function selectedRunnerEventInstallMemoryOptionIds(
   selectableOptions: PendingChoiceOptions,
   currentPortfolio?: ResidentPlanPortfolio,
 ): string[] {
+  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+  if (
+    portfolio?.instances.some(
+      (instance) =>
+        instance.instanceId === portfolio.executorInstanceId &&
+        instance.moduleId === "runner.rig_and_coverage" &&
+        instance.executionState === "executor",
+    )
+  ) {
+    return selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
+      input,
+      action,
+      choice,
+      selectableOptions,
+      portfolio,
+    );
+  }
   const sourceParts = choice.source.split(":");
   const targetCardInstanceId = sourceParts[2];
   const automaticFreedMemory = Number(sourceParts[3]);
@@ -2370,7 +2404,6 @@ function selectedRunnerEventInstallMemoryOptionIds(
     requirement.optionIds.every(
       (optionId, index) => optionId === selectableOptions[index]?.id,
     );
-  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
   const executor = portfolio?.instances.find(
     (instance) =>
       instance.instanceId === portfolio.executorInstanceId &&

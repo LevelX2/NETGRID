@@ -62,6 +62,7 @@ import {
 } from "../actions/risk-action-projection";
 import {
   runnerDebtFinancingProfile,
+  runnerEventStartsRunAfterProgramSearch,
   runnerInstalledDebtFinancingLiability,
   runnerNoRunRecurringEconomyProfile,
   runnerRestrictedRunCreditProfile,
@@ -848,7 +849,6 @@ export function choosePlanFirstLiveAction(
   bindSelectedPlanActionOrigin(input, result, candidates);
   bindSelectedRunnerExposeInformationMemory(input, result);
   bindSelectedEngineWindowRunnerVacuumLinkOrigin(input, result, previous);
-  advanceSelectedRunnerRunStartOrderOrigin(input, result, previous);
   reconcileSelectedRunnerCostPenaltySupportOrigin(input, result, previous);
   bindSelectedRunnerDelayedProgramSearchChoice(
     input,
@@ -878,6 +878,7 @@ export function choosePlanFirstLiveAction(
     decision,
     dependencies.runnerProgramInstallTrashAssessmentForCard,
   );
+  advanceSelectedRunnerRunStartOrderOrigin(input, result, previous);
   if (
     options.persistTacticalPlanMemory !== false &&
     result.portfolio &&
@@ -1275,7 +1276,8 @@ function resolvePlanBoundRunnerEventInstallMemoryChoice(
   const executor = previous?.instances.find(
     (instance) =>
       instance.instanceId === previous.executorInstanceId &&
-      instance.moduleId === "runner.develop_board_and_hand" &&
+      (instance.moduleId === "runner.develop_board_and_hand" ||
+        instance.moduleId === "runner.rig_and_coverage") &&
       instance.executionState === "executor",
   );
   const root = previous?.instances.find(
@@ -1294,6 +1296,33 @@ function resolvePlanBoundRunnerEventInstallMemoryChoice(
     delayedBinding?.installMemorySacrificeBinding;
   const boundTargetCardInstanceId =
     commitment?.targetCardInstanceId ?? delayedBinding?.targetCardInstanceId;
+  const coverageState = executor?.moduleState as
+    | {
+        kind?: string;
+        phase?: string;
+        selectedSearchActionId?: string;
+        selectedSearchStateVersion?: number;
+        gap?: RunnerCoverageGapSignal;
+      }
+    | undefined;
+  const coverageBindings =
+    coverageState?.gap?.directSearchChoiceBindings?.filter(
+      (candidate) =>
+        candidate.actionId === coverageState.selectedSearchActionId &&
+        candidate.resolvedSearchChoice?.choiceId === originalChoiceId &&
+        candidate.resolvedSearchChoice.choiceSource === originalChoiceSource &&
+        candidate.resolvedSearchChoice.stateVersion ===
+          previous?.stateVersion &&
+        candidate.targetCardInstanceId === targetCardInstanceId &&
+        candidate.installMemorySacrificeBinding?.targetCardInstanceId ===
+          targetCardInstanceId,
+    );
+  const exactCoverageBinding =
+    executor?.moduleId === "runner.rig_and_coverage" &&
+    coverageState?.kind === "coverage" &&
+    coverageState.phase === "search_answer" &&
+    coverageState.selectedSearchStateVersion === previous?.stateVersion &&
+    coverageBindings?.length === 1;
   const action =
     context.input.legalActions.length === 1
       ? context.input.legalActions[0]
@@ -1309,15 +1338,16 @@ function resolvePlanBoundRunnerEventInstallMemoryChoice(
     previous.stateVersion === context.input.playerView.stateVersion - 1 &&
     previous.rootForegroundInstanceId === root?.instanceId &&
     previous.executorInstanceId === executor?.instanceId &&
-    moduleState?.kind === "development" &&
-    (signal?.phase === "resolve_event_install_choice" ||
-      signal?.phase === "resolve_delayed_program_search_choice") &&
-    activeBinding?.sourceStateVersion === previous.stateVersion &&
-    activeBinding.choiceId === originalChoiceId &&
-    activeBinding.choiceSource === originalChoiceSource &&
-    activeBinding.targetCardInstanceId === targetCardInstanceId &&
-    boundTargetCardInstanceId === targetCardInstanceId &&
-    sacrifice?.targetCardInstanceId === targetCardInstanceId &&
+    (exactCoverageBinding ||
+      (moduleState?.kind === "development" &&
+        (signal?.phase === "resolve_event_install_choice" ||
+          signal?.phase === "resolve_delayed_program_search_choice") &&
+        activeBinding?.sourceStateVersion === previous.stateVersion &&
+        activeBinding.choiceId === originalChoiceId &&
+        activeBinding.choiceSource === originalChoiceSource &&
+        activeBinding.targetCardInstanceId === targetCardInstanceId &&
+        boundTargetCardInstanceId === targetCardInstanceId &&
+        sacrifice?.targetCardInstanceId === targetCardInstanceId)) &&
     choice.side === "runner" &&
     choice.kind === "select_cards" &&
     choice.visibility === "hidden_info_barrier" &&
@@ -1347,7 +1377,7 @@ function resolvePlanBoundRunnerEventInstallMemoryChoice(
       ),
       owner: "continuation",
       removalCondition:
-        "Resolve program-install memory pressure only from the immediately preceding Runner development executor, its exact prebound target and sacrifice, and the current Engine choice contract.",
+        "Resolve program-install memory pressure only from the immediately preceding Runner development or coverage executor, its exact search/install choice, prebound target and sacrifice, and the current Engine choice contract.",
       ...(executor ? { planInstanceId: executor.instanceId } : {}),
     });
   }
@@ -1619,6 +1649,10 @@ function bindSelectedPlanActionOrigin(
     ) === true;
   const canOpenRunnerRunStartOrder =
     selectedAction?.type === "start_run" ||
+    (selectedAction?.type === "play_event" &&
+      runnerEventStartsRunAfterProgramSearch(
+        selectedCandidate?.sourceDefinitionId,
+      )) ||
     ((selectedAction?.type === "play_event" ||
       selectedAction?.type === "activated_card_ability") &&
       (selectedAction.payload?.runnerEventRun === true ||
@@ -1737,8 +1771,12 @@ function advanceSelectedRunnerRunStartOrderOrigin(
     input.side !== "runner" ||
     result.lane !== "engine_window" ||
     !result.portfolio ||
-    !input.playerView.pendingChoice?.source.startsWith(
-      "runner_run_start.order:",
+    !result.diagnostics.some((diagnostic) =>
+      [
+        "plan_bound_runner_run_start_order_choice",
+        "plan_bound_runner_delayed_program_search_choice",
+        "plan_bound_runner_event_install_memory_choice",
+      ].includes(diagnostic.code),
     ) ||
     origin?.immediateChoicePolicy !== "resolve_runner_run_start_order" ||
     result.origin.rootPlanInstanceId !== origin.rootPlanInstanceId ||
@@ -4377,6 +4415,11 @@ function bindSelectedRunnerCoverageSearchChoiceContinuation(
   const boundTarget = {
     ...binding,
     targetCardInstanceId: selectedTarget.instanceId,
+    resolvedSearchChoice: {
+      choiceId: choice.choiceId,
+      choiceSource: choice.source,
+      stateVersion: input.playerView.stateVersion,
+    },
     ...(assessment.memoryRequired
       ? {
           installMemorySacrificeBinding: {
@@ -23237,6 +23280,8 @@ function resolvePlanBoundRunnerRunStartOrderChoice(
     (event) =>
       originIsRunStartOrder &&
       event.stateVersionBefore >= origin.selectedAtStateVersion &&
+      // The setup snapshot (v0 -> v0) is not a selected action transition.
+      event.stateVersionAfter > origin.selectedAtStateVersion &&
       event.stateVersionAfter <= context.input.playerView.stateVersion,
   );
   const exactRunStartContinuation =

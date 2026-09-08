@@ -10,7 +10,6 @@ import proteusDecksJson from "../../../../data/decks/proteus-playtest-decks-2026
 import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import { chooseAiAction } from "../index";
-import { simulateAiGame } from "../simulation";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { buildPlanningStateIdentity } from "../plans/turn-planning-contracts";
 import { buildAiDecisionInput } from "../runtime/ai-decision-input";
@@ -243,45 +242,6 @@ describe("Proteus Hijack plan continuation", () => {
       ),
     ).toBe(true);
   });
-
-  it("keeps Test Spin target and MU choices in its delayed development continuation", () => {
-    resetResidentPlanPortfolioMemory();
-    const summary = simulateAiGame({
-      seed: "proteus-pilot-holdout-02",
-      maxActions: 305,
-      runnerDeck: deck("proteus_runner_hq_virus_derez_2026_05_25"),
-      corpDeck: deck("proteus_corp_region_fast_score_2026_05_25"),
-      runnerControllerMode: "current_candidate",
-      corpControllerMode: "current_candidate",
-    });
-
-    expect(summary.errors).toEqual([]);
-    const testSpinStart = summary.actionSequence.findIndex(
-      (entry) =>
-        entry.actionType === "play_event" &&
-        entry.evidence?.some((item) =>
-          item.includes("onr_proteus_126_test-spin"),
-        ),
-    );
-    expect(testSpinStart).toBeGreaterThanOrEqual(0);
-    const continuation = summary.actionSequence.slice(
-      testSpinStart,
-      testSpinStart + 4,
-    );
-    expect(continuation.map((entry) => entry.actionType)).toEqual([
-      "play_event",
-      "play_event",
-      "resolve_choice",
-      "resolve_choice",
-    ]);
-    for (const entry of continuation) {
-      expect(entry).toMatchObject({
-        side: "runner",
-        planKind: "runner.develop_board_and_hand",
-        fallbackUsed: false,
-      });
-    }
-  }, 30_000);
 });
 
 function hijackState(
