@@ -575,8 +575,56 @@ Ownerprüfung wird nicht gelockert. Der neue Quellregressionstest ist vor der
 Änderung rot, danach sind sechs Quell-/Binarytests und 407 Lifecyclechecks
 grün. Auch das neue echte MSI-Sequenzgate weist das alte 8200 mit
 `installer_lifecycle_sequence_invalid:CommitNetgridLifecycle` ab.
-Korrigierte MSI-Tabelle und nativer Versionswechsel sind noch zu prüfen;
-WIN-I08 bleibt aktiv, kein Push oder Main-Merge.
+Die korrigierte MSI-Tabelle und der native Upgrade-Pilot sind anschließend
+grün (siehe unten); WIN-I08 bleibt aktiv, kein Push oder Main-Merge.
+
+### Build 8201: korrigierter MSI-Abschluss nativ grün
+
+Der reguläre Build aus `2a97297113a3e93c14498bfe40381fc0eb101f2d` liegt sauber
+unter `output/windows-installer-commit-order-8201`. Alle regulären Gates
+bestehen, einschließlich 10.902 Payload-Dateien, 185 Strings in drei Sprachen
+bei drei Skalierungen, sechs Lifecycle-Quell-/Binarytests und 407
+Lifecycle-Komponentenchecks. Die echte MSI-Tabelle bestätigt
+`RemoveExistingProducts=6501 < VerifyNetgridLifecycle=6598 <
+CommitNetgridLifecycle=6599 < InstallFinalize=6600`. Der separate inerte
+Authoring-Probe `msi-authoring-probe-8127c59e40214bfa89cdd98188167285` bestätigt
+dieselbe Reihenfolge und wurde nicht installiert.
+
+- Setup-SHA-256:
+  `f077cee9b8a84b7df202130fec17965640a840cb04ba930d738a8932163fdc10`.
+- MSI-SHA-256:
+  `fa09b84cda930f85f3317a411a41cd421121f4459f742264ce37d09f9880cc25`.
+
+Die unveränderten Artefakte liegen hashgeprüft in `candidate-8201` des
+bisherigen Sandboxinputs. Vor dem Pilotupgrade bestätigen fünf tatsächliche
+8199-Headless-Läufe nach dem vorherigen Abbruch Exit 0 und leeres stderr
+(`native-8199-post8200-health.json`, 05:10:16 UTC). Kein Datenrestore wird daraus
+abgeleitet. Das Pilotfixture `test-native-8199-8201-msi.ps1` lässt nur
+Rootwechsel-Ablehnung, Upgrade und dessen Verifikation zu: Kein Downgrade auf
+die alte, fehlerhafte Commit-Reihenfolge von 8199.
+
+Am 2026-09-08 um 05:16:59 UTC ist die Rootwechsel-Ablehnung grün, einschließlich
+aller unveränderten alten Dateien und Caches. Das echte Upgrade endet um
+05:21:34 UTC mit MSI 0, erfolgreichem Capture/Verify und ohne Commitfehler.
+`native-8199-8201-verifyupgrade.json` bestätigt um 05:22:20 UTC:
+
+- 1.0.8201, ProductCode `{2A5E60ED-DF1E-4539-A301-FBB855136B6C}`;
+- alle 10.890 Manifestdateien sowie vier native Hashes/Dateiversionen korrekt;
+- Registrierung, Original-MSI-Cache, Setupcache und Setup-Startmenüziel korrekt;
+- alter Setupcache einschließlich Änderungszeit und sämtliche vorherigen
+  MSI-Caches unverändert;
+- Snapshot `e3754fb62f214570b7ff2860b88f1380`, Manifest-SHA-256
+  `1a53bde7be538af667c6baabd4a38b2d352da5e650fe401453267bff0667e1f8`,
+  Datenphase `verified`, Lease `completed`, MSI-Bindung freigegeben;
+- MSI-Cache im Snapshot ausgeschlossen, keine Produktprozesse/Listener,
+  Konfiguration und vorhandene Credentials bytegleich erhalten.
+
+Es wurden weder Prozesse manuell beendet noch Registry-/Datenzustände
+repariert. Dieser Sandbox-SYSTEM-Pilot belegt den direkten Upgrade-Fix,
+nicht Standardbenutzerbetrieb, GUI-/Tray-Updater, Downgrade oder Fehlerrestore.
+Als Nächstes ist ein zweiter korrigierter Build für Upgrade, Downgrade und
+gezielte Fehlertransaktion erforderlich. Host-Port 3100 bleibt bei PID 25276;
+Main und Remote sind unverändert, WIN-I08 bleibt offen.
 
 ### Regulärer Build 8199: Installation, Repair und Headless nativ grün
 

@@ -68,16 +68,31 @@ Der Quellstand reiht deshalb `VerifyNetgridLifecycle` und anschließend
 `CommitNetgridLifecycle` erst nach `RemoveExistingProducts` unmittelbar vor
 `InstallFinalize` ein. `RequireMsi` bleibt unverändert streng. Quell- und
 kompilierte MSI-Gates sichern diese Reihenfolge; das alte 8200-MSI fällt im
-neuen Sequenzgate reproduzierbar durch. Die native Abnahme des Fixes ist offen.
+neuen Sequenzgate reproduzierbar durch. Die folgende native Upgrade-Prüfung
+bestätigt den Fix; die vollständige Transaktionsmatrix bleibt offen.
 
-Die lesende Prüfung nach dem fehlgeschlagenen 8200-Lauf bestätigt sämtliche
+Der reguläre Fixbuild 8201 besteht inzwischen die echte Upgrade-Transaktion
+von 8199: MSI 0, Capture und Verify erfolgreich, beide Commit-Callbacks ohne
+Fehler. Die nachfolgende Prüfung bestätigt alle 10.890 Manifestdateien,
+native Versionen/Hashes, Produktregistrierung, ausgewählten Setup-/MSI-Cache,
+Startmenüziel und unveränderte vorherige Caches. Die Snapshotbindung steht
+auf `verified`, die Lease ordnungsgemäß auf `completed`; Konfiguration und
+Credentials sind unverändert. Der MSI-Cache fehlt im Sicherungspayload.
+Dies ist ein Sandbox-SYSTEM-Nachweis für das direkte Upgrade, kein
+Standardbenutzer-/Tray-Test oder Testat für Downgrade und Fehlerrollback.
+Diese weiteren Transaktionen benötigen zwei Builds mit dem korrigierten
+Commit-Zeitpunkt; 8199 wird dafür nicht erneut als Ziel installiert.
+
+Die lesende Prüfung nach dem zuvor fehlgeschlagenen 8200-Lauf bestätigt sämtliche
 10.890 Programmdateien und die Registrierung wieder auf 8199, unveränderte
 Konfiguration/Credentials und keine Produktprozesse oder Listener. Der
 Datenstatus blieb jedoch `verified`, nicht `restored`, bei schon abgeschlossener
 Lease. Daher ist dies ausdrücklich **kein vollständig verifizierter Rollback**.
 Die neue Sicherung enthält den korrekten MSI-Cache-Ausschluss; deren Existenz
 ersetzt keinen Restore. Bis zur korrigierten nativen Transaktionsabnahme bleibt
-die Releasefreigabe gesperrt.
+die Releasefreigabe gesperrt. Vor dem neuen Upgrade bestehen zusätzlich fünf
+installierte 8199-Headless-Läufe mit dem verbliebenen Datenstand. Auch diese
+Funktionsprüfung ist ausdrücklich kein nachträglicher Datenrestore-Nachweis.
 
 Der native Healthabschluss von 8195/8196 kann am HTTP-Stopp hängen: Eine
 vorab geöffnete TCP-Verbindung ohne vollständige Anfrage bleibt nach
@@ -481,6 +496,15 @@ die geschützte Weitergabe der äußeren Lease und die Bedingungen beider
 Cleanup-Aktionen samt Parameterbereitstellung. Die Registrytests prüfen
 separat Standalone-Besitz, verschachtelte Bindung, fremde/verspätete Abschlüsse
 und das unveränderte äußere Startverbot nach MSI-Commit oder -Rollback.
+
+Die äußere Commit-Aktion wird erst nach dem Einreihen der verschachtelten
+Altversions-Abschlüsse eingetragen. Das entspricht der
+[MSI-Aktionsreihenfolge](https://learn.microsoft.com/en-us/windows/win32/msi/action-execution-order)
+und berücksichtigt, dass ein Fehler in einer
+[Commit-Aktion](https://learn.microsoft.com/en-us/windows/win32/msi/commit-custom-actions)
+noch einen Rollback auslösen kann. Die tatsächliche Tabelle des 8201-MSI
+enthält `RemoveExistingProducts=6501`, `VerifyNetgridLifecycle=6598`,
+`CommitNetgridLifecycle=6599` und `InstallFinalize=6600`.
 
 Die reine Diagnosekompilierung unter
 `output/msi-ownership-probe-0afaa24b96a8473ab29ddf76b13ba5a6/NOT-FOR-INSTALLATION.msi`
