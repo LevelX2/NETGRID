@@ -29,6 +29,10 @@ festen Parallelprozesse oder mehr als ein Worker je Shard werden erst nach
 einer dokumentierten Laufzeit-, RAM- und Stabilitätsmessung zum neuen Standard.
 
 Tests mit Timeout oder abgebrochene Prozesse gelten nicht als bestanden.
+Ein grüner Testzähler reicht nicht: Auch der Sammelbefehl einschließlich
+Prozessende und Cleanup muss erfolgreich abschließen. Temporäre Dateisperren
+dürfen nach beendetem Testprozess begrenzt abgewartet werden; dauerhaft
+gesperrte Artefakte und Teardown-Fehler werden nicht stillschweigend ignoriert.
 
 ## Stabiler Testvertrag statt historischer Momentaufnahme
 

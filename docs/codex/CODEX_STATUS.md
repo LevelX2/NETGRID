@@ -1,6 +1,6 @@
 # CODEX_STATUS
 
-Stand: 2026-09-05
+Stand: 2026-09-08
 
 ## Einstieg
 
@@ -94,14 +94,19 @@ Spielevidence und dem Integrationsstand ab. Die ehemals offenen 18
 Main-Baseline-Erwartungsfehler waren veraltete Testbindungen an historische
 Einzelaktionen, absolute Simulationspositionen und Vollspielstände. Sie sind
 gegen die aktuellen Owner-, Executor-, Capability-, Legalitäts- und
-Replayverträge neu gebunden. Der aktuelle Integrationscheckpoint nach der
-Metaserie 403 umfasst 5.181 Tests in drei festen AI-Shards: 5.174 bestanden,
-sieben fehlgeschlagen. Fünf veraltete Erwartungen wurden anschließend ohne
-produktive Änderung an die aktuellen Finanzierungs- und Replayverträge
-gebunden; alle 32 Tests der fünf betroffenen Dateien bestehen. Zwei bekannte
-Erwartungsfehler bleiben offen: SP-082-Scorekontinuität und die
-Proteus-TestSpin-Vollspielsequenz. Ein vollständig grüner Gesamtlauf ist für
-diesen Stand daher nicht belegt. Die finale unveränderte 40-Spiele-Population
+Replayverträge neu gebunden. Der Gesamttest vom 2026-09-08 ist vollständig
+grün: 5.215 AI-Tests in 619 Dateien über drei feste Shards, 3.777 Tests der
+übrigen Pakete, acht Spec-Tests, sieben Selfplay-Evidence-Tests und 15 E2E-Tests.
+Discovery, AI-Strukturgates, Paketgrenzen, Typechecks und Gesamtbuild sind
+ebenfalls bestanden. SP-082-Finanzierung, R&D-Protocol-Ordering und Test Spin
+verwenden jetzt gezielt hergestellte Engine-Pfade statt vorausgesetzter
+Vollspielverläufe. Dabei wurde zusätzlich ein echter Test-Spin-Fehler behoben:
+direktes Ausspielen, Such-Choice, Coverage-MU-Freigabe und Runstart-Ordering
+erhalten denselben exakt gebundenen Ursprung. Fehlende oder fremde Bindungen
+bleiben fail-closed; Replay und StateHash sind für die Pfade geprüft.
+Der E2E-Runner wartet nach Prozessende begrenzt auf die Dateifreigabe durch
+Windows; ein dauerhaft gesperrtes Artefakt lässt den Befehl weiterhin scheitern.
+Die finale unveränderte 40-Spiele-Population
 der Metaserie enthält 10.851 Entscheidungen ohne technische Audit-Flags;
 die 707 angewandten Choices sind gegen die LegalActions geprüft.
 Für wachsende Kataloge und
