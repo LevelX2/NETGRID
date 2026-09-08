@@ -694,12 +694,64 @@ Testnachweis erhalten. Host-Port 3100 gehört unverändert PID 25276.
 
 Dies ist der direkte ruhende Sandbox-SYSTEM-MSI-Pfad, nicht der vollständige
 Tray-Updater, Aktivspielschutz, Standardbenutzer- oder Absturzreparaturpfad.
-Für die nächste frische lokale MSI-Matrix ist ausschließlich der Hostinput
+Der alte Sandboxgast wurde nach geprüftem Stillstand mit der erteilten
+Freigabe zum Ersetzen eigener Testdaten geschlossen. Seine hostseitigen
+Ergebnisdateien bleiben erhalten; gastinterne Daten und Snapshots sind nach
+dem Schließen nicht mehr verfügbar.
+
+Die frische lokale MSI-Matrix läuft seit 05:58 UTC am 8. September unter
 `output/windows-sandbox-e2e/4e3eb1bf3ede4e27bcf4278dcc097dde` mit denselben
-geprüften Builds vorbereitet (`PrepareOnly`, Netzwerk aus, kein alter
-synthetischer Updater-Rollbackharness). Eine zweite Sandbox wurde noch nicht
-gestartet. WIN-I08, Main-Integration und sämtliche übrigen Gates bleiben offen;
+geprüften Builds. Genau eine Sandbox ist aktiv:
+`59413984-bfbe-4480-a66e-aa73e4a70477`, Windows 11 Enterprise 10.0.26100,
+Netzwerk aus und ohne Entwicklungswerkzeuge. Der unveränderte Matrixworker
+hat PID 7500, Erzeugungszeit 05:58:18 UTC. Die read-only Beobachtung um
+06:26:24 UTC bestätigt den laufenden Worker; das Gesamtergebnis fehlt noch.
+Default-/Custom-Installation, Retention-Neuinstallation, Reparatur,
+Ordnerwechsel-Ablehnung und Upgrade wurden bereits durchlaufen. Die folgende
+ProductCode-Reparatur endet um 06:25:10 UTC mit MSI-Exit 0; Downgrade und
+abschließende Entfernung sind noch nicht abgenommen. Maßgeblich bleiben
+`installer-result.json` und `suite-result.json` nach beendetem Worker.
+Die vollständigen MSI-Logs müssen vor dem Schließen dieses Gasts aus seinem
+eindeutig gebundenen Test-Tempordner in den hostseitigen Ergebnisordner
+kopiert und per SHA-256 verifiziert werden. Das vorbereitete, rein lesende
+Produktfixture `input/collect-matrix-logs.ps1` verweigert die Sammlung bei
+laufendem Worker oder bereits vorhandenem Exportziel.
+WIN-I08, Main-Integration und sämtliche übrigen Gates bleiben offen;
 kein Push oder Release.
+
+### Offene MSI-Alleininstallation: Setup-Cache ohne externe Setupquelle
+
+Die Quellprüfung zeigt eine bislang nicht geschlossene Produktlücke:
+`CacheNetgridSetup` läuft nur mit gesetztem `NETGRID_SETUP_SOURCE`.
+Der vollständige Setup-Host wird erst nach dem MSI gebaut und enthält dieses
+als Managed Resource. Eine frische MSI-Alleininstallation erhält deshalb
+keine vollständige gecachte Setup-EXE für Setup-Verknüpfung und späteren
+Updater-Rückkehrpfad. Die laufende Matrix übergibt die Setupquelle und belegt
+diesen Sonderfall ausdrücklich nicht. Er darf nicht durch Entfernen des
+MSI-Produkts aus dem zugesagten Scope als erledigt gelten.
+
+Ein isolierter Machbarkeitsversuch unter
+`output/setup-overlay-probe-a6d829159a7b47d6a07d86129fce11b8` ist grün:
+Ein selbstenthaltener .NET-10-WinForms-Single-File-Prozess startet nach
+Anhängen des unveränderten 255.447.860-Byte-MSI von Build 8202 und eines
+Probeabschlusses mit Exit 0 und `NETGRID_SETUP_OVERLAY_PROBE_OK`.
+`composition.json` bindet Stub und MSI per Größe und SHA-256. Der Versuch
+führt keine MSI-Payload aus und ist weder Produktimplementierung noch
+Installationsnachweis.
+
+Zu prüfender Ursachen-Fix: Setup-Stub vor dem MSI bauen und mitliefern;
+öffentliche Setup-EXE sowie lokal gecachte Setup-EXE aus identischen
+Stub-/MSI-Bytes über genau einen gemeinsamen, deterministischen Bundle-
+Writer/Reader erzeugen. MSI bleibt Installationsautorität,
+`InstalledSetupCache` behält ProductCode-Bindung und unveränderliche Einträge,
+der Updater seinen bestehenden Rückkehrpfad. Erforderlich sind strikte
+Längen-/Hash-/Identitätsprüfung, geschützte atomare Dateiverarbeitung,
+bytegleiche Rekonstruktion, korrekte Speicherplatzberechnung und eine native
+Offline-MSI-Alleininstallation einschließlich Reparatur/Update/Rollback.
+Keine zweite Installationsteuerung oder Legacy-Dual-Reader einführen.
+Die bytegleiche Rekonstruktion eines später außen Authenticode-signierten
+Setups ist damit noch nicht gelöst; dieser Versuch betrifft ausschließlich
+die bereits freigegebene unsignierte private Alpha.
 
 ### Regulärer Build 8199: Installation, Repair und Headless nativ grün
 
