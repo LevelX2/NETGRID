@@ -75,6 +75,10 @@ nicht stillschweigend zum Vertrag erklären.
   Windows-Pfade aus; natives `path.basename` allein genügt dafür nicht.
   Tests bilden beide Pfadinterpretationen auch lokal ab und prüfen die
   Ablehnung vor dem Dateizugriff sowie das Zulassen gültiger Dateinamen.
+- Host-native Speicherpfade verwenden host-native absolute Testfixtures.
+  Ein hartcodierter Windows-Pfad ist unter Linux kein absoluter Pfad.
+  Konfigurationsprüfungen sichern Override-Priorität, relative Auflösung und
+  Normalisierung statt eine betriebssystemfremde Pfadschreibweise ab.
 - Berechnete Scores, Reserven und Diagnosewerte werden nur exakt fixiert, wenn
   ihre konkrete Berechnung Vertragsgegenstand ist. Sonst wird die stabile
   Klassifikation oder der verantwortliche Pfad geprüft.

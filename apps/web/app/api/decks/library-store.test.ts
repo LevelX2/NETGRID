@@ -1,6 +1,6 @@
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { tmpdir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import { describe, expect, it } from "vitest";
 import type { EditableDeck } from "@netgrid/decks";
 import {
@@ -27,25 +27,52 @@ const runnerDeckNeedsRevalidation = {
 };
 
 describe("deck file library", () => {
-  it("uses the application data folder on Windows by default", () => {
+  it("uses APPDATA as the default application data folder when configured", () => {
+    const appData = join(tmpdir(), "app-data");
     expect(
       defaultDeckLibraryPath({
-        APPDATA: "C:\\Users\\Lui\\AppData\\Roaming",
-      } as unknown as NodeJS.ProcessEnv),
-    ).toBe(join("C:\\Users\\Lui\\AppData\\Roaming", "NetGrid", "Decks"));
+        NODE_ENV: "test",
+        APPDATA: appData,
+      }),
+    ).toBe(join(appData, "NetGrid", "Decks"));
   });
 
-  it("uses the NETGRID deck library env name when set", () => {
+  it.each(["Netgrid", "Custom"])(
+    "uses the absolute NETGRID deck library override (%s) before defaults",
+    (folder) => {
+      // Absolute filesystem paths must be native to the host running the test.
+      const configuredPath = join(tmpdir(), "decks", folder);
+      expect(
+        defaultDeckLibraryPath({
+          NODE_ENV: "test",
+          NETGRID_DECK_LIBRARY_PATH: configuredPath,
+          APPDATA: join(tmpdir(), "ignored-app-data"),
+          XDG_DATA_HOME: join(tmpdir(), "ignored-xdg-data"),
+        }),
+      ).toBe(configuredPath);
+    },
+  );
+
+  it("resolves and normalizes a relative override against the working directory", () => {
     expect(
       defaultDeckLibraryPath({
-        NETGRID_DECK_LIBRARY_PATH: "C:\\Decks\\Netgrid",
-      } as unknown as NodeJS.ProcessEnv),
-    ).toBe("C:\\Decks\\Netgrid");
+        NODE_ENV: "test",
+        NETGRID_DECK_LIBRARY_PATH: "relative-decks/../selected-decks",
+      }),
+    ).toBe(join(process.cwd(), "selected-decks"));
+  });
+
+  it("uses XDG_DATA_HOME when APPDATA is absent", () => {
+    const dataHome = join(tmpdir(), "xdg-data");
     expect(
-      defaultDeckLibraryPath({
-        NETGRID_DECK_LIBRARY_PATH: "C:\\Decks\\Custom",
-      } as unknown as NodeJS.ProcessEnv),
-    ).toBe("C:\\Decks\\Custom");
+      defaultDeckLibraryPath({ NODE_ENV: "test", XDG_DATA_HOME: dataHome }),
+    ).toBe(join(dataHome, "netgrid", "decks"));
+  });
+
+  it("uses the user home when no storage environment setting is present", () => {
+    expect(defaultDeckLibraryPath({ NODE_ENV: "test" })).toBe(
+      join(homedir(), ".netgrid", "decks"),
+    );
   });
 
   it("writes editable decks as local JSON files and reads them back", async () => {
