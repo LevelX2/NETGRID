@@ -3363,6 +3363,17 @@ Deckstrategie, Hand, Agendaexposition und erwarteter früher Run-Gefahr.
 
 ### 28.2 `corp.score_agenda`
 
+Das Fehlen einer Agenda in HQ erzeugt keinen generischen Score-Parent und
+keinen Auftrag, nach unbekanntem Agendamaterial zu ziehen. Der Score-Owner
+beginnt mit einer konkret verfügbaren Agenda oder einer aktuell gequoteten
+Punktkonversion. Bis dahin dürfen vorhandenes Handpotenzial, Economy und
+Defense aufgebaut werden; der normale Mandatory Draw liefert neue Karten.
+Ein optionaler Draw benötigt einen unabhängig begründeten Bedarf, etwa die
+Suche nach fehlender wirksamer ICE. Eine bekannte bedrohte Agenda in R&D wäre
+ein konkreter Informations-/Defense-Fall und darf nur aus dafür tatsächlich
+verfügbaren side-sicheren Fakten begründet werden. Weder allgemeine
+Agendadichte noch eine leere Agenda-Hand ersetzen diesen Nachweis.
+
 Für eine installierte Agenda unterscheidet der Scoreowner die vollständigen
 Kosten der aktuellen Konversion von der bis zum nächsten Corp-Zug nötigen
 Reserve. Eine Engine-Quote mit `creditsRequiredBeforeNextCorpTurn: 0` bedeutet
@@ -4065,8 +4076,8 @@ diesen Wert statt nur den nächsten Bruttobetrag. Jede ausgeführte Entnahme
 bleibt an die aktuelle Engine-Action gebunden und wird danach neu bewertet.
 Die Projektion reserviert keine künftigen Klicks und erzwingt kein vollständiges
 Leeren; andere Ziele dürfen die Folge unterbrechen. Eine rentable Installation
-ist damit zugelassen, gewinnt aber nicht automatisch gegen Agenda-Suche,
-Scoring oder Defense.
+ist damit zugelassen, gewinnt aber nicht automatisch gegen einen konkreten
+Defense-Suchbedarf, Scoring oder andere Defense-Maßnahmen.
 
 Wiederholte Nutzung ist zulässig, solange sie das Fundingziel real
 voranbringt. Nach erreichter Zielreserve muss das Modul dem finanzierten

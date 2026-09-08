@@ -164,10 +164,16 @@ describe("hardened decision contracts on real Engine inputs", () => {
       withIceInput.legalActions.find(
         (action) => action.actionId === eligible.actionId,
       )?.type,
-    ).toBe("draw_card");
-    expect(eligible.actionId).not.toBe(rasminWithIce.actionId);
+    ).toBe("install_card");
+    expect(
+      withIceInput.legalActions.find((a) => a.actionId === eligible.actionId)
+        ?.source,
+    ).toBe(rasminWithIce.source);
+    expect(
+      eligible.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+    ).toMatch(/^plan:corp\.defend_servers:/);
     // Existing funded central ICE is not a missing-ICE search reason.
-    // Rasmin is eligible, while the global portfolio may still prefer draw.
+    // The eligible defensive upgrade wins without an invented agenda-search parent.
     expect(
       corpUpgradePlacementExclusion(
         upgradePlacementParams(withIceInput, rasminWithIce),
@@ -395,7 +401,7 @@ describe("hardened decision contracts on real Engine inputs", () => {
     expect(state.pendingChoice).toBeUndefined();
   });
 
-  it("selects Corporate Shuffle for exact score-material rotation when cleanup overflow is covered", () => {
+  it("preserves the Corporate Shuffle quote but draws only for the concrete defense need", () => {
     let state = createGameAfterSetup({
       seed: "contract-corporate-shuffle-low-hq",
       agendaPointsToWin: 7,
@@ -428,8 +434,9 @@ describe("hardened decision contracts on real Engine inputs", () => {
     });
     expect(input.playerView.own.gripOrHq).toHaveLength(3);
     expect(decision).toMatchObject({
-      actionId: shuffle?.actionId,
-      reasonCode: "plan_first.corp.hand_and_agenda_management",
+      actionId: input.legalActions.find((a) => a.type === "draw_card")
+        ?.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
       fallbackUsed: false,
     });
   });

@@ -321,8 +321,9 @@ Defense-Bewertung bestimmt weiterhin den Schutzhorizont. Der Engine-Test
 belegt die Zulassung einer rentablen geschützten Installation, die Ablehnung
 einer unprofitablen oder unfinanzierten Economy-Installation sowie die
 tatsächliche Wahl und Ausführung der Auszahlung über den Economy-Owner.
-Er behauptet ausdrücklich keine automatische Wahl der Installation oder des
-Rez vor einer begründeten Agenda-Suche und keine reservierte Komplettauszahlung.
+Nach der unten beschriebenen Korrektur der Corp-Policy belegt derselbe Test
+auch die tatsächliche Wahl von Installation und Rez vor dem früheren blinden
+Agenda-Suchauftrag. Eine reservierte Komplettauszahlung wird nicht behauptet.
 
 Die Architektur bleibt unverändert: keine Karten-ID-Boni, kein zweiter
 Chooser, keine zusätzlichen LegalActions und keine verdeckten Gegnerdaten.
@@ -358,10 +359,55 @@ Mechaniken ist nachgewiesen, ein Siegquotengewinn oder generell optimale
 Installation wird nicht behauptet. Lokale Details:
 `data/local/deck-value-final-results.json` und `data/local/deck-value*-tests/`.
 
-Offener, vom Nutzer konkretisierter Folgebefund: Der generische Score-Plan
-erzeugt allein wegen fehlender HQ-Agendas einen Agenda-Such-Draw und kann
-damit rentablen Economy-Aufbau verdrängen. Dieser Auslöser ist noch zu
-korrigieren; bloßes Fehlen einer Agenda begründet keine Beschleunigung.
+### Corp-Aufbau vor spekulativer Agenda-Suche
+
+Der vom Nutzer konkretisierte Folgebefund ist im separaten Worktree
+ursächlich korrigiert: Der bisherige generische Score-Plan entstand allein
+wegen fehlender HQ-Agendas und erzeugte einen Agenda-Such-Draw. Er konnte
+dadurch rentablen Economy-Aufbau verdrängen. Dieser automatische Parent und
+sein Suchauftrag entfallen. Konkrete Agenda-Konversionen, wirksame
+Defense-Suche und normale Mandatory Draws bleiben erhalten. Der Fix setzt
+weder die Draw-Aktion pauschal herunter noch gibt er bestimmten Karten einen
+Namensbonus.
+
+Der Engine-Test mit Rockerboy wählt jetzt die vollständige aktuelle Folge
+aus Installation in einen geschützten Remote, Rez und Auszahlung. Ein
+weiterer Engine-Fall verwendet ein vorhandenes sinnvolles Defense-Upgrade,
+statt ohne konkreten Bedarf eine unbekannte Agenda zu suchen. Frühere
+Tests, die gerade diese blinde Agenda-Suche verlangten, sind auf den
+korrigierten fachlichen Vertrag umgestellt.
+
+Der vollständige AI-Shardlauf deckte **5.238 Tests in 623 Dateien** ab.
+Er meldete sieben Abweichungen: sechs überholte Verhaltenserwartungen
+(einschließlich einer durch den geänderten Spielverlauf anders gewählten,
+weiterhin exakt gebundenen Run-Route) und Karls noch fehlende Aktualisierung
+im semantischen Hint-Golden. Diese Erwartungen sind gezielt korrigiert und
+nachgeprüft; Engine-Zustände, Quotes und negative Wirkungsprüfungen wurden
+dabei nicht abgeschwächt. Der Erstlauf der Shards war damit nicht grün;
+die abschließende gemeinsame Nachprüfung besteht mit **415 Tests in elf
+Dateien**. KI-Typecheck, Struktur-/Metadaten-/Karten-ID-Gates bestehen.
+
+Ein weiterer Vergleich aller **36 identischen Deck-/Seed-Kombinationen**
+gegen den Stand mit korrigierter Kartenbewertung, aber noch blindem
+Agenda-Suchauftrag, endet vollständig regulär und mit gültigem Replay:
+
+| Paarung, Siege des überarbeiteten Decks     | Vor Corp-Policy-Korrektur | Danach |
+| ------------------------------------------- | ------------------------: | -----: |
+| Breaker Lab gegen Shadoe, 12 Seeds          |                         6 |      5 |
+| Breaker Lab gegen Tycho, 6 Seeds            |                         4 |      5 |
+| Remote Lab gegen King of the Hill, 12 Seeds |                         0 |      0 |
+| Remote Lab gegen Purge Window, 6 Seeds      |                         2 |      2 |
+
+In den Runner-Paarungen verändert diese Corp-Korrektur den Gegner. Die Werte
+sind daher kein isolierter Stärkenachweis für die Runner-Deckrevision.
+Karl bleibt bei zwei Installationen und acht ausgezahlten Credits, Rockerboy
+bei einer genutzten Quelle und 15 Credits. Die fokussierten Entscheidungsfälle
+belegen die korrigierte Nutzung vorhandener Karten; die kleine Stichprobe
+belegt weiterhin keine generelle Siegquotensteigerung.
+Die vollständigen lokalen Nachweise liegen im Worktree
+`C:/Projekte/NETGRID-worktrees/corp-agenda-draw-intent-20260908/data/local/`
+unter `deck-agenda-draw-results.json`, `deck-agenda-draw-tests/` und
+`agenda-draw-*.log`.
 
 ## Führende Quellen
 

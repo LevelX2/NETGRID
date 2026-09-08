@@ -376,7 +376,6 @@ import {
   corpUpgradeInstallPlacementComponent,
   corpUpgradePlacementAssessment,
 } from "./corp-upgrade-placement";
-import { corpKnownAgendaInventory } from "./corp-known-agenda-inventory";
 import { allocateCorpCentralDefenseFromAiFacts } from "./corp-central-defense-facts-adapter";
 import {
   corpCentralDefenseHqAgendaExposureIsDeadline,
@@ -838,7 +837,6 @@ export function choosePlanFirstLiveAction(
     dependencies.discardKeepScore,
   );
   bindSelectedCorpDefenseDrawAttempt(input, result);
-  bindSelectedCorpHandDrawAttempt(input, result);
   bindSelectedCorpHqOverflowConversion(input, result);
   bindSelectedCorpArchivesToHqChoiceContinuation(
     input,
@@ -3123,45 +3121,6 @@ function bindSelectedCorpDefenseDrawAttempt(
     return;
   }
   selectedSignal.drawAttemptState = {
-    turnKey: turnKey(input),
-    remainingAttempts: 0,
-    selectedAtStateVersion: input.playerView.stateVersion,
-  };
-}
-
-function bindSelectedCorpHandDrawAttempt(
-  input: AiDecisionInput,
-  result: PlanSchedulerResult,
-): void {
-  if (
-    result.lane !== "plan" ||
-    result.portfolio.executorInstanceId === undefined
-  ) {
-    return;
-  }
-  const executor = result.portfolio.instances.find(
-    (instance) =>
-      instance.instanceId === result.portfolio.executorInstanceId &&
-      instance.moduleId === "corp.hand_and_agenda_management",
-  );
-  const moduleState = executor?.moduleState as
-    | {
-        kind?: unknown;
-        signal?: CorpPlanDomain["handManagement"][number];
-      }
-    | undefined;
-  const signal = moduleState?.signal;
-  if (
-    !executor ||
-    moduleState?.kind !== "hand" ||
-    signal?.handPlanId !== "draw-for-score-material" ||
-    signal.phase !== "draw_for_plan" ||
-    signal.drawAttemptState?.remainingAttempts !== 1 ||
-    signal.actionIds?.includes(result.route.head.actionId) !== true
-  ) {
-    return;
-  }
-  signal.drawAttemptState = {
     turnKey: turnKey(input),
     remainingAttempts: 0,
     selectedAtStateVersion: input.playerView.stateVersion,
@@ -15683,10 +15642,6 @@ function buildCorpDomain(
     centralDefenseAllocation,
   );
   const residentDrawAttempt = corpResidentDefenseDrawAttempt(previous, input);
-  const residentScoreMaterialDrawAttempt = corpResidentScoreMaterialDrawAttempt(
-    previous,
-    input,
-  );
   const eventDrawAttempted =
     corpOptionalDrawAttemptedInEventTailThisTurn(input);
   const defenseDrawAttemptConsumed =
@@ -15774,10 +15729,6 @@ function buildCorpDomain(
   const ownAgendas = input.playerView.own.gripOrHq.filter(
     (card) => card.known && visibleCardIsAgenda(input, card),
   ).length;
-  const legalCorpDraw = candidates.some(
-    (candidate) => candidate.semanticActionType === "draw.card",
-  );
-  const knownAgendaInventory = corpKnownAgendaInventory(input);
   const agendaInstancesWithPreparedRemote = new Set(
     proposedScoreProjects
       .filter(
@@ -15927,30 +15878,11 @@ function buildCorpDomain(
           : project;
       })
     : concreteScoreProjects;
-  const scoreMaterialMissing =
-    ownAgendas === 0 &&
-    continuityBoundScoreProjects.length === 0 &&
-    knownAgendaInventory !== undefined &&
-    knownAgendaInventory.remainingStealableAgendaPoints !== 0;
-  const scoreMaterialDrawSupportAvailable =
-    scoreMaterialMissing &&
-    legalCorpDraw &&
-    corpScoreMaterialDrawHasSafeConversionWindow(input);
+  // Missing HQ agendas are not an actionable scoring window. Optional draws
+  // need an independently justified development or defense purpose; the
+  // mandatory draw will expose fresh scoring material at its normal cadence.
   const scoreProjects: CorpScoreProjectSignal[] = [
     ...continuityBoundScoreProjects,
-    ...(scoreMaterialMissing
-      ? [
-          {
-            projectId: "general",
-            agendaPoints: 0,
-            phase: "select_agenda" as const,
-            sameTurnCloseout: false,
-            terminalScore: false,
-            feasible: false,
-            evidenceCode: "corp_score_campaign_missing_agenda_material",
-          },
-        ]
-      : []),
   ];
   const deferredLastClickScoreProject =
     corpKnownDeferredLastClickScoreProject(scoreProjects);
@@ -17148,18 +17080,6 @@ function buildCorpDomain(
       centralDefenseAllocation,
     ).map((disposition) => disposition.actionId),
   );
-  const scoreMaterialDrawAttemptConsumed =
-    residentScoreMaterialDrawAttempt !== undefined || eventDrawAttempted;
-  const scoreMaterialDrawRouteActionIds =
-    scoreMaterialDrawAttemptConsumed || !scoreMaterialDrawSupportAvailable
-      ? []
-      : candidates
-          .filter(
-            (candidate) =>
-              !defenseDispositionActionIds.has(candidate.actionId) &&
-              exactCurrentCorpScoreMaterialDrawCandidate(input, candidate),
-          )
-          .map((candidate) => candidate.actionId);
   const scoreSetupBinding = corpScoreAccelerationSetupBinding(
     input,
     candidates,
@@ -17188,52 +17108,6 @@ function buildCorpDomain(
   const hqOverflowActionIds = new Set(hqOverflowResolution?.actionIds ?? []);
   const handManagement: CorpPlanDomain["handManagement"] = [
     ...(hqOverflowResolution ? [hqOverflowResolution] : []),
-    ...(scoreMaterialMissing
-      ? [
-          {
-            handPlanId: "draw-for-score-material",
-            parentPlanInstanceId: planInstanceIdForProposal({
-              moduleId: "corp.score_agenda",
-              dedupeKey: "general",
-            }),
-            parentNeedId: "score-material:general",
-            phase: "draw_for_plan" as const,
-            agendaCount: ownAgendas,
-            handSize: input.playerView.own.gripOrHq.length,
-            maximumHandSize: input.playerView.own.maxHandSize,
-            actionIds: scoreMaterialDrawRouteActionIds,
-            concretePurposeCode:
-              "Execute one currently legal Engine-described draw action, observe every drawn identity, then revalidate the blocked score-material campaign.",
-            uncertainty: {
-              kind: "draw_then_observe" as const,
-              unknownOutcome: "drawn_card_identity" as const,
-              revalidateAfterCurrentHead: true as const,
-            },
-            drawAttemptState: {
-              turnKey: currentTurnKey,
-              remainingAttempts: scoreMaterialDrawAttemptConsumed
-                ? (0 as const)
-                : (1 as const),
-              ...(residentScoreMaterialDrawAttempt
-                ? {
-                    selectedAtStateVersion:
-                      residentScoreMaterialDrawAttempt.selectedAtStateVersion,
-                  }
-                : eventDrawAttempted
-                  ? {
-                      selectedAtStateVersion: Math.max(
-                        0,
-                        input.playerView.stateVersion - 1,
-                      ),
-                    }
-                  : {}),
-            },
-            priorityClass: "P5" as const,
-            value: 80,
-            evidenceCode: "corp_score_campaign_missing_agenda_material",
-          },
-        ]
-      : []),
     ...cardDevelopmentSignals.filter(
       (signal) =>
         !signal.evidenceCode.startsWith(
@@ -22945,16 +22819,6 @@ function corpTraceSupportTargetHasVisibleTraceSource(
         (subroutine) => subroutine.type === "initiate_trace",
       ) === true,
   );
-}
-
-function corpScoreMaterialDrawHasSafeConversionWindow(
-  input: AiDecisionInput,
-): boolean {
-  const lastAction = input.playerView.own.clicks <= 1;
-  const opponentAtMatchpoint =
-    input.playerView.opponent.agendaPoints >=
-    input.playerView.agendaPointsToWin - 1;
-  return !(lastAction && opponentAtMatchpoint);
 }
 
 function corpPunishCandidateHasVisibleEffect(
@@ -33749,78 +33613,6 @@ function corpResidentDefenseDrawAttempt(
     }
   }
   return undefined;
-}
-
-function corpResidentScoreMaterialDrawAttempt(
-  previous: ResidentPlanPortfolio | undefined,
-  input: AiDecisionInput,
-):
-  | {
-      selectedAtStateVersion: number;
-    }
-  | undefined {
-  const instance = previous?.instances.find(
-    (candidate) =>
-      candidate.moduleId === "corp.hand_and_agenda_management" &&
-      candidate.dedupeKey === "draw-for-score-material",
-  );
-  if (!instance) return undefined;
-  const moduleState = instance.moduleState as
-    | {
-        kind?: unknown;
-        signal?: CorpPlanDomain["handManagement"][number];
-      }
-    | undefined;
-  const signal = moduleState?.signal;
-  const attempt = signal?.drawAttemptState;
-  if (!attempt) return undefined;
-  const turnKeyMatch = /^corp:(0|[1-9]\d*)$/.exec(attempt.turnKey);
-  const exactParentInstanceId = planInstanceIdForProposal({
-    moduleId: "corp.score_agenda",
-    dedupeKey: "general",
-  });
-  const valid =
-    moduleState?.kind === "hand" &&
-    instance.parentInstanceId === exactParentInstanceId &&
-    instance.parentNeedId === "score-material:general" &&
-    instance.persistencePolicy === "flexible_support" &&
-    signal?.handPlanId === "draw-for-score-material" &&
-    signal.parentPlanInstanceId === exactParentInstanceId &&
-    signal.parentNeedId === "score-material:general" &&
-    signal.phase === "draw_for_plan" &&
-    signal.uncertainty?.kind === "draw_then_observe" &&
-    signal.uncertainty.unknownOutcome === "drawn_card_identity" &&
-    signal.uncertainty.revalidateAfterCurrentHead === true &&
-    turnKeyMatch !== null &&
-    Number.isSafeInteger(Number(turnKeyMatch[1])) &&
-    (attempt.remainingAttempts === 0 || attempt.remainingAttempts === 1) &&
-    (attempt.remainingAttempts === 0
-      ? Number.isSafeInteger(attempt.selectedAtStateVersion) &&
-        (attempt.selectedAtStateVersion as number) >= 0 &&
-        (attempt.selectedAtStateVersion as number) <= previous!.stateVersion
-      : attempt.selectedAtStateVersion === undefined);
-  if (!valid) {
-    throw new PlanResolutionFailure("invalid_plan_identity", {
-      side: input.side,
-      stateVersion: input.playerView.stateVersion,
-      timingPoint: input.playerView.timingPoint ?? "corp_action.main",
-      legalActionTypes: input.legalActions.map((action) => action.type),
-      owner: "plan_registry",
-      planInstanceId: instance.instanceId,
-      removalCondition:
-        "A resident Corp score-material draw receipt must remain flexible_support-bound to the exact generic score parent and material need, one exact Corp turn, and a consumed state version only after its current legal draw head was selected.",
-    });
-  }
-  if (
-    attempt.turnKey !== turnKey(input) ||
-    attempt.remainingAttempts !== 0 ||
-    input.playerView.stateVersion <= (attempt.selectedAtStateVersion as number)
-  ) {
-    return undefined;
-  }
-  return {
-    selectedAtStateVersion: attempt.selectedAtStateVersion as number,
-  };
 }
 
 function corpResidentCentralDefenseHqHoldState(

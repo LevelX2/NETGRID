@@ -66,10 +66,10 @@ function input(state: GameState) {
     },
   });
 }
-it("admits a funded protected investment and prioritizes its remaining payout campaign", () => {
+it("develops funded economy before speculative agenda search and takes the actual payouts", () => {
   let state = prepared(true);
   const first = input(state);
-  chooseAiAction(first);
+  const installationDecision = chooseAiAction(first);
   const portfolio = residentPlanPortfolioSnapshot(first)!;
   const campaign = portfolio.instances.find(
     (p) => p.moduleId === "corp.economy" && p.phase === "install",
@@ -82,24 +82,34 @@ it("admits a funded protected investment and prioritizes its remaining payout ca
       riskAdjustment: { protectionState: "protected_not_contestable" },
     },
   });
-  // An agenda-material draw can legitimately win this competition. Exercise the
-  // admitted investment's exact legal head to check the subsequent real decisions.
   const chosen = first.legalActions.find(
-    (a) => a.type === "install_card" && a.payload?.serverId === "remote_1",
+    (a) => a.actionId === installationDecision.actionId,
   )!;
+  expect(chosen).toMatchObject({
+    type: "install_card",
+    payload: { serverId: "remote_1" },
+  });
+  expect(
+    installationDecision.decisionDebug?.planFirstDecision
+      ?.leafExecutorInstanceId,
+  ).toMatch(/^plan:corp\.economy:/);
   expect(state.cardInstances[chosen.source]!.definitionId).toBe(pool);
   state = apply(state, chosen);
   resetResidentPlanPortfolioMemory();
   const next = input(state);
-  chooseAiAction(next);
+  const rezDecision = chooseAiAction(next);
   expect(
     residentPlanPortfolioSnapshot(next)!.instances.some(
       (p) => p.moduleId === "corp.economy" && p.phase === "rez",
     ),
   ).toBe(true);
   const rezAction = next.legalActions.find(
-    (a) => a.type === "rez_card" && a.source === chosen.source,
+    (a) => a.actionId === rezDecision.actionId,
   )!;
+  expect(rezAction).toMatchObject({ type: "rez_card", source: chosen.source });
+  expect(
+    rezDecision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+  ).toMatch(/^plan:corp\.economy:/);
   state = apply(state, rezAction);
   resetResidentPlanPortfolioMemory();
   const payoutInput = input(state);

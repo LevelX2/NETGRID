@@ -10663,11 +10663,40 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["resource"],
         "planRoles": ["build_rig", "economy"],
-        "valueHints": { "economy": 1 },
-        "functionSignals": ["resource.connection"],
+        "valueHints": {
+          "economy": 1
+        },
+        "effects": [
+          {
+            "kind": "economy",
+            "scope": "runner",
+            "timing": "after_successful_run",
+            "resource": "credits",
+            "target": "run.successful_run_credit_gain",
+            "amount": 1,
+            "repeatable": true
+          }
+        ],
+        "functionSignals": [
+          "resource.connection",
+          "economy.successful_run_credits"
+        ],
         "tacticSignals": ["economy.card"],
-        "actionTacticSignals": ["economy.card"],
-        "costProfile": { "clicks": 1, "credits": 2 },
+        "actionTacticSignals": [
+          "economy.card",
+          "effect:economy",
+          "effect_scope:runner",
+          "effect_timing:after_successful_run"
+        ],
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 2
+        },
         "riskTags": ["resource_trash_if_tagged", "unique_resource"],
         "quality": {
           "hintReviewed": true,

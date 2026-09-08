@@ -65,16 +65,21 @@ describe("match Manhunt exact decision checkpoints", () => {
     expect(result.ok, result.message).toBe(true);
   });
 
-  it("draws for missing score material when no tag action remains", () => {
+  it("takes the available certified economy payout instead of a blind agenda search", () => {
     const noTagWindow = mutateFixture(cp02Json, (fixture) => {
       moveCorpCardsToArchives(fixture, new Set([CHANCE_OBSERVATION]));
       fixture.expectation = {
-        acceptableActions: [{ type: "draw_card" }],
+        acceptableActions: [
+          {
+            type: "activated_card_ability",
+            sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+          },
+        ],
         planExecution: {
-          acceptablePlanKinds: ["corp.hand_and_agenda_management"],
-          acceptableCapabilities: ["draw_for_plan"],
+          acceptablePlanKinds: ["corp.economy"],
+          acceptableCapabilities: ["develop_or_convert_corp_economy"],
           requiredAssessmentEvidence: [
-            "corp_score_campaign_missing_agenda_material",
+            "corp_engine_certified_visible_card_payout:onr_v1_309_bbs-whispering-campaign",
           ],
         },
       };

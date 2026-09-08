@@ -8943,7 +8943,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("reactivates overflow for a support draw but never for unbound action capacity", () => {
+  it("does not create speculative agenda overflow or exploit unbound action capacity", () => {
     resetResidentPlanPortfolioMemory();
     const installPacifica = pacificaOverflowInstall(
       "install-pacifica",
@@ -9052,8 +9052,8 @@ describe("authoritative plan-first live runtime", () => {
     supportDraw.playerView.legalActions = supportDraw.legalActions;
 
     expect(context.chooseSemanticRuntimeAction(supportDraw, {})).toMatchObject({
-      actionId: draw.actionId,
-      reasonCode: "plan_first.corp.hand_and_agenda_management",
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
     expect(
@@ -9064,6 +9064,8 @@ describe("authoritative plan-first live runtime", () => {
       expectedOverflowAfterSelectedConversion: 0,
     });
 
+    // Counterfactual external draw: overflow accounting must still reject
+    // unbound action capacity even though the AI no longer requests this draw.
     const afterSupportDraw = structuredClone(supportDraw);
     afterSupportDraw.playerView.stateVersion = 3;
     afterSupportDraw.playerView.own.clicks = 1;
@@ -10453,7 +10455,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("limits score-material observation to one exact basic draw per Corp turn", () => {
+  it("does not recreate a blind agenda search across repeated decisions or turns", () => {
     resetResidentPlanPortfolioMemory();
     const draw = legalAction("draw", "corp", "draw_card", "Draw a card", {
       credits: 0,
@@ -10499,47 +10501,18 @@ describe("authoritative plan-first live runtime", () => {
 
     const firstDecision = context.chooseSemanticRuntimeAction(input, {});
     expect(firstDecision).toMatchObject({
-      actionId: "draw",
-      reasonCode: "plan_first.corp.hand_and_agenda_management",
+      actionId: "credit",
+      reasonCode: "plan_first.corp.economy",
     });
-    expect(firstDecision.evidence).toEqual(
-      expect.arrayContaining([
-        "plan_first_root:plan:corp.score_agenda:general",
-        "plan_first_executor:plan:corp.hand_and_agenda_management:draw-for-score-material",
-        "plan_priority_class:P4",
-        "plan_priority_delegated_from:plan:corp.score_agenda:general",
-        "plan_priority_need:score-material:general",
-        "plan_assessment_evidence:corp_score_campaign_missing_agenda_material",
-      ]),
-    );
     expect(context.chooseSemanticRuntimeAction(input, {})).toMatchObject({
-      actionId: "draw",
-      reasonCode: "plan_first.corp.hand_and_agenda_management",
+      actionId: "credit",
+      reasonCode: "plan_first.corp.economy",
     });
-    const residentPortfolio = JSON.stringify(
-      residentPlanPortfolioSnapshot(input),
+    expect(JSON.stringify(residentPlanPortfolioSnapshot(input))).not.toContain(
+      "score-material:general",
     );
-    expect(residentPortfolio).toContain(
-      '"drawAttemptState":{"turnKey":"corp:0","remainingAttempts":0,"selectedAtStateVersion":1}',
-    );
-    expect(residentPortfolio).toContain(
-      '"rootForegroundInstanceId":"plan:corp.score_agenda:general"',
-    );
-    expect(residentPortfolio).toContain(
-      '"executorInstanceId":"plan:corp.hand_and_agenda_management:draw-for-score-material"',
-    );
-    expect(residentPortfolio).toContain(
-      '"parentInstanceId":"plan:corp.score_agenda:general"',
-    );
-    expect(residentPortfolio).toContain(
-      '"parentNeedId":"score-material:general"',
-    );
-    expect(residentPortfolio).toContain(
-      '"openNeedIds":["score-material:general"]',
-    );
-    expect(residentPortfolio).toContain('"phase":"select_agenda"');
-    expect(residentPortfolio).toContain(
-      '"persistencePolicy":"flexible_support"',
+    expect(JSON.stringify(residentPlanPortfolioSnapshot(input))).not.toContain(
+      "plan:corp.score_agenda:general",
     );
 
     const afterDraw = structuredClone(input);
@@ -10568,8 +10541,8 @@ describe("authoritative plan-first live runtime", () => {
     }
     nextTurn.playerView.legalActions = nextTurn.legalActions;
     expect(context.chooseSemanticRuntimeAction(nextTurn, {})).toMatchObject({
-      actionId: "draw",
-      reasonCode: "plan_first.corp.hand_and_agenda_management",
+      actionId: "credit",
+      reasonCode: "plan_first.corp.economy",
     });
   });
 
@@ -15653,7 +15626,7 @@ describe("authoritative plan-first live runtime", () => {
     expect(portfolio).toContain('"projectedNetCredits":3');
   });
 
-  it("draws for score material when the score campaign has no agenda", () => {
+  it("does not turn absent HQ agendas into a scoring or draw need", () => {
     resetResidentPlanPortfolioMemory();
     const draw = legalAction("draw", "corp", "draw_card", "Draw a card", {
       credits: 0,
@@ -15697,22 +15670,16 @@ describe("authoritative plan-first live runtime", () => {
 
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
     expect(decision).toMatchObject({
-      actionId: "draw",
-      reasonCode: "plan_first.corp.hand_and_agenda_management",
+      actionId: "credit",
+      reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
-    expect(decision.evidence).toEqual(
-      expect.arrayContaining([
-        "plan_first_root:plan:corp.score_agenda:general",
-        "plan_first_executor:plan:corp.hand_and_agenda_management:draw-for-score-material",
-        "plan_priority_class:P4",
-        "plan_priority_delegated_from:plan:corp.score_agenda:general",
-        "plan_priority_need:score-material:general",
-      ]),
+    expect(JSON.stringify(residentPlanPortfolioSnapshot(input))).not.toContain(
+      "plan:corp.score_agenda:general",
     );
   });
 
-  it("converts a same-class HQ operation before drawing, then revalidates the answer search", () => {
+  it("converts known HQ economy without creating a subsequent speculative agenda search", () => {
     resetResidentPlanPortfolioMemory();
     const accountsCard = visibleCard("accounts-card", "corp", "operation", {
       definitionId: "onr_v1_281_accounts-receivable",
@@ -15774,14 +15741,6 @@ describe("authoritative plan-first live runtime", () => {
       reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
-    expect(
-      conversion.decisionDebug?.detailSections
-        ?.find((section) => section.id === "corp_draw_arbitration")
-        ?.items.join("|"),
-    ).toContain(
-      "action:draw|purpose:score_material_search|priority:P4|attempts:1|net_hand:1|projected_overflow:0|capacity_release:accounts|disposition:defer_for_capacity_release",
-    );
-
     const afterConversion = structuredClone(input);
     afterConversion.playerView.stateVersion = 2;
     afterConversion.playerView.own.clicks = 1;
@@ -15804,17 +15763,13 @@ describe("authoritative plan-first live runtime", () => {
       {},
     );
     expect(revalidatedDraw).toMatchObject({
-      actionId: draw.actionId,
-      reasonCode: "plan_first.corp.hand_and_agenda_management",
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
     expect(
-      revalidatedDraw.decisionDebug?.detailSections
-        ?.find((section) => section.id === "corp_draw_arbitration")
-        ?.items.join("|"),
-    ).toContain(
-      "action:draw|purpose:score_material_search|priority:P4|attempts:1|net_hand:1|projected_overflow:0|capacity_release:none|disposition:admitted",
-    );
+      JSON.stringify(residentPlanPortfolioSnapshot(afterConversion)),
+    ).not.toContain("score-material:general");
   });
 
   it("does not invent a generic card-development root without an exact parent need", () => {
