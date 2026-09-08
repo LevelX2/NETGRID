@@ -84,7 +84,7 @@ export type PendingChoiceResolutionHost = {
     resolveRunnerProgramTrashBeforeInstallChoice: HostFn<void>;
     resolveRunnerMemoryCheckpointChoice: HostFn<void>;
     resolveDelayedInstallStartTurnChoice: HostFn<void>;
-    resolveDelayedInstallMemoryChoice: HostFn<void>;
+    resolveDelayedInstallPlacementChoice: HostFn<void>;
   };
   run: {
     resolveHqIceSwapChoice: HostFn<void>;
@@ -244,8 +244,8 @@ export function resolvePendingChoice(
     host.runner.resolveRunnerMemoryCheckpointChoice;
   const resolveDelayedInstallStartTurnChoice =
     host.runner.resolveDelayedInstallStartTurnChoice;
-  const resolveDelayedInstallMemoryChoice =
-    host.runner.resolveDelayedInstallMemoryChoice;
+  const resolveDelayedInstallPlacementChoice =
+    host.runner.resolveDelayedInstallPlacementChoice;
   const resolveHqIceSwapChoice = host.run.resolveHqIceSwapChoice;
   const fortPassWindowHostForState = host.run.fortPassWindowHostForState;
   const resolveSecretSpendCompareChoiceInRunModule =
@@ -536,8 +536,11 @@ export function resolvePendingChoice(
     resolveDelayedInstallStartTurnChoice(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("v1912.delayed_install_memory:")) {
-    resolveDelayedInstallMemoryChoice(state, legalAction, playerAction);
+  if (
+    state.pendingChoice.source.startsWith("v1912.delayed_install_memory:") ||
+    state.pendingChoice.source.startsWith("runner.delayed_install_destination:")
+  ) {
+    resolveDelayedInstallPlacementChoice(state, legalAction, playerAction);
     return;
   }
   if (

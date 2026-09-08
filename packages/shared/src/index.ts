@@ -913,6 +913,7 @@ export type ChoiceKind =
   | "confirm";
 
 export type ChoicePresentationKey =
+  | "delayed_install_destination"
   | "access_ability"
   | "generic_bid_amount"
   | "generic_confirm"

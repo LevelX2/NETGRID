@@ -737,6 +737,7 @@ function formatSemanticChronicleEvent(
         const subroutineType = stringValue(effect.subroutineType);
         return (
           subroutineType === "end_the_run" ||
+          subroutineType === "end_the_run_and_trash_source_at_end_of_turn" ||
           subroutineType === "end_the_run_unless_runner_pays"
         );
       });
@@ -5262,8 +5263,12 @@ function formatSemanticChronicleEffect(
   const subroutineIndex = numberValue(effect.subroutineIndex);
   const subroutineNumber =
     subroutineIndex !== undefined ? subroutineIndex + 1 : undefined;
+  const endRunWithDelayedTrash =
+    kind === "resolve_subroutine" &&
+    subroutineType === "end_the_run_and_trash_source_at_end_of_turn";
   const endRunSubroutine =
-    kind === "resolve_subroutine" && subroutineType === "end_the_run";
+    kind === "resolve_subroutine" &&
+    (subroutineType === "end_the_run" || endRunWithDelayedTrash);
   const payOrEndRun =
     kind === "resolve_subroutine" &&
     subroutineType === "end_the_run_unless_runner_pays";
@@ -5288,6 +5293,48 @@ function formatSemanticChronicleEffect(
   const visibility = publiclyRevealedDamage
     ? "public"
     : chronicleEffectVisibility(effect, side);
+  const removedShellCounters = positiveIntegerValue(
+    effect.removedCounterAmount,
+  );
+  if (
+    visibility !== "redacted" &&
+    kind === "counter_change" &&
+    effect.counterType === "shell" &&
+    removedShellCounters !== undefined
+  ) {
+    const cardDefinitionId = stringValue(effect.cardDefinitionId);
+    const cardTitle =
+      stringValue(effect.cardTitle) ??
+      publicCardTitle(cardDefinitionId, cardPresentationsById) ??
+      translate("card.unknown");
+    const remainingCounters = numberValue(effect.remainingCounters);
+    return {
+      id: `${event.eventId}:effect:${effect.effectId || index}`,
+      category: "card",
+      importance: "normal",
+      visibility,
+      ...(actor ? { actor } : {}),
+      title: translate("effect.shellCountersRemoved", {
+        source: sourceTitle,
+        amount: removedShellCounters,
+        card: cardTitle,
+      }),
+      chips: [
+        sourceTitle,
+        ...(remainingCounters !== undefined
+          ? [
+              translate("effect.shellCountersRemaining", {
+                amount: remainingCounters,
+              }),
+            ]
+          : []),
+      ],
+      ...(cardDefinitionId ? { cardDefinitionId } : {}),
+      cardTitle,
+      cardDetailLines: [],
+      groupLabel: translate("group.card"),
+    };
+  }
   const flatline =
     publiclyRevealedDamage && event.publicPayload.flatline === true;
   const damageType = semanticDamageTypeLabel(
@@ -5356,17 +5403,21 @@ function formatSemanticChronicleEffect(
           : "normal",
     visibility,
     ...(actor ? { actor } : {}),
-    title: translate(key, {
-      subject,
-      amount: payOrEndRun ? paidCredits : amount,
-      count: amount,
-      source: sourceTitle,
-      damageType,
-      number: subroutineNumber ?? 1,
-    }),
+    title:
+      translate(key, {
+        subject,
+        amount: payOrEndRun ? paidCredits : amount,
+        count: amount,
+        source: sourceTitle,
+        damageType,
+        number: subroutineNumber ?? 1,
+      }) +
+      (endRunWithDelayedTrash && visibility !== "redacted"
+        ? ` ${translate("effect.sourceTrashScheduledAtTurnEnd", { source: sourceTitle })}`
+        : ""),
     chips: [
       ...(actor ? [translate(`side.${actor}`)] : []),
-      ...(endRunSubroutine
+      ...(endRunSubroutine && visibility !== "redacted"
         ? [
             sourceTitle,
             subroutineNumber !== undefined
@@ -5375,6 +5426,9 @@ function formatSemanticChronicleEffect(
                 })
               : translate("effect.subroutineChip"),
             translate("effect.runEndedChip"),
+            ...(endRunWithDelayedTrash
+              ? [translate("effect.trashAtTurnEndChip")]
+              : []),
           ]
         : payOrEndRun
           ? [
@@ -5416,6 +5470,11 @@ export function formatChronicleEffectItems(
 ): ChronicleItem[] {
   const effects = resolvedEffectsFromPayload(
     event.publicPayload.resolvedEffects,
+  );
+  const turnEndTrashItems = endTurnTrashChronicleItems(
+    event,
+    cardPresentationsById,
+    translate,
   );
   const mergedRecurringCreditPayoutCounters =
     recurringCreditPayoutCounterEffects(effects);
@@ -5462,6 +5521,7 @@ export function formatChronicleEffectItems(
       ...(successfulRunCreditItem ? [successfulRunCreditItem] : []),
       ...(tagGainItem ? [tagGainItem] : []),
       ...effectItems,
+      ...turnEndTrashItems,
       ...(terminalItem ? [terminalItem] : []),
     ];
   }
@@ -5516,9 +5576,45 @@ export function formatChronicleEffectItems(
     ...(traceHardwareWreckerItem ? [traceHardwareWreckerItem] : []),
     ...(tagGainItem ? [tagGainItem] : []),
     ...effectItems,
+    ...turnEndTrashItems,
     ...(runnerForgoneActionItem ? [runnerForgoneActionItem] : []),
     ...(terminalItem ? [terminalItem] : []),
   ];
+}
+
+function endTurnTrashChronicleItems(
+  event: PublicGameEvent,
+  cardPresentationsById?: PublicCardPresentationsById,
+  translate?: ChronicleTranslate,
+): ChronicleItem[] {
+  const payload = event.publicPayload;
+  if ((stringValue(payload.actionType) ?? event.type) !== "end_turn") return [];
+  const definitionIds = definitionIdsFromCsv(
+    stringValue(payload.corpInstalledCardTrashAtTurnEndDefinitionIds),
+  );
+  return definitionIds.map((cardDefinitionId, index) => {
+    const cardTitle = publicCardTitle(cardDefinitionId, cardPresentationsById);
+    const card =
+      cardTitle ?? (translate ? translate("card.unknown") : "Eine Karte");
+    return {
+      id: `${event.eventId}:end-turn-trash:${index}`,
+      category: "card",
+      importance: "important",
+      visibility: "public",
+      icon: "discard",
+      actor: "corp",
+      title: translate
+        ? translate("effect.cardTrashedAtTurnEnd", { card })
+        : `${card} wurde am Ende des Zuges getrasht.`,
+      chips: [
+        translate ? translate("effect.trashAtTurnEndChip") : "Trash am Zugende",
+      ],
+      cardDefinitionId,
+      ...(cardTitle ? { cardTitle } : {}),
+      cardDetailLines: [],
+      groupLabel: translate ? translate("group.card") : "Karten",
+    };
+  });
 }
 
 function successfulRunCreditGainChronicleItem(

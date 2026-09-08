@@ -626,6 +626,7 @@ export function createTriggerAbilityRuntimeHosts(
       },
       runner: {
         runnerMemoryLimit,
+        canHostProgramOnDaemon: deps.canHostProgramOnDaemon,
         runnerProgramUsesMemory: deps.runnerProgramUsesMemory,
         pickAgendaPointCostSource: () =>
           deps.pickRunnerAgendaForAgendaPointCost(state) as

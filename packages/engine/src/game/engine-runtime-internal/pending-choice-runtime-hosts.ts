@@ -847,7 +847,7 @@ export function createPendingChoiceRuntimeHosts(
             legalAction,
             playerAction,
           ),
-        resolveDelayedInstallMemoryChoice: (
+        resolveDelayedInstallPlacementChoice: (
           _state,
           legalAction,
           playerAction,
@@ -855,7 +855,7 @@ export function createPendingChoiceRuntimeHosts(
           const resumesStartOfTurn =
             state.pendingChoice?.source.split(":")[3] === "start_turn";
           const effects: ResolvedGameEffect[] = [];
-          deps.resolveDelayedInstallMemoryChoice(
+          deps.resolveDelayedInstallPlacementChoice(
             deps.runnerSpecialTriggerExecutionHost(state),
             legalAction,
             playerAction,

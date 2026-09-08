@@ -38,6 +38,177 @@ function event(
 }
 
 describe("semantic chronicle localization", () => {
+  it.each(["de", "en", "fr"] as const)(
+    "names each Shell Traders counter target and keeps its card link in %s",
+    (locale) => {
+      const targets = ["Simple Fracter", "Simple Decoder"];
+      const resolvedEffects = targets.map((cardTitle, index) => ({
+        effectId: `shell-removal-${index}`,
+        kind: "counter_change",
+        visibility: "public",
+        side: "runner",
+        amount: 1 - index,
+        reason: "start_of_turn",
+        counterType: "shell",
+        removedCounterAmount: 1,
+        remainingCounters: 1 - index,
+        sourceDefinitionId: "onr_v1_176_the-shell-traders",
+        sourceTitle: "The Shell Traders",
+        cardDefinitionId: `target-${index}`,
+        cardTitle,
+      }));
+      const removal = event("end_turn", { actor: "corp", resolvedEffects });
+      for (const side of ["runner", "corp"] as const) {
+        const items = formatChronicleEffectItems(
+          removal,
+          side,
+          undefined,
+          translate(locale),
+        );
+        expect(items).toHaveLength(2);
+        items.forEach((item, index) => {
+          const expected = {
+            de: `The Shell Traders: 1 Shell-Counter von ${targets[index]} entfernt.`,
+            en: `The Shell Traders: removed 1 shell counter from ${targets[index]}.`,
+            fr: `The Shell Traders : 1 compteur Shell retiré de ${targets[index]}.`,
+          }[locale];
+          expect(item).toMatchObject({
+            title: expected,
+            category: "card",
+            cardDefinitionId: `target-${index}`,
+            cardTitle: targets[index],
+            visibility: "public",
+          });
+          expect(item.chips).toContain(
+            translate(locale)("effect.shellCountersRemaining", {
+              amount: 1 - index,
+            }),
+          );
+        });
+      }
+      resolvedEffects.forEach((effect) => {
+        effect.visibility = "private_to_side";
+      });
+      const hidden = formatChronicleEffectItems(
+        removal,
+        "corp",
+        undefined,
+        translate(locale),
+      );
+      expect(hidden.every((item) => item.visibility === "redacted")).toBe(true);
+      expect(JSON.stringify(hidden)).not.toContain("The Shell Traders");
+      for (const target of targets)
+        expect(JSON.stringify(hidden)).not.toContain(target);
+      expect(JSON.stringify(hidden)).not.toContain("target-");
+    },
+  );
+
+  it.each(["de", "en", "fr"] as const)(
+    "explains Puzzle's run end and scheduled trash in %s",
+    (locale) => {
+      const ended = event("continue_run", {
+        encounterContinue: true,
+        result: "ended",
+        resolvedEffects: [
+          {
+            effectId: "puzzle-subroutine-0",
+            kind: "resolve_subroutine",
+            visibility: "public",
+            side: "runner",
+            sourceDefinitionId: "onr_classic_013_puzzle",
+            sourceTitle: "Puzzle",
+            subroutineIndex: 0,
+            subroutineType: "end_the_run_and_trash_source_at_end_of_turn",
+            endedRun: true,
+          },
+        ],
+      });
+      const expected = {
+        de: "Puzzle: Subroutine 1 beendet den Run. Puzzle wird am Ende des Zuges getrasht.",
+        en: "Puzzle: subroutine 1 ends the run. Puzzle will be trashed at the end of the turn.",
+        fr: "Puzzle : le sous-programme 1 met fin au piratage. Puzzle sera détruit à la fin du tour.",
+      }[locale];
+      for (const side of ["runner", "corp"] as const) {
+        const [item] = formatChronicleEffectItems(
+          ended,
+          side,
+          undefined,
+          translate(locale),
+        );
+        expect(item).toMatchObject({
+          title: expected,
+          category: "run",
+          importance: "important",
+          cardDefinitionId: "onr_classic_013_puzzle",
+        });
+        expect(
+          formatChronicleEvent(ended, side, { translate: translate(locale) })
+            .title,
+        ).toBe(expected);
+      }
+      const effect = (
+        ended.publicPayload.resolvedEffects as Array<Record<string, unknown>>
+      )[0]!;
+      effect.visibility = "private_to_side";
+      effect.side = "corp";
+      const hidden = formatChronicleEffectItems(
+        ended,
+        "runner",
+        undefined,
+        translate(locale),
+      );
+      expect(JSON.stringify(hidden)).not.toContain("Puzzle");
+      expect(JSON.stringify(hidden)).not.toContain("onr_classic_013_puzzle");
+    },
+  );
+
+  it.each(["de", "en", "fr"] as const)(
+    "reports each actual Puzzle trash at turn end in %s",
+    (locale) => {
+      const presentations = {
+        onr_classic_013_puzzle: { title: "Puzzle", type: "ice" },
+      };
+      const ended = event("end_turn", {
+        corpInstalledCardsTrashedAtTurnEnd: 2,
+        corpInstalledCardTrashAtTurnEndDefinitionIds:
+          "onr_classic_013_puzzle,onr_classic_013_puzzle",
+      });
+      const expected = {
+        de: "Puzzle wurde am Ende des Zuges getrasht.",
+        en: "Puzzle was trashed at the end of the turn.",
+        fr: "Puzzle a été détruit à la fin du tour.",
+      }[locale];
+      const items = formatChronicleEffectItems(
+        ended,
+        "runner",
+        presentations,
+        translate(locale),
+      );
+      expect(items).toHaveLength(2);
+      expect(new Set(items.map((item) => item.id)).size).toBe(2);
+      for (const item of items)
+        expect(item).toMatchObject({
+          title: expected,
+          category: "card",
+          visibility: "public",
+          icon: "discard",
+          cardDefinitionId: "onr_classic_013_puzzle",
+          cardTitle: "Puzzle",
+        });
+      expect(
+        formatChronicleEffectItems(ended, "runner", presentations)[0]?.title,
+      ).toBe("Puzzle wurde am Ende des Zuges getrasht.");
+      expect(
+        formatChronicleEffectItems(
+          event("end_turn"),
+          "runner",
+          presentations,
+          translate(locale),
+        ),
+      ).toEqual([]);
+    },
+  );
+
   it.each([
     {
       payload: { runDestination: "ice", runDestinationIcePosition: 2 },

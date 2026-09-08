@@ -39,6 +39,20 @@ dagegen weiterhin einen existierenden Fort. Ein existierender Fort ohne rezzed
 ICE erfüllt diese Zielbindung; dessen leere Zielmenge wird regulär gequotet.
 Quote und Ausführung behalten ihre strikten Bindungsprüfungen.
 
+## Verzögerte Programminstallation
+
+Beim letzten Shell-Counter prüft die verzögerte Installation legale
+Program-Hosts über den gemeinsamen `canHostProgramOnDaemon`-Vertrag. Sind
+Hosts verfügbar, wählt der Runner vor Counterentfernung und Installation
+zwischen dem normalen Programmspeicher und einem passenden installierten
+Host. Nur die normale Installation fordert bei MU-Mangel Programmtrash.
+Hostkapazität, Zielkarte, Quelle und letzter Counter werden bei der Wahl
+erneut validiert. Die gemeinsame Rig-Finalisierung setzt `hostedOn` und
+belastet bei Hosting keine Runner-MU; On-install-Effekte bleiben erhalten.
+Bezahlte Counterentfernung und Zugbeginn nutzen dieselbe Platzierungswahl;
+der Zugbeginn wird erst nach abgeschlossener Platzierung beziehungsweise
+anschließender Speicherfreigabe fortgesetzt.
+
 ## Verpflichtende Kreditzahlungen
 
 Aktive verpflichtende Corp-Kreditzahlungen stammen aus dem aktuellen

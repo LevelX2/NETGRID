@@ -844,6 +844,7 @@ function testHost(
       },
     },
     runner: {
+      canHostProgramOnDaemon: () => false,
       runnerMemoryLimit: (stateToRead) => stateToRead.runner.memoryLimit,
       runnerProgramUsesMemory: (stateToRead, cardId) =>
         stateToRead.runner.rig.programs.includes(cardId),

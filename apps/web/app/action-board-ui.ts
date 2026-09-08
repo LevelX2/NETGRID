@@ -4085,6 +4085,14 @@ export function choiceOptionPresentationLabel(
   };
 
   switch (choice.presentationKey) {
+    case "delayed_install_destination":
+      if (option.id === "rig")
+        return actionPresentationText(locale, "choiceInstallInMemory");
+      if (cardTitle)
+        return actionPresentationText(locale, "choiceInstallOnHost", {
+          card: cardTitle,
+        });
+      break;
     case "runner_draw_tax":
       if (option.id === "pay_credit")
         return actionPresentationText(locale, "choicePayOneCredit");
@@ -4596,6 +4604,11 @@ export function choicePromptPresentationLabel(
   locale: AppLocale | string = "de",
 ): string {
   switch (choice.presentationKey) {
+    case "delayed_install_destination":
+      return actionPresentationText(
+        locale,
+        "choicePromptDelayedInstallDestination",
+      );
     case "generic_select_cards":
       return actionPresentationText(locale, "choicePromptGenericSelectCards");
     case "generic_bid_amount":

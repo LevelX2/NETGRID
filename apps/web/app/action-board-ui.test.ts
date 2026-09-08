@@ -343,6 +343,54 @@ describe("localized action presentation", () => {
     expect(runWindowStatusLabel(running, "fr")).toBe("Accès au serveur");
   });
 
+  it.each(["de", "en", "fr"] as const)(
+    "localizes Shell Traders host placement in %s",
+    (locale) => {
+      const choice: NonNullable<PlayerView["pendingChoice"]> = {
+        choiceId: "shell_destination",
+        side: "runner",
+        source: "runner.delayed_install_destination:shell:target:paid:1",
+        prompt: "nicht auswerten",
+        presentationKey: "delayed_install_destination",
+        kind: "select_option",
+        options: [
+          { id: "rig", value: "rig", label: "nicht auswerten" },
+          {
+            id: "host_afreet",
+            value: "afreet",
+            label: "nicht auswerten",
+            metadata: { cardTitle: "Afreet" },
+          },
+        ],
+        minSelections: 1,
+        maxSelections: 1,
+        stateVersion: 1,
+        visibility: "public",
+      };
+      expect(choicePromptPresentationLabel(choice, locale)).toContain(
+        "The Shell Traders",
+      );
+      expect(
+        choiceOptionPresentationLabel(choice, choice.options[1]!, locale),
+      ).toBe(
+        {
+          de: "Auf Afreet installieren",
+          en: "Install on Afreet",
+          fr: "Installer sur Afreet",
+        }[locale],
+      );
+      expect(
+        choiceOptionPresentationLabel(choice, choice.options[0]!, locale),
+      ).toBe(
+        {
+          de: "Im Programmspeicher installieren (bei Bedarf Programme trashen)",
+          en: "Install in program memory (trash programs if needed)",
+          fr: "Installer en mémoire (détruire des programmes si nécessaire)",
+        }[locale],
+      );
+    },
+  );
+
   it("localizes City Surveillance prompts and options without reading German labels", () => {
     const choice = {
       choiceId: "runner_draw_draw_tax_12_0_13",

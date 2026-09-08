@@ -2271,6 +2271,11 @@
       "resolved": "Un effet automatique de {source} résolu.",
       "automatic": "Automatique",
       "flatline": "Flatline",
+      "sourceTrashScheduledAtTurnEnd": "{source} sera détruit à la fin du tour.",
+      "cardTrashedAtTurnEnd": "{card} a été détruit à la fin du tour.",
+      "trashAtTurnEndChip": "Destruction en fin de tour",
+      "shellCountersRemoved": "{source} : {amount, plural, one {# compteur Shell retiré} other {# compteurs Shell retirés}} de {card}.",
+      "shellCountersRemaining": "Encore {amount, plural, one {# compteur Shell} other {# compteurs Shell}}",
       "corpEffect": "Effet de la Corpo"
     },
     "damageType": {
