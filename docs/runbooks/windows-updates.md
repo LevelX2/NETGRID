@@ -133,7 +133,16 @@ zu behandeln. Bei erhaltenem Datenordner nach Deinstallation bleiben dessen
 Konfigurationswerte ebenfalls gesperrt; ein anderer neuer Datenordner aktiviert
 eine frische Konfiguration. Zugangsdaten werden weder gelesen noch geändert.
 Fehlende oder widersprüchliche Bestandskonfiguration blockiert das Setup.
-Fokussierte Tests sind vorhanden; die neue Bundle-/Sandboxabnahme bleibt offen.
+Der reguläre Bundlebuild 8214 besteht 2.244 Setupchecks, Windows-Komponentengates,
+Sprach-/Render-Matrix und den Audit aller 10.903 Paketdateien. Neun
+Offscreen-Vorschauen des vollständigen Bundles lesen die tatsächliche
+Sandboxregistrierung von 8212; die betrachteten de/en-Bilder zeigen die
+registrierten Ordner und 32141/32142. Prozessidentitäten, Konfiguration und
+Credentials bleiben unverändert, Health ist grün. Die Sitzung-0-Vorschauen
+sind kein vollständiger visueller Bedien- oder echter Monitor-DPI-Nachweis:
+ihr begrenzter Viewport zeigt nicht alle unteren Optionen gleichzeitig.
+Der neue Setupformular-Installationslauf und die interaktive Scrollprüfung
+bleiben offen. 8214 wurde dabei nicht installiert.
 
 Die Behauptung, ein direktes MSI könne keinen Setupcache herstellen, gilt
 nicht mehr: Der installierte Setupstub und der geschützte vollständige

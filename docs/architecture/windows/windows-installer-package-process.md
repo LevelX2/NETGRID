@@ -1147,7 +1147,7 @@ Runtimeprozesse und weiterhin gleiche Konfiguration/Credentials
 MSI-Spielschutzwege für eine echte nichtterminale Lobby nativ belegt. Ein
 mehrbenutzerübergreifender Lauf und der vollständige GitHub-Updater bleiben offen.
 
-Separater offener Setupfund: Wiederöffnen des gecachten Setups zeigt zwar den
+Separater Setupfund in 8209: Wiederöffnen des gecachten Setups zeigt zwar den
 beibehaltenen Datenordner, aber den Standardprogrammordner und 3100/8787
 statt der registrierten Installation mit eigenen Pfaden und 32141/32142.
 Es wurde nicht auf „Installieren“ gedrückt. Der Quellenfix liest jetzt die
@@ -1159,7 +1159,32 @@ erst ein anderer neuer Datenordner aktiviert eine frische Konfiguration.
 Fehlende/inkonsistente Bestandswerte blockieren sichtbar, ohne Defaults darüber
 zu schreiben oder Zugangsdaten zu lesen/ändern. Die nativen Setup-Unit-/UI-
 Tests decken diese Fälle in de/en/fr ohne Installation oder Registrymutation
-ab. Die Abnahme des neuen vollständigen Bundles steht noch aus.
+ab. Der Quellenfix ist als `071a2c5cf25965983d7bad760542e45246951b8b`
+committed und regulär als 1.0.8214 aus sauberem Quellstand gebaut. Die 2.244
+Setupchecks, sämtliche eingebauten Windows-Komponentengates, die 190 Texte in
+de/en/fr, die 3×3-Render-Matrix und der vollständige Audit aller 10.903
+Paketdateien sind grün. Artefakte:
+`output/windows-installer-existing-settings-8214`; Setup-SHA-256
+`f1c13c08453a017c14240de7a8d29a996d1b5058b4f792e8eb6968634df0554d`,
+MSI-SHA-256
+`a671d24a0926fd01a9cdd60904c7a70672fe8ca8bdb348afa115d477dee383dc`.
+
+Das unveränderte vollständige Setupbundle erzeugt anschließend neun
+Offscreen-Vorschauen gegen die tatsächlich registrierte Sandboxinstallation
+8212. Die nicht interaktive Sitzung 0 ist vorher und im Harness geprüft;
+es findet keine Installation, UAC-Bedienung oder interaktive Eingabe statt.
+Die betrachteten de/en-Vorschauen zeigen die registrierten Testordner,
+32141/32142 und gesperrte Bestandswerte. Konfiguration und Authentifizierung
+bleiben hashgleich, sämtliche Runtimeprozesse identisch und der Healthpfad
+grün. Nachweis im bisherigen Sandboxlauf:
+`result/native-existing-setup-8214.json`, Abschluss 8. September 10:50:08 UTC,
+SHA-256 `a9d45b8174c4d4ca3134c137d72a6567d61ad531d44a3fdd0167c9be8ed26265`.
+Die Sitzung-0-Bitmaps besitzen einen begrenzten Viewport und keine normale
+interaktive Windows-Themendarstellung; nicht alle unteren Optionen sind
+gleichzeitig sichtbar. Sie ersetzen weder eine Scroll-/Bedienprüfung noch
+echte Monitor-DPI-Abnahme. Auch ein tatsächlicher Installationslauf des neuen
+Setupformulars bleibt gesondert offen. Installiert bleibt 8212; 8214 liegt
+lediglich als hashgeprüfter Kandidat im schreibgeschützten Sandboxinput.
 
 Der normale Tray-Aufruf der Drittanbieterhinweise erreicht um 09:58 UTC die
 Windows-App-Auswahl für `.txt`: Im aktuellen Sandboximage fehlt eine
