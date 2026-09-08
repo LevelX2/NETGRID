@@ -59,6 +59,26 @@ Integritätsangaben werden nicht installiert.
 
 ### Noch offene Abnahmen vor der Freigabe
 
+Der native Versionswechsel 8199 → 8200 erreicht jetzt Sicherung und
+Healthprüfung erfolgreich, scheitert danach aber am zweiten Commit-Callback
+mit `installation_gate_msi_owner_missing`. Der äußere Commit war unmittelbar
+nach Begin eingereiht und hatte die gemeinsame MSI-Bindung bereits gelöscht,
+bevor der verschachtelte Altversions-Uninstall seinen Abschluss prüfte.
+Der Quellstand reiht deshalb `VerifyNetgridLifecycle` und anschließend
+`CommitNetgridLifecycle` erst nach `RemoveExistingProducts` unmittelbar vor
+`InstallFinalize` ein. `RequireMsi` bleibt unverändert streng. Quell- und
+kompilierte MSI-Gates sichern diese Reihenfolge; das alte 8200-MSI fällt im
+neuen Sequenzgate reproduzierbar durch. Die native Abnahme des Fixes ist offen.
+
+Die lesende Prüfung nach dem fehlgeschlagenen 8200-Lauf bestätigt sämtliche
+10.890 Programmdateien und die Registrierung wieder auf 8199, unveränderte
+Konfiguration/Credentials und keine Produktprozesse oder Listener. Der
+Datenstatus blieb jedoch `verified`, nicht `restored`, bei schon abgeschlossener
+Lease. Daher ist dies ausdrücklich **kein vollständig verifizierter Rollback**.
+Die neue Sicherung enthält den korrekten MSI-Cache-Ausschluss; deren Existenz
+ersetzt keinen Restore. Bis zur korrigierten nativen Transaktionsabnahme bleibt
+die Releasefreigabe gesperrt.
+
 Der native Healthabschluss von 8195/8196 kann am HTTP-Stopp hängen: Eine
 vorab geöffnete TCP-Verbindung ohne vollständige Anfrage bleibt nach
 `server.close()` bestehen und kann anschließend weiterverwendet werden.
@@ -455,7 +475,8 @@ beschädigen. Alte Alpha-MSI-Dateien enthalten diesen Vertrag nicht und sind
 kein geeigneter Altstand für dessen Zwei-Versionen-Abnahme.
 
 `check-windows-msi-lifecycle.ps1` prüft im kompilierten Paket insbesondere
-`InstallFiles < InstallExecute < RemoveExistingProducts < InstallFinalize`,
+`InstallFiles < InstallExecute < RemoveExistingProducts < VerifyNetgridLifecycle
+< CommitNetgridLifecycle < InstallFinalize`,
 die geschützte Weitergabe der äußeren Lease und die Bedingungen beider
 Cleanup-Aktionen samt Parameterbereitstellung. Die Registrytests prüfen
 separat Standalone-Besitz, verschachtelte Bindung, fremde/verspätete Abschlüsse

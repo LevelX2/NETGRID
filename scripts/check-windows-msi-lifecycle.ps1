@@ -26,15 +26,16 @@ try {
   foreach ($row in (Read-InstallerRows 'SELECT `Action`, `Condition`, `Sequence` FROM `InstallExecuteSequence`' 3)) {
     $sequence[$row[0]] = @{ Condition = $row[1]; Number = [int]$row[2] }
   }
-  $ordered = @('CostFinalize', 'PrepareNetgridLifecycle', 'InstallInitialize', 'RollbackNetgridLifecycle', 'BeginNetgridLifecycle', 'CommitNetgridLifecycle', 'RemoveRegistryValues', 'RemoveFiles', 'InstallFiles', 'InstallExecute', 'RemoveExistingProducts', 'VerifyNetgridLifecycle', 'InstallFinalize')
+  $ordered = @('CostFinalize', 'PrepareNetgridLifecycle', 'InstallInitialize', 'RollbackNetgridLifecycle', 'BeginNetgridLifecycle', 'RemoveRegistryValues', 'RemoveFiles', 'InstallFiles', 'InstallExecute', 'RemoveExistingProducts', 'VerifyNetgridLifecycle', 'CommitNetgridLifecycle', 'InstallFinalize')
   $previous = -1
   foreach ($action in $ordered) {
     if (-not $sequence.ContainsKey($action) -or $sequence[$action].Number -le $previous) { throw "installer_lifecycle_sequence_invalid:$action" }
     $previous = $sequence[$action].Number
     if ($action -like '*NetgridLifecycle' -and -not [string]::IsNullOrEmpty($sequence[$action].Condition)) { throw "installer_lifecycle_sequence_conditional:$action" }
   }
-  # Commit is recorded here but MSI executes it only after the install script
-  # succeeds; rollback runs in reverse order, releasing after file restoration.
+  # Queue the outer commit after RemoveExistingProducts has queued its nested
+  # callbacks. Only the final owner may release their shared MSI binding.
+  # Rollback remains before mutation, releasing after file restoration.
   $expectedTypes = @{ PrepareNetgridLifecycle = 1; BeginNetgridLifecycle = 11265; VerifyNetgridLifecycle = 11265; RollbackNetgridLifecycle = 11521; CommitNetgridLifecycle = 11777 }
   $checked = 0
   foreach ($row in (Read-InstallerRows 'SELECT `Action`, `Type`, `Source`, `Target` FROM `CustomAction`' 4)) {

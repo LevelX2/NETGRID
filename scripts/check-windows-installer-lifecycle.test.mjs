@@ -44,10 +44,20 @@ test("upgrade order, nested cleanup and outer lease forwarding are mandatory", (
     value => value.replace('Id="NETGRID_UPDATE_LEASE" Secure="yes"', 'Id="NETGRID_UPDATE_LEASE" Secure="no"'),
     value => value.replace('Id="NETGRID_UPDATE_LEASE" Secure="yes" Hidden="yes"', 'Id="NETGRID_UPDATE_LEASE" Secure="yes" Hidden="no"'),
     value => value.replaceAll(' AND NOT UPGRADINGPRODUCTCODE', ''),
-    value => value.replace('Action="VerifyNetgridLifecycle" Before="InstallFinalize"', 'Action="VerifyNetgridLifecycle" After="InstallFinalize"'),
+    value => value.replace('Action="VerifyNetgridLifecycle" Before="CommitNetgridLifecycle"', 'Action="VerifyNetgridLifecycle" After="InstallFinalize"'),
     value => value.replace('DllEntry="VerifyNetgridLifecycle" Execute="deferred"', 'DllEntry="VerifyNetgridLifecycle" Execute="commit"'),
     value => value.replace('Id="REINSTALLMODE" Value="amus"', 'Id="REINSTALLMODE" Value="omus"'),
   ]) assert.throws(() => checkLifecycleSource(mutate(source)), /installer_lifecycle_/);
+});
+
+test("outer commit is queued after nested removal and verification, never beside begin", () => {
+  const source = readFileSync("installer/product/Product.wxs", "utf8");
+  assert.match(source, /<Custom Action="CommitNetgridLifecycle" Before="InstallFinalize"\s*\/>/);
+  assert.match(source, /<Custom Action="VerifyNetgridLifecycle" Before="CommitNetgridLifecycle"\s*\/>/);
+  checkLifecycleSource(source);
+  const earlyCommit = source.replace('Action="CommitNetgridLifecycle" Before="InstallFinalize"',
+    'Action="CommitNetgridLifecycle" After="BeginNetgridLifecycle"');
+  assert.throws(() => checkLifecycleSource(earlyCommit), /installer_lifecycle_commit_sequence_invalid/);
 });
 
 test("setup cache, current product selector and uninstall shortcut share MSI identity", () => {

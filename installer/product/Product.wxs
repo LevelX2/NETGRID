@@ -217,8 +217,10 @@
       <Custom Action="PrepareNetgridLifecycle" After="CostFinalize" />
       <Custom Action="RollbackNetgridLifecycle" After="InstallInitialize" />
       <Custom Action="BeginNetgridLifecycle" After="RollbackNetgridLifecycle" />
-      <Custom Action="CommitNetgridLifecycle" After="BeginNetgridLifecycle" />
-      <Custom Action="VerifyNetgridLifecycle" Before="InstallFinalize" />
+      <!-- Queue the final owner after RemoveExistingProducts has queued the
+           nested uninstall commit. Both callbacks still require the live lease. -->
+      <Custom Action="VerifyNetgridLifecycle" Before="CommitNetgridLifecycle" />
+      <Custom Action="CommitNetgridLifecycle" Before="InstallFinalize" />
       <Custom Action="InitializeNetgridRuntime" After="InstallFiles" Condition='NOT REMOVE~="ALL"' />
       <Custom Action="CacheNetgridMsi" After="InitializeNetgridRuntime" Condition='NOT Installed AND NOT REMOVE~="ALL"' />
       <Custom Action="CacheNetgridSetup" After="CacheNetgridMsi" Condition='NOT REMOVE~="ALL" AND NETGRID_SETUP_SOURCE &lt;&gt; ""' />

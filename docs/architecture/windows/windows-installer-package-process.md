@@ -547,6 +547,37 @@ decken gültige, ungültige, 64-KiB-lange und mit Erfolg widersprüchliche
 stderr-Ausgabe sowohl für normale Update- als auch direkte MSI-Leases ab.
 Ein neues Installerbuild und dessen native Installation bleiben erforderlich.
 
+### Nachfolgendes Gate 8199 → 8200: Commit-Reihenfolge korrigieren
+
+Der reguläre, saubere Build 8200 aus `e7555ed85b8322e748ae8d624e20a5dddfeea575`
+liegt unter `output/windows-installer-msi-pair-8200`. Setup-SHA-256:
+`3c4c33bcac5ce20b7853ac2f18b9df453cfe45dfe20755ccbef7d58cc634795a`,
+MSI-SHA-256:
+`c6e3c925bd693ebb0dc2738aa24216eb3572e3a9c13b9fa9ed1a27cf98c0cc00`.
+Die regulären Build-/Payload-/UI-Gates sind grün. Im bisherigen Sandboxlauf
+`bb8eccf05f4747369da2d3c3806c1f85` bestehen die Rootwechsel-Ablehnung und
+anschließend erstmals `MSI_DATA_OK capture` sowie `MSI_DATA_OK verify` im
+echten Upgrade. Der Lauf endet am 2026-09-08 um 04:54:07 UTC dennoch mit MSI
+1603: Der zweite Commit-Callback findet nach dem ersten, freigebenden Commit
+keinen aktiven MSI-Owner mehr. Rollback meldet `released=False`, keinen Restore.
+
+`native-8200-commit-failure-state.json` belegt um 04:57:18 UTC lesend:
+8199-Registrierung und alle 10.890 Programmdateien wiederhergestellt,
+Konfiguration/Credentials unverändert, keine Produktprozesse oder Listener.
+Lease `completed`, MSI-Bindung leer, Datenphase weiterhin `verified`.
+Snapshot `92a28c8ce8e24aa3ac1077827bc909dc` ist hashgeprüft; `config/installer`
+ist ausgeschlossen und fehlt im Snapshotpayload. Es wird weder ein
+Datenrestore noch ein erfolgreicher Versionswechsel behauptet.
+
+Ursachenfix: Den äußeren Commit erst nach der verschachtelten Entfernung
+einreihen, unmittelbar nach Verify vor InstallFinalize. Die strenge
+Ownerprüfung wird nicht gelockert. Der neue Quellregressionstest ist vor der
+Änderung rot, danach sind sechs Quell-/Binarytests und 407 Lifecyclechecks
+grün. Auch das neue echte MSI-Sequenzgate weist das alte 8200 mit
+`installer_lifecycle_sequence_invalid:CommitNetgridLifecycle` ab.
+Korrigierte MSI-Tabelle und nativer Versionswechsel sind noch zu prüfen;
+WIN-I08 bleibt aktiv, kein Push oder Main-Merge.
+
 ### Regulärer Build 8199: Installation, Repair und Headless nativ grün
 
 `output/windows-installer-stop-diagnostic-8199` ist regulär aus dem sauberen

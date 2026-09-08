@@ -79,8 +79,11 @@ export function checkLifecycleSource(authoring) {
   if (!upgrade?.includes('Schedule="afterInstallExecute"'))
     throw new Error("installer_lifecycle_upgrade_sequence_invalid");
   const verification = authoring.match(/<Custom Action="VerifyNetgridLifecycle"[^>]+>/)?.[0];
-  if (!verification?.includes('Before="InstallFinalize"'))
+  if (!verification?.includes('Before="CommitNetgridLifecycle"'))
     throw new Error("installer_lifecycle_verification_sequence_invalid");
+  const commit = authoring.match(/<Custom Action="CommitNetgridLifecycle"[^>]+>/)?.[0];
+  if (!commit?.includes('Before="InstallFinalize"'))
+    throw new Error("installer_lifecycle_commit_sequence_invalid");
   const definition = authoring.match(/<CustomAction Id="VerifyNetgridLifecycle"[^>]+>/)?.[0];
   if (!definition?.includes('Execute="deferred"') || !definition.includes('Impersonate="no"') || !definition.includes('Return="check"'))
     throw new Error("installer_lifecycle_verification_execution_invalid");

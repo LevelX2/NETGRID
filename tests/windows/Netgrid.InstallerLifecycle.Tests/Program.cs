@@ -111,8 +111,8 @@ foreach (var (name, execution) in new[] { ("BeginNetgridLifecycle", "deferred"),
 }
 Assert((string?)Scheduled("RollbackNetgridLifecycle").Attribute("After") == "InstallInitialize", "rollback_scheduled_before_mutation");
 Assert((string?)Scheduled("BeginNetgridLifecycle").Attribute("After") == "RollbackNetgridLifecycle", "begin_before_file_changes");
-Assert((string?)Scheduled("CommitNetgridLifecycle").Attribute("After") == "BeginNetgridLifecycle", "commit_registered_after_begin");
-Assert((string?)Scheduled("VerifyNetgridLifecycle").Attribute("Before") == "InstallFinalize", "verify_inside_rollback_boundary");
+Assert((string?)Scheduled("CommitNetgridLifecycle").Attribute("Before") == "InstallFinalize", "outer_commit_queued_after_nested_removal");
+Assert((string?)Scheduled("VerifyNetgridLifecycle").Attribute("Before") == "CommitNetgridLifecycle", "verify_before_final_commit_inside_rollback_boundary");
 Assert(package.Elements(wix + "Launch").Any(x => (string?)x.Attribute("Condition") == "NOT RollbackDisabled"), "rollback_cannot_be_disabled");
 Assert(package.Elements(wix + "Property").Any(x => (string?)x.Attribute("Id") == "MSIRESTARTMANAGERCONTROL" && (string?)x.Attribute("Value") == "DisableShutdown"), "restart_manager_not_second_process_owner");
 var frameworkCondition = package.Elements(wix + "Launch").Select(x => (string)x.Attribute("Condition")!)
