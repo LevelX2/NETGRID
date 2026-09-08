@@ -1091,6 +1091,25 @@ function deriveGenericTypedHintOverlay(
   }
 
   const uniqueDirect = engine.uniqueDirectLongtail;
+  if (uniqueDirect?.kind === "successful_run_end_credit_resource") {
+    if (
+      !Number.isSafeInteger(uniqueDirect.amount) ||
+      uniqueDirect.amount <= 0 ||
+      uniqueDirect.visibility !== "public"
+    )
+      throw new Error("card_spec_unknown_successful_run_credit_shape");
+    overlay.effects.push({
+      kind: "economy",
+      scope: "runner",
+      timing: "after_successful_run",
+      resource: "credits",
+      target: "run.successful_run_credit_gain",
+      amount: uniqueDirect.amount,
+      repeatable: true,
+    });
+    overlay.conditions.push({ kind: "requires_successful_run" });
+    overlay.functionSignals.push("economy.successful_run_credits");
+  }
   if (uniqueDirect?.kind === "tagged_meat_damage") {
     if (
       uniqueDirect.requiredRunnerTags <= 0 ||

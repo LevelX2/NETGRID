@@ -4,6 +4,58 @@ import { describe, expect, it } from "vitest";
 import { assessCorpEconomyAssetPayback } from "./corp-economy-asset-payback";
 
 describe("Corp economy asset payback", () => {
+  it("prices a costly campaign against protection and actual remaining withdrawal clicks", () => {
+    const input = corpInput(remote("remote_1", []));
+    const quote = (setupActionCost: number) =>
+      assessCorpEconomyAssetPayback({
+        input,
+        serverId: "remote_1",
+        cadence: "finite_pool",
+        baselineHorizonTurns: 3,
+        finitePoolCredits: 15,
+        payoutCreditsPerExecution: 3,
+        payoutActionCost: 1,
+        setupCreditCost: 4,
+        setupActionCost,
+      });
+    expect(quote(1)).toMatchObject({
+      projectedPayoutExecutions: 2,
+      projectedNetCredits: -1,
+    });
+    expect(quote(0)).toMatchObject({
+      projectedPayoutExecutions: 3,
+      projectedNetCredits: 2,
+    });
+    input.playerView.own.clicks = 2;
+    expect(quote(0)).toMatchObject({
+      projectedPayoutExecutions: 2,
+      projectedNetCredits: 0,
+    });
+    input.playerView.servers = [remote("remote_1", [knownRezzedWall("wall")])];
+    expect(quote(1)).toMatchObject({
+      protectionState: "protected_not_contestable",
+      projectedNetCredits: 1,
+    });
+  });
+  it("counts the last partial withdrawal without inventing credits beyond the finite pool", () => {
+    expect(
+      assessCorpEconomyAssetPayback({
+        input: corpInput(remote("remote_1", [])),
+        serverId: "remote_1",
+        cadence: "finite_pool",
+        baselineHorizonTurns: 3,
+        finitePoolCredits: 5,
+        payoutCreditsPerExecution: 3,
+        payoutActionCost: 1,
+        setupCreditCost: 0,
+        setupActionCost: 0,
+      }),
+    ).toMatchObject({
+      projectedPayoutExecutions: 2,
+      projectedCredits: 5,
+      projectedNetCredits: 3,
+    });
+  });
   it("prices an unprotected finite pool only through its immediate payout window", () => {
     expect(
       assessCorpEconomyAssetPayback({

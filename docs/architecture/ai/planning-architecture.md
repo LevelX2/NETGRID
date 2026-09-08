@@ -2931,6 +2931,30 @@ Non-noisy-Credits schließen noisy Provider aus. Die Supportkarte bleibt bei
 abstrakte spätere Run-Option genügt nicht und es entsteht kein zusätzlicher
 Run-, Economy- oder Choice-Owner.
 
+Passives Einkommen nach erfolgreichen Runs wird aus
+`successful_run_end_credit_resource` in einen wiederholbaren, bedingten
+Economy-Effekt übersetzt. Die persistente Bewertung erkennt den vorhandenen
+`successful_run_followup_engine` mit Credit-Ausgabe. Der Owner vergleicht
+Installationskosten einschließlich Installationsklick mit einem begrenzten
+Ertrag: verbleibende bezahlbare Runs dieses Zuges plus höchstens ein Run je
+Folgezug, insgesamt höchstens drei Züge und begrenzt durch beide Deckreste.
+Ein aktuell legaler, erreichbarer HQ-/R&D-Run mit vorhandener Reserve-Quote
+muss nach der Installation weiter finanzierbar sein. Unbekannte ICE bleibt
+als Unsicherheit sichtbar; der bedingte Ertrag ist niemals verfügbares Geld.
+Tags, Score-/Matchpoint-Dringlichkeit, zu kurzer Horizont, weniger als zwei
+aktuell finanzierbare Runs und bereits ausreichende Liquidität verhindern
+die Aufwertung. Ein positiver Überschuss wird innerhalb der bestehenden
+Handentwicklung mit höchstens 300 Bewertungspunkten (100 je bedingtem
+Netto-Credit) und P4 statt allgemeinem Aufbauwert eingebracht. Diese
+Kalibrierung ist eine begrenzte Policy-Projektion, keine Erfolgsgarantie oder
+Installationspflicht; P1–P3 und die gemeinsame Zugplanung bleiben maßgeblich.
+Eine zurückgestellte, aktuell gequotete Investition erhält keinen allgemeinen
+Handentwicklungsplan als Ersatz. Damit kann eine späte oder taktisch
+unbegründete Installation nicht über den alten pauschalen Aufbauwert wieder
+zugelassen werden. Bereits separat begründete Spezial-Owner bleiben erhalten.
+Die passive Quelle benötigt keine zusätzliche Aktivierungsreserve, wohl aber
+die bestehende Mindestreserve und die konkrete Run-Reserve.
+
 Memory-Support wird aus einem positiven kanonischen MU-Bonus oder der
 eigentlichen Kartenregel erkannt. Aggregierte Planning-Annotationen wie eine
 Target-Präferenz mit dem Wort `memory` dürfen eine Eventkarte nicht zu
@@ -4025,6 +4049,24 @@ kleiner sicherer Nettovorteil wird nicht durch eine zusätzliche pauschale
 Mindestmarge verworfen; Score-Reserve, Remote-Belegung und höher priorisierte
 Parent-Needs bleiben dennoch bindende Gegenargumente. BBS Whispering Campaign
 ist dafür ein Referenzfall und bleibt vollständig im Owner `corp.economy`.
+
+Eine Economy-Installation darf ihren späteren Rez nicht mit den erst danach
+verfügbaren Auszahlungen finanzieren. Die aktuelle Liquidität muss den
+bekannten Aufbau einschließlich Rez decken. Die Schutzbewertung bleibt beim
+Defense-Owner: Ein aktuell nicht angreifbarer Remote erlaubt den begrenzten
+Mehrzugshorizont, andernfalls zählt bei klickpflichtigen Guthaben nur die
+aktuelle Auszahlungskapazität. Ein letzter Teilbetrag zählt als eigene
+Auszahlung; die Summe darf den verbleibenden Pool nie überschreiten.
+
+Bei einer aktuell legalen, kostenlosen Entnahme aus einem sichtbaren
+Credit-Pool liefert der Economy-Owner zusätzlich den risikobegrenzten
+Restkampagnenwert nach Aktionskosten. Plan-Assessment und Step vergleichen
+diesen Wert statt nur den nächsten Bruttobetrag. Jede ausgeführte Entnahme
+bleibt an die aktuelle Engine-Action gebunden und wird danach neu bewertet.
+Die Projektion reserviert keine künftigen Klicks und erzwingt kein vollständiges
+Leeren; andere Ziele dürfen die Folge unterbrechen. Eine rentable Installation
+ist damit zugelassen, gewinnt aber nicht automatisch gegen Agenda-Suche,
+Scoring oder Defense.
 
 Wiederholte Nutzung ist zulässig, solange sie das Fundingziel real
 voranbringt. Nach erreichter Zielreserve muss das Modul dem finanzierten

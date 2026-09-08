@@ -1,5 +1,6 @@
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import { currentCorpCreditObligation } from "../plans/corp-credit-obligation";
+import { assessRunnerSuccessfulRunCreditInvestment } from "./runner-successful-run-credit-investment";
 import {
   AI_DECISION_DEBUG_SCHEMA_VERSION,
   AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
@@ -9750,20 +9751,32 @@ function buildRunnerDomain(
                 restrictedCapacitySetup
               ? ("P5" as const)
               : ("P6" as const);
-      const normalizedDevelopmentValue = unassignedWeakCardPlan
-        ? Math.min(20, evaluation.priority)
-        : restrictedCapacitySetup
-          ? Math.min(
-              120,
-              60 +
-                candidate.actionCapacityProjection!.followupActionCapacity * 10,
-            )
-          : evaluation.currentNeed === "acute"
-            ? Math.min(300, evaluation.priority)
-            : evaluation.currentNeed === "useful_now" ||
-                evaluation.currentNeed === "setup"
-              ? Math.min(80, evaluation.priority)
-              : Math.min(20, evaluation.priority);
+      const runCreditInvestment = assessRunnerSuccessfulRunCreditInvestment(
+        input,
+        evaluation,
+        runTargets,
+        economy,
+      );
+      // The mechanic-specific investment quote owns admission as well as value.
+      // A deferred investment cannot return through the generic useful-card plan.
+      if (runCreditInvestment && !runCreditInvestment.admitted) return [];
+      const normalizedDevelopmentValue = runCreditInvestment?.admitted
+        ? runCreditInvestment.value
+        : unassignedWeakCardPlan
+          ? Math.min(20, evaluation.priority)
+          : restrictedCapacitySetup
+            ? Math.min(
+                120,
+                60 +
+                  candidate.actionCapacityProjection!.followupActionCapacity *
+                    10,
+              )
+            : evaluation.currentNeed === "acute"
+              ? Math.min(300, evaluation.priority)
+              : evaluation.currentNeed === "useful_now" ||
+                  evaluation.currentNeed === "setup"
+                ? Math.min(80, evaluation.priority)
+                : Math.min(20, evaluation.priority);
       const reserveProtectedTargetCredits = waitingForReserve
         ? evaluation.fundingNeed!.targetCredits
         : undefined;
@@ -9877,9 +9890,14 @@ function buildRunnerDomain(
                 fundingRouteAssessment: fundingRoute!.routeAssessment,
               }
             : {}),
-          priorityClass: developmentPriorityClass,
+          priorityClass: runCreditInvestment?.admitted
+            ? ("P4" as const)
+            : developmentPriorityClass,
           value: normalizedDevelopmentValue,
           evidenceCode: evaluation.evidence[0] ?? "runner_hand_development",
+          ...(runCreditInvestment
+            ? { evidenceCodes: runCreditInvestment.evidenceCodes }
+            : {}),
           ...(restrictedProgramInstallCommitment
             ? {
                 evidenceCodes: restrictedProgramInstallCommitment.evidenceCodes,
@@ -20802,6 +20820,10 @@ function corpEconomyDevelopmentCampaigns(
             ? quote.consumer.creditCost + quote.payoutGeneralCreditCost
             : (candidate!.costProfile.creditCost as number)) +
         (phase === "install" ? (definition.rezCost ?? 0) : 0);
+      // Installation alone is not a funded economy route. Future payouts cannot
+      // pay the rez that makes them available.
+      if (phase === "install" && input.playerView.own.credits < setupCreditCost)
+        continue;
       const payback = assessCorpEconomyAssetPayback({
         input,
         serverId: targetServerId,
@@ -21345,6 +21367,28 @@ function corpVisibleCardEconomyWithdrawals(
     ) {
       return [];
     }
+    const payoutServer = input.playerView.servers.find((server) =>
+      server.root.some((card) => card.instanceId === sourceInstanceId),
+    );
+    const remainingPoolCredits = sourceCard.counters?.bit;
+    const withdrawalPayback =
+      admittedPayout.payoutSource === "hosted_credit_pool" &&
+      payoutServer &&
+      Number.isSafeInteger(remainingPoolCredits) &&
+      remainingPoolCredits! > 0 &&
+      projection.creditCost === 0
+        ? assessCorpEconomyAssetPayback({
+            input,
+            serverId: payoutServer.id,
+            cadence: "finite_pool",
+            baselineHorizonTurns: 3,
+            finitePoolCredits: remainingPoolCredits!,
+            payoutCreditsPerExecution: grossLiquidCreditGain,
+            payoutActionCost: projection.clickCost,
+            setupCreditCost: 0,
+            setupActionCost: 0,
+          })
+        : undefined;
     return [
       {
         kind: "convert_visible_card_payout",
@@ -21353,6 +21397,18 @@ function corpVisibleCardEconomyWithdrawals(
         sourceDefinitionId,
         sourceZone,
         actionIds: [candidate.actionId],
+        ...(withdrawalPayback
+          ? {
+              withdrawalCampaign: {
+                remainingPoolCredits: remainingPoolCredits!,
+                projectedPayoutExecutions:
+                  withdrawalPayback.projectedPayoutExecutions,
+                projectedNetCredits: withdrawalPayback.projectedNetCredits,
+                horizonTurns: withdrawalPayback.riskAdjustedHorizonTurns,
+                evidenceCodes: withdrawalPayback.evidenceCodes,
+              },
+            }
+          : {}),
         conversion: {
           clickCost: projection.clickCost,
           creditCost: projection.creditCost,

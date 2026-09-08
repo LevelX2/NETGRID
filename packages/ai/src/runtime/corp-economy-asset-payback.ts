@@ -68,7 +68,7 @@ export function assessCorpEconomyAssetPayback(params: {
         : 0;
   const maximumFinitePoolExecutions =
     params.cadence === "finite_pool"
-      ? Math.floor(params.finitePoolCredits / params.payoutCreditsPerExecution)
+      ? Math.ceil(params.finitePoolCredits / params.payoutCreditsPerExecution)
       : params.baselineHorizonTurns;
   const currentPayoutActionCapacity = Math.max(
     0,
@@ -91,9 +91,19 @@ export function assessCorpEconomyAssetPayback(params: {
     maximumFinitePoolExecutions,
   );
   const unadjustedProjectedCredits =
-    unadjustedPayoutExecutions * params.payoutCreditsPerExecution;
+    params.cadence === "finite_pool"
+      ? Math.min(
+          params.finitePoolCredits,
+          unadjustedPayoutExecutions * params.payoutCreditsPerExecution,
+        )
+      : unadjustedPayoutExecutions * params.payoutCreditsPerExecution;
   const projectedCredits =
-    projectedPayoutExecutions * params.payoutCreditsPerExecution;
+    params.cadence === "finite_pool"
+      ? Math.min(
+          params.finitePoolCredits,
+          projectedPayoutExecutions * params.payoutCreditsPerExecution,
+        )
+      : projectedPayoutExecutions * params.payoutCreditsPerExecution;
   const projectedOpportunityCostCredits =
     params.setupActionCost +
     projectedPayoutExecutions * params.payoutActionCost;

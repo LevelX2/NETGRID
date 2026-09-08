@@ -1078,7 +1078,11 @@ function evaluateRunnerPersistentInstall(
   );
   const protectedCreditReserve =
     engineNeedsProtectedReserve && !handCapacityMaySpendReserve
-      ? desiredCreditReserveForPersistentEngine(params.input)
+      ? engineAssessment.kind === "successful_run_followup_engine" &&
+        engineAssessment.outputCapabilities.length === 1 &&
+        engineAssessment.outputCapabilities[0] === "credits"
+        ? minimumCreditFloorForPersistentInstall(params.input)
+        : desiredCreditReserveForPersistentEngine(params.input)
       : undefined;
   const safeInstallTargetCredits =
     protectedCreditReserve !== undefined

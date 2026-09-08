@@ -495,6 +495,13 @@ export type CorpEconomyVisibleCardWithdrawalSignal = CorpEconomySignalBase & {
   sourceDefinitionId: string;
   sourceZone: "installed_root" | "score_area";
   actionIds: [string];
+  withdrawalCampaign?: {
+    remainingPoolCredits: number;
+    projectedPayoutExecutions: number;
+    projectedNetCredits: number;
+    horizonTurns: number;
+    evidenceCodes: string[];
+  };
   conversion: {
     clickCost: number;
     creditCost: number;
@@ -2405,7 +2412,10 @@ function economyAssessmentValue(signal: CorpEconomyNeedSignal): number {
     );
   }
   if (signal.kind === "convert_visible_card_payout") {
-    return signal.conversion.netLiquidCreditGain * 20;
+    return (
+      (signal.withdrawalCampaign?.projectedNetCredits ??
+        signal.conversion.netLiquidCreditGain) * 20
+    );
   }
   if (signal.kind === "prepare_immediate_operation") {
     return 50 + signal.futureConversion.strategicEconomyValue * 10;
@@ -6701,7 +6711,10 @@ function economyImmediateOperationStepValue(
 function economyVisibleCardPayoutStepValue(
   signal: CorpEconomyVisibleCardWithdrawalSignal,
 ): number {
-  return signal.conversion.netLiquidCreditGain * 20;
+  return (
+    (signal.withdrawalCampaign?.projectedNetCredits ??
+      signal.conversion.netLiquidCreditGain) * 20
+  );
 }
 
 function economyOperationThresholdStepValue(

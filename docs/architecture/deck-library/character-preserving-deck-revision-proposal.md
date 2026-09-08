@@ -21,23 +21,23 @@ Broker-Wirtschaft bleibt erhalten.
 
 ### Umgesetzte Entnahmen
 
-| Karte | Heraus | Verbleibt | Begründung |
-| --- | ---: | ---: | --- |
-| Faked Hit | 1 | 0 | Ein Bad-Publicity-Punkt ohne vollständigen eigenen Sieben-Punkte-Pfad rechtfertigt die zwei unverhinderbaren Core-Schäden nicht. |
-| Poisoned Water Supply | 1 | 0 | Würde die beiden Broker für einen weiteren isolierten Bad-Publicity-Punkt opfern; die Wirtschaft wird für Runs gebraucht. |
-| Disintegrator | 1 | 1 | Sechs Installationscredits und zwei MU sind teuer. Eine Kopie und Disgruntled Ice Technician bewahren die Derez-Option. |
-| Boring Bit | 1 | 1 | Eine redundante Wall-Kopie wird durch die Suche nach der jeweils passenden Antwort ersetzt. Corrosion und weitere Wall-Breaker bleiben. |
-| Big Frackin' Gun | 1 | 1 | Die teure Spezialantwort bleibt suchbar; eine zweite Kopie ist weniger dringend als Nachschub. Andere Sentry-Breaker und konfigurierbare Programme bleiben. |
-| Demolition Run | 1 | 0 | Verzichtet auf Zugriffe und erzeugt drei Tags. Das ist eine teure Nebenlinie für ein Deck, dessen Viren wiederholte Zugriffe vorbereiten sollen. |
+| Karte                 | Heraus | Verbleibt | Begründung                                                                                                                                                  |
+| --------------------- | -----: | --------: | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Faked Hit             |      1 |         0 | Ein Bad-Publicity-Punkt ohne vollständigen eigenen Sieben-Punkte-Pfad rechtfertigt die zwei unverhinderbaren Core-Schäden nicht.                            |
+| Poisoned Water Supply |      1 |         0 | Würde die beiden Broker für einen weiteren isolierten Bad-Publicity-Punkt opfern; die Wirtschaft wird für Runs gebraucht.                                   |
+| Disintegrator         |      1 |         1 | Sechs Installationscredits und zwei MU sind teuer. Eine Kopie und Disgruntled Ice Technician bewahren die Derez-Option.                                     |
+| Boring Bit            |      1 |         1 | Eine redundante Wall-Kopie wird durch die Suche nach der jeweils passenden Antwort ersetzt. Corrosion und weitere Wall-Breaker bleiben.                     |
+| Big Frackin' Gun      |      1 |         1 | Die teure Spezialantwort bleibt suchbar; eine zweite Kopie ist weniger dringend als Nachschub. Andere Sentry-Breaker und konfigurierbare Programme bleiben. |
+| Demolition Run        |      1 |         0 | Verzichtet auf Zugriffe und erzeugt drei Tags. Das ist eine teure Nebenlinie für ein Deck, dessen Viren wiederholte Zugriffe vorbereiten sollen.            |
 
 ### Hinein
 
-| Karte | Anzahl | Wirkung und Beitrag | Bisher in Runner-Standarddecks |
-| --- | ---: | --- | ---: |
-| Stakeout | 2 | Kosten 0; zwei Credits und eine Karte. Liefert Liquidität, ohne die Hand zu verkleinern. | 3 von 24 |
-| Cruising for Netwatch | 2 | Kosten 0; ein Credit und zwei Karten. Sucht über Kartennachschub nach Wirtschaft, Breakern und Viren. | 4 von 24 |
-| The Short Circuit | 1 | Installation 1 Credit. Eine Aktion und 1 Credit suchen ein beliebiges Programm auf die Hand; dessen Installation muss anschließend bezahlt werden. | 6 von 24 |
-| Karl de Veres, Corporate Stooge | 1 | Installation 2 Credits; ein Credit nach jedem erfolgreichen Run. Finanziert weitere Zugriffe und benötigt keine MU. | 2 von 24 |
+| Karte                           | Anzahl | Wirkung und Beitrag                                                                                                                                | Bisher in Runner-Standarddecks |
+| ------------------------------- | -----: | -------------------------------------------------------------------------------------------------------------------------------------------------- | -----------------------------: |
+| Stakeout                        |      2 | Kosten 0; zwei Credits und eine Karte. Liefert Liquidität, ohne die Hand zu verkleinern.                                                           |                       3 von 24 |
+| Cruising for Netwatch           |      2 | Kosten 0; ein Credit und zwei Karten. Sucht über Kartennachschub nach Wirtschaft, Breakern und Viren.                                              |                       4 von 24 |
+| The Short Circuit               |      1 | Installation 1 Credit. Eine Aktion und 1 Credit suchen ein beliebiges Programm auf die Hand; dessen Installation muss anschließend bezahlt werden. |                       6 von 24 |
+| Karl de Veres, Corporate Stooge |      1 | Installation 2 Credits; ein Credit nach jedem erfolgreichen Run. Finanziert weitere Zugriffe und benötigt keine MU.                                |                       2 von 24 |
 
 Alle zwölf Virus-Kopien bleiben erhalten. Die Programmdichte sinkt von 32
 auf 29 Karten; keine Breaker-Kartenart verschwindet. Fubar und beide Morphing
@@ -68,21 +68,21 @@ und Advancement, nicht zusätzliche Verteidigungsschichten ohne Rezreserve.
 
 ### Umgesetzte Entnahmen
 
-| Karte | Heraus | Verbleibt | Begründung |
-| --- | ---: | ---: | --- |
-| Reclamation Project | 2 | 1 | Drei Kopien einer Zwei-Aktionen-Rückholung sind bei Geldmangel schwer nutzbar. Eine bleibt für verbrauchtes Puzzle und relevante verlorene ICE. Die Karte holt ICE nach HQ, nicht nach R&D. |
-| Indiscriminate Response Team | 1 | 0 | Gegnerischer Handtausch trägt zur Finanzierung und zum Remote-Abschluss nur indirekt bei. |
-| Shock Treatment | 1 | 0 | Der Payoff benötigt vier Tags und einen Zugriff. Satellite Monitors, Badtimes und Street Enforcer bewahren die kleinere Tag-Nebenlinie. |
-| Sterdroid | 1 | 0 | Die einmalige Stärkeerhöhung kostet weitere Credits und die Karte. Der erste Bedarf ist, die vorhandenen Verteidiger überhaupt bezahlen zu können. |
-| Brain Drain | 1 | 0 | Zufallsabhängiger Schaden ohne eigenen End-the-run-Effekt ist weniger verlässlich als die Finanzierung der bestehenden Stopper und Umleitungen. |
+| Karte                        | Heraus | Verbleibt | Begründung                                                                                                                                                                                  |
+| ---------------------------- | -----: | --------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Reclamation Project          |      2 |         1 | Drei Kopien einer Zwei-Aktionen-Rückholung sind bei Geldmangel schwer nutzbar. Eine bleibt für verbrauchtes Puzzle und relevante verlorene ICE. Die Karte holt ICE nach HQ, nicht nach R&D. |
+| Indiscriminate Response Team |      1 |         0 | Gegnerischer Handtausch trägt zur Finanzierung und zum Remote-Abschluss nur indirekt bei.                                                                                                   |
+| Shock Treatment              |      1 |         0 | Der Payoff benötigt vier Tags und einen Zugriff. Satellite Monitors, Badtimes und Street Enforcer bewahren die kleinere Tag-Nebenlinie.                                                     |
+| Sterdroid                    |      1 |         0 | Die einmalige Stärkeerhöhung kostet weitere Credits und die Karte. Der erste Bedarf ist, die vorhandenen Verteidiger überhaupt bezahlen zu können.                                          |
+| Brain Drain                  |      1 |         0 | Zufallsabhängiger Schaden ohne eigenen End-the-run-Effekt ist weniger verlässlich als die Finanzierung der bestehenden Stopper und Umleitungen.                                             |
 
 ### Hinein
 
-| Karte | Anzahl | Wirkung und Beitrag | Bisher in Corp-Standarddecks |
-| --- | ---: | --- | ---: |
-| Efficiency Experts | 3 | Kosten 0; drei Credits für eine Aktion. Funktioniert auch ohne Startkapital und schafft Reserve für Aufbau, Rez und Advancement. | 17 von 27 |
-| Accounts Receivable | 1 | Kosten 5; neun Credits, also vier netto. Eine Kopie ergänzt den größeren Finanzierungsschritt, ohne mehrere frühe Hände von fünf Startcredits abhängig zu machen. | 19 von 27 |
-| Rockerboy Promotion | 2 | Rez 4; Vorrat 15 Credits; jede Auszahlung kostet eine Aktion und liefert drei Credits. Die selten genutzte Kampagne macht aus einem geschützten Remote eine wiederholbare Geldquelle. | 1 von 27 |
+| Karte               | Anzahl | Wirkung und Beitrag                                                                                                                                                                   | Bisher in Corp-Standarddecks |
+| ------------------- | -----: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------: |
+| Efficiency Experts  |      3 | Kosten 0; drei Credits für eine Aktion. Funktioniert auch ohne Startkapital und schafft Reserve für Aufbau, Rez und Advancement.                                                      |                    17 von 27 |
+| Accounts Receivable |      1 | Kosten 5; neun Credits, also vier netto. Eine Kopie ergänzt den größeren Finanzierungsschritt, ohne mehrere frühe Hände von fünf Startcredits abhängig zu machen.                     |                    19 von 27 |
+| Rockerboy Promotion |      2 | Rez 4; Vorrat 15 Credits; jede Auszahlung kostet eine Aktion und liefert drei Credits. Die selten genutzte Kampagne macht aus einem geschützten Remote eine wiederholbare Geldquelle. |                     1 von 27 |
 
 Alle neun Agenda-Kopien mit zusammen 20 Punkten bleiben gleich. Die Corp
 behält 18 ihrer 19 ICE-Kopien. Dumpster, Entrapment, Trapdoor und Vortex
@@ -152,12 +152,12 @@ bei veränderter Kartenliste nicht dieselbe gezogene Kartenfolge.
 Die Siege beziehen sich jeweils auf das überarbeitete Deck, nicht stets auf
 dieselbe Spielseite.
 
-| Deck / Gegner | Vollständige Paare | Siege Original | Siege Revision | Eigene Agendapunkte Original → Revision, Summe |
-| --- | ---: | ---: | ---: | ---: |
-| Breaker Lab / Shadoe Tag & Bag | 12 | 5 | 7 | 50 → 72 |
-| Breaker Lab / Tycho Ice Stack | 6 | 5 | 4 | 43 → 32 |
-| Remote Lab / King of the Road | 12 | 0 | 0 | 8 → 13 |
-| Remote Lab / Purge Window | 5 | 0 | 2 | 12 → 20 |
+| Deck / Gegner                  | Vollständige Paare | Siege Original | Siege Revision | Eigene Agendapunkte Original → Revision, Summe |
+| ------------------------------ | -----------------: | -------------: | -------------: | ---------------------------------------------: |
+| Breaker Lab / Shadoe Tag & Bag |                 12 |              5 |              7 |                                        50 → 72 |
+| Breaker Lab / Tycho Ice Stack  |                  6 |              5 |              4 |                                        43 → 32 |
+| Remote Lab / King of the Road  |                 12 |              0 |              0 |                                         8 → 13 |
+| Remote Lab / Purge Window      |                  5 |              0 |              2 |                                        12 → 20 |
 
 Der Runner verbessert sich insgesamt von 10 auf 11 Siege in 18 vollständigen
 Paaren, verliert aber gegen den zweiten Gegner einen Sieg. Das ist ein
@@ -260,7 +260,7 @@ einschließlich des realen Entscheidungszustands und negativer Bindungsfälle.
 Typechecks für Shared, Engine und KI sowie `check:ai` und
 `check:engine-source-structure` bestehen ebenfalls.
 
-**Bei Karl ist eine konkrete Bewertungslücke offen.** In StateVersion 7 von
+**Karls ursprüngliche Bewertungslücke ist inzwischen geschlossen.** In StateVersion 7 von
 `runner-primary-12` sind 5 Credits, 4 Klicks und eine legale Installation für
 2 Credits vorhanden. Die Handentwicklung bewertet Karl als `economy_engine`,
 `strong`, `useful_now`, ohne Installationssperre. Der tatsächliche Plan
@@ -275,7 +275,8 @@ Es beweist jedoch keine Installationspflicht in allen 135 Angebotszuständen.
 Eine vollständige Verhaltenskorrektur muss die Installation und anschließende
 Runs mit Kosten, Reserven, Dringlichkeit und bedingtem Ertrag vergleichen.
 Ein Namensbonus oder eine bloße Hochstufung würde diese Ursache verdecken.
-Der vorliegende Patch verändert Karls Bewertung noch nicht.
+Die unten beschriebene Verhaltenskorrektur ergänzt jetzt diese fehlende
+Bewertungskette.
 
 **Rockerboys Auszahlung beweist keine gute Investitionsplanung.** Die genaue
 Installation im erfolgreichen `corp-secondary-02` erfolgt bei StateVersion
@@ -294,6 +295,73 @@ nachgewiesen. Aus dem Einzelspiel wird kein zusätzlicher KI-Fix behauptet.
 Die vertieften lokalen Nachweise liegen unter `data/local/deck-audit-*`;
 der side-sichere Deadeye-Entscheidungszustand ist als fokussierte
 Regressionsfixture versioniert.
+
+### Aktuelle KI-Korrektur und Vergleich auf unveränderten Decklisten
+
+Die kanonische Mechanik für Einkommen nach erfolgreichen Runs erzeugt jetzt
+einen expliziten bedingten, wiederholbaren Economy-Effekt. Die persistente
+Bewertung und der bestehende Owner `runner.develop_board_and_hand` verwenden
+ihn für den Vergleich von Installation, Run-Reserve, Aktionskosten und
+begrenztem zukünftigem Einkommen. Im gesicherten Zustand 7 wird Karl nun
+installiert; aus den anschließenden erfolgreichen Runs entstehen insgesamt
+sechs Credits. Die Quelle bleibt passiv: Es gibt keine zusätzliche
+Aktivierungsaktion und zukünftige Auszahlungen finanzieren niemals den
+aktuellen Installations- oder Run-Kauf. Acht Gegenfälle verhindern die
+Investitionszulassung bei fehlender wirtschaftlicher oder taktischer Grundlage.
+Der reale späte Zustand 300 aus `runner-primary-11` sichert zusätzlich ab,
+dass die zurückgestellte Investition nicht über den allgemeinen Aufbauplan
+wieder zugelassen wird. Separat begründete Spezial-Owner bleiben erhalten.
+
+Bei begrenzten Corp-Guthaben bewertet `corp.economy` die noch nutzbare,
+risikobegrenzte Auszahlungsfolge nach Klickkosten statt nur der nächsten
+Bruttoauszahlung. Der letzte Teilbetrag wird korrekt berücksichtigt, ohne
+den Pool zu überschreiten. Ein noch nicht finanzierbarer Rez darf keine
+scheinbar bereits finanzierte Economy-Installation begründen. Die bestehende
+Defense-Bewertung bestimmt weiterhin den Schutzhorizont. Der Engine-Test
+belegt die Zulassung einer rentablen geschützten Installation, die Ablehnung
+einer unprofitablen oder unfinanzierten Economy-Installation sowie die
+tatsächliche Wahl und Ausführung der Auszahlung über den Economy-Owner.
+Er behauptet ausdrücklich keine automatische Wahl der Installation oder des
+Rez vor einer begründeten Agenda-Suche und keine reservierte Komplettauszahlung.
+
+Die Architektur bleibt unverändert: keine Karten-ID-Boni, kein zweiter
+Chooser, keine zusätzlichen LegalActions und keine verdeckten Gegnerdaten.
+Die konkrete Bewertungsprojektion einschließlich Horizont und Kalibrierung
+steht in der [Planungsarchitektur](../ai/planning-architecture.md),
+Abschnitte 27.5 und 28.6.
+
+Fokussierte Validierung: **247 Tests in neun Dateien**, KI-Typecheck,
+`check:ai` und `check:card-spec-ai-hints` bestanden. Alle
+36 revidierten Deck-/Seed-Kombinationen wurden gegen die eingefrorenen Ergebnisse
+des vorherigen Decktests verglichen. Nach der abschließenden Sperre des
+allgemeinen Karl-Aufbauplans wurden die fünf betroffenen Seeds wiederholt;
+in den anderen 31 gab es kein legales Karl-Installationsangebot. Alle 41
+Vergleichsläufe endeten regulär mit gültigem Replay und ohne Runtimefehler.
+Das ist ein Vergleich der KI-Stände bei
+identischen Listen, kein erneuter Originaldeck-/Revisionsvergleich und keine
+weitere 40-Spiele-Metaserie.
+
+| Paarung, Siege des überarbeiteten Decks     | Vorherige KI | Korrigierte KI |
+| ------------------------------------------- | -----------: | -------------: |
+| Breaker Lab gegen Shadoe, 12 Seeds          |            7 |              6 |
+| Breaker Lab gegen Tycho, 6 Seeds            |            4 |              4 |
+| Remote Lab gegen King of the Hill, 12 Seeds |            0 |              0 |
+| Remote Lab gegen Purge Window, 6 Seeds      |            2 |              2 |
+
+Karl wird jetzt in zwei der fünf Spiele mit legalem Angebot installiert
+(vorher null), mit zwei beziehungsweise sechs ausgezahlten Credits. Nach
+vier Installations-Credits und zwei Installationsklicks ergibt das insgesamt
+zwei Credits Mehrertrag gegenüber Basic Credit; eine einzelne Installation
+amortisiert ihren Klick nicht. Rockerboy bleibt bei einer aufgedeckten Quelle
+und fünf Auszahlungen von zusammen 15 Credits. Die bessere Abbildung der
+Mechaniken ist nachgewiesen, ein Siegquotengewinn oder generell optimale
+Installation wird nicht behauptet. Lokale Details:
+`data/local/deck-value-final-results.json` und `data/local/deck-value*-tests/`.
+
+Offener, vom Nutzer konkretisierter Folgebefund: Der generische Score-Plan
+erzeugt allein wegen fehlender HQ-Agendas einen Agenda-Such-Draw und kann
+damit rentablen Economy-Aufbau verdrängen. Dieser Auslöser ist noch zu
+korrigieren; bloßes Fehlen einer Agenda begründet keine Beschleunigung.
 
 ## Führende Quellen
 
