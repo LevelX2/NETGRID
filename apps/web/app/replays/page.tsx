@@ -45,8 +45,7 @@ import {
   catalogCardPresentationsFor,
 } from "../../features/catalog/catalog-card-presentations";
 
-const SERVER_HTTP =
-  process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
+import { configuredServerHttp } from "../../lib/server-endpoint";
 
 type ReplayIndexEntry = {
   replayId: string;
@@ -153,7 +152,7 @@ export default function ReplayPage() {
       setError("");
       try {
         const response = await fetch(
-          `${SERVER_HTTP}/api/replays/${encodeURIComponent(selectedMatchId)}?perspective=local_analysis`,
+          `${configuredServerHttp()}/api/replays/${encodeURIComponent(selectedMatchId)}?perspective=local_analysis`,
           { cache: "no-store" },
         );
         const payload = (await response.json()) as

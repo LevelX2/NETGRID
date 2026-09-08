@@ -18,9 +18,9 @@ import {
 } from "../app/maintenance";
 import type { SessionInfo } from "../app/session-recovery";
 
-const SERVER_HTTP =
-  process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
-const SERVER_UNREACHABLE_NOTICE = `Multiplayer-Server nicht erreichbar (${SERVER_HTTP}). Bitte starte den lokalen Multiplayer-Server und versuche es erneut.`;
+import { configuredServerHttp } from "./server-endpoint";
+const serverUnreachableNotice = () =>
+  `Multiplayer-Server nicht erreichbar (${configuredServerHttp()}). Bitte starte den lokalen Multiplayer-Server und versuche es erneut.`;
 
 type ClientPayload = ApiSidePayload;
 type LobbyClientPayload = ApiLobbyPayload;
@@ -201,7 +201,7 @@ export async function bootstrap(
   let response: Response;
   try {
     response = await fetch(
-      `${SERVER_HTTP}/api/matches/${encodeURIComponent(session.matchId)}/bootstrap?side=${session.side}`,
+      `${configuredServerHttp()}/api/matches/${encodeURIComponent(session.matchId)}/bootstrap?side=${session.side}`,
       {
         headers: { authorization: `Bearer ${session.sessionToken}` },
         cache: "no-store",
@@ -217,7 +217,7 @@ export async function bootstrap(
 export async function fetchPublicMatches(): Promise<PublicMatchesResponse> {
   let response: Response;
   try {
-    response = await fetch(`${SERVER_HTTP}/api/public/matches`, {
+    response = await fetch(`${configuredServerHttp()}/api/public/matches`, {
       cache: "no-store",
     });
   } catch {
@@ -251,7 +251,7 @@ export async function fetchPersonalRecentGameResults(): Promise<RecentGameResult
   let response: Response;
   try {
     response = await fetch(
-      `${SERVER_HTTP}/api/account/recent-results?limit=20`,
+      `${configuredServerHttp()}/api/account/recent-results?limit=20`,
       { cache: "no-store", credentials: "include" },
     );
   } catch {
@@ -287,7 +287,7 @@ export async function enableAiDecisionDebugTracing(
   let response: Response;
   try {
     response = await fetch(
-      `${SERVER_HTTP}${buildMaintenanceAiTraceEnablePath(matchId)}`,
+      `${configuredServerHttp()}${buildMaintenanceAiTraceEnablePath(matchId)}`,
       {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -318,7 +318,7 @@ export async function fetchAiDecisionDebugTraceIndex(
   let response: Response;
   try {
     response = await fetch(
-      `${SERVER_HTTP}${buildMaintenanceAiTraceIndexPath(matchId)}`,
+      `${configuredServerHttp()}${buildMaintenanceAiTraceIndexPath(matchId)}`,
       { cache: "no-store" },
     );
   } catch {
@@ -347,7 +347,7 @@ export async function fetchAiDecisionDebugTraceDetail(
   let response: Response;
   try {
     response = await fetch(
-      `${SERVER_HTTP}/api/storage/maintenance/ai-decision-traces/${encodeURIComponent(traceId)}`,
+      `${configuredServerHttp()}/api/storage/maintenance/ai-decision-traces/${encodeURIComponent(traceId)}`,
       { cache: "no-store" },
     );
   } catch {
@@ -376,7 +376,7 @@ export async function fetchAiDecisionPreview(
   let response: Response;
   try {
     response = await fetch(
-      `${SERVER_HTTP}/api/matches/${encodeURIComponent(session.matchId)}/ai-preview`,
+      `${configuredServerHttp()}/api/matches/${encodeURIComponent(session.matchId)}/ai-preview`,
       {
         method: "POST",
         headers: {
@@ -419,7 +419,7 @@ export async function fetchPreparedAiDecisionDebug(
   let response: Response;
   try {
     response = await fetch(
-      `${SERVER_HTTP}/api/matches/${encodeURIComponent(session.matchId)}/ai-decision-debug`,
+      `${configuredServerHttp()}/api/matches/${encodeURIComponent(session.matchId)}/ai-decision-debug`,
       {
         method: "POST",
         headers: {
@@ -456,7 +456,7 @@ export async function fetchPreparedAiDecisionDebug(
 export async function postJson<T>(path: string, body: unknown): Promise<T> {
   let response: Response;
   try {
-    response = await fetch(`${SERVER_HTTP}${path}`, {
+    response = await fetch(`${configuredServerHttp()}${path}`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       credentials: "include",
@@ -470,7 +470,7 @@ export async function postJson<T>(path: string, body: unknown): Promise<T> {
 
 class ServerConnectionError extends Error {
   constructor() {
-    super(SERVER_UNREACHABLE_NOTICE);
+    super(serverUnreachableNotice());
     this.name = "ServerConnectionError";
   }
 }
@@ -478,7 +478,7 @@ class ServerConnectionError extends Error {
 export function serverErrorNotice(error: unknown, fallback: string): string {
   if (error instanceof ServerConnectionError) return error.message;
   if (error instanceof TypeError && /fetch|network|failed/i.test(error.message))
-    return SERVER_UNREACHABLE_NOTICE;
+    return serverUnreachableNotice();
   if (error instanceof Error && error.message) return error.message;
   return fallback;
 }

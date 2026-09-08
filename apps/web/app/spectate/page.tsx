@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-const SERVER_HTTP =
-  process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
+import { configuredServerHttp } from "../../lib/server-endpoint";
 
 type SideSummary = {
   credits: number;
@@ -64,7 +63,7 @@ export default function SpectatePage() {
     const load = async () => {
       try {
         const response = await fetch(
-          `${SERVER_HTTP}/api/public/matches/${encodeURIComponent(requestedMatchId)}/spectator`,
+          `${configuredServerHttp()}/api/public/matches/${encodeURIComponent(requestedMatchId)}/spectator`,
           { cache: "no-store" },
         );
         if (!response.ok) {

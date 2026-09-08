@@ -38,15 +38,14 @@ import {
 import { formatAppDateTime } from "../../../i18n/format";
 import { normalizeAppLocale } from "../../../i18n/locale";
 
-const CONFIGURED_SERVER_HTTP =
-  process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
+import { configuredServerHttp } from "../../../lib/server-endpoint";
 
 export default function AiTraceMaintenancePage() {
   const t = useTranslations("Maintenance.aiTraces");
   const locale = normalizeAppLocale(useLocale());
   const [serverHttp] = useState(() =>
     resolveMaintenanceServerHttp(
-      CONFIGURED_SERVER_HTTP,
+      configuredServerHttp(),
       typeof window === "undefined" ? undefined : window.location.hostname,
     ),
   );

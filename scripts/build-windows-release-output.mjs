@@ -62,8 +62,6 @@ try {
       NETGRID_RELEASE_BUILD: "true",
       NETGRID_RELEASE_CARD_INDEX: releaseCardIndex,
       NETGRID_NEXT_DIST_DIR: webDistName,
-      NEXT_PUBLIC_NETGRID_SERVER_URL:
-        process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787",
     },
   );
 

@@ -9,8 +9,7 @@ import {
   type ServerRuntimeMode,
 } from "../../lib/server-runtime-mode";
 
-const SERVER_HTTP =
-  process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
+import { configuredServerHttp } from "../../lib/server-endpoint";
 
 export function AppRuntimeStatus({ statusLabel }: { statusLabel: string }) {
   const t = useTranslations("AppShell.runtimeStatus");
@@ -21,7 +20,7 @@ export function AppRuntimeStatus({ statusLabel }: { statusLabel: string }) {
 
     const refreshRuntimeMode = async () => {
       try {
-        const response = await fetch(`${SERVER_HTTP}/health`, {
+        const response = await fetch(`${configuredServerHttp()}/health`, {
           cache: "no-store",
         });
         if (!response.ok) return;

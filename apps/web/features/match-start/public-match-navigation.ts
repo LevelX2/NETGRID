@@ -1,8 +1,7 @@
 import type { PublicMatchEntry } from "../../lib/client-api";
 import type { AppLocale } from "../../i18n/locale";
 
-const SERVER_HTTP =
-  process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
+import { configuredServerHttp } from "../../lib/server-endpoint";
 
 export function publicMatchActionLabel(
   status: PublicMatchEntry["status"],
@@ -42,5 +41,5 @@ export function gamebookDownloadTarget(
   matchId: string,
   locale: AppLocale,
 ): string {
-  return `${SERVER_HTTP}/api/replays/${encodeURIComponent(matchId)}/gamebook?locale=${encodeURIComponent(locale)}`;
+  return `${configuredServerHttp()}/api/replays/${encodeURIComponent(matchId)}/gamebook?locale=${encodeURIComponent(locale)}`;
 }

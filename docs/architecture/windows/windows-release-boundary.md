@@ -64,6 +64,18 @@ unzulässig.
 - Produktdefaults verweisen auf kuratierte Standarddecks;
 - fehlende oder inkonsistente Runtimekonfiguration bricht sichtbar ab.
 
+Die Browser-API-Adresse ist eine Laufzeitkonfiguration, keine Buildvariable.
+Das dynamische Rootlayout projiziert ausschließlich den validierten Origin
+aus `NETGRID_SERVER_BASE_URL` als React-escaped `data-netgrid-server-origin`.
+Alle Browser-API-Aufrufer lesen diesen Wert bei Verwendung über
+`apps/web/lib/server-endpoint.ts`; eine fehlende Projektion scheitert sichtbar.
+`NEXT_PUBLIC_NETGRID_SERVER_URL` darf den Releaseclient nicht mehr steuern,
+da Next.js solche Werte beim Build einfriert. Geheimnisse und die übrige
+Runtimeumgebung werden nicht projiziert. Maintenance verwendet weiterhin
+seinen bestehenden Loopback-Vertrag und erhält dabei den konfigurierten Port.
+Nur serverseitiger Entwicklungsbetrieb ohne Releaseprofil besitzt den
+ausdrücklichen lokalen Default `http://127.0.0.1:8787`.
+
 Der installerneutrale Output besitzt diese öffentlichen Verträge:
 
 ```text

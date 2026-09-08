@@ -3,8 +3,7 @@ import type {
   ApiJoinMatchResponse,
 } from "@netgrid/shared";
 
-export const ACCOUNT_SERVER_HTTP =
-  process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
+import { configuredServerHttp } from "../../lib/server-endpoint";
 
 export type AccountSelf = {
   accountId: string;
@@ -249,7 +248,7 @@ export async function accountRequest<T>(
 ): Promise<T> {
   const headers = new Headers(init.headers);
   if (init.body !== undefined) headers.set("content-type", "application/json");
-  const response = await fetcher(`${ACCOUNT_SERVER_HTTP}${path}`, {
+  const response = await fetcher(`${configuredServerHttp()}${path}`, {
     ...init,
     headers,
     credentials: "include",

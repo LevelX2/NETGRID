@@ -37,14 +37,13 @@ import {
   type CardImageProfileId,
 } from "../../card-image-maintenance";
 
-const CONFIGURED_SERVER_HTTP =
-  process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
+import { configuredServerHttp } from "../../../lib/server-endpoint";
 
 export default function CardImageMaintenancePage() {
   const t = useTranslations("Maintenance.cardImages");
   const [serverHttp] = useState(() =>
     resolveMaintenanceServerHttp(
-      CONFIGURED_SERVER_HTTP,
+      configuredServerHttp(),
       typeof window === "undefined" ? undefined : window.location.hostname,
     ),
   );

@@ -1,5 +1,6 @@
 import type { DeckSnapshot } from "../decks/deck-api-types";
-import { ACCOUNT_SERVER_HTTP, AccountClientError } from "./account-client";
+import { AccountClientError } from "./account-client";
+import { configuredServerHttp } from "../../lib/server-endpoint";
 import { loadStandardDecks, type StandardDeck } from "./account-deck-client";
 
 export const STANDARD_DECK_CATALOG_TIMEOUT_MS = 8_000;
@@ -148,7 +149,7 @@ export function standardDeckCatalogDiagnostic(
   error: unknown,
   attempt: number,
   occurredAt: string,
-  serverHttp = ACCOUNT_SERVER_HTTP,
+  serverHttp = configuredServerHttp(),
 ): StandardDeckCatalogDiagnostic {
   const serverOrigin = standardDeckCatalogServerOrigin(serverHttp);
   if (error instanceof StandardDeckCatalogTimeoutError) {

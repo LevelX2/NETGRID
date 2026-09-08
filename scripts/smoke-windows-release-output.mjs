@@ -27,7 +27,8 @@ try {
     ["--output", "output/windows-release-smoke"],
     {
       ...process.env,
-      NEXT_PUBLIC_NETGRID_SERVER_URL: serverUrl,
+      // Intentionally different from installation-time ports: no frozen URL.
+      NEXT_PUBLIC_NETGRID_SERVER_URL: "http://127.0.0.1:18787",
     },
   );
   await runNode(
@@ -82,6 +83,11 @@ try {
   const rootResponse = await waitForResponse(webUrl, web);
   if (!rootResponse.ok)
     throw new Error(`release_web_root_failed:${rootResponse.status}`);
+  const rootHtml = await rootResponse.text();
+  if (!rootHtml.includes(`data-netgrid-server-origin="${serverUrl}"`))
+    throw new Error("release_browser_runtime_origin_missing");
+  if (rootHtml.includes(commonEnvironment.NETGRID_TOKEN_SALT))
+    throw new Error("release_browser_runtime_secret_leaked");
 
   const catalog = await fetchJson(`${webUrl}/api/cards/catalog`);
   if (

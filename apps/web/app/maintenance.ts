@@ -1,4 +1,5 @@
 import type { AppLocale } from "../i18n/locale";
+import { validateServerOrigin } from "../lib/server-endpoint";
 
 export type MaintenanceParticipant = {
   side: "runner" | "corp";
@@ -261,7 +262,7 @@ export function resolveMaintenanceServerHttp(
   configuredServerHttp: string,
   pageHostname?: string,
 ): string {
-  const configured = configuredServerHttp.trim() || "http://127.0.0.1:8787";
+  const configured = validateServerOrigin(configuredServerHttp);
   const hostname = pageHostname?.toLowerCase();
   if (
     hostname === "127.0.0.1" ||
@@ -269,13 +270,9 @@ export function resolveMaintenanceServerHttp(
     hostname === "::1" ||
     hostname === "[::1]"
   ) {
-    try {
-      const localServerUrl = new URL(configured);
-      localServerUrl.hostname = "127.0.0.1";
-      return localServerUrl.origin;
-    } catch {
-      return "http://127.0.0.1:8787";
-    }
+    const localServerUrl = new URL(configured);
+    localServerUrl.hostname = "127.0.0.1";
+    return localServerUrl.origin;
   }
   return configured;
 }

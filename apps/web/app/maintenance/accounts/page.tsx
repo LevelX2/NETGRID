@@ -11,8 +11,7 @@ import {
 } from "../../maintenance-auth-ui";
 import { resolveMaintenanceServerHttp } from "../../maintenance";
 
-const CONFIGURED_SERVER_HTTP =
-  process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
+import { configuredServerHttp } from "../../../lib/server-endpoint";
 
 type AccountMode = "invite_only" | "simple" | "protected";
 type ManagedAccount = {
@@ -31,7 +30,7 @@ export default function MaintenanceAccountsPage() {
   const t = useTranslations("Maintenance.accounts");
   const [serverHttp] = useState(() =>
     resolveMaintenanceServerHttp(
-      CONFIGURED_SERVER_HTTP,
+      configuredServerHttp(),
       typeof window === "undefined" ? undefined : window.location.hostname,
     ),
   );

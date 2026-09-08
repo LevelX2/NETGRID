@@ -1071,6 +1071,42 @@ direkten MSI-Weg. Es ersetzt weder Tray-/Pipe-Updater, Aktivspiel-/Mehrbenutzer-
 schutz, UAC-Kontowechsel noch die Absturzreparatur. WIN-I08 bleibt aktiv;
 kein Main-Merge, Worktree-Cleanup oder Push.
 
+### Aktuelle Browser-/Setupfunde vom 8. September (WIN-I08 offen)
+
+Nach der neuen UI-Freigabe des Nutzers wurde der installierte Build 8209
+über seinen normalen Tray-Pfad geöffnet. Der native Browser zeigt auf
+Webport 32141, doch die Standarddeck-Diagnose nennt um 09:43 UTC den
+falschen Backendport 8787 statt 32142. Beide tatsächlichen Healthendpunkte
+antworten erfolgreich. Ursache ist das bisher beim Next-Build eingefrorene
+`NEXT_PUBLIC_NETGRID_SERVER_URL`; Root-HTML- und Backend-Healthchecks allein
+belegen keine funktionierende benutzerdefinierte Browser-Portwahl.
+
+Der Quellenfix verwendet eine einzige laufzeitgebundene öffentliche
+Origin-Projektion im dynamischen Rootlayout und verzögert die Auflösung bis
+zur Verwendung. 47 fokussierte Tests und der Web-Typecheck sind grün. Der
+vollständige Releaseoutput-Smoke besteht mit zur Buildadresse abweichenden
+Laufzeitports 54157/54158, explizitem Origin-HTML-Nachweis und Ausschluss des
+Test-Tokensalzes aus dem HTML. Seine eigenen Testdaten/Prozesse sind bereinigt.
+Account-/Deck-, Spiel-, Replay-, Spectator-, Diagnose- und
+Maintenance-Aufrufer teilen diese Autorität. Der installierte Browsernachweis
+des Fixes steht noch aus; keine neue Partie wurde im fehlerhaften Browser
+angelegt. Die Gastvorbereitung reparierte ausschließlich die fehlende Klasse
+des bereits ausgewählten, Microsoft-signierten Edge; UserChoice blieb
+unverändert (`edge-http-registration-repair.json`).
+
+Separater offener Setupfund: Wiederöffnen des gecachten Setups zeigt zwar den
+beibehaltenen Datenordner, aber den Standardprogrammordner und 3100/8787
+statt der registrierten Installation mit eigenen Pfaden und 32141/32142.
+Es wurde nicht auf „Installieren“ gedrückt. Die UI muss vorhandene Werte
+korrekt darstellen und darf keine Änderungen anbieten, die der
+Konfigurationserhalt anschließend ignoriert. Dieser Ursachenfix ist noch offen.
+
+Der normale Tray-Aufruf der Drittanbieterhinweise erreicht um 09:58 UTC die
+Windows-App-Auswahl für `.txt`: Im aktuellen Sandboximage fehlt eine
+Textdateizuordnung. Die Auswahl wurde ohne Zuordnungsänderung geschlossen.
+Das ist kein erfolgreicher visueller Lesenachweis der Hinweise; die
+manifestgebundenen Lizenzdateien selbst sind weiterhin auditiert.
+
 ### Regulärer Build 8199: Installation, Repair und Headless nativ grün
 
 `output/windows-installer-stop-diagnostic-8199` ist regulär aus dem sauberen
