@@ -292,17 +292,19 @@ function buildLegalActionsUnchecked(
       : [];
   }
   if (state.timingPoint === "run.encounter_ice") {
+    const corpActions = buildCorpEncounterCardImplementationActions(
+      host.hosts.runCardImplementationActionHost(),
+    ).legalActions;
     if (side === "runner")
-      return [
-        ...buildRunnerEncounterActions(host.hosts.runnerEncounterActionHost())
-          .legalActions,
-        ...host.actions.runnerRunSpecialEffectActions(),
-      ];
-    return side === "corp"
-      ? buildCorpEncounterCardImplementationActions(
-          host.hosts.runCardImplementationActionHost(),
-        ).legalActions
-      : [];
+      return corpActions.length > 0
+        ? []
+        : [
+            ...buildRunnerEncounterActions(
+              host.hosts.runnerEncounterActionHost(),
+            ).legalActions,
+            ...host.actions.runnerRunSpecialEffectActions(),
+          ];
+    return side === "corp" ? corpActions : [];
   }
   if (state.timingPoint === "run.jack_out_window") {
     if (side === "corp")

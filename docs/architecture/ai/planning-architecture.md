@@ -3918,6 +3918,18 @@ zweiten, gegen HQ-, R&D- oder Remote-Schutz konkurrierenden Verteidigungsplan.
 Der Verteidigungsplan darf einen Scoring- oder Remoteplan präemptieren, aber
 deren Zustand nicht vergessen.
 
+Dasselbe `corp.defend_servers` besitzt die Aktivierung und den Pass im
+bezahlten Encounter-Fenster. Die Engine bestimmt die Entscheidungsseite durch
+ihre exklusiven LegalActions; die KI ergänzt keinen eigenen Prioritätswechsel.
+Die aktuelle ETR-Ergänzung wird über `currentEncounterDefenseQuotes` an
+Action-ID, Quell-ICE, Server, StateVersion und Kosten gebunden. Eine schon
+offene harte ETR verhindert redundantes Bezahlen. Der Owner berücksichtigt
+eine nicht bezahlbare sichtbare Breakroute oder einen mindestens gleichwertigen
+sichtbaren Ressourcenverlust; einen billigeren Break lässt er passieren.
+Unvollständige Austauschquoten begründen keine erfundene Stop- oder Taxwirkung.
+Ein fehlender beziehungsweise falsch gebundener Quote scheitert strukturiert.
+Der Pass ist eine ausdrückliche Engine-Action desselben Plans, kein Fallback.
+
 `decline_rez` wird nur dann als unproduktiv zurückgewiesen, wenn derselbe
 Defense-Modus eine exakte, aktuell produktive Rez-Action als Route
 materialisiert. Gibt es keine solche Rez-Route, ist Decline die regelkonforme

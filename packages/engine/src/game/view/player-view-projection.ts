@@ -30,6 +30,7 @@ import {
 import { visibleChoice } from "./choice-view";
 import { toPublicEventForSide } from "./public-event-view";
 import { visibleCorpIceRezResourceExchangeQuote } from "./visible-rez-resource-exchange-quote";
+import { visibleCorpEncounterDefenseQuotes } from "./visible-corp-encounter-defense-quote";
 import {
   visibleEffectiveEncounteredIceRunQuote,
   visibleEffectiveIceRunQuote,
@@ -121,8 +122,15 @@ export function buildPlayerViewProjection(
               return quote ? [{ actionId: action.actionId, quote }] : [];
             })
           : [];
+      const currentEncounterDefenseQuotes =
+        side === "corp"
+          ? visibleCorpEncounterDefenseQuotes(state, visibleIce, legalActions)
+          : [];
       return {
         ...visibleIce,
+        ...(currentEncounterDefenseQuotes.length > 0
+          ? { currentEncounterDefenseQuotes }
+          : {}),
         ...(effectiveRunQuote ? { effectiveRunQuote } : {}),
         ...(effectivePostRezRunQuote ? { effectivePostRezRunQuote } : {}),
         ...(effectiveRezCostQuote ? { effectiveRezCostQuote } : {}),

@@ -1740,6 +1740,36 @@ function sanitizeVisibleCardWithOptions(
   const effectiveRezCostQuote = card.effectiveRezCostQuote;
   const effectiveRezResourceExchangeQuote =
     card.effectiveRezResourceExchangeQuote;
+  const currentEncounterDefenseQuotes =
+    options.allowCorpRezCostQuote === true
+      ? (card.currentEncounterDefenseQuotes ?? [])
+          .filter(
+            (entry) =>
+              typeof entry.actionId === "string" &&
+              entry.actionId.length > 0 &&
+              Number.isSafeInteger(entry.creditCost) &&
+              entry.creditCost >= 0 &&
+              Number.isSafeInteger(entry.existingUnbrokenEndTheRunCount) &&
+              entry.existingUnbrokenEndTheRunCount >= 0 &&
+              entry.exchange.context === "installed" &&
+              entry.exchange.cardId === card.instanceId &&
+              entry.exchange.targetServerId ===
+                options.expectedCorpRezServerId &&
+              entry.exchange.projectedServerId ===
+                options.expectedCorpRezServerId &&
+              entry.exchange.expiresAtStateVersion ===
+                options.expectedCorpRezStateVersion,
+          )
+          .map((entry) => ({
+            actionId: entry.actionId,
+            creditCost: entry.creditCost,
+            existingUnbrokenEndTheRunCount:
+              entry.existingUnbrokenEndTheRunCount,
+            exchange: sanitizeInstalledCorpIceRezResourceExchangeQuote(
+              entry.exchange,
+            ),
+          }))
+      : [];
   const effectiveRezActionResourceExchangeQuotes =
     card.effectiveRezActionResourceExchangeQuotes;
   const scoreContinuationQuote = card.scoreContinuationQuote;
@@ -2012,6 +2042,9 @@ function sanitizeVisibleCardWithOptions(
               effectiveRezResourceExchangeQuote,
             ),
         }
+      : {}),
+    ...(currentEncounterDefenseQuotes.length > 0
+      ? { currentEncounterDefenseQuotes }
       : {}),
     ...(sanitizedEffectiveRezActionResourceExchangeQuotes.length > 0
       ? {

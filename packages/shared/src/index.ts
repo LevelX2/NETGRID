@@ -1547,6 +1547,8 @@ export type RunState = {
     | { kind: "server"; serverId: Exclude<ServerId, "new_remote"> };
   approachedIceId?: CardInstanceId;
   encounteredIceId?: CardInstanceId;
+  /** Corp passed the paid encounter window for this exact next action state. */
+  corpEncounterPassStateVersion?: number;
   pendingEncounterEntryIceId?: CardInstanceId;
   encounteredBlackIceCount?: number;
   rezzedBlackOpsCount?: number;
@@ -3432,6 +3434,14 @@ export type VisibleCorpIceRezActionResourceExchangeQuote = {
   quote: VisibleCorpIceRezResourceExchangeQuote;
 };
 
+/** Exact legal paid ETR addition and the visible response to its new subroutine. */
+export type VisibleCorpEncounterDefenseQuote = {
+  actionId: string;
+  creditCost: number;
+  existingUnbrokenEndTheRunCount: number;
+  exchange: VisibleCorpIceRezResourceExchangeQuote;
+};
+
 /**
  * Corp-private, Engine-certified continuation budget for one installed agenda.
  *
@@ -3945,6 +3955,7 @@ export type VisibleCard = {
   effectivePostRezRunQuote?: VisibleCorpIcePostRezRunQuote;
   effectiveRezCostQuote?: VisibleCorpRezCostQuote;
   effectiveRezResourceExchangeQuote?: VisibleCorpIceRezResourceExchangeQuote;
+  currentEncounterDefenseQuotes?: VisibleCorpEncounterDefenseQuote[];
   effectiveRezActionResourceExchangeQuotes?: VisibleCorpIceRezActionResourceExchangeQuote[];
   /** Present only for the Corp's installed agendas. */
   scoreContinuationQuote?: VisibleCorpScoreContinuationQuote;

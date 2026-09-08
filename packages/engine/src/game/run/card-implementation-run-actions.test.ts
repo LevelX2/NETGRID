@@ -320,7 +320,12 @@ describe("corp encounter CardImplementation actions", () => {
     const result = buildCorpEncounterCardImplementationActions(host);
 
     expect(calls).toEqual(["corp:ice_1:ice_definition:corp_encounter"]);
-    expect(result.legalActions).toHaveLength(1);
+    expect(result.legalActions).toHaveLength(2);
+    expect(result.legalActions[1]).toMatchObject({
+      side: "corp",
+      type: "continue_run",
+      source: "game_rule",
+    });
   });
 });
 

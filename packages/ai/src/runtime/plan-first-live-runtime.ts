@@ -1,4 +1,5 @@
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { assessCorpPaidEncounterDefense } from "./corp-paid-encounter-defense";
 import { currentCorpCreditObligation } from "../plans/corp-credit-obligation";
 import { assessRunnerSuccessfulRunCreditInvestment } from "./runner-successful-run-credit-investment";
 import {
@@ -16867,6 +16868,30 @@ function buildCorpDomain(
           ];
         }
         if (
+          candidate.actionType === "continue_run" &&
+          input.playerView.timingPoint === "run.encounter_ice" &&
+          input.legalActions.some(
+            (action) =>
+              action.actionId === candidate.actionId &&
+              action.side === "corp" &&
+              action.source === "game_rule",
+          )
+        ) {
+          return [
+            {
+              kind: "generic",
+              defenseId: `pass-encounter:${candidate.actionId}`,
+              serverId: input.playerView.run!.attackedServerId,
+              phase: "pass_encounter" as const,
+              sourceDefinitionIds: [],
+              actionIds: [candidate.actionId],
+              urgent: true,
+              value: 0,
+              evidenceCode: "corp_paid_encounter_window_pass",
+            },
+          ];
+        }
+        if (
           candidate.actionType === "activated_card_ability" ||
           candidate.semanticActionType === "card_ability.trigger" ||
           candidate.semanticActionType === "run.end_by_corp"
@@ -32642,6 +32667,11 @@ function corpRunDefenseAbilityAssessment(
       removalCondition:
         "Bind the run-defense assessment to the current exact LegalAction.",
     });
+  const paidEncounterDefense = assessCorpPaidEncounterDefense(
+    input,
+    legalAction,
+  );
+  if (paidEncounterDefense) return paidEncounterDefense;
   if (
     candidate.semanticActionType === "run.end_by_corp" &&
     legalAction.side === "corp" &&

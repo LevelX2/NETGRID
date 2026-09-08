@@ -210,6 +210,7 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
     | "fund_rez_reserve"
     | "rez_response"
     | "activate_run_defense"
+    | "pass_encounter"
     | "decline_rez";
   sourceDefinitionIds: string[];
   parentKind?: "remote";
@@ -1857,6 +1858,7 @@ export function corpGenericDefensePriorityClass(
           (signal.phase === "draw_for_ice" &&
             signal.centralPressure === "terminal") ||
           signal.phase === "activate_run_defense" ||
+          signal.phase === "pass_encounter" ||
           (signal.phase === "rez_response" &&
             signal.rezWindowVerdict === "productive")),
     )
@@ -3036,8 +3038,22 @@ function defenseCandidates(
         );
       if (signal.phase === "draw_for_ice")
         return corpCandidateProjectsCardDraw(candidate);
+      if (signal.phase === "pass_encounter")
+        return (
+          candidate.semanticActionType === "run.continue" &&
+          context.input.playerView.timingPoint === "run.encounter_ice" &&
+          context.input.legalActions.some(
+            (action) =>
+              action.actionId === candidate.actionId &&
+              action.side === "corp" &&
+              action.source === "game_rule" &&
+              action.expiresAtStateVersion ===
+                context.input.playerView.stateVersion,
+          )
+        );
       if (signal.phase === "activate_run_defense")
         return (
+          candidate.actionType === "activated_card_ability" ||
           candidate.semanticActionType === "card_ability.trigger" ||
           candidate.semanticActionType === "run.end_by_corp" ||
           candidate.semanticActionType === "play.corp_operation"
@@ -5696,6 +5712,7 @@ function genericDefensePhase(
     value === "fund_rez_reserve" ||
     value === "rez_response" ||
     value === "activate_run_defense" ||
+    value === "pass_encounter" ||
     value === "decline_rez"
   );
 }
@@ -6077,6 +6094,7 @@ function urgentDefenseBand(
       (signal.phase === "rez_response" ||
         signal.phase === "decline_rez" ||
         signal.phase === "activate_run_defense" ||
+        signal.phase === "pass_encounter" ||
         signal.phase === "resolve_post_pass_ice_lifecycle") &&
       defenseCandidates(context, signal).length > 0,
   );

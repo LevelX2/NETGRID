@@ -114,6 +114,52 @@ export function visibleCorpIceRezResourceExchangeQuote(
       reason: "unsupported_encounter_cost_projection",
     };
   }
+  return visibleCurrentIceBreakExchange(
+    state,
+    iceId,
+    projectedVisibleIce,
+    projectedRunQuote,
+    endTheRunCount,
+  );
+}
+
+/** Exact visible breaker payment facts shared by rez and paid encounter defense. */
+export function visibleCurrentIceBreakExchange(
+  state: GameState,
+  iceId: CardInstanceId,
+  projectedVisibleIce: VisibleCard,
+  projectedRunQuote: VisibleEffectiveIceRunQuote,
+  endTheRunCount: number,
+): VisibleCorpIceRezResourceExchangeQuote {
+  const server = state.corp.servers.find((server) =>
+    server.ice.includes(iceId),
+  );
+  if (!server)
+    throw new Error(
+      "Current ICE break exchange has no installed server binding.",
+    );
+  const binding = {
+    context: "installed" as const,
+    cardId: iceId,
+    targetServerId: server.id,
+    projectedServerId: server.id,
+    expiresAtStateVersion: state.stateVersion,
+  };
+  if (
+    state.run?.phase === "encounter_ice" &&
+    state.run.encounteredIceId === iceId &&
+    state.run.noBreakSubroutinesActive
+  ) {
+    return {
+      ...binding,
+      complete: true,
+      hardEndTheRunSubroutineCount: endTheRunCount,
+      runnerBreakUnavailable: {
+        reason: "no_visible_eligible_breaker",
+        evidenceSource: "engine_icebreaker_ability",
+      },
+    };
+  }
   const runnerRig = [
     ...state.runner.rig.programs,
     ...state.runner.rig.hardware,
@@ -264,6 +310,16 @@ function quoteRunnerBreak(params: {
     return { kind: "unknown" };
   }
   const abilities = icebreakerAbilitiesForDefinition(breakerDefinition);
+  // A choice-dependent matching capability is unresolved, not proof that no
+  // eligible breaker exists. Preserve that distinction for both consumers.
+  if (
+    abilities.some(
+      (ability) =>
+        ability.type === "break_subroutine" &&
+        (ability.selectedIceSubtypeFromBreaker || ability.subroutineBreakTags),
+    )
+  )
+    return { kind: "unknown" };
   const matchingBreakAbilities = abilities.filter(
     (ability) =>
       ability.type === "break_subroutine" &&

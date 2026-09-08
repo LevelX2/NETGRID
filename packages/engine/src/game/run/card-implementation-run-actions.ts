@@ -7,6 +7,7 @@ import type {
   Side,
 } from "@netgrid/shared";
 import type { ActivatedCardAbilityImplementation } from "../../ability-engine/definition-types";
+import { buildLegalAction } from "../turn/action-builders";
 
 export type RunCardImplementationActionHost = {
   state: GameState;
@@ -187,7 +188,8 @@ export function buildCorpEncounterCardImplementationActions(
   if (
     host.state.timingPoint !== "run.encounter_ice" ||
     run?.phase !== "encounter_ice" ||
-    !run.encounteredIceId
+    !run.encounteredIceId ||
+    run.corpEncounterPassStateVersion === host.state.stateVersion
   )
     return { handled: true, legalActions: [] };
   const instance = host.cards.cardInstanceFor(run.encounteredIceId);
@@ -201,6 +203,19 @@ export function buildCorpEncounterCardImplementationActions(
     host.cards.definitionFor(run.encounteredIceId),
     "corp_encounter",
   );
+  if (legalActions.length > 0) {
+    legalActions.push(
+      buildLegalAction(
+        host.state,
+        "corp",
+        "continue_run",
+        "Bezahlte Encounter-Fähigkeiten abschließen",
+        "game_rule",
+        [],
+        { serverId: run.attackedServerId },
+      ),
+    );
+  }
   return { handled: true, legalActions };
 }
 
