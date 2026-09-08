@@ -164,8 +164,29 @@ unter seinem registrierten Namen stellt dagegen die gezielt entfernte eigene
 Lizenzdatei wieder her, Exit 0, ohne zusätzliche `REINSTALL`-Eigenschaft.
 Konfiguration und bestehende Credentials bleiben in beiden Versuchen gleich;
 die Fehlerfixture wurde aus ihrer exakten Sicherung zurückgestellt.
-24 Dateinamen- und 66 Kommando-/Elevationsassertions sind grün. Der native
-Reparaturlauf eines neu gebauten korrigierten Setuphosts bleibt noch offen.
+24 Dateinamen- und 66 Kommando-/Elevationsassertions sind grün. Der reguläre
+Build 8217 aus `2eb65b409908f47c9f603c12f75a2cdfa676d801` besteht sämtliche
+Windows-Komponentengates, 2.291 Setupprüfungen, Sprach-/Render-Matrix und den
+Audit aller 10.903 Paketdateien. Der korrigierte Setuphost installiert unter
+Sandbox-SYSTEM erfolgreich 8212→8217 einschließlich nativer Sicherung und
+gebundenem Healthcheck. Anschließend stellt seine tatsächlich installierte
+Cachekopie bei erneuter Installation derselben Version die entfernte
+Lizenzdatei selbst hashgleich wieder her, Exit 0. Der private MSI-Ordner ist
+danach entfernt. Die vollständige Manifestprüfung, fünf native PE-Hashes,
+MSI-/Setupcache und Verknüpfungsbindung bleiben korrekt; Konfiguration und
+Credentials sind unverändert. Ein zusätzlicher Headless-Start-/Stoppcheck
+endet mit Exit 0; eigene Runtimeprozesse beendet, Ports frei
+(8. September, 11:54:22 UTC).
+
+Die erste Nachprüfungsfixture verlangte irrtümlich auch für die Reparatur
+desselben ProductCodes einen neuen Upgrade-Snapshot. Dieser rote Testbeleg
+bleibt erhalten. `NeedsDataTransaction` und der bestehende Produktvertrag
+binden die Datentransaktion an den Versionswechsel. Die korrigierte Prüfung
+verlangt stattdessen die abgeschlossene Reparaturlease, den unveränderten
+vorherigen Upgrade-Snapshot und den zusätzlichen tatsächlichen Healthlauf;
+kein Produktgate wurde dafür abgeschwächt. Die interaktive Windows-Freigabe
+des eigenständigen CLI-Aufrufs und der GUI-Worker sind durch den erhöhten
+CLI-Nachweis weiterhin nicht nativ abgenommen.
 
 Offen sind weiterhin der vollständige GUI-/Tray-Updater mit gebundener Pipe, ursprünglichem
 Benutzerneustart und anderer UAC-Administratorfreigabe sowie

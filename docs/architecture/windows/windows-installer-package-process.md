@@ -122,8 +122,56 @@ Die CLI-Extraktion erfolgt erst erhöht im atomar angelegten geschützten
 Ordner; eigenständige Aufrufe behalten ihre normale Windows-Rechteabfrage,
 gebundene Updater-Aufrufe behalten ihren tatsächlichen Owner. 24 fokussierte
 Dateinamenchecks, 66 Kommando-/Elevationschecks und der de/en/fr-Katalog mit
-191 Schlüsseln sind grün. Noch kein korrigierter Bundlebuild oder nativer
-Setup-Reparaturbeleg. Keine Releasefreigabe, Integration oder Übertragung.
+191 Schlüsseln sind grün.
+
+Der reguläre korrigierte Kandidat 8217 ist aus dem sauberen Quellcommit
+`2eb65b409908f47c9f603c12f75a2cdfa676d801` unter
+`output/windows-installer-msi-source-8217` gebaut. Alle Windows-Komponentengates,
+2.291 Setupchecks, 27 Renderbilder und der 10.903-Dateien-Audit bestehen.
+Setup: 353.131.083 Bytes, SHA-256
+`462adce4f6c6a67ce7e023c04a7901d86570348e4460ed71d73c121814fcab33`.
+MSI: 300.938.076 Bytes, SHA-256
+`75e5ff1720bf1fb90786de1efe4f37882338bbaf8c64a22060f3bb0604a49075`.
+Metadaten, Originaldateien und Gastkopien sind hashgebunden; keine
+Versions-/Prüfsummenmetadaten wurden nachträglich umgeschrieben.
+
+Die bestehende Sandbox ist jetzt regulär auf 8217 installiert,
+ProductCode `{268656CD-6328-40FF-9F19-26BD1E4475D6}`. Neue Belege im selben
+Laufordner:
+
+- `native-8212-8217-upgrade.json`, SHA-256
+  `2b455b7eeba8d3c2da619aa528316ad046fbc7dbcce08a233d345347c0116ae3`:
+  echter neuer Setuphost unter SYSTEM, Exit 0, native Sicherung und
+  gebundener Healthcheck erfolgreich. Vorherige Installer-Caches erhalten.
+- `native-8212-8217-verifyupgrade.json`, SHA-256
+  `31a833343cf21c702bedfb2eacfbd72cfd77cd0416488f3f7f3baf2dfc76e86a`:
+  vollständige 10.890 Manifestdateien, fünf native Programme, Versionen,
+  Registrierung, MSI-/Setupcache und Shortcut geprüft. Snapshot
+  `733f558ace134fb2b8d95375fa349fd1`, Lease abgeschlossen. Konfiguration
+  und Credentials unverändert.
+- `native-same-version-setup-repair-8217.json`, SHA-256
+  `cee63dd3d6f3616fa5e3df259c48fab68f636f57e428a7ef2bf6df5d0c58e0c6`:
+  die installierte Setup-Cachekopie repariert die gezielt entfernte eigene
+  Lizenzdatei derselben Version selbst mit exaktem Hash, Exit 0; kein
+  Fixture-Restore nötig. Geschützte Dateien gleich, privater MSI-Ordner entfernt.
+  MSI-Log-SHA-256:
+  `1bb5b54fb2ea35f12f873cd09bbff00e944ae52f90ef3fc3d048f77db3d8584a`.
+- `native-msi-source-repair-8217-verified-v2.json`, SHA-256
+  `90b144710a9ff63419b815f378006da36b120be23db1b93112e8ab42f42711b0`:
+  Manifest-/Native-/Cacheprüfung nach Reparatur, abgeschlossene Lease,
+  vorheriger Upgrade-Snapshot erhalten und tatsächlicher anschließender
+  Headless-Healthlauf mit Exit 0. Konfiguration/Credentials auch danach
+  unverändert; Runtime gestoppt, 32141/32142 frei (11:54:22 UTC).
+
+Die erste Datei `native-msi-source-repair-8217-verified.json` ist ein roter
+Fixturebeleg: Der aus dem Upgradetest übernommene Prüfer verlangte fälschlich
+einen neuen Snapshot für dieselbe Produktversion. Die V2-Prüfung folgt dem
+bestehenden `NeedsDataTransaction`-/Reparaturvertrag und prüft zusätzlich die
+erhaltene Sicherung und echten Start/Stopp. Keine Produktionslogik wurde
+dafür geändert oder ein Fehlerbeleg überschrieben. Der native MSI-Quellnamen-
+Reparaturfehler ist geschlossen. CLI-UAC, GUI-Worker, vollständiger Tray-
+Updater und Absturzreparatur bleiben getrennte offene Abnahmen.
+Keine Releasefreigabe, Integration, Worktreeentfernung oder Übertragung.
 
 ### Paketstand
 
