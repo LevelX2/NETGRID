@@ -238,6 +238,34 @@ Die Transaktionsparität direkter MSI-Versionswechsel und die native Abnahme
 des vollständigen Ablaufs bleiben offen; ein Komponentencheck allein erfüllt
 das Release-Gate nicht.
 
+Die gemeinsame Lease-Autorität unterstützt als Voraussetzung dafür einen
+kurzlebigen direkten MSI-Operationsowner. Er bindet seine tatsächliche
+PID/Startzeit an die unveränderte MSI-Lease und den ProductCode. Nur ein
+direktes MSI (`Lease == MsiLease`) ohne vorhandenen Operationsowner darf diese
+Rolle vergeben; eine MSI-Teiltransaktion eines äußeren Updaters bleibt davon
+ausgeschlossen. Deren Lease-IDs müssen ausdrücklich verschieden sein.
+`OpenVerificationOwner` erlaubt den bestehenden gebundenen Headless-Verifier
+auch innerhalb dieser direkten MSI-Operation. `OpenUpdateOwner` bleibt enger
+und erlaubt weiterhin keine aktive MSI-Teiltransaktion.
+
+Die Verifierfreigabe erhält MSI-Lease und ProductCode. Nur der genaue
+Operationsowner darf sie vergeben, widerrufen und seine Rolle zurückgeben.
+Ein Commit oder Rollback kann die MSI-Lease während einer aktiven Operation
+nicht freigeben. Nach Rückgabe bleibt die MSI-Sperre aktiv; weder ein
+fehlgeschlagener Healthcheck noch ein Helper-Ende beweist einen erfolgreichen
+Datenrestore. Diese Ownership- und Verifierpfade sind isoliert geprüft,
+aber noch nicht durch die MSI-Custom-Actions aufgerufen.
+
+Für die verbleibende Anbindung gilt: Die Prüfung der neuen Version muss als
+synchrone Deferred-Aktion vor `InstallFinalize` und nach dem Dateiaustausch
+einschließlich verschachtelter Altproduktentfernung erfolgen. Ein fehlgeschlagener
+Check muss die noch rücknehmbare MSI-Transaktion scheitern lassen. Die vor
+Dateiänderungen registrierte Rollback-Aktion führt nach Rücknahme der
+Programmänderungen den eigenen Datenrestore und dessen Prüfung aus. Eine
+Commit-Aktion ersetzt dieses Verify-Gate nicht. Führend sind Microsofts
+[InstallFinalize-Vertrag](https://learn.microsoft.com/en-us/windows/win32/msi/installfinalize-action)
+und [Rollback-Custom-Action-Vertrag](https://learn.microsoft.com/en-us/windows/win32/msi/rollback-custom-actions).
+
 ### Vollständige Updatesicherung im Updater
 
 - Nach gehaltenem Installationslease und nachgewiesener Abwesenheit aller

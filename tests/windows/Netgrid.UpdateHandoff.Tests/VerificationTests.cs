@@ -84,7 +84,10 @@ internal static class VerificationTests
 
             await OwnerExitAsync(fixture, root + "-owner-exit", lease);
             foreach (var mode in new[] { "healthy", "unhealthy", "revoked" })
+            {
                 await VerifierAsync(fixture, fixturePath, root + "-" + mode, lease, mode, owner);
+                await VerifierAsync(fixture, fixturePath, root + "-msi-" + mode, lease, mode, owner, directMsi: true);
+            }
         }
         finally
         {
@@ -119,9 +122,15 @@ internal static class VerificationTests
         finally { if (!child.HasExited) { child.Kill(); await child.WaitForExitAsync(); } }
     }
 
-    private static async Task VerifierAsync(RegistryKey fixture, string fixturePath, string root, string lease, string mode, Process owner)
+    private static async Task VerifierAsync(RegistryKey fixture, string fixturePath, string root, string lease, string mode, Process owner, bool directMsi = false)
     {
-        Begin(fixture, root, lease, owner);
+        var product = Guid.NewGuid().ToString("B").ToUpperInvariant();
+        if (directMsi)
+        {
+            InstallationLease.BeginMsi(fixture, root, lease, product, "");
+            InstallationLease.BeginMsiOperation(fixture, root, lease, product);
+        }
+        else Begin(fixture, root, lease, owner);
         Process? observer = null;
         try
         {
@@ -150,6 +159,16 @@ internal static class VerificationTests
             var state = InstallationGate.Read(fixture, InstallationGate.KeyFor(root))!;
             Assert(state.Phase == InstallationGate.GateState.Stopping && state.Lease == lease && state.OwnerId == owner.Id,
                 "outer_lease_retained_after_" + mode);
+            if (directMsi)
+            {
+                Assert(state.MsiLease == lease && state.MsiProductCode == product, "direct_msi_binding_retained_" + mode);
+                Reject(() => InstallationLease.CompleteMsi(fixture, root, lease, product), "direct_msi_cannot_commit_before_helper_returns");
+                InstallationLease.EndMsiOperation(fixture, root, lease, product);
+                Assert(InstallationGate.Read(fixture, InstallationGate.KeyFor(root))!.Active, "returning_helper_keeps_msi_blocked");
+                // Fixture cleanup only. Real MSI commit additionally requires
+                // its transaction's successful backup/verification evidence.
+                Assert(InstallationLease.RollbackMsi(fixture, root, lease, product), "fixture_msi_released_after_verifier_exit");
+            }
         }
         finally
         {

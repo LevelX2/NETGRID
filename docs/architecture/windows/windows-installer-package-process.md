@@ -1311,6 +1311,31 @@ Rechteprüfung und die native Gesamtmatrix bleiben offen. Keine Installation,
 UAC-Aktion oder bestehende Zugangsdaten wurden bei diesen Prüfungen berührt;
 der Prozess behauptet kein Release-Done.
 
+### Direkte MSI-Verifikation: Ownership vorbereitet, Datenanbindung offen
+
+Der bestehende Verifier kann jetzt innerhalb einer exakt gebundenen direkten
+MSI-Operation arbeiten. Die zentrale Lease-Autorität bindet den Helper an
+seine tatsächliche PID/Startzeit und erhält Lease/ProductCode über die
+Verifierfreigabe und deren Widerruf. Sie verweigert Abschluss oder Rollback
+solange der Helper die Operation hält. Die Rückgabe der Rolle allein gibt
+NETGRID nicht frei. Äußere Updater-Lease und untergeordnete MSI-Lease dürfen
+nicht identisch sein; ihr MSI-Teil kann keine direkte Operationsrolle übernehmen.
+
+403 Lifecyclechecks sind grün, davon 30 neue Operationsprüfungen für Identität,
+Fremdprodukt, doppelte Übernahme, Wiederverwendung einer PID, Startblockade,
+Commit-/Rollback-Sperre und Trennung vom äußeren Updater. 75 Verifierchecks
+decken zusätzlich echte isolierte Kindprozesse für erfolgreiches, ungesundes
+und widerrufenes direktes MSI-Verify ab; in jedem Fall wird das tatsächliche
+Prozessende geprüft und die MSI-Bindung erhalten. Die bestehenden Handoff-,
+Session-, Request-, Neustart- und Launcher-Gates sind grün. Die gemeinsame
+DTF-Komponente baut für net48 ohne Warnungen oder Fehler.
+
+Noch keine native Installation oder vollständige MSI-Datentransaktion ist
+damit nachgewiesen. Nächster Implementierungsschritt ist die Bindung von
+Snapshot/Verify/Restore an die Custom Actions mit Verify vor `InstallFinalize`
+und Datenrestore nach der MSI-Programmrollback-Reihenfolge. Die reine
+Operationsfreigabe darf nicht als Ersatz für dieses offene Done-Gate gelten.
+
 Vor der Freigabe bleiben die vollständige Prozess-Ende-Raceprüfung,
 die native Abnahme direkter MSI-Updatepfade hinsichtlich
 laufender Spiele und vollständiger Transaktionsabsicherung, verständliche lokalisierte Fehler, die vollständige

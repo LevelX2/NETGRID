@@ -13,7 +13,7 @@ internal static class UpdateVerification
 
     internal static async Task AcceptPermitAsync(RegistryKey machine, string programRoot, string lease, string session)
     {
-        using var owner = InstallationGate.OpenUpdateOwner(machine, programRoot, lease);
+        using var owner = InstallationGate.OpenVerificationOwner(machine, programRoot, lease);
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(30));
         using var peer = await UpdateHandoff.ConnectAsync(session, owner, deadline.Token);
         if (!await peer.ReceiveDecisionAsync(deadline.Token) ||

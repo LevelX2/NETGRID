@@ -151,6 +151,7 @@ namespace Netgrid.Windows
                 else
                 {
                     InstallationGate.ValidateLease(outerLease);
+                    if (msiLease == outerLease) throw new InvalidOperationException("installation_gate_msi_outer_identity_conflict");
                     if (current == null || current.Lease != outerLease || current.Phase != InstallationGate.GateState.Stopping ||
                         current.OwnerId == 0 || current.MsiLease != "")
                         throw new InvalidOperationException("installation_gate_update_owner_missing");
@@ -176,6 +177,38 @@ namespace Netgrid.Windows
         public static bool CompleteMsi(RegistryKey root, string programRoot, string msiLease, string productCode)
             => FinishMsi(root, programRoot, msiLease, productCode, allowPreparationCancel: false);
 
+        // A synchronous direct-MSI helper borrows operation ownership without
+        // releasing or replacing the MSI transaction. Only its exact process
+        // can return ownership; an interrupted helper leaves the MSI blocked.
+        public static void BeginMsiOperation(RegistryKey root, string programRoot, string msiLease, string productCode)
+        {
+            InstallationLaunchFence.Execute(programRoot, () => Mutate(programRoot, () =>
+            {
+                var current = RequireMsi(root, programRoot, msiLease, productCode);
+                if (current.Lease != msiLease || current.OwnerId != 0)
+                    throw new InvalidOperationException("installation_gate_msi_operation_already_owned");
+                using (var owner = Process.GetCurrentProcess())
+                    Write(root, programRoot, new InstallationGate.GateState(current.Lease, current.Phase,
+                        current.CompletedUtcTicks, ownerId: owner.Id, ownerStart: owner.StartTime.ToUniversalTime().Ticks,
+                        msiLease: current.MsiLease, msiProductCode: current.MsiProductCode));
+                return true;
+            }));
+        }
+
+        public static void EndMsiOperation(RegistryKey root, string programRoot, string msiLease, string productCode)
+        {
+            Mutate(programRoot, () =>
+            {
+                var current = RequireMsi(root, programRoot, msiLease, productCode);
+                using (var owner = Process.GetCurrentProcess())
+                    if (current.Lease != msiLease || current.OwnerId != owner.Id || current.OwnerStart != owner.StartTime.ToUniversalTime().Ticks)
+                        throw new InvalidOperationException("installation_gate_msi_operation_owner_missing");
+                Write(root, programRoot, new InstallationGate.GateState(current.Lease, current.Phase,
+                    current.CompletedUtcTicks, msiLease: current.MsiLease, msiProductCode: current.MsiProductCode));
+                return true;
+            });
+        }
+
         public static bool RollbackMsi(RegistryKey root, string programRoot, string msiLease, string productCode)
             => FinishMsi(root, programRoot, msiLease, productCode, allowPreparationCancel: true);
 
@@ -195,6 +228,8 @@ namespace Netgrid.Windows
                         Math.Max(DateTime.UtcNow.Ticks, current.CompletedUtcTicks), current.AllowedParentId, current.AllowedParentStart));
                     return true;
                 }
+                if (current.OwnerId > 0 && current.Lease == current.MsiLease)
+                    throw new InvalidOperationException("installation_gate_msi_operation_still_active");
                 if (current.OwnerId > 0) Write(root, programRoot, current.WithMsi("", ""));
                 else Write(root, programRoot, new InstallationGate.GateState(current.Lease, InstallationGate.GateState.Completed,
                     Math.Max(DateTime.UtcNow.Ticks, current.CompletedUtcTicks)));
@@ -272,10 +307,11 @@ namespace Netgrid.Windows
                 InstallationGate.ValidateLease(lease);
                 var current = InstallationGate.Read(root, InstallationGate.KeyFor(programRoot));
                 if (current == null || current.Lease != lease || current.Phase != InstallationGate.GateState.Stopping ||
-                    current.OwnerId == 0 || current.MsiLease != "")
+                    current.OwnerId == 0 || (current.MsiLease != "" && current.MsiLease != current.Lease))
                     throw new InvalidOperationException("installation_gate_verification_owner_missing");
+                RequireMsiOperationCaller(current);
                 Write(root, programRoot, new InstallationGate.GateState(lease, InstallationGate.GateState.Verifying,
-                    current.CompletedUtcTicks, verifierId, verifierStart, current.OwnerId, current.OwnerStart));
+                    current.CompletedUtcTicks, verifierId, verifierStart, current.OwnerId, current.OwnerStart, current.MsiLease, current.MsiProductCode));
                 return true;
             });
         }
@@ -288,10 +324,20 @@ namespace Netgrid.Windows
                 var current = InstallationGate.Read(root, InstallationGate.KeyFor(programRoot));
                 if (current == null || current.Lease != lease || current.Phase != InstallationGate.GateState.Verifying)
                     throw new InvalidOperationException("installation_gate_verification_owner_missing");
+                RequireMsiOperationCaller(current);
                 Write(root, programRoot, new InstallationGate.GateState(lease, InstallationGate.GateState.Stopping,
-                    current.CompletedUtcTicks, ownerId: current.OwnerId, ownerStart: current.OwnerStart));
+                    current.CompletedUtcTicks, ownerId: current.OwnerId, ownerStart: current.OwnerStart,
+                    msiLease: current.MsiLease, msiProductCode: current.MsiProductCode));
                 return true;
             });
+        }
+
+        private static void RequireMsiOperationCaller(InstallationGate.GateState current)
+        {
+            if (current.MsiLease == "") return;
+            using (var owner = Process.GetCurrentProcess())
+                if (current.Lease != current.MsiLease || current.OwnerId != owner.Id || current.OwnerStart != owner.StartTime.ToUniversalTime().Ticks)
+                    throw new InvalidOperationException("installation_gate_msi_operation_owner_missing");
         }
 
         private static void Write(RegistryKey root, string programRoot, InstallationGate.GateState state)

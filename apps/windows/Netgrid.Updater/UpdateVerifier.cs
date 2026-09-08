@@ -17,7 +17,7 @@ internal static class UpdateVerifier
     internal static async Task<bool> RunAsync(RegistryKey machine, string programRoot, string environmentFile, string lease,
         Func<ProcessStartInfo, Process> startProcess, TimeSpan timeout)
     {
-        using var owner = InstallationGate.OpenUpdateOwner(machine, programRoot, lease);
+        using var owner = InstallationGate.OpenVerificationOwner(machine, programRoot, lease);
         if (owner.Id != Environment.ProcessId) throw new InvalidOperationException("update_verifier_not_lease_owner");
         var session = Guid.NewGuid().ToString("N");
         using var pipe = UpdateHandoff.CreateServer(session);

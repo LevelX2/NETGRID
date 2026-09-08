@@ -103,11 +103,20 @@ namespace Netgrid.Windows
         // Read-only identity binding for an updater-owned child operation.
         // A present registry record is not proof that its process still lives.
         internal static Process OpenUpdateOwner(RegistryKey machine, string root, string lease)
+            => OpenOperationOwner(machine, root, lease, allowDirectMsi: false);
+
+        // Verification may run inside a direct MSI, but never inside the MSI
+        // child of an outer updater transaction. The direct MSI's bound helper
+        // is the only process that can authorize its headless verifier.
+        internal static Process OpenVerificationOwner(RegistryKey machine, string root, string lease)
+            => OpenOperationOwner(machine, root, lease, allowDirectMsi: true);
+
+        private static Process OpenOperationOwner(RegistryKey machine, string root, string lease, bool allowDirectMsi)
         {
             ValidateLease(lease);
             var current = Read(machine, KeyFor(root));
             if (current == null || current.Lease != lease || current.Phase != GateState.Stopping ||
-                current.OwnerId <= 0 || current.MsiLease != "")
+                current.OwnerId <= 0 || (current.MsiLease != "" && (!allowDirectMsi || current.MsiLease != current.Lease)))
                 throw new InvalidOperationException("installation_gate_update_owner_missing");
             Process owner;
             try { owner = Process.GetProcessById(current.OwnerId); }
@@ -165,7 +174,8 @@ namespace Netgrid.Windows
                 {
                     ValidateLease(msiLease);
                     ValidateProductCode(msiProductCode);
-                    if (phase != Stopping && phase != PreparingMsi) throw new InvalidOperationException("installation_gate_msi_phase_invalid");
+                    if (phase != Stopping && phase != PreparingMsi && !(phase == Verifying && ownerId > 0 && msiLease == lease))
+                        throw new InvalidOperationException("installation_gate_msi_phase_invalid");
                     if (ownerId == 0 && msiLease != lease) throw new InvalidOperationException("installation_gate_msi_owner_invalid");
                 }
                 if (phase == PreparingMsi && (msiLease != lease || msiProductCode == ""))
