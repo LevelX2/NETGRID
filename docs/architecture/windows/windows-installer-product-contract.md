@@ -146,8 +146,9 @@ geschützten Updatesnapshot gehalten. Nach Erfolg oder Rücknahme wird der
 selektierte Cachehash vor Freigabe gegen den erwarteten Stand geprüft.
 Die Komponenten- und MSI-Tabellenprüfungen sowie die native Wiederinstallation
 und ProductCode-Reparatur von 8195 mit korrektem Cache-/Shortcutziel sind grün.
-Der native Nachweis
-dieser Cacheänderung mit zwei aktuellen Produktbuilds ist noch offen.
+Die direkten MSI-Transaktionen mit 8201/8202 belegen inzwischen Upgrade,
+Downgrade und Fehlerrollback einschließlich unveränderter vorheriger Caches.
+GUI-/Tray-Updater und Mehrbenutzerbetrieb bleiben gesonderte native Gates.
 
 Die MSI-Transaktion besitzt eine pro Programmordner gebundene Installersperre
 unter `HKLM\SOFTWARE\LevelX2\NETGRID.InstallerLifecycle` (64-Bit-Ansicht).
@@ -187,7 +188,8 @@ bleibt gehalten. Die Entfernung der alten Version liegt nach
 `InstallExecute` innerhalb der neuen Transaktion. Der verschachtelte
 Altversions-Uninstall prüft die Bindung an den neuen ProductCode und löst
 weder die Sperre noch Daten-/Firewall-Löschaktionen aus. Die echte
-Zwei-Versionen- und Rollback-Abnahme bleibt offen.
+Zwei-Versionen-Prüfung mit absichtlichem MSI-Fehlerrollback ist für den
+ruhenden Sandbox-SYSTEM-Fall grün; die vollständige Abnahme bleibt offen.
 
 Eine zweite, kurze und pro Programmordner benannte Windows-Mutex
 `InstallationLaunchFence` schließt die Lücke zwischen letzter Sperrprüfung
@@ -258,9 +260,11 @@ Reparatur- und Mehrbenutzerprüfungen bleiben offen. Updater und direkte
 MSI-Versionswechsel binden Backup, Healthcheck und Restore als Ablauf zusammen.
 Beide verwenden den vollständigen Live-Datenroot-Snapshot aus `UpdateDataSnapshot`,
 nicht mehr das reine Match-SQLite-Backup aus `storage-admin.mjs backup-update`.
-Die native Transaktionsparität direkter MSI-Versionswechsel und die Abnahme
-des vollständigen Ablaufs bleiben offen; ein Komponentencheck allein erfüllt
-das Release-Gate nicht.
+Direkte MSI-Upgrades, Downgrades und der physisch nachgeprüfte Datenrestore
+nach einem absichtlichen Cachefehler sind mit 8201/8202 unter Sandbox-SYSTEM
+belegt. Der vollständige Tray-Updater-Ablauf, Aktivspielschutz und
+Mehrbenutzerbetrieb bleiben offen; diese Teilabnahme erfüllt nicht das
+gesamte Release-Gate.
 
 Die gemeinsame Lease-Autorität unterstützt als Voraussetzung dafür einen
 kurzlebigen direkten MSI-Operationsowner. Er bindet seine tatsächliche
@@ -418,9 +422,10 @@ Verknüpfung; der Reparaturhelfer startet keine erhöhte Runtime.
 
 Wiederöffnen nach Ende eines separaten Snapshot-Erzeugers, Lease-Übernahme,
 Reparaturreihenfolge und Staging-Sperren sind komponentenweise geprüft.
-Die tatsächliche erhöhte Reparatur, native direkte MSI-Transaktion, erhöhte
-Archivberechtigungen und die vollständige native Zwei-Build-Abnahme bleiben
-Release-Gates. Eine noch gebundene MSI-Teiltransaktion wird auch nach dem
+Die tatsächliche erhöhte Absturzreparatur, verwaiste direkte MSI-Transaktion,
+erhöhte Archivberechtigungen gegenüber Standardbenutzern und die vollständige
+native Zwei-Build-Abnahme bleiben Release-Gates. Eine noch gebundene
+MSI-Teiltransaktion wird auch nach dem
 Owner-Ende nicht automatisch gelöscht. Ein Fehler
 erhält die Sicherungen und lässt die Installationssperre bestehen; er wird
 nicht als erfolgreiche Reparatur gewertet.

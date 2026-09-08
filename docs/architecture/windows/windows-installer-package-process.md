@@ -1,6 +1,6 @@
 # Paketprozess: Windows-Installer und Launcher
 
-Stand: 2026-09-04  
+Stand: 2026-09-08  
 Status: in Umsetzung; WIN-I00 bis WIN-I07 verifiziert, WIN-I08 aktiv
 
 ## Quelle und Zielprüfung
@@ -625,6 +625,81 @@ nicht Standardbenutzerbetrieb, GUI-/Tray-Updater, Downgrade oder Fehlerrestore.
 Als Nächstes ist ein zweiter korrigierter Build für Upgrade, Downgrade und
 gezielte Fehlertransaktion erforderlich. Host-Port 3100 bleibt bei PID 25276;
 Main und Remote sind unverändert, WIN-I08 bleibt offen.
+
+### Zweibuild-Gate 8201/8202: Upgrade, Downgrade und Datenrollback grün
+
+Build 8202 aus dem sauberen Commit
+`91496746ce97411cd37b06bac733f93ca9fc5666` liegt unter
+`output/windows-installer-transaction-pair-8202`. Der reguläre Build endet
+grün, einschließlich aller Komponentenprüfungen, der korrigierten echten
+MSI-Sequenztabelle, UI-Matrix und des Audits aller 10.902 Payload-Dateien.
+Setup-SHA-256:
+`d2e081e12762297e9a01fee57114abadc6bb2d547c30679f2ced83f926bda0f2`,
+MSI-SHA-256:
+`edadcb7a7d00cf0325625b68b8143fbe9905d9a791983cdd7a813a4272e88f55`.
+
+Im bestehenden Sandboxlauf `bb8eccf05f4747369da2d3c3806c1f85` bindet
+`test-native-8201-8202-msi.ps1` beide sauberen Quellcommits und Artefakthashes;
+seine SHA-256 ist
+`b5e4d20fbdd2a8b8954b44d2ad9a633d1f4b9175fcfc3ca011e2abb36f7e0a37`.
+Der Windows-PowerShell-5.1-Parsercheck ist grün. Alle sechs ausgeführten
+Phasen liefern `ok=true` und sind unter `result/native-8201-8202-*.json`
+einschließlich nativer MSI-Protokolle nachgewiesen, am 2026-09-08:
+
+| Phase | Abschluss UTC | Ergebnis |
+| --- | --- | --- |
+| Upgrade | 05:38:47 | MSI 0, Capture/Verify erfolgreich |
+| VerifyUpgrade | 05:39:34 | 8202, ProductCode `{BF87434B-7EB8-4350-925A-CB567BF66435}`, vollständige Datei-/Cacheprüfung |
+| Downgrade | 05:44:25 | MSI 0, Capture/Verify erfolgreich |
+| VerifyDowngrade | 05:45:16 | tatsächliche 8201-Bytes und alter Cache einschließlich Änderungszeit wieder vorhanden |
+| FaultedUpgrade | 05:49:50 | erwarteter MSI 1603 aus CacheNetgridSetup/Exit 2, Restore und Rollback-Freigabe erfolgreich |
+| VerifyRollback | 05:50:36 | 8201 vollständig wiederhergestellt, physischer Dateirestore und Fehlerstand-Sicherung geprüft |
+
+Upgrade-Snapshot: `7d82f14116164b65b3beb6d1aa82f433`, Manifest-SHA-256
+`dc6063f1d5ba2802e0eaa2640073589de502dca695b05ccaa80d73d549616d1d`.
+Downgrade-Snapshot: `75a66986ba364769800f256dc061c4c7`, Manifest-SHA-256
+`bf459bec9ec2424411753a01a7e826b94968696e93d01b109321371c1df66d38`.
+Beide haben nach erfolgreichem Abschluss Datenphase `verified` und eine
+abgeschlossene Lease ohne MSI-Bindung.
+
+Der Fehlerlauf verändert keine Produktbinärdatei. Er deklariert absichtlich
+eine falsche Setup-Prüfsumme und erzeugt zuvor ausschließlich die eigene
+Runtime-Fixture `installer-transaction-test-6aaacb5221bf42bd836585028099a30d9`.
+Nach nachgewiesenem Capture, ruhender gebundener MSI-Lease und vor der
+Cache-Aktion überschreibt das Fixture seine eigene `baseline.txt` und legt
+`added-after-capture.txt` an. Die Injektion ist um 05:48:37 UTC gesondert in
+`native-8201-8202-data-injection.json` belegt. Ein Injektionsfehler würde den
+MSI-Prozess weiterhin bis zu seinem Ende verfolgen und den Test rot beenden.
+
+`VerifyRollback` bestätigt anschließend nicht nur `MsiData=restored`, sondern
+die ursprünglichen Bytes und Berechtigungen von `baseline.txt`, die Entfernung
+der zusätzlichen Datei sowie beide Fehlerstand-Dateien im separat erhaltenen
+Snapshot. Ursprüngliche Datei-SHA-256:
+`86a2e60ebda19361a671c633a475baa9f35a8fe2630e895de097b6017ea73412`,
+veränderte Datei-SHA-256:
+`dbc07ebe714a081b519ab743b07fead88613bd6865aacaee85f6c44aa15f518d`.
+Gebundener Restore-Snapshot: `673f546e1d9a4ef2bd7adea51928daa1`, Manifest-SHA-256
+`b382b6e63a72b54f386fb3d74401c6c401f8ace0baa9d8c63c5ab697911b4427`.
+Erhaltener Fehlerstand: `f74de8b6f43641eeba7f468ad665eea9`, Manifest-SHA-256
+`578a9358a75b1285beada4ca36ce6dc8c2e26250e65eadd7db09f1b77bad27db`.
+
+Alle drei Nachprüfungen bestätigen sämtliche 10.890 Manifestdateien, vier
+native Hashes/Versionen, Registrierung und Cache-/Shortcutzuordnung.
+Vorherige MSI-Caches und der ursprüngliche 8201-Setupcache bleiben unverändert.
+Konfiguration und vorhandene Maintenance-Credentials sind bytegleich, der
+MSI-Cache fehlt im Snapshotpayload, Produktprozesse und Listener sind beendet.
+Keine manuelle Registryreparatur oder fremde Prozessbeendigung. Die Sandbox
+steht danach wieder auf 8201; die eigene Testdatei und Snapshots bleiben als
+Testnachweis erhalten. Host-Port 3100 gehört unverändert PID 25276.
+
+Dies ist der direkte ruhende Sandbox-SYSTEM-MSI-Pfad, nicht der vollständige
+Tray-Updater, Aktivspielschutz, Standardbenutzer- oder Absturzreparaturpfad.
+Für die nächste frische lokale MSI-Matrix ist ausschließlich der Hostinput
+`output/windows-sandbox-e2e/4e3eb1bf3ede4e27bcf4278dcc097dde` mit denselben
+geprüften Builds vorbereitet (`PrepareOnly`, Netzwerk aus, kein alter
+synthetischer Updater-Rollbackharness). Eine zweite Sandbox wurde noch nicht
+gestartet. WIN-I08, Main-Integration und sämtliche übrigen Gates bleiben offen;
+kein Push oder Release.
 
 ### Regulärer Build 8199: Installation, Repair und Headless nativ grün
 

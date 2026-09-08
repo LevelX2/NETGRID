@@ -59,40 +59,37 @@ Integritätsangaben werden nicht installiert.
 
 ### Noch offene Abnahmen vor der Freigabe
 
-Der native Versionswechsel 8199 → 8200 erreicht jetzt Sicherung und
-Healthprüfung erfolgreich, scheitert danach aber am zweiten Commit-Callback
-mit `installation_gate_msi_owner_missing`. Der äußere Commit war unmittelbar
-nach Begin eingereiht und hatte die gemeinsame MSI-Bindung bereits gelöscht,
-bevor der verschachtelte Altversions-Uninstall seinen Abschluss prüfte.
-Der Quellstand reiht deshalb `VerifyNetgridLifecycle` und anschließend
+Direkte MSI-Upgrades, Downgrades und ein Fehlerrollback sind mit den regulären
+Builds 8201/8202 unter Sandbox-SYSTEM nativ geprüft. Beide erfolgreichen
+Versionswechsel führen Capture und Healthprüfung aus und schließen mit MSI 0.
+Die Nachprüfungen binden jeweils alle 10.890 Manifestdateien, vier native
+Hashes/Versionen, Registrierung, Setup-/MSI-Cache und Startmenüziel.
+Vorherige Installer-Caches sowie Konfiguration und Credentials bleiben
+unverändert; es bleiben keine Produktprozesse oder Listener zurück.
+
+Der gezielte Fehlerlauf verwendet nur eine falsche deklarierte Setup-Prüfsumme,
+keine veränderte Produktbinärdatei. Nach dem erfolgreichen Capture wird eine
+eigene Runtime-Testdatei verändert und eine weitere angelegt. Die anschließende
+MSI-Rücknahme stellt 8201 und den ursprünglichen Dateiinhalt einschließlich
+Berechtigungen wieder her, entfernt die zusätzliche Datei und erhält beide
+veränderten Dateien im separaten Fehlerstand-Snapshot. `MsiData=restored`
+und die abgeschlossene Lease sind zusätzlich zu diesen physischen
+Dateiprüfungen belegt. Der MSI-Reparaturcache bleibt außerhalb des Restores.
+Führende Artefakt-/Ergebnisbindung: aktiver Windows-Installer-Paketprozess.
+
+Der Quellstand reiht `VerifyNetgridLifecycle` und anschließend
 `CommitNetgridLifecycle` erst nach `RemoveExistingProducts` unmittelbar vor
 `InstallFinalize` ein. `RequireMsi` bleibt unverändert streng. Quell- und
-kompilierte MSI-Gates sichern diese Reihenfolge; das alte 8200-MSI fällt im
-neuen Sequenzgate reproduzierbar durch. Die folgende native Upgrade-Prüfung
-bestätigt den Fix; die vollständige Transaktionsmatrix bleibt offen.
+kompilierte MSI-Gates sichern diese Reihenfolge. Ein zu früh eingereihter
+äußerer Commit kann die Bindung vor dem verschachtelten Callback löschen:
+`installation_gate_msi_owner_missing`. Der damit gescheiterte 8200-Lauf
+bewies nur Programmrollback, nicht Datenrestore; er wird durch spätere grüne
+Läufe nicht nachträglich zum erfolgreichen Rollback erklärt.
 
-Der reguläre Fixbuild 8201 besteht inzwischen die echte Upgrade-Transaktion
-von 8199: MSI 0, Capture und Verify erfolgreich, beide Commit-Callbacks ohne
-Fehler. Die nachfolgende Prüfung bestätigt alle 10.890 Manifestdateien,
-native Versionen/Hashes, Produktregistrierung, ausgewählten Setup-/MSI-Cache,
-Startmenüziel und unveränderte vorherige Caches. Die Snapshotbindung steht
-auf `verified`, die Lease ordnungsgemäß auf `completed`; Konfiguration und
-Credentials sind unverändert. Der MSI-Cache fehlt im Sicherungspayload.
-Dies ist ein Sandbox-SYSTEM-Nachweis für das direkte Upgrade, kein
-Standardbenutzer-/Tray-Test oder Testat für Downgrade und Fehlerrollback.
-Diese weiteren Transaktionen benötigen zwei Builds mit dem korrigierten
-Commit-Zeitpunkt; 8199 wird dafür nicht erneut als Ziel installiert.
-
-Die lesende Prüfung nach dem zuvor fehlgeschlagenen 8200-Lauf bestätigt sämtliche
-10.890 Programmdateien und die Registrierung wieder auf 8199, unveränderte
-Konfiguration/Credentials und keine Produktprozesse oder Listener. Der
-Datenstatus blieb jedoch `verified`, nicht `restored`, bei schon abgeschlossener
-Lease. Daher ist dies ausdrücklich **kein vollständig verifizierter Rollback**.
-Die neue Sicherung enthält den korrekten MSI-Cache-Ausschluss; deren Existenz
-ersetzt keinen Restore. Bis zur korrigierten nativen Transaktionsabnahme bleibt
-die Releasefreigabe gesperrt. Vor dem neuen Upgrade bestehen zusätzlich fünf
-installierte 8199-Headless-Läufe mit dem verbliebenen Datenstand. Auch diese
-Funktionsprüfung ist ausdrücklich kein nachträglicher Datenrestore-Nachweis.
+Offen bleiben insbesondere die frische vollständige Installationsmatrix,
+Aktivspiel-/Mehrbenutzerschutz, der echte GUI-/Tray-Updater einschließlich
+ursprünglichem Benutzerneustart und die Absturzreparatur. Die direkten
+SYSTEM-MSI-Prüfungen ersetzen diese Gates nicht. Kein Release vor deren Abnahme.
 
 Der native Healthabschluss von 8195/8196 kann am HTTP-Stopp hängen: Eine
 vorab geöffnete TCP-Verbindung ohne vollständige Anfrage bleibt nach
@@ -109,8 +106,8 @@ Fünf Sandbox-Quellfixtureläufe mit tatsächlicher Node-Laufzeit, installiertem
 Webclient und absichtlich offener Vorabverbindung bestehen den unveränderten
 strikten Launcher-Stopp in 22–33 ms, Server-Exit jeweils 0. Konfiguration und
 Credentials bleiben bytegleich; keine Produktprozesse oder Listener bleiben
-zurück. Das ist noch kein Testat eines neu installierten Releasebuilds.
-Neue Installerbuilds und der native Versionswechsel bleiben erforderlich.
+zurück. Diese Quellfixtureprüfung wird inzwischen durch installierte
+Headless-Läufe und die native MSI-Transaktionsprüfung von 8201/8202 ergänzt.
 Der Headless-Einstieg liefert jetzt nach seiner Bereinigung zusätzlich zu
 Exit 2 genau einen begrenzten Fehlerdatensatz auf stderr. Er enthält nur die
 Phase (`permit`, `load`, `start`, `stop`, `recheck`, `cleanup`), einen fest
@@ -135,17 +132,19 @@ und leerem stderr; Konfiguration und Credentials bleiben unverändert.
 Eine absichtlich fehlende, separate Konfigurationsdatei führt im installierten
 Launcher zu Exit 2 und genau dem erwarteten begrenzten `load`-Fehlerdatensatz.
 Diese Prüfungen liefen unter Sandbox-SYSTEM, nicht als Standardbenutzer.
-Der Versionswechsel zwischen zwei korrigierten Builds, native MSI-
-Fehlerweitergabe und vollständiger Updater-/Rollbacklauf bleiben offen.
+Die native Headless-Fehlerweitergabe bis zum MSI und der vollständige
+Tray-Updater-/Rollbacklauf bleiben zusätzlich zur direkten MSI-Prüfung offen.
 
 Die Builds 8195/8196 enthalten im Snapshotvertrag noch nicht den Ausschluss
 des separaten MSI-Reparaturcaches. Der aktuelle Quellstand korrigiert dies am
 gemeinsamen `UpdateDataLayout`-Owner: `config/installer` wird weder gesichert
 noch zurückgeschrieben oder entfernt. Live-Datenpfade und benutzerdefinierte
 Backupordner dürfen diesen Bereich nicht überlappen. Der reproduzierende
-Negativtest und anschließend 122 Snapshot-/Restore-Prüfungen sind belegt;
-die native Abnahme benötigt neue Builds. Bestehende Archive mit abweichender
-Ausschlussmenge werden weiterhin sichtbar abgewiesen, nicht konvertiert.
+Negativtest und anschließend 122 Snapshot-/Restore-Prüfungen sind belegt.
+Die native Prüfung mit 8201/8202 bestätigt inzwischen den Ausschluss und den
+Erhalt sämtlicher vorheriger MSI-Caches auch beim Fehlerrestore.
+Bestehende Archive mit abweichender Ausschlussmenge werden weiterhin sichtbar
+abgewiesen, nicht konvertiert.
 
 Die native Wiederinstallation 8190 über erhaltene Sandboxdaten belegt den
 Cachefehler des bisherigen Stands: `config/updates/NETGRID-Setup.exe` bleibt auf dem alten
@@ -168,8 +167,9 @@ Sandboxdaten ist inzwischen grün: installierte EXE-Hashes/-Versionen, alle
 Manifestdateien, registrierter ProductCode, Setupcachehash und Setup-
 Verknüpfung stimmen überein. Konfiguration und bestehende Credentials sind
 bytegleich erhalten. Auch die anschließende ProductCode-Reparatur besteht;
-Cacheinhalt und Änderungszeitpunkt bleiben unverändert. Versionswechsel,
-GUI-Uninstall und Updater-Rollback mit zwei neuen Cache-Ständen bleiben
+Cacheinhalt und Änderungszeitpunkt bleiben unverändert. Direkte Versionswechsel
+und Fehlerrollback sind mit 8201/8202 ebenfalls geprüft; GUI-Uninstall und
+Tray-Updater-Rollback mit zwei neuen Cache-Ständen bleiben
 vor der Releasefreigabe nativ
 abzunehmen. Den 8190-Cache nicht manuell
 umbenennen und dessen frühere native Ergebnisse nicht auf den Fix übertragen.
