@@ -70,6 +70,11 @@ nicht stillschweigend zum Vertrag erklären.
   Quellaktion werden aktuelle vollständige Engine-Angebote verwendet. Ein
   Finanzierungscheckpoint garantiert nur seinen gebundenen Bedarf, nicht eine
   spätere Schutz-/Installationsfolge ohne deren eigene Voraussetzungen.
+- Plattformübergreifende Eingabeverträge werden unabhängig vom Host geprüft.
+  Ein „reiner Dateiname“ für den lokalen Benchmark-Import schließt POSIX- und
+  Windows-Pfade aus; natives `path.basename` allein genügt dafür nicht.
+  Tests bilden beide Pfadinterpretationen auch lokal ab und prüfen die
+  Ablehnung vor dem Dateizugriff sowie das Zulassen gültiger Dateinamen.
 - Berechnete Scores, Reserven und Diagnosewerte werden nur exakt fixiert, wenn
   ihre konkrete Berechnung Vertragsgegenstand ist. Sonst wird die stabile
   Klassifikation oder der verantwortliche Pfad geprüft.

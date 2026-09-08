@@ -101,7 +101,7 @@ Spielevidence und dem Integrationsstand ab. Die ehemals offenen 18
 Main-Baseline-Erwartungsfehler waren veraltete Testbindungen an historische
 Einzelaktionen, absolute Simulationspositionen und Vollspielstände. Sie sind
 gegen die aktuellen Owner-, Executor-, Capability-, Legalitäts- und
-Replayverträge neu gebunden. Der Gesamttest vom 2026-09-08 ist vollständig
+Replayverträge neu gebunden. Der lokale Gesamttest vom 2026-09-08 ist vollständig
 grün: 5.215 AI-Tests in 619 Dateien über drei feste Shards, 3.777 Tests der
 übrigen Pakete, acht Spec-Tests, sieben Selfplay-Evidence-Tests und 15 E2E-Tests.
 Discovery, AI-Strukturgates, Paketgrenzen, Typechecks und Gesamtbuild sind
