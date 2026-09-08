@@ -920,10 +920,31 @@ Gates bleiben gesondert offen. Kein Main-Merge, Worktree-Cleanup oder Push.
 
 Der reguläre Build 8208 aus `c6512c2f48e9108123d5acf0ea484e5e8dbdb414`
 ist mit `sourceDirty=false`, Komponenten-/UI-/Smoke-Gates und vollständigem
-10.903-Dateien-Audit grün. Die frische native MSI-Matrix 8207/8208 läuft unter
-`output/windows-sandbox-e2e/32fb2f4eff424959a9d41c29b9adadd3`; sie enthält
-noch nicht den nachfolgend beschriebenen Neustartfix. Ein laufender Test ist
-kein positiver Abschlussnachweis.
+10.903-Dateien-Audit grün. Die frische native MSI-Matrix 8207/8208 unter
+`output/windows-sandbox-e2e/32fb2f4eff424959a9d41c29b9adadd3` endet am
+8. September um 08:49:07 UTC einschließlich Cleanup grün; sie enthält noch
+nicht den nachfolgend beschriebenen Neustartfix. Alle 16 Prüfbereiche sind
+bestanden: MSI-Alleininstallation mit rekonstruiertem Setupcache, empfohlene
+Defaults und Custom-Pfade/-Policy, Shortcuts, Health, Backup, Reparatur,
+abgewiesener Rootwechsel, Upgrade, echte ProductCode-Reparatur aus dem
+geschützten Cache nach Entfernen der eigenen Downloadkopie, Downgrade,
+Manifest-/PE-Identität, Cache-/Shortcutbindung, normaler Datenerhalt und
+explizite Datenlöschung. Der tatsächliche Cachepfad steht in
+`repair-updated.log` unter `Resolved source to:`; der Test verlässt sich
+nicht allein auf weggelassene Quellargumente.
+
+`installer-result.json` SHA-256:
+`e7243b60995c35cbcf7e6732ebe4fb57c2fce6d21c0349767fa8043263477c24`;
+`suite-result.json` SHA-256:
+`3c7742a8ce5ad8ce3b9f64c4610a3a5aba421524cafb597b72f5527fcb1a6471`.
+Alle 13 MSI-Logs (378.761.534 Bytes) liegen außerhalb der Sandbox unter
+`result/msi-logs`; Kopier- und erneuter Host-Hashvergleich sind grün.
+Collector-SHA-256:
+`ecd74075aed1d6620e99c7b98ac0ca0a402e5e2393796f915798b636e09c7f17`.
+Diese Matrix enthält keinen vollständigen Tray-Updater- oder gezielten
+Fehlerrollbacklauf (`includedRollback=false`). Die eigenen Wegwerf-
+Testdaten wurden durch den geprüften Uninstall gelöscht; Protokolle bleiben
+erhalten. Die Sandbox bleibt für die folgenden isolierten Tests bestehen.
 
 Der getrennte native Neustarttest reproduziert Fehler 5 in
 `CreateProcessWithTokenW`, sowohl vor als auch nach Parent-Ende. Ursache ist
@@ -950,6 +971,39 @@ auch in der abschließenden PowerShell-Prüfung belastbar. Alle angelegten
 Testkonten sind entfernt. Die Probes installieren nichts und bedienen keine
 UAC-/Passwortoberfläche; vollständiger Tray-Updater, UAC-Kontowechsel und
 normal privilegierter Produktneustart bleiben offen. WIN-I08 bleibt aktiv.
+
+Der nachfolgende reguläre Build 8209 aus dem sauberen Commit
+`7b2efaa938bb2767af8721b42573d8f058bddb52` enthält diesen Fix. Er endet mit
+`WINDOWS_INSTALLER_CHECK_OK files=10903`, `WINDOWS_INSTALLER_BUILD_OK` und
+Exit 0. Komponenten-, native Laufzeitsmoke-, UI- und vollständige Payload-
+Gates sind grün; die 40 Neustart-Komponentenchecks weisen den lokalen
+fehlenden Startprivileg-Negativfall weiterhin ausdrücklich aus.
+`output/windows-installer-user-restart-8209` enthält regulär erzeugte
+Release-Metadaten mit `sourceDirty=false` und `SHA256SUMS.txt`.
+Setup-SHA-256:
+`9b3cab3016b4f4ba66565e7f58c1e71f4cadee9332d823cc84f8624f61cf49d2`;
+MSI-SHA-256:
+`08850e05152fe5ae41a7543f5b9bccd8182b883a3973c24be325771e6cfef069`.
+Der anschließende native 8209-Test unter `result/native-bundle-8209`
+installiert ohne externe Setupquelle in einen frischen, eigenen Datenroot.
+Installationsabschluss 08:53:15 UTC: MSI 0, alle 10.890 Manifestdateien und
+fünf native Hashes/PE-Versionen, ProductCode
+`{5B933F96-F957-444B-937C-3B49B7441861}`, Setup-/MSI-Cache und Shortcutziel
+stimmen; die SQLite-Datei ist noch abwesend. Danach erfolgt der erste
+Launcher-/Healthlauf vor jeder erhöhten Healthprüfung unter einem neuen
+Standardbenutzer. Abschluss 08:54:55 UTC: `elevated=false`,
+`databaseExistedBefore=false`, SQLite anschließend vorhanden, beschreibbare
+Runtime, verweigerte Schreibzugriffe auf Programm und Runtimekonfiguration,
+unveränderte Konfiguration und Setupcache. Testkonto entfernt, keine laufenden
+Produktprozesse oder Listener auf den Testports 32141/32142.
+
+Installationsbeleg SHA-256:
+`40e7d075f7192f8897821012bb56d438f097e0c2eb149d64ddae8513f9451d36`;
+Standardbenutzerbeleg SHA-256:
+`b74adcad2ef0a909af467cc8867df4542140ec62886f80d5cdb9b5b3c150782d`.
+Programm und eigene Testdaten bleiben in dieser Sandbox für die folgenden
+Versionswechsel-/Rollbackprüfungen installiert. Die normale Hostinstanz auf
+Port 3100 bleibt unverändert. Kein Main-Merge, Worktree-Cleanup oder Push.
 
 ### Regulärer Build 8199: Installation, Repair und Headless nativ grün
 

@@ -59,142 +59,73 @@ Integritätsangaben werden nicht installiert.
 
 ### Noch offene Abnahmen vor der Freigabe
 
-Direkte MSI-Upgrades, Downgrades und ein Fehlerrollback sind mit den regulären
-Builds 8201/8202 unter Sandbox-SYSTEM nativ geprüft. Beide erfolgreichen
-Versionswechsel führen Capture und Healthprüfung aus und schließen mit MSI 0.
-Die Nachprüfungen binden jeweils alle 10.890 Manifestdateien, vier native
-Hashes/Versionen, Registrierung, Setup-/MSI-Cache und Startmenüziel.
-Vorherige Installer-Caches sowie Konfiguration und Credentials bleiben
-unverändert; es bleiben keine Produktprozesse oder Listener zurück.
+Die Komponentengates ersetzen keine native Produktabnahme. Der aktuelle
+Artefakt-/Ergebnisnachweis steht im aktiven
+[Windows-Installer-Paketprozess](../architecture/windows/windows-installer-package-process.md).
 
-Der gezielte Fehlerlauf verwendet nur eine falsche deklarierte Setup-Prüfsumme,
-keine veränderte Produktbinärdatei. Nach dem erfolgreichen Capture wird eine
-eigene Runtime-Testdatei verändert und eine weitere angelegt. Die anschließende
-MSI-Rücknahme stellt 8201 und den ursprünglichen Dateiinhalt einschließlich
-Berechtigungen wieder her, entfernt die zusätzliche Datei und erhält beide
-veränderten Dateien im separaten Fehlerstand-Snapshot. `MsiData=restored`
-und die abgeschlossene Lease sind zusätzlich zu diesen physischen
-Dateiprüfungen belegt. Der MSI-Reparaturcache bleibt außerhalb des Restores.
-Führende Artefakt-/Ergebnisbindung: aktiver Windows-Installer-Paketprozess.
+Belastbar nachgewiesen sind bislang:
 
-Der Quellstand reiht `VerifyNetgridLifecycle` und anschließend
-`CommitNetgridLifecycle` erst nach `RemoveExistingProducts` unmittelbar vor
-`InstallFinalize` ein. `RequireMsi` bleibt unverändert streng. Quell- und
-kompilierte MSI-Gates sichern diese Reihenfolge. Ein zu früh eingereihter
-äußerer Commit kann die Bindung vor dem verschachtelten Callback löschen:
-`installation_gate_msi_owner_missing`. Der damit gescheiterte 8200-Lauf
-bewies nur Programmrollback, nicht Datenrestore; er wird durch spätere grüne
-Läufe nicht nachträglich zum erfolgreichen Rollback erklärt.
+- Die vollständige Offline-MSI-Matrix 8207/8208 auf sauberem Windows 11 x64:
+  16 Prüfbereiche einschließlich Installation ohne Setupquelle, Custom-Pfaden,
+  tatsächlicher Reparaturquelle im geschützten Cache, Upgrade, Downgrade,
+  nativer Dateiidentität, Datenerhalt und expliziter Datenlöschung.
+  Gesamtabschluss einschließlich Cleanup: 8. September, 08:49:07 UTC.
+  Alle 13 MSI-Logs sind auf den Host kopiert und dort erneut hashgeprüft.
+- Direkte MSI-Upgrades, Downgrades und physischer Fehlerrollback unter
+  Sandbox-SYSTEM mit 8201/8202. Programmhashes/-versionen, Registrierung,
+  Cache-/Shortcutbindung, Dateninhalte und Berechtigungen sind geprüft.
+  Nach dem Capture veränderte eigene Testdaten wurden zurückgestellt und
+  zusätzlich im separaten Fehlerstand erhalten. Das ist noch kein
+  Fehlerrollbacknachweis für das neue Bundleformat.
+- MSI-Alleininstallation, vollständige installierte Dateiidentität und
+  ProductCode-Reparatur von 8207. Eine weitere Reparatur bei tatsächlich
+  entfernten Downloadkopien verwendet nachweislich den geschützten
+  Original-MSI-Cache. Der rekonstruierte Setupcache bleibt hash- und
+  zeitgleich; normales Löschen und Datenerhalt sind gesonderte Matrixfälle.
+- Nichtadministrativer Lauf von 8207 mit verweigertem Schreibzugriff auf
+  Programm und Konfiguration, beschreibbarer Runtime und gesundem
+  Launcherstart. Die Datenbank bestand zuvor bereits; ihre erstmalige
+  Erstellung unter Standardbenutzer bleibt dadurch unbewiesen. Der neue
+  native 8209-Lauf schließt genau diese Lücke: Nach MSI-Alleininstallation
+  mit vollständiger Dateiidentität ist die SQLite-Datei nachweislich noch
+  abwesend. Der erste Launcher-/Healthlauf wird dann unter einem frisch
+  angelegten Standardbenutzer ausgeführt; 
+  `databaseExistedBefore=false`, Datenbank danach vorhanden, Health und
+  ACL-Schreibschutz sind grün. Konfiguration und Setupcache bleiben gleich,
+  das temporäre Konto ist entfernt (08:54:55 UTC).
+- Nativer Cross-Account-Start des korrigierten `OriginalUserRestart`-Owners
+  vor und nach Ende des ursprünglichen Benutzerprozesses, einschließlich
+  Kindtokenprüfung vor Resume. Details und Grenzen stehen im
+  [Neustartvertrag](#neustart-im-ursprünglichen-benutzerkontext).
 
-Offen bleiben insbesondere die frische vollständige Installationsmatrix,
-Aktivspiel-/Mehrbenutzerschutz, der echte GUI-/Tray-Updater einschließlich
-ursprünglichem Benutzerneustart und die Absturzreparatur. Die direkten
-SYSTEM-MSI-Prüfungen ersetzen diese Gates nicht. Kein Release vor deren Abnahme.
+Offen sind weiterhin nativer Fehlerrollback mit dem neuen Bundle,
+Aktivspiel-/Mehrbenutzerschutz,
+vollständiger GUI-/Tray-Updater mit gebundener Pipe, ursprünglichem
+Benutzerneustart und anderer UAC-Administratorfreigabe sowie
+Absturzreparatur. Keine Releasefreigabe durch Zusammenzählen
+engerer oder früherer Komponentenbelege.
 
-Der native Healthabschluss von 8195/8196 kann am HTTP-Stopp hängen: Eine
-vorab geöffnete TCP-Verbindung ohne vollständige Anfrage bleibt nach
-`server.close()` bestehen und kann anschließend weiterverwendet werden.
-Der neue `HttpConnectionDrain` am HTTP-Owner schließt solche Verbindungen,
-lässt bereits angenommene Antworten einschließlich Pipelining vollständig
-auslaufen und weist spätere HTTP-Anfragen mit `503 server_stopping` ab.
-Upgegradete Verbindungen bleiben beim Realtime-Owner. Weder der strikte
-Launcher-Timeout noch dessen Fehlerentscheidung werden abgeschwächt.
+Die Behauptung, ein direktes MSI könne keinen Setupcache herstellen, gilt
+nicht mehr: Der installierte Setupstub und der geschützte vollständige
+MSI-Cache besitzen inzwischen genau diesen Rekonstruktionspfad.
+`config/installer` bleibt außerhalb von Snapshot/Restore; Live-Datenpfade
+und benutzerdefinierte Backupordner dürfen diesen Bereich nicht überlappen.
+Unpassende alte Snapshotformate werden abgewiesen, nicht konvertiert.
 
-Die beiden ursprünglichen Reproduktionstests scheitern vor dem Fix; danach
-bestehen zehn fokussierte HTTP-/Drain-/Readiness-Tests und der Server-Typecheck.
-Fünf Sandbox-Quellfixtureläufe mit tatsächlicher Node-Laufzeit, installiertem
-Webclient und absichtlich offener Vorabverbindung bestehen den unveränderten
-strikten Launcher-Stopp in 22–33 ms, Server-Exit jeweils 0. Konfiguration und
-Credentials bleiben bytegleich; keine Produktprozesse oder Listener bleiben
-zurück. Diese Quellfixtureprüfung wird inzwischen durch installierte
-Headless-Läufe und die native MSI-Transaktionsprüfung von 8201/8202 ergänzt.
-Der Headless-Einstieg liefert jetzt nach seiner Bereinigung zusätzlich zu
-Exit 2 genau einen begrenzten Fehlerdatensatz auf stderr. Er enthält nur die
-Phase (`permit`, `load`, `start`, `stop`, `recheck`, `cleanup`), einen fest
-klassifizierten Fehlercode und den Bereinigungsstatus. Rohe Ausnahmetexte,
-Pfade, Konfiguration und Credentials werden nicht ausgegeben. Ein
-Bereinigungsfehler überschreibt die ursprüngliche Fehlerursache nicht.
-Der gebundene Updater liest höchstens 256 Zeichen in den Diagnosepuffer,
-leert die Pipe weiter und akzeptiert ausschließlich das festgelegte Format.
-Ungültige/überlange Ausgabe oder Fehlerausgabe bei Exit 0 schlägt sichtbar
-fehl. Der validierte Code wird beispielsweise als
-`installation_gate_verification_stop_server_timeout_cleanup_ok` bis zum
-MSI-Helfer weitergereicht. Echte Kindprozess-/Pipe-/HKCU-Fixtures prüfen die
-Weitergabe und behalten auch im Fehlerfall den Nachweis von Prozessende und
-Lease-Rücknahme bei. Die native Weitergabe in einer tatsächlichen MSI-
-Versionstransaktion bleibt zusätzlich abzunehmen.
+Der frühere HTTP-Stoppfehler ist am `HttpConnectionDrain`-Owner korrigiert:
+Vorabverbindungen ohne Anfrage werden geschlossen, bereits angenommene
+Antworten dürfen auslaufen, spätere Anfragen erhalten `503 server_stopping`.
+Launcher-Timeout und Stoppeigentümerschaft bleiben streng. Der Headless-Pfad
+meldet auf stderr ausschließlich begrenzte Phasen-/Ursachen-/Cleanupcodes;
+der Updater validiert diese vor Weitergabe. Rohe Ausnahmen oder
+Konfigurationsinhalte sind keine Diagnoseausgabe.
 
-Der reguläre Build 1.0.8199 enthält beide Korrekturen und die neue Diagnose.
-Seine Neuinstallation über erhaltene Sandboxdaten, vollständige
-Datei-/Versions-/Cacheprüfung und anschließende ProductCode-Reparatur sind
-nativ grün. Fünf echte installierte Headless-Läufe enden jeweils mit Exit 0
-und leerem stderr; Konfiguration und Credentials bleiben unverändert.
-Eine absichtlich fehlende, separate Konfigurationsdatei führt im installierten
-Launcher zu Exit 2 und genau dem erwarteten begrenzten `load`-Fehlerdatensatz.
-Diese Prüfungen liefen unter Sandbox-SYSTEM, nicht als Standardbenutzer.
-Die native Headless-Fehlerweitergabe bis zum MSI und der vollständige
-Tray-Updater-/Rollbacklauf bleiben zusätzlich zur direkten MSI-Prüfung offen.
-
-Die Builds 8195/8196 enthalten im Snapshotvertrag noch nicht den Ausschluss
-des separaten MSI-Reparaturcaches. Der aktuelle Quellstand korrigiert dies am
-gemeinsamen `UpdateDataLayout`-Owner: `config/installer` wird weder gesichert
-noch zurückgeschrieben oder entfernt. Live-Datenpfade und benutzerdefinierte
-Backupordner dürfen diesen Bereich nicht überlappen. Der reproduzierende
-Negativtest und anschließend 122 Snapshot-/Restore-Prüfungen sind belegt.
-Die native Prüfung mit 8201/8202 bestätigt inzwischen den Ausschluss und den
-Erhalt sämtlicher vorheriger MSI-Caches auch beim Fehlerrestore.
-Bestehende Archive mit abweichender Ausschlussmenge werden weiterhin sichtbar
-abgewiesen, nicht konvertiert.
-
-Die native Wiederinstallation 8190 über erhaltene Sandboxdaten belegt den
-Cachefehler des bisherigen Stands: `config/updates/NETGRID-Setup.exe` bleibt auf dem alten
-Stand, während nur `NETGRID-Setup.pending.exe` der installierten Version
-entspricht. Im direkten MSI-/Setupweg fehlt die transaktionsgebundene
-Übernahme. Deshalb sind die alte Datei als Updater-Rückkehrversion und die
-darauf zeigende Setup-Startmenüverknüpfung derzeit nicht verlässlich.
-Der Quellstand ersetzt die globalen Slots inzwischen durch den oben
-beschriebenen produktgebundenen Cache. Runtimekonfigurator, Updater,
-Absturzreparatur und Setup-Verknüpfung verwenden dieselbe Zuordnung.
-Gleiche Produktkennung mit anderem Setupinhalt wird abgewiesen; eine
-identische Reparatur schreibt die Datei nicht neu. Es gibt keinen Rückgriff
-auf alte globale Dateien oder den Cache einer anderen Produktkennung.
-Ein direktes MSI ohne mitgelieferte, passende Setupquelle erzeugt weiterhin
-keinen nutzbaren Setupcache für diese Produktkennung; diesen Fall nicht als
-vollständig updatefähige Installation abnehmen.
-Die 21 Cachetests verwenden eigene Dateien und HKCU-Fixtures, keine echte
-MSI-Rücknahme. Die native Wiederinstallation von 8195 über erhaltene
-Sandboxdaten ist inzwischen grün: installierte EXE-Hashes/-Versionen, alle
-Manifestdateien, registrierter ProductCode, Setupcachehash und Setup-
-Verknüpfung stimmen überein. Konfiguration und bestehende Credentials sind
-bytegleich erhalten. Auch die anschließende ProductCode-Reparatur besteht;
-Cacheinhalt und Änderungszeitpunkt bleiben unverändert. Direkte Versionswechsel
-und Fehlerrollback sind mit 8201/8202 ebenfalls geprüft; GUI-Uninstall und
-Tray-Updater-Rollback mit zwei neuen Cache-Ständen bleiben
-vor der Releasefreigabe nativ
-abzunehmen. Den 8190-Cache nicht manuell
-umbenennen und dessen frühere native Ergebnisse nicht auf den Fix übertragen.
-
-Die zusammenhängende Tray-/Updater-Anbindung ersetzt inzwischen die zweite
-Readiness-Momentaufnahme durch atomare Vorbereitung, Prozessbindung und
-explizite Übergabe. Windows-Abbruchcode 1223 beendet den Versuch vor dieser
-Vorbereitung. Echte unelevierte Prozess-, Pipe-, Registry- und Runtimefixtures
-prüfen die beteiligten Owner; der vollständige erhöhte Produktlauf mit zwei
-aktuellen Installern ist damit noch nicht nativ bewiesen.
-
-Direkte MSI-Upgrades benötigen weiterhin den Aktivspielschutz vor dem
-Entfernen der bisherigen Version. Der Neustart verwendet inzwischen den unten
-beschriebenen ursprünglichen Benutzerkontext, nicht mehr den direkten
-Prozessstart aus dem erhöhten Updater. Die erfolgreiche erhöhte Ausführung
-und die Freigabe über ein anderes Administratorkonto sind jedoch noch nativ
-abzunehmen. Ein stiller Verzicht auf Neustart oder ein erhöht weiterlaufendes
-NETGRID ist kein abgeschlossener Fix. Diese Punkte bleiben WIN-I08-Releaseblocker.
-
-`apps/server/src/update-readiness.test.ts` prüft die aktuelle Zählung über den
-echten SQLite-/HTTP-Pfad für sämtliche elf gespeicherten Matchzustände:
-nichtterminale Lobbys, Countdown und aktive Spiele blockieren auch ohne
-verbundene Spieler; ausschließlich terminale Zustände erlauben ein Update.
-Ein nicht verfügbarer Speicherstatus wird mit 503 abgewiesen. Dieser Test
-belegt bewusst weder eine atomare Freigabe noch den nativen Updateablauf.
+GitHub Releases bleibt der einzige Kanal. Die echte Repository-Abfrage vom
+8. September liefert aktuell keine Releases; ein reales Releaseasset kann
+deshalb noch nicht heruntergeladen und geprüft werden. Fixturetests für
+Stable, Prerelease, Offlinebetrieb und Integritätsfehler bleiben davon
+getrennt. Die laufenden Tests begründen weder einen Push noch eine
+Veröffentlichung.
 
 ### Serverseitige Vorbereitungsschnittstelle
 
