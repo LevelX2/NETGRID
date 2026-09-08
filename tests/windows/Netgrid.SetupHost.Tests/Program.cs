@@ -112,7 +112,7 @@ foreach (var language in new[] { "de", "en", "fr" })
         [@"P:\NETGRID", @"D:\Data", @"T:\Temp", @"W:\Windows", footprint, 300_000L, cluster])!;
     Assert(plan.Count == 4, "space_distinct_drives");
     Assert(plan[@"P:\"] == 1_000_000L + 100 * 4096, "space_program_payload_and_allocation");
-    Assert(plan[@"D:\"] == 300_000L + 200_000 + 512L * 1024 * 1024 + 2 * 4096, "space_data_caches_and_reserve");
+    Assert(plan[@"D:\"] == 2 * 300_000L + 200_000 + 512L * 1024 * 1024 + 3 * 4096, "space_data_caches_reconstruction_stage_and_reserve");
     Assert(plan[@"T:\"] == 200_000L + 1_000_000 + 100 * 4096, "space_temporary_reserve");
     Assert(plan[@"W:\"] == 200_000L + 4096, "space_windows_installer_cache");
     var shared = (IReadOnlyDictionary<string, long>)space.GetMethod("Plan")!.Invoke(null,

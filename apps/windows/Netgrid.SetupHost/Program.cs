@@ -928,23 +928,21 @@ internal static class Installer
 
 internal static class MsiPayload
 {
-    private const string ResourceName = "NETGRID.Product.msi";
-    private static readonly IReadOnlyDictionary<string, string> Metadata = Assembly.GetExecutingAssembly()
-        .GetCustomAttributes<AssemblyMetadataAttribute>()
-        .ToDictionary(attribute => attribute.Key, attribute => attribute.Value ?? string.Empty, StringComparer.Ordinal);
-
-    public static string ProductVersion => Metadata.GetValueOrDefault("NetgridProductVersion") ?? "";
-    public static InstallationFootprint Footprint => new(
-        PositiveMetadata("NetgridPayloadBytes"), PositiveMetadata("NetgridPayloadFileCount"), PositiveMetadata("NetgridMsiBytes"));
-
-    private static long PositiveMetadata(string key) =>
-        Metadata.TryGetValue(key, out var value) && long.TryParse(value, out var number) && number > 0
-            ? number : throw new SetupException("disk_space_metadata_invalid");
+    public static string ProductVersion => Assembly.GetExecutingAssembly().GetName().Version!.ToString(3);
+    public static InstallationFootprint Footprint
+    {
+        get
+        {
+            using var input = Open();
+            var contents = Read(input);
+            return new(contents.Product.PayloadBytes, contents.Product.PayloadFileCount, contents.MsiBytes);
+        }
+    }
 
     public static void Verify()
     {
         using var stream = Open();
-        VerifyHash(stream);
+        Read(stream);
     }
 
     public static void ExtractVerified(string target)
@@ -954,8 +952,14 @@ internal static class MsiPayload
         try
         {
             using (var input = Open())
-            using (var output = File.Create(temporary)) input.CopyTo(output);
-            using (var verify = File.OpenRead(temporary)) VerifyHash(verify);
+            using (var output = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+            {
+                Read(input);
+                try { SetupBundle.ExtractVerified(input, output); }
+                catch (InvalidOperationException exception) when (exception.Message.StartsWith("setup_bundle_", StringComparison.Ordinal))
+                { throw new SetupException("payload_hash_mismatch"); }
+                output.Flush(flushToDisk: true);
+            }
             File.Move(temporary, target, overwrite: true);
         }
         finally
@@ -964,15 +968,19 @@ internal static class MsiPayload
         }
     }
 
-    private static Stream Open() => Assembly.GetExecutingAssembly().GetManifestResourceStream(ResourceName)
-        ?? throw new SetupException("payload_missing");
+    private static Stream Open() => new FileStream(Environment.ProcessPath ?? throw new SetupException("payload_missing"),
+        FileMode.Open, FileAccess.Read, FileShare.Read);
 
-    private static void VerifyHash(Stream stream)
+    private static SetupBundle.Contents Read(Stream stream)
     {
-        var expected = Metadata.GetValueOrDefault("NetgridMsiSha256");
-        if (string.IsNullOrWhiteSpace(expected) || expected.Length != 64) throw new SetupException("payload_hash_missing");
-        var actual = Convert.ToHexString(SHA256.HashData(stream)).ToLowerInvariant();
-        if (!string.Equals(actual, expected, StringComparison.Ordinal)) throw new SetupException("payload_hash_mismatch");
+        try
+        {
+            var contents = SetupBundle.ReadVerified(stream);
+            if (contents.Product.ProductVersion.ToString(3) != ProductVersion) throw new SetupException("payload_hash_mismatch");
+            return contents;
+        }
+        catch (InvalidOperationException exception) when (exception.Message.StartsWith("setup_bundle_", StringComparison.Ordinal))
+        { throw new SetupException("payload_hash_mismatch"); }
     }
 }
 

@@ -25,6 +25,7 @@ $launcherRoot = Join-Path $installerInputRoot "launcher"
 $firstRunRoot = Join-Path $installerInputRoot "first-run"
 $updaterRoot = Join-Path $installerInputRoot "updater"
 $setupHostRoot = Join-Path $installerInputRoot "setup-host"
+$setupStubRoot = Join-Path $installerInputRoot "setup-stub"
 $lifecycleRoot = Join-Path $installerInputRoot "lifecycle"
 $localDotnet = Join-Path $projectRoot ".tools\dotnet\dotnet.exe"
 $dotnet = if (Test-Path -LiteralPath $localDotnet -PathType Leaf) {
@@ -67,6 +68,8 @@ try {
   if ($LASTEXITCODE -ne 0) { throw "Die Windows-Update-Übergabetests sind fehlgeschlagen." }
   & $dotnet run --project tests/windows/Netgrid.SetupHost.Tests/Netgrid.SetupHost.Tests.csproj -c Release
   if ($LASTEXITCODE -ne 0) { throw "Die Windows-Setup-Regressionstests sind fehlgeschlagen." }
+  & $dotnet run --project tests/windows/Netgrid.SetupBundle.Tests/Netgrid.SetupBundle.Tests.csproj -c Release
+  if ($LASTEXITCODE -ne 0) { throw "Die Windows-Setup-Bundle-Regressionstests sind fehlgeschlagen." }
   & $dotnet run --project tests/windows/Netgrid.FirstRun.Tests/Netgrid.FirstRun.Tests.csproj -c Release
   if ($LASTEXITCODE -ne 0) { throw "Die Windows-Ersteinrichtungs-UI-Tests sind fehlgeschlagen." }
   & $dotnet run --project tests/windows/Netgrid.Launcher.Tests/Netgrid.Launcher.Tests.csproj -c Release
@@ -186,6 +189,14 @@ try {
   & node scripts/smoke-windows-updater.mjs --launcher $launcherExecutable --updater $updaterExecutable
   if ($LASTEXITCODE -ne 0) { throw "Der NETGRID-Updater hat seinen isolierten Vertragssmoke nicht bestanden." }
 
+  # Build the MSI-independent apphost first. Both build-time composition and
+  # installed cache reconstruction consume this exact stub and the original MSI.
+  & $dotnet publish apps/windows/Netgrid.SetupHost/Netgrid.SetupHost.csproj `
+    -c Release -r win-x64 --self-contained true $nativeVersionProperty `
+    -p:DebugType=None -p:DebugSymbols=false -o $setupStubRoot
+  if ($LASTEXITCODE -ne 0) { throw "Der NETGRID-Setup-Stub konnte nicht gebaut werden." }
+  $setupStubExecutable = Join-Path $setupStubRoot "NETGRID.Setup.exe"
+
   & $dotnet tool restore
   if ($LASTEXITCODE -ne 0) { throw "WiX Toolset 7.0.0 konnte nicht wiederhergestellt werden." }
 
@@ -215,6 +226,7 @@ try {
     -d "LauncherRoot=$launcherRoot" `
     -d "FirstRunRoot=$firstRunRoot" `
     -d "UpdaterRoot=$updaterRoot" `
+    -d "SetupStubRoot=$setupStubRoot" `
     -d "LifecycleActionsPath=$lifecycleActionsPath" `
     -d "NetgridIcon=$iconPath" `
     -d "FirstRunTitleDe=$($uiCatalog.de.'first.title')" `
@@ -226,24 +238,11 @@ try {
     installer/product/Product.wxs
   if ($LASTEXITCODE -ne 0) { throw "NETGRID-MSI konnte nicht gebaut werden." }
 
-  $msiSha256 = (Get-FileHash -LiteralPath $msiPath -Algorithm SHA256).Hash.ToLowerInvariant()
-  $footprint = & (Join-Path $PSScriptRoot 'read-windows-msi-footprint.ps1') -MsiPath $msiPath
-  & $dotnet publish apps/windows/Netgrid.SetupHost/Netgrid.SetupHost.csproj `
-    -c Release -r win-x64 --self-contained true $nativeVersionProperty `
-    -p:DebugType=None -p:DebugSymbols=false `
-    "-p:EmbeddedMsiPath=$msiPath" `
-    "-p:EmbeddedMsiSha256=$msiSha256" `
-    "-p:NetgridProductVersion=$productVersion" `
-    "-p:NetgridPayloadBytes=$($footprint.payloadBytes)" `
-    "-p:NetgridPayloadFileCount=$($footprint.payloadFileCount)" `
-    "-p:NetgridMsiBytes=$($footprint.msiBytes)" `
-    -o $setupHostRoot
-  if ($LASTEXITCODE -ne 0) { throw "Der geführte NETGRID-Setuphost konnte nicht gebaut werden." }
+  & $dotnet run --project tools/windows/Netgrid.SetupBundleTool/Netgrid.SetupBundleTool.csproj -c Release -- $setupStubExecutable $msiPath $setupPath
+  if ($LASTEXITCODE -ne 0) { throw "Das geführte NETGRID-Setup konnte nicht zusammengesetzt werden." }
+  New-Item -ItemType Directory -Path $setupHostRoot | Out-Null
   $setupHostExecutable = Join-Path $setupHostRoot "NETGRID.Setup.exe"
-  if (-not (Test-Path -LiteralPath $setupHostExecutable -PathType Leaf)) {
-    throw "Der selbst enthaltene NETGRID-Setuphost fehlt."
-  }
-  Copy-Item -LiteralPath $setupHostExecutable -Destination $setupPath -Force
+  Copy-Item -LiteralPath $setupPath -Destination $setupHostExecutable
 
   $uiMatrixRoot = Join-Path $projectRoot "output\windows-ui-matrix"
   Reset-BuildDirectory -Path $uiMatrixRoot -ProjectRoot $projectRoot
@@ -279,6 +278,7 @@ try {
       firstRunSha256 = (Get-FileHash -LiteralPath $firstRunExecutable -Algorithm SHA256).Hash.ToLowerInvariant()
       updaterSha256 = (Get-FileHash -LiteralPath $updaterExecutable -Algorithm SHA256).Hash.ToLowerInvariant()
       setupHostSha256 = (Get-FileHash -LiteralPath $setupHostExecutable -Algorithm SHA256).Hash.ToLowerInvariant()
+      setupStubSha256 = (Get-FileHash -LiteralPath $setupStubExecutable -Algorithm SHA256).Hash.ToLowerInvariant()
       installerLifecycleSha256 = (Get-FileHash -LiteralPath $lifecycleActionsPath -Algorithm SHA256).Hash.ToLowerInvariant()
     }
     dataContract = [ordered]@{

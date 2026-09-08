@@ -65,6 +65,7 @@ try {
     ["NETGRID.exe", "launcher/NETGRID.exe"],
     ["NETGRID.FirstRun.exe", "first-run/NETGRID.FirstRun.exe"],
     ["NETGRID.Updater.exe", "updater/NETGRID.Updater.exe"],
+    ["tools/NETGRID.SetupStub.exe", "setup-stub/NETGRID.Setup.exe"],
   ]);
   for (const [installedRelative, inputRelative] of installerFiles) {
     const input = path.join(installerInputRoot, ...inputRelative.split("/"));
@@ -98,7 +99,7 @@ try {
   const nodeVersion = run(nodeRuntime, ["--version"]).stdout.trim();
   if (!/^v24\.\d+\.\d+$/.test(nodeVersion))
     throw new Error(`installer_node_version_invalid:${nodeVersion}`);
-  for (const executable of [setupPath, ...["NETGRID.exe", "NETGRID.FirstRun.exe", "NETGRID.Updater.exe", "tools/NETGRID.RuntimeConfig.exe"]
+  for (const executable of [setupPath, ...["NETGRID.exe", "NETGRID.FirstRun.exe", "NETGRID.Updater.exe", "tools/NETGRID.RuntimeConfig.exe", "tools/NETGRID.SetupStub.exe"]
     .map(relative => path.join(installedProductRoot, relative))])
     run("powershell.exe", ["-NoProfile", "-File", path.join(import.meta.dirname, "check-windows-native-version.ps1"),
       "-Executable", executable, "-Version", productLayout.product.installerVersion]);
@@ -191,7 +192,7 @@ try {
     !authoring.includes("--desktop-shortcut &quot;[INSTALLDESKTOPSHORTCUT]&quot;") ||
     !authoring.includes("--ui-language &quot;[NETGRID_UI_LANGUAGE]&quot;") ||
     !authoring.includes('Id="CacheNetgridSetup" HideTarget="yes"') ||
-    !authoring.includes("NETGRID_SETUP_SOURCE &lt;&gt; &quot;&quot;") ||
+    !authoring.includes('<Custom Action="CacheNetgridSetup" Condition="NOT REMOVE~=&quot;ALL&quot;"') ||
     !authoring.includes(
       '<Property Id="DELETEUSERDATA" Value="0" Secure="yes" />',
     ) ||
@@ -222,6 +223,8 @@ try {
   const expectedMsiHash = sha256(msiPath);
   if (sha256(embeddedMsi) !== expectedMsiHash)
     throw new Error("installer_setup_msi_mismatch");
+  run("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", path.join(import.meta.dirname, "test-windows-setup-reconstruction.ps1"),
+    "-ProgramRoot", installedProductRoot, "-MsiPath", msiPath, "-SetupPath", setupPath]);
   const contractPath = path.join(scratch, "setup-contract.json");
   run(setupPath, ["--audit-contract", contractPath]);
   const setupContract = JSON.parse(readFileSync(contractPath, "utf8"));

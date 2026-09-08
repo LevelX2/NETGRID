@@ -52,6 +52,7 @@ function Assert-InstalledIdentity {
     'NETGRID.FirstRun.exe' = $metadata.runtime.firstRunSha256
     'NETGRID.Updater.exe' = $metadata.runtime.updaterSha256
     'tools\NETGRID.RuntimeConfig.exe' = $metadata.runtime.runtimeConfigSha256
+    'tools\NETGRID.SetupStub.exe' = $metadata.runtime.setupStubSha256
   }
   foreach ($relative in $files.Keys) {
     $target = Join-Path $programRoot $relative
@@ -113,8 +114,7 @@ try {
   Invoke-Msi @(
     "/i", (Quote-Msi $baseMsi), "/qn", "/norestart", "/l*v", (Quote-Msi $recommendedLog),
     "INSTALLFOLDER=$(Quote-Msi $programRoot)", "NETGRID_DATA_ROOT=$(Quote-Msi $dataRoot)",
-    "NETGRID_WEB_PORT=32141", "NETGRID_SERVER_PORT=32142",
-    "NETGRID_SETUP_SOURCE=$(Quote-Msi $baseSetup)", "NETGRID_SETUP_SHA256=$(Setup-Hash $baseSetup)"
+    "NETGRID_WEB_PORT=32141", "NETGRID_SERVER_PORT=32142"
   ) | Out-Null
   Assert-True ((Product-Version $programRoot) -eq $baseVersion) "recommended_install_version_invalid"
   Assert-InstalledIdentity $baseMsi $baseSetup
@@ -249,7 +249,7 @@ try {
       updateMsiSha256 = Setup-Hash $updateMsi
       updateSetupSha256 = Setup-Hash $updateSetup
     }
-    checks = @("recommended-install-defaults", "fresh-install", "custom-paths-and-policy", "start-menu-and-desktop-preference", "launcher-health", "pre-update-backup", "repair", "root-change-rejection-preserves-version", "standalone-msi-upgrade", "product-code-repair-from-protected-cache", "standalone-downgrade", "native-file-hashes-and-versions", "product-bound-setup-cache-and-shortcut", "standard-uninstall-retains-data", "explicit-data-delete")
+    checks = @("recommended-install-defaults", "fresh-install", "msi-only-reconstructed-setup-cache", "custom-paths-and-policy", "start-menu-and-desktop-preference", "launcher-health", "pre-update-backup", "repair", "root-change-rejection-preserves-version", "standalone-msi-upgrade", "product-code-repair-from-protected-cache", "standalone-downgrade", "native-file-hashes-and-versions", "product-bound-setup-cache-and-shortcut", "standard-uninstall-retains-data", "explicit-data-delete")
     logRoot = $logRoot
   }
 } catch {

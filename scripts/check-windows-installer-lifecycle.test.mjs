@@ -66,6 +66,19 @@ test("setup cache, current product selector and uninstall shortcut share MSI ide
   for (const mutate of [
     value => value.replace('Name="CurrentProductCode" Type="string" Value="[ProductCode]"', 'Name="CurrentProductCode" Type="string" Value="unbound"'),
     value => value.replace('\\config\\updates\\[ProductCode]\\NETGRID-Setup.exe', '\\config\\updates\\NETGRID-Setup.exe'),
-    value => value.replace('cache-setup --data-root "[NETGRID_DATA_ROOT]" --product-code "[ProductCode]"', 'cache-setup --data-root "[NETGRID_DATA_ROOT]"'),
-  ]) assert.throws(() => checkLifecycleSource(mutate(source)), /setup_cache_identity_unbound/);
+    value => value.replace('cache-setup --data-root "[NETGRID_DATA_ROOT]" --program-root "[INSTALLFOLDER]" --product-code "[ProductCode]"', 'cache-setup --data-root "[NETGRID_DATA_ROOT]" --program-root "[INSTALLFOLDER]"'),
+  ]) {
+    const changed = mutate(source);
+    assert.notEqual(changed, source, 'negative fixture must alter the current owner');
+    assert.throws(() => checkLifecycleSource(changed), /setup_cache_identity_unbound/);
+  }
+});
+
+test('MSI cache reconstruction does not depend on an external setup source', () => {
+  const source = readFileSync('installer/product/Product.wxs', 'utf8');
+  const scheduled = source.match(/<Custom Action="CacheNetgridSetup"[^>]+>/)?.[0];
+  assert.equal(scheduled, '<Custom Action="CacheNetgridSetup" After="CacheNetgridMsi" Condition=\'NOT REMOVE~="ALL"\' />');
+  assert.match(source, /Id="NetgridSetupStub" Name="NETGRID.SetupStub.exe"/);
+  const args = source.match(/Value='cache-setup[^']+'/)?.[0];
+  assert.ok(args?.includes('--program-root "[INSTALLFOLDER]"'));
 });

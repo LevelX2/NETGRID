@@ -39,9 +39,10 @@ internal static class InstallationSpace
             // being removed before the new files and rollback state are safe.
             var programDrive = Root(programRoot);
             Add(programDrive, checked(footprint.PayloadBytes + footprint.PayloadFileCount * Unit(programDrive)));
-            // Protected original-MSI and Setup caches plus initial working-data reserve.
+            // Protected original MSI, generated Setup stage and immutable Setup
+            // cache coexist during publication, plus initial working-data reserve.
             var dataDrive = Root(dataRoot);
-            Add(dataDrive, checked(setupBytes + footprint.MsiBytes + InitialDataReserveBytes + 2 * Unit(dataDrive)));
+            Add(dataDrive, checked(2 * setupBytes + footprint.MsiBytes + InitialDataReserveBytes + 3 * Unit(dataDrive)));
             // Embedded MSI extraction and a conservative full-payload temporary buffer
             // for extraction/installer/native-runtime work. This is a reserve, not a
             // claim that every byte will remain occupied after installation.

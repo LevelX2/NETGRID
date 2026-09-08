@@ -29,11 +29,12 @@ internal static class Program
             }
             if (string.Equals(command.Name, "cache-setup", StringComparison.OrdinalIgnoreCase))
             {
-                InstalledSetupCache.Store(
+                SetupCacheReconstruction.Store(
                     ResolveCacheDataRoot(command.Optional("--data-root"), command.Optional("--state-file")),
+                    ResolveProgramRoot(command.Optional("--program-root")),
                     command.Required("--product-code"),
-                    RequireAbsoluteFile(command.Optional("--source") ?? string.Empty, "setup_cache_source_missing"),
-                    command.Optional("--sha256") ?? string.Empty
+                    string.IsNullOrEmpty(command.Optional("--source")) ? null : RequireAbsoluteFile(command.Required("--source"), "setup_cache_source_missing"),
+                    command.Optional("--sha256")
                 );
                 Console.WriteLine("NETGRID_SETUP_CACHE_OK");
                 return 0;
@@ -114,7 +115,7 @@ internal static class Program
             );
             return 2;
         }
-        catch (InvalidOperationException exception) when (exception.Message.StartsWith("setup_cache_", StringComparison.Ordinal))
+        catch (InvalidOperationException exception) when (exception.Message.StartsWith("setup_cache_", StringComparison.Ordinal) || exception.Message.StartsWith("setup_bundle_", StringComparison.Ordinal))
         {
             Console.Error.WriteLine($"NETGRID_RUNTIME_CONFIG_ERROR code={exception.Message}");
             return 2;

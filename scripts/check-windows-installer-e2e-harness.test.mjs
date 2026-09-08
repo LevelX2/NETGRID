@@ -24,7 +24,7 @@ test('rejected root change proves its cause, without claiming a rollback', () =>
 });
 
 test('installation identity includes actual native bytes and the selected setup', () => {
-  for (const field of ['launcherSha256', 'firstRunSha256', 'updaterSha256', 'runtimeConfigSha256'])
+  for (const field of ['launcherSha256', 'firstRunSha256', 'updaterSha256', 'runtimeConfigSha256', 'setupStubSha256'])
     assert.ok(source.includes(`$metadata.runtime.${field}`));
   assert.match(source, /Setup-Hash \$target\) -eq \$files\[\$relative\]/);
   assert.match(source, /GetVersionInfo\(\$target\).FileVersion -eq "\$version.0"/);
@@ -36,6 +36,14 @@ test('installation identity includes actual native bytes and the selected setup'
   assert.match(source, /Setup-Hash \$cachePath\) -eq \(Setup-Hash \$SetupPath\)/);
   assert.match(source, /\$shortcut.TargetPath -eq \$cachePath/);
   assert.equal((source.match(/^[ \t]+Assert-InstalledIdentity \$(?:base|update)Msi \$(?:base|update)Setup/gm) ?? []).length, 8);
+});
+
+test('fresh MSI-only installation proves the generated setup without an external setup source', () => {
+  const start = source.indexOf('$recommendedLog =');
+  const end = source.indexOf('Assert-InstalledIdentity $baseMsi $baseSetup', start);
+  assert.ok(start > 0 && end > start);
+  assert.doesNotMatch(source.slice(start, end), /NETGRID_SETUP_SOURCE|NETGRID_SETUP_SHA256/);
+  assert.match(source, /msi-only-reconstructed-setup-cache/);
 });
 
 test('a second higher artifact version is required before installation', () => {

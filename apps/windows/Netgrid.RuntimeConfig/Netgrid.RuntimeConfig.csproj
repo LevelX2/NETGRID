@@ -14,6 +14,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\Common\InstalledSetupCache.cs" Link="InstalledSetupCache.cs" />
+    <Compile Include="..\Common\SetupBundle.cs" Link="SetupBundle.cs" />
+    <Compile Include="..\Common\MsiBundleMetadata.cs" Link="MsiBundleMetadata.cs" />
     <Compile Include="..\Common\UpdateDataFiles.cs" Link="UpdateDataFiles.cs" />
     <Compile Include="..\Common\WindowsUiLanguage.cs" Link="WindowsUiLanguage.cs" />
   </ItemGroup>

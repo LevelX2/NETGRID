@@ -377,8 +377,12 @@ Ordnerwechsel muss explizit `installation_gate_upgrade_root_changed` liefern;
 eine Ablehnung vor Änderungen ist kein Rollback-Nachweis.
 `node --test scripts/check-windows-installer-e2e-harness.test.mjs` prüft diese
 Harnessverträge und die Windows-PowerShell-Syntax ohne Installation. Der
-überarbeitete Gesamtlauf benötigt weiterhin zwei aktuelle, regulär gebaute
-Artefaktsätze und ist noch nativ auszuführen.
+Gesamtlauf mit 8201/8202 ist am 8. September in einer frischen Offline-Sandbox
+mit 15 Prüfbereichen einschließlich Cleanup grün beendet worden; Ergebnisse
+und vollständige, hashgeprüfte MSI-Logs liegen im Laufordner
+`output/windows-sandbox-e2e/4e3eb1bf3ede4e27bcf4278dcc097dde/result`.
+Die danach ergänzte MSI-Alleininstallation und Stubidentität benötigen zwei
+neue reguläre Artefaktsätze; der alte Nachweis deckt diese Änderung nicht ab.
 
 `corepack pnpm certify:windows-release` verbindet Releasegrenzenprüfung,
 Installer-Build und diesen erhöhten Lauf. Das Ergebnis unter
@@ -667,11 +671,12 @@ die Diagnose nicht gespeichert werden, zeigt die Oberfläche beide
 strukturierten Fehler an, statt auf ein nicht vorhandenes Protokoll zu
 verweisen. Es findet keine automatische Übermittlung statt.
 
-`read-windows-msi-footprint.ps1` liest ausschließlich die tatsächliche
-MSI-File-Tabelle. Dateigröße, Anzahl und MSI-Größe werden im Setup eingebettet
+`Common/MsiBundleMetadata.cs` liest ausschließlich die tatsächliche
+MSI-File-Tabelle sowie Produktversion und ProductCode. Dateigröße, Anzahl und MSI-Größe werden im Setup eingebettet
 und beim Installer-Audit gegen die extrahierte Payload verglichen. Die
 Platzprüfung reserviert den vollständigen neuen Programmstand samt
-Allokationspuffer, geschützte Setup-/MSI-Caches, eine vollständige Payload als
+Allokationspuffer, geschützte Setup-/MSI-Caches einschließlich gleichzeitigem
+Setup-Rekonstruktionsstage, eine vollständige Payload als
 temporären Puffer und 512 MiB als anfängliche Datenreserve. Mehrere Ziele auf
 demselben Laufwerk zählen zusammen. Das ist ein konservativer Installations-
 Platzplan, keine Zusage über späteren Speicherbedarf der Spielhistorie.
@@ -680,6 +685,26 @@ Installation nicht; die lokalisierte Meldung nennt einzuplanenden und freien
 Platz pro betroffenem Laufwerk. Auch Updates verwenden diese Prüfung vor dem
 Entpacken. Eine zwischenzeitliche Belegung durch andere Programme kann nicht
 ausgeschlossen werden und bleibt zusätzlich Aufgabe der MSI-Fehlerbehandlung.
+
+Der unsigned-private-alpha-Build erzeugt den Setup-Stub vor dem MSI und
+installiert ihn als `tools/NETGRID.SetupStub.exe`. Der gemeinsame
+`Common/SetupBundle.cs`-Writer hängt unveränderte MSI-Bytes und einen festen,
+versions-/produkt-/hashgebundenen Footer an diesen Stub. Derselbe Writer
+erzeugt im erhöhten Runtimekonfigurator die vollständige Setupcache-Datei aus
+installiertem Stub und geschütztem Original-MSI. Dadurch benötigt eine
+MSI-Alleininstallation keine externe Setup-EXE und keinen Download.
+`InstalledSetupCache` bleibt Eigentümer des unveränderlichen ProductCode-
+Eintrags; MSI bleibt Installations- und Registryautorität. Die normale
+Setupquelle dient, falls übergeben, nur der zusätzlichen Hashbestätigung.
+Reparatur konsumiert das vollständige MSI aus `config/installer/<ProductCode>`,
+nicht die reduzierte MSI-Datenbank unter Windows Installer. Ein fehlender oder
+mehrdeutiger Cache bricht sichtbar ab. Der Reader akzeptiert nur das neue
+Format, keine Legacy-Ressource als Ersatz. Der reguläre Extraktionsaudit ruft
+`test-windows-setup-reconstruction.ps1` auf und verlangt Bytegleichheit,
+idempotenten Cache und Ablehnung falscher Bestätigungen. Diese Komponenten-
+und Fixturechecks ersetzen nicht die noch ausstehende neue Sandbox-Abnahme.
+Die Rekonstruktion einer später außen Authenticode-signierten EXE ist kein
+Teil dieses Formats; breite signierte Veröffentlichung bleibt gesperrt.
 
 Die Runtimekonfiguration wird als EXE-Custom-Action aufgerufen. Ihre
 Argumente werden beim Einplanen aus der jeweils vorbereiteten Action-Property
