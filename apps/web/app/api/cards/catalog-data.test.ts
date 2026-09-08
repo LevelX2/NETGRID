@@ -993,9 +993,18 @@ describe("catalog API filters", () => {
     }
   });
 
-  it("serves the generated CardSpec hint projection for every runtime card", () => {
-    expect(generatedCardSpecAiHints.cards).toHaveLength(618);
-    for (const generated of generatedCardSpecAiHints.cards) {
+  it("covers the generated CardSpec hint inventory with unique current entries", () => {
+    const cardIds = generatedCardSpecAiHints.cards.map((entry) => entry.cardId);
+    expect(cardIds.length).toBeGreaterThanOrEqual(618);
+    expect(new Set(cardIds).size).toBe(cardIds.length);
+    expect(cardIds).toEqual(generatedCardSpecAiHints.cardIds);
+  });
+
+  // Each API response is the contract unit. A growing catalog must not share
+  // one aggregate timeout, and failures must identify the affected card.
+  it.each(generatedCardSpecAiHints.cards)(
+    "serves the generated CardSpec hint projection for $cardId",
+    (generated) => {
       const response = catalogDetailResponse(generated.cardId);
       expect(response.status, generated.cardId).toBe(200);
       const body = response.body as CatalogDetailAiHints;
@@ -1010,8 +1019,8 @@ describe("catalog API filters", () => {
         scenarioRefs: generated.hint.scenarioRefs,
         aiSupportStatus: "ai_supported",
       });
-    }
-  }, 30_000);
+    },
+  );
 
   it("keeps generated detail hints deeply immutable across API responses", () => {
     for (const cardId of [
