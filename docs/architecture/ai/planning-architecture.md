@@ -805,6 +805,13 @@ keinen AI-Callback und keine zweite Plan-, Action- oder Choice-Wahl.
 
 ### 8.3 Ausführungsursprung und Receipt
 
+Öffentlich als Runner-Programm installierte Karten tragen ihre aktuelle
+Installationsrolle in `VisibleCard.installedAsRunnerProgram` durch PlayerView
+und KI-DTO. Gedruckter Kartentyp und Eigentümer bleiben separat erhalten.
+Programm-Zielentscheidungen prüfen deshalb die aktuelle Rolle und
+Runner-Kontrolle; eine übernommene Corp-Agenda darf nicht aus einem exakt
+gebundenen legalen Programmzielangebot herausgefiltert werden.
+
 Fenster- und Runfortsetzungen tragen einen stabilen, side-sicheren Ursprung:
 
 ```ts

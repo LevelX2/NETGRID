@@ -1,0 +1,2899 @@
+{
+  "input": {
+    "matchId": "deck-revision:deck-revision-20260908-corp-secondary-01",
+    "side": "corp",
+    "playerView": {
+      "side": "corp",
+      "stateVersion": 42,
+      "traceRulesProfile": "modern_open",
+      "turnSerial": 5,
+      "timingPoint": "run.encounter_ice",
+      "activeSide": "corp",
+      "phase": "run",
+      "own": {
+        "identity": {
+          "instanceId": "corp_corp_identity_001_0",
+          "known": true,
+          "title": "Korp",
+          "definitionId": "corp_identity_001",
+          "type": "identity",
+          "subtypes": [],
+          "rulesText": "Technische Seitenidentität ohne aktive Fähigkeit.",
+          "rezzed": true,
+          "advancementCounters": 0,
+          "owner": "corp",
+          "controller": "corp"
+        },
+        "credits": 0,
+        "clicks": 0,
+        "agendaPoints": 0,
+        "gripOrHq": [
+          {
+            "instanceId": "corp_onr_classic_018_reclamation-project_2",
+            "known": true,
+            "title": "Reclamation Project",
+            "definitionId": "onr_classic_018_reclamation-project",
+            "type": "operation",
+            "subtypes": [
+              "double"
+            ],
+            "rulesText": "Search the archives for any number of ice cards. Show those cards to Runner, then store them in HQ. Playing a double operation costs two consecutive actions this turn instead of one.",
+            "cost": 0,
+            "playCost": {
+              "kind": "fixed",
+              "credits": 0
+            },
+            "rezzed": false,
+            "advancementCounters": 0,
+            "owner": "corp",
+            "controller": "corp"
+          },
+          {
+            "instanceId": "corp_onr_classic_018_reclamation-project_1",
+            "known": true,
+            "title": "Reclamation Project",
+            "definitionId": "onr_classic_018_reclamation-project",
+            "type": "operation",
+            "subtypes": [
+              "double"
+            ],
+            "rulesText": "Search the archives for any number of ice cards. Show those cards to Runner, then store them in HQ. Playing a double operation costs two consecutive actions this turn instead of one.",
+            "cost": 0,
+            "playCost": {
+              "kind": "fixed",
+              "credits": 0
+            },
+            "rezzed": false,
+            "advancementCounters": 0,
+            "owner": "corp",
+            "controller": "corp"
+          },
+          {
+            "instanceId": "corp_onr_classic_017_corporate-shuffle_1",
+            "known": true,
+            "title": "Corporate Shuffle",
+            "definitionId": "onr_classic_017_corporate-shuffle",
+            "type": "operation",
+            "subtypes": [
+              "double"
+            ],
+            "rulesText": "Draw five cards, then shuffle a card stored in HQ into R&D. Playing a double operation costs two consecutive actions this turn instead of one.",
+            "cost": 0,
+            "playCost": {
+              "kind": "fixed",
+              "credits": 0
+            },
+            "rezzed": false,
+            "advancementCounters": 0,
+            "owner": "corp",
+            "controller": "corp"
+          },
+          {
+            "instanceId": "corp_onr_classic_014_trapdoor_1",
+            "known": true,
+            "title": "Trapdoor",
+            "definitionId": "onr_classic_014_trapdoor",
+            "type": "ice",
+            "subtypes": [
+              "code_gate",
+              "deflector"
+            ],
+            "rulesText": "Install Trapdoor only on R&D or HQ. *Runner is now encountering the outermost piece of rezzed ice on a subsidiary data fort of your choice, instead of passing Trapdoor. The run is now considered to be a run on that data fort. If there is no rezzed ice on that fort, Runner is considered to have passed the last piece of ice on that fort. Runner automatically breaks this subroutine if there are no subsidiary data forts.",
+            "rezCost": 3,
+            "rezzed": false,
+            "advancementCounters": 0,
+            "strength": 3,
+            "owner": "corp",
+            "controller": "corp"
+          }
+        ],
+        "stackOrRdCount": 34,
+        "heapOrArchives": [
+          {
+            "instanceId": "corp_onr_classic_025_strategic-planning-group_1",
+            "known": true,
+            "title": "Strategic Planning Group",
+            "definitionId": "onr_classic_025_strategic-planning-group",
+            "type": "asset",
+            "subtypes": [
+              "node",
+              "unique"
+            ],
+            "rulesText": "Whenever you draw one or more cards, draw an extra card. Then place one of the drawn cards on the bottom of R&D. Only one unique card of a particular name can be in play at a time. If for some reason more than one is in play, trash all but one.",
+            "rezCost": 2,
+            "rezzed": false,
+            "advancementCounters": 0,
+            "trashCost": 4,
+            "owner": "corp",
+            "controller": "corp"
+          }
+        ],
+        "scoreArea": [],
+        "maxHandSize": 5,
+        "tags": 0
+      },
+      "opponent": {
+        "identity": {
+          "instanceId": "runner_runner_identity_001_0",
+          "known": true,
+          "title": "Runner",
+          "definitionId": "runner_identity_001",
+          "type": "identity",
+          "subtypes": [],
+          "rulesText": "Technische Seitenidentität ohne aktive Fähigkeit.",
+          "baseLink": 0,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "owner": "runner",
+          "controller": "runner"
+        },
+        "credits": 3,
+        "clicks": 3,
+        "agendaPoints": 0,
+        "tags": 0,
+        "handCount": 5,
+        "maxHandSize": 5,
+        "coreDamage": 0,
+        "deckCount": 34,
+        "discardCount": 3,
+        "scoreArea": [],
+        "rig": [
+          {
+            "instanceId": "runner_onr_proteus_078_armageddon_1",
+            "known": true,
+            "title": "Armageddon",
+            "definitionId": "onr_proteus_078_armageddon",
+            "type": "program",
+            "subtypes": [
+              "random",
+              "virus"
+            ],
+            "rulesText": "After each successful run on R&D, you may choose to give the Corp a Doom counter instead of accessing cards from R&D. Each Doom counter forces the Corp to roll a die whenever it installs a card. On a 6, the card is trashed after it is installed, and the Corp removes a Doom counter. The Corp may remove all Virus counters at any time, but must then forgo its next three actions.",
+            "installCost": 1,
+            "memoryCost": 1,
+            "rezzed": true,
+            "advancementCounters": 0,
+            "owner": "runner",
+            "controller": "runner"
+          },
+          {
+            "instanceId": "runner_onr_v1_014_codecracker_1",
+            "known": true,
+            "title": "Codecracker",
+            "definitionId": "onr_v1_014_codecracker",
+            "type": "program",
+            "subtypes": [
+              "icebreaker"
+            ],
+            "rulesText": "[0]: Break code gate subroutine.\n[1]: +1 strength.",
+            "installCost": 2,
+            "memoryCost": 1,
+            "rezzed": true,
+            "advancementCounters": 0,
+            "strength": 0,
+            "owner": "runner",
+            "controller": "runner"
+          },
+          {
+            "instanceId": "corp_onr_classic_004_theorem-proof_2",
+            "known": true,
+            "title": "Theorem Proof",
+            "definitionId": "onr_classic_004_theorem-proof",
+            "type": "agenda",
+            "subtypes": [
+              "research"
+            ],
+            "rulesText": "If Runner accesses Theorem Proof, he or she does not score it, but instead may install it as a 2 MU program that has the ability \"A: Score Theorem Proof\" but is removed from the game if it leaves play in any other way.",
+            "installedAsRunnerProgram": {
+              "memoryCost": 2,
+              "scoreAsAgendaAction": true,
+              "removeFromGameOnLeavePlay": true,
+              "originalType": "agenda"
+            },
+            "rezzed": true,
+            "advancementCounters": 0,
+            "advancementRequirement": 5,
+            "agendaPoints": 3,
+            "owner": "corp",
+            "controller": "runner"
+          },
+          {
+            "instanceId": "hidden_runner_resource_3d344ba0",
+            "known": false,
+            "type": "resource",
+            "subtypes": [
+              "hidden_runner_resource"
+            ],
+            "rezzed": false,
+            "concealed": true,
+            "hiddenRunnerResource": true,
+            "owner": "runner",
+            "controller": "runner"
+          }
+        ],
+        "memoryUsed": 4,
+        "memoryLimit": 4
+      },
+      "servers": [
+        {
+          "id": "hq",
+          "label": "HQ",
+          "ice": [
+            {
+              "instanceId": "corp_onr_classic_006_bolter-swarm_2",
+              "known": true,
+              "title": "Bolter Swarm",
+              "definitionId": "onr_classic_006_bolter-swarm",
+              "type": "ice",
+              "subtypes": [
+                "ap",
+                "hellbolt",
+                "sentry",
+                "sleepy"
+              ],
+              "rulesText": "*Do 4 Net damage. *Runner cannot break any subroutines on the next piece of ice encountered during this run. If Runner has used a noisy icebreaker during this run, the cost to rez Bolter Swarm is reduced by [5].",
+              "rezCost": 8,
+              "rezzed": false,
+              "advancementCounters": 0,
+              "strength": 4,
+              "owner": "corp",
+              "controller": "corp",
+              "effectivePostRezRunQuote": {
+                "context": "installed_post_rez",
+                "cardId": "corp_onr_classic_006_bolter-swarm_2",
+                "iceDefinitionId": "onr_classic_006_bolter-swarm",
+                "targetServerId": "hq",
+                "projectedServerId": "hq",
+                "expiresAtStateVersion": 42,
+                "complete": false,
+                "reason": "active_run_context"
+              },
+              "effectiveRezCostQuote": {
+                "context": "installed",
+                "cardId": "corp_onr_classic_006_bolter-swarm_2",
+                "targetServerId": "hq",
+                "projectedServerId": "hq",
+                "expiresAtStateVersion": 42,
+                "complete": true,
+                "baseCredits": 8,
+                "finalCredits": 8,
+                "mandatoryAdditionalCosts": {
+                  "agendaPoints": 0
+                },
+                "costKind": "fixed"
+              },
+              "effectiveRezResourceExchangeQuote": {
+                "context": "installed",
+                "cardId": "corp_onr_classic_006_bolter-swarm_2",
+                "targetServerId": "hq",
+                "projectedServerId": "hq",
+                "expiresAtStateVersion": 42,
+                "complete": false,
+                "reason": "not_current_approached_ice"
+              }
+            }
+          ],
+          "root": [
+            {
+              "instanceId": "corp_onr_classic_024_sterdroid_1",
+              "known": true,
+              "title": "Sterdroid",
+              "definitionId": "onr_classic_024_sterdroid",
+              "type": "upgrade",
+              "subtypes": [],
+              "rulesText": "[3], [T]: Choose a piece of ice. That ice's strength is doubled until end of turn. If this would raise the ice's strength above 10, its strength becomes 10.",
+              "rezCost": 0,
+              "rezzed": false,
+              "advancementCounters": 0,
+              "trashCost": 0,
+              "owner": "corp",
+              "controller": "corp"
+            }
+          ]
+        },
+        {
+          "id": "rd",
+          "label": "R&D",
+          "ice": [
+            {
+              "instanceId": "corp_onr_classic_006_bolter-swarm_1",
+              "known": true,
+              "title": "Bolter Swarm",
+              "definitionId": "onr_classic_006_bolter-swarm",
+              "type": "ice",
+              "subtypes": [
+                "ap",
+                "hellbolt",
+                "sentry",
+                "sleepy"
+              ],
+              "rulesText": "*Do 4 Net damage. *Runner cannot break any subroutines on the next piece of ice encountered during this run. If Runner has used a noisy icebreaker during this run, the cost to rez Bolter Swarm is reduced by [5].",
+              "rezCost": 8,
+              "rezzed": false,
+              "advancementCounters": 0,
+              "strength": 4,
+              "owner": "corp",
+              "controller": "corp",
+              "effectivePostRezRunQuote": {
+                "context": "installed_post_rez",
+                "cardId": "corp_onr_classic_006_bolter-swarm_1",
+                "iceDefinitionId": "onr_classic_006_bolter-swarm",
+                "targetServerId": "rd",
+                "projectedServerId": "rd",
+                "expiresAtStateVersion": 42,
+                "complete": false,
+                "reason": "active_run_context"
+              },
+              "effectiveRezCostQuote": {
+                "context": "installed",
+                "cardId": "corp_onr_classic_006_bolter-swarm_1",
+                "targetServerId": "rd",
+                "projectedServerId": "rd",
+                "expiresAtStateVersion": 42,
+                "complete": true,
+                "baseCredits": 8,
+                "finalCredits": 8,
+                "mandatoryAdditionalCosts": {
+                  "agendaPoints": 0
+                },
+                "costKind": "fixed"
+              },
+              "effectiveRezResourceExchangeQuote": {
+                "context": "installed",
+                "cardId": "corp_onr_classic_006_bolter-swarm_1",
+                "targetServerId": "rd",
+                "projectedServerId": "rd",
+                "expiresAtStateVersion": 42,
+                "complete": false,
+                "reason": "not_current_approached_ice"
+              }
+            }
+          ],
+          "root": []
+        },
+        {
+          "id": "archives",
+          "label": "Archives",
+          "ice": [],
+          "root": [
+            {
+              "instanceId": "corp_onr_classic_025_strategic-planning-group_1",
+              "known": true,
+              "title": "Strategic Planning Group",
+              "definitionId": "onr_classic_025_strategic-planning-group",
+              "type": "asset",
+              "subtypes": [
+                "node",
+                "unique"
+              ],
+              "rulesText": "Whenever you draw one or more cards, draw an extra card. Then place one of the drawn cards on the bottom of R&D. Only one unique card of a particular name can be in play at a time. If for some reason more than one is in play, trash all but one.",
+              "rezCost": 2,
+              "rezzed": false,
+              "advancementCounters": 0,
+              "trashCost": 4,
+              "owner": "corp",
+              "controller": "corp"
+            }
+          ]
+        },
+        {
+          "id": "remote_1",
+          "label": "Remote 1",
+          "ice": [
+            {
+              "instanceId": "corp_onr_classic_008_deadeye_1",
+              "known": true,
+              "title": "Deadeye",
+              "definitionId": "onr_classic_008_deadeye",
+              "type": "ice",
+              "subtypes": [
+                "killer",
+                "sentry",
+                "sleepy"
+              ],
+              "rulesText": "*Trash a program. *End the run. If Runner has used a noisy icebreaker during this run, the cost to rez Deadeye is reduced by [5].",
+              "rezCost": 5,
+              "rezzed": true,
+              "advancementCounters": 0,
+              "strength": 0,
+              "owner": "corp",
+              "controller": "corp",
+              "effectiveRunQuote": {
+                "iceInstanceId": "corp_onr_classic_008_deadeye_1",
+                "iceDefinitionId": "onr_classic_008_deadeye",
+                "effectiveStrength": 0,
+                "subroutines": [
+                  {
+                    "id": "subroutine_trash_program",
+                    "type": "trash_installed_program",
+                    "sourceDefinitionId": "onr_classic_008_deadeye",
+                    "sourceTitle": "Deadeye",
+                    "unbrokenRunEffect": {
+                      "causesDamageOrProgramTrash": true
+                    }
+                  },
+                  {
+                    "id": "subroutine_end_run",
+                    "type": "end_the_run",
+                    "sourceDefinitionId": "onr_classic_008_deadeye",
+                    "sourceTitle": "Deadeye"
+                  }
+                ]
+              },
+              "effectiveRezResourceExchangeQuote": {
+                "context": "installed",
+                "cardId": "corp_onr_classic_008_deadeye_1",
+                "targetServerId": "remote_1",
+                "projectedServerId": "remote_1",
+                "expiresAtStateVersion": 42,
+                "complete": false,
+                "reason": "not_current_approached_ice"
+              }
+            }
+          ],
+          "root": [
+            {
+              "instanceId": "corp_onr_classic_003_unlisted-research-lab_3",
+              "known": true,
+              "title": "Unlisted Research Lab",
+              "definitionId": "onr_classic_003_unlisted-research-lab",
+              "type": "agenda",
+              "subtypes": [
+                "asset",
+                "gray_ops"
+              ],
+              "rulesText": "Draw an additional card at the start of each of your turns.",
+              "rezzed": false,
+              "advancementCounters": 1,
+              "advancementRequirement": 3,
+              "agendaPoints": 2,
+              "counterDisplays": [
+                {
+                  "id": "advancement",
+                  "amount": 1,
+                  "displayKind": "advancement",
+                  "label": "Entwicklung",
+                  "ariaLabel": "1 öffentliche Advancement-Counter",
+                  "usageHint": "score_modifier"
+                }
+              ],
+              "owner": "corp",
+              "controller": "corp",
+              "scoreContinuationQuote": {
+                "context": "installed_agenda",
+                "agendaCardId": "corp_onr_classic_003_unlisted-research-lab_3",
+                "serverId": "remote_1",
+                "expiresAtStateVersion": 42,
+                "complete": true,
+                "remainingAdvancementCounters": 2,
+                "advancementCreditCostPerCounter": 1,
+                "advancementClickCostPerCounter": 1,
+                "scoreActionCreditCost": 0,
+                "scoreActionClickCost": 0,
+                "nextCorpTurnGuaranteedFlexibleClicks": 3,
+                "freeCreditClicksAfterAdvancement": 1,
+                "certifiedCreditGainFromFreeClicks": 1,
+                "creditsRequiredBeforeNextCorpTurn": 1,
+                "terminalScore": false
+              }
+            }
+          ]
+        }
+      ],
+      "specialZones": {
+        "setAside": [],
+        "removedFromGame": [],
+        "setAsideCount": 0,
+        "removedFromGameCount": 0
+      },
+      "corpCentralAccessQuotes": [
+        {
+          "serverId": "hq",
+          "stateVersion": 42,
+          "complete": true,
+          "effectiveAccessCount": 1,
+          "isMultiaccess": false,
+          "sourceDefinitionIds": [],
+          "serverBoundEffects": []
+        },
+        {
+          "serverId": "rd",
+          "stateVersion": 42,
+          "complete": true,
+          "effectiveAccessCount": 1,
+          "isMultiaccess": false,
+          "sourceDefinitionIds": [],
+          "serverBoundEffects": []
+        }
+      ],
+      "run": {
+        "runId": "run_39",
+        "attackedServerId": "remote_1",
+        "phase": "encounter_ice",
+        "position": {
+          "kind": "ice",
+          "serverId": "remote_1",
+          "iceIndex": 0
+        },
+        "encounteredIce": {
+          "instanceId": "corp_onr_classic_008_deadeye_1",
+          "known": true,
+          "title": "Deadeye",
+          "definitionId": "onr_classic_008_deadeye",
+          "type": "ice",
+          "subtypes": [
+            "killer",
+            "sentry",
+            "sleepy"
+          ],
+          "rulesText": "*Trash a program. *End the run. If Runner has used a noisy icebreaker during this run, the cost to rez Deadeye is reduced by [5].",
+          "rezCost": 5,
+          "rezzed": true,
+          "advancementCounters": 0,
+          "strength": 0,
+          "owner": "corp",
+          "controller": "corp",
+          "effectiveRunQuote": {
+            "iceInstanceId": "corp_onr_classic_008_deadeye_1",
+            "iceDefinitionId": "onr_classic_008_deadeye",
+            "effectiveStrength": 0,
+            "subroutines": [
+              {
+                "id": "subroutine_trash_program",
+                "type": "trash_installed_program",
+                "sourceDefinitionId": "onr_classic_008_deadeye",
+                "sourceTitle": "Deadeye",
+                "unbrokenRunEffect": {
+                  "causesDamageOrProgramTrash": true
+                }
+              },
+              {
+                "id": "subroutine_end_run",
+                "type": "end_the_run",
+                "sourceDefinitionId": "onr_classic_008_deadeye",
+                "sourceTitle": "Deadeye"
+              }
+            ]
+          }
+        },
+        "badPublicityCredits": 0,
+        "successful": false
+      },
+      "deckMetadata": {
+        "own": {
+          "side": "corp",
+          "identityCardId": "corp_identity_001",
+          "deckName": "Classic Corp - Remote Lab Deflection",
+          "cardPoolSnapshotId": "card-snapshot-0.8",
+          "cardPoolVersion": "private-local-onr-v1-plus-classic-playtest",
+          "formatProfileId": "netgrid_private_local_classic_playtest_v1",
+          "formatProfileVersion": "1.0.0",
+          "deckHash": "fnv1a:a0f49f33"
+        },
+        "opponent": {
+          "side": "runner",
+          "identityCardId": "runner_identity_001",
+          "deckName": "Purge Window",
+          "cardPoolSnapshotId": "card-snapshot-0.8",
+          "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
+          "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
+          "formatProfileVersion": "1.0.0",
+          "deckHash": "fnv1a:5249fb86"
+        }
+      },
+      "pendingChoice": {
+        "choiceId": "trash_installed_program_42",
+        "side": "corp",
+        "source": "card_implementation.trash_installed_program:run_39:corp_onr_classic_008_deadeye_1:0:onr_classic_008_deadeye:subroutine_trash_program:trash_installed_program:encounter",
+        "prompt": "Deadeye: installiertes Programm zum Trashing wählen.",
+        "kind": "select_cards",
+        "options": [
+          {
+            "id": "card_runner_onr_proteus_078_armageddon_1",
+            "label": "Armageddon",
+            "value": "runner_onr_proteus_078_armageddon_1"
+          },
+          {
+            "id": "card_runner_onr_v1_014_codecracker_1",
+            "label": "Codecracker",
+            "value": "runner_onr_v1_014_codecracker_1"
+          },
+          {
+            "id": "card_corp_onr_classic_004_theorem-proof_2",
+            "label": "Theorem Proof",
+            "value": "corp_onr_classic_004_theorem-proof_2"
+          }
+        ],
+        "minSelections": 1,
+        "maxSelections": 1,
+        "stateVersion": 42,
+        "visibility": "public"
+      },
+      "publicEvents": [
+        {
+          "eventId": "evt_0",
+          "type": "game_created",
+          "stateVersionBefore": 0,
+          "stateVersionAfter": 0,
+          "stateHashAfter": "fnv1a:f1d8a021",
+          "publicPayload": {
+            "setupStatus": "mulligan_runner",
+            "agendaPointsToWin": 7,
+            "runnerDeckId": "standard_standard_runner_purge_window_1.0.0",
+            "corpDeckId": "standard_standard_classic_corp_remote_lab_deflection_2026_07_01_1.1.0",
+            "baseline": {
+              "rulesVersion": "26.03",
+              "engineSchemaVersion": "0.99.0",
+              "playerViewSchemaVersion": "0.99.0",
+              "aiControllerSchemaVersion": "0.99.0",
+              "simulationSchemaVersion": "0.99.0",
+              "multiplayerSchemaVersion": "0.99.0",
+              "cardTextSnapshotId": "mvp-0.99-demo",
+              "cardTextSource": "manual",
+              "cardImplementationVersion": "0.99.0",
+              "deviationRegistryVersion": "0.99.0"
+            },
+            "runnerDeck": {
+              "deckName": "Purge Window",
+              "deckHash": "fnv1a:5249fb86",
+              "side": "runner",
+              "identityCardId": "runner_identity_001",
+              "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
+              "cardPoolSnapshotId": "card-snapshot-0.8"
+            },
+            "corpDeck": {
+              "deckName": "Classic Corp - Remote Lab Deflection",
+              "deckHash": "fnv1a:a0f49f33",
+              "side": "corp",
+              "identityCardId": "corp_identity_001",
+              "formatProfileId": "netgrid_private_local_classic_playtest_v1",
+              "cardPoolSnapshotId": "card-snapshot-0.8"
+            }
+          }
+        },
+        {
+          "eventId": "evt_1",
+          "type": "resolve_choice",
+          "stateVersionBefore": 0,
+          "stateVersionAfter": 1,
+          "turnSerial": 0,
+          "stateHashAfter": "fnv1a:5f473487",
+          "visibilityClass": "hidden_info_barrier",
+          "publicPayload": {
+            "actor": "runner",
+            "actionType": "resolve_choice",
+            "label": "Setup-Entscheidung wurde beantwortet.",
+            "choiceVisibility": "hidden_info_barrier",
+            "redactedKind": "hidden_zone",
+            "hiddenZoneAction": "setup_mulligan",
+            "abilityFamily": "hidden-zone",
+            "abilityId": "setup_mulligan",
+            "effectKind": "hidden_zone",
+            "hiddenZoneBarrier": true,
+            "setupStatus": "mulligan_corp",
+            "targets": {
+              "choiceVisibility": "hidden_info_barrier",
+              "redactedKind": "hidden_zone"
+            },
+            "visibility": {
+              "class": "hidden_info_barrier",
+              "hiddenZoneBarrier": true,
+              "redactedKind": "hidden_zone"
+            }
+          }
+        },
+        {
+          "eventId": "evt_2",
+          "type": "resolve_choice",
+          "stateVersionBefore": 1,
+          "stateVersionAfter": 2,
+          "turnSerial": 0,
+          "stateHashAfter": "fnv1a:a1d14c08",
+          "visibilityClass": "hidden_info_barrier",
+          "publicPayload": {
+            "actor": "corp",
+            "actionType": "resolve_choice",
+            "label": "Setup-Entscheidung wurde beantwortet.",
+            "choiceVisibility": "hidden_info_barrier",
+            "redactedKind": "hidden_zone",
+            "hiddenZoneAction": "setup_mulligan",
+            "abilityFamily": "hidden-zone",
+            "abilityId": "setup_mulligan",
+            "effectKind": "hidden_zone",
+            "hiddenZoneBarrier": true,
+            "setupStatus": "complete",
+            "targets": {
+              "choiceVisibility": "hidden_info_barrier",
+              "redactedKind": "hidden_zone"
+            },
+            "visibility": {
+              "class": "hidden_info_barrier",
+              "hiddenZoneBarrier": true,
+              "redactedKind": "hidden_zone"
+            }
+          }
+        },
+        {
+          "eventId": "evt_3",
+          "type": "mandatory_draw",
+          "stateVersionBefore": 2,
+          "stateVersionAfter": 3,
+          "turnSerial": 0,
+          "stateHashAfter": "fnv1a:2e72edc0",
+          "visibilityClass": "private_to_side",
+          "publicPayload": {
+            "actor": "corp",
+            "actionType": "mandatory_draw",
+            "label": "Korp Pflichtkarte ziehen",
+            "corpMandatoryDraw": true,
+            "corpMandatoryDrawCompleted": true,
+            "corpMandatoryCardCount": 1,
+            "corpMandatoryAdditionalCardCount": 0,
+            "corpMandatoryTotalBaseDrawCount": 1,
+            "corpMandatoryAgendaCardCount": 0,
+            "corpMandatoryOptionalAgendaCardCount": 0,
+            "corpMandatorySkivvissCardCount": 0,
+            "corpMandatoryAdditionalSourceCount": 0,
+            "corpMandatoryAdditionalSourceDefinitionIds": "",
+            "visibility": {
+              "class": "private_to_side"
+            }
+          }
+        },
+        {
+          "eventId": "evt_4",
+          "type": "install_card",
+          "stateVersionBefore": 3,
+          "stateVersionAfter": 4,
+          "turnSerial": 0,
+          "stateHashAfter": "fnv1a:8a0493bb",
+          "visibilityClass": "private_to_side",
+          "publicPayload": {
+            "actor": "corp",
+            "actionType": "install_card",
+            "label": "Korp installiert eine Karte.",
+            "serverId": "rd",
+            "serverLabel": "R&D",
+            "installPlacement": "ice",
+            "redactedKind": "installed_card",
+            "installedPositionKey": "installed-position-v1:5182eed7",
+            "effectKind": "install_card",
+            "targets": {
+              "serverLabel": "R&D",
+              "redactedKind": "installed_card"
+            },
+            "visibility": {
+              "class": "private_to_side",
+              "redactedKind": "installed_card"
+            }
+          }
+        },
+        {
+          "eventId": "evt_5",
+          "type": "install_card",
+          "stateVersionBefore": 4,
+          "stateVersionAfter": 5,
+          "turnSerial": 0,
+          "stateHashAfter": "fnv1a:3c28432a",
+          "visibilityClass": "private_to_side",
+          "publicPayload": {
+            "actor": "corp",
+            "actionType": "install_card",
+            "label": "Korp installiert eine Karte.",
+            "serverId": "hq",
+            "serverLabel": "HQ",
+            "installPlacement": "ice",
+            "redactedKind": "installed_card",
+            "installedPositionKey": "installed-position-v1:5282f06a",
+            "effectKind": "install_card",
+            "targets": {
+              "serverLabel": "HQ",
+              "redactedKind": "installed_card"
+            },
+            "visibility": {
+              "class": "private_to_side",
+              "redactedKind": "installed_card"
+            }
+          }
+        },
+        {
+          "eventId": "evt_6",
+          "type": "draw_card",
+          "stateVersionBefore": 5,
+          "stateVersionAfter": 6,
+          "turnSerial": 0,
+          "stateHashAfter": "fnv1a:721b63f9",
+          "visibilityClass": "private_to_side",
+          "publicPayload": {
+            "actor": "corp",
+            "actionType": "draw_card",
+            "label": "Karte ziehen",
+            "amount": 1,
+            "amounts": {
+              "amount": 1
+            },
+            "visibility": {
+              "class": "private_to_side"
+            }
+          }
+        },
+        {
+          "eventId": "evt_7",
+          "type": "end_turn",
+          "stateVersionBefore": 6,
+          "stateVersionAfter": 7,
+          "turnSerial": 1,
+          "stateHashAfter": "fnv1a:37059e5b",
+          "visibilityClass": "private_to_side",
+          "publicPayload": {
+            "actor": "corp",
+            "actionType": "end_turn",
+            "label": "Zug beenden",
+            "visibility": {
+              "class": "private_to_side"
+            }
+          }
+        },
+        {
+          "eventId": "evt_8",
+          "type": "install_card",
+          "stateVersionBefore": 7,
+          "stateVersionAfter": 8,
+          "turnSerial": 1,
+          "stateHashAfter": "fnv1a:d5c798c0",
+          "visibilityClass": "public",
+          "publicPayload": {
+            "actor": "runner",
+            "actionType": "install_card",
+            "label": "Armageddon installieren",
+            "title": "Armageddon",
+            "cardDefinitionId": "onr_proteus_078_armageddon",
+            "effectKind": "install_card",
+            "runnerCreditsAfter": 4,
+            "amounts": {
+              "runnerCreditsAfter": 4
+            },
+            "visibility": {
+              "class": "public"
+            }
+          }
+        },
+        {
+          "eventId": "evt_9",
+          "type": "start_run",
+          "stateVersionBefore": 8,
+          "stateVersionAfter": 9,
+          "turnSerial": 1,
+          "stateHashAfter": "fnv1a:78773c72",
+          "visibilityClass": "hidden_info_barrier",
+          "publicPayload": {
+            "actor": "runner",
+            "actionType": "start_run",
+            "label": "Run auf R&D",
+            "serverId": "rd",
+            "serverLabel": "R&D",
+            "abilityFamily": "run-access",
+            "effectKind": "run",
+            "damageResolved": true,
+            "damageAmount": 0,
+            "amounts": {
+              "damageAmount": 0
+            },
+            "targets": {
+              "serverLabel": "R&D"
+            },
+            "visibility": {
+              "class": "hidden_info_barrier"
+            }
+          }
+        },
+        {
+          "eventId": "evt_10",
+          "type": "decline_rez",
+          "stateVersionBefore": 9,
+          "stateVersionAfter": 10,
+          "turnSerial": 1,
+          "stateHashAfter": "fnv1a:10782d9b",
+          "visibilityClass": "public",
+          "publicPayload": {
+            "actor": "corp",
+            "actionType": "decline_rez",
+            "label": "ICE nicht rezzen",
+            "visibility": {
+              "class": "public"
+            }
+          }
+        },
+        {
+          "eventId": "evt_11",
+          "type": "continue_run",
+          "stateVersionBefore": 10,
+          "stateVersionAfter": 11,
+          "turnSerial": 1,
+          "stateHashAfter": "fnv1a:7ebefce4",
+          "visibilityClass": "private_to_side",
+          "publicPayload": {
+            "actor": "runner",
+            "actionType": "continue_run",
+            "label": "Run fortsetzen",
+            "serverId": "rd",
+            "serverLabel": "R&D",
+            "abilityFamily": "run-access",
+            "targets": {
+              "serverLabel": "R&D"
+            },
+            "visibility": {
+              "class": "private_to_side"
+            }
+          }
+        },
+        {
+          "eventId": "evt_12",
+          "type": "access_card",
+          "stateVersionBefore": 11,
+          "stateVersionAfter": 12,
+          "turnSerial": 1,
+          "stateHashAfter": "fnv1a:e2185fe0",
+          "visibilityClass": "hidden_info_barrier",
+          "publicPayload": {
+            "actor": "runner",
+            "actionType": "access_card",
+            "label": "Karte accessen",
+            "serverLabel": "R&D",
+            "redactedKind": "accessed_card",
+            "abilityFamily": "run-access",
+            "targets": {
+              "serverLabel": "R&D"
+            },
+            "visibility": {
+              "class": "hidden_info_barrier"
+            }
+          }
+        },
+        {
+          "eventId": "evt_13",
+          "type": "decline_trash",
+          "stateVersionBefore": 12,
+          "stateVersionAfter": 13,
+          "turnSerial": 1,
+          "stateHashAfter": "fnv1a:7cd9ac93",
+          "visibilityClass": "private_to_side",
+          "publicPayload": {
+            "actor": "runner",
+            "actionType": "decline_trash",
+            "label": "Nicht trashen",
+            "serverLabel": "R&D",
+            "targets": {
+              "serverLabel": "R&D"
+            },
+            "visibility": {
+              "class": "private_to_side"
+            }
+          }
+        },
+        {
+          "eventId": "evt_14",
+          "type": "install_card",
+          "stateVersionBefore": 13,
+          "stateVersionAfter": 14,
+          "turnSerial": 1,
+          "stateHashAfter": "fnv1a:8d352541",
+          "visibilityClass": "public",
+          "publicPayload": {
+            "actor": "runner",
+            "actionType": "install_card",
+            "label": "Codecracker installieren",
+            "title": "Codecracker",
+            "cardDefinitionId": "onr_v1_014_codecracker",
+            "effectKind": "install_card",
+            "runnerCreditsAfter": 2,
+            "amounts": {
+              "runnerCreditsAfter": 2
+            },
+            "visibility": {
+              "class": "public"
+            }
+          }
+        },
+        {
+          "eventId": "evt_15",
+          "type": "draw_card",
+          "stateVersionBefore": 14,
+          "stateVersionAfter": 15,
+          "turnSerial": 1,
+          "stateHashAfter": "fnv1a:9f8aa44a",
+          "visibilityClass": "private_to_side",
+          "publicPayload": {
+            "actor": "runner",
+            "actionType": "draw_card",
+            "label": "Karte ziehen",
+            "amount": 1,
+            "amounts": {
+              "amount": 1
+            },
+            "visibility": {
+              "class": "private_to_side"
+            }
+          }
+        },
+        {
+          "eventId": "evt_16",
+          "type": "end_turn",
+          "stateVersionBefore": 15,
+          "stateVersionAfter": 16,
+          "turnSerial": 2,
+          "stateHashAfter": "fnv1a:ab74037f",
+          "visibilityClass": "private_to_side",
+          "publicPayload": {
+            "actor": "runner",
+            "actionType": "end_turn",
+            "label": "Zug beenden",
+            "visibility": {
+              "class": "private_to_side"
+            }
+          }
+        },
+        {
+          "eventId": "evt_17",
+          "type": "mandatory_draw",
+          "stateVersionBefore": 16,
+          "stateVersionAfter": 17,
+          "turnSerial": 2,
+          "stateHashAfter": "fnv1a:e6edd648",
+          "visibilityClass": "private_to_side",
+          "publicPayload": {
+            "actor": "corp",
+            "actionType": "mandatory_draw",
+            "label": "Korp Pflichtkarte ziehen",
+            "corpMandatoryDraw": true,
+            "corpMandatoryDrawCompleted": true,
+            "corpMandatoryCardCount": 1,
+            "corpMandatoryAdditionalCardCount": 0,
+            "corpMandatoryTotalBaseDrawCount": 1,
+            "corpMandatoryAgendaCardCount": 0,
+            "corpMandatoryOptionalAgendaCardCount": 0,
+            "corpMandatorySkivvissCardCount": 0,
+            "corpMandatoryAdditionalSourceCount": 0,
+            "corpMandatoryAdditionalSourceDefinitionIds": "",
+            "visibility": {
+              "class": "private_to_side"
+            }
+          }
+        },
+        {
+          "eventId": "evt_18",
+          "type": "install_card",
+          "stateVersionBefore": 17,
+          "stateVersionAfter": 18,
+          "turnSerial": 2,
+          "stateHashAfter": "fnv1a:5a9bc4da",
+          "visibilityClass": "private_to_side",
+          "publicPayload": {
+            "actor": "corp",
+            "actionType": "install_card",
+            "label": "Korp installiert eine Karte.",
+            "serverId": "hq",
+            "serverLabel": "HQ",
+            "installPlacement": "root",
+            "redactedKind": "installed_card",
+            "installedPositionKey": "installed-position-v1:ca970d58",
+            "effectKind": "install_card",
+            "targets": {
+              "serverLabel": "HQ",
+              "redactedKind": "installed_card"
+            },
+            "visibility": {
+              "class": "private_to_side",
+              "redactedKind": "installed_card"
+            }
+          }
+        },
+        {
+          "eventId": "evt_19",
+          "type": "draw_card",
+          "stateVersionBefore": 18,
+          "stateVersionAfter": 19,
+          "turnSerial": 2,
+          "stateHashAfter": "fnv1a:c3522681",
+          "visibilityClass": "private_to_side",
+          "publicPayload": {
+            "actor": "corp",
+            "actionType": "draw_card",
+            "label": "Karte ziehen",
+            "amount": 1,
+            "amounts": {
+              "amount": 1
+            },
+            "visibility": {
+              "class": "private_to_side"
+            }
+          }
+        },
+        {
+          "eventId": "evt_20",
+          "type": "gain_credit",
+          "stateVersionBefore": 19,
+          "stateVersionAfter": 20,
+          "turnSerial": 2,
+          "stateHashAfter": "fnv1a:f57b4b37",
+          "visibilityClass": "private_to_side",
+          "publicPayload": {
+            "actor": "corp",
+            "actionType": "gain_credit",
+            "label": "1 Credit nehmen",
+            "abilityFamily": "payment-costs",
+            "effectKind": "gain_credits",
+            "amount": 1,
+            "gainCreditsAmount": 1,
+            "amounts": {
+              "amount": 1,
+              "gainCreditsAmount": 1
+            },
+            "visibility": {
+              "class": "private_to_side"
+            }
+          }
+        },
+        {
+          "eventId": "evt_21",
+          "type": "end_turn",
+          "stateVersionBefore": 20,
+          "stateVersionAfter": 21,
+          "turnSerial": 2,
+          "stateHashAfter": "fnv1a:5b86d917",
+          "visibilityClass": "private_to_side",
+          "publicPayload": {
+            "actor": "corp",
+            "actionType": "end_turn",
+            "label": "Zug beenden",
+            "visibility": {
+              "class": "private_to_side"
+            }
+          }
+        },
+        {
+          "eventId": "evt_22",
+          "type": "resolve_choice",
+          "stateVersionBefore": 21,
+          "stateVersionAfter": 22,
+          "turnSerial": 3,
+          "stateHashAfter": "fnv1a:a7d989b0",
+          "visibilityClass": "hidden_info_barrier",
+          "publicPayload": {
+            "actor": "corp",
+            "actionType": "resolve_choice",
+            "label": "Discard wurde abgeschlossen.",
+            "choiceVisibility": "hidden_info_barrier",
+            "redactedKind": "hidden_zone",
+            "hiddenZoneAction": "discard_phase",
+            "discardResolved": true,
+            "abilityFamily": "hidden-zone",
+            "abilityId": "discard_phase",
+            "effectKind": "hidden_zone",
+            "hiddenZoneBarrier": true,
+            "targets": {
+              "choiceVisibility": "hidden_info_barrier",
+              "redactedKind": "hidden_zone"
+            },
+            "visibility": {
+              "class": "hidden_info_barrier",
+              "hiddenZoneBarrier": true,
+              "redactedKind": "hidden_zone"
+            }
+          }
+        },
+        {
+          "eventId": "evt_23",
+          "type": "play_event",
+          "stateVersionBefore": 22,
+          "stateVersionAfter": 23,
+          "turnSerial": 3,
+          "stateHashAfter": "fnv1a:a78ba877",
+          "visibilityClass": "public",
+          "publicPayload": {
+            "actor": "runner",
+            "actionType": "play_event",
+            "label": "Bodyweight™ Synthetic Blood spielen",
+            "title": "Bodyweight™ Synthetic Blood",
+            "cardDefinitionId": "onr_v1_079_bodyweight-synthetic-blood",
+            "runnerCreditsAfter": 0,
+            "amounts": {
+              "runnerCreditsAfter": 0
+            },
+            "visibility": {
+              "class": "public"
+            },
+            "resolvedEffects": [
+              {
+                "effectId": "onr_v1_079_bodyweight-synthetic-blood.effect.0.draw_cards",
+                "kind": "draw_cards",
+                "visibility": "public",
+                "side": "runner",
+                "amount": 5,
+                "reason": "card_resolver",
+                "sourceDefinitionId": "onr_v1_079_bodyweight-synthetic-blood",
+                "sourceTitle": "Bodyweight™ Synthetic Blood"
+              }
+            ]
+          }
+        },
+        {
+          "eventId": "evt_24",
+          "type": "install_card",
+          "stateVersionBefore": 23,
+          "stateVersionAfter": 24,
+          "turnSerial": 3,
+          "stateHashAfter": "fnv1a:62666fbf",
+          "visibilityClass": "public",
+          "publicPayload": {
+            "actor": "runner",
+            "actionType": "install_card",
+            "label": "Runner installiert eine verdeckte Resource.",
+            "redactedKind": "hidden_runner_resource",
+            "hiddenResourceSlotId": "hidden_runner_resource_3d344ba0",
+            "hiddenRunnerResourceInstall": true,
+            "effectKind": "install_card",
+            "runnerCreditsAfter": 0,
+            "amounts": {
+              "runnerCreditsAfter": 0
+            },
+            "targets": {
+              "redactedKind": "hidden_runner_resource"
+            },
+            "visibility": {
+              "class": "public",
+              "redactedKind": "hidden_runner_resource"
+            }
+          }
+        },
+        {
+          "eventId": "evt_25",
+          "type": "play_event",
+          "stateVersionBefore": 24,
+          "stateVersionAfter": 25,
+          "turnSerial": 3,
+          "stateHashAfter": "fnv1a:a6fcbac7",
+          "visibilityClass": "public",
+          "publicPayload": {
+            "actor": "runner",
+            "actionType": "play_event",
+            "label": "Livewire’s Contacts spielen",
+            "title": "Livewire’s Contacts",
+            "cardDefinitionId": "onr_v1_097_livewires-contacts",
+            "abilityFamily": "payment-costs",
+            "effectKind": "gain_credits",
+            "gainedCredits": 3,
+            "gainCreditsAmount": 3,
+            "runnerCreditsAfter": 3,
+            "amounts": {
+              "gainedCredits": 3,
+              "gainCreditsAmount": 3,
+              "runnerCreditsAfter": 3
+            },
+            "visibility": {
+              "class": "public"
+            },
+            "resolvedEffects": [
+              {
+                "effectId": "onr_v1_097_livewires-contacts.effect.0.gain_credits",
+                "kind": "gain_credits",
+                "visibility": "public",
+                "side": "runner",
+                "amount": 3,
+                "reason": "card_resolver",
+                "sourceDefinitionId": "onr_v1_097_livewires-contacts",
+                "sourceTitle": "Livewire’s Contacts"
+              }
+            ]
+          }
+        },
+        {
+          "eventId": "evt_26",
+          "type": "start_run",
+          "stateVersionBefore": 25,
+          "stateVersionAfter": 26,
+          "turnSerial": 3,
+          "stateHashAfter": "fnv1a:9c065212",
+          "visibilityClass": "hidden_info_barrier",
+          "publicPayload": {
+            "actor": "runner",
+            "actionType": "start_run",
+            "label": "Run auf R&D",
+            "serverId": "rd",
+            "serverLabel": "R&D",
+            "abilityFamily": "run-access",
+            "effectKind": "run",
+            "damageResolved": true,
+            "damageAmount": 0,
+            "amounts": {
+              "damageAmount": 0
+            },
+            "targets": {
+              "serverLabel": "R&D"
+            },
+            "visibility": {
+              "class": "hidden_info_barrier"
+            }
+          }
+        },
+        {
+          "eventId": "evt_27",
+          "type": "decline_rez",
+          "stateVersionBefore": 26,
+          "stateVersionAfter": 27,
+          "turnSerial": 3,
+          "stateHashAfter": "fnv1a:6119cbd8",
+          "visibilityClass": "public",
+          "publicPayload": {
+            "actor": "corp",
+            "actionType": "decline_rez",
+            "label": "ICE nicht rezzen",
+            "visibility": {
+              "class": "public"
+            }
+          }
+        },
+        {
+          "eventId": "evt_28",
+          "type": "continue_run",
+          "stateVersionBefore": 27,
+          "stateVersionAfter": 28,
+          "turnSerial": 3,
+          "stateHashAfter": "fnv1a:29fce234",
+          "visibilityClass": "private_to_side",
+          "publicPayload": {
+            "actor": "runner",
+            "actionType": "continue_run",
+            "label": "Run fortsetzen",
+            "serverId": "rd",
+            "serverLabel": "R&D",
+            "abilityFamily": "run-access",
+            "targets": {
+              "serverLabel": "R&D"
+            },
+            "visibility": {
+              "class": "private_to_side"
+            }
+          }
+        },
+        {
+          "eventId": "evt_29",
+          "type": "decline_rez",
+          "stateVersionBefore": 28,
+          "stateVersionAfter": 29,
+          "turnSerial": 3,
+          "stateHashAfter": "fnv1a:b643dd48",
+          "visibilityClass": "public",
+          "publicPayload": {
+            "actor": "corp",
+            "actionType": "decline_rez",
+            "label": "Nichts rezzen / Weiter",
+            "serverLabel": "R&D",
+            "targets": {
+              "serverLabel": "R&D"
+            },
+            "visibility": {
+              "class": "public"
+            }
+          }
+        },
+        {
+          "eventId": "evt_30",
+          "type": "access_card",
+          "stateVersionBefore": 29,
+          "stateVersionAfter": 30,
+          "turnSerial": 3,
+          "stateHashAfter": "fnv1a:358fa729",
+          "visibilityClass": "hidden_info_barrier",
+          "publicPayload": {
+            "actor": "runner",
+            "actionType": "access_card",
+            "label": "Karte accessen",
+            "serverLabel": "R&D",
+            "redactedKind": "accessed_card",
+            "abilityFamily": "run-access",
+            "targets": {
+              "serverLabel": "R&D"
+            },
+            "visibility": {
+              "class": "hidden_info_barrier"
+            }
+          }
+        },
+        {
+          "eventId": "evt_31",
+          "type": "steal_agenda",
+          "stateVersionBefore": 30,
+          "stateVersionAfter": 31,
+          "turnSerial": 3,
+          "stateHashAfter": "fnv1a:f513dd30",
+          "visibilityClass": "hidden_info_barrier",
+          "publicPayload": {
+            "actor": "runner",
+            "actionType": "steal_agenda",
+            "label": "Theorem Proof als Programm installieren",
+            "title": "Theorem Proof",
+            "cardDefinitionId": "onr_classic_004_theorem-proof",
+            "sourceDefinitionId": "onr_classic_004_theorem-proof",
+            "serverLabel": "R&D",
+            "abilityFamily": "agenda-scoring",
+            "targets": {
+              "sourceDefinitionId": "onr_classic_004_theorem-proof",
+              "serverLabel": "R&D"
+            },
+            "visibility": {
+              "class": "hidden_info_barrier"
+            }
+          }
+        },
+        {
+          "eventId": "evt_32",
+          "type": "end_turn",
+          "stateVersionBefore": 31,
+          "stateVersionAfter": 32,
+          "turnSerial": 3,
+          "stateHashAfter": "fnv1a:d0f0d561",
+          "visibilityClass": "private_to_side",
+          "publicPayload": {
+            "actor": "runner",
+            "actionType": "end_turn",
+            "label": "Zug beenden",
+            "visibility": {
+              "class": "private_to_side"
+            }
+          }
+        },
+        {
+          "eventId": "evt_33",
+          "type": "resolve_choice",
+          "stateVersionBefore": 32,
+          "stateVersionAfter": 33,
+          "turnSerial": 4,
+          "stateHashAfter": "fnv1a:51a0ef90",
+          "visibilityClass": "hidden_info_barrier",
+          "publicPayload": {
+            "actor": "runner",
+            "actionType": "resolve_choice",
+            "label": "Discard wurde abgeschlossen.",
+            "choiceVisibility": "hidden_info_barrier",
+            "redactedKind": "hidden_zone",
+            "hiddenZoneAction": "discard_phase",
+            "discardResolved": true,
+            "abilityFamily": "hidden-zone",
+            "abilityId": "discard_phase",
+            "effectKind": "hidden_zone",
+            "hiddenZoneBarrier": true,
+            "targets": {
+              "choiceVisibility": "hidden_info_barrier",
+              "redactedKind": "hidden_zone"
+            },
+            "visibility": {
+              "class": "hidden_info_barrier",
+              "hiddenZoneBarrier": true,
+              "redactedKind": "hidden_zone"
+            }
+          }
+        },
+        {
+          "eventId": "evt_34",
+          "type": "mandatory_draw",
+          "stateVersionBefore": 33,
+          "stateVersionAfter": 34,
+          "turnSerial": 4,
+          "stateHashAfter": "fnv1a:e6012269",
+          "visibilityClass": "private_to_side",
+          "publicPayload": {
+            "actor": "corp",
+            "actionType": "mandatory_draw",
+            "label": "Korp Pflichtkarte ziehen",
+            "corpMandatoryDraw": true,
+            "corpMandatoryDrawCompleted": true,
+            "corpMandatoryCardCount": 1,
+            "corpMandatoryAdditionalCardCount": 0,
+            "corpMandatoryTotalBaseDrawCount": 1,
+            "corpMandatoryAgendaCardCount": 0,
+            "corpMandatoryOptionalAgendaCardCount": 0,
+            "corpMandatorySkivvissCardCount": 0,
+            "corpMandatoryAdditionalSourceCount": 0,
+            "corpMandatoryAdditionalSourceDefinitionIds": "",
+            "visibility": {
+              "class": "private_to_side"
+            }
+          }
+        },
+        {
+          "eventId": "evt_35",
+          "type": "install_card",
+          "stateVersionBefore": 34,
+          "stateVersionAfter": 35,
+          "turnSerial": 4,
+          "stateHashAfter": "fnv1a:dbe661cf",
+          "visibilityClass": "private_to_side",
+          "publicPayload": {
+            "actor": "corp",
+            "actionType": "install_card",
+            "label": "Korp installiert eine Karte.",
+            "serverId": "remote_1",
+            "serverLabel": "Remote 1",
+            "installPlacement": "ice",
+            "redactedKind": "installed_card",
+            "installedPositionKey": "installed-position-v1:0169f63b",
+            "effectKind": "install_card",
+            "targets": {
+              "serverLabel": "Remote 1",
+              "redactedKind": "installed_card"
+            },
+            "visibility": {
+              "class": "private_to_side",
+              "redactedKind": "installed_card"
+            }
+          }
+        },
+        {
+          "eventId": "evt_36",
+          "type": "install_card",
+          "stateVersionBefore": 35,
+          "stateVersionAfter": 36,
+          "turnSerial": 4,
+          "stateHashAfter": "fnv1a:25246235",
+          "visibilityClass": "private_to_side",
+          "publicPayload": {
+            "actor": "corp",
+            "actionType": "install_card",
+            "label": "Korp installiert eine Karte.",
+            "serverId": "remote_1",
+            "serverLabel": "Remote 1",
+            "installPlacement": "root",
+            "redactedKind": "installed_card",
+            "installedPositionKey": "installed-position-v1:3ba9262d",
+            "effectKind": "install_card",
+            "targets": {
+              "serverLabel": "Remote 1",
+              "redactedKind": "installed_card"
+            },
+            "visibility": {
+              "class": "private_to_side",
+              "redactedKind": "installed_card"
+            }
+          }
+        },
+        {
+          "eventId": "evt_37",
+          "type": "advance_card",
+          "stateVersionBefore": 36,
+          "stateVersionAfter": 37,
+          "turnSerial": 4,
+          "stateHashAfter": "fnv1a:51d1d507",
+          "visibilityClass": "private_to_side",
+          "publicPayload": {
+            "actor": "corp",
+            "actionType": "advance_card",
+            "label": "Korp advanced eine Karte.",
+            "serverId": "remote_1",
+            "serverLabel": "Remote 1",
+            "installPlacement": "root",
+            "redactedKind": "installed_card",
+            "installedPositionKey": "installed-position-v1:3ba9262d",
+            "targets": {
+              "serverLabel": "Remote 1",
+              "redactedKind": "installed_card"
+            },
+            "visibility": {
+              "class": "private_to_side",
+              "redactedKind": "installed_card"
+            }
+          }
+        },
+        {
+          "eventId": "evt_38",
+          "type": "end_turn",
+          "stateVersionBefore": 37,
+          "stateVersionAfter": 38,
+          "turnSerial": 5,
+          "stateHashAfter": "fnv1a:d400a8f5",
+          "visibilityClass": "private_to_side",
+          "publicPayload": {
+            "actor": "corp",
+            "actionType": "end_turn",
+            "label": "Zug beenden",
+            "visibility": {
+              "class": "private_to_side"
+            }
+          }
+        },
+        {
+          "eventId": "evt_39",
+          "type": "start_run",
+          "stateVersionBefore": 38,
+          "stateVersionAfter": 39,
+          "turnSerial": 5,
+          "stateHashAfter": "fnv1a:e4e9e213",
+          "visibilityClass": "hidden_info_barrier",
+          "publicPayload": {
+            "actor": "runner",
+            "actionType": "start_run",
+            "label": "Run auf Remote 1",
+            "serverId": "remote_1",
+            "serverLabel": "Remote 1",
+            "abilityFamily": "run-access",
+            "effectKind": "run",
+            "damageResolved": true,
+            "damageAmount": 0,
+            "amounts": {
+              "damageAmount": 0
+            },
+            "targets": {
+              "serverLabel": "Remote 1"
+            },
+            "visibility": {
+              "class": "hidden_info_barrier"
+            }
+          }
+        },
+        {
+          "eventId": "evt_40",
+          "type": "rez_ice",
+          "stateVersionBefore": 39,
+          "stateVersionAfter": 40,
+          "turnSerial": 5,
+          "stateHashAfter": "fnv1a:402bbb93",
+          "visibilityClass": "hidden_info_barrier",
+          "publicPayload": {
+            "actor": "corp",
+            "actionType": "rez_ice",
+            "label": "Deadeye rezzen",
+            "title": "Deadeye",
+            "cardDefinitionId": "onr_classic_008_deadeye",
+            "serverId": "remote_1",
+            "serverLabel": "Remote 1",
+            "installPlacement": "ice",
+            "installedPositionKey": "installed-position-v1:0169f63b",
+            "abilityFamily": "run-access",
+            "targets": {
+              "serverLabel": "Remote 1"
+            },
+            "visibility": {
+              "class": "hidden_info_barrier"
+            }
+          }
+        },
+        {
+          "eventId": "evt_41",
+          "type": "decline_rez",
+          "stateVersionBefore": 40,
+          "stateVersionAfter": 41,
+          "turnSerial": 5,
+          "stateHashAfter": "fnv1a:b59357b3",
+          "visibilityClass": "public",
+          "publicPayload": {
+            "actor": "corp",
+            "actionType": "decline_rez",
+            "label": "Keine weitere Karte rezzen / Begegnung beginnen",
+            "visibility": {
+              "class": "public"
+            }
+          }
+        },
+        {
+          "eventId": "evt_42",
+          "type": "continue_run",
+          "stateVersionBefore": 41,
+          "stateVersionAfter": 42,
+          "turnSerial": 5,
+          "stateHashAfter": "fnv1a:d8973c86",
+          "visibilityClass": "private_to_side",
+          "publicPayload": {
+            "actor": "runner",
+            "actionType": "continue_run",
+            "label": "Subroutinen auslösen (Run endet)",
+            "sourceDefinitionId": "onr_classic_008_deadeye",
+            "serverId": "remote_1",
+            "serverLabel": "Remote 1",
+            "abilityFamily": "run-access",
+            "targets": {
+              "sourceDefinitionId": "onr_classic_008_deadeye",
+              "serverLabel": "Remote 1"
+            },
+            "visibility": {
+              "class": "private_to_side"
+            },
+            "resolvedEffects": [
+              {
+                "effectId": "subroutine_1",
+                "kind": "resolve_subroutine",
+                "visibility": "public",
+                "side": "runner",
+                "reason": "ice_subroutine",
+                "sourceDefinitionId": "onr_classic_008_deadeye",
+                "sourceTitle": "Deadeye"
+              }
+            ]
+          }
+        }
+      ],
+      "legalActions": [
+        {
+          "actionId": "corp.resolve_choice",
+          "side": "corp",
+          "type": "resolve_choice",
+          "label": "Deadeye: installiertes Programm zum Trashing wählen.",
+          "source": "game_rule",
+          "timingPoint": "run.encounter_ice",
+          "costs": [],
+          "targetRequirements": [],
+          "choiceRequirements": [
+            {
+              "choiceId": "trash_installed_program_42",
+              "minSelections": 1,
+              "maxSelections": 1,
+              "optionIds": [
+                "card_runner_onr_proteus_078_armageddon_1",
+                "card_runner_onr_v1_014_codecracker_1",
+                "card_corp_onr_classic_004_theorem-proof_2"
+              ]
+            }
+          ],
+          "visibility": "private_to_actor",
+          "expiresAtStateVersion": 42,
+          "payload": {}
+        }
+      ],
+      "winner": null,
+      "agendaPointsToWin": 7
+    },
+    "eventTail": [
+      {
+        "eventId": "evt_0",
+        "type": "game_created",
+        "stateVersionBefore": 0,
+        "stateVersionAfter": 0,
+        "stateHashAfter": "fnv1a:f1d8a021",
+        "publicPayload": {
+          "setupStatus": "mulligan_runner",
+          "agendaPointsToWin": 7,
+          "runnerDeckId": "standard_standard_runner_purge_window_1.0.0",
+          "corpDeckId": "standard_standard_classic_corp_remote_lab_deflection_2026_07_01_1.1.0",
+          "baseline": {
+            "rulesVersion": "26.03",
+            "engineSchemaVersion": "0.99.0",
+            "playerViewSchemaVersion": "0.99.0",
+            "aiControllerSchemaVersion": "0.99.0",
+            "simulationSchemaVersion": "0.99.0",
+            "multiplayerSchemaVersion": "0.99.0",
+            "cardTextSnapshotId": "mvp-0.99-demo",
+            "cardTextSource": "manual",
+            "cardImplementationVersion": "0.99.0",
+            "deviationRegistryVersion": "0.99.0"
+          },
+          "runnerDeck": {
+            "deckName": "Purge Window",
+            "deckHash": "fnv1a:5249fb86",
+            "side": "runner",
+            "identityCardId": "runner_identity_001",
+            "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
+            "cardPoolSnapshotId": "card-snapshot-0.8"
+          },
+          "corpDeck": {
+            "deckName": "Classic Corp - Remote Lab Deflection",
+            "deckHash": "fnv1a:a0f49f33",
+            "side": "corp",
+            "identityCardId": "corp_identity_001",
+            "formatProfileId": "netgrid_private_local_classic_playtest_v1",
+            "cardPoolSnapshotId": "card-snapshot-0.8"
+          }
+        }
+      },
+      {
+        "eventId": "evt_1",
+        "type": "resolve_choice",
+        "stateVersionBefore": 0,
+        "stateVersionAfter": 1,
+        "turnSerial": 0,
+        "stateHashAfter": "fnv1a:5f473487",
+        "visibilityClass": "hidden_info_barrier",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "resolve_choice",
+          "label": "Setup-Entscheidung wurde beantwortet.",
+          "choiceVisibility": "hidden_info_barrier",
+          "redactedKind": "hidden_zone",
+          "hiddenZoneAction": "setup_mulligan",
+          "abilityFamily": "hidden-zone",
+          "abilityId": "setup_mulligan",
+          "effectKind": "hidden_zone",
+          "hiddenZoneBarrier": true,
+          "setupStatus": "mulligan_corp",
+          "targets": {
+            "choiceVisibility": "hidden_info_barrier",
+            "redactedKind": "hidden_zone"
+          },
+          "visibility": {
+            "class": "hidden_info_barrier",
+            "hiddenZoneBarrier": true,
+            "redactedKind": "hidden_zone"
+          }
+        }
+      },
+      {
+        "eventId": "evt_2",
+        "type": "resolve_choice",
+        "stateVersionBefore": 1,
+        "stateVersionAfter": 2,
+        "turnSerial": 0,
+        "stateHashAfter": "fnv1a:a1d14c08",
+        "visibilityClass": "hidden_info_barrier",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "resolve_choice",
+          "label": "Setup-Entscheidung wurde beantwortet.",
+          "choiceVisibility": "hidden_info_barrier",
+          "redactedKind": "hidden_zone",
+          "hiddenZoneAction": "setup_mulligan",
+          "abilityFamily": "hidden-zone",
+          "abilityId": "setup_mulligan",
+          "effectKind": "hidden_zone",
+          "hiddenZoneBarrier": true,
+          "setupStatus": "complete",
+          "targets": {
+            "choiceVisibility": "hidden_info_barrier",
+            "redactedKind": "hidden_zone"
+          },
+          "visibility": {
+            "class": "hidden_info_barrier",
+            "hiddenZoneBarrier": true,
+            "redactedKind": "hidden_zone"
+          }
+        }
+      },
+      {
+        "eventId": "evt_3",
+        "type": "mandatory_draw",
+        "stateVersionBefore": 2,
+        "stateVersionAfter": 3,
+        "turnSerial": 0,
+        "stateHashAfter": "fnv1a:2e72edc0",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "mandatory_draw",
+          "label": "Korp Pflichtkarte ziehen",
+          "corpMandatoryDraw": true,
+          "corpMandatoryDrawCompleted": true,
+          "corpMandatoryCardCount": 1,
+          "corpMandatoryAdditionalCardCount": 0,
+          "corpMandatoryTotalBaseDrawCount": 1,
+          "corpMandatoryAgendaCardCount": 0,
+          "corpMandatoryOptionalAgendaCardCount": 0,
+          "corpMandatorySkivvissCardCount": 0,
+          "corpMandatoryAdditionalSourceCount": 0,
+          "corpMandatoryAdditionalSourceDefinitionIds": "",
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_4",
+        "type": "install_card",
+        "stateVersionBefore": 3,
+        "stateVersionAfter": 4,
+        "turnSerial": 0,
+        "stateHashAfter": "fnv1a:8a0493bb",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "install_card",
+          "label": "Korp installiert eine Karte.",
+          "serverId": "rd",
+          "serverLabel": "R&D",
+          "installPlacement": "ice",
+          "redactedKind": "installed_card",
+          "installedPositionKey": "installed-position-v1:5182eed7",
+          "effectKind": "install_card",
+          "targets": {
+            "serverLabel": "R&D",
+            "redactedKind": "installed_card"
+          },
+          "visibility": {
+            "class": "private_to_side",
+            "redactedKind": "installed_card"
+          }
+        }
+      },
+      {
+        "eventId": "evt_5",
+        "type": "install_card",
+        "stateVersionBefore": 4,
+        "stateVersionAfter": 5,
+        "turnSerial": 0,
+        "stateHashAfter": "fnv1a:3c28432a",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "install_card",
+          "label": "Korp installiert eine Karte.",
+          "serverId": "hq",
+          "serverLabel": "HQ",
+          "installPlacement": "ice",
+          "redactedKind": "installed_card",
+          "installedPositionKey": "installed-position-v1:5282f06a",
+          "effectKind": "install_card",
+          "targets": {
+            "serverLabel": "HQ",
+            "redactedKind": "installed_card"
+          },
+          "visibility": {
+            "class": "private_to_side",
+            "redactedKind": "installed_card"
+          }
+        }
+      },
+      {
+        "eventId": "evt_6",
+        "type": "draw_card",
+        "stateVersionBefore": 5,
+        "stateVersionAfter": 6,
+        "turnSerial": 0,
+        "stateHashAfter": "fnv1a:721b63f9",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "draw_card",
+          "label": "Karte ziehen",
+          "amount": 1,
+          "amounts": {
+            "amount": 1
+          },
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_7",
+        "type": "end_turn",
+        "stateVersionBefore": 6,
+        "stateVersionAfter": 7,
+        "turnSerial": 1,
+        "stateHashAfter": "fnv1a:37059e5b",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "end_turn",
+          "label": "Zug beenden",
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_8",
+        "type": "install_card",
+        "stateVersionBefore": 7,
+        "stateVersionAfter": 8,
+        "turnSerial": 1,
+        "stateHashAfter": "fnv1a:d5c798c0",
+        "visibilityClass": "public",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "install_card",
+          "label": "Armageddon installieren",
+          "title": "Armageddon",
+          "cardDefinitionId": "onr_proteus_078_armageddon",
+          "effectKind": "install_card",
+          "runnerCreditsAfter": 4,
+          "amounts": {
+            "runnerCreditsAfter": 4
+          },
+          "visibility": {
+            "class": "public"
+          }
+        }
+      },
+      {
+        "eventId": "evt_9",
+        "type": "start_run",
+        "stateVersionBefore": 8,
+        "stateVersionAfter": 9,
+        "turnSerial": 1,
+        "stateHashAfter": "fnv1a:78773c72",
+        "visibilityClass": "hidden_info_barrier",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "start_run",
+          "label": "Run auf R&D",
+          "serverId": "rd",
+          "serverLabel": "R&D",
+          "abilityFamily": "run-access",
+          "effectKind": "run",
+          "damageResolved": true,
+          "damageAmount": 0,
+          "amounts": {
+            "damageAmount": 0
+          },
+          "targets": {
+            "serverLabel": "R&D"
+          },
+          "visibility": {
+            "class": "hidden_info_barrier"
+          }
+        }
+      },
+      {
+        "eventId": "evt_10",
+        "type": "decline_rez",
+        "stateVersionBefore": 9,
+        "stateVersionAfter": 10,
+        "turnSerial": 1,
+        "stateHashAfter": "fnv1a:10782d9b",
+        "visibilityClass": "public",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "decline_rez",
+          "label": "ICE nicht rezzen",
+          "visibility": {
+            "class": "public"
+          }
+        }
+      },
+      {
+        "eventId": "evt_11",
+        "type": "continue_run",
+        "stateVersionBefore": 10,
+        "stateVersionAfter": 11,
+        "turnSerial": 1,
+        "stateHashAfter": "fnv1a:7ebefce4",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "continue_run",
+          "label": "Run fortsetzen",
+          "serverId": "rd",
+          "serverLabel": "R&D",
+          "abilityFamily": "run-access",
+          "targets": {
+            "serverLabel": "R&D"
+          },
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_12",
+        "type": "access_card",
+        "stateVersionBefore": 11,
+        "stateVersionAfter": 12,
+        "turnSerial": 1,
+        "stateHashAfter": "fnv1a:e2185fe0",
+        "visibilityClass": "hidden_info_barrier",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "access_card",
+          "label": "Karte accessen",
+          "serverLabel": "R&D",
+          "redactedKind": "accessed_card",
+          "abilityFamily": "run-access",
+          "targets": {
+            "serverLabel": "R&D"
+          },
+          "visibility": {
+            "class": "hidden_info_barrier"
+          }
+        }
+      },
+      {
+        "eventId": "evt_13",
+        "type": "decline_trash",
+        "stateVersionBefore": 12,
+        "stateVersionAfter": 13,
+        "turnSerial": 1,
+        "stateHashAfter": "fnv1a:7cd9ac93",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "decline_trash",
+          "label": "Nicht trashen",
+          "serverLabel": "R&D",
+          "targets": {
+            "serverLabel": "R&D"
+          },
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_14",
+        "type": "install_card",
+        "stateVersionBefore": 13,
+        "stateVersionAfter": 14,
+        "turnSerial": 1,
+        "stateHashAfter": "fnv1a:8d352541",
+        "visibilityClass": "public",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "install_card",
+          "label": "Codecracker installieren",
+          "title": "Codecracker",
+          "cardDefinitionId": "onr_v1_014_codecracker",
+          "effectKind": "install_card",
+          "runnerCreditsAfter": 2,
+          "amounts": {
+            "runnerCreditsAfter": 2
+          },
+          "visibility": {
+            "class": "public"
+          }
+        }
+      },
+      {
+        "eventId": "evt_15",
+        "type": "draw_card",
+        "stateVersionBefore": 14,
+        "stateVersionAfter": 15,
+        "turnSerial": 1,
+        "stateHashAfter": "fnv1a:9f8aa44a",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "draw_card",
+          "label": "Karte ziehen",
+          "amount": 1,
+          "amounts": {
+            "amount": 1
+          },
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_16",
+        "type": "end_turn",
+        "stateVersionBefore": 15,
+        "stateVersionAfter": 16,
+        "turnSerial": 2,
+        "stateHashAfter": "fnv1a:ab74037f",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "end_turn",
+          "label": "Zug beenden",
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_17",
+        "type": "mandatory_draw",
+        "stateVersionBefore": 16,
+        "stateVersionAfter": 17,
+        "turnSerial": 2,
+        "stateHashAfter": "fnv1a:e6edd648",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "mandatory_draw",
+          "label": "Korp Pflichtkarte ziehen",
+          "corpMandatoryDraw": true,
+          "corpMandatoryDrawCompleted": true,
+          "corpMandatoryCardCount": 1,
+          "corpMandatoryAdditionalCardCount": 0,
+          "corpMandatoryTotalBaseDrawCount": 1,
+          "corpMandatoryAgendaCardCount": 0,
+          "corpMandatoryOptionalAgendaCardCount": 0,
+          "corpMandatorySkivvissCardCount": 0,
+          "corpMandatoryAdditionalSourceCount": 0,
+          "corpMandatoryAdditionalSourceDefinitionIds": "",
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_18",
+        "type": "install_card",
+        "stateVersionBefore": 17,
+        "stateVersionAfter": 18,
+        "turnSerial": 2,
+        "stateHashAfter": "fnv1a:5a9bc4da",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "install_card",
+          "label": "Korp installiert eine Karte.",
+          "serverId": "hq",
+          "serverLabel": "HQ",
+          "installPlacement": "root",
+          "redactedKind": "installed_card",
+          "installedPositionKey": "installed-position-v1:ca970d58",
+          "effectKind": "install_card",
+          "targets": {
+            "serverLabel": "HQ",
+            "redactedKind": "installed_card"
+          },
+          "visibility": {
+            "class": "private_to_side",
+            "redactedKind": "installed_card"
+          }
+        }
+      },
+      {
+        "eventId": "evt_19",
+        "type": "draw_card",
+        "stateVersionBefore": 18,
+        "stateVersionAfter": 19,
+        "turnSerial": 2,
+        "stateHashAfter": "fnv1a:c3522681",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "draw_card",
+          "label": "Karte ziehen",
+          "amount": 1,
+          "amounts": {
+            "amount": 1
+          },
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_20",
+        "type": "gain_credit",
+        "stateVersionBefore": 19,
+        "stateVersionAfter": 20,
+        "turnSerial": 2,
+        "stateHashAfter": "fnv1a:f57b4b37",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "gain_credit",
+          "label": "1 Credit nehmen",
+          "abilityFamily": "payment-costs",
+          "effectKind": "gain_credits",
+          "amount": 1,
+          "gainCreditsAmount": 1,
+          "amounts": {
+            "amount": 1,
+            "gainCreditsAmount": 1
+          },
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_21",
+        "type": "end_turn",
+        "stateVersionBefore": 20,
+        "stateVersionAfter": 21,
+        "turnSerial": 2,
+        "stateHashAfter": "fnv1a:5b86d917",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "end_turn",
+          "label": "Zug beenden",
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_22",
+        "type": "resolve_choice",
+        "stateVersionBefore": 21,
+        "stateVersionAfter": 22,
+        "turnSerial": 3,
+        "stateHashAfter": "fnv1a:a7d989b0",
+        "visibilityClass": "hidden_info_barrier",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "resolve_choice",
+          "label": "Discard wurde abgeschlossen.",
+          "choiceVisibility": "hidden_info_barrier",
+          "redactedKind": "hidden_zone",
+          "hiddenZoneAction": "discard_phase",
+          "discardResolved": true,
+          "abilityFamily": "hidden-zone",
+          "abilityId": "discard_phase",
+          "effectKind": "hidden_zone",
+          "hiddenZoneBarrier": true,
+          "targets": {
+            "choiceVisibility": "hidden_info_barrier",
+            "redactedKind": "hidden_zone"
+          },
+          "visibility": {
+            "class": "hidden_info_barrier",
+            "hiddenZoneBarrier": true,
+            "redactedKind": "hidden_zone"
+          }
+        }
+      },
+      {
+        "eventId": "evt_23",
+        "type": "play_event",
+        "stateVersionBefore": 22,
+        "stateVersionAfter": 23,
+        "turnSerial": 3,
+        "stateHashAfter": "fnv1a:a78ba877",
+        "visibilityClass": "public",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "play_event",
+          "label": "Bodyweight™ Synthetic Blood spielen",
+          "title": "Bodyweight™ Synthetic Blood",
+          "cardDefinitionId": "onr_v1_079_bodyweight-synthetic-blood",
+          "runnerCreditsAfter": 0,
+          "amounts": {
+            "runnerCreditsAfter": 0
+          },
+          "visibility": {
+            "class": "public"
+          },
+          "resolvedEffects": [
+            {
+              "effectId": "onr_v1_079_bodyweight-synthetic-blood.effect.0.draw_cards",
+              "kind": "draw_cards",
+              "visibility": "public",
+              "side": "runner",
+              "amount": 5,
+              "reason": "card_resolver",
+              "sourceDefinitionId": "onr_v1_079_bodyweight-synthetic-blood",
+              "sourceTitle": "Bodyweight™ Synthetic Blood"
+            }
+          ]
+        }
+      },
+      {
+        "eventId": "evt_24",
+        "type": "install_card",
+        "stateVersionBefore": 23,
+        "stateVersionAfter": 24,
+        "turnSerial": 3,
+        "stateHashAfter": "fnv1a:62666fbf",
+        "visibilityClass": "public",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "install_card",
+          "label": "Runner installiert eine verdeckte Resource.",
+          "redactedKind": "hidden_runner_resource",
+          "hiddenResourceSlotId": "hidden_runner_resource_3d344ba0",
+          "hiddenRunnerResourceInstall": true,
+          "effectKind": "install_card",
+          "runnerCreditsAfter": 0,
+          "amounts": {
+            "runnerCreditsAfter": 0
+          },
+          "targets": {
+            "redactedKind": "hidden_runner_resource"
+          },
+          "visibility": {
+            "class": "public",
+            "redactedKind": "hidden_runner_resource"
+          }
+        }
+      },
+      {
+        "eventId": "evt_25",
+        "type": "play_event",
+        "stateVersionBefore": 24,
+        "stateVersionAfter": 25,
+        "turnSerial": 3,
+        "stateHashAfter": "fnv1a:a6fcbac7",
+        "visibilityClass": "public",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "play_event",
+          "label": "Livewire’s Contacts spielen",
+          "title": "Livewire’s Contacts",
+          "cardDefinitionId": "onr_v1_097_livewires-contacts",
+          "abilityFamily": "payment-costs",
+          "effectKind": "gain_credits",
+          "gainedCredits": 3,
+          "gainCreditsAmount": 3,
+          "runnerCreditsAfter": 3,
+          "amounts": {
+            "gainedCredits": 3,
+            "gainCreditsAmount": 3,
+            "runnerCreditsAfter": 3
+          },
+          "visibility": {
+            "class": "public"
+          },
+          "resolvedEffects": [
+            {
+              "effectId": "onr_v1_097_livewires-contacts.effect.0.gain_credits",
+              "kind": "gain_credits",
+              "visibility": "public",
+              "side": "runner",
+              "amount": 3,
+              "reason": "card_resolver",
+              "sourceDefinitionId": "onr_v1_097_livewires-contacts",
+              "sourceTitle": "Livewire’s Contacts"
+            }
+          ]
+        }
+      },
+      {
+        "eventId": "evt_26",
+        "type": "start_run",
+        "stateVersionBefore": 25,
+        "stateVersionAfter": 26,
+        "turnSerial": 3,
+        "stateHashAfter": "fnv1a:9c065212",
+        "visibilityClass": "hidden_info_barrier",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "start_run",
+          "label": "Run auf R&D",
+          "serverId": "rd",
+          "serverLabel": "R&D",
+          "abilityFamily": "run-access",
+          "effectKind": "run",
+          "damageResolved": true,
+          "damageAmount": 0,
+          "amounts": {
+            "damageAmount": 0
+          },
+          "targets": {
+            "serverLabel": "R&D"
+          },
+          "visibility": {
+            "class": "hidden_info_barrier"
+          }
+        }
+      },
+      {
+        "eventId": "evt_27",
+        "type": "decline_rez",
+        "stateVersionBefore": 26,
+        "stateVersionAfter": 27,
+        "turnSerial": 3,
+        "stateHashAfter": "fnv1a:6119cbd8",
+        "visibilityClass": "public",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "decline_rez",
+          "label": "ICE nicht rezzen",
+          "visibility": {
+            "class": "public"
+          }
+        }
+      },
+      {
+        "eventId": "evt_28",
+        "type": "continue_run",
+        "stateVersionBefore": 27,
+        "stateVersionAfter": 28,
+        "turnSerial": 3,
+        "stateHashAfter": "fnv1a:29fce234",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "continue_run",
+          "label": "Run fortsetzen",
+          "serverId": "rd",
+          "serverLabel": "R&D",
+          "abilityFamily": "run-access",
+          "targets": {
+            "serverLabel": "R&D"
+          },
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_29",
+        "type": "decline_rez",
+        "stateVersionBefore": 28,
+        "stateVersionAfter": 29,
+        "turnSerial": 3,
+        "stateHashAfter": "fnv1a:b643dd48",
+        "visibilityClass": "public",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "decline_rez",
+          "label": "Nichts rezzen / Weiter",
+          "serverLabel": "R&D",
+          "targets": {
+            "serverLabel": "R&D"
+          },
+          "visibility": {
+            "class": "public"
+          }
+        }
+      },
+      {
+        "eventId": "evt_30",
+        "type": "access_card",
+        "stateVersionBefore": 29,
+        "stateVersionAfter": 30,
+        "turnSerial": 3,
+        "stateHashAfter": "fnv1a:358fa729",
+        "visibilityClass": "hidden_info_barrier",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "access_card",
+          "label": "Karte accessen",
+          "serverLabel": "R&D",
+          "redactedKind": "accessed_card",
+          "abilityFamily": "run-access",
+          "targets": {
+            "serverLabel": "R&D"
+          },
+          "visibility": {
+            "class": "hidden_info_barrier"
+          }
+        }
+      },
+      {
+        "eventId": "evt_31",
+        "type": "steal_agenda",
+        "stateVersionBefore": 30,
+        "stateVersionAfter": 31,
+        "turnSerial": 3,
+        "stateHashAfter": "fnv1a:f513dd30",
+        "visibilityClass": "hidden_info_barrier",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "steal_agenda",
+          "label": "Theorem Proof als Programm installieren",
+          "title": "Theorem Proof",
+          "cardDefinitionId": "onr_classic_004_theorem-proof",
+          "sourceDefinitionId": "onr_classic_004_theorem-proof",
+          "serverLabel": "R&D",
+          "abilityFamily": "agenda-scoring",
+          "targets": {
+            "sourceDefinitionId": "onr_classic_004_theorem-proof",
+            "serverLabel": "R&D"
+          },
+          "visibility": {
+            "class": "hidden_info_barrier"
+          }
+        }
+      },
+      {
+        "eventId": "evt_32",
+        "type": "end_turn",
+        "stateVersionBefore": 31,
+        "stateVersionAfter": 32,
+        "turnSerial": 3,
+        "stateHashAfter": "fnv1a:d0f0d561",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "end_turn",
+          "label": "Zug beenden",
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_33",
+        "type": "resolve_choice",
+        "stateVersionBefore": 32,
+        "stateVersionAfter": 33,
+        "turnSerial": 4,
+        "stateHashAfter": "fnv1a:51a0ef90",
+        "visibilityClass": "hidden_info_barrier",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "resolve_choice",
+          "label": "Discard wurde abgeschlossen.",
+          "choiceVisibility": "hidden_info_barrier",
+          "redactedKind": "hidden_zone",
+          "hiddenZoneAction": "discard_phase",
+          "discardResolved": true,
+          "abilityFamily": "hidden-zone",
+          "abilityId": "discard_phase",
+          "effectKind": "hidden_zone",
+          "hiddenZoneBarrier": true,
+          "targets": {
+            "choiceVisibility": "hidden_info_barrier",
+            "redactedKind": "hidden_zone"
+          },
+          "visibility": {
+            "class": "hidden_info_barrier",
+            "hiddenZoneBarrier": true,
+            "redactedKind": "hidden_zone"
+          }
+        }
+      },
+      {
+        "eventId": "evt_34",
+        "type": "mandatory_draw",
+        "stateVersionBefore": 33,
+        "stateVersionAfter": 34,
+        "turnSerial": 4,
+        "stateHashAfter": "fnv1a:e6012269",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "mandatory_draw",
+          "label": "Korp Pflichtkarte ziehen",
+          "corpMandatoryDraw": true,
+          "corpMandatoryDrawCompleted": true,
+          "corpMandatoryCardCount": 1,
+          "corpMandatoryAdditionalCardCount": 0,
+          "corpMandatoryTotalBaseDrawCount": 1,
+          "corpMandatoryAgendaCardCount": 0,
+          "corpMandatoryOptionalAgendaCardCount": 0,
+          "corpMandatorySkivvissCardCount": 0,
+          "corpMandatoryAdditionalSourceCount": 0,
+          "corpMandatoryAdditionalSourceDefinitionIds": "",
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_35",
+        "type": "install_card",
+        "stateVersionBefore": 34,
+        "stateVersionAfter": 35,
+        "turnSerial": 4,
+        "stateHashAfter": "fnv1a:dbe661cf",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "install_card",
+          "label": "Korp installiert eine Karte.",
+          "serverId": "remote_1",
+          "serverLabel": "Remote 1",
+          "installPlacement": "ice",
+          "redactedKind": "installed_card",
+          "installedPositionKey": "installed-position-v1:0169f63b",
+          "effectKind": "install_card",
+          "targets": {
+            "serverLabel": "Remote 1",
+            "redactedKind": "installed_card"
+          },
+          "visibility": {
+            "class": "private_to_side",
+            "redactedKind": "installed_card"
+          }
+        }
+      },
+      {
+        "eventId": "evt_36",
+        "type": "install_card",
+        "stateVersionBefore": 35,
+        "stateVersionAfter": 36,
+        "turnSerial": 4,
+        "stateHashAfter": "fnv1a:25246235",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "install_card",
+          "label": "Korp installiert eine Karte.",
+          "serverId": "remote_1",
+          "serverLabel": "Remote 1",
+          "installPlacement": "root",
+          "redactedKind": "installed_card",
+          "installedPositionKey": "installed-position-v1:3ba9262d",
+          "effectKind": "install_card",
+          "targets": {
+            "serverLabel": "Remote 1",
+            "redactedKind": "installed_card"
+          },
+          "visibility": {
+            "class": "private_to_side",
+            "redactedKind": "installed_card"
+          }
+        }
+      },
+      {
+        "eventId": "evt_37",
+        "type": "advance_card",
+        "stateVersionBefore": 36,
+        "stateVersionAfter": 37,
+        "turnSerial": 4,
+        "stateHashAfter": "fnv1a:51d1d507",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "advance_card",
+          "label": "Korp advanced eine Karte.",
+          "serverId": "remote_1",
+          "serverLabel": "Remote 1",
+          "installPlacement": "root",
+          "redactedKind": "installed_card",
+          "installedPositionKey": "installed-position-v1:3ba9262d",
+          "targets": {
+            "serverLabel": "Remote 1",
+            "redactedKind": "installed_card"
+          },
+          "visibility": {
+            "class": "private_to_side",
+            "redactedKind": "installed_card"
+          }
+        }
+      },
+      {
+        "eventId": "evt_38",
+        "type": "end_turn",
+        "stateVersionBefore": 37,
+        "stateVersionAfter": 38,
+        "turnSerial": 5,
+        "stateHashAfter": "fnv1a:d400a8f5",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "end_turn",
+          "label": "Zug beenden",
+          "visibility": {
+            "class": "private_to_side"
+          }
+        }
+      },
+      {
+        "eventId": "evt_39",
+        "type": "start_run",
+        "stateVersionBefore": 38,
+        "stateVersionAfter": 39,
+        "turnSerial": 5,
+        "stateHashAfter": "fnv1a:e4e9e213",
+        "visibilityClass": "hidden_info_barrier",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "start_run",
+          "label": "Run auf Remote 1",
+          "serverId": "remote_1",
+          "serverLabel": "Remote 1",
+          "abilityFamily": "run-access",
+          "effectKind": "run",
+          "damageResolved": true,
+          "damageAmount": 0,
+          "amounts": {
+            "damageAmount": 0
+          },
+          "targets": {
+            "serverLabel": "Remote 1"
+          },
+          "visibility": {
+            "class": "hidden_info_barrier"
+          }
+        }
+      },
+      {
+        "eventId": "evt_40",
+        "type": "rez_ice",
+        "stateVersionBefore": 39,
+        "stateVersionAfter": 40,
+        "turnSerial": 5,
+        "stateHashAfter": "fnv1a:402bbb93",
+        "visibilityClass": "hidden_info_barrier",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "rez_ice",
+          "label": "Deadeye rezzen",
+          "title": "Deadeye",
+          "cardDefinitionId": "onr_classic_008_deadeye",
+          "serverId": "remote_1",
+          "serverLabel": "Remote 1",
+          "installPlacement": "ice",
+          "installedPositionKey": "installed-position-v1:0169f63b",
+          "abilityFamily": "run-access",
+          "targets": {
+            "serverLabel": "Remote 1"
+          },
+          "visibility": {
+            "class": "hidden_info_barrier"
+          }
+        }
+      },
+      {
+        "eventId": "evt_41",
+        "type": "decline_rez",
+        "stateVersionBefore": 40,
+        "stateVersionAfter": 41,
+        "turnSerial": 5,
+        "stateHashAfter": "fnv1a:b59357b3",
+        "visibilityClass": "public",
+        "publicPayload": {
+          "actor": "corp",
+          "actionType": "decline_rez",
+          "label": "Keine weitere Karte rezzen / Begegnung beginnen",
+          "visibility": {
+            "class": "public"
+          }
+        }
+      },
+      {
+        "eventId": "evt_42",
+        "type": "continue_run",
+        "stateVersionBefore": 41,
+        "stateVersionAfter": 42,
+        "turnSerial": 5,
+        "stateHashAfter": "fnv1a:d8973c86",
+        "visibilityClass": "private_to_side",
+        "publicPayload": {
+          "actor": "runner",
+          "actionType": "continue_run",
+          "label": "Subroutinen auslösen (Run endet)",
+          "sourceDefinitionId": "onr_classic_008_deadeye",
+          "serverId": "remote_1",
+          "serverLabel": "Remote 1",
+          "abilityFamily": "run-access",
+          "targets": {
+            "sourceDefinitionId": "onr_classic_008_deadeye",
+            "serverLabel": "Remote 1"
+          },
+          "visibility": {
+            "class": "private_to_side"
+          },
+          "resolvedEffects": [
+            {
+              "effectId": "subroutine_1",
+              "kind": "resolve_subroutine",
+              "visibility": "public",
+              "side": "runner",
+              "reason": "ice_subroutine",
+              "sourceDefinitionId": "onr_classic_008_deadeye",
+              "sourceTitle": "Deadeye"
+            }
+          ]
+        }
+      }
+    ],
+    "legalActions": [
+      {
+        "actionId": "corp.resolve_choice",
+        "side": "corp",
+        "type": "resolve_choice",
+        "label": "Deadeye: installiertes Programm zum Trashing wählen.",
+        "source": "game_rule",
+        "timingPoint": "run.encounter_ice",
+        "costs": [],
+        "targetRequirements": [],
+        "choiceRequirements": [
+          {
+            "choiceId": "trash_installed_program_42",
+            "minSelections": 1,
+            "maxSelections": 1,
+            "optionIds": [
+              "card_runner_onr_proteus_078_armageddon_1",
+              "card_runner_onr_v1_014_codecracker_1",
+              "card_corp_onr_classic_004_theorem-proof_2"
+            ]
+          }
+        ],
+        "visibility": "private_to_actor",
+        "expiresAtStateVersion": 42,
+        "payload": {}
+      }
+    ],
+    "difficulty": "hard",
+    "seed": "deck-revision-20260908-corp-secondary-01",
+    "decisionId": "ai-sim_deck-revision_deck-revision-20260908-corp-secondary-01_standard_standard_runner_purge_window_1.0.0_standard_standard_classic_corp_remote_lab_deflection_2026_07_01_1.1.0:42:corp",
+    "actionNumber": 42,
+    "profileId": "corp-ai-v0.9-hard"
+  }
+}

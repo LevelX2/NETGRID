@@ -1878,6 +1878,17 @@ function sanitizeVisibleCardWithOptions(
     includeEffectivePostRezRunQuote && effectivePostRezRunQuote
       ? sanitizeVisibleCorpIcePostRezRunQuote(effectivePostRezRunQuote)
       : undefined;
+  const installedProgram = card.known
+    ? card.installedAsRunnerProgram
+    : undefined;
+  if (
+    installedProgram &&
+    (card.controller !== "runner" ||
+      !Number.isSafeInteger(installedProgram.memoryCost) ||
+      installedProgram.memoryCost < 0)
+  ) {
+    throw new Error("Invalid public installed-as-Runner-program projection.");
+  }
   return {
     instanceId: card.instanceId,
     known: card.known,
@@ -1904,6 +1915,22 @@ function sanitizeVisibleCardWithOptions(
       ? { installCost: card.installCost }
       : {}),
     ...(card.memoryCost !== undefined ? { memoryCost: card.memoryCost } : {}),
+    ...(installedProgram
+      ? {
+          installedAsRunnerProgram: {
+            memoryCost: installedProgram.memoryCost,
+            ...(installedProgram.scoreAsAgendaAction === true
+              ? { scoreAsAgendaAction: true as const }
+              : {}),
+            ...(installedProgram.removeFromGameOnLeavePlay === true
+              ? { removeFromGameOnLeavePlay: true as const }
+              : {}),
+            ...(installedProgram.originalType !== undefined
+              ? { originalType: installedProgram.originalType }
+              : {}),
+          },
+        }
+      : {}),
     ...(card.memoryLimitBonus !== undefined
       ? { memoryLimitBonus: card.memoryLimitBonus }
       : {}),

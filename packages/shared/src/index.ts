@@ -3898,6 +3898,8 @@ export type VisibleCard = {
   playCost?: PlayCostDefinition;
   installCost?: number;
   memoryCost?: number;
+  /** Public current installation role; the printed card type and owner remain unchanged. */
+  installedAsRunnerProgram?: CardInstance["installedAsRunnerProgram"];
   memoryLimitBonus?: number;
   maxHandSizeBonus?: number;
   rezCost?: number;

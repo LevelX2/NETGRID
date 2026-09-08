@@ -193,6 +193,9 @@ function visibleKnownCardWithReferenceViewer(
     title: definition.title,
     definitionId: definition.id,
     type: definition.type,
+    ...(instance.installedAsRunnerProgram
+      ? { installedAsRunnerProgram: { ...instance.installedAsRunnerProgram } }
+      : {}),
     subtypes: effectiveSubtypesForCard(state, id, definition),
     ...(alternateIceSubtypeIsActive(instance)
       ? { alternateIceSubtypeActive: true }

@@ -176,9 +176,9 @@ kein weiterer Tausch wurde aus diesem kleinen Sample abgeleitet.
 - Karl wurde in fünf Spielen in insgesamt 135 eindeutigen Zuständen legal
   angeboten, aber nie installiert. In `runner-primary-12` war sein
   Entwicklungsplan schon im frühen Spiel als bereit geführt, während
-  Zentraldruck gewählt wurde. Sein Beitrag ist nicht bestätigt; daraus folgt
-  ohne vollständige Gegenlinie weder ein bewiesener Bewertungsfehler noch
-  ein belastbares Urteil gegen den Slot.
+  Zentraldruck gewählt wurde. Die anschließende Diagnose belegt eine
+  Bewertungslücke; siehe unten. Sein Beitrag zum Deck ist weiterhin nicht
+  bestätigt.
 - Efficiency Experts wurde 31-mal und Accounts Receivable zehnmal gespielt.
 - Rockerboy wurde einmal gerezzt und fünfmal aktiviert, insgesamt wurden alle
   15 Credits ausgezahlt. In `corp-secondary-02` erfolgte Rez bei StateVersion
@@ -190,7 +190,7 @@ kein weiterer Tausch wurde aus diesem kleinen Sample abgeleitet.
 Kartenauswahlen wurden aus expliziten Quellenidentitäten der Events gezählt.
 Verdeckte Corp-Installationen wurden nicht aus Aktionslabels erraten.
 
-### Technische Prüfung und offener Baseline-Fehler
+### Technische Prüfung und anschließend behobener Laufzeitfehler
 
 72 Vergleichsversuche lieferten 71 reguläre Endergebnisse und einen
 Laufzeitabbruch. **Alle 36 Spiele der neuen Listen** endeten regulär, ohne
@@ -207,7 +207,8 @@ Program-Trash-Subroutine ab: `window_origin_missing`, Owner
 Fehler und StateHash `fnv1a:d8973c86`. Der exakte Zustand wurde lokal gesichert.
 Die KI-/Engine-/CardSpec-Dateien sind gegenüber dem Stand vor der Deckrevision
 unverändert; dieser Fehler entsteht bereits mit der Originalliste und bleibt
-als separater KI-Befund offen. Das zugehörige reguläre Spiel der Variante
+als separater KI-Befund sichtbar. Er ist inzwischen ursächlich behoben, wie
+unten beschrieben. Das zugehörige reguläre Spiel der Variante
 wurde ebenfalls aus der gepaarten Ergebnistabelle ausgeschlossen. Deshalb
 stehen dort fünf statt sechs Purge-Window-Paare.
 
@@ -231,6 +232,68 @@ Ausgangslisten und bereits gespeicherte persönliche Deckkopien werden durch
 diese Standarddeck-Revision nicht überschrieben. Der Vergleich verwendet
 unveränderte Originalkopien und die neuen Listen auf demselben Code-Commit.
 Es wurden keine Mails oder zusätzlichen Metaserien gestartet.
+
+### Vertiefte Diagnose: Deadeye, Karl und Rockerboy
+
+**Deadeye ist behoben.** Das Zielangebot enthielt zwei gedruckte Programme
+und Theorem Proof, eine Corp-Agenda unter Runner-Kontrolle, die regelkonform
+als Programm installiert war. Die Engine bot alle drei Ziele korrekt an.
+Die PlayerView und anschließend das KI-DTO transportierten die aktuelle
+Installationsrolle jedoch nicht; der Choice-Verbraucher verlangte außerdem
+Eigentümer `runner` und gedruckten Typ `program`. Dadurch entstand der
+falsche Befund eines unvollständigen Optionssatzes.
+
+`VisibleCard.installedAsRunnerProgram` überträgt jetzt die öffentliche
+Installationsrolle durch beide Projektionen. Gedruckter Typ und Eigentümer
+bleiben erhalten. Die Choice-Bindung prüft Runner-Kontrolle und gedrucktes
+Programm oder die explizite umgewandelte Installationsrolle. Run, ICE,
+Subroutine, StateVersion und vollständiges legales Zielangebot bleiben exakt
+gebunden. Es entsteht weder eine Karten-ID-Ausnahme noch eine Ersatzaktion.
+
+Der gespeicherte Originalzustand löst nun `corp.resolve_choice` mit dem
+legalen Codecracker-Ziel auf; `applyAction` akzeptiert die Entscheidung.
+Der vollständige ursprüngliche Seed endet nach **147 Aktionen mit Runner
+7:0**, gültigem Replay und ohne Runtimefehler. Das ergänzt den Fehlernachweis,
+überschreibt aber nicht die alte Ergebnistabelle mit einem gemischten
+Codevergleich. Nachweise: 70 fokussierte KI-/DTO-Tests und 36 Engine-Tests,
+einschließlich des realen Entscheidungszustands und negativer Bindungsfälle.
+Typechecks für Shared, Engine und KI sowie `check:ai` und
+`check:engine-source-structure` bestehen ebenfalls.
+
+**Bei Karl ist eine konkrete Bewertungslücke offen.** In StateVersion 7 von
+`runner-primary-12` sind 5 Credits, 4 Klicks und eine legale Installation für
+2 Credits vorhanden. Die Handentwicklung bewertet Karl als `economy_engine`,
+`strong`, `useful_now`, ohne Installationssperre. Der tatsächliche Plan
+`runner.develop_board_and_hand` erhält trotzdem nur den allgemeinen
+Aufbauwert 80/P5; der gewählte R&D-Plan erhält 180/P4.
+Die persistente Bewertung meldet gleichzeitig `kind:none`,
+`repeatable:false`, `outputCapabilities:[]`. Der kanonische
+`successful_run_end_credit_resource`-Vertrag ist vorhanden, erreicht diese
+Bewertung aber nicht; der allgemeine Wirtschaftskartenstatus genügt dafür
+nicht. Das ist mehr als ein bloßer Verdacht auf eine schlecht passende Karte.
+Es beweist jedoch keine Installationspflicht in allen 135 Angebotszuständen.
+Eine vollständige Verhaltenskorrektur muss die Installation und anschließende
+Runs mit Kosten, Reserven, Dringlichkeit und bedingtem Ertrag vergleichen.
+Ein Namensbonus oder eine bloße Hochstufung würde diese Ursache verdecken.
+Der vorliegende Patch verändert Karls Bewertung noch nicht.
+
+**Rockerboys Auszahlung beweist keine gute Investitionsplanung.** Die genaue
+Installation im erfolgreichen `corp-secondary-02` erfolgt bei StateVersion
+83 durch `corp.hand_and_agenda_management`, um einen HQ-Überlauf zu lösen:
+8 Credits, 3 Klicks, Installation nach Remote 2 neben Self-Destruct, ohne ICE.
+Die Economy rezzt ihn erst bei StateVersion 105 mit 9 Credits und 3 Klicks.
+Die ICE-Installation bei 106 schützt Remote 1, nicht Rockerboys Remote 2.
+Danach folgen fünf Auszahlungen bis StateVersion 142, insgesamt 15 Credits.
+Das sind nach 4 Rez-Credits 11 Netto-Credits für sechs Klicks einschließlich
+Installation, gegenüber sechs Basic-Credits ein realisierter Mehrertrag von
+5 Credits. Vorab war dieser Ertrag wegen des ungeschützten Remotes nicht
+gesichert. Die Installation ist als Handentlastung nachvollziehbar, eine
+zuverlässige, vorausschauend abgesicherte Economy-Kampagne ist damit nicht
+nachgewiesen. Aus dem Einzelspiel wird kein zusätzlicher KI-Fix behauptet.
+
+Die vertieften lokalen Nachweise liegen unter `data/local/deck-audit-*`;
+der side-sichere Deadeye-Entscheidungszustand ist als fokussierte
+Regressionsfixture versioniert.
 
 ## Führende Quellen
 
