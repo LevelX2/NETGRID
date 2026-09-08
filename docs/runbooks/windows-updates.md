@@ -235,7 +235,7 @@ Der anschließende ungestörte Setup-Lauf auf denselben Artefakten installiert
 die vollständige installierte Manifest-/Native-/Cache-/Shortcutprüfung ist
 am 8. September um 12:37:43 UTC grün. Konfiguration und Credentials sind
 unverändert, vorherige MSI-Caches erhalten, Runtime gestoppt und Testports
-frei. Der aktuelle Sandboxstand ist damit 8219, nicht einer der absichtlich
+frei. Nach diesem Lauf war der Sandboxstand 8219, nicht einer der absichtlich
 zurückgerollten Zwischenstände.
 
 Der zusätzliche native Client-Crashlauf 8217→8219 am 8. September trennt
@@ -262,10 +262,49 @@ Funktionsfähigkeit wurden unabhängig über Ereignisse, geschützte Bindung,
 vollständige installierte Identität und realen Start/Stopp geprüft. Kein roter
 Bericht wurde umgeschrieben und kein Produktgate abgeschwächt.
 
-Offen bleibt der Verlust des synchronen Custom-Action-Hosts selbst oder des
-ausführenden Installer-Dienstes. Ohne den erhaltenen Helper-Prozesshandle
-wird keine pauschale verwaiste Bindung gelöscht. Ein Client-Crash ersetzt
-weder diesen weitergehenden Nachweis noch den vollständigen Tray-/GitHub-Updater.
+Die Custom-Action-Prozesse sind getrennt zu diagnostizieren. Der gepinnte
+[WiX-7-SfxCA-Quellstand](https://github.com/wixtoolset/wix/blob/b8977d6f88e7b68e000bac226a2814f236770570/src/dtf/SfxCA/SfxCA.cpp)
+startet den verwalteten Code außerhalb des nativen MSI-Custom-Action-Servers
+über `rundll32.exe`. Der reale 8217-Verify-Lauf vom 8. September um 13:20:01 UTC
+bestätigt die Kette: Installer-Dienst → nativer MSI-Custom-Action-Server
+(`-Embedding`) → WiX-.NET-Host (`rundll32`, `zzzzInvokeManagedCustomActionOutOfProc`)
+→ installierter NETGRID-Prüfhelper → Verifier. Der direkte MSI-Client gehört
+nicht in diese Elternkette. Eine Fehlerfixture bindet den unmittelbaren
+Helper-Elternprozess daher an seinen tatsächlichen `rundll32`-Handle und
+Startzeit, die ausgeführte Verify-Methode, die Prüfsumme der aus dem MSI
+geladenen Custom-Action-DLL und die übrige native Elternkette. Ein bloßer
+Prozessname oder ein unpassender `msiexec`-Elternvergleich genügt nicht.
+
+Der so gebundene native Abbruch des verwalteten Custom-Action-Hosts ist
+inzwischen erfolgreich geprüft: Während des 8217→8219-Healthchecks wird nur
+`rundll32` PID 2396 abrupt beendet. Der native MSI-Custom-Action-Server und
+der Installer-Dienst bleiben erhalten; der NETGRID-Helper und sein Verifier
+enden selbstständig mit Exit 0. WiX erkennt den Host-Exit -1 und löst den
+regulären MSI-Fehlerrollback (1603) aus. Nach `operation=restore` und
+`NETGRID_LIFECYCLE_ROLLBACK released=True` sind die vollständige 8217-
+Programminstallation, MSI-/Setupcache und Verknüpfung wiederhergestellt.
+Der ursprüngliche Setupcache bleibt auch zeitgleich. Die nach Snapshot-
+Erzeugung veränderte eigene Testdatei samt DACL wird zurückgestellt, die
+zusätzlich erzeugte Datei entfernt und der fehlgeschlagene Datenstand separat
+gesichert. Der gebundene Snapshot ist `restored`, die Lease abgeschlossen.
+Ein zusätzlicher tatsächlicher Headless-Healthcheck endet mit Exit 0.
+Konfiguration und Credentials bleiben unverändert. Aktueller Sandboxstand
+am 8. September um 13:26:04 UTC: 8217 gesund wiederhergestellt, Runtime
+gestoppt, 32141/32142 frei. Beweis: `native-8217-8219-ca-host-v2-crash.json`;
+Hashes und Fehlerauslösung stehen im Paketprozess.
+
+Ein vorheriger Testversuch hatte das Beenden wegen der falschen Annahme eines
+unmittelbaren `msiexec`-Elternprozesses verweigert; sein roter Bericht bleibt
+erhalten. Er ist kein Produktfehler und kein Crashnachweis. Weder die
+Korrektur dieser Testbindung noch der erfolgreiche Folgelauf verändern
+Produktcode, Sicherungen, Credentials oder geschützte Lease-Werte manuell.
+
+Offen bleiben weitergehende Ausfälle des nativen MSI-Custom-Action-Servers
+oder des ausführenden Installer-Dienstes sowie eine tatsächlich verwaiste
+Transaktion ohne verbleibenden regulären Rollback-Aufrufer. Ohne gehaltenen
+Helper-Prozesshandle wird keine pauschale verwaiste Bindung gelöscht.
+Die getrennten Client- und verwalteten Host-Crashnachweise ersetzen diese
+Fälle und den vollständigen Tray-/GitHub-Updater nicht.
 
 Offen sind weiterhin der vollständige GUI-/Tray-Updater mit gebundener Pipe, ursprünglichem
 Benutzerneustart und anderer UAC-Administratorfreigabe sowie

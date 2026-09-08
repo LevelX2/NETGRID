@@ -319,14 +319,20 @@ und Registry-Schreibsperre, erhält dieselbe aktive MSI-Lease, ProductCode und
 den vollständigen Sicherungsnachweis und erlaubt nur den anschließenden
 regulären MSI-Rollback. Ein Fehlerexit bleibt ein Fehler; selbst Exit 0 ohne
 reguläre Helper-Rückgabe gilt nicht als erfolgreiche Datenoperation.
-Bei Timeout, weiterlaufenden Prozessen, fremdem Owner oder Verlust des
-Custom-Action-Aufrufers bleibt die Bindung bestehen. Der davon getrennte
+Bei Timeout, weiterlaufenden Prozessen oder fremdem Owner bleibt die Bindung
+bestehen. Der native Verlust des verwalteten WiX-Custom-Action-Aufrufers ist
+inzwischen für den Fall mit weiterlaufendem Helper und erhaltenem nativem
+MSI-Aufrufer geprüft: Der Helper gibt seine Operationsrolle regulär zurück,
+WiX erkennt den Host-Abbruch, und der noch laufende Windows Installer führt
+seinen regulären Datenrestore und Rollback aus. Eine pauschale Übernahme
+einer verwaisten Transaktion findet dabei nicht statt. Der davon getrennte
 `msiexec /i`-Client ist nicht der Halter des Helper-Prozesshandles. Sein
 nativer Abbruch während eines Versionswechsels ist inzwischen mit fortgesetzter
-erfolgreicher Installer-Ausführung belegt; er beweist weder einen Ausfall
-des Custom-Action-Hosts noch eine verwaiste MSI-Transaktion. Umfang und
-unabhängige Abschlussnachweise stehen im Update-Runbook. Die normale Updater-Absturzreparatur
-darf sie weiterhin nicht löschen. Same-Product-Repair, Erstinstallation,
+erfolgreicher Installer-Ausführung belegt. Beide Nachweise ersetzen weder
+den Verlust des nativen MSI-Ausführers noch eine verwaiste MSI-Transaktion.
+Umfang und unabhängige Abschlussnachweise stehen im Update-Runbook. Die normale
+Updater-Absturzreparatur darf eine bestehende MSI-Bindung weiterhin nicht
+löschen. Same-Product-Repair, Erstinstallation,
 Uninstall, verschachtelte Altproduktentfernung und bereits außen abgesicherte
 Updater-MSI-Teiltransaktionen erzeugen keine zweite Datensicherung.
 

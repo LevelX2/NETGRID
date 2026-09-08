@@ -186,8 +186,8 @@ Abgleich und die abgeschlossene verifizierte MSI-Lease. Snapshot
 `2826e80d25f647b3ac8c444100b36c5f`, Manifest-SHA-256
 `57feb967a5fa5ffb1d1e139cd965b6fddaccced61aa4fc7703c56538a4718737`.
 Konfiguration und Credentials bleiben unverändert, vorherige MSI-Caches
-erhalten. Abschluss: 12:37:43.3990304 UTC. Aktuell ist in der Sandbox 8219
-installiert; Runtime gestoppt und 32141/32142 frei. Ein neues UAC-/GUI-Gate
+erhalten. Abschluss: 12:37:43.3990304 UTC. Nach diesem Lauf war in der Sandbox
+8219 installiert; Runtime gestoppt und 32141/32142 frei. Ein neues UAC-/GUI-Gate
 oder vollständiger GitHub-/Tray-Updater wird dadurch nicht behauptet.
 
 ### Aktiver Prüfpunkt: MSI-Clientverlust und verbleibender Ausführungsabbruch
@@ -240,10 +240,69 @@ Registry-Freigabe wurden dafür verwendet.
 
 Der Verlust des MSI-Clients ist damit in diesem nativen Versionswechsel
 nachgewiesen: Die erhöhte Ausführung beendet das Upgrade gesund, nicht per
-Rollback. Der Verlust des synchronen Custom-Action-Hosts beziehungsweise
-des ausführenden Installer-Dienstes und eine dadurch tatsächlich verwaiste
-MSI-Transaktion bleiben offen. Dieser Befund ersetzt weder diese Gates noch
-die vollständige Tray-/GitHub-/UAC-Abnahme; WIN-I08 bleibt aktiv.
+Rollback. Dieser Clientlauf deckt den Verlust des synchronen Custom-Action-
+Hosts oder des Installer-Dienstes nicht ab; der getrennte Host-Test folgt
+unten. Die vollständige Tray-/GitHub-/UAC-Abnahme bleibt offen; WIN-I08 bleibt aktiv.
+
+### Aktiver Prüfpunkt: Verwalteter WiX-Custom-Action-Host-Abbruch
+
+Der erste Host-Crashversuch verweigerte die Fehlerauslösung mit
+`owned_custom_action_host_identity_invalid`: Der Test nahm fälschlich an,
+der unmittelbare Elternprozess des NETGRID-Helfers sei `msiexec`.
+`native-8217-8219-ca-host-crash.json` bleibt mit `ok=false`, MSI-Exit 0 und
+SHA-256 `613497977ab94d41b6a0972d6b1395754f4681d759ace9511fb7f1bdf2bdfa25`
+erhalten; kein Prozess wurde darin beendet. Der gepinnte WiX-Quellcode und
+die native Beobachtung `native-ca-host-observer-20260908-132001.json`
+(SHA-256 `f944520a23b779e198968f00cb3aa321a884c432bc68c08ed2b76749a0a8d028`)
+belegen die zusätzliche ausgelagerte `rundll32`-Ebene. Der folgende reguläre
+Setup-Downgrade samt vollständigem 8217-Abgleich ist um 13:20:29 UTC grün
+(`native-ca-host-crash-baseline-v2-8217.json`, SHA-256
+`8c5b385a8b9bd5fa1307d32e137872c5c62fa9118492e68a61c21a6e000ab3d9`).
+
+Die korrigierte Fehlerfixture bindet den tatsächlichen unmittelbaren
+Helper-Elternprozess per Handle/Startzeit, vollständiger Windows-Argumentliste,
+Verify-Methode, nativem MSI-Elternprozess und Installer-Dienst. Die geladene
+Custom-Action-DLL muss die originale Kandidatenprüfsumme
+`d0c65d315939d6d3a311083ad9aac6891dce6e88957e1404e728922651bdc9ec`
+besitzen; `native-ca-host-v2-identity.json` bestätigt diese Bindung.
+Sie beendet während `verifying` ausschließlich `rundll32` PID 2396
+(Start 13:24:54.4690742 UTC, Exit -1). Client 5464, nativer MSI-Custom-Action-
+Server 5940 und Dienst 4488 bleiben unangetastet. Der gebundene NETGRID-
+Helper 7160 und sein Verifier 6008 enden ohne Beenden durch den Test beide
+regulär mit Exit 0. Native Bindungsnachweise:
+
+- `native-8217-8219-ca-host-v2-crashed.json`, SHA-256
+  `a79e04427e762f1ee8d49d6bb6dfff6a6c42806b9f29b2f5cf7ede48ae565003`;
+- `native-8217-8219-ca-host-v2-followers.json`, SHA-256
+  `8f0b7b90d2bf6216f93f921d198be57f73b71cb6f427a495fd5d42c184072779`.
+
+`native-8217-8219-ca-host-v2-crash.log` (SHA-256
+`c7d44bfb182ca07848e301db6509b1493a21ec9f0b47a965f763496f1e407332`)
+belegt `RUNDLL32 returned error code: -1`, den tatsächlichen
+`operation=restore`, `NETGRID_LIFECYCLE_ROLLBACK released=True` und
+Server-/Client-Exit 1603. Das vollständige Ergebnis
+`native-8217-8219-ca-host-v2-crash.json`, SHA-256
+`25e4e22741041600e7a5141c6fee535f687348e7c7ade0d33b90fdf2ecee0749`,
+ist grün: alle 10.890 Manifestdateien, fünf nativen Images, Registrierung,
+MSI-/Setupcache und Setupverknüpfung entsprechen wieder 8217. Der vorherige
+Setupcache ist auch zeitgleich. Die eigene nach Capture veränderte Datei
+ist samt DACL wiederhergestellt, die hinzugefügte Datei entfernt und deren
+fehlgeschlagener Zustand separat erhalten. Snapshot
+`2d8dac44d5df4cccae0a01a2b9c20a66`, Manifest-SHA-256
+`1eb729255c76f81b14bbaac8836ad92d3ceeaf5c27b3807220e8fa44f75ae9f8`,
+ist an dieselbe abgeschlossene Lease `7b1d27260731431e90c69a02330f0ddf`
+gebunden und `restored`; der zusätzliche Fehlzustand liegt in
+`90c9ecf626e64f7ebceae7dcef1d1e4f`. Konfiguration und Credentials sind
+bytegleich. Der weitere tatsächliche Headless-Healthlauf endet mit Exit 0.
+Abschluss 13:26:04.8653314 UTC: 8217 gesund wiederhergestellt, Runtime
+gestoppt und 32141/32142 frei. Keine Vordergrund-/UAC-Eingabe,
+Hostinstallation, manuelle Lease-Freigabe oder Produktcodeänderung.
+
+Damit ist dieser verwaltete Host-Abbruch mit weiterlaufendem Helper und
+erhaltenem nativem MSI-Rollback-Aufrufer nachgewiesen. Ausfälle des nativen
+Custom-Action-Servers oder Installer-Dienstes sowie eine tatsächlich verwaiste
+MSI-Transaktion ohne regulären Rollback-Aufrufer bleiben offen. WIN-I08,
+GitHub-/Tray-/UAC-Abnahme, Integration und Cleanup sind nicht abgeschlossen.
 
 ### Aktiver Prüfpunkt: Setup-Reparaturquelle und Archivschutz
 
