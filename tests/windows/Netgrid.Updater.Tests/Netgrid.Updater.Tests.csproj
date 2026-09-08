@@ -8,6 +8,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="../../../apps/windows/Common/InstalledSetupCache.cs" Link="InstalledSetupCache.cs" />
+    <Compile Include="../../../apps/windows/Common/UpdateDataFiles.cs" Link="UpdateDataFiles.cs" />
     <ProjectReference Include="../../../apps/windows/Netgrid.Updater/Netgrid.Updater.csproj" />
   </ItemGroup>
 </Project>

@@ -48,3 +48,13 @@ test("upgrade order, nested cleanup and outer lease forwarding are mandatory", (
     value => value.replace('DllEntry="VerifyNetgridLifecycle" Execute="deferred"', 'DllEntry="VerifyNetgridLifecycle" Execute="commit"'),
   ]) assert.throws(() => checkLifecycleSource(mutate(source)), /installer_lifecycle_/);
 });
+
+test("setup cache, current product selector and uninstall shortcut share MSI identity", () => {
+  const source = readFileSync("installer/product/Product.wxs", "utf8");
+  checkLifecycleSource(source);
+  for (const mutate of [
+    value => value.replace('Name="CurrentProductCode" Type="string" Value="[ProductCode]"', 'Name="CurrentProductCode" Type="string" Value="unbound"'),
+    value => value.replace('\\config\\updates\\[ProductCode]\\NETGRID-Setup.exe', '\\config\\updates\\NETGRID-Setup.exe'),
+    value => value.replace('cache-setup --data-root "[NETGRID_DATA_ROOT]" --product-code "[ProductCode]"', 'cache-setup --data-root "[NETGRID_DATA_ROOT]"'),
+  ]) assert.throws(() => checkLifecycleSource(mutate(source)), /setup_cache_identity_unbound/);
+});

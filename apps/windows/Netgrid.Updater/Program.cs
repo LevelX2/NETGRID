@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text.Json;
+using Microsoft.Win32;
 using Netgrid.Windows;
 
 namespace Netgrid.Updater;
@@ -111,16 +112,15 @@ internal static class UpdateTransaction
 
     private static int RunVerifiedTransaction(UpdateRequest options, UpdateSession session, IReadOnlyDictionary<string, string> environment, string dataRoot, string logPath)
     {
-        var previousSetup = Path.Combine(dataRoot, "config", "updates", "NETGRID-Setup.exe");
-        if (!File.Exists(previousSetup)) throw new InvalidOperationException("updater_previous_setup_missing");
-        var previousHash = Hash(previousSetup);
+        using var previousSetup = OpenRegisteredSetup(options.ProgramRoot, dataRoot);
+        var previousHash = previousSetup.Sha256;
         if (!Hash(options.SetupPath).Equals(options.SetupSha256, StringComparison.Ordinal)) throw new InvalidOperationException("updater_setup_hash_mismatch");
 
         WriteLog(logPath, "backup_started");
         RequireProductAbsent(options.ProgramRoot);
         using var backup = UpdateDataSnapshot.Capture(new UpdateDataLayout(dataRoot, environment));
         backup.Verify();
-        backup.StorePreviousSetup(previousSetup, previousHash);
+        backup.StorePreviousSetup(previousSetup.Path, previousHash);
         session.BindRecovery(dataRoot, Path.GetFileName(backup.DirectoryPath), backup.ManifestSha256, previousHash);
         WriteLog(logPath, $"backup_verified:{Path.GetFileName(backup.DirectoryPath)}:{backup.ManifestSha256}");
         RequireProductAbsent(options.ProgramRoot);
@@ -133,7 +133,7 @@ internal static class UpdateTransaction
             string preserved;
             using (var recovery = session.OpenRecoverySnapshot(new UpdateDataLayout(dataRoot, environment))) preserved = recovery.Restore();
             WriteLog(logPath, $"failed_install_data_restored:preserved={Path.GetFileName(preserved)}");
-            if (RestartIfHealthy(options, session, backup, logPath))
+            if (RestartIfHealthy(options, session, backup, dataRoot, previousHash, logPath))
             {
                 MessageBox.Show(UiText.Get("updater.previous_ready"), "NETGRID Update", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return 2;
@@ -144,7 +144,7 @@ internal static class UpdateTransaction
         {
             RequireProductAbsent(options.ProgramRoot);
             backup.AssertProtectedFilesUnchanged();
-            PromoteCachedSetup(dataRoot);
+            RequireRegisteredSetup(options.ProgramRoot, dataRoot, options.SetupSha256);
             WriteLog(logPath, "update_verified");
             backup.Dispose();
             session.Complete();
@@ -168,6 +168,7 @@ internal static class UpdateTransaction
         if (!VerifyInstalled(options)) throw new InvalidOperationException("updater_rollback_health_failed");
         RequireProductAbsent(options.ProgramRoot);
         backup.AssertProtectedFilesUnchanged();
+        RequireRegisteredSetup(options.ProgramRoot, dataRoot, previousHash);
         WriteLog(logPath, "rollback_verified");
         backup.Dispose();
         session.Complete();
@@ -178,11 +179,12 @@ internal static class UpdateTransaction
 
     private static bool VerifyInstalled(UpdateRequest options) => UpdateVerifier.RunAsync(options.ProgramRoot, options.EnvironmentFile, options.Lease).GetAwaiter().GetResult();
 
-    private static bool RestartIfHealthy(UpdateRequest options, UpdateSession session, UpdateDataSnapshot backup, string logPath)
+    private static bool RestartIfHealthy(UpdateRequest options, UpdateSession session, UpdateDataSnapshot backup, string dataRoot, string previousHash, string logPath)
     {
         if (!VerifyInstalled(options)) return false;
         RequireProductAbsent(options.ProgramRoot);
         backup.AssertProtectedFilesUnchanged();
+        RequireRegisteredSetup(options.ProgramRoot, dataRoot, previousHash);
         WriteLog(logPath, "previous_install_verified_after_failure");
         backup.Dispose();
         session.Complete();
@@ -244,13 +246,17 @@ internal static class UpdateTransaction
         if (!options.SetupPath.StartsWith(staging, StringComparison.OrdinalIgnoreCase) || !File.Exists(options.SetupPath)) throw new InvalidOperationException("updater_setup_scope_invalid");
     }
 
-    internal static void PromoteCachedSetup(string dataRoot)
+    private static InstalledSetupCache.Entry OpenRegisteredSetup(string programRoot, string dataRoot)
     {
-        var root = Path.Combine(dataRoot, "config", "updates");
-        var pending = Path.Combine(root, "NETGRID-Setup.pending.exe");
-        var current = Path.Combine(root, "NETGRID-Setup.exe");
-        if (!File.Exists(pending)) throw new InvalidOperationException("updater_pending_setup_missing");
-        File.Move(pending, current, overwrite: true);
+        using var machine = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64);
+        return InstalledSetupCache.OpenRegistered(machine, programRoot, dataRoot);
+    }
+
+    internal static void RequireRegisteredSetup(string programRoot, string dataRoot, string expectedHash)
+    {
+        using var setup = OpenRegisteredSetup(programRoot, dataRoot);
+        if (!setup.Sha256.Equals(expectedHash, StringComparison.Ordinal))
+            throw new InvalidOperationException("setup_cache_installed_hash_mismatch");
     }
 
     private static string Hash(string path) => Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path))).ToLowerInvariant();

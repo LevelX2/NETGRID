@@ -5,6 +5,7 @@ var scratch = Path.Combine(Path.GetTempPath(), $"netgrid-updater-unit-{Guid.NewG
 Directory.CreateDirectory(scratch);
 try
 {
+    Console.WriteLine($"WINDOWS_INSTALLED_SETUP_CACHE_TEST_OK checks={SetupCacheTests.Run(scratch)} registry=isolated-hkcu msi=not-started");
     var updater = Assembly.Load("NETGRID.Updater");
     Console.WriteLine($"WINDOWS_UPDATE_RECOVERY_TEST_OK checks={RecoveryTests.Run(updater)} execution=isolated-callbacks UAC=not-started");
     var contractPath = Path.Combine(scratch, "contract.json");

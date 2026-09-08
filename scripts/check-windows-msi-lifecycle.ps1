@@ -43,6 +43,13 @@ try {
     $checked++
   }
   if ($checked -ne 5) { throw 'installer_lifecycle_custom_actions_missing' }
+  $launcherComponent = @(Read-InstallerRows "SELECT ``Component_`` FROM ``File`` WHERE ``File`` = 'NetgridLauncher'" 1)
+  $cacheSelector = @(Read-InstallerRows "SELECT ``Root``, ``Key``, ``Value``, ``Component_`` FROM ``Registry`` WHERE ``Name`` = 'CurrentProductCode'" 4)
+  if ($launcherComponent.Count -ne 1 -or $cacheSelector.Count -ne 1 -or $cacheSelector[0][0] -ne '2' -or
+      $cacheSelector[0][1] -ine 'Software\LevelX2\NETGRID' -or $cacheSelector[0][2] -ne '[ProductCode]' -or
+      $cacheSelector[0][3] -ne $launcherComponent[0][0]) { throw 'installer_lifecycle_setup_selector_not_msi_owned' }
+  $cacheShortcut = @(Read-InstallerRows "SELECT ``Target`` FROM ``Shortcut`` WHERE ``Shortcut`` = 'NetgridSetupStartMenuShortcut'" 1)
+  if ($cacheShortcut.Count -ne 1 -or $cacheShortcut[0][0] -ne '[NETGRID_DATA_ROOT]\config\updates\[ProductCode]\NETGRID-Setup.exe') { throw 'installer_lifecycle_setup_shortcut_unbound' }
   $properties = @{}
   foreach ($row in (Read-InstallerRows 'SELECT `Property`, `Value` FROM `Property`' 2)) { $properties[$row[0]] = $row[1] }
   if ($properties['MSIRESTARTMANAGERCONTROL'] -ne 'DisableShutdown') { throw 'installer_lifecycle_restart_manager_conflict' }

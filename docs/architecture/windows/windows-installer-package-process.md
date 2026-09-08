@@ -317,6 +317,24 @@ Benötigt wird eine transaktionsgebundene Cache-Zuordnung einschließlich
 Fehlschlag, Repair, direktem Versionswechsel und Updater-Rollback.
 Der Test hat keine Cachedatei zur Kaschierung dieses Fehlers umgeschrieben.
 
+Der anschließende Ursachen-Fix verwendet unveränderliche Cacheeinträge je
+ProductCode statt globaler aktueller/pending Slots. MSI besitzt den Selektor
+`CurrentProductCode` und die produktgebundene Setup-Verknüpfung; Updater und
+Absturzreparatur wählen über denselben gemeinsamen Reader. 21 echte
+Datei-/HKCU-Cachechecks, 23 Recoveryprüfungen, 407 Lifecyclechecks und fünf
+Authoringtests sind grün. Die Runtimekonfigurationssuite besteht unter
+Windows PowerShell 5.1; der erste Aufruf unter PowerShell 7 scheiterte an den
+vorhandenen Framework-ACL-Methoden des Testskripts, seine eigene temporäre
+Fixture wurde gezielt bereinigt. Der MSI-Autorisierungsprobe unter
+`output/msi-authoring-probe-ea6bcb2896654c56829257a47f42e3d1` und dessen
+WiX-Rückübersetzung bestätigen Registry-Owner, Shortcutbindung und Sequenz.
+Diese Probe enthält inerte Dateien und wurde nicht installiert.
+Ein vollständiger neuer Produktbuild und native Cacheabnahme stehen aus.
+Vor dem Zweiversionslauf zusätzlich die Dateiversionierung prüfen:
+Die produktgebundenen EXEs von 8190 tragen trotz unterschiedlicher
+Git-Buildkennung noch durchgehend `FileVersion=1.0.0.0`; unveränderte
+Dateiversionen dürfen keinen unbemerkten Verbleib alter Programmbytes erlauben.
+
 | Nachweis | Aktuelle belastbare Evidenz | Noch erforderlich |
 | --- | --- | --- |
 | Produktgrenze und Installer-Payload | Builds 8136 und 8145 regulär aus sauberen Quellständen gebaut, jeweils 10.901-Dateien-Audit und Setup-/MSI-Prüfsummen grün; installierte Binärdateien zusätzlich für 8136 gebunden | Für beide Builds erfüllt; keine Versions-/Hash-Umetikettierung |

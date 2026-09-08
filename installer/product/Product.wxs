@@ -53,6 +53,7 @@
     <Component Directory="INSTALLFOLDER">
       <File Id="NetgridLauncher" Source="$(LauncherRoot)\NETGRID.exe" />
       <RegistryValue Root="HKLM" Key="Software\LevelX2\NETGRID" Name="InstallerLifecycleProtocol" Type="string" Value="msi-data-v1" />
+      <RegistryValue Root="HKLM" Key="Software\LevelX2\NETGRID" Name="CurrentProductCode" Type="string" Value="[ProductCode]" />
     </Component>
     <Component Directory="INSTALLFOLDER">
       <File Id="NetgridFirstRun" Source="$(FirstRunRoot)\NETGRID.FirstRun.exe" />
@@ -63,7 +64,7 @@
     <Component Directory="NETGRIDPROGRAMMENU">
       <Shortcut Id="NetgridStartMenuShortcut" Name="NETGRID" Target="[#NetgridLauncher]" WorkingDirectory="INSTALLFOLDER" Icon="NetgridIcon" />
       <Shortcut Id="NetgridMaintenanceStartMenuShortcut" Name="NETGRID Maintenance" Target="[#NetgridLauncher]" Arguments="--open-maintenance" WorkingDirectory="INSTALLFOLDER" Icon="NetgridIcon" />
-      <Shortcut Id="NetgridSetupStartMenuShortcut" Name="NETGRID Setup" Target="[NETGRID_DATA_ROOT]\config\updates\NETGRID-Setup.exe" Arguments="--uninstall" WorkingDirectory="INSTALLFOLDER" Icon="NetgridIcon" />
+      <Shortcut Id="NetgridSetupStartMenuShortcut" Name="NETGRID Setup" Target="[NETGRID_DATA_ROOT]\config\updates\[ProductCode]\NETGRID-Setup.exe" Arguments="--uninstall" WorkingDirectory="INSTALLFOLDER" Icon="NetgridIcon" />
       <RemoveFolder Id="RemoveNetgridProgramMenu" On="uninstall" />
       <RegistryValue Root="HKLM" Key="Software\LevelX2\NETGRID" Name="StartMenuShortcuts" Type="integer" Value="1" KeyPath="yes" />
       <RegistryValue Root="HKLM" Key="Software\LevelX2\NETGRID" Name="InstallDirectory" Type="string" Value="[INSTALLFOLDER]" />
@@ -169,7 +170,7 @@
       HideTarget="yes" />
     <SetProperty
       Id="CacheNetgridSetup"
-      Value='cache-setup --data-root "[NETGRID_DATA_ROOT]" --source "[NETGRID_SETUP_SOURCE]" --sha256 "[NETGRID_SETUP_SHA256]"'
+      Value='cache-setup --data-root "[NETGRID_DATA_ROOT]" --product-code "[ProductCode]" --source "[NETGRID_SETUP_SOURCE]" --sha256 "[NETGRID_SETUP_SHA256]"'
       Before="CacheNetgridSetup"
       Sequence="execute"
       Condition='NOT REMOVE~="ALL" AND NETGRID_SETUP_SOURCE &lt;&gt; ""' />

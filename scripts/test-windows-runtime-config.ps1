@@ -119,22 +119,27 @@ NETGRID_INITIAL_CLEANUP_RETENTION_DAYS=30
   }
 
   $cacheRoot = Join-Path $scratch "cache-data"
+  New-Item -ItemType Directory -Path (Join-Path $cacheRoot 'config') -Force | Out-Null
+  $cacheProductA = '{47062817-1ECC-4283-B95D-AF23557B9771}'
+  $cacheProductB = '{3552C5AD-00F5-47D3-A332-BEC6CA280ED7}'
   $setupFixture = Join-Path $scratch "setup-fixture.exe"
   [System.IO.File]::WriteAllText($setupFixture, "setup-v1")
   $setupHash = (Get-FileHash -LiteralPath $setupFixture -Algorithm SHA256).Hash.ToLowerInvariant()
-  Invoke-RuntimeConfig -Arguments @("cache-setup", "--data-root", $cacheRoot, "--state-file", (Join-Path $scratch "cache-state.json"), "--source", $setupFixture, "--sha256", $setupHash)
-  $cachedSetup = Join-Path $cacheRoot "config\updates\NETGRID-Setup.exe"
+  Invoke-RuntimeConfig -Arguments @("cache-setup", "--data-root", $cacheRoot, "--product-code", $cacheProductA, "--state-file", (Join-Path $scratch "cache-state.json"), "--source", $setupFixture, "--sha256", $setupHash)
+  $cachedSetup = Join-Path $cacheRoot "config\updates\$cacheProductA\NETGRID-Setup.exe"
   if ((Get-FileHash -LiteralPath $cachedSetup -Algorithm SHA256).Hash.ToLowerInvariant() -ne $setupHash) {
     throw "Der geschützte Setup-Cache enthält nicht die geprüfte Ausgangsdatei."
   }
   [System.IO.File]::WriteAllText($setupFixture, "setup-v2")
   $pendingHash = (Get-FileHash -LiteralPath $setupFixture -Algorithm SHA256).Hash.ToLowerInvariant()
-  Invoke-RuntimeConfig -Arguments @("cache-setup", "--data-root", $cacheRoot, "--state-file", (Join-Path $scratch "cache-state.json"), "--source", $setupFixture, "--sha256", $pendingHash)
-  if ((Get-FileHash -LiteralPath (Join-Path $cacheRoot "config\updates\NETGRID-Setup.pending.exe") -Algorithm SHA256).Hash.ToLowerInvariant() -ne $pendingHash -or
+  Invoke-RuntimeConfig -Arguments @("cache-setup", "--data-root", $cacheRoot, "--product-code", $cacheProductB, "--state-file", (Join-Path $scratch "cache-state.json"), "--source", $setupFixture, "--sha256", $pendingHash)
+  if ((Get-FileHash -LiteralPath (Join-Path $cacheRoot "config\updates\$cacheProductB\NETGRID-Setup.exe") -Algorithm SHA256).Hash.ToLowerInvariant() -ne $pendingHash -or
       (Get-FileHash -LiteralPath $cachedSetup -Algorithm SHA256).Hash.ToLowerInvariant() -ne $setupHash) {
     throw "Der Setup-Cache hat die verifizierte Vorversion vorzeitig ersetzt."
   }
-  Invoke-RuntimeConfig -Arguments @("cache-setup", "--data-root", (Join-Path $scratch "bad-cache"), "--state-file", (Join-Path $scratch "bad-cache-state.json"), "--source", $setupFixture, "--sha256", ("0" * 64)) -ExpectedExitCode 2
+  Invoke-RuntimeConfig -Arguments @("cache-setup", "--data-root", $cacheRoot, "--product-code", $cacheProductA, "--state-file", (Join-Path $scratch "cache-state.json"), "--source", $setupFixture, "--sha256", $pendingHash) -ExpectedExitCode 2
+  Invoke-RuntimeConfig -Arguments @("cache-setup", "--data-root", $cacheRoot, "--product-code", $cacheProductB, "--state-file", (Join-Path $scratch "cache-state.json"), "--source", $setupFixture, "--sha256", ("0" * 64)) -ExpectedExitCode 2
+  if (Test-Path -LiteralPath (Join-Path $cacheRoot 'config\updates\NETGRID-Setup.pending.exe')) { throw 'unbound_setup_cache_slot_created' }
 
   $msiFixture = Join-Path $scratch "source-fixture.msi"
   [System.IO.File]::WriteAllText($msiFixture, "installer-source-fixture")

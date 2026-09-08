@@ -125,6 +125,21 @@ werden können.
 
 ### Installer-/Launcher-Koordination (in nativer Abnahme)
 
+Die Setup-Rückkehrdatei und die Setup-Verknüpfung sind an dieselbe MSI-
+Produktkennung gebunden. `InstalledSetupCache` schreibt ausschließlich
+`config/updates/<ProductCode>/NETGRID-Setup.exe`: Hashprüfung und Kopie halten
+die Quelldatei gegen Änderung gesperrt; Verzeichnisse werden beim Zugriff
+gegen Austausch gehalten. Ein vorhandener Eintrag darf nur mit exakt
+identischen Bytes wiederverwendet werden. Eine neue Produktkennung erhält
+einen getrennten Eintrag. MSI besitzt `CurrentProductCode` als Registrywert
+seiner Launcher-Komponente und nimmt ihn bei Fehlern transaktional zurück.
+Updater und Reparatur wählen über diese Registrierung, nicht über globale
+„aktuell“-/„pending“-Dateien. Die Rückkehrdatei bleibt zusätzlich im
+geschützten Updatesnapshot gehalten. Nach Erfolg oder Rücknahme wird der
+selektierte Cachehash vor Freigabe gegen den erwarteten Stand geprüft.
+Die Komponenten- und MSI-Tabellenprüfungen sind grün; der native Nachweis
+dieser Cacheänderung mit zwei aktuellen Produktbuilds ist noch offen.
+
 Die MSI-Transaktion besitzt eine pro Programmordner gebundene Installersperre
 unter `HKLM\SOFTWARE\LevelX2\NETGRID.InstallerLifecycle` (64-Bit-Ansicht).
 Der gemeinsame Writer ist nur in erhöhte MSI-Aktion und Updater eingebunden;

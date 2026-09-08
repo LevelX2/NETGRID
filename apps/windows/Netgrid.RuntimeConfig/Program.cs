@@ -29,8 +29,9 @@ internal static class Program
             }
             if (string.Equals(command.Name, "cache-setup", StringComparison.OrdinalIgnoreCase))
             {
-                SetupCache.Store(
+                InstalledSetupCache.Store(
                     ResolveCacheDataRoot(command.Optional("--data-root"), command.Optional("--state-file")),
+                    command.Required("--product-code"),
                     RequireAbsoluteFile(command.Optional("--source") ?? string.Empty, "setup_cache_source_missing"),
                     command.Optional("--sha256") ?? string.Empty
                 );
@@ -113,6 +114,11 @@ internal static class Program
             );
             return 2;
         }
+        catch (InvalidOperationException exception) when (exception.Message.StartsWith("setup_cache_", StringComparison.Ordinal))
+        {
+            Console.Error.WriteLine($"NETGRID_RUNTIME_CONFIG_ERROR code={exception.Message}");
+            return 2;
+        }
         catch (Exception exception)
         {
             Console.Error.WriteLine(
@@ -173,28 +179,6 @@ internal static class Program
             {
                 if (File.Exists(temporary)) File.Delete(temporary);
             }
-        }
-    }
-
-    private static class SetupCache
-    {
-        public static void Store(string dataRoot, string source, string expectedHash)
-        {
-            if (expectedHash.Length != 64 || !expectedHash.All(Uri.IsHexDigit))
-                throw new RuntimeConfigException("setup_cache_hash_invalid", "Die Setup-Prüfsumme ist ungültig.");
-            using (var stream = File.OpenRead(source))
-            {
-                var actual = Convert.ToHexString(SHA256.HashData(stream)).ToLowerInvariant();
-                if (!actual.Equals(expectedHash, StringComparison.OrdinalIgnoreCase))
-                    throw new RuntimeConfigException("setup_cache_hash_mismatch", "Die Setup-Datei stimmt nicht mit ihrer Prüfsumme überein.");
-            }
-            var root = Path.Combine(dataRoot, "config", "updates");
-            Directory.CreateDirectory(root);
-            var current = Path.Combine(root, "NETGRID-Setup.exe");
-            var destination = File.Exists(current) ? Path.Combine(root, "NETGRID-Setup.pending.exe") : current;
-            var temporary = $"{destination}.{Guid.NewGuid():N}.tmp";
-            File.Copy(source, temporary, overwrite: true);
-            File.Move(temporary, destination, overwrite: true);
         }
     }
 

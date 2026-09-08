@@ -86,7 +86,7 @@ internal static class UpdateRecovery
                 () =>
                 {
                     snapshot.AssertProtectedFilesUnchanged();
-                    UpdateTransaction.PromoteCachedSetup(dataRoot);
+                    UpdateTransaction.RequireRegisteredSetup(request.ProgramRoot, dataRoot, binding.PreviousSetupSha256);
                     File.AppendAllText(logPath, $"{DateTimeOffset.UtcNow:O} recovery_health_verified restart=manual-normal-user{Environment.NewLine}");
                     // No elevated restart: the original user's token is gone.
                     // Release all data locks before allowing a fresh shortcut.

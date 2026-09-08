@@ -46,24 +46,36 @@ Integritätsangaben werden nicht installiert.
 8. Der konkret gebundene `NETGRID.exe --headless-verify` startet unter der
    eigenen Prüfausnahme Server und Webclient, prüft beide Healthpfade und
    beendet sie kontrolliert. Erst danach wird der neue
-   Setuphost aus dem installerverwalteten Cache als neue Vorversion
-   übernommen und NETGRID neu gestartet. Der Cache liegt unter `config`, ist
-   für normale Benutzer schreibgeschützt und hält bis zu diesem Healthcheck
-   die alte Version unverändert.
+   Setuphost aus dem zur registrierten MSI-Produktkennung gehörenden Cache
+   nochmals gegen die erwartete Prüfsumme geprüft und NETGRID neu gestartet.
+   Die Cacheeinträge unter `config/updates/<ProductCode>/NETGRID-Setup.exe`
+   sind getrennt und unveränderlich; normale Benutzer können sie nicht
+   schreiben. MSI besitzt den Registry-Selektor `CurrentProductCode` und
+   nimmt ihn bei Transaktionsfehlern zusammen mit den Programmdateien zurück.
+   Der alte Cacheeintrag bleibt unabhängig vom Selektor erhalten.
 
 ### Noch offene Abnahmen vor der Freigabe
 
-Die native Wiederinstallation 8190 über erhaltene Sandboxdaten belegt einen
-offenen Cachefehler: `config/updates/NETGRID-Setup.exe` bleibt auf dem alten
+Die native Wiederinstallation 8190 über erhaltene Sandboxdaten belegt den
+Cachefehler des bisherigen Stands: `config/updates/NETGRID-Setup.exe` bleibt auf dem alten
 Stand, während nur `NETGRID-Setup.pending.exe` der installierten Version
 entspricht. Im direkten MSI-/Setupweg fehlt die transaktionsgebundene
 Übernahme. Deshalb sind die alte Datei als Updater-Rückkehrversion und die
 darauf zeigende Setup-Startmenüverknüpfung derzeit nicht verlässlich.
-Die Cachedateien nicht manuell umbenennen und diesen Zustand nicht als
-Release freigeben. Der Ursachen-Fix muss Cacheidentität, erfolgreichen
-Abschluss und Rücknahme zusammen binden; die grüne native Installation,
-Headless-Healthprüfung und direkte MSI-Deinstallation von 8190 ersetzen
-diesen offenen Nachweis nicht.
+Der Quellstand ersetzt die globalen Slots inzwischen durch den oben
+beschriebenen produktgebundenen Cache. Runtimekonfigurator, Updater,
+Absturzreparatur und Setup-Verknüpfung verwenden dieselbe Zuordnung.
+Gleiche Produktkennung mit anderem Setupinhalt wird abgewiesen; eine
+identische Reparatur schreibt die Datei nicht neu. Es gibt keinen Rückgriff
+auf alte globale Dateien oder den Cache einer anderen Produktkennung.
+Ein direktes MSI ohne mitgelieferte, passende Setupquelle erzeugt weiterhin
+keinen nutzbaren Setupcache für diese Produktkennung; diesen Fall nicht als
+vollständig updatefähige Installation abnehmen.
+Die 21 Cachetests verwenden eigene Dateien und HKCU-Fixtures, keine echte
+MSI-Rücknahme. Reale Wiederinstallation, Versionswechsel, Repair,
+GUI-Uninstall und Updater-Rollback mit zwei neuen Cache-Ständen bleiben
+vor der Releasefreigabe nativ abzunehmen. Den 8190-Cache nicht manuell
+umbenennen und dessen frühere native Ergebnisse nicht auf den Fix übertragen.
 
 Die zusammenhängende Tray-/Updater-Anbindung ersetzt inzwischen die zweite
 Readiness-Momentaufnahme durch atomare Vorbereitung, Prozessbindung und

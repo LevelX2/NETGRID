@@ -36,6 +36,15 @@ export function checkLifecycleBinary(file) {
 }
 
 export function checkLifecycleAuthoring(authoring) {
+  const selector = authoring.match(/<RegistryValue\b[^>]*\bName="CurrentProductCode"[^>]*>/)?.[0];
+  const shortcut = authoring.match(/<Shortcut\b[^>]*\bId="NetgridSetupStartMenuShortcut"[^>]*>/)?.[0];
+  const cacheArguments = [...authoring.matchAll(/<(?:SetProperty|CustomAction)\b[^>]*>/g)]
+    .map(match => match[0]).find(tag => tag.includes('Value=') &&
+      (tag.includes('Id="CacheNetgridSetup"') || tag.includes('Property="CacheNetgridSetup"')));
+  if (!selector?.includes('Value="[ProductCode]"') ||
+      !shortcut?.includes('Target="[NETGRID_DATA_ROOT]\\config\\updates\\[ProductCode]\\NETGRID-Setup.exe"') ||
+      !(cacheArguments?.includes('--product-code "[ProductCode]"') || cacheArguments?.includes('--product-code &quot;[ProductCode]&quot;')))
+    throw new Error("installer_lifecycle_setup_cache_identity_unbound");
   for (const action of actions) {
     const definition = authoring.match(new RegExp(`<CustomAction Id="${action}"[^>]+>`))?.[0];
     if (!definition?.includes('BinaryRef="NetgridLifecycleActions"') || !definition.includes(`DllEntry="${action}"`))
