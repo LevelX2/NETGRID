@@ -6,9 +6,11 @@ import {
   rm,
   writeFile,
 } from "node:fs/promises";
-import { join, resolve } from "node:path";
+import { isAbsolute, join, relative, resolve, sep } from "node:path";
 import { homedir } from "node:os";
 import type { EditableDeck } from "@netgrid/decks";
+import { runtimeProfileFromEnvironment } from "@netgrid/shared";
+import { resolveNetgridDataRoot } from "@netgrid/card-images/paths";
 
 const LIBRARY_SCHEMA_VERSION = "netgrid-editable-deck-v1";
 const PRIVATE_LOCAL_PROFILE_ID = "netgrid_private_local_v1";
@@ -29,6 +31,23 @@ export function defaultDeckLibraryPath(
   env: NodeJS.ProcessEnv = process.env,
 ): string {
   const configuredPath = env.NETGRID_DECK_LIBRARY_PATH;
+  if (runtimeProfileFromEnvironment(env) === "release") {
+    if (!env.NETGRID_DATA_ROOT?.trim())
+      throw new Error("release_data_root_required");
+    const dataRoot = resolveNetgridDataRoot({ env });
+    if (!configuredPath) return join(dataRoot, "runtime", "decks");
+    const libraryPath = resolve(configuredPath);
+    const inside = relative(dataRoot, libraryPath);
+    if (
+      !isAbsolute(configuredPath) ||
+      inside === "" ||
+      inside === ".." ||
+      inside.startsWith(`..${sep}`) ||
+      isAbsolute(inside)
+    )
+      throw new Error("release_deck_library_outside_data_root");
+    return libraryPath;
+  }
   if (configuredPath) return resolve(configuredPath);
   if (env.APPDATA) return join(env.APPDATA, "NetGrid", "Decks");
   if (env.XDG_DATA_HOME) return join(env.XDG_DATA_HOME, "netgrid", "decks");

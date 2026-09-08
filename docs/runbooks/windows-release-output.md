@@ -108,6 +108,22 @@ den Offline-Versionswechselcheck. Für einen vollständigen Releaseabschluss
 ist neben diesen Komponententests insbesondere die Backup-/Health-/Restore-
 Absicherung direkter MSI-Versionswechsel noch offen.
 
+Auch im Updater ist das bestehende `backup-update` derzeit nur ein geprüftes
+Match-SQLite-Backup. Es ist kein vollständiges Datenroot-Backup und darf nicht
+als solches abgenommen werden. Konfiguration, separate Kontendatenbanken,
+Maintenance-Credentials, Deckdateien und persönliche Kartenbilder benötigen
+noch einen gemeinsamen gesicherten Snapshot-/Restore-Vertrag. Bestehende
+Zugangsdaten dürfen dabei nicht überschrieben werden.
+
+Die Deckbibliothek liegt im Releaseprofil nun unter
+`NETGRID_DATA_ROOT/runtime/decks`; ein expliziter Bibliothekspfad muss innerhalb
+dieses Roots liegen. `APPDATA` entscheidet nur weiterhin über die bisherige
+Entwicklungsablage. Der fokussierte Test
+`corepack pnpm --filter @netgrid/web exec vitest run app/api/decks/library-store.test.ts --maxWorkers=1`
+prüft auch tatsächliches Lesen und Schreiben ohne Import oder Änderung von
+Entwicklungsdecks. Das ersetzt weder einen neuen Payload-Build noch das offene
+vollständige Backup-/Restore-Gate.
+
 ```powershell
 .\.tools\dotnet\dotnet.exe run --project tests/windows/Netgrid.InstallerLifecycle.Tests/Netgrid.InstallerLifecycle.Tests.csproj -c Release
 .\.tools\dotnet\dotnet.exe run --project tests/windows/Netgrid.Launcher.Tests/Netgrid.Launcher.Tests.csproj -c Release -- --check-installation-stop

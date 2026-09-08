@@ -1196,9 +1196,26 @@ Kein Installer wurde in diesem Schritt neu gebaut oder ausgeführt; kein
 UAC-/SYSTEM-/anderes Administratorkonto-Test wurde behauptet. Der aktuelle
 Quellpfad ersetzt weder die Zwei-Build-MSI-Abnahme noch Payload- oder
 Uninstall-Nachweise. Außerdem bleibt zu klären und umzusetzen, wie direkte
-MSI-Versionswechsel den vollständigen Backup-/Health-/Restore-Vertrag des
-Updaters erfüllen; die Aktivspielprüfung allein ist kein vollständiges
+MSI-Versionswechsel den geforderten vollständigen Backup-/Health-/Restore-
+Vertrag erfüllen; die Aktivspielprüfung allein ist kein vollständiges
 Transaktions- oder Release-Done. Sandbox, 8169 und Zugangsdaten sind unverändert.
+
+Die anschließende Prüfung der Sicherungsquelle zeigt eine weitere konkrete
+Lücke innerhalb dieses Vertrags: Auch der vorhandene Updater sichert mit
+`backup-update` nur die Match-SQLite-Datei. Separate Kontendatenbanken,
+Konfiguration, Credentials, Deckdateien und Kartenbilder sind nicht enthalten.
+Ein vollständiges Datenbackup ist deshalb für beide Updatewege noch offen.
+Der alte SQLite-Backupnachweis bleibt gültig, wird aber nicht als Nachweis
+für den vollständigen Datenbestand gewertet.
+
+Als notwendige Korrektur der Datenablage verwendet die Web-Deckbibliothek im
+Releaseprofil nun `NETGRID_DATA_ROOT/runtime/decks` statt des Windows-
+Benutzerprofils. Ungültige Releasepfade und Overrides außerhalb des Datenroots
+scheitern sichtbar; die Entwicklungsdefaults bleiben erhalten. Neun fokussierte
+Tests einschließlich tatsächlicher Standardpfad-I/O, simuliertem Wechsel von
+`APPDATA` und unveränderter Entwicklungsbibliothek sowie der Web-Typecheck sind
+grün. Das ist keine Windows-Identitäts-/ACL-Abnahme. Es wurde kein neuer
+Installer gebaut oder gestartet und kein bestehender Datenbestand migriert.
 
 Vor der Freigabe bleiben die vollständige Prozess-Ende-Raceprüfung,
 die native Abnahme direkter MSI-Updatepfade hinsichtlich

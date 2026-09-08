@@ -74,6 +74,12 @@ werden können.
 
 - Alle veränderlichen Daten liegen außerhalb des Programmordners unter einem
   absoluten `NETGRID_DATA_ROOT`.
+- Die bearbeitbare Deckbibliothek verwendet im Releaseprofil
+  `NETGRID_DATA_ROOT/runtime/decks`, unabhängig vom Windows-Benutzerprofil.
+  Ein expliziter `NETGRID_DECK_LIBRARY_PATH` muss ein absoluter Unterpfad des
+  Datenroots sein; fehlende oder ungültige Releasepfade brechen sichtbar ab.
+  Der Entwicklungsbetrieb behält seine bisherige benutzerbezogene Ablage.
+  Bestehende Entwicklungsdecks werden weder importiert noch verändert.
 - Standard ist `C:\ProgramData\NETGRID`. In den erweiterten Optionen darf ein
   anderer Ordner auf einem lokalen, dauerhaft verfügbaren Laufwerk gewählt
   werden.
@@ -224,10 +230,15 @@ abgebrochen. Es entsteht kein Legacy- oder Ersatzprotokoll. Die native
 Upgrade-/Downgrade-Abnahme benötigt daher zwei aktuelle Builds; alte
 Testkandidaten sind keine gültige Basis. Der Versionswechsel behält den
 registrierten Programmordner bei. Vollständige native Transaktions-,
-Reparatur- und Mehrbenutzerprüfungen bleiben offen. Ein updaterweites
-Backup/Health-/Restore-Protokoll wird weiterhin nur vom Updater bereitgestellt;
-die Transaktionsparität direkter MSI-Versionswechsel ist damit noch nicht
-als vollständig umgesetzt oder abgenommen erklärt.
+Reparatur- und Mehrbenutzerprüfungen bleiben offen. Nur der Updater bindet
+bislang Backup, Healthcheck und Restore als Ablauf zusammen. Sein
+`storage-admin.mjs backup-update` sichert jedoch ausschließlich die
+Match-SQLite-Datei, nicht den vollständigen Datenroot. Insbesondere separate
+Kontendatenbanken, Deckdateien, Konfiguration, Maintenance-Credentials und
+Kartenbilder sind darin nicht erfasst. Der vollständige Datenbackupvertrag
+und die Transaktionsparität direkter MSI-Versionswechsel sind deshalb noch
+nicht umgesetzt oder abgenommen; eine erfolgreiche SQLite-Sicherung allein
+erfüllt das Release-Gate nicht.
 
 ### Aufbewahrung gespeicherter Spiele
 
