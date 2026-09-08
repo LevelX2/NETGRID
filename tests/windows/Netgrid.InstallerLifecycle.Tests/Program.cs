@@ -3,6 +3,7 @@ using Netgrid.Windows;
 using System.Xml.Linq;
 
 if (LaunchFenceTests.TryChild(args)) return;
+if (RecoveryTakeoverTests.TryChild(args)) return;
 if (await DirectMsiPreparationTests.TryChildAsync(args)) return;
 
 var checks = 0;
@@ -117,4 +118,5 @@ var frameworkCondition = package.Elements(wix + "Launch").Select(x => (string)x.
     .Single(x => x.Contains("NETGRID_DOTNET_FRAMEWORK_RELEASE", StringComparison.Ordinal));
 Assert(frameworkCondition == "NETGRID_DOTNET_FRAMEWORK_RELEASE >= \"#528040\"", "framework_condition_uses_raw_dword_representation");
 checks += RecoveryBindingTests.Run();
+checks += RecoveryTakeoverTests.Run();
 Console.WriteLine($"INSTALLER_LIFECYCLE_TESTS_OK checks={checks} registry=isolated_HKCU fixtureCleanup=verified installed=false");

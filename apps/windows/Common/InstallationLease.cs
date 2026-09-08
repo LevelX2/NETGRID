@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Threading;
 using System.Diagnostics;
@@ -9,6 +10,47 @@ namespace Netgrid.Windows
     // Runtime components link the read-only InstallationGate, never this file.
     internal static class InstallationLease
     {
+        public static void TakeOverRecovery(RegistryKey root, string programRoot, InstallationGate.GateState expected,
+            Func<bool> productProcessesRemain)
+        {
+            InstallationLaunchFence.Execute(programRoot, () => Mutate(programRoot, () =>
+            {
+                var current = InstallationGate.Read(root, InstallationGate.KeyFor(programRoot));
+                if (current == null || current.Encode() != expected.Encode() || current.OwnerId == 0 ||
+                    (current.Phase != InstallationGate.GateState.Stopping && current.Phase != InstallationGate.GateState.Verifying))
+                    throw new InvalidOperationException("installation_gate_recovery_state_changed");
+                RequireRecoveryOwnerExited(current);
+                // A reused PID belongs to somebody else and is never killed.
+                // A verifier or product process must also have actually exited.
+                if (productProcessesRemain()) throw new InvalidOperationException("installation_gate_recovery_products_remain");
+                ReadRecovery(root, programRoot, current.Lease);
+                using (var owner = Process.GetCurrentProcess())
+                    Write(root, programRoot, new InstallationGate.GateState(current.Lease, InstallationGate.GateState.Stopping,
+                        current.CompletedUtcTicks, ownerId: owner.Id, ownerStart: owner.StartTime.ToUniversalTime().Ticks));
+                return true;
+            }));
+        }
+
+        public static void RequireRecoveryOwnerExited(InstallationGate.GateState current)
+        {
+            if (current.OwnerId == 0 || (current.Phase != InstallationGate.GateState.Stopping && current.Phase != InstallationGate.GateState.Verifying))
+                throw new InvalidOperationException("installation_gate_recovery_state_changed");
+            if (current.MsiLease != "") throw new InvalidOperationException("installation_gate_msi_still_active");
+            Process? prior = null;
+            try
+            {
+                try { prior = Process.GetProcessById(current.OwnerId); }
+                catch (ArgumentException) { } // This exact PID no longer exists.
+                if (prior != null)
+                {
+                    var handle = prior.Handle;
+                    if (!prior.HasExited && prior.StartTime.ToUniversalTime().Ticks == current.OwnerStart)
+                        throw new InvalidOperationException("installation_gate_recovery_owner_alive");
+                }
+            }
+            finally { prior?.Dispose(); }
+        }
+
         public static void BindRecovery(RegistryKey root, string programRoot, UpdateRecoveryBinding binding)
         {
             Mutate(programRoot, () =>

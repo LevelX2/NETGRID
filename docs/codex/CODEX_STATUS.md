@@ -122,8 +122,10 @@ Sidecars und Kartenbildern; historische Backups und Installer-Caches sind
 ausgeschlossen. Credentials und Runtimekonfiguration werden beim Restore
 nicht überschrieben. Der Updater führt das MSI-Upgrade aus und startet erst
 nach Healthcheck neu. Der neue Sicherungspfad ist komponentenweise geprüft;
-direkte MSI-Anbindung, Wiederaufnahme nach Prozessverlust und native Abnahme
-bleiben offen. Bei Fehlern werden Programm und Daten soweit sicher möglich zurückgerollt,
+direkte MSI-Anbindung und native Abnahme bleiben offen. Ein expliziter
+Reparatureinstieg nach Prozessverlust ist mit geschützter Snapshot-/Setup-
+Bindung und geprüfter Übernahme der verwaisten Lease komponentenweise
+implementiert, aber noch nicht nativ abgenommen. Bei Fehlern werden Programm und Daten soweit sicher möglich zurückgerollt,
 andernfalls bleibt NETGRID klar diagnostiziert gestoppt. Alle Windows-
 Oberflächen verwenden eine gemeinsame vollständige Sprachquelle für Deutsch,
 Englisch und Französisch sowie das NETGRID-Icon. Die 3×3-Setup-Renderprüfung

@@ -308,12 +308,34 @@ erneut lesend gesperrt. Fehlende normale Datenverzeichnisse können anhand des
 Manifests mit ihren ursprünglichen Rechten neu angelegt werden; geschützte
 Dateien werden weiterhin niemals ersetzt.
 
-Das erneute Öffnen und Wiederherstellen nach Ende eines separaten
-Snapshot-Erzeugerprozesses ist komponentenweise geprüft. Es übernimmt aber
-keine verwaiste Installationslease und startet keine Reparatur von selbst.
-Der autorisierte Reparatureinstieg samt Owner-Übernahme nach Prozessverlust,
-direkte MSI-Anbindung, tatsächlich erhöhte Archivberechtigungen und die
-vollständige native Zwei-Build-Abnahme bleiben Release-Gates. Ein Fehler
+Das vorherige Setup wird vor dem ersten MSI-Start zusätzlich als
+`previous-setup.exe` im geschützten Snapshot gehalten und per gebundener
+Prüfsumme geöffnet. Ein bereits ausgetauschter Installer-Cache darf die
+Rückkehr zur Vorversion nach einem Prozessabbruch nicht verhindern.
+
+Der explizite Einstieg `NETGRID.Updater.exe --repair-update --program-root
+<Installationsordner>` fragt nach Zustimmung und startet einen erhöhten
+Reparaturhelfer aus einer separaten Kopie. Quelle, Kopie und sämtliche
+Elternverzeichnisse sind während dieser Übergabe gegen Austausch gesperrt;
+Junctions und Dateilinks werden abgewiesen. Der installierte Einstieg beendet
+sich vor dem MSI-Lauf. Die registrierte Installation und der geschützte
+Recovery-Wert bestimmen die Daten und das Setup; freie Archivpfade sind keine
+Reparaturautorität.
+
+Die Übernahme derselben Lease erfolgt nur in `stopping` oder `verifying`,
+nach nachgewiesenem Ende des ursprünglichen Owners, ohne MSI-Teiltransaktion
+und ohne verbleibende Produktprozesse. Zustand und Prozessidentität werden
+unter Start- und Schreibsperre erneut geprüft. Programmwiederherstellung,
+Datenrestore und gebundener Healthcheck müssen gelingen, bevor die Sperre
+freigegeben wird. Danach startet der Nutzer NETGRID über seine normale
+Verknüpfung; der Reparaturhelfer startet keine erhöhte Runtime.
+
+Wiederöffnen nach Ende eines separaten Snapshot-Erzeugers, Lease-Übernahme,
+Reparaturreihenfolge und Staging-Sperren sind komponentenweise geprüft.
+Die tatsächliche erhöhte Reparatur, direkte MSI-Anbindung, erhöhte
+Archivberechtigungen und die vollständige native Zwei-Build-Abnahme bleiben
+Release-Gates. Eine noch gebundene MSI-Teiltransaktion wird auch nach dem
+Owner-Ende nicht automatisch gelöscht. Ein Fehler
 erhält die Sicherungen und lässt die Installationssperre bestehen; er wird
 nicht als erfolgreiche Reparatur gewertet.
 

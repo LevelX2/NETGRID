@@ -135,10 +135,30 @@ gespeicherte Prüfsumme, Pfad-/ACL-Grenzen und unveränderte Credentials bleiben
 Pflicht. Der aktive Updater bezieht die Referenz aus dem geschützten
 `Recovery`-Wert seiner Installationslease und verwendet diesen Weg auch im
 normalen Rollback. Ein Archiv darf seine eigene Prüfsumme nicht als
-Wiederherstellungsfreigabe liefern. Der tatsächliche Reparatureinstieg mit
-geprüfter Übernahme einer verwaisten Lease und die direkte MSI-Anbindung sind
-noch offen. Archive nicht manuell in eine laufende Runtime
+Wiederherstellungsfreigabe liefern. Das vorherige Setup liegt zusätzlich
+prüfsummengebunden im Snapshot, unabhängig vom inzwischen ersetzten Cache.
+Der explizite Reparatureinstieg ist komponentenweise implementiert; seine
+native erhöhte Abnahme und die direkte MSI-Anbindung bleiben offen.
+Archive nicht manuell in eine laufende Runtime
 kopieren; insbesondere darf dabei kein Credentialstore überschrieben werden.
+
+Für die kontrollierte Reparatur eines abgebrochenen Updater-Laufs lautet der
+Einstieg bei Standardinstallation:
+
+```powershell
+& 'C:\Program Files\NETGRID\NETGRID.Updater.exe' --repair-update --program-root 'C:\Program Files\NETGRID'
+```
+
+Bei einem eigenen Installationsordner müssen beide Pfade auf diese registrierte
+Installation zeigen. Dies ist kein allgemeiner MSI-Reparaturbefehl. Der Einstieg
+fragt ausdrücklich nach Zustimmung und fordert Windows-Administratorrechte
+an. Eine noch laufende Update-Instanz, eine gebundene MSI-Teiltransaktion,
+verbleibende Produktprozesse oder ein unvollständiges/verändertes Archiv
+verhindern die Reparatur. Registry-Sperren nicht manuell löschen. Der erhöhte
+Helfer stellt die gebundene Vorversion und Daten wieder her und prüft sie vor
+der Freigabe. Erst nach der Erfolgsmeldung NETGRID über die normale Verknüpfung
+starten; der Helfer startet keine Administrator-Runtime. Diese native
+Gesamtstrecke ist noch nicht als Release-Nachweis abgenommen.
 
 Die Deckbibliothek liegt im Releaseprofil nun unter
 `NETGRID_DATA_ROOT/runtime/decks`; ein expliziter Bibliothekspfad muss innerhalb

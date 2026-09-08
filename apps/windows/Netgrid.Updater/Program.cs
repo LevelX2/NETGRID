@@ -42,6 +42,19 @@ internal static class Program
                 var actual = Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(Path.GetFullPath(args[1])))).ToLowerInvariant();
                 return actual.Equals(args[2], StringComparison.OrdinalIgnoreCase) ? 0 : 2;
             }
+            if (args.Length > 0 && args[0] == "--repair-update")
+            {
+                ApplicationConfiguration.Initialize();
+                return UpdateRecovery.Start(args);
+            }
+            if (args.Length > 0 && args[0] == "--repair-worker")
+            {
+                var recovery = RecoveryRequest.Parse(args);
+                ApplicationConfiguration.Initialize();
+                UpdateRecovery.Run(recovery);
+                MessageBox.Show(UiText.Get("updater.repair_success"), "NETGRID", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return 0;
+            }
             var options = UpdateRequest.Parse(args);
             ApplicationConfiguration.Initialize();
             return UpdateTransaction.Run(options);
@@ -59,7 +72,8 @@ internal static class Program
         }
         catch (Exception)
         {
-            MessageBox.Show(UiText.Get("updater.failed"), "NETGRID Update", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show(UiText.Get(args.Length > 0 && args[0].StartsWith("--repair-", StringComparison.Ordinal)
+                ? "updater.repair_failed" : "updater.failed"), "NETGRID Update", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return 3;
         }
     }
@@ -105,6 +119,7 @@ internal static class UpdateTransaction
         RequireProductAbsent(options.ProgramRoot);
         using var backup = UpdateDataSnapshot.Capture(new UpdateDataLayout(dataRoot, environment));
         backup.Verify();
+        backup.StorePreviousSetup(previousSetup, previousHash);
         session.BindRecovery(dataRoot, Path.GetFileName(backup.DirectoryPath), backup.ManifestSha256, previousHash);
         WriteLog(logPath, $"backup_verified:{Path.GetFileName(backup.DirectoryPath)}:{backup.ManifestSha256}");
         RequireProductAbsent(options.ProgramRoot);
@@ -142,7 +157,7 @@ internal static class UpdateTransaction
         // The authored downgrade replaces the new product inside one MSI
         // transaction. A separate uninstall would remove the registered
         // install identity before the bound old Setup can validate it.
-        var reinstallCode = RunVerified(previousSetup, previousHash, ["--install-update", "--program-root", options.ProgramRoot, "--update-lease", options.Lease]);
+        var reinstallCode = RunVerified(backup.PreviousSetupPath, previousHash, ["--install-update", "--program-root", options.ProgramRoot, "--update-lease", options.Lease]);
         if (reinstallCode != 0)
             throw new InvalidOperationException($"updater_program_rollback_failed:install={reinstallCode}");
         RequireProductAbsent(options.ProgramRoot);
@@ -189,7 +204,7 @@ internal static class UpdateTransaction
         return process.ExitCode;
     }
 
-    private static int RunVerified(string executable, string expectedHash, IReadOnlyList<string> arguments)
+    internal static int RunVerified(string executable, string expectedHash, IReadOnlyList<string> arguments)
     {
         using var locked = new FileStream(executable, FileMode.Open, FileAccess.Read, FileShare.Read);
         var actual = Convert.ToHexString(SHA256.HashData(locked)).ToLowerInvariant();
@@ -197,7 +212,7 @@ internal static class UpdateTransaction
         return Run(executable, arguments);
     }
 
-    private static IReadOnlyDictionary<string, string> ReadEnvironment(string path)
+    internal static IReadOnlyDictionary<string, string> ReadEnvironment(string path)
     {
         var values = new Dictionary<string, string>(StringComparer.Ordinal);
         foreach (var raw in File.ReadAllLines(path))
@@ -228,7 +243,7 @@ internal static class UpdateTransaction
         if (!options.SetupPath.StartsWith(staging, StringComparison.OrdinalIgnoreCase) || !File.Exists(options.SetupPath)) throw new InvalidOperationException("updater_setup_scope_invalid");
     }
 
-    private static void PromoteCachedSetup(string dataRoot)
+    internal static void PromoteCachedSetup(string dataRoot)
     {
         var root = Path.Combine(dataRoot, "config", "updates");
         var pending = Path.Combine(root, "NETGRID-Setup.pending.exe");
@@ -249,6 +264,6 @@ internal static class UpdateTransaction
         return redacted;
     }
     private static void WriteLog(string path, string message) => File.AppendAllText(path, $"{DateTimeOffset.Now:O} {message}{Environment.NewLine}");
-    private static void WriteFailure(string path, Exception exception, IReadOnlyDictionary<string, string> environment) =>
+    internal static void WriteFailure(string path, Exception exception, IReadOnlyDictionary<string, string> environment) =>
         WriteLog(path, $"transaction_failed:{exception.GetType().Name}:{SafeError(Redact(exception.Message, environment))}");
 }

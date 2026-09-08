@@ -13,6 +13,7 @@ internal static class StagedUpdaterTests
             var program = Path.Combine(scratch, "program");
             var data = Path.Combine(scratch, "data");
             Directory.CreateDirectory(program);
+            Directory.CreateDirectory(data);
             // Inert Windows CLI, not NETGRID or an installer. /q with a fresh
             // absent name performs only a lookup and returns exit code 1.
             var source = Path.Combine(program, "NETGRID.Updater.exe");
@@ -62,6 +63,29 @@ internal static class StagedUpdaterTests
             finally { first.Dispose(); }
             using (new FileStream(staged, FileMode.Open, FileAccess.Write, FileShare.None)) Assert(true, "dispose_releases_own_staging_lock");
             using (new FileStream(source, FileMode.Open, FileAccess.Write, FileShare.None)) Assert(true, "dispose_releases_source_lock");
+            var linkData = Path.Combine(scratch, "linked-data");
+            var target = Path.Combine(scratch, "junction-target");
+            Directory.CreateDirectory(linkData);
+            Directory.CreateDirectory(target);
+            var link = Path.Combine(linkData, "runtime");
+            await Junction(link, target);
+            try
+            {
+                try
+                {
+                    using var unexpected = (IDisposable)type.GetMethod("Create")!.Invoke(null, [program, linkData])!;
+                    throw new Exception("staging_test_failed:junction_accepted");
+                }
+                catch (TargetInvocationException error) when (error.InnerException is InvalidOperationException cause &&
+                    cause.Message == "update_data_directory_reparse_or_invalid") { checks++; }
+                Assert(!Directory.EnumerateFileSystemEntries(target).Any(), "junction_target_untouched");
+                using (new FileStream(source, FileMode.Open, FileAccess.Write, FileShare.None)) Assert(true, "failure_releases_source_lock");
+                var moved = linkData + "-moved";
+                Directory.Move(linkData, moved);
+                Directory.Move(moved, linkData);
+                Assert(true, "failure_releases_directory_pins");
+            }
+            finally { Directory.Delete(link); } // Only the fixture junction, never its target.
         }
         finally
         {
@@ -78,5 +102,22 @@ internal static class StagedUpdaterTests
             catch (IOException) { checks++; return; }
             throw new Exception("staging_rejection_missing:" + name);
         }
+    }
+
+    private static async Task Junction(string link, string target)
+    {
+        var command = "$ErrorActionPreference='Stop'; New-Item -ItemType Junction -Path '" + link.Replace("'", "''") +
+            "' -Target '" + target.Replace("'", "''") + "' | Out-Null";
+        var start = new ProcessStartInfo("powershell.exe") { UseShellExecute = false, CreateNoWindow = true, RedirectStandardError = true };
+        foreach (var argument in new[] { "-NoProfile", "-NonInteractive", "-EncodedCommand",
+            Convert.ToBase64String(System.Text.Encoding.Unicode.GetBytes(command)) }) start.ArgumentList.Add(argument);
+        using var child = Process.Start(start) ?? throw new Exception("staging_junction_fixture_start_failed");
+        var error = child.StandardError.ReadToEndAsync();
+        try
+        {
+            await child.WaitForExitAsync().WaitAsync(TimeSpan.FromSeconds(15));
+            if (child.ExitCode != 0) throw new Exception("staging_junction_fixture_failed:" + await error);
+        }
+        finally { if (!child.HasExited) { child.Kill(); await child.WaitForExitAsync(); } }
     }
 }

@@ -14,6 +14,7 @@
     <ApplicationIcon>..\..\web\public\brand\netgrid.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\Common\UpdateDataFiles.cs" Link="UpdateDataFiles.cs" />
     <Compile Include="..\Common\UpdateHandoff.cs" Link="UpdateHandoff.cs" />
     <Compile Include="..\Common\UpdateRequest.cs" Link="UpdateRequest.cs" />
     <Compile Include="..\Common\UpdateVerification.cs" Link="UpdateVerification.cs" />

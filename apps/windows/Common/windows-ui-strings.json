@@ -181,7 +181,10 @@
     "updater.restart_failed": "Die geprüfte NETGRID-Installation konnte nicht automatisch geöffnet werden. Starten Sie NETGRID über das Startmenü. Details stehen im lokalen Updaterprotokoll.",
     "updater.previous_ready": "Das Update konnte nicht installiert werden. Die bisherige NETGRID-Version wurde geprüft und ist weiterhin verwendbar.",
     "updater.rollback": "Das Update schlug fehl. NETGRID und das geprüfte Datenbackup wurden auf den vorherigen Stand zurückgesetzt.",
-    "updater.failed": "NETGRID konnte nicht sicher aktualisiert werden. Die Anwendung bleibt gestoppt. Details stehen im lokalen Updaterprotokoll."
+    "updater.failed": "NETGRID konnte nicht sicher aktualisiert werden. Die Anwendung bleibt gestoppt. Details stehen im lokalen Updaterprotokoll.",
+    "updater.repair_confirm": "Möchten Sie das abgebrochene Update wiederherstellen? Die vorherige NETGRID-Version und ihr gesicherter Datenstand werden wiederhergestellt. Der aktuelle Datenstand wird vorher separat gesichert. Vorhandene Zugangsdaten werden nicht überschrieben. Windows fordert dafür Administratorrechte an.",
+    "updater.repair_success": "Die vorherige NETGRID-Version und ihre Daten wurden wiederhergestellt und geprüft. Starten Sie NETGRID jetzt über die normale Verknüpfung. Es wird nicht mit Windows-Administratorrechten gestartet.",
+    "updater.repair_failed": "Das abgebrochene Update konnte nicht sicher wiederhergestellt werden. Starten Sie NETGRID nicht und entfernen Sie keine Installationssperren von Hand. Prüfen Sie, ob noch ein Setup oder Updater läuft. Für die Diagnose stehen die lokalen Updaterprotokolle und gesicherten Daten bereit."
   },
   "en": {
     "setup.language.continue": "Continue",
@@ -365,7 +368,10 @@
     "updater.restart_failed": "The verified NETGRID installation could not be opened automatically. Start NETGRID from the Start menu. Details are available in the local updater log.",
     "updater.previous_ready": "The update could not be installed. The previous NETGRID version has been verified and is still usable.",
     "updater.rollback": "The update failed. NETGRID and the verified data backup were restored to the previous version.",
-    "updater.failed": "NETGRID could not be updated safely. The application remains stopped. Details are available in the local updater log."
+    "updater.failed": "NETGRID could not be updated safely. The application remains stopped. Details are available in the local updater log.",
+    "updater.repair_confirm": "Restore the interrupted update? The previous NETGRID version and its backed-up data will be restored. The current data will first be backed up separately. Existing credentials will not be overwritten. Windows will request administrator privileges.",
+    "updater.repair_success": "The previous NETGRID version and its data have been restored and verified. Start NETGRID using its normal shortcut. It will not be started with Windows administrator privileges.",
+    "updater.repair_failed": "The interrupted update could not be restored safely. Do not start NETGRID or manually remove installation locks. Check whether a setup or updater is still running. The local updater logs and data backups are available for diagnosis."
   },
   "fr": {
     "setup.language.continue": "Continuer",
@@ -549,6 +555,9 @@
     "updater.restart_failed": "L’installation NETGRID vérifiée n’a pas pu être ouverte automatiquement. Lancez NETGRID depuis le menu Démarrer. Les détails figurent dans le journal local de mise à jour.",
     "updater.previous_ready": "La mise à jour n’a pas pu être installée. La version précédente de NETGRID a été vérifiée et reste utilisable.",
     "updater.rollback": "La mise à jour a échoué. NETGRID et la sauvegarde vérifiée ont été restaurés à la version précédente.",
-    "updater.failed": "NETGRID n’a pas pu être mis à jour en toute sécurité. L’application reste arrêtée. Les détails figurent dans le journal local de mise à jour."
+    "updater.failed": "NETGRID n’a pas pu être mis à jour en toute sécurité. L’application reste arrêtée. Les détails figurent dans le journal local de mise à jour.",
+    "updater.repair_confirm": "Voulez-vous restaurer la mise à jour interrompue ? La version précédente de NETGRID et ses données sauvegardées seront restaurées. Les données actuelles seront d’abord sauvegardées séparément. Les identifiants existants ne seront pas remplacés. Windows demandera les droits d’administrateur.",
+    "updater.repair_success": "La version précédente de NETGRID et ses données ont été restaurées et vérifiées. Démarrez NETGRID avec son raccourci habituel. L’application ne sera pas lancée avec les droits d’administrateur Windows.",
+    "updater.repair_failed": "La mise à jour interrompue n’a pas pu être restaurée en toute sécurité. Ne démarrez pas NETGRID et ne supprimez pas les verrous d’installation manuellement. Vérifiez si un programme d’installation ou de mise à jour est encore actif. Les journaux locaux et les sauvegardes sont disponibles pour le diagnostic."
   }
 }

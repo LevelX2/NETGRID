@@ -19,6 +19,34 @@ internal sealed partial class UpdateDataSnapshot : IDisposable
     private bool _disposed;
     public string DirectoryPath { get; }
     public string ManifestSha256 { get; }
+    public string PreviousSetupPath => Path.Combine(DirectoryPath, "previous-setup.exe");
+
+    public void StorePreviousSetup(string sourcePath, string expectedHash)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        if (!Digest(expectedHash)) throw new InvalidOperationException("update_data_previous_setup_hash_invalid");
+        using var source = UpdateDataFiles.ReadLocked(sourcePath);
+        if (Hash(source) != expectedHash) throw new InvalidOperationException("update_data_previous_setup_changed");
+        source.Position = 0;
+        using (var target = new FileStream(PreviousSetupPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+        { source.CopyTo(target); target.Flush(true); }
+        var retained = OpenPreviousSetup(expectedHash);
+        _held.Add(retained);
+    }
+
+    public FileStream OpenPreviousSetup(string expectedHash)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        if (!Digest(expectedHash)) throw new InvalidOperationException("update_data_previous_setup_hash_invalid");
+        var file = UpdateDataFiles.ReadLocked(PreviousSetupPath);
+        try
+        {
+            if (Hash(file) != expectedHash) throw new InvalidOperationException("update_data_previous_setup_changed");
+            file.Position = 0;
+            return file;
+        }
+        catch { file.Dispose(); throw; }
+    }
 
     private UpdateDataSnapshot(UpdateDataLayout layout, string directory, Entry[] entries, string rootDacl, string hash, List<IDisposable> held)
     { _layout = layout; DirectoryPath = directory; _entries = entries; _rootDacl = rootDacl; ManifestSha256 = hash; _held = held; }

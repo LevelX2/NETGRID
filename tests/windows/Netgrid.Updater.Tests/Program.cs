@@ -6,6 +6,7 @@ Directory.CreateDirectory(scratch);
 try
 {
     var updater = Assembly.Load("NETGRID.Updater");
+    Console.WriteLine($"WINDOWS_UPDATE_RECOVERY_TEST_OK checks={RecoveryTests.Run(updater)} execution=isolated-callbacks UAC=not-started");
     var contractPath = Path.Combine(scratch, "contract.json");
     var main = updater.GetType("Netgrid.Updater.Program", throwOnError: true)!.GetMethod("Main", BindingFlags.NonPublic | BindingFlags.Static)!;
     Assert((int)main.Invoke(null, [new[] { "--audit-contract", contractPath }])! == 0, "contract_audit_failed");

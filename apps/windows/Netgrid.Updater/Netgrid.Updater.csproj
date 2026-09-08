@@ -14,6 +14,7 @@
     <ApplicationIcon>..\..\web\public\brand\netgrid.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\Netgrid.Launcher\StagedUpdater.cs" Link="StagedUpdater.cs" />
     <Compile Include="..\Common\UpdateDataLayout.cs" Link="UpdateDataLayout.cs" />
     <Compile Include="..\Common\UpdateDataFiles.cs" Link="UpdateDataFiles.cs" />
     <Compile Include="..\Common\UpdateDataSnapshot.cs" Link="UpdateDataSnapshot.cs" />

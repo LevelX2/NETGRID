@@ -1277,10 +1277,39 @@ ebenfalls; Handoff-, Verifier-, Session-, Request- und ursprüngliche
 Benutzer-Neustart-Gates bleiben grün. Die DTF-Komponente baut unter .NET
 Framework 4.8 ohne Warnungen. Keine native Installation wurde ausgeführt.
 
-Eine neue Instanz darf deshalb noch nicht eigenständig eine verwaiste Lease
-übernehmen oder den Rechner reparieren. Dieser Reparatureinstieg, direkte
-MSI-Transaktionsparität, erhöhte Rechteprüfung und die native Gesamtmatrix
-bleiben offen; der Prozess behauptet kein Release-Done.
+Der explizite Reparatureinstieg ist inzwischen implementiert: Er fragt nach
+Zustimmung und startet eine erhöhte, separat kopierte Updater-Instanz. Der
+installierte Bootstrap muss vor dem MSI-Lauf tatsächlich beendet sein.
+Die zentrale Lease-Autorität übernimmt ausschließlich denselben verwaisten
+Vorgang nach Prozessende, ohne aktive MSI-Teiltransaktion oder verbleibende
+Produktprozesse. Sie prüft den unveränderten Registryzustand unter Start- und
+Schreibsperre erneut. Erst Programmrestore, Datenrestore und gebundener
+Healthcheck erlauben die Freigabe; ein Neustart bleibt eine normale
+Benutzeraktion. Das vorherige Setup wird vor dem ersten MSI zusätzlich
+prüfsummengebunden im geschützten Snapshot erhalten, sodass auch ein schon
+ausgetauschter Installer-Cache die Absturzreparatur nicht verhindert.
+
+Die gemeinsame Staging-Implementierung von Launcher und Reparatureinstieg
+hält nun Quelle, Kopie und sämtliche Elternverzeichnisse gegen Austausch
+gesperrt. Jeder neue Unterordner wird unter gepinntem Elternordner angelegt
+und vor dem nächsten Zugriff gegen Reparse Points geprüft. Dateilinks werden
+abgewiesen. 20 Stagingchecks sind grün, einschließlich Verzeichnis-Rename,
+Junction-Abweisung ohne Zieländerung, Lock-Freigabe im Fehlerfall und tatsächlicher
+Ausführung einer inerten Windows-CLI unter Dateisperre.
+
+Aktuell grün: 373 Lifecyclechecks mit 42 neuen Owner-Übernahmeprüfungen in
+eigenen HKCU-Fixtures und echten, selbst gestarteten Kindprozessen; 113
+Snapshot-/Restore-Assertions einschließlich des dauerhaft erhaltenen alten
+Setups nach Cachewechsel; 23 Reparaturreihenfolge-/Argumentprüfungen ohne UAC
+oder MSI. Launcher-, Handoff-, Verifier-, Session-, Request- und ursprüngliche
+Benutzer-Neustart-Gates bleiben grün. Der net48-DTF-Build hat keine Warnungen
+oder Fehler; vier Lifecycle-Strukturtests und 185 UI-Sprachschlüssel in
+de/en/fr sind geprüft. Die Sprachquellenprüfung ersetzt keinen nativen Renderlauf.
+
+Die native erhöhte Reparatur, direkte MSI-Transaktionsparität, erhöhte
+Rechteprüfung und die native Gesamtmatrix bleiben offen. Keine Installation,
+UAC-Aktion oder bestehende Zugangsdaten wurden bei diesen Prüfungen berührt;
+der Prozess behauptet kein Release-Done.
 
 Vor der Freigabe bleiben die vollständige Prozess-Ende-Raceprüfung,
 die native Abnahme direkter MSI-Updatepfade hinsichtlich
