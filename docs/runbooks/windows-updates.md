@@ -531,6 +531,15 @@ kein Passwort. Bei Abbruch oder Sessionende werden Token und Environmentblock
 freigegeben. Die [Windows-Token-Duplizierung](https://learn.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-duplicatetokenex)
 erhält dessen vorhandenen Sicherheitskontext; ein Explorerprozess oder das
 erhöhte Administratorkonto wird nicht als Ersatzbenutzer ausgewählt.
+Der duplizierte Handle erhält exakt `0x018B`: `ASSIGN_PRIMARY`, `DUPLICATE`,
+`QUERY`, `ADJUST_DEFAULT` und `ADJUST_SESSIONID`. Die beiden letzten
+[Handle-Zugriffsrechte](https://learn.microsoft.com/en-us/windows/win32/secauthz/access-rights-for-access-token-objects)
+sind keine Aktivierung von Benutzerprivilegien. Im nativen Windows-11-
+Cross-Account-Test scheitern `0x000B`, `0x008B` und `0x010B` mit Fehler 5;
+erst `0x018B` ermöglicht den verifizierten Prozessstart. Es gibt weder
+`ALL_ACCESS`, eine Änderung von Gruppen/Privilegien noch eine Retry-Maskenfolge
+im Produkt. Sitzung, Anmeldevorgang und nicht erhöhter Kontext bleiben vor
+und nach der Prozessanlage exakt geprüft.
 
 Der Kontext muss ein nicht erhöhter primärer Token mit mittlerer
 Integritätsstufe in derselben interaktiven Windows-Sitzung sein. System- und
@@ -558,15 +567,26 @@ zu öffnen. Ein fehlgeschlagenes MSI-Update mit erneut verifizierter alter
 Version meldet ebenfalls ausdrücklich diesen Zustand, statt fälschlich eine
 gestoppte oder erfolgreich aktualisierte Anwendung zu behaupten.
 
-Die 39 `OriginalUserRestartTests` prüfen x64-Interoplayouts, echte Tokenabfragen, Duplizierung,
+Die 40 `OriginalUserRestartTests` prüfen x64-Interoplayouts, echte Tokenabfragen, Duplizierung,
 nicht vererbbare Handles, ursprüngliches Profil, Ausschluss der
 Updater-Prozessumgebung, Fortbestand nach Parent-Ende, einmalige Verwendung
 und die native Bereinigung eines eigenen angehaltenen inerten Prozesses.
+Eine ausschließlich testseitige, lesende `NtQueryObject`-Abfrage verlangt
+außerdem die tatsächlich gewährte Handle-Maske exakt, nicht bloß eine
+Quelltextkonstante. Der neue Check wurde vor dem Fix rot und danach grün geprüft.
 Der unelevierte Hostlauf besitzt kein `SeImpersonatePrivilege`: Er belegt
 Fehler 1314 und die Ablehnung vor Lease-Erwerb, **nicht** den erfolgreichen
-erhöhten Benutzerstart. Dieser positive Nachweis, die andere
-Administratorkonto-Freigabe und anschließend normal privilegierte
-Launcher-/Runtimeprozesse bleiben Teil der nativen Abnahme.
+erhöhten Benutzerstart. Ein separater Sandbox-Test vom 8. September belegt
+inzwischen den unverändert eingebundenen korrigierten Capture-/Startpfad:
+anderes Administratorkonto, echter normaler Testbenutzer, Start vor und nach
+Parent-Ende, identischer Kindtoken vor Resume, ursprüngliche Profilumgebung
+ohne Admin-Sentinel und einmalige Kontextverwendung. Der inerte `where.exe`-
+Aufruf ohne Argumente endet wie der Kontrollaufruf mit Exit 2; das ist hier
+erwartet und kein Installationsfehler. Das Testkonto wurde entfernt.
+Dies ist ein nativer Komponentenbeleg, keine UAC-Bedienung und kein voller
+Tray-Updater-Lauf. Die andere Administratorkonto-Freigabe über UAC sowie
+anschließend normal privilegierte Launcher-/Runtimeprozesse im vollständigen
+Produktablauf bleiben Teil der nativen Abnahme.
 
 ## Fehlschlag und Rollback
 

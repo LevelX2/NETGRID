@@ -42,7 +42,12 @@ internal sealed class OriginalUserRestart : IDisposable
         var context = ReadContext(source);
         using var current = Process.GetCurrentProcess();
         context.RequireNormalUser(current.SessionId);
-        if (!DuplicateTokenEx(source, 0x000B, IntPtr.Zero, 2, 1, out var duplicate)) throw LastError("duplicate_token");
+        // ASSIGN_PRIMARY | DUPLICATE | QUERY | ADJUST_DEFAULT | ADJUST_SESSIONID.
+        // Windows 11 cross-account CreateProcessWithTokenW needs both adjustment
+        // handle rights; omitting either fails with ERROR_ACCESS_DENIED. No token
+        // privileges are enabled and the original context is rechecked below and
+        // on the suspended child. Never request ALL_ACCESS or retry another mask.
+        if (!DuplicateTokenEx(source, 0x018B, IntPtr.Zero, 2, 1, out var duplicate)) throw LastError("duplicate_token");
         try
         {
             ReadContext(duplicate).RequireSame(context);

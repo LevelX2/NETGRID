@@ -916,6 +916,41 @@ nativer Tray-Updater, ursprünglicher Benutzer-Neustart mit anderer Admin-
 Freigabe, Aktivspielschutz, Prozessverlust-Reparatur und die übrigen WIN-I08-
 Gates bleiben gesondert offen. Kein Main-Merge, Worktree-Cleanup oder Push.
 
+### Aktuelles Neustart-Gate: Cross-Account-Handle korrigiert
+
+Der reguläre Build 8208 aus `c6512c2f48e9108123d5acf0ea484e5e8dbdb414`
+ist mit `sourceDirty=false`, Komponenten-/UI-/Smoke-Gates und vollständigem
+10.903-Dateien-Audit grün. Die frische native MSI-Matrix 8207/8208 läuft unter
+`output/windows-sandbox-e2e/32fb2f4eff424959a9d41c29b9adadd3`; sie enthält
+noch nicht den nachfolgend beschriebenen Neustartfix. Ein laufender Test ist
+kein positiver Abschlussnachweis.
+
+Der getrennte native Neustarttest reproduziert Fehler 5 in
+`CreateProcessWithTokenW`, sowohl vor als auch nach Parent-Ende. Ursache ist
+die zu enge Zugriffsmaske des duplizierten Handles: `0x000B`, `0x008B` und
+`0x010B` scheitern; `0x018B` erlaubt den Start mit unverändert geprüftem
+ursprünglichem Benutzerkontext. Der Produktpfad fordert jetzt genau diese
+Maske einmalig an, ohne Privilegaktivierung, Kontextwechsel oder Fallback.
+Ein neuer lesender Regressionstest prüft die tatsächlichen Handle-Rechte;
+er ist vor dem Fix rot und danach grün. Alle angrenzenden Handoff-, Verifier-,
+Session-, Request- und MSI-Datentransaktionschecks bleiben grün.
+
+Die unverändert eingebundene korrigierte Produktionsklasse wurde zusätzlich
+als kleine selbstenthaltene Test-EXE in derselben Sandbox geprüft. Ergebnis
+`result/native-restart-fixed-bound.json` ist um 08:24:29 UTC grün, SHA-256
+`b0c7e84e5f561f8acd11854bff0cb3e077d6df63825ac16c9137ef246be1cf17`.
+Der OriginalUserRestart-Quellhash lautet
+`c323b8e26618ad779ff9fe4780fa9a8df1d2d2e6757682b96f3270776876b8ff`.
+Nachgewiesen sind echter normaler Benutzer unter anderem Administratorkonto,
+vorhandenes Startprivileg, gebundener Parent, identische Kindidentität vor
+Resume, erfolgreiche Starts vor/nach Parent-Ende, eigene Profilumgebung,
+keine übernommene Admin-Umgebung und einmalige Verwendung. Der Harness hält
+den Parent-Handle jetzt selbst vor dessen Ende; dadurch ist dessen Exit 0
+auch in der abschließenden PowerShell-Prüfung belastbar. Alle angelegten
+Testkonten sind entfernt. Die Probes installieren nichts und bedienen keine
+UAC-/Passwortoberfläche; vollständiger Tray-Updater, UAC-Kontowechsel und
+normal privilegierter Produktneustart bleiben offen. WIN-I08 bleibt aktiv.
+
 ### Regulärer Build 8199: Installation, Repair und Headless nativ grün
 
 `output/windows-installer-stop-diagnostic-8199` ist regulär aus dem sauberen

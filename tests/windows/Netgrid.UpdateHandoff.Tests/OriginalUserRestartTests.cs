@@ -50,6 +50,7 @@ internal static class OriginalUserRestartTests
                 try
                 {
                     Assert(GetHandleInformation(token, out var flags) && (flags & 1) == 0, "captured_token_not_inheritable");
+                    Assert(GrantedAccess(token) == 0x018B, "captured_token_exact_native_launch_access");
                     var block = ReadEnvironment(environment.DangerousGetHandle());
                     Assert(!block.ContainsKey(sentinel), "updater_process_environment_not_inherited");
                     Assert(block.TryGetValue("USERPROFILE", out var profile) && Path.GetFullPath(profile).Equals(
@@ -143,6 +144,19 @@ internal static class OriginalUserRestartTests
         throw new Exception("restart_environment_fixture_unbounded");
     }
     private static void Assert(bool value, string name) { if (!value) throw new Exception("restart_test_failed:" + name); checks++; }
+    private static int GrantedAccess(SafeAccessTokenHandle token)
+    {
+        // Read-only test inspection of PUBLIC_OBJECT_BASIC_INFORMATION.
+        // No token/ACL/privilege mutation and no native-query dependency in product.
+        var buffer = Marshal.AllocHGlobal(56);
+        try
+        {
+            if (NtQueryObject(token, 0, buffer, 56, out var returned) != 0 || returned != 56)
+                throw new Exception("restart_token_access_query_failed");
+            return Marshal.ReadInt32(buffer, 4);
+        }
+        finally { Marshal.FreeHGlobal(buffer); }
+    }
     private static void Reject(Action action, string code)
     {
         try { action(); }
@@ -150,6 +164,7 @@ internal static class OriginalUserRestartTests
         throw new Exception("restart_rejection_missing:" + code);
     }
     [DllImport("kernel32.dll", SetLastError = true)] [return: MarshalAs(UnmanagedType.Bool)] private static extern bool GetHandleInformation(SafeHandle handle, out uint flags);
+    [DllImport("ntdll.dll")] private static extern int NtQueryObject(SafeHandle handle, int kind, IntPtr buffer, int length, out int returned);
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)] private struct StartupInfo
     {
         public int Size; public string? Reserved, Desktop, Title;
