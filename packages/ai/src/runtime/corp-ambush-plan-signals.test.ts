@@ -148,6 +148,17 @@ describe("Corp ambush plan signal duplicate scope", () => {
             assignedDomainPlanIds: ["corp.ambush_bluff"],
           }),
         ]);
+      } else if (definitionId === "onr_proteus_054_bel-digmo-antibody") {
+        expect(signals).toMatchObject([
+          {
+            patternKind: "rd_recycle",
+            phase: "install",
+            plannedAdvancementTarget: 0,
+            decisionEvidenceCodes: expect.arrayContaining([
+              "corp_rd_recycling_access_damage_is_conditional",
+            ]),
+          },
+        ]);
       } else {
         // Bel-Digmo hurts on R&D access; Stereogram on Archives access.
         // An unknown opponent response does not turn either into a remote trap.

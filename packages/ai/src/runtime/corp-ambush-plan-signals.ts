@@ -1,3 +1,4 @@
+import { corpRdRecyclingSignals } from "./corp-access-zone-preparation";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { AI_HINTS_BY_CARD } from "../ai-hints";
@@ -22,6 +23,7 @@ const RECYCLING_CLICK_COST_VALUE = 40;
 const RECYCLING_CREDIT_COST_VALUE = 10;
 
 export function buildCorpAmbushPlanSignals(params: {
+  reservedScoreServerIds?: ReadonlySet<string>;
   input: AiDecisionInput;
   candidates: readonly ActionSemanticCandidate[];
   previous: ResidentPlanPortfolio | undefined;
@@ -45,6 +47,12 @@ export function buildCorpAmbushPlanSignals(params: {
       ...continued,
     ];
   }
+  const recycling = corpRdRecyclingSignals(
+    params.input,
+    params.candidates,
+    params.previous,
+    params.reservedScoreServerIds,
+  );
   const plannedDecoys = scoreDecoySignals({
     ...params,
     continuedSourceIds,
@@ -89,6 +97,7 @@ export function buildCorpAmbushPlanSignals(params: {
     ...(accessProgramBounce ? [accessProgramBounce] : []),
     ...continued,
     ...plannedDecoys,
+    ...recycling,
     ...planned,
   ];
 }
@@ -617,6 +626,7 @@ function continuedAmbushSignals(params: {
         `Resident ambush plan ${instance.instanceId} has an incomplete sequence commitment.`,
       );
     }
+    if (signal.patternKind === "rd_recycle") return []; // Rediscover the exact current source/zone and legal route.
     const sourceInstanceId = signal.sourceInstanceId;
     const plannedAdvancementTarget = signal.plannedAdvancementTarget!;
     const visibleGripSource = visibleGripCard(params.input, sourceInstanceId);
@@ -624,10 +634,7 @@ function continuedAmbushSignals(params: {
       if (
         visibleGripSource.known !== true ||
         visibleGripSource.definitionId !== signal.sourceDefinitionId ||
-        !agendaAmbushInstallHasDecisivePayoff(
-          params.input,
-          visibleGripSource,
-        )
+        !agendaAmbushInstallHasDecisivePayoff(params.input, visibleGripSource)
       ) {
         return [];
       }

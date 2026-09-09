@@ -15698,6 +15698,13 @@ function buildCorpDomain(
     ),
   );
   const proposedAmbushes = buildCorpAmbushPlanSignals({
+    reservedScoreServerIds: new Set(
+      directScoreProjects.flatMap((project) =>
+        project.serverId && project.serverId !== "new_remote"
+          ? [project.serverId]
+          : [],
+      ),
+    ),
     input,
     candidates,
     previous,

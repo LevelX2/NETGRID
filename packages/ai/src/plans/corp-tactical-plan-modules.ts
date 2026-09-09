@@ -83,8 +83,10 @@ export type CorpAmbushSignal = {
     | "rez_support"
     | "trigger_support"
     | "trigger"
-    | "recycle";
-  patternKind?: "access_ambush" | "score_decoy";
+    | "recycle"
+    | "recycle_rd";
+  patternKind?: "access_ambush" | "score_decoy" | "rd_recycle";
+  recycleBluffUntilTurnSerial?: number;
   followupAgendaInstanceId?: string;
   runnerCreditsAtPlanStart?: number;
   purposeCode?: string;
@@ -738,7 +740,7 @@ function ambushPriority(signal: CorpAmbushSignal): "P3" | "P4" | "P5" {
     return "P3";
   if (signal.phase === "rez_support") return "P3";
   if (signal.phase === "install_support") return "P4";
-  if (signal.phase === "recycle") return "P4";
+  if (signal.phase === "recycle" || signal.phase === "recycle_rd") return "P4";
   if (signal.phase === "advance") return "P4";
   return "P5";
 }
@@ -1117,6 +1119,7 @@ function ambushSemanticTypes(phase: CorpAmbushSignal["phase"]): string[] {
   if (phase === "install" || phase === "install_support")
     return ["install.card"];
   if (phase === "advance") return ["score.advance_card"];
+  if (phase === "recycle_rd") return ["corp_window.rez"];
   if (phase === "recycle") return ["corp_board.return_installed_card_to_hq"];
   if (phase === "rez_support") return ["corp_window.rez"];
   return ["corp_window.rez", "card_ability.trigger", "choice.resolve"];

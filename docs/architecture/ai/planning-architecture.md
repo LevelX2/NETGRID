@@ -4292,6 +4292,23 @@ Instanzidentität. Nach jedem State-Wechsel werden nur die dann legalen
 Action-IDs neu entdeckt; eine fehlende kartenspezifische Phasensemantik darf
 nicht durch Definition-, Server- oder Rollenfallbacks ersetzt werden.
 
+Die access-zonenbezogene Vorbereitung ergänzt den bestehenden Ambush-Owner:
+Eine eigene Asset-Quelle mit kostenlosem Self-Shuffle beim Rez und
+R&D-Zugriffseffekt darf als exakt gebundene Install-/Rez-Folge auftreten.
+Installation kostet weiterhin einen Klick. Die Planung behauptet keinen
+Schaden am Remote. Ein verdeckter Köder darf für bestehendes ICE oder neben
+einer finanzierbaren Drei-Advance-Agenda bis zu zwei Gegnerzügen liegen
+bleiben; der gespeicherte Ablaufzeitpunkt wird bei erneuter Discovery nicht
+verlängert. Bei knappem Deckrest wird früher zurückgemischt, bei einem Run
+auf das Remote erst nach dem ICE-Abschnitt. Exponierte Identitäten tragen
+keinen unbekannten Bluff. Score reserviert seine Server weiterhin selbst;
+die Ambush-Vorbereitung darf sie nicht belegen. Zwei parallele Köder sind
+nur mit der konkreten Agenda zulässig, ansonsten höchstens einer.
+
+Das ist eine begrenzte Vorbereitung, keine nachgewiesene gegnerische
+Lernreaktion und keine automatische Agenda-Installationsstrategie. Priorität
+und Fortsetzung bleiben beim vorhandenen Scheduler und Planportfolio.
+
 ### 28.10 `corp.hand_and_agenda_management`
 
 **Klasse:** `bounded_sequence` oder `development_project`
@@ -4305,6 +4322,13 @@ Verantwortung:
 - Agenda in eine Scoreline überführen;
 - überzählige Karten im Cleanup zweckgebunden priorisieren;
 - Deckout-Risiko und notwendige R&D-Erholung.
+
+Der bestehende Zielgebietsvergleich bewertet einen eigenen kostenlosen
+Archives-Zugriffseffekt als Nutzen des Abwerfens. Diese Anpassung gilt nur
+für das Ziel Archives; eine R&D-Rückführung bleibt separat bewertet. Cleanup
+verwendet dieselbe Disposition, behält konkrete Parent-Bindungen und den
+Schutz vor entscheidender Agenda-Exposition aber bei. Weder Installation noch
+garantierter Zugriffsschaden werden aus einer Ambush-Rolle abgeleitet.
 
 Das Modul darf Hidden-Info nur aus der eigenen HQ/R&D und öffentlichen
 Ereignissen verwenden.

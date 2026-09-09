@@ -400,3 +400,82 @@ das bloße Bestehen blockierter Score-Parents reicht nicht. Zusätzliche
 Counter-Punish-Vorbereitung muss den Mehrwert gegenüber bereits wirksamen
 HQ-/R&D-Fallen belegen. Keine dieser Erweiterungen wird durch weitere
 Kartenkopien oder einen globalen Bewertungsaufschlag ersetzt.
+
+## Vier-Karten-Nachprüfung aus Paarung 407
+
+Die ursprünglichen Nullen zählten gewählte Kartenaktionen, nicht automatische
+Auslösungen oder Kartenwahlen beim Abwerfen. Vollständig nachgezählt wurden
+11 Bel-Digmo-Auslösungen in 10 Spielen mit 11 Net-Schaden und 22
+Stereogram-Auslösungen in 12 Spielen mit 16 Net-Schaden und 22 Rückmischungen.
+Sechs verhinderte Treffer verhinderten die Rückmischung nicht.
+
+**Bel-Digmo:** Die 461 eindeutigen Installationsangebote wurden als fehlende
+Punish-Kampagne abgelehnt. Das verwarf einen davon unabhängigen Nutzen:
+HQ entlasten, Deckrest um eine Karte erhöhen, Agenda-Dichte im R&D senken und
+Zugriffe dort belasten. Installation kostet einen Klick, Rez weder Klick
+noch Credits. Ein Remote-Zugriff macht keinen Net-Schaden. Die verdeckte
+Installation kann trotzdem einen Run oder ICE-Kosten provozieren, besonders
+wenn echte Agendas in vergleichbaren Remotes liegen. Expose, ein freier Run,
+fehlende Glaubwürdigkeit und Opportunitätskosten begrenzen den Bluff.
+
+Der bestehende Ambush-Owner erhält deshalb eine mechanisch erkannte,
+instanzgebundene Install-/Halte-/Rez-Folge. Keine Karten-ID-Ausnahme, keine
+zusätzliche ICE-Installation allein für den Köder, keine Verdrängung eines
+reservierten Score-Servers. Zwei Köder dürfen neben einer finanzierbaren
+Drei-Advance-Agenda vorbereitet werden. Der Score-Owner entscheidet weiterhin
+über Installation und Scoring der Agenda; eine komplette gelernte Mischstrategie
+ist damit nicht abgenommen. Der begrenzte Haltehorizont umfasst bis zu zwei
+Gegnerzüge und wird resident nicht verlängert.
+
+**Stereogram:** Ihr natürlicher Vorbereitungsweg ist Abwerfen ins Archives.
+In allen 40 Spielen gab es 98 echte Corp-Cleanup-Entscheidungen mit Stereogram
+in HQ: 54-mal wurde mindestens eine ausgewählt, 44-mal keine. Historische
+Engine-Zustände G1 D291, G4 D65 und G4 D137 belegen den falschen Tausch:
+Die KI behielt Stereogram und warf Bel-Digmo ab. Die zielgebietsbezogene
+Handbewertung berücksichtigt nun den kostenlosen Archives-Zugriffseffekt
+und die Rückmischung. Bestehende konkrete Planbindungen und Agenda-Sicherheit
+bleiben vorrangig. Installation ist kein Selbstzweck: Sie kostet einen Klick
+und aktiviert den Archives-Effekt nicht. Auch dieser Schaden bleibt vom
+gegnerischen Zugriff und möglicher Prävention abhängig.
+
+**Manhunt:** 45 Angebote, davon 14 ohne benötigte Engine-Quote. Der Producer
+forderte alleinstehende Trace-Tag-Operationen ohne weitere Payoff-Karte gar
+nicht an. Er stellt diese Anfrage jetzt innerhalb des vorhandenen begrenzten
+Quote-Vertrags. Die Engine kann Kosten, Tags und Antworten damit sichtbar
+machen. Eine Quote allein erzwingt keine Ausführung. Tags können anschließende
+Bestrafung ermöglichen oder freiwillige Cleanup-Kosten auslösen; sie sind
+kein garantierter Kreditverlust. Vier Operations-Credits, ein Klick,
+Trace-Gebot, Runner-Link, Antworten und ein verfallendes Run-Fenster gehören
+in die Bewertung. Ein ungeprüfter Bonus für jedes Tag-Angebot wäre falsch.
+
+Offen bleibt die vollständige strategische Abnahme von alleinstehendem
+Tag-Druck: Die aktuelle Quote zertifiziert gewöhnlich das gedruckte
+Limit-Gebot, während die spätere Bid-Policy einen günstigeren anderen Zweig
+wählen kann. Kosten und Tag-Mindestwert dürfen nicht zwischen diesen Zweigen
+vermischt werden. Es wird deshalb keine neue Druckroute mit garantiertem
+Tag-Mindestwert zugelassen. Die vorhandenen vollständigen Punish-Routen bleiben
+erhalten; zusätzliche Gebotsvarianten benötigen einen durchgehend gebundenen
+Quote-/Plan-/Choice-Vertrag. SP-076 zur frühen Punish-Liquidität ist davon
+abzugrenzen.
+
+**Government Contract:** SP-303 bleibt offen. Die bereits unterstützte
+vorbereitete Bank ist nicht die vollständige Erstinvestition. Bei n vollständig
+verbrauchten Drei-Credit-Auszahlungen ergeben sich nach Rez und Advancement
+2n−2 zusätzliche Credits für 1+n Klicks. Gegen dieselbe Zahl einfacher
+Kreditklicks ist der Unterschied n−3: drei Auszahlungen gleichen die Kosten
+aus, die vierte erzielt erstmals einen Vorteil. Das setzt zusammen zwölf
+Credits tatsächlichen Install-/Rez-Verbrauch voraus. Quelle und Counter müssen
+überleben; nicht verbrauchte Auszahlungen verfallen zum Zugende. Advancement,
+Operations und Traces sind keine zulässigen Verbraucher. Ein früher Aufbau
+kann langfristig sinnvoll sein, ein später Aufbau bei Geldüberfluss oder ohne
+Verbraucher dagegen nicht. Der fehlende mehrzügige Investitionshorizont wird
+nicht durch einen pauschalen Kartenbonus ersetzt.
+
+Die historischen Vergleichsproben rekonstruieren alle Engine-Präfixe bis zum
+Checkpoint und prüfen jeden StateHash. Die neue Entscheidung startet mit
+frischem residentem KI-Portfolio; sie ist keine Rekonstruktion des alten
+KI-Gedächtnisses. G10 D324 wählt jetzt Bel-Digmo-Installation statt Kredit;
+G1 D291 und G4 D65/D137 wählen Stereogram zum Abwerfen. G1 D231 bleibt eine
+korrekte Stereogram-Auswahl. Die geprüften Manhunt- und Contract-Kontrollfälle
+behaupten keinen nachgewiesenen Alternativsieg. Neue Serienmetriken müssen von
+den unveränderten historischen 40 Spielen getrennt bleiben.

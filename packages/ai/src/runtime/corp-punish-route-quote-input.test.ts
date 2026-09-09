@@ -93,6 +93,14 @@ describe("decision-local Corp punish route quote input", () => {
           expect.objectContaining({
             kind: "trace_tag",
             sourceCardInstanceId: "chance",
+          }),
+        ],
+      }),
+      expect.objectContaining({
+        steps: [
+          expect.objectContaining({
+            kind: "trace_tag",
+            sourceCardInstanceId: "chance",
             sourceCapabilityBindingKind: "card_spec_capability_key",
             sourceCapabilityId:
               "onr_v1_284_chance-observation:abilities_on_play_trace",
@@ -114,6 +122,14 @@ describe("decision-local Corp punish route quote input", () => {
     ];
 
     expect(buildBoundedCorpPunishRouteRequests(input)).toEqual([
+      expect.objectContaining({
+        steps: [
+          expect.objectContaining({
+            kind: "trace_tag",
+            sourceCardInstanceId: "manhunt",
+          }),
+        ],
+      }),
       expect.objectContaining({
         steps: [
           expect.objectContaining({
