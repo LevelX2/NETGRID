@@ -168,7 +168,7 @@ Bedarf, verwendet eine Instanz, öffnet Spiel oder Maintenance, stoppt den
 Server geordnet und versucht nach einem Prozessabbruch genau eine
 Wiederherstellung. Startmenü und optionale Desktopverknüpfung sind im MSI
 gebunden. Der selbstenthaltene Setup-Assistent bindet das eingebettete MSI per
-SHA-256, führt durch empfohlenen oder benutzerdefinierten Weg und fragt die
+SHA-256, führt durch voreingestellte oder benutzerdefinierte Werte und fragt die
 Local-/Private-LAN-Freigabe ausdrücklich ab. Ports werden vor der Erhöhung
 geprüft; LAN-Firewallregeln gelten ausschließlich im Windows-Profil „Privat“.
 Die gewählte Spielaufbewahrung initialisiert die bestehende Storage-Policy
@@ -192,11 +192,14 @@ Owner und den gebundenen Verifier angeschlossen. Ihre Prüfung liegt vor dem
 MSI-Transaktionsabschluss. Prozessverlust von Prüfer, MSI-Client,
 Custom-Action-Host und Windows-Installer-Dienst sowie die gebundene Übernahme
 verwaister Leases sind inzwischen in der isolierten Windows-11-Sandbox nativ
-geprüft. Der reguläre Kandidat 1.0.8226 besteht außerdem den nativen Bestands-
-Reparaturablauf einschließlich erhaltenem Maintenance-Zugang, Healthcheck und
-Abschlussstart. Die vollständige Release-Abnahme bleibt wegen des noch
-ausstehenden echten GitHub-Release-/Download-Updatepfads und der Probe auf
-einem getrennten Zielrechner offen. Bei Fehlern werden Programm und Daten
+geprüft. Der native Vorintegrationskandidat 1.0.8226 besteht außerdem den
+Bestands-Reparaturablauf einschließlich erhaltenem Maintenance-Zugang,
+Healthcheck und Abschlussstart. Nach defensiver Integration des aktuellen
+lokalen `main` ist der saubere Kandidat 1.0.8379 mit dynamischer Server-
+Buildinformation und 10.909 vollständig auditierten Payload-Dateien gebaut;
+alle lokalen Windows-Komponenten- und UI-Gates sind grün. Seine native
+Sandbox-Nachprüfung, der echte GitHub-Release-/Download-Updatepfad und die
+Probe auf einem getrennten Zielrechner stehen noch aus. Bei Fehlern werden Programm und Daten
 soweit sicher möglich zurückgerollt,
 andernfalls bleibt NETGRID klar diagnostiziert gestoppt. Alle Windows-
 Oberflächen verwenden eine gemeinsame vollständige Sprachquelle für Deutsch,

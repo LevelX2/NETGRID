@@ -201,6 +201,27 @@ sowie Verwechslung von `config/updates` und `config/installer`. Beide
 Annahmen wurden ursächlich berichtigt; das Produkt wurde dafür nicht erneut
 installiert oder verändert.
 
+Am 9. September wird der aktuelle lokale `main` defensiv in den Installer-
+Branch integriert. Der Mergecommit
+`0d6a4a6282c01047075a4ba71e358d38166cc567` erhält sowohl die neue zentrale
+Maintenance-Sitzung und Navigation als auch den installierten Release-
+Datenrootvertrag. 34 gezielte Webtests, Web-Typecheck, 15 Server-Build-/
+Maintenance-Tests und acht Internet-Hardening-Tests sind grün. Dadurch meldet
+der Server künftig die dynamische Produkt- und Buildinformation statt der
+historischen festen Health-Bezeichnung `V1.0.9`.
+
+Der anschließend aus sauberem Quellstand erzeugte Kandidat 1.0.8379 enthält
+10.909 vollständig auditierte Payload-Dateien. Setup SHA-256 ist
+`aedf88a64f64a1fd9a58b31cb9de22ba921d9e86372bfb6bdb63d0f4a4aeb872`,
+MSI SHA-256 ist
+`aefa9f3fd46a0643841d7dc98ec01ac3dd88845e047a95df3be2f4d6ac0e36ae`,
+ProductCode `{3A378001-97F7-4B39-8735-6B6924CF2628}`. Metadaten und
+`SHA256SUMS.txt` stimmen bytegenau mit beiden Artefakten überein. Alle lokalen
+Windows-Komponenten-, Releaseoutput-, UI- und Installer-Audits sind grün. Die
+native Sandbox-Nachprüfung dieses integrierten Kandidaten ist der nächste
+Prüfschritt; sie wird nicht aus der nativen Evidence des Vorgängers 8226
+abgeleitet.
+
 ### Aktiver Prüfpunkt: beendeter MSI-Helfer und Fehlerrollback
 
 Ausgangsstand der folgenden nativen Prüfungen ist die abgenommene
