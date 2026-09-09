@@ -204,11 +204,22 @@ Abschlussstart sowie Client- und Server-Buildidentität sind belegt. Eine neue
 saubere Offline-Sandboxmatrix belegt zusätzlich Standard-/Custom-
 Frischinstallation, 8226→8379-Upgrade, Cache-Repair, Rückwechsel,
 Deinstallation, Datenerhalt und ausdrückliche Datenlöschung in 16 grünen
-Prüfbereichen. Der gehärtete Updater lehnt den historischen synthetischen
-Rollback-Harness vor jeder Produktmutation korrekt ab; sein produktiver
+Prüfbereichen. Das veröffentlichte GitHub-Prerelease 1.0.8379 wurde vom
+installierten 8226-Launcher korrekt gefunden, geladen und hashgeprüft. Der
+echte Lauf deckte vor jeder Produktmutation eine zu enge Neustartprüfung auf:
+Der nicht erhöhte gefilterte Sandbox-Administrator wurde wegen
+`TokenElevationTypeLimited` abgewiesen. Der Fix lässt Default und den nicht
+erhöhten Limited-Kontext zu, hält Full und alle übrigen Sicherheitsgrenzen
+weiterhin geschlossen und besteht 42 fokussierte native Prüfungen. Der daraus
+erzeugte Kandidat 1.0.8383 besteht sämtliche Windows-Buildgates und wurde in
+einer neuen Sandbox erfolgreich eigenständig installiert; die überarbeitete
+Ersteinrichtungsentscheidung erscheint wie vorgesehen. Der gehärtete Updater
+lehnt den historischen synthetischen Rollback-Harness vor jeder
+Produktmutation korrekt ab; sein produktiver
 Rollbacknachweis bleibt deshalb an den echten Launcher- und GitHub-Flow
-gebunden. Der echte GitHub-Release-/Download-Updatepfad und die Probe auf einem
-getrennten Zielrechner stehen noch aus. Bei Fehlern werden Programm und Daten
+gebunden. Als letzter lokaler Produktnachweis steht der echte GitHub-Updateweg
+von 1.0.8383 auf einen höheren korrigierten Build aus; die Probe auf einem
+getrennten Zielrechner folgt danach. Bei Fehlern werden Programm und Daten
 soweit sicher möglich zurückgerollt,
 andernfalls bleibt NETGRID klar diagnostiziert gestoppt. Alle Windows-
 Oberflächen verwenden eine gemeinsame vollständige Sprachquelle für Deutsch,

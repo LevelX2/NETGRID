@@ -248,6 +248,38 @@ Pfadwechsel, 8226→8379-Upgrade, ProductCode-Repair aus geschütztem Cache,
 Rückwechsel auf 8226, native Binär-/Manifestidentität, Datenerhalt bei normaler
 Deinstallation und ausdrückliche Datenlöschung.
 
+Der anschließend gegen das veröffentlichte GitHub-Prerelease 1.0.8379
+ausgeführte echte Launcher-Updateversuch findet den neuen Stand, lädt und
+prüft das Setup, scheitert aber vor jeder Produktmutation an
+`updater_restart_user_context_invalid`. Die redigierten Diagnoseprotokolle
+des Laufs `76feb2872e8f4337aeafd1f578ae6760` binden die Ursache an
+`OriginalUserRestart`: Der nicht erhöhte Sandbox-Administrator besitzt den
+normalen gefilterten `TokenElevationTypeLimited`, während der damalige Code
+nur `TokenElevationTypeDefault` akzeptierte. Der korrigierte Vertrag lässt
+Default und den nicht erhöhten Limited-Kontext bei unverändert mittlerer
+Integrität zu; Full, erhöhte Tokens, andere Sitzungen, UIAccess, AppContainer,
+System- und Dienstkonten bleiben fail-closed. Die fokussierte native Suite ist
+mit 42 Prüfungen grün.
+
+Aus dem Fixcommit `5ea3c0e2b` wurde der saubere Kandidat 1.0.8383 mit 10.909
+auditierten Payload-Dateien gebaut. Setup SHA-256 ist
+`78bdb750c3a1288f027c9de939f44c1863cce2667261478255178491dfc00f99`,
+MSI SHA-256 ist
+`a3f04a6cf27ea189bf6d636e0d9e1a5b59124cc6242649b3a6e570cea01e13d4`.
+Alle Windows-Komponenten-, Sprach-, Render-, Releaseoutput- und Installer-
+Audits sind grün. In einer neu erzeugten Sandbox mit funktionierender
+schreibgeschützter Eingabefreigabe wird 1.0.8383 über die deutsche
+Setupoberfläche erfolgreich installiert. Die Standardpfade enthalten keine
+Lauf-ID, Status und Fortschrittsbalken überlagern sich nicht, und First Run
+zeigt zunächst ausschließlich die verständliche Entscheidung
+„Jetzt einrichten“/„Später“. Für den Updatebeweis wurde „Später“ gewählt;
+keine Maintenance-Zugangsdaten wurden angelegt oder verändert. Der bekannte
+fehlende HTTP-Handler des unveränderten Sandbox-Images verhindert nur das
+automatische Öffnen des Browsers und ändert den erfolgreichen Setupabschluss
+nicht. Als letzter produktiver Gate-Schritt folgt nun ein echter
+GitHub-Updateversuch von diesem korrigierten 8383-Ausgangsstand auf einen
+höheren, regulär gebauten Kandidaten.
+
 Der optionale historische Rollback-Zusatz bricht danach erwartungsgemäß vor
 jeder neuen Produktmutation mit
 `rollback_harness_requires_actual_launcher_handoff` ab. Sein auditiertes

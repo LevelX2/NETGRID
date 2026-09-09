@@ -823,6 +823,17 @@ Identitäten werden weder in Requests noch Logs gespeichert. Der
 entsteht ohne Übernahme der Updater-Prozessumgebung und bleibt ebenfalls nur
 im Arbeitsspeicher. Das Benutzerprofil stammt vom bereits laufenden Launcher.
 
+Der reale GitHub-Updateversuch 1.0.8226→1.0.8379 in Windows Sandbox hat diese
+Unterscheidung praktisch bestätigt. Discovery, Download und Hashprüfung waren
+erfolgreich; die damalige ausschließliche Zulassung von
+`TokenElevationTypeDefault` wies den üblichen nicht erhöhten, gefilterten
+Administrator mit `TokenElevationTypeLimited` vor jeder Produktmutation ab.
+`OriginalUserRestartTests` deckt deshalb Default und Limited positiv sowie
+ungültige und Full-Tokens negativ ab. Ein bereits installierter alter Updater
+kann diese eigene Vorabprüfung nicht selbst reparieren; für den produktiven
+Nachweis wird zuerst ein korrigierter Stand eigenständig installiert und von
+dort auf einen höheren Build aktualisiert.
+
 Erst nach erfolgreichem Healthcheck und explizitem Abschluss der äußeren Lease
 darf `RestartLauncher` genau einmal starten. Der explizite Programmpfad wird
 über [CreateProcessWithTokenW](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-createprocesswithtokenw)
