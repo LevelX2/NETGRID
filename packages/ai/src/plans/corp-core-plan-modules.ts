@@ -2112,7 +2112,10 @@ function validatedEconomyNeeds(
       signal.parentPlanInstanceId?.startsWith("plan:corp.ambush_and_bluff:") ===
         true;
     if (!ambushFundingShape) return false;
-    const sourceInstanceId = signal.needId.slice("ambush-funding:".length);
+    const defenseFunding = signal.needId.startsWith("ambush-defense-funding:");
+    const sourceInstanceId = signal.needId.slice(
+      (defenseFunding ? "ambush-defense-funding:" : "ambush-funding:").length,
+    );
     const ambushes = (
       context.domain as
         | (CorpCorePlanDomain & {
@@ -2122,13 +2125,19 @@ function validatedEconomyNeeds(
               phase: string;
               evidenceCode: string;
               installRoute?: { fundingGap: number };
+              defenseNeed?: {
+                fundingGap: number;
+                observedAtStateVersion: number;
+                sourceInstanceId: string;
+              };
             }[];
           })
         | undefined
     )?.ambushes;
     const ambush = ambushes?.find(
       (candidate) =>
-        candidate.phase === "install" &&
+        (candidate.phase === "install" ||
+          (defenseFunding && candidate.phase === "recycle_rd")) &&
         candidate.sourceInstanceId === sourceInstanceId,
     );
     const expectedParent = ambush
@@ -2151,11 +2160,19 @@ function validatedEconomyNeeds(
           signal.fundingRouteAssessment.headActionId === undefined;
     return (
       !ambush ||
-      ambush.installRoute?.fundingGap !== signal.gap ||
+      (defenseFunding
+        ? ambush.defenseNeed?.fundingGap
+        : ambush.installRoute?.fundingGap) !== signal.gap ||
+      (defenseFunding &&
+        (ambush.defenseNeed?.observedAtStateVersion !==
+          context.input.playerView.stateVersion ||
+          ambush.defenseNeed.sourceInstanceId !== sourceInstanceId ||
+          context.input.playerView.run !== undefined)) ||
       signal.parentPlanInstanceId !== expectedParent ||
       signal.parentNeedId !== signal.needId ||
       signal.delegatedPriorityClass !== undefined ||
-      signal.parentPriorityClass !== "P5" ||
+      signal.parentPriorityClass !==
+        (ambush.phase === "install" ? "P5" : "P4") ||
       signal.evidenceCode !== ambush.evidenceCode ||
       !validFundingRouteBinding
     );
@@ -2168,7 +2185,7 @@ function validatedEconomyNeeds(
       legalActionTypes: context.input.legalActions.map((action) => action.type),
       unresolvedActionIds: invalidAmbushParent.actionIds,
       owner: "plan_module",
-      removalCondition: `Bind Ambush funding need ${invalidAmbushParent.needId} to its exact visible Ambush root, inherited P5 priority, exact LegalAction-derived credit gap and current liquid-credit actions.`,
+      removalCondition: `Bind Ambush funding need ${invalidAmbushParent.needId} to its exact visible Ambush root, inherited phase priority, current quoted funding gap and liquid-credit actions.`,
     });
   }
   const punishCampaigns = (
@@ -3316,6 +3333,7 @@ function exactIceRezRouteIsCurrent(
     candidate,
     sourceCard,
     targetServerId: signal.serverId,
+    bluffDefenseNeed: route.bluffDefenseNeed,
   });
   return expected !== undefined && exactCorpIceRezRoutesEqual(route, expected);
 }
@@ -5866,6 +5884,19 @@ function validExactIceRezRoute(value: unknown): boolean {
     route.routeKind === "qualitative_encounter_defense" &&
     (route.marginalDefenseThreat === "visible_agenda_remote" ||
       route.marginalDefenseThreat === "terminal_central_access");
+  const bluff = route.bluffDefenseNeed as Record<string, unknown> | undefined;
+  const hasBoundBluffDefense =
+    bluff !== undefined &&
+    bluff.serverId === route.targetServerId &&
+    bluff.iceInstanceId === route.sourceCardInstanceId &&
+    bluff.observedAtStateVersion === quote?.expiresAtStateVersion &&
+    nonEmptyString(bluff.sourceInstanceId) &&
+    knownNonNegativeInteger(bluff.requiredCredits) &&
+    knownNonNegativeInteger(bluff.encounterCredits) &&
+    bluff.fundingGap === 0 &&
+    (bluff.outcome === "access_cost" ||
+      bluff.outcome === "visible_stop" ||
+      bluff.outcome === "paid_encounter_opportunity");
   const freeCurrentEncounterDefense = route.freeCurrentEncounterDefense as
     | Record<string, unknown>
     | undefined;
@@ -5890,6 +5921,7 @@ function validExactIceRezRoute(value: unknown): boolean {
     (hasKnownHolisticAssessment ||
       hasExactResourceExchange ||
       hasExactAccessBlock ||
+      hasBoundBluffDefense ||
       hasExactMarginalDefenseThreat ||
       hasExactFreeCurrentEncounterDefense) &&
     (route.effect === "progress" || route.effect === "satisfied") &&
@@ -6434,12 +6466,15 @@ export function assessCorpEconomyFundingRoute(
     signal.gap > 0;
   const exactIncrementalAmbushFunding =
     signal.kind === "parent_funding" &&
-    signal.needId.startsWith("ambush-funding:") &&
+    (signal.needId.startsWith("ambush-funding:") ||
+      signal.needId.startsWith("ambush-defense-funding:")) &&
     signal.parentPlanInstanceId?.startsWith("plan:corp.ambush_and_bluff:") ===
       true &&
     signal.parentNeedId === signal.needId &&
     signal.delegatedPriorityClass === undefined &&
-    signal.parentPriorityClass === "P5" &&
+    (signal.parentPriorityClass === "P5" ||
+      (signal.needId.startsWith("ambush-defense-funding:") &&
+        signal.parentPriorityClass === "P4")) &&
     Number.isFinite(signal.gap) &&
     signal.gap > 0;
   const incrementalProgressAllowed =

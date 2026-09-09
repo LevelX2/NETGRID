@@ -18,6 +18,7 @@ import type {
 } from "./plan-scheduler";
 import type { CorpCorePlanDomain } from "./corp-core-plan-modules";
 import { PlanResolutionFailure } from "./plan-resolution-failure";
+import type { CorpBluffDefenseNeed } from "./corp-bluff-defense-types";
 
 export type CorpVirusPressureSignal = {
   pressureId: string;
@@ -87,6 +88,7 @@ export type CorpAmbushSignal = {
     | "recycle_rd";
   patternKind?: "access_ambush" | "score_decoy" | "rd_recycle";
   recycleBluffUntilTurnSerial?: number;
+  defenseNeed?: CorpBluffDefenseNeed;
   followupAgendaInstanceId?: string;
   runnerCreditsAtPlanStart?: number;
   purposeCode?: string;
@@ -622,7 +624,8 @@ function ambushModule(): PlanModule {
         if (
           signal.phase !== "install" ||
           !signal.installRoute ||
-          signal.installRoute.fundingGap > 0
+          signal.installRoute.fundingGap > 0 ||
+          (signal.defenseNeed?.fundingGap ?? 0) > 0
         ) {
           return [rootProposal];
         }
@@ -750,6 +753,17 @@ function ambushSetupPriority(signal: CorpAmbushSignal): "P4" | "P5" {
 }
 
 function ambushRootResourceGaps(signal: CorpAmbushSignal): ResourceGap[] {
+  if (signal.defenseNeed && signal.defenseNeed.fundingGap > 0) {
+    return [
+      {
+        needId: `ambush-defense-funding:${signal.sourceInstanceId}`,
+        capability: "credits",
+        minimum: signal.defenseNeed.fundingGap,
+        available: 0,
+        deadline: "current_turn",
+      },
+    ];
+  }
   if (signal.phase !== "install" || !signal.installRoute) return [];
   if (signal.installRoute.fundingGap > 0) {
     return [
@@ -1129,6 +1143,8 @@ function ambushCandidates(
   context: PlanSchedulerContext,
   signal: CorpAmbushSignal,
 ): PlanMaterialization["candidates"] {
+  if (signal.phase === "install" && (signal.defenseNeed?.fundingGap ?? 0) > 0)
+    return [];
   return context.actionCandidates
     .filter((candidate) => signal.actionIds.includes(candidate.actionId))
     .map((candidate) => ({ candidate, stepValue: signal.value }));

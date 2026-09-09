@@ -9,6 +9,7 @@ import {
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { visibleCorpCard } from "./card-view";
 import { visibleEffectiveIceRunQuote } from "./visible-run-quote";
+import { visibleCurrentIceBreakExchange } from "./visible-rez-resource-exchange-quote";
 
 /**
  * Projects the deterministic state transition shared by every fixed ICE rez.
@@ -102,7 +103,30 @@ export function visibleCorpIcePostRezRunQuote(
       reason: "effective_run_projection_unavailable",
     };
   }
-  return { ...binding, complete: true, effectiveRunQuote };
+  const effect = effectiveRunQuote.conditionalEncounterEffects?.[0];
+  const paidEncounterDefense =
+    isCurrentApproachedIce(state, iceId, server.id) &&
+    projectedVisibleIce &&
+    effectiveRunQuote.subroutines.length === 0 &&
+    effectiveRunQuote.conditionalEncounterEffects?.length === 1 &&
+    effect?.kind === "corp_paid_add_end_the_run_subroutine"
+      ? {
+          creditCost: effect.creditCost,
+          exchange: visibleCurrentIceBreakExchange(
+            state,
+            iceId,
+            projectedVisibleIce,
+            effectiveRunQuote,
+            1,
+          ),
+        }
+      : undefined;
+  return {
+    ...binding,
+    complete: true,
+    effectiveRunQuote,
+    ...(paidEncounterDefense ? { paidEncounterDefense } : {}),
+  };
 }
 
 export function visibleCorpIcePostInstallRunQuote(

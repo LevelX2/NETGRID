@@ -1744,6 +1744,16 @@ function boundaryForCandidate(
       input.playerView.own.clicks - (candidate.costProfile.clickCost ?? 0),
     ),
   };
+  if (candidate.semanticActionType === "corp_window.decline_rez") {
+    return assessTurnObservationBoundary({
+      boundaryKind: "engine_continuation",
+      remainingActionCapacity,
+      residualTurnValueBasis: "remaining_capacity",
+      immediateOutcomeCodes: ["current_corp_rez_window_closed"],
+      uncertainty: [{ code: "next_run_window_requires_current_legal_actions" }],
+      assumptionIds: ["current_decline_rez_route_executable"],
+    });
+  }
   if (
     head?.moduleId === "corp.defend_servers" &&
     head.evidenceCodes.includes(

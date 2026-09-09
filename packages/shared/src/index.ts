@@ -3247,6 +3247,11 @@ export type VisibleCorpIcePostRezRunQuote =
       expiresAtStateVersion: number;
       complete: true;
       effectiveRunQuote: VisibleEffectiveIceRunQuote;
+      /** One optional paid ETR at the next encounter; never a free rez effect. */
+      paidEncounterDefense?: {
+        creditCost: number;
+        exchange: VisibleCorpIceRezResourceExchangeQuote;
+      };
     };
 
 export type VisibleMandatoryCorpRezCosts = {

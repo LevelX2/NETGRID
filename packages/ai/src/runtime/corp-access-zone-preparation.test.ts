@@ -124,6 +124,17 @@ describe("zone-specific access preparation", () => {
       "antibody-action",
     ]);
   });
+  it("does not reveal a held protected decoy during an unrelated central run", () => {
+    const { input, candidates } = setup(true, true);
+    input.playerView.run = {
+      runId: "central",
+      attackedServerId: "rd",
+      phase: "movement",
+      successful: false,
+      position: { kind: "server", serverId: "rd" },
+    };
+    expect(corpRdRecyclingSignals(input, candidates)[0]?.actionIds).toEqual([]);
+  });
   it("does not claim a taxed or stale rez as the free current route", () => {
     const { input, candidates, action } = setup(true);
     action.costs = [{ credits: 1 }];

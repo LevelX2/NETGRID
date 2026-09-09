@@ -11,6 +11,7 @@ import {
 } from "./corp-score-protection-assessment";
 import { readKnownCorpCentralAgendaThreat } from "./corp-central-defense-facts-adapter";
 import { visibleCorpIceDefenseProfile } from "./semantic-runtime-corp-effective-defense";
+import type { CorpBluffDefenseNeed } from "../plans/corp-bluff-defense-types";
 
 export type CorpExactIceRezRouteProjection = Readonly<{
   actionId: string;
@@ -59,6 +60,7 @@ export type CorpExactIceRezRouteProjection = Readonly<{
   }>;
   effect: "progress" | "satisfied";
   totalRezCredits: number;
+  bluffDefenseNeed?: CorpBluffDefenseNeed | undefined;
 }>;
 
 export type CorpExactInstalledIceRezQuoteRead = Readonly<{
@@ -123,6 +125,7 @@ export function projectExactCorpIceRezRoute(params: {
   candidate: ActionSemanticCandidate;
   sourceCard: VisibleCard;
   targetServerId: string;
+  bluffDefenseNeed?: CorpBluffDefenseNeed | undefined;
 }): CorpExactIceRezRouteProjection | undefined {
   const { input, candidate, sourceCard, targetServerId } = params;
   const quoteRead = readExactInstalledCorpIceRezQuote(params);
@@ -131,6 +134,25 @@ export function projectExactCorpIceRezRoute(params: {
   const server = input.playerView.servers.find(
     (candidateServer) => candidateServer.id === targetServerId,
   )!;
+  const requestedBluff = params.bluffDefenseNeed;
+  const bluffDefenseNeed =
+    requestedBluff &&
+    requestedBluff.serverId === targetServerId &&
+    requestedBluff.iceInstanceId === sourceCard.instanceId &&
+    requestedBluff.observedAtStateVersion === input.playerView.stateVersion &&
+    requestedBluff.fundingGap === 0 &&
+    requestedBluff.requiredCredits <= input.playerView.own.credits &&
+    requestedBluff.requiredCredits >=
+      totalRezCredits + requestedBluff.encounterCredits &&
+    input.playerView.run?.attackedServerId === targetServerId &&
+    server.root.some(
+      (card) =>
+        card.instanceId === requestedBluff.sourceInstanceId &&
+        card.known &&
+        card.rezzed === false,
+    )
+      ? requestedBluff
+      : undefined;
   const serverIce = server.ice.map((ice) => ({
     instanceId: ice.instanceId,
     known: ice.known,
@@ -202,7 +224,8 @@ export function projectExactCorpIceRezRoute(params: {
     !resourceExchange &&
     !accessBlock &&
     !freeQualitativeEncounterDefense &&
-    marginalDefenseThreat === undefined
+    marginalDefenseThreat === undefined &&
+    !bluffDefenseNeed
   )
     return undefined;
   if (assessmentsKnown && probabilityComparison === undefined) return undefined;
@@ -231,12 +254,15 @@ export function projectExactCorpIceRezRoute(params: {
           before: knownBefore,
           after: knownAfter,
           totalRezCredits,
+          allowBluffTax: bluffDefenseNeed?.outcome === "access_cost",
         })
       : undefined;
   const qualitativeEncounterDefense =
     (probabilityComparison === 0 ||
       freeQualitativeEncounterDefense ||
-      (!assessmentsKnown && marginalDefenseThreat !== undefined)) &&
+      (!assessmentsKnown &&
+        (marginalDefenseThreat !== undefined ||
+          bluffDefenseNeed !== undefined))) &&
     !resourceExchange &&
     !accessBlock &&
     !freePersistentDefense &&
@@ -292,6 +318,7 @@ export function projectExactCorpIceRezRoute(params: {
         ? "satisfied"
         : "progress",
     totalRezCredits,
+    ...(bluffDefenseNeed ? { bluffDefenseNeed } : {}),
   };
 }
 
@@ -302,6 +329,7 @@ function readKnownCurrentRunAccessPathTax(params: {
   before: KnownCorpScoreProtectionAssessment;
   after: KnownCorpScoreProtectionAssessment;
   totalRezCredits: number;
+  allowBluffTax?: boolean;
 }): number | undefined {
   const { input, sourceCard, targetServerId, before, after, totalRezCredits } =
     params;
@@ -320,7 +348,10 @@ function readKnownCurrentRunAccessPathTax(params: {
   ) {
     return undefined;
   }
-  if (!server.root.some((card) => card.known && card.type === "agenda")) {
+  if (
+    !params.allowBluffTax &&
+    !server.root.some((card) => card.known && card.type === "agenda")
+  ) {
     return undefined;
   }
   const tax =
@@ -1031,6 +1062,17 @@ export function exactCorpIceRezRoutesEqual(
     left.knownAccessPathTax === right.knownAccessPathTax &&
     left.effect === right.effect &&
     left.totalRezCredits === right.totalRezCredits &&
+    left.bluffDefenseNeed?.sourceInstanceId ===
+      right.bluffDefenseNeed?.sourceInstanceId &&
+    left.bluffDefenseNeed?.iceInstanceId ===
+      right.bluffDefenseNeed?.iceInstanceId &&
+    left.bluffDefenseNeed?.observedAtStateVersion ===
+      right.bluffDefenseNeed?.observedAtStateVersion &&
+    left.bluffDefenseNeed?.requiredCredits ===
+      right.bluffDefenseNeed?.requiredCredits &&
+    left.bluffDefenseNeed?.encounterCredits ===
+      right.bluffDefenseNeed?.encounterCredits &&
+    left.bluffDefenseNeed?.outcome === right.bluffDefenseNeed?.outcome &&
     exactAccessBlocksEqual(left.accessBlock, right.accessBlock) &&
     exactOptionalProtectionAssessmentsEqual(left.before, right.before) &&
     exactOptionalProtectionAssessmentsEqual(left.after, right.after) &&

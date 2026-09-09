@@ -4,6 +4,7 @@ import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type { ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
 import type { CorpAmbushSignal } from "../plans/corp-tactical-plan-modules";
+import { corpBluffDefenseNeed } from "../plans/corp-bluff-defense";
 
 /** Mechanical profile only. No remote damage is inferred from central access. */
 export function corpAccessZonePreparationProfile(definitionId: string) {
@@ -61,6 +62,7 @@ export function corpRdRecyclingSignals(
   candidates: readonly ActionSemanticCandidate[],
   previous?: ResidentPlanPortfolio,
   reservedScoreServerIds: ReadonlySet<string> = new Set(),
+  reservedScoreCredits = 0,
 ): CorpAmbushSignal[] {
   const locations = [
     ...input.playerView.own.gripOrHq.map((card) => ({
@@ -78,8 +80,9 @@ export function corpRdRecyclingSignals(
         card.known &&
         card.type === "agenda" &&
         typeof card.advancementRequirement === "number" &&
-        card.advancementRequirement <= 3 &&
-        input.playerView.own.credits >= card.advancementRequirement,
+        card.advancementRequirement - (card.advancementCounters ?? 0) <= 3 &&
+        input.playerView.own.credits >=
+          card.advancementRequirement - (card.advancementCounters ?? 0),
     );
   const priorSignals = (previous?.instances ?? []).flatMap((instance) => {
     if (instance.moduleId !== "corp.ambush_and_bluff") return [];
@@ -164,17 +167,37 @@ export function corpRdRecyclingSignals(
     // One recycling source normally; a funded one-turn agenda permits a bounded
     // two-decoy setup, leaving the agenda installation as a separate Score choice.
     if (!server && installedCopies >= (fastAgenda ? 2 : 1)) return [];
+    const defenseByServer = new Map<
+      string,
+      ReturnType<typeof corpBluffDefenseNeed>
+    >(
+      input.playerView.servers.map((s) => [
+        s.id,
+        corpBluffDefenseNeed(
+          input,
+          s.id,
+          card.instanceId,
+          reservedScoreCredits,
+        ),
+      ]),
+    );
     actions.sort((left, right) => {
-      const iceCount = (candidate: ActionSemanticCandidate) => {
+      const defense = (candidate: ActionSemanticCandidate) => {
         const target = input.legalActions.find(
           (a) => a.actionId === candidate.actionId,
         )?.payload?.serverId;
-        return (
-          input.playerView.servers.find((s) => s.id === target)?.ice.length ?? 0
-        );
+        return typeof target === "string"
+          ? defenseByServer.get(target)
+          : undefined;
       };
+      const a = defense(left),
+        b = defense(right);
       return (
-        iceCount(right) - iceCount(left) ||
+        Number(!!b) - Number(!!a) ||
+        Number(b?.outcome === "access_cost") -
+          Number(a?.outcome === "access_cost") ||
+        (a?.fundingGap ?? 0) - (b?.fundingGap ?? 0) ||
+        (a?.requiredCredits ?? 0) - (b?.requiredCredits ?? 0) ||
         left.actionId.localeCompare(right.actionId)
       );
     });
@@ -193,7 +216,7 @@ export function corpRdRecyclingSignals(
       (server.ice.length > 0 || !!fastAgenda) &&
       deckCount > 1 &&
       !knownSources.has(card.instanceId) &&
-      !run &&
+      run?.attackedServerId !== server.id &&
       bluffUntil !== undefined &&
       input.playerView.turnSerial !== undefined &&
       input.playerView.turnSerial < bluffUntil;
@@ -202,6 +225,12 @@ export function corpRdRecyclingSignals(
       run?.attackedServerId === server.id &&
       run.position?.kind === "ice";
     const execute = !holdBluff && !beforeIceToll;
+    const defenseNeed =
+      deckCount > 1 &&
+      !knownSources.has(card.instanceId) &&
+      (!server || holdBluff || beforeIceToll)
+        ? defenseByServer.get(target)
+        : undefined;
     return [
       {
         commitmentVersion: "corp_ambush_commitment_v1",
@@ -211,6 +240,7 @@ export function corpRdRecyclingSignals(
         serverId: target,
         phase: server ? "recycle_rd" : "install",
         patternKind: "rd_recycle",
+        ...(defenseNeed ? { defenseNeed } : {}),
         actionIds: selected && execute ? [selected.actionId] : [],
         purposeCode: server
           ? "recycle_access_source_into_rd"

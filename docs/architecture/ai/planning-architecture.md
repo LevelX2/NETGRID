@@ -4309,6 +4309,25 @@ Das ist eine begrenzte Vorbereitung, keine nachgewiesene gegnerische
 Lernreaktion und keine automatische Agenda-Installationsstrategie. Priorität
 und Fortsetzung bleiben beim vorhandenen Scheduler und Planportfolio.
 
+Die Remote-Auswahl konsumiert einen typisierten, von `corp.defend_servers`
+bewerteten Bluff-Defense-Bedarf statt der bloßen ICE-Anzahl. Eine einzelne
+optionale ICE-Schicht besitzt einen aktuellen Kosten-/Effektnachweis,
+unterscheidet bezahlbaren Zugriff von sichtbarem Stop und berücksichtigt eine
+separat gequotete bezahlte Encounter-Fähigkeit. Ein vorhandener Score-Reserve-
+Bedarf bleibt erhalten. Eine noch fehlende Finanzierung ist auf höchstens
+drei Credits begrenzt; Economy bindet diesen Bedarf an den Ambush-Parent und
+seine aktuelle Phase. Die Installation beginnt nicht vor Erfüllung dieses
+Budgets. Im Run revalidiert allein Defense ICE-Rez und Encounter-Ausgaben;
+ein Stop zählt nicht als tatsächlich gezahlte Breakkosten.
+
+Runs auf andere Server lösen einen noch verdeckt zu haltenden Köder nicht
+auf. Ein bereits angefangener Agenda-Fortschritt darf den verbleibenden
+Drei-Advance-Horizont tragen. Am Ende des ICE-Pfads bleibt das kostenlose
+Zurückmischen eine eigene aktuelle Ambush-Aktion. `decline_rez` schließt ein
+Engine-Fenster und ist eine `engine_continuation`-Grenze der Zugprojektion:
+Der Planer darf danach keine weitere Aktion desselben alten Rez-Fensters
+einplanen. Die tatsächliche Folgesituation wird neu beobachtet.
+
 Eine bezahlbare Ambush-Installation unterdrückt einen Score-Finanzierungsbedarf
 nur bei konkurrierender Bindung derselben Agenda-Instanz. Ein unabhängiger
 Köder darf den Funding-Provider einer anderen Agenda nicht vor dem

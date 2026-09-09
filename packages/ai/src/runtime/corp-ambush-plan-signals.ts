@@ -24,6 +24,7 @@ const RECYCLING_CREDIT_COST_VALUE = 10;
 
 export function buildCorpAmbushPlanSignals(params: {
   reservedScoreServerIds?: ReadonlySet<string>;
+  reservedScoreCredits?: number;
   input: AiDecisionInput;
   candidates: readonly ActionSemanticCandidate[];
   previous: ResidentPlanPortfolio | undefined;
@@ -52,6 +53,7 @@ export function buildCorpAmbushPlanSignals(params: {
     params.candidates,
     params.previous,
     params.reservedScoreServerIds,
+    params.reservedScoreCredits,
   );
   const plannedDecoys = scoreDecoySignals({
     ...params,

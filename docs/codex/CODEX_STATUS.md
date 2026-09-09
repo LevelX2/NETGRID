@@ -59,7 +59,10 @@ Führend:
 
 R&D-Zugriffsfallen mit kostenloser Rez-Rückmischung besitzen jetzt eine
 exakte Install-/Rez-Linie im bestehenden Ambush-Owner, einschließlich
-begrenztem verdecktem Halten und Schutz reservierter Agenda-Orte. Der
+begrenztem verdecktem Halten und Schutz reservierter Agenda-Orte. Defense
+bindet geeignete geschützte Köder an eine finanzierbare ICE-/Encounter-Folge;
+Economy schließt den begrenzten Bedarf. Geschlossene Rez-Fenster sind eine
+verbindliche Planungsgrenze. Der
 Cleanup bewertet den Nutzen von Archives-Zugriffsfallen am tatsächlichen
 Abwurfziel. Unabhängige Ambush-Vorbereitung löscht keine fremden
 Agenda-Finanzierungsbedarfe mehr. Eigenständige Trace-Tag-Quellen erhalten

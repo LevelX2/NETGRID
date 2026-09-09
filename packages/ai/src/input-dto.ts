@@ -2953,7 +2953,43 @@ function sanitizeVisibleCorpIcePostRezRunQuote(
   ) {
     return undefined;
   }
-  return { ...binding, complete: true, effectiveRunQuote };
+  let paidEncounterDefense: Extract<
+    VisibleCorpIcePostRezRunQuote,
+    { complete: true }
+  >["paidEncounterDefense"];
+  if (value.paidEncounterDefense !== undefined) {
+    const paid = value.paidEncounterDefense;
+    if (
+      !isPlainObjectRecord(paid) ||
+      !isNonNegativeSafeInteger(paid.creditCost) ||
+      !isPlainObjectRecord(paid.exchange) ||
+      paid.exchange.context !== "installed" ||
+      paid.exchange.cardId !== binding.cardId ||
+      paid.exchange.targetServerId !== binding.targetServerId ||
+      paid.exchange.projectedServerId !== binding.projectedServerId ||
+      paid.exchange.expiresAtStateVersion !== binding.expiresAtStateVersion ||
+      (paid.exchange.complete !== false &&
+        !(
+          paid.exchange.complete === true &&
+          (isPlainObjectRecord(paid.exchange.runnerBreakUnavailable) ||
+            (isPlainObjectRecord(paid.exchange.runnerBreak) &&
+              Array.isArray(paid.exchange.runnerBreak.consumedCards)))
+        ))
+    )
+      return undefined;
+    paidEncounterDefense = {
+      creditCost: paid.creditCost,
+      exchange: sanitizeInstalledCorpIceRezResourceExchangeQuote(
+        paid.exchange as VisibleCorpIceRezResourceExchangeQuote,
+      ),
+    };
+  }
+  return {
+    ...binding,
+    complete: true,
+    effectiveRunQuote,
+    ...(paidEncounterDefense ? { paidEncounterDefense } : {}),
+  };
 }
 
 function sanitizeVisibleConditionalEncounterEffects(

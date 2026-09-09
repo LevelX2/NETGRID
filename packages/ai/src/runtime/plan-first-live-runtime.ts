@@ -15698,6 +15698,13 @@ function buildCorpDomain(
     ),
   );
   const proposedAmbushes = buildCorpAmbushPlanSignals({
+    reservedScoreCredits: Math.max(
+      0,
+      ...directScoreProjects.map(
+        (project) =>
+          project.continuationReserve?.requiredCreditsBeforeNextCorpTurn ?? 0,
+      ),
+    ),
     reservedScoreServerIds: new Set(
       directScoreProjects.flatMap((project) =>
         project.serverId && project.serverId !== "new_remote"
@@ -16786,6 +16793,12 @@ function buildCorpDomain(
                   candidate,
                   sourceCard: visibleSource,
                   targetServerId: rezServerId,
+                  bluffDefenseNeed: ambushes.find(
+                    (ambush) =>
+                      ambush.serverId === rezServerId &&
+                      ambush.defenseNeed?.iceInstanceId ===
+                        visibleSource.instanceId,
+                  )?.defenseNeed,
                 })
               : undefined;
           const scoreReserveAdmission = exactIceRezRoute
@@ -21536,16 +21549,20 @@ function corpRequiredEconomyNeeds(
     ];
   });
   const ambushFunding = ambushes.flatMap((ambush) => {
-    const gap = ambush.installRoute?.fundingGap;
+    const defenseFunding = (ambush.defenseNeed?.fundingGap ?? 0) > 0;
+    const gap = defenseFunding
+      ? ambush.defenseNeed!.fundingGap
+      : ambush.installRoute?.fundingGap;
     if (
-      ambush.phase !== "install" ||
+      (ambush.phase !== "install" && !defenseFunding) ||
+      (defenseFunding && input.playerView.run !== undefined) ||
       typeof gap !== "number" ||
       !Number.isSafeInteger(gap) ||
       gap <= 0
     ) {
       return [];
     }
-    const needId = `ambush-funding:${ambush.sourceInstanceId}`;
+    const needId = `${defenseFunding ? "ambush-defense-funding" : "ambush-funding"}:${ambush.sourceInstanceId}`;
     return [
       {
         kind: "parent_funding" as const,
@@ -21557,7 +21574,8 @@ function corpRequiredEconomyNeeds(
           dedupeKey: ambush.ambushId,
         }),
         parentNeedId: needId,
-        parentPriorityClass: "P5" as const,
+        parentPriorityClass:
+          ambush.phase === "install" ? ("P5" as const) : ("P4" as const),
         urgentForScore: false,
         evidenceCode: ambush.evidenceCode,
       },

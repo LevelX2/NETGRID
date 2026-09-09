@@ -550,3 +550,67 @@ Mischstrategie, optimal wiederholtes Recycling oder sichere ICE-Ausgaben des
 Runners werden nicht behauptet. G24 D380–396 zeigt Bel neben tatsächlicher
 Headhunters-Entwicklung und anschließendem Köder-Run; G34 D458 zeigt zugleich,
 dass Rückmischung den späteren HQ-Verlust nicht verhindert.
+
+Die anschließende Prüfung der geschützten Köder präzisiert diesen offenen
+Punkt: 69 der 74 Installationen erfolgen zunächst ohne ICE, fünf hinter
+vorhandenem ICE. Der Discovery-Code verbietet geschützte Remotes nicht,
+sondern sortiert freie, nicht für Score reservierte Remotes nach ICE-Anzahl.
+Diese Anzahl belegt weder eine finanzierbare Verteidigung noch Runner-Kosten.
+Die fünf Installationen sind G6 D102, G34 D306/D336 und G37 D167/D242.
+Nur die beiden G37-Fälle nutzen bereits gerezzte Mobile Barricade; die
+übrigen drei legen Bel hinter unrezzte Dog Pile ohne ausreichende Rez-Credits.
+
+Die vier tatsächlich angelaufenen ICE-Köder sind getrennt zu beurteilen:
+G6 D106 sowie G34 D320/D342 haben jeweils vier Corp-Credits bei fünf
+benötigten Dog-Pile-Rez-Credits. Die Engine bietet das ICE-Rez deshalb gar
+nicht legal an. Ein bloßer Rez-Bewertungsbonus könnte diese Finanzierungslücke
+nicht beheben. In G24 D394 ist Riddler dagegen für zwei Credits bei 25
+Corp-Credits legal rezbar. Die exakte Defense-Routenprüfung verwirft es mit
+`corp_ice_rez_resource_exchange_unknown`: Der Engine-Quote enthält noch
+keine feste ETR-Subroutine, sondern den bedingten Encounter-Effekt, für zwei
+weitere Credits eine hinzuzufügen. Eine sichere Creditsteuer folgt aus diesem
+unvollständigen Routenvergleich nicht. G24 D391 installiert das ICE erst nach
+dem zunächst ungeschützten Bel, weshalb dieser Fall nicht zu den fünf bereits
+bei Installation geschützten Ködern gehört.
+
+Der verbleibende Implementierungsbedarf ist damit die zusammenhängende
+Bluff-/Defense-Folge, nicht eine feste Quote ungeschützter Installationen:
+Ambush bindet Köder und begrenzten Haltehorizont; Defense bewertet geeignete
+ICE, tatsächliche Passierbarkeit, Rez-/Encounter-Kosten und eine finanzierbare
+Runner-Creditbelastung. Ein nötiger Funding-Need muss vor dem Gegnerzug mit
+dieser Folge verbunden werden. Score behält echte Agenda-Folgen und seine
+Finanzierung; freie ehemalige Scoring-Remotes können später Köder aufnehmen.
+Beide Remote-Arten müssen glaubwürdige Inhalte erlauben, ohne festes
+abwechselndes Muster oder behauptete Lernreaktion des Gegners. Diese Diagnose ist der Ausgangsbefund der folgenden Korrektur.
+
+
+### Finanzierbare geschützte Köder und gültige Rez-Fenster
+
+Der bestehende Defense-Owner bewertet nun eine konkrete verfügbare ICE-Schicht
+mit aktuellen Engine-Quotes, sichtbarem Runner-Rig, Rez- und Encounter-Kosten.
+Ambush bindet diesen typisierten Bedarf an seine Quelle; Economy darf einen
+begrenzten Gap von höchstens drei Credits schließen. Vor ausreichender
+Finanzierung wird keine vermeintlich geschützte Köder-Installation ausgeführt.
+Unabhängige Score-Reserven und reservierte Agenda-Orte bleiben geschützt.
+Ein Run auf eine Zentrale beendet den verdeckten Haltehorizont nicht.
+
+Der Engine-Quote unterscheidet eine öffentlich gewählte Breaker-Unterart von
+einer noch offenen Choice. Die zusätzliche kostenpflichtige ETR-Subroutine
+bei einem entsprechend bedingten ICE besitzt eine separate Encounter-Quote:
+Sie zählt weder als kostenlose Rez-Wirkung noch als garantierter Runnerverlust.
+Im historischen G24 D394 kann die Corp damit Riddler rezzen und seine
+bezahlte ETR im nächsten Fenster tatsächlich aktivieren. Der sichtbar auf
+Sentry eingestellte Fubar kann diesen Code-Gate-Zweig nicht brechen.
+
+Der TurnPlanner beendet seine Vorausplanung beim Schließen des aktuellen
+Corp-Rez-Fensters. Die vorher erzeugte Folge „Fenster schließen, dann dieselbe
+Quelle rezzen“ war regelwidrig projiziert und konnte die rechtzeitige
+Bel-Rückmischung verdrängen. Ein Real-Engine-Test führt nun die ganze Folge
+aus: Defense-Rez, tatsächlich vom Runner bezahlter Break, anschließend
+Ambush-Rez im letzten gültigen Serverfenster. Ein zweiter Ablauf belegt
+Rez plus bezahltes ETR und den erhaltenen verdeckten Köder nach Run-Ende.
+
+Das ist eine begrenzte, zustandsabhängige Koordination vorhandener Owner.
+Eine optimale gelernte Mischstrategie, ein garantierter Alternativsieg oder
+eine Pflicht, jeden Köder-Run mit ICE-Ausgaben zu verteidigen, folgen daraus
+nicht. Die getrennte frische Kontrollpopulation 413 prüft die Häufigkeiten.
