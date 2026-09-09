@@ -4,6 +4,37 @@ export type TemporaryBreakerStrengthModifier = NonNullable<
   GameState["temporaryBreakerStrengthModifiersUntilEndOfTurn"]
 >[number];
 
+/** Strength belongs to the departed installation, not a future reuse of its ID. */
+export function clearDepartedBreakerStrength(
+  state: GameState,
+  cardId: CardInstanceId,
+): void {
+  const instance = state.cardInstances[cardId];
+  if (!instance) throw new Error(`CardInstance fehlt: ${cardId}`);
+  state.cardInstances[cardId] = { ...instance, strengthModifier: 0 };
+  if (state.temporaryBreakerStrengthModifiersUntilEndOfTurn) {
+    const remaining =
+      state.temporaryBreakerStrengthModifiersUntilEndOfTurn.filter(
+        (modifier) => modifier.targetBreakerId !== cardId,
+      );
+    if (remaining.length)
+      state.temporaryBreakerStrengthModifiersUntilEndOfTurn = remaining;
+    else delete state.temporaryBreakerStrengthModifiersUntilEndOfTurn;
+  }
+  const run = state.run;
+  if (!run) return;
+  if (run.breakerState)
+    delete run.breakerState.strengthModifiersByBreakerInstanceId[cardId];
+  if (run.remainderStrengthBonusByBreaker)
+    delete run.remainderStrengthBonusByBreaker[cardId];
+  if (run.runStartRandomStrengthByBreaker)
+    delete run.runStartRandomStrengthByBreaker[cardId];
+  if (run.runStartRandomStrengthSourceCardId === cardId) {
+    delete run.runStartRandomStrengthSourceCardId;
+    delete run.runStartRandomStrength;
+  }
+}
+
 function currentTurnSerial(state: GameState): number {
   return Math.max(0, Math.floor(state.turnSerial ?? 0));
 }

@@ -24,6 +24,7 @@ import type {
   Side,
 } from "./runtime-shared";
 import type { CardLeavePlayCleanupImplementation } from "../../ability-engine/definition-types";
+import { clearDepartedBreakerStrength } from "../state/temporary-breaker-strength";
 import {
   microtechHostedProgramIds,
   trashMicrotechBackedProgram,
@@ -105,6 +106,7 @@ export function createLifecycleRuntime(
         },
       };
       deps.clearCardCounters(state, cardId);
+      clearDepartedBreakerStrength(state, cardId);
       return;
     }
     state.runner.heap.push(cardId);
@@ -115,6 +117,7 @@ export function createLifecycleRuntime(
       zone: { side: "runner", zone: "heap" },
     };
     deps.clearCardCounters(state, cardId);
+    clearDepartedBreakerStrength(state, cardId);
   }
 
   function runnerProgramUsesMemory(
@@ -218,6 +221,7 @@ export function createLifecycleRuntime(
       zone: { side: "runner", zone: "heap" },
     };
     deps.clearCardCounters(state, cardId);
+    clearDepartedBreakerStrength(state, cardId);
   }
 
   function trashRunnerInstalledCardsToHeapBatch(
@@ -274,6 +278,7 @@ export function createLifecycleRuntime(
         zone: { side: "runner", zone: "heap" },
       };
       deps.clearCardCounters(state, snapshot.cardId);
+      clearDepartedBreakerStrength(state, snapshot.cardId);
     }
 
     for (const snapshot of snapshots) {
@@ -348,6 +353,7 @@ export function createLifecycleRuntime(
         },
       };
       deps.clearCardCounters(state, cardId);
+      clearDepartedBreakerStrength(state, cardId);
       return;
     }
     if (
@@ -374,6 +380,7 @@ export function createLifecycleRuntime(
       zone: { side: "runner", zone: "grip" },
     };
     deps.clearCardCounters(state, cardId);
+    clearDepartedBreakerStrength(state, cardId);
   }
 
   function returnRunnerInstalledProgramsToGripForAccess(
