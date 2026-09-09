@@ -51,6 +51,8 @@ export function corpAccessPaymentChoiceSignal(
   );
   const creditCost = pay?.metadata?.creditCost;
   const noOpCertified = pay?.metadata?.accessPaymentNoOpCertified;
+  const sourceDefinitionId = choice.sourceCardDefinitionId;
+  const sourceInstanceId = choice.sourceCardInstanceId;
   if (
     selectableOptions.length !== 2 ||
     !pay ||
@@ -59,7 +61,10 @@ export function corpAccessPaymentChoiceSignal(
     creditCost === undefined ||
     creditCost <= 0 ||
     creditCost > input.playerView.own.credits ||
-    typeof noOpCertified !== "boolean"
+    typeof noOpCertified !== "boolean" ||
+    !sourceDefinitionId ||
+    !sourceInstanceId ||
+    sourceInstanceId !== sourceParts[1]
   ) {
     return undefined;
   }
@@ -73,7 +78,6 @@ export function corpAccessPaymentChoiceSignal(
   ) {
     return undefined;
   }
-  const source = input.playerView.run?.accessedCard;
   const run = input.playerView.run;
   const resolveCandidates = candidates.filter(
     (candidate) =>
@@ -87,11 +91,6 @@ export function corpAccessPaymentChoiceSignal(
   const requirement = action?.choiceRequirements?.[0];
   if (
     !run ||
-    !source ||
-    source.known !== true ||
-    !source.definitionId ||
-    source.instanceId !== sourceParts[1] ||
-    source.owner !== "corp" ||
     action?.side !== "corp" ||
     action.type !== "resolve_choice" ||
     action.source !== "game_rule" ||
@@ -110,8 +109,8 @@ export function corpAccessPaymentChoiceSignal(
   return {
     commitmentVersion: "corp_ambush_commitment_v1",
     ambushId: `access-payment:${choice.choiceId}`,
-    sourceDefinitionId: source.definitionId,
-    sourceInstanceId: source.instanceId,
+    sourceDefinitionId,
+    sourceInstanceId,
     actionIds: [action.actionId],
     serverId: run.attackedServerId,
     phase: "trigger",

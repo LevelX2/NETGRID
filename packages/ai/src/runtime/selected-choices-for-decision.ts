@@ -123,6 +123,8 @@ function selectedCorpAccessPaymentOptionsFromAmbushPlan(
     ) ||
     pay?.metadata?.creditCost !== binding.creditCost ||
     pay.metadata.accessPaymentNoOpCertified !== binding.noOpCertified ||
+    choice.sourceCardDefinitionId !== moduleState.signal.sourceDefinitionId ||
+    choice.sourceCardInstanceId !== moduleState.signal.sourceInstanceId ||
     binding.selectedOptionIds.length !== 1 ||
     !selectableOptions.some(
       (option) => option.id === binding.selectedOptionIds[0],

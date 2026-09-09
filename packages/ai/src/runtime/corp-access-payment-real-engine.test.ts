@@ -38,14 +38,13 @@ const decks = Object.fromEntries(
   }),
 );
 beforeEach(() => resetResidentPlanPortfolioMemory());
-function apply(s: GameState, side: Side, type: string) {
+function apply(s: GameState, side: Side, type: string, serverId = "hq") {
   const action = getLegalActions(s, side).find(
     (a) =>
-      a.type === type && (type !== "start_run" || a.payload?.serverId === "hq"),
+      a.type === type &&
+      (type !== "start_run" || a.payload?.serverId === serverId),
   );
   if (!action) throw Error("missing fixture action " + type);
-  if (!d.actionId || !d.selectedChoices)
-    throw Error("Missing bound Corp action or choices.");
   const r = applyAction(s, {
     matchId: s.matchId,
     side,
@@ -55,7 +54,11 @@ function apply(s: GameState, side: Side, type: string) {
   if (!r.ok) throw Error(r.error.message);
   return r.state;
 }
-function fixture(program?: string, source = "onr_proteus_068_pattel-antibody") {
+function fixture(
+  program?: string,
+  source = "onr_proteus_068_pattel-antibody",
+  zone = "hq",
+) {
   let s = createGameAfterSetup({
     seed: "corp-empty-access-payment",
     corpDeck: decks.corp!,
@@ -67,9 +70,15 @@ function fixture(program?: string, source = "onr_proteus_068_pattel-antibody") {
     .withCorpHqSize(0)
     .withCorpCardInHq(source);
   if (program) f.withRunnerProgramInstalled(program);
+  if (zone === "rd") {
+    const cardId = s.corp.hq.pop();
+    if (!cardId) throw Error("Missing R&D access fixture source.");
+    s.corp.rd.unshift(cardId);
+    s.cardInstances[cardId]!.zone = { side: "corp", zone: "rd" };
+  }
   s.corp.credits = 10;
   s = apply(s, "corp", "end_turn");
-  s = apply(s, "runner", "start_run");
+  s = apply(s, "runner", "start_run", zone);
   s = apply(s, "runner", "access_card");
   return s;
 }
@@ -159,7 +168,14 @@ it("preserves payment and real counter effect when an icebreaker is installed", 
     )?.counters?.pattel,
   ).toBe(1);
 });
-it.each(["stateVersion", "certificate", "options", "source"] as const)(
+it.each([
+  "stateVersion",
+  "certificate",
+  "options",
+  "source",
+  "sourceDefinition",
+  "sourceInstance",
+] as const)(
   "rejects a stale paid-access binding after %s changes",
   (changed) => {
     const i = input(fixture());
@@ -173,6 +189,12 @@ it.each(["stateVersion", "certificate", "options", "source"] as const)(
       altered.playerView.pendingChoice!.options[1]!.id = "different-decline";
     if (changed === "source")
       altered.playerView.pendingChoice!.source += "-stale";
+    if (changed === "sourceDefinition")
+      altered.playerView.pendingChoice!.sourceCardDefinitionId =
+        "different-definition";
+    if (changed === "sourceInstance")
+      altered.playerView.pendingChoice!.sourceCardInstanceId =
+        "different-instance";
     const action = altered.legalActions.find(
       (a) => a.type === "resolve_choice",
     )!;
@@ -199,4 +221,62 @@ it("does not mistake a runner counter effect for an empty icebreaker effect", ()
   });
   if (!r.ok) throw Error(r.error.message);
   expect(r.state.corp.credits).toBe(8);
+});
+it.each([
+  {
+    source: "onr_proteus_057_doppelganger-antibody",
+    program: undefined,
+    selected: "pay",
+    credits: 8,
+  },
+  {
+    source: "onr_proteus_068_pattel-antibody",
+    program: undefined,
+    selected: "decline",
+    credits: 10,
+  },
+  {
+    source: "onr_proteus_068_pattel-antibody",
+    program: "onr_proteus_095_skeleton-passkeys",
+    selected: "pay",
+    credits: 7,
+  },
+])(
+  "binds the private R&D source for $source with $program",
+  ({ source, program, selected, credits }) => {
+    const s = fixture(program, source, "rd"),
+      i = input(s);
+    expect(i.playerView.run?.accessedCard?.known).toBe(false);
+    expect(i.playerView.pendingChoice?.sourceCardDefinitionId).toBe(source);
+    const d = chooseCorpAction(i);
+    expect(d.selectedChoices?.selectedOptionIds).toEqual([selected]);
+    expect(d.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
+      "corp.ambush_and_bluff",
+    );
+    expect(getPlayerView(s, "runner").pendingChoice).toBeUndefined();
+    if (!d.actionId || !d.selectedChoices)
+      throw Error("Missing bound access decision.");
+    const r = applyAction(s, {
+      matchId: s.matchId,
+      side: "corp",
+      actionId: d.actionId,
+      clientKnownStateVersion: s.stateVersion,
+      selectedChoices: d.selectedChoices,
+    });
+    if (!r.ok) throw Error(r.error.message);
+    expect(r.state.corp.credits).toBe(credits);
+    if (program)
+      expect(
+        getPlayerView(r.state, "runner").own.rig?.find(
+          (c) => c.definitionId === program,
+        )?.counters?.pattel,
+      ).toBe(1);
+  },
+);
+it("requires the Engine's private source binding even for a visible HQ source", () => {
+  const i = input(fixture());
+  delete i.playerView.pendingChoice!.sourceCardDefinitionId;
+  expect(() => chooseCorpAction(i)).toThrow(
+    expect.objectContaining({ code: "missing_plan_module_coverage" }),
+  );
 });

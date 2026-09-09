@@ -4384,7 +4384,11 @@ Restklick-Wirtschaft gewinnen.
 Bezahlte Zugriffseffekte gehören ebenfalls diesem Owner. Die Engine kann für
 eine ausschließlich auf installierte Runner-Icebreaker wirkende Counterfolge
 bescheinigen, dass aktuell kein Ziel existiert. Diese negative Bescheinigung
-steht nur in der Corp-Choice; `false` behauptet weder Nutzen noch Optimalität.
+steht nur in der Corp-Choice. Dieselbe Choice bindet ihre bereits im privaten
+Prompt benannte Quelle über die vorhandenen Felder `sourceCardInstanceId`
+und `sourceCardDefinitionId`. Der Plan konsumiert diese Bindung für jede
+Zugriffszone. Die allgemeine R&D-Run-Ansicht bleibt unverändert verdeckt.
+`false` behauptet weder Nutzen noch Optimalität.
 Ambush lehnt eine so belegte wirkungslose Zahlung ab und bindet die Auswahl
 an Quelle, Choice, StateVersion, Kosten, Bescheinigung und LegalAction. Andere
 bezahlte Zugriffseffekte behalten ihre bisherige Aktivierung. Die Bewertung
