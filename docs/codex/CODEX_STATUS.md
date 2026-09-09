@@ -1,6 +1,6 @@
 # CODEX_STATUS
 
-Stand: 2026-09-04
+Stand: 2026-09-09
 
 ## Einstieg
 
@@ -124,10 +124,15 @@ nicht überschrieben. Der Updater führt das MSI-Upgrade aus und startet erst
 nach Healthcheck neu. Der neue Sicherungspfad ist komponentenweise geprüft;
 direkte MSI-Versionswechsel sind inzwischen an denselben Snapshot-/Restore-
 Owner und den gebundenen Verifier angeschlossen. Ihre Prüfung liegt vor dem
-MSI-Transaktionsabschluss; die native Gesamt-Abnahme bleibt offen. Ein expliziter
-Reparatureinstieg nach Prozessverlust ist mit geschützter Snapshot-/Setup-
-Bindung und geprüfter Übernahme der verwaisten Lease komponentenweise
-implementiert, aber noch nicht nativ abgenommen. Bei Fehlern werden Programm und Daten soweit sicher möglich zurückgerollt,
+MSI-Transaktionsabschluss. Prozessverlust von Prüfer, MSI-Client,
+Custom-Action-Host und Windows-Installer-Dienst sowie die gebundene Übernahme
+verwaister Leases sind inzwischen in der isolierten Windows-11-Sandbox nativ
+geprüft. Der reguläre Kandidat 1.0.8226 besteht außerdem den nativen Bestands-
+Reparaturablauf einschließlich erhaltenem Maintenance-Zugang, Healthcheck und
+Abschlussstart. Die vollständige Release-Abnahme bleibt wegen des noch
+ausstehenden echten GitHub-Release-/Download-Updatepfads und der Probe auf
+einem getrennten Zielrechner offen. Bei Fehlern werden Programm und Daten
+soweit sicher möglich zurückgerollt,
 andernfalls bleibt NETGRID klar diagnostiziert gestoppt. Alle Windows-
 Oberflächen verwenden eine gemeinsame vollständige Sprachquelle für Deutsch,
 Englisch und Französisch sowie das NETGRID-Icon. Die 3×3-Setup-Renderprüfung
