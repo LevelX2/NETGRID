@@ -166,6 +166,13 @@ it("prices Manhunt, binds its zero-credit bid and then trashes a visible resourc
   const traceAction = traceInput.legalActions.find(
     (action) => action.type === "resolve_choice",
   )!;
+  const traceOrigin = {
+    ...origin.executionOrigin!,
+    stateVersion: traceInput.playerView.stateVersion,
+    timingPoint: traceInput.playerView.timingPoint,
+    windowKind: "trace" as const,
+    windowId: traceInput.playerView.trace!.traceId,
+  };
   for (const invalid of ["source", "version", "option"] as const) {
     const altered = structuredClone(traceInput);
     const action = structuredClone(traceAction);
@@ -175,12 +182,7 @@ it("prices Manhunt, binds its zero-credit bid and then trashes a visible resourc
     if (invalid === "option")
       action.choiceRequirements![0]!.optionIds = ["bid_1"];
     expect(() =>
-      boundCorpPunishTraceChoices(
-        altered,
-        action,
-        origin.executionOrigin!,
-        portfolio,
-      ),
+      boundCorpPunishTraceChoices(altered, action, traceOrigin, portfolio),
     ).toThrow();
   }
   const bid = choose(state);

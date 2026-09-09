@@ -59,6 +59,20 @@ const CORP_DECK: DeckDefinition = {
 describe("Corp restricted install/rez credit real-Engine capability", () => {
   afterEach(resetResidentPlanPortfolioMemory);
 
+  it("does not admit a zero-click terminal funding need without an executable head", () => {
+    const state = preparedOriginalTerminalReserve(3, 0);
+    const input = decisionInput(state, ORIGINAL_DECK);
+    expect(input.legalActions.map((action) => action.type)).toEqual([
+      "end_turn",
+    ]);
+    const decision = chooseCorpAction(input);
+    expect(decision.actionId).toBe("corp.end_turn");
+    expect(
+      decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
+    ).toBe("corp.complete_turn");
+    expect(apply(state, input.legalActions[0]!).activeSide).toBe("runner");
+  });
+
   it("completes a profitable unrezzed bank prefix for the exact Defense consumer", () => {
     let state = preparedOriginalTerminalReserve(3, 1);
     const source = state.cardInstances[contractId(state)]!;

@@ -99,15 +99,14 @@ it("quotes a standalone trace without treating optional tag clearing as guarante
     quoteCorpPunishRoute: (r) => quoteCorpPunishRoute(s, r),
   });
   expect(d.fallbackUsed).toBe(false);
-  expect(d.decisionDebug?.planFirstDecision?.portfolio).toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({
-        moduleId: "corp.punish_campaign",
-        viability: "blocked",
-        evidenceCodes: expect.arrayContaining([
-          "corp_punish_opportunity_watch:no_positive_non_damage_payoff",
-        ]),
-      }),
-    ]),
+  expect(i.playerView.corpPunishRouteQuoteSet?.routes[0]).toMatchObject({
+    responsePaymentEnvelope: {
+      totalCorpCredits: { minimum: 4, maximum: 4 },
+      runnerResponseCredits: { maximum: 0 },
+    },
+    tagOutcomeEnvelope: { addedTags: { minimum: 6, maximum: 6 } },
+  });
+  expect(d.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
+    "corp.execute_punish_sequence",
   );
 });

@@ -16245,6 +16245,7 @@ function buildCorpDomain(
   const terminalRezReserveSignals = corpTerminalCentralRezReserveSignals(
     input,
     centralDefenseAllocation,
+    candidates,
   );
   const terminalRezPreparations = terminalRezReserveSignals.flatMap((need) =>
     need.targetIceInstanceId && need.rezReserveNeed
@@ -21678,6 +21679,7 @@ function corpPunishFundingParentPriority(
 function corpTerminalCentralRezReserveSignals(
   input: AiDecisionInput,
   centralDefenseAllocation: CorpCentralDefenseAllocation | undefined,
+  candidates: readonly ActionSemanticCandidate[],
 ): CorpGenericDefenseSignal[] {
   if (
     input.side !== "corp" ||
@@ -21750,6 +21752,15 @@ function corpTerminalCentralRezReserveSignals(
         technicalIdCompare(left.ice.instanceId, right.ice.instanceId),
     )[0];
   if (!reserveCandidate) return [];
+  if (
+    input.playerView.own.clicks === 0 &&
+    !corpRestrictedRezPreparationCandidates(input, candidates, {
+      targetIceInstanceId: reserveCandidate.ice.instanceId,
+      targetServerId: serverId,
+      requiredRezCredits: reserveCandidate.requiredCredits,
+    }).some((preparation) => preparation.clickCost === 0)
+  )
+    return [];
   return [
     {
       kind: "generic",

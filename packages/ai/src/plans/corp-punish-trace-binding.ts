@@ -77,6 +77,11 @@ export function boundCorpPunishTraceChoices(
   );
   if (
     origin.rootPlanInstanceId !== leaf.parentInstanceId ||
+    origin.side !== "corp" ||
+    origin.stateVersion !== input.playerView.stateVersion ||
+    origin.timingPoint !== input.playerView.timingPoint ||
+    origin.windowKind !== "trace" ||
+    origin.windowId !== trace.traceId ||
     !root ||
     !Number.isSafeInteger(binding.amount) ||
     binding.amount < 0 ||

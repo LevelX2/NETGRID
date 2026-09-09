@@ -89,27 +89,35 @@ describe("AI behavior baseline runtime regressions", () => {
     ).toEqual([]);
   });
 
-  it("reaches the final deterministic hybrid checkpoint without runtime errors", () => {
-    const result = runCapturedSeed(
-      "strategy_panel_hybrid_score_punish_cheap_bag",
-      "ai-behavior-baseline-v1-08",
-      111,
-    );
-
-    expect(
-      result.summary.errors,
-      JSON.stringify(captureDiagnostic(result.capture), undefined, 2),
-    ).toEqual([]);
-    // This regression covers the decision prefix through action 111. Changed
-    // earlier decisions need not preserve an older terminal punish at that index.
-    expect(result.summary).toMatchObject({
+  it("keeps the hybrid trace-to-payoff sequence legal through completion or the bounded horizon", () => {
+    const slot = listMatchProgressionBenchmarkDeckSlots().find(
+      (candidate) =>
+        candidate.slotId === "strategy_panel_hybrid_score_punish_cheap_bag",
+    )!;
+    const resolved = resolveBenchmarkDeckSlot(slot);
+    if (!resolved.ok) throw new Error(resolved.reason);
+    const summary = simulateAiGame({
+      ...resolved.config,
+      seed: "ai-behavior-baseline-v1-08",
+      maxActions: 112,
+      runnerControllerMode: "current_candidate",
+      corpControllerMode: "current_candidate",
+    });
+    expect(summary.errors).toEqual([]);
+    // A correctly priced trace can finish before historical checkpoint 111.
+    expect(summary).toMatchObject({
       replayOk: true,
     });
-    expect(result.summary.runtimeFailures).toEqual([]);
-    expect(result.summary.metrics.illegalActions).toBe(0);
+    expect(summary.runtimeFailures).toEqual([]);
+    expect(summary.metrics.illegalActions).toBe(0);
     expect(
-      result.summary.actionSequence.every((entry) => !entry.fallbackUsed),
+      summary.actionSequence.some(
+        (entry) => entry.planKind === "corp.execute_punish_sequence",
+      ),
     ).toBe(true);
+    expect(summary.actionSequence.every((entry) => !entry.fallbackUsed)).toBe(
+      true,
+    );
   }, 20_000);
 });
 
