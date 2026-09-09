@@ -3282,6 +3282,16 @@ Zweck, sofern dessen Quote keine Umleitung oder Rückversetzung enthält.
 Diese Zielprüfung gehört zur Encounter-Action-Admission und bleibt von der
 Wahl eines bestimmten Breakers unabhängig.
 
+Dasselbe Modul lehnt einen Break ab, wenn die aktuelle Engine-LegalAction
+`breakSubroutinePurpose: zero_damage_no_secondary_effect` zertifiziert.
+Die Engine prüft dafür die tatsächlich abgeleitete Nullschadensmenge aller
+gebrochenen Subroutinen sowie aktive Vollbruch-Schadenspflichten, eigene
+Vollbruch-Payoffs und Spezial-/Erfolgseffekte der Breakerfähigkeit. Ein
+gemischter Break mit wirksamer ETR, positive oder unbekannte Schadensmengen
+und eigenständige Vollbruchwirkungen erhalten dieses Zertifikat nicht.
+Legalität, Quelle, Subroutinen und StateVersion bleiben unverändert gebunden;
+ein bestehendes Run-Commitment überstimmt die fehlende Wirkung nicht.
+
 Die vorab gebundene Reserve für unbekanntes ICE gilt auch vor dessen
 Informationsgrenze: Bekannter Schaden darf den reservierten Handpuffer nicht
 verbrauchen; seine Vermeidung darf nur aus Credits außerhalb derselben

@@ -84,6 +84,17 @@ export function runnerEncounterActionExclusion(
     };
   }
   if (action.type === "break_subroutine") {
+    if (
+      action.payload?.breakSubroutinePurpose ===
+      "zero_damage_no_secondary_effect"
+    ) {
+      return {
+        key: "break_has_no_damage_or_secondary_purpose",
+        label: "Nullschaden ohne weiteren Break-Effekt",
+        reason:
+          "encounter_action:break_subroutine|engine_certified_zero_damage_no_secondary_effect",
+      };
+    }
     if (breakOnlyPreventsAbsentNextEncounter(input, action)) {
       return {
         key: "break_targets_absent_next_encounter",
