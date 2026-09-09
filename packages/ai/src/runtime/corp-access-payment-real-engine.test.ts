@@ -44,7 +44,8 @@ function apply(s: GameState, side: Side, type: string) {
       a.type === type && (type !== "start_run" || a.payload?.serverId === "hq"),
   );
   if (!action) throw Error("missing fixture action " + type);
-  if (!d.actionId) throw Error("Missing bound Corp action.");
+  if (!d.actionId || !d.selectedChoices)
+    throw Error("Missing bound Corp action or choices.");
   const r = applyAction(s, {
     matchId: s.matchId,
     side,
@@ -112,7 +113,8 @@ it.each([undefined, "onr_proteus_089_garbage-in"])(
       ),
     ).toBe(true);
     expect(hashState(s)).toBe(before);
-    if (!d.actionId) throw Error("Missing bound Corp action.");
+    if (!d.actionId || !d.selectedChoices)
+      throw Error("Missing bound Corp action or choices.");
     const r = applyAction(s, {
       matchId: s.matchId,
       side: "corp",
@@ -140,7 +142,8 @@ it("preserves payment and real counter effect when an icebreaker is installed", 
   expect(d.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
     "corp.ambush_and_bluff",
   );
-  if (!d.actionId) throw Error("Missing bound Corp action.");
+  if (!d.actionId || !d.selectedChoices)
+    throw Error("Missing bound Corp action or choices.");
   const r = applyAction(s, {
     matchId: s.matchId,
     side: "corp",
@@ -185,7 +188,8 @@ it("does not mistake a runner counter effect for an empty icebreaker effect", ()
   expect(d.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId).toBe(
     "corp.ambush_and_bluff",
   );
-  if (!d.actionId) throw Error("Missing bound Corp action.");
+  if (!d.actionId || !d.selectedChoices)
+    throw Error("Missing bound Corp action or choices.");
   const r = applyAction(s, {
     matchId: s.matchId,
     side: "corp",
