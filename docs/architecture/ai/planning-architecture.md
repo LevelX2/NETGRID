@@ -903,6 +903,17 @@ gültiger Stärke. Ein bezahlter Encounter-Pump gilt für alle weiteren
 Subroutinen desselben ICE, einschließlich aufeinanderfolgender Trace-Breaks,
 und wird dort nicht erneut berechnet. Am nächsten ICE sowie in dessen
 Vorausberechnung bleibt nur ausdrücklich länger gültige Stärke erhalten.
+Bei Engine-typisiertem Schaden, der durch vollständigen Bruch des nächsten
+ICE entfällt, vergleicht die bekannte Pfadbewertung den Bruch der Quelle mit
+dem vollständigen Bruch des bekannten nächsten Encounters. Unbekannte,
+ungerezzte oder bedingt veränderliche Folgezustände zertifizieren diese
+Alternative nicht. Die gewählte vollständige Brechung bezahlt Pump und
+Subroutinen genau einmal, trägt Breakerzustand und Zahlungspools weiter und
+weist die vollständig gebrochenen ICE aus. Die nachgelagerte Schadensprüfung
+rechnet diese bereits bezahlten Subroutinen nicht erneut als Schaden oder
+optionale Zusatzzahlung. Runstart und Fortsetzung bleiben beim bestehenden
+Contest-/Runwindow-Owner mit jeweils aktuellen LegalActions; eine Quote
+wählt keine Action und ersetzt keine Engine-Fortsetzung.
 Ein Runstart-Choice-Ursprung entsteht nur aus einer echten Runstart-Aktion
 oder einer entsprechend gebundenen Engine-Runfähigkeit. Ein projizierter
 Serverkontext innerhalb eines laufenden Runs genügt nicht: Eine Bankaktivierung

@@ -71,6 +71,7 @@ export type RunnerFutureEncounterDamageJackOutAssessment = {
 
 export type RunnerVisibleLethalIceDamageOptions = {
   generalCredits?: number;
+  fullyBrokenIceInstanceIds?: readonly string[];
   runDamagePreventionRemaining?: number;
   handCount?: number;
   requiredHandFloor?: number;
@@ -128,6 +129,7 @@ export function runnerVisibleLethalIceDamageAssessment(
     ) {
       continue;
     }
+    if (options.fullyBrokenIceInstanceIds?.includes(ice.instanceId)) continue;
     for (const subroutine of quote.subroutines) {
       const amount = subroutine.amount;
       if (

@@ -256,6 +256,9 @@ function evaluateRunnerRunTarget(
       // encounter costs.  Optional damage avoidance may only spend what is
       // actually left after those commitments.
       generalCredits: path.creditsAfterPath,
+      ...(path.fullyBrokenIceInstanceIds
+        ? { fullyBrokenIceInstanceIds: path.fullyBrokenIceInstanceIds }
+        : {}),
       runDamagePreventionRemaining: Math.max(
         0,
         projection.damagePreventionPool ?? 0,

@@ -157,31 +157,42 @@ export function assessKnownRezzedIcePath(
   };
   const availablePreRunCredits =
     typeof runnerCredits === "number" ? runnerCredits : runnerCredits.credits;
+  const conditionalFullBreakVariants = iceCards.some((ice) =>
+    ice.effectiveRunQuote?.subroutines.some(
+      (subroutine) =>
+        subroutine.type === "set_next_encounter_unless_fully_break_damage",
+    ),
+  )
+    ? [false, true]
+    : [false];
   const candidates = selectableSubtypeRigVariants(
     rigCards,
     context,
     availablePreRunCredits,
   ).flatMap((variant) =>
-    (["retained", "trashed"] as const).map((bartmossOutcome) => ({
-      bartmossOutcome,
-      assessment: assessKnownRezzedIcePathInternal(
-        iceCards,
-        variant.rigCards,
-        runnerCredits,
-        rootCards,
-        normalizedCorpBidCapacity,
-        [],
-        {
-          allowBreakingRunPathEffects: true,
-          bartmossOutcome,
-          ...(variant.preRunPreparation
-            ? { preRunPreparation: variant.preRunPreparation }
-            : {}),
-        },
-        undefined,
-        context,
-      ),
-    })),
+    (["retained", "trashed"] as const).flatMap((bartmossOutcome) =>
+      conditionalFullBreakVariants.map((deferConditionalFullBreak) => ({
+        bartmossOutcome,
+        assessment: assessKnownRezzedIcePathInternal(
+          iceCards,
+          variant.rigCards,
+          runnerCredits,
+          rootCards,
+          normalizedCorpBidCapacity,
+          [],
+          {
+            allowBreakingRunPathEffects: true,
+            bartmossOutcome,
+            deferConditionalFullBreak,
+            ...(variant.preRunPreparation
+              ? { preRunPreparation: variant.preRunPreparation }
+              : {}),
+          },
+          undefined,
+          context,
+        ),
+      })),
+    ),
   );
   const best = candidates
     .slice()
@@ -378,6 +389,7 @@ function assessKnownRezzedIcePathInternal(
   options: {
     allowBreakingRunPathEffects: boolean;
     bartmossOutcome?: "retained" | "trashed";
+    deferConditionalFullBreak?: boolean;
     preRunPreparation?: KnownRezzedIcePathAssessment["preRunPreparation"];
   },
   initialBreakerStrengths?: Map<string, number>,
@@ -419,6 +431,8 @@ function assessKnownRezzedIcePathInternal(
       )
     : undefined;
   const breakersAtRiskOfBeingTrashed = new Set<string>();
+  const fullyBrokenIceInstanceIds: string[] = [];
+  let requiredFullBreakIceIndex: number | undefined;
   const breakerState: VisibleRunBreakerState = {
     strengthByBreakerInstanceId: new Map(
       rigCards.map((card) => [
@@ -524,6 +538,59 @@ function assessKnownRezzedIcePathInternal(
       visibleBreakCost += encounterTax;
       spendGeneralCredits(creditBudget, encounterTax);
       creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
+    }
+    if (requiredFullBreakIceIndex === iceIndex) {
+      // A typed next-encounter obligation is paid at its target. Every
+      // subroutine is broken once, so none of its printed effects also fires.
+      const assessment = runPathEffectsPreventFutureBreaking(
+        activeRunPathEffects,
+      )
+        ? undefined
+        : minimumCreditsToBreakVisibleSubroutines(
+            effectiveIceForQuote(effectiveIce, quote),
+            rigCardsForEncounter,
+            quote.subroutines,
+            breakerStrengths,
+            additionalBreakCostPerSubroutine,
+            breakerState.pendingFreeBreaks,
+          );
+      const payment = assessment
+        ? projectBreakerCreditPayment(creditBudget, assessment)
+        : undefined;
+      if (!assessment || !payment?.affordable) {
+        return blockedPathAssessment(
+          visibleBreakCost + (assessment?.cost ?? 0),
+          payment?.creditsAfterPath ?? creditBudget.credits,
+          iceIndex,
+          effectiveIce.definitionId,
+          effectiveIce.subtypes,
+          pathCostBeforeIce,
+          firstKnownIceBreakable,
+          assessedKnownIceCount,
+          assessment ? "ice_unaffordable" : "ice_unbreakable",
+        );
+      }
+      visibleBreakCost += assessment.cost;
+      futureClicksLost += assessment.futureClicksLost ?? 0;
+      spendBreakerCreditsAndApplySideEffects(creditBudget, assessment);
+      advanceVisibleRunBreakerState(breakerState, assessment, true);
+      recordProjectedBreakerStrength(
+        assessment,
+        breakerStrengths,
+        carriedBreakerStrengths,
+      );
+      if (assessment.conditionalAccessReason)
+        conditionalAccessReasons.add(assessment.conditionalAccessReason);
+      if (assessment.conditionalRiskReason) {
+        conditionalRiskReasons.add(assessment.conditionalRiskReason);
+        if (options.bartmossOutcome !== "retained")
+          breakersAtRiskOfBeingTrashed.add(assessment.breakerInstanceId);
+      }
+      fullyBrokenIceInstanceIds.push(effectiveIce.instanceId!);
+      creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
+      firstKnownIceBreakable = true;
+      requiredFullBreakIceIndex = undefined;
+      continue;
     }
     for (const subroutine of quote.subroutines) {
       if (!isVisibleRunnerCreditLossSubroutine(subroutine)) continue;
@@ -858,6 +925,24 @@ function assessKnownRezzedIcePathInternal(
       effectIndex,
       { effect, sourceSubroutine },
     ] of runPathEffects.entries()) {
+      const nextIce = futureIce.at(-1);
+      if (
+        options.deferConditionalFullBreak &&
+        sourceSubroutine.type ===
+          "set_next_encounter_unless_fully_break_damage" &&
+        !runPathEffectsPreventFutureBreaking(activeRunPathEffects) &&
+        nextIce?.known === true &&
+        nextIce.instanceId &&
+        (nextIce.rezzed === true ||
+          nextIce.authoritativePostRezRunProjection === true) &&
+        nextIce.effectiveRunQuote &&
+        !nextIce.effectiveRunQuote.conditionalEncounterEffects?.length
+      ) {
+        // Unknown or conditional next encounters cannot certify this branch.
+        // The ordinary source-break branch is evaluated independently above.
+        requiredFullBreakIceIndex = iceIndex - 1;
+        continue;
+      }
       const matchingTraceHazard = visibleHazardProjections.find(
         ({ hazard }) => hazard.subroutineId === sourceSubroutine.id,
       )?.hazard;
@@ -1000,6 +1085,7 @@ function assessKnownRezzedIcePathInternal(
   }
   return {
     blocked: false,
+    ...(fullyBrokenIceInstanceIds.length ? { fullyBrokenIceInstanceIds } : {}),
     ...(visibleBreakCost > 0 ? { visibleBreakCost } : {}),
     ...(futureClicksLost > 0 ? { futureClicksLost } : {}),
     ...(preRunPreparation ? { preRunPreparation } : {}),

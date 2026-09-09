@@ -1071,11 +1071,12 @@ describe("visible run analysis access-preserving effect choices", () => {
       20,
     );
 
-    expect(outside.visibleBreakCost).toBe(14);
+    expect(outside.visibleBreakCost).toBe(4);
+    expect(outside.fullyBrokenIceInstanceIds).toEqual(["inner-wall"]);
     expect(inside.visibleBreakCost).toBe(4);
   });
 
-  it("breaks a harmful non-ETR setup subroutine with a universal breaker", () => {
+  it("uses the cheaper complete follow-up break for conditional setup damage", () => {
     const assessment = assessKnownRezzedIcePath(
       [
         dataWallTwoPointZeroIce("inner-wall"),
@@ -1088,8 +1089,8 @@ describe("visible run analysis access-preserving effect choices", () => {
     expect(assessment).toMatchObject({
       blocked: false,
       canReachAccess: true,
-      visibleBreakCost: 14,
-      creditsAfterPath: 6,
+      visibleBreakCost: 4,
+      creditsAfterPath: 16,
     });
   });
 

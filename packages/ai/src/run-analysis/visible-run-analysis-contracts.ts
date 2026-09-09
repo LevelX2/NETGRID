@@ -229,6 +229,8 @@ export type VisibleIceRunHazardProjection = {
 
 export type KnownRezzedIcePathAssessment = {
   blocked: boolean;
+  /** ICE fully broken by the selected, already paid visible path. */
+  fullyBrokenIceInstanceIds?: string[];
   visibleBreakCost?: number;
   futureClicksLost?: number;
   visibleIceRunHazards?: VisibleIceRunHazard[];
