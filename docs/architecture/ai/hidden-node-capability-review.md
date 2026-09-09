@@ -613,7 +613,8 @@ Rez plus bezahltes ETR und den erhaltenen verdeckten Köder nach Run-Ende.
 Das ist eine begrenzte, zustandsabhängige Koordination vorhandener Owner.
 Eine optimale gelernte Mischstrategie, ein garantierter Alternativsieg oder
 eine Pflicht, jeden Köder-Run mit ICE-Ausgaben zu verteidigen, folgen daraus
-nicht. Die getrennte frische Kontrollpopulation 413 prüft die Häufigkeiten.
+nicht. Die getrennte frische Kontrollpopulation 413 bestätigt die Ausführung,
+aber weiterhin seltene geschützte Köder.
 
 
 Die erste Kontrolle 413 findet zusätzlich eine Engine-Timinglücke (SP-324):
@@ -642,3 +643,27 @@ wählen nun Installation; die Real-Engine-Probe führt die Folge bis zum
 überlebten Pflichtziehen aus. Auch Runde zwei bleibt deshalb diagnostisch.
 Kompass und allgemeines Zielbild gelten unverändert; es entsteht weder ein
 zweiter Chooser noch eine neue Planprioritätsklasse.
+
+### Verifizierter Umfang und verbleibende Grenzen
+
+Die abschließende Kontrolle auf `68dbb8f7c` enthält 40 neue vollständige
+Partien ohne technische Flags. Der geschützte Mobile-Barricade-Köder wird
+erneut tatsächlich bezahlt; bei leerem R&D verhindert die aktuelle
+Recycling-Priorität den früheren Pflichtzieh-Verlust. Der genaue betroffene
+Seed endet nach 921 Entscheidungen regulär über Agendapunkte. Eine verlängerte
+Partie ist kein Nachweis eines Alternativsiegs. Geschützte Köder bleiben selten;
+eine ausgewogene Agenda-/Köder-Mischstrategie ist nicht abgenommen.
+
+Die neuen Real-Engine- und Signalregressionen sowie die angrenzenden
+Engine-Prüfungen bestehen. Der breite AI-Gate enthält weiterhin vier auf dem
+unveränderten Ausgangsstand reproduzierte Fehler (Crybaby-Sicherheit,
+Decision-Modulgrenze, MRGSG-Remote-Contest und 5285-Run-Target-Metrik).
+Er gilt deshalb nicht als vollständig grün. Einzelresultate und Rohbelege
+liegen in der zentralen Evidence-Registry unter Kontrolle 413.
+
+Stereograms produktive Vorbereitung im regulären Cleanup bleibt bestätigt.
+Manhunts vollständige gebotsgebundene Druckfolge und Government Contracts
+Erstinvestition mit tatsächlichen Verbrauchern bleiben offen. Aus dem
+reparierten Bel-Pfad folgt für diese beiden anderen Planungsketten keine
+Abnahme. Der zusätzliche Hand-/Score-Konflikt vor dem Agenda-Pflichtabwurf
+wird getrennt als SP-323 geführt.

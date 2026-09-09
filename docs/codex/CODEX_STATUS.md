@@ -67,12 +67,14 @@ exakte Install-/Rez-Linie im bestehenden Ambush-Owner, einschließlich
 begrenztem verdecktem Halten und Schutz reservierter Agenda-Orte. Defense
 bindet geeignete geschützte Köder an eine finanzierbare ICE-/Encounter-Folge;
 Economy schließt den begrenzten Bedarf. Geschlossene Rez-Fenster sind eine
-verbindliche Planungsgrenze. Der
+verbindliche Planungsgrenze. Bei bereits leerem R&D bindet Ambush die legale
+Install-/Rez-Rettung als dringliche Bedrohungsantwort vor gewöhnlicher
+Score-Finanzierung; nach Auffüllen entfällt dieser aktuelle Nachweis. Der
 Cleanup bewertet den Nutzen von Archives-Zugriffsfallen am tatsächlichen
 Abwurfziel. Unabhängige Ambush-Vorbereitung löscht keine fremden
 Agenda-Finanzierungsbedarfe mehr. Eigenständige Trace-Tag-Quellen erhalten
 eine Engine-Quote; vollständiger gebotsgebundener Tag-Druck und die
-Government-Contract-Erstinvestition bleiben offen. Kontrolle 412 und
+Government-Contract-Erstinvestition bleiben offen. Kontrollen 412/413 und
 Testgrenzen stehen im
 `docs/architecture/ai/hidden-node-capability-review.md`.
 

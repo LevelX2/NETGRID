@@ -2,6 +2,13 @@
 
 Stand: 2026-08-30
 
+Die kanonische 40er-Erfassung erlaubt für nachweislich fortschreitende lange
+Partien ein explizites `--max-batches N` (1–200, Standard 20). Das Limit wird
+im Manifest gespeichert und beim Resume unverändert verlangt. Ein Erreichen
+der Grenze ist ein diagnostischer Erfassungsabbruch, kein Spielausgang.
+Erst der vollständige erneute Lauf mit dokumentierter größerer Grenze darf
+in den finalen Nenner eingehen; Regeln und KI werden dafür nicht abgeschwächt.
+
 ## Zweck
 
 Die zentrale Evidenzregistrierung ist der alleinige operative
