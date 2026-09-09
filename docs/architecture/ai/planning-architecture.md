@@ -2221,6 +2221,13 @@ Access-Consumer prüft die letzte Beobachtung eines noch vorhandenen Roots:
 Der Steal einer benachbarten Agenda macht den bereits abgelehnten Restinhalt
 nicht zu einem neuen Informationsziel.
 
+Eine öffentliche `asset_to_agenda`-Ersetzung entfernt die bisherigen
+Asset-Beobachtungen. Beobachtete Upgrades rücken nur dann sicher nach, wenn
+alle niedrigeren Root-Positionen bekannt sind; andernfalls bleibt ihre neue
+Position unbekannt. Das Installationsereignis offenbart keine Definition der
+neuen Agenda. Diese Invalidation gehört zu `BeliefState`, nicht zur
+nachgelagerten Run-Zielauswahl.
+
 ### 19.3 Marginaler Nutzen
 
 Planmodule definieren selbst, wann der nächste gleichartige Step keinen
@@ -3187,6 +3194,16 @@ Verantwortung:
 
 Das Modul besitzt kein unabhängiges langfristiges Ziel. Es gehört logisch zum
 auslösenden Run-/Contest-Plan und kehrt anschließend dorthin zurück.
+
+Die bekannte Remote-Vorprojektion und die aktuelle Access-Konversion nutzen
+dieselbe kanonische Trash-Impact-Bewertung. Die Vorprojektion erhält die
+aktuelle Economy-Reserve; endliche Kreditpools, tatsächlich vorhandene
+transferierbare Advancement-Counter und kanonische Schadens-/Tag-Effekte
+bleiben getrennte Wertquellen. Ein leerer Kreditpool erzeugt kein weiteres
+Einkommen. Fehlende kanonische Kartendaten scheitern strukturiert.
+Trash-Impact ist ausschließlich an eine vorhandene `trash_accessed_card`-
+LegalAction gebunden. `decline_trash` bei einem Agenda-Steal ist keine
+Trash-Alternative und erhält keinen daraus abgeleiteten Verzichtswert.
 
 Ein fehlender Steal-/Trash-Ertrag allein rechtfertigt keinen Abbruch nach dem
 letzten ICE: Eine aus der eigenen sichtbaren CardSpec belegte Belohnung am

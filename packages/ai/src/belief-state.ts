@@ -879,6 +879,7 @@ function deriveKnownPositionMemory(
     ) {
       continue;
     }
+    reconcileObservedRootReplacement(memory, classification, eventsById);
     reconcileObservedRootRemoval(memory, classification, eventsById);
     for (const key of [...memory.keys()]) {
       if (positionInvalidatesKey(key, classification)) memory.delete(key);
@@ -1669,6 +1670,50 @@ function positionInvalidatesKey(
     return event.serverId ? key.startsWith(`${event.serverId}:`) : true;
   }
   return false;
+}
+
+/** A public asset replacement removes assets and appends an unknown agenda. */
+function reconcileObservedRootReplacement(
+  memory: Map<string, KnownPositionMemory>,
+  event: BeliefEventClassification,
+  eventsById: Map<string, PublicGameEvent>,
+): void {
+  const raw = eventsById.get(event.eventId);
+  if (
+    event.family !== "install" ||
+    !event.serverId ||
+    raw?.publicPayload.rootReplacement !== "asset_to_agenda" ||
+    raw.publicPayload.replacedRootCardType !== "asset"
+  )
+    return;
+  const roots = new Map(
+    [...memory.values()]
+      .filter(
+        (entry) =>
+          entry.zone === event.serverId && /^root:\d+$/.test(entry.positionKey),
+      )
+      .map((entry) => [Number(entry.positionKey.slice(5)), entry]),
+  );
+  for (const entry of roots.values())
+    memory.delete(`${entry.zone}:${entry.positionKey}`);
+  for (const [index, entry] of roots) {
+    if (CARD_DEFINITIONS_BY_ID[entry.definitionId]?.type === "asset") continue;
+    let removedBefore = 0;
+    let prefixKnown = true;
+    for (let lower = 0; lower < index; lower++) {
+      const lowerEntry = roots.get(lower);
+      if (!lowerEntry) {
+        prefixKnown = false;
+        break;
+      }
+      if (CARD_DEFINITIONS_BY_ID[lowerEntry.definitionId]?.type === "asset")
+        removedBefore++;
+    }
+    // An unobserved lower slot could contain another removed asset.
+    if (!prefixKnown) continue;
+    const positionKey = `root:${index - removedBefore}`;
+    memory.set(`${entry.zone}:${positionKey}`, { ...entry, positionKey });
+  }
 }
 
 /** Keep positional observations aligned when a publicly identified sibling leaves. */

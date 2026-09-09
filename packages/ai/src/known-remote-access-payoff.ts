@@ -15,6 +15,7 @@ import { projectAccessDecision } from "./decision/access-decision-projection";
 import { createProjectedAccessOutcome } from "./access/access-outcome-projection";
 import { assessKnownRezzedIcePath } from "./visible-run-analysis";
 import { currentRunRemainingIce } from "./runtime/current-encounter";
+import type { AccessReserveEconomyPosture } from "./access/access-reserve-adapter";
 import {
   mergedPublicHistory,
   serverIdFromEvent,
@@ -83,6 +84,7 @@ export function evaluateKnownRemoteAccessPayoff(
   input: AiDecisionInput,
   serverId: string | undefined,
   beliefState: BeliefState = reconstructBeliefState(input),
+  economyPosture?: AccessReserveEconomyPosture,
 ): KnownRemoteAccessPayoff {
   if (!serverId?.startsWith("remote_")) return unknownRemotePayoff("none");
   const server = input.playerView.servers.find(
@@ -322,6 +324,7 @@ export function evaluateKnownRemoteAccessPayoff(
       rootType: cheapestTrashRoot.type,
       trashCost: cheapestTrashCost,
       creditsAfterPath,
+      ...(economyPosture ? { economyPosture } : {}),
       ...(cheapestTrashRoot.visibleCard
         ? { visibleCard: cheapestTrashRoot.visibleCard }
         : {}),

@@ -116,19 +116,19 @@ describe("known remote access commitment", () => {
     );
   });
 
-  it("keeps affordable non-pooled remote trash as a trash commitment", () => {
+  it("keeps affordable known steal-tax removal as a trash commitment", () => {
     const projection = projectKnownRemoteTrashCommitment(
       aiInput({ credits: 8 }),
       {
         serverId: "remote_1",
-        definitionId: "neutral-known-asset",
-        rootType: "asset",
-        trashCost: 4,
+        definitionId: "onr_v1_366_red-herrings",
+        rootType: "upgrade",
+        trashCost: 1,
         creditsAfterPath: 8,
         visibleCard: visibleCard("neutral-asset", {
-          definitionId: "neutral-known-asset",
-          title: "Neutral Asset",
-          type: "asset",
+          definitionId: "onr_v1_366_red-herrings",
+          title: "Red Herrings",
+          type: "upgrade",
         }),
       },
     );
@@ -165,14 +165,14 @@ describe("known remote access commitment", () => {
       }),
       {
         serverId: "remote_1",
-        definitionId: "neutral-known-asset",
-        rootType: "asset",
-        trashCost: 4,
+        definitionId: "onr_v1_366_red-herrings",
+        rootType: "upgrade",
+        trashCost: 1,
         creditsAfterPath: 8,
         visibleCard: visibleCard("neutral-asset", {
-          definitionId: "neutral-known-asset",
-          title: "Neutral Asset",
-          type: "asset",
+          definitionId: "onr_v1_366_red-herrings",
+          title: "Red Herrings",
+          type: "upgrade",
         }),
       },
     );
@@ -224,7 +224,7 @@ describe("known remote access commitment", () => {
       desiredCreditReserve: 7,
       preservesReserve: false,
       commitment: {
-        reason: "reserve_would_break",
+        reason: "low_value_target",
       },
     });
     expect(projection.evidence).toEqual(

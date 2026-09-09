@@ -31585,17 +31585,19 @@ function runnerRunWindowActionAssessment(
     runOrigin?.accessCommitment?.knownTargetDefinitionIds.includes(
       accessedDefinitionId,
     ) === true;
+  const accessTrashAction =
+    action.type === "trash_accessed_card"
+      ? action
+      : input.legalActions.find(
+          (candidateAction) => candidateAction.type === "trash_accessed_card",
+        );
   const accessTrashImpact =
-    action.type === "trash_accessed_card" || action.type === "decline_trash"
+    (action.type === "trash_accessed_card" ||
+      action.type === "decline_trash") &&
+    accessTrashAction
       ? assessRunnerAccessTrashImpact({
           input,
-          trashAction:
-            action.type === "trash_accessed_card"
-              ? action
-              : (input.legalActions.find(
-                  (candidateAction) =>
-                    candidateAction.type === "trash_accessed_card",
-                ) ?? action),
+          trashAction: accessTrashAction,
           economyReserve: economy.desiredCreditReserve,
           parentReservedCredits: exactParentTrashTarget
             ? 0

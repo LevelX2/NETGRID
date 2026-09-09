@@ -2422,9 +2422,10 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         server("remote_1", {
           ice: [vacuumLinkIce("remote-vacuum-link")],
           root: [
-            visibleCard("remote-euromarket", {
-              definitionId: "onr_v1_322_euromarket-consortium",
-              title: "Euromarket Consortium",
+            visibleCard("remote-bbs", {
+              definitionId: "onr_v1_309_bbs-whispering-campaign",
+              title: "BBS Whispering Campaign",
+              counters: { bit: 8 },
               type: "asset",
               known: true,
             }),
@@ -2474,9 +2475,10 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         server("remote_1", {
           ice: [simpleCodeGateIce("remote-code-gate")],
           root: [
-            visibleCard("remote-euromarket", {
-              definitionId: "onr_v1_322_euromarket-consortium",
-              title: "Euromarket Consortium",
+            visibleCard("remote-bbs", {
+              definitionId: "onr_v1_309_bbs-whispering-campaign",
+              title: "BBS Whispering Campaign",
+              counters: { bit: 8 },
               type: "asset",
               known: true,
             }),
@@ -2556,9 +2558,10 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       servers: [
         server("remote_1", {
           root: [
-            visibleCard("remote-euromarket", {
-              definitionId: "onr_v1_322_euromarket-consortium",
-              title: "Euromarket Consortium",
+            visibleCard("remote-bbs", {
+              definitionId: "onr_v1_309_bbs-whispering-campaign",
+              title: "BBS Whispering Campaign",
+              counters: { bit: 8 },
               type: "asset",
               known: true,
             }),
@@ -2599,9 +2602,10 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       servers: [
         server("remote_1", {
           root: [
-            visibleCard("remote-euromarket", {
-              definitionId: "onr_v1_322_euromarket-consortium",
-              title: "Euromarket Consortium",
+            visibleCard("remote-bbs", {
+              definitionId: "onr_v1_309_bbs-whispering-campaign",
+              title: "BBS Whispering Campaign",
+              counters: { bit: 8 },
               type: "asset",
               known: true,
             }),
@@ -3189,9 +3193,10 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       servers: [
         server("remote_1", {
           root: [
-            visibleCard("remote-euromarket", {
-              definitionId: "onr_v1_322_euromarket-consortium",
-              title: "Euromarket Consortium",
+            visibleCard("remote-bbs", {
+              definitionId: "onr_v1_309_bbs-whispering-campaign",
+              title: "BBS Whispering Campaign",
+              counters: { bit: 8 },
               type: "asset",
               known: true,
             }),
@@ -3203,8 +3208,8 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     const rankedAccessTargets = rankKnownRemoteAccessTargets([
       {
         positionKey: "root:0",
-        instanceId: "remote-euromarket",
-        definitionId: "onr_v1_322_euromarket-consortium",
+        instanceId: "remote-bbs",
+        definitionId: "onr_v1_309_bbs-whispering-campaign",
         targetKind: "asset",
         valueScore: 3,
         commitment: {
@@ -3217,7 +3222,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         projection: {
           source: "pre_run",
           serverId: "remote_1",
-          knownRootDefinitionId: "onr_v1_322_euromarket-consortium",
+          knownRootDefinitionId: "onr_v1_309_bbs-whispering-campaign",
           target: "asset",
           intendedAccessAction: "trash",
           projections: ["asset_trash"],

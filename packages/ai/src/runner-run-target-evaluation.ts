@@ -241,7 +241,8 @@ function evaluateRunnerRunTarget(
       projection,
       accessServerId,
       accessTargetKind,
-    ) ?? payoffForTarget(params, accessServerId, accessTargetKind);
+    ) ??
+    payoffForTarget(params, accessServerId, accessTargetKind, economyPosture);
   const runActionGripCost = runActionGripCardCost(params.input, projection);
   const projectedGripAfterRunAction = Math.max(
     0,
@@ -1134,6 +1135,7 @@ function payoffForTarget(
   params: EvaluateRunnerRunTargetsParams,
   targetServerId: string,
   targetKind: RunnerRunTargetKind,
+  economyPosture: RunnerEconomyPosture,
 ): {
   accessPayoff: RunnerAccessPayoff;
   accessPayoffContestable?: boolean;
@@ -1149,6 +1151,7 @@ function payoffForTarget(
         params.input,
         targetServerId,
         params.beliefState,
+        economyPosture,
       ),
     );
   }
