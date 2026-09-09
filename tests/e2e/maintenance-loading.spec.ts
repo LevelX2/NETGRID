@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
-test.use({ browserName: "firefox", locale: "de-DE" });
+// Browser selection belongs to the Playwright project, not this UI contract.
+test.use({ locale: "de-DE" });
 
 test("maintenance loads on demand and reports status timeout without losing usable sections", async ({
   page,

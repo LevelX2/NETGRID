@@ -28,6 +28,18 @@ Die Abhängigkeitsrichtung verläuft von den Blattverträgen zu Effekten und
 Modifikatoren, anschließend zu Ability-/Domänenverträgen und zuletzt zu den
 obersten Card-Unions. Zwischen den Familien existiert kein Importzyklus.
 
+## Stärke beim Verlassen der Runner-Installation
+
+Die Runner-Lifecycle-Pfade für Trash, Batch-Trash, Rückgabe und Entfernung aus
+dem Spiel bereinigen die Stärke der verlassenen Installation nach dem
+Zonenwechsel. Dasselbe gilt beim Ablegen eines Programms auf Backup-Speicher.
+`clearDepartedBreakerStrength` entfernt den Instanzmodifikator sowie an dieses
+Ziel gebundene Run-/Zugboni und aufgelöste Runstart-Stärke. Andere Ziele und
+deren bereits erzeugte Boni bleiben erhalten, auch wenn die verlassene Karte
+deren ursprüngliche Quelle war. Eine Wiederverwendung derselben Karten-ID
+übernimmt keine Stärke aus der früheren Installation. Die PlayerView zeigt
+den bereinigten Engine-Zustand; die UI kaschiert keine verbliebenen Boni.
+
 ## Verfügbarkeit gebundener Effektziele
 
 `canResolveOnPlayCardImplementationAbility` prüft vor dem Erzeugen einer

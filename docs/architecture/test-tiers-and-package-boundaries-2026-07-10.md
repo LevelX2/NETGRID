@@ -29,6 +29,21 @@ festen Parallelprozesse oder mehr als ein Worker je Shard werden erst nach
 einer dokumentierten Laufzeit-, RAM- und Stabilitätsmessung zum neuen Standard.
 
 Tests mit Timeout oder abgebrochene Prozesse gelten nicht als bestanden.
+Browser-E2E übernimmt die Browserwahl aus `playwright.config.ts` (Firefox als
+NETGRID-UI-Standard). Fachliche Szenarien setzen keinen eigenen `browserName`;
+Locale und fachliche Fixtures dürfen lokal festgelegt werden. Der Nightly-Job
+installiert Firefox sowie Chromium für den ausdrücklich eigenständigen
+Zwei-Browser-Multiplayer-Helper. Neue Browserabhängigkeiten müssen zugleich im
+CI-Setup deklariert werden; ein lokal vorhandener Browser ist keine CI-Garantie.
+Ein bereits als erwarteter Fehler markierter Test ist separat auszuweisen und
+kein Nachweis funktionierender Produktfunktion, auch wenn der Sammelbefehl grün ist.
+
+Der Abstraktionsguard einschließlich seiner Selbsttests läuft bereits in der
+normalen Push-/PR-CI. Im Nightly-Job werden unabhängige Prüfungen nach erfolgreicher
+Installation auch bei einem vorherigen Prüffehler ausgeführt, außer der Lauf wurde
+abgebrochen. Fehler werden nicht mit `continue-on-error` umgewertet: Jeder rote
+Schritt hält den Job rot. So bleiben nachgelagerte Befunde im selben Lauf sichtbar.
+
 Die GitHub-CI führt die serielle AI-Paketsuite und die übrigen Workspace-Pakete
 in unabhängigen Jobs aus. `fail-fast: false` und `pnpm -r --no-bail` lassen
 andere Testgruppen beziehungsweise Pakete auch nach einem Fehler auswerten;
@@ -117,6 +132,27 @@ Eine rote Erwartung wird erst geändert, nachdem Legalität, Runtime-/Replay-
 Fehlerfreiheit und der aktuelle Fachvertrag das beobachtete Verhalten gemeinsam
 tragen. Andernfalls bleibt der Test rot und der Produktfehler wird an seiner
 Ursprungsschicht behoben.
+
+### Abstraktionsguard: Regression statt Inventargleichheit
+
+`check:card-function-abstraction` begrenzt bekannte problematische Fundstellen,
+nicht die Größe eines historischen Gesamtinventars. Erlaubte Katalogreferenzen,
+Testnamen, klassifizierte False Positives, Fundpositionen, Snippets und reine
+Diagnose-/Tokenzählungen sind kein Architekturvertrag. Entfernte Leaks sind
+Verbesserungen; neue Fundstellen und zusätzliche Vorkommen eines bestehenden
+Leaks bleiben Fehler. Pfad, Token und Kategorie bleiben Teil der Identität;
+eine Verschiebung darf keine fremde Baseline-Freigabe übernehmen.
+
+In Tooling-Skripten darf ein syntaktischer `cardId`-/`cardDefinitionId`-Datenwert
+eine kanonische Karten-ID enthalten. Diese eng begrenzte Ausnahme umfasst weder
+Engine-Code noch Vergleiche, Dispatch, Funktionsnamen oder `kind`-Werte – auch
+nicht auf derselben Zeile. Die Diagnose nennt Fingerprint, bisherigen und neuen
+Zähler sowie konkrete Fundstellen. Baselines werden nur nach Prüfung angepasst;
+bei Bereinigungen werden alte Freigaben entfernt, damit sie nicht wiederkehren.
+`check:card-function-abstraction:selftest` prüft erlaubten Drift und tatsächliche
+Regressionen getrennt, einschließlich eines bereits anderweitig abweichenden
+Inventars. Ein negativer Selbsttest darf nicht allein deshalb bestehen, weil
+eine unabhängige Baseline-Abweichung vorliegt.
 
 ## Abhängigkeitsrichtung
 

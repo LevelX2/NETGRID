@@ -22,9 +22,9 @@ export default defineConfig({
   },
   projects: [
     {
-      name: "chromium",
+      name: "firefox",
       use: {
-        ...devices["Desktop Chrome"],
+        ...devices["Desktop Firefox"],
       },
     },
   ],
