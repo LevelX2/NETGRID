@@ -120,10 +120,43 @@ Es entstehen keine neuen Konfigurationswerte, Freigaben oder Übersetzungen.
 171 gezielte Bestandsprüfungen in de/en/fr sowie die vollständige Setup-Suite
 mit 2.345 Assertions sind grün. Der Quellfix ist noch nicht Bestandteil des
 unveränderten Bundles 8219 und benötigt dessen spätere native Nachprüfung
-im nächsten regulären Bundle. Der GUI-Installationsklick wartet auf die nach
-Computer-Use-Regeln gesondert angefragte unmittelbare Zustimmung. Keine
-Installation, UAC-Eingabe, Credentialänderung oder Hostkonfiguration durch
-diese Sichtprüfung.
+im nächsten regulären Bundle.
+
+Nach unmittelbarer Nutzerbestätigung wird die Bestandsreparatur am 9. September
+um 04:36 UTC tatsächlich über „Installieren“ gestartet. Die Maske bleibt
+während Validierung, ungemessenem Windows-Installer-Abschnitt und messbarem
+Fortschritt gesperrt; Status, Balken und Datenhinweis überlagern sich nicht.
+First Run erkennt anschließend den vorhandenen Maintenance-Zugang und bietet
+nur „Schließen“ an. Nach der deutschen Erfolgsmeldung startet die ausgewählte
+8219-Instanz; Browser und Server melden den aktuellen Build gesund.
+
+Der unabhängige Nachweis `native-gui-repair-8219.json` (SHA-256
+`02ec35873216366525ab888bfbc421a631f65451e6a0e3a37fe6b16b1f8784de`)
+ist um 04:41:32 UTC grün: 10.890 Manifestdateien, fünf native Images,
+Registrierung, MSI-/Setupcache und ProductCode stimmen. Webantwort 200,
+Serverhealth `ok=true`, beide Testlistener vorhanden und genau eine
+Launcherinstanz aktiv. `runtime.env` und Maintenance-Credential bleiben
+bytegleich. Das schließt den nativen deutschen Bestands-Reparaturablauf von
+8219 einschließlich Abschlussstart; der Quellfix der Modushilfe bleibt bis
+zum Neubau getrennt.
+
+Der anschließende reale Tray-Befehl „Drittanbieterhinweise öffnen“ erzeugt
+auf diesem Gast kein lesbares Fenster. Ursache ist die bereits beobachtete
+fehlende `.txt`-Shellzuordnung: Der Launcher delegiert das mitgelieferte
+Dokument bislang an Windows. Der Produktpfad verwendet nun stattdessen einen
+eigenen lokalisierten, schreibgeschützten und in beide Richtungen scrollbareren
+NETGRID-Dialog. Fehlende oder unlesbare Hinweise melden einen sichtbaren
+Fehler statt still nichts zu tun. 14 direkte Prüfungen in de/en/fr belegen
+exakte Inhalte, Read-only, Scrollbarkeit, Accessibility, fehlendes Dokument
+und null sichtbare Testfenster. Die vollständige Launcher-Suite ist grün:
+Staging 20, Installationsstopp 14, Stop-Ownership 18, Updatevorbereitung 44,
+Runtimevorbereitung 118, Updatefehler 35 sowie die bestehenden Download-,
+Fence- und Headless-Gates. Ein erster breiter Testlauf wurde nach den ersten
+vier Ausgaben gezielt beendet: Die neue Formprüfung hatte vor den asynchronen
+Tests einen WinForms-Synchronisationskontext ohne Nachrichtenloop installiert.
+Sie läuft nun erst nach allen asynchronen Prüfungen; der unveränderte erneute
+Gesamtlauf endet grün. Produktcode oder Laufzeitverhalten wurden durch diese
+Testreihenfolge nicht abgeschwächt.
 
 ### Aktiver Prüfpunkt: beendeter MSI-Helfer und Fehlerrollback
 

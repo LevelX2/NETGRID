@@ -157,7 +157,15 @@ internal sealed class TrayApplicationContext : ApplicationContext
     {
         if (_runtime is null) return;
         var path = Path.Combine(_runtime.ProgramRoot, "legal", "THIRD-PARTY-NOTICES.txt");
-        if (File.Exists(path)) System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(path) { UseShellExecute = true });
+        try
+        {
+            NoticesDialog.Show(path);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            MessageBox.Show(UiText.Get("launcher.notices.failed"), UiText.Get("launcher.notices.title"),
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
     }
 
     private void SaveUpdateSetting()

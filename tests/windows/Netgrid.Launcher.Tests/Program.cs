@@ -27,6 +27,11 @@ if (args is ["--installation-stop-child"])
 }
 
 var assembly = Assembly.Load("NETGRID");
+if (args is ["--check-notices-dialog"])
+{
+    Console.WriteLine($"LAUNCHER_NOTICES_DIALOG_TESTS_OK checks={NoticesDialogTests.Run(assembly)} windowsVisible=0 shellAssociationUsed=false");
+    return;
+}
 Console.WriteLine($"LAUNCHER_HEADLESS_VERIFICATION_TESTS_OK checks={await HeadlessVerificationTests.Run(assembly)} runtimeStarted=false");
 Console.WriteLine($"LAUNCHER_LAUNCH_FENCE_TESTS_OK checks={await LaunchFenceTests.Run(assembly)} runtimeStarted=false");
 Console.WriteLine($"LAUNCHER_VERIFICATION_OPTIONS_TESTS_OK checks={VerificationOptionsTests.Run(assembly)}");
@@ -96,6 +101,7 @@ finally
         throw new Exception("download_test_cleanup_scope_invalid");
     Directory.Delete(resolved, recursive: true);
 }
+Console.WriteLine($"LAUNCHER_NOTICES_DIALOG_TESTS_OK checks={NoticesDialogTests.Run(assembly)} windowsVisible=0 shellAssociationUsed=false");
 
 static void Assert(bool condition, string name)
 {

@@ -376,6 +376,21 @@ Setupprüfungen sind grün. Das unveränderte installierte 8219-Bundle enthält
 diesen nachträglichen UI-Fix noch nicht; die native Prüfung des nächsten
 regulären Bundles bleibt erforderlich.
 
+Die anschließend ausdrücklich bestätigte GUI-Reparatur von 8219 durchläuft
+Validierung, nativen MSI-Fortschritt, Erkennung des bestehenden Maintenance-
+Zugangs und deutsche Erfolgsmeldung. Der Abschlussstart zeigt Build 8219;
+vollständige Datei-/Cacheidentität, Web 200, Serverhealth, beide Listener und
+die einzelne Launcherinstanz sind unabhängig geprüft. Geschützte Konfiguration
+und Credentials bleiben bytegleich. Beleg und Hash stehen im Paketprozess.
+
+Der Tray-Befehl für Drittanbieterhinweise darf nicht von einer installierten
+`.txt`-Shellzuordnung abhängen. Der neue Launcher liest ausschließlich seine
+mitgelieferte Datei und zeigt sie in einem eigenen lokalisierten,
+schreibgeschützten, scrollbareren Dialog. Fehlende oder nicht lesbare Inhalte
+führen zu einer sichtbaren Fehlermeldung. Die Komponenten- und vollständige
+Launcher-Suite sind grün; die native Sichtprüfung folgt mit dem nächsten
+regulären Bundle.
+
 Die Behauptung, ein direktes MSI könne keinen Setupcache herstellen, gilt
 nicht mehr: Der installierte Setupstub und der geschützte vollständige
 MSI-Cache besitzen inzwischen genau diesen Rekonstruktionspfad.
