@@ -5152,6 +5152,15 @@ unbekannte Gegenoption Tag, Trace oder Damage beeinflussen kann. Das
 Assessment trägt den tatsächlichen Garantiegrad und die gegnerische
 Eingriffsmöglichkeit.
 
+Die Engine-Quote für Trace-/Tag-Folgen verwendet dieselbe öffentliche
+Semantik für automatischen Trace-Erfolg und zusätzliche Tags wie die
+Trace-Ausführung. Bei einem solchen sichtbaren Effekt wird ein Corp-Gebot
+von null gegen die legalen Runner-Antworten ausgeführt und zertifiziert;
+Tagvermeidung und verdeckte Reaktionsmöglichkeiten bleiben Bestandteil der
+Ergebnisgrenzen. Gedrucktes Trace-Limit und gedruckte Tagmenge dürfen diese
+vollständige Regelwirkung nicht ersetzen. Die Auswahl der Folge bleibt bei
+`corp.execute_punish_sequence` unter der Punish-Kampagne.
+
 ### 37.6 Abnahmebedingungen
 
 - Punish-Kampagne bleibt über Scoring- und Economy-Züge resident;

@@ -52,6 +52,7 @@ import {
   quoteTraceBaseLinkChoices,
   traceBaseLinkChoicePublicPayload,
 } from "./base-link";
+import { traceAutoSuccessSource } from "./trace-auto-success";
 import { describeTraceResultFromTrace } from "./trace-result";
 import {
   traceCorpBaseStrength,
@@ -910,7 +911,7 @@ function finishTraceRunnerBid(
     traceValue,
     runnerStrength,
   };
-  const crashSpaceSource = traceAutoSuccessSource(host);
+  const crashSpaceSource = traceAutoSuccessSource(host.cards);
   if (crashSpaceSource) {
     const forcedTrace = forceTraceSuccessful(postBidTrace);
     const extraPayload = traceAutoSuccessAdditionalTagPayload(crashSpaceSource);
@@ -918,7 +919,7 @@ function finishTraceRunnerBid(
       completeTraceWithoutRun(host, forcedTrace, "runner_bid", legalAction, {
         runnerLinkFallback: runnerLink,
         extraPayload: { ...tracePaymentPayload, ...extraPayload },
-        additionalTagAmount: 1,
+        additionalTagAmount: crashSpaceSource.additionalTagAmount,
         deletePendingChoice: true,
       });
       return;
@@ -929,7 +930,7 @@ function finishTraceRunnerBid(
       legalAction,
       runnerLinkFallback: runnerLink,
       extraPayload: { ...tracePaymentPayload, ...extraPayload },
-      additionalTagAmount: 1,
+      additionalTagAmount: crashSpaceSource.additionalTagAmount,
       deletePendingChoice: true,
     });
     return;
@@ -1339,7 +1340,7 @@ function completeTraceAfterPostBidLink(
   trace: CurrentTrace,
   legalAction: LegalAction,
 ): void {
-  const crashSpaceSource = traceAutoSuccessSource(host);
+  const crashSpaceSource = traceAutoSuccessSource(host.cards);
   if (crashSpaceSource) {
     const forcedTrace = forceTraceSuccessful(trace);
     const extraPayload = traceAutoSuccessAdditionalTagPayload(crashSpaceSource);
@@ -1347,7 +1348,7 @@ function completeTraceAfterPostBidLink(
       completeTraceWithoutRun(host, forcedTrace, "post_bid_link", legalAction, {
         runnerLinkFallback: calculateRunnerLink(host),
         extraPayload,
-        additionalTagAmount: 1,
+        additionalTagAmount: crashSpaceSource.additionalTagAmount,
         deletePendingChoice: true,
       });
       return;
@@ -1358,7 +1359,7 @@ function completeTraceAfterPostBidLink(
       legalAction,
       runnerLinkFallback: calculateRunnerLink(host),
       extraPayload,
-      additionalTagAmount: 1,
+      additionalTagAmount: crashSpaceSource.additionalTagAmount,
       deletePendingChoice: true,
     });
     return;
@@ -1388,20 +1389,6 @@ function completeTraceAfterPostBidLink(
   });
 }
 
-function traceAutoSuccessSource(
-  host: TraceOrchestrationHost,
-): { cardId: CardInstanceId; definitionId: CardDefinitionId } | undefined {
-  for (const cardId of host.cards.runnerInstalledCardIds().slice().sort()) {
-    const definition = host.cards.definitionFor(cardId);
-    if (
-      cardImplementationForDefinitionId(definition.id)?.runnerUtilityLongtail
-        ?.kind === "trace_attempts_auto_success_add_tag"
-    )
-      return { cardId, definitionId: definition.id };
-  }
-  return undefined;
-}
-
 function forceTraceSuccessful(trace: CurrentTrace): CurrentTrace {
   const result = describeTraceResultFromTrace(trace);
   return {
@@ -1414,11 +1401,12 @@ function forceTraceSuccessful(trace: CurrentTrace): CurrentTrace {
 function traceAutoSuccessAdditionalTagPayload(source: {
   cardId: CardInstanceId;
   definitionId: CardDefinitionId;
+  additionalTagAmount: number;
 }): Record<string, string | number | boolean> {
   return {
     traceAutoSuccessSourceCardId: source.cardId,
     traceAutoSuccessSourceDefinitionId: source.definitionId,
-    traceAutoSuccessAdditionalTagAmount: 1,
+    traceAutoSuccessAdditionalTagAmount: source.additionalTagAmount,
   };
 }
 

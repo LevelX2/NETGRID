@@ -10,6 +10,7 @@ import {
   engineCardByDefinitionId,
 } from "@netgrid/cards/engine";
 import { describe, expect, it } from "vitest";
+import { applyAction } from "../apply-action";
 import { createGame } from "../create-game";
 import { addCorpCardToHqForTest } from "../../test-fixtures/index-test-helpers";
 import { getLegalActions } from "../legal-actions";
@@ -19,6 +20,113 @@ import {
 } from "./corp-punish-route-quotes";
 
 describe("Corp punish-route quote request", () => {
+  it.each([0, 12])(
+    "certifies public forced success and its extra tag against Runner bid %i",
+    (runnerBid) => {
+      const state = corpActionState("public-forced-success");
+      state.corp.credits = 8;
+      state.corp.clicks = 2;
+      state.runner.credits = 12;
+      state.runnerTurnFlags!.runAttemptsLastTurn = 1;
+      for (const id of state.runner.grip.splice(4)) {
+        state.runner.heap.push(id);
+        state.cardInstances[id]!.zone = { side: "runner", zone: "heap" };
+      }
+      const chance = addCorpCardToHqForTest(
+        state,
+        "onr_v1_284_chance-observation",
+        "chance",
+      );
+      const urban = addCorpCardToHqForTest(
+        state,
+        "onr_v1_307_urban-renewal",
+        "urban",
+      );
+      const crash = addConcealedRunnerResource(
+        state,
+        "onr_classic_044_crash-space",
+        "public",
+      );
+      state.cardInstances[crash]!.faceup = true;
+      const request = routeRequest(state, [
+        canonicalStep(
+          "tag",
+          0,
+          "trace_tag",
+          chance,
+          "onr_v1_284_chance-observation",
+          "abilities_on_play_trace",
+        ),
+        canonicalStep(
+          "damage",
+          1,
+          "meat_damage",
+          urban,
+          "onr_v1_307_urban-renewal",
+          "abilities_on_play_damage",
+        ),
+      ]);
+      const before = structuredClone(state);
+      expect(quoteCorpPunishRoute(state, request)).toMatchObject({
+        ok: true,
+        quote: {
+          complete: true,
+          totalClicks: 2,
+          tagOutcomeEnvelope: { addedTags: { minimum: 2, maximum: 2 } },
+          responsePaymentEnvelope: {
+            corpResponseCredits: { minimum: 0, maximum: 0 },
+            totalCorpCredits: { minimum: 8, maximum: 8 },
+          },
+          damageEnvelope: {
+            runnerHandCount: 4,
+            effectiveDamage: { minimum: 5, maximum: 5 },
+          },
+          responseKnowledge: "public_exact",
+        },
+      });
+      expect(state).toEqual(before);
+      const concealed = structuredClone(state);
+      concealed.cardInstances[crash]!.faceup = false;
+      const other = structuredClone(concealed);
+      other.cardInstances[crash]!.definitionId = "onr_proteus_142_hq-mole";
+      expect(quoteCorpPunishRoute(concealed, request)).toEqual(
+        quoteCorpPunishRoute(other, request),
+      );
+      let current = state;
+      for (const [side, source, bid] of [
+        ["corp", chance, undefined],
+        ["corp", undefined, 0],
+        ["runner", undefined, runnerBid],
+        ["corp", urban, undefined],
+      ] as const) {
+        const action = getLegalActions(current, side).find((a) =>
+          source ? a.source === source : a.type === "resolve_choice",
+        );
+        expect(action).toBeDefined();
+        const result = applyAction(current, {
+          matchId: current.matchId,
+          side,
+          actionId: action!.actionId,
+          clientKnownStateVersion: current.stateVersion,
+          ...(bid === undefined
+            ? {}
+            : {
+                selectedChoices: {
+                  choiceId: current.pendingChoice!.choiceId,
+                  selectedOptionIds: ["bid_" + bid],
+                },
+              }),
+        });
+        expect(result.ok).toBe(true);
+        if (!result.ok) throw new Error(result.error.message);
+        current = result.state;
+      }
+      expect(current.winner).toBe("corp");
+      expect(current.runner.tags).toBe(2);
+      expect(current.corp.credits).toBe(0);
+    },
+  );
+
   it("rejects a forged hardware capability outside CardSpec authority", () => {
     const state = corpActionState("punish-route-hardware-owner-xor");
     state.runner.tags = 1;

@@ -38,6 +38,11 @@ import {
   damagePreventionUsedThisTurn,
 } from "../state/turn-flags-counters";
 import { eligibleInstalledRunnerHardwareIds } from "../state/installed-runner-hardware";
+import {
+  definitionFor,
+  runnerInstalledCardIds,
+} from "../state/card-server-lookup";
+import { traceAutoSuccessSource } from "../trace/trace-auto-success";
 import { isConcealedRunnerResource } from "./card-view";
 
 type CertifiedStep = {
@@ -597,6 +602,15 @@ function certifyExactTraceTagResponse(
 
   const { state: simulationState, concealedRunnerResponsesUnknown } =
     publicTraceSimulationState(state);
+  const automaticSuccess = traceAutoSuccessSource({
+    runnerInstalledCardIds: () => runnerInstalledCardIds(simulationState),
+    definitionFor: (cardId) => definitionFor(simulationState, cardId),
+  });
+  const requiredCorpBid = automaticSuccess ? 0 : traceEffect.traceLimit;
+  const exactFixedTagAmount =
+    fixedTagAmount === undefined
+      ? undefined
+      : fixedTagAmount + (automaticSuccess?.additionalTagAmount ?? 0);
   if (!currentHeadAction) {
     simulationState.corp.credits = traceStep.quote.credits;
     currentHeadAction = exactCurrentHeadAction(
@@ -627,11 +641,11 @@ function certifyExactTraceTagResponse(
   )[0];
   if (
     !maximumAvailableCorpBid ||
-    maximumAvailableCorpBid.value < traceEffect.traceLimit
+    maximumAvailableCorpBid.value < requiredCorpBid
   ) {
     const { state: fundedSimulationState } = publicTraceSimulationState(state);
     fundedSimulationState.corp.credits =
-      traceStep.quote.credits + traceEffect.traceLimit;
+      traceStep.quote.credits + requiredCorpBid;
     const fundedHeadAction = exactCurrentHeadAction(
       fundedSimulationState,
       traceStep.quote,
@@ -658,11 +672,11 @@ function certifyExactTraceTagResponse(
     )[0];
   }
   const winningCorpBid = corpBidOptions.find(
-    (option) => option.value === traceEffect.traceLimit,
+    (option) => option.value === requiredCorpBid,
   );
   if (
     !maximumAvailableCorpBid ||
-    maximumAvailableCorpBid.value < traceEffect.traceLimit ||
+    maximumAvailableCorpBid.value < requiredCorpBid ||
     !winningCorpBid ||
     !corpBidOptions.some((option) => option.value === 0)
   ) {
@@ -694,15 +708,15 @@ function certifyExactTraceTagResponse(
   if (!maximumRunnerBid || !zeroRunnerBid) return undefined;
 
   // Original Trace is open and sequential: Corp bids first, then Runner
-  // responds. The quote intentionally certifies the smallest bid at the
-  // printed trace limit; it must not fail merely because the rules also allow
-  // the Corp to overbid with additional visible credits.
+  // responds. A public automatic success needs no bid or link comparison.
+  // Otherwise certify the printed-limit bid, even if additional visible
+  // credits would also permit overbidding.
   const runnerLink = afterCorpBid.trace.runnerLink!;
-  if (winningCorpBid.value < runnerLink) return undefined;
+  if (!automaticSuccess && winningCorpBid.value < runnerLink) return undefined;
   const tieCorpBid = corpBidOptions.find(
     (option) => option.value === runnerLink,
   );
-  if (tieCorpBid) {
+  if (!automaticSuccess && tieCorpBid) {
     const tieRunnerWindow = applyExactChoice(
       structuredClone(verifiedAfterHead),
       "corp",
@@ -727,10 +741,10 @@ function certifyExactTraceTagResponse(
         (amount) =>
           !Number.isSafeInteger(amount) ||
           amount < 0 ||
-          (fixedTagAmount !== undefined && amount > fixedTagAmount),
+          (exactFixedTagAmount !== undefined && amount > exactFixedTagAmount),
       ) ||
-      (fixedTagAmount !== undefined
-        ? Math.max(...tiedTagAmounts) !== fixedTagAmount
+      (exactFixedTagAmount !== undefined
+        ? Math.max(...tiedTagAmounts) !== exactFixedTagAmount
         : Math.max(...tiedTagAmounts) <= 0)
     ) {
       return undefined;
@@ -771,10 +785,10 @@ function certifyExactTraceTagResponse(
       (amount) =>
         !Number.isSafeInteger(amount) ||
         amount < 0 ||
-        (fixedTagAmount !== undefined && amount > fixedTagAmount),
+        (exactFixedTagAmount !== undefined && amount > exactFixedTagAmount),
     ) ||
-    (fixedTagAmount !== undefined
-      ? maximumTagAmount !== fixedTagAmount
+    (exactFixedTagAmount !== undefined
+      ? maximumTagAmount !== exactFixedTagAmount
       : maximumTagAmount <= 0)
   ) {
     return undefined;
