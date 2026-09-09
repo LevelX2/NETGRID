@@ -700,5 +700,89 @@ und veraltete Quotes werden abgelehnt.
 
 Eine optimale Agenda-/Bluff-Mischung, der vollständige mehrzügige Contract-
 Aufbau aus HQ und eine allgemeine Spielstärkensteigerung sind damit weiterhin
-nicht abgenommen. Die frische Kontrollserie 414 prüft die natürliche Nutzung
-dieser engeren Fähigkeiten; ihre Ergebnisse werden getrennt von 413 geführt.
+nicht abgenommen. Die Kontrollserie 414 prüft die natürliche Nutzung dieser
+engeren Fähigkeiten; ihre Ergebnisse werden getrennt von 413 geführt.
+
+### Aktuelle Abnahmegrenze aus Kontrolle 414
+
+Der finale Stand `8c878c2dc` beendet 40 Spiele und 10.701 Entscheidungen ohne
+technische Flags. Die erste Runde mit vier Null-Klick-Fundingfehlern bleibt
+vollständig ausgeschlossen. SP-327 behebt deren Quelle: Defense darf nach dem
+letzten Klick einen terminalen Finanzierungsbedarf nur mit einem aktuellen
+ausführbaren kostenlosen Vorbereitungskopf erzeugen. Alle vier Originalzustände
+beenden nun legal den Zug; profitable Null-Klick-Contract-Rez bleibt möglich.
+
+Natürlich ausgeführt werden 55 Bel-Installationen und 55 Rückmischungen, davon
+eine Installation bereits hinter ICE und ein bezahlter Köder-Run mit drei
+Break-/Pumpcredits. Manhunt wird fünfmal gespielt. Stereogram wird in 42 von
+43 Cleanup-Zuständen mit Handkontakt abgeworfen. Contract hat weiterhin nur
+eine Installation und keine natürliche Vorbereitung oder Auszahlung. Diese
+Unterscheidung zwischen Quellaktionen, Cleanup und automatischen Effekten ist
+für Kartenbewertungen verbindlich; null Quellaktionen bedeutet nicht null Nutzen.
+
+Der gepaarte Vergleich mit 413 zeigt ein gemischtes strategisches Ergebnis:
+Die Corp-Siege steigen von eins auf drei, die mittleren Corp-Agendapunkte über
+alle 40 Spiele sinken von 1,25 auf 1,20. Bei den jeweiligen Niederlagen sinken
+sie von 1,28 (39 Spiele) auf 0,86 (37 Spiele). Für dieselben 37 beidseitig
+verlorenen Seeds sinken sie von 1,27 auf 0,86: 33 gleich, vier schlechter,
+keiner besser. Der Median bleibt null. Neue Punktesiege dürfen einen Rückgang
+in den übrigen Spielen deshalb nicht verdecken; künftige gepaarte Vergleiche
+weisen beide Nenner und den gemeinsamen Niederlagen-Satz getrennt aus.
+
+G2 D20 und G4 D17 priorisieren früh Manhunt-Finanzierung beziehungsweise
+Manhunt statt Schutzsuche beziehungsweise Accounts Receivable. G22 D246 und
+G27 D447 installieren Corporate Headhunters zur Handentlastung; die Karten
+werden danach im Remote gestohlen. Diese ersten Abweichungen grenzen die
+geänderten Pfade ein, beweisen aber keine einzelne Ursache aller Folgeereignisse.
+Preis-/Origin-Ausführung und begrenzte Score-Entlastung sind mechanisch geprüft;
+Tag-Druck ohne gesicherten Folgeertrag und Handentlastung ohne ausreichenden
+Schutz sind strategisch nur teilweise abgenommen. Auch gemischte HQ-Abwürfe
+(G29), die Bluff-Mischung und Contract-Erstaufbau bleiben offen. Die nächsten
+Vergleiche müssen diese konkreten Alternativen vor pauschalen Boni untersuchen.
+
+48 fokussierte KI- und 27 Engine-Tests bestehen; eine strengere Trace-Origin-
+Prüfung wurde zusätzlich mit drei Tests bestätigt. Typechecks und Struktur-
+gates bestehen. Der finale breite AI-Gate besteht 5.334 von 5.338 Tests; dieselben
+vier bekannten Ausgangsfehler aus der vorigen Abnahme bleiben getrennt offen.
+Der vollständige Einzelpartien-, Karten- und Agenda-Vergleich liegt in der
+zentralen Evidence-Registry unter Kontrolle 414 und Bericht `meta-series-414`.
+
+### Meta-Prioritäten und unveränderter Deckcharakter
+
+29 von 37 Corp-Niederlagen enden über HQ/R&D (16/13), sieben über Remotes,
+eine über Archives. 113 von 134 gestohlenen Agendas stammen aus HQ/R&D.
+Die nächste Priorität ist daher finanzierter Zentral- und Remote-Schutz,
+nicht allein eine höhere Fallen-Installationszahl. Die Liste hat 16 ICE und
+zehn Agendas; sämtliche Agendas benötigen gedruckt vier oder fünf Advances.
+Mehrere Regionen kosten jeweils vier Credits und helfen nur passenden
+Untertypen. Schutz, Regionsaufbau und Scoring konkurrieren um dieselbe knappe
+Liquidität; Accounts Receivable, BBS und Contract liegen jeweils nur einmal vor.
+
+Zwei aktuell nicht produktive Schutzfunktionen verlangen gezielte Vergleiche:
+Homing Missile wird 42-mal installiert und trotz 82 legaler Rez-Zustände nie
+gerezzed. G1 D136/D151 weisen unbekannten Ressourcentausch aus. Die frühere
+SP-155-Korrektur verhindert das Blockieren anderer Scorelinien, bildet aber
+diesen tatsächlichen Trace-Rez noch nicht vollständig ab. Rasmin Bridger wird
+17-mal installiert und nie gerezzed, auch bei 161 legalen Zuständen am gerade
+angegriffenen Fort. G5 D132 hat vier Corp-Credits, fünf Runner-Credits und drei
+HQ-ICE; eine zertifizierte Economy-/Defense-Route für die Passiergebühr fehlt
+(SP-328, Verdacht). Ein profitabler vollständiger Rez-/Run-Verlauf ist erst
+nachzuweisen. Legalität allein rechtfertigt keinen allgemeinen Rezbonus.
+
+Pattel hat zwar null Quellaktionen, aber 15 bezahlte Zugriffsauslösungen in
+sieben Spielen: 21 Breaker-Counter für insgesamt 45 Corp-Credits. Auch dieser
+Preis muss gegen tatsächlich verteuerte spätere Runs betrachtet werden.
+Cybertech Think Tank findet in dieser Population keinen Meat-Schadensverbrauch;
+alle 80 erlittenen Schadenspunkte sind Net-Schaden. Das erklärt einen bedingten
+Engpass, keinen automatischen Auftrag zum Austausch dieser Kernfunktion.
+
+Ein noch ungespielter, durch den Deckvalidator akzeptierter Testentwurf tauscht
+nur eine Stereogram-Kopie gegen eine zweite BBS Whispering Campaign. Er behält
+45 Karten, 21 Agendapunkte, alle Agendas, sämtliche Antibody-Typen, Regionen
+und Kernfunktionen. BBS braucht keinen Rez-Startbetrag und verbessert spätere
+Credit-Aktionen; dagegen stehen Installationsklick, Trashrisiko und weniger
+Archives-Strafe/Recycling. Die Standardliste bleibt unverändert. Die ältere
+Zwei-Accounts-Variante ergab keine konsistente Verbesserung; der neue Entwurf
+ist deshalb ausdrücklich eine andere Testhypothese. Er wird getrennt vom
+Systemfix, mit gepaarten Seeds und weiteren Runnern bewertet, bevor eine
+Deckänderung gerechtfertigt wäre.

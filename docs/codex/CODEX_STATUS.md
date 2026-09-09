@@ -78,8 +78,11 @@ Fortsetzung. Vollständig mit Agendas überfüllte HQ darf Score durch eine
 begrenzte verdeckte Score-Linie entlasten. Installierte ungerezzte Counterbanken
 können für einen exakten Defense-Verbraucher profitabel vorbereitet werden;
 die Zahlungsquote unterstützt mehrere nötige Counterauszahlungen. Der
-mehrzügige Contract-Aufbau aus HQ bleibt offen. Kontrollen 412/413 und
-Testgrenzen stehen im
+mehrzügige Contract-Aufbau aus HQ bleibt offen. Kontrolle 414 ist technisch
+sauber, aber strategisch gemischt: drei statt eines Corp-Siegs, zugleich
+weniger Agendapunkte in denselben verlorenen Seeds. Frühe Tag-Ausgaben und
+Agenda-Handentlastung benötigen einen besseren Vergleich mit Wirtschaft und
+Schutz. Kontrollen 412–414 und Testgrenzen stehen im
 `docs/architecture/ai/hidden-node-capability-review.md`.
 
 Die Corp erzeugt aus fehlenden HQ-Agendas keinen blinden Agenda-Suchauftrag.
