@@ -127,6 +127,27 @@ Fehlerfreiheit und der aktuelle Fachvertrag das beobachtete Verhalten gemeinsam
 tragen. Andernfalls bleibt der Test rot und der Produktfehler wird an seiner
 Ursprungsschicht behoben.
 
+### Abstraktionsguard: Regression statt Inventargleichheit
+
+`check:card-function-abstraction` begrenzt bekannte problematische Fundstellen,
+nicht die Größe eines historischen Gesamtinventars. Erlaubte Katalogreferenzen,
+Testnamen, klassifizierte False Positives, Fundpositionen, Snippets und reine
+Diagnose-/Tokenzählungen sind kein Architekturvertrag. Entfernte Leaks sind
+Verbesserungen; neue Fundstellen und zusätzliche Vorkommen eines bestehenden
+Leaks bleiben Fehler. Pfad, Token und Kategorie bleiben Teil der Identität;
+eine Verschiebung darf keine fremde Baseline-Freigabe übernehmen.
+
+In Tooling-Skripten darf ein syntaktischer `cardId`-/`cardDefinitionId`-Datenwert
+eine kanonische Karten-ID enthalten. Diese eng begrenzte Ausnahme umfasst weder
+Engine-Code noch Vergleiche, Dispatch, Funktionsnamen oder `kind`-Werte – auch
+nicht auf derselben Zeile. Die Diagnose nennt Fingerprint, bisherigen und neuen
+Zähler sowie konkrete Fundstellen. Baselines werden nur nach Prüfung angepasst;
+bei Bereinigungen werden alte Freigaben entfernt, damit sie nicht wiederkehren.
+`check:card-function-abstraction:selftest` prüft erlaubten Drift und tatsächliche
+Regressionen getrennt, einschließlich eines bereits anderweitig abweichenden
+Inventars. Ein negativer Selbsttest darf nicht allein deshalb bestehen, weil
+eine unabhängige Baseline-Abweichung vorliegt.
+
 ## Abhängigkeitsrichtung
 
 `corepack pnpm check:package-boundaries` prüft die produktiven TypeScript- und

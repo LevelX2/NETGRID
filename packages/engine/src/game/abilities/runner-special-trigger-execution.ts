@@ -144,7 +144,7 @@ export function delayedInstallCounterCost(definition: CardDefinition): number {
   return value;
 }
 
-function isShellTradersSource(
+function isDelayedInstallSource(
   host: RunnerSpecialTriggerExecutionHost,
   sourceCardId: CardInstanceId,
 ): boolean {
@@ -155,12 +155,12 @@ function isShellTradersSource(
   );
 }
 
-function shellTradersDefinitionId(
+function delayedInstallSourceDefinitionId(
   host: RunnerSpecialTriggerExecutionHost,
   sourceCardId: CardInstanceId,
 ): CardDefinitionId {
   const definition = host.cards.definitionFor(host.state, sourceCardId);
-  if (!isShellTradersSource(host, sourceCardId))
+  if (!isDelayedInstallSource(host, sourceCardId))
     throw new Error(
       "Die verzögerte Installationsfähigkeit passt nicht zur Karte.",
     );
@@ -234,7 +234,7 @@ export function applyDelayedInstallStartOfTurn(
     []);
   for (const sourceCardId of state.runner.rig.resources.slice().sort()) {
     if (onlySourceCardId && sourceCardId !== onlySourceCardId) continue;
-    if (!isShellTradersSource(host, sourceCardId)) continue;
+    if (!isDelayedInstallSource(host, sourceCardId)) continue;
     if (resolvedSourceIds.includes(sourceCardId)) continue;
     const targetCardIds = delayedInstallPreparedTargetIds(host);
     if (targetCardIds.length === 0) return;
@@ -282,7 +282,7 @@ export function resolveDelayedInstallStartTurnChoice(
   if (
     !sourceCardId ||
     !state.runner.rig.resources.includes(sourceCardId) ||
-    !isShellTradersSource(host, sourceCardId)
+    !isDelayedInstallSource(host, sourceCardId)
   )
     throw new Error("The Shell Traders ist nicht mehr installiert.");
 
@@ -330,7 +330,7 @@ export function resolveDelayedInstallStartTurnChoice(
     delayedInstallAbility: "start_turn_remove_shell_counter",
     abilityFamily: "hosting-counters",
     effectKind: "counter_change",
-    sourceDefinitionId: shellTradersDefinitionId(host, sourceCardId),
+    sourceDefinitionId: delayedInstallSourceDefinitionId(host, sourceCardId),
     targetCardId,
     targetCardDefinitionId: targetDefinition.id,
     counterType: "shell",
@@ -381,7 +381,7 @@ export function resolveDelayedInstallPlacementChoice(
   if (
     !sourceCardId ||
     !state.runner.rig.resources.includes(sourceCardId) ||
-    !isShellTradersSource(host, sourceCardId)
+    !isDelayedInstallSource(host, sourceCardId)
   )
     throw new Error("The Shell Traders ist nicht mehr installiert.");
   if (!targetCardId) throw new Error("Die Shell-Traders-Zielkarte fehlt.");
@@ -454,7 +454,7 @@ export function resolveDelayedInstallPlacementChoice(
     abilityFamily: "hosting-counters",
     abilityId: "resolve_delayed_install_memory",
     effectKind: "counter_change",
-    sourceDefinitionId: shellTradersDefinitionId(host, sourceCardId),
+    sourceDefinitionId: delayedInstallSourceDefinitionId(host, sourceCardId),
     targetCardId,
     targetCardDefinitionId: targetDefinition.id,
     counterType: "shell",
@@ -479,7 +479,7 @@ function startDelayedInstallStartTurnChoice(
     side: "runner",
     source: `runner_start.delayed_install:${sourceCardId}:${nextStateVersion}`,
     prompt: `${host.cards.publicTitle(
-      shellTradersDefinitionId(host, sourceCardId),
+      delayedInstallSourceDefinitionId(host, sourceCardId),
     )}: Wähle eine Karte, von der 1 Shell-Counter entfernt wird.`,
     kind: "select_cards",
     options: targetCardIds.map((cardId) => {
@@ -520,9 +520,9 @@ function delayedInstallStartTurnCounterEffect(
     counterType: "shell",
     removedCounterAmount: 1,
     remainingCounters: result.remainingCounters,
-    sourceDefinitionId: shellTradersDefinitionId(host, sourceCardId),
+    sourceDefinitionId: delayedInstallSourceDefinitionId(host, sourceCardId),
     sourceTitle: host.cards.publicTitle(
-      shellTradersDefinitionId(host, sourceCardId),
+      delayedInstallSourceDefinitionId(host, sourceCardId),
     ),
     cardDefinitionId: targetDefinition.id,
     cardTitle: host.cards.publicTitle(targetDefinition.id),
@@ -546,7 +546,7 @@ function resolveDelayedInstallSetAside(
   const sourceCardId = String(legalAction.payload?.cardId ?? "");
   if (!state.runner.rig.resources.includes(sourceCardId))
     throw new Error("The Shell Traders ist nicht installiert.");
-  if (!isShellTradersSource(host, sourceCardId))
+  if (!isDelayedInstallSource(host, sourceCardId))
     throw new Error("Die Shell-Traders-Faehigkeit passt nicht zur Karte.");
   const targetCardId = String(legalAction.payload?.targetCardId ?? "");
   if (!delayedInstallCanPrepareTarget(host, targetCardId))
@@ -593,7 +593,7 @@ function resolveDelayedInstallSetAside(
     ...(legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
     hiddenZoneAction: "delayed_install_set_aside",
-    sourceDefinitionId: shellTradersDefinitionId(host, sourceCardId),
+    sourceDefinitionId: delayedInstallSourceDefinitionId(host, sourceCardId),
     targetCardDefinitionId: targetDefinition.id,
     counterType: "shell",
     addedCounterAmount: shellCounterAmount,
@@ -623,7 +623,7 @@ function resolveDelayedInstallRemoveCounter(
   const sourceCardId = String(legalAction.payload?.cardId ?? "");
   if (!state.runner.rig.resources.includes(sourceCardId))
     throw new Error("The Shell Traders ist nicht installiert.");
-  if (!isShellTradersSource(host, sourceCardId))
+  if (!isDelayedInstallSource(host, sourceCardId))
     throw new Error("Die Shell-Traders-Faehigkeit passt nicht zur Karte.");
   const targetCardId = String(legalAction.payload?.targetCardId ?? "");
   if (!delayedInstallPreparedTargetIds(host).includes(targetCardId))
@@ -643,7 +643,7 @@ function resolveDelayedInstallRemoveCounter(
   });
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    sourceDefinitionId: shellTradersDefinitionId(host, sourceCardId),
+    sourceDefinitionId: delayedInstallSourceDefinitionId(host, sourceCardId),
     targetCardDefinitionId: targetDefinition.id,
     counterType: "shell",
     removeCounterAmount: result.installChoiceOpened ? 0 : 1,
@@ -855,7 +855,7 @@ function startDelayedInstallDestinationChoice(
     side: "runner",
     source: `runner.delayed_install_destination:${context.sourceCardId}:${targetCardId}:${context.reason}:${nextStateVersion}`,
     sourceCardInstanceId: context.sourceCardId,
-    sourceCardDefinitionId: shellTradersDefinitionId(
+    sourceCardDefinitionId: delayedInstallSourceDefinitionId(
       host,
       context.sourceCardId,
     ),
@@ -907,7 +907,7 @@ function resolveDelayedInstallDestinationChoice(
   if (
     !sourceCardId ||
     !host.state.runner.rig.resources.includes(sourceCardId) ||
-    !isShellTradersSource(host, sourceCardId)
+    !isDelayedInstallSource(host, sourceCardId)
   )
     throw new Error("The Shell Traders ist nicht mehr installiert.");
   if (
@@ -971,7 +971,7 @@ function resolveDelayedInstallDestinationChoice(
     abilityFamily: "hosting-counters",
     abilityId: "resolve_delayed_install_destination",
     effectKind: "counter_change",
-    sourceDefinitionId: shellTradersDefinitionId(host, sourceCardId),
+    sourceDefinitionId: delayedInstallSourceDefinitionId(host, sourceCardId),
     targetCardDefinitionId: definition.id,
     counterType: "shell",
     removedCounterAmount: result.installChoiceOpened ? 0 : 1,

@@ -911,15 +911,16 @@ function finishTraceRunnerBid(
     traceValue,
     runnerStrength,
   };
-  const crashSpaceSource = traceAutoSuccessSource(host.cards);
-  if (crashSpaceSource) {
+  const autoSuccessSource = traceAutoSuccessSource(host.cards);
+  if (autoSuccessSource) {
     const forcedTrace = forceTraceSuccessful(postBidTrace);
-    const extraPayload = traceAutoSuccessAdditionalTagPayload(crashSpaceSource);
+    const extraPayload =
+      traceAutoSuccessAdditionalTagPayload(autoSuccessSource);
     if (!state.run) {
       completeTraceWithoutRun(host, forcedTrace, "runner_bid", legalAction, {
         runnerLinkFallback: runnerLink,
         extraPayload: { ...tracePaymentPayload, ...extraPayload },
-        additionalTagAmount: crashSpaceSource.additionalTagAmount,
+        additionalTagAmount: autoSuccessSource.additionalTagAmount,
         deletePendingChoice: true,
       });
       return;
@@ -930,7 +931,7 @@ function finishTraceRunnerBid(
       legalAction,
       runnerLinkFallback: runnerLink,
       extraPayload: { ...tracePaymentPayload, ...extraPayload },
-      additionalTagAmount: crashSpaceSource.additionalTagAmount,
+      additionalTagAmount: autoSuccessSource.additionalTagAmount,
       deletePendingChoice: true,
     });
     return;
@@ -1340,15 +1341,16 @@ function completeTraceAfterPostBidLink(
   trace: CurrentTrace,
   legalAction: LegalAction,
 ): void {
-  const crashSpaceSource = traceAutoSuccessSource(host.cards);
-  if (crashSpaceSource) {
+  const autoSuccessSource = traceAutoSuccessSource(host.cards);
+  if (autoSuccessSource) {
     const forcedTrace = forceTraceSuccessful(trace);
-    const extraPayload = traceAutoSuccessAdditionalTagPayload(crashSpaceSource);
+    const extraPayload =
+      traceAutoSuccessAdditionalTagPayload(autoSuccessSource);
     if (!host.state.run) {
       completeTraceWithoutRun(host, forcedTrace, "post_bid_link", legalAction, {
         runnerLinkFallback: calculateRunnerLink(host),
         extraPayload,
-        additionalTagAmount: crashSpaceSource.additionalTagAmount,
+        additionalTagAmount: autoSuccessSource.additionalTagAmount,
         deletePendingChoice: true,
       });
       return;
@@ -1359,7 +1361,7 @@ function completeTraceAfterPostBidLink(
       legalAction,
       runnerLinkFallback: calculateRunnerLink(host),
       extraPayload,
-      additionalTagAmount: crashSpaceSource.additionalTagAmount,
+      additionalTagAmount: autoSuccessSource.additionalTagAmount,
       deletePendingChoice: true,
     });
     return;

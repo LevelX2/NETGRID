@@ -1,10 +1,16 @@
 # Nightly-Testverträge
 
-Status: P1 abgeschlossen, P2 aktiv. Quelle: Nutzerauftrag vom 2026-09-09;
+Status: P1 und P2 abgeschlossen, P3 aktiv. Quelle: Nutzerauftrag vom 2026-09-09;
 GitHub-Nightly 34319847225. E2E: Exit 0, 15 erwartungsgemäße Ergebnisse
 (14 bestandene Szenarien, 1 bereits bekannter erwarteter Deckpool-Fehler),
 Cleanup erfolgreich. Browser zentral auf Firefox und CI-Installation angepasst.
 Format- und Diffprüfung grün. Kein voller Workspace-Lauf für diesen Schnitt.
+P2: 28 Engine-Regressionen, Engine-Typecheck, 11 Guard-Vertragstests und zwei
+Selftests grün. Ein absichtlich eingefügter neuer Runtime-Kartenname schaltete
+den echten CLI-Prüfer mit konkreter Datei und Exit 1 rot; nach Entfernung grün.
+Die Baseline wurde ausschließlich reduziert (427 auf 388 Derived-Vorkommen),
+keine neue problematische Freigabe. Zwei generische Helfer und eine generische
+Quellvariable wurden ohne Verhaltensänderung umbenannt.
 
 ## Ziel und Grenzen
 
