@@ -67,6 +67,12 @@ export type CorpPunishCampaignSignal = {
     fundingNeedId: string;
     currentHeadStepId?: string;
     currentHeadActionId?: string;
+    traceBidBinding?: {
+      sourceCardInstanceId: string;
+      sourceDefinitionId: string;
+      quotedAtStateVersion: number;
+      amount: number;
+    };
   };
 };
 

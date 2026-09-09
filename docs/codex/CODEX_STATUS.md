@@ -73,8 +73,12 @@ Score-Finanzierung; nach Auffüllen entfällt dieser aktuelle Nachweis. Der
 Cleanup bewertet den Nutzen von Archives-Zugriffsfallen am tatsächlichen
 Abwurfziel. Unabhängige Ambush-Vorbereitung löscht keine fremden
 Agenda-Finanzierungsbedarfe mehr. Eigenständige Trace-Tag-Quellen erhalten
-eine Engine-Quote; vollständiger gebotsgebundener Tag-Druck und die
-Government-Contract-Erstinvestition bleiben offen. Kontrollen 412/413 und
+eine Engine-Quote mit kleinstem ausreichendem Gebot und gebundener Trace-
+Fortsetzung. Vollständig mit Agendas überfüllte HQ darf Score durch eine
+begrenzte verdeckte Score-Linie entlasten. Installierte ungerezzte Counterbanken
+können für einen exakten Defense-Verbraucher profitabel vorbereitet werden;
+die Zahlungsquote unterstützt mehrere nötige Counterauszahlungen. Der
+mehrzügige Contract-Aufbau aus HQ bleibt offen. Kontrollen 412/413 und
 Testgrenzen stehen im
 `docs/architecture/ai/hidden-node-capability-review.md`.
 

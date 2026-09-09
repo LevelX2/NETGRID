@@ -16,6 +16,15 @@ export type CorpRestrictedCreditBankQuote = {
   usableFor: "corp_install_or_rez";
   payoutCleanup: "end_of_turn";
   condition: "source_remains_installed_and_rezzed_at_paid_window";
+  /** Exact affordable setup prefixes inside the current Corp turn. No payout is liquid yet. */
+  setupRoutes?: Array<{
+    headActionId: string;
+    headKind: "advance_card" | "rez_card";
+    setupCredits: number;
+    setupClicks: number;
+    targetCounters: number;
+    remainingGeneralCredits: number;
+  }>;
 };
 
 /** A semantic consumer, never a future LegalAction ID. Its plan retains target ownership. */
@@ -40,6 +49,8 @@ export type CorpRestrictedCreditRouteQuote = {
   payoutSourceCardInstanceId: string;
   payoutSourceAbilityId: string;
   payoutCredits: number;
+  /** Exact same-window payouts needed before this consumer becomes legal. */
+  payoutCount: number;
   payoutClickCost: number;
   payoutGeneralCreditCost: number;
   payoutAdvancementCounterCost: number;

@@ -16,6 +16,9 @@ export type CorpRestrictedRezPreparation = {
   generalCreditsAfterPreparation: number;
   remainingGeneralCreditGap: number;
   horizon: "next_runner_turn_rez_window";
+  setupRoute?: NonNullable<
+    CorpRestrictedCreditBankQuote["setupRoutes"]
+  >[number];
 };
 
 export function currentCorpRestrictedCreditBanks(
@@ -51,7 +54,9 @@ export function corpRestrictedRezPreparationCandidates(
     input.playerView.run
   )
     return [];
-  return currentCorpRestrictedCreditBanks(input).flatMap((bank) => {
+  const existingBankPreparations = currentCorpRestrictedCreditBanks(
+    input,
+  ).flatMap((bank) => {
     // One prepared payout for this one consumer. Do not keep stockpiling counters.
     if (
       bank.advancementCounters !== 0 ||
@@ -135,4 +140,87 @@ export function corpRestrictedRezPreparationCandidates(
       ];
     });
   });
+  const initialPreparations = input.playerView.servers.flatMap((server) =>
+    server.root.flatMap((card) => {
+      const bank = card.restrictedCreditBankQuote;
+      if (
+        !card.known ||
+        card.rezzed ||
+        !bank ||
+        bank.sourceCardInstanceId !== card.instanceId ||
+        bank.serverId !== server.id ||
+        bank.expiresAtStateVersion !== input.playerView.stateVersion ||
+        bank.advancementCounters !== card.advancementCounters ||
+        bank.generalCreditsAvailable !== input.playerView.own.credits
+      )
+        return [];
+      return (bank.setupRoutes ?? [])
+        .flatMap((setupRoute) => {
+          const action = input.legalActions.find(
+            (action) => action.actionId === setupRoute.headActionId,
+          );
+          const candidate = candidates.find(
+            (candidate) => candidate.actionId === action?.actionId,
+          );
+          if (
+            !action ||
+            !candidate ||
+            action.type !== setupRoute.headKind ||
+            action.source !== card.instanceId ||
+            action.expiresAtStateVersion !== input.playerView.stateVersion ||
+            action.targetRequirements.length > 0 ||
+            (action.choiceRequirements?.length ?? 0) > 0 ||
+            candidate.costProfile.costKnownStatus !== "known" ||
+            candidate.costProfile.additionalCosts.length > 0
+          )
+            return [];
+          const creditCost = candidate.costProfile.creditCost;
+          const clickCost = candidate.costProfile.clickCost;
+          if (
+            typeof creditCost !== "number" ||
+            typeof clickCost !== "number" ||
+            setupRoute.setupCredits > bank.generalCreditsAvailable ||
+            setupRoute.setupClicks > input.playerView.own.clicks
+          )
+            return [];
+          const afterCapacity =
+            setupRoute.remainingGeneralCredits +
+            setupRoute.targetCounters * bank.creditsPerCounter;
+          const capacityGain =
+            Math.min(target.requiredRezCredits, afterCapacity) -
+            Math.min(target.requiredRezCredits, bank.generalCreditsAvailable);
+          // A complete affordable prefix must fund this exact Defense consumer and
+          // outperform the same clicks spent gaining credits. Stored counters are
+          // conditional future capacity; no payout or future action is bound here.
+          if (
+            !Number.isSafeInteger(afterCapacity) ||
+            afterCapacity < target.requiredRezCredits ||
+            capacityGain <= setupRoute.setupClicks
+          )
+            return [];
+          return [
+            {
+              actionId: action.actionId,
+              bank,
+              ...target,
+              creditCost,
+              clickCost,
+              capacityGain,
+              generalCreditsAfterPreparation:
+                setupRoute.remainingGeneralCredits,
+              remainingGeneralCreditGap: 0,
+              horizon: "next_runner_turn_rez_window" as const,
+              setupRoute,
+            },
+          ];
+        })
+        .sort(
+          (a, b) =>
+            a.setupRoute.setupClicks - b.setupRoute.setupClicks ||
+            a.setupRoute.setupCredits - b.setupRoute.setupCredits,
+        )
+        .slice(0, 1);
+    }),
+  );
+  return [...existingBankPreparations, ...initialPreparations];
 }

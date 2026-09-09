@@ -303,6 +303,7 @@ export function buildPlayerViewProjection(
   const visibleTrace = trace
     ? {
         traceId: trace.traceId,
+        sourceCardInstanceId: trace.sourceCardInstanceId,
         ...(traceBidEffect ? { bidEffect: traceBidEffect } : {}),
         sourceDefinitionId: trace.sourceDefinitionId,
         profile: normalizeTraceRulesProfile(trace.traceRulesProfile),

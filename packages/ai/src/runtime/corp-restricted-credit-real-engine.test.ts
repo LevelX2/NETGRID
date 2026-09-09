@@ -59,6 +59,102 @@ const CORP_DECK: DeckDefinition = {
 describe("Corp restricted install/rez credit real-Engine capability", () => {
   afterEach(resetResidentPlanPortfolioMemory);
 
+  it("completes a profitable unrezzed bank prefix for the exact Defense consumer", () => {
+    let state = preparedOriginalTerminalReserve(3, 1);
+    const source = state.cardInstances[contractId(state)]!;
+    source.rezzed = false;
+    source.faceup = false;
+    source.advancementCounters = 1;
+    const before = hashState(state);
+    const firstInput = decisionInput(state, ORIGINAL_DECK);
+    expect(preparationsForOriginal(firstInput)).toMatchObject([
+      {
+        setupRoute: {
+          headKind: "advance_card",
+          setupCredits: 3,
+          setupClicks: 1,
+          targetCounters: 2,
+          remainingGeneralCredits: 0,
+        },
+      },
+    ]);
+    expect(hashState(state)).toBe(before);
+    for (const type of ["advance_card", "rez_card"]) {
+      const input = decisionInput(state, ORIGINAL_DECK);
+      const decision = chooseCorpAction(input);
+      const head = input.legalActions.find(
+        (action) => action.actionId === decision.actionId,
+      )!;
+      expect(
+        head,
+        JSON.stringify(decision.decisionDebug?.planFirstDecision),
+      ).toMatchObject({ type, source: source.instanceId });
+      expect(
+        decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
+      ).toBe("corp.economy");
+      expect(
+        decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId,
+      ).toContain("corp.defend_servers");
+      state = apply(state, head);
+    }
+    expect(state.corp.credits).toBe(0);
+    expect(state.cardInstances[source.instanceId]).toMatchObject({
+      rezzed: true,
+      advancementCounters: 2,
+    });
+    expect(
+      preparationsForOriginal(decisionInput(state, ORIGINAL_DECK)),
+    ).toEqual([]);
+    state = apply(
+      state,
+      getLegalActions(state, "corp").find(
+        (action) => action.type === "end_turn",
+      )!,
+    );
+    state = apply(
+      state,
+      getLegalActions(state, "runner").find(
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "rd",
+      )!,
+    );
+    for (const type of [
+      "activated_card_ability",
+      "activated_card_ability",
+      "rez_ice",
+    ]) {
+      const input = decisionInput(state, ORIGINAL_DECK);
+      const decision = chooseCorpAction(input);
+      const head = input.legalActions.find(
+        (action) => action.actionId === decision.actionId,
+      )!;
+      expect(
+        head.type,
+        JSON.stringify(decision.decisionDebug?.planFirstDecision),
+      ).toBe(type);
+      state = apply(state, head);
+    }
+    expect(state.cardInstances[source.instanceId]!.advancementCounters).toBe(0);
+    expect(state.corp.credits).toBe(0);
+  });
+
+  it("rejects an unprofitable initial investment and a stale setup quote", () => {
+    const state = preparedOriginalTerminalReserve(5, 3);
+    const source = state.cardInstances[contractId(state)]!;
+    source.rezzed = false;
+    source.faceup = false;
+    expect(
+      preparationsForOriginal(decisionInput(state, ORIGINAL_DECK)),
+    ).toEqual([]);
+    source.advancementCounters = 1;
+    state.corp.credits = 3;
+    const input = decisionInput(state, ORIGINAL_DECK);
+    expect(preparationsForOriginal(input)).toHaveLength(1);
+    input.playerView.servers.find((server) => server.id === "remote_1")!
+      .root[0]!.restrictedCreditBankQuote!.expiresAtStateVersion--;
+    expect(preparationsForOriginal(input)).toEqual([]);
+  });
+
   it.each([
     { credits: 4, clicks: 1 },
     { credits: 3, clicks: 2 },
@@ -310,7 +406,7 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
       decisionInput(state).playerView.servers.find(
         (server) => server.id === "remote_1",
       )!.root[0]!.restrictedCreditBankQuote,
-    ).toBeUndefined();
+    ).toMatchObject({ setupRoutes: [] });
   });
 
   it("funds and hands back Mobile Barricade on the unchanged Hidden Node deck", () => {

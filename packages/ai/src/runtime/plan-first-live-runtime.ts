@@ -183,6 +183,10 @@ import {
 } from "../plans/transient-plan-signals";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import { assessTraceBidCandidates } from "./trace-bid-assessment";
+import {
+  boundCorpPunishTraceChoices,
+  resolveCorpPunishTraceWindow,
+} from "../plans/corp-punish-trace-binding";
 import { latestTraceContext } from "./trace-context";
 import { buildCorpAgendaTurnPlanningSlice } from "../plans/corp-agenda-turn-planning";
 import { buildCorpDefenseTurnPlanningSlice } from "../plans/corp-defense-turn-planning";
@@ -625,6 +629,7 @@ export function choosePlanFirstLiveAction(
   ): EngineWindowResolution | undefined => {
     if (planBoundRunnerEventInstallChoice) return undefined;
     return (
+      resolveCorpPunishTraceWindow(schedulerContext, previous) ??
       resolvePlanBoundRunnerDelayedProgramSearchChoice(
         schedulerContext,
         previous,
@@ -18029,11 +18034,37 @@ function scoreProjectForCandidate(
       scorelineFeasibility,
       candidate.actionId,
     );
+    // A forced agenda discard creates a new, publicly accessible scoring
+    // source in Archives. An empty remote keeps the same card concealed and
+    // preserves a bounded score attempt. This is a risky Score
+    // route, never a claim that the Runner cannot steal it.
+    const forcedAgendaDiscardRelief =
+      input.playerView.own.gripOrHq.length > input.playerView.own.maxHandSize &&
+      input.playerView.own.gripOrHq.every((card) =>
+        visibleCardIsAgenda(input, card),
+      ) &&
+      (serverId === "new_remote" ||
+        input.playerView.servers.some(
+          (server) => server.id === serverId && server.root.length === 0,
+        )) &&
+      (corpAgendaInstallHasCertifiedNearTermScoreHorizon(
+        input,
+        candidate,
+        serverId,
+      ) ||
+        (serverId !== undefined &&
+          corpAgendaInstallScoreHorizonShortfall(input, candidate, serverId) ===
+            1)) &&
+      hasExactNonNegativeCostProfile(candidate) &&
+      remainingAgendaAdvancementCreditsAfterAction(input, candidate, agenda) +
+        candidate.costProfile.creditCost! <=
+        input.playerView.own.credits;
     const deadlinePressure =
       scorelineFeasibility?.deadline === "last_draw_window" ||
       scorelineFeasibility?.deadline === "current_turn_only" ||
       corpDeckoutAgendaFloodRequiresScoreDevelopment(input) ||
-      corpCentralDefenseHqAgendaExposureIsDeadline(centralDefenseAllocation);
+      corpCentralDefenseHqAgendaExposureIsDeadline(centralDefenseAllocation) ||
+      forcedAgendaDiscardRelief;
     const matchpointTarget =
       input.playerView.own.agendaPoints + agendaPoints >=
       input.playerView.agendaPointsToWin;
@@ -18153,6 +18184,7 @@ function scoreProjectForCandidate(
       fundedProtectionSupportsExtendedScoreHorizon ||
       matureRemoteScoreHorizonCertification !== undefined;
     const boundedScoreHorizon =
+      forcedAgendaDiscardRelief ||
       certifiedNearTermScoreHorizon ||
       certifiedMatureRemoteScoreHorizon ||
       boundedStagedScoreWindow ||
@@ -18160,6 +18192,7 @@ function scoreProjectForCandidate(
       lastDrawAgendaRecycleWindow ||
       deckoutAgendaFloodScoreWindow;
     const remoteRequiresNearMatchpointMaturity =
+      !forcedAgendaDiscardRelief &&
       !sameTurnCloseout &&
       !lastViableDeckoutMatchpointWindow &&
       !lastDrawAgendaRecycleWindow &&
@@ -18174,6 +18207,7 @@ function scoreProjectForCandidate(
       input.playerView.own.clicks >= (boundedStagedScoreWindow ? 1 : 2) ||
       deadlinePressure;
     const protectedScoreWindow =
+      forcedAgendaDiscardRelief ||
       sameTurnCloseout ||
       lastViableDeckoutMatchpointWindow ||
       lastDrawAgendaRecycleWindow ||
@@ -18200,6 +18234,7 @@ function scoreProjectForCandidate(
         serverId,
       );
     const fundingGap =
+      forcedAgendaDiscardRelief ||
       lastViableDeckoutMatchpointWindow ||
       lastDrawAgendaRecycleWindow ||
       deckoutAgendaFloodScoreWindow ||
@@ -18268,37 +18303,39 @@ function scoreProjectForCandidate(
           scorelineFeasibility?.deadline === "current_turn_only" &&
           !sameTurnCloseout
             ? `corp_current_turn_scoreline_unreachable:${serverId ?? "unbound"}`
-            : recentlyCompromisedTarget
-              ? `corp_recently_compromised_score_remote_requires_reprotection:${serverId}`
-              : lastDrawAgendaRecycleWindow
-                ? `corp_last_draw_hq_agenda_recycle_install:${serverId ?? "unbound"}`
-                : deckoutAgendaFloodScoreWindow
-                  ? `corp_deckout_agenda_flood_score_install:${serverId ?? "unbound"}`
-                  : accessPunishingScoreDeceptionWindow
-                    ? `corp_access_punishing_agenda_deception_score_install:${serverId ?? "unbound"}`
-                    : !scoreActionSemanticsKnown
-                      ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:missing_action_semantics`
-                      : !developmentClickAvailable
-                        ? `corp_last_click_score_install_deferred:${serverId ?? "unbound"}`
-                        : protectionNeed?.baseline.knowledge === "unknown"
-                          ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:${protectionNeed.baseline.unknownReason}`
-                          : fundingGap !== undefined && fundingGap > 0
-                            ? `corp_score_protection_funding_gap:${serverId ?? "unbound"}:${fundingGap}`
-                            : remoteRequiresNearMatchpointMaturity
-                              ? `corp_near_matchpoint_remote_maturity_required:${serverId ?? "unbound"}`
-                              : lastViableDeckoutMatchpointWindow
-                                ? `corp_last_viable_deckout_matchpoint_install:${serverId ?? "unbound"}`
-                                : certifiedMatureRemoteScoreHorizon
-                                  ? `corp_engine_certified_mature_remote_score_install:${serverId ?? "unbound"}`
-                                  : boundedStagedScoreWindow
-                                    ? `corp_bounded_staged_score_install:${serverId ?? "unbound"}`
-                                    : !protectedScoreWindow
-                                      ? `corp_score_protection_required:${serverId ?? "unbound"}`
-                                      : !boundedScoreHorizon
-                                        ? `corp_score_horizon_unbounded:${serverId ?? "unbound"}`
-                                        : protectedScoreWindow
-                                          ? `corp_funded_protected_score_install:${serverId ?? "unbound"}`
-                                          : `corp_score_protection_required:${serverId ?? "unbound"}`,
+            : forcedAgendaDiscardRelief
+              ? `corp_forced_agenda_discard_score_attempt:${serverId ?? "unbound"}`
+              : recentlyCompromisedTarget
+                ? `corp_recently_compromised_score_remote_requires_reprotection:${serverId}`
+                : lastDrawAgendaRecycleWindow
+                  ? `corp_last_draw_hq_agenda_recycle_install:${serverId ?? "unbound"}`
+                  : deckoutAgendaFloodScoreWindow
+                    ? `corp_deckout_agenda_flood_score_install:${serverId ?? "unbound"}`
+                    : accessPunishingScoreDeceptionWindow
+                      ? `corp_access_punishing_agenda_deception_score_install:${serverId ?? "unbound"}`
+                      : !scoreActionSemanticsKnown
+                        ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:missing_action_semantics`
+                        : !developmentClickAvailable
+                          ? `corp_last_click_score_install_deferred:${serverId ?? "unbound"}`
+                          : protectionNeed?.baseline.knowledge === "unknown"
+                            ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:${protectionNeed.baseline.unknownReason}`
+                            : fundingGap !== undefined && fundingGap > 0
+                              ? `corp_score_protection_funding_gap:${serverId ?? "unbound"}:${fundingGap}`
+                              : remoteRequiresNearMatchpointMaturity
+                                ? `corp_near_matchpoint_remote_maturity_required:${serverId ?? "unbound"}`
+                                : lastViableDeckoutMatchpointWindow
+                                  ? `corp_last_viable_deckout_matchpoint_install:${serverId ?? "unbound"}`
+                                  : certifiedMatureRemoteScoreHorizon
+                                    ? `corp_engine_certified_mature_remote_score_install:${serverId ?? "unbound"}`
+                                    : boundedStagedScoreWindow
+                                      ? `corp_bounded_staged_score_install:${serverId ?? "unbound"}`
+                                      : !protectedScoreWindow
+                                        ? `corp_score_protection_required:${serverId ?? "unbound"}`
+                                        : !boundedScoreHorizon
+                                          ? `corp_score_horizon_unbounded:${serverId ?? "unbound"}`
+                                          : protectedScoreWindow
+                                            ? `corp_funded_protected_score_install:${serverId ?? "unbound"}`
+                                            : `corp_score_protection_required:${serverId ?? "unbound"}`,
       },
     ];
   }
@@ -21646,7 +21683,6 @@ function corpTerminalCentralRezReserveSignals(
     input.side !== "corp" ||
     input.playerView.timingPoint !== "corp_action.main" ||
     input.playerView.run !== undefined ||
-    input.playerView.own.clicks <= 0 ||
     input.playerView.agendaPointsToWin -
       input.playerView.opponent.agendaPoints !==
       1 ||
@@ -21670,7 +21706,7 @@ function corpTerminalCentralRezReserveSignals(
           bank.advancementCounters > 0 &&
           bank.generalCreditsAvailable === input.playerView.own.credits,
       )
-      .map((bank) => bank.creditsPerCounter),
+      .map((bank) => bank.creditsPerCounter * bank.advancementCounters),
   );
   const reserveCandidate = server.ice
     .flatMap((ice) => {
@@ -22153,8 +22189,12 @@ function assessQuotedPunishOpportunity(
       route.tagTrigger.kind === "direct_tag_step" &&
       route.tagTrigger.status === "projected";
     const additionalTagPressure =
-      route.tagTrigger.kind === "existing_tag" &&
-      (route.tagOutcomeEnvelope?.addedTags.maximum ?? 0) > 0;
+      (route.tagTrigger.kind === "existing_tag" &&
+        (route.tagOutcomeEnvelope?.addedTags.maximum ?? 0) > 0) ||
+      (route.tagTrigger.kind === "trace_tag_step" &&
+        (route.tagOutcomeEnvelope?.addedTags.minimum ?? 0) >= 2 &&
+        (route.tagOutcomeEnvelope?.addedTags.minimum ?? 0) >=
+          route.responsePaymentEnvelope.totalCorpCredits.maximum);
     if (expiringDirectTag) {
       return {
         disposition: "opportunity",
@@ -22461,6 +22501,16 @@ function quotedPunishSignal(
       executionNeedId,
       fundingNeedId,
       currentHeadStepId: head.stepId,
+      ...(head.kind === "trace_tag" && currentHeadAvailable
+        ? {
+            traceBidBinding: {
+              sourceCardInstanceId: head.sourceCardInstanceId,
+              sourceDefinitionId: head.sourceCardDefinitionId,
+              quotedAtStateVersion: route.stateVersion,
+              amount: route.responsePaymentEnvelope.corpResponseCredits.maximum,
+            },
+          }
+        : {}),
       ...(currentHeadAvailable ? { currentHeadActionId: headActionId! } : {}),
     },
   };
@@ -25677,23 +25727,38 @@ function decisionFromScheduler(
   );
   if (!action) throw new Error("plan_first_selected_action_not_legal");
   const pendingChoice = input.playerView.pendingChoice;
-  const traceBidAssessment = pendingChoice
-    ? assessTraceBidCandidates(input, pendingChoice, latestTraceContext(input))
-    : undefined;
-  const selectedChoices = randomizedIceInstallNearTie
-    ? undefined
-    : traceBidAssessment
-      ? traceBidAssessment.candidates.length === 1
-        ? {
-            choiceId: pendingChoice!.choiceId,
-            selectedOptionIds: [traceBidAssessment.selectedOptionId],
-          }
-        : undefined
-      : dependencies.selectedChoicesForDecision(
+  const boundTraceChoices =
+    result.lane === "engine_window"
+      ? boundCorpPunishTraceChoices(
           input,
           action,
+          result.origin,
           result.portfolio,
-        );
+        )
+      : undefined;
+  const traceBidAssessment =
+    pendingChoice && !boundTraceChoices
+      ? assessTraceBidCandidates(
+          input,
+          pendingChoice,
+          latestTraceContext(input),
+        )
+      : undefined;
+  const selectedChoices = randomizedIceInstallNearTie
+    ? undefined
+    : (boundTraceChoices ??
+      (traceBidAssessment
+        ? traceBidAssessment.candidates.length === 1
+          ? {
+              choiceId: pendingChoice!.choiceId,
+              selectedOptionIds: [traceBidAssessment.selectedOptionId],
+            }
+          : undefined
+        : dependencies.selectedChoicesForDecision(
+            input,
+            action,
+            result.portfolio,
+          )));
   const planId =
     result.lane === "plan"
       ? result.selectedAssessment.instanceId

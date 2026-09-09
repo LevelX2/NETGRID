@@ -1861,7 +1861,6 @@ function sanitizeVisibleCardWithOptions(
     options.allowCorpCounterBankPreparationQuote === true &&
     options.expectedCorpCounterBankLocation === "installed_root" &&
     card.known &&
-    card.rezzed === true &&
     restrictedBank?.schemaVersion === "corp-restricted-credit-bank-v1" &&
     restrictedBank.sourceCardInstanceId === card.instanceId &&
     restrictedBank.serverId === options.expectedCorpCounterBankServerId &&
@@ -1895,6 +1894,30 @@ function sanitizeVisibleCardWithOptions(
           usableFor: restrictedBank.usableFor,
           payoutCleanup: restrictedBank.payoutCleanup,
           condition: restrictedBank.condition,
+          ...(restrictedBank.setupRoutes?.every(
+            (route) =>
+              typeof route.headActionId === "string" &&
+              route.headActionId.length > 0 &&
+              (route.headKind === "advance_card" ||
+                route.headKind === "rez_card") &&
+              [
+                route.setupCredits,
+                route.setupClicks,
+                route.targetCounters,
+                route.remainingGeneralCredits,
+              ].every((value) => Number.isSafeInteger(value) && value >= 0),
+          )
+            ? {
+                setupRoutes: restrictedBank.setupRoutes.map((route) => ({
+                  headActionId: route.headActionId,
+                  headKind: route.headKind,
+                  setupCredits: route.setupCredits,
+                  setupClicks: route.setupClicks,
+                  targetCounters: route.targetCounters,
+                  remainingGeneralCredits: route.remainingGeneralCredits,
+                })),
+              }
+            : {}),
         }
       : undefined;
   const sanitizedEffectiveRunQuote =

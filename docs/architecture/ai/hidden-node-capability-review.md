@@ -662,8 +662,43 @@ Er gilt deshalb nicht als vollständig grün. Einzelresultate und Rohbelege
 liegen in der zentralen Evidence-Registry unter Kontrolle 413.
 
 Stereograms produktive Vorbereitung im regulären Cleanup bleibt bestätigt.
-Manhunts vollständige gebotsgebundene Druckfolge und Government Contracts
-Erstinvestition mit tatsächlichen Verbrauchern bleiben offen. Aus dem
-reparierten Bel-Pfad folgt für diese beiden anderen Planungsketten keine
-Abnahme. Der zusätzliche Hand-/Score-Konflikt vor dem Agenda-Pflichtabwurf
-wird getrennt als SP-323 geführt.
+Für die anschließende Druckfolge und Erstinvestition gelten die folgenden
+aktuellen Fähigkeitsgrenzen. Der Hand-/Score-Konflikt wird als SP-323 geführt.
+
+### Aktuelle Owner-Fortsetzungen: Score, Trace und Counterbank
+
+Score darf eine vollständig mit Agendas überfüllte HQ mit einer bezahlbaren
+verdeckten Installation entlasten. Der bounded Score-Horizont darf dabei um
+genau eine Aktion über den nächsten Corp-Zug hinausreichen. Dies verhindert
+den andernfalls erzwungenen offenen Archives-Abwurf; es behauptet weder
+sicheren Schutz noch einen garantierten Score. Normale Hände erhalten diese
+Ausnahme nicht. Der rekonstruierte Zustand 413 G5 D291 wählt diese Score-Linie.
+
+Die Engine ermittelt für eine unterstützte Trace-Tag-Route das kleinste
+ausreichende Gebot innerhalb des bisherigen begrenzten Trace-Budgets anhand
+der tatsächlichen öffentlichen Antwortoptionen. Falls kein Gebot Erfolg
+garantiert, bleibt das Angebot ausdrücklich reaktiv. Punish bindet das
+ausgewählte Gebot an Quelle, unmittelbare StateVersion, Parent und Executor.
+Die Choice löst ausschließlich dieses aktuelle Optionsangebot auf; eine
+fehlende oder veraltete Bindung scheitert sichtbar. Mindestens zwei sicher
+zusätzliche Tags können als eigenständiger Druck zugelassen werden, wenn
+ihre Zahl die gesamten quotierten Corp-Credits erreicht. Eine Real-Engine-
+Probe spielt Manhunt für vier Credits, bietet null und trasht anschließend
+die sichtbare Ressource. Ein Ressourcentrasherfolg wird vorab nicht garantiert.
+
+Economy kann eine installierte, noch ungerezzte Counterbank vorbereiten,
+wenn ein echter Defense-Rez-Verbraucher gebunden ist und die Engine eine
+vollständig bezahlbare Advance-/Rez-Folge im aktuellen Zug bestätigt. Der
+Kapazitätsgewinn für genau diesen Verbraucher muss die gleiche Zahl einfacher
+Credit-Aktionen übertreffen. Nach jedem Kopf wird erneut quotiert. Gespeicherte
+Counter sind keine Liquidität. Die aktuelle Engine-Zahlungsquote kann mehrere
+kostenlose Counterauszahlungen derselben Quelle bis zur legalen Verbrauchs-
+Action nachweisen; nur der erste aktuelle Kopf wird zur Ausführung gebunden.
+Der Test belegt Advance → Null-Klick-Rez → Zugwechsel → zwei Auszahlungen →
+Mobile-Barricade-Rez mit Defense als Parent. Unwirtschaftliche Erstinvestitionen
+und veraltete Quotes werden abgelehnt.
+
+Eine optimale Agenda-/Bluff-Mischung, der vollständige mehrzügige Contract-
+Aufbau aus HQ und eine allgemeine Spielstärkensteigerung sind damit weiterhin
+nicht abgenommen. Die frische Kontrollserie 414 prüft die natürliche Nutzung
+dieser engeren Fähigkeiten; ihre Ergebnisse werden getrennt von 413 geführt.
