@@ -77,12 +77,16 @@ eine Engine-Quote mit kleinstem ausreichendem Gebot und gebundener Trace-
 Fortsetzung. Vollständig mit Agendas überfüllte HQ darf Score durch eine
 begrenzte verdeckte Score-Linie entlasten. Installierte ungerezzte Counterbanken
 können für einen exakten Defense-Verbraucher profitabel vorbereitet werden;
-die Zahlungsquote unterstützt mehrere nötige Counterauszahlungen. Der
-mehrzügige Contract-Aufbau aus HQ bleibt offen. Kontrolle 414 ist technisch
-sauber, aber strategisch gemischt: drei statt eines Corp-Siegs, zugleich
-weniger Agendapunkte in denselben verlorenen Seeds. Frühe Tag-Ausgaben und
-Agenda-Handentlastung benötigen einen besseren Vergleich mit Wirtschaft und
-Schutz. Kontrollen 412–414 und Testgrenzen stehen im
+die Zahlungsquote unterstützt mehrere nötige Counterauszahlungen. Der mehrzügige Contract-Aufbau aus HQ bleibt offen. Aktuelle Fort-Pass-
+Verteidigung und variables Trace-ICE sind ausführbar; Runner unterscheidet
+Gebühr und Run-Abbruch. Der Ambush-Owner bindet bezahlte Zugriffseffekte an
+die private Engine-Choice und lehnt nachweislich leere Icebreaker-Counter-
+Zahlungen ab. Kontrolle 415 umfasst 40 saubere Originalspiele und 40 getrennte
+BBS-Variantenspiele. Corp-Siege 3 → 3, mittlere Punkte
+1,20 → 1,53; derselbe Niederlagen-Satz wird separat verglichen.
+Die Standardliste bleibt unverändert. Score-Finanzierung, Agenda-Risiko,
+Contract-Erstaufbau und die Bluff-Mischung bleiben begrenzt abgenommen.
+Ergebnisse und Testgrenzen stehen in
 `docs/architecture/ai/hidden-node-capability-review.md`.
 
 Die Corp erzeugt aus fehlenden HQ-Agendas keinen blinden Agenda-Suchauftrag.
