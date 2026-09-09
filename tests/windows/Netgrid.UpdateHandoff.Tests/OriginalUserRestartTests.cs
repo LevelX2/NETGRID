@@ -19,8 +19,12 @@ internal static class OriginalUserRestartTests
         normal.RequireNormalUser(1);
         normal.RequireSame(normal with { });
         Assert(true, "normal_user_is_allowed");
+        var filteredAdministrator = normal with { Type = 3 };
+        filteredAdministrator.RequireNormalUser(1);
+        filteredAdministrator.RequireSame(filteredAdministrator with { });
+        Assert(true, "filtered_unelevated_administrator_is_allowed");
         foreach (var invalid in new[] { normal with { Session = 0 }, normal with { Session = 2 }, normal with { Logon = 0 },
-            normal with { Type = 2 }, normal with { Elevated = true }, normal with { Integrity = 0x3000 }, normal with { Integrity = 0x1000 },
+            normal with { Type = 0 }, normal with { Type = 2 }, normal with { Elevated = true }, normal with { Integrity = 0x3000 }, normal with { Integrity = 0x1000 },
             normal with { UiAccess = true }, normal with { AppContainer = true }, normal with { Sid = "S-1-5-18" },
             normal with { Sid = "S-1-5-19" }, normal with { Sid = "S-1-5-20" }, normal with { Sid = "" } })
             Reject(() => invalid.RequireNormalUser(1), "updater_restart_user_context_invalid");

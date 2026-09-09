@@ -23,7 +23,13 @@ internal sealed class OriginalUserRestart : IDisposable
     {
         public void RequireNormalUser(int callerSession)
         {
-            if (Session <= 0 || Session != callerSession || Logon == 0 || Type != 1 || Elevated || Integrity != 0x2000 || UiAccess || AppContainer ||
+            // TokenElevationTypeDefault (1) is used by standard users (and
+            // when UAC does not create a linked token). A normally running
+            // administrator has the filtered TokenElevationTypeLimited (3)
+            // token. Both are valid only while TokenElevation is false and
+            // the integrity level remains medium; TokenElevationTypeFull (2)
+            // is always rejected.
+            if (Session <= 0 || Session != callerSession || Logon == 0 || Type is not (1 or 3) || Elevated || Integrity != 0x2000 || UiAccess || AppContainer ||
                 Sid is "S-1-5-18" or "S-1-5-19" or "S-1-5-20" || string.IsNullOrWhiteSpace(Sid))
                 throw new InvalidOperationException("updater_restart_user_context_invalid");
         }

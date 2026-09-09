@@ -812,8 +812,11 @@ im Produkt. Sitzung, Anmeldevorgang und nicht erhöhter Kontext bleiben vor
 und nach der Prozessanlage exakt geprüft.
 
 Der Kontext muss ein nicht erhöhter primärer Token mit mittlerer
-Integritätsstufe in derselben interaktiven Windows-Sitzung sein. System- und
-Dienstkonten, AppContainer und UIAccess werden abgewiesen. Benutzer-SID und
+Integritätsstufe in derselben interaktiven Windows-Sitzung sein. Zulässig sind
+sowohl `TokenElevationTypeDefault` eines Standardbenutzers als auch der
+gefilterte, nicht erhöhte `TokenElevationTypeLimited` eines Administratorkontos;
+`TokenElevationTypeFull` bleibt ausgeschlossen. System- und Dienstkonten,
+AppContainer und UIAccess werden abgewiesen. Benutzer-SID und
 Anmeldevorgang bleiben neben Sitzung und Rechtestatus exakt gebunden. Diese
 Identitäten werden weder in Requests noch Logs gespeichert. Der
 [Benutzer-Environmentblock](https://learn.microsoft.com/en-us/windows/win32/api/userenv/nf-userenv-createenvironmentblock)
