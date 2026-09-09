@@ -921,6 +921,12 @@ Vollbruch verhindert diesen bedingten Schaden; er wird nicht pauschal vom
 Handpuffer abgezogen. Fehlende oder fremde Quotes, dynamische
 Encounterbedingungen, Breaksperren und unzureichendes Geld zertifizieren
 keine solche Fortsetzung. Weitere sichtbare Gefahren bleiben separat aktiv.
+Bereits ausgelöste Zukunftsschäden werden am Ursprung des aktuellen Runs
+abgegrenzt. Die Engine bindet dessen `runId` an die StateVersion der
+erzeugenden Aktion; dadurch begrenzen auch Event- und Fähigkeitsstarts den
+Historienausschnitt. Eine alte Quellenauflösung aus einem vorherigen Run
+darf keine neue Schadenspflicht erzeugen, auch wenn beide denselben Server
+angreifen. Der bloße Actiontyp `start_run` deckt diese Ursprünge nicht ab.
 Ein Runstart-Choice-Ursprung entsteht nur aus einer echten Runstart-Aktion
 oder einer entsprechend gebundenen Engine-Runfähigkeit. Ein projizierter
 Serverkontext innerhalb eines laufenden Runs genügt nicht: Eine Bankaktivierung
