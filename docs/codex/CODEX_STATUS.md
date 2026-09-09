@@ -197,9 +197,12 @@ Bestands-Reparaturablauf einschließlich erhaltenem Maintenance-Zugang,
 Healthcheck und Abschlussstart. Nach defensiver Integration des aktuellen
 lokalen `main` ist der saubere Kandidat 1.0.8379 mit dynamischer Server-
 Buildinformation und 10.909 vollständig auditierten Payload-Dateien gebaut;
-alle lokalen Windows-Komponenten- und UI-Gates sind grün. Seine native
-Sandbox-Nachprüfung, der echte GitHub-Release-/Download-Updatepfad und die
-Probe auf einem getrennten Zielrechner stehen noch aus. Bei Fehlern werden Programm und Daten
+alle lokalen Windows-Komponenten- und UI-Gates sind grün. Die bestätigte
+native Bestandsreparatur auf 1.0.8379 ist ebenfalls grün: Setupabschluss,
+echter MSI-Fortschritt ohne Überlagerung, erhaltener Maintenance-Zugang,
+Abschlussstart sowie Client- und Server-Buildidentität sind belegt. Der echte
+GitHub-Release-/Download-Updatepfad und die Probe auf einem getrennten
+Zielrechner stehen noch aus. Bei Fehlern werden Programm und Daten
 soweit sicher möglich zurückgerollt,
 andernfalls bleibt NETGRID klar diagnostiziert gestoppt. Alle Windows-
 Oberflächen verwenden eine gemeinsame vollständige Sprachquelle für Deutsch,

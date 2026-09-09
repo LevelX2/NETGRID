@@ -218,9 +218,23 @@ MSI SHA-256 ist
 ProductCode `{3A378001-97F7-4B39-8735-6B6924CF2628}`. Metadaten und
 `SHA256SUMS.txt` stimmen bytegenau mit beiden Artefakten überein. Alle lokalen
 Windows-Komponenten-, Releaseoutput-, UI- und Installer-Audits sind grün. Die
-native Sandbox-Nachprüfung dieses integrierten Kandidaten ist der nächste
-Prüfschritt; sie wird nicht aus der nativen Evidence des Vorgängers 8226
-abgeleitet.
+native Sandbox-Nachprüfung dieses integrierten Kandidaten ist unabhängig von
+der Evidence des Vorgängers 8226 ebenfalls grün. Nach unmittelbarer
+Nutzerbestätigung wird die bestehende Sandboxinstallation auf 1.0.8379
+repariert. Die Bestandsmaske zeigt die registrierten Testpfade und Ports
+32141/32142 sowie die korrigierte kontextabhängige Hilfe. Während der
+Installation erscheinen reale MSI-Abschnitte einschließlich numerischem
+Fortschritt bis 95 Prozent; Fortschrittsbalken, Status und Datenhinweis
+überlagern sich nicht und es erscheint keine RuntimeConfig-Konsole. First Run
+erkennt den vorhandenen Maintenance-Zugang, bietet nur „Schließen“ an und
+verändert das Passwort nicht. Die deutsche Erfolgsmeldung wird bestätigt und
+der ausgewählte Abschlussstart öffnet den Client mit Produktversion `V1.0`,
+Build `8379`, Commit `0d6a4a628` und sauberem Webstart. Der installierte
+Serverhealth liefert HTTP 200 mit `ok=true`, `release=V1.0`,
+`buildNumber=8379`, demselben Commit, `dirty=false`, eingebetteter Quelle und
+bereiter SQLite-Datenbank. Damit ist der integrierte lokale Kandidat nativ
+nachgeprüft; der echte GitHub-Release-/Download-Updatepfad und die Probe auf
+einem getrennten Zielrechner bleiben Teil des offenen WIN-I08-Gates.
 
 ### Aktiver Prüfpunkt: beendeter MSI-Helfer und Fehlerrollback
 
