@@ -204,6 +204,21 @@ describe("zone-specific access preparation", () => {
       ),
     ).toEqual([]);
   });
+  it("binds urgent recycling only to the current empty-R&D state and legal source", () => {
+    const { input, candidates } = setup();
+    input.playerView.own.stackOrRdCount = 0;
+    expect(
+      corpRdRecyclingSignals(input, candidates)[0]?.emptyRdRecovery,
+    ).toEqual({ observedAtStateVersion: input.playerView.stateVersion });
+    input.playerView.own.stackOrRdCount = 1;
+    expect(
+      corpRdRecyclingSignals(input, candidates)[0]?.emptyRdRecovery,
+    ).toBeUndefined();
+    input.playerView.own.stackOrRdCount = 0;
+    expect(
+      corpRdRecyclingSignals(input, [])[0]?.emptyRdRecovery,
+    ).toBeUndefined();
+  });
   it("prefers an uncommitted Archives-only source at cleanup, preserving an exact parent hold", () => {
     const { input, card } = setup();
     const stereo = { ...card, instanceId: "stereo", definitionId: STEREO };

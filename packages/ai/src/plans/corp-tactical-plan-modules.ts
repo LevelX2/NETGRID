@@ -88,6 +88,7 @@ export type CorpAmbushSignal = {
     | "recycle_rd";
   patternKind?: "access_ambush" | "score_decoy" | "rd_recycle";
   recycleBluffUntilTurnSerial?: number;
+  emptyRdRecovery?: { observedAtStateVersion: number };
   defenseNeed?: CorpBluffDefenseNeed;
   followupAgendaInstanceId?: string;
   runnerCreditsAtPlanStart?: number;
@@ -593,7 +594,7 @@ function ambushModule(): PlanModule {
           affordableOrSupportable: signal.affordableOrSupportable,
         });
         if (!admission.admitted) return [];
-        const priorityClass = ambushPriority(signal);
+        const priorityClass = ambushPriority(signal, context);
         const rootInstanceId = planInstanceIdForProposal({
           moduleId: "corp.ambush_and_bluff",
           dedupeKey: signal.ambushId,
@@ -630,7 +631,7 @@ function ambushModule(): PlanModule {
           return [rootProposal];
         }
         const setupNeedId = ambushSetupNeedId(signal);
-        const setupPriority = ambushSetupPriority(signal);
+        const setupPriority = ambushSetupPriority(signal, context);
         const setupProposal = proposal(
           "corp.ambush_and_bluff",
           `${signal.ambushId}:setup:${signal.serverId}`,
@@ -655,11 +656,13 @@ function ambushModule(): PlanModule {
       if (current.kind === "ambush_setup") {
         return assessment(
           instance,
-          ambushSetupPriority(current.signal),
+          ambushSetupPriority(current.signal, context),
           ambushCandidates(context, current.signal).length > 0,
           current.signal.value,
           portfolio.executorInstanceId,
-          "belief_supported",
+          currentEmptyRdRecovery(current.signal, context)
+            ? "rules_proven"
+            : "belief_supported",
         );
       }
       const resourceGaps = ambushRootResourceGaps(current.signal);
@@ -670,12 +673,14 @@ function ambushModule(): PlanModule {
         ambushCandidates(context, current.signal).length > 0;
       return assessment(
         instance,
-        ambushPriority(current.signal),
+        ambushPriority(current.signal, context),
         current.signal.phase !== "install" &&
           ambushCandidates(context, current.signal).length > 0,
         current.signal.value,
         portfolio.executorInstanceId,
-        exactCurrentTrigger ? "rules_proven" : "belief_supported",
+        exactCurrentTrigger || currentEmptyRdRecovery(current.signal, context)
+          ? "rules_proven"
+          : "belief_supported",
         false,
         resourceGaps,
       );
@@ -738,7 +743,32 @@ function ambushModule(): PlanModule {
   };
 }
 
-function ambushPriority(signal: CorpAmbushSignal): "P3" | "P4" | "P5" {
+function currentEmptyRdRecovery(
+  signal: CorpAmbushSignal,
+  context: PlanSchedulerContext,
+): boolean {
+  return (
+    signal.patternKind === "rd_recycle" &&
+    signal.emptyRdRecovery?.observedAtStateVersion ===
+      context.input.playerView.stateVersion &&
+    context.input.playerView.own.stackOrRdCount === 0 &&
+    signal.actionIds.some((id) =>
+      context.input.legalActions.some(
+        (action) =>
+          action.actionId === id &&
+          action.payload?.cardId === signal.sourceInstanceId &&
+          action.expiresAtStateVersion ===
+            context.input.playerView.stateVersion,
+      ),
+    )
+  );
+}
+
+function ambushPriority(
+  signal: CorpAmbushSignal,
+  context: PlanSchedulerContext,
+): "P2" | "P3" | "P4" | "P5" {
+  if (currentEmptyRdRecovery(signal, context)) return "P2";
   if (signal.phase === "trigger" || signal.phase === "trigger_support")
     return "P3";
   if (signal.phase === "rez_support") return "P3";
@@ -748,7 +778,11 @@ function ambushPriority(signal: CorpAmbushSignal): "P3" | "P4" | "P5" {
   return "P5";
 }
 
-function ambushSetupPriority(signal: CorpAmbushSignal): "P4" | "P5" {
+function ambushSetupPriority(
+  signal: CorpAmbushSignal,
+  context: PlanSchedulerContext,
+): "P2" | "P4" | "P5" {
+  if (currentEmptyRdRecovery(signal, context)) return "P2";
   return signal.patternKind === "score_decoy" ? "P4" : "P5";
 }
 
@@ -782,7 +816,7 @@ function ambushRootResourceGaps(signal: CorpAmbushSignal): ResourceGap[] {
       capability: "install_ambush_setup",
       minimum: 1,
       available: 0,
-      deadline: "multi_turn",
+      deadline: signal.emptyRdRecovery ? "current_turn" : "multi_turn",
     },
   ];
 }

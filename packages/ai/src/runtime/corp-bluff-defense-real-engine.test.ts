@@ -290,9 +290,13 @@ it("prefers an available taxing remote over naked placement and preserves Score'
   ).toBe("new_remote");
 });
 
-it("recycles the last-click installed source before end turn and survives the next mandatory draw", () => {
+it("installs the empty-R&D rescue before score funding, then recycles after the last click", () => {
   let state = fixture();
-  RealEngineFixtureBuilder.forState(state).withCorpCardInHq(BEL);
+  RealEngineFixtureBuilder.forState(state)
+    .withCorpCardInHq(BEL)
+    .withCorpCardInHq("onr_proteus_002_charity-takeover")
+    .withCorpCardInHq("onr_proteus_005_marked-accounts")
+    .withCorpCredits(2);
   for (const id of state.corp.rd) {
     state.corp.archives.push(id);
     state.cardInstances[id] = {
@@ -306,16 +310,13 @@ it("recycles the last-click installed source before end turn and survives the ne
   const sourceId = state.corp.hq.find(
     (id) => state.cardInstances[id]!.definitionId === BEL,
   )!;
-  state = act(
-    state,
-    "corp",
-    getLegalActions(state, "corp").find(
-      (a) =>
-        a.type === "install_card" &&
-        a.payload?.cardId === sourceId &&
-        a.payload?.serverId === "new_remote",
-    )!.actionId,
-  );
+  const installed = chooseAndApply(state, "corp");
+  expect(installed.action.type).toBe("install_card");
+  expect(installed.action.payload?.cardId).toBe(sourceId);
+  expect(
+    installed.decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
+  ).toBe("corp.ambush_and_bluff");
+  state = installed.state;
   expect(state.corp.clicks).toBe(0);
   const before = hashState(state);
   const legal = getLegalActions(state, "corp");

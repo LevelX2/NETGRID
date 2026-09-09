@@ -4309,6 +4309,15 @@ Das ist eine begrenzte Vorbereitung, keine nachgewiesene gegnerische
 Lernreaktion und keine automatische Agenda-Installationsstrategie. Priorität
 und Fortsetzung bleiben beim vorhandenen Scheduler und Planportfolio.
 
+Bei bereits leerem R&D trägt eine aktuell legale kostenlose Install-/Rez-
+Rückmischung einen zustandsgebundenen `irreversible_threat`-Nachweis (P2).
+Der vorhandene Ambush-Parent und sein Setup-Schritt behandeln die drohende
+Pflichtzieh-Niederlage damit vor gewöhnlicher Score-Finanzierung. Der Nachweis
+bindet aktuelle StateVersion, Quellinstanz und LegalAction und entfällt nach
+dem Auffüllen. Das ist kein allgemeiner Kartenbonus oder garantierter Sieg:
+Zusätzliche spätere Zieheffekte und neue Runnerzugriffe bleiben gesonderte
+Risiken. Der Setup-Bedarf hat hier die Frist `current_turn`.
+
 Die Remote-Auswahl konsumiert einen typisierten, von `corp.defend_servers`
 bewerteten Bluff-Defense-Bedarf statt der bloßen ICE-Anzahl. Eine einzelne
 optionale ICE-Schicht besitzt einen aktuellen Kosten-/Effektnachweis,

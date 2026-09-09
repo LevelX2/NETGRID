@@ -240,6 +240,13 @@ export function corpRdRecyclingSignals(
         serverId: target,
         phase: server ? "recycle_rd" : "install",
         patternKind: "rd_recycle",
+        ...(deckCount === 0 && selected && execute
+          ? {
+              emptyRdRecovery: {
+                observedAtStateVersion: input.playerView.stateVersion,
+              },
+            }
+          : {}),
         ...(defenseNeed ? { defenseNeed } : {}),
         actionIds: selected && execute ? [selected.actionId] : [],
         purposeCode: server
@@ -262,9 +269,12 @@ export function corpRdRecyclingSignals(
           profile.damage * 30 +
           Math.min(handRelief, 1) * 40 +
           (deckCount <= 1 ? 300 : deckCount <= 5 ? 80 : 0),
-        evidenceCode: execute
-          ? "corp_rd_recycling_exact_source_route"
-          : "corp_rd_recycling_hold_remote_bluff_without_remote_damage",
+        evidenceCode:
+          deckCount === 0 && selected && execute
+            ? "corp_empty_rd_exact_recycling_before_mandatory_draw"
+            : execute
+              ? "corp_rd_recycling_exact_source_route"
+              : "corp_rd_recycling_hold_remote_bluff_without_remote_damage",
         decisionEvidenceCodes: [
           "corp_rd_recycling_adds_one_deck_card",
           "corp_rd_recycling_dilutes_agenda_density",

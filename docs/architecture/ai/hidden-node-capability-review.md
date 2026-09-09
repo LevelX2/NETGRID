@@ -629,3 +629,16 @@ Pflichtziehen aus; Remote Facility wird mit null und drei Klicks einschließlich
 unzureichender Credits und deterministischem Replay geprüft.
 Die gesamte erste 40er-Runde auf `a48d0290f` ist wegen dieser folgenden
 Regelkorrektur diagnostisch und von der finalen Population ausgeschlossen.
+
+Die zweite 40er-Kontrolle auf `52e1df950` belegt erstmals einen tatsächlich
+bezahlten geschützten Bel-Run: G14 D101 installiert hinter Mobile Barricade,
+D104 rezzt das ICE, D106–110 bezahlt der Runner insgesamt drei Credits,
+D113 mischt Ambush Bel im Serverfenster zurück. Sie zeigt aber zusätzlich
+SP-325 in G27 D706/D708: R&D ist bereits leer, Bel liegt in HQ, doch normale
+Score-Finanzierung verdrängt die legale Rettung. Der Ambush-Plan erhält für
+diesen aktuellen, exakt gebundenen Zustand den bestehenden P2-Vertrag für
+irreversible Bedrohungen. Beide vollständig hashgeprüften Originalzustände
+wählen nun Installation; die Real-Engine-Probe führt die Folge bis zum
+überlebten Pflichtziehen aus. Auch Runde zwei bleibt deshalb diagnostisch.
+Kompass und allgemeines Zielbild gelten unverändert; es entsteht weder ein
+zweiter Chooser noch eine neue Planprioritätsklasse.
