@@ -29,6 +29,15 @@ festen Parallelprozesse oder mehr als ein Worker je Shard werden erst nach
 einer dokumentierten Laufzeit-, RAM- und Stabilitätsmessung zum neuen Standard.
 
 Tests mit Timeout oder abgebrochene Prozesse gelten nicht als bestanden.
+Browser-E2E übernimmt die Browserwahl aus `playwright.config.ts` (Firefox als
+NETGRID-UI-Standard). Fachliche Szenarien setzen keinen eigenen `browserName`;
+Locale und fachliche Fixtures dürfen lokal festgelegt werden. Der Nightly-Job
+installiert Firefox sowie Chromium für den ausdrücklich eigenständigen
+Zwei-Browser-Multiplayer-Helper. Neue Browserabhängigkeiten müssen zugleich im
+CI-Setup deklariert werden; ein lokal vorhandener Browser ist keine CI-Garantie.
+Ein bereits als erwarteter Fehler markierter Test ist separat auszuweisen und
+kein Nachweis funktionierender Produktfunktion, auch wenn der Sammelbefehl grün ist.
+
 Die GitHub-CI führt die serielle AI-Paketsuite und die übrigen Workspace-Pakete
 in unabhängigen Jobs aus. `fail-fast: false` und `pnpm -r --no-bail` lassen
 andere Testgruppen beziehungsweise Pakete auch nach einem Fehler auswerten;
