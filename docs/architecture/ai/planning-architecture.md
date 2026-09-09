@@ -914,6 +914,13 @@ rechnet diese bereits bezahlten Subroutinen nicht erneut als Schaden oder
 optionale Zusatzzahlung. Runstart und Fortsetzung bleiben beim bestehenden
 Contest-/Runwindow-Owner mit jeweils aktuellen LegalActions; eine Quote
 wählt keine Action und ersetzt keine Engine-Fortsetzung.
+Auch nach Auflösung der Quelle prüft der Bewegungs-Guard die typisierte
+Vollbruchbedingung gegen die aktuelle Quote des nächsten bekannten,
+gerezzten ICE. Ein deterministischer, mit vorhandenen Credits bezahlbarer
+Vollbruch verhindert diesen bedingten Schaden; er wird nicht pauschal vom
+Handpuffer abgezogen. Fehlende oder fremde Quotes, dynamische
+Encounterbedingungen, Breaksperren und unzureichendes Geld zertifizieren
+keine solche Fortsetzung. Weitere sichtbare Gefahren bleiben separat aktiv.
 Ein Runstart-Choice-Ursprung entsteht nur aus einer echten Runstart-Aktion
 oder einer entsprechend gebundenen Engine-Runfähigkeit. Ein projizierter
 Serverkontext innerhalb eines laufenden Runs genügt nicht: Eine Bankaktivierung

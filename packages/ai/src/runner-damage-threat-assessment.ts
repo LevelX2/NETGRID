@@ -520,6 +520,45 @@ export function runnerFutureEncounterDamageJackOutAssessment(
   const sourceDefinitionId = triggerEvent?.publicPayload?.sourceDefinitionId;
   if (typeof sourceDefinitionId !== "string") return undefined;
   const hint = AI_HINTS.get(sourceDefinitionId);
+  const futureEffects = (hint?.effects ?? []).filter(
+    (effect) => effect.kind === "future_encounter_effect",
+  );
+  const nextIce = input.playerView.servers.find(
+    (server) => server.id === input.playerView.run!.position!.serverId,
+  )?.ice[input.playerView.run.position.iceIndex];
+  const nextQuote = nextIce?.effectiveRunQuote;
+  // The source has resolved, but its conditional damage is still avoidable
+  // by fully breaking the next encounter. Use that encounter's Engine quote,
+  // not a blanket subtraction of the source's printed damage from the grip.
+  if (
+    futureEffects.length > 0 &&
+    futureEffects.every(
+      (effect) => effect.target === "next_encounter_unless_fully_break_damage",
+    ) &&
+    nextIce?.known === true &&
+    nextIce.rezzed === true &&
+    nextQuote?.iceInstanceId === nextIce.instanceId &&
+    nextQuote.iceDefinitionId === nextIce.definitionId &&
+    !nextQuote.conditionalEncounterEffects?.length &&
+    !visibleEncounterBreakingProhibited(input, nextIce) &&
+    (input.playerView.own.rig ?? []).some((breaker) => {
+      const fullBreak = creditsToBreakVisibleSubroutinesWithBreaker(
+        breaker,
+        { ...nextIce, strength: nextQuote.effectiveStrength },
+        nextQuote.subroutines,
+        breaker.strength,
+        nextQuote.breakSubroutineAdditionalCostPerSubroutine ?? 0,
+      );
+      return (
+        fullBreak !== undefined &&
+        fullBreak.conditionalAccessReason === undefined &&
+        fullBreak.cost <=
+          input.playerView.own.credits +
+            (input.playerView.run?.badPublicityCredits ?? 0)
+      );
+    })
+  )
+    return undefined;
   const projectedDamage = Math.max(
     0,
     ...(hint?.effects ?? [])
