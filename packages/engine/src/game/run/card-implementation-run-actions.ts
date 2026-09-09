@@ -7,6 +7,7 @@ import type {
   Side,
 } from "@netgrid/shared";
 import type { ActivatedCardAbilityImplementation } from "../../ability-engine/definition-types";
+import { buildLegalAction } from "../turn/action-builders";
 
 export type RunCardImplementationActionHost = {
   state: GameState;
@@ -31,7 +32,9 @@ export type RunCardImplementationActionHost = {
       side: Side,
       sourceCardId: CardInstanceId,
       definition: CardDefinition,
-      timing: ActivatedCardAbilityImplementation["timing"],
+      timing:
+        | ActivatedCardAbilityImplementation["timing"]
+        | readonly ActivatedCardAbilityImplementation["timing"][],
     ) => void;
   };
 };
@@ -54,14 +57,7 @@ export function buildRunnerDuringRunCardImplementationActions(
       "runner",
       cardId,
       definition,
-      "during_run",
-    );
-    host.runtime.pushActivatedActionsForTiming(
-      legalActions,
-      "runner",
-      cardId,
-      definition,
-      "runner_paid",
+      ["during_run", "runner_paid"],
     );
     const boost = host.cards.cardImplementationForDefinitionId?.(
       definition.id,
@@ -192,7 +188,8 @@ export function buildCorpEncounterCardImplementationActions(
   if (
     host.state.timingPoint !== "run.encounter_ice" ||
     run?.phase !== "encounter_ice" ||
-    !run.encounteredIceId
+    !run.encounteredIceId ||
+    run.corpEncounterPassStateVersion === host.state.stateVersion
   )
     return { handled: true, legalActions: [] };
   const instance = host.cards.cardInstanceFor(run.encounteredIceId);
@@ -206,6 +203,19 @@ export function buildCorpEncounterCardImplementationActions(
     host.cards.definitionFor(run.encounteredIceId),
     "corp_encounter",
   );
+  if (legalActions.length > 0) {
+    legalActions.push(
+      buildLegalAction(
+        host.state,
+        "corp",
+        "continue_run",
+        "Bezahlte Encounter-Fähigkeiten abschließen",
+        "game_rule",
+        [],
+        { serverId: run.attackedServerId },
+      ),
+    );
+  }
   return { handled: true, legalActions };
 }
 
@@ -237,12 +247,15 @@ export function buildCorpDuringRunCardImplementationActions(
     ...rezzedCorpRootCardIds(host.state),
     ...scoredCorpAgendaIds(host.state),
   ]) {
+    // The callers expose this list at the existing run rez windows (or probe
+    // whether to open one). General paid effects also belong to those windows.
+    // Encounter and trace action generation remain separate.
     host.runtime.pushActivatedActionsForTiming(
       legalActions,
       "corp",
       cardId,
       host.cards.definitionFor(cardId),
-      "corp_during_run",
+      ["corp_during_run", "corp_paid"],
     );
   }
   return { handled: true, legalActions };

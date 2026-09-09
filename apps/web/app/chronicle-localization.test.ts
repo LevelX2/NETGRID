@@ -38,6 +38,276 @@ function event(
 }
 
 describe("semantic chronicle localization", () => {
+  it.each(["de", "en", "fr"] as const)(
+    "names each Shell Traders counter target and keeps its card link in %s",
+    (locale) => {
+      const targets = ["Simple Fracter", "Simple Decoder"];
+      const resolvedEffects = targets.map((cardTitle, index) => ({
+        effectId: `shell-removal-${index}`,
+        kind: "counter_change",
+        visibility: "public",
+        side: "runner",
+        amount: 1 - index,
+        reason: "start_of_turn",
+        counterType: "shell",
+        removedCounterAmount: 1,
+        remainingCounters: 1 - index,
+        sourceDefinitionId: "onr_v1_176_the-shell-traders",
+        sourceTitle: "The Shell Traders",
+        cardDefinitionId: `target-${index}`,
+        cardTitle,
+      }));
+      const removal = event("end_turn", { actor: "corp", resolvedEffects });
+      for (const side of ["runner", "corp"] as const) {
+        const items = formatChronicleEffectItems(
+          removal,
+          side,
+          undefined,
+          translate(locale),
+        );
+        expect(items).toHaveLength(2);
+        items.forEach((item, index) => {
+          const expected = {
+            de: `The Shell Traders: 1 Shell-Counter von ${targets[index]} entfernt.`,
+            en: `The Shell Traders: removed 1 shell counter from ${targets[index]}.`,
+            fr: `The Shell Traders : 1 compteur Shell retiré de ${targets[index]}.`,
+          }[locale];
+          expect(item).toMatchObject({
+            title: expected,
+            category: "card",
+            cardDefinitionId: `target-${index}`,
+            cardTitle: targets[index],
+            visibility: "public",
+          });
+          expect(item.chips).toContain(
+            translate(locale)("effect.shellCountersRemaining", {
+              amount: 1 - index,
+            }),
+          );
+        });
+      }
+      resolvedEffects.forEach((effect) => {
+        effect.visibility = "private_to_side";
+      });
+      const hidden = formatChronicleEffectItems(
+        removal,
+        "corp",
+        undefined,
+        translate(locale),
+      );
+      expect(hidden.every((item) => item.visibility === "redacted")).toBe(true);
+      expect(JSON.stringify(hidden)).not.toContain("The Shell Traders");
+      for (const target of targets)
+        expect(JSON.stringify(hidden)).not.toContain(target);
+      expect(JSON.stringify(hidden)).not.toContain("target-");
+    },
+  );
+
+  it.each(["de", "en", "fr"] as const)(
+    "explains Puzzle's run end and scheduled trash in %s",
+    (locale) => {
+      const ended = event("continue_run", {
+        encounterContinue: true,
+        result: "ended",
+        resolvedEffects: [
+          {
+            effectId: "puzzle-subroutine-0",
+            kind: "resolve_subroutine",
+            visibility: "public",
+            side: "runner",
+            sourceDefinitionId: "onr_classic_013_puzzle",
+            sourceTitle: "Puzzle",
+            subroutineIndex: 0,
+            subroutineType: "end_the_run_and_trash_source_at_end_of_turn",
+            endedRun: true,
+          },
+        ],
+      });
+      const expected = {
+        de: "Puzzle: Subroutine 1 beendet den Run. Puzzle wird am Ende des Zuges getrasht.",
+        en: "Puzzle: subroutine 1 ends the run. Puzzle will be trashed at the end of the turn.",
+        fr: "Puzzle : le sous-programme 1 met fin au piratage. Puzzle sera détruit à la fin du tour.",
+      }[locale];
+      for (const side of ["runner", "corp"] as const) {
+        const [item] = formatChronicleEffectItems(
+          ended,
+          side,
+          undefined,
+          translate(locale),
+        );
+        expect(item).toMatchObject({
+          title: expected,
+          category: "run",
+          importance: "important",
+          cardDefinitionId: "onr_classic_013_puzzle",
+        });
+        expect(
+          formatChronicleEvent(ended, side, { translate: translate(locale) })
+            .title,
+        ).toBe(expected);
+      }
+      const effect = (
+        ended.publicPayload.resolvedEffects as Array<Record<string, unknown>>
+      )[0]!;
+      effect.visibility = "private_to_side";
+      effect.side = "corp";
+      const hidden = formatChronicleEffectItems(
+        ended,
+        "runner",
+        undefined,
+        translate(locale),
+      );
+      expect(JSON.stringify(hidden)).not.toContain("Puzzle");
+      expect(JSON.stringify(hidden)).not.toContain("onr_classic_013_puzzle");
+    },
+  );
+
+  it.each(["de", "en", "fr"] as const)(
+    "reports each actual Puzzle trash at turn end in %s",
+    (locale) => {
+      const presentations = {
+        onr_classic_013_puzzle: { title: "Puzzle", type: "ice" },
+      };
+      const ended = event("end_turn", {
+        corpInstalledCardsTrashedAtTurnEnd: 2,
+        corpInstalledCardTrashAtTurnEndDefinitionIds:
+          "onr_classic_013_puzzle,onr_classic_013_puzzle",
+      });
+      const expected = {
+        de: "Puzzle wurde am Ende des Zuges getrasht.",
+        en: "Puzzle was trashed at the end of the turn.",
+        fr: "Puzzle a été détruit à la fin du tour.",
+      }[locale];
+      const items = formatChronicleEffectItems(
+        ended,
+        "runner",
+        presentations,
+        translate(locale),
+      );
+      expect(items).toHaveLength(2);
+      expect(new Set(items.map((item) => item.id)).size).toBe(2);
+      for (const item of items)
+        expect(item).toMatchObject({
+          title: expected,
+          category: "card",
+          visibility: "public",
+          icon: "discard",
+          cardDefinitionId: "onr_classic_013_puzzle",
+          cardTitle: "Puzzle",
+        });
+      expect(
+        formatChronicleEffectItems(ended, "runner", presentations)[0]?.title,
+      ).toBe("Puzzle wurde am Ende des Zuges getrasht.");
+      expect(
+        formatChronicleEffectItems(
+          event("end_turn"),
+          "runner",
+          presentations,
+          translate(locale),
+        ),
+      ).toEqual([]);
+    },
+  );
+
+  it.each([
+    {
+      payload: { runDestination: "ice", runDestinationIcePosition: 2 },
+      destination: "zu ICE 2",
+    },
+    {
+      payload: { runDestination: "ice", runDestinationIcePosition: 1 },
+      destination: "zu ICE 1",
+    },
+    { payload: { runDestination: "root" }, destination: "zum Root" },
+  ])(
+    "names the next run destination $destination",
+    ({ payload, destination }) => {
+      const continued = event("continue_run", {
+        serverLabel: "Remote 1",
+        aiReasonCode: "plan_first.runner.convert_run_window",
+        ...payload,
+      });
+      expect(
+        formatChronicleEvent(continued, "corp", { translate: translate("de") })
+          .title,
+      ).toBe(`Die Runner-KI: Run auf Remote 1 ${destination} fortgesetzt.`);
+      for (const locale of ["en", "fr"] as const) {
+        const title = formatChronicleEvent(continued, "corp", {
+          translate: translate(locale),
+        }).title;
+        expect(title).toContain(locale === "fr" ? "À distance 1" : "Remote 1");
+        expect(title).toContain(
+          payload.runDestination === "ice"
+            ? `ICE ${payload.runDestinationIcePosition}`
+            : locale === "en"
+              ? "root"
+              : "racine",
+        );
+      }
+      expect(formatChronicleEvent(continued, "corp").title).toContain(
+        destination,
+      );
+    },
+  );
+
+  it.each(["de", "en", "fr"] as const)(
+    "keeps the Inside Job bypass on a rez pass in %s",
+    (locale) => {
+      const bypass = event("decline_rez", {
+        actor: "corp",
+        runApproachRootRezPass: true,
+        runStartBypassAutoPassedIce: true,
+        runStartBypassPassedIceDefinitionId: "onr_v1_261_quandary",
+        passedIcePosition: 3,
+        serverLabel: "Remote 1",
+      });
+      const items = formatChronicleEffectItems(
+        bypass,
+        "corp",
+        {
+          onr_v1_261_quandary: { title: "Quandary", type: "ice" },
+        },
+        translate(locale),
+      );
+      expect(items).toHaveLength(1);
+      expect(items[0]?.title).toContain("Quandary");
+      expect(items[0]?.title).toContain("Inside Job");
+      expect(items[0]?.actor).toBe("runner");
+    },
+  );
+
+  it.each(["de", "en", "fr"] as const)(
+    "names Misleading Access Menus and its paid credit in %s",
+    (locale) => {
+      const paid = event("continue_run", {
+        encounterContinue: true,
+        resolvedEffects: [
+          {
+            effectId: "subroutine_1",
+            kind: "resolve_subroutine",
+            visibility: "public",
+            side: "runner",
+            sourceDefinitionId: "onr_proteus_032_misleading-access-menus",
+            sourceTitle: "Misleading Access Menus",
+            subroutineIndex: 0,
+            subroutineType: "end_the_run_unless_runner_pays",
+            amount: 1,
+            paidCredits: 1,
+          },
+        ],
+      });
+      const items = formatChronicleEffectItems(
+        paid,
+        "corp",
+        undefined,
+        translate(locale),
+      );
+      expect(items).toHaveLength(1);
+      expect(items[0]?.title).toContain("Misleading Access Menus");
+      expect(items[0]?.title).toContain("1");
+    },
+  );
+
   it("renders the same public event independently in every locale", () => {
     const gained = event("gain_credits", { amount: 3 });
     const de = formatChronicleEvent(gained, "runner", {
@@ -214,6 +484,72 @@ describe("semantic chronicle localization", () => {
       "The Runner AI: gained 1 credit from Karl de Veres, Corporate Stooge.",
     );
   });
+
+  it.each(["de", "en", "fr"] as const)(
+    "distinguishes Broker loading from taking all hosted credits in %s",
+    (locale) => {
+      const presentations = {
+        onr_v1_154_broker: { title: "Broker", type: "resource" as const },
+      };
+      for (const take of [false, true]) {
+        const amount = take ? 6 : 3;
+        const broker = event("activated_card_ability", {
+          actor: "runner",
+          cardDefinitionId: "onr_v1_154_broker",
+          cardImplementationAbility: "activated",
+          ...(take
+            ? { hostedCreditsTaken: amount, gainedCredits: amount }
+            : { hostedCreditsAdded: amount }),
+          hostedCreditsAfter: take ? 0 : 6,
+          aiReasonCode: take
+            ? "runner_credit_bank_cash_out"
+            : "runner_credit_bank_build",
+          resolvedEffects: [
+            {
+              effectId: "broker.hosted-credits",
+              kind: take ? "take_hosted_credits" : "add_hosted_credits",
+              visibility: "public",
+              side: "runner",
+              amount,
+              remainingCounters: take ? 0 : 6,
+              sourceDefinitionId: "onr_v1_154_broker",
+              sourceTitle: "Broker",
+              reason: "card_resolver",
+            },
+          ],
+        });
+        const item = formatChronicleEvent(broker, "corp", {
+          translate: translate(locale),
+          cardPresentationsById: presentations,
+        });
+        const expected = {
+          de: take
+            ? "Die Runner-KI: alle Credits (6) von Broker genommen."
+            : "Die Runner-KI: 3 Credits auf Broker gelegt.",
+          en: take
+            ? "The Runner AI: took all credits (6) from Broker."
+            : "The Runner AI: placed 3 credits on Broker.",
+          fr: take
+            ? "L'IA Runner : a pris tous les crédits (6) de Broker."
+            : "L'IA Runner : a placé 3 crédits sur Broker.",
+        };
+        expect(item).toMatchObject({
+          title: expected[locale],
+          category: "economy",
+          visibility: "public",
+          cardTitle: "Broker",
+        });
+        expect(
+          formatChronicleEffectItems(
+            broker,
+            "corp",
+            presentations,
+            translate(locale),
+          ),
+        ).toEqual([]);
+      }
+    },
+  );
 
   it("shows credits taken with Short-Term Contract instead of a generic ability", () => {
     const contract = event("activated_card_ability", {

@@ -2007,6 +2007,12 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
   const targetCardInstanceId = sourceParts[2];
   const automaticFreedMemory = Number(sourceParts[3]);
   const originalChoiceSource = decodeChoiceSourcePart(sourceParts[5]);
+  const originalChoiceId = decodeChoiceSourcePart(sourceParts[4]);
+  const delayedSearch =
+    sourceParts[1] === "nonsearch" &&
+    originalChoiceSource?.startsWith(
+      "card_implementation.pro018_stack_install_run_cleanup:",
+    ) === true;
   const originalSourceBinding = originalChoiceSource
     ? runnerHiddenSearchProgramInstallSourceBinding(originalChoiceSource)
     : undefined;
@@ -2030,6 +2036,11 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
             actionId?: unknown;
             sourceCardInstanceId?: unknown;
             sourceDefinitionId?: unknown;
+            resolvedSearchChoice?: {
+              choiceId?: unknown;
+              choiceSource?: unknown;
+              stateVersion?: unknown;
+            };
             targetCardInstanceId?: unknown;
             targetDefinitionId?: unknown;
             installMemorySacrificeBinding?: {
@@ -2048,10 +2059,14 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
   const bindings = moduleState?.gap?.directSearchChoiceBindings?.filter(
     (binding) =>
       binding.actionId === moduleState.selectedSearchActionId &&
-      binding.sourceCardInstanceId ===
-        originalSourceBinding?.sourceCardInstanceId &&
-      binding.sourceDefinitionId ===
-        originalSourceBinding?.sourceDefinitionId &&
+      (delayedSearch
+        ? binding.resolvedSearchChoice?.choiceId === originalChoiceId &&
+          binding.resolvedSearchChoice?.choiceSource === originalChoiceSource &&
+          binding.resolvedSearchChoice?.stateVersion === portfolio?.stateVersion
+        : binding.sourceCardInstanceId ===
+            originalSourceBinding?.sourceCardInstanceId &&
+          binding.sourceDefinitionId ===
+            originalSourceBinding?.sourceDefinitionId) &&
       binding.targetCardInstanceId === targetCardInstanceId &&
       binding.installMemorySacrificeBinding?.targetCardInstanceId ===
         targetCardInstanceId,
@@ -2124,10 +2139,12 @@ function selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
       moduleState.gap.requesterNeedId === executor.parentNeedId);
   const exactBinding =
     sourceParts.length === 6 &&
-    sourceParts[1] === "hidden_search" &&
-    originalSourceBinding !== undefined &&
-    originalSourceBinding.selectedAtStateVersion + 1 ===
-      input.playerView.stateVersion &&
+    (delayedSearch
+      ? portfolio?.stateVersion === input.playerView.stateVersion - 1
+      : sourceParts[1] === "hidden_search" &&
+        originalSourceBinding !== undefined &&
+        originalSourceBinding.selectedAtStateVersion + 1 ===
+          input.playerView.stateVersion) &&
     Number.isInteger(automaticFreedMemory) &&
     automaticFreedMemory >= 0 &&
     input.side === "runner" &&
@@ -2339,6 +2356,23 @@ function selectedRunnerEventInstallMemoryOptionIds(
   selectableOptions: PendingChoiceOptions,
   currentPortfolio?: ResidentPlanPortfolio,
 ): string[] {
+  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+  if (
+    portfolio?.instances.some(
+      (instance) =>
+        instance.instanceId === portfolio.executorInstanceId &&
+        instance.moduleId === "runner.rig_and_coverage" &&
+        instance.executionState === "executor",
+    )
+  ) {
+    return selectedRunnerCoverageBoundProgramInstallMemoryOptionIds(
+      input,
+      action,
+      choice,
+      selectableOptions,
+      portfolio,
+    );
+  }
   const sourceParts = choice.source.split(":");
   const targetCardInstanceId = sourceParts[2];
   const automaticFreedMemory = Number(sourceParts[3]);
@@ -2370,7 +2404,6 @@ function selectedRunnerEventInstallMemoryOptionIds(
     requirement.optionIds.every(
       (optionId, index) => optionId === selectableOptions[index]?.id,
     );
-  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
   const executor = portfolio?.instances.find(
     (instance) =>
       instance.instanceId === portfolio.executorInstanceId &&
@@ -3606,13 +3639,14 @@ function selectedCorpDelayedSuccessOptionId(
     choice.maxSelections === 1 &&
     selectedOption !== undefined &&
     typeof selectedOption.value === "string" &&
-    selectedOption.id === `ice_${selectedOption.value}` &&
-    input.playerView.own.gripOrHq.some(
-      (card) =>
-        card.instanceId === selectedOption.value &&
-        card.known &&
-        card.type === "ice",
-    ) &&
+    ((selectedOption.id === "decline" && selectedOption.value === "decline") ||
+      (selectedOption.id === `ice_${selectedOption.value}` &&
+        input.playerView.own.gripOrHq.some(
+          (card) =>
+            card.instanceId === selectedOption.value &&
+            card.known &&
+            card.type === "ice",
+        ))) &&
     action.side === "corp" &&
     action.type === "resolve_choice" &&
     action.source === "game_rule" &&
@@ -3628,7 +3662,7 @@ function selectedCorpDelayedSuccessOptionId(
     throw unresolvedChoiceFailure(
       input,
       action,
-      "Complete Dr. Dreff only from the exact current corp.defend_servers choice binding on the attacked fort and visible HQ-ICE payload.",
+      "Complete Dr. Dreff only from the exact current corp.defend_servers choice binding on the attacked fort and its legal decline or visible HQ-ICE payload.",
     );
   }
   return [selectedOption.id];
@@ -4224,6 +4258,8 @@ function selectedCorpScoredAgendaFreeRezOptionId(
             targetPurpose?: unknown;
             targetCardId?: unknown;
             targetDefinitionId?: unknown;
+            selectedVariantId?: unknown;
+            selectedOptionId?: unknown;
           };
         };
       }
@@ -4243,8 +4279,8 @@ function selectedCorpScoredAgendaFreeRezOptionId(
     .find((ice) => ice.instanceId === binding?.targetCardId);
   const matchingTargetOptions = selectableOptions.filter(
     (option) =>
-      typeof option.value === "string" &&
-      option.value.split("|")[0] === binding?.targetCardId,
+      option.id === binding?.selectedOptionId &&
+      option.value === `${binding?.targetCardId}|${binding?.selectedVariantId}`,
   );
   const [requirement] = action.choiceRequirements ?? [];
   const exactContinuation =
@@ -4260,6 +4296,9 @@ function selectedCorpScoredAgendaFreeRezOptionId(
     choice.maxSelections === 1 &&
     portfolio !== undefined &&
     portfolio.side === "corp" &&
+    // Opening Priority Requisition's Engine-owned choice is the single
+    // committed score transition. The resident executor therefore remains
+    // bound to the exact pre-score state, one version earlier.
     portfolio.stateVersion === input.playerView.stateVersion - 1 &&
     executor !== undefined &&
     moduleState?.kind === "score" &&
@@ -4278,6 +4317,8 @@ function selectedCorpScoredAgendaFreeRezOptionId(
     targetCard.type === "ice" &&
     targetCard.rezzed === false &&
     targetCard.definitionId === binding.targetDefinitionId &&
+    binding.selectedOptionId ===
+      `rez_${binding.targetCardId}_${binding.selectedVariantId}` &&
     matchingTargetOptions.length === 1 &&
     action.side === "corp" &&
     action.type === "resolve_choice" &&
@@ -4302,7 +4343,7 @@ function selectedCorpScoredAgendaFreeRezOptionId(
       unresolvedActionIds: [action.actionId],
       owner: "continuation",
       removalCondition:
-        "Bind the scored-agenda free-rez target to the immediately preceding resident Corp score executor, canonical source capability, exact visible ICE and current Engine choice contract.",
+        "Bind the scored-agenda free-rez target and exact rez variant to the immediately preceding resident Corp score executor, canonical source capability, exact visible ICE and current Engine choice contract.",
       ...(executor ? { planInstanceId: executor.instanceId } : {}),
     });
   }
@@ -4539,6 +4580,7 @@ function runnerDevelopmentSearchChoiceBinding(
             plannedAtStateVersion?: unknown;
             selectedActionId?: unknown;
             selectedAtStateVersion?: unknown;
+            engineContinuationAtStateVersion?: unknown;
           };
           recoverySearchCommitment?: {
             sourceCardInstanceId?: unknown;
@@ -4549,6 +4591,7 @@ function runnerDevelopmentSearchChoiceBinding(
             plannedAtStateVersion?: unknown;
             selectedActionId?: unknown;
             selectedAtStateVersion?: unknown;
+            engineContinuationAtStateVersion?: unknown;
           };
         };
       }
@@ -4585,8 +4628,13 @@ function runnerDevelopmentSearchChoiceBinding(
     typeof commitment.targetDefinitionId === "string" &&
     typeof commitment.selectedActionId === "string" &&
     signal.actionIds.includes(commitment.selectedActionId) &&
-    commitment.plannedAtStateVersion === portfolio?.stateVersion &&
-    commitment.selectedAtStateVersion === portfolio?.stateVersion &&
+    commitment.plannedAtStateVersion === commitment.selectedAtStateVersion &&
+    (commitment.engineContinuationAtStateVersion === undefined
+      ? commitment.selectedAtStateVersion === portfolio.stateVersion
+      : commitment.engineContinuationAtStateVersion ===
+          portfolio.stateVersion &&
+        typeof commitment.selectedAtStateVersion === "number" &&
+        commitment.selectedAtStateVersion < portfolio.stateVersion) &&
     input.playerView.stateVersion === portfolio.stateVersion + 1 &&
     choice.stateVersion === input.playerView.stateVersion &&
     choice.sourceCardInstanceId === commitment.sourceCardInstanceId &&

@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "use-intl/react";
 import type { CSSProperties } from "react";
 import {
-  ArrowLeft,
   CheckCircle2,
   Download,
   FileUp,
@@ -16,12 +15,7 @@ import {
   ShieldCheck,
   XCircle,
 } from "lucide-react";
-import {
-  MaintenanceAuthBoundary,
-  MaintenanceSecurityControls,
-  useMaintenanceAuth,
-} from "../../maintenance-auth-ui";
-import { resolveMaintenanceServerHttp } from "../../maintenance";
+import { useMaintenanceSession } from "../../maintenance-auth-ui";
 import {
   cardImageJobIsTerminal,
   cardImageJobProgressPercent,
@@ -37,17 +31,9 @@ import {
   type CardImageProfileId,
 } from "../../card-image-maintenance";
 
-import { configuredServerHttp } from "../../../lib/server-endpoint";
-
 export default function CardImageMaintenancePage() {
   const t = useTranslations("Maintenance.cardImages");
-  const [serverHttp] = useState(() =>
-    resolveMaintenanceServerHttp(
-      configuredServerHttp(),
-      typeof window === "undefined" ? undefined : window.location.hostname,
-    ),
-  );
-  const auth = useMaintenanceAuth(serverHttp);
+  const auth = useMaintenanceSession();
   const [inventory, setInventory] =
     useState<CardImageCollectionInventory | null>(null);
   const [inbox, setInbox] = useState<CardImageInboxInventory | null>(null);
@@ -370,9 +356,6 @@ export default function CardImageMaintenancePage() {
     }
   };
 
-  if (auth.status !== "authenticated")
-    return <MaintenanceAuthBoundary auth={auth} title={t("m009")} />;
-
   return (
     <main style={pageShell}>
       <div style={page}>
@@ -384,10 +367,7 @@ export default function CardImageMaintenancePage() {
               <p style={subtle}>{t("m010")}</p>
             </div>
           </div>
-          <MaintenanceSecurityControls auth={auth}>
-            <a href="/maintenance" style={linkButton}>
-              <ArrowLeft size={16} aria-hidden="true" /> {t("m011")}
-            </a>
+          <div>
             <button
               type="button"
               style={button}
@@ -397,7 +377,7 @@ export default function CardImageMaintenancePage() {
               {loading ? <LoaderCircle size={16} /> : <RefreshCcw size={16} />}
               {loading ? t("m012") : t("m013")}
             </button>
-          </MaintenanceSecurityControls>
+          </div>
         </header>
 
         <p style={infoBox}>{t("m014")}</p>
@@ -836,9 +816,9 @@ function JobPanel({ job }: { job: CardImageMaintenanceJob }) {
       <div style={panelHeader}>
         <div style={headerTitle}>
           {job.status === "failed" ? (
-            <XCircle size={20} color="#9b1c1c" />
+            <XCircle size={20} color="var(--danger)" />
           ) : job.status === "succeeded" ? (
-            <CheckCircle2 size={20} color="#24704c" />
+            <CheckCircle2 size={20} color="var(--ok)" />
           ) : (
             <LoaderCircle size={20} />
           )}
@@ -976,18 +956,8 @@ function profileLabel(profile: CardImageProfileId): string {
   return "Classic";
 }
 
-const pageShell: CSSProperties = {
-  minHeight: "100vh",
-  background: "#eef3f8",
-  color: "#102033",
-};
-const page: CSSProperties = {
-  maxWidth: 1240,
-  margin: "0 auto",
-  padding: "1.25rem",
-  display: "grid",
-  gap: "1rem",
-};
+const pageShell: CSSProperties = { color: "var(--text)" };
+const page: CSSProperties = { display: "grid", gap: "1rem", minWidth: 0 };
 const header: CSSProperties = {
   display: "flex",
   justifyContent: "space-between",
@@ -1001,28 +971,28 @@ const headerTitle: CSSProperties = {
   gap: "0.75rem",
 };
 const h1: CSSProperties = { margin: 0, fontSize: "1.55rem" };
-const h2: CSSProperties = { margin: 0, fontSize: "1rem", color: "#0f2538" };
+const h2: CSSProperties = { margin: 0, fontSize: "1rem", color: "var(--text)" };
 const subtle: CSSProperties = {
   margin: 0,
-  color: "#42576b",
+  color: "var(--muted)",
   fontSize: "0.9rem",
 };
 const button: CSSProperties = {
   display: "inline-flex",
   alignItems: "center",
   gap: "0.4rem",
-  border: "1px solid #9db0c3",
-  background: "#fff",
-  color: "#102033",
+  border: "1px solid var(--line)",
+  background: "var(--panel)",
+  color: "var(--text)",
   borderRadius: 6,
   padding: "0.5rem 0.7rem",
   cursor: "pointer",
 };
 const primaryButton: CSSProperties = {
   ...button,
-  borderColor: "#25679f",
-  background: "#2f74b5",
-  color: "#fff",
+  borderColor: "var(--primary-border)",
+  background: "var(--primary-bg)",
+  color: "var(--primary-text)",
 };
 const linkButton: CSSProperties = { ...button, textDecoration: "none" };
 const buttonRow: CSSProperties = {
@@ -1031,10 +1001,10 @@ const buttonRow: CSSProperties = {
   flexWrap: "wrap",
 };
 const panel: CSSProperties = {
-  border: "1px solid #c7d4e2",
+  border: "1px solid var(--line)",
   borderRadius: 8,
   padding: "0.9rem",
-  background: "#fff",
+  background: "var(--panel)",
   display: "grid",
   gap: "0.8rem",
 };
@@ -1055,8 +1025,14 @@ const metric: CSSProperties = {
   gap: "0.25rem",
   minWidth: 0,
 };
-const metricLabel: CSSProperties = { color: "#42576b", fontSize: "0.82rem" };
-const metricValue: CSSProperties = { fontSize: "1.35rem", color: "#0f2538" };
+const metricLabel: CSSProperties = {
+  color: "var(--muted)",
+  fontSize: "0.82rem",
+};
+const metricValue: CSSProperties = {
+  fontSize: "1.35rem",
+  color: "var(--text)",
+};
 const formGrid: CSSProperties = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
@@ -1070,7 +1046,7 @@ const twoColumns: CSSProperties = {
 const field: CSSProperties = {
   display: "grid",
   gap: "0.3rem",
-  color: "#42576b",
+  color: "var(--muted)",
   fontSize: "0.83rem",
 };
 const checkField: CSSProperties = {
@@ -1081,33 +1057,33 @@ const checkField: CSSProperties = {
 };
 const input: CSSProperties = {
   minHeight: 36,
-  border: "1px solid #9db0c3",
+  border: "1px solid var(--line)",
   borderRadius: 6,
   padding: "0.35rem 0.45rem",
-  background: "#fff",
-  color: "#102033",
+  background: "var(--panel)",
+  color: "var(--text)",
 };
 const infoBox: CSSProperties = {
   margin: 0,
-  border: "1px solid #9db0c3",
-  background: "#f6fbff",
-  color: "#153654",
+  border: "1px solid var(--line)",
+  background: "var(--panel-soft)",
+  color: "var(--primary-text)",
   borderRadius: 8,
   padding: "0.75rem",
 };
 const errorBox: CSSProperties = {
   margin: 0,
-  border: "1px solid #f3b5b5",
-  background: "#fff5f5",
-  color: "#9b1c1c",
+  border: "1px solid var(--danger)",
+  background: "var(--status-danger-bg)",
+  color: "var(--danger)",
   borderRadius: 8,
   padding: "0.75rem",
 };
 const successBox: CSSProperties = {
   margin: 0,
-  border: "1px solid #9bc9b4",
-  background: "#f3fbf7",
-  color: "#155c3c",
+  border: "1px solid var(--ok)",
+  background: "var(--status-ok-bg)",
+  color: "var(--ok)",
   borderRadius: 8,
   padding: "0.75rem",
 };
@@ -1115,12 +1091,12 @@ const progressTrack: CSSProperties = {
   height: 9,
   borderRadius: 999,
   overflow: "hidden",
-  background: "#d8e4ef",
+  background: "var(--panel-soft)",
 };
 const progressFill: CSSProperties = {
   height: "100%",
   borderRadius: 999,
-  background: "#2f74b5",
+  background: "var(--primary-bg)",
   transition: "width 180ms ease",
 };
 const tableWrap: CSSProperties = { overflow: "auto", maxHeight: 460 };
@@ -1132,15 +1108,15 @@ const table: CSSProperties = {
 const th: CSSProperties = {
   textAlign: "left",
   fontSize: "0.8rem",
-  color: "#37506a",
-  borderBottom: "1px solid #cbd5e1",
+  color: "var(--muted)",
+  borderBottom: "1px solid var(--line)",
   padding: "0.45rem 0.5rem",
   position: "sticky",
   top: 0,
-  background: "#fff",
+  background: "var(--panel)",
 };
 const td: CSSProperties = {
-  borderBottom: "1px solid #edf1f5",
+  borderBottom: "1px solid var(--line)",
   padding: "0.45rem 0.5rem",
   fontSize: "0.86rem",
 };

@@ -33091,10 +33091,13 @@
       }
     ],
     "planExecution": {
+      "acceptablePlanIds": [
+        "plan:corp.economy:score-support%3Aagenda%3Acorp_onr_v1_207_netwatch-operations-office_1%3Aremote_1"
+      ],
       "acceptablePlanKinds": ["corp.economy"],
       "acceptableCapabilities": ["develop_or_convert_corp_economy"],
       "requiredAssessmentEvidence": [
-        "corp_score_protection_funding_gap:remote_2:3"
+        "corp_engine_certified_mature_remote_score_install:remote_1"
       ]
     }
   }

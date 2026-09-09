@@ -11,7 +11,7 @@ describe("Proteus Fetal AI install plan coverage", () => {
     "proteus_runner_hq_virus_derez_2026_05_25",
     "proteus_runner_rd_bad_publicity_2026_05_25",
   ]) {
-    it(`covers both open centrals before optional Ambush development against ${runnerDeckId}`, () => {
+    it(`covers both open centrals without donating a nonlethal agenda Ambush against ${runnerDeckId}`, () => {
       const summary = simulateAiGame({
         seed: "proteus-pilot-qualifier-02",
         maxActions: 6,
@@ -51,11 +51,11 @@ describe("Proteus Fetal AI install plan coverage", () => {
       const firstAmbushIndex = summary.actionSequence.findIndex(
         (entry) => entry.reasonCode === "plan_first.corp.ambush_and_bluff",
       );
-      expect(firstAmbushIndex).toBeGreaterThan(4);
+      expect(firstAmbushIndex).toBe(-1);
     });
   }
 
-  it("installs the first-copy Ambush through score ownership after certified defense and economy routes", () => {
+  it("does not donate Fetal AI while the score remote still lacks certified defense", () => {
     const summary = simulateAiGame({
       seed: "proteus-pilot-qualifier-10",
       maxActions: 23,
@@ -81,20 +81,13 @@ describe("Proteus Fetal AI install plan coverage", () => {
         entry.evidence.includes(admittedAmbushEvidence),
       ),
       fetalDiagnostic(summary),
-    ).toBe(true);
+    ).toBe(false);
     const selectedAmbushIndex = summary.actionSequence.findIndex(
       (entry) =>
         entry.reasonCode === "plan_first.corp.score_agenda" &&
         entry.selectedActionId === "corp.install_card.new_remote",
     );
-    expect(selectedAmbushIndex, fetalDiagnostic(summary)).toBeGreaterThan(5);
-    expect(
-      summary.actionSequence[selectedAmbushIndex],
-      fetalDiagnostic(summary),
-    ).toMatchObject({
-      reasonCode: "plan_first.corp.score_agenda",
-      selectedActionId: "corp.install_card.new_remote",
-    });
+    expect(selectedAmbushIndex, fetalDiagnostic(summary)).toBe(-1);
   }, 30_000);
 
   function requireDeck(deckId: string): DeckDefinition {

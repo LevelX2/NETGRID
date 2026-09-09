@@ -1,17 +1,13 @@
 "use client";
 
 import { useEffect, useState, type CSSProperties } from "react";
-import { ArrowLeft, KeyRound, ShieldCheck, Users } from "lucide-react";
+import { Eye, EyeOff, KeyRound, ShieldCheck, Users } from "lucide-react";
 import { useTranslations } from "use-intl/react";
 import {
-  MaintenanceAuthBoundary,
   MaintenanceReauthenticationDialog,
-  MaintenanceSecurityControls,
-  useMaintenanceAuth,
+  MaintenancePasswordInput,
+  useMaintenanceSession,
 } from "../../maintenance-auth-ui";
-import { resolveMaintenanceServerHttp } from "../../maintenance";
-
-import { configuredServerHttp } from "../../../lib/server-endpoint";
 
 type AccountMode = "invite_only" | "simple" | "protected";
 type ManagedAccount = {
@@ -22,21 +18,19 @@ type ManagedAccount = {
   role: "user" | "admin";
 };
 type AccessPayload = {
-  policy: { mode: AccountMode; source: "configured" | "persisted" };
+  policy: { mode: AccountMode; source: "configured_default" | "persisted" };
   accounts: ManagedAccount[];
 };
 
 export default function MaintenanceAccountsPage() {
   const t = useTranslations("Maintenance.accounts");
-  const [serverHttp] = useState(() =>
-    resolveMaintenanceServerHttp(
-      configuredServerHttp(),
-      typeof window === "undefined" ? undefined : window.location.hostname,
-    ),
-  );
-  const auth = useMaintenanceAuth(serverHttp);
+  const passwordText = useTranslations("Account.panel");
+  const auth = useMaintenanceSession();
   const [data, setData] = useState<AccessPayload | null>(null);
   const [passwords, setPasswords] = useState<Record<string, string>>({});
+  const [visiblePasswords, setVisiblePasswords] = useState<
+    Record<string, boolean>
+  >({});
   const [resetPasswords, setResetPasswords] = useState<Record<string, string>>(
     {},
   );
@@ -60,6 +54,7 @@ export default function MaintenanceAccountsPage() {
     if (!response.ok)
       throw new Error(payload.error?.message ?? t("loadFailed"));
     setData(payload);
+    return payload;
   };
 
   useEffect(() => {
@@ -80,7 +75,7 @@ export default function MaintenanceAccountsPage() {
     try {
       const credentials =
         mode === "protected"
-          ? (data?.accounts ?? []).map((account) => ({
+          ? activeAccounts.map((account) => ({
               accountId: account.accountId,
               password: passwords[account.accountId] ?? "",
             }))
@@ -94,13 +89,15 @@ export default function MaintenanceAccountsPage() {
         },
       );
       const payload = (await response.json()) as {
-        error?: { message?: string };
+        error?: { code?: string; message?: string };
       };
       if (!response.ok)
-        throw new Error(payload.error?.message ?? t("changeFailed"));
+        throw new Error(describeError(payload.error, t("changeFailed")));
       setPasswords({});
+      setVisiblePasswords({});
+      const refreshed = await load();
+      if (refreshed.policy.mode !== mode) throw new Error(t("modeNotSaved"));
       setNotice(t("modeChanged"));
-      await load();
     } catch (changeError) {
       setError(
         changeError instanceof Error ? changeError.message : t("changeFailed"),
@@ -126,10 +123,10 @@ export default function MaintenanceAccountsPage() {
         },
       );
       const payload = (await response.json()) as {
-        error?: { message?: string };
+        error?: { code?: string; message?: string };
       };
       if (!response.ok)
-        throw new Error(payload.error?.message ?? t("resetFailed"));
+        throw new Error(describeError(payload.error, t("resetFailed")));
       setResetPasswords((current) => ({ ...current, [account.accountId]: "" }));
       setNotice(t("passwordReset", { name: account.displayName }));
     } catch (resetError) {
@@ -141,11 +138,47 @@ export default function MaintenanceAccountsPage() {
     }
   };
 
-  if (auth.status !== "authenticated")
-    return <MaintenanceAuthBoundary auth={auth} title={t("title")} />;
-
   const activeAccounts =
     data?.accounts.filter((account) => account.status === "active") ?? [];
+  const describeError = (
+    failure: { code?: string; message?: string } | undefined,
+    message: string,
+  ) => {
+    const key = (
+      [
+        "account_password_too_short",
+        "account_password_too_long",
+        "account_password_blocked",
+        "account_access_mode_credentials_incomplete",
+        "account_access_mode_accounts_changed",
+        "account_access_mode_unchanged",
+      ] as const
+    ).find((code) => code === failure?.code);
+    return key
+      ? t(`errors.${key}`)
+      : `${failure?.message ?? message}${failure?.code ? ` (${failure.code})` : ""}`;
+  };
+  const validatePasswords = (
+    accounts: ManagedAccount[],
+    values: Record<string, string>,
+  ) => {
+    const invalid = accounts.find((account) => {
+      const length = Array.from(
+        (values[account.accountId] ?? "").normalize("NFC"),
+      ).length;
+      return length < 15 || length > 256;
+    });
+    setNotice("");
+    setError(
+      invalid
+        ? t("invalidPasswordFor", {
+            name: invalid.displayName,
+            login: invalid.loginName,
+          })
+        : "",
+    );
+    return !invalid;
+  };
   return (
     <main style={pageShell}>
       <div style={page}>
@@ -156,11 +189,6 @@ export default function MaintenanceAccountsPage() {
             </h1>
             <p style={muted}>{t("subtitle")}</p>
           </div>
-          <MaintenanceSecurityControls auth={auth}>
-            <a href="/maintenance" style={button}>
-              <ArrowLeft size={16} /> {t("back")}
-            </a>
-          </MaintenanceSecurityControls>
         </header>
 
         {sensitiveAction ? (
@@ -175,8 +203,17 @@ export default function MaintenanceAccountsPage() {
             }}
           />
         ) : null}
-        {error ? <p style={errorBox}>{error}</p> : null}
-        {notice ? <p style={noticeBox}>{notice}</p> : null}
+        {error ? (
+          <p role="alert" style={errorBox}>
+            {error}
+          </p>
+        ) : null}
+        {notice ? (
+          <p role="status" style={noticeBox}>
+            {notice}
+          </p>
+        ) : null}
+        {busy ? <p role="status">{t("saving")}</p> : null}
 
         <section style={panel}>
           <h2 style={subheading}>
@@ -185,40 +222,89 @@ export default function MaintenanceAccountsPage() {
           <p style={muted}>
             {data ? t(`mode.${data.policy.mode}`) : t("loading")}
           </p>
-          {data?.policy.mode !== "protected" ? (
+          <p style={muted}>{t("namesHelp")}</p>
+          {activeAccounts.map((account) => (
+            <p key={account.accountId}>
+              <strong>{account.displayName}</strong> · {t("loginName")}:{" "}
+              <code>{account.loginName}</code>
+            </p>
+          ))}
+          {data && data.policy.mode !== "protected" ? (
             <div style={stack}>
               <p>{t("protectedHelp")}</p>
+              <p style={muted}>{t("passwordRequirements")}</p>
               {activeAccounts.map((account) => (
-                <label key={account.accountId} style={field}>
-                  {t("initialPassword", { name: account.displayName })}
-                  <input
-                    minLength={15}
-                    onChange={(event) =>
-                      setPasswords((current) => ({
-                        ...current,
-                        [account.accountId]: event.target.value,
-                      }))
-                    }
-                    type="password"
-                    value={passwords[account.accountId] ?? ""}
-                  />
-                </label>
+                <div key={account.accountId} style={field}>
+                  <label htmlFor={`initial-password-${account.accountId}`}>
+                    {t("initialPassword", { name: account.displayName })} ·{" "}
+                    {t("loginName")}: {account.loginName}
+                  </label>
+                  <span style={{ display: "flex", gap: 6, minWidth: 0 }}>
+                    <input
+                      id={`initial-password-${account.accountId}`}
+                      style={{ flex: 1, minWidth: 0 }}
+                      autoComplete="new-password"
+                      disabled={busy}
+                      onChange={(event) =>
+                        setPasswords((current) => ({
+                          ...current,
+                          [account.accountId]: event.target.value,
+                        }))
+                      }
+                      type={
+                        visiblePasswords[account.accountId]
+                          ? "text"
+                          : "password"
+                      }
+                      value={passwords[account.accountId] ?? ""}
+                    />
+                    <button
+                      type="button"
+                      style={button}
+                      disabled={busy}
+                      aria-label={`${passwordText(visiblePasswords[account.accountId] ? "hidePassword" : "showPassword")} · ${account.displayName}`}
+                      title={passwordText(
+                        visiblePasswords[account.accountId]
+                          ? "hidePassword"
+                          : "showPassword",
+                      )}
+                      aria-pressed={
+                        visiblePasswords[account.accountId] === true
+                      }
+                      aria-controls={`initial-password-${account.accountId}`}
+                      onClick={() =>
+                        setVisiblePasswords((current) => ({
+                          ...current,
+                          [account.accountId]: !current[account.accountId],
+                        }))
+                      }
+                    >
+                      {visiblePasswords[account.accountId] ? (
+                        <EyeOff size={18} aria-hidden="true" />
+                      ) : (
+                        <Eye size={18} aria-hidden="true" />
+                      )}
+                    </button>
+                  </span>
+                </div>
               ))}
               <button
                 disabled={busy || !data}
-                onClick={() =>
+                onClick={() => {
+                  if (!validatePasswords(activeAccounts, passwords)) return;
                   setSensitiveAction({
                     label: t("enableProtected"),
                     run: () => applyMode("protected"),
-                  })
-                }
+                  });
+                }}
                 style={primaryButton}
                 type="button"
               >
                 {t("enableProtected")}
               </button>
             </div>
-          ) : (
+          ) : null}
+          {data && data.policy.mode !== "simple" ? (
             <div style={stack}>
               <p>{t("simpleWarning")}</p>
               <button
@@ -235,7 +321,7 @@ export default function MaintenanceAccountsPage() {
                 {t("enableSimple")}
               </button>
             </div>
-          )}
+          ) : null}
         </section>
 
         {data?.policy.mode === "protected" ? (
@@ -244,18 +330,22 @@ export default function MaintenanceAccountsPage() {
               <KeyRound size={20} /> {t("passwordsTitle")}
             </h2>
             <p style={muted}>{t("passwordsHelp")}</p>
+            <p style={muted}>{t("passwordRequirements")}</p>
             {activeAccounts.map((account) => (
               <div key={account.accountId} style={accountRow}>
                 <div>
                   <strong>{account.displayName}</strong>
                   <br />
-                  <span style={muted}>{account.loginName}</span>
+                  <span style={muted}>
+                    {t("loginName")}: {account.loginName}
+                  </span>
                 </div>
-                <input
+                <MaintenancePasswordInput
                   aria-label={t("newPasswordFor", {
                     name: account.displayName,
                   })}
-                  minLength={15}
+                  autoComplete="new-password"
+                  disabled={busy}
                   onChange={(event) =>
                     setResetPasswords((current) => ({
                       ...current,
@@ -263,17 +353,17 @@ export default function MaintenanceAccountsPage() {
                     }))
                   }
                   placeholder={t("newPassword")}
-                  type="password"
                   value={resetPasswords[account.accountId] ?? ""}
                 />
                 <button
                   disabled={busy || !(resetPasswords[account.accountId] ?? "")}
-                  onClick={() =>
+                  onClick={() => {
+                    if (!validatePasswords([account], resetPasswords)) return;
                     setSensitiveAction({
                       label: t("resetFor", { name: account.displayName }),
                       run: () => resetPassword(account),
-                    })
-                  }
+                    });
+                  }}
                   style={button}
                   type="button"
                 >
@@ -288,18 +378,8 @@ export default function MaintenanceAccountsPage() {
   );
 }
 
-const pageShell: CSSProperties = {
-  minHeight: "100vh",
-  padding: "32px 20px",
-  background: "#09111f",
-  color: "#edf4ff",
-};
-const page: CSSProperties = {
-  width: "min(100%, 980px)",
-  margin: "0 auto",
-  display: "grid",
-  gap: 20,
-};
+const pageShell: CSSProperties = { color: "var(--text)" };
+const page: CSSProperties = { display: "grid", gap: "1rem", minWidth: 0 };
 const header: CSSProperties = {
   display: "flex",
   alignItems: "start",
@@ -308,17 +388,18 @@ const header: CSSProperties = {
   flexWrap: "wrap",
 };
 const heading: CSSProperties = {
+  fontSize: "1.55rem",
   display: "flex",
   alignItems: "center",
   gap: 10,
   margin: 0,
 };
 const subheading: CSSProperties = { ...heading, fontSize: 20 };
-const muted: CSSProperties = { color: "#aabbd1" };
+const muted: CSSProperties = { color: "var(--muted)" };
 const panel: CSSProperties = {
-  border: "1px solid #30445f",
+  border: "1px solid var(--line)",
   borderRadius: 14,
-  background: "#111d2e",
+  background: "var(--panel)",
   padding: 20,
 };
 const stack: CSSProperties = { display: "grid", gap: 12 };
@@ -329,7 +410,7 @@ const accountRow: CSSProperties = {
   gap: 12,
   alignItems: "center",
   padding: "12px 0",
-  borderTop: "1px solid #30445f",
+  borderTop: "1px solid var(--line)",
 };
 const button: CSSProperties = {
   display: "inline-flex",
@@ -337,25 +418,25 @@ const button: CSSProperties = {
   gap: 7,
   padding: "9px 13px",
   borderRadius: 8,
-  border: "1px solid #57708d",
-  background: "#17283d",
+  border: "1px solid var(--line)",
+  background: "var(--button-bg)",
   color: "inherit",
   textDecoration: "none",
   cursor: "pointer",
 };
 const primaryButton: CSSProperties = {
   ...button,
-  background: "#1f6feb",
-  borderColor: "#388bfd",
+  background: "var(--primary-bg)",
+  borderColor: "var(--primary-border)",
   width: "fit-content",
 };
 const errorBox: CSSProperties = {
   ...panel,
-  borderColor: "#a94a55",
-  color: "#ffb8c0",
+  borderColor: "var(--danger)",
+  color: "var(--danger)",
 };
 const noticeBox: CSSProperties = {
   ...panel,
-  borderColor: "#3d8b61",
-  color: "#a8f0c2",
+  borderColor: "var(--ok)",
+  color: "var(--ok)",
 };

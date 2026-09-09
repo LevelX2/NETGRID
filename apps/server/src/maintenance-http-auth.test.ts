@@ -42,6 +42,19 @@ describe("ARC-001 maintenance HTTP security", () => {
         socket: { remoteAddress: address },
         headers: { host: "127.0.0.1", "x-forwarded-for": "127.0.0.1" },
       }) as never;
+    for (const [address, method, allowed] of [
+      ["127.0.0.1", "GET", true],
+      ["203.0.113.9", "GET", false],
+      ["127.0.0.1", "POST", false],
+    ] as const) {
+      expect(
+        mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(
+          request(address, method),
+          "/api/storage/maintenance/analysis/matches/match/current-ai-input",
+          config,
+        ),
+      ).toBe(allowed);
+    }
     expect(
       mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(
         request("127.0.0.1"),

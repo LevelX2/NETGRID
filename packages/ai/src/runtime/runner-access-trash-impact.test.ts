@@ -7,6 +7,62 @@ import { describe, expect, it } from "vitest";
 import { assessRunnerAccessTrashImpactFromPlanningCard } from "./runner-access-trash-impact";
 
 describe("assessRunnerAccessTrashImpactFromPlanningCard", () => {
+  it("does not invent recurring income for a depleted finite pool even at zero trash cost", () => {
+    expect(
+      assess({
+        definitionId: "onr_v1_326_holovid-campaign",
+        counters: { bit: 0 },
+        trashCost: 0,
+        runnerCredits: 10,
+        economyReserve: 4,
+      }),
+    ).toMatchObject({
+      recommendation: "decline",
+      visibleImpactValue: 0,
+      impactClasses: [],
+    });
+  });
+
+  it("values observed transferable advancement counters without a card-name rule", () => {
+    const planningCard = lookupPlanningCard("onr_v1_347_vapor-ops");
+    const project = (advancementCounters: number) =>
+      assessRunnerAccessTrashImpactFromPlanningCard({
+        planningCard,
+        accessed: {
+          known: true,
+          definitionId: planningCard.planning.cardDefinitionId,
+          advancementCounters,
+        },
+        trashCost: 1,
+        runnerCredits: 4,
+        economyReserve: 5,
+      });
+    expect(project(0)).toMatchObject({
+      recommendation: "decline",
+      impactClasses: ["scoring_support"],
+    });
+    expect(project(2)).toMatchObject({
+      recommendation: "trash",
+      impactClasses: ["scoring_support"],
+    });
+    expect(
+      project(2)!.visibleImpactValue - project(0)!.visibleImpactValue,
+    ).toBe(800);
+  });
+
+  it("recognizes canonical damage and tag access effects as hazardous assets", () => {
+    expect(
+      assess({
+        definitionId: "onr_v1_345_trap",
+        trashCost: 0,
+        runnerCredits: 10,
+        economyReserve: 4,
+      }),
+    ).toMatchObject({
+      recommendation: "trash",
+      impactClasses: ["damage_or_tags"],
+    });
+  });
   it("justifies trashing a finite campaign with fourteen visible stored credits", () => {
     const assessment = assess({
       definitionId: "onr_v1_309_bbs-whispering-campaign",
@@ -158,12 +214,7 @@ function assess(params: {
   return assessRunnerAccessTrashImpactFromPlanningCard({
     planningCard,
     accessed: {
-      instanceId: `accessed:${params.definitionId}`,
       definitionId: params.definitionId,
-      title: "Generic visible Corp card",
-      owner: "corp",
-      controller: "corp",
-      type: planningCard.planning.cardType,
       known: true,
       ...(params.counters ? { counters: params.counters } : {}),
     },

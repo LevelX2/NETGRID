@@ -123,7 +123,7 @@ describe("Deck strategy runtime vertical slices", () => {
     expect(second.decisionDebug?.planId).toBe(first.decisionDebug?.planId);
   });
 
-  it("does not invent Corp tag-punish payoff without an Engine quote and keeps the score plan active outside the window", () => {
+  it("does not invent tag-punish payoff or a speculative agenda-search window", () => {
     const closedAccounts = visibleCard("closed-accounts", "corp", "operation", {
       definitionId: "onr_v1_285_closed-accounts",
       title: "Closed Accounts",
@@ -160,6 +160,9 @@ describe("Deck strategy runtime vertical slices", () => {
       snapshot: corpTagPunishSnapshot(),
       actions: [
         draw,
+        legalAction("credit", "corp", "gain_credit", "Gain 1 Credit", {
+          payload: { gainCreditsAmount: 1 },
+        }),
         legalAction("end-turn", "corp", "end_turn", "End turn", {
           source: "game_rule",
         }),
@@ -184,12 +187,9 @@ describe("Deck strategy runtime vertical slices", () => {
       corpTurnPlannerMode: "legacy_compare",
     });
 
-    expect(noWindow.actionId).toBe("draw-score-material");
+    expect(noWindow.actionId).toBe("credit");
     expect(noWindow.evidence).toEqual(
-      expect.arrayContaining([
-        "plan_module:corp.hand_and_agenda_management",
-        "plan_step_capability:draw_for_plan",
-      ]),
+      expect.arrayContaining(["plan_module:corp.economy"]),
     );
   });
 

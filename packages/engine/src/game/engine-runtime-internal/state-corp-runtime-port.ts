@@ -6,10 +6,6 @@ export type StateCorpRuntimePort = {
     state: GameState,
     agendaId: CardInstanceId,
   ) => number;
-  serverDifficultyReductionFromUpgrades: (
-    state: GameState,
-    agendaId: CardInstanceId,
-  ) => number;
   swapCorpHqAndRdTop: (state: GameState) => void;
   spendRecurringTraceCreditPool: (state: GameState, amount: number) => number;
 };

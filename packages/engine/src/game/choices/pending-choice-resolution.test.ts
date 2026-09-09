@@ -76,23 +76,26 @@ describe("pending choice resolution", () => {
     expect(resolveDelayedInstallStartTurnChoice.mock.calls[0]?.[0]).toBe(state);
   });
 
-  it("dispatches Shell Traders MU choices through the runner callback", () => {
+  it.each([
+    "v1912.delayed_install_memory",
+    "runner.delayed_install_destination",
+  ])("dispatches %s through the placement callback", (source) => {
     const state = stateWithChoice(
       "shell_memory_choice",
-      "v1912.delayed_install_memory:shell_1:target_1:paid:1",
+      `${source}:shell_1:target_1:paid:1`,
     );
-    const resolveDelayedInstallMemoryChoice = vi.fn();
+    const resolveDelayedInstallPlacementChoice = vi.fn();
 
     resolvePendingChoice(
       pendingChoiceHost(state, {
-        runner: { resolveDelayedInstallMemoryChoice },
+        runner: { resolveDelayedInstallPlacementChoice },
       }),
       choiceAction("shell_memory_choice"),
       playerChoice("shell_memory_choice", ["program_1"]),
     );
 
-    expect(resolveDelayedInstallMemoryChoice).toHaveBeenCalledOnce();
-    expect(resolveDelayedInstallMemoryChoice.mock.calls[0]?.[0]).toBe(state);
+    expect(resolveDelayedInstallPlacementChoice).toHaveBeenCalledOnce();
+    expect(resolveDelayedInstallPlacementChoice.mock.calls[0]?.[0]).toBe(state);
   });
 
   it("lets hidden-zone search handlers clear the pending choice", () => {
@@ -446,8 +449,8 @@ function pendingChoiceHost(
       resolveDelayedInstallStartTurnChoice: unexpected(
         "resolveDelayedInstallStartTurnChoice",
       ),
-      resolveDelayedInstallMemoryChoice: unexpected(
-        "resolveDelayedInstallMemoryChoice",
+      resolveDelayedInstallPlacementChoice: unexpected(
+        "resolveDelayedInstallPlacementChoice",
       ),
       ...overrides.runner,
     },

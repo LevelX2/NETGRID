@@ -226,26 +226,40 @@ describe("plan-first Engine-restricted run contract", () => {
       reasonCode: "plan_first.runner.convert_run_window",
       fallbackUsed: false,
     });
-    const window = residentPlanPortfolioSnapshot(input)?.instances.find(
+    const windows = residentPlanPortfolioSnapshot(input)?.instances.filter(
       (instance) => instance.moduleId === "runner.convert_run_window",
     );
-    expect(window).toMatchObject({
-      parentInstanceId: "rules.restricted_action_sequence",
-      moduleState: {
-        signal: {
-          purposeCode: "continue_engine_restricted_run_sequence",
-          evidenceCode: "runner_engine_restricted_run_sequence_continuation",
-          actionAssessments: {
-            [runHq.actionId]: {
-              admissible: true,
-            },
-            [runRemote.actionId]: {
-              admissible: false,
-            },
-          },
-        },
-      },
-    });
+    expect(windows).toHaveLength(2);
+    expect(windows).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          parentInstanceId: "rules.restricted_action_sequence",
+          moduleState: expect.objectContaining({
+            signal: expect.objectContaining({
+              serverId: "hq",
+              purposeCode: "continue_engine_restricted_run_sequence",
+              evidenceCode: "runner_engine_restricted_run_sequence_continuation",
+              actionAssessments: {
+                [runHq.actionId]: expect.objectContaining({ admissible: true }),
+              },
+            }),
+          }),
+        }),
+        expect.objectContaining({
+          parentInstanceId: "rules.restricted_action_sequence",
+          moduleState: expect.objectContaining({
+            signal: expect.objectContaining({
+              serverId: "remote_1",
+              actionAssessments: {
+                [runRemote.actionId]: expect.objectContaining({
+                  admissible: false,
+                }),
+              },
+            }),
+          }),
+        }),
+      ]),
+    );
   });
 
   it("ends the turn when the only ordinary Remote run is explicitly nonproductive", () => {

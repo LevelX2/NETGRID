@@ -107,6 +107,15 @@ export type VisibleRunBreakerState = {
 
 export type RunnerRunPathCreditBudget = {
   credits: number;
+  /** Conditional one-shot sources, usable only at a positive payment window. */
+  paymentSupportSources?: readonly {
+    cardInstanceId: string;
+    sourceAbilityId: string;
+    creditCost: number;
+    gainCredits: number;
+  }[];
+  paymentSupportLiquidCredits?: number;
+  paymentSupportCreditsGained?: number;
   icebreakerCredits?: number;
   nonNoisyIcebreakerCredits?: number;
   /** Non-stealth portion of the non-noisy breaker-credit pool. */
@@ -121,8 +130,16 @@ export type RunnerRunPathCreditBudgetInput = number | RunnerRunPathCreditBudget;
 
 export type MutableRunnerRunPathCreditBudget = Omit<
   Required<RunnerRunPathCreditBudget>,
-  "hostedIcebreakerCreditsByBreakerInstanceId"
+  | "hostedIcebreakerCreditsByBreakerInstanceId"
+  | "paymentSupportSources"
+  | "paymentSupportLiquidCredits"
+  | "paymentSupportCreditsGained"
 > & {
+  paymentSupportSources?: NonNullable<
+    RunnerRunPathCreditBudget["paymentSupportSources"]
+  >;
+  paymentSupportLiquidCredits?: number;
+  paymentSupportCreditsGained?: number;
   hostedIcebreakerCreditsByBreakerInstanceId: Record<string, number>;
   stealthCreditsBySourceId: Record<string, number>;
 };
@@ -212,6 +229,8 @@ export type VisibleIceRunHazardProjection = {
 
 export type KnownRezzedIcePathAssessment = {
   blocked: boolean;
+  /** ICE fully broken by the selected, already paid visible path. */
+  fullyBrokenIceInstanceIds?: string[];
   visibleBreakCost?: number;
   futureClicksLost?: number;
   visibleIceRunHazards?: VisibleIceRunHazard[];

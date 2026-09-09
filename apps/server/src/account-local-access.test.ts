@@ -123,6 +123,105 @@ describe("local account access policy", () => {
     }
   });
 
+  it("switches named invite-only accounts atomically with the runtime password KDF", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "netgrid-named-mode-"));
+    const dbPath = join(directory, "netgrid.sqlite");
+    let service = new AccountAuthService(
+      new SqliteAccountStorage({
+        dbPath,
+        backupDir: join(directory, "backups"),
+      }),
+    );
+    try {
+      const first = await service.bootstrapAdmin({
+        loginName: "admin",
+        displayName: "Lui",
+        password: FIRST_PASSWORD,
+      });
+      const second = await service.createAccountWithPassword({
+        loginName: "__Sepp",
+        displayName: "Seppel",
+        password: SECOND_PASSWORD,
+      });
+      await service.createInvite({
+        loginName: "pending",
+        displayName: "Noch nicht aktiv",
+      });
+      const changedPassword = "Neue ausreichend lange Passphrase 2026";
+      await expect(
+        service.changeLocalAccessMode({
+          mode: "protected",
+          credentials: [
+            { accountId: first.account.accountId, password: changedPassword },
+            { accountId: second.account.accountId, password: "zu kurz" },
+          ],
+        }),
+      ).rejects.toThrow("account_password_too_short");
+      expect((await service.accessPolicy()).mode).toBe("invite_only");
+      expect(
+        (await service.authenticateSession(first.session.sessionToken)).ok,
+      ).toBe(true);
+      expect(
+        (await service.login({ loginName: "admin", password: FIRST_PASSWORD }))
+          .ok,
+      ).toBe(true);
+      await service.changeLocalAccessMode({
+        mode: "protected",
+        credentials: [
+          { accountId: first.account.accountId, password: changedPassword },
+          { accountId: second.account.accountId, password: SECOND_PASSWORD },
+        ],
+      });
+      expect(
+        (await service.authenticateSession(first.session.sessionToken)).ok,
+      ).toBe(false);
+      expect(
+        (await service.login({ loginName: "admin", password: FIRST_PASSWORD }))
+          .ok,
+      ).toBe(false);
+      expect(
+        (await service.login({ loginName: "Lui", password: changedPassword }))
+          .ok,
+      ).toBe(false);
+      service.close();
+      service = new AccountAuthService(
+        new SqliteAccountStorage({
+          dbPath,
+          backupDir: join(directory, "backups"),
+        }),
+      );
+      expect((await service.accessPolicy()).mode).toBe("protected");
+      expect(
+        (await service.login({ loginName: "admin", password: changedPassword }))
+          .ok,
+      ).toBe(true);
+      expect(
+        (
+          await service.login({
+            loginName: "__sepp",
+            password: SECOND_PASSWORD,
+          })
+        ).ok,
+      ).toBe(true);
+      await service.changeLocalAccessMode({ mode: "simple" });
+      expect(await service.listLocalProfiles()).toHaveLength(2);
+      expect(
+        (
+          await service.selectLocalProfile({
+            accountId: second.account.accountId,
+          })
+        )?.account.displayName,
+      ).toBe("Seppel");
+      expect(
+        (await service.login({ loginName: "admin", password: changedPassword }))
+          .ok,
+      ).toBe(false);
+    } finally {
+      service.close();
+      await rm(directory, { recursive: true, force: true });
+    }
+  }, 20_000);
+
   it("exposes simple and protected self-service only on the local deployment profile", async () => {
     const accountAuth = new AccountAuthService(new InMemoryAccountStorage(), {
       tokenSalt: "local-access-http-test",

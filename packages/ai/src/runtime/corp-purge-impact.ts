@@ -7,6 +7,7 @@ import type {
 import { endTheRunSubroutineCount } from "../visible-run-analysis";
 import type { CorpBoardTriage } from "./semantic-runtime-corp-board-triage";
 import { semanticRuntimeCorpCentralPressureAssessment } from "./semantic-runtime-corp-central-pressure";
+import { currentCorpMandatoryDrawCardsPerWindow } from "./corp-scoreline-feasibility";
 
 type VisibleVirusCounterCard = {
   card: VisibleCard;
@@ -77,8 +78,31 @@ export function corpPurgeImpactScoreComponent(
     boardTriage.primary === "protect_score_remote" ||
     boardTriage.primary === "fund_score_remote";
   const clickCost = Math.max(3, legalActionClickCost(action));
+  const recurringActionLoss = corpPurgeRecurringActionLoss(input, action);
+  const remainingDeckCards = input.playerView.own.stackOrRdCount;
+  const recoveryTurns =
+    typeof remainingDeckCards === "number"
+      ? Math.min(
+          4,
+          Math.floor(
+            Math.max(0, remainingDeckCards) /
+              currentCorpMandatoryDrawCardsPerWindow(input.playerView),
+          ),
+        )
+      : 0;
+  const preventedActionLoss = recoveryTurns * Math.min(3, recurringActionLoss);
 
   let value = purgeCounterVolumeValue(activeCounterTotal);
+  if (recurringActionLoss > 0) {
+    // Persistent action denial is valued by its recoverable tempo, not by the
+    // number of tokens. The finite four-turn horizon does not assume survival.
+    const otherCounters = activeCounterTotal - recurringActionLoss;
+    value =
+      (otherCounters > 0
+        ? Math.max(0, purgeCounterVolumeValue(otherCounters))
+        : 0) +
+      (preventedActionLoss - clickCost) * 1000;
+  }
   value += Math.min(900, criticalIce.length * 450);
   value += Math.min(1300, pressuredCentralServers.length * 650);
   if (
@@ -120,12 +144,26 @@ export function corpPurgeImpactScoreComponent(
       `purge_pressured_central_count:${pressuredCentralServers.length}`,
       `purge_pressured_centrals:${pressuredCentralServers.join(",") || "none"}`,
       `purge_click_cost:${clickCost}`,
+      `purge_recurring_action_loss:${recurringActionLoss}`,
+      `purge_recovery_turn_horizon:${recoveryTurns}`,
+      `purge_prevented_action_loss:${preventedActionLoss}`,
       `purge_urgent_scoreline:${urgentScoreline}`,
       `purge_board_triage:${boardTriage.primary}`,
       `purge_board_triage_severity:${boardTriage.severity}`,
       `purge_component_value:${value}`,
     ].join("|"),
   };
+}
+
+/** Public counter semantics: each Pipe adds one Corp action debt every turn. */
+export function corpPurgeRecurringActionLoss(
+  input: AiDecisionInput,
+  action: LegalAction,
+): number {
+  return visibleRunnerVirusCounters(input, action).reduce(
+    (sum, entry) => sum + (entry.counterType === "pipe" ? entry.amount : 0),
+    0,
+  );
 }
 
 /**

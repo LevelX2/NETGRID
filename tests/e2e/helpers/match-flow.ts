@@ -64,20 +64,62 @@ export async function createHumanVsHumanLobby(
   seed: string,
   side: "runner" | "corp" = "runner",
 ): Promise<string> {
+  return createHumanVsHumanLobbyWithOptions(page, seed, {
+    side,
+    format: "rules_match",
+    cardPool: "originalset",
+  });
+}
+
+export async function createHumanVsHumanSeriesLobby(
+  page: Page,
+  seed: string,
+  side: "runner" | "corp" = "runner",
+  cardPool: "originalset" | "originalset_classic_proteus" = "originalset",
+): Promise<string> {
+  return createHumanVsHumanLobbyWithOptions(page, seed, {
+    side,
+    format: "two_game_side_swap",
+    cardPool,
+  });
+}
+
+async function createHumanVsHumanLobbyWithOptions(
+  page: Page,
+  seed: string,
+  options: {
+    side: "runner" | "corp";
+    format: "rules_match" | "two_game_side_swap";
+    cardPool: "originalset" | "originalset_classic_proteus";
+  },
+): Promise<string> {
   await openApp(page);
   await page.getByTestId("play-mode-human-vs-human").click();
-  await page.getByTestId("match-format-rules-match").click();
+  await page
+    .getByTestId(`match-format-${options.format.replaceAll("_", "-")}`)
+    .click();
+  if (options.format === "two_game_side_swap") {
+    await page.getByTestId("match-series-games").selectOption("2");
+  }
+  if (options.cardPool === "originalset_classic_proteus") {
+    await page.getByTestId("match-card-pool-classic").press("Space");
+    await page.getByTestId("match-card-pool-proteus").press("Space");
+    await expect(page.getByTestId("match-card-pool-classic")).toBeChecked();
+    await expect(page.getByTestId("match-card-pool-proteus")).toBeChecked();
+  }
   await selectE2eDecks(page, "Dein Runner-Deck", "Dein Korp-Deck");
   const advancedOptions = page.getByTestId("advanced-match-options");
   if ((await advancedOptions.getAttribute("open")) === null)
     await advancedOptions.locator("summary").click();
   await expect(advancedOptions).toHaveAttribute("open", "");
-  await page.getByLabel("Deine Startseite").selectOption(side);
+  await page.getByLabel("Deine Startseite").selectOption(options.side);
   await page.getByLabel("Countdown").selectOption("3");
   await page.getByLabel("Seed").fill(seed);
   const name = page.getByLabel("Name");
   if (/^Teilnehmer [AB]$/.test((await name.inputValue()).trim())) {
-    await name.fill(side === "corp" ? "Host Corp V107" : "Host Runner V107");
+    await name.fill(
+      options.side === "corp" ? "Host Corp V107" : "Host Runner V107",
+    );
   }
   await page.getByTestId("create-match").click();
   await expect(page.getByTestId("start-lobby")).toBeVisible({
@@ -95,6 +137,10 @@ export async function createHumanVsHumanLobby(
 export async function joinHumanVsHumanLobby(
   page: Page,
   joinUrl: string,
+  options: {
+    expectedDestination?: "lobby" | "active";
+    expectedRunnerDeckOption?: RegExp;
+  } = {},
 ): Promise<void> {
   await installE2eMatchStartSettings(page);
   await page.goto(joinUrl);
@@ -108,9 +154,24 @@ export async function joinHumanVsHumanLobby(
       await name.fill("Joiner V107");
     }
   }
+  if (options.expectedRunnerDeckOption) {
+    await expect(
+      page
+        .getByLabel("Dein Runner-Deck")
+        .locator("option")
+        .filter({ hasText: options.expectedRunnerDeckOption })
+        .first(),
+    ).toBeAttached();
+  }
   await selectE2eDecks(page, "Dein Runner-Deck", "Dein Korp-Deck");
   await expect(page.getByTestId("join-link-input")).toHaveValue(/joinToken=/);
   await page.getByTestId("join-match").click();
+  if (options.expectedDestination === "active") {
+    await expect(page.getByTestId("active-game")).toBeVisible({
+      timeout: 20_000,
+    });
+    return;
+  }
   await expect(page.getByTestId("start-lobby")).toBeVisible({
     timeout: 20_000,
   });
@@ -131,6 +192,13 @@ export async function readyAndWaitForActive(
   await expect(
     host.getByText(/Countdown bis|Startet automatisch/),
   ).toBeVisible();
+  await waitForActiveAndResolveSetup(host, joiner);
+}
+
+export async function waitForActiveAndResolveSetup(
+  host: Page,
+  joiner: Page,
+): Promise<void> {
   await expect(host.getByTestId("active-game")).toBeVisible({
     timeout: 20_000,
   });

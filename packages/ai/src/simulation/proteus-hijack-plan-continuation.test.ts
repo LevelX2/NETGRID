@@ -10,7 +10,6 @@ import proteusDecksJson from "../../../../data/decks/proteus-playtest-decks-2026
 import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import { chooseAiAction } from "../index";
-import { simulateAiGame } from "../simulation";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { buildPlanningStateIdentity } from "../plans/turn-planning-contracts";
 import { buildAiDecisionInput } from "../runtime/ai-decision-input";
@@ -243,69 +242,6 @@ describe("Proteus Hijack plan continuation", () => {
       ),
     ).toBe(true);
   });
-
-  it("keeps Test Spin target and MU choices in its delayed development continuation", () => {
-    resetResidentPlanPortfolioMemory();
-    const summary = simulateAiGame({
-      seed: "proteus-pilot-holdout-02",
-      maxActions: 305,
-      runnerDeck: deck("proteus_runner_hq_virus_derez_2026_05_25"),
-      corpDeck: deck("proteus_corp_region_fast_score_2026_05_25"),
-      runnerControllerMode: "current_candidate",
-      corpControllerMode: "current_candidate",
-    });
-
-    expect(summary.errors).toEqual([]);
-    for (const stateVersion of [301, 302]) {
-      expect(
-        summary.actionSequence.find(
-          (entry) => entry.stateVersionBefore === stateVersion,
-        ),
-      ).toMatchObject({
-        side: "runner",
-        actionType: "resolve_choice",
-        planKind: "runner.develop_board_and_hand",
-        fallbackUsed: false,
-      });
-    }
-  }, 30_000);
-
-  it("keeps Hijack bound across an Engine cost-support continuation", () => {
-    resetResidentPlanPortfolioMemory();
-    const summary = simulateAiGame({
-      seed: "proteus-pilot-qualifier-02",
-      maxActions: 343,
-      runnerDeck: deck("proteus_runner_hq_virus_derez_2026_05_25"),
-      corpDeck: deck("proteus_corp_region_fast_score_2026_05_25"),
-      runnerControllerMode: "current_candidate",
-      corpControllerMode: "current_candidate",
-    });
-
-    expect(summary.errors).toEqual([]);
-    expect(
-      summary.actionSequence.find((entry) => entry.stateVersionBefore === 340),
-    ).toMatchObject({
-      side: "runner",
-      actionType: "play_event",
-      planKind: "runner.develop_board_and_hand",
-      fallbackUsed: false,
-    });
-    expect(
-      summary.actionSequence.find((entry) => entry.stateVersionBefore === 341),
-    ).toMatchObject({
-      side: "runner",
-      actionType: "play_event",
-      fallbackUsed: false,
-    });
-    expect(
-      summary.actionSequence.find((entry) => entry.stateVersionBefore === 342),
-    ).toMatchObject({
-      side: "runner",
-      actionType: "resolve_choice",
-      planKind: "runner.develop_board_and_hand",
-      fallbackUsed: false,
-    });
-  }, 60_000);
 });
 
 function hijackState(

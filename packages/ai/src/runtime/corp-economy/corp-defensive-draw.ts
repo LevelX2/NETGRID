@@ -11,6 +11,7 @@ import type { AiDeckStrategyDeckSnapshot } from "../../deck-strategy-snapshot";
 import type { CorpBoardTriage } from "../semantic-runtime-corp-board-triage";
 import type { CorpFundedRemoteAccessRiskNeed } from "../corp-funded-score-protection";
 import type { CorpCentralDefenseAllocation } from "../corp-central-defense-allocation";
+import type { CorpRestrictedRezPreparation } from "../corp-restricted-credit-reserve";
 import {
   assessCorpScoreProtection,
   compareExactProbabilities,
@@ -196,6 +197,8 @@ export function corpMissingConcreteScoreDefenseDrawNeed(
     !exposedAgendaParent &&
     hardClickReserve === 0 &&
     clicks >= drawActionProjection.clickCost &&
+    input.playerView.own.credits >=
+      protectionNeed.baseline.totalScoreReserveCredits &&
     projectedHandAfterDraw <= maxHandSize;
   if (!sameTurnFollowupAvailable && !safeMultiTurnProgressAvailable) {
     return undefined;
@@ -634,6 +637,7 @@ export function corpMissingConcreteDefenseDrawNeed(
   capacity = corpOptionalDrawCapacity(input, action),
   centralAllocation?: CorpCentralDefenseAllocation,
   directInstallRouteState?: CorpCentralDefenseDirectInstallRouteState,
+  installedRezPreparations: readonly CorpRestrictedRezPreparation[] = [],
 ): CorpMissingConcreteDefenseDrawNeed | undefined {
   const boundedOverflowSearch =
     capacity.maxHandSize > 2 &&
@@ -657,6 +661,96 @@ export function corpMissingConcreteDefenseDrawNeed(
     directInstallRouteState,
   );
   if (!target) return undefined;
+  // Missing current liquidity does not imply missing ICE. A current, exactly
+  // bound preparation for an already installed blocker needs no speculative
+  // draw. Unknown or ineffective projected protection does not suppress draw.
+  const server = input.playerView.servers.find(
+    (entry) => entry.id === target.serverId,
+  )!;
+  const basicFunding = input.legalActions.find(
+    (head) =>
+      head.side === "corp" &&
+      head.type === "gain_credit" &&
+      head.source === "basic_action" &&
+      head.expiresAtStateVersion === input.playerView.stateVersion &&
+      head.payload?.effectKind === "gain_credits" &&
+      positiveSafeInteger(head.payload.gainCreditsAmount) &&
+      exactLegalActionClickCost(head) !== undefined &&
+      exactLegalActionClickCost(head)! > 0 &&
+      head.costs.every((cost) =>
+        Object.entries(cost).every(
+          ([key, value]) => key === "clicks" || value === 0,
+        ),
+      ),
+  );
+  if (basicFunding) {
+    const availableAfterFunding =
+      input.playerView.own.credits +
+      Math.floor(
+        input.playerView.own.clicks / exactLegalActionClickCost(basicFunding)!,
+      ) *
+        (basicFunding.payload!.gainCreditsAmount as number);
+    for (const ice of server.ice) {
+      const quote = ice.effectiveRezCostQuote;
+      if (
+        ice.rezzed ||
+        !quote?.complete ||
+        quote.context !== "installed" ||
+        quote.cardId !== ice.instanceId ||
+        quote.targetServerId !== server.id ||
+        quote.projectedServerId !== server.id ||
+        quote.expiresAtStateVersion !== input.playerView.stateVersion ||
+        quote.mandatoryAdditionalCosts.agendaPoints !== 0 ||
+        !nonNegativeSafeInteger(quote.finalCredits) ||
+        quote.finalCredits > availableAfterFunding
+      )
+        continue;
+      const projectedProtection = assessCorpScoreProtection({
+        serverIce: server.ice.map((card) =>
+          card.instanceId === ice.instanceId ? { ...card, rezzed: true } : card,
+        ),
+        runnerRig: input.playerView.opponent.rig!,
+        runnerCredits: input.playerView.opponent.credits,
+        maximumRunnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
+      });
+      if (
+        projectedProtection.knowledge === "known" &&
+        projectedProtection.protectsScore
+      )
+        return undefined;
+    }
+  }
+  for (const preparation of installedRezPreparations) {
+    if (
+      preparation.targetServerId !== target.serverId ||
+      preparation.bank.expiresAtStateVersion !==
+        input.playerView.stateVersion ||
+      !input.legalActions.some(
+        (head) =>
+          head.actionId === preparation.actionId &&
+          head.source === preparation.bank.sourceCardInstanceId,
+      ) ||
+      !server.ice.some(
+        (ice) => ice.instanceId === preparation.targetIceInstanceId,
+      )
+    )
+      continue;
+    const projectedProtection = assessCorpScoreProtection({
+      serverIce: server.ice.map((ice) =>
+        ice.instanceId === preparation.targetIceInstanceId
+          ? { ...ice, rezzed: true }
+          : ice,
+      ),
+      runnerRig: input.playerView.opponent.rig!,
+      runnerCredits: input.playerView.opponent.credits,
+      maximumRunnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
+    });
+    if (
+      projectedProtection.knowledge === "known" &&
+      projectedProtection.protectsScore
+    )
+      return undefined;
+  }
   return {
     serverId: target.serverId,
     planValue: 1_000 + CORP_MISSING_CONCRETE_DEFENSE_DRAW_VALUE,

@@ -217,13 +217,22 @@ export function runnerRunRecurringCredits(
   );
 }
 
+/** Eligible payment resources before an independent run action spending cap. */
+export function availableRunnerRunCreditPool(
+  host: RunDurationPaymentHost,
+  breakerId?: CardInstanceId,
+): number {
+  return (
+    availableRunnerRunCreditsWithoutSupport(host, breakerId) +
+    runnerCostPenaltySupportCreditCapacity(host.state)
+  );
+}
+
 export function availableRunnerRunCredits(
   host: RunDurationPaymentHost,
   breakerId?: CardInstanceId,
 ): number {
-  const available =
-    availableRunnerRunCreditsWithoutSupport(host, breakerId) +
-    runnerCostPenaltySupportCreditCapacity(host.state);
+  const available = availableRunnerRunCreditPool(host, breakerId);
   if (!breakerId) return available;
   const spendingCap = host.state.run?.runActionSpendingCap;
   if (!spendingCap) return available;

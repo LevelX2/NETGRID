@@ -31,6 +31,21 @@ NETGRID trennt ab sofort Produktreife und technischen Quellstand:
 - Die Git-Metadaten werden beim Start beziehungsweise Build des Webclients
   ermittelt. Ein bereits laufender Webprozess übernimmt einen neuen Stand erst
   nach seinem Neustart.
+- Das Backend erfasst denselben Git-Vertrag einmal beim Prozessstart.
+  `/health` meldet unter `release` die Produktversion und unter `build`
+  Buildnummer, Commit, Commit-Zeitpunkt, Änderungsstatus, Herkunft
+  (`git`, `embedded`, `unavailable`) und Prozessstartzeit. Spätere Commits
+  oder lokale Änderungen werden nicht nachträglich als geladener Stand
+  ausgegeben.
+- Die Maintenance zeigt Frontend und Backend gemeinsam an. Unterschiedliche
+  Produktversionen, Buildnummern oder Commits werden markiert; `lokal geändert`
+  bleibt eine separate Information. Gleiche Commitkennungen beweisen bei
+  uncommitteten Änderungen keine identischen Inhalte.
+- Ein Releasebundle trägt die Backend-Metadaten eingebettet und benötigt
+  beim Start weder Git noch einen Checkout. Ungültige eingebettete Metadaten
+  werden abgewiesen. Ohne Git-Metadaten im lokalen Quellstart wird der
+  Backendbuild ausdrücklich als unbekannt gemeldet; insbesondere wird kein
+  sauberer Arbeitsbaum behauptet.
 
 ## Verhältnis zu Releasebezeichnungen
 
@@ -55,10 +70,15 @@ Rückwärtskompatibilitätszusage.
 
 ## Technischer Vertrag
 
-- Produktversion: `apps/web/lib/app-build-info.ts`
+- Gemeinsame Produktversion und Backend-Buildvertrag:
+  `packages/shared/src/product-version.ts`
+- Frontend-Projektion: `apps/web/lib/app-build-info.ts`
 - Git-Ermittlung und Einbettung: `apps/web/next.config.ts`
+- Backend-Ermittlung: `apps/server/src/server-build-info.ts`
+- Backend-Release-Einbettung: `scripts/build-windows-release-output.mjs`
 - Sichtbare Kurzform: Kopfzeile des Webclients
 - Detaillierte Form: Optionsbereich des Webclients
+- Vergleich beider laufenden Komponenten: Maintenance-Buildleiste
 - Fallback ohne Git-Metadaten: `Build lokal` und `nicht verfügbar`
 
 ## Akzeptanz

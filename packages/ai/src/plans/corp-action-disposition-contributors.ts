@@ -463,6 +463,16 @@ function contributeCorpActionDispositionForCandidate(
     }
     return;
   }
+  if (candidate.economyProjection?.kind === "restricted_credit") {
+    if (!facts.corpOpenEconomyPlanOwnsAction(domain, candidate.actionId)) {
+      addUnknown(
+        candidate.actionId,
+        "corp.economy",
+        "corp_restricted_credit_no_admitted_exact_consumer",
+      );
+    }
+    return;
+  }
   if (
     corpEconomyActionIsOwned(candidate) &&
     !facts.corpOpenEconomyPlanOwnsAction(domain, candidate.actionId) &&

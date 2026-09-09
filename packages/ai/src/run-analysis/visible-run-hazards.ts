@@ -106,6 +106,7 @@ export function visibleIceRunHazardsForQuote(params: {
   if (!quote) return [];
   const traceRulesProfile = planningTraceRulesProfile(params.traceRulesProfile);
   const hazards: VisibleIceRunHazardProjection[] = [];
+  const encounterBreakerStrengths = new Map(params.breakerStrengths);
   let remainingHazardCredits = Math.max(0, Math.floor(params.availableCredits));
   let remainingTraceCreditPool = visibleTraceCreditPool(
     params.runnerTraceSupportQuote,
@@ -164,7 +165,7 @@ export function visibleIceRunHazardsForQuote(params: {
       effectiveIceForQuote(params.ice, quote),
       params.rigCards,
       [subroutine],
-      params.breakerStrengths,
+      encounterBreakerStrengths,
       params.additionalBreakCostPerSubroutine,
     );
     const breakAvoidanceCandidate =
@@ -379,6 +380,12 @@ export function visibleIceRunHazardsForQuote(params: {
     });
     if (!unavoidable && minimumAvoidanceCost !== undefined) {
       remainingHazardCredits -= minimumAvoidanceCost;
+      if (usesBreakAvoidance && breakAssessment) {
+        encounterBreakerStrengths.set(
+          breakAssessment.breakerInstanceId,
+          breakAssessment.endingStrength,
+        );
+      }
       const selectedTraceCreditPoolSpent = usesTraceLinkAvoidance
         ? (visibleCorpMaxTraceAvoidance?.cheapestAffordableSafe
             ?.traceCreditPoolSpent ?? 0)

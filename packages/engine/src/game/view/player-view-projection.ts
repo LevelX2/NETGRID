@@ -28,8 +28,10 @@ import {
   visibleSpecialZones,
 } from "./card-view";
 import { visibleChoice } from "./choice-view";
+import { visibleTraceBidEffect } from "./visible-trace-bid-effect";
 import { toPublicEventForSide } from "./public-event-view";
 import { visibleCorpIceRezResourceExchangeQuote } from "./visible-rez-resource-exchange-quote";
+import { visibleCorpEncounterDefenseQuotes } from "./visible-corp-encounter-defense-quote";
 import {
   visibleEffectiveEncounteredIceRunQuote,
   visibleEffectiveIceRunQuote,
@@ -37,6 +39,7 @@ import {
 import { quoteCorpCentralAccesses } from "./corp-central-access-quotes";
 import { visibleCorpScoreContinuationQuote } from "./visible-corp-score-continuation-quote";
 import { visibleCorpCounterBankPreparationQuote } from "./visible-corp-counter-bank-preparation-quote";
+import { visibleCorpRestrictedCreditBankQuote } from "./visible-corp-restricted-credit-bank-quote";
 import { visibleServerStatuses } from "./server-status-view";
 import {
   visibleRunnerTraceBidCapacity,
@@ -89,11 +92,18 @@ export function buildPlayerViewProjection(
         side === "corp"
           ? legalActions.flatMap((action) => {
               const count = action.payload?.effectiveSubroutineCountAfterRez;
+              const selectedSubtypes =
+                action.payload?.variableRezKind === "alternate_subtype" &&
+                typeof action.payload.selectedSubtypesAfterRez === "string"
+                  ? action.payload.selectedSubtypesAfterRez
+                      .split(",")
+                      .filter((subtype) => subtype.length > 0)
+                  : undefined;
               if (
                 action.type !== "rez_ice" ||
                 action.source !== id ||
-                !Number.isSafeInteger(count) ||
-                (count as number) < 0
+                ((!Number.isSafeInteger(count) || (count as number) < 0) &&
+                  (!selectedSubtypes || selectedSubtypes.length === 0))
               ) {
                 return [];
               }
@@ -101,13 +111,27 @@ export function buildPlayerViewProjection(
                 state,
                 id,
                 visibleIce,
-                { hardEndTheRunSubroutineCountAfterRez: count as number },
+                {
+                  ...(Number.isSafeInteger(count)
+                    ? { hardEndTheRunSubroutineCountAfterRez: count as number }
+                    : {}),
+                  ...(selectedSubtypes
+                    ? { subtypesAfterRez: selectedSubtypes }
+                    : {}),
+                },
               );
               return quote ? [{ actionId: action.actionId, quote }] : [];
             })
           : [];
+      const currentEncounterDefenseQuotes =
+        side === "corp"
+          ? visibleCorpEncounterDefenseQuotes(state, visibleIce, legalActions)
+          : [];
       return {
         ...visibleIce,
+        ...(currentEncounterDefenseQuotes.length > 0
+          ? { currentEncounterDefenseQuotes }
+          : {}),
         ...(effectiveRunQuote ? { effectiveRunQuote } : {}),
         ...(effectivePostRezRunQuote ? { effectivePostRezRunQuote } : {}),
         ...(effectiveRezCostQuote ? { effectiveRezCostQuote } : {}),
@@ -136,6 +160,10 @@ export function buildPlayerViewProjection(
                 side === "corp"
                   ? visibleCorpCounterBankPreparationQuote(state, id)
                   : undefined;
+              const restrictedCreditBankQuote =
+                side === "corp"
+                  ? visibleCorpRestrictedCreditBankQuote(state, id)
+                  : undefined;
               return {
                 ...visibleRoot,
                 ...(continuationQuote
@@ -143,6 +171,9 @@ export function buildPlayerViewProjection(
                   : {}),
                 ...(counterBankPreparationQuote
                   ? { counterBankPreparationQuote }
+                  : {}),
+                ...(restrictedCreditBankQuote
+                  ? { restrictedCreditBankQuote }
                   : {}),
               };
             }),
@@ -250,6 +281,12 @@ export function buildPlayerViewProjection(
         ...(state.run.prohibitNoisyIcebreakers
           ? { prohibitNoisyIcebreakers: true }
           : {}),
+        ...(state.run.nextEncounterNoBreakSubroutines
+          ? { nextEncounterNoBreakSubroutines: true }
+          : {}),
+        ...(state.run.noBreakSubroutinesActive
+          ? { noBreakSubroutinesActive: true }
+          : {}),
         ...(state.run.runnerCreditGainOnCorpRez !== undefined
           ? { runnerCreditGainOnCorpRez: state.run.runnerCreditGainOnCorpRez }
           : {}),
@@ -262,9 +299,11 @@ export function buildPlayerViewProjection(
   const trace = state.trace;
   const traceRulesProfile = normalizeTraceRulesProfile(state.traceRulesProfile);
   const traceBidsRevealed = trace?.bidsRevealed === true;
+  const traceBidEffect = visibleTraceBidEffect(state);
   const visibleTrace = trace
     ? {
         traceId: trace.traceId,
+        ...(traceBidEffect ? { bidEffect: traceBidEffect } : {}),
         sourceDefinitionId: trace.sourceDefinitionId,
         profile: normalizeTraceRulesProfile(trace.traceRulesProfile),
         phase: trace.status,
@@ -420,6 +459,17 @@ export function buildPlayerViewProjection(
           ),
           maxHandSize: maxHandSize(state, "corp"),
           tags: state.runner.tags,
+          ...(state.activeObligationDebtCount !== undefined &&
+          state.activeObligationDebtCount > 0
+            ? {
+                corpEndTurnCreditObligation: {
+                  creditsDue: state.activeObligationDebtCount,
+                  expiresAtStateVersion: state.stateVersion,
+                  deadline: "end_of_corp_turn" as const,
+                  consequence: "lose_game" as const,
+                },
+              }
+            : {}),
         },
     opponent: runnerSide
       ? {

@@ -867,7 +867,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       matchCountsByMode,
       ...(oldestMatchCreatedAt ? { oldestMatchCreatedAt } : {}),
       ...(newestMatchUpdatedAt ? { newestMatchUpdatedAt } : {}),
-      tableSizes: this.maintenanceTableSizes(),
+      tableSizes: this.maintenanceTableSizes(matches),
       largestMatches: [...matches]
         .sort(
           (a, b) =>
@@ -3332,43 +3332,45 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     now: Date,
   ): StorageMaintenanceMatchEntry[] {
     if (!this.tableExists("matches")) return [];
+    // OCTET_LENGTH reads byte counts from SQLite record metadata. LENGTH on
+    // text would load every snapshot/event/trace just to count its characters.
     const rows = this.db
       .prepare(
         `WITH
           event_sizes AS (
-            SELECT match_id, COUNT(*) AS event_count, COALESCE(SUM(LENGTH(public_payload_json)), 0) AS event_payload_bytes
+            SELECT match_id, COUNT(*) AS event_count, COALESCE(SUM(OCTET_LENGTH(public_payload_json)), 0) AS event_payload_bytes
             FROM events
             GROUP BY match_id
           ),
           snapshot_sizes AS (
-            SELECT match_id, COUNT(*) AS snapshot_count, COALESCE(SUM(LENGTH(game_state_json)), 0) AS state_snapshot_bytes
+            SELECT match_id, COUNT(*) AS snapshot_count, COALESCE(SUM(OCTET_LENGTH(game_state_json)), 0) AS state_snapshot_bytes
             FROM state_snapshots
             GROUP BY match_id
           ),
           game_state_sizes AS (
-            SELECT match_id, COALESCE(LENGTH(game_state_json), 0) AS game_state_bytes
+            SELECT match_id, COALESCE(OCTET_LENGTH(game_state_json), 0) AS game_state_bytes
             FROM game_states
           ),
           deck_sizes AS (
-            SELECT match_id, COALESCE(LENGTH(private_deck_snapshots_json), 0) AS deck_snapshot_bytes
+            SELECT match_id, COALESCE(OCTET_LENGTH(private_deck_snapshots_json), 0) AS deck_snapshot_bytes
             FROM private_deck_snapshots
           ),
           engine_event_sizes AS (
-            SELECT match_id, COALESCE(SUM(LENGTH(event_json)), 0) AS engine_event_bytes
+            SELECT match_id, COALESCE(SUM(OCTET_LENGTH(event_json)), 0) AS engine_event_bytes
             FROM engine_events
             GROUP BY match_id
           ),
           ai_trace_sizes AS (
-            SELECT match_id, COALESCE(SUM(LENGTH(trace_json)), 0) AS ai_decision_trace_bytes
+            SELECT match_id, COALESCE(SUM(OCTET_LENGTH(trace_json)), 0) AS ai_decision_trace_bytes
             FROM ai_decision_traces
             GROUP BY match_id
           ),
           pending_undo_sizes AS (
-            SELECT match_id, COALESCE(LENGTH(pending_undo_json), 0) AS pending_undo_bytes
+            SELECT match_id, COALESCE(OCTET_LENGTH(pending_undo_json), 0) AS pending_undo_bytes
             FROM pending_undo
           ),
           start_lobby_sizes AS (
-            SELECT match_id, COALESCE(LENGTH(start_lobby_json), 0) AS start_lobby_bytes
+            SELECT match_id, COALESCE(OCTET_LENGTH(start_lobby_json), 0) AS start_lobby_bytes
             FROM start_lobbies
           )
         SELECT
@@ -3381,10 +3383,10 @@ export class SqliteMatchStorage implements MultiplayerStorage {
           m.record_json AS recordJson,
           m.created_at AS createdAt,
           m.updated_at AS updatedAt,
-          COALESCE(LENGTH(m.record_json), 0)
-            + COALESCE(LENGTH(m.baseline_json), 0)
-            + COALESCE(LENGTH(m.settings_json), 0)
-            + COALESCE(LENGTH(m.lifecycle_json), 0) AS matchRecordBytes,
+          COALESCE(OCTET_LENGTH(m.record_json), 0)
+            + COALESCE(OCTET_LENGTH(m.baseline_json), 0)
+            + COALESCE(OCTET_LENGTH(m.settings_json), 0)
+            + COALESCE(OCTET_LENGTH(m.lifecycle_json), 0) AS matchRecordBytes,
           COALESCE(gs.game_state_bytes, 0) AS gameStateBytes,
           COALESCE(es.event_count, 0) AS eventCount,
           COALESCE(es.event_payload_bytes, 0) AS eventPayloadBytes,
@@ -3576,56 +3578,73 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     };
   }
 
-  private maintenanceTableSizes(): StorageMaintenanceTableSize[] {
+  private maintenanceTableSizes(
+    matches: readonly StorageMaintenanceMatchEntry[],
+  ): StorageMaintenanceTableSize[] {
+    // The summary already aggregated these payloads per match. Reuse that
+    // exact result instead of scanning the same event/trace tables again.
+    const matchSizeKeys: Partial<
+      Record<string, keyof StorageMaintenanceMatchSizes>
+    > = {
+      matches: "matchRecordBytes",
+      state_snapshots: "stateSnapshotBytes",
+      game_states: "gameStateBytes",
+      events: "eventPayloadBytes",
+      engine_events: "engineEventBytes",
+      ai_decision_traces: "aiDecisionTraceBytes",
+      pending_undo: "pendingUndoBytes",
+      private_deck_snapshots: "deckSnapshotBytes",
+      start_lobbies: "startLobbyBytes",
+    };
     const definitions = [
       {
         key: "matches",
         label: "Matches",
         table: "matches",
         expression:
-          "COALESCE(SUM(LENGTH(record_json) + LENGTH(baseline_json) + LENGTH(settings_json) + COALESCE(LENGTH(lifecycle_json), 0)), 0)",
+          "COALESCE(SUM(OCTET_LENGTH(record_json) + OCTET_LENGTH(baseline_json) + OCTET_LENGTH(settings_json) + COALESCE(OCTET_LENGTH(lifecycle_json), 0)), 0)",
       },
       {
         key: "state_snapshots",
         label: "State Snapshots",
         table: "state_snapshots",
-        expression: "COALESCE(SUM(LENGTH(game_state_json)), 0)",
+        expression: "COALESCE(SUM(OCTET_LENGTH(game_state_json)), 0)",
       },
       {
         key: "game_states",
         label: "Aktuelle GameStates",
         table: "game_states",
-        expression: "COALESCE(SUM(LENGTH(game_state_json)), 0)",
+        expression: "COALESCE(SUM(OCTET_LENGTH(game_state_json)), 0)",
       },
       {
         key: "events",
         label: "Events",
         table: "events",
-        expression: "COALESCE(SUM(LENGTH(public_payload_json)), 0)",
+        expression: "COALESCE(SUM(OCTET_LENGTH(public_payload_json)), 0)",
       },
       {
         key: "engine_events",
         label: "Engine Events",
         table: "engine_events",
-        expression: "COALESCE(SUM(LENGTH(event_json)), 0)",
+        expression: "COALESCE(SUM(OCTET_LENGTH(event_json)), 0)",
       },
       {
         key: "ai_decision_traces",
         label: "KI-Entscheidungstraces",
         table: "ai_decision_traces",
-        expression: "COALESCE(SUM(LENGTH(trace_json)), 0)",
+        expression: "COALESCE(SUM(OCTET_LENGTH(trace_json)), 0)",
       },
       {
         key: "sessions",
         label: "Sessions (redigiert)",
         table: "sessions",
-        expression: "COALESCE(SUM(LENGTH(display_name)), 0)",
+        expression: "COALESCE(SUM(OCTET_LENGTH(display_name)), 0)",
       },
       {
         key: "action_receipts",
         label: "Action Receipts",
         table: "action_receipts",
-        expression: "COALESCE(SUM(LENGTH(COALESCE(error_code, ''))), 0)",
+        expression: "COALESCE(SUM(OCTET_LENGTH(COALESCE(error_code, ''))), 0)",
       },
       {
         key: "undo_snapshots",
@@ -3637,19 +3656,20 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         key: "pending_undo",
         label: "Pending Undo",
         table: "pending_undo",
-        expression: "COALESCE(SUM(LENGTH(pending_undo_json)), 0)",
+        expression: "COALESCE(SUM(OCTET_LENGTH(pending_undo_json)), 0)",
       },
       {
         key: "deck_snapshots_redacted",
         label: "Deck-Snapshots (Inhalt redigiert)",
         table: "private_deck_snapshots",
-        expression: "COALESCE(SUM(LENGTH(private_deck_snapshots_json)), 0)",
+        expression:
+          "COALESCE(SUM(OCTET_LENGTH(private_deck_snapshots_json)), 0)",
       },
       {
         key: "start_lobbies",
         label: "Start-Lobbys",
         table: "start_lobbies",
-        expression: "COALESCE(SUM(LENGTH(start_lobby_json)), 0)",
+        expression: "COALESCE(SUM(OCTET_LENGTH(start_lobby_json)), 0)",
       },
       {
         key: "account_match_participants",
@@ -3676,16 +3696,23 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         const rowCount = this.db
           .prepare(`SELECT COUNT(*) AS count FROM ${definition.table}`)
           .get() as { count: number };
-        const payload = this.db
-          .prepare(
-            `SELECT ${definition.expression} AS bytes FROM ${definition.table}`,
-          )
-          .get() as { bytes: number | bigint | null };
+        const matchSizeKey = matchSizeKeys[definition.table];
+        const payloadBytes = matchSizeKey
+          ? matches.reduce((sum, match) => sum + match.sizes[matchSizeKey], 0)
+          : Number(
+              (
+                this.db
+                  .prepare(
+                    `SELECT ${definition.expression} AS bytes FROM ${definition.table}`,
+                  )
+                  .get() as { bytes: number | bigint | null }
+              ).bytes ?? 0,
+            );
         return {
           key: definition.key,
           label: definition.label,
           rowCount: Number(rowCount.count),
-          approximatePayloadBytes: Number(payload.bytes ?? 0),
+          approximatePayloadBytes: payloadBytes,
         };
       });
   }

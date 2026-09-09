@@ -1147,6 +1147,68 @@ describe("Runner tactical plan modules", () => {
     ).toEqual(["access"]);
   });
 
+  it("keeps restricted run targets and their access commitments in separate owner routes", () => {
+    const module = tacticalModule("runner.convert_run_window");
+    const runnerContext = context(
+      [run("bonus-hq", "hq"), run("bonus-rd", "rd")],
+      {
+        runWindows: ["hq", "rd"].map((serverId) => ({
+          windowId: `bonus:${serverId}`,
+          serverId,
+          rootPlanInstanceId: "rules.restricted_action_sequence",
+          leafPlanInstanceId: `plan:runner.convert_run_window:bonus%3A${serverId}`,
+          semanticActionTypes: ["run.start"],
+          purposeCode: "continue_engine_restricted_run_sequence",
+          evidenceCode: "runner_engine_restricted_run_sequence_continuation",
+          accessCommitment: {
+            payoff: "unknown",
+            intendedAction: "access",
+            knownTargetDefinitionIds: [],
+            trashBudget: 0,
+            evidenceCode: "bound_target_access",
+          },
+          actionAssessments: {
+            [`bonus-${serverId}`]: {
+              admissible: true,
+              value: serverId === "hq" ? 80 : 140,
+              evidenceCodes: [
+                "runner_engine_restricted_run_sequence_continuation",
+              ],
+            },
+          },
+        })),
+      },
+    );
+    const proposals = module.discover(runnerContext);
+    expect(proposals).toHaveLength(2);
+    for (const proposal of proposals) {
+      const instance = instantiatePlanProposal(proposal, 10);
+      expect(
+        module.assess(instance, runnerContext, emptyPortfolio()),
+      ).toMatchObject({
+        expectedOutcome: {
+          expectedValue: proposal.target!.id === "hq" ? 80 : 140,
+        },
+      });
+      const materialized = module.materialize(
+        instance,
+        {} as never,
+        runnerContext,
+      );
+      expect(proposal.target?.kind).toBe("server");
+      expect(materialized.step.target).toEqual(proposal.target);
+      expect(
+        materialized.candidates.map((entry) => entry.candidate.actionId),
+      ).toEqual([`bonus-${proposal.target!.id}`]);
+      expect(instance.moduleState).toMatchObject({
+        signal: {
+          serverId: proposal.target!.id,
+          accessCommitment: { intendedAction: "access" },
+        },
+      });
+    }
+  });
+
   it("does not admit a run-window candidate without an explicit positive assessment", () => {
     const module = tacticalModule("runner.convert_run_window");
     const access = candidate(

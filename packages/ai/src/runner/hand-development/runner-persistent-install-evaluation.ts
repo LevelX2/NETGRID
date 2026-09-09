@@ -510,6 +510,25 @@ export function persistentEngineProfileForCard(
         (condition) => condition.kind === "requires_successful_run",
       ) === true,
   );
+  const successfulRunCredits = hint.effects?.find(
+    (effect) =>
+      effect.kind === "economy" &&
+      effect.timing === "after_successful_run" &&
+      effect.target === "run.successful_run_credit_gain" &&
+      effect.resource === "credits" &&
+      effect.repeatable === true &&
+      typeof effect.amount === "number" &&
+      effect.amount > 0,
+  );
+  if (successfulRunCredits && consumptionBlockers.length === 0) {
+    return {
+      kind: "successful_run_followup_engine",
+      outputCapabilities: ["credits"],
+      repeatable: true,
+      consumptionBlockers,
+      coverage: "persistent_engine:successful_run_credits",
+    };
+  }
   if (successfulRunFollowup && consumptionBlockers.length === 0) {
     return {
       kind: "successful_run_followup_engine",

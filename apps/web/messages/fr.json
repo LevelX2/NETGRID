@@ -38,7 +38,7 @@
       "changing": "Modification …",
       "signOut": "Se déconnecter",
       "close": "Fermer",
-      "confirmPassword": "Confirmer le mot de passe",
+      "confirmPassword": "Confirmer le mot de passe Maintenance",
       "cancel": "Annuler",
       "checkingPassword": "Vérification …",
       "confirm": "Confirmer",
@@ -315,6 +315,7 @@
   },
   "Account": {
     "panel": {
+      "retry": "Recharger",
       "loading": "Session de compte courant…",
       "signedIn": "Compte connecté",
       "admin": "Administrateur",
@@ -1734,8 +1735,11 @@
         "complete": "Terminé"
       },
       "opportunity": {
+        "target": "Choisir la cible du piratage",
+        "complete": "Terminer le piratage",
         "choice": "Décision",
-        "rez": "Rez",
+        "ice_rez": "Activer une GLACE",
+        "card_rez": "Activer d’autres cartes",
         "breaker": "Augmenter la force ou casser",
         "ability": "Capacité de la carte",
         "access": "Accès",
@@ -1744,6 +1748,7 @@
         "pass": "Passer"
       },
       "currentlyPossible": "Actuellement possible : {actions}",
+      "stagePossibility": "Repère pour cette étape : {actions} – non proposé actuellement",
       "optionCost": "{option}, coût : {cost}",
       "runActions": "Exécuter des actions",
       "rezOtherServers": "Rez sur d'autres serveurs",
@@ -2185,7 +2190,11 @@
       "agendaScored": "{subject} : noté {card}.",
       "agendaStolen": "{subject} : étole {card}.",
       "runStarted": "{subject} : démarrage d'une exécution sur {server}.",
+      "iceBypassedByInsideJob": "{subject} : a automatiquement passé {ice} avec Inside Job.",
+      "insideJobBypassDescription": "La première GLACE activée a été passée automatiquement ; ses routines n’ont pas été résolues.",
       "runContinued": "{subject} : poursuite de l'exécution sur {server}.",
+      "runContinuedToIce": "{subject} : poursuite de l'exécution sur {server} vers ICE {number}.",
+      "runContinuedToRoot": "{subject} : poursuite de l'exécution sur {server} vers la racine.",
       "runJackedOut": "{subject} : débranché.",
       "runEnded": "La course s'est terminée.",
       "cardAccessed": "{subject} : accès à {card}.",
@@ -2232,6 +2241,8 @@
       "redacted": "Un effet caché résolu.",
       "creditsGained": "{subject} : vous avez obtenu {amount, plural, one {# crédit} other {# crédits}} grâce à {source}.",
       "hostedCreditsTaken": "{subject} : a reçu {amount, plural, one {# crédit} other {# crédits}} de {source}.",
+      "allHostedCreditsTaken": "{subject} : a pris tous les crédits ({amount}) de {source}.",
+      "hostedCreditsAdded": "{subject} : a placé {amount, plural, one {# crédit} other {# crédits}} sur {source}.",
       "creditsLost": "{subject} : crédits {amount} perdus de {source}.",
       "cardsDrawn": "{subject} : a tiré des cartes {count} de {source}.",
       "cardTrashed": "{subject} : carte détruite à cause de {source}.",
@@ -2260,6 +2271,11 @@
       "resolved": "Un effet automatique de {source} résolu.",
       "automatic": "Automatique",
       "flatline": "Flatline",
+      "sourceTrashScheduledAtTurnEnd": "{source} sera détruit à la fin du tour.",
+      "cardTrashedAtTurnEnd": "{card} a été détruit à la fin du tour.",
+      "trashAtTurnEndChip": "Destruction en fin de tour",
+      "shellCountersRemoved": "{source} : {amount, plural, one {# compteur Shell retiré} other {# compteurs Shell retirés}} de {card}.",
+      "shellCountersRemaining": "Encore {amount, plural, one {# compteur Shell} other {# compteurs Shell}}",
       "corpEffect": "Effet de la Corpo"
     },
     "damageType": {

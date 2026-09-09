@@ -8,6 +8,35 @@ import { describe, expect, it } from "vitest";
 import { selectedCorpProgramTrashChoiceOptionIds } from "./corp-program-trash-choice";
 
 describe("selectedCorpProgramTrashChoiceOptionIds", () => {
+  it("includes a publicly converted Corp agenda controlled as a Runner program", () => {
+    const { input, action, choice } = fixture();
+    const converted = input.playerView.opponent.rig![1]!;
+    converted.type = "agenda";
+    converted.owner = "corp";
+    converted.installedAsRunnerProgram = {
+      memoryCost: 2,
+      scoreAsAgendaAction: true,
+    };
+    expect(
+      selectedCorpProgramTrashChoiceOptionIds(
+        input,
+        action,
+        choice,
+        choice.options,
+        () => [],
+      ),
+    ).toEqual(["card_utility_1"]);
+    delete converted.installedAsRunnerProgram;
+    expect(
+      selectedCorpProgramTrashChoiceOptionIds(
+        input,
+        action,
+        choice,
+        choice.options,
+        () => [],
+      ),
+    ).toBeUndefined();
+  });
   it("binds the exact public encounter choice and prefers a valuable breaker", () => {
     const { input, action, choice } = fixture();
 

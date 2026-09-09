@@ -103,6 +103,46 @@ function withSnapshot(value: AiDecisionInput): AiDecisionInput {
   return value;
 }
 describe("allocateCorpCentralDefenseFromAiFacts", () => {
+  it("does not subtract Runner-owned scored cards from the Corp snapshot", () => {
+    const value = withSnapshot(input());
+    value.playerView.opponent.scoreArea.push({
+      instanceId: "runner-bonus",
+      definitionId: "onr_v1_083_desperate-competitor",
+      known: true,
+      type: "event",
+      owner: "runner",
+      controller: "runner",
+    });
+    expect(
+      allocateCorpCentralDefenseFromAiFacts({ input: value }),
+    ).toMatchObject({ status: "known" });
+  });
+  it.each(["scoreArea", "rig"] as const)(
+    "subtracts Corp-owned cards in the Runner %s exactly once",
+    (zone) => {
+      const value = withSnapshot(input());
+      (
+        value as AiDecisionInput & {
+          ownDeckSnapshot: { cards: Array<{ quantity: number }> };
+        }
+      ).ownDeckSnapshot.cards[0]!.quantity = 3;
+      value.playerView.opponent[zone]!.push({
+        ...agenda("transferred"),
+        owner: "corp",
+        controller: "runner",
+      });
+      expect(
+        allocateCorpCentralDefenseFromAiFacts({ input: value }),
+      ).toMatchObject({ status: "known" });
+      value.playerView.own.scoreArea.push({
+        ...agenda("transferred"),
+        owner: "corp",
+      });
+      expect(
+        allocateCorpCentralDefenseFromAiFacts({ input: value }),
+      ).toMatchObject({ status: "unknown" });
+    },
+  );
   it("adapts complete HQ agendas and exact R&D residual inventory", () => {
     const value = withSnapshot(input());
     expect(

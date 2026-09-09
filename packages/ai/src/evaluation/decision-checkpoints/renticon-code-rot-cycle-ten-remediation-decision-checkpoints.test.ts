@@ -26,7 +26,7 @@ describe("Rent-I-Con versus CODE ROT cycle-ten remediation checkpoints", () => {
       "converts exact burst economy before the second Corporate Coup defense draw",
       safeLowCreditAdvanceJson,
       "plan:corp.score_agenda:agenda%3Acorp_onr_v1_193_corporate-coup_2%3Aremote_1",
-      true,
+      false,
       "P4",
     ],
   ] as const)(

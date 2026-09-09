@@ -17,12 +17,12 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
       ],
     ],
     [
-      "draws defense for the viable Strike Force Kali score parent",
+      "protects HQ at matchpoint before developing the slow Strike Force Kali score parent",
       realisticScoreHorizonJson,
       [
-        "plan_priority_class:P4",
+        "plan_priority_class:P2",
         "plan_module:corp.defend_servers",
-        "plan_priority_delegated_from:plan:corp.score_agenda:agenda%3Acorp_onr_v1_217_strike-force-kali_1%3Anew_remote",
+        "plan_assessment_evidence:corp_terminal_central_additional_layer_staging:hq:corp.install_card.corp_onr_v1_268_shock-r_1.hq.corp_onr_v1_268_shock-r_1.2:rez_gap_0",
       ],
     ],
   ] as const)("%s", (_label, json, requiredDecisionEvidence) => {

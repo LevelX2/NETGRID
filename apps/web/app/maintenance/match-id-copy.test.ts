@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import deMaintenanceMessages from "../../messages/maintenance/de.json";
 
 const maintenancePageSource = readFileSync(
-  new URL("./page.tsx", import.meta.url),
+  new URL("./status-view.tsx", import.meta.url),
   "utf8",
 );
 

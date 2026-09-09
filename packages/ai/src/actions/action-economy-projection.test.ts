@@ -8,6 +8,47 @@ import { describe, expect, it } from "vitest";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 
 describe("action economy projection", () => {
+  it("keeps a current restricted payout separate from all general liquidity", () => {
+    const projection = project(restrictedCreditAction());
+    expect(projection).toMatchObject({
+      kind: "restricted_credit",
+      timing: "immediate",
+      creditRestriction: "restricted",
+      reliability: "guaranteed",
+      restrictedCreditPayout: {
+        amount: 3,
+        usableFor: "corp_install_or_rez",
+        cleanup: "end_of_turn",
+        sourceAdvancementCounterCost: 1,
+      },
+    });
+    expect(projection.grossLiquidCreditGain).toBeUndefined();
+    expect(projection.netLiquidCreditGain).toBeUndefined();
+  });
+
+  it.each([
+    "restrictedCreditGainAmount",
+    "restrictedCreditGainUsableFor",
+    "restrictedCreditGainCleanup",
+    "restrictedCreditGainComplete",
+    "cardImplementationAdvancementCounterCost",
+  ])("does not invent a payout with missing %s", (field) => {
+    const action = restrictedCreditAction();
+    delete action.payload![field];
+    // An unrelated free-credit field cannot repair a restricted grant.
+    action.payload!.gainCreditsAmount = 99;
+    const projection = project(action);
+    expect(projection.reliability).toBe("unknown");
+    expect(projection.restrictedCreditPayout).toBeUndefined();
+    expect(projection.netLiquidCreditGain).toBeUndefined();
+  });
+
+  it("does not accept a payout bound to another ability source", () => {
+    const action = restrictedCreditAction();
+    action.abilityRef!.sourceCardInstanceId = "other-source";
+    expect(() => project(action)).toThrow("canonical capability binding");
+  });
+
   it("projects the basic credit action as a guaranteed liquid +1", () => {
     const projection = project(
       legalAction("basic-credit", "gain_credit", {
@@ -211,6 +252,21 @@ describe("action economy projection", () => {
       reliability: "guaranteed",
       source: "legal_action_payload",
       confidence: "high",
+    });
+  });
+
+  it("preserves an Engine-quoted zero draw yield as hand consumption", () => {
+    expect(
+      project(
+        legalAction("empty-stack-draw", "play_event", {
+          payload: { drawCardsAmount: 0 },
+        }),
+      ),
+    ).toMatchObject({
+      cardsDrawn: 0,
+      cardsConsumed: 1,
+      netHandDelta: -1,
+      source: "legal_action_payload",
     });
   });
 
@@ -459,6 +515,29 @@ function project(action: LegalAction) {
     throw new Error("Expected economy projection");
   }
   return candidate.economyProjection;
+}
+
+function restrictedCreditAction(): LegalAction {
+  return legalAction("restricted-payout", "activated_card_ability", {
+    source: "payout-source",
+    costs: [],
+    abilityRef: {
+      sourceCardInstanceId: "payout-source",
+      sourceAbilityId: "test-card:payout",
+    },
+    payload: {
+      cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+      cardImplementationAbilityId: "test-card:payout",
+      cardImplementationAbilityKey: "payout",
+      cardId: "payout-source",
+      cardImplementationEffectKind: "gain_temporary_corp_credits",
+      restrictedCreditGainAmount: 3,
+      restrictedCreditGainUsableFor: "corp_install_or_rez",
+      restrictedCreditGainCleanup: "end_of_turn",
+      restrictedCreditGainComplete: true,
+      cardImplementationAdvancementCounterCost: 1,
+    },
+  });
 }
 
 function legalAction(

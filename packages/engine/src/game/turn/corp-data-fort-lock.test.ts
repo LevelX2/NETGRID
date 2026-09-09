@@ -114,6 +114,25 @@ function proteus9dFixture(withLock = true): GameState {
 }
 
 describe("Proteus Phase 9d data-fort creation lock", () => {
+  it("does not use install/rez credits to remove the lock", () => {
+    const state = proteus9dFixture();
+    const isRemoval = (action: ReturnType<typeof getLegalActions>[number]) =>
+      action.payload?.corpAbility ===
+      "trash_new_data_fort_creation_lock_source";
+    const initial = getLegalActions(state, "corp").find(isRemoval)!;
+    const cost = initial.costs[0]!.credits!;
+    state.corp.credits = cost + 2;
+    state.corpTemporaryInstallRezCredits = {
+      sourceCardInstanceId: "contract",
+      sourceDefinitionId: "onr_proteus_059_government-contract",
+      remaining: 3,
+      usableFor: "corp_install_or_rez",
+      returnUnusedAtTurnEnd: true,
+    };
+    expect(getLegalActions(state, "corp").some(isRemoval)).toBe(false);
+    state.corp.credits += 1;
+    expect(getLegalActions(state, "corp").some(isRemoval)).toBe(true);
+  });
   it("blocks new-remote Corp installs while keeping existing-fort installs legal", () => {
     const state = proteus9dFixture();
     const actions = getLegalActions(state, "corp");

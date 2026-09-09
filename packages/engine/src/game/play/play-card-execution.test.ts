@@ -288,6 +288,27 @@ describe("play-card-execution", () => {
     expect(targetState.corp.hq).toContain(OPERATION_ID);
   });
 
+  it("does not pay an operation with the included install/rez reserve", () => {
+    const calls: string[] = [];
+    const targetState = state();
+    targetState.corpTemporaryInstallRezCredits = {
+      sourceCardInstanceId: "contract",
+      sourceDefinitionId: "onr_proteus_059_government-contract",
+      remaining: 3,
+      usableFor: "corp_install_or_rez",
+      returnUnusedAtTurnEnd: true,
+    };
+    const before = JSON.stringify(targetState);
+    expect(() =>
+      handlePlayCardExecution(
+        hostFor(targetState, calls),
+        legalAction("play_operation", OPERATION_ID, 3),
+      ),
+    ).toThrow("nicht zweckgebundene Credits");
+    expect(calls).toEqual([]);
+    expect(JSON.stringify(targetState)).toBe(before);
+  });
+
   it("does not synthesize card-specific hidden-zone or bad-publicity payloads", () => {
     const hiddenCalls: string[] = [];
     const hiddenState = state();

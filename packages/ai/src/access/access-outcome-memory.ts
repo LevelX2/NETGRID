@@ -1,4 +1,6 @@
 import type { AiDecisionInput, PublicGameEvent } from "@netgrid/shared";
+import { reconstructBeliefState } from "../belief-state";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import type {
   AccessDecisionReason,
   AccessIntent,
@@ -179,19 +181,27 @@ export function deriveObservedRemoteNoProgressAccessMemory(
     return undefined;
   }
   if (!serverId?.startsWith("remote_")) return undefined;
-  const currentKnownRootDefinitionIds = currentKnownRemoteRootDefinitionIds(
-    input,
-    serverId,
-  );
-  if (currentKnownRootDefinitionIds.length === 0) return undefined;
-  if (currentKnownRemoteHasAgenda(input, serverId)) return undefined;
+  const currentKnownRoots = currentKnownRemoteRoots(input, serverId);
+  if (currentKnownRoots.length === 0) return undefined;
+  if (
+    currentKnownRoots.some(
+      ({ definitionId }) =>
+        CARD_DEFINITIONS_BY_ID[definitionId]?.type === "agenda",
+    )
+  )
+    return undefined;
   const history = mergedPublicHistory(input);
   const lastAccessIndex = findLastIndex(
     history,
     (event) =>
       publicActor(event) === "runner" &&
       publicActionType(event) === "access_card" &&
-      eventServerId(event) === serverId,
+      eventServerId(event) === serverId &&
+      currentKnownRoots.some((root) =>
+        root.sourceEventId
+          ? root.sourceEventId === event.eventId
+          : root.definitionId === stringPayloadValue(event, "cardDefinitionId"),
+      ),
   );
   if (lastAccessIndex < 0) return undefined;
   const lastRunIndex = findLastIndex(
@@ -209,11 +219,19 @@ export function deriveObservedRemoteNoProgressAccessMemory(
       publicActor(event) === "runner" &&
       (publicActionType(event) === "trash_accessed_card" ||
         publicActionType(event) === "steal_agenda") &&
-      eventServerId(event) === serverId,
+      eventServerId(event) === serverId &&
+      !removesIdentifiedSibling(event, accessEvent),
   );
   if (progressEvent) return undefined;
   if (remoteChangedAfterAccess(input, serverId, accessEvent)) return undefined;
-  const declineEvent = afterAccess.find(
+  const nextAccessIndex = afterAccess.findIndex(
+    (event) =>
+      publicActionType(event) === "access_card" &&
+      eventServerId(event) === serverId,
+  );
+  const thisAccessOutcome =
+    nextAccessIndex < 0 ? afterAccess : afterAccess.slice(0, nextAccessIndex);
+  const declineEvent = thisAccessOutcome.find(
     (event) =>
       event.stateVersionAfter > accessEvent.stateVersionAfter &&
       publicActor(event) === "runner" &&
@@ -224,7 +242,7 @@ export function deriveObservedRemoteNoProgressAccessMemory(
   const reason = declineEvent ? "reserve_would_break" : "target_unavailable";
   const accessedDefinitionId =
     stringPayloadValue(accessEvent, "cardDefinitionId") ??
-    currentKnownRootDefinitionIds[0]!;
+    currentKnownRoots[0]!.definitionId;
   const remoteFingerprint = knownRootFingerprint(accessedDefinitionId);
   const record: AccessOutcomeMemoryRecord = {
     matchId: input.matchId,
@@ -288,30 +306,38 @@ function knownRootFingerprint(knownRootDefinitionId: string): string {
   return `known_root:${knownRootDefinitionId}`;
 }
 
-function currentKnownRemoteRootDefinitionIds(
+function currentKnownRemoteRoots(
   input: AiDecisionInput,
   serverId: string,
-): string[] {
+): Array<{ definitionId: string; sourceEventId?: string }> {
   const server = input.playerView.servers.find(
     (candidate) => candidate.id === serverId,
   );
-  if (!server) return [];
-  return server.root
-    .filter((card) => card.known && card.definitionId)
-    .map((card) => card.definitionId!)
-    .sort();
-}
-
-function currentKnownRemoteHasAgenda(
-  input: AiDecisionInput,
-  serverId: string,
-): boolean {
-  const server = input.playerView.servers.find(
-    (candidate) => candidate.id === serverId,
+  if (!server || server.root.length === 0) return [];
+  const rememberedRoots = new Map(
+    reconstructBeliefState(input)
+      .runnerOpponentModel?.knownPositionMemory.filter(
+        (entry) => entry.zone === serverId && entry.invalidatedBy.length === 0,
+      )
+      .map((entry) => [entry.positionKey, entry]),
   );
-  return (
-    server?.root.some((card) => card.known && card.type === "agenda") ?? false
-  );
+  const definitions: Array<{ definitionId: string; sourceEventId?: string }> =
+    [];
+  for (const [index, card] of server.root.entries()) {
+    const remembered = rememberedRoots.get(`root:${index}`);
+    const definitionId = card.known
+      ? card.definitionId
+      : remembered?.definitionId;
+    // A remembered declined card does not answer a different unknown position.
+    if (!definitionId) return [];
+    definitions.push({
+      definitionId,
+      ...(!card.known && remembered
+        ? { sourceEventId: remembered.sourceEventId }
+        : {}),
+    });
+  }
+  return definitions;
 }
 
 function mergedPublicHistory(input: AiDecisionInput): PublicGameEvent[] {
@@ -333,8 +359,24 @@ function remoteChangedAfterAccess(
     (event) =>
       event.stateVersionAfter > accessEvent.stateVersionAfter &&
       eventServerId(event) === serverId &&
-      remoteChangeActionTypes.has(publicActionType(event)),
+      remoteChangeActionTypes.has(publicActionType(event)) &&
+      !removesIdentifiedSibling(event, accessEvent),
   );
+}
+
+function removesIdentifiedSibling(
+  event: PublicGameEvent,
+  accessEvent: PublicGameEvent,
+): boolean {
+  if (
+    !["trash_accessed_card", "steal_agenda", "score_agenda"].includes(
+      publicActionType(event),
+    )
+  )
+    return false;
+  const accessed = stringPayloadValue(accessEvent, "installedPositionKey");
+  const removed = stringPayloadValue(event, "installedPositionKey");
+  return Boolean(accessed && removed && accessed !== removed);
 }
 
 const remoteChangeActionTypes = new Set([

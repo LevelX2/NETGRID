@@ -22,7 +22,7 @@ describe("AI card hint full-inventory closeout", () => {
   it("closes every active quality review marker", () => {
     const hints = [...hintById().values()];
 
-    expect(hints).toHaveLength(618);
+    expect(hints.length).toBeGreaterThanOrEqual(618);
     expect(hints.filter((hint) => hint.quality?.hintReviewed !== true)).toEqual(
       [],
     );

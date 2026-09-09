@@ -10,6 +10,63 @@ import {
 } from "./plan-first-live-runtime";
 
 describe("Runner cost/penalty support plan continuation", () => {
+  it("preserves the run owner when a zero-cost movement starts an encounter-tax payment", () => {
+    const action = {
+      ...paymentAction(90),
+      actionId: "runner.continue_run",
+      type: "continue_run",
+      source: "game_rule",
+      costs: [],
+      payload: {},
+      timingPoint: "run.jack_out_window",
+    } as LegalAction;
+    const before = traceBidInput(90, [action]);
+    delete before.playerView.pendingChoice;
+    before.playerView.timingPoint = "run.jack_out_window";
+    before.playerView.run!.phase = "movement";
+    const selected = planResult(90, action.actionId, "rig-root");
+    selected.portfolio = runPortfolio(90);
+    selected.route = {
+      ...selected.route,
+      planInstanceId: selected.portfolio.executorInstanceId!,
+      head: { ...selected.route.head, actionType: "continue_run" },
+      step: { ...selected.route.step, stepId: "run_211:convert" },
+    };
+    reconcileSelectedRunnerCostPenaltySupportOrigin(
+      before,
+      selected,
+      runPortfolio(89),
+    );
+    expect(selected.portfolio.pendingRunnerCostPenaltySupportOrigin).toEqual({
+      rootPlanInstanceId: selected.portfolio.rootForegroundInstanceId,
+      executorInstanceId: selected.portfolio.executorInstanceId,
+      sourceStepId: "run_211:convert",
+      originalActionId: action.actionId,
+      selectedAtStateVersion: 90,
+    });
+    const support = supportAction(91, action.actionId);
+    const next = traceBidInput(91, [support]);
+    delete next.playerView.pendingChoice;
+    next.playerView.timingPoint = "run.movement_rez_window";
+    const resolution = resolvePlanBoundRunnerCostPenaltyContinuation(
+      { input: next, actionCandidates: [], turnKey: "runner:turn:14" },
+      selected.portfolio,
+    );
+    expect(resolution?.actionId).toBe(support.actionId);
+    expect(resolution?.origin.rootPlanInstanceId).toBe(
+      selected.portfolio.rootForegroundInstanceId,
+    );
+    expect(resolution?.origin.leafPlanInstanceId).toBe(
+      selected.portfolio.executorInstanceId,
+    );
+    next.playerView.stateVersion = 93;
+    expect(() =>
+      resolvePlanBoundRunnerCostPenaltyContinuation(
+        { input: next, actionCandidates: [], turnKey: "runner:turn:14" },
+        selected.portfolio,
+      ),
+    ).toThrow();
+  });
   it("preserves the original plan origin across a payment-support action", () => {
     const originalAction = paymentAction(90);
     const originalResult = planResult(90, originalAction.actionId, "rig-root");

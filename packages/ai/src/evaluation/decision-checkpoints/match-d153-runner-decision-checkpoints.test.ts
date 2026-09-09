@@ -1,3 +1,4 @@
+import { hashGameState } from "@netgrid/engine";
 import { describe, expect, it } from "vitest";
 
 import payForEarlyRemoteAccessD7Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-d153-01-pay-for-early-remote-access-d7.json";
@@ -44,7 +45,7 @@ describe("match D153 Runner decision checkpoints", () => {
       buildRemoteReserveD161Json,
     ],
     [
-      "F08 cashes out Broker for the urgent remote threat at D167",
+      "F08 directly contests the urgent remote once its exact 27-credit path is affordable",
       liquidateForRemoteD167Json,
     ],
   ])("satisfies %s", (_label, json) => {
@@ -55,6 +56,29 @@ describe("match D153 Runner decision checkpoints", () => {
     ["the breaker-AP coverage draw at D61", preserveHqFacecheckD61Json],
   ])("keeps the positive control: %s", (_label, json) => {
     expectCheckpointToPass(fixture(json));
+  });
+
+  it("F08 still cashes out Broker when the exact remote path has a funding gap", () => {
+    const checkpoint = fixture(liquidateForRemoteD167Json);
+    checkpoint.engine.testOnlyGameState.runner.credits = 26;
+    checkpoint.engine.stateHash = hashGameState(
+      checkpoint.engine.testOnlyGameState,
+    );
+    checkpoint.source.kind = "synthetic_companion";
+    checkpoint.source.findingId = "F08-EXACT-REMOTE-FUNDING-GAP";
+    checkpoint.expectation = {
+      acceptableActions: [
+        {
+          actionId:
+            "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:withdraw_credits",
+        },
+      ],
+      planExecution: {
+        acceptablePlanKinds: ["runner.credit_bank"],
+        acceptableCapabilities: ["credit_bank_cash_out"],
+      },
+    };
+    expectCheckpointToPass(checkpoint);
   });
 });
 

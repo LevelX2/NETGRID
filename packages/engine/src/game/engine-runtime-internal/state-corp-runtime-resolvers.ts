@@ -534,7 +534,6 @@ import {
   scoredAgendaCounterCreditProfileForDefinition,
   scoredAgendaCounterCreditProfileForPayload,
   SCORED_REVEAL_AGENDA_SOURCES,
-  SERVER_DIFFICULTY_UPGRADE_SOURCES,
 } from "../../mechanics/agenda-scoring";
 import { TAG_HANDSIZE_ASSET_SOURCE } from "../../mechanics/global-modifiers";
 import { COUNTER_UPGRADE_SOURCES } from "../../mechanics/hosting-counters";
@@ -609,25 +608,6 @@ export function createStateCorpRuntimeResolvers(
     );
   }
 
-  function serverDifficultyReductionFromUpgrades(
-    state: GameState,
-    agendaId: CardInstanceId,
-  ): number {
-    const zone = mustInstance(state.cardInstances, agendaId).zone;
-    if (zone.side !== "corp" || zone.zone !== "serverRoot" || !zone.serverId)
-      return 0;
-    const server = mustServer(state, zone.serverId);
-    return server.root.reduce((sum, rootCardId) => {
-      if (rootCardId === agendaId) return sum;
-      const instance = mustInstance(state.cardInstances, rootCardId);
-      if (!instance.rezzed) return sum;
-      const definitionId = definitionFor(state, rootCardId).id;
-      return SERVER_DIFFICULTY_UPGRADE_SOURCES.has(definitionId)
-        ? sum + 1
-        : sum;
-    }, 0);
-  }
-
   function swapCorpHqAndRdTop(state: GameState): void {
     const hqCardId = state.corp.hq[0];
     const rdCardId = state.corp.rd[0];
@@ -668,7 +648,6 @@ export function createStateCorpRuntimeResolvers(
 
   return {
     serverDifficultyIncreaseFromRunCounters,
-    serverDifficultyReductionFromUpgrades,
     swapCorpHqAndRdTop,
     spendRecurringTraceCreditPool,
   };

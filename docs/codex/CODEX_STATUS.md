@@ -57,6 +57,13 @@ Führend:
 
 ## KI
 
+Die Corp erzeugt aus fehlenden HQ-Agendas keinen blinden Agenda-Suchauftrag.
+Vorhandenes Handpotenzial, Economy und Defense werden ohne diesen künstlichen
+Score-Parent entwickelt. Passives Runner-Einkommen nach erfolgreichen Runs
+und begrenzte Corp-Guthaben werden mit Kosten, Reserven und begrenztem
+Amortisationshorizont bewertet. Führend sind die Abschnitte 27.5, 28.2 und 28.6
+der `docs/architecture/ai/planning-architecture.md`.
+
 Die produktive KI ist Plan-first. Residente Planinstanzen, side-spezifische Scheduler, TurnPlanner, Commitment/Execution Lease, Kampagnenfortsetzung und eng gebundene Choice-Auflösung bilden den aktuellen Entscheidungsweg. Doctrine, Hints, Sensoren und Quotes liefern Information; sie besitzen keine parallele Action-Autorität.
 
 Führend:
@@ -70,10 +77,68 @@ Führend:
 
 Weitere KI-Arbeit ist überwiegend Play-Strength- und Modulerweiterung. Neue Beobachtungen werden als kleine Activities und Regressionstests geführt, nicht als neue globale Heuristikschicht oder dauerhafte Reviewchronik.
 
+Die aktuellen Grenzen von zweckgebundener Corp-Finanzierung und
+zonenspezifischer Fallen-Vorbereitung sind in
+`docs/architecture/ai/hidden-node-capability-review.md` abgegrenzt. Der
+charaktererhaltende Hidden-Node-Vergleich begründet derzeit weder einen
+Standarddeck-Tausch noch pauschale KI-Boni; die Originalliste bleibt
+unverändert. Im aktiven Capability-Paket entsteht eine eng gebundene
+zweckgebundene Economy-Finanzierung mit Rückgabe an den tatsächlichen
+Verbraucher. Auszahlung → tatsächlicher Economy-Rez sowie Auszahlung →
+Defense-Rez mit erhaltenem Parent und beendetem Support sind geprüft, letzteres
+auch mit Mobile Barricade im unveränderten Original-Corpdeck. Ein bereits
+rezzed und erschöpfter Contract wird für einen endlichen terminalen ICE-Rez-
+Bedarf aufgeladen, bei Bedarf um einen allgemeinen Credit ergänzt und über
+den Zugwechsel in Auszahlung/Rezzing überführt. Bedarf und Quelle werden
+nach jedem Schritt neu geprüft; gespeicherte Counter sind keine Liquidität.
+Erstinvestition und weitergehende Verbraucher bleiben begrenzt. Der 70er-
+Vergleich vor dem abschließenden Main-Abgleich ergibt 0→1 Corp-Siege,
+42→45 Corp-Punkte und 57→56 Nullscore-Niederlagen bei gültigen Replays ohne
+Runtimefehler. Die neue Contract-Vorbereitung wurde darin nicht ausgewählt;
+dieser kleine gemischte Systemeffekt ist kein allgemeiner Stärkennachweis.
+Die Current-State-Review grenzt vorbereitete Capability-Fixtures von
+Spielevidence und dem Integrationsstand ab. Die ehemals offenen 18
+Main-Baseline-Erwartungsfehler waren veraltete Testbindungen an historische
+Einzelaktionen, absolute Simulationspositionen und Vollspielstände. Sie sind
+gegen die aktuellen Owner-, Executor-, Capability-, Legalitäts- und
+Replayverträge neu gebunden. Der lokale Gesamttest vom 2026-09-08 ist vollständig
+grün: 5.215 AI-Tests in 619 Dateien über drei feste Shards, 3.777 Tests der
+übrigen Pakete, acht Spec-Tests, sieben Selfplay-Evidence-Tests und 15 E2E-Tests.
+Discovery, AI-Strukturgates, Paketgrenzen, Typechecks und Gesamtbuild sind
+ebenfalls bestanden. SP-082-Finanzierung, R&D-Protocol-Ordering und Test Spin
+verwenden jetzt gezielt hergestellte Engine-Pfade statt vorausgesetzter
+Vollspielverläufe. Dabei wurde zusätzlich ein echter Test-Spin-Fehler behoben:
+direktes Ausspielen, Such-Choice, Coverage-MU-Freigabe und Runstart-Ordering
+erhalten denselben exakt gebundenen Ursprung. Fehlende oder fremde Bindungen
+bleiben fail-closed; Replay und StateHash sind für die Pfade geprüft.
+Der E2E-Runner wartet nach Prozessende begrenzt auf die Dateifreigabe durch
+Windows; ein dauerhaft gesperrtes Artefakt lässt den Befehl weiterhin scheitern.
+Die finale unveränderte 40-Spiele-Population
+der Metaserie enthält 10.851 Entscheidungen ohne technische Audit-Flags;
+die 707 angewandten Choices sind gegen die LegalActions geprüft.
+Für wachsende Kataloge und
+Verhaltenssimulationen gilt der stabile Testvertrag aus
+`docs/architecture/test-tiers-and-package-boundaries-2026-07-10.md`.
+
 Historische Selfplay-Cycle-Reviews, Markdown-Matrix, Reporting-State und
 versionierte HTML-Blockberichte wurden nach dem abschließenden idempotenten
 Import vom 2026-08-30 entfernt. Führend sind die lokale SQLite-Registry, ihre
 Sicherungen und `docs/runbooks/ai-selfplay-evidence-registry.md`.
+
+Die Express-Shutdown-Metaserien (Registry-Paarungen 387, 395, 396) begründen
+keinen automatischen Standarddeck-Tausch. Der Killkern konvertiert tatsächlich;
+offene Arbeit betrifft geschützte Scorelinien, Archives-Schutz gegen sichtbare
+HQ-Umleitung und rechtzeitige Runner-Vorsorge. Eine mögliche verdeckte
+Tagabwehr ist weder eine sichere Abwehr noch ein garantierter Kill:
+Versuchskosten und alternative Gewinnlinien bleiben gemeinsam zu bewerten.
+Die verifizierten SP-251/252 korrigieren lokale Run-Dispositionsgrenzen und
+die Engine-Trennung von Ressourcenpool und gedeckeltem Ausgabenbudget;
+`planning-architecture.md` hält diese bestehenden Owner-Grenzen fest.
+Die fokussierte Integration bestätigt beide Fixes und einen vollständig
+aktions-/owner-/ressourcengleichen Exact-Replay. Die drei damals
+mitgeprüften älteren Score-Erwartungen sind im aktuellen Testvertrag anhand
+der verantwortlichen Root-/Support-Owner statt historischer Leaf-Aktionen
+abgedeckt.
 
 ## Plattform und Betrieb
 

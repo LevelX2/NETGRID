@@ -25,8 +25,11 @@ describe("deck strategy completeness gate", () => {
     cards: Array<{ cardId: string; quantity: number }>;
   }>;
 
-  it("classifies all 49 active standard decks and exposes under-equipped lists deterministically", () => {
-    expect(activeDecks).toHaveLength(49);
+  it("classifies every active standard deck and preserves the catalog floor", () => {
+    // Catalog growth must not invalidate this completeness gate. The lower bound
+    // still catches accidental bulk removal; the loop below proves coverage for
+    // every currently active deck, regardless of the current catalog size.
+    expect(activeDecks.length).toBeGreaterThanOrEqual(50);
     const neutralDeckNames: string[] = [];
 
     for (const deck of activeDecks) {

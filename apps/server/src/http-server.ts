@@ -2906,6 +2906,32 @@ async function routeHttp(
       return;
     }
 
+    const currentAiInputRoute =
+      /^\/api\/storage\/maintenance\/analysis\/matches\/([^/]+)\/current-ai-input$/.exec(
+        url.pathname,
+      );
+    if (currentAiInputRoute && request.method === "GET") {
+      const matchId = decodeURIComponent(currentAiInputRoute[1] ?? "");
+      if (
+        !checkRateLimit(
+          response,
+          rateLimiter,
+          "token_probe",
+          request,
+          deploymentConfig,
+          `storage-current-ai-input:${matchId}`,
+        )
+      )
+        return;
+      const context = await service.storageMaintenanceCurrentAiInput(matchId);
+      sendJson(
+        response,
+        context ? 200 : 404,
+        context ?? { error: { code: "not_found" } },
+      );
+      return;
+    }
+
     const maintenanceAnalysisRoute = MAINTENANCE_ANALYSIS_BUNDLE_ROUTE.exec(
       url.pathname,
     );
@@ -5260,6 +5286,9 @@ function isLocalProductProfile(deploymentConfig: DeploymentConfig): boolean {
 function isExplicitLocalReadOnlyAnalysisRoute(pathname: string): boolean {
   return (
     MAINTENANCE_ANALYSIS_BUNDLE_ROUTE.test(pathname) ||
+    /^\/api\/storage\/maintenance\/analysis\/matches\/[^/]+\/current-ai-input$/.test(
+      pathname,
+    ) ||
     MAINTENANCE_DECISION_ANALYSIS_ROUTE.test(pathname) ||
     MAINTENANCE_AI_TRACE_INDEX_ROUTE.test(pathname)
   );

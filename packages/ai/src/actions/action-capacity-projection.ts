@@ -67,10 +67,19 @@ function actionCapacityProjectionWithListedCost(
     0,
     grossActionsGained - generatedActionsConsumedByCurrentAction,
   );
-  const actionDebt =
-    action.type === "forgo_action"
-      ? Math.max(1, nonNegativeInteger(action.payload?.forgoActionsPending))
-      : 0;
+  const createsActionDebt = action.type === "purge_runner_virus_counters";
+  const debtAmount = action.payload?.actionDebtAdded;
+  const minimumAvailableActions =
+    action.payload?.actionCapacityMinimumAvailableActions;
+  const debtQuoteKnown =
+    action.payload?.purgeModel === "future_action_debt" &&
+    typeof debtAmount === "number" &&
+    Number.isSafeInteger(debtAmount) &&
+    debtAmount > 0 &&
+    typeof minimumAvailableActions === "number" &&
+    Number.isSafeInteger(minimumAvailableActions) &&
+    minimumAvailableActions >= 0;
+  const actionDebt = createsActionDebt && debtQuoteKnown ? debtAmount : 0;
   const gainAmountPerTurn = positiveInteger(
     action.payload?.actionCapacityGainAmountPerTurn,
   );
@@ -80,19 +89,18 @@ function actionCapacityProjectionWithListedCost(
   const source =
     grossActionsGained > 0 || gainAmountPerTurn !== undefined
       ? "legal_action_payload"
-      : actionDebt > 0
+      : createsActionDebt
         ? "action_debt_contract"
         : "unknown";
-  const kind =
-    actionDebt > 0
-      ? "action_debt"
-      : timing === "future_turn_start" && gainAmountPerTurn !== undefined
-        ? "future_recurring_gain"
-        : grossActionsGained > 0 && restriction !== "unrestricted"
-          ? "immediate_restricted_gain"
-          : grossActionsGained > 0
-            ? "immediate_unrestricted_gain"
-            : "non_action_capacity";
+  const kind = createsActionDebt
+    ? "action_debt"
+    : timing === "future_turn_start" && gainAmountPerTurn !== undefined
+      ? "future_recurring_gain"
+      : grossActionsGained > 0 && restriction !== "unrestricted"
+        ? "immediate_restricted_gain"
+        : grossActionsGained > 0
+          ? "immediate_unrestricted_gain"
+          : "non_action_capacity";
   const allowedActionTypes = allowedActionTypesFor(action, restriction);
   const allowedCardType =
     restriction === "program_install_only" &&
@@ -102,7 +110,10 @@ function actionCapacityProjectionWithListedCost(
   const temporaryCredits = nonNegativeInteger(
     action.payload?.actionCapacityTemporaryCredits,
   );
-  const reliability = actionCapacityReliability(action, source);
+  const reliability =
+    createsActionDebt && !debtQuoteKnown
+      ? "unknown"
+      : actionCapacityReliability(action, source);
   const explicitSourceCounterType = stringPayload(
     action,
     "cardImplementationSourceCounterType",
@@ -158,6 +169,7 @@ function actionCapacityProjectionWithListedCost(
     ...(temporaryCredits > 0 ? { temporaryCredits } : {}),
     listedActionCost,
     preExistingActionCost,
+    ...(createsActionDebt && debtQuoteKnown ? { minimumAvailableActions } : {}),
     grossActionsGained,
     generatedActionsConsumedByCurrentAction,
     followupActionCapacity,
@@ -193,7 +205,7 @@ function actionCapacityTiming(
 ): ActionCapacityProjection["timing"] {
   const timing = stringPayload(action, "actionCapacityTiming");
   if (timing === "immediate" || timing === "future_turn_start") return timing;
-  if (action.type === "forgo_action") return "debt";
+  if (action.type === "purge_runner_virus_counters") return "debt";
   if (grossActionsGained > 0) return "immediate";
   return "unknown";
 }

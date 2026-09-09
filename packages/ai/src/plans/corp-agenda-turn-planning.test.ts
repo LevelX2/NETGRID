@@ -3,23 +3,34 @@ import { describe, expect, it } from "vitest";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type { CorpScoreProjectSignal } from "./corp-core-plan-modules";
-import type { CorpDefenseSignal } from "./corp-core-plan-modules";
+import type {
+  CorpDefenseSignal,
+  CorpEconomyNeedSignal,
+} from "./corp-core-plan-modules";
+import { planInstanceIdForProposal } from "./plan-instance";
 import {
   buildPlanningRulesContext,
   buildPlanningStateIdentity,
 } from "./turn-planning-contracts";
 import { buildCorpAgendaTurnPlanningSlice } from "./corp-agenda-turn-planning";
 import { campaignDisposition } from "./corp-agenda-turn-planning";
+import type { KnownCorpFundedIceInstallRouteProjection } from "../runtime/corp-funded-score-protection";
 
 describe("Corp agenda turn-planning vertical slice", () => {
   it("builds pure rush, combined rush, and safe setup without duplicate payoff ownership", () => {
     const input = decisionInput();
-    const slice = buildSlice(input, project(2), [
-      agendaCandidate(),
-      iceCandidate("remote-ice", "remote_1"),
-      iceCandidate("rd-ice", "rd"),
-      economyCandidate(),
-    ]);
+    const scoreProject = project(2);
+    const slice = buildSlice(
+      input,
+      scoreProject,
+      [
+        agendaCandidate(),
+        iceCandidate("remote-ice", "remote_1"),
+        iceCandidate("rd-ice", "rd"),
+        economyCandidate(),
+      ],
+      fundedProviders(scoreProject),
+    );
 
     expect(slice.lines.map((line) => line.family).sort()).toEqual([
       "combined_rush",
@@ -49,6 +60,73 @@ describe("Corp agenda turn-planning vertical slice", () => {
       ).toBe(true);
     }
   });
+
+  it.each([
+    "same_card",
+    "staging",
+    "unfunded",
+    "joint_credit_gap",
+    "unbound_central",
+    "mismatched_action",
+  ])(
+    "excludes combined protection without a jointly executable Defense witness: %s",
+    (kind) => {
+      const input = decisionInput();
+      const scoreProject = project(2);
+      const candidates = [
+        agendaCandidate(),
+        iceCandidate("remote-ice", "remote_1"),
+        iceCandidate("rd-ice", "rd"),
+      ];
+      const providers = fundedProviders(scoreProject);
+      const remote = providers[0]!;
+      const central = providers[1]!;
+      if (
+        remote.kind !== "score_protection_install" ||
+        central.kind !== "generic" ||
+        !central.installRoute
+      )
+        throw new Error("invalid test witness");
+      if (kind === "same_card") {
+        candidates[2]!.sourceCardInstanceId = "remote-ice";
+        central.installRoute = {
+          ...central.installRoute,
+          projection: {
+            ...central.installRoute.projection,
+            sourceCardInstanceId: "remote-ice",
+          },
+        };
+      }
+      if (kind === "staging")
+        providers[0] = scoreProtectionProvider(
+          scoreProject.protectionNeed!.needId,
+          "remote-ice",
+        );
+      if (kind === "unfunded")
+        remote.projection = { ...remote.projection, funded: false };
+      // Each install+rez costs 4 and individually preserves the 3-credit score reserve.
+      // The combined 8-credit defense cannot preserve that reserve from 10 credits.
+      if (kind === "joint_credit_gap") {
+        remote.projection = protectionProjection("remote-ice", "remote_1", 4);
+        central.installRoute = {
+          ...central.installRoute,
+          projection: protectionProjection("rd-ice", "rd", 4),
+        };
+      }
+      if (kind === "unbound_central") providers.pop();
+      if (kind === "mismatched_action") central.actionIds = ["unrelated"];
+      const slice = buildSlice(input, scoreProject, candidates, providers);
+      expect(slice.lines.some((line) => line.family === "combined_rush")).toBe(
+        false,
+      );
+      expect(slice.lines.some((line) => line.family === "pure_rush")).toBe(
+        true,
+      );
+      expect(slice.lines.some((line) => line.family === "safe_setup")).toBe(
+        true,
+      );
+    },
+  );
 
   it("admits a bounded rush-versus-safe mix for the Engine RNG domain", () => {
     const input = decisionInput();
@@ -105,6 +183,7 @@ describe("Corp agenda turn-planning vertical slice", () => {
       actionIds: undefined,
       feasible: false,
       protectionNeed: {
+        ...project(2).protectionNeed,
         needId: "score-protection:agenda-1:remote_1:revision-2",
         parentProjectId: "agenda:agenda-1:remote_1",
         targetServerId: "remote_1",
@@ -138,6 +217,150 @@ describe("Corp agenda turn-planning vertical slice", () => {
       "agenda_slice_missing_exact_agenda_head",
     );
   });
+
+  it("excludes an infeasible non-opening agenda head instead of publishing a false complete rush line", () => {
+    const input = decisionInput();
+    const { openingRush: _openingRush, ...nonOpeningProject } = project(2);
+    const blocked = {
+      ...nonOpeningProject,
+      feasible: false,
+      evidenceCode: "corp_score_horizon_unbounded:new_remote",
+    } satisfies CorpScoreProjectSignal;
+
+    const slice = buildSlice(input, blocked, [
+      agendaCandidate(),
+      economyCandidate(),
+    ]);
+
+    expect(slice.lines).toEqual([]);
+    expect(slice.selectionReason).toBe("no_complete_line");
+    expect(slice.campaignDisposition).toBe("blocked_replan");
+    expect(slice.evidenceCodes).toContain(
+      "agenda_slice_infeasible_agenda_head_excluded",
+    );
+  });
+
+  it("classifies exact bound funding as neither rush nor agenda-install progress", () => {
+    const input = decisionInput();
+    const { openingRush: _openingRush, ...baseProject } = project(2);
+    const fundingMilestone = {
+      kind: "score_credit_milestone",
+      basis: { kind: "score_conversion_floor" },
+      targetCredits: 4,
+      observedCredits: 0,
+      remainingGap: 4,
+      priorityClass: "P4",
+      hardness: "soft",
+      deadline: "multi_turn",
+      releaseCondition: "parent_invalidated_or_higher_priority_preemption",
+    } as const;
+    const blocked = {
+      ...baseProject,
+      feasible: false,
+      fundingMilestone,
+    } satisfies CorpScoreProjectSignal;
+    const parentPlanInstanceId = planInstanceIdForProposal({
+      moduleId: "corp.score_agenda",
+      dedupeKey: blocked.projectId,
+    });
+    const fundingNeed = {
+      kind: "parent_funding",
+      needId: `score-support:${blocked.projectId}`,
+      gap: 4,
+      actionIds: ["economy"],
+      parentPlanInstanceId,
+      parentNeedId: `score-support:${blocked.projectId}`,
+      scoreFundingMilestone: fundingMilestone,
+      delegatedPriorityClass: "P4",
+      urgentForScore: true,
+      evidenceCode: blocked.evidenceCode,
+    } satisfies CorpEconomyNeedSignal;
+
+    const slice = buildSlice(
+      input,
+      blocked,
+      [agendaCandidate(), economyCandidate()],
+      [],
+      [fundingNeed],
+    );
+
+    expect(slice.lines).toEqual([
+      expect.objectContaining({
+        family: "fund_setup",
+        currentActionId: "economy",
+        parentNeedId: `score-support:${blocked.projectId}`,
+        providerModuleId: "corp.economy",
+        expectedNeedProgress: "net_funding_gap_reduction",
+        fundingGapBefore: 4,
+        evaluation: expect.objectContaining({
+          agendaProgress: 0,
+          defense: 0,
+          economy: 3,
+        }),
+        campaignQuote: expect.objectContaining({
+          nextMilestoneId: "score_funding_gap_reduced",
+          commitment: "soft",
+        }),
+      }),
+    ]);
+    expect(slice.lines[0]?.valueClaims).toEqual([
+      expect.objectContaining({
+        ownerModuleId: "corp.economy",
+        contributionKind: "funding_gap_reduction",
+        amount: 3,
+      }),
+    ]);
+  });
+
+  it("does not retain fund setup after the published score gap is closed", () => {
+    const input = decisionInput();
+    const { openingRush: _openingRush, ...baseProject } = project(2);
+    const completedMilestone = {
+      kind: "score_credit_milestone",
+      basis: { kind: "score_conversion_floor" },
+      targetCredits: 4,
+      observedCredits: 4,
+      remainingGap: 0,
+      priorityClass: "P4",
+      hardness: "soft",
+      deadline: "multi_turn",
+      releaseCondition: "parent_invalidated_or_higher_priority_preemption",
+    } as const;
+    const blocked = {
+      ...baseProject,
+      feasible: false,
+      fundingMilestone: completedMilestone,
+    } satisfies CorpScoreProjectSignal;
+    const parentPlanInstanceId = planInstanceIdForProposal({
+      moduleId: "corp.score_agenda",
+      dedupeKey: blocked.projectId,
+    });
+    const completedFundingNeed = {
+      kind: "parent_funding",
+      needId: `score-support:${blocked.projectId}`,
+      gap: 0,
+      actionIds: ["economy"],
+      parentPlanInstanceId,
+      parentNeedId: `score-support:${blocked.projectId}`,
+      scoreFundingMilestone: completedMilestone,
+      delegatedPriorityClass: "P4",
+      urgentForScore: true,
+      evidenceCode: blocked.evidenceCode,
+    } satisfies CorpEconomyNeedSignal;
+
+    const slice = buildSlice(
+      input,
+      blocked,
+      [agendaCandidate(), economyCandidate()],
+      [],
+      [completedFundingNeed],
+    );
+
+    expect(slice.lines).toEqual([]);
+    expect(slice.evidenceCodes).toContain(
+      "agenda_slice_infeasible_agenda_head_excluded",
+    );
+  });
 });
 
 function buildSlice(
@@ -145,6 +368,7 @@ function buildSlice(
   scoreProject: CorpScoreProjectSignal,
   candidates: ActionSemanticCandidate[],
   defenseNeeds?: CorpDefenseSignal[],
+  economyNeeds?: CorpEconomyNeedSignal[],
 ) {
   const protectionNeedId = scoreProject.protectionNeed?.needId;
   const remoteProvider = candidates
@@ -166,6 +390,7 @@ function buildSlice(
       (protectionNeedId && remoteProvider
         ? [scoreProtectionProvider(protectionNeedId, remoteProvider.actionId)]
         : []),
+    ...(economyNeeds ? { economyNeeds } : {}),
     rulesContext: buildPlanningRulesContext({
       rulesBaseline: CURRENT_RULES_BASELINE,
       formatProfileId: "agenda-slice-test",
@@ -188,6 +413,10 @@ function project(agendaPoints: number): CorpScoreProjectSignal {
     terminalScore: false,
     feasible: false,
     protectionNeed: {
+      scoreReserve: {
+        creditBreakdown: [{ reserveId: "agenda", credits: 3 }],
+        hardClickReserve: 0,
+      },
       needId: "score-protection:agenda:agenda-1:remote_1:revision-1",
       parentProjectId: "agenda:agenda-1:remote_1",
       targetServerId: "remote_1",
@@ -244,6 +473,68 @@ function scoreProtectionProvider(
     sourceDefinitionId: `${actionId}-definition`,
     evidenceCode: "score_protection_staging_install:test",
   };
+}
+
+function protectionProjection(
+  actionId: string,
+  serverId: string,
+  credits = 2,
+): KnownCorpFundedIceInstallRouteProjection & { effect: "satisfied" } {
+  return {
+    actionId,
+    sourceCardInstanceId: actionId,
+    sourceDefinitionId: `${actionId}-definition`,
+    targetServerId: serverId,
+    knowledge: "known",
+    effect: "satisfied",
+    funded: true,
+    preservesReserves: true,
+    selectedRezCosts: [
+      {
+        iceInstanceId: actionId,
+        iceDefinitionId: `${actionId}-definition`,
+        credits,
+        source: "engine_rez_cost_quote",
+      },
+    ],
+  } as unknown as KnownCorpFundedIceInstallRouteProjection & {
+    effect: "satisfied";
+  };
+}
+
+function fundedProviders(
+  scoreProject: CorpScoreProjectSignal,
+): CorpDefenseSignal[] {
+  return [
+    {
+      ...scoreProtectionProvider(
+        scoreProject.protectionNeed!.needId,
+        "remote-ice",
+      ),
+      kind: "score_protection_install",
+      effect: "satisfied",
+      totalInstallAndRezCredits: 2,
+      runnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
+      projection: protectionProjection("remote-ice", "remote_1"),
+    } as CorpDefenseSignal,
+    {
+      kind: "generic",
+      phase: "install_ice",
+      defenseId: "central:rd",
+      serverId: "rd",
+      sourceDefinitionIds: ["rd-ice-definition"],
+      sourceCardInstanceId: "rd-ice",
+      actionIds: ["rd-ice"],
+      urgent: false,
+      value: 20,
+      evidenceCode: "funded_central_test",
+      installRoute: {
+        disposition: "productive",
+        progressKind: "engine_certified_access",
+        projection: protectionProjection("rd-ice", "rd"),
+      },
+    },
+  ];
 }
 
 function agendaCandidate(): ActionSemanticCandidate {

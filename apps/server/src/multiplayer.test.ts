@@ -3825,6 +3825,10 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     storage.close();
   });
 
+  // Functional persistence coverage, not a five-second performance SLA: this
+  // creates 25 matches and checks all 36 receipts across successive bursts.
+  // Linux CI measured 6.74s with every assertion passing; keep bounded headroom
+  // for setup and SQLite I/O while retaining the full workload and diagnostics.
   it("processes synthetic 1, 10 and 25 match action bursts through SQLite", async () => {
     const dir = await tempStorageDir();
     const dbPath = join(dir, "netgrid.sqlite");
@@ -3832,81 +3836,91 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       dbPath,
       backupDir: join(dir, "backups"),
     });
-    const service = new MultiplayerService(storage, {
-      tokenSalt: "v108-delta-load-probe",
-    });
-    const matches: Array<{ matchId: string; sessionToken: string }> = [];
-    for (let index = 0; index < 25; index += 1) {
-      const created = await service.createMatch({
-        hostSide: "corp",
-        seed: `v108-delta-load-probe-${index}`,
+    try {
+      const service = new MultiplayerService(storage, {
+        tokenSalt: "v108-delta-load-probe",
       });
-      const joinToken = new URL(created.joinUrl ?? "").searchParams.get(
-        "joinToken",
-      );
-      if (!joinToken) throw new Error("Missing join token");
-      const joined = await service.joinMatch(created.matchId, {
-        token: joinToken,
-        displayName: `Runner ${index}`,
-      });
-      if ("error" in joined) throw new Error(joined.error.message);
-      await forceSetupComplete(service, created.matchId);
-      matches.push({
-        matchId: created.matchId,
-        sessionToken: created.hostSessionToken,
-      });
+      const matches: Array<{ matchId: string; sessionToken: string }> = [];
+      for (let index = 0; index < 25; index += 1) {
+        const created = await service.createMatch({
+          hostSide: "corp",
+          seed: `v108-delta-load-probe-${index}`,
+        });
+        const joinToken = new URL(created.joinUrl ?? "").searchParams.get(
+          "joinToken",
+        );
+        if (!joinToken) throw new Error("Missing join token");
+        const joined = await service.joinMatch(created.matchId, {
+          token: joinToken,
+          displayName: `Runner ${index}`,
+        });
+        if ("error" in joined) throw new Error(joined.error.message);
+        await forceSetupComplete(service, created.matchId);
+        matches.push({
+          matchId: created.matchId,
+          sessionToken: created.hostSessionToken,
+        });
+      }
+
+      const probe = async (
+        size: 1 | 10 | 25,
+        round: number,
+      ): Promise<number> => {
+        const startedAt = performance.now();
+        const results = await Promise.all(
+          matches.slice(0, size).map(async (match) => {
+            const payload = await service.bootstrap(
+              match.matchId,
+              "corp",
+              match.sessionToken,
+            );
+            if ("error" in payload) throw new Error(payload.error.message);
+            const action = payload.legalActions.find(
+              (candidate) =>
+                candidate.type !== "end_turn" &&
+                candidate.targetRequirements.length === 0 &&
+                (candidate.choiceRequirements?.length ?? 0) === 0,
+            );
+            if (!action) throw new Error("Missing probe action");
+            return service.submitAction({
+              matchId: match.matchId,
+              side: "corp",
+              sessionToken: match.sessionToken,
+              actionId: action.actionId,
+              clientKnownStateVersion: payload.playerView.stateVersion,
+              idempotencyKey: `delta-load-probe-${round}-${match.matchId}`,
+            });
+          }),
+        );
+        expect(results.every((result) => result.ok)).toBe(true);
+        return performance.now() - startedAt;
+      };
+
+      const timings = {
+        oneMatchMs: await probe(1, 1),
+        tenMatchesMs: await probe(10, 2),
+        twentyFiveMatchesMs: await probe(25, 3),
+      };
+      expect(
+        Object.values(timings).every(
+          (duration) => Number.isFinite(duration) && duration >= 0,
+        ),
+      ).toBe(true);
+      const database = new DatabaseSync(dbPath, { readOnly: true });
+      try {
+        const receiptCount = database
+          .prepare("SELECT COUNT(*) AS count FROM action_receipts")
+          .get() as { count: number };
+        expect(Number(receiptCount.count)).toBe(36);
+      } finally {
+        database.close();
+      }
+      console.info(`[delta-action-load-probe] ${JSON.stringify(timings)}`);
+    } finally {
+      storage.close();
+      await rm(dir, { recursive: true, force: true });
     }
-
-    const probe = async (size: 1 | 10 | 25, round: number): Promise<number> => {
-      const startedAt = performance.now();
-      const results = await Promise.all(
-        matches.slice(0, size).map(async (match) => {
-          const payload = await service.bootstrap(
-            match.matchId,
-            "corp",
-            match.sessionToken,
-          );
-          if ("error" in payload) throw new Error(payload.error.message);
-          const action = payload.legalActions.find(
-            (candidate) =>
-              candidate.type !== "end_turn" &&
-              candidate.targetRequirements.length === 0 &&
-              (candidate.choiceRequirements?.length ?? 0) === 0,
-          );
-          if (!action) throw new Error("Missing probe action");
-          return service.submitAction({
-            matchId: match.matchId,
-            side: "corp",
-            sessionToken: match.sessionToken,
-            actionId: action.actionId,
-            clientKnownStateVersion: payload.playerView.stateVersion,
-            idempotencyKey: `delta-load-probe-${round}-${match.matchId}`,
-          });
-        }),
-      );
-      expect(results.every((result) => result.ok)).toBe(true);
-      return performance.now() - startedAt;
-    };
-
-    const timings = {
-      oneMatchMs: await probe(1, 1),
-      tenMatchesMs: await probe(10, 2),
-      twentyFiveMatchesMs: await probe(25, 3),
-    };
-    expect(
-      Object.values(timings).every(
-        (duration) => Number.isFinite(duration) && duration >= 0,
-      ),
-    ).toBe(true);
-    const database = new DatabaseSync(dbPath, { readOnly: true });
-    const receiptCount = database
-      .prepare("SELECT COUNT(*) AS count FROM action_receipts")
-      .get() as { count: number };
-    expect(Number(receiptCount.count)).toBe(36);
-    database.close();
-    console.info(`[delta-action-load-probe] ${JSON.stringify(timings)}`);
-    storage.close();
-  });
+  }, 30_000);
 
   it("deduplicates repeated state snapshots before writing SQLite mirror tables", async () => {
     const fixture = await storedMatchFixture("v108-duplicate-state-snapshot");
@@ -13304,6 +13318,23 @@ describe("MVP 0.2 multiplayer service", () => {
                 removalCondition:
                   "Provide at least one ready assessed plan for the legal voluntary actions.",
                 candidateCount: input.legalActions.length,
+                portfolioBinding: {
+                  schemaVersion: "resident-portfolio-binding-failure-v1",
+                  operation: "read",
+                  expected: {
+                    schemaVersion: "resident-plan-portfolio-v2",
+                    side: "runner",
+                    stateVersion: input.playerView.stateVersion,
+                    relation: "at_most",
+                  },
+                  actual: {
+                    schemaVersion: "resident-plan-portfolio-v2",
+                    side: "runner",
+                    stateVersion: input.playerView.stateVersion + 1,
+                  },
+                  violations: ["future_state_version"],
+                  privateCardPayload: "must-not-be-copied",
+                },
               },
             },
           );
@@ -13391,6 +13422,27 @@ describe("MVP 0.2 multiplayer service", () => {
       const beforeFailure = await service.loadForTest(created.matchId);
       if (!beforeFailure?.gameState)
         throw new Error("Missing match before failed AI choose attempt");
+      const currentInput = await service.storageMaintenanceCurrentAiInput(
+        created.matchId,
+      );
+      expect(currentInput).toMatchObject({
+        status: "available",
+        actor: "runner",
+        stateVersion: beforeFailure.gameState.stateVersion,
+        stateHash: hashState(beforeFailure.gameState),
+        input: {
+          playerView: {
+            side: "runner",
+            opponent: { handCount: beforeFailure.gameState.corp.hq.length },
+          },
+        },
+      });
+      expect(
+        currentInput &&
+          "input" in currentInput &&
+          currentInput.input.playerView.opponent,
+      ).not.toHaveProperty("gripOrHq");
+      expect(await service.loadForTest(created.matchId)).toEqual(beforeFailure);
       const eventAnchorId = beforeFailure.eventLog.at(-1)?.eventId;
       if (!eventAnchorId) throw new Error("Missing failure event anchor");
       const failureDecisionIndex =
@@ -13454,10 +13506,24 @@ describe("MVP 0.2 multiplayer service", () => {
               owner: "scheduler",
               removalCondition:
                 "Provide at least one ready assessed plan for the legal voluntary actions.",
+              portfolioBinding: {
+                schemaVersion: "resident-portfolio-binding-failure-v1",
+                operation: "read",
+                expected: {
+                  stateVersion: beforeFailure.gameState.stateVersion,
+                  relation: "at_most",
+                },
+                actual: {
+                  stateVersion: beforeFailure.gameState.stateVersion + 1,
+                },
+                violations: ["future_state_version"],
+              },
             },
           },
         },
       });
+      expect(JSON.stringify(bundle)).not.toContain("must-not-be-copied");
+      expect(JSON.stringify(failed.error)).not.toContain("portfolioBinding");
       expect(bundle?.decisions.at(-1)?.auditAvailability).toMatchObject({
         historicalLegalActions: { status: "persisted" },
         engineEvidence: { status: "persisted" },

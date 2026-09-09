@@ -58,6 +58,7 @@ describe("match 9f8cecdd78b35d0e Corp scoring liveness at decision 60", () => {
         parentProjectId: "agenda:agenda-1:remote_1",
         targetServerId: "remote_1",
         observedAtStateVersion: 60,
+        scoreReserve: { creditBreakdown: [], hardClickReserve: 0 },
       },
       evidenceCode: "corp_score_protection_required:remote_1",
     } as unknown as CorpScoreProjectSignal;

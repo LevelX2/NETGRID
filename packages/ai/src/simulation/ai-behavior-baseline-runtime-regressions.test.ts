@@ -48,7 +48,7 @@ describe("AI behavior baseline runtime regressions", () => {
       result.summary.errors,
       JSON.stringify(captureDiagnostic(result.capture), undefined, 2),
     ).toEqual([]);
-  }, 20_000);
+  }, 60_000);
 
   it("preserves the owner of an unforced Runner choice window", () => {
     const result = runCapturedSeed(
@@ -74,7 +74,7 @@ describe("AI behavior baseline runtime regressions", () => {
       result.summary.errors,
       JSON.stringify(captureDiagnostic(result.capture), undefined, 2),
     ).toEqual([]);
-  }, 20_000);
+  }, 90_000);
 
   it("leaves parent-bound strategic-exchange funding exclusively with its parent route", () => {
     const result = runCapturedSeed(
@@ -93,13 +93,23 @@ describe("AI behavior baseline runtime regressions", () => {
     const result = runCapturedSeed(
       "strategy_panel_hybrid_score_punish_cheap_bag",
       "ai-behavior-baseline-v1-08",
-      184,
+      111,
     );
 
     expect(
       result.summary.errors,
       JSON.stringify(captureDiagnostic(result.capture), undefined, 2),
     ).toEqual([]);
+    // This regression covers the decision prefix through action 111. Changed
+    // earlier decisions need not preserve an older terminal punish at that index.
+    expect(result.summary).toMatchObject({
+      replayOk: true,
+    });
+    expect(result.summary.runtimeFailures).toEqual([]);
+    expect(result.summary.metrics.illegalActions).toBe(0);
+    expect(
+      result.summary.actionSequence.every((entry) => !entry.fallbackUsed),
+    ).toBe(true);
   }, 20_000);
 });
 

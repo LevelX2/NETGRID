@@ -54,6 +54,13 @@ export function selectedBidChoiceOptionId(
     )
     .sort((left, right) => left.amount - right.amount);
   if (bidOptions.length === 0) return undefined;
+  const trace = input.playerView.trace;
+  if (
+    trace?.bidEffect === "automatic_success_fixed_effect" &&
+    choice.source === `trace:${trace.traceId}`
+  ) {
+    return bidOptions[0]!.id;
+  }
   const maxBid = bidOptions.at(-1)!.amount;
   let desired = 0;
   if (input.side === "corp") {

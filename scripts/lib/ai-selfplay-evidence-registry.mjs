@@ -350,7 +350,7 @@ export function recordReport(db, input) {
       input.recipient ?? input.series?.recipient ?? null,
       input.subject ?? null,
       status,
-      requireText(input.htmlBody, "report.htmlBody"),
+      requireNonBlankText(input.htmlBody, "report.htmlBody"),
       input.outputPath ?? null,
       input.sentAt ?? null,
       input.createdAt ?? timestamp,
@@ -405,6 +405,13 @@ function requireText(value, name) {
     throw new Error(`${name} is required`);
   }
   return value.trim();
+}
+
+function requireNonBlankText(value, name) {
+  if (typeof value !== "string" || value.trim().length === 0) {
+    throw new Error(`${name} is required`);
+  }
+  return value;
 }
 
 export function importPairingBundle(db, bundle) {

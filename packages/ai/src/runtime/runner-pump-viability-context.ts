@@ -28,13 +28,15 @@ import type {
   RunnerEncounterActionConstraint,
   RunnerEncounterViabilityAssessment,
 } from "./runner-encounter-action-exclusion";
+import type { MutableRunnerRunPathCreditBudget } from "../run-analysis/visible-run-analysis-contracts";
+import {
+  fundRunnerRunPathPayment,
+  runnerPaymentSupportBudgetForRig,
+} from "../run-analysis/visible-run-credit-budget";
 
 type VisibleServer = AiDecisionInput["playerView"]["servers"][number];
-type MutableEncounterCreditBudget = Omit<
-  Required<RunnerRunPathCreditBudget>,
-  "hostedIcebreakerCreditsByBreakerInstanceId"
-> & {
-  hostedIcebreakerCreditsByBreakerInstanceId: Record<string, number>;
+type MutableEncounterCreditBudget = MutableRunnerRunPathCreditBudget & {
+  runOnlyCredits: number;
 };
 
 export type RunnerPumpViabilityContextDependencies = {
@@ -300,7 +302,12 @@ export function createRunnerPumpViabilityContext(
         : dependencies.encounterFuturePathAfterPumpBreakAssessment(
             input,
             server,
-            breakPayment.budget,
+            {
+              ...breakPayment.budget,
+              credits:
+                breakPayment.budget.credits +
+                breakPayment.budget.runOnlyCredits,
+            },
           );
       if (futurePath.blocksPump)
         return {
@@ -373,6 +380,13 @@ function encounterCreditBudget(
   );
   return {
     credits: normalizeCreditAmount(input.playerView.own.credits),
+    runOnlyCredits: normalizeCreditAmount(
+      input.playerView.run?.badPublicityCredits ?? 0,
+    ),
+    ...runnerPaymentSupportBudgetForRig(
+      input.playerView.own.credits,
+      input.playerView.own.rig ?? [],
+    ),
     icebreakerCredits: visiblePools.icebreakerCredits,
     nonNoisyIcebreakerCredits: visiblePools.nonNoisyIcebreakerCredits,
     nonStealthNonNoisyIcebreakerCredits:
@@ -404,7 +418,12 @@ function spendIcebreakerCredits(
     stealthCreditsBySourceId: { ...budget.stealthCreditsBySourceId },
   };
   let remaining = normalizeCreditAmount(cost);
+  fundRunnerRunPathPayment(next, remaining);
   let restrictedSpent = 0;
+  const runOnlySpent = Math.min(next.runOnlyCredits, remaining);
+  next.runOnlyCredits -= runOnlySpent;
+  remaining -= runOnlySpent;
+  restrictedSpent += runOnlySpent;
   const hostedCredits = Math.min(
     next.hostedIcebreakerCreditsByBreakerInstanceId[breaker.instanceId] ?? 0,
     remaining,

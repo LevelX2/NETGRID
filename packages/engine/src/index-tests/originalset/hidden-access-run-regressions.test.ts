@@ -4918,6 +4918,78 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
     expect(state.cardInstances[vaporId]?.advancementCounters).toBe(0);
   });
 
+  it("keeps both player views usable after paying Misleading Access Menus with rezzed Vapor Ops", () => {
+    let state = apply(
+      originalsetReorderCounterRunlockGame("vapor-ops-after-pay-or-end-run"),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state.corp.credits = 20;
+    const vaporId = putCorpRootInRemote(state, "onr_v1_347_vapor-ops");
+    state.cardInstances[vaporId]!.advancementCounters = 1;
+    const iceId = putCorpIceOnServer(state, "remote_1", "simple_code_gate_ice");
+    state.cardInstances[iceId]!.definitionId =
+      "onr_proteus_032_misleading-access-menus";
+    state = toRunnerTurnFromCorpMain(state);
+    state.runner.credits = 1;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(state, "corp", (action) => action.type === "rez_ice");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_card" && action.payload?.cardId === vaporId,
+    );
+    const beforePayment = structuredClone(state);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.payload?.payOrEndRunSubroutinePayment === 1,
+    );
+
+    expect(state.runner.credits).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      runDestination: "root",
+    });
+    expect(
+      hashState(
+        apply(
+          beforePayment,
+          "runner",
+          (action) => action.payload?.payOrEndRunSubroutinePayment === 1,
+        ),
+      ),
+    ).toBe(hashState(state));
+    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          sourceDefinitionId: "onr_proteus_032_misleading-access-menus",
+          paidCredits: 1,
+        }),
+      ]),
+    );
+    expect(state.run?.phase).toBe("movement");
+    expect(() => getPlayerView(state, "runner")).not.toThrow();
+    expect(() => getPlayerView(state, "corp")).not.toThrow();
+    const vaporActions = getLegalActions(state, "corp").filter(
+      (action) =>
+        action.type === "activated_card_ability" && action.source === vaporId,
+    );
+    expect(vaporActions).toHaveLength(1);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === vaporActions[0]!.actionId,
+    );
+    expect(state.cardInstances[vaporId]!.advancementCounters).toBe(0);
+    expect(validateGameState(state).ok).toBe(true);
+  });
+
   it("labels Vapor Ops advancement move choices with counter amount and target", () => {
     let state = apply(
       MECHANIC_SMOKE_GAMES.agendaScoring("spotcheck-vapor-ops-move-labels"),

@@ -33,6 +33,7 @@ export type CorpUpgradePlacementAssessment = {
   reason:
     | "placement_has_current_value"
     | "ice_support_without_ice"
+    | "agenda_difficulty_requires_remote_scoring_fort"
     | "region_replacement_without_marginal_value"
     | "region_replacement_adds_active_utility";
   candidateActiveUtility: string[];
@@ -53,6 +54,20 @@ export function corpUpgradePlacementAssessment(
   }
   const signals = semanticSignals(params.actionSemanticCandidate);
   const server = visibleServer(params.input, params.serverId);
+  if (
+    (hasSignal(signals, "remote.agenda_difficulty_discount") ||
+      hasSignal(signals, "score.agenda_difficulty_discount")) &&
+    !isRemoteServerId(params.serverId)
+  ) {
+    return placementAssessment({
+      recommendation: "defer",
+      reason: "agenda_difficulty_requires_remote_scoring_fort",
+      evidence: [
+        "placement_contract:agenda_difficulty_requires_remote_scoring_fort",
+        `server:${params.serverId ?? "none"}`,
+      ],
+    });
+  }
   if (hasIceSupportSignal(signals) && (server?.ice.length ?? 0) === 0) {
     return placementAssessment({
       recommendation: "defer",
@@ -88,7 +103,9 @@ export function corpUpgradePlacementExclusion(
     label:
       assessment.reason === "ice_support_without_ice"
         ? "Upgrade benötigt zuerst ICE"
-        : "Regionsersatz ohne belegten Mehrwert",
+        : assessment.reason === "agenda_difficulty_requires_remote_scoring_fort"
+          ? "Agenda-Unterstützung benötigt einen Score-Remote"
+          : "Regionsersatz ohne belegten Mehrwert",
     reason: assessment.evidence.join("|"),
   };
 }
@@ -130,9 +147,15 @@ export function corpUpgradeInstallPlacementComponent(
 
   if (
     hasSignal(signals, "remote.agenda_steal_tax") ||
-    hasSignal(signals, "remote_role:agenda_steal_tax")
+    hasSignal(signals, "remote_role:agenda_steal_tax") ||
+    hasSignal(signals, "access.agenda_steal_tax")
   ) {
-    return agendaStealTaxPlacementComponent(params.serverId, server, evidence);
+    return agendaStealTaxPlacementComponent(
+      params.serverId,
+      server,
+      hasSignal(signals, "access.agenda_steal_tax"),
+      evidence,
+    );
   }
 
   if (
@@ -194,8 +217,17 @@ export function corpUpgradeInstallPlacementComponent(
 function agendaStealTaxPlacementComponent(
   serverId: string | undefined,
   server: VisibleCorpServer | undefined,
+  supportsCentralServers: boolean,
   evidence: string[],
 ): AiDecisionScoreComponent {
+  if (supportsCentralServers && (serverId === "hq" || serverId === "rd")) {
+    return {
+      key: "corp_upgrade_install_placement_fit",
+      label: "Upgrade-Zielserver passend",
+      value: 1700,
+      reason: [...evidence, "fit:central_agenda_steal_tax"].join("|"),
+    };
+  }
   if (!isRemoteServerId(serverId) || serverId === "new_remote") {
     return {
       key: "corp_upgrade_install_placement_mismatch",
@@ -603,6 +635,12 @@ function activeUpgradeUtility(
     signals.has("access.corp_central_access_reduction")
   ) {
     utility.add("central_access_reduction");
+  }
+  if (
+    (serverId === "hq" || serverId === "rd") &&
+    signals.has("access.agenda_steal_tax")
+  ) {
+    utility.add("central_agenda_steal_tax");
   }
   if (
     serverId.startsWith("remote_") &&

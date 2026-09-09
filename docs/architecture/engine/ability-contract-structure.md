@@ -28,6 +28,51 @@ Die Abhängigkeitsrichtung verläuft von den Blattverträgen zu Effekten und
 Modifikatoren, anschließend zu Ability-/Domänenverträgen und zuletzt zu den
 obersten Card-Unions. Zwischen den Familien existiert kein Importzyklus.
 
+## Verfügbarkeit gebundener Effektziele
+
+`canResolveOnPlayCardImplementationAbility` prüft vor dem Erzeugen einer
+LegalAction, ob der deklarierte Effekt seine erforderlichen aktuellen Ziele
+noch auflösen kann. Ein erfolgreicher Run bleibt Turnhistorie, auch wenn der
+betroffene Remote beim anschließenden Trash seiner letzten Karte verschwindet.
+Der Effekt `trash_rezzed_ice_on_last_successful_run_fort_and_add_tags` benötigt
+dagegen weiterhin einen existierenden Fort. Ein existierender Fort ohne rezzed
+ICE erfüllt diese Zielbindung; dessen leere Zielmenge wird regulär gequotet.
+Quote und Ausführung behalten ihre strikten Bindungsprüfungen.
+
+## Verzögerte Programminstallation
+
+Beim letzten Shell-Counter prüft die verzögerte Installation legale
+Program-Hosts über den gemeinsamen `canHostProgramOnDaemon`-Vertrag. Sind
+Hosts verfügbar, wählt der Runner vor Counterentfernung und Installation
+zwischen dem normalen Programmspeicher und einem passenden installierten
+Host. Nur die normale Installation fordert bei MU-Mangel Programmtrash.
+Hostkapazität, Zielkarte, Quelle und letzter Counter werden bei der Wahl
+erneut validiert. Die gemeinsame Rig-Finalisierung setzt `hostedOn` und
+belastet bei Hosting keine Runner-MU; On-install-Effekte bleiben erhalten.
+Bezahlte Counterentfernung und Zugbeginn nutzen dieselbe Platzierungswahl;
+der Zugbeginn wird erst nach abgeschlossener Platzierung beziehungsweise
+anschließender Speicherfreigabe fortgesetzt.
+
+## Verpflichtende Kreditzahlungen
+
+Aktive verpflichtende Corp-Kreditzahlungen stammen aus dem aktuellen
+Engine-Zustand, nicht aus Karten im Archiv oder historischen Kreditaufnahmen.
+Die eigene Corp-PlayerView trägt bei aktiver Verpflichtung
+`corpEndTurnCreditObligation` mit aktuellem Betrag, StateVersion,
+Corp-Zugende als Deadline und Niederlage bei Nichtzahlung. Die Runner-Sicht
+erhält dieses private Planungsfeld nicht. Projektion und Anwendung verändern
+die bestehende Zahlungs- und Ablöseregel nicht.
+
+## Agenda-Anforderung
+
+`effectiveAgendaDifficulty` verbindet die gedruckte Anforderung mit aktiven
+deklarierten `agenda_difficulty`-Modifikatoren und dem ausdrücklich gebundenen
+Server-Run-Counter-Zuschlag. PlayerView, Installations-/Score-Quotes,
+LegalActions und Ausführung verwenden diese gemeinsame Berechnung.
+`fortRunWindows` beschreibt ausschließlich Run-Zulässigkeit; daraus wird kein
+Agenda-Rabatt abgeleitet. Ein Regionsrabatt wie Washington wird nur einmal über
+den deklarierten Modifikator angewendet.
+
 ## Gleichzeitige Lifecycle-Fähigkeiten
 
 `CardLifecycleTriggeredAbilityImplementation.simultaneousResolution` ist eine

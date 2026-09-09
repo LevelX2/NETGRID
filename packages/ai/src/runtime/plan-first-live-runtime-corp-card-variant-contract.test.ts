@@ -168,24 +168,27 @@ describe("plan-first Corp card variant contracts", () => {
     expect(debug).not.toContain("corp_card_development");
   });
 
-  it("uses safe Annual Reviews as the denser draw step of the exact score-material parent", () => {
+  it("does not create an agenda-search parent just to use a legal draw operation", () => {
     const fixture = annualReviewsFixture({
       startingHandSize: 3,
       includeBlockedScoreParent: false,
     });
 
+    const credit = legalAction(
+      "credit",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { clicks: 1, credits: 0 },
+      { payload: { gainCreditsAmount: 1 } },
+    );
+    fixture.input.legalActions.push(credit);
+    bindCurrentStateVersion(fixture.input);
     const decision = chooseCorpAction(fixture.input);
-
-    expect(decision.actionId).toBe(fixture.annualReviews.actionId);
-    expect(decision.decisionDebug?.planKind).toBe(
-      "corp.hand_and_agenda_management",
-    );
-    expect(decision.evidence).toEqual(
-      expect.arrayContaining([
-        "plan_priority_class:P4",
-        "plan_assessment_evidence:corp_score_campaign_missing_agenda_material",
-      ]),
-    );
+    expect(decision.actionId).toBe(credit.actionId);
+    expect(
+      JSON.stringify(residentPlanPortfolioSnapshot(fixture.input)),
+    ).not.toContain("plan:corp.score_agenda:general");
   });
 
   it("routes a visible HQ agenda through its exact P4 remote-lock removal step", () => {

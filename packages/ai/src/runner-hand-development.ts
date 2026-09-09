@@ -678,6 +678,13 @@ function currentNeedForCard(
   if (rigDemandNeed !== undefined) return rigDemandNeed;
   if (
     role === "draw_or_search_engine" &&
+    context.legalAction?.type === "play_event" &&
+    context.legalAction.payload?.drawCardsAmount === 0
+  ) {
+    return "none";
+  }
+  if (
+    role === "draw_or_search_engine" &&
     recoveryOnlySearchHasNoVisibleTarget(params.input, context) &&
     !doctrineSupportsProspectiveRecoveryInfrastructure(params, context)
   ) {
@@ -1071,7 +1078,11 @@ function evaluateRunnerPersistentInstall(
   );
   const protectedCreditReserve =
     engineNeedsProtectedReserve && !handCapacityMaySpendReserve
-      ? desiredCreditReserveForPersistentEngine(params.input)
+      ? engineAssessment.kind === "successful_run_followup_engine" &&
+        engineAssessment.outputCapabilities.length === 1 &&
+        engineAssessment.outputCapabilities[0] === "credits"
+        ? minimumCreditFloorForPersistentInstall(params.input)
+        : desiredCreditReserveForPersistentEngine(params.input)
       : undefined;
   const safeInstallTargetCredits =
     protectedCreditReserve !== undefined

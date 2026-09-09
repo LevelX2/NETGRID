@@ -245,6 +245,17 @@ describe("Classic Agenda Implementation Smokes", () => {
     expect(state.runner.scoreArea).not.toContain(theoremId);
     expect(state.runner.rig.programs).toContain(theoremId);
     expect(state.runner.memoryUsed).toBe(2);
+    for (const side of ["runner", "corp"] as const) {
+      const view = getPlayerView(state, side);
+      const rig = side === "runner" ? view.own.rig : view.opponent.rig;
+      expect(rig?.find((card) => card.instanceId === theoremId)).toMatchObject({
+        known: true,
+        type: "agenda",
+        owner: "corp",
+        controller: "runner",
+        installedAsRunnerProgram: { memoryCost: 2, scoreAsAgendaAction: true },
+      });
+    }
     expect(
       state.cardInstances[theoremId]?.installedAsRunnerProgram,
     ).toMatchObject({

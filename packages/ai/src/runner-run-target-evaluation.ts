@@ -193,7 +193,10 @@ function evaluateRunnerRunTarget(
     runnerRunPathCreditBudgetWithVisiblePools(
       creditsAvailableDuringRun,
       params.input.playerView.own.rig ?? [],
-      { excludeStealthCredits: stealthCreditsBlocked },
+      {
+        excludeStealthCredits: stealthCreditsBlocked,
+        liquidCredits: creditsAfterAction,
+      },
     ),
     server?.root ?? [],
     params.input.playerView.opponent.credits,
@@ -238,7 +241,8 @@ function evaluateRunnerRunTarget(
       projection,
       accessServerId,
       accessTargetKind,
-    ) ?? payoffForTarget(params, accessServerId, accessTargetKind);
+    ) ??
+    payoffForTarget(params, accessServerId, accessTargetKind, economyPosture);
   const runActionGripCost = runActionGripCardCost(params.input, projection);
   const projectedGripAfterRunAction = Math.max(
     0,
@@ -252,6 +256,9 @@ function evaluateRunnerRunTarget(
       // encounter costs.  Optional damage avoidance may only spend what is
       // actually left after those commitments.
       generalCredits: path.creditsAfterPath,
+      ...(path.fullyBrokenIceInstanceIds
+        ? { fullyBrokenIceInstanceIds: path.fullyBrokenIceInstanceIds }
+        : {}),
       runDamagePreventionRemaining: Math.max(
         0,
         projection.damagePreventionPool ?? 0,
@@ -270,7 +277,10 @@ function evaluateRunnerRunTarget(
     },
   );
   const cumulativeVisibleAndKnownAccessDamageLethal = Boolean(
-    payoff.knownAccessDamage && visibleLethalIceDamage,
+    payoff.knownAccessDamage &&
+    visibleLethalIceDamage?.evidenceCode.startsWith(
+      "runner_visible_lethal_ice_damage|",
+    ),
   );
   const effectiveAccessPayoffContestable =
     cumulativeVisibleAndKnownAccessDamageLethal
@@ -458,15 +468,43 @@ function evaluateRunnerRunTarget(
     riskyUniversalCoverage,
     visibleDuringRunRezSupport,
   });
+  // The unknown remainder requires both liquid credits and a surviving grip.
+  // Known damage avoidance may spend only the money outside that same reserve.
+  const visibleDamageViolatesPrerunReserve =
+    unknownUnrezzedIceCount > 0 && prerunReserveQuote.requiredHandBuffer > 0
+      ? runnerVisibleLethalIceDamageAssessment(
+          params.input,
+          projectedServerIce,
+          {
+            generalCredits: Math.max(
+              0,
+              path.creditsAfterPath - prerunReserveQuote.requiredCredits,
+            ),
+            runDamagePreventionRemaining: Math.max(
+              0,
+              projection.damagePreventionPool ?? 0,
+            ),
+            handCount: projectedGripAfterRunAction,
+            requiredHandFloor: prerunReserveQuote.requiredHandBuffer,
+          },
+        )
+      : undefined;
+  if (visibleDamageViolatesPrerunReserve && pathPassability === "reachable") {
+    pathPassability = "blocked_by_visible_damage_hand_buffer";
+  }
   const unrezzedIceRiskUnderfunded = prerunReserveQuote.creditGap > 0;
   const targetFundingNeed = runnerRunTargetFundingNeed({
     routeQuote,
     creditsAfterRun,
     economyPosture,
-    consumeUrgentContestReserve:
-      scoreThreat &&
-      economyPosture.creditReservePolicy.remoteScoreThreat === "urgent" &&
-      creditsAfterRun >= economyPosture.minimumCreditFloor,
+    consumeCurrentGoalReserve:
+      (scoreThreat &&
+        economyPosture.creditReservePolicy.remoteScoreThreat === "urgent" &&
+        creditsAfterRun >= economyPosture.minimumCreditFloor) ||
+      // A matchpoint central access spends its run budget. With no current
+      // remote threat, the desired refill target is not a post-run liability.
+      (runnerMatchpointCentralAccess &&
+        economyPosture.creditReservePolicy.remoteScoreThreat === "none"),
   });
   const recommendation = recommendationForRunTarget({
     targetKind: accessTargetKind,
@@ -601,6 +639,12 @@ function evaluateRunnerRunTarget(
       `known_access_state:${payoff.knownAccessState}`,
       `central_access_novelty_ratio:${payoff.accessNoveltyRatio}`,
       `path_passability:${pathPassability}`,
+      ...(visibleDamageViolatesPrerunReserve
+        ? [
+            `runner_visible_damage_violates_prerun_reserve:${targetServerId}`,
+            visibleDamageViolatesPrerunReserve.evidenceCode,
+          ]
+        : []),
       ...(visibleLethalIceDamage
         ? [
             `runner_visible_lethal_ice_damage_blocks_run_start:${targetServerId}`,
@@ -1094,6 +1138,7 @@ function payoffForTarget(
   params: EvaluateRunnerRunTargetsParams,
   targetServerId: string,
   targetKind: RunnerRunTargetKind,
+  economyPosture: RunnerEconomyPosture,
 ): {
   accessPayoff: RunnerAccessPayoff;
   accessPayoffContestable?: boolean;
@@ -1109,6 +1154,7 @@ function payoffForTarget(
         params.input,
         targetServerId,
         params.beliefState,
+        economyPosture,
       ),
     );
   }
@@ -1644,13 +1690,13 @@ function runnerRunTargetFundingNeed(params: {
   routeQuote: NonNullable<RunnerRunTargetEvaluation["routeQuote"]>;
   creditsAfterRun: number;
   economyPosture: RunnerEconomyPosture;
-  consumeUrgentContestReserve: boolean;
+  consumeCurrentGoalReserve: boolean;
 }): RunnerRunTargetFundingNeed {
   const routeFundingGap = Math.max(0, params.routeQuote.fundingGap ?? 0);
   const liquidCreditsSpent =
     params.creditsAfterRun <
     params.economyPosture.creditReservePolicy.currentCredits;
-  const protectedLiquidReserve = params.consumeUrgentContestReserve
+  const protectedLiquidReserve = params.consumeCurrentGoalReserve
     ? params.economyPosture.minimumCreditFloor
     : liquidCreditsSpent
       ? params.economyPosture.creditReservePolicy.phase === "opening"

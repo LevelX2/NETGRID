@@ -303,6 +303,167 @@ function accessStartActionFor(
 }
 
 describe("PRO011 hidden resource timing hardening", () => {
+  it.each([2, 3])(
+    "funds a four-credit Krash route from %i cash with one timed Chiba withdrawal",
+    (credits) => {
+      let state = runnerState(`bank-krash-path-${credits}`);
+      const chiba = installHiddenResource(
+        state,
+        "onr_proteus_133_chiba-bank-account",
+        "bank_path_chiba",
+      );
+      const krash = addRunnerGripCard(
+        state,
+        "onr_v1_039_krash",
+        "bank_path_krash",
+      );
+      state.runner.grip = state.runner.grip.filter((id) => id !== krash);
+      state.runner.rig.programs.push(krash);
+      Object.assign(state.cardInstances[krash]!, {
+        faceup: true,
+        rezzed: true,
+        zone: { side: "runner", zone: "rig" },
+      });
+      const wall = addCorpServerCard(
+        state,
+        "onr_v1_238_data-wall-2-0",
+        "bank_path_wall",
+        "remote_1",
+        "ice",
+      );
+      Object.assign(state.cardInstances[wall]!, { faceup: true, rezzed: true });
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "start_run" &&
+          action.payload?.serverId === "remote_1",
+      );
+      for (
+        let step = 0;
+        state.run?.phase !== "encounter_ice" && step < 8;
+        step += 1
+      ) {
+        const action = (["corp", "runner"] as const)
+          .flatMap((side) => getLegalActions(state, side))
+          .find((entry) => entry.type === "continue_run");
+        expect(action).toBeDefined();
+        state = apply(
+          state,
+          action!.side,
+          (entry) => entry.actionId === action!.actionId,
+        );
+      }
+      expect(state.run?.phase).toBe("encounter_ice");
+      state.runner.credits = credits;
+      const initial = structuredClone(state);
+      for (const type of ["pump_breaker", "break_subroutine"] as const) {
+        const bankAvailable = state.runner.rig.resources.includes(chiba);
+        state = apply(
+          state,
+          "runner",
+          (action) =>
+            action.type === type && action.payload?.breakerId === krash,
+        );
+        if (bankAvailable)
+          expect(state.runnerCostPenaltySupportWindow).toBeDefined();
+        const useBank =
+          credits === 2 ? type === "pump_breaker" : type === "break_subroutine";
+        if (useBank)
+          state = apply(
+            state,
+            "runner",
+            (action) =>
+              action.type === "activated_card_ability" &&
+              action.payload?.cardId === chiba,
+          );
+        if (state.runnerCostPenaltySupportWindow)
+          state = apply(
+            state,
+            "runner",
+            (action) =>
+              action.payload?.runnerCostPenaltySupportContinuation === true,
+          );
+      }
+      expect(state.runner.credits).toBe(credits - 1);
+      expectHiddenResourceTrashed(
+        state,
+        chiba,
+        "onr_proteus_133_chiba-bank-account",
+      );
+      expectReplayStable(initial, state);
+    },
+  );
+  it.each([13, 1])(
+    "resumes encounter entry after bank support with %i pool credits",
+    (credits) => {
+      let state = runnerState(`encounter-tax-bank-${credits}`);
+      const chibaId = installHiddenResource(
+        state,
+        "onr_proteus_133_chiba-bank-account",
+        "entry_chiba",
+      );
+      const iceId = addCorpServerCard(
+        state,
+        "onr_v1_266_scramble",
+        "entry_scramble",
+        "hq",
+        "ice",
+      );
+      state.cardInstances[iceId]!.rezzed = true;
+      state.cardInstances[iceId]!.faceup = true;
+      state.runner.credits = credits;
+      state.phase = "run";
+      state.timingPoint = "run.jack_out_window";
+      state.activeSide = "runner";
+      state.run = {
+        runId: "entry_tax_run",
+        attackedServerId: "hq",
+        phase: "movement",
+        position: { kind: "ice", serverId: "hq", iceIndex: 0 },
+        brokenSubroutineIndexes: [],
+        resolvedSubroutineIndexes: [],
+        successful: false,
+        accessCount: 1,
+        encounterTaxForFutureIce: 2,
+        encounterTaxSourceDefinitionId: "onr_v1_222_ball-and-chain",
+        nextEncounterJackOutLock: true,
+      };
+      const before = structuredClone(state);
+      const start = getLegalActions(state, "runner").find(
+        (a) => a.actionId === "runner.continue_run",
+      )!;
+      expect(start).toBeDefined();
+      state = applyLegal(state, "runner", start).state;
+      expect(state.runnerCostPenaltySupportWindow?.amountDue).toBe(2);
+      expect(state.run?.nextEncounterJackOutLock).toBe(true);
+      expect(state.run?.encounteredIceId).toBeUndefined();
+      if (credits === 1) {
+        expect(
+          getLegalActions(state, "runner").some(
+            (a) => a.actionId === start.actionId,
+          ),
+        ).toBe(false);
+        state = applyLegal(
+          state,
+          "runner",
+          supportActionFor(state, chibaId)!,
+        ).state;
+      }
+      const resume = getLegalActions(state, "runner").find(
+        (a) => a.actionId === start.actionId,
+      );
+      expect(resume?.payload?.runnerCostPenaltySupportContinuation).toBe(true);
+      state = applyLegal(state, "runner", resume!).state;
+      expect(state.runnerCostPenaltySupportWindow).toBeUndefined();
+      expect(state.run?.encounteredIceId).toBe(iceId);
+      expect(state.run?.jackOutLockedUntilEncounterEnds).toBe(true);
+      expect(state.timingPoint).toBe("run.encounter_ice");
+      expect(state.runner.credits).toBe(credits === 1 ? 2 : 11);
+      expect(state.runner.rig.resources.includes(chibaId)).toBe(credits !== 1);
+      expectReplayStable(before, state);
+    },
+  );
   it("uses Airport Locker in Runner main and still offers it during an ICE encounter", () => {
     let state = runnerState("pro011-airport-locker-main");
     const lockerId = installHiddenResource(

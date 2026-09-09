@@ -15,11 +15,80 @@ import {
   visibleCard,
 } from "../semantic-ai-runtime-cutover.test-support";
 import { corpCounterBankScoreProjects } from "./corp-counter-bank-score-plan";
+import type { CorpAmbushSignal } from "./corp-tactical-plan-modules";
 
 const VAPOR_OPS = "onr_v1_347_vapor-ops";
 const DATA_WALL = "onr_v1_238_data-wall-2-0";
 
 describe("corpCounterBankScoreProjects", () => {
+  it.each([
+    ["unclaimed", "other", "remote_1", false, true],
+    ["active exact decoy", "vapor", "remote_1", false, false],
+    ["different server", "vapor", "remote_2", false, true],
+    ["already revealed", "vapor", "remote_1", true, true],
+  ] as const)(
+    "keeps liquidation separate from a %s",
+    (_label, sourceId, serverId, rezzed, allowed) => {
+      const action = current(
+        legalAction(
+          "liquidate-vapor",
+          "corp",
+          rezzed ? "activated_card_ability" : "rez_card",
+          "Liquidate bank",
+          { credits: 0, clicks: 0 },
+          {
+            source: "vapor",
+            payload: {
+              cardId: "vapor",
+              serverId: "remote_1",
+              ...(rezzed
+                ? {
+                    cardImplementationAdvancementCounterCost: 1,
+                    gainCreditsAmount: 1,
+                  }
+                : {}),
+            },
+          },
+        ),
+      );
+      const input = withDeck(aiInput("corp", [action]));
+      input.playerView.servers = [
+        server("remote_1", [], [vapor("vapor", "installed_root", 1, rezzed)]),
+      ];
+      const ambush: CorpAmbushSignal = {
+        commitmentVersion: "corp_ambush_commitment_v1",
+        ambushId: "decoy",
+        sourceDefinitionId: VAPOR_OPS,
+        sourceInstanceId: sourceId,
+        serverId,
+        actionIds: [],
+        phase: "trigger",
+        patternKind: "score_decoy",
+        assignedDomainPlanIds: [],
+        duplicateAlreadyInstalled: false,
+        affordableOrSupportable: true,
+        plannedAtStateVersion: input.playerView.stateVersion,
+        plannedAdvancementTarget: 1,
+        value: 300,
+        evidenceCode: "exact_decoy",
+      };
+      const projects = corpCounterBankScoreProjects(
+        input,
+        [candidate(action, rezzed ? "economy.gain_credit" : "corp_window.rez")],
+        [ambush],
+      );
+      expect(
+        projects.some(
+          (project) =>
+            project.phase ===
+            (rezzed
+              ? "liquidate_counter_bank"
+              : "rez_counter_bank_for_liquidation"),
+        ),
+      ).toBe(allowed);
+    },
+  );
+
   it("installs one Engine-certified counter bank only into a remote the visible Runner cannot reach", () => {
     const install = current(
       legalAction(
@@ -39,7 +108,11 @@ describe("corpCounterBankScoreProjects", () => {
     input.playerView.servers = [secureRemote("remote_1")];
 
     expect(
-      corpCounterBankScoreProjects(input, [candidate(install, "install.card")]),
+      corpCounterBankScoreProjects(
+        input,
+        [candidate(install, "install.card")],
+        [],
+      ),
     ).toContainEqual(
       expect.objectContaining({
         phase: "install_counter_bank",
@@ -72,7 +145,11 @@ describe("corpCounterBankScoreProjects", () => {
     input.playerView.servers = [server("remote_1")];
 
     expect(
-      corpCounterBankScoreProjects(input, [candidate(install, "install.card")]),
+      corpCounterBankScoreProjects(
+        input,
+        [candidate(install, "install.card")],
+        [],
+      ),
     ).toEqual([]);
 
     input.playerView.servers = [secureRemote("remote_1")];
@@ -81,7 +158,11 @@ describe("corpCounterBankScoreProjects", () => {
       expiresAtStateVersion: 0,
     };
     expect(
-      corpCounterBankScoreProjects(input, [candidate(install, "install.card")]),
+      corpCounterBankScoreProjects(
+        input,
+        [candidate(install, "install.card")],
+        [],
+      ),
     ).toEqual([]);
 
     input.playerView.own.gripOrHq[0]!.counterBankPreparationQuote = {
@@ -90,7 +171,11 @@ describe("corpCounterBankScoreProjects", () => {
       advancementCounters: 1,
     };
     expect(
-      corpCounterBankScoreProjects(input, [candidate(install, "install.card")]),
+      corpCounterBankScoreProjects(
+        input,
+        [candidate(install, "install.card")],
+        [],
+      ),
     ).toEqual([]);
   });
 
@@ -111,9 +196,11 @@ describe("corpCounterBankScoreProjects", () => {
     ];
 
     expect(
-      corpCounterBankScoreProjects(input, [
-        candidate(advance, "score.advance_card"),
-      ]),
+      corpCounterBankScoreProjects(
+        input,
+        [candidate(advance, "score.advance_card")],
+        [],
+      ),
     ).toContainEqual(
       expect.objectContaining({
         phase: "advance_counter_bank",
@@ -162,10 +249,14 @@ describe("corpCounterBankScoreProjects", () => {
     ];
 
     expect(
-      corpCounterBankScoreProjects(input, [
-        candidate(installAgenda, "install.card"),
-        candidate(rez, "corp_window.rez"),
-      ]),
+      corpCounterBankScoreProjects(
+        input,
+        [
+          candidate(installAgenda, "install.card"),
+          candidate(rez, "corp_window.rez"),
+        ],
+        [],
+      ),
     ).toContainEqual(
       expect.objectContaining({
         phase: "install_agenda_from_counter_bank",
@@ -214,10 +305,14 @@ describe("corpCounterBankScoreProjects", () => {
     ];
 
     expect(
-      corpCounterBankScoreProjects(input, [
-        candidate(installAgenda, "install.card"),
-        candidate(rez, "corp_window.rez"),
-      ]).filter(
+      corpCounterBankScoreProjects(
+        input,
+        [
+          candidate(installAgenda, "install.card"),
+          candidate(rez, "corp_window.rez"),
+        ],
+        [],
+      ).filter(
         (project) => project.phase === "install_agenda_from_counter_bank",
       ),
     ).toEqual([]);
@@ -242,7 +337,11 @@ describe("corpCounterBankScoreProjects", () => {
     ];
 
     expect(
-      corpCounterBankScoreProjects(input, [candidate(rez, "corp_window.rez")]),
+      corpCounterBankScoreProjects(
+        input,
+        [candidate(rez, "corp_window.rez")],
+        [],
+      ),
     ).toContainEqual(
       expect.objectContaining({
         phase: "rez_counter_bank_for_handoff",
@@ -276,9 +375,11 @@ describe("corpCounterBankScoreProjects", () => {
       server("remote_1", [], [vapor("vapor", "installed_root", 2, true)]),
     ];
 
-    const projects = corpCounterBankScoreProjects(input, [
-      candidate(cashout, "economy.gain_credit"),
-    ]);
+    const projects = corpCounterBankScoreProjects(
+      input,
+      [candidate(cashout, "economy.gain_credit")],
+      [],
+    );
     expect(projects).toContainEqual(
       expect.objectContaining({
         phase: "liquidate_counter_bank",
@@ -289,9 +390,11 @@ describe("corpCounterBankScoreProjects", () => {
     input.playerView.activeSide = "runner";
     input.playerView.timingPoint = "runner_action.main";
     expect(
-      corpCounterBankScoreProjects(input, [
-        candidate(cashout, "economy.gain_credit"),
-      ]),
+      corpCounterBankScoreProjects(
+        input,
+        [candidate(cashout, "economy.gain_credit")],
+        [],
+      ),
     ).toEqual([]);
   });
 
@@ -321,9 +424,11 @@ describe("corpCounterBankScoreProjects", () => {
     ];
 
     expect(
-      corpCounterBankScoreProjects(input, [
-        candidate(installAsset, "install.card"),
-      ]),
+      corpCounterBankScoreProjects(
+        input,
+        [candidate(installAsset, "install.card")],
+        [],
+      ),
     ).toEqual([]);
   });
 });

@@ -15,6 +15,57 @@ import {
 } from "./corp-main-actions";
 
 describe("corp main action generation", () => {
+  it.each(["spy", "obligation"] as const)(
+    "keeps the install/rez reserve out of %s payment offers",
+    (kind) => {
+      const state = minimalCorpMainState(`restricted-${kind}-offer`);
+      const cost = kind === "spy" ? 4 : 12;
+      state.corp.credits = cost + 2;
+      state.corpTemporaryInstallRezCredits = {
+        sourceCardInstanceId: "contract",
+        sourceDefinitionId: "onr_proteus_059_government-contract",
+        remaining: 3,
+        usableFor: "corp_install_or_rez",
+        returnUnusedAtTurnEnd: true,
+      };
+      const host = testCorpMainHost(state);
+      if (kind === "spy") host.counters.spyCountersForServer = () => 1;
+      else host.corp.activeObligationCount = () => 1;
+      const offered = () =>
+        buildCorpMainActions(host).some((action) =>
+          kind === "spy"
+            ? action.payload?.corpAbility === "remove_spy_counter"
+            : action.payload?.obligationDebtAbility === "remove_obligation",
+        );
+      expect(offered()).toBe(false);
+      state.corp.credits += 1;
+      expect(offered()).toBe(true);
+    },
+  );
+  it.each([3, 5])(
+    "offers tagged-resource trash only with two general credits (total %s)",
+    (total) => {
+      const state = minimalCorpMainState("restricted-trash-offer");
+      state.corp.credits = total;
+      state.runner.tags = 1;
+      state.runner.rig.resources = ["resource-instance"];
+      state.corpTemporaryInstallRezCredits = {
+        sourceCardInstanceId: "contract-instance",
+        sourceDefinitionId: "onr_proteus_059_government-contract",
+        remaining: 3,
+        usableFor: "corp_install_or_rez",
+        returnUnusedAtTurnEnd: true,
+      };
+      const host = testCorpMainHost(state);
+      host.cards.definitionFor = () =>
+        CARD_DEFINITIONS_BY_ID["onr_v1_151_aujourdoui"]!;
+      expect(
+        buildCorpMainActions(host).some(
+          (action) => action.type === "trash_resource",
+        ),
+      ).toBe(total === 5);
+    },
+  );
   it("returns only end turn when the Corp has no clicks", () => {
     const state = minimalCorpMainState("arch-53-corp-no-clicks");
     state.corp.clicks = 0;

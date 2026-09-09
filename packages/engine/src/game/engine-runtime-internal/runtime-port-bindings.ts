@@ -377,7 +377,6 @@ export let corpIceInstallAdditionalCost: RuntimePortGroups["stateRuntimeServices
 export let corpIceInstallTotalCost: RuntimePortGroups["stateRuntimeServices"]["corpIceInstallTotalCost"];
 export let assertCorpIceInstallCostValid: RuntimePortGroups["stateRuntimeServices"]["assertCorpIceInstallCostValid"];
 export let serverDifficultyIncreaseFromRunCounters: RuntimePortGroups["stateCorpRuntimeResolvers"]["serverDifficultyIncreaseFromRunCounters"];
-export let serverDifficultyReductionFromUpgrades: RuntimePortGroups["stateCorpRuntimeResolvers"]["serverDifficultyReductionFromUpgrades"];
 export let discardRandomCorpHqCards: RuntimePortGroups["lifecycleRuntime"]["discardRandomCorpHqCards"];
 export let trashRunnerInstalledProgram: RuntimePortGroups["lifecycleRuntime"]["trashRunnerInstalledProgram"];
 export let runnerProgramUsesMemory: RuntimePortGroups["lifecycleRuntime"]["runnerProgramUsesMemory"];
@@ -1101,8 +1100,6 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
     ports.stateRuntimeServices.assertCorpIceInstallCostValid;
   serverDifficultyIncreaseFromRunCounters =
     ports.stateCorpRuntimeResolvers.serverDifficultyIncreaseFromRunCounters;
-  serverDifficultyReductionFromUpgrades =
-    ports.stateCorpRuntimeResolvers.serverDifficultyReductionFromUpgrades;
   discardRandomCorpHqCards = ports.lifecycleRuntime.discardRandomCorpHqCards;
   trashRunnerInstalledProgram =
     ports.lifecycleRuntime.trashRunnerInstalledProgram;

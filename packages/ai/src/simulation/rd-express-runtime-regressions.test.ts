@@ -10,16 +10,86 @@ import {
   type EditableDeck,
 } from "@netgrid/decks";
 import { describe, expect, it } from "vitest";
-import type { AiSimulationDecisionCheckpointCapture } from "./ai-simulation-config";
-import { chooseAiAction } from "../index";
+import {
+  applyAction,
+  createGameAfterSetup,
+  getLegalActions,
+  hashState,
+  replayEvents,
+} from "@netgrid/engine";
+import type { LegalAction } from "@netgrid/shared";
+import { buildAiDecisionInput } from "../runtime/ai-decision-input";
+import { chooseAiAction } from "../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
+import type { AiSimulationDecisionCheckpointCapture } from "./ai-simulation-config";
 
 import { simulateAiGame } from "../simulation";
 
 const RUNNER_DECK_ID = "standard_runner_rd_express";
 
 describe("R&D Express selfplay runtime regressions", () => {
+  it("uses the renewing program-install pool before liquid credits in the captured coverage line", () => {
+    const captures: AiSimulationDecisionCheckpointCapture[] = [];
+    const summary = simulateStandardGame({
+      runnerDeckId: "standard_runner_blink_pressure_rig",
+      corpDeckId: "standard_corp_original_speed_v10",
+      seed: "meta-402-round-3-002",
+      difficulty: "hard",
+      // The current decision line reaches the same pool-funded installation at 187.
+      maxActions: 200,
+      captures,
+    });
+    expect(summary.errors).toEqual([]);
+    const installed = (capture: AiSimulationDecisionCheckpointCapture) =>
+      capture.input.playerView.own.rig?.some(
+        (card) => card.definitionId === "onr_v1_007_blink",
+      ) === true;
+    const afterIndex = captures.findIndex(installed);
+    expect(afterIndex).toBeGreaterThan(0);
+    const before = captures[afterIndex - 1]!.input.playerView.own;
+    const after = captures[afterIndex]!.input.playerView.own;
+    const pool = (rig: typeof before.rig) =>
+      rig?.find(
+        (card) =>
+          card.definitionId === "onr_v1_075_zetatech-software-installer",
+      )?.counters?.bit;
+    expect(pool(before.rig)).toBeGreaterThan(0);
+    expect(
+      after.rig?.some(
+        (card) =>
+          card.definitionId === "onr_v1_075_zetatech-software-installer",
+      ),
+    ).toBe(true);
+    expect(pool(after.rig)).toBeUndefined();
+    expect(after.credits).toBe(before.credits - 5 + pool(before.rig)!);
+    expect(summary.replayOk).toBe(true);
+  }, 120_000);
+
   it.each([
+    {
+      label:
+        "keeps a restricted run's exact target and access purpose through Vacuum Link",
+      runnerDeckId: "standard_runner_blink_pressure_rig",
+      corpDeckId: "standard_corp_original_speed_v10",
+      seed: "meta-402-round-2-008",
+      maxActions: 75,
+    },
+    {
+      label:
+        "releases the superseded coverage requester when a targeted bypass becomes executable",
+      runnerDeckId: "standard_runner_blink_pressure_rig",
+      corpDeckId: "standard_corp_original_speed_v10",
+      seed: "meta-402-round-2-024",
+      maxActions: 305,
+    },
+    {
+      label:
+        "keeps an event-started run bound through the Vacuum Link rewind choice",
+      runnerDeckId: "standard_runner_blink_pressure_rig",
+      corpDeckId: "standard_corp_original_speed_v10",
+      seed: "meta-402-round-1-035",
+      maxActions: 15,
+    },
     {
       label: "keeps the opening Cheap Bag match plan-covered",
       corpDeckId: "standard_corp_cheap_bag_tricks",
@@ -234,40 +304,108 @@ describe("R&D Express selfplay runtime regressions", () => {
   }, 120_000);
 
   it("keeps the next R&D multiaccess target current after declining trash", () => {
-    const captures: AiSimulationDecisionCheckpointCapture[] = [];
-    const summary = simulateStandardGame({
-      corpDeckId: "standard_corp_original_speed_v10",
-      seed: "rd-express-corp-panel-08",
-      maxActions: 266,
-      captures,
+    // Freeze the access preconditions, not a numeric turn in a changing game.
+    // The Engine creates the breach; the live AI retains one resident run
+    // owner through both accesses and the intervening decline.
+    const runner = standardSnapshot(RUNNER_DECK_ID);
+    const corp = standardSnapshot("standard_corp_original_speed_v10");
+    let state = createGameAfterSetup({
+      seed: "rd-decline-continuation-fixture",
+      runnerDeck: buildEngineDeck(runner),
+      corpDeck: buildEngineDeck(corp),
     });
-    const failingCapture = captures.find(
-      (capture) => capture.state.stateVersion === 265,
+    state.activeSide = "runner";
+    state.phase = "runner_action_phase";
+    state.timingPoint = "runner_action.main";
+    state.runner.clicks = 4;
+    state.runner.credits = 0;
+    const hardware = Object.values(state.cardInstances).find(
+      (card) => card.definitionId === "onr_v1_139_r-and-d-interface",
+    )!;
+    state.runner.grip = state.runner.grip.filter(
+      (id) => id !== hardware.instanceId,
     );
+    state.runner.stack = state.runner.stack.filter(
+      (id) => id !== hardware.instanceId,
+    );
+    state.runner.rig.hardware.push(hardware.instanceId);
+    Object.assign(hardware, {
+      zone: { side: "runner", zone: "rig" },
+      faceup: true,
+      rezzed: true,
+    });
+    const asset = Object.values(state.cardInstances).find(
+      (card) => card.definitionId === "onr_v1_320_encoder-inc",
+    )!;
+    state.corp.hq = state.corp.hq.filter((id) => id !== asset.instanceId);
+    state.corp.rd = state.corp.rd.filter((id) => id !== asset.instanceId);
+    state.corp.rd.unshift(asset.instanceId);
+    Object.assign(asset, {
+      zone: { side: "corp", zone: "rd" },
+      faceup: false,
+      rezzed: false,
+    });
+    const initial = structuredClone(state);
+    const apply = (action: LegalAction) => {
+      const result = applyAction(state, {
+        matchId: state.matchId,
+        side: action.side,
+        actionId: action.actionId,
+        clientKnownStateVersion: state.stateVersion,
+      });
+      expect(result.ok).toBe(true);
+      if (!result.ok) throw new Error(result.error.message);
+      state = result.state;
+    };
+    apply(
+      getLegalActions(state, "runner").find(
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "rd",
+      )!,
+    );
+    expect(state.run?.breach?.queue).toHaveLength(2);
+    const runId = state.run!.runId;
+    const root = `plan:runner.convert_run_window:run%3A${runId}`;
     resetResidentPlanPortfolioMemory();
-    const failingDecision = failingCapture
-      ? chooseAiAction(failingCapture.input, {
-          persistTacticalPlanMemory: false,
-        })
-      : undefined;
-
-    expect(
-      summary.errors,
-      JSON.stringify(
-        {
-          captures: captures
-            .filter((capture) => capture.state.stateVersion >= 263)
-            .map(captureDiagnostic),
-          failingDecision,
+    for (const actionType of [
+      "access_card",
+      "decline_trash",
+      "access_card",
+    ] as const) {
+      const input = buildAiDecisionInput(state, "runner", {
+        ownDeckSnapshot: { ...runner, side: "runner" },
+      });
+      expect(input.playerView.run?.runId).toBe(runId);
+      expect(input.playerView.run?.accessedCard?.instanceId).toBe(
+        actionType === "decline_trash" ? asset.instanceId : undefined,
+      );
+      const decision = chooseAiAction(input);
+      const action = input.legalActions.find(
+        (candidate) => candidate.actionId === decision.actionId,
+      )!;
+      expect(action.type).toBe(actionType);
+      expect(decision).toMatchObject({
+        fallbackUsed: false,
+        timeoutUsed: false,
+        decisionDebug: {
+          planFirstDecision: {
+            rootPlanInstanceId: root,
+            leafExecutorInstanceId: root,
+            route: {
+              actionId: action.actionId,
+              stateVersion: state.stateVersion,
+              planInstanceId: root,
+            },
+          },
         },
-        undefined,
-        2,
-      ),
-    ).toEqual([]);
-    expect(summary.runtimeFailures).toEqual([]);
-    expect(summary.metrics.illegalActions).toBe(0);
-    expect(summary.replayOk).toBe(true);
-  }, 30_000);
+      });
+      apply(action);
+    }
+    expect(
+      replayEvents(initial, state.eventLog.slice(initial.eventLog.length))
+        .actualFinalStateHash,
+    ).toBe(hashState(state));
+  });
 
   it("finishes the former Manhunt action-limit seed", () => {
     const summary = simulateStandardGame({
@@ -313,6 +451,7 @@ type StandardDeck = {
 };
 
 function simulateStandardGame(params: {
+  difficulty?: "hard";
   runnerDeckId?: string;
   corpDeckId: string;
   seed: string;
@@ -322,6 +461,12 @@ function simulateStandardGame(params: {
   const runner = standardSnapshot(params.runnerDeckId ?? RUNNER_DECK_ID);
   const corp = standardSnapshot(params.corpDeckId);
   return simulateAiGame({
+    ...(params.difficulty
+      ? {
+          runnerDifficulty: params.difficulty,
+          corpDifficulty: params.difficulty,
+        }
+      : {}),
     seed: params.seed,
     maxActions: params.maxActions,
     runnerDeck: buildEngineDeck(runner),

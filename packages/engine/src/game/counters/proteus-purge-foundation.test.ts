@@ -84,6 +84,7 @@ describe("Proteus Phase 8a purgeable Runner-virus foundation", () => {
       payload: {
         purgeModel: "future_action_debt",
         actionDebtAdded: 3,
+        actionCapacityMinimumAvailableActions: 0,
         timingWindowId: "run_1.special_effect.1",
       },
     });
@@ -227,53 +228,71 @@ describe("Proteus Phase 8a purgeable Runner-virus foundation", () => {
     );
   });
 
-  it("offers Runner-virus purge in the normal Corp action phase and creates future action debt", () => {
-    let state = createGame({
-      seed: "proteus-8a-main-phase-runner-virus-purge",
-      setupMode: "completed",
-    });
-    state.activeSide = "corp";
-    state.phase = "corp_action_phase";
-    state.timingPoint = "corp_action.main";
-    state.corp.clicks = 3;
-    state.purgeableRunnerVirusCounters = {
-      corp: { vienna: 2 },
-    };
+  it.each([1, 3])(
+    "offers a main-phase purge with %s available actions and creates future debt",
+    (clicks) => {
+      let state = createGame({
+        seed: "proteus-8a-main-phase-runner-virus-purge",
+        setupMode: "completed",
+      });
+      state.activeSide = "corp";
+      state.phase = "corp_action_phase";
+      state.timingPoint = "corp_action.main";
+      state.corp.clicks = clicks;
+      state.purgeableRunnerVirusCounters = {
+        corp: { vienna: 2 },
+      };
 
-    const purge = getLegalActions(state, "corp").find(
-      (action) => action.type === "purge_runner_virus_counters",
-    );
-    expect(purge).toMatchObject({
-      label: "Runner-Virus-Counter purgen (3 Aktionen aussetzen)",
-      costs: [],
-      payload: {
-        purgeModel: "future_action_debt",
+      const purge = getLegalActions(state, "corp").find(
+        (action) => action.type === "purge_runner_virus_counters",
+      );
+      expect(purge).toMatchObject({
+        label: "Runner-Virus-Counter purgen (3 Aktionen aussetzen)",
+        costs: [],
+        payload: {
+          purgeModel: "future_action_debt",
+          actionDebtAdded: 3,
+          actionCapacityMinimumAvailableActions: 1,
+          timingFamily: "corp_main_action",
+        },
+      });
+
+      state = apply(
+        state,
+        "corp",
+        (action) => action.type === "purge_runner_virus_counters",
+      );
+
+      expect(state.purgeableRunnerVirusCounters).toBeUndefined();
+      expect(state.corp.clicks).toBe(clicks);
+      expect(state.corpActionDebt).toMatchObject({
+        forgoActionsPending: 3,
+      });
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        actionType: "purge_runner_virus_counters",
+        purgedRunnerVirusCounters: 2,
         actionDebtAdded: 3,
         timingFamily: "corp_main_action",
-      },
-    });
-
-    state = apply(
-      state,
-      "corp",
-      (action) => action.type === "purge_runner_virus_counters",
-    );
-
-    expect(state.purgeableRunnerVirusCounters).toBeUndefined();
-    expect(state.corp.clicks).toBe(3);
-    expect(state.corpActionDebt).toMatchObject({
-      forgoActionsPending: 3,
-    });
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "purge_runner_virus_counters",
-      purgedRunnerVirusCounters: 2,
-      actionDebtAdded: 3,
-      timingFamily: "corp_main_action",
-    });
-    expect(getLegalActions(state, "corp").map((action) => action.type)).toEqual(
-      ["forgo_action"],
-    );
-  });
+      });
+      expect(
+        getLegalActions(state, "corp").map((action) => action.type),
+      ).toEqual(["forgo_action"]);
+      for (let remaining = clicks; remaining > 0; remaining--) {
+        state = apply(
+          state,
+          "corp",
+          (action) => action.type === "forgo_action",
+        );
+      }
+      expect(state.corp.clicks).toBe(0);
+      expect(state.corpActionDebt?.forgoActionsPending ?? 0).toBe(3 - clicks);
+      expect(
+        getLegalActions(state, "corp").some(
+          (action) => action.type === "purge_runner_virus_counters",
+        ),
+      ).toBe(false);
+    },
+  );
 
   it("applies Tax and Pipe counters at Corp start of turn", () => {
     let state = createGame({

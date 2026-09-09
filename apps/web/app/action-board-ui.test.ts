@@ -93,6 +93,7 @@ import {
   runnerProgramInstallTrashChoiceInfo,
   runPositionStatusLabel,
   runPhaseOpportunityKinds,
+  runStepOpportunities,
   runTargetServerIds,
   runWindowActionButtonLabel,
   runWindowActionInstanceDetail,
@@ -342,6 +343,54 @@ describe("localized action presentation", () => {
     expect(runWindowStatusLabel(running, "fr")).toBe("Accès au serveur");
   });
 
+  it.each(["de", "en", "fr"] as const)(
+    "localizes Shell Traders host placement in %s",
+    (locale) => {
+      const choice: NonNullable<PlayerView["pendingChoice"]> = {
+        choiceId: "shell_destination",
+        side: "runner",
+        source: "runner.delayed_install_destination:shell:target:paid:1",
+        prompt: "nicht auswerten",
+        presentationKey: "delayed_install_destination",
+        kind: "select_option",
+        options: [
+          { id: "rig", value: "rig", label: "nicht auswerten" },
+          {
+            id: "host_afreet",
+            value: "afreet",
+            label: "nicht auswerten",
+            metadata: { cardTitle: "Afreet" },
+          },
+        ],
+        minSelections: 1,
+        maxSelections: 1,
+        stateVersion: 1,
+        visibility: "public",
+      };
+      expect(choicePromptPresentationLabel(choice, locale)).toContain(
+        "The Shell Traders",
+      );
+      expect(
+        choiceOptionPresentationLabel(choice, choice.options[1]!, locale),
+      ).toBe(
+        {
+          de: "Auf Afreet installieren",
+          en: "Install on Afreet",
+          fr: "Installer sur Afreet",
+        }[locale],
+      );
+      expect(
+        choiceOptionPresentationLabel(choice, choice.options[0]!, locale),
+      ).toBe(
+        {
+          de: "Im Programmspeicher installieren (bei Bedarf Programme trashen)",
+          en: "Install in program memory (trash programs if needed)",
+          fr: "Installer en mémoire (détruire des programmes si nécessaire)",
+        }[locale],
+      );
+    },
+  );
+
   it("localizes City Surveillance prompts and options without reading German labels", () => {
     const choice = {
       choiceId: "runner_draw_draw_tax_12_0_13",
@@ -451,6 +500,27 @@ describe("localized action presentation", () => {
 });
 
 describe("V1.0.5 action board UI helpers", () => {
+  it("keeps stage cues dim and highlights only the current offered actions", () => {
+    const actions = [{ type: "rez_card" }, { type: "decline_rez" }] as const;
+    expect(runStepOpportunities("movement", "movement", actions)).toEqual([
+      { kind: "card_rez", active: true },
+      { kind: "ability", active: false },
+      { kind: "continue", active: false },
+      { kind: "jack_out", active: false },
+      { kind: "pass", active: true },
+    ]);
+    const approach = runStepOpportunities("approach_ice", "movement", actions);
+    expect(approach).toContainEqual({ kind: "ice_rez", active: false });
+    expect(approach.every((cue) => !cue.active)).toBe(true);
+    expect(runPhaseOpportunityKinds([{ type: "rez_ice" }])).toEqual([
+      "ice_rez",
+    ]);
+    expect(runStepOpportunities("movement", "movement", [])).toHaveLength(5);
+    expect(
+      runStepOpportunities("access", "access", [{ type: "resolve_choice" }]),
+    ).toContainEqual({ kind: "choice", active: true });
+  });
+
   it("formats persisted card state as readable card detail labels", () => {
     expect(selectedSubtypeDetailLabel({ selectedSubtypeLabel: "Sentry" })).toBe(
       "Gewählter Typ: Sentry",
@@ -1099,7 +1169,7 @@ describe("V1.0.5 action board UI helpers", () => {
           "run.movement_rez_window",
         ),
       ]),
-    ).toEqual(["rez", "continue", "jack_out", "pass"]);
+    ).toEqual(["card_rez", "continue", "jack_out", "pass"]);
     expect(
       runAwareActionButtonLabel(
         running,

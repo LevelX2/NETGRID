@@ -1,6 +1,7 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
 import { rolesForDeckDoctrineCard } from "../deck-doctrine-card-roles";
+import { AI_HINTS_BY_CARD } from "../ai-hints";
 import type { AiDeckStrategyProfile } from "../deck-doctrine-strategy";
 import { rolesMatch } from "../runtime/role-match";
 import { runnerEffectsProvideDamagePrevention } from "../runner-canonical-hint-semantics";
@@ -27,6 +28,7 @@ import type {
   FundingRouteHorizon,
   FundingRouteReliability,
   FundingRouteStatus,
+  PaymentWindowFundingSetup,
 } from "./funding-route";
 import type { ProjectedHandDisposition } from "./turn-projection";
 import type { RunnerCreditBankProspectivePlan } from "./runner-credit-bank-prospective-planning";
@@ -45,6 +47,10 @@ export type RunnerFundingRouteAssessment = {
   projectedGap: number;
   totalClickCost: number;
   firstStepActionId?: string;
+  paymentInstall?: PaymentWindowFundingSetup & {
+    targetServerId: string;
+    runActionId: string;
+  };
   evidenceCodes: string[];
 };
 
@@ -195,6 +201,11 @@ export type RunnerCoverageGapSignal = {
     actionId: string;
     sourceCardInstanceId: string;
     sourceDefinitionId: string;
+    resolvedSearchChoice?: {
+      choiceId: string;
+      choiceSource: string;
+      stateVersion: number;
+    };
     targetCardInstanceId?: string;
     targetDefinitionId?: string;
     installMemorySacrificeBinding?: {
@@ -297,9 +308,9 @@ export type RunnerRecurringEconomySignal = {
   evidenceCodes: string[];
   investmentHorizon: Readonly<{
     installCost: number;
-    earliestPayout: "start_of_runner_turn";
+    earliestPayout: "start_of_runner_turn" | "next_compatible_icebreaker_use";
     projectedHoldTurns: number;
-    invalidatingActionType: "start_run";
+    invalidatingActionType: "start_run" | "none";
     realizedPayoutCount: number;
     realizedValue: number;
     futureValueAtRisk: number;
@@ -2088,6 +2099,24 @@ function economyCandidates(
   const routeActionIds = new Set(
     need.kind === "develop_liquidity" ? need.actionIds : need.routeActionIds,
   );
+  const paymentInstall =
+    need.kind === "parent_plan_support" &&
+    (need.driver.kind === "contest" || need.driver.kind === "run")
+      ? need.routeAssessment.paymentInstall
+      : undefined;
+  const isPaymentInstall = (candidate: ActionSemanticCandidate) =>
+    paymentInstall?.actionId === candidate.actionId &&
+    need.kind === "parent_plan_support" &&
+    need.driver.targetId === paymentInstall.targetServerId &&
+    context.actionCandidates.some(
+      (entry) => entry.actionId === paymentInstall.runActionId,
+    ) &&
+    paymentInstall.sourceCardInstanceId === candidate.sourceCardInstanceId &&
+    paymentInstall.sourceDefinitionId === candidate.sourceDefinitionId &&
+    candidate.semanticActionType === "install.card" &&
+    candidate.costProfile.costKnownStatus === "known" &&
+    candidate.costProfile.clickCost === paymentInstall.installClickCost &&
+    candidate.costProfile.creditCost === paymentInstall.installCreditCost;
   return context.actionCandidates
     .filter(
       (candidate) =>
@@ -2097,11 +2126,13 @@ function economyCandidates(
         routeActionIds.has(candidate.actionId) &&
         (need.kind === "develop_liquidity"
           ? runnerTurnLiquidityCandidateIsMaterializable(candidate)
-          : runnerFundingRouteCandidateIsMaterializable(candidate)),
+          : runnerFundingRouteCandidateIsMaterializable(candidate) ||
+            isPaymentInstall(candidate)),
     )
     .map((candidate) => {
-      const netLiquidCreditGain =
-        candidate.economyProjection!.netLiquidCreditGain!;
+      const netLiquidCreditGain = isPaymentInstall(candidate)
+        ? paymentInstall!.netPaymentGain - paymentInstall!.installCreditCost
+        : candidate.economyProjection!.netLiquidCreditGain!;
       const fundingGapProgress = Math.min(need.gap, netLiquidCreditGain);
       return {
         candidate,
@@ -2486,7 +2517,14 @@ function coverageInstallCandidates(
     );
     if (!sourceDefinitionId) return [];
     const roles = rolesForDefinitionId(sourceDefinitionId);
-    if (!runnerRolesCoverCoverageGap(roles, gap.requiredRole)) return [];
+    if (
+      !runnerInstallDefinitionCoversCoverageGap(
+        sourceDefinitionId,
+        roles,
+        gap.requiredRole,
+      )
+    )
+      return [];
     return [
       {
         candidate,
@@ -2593,6 +2631,24 @@ export function runnerRolesCoverCoverageGap(
   return (
     rolesMatch(roles, runnerCoverageRoleNeedles(requiredRole)) ||
     rolesMatch(roles, ["universal_breaker", "breaker_universal"])
+  );
+}
+
+/** Prospective installation coverage; never use this as active rig coverage.
+ * Configurable modes remain alternatives, with their costs and single-mode
+ * limits evaluated by the existing Engine-backed run-path assessment. */
+export function runnerInstallDefinitionCoversCoverageGap(
+  definitionId: string,
+  roles: readonly string[],
+  requiredRole: RunnerCoverageGapSignal["requiredRole"],
+): boolean {
+  if (runnerRolesCoverCoverageGap(roles, requiredRole)) return true;
+  const profile = AI_HINTS_BY_CARD.get(definitionId)?.breakerProfile;
+  return (
+    profile?.configurableCoverage === true &&
+    (profile.coverageCandidates ?? []).some(
+      (coverage) => `breaker_${coverage}` === requiredRole,
+    )
   );
 }
 

@@ -1,4 +1,5 @@
-export const NETGRID_PRODUCT_VERSION = "1.0";
+import { NETGRID_PRODUCT_VERSION } from "@netgrid/shared";
+export { NETGRID_PRODUCT_VERSION } from "@netgrid/shared";
 
 export type AppBuildInfo = {
   productVersion: string;

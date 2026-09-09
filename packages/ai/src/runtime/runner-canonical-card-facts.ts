@@ -4,6 +4,37 @@ type RunnerPlanningCard = NonNullable<
   ReturnType<typeof cardSpecPlanningCardByDefinitionId>
 >;
 
+export function runnerEventStartsRunAfterProgramSearch(
+  definitionId: string | undefined,
+): boolean {
+  if (!definitionId) return false;
+  const planning = cardSpecPlanningCardByDefinitionId(definitionId)?.planning;
+  return (
+    planning?.side === "runner" &&
+    planning.engine.runnerEventLongtail?.kind ===
+      "search_stack_install_program_free_then_run_return_or_penalty"
+  );
+}
+
+export function runnerSoleFortIceTrashTagAmount(
+  definitionId: string | undefined,
+): number | undefined {
+  if (!definitionId) return undefined;
+  const planning = cardSpecPlanningCardByDefinitionId(definitionId)?.planning;
+  if (planning?.side !== "runner") return undefined;
+  const abilities = (planning.engine.abilities ?? []).filter(
+    (entry) => entry.kind === "on_play",
+  );
+  if (abilities.length !== 1) return undefined;
+  const effects = abilities[0]!.effects;
+  if (effects.length !== 1) return undefined;
+  const effect = effects[0]!;
+  return effect.kind ===
+    "trash_rezzed_ice_on_last_successful_run_fort_and_add_tags"
+    ? effect.tagAmount
+    : undefined;
+}
+
 export type RunnerRestrictedRunCreditUse =
   | "using_icebreaker_during_run_non_noisy"
   | "using_killer_during_run";

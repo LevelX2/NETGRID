@@ -19,6 +19,7 @@ import { fixedPlayCostCredits } from "../payment/play-cost";
 import { restrictedHostedCredits } from "../run/run-duration-payment";
 import { evaluateRunStartEligibility } from "../run/run-start-eligibility";
 import { runnerCanStartRun } from "../run/run-start-lock";
+import { runnerFortIceTrashActionPayload } from "./runner-fort-ice-trash-quote";
 
 type HostFn<T = unknown> = (...args: any[]) => T;
 
@@ -718,11 +719,12 @@ export function buildRunnerMainActions(
         state,
         definition,
       );
-      const deterministicResourcePayload = deterministicOnPlayResourcePayload(
-        definition,
-        "runner",
-        state,
-      );
+      const deterministicResourcePayload = {
+        ...deterministicOnPlayResourcePayload(definition, "runner", state),
+        ...(canPlayCardImplementation
+          ? runnerFortIceTrashActionPayload(state, definition)
+          : {}),
+      };
       const eventCapabilityBinding = runnerEventCapabilityBinding(
         host,
         definition,

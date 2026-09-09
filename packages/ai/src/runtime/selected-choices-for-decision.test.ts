@@ -1671,10 +1671,10 @@ describe("selectedChoicesForDecision", () => {
     });
   });
 
-  it("completes a scored-agenda free-rez payload only for the exact ICE prebound by the resident score plan", () => {
+  it("completes a scored-agenda free-rez payload only for the exact ICE variant prebound by the resident score plan", () => {
     const sourceAgendaId = "priority-requisition";
-    const targetCardId = "expensive-ice";
-    const targetDefinitionId = "onr_v1_273_triggerman";
+    const targetCardId = "credit-blocks";
+    const targetDefinitionId = "onr_proteus_017_credit-blocks";
     const sourceProfile = corpScoredAgendaFreeRezProfile(
       "onr_v1_212_priority-requisition",
     )!;
@@ -1687,9 +1687,14 @@ describe("selectedChoicesForDecision", () => {
         maxSelections: 1,
         options: [
           {
-            id: "rez_expensive_fixed",
-            label: "Expensive ICE",
-            value: `${targetCardId}|fixed`,
+            id: "rez_credit-blocks_alternate_subtype:base",
+            label: "Credit Blocks as sentry",
+            value: `${targetCardId}|alternate_subtype:base`,
+          },
+          {
+            id: "rez_credit-blocks_alternate_subtype:alternate",
+            label: "Credit Blocks as wall",
+            value: `${targetCardId}|alternate_subtype:alternate`,
           },
           {
             id: "rez_cheaper_fixed",
@@ -1715,7 +1720,7 @@ describe("selectedChoicesForDecision", () => {
                 ...visibleCard(targetCardId, "ice"),
                 definitionId: targetDefinitionId,
                 rezzed: false,
-                rezCost: 7,
+                rezCost: 6,
               },
               {
                 ...visibleCard("cheaper-ice", "ice"),
@@ -1739,6 +1744,8 @@ describe("selectedChoicesForDecision", () => {
         targetPurpose: sourceProfile.targetPurpose,
         targetCardId,
         targetDefinitionId,
+        selectedVariantId: "alternate_subtype:base",
+        selectedOptionId: "rez_credit-blocks_alternate_subtype:base",
       },
     );
 
@@ -1750,7 +1757,7 @@ describe("selectedChoicesForDecision", () => {
       ),
     ).toEqual({
       choiceId: "v162_scored_agenda_free_rez_7",
-      selectedOptionIds: ["rez_expensive_fixed"],
+      selectedOptionIds: ["rez_credit-blocks_alternate_subtype:base"],
     });
   });
 
@@ -2836,6 +2843,8 @@ function rememberResidentScoreChoiceContinuation(
     targetPurpose: "rez_best_defensive_ice";
     targetCardId: string;
     targetDefinitionId: string;
+    selectedVariantId: string;
+    selectedOptionId: string;
   },
   iceMarkChoiceBinding?: {
     sourceCapabilityId: string;

@@ -14,6 +14,7 @@ import {
   exactImmediateCreditGainAmount,
   isBasicCreditAction,
 } from "./action-effect-classification";
+import { corpRestrictedCreditProjection } from "./corp-restricted-credit-projection";
 
 export type RootRezCreditOutcomeProjectionStatus =
   | { status: "not_applicable" }
@@ -58,6 +59,18 @@ export function applyActionEconomyProjection(
   const economyProjection = actionEconomyProjectionFor(candidate, action);
   return {
     ...candidate,
+    ...(economyProjection.restrictedCreditPayout &&
+    economyProjection.reliability === "guaranteed"
+      ? {
+          semanticActionType: "economy.gain_restricted_credit",
+          costProfile: {
+            ...candidate.costProfile,
+            clickCost: economyProjection.clickCost,
+            creditCost: economyProjection.creditCost,
+            costKnownStatus: "known" as const,
+          },
+        }
+      : {}),
     economyProjection,
     evidence: [
       ...candidate.evidence,
@@ -71,6 +84,8 @@ export function actionEconomyProjectionFor(
   candidate: ActionSemanticCandidate,
   action: LegalAction,
 ): ActionEconomyProjection {
+  const restrictedCredit = corpRestrictedCreditProjection(candidate, action);
+  if (restrictedCredit) return restrictedCredit;
   const rootRezOutcome = rootRezCreditOutcomeProjectionStatus(
     candidate,
     action,
@@ -106,7 +121,11 @@ export function actionEconomyProjectionFor(
   const payloadCardsDrawn =
     corpZoneProjection?.grossDrawCount ??
     runnerDrawProjection?.projectedGrossDrawCount ??
-    firstPositiveNumber(action, ["drawCardsAmount", "drawAmount", "drawCount"]);
+    firstNonNegativeNumber(action, [
+      "drawCardsAmount",
+      "drawAmount",
+      "drawCount",
+    ]);
   const basicActionCardsDrawn =
     runnerDrawProjection === undefined && isBasicDrawAction(action)
       ? 1
@@ -608,13 +627,13 @@ function exactListedCreditCost(action: LegalAction): number | undefined {
   return total;
 }
 
-function firstPositiveNumber(
+function firstNonNegativeNumber(
   action: LegalAction,
   keys: readonly string[],
 ): number | undefined {
   for (const key of keys) {
-    const value = positiveNumber(action.payload?.[key]);
-    if (value !== undefined) return value;
+    const value = action.payload?.[key];
+    if (isExactNonNegativeInteger(value)) return value;
   }
   return undefined;
 }

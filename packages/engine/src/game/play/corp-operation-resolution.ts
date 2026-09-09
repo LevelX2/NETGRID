@@ -12,6 +12,7 @@ import type {
   CardCorpUtilityImplementation,
   CardEffectImplementation,
 } from "../../ability-engine/definition-types";
+import { corpGeneralCreditAvailability } from "../payment/corp-general-credit-availability";
 import {
   isPrintedCostOnPlayAbility,
   onPlayCardImplementationClickCost,
@@ -181,7 +182,7 @@ export function canPlayCorpOperation(
     return (
       host.state.corp.clicks >=
         onPlayCardImplementationClickCostForDefinition(definition) &&
-      host.state.corp.credits >=
+      corpGeneralCreditAvailability(host.state) >=
         minimumPlayCostCredits(definition) +
           onPlayCardImplementationAdditionalOperationCost(definition) &&
       host.cardImplementation.canPlayPrintedCostOnPlay(definition) &&
@@ -257,7 +258,9 @@ export function canPlayCorpUtilityOperation(
         ) || hasVirusCountersToPurge(host.state)
       );
     case "x_future_actions_and_credit_forfeit":
-      return host.state.corp.credits >= utility.costMultiplier;
+      return (
+        corpGeneralCreditAvailability(host.state) >= utility.costMultiplier
+      );
     case "corp_archives_to_hq":
       return host.state.corp.archives.some((cardId) => {
         const sourceCardId = host.state.corp.hq.find(
@@ -290,7 +293,7 @@ export function canPlayCorpUtilityOperation(
       return (
         host.state.runner.tags > 0 &&
         (playCost.minimumX === 0 ||
-          (host.state.corp.credits >= playCost.creditsPerX &&
+          (corpGeneralCreditAvailability(host.state) >= playCost.creditsPerX &&
             host.operations.hardwareTrashByCounterEligibleHardwareIds().length >
               0))
       );
@@ -622,7 +625,9 @@ export function cardImplementationOperationLegalActions(
 ): LegalAction[] {
   const utility = corpUtilityImplementationForDefinition(definition.id);
   if (utility?.kind === "x_future_actions_and_credit_forfeit") {
-    const maxX = Math.floor(host.state.corp.credits / utility.costMultiplier);
+    const maxX = Math.floor(
+      corpGeneralCreditAvailability(host.state) / utility.costMultiplier,
+    );
     const actions: LegalAction[] = [];
     for (let x = 1; x <= maxX; x += 1) {
       actions.push(
@@ -654,7 +659,7 @@ export function cardImplementationOperationLegalActions(
     const totalCost = fixedPlayCostCredits(definition);
     if (
       host.state.corp.clicks < utilityClickCost ||
-      host.state.corp.credits < totalCost ||
+      corpGeneralCreditAvailability(host.state) < totalCost ||
       !canPlayCorpUtilityOperation(host, definition, utility)
     )
       return [];
@@ -704,7 +709,7 @@ export function cardImplementationOperationLegalActions(
   if (
     !isVariableKludgeRez &&
     totalCost !== undefined &&
-    host.state.corp.credits < totalCost
+    corpGeneralCreditAvailability(host.state) < totalCost
   ) {
     return [];
   }
@@ -718,9 +723,9 @@ export function cardImplementationOperationLegalActions(
           freeRezEffect.amount.kind === "bounded_x_by_rez_cost_min_one"
             ? Math.min(
                 Math.max(1, targetRezCost),
-                Math.max(0, Math.floor(host.state.corp.credits)),
+                corpGeneralCreditAvailability(host.state),
               )
-            : Math.max(0, Math.floor(host.state.corp.credits));
+            : corpGeneralCreditAvailability(host.state);
         for (let x = 1; x <= xUpperBound; x += 1) {
           actions.push(
             host.actions.buildLegalAction(

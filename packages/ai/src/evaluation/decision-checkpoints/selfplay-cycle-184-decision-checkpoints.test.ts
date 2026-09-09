@@ -1,4 +1,4 @@
-import type { AiDecisionInput } from "@netgrid/shared";
+import type { AiDecisionInput, PublicGameEvent } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import emptyGripRdJackOutJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-selfplay-184-01-empty-grip-rd-jack-out-d43.json";
@@ -7,6 +7,7 @@ import criticalDamageRemoteContestJson from "../../../../../data/scenarios/ai-de
 import confirmedDamageUnrezzedRdJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-selfplay-184-04-confirmed-damage-unrezzed-rd-d63.json";
 import terminalRemoteNonlethalDamageJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-selfplay-184-05-terminal-remote-nonlethal-damage-d265.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
+import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import {
@@ -169,10 +170,149 @@ describe("selfplay cycle 184 decision checkpoints", () => {
     });
   });
 
+  it("keeps the terminal contest owner for survivable known access damage below the normal hand floor", () => {
+    const capture = structuredClone(
+      terminalRemoteNonlethalDamageJson,
+    ) as ReconstructedDecisionCapture;
+    const input = capture.input;
+    input.playerView.own.gripOrHq = input.playerView.own.gripOrHq.slice(0, 4);
+    while (input.playerView.own.gripOrHq.length < 4) {
+      input.playerView.own.gripOrHq.push({
+        ...input.playerView.own.gripOrHq[0]!,
+        instanceId: `access-buffer-${input.playerView.own.gripOrHq.length}`,
+      });
+    }
+    input.playerView.own.credits = 2;
+    input.playerView.own.clicks = 1;
+    input.playerView.own.agendaPoints = 0;
+    input.playerView.opponent.agendaPoints = 6;
+    const remote = input.playerView.servers.find(
+      (server) => server.id === "remote_1",
+    )!;
+    remote.ice = [];
+    remote.root = [
+      {
+        instanceId: "hidden-previously-accessed-agenda",
+        known: false,
+        advancementCounters: 4,
+      },
+    ];
+    const observedAccess: PublicGameEvent = {
+      eventId: "known-access-before-terminal-contest",
+      type: "access_card",
+      stateVersionBefore: input.playerView.stateVersion - 2,
+      stateVersionAfter: input.playerView.stateVersion - 1,
+      stateHashAfter: "fnv1a:12345678",
+      visibilityClass: "public" as const,
+      publicPayload: {
+        actor: "runner",
+        actionType: "access_card",
+        serverId: "remote_1",
+        accessedCardPositionKey: "root:0",
+        cardDefinitionId: "onr_proteus_004_fetal-ai",
+        damageResolved: true,
+        damageType: "net",
+        damageAmount: 2,
+      },
+    };
+    const confirmedDamage: PublicGameEvent = {
+      ...observedAccess,
+      eventId: "confirmed-damage-before-terminal-contest",
+      type: "play_operation",
+      publicPayload: {
+        actor: "corp",
+        damageResolved: true,
+        damageType: "meat",
+        damageAmount: 2,
+        sourceDefinitionId: "onr_v1_301_punitive-counterstrike",
+      },
+    };
+    input.eventTail = [...input.eventTail, observedAccess, confirmedDamage];
+    input.playerView.publicEvents = [
+      ...input.playerView.publicEvents,
+      observedAccess,
+      confirmedDamage,
+    ];
+    resetResidentPlanPortfolioMemory();
+    restoreAiRuntimeCheckpoint(
+      input,
+      input.ownDeckSnapshot!.deckSnapshotId,
+      capture.runtime,
+    );
+    const target = evaluateRunnerRunTargets({ input }).find(
+      (target) => target.targetServerId === "remote_1",
+    );
+    expect(target?.pathPassability, target?.evidence.join("\n")).toBe(
+      "blocked_by_visible_damage_hand_buffer",
+    );
+    const decision = chooseAiAction(input as AiDecisionInput);
+    expect(decision).toMatchObject({
+      actionId: "runner.start_run.remote_1",
+      reasonCode: "plan_first.runner.contest_remote",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+          leafExecutorInstanceId:
+            "plan:runner.contest_remote:remote%3Aremote_1",
+          selectedStep: {
+            planInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+          },
+          route: { actionType: "start_run", capabilityId: "contest_remote" },
+        },
+      },
+    });
+    expect(
+      input.legalActions.some(
+        (action) => action.actionId === decision.actionId,
+      ),
+    ).toBe(true);
+  });
+
   it("contests a terminal remote when the visible damage only violates the normal hand floor", () => {
     const capture = structuredClone(
       terminalRemoteNonlethalDamageJson,
     ) as ReconstructedDecisionCapture;
+    // The historical Nerve Labyrinth also had an unbreakable ETR. Use a
+    // canonical damage-only final ICE so this test isolates the floor waiver.
+    const server = capture.input.playerView.servers.find(
+      (s) => s.id === "remote_1",
+    )!;
+    const ice = server.ice[0]!;
+    server.ice = [
+      {
+        ...ice,
+        definitionId: "onr_v1_234_data-darts",
+        title: "Data Darts",
+        rulesText:
+          "[Subroutine] Do 3 net damage.\n[Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.",
+        subtypes: ["ap", "hellbolt", "sentry"],
+        strength: 3,
+        rezCost: 5,
+        effectiveRunQuote: {
+          iceInstanceId: ice.instanceId,
+          iceDefinitionId: "onr_v1_234_data-darts",
+          effectiveStrength: 3,
+          subroutines: [
+            {
+              id: "printed_subroutines_damage_net",
+              type: "do_damage",
+              damageType: "net",
+              amount: 3,
+              sourceDefinitionId: "onr_v1_234_data-darts",
+              sourceTitle: "Data Darts",
+              unbrokenRunEffect: { causesDamageOrProgramTrash: true },
+            },
+            {
+              id: "printed_subroutines_prohibit_break_next_ice",
+              type: "set_next_encounter_no_break_subroutines",
+              sourceDefinitionId: "onr_v1_234_data-darts",
+              sourceTitle: "Data Darts",
+            },
+          ],
+        },
+      },
+    ];
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
     expect(deckSnapshotId).toBeDefined();
     resetResidentPlanPortfolioMemory();

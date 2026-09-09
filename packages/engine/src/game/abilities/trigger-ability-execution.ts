@@ -10,6 +10,7 @@ import {
   openRunnerCostPenaltySupportWindow,
 } from "../payment/runner-payment-support";
 import type { RunFortTriggerExecutionResult } from "./run-fort-trigger-execution";
+import { corpGeneralCreditAvailability } from "../payment/corp-general-credit-availability";
 import type { RunnerSpecialTriggerExecutionResult } from "./runner-special-trigger-execution";
 import type { CounterUtilityTriggerExecutionResult } from "./counter-utility-trigger-execution";
 import type { HiddenZoneTriggerExecutionResult } from "./hidden-zone-trigger-execution";
@@ -222,6 +223,10 @@ export function handleTriggerAbilityExecution(
     )
       throw new Error(
         "Die Runner-Resource deklariert keine Corp-Trash-Ability.",
+      );
+    if (corpGeneralCreditAvailability(state) < corpTrashAbility.cost.credits)
+      throw new Error(
+        "Resource-Trash benötigt ausreichend nicht zweckgebundene Credits.",
       );
     host.actions.spendClick(state, "corp");
     host.credits.spend(state, "corp", corpTrashAbility.cost.credits);
@@ -523,6 +528,10 @@ export function handleTriggerAbilityExecution(
     );
     if (!Number.isInteger(scorePoints) || scorePoints !== 1)
       throw new Error("ACME Savings and Loan scored genau 1 Agenda-Punkt.");
+    if (corpGeneralCreditAvailability(state) < creditCost)
+      throw new Error(
+        "Die Verpflichtung benötigt zwölf nicht zweckgebundene Credits.",
+      );
     host.actions.spendClick(state, "corp");
     host.credits.spend(state, "corp", creditCost);
     host.corp.removeActiveObligation(state);

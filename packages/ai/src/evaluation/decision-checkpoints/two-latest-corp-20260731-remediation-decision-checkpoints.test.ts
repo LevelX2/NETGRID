@@ -28,9 +28,24 @@ describe("two latest Corp matches 2026-07-31 remediation checkpoints", () => {
     },
   );
 
-  it("starts the exact score conversion when the agenda can score this turn", () => {
-    const result = runAiDecisionCheckpoint(fixture(sameTurnScoreD34Json));
+  it("preserves the same-turn score head while keeping the central rez reserve reachable", () => {
+    // Liche needs 14 credits; 12 credits and three actions can fund it.
+    // The rejected extra HQ installation would leave at most 13 credits.
+    const checkpoint = fixture(sameTurnScoreD34Json);
+    // The canonical checkpoint already requires the certified score action.
+    // Reachable installed Liche funding must not invent a missing-ICE draw.
+    const result = runAiDecisionCheckpoint(checkpoint);
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+    expect(
+      result.decision?.decisionDebug?.planFirstDecision?.turnPlanning?.heads,
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          moduleId: "corp.score_agenda",
+          witnessValid: true,
+        }),
+      ]),
+    );
   });
 
   it.each([

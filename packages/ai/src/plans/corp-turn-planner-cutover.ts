@@ -310,12 +310,7 @@ function resumePlanInternalContinuation(
   const sequencedPrevious = previous as TurnPlanCommitment & {
     sequenceRootPlanInstanceId: string;
   };
-  const lines =
-    "lines" in params.planner
-      ? params.planner.lines
-      : params.planner.selectedLine
-        ? [params.planner.selectedLine]
-        : [];
+  const lines = params.planner.lines;
   const continuationLine = lines.find(
     (line) => line.rootPlanInstanceId === previousOwnerRootPlanInstanceId,
   );

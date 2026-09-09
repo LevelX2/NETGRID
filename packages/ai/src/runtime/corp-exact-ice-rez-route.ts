@@ -376,6 +376,22 @@ function isQualitativeEncounterDefenseOnCurrentRun(params: {
         effect.kind === "corp_paid_add_end_the_run_subroutine" &&
         nonNegativeSafeInteger(effect.creditCost),
     ) === true;
+  // Printed tax/disruption describes an ICE's potential, not necessarily
+  // progress on this run. A complete quote containing only future-encounter
+  // effects has no target after the innermost ICE. Keep mixed immediate
+  // effects and Engine-quoted paid encounter defenses independently useful.
+  if (
+    postRezQuote.complete === true &&
+    run.position.iceIndex === 0 &&
+    !hasEngineQuotedPaidEncounterEtr &&
+    corpIceEffectsOnlyReachFutureEncounters(
+      postRezQuote.effectiveRunQuote.subroutines.map(
+        (subroutine) => subroutine.type,
+      ),
+    )
+  ) {
+    return false;
+  }
   if (
     !profile.hasMeaningfulTaxOrDamage &&
     !profile.hasEncounterDisruption &&
@@ -396,6 +412,20 @@ function isQualitativeEncounterDefenseOnCurrentRun(params: {
     activationCredits !== undefined &&
     totalRezCredits + activationCredits <= input.playerView.own.credits
   );
+}
+
+export function corpIceEffectsOnlyReachFutureEncounters(
+  types: readonly string[],
+): boolean {
+  const futureTypes = new Set([
+    "set_run_encounter_tax",
+    "set_run_future_end_the_run_subroutine",
+    "set_run_future_strength_bonus",
+    "set_next_encounter_unless_fully_break_damage",
+    "set_next_encounter_lock",
+    "set_next_encounter_no_break_subroutines",
+  ]);
+  return types.length > 0 && types.every((type) => futureTypes.has(type));
 }
 
 export function corpEffectiveDefenseActivationCredits(
@@ -836,6 +866,38 @@ function ordinaryRezActionQuote(
       payload.rezCostPaid !== actionCredits ||
       payload.effectiveSubroutineCountAfterRez !== value ||
       actionCredits !== quote.finalCredits + additionalCredits
+    ) {
+      return undefined;
+    }
+    return { ...quote, finalCredits: actionCredits };
+  }
+  if (
+    quote.costKind === "variable" &&
+    quote.variableParameter.kind === "alternate_subtype"
+  ) {
+    const value = payload?.variableRezValue;
+    const additionalCredits = payload?.variableRezAdditionalCost;
+    const alternate = value === 1;
+    const expectedAdditionalCredits = alternate
+      ? quote.variableParameter.alternateSubtypesAdditionalCredits
+      : 0;
+    const expectedFinalCredits = alternate
+      ? quote.variableParameter.alternateSubtypesFinalCredits
+      : quote.variableParameter.baseSubtypesFinalCredits;
+    const expectedSubtypes = (
+      alternate
+        ? quote.variableParameter.alternateSubtypes
+        : quote.variableParameter.baseSubtypes
+    ).join(",");
+    if (
+      payload?.variableRezKind !== "alternate_subtype" ||
+      (value !== 0 && value !== 1) ||
+      !nonNegativeSafeInteger(additionalCredits) ||
+      additionalCredits !== expectedAdditionalCredits ||
+      payload.baseRezCost !== quote.finalCredits ||
+      payload.rezCostPaid !== actionCredits ||
+      payload.selectedSubtypesAfterRez !== expectedSubtypes ||
+      actionCredits !== expectedFinalCredits
     ) {
       return undefined;
     }

@@ -82,26 +82,28 @@ describe("match FD7671 runner decision checkpoints", () => {
     expectCheckpointToPass(missingDecoder);
   });
 
-  it("still trashes central economy when credits cover the reserve", () => {
+  it("does not infer a current payout from an unrezzed HQ campaign when more credits are available", () => {
     const surplusCredits = mutateFixture(centralTrashJson, (checkpoint) => {
       checkpoint.engine.testOnlyGameState.runner.credits = 12;
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "FD7671-C03-TRASH-SURPLUS";
       checkpoint.expectation = {
-        acceptableActions: [{ type: "trash_accessed_card" }],
+        acceptableActions: [{ actionId: "runner.decline_trash" }],
+        planExecution: { acceptablePlanKinds: ["runner.convert_run_window"] },
       };
     });
 
     expectCheckpointToPass(surplusCredits);
   });
 
-  it("trashes central economy when no click remains for a follow-up run", () => {
+  it("keeps the no-current-payout assessment when no follow-up click remains", () => {
     const noFollowUpClick = mutateFixture(centralTrashJson, (checkpoint) => {
       checkpoint.engine.testOnlyGameState.runner.clicks = 0;
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "FD7671-C05-TRASH-WITHOUT-RUN-CLICK";
       checkpoint.expectation = {
-        acceptableActions: [{ type: "trash_accessed_card" }],
+        acceptableActions: [{ actionId: "runner.decline_trash" }],
+        planExecution: { acceptablePlanKinds: ["runner.convert_run_window"] },
       };
     });
 

@@ -34,6 +34,19 @@ export type PlanResolutionFailureOwner =
   | "continuation"
   | "scheduler";
 
+export type ResidentPortfolioBindingFailure = {
+  schemaVersion: "resident-portfolio-binding-failure-v1";
+  operation: "read" | "remember" | "restore";
+  expected: {
+    schemaVersion: string;
+    side: Side;
+    stateVersion: number;
+    relation: "equal" | "at_most";
+  };
+  actual: { schemaVersion: string; side: Side; stateVersion: number };
+  violations: string[];
+};
+
 export type PlanResolutionFailureContextInput = {
   side: Side;
   stateVersion: number;
@@ -47,6 +60,7 @@ export type PlanResolutionFailureContextInput = {
   candidateCount?: number;
   assessmentCount?: number;
   routeCount?: number;
+  portfolioBinding?: ResidentPortfolioBindingFailure;
 };
 
 export type PlanResolutionFailureContext = {
@@ -62,6 +76,7 @@ export type PlanResolutionFailureContext = {
   candidateCount?: number;
   assessmentCount?: number;
   routeCount?: number;
+  portfolioBinding?: ResidentPortfolioBindingFailure;
 };
 
 export class PlanResolutionFailure extends Error {
@@ -139,6 +154,32 @@ function normalizePlanResolutionFailureContext(
       : {}),
     owner: context.owner,
     removalCondition: redactedText(context.removalCondition),
+    ...(context.portfolioBinding
+      ? {
+          portfolioBinding: {
+            schemaVersion: context.portfolioBinding.schemaVersion,
+            operation: context.portfolioBinding.operation,
+            expected: {
+              schemaVersion: redactedToken(
+                context.portfolioBinding.expected.schemaVersion,
+              ),
+              side: context.portfolioBinding.expected.side,
+              stateVersion: context.portfolioBinding.expected.stateVersion,
+              relation: context.portfolioBinding.expected.relation,
+            },
+            actual: {
+              schemaVersion: redactedToken(
+                context.portfolioBinding.actual.schemaVersion,
+              ),
+              side: context.portfolioBinding.actual.side,
+              stateVersion: context.portfolioBinding.actual.stateVersion,
+            },
+            violations: context.portfolioBinding.violations.map((entry) =>
+              redactedToken(entry),
+            ),
+          },
+        }
+      : {}),
     ...(context.planInstanceId
       ? { planInstanceId: redactedToken(context.planInstanceId) }
       : {}),

@@ -1,4 +1,5 @@
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import {
   type AiDecisionInput,
   type LegalAction,
@@ -41,6 +42,13 @@ export type CorpScoreConversionStep = {
 };
 
 export type CorpScoreConversionPath = {
+  /** One exact current Economy step, before the projected score sequence. */
+  fundingPrefix?: {
+    actionId: string;
+    clickCost: number;
+    creditCost: number;
+    grossCreditGain: number;
+  };
   agendaCardId: string;
   agendaPoints: number;
   targetServerId: string;
@@ -92,10 +100,14 @@ type CandidatePath = CorpScoreConversionPath & {
 
 export function corpSameTurnScoreConversionPaths(
   input: AiDecisionInput,
+  fundingCandidates: readonly ActionSemanticCandidate[] = [],
 ): CorpScoreConversionPath[] {
   if (input.side !== "corp") return [];
   return scoreTargets(input)
-    .flatMap((target) => conversionPathForTarget(input, target) ?? [])
+    .flatMap(
+      (target) =>
+        conversionPathForTarget(input, target, fundingCandidates) ?? [],
+    )
     .sort(comparePaths);
 }
 
@@ -108,6 +120,7 @@ export function bestCorpSameTurnScoreConversionPath(
 function conversionPathForTarget(
   input: AiDecisionInput,
   target: ScoreTarget,
+  fundingCandidates: readonly ActionSemanticCandidate[],
 ): CandidatePath | undefined {
   const requirement = advancementRequirement(target.card);
   if (requirement === undefined) return undefined;
@@ -126,6 +139,7 @@ function conversionPathForTarget(
         requirement,
         desiredCounters,
         initialCounters,
+        fundingCandidates,
       ),
     )
     .filter((path): path is CandidatePath => path !== undefined)
@@ -138,6 +152,7 @@ function conversionPathForDesiredTarget(
   requirement: number,
   desiredCounters: number,
   initialCounters: number,
+  fundingCandidates: readonly ActionSemanticCandidate[],
 ): CandidatePath | undefined {
   const deficit = Math.max(0, desiredCounters - initialCounters);
   if (deficit === 0) {
@@ -162,46 +177,125 @@ function conversionPathForDesiredTarget(
   const sourceCounterBudget = visibleAdvancementCounterBudget(input);
   let best: CandidatePath | undefined;
 
-  for (const capacitySet of actionCapacitySets) {
-    const capacityResult = applyActionCapacitySet(
-      input,
-      target,
-      capacitySet,
-      sourceCounterBudget,
+  const fundingPrefixes: Array<CorpScoreConversionPath["fundingPrefix"]> = [
+    undefined,
+  ];
+  for (const candidate of fundingCandidates) {
+    const action = input.legalActions.find(
+      (a) => a.actionId === candidate.actionId,
     );
-    if (!capacityResult) continue;
-    let clicks = capacityResult.clicks;
-    let credits = capacityResult.credits;
-    const steps = [...capacityResult.steps];
-    const sourceCounters = { ...capacityResult.sourceCounters };
-    if (installStep) {
-      if (installStep.clickCost > clicks || installStep.creditCost > credits)
-        continue;
-      clicks -= installStep.clickCost;
-      credits -= installStep.creditCost;
-      steps.push(installStep);
-    }
-
-    visitCapabilityCombinations({
-      capabilities: advancementCapabilities,
-      index: 0,
-      remaining: deficit,
-      clicks,
-      credits,
-      sourceCounters,
-      usedActionIds: new Set(),
-      steps,
-      target,
-      input,
-      requirement,
-      desiredCounters,
-      initialCounters,
-      onCandidate: (candidate) => {
-        if (replacementRouteDestroysPlanProgress(input, candidate)) return;
-        if (!best || comparePaths(candidate, best) < 0) best = candidate;
-      },
+    const projection = candidate.economyProjection;
+    if (
+      !action ||
+      action.side !== "corp" ||
+      action.expiresAtStateVersion !== input.playerView.stateVersion ||
+      action.type !== "play_operation" ||
+      action.payload?.effectKind !== "gain_credits" ||
+      action.targetRequirements.length > 0 ||
+      (action.choiceRequirements?.length ?? 0) > 0 ||
+      action.costs.some((cost) =>
+        Object.keys(cost).some((key) => key !== "clicks" && key !== "credits"),
+      ) ||
+      projection?.kind !== "immediate_liquid" ||
+      projection.timing !== "immediate" ||
+      projection.creditRestriction !== "general" ||
+      projection.reliability !== "guaranteed" ||
+      projection.source !== "legal_action_payload" ||
+      projection.confidence !== "high" ||
+      !Number.isSafeInteger(projection.grossLiquidCreditGain) ||
+      !Number.isSafeInteger(projection.clickCost) ||
+      !Number.isSafeInteger(projection.creditCost) ||
+      projection.netLiquidCreditGain === undefined ||
+      projection.netLiquidCreditGain <= 0 ||
+      projection.netLiquidCreditGain !==
+        projection.grossLiquidCreditGain! - projection.creditCost ||
+      projection.clickCost !== actionCost(action, "clicks") ||
+      projection.creditCost !== actionCost(action, "credits") ||
+      projection.clickCost <= 0 ||
+      projection.creditCost < 0 ||
+      projection.cardsDrawn !== 0 ||
+      projection.creditCost > input.playerView.own.credits
+    )
+      continue;
+    fundingPrefixes.push({
+      actionId: action.actionId,
+      clickCost: projection.clickCost,
+      creditCost: projection.creditCost,
+      grossCreditGain: projection.grossLiquidCreditGain!,
     });
   }
+  for (const fundingPrefix of fundingPrefixes)
+    for (const capacitySet of actionCapacitySets) {
+      // Current burst funding is a separate support prefix. Capacity effects
+      // retain their own search; their source order is not silently rearranged.
+      if (fundingPrefix && capacitySet.length > 0) continue;
+      const capacityResult = applyActionCapacitySet(
+        input,
+        target,
+        capacitySet,
+        sourceCounterBudget,
+      );
+      if (!capacityResult) continue;
+      let clicks = capacityResult.clicks;
+      let credits = capacityResult.credits;
+      if (fundingPrefix) {
+        clicks -= fundingPrefix.clickCost;
+        credits += fundingPrefix.grossCreditGain - fundingPrefix.creditCost;
+        if (clicks < 0) continue;
+      }
+      const steps = [...capacityResult.steps];
+      const sourceCounters = { ...capacityResult.sourceCounters };
+      if (installStep) {
+        if (installStep.clickCost > clicks || installStep.creditCost > credits)
+          continue;
+        clicks -= installStep.clickCost;
+        credits -= installStep.creditCost;
+        steps.push(installStep);
+      }
+
+      visitCapabilityCombinations({
+        capabilities: fundingPrefix
+          ? advancementCapabilities.filter(
+              (capability) =>
+                capability.sourceCardId !==
+                input.legalActions.find(
+                  (a) => a.actionId === fundingPrefix.actionId,
+                )?.source,
+            )
+          : advancementCapabilities,
+        index: 0,
+        remaining: deficit,
+        clicks,
+        credits,
+        sourceCounters,
+        usedActionIds: new Set(),
+        steps,
+        target,
+        input,
+        requirement,
+        desiredCounters,
+        initialCounters,
+        onCandidate: (candidate) => {
+          if (replacementRouteDestroysPlanProgress(input, candidate)) return;
+          if (fundingPrefix) {
+            candidate = {
+              ...candidate,
+              fundingPrefix,
+              clicksRequired:
+                candidate.clicksRequired + fundingPrefix.clickCost,
+              creditsRequired:
+                candidate.creditsRequired + fundingPrefix.creditCost,
+              evidence: [
+                ...candidate.evidence,
+                "corp_score_conversion_exact_burst_funding_prefix",
+                `funding_action:${fundingPrefix.actionId}`,
+              ],
+            };
+          }
+          if (!best || comparePaths(candidate, best) < 0) best = candidate;
+        },
+      });
+    }
   return best;
 }
 

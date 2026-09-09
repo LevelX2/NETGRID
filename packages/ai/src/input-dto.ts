@@ -40,8 +40,10 @@ import {
   assertAbilityRefIdentity,
   parseCanonicalCapabilityId,
 } from "@netgrid/cards/planning";
+import { sanitizeCorpRestrictedCreditRouteQuotes } from "./runtime/corp-restricted-credit-quote-input";
 
 export type BuildAiDecisionInputDtoParams = {
+  corpRestrictedCreditRouteQuotes?: AiDecisionInput["corpRestrictedCreditRouteQuotes"];
   matchId?: string;
   side: Side;
   playerView: PlayerView;
@@ -70,10 +72,27 @@ export const AI_DECISION_INPUT_TOP_LEVEL_FIELDS = [
 // Nested AI-input payloads are positive allowlists. New engine/public payload
 // shapes must be added here deliberately instead of being deep-copied.
 const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
+  "breakSubroutinePurpose",
+  "runnerFortIceTrashQuoteSchemaVersion",
+  "runnerFortIceTrashQuoteStateVersion",
+  "runnerFortIceTrashServerId",
+  "runnerFortIceTrashRezzedIceCount",
+  "runnerFortIceTrashTagsAdded",
+  "runnerInstallPaymentSourceIds",
+  "runnerInstallPaymentSourceAmounts",
+  "runnerInstallPaymentHostedCredits",
+  "runnerProgramTrashBeforeInstall",
+  "restrictedCreditGainAmount",
+  "restrictedCreditGainUsableFor",
+  "restrictedCreditGainCleanup",
+  "restrictedCreditGainComplete",
   "runnerCostPenaltySupportContinuation",
   "runnerCostPenaltySupportWindowId",
   "costPenaltySupportWindowId",
   "costPenaltySupportOriginalActionId",
+  "costPenaltySupportRunnerCreditTarget",
+  "costPenaltySupportAmountDue",
+  "costPenaltySupportKind",
   "runnerDrawProjectionSchemaVersion",
   "projectedGrossDrawCount",
   "projectedPostDrawDispositionCount",
@@ -150,6 +169,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "variableRezAdditionalCost",
   "variableRezValue",
   "effectiveSubroutineCountAfterRez",
+  "selectedSubtypesAfterRez",
   "rezCostPaid",
   "rezCostReductionAmount",
   "rezCostReductionSourceDefinitionIds",
@@ -208,6 +228,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "rootReplacement",
   "encounterContinue",
   "unbrokenSubroutineCount",
+  "encounterSubroutineIds",
   "delayedInstallAbility",
   "encounterWillEndRun",
   "encounterSourceWillTrashAtEndOfTurn",
@@ -284,6 +305,11 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "scoreConversionTargetMode",
   "scoreConversionTiming",
   "gainActionsAmount",
+  "purgeModel",
+  "actionDebtAdded",
+  "actionCapacityMinimumAvailableActions",
+  "actionDebtPaid",
+  "corpActionDebtTotalBefore",
   "actionCapacityTiming",
   "actionCapacityRestriction",
   "actionCapacityAllowedActionType",
@@ -389,6 +415,7 @@ const PUBLIC_PAYLOAD_PRIMITIVE_KEYS = new Set<string>([
   "knownRndCardCount",
   "knownRndTopDefinitionId",
   "accessedCardPositionKey",
+  "installedPositionKey",
   "accessedArea",
   "accessedIndex",
   "stealCost",
@@ -610,6 +637,15 @@ export function buildAiDecisionInputDto(
   );
   return {
     ...(params.matchId !== undefined ? { matchId: params.matchId } : {}),
+    ...(params.corpRestrictedCreditRouteQuotes?.length
+      ? {
+          corpRestrictedCreditRouteQuotes:
+            sanitizeCorpRestrictedCreditRouteQuotes(
+              params,
+              params.corpRestrictedCreditRouteQuotes,
+            ),
+        }
+      : {}),
     side: params.side,
     playerView: sanitizePlayerView(params.playerView, sanitizedPublicEvents),
     eventTail: sanitizeEventTail(
@@ -667,6 +703,18 @@ function sanitizePlayerView(
   publicEvents: PublicGameEvent[],
 ): PlayerView {
   const corpPunishRouteQuoteSet = sanitizeCorpPunishRouteQuoteSet(view);
+  const obligation = view.own.corpEndTurnCreditObligation;
+  if (
+    obligation !== undefined &&
+    (view.side !== "corp" ||
+      !Number.isSafeInteger(obligation.creditsDue) ||
+      obligation.creditsDue <= 0 ||
+      obligation.expiresAtStateVersion !== view.stateVersion ||
+      obligation.deadline !== "end_of_corp_turn" ||
+      obligation.consequence !== "lose_game")
+  ) {
+    throw new Error("Invalid current Corp end-turn credit obligation quote.");
+  }
   return {
     side: view.side,
     stateVersion: view.stateVersion,
@@ -679,6 +727,16 @@ function sanitizePlayerView(
     own: {
       identity: sanitizeVisibleCard(view.own.identity),
       credits: view.own.credits,
+      ...(obligation
+        ? {
+            corpEndTurnCreditObligation: {
+              creditsDue: obligation.creditsDue,
+              expiresAtStateVersion: obligation.expiresAtStateVersion,
+              deadline: obligation.deadline,
+              consequence: obligation.consequence,
+            },
+          }
+        : {}),
       clicks: view.own.clicks,
       agendaPoints: view.own.agendaPoints,
       gripOrHq: view.own.gripOrHq.map((card) =>
@@ -695,7 +753,15 @@ function sanitizePlayerView(
       stackOrRdCount: view.own.stackOrRdCount,
       heapOrArchives: view.own.heapOrArchives.map(sanitizeVisibleCard),
       scoreArea: view.own.scoreArea.map(sanitizeVisibleCard),
-      ...(view.own.rig ? { rig: view.own.rig.map(sanitizeVisibleCard) } : {}),
+      ...(view.own.rig
+        ? {
+            rig: view.own.rig.map((card) =>
+              sanitizeVisibleCardWithOptions(card, {
+                allowRunnerPaymentSupport: view.side === "runner",
+              }),
+            ),
+          }
+        : {}),
       ...(view.own.memoryUsed !== undefined
         ? { memoryUsed: view.own.memoryUsed }
         : {}),
@@ -917,6 +983,12 @@ function sanitizePlayerView(
               : {}),
             ...(view.run.prohibitNoisyIcebreakers
               ? { prohibitNoisyIcebreakers: true }
+              : {}),
+            ...(view.run.nextEncounterNoBreakSubroutines === true
+              ? { nextEncounterNoBreakSubroutines: true }
+              : {}),
+            ...(view.run.noBreakSubroutinesActive === true
+              ? { noBreakSubroutinesActive: true }
               : {}),
             ...(view.run.runnerCreditGainOnCorpRez !== undefined
               ? {
@@ -1649,6 +1721,7 @@ function sanitizeVisibleCard(card: VisibleCard): VisibleCard {
 function sanitizeVisibleCardWithOptions(
   card: VisibleCard,
   options: {
+    allowRunnerPaymentSupport?: boolean;
     allowCorpRezCostQuote?: boolean;
     allowCorpPostRezRunQuote?: boolean;
     expectedCorpRezServerId?: PlayerView["servers"][number]["id"];
@@ -1668,6 +1741,36 @@ function sanitizeVisibleCardWithOptions(
   const effectiveRezCostQuote = card.effectiveRezCostQuote;
   const effectiveRezResourceExchangeQuote =
     card.effectiveRezResourceExchangeQuote;
+  const currentEncounterDefenseQuotes =
+    options.allowCorpRezCostQuote === true
+      ? (card.currentEncounterDefenseQuotes ?? [])
+          .filter(
+            (entry) =>
+              typeof entry.actionId === "string" &&
+              entry.actionId.length > 0 &&
+              Number.isSafeInteger(entry.creditCost) &&
+              entry.creditCost >= 0 &&
+              Number.isSafeInteger(entry.existingUnbrokenEndTheRunCount) &&
+              entry.existingUnbrokenEndTheRunCount >= 0 &&
+              entry.exchange.context === "installed" &&
+              entry.exchange.cardId === card.instanceId &&
+              entry.exchange.targetServerId ===
+                options.expectedCorpRezServerId &&
+              entry.exchange.projectedServerId ===
+                options.expectedCorpRezServerId &&
+              entry.exchange.expiresAtStateVersion ===
+                options.expectedCorpRezStateVersion,
+          )
+          .map((entry) => ({
+            actionId: entry.actionId,
+            creditCost: entry.creditCost,
+            existingUnbrokenEndTheRunCount:
+              entry.existingUnbrokenEndTheRunCount,
+            exchange: sanitizeInstalledCorpIceRezResourceExchangeQuote(
+              entry.exchange,
+            ),
+          }))
+      : [];
   const effectiveRezActionResourceExchangeQuotes =
     card.effectiveRezActionResourceExchangeQuotes;
   const scoreContinuationQuote = card.scoreContinuationQuote;
@@ -1753,6 +1856,47 @@ function sanitizeVisibleCardWithOptions(
     includeCounterBankPreparationQuote && counterBankPreparationQuote
       ? sanitizeCorpCounterBankPreparationQuote(counterBankPreparationQuote)
       : undefined;
+  const restrictedBank = card.restrictedCreditBankQuote;
+  const sanitizedRestrictedBank =
+    options.allowCorpCounterBankPreparationQuote === true &&
+    options.expectedCorpCounterBankLocation === "installed_root" &&
+    card.known &&
+    card.rezzed === true &&
+    restrictedBank?.schemaVersion === "corp-restricted-credit-bank-v1" &&
+    restrictedBank.sourceCardInstanceId === card.instanceId &&
+    restrictedBank.serverId === options.expectedCorpCounterBankServerId &&
+    restrictedBank.expiresAtStateVersion ===
+      options.expectedCorpCounterBankStateVersion &&
+    restrictedBank.advancementCounters === card.advancementCounters &&
+    Number.isSafeInteger(restrictedBank.advancementCounters) &&
+    restrictedBank.advancementCounters >= 0 &&
+    Number.isSafeInteger(restrictedBank.creditsPerCounter) &&
+    restrictedBank.creditsPerCounter > 0 &&
+    Number.isSafeInteger(restrictedBank.generalCreditsAvailable) &&
+    restrictedBank.generalCreditsAvailable >= 0 &&
+    restrictedBank.payoutCounterCost === 1 &&
+    restrictedBank.payoutClickCost === 0 &&
+    restrictedBank.payoutGeneralCreditCost === 0 &&
+    restrictedBank.usableFor === "corp_install_or_rez" &&
+    restrictedBank.payoutCleanup === "end_of_turn" &&
+    restrictedBank.condition ===
+      "source_remains_installed_and_rezzed_at_paid_window"
+      ? {
+          schemaVersion: restrictedBank.schemaVersion,
+          sourceCardInstanceId: restrictedBank.sourceCardInstanceId,
+          serverId: restrictedBank.serverId,
+          expiresAtStateVersion: restrictedBank.expiresAtStateVersion,
+          advancementCounters: restrictedBank.advancementCounters,
+          creditsPerCounter: restrictedBank.creditsPerCounter,
+          generalCreditsAvailable: restrictedBank.generalCreditsAvailable,
+          payoutCounterCost: restrictedBank.payoutCounterCost,
+          payoutClickCost: restrictedBank.payoutClickCost,
+          payoutGeneralCreditCost: restrictedBank.payoutGeneralCreditCost,
+          usableFor: restrictedBank.usableFor,
+          payoutCleanup: restrictedBank.payoutCleanup,
+          condition: restrictedBank.condition,
+        }
+      : undefined;
   const sanitizedEffectiveRunQuote =
     card.known === true &&
     card.type === "ice" &&
@@ -1765,6 +1909,17 @@ function sanitizeVisibleCardWithOptions(
     includeEffectivePostRezRunQuote && effectivePostRezRunQuote
       ? sanitizeVisibleCorpIcePostRezRunQuote(effectivePostRezRunQuote)
       : undefined;
+  const installedProgram = card.known
+    ? card.installedAsRunnerProgram
+    : undefined;
+  if (
+    installedProgram &&
+    (card.controller !== "runner" ||
+      !Number.isSafeInteger(installedProgram.memoryCost) ||
+      installedProgram.memoryCost < 0)
+  ) {
+    throw new Error("Invalid public installed-as-Runner-program projection.");
+  }
   return {
     instanceId: card.instanceId,
     known: card.known,
@@ -1791,6 +1946,22 @@ function sanitizeVisibleCardWithOptions(
       ? { installCost: card.installCost }
       : {}),
     ...(card.memoryCost !== undefined ? { memoryCost: card.memoryCost } : {}),
+    ...(installedProgram
+      ? {
+          installedAsRunnerProgram: {
+            memoryCost: installedProgram.memoryCost,
+            ...(installedProgram.scoreAsAgendaAction === true
+              ? { scoreAsAgendaAction: true as const }
+              : {}),
+            ...(installedProgram.removeFromGameOnLeavePlay === true
+              ? { removeFromGameOnLeavePlay: true as const }
+              : {}),
+            ...(installedProgram.originalType !== undefined
+              ? { originalType: installedProgram.originalType }
+              : {}),
+          },
+        }
+      : {}),
     ...(card.memoryLimitBonus !== undefined
       ? { memoryLimitBonus: card.memoryLimitBonus }
       : {}),
@@ -1829,6 +2000,23 @@ function sanitizeVisibleCardWithOptions(
     ...(card.hiddenRunnerResource !== undefined
       ? { hiddenRunnerResource: card.hiddenRunnerResource }
       : {}),
+    ...(options.allowRunnerPaymentSupport &&
+    card.known &&
+    card.runnerPaymentSupportAbilities
+      ? {
+          runnerPaymentSupportAbilities: card.runnerPaymentSupportAbilities.map(
+            (ability) => ({
+              sourceAbilityId: ability.sourceAbilityId,
+              capabilityKey: ability.capabilityKey,
+              timing: ability.timing,
+              label: ability.label,
+              creditCost: ability.creditCost,
+              gainCredits: ability.gainCredits,
+              trashesSource: ability.trashesSource,
+            }),
+          ),
+        }
+      : {}),
     ...(card.hostedOn !== undefined ? { hostedOn: card.hostedOn } : {}),
     ...(card.owner !== undefined ? { owner: card.owner } : {}),
     ...(card.controller !== undefined ? { controller: card.controller } : {}),
@@ -1856,6 +2044,9 @@ function sanitizeVisibleCardWithOptions(
             ),
         }
       : {}),
+    ...(currentEncounterDefenseQuotes.length > 0
+      ? { currentEncounterDefenseQuotes }
+      : {}),
     ...(sanitizedEffectiveRezActionResourceExchangeQuotes.length > 0
       ? {
           effectiveRezActionResourceExchangeQuotes:
@@ -1873,6 +2064,9 @@ function sanitizeVisibleCardWithOptions(
       ? {
           counterBankPreparationQuote: sanitizedCounterBankPreparationQuote,
         }
+      : {}),
+    ...(sanitizedRestrictedBank
+      ? { restrictedCreditBankQuote: sanitizedRestrictedBank }
       : {}),
   };
 }
@@ -2931,6 +3125,25 @@ function sanitizeVisibleChoiceRequest(
         ownRig,
         servers,
       );
+      if (
+        metadata &&
+        playerViewSide === "corp" &&
+        choice.side === "corp" &&
+        choice.source.startsWith("p3_54.delayed_success:") &&
+        option.metadata
+      ) {
+        const kinds = option.metadata.temporaryEncounterSubroutineTypes;
+        const additional =
+          option.metadata.temporaryEncounterHasAdditionalMechanics;
+        if (
+          Array.isArray(kinds) &&
+          kinds.every((kind) => typeof kind === "string") &&
+          typeof additional === "boolean"
+        ) {
+          metadata.temporaryEncounterSubroutineTypes = [...kinds];
+          metadata.temporaryEncounterHasAdditionalMechanics = additional;
+        }
+      }
       const hqInstallRezOptionQuote = sanitizeCorpOptionalRezChoiceQuote(
         option.hqInstallRezOptionQuote,
         {

@@ -1,5 +1,10 @@
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
-import type { AiDecisionInput, VisibleCorpRezCostQuote } from "@netgrid/shared";
+import { currentCorpCreditObligation } from "./corp-credit-obligation";
+import type {
+  AiDecisionInput,
+  VisibleCorpRezCostQuote,
+  CorpRestrictedCreditRouteQuote,
+} from "@netgrid/shared";
 import type {
   GuaranteeLevel,
   PlanAssessment,
@@ -16,6 +21,11 @@ import type {
 } from "./plan-scheduler";
 import type { PlanStepCapability } from "./plan-route";
 import { PlanResolutionFailure } from "./plan-resolution-failure";
+import {
+  currentCorpRestrictedCreditBanks,
+  corpRestrictedRezPreparationCandidates,
+  type CorpRestrictedRezPreparation,
+} from "../runtime/corp-restricted-credit-reserve";
 import { createCreditDemand } from "./credit-demand";
 import {
   searchFundingRoutes,
@@ -61,6 +71,15 @@ export type CorpScorePhase =
 
 export type CorpScoreFundingMilestone = Readonly<{
   kind: "score_credit_milestone";
+  basis:
+    | Readonly<{ kind: "score_route_gap" }>
+    | Readonly<{
+        kind: "score_protection_gap";
+        needId: string;
+        observedAtStateVersion: number;
+      }>
+    | Readonly<{ kind: "score_conversion_floor" }>
+    | Readonly<{ kind: "score_continuation_floor" }>;
   targetCredits: number;
   observedCredits: number;
   remainingGap: number;
@@ -103,6 +122,7 @@ export type CorpScoreProjectSignal = {
     currentActionScope: "exact_install_only";
   };
   fundingGap?: number;
+  sameTurnFundingActionIds?: string[];
   /**
    * Published by corp.score_agenda for its exact current credit objective.
    * Support leaves may advance it and lower-priority siblings may preserve it,
@@ -166,6 +186,8 @@ export type CorpScoreProjectSignal = {
   };
   terminalScore: boolean;
   preventsTerminalSteal?: boolean;
+  /** Exact installation horizon closes a winning score before unavoidable deckout. */
+  lastDrawScoreSurvival?: boolean;
   feasible: boolean;
   evidenceCode: string;
 };
@@ -188,6 +210,7 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
     | "fund_rez_reserve"
     | "rez_response"
     | "activate_run_defense"
+    | "pass_encounter"
     | "decline_rez";
   sourceDefinitionIds: string[];
   parentKind?: "remote";
@@ -219,8 +242,13 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
     currentCredits: number;
     requiredCredits: number;
     fundingGap: number;
+    storedRestrictedCredits?: number;
   }>;
   rezRoute?: CorpExactIceRezRouteProjection;
+  restrictedRezFunding?: {
+    gap: number;
+    quotes: CorpRestrictedCreditRouteQuote[];
+  };
   value: number;
   choiceResolution?:
     | {
@@ -339,6 +367,8 @@ export type CorpEconomyParentFundingSignal = CorpEconomySignalBase & {
     iceInstanceId: string;
   };
   fundingRouteAssessment?: CorpEconomyFundingRouteAssessment;
+  restrictedCreditFunding?: import("@netgrid/shared").CorpRestrictedCreditRouteQuote[];
+  restrictedCreditPreparations?: CorpRestrictedRezPreparation[];
 };
 
 export type CorpEconomyReserveSignal = CorpEconomySignalBase & {
@@ -346,7 +376,8 @@ export type CorpEconomyReserveSignal = CorpEconomySignalBase & {
   targetCredits: number;
   gap: number;
   actionIds: string[];
-  priorityClass?: "P5" | "P6";
+  priorityClass?: "P1" | "P5" | "P6";
+  mandatoryCreditObligation?: { creditsDue: number; stateVersion: number };
   fundingRouteAssessment?: CorpEconomyFundingRouteAssessment;
 };
 
@@ -379,6 +410,11 @@ export type CorpEconomyDevelopmentSignal = CorpEconomySignalBase & {
   sourceDefinitionId: string;
   phase: "install" | "advance" | "rez";
   actionIds: string[];
+  restrictedCreditNeed?: {
+    needId: string;
+    gap: number;
+    quotes: import("@netgrid/shared").CorpRestrictedCreditRouteQuote[];
+  };
   startRezChoiceBinding?: {
     actionId: string;
     choiceId: string;
@@ -460,6 +496,13 @@ export type CorpEconomyVisibleCardWithdrawalSignal = CorpEconomySignalBase & {
   sourceDefinitionId: string;
   sourceZone: "installed_root" | "score_area";
   actionIds: [string];
+  withdrawalCampaign?: {
+    remainingPoolCredits: number;
+    projectedPayoutExecutions: number;
+    projectedNetCredits: number;
+    horizonTurns: number;
+    evidenceCodes: string[];
+  };
   conversion: {
     clickCost: number;
     creditCost: number;
@@ -1216,7 +1259,12 @@ export function corpScorePriorityClass(
   signal: CorpScoreProjectSignal,
 ): CorpScorePriorityClass {
   if (signal.terminalScore && signal.sameTurnCloseout) return "P1";
-  if (signal.preventsTerminalSteal) return "P2";
+  if (
+    signal.preventsTerminalSteal ||
+    (signal.lastDrawScoreSurvival && signal.terminalScore && signal.feasible)
+  ) {
+    return "P2";
+  }
   if (signal.sameTurnCloseout || signal.deadlinePressure) return "P3";
   return "P4";
 }
@@ -1235,12 +1283,18 @@ export function corpScoreFundingMilestone(
   ) {
     return undefined;
   }
-  const fundingGap =
+  const routeFundingGap =
     typeof signal.fundingGap === "number" &&
     Number.isSafeInteger(signal.fundingGap) &&
     signal.fundingGap > 0
       ? signal.fundingGap
       : 0;
+  const protectionFundingGap = knownScoreProtectionFundingGap(signal);
+  const fundingOptions = [routeFundingGap, protectionFundingGap ?? 0].filter(
+    (gap) => gap > 0,
+  );
+  const fundingGap =
+    fundingOptions.length > 0 ? Math.min(...fundingOptions) : 0;
   const continuationTarget =
     signal.continuationReserve &&
     Number.isSafeInteger(
@@ -1249,14 +1303,39 @@ export function corpScoreFundingMilestone(
     signal.continuationReserve.requiredCreditsBeforeNextCorpTurn >= 0
       ? signal.continuationReserve.requiredCreditsBeforeNextCorpTurn
       : 0;
+  const conversionTarget =
+    signal.conversion &&
+    Number.isSafeInteger(signal.conversion.remainingScoreCredits) &&
+    signal.conversion.remainingScoreCredits >= 0
+      ? signal.conversion.remainingScoreCredits
+      : 0;
+  const incrementalFundingTarget =
+    fundingGap > 0 ? observedCredits + fundingGap : 0;
   const targetCredits = Math.max(
-    fundingGap > 0 ? observedCredits + fundingGap : 0,
+    incrementalFundingTarget,
+    conversionTarget,
     continuationTarget,
   );
   if (targetCredits <= 0) return undefined;
   const priorityClass = corpScorePriorityClass(signal);
+  const protectionNeed = signal.protectionNeed;
+  const basis: CorpScoreFundingMilestone["basis"] =
+    targetCredits === incrementalFundingTarget &&
+    protectionFundingGap === fundingGap &&
+    protectionNeed
+      ? {
+          kind: "score_protection_gap",
+          needId: protectionNeed.needId,
+          observedAtStateVersion: protectionNeed.observedAtStateVersion,
+        }
+      : targetCredits === incrementalFundingTarget
+        ? { kind: "score_route_gap" }
+        : targetCredits === conversionTarget
+          ? { kind: "score_conversion_floor" }
+          : { kind: "score_continuation_floor" };
   return {
     kind: "score_credit_milestone",
+    basis,
     targetCredits,
     observedCredits,
     remainingGap: Math.max(0, targetCredits - observedCredits),
@@ -1269,6 +1348,29 @@ export function corpScoreFundingMilestone(
         : "multi_turn",
     releaseCondition: "parent_invalidated_or_higher_priority_preemption",
   };
+}
+
+/**
+ * Returns only the current, Engine-quoted credit delta that makes an already
+ * installed score-defense portfolio satisfy its parent's protection policy.
+ * Unknown protection futures remain local and never manufacture a funding
+ * objective.
+ */
+export function knownScoreProtectionFundingGap(
+  signal: Pick<CorpScoreProjectSignal, "projectId" | "protectionNeed">,
+): number | undefined {
+  const need = signal.protectionNeed;
+  if (
+    !need ||
+    need.parentProjectId !== signal.projectId ||
+    need.baseline.knowledge !== "known"
+  ) {
+    return undefined;
+  }
+  const gap = need.baseline.minimumAdditionalCreditsToSatisfy;
+  return typeof gap === "number" && Number.isSafeInteger(gap) && gap > 0
+    ? gap
+    : undefined;
 }
 
 export type CorpScoreFundingSpendAssessment = Readonly<{
@@ -1756,6 +1858,7 @@ export function corpGenericDefensePriorityClass(
           (signal.phase === "draw_for_ice" &&
             signal.centralPressure === "terminal") ||
           signal.phase === "activate_run_defense" ||
+          signal.phase === "pass_encounter" ||
           (signal.phase === "rez_response" &&
             signal.rezWindowVerdict === "productive")),
     )
@@ -1841,6 +1944,9 @@ function economyModule(): PlanModule {
                 ? { kind: "card", id: signal.sourceInstanceId }
                 : { kind: "capability", id: signal.needId },
             routeExists: economyCandidates(context, signal).length > 0,
+            supportable:
+              signal.kind === "develop_campaign" &&
+              signal.restrictedCreditNeed !== undefined,
             evidenceCode: signal.evidenceCode,
             ...(signal.kind === "parent_funding" && signal.parentPlanInstanceId
               ? {
@@ -1865,6 +1971,18 @@ function economyModule(): PlanModule {
           economyCandidates(context, currentSignal).length > 0,
         economyAssessmentValue(currentSignal ?? current.signal),
         portfolio.executorInstanceId,
+        currentSignal?.kind === "develop_campaign" &&
+          currentSignal.restrictedCreditNeed
+          ? [
+              {
+                needId: currentSignal.restrictedCreditNeed.needId,
+                capability: "fund_corp_install_or_rez",
+                minimum: currentSignal.restrictedCreditNeed.gap,
+                available: 0,
+                deadline: "current_turn",
+              },
+            ]
+          : [],
       );
     },
     materialize: (instance, _assessment, context) => ({
@@ -1881,6 +1999,44 @@ function validatedEconomyNeeds(
   context: PlanSchedulerContext,
 ): CorpCorePlanDomain {
   const currentDomain = domain(context);
+  const requiredCredits = currentCorpCreditObligation(context.input);
+  const invalidObligation = currentDomain.economyNeeds.find((signal) => {
+    if (
+      signal.kind !== "reserve" ||
+      (signal.priorityClass !== "P1" &&
+        signal.mandatoryCreditObligation === undefined)
+    )
+      return false;
+    return (
+      signal.priorityClass !== "P1" ||
+      requiredCredits === undefined ||
+      signal.mandatoryCreditObligation?.creditsDue !== requiredCredits ||
+      signal.mandatoryCreditObligation.stateVersion !==
+        context.input.playerView.stateVersion ||
+      signal.targetCredits !== requiredCredits ||
+      signal.gap !== requiredCredits - context.input.playerView.own.credits ||
+      signal.gap <= 0 ||
+      signal.actionIds.some(
+        (id) =>
+          !context.actionCandidates.some(
+            (candidate) =>
+              candidate.actionId === id &&
+              immediateCorpLiquidCreditGain(candidate) > 0 &&
+              candidate.economyProjection?.reliability === "guaranteed",
+          ),
+      )
+    );
+  });
+  if (invalidObligation)
+    throw new PlanResolutionFailure("missing_plan_module_coverage", {
+      side: context.input.side,
+      stateVersion: context.input.playerView.stateVersion,
+      timingPoint: context.input.playerView.timingPoint,
+      legalActionTypes: context.input.legalActions.map((a) => a.type),
+      owner: "plan_module",
+      removalCondition:
+        "Bind mandatory P1 credit funding to the current Engine obligation and guaranteed liquid funding actions.",
+    });
   const invalidScoreParent = currentDomain.economyNeeds.find((signal) => {
     if (signal.kind !== "parent_funding") return false;
     const scoreFundingNeed = signal.needId.startsWith("score-support:");
@@ -2113,6 +2269,33 @@ function validatedEconomyNeeds(
       (need): need is CorpGenericDefenseSignal =>
         need.kind === "generic" && need.defenseId === signal.parentNeedId,
     );
+    if (signal.restrictedCreditFunding || parentNeed?.restrictedRezFunding) {
+      const quotes = parentNeed?.restrictedRezFunding?.quotes;
+      return (
+        !parentNeed ||
+        !quotes?.length ||
+        signal.needId !==
+          `defense-restricted-funding:${parentNeed.defenseId}` ||
+        signal.parentPlanInstanceId !== expectedDefenseParent ||
+        signal.parentPriorityClass !==
+          corpGenericDefensePriorityClass([parentNeed]) ||
+        signal.evidenceCode !== parentNeed.evidenceCode ||
+        signal.gap !== parentNeed.restrictedRezFunding?.gap ||
+        signal.immediateDefenseConversion !== true ||
+        signal.incrementalDefenseReserve !== undefined ||
+        JSON.stringify(signal.restrictedCreditFunding) !==
+          JSON.stringify(quotes) ||
+        JSON.stringify(signal.actionIds) !==
+          JSON.stringify(quotes.map((quote) => quote.request.payoutActionId)) ||
+        quotes.some(
+          (quote) =>
+            !(context.input.corpRestrictedCreditRouteQuotes ?? []).some(
+              (current) => JSON.stringify(current) === JSON.stringify(quote),
+            ),
+        ) ||
+        economyCandidates(context, signal).length === 0
+      );
+    }
     const validFundingActions = new Set(
       context.actionCandidates
         .filter(immediateCorpLiquidCreditGain)
@@ -2124,6 +2307,25 @@ function validatedEconomyNeeds(
           context.input.playerView.own.credits,
         )
       : undefined;
+    const expectedPreparations =
+      parentNeed?.rezReserveNeed && parentNeed.targetIceInstanceId
+        ? corpRestrictedRezPreparationCandidates(
+            context.input,
+            context.actionCandidates,
+            {
+              targetIceInstanceId: parentNeed.targetIceInstanceId,
+              targetServerId: parentNeed.serverId,
+              requiredRezCredits: parentNeed.rezReserveNeed.requiredCredits,
+            },
+          )
+        : [];
+    for (const preparation of expectedPreparations)
+      validFundingActions.add(preparation.actionId);
+    if (
+      JSON.stringify(signal.restrictedCreditPreparations ?? []) !==
+      JSON.stringify(expectedPreparations)
+    )
+      return true;
     const exactNeedId = requirement
       ? `defense-reserve:${parentNeed!.serverId}:${requirement.iceInstanceId}`
       : undefined;
@@ -2201,6 +2403,9 @@ export function corpEconomyPriorityClass(
 }
 
 function economyAssessmentValue(signal: CorpEconomyNeedSignal): number {
+  if (signal.kind === "parent_funding" && signal.restrictedCreditFunding) {
+    return signal.gap * 20;
+  }
   if (signal.kind === "develop_liquidity") return -9_999;
   if (signal.kind === "convert_immediate_operation") {
     return (
@@ -2209,7 +2414,10 @@ function economyAssessmentValue(signal: CorpEconomyNeedSignal): number {
     );
   }
   if (signal.kind === "convert_visible_card_payout") {
-    return signal.conversion.netLiquidCreditGain * 20;
+    return (
+      (signal.withdrawalCampaign?.projectedNetCredits ??
+        signal.conversion.netLiquidCreditGain) * 20
+    );
   }
   if (signal.kind === "prepare_immediate_operation") {
     return 50 + signal.futureConversion.strategicEconomyValue * 10;
@@ -2552,6 +2760,11 @@ function scoreCandidates(
   signal: CorpScoreProjectSignal,
 ): PlanMaterialization["candidates"] {
   if (signal.phase === "select_agenda") return [];
+  if (
+    signal.sameTurnFundingActionIds !== undefined &&
+    (signal.fundingMilestone?.remainingGap ?? signal.fundingGap ?? 0) > 0
+  )
+    return [];
   const semantic = scoreCapability(signal).semanticActionTypes;
   return context.actionCandidates
     .filter((candidate) => {
@@ -2825,8 +3038,22 @@ function defenseCandidates(
         );
       if (signal.phase === "draw_for_ice")
         return corpCandidateProjectsCardDraw(candidate);
+      if (signal.phase === "pass_encounter")
+        return (
+          candidate.semanticActionType === "run.continue" &&
+          context.input.playerView.timingPoint === "run.encounter_ice" &&
+          context.input.legalActions.some(
+            (action) =>
+              action.actionId === candidate.actionId &&
+              action.side === "corp" &&
+              action.source === "game_rule" &&
+              action.expiresAtStateVersion ===
+                context.input.playerView.stateVersion,
+          )
+        );
       if (signal.phase === "activate_run_defense")
         return (
+          candidate.actionType === "activated_card_ability" ||
           candidate.semanticActionType === "card_ability.trigger" ||
           candidate.semanticActionType === "run.end_by_corp" ||
           candidate.semanticActionType === "play.corp_operation"
@@ -2889,6 +3116,22 @@ function genericDefenseFundingAlternativeExists(
   context: PlanSchedulerContext,
   signal: CorpGenericDefenseSignal,
 ): boolean {
+  if (signal.restrictedRezFunding) {
+    const provider = corpDomainIfAvailable(context)?.economyNeeds.find(
+      (need) =>
+        need.kind === "parent_funding" &&
+        need.parentNeedId === signal.defenseId &&
+        need.parentPlanInstanceId ===
+          planInstanceIdForProposal({
+            moduleId: "corp.defend_servers",
+            dedupeKey: "server-defense-portfolio",
+          }) &&
+        need.restrictedCreditFunding !== undefined,
+    );
+    return (
+      provider !== undefined && economyCandidates(context, provider).length > 0
+    );
+  }
   const requirement = genericDefenseFundingRequirement(
     signal,
     context.input.playerView.own.credits,
@@ -2917,7 +3160,11 @@ function genericDefenseFundingAlternativeExists(
       context.actionCandidates.some(
         (candidate) =>
           candidate.actionId === actionId &&
-          immediateCorpLiquidCreditGain(candidate) > 0 &&
+          (immediateCorpLiquidCreditGain(candidate) > 0 ||
+            (need.kind === "parent_funding" &&
+              need.restrictedCreditPreparations?.some(
+                (preparation) => preparation.actionId === actionId,
+              ) === true)) &&
           corpEconomyCandidateHasExecutablePayload(context.input, candidate),
       ),
     ) === true
@@ -2963,13 +3210,17 @@ function genericDefenseFundingRequirement(
     !Number.isSafeInteger(reserve.fundingGap) ||
     reserve.currentCredits < 0 ||
     reserve.requiredCredits <= reserve.currentCredits ||
-    reserve.fundingGap !== reserve.requiredCredits - reserve.currentCredits
+    reserve.fundingGap !==
+      reserve.requiredCredits -
+        reserve.currentCredits -
+        (reserve.storedRestrictedCredits ?? 0)
   ) {
     return undefined;
   }
   return {
     gap: reserve.fundingGap,
-    targetCredits: reserve.requiredCredits,
+    targetCredits:
+      reserve.requiredCredits - (reserve.storedRestrictedCredits ?? 0),
     iceInstanceId: signal.targetIceInstanceId,
   };
 }
@@ -3002,7 +3253,8 @@ function genericDefenseFundingRequirementIsCurrent(
     signal.phase === "fund_rez_reserve" &&
     reserve?.observedAtStateVersion === context.input.playerView.stateVersion &&
     reserve.currentCredits === context.input.playerView.own.credits &&
-    reserve.requiredCredits === requirement.targetCredits &&
+    reserve.requiredCredits - (reserve.storedRestrictedCredits ?? 0) ===
+      requirement.targetCredits &&
     ice?.rezzed !== true &&
     quote?.context === "installed" &&
     quote.cardId === requirement.iceInstanceId &&
@@ -3011,7 +3263,19 @@ function genericDefenseFundingRequirementIsCurrent(
     quote.expiresAtStateVersion === context.input.playerView.stateVersion &&
     quote.complete === true &&
     quote.mandatoryAdditionalCosts.agendaPoints === 0 &&
-    quote.finalCredits === requirement.targetCredits
+    quote.finalCredits === reserve.requiredCredits &&
+    (reserve.storedRestrictedCredits ?? 0) ===
+      Math.max(
+        0,
+        ...currentCorpRestrictedCreditBanks(context.input)
+          .filter(
+            (bank) =>
+              bank.advancementCounters > 0 &&
+              bank.generalCreditsAvailable ===
+                context.input.playerView.own.credits,
+          )
+          .map((bank) => bank.creditsPerCounter),
+      )
   );
 }
 
@@ -3745,7 +4009,13 @@ function scoreResourceGaps(
           signal.fundingMilestone.targetCredits -
             signal.fundingMilestone.observedCredits,
         ) ||
-      signal.fundingMilestone.priorityClass !== corpScorePriorityClass(signal))
+      signal.fundingMilestone.priorityClass !==
+        corpScorePriorityClass(signal) ||
+      (signal.fundingMilestone.basis.kind === "score_protection_gap" &&
+        (signal.fundingMilestone.basis.needId !==
+          signal.protectionNeed?.needId ||
+          signal.fundingMilestone.basis.observedAtStateVersion !==
+            context.input.playerView.stateVersion)))
   ) {
     throw new PlanResolutionFailure("invalid_support_graph", {
       side: context.input.side,
@@ -3774,6 +4044,7 @@ function scoreResourceGaps(
     scoreCandidates(context, signal).length > 0;
   const hasExactCurrentScopedInstallHead =
     signal.phase === "install_agenda" &&
+    signal.sameTurnFundingActionIds === undefined &&
     signal.feasible &&
     signal.uncertainty?.currentActionScope === "exact_install_only" &&
     scoreCandidates(context, signal).length > 0;
@@ -3983,12 +4254,22 @@ function defenseResourceGaps(
   if (selectedBand.kind !== "generic" || selectedBand.candidates.length > 0)
     return [];
   return selectedBand.eligibleSignals.flatMap((signal) => {
+    if (signal.restrictedRezFunding)
+      return [
+        {
+          needId: signal.defenseId,
+          capability: "fund_corp_install_or_rez",
+          minimum: signal.restrictedRezFunding.gap,
+          available: 0,
+          deadline: "current_turn",
+        } satisfies ResourceGap,
+      ];
     const requirement = genericDefenseFundingRequirement(signal);
     if (!requirement) return [];
     return [
       {
         needId: signal.defenseId,
-        capability: "credits",
+        capability: signal.rezReserveNeed ? "fund_corp_rez_reserve" : "credits",
         minimum: requirement.gap,
         available: 0,
         deadline: signal.urgent ? "current_turn" : "multi_turn",
@@ -5116,6 +5397,25 @@ function isValidDefenseSignal(
     return (
       hasOnlyKeys(value, GENERIC_DEFENSE_SIGNAL_KEYS) &&
       genericDefensePhase(value.phase) &&
+      (value.restrictedRezFunding === undefined ||
+        (value.phase === "rez_response" &&
+          value.rezWindowVerdict === "productive" &&
+          signal.kind === "generic" &&
+          signal.restrictedRezFunding !== undefined &&
+          knownNonNegativeInteger(signal.restrictedRezFunding.gap) &&
+          signal.restrictedRezFunding.gap > 0 &&
+          Array.isArray(signal.restrictedRezFunding.quotes) &&
+          signal.restrictedRezFunding.quotes.length > 0 &&
+          signal.restrictedRezFunding.quotes.every(
+            (quote) =>
+              quote.consumer?.actionType === "rez_ice" &&
+              quote.consumer.currentRunAccessBlock !== undefined &&
+              quote.consumer.availableBeforePayout === false &&
+              quote.consumer.sourceCardInstanceId ===
+                signal.targetIceInstanceId &&
+              quote.consumer.serverId === signal.serverId,
+          ) &&
+          signal.actionIds?.length === 0)) &&
       Array.isArray(value.sourceDefinitionIds) &&
       value.sourceDefinitionIds.every(nonEmptyString) &&
       (value.actionIds === undefined ||
@@ -5412,6 +5712,7 @@ function genericDefensePhase(
     value === "fund_rez_reserve" ||
     value === "rez_response" ||
     value === "activate_run_defense" ||
+    value === "pass_encounter" ||
     value === "decline_rez"
   );
 }
@@ -5427,14 +5728,19 @@ function validCorpRezReserveNeed(value: unknown): boolean {
         "currentCredits",
         "requiredCredits",
         "fundingGap",
+        "storedRestrictedCredits",
       ]),
     ) &&
     knownNonNegativeInteger(reserve.observedAtStateVersion) &&
     knownNonNegativeInteger(reserve.currentCredits) &&
     knownNonNegativeInteger(reserve.requiredCredits) &&
     knownNonNegativeInteger(reserve.fundingGap) &&
+    (reserve.storedRestrictedCredits === undefined ||
+      knownNonNegativeInteger(reserve.storedRestrictedCredits)) &&
     (reserve.fundingGap as number) > 0 &&
-    (reserve.requiredCredits as number) - (reserve.currentCredits as number) ===
+    (reserve.requiredCredits as number) -
+      (reserve.currentCredits as number) -
+      ((reserve.storedRestrictedCredits as number | undefined) ?? 0) ===
       reserve.fundingGap
   );
 }
@@ -5628,6 +5934,7 @@ const GENERIC_DEFENSE_SIGNAL_KEYS = new Set([
   "installRoute",
   "rezReserveNeed",
   "rezRoute",
+  "restrictedRezFunding",
   "value",
   "evidenceCode",
   "choiceResolution",
@@ -5787,6 +6094,7 @@ function urgentDefenseBand(
       (signal.phase === "rez_response" ||
         signal.phase === "decline_rez" ||
         signal.phase === "activate_run_defense" ||
+        signal.phase === "pass_encounter" ||
         signal.phase === "resolve_post_pass_ice_lifecycle") &&
       defenseCandidates(context, signal).length > 0,
   );
@@ -5832,6 +6140,51 @@ function economyCandidates(
   context: PlanSchedulerContext,
   signal: CorpEconomyNeedSignal,
 ): PlanMaterialization["candidates"] {
+  if (
+    signal.kind === "parent_funding" &&
+    signal.restrictedCreditPreparations?.length
+  ) {
+    const preparations = signal.restrictedCreditPreparations;
+    const { restrictedCreditPreparations: _preparations, ...liquidSignal } =
+      signal;
+    return [
+      ...context.actionCandidates.flatMap((candidate) => {
+        const preparation = preparations.find(
+          (preparation) => preparation.actionId === candidate.actionId,
+        );
+        return preparation
+          ? [{ candidate, stepValue: preparation.capacityGain * 10 }]
+          : [];
+      }),
+      ...economyCandidates(context, liquidSignal),
+    ];
+  }
+  if (signal.kind === "parent_funding" && signal.restrictedCreditFunding) {
+    return context.actionCandidates.flatMap((candidate) => {
+      const quote = signal.restrictedCreditFunding!.find(
+        (entry) => entry.request.payoutActionId === candidate.actionId,
+      );
+      const payout = candidate.economyProjection?.restrictedCreditPayout;
+      if (
+        !quote ||
+        !payout ||
+        quote.request.stateVersion !== context.input.playerView.stateVersion ||
+        candidate.sourceCardInstanceId !== quote.payoutSourceCardInstanceId ||
+        candidate.abilityId !== quote.payoutSourceAbilityId ||
+        payout.amount !== quote.payoutCredits ||
+        !corpEconomyCandidateHasExecutablePayload(context.input, candidate)
+      )
+        return [];
+      return [
+        {
+          candidate,
+          stepValue:
+            Math.min(signal.gap, quote.consumer.newlyProvidedCreditsApplied) *
+            10,
+        },
+      ];
+    });
+  }
   const exactFundingHead =
     signal.kind === "develop_campaign" ||
     signal.kind === "convert_immediate_operation" ||
@@ -6257,7 +6610,13 @@ function economyMaterialization(
                       ? signal.decision === "accept"
                         ? `Accept the exact current optional action-capacity offer from ${signal.sourceDefinitionId}; the granted action is replanned by its normal domain owner.`
                         : `Decline the exact current optional action-capacity offer from ${signal.sourceDefinitionId} because its restricted follow-up has no admitted productive route.`
-                      : "Convert an immediate positive liquid-credit route for the bound Corp funding need.",
+                      : signal.kind === "parent_funding" &&
+                          signal.restrictedCreditPreparations?.length
+                        ? "Prepare conditional stored install/rez capacity or liquid funding for the bound installed-ICE reserve; revalidate the remaining gap after this current head."
+                        : signal.kind === "parent_funding" &&
+                            signal.restrictedCreditFunding
+                          ? "Take the exact restricted payout for the bound current install/rez consumer, then return control to its resident parent."
+                          : "Convert an immediate positive liquid-credit route for the bound Corp funding need.",
     },
     candidates,
   };
@@ -6370,7 +6729,10 @@ function economyImmediateOperationStepValue(
 function economyVisibleCardPayoutStepValue(
   signal: CorpEconomyVisibleCardWithdrawalSignal,
 ): number {
-  return signal.conversion.netLiquidCreditGain * 20;
+  return (
+    (signal.withdrawalCampaign?.projectedNetCredits ??
+      signal.conversion.netLiquidCreditGain) * 20
+  );
 }
 
 function economyOperationThresholdStepValue(

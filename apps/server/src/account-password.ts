@@ -209,6 +209,15 @@ export class AccountAuthService {
         activeAccounts.some((account) => !supplied.has(account.accountId)))
     )
       throw new Error("account_access_mode_credentials_incomplete");
+    // Validate every profile before deriving or storing any credentials.
+    if (input.mode === "protected") {
+      for (const account of activeAccounts) {
+        validateNewAccountPassword(
+          supplied.get(account.accountId)!,
+          account.loginName,
+        );
+      }
+    }
     const changedAt = this.now();
     const credentials =
       input.mode === "protected"

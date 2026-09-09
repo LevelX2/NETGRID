@@ -51,6 +51,19 @@ export function AccountPanel({
     );
   }
 
+  if (!accountSession.accessPolicy) {
+    return (
+      <section className="accountPanel">
+        <p className="notice" role="alert">
+          {accountSession.error}
+        </p>
+        <button className="button" type="button" onClick={accountSession.retry}>
+          {t("retry")}
+        </button>
+      </section>
+    );
+  }
+
   if (accountSession.account) {
     const submitPassword = async (event: FormEvent) => {
       event.preventDefault();

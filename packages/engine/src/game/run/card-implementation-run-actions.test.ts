@@ -147,11 +147,11 @@ describe("runner during-run CardImplementation actions", () => {
           timing,
         ) => {
           calls.push(`${side}:${sourceCardId}:${cardDefinition.id}:${timing}`);
-          if (timing !== "during_run") return;
+          if (!Array.isArray(timing) || !timing.includes("during_run")) return;
           legalActions.push(
             action(sourceCardId, {
               sourceDefinitionId: cardDefinition.id,
-              cardImplementationAbilityTiming: timing,
+              cardImplementationAbilityTiming: "during_run",
             }),
           );
         },
@@ -161,10 +161,8 @@ describe("runner during-run CardImplementation actions", () => {
     const result = buildRunnerDuringRunCardImplementationActions(host);
 
     expect(calls).toEqual([
-      "runner:program_a:program_a_definition:during_run",
-      "runner:program_a:program_a_definition:runner_paid",
-      "runner:program_b:program_b_definition:during_run",
-      "runner:program_b:program_b_definition:runner_paid",
+      "runner:program_a:program_a_definition:during_run,runner_paid",
+      "runner:program_b:program_b_definition:during_run,runner_paid",
     ]);
     expect(
       result.legalActions.map((legalAction) => legalAction.source),
@@ -193,7 +191,7 @@ describe("runner during-run CardImplementation actions", () => {
           _definition,
           timing,
         ) => {
-          if (timing !== "during_run") return;
+          if (!Array.isArray(timing) || !timing.includes("during_run")) return;
           legalActions.push(
             action(sourceCardId, {
               sourceDefinitionId: "program_a_definition",
@@ -312,7 +310,7 @@ describe("corp encounter CardImplementation actions", () => {
           legalActions.push(
             action(sourceCardId, {
               sourceDefinitionId: cardDefinition.id,
-              cardImplementationAbilityTiming: timing,
+              cardImplementationAbilityTiming: "corp_encounter",
             }),
           );
         },
@@ -322,12 +320,17 @@ describe("corp encounter CardImplementation actions", () => {
     const result = buildCorpEncounterCardImplementationActions(host);
 
     expect(calls).toEqual(["corp:ice_1:ice_definition:corp_encounter"]);
-    expect(result.legalActions).toHaveLength(1);
+    expect(result.legalActions).toHaveLength(2);
+    expect(result.legalActions[1]).toMatchObject({
+      side: "corp",
+      type: "continue_run",
+      source: "game_rule",
+    });
   });
 });
 
 describe("corp during-run CardImplementation actions", () => {
-  it("delegates scored corp agendas with corp_during_run timing", () => {
+  it("delegates scored corp agendas with both during-run and paid timings", () => {
     const state = makeState();
     state.corp.scoreArea = [
       "agenda_b" as CardInstanceId,
@@ -364,7 +367,7 @@ describe("corp during-run CardImplementation actions", () => {
           legalActions.push({
             ...action(sourceCardId, {
               sourceDefinitionId: cardDefinition.id,
-              cardImplementationAbilityTiming: timing,
+              cardImplementationAbilityTiming: "corp_during_run",
             }),
             side,
           } as LegalAction);
@@ -375,8 +378,8 @@ describe("corp during-run CardImplementation actions", () => {
     const result = buildCorpDuringRunCardImplementationActions(host);
 
     expect(calls).toEqual([
-      "corp:agenda_a:agenda_a_definition:corp_during_run",
-      "corp:agenda_b:agenda_b_definition:corp_during_run",
+      "corp:agenda_a:agenda_a_definition:corp_during_run,corp_paid",
+      "corp:agenda_b:agenda_b_definition:corp_during_run,corp_paid",
     ]);
     expect(
       result.legalActions.map((legalAction) => legalAction.source),

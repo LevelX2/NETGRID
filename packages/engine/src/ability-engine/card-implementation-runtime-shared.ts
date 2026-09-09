@@ -97,6 +97,23 @@ export function deterministicOnPlayResourcePayload(
     }
   }
 
+  const hasDirectDraw = drawCardsAmount > 0;
+  if (controller === "runner" && hasDirectDraw) {
+    if (state === undefined) {
+      throw Object.assign(
+        new Error(
+          "Runner on-play draw projection requires the current game state.",
+        ),
+        {
+          code: "missing_runner_draw_projection_state",
+          owner: "deterministicOnPlayResourcePayload",
+          definitionId: definition.id,
+        },
+      );
+    }
+    drawCardsAmount = Math.min(drawCardsAmount, state.runner.stack.length);
+  }
+
   const actionCapacityPayload = implementation
     ? actionCapacityLegalActionPayloadForEffects(
         implementation.effects,
@@ -105,6 +122,9 @@ export function deterministicOnPlayResourcePayload(
     : {};
   const removeTagsEffect = implementation?.effects.find(
     (effect) => effect.kind === "remove_tags",
+  );
+  const heapRecoveryEffect = implementation?.effects.find(
+    (effect) => effect.kind === "search_trash_to_grip",
   );
   const advancementDistribution = implementation?.effects.find(
     (effect) => effect.kind === "distribute_advancement_counters",
@@ -146,9 +166,15 @@ export function deterministicOnPlayResourcePayload(
 
   return {
     ...(gainCreditsAmount > 0 ? { gainCreditsAmount } : {}),
-    ...(drawCardsAmount > 0 ? { drawCardsAmount } : {}),
+    ...(hasDirectDraw ? { drawCardsAmount } : {}),
     ...(badPublicityAdded > 0 ? { badPublicityAdded } : {}),
     ...(selfDamage?.damageAmount ? selfDamage : {}),
+    ...(heapRecoveryEffect
+      ? {
+          cardImplementationEffectKind: "search_trash_to_grip",
+          cardImplementationSearchFilter: heapRecoveryEffect.filter,
+        }
+      : {}),
     ...(removeTagsEffect
       ? {
           cardImplementationEffectKind: "remove_tags",

@@ -105,6 +105,16 @@ try {
     format: "esm",
     platform: "node",
     target: "node24",
+    define: {
+      "process.env.NETGRID_SERVER_BUILD_INFO": JSON.stringify(
+        JSON.stringify({
+          buildNumber: releaseGitValue(["rev-list", "--count", "HEAD"]),
+          commit: releaseGitValue(["rev-parse", "--short=9", "HEAD"]),
+          sourceDate: releaseGitValue(["show", "-s", "--format=%cI", "HEAD"]),
+          dirty: releaseGitValue(["status", "--porcelain"]).length > 0,
+        }),
+      ),
+    },
     banner: {
       js: 'import { createRequire as __netgridCreateRequire } from "node:module"; const require = __netgridCreateRequire(import.meta.url);',
     },
@@ -519,6 +529,16 @@ function collectFiles(directory) {
       const target = path.join(directory, entry.name);
       return entry.isDirectory() ? collectFiles(target) : [target];
     });
+}
+
+function releaseGitValue(args) {
+  const result = spawnSync("git", args, {
+    cwd: repositoryRoot,
+    encoding: "utf8",
+    windowsHide: true,
+  });
+  if (result.status !== 0) throw new Error("release_git_metadata_unavailable");
+  return result.stdout.trim();
 }
 
 function optionValue(name) {

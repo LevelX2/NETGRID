@@ -375,6 +375,15 @@ export function buildRunnerEncounterActions(
                 iceId: encounteredIceId,
                 subroutineIndex: index,
                 subroutineId: subroutine.id,
+                ...(breakHasNoDamageOrSecondaryPurpose(
+                  host,
+                  subroutine,
+                  breakAbility,
+                )
+                  ? {
+                      breakSubroutinePurpose: "zero_damage_no_secondary_effect",
+                    }
+                  : {}),
                 targetIceDefinitionId: iceDefinition.id,
                 targetIceTitle: iceDefinition.title,
                 ...dynamicSubroutinePayload(subroutine),
@@ -515,6 +524,44 @@ export function buildRunnerEncounterActions(
     encounterId: run.runId,
     iceId: encounteredIceId,
   };
+}
+
+/** Exact mechanical certificate, not a recommendation or a legality filter. */
+function breakHasNoDamageOrSecondaryPurpose(
+  host: RunnerEncounterActionHost,
+  subroutine: Subroutine,
+  ability: RuntimeIcebreakerAbility,
+): boolean {
+  if (
+    subroutine.type !== "do_damage" ||
+    subroutine.amount !== 0 ||
+    ability.special ||
+    ability.specialEffects?.length ||
+    ability.onSuccessfulBreakEffects?.length ||
+    ability.onUseEffects?.length ||
+    ability.onUseEndRun ||
+    ability.postBreakStealthLossSourceMode
+  )
+    return false;
+  const run = host.run.currentRun();
+  if (run.fatalDamageActiveForEncounter) return false;
+  const sources = [
+    ...host.state.runner.rig.programs,
+    ...(run.successfulRunSourceCardId ? [run.successfulRunSourceCardId] : []),
+  ];
+  return !sources.some((cardId) => {
+    const implementation = cardImplementationForDefinitionId(
+      host.cards.definitionFor(cardId).id,
+    );
+    const utility = implementation?.runnerUtilityLongtail;
+    return (
+      utility?.kind === "trash_fully_broken_passed_ice" ||
+      utility?.kind === "derez_fully_broken_passed_ice" ||
+      utility?.kind === "derez_fully_broken_passed_ice_and_end_run" ||
+      implementation?.virusCounter?.addOnSuccessfulRun?.counterScope.kind ===
+        "chosen_fully_broken_ice"
+    );
+  });
 }
 
 function icebreakerSubtypeLabel(subtype: string): string {
@@ -699,6 +746,15 @@ function multiBreakSubroutineActions(
           breakerId,
           iceId: encounteredIceId,
           subroutineIndexes: eligibleIndexes.join(","),
+          ...(eligibleIndexes.every((index) =>
+            breakHasNoDamageOrSecondaryPurpose(
+              host,
+              subroutines[index]!,
+              breakAbility,
+            ),
+          )
+            ? { breakSubroutinePurpose: "zero_damage_no_secondary_effect" }
+            : {}),
           breakSubroutineCount: eligibleIndexes.length,
           multiBreakSubroutines: true,
           breakAllMatchingSubroutines: true,
@@ -757,6 +813,15 @@ function multiBreakSubroutineActions(
               breakerId,
               iceId: encounteredIceId,
               subroutineIndexes: subroutineIndexes.join(","),
+              ...(subroutineIndexes.every((index) =>
+                breakHasNoDamageOrSecondaryPurpose(
+                  host,
+                  subroutines[index]!,
+                  breakAbility,
+                ),
+              )
+                ? { breakSubroutinePurpose: "zero_damage_no_secondary_effect" }
+                : {}),
               breakSubroutineCount: subroutineIndexes.length,
               multiBreakSubroutines: true,
               targetIceDefinitionId: iceDefinition.id,

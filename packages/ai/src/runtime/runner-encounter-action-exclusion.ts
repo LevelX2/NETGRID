@@ -84,6 +84,25 @@ export function runnerEncounterActionExclusion(
     };
   }
   if (action.type === "break_subroutine") {
+    if (
+      action.payload?.breakSubroutinePurpose ===
+      "zero_damage_no_secondary_effect"
+    ) {
+      return {
+        key: "break_has_no_damage_or_secondary_purpose",
+        label: "Nullschaden ohne weiteren Break-Effekt",
+        reason:
+          "encounter_action:break_subroutine|engine_certified_zero_damage_no_secondary_effect",
+      };
+    }
+    if (breakOnlyPreventsAbsentNextEncounter(input, action)) {
+      return {
+        key: "break_targets_absent_next_encounter",
+        label: "Die Subroutine hat kein folgendes Encounter als Ziel",
+        reason:
+          "encounter_action:break_subroutine|remaining_inner_ice:0|target_effect:next_encounter_only",
+      };
+    }
     const randomBreakExclusion = dependencies.randomBreakOrDamageBreakExclusion(
       input,
       action,
@@ -115,6 +134,43 @@ export function runnerEncounterActionExclusion(
     };
   }
   return undefined;
+}
+
+function breakOnlyPreventsAbsentNextEncounter(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  const run = input.playerView.run;
+  if (
+    run?.phase !== "encounter_ice" ||
+    run.position?.kind !== "ice" ||
+    run.position.iceIndex !== 0
+  )
+    return false;
+  const ice = currentEncounteredIceCard(input);
+  if (!ice || action.payload?.iceId !== ice.instanceId) return false;
+  const subroutines = ice.effectiveRunQuote?.subroutines;
+  if (
+    !subroutines?.length ||
+    subroutines.some(
+      (subroutine) =>
+        subroutine.type === "deflect_run" ||
+        subroutine.type === "rewind_run_to_rezzed_ice_by_die",
+    )
+  )
+    return false;
+  const indexes = breakSubroutineIndexesForAction(action);
+  return (
+    indexes.size > 0 &&
+    [...indexes].every((index) => {
+      const type = subroutines[index]?.type;
+      return (
+        type === "set_next_encounter_no_break_subroutines" ||
+        type === "set_next_encounter_lock" ||
+        type === "set_next_encounter_unless_fully_break_damage"
+      );
+    })
+  );
 }
 
 function breakMissesAvailableImmediateSafetyThreat(
