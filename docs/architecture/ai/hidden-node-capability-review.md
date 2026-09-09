@@ -614,3 +614,18 @@ Das ist eine begrenzte, zustandsabhängige Koordination vorhandener Owner.
 Eine optimale gelernte Mischstrategie, ein garantierter Alternativsieg oder
 eine Pflicht, jeden Köder-Run mit ICE-Ausgaben zu verteidigen, folgen daraus
 nicht. Die getrennte frische Kontrollpopulation 413 prüft die Häufigkeiten.
+
+
+Die erste Kontrolle 413 findet zusätzlich eine Engine-Timinglücke (SP-324):
+G18 D689 installiert Bel beim leeren R&D mit dem letzten Klick. D690 enthält
+nur `end_turn`; der Runner kann seinen Zug beenden und die Corp zum leeren
+Pflichtziehen zwingen. Die führende `docs/source/Netrunner Errata 1.70.md`
+erlaubt im Abschnitt „Gaining Actions“ und bei Remote Facility ausdrücklich
+Rez nach der letzten Aktion. Die normale Asset-/Upgrade-Rez-Quote wird daher
+auch vor dem tatsächlichen Zugende bei null Klicks angeboten. Kostenprüfung,
+Replay und Side-Grenzen bleiben Teil desselben vorhandenen Engine-Pfads.
+Die Null-Klick-Probe führt Bel-Rez, beiderseitiges Zugende und erfolgreiches
+Pflichtziehen aus; Remote Facility wird mit null und drei Klicks einschließlich
+unzureichender Credits und deterministischem Replay geprüft.
+Die gesamte erste 40er-Runde auf `a48d0290f` ist wegen dieser folgenden
+Regelkorrektur diagnostisch und von der finalen Population ausgeschlossen.

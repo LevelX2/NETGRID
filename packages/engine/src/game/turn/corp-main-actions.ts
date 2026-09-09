@@ -241,6 +241,42 @@ export function buildCorpMainActions(
     host.specialZones.edgerunnerTempsInstallActionsRemaining;
   const COUNTER_UPGRADE_SOURCES = host.constants.COUNTER_UPGRADE_SOURCES;
 
+  const rootRezAction = (
+    id: CardInstanceId,
+    serverLabel: string,
+  ): LegalAction | undefined => {
+    const definition = definitionFor(state, id);
+    if (
+      (definition.type !== "asset" && definition.type !== "upgrade") ||
+      mustInstance(state.cardInstances, id).rezzed
+    )
+      return undefined;
+    const rezQuote = quoteCorpRootRezCost(state, id);
+    if (!rezQuote.canPay) return undefined;
+    const rezAction = action(
+      state,
+      "corp",
+      "rez_card",
+      `Karte in ${serverLabel} rezzen`,
+      id,
+      rezQuote.costs.map((cost: Record<string, unknown>) => ({ ...cost })),
+      { ...rezQuote.publicPayload },
+    );
+    const creditOutcomeQuote = quoteCorpRootRezCreditOutcome(
+      state,
+      id,
+      rezAction.actionId,
+      rezQuote.finalCredits,
+    );
+    if (creditOutcomeQuote) {
+      rezAction.payload = {
+        ...(rezAction.payload ?? {}),
+        ...corpRootRezCreditOutcomeQuotePayload(creditOutcomeQuote),
+      };
+    }
+    return rezAction;
+  };
+
   const actions: LegalAction[] = [];
   if (state.actionEconomy?.pendingOffer?.side === "corp") {
     const offer = state.actionEconomy.pendingOffer;
@@ -328,6 +364,14 @@ export function buildCorpMainActions(
     }
   }
   if (state.corp.clicks <= 0) {
+    // Rezzing does not spend an action. This window remains open until the
+    // Corp explicitly ends the turn, including after its last click.
+    for (const server of state.corp.servers) {
+      for (const id of server.root) {
+        const rezAction = rootRezAction(id, server.label);
+        if (rezAction) actions.push(rezAction);
+      }
+    }
     actions.push(buildCorpEndTurnAction(state));
     return actions;
   }
@@ -672,37 +716,8 @@ export function buildCorpMainActions(
             ),
           );
       }
-      if (
-        (definition.type === "asset" || definition.type === "upgrade") &&
-        !mustInstance(state.cardInstances, id).rezzed
-      ) {
-        const rezQuote = quoteCorpRootRezCost(state, id);
-        if (!rezQuote.canPay) continue;
-        const rezAction = action(
-          state,
-          "corp",
-          "rez_card",
-          `Karte in ${server.label} rezzen`,
-          id,
-          rezQuote.costs.map((cost: Record<string, unknown>) => ({
-            ...cost,
-          })),
-          { ...rezQuote.publicPayload },
-        );
-        const creditOutcomeQuote = quoteCorpRootRezCreditOutcome(
-          state,
-          id,
-          rezAction.actionId,
-          rezQuote.finalCredits,
-        );
-        if (creditOutcomeQuote) {
-          rezAction.payload = {
-            ...(rezAction.payload ?? {}),
-            ...corpRootRezCreditOutcomeQuotePayload(creditOutcomeQuote),
-          };
-        }
-        actions.push(rezAction);
-      }
+      const rezAction = rootRezAction(id, server.label);
+      if (rezAction) actions.push(rezAction);
     }
   }
   const corpTraceDamageAbilityActionsHost = corpTraceDamageAbilityHost(state);

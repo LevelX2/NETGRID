@@ -2566,53 +2566,65 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     ).toEqual(legalActionIdsBeforeView);
   });
 
-  it("grants Remote Facility's action immediately when it is rezzed", () => {
-    let state = apply(
-      createGameAfterSetup({
-        seed: "remote-facility-immediate-rez-action",
-        baseline: CURRENT_RULES_BASELINE,
-        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
-        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
-        agendaPointsToWin: 7,
-      }),
-      "corp",
-      (action) => action.type === "mandatory_draw",
-    );
-    state.corp.credits = 5;
-    const remoteId = putCorpRootInRemote(state, "onr_v1_335_remote-facility");
-    const clicksBeforeRez = state.corp.clicks;
-    const initial = structuredClone(state);
-    const replayStart = state.eventLog.length;
-
-    state = apply(
-      state,
-      "corp",
-      (action) =>
-        action.type === "rez_card" && action.payload?.cardId === remoteId,
-    );
-
-    expect(state.cardInstances[remoteId]?.rezzed).toBe(true);
-    expect(state.corp.credits).toBe(0);
-    expect(state.corp.clicks).toBe(clicksBeforeRez + 1);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "rez_card",
-      gainedActions: 1,
-    });
-    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          kind: "gain_actions",
-          amount: 1,
-          reason: "card_resolver",
-          sourceDefinitionId: "onr_v1_335_remote-facility",
-          sourceTitle: "Remote Facility",
+  it.each([0, 3])(
+    "grants Remote Facility's action immediately when rezzed with %i clicks",
+    (clicks) => {
+      let state = apply(
+        createGameAfterSetup({
+          seed: "remote-facility-immediate-rez-action",
+          baseline: CURRENT_RULES_BASELINE,
+          runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+          agendaPointsToWin: 7,
         }),
-      ]),
-    );
-    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-    expect(replay.ok).toBe(true);
-    expect(hashState(replay.state)).toBe(hashState(state));
-  });
+        "corp",
+        (action) => action.type === "mandatory_draw",
+      );
+      state.corp.credits = 5;
+      const remoteId = putCorpRootInRemote(state, "onr_v1_335_remote-facility");
+      state.corp.clicks = clicks;
+      state.corp.credits = 4;
+      expect(
+        getLegalActions(state, "corp").some(
+          (action) =>
+            action.type === "rez_card" && action.payload?.cardId === remoteId,
+        ),
+      ).toBe(false);
+      state.corp.credits = 5;
+      const clicksBeforeRez = state.corp.clicks;
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "rez_card" && action.payload?.cardId === remoteId,
+      );
+
+      expect(state.cardInstances[remoteId]?.rezzed).toBe(true);
+      expect(state.corp.credits).toBe(0);
+      expect(state.corp.clicks).toBe(clicksBeforeRez + 1);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        actionType: "rez_card",
+        gainedActions: 1,
+      });
+      expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            kind: "gain_actions",
+            amount: 1,
+            reason: "card_resolver",
+            sourceDefinitionId: "onr_v1_335_remote-facility",
+            sourceTitle: "Remote Facility",
+          }),
+        ]),
+      );
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(state));
+    },
+  );
 
   it("applies P3.7 turn-start economy CardImplementations once from valid sources", () => {
     let corpState = apply(

@@ -33,6 +33,11 @@ Die Engine ist alleinige Regelautorität. UI, Server und KI reichen nur angebote
 
 Originalset, Classic und Proteus sind technisch spielbar. Kartenspezifische Autorenwahrheit wird über die zentrale CardSpec-Architektur konsolidiert.
 
+Bezahlbare Assets und Upgrades können in der Corp-Hauptphase auch nach der
+letzten Aktion gerezzt werden, bis die Corp den Zug tatsächlich beendet.
+Der Null-Klick-Zweig verwendet dieselbe Root-Rez-Kostenquote. Bel-Recycling
+gegen Deckout und Remote Facilitys sofortige Extra-Aktion sind regressionsgeprüft.
+
 Das interne `testset` ist im normalen Laufzeitprofil deaktiviert. Es wird in
 Katalog, Deckdaten und Matchaufbau nur mit
 `NETGRID_ENABLE_TEST_CARDS=true` angeboten; auch der nicht verlinkte

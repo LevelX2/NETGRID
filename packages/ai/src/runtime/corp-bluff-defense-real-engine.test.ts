@@ -289,3 +289,58 @@ it("prefers an available taxing remote over naked placement and preserves Score'
     ).find((s) => s.phase === "install")?.serverId,
   ).toBe("new_remote");
 });
+
+it("recycles the last-click installed source before end turn and survives the next mandatory draw", () => {
+  let state = fixture();
+  RealEngineFixtureBuilder.forState(state).withCorpCardInHq(BEL);
+  for (const id of state.corp.rd) {
+    state.corp.archives.push(id);
+    state.cardInstances[id] = {
+      ...state.cardInstances[id]!,
+      zone: { side: "corp", zone: "archives" },
+      faceup: false,
+    };
+  }
+  state.corp.rd = [];
+  state.corp.clicks = 1;
+  const sourceId = state.corp.hq.find(
+    (id) => state.cardInstances[id]!.definitionId === BEL,
+  )!;
+  state = act(
+    state,
+    "corp",
+    getLegalActions(state, "corp").find(
+      (a) =>
+        a.type === "install_card" &&
+        a.payload?.cardId === sourceId &&
+        a.payload?.serverId === "new_remote",
+    )!.actionId,
+  );
+  expect(state.corp.clicks).toBe(0);
+  const before = hashState(state);
+  const legal = getLegalActions(state, "corp");
+  expect(
+    legal.some((a) => a.type === "rez_card" && a.payload?.cardId === sourceId),
+  ).toBe(true);
+  expect(
+    legal.some((a) =>
+      ["gain_credit", "draw_card", "install_card", "advance_card"].includes(
+        a.type,
+      ),
+    ),
+  ).toBe(false);
+  expect(hashState(state)).toBe(before);
+  const recycled = chooseAndApply(state, "corp");
+  expect(recycled.action.type).toBe("rez_card");
+  expect(recycled.action.payload?.cardId).toBe(sourceId);
+  expect(
+    recycled.decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
+  ).toBe("corp.ambush_and_bluff");
+  expect(recycled.state.corp.rd).toContain(sourceId);
+  expect(recycled.state.corp.clicks).toBe(0);
+  state = act(recycled.state, "corp", "corp.end_turn");
+  state = act(state, "runner", "runner.end_turn");
+  state = act(state, "corp", "corp.mandatory_draw");
+  expect(state.corp.hq).toContain(sourceId);
+  expect(state.winner).toBeNull();
+});
