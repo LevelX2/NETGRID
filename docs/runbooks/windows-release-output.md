@@ -419,16 +419,27 @@ Netzwerkanbindung einer neuen Test-Sandbox und kennzeichnet deren Ergebnis
 entsprechend; allein dadurch gilt noch kein Private-LAN-/Firewall-Gate als
 bestanden. Der Host und seine Firewallregeln bleiben unverändert.
 
-`-IncludeRollback` ergänzt einen echten Updatertransaktionstest und einen
-installierten Standardbenutzertest. Dafür wird der Testhelfer vorher mit
+`-IncludeRollback` ist seit dem gebundenen Launcher-/Updater-Handoff kein
+ausführbares Releasegate mehr. Der vorhandene Alt-Harness auditiert zuerst den
+eingebauten Updatervertrag und bricht bei
+`requiresBoundParentAndProceed=true` vor Baselineinstallation, Testbenutzer
+und Produktmutation sichtbar mit
+`rollback_harness_requires_actual_launcher_handoff` ab. Er darf nicht als
+fehlgeschlagener Produktrollback und ebenso wenig als bestandener
+Rollbacknachweis gewertet werden. Der echte Rollbacknachweis muss über den
+Launcher und den ausschließlich bei GitHub gefundenen, nach Zustimmung
+heruntergeladenen Kandidaten laufen; ein lokaler Feed oder synthetischer
+Parent ist ausdrücklich kein Ersatz.
+
+Der historische Alt-Harness baute den Testhelfer vorher mit
 `.tools/dotnet/dotnet.exe publish
 tests/windows/Netgrid.Updater.FaultFixture/Netgrid.Updater.FaultFixture.csproj
 -c Release -r win-x64 --self-contained true -p:DebugType=None -p:DebugSymbols=false
 -o output/windows-updater-fault-fixture` gebaut. Dieser Helfer ist niemals
 Releasepayload. Er verweigert den Hostbetrieb und darf nur die registrierte
 zufällige `NETGRID-E2E-*`-Testdatenbank nach dem echten MSI-Upgrade beschädigen.
-Der unveränderte, an die aktuellen Releasemetadaten gebundene Updater muss
-daraufhin die Vorversion und das Backup wiederherstellen. Geprüft werden
+Der damalige, an die aktuellen Releasemetadaten gebundene Updater musste
+daraufhin die Vorversion und das Backup wiederherstellen. Geprüft wurden
 SQLite-Integrität, ein zuvor gesetzter Datenbankmarker und die unveränderte
 Runtimekonfiguration. Die abschließende Meldungsbox ist eine getrennte UI-
 Abnahme; ihr bloßes Stoppen nach verifizierter Transaktion zählt nicht als

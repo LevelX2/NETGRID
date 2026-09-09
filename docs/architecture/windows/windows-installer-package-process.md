@@ -236,6 +236,30 @@ bereiter SQLite-Datenbank. Damit ist der integrierte lokale Kandidat nativ
 nachgeprüft; der echte GitHub-Release-/Download-Updatepfad und die Probe auf
 einem getrennten Zielrechner bleiben Teil des offenen WIN-I08-Gates.
 
+Die anschließend vollständig neu gestartete Offline-Sandboxmatrix
+`2000e48daf6a4d23abc0c8cf95793a0e` bindet 8226 und 8379 an dieselben vier
+Artefakthashes. Ihr terminales `result.json` (SHA-256
+`28d87acdd367de32f33b47303b8ecdb668a1692f03ca8382b51386afeda11e32`)
+ist auf Windows 11 Enterprise x64, Build 26100, ohne Entwicklungswerkzeuge
+grün. Sie belegt 16 Prüfbereiche: Standard- und benutzerdefinierte
+Frischinstallation, rekonstruierter Setupcache aus alleiniger MSI-
+Installation, Launcher-Health, Backup, Repair, fail-closed abgewiesener
+Pfadwechsel, 8226→8379-Upgrade, ProductCode-Repair aus geschütztem Cache,
+Rückwechsel auf 8226, native Binär-/Manifestidentität, Datenerhalt bei normaler
+Deinstallation und ausdrückliche Datenlöschung.
+
+Der optionale historische Rollback-Zusatz bricht danach erwartungsgemäß vor
+jeder neuen Produktmutation mit
+`rollback_harness_requires_actual_launcher_handoff` ab. Sein auditiertes
+Vertragsartefakt (SHA-256
+`63405bbf8a72bb9f8dc3746ea472d9eed4f1b26d7efdfd08dad55826fc6df2e8`)
+bestätigt `requiresBoundParentAndProceed=true`. Damit wird gerade kein
+synthetischer Parent als Ersatzautorität zugelassen. Der grüne Installer-
+Nachweis bleibt im getrennten `result.json` bestehen; `suite-result.json`
+weist den nicht ausgeführten Zusatz korrekt als fehlgeschlagen aus. Für den
+produktiven Rollbacknachweis bleibt deshalb der echte, vom Launcher nach
+Zustimmung gestartete GitHub-Updatefluss erforderlich.
+
 ### Aktiver Prüfpunkt: beendeter MSI-Helfer und Fehlerrollback
 
 Ausgangsstand der folgenden nativen Prüfungen ist die abgenommene

@@ -200,9 +200,15 @@ Buildinformation und 10.909 vollständig auditierten Payload-Dateien gebaut;
 alle lokalen Windows-Komponenten- und UI-Gates sind grün. Die bestätigte
 native Bestandsreparatur auf 1.0.8379 ist ebenfalls grün: Setupabschluss,
 echter MSI-Fortschritt ohne Überlagerung, erhaltener Maintenance-Zugang,
-Abschlussstart sowie Client- und Server-Buildidentität sind belegt. Der echte
-GitHub-Release-/Download-Updatepfad und die Probe auf einem getrennten
-Zielrechner stehen noch aus. Bei Fehlern werden Programm und Daten
+Abschlussstart sowie Client- und Server-Buildidentität sind belegt. Eine neue
+saubere Offline-Sandboxmatrix belegt zusätzlich Standard-/Custom-
+Frischinstallation, 8226→8379-Upgrade, Cache-Repair, Rückwechsel,
+Deinstallation, Datenerhalt und ausdrückliche Datenlöschung in 16 grünen
+Prüfbereichen. Der gehärtete Updater lehnt den historischen synthetischen
+Rollback-Harness vor jeder Produktmutation korrekt ab; sein produktiver
+Rollbacknachweis bleibt deshalb an den echten Launcher- und GitHub-Flow
+gebunden. Der echte GitHub-Release-/Download-Updatepfad und die Probe auf einem
+getrennten Zielrechner stehen noch aus. Bei Fehlern werden Programm und Daten
 soweit sicher möglich zurückgerollt,
 andernfalls bleibt NETGRID klar diagnostiziert gestoppt. Alle Windows-
 Oberflächen verwenden eine gemeinsame vollständige Sprachquelle für Deutsch,
