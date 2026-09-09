@@ -1,4 +1,5 @@
 import { corpRdRecyclingSignals } from "./corp-access-zone-preparation";
+import { corpAccessPaymentChoiceSignal } from "./corp-access-payment-choice";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { AI_HINTS_BY_CARD } from "../ai-hints";
@@ -29,13 +30,18 @@ export function buildCorpAmbushPlanSignals(params: {
   candidates: readonly ActionSemanticCandidate[];
   previous: ResidentPlanPortfolio | undefined;
 }): CorpAmbushSignal[] {
+  const accessPayment = corpAccessPaymentChoiceSignal(
+    params.input,
+    params.candidates,
+  );
   const accessProgramBounce = accessProgramBounceChoiceSignal(
     params.input,
     params.candidates,
   );
   const continued = continuedAmbushSignals(params).filter(
     (signal) =>
-      signal.sourceInstanceId !== accessProgramBounce?.sourceInstanceId,
+      signal.sourceInstanceId !== accessProgramBounce?.sourceInstanceId &&
+      signal.sourceInstanceId !== accessPayment?.sourceInstanceId,
   );
   const continuedSourceIds = new Set(
     continued.map((signal) => signal.sourceInstanceId),
@@ -44,6 +50,7 @@ export function buildCorpAmbushPlanSignals(params: {
     .ownCorpStrategicIntent;
   if (!strategicIntent || !corpIntentSupportsAmbush(strategicIntent)) {
     return [
+      ...(accessPayment ? [accessPayment] : []),
       ...(accessProgramBounce ? [accessProgramBounce] : []),
       ...continued,
     ];
@@ -96,6 +103,7 @@ export function buildCorpAmbushPlanSignals(params: {
   );
 
   return [
+    ...(accessPayment ? [accessPayment] : []),
     ...(accessProgramBounce ? [accessProgramBounce] : []),
     ...continued,
     ...plannedDecoys,

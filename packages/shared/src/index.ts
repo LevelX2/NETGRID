@@ -1013,6 +1013,8 @@ export type ChoiceOption = {
   selectable?: boolean;
   metadata?: {
     creditCost?: number;
+    /** Corp-private certificate: this exact paid access effect has no target or other effect. False makes no optimality claim. */
+    accessPaymentNoOpCertified?: boolean;
     amount?: number;
     secondaryAmount?: number;
     cardTitle?: string;

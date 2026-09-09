@@ -24631,6 +24631,14 @@ function resolveEngineWindow(
 ): EngineWindowResolution | undefined {
   if (
     context.input.side === "corp" &&
+    context.input.playerView.pendingChoice?.source.startsWith(
+      "p3_35.access_payment:",
+    )
+  ) {
+    return undefined;
+  }
+  if (
+    context.input.side === "corp" &&
     context.input.playerView.pendingChoice?.kind === "select_option" &&
     context.input.playerView.pendingChoice.source.startsWith("corp_start.rez:")
   ) {

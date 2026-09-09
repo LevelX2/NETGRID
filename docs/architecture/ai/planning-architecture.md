@@ -4381,6 +4381,19 @@ Prioritätsvergleich aus der Discovery entfernen. Nach erfülltem exaktem
 Finanzierungsziel darf die unabhängige Vorbereitung gegenüber bloßer
 Restklick-Wirtschaft gewinnen.
 
+Bezahlte Zugriffseffekte gehören ebenfalls diesem Owner. Die Engine kann für
+eine ausschließlich auf installierte Runner-Icebreaker wirkende Counterfolge
+bescheinigen, dass aktuell kein Ziel existiert. Diese negative Bescheinigung
+steht nur in der Corp-Choice; `false` behauptet weder Nutzen noch Optimalität.
+Ambush lehnt eine so belegte wirkungslose Zahlung ab und bindet die Auswahl
+an Quelle, Choice, StateVersion, Kosten, Bescheinigung und LegalAction. Andere
+bezahlte Zugriffseffekte behalten ihre bisherige Aktivierung. Die Bewertung
+ihres längerfristigen Nutzens bleibt eine gesonderte offene Aufgabe.
+Der Window-Resolver besitzt keine eigene Zahlungsstrategie und darf nur die
+exakte Auswahl des aktuellen Ambush-Executors vervollständigen. Fehlende oder
+veraltete Bindungen scheitern fail-closed. Die menschliche Zahlung bleibt
+regellegal; Engine-Ausführung und Zielprüfung bleiben unverändert maßgeblich.
+
 ### 28.10 `corp.hand_and_agenda_management`
 
 **Klasse:** `bounded_sequence` oder `development_project`

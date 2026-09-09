@@ -114,6 +114,15 @@ export type CorpAmbushSignal = {
     | "recycle_to_hq"
     | "trigger_on_access";
   accessThreatProjection?: KnownCorpCardAccessEffectProjection;
+  accessPaymentChoiceBinding?: {
+    actionId: string;
+    choiceId: string;
+    choiceSource: string;
+    observedAtStateVersion: number;
+    selectedOptionIds: string[];
+    creditCost: number;
+    noOpCertified: boolean;
+  };
   accessProgramBounceChoiceBinding?: {
     actionId: string;
     choiceId: string;
@@ -706,7 +715,8 @@ function ambushModule(): PlanModule {
                 : "ambush_setup"
               : `ambush_${current.signal.phase}`,
             semanticActionTypes: ambushSemanticTypes(current.signal.phase),
-            ...(current.signal.accessProgramBounceChoiceBinding
+            ...(current.signal.accessProgramBounceChoiceBinding ||
+            current.signal.accessPaymentChoiceBinding
               ? {}
               : {
                   requiredSourceDefinitionIds: current.signal
@@ -721,7 +731,8 @@ function ambushModule(): PlanModule {
                       : [current.signal.sourceDefinitionId],
                 }),
           },
-          ...(current.signal.accessProgramBounceChoiceBinding
+          ...(current.signal.accessProgramBounceChoiceBinding ||
+          current.signal.accessPaymentChoiceBinding
             ? {}
             : {
                 target:

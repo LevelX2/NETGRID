@@ -3244,6 +3244,16 @@ function sanitizeVisibleChoiceRequest(
           metadata.temporaryEncounterHasAdditionalMechanics = additional;
         }
       }
+      if (
+        metadata &&
+        playerViewSide === "corp" &&
+        choice.side === "corp" &&
+        choice.source.startsWith("p3_35.access_payment:") &&
+        typeof option.metadata?.accessPaymentNoOpCertified === "boolean"
+      ) {
+        metadata.accessPaymentNoOpCertified =
+          option.metadata.accessPaymentNoOpCertified;
+      }
       const hqInstallRezOptionQuote = sanitizeCorpOptionalRezChoiceQuote(
         option.hqInstallRezOptionQuote,
         {
