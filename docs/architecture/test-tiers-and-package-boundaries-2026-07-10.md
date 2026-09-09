@@ -38,6 +38,12 @@ CI-Setup deklariert werden; ein lokal vorhandener Browser ist keine CI-Garantie.
 Ein bereits als erwarteter Fehler markierter Test ist separat auszuweisen und
 kein Nachweis funktionierender Produktfunktion, auch wenn der Sammelbefehl grün ist.
 
+Der Abstraktionsguard einschließlich seiner Selbsttests läuft bereits in der
+normalen Push-/PR-CI. Im Nightly-Job werden unabhängige Prüfungen nach erfolgreicher
+Installation auch bei einem vorherigen Prüffehler ausgeführt, außer der Lauf wurde
+abgebrochen. Fehler werden nicht mit `continue-on-error` umgewertet: Jeder rote
+Schritt hält den Job rot. So bleiben nachgelagerte Befunde im selben Lauf sichtbar.
+
 Die GitHub-CI führt die serielle AI-Paketsuite und die übrigen Workspace-Pakete
 in unabhängigen Jobs aus. `fail-fast: false` und `pnpm -r --no-bail` lassen
 andere Testgruppen beziehungsweise Pakete auch nach einem Fehler auswerten;
