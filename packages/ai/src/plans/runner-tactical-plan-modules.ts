@@ -1,3 +1,4 @@
+import { runnerRunExitAction } from "../runtime/runner-fort-pass-toll";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type {
   GuaranteeLevel,
@@ -1888,7 +1889,10 @@ function runWindowCandidateValue(
   assessedValue?: number,
 ): number {
   if (safetyIntent === "jack_out") {
-    if (candidate.actionType === "jack_out")
+    const action = context.input.legalActions.find(
+      (entry) => entry.actionId === candidate.actionId,
+    );
+    if (action && runnerRunExitAction(action))
       return (assessedValue ?? 0) + 5_000;
     if (candidate.actionType === "continue_run")
       return (assessedValue ?? 0) - 5_000;

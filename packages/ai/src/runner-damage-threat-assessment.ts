@@ -1,3 +1,8 @@
+import {
+  runnerFortPassTollWindow,
+  runnerRunExitAction,
+  runnerRunWindowCreditBudget,
+} from "./runtime/runner-fort-pass-toll";
 import type {
   AiDecisionInput,
   AiDecisionScoreComponent,
@@ -334,7 +339,7 @@ export function runnerVisibleLethalIceDamageJackOutAssessment(
     input.side !== "runner" ||
     input.playerView.timingPoint !== "run.jack_out_window" ||
     input.playerView.run?.position?.kind !== "ice" ||
-    !input.legalActions.some((action) => action.type === "jack_out") ||
+    !input.legalActions.some(runnerRunExitAction) ||
     !input.legalActions.some((action) => action.type === "continue_run")
   ) {
     return undefined;
@@ -342,7 +347,12 @@ export function runnerVisibleLethalIceDamageJackOutAssessment(
   const assessment = runnerVisibleLethalIceDamageAssessment(
     input,
     remainingIce,
-    { requiredHandFloor: runnerConfirmedDamageRequiredHandFloor(input) },
+    {
+      requiredHandFloor: runnerConfirmedDamageRequiredHandFloor(input),
+      ...(runnerFortPassTollWindow(input)
+        ? { generalCredits: runnerRunWindowCreditBudget(input).credits }
+        : {}),
+    },
   );
   return assessment
     ? {
@@ -558,8 +568,10 @@ export function runnerFutureEncounterDamageJackOutAssessment(
         fullBreak !== undefined &&
         fullBreak.conditionalAccessReason === undefined &&
         fullBreak.cost <=
-          input.playerView.own.credits +
-            (input.playerView.run?.badPublicityCredits ?? 0)
+          (runnerFortPassTollWindow(input)
+            ? runnerRunWindowCreditBudget(input).credits
+            : input.playerView.own.credits +
+              (input.playerView.run?.badPublicityCredits ?? 0))
       );
     })
   )
@@ -690,7 +702,7 @@ function knownAccessDamageAmbushAssessment(
     input.playerView.timingPoint !== "run.jack_out_window" ||
     (requireRunWindowActions &&
       (!input.legalActions.some((action) => action.type === "continue_run") ||
-        !input.legalActions.some((action) => action.type === "jack_out")))
+        !input.legalActions.some(runnerRunExitAction)))
   ) {
     return undefined;
   }

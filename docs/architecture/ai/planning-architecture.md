@@ -3219,6 +3219,21 @@ Verantwortung:
 Das Modul besitzt kein unabhängiges langfristiges Ziel. Es gehört logisch zum
 auslösenden Run-/Contest-Plan und kehrt anschließend dorthin zurück.
 
+Im aktuellen Fort-Pass-Fenster unterscheiden sich die beiden angebotenen
+`continue_run`-Actions fachlich: `decision:pay` erhält den Run, `decision:end_run`
+beendet ihn. Der DTO erhält dazu `fortRunWindowAbility`, Entscheidung und
+Zahlbetrag; interne IDs oder Definitionen des möglicherweise unrezzten
+passierten ICE werden dafür nicht zusätzlich durchgereicht. Der bestehende
+Run-Owner bindet die exakte Phase an aktuelle Action-Version, Server,
+Bewegungsposition und übereinstimmende Kosten. Vor einer bezahlten Fortsetzung
+bewertet er den verbleibenden sichtbaren Breakerpfad und die Schadensreserve
+nach dieser Gebühr. Seine vorhandenen Sicherheitsabbrüche gelten auch für
+die angebotene Fort-Exit-Action. Bad-Publicity-/temporäre Run-Credits und
+gebundene Zahlungshilfen bleiben von zweckgebundenen Breaker-Pools getrennt;
+eine quotierte Zahlungshilfe muss weiterhin im echten Engine-Fenster ausgeführt
+werden. Die Engine revalidiert beim Anwenden das tatsächliche passierte ICE.
+Es entstehen weder ein zweiter Chooser noch ein allgemeiner Zahlungsbonus.
+
 Die bekannte Remote-Vorprojektion und die aktuelle Access-Konversion nutzen
 dieselbe kanonische Trash-Impact-Bewertung. Die Vorprojektion erhält die
 aktuelle Economy-Reserve; endliche Kreditpools, tatsächlich vorhandene

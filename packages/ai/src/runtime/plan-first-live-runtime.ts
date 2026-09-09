@@ -1,3 +1,8 @@
+import {
+  runnerFortPassTollWindow,
+  runnerRunExitAction,
+  runnerRunWindowCreditBudget,
+} from "./runner-fort-pass-toll";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import { assessCorpPaidEncounterDefense } from "./corp-paid-encounter-defense";
 import { currentCorpCreditObligation } from "../plans/corp-credit-obligation";
@@ -31216,17 +31221,12 @@ function runnerRunRiskContractReassessment(
   const knownRezzedRemainingIce = remainingIce.filter(
     (card) => card.known !== false && card.rezzed === true,
   );
-  const generalCredits =
-    input.playerView.own.credits +
-    Math.max(0, input.playerView.run?.badPublicityCredits ?? 0);
+  const continuationBudget = runnerRunWindowCreditBudget(input);
+  const generalCredits = continuationBudget.credits;
   const knownPath = assessKnownRezzedIcePath(
     knownRezzedRemainingIce,
     input.playerView.own.rig ?? [],
-    runnerRunPathCreditBudgetWithVisiblePools(
-      generalCredits,
-      input.playerView.own.rig ?? [],
-      { liquidCredits: input.playerView.own.credits },
-    ),
+    continuationBudget,
     server.root,
     input.playerView.opponent.credits,
   );
@@ -31290,8 +31290,7 @@ function currentRunAbortAssessment(
   runRiskReassessment?: RunnerRunRiskReassessmentSignal,
 ): { evidenceCode: string } | undefined {
   const run = input.playerView.run;
-  if (!run || !input.legalActions.some((action) => action.type === "jack_out"))
-    return undefined;
+  if (!run || !input.legalActions.some(runnerRunExitAction)) return undefined;
   const server = input.playerView.servers.find(
     (entry) => entry.id === run.attackedServerId,
   );
@@ -31341,17 +31340,11 @@ function currentRunAbortAssessment(
   }
   const remainingIce = currentRunRemainingIce(input);
   if (remainingIce.length === 0) return undefined;
-  const generalCredits =
-    input.playerView.own.credits +
-    Math.max(0, input.playerView.run?.badPublicityCredits ?? 0);
+  const continuationBudget = runnerRunWindowCreditBudget(input);
   const path = assessKnownRezzedIcePath(
     remainingIce,
     input.playerView.own.rig ?? [],
-    runnerRunPathCreditBudgetWithVisiblePools(
-      generalCredits,
-      input.playerView.own.rig ?? [],
-      { liquidCredits: input.playerView.own.credits },
-    ),
+    continuationBudget,
     server.root,
     input.playerView.opponent.credits,
   );
@@ -31960,6 +31953,24 @@ function runnerExactRunWindowPhaseActionIds(
       isRunnerRunWindowCandidate(input, candidate) &&
       assessments[candidate.actionId]?.admissible === true,
   );
+  const fortToll = runnerFortPassTollWindow(input);
+  if (fortToll) {
+    const selected =
+      safetyRequiresJackOut || !fortToll.pay ? fortToll.end : fortToll.pay;
+    if (assessments[selected.actionId]?.admissible !== true) {
+      throw new PlanResolutionFailure("no_current_route_head", {
+        side: input.side,
+        stateVersion: input.playerView.stateVersion,
+        timingPoint: input.playerView.timingPoint,
+        legalActionTypes: input.legalActions.map((action) => action.type),
+        unresolvedActionIds: [selected.actionId],
+        owner: "plan_module",
+        removalCondition:
+          "Resolve the current fort-pass continuation or safety exit inside runner.convert_run_window.",
+      });
+    }
+    return [selected.actionId];
+  }
   if (safetyRequiresJackOut) {
     return admissibleRunWindowCandidates
       .filter((candidate) => candidate.actionType === "jack_out")
