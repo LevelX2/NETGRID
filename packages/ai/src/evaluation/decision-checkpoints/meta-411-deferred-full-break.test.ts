@@ -101,4 +101,22 @@ describe("meta 411 conditional next-encounter full break", () => {
       debug.selectedPlan!.instanceId,
     );
   });
+  it("keeps the best deferred continuation inside each breaker survival branch", () => {
+    const { input } = capture();
+    const ice = input.playerView.servers.find((s) => s.id === "remote_1")!.ice;
+    const breaker = {
+      instanceId: "branch-breaker",
+      definitionId: "onr_v1_005_bartmoss-memorial-icebreaker",
+      type: "program" as const,
+      known: true,
+      strength: 5,
+      subtypes: ["icebreaker"],
+    };
+    const path = assessKnownRezzedIcePath(ice, [breaker], 3);
+    expect(path.canReachAccess).toBe(true);
+    expect(path.postEncounterBreakerBranches).toEqual([
+      { outcome: "breaker_retained", blocked: false, canReachAccess: true },
+      { outcome: "breaker_trashed", blocked: false, canReachAccess: true },
+    ]);
+  });
 });

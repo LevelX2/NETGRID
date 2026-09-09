@@ -209,9 +209,11 @@ export function assessKnownRezzedIcePath(
     ...best,
     postEncounterBreakerBranches: (["retained", "trashed"] as const).map(
       (outcome) => {
-        const branch = bartmossBranches.find(
-          (candidate) => candidate.bartmossOutcome === outcome,
-        )?.assessment;
+        const branch = bartmossBranches
+          .filter((candidate) => candidate.bartmossOutcome === outcome)
+          .sort((left, right) =>
+            compareKnownPathAssessments(left.assessment, right.assessment),
+          )[0]?.assessment;
         return {
           outcome:
             outcome === "retained" ? "breaker_retained" : "breaker_trashed",
