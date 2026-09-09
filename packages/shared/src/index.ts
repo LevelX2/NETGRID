@@ -3968,6 +3968,8 @@ export type VisibleCard = {
 
 export type VisibleTraceState = {
   traceId: string;
+  /** Public Engine fact: neither bid changes success or the fixed effect amount. */
+  bidEffect?: "automatic_success_fixed_effect";
   sourceDefinitionId: CardDefinitionId;
   profile: TraceRulesProfile;
   phase: TraceState["status"];

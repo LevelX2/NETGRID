@@ -28,6 +28,7 @@ import {
   visibleSpecialZones,
 } from "./card-view";
 import { visibleChoice } from "./choice-view";
+import { visibleTraceBidEffect } from "./visible-trace-bid-effect";
 import { toPublicEventForSide } from "./public-event-view";
 import { visibleCorpIceRezResourceExchangeQuote } from "./visible-rez-resource-exchange-quote";
 import { visibleCorpEncounterDefenseQuotes } from "./visible-corp-encounter-defense-quote";
@@ -298,9 +299,11 @@ export function buildPlayerViewProjection(
   const trace = state.trace;
   const traceRulesProfile = normalizeTraceRulesProfile(state.traceRulesProfile);
   const traceBidsRevealed = trace?.bidsRevealed === true;
+  const traceBidEffect = visibleTraceBidEffect(state);
   const visibleTrace = trace
     ? {
         traceId: trace.traceId,
+        ...(traceBidEffect ? { bidEffect: traceBidEffect } : {}),
         sourceDefinitionId: trace.sourceDefinitionId,
         profile: normalizeTraceRulesProfile(trace.traceRulesProfile),
         phase: trace.status,

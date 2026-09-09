@@ -4395,6 +4395,14 @@ innerhalb rationaler legaler Kandidaten replaybar variieren. Sie ändert weder
 Punish-, Defense-, Run- oder Scoreplan wählen. Die Engine bindet und
 revalidiert den aktuellen `resolve_choice`-Step vor jedem RNG-Draw.
 
+Bei einer öffentlich enginebestätigten automatischen Trace-Wirkung mit
+gebotsunabhängiger Menge bleibt ausschließlich das kleinste legale Gebot
+rational. Die aktive `VisibleTraceState.bidEffect`-Tatsache wird nur für die
+Choice derselben Trace-ID verwendet; auch Blind-Varianz darf keine wirkungslos
+teureren Gebote ergänzen. Variable Trace-Mengen und unbekannte Wirkungen
+erhalten diese Zertifizierung nicht. Plan-, Action- und Choice-Bindung bleiben
+unverändert.
+
 ### 30.3 Coverage-Gate
 
 Die Implementierung ist erst vollständig umgestellt, wenn ein automatischer
