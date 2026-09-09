@@ -399,6 +399,25 @@ bisherigen Befehle und Exitcodes prüft. Dadurch bleibt die bestehende
 fail-closed MSI-Auswertung erhalten, während Reparatur, Installation und
 Deinstallation keine schwarze Konsole mehr einblenden.
 
+Der reguläre Kandidat 1.0.8226 aus Quellcommit
+`dae6fbca12157367f251d0b5111c94fae01749fe` ist vollständig gebaut und in der
+bestehenden isolierten Sandbox von 8219 aus über die native Setupoberfläche
+repariert. Modushilfe, Fortschritt, bestehender Maintenance-Zugang,
+Erfolgsmeldung, Abschlussstart mit Build 8226 und eigener scrollbarerer
+Drittanbieterhinweis-Dialog sind sichtbar geprüft. Während aller
+RuntimeConfig-Custom-Actions erschien keine Produktkonsole.
+
+Führender Nachweis ist `native-gui-repair-8226.json` mit SHA-256
+`4824e1d279a24c4354d38e5190f4ad00e91d05d4c5cd65ec8cf58d41267217b0`.
+Er bindet ProductCode, 10.890 Manifestdateien, native Images, PE-Subsystem 2,
+Setupcache unter `config/updates`, MSI-Cache unter `config/installer`,
+unveränderte geschützte Dateien, Web-/Serverhealth, Einzelinstanz und beide
+Testlistener. Die Windows-Installer-Ereignisse 1033, 11707 und 1042 bestätigen
+Version 1.0.8226 mit Status 0. Setup und MSI tragen die SHA-256-Werte
+`1a1fe9ed6cb20c8e370afee8201200c69717b3f6f08fa3f9ac34c01a1e29b27b`
+beziehungsweise
+`19c824c962b062b7769fc6ba2af858e1eea4e98494084acba69ab7af385402f9`.
+
 Die Behauptung, ein direktes MSI könne keinen Setupcache herstellen, gilt
 nicht mehr: Der installierte Setupstub und der geschützte vollständige
 MSI-Cache besitzen inzwischen genau diesen Rekonstruktionspfad.

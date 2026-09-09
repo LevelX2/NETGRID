@@ -1,6 +1,6 @@
 # Paketprozess: Windows-Installer und Launcher
 
-Stand: 2026-09-08  
+Stand: 2026-09-09  
 Status: in Umsetzung; WIN-I00 bis WIN-I07 verifiziert, WIN-I08 aktiv
 
 ## Quelle und Zielprüfung
@@ -168,6 +168,38 @@ dem vollständigen Befehlsvertrag jetzt auch PE-Subsystem 2; die fokussierte
 Veröffentlichung und der vollständige RuntimeConfig-Test sind grün. Der
 native Sichtnachweis folgt zusammen mit Modushilfe und Hinweisedialog im
 nächsten regulären Bundle.
+
+Der saubere reguläre Bundlebuild 1.0.8226 aus Commit
+`dae6fbca12157367f251d0b5111c94fae01749fe` schließt diesen Nachweis am
+9. September. Alle eingebauten Windows-Gates sind grün, darunter 2.345
+Setup-, 14 Hinweisedialog-, 481 Lifecycle- und die vollständigen
+RuntimeConfig-Prüfungen. Die UI-Matrix umfasst de/en/fr, 194 Texte und
+100/125/150 Prozent Skalierung. Setup SHA-256 ist
+`1a1fe9ed6cb20c8e370afee8201200c69717b3f6f08fa3f9ac34c01a1e29b27b`,
+MSI SHA-256 ist
+`19c824c962b062b7769fc6ba2af858e1eea4e98494084acba69ab7af385402f9`.
+
+Die ausdrücklich bestätigte native Bestandsreparatur 8219→8226 zeigt die
+registrierten Testpfade und Ports, den korrigierten Hilfedialog
+„Vorhandene Einstellungen verwenden“, echten abschnittsweisen MSI-Fortschritt
+und keine RuntimeConfig-Konsole. First Run erkennt den bestehenden
+Maintenance-Zugang und verändert dessen Passwort nicht. Nach der deutschen
+Erfolgsmeldung zeigt der gestartete Client Build 8226. Der reale Tray-Befehl
+öffnet den eigenen Dialog „NETGRID Drittanbieterhinweise“ mit Bundleinhalt,
+Buildnummer, Scrollbereich und Schließen-Knopf.
+
+`native-gui-repair-8226.json` (SHA-256
+`4824e1d279a24c4354d38e5190f4ad00e91d05d4c5cd65ec8cf58d41267217b0`)
+bestätigt unabhängig 10.890 Release-Manifestdateien, alle fünf nativen
+Binärdateien, PE-Subsystem 2 für RuntimeConfig, ProductCode
+`{AA4EA5E6-23FD-436E-99F9-7FB8047A4A00}`, getrennte hashgenaue Setup-/MSI-
+Caches, bytegleiche `runtime.env` und Maintenance-Credential, Web 200,
+gesunden Server, genau einen Launcher, beide Testlistener und MSI-Status 0.
+Zwei vorherige Beweisversuche scheiterten ausschließlich an neuen
+Harnessannahmen: MSI-Payloadzahl 10.903 statt Release-Manifestzahl 10.890
+sowie Verwechslung von `config/updates` und `config/installer`. Beide
+Annahmen wurden ursächlich berichtigt; das Produkt wurde dafür nicht erneut
+installiert oder verändert.
 
 ### Aktiver Prüfpunkt: beendeter MSI-Helfer und Fehlerrollback
 
