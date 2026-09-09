@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { applyAction } from "@netgrid/engine";
 
 import scoredOnlyTimingJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-3bb14-01-scored-only-tag-timing-d39.json";
 import realisticScoreHorizonJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-3bb14-02-realistic-score-horizon-d40.json";
@@ -9,11 +10,11 @@ import { scoringWindowPostRezProtectionAssessment } from "../../runtime/corp-sco
 describe("match 3bb14 Corp remediation decision checkpoints", () => {
   it.each([
     [
-      "funds exact score protection instead of exposing Strike Force Kali to the staged breaker",
+      "funds the admitted score parent while keeping Kali protection open beside an independent ambush",
       scoredOnlyTimingJson,
       [
         "plan_priority_class:P4",
-        "plan_priority_delegated_from:plan:corp.score_agenda:agenda%3Acorp_onr_v1_217_strike-force-kali_1%3Aremote_1",
+        "plan_priority_delegated_from:plan:corp.score_agenda:agenda%3Acorp_onr_v1_213_private-cybernet-police_1%3Aremote_1",
       ],
     ],
     [
@@ -31,6 +32,47 @@ describe("match 3bb14 Corp remediation decision checkpoints", () => {
     for (const evidence of requiredDecisionEvidence) {
       expect(result.decision?.evidence).toContain(evidence);
     }
+  });
+
+  it("keeps both agendas in HQ and the staged-breaker protection need open after funding", () => {
+    const checkpoint = fixture(scoredOnlyTimingJson);
+    const result = runAiDecisionCheckpoint(checkpoint);
+    expect(result.ok, result.message).toBe(true);
+    const portfolio =
+      result.decision?.decisionDebug?.planFirstDecision?.portfolio;
+    expect(portfolio).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          moduleId: "corp.defend_servers",
+          parentNeedId:
+            "score-protection:agenda:corp_onr_v1_217_strike-force-kali_1:remote_1",
+          evidenceCodes: expect.arrayContaining([
+            "score_plan_requires_effective_ice_draw:agenda:corp_onr_v1_217_strike-force-kali_1:remote_1:remote_1",
+          ]),
+        }),
+        expect.objectContaining({
+          moduleId: "corp.ambush_and_bluff",
+          phase: "install",
+          viability: "ready",
+        }),
+      ]),
+    );
+    const state = structuredClone(checkpoint.engine.testOnlyGameState);
+    state.eventLog = checkpoint.engine.eventPrefix.map((event) => ({
+      ...event,
+    }));
+    const actionId = result.decision?.actionId;
+    if (!actionId) throw new Error("Missing checkpoint action");
+    const after = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId,
+      clientKnownStateVersion: state.stateVersion,
+    });
+    if (!after.ok) throw new Error(after.error.message);
+    expect(after.state.corp.credits).toBe(state.corp.credits + 1);
+    expect(after.state.corp.hq).toEqual(state.corp.hq);
+    expect(after.state.corp.servers).toEqual(state.corp.servers);
   });
 
   it("counts a public Shell-Traders breaker when it is reachable before scoring", () => {

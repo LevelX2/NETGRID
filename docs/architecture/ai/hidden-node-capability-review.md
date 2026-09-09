@@ -498,3 +498,55 @@ reproduziert: Crybaby-Trash-Erwartung, Runtime-Import in
 `decision/known-remote-access-commitment`, MRGSG-Remote-Contest und
 5285-Run-Target-Erwartung. Sie gehören nicht zum hier reparierten Kartenpfad;
 der vollständige KI-Gate-Stand darf deshalb nicht als grün ausgewiesen werden.
+
+Die entfernte globale Ambush-Sperre macht im historischen 3bb14-Checkpoint
+auch den bereits vorhandenen Funding-Need von Private Cybernet Police
+wieder ausführbar. Der Scheduler wählt dessen exakt delegierten P4-Credit
+vor dem alternativen Kali-Schutz-Draw. Der aktualisierte Checkpoint bindet
+diese konkrete Finanzierung, prüft den tatsächlichen Credit-Zuwachs und
+unveränderte HQ-/Serverbelegung. Kalis Schutz-Need gegen den öffentlich
+bereitstehenden Breaker und die unabhängige Experimental-AI-Vorbereitung
+bleiben im Portfolio nachgewiesen. Das ist keine Freigabe, Kali ungeschützt
+zu exponieren, und kein Nachweis einer optimalen mehrzügigen Agenda-Auswahl.
+
+### Kontrollpopulation 412 und verbleibender Strategievertrag
+
+Die frischen 40 Seeds `meta-412-r2-001` bis `meta-412-r2-040` auf
+`4e8ad4064` enthalten 11.471 Entscheidungen ohne technische Flags, Fallbacks,
+Timeouts oder Auswahlabweichungen. 39 Runner-Agendasiege und ein
+Fetal-Flatline sind kein kausaler Gewinnratennachweis gegenüber den anderen
+Seeds von 407. Alle Entscheidungen sind individuell projiziert; 8.114 bleiben
+ohne vollständigen Alternativenvergleich trace-limitiert.
+
+- Bel-Digmo: 74 Installationen und 74 Rez-Rückmischungen, je 39/35 pro
+  Hälfte. 34 Vorbereitungen bleiben über den Installationszug hinaus verdeckt; 20
+  Rückmischungen erfolgen bei einem Run auf genau diesen Remote. Diese Runs
+  verbrauchen Runner-Klicks. In den vier Fällen mit ICE wird dieses nicht
+  gerezzt; zusätzliche Breakkosten sind daher nicht belegt. 12 automatische
+  R&D-Schadensauflösungen in neun Spielen ergeben zehn erlittene Net-Schäden.
+- Stereogram: 54 von 55 Cleanup-Fenstern mit Handkontakt wählen die Karte;
+  einmal wird stattdessen eine doppelte Pattel abgeworfen. 15
+  Archives-Auslösungen in acht Spielen verursachen zehn erlittene Net-Schäden
+  und 15 Rückmischungen. Eigene Quellaktionen bleiben null. Abwurf und
+  automatische Wirkung müssen deshalb separat zur Install-/Rez-Metrik stehen.
+- Manhunt: 83 eindeutige Angebote, davon 66 ohne sichtbaren Payoff und 17
+  ohne machbare Campaign; keine Missing-Quote-Ausschlüsse mehr. Ausspielungen
+  bleiben null. SP-320 verifiziert nur die eigenständige Quote-Anfrage.
+- Government Contract: 363 eindeutige Angebote und zwei Installationen,
+  je eine pro Hälfte; kein Rez, Advancement oder Auszahlung. SP-303 bleibt
+  offen. Die Bank-Erstinvestition ist nicht durch ihre Installation bewiesen.
+
+128 fokussierte Tests, AI-Typecheck und `check:ai` bestehen. Der breite
+Zweitlauf erfasst 5.321 Tests mit fünf Fehlern; nach der beschriebenen
+3bb14-Vertragsaktualisierung bestehen dessen fünf fokussierte Proben. Die
+vier unabhängig reproduzierten Ausgangsfehler bleiben offen.
+
+Ein vollständiger Bluffplan muss zwei verdeckte Köder mit einer wirklich
+finanzierbaren Agenda-Folge verbinden, den Scoring-Ort freihalten und den
+konkurrierenden HQ-/R&D-Druck berücksichtigen. Ein einzelner gezeigter
+Agenda-Erfolg garantiert keine künftigen Runs auf jeden Köder. Die aktuelle
+Anbindung unterstützt die Vorbereitung und begrenztes Halten; eine gelernte
+Mischstrategie, optimal wiederholtes Recycling oder sichere ICE-Ausgaben des
+Runners werden nicht behauptet. G24 D380–396 zeigt Bel neben tatsächlicher
+Headhunters-Entwicklung und anschließendem Köder-Run; G34 D458 zeigt zugleich,
+dass Rückmischung den späteren HQ-Verlust nicht verhindert.

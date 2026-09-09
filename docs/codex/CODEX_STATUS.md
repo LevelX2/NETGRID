@@ -1,6 +1,6 @@
 # CODEX_STATUS
 
-Stand: 2026-09-08
+Stand: 2026-09-09
 
 ## Einstieg
 
@@ -56,6 +56,17 @@ Führend:
 - `packages/engine/AGENTS.md`
 
 ## KI
+
+R&D-Zugriffsfallen mit kostenloser Rez-Rückmischung besitzen jetzt eine
+exakte Install-/Rez-Linie im bestehenden Ambush-Owner, einschließlich
+begrenztem verdecktem Halten und Schutz reservierter Agenda-Orte. Der
+Cleanup bewertet den Nutzen von Archives-Zugriffsfallen am tatsächlichen
+Abwurfziel. Unabhängige Ambush-Vorbereitung löscht keine fremden
+Agenda-Finanzierungsbedarfe mehr. Eigenständige Trace-Tag-Quellen erhalten
+eine Engine-Quote; vollständiger gebotsgebundener Tag-Druck und die
+Government-Contract-Erstinvestition bleiben offen. Kontrolle 412 und
+Testgrenzen stehen im
+`docs/architecture/ai/hidden-node-capability-review.md`.
 
 Die Corp erzeugt aus fehlenden HQ-Agendas keinen blinden Agenda-Suchauftrag.
 Vorhandenes Handpotenzial, Economy und Defense werden ohne diesen künstlichen
