@@ -158,6 +158,17 @@ Sie läuft nun erst nach allen asynchronen Prüfungen; der unveränderte erneute
 Gesamtlauf endet grün. Produktcode oder Laufzeitverhalten wurden durch diese
 Testreihenfolge nicht abgeschwächt.
 
+Beim nativen Reparaturlauf war außerdem für einige Sekunden ein schwarzes
+`NETGRID.RuntimeConfig.exe`-Konsolenfenster sichtbar. Das ist kein Sandbox-
+Darstellungsfehler: Die als MSI-Custom-Action verwendete Hilfsanwendung war
+mit dem PE-Konsolensubsystem gebaut. Sie wird nun als fensterlose Windows-
+Anwendung veröffentlicht. Befehle, Exitcodes und die vorhandene
+MSI-Fehlerbehandlung bleiben unverändert. Der RuntimeConfig-Test prüft neben
+dem vollständigen Befehlsvertrag jetzt auch PE-Subsystem 2; die fokussierte
+Veröffentlichung und der vollständige RuntimeConfig-Test sind grün. Der
+native Sichtnachweis folgt zusammen mit Modushilfe und Hinweisedialog im
+nächsten regulären Bundle.
+
 ### Aktiver Prüfpunkt: beendeter MSI-Helfer und Fehlerrollback
 
 Ausgangsstand der folgenden nativen Prüfungen ist die abgenommene

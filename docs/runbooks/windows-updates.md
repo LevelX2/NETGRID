@@ -391,6 +391,14 @@ führen zu einer sichtbaren Fehlermeldung. Die Komponenten- und vollständige
 Launcher-Suite sind grün; die native Sichtprüfung folgt mit dem nächsten
 regulären Bundle.
 
+MSI-Custom-Actions über `NETGRID.RuntimeConfig.exe` dürfen dabei kein eigenes
+Konsolenfenster öffnen. Die RuntimeConfig-Hilfsanwendung ist deshalb als
+Windows- statt Konsolen-Subsystem gebaut. Ihr Regressionstest liest das
+PE-Subsystem aus der veröffentlichten EXE und verlangt Wert 2, bevor er die
+bisherigen Befehle und Exitcodes prüft. Dadurch bleibt die bestehende
+fail-closed MSI-Auswertung erhalten, während Reparatur, Installation und
+Deinstallation keine schwarze Konsole mehr einblenden.
+
 Die Behauptung, ein direktes MSI könne keinen Setupcache herstellen, gilt
 nicht mehr: Der installierte Setupstub und der geschützte vollständige
 MSI-Cache besitzen inzwischen genau diesen Rekonstruktionspfad.

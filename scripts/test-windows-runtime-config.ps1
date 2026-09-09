@@ -13,6 +13,14 @@ if (-not (Test-Path -LiteralPath $executablePath -PathType Leaf)) {
   throw "Die veröffentlichte Runtimekonfiguration fehlt: $executablePath"
 }
 
+$peBytes = [System.IO.File]::ReadAllBytes($executablePath)
+$peHeaderOffset = [BitConverter]::ToInt32($peBytes, 0x3c)
+$optionalHeaderOffset = $peHeaderOffset + 4 + 20
+$subsystem = [BitConverter]::ToUInt16($peBytes, $optionalHeaderOffset + 68)
+if ($subsystem -ne 2) {
+  throw "Die Runtimekonfiguration ist kein fensterloses Windows-Programm (PE subsystem=$subsystem)."
+}
+
 $scratch = Join-Path ([System.IO.Path]::GetTempPath()) ("netgrid-runtime-config-test-" + [guid]::NewGuid().ToString("N"))
 New-Item -ItemType Directory -Path $scratch | Out-Null
 
