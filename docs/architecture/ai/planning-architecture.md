@@ -4309,6 +4309,13 @@ Das ist eine begrenzte Vorbereitung, keine nachgewiesene gegnerische
 Lernreaktion und keine automatische Agenda-Installationsstrategie. Priorität
 und Fortsetzung bleiben beim vorhandenen Scheduler und Planportfolio.
 
+Eine bezahlbare Ambush-Installation unterdrückt einen Score-Finanzierungsbedarf
+nur bei konkurrierender Bindung derselben Agenda-Instanz. Ein unabhängiger
+Köder darf den Funding-Provider einer anderen Agenda nicht vor dem
+Prioritätsvergleich aus der Discovery entfernen. Nach erfülltem exaktem
+Finanzierungsziel darf die unabhängige Vorbereitung gegenüber bloßer
+Restklick-Wirtschaft gewinnen.
+
 ### 28.10 `corp.hand_and_agenda_management`
 
 **Klasse:** `bounded_sequence` oder `development_project`

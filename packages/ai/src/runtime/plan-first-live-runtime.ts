@@ -21476,7 +21476,8 @@ function corpRequiredEconomyNeeds(
       project.conversion?.runnerStealIsMatchpoint === true ||
       (project.conversion?.existingRemoteIceCount ?? 0) > 0 ||
       (project.conversion?.realizedStrategySupportCount ?? 0) > 0) &&
-    exactAmbushSetupCardIds.size === 0 &&
+    (project.agendaInstanceId === undefined ||
+      !exactAmbushSetupCardIds.has(project.agendaInstanceId)) &&
     !projectsWithCurrentProtectionSupport.has(project.projectId)
       ? [
           {

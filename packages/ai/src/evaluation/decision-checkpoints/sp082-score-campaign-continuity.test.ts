@@ -108,18 +108,22 @@ describe("SP-082 score campaign continuity checkpoints", () => {
     const { capture, decision } = decide(closedGapCaptureJson);
 
     expect(capture.stateVersion).toBe(118);
+    // Once the exact score funding need is closed, a separately bound
+    // recycling installation may use the remaining click. Do not require
+    // residual credit taking in a state with this now-supported preparation.
     expect(decision).toMatchObject({
-      actionId: "corp.gain_credit",
-      reasonCode: "plan_first.corp.economy",
+      actionId:
+        "corp.install_card.corp_onr_proteus_054_bel-digmo-antibody_2.new_remote.corp_onr_proteus_054_bel-digmo-antibody_2",
+      reasonCode: "plan_first.corp.ambush_and_bluff",
       fallbackUsed: false,
     });
     expect(decision.decisionDebug).toMatchObject({
-      planKind: "corp.economy",
+      planKind: "corp.ambush_and_bluff",
       planFirstDecision: {
         selectedPlan: {
-          moduleId: "corp.economy",
+          moduleId: "corp.ambush_and_bluff",
           instanceId:
-            "plan:corp.economy:economy-residual-capacity%3Acorp%3A12",
+            "plan:corp.ambush_and_bluff:ambush%3Acorp_onr_proteus_054_bel-digmo-antibody_2%3Asetup%3Anew_remote",
         },
       },
     });

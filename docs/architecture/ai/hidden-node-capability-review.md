@@ -479,3 +479,22 @@ G1 D291 und G4 D65/D137 wählen Stereogram zum Abwerfen. G1 D231 bleibt eine
 korrekte Stereogram-Auswahl. Die geprüften Manhunt- und Contract-Kontrollfälle
 behaupten keinen nachgewiesenen Alternativsieg. Neue Serienmetriken müssen von
 den unveränderten historischen 40 Spielen getrennt bleiben.
+
+Die breite Regression fand eine Wechselwirkung mit SP-082: Der
+Economy-Producer entfernte sämtliche Score-Funding-Provider, sobald irgendeine
+bezahlbare Ambush-Installation existierte. Die neu zugelassene Recyclingkarte
+verdrängte dadurch eine bereits gebundene Agenda-Finanzierung. Der Ausschluss
+gilt jetzt nur für dieselbe konkurrierend gebundene Agenda-Instanz. Die
+historische Finanzierung über den Gegnerzug und ihre Freigabe am Zielwert
+sind erneut geprüft. Nach geschlossenem Gap ist Bel-Digmo als unabhängige
+Vorbereitung zulässig; der alte Test auf ausschließlich residuale Creditnahme
+wurde entsprechend auf die konkret gebundene neue Route aktualisiert.
+
+Die erste neue 40er-Runde auf `ac8cf7d34` erfasst 10.631 Entscheidungen ohne
+technische Flags, ist wegen dieser anschließenden Verhaltenskorrektur aber
+vollständig aus der finalen Kontrollpopulation ausgeschlossen. Vier weitere
+breite Testfehler sind auf dem unveränderten Ausgangsstand `57cffe5da`
+reproduziert: Crybaby-Trash-Erwartung, Runtime-Import in
+`decision/known-remote-access-commitment`, MRGSG-Remote-Contest und
+5285-Run-Target-Erwartung. Sie gehören nicht zum hier reparierten Kartenpfad;
+der vollständige KI-Gate-Stand darf deshalb nicht als grün ausgewiesen werden.
