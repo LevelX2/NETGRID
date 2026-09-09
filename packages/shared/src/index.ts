@@ -3439,6 +3439,35 @@ export type VisibleCorpIceRezActionResourceExchangeQuote = {
   quote: VisibleCorpIceRezResourceExchangeQuote;
 };
 
+/** Current pass-toll exposure; payment is conditional on continuing the run. */
+export type VisibleCorpTraceIceRezQuote = {
+  actionId: string;
+  sourceCardInstanceId: CardInstanceId;
+  targetServerId: Exclude<ServerId, "new_remote">;
+  stateVersion: number;
+  runId: string;
+  rezCredits: number;
+  variableValue: number;
+  corpBid: 0;
+  corpTraceStrength: number;
+  maximumRunnerTraceStrength: number;
+  runnerCanBreak: boolean;
+  guaranteedRunEnd: boolean;
+};
+
+export type VisibleCorpPassTaxRezQuote = {
+  actionId: string;
+  sourceCardInstanceId: CardInstanceId;
+  targetServerId: Exclude<ServerId, "new_remote">;
+  stateVersion: number;
+  runId: string;
+  rezCredits: number;
+  creditsPerPass: number;
+  remainingPasses: number;
+  remainingPassCredits: number;
+  runnerSpendableCredits: number;
+};
+
 /** Exact legal paid ETR addition and the visible response to its new subroutine. */
 export type VisibleCorpEncounterDefenseQuote = {
   actionId: string;
@@ -3962,6 +3991,10 @@ export type VisibleCard = {
   effectiveRezResourceExchangeQuote?: VisibleCorpIceRezResourceExchangeQuote;
   currentEncounterDefenseQuotes?: VisibleCorpEncounterDefenseQuote[];
   effectiveRezActionResourceExchangeQuotes?: VisibleCorpIceRezActionResourceExchangeQuote[];
+  /** Corp-only, exact legal root rez during the source fort's current run. */
+  currentPassTaxRezQuote?: VisibleCorpPassTaxRezQuote;
+  /** Corp-private exact current trace ICE rez options, with visible responses. */
+  currentTraceIceRezQuotes?: VisibleCorpTraceIceRezQuote[];
   /** Present only for the Corp's installed agendas. */
   scoreContinuationQuote?: VisibleCorpScoreContinuationQuote;
   /** Present only in the Corp's own HQ or on an own installed root card. */
@@ -3975,7 +4008,9 @@ export type VisibleTraceState = {
   traceId: string;
   sourceCardInstanceId?: CardInstanceId;
   /** Public Engine fact: neither bid changes success or the fixed effect amount. */
-  bidEffect?: "automatic_success_fixed_effect";
+  bidEffect?:
+    | "automatic_success_fixed_effect"
+    | "zero_corp_bid_guaranteed_fixed_effect";
   sourceDefinitionId: CardDefinitionId;
   profile: TraceRulesProfile;
   phase: TraceState["status"];

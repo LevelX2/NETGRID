@@ -2,6 +2,7 @@ import type {
   AiDecisionInput,
   VisibleCard,
   VisibleCorpRezCostQuote,
+  VisibleCorpTraceIceRezQuote,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import {
@@ -23,11 +24,13 @@ export type CorpExactIceRezRouteProjection = Readonly<{
   after?: KnownCorpScoreProtectionAssessment;
   routeKind:
     | "access_reduction"
+    | "trace_access_block"
     | "exact_resource_exchange"
     | "known_access_path_tax"
     | "free_persistent_defense"
     | "qualitative_encounter_defense";
   marginalDefenseThreat?: "visible_agenda_remote" | "terminal_central_access";
+  traceAccessBlock?: Readonly<VisibleCorpTraceIceRezQuote>;
   freeCurrentEncounterDefense?: Readonly<{
     effect: "meaningful_tax_or_damage_or_disruption";
     evidenceSource: "visible_corp_ice_defense_profile";
@@ -131,6 +134,45 @@ export function projectExactCorpIceRezRoute(params: {
   const quoteRead = readExactInstalledCorpIceRezQuote(params);
   if (!quoteRead) return undefined;
   const { quote, totalRezCredits } = quoteRead;
+  const traceQuotes = sourceCard.currentTraceIceRezQuotes?.filter(
+    (q) => q.actionId === candidate.actionId,
+  );
+  const trace = traceQuotes?.length === 1 ? traceQuotes[0] : undefined;
+  if (
+    trace &&
+    trace.sourceCardInstanceId === sourceCard.instanceId &&
+    trace.targetServerId === targetServerId &&
+    trace.stateVersion === input.playerView.stateVersion &&
+    trace.runId === input.playerView.run?.runId &&
+    input.playerView.run?.phase === "approach_ice" &&
+    input.playerView.run.position?.kind === "ice" &&
+    input.playerView.run.attackedServerId === targetServerId &&
+    input.playerView.servers.find((s) => s.id === targetServerId)?.ice[
+      input.playerView.run.position.iceIndex
+    ]?.instanceId === sourceCard.instanceId &&
+    trace.rezCredits === totalRezCredits &&
+    trace.corpBid === 0 &&
+    trace.variableValue ===
+      input.legalActions.find((a) => a.actionId === candidate.actionId)?.payload
+        ?.variableRezValue &&
+    nonNegativeSafeInteger(trace.maximumRunnerTraceStrength) &&
+    nonNegativeSafeInteger(trace.corpTraceStrength) &&
+    trace.corpTraceStrength > trace.maximumRunnerTraceStrength &&
+    trace.runnerCanBreak === false &&
+    trace.guaranteedRunEnd === true
+  ) {
+    return {
+      actionId: candidate.actionId,
+      sourceCardInstanceId: sourceCard.instanceId,
+      sourceDefinitionId: sourceCard.definitionId!,
+      targetServerId,
+      quote,
+      routeKind: "trace_access_block",
+      traceAccessBlock: trace,
+      effect: "satisfied",
+      totalRezCredits,
+    };
+  }
   const server = input.playerView.servers.find(
     (candidateServer) => candidateServer.id === targetServerId,
   )!;
@@ -882,6 +924,30 @@ function ordinaryRezActionQuote(
   }
   if (
     quote.costKind === "variable" &&
+    quote.variableParameter.kind === "x_strength"
+  ) {
+    const p = quote.variableParameter;
+    const value = payload?.variableRezValue;
+    if (
+      payload?.variableRezKind !== "x_strength" ||
+      !nonNegativeSafeInteger(value) ||
+      value < p.minValue ||
+      value > p.maxValue ||
+      payload.variableRezCap !== p.maxValue ||
+      payload.variableRezAdditionalCost !==
+        value * p.additionalCreditsPerValue ||
+      payload.baseRezCost !== quote.finalCredits ||
+      payload.rezCostPaid !== actionCredits ||
+      payload.effectiveStrengthAfterRez !== value ||
+      (p.traceLimitFromValue &&
+        payload.effectiveTraceLimitAfterRez !== value) ||
+      actionCredits !== quote.finalCredits + value * p.additionalCreditsPerValue
+    )
+      return undefined;
+    return { ...quote, finalCredits: actionCredits };
+  }
+  if (
+    quote.costKind === "variable" &&
     quote.variableParameter.kind === "paid_end_the_run_subroutines"
   ) {
     const value = payload?.variableRezValue;
@@ -1055,6 +1121,7 @@ export function exactCorpIceRezRoutesEqual(
     left.sourceDefinitionId === right.sourceDefinitionId &&
     left.targetServerId === right.targetServerId &&
     left.routeKind === right.routeKind &&
+    traceAccessBlocksEqual(left.traceAccessBlock, right.traceAccessBlock) &&
     left.freeCurrentEncounterDefense?.effect ===
       right.freeCurrentEncounterDefense?.effect &&
     left.freeCurrentEncounterDefense?.evidenceSource ===
@@ -1098,6 +1165,27 @@ export function exactCorpIceRezRoutesEqual(
       left.quote.increaseSourceDefinitionIds,
       right.quote.increaseSourceDefinitionIds,
     )
+  );
+}
+
+function traceAccessBlocksEqual(
+  left: CorpExactIceRezRouteProjection["traceAccessBlock"],
+  right: CorpExactIceRezRouteProjection["traceAccessBlock"],
+): boolean {
+  if (!left || !right) return left === right;
+  return (
+    left.actionId === right.actionId &&
+    left.sourceCardInstanceId === right.sourceCardInstanceId &&
+    left.targetServerId === right.targetServerId &&
+    left.stateVersion === right.stateVersion &&
+    left.runId === right.runId &&
+    left.rezCredits === right.rezCredits &&
+    left.variableValue === right.variableValue &&
+    left.corpBid === right.corpBid &&
+    left.corpTraceStrength === right.corpTraceStrength &&
+    left.maximumRunnerTraceStrength === right.maximumRunnerTraceStrength &&
+    left.runnerCanBreak === right.runnerCanBreak &&
+    left.guaranteedRunEnd === right.guaranteedRunEnd
   );
 }
 

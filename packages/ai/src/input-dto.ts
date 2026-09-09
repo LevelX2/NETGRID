@@ -168,6 +168,9 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "baseRezCost",
   "variableRezAdditionalCost",
   "variableRezValue",
+  "variableRezCap",
+  "effectiveStrengthAfterRez",
+  "effectiveTraceLimitAfterRez",
   "effectiveSubroutineCountAfterRez",
   "selectedSubtypesAfterRez",
   "rezCostPaid",
@@ -2041,6 +2044,43 @@ function sanitizeVisibleCardWithOptions(
         }
       : {}),
     ...(card.hostedOn !== undefined ? { hostedOn: card.hostedOn } : {}),
+    ...(card.currentTraceIceRezQuotes && card.known && card.owner === "corp"
+      ? {
+          currentTraceIceRezQuotes: card.currentTraceIceRezQuotes.map((q) => ({
+            actionId: q.actionId,
+            sourceCardInstanceId: q.sourceCardInstanceId,
+            targetServerId: q.targetServerId,
+            stateVersion: q.stateVersion,
+            runId: q.runId,
+            rezCredits: q.rezCredits,
+            variableValue: q.variableValue,
+            corpBid: q.corpBid,
+            corpTraceStrength: q.corpTraceStrength,
+            maximumRunnerTraceStrength: q.maximumRunnerTraceStrength,
+            runnerCanBreak: q.runnerCanBreak,
+            guaranteedRunEnd: q.guaranteedRunEnd,
+          })),
+        }
+      : {}),
+    ...(card.currentPassTaxRezQuote && card.known && card.owner === "corp"
+      ? {
+          currentPassTaxRezQuote: {
+            actionId: card.currentPassTaxRezQuote.actionId,
+            sourceCardInstanceId:
+              card.currentPassTaxRezQuote.sourceCardInstanceId,
+            targetServerId: card.currentPassTaxRezQuote.targetServerId,
+            stateVersion: card.currentPassTaxRezQuote.stateVersion,
+            runId: card.currentPassTaxRezQuote.runId,
+            rezCredits: card.currentPassTaxRezQuote.rezCredits,
+            creditsPerPass: card.currentPassTaxRezQuote.creditsPerPass,
+            remainingPasses: card.currentPassTaxRezQuote.remainingPasses,
+            remainingPassCredits:
+              card.currentPassTaxRezQuote.remainingPassCredits,
+            runnerSpendableCredits:
+              card.currentPassTaxRezQuote.runnerSpendableCredits,
+          },
+        }
+      : {}),
     ...(card.owner !== undefined ? { owner: card.owner } : {}),
     ...(card.controller !== undefined ? { controller: card.controller } : {}),
     ...(sanitizedEffectiveRunQuote

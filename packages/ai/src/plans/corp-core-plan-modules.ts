@@ -5880,6 +5880,23 @@ function validExactIceRezRoute(value: unknown): boolean {
     (accessBlock.hardEndTheRunSubroutineCount as number) > 0 &&
     (accessBlock.reason === "no_visible_eligible_breaker" ||
       accessBlock.reason === "visible_break_route_unaffordable");
+  const trace = route.traceAccessBlock as Record<string, unknown> | undefined;
+  const hasExactTraceBlock =
+    route.routeKind === "trace_access_block" &&
+    trace !== undefined &&
+    trace.actionId === route.actionId &&
+    trace.sourceCardInstanceId === route.sourceCardInstanceId &&
+    trace.targetServerId === route.targetServerId &&
+    trace.stateVersion === quote?.expiresAtStateVersion &&
+    nonEmptyString(trace.runId) &&
+    trace.rezCredits === quote?.finalCredits &&
+    knownNonNegativeInteger(trace.variableValue) &&
+    trace.corpBid === 0 &&
+    knownNonNegativeInteger(trace.corpTraceStrength) &&
+    knownNonNegativeInteger(trace.maximumRunnerTraceStrength) &&
+    trace.corpTraceStrength > trace.maximumRunnerTraceStrength &&
+    trace.runnerCanBreak === false &&
+    trace.guaranteedRunEnd === true;
   const hasExactMarginalDefenseThreat =
     route.routeKind === "qualitative_encounter_defense" &&
     (route.marginalDefenseThreat === "visible_agenda_remote" ||
@@ -5921,6 +5938,7 @@ function validExactIceRezRoute(value: unknown): boolean {
     (hasKnownHolisticAssessment ||
       hasExactResourceExchange ||
       hasExactAccessBlock ||
+      hasExactTraceBlock ||
       hasBoundBluffDefense ||
       hasExactMarginalDefenseThreat ||
       hasExactFreeCurrentEncounterDefense) &&

@@ -56,7 +56,9 @@ export function selectedBidChoiceOptionId(
   if (bidOptions.length === 0) return undefined;
   const trace = input.playerView.trace;
   if (
-    trace?.bidEffect === "automatic_success_fixed_effect" &&
+    (trace?.bidEffect === "automatic_success_fixed_effect" ||
+      (input.side === "corp" &&
+        trace?.bidEffect === "zero_corp_bid_guaranteed_fixed_effect")) &&
     choice.source === `trace:${trace.traceId}`
   ) {
     return bidOptions[0]!.id;

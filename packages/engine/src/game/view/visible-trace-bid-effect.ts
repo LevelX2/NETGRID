@@ -4,6 +4,11 @@ import {
   runnerInstalledCardIds,
 } from "../state/card-server-lookup";
 import { traceAutoSuccessSource } from "../trace/trace-auto-success";
+import { visibleRunnerMaximumTraceStrength } from "./visible-trace-ice-rez-quote";
+import {
+  traceCorpBaseStrength,
+  traceComparisonIsSuccessful,
+} from "../trace/trace-rules-profile";
 
 /** Public rule facts only; bid-dependent magnitudes remain uncertified. */
 export function visibleTraceBidEffect(
@@ -34,5 +39,16 @@ export function visibleTraceBidEffect(
       ),
     definitionFor: (id) => definitionFor(state, id),
   });
-  return automaticSuccess ? "automatic_success_fixed_effect" : undefined;
+  if (automaticSuccess) return "automatic_success_fixed_effect";
+  const maximum = visibleRunnerMaximumTraceStrength(state);
+  if (
+    maximum !== undefined &&
+    traceComparisonIsSuccessful(
+      trace.traceRulesProfile,
+      traceCorpBaseStrength(trace),
+      maximum,
+    )
+  )
+    return "zero_corp_bid_guaranteed_fixed_effect";
+  return undefined;
 }

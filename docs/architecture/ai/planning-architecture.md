@@ -3656,6 +3656,28 @@ Scorewert werden getrennt zugerechnet.
 
 ### 28.4 `corp.defend_servers`
 
+Aktuelle Passgebühren gehören als Rez-Response diesem Owner. Die Engine
+bindet den Root-Rez an Action, StateVersion, Run und Server und liefert die
+verbleibenden ICE-Passagen sowie tatsächlich verfügbare Runner-Run-Credits.
+Defense darf damit einen bezahlbaren Durchlauf, einen erzwungenen Abbruch
+oder einen wirtschaftlich sinnvollen Gebührentausch bewerten. Die spätere
+Access-Rez-Heuristik gilt nicht für vor dem ICE-Pass fällige Gebühren.
+
+Für X-Trace-ICE validiert Defense die vollständige aktuelle Rez-Aktion
+einschließlich X, Cap, zusätzlicher Kosten, Stärke und Trace-Wert. Eine eigene
+`trace_access_block`-Route verwendet ausschließlich die Engine-Quote für
+einen bei Corp-Gebot 0 garantierten Run-Abbruch und die sichtbare Breaker-
+Antwort. Sie bezeichnet den Trace nicht als bedingungslose ETR-Subroutine.
+Die bestehende Score-Reserve bleibt bindend; unter gleich wirksamen Routen
+entscheidet der geringere Rez-Aufwand. Die erste Ausbaustufe zertifiziert nur
+`modern_open` mit vollständig bekanntem installiertem Runner-Support, einer
+einzelnen Run-Ende-/Runsperre-Trace-Subroutine und ohne unbekannte
+Encounter-, Post-Bid- oder Cancel-Pfade. Andere Fälle erhalten keine Garantie.
+Für einen tatsächlich begonnenen Trace mit fester Wirkung kann die Engine
+auch das wirkungsgleiche Mindestgebot 0 zertifizieren. Die Choice-Auflösung
+verwendet dann die vorhandene, exakt gebundene Nulloption; sie bewertet keine
+neue Strategie und gibt keine zusätzlichen Credits ohne Wirkung aus.
+
 **Klasse:** `development_project` mit internem Urgent-Response-Modus
 **Rolle:** Background/Vordergrund/Urgent Response
 **Status:** erweitert `corp.rez_defense`

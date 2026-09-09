@@ -392,6 +392,7 @@ import {
 } from "./corp-defense-rez-support-facts";
 import { visibleCorpIceDefenseProfile } from "./semantic-runtime-corp-effective-defense";
 import { corpRootRezTimingComponent } from "./corp-scoreline/semantic-runtime-corp-score-ice-components";
+import { corpPassTaxRezAssessment } from "./corp-pass-tax-rez-assessment";
 import {
   corpMissingConcreteDefenseDrawNeed,
   corpMissingConcreteScoreDefenseDrawNeed,
@@ -16859,21 +16860,23 @@ function buildCorpDomain(
                 : ("open" as const),
               value: productiveIceRezRoute ? 1 : 0,
               evidenceCode: productiveIceRezRoute
-                ? productiveIceRezRoute.routeKind === "access_reduction"
-                  ? `engine_certified_ice_rez_access_reduction:${rezServerId}:${candidate.actionId}`
-                  : productiveIceRezRoute.routeKind ===
-                      "exact_resource_exchange"
-                    ? productiveIceRezRoute.resourceExchange
-                        ?.layeredCentralPathTax === true
-                      ? `engine_certified_ice_rez_layered_central_path_tax:${rezServerId}:tax_${productiveIceRezRoute.resourceExchange.runnerNormalCreditsLostOnAccessPath}:other_rezzed_${productiveIceRezRoute.resourceExchange.otherRezzedIceCount ?? 0}:${candidate.actionId}`
-                      : `engine_certified_ice_rez_exact_resource_exchange:${rezServerId}:${candidate.actionId}`
+                ? productiveIceRezRoute.routeKind === "trace_access_block"
+                  ? `engine_certified_ice_rez_trace_access_block:${rezServerId}:${candidate.actionId}`
+                  : productiveIceRezRoute.routeKind === "access_reduction"
+                    ? `engine_certified_ice_rez_access_reduction:${rezServerId}:${candidate.actionId}`
                     : productiveIceRezRoute.routeKind ===
-                        "free_persistent_defense"
-                      ? `engine_certified_ice_rez_free_persistent_defense:${rezServerId}:${candidate.actionId}`
+                        "exact_resource_exchange"
+                      ? productiveIceRezRoute.resourceExchange
+                          ?.layeredCentralPathTax === true
+                        ? `engine_certified_ice_rez_layered_central_path_tax:${rezServerId}:tax_${productiveIceRezRoute.resourceExchange.runnerNormalCreditsLostOnAccessPath}:other_rezzed_${productiveIceRezRoute.resourceExchange.otherRezzedIceCount ?? 0}:${candidate.actionId}`
+                        : `engine_certified_ice_rez_exact_resource_exchange:${rezServerId}:${candidate.actionId}`
                       : productiveIceRezRoute.routeKind ===
-                          "known_access_path_tax"
-                        ? `engine_certified_ice_rez_known_access_path_tax:${rezServerId}:${productiveIceRezRoute.knownAccessPathTax ?? 0}:${candidate.actionId}`
-                        : `engine_certified_ice_rez_qualitative_encounter_defense:${rezServerId}:${candidate.actionId}`
+                          "free_persistent_defense"
+                        ? `engine_certified_ice_rez_free_persistent_defense:${rezServerId}:${candidate.actionId}`
+                        : productiveIceRezRoute.routeKind ===
+                            "known_access_path_tax"
+                          ? `engine_certified_ice_rez_known_access_path_tax:${rezServerId}:${productiveIceRezRoute.knownAccessPathTax ?? 0}:${candidate.actionId}`
+                          : `engine_certified_ice_rez_qualitative_encounter_defense:${rezServerId}:${candidate.actionId}`
                 : "visible_non_ice_rez_window",
             },
           ];
@@ -33086,6 +33089,13 @@ function corpExactCardRezSupportAssessment(
   ) {
     return undefined;
   }
+  const passTaxAssessment = corpPassTaxRezAssessment(
+    input,
+    candidate,
+    sourceCard,
+    serverId,
+  );
+  if (passTaxAssessment) return passTaxAssessment;
   const hint = candidate.sourceDefinitionId
     ? AI_HINTS_BY_CARD.get(candidate.sourceDefinitionId)
     : sourceCard.definitionId
