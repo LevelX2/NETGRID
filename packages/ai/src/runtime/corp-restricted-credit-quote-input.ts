@@ -82,6 +82,7 @@ export function sanitizeCorpRestrictedCreditRouteQuotes(
     )?.find((entry) => entry.instanceId === consumer.sourceCardInstanceId);
     const numbers = [
       q.payoutCredits,
+      q.payoutCount,
       q.payoutClickCost,
       q.payoutGeneralCreditCost,
       q.payoutAdvancementCounterCost,
@@ -124,9 +125,10 @@ export function sanitizeCorpRestrictedCreditRouteQuotes(
         q.payoutAdvancementCounterCost ||
       numbers.some((n) => !Number.isSafeInteger(n) || n < 0) ||
       q.payoutCredits <= 0 ||
+      q.payoutCount <= 0 ||
       q.payoutAdvancementCounterCost <= 0 ||
       consumer.newlyProvidedCreditsApplied <= 0 ||
-      consumer.newlyProvidedCreditsApplied > q.payoutCredits ||
+      consumer.newlyProvidedCreditsApplied > q.payoutCredits * q.payoutCount ||
       consumer.newlyProvidedCreditsApplied >
         consumer.restrictedCreditsApplied ||
       consumer.restrictedCreditsApplied + consumer.generalCreditsRequired !==
@@ -180,6 +182,7 @@ export function sanitizeCorpRestrictedCreditRouteQuotes(
         payoutSourceCardInstanceId: q.payoutSourceCardInstanceId,
         payoutSourceAbilityId: q.payoutSourceAbilityId,
         payoutCredits: q.payoutCredits,
+        payoutCount: q.payoutCount,
         payoutClickCost: q.payoutClickCost,
         payoutGeneralCreditCost: q.payoutGeneralCreditCost,
         payoutAdvancementCounterCost: q.payoutAdvancementCounterCost,

@@ -33,6 +33,11 @@ Die Engine ist alleinige Regelautorität. UI, Server und KI reichen nur angebote
 
 Originalset, Classic und Proteus sind technisch spielbar. Kartenspezifische Autorenwahrheit wird über die zentrale CardSpec-Architektur konsolidiert.
 
+Bezahlbare Assets und Upgrades können in der Corp-Hauptphase auch nach der
+letzten Aktion gerezzt werden, bis die Corp den Zug tatsächlich beendet.
+Der Null-Klick-Zweig verwendet dieselbe Root-Rez-Kostenquote. Bel-Recycling
+gegen Deckout und Remote Facilitys sofortige Extra-Aktion sind regressionsgeprüft.
+
 Das interne `testset` ist im normalen Laufzeitprofil deaktiviert. Es wird in
 Katalog, Deckdaten und Matchaufbau nur mit
 `NETGRID_ENABLE_TEST_CARDS=true` angeboten; auch der nicht verlinkte
@@ -56,6 +61,33 @@ Führend:
 - `packages/engine/AGENTS.md`
 
 ## KI
+
+R&D-Zugriffsfallen mit kostenloser Rez-Rückmischung besitzen jetzt eine
+exakte Install-/Rez-Linie im bestehenden Ambush-Owner, einschließlich
+begrenztem verdecktem Halten und Schutz reservierter Agenda-Orte. Defense
+bindet geeignete geschützte Köder an eine finanzierbare ICE-/Encounter-Folge;
+Economy schließt den begrenzten Bedarf. Geschlossene Rez-Fenster sind eine
+verbindliche Planungsgrenze. Bei bereits leerem R&D bindet Ambush die legale
+Install-/Rez-Rettung als dringliche Bedrohungsantwort vor gewöhnlicher
+Score-Finanzierung; nach Auffüllen entfällt dieser aktuelle Nachweis. Der
+Cleanup bewertet den Nutzen von Archives-Zugriffsfallen am tatsächlichen
+Abwurfziel. Unabhängige Ambush-Vorbereitung löscht keine fremden
+Agenda-Finanzierungsbedarfe mehr. Eigenständige Trace-Tag-Quellen erhalten
+eine Engine-Quote mit kleinstem ausreichendem Gebot und gebundener Trace-
+Fortsetzung. Vollständig mit Agendas überfüllte HQ darf Score durch eine
+begrenzte verdeckte Score-Linie entlasten. Installierte ungerezzte Counterbanken
+können für einen exakten Defense-Verbraucher profitabel vorbereitet werden;
+die Zahlungsquote unterstützt mehrere nötige Counterauszahlungen. Der mehrzügige Contract-Aufbau aus HQ bleibt offen. Aktuelle Fort-Pass-
+Verteidigung und variables Trace-ICE sind ausführbar; Runner unterscheidet
+Gebühr und Run-Abbruch. Der Ambush-Owner bindet bezahlte Zugriffseffekte an
+die private Engine-Choice und lehnt nachweislich leere Icebreaker-Counter-
+Zahlungen ab. Kontrolle 415 umfasst 40 saubere Originalspiele und 40 getrennte
+BBS-Variantenspiele. Corp-Siege 3 → 3, mittlere Punkte
+1,20 → 1,53; derselbe Niederlagen-Satz wird separat verglichen.
+Die Standardliste bleibt unverändert. Score-Finanzierung, Agenda-Risiko,
+Contract-Erstaufbau und die Bluff-Mischung bleiben begrenzt abgenommen.
+Ergebnisse und Testgrenzen stehen in
+`docs/architecture/ai/hidden-node-capability-review.md`.
 
 Die Corp erzeugt aus fehlenden HQ-Agendas keinen blinden Agenda-Suchauftrag.
 Vorhandenes Handpotenzial, Economy und Defense werden ohne diesen künstlichen

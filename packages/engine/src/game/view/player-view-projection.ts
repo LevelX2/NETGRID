@@ -32,6 +32,8 @@ import { visibleTraceBidEffect } from "./visible-trace-bid-effect";
 import { toPublicEventForSide } from "./public-event-view";
 import { visibleCorpIceRezResourceExchangeQuote } from "./visible-rez-resource-exchange-quote";
 import { visibleCorpEncounterDefenseQuotes } from "./visible-corp-encounter-defense-quote";
+import { visibleCorpPassTaxRezQuote } from "./visible-pass-tax-rez-quote";
+import { visibleCorpTraceIceRezQuotes } from "./visible-trace-ice-rez-quote";
 import {
   visibleEffectiveEncounteredIceRunQuote,
   visibleEffectiveIceRunQuote,
@@ -127,8 +129,15 @@ export function buildPlayerViewProjection(
         side === "corp"
           ? visibleCorpEncounterDefenseQuotes(state, visibleIce, legalActions)
           : [];
+      const currentTraceIceRezQuotes =
+        side === "corp"
+          ? visibleCorpTraceIceRezQuotes(state, visibleIce, legalActions)
+          : [];
       return {
         ...visibleIce,
+        ...(currentTraceIceRezQuotes.length
+          ? { currentTraceIceRezQuotes }
+          : {}),
         ...(currentEncounterDefenseQuotes.length > 0
           ? { currentEncounterDefenseQuotes }
           : {}),
@@ -164,8 +173,13 @@ export function buildPlayerViewProjection(
                 side === "corp"
                   ? visibleCorpRestrictedCreditBankQuote(state, id)
                   : undefined;
+              const currentPassTaxRezQuote =
+                side === "corp"
+                  ? visibleCorpPassTaxRezQuote(state, id, legalActions)
+                  : undefined;
               return {
                 ...visibleRoot,
+                ...(currentPassTaxRezQuote ? { currentPassTaxRezQuote } : {}),
                 ...(continuationQuote
                   ? { scoreContinuationQuote: continuationQuote }
                   : {}),
@@ -303,6 +317,7 @@ export function buildPlayerViewProjection(
   const visibleTrace = trace
     ? {
         traceId: trace.traceId,
+        sourceCardInstanceId: trace.sourceCardInstanceId,
         ...(traceBidEffect ? { bidEffect: traceBidEffect } : {}),
         sourceDefinitionId: trace.sourceDefinitionId,
         profile: normalizeTraceRulesProfile(trace.traceRulesProfile),

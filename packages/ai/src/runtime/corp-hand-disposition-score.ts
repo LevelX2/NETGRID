@@ -1,3 +1,4 @@
+import { corpArchivesPreparationDiscardValue } from "./corp-access-zone-preparation";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
@@ -32,13 +33,21 @@ export function corpHandDispositionScore(params: {
   };
 }): CorpHandDispositionScore {
   const { input, card, destination, baseKeepScore } = params;
+  const archivesPreparation =
+    input.side === "corp" && destination === "archives"
+      ? corpArchivesPreparationDiscardValue(card)
+      : 0;
   if (input.side !== "corp" || destination === "archives") {
     return {
       ...baseKeepScore,
       destination,
-      destinationAdjustment: 0,
+      total: baseKeepScore.total - archivesPreparation,
+      destinationAdjustment: -archivesPreparation,
       evidence: [
         ...(baseKeepScore.evidence ?? []),
+        ...(archivesPreparation > 0
+          ? ["corp_hand_destination_archives_access_preparation"]
+          : []),
         `corp_hand_destination:${destination}`,
       ],
     };

@@ -5,6 +5,8 @@ import type {
 } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { corpGeneralCreditAvailability } from "../payment/corp-general-credit-availability";
+import { getLegalActions } from "../legal-actions";
+import { applyAction } from "../apply-action";
 
 /** Mechanical capacity only. A planning owner must bind a finite consumer and horizon. */
 export function visibleCorpRestrictedCreditBankQuote(
@@ -16,7 +18,6 @@ export function visibleCorpRestrictedCreditBankQuote(
     !source ||
     source.owner !== "corp" ||
     source.controller !== "corp" ||
-    !source.rezzed ||
     source.zone.side !== "corp" ||
     source.zone.zone !== "serverRoot"
   )
@@ -68,5 +69,86 @@ export function visibleCorpRestrictedCreditBankQuote(
     usableFor: "corp_install_or_rez",
     payoutCleanup: "end_of_turn",
     condition: "source_remains_installed_and_rezzed_at_paid_window",
+    ...(!source.rezzed
+      ? { setupRoutes: currentTurnSetupRoutes(state, sourceId) }
+      : {}),
   };
+}
+
+function currentTurnSetupRoutes(
+  state: GameState,
+  sourceId: string,
+): NonNullable<CorpRestrictedCreditBankQuote["setupRoutes"]> {
+  if (
+    state.timingPoint !== "corp_action.main" ||
+    state.run ||
+    state.pendingChoice
+  )
+    return [];
+  const routes: NonNullable<CorpRestrictedCreditBankQuote["setupRoutes"]> = [];
+  let projected = structuredClone(state);
+  let firstAdvanceId: string | undefined;
+  for (let advances = 0; advances <= 4; advances++) {
+    const actions = getLegalActions(projected, "corp");
+    const rez = actions.find(
+      (action) =>
+        action.type === "rez_card" &&
+        action.source === sourceId &&
+        action.targetRequirements.length === 0 &&
+        (action.choiceRequirements?.length ?? 0) === 0,
+    );
+    if (rez && projected.cardInstances[sourceId]!.advancementCounters > 0) {
+      const result = applyAction(projected, {
+        matchId: projected.matchId,
+        side: "corp",
+        actionId: rez.actionId,
+        clientKnownStateVersion: projected.stateVersion,
+      });
+      if (!result.ok)
+        throw new Error("corp_restricted_bank_legal_rez_projection_failed");
+      if (
+        !result.state.pendingChoice &&
+        result.state.cardInstances[sourceId]?.rezzed &&
+        result.state.cardInstances[sourceId]?.zone.zone === "serverRoot" &&
+        result.state.timingPoint === "corp_action.main"
+      ) {
+        routes.push({
+          headActionId: firstAdvanceId ?? rez.actionId,
+          headKind: firstAdvanceId ? "advance_card" : "rez_card",
+          setupCredits:
+            corpGeneralCreditAvailability(state) -
+            corpGeneralCreditAvailability(result.state),
+          setupClicks: state.corp.clicks - result.state.corp.clicks,
+          targetCounters:
+            result.state.cardInstances[sourceId]!.advancementCounters,
+          remainingGeneralCredits: corpGeneralCreditAvailability(result.state),
+        });
+      }
+    }
+    if (advances === 4) break;
+    const advance = actions.find(
+      (action) =>
+        action.type === "advance_card" &&
+        action.source === sourceId &&
+        action.targetRequirements.length === 0 &&
+        (action.choiceRequirements?.length ?? 0) === 0,
+    );
+    if (!advance) break;
+    const result = applyAction(projected, {
+      matchId: projected.matchId,
+      side: "corp",
+      actionId: advance.actionId,
+      clientKnownStateVersion: projected.stateVersion,
+    });
+    if (!result.ok)
+      throw new Error("corp_restricted_bank_legal_advance_projection_failed");
+    if (
+      result.state.pendingChoice ||
+      result.state.timingPoint !== "corp_action.main"
+    )
+      break;
+    firstAdvanceId ??= advance.actionId;
+    projected = result.state;
+  }
+  return routes;
 }

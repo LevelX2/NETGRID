@@ -11,7 +11,7 @@ import { corpGeneralCreditAvailability } from "../payment/corp-general-credit-av
 import { visibleCorpCard } from "./card-view";
 import { visibleCorpIceRezResourceExchangeQuote } from "./visible-rez-resource-exchange-quote";
 
-/** Read-only one-payout funding prefix. No strategic selection and no future action authority. */
+/** Read-only finite payout prefix. No strategic selection or future action authority. */
 export function quoteCorpRestrictedCreditRoute(
   state: GameState,
   request: CorpRestrictedCreditRouteRequest,
@@ -65,7 +65,7 @@ export function quoteCorpRestrictedCreditRoute(
   });
   if (!funded.ok)
     return { status: "failed", reason: "legal_payout_execution_failed" };
-  const projected = funded.state;
+  let projected = funded.state;
   if (
     projected.pendingChoice ||
     projected.winner ||
@@ -74,9 +74,61 @@ export function quoteCorpRestrictedCreditRoute(
     projected.randomCounter !== state.randomCounter
   )
     return { status: "unavailable", reason: "payout_boundary" };
-  const matches = getLegalActions(projected, "corp").filter((action) =>
+  let matches = getLegalActions(projected, "corp").filter((action) =>
     matchesConsumer(projected, action, request.consumer),
   );
+  let payoutCount = 1;
+  // Further identical, free-click payments from the same stored source may be
+  // necessary. Every step uses newly generated LegalActions and must preserve
+  // this exact timing window. The AI receives only the current first action.
+  while (
+    matches.length === 0 &&
+    totalCost(payout, "clicks") === 0 &&
+    totalCost(payout, "credits") === 0
+  ) {
+    const nextPayout = getLegalActions(projected, "corp").find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.source === payout.source &&
+        action.abilityRef?.sourceAbilityId ===
+          payout.abilityRef!.sourceAbilityId &&
+        action.targetRequirements.length === 0 &&
+        (action.choiceRequirements?.length ?? 0) === 0 &&
+        action.payload?.restrictedCreditGainComplete === true &&
+        action.payload.restrictedCreditGainAmount ===
+          payload.restrictedCreditGainAmount &&
+        action.payload.cardImplementationAdvancementCounterCost ===
+          payload.cardImplementationAdvancementCounterCost &&
+        totalCost(action, "clicks") === 0 &&
+        totalCost(action, "credits") === 0,
+    );
+    if (!nextPayout) break;
+    const beforeCounters =
+      projected.cardInstances[payout.source]!.advancementCounters;
+    const next = applyAction(projected, {
+      matchId: projected.matchId,
+      side: "corp",
+      actionId: nextPayout.actionId,
+      clientKnownStateVersion: projected.stateVersion,
+    });
+    if (!next.ok)
+      return { status: "failed", reason: "legal_payout_execution_failed" };
+    if (
+      next.state.pendingChoice ||
+      next.state.winner ||
+      next.state.timingPoint !== state.timingPoint ||
+      next.state.activeSide !== state.activeSide ||
+      next.state.randomCounter !== state.randomCounter ||
+      next.state.cardInstances[payout.source]?.advancementCounters !==
+        beforeCounters - payload.cardImplementationAdvancementCounterCost
+    )
+      return { status: "unavailable", reason: "payout_boundary" };
+    projected = next.state;
+    payoutCount++;
+    matches = getLegalActions(projected, "corp").filter((action) =>
+      matchesConsumer(projected, action, request.consumer),
+    );
+  }
   if (matches.length === 0)
     return {
       status: "unavailable",
@@ -138,6 +190,7 @@ export function quoteCorpRestrictedCreditRoute(
       payoutSourceCardInstanceId: payout.source,
       payoutSourceAbilityId: payout.abilityRef.sourceAbilityId,
       payoutCredits: payload.restrictedCreditGainAmount,
+      payoutCount,
       payoutClickCost: totalCost(payout, "clicks"),
       payoutGeneralCreditCost: totalCost(payout, "credits"),
       payoutAdvancementCounterCost:

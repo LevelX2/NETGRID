@@ -122,13 +122,11 @@ export function buildBoundedCorpPunishRouteRequests(
       component.adapter.kind === "other_punish" ||
       component.adapter.kind === "hardware_trash",
   );
-  const standaloneDirectTags = tags
-    .filter((component) => component.adapter.kind === "tag")
-    .map((component) => [component]);
+  const standaloneTagRoutes = tags.map((component) => [component]);
   if (
     damage.length === 0 &&
     otherPunish.length === 0 &&
-    standaloneDirectTags.length === 0
+    standaloneTagRoutes.length === 0
   )
     return [];
   const tagHeads =
@@ -149,7 +147,7 @@ export function buildBoundedCorpPunishRouteRequests(
     otherPunish.map((payoff) => [...(tag ? [tag] : []), payoff]),
   );
   const routeComponents = [
-    ...standaloneDirectTags,
+    ...standaloneTagRoutes,
     ...damageRouteComponents,
     ...otherPunishRouteComponents,
   ];

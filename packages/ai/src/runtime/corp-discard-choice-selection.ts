@@ -1,5 +1,6 @@
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 
+import { corpHandDispositionScore } from "./corp-hand-disposition-score";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import type { ProjectedHandDisposition } from "../plans/turn-projection";
 import { boundedSelectionCount } from "./choice-option";
@@ -78,7 +79,12 @@ export function selectedCorpDiscardChoiceOptionIds(
     const ranked = candidates
       .map((candidate) => ({
         ...candidate,
-        score: scoreDiscardCandidate(scoringInput, candidate.card),
+        score: corpHandDispositionScore({
+          input: scoringInput,
+          card: candidate.card,
+          destination: "archives",
+          baseKeepScore: scoreDiscardCandidate(scoringInput, candidate.card),
+        }),
       }))
       .sort((left, right) =>
         compareCorpDiscardCandidates({

@@ -36,45 +36,63 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
+        id: install
         run: pnpm install --frozen-lockfile
 
       - name: Typecheck
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pnpm typecheck
 
       - name: Lint
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pnpm lint
 
       - name: AI architecture checks
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pnpm check:ai
 
       - name: Engine source structure
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pnpm check:engine-source-structure
 
       - name: Card-function abstraction
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pnpm check:card-function-abstraction
 
+      - name: Card-function guard self-tests
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: pnpm check:card-function-abstraction:selftest
+
       - name: Engine CardImplementation architecture
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pnpm check:engine-cardimplementation-architecture-target
 
       - name: Engine credit-gain boundary
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pnpm check:engine-credit-gain-boundary
 
       - name: Package boundaries
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pnpm check:package-boundaries
 
       - name: Icebreaker run semantics
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pnpm check:icebreaker-run-semantics
 
       - name: Proteus AI readiness
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pnpm check:proteus-ai-readiness
 
       - name: Contract tests
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pnpm test:contracts
 
       - name: Full test suite
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pnpm test
 
       - name: Build
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pnpm build
 
   ai-shards:
@@ -128,8 +146,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install Playwright Chromium
-        run: pnpm exec playwright install --with-deps chromium
+      # Firefox is the configured UI project; multiplayer explicitly launches Chromium.
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps firefox chromium
 
       - name: Run E2E suite
         run: pnpm e2e

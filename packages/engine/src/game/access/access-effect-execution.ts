@@ -402,6 +402,9 @@ export function startCardImplementationAccessPaymentChoice(
     choiceId: `p3_35_${cost.kind === "corp_may_pay_credits" ? "access_payment" : "access_activation"}_${host.state.stateVersion + 1}`,
     side: "corp",
     source: `p3_35.${cost.kind === "corp_may_pay_credits" ? "access_payment" : "access_activation"}:${cardId}:${effectIndex}:${accessZone}:${host.state.stateVersion + 1}`,
+    ...(cost.kind === "corp_may_pay_credits"
+      ? { sourceCardInstanceId: cardId, sourceCardDefinitionId: definition.id }
+      : {}),
     prompt: cardImplementationAccessPaymentPrompt(
       definition.title,
       accessZone,
@@ -423,7 +426,23 @@ export function startCardImplementationAccessPaymentChoice(
         value: cost.kind === "corp_may_pay_credits" ? "pay" : "use",
         metadata:
           cost.kind === "corp_may_pay_credits"
-            ? { creditCost: cost.amount, optionKind: "pay_credits" }
+            ? {
+                creditCost: cost.amount,
+                optionKind: "pay_credits",
+                accessPaymentNoOpCertified:
+                  effect.effects.length > 0 &&
+                  effect.effects.every(
+                    (step) =>
+                      step.kind ===
+                      "add_counter_to_all_installed_runner_icebreakers",
+                  ) &&
+                  !host.state.runner.rig.programs.some((id) =>
+                    host.cards.cardHasSubtype(
+                      host.cards.definitionFor(id),
+                      "icebreaker",
+                    ),
+                  ),
+              }
             : { optionKind: cost.kind },
       },
       {

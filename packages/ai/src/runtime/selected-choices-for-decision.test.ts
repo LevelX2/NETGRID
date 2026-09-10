@@ -739,7 +739,7 @@ describe("selectedChoicesForDecision", () => {
     });
   });
 
-  it("resolves the real Engine access-payment choice for the exact accessed Corp card", () => {
+  it("requires a plan binding for the real Engine access-payment choice", () => {
     let state = createGameAfterSetup({
       seed: "ai-real-access-payment-choice",
     });
@@ -822,6 +822,7 @@ describe("selectedChoicesForDecision", () => {
     });
     expect(input.playerView.pendingChoice?.options[0]?.metadata).toEqual({
       creditCost: 4,
+      accessPaymentNoOpCertified: false,
     });
     expect(input.eventTail.at(-1)?.publicPayload).toMatchObject({
       actionType: "access_card",
@@ -829,18 +830,14 @@ describe("selectedChoicesForDecision", () => {
       ambushPaymentAmount: 4,
     });
 
-    const selectedChoices = selectedChoicesForDecision(
-      input,
-      resolve,
-      unusedDependencies(),
-    );
-    expect(selectedChoices).toEqual({
-      choiceId: playerView.pendingChoice?.choiceId,
+    expect(() =>
+      selectedChoicesForDecision(input, resolve, unusedDependencies()),
+    ).toThrow(expect.objectContaining({ code: "window_origin_missing" }));
+    // The Engine still permits the human player's explicit payment.
+    const selectedChoices = {
+      choiceId: playerView.pendingChoice!.choiceId,
       selectedOptionIds: ["pay"],
-    });
-    if (!selectedChoices) {
-      throw new Error("Missing selected Corp access-payment choice.");
-    }
+    };
 
     const result = applyAction(state, {
       matchId: state.matchId,

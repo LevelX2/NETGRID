@@ -1,9 +1,9 @@
 # Hidden Node: Fähigkeitsgrenzen und Änderungsentscheidung
 
-Stand: 2026-09-05. Auftrag: charaktererhaltende Verbesserung von
+Stand: 2026-09-09. Auftrag: charaktererhaltende Verbesserung von
 `standard_proteus_corp_hidden_node_control_2026_05_25`.
-Die Variantenprüfung HN-A–E ist abgeschlossen; die Fähigkeitenabnahme wird
-in HN-F–H fortgesetzt. Führende Vergleichsergebnisse liegen
+Die früheren Varianten- und Fähigkeitenprüfungen bilden die Vergleichsbasis.
+Die aktuelle Abnahme ist Kontrolle 415; ergänzende Vergleichsergebnisse liegen
 in der lokalen [Evidenzregistrierung](../../runbooks/ai-selfplay-evidence-registry.md),
 Paarungen 388–394, Report `hidden-node-character-20260905`.
 
@@ -400,3 +400,401 @@ das bloße Bestehen blockierter Score-Parents reicht nicht. Zusätzliche
 Counter-Punish-Vorbereitung muss den Mehrwert gegenüber bereits wirksamen
 HQ-/R&D-Fallen belegen. Keine dieser Erweiterungen wird durch weitere
 Kartenkopien oder einen globalen Bewertungsaufschlag ersetzt.
+
+## Vier-Karten-Nachprüfung aus Paarung 407
+
+Die ursprünglichen Nullen zählten gewählte Kartenaktionen, nicht automatische
+Auslösungen oder Kartenwahlen beim Abwerfen. Vollständig nachgezählt wurden
+11 Bel-Digmo-Auslösungen in 10 Spielen mit 11 Net-Schaden und 22
+Stereogram-Auslösungen in 12 Spielen mit 16 Net-Schaden und 22 Rückmischungen.
+Sechs verhinderte Treffer verhinderten die Rückmischung nicht.
+
+**Bel-Digmo:** Die 461 eindeutigen Installationsangebote wurden als fehlende
+Punish-Kampagne abgelehnt. Das verwarf einen davon unabhängigen Nutzen:
+HQ entlasten, Deckrest um eine Karte erhöhen, Agenda-Dichte im R&D senken und
+Zugriffe dort belasten. Installation kostet einen Klick, Rez weder Klick
+noch Credits. Ein Remote-Zugriff macht keinen Net-Schaden. Die verdeckte
+Installation kann trotzdem einen Run oder ICE-Kosten provozieren, besonders
+wenn echte Agendas in vergleichbaren Remotes liegen. Expose, ein freier Run,
+fehlende Glaubwürdigkeit und Opportunitätskosten begrenzen den Bluff.
+
+Der bestehende Ambush-Owner erhält deshalb eine mechanisch erkannte,
+instanzgebundene Install-/Halte-/Rez-Folge. Keine Karten-ID-Ausnahme, keine
+zusätzliche ICE-Installation allein für den Köder, keine Verdrängung eines
+reservierten Score-Servers. Zwei Köder dürfen neben einer finanzierbaren
+Drei-Advance-Agenda vorbereitet werden. Der Score-Owner entscheidet weiterhin
+über Installation und Scoring der Agenda; eine komplette gelernte Mischstrategie
+ist damit nicht abgenommen. Der begrenzte Haltehorizont umfasst bis zu zwei
+Gegnerzüge und wird resident nicht verlängert.
+
+**Stereogram:** Ihr natürlicher Vorbereitungsweg ist Abwerfen ins Archives.
+In allen 40 Spielen gab es 98 echte Corp-Cleanup-Entscheidungen mit Stereogram
+in HQ: 54-mal wurde mindestens eine ausgewählt, 44-mal keine. Historische
+Engine-Zustände G1 D291, G4 D65 und G4 D137 belegen den falschen Tausch:
+Die KI behielt Stereogram und warf Bel-Digmo ab. Die zielgebietsbezogene
+Handbewertung berücksichtigt nun den kostenlosen Archives-Zugriffseffekt
+und die Rückmischung. Bestehende konkrete Planbindungen und Agenda-Sicherheit
+bleiben vorrangig. Installation ist kein Selbstzweck: Sie kostet einen Klick
+und aktiviert den Archives-Effekt nicht. Auch dieser Schaden bleibt vom
+gegnerischen Zugriff und möglicher Prävention abhängig.
+
+**Manhunt:** 45 Angebote, davon 14 ohne benötigte Engine-Quote. Der Producer
+forderte alleinstehende Trace-Tag-Operationen ohne weitere Payoff-Karte gar
+nicht an. Er stellt diese Anfrage jetzt innerhalb des vorhandenen begrenzten
+Quote-Vertrags. Die Engine kann Kosten, Tags und Antworten damit sichtbar
+machen. Eine Quote allein erzwingt keine Ausführung. Tags können anschließende
+Bestrafung ermöglichen oder freiwillige Cleanup-Kosten auslösen; sie sind
+kein garantierter Kreditverlust. Vier Operations-Credits, ein Klick,
+Trace-Gebot, Runner-Link, Antworten und ein verfallendes Run-Fenster gehören
+in die Bewertung. Ein ungeprüfter Bonus für jedes Tag-Angebot wäre falsch.
+
+Offen bleibt die vollständige strategische Abnahme von alleinstehendem
+Tag-Druck: Die aktuelle Quote zertifiziert gewöhnlich das gedruckte
+Limit-Gebot, während die spätere Bid-Policy einen günstigeren anderen Zweig
+wählen kann. Kosten und Tag-Mindestwert dürfen nicht zwischen diesen Zweigen
+vermischt werden. Es wird deshalb keine neue Druckroute mit garantiertem
+Tag-Mindestwert zugelassen. Die vorhandenen vollständigen Punish-Routen bleiben
+erhalten; zusätzliche Gebotsvarianten benötigen einen durchgehend gebundenen
+Quote-/Plan-/Choice-Vertrag. SP-076 zur frühen Punish-Liquidität ist davon
+abzugrenzen.
+
+**Government Contract:** SP-303 bleibt offen. Die bereits unterstützte
+vorbereitete Bank ist nicht die vollständige Erstinvestition. Bei n vollständig
+verbrauchten Drei-Credit-Auszahlungen ergeben sich nach Rez und Advancement
+2n−2 zusätzliche Credits für 1+n Klicks. Gegen dieselbe Zahl einfacher
+Kreditklicks ist der Unterschied n−3: drei Auszahlungen gleichen die Kosten
+aus, die vierte erzielt erstmals einen Vorteil. Das setzt zusammen zwölf
+Credits tatsächlichen Install-/Rez-Verbrauch voraus. Quelle und Counter müssen
+überleben; nicht verbrauchte Auszahlungen verfallen zum Zugende. Advancement,
+Operations und Traces sind keine zulässigen Verbraucher. Ein früher Aufbau
+kann langfristig sinnvoll sein, ein später Aufbau bei Geldüberfluss oder ohne
+Verbraucher dagegen nicht. Der fehlende mehrzügige Investitionshorizont wird
+nicht durch einen pauschalen Kartenbonus ersetzt.
+
+Die historischen Vergleichsproben rekonstruieren alle Engine-Präfixe bis zum
+Checkpoint und prüfen jeden StateHash. Die neue Entscheidung startet mit
+frischem residentem KI-Portfolio; sie ist keine Rekonstruktion des alten
+KI-Gedächtnisses. G10 D324 wählt jetzt Bel-Digmo-Installation statt Kredit;
+G1 D291 und G4 D65/D137 wählen Stereogram zum Abwerfen. G1 D231 bleibt eine
+korrekte Stereogram-Auswahl. Die geprüften Manhunt- und Contract-Kontrollfälle
+behaupten keinen nachgewiesenen Alternativsieg. Neue Serienmetriken müssen von
+den unveränderten historischen 40 Spielen getrennt bleiben.
+
+Die breite Regression fand eine Wechselwirkung mit SP-082: Der
+Economy-Producer entfernte sämtliche Score-Funding-Provider, sobald irgendeine
+bezahlbare Ambush-Installation existierte. Die neu zugelassene Recyclingkarte
+verdrängte dadurch eine bereits gebundene Agenda-Finanzierung. Der Ausschluss
+gilt jetzt nur für dieselbe konkurrierend gebundene Agenda-Instanz. Die
+historische Finanzierung über den Gegnerzug und ihre Freigabe am Zielwert
+sind erneut geprüft. Nach geschlossenem Gap ist Bel-Digmo als unabhängige
+Vorbereitung zulässig; der alte Test auf ausschließlich residuale Creditnahme
+wurde entsprechend auf die konkret gebundene neue Route aktualisiert.
+
+Die erste neue 40er-Runde auf `ac8cf7d34` erfasst 10.631 Entscheidungen ohne
+technische Flags, ist wegen dieser anschließenden Verhaltenskorrektur aber
+vollständig aus der finalen Kontrollpopulation ausgeschlossen. Vier weitere
+breite Testfehler sind auf dem unveränderten Ausgangsstand `57cffe5da`
+reproduziert: Crybaby-Trash-Erwartung, Runtime-Import in
+`decision/known-remote-access-commitment`, MRGSG-Remote-Contest und
+5285-Run-Target-Erwartung. Sie gehören nicht zum hier reparierten Kartenpfad;
+der vollständige KI-Gate-Stand darf deshalb nicht als grün ausgewiesen werden.
+
+Die entfernte globale Ambush-Sperre macht im historischen 3bb14-Checkpoint
+auch den bereits vorhandenen Funding-Need von Private Cybernet Police
+wieder ausführbar. Der Scheduler wählt dessen exakt delegierten P4-Credit
+vor dem alternativen Kali-Schutz-Draw. Der aktualisierte Checkpoint bindet
+diese konkrete Finanzierung, prüft den tatsächlichen Credit-Zuwachs und
+unveränderte HQ-/Serverbelegung. Kalis Schutz-Need gegen den öffentlich
+bereitstehenden Breaker und die unabhängige Experimental-AI-Vorbereitung
+bleiben im Portfolio nachgewiesen. Das ist keine Freigabe, Kali ungeschützt
+zu exponieren, und kein Nachweis einer optimalen mehrzügigen Agenda-Auswahl.
+
+### Kontrollpopulation 412 und verbleibender Strategievertrag
+
+Die frischen 40 Seeds `meta-412-r2-001` bis `meta-412-r2-040` auf
+`4e8ad4064` enthalten 11.471 Entscheidungen ohne technische Flags, Fallbacks,
+Timeouts oder Auswahlabweichungen. 39 Runner-Agendasiege und ein
+Fetal-Flatline sind kein kausaler Gewinnratennachweis gegenüber den anderen
+Seeds von 407. Alle Entscheidungen sind individuell projiziert; 8.114 bleiben
+ohne vollständigen Alternativenvergleich trace-limitiert.
+
+- Bel-Digmo: 74 Installationen und 74 Rez-Rückmischungen, je 39/35 pro
+  Hälfte. 34 Vorbereitungen bleiben über den Installationszug hinaus verdeckt; 20
+  Rückmischungen erfolgen bei einem Run auf genau diesen Remote. Diese Runs
+  verbrauchen Runner-Klicks. In den vier Fällen mit ICE wird dieses nicht
+  gerezzt; zusätzliche Breakkosten sind daher nicht belegt. 12 automatische
+  R&D-Schadensauflösungen in neun Spielen ergeben zehn erlittene Net-Schäden.
+- Stereogram: 54 von 55 Cleanup-Fenstern mit Handkontakt wählen die Karte;
+  einmal wird stattdessen eine doppelte Pattel abgeworfen. 15
+  Archives-Auslösungen in acht Spielen verursachen zehn erlittene Net-Schäden
+  und 15 Rückmischungen. Eigene Quellaktionen bleiben null. Abwurf und
+  automatische Wirkung müssen deshalb separat zur Install-/Rez-Metrik stehen.
+- Manhunt: 83 eindeutige Angebote, davon 66 ohne sichtbaren Payoff und 17
+  ohne machbare Campaign; keine Missing-Quote-Ausschlüsse mehr. Ausspielungen
+  bleiben null. SP-320 verifiziert nur die eigenständige Quote-Anfrage.
+- Government Contract: 363 eindeutige Angebote und zwei Installationen,
+  je eine pro Hälfte; kein Rez, Advancement oder Auszahlung. SP-303 bleibt
+  offen. Die Bank-Erstinvestition ist nicht durch ihre Installation bewiesen.
+
+128 fokussierte Tests, AI-Typecheck und `check:ai` bestehen. Der breite
+Zweitlauf erfasst 5.321 Tests mit fünf Fehlern; nach der beschriebenen
+3bb14-Vertragsaktualisierung bestehen dessen fünf fokussierte Proben. Die
+vier unabhängig reproduzierten Ausgangsfehler bleiben offen.
+
+Ein vollständiger Bluffplan muss zwei verdeckte Köder mit einer wirklich
+finanzierbaren Agenda-Folge verbinden, den Scoring-Ort freihalten und den
+konkurrierenden HQ-/R&D-Druck berücksichtigen. Ein einzelner gezeigter
+Agenda-Erfolg garantiert keine künftigen Runs auf jeden Köder. Die aktuelle
+Anbindung unterstützt die Vorbereitung und begrenztes Halten; eine gelernte
+Mischstrategie, optimal wiederholtes Recycling oder sichere ICE-Ausgaben des
+Runners werden nicht behauptet. G24 D380–396 zeigt Bel neben tatsächlicher
+Headhunters-Entwicklung und anschließendem Köder-Run; G34 D458 zeigt zugleich,
+dass Rückmischung den späteren HQ-Verlust nicht verhindert.
+
+Die anschließende Prüfung der geschützten Köder präzisiert diesen offenen
+Punkt: 69 der 74 Installationen erfolgen zunächst ohne ICE, fünf hinter
+vorhandenem ICE. Der Discovery-Code verbietet geschützte Remotes nicht,
+sondern sortiert freie, nicht für Score reservierte Remotes nach ICE-Anzahl.
+Diese Anzahl belegt weder eine finanzierbare Verteidigung noch Runner-Kosten.
+Die fünf Installationen sind G6 D102, G34 D306/D336 und G37 D167/D242.
+Nur die beiden G37-Fälle nutzen bereits gerezzte Mobile Barricade; die
+übrigen drei legen Bel hinter unrezzte Dog Pile ohne ausreichende Rez-Credits.
+
+Die vier tatsächlich angelaufenen ICE-Köder sind getrennt zu beurteilen:
+G6 D106 sowie G34 D320/D342 haben jeweils vier Corp-Credits bei fünf
+benötigten Dog-Pile-Rez-Credits. Die Engine bietet das ICE-Rez deshalb gar
+nicht legal an. Ein bloßer Rez-Bewertungsbonus könnte diese Finanzierungslücke
+nicht beheben. In G24 D394 ist Riddler dagegen für zwei Credits bei 25
+Corp-Credits legal rezbar. Die exakte Defense-Routenprüfung verwirft es mit
+`corp_ice_rez_resource_exchange_unknown`: Der Engine-Quote enthält noch
+keine feste ETR-Subroutine, sondern den bedingten Encounter-Effekt, für zwei
+weitere Credits eine hinzuzufügen. Eine sichere Creditsteuer folgt aus diesem
+unvollständigen Routenvergleich nicht. G24 D391 installiert das ICE erst nach
+dem zunächst ungeschützten Bel, weshalb dieser Fall nicht zu den fünf bereits
+bei Installation geschützten Ködern gehört.
+
+Der verbleibende Implementierungsbedarf ist damit die zusammenhängende
+Bluff-/Defense-Folge, nicht eine feste Quote ungeschützter Installationen:
+Ambush bindet Köder und begrenzten Haltehorizont; Defense bewertet geeignete
+ICE, tatsächliche Passierbarkeit, Rez-/Encounter-Kosten und eine finanzierbare
+Runner-Creditbelastung. Ein nötiger Funding-Need muss vor dem Gegnerzug mit
+dieser Folge verbunden werden. Score behält echte Agenda-Folgen und seine
+Finanzierung; freie ehemalige Scoring-Remotes können später Köder aufnehmen.
+Beide Remote-Arten müssen glaubwürdige Inhalte erlauben, ohne festes
+abwechselndes Muster oder behauptete Lernreaktion des Gegners. Diese Diagnose ist der Ausgangsbefund der folgenden Korrektur.
+
+
+### Finanzierbare geschützte Köder und gültige Rez-Fenster
+
+Der bestehende Defense-Owner bewertet nun eine konkrete verfügbare ICE-Schicht
+mit aktuellen Engine-Quotes, sichtbarem Runner-Rig, Rez- und Encounter-Kosten.
+Ambush bindet diesen typisierten Bedarf an seine Quelle; Economy darf einen
+begrenzten Gap von höchstens drei Credits schließen. Vor ausreichender
+Finanzierung wird keine vermeintlich geschützte Köder-Installation ausgeführt.
+Unabhängige Score-Reserven und reservierte Agenda-Orte bleiben geschützt.
+Ein Run auf eine Zentrale beendet den verdeckten Haltehorizont nicht.
+
+Der Engine-Quote unterscheidet eine öffentlich gewählte Breaker-Unterart von
+einer noch offenen Choice. Die zusätzliche kostenpflichtige ETR-Subroutine
+bei einem entsprechend bedingten ICE besitzt eine separate Encounter-Quote:
+Sie zählt weder als kostenlose Rez-Wirkung noch als garantierter Runnerverlust.
+Im historischen G24 D394 kann die Corp damit Riddler rezzen und seine
+bezahlte ETR im nächsten Fenster tatsächlich aktivieren. Der sichtbar auf
+Sentry eingestellte Fubar kann diesen Code-Gate-Zweig nicht brechen.
+
+Der TurnPlanner beendet seine Vorausplanung beim Schließen des aktuellen
+Corp-Rez-Fensters. Die vorher erzeugte Folge „Fenster schließen, dann dieselbe
+Quelle rezzen“ war regelwidrig projiziert und konnte die rechtzeitige
+Bel-Rückmischung verdrängen. Ein Real-Engine-Test führt nun die ganze Folge
+aus: Defense-Rez, tatsächlich vom Runner bezahlter Break, anschließend
+Ambush-Rez im letzten gültigen Serverfenster. Ein zweiter Ablauf belegt
+Rez plus bezahltes ETR und den erhaltenen verdeckten Köder nach Run-Ende.
+
+Das ist eine begrenzte, zustandsabhängige Koordination vorhandener Owner.
+Eine optimale gelernte Mischstrategie, ein garantierter Alternativsieg oder
+eine Pflicht, jeden Köder-Run mit ICE-Ausgaben zu verteidigen, folgen daraus
+nicht. Die getrennte frische Kontrollpopulation 413 bestätigt die Ausführung,
+aber weiterhin seltene geschützte Köder.
+
+
+Die erste Kontrolle 413 findet zusätzlich eine Engine-Timinglücke (SP-324):
+G18 D689 installiert Bel beim leeren R&D mit dem letzten Klick. D690 enthält
+nur `end_turn`; der Runner kann seinen Zug beenden und die Corp zum leeren
+Pflichtziehen zwingen. Die führende `docs/source/Netrunner Errata 1.70.md`
+erlaubt im Abschnitt „Gaining Actions“ und bei Remote Facility ausdrücklich
+Rez nach der letzten Aktion. Die normale Asset-/Upgrade-Rez-Quote wird daher
+auch vor dem tatsächlichen Zugende bei null Klicks angeboten. Kostenprüfung,
+Replay und Side-Grenzen bleiben Teil desselben vorhandenen Engine-Pfads.
+Die Null-Klick-Probe führt Bel-Rez, beiderseitiges Zugende und erfolgreiches
+Pflichtziehen aus; Remote Facility wird mit null und drei Klicks einschließlich
+unzureichender Credits und deterministischem Replay geprüft.
+Die gesamte erste 40er-Runde auf `a48d0290f` ist wegen dieser folgenden
+Regelkorrektur diagnostisch und von der finalen Population ausgeschlossen.
+
+Die zweite 40er-Kontrolle auf `52e1df950` belegt erstmals einen tatsächlich
+bezahlten geschützten Bel-Run: G14 D101 installiert hinter Mobile Barricade,
+D104 rezzt das ICE, D106–110 bezahlt der Runner insgesamt drei Credits,
+D113 mischt Ambush Bel im Serverfenster zurück. Sie zeigt aber zusätzlich
+SP-325 in G27 D706/D708: R&D ist bereits leer, Bel liegt in HQ, doch normale
+Score-Finanzierung verdrängt die legale Rettung. Der Ambush-Plan erhält für
+diesen aktuellen, exakt gebundenen Zustand den bestehenden P2-Vertrag für
+irreversible Bedrohungen. Beide vollständig hashgeprüften Originalzustände
+wählen nun Installation; die Real-Engine-Probe führt die Folge bis zum
+überlebten Pflichtziehen aus. Auch Runde zwei bleibt deshalb diagnostisch.
+Kompass und allgemeines Zielbild gelten unverändert; es entsteht weder ein
+zweiter Chooser noch eine neue Planprioritätsklasse.
+
+### Verifizierter Umfang und verbleibende Grenzen
+
+Die abschließende Kontrolle auf `68dbb8f7c` enthält 40 neue vollständige
+Partien ohne technische Flags. Der geschützte Mobile-Barricade-Köder wird
+erneut tatsächlich bezahlt; bei leerem R&D verhindert die aktuelle
+Recycling-Priorität den früheren Pflichtzieh-Verlust. Der genaue betroffene
+Seed endet nach 921 Entscheidungen regulär über Agendapunkte. Eine verlängerte
+Partie ist kein Nachweis eines Alternativsiegs. Geschützte Köder bleiben selten;
+eine ausgewogene Agenda-/Köder-Mischstrategie ist nicht abgenommen.
+
+Die neuen Real-Engine- und Signalregressionen sowie die angrenzenden
+Engine-Prüfungen bestehen. Der breite AI-Gate enthält weiterhin vier auf dem
+unveränderten Ausgangsstand reproduzierte Fehler (Crybaby-Sicherheit,
+Decision-Modulgrenze, MRGSG-Remote-Contest und 5285-Run-Target-Metrik).
+Er gilt deshalb nicht als vollständig grün. Einzelresultate und Rohbelege
+liegen in der zentralen Evidence-Registry unter Kontrolle 413.
+
+Stereograms produktive Vorbereitung im regulären Cleanup bleibt bestätigt.
+Für die anschließende Druckfolge und Erstinvestition gelten die folgenden
+aktuellen Fähigkeitsgrenzen. Der Hand-/Score-Konflikt wird als SP-323 geführt.
+
+### Aktuelle Owner-Fortsetzungen: Score, Trace und Counterbank
+
+Score darf eine vollständig mit Agendas überfüllte HQ mit einer bezahlbaren
+verdeckten Installation entlasten. Der bounded Score-Horizont darf dabei um
+genau eine Aktion über den nächsten Corp-Zug hinausreichen. Dies verhindert
+den andernfalls erzwungenen offenen Archives-Abwurf; es behauptet weder
+sicheren Schutz noch einen garantierten Score. Normale Hände erhalten diese
+Ausnahme nicht. Der rekonstruierte Zustand 413 G5 D291 wählt diese Score-Linie.
+
+Die Engine ermittelt für eine unterstützte Trace-Tag-Route das kleinste
+ausreichende Gebot innerhalb des bisherigen begrenzten Trace-Budgets anhand
+der tatsächlichen öffentlichen Antwortoptionen. Falls kein Gebot Erfolg
+garantiert, bleibt das Angebot ausdrücklich reaktiv. Punish bindet das
+ausgewählte Gebot an Quelle, unmittelbare StateVersion, Parent und Executor.
+Die Choice löst ausschließlich dieses aktuelle Optionsangebot auf; eine
+fehlende oder veraltete Bindung scheitert sichtbar. Mindestens zwei sicher
+zusätzliche Tags können als eigenständiger Druck zugelassen werden, wenn
+ihre Zahl die gesamten quotierten Corp-Credits erreicht. Eine Real-Engine-
+Probe spielt Manhunt für vier Credits, bietet null und trasht anschließend
+die sichtbare Ressource. Ein Ressourcentrasherfolg wird vorab nicht garantiert.
+
+Economy kann eine installierte, noch ungerezzte Counterbank vorbereiten,
+wenn ein echter Defense-Rez-Verbraucher gebunden ist und die Engine eine
+vollständig bezahlbare Advance-/Rez-Folge im aktuellen Zug bestätigt. Der
+Kapazitätsgewinn für genau diesen Verbraucher muss die gleiche Zahl einfacher
+Credit-Aktionen übertreffen. Nach jedem Kopf wird erneut quotiert. Gespeicherte
+Counter sind keine Liquidität. Die aktuelle Engine-Zahlungsquote kann mehrere
+kostenlose Counterauszahlungen derselben Quelle bis zur legalen Verbrauchs-
+Action nachweisen; nur der erste aktuelle Kopf wird zur Ausführung gebunden.
+Der Test belegt Advance → Null-Klick-Rez → Zugwechsel → zwei Auszahlungen →
+Mobile-Barricade-Rez mit Defense als Parent. Unwirtschaftliche Erstinvestitionen
+und veraltete Quotes werden abgelehnt.
+
+Eine optimale Agenda-/Bluff-Mischung, der vollständige mehrzügige Contract-
+Aufbau aus HQ und eine allgemeine Spielstärkensteigerung sind damit weiterhin
+nicht abgenommen. Die Kontrollserie 414 prüft die natürliche Nutzung dieser
+engeren Fähigkeiten; ihre Ergebnisse werden getrennt von 413 geführt.
+
+### Aktuelle Abnahmegrenze aus Kontrolle 415
+
+Der feste Stand `4c4831b98511aeab9dcb6a0cc8593448184e283a` umfasst 40 Originaldeck-Spiele mit
+10384 Entscheidungen sowie 40 getrennte Spiele des genehmigten
+Einzeltauschs mit 12218 Entscheidungen. Beide Populationen sind
+vollständig, terminal und ohne Flags. Frühere Runden mit Transportfehler,
+unzureichender Fort-Pass-Auflösung, Pattel-Leerzahlung oder fehlender privater
+R&D-Quellbindung bleiben vollständig ausgeschlossen. Exakte Fehlerseeds und
+alle individuellen Verlustprüfungen stehen unter Paarung 415 in der Registry.
+Die verglichenen Systemstände enthalten mehrere Änderungen; die Punktedifferenz
+ist kein isolierter Wirkungsnachweis einer einzelnen Reparatur.
+
+SP-328 bindet Rasmins aktuelle Passiergebühr an die verbleibenden ICE und
+das sichtbare Runbudget. SP-329 bewertet variables Trace-ICE mit dem billigsten
+aktuell ausreichenden Rez und der tatsächlichen Runnerantwort. SP-330 erhält
+die Unterscheidung zwischen Fort-Gebühr und Run-Abbruch im bestehenden
+Runner-Run-Owner. SP-331 lehnt nach Engine-Nachweis eine reine Icebreaker-
+Counterzahlung ohne Ziele ab. Paid-Access-Auswahl und private Quellidentität
+gehören dem vorhandenen Ambush-Owner; die allgemeine R&D-Ansicht bleibt
+verdeckt. Fehlende oder veraltete Bindungen scheitern sichtbar.
+
+Homing Missile: 6 natürliche Rez-Aktionen; 6 aufgelöste Traces, davon 6 erfolgreich. Rasmin: 4 natürliche Rez-Aktionen. Der Runner zahlt in 20 tatsächlichen Fortfenstern insgesamt 20 Credits; 0 aufgelöste Gebührenfenster enden mit Run-Abbruch. Ein Abbruch wird nur als erzwungen bezeichnet, wenn die Zahloption tatsächlich nicht bezahlbar war. Die früheren 72 unbegründeten Abbrüche sind keine Erfolgsevidenz.
+
+Im Vorher-Spiel 33 kosteten drei Pattel-Auslösungen neun Credits ohne einen
+einzigen Counter. Die frische Kontrolle enthält 2 bewusst abgelehnte
+Leerzahlungen. Tatsächlich bezahlte Effekte und Counter stehen getrennt im
+Bericht; eine Aktivierung beweist weiterhin keine langfristige Amortisation.
+
+Bel hat 47 Installationen und 47 Rückmischungen. Davon erfolgt eine
+Installation bereits hinter ICE; 2 echte Köder-Runs kosten 3
+Break-/Pumpcredits. Stereogram wird in 42 von
+43 Cleanup-Zuständen mit Handkontakt abgeworfen. Government Contract:
+{"install_card":2}. Der vollständige mehrzügige Erstaufbau aus HQ
+und eine abwechslungsreiche, glaubwürdige Agenda-/Bel-Mischung bleiben offen.
+Null Quellaktionen bedeutet bei Zugriffseffekten und Cleanup weiterhin nicht
+null Wirkung.
+
+| System / Deck | Corp-Siege | Mittlere Corp-Punkte, alle Spiele | Mittlere Corp-Punkte in Niederlagen (Anzahl) | Nullscore-Niederlagen |
+| --- | ---: | ---: | ---: | ---: |
+| Ausgangspunkt 414 | 3/40 | 1,20 | 0,86 (37) | 26 |
+| Kontrolle 415, Original | 3/40 | 1,53 | 1,22 (37) | 23 |
+| Kontrolle 415, BBS-Einzeltausch | 4/40 | 1,43 | 0,94 (36) | 24 |
+
+Für dieselben 36 beidseitig verlorenen Seeds verändert sich der
+Corp-Punkteschnitt von 0,89 auf 1,08;
+2 besser, 34 gleich, 0 schlechter.
+Die Hälften bleiben getrennt: Original 2/20 Siege und 36 Punkte; 1/20 Siege und 25 Punkte.
+BBS 2/20 Siege und 35 Punkte; 2/20 Siege und 22 Punkte.
+Es werden weder Vorher/Nachher noch Original/Variante zu einer Quote addiert.
+
+### Meta-Prioritäten und unveränderter Deckcharakter
+
+31 von 37 Corp-Niederlagen enden über HQ oder R&D; 119 von 136 gestohlenen Agendas stammen aus diesen Zentralen. Die Corp muss eine finanzierte Scorefolge abschließen, bevor das flexible Rig diese Zugriffe wiederholt öffnet. Späte Agenda-Auslage ohne ausreichenden Schutz und die frühe Konkurrenz von Wirtschaft, Regionsaufbau und Tags sind wiederkehrende Engpässe.
+
+Der historische Gegenvergleich 414, G4 D17, erreicht nach Accounts vor
+Manhunt denselben Tag-Druck und Draw mit drei zusätzlichen Corp-Credits.
+G2 D20 belegt dagegen keinen Vorteil eines vorgeschalteten Draws. Beide
+Vergleichszweige beginnen ohne residente Planhistorie und enden am nächsten
+Corp-Zug; ein alternativer Sieg ist damit nicht belegt. Wirtschaftliche
+Vorbereitung, Verbraucher, Frist und Schutz müssen als zusammenhängende
+Planfolge gebunden werden. Ein pauschaler Tag-, Credit- oder Fallenbonus
+ersetzt diesen Nachweis nicht.
+
+Die finale BBS-Variante liefert zwei konkrete nächste Vergleichsfenster:
+G6 D309 könnte ein zweiter Headhunters-Advance statt eines Credits den
+Drei-Advance-Folgezug vorbereiten. Die aktuelle Quote prüft den unveränderten
+Stand und meldet noch `not_completable_next_corp_turn`; die vollständige
+Folge muss Schutzreserve und Überleben der Auslage einschließen. G33 D127
+bietet eine Auszahlung der gerade gerezzten BBS, wählt aber Purge und bindet
+damit drei Aktionen. Der Runner zerstört die BBS im nächsten Zug, bevor sie
+ausgezahlt wurde. Der Gegenvergleich muss auch den fortbestehenden
+Crumble-Aufschlag tragen. Spätere BBS-Auszahlungen und hohe Liquidität führen
+in dieser Partie weiterhin zu keinem Score. Beide Befunde belegen noch
+keinen alternativen Gesamtsieg.
+
+Alle zehn Agenda-Kopien benötigen gedruckt vier oder fünf Advances. Die
+vier Credits teuren Regionen helfen nur passenden Untertypen: Research
+den zwei Viral Breeding Ground, Networked den zwei Marked Accounts und
+Please Don’t Choke Anyone, Weapons den zwei Charity Takeover. Fetal AI und
+Corporate Headhunters erhalten hier keinen Rabatt. Department besitzt in
+dieser Paarung keine gegnerische Expose-Quelle als Verbraucher; Think Tank
+verstärkt ausschließlich Meat-Schaden einer anderen Quelle, hier der selten
+vorbereiteten Corporate Headhunters. Das sind begrenzte Rollenbefunde und
+keine automatische Freigabe zum Austausch.
+
+Der getrennte BBS-Einzeltausch erzielt 4 statt 3 Corp-Siege und 57 statt 61 Corp-Agendapunkte. Die Hälften und dieselben beidseitig verlorenen Seeds stehen getrennt im Vergleich. Diese eine Paarung mit denselben bekannten Seeds belegt keine robuste Überlegenheit; ein unabhängiger Seed-Satz und weitere Runner fehlen. Die Standardliste bleibt unverändert.
+Die geprüfte Variante tauscht genau eine Stereogram-Kopie gegen eine zweite
+BBS; 45 Karten, 21 Agendapunkte und sämtliche benannten Kernfunktionen bleiben
+erhalten. Die Standardliste wurde nicht geändert. Priorität 1: frühe Accounts-/BBS-Vorbereitung, Agenda-Auswahl und tatsächlich finanzierbaren Score-/Schutzplan gemeinsam vergleichen. Priorität 2: die bekannte Runner-Vorabquote für nutzlose Nullschaden-Breaks mit einer vollständigen Engine-Gegenfolge prüfen. Danach Contract-Erstaufbau aus HQ und mehrere glaubwürdige geschützte Agenda-/Bel-Folgen bewerten. Eine weitere Deckübernahme braucht getrennte Holdout-Seeds und andere Runner.
+
+114 fokussierte AI-Tests einschließlich 14 Paid-Access-Regressionen sowie
+14 Engine-Tests bestehen. Typechecks, KI-Struktur-/Reachability- und
+Kartenabstraktions-Gates bestehen. Finaler breiter AI-Lauf: 5360 von 5365 Tests bestanden. Vier bekannte Ausgangsfehler und das bereits auf unverändertem main reproduzierte 30-Sekunden-Testlimit bleiben getrennt offen; der breite Gate ist nicht vollständig grün.
+Der vollständige Bericht ist in der zentralen Evidence-Registry als
+`meta-series-415` gespeichert.

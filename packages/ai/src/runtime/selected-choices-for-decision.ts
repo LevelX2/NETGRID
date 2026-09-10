@@ -11,7 +11,6 @@ import {
 import { selectedBidChoiceOptionId } from "./bid-choice-option";
 import { selectableChoiceOptions } from "./choice-option";
 import { selectedCorpAdvancementCounterChoiceOptionId } from "./corp-advancement-counter-choice";
-import { selectedCorpAccessPaymentChoiceOptionId } from "./corp-access-payment-choice";
 import { selectedCorpHqRetainPaymentOptionIds } from "./corp-hq-retain-payment-choice";
 import { selectedCorpHardwareTrashChoiceOptionIds } from "./corp-hardware-trash-choice";
 import {
@@ -75,6 +74,70 @@ type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
 >;
 type PendingChoiceOptions = PendingChoice["options"];
+
+function selectedCorpAccessPaymentOptionsFromAmbushPlan(
+  input: AiDecisionInput,
+  action: LegalAction,
+  choice: PendingChoice,
+  selectableOptions: PendingChoiceOptions,
+  currentPortfolio?: ResidentPlanPortfolio,
+): string[] {
+  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+  const executor = portfolio?.instances.find(
+    (instance) => instance.instanceId === portfolio.executorInstanceId,
+  );
+  const moduleState = executor?.moduleState as
+    | { kind?: unknown; signal?: CorpAmbushSignal }
+    | undefined;
+  const binding = moduleState?.signal?.accessPaymentChoiceBinding;
+  const pay = selectableOptions.find(
+    (option) => option.id === "pay" && option.value === "pay",
+  );
+  const requirement = action.choiceRequirements?.[0];
+  if (
+    portfolio?.side !== "corp" ||
+    portfolio.stateVersion !== input.playerView.stateVersion ||
+    executor?.moduleId !== "corp.ambush_and_bluff" ||
+    executor.executionState !== "executor" ||
+    moduleState?.kind !== "ambush" ||
+    moduleState.signal?.phase !== "trigger" ||
+    binding?.actionId !== action.actionId ||
+    binding.choiceId !== choice.choiceId ||
+    binding.choiceSource !== choice.source ||
+    binding.observedAtStateVersion !== input.playerView.stateVersion ||
+    choice.stateVersion !== input.playerView.stateVersion ||
+    choice.side !== "corp" ||
+    action.side !== "corp" ||
+    action.type !== "resolve_choice" ||
+    action.source !== "game_rule" ||
+    action.expiresAtStateVersion !== input.playerView.stateVersion ||
+    action.timingPoint !== input.playerView.timingPoint ||
+    action.choiceRequirements?.length !== 1 ||
+    requirement?.choiceId !== choice.choiceId ||
+    requirement.minSelections !== 1 ||
+    requirement.maxSelections !== 1 ||
+    requirement.optionIds.length !== 2 ||
+    selectableOptions.length !== 2 ||
+    !selectableOptions.every((option) =>
+      requirement.optionIds.includes(option.id),
+    ) ||
+    pay?.metadata?.creditCost !== binding.creditCost ||
+    pay.metadata.accessPaymentNoOpCertified !== binding.noOpCertified ||
+    choice.sourceCardDefinitionId !== moduleState.signal.sourceDefinitionId ||
+    choice.sourceCardInstanceId !== moduleState.signal.sourceInstanceId ||
+    binding.selectedOptionIds.length !== 1 ||
+    !selectableOptions.some(
+      (option) => option.id === binding.selectedOptionIds[0],
+    )
+  ) {
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "The Corp ambush plan must bind the exact current paid-access option and Engine certificate before payload resolution.",
+    );
+  }
+  return [...binding.selectedOptionIds];
+}
 
 export type SelectedChoicesForDecisionDependencies = {
   readonly evaluateCorpOpeningHand: (input: AiDecisionInput) => {
@@ -1482,19 +1545,16 @@ export function selectedChoicesForDecision(
     );
   }
   if (choice.source.startsWith("p3_35.access_payment")) {
-    const selectedOptionId = selectedCorpAccessPaymentChoiceOptionId(
-      input,
-      choice,
-      selectableOptions,
-    );
-    if (!selectedOptionId) {
-      throw unresolvedChoiceFailure(
+    return resolved(
+      selectedCorpAccessPaymentOptionsFromAmbushPlan(
         input,
         action,
-        "Preserve the exact Corp access-payment source, accessed-card binding, state version, pay/decline contract and Engine-certified credit cost.",
-      );
-    }
-    return resolved([selectedOptionId], "corp_access_payment");
+        choice,
+        selectableOptions,
+        currentPortfolio,
+      ),
+      "corp_access_payment",
+    );
   }
   if (choice.kind === "select_cards") {
     const retainedHqCards = selectedCorpHqRetainPaymentOptionIds(

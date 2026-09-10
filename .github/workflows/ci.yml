@@ -50,6 +50,9 @@ jobs:
       - name: Engine source structure
         run: pnpm check:engine-source-structure
 
+      - name: Card-function abstraction and guard self-tests
+        run: pnpm check:card-function-abstraction && pnpm check:card-function-abstraction:selftest
+
       - name: Package boundaries
         run: pnpm check:package-boundaries
 

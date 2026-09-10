@@ -310,13 +310,14 @@ function quoteRunnerBreak(params: {
     return { kind: "unknown" };
   }
   const abilities = icebreakerAbilitiesForDefinition(breakerDefinition);
-  // A choice-dependent matching capability is unresolved, not proof that no
-  // eligible breaker exists. Preserve that distinction for both consumers.
+  // An unset subtype is unresolved, not proof that no eligible breaker
+  // exists. A publicly configured subtype is an exact matching capability.
   if (
     abilities.some(
       (ability) =>
         ability.type === "break_subroutine" &&
-        (ability.selectedIceSubtypeFromBreaker || ability.subroutineBreakTags),
+        ((ability.selectedIceSubtypeFromBreaker && !breaker.selectedSubtype) ||
+          ability.subroutineBreakTags),
     )
   )
     return { kind: "unknown" };
@@ -327,6 +328,7 @@ function quoteRunnerBreak(params: {
         ability,
         ice.subtypes ?? iceDefinition.subtypes,
         iceDefinition.id,
+        breaker.selectedSubtype,
       ),
   );
   if (matchingBreakAbilities.length === 0) return { kind: "not_applicable" };
@@ -355,13 +357,23 @@ function breakAbilityMatchesIce(
   ability: RuntimeIcebreakerAbility,
   iceSubtypes: readonly string[],
   iceDefinitionId: string,
+  selectedSubtype?: string,
 ): boolean {
   if (
     ability.iceDefinitionIds?.length &&
     !ability.iceDefinitionIds.includes(iceDefinitionId)
   )
     return false;
-  if (ability.selectedIceSubtypeFromBreaker || ability.subroutineBreakTags) {
+  if (ability.selectedIceSubtypeFromBreaker) {
+    return (
+      selectedSubtype !== undefined &&
+      iceSubtypes.some(
+        (subtype) =>
+          normalizeSubtype(subtype) === normalizeSubtype(selectedSubtype),
+      )
+    );
+  }
+  if (ability.subroutineBreakTags) {
     return false;
   }
   if (ability.iceSubtype) {

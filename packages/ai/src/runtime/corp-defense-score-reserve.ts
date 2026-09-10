@@ -88,6 +88,7 @@ export function assessCorpExactIceRezAgainstScoreReserves(params: {
     : exactCurrentRunFollowupStoppingRez(input, route.sourceCardInstanceId);
   const requiredCreditsAfterRez =
     scoreCredits +
+    (route.bluffDefenseNeed?.encounterCredits ?? 0) +
     immediateRezClaims.reduce((sum, claim) => sum + claim.credits, 0) +
     (currentRunFollowup?.credits ?? 0);
   const availableCreditsAfterRez = params.restrictedCreditFunding

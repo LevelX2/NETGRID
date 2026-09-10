@@ -3219,6 +3219,21 @@ Verantwortung:
 Das Modul besitzt kein unabhängiges langfristiges Ziel. Es gehört logisch zum
 auslösenden Run-/Contest-Plan und kehrt anschließend dorthin zurück.
 
+Im aktuellen Fort-Pass-Fenster unterscheiden sich die beiden angebotenen
+`continue_run`-Actions fachlich: `decision:pay` erhält den Run, `decision:end_run`
+beendet ihn. Der DTO erhält dazu `fortRunWindowAbility`, Entscheidung und
+Zahlbetrag; interne IDs oder Definitionen des möglicherweise unrezzten
+passierten ICE werden dafür nicht zusätzlich durchgereicht. Der bestehende
+Run-Owner bindet die exakte Phase an aktuelle Action-Version, Server,
+Bewegungsposition und übereinstimmende Kosten. Vor einer bezahlten Fortsetzung
+bewertet er den verbleibenden sichtbaren Breakerpfad und die Schadensreserve
+nach dieser Gebühr. Seine vorhandenen Sicherheitsabbrüche gelten auch für
+die angebotene Fort-Exit-Action. Bad-Publicity-/temporäre Run-Credits und
+gebundene Zahlungshilfen bleiben von zweckgebundenen Breaker-Pools getrennt;
+eine quotierte Zahlungshilfe muss weiterhin im echten Engine-Fenster ausgeführt
+werden. Die Engine revalidiert beim Anwenden das tatsächliche passierte ICE.
+Es entstehen weder ein zweiter Chooser noch ein allgemeiner Zahlungsbonus.
+
 Die bekannte Remote-Vorprojektion und die aktuelle Access-Konversion nutzen
 dieselbe kanonische Trash-Impact-Bewertung. Die Vorprojektion erhält die
 aktuelle Economy-Reserve; endliche Kreditpools, tatsächlich vorhandene
@@ -3655,6 +3670,28 @@ Central-Responses erhalten. Remote-Optionswert, Defense-Wert, Fundingwert und
 Scorewert werden getrennt zugerechnet.
 
 ### 28.4 `corp.defend_servers`
+
+Aktuelle Passgebühren gehören als Rez-Response diesem Owner. Die Engine
+bindet den Root-Rez an Action, StateVersion, Run und Server und liefert die
+verbleibenden ICE-Passagen sowie tatsächlich verfügbare Runner-Run-Credits.
+Defense darf damit einen bezahlbaren Durchlauf, einen erzwungenen Abbruch
+oder einen wirtschaftlich sinnvollen Gebührentausch bewerten. Die spätere
+Access-Rez-Heuristik gilt nicht für vor dem ICE-Pass fällige Gebühren.
+
+Für X-Trace-ICE validiert Defense die vollständige aktuelle Rez-Aktion
+einschließlich X, Cap, zusätzlicher Kosten, Stärke und Trace-Wert. Eine eigene
+`trace_access_block`-Route verwendet ausschließlich die Engine-Quote für
+einen bei Corp-Gebot 0 garantierten Run-Abbruch und die sichtbare Breaker-
+Antwort. Sie bezeichnet den Trace nicht als bedingungslose ETR-Subroutine.
+Die bestehende Score-Reserve bleibt bindend; unter gleich wirksamen Routen
+entscheidet der geringere Rez-Aufwand. Die erste Ausbaustufe zertifiziert nur
+`modern_open` mit vollständig bekanntem installiertem Runner-Support, einer
+einzelnen Run-Ende-/Runsperre-Trace-Subroutine und ohne unbekannte
+Encounter-, Post-Bid- oder Cancel-Pfade. Andere Fälle erhalten keine Garantie.
+Für einen tatsächlich begonnenen Trace mit fester Wirkung kann die Engine
+auch das wirkungsgleiche Mindestgebot 0 zertifizieren. Die Choice-Auflösung
+verwendet dann die vorhandene, exakt gebundene Nulloption; sie bewertet keine
+neue Strategie und gibt keine zusätzlichen Credits ohne Wirkung aus.
 
 **Klasse:** `development_project` mit internem Urgent-Response-Modus
 **Rolle:** Background/Vordergrund/Urgent Response
@@ -4292,6 +4329,75 @@ Instanzidentität. Nach jedem State-Wechsel werden nur die dann legalen
 Action-IDs neu entdeckt; eine fehlende kartenspezifische Phasensemantik darf
 nicht durch Definition-, Server- oder Rollenfallbacks ersetzt werden.
 
+Die access-zonenbezogene Vorbereitung ergänzt den bestehenden Ambush-Owner:
+Eine eigene Asset-Quelle mit kostenlosem Self-Shuffle beim Rez und
+R&D-Zugriffseffekt darf als exakt gebundene Install-/Rez-Folge auftreten.
+Installation kostet weiterhin einen Klick. Die Planung behauptet keinen
+Schaden am Remote. Ein verdeckter Köder darf für bestehendes ICE oder neben
+einer finanzierbaren Drei-Advance-Agenda bis zu zwei Gegnerzügen liegen
+bleiben; der gespeicherte Ablaufzeitpunkt wird bei erneuter Discovery nicht
+verlängert. Bei knappem Deckrest wird früher zurückgemischt, bei einem Run
+auf das Remote erst nach dem ICE-Abschnitt. Exponierte Identitäten tragen
+keinen unbekannten Bluff. Score reserviert seine Server weiterhin selbst;
+die Ambush-Vorbereitung darf sie nicht belegen. Zwei parallele Köder sind
+nur mit der konkreten Agenda zulässig, ansonsten höchstens einer.
+
+Das ist eine begrenzte Vorbereitung, keine nachgewiesene gegnerische
+Lernreaktion und keine automatische Agenda-Installationsstrategie. Priorität
+und Fortsetzung bleiben beim vorhandenen Scheduler und Planportfolio.
+
+Bei bereits leerem R&D trägt eine aktuell legale kostenlose Install-/Rez-
+Rückmischung einen zustandsgebundenen `irreversible_threat`-Nachweis (P2).
+Der vorhandene Ambush-Parent und sein Setup-Schritt behandeln die drohende
+Pflichtzieh-Niederlage damit vor gewöhnlicher Score-Finanzierung. Der Nachweis
+bindet aktuelle StateVersion, Quellinstanz und LegalAction und entfällt nach
+dem Auffüllen. Das ist kein allgemeiner Kartenbonus oder garantierter Sieg:
+Zusätzliche spätere Zieheffekte und neue Runnerzugriffe bleiben gesonderte
+Risiken. Der Setup-Bedarf hat hier die Frist `current_turn`.
+
+Die Remote-Auswahl konsumiert einen typisierten, von `corp.defend_servers`
+bewerteten Bluff-Defense-Bedarf statt der bloßen ICE-Anzahl. Eine einzelne
+optionale ICE-Schicht besitzt einen aktuellen Kosten-/Effektnachweis,
+unterscheidet bezahlbaren Zugriff von sichtbarem Stop und berücksichtigt eine
+separat gequotete bezahlte Encounter-Fähigkeit. Ein vorhandener Score-Reserve-
+Bedarf bleibt erhalten. Eine noch fehlende Finanzierung ist auf höchstens
+drei Credits begrenzt; Economy bindet diesen Bedarf an den Ambush-Parent und
+seine aktuelle Phase. Die Installation beginnt nicht vor Erfüllung dieses
+Budgets. Im Run revalidiert allein Defense ICE-Rez und Encounter-Ausgaben;
+ein Stop zählt nicht als tatsächlich gezahlte Breakkosten.
+
+Runs auf andere Server lösen einen noch verdeckt zu haltenden Köder nicht
+auf. Ein bereits angefangener Agenda-Fortschritt darf den verbleibenden
+Drei-Advance-Horizont tragen. Am Ende des ICE-Pfads bleibt das kostenlose
+Zurückmischen eine eigene aktuelle Ambush-Aktion. `decline_rez` schließt ein
+Engine-Fenster und ist eine `engine_continuation`-Grenze der Zugprojektion:
+Der Planer darf danach keine weitere Aktion desselben alten Rez-Fensters
+einplanen. Die tatsächliche Folgesituation wird neu beobachtet.
+
+Eine bezahlbare Ambush-Installation unterdrückt einen Score-Finanzierungsbedarf
+nur bei konkurrierender Bindung derselben Agenda-Instanz. Ein unabhängiger
+Köder darf den Funding-Provider einer anderen Agenda nicht vor dem
+Prioritätsvergleich aus der Discovery entfernen. Nach erfülltem exaktem
+Finanzierungsziel darf die unabhängige Vorbereitung gegenüber bloßer
+Restklick-Wirtschaft gewinnen.
+
+Bezahlte Zugriffseffekte gehören ebenfalls diesem Owner. Die Engine kann für
+eine ausschließlich auf installierte Runner-Icebreaker wirkende Counterfolge
+bescheinigen, dass aktuell kein Ziel existiert. Diese negative Bescheinigung
+steht nur in der Corp-Choice. Dieselbe Choice bindet ihre bereits im privaten
+Prompt benannte Quelle über die vorhandenen Felder `sourceCardInstanceId`
+und `sourceCardDefinitionId`. Der Plan konsumiert diese Bindung für jede
+Zugriffszone. Die allgemeine R&D-Run-Ansicht bleibt unverändert verdeckt.
+`false` behauptet weder Nutzen noch Optimalität.
+Ambush lehnt eine so belegte wirkungslose Zahlung ab und bindet die Auswahl
+an Quelle, Choice, StateVersion, Kosten, Bescheinigung und LegalAction. Andere
+bezahlte Zugriffseffekte behalten ihre bisherige Aktivierung. Die Bewertung
+ihres längerfristigen Nutzens bleibt eine gesonderte offene Aufgabe.
+Der Window-Resolver besitzt keine eigene Zahlungsstrategie und darf nur die
+exakte Auswahl des aktuellen Ambush-Executors vervollständigen. Fehlende oder
+veraltete Bindungen scheitern fail-closed. Die menschliche Zahlung bleibt
+regellegal; Engine-Ausführung und Zielprüfung bleiben unverändert maßgeblich.
+
 ### 28.10 `corp.hand_and_agenda_management`
 
 **Klasse:** `bounded_sequence` oder `development_project`
@@ -4305,6 +4411,13 @@ Verantwortung:
 - Agenda in eine Scoreline überführen;
 - überzählige Karten im Cleanup zweckgebunden priorisieren;
 - Deckout-Risiko und notwendige R&D-Erholung.
+
+Der bestehende Zielgebietsvergleich bewertet einen eigenen kostenlosen
+Archives-Zugriffseffekt als Nutzen des Abwerfens. Diese Anpassung gilt nur
+für das Ziel Archives; eine R&D-Rückführung bleibt separat bewertet. Cleanup
+verwendet dieselbe Disposition, behält konkrete Parent-Bindungen und den
+Schutz vor entscheidender Agenda-Exposition aber bei. Weder Installation noch
+garantierter Zugriffsschaden werden aus einer Ambush-Rolle abgeleitet.
 
 Das Modul darf Hidden-Info nur aus der eigenen HQ/R&D und öffentlichen
 Ereignissen verwenden.

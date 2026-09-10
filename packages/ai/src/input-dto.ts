@@ -168,6 +168,9 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "baseRezCost",
   "variableRezAdditionalCost",
   "variableRezValue",
+  "variableRezCap",
+  "effectiveStrengthAfterRez",
+  "effectiveTraceLimitAfterRez",
   "effectiveSubroutineCountAfterRez",
   "selectedSubtypesAfterRez",
   "rezCostPaid",
@@ -258,6 +261,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "targetIceId",
   "targetIceDefinitionId",
   "corpPostPassIceAbility",
+  "fortRunWindowAbility",
   "decision",
   "paymentAmount",
   "gainCredits",
@@ -1861,7 +1865,6 @@ function sanitizeVisibleCardWithOptions(
     options.allowCorpCounterBankPreparationQuote === true &&
     options.expectedCorpCounterBankLocation === "installed_root" &&
     card.known &&
-    card.rezzed === true &&
     restrictedBank?.schemaVersion === "corp-restricted-credit-bank-v1" &&
     restrictedBank.sourceCardInstanceId === card.instanceId &&
     restrictedBank.serverId === options.expectedCorpCounterBankServerId &&
@@ -1895,6 +1898,30 @@ function sanitizeVisibleCardWithOptions(
           usableFor: restrictedBank.usableFor,
           payoutCleanup: restrictedBank.payoutCleanup,
           condition: restrictedBank.condition,
+          ...(restrictedBank.setupRoutes?.every(
+            (route) =>
+              typeof route.headActionId === "string" &&
+              route.headActionId.length > 0 &&
+              (route.headKind === "advance_card" ||
+                route.headKind === "rez_card") &&
+              [
+                route.setupCredits,
+                route.setupClicks,
+                route.targetCounters,
+                route.remainingGeneralCredits,
+              ].every((value) => Number.isSafeInteger(value) && value >= 0),
+          )
+            ? {
+                setupRoutes: restrictedBank.setupRoutes.map((route) => ({
+                  headActionId: route.headActionId,
+                  headKind: route.headKind,
+                  setupCredits: route.setupCredits,
+                  setupClicks: route.setupClicks,
+                  targetCounters: route.targetCounters,
+                  remainingGeneralCredits: route.remainingGeneralCredits,
+                })),
+              }
+            : {}),
         }
       : undefined;
   const sanitizedEffectiveRunQuote =
@@ -2018,6 +2045,43 @@ function sanitizeVisibleCardWithOptions(
         }
       : {}),
     ...(card.hostedOn !== undefined ? { hostedOn: card.hostedOn } : {}),
+    ...(card.currentTraceIceRezQuotes && card.known && card.owner === "corp"
+      ? {
+          currentTraceIceRezQuotes: card.currentTraceIceRezQuotes.map((q) => ({
+            actionId: q.actionId,
+            sourceCardInstanceId: q.sourceCardInstanceId,
+            targetServerId: q.targetServerId,
+            stateVersion: q.stateVersion,
+            runId: q.runId,
+            rezCredits: q.rezCredits,
+            variableValue: q.variableValue,
+            corpBid: q.corpBid,
+            corpTraceStrength: q.corpTraceStrength,
+            maximumRunnerTraceStrength: q.maximumRunnerTraceStrength,
+            runnerCanBreak: q.runnerCanBreak,
+            guaranteedRunEnd: q.guaranteedRunEnd,
+          })),
+        }
+      : {}),
+    ...(card.currentPassTaxRezQuote && card.known && card.owner === "corp"
+      ? {
+          currentPassTaxRezQuote: {
+            actionId: card.currentPassTaxRezQuote.actionId,
+            sourceCardInstanceId:
+              card.currentPassTaxRezQuote.sourceCardInstanceId,
+            targetServerId: card.currentPassTaxRezQuote.targetServerId,
+            stateVersion: card.currentPassTaxRezQuote.stateVersion,
+            runId: card.currentPassTaxRezQuote.runId,
+            rezCredits: card.currentPassTaxRezQuote.rezCredits,
+            creditsPerPass: card.currentPassTaxRezQuote.creditsPerPass,
+            remainingPasses: card.currentPassTaxRezQuote.remainingPasses,
+            remainingPassCredits:
+              card.currentPassTaxRezQuote.remainingPassCredits,
+            runnerSpendableCredits:
+              card.currentPassTaxRezQuote.runnerSpendableCredits,
+          },
+        }
+      : {}),
     ...(card.owner !== undefined ? { owner: card.owner } : {}),
     ...(card.controller !== undefined ? { controller: card.controller } : {}),
     ...(sanitizedEffectiveRunQuote
@@ -2953,7 +3017,43 @@ function sanitizeVisibleCorpIcePostRezRunQuote(
   ) {
     return undefined;
   }
-  return { ...binding, complete: true, effectiveRunQuote };
+  let paidEncounterDefense: Extract<
+    VisibleCorpIcePostRezRunQuote,
+    { complete: true }
+  >["paidEncounterDefense"];
+  if (value.paidEncounterDefense !== undefined) {
+    const paid = value.paidEncounterDefense;
+    if (
+      !isPlainObjectRecord(paid) ||
+      !isNonNegativeSafeInteger(paid.creditCost) ||
+      !isPlainObjectRecord(paid.exchange) ||
+      paid.exchange.context !== "installed" ||
+      paid.exchange.cardId !== binding.cardId ||
+      paid.exchange.targetServerId !== binding.targetServerId ||
+      paid.exchange.projectedServerId !== binding.projectedServerId ||
+      paid.exchange.expiresAtStateVersion !== binding.expiresAtStateVersion ||
+      (paid.exchange.complete !== false &&
+        !(
+          paid.exchange.complete === true &&
+          (isPlainObjectRecord(paid.exchange.runnerBreakUnavailable) ||
+            (isPlainObjectRecord(paid.exchange.runnerBreak) &&
+              Array.isArray(paid.exchange.runnerBreak.consumedCards)))
+        ))
+    )
+      return undefined;
+    paidEncounterDefense = {
+      creditCost: paid.creditCost,
+      exchange: sanitizeInstalledCorpIceRezResourceExchangeQuote(
+        paid.exchange as VisibleCorpIceRezResourceExchangeQuote,
+      ),
+    };
+  }
+  return {
+    ...binding,
+    complete: true,
+    effectiveRunQuote,
+    ...(paidEncounterDefense ? { paidEncounterDefense } : {}),
+  };
 }
 
 function sanitizeVisibleConditionalEncounterEffects(
@@ -3143,6 +3243,16 @@ function sanitizeVisibleChoiceRequest(
           metadata.temporaryEncounterSubroutineTypes = [...kinds];
           metadata.temporaryEncounterHasAdditionalMechanics = additional;
         }
+      }
+      if (
+        metadata &&
+        playerViewSide === "corp" &&
+        choice.side === "corp" &&
+        choice.source.startsWith("p3_35.access_payment:") &&
+        typeof option.metadata?.accessPaymentNoOpCertified === "boolean"
+      ) {
+        metadata.accessPaymentNoOpCertified =
+          option.metadata.accessPaymentNoOpCertified;
       }
       const hqInstallRezOptionQuote = sanitizeCorpOptionalRezChoiceQuote(
         option.hqInstallRezOptionQuote,
