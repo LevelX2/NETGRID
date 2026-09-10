@@ -1,3 +1,4 @@
+import type { RunnerAccessFacts } from "./access/runner-access-facts";
 import { CARD_DEFINITIONS_BY_ID } from "./card-definition-compatibility";
 import { type AiDecisionInput } from "@netgrid/shared";
 import { RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
@@ -16,6 +17,7 @@ export type KnownCentralAccessPayoffKind =
 
 export type KnownCentralAccessPayoff = {
   payoff: KnownCentralAccessPayoffKind;
+  accessFacts: RunnerAccessFacts;
   knownNoCurrentPayoff: boolean;
   accessNoveltyRatio: number;
   score: number;
@@ -81,6 +83,7 @@ export function evaluateKnownCentralAccessPayoff(
   if (freshness.freshness === "fresh_after_top_removed") {
     return {
       payoff: "fresh",
+      accessFacts: { knownTargetDefinitionIds: [], trashBudget: "unknown" },
       knownNoCurrentPayoff: false,
       accessNoveltyRatio: 1,
       score: 160,
@@ -130,6 +133,10 @@ export function evaluateKnownCentralAccessPayoff(
   if (type === "agenda" || freshness.knownTopIsAgenda === true) {
     return {
       payoff: "agenda",
+      accessFacts: {
+        knownTargetDefinitionIds: definitionId ? [definitionId] : [],
+        trashBudget: "not_applicable",
+      },
       knownNoCurrentPayoff: false,
       accessNoveltyRatio: 1,
       score: 520,
@@ -146,6 +153,10 @@ export function evaluateKnownCentralAccessPayoff(
   if (hasInstalledRdAccessBonus(input)) {
     return {
       payoff: "access_bonus",
+      accessFacts: {
+        knownTargetDefinitionIds: [],
+        trashBudget: "not_applicable",
+      },
       knownNoCurrentPayoff: false,
       accessNoveltyRatio: knownRdAccessNoveltyRatio(input, freshness),
       score: 120,
@@ -158,6 +169,10 @@ export function evaluateKnownCentralAccessPayoff(
   if (!definitionId) {
     return {
       payoff: "known_low_value",
+      accessFacts: {
+        knownTargetDefinitionIds: [],
+        trashBudget: "not_applicable",
+      },
       knownNoCurrentPayoff: true,
       accessNoveltyRatio: 0,
       score: 0,
@@ -184,6 +199,10 @@ export function evaluateKnownCentralAccessPayoff(
       if (affordable && !reserveSafe) {
         return {
           payoff: "trash_unaffordable",
+          accessFacts: {
+            knownTargetDefinitionIds: [definitionId],
+            trashBudget: trashCost,
+          },
           knownNoCurrentPayoff: true,
           accessNoveltyRatio: 0,
           score: 0,
@@ -209,6 +228,10 @@ export function evaluateKnownCentralAccessPayoff(
       ) {
         return {
           payoff: "known_low_value",
+          accessFacts: {
+            knownTargetDefinitionIds: [definitionId],
+            trashBudget: trashCost,
+          },
           knownNoCurrentPayoff: true,
           accessNoveltyRatio: 0,
           score: 0,
@@ -228,6 +251,10 @@ export function evaluateKnownCentralAccessPayoff(
       }
       return {
         payoff: affordable ? "trash_affordable" : "trash_unaffordable",
+        accessFacts: {
+          knownTargetDefinitionIds: [definitionId],
+          trashBudget: trashCost,
+        },
         knownNoCurrentPayoff: !affordable,
         accessNoveltyRatio: affordable ? 1 : 0,
         score: affordable ? 150 : 0,
@@ -258,6 +285,10 @@ export function evaluateKnownCentralAccessPayoff(
 
   return {
     payoff: "known_low_value",
+    accessFacts: {
+      knownTargetDefinitionIds: [],
+      trashBudget: "not_applicable",
+    },
     knownNoCurrentPayoff: true,
     accessNoveltyRatio: 0,
     score: 0,
@@ -360,6 +391,10 @@ function evaluateKnownRdAccessSequencePayoff(
   if (agendaDefinitionId) {
     return {
       payoff: "agenda",
+      accessFacts: {
+        knownTargetDefinitionIds: [agendaDefinitionId],
+        trashBudget: "not_applicable",
+      },
       knownNoCurrentPayoff: false,
       accessNoveltyRatio: 1,
       score: 520,
@@ -394,6 +429,10 @@ function evaluateKnownRdAccessSequencePayoff(
   if (trashCandidate) {
     return {
       payoff: "trash_affordable",
+      accessFacts: {
+        knownTargetDefinitionIds: [trashCandidate.definitionId],
+        trashBudget: trashCandidate.trashCost,
+      },
       knownNoCurrentPayoff: false,
       accessNoveltyRatio: 1,
       score: 150,
@@ -415,6 +454,10 @@ function evaluateKnownRdAccessSequencePayoff(
 
   return {
     payoff: "known_low_value",
+    accessFacts: {
+      knownTargetDefinitionIds: [],
+      trashBudget: "not_applicable",
+    },
     knownNoCurrentPayoff: true,
     accessNoveltyRatio: 0,
     score: 0,
@@ -438,6 +481,10 @@ function evaluateKnownHqAccessPayoff(
   if (input.playerView.opponent.handCount <= 0) {
     return {
       payoff: "known_low_value",
+      accessFacts: {
+        knownTargetDefinitionIds: [],
+        trashBudget: "not_applicable",
+      },
       knownNoCurrentPayoff: true,
       accessNoveltyRatio: 0,
       score: 0,
@@ -504,6 +551,12 @@ function evaluateKnownHqAccessPayoff(
   if (assessment.knownAgendaCount > 0) {
     return {
       payoff: "agenda",
+      accessFacts: {
+        knownTargetDefinitionIds: safeKnownDefinitions.filter(
+          (id) => cardDefinitionType(id) === "agenda",
+        ),
+        trashBudget: "not_applicable",
+      },
       knownNoCurrentPayoff: false,
       accessNoveltyRatio: 1,
       score: 520,
@@ -546,6 +599,10 @@ function evaluateKnownHqAccessPayoff(
     )[0]!;
     return {
       payoff: "trash_affordable",
+      accessFacts: {
+        knownTargetDefinitionIds: [cheapestTrashCard.definitionId],
+        trashBudget: cheapestTrashCard.trashCost,
+      },
       knownNoCurrentPayoff: false,
       accessNoveltyRatio: 1,
       score: 120,
@@ -566,6 +623,10 @@ function evaluateKnownHqAccessPayoff(
   if (memory.allCardsKnown && affordableTrashCards.length > 0) {
     return {
       payoff: "known_low_value",
+      accessFacts: {
+        knownTargetDefinitionIds: [],
+        trashBudget: "not_applicable",
+      },
       knownNoCurrentPayoff: true,
       accessNoveltyRatio: 0,
       score: 0,
@@ -589,6 +650,12 @@ function evaluateKnownHqAccessPayoff(
   if (memory.allCardsKnown && trashableKnownCards.length > 0) {
     return {
       payoff: "trash_unaffordable",
+      accessFacts: {
+        knownTargetDefinitionIds: trashableKnownCards.map(
+          (card) => card.definitionId,
+        ),
+        trashBudget: "unknown",
+      },
       knownNoCurrentPayoff: true,
       accessNoveltyRatio: 0,
       score: 0,
@@ -613,6 +680,10 @@ function evaluateKnownHqAccessPayoff(
   ) {
     return {
       payoff: "known_low_value",
+      accessFacts: {
+        knownTargetDefinitionIds: [],
+        trashBudget: "not_applicable",
+      },
       knownNoCurrentPayoff: true,
       accessNoveltyRatio: 0,
       score: 0,
@@ -632,6 +703,7 @@ function evaluateKnownHqAccessPayoff(
   ) {
     return {
       payoff: "unknown",
+      accessFacts: { knownTargetDefinitionIds: [], trashBudget: "unknown" },
       knownNoCurrentPayoff: false,
       accessNoveltyRatio: assessment.unknownFraction,
       score: 0,
@@ -1214,6 +1286,7 @@ function unknownCentralPayoff(
 ): KnownCentralAccessPayoff {
   return {
     payoff: "unknown",
+    accessFacts: { knownTargetDefinitionIds: [], trashBudget: "unknown" },
     knownNoCurrentPayoff: false,
     accessNoveltyRatio: 1,
     score: 0,

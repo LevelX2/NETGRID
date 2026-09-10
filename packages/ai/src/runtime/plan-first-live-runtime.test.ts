@@ -20362,6 +20362,10 @@ describe("authoritative plan-first live runtime", () => {
       targetKind: "remote" as const,
       accessTargetKind: "remote" as const,
       accessPayoff: "trash_affordable" as const,
+      accessFacts: {
+        knownTargetDefinitionIds: ["test-known-trashable-asset"],
+        trashBudget: 0,
+      },
       knownAccessState: "known_payoff" as const,
       accessPayoffContestable: true,
       pathCost: 3,
@@ -24051,102 +24055,129 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
-  it("carries a known HQ trash commitment from the pressure plan into the access step", () => {
-    resetResidentPlanPortfolioMemory();
-    const run = legalAction(
-      "run-hq",
-      "runner",
-      "start_run",
-      "Run HQ",
-      {
-        credits: 0,
-        clicks: 1,
-      },
-      {
-        payload: { serverId: "hq" },
-      },
-    );
-    const credit = legalAction(
-      "credit",
-      "runner",
-      "gain_credit",
-      "Gain 1 Credit",
-      { credits: 0, clicks: 1 },
-    );
-    const runInput = aiInput("runner", [run, credit]);
-    runInput.playerView.opponent.deckCount = 10;
-    const target = {
-      ...safeRuntimeRunTarget(run.actionId, "hq"),
-      accessPayoff: "trash_affordable" as const,
-      knownAccessState: "known_payoff" as const,
-      multiaccessAvailable: true,
-      score: 300,
-      evidence: [
-        "central_memory_payoff:trash_affordable",
-        "hq_known_trash_definition:onr_v1_330_krumz",
-        "hq_known_trash_cost:2",
-      ],
-    };
-    const context = liveContext({
-      evaluateRunnerRunTargets: (params: {
-        input: { legalActions: Array<{ type: string }> };
-      }) =>
-        params.input.legalActions.some((action) => action.type === "start_run")
-          ? [target]
-          : [],
-    });
+  it.each([
+    [],
+    ["translated access explanation"],
+    ["hq_known_trash_definition:wrong-target", "hq_known_trash_cost:999"],
+  ])(
+    "carries the typed HQ trash commitment through the exact pressure/access owners despite evidence %j",
+    (...evidence) => {
+      resetResidentPlanPortfolioMemory();
+      const run = legalAction(
+        "run-hq",
+        "runner",
+        "start_run",
+        "Run HQ",
+        {
+          credits: 0,
+          clicks: 1,
+        },
+        {
+          payload: { serverId: "hq" },
+        },
+      );
+      const credit = legalAction(
+        "credit",
+        "runner",
+        "gain_credit",
+        "Gain 1 Credit",
+        { credits: 0, clicks: 1 },
+      );
+      const runInput = aiInput("runner", [run, credit]);
+      runInput.playerView.opponent.deckCount = 10;
+      const target = {
+        ...safeRuntimeRunTarget(run.actionId, "hq"),
+        accessPayoff: "trash_affordable" as const,
+        accessFacts: {
+          knownTargetDefinitionIds: ["onr_v1_330_krumz"],
+          trashBudget: 2,
+        },
+        knownAccessState: "known_payoff" as const,
+        multiaccessAvailable: true,
+        score: 300,
+        evidence,
+      };
+      const context = liveContext({
+        evaluateRunnerRunTargets: (params: {
+          input: { legalActions: Array<{ type: string }> };
+        }) =>
+          params.input.legalActions.some(
+            (action) => action.type === "start_run",
+          )
+            ? [target]
+            : [],
+      });
 
-    expect(context.chooseSemanticRuntimeAction(runInput, {})).toMatchObject({
-      actionId: "run-hq",
-      reasonCode: "plan_first.runner.pressure_central",
-    });
+      expect(context.chooseSemanticRuntimeAction(runInput, {})).toMatchObject({
+        actionId: "run-hq",
+        reasonCode: "plan_first.runner.pressure_central",
+      });
 
-    const trash = legalAction(
-      "trash-krumz",
-      "runner",
-      "trash_accessed_card",
-      "Trash Krumz",
-      { credits: 2, clicks: 0 },
-      { source: "corp-krumz" },
-    );
-    const decline = legalAction(
-      "decline",
-      "runner",
-      "decline_trash",
-      "Decline trash",
-      { credits: 0, clicks: 0 },
-    );
-    const accessInput = aiInput("runner", [decline, trash]);
-    accessInput.playerView.stateVersion = 2;
-    accessInput.playerView.timingPoint = "access.resolve_card";
-    accessInput.playerView.run = {
-      attackedServerId: "hq",
-      phase: "access",
-      position: { kind: "server", serverId: "hq" },
-      successful: true,
-    };
-    accessInput.playerView.servers = [
-      server(
-        "hq",
-        [],
-        [
-          visibleCard("corp-krumz", "corp", "asset", {
-            definitionId: "onr_v1_330_krumz",
-          }),
-        ],
-      ),
-    ];
+      expect(
+        residentPlanPortfolioSnapshot(runInput)?.instances.find(
+          (instance) =>
+            instance.moduleId === "runner.pressure_central" &&
+            instance.target?.id === "hq",
+        ),
+      ).toMatchObject({
+        moduleState: {
+          signal: {
+            accessCommitment: {
+              intendedAction: "trash",
+              knownTargetDefinitionIds: ["onr_v1_330_krumz"],
+              trashBudget: 2,
+            },
+          },
+        },
+      });
 
-    expect(
-      context.chooseSemanticRuntimeAction(accessInput, {
-        runnerTurnPlannerMode: "legacy_compare",
-      }),
-    ).toMatchObject({
-      actionId: "trash-krumz",
-      reasonCode: "plan_first.runner.convert_run_window",
-      fallbackUsed: false,
-    });
-  });
+      const trash = legalAction(
+        "trash-krumz",
+        "runner",
+        "trash_accessed_card",
+        "Trash Krumz",
+        { credits: 2, clicks: 0 },
+        { source: "corp-krumz" },
+      );
+      const decline = legalAction(
+        "decline",
+        "runner",
+        "decline_trash",
+        "Decline trash",
+        { credits: 0, clicks: 0 },
+      );
+      const accessInput = aiInput("runner", [decline, trash]);
+      accessInput.playerView.stateVersion = 2;
+      accessInput.playerView.timingPoint = "access.resolve_card";
+      accessInput.playerView.run = {
+        attackedServerId: "hq",
+        phase: "access",
+        position: { kind: "server", serverId: "hq" },
+        successful: true,
+      };
+      accessInput.playerView.servers = [
+        server(
+          "hq",
+          [],
+          [
+            visibleCard("corp-krumz", "corp", "asset", {
+              definitionId: "onr_v1_330_krumz",
+            }),
+          ],
+        ),
+      ];
+
+      expect(
+        context.chooseSemanticRuntimeAction(accessInput, {
+          runnerTurnPlannerMode: "legacy_compare",
+        }),
+      ).toMatchObject({
+        actionId: "trash-krumz",
+        reasonCode: "plan_first.runner.convert_run_window",
+        fallbackUsed: false,
+      });
+    },
+  );
 
   it("creates a structured access-step trash commitment after an information run reveals a relevant card", () => {
     resetResidentPlanPortfolioMemory();
@@ -24513,6 +24544,7 @@ describe("authoritative plan-first live runtime", () => {
       evaluateRunnerRunTargets: () => [
         {
           actionId: "run-archives",
+          accessFacts: { knownTargetDefinitionIds: [], trashBudget: "unknown" },
           targetKind: "archives",
           targetServerId: "archives",
           pathPassability: "reachable",
@@ -24567,6 +24599,7 @@ describe("authoritative plan-first live runtime", () => {
       evaluateRunnerRunTargets: () => [
         {
           actionId: "run-archives",
+          accessFacts: { knownTargetDefinitionIds: [], trashBudget: "unknown" },
           targetKind: "archives",
           accessTargetKind: "archives",
           targetServerId: "archives",
@@ -31166,6 +31199,10 @@ function runTargetEvaluation(params: {
 }): RunnerRunTargetEvaluation {
   return {
     schemaVersion: "runner-run-target-evaluation-v1" as const,
+    accessFacts: {
+      knownTargetDefinitionIds: [],
+      trashBudget: "unknown" as const,
+    },
     targetServerId: params.targetServerId,
     targetKind: params.targetServerId,
     accessServerId: params.targetServerId,

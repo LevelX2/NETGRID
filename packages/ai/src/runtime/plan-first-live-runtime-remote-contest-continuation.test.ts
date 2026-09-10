@@ -661,6 +661,10 @@ describe("plan-first Remote contest continuation", () => {
       accessTargetKind: "remote" as const,
       knownAccessState: "known_payoff" as const,
       accessPayoff: "trash_affordable" as const,
+      accessFacts: {
+        knownTargetDefinitionIds: ["onr_v1_347_vapor-ops"],
+        trashBudget: 1,
+      },
       recommendation: "run_now" as const,
       pathCost: 9,
       creditsAfterRun: 1,
@@ -871,6 +875,10 @@ describe("plan-first Remote contest continuation", () => {
       accessTargetKind: "remote" as const,
       knownAccessState: "known_payoff" as const,
       accessPayoff: "trash_affordable" as const,
+      accessFacts: {
+        knownTargetDefinitionIds: ["onr_v1_312_chicago-branch"],
+        trashBudget: 1,
+      },
       runCommitment: "full_path" as const,
       unknownUnrezzedIceCount: 0,
       prerunReserveQuote: {
@@ -1599,6 +1607,10 @@ function runRiskContractScenario(params: {
     accessTargetKind: "remote" as const,
     knownAccessState: "known_payoff" as const,
     accessPayoff: "trash_affordable" as const,
+    accessFacts: {
+      knownTargetDefinitionIds: ["onr_v1_294_investment-firm"],
+      trashBudget: 2,
+    },
     runCommitment: "probe_only" as const,
     unknownUnrezzedIceCount: 1,
     unrezzedIceRisk: 0.81,

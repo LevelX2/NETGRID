@@ -1,3 +1,4 @@
+import type { RunnerAccessFacts } from "./access/runner-access-facts";
 import { CARD_DEFINITIONS_BY_ID } from "./card-definition-compatibility";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "./ai-hints";
@@ -51,6 +52,7 @@ export type KnownRemoteAccessDeclineReason =
 
 export type KnownRemoteAccessPayoff = {
   payoff: KnownRemoteAccessPayoffKind;
+  accessFacts: RunnerAccessFacts;
   accessDecision: KnownRemoteAccessDecision;
   declineReason?: KnownRemoteAccessDeclineReason;
   contestable: boolean;
@@ -110,6 +112,7 @@ export function evaluateKnownRemoteAccessPayoff(
       if (typeDeduction) {
         return {
           payoff: "unknown",
+          accessFacts: { knownTargetDefinitionIds: [], trashBudget: "unknown" },
           accessDecision: "unknown",
           contestable: false,
           knownNoCurrentPayoff: false,
@@ -128,6 +131,7 @@ export function evaluateKnownRemoteAccessPayoff(
       }
       return {
         payoff: "unknown",
+        accessFacts: { knownTargetDefinitionIds: [], trashBudget: "unknown" },
         accessDecision: "unknown",
         contestable: true,
         knownNoCurrentPayoff: false,
@@ -240,6 +244,10 @@ export function evaluateKnownRemoteAccessPayoff(
     });
     return {
       payoff: "agenda",
+      accessFacts: {
+        knownTargetDefinitionIds: [agendaRoots[0]!.definitionId],
+        trashBudget: "not_applicable",
+      },
       accessDecision: !accessSurvivable
         ? "defer_until_safe"
         : stealAffordable
@@ -366,6 +374,10 @@ export function evaluateKnownRemoteAccessPayoff(
     });
     return {
       payoff: trashProjection.payoff,
+      accessFacts: {
+        knownTargetDefinitionIds: [cheapestTrashRoot.definitionId],
+        trashBudget: trashProjection.generalTrashCost,
+      },
       accessDecision: trashProjection.accessDecision,
       ...(trashProjection.declineReason
         ? { declineReason: trashProjection.declineReason }
@@ -446,6 +458,10 @@ export function evaluateKnownRemoteAccessPayoff(
   const lowValueCommitment = knownRemoteLowValueAccessCommitment(serverId);
   return {
     payoff: "known_low_value",
+    accessFacts: {
+      knownTargetDefinitionIds: [],
+      trashBudget: "not_applicable",
+    },
     accessDecision: "decline",
     declineReason: "low_value_target",
     contestable: false,
@@ -731,6 +747,7 @@ function unknownRemotePayoff(
 ): KnownRemoteAccessPayoff {
   return {
     payoff: "unknown",
+    accessFacts: { knownTargetDefinitionIds: [], trashBudget: "unknown" },
     accessDecision: "unknown",
     contestable: true,
     knownNoCurrentPayoff: false,
@@ -748,6 +765,10 @@ function unknownRemotePayoff(
 function emptyRemotePayoff(serverId: string): KnownRemoteAccessPayoff {
   return {
     payoff: "known_low_value",
+    accessFacts: {
+      knownTargetDefinitionIds: [],
+      trashBudget: "not_applicable",
+    },
     accessDecision: "decline",
     declineReason: "no_current_payoff",
     contestable: false,
@@ -770,6 +791,7 @@ function changedRemotePayoff(
 ): KnownRemoteAccessPayoff {
   return {
     payoff: "changed",
+    accessFacts: { knownTargetDefinitionIds: [], trashBudget: "unknown" },
     accessDecision: "unknown",
     contestable: true,
     knownNoCurrentPayoff: false,

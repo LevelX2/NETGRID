@@ -274,6 +274,7 @@ export function safeRuntimeRunTarget(actionId: string, targetServerId: string) {
   };
   return {
     schemaVersion: "runner-run-target-evaluation-v1",
+    accessFacts: { knownTargetDefinitionIds: [], trashBudget: "unknown" as const },
     targetServerId,
     targetKind,
     accessServerId: targetServerId,

@@ -1,3 +1,4 @@
+import type { RunnerAccessFacts } from "../access/runner-access-facts";
 import { runnerRunExitAction } from "../runtime/runner-fort-pass-toll";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type {
@@ -176,7 +177,7 @@ export type RunnerRunAccessCommitmentSignal = {
     | "access_bonus";
   intendedAction: "steal" | "trash" | "decline" | "access";
   knownTargetDefinitionIds: string[];
-  trashBudget: number;
+  trashBudget: RunnerAccessFacts["trashBudget"];
   evidenceCode: string;
 };
 
@@ -1919,6 +1920,7 @@ function runWindowCandidateValue(
       entry.actionType === "trash_accessed_card" &&
       entry.sourceDefinitionId !== undefined &&
       commitment.knownTargetDefinitionIds.includes(entry.sourceDefinitionId) &&
+      typeof commitment.trashBudget === "number" &&
       actionCreditCost(entry) <= commitment.trashBudget,
   );
   if (candidate.actionType === "decline_trash") {

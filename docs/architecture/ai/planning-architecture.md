@@ -2663,6 +2663,18 @@ Der Plan endet, sobald:
 
 ### 27.2 `runner.pressure_central`
 
+Die bekannten Central-/Remote-Access-Payoffs veröffentlichen Zielidentitäten
+und das allgemeine Trash-Creditbudget als `RunnerAccessFacts`. Die Runbewertung
+transportiert diese Fakten vollständig bis zum gebundenen Access-Commitment;
+begrenzte Evidence-Listen sind ausschließlich Erklärung. Ein Budget von `0`
+ist ein bekannter kostenloser beziehungsweise durch zweckgebundene Mittel
+gedeckter Zugriff. `unknown` und `not_applicable` bleiben davon getrennt.
+Ein unbekanntes Zugriffsziel bindet keine Trash-Reserve; ein konkretes
+Trash-Commitment verlangt dagegen bekannte Ziele und ein endliches,
+nichtnegatives Budget. Fehlende notwendige Fakten scheitern mit strukturierter
+Plan-Diagnose, ohne Rekonstruktion aus Texten oder Ersatzbudget. Neue Fakten
+erweitern weder den side-sicheren Wissensstand noch die Action-Autorität.
+
 **Klasse:** `strategic_campaign`
 **Rolle:** Vordergrund, zeitweise präemptierbar
 **Status:** neu aufzubauen; ersetzt den rein opportunistischen Ein-Zug-Plan
@@ -3428,6 +3440,16 @@ Der Plan darf nicht pauschal jedes Central mit einem ICE versehen. Er folgt
 Deckstrategie, Hand, Agendaexposition und erwarteter früher Run-Gefahr.
 
 ### 28.2 `corp.score_agenda`
+
+Der Score-Owner veröffentlicht die aktuelle Install-/Advance-Zulassung als
+typisiertes `routeAssessment`. Schutzreife, unbekannte Schutzbewertung und
+zurückgestellte letzte Installationsklicks werden daraus gelesen; Evidence
+erklärt denselben Zustand. Funding-, Rush- und Parent-Dominanzübergänge
+aktualisieren den fachlichen Zustand ausdrücklich. Ein exakter Same-Turn-
+Konversionspfad trägt zusätzlich `sameTurnConversionProof: engine_quoted_path`
+aus dem bestehenden Engine-gequoteten Pfad. Projektvergleich und
+Zusammenführung lesen diesen Nachweis und die gebundenen Routenfakten,
+niemals Evidence-Präfixe oder die Gleichheit von Erklärungstexten.
 
 Das Fehlen einer Agenda in HQ erzeugt keinen generischen Score-Parent und
 keinen Auftrag, nach unbekanntem Agendamaterial zu ziehen. Der Score-Owner

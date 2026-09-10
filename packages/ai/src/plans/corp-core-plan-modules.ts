@@ -90,6 +90,34 @@ export type CorpScoreFundingMilestone = Readonly<{
 }>;
 
 export type CorpScoreProjectSignal = {
+  /** Current route admission published by corp.score_agenda; evidence only explains it. */
+  routeAssessment?:
+    | "corp_opening_rush_engine_randomized"
+    | "visible_legal_score_conversion"
+    | "corp_funded_protected_score_advance"
+    | "corp_last_viable_deckout_matchpoint_advance"
+    | "corp_engine_certified_mature_remote_score_advance"
+    | "corp_exposed_agenda_progress_preserves_conversion_clock"
+    | "corp_deckout_agenda_flood_score_advance"
+    | "corp_current_turn_scoreline_unreachable"
+    | "corp_forced_agenda_discard_score_attempt"
+    | "corp_recently_compromised_score_remote_requires_reprotection"
+    | "corp_last_draw_hq_agenda_recycle_install"
+    | "corp_deckout_agenda_flood_score_install"
+    | "corp_access_punishing_agenda_deception_score_install"
+    | "corp_score_protection_assessment_unknown"
+    | "corp_last_click_score_install_deferred"
+    | "corp_score_protection_funding_gap"
+    | "corp_near_matchpoint_remote_maturity_required"
+    | "corp_last_viable_deckout_matchpoint_install"
+    | "corp_engine_certified_mature_remote_score_install"
+    | "corp_bounded_staged_score_install"
+    | "corp_score_protection_required"
+    | "corp_score_horizon_unbounded"
+    | "corp_funded_protected_score_install"
+    | "corp_resident_score_parent_dominates_sibling_route";
+  /** Positive certificate from the existing Engine-quoted same-turn conversion path. */
+  sameTurnConversionProof?: "engine_quoted_path";
   projectId: string;
   agendaDefinitionId?: string;
   agendaPoints: number;
