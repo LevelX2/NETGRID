@@ -329,7 +329,8 @@ Die Architektur bleibt unverändert: keine Karten-ID-Boni, kein zweiter
 Chooser, keine zusätzlichen LegalActions und keine verdeckten Gegnerdaten.
 Die konkrete Bewertungsprojektion einschließlich Horizont und Kalibrierung
 steht in der [Planungsarchitektur](../ai/planning-architecture.md),
-Abschnitte 27.5 und 28.6.
+[Runner-Entwicklung](../ai/runner-plan-contracts.md#5-runnerdevelop_board_and_hand)
+und [Corp-Economy](../ai/corp-plan-contracts.md#6-corpeconomy).
 
 Fokussierte Validierung: **247 Tests in neun Dateien**, KI-Typecheck,
 `check:ai` und `check:card-spec-ai-hints` bestanden. Alle

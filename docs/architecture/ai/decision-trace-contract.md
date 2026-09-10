@@ -1,6 +1,7 @@
 # KI-Entscheidungslog-Vertrag
 
-Status: Architekturvertrag, 2026-08-20.
+Status: aktueller Architekturvertrag.  
+Stand: 2026-09-10
 
 Dieser Vertrag beschreibt, wie NETGRID KI-Entscheidungen lokal nachvollziehbar macht, ohne die bestehenden Engine-, Replay-, Hidden-Info- und Observability-Grenzen aufzuweichen. Er gibt keine Karten frei und ändert keine Regelentscheidung.
 
@@ -14,8 +15,10 @@ Das Log ist Diagnosematerial. Es ist kein Teil von `AIInput`, FullState, Engine-
 
 - `packages/shared/src/index.ts` definiert `AiDecisionDebug`, `AI_DECISION_DEBUG_SCHEMA_VERSION` und `sanitizeAiDecisionDebug`.
 - `apps/server/src/multiplayer.ts` projiziert `aiDecisionDebug` bereits nur sanitisiert und perspektivabhängig in Replay-Daten.
-- `docs/releases/v2/v2-7-observability/observability-redaction-baseline.md` verbietet `DecisionDebug` in normalen Logs und Metriken.
-- `docs/releases/v2/v2-6-moderation/evidence-rbac-contract.md` klassifiziert `AIInput` und `DecisionDebug` als `D6_ai_debug_data`, nicht als Standardzugriff.
+- Der [Controllervertrag](controller-contract.md) grenzt KI-Inputs und normale
+  Spielerkanäle ab.
+- Die Datenklasse `D6_ai_debug_data` und der Ausschluss aus normalen Logs,
+  Metriken und Standardzugriffen werden im folgenden Abschnitt definiert.
 
 Diese Grenzen bleiben führend. Neue Trace-Felder dürfen sie nur konkretisieren, nicht umgehen.
 
@@ -93,8 +96,9 @@ Die Entscheidungskette nutzt denselben Persistenzvertrag. Bei
 `traceLevel: summary`-Projektion; bei `aiTraceMode: detailed` enthält derselbe
 Schlüssel die vollständige sanitizierte `AiDecisionChainDebug` mit
 `traceLevel: detailed`. Es gibt dafür keine weitere Tabelle oder Logdatei.
-Die genaue Feldabgrenzung führt
-`semantic-decision-chain-observability-contract-2026-07-14.md`.
+Die genaue Feldabgrenzung liefern `AiDecisionChainDebug` und
+`sanitizeAiDecisionChainDebug` in [shared](../../../packages/shared/src/index.ts);
+der Decision-Episode-Vertrag unten erläutert ihre fachliche Bedeutung.
 
 ## Metaebene
 
