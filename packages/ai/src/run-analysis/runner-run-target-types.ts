@@ -1,3 +1,4 @@
+import type { RunnerAccessFacts } from "../access/runner-access-facts";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { AccessOutcomeMemoryStatus } from "../access/access-outcome-memory";
@@ -330,6 +331,7 @@ export type RunnerRunTargetEvaluation = {
   accessTargetKind: RunnerRunTargetKind;
   actionId: string;
   accessPayoff: RunnerAccessPayoff;
+  accessFacts: RunnerAccessFacts;
   accessPayoffContestable?: boolean;
   knownAccessState: RunnerKnownAccessState;
   accessNoveltyRatio?: number;

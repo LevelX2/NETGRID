@@ -378,6 +378,10 @@ describe("known central access payoff HQ knownness", () => {
 
     expect(payoff).toMatchObject({
       payoff: "trash_affordable",
+      accessFacts: {
+        knownTargetDefinitionIds: ["onr_v1_330_krumz"],
+        trashBudget: 2,
+      },
       knownNoCurrentPayoff: false,
     });
     expect(payoff.evidence).toEqual(
@@ -696,6 +700,52 @@ describe("known central access payoff HQ knownness", () => {
       ]),
     );
   });
+
+  it.each([false, true])(
+    "publishes the known R&D trash target and cost for multiaccess=%s",
+    (multiaccess) => {
+      const target = "onr_v1_330_krumz";
+      const input = aiInput({
+        handCount: 1,
+        credits: 10,
+        rig: multiaccess
+          ? [
+              visibleInstalledRunnerCard(
+                "onr_v1_139_r-and-d-interface",
+                "hardware",
+              ),
+            ]
+          : [],
+        servers: [{ id: "rd", label: "R&D", ice: [], root: [] }],
+        legalActions: [runAction("run-rd", "rd")],
+      });
+      const payoff = evaluateKnownCentralAccessPayoff(
+        input,
+        "rd",
+        beliefWithRndMemory({
+          lastKnownAccessEventId: "evt-known-rd",
+          knownToRunner: true,
+          freshness: "stale_known_same_top",
+          knownTopDefinitionId: multiaccess
+            ? "simple_economy_operation"
+            : target,
+          knownTopIsAgenda: false,
+          knownSequenceDefinitionIds: multiaccess
+            ? ["simple_economy_operation", target]
+            : [target],
+          freshenedByRunnerAccess: false,
+          invalidationReasons: [],
+        }),
+      );
+      expect(payoff).toMatchObject({
+        payoff: "trash_affordable",
+        accessFacts: {
+          knownTargetDefinitionIds: [target],
+          trashBudget: 2,
+        },
+      });
+    },
+  );
 
   it("keeps R&D multiaccess pressure when the known accessible sequence contains an agenda", () => {
     const input = aiInput({

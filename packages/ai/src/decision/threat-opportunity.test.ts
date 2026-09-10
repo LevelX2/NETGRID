@@ -231,6 +231,7 @@ function runTarget(params: {
   const pathPassability = params.pathPassability ?? "reachable";
   return {
     schemaVersion: "runner-run-target-evaluation-v1",
+    accessFacts: { knownTargetDefinitionIds: [], trashBudget: "unknown" as const },
     targetServerId: params.targetServerId,
     targetKind: params.targetKind,
     accessServerId: params.targetServerId,

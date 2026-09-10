@@ -8871,7 +8871,7 @@ function buildRunnerDomain(
                   encounterCreditSpendLimit: evaluation.pathCost,
                 }
               : {}),
-            accessCommitment: accessCommitmentForEvaluation(evaluation),
+            accessCommitment: accessCommitmentForEvaluation(input, evaluation),
             ...(runRiskContract ? { runRiskContract } : {}),
             ...(sourceDefinitionForEvaluation(evaluation, candidates)
               ? {
@@ -9233,7 +9233,7 @@ function buildRunnerDomain(
                 encounterCreditSpendLimit: evaluation.pathCost,
               }
             : {}),
-          accessCommitment: accessCommitmentForEvaluation(evaluation),
+          accessCommitment: accessCommitmentForEvaluation(input, evaluation),
           ...(runRiskContract ? { runRiskContract } : {}),
         };
       }),
@@ -9278,6 +9278,7 @@ function buildRunnerDomain(
           ...(coverageSupport ? { supportNeedId: coverageSupport.gapId } : {}),
           preferredRunActionIds,
           accessCommitment: accessCommitmentForEvaluation(
+            input,
             knownAgendaRunEvaluations[0]!,
           ),
         },
@@ -10200,7 +10201,7 @@ function buildRunnerDomain(
               dedupeKey: windowId,
             }),
             semanticActionTypes: ["run.start"],
-            accessCommitment: accessCommitmentForEvaluation(evaluation),
+            accessCommitment: accessCommitmentForEvaluation(input, evaluation),
             actionAssessments: { [action.actionId]: assessment },
           };
         });
@@ -13444,28 +13445,39 @@ function runnerRunLockPreferredServerIds(
   );
 }
 
-function accessCommitmentForEvaluation(
+export function accessCommitmentForEvaluation(
+  input: AiDecisionInput,
   evaluation: RunnerRunTargetEvaluation,
 ): RunnerRunAccessCommitmentSignal {
-  const knownTargetDefinitionIds = evaluation.evidence
-    .flatMap((entry) => {
-      for (const prefix of [
-        "hq_known_trash_definition:",
-        "access_decision_projection_known_root:",
-      ]) {
-        if (entry.startsWith(prefix)) return [entry.slice(prefix.length)];
-      }
-      return [];
-    })
-    .filter((entry) => entry.length > 0);
-  const trashBudget =
-    firstEvidenceNumber(evaluation.evidence, [
-      "known_remote_root_general_trash_cost:",
-      "hq_known_trash_cost:",
-      "known_remote_root_trash_cost:",
-      "rnd_known_top_trash_cost:",
-      "rnd_known_sequence_trash_cost:",
-    ]) ?? 0;
+  const facts = evaluation.accessFacts;
+  if (
+    !facts ||
+    !Array.isArray(facts.knownTargetDefinitionIds) ||
+    !facts.knownTargetDefinitionIds.every(
+      (id) => typeof id === "string" && id.length > 0,
+    ) ||
+    !(
+      facts.trashBudget === "unknown" ||
+      facts.trashBudget === "not_applicable" ||
+      (typeof facts.trashBudget === "number" &&
+        Number.isFinite(facts.trashBudget) &&
+        facts.trashBudget >= 0)
+    ) ||
+    (evaluation.accessPayoff === "trash_affordable" &&
+      (typeof facts.trashBudget !== "number" ||
+        facts.knownTargetDefinitionIds.length === 0))
+  ) {
+    throw new PlanResolutionFailure("missing_action_semantics", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      unresolvedActionIds: [evaluation.actionId],
+      owner: "plan_module",
+      removalCondition:
+        "Runner access payoff must publish typed target identities and a known nonnegative general-credit budget before binding a trash commitment.",
+    });
+  }
   const intendedAction =
     evaluation.accessPayoff === "agenda" ||
     evaluation.accessPayoff === "score_threat"
@@ -13479,16 +13491,11 @@ function accessCommitmentForEvaluation(
   return {
     payoff: evaluation.accessPayoff,
     intendedAction,
-    knownTargetDefinitionIds: [...new Set(knownTargetDefinitionIds)].sort(),
-    trashBudget: Math.max(0, trashBudget),
-    evidenceCode:
-      evaluation.evidence.find((entry) =>
-        entry.startsWith("central_memory_payoff:"),
-      ) ??
-      evaluation.evidence.find((entry) =>
-        entry.startsWith("remote_memory_payoff:"),
-      ) ??
-      `access_payoff:${evaluation.accessPayoff}`,
+    knownTargetDefinitionIds: [
+      ...new Set(facts.knownTargetDefinitionIds),
+    ].sort(),
+    trashBudget: facts.trashBudget,
+    evidenceCode: `access_payoff:${evaluation.accessPayoff}`,
   };
 }
 
@@ -13538,7 +13545,7 @@ function currentAccessWindowCommitment(
     economyReserve: economy.desiredCreditReserve,
     parentReservedCredits: exactParentTarget
       ? 0
-      : (parentCommitment?.trashBudget ?? 0),
+      : reservedAccessTrashCredits(input, parentCommitment),
   });
   if (!impact) return parentCommitment;
   if (impact.recommendation === "trash") {
@@ -13565,17 +13572,32 @@ function currentAccessWindowCommitment(
   };
 }
 
-function firstEvidenceNumber(
-  evidence: readonly string[],
-  prefixes: readonly string[],
-): number | undefined {
-  for (const prefix of prefixes) {
-    const entry = evidence.find((candidate) => candidate.startsWith(prefix));
-    if (!entry) continue;
-    const parsed = Number(entry.slice(prefix.length));
-    if (Number.isFinite(parsed) && parsed >= 0) return parsed;
-  }
-  return undefined;
+export function reservedAccessTrashCredits(
+  input: AiDecisionInput,
+  commitment: RunnerRunAccessCommitmentSignal | undefined,
+): number {
+  if (!commitment) return 0;
+  if (
+    typeof commitment.trashBudget === "number" &&
+    Number.isFinite(commitment.trashBudget) &&
+    commitment.trashBudget >= 0
+  )
+    return commitment.trashBudget;
+  if (
+    commitment.intendedAction !== "trash" &&
+    (commitment.trashBudget === "unknown" ||
+      commitment.trashBudget === "not_applicable")
+  )
+    return 0; // No committed trash objective reserves general credits.
+  throw new PlanResolutionFailure("missing_action_semantics", {
+    side: input.side,
+    stateVersion: input.playerView.stateVersion,
+    timingPoint: input.playerView.timingPoint,
+    legalActionTypes: input.legalActions.map((action) => action.type),
+    owner: "plan_module",
+    removalCondition:
+      "A committed Runner trash objective requires a known nonnegative general-credit budget from its access owner.",
+  });
 }
 
 function activeRunRootPlan(
@@ -13736,7 +13758,7 @@ function reassessActiveInformationRunParent(
   const knownPathCost = Math.max(0, knownPath.visibleBreakCost ?? 0);
   const reservedCredits =
     root.accessCommitment?.intendedAction === "trash"
-      ? Math.max(0, root.accessCommitment.trashBudget)
+      ? reservedAccessTrashCredits(input, root.accessCommitment)
       : 0;
   const fundingGap = Math.max(0, reservedCredits - knownPath.creditsAfterPath);
   const unavoidableHazardCount = Math.max(
@@ -13926,7 +13948,13 @@ function accessCommitmentFromModuleState(
   if (
     !commitment ||
     !Array.isArray(commitment.knownTargetDefinitionIds) ||
-    !Number.isFinite(commitment.trashBudget)
+    !(
+      commitment.trashBudget === "unknown" ||
+      commitment.trashBudget === "not_applicable" ||
+      (typeof commitment.trashBudget === "number" &&
+        Number.isFinite(commitment.trashBudget) &&
+        commitment.trashBudget >= 0)
+    )
   ) {
     return undefined;
   }
@@ -15842,9 +15870,8 @@ function buildCorpDomain(
   const concreteScoreProjects = concreteScoreProjectsBeforeOpeningRush.map(
     (project) => {
       if (
-        project.evidenceCode.startsWith(
-          "corp_recently_compromised_score_remote_requires_reprotection:",
-        )
+        project.routeAssessment ===
+        "corp_recently_compromised_score_remote_requires_reprotection"
       ) {
         return project;
       }
@@ -15864,6 +15891,7 @@ function buildCorpDomain(
           ...project,
           openingRush,
           feasible: project.feasible,
+          routeAssessment: "corp_opening_rush_engine_randomized" as const,
           evidenceCode: `corp_opening_rush_engine_randomized:${openingRush.quote.opportunityKey}`,
         };
       }
@@ -15899,6 +15927,8 @@ function buildCorpDomain(
           ? {
               ...project,
               feasible: false,
+              routeAssessment:
+                "corp_resident_score_parent_dominates_sibling_route" as const,
               evidenceCode: `corp_resident_score_parent_dominates_sibling_route:${residentScoreAgendaInstanceId}:${residentPreparedScoreProject.serverId}`,
             }
           : project;
@@ -15946,8 +15976,9 @@ function buildCorpDomain(
   const scoreProtectionProjects = scoreProjects
     .filter(
       (project) =>
-        !project.evidenceCode.startsWith(
-          "corp_resident_score_parent_dominates_sibling_route:",
+        !(
+          project.routeAssessment ===
+          "corp_resident_score_parent_dominates_sibling_route"
         ) &&
         project.protectionNeed !== undefined &&
         !corpScoreHorizonCertificationIsCurrent(input, project) &&
@@ -15994,6 +16025,7 @@ function buildCorpDomain(
       scan.fundingGap > 0
     ) {
       project.fundingGap = scan.fundingGap;
+      project.routeAssessment = "corp_score_protection_funding_gap";
       project.evidenceCode = `corp_score_protection_funding_gap:${project.serverId ?? "unbound"}:${scan.fundingGap}`;
     }
   }
@@ -17734,8 +17766,7 @@ function corpReservedScoreServerIds(
         (candidate) => candidate.id === project.serverId,
       );
       const exactLastClickContinuation =
-        project.evidenceCode ===
-        `corp_last_click_score_install_deferred:${project.serverId}`;
+        project.routeAssessment === "corp_last_click_score_install_deferred";
       const preparedScoreServer = (server?.ice.length ?? 0) > 0;
       return project.agendaInstanceId !== undefined &&
         project.phase === "install_agenda" &&
@@ -18264,6 +18295,45 @@ function scoreProjectForCandidate(
         developmentClickAvailable &&
         protectedScoreWindow &&
         (fundingGap ?? 0) === 0);
+    const routeAssessment: NonNullable<
+      CorpScoreProjectSignal["routeAssessment"]
+    > =
+      scorelineFeasibility?.deadline === "current_turn_only" &&
+      !sameTurnCloseout
+        ? "corp_current_turn_scoreline_unreachable"
+        : forcedAgendaDiscardRelief
+          ? "corp_forced_agenda_discard_score_attempt"
+          : recentlyCompromisedTarget
+            ? "corp_recently_compromised_score_remote_requires_reprotection"
+            : lastDrawAgendaRecycleWindow
+              ? "corp_last_draw_hq_agenda_recycle_install"
+              : deckoutAgendaFloodScoreWindow
+                ? "corp_deckout_agenda_flood_score_install"
+                : accessPunishingScoreDeceptionWindow
+                  ? "corp_access_punishing_agenda_deception_score_install"
+                  : !scoreActionSemanticsKnown
+                    ? "corp_score_protection_assessment_unknown"
+                    : !developmentClickAvailable
+                      ? "corp_last_click_score_install_deferred"
+                      : protectionNeed?.baseline.knowledge === "unknown"
+                        ? "corp_score_protection_assessment_unknown"
+                        : fundingGap !== undefined && fundingGap > 0
+                          ? "corp_score_protection_funding_gap"
+                          : remoteRequiresNearMatchpointMaturity
+                            ? "corp_near_matchpoint_remote_maturity_required"
+                            : lastViableDeckoutMatchpointWindow
+                              ? "corp_last_viable_deckout_matchpoint_install"
+                              : certifiedMatureRemoteScoreHorizon
+                                ? "corp_engine_certified_mature_remote_score_install"
+                                : boundedStagedScoreWindow
+                                  ? "corp_bounded_staged_score_install"
+                                  : !protectedScoreWindow
+                                    ? "corp_score_protection_required"
+                                    : !boundedScoreHorizon
+                                      ? "corp_score_horizon_unbounded"
+                                      : protectedScoreWindow
+                                        ? "corp_funded_protected_score_install"
+                                        : "corp_score_protection_required";
     return [
       {
         projectId,
@@ -18308,43 +18378,14 @@ function scoreProjectForCandidate(
         }),
         ...(fundingGap !== undefined && fundingGap > 0 ? { fundingGap } : {}),
         feasible,
-        evidenceCode:
-          scorelineFeasibility?.deadline === "current_turn_only" &&
-          !sameTurnCloseout
-            ? `corp_current_turn_scoreline_unreachable:${serverId ?? "unbound"}`
-            : forcedAgendaDiscardRelief
-              ? `corp_forced_agenda_discard_score_attempt:${serverId ?? "unbound"}`
-              : recentlyCompromisedTarget
-                ? `corp_recently_compromised_score_remote_requires_reprotection:${serverId}`
-                : lastDrawAgendaRecycleWindow
-                  ? `corp_last_draw_hq_agenda_recycle_install:${serverId ?? "unbound"}`
-                  : deckoutAgendaFloodScoreWindow
-                    ? `corp_deckout_agenda_flood_score_install:${serverId ?? "unbound"}`
-                    : accessPunishingScoreDeceptionWindow
-                      ? `corp_access_punishing_agenda_deception_score_install:${serverId ?? "unbound"}`
-                      : !scoreActionSemanticsKnown
-                        ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:missing_action_semantics`
-                        : !developmentClickAvailable
-                          ? `corp_last_click_score_install_deferred:${serverId ?? "unbound"}`
-                          : protectionNeed?.baseline.knowledge === "unknown"
-                            ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:${protectionNeed.baseline.unknownReason}`
-                            : fundingGap !== undefined && fundingGap > 0
-                              ? `corp_score_protection_funding_gap:${serverId ?? "unbound"}:${fundingGap}`
-                              : remoteRequiresNearMatchpointMaturity
-                                ? `corp_near_matchpoint_remote_maturity_required:${serverId ?? "unbound"}`
-                                : lastViableDeckoutMatchpointWindow
-                                  ? `corp_last_viable_deckout_matchpoint_install:${serverId ?? "unbound"}`
-                                  : certifiedMatureRemoteScoreHorizon
-                                    ? `corp_engine_certified_mature_remote_score_install:${serverId ?? "unbound"}`
-                                    : boundedStagedScoreWindow
-                                      ? `corp_bounded_staged_score_install:${serverId ?? "unbound"}`
-                                      : !protectedScoreWindow
-                                        ? `corp_score_protection_required:${serverId ?? "unbound"}`
-                                        : !boundedScoreHorizon
-                                          ? `corp_score_horizon_unbounded:${serverId ?? "unbound"}`
-                                          : protectedScoreWindow
-                                            ? `corp_funded_protected_score_install:${serverId ?? "unbound"}`
-                                            : `corp_score_protection_required:${serverId ?? "unbound"}`,
+        routeAssessment,
+        evidenceCode: `${routeAssessment}:${serverId ?? "unbound"}${
+          routeAssessment === "corp_score_protection_assessment_unknown"
+            ? `:${!scoreActionSemanticsKnown ? "missing_action_semantics" : protectionNeed?.baseline.knowledge === "unknown" ? protectionNeed.baseline.unknownReason : ""}`
+            : routeAssessment === "corp_score_protection_funding_gap"
+              ? `:${fundingGap}`
+              : ""
+        }`,
       },
     ];
   }
@@ -18473,6 +18514,31 @@ function scoreProjectForCandidate(
         scoreActionSemanticsKnown &&
         (fundedWindowProtected || certifiedMatureRemoteScoreHorizon) &&
         (fundingGap ?? 0) === 0);
+    const routeAssessment: NonNullable<
+      CorpScoreProjectSignal["routeAssessment"]
+    > =
+      scorelineFeasibility?.deadline === "current_turn_only" &&
+      !sameTurnCloseout
+        ? "corp_current_turn_scoreline_unreachable"
+        : deckoutAgendaFloodScoreWindow
+          ? "corp_deckout_agenda_flood_score_advance"
+          : exposedAgendaProgressRoute
+            ? "corp_exposed_agenda_progress_preserves_conversion_clock"
+            : !scoreActionSemanticsKnown
+              ? "corp_score_protection_assessment_unknown"
+              : protectionNeed?.baseline.knowledge === "unknown"
+                ? "corp_score_protection_assessment_unknown"
+                : fundingGap !== undefined && fundingGap > 0
+                  ? "corp_score_protection_funding_gap"
+                  : certifiedMatureRemoteScoreHorizon
+                    ? "corp_engine_certified_mature_remote_score_advance"
+                    : lastViableDeckoutMatchpointWindow
+                      ? "corp_last_viable_deckout_matchpoint_advance"
+                      : fundedWindowProtected
+                        ? "corp_funded_protected_score_advance"
+                        : candidate.semanticActionType === "score.advance_card"
+                          ? "corp_score_protection_required"
+                          : "visible_legal_score_conversion";
     return [
       {
         projectId,
@@ -18527,30 +18593,17 @@ function scoreProjectForCandidate(
         }),
         ...(fundingGap !== undefined && fundingGap > 0 ? { fundingGap } : {}),
         feasible,
+        routeAssessment,
         evidenceCode:
-          scorelineFeasibility?.deadline === "current_turn_only" &&
-          !sameTurnCloseout
-            ? `corp_current_turn_scoreline_unreachable:${serverId ?? "unbound"}`
-            : deckoutAgendaFloodScoreWindow
-              ? `corp_deckout_agenda_flood_score_advance:${serverId ?? "unbound"}`
-              : exposedAgendaProgressRoute
-                ? `corp_exposed_agenda_progress_preserves_conversion_clock:${serverId ?? "unbound"}`
-                : !scoreActionSemanticsKnown
-                  ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:missing_action_semantics`
-                  : protectionNeed?.baseline.knowledge === "unknown"
-                    ? `corp_score_protection_assessment_unknown:${serverId ?? "unbound"}:${protectionNeed.baseline.unknownReason}`
-                    : fundingGap !== undefined && fundingGap > 0
-                      ? `corp_score_protection_funding_gap:${serverId ?? "unbound"}:${fundingGap}`
-                      : certifiedMatureRemoteScoreHorizon
-                        ? `corp_engine_certified_mature_remote_score_advance:${serverId ?? "unbound"}`
-                        : lastViableDeckoutMatchpointWindow
-                          ? `corp_last_viable_deckout_matchpoint_advance:${serverId ?? "unbound"}`
-                          : fundedWindowProtected
-                            ? `corp_funded_protected_score_advance:${serverId ?? "unbound"}`
-                            : candidate.semanticActionType ===
-                                "score.advance_card"
-                              ? `corp_score_protection_required:${serverId ?? "unbound"}`
-                              : "visible_legal_score_conversion",
+          routeAssessment === "visible_legal_score_conversion"
+            ? routeAssessment
+            : `${routeAssessment}:${serverId ?? "unbound"}${
+                routeAssessment === "corp_score_protection_assessment_unknown"
+                  ? `:${!scoreActionSemanticsKnown ? "missing_action_semantics" : protectionNeed?.baseline.knowledge === "unknown" ? protectionNeed.baseline.unknownReason : ""}`
+                  : routeAssessment === "corp_score_protection_funding_gap"
+                    ? `:${fundingGap}`
+                    : ""
+              }`,
       },
     ];
   }
@@ -18973,6 +19026,7 @@ function sameTurnScoreConversionProjectForCandidate(
       routeSemanticActionTypes: [candidate.semanticActionType],
       phase: scorePhaseForConversionStep(step),
       sameTurnCloseout: true,
+      sameTurnConversionProof: "engine_quoted_path",
       ...(path.fundingPrefix
         ? {
             fundingGap: Math.max(
@@ -19404,9 +19458,8 @@ function corpScoreProjectAssessmentIsUnknown(
   project: CorpScoreProjectSignal,
 ): boolean {
   return (
-    project.evidenceCode.startsWith(
-      "corp_score_protection_assessment_unknown:",
-    ) || project.protectionNeed?.baseline.knowledge === "unknown"
+    project.routeAssessment === "corp_score_protection_assessment_unknown" ||
+    project.protectionNeed?.baseline.knowledge === "unknown"
   );
 }
 
@@ -20125,14 +20178,12 @@ function scoreProtectionStagingMayBackstopDirectRoute(
   );
 }
 
-function corpScoreProjectNeedsProtectionMaturity(
+export function corpScoreProjectNeedsProtectionMaturity(
   project: CorpScoreProjectSignal,
 ): boolean {
   return (
-    project.evidenceCode.startsWith("corp_score_horizon_unbounded:") ||
-    project.evidenceCode.startsWith(
-      "corp_near_matchpoint_remote_maturity_required:",
-    )
+    project.routeAssessment === "corp_score_horizon_unbounded" ||
+    project.routeAssessment === "corp_near_matchpoint_remote_maturity_required"
   );
 }
 
@@ -31707,7 +31758,7 @@ function runnerRunWindowActionAssessment(
           economyReserve: economy.desiredCreditReserve,
           parentReservedCredits: exactParentTrashTarget
             ? 0
-            : (runOrigin?.accessCommitment?.trashBudget ?? 0),
+            : reservedAccessTrashCredits(input, runOrigin?.accessCommitment),
         })
       : undefined;
   const committedParentPayoff = runnerRunOriginCommittedPayoff(runOrigin);
@@ -33921,7 +33972,48 @@ function uniqueBy<T>(
   ];
 }
 
-function uniqueScoreProjects(
+function sameScoreProjectMergeFacts(
+  left: CorpScoreProjectSignal,
+  right: CorpScoreProjectSignal,
+): boolean {
+  const facts = (project: CorpScoreProjectSignal) => [
+    project.agendaDefinitionId,
+    project.agendaInstanceId,
+    project.agendaPoints,
+    project.serverId,
+    project.routeAssessment,
+    project.sameTurnConversionProof,
+    project.terminalScore,
+    project.preventsTerminalSteal,
+    project.deadlinePressure,
+    project.fundingGap,
+    project.sameTurnFundingActionIds,
+    project.conversion,
+    project.advancementCounterChoiceBinding,
+    project.continuationReserve,
+    project.protectionNeed?.needId,
+    project.protectionNeed?.observedAtStateVersion,
+    project.protectionNeed?.objective,
+    project.protectionNeed?.scoreReserve,
+    project.protectionNeed?.baseline.knowledge,
+    project.protectionNeed?.baseline.knowledge === "unknown"
+      ? project.protectionNeed.baseline.unknownReason
+      : undefined,
+    project.scoreHorizonCertification,
+    project.uncertainty,
+    project.fundingMilestone,
+    project.openingRush?.status,
+    project.openingRush?.status === "qualified"
+      ? project.openingRush.quote
+      : project.openingRush?.reason,
+    project.setupNeed,
+    project.counterBank,
+    project.lastDrawScoreSurvival,
+  ];
+  return JSON.stringify(facts(left)) === JSON.stringify(facts(right));
+}
+
+export function uniqueScoreProjects(
   values: readonly CorpScoreProjectSignal[],
 ): CorpScoreProjectSignal[] {
   const phaseRank: Record<CorpScoreProjectSignal["phase"], number> = {
@@ -33956,17 +34048,17 @@ function uniqueScoreProjects(
       continue;
     }
     if (previous.feasible && !value.feasible) continue;
-    const valueHasExactSameTurnConversionEvidence =
+    const valueHasExactSameTurnConversionProof =
       value.sameTurnCloseout &&
-      value.evidenceCode.startsWith("corp_same_turn_score_conversion");
-    const previousHasExactSameTurnConversionEvidence =
+      value.sameTurnConversionProof === "engine_quoted_path";
+    const previousHasExactSameTurnConversionProof =
       previous.sameTurnCloseout &&
-      previous.evidenceCode.startsWith("corp_same_turn_score_conversion");
+      previous.sameTurnConversionProof === "engine_quoted_path";
     if (
-      valueHasExactSameTurnConversionEvidence !==
-      previousHasExactSameTurnConversionEvidence
+      valueHasExactSameTurnConversionProof !==
+      previousHasExactSameTurnConversionProof
     ) {
-      if (valueHasExactSameTurnConversionEvidence) {
+      if (valueHasExactSameTurnConversionProof) {
         byProject.set(value.projectId, value);
       }
       continue;
@@ -33974,7 +34066,7 @@ function uniqueScoreProjects(
     if (
       value.sameTurnCloseout === previous.sameTurnCloseout &&
       value.feasible === previous.feasible &&
-      value.evidenceCode === previous.evidenceCode
+      sameScoreProjectMergeFacts(value, previous)
     ) {
       byProject.set(value.projectId, {
         ...previous,
@@ -34395,9 +34487,7 @@ function corpDeferredLastClickScoreProject(
         !project.feasible &&
         !project.sameTurnCloseout &&
         (project.fundingGap ?? 0) === 0 &&
-        project.evidenceCode.startsWith(
-          "corp_last_click_score_install_deferred:",
-        ),
+        project.routeAssessment === "corp_last_click_score_install_deferred",
     )
     .sort(
       (left, right) =>

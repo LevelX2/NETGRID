@@ -2576,6 +2576,10 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     expect(evaluation).toMatchObject({
       targetServerId: "remote_1",
       accessPayoff: "trash_affordable",
+      accessFacts: {
+        knownTargetDefinitionIds: ["onr_v1_309_bbs-whispering-campaign"],
+        trashBudget: 4,
+      },
       knownAccessState: "known_payoff",
       recommendation: "run_now",
     });
@@ -2620,6 +2624,10 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     expect(evaluation).toMatchObject({
       targetServerId: "remote_1",
       accessPayoff: "trash_affordable",
+      accessFacts: {
+        knownTargetDefinitionIds: ["onr_v1_309_bbs-whispering-campaign"],
+        trashBudget: 2,
+      },
       knownAccessState: "known_payoff",
       recommendation: "run_now",
     });

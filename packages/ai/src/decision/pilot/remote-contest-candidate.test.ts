@@ -181,6 +181,7 @@ function frame(candidate: ActionSemanticCandidate): SemanticDecisionFrame {
       runTargets: [
         {
           schemaVersion: "runner-run-target-evaluation-v1",
+          accessFacts: { knownTargetDefinitionIds: [], trashBudget: "unknown" as const },
           targetServerId: "remote_1",
           targetKind: "remote",
           accessServerId: "remote_1",

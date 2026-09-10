@@ -60,6 +60,7 @@ function frame(params: {
       runTargets: [
         {
           schemaVersion: "runner-run-target-evaluation-v1",
+          accessFacts: { knownTargetDefinitionIds: [], trashBudget: "unknown" as const },
           targetServerId: "hq",
           targetKind: "hq",
           accessServerId: "hq",

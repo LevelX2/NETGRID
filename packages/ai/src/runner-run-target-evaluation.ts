@@ -1,3 +1,4 @@
+import type { RunnerAccessFacts } from "./access/runner-access-facts";
 import {
   type AiDecisionInput,
   type LegalAction,
@@ -586,6 +587,7 @@ function evaluateRunnerRunTarget(
     accessTargetKind,
     actionId: projection.actionId,
     accessPayoff,
+    accessFacts: payoff.accessFacts,
     ...(effectiveAccessPayoffContestable !== undefined
       ? { accessPayoffContestable: effectiveAccessPayoffContestable }
       : {}),
@@ -1141,6 +1143,7 @@ function payoffForTarget(
   economyPosture: RunnerEconomyPosture,
 ): {
   accessPayoff: RunnerAccessPayoff;
+  accessFacts: RunnerAccessFacts;
   accessPayoffContestable?: boolean;
   knownAccessDamage?: KnownRemoteAccessPayoff["observedAccessDamage"];
   knownAccessState: RunnerKnownAccessState;
@@ -1169,6 +1172,7 @@ function payoffForTarget(
   }
   return {
     accessPayoff: "unknown",
+    accessFacts: { knownTargetDefinitionIds: [], trashBudget: "unknown" },
     knownAccessState: "unknown",
     accessNoveltyRatio: 1,
     scoreAdjustment: 0,
@@ -1219,6 +1223,10 @@ function accessReplacementPayoffForTarget(
   if (!addsNewInformation) {
     return {
       accessPayoff: "known_low_value",
+      accessFacts: {
+        knownTargetDefinitionIds: [],
+        trashBudget: "not_applicable",
+      },
       knownAccessState: "known_no_current_payoff",
       accessNoveltyRatio: 0,
       scoreAdjustment: -640,
@@ -1227,6 +1235,10 @@ function accessReplacementPayoffForTarget(
   }
   return {
     accessPayoff: "access_bonus",
+    accessFacts: {
+      knownTargetDefinitionIds: [],
+      trashBudget: "not_applicable",
+    },
     knownAccessState: "known_payoff",
     accessNoveltyRatio: 1,
     scoreAdjustment: 0,
@@ -1340,6 +1352,7 @@ function rankedAccessTargetEvaluationEvidence(
 
 function remotePayoffToRunTarget(payoff: KnownRemoteAccessPayoff): {
   accessPayoff: RunnerAccessPayoff;
+  accessFacts: RunnerAccessFacts;
   accessPayoffContestable: boolean;
   knownAccessDamage?: KnownRemoteAccessPayoff["observedAccessDamage"];
   knownAccessState: RunnerKnownAccessState;
@@ -1363,11 +1376,13 @@ function remotePayoffToRunTarget(payoff: KnownRemoteAccessPayoff): {
     accessNoveltyRatio: 1,
     scoreAdjustment: -payoff.penalty,
     evidence: payoff.evidence,
+    accessFacts: payoff.accessFacts,
   };
 }
 
 function centralPayoffToRunTarget(payoff: KnownCentralAccessPayoff): {
   accessPayoff: RunnerAccessPayoff;
+  accessFacts: RunnerAccessFacts;
   knownAccessState: RunnerKnownAccessState;
   accessNoveltyRatio: number;
   scoreAdjustment: number;
@@ -1385,6 +1400,7 @@ function centralPayoffToRunTarget(payoff: KnownCentralAccessPayoff): {
     accessNoveltyRatio: payoff.accessNoveltyRatio,
     scoreAdjustment: (payoff.bonus ?? 0) - payoff.penalty,
     evidence: payoff.evidence,
+    accessFacts: payoff.accessFacts,
   };
 }
 
