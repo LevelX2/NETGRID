@@ -11,7 +11,7 @@ import type {
 import { projectRemoteRootValue } from "../access/remote-root-value-projection";
 import { rolesMatch } from "../role-match";
 import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
-import { assessRunnerAccessTrashImpactFromPlanningCard } from "../runtime/runner-access-trash-impact";
+import { assessRunnerAccessTrashImpactFromPlanningCard } from "../access/runner-access-trash-impact";
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();

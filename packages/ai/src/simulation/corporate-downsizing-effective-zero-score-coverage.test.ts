@@ -28,6 +28,8 @@ describe("Corporate Downsizing effective-zero score coverage", () => {
 
     expect(summary.errors).toEqual([]);
     expect(summary.runtimeFailures).toEqual([]);
+    expect(summary.replayOk).toBe(true);
+    expect(summary.replayErrors).toEqual([]);
     expect(summary.terminationKind).toBe("game_result");
     expect(summary.actionSequence).toEqual(
       expect.arrayContaining([
@@ -39,5 +41,7 @@ describe("Corporate Downsizing effective-zero score coverage", () => {
         }),
       ]),
     );
-  }, 30_000);
+    // This is a complete 500-action-budget integration run, including replay.
+    // Keep a local CI budget above the measured ~42-second baseline.
+  }, 120_000);
 });
