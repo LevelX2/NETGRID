@@ -78,6 +78,14 @@ export function canResolveOnPlayCardImplementationAbility(
       return effect.max >= 0;
     if (effect.kind === "pay_rez_cost_to_trash_rezzed_ice")
       return deps.rezzedIceTargetCount(state) > 0;
+    if (
+      effect.kind ===
+      "trash_rezzed_ice_on_last_successful_run_fort_and_add_tags"
+    )
+      return state.corp.servers.some(
+        (server) =>
+          server.id === state.runnerTurnFlags?.lastSuccessfulRunServerId,
+      );
     if (effect.kind === "trash_unrezzed_ice")
       return deps.unrezzedIceTargetCount(state) > 0;
     if (effect.kind === "corp_choice_rez_or_trash_ice")

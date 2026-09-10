@@ -21021,7 +21021,9 @@
     "planExecution": {
       "acceptablePlanKinds": ["corp.score_agenda"],
       "acceptableCapabilities": ["install_score_agenda"],
-      "requiredAssessmentEvidence": ["corp_bounded_staged_score_install:remote_1"]
+      "requiredAssessmentEvidence": [
+        "corp_bounded_staged_score_install:remote_1"
+      ]
     }
   }
 }

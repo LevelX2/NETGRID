@@ -1,6 +1,6 @@
 # Account-Alpha betreiben
 
-Stand: 2026-07-19
+Stand: 2026-09-05
 
 ## Voraussetzungen
 
@@ -17,6 +17,62 @@ Stand: 2026-07-19
   lokalen Start wird deshalb die vom Startskript ausgegebene gemeinsame
   LAN- oder Loopback-Hostvariante verwendet; im Internet übernimmt ein
   HTTPS-Reverse-Proxy die beiden Pfade unter der freigegebenen Origin.
+
+## Zugangsmodi
+
+Die Accountdaten besitzen genau eine Autorität und eine persistente
+Zugangsrichtlinie. `NETGRID_ACCOUNT_ACCESS_MODE` setzt nur den Ausgangswert,
+solange noch keine persistierte Auswahl existiert:
+
+- `invite_only` ist der unveränderte Standard des Entwicklungsbetriebs und
+  erhält den bestehenden Admin-, Einladungs- und Resetablauf.
+- `simple` ist der empfohlene lokale Produktmodus. Jeder erreichbare lokale
+  Nutzer darf ein Profil mit Anzeigenamen anlegen oder auswählen; NETGRID
+  merkt das aktive Profil über eine nicht erratbare HttpOnly-Sitzung je
+  Browser. Ein Spielerpasswort existiert in diesem Modus nicht.
+- `protected` erlaubt ebenfalls die direkte Profilanlage, verlangt aber
+  Anmeldename und mindestens 15 Zeichen langes Passwort.
+
+Selbstregistrierung und Profilwahl sind ausschließlich im Deploymentprofil
+`local` verfügbar. `private_internet` bleibt unabhängig vom konfigurierten
+Zugangsmodus geschlossen. Ein Wechsel zwischen `simple` und `protected`
+erfolgt nur lokal unter `/maintenance/accounts`, verlangt eine frische
+Maintenance-Passwortbestätigung und beendet alle Spielersitzungen. Beim
+Wechsel nach `protected` muss jedes aktive Profil ein Passwort erhalten.
+Vergessene Spielerpasswörter werden dort zurückgesetzt; Profil, Decks und
+Spielhistorie bleiben erhalten.
+
+Der installierbare Releaseoutput setzt `simple` als Ausgangswert. Das normale
+Startskript setzt die Variable nicht und bleibt dadurch bei `invite_only`.
+
+### Namen, Moduswechsel und Rückmeldung
+
+`displayName` ist der im Spiel gezeigte Name; `loginName` ist der eindeutige
+Anmeldename für die Passwortanmeldung. Beide bleiben beim Moduswechsel
+unverändert und werden in der Maintenance nebeneinander angezeigt. Im
+einfachen Modus angelegte Profile erhalten derzeit einen automatisch
+erzeugten `local_…`-Anmeldenamen; beim späteren Wechsel zu `protected` ist
+genau dieser in der Maintenance sichtbare Name zu verwenden.
+Das Maintenance-Passwort ist unabhängig von allen Spielerpasswörtern.
+
+Die Maintenance bietet aus `invite_only` beide lokalen Zielmodi an. Für
+`protected` werden ausschließlich aktive Profile mit Passwörtern übermittelt;
+offene Einladungen beziehungsweise deaktivierte Profile zählen nicht dazu.
+Der Client prüft 15 bis 256 Unicode-Zeichen vor der Maintenance-Bestätigung.
+Der Account-Service prüft alle Passwörter einschließlich Sperrliste vor der
+Hashberechnung und dem atomaren Schreiben. Ein ungültiges Passwort darf
+weder den Modus noch bestehende Passwörter oder Sitzungen verändern.
+Die Oberfläche meldet den Wechsel erst nach dem erneuten Lesen des
+gespeicherten Modus als erfolgreich und zeigt bei Ablehnung den konkreten
+Fehler. Die Spielseite liest Richtlinie und Sitzung bei Fokus-/Sichtbarkeits-
+Rückkehr sowie nach Accountoperationen erneut; widerrufene Sitzungen und
+die Profilauswahl bleiben dadurch nicht auf einem alten Stand. Ladefehler
+werden mit einer Wiederholungsmöglichkeit angezeigt.
+
+Fokussierte Nachweise: `apps/server/src/account-local-access.test.ts`
+(SQLite, normale Passwortberechnung, Namen, atomare Ablehnung, Persistenz
+und Sitzungswiderruf) und `tests/e2e/maintenance-accounts.spec.ts`
+(Firefox-Oberflächenabläufe mit isolierten API-Antworten).
 
 ## Ersten Admin lokal anlegen
 
@@ -49,7 +105,8 @@ liegt nur sein HMAC-Hash. Ein Invite ist standardmäßig 72 Stunden, ein Reset
 
 ## Sicherheitsverhalten
 
-- Keine öffentliche Registrierung und keine E-Mail-Erhebung in dieser Stufe.
+- Keine Registrierung im Deploymentprofil `private_internet` und keine
+  E-Mail-Erhebung in dieser Stufe.
 - Browser erhalten den Session-Rohwert ausschließlich als `HttpOnly`-Cookie.
 - Login-, Invite- und Resetmutationen verlangen eine erlaubte Origin;
   eingeloggte Mutationen zusätzlich `X-NETGRID-CSRF`.
@@ -131,8 +188,13 @@ Größenwerte ausweisen. Vollständige Statistikantworten gehören nicht in Logs
 
 - `Standard-Decks` werden vom Server geliefert, sind unveränderlich und
   können direkt am Matchstart verwendet werden.
+- Ein konkret ausgewähltes Standard-Deck kann vom Matchstart direkt im
+  Decktisch geöffnet werden. Die Vorschau schützt Deckzusammensetzung und
+  Speicheraktion, erlaubt aber eine temporäre Kartenanordnung auf dem Tisch.
 - `Als eigenes Deck kopieren` legt eine unabhängige persönliche Kopie an und
-  verbraucht einen Quotenplatz.
+  verbraucht einen Quotenplatz. Aus der Decktisch-Vorschau wird die aktuelle
+  Tischanordnung übernommen und anschließend die bearbeitbare Kopie geöffnet;
+  Verlassen ohne Kopie verwirft die temporäre Anordnung.
 - `Meine Decks` liegen ausschließlich im Accountstorage. Anlegen, Import,
   Duplizieren und Standardkopie werden bei ausgeschöpfter Quote abgewiesen.
 - Speichern verwendet die geladene Deckversion. Nach einem Versionskonflikt
@@ -167,7 +229,7 @@ Größenwerte ausweisen. Vollständige Statistikantworten gehören nicht in Logs
 ## Noch nicht enthalten
 
 Diese Alpha versendet keine E-Mails und besitzt weder E-Mail-Verifikation noch
-Self-Service-Recovery, Passkeys oder Zwei-Faktor-Authentisierung. Ein verlorenes
-Passwort wird durch einen Admin-Reset behandelt. Eine öffentliche
-Selbstregistrierung darf erst in einer späteren, separat gegateten Stufe
-aktiviert werden.
+Self-Service-Recovery, Passkeys oder Zwei-Faktor-Authentisierung. Ein
+verlorenes Spielerpasswort wird lokal durch Maintenance zurückgesetzt. Eine
+Selbstregistrierung außerhalb des lokalen Deploymentprofils darf erst in
+einer späteren, separat gegateten Stufe aktiviert werden.

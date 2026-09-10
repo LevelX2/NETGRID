@@ -40,9 +40,9 @@ describe("ActionGoalFit", () => {
 
     expect(highPressureFit.score).toBeGreaterThan(lowPressureFit.score);
     expect(
-      highPressureFit.components
-        .find((component) => component.component === "cost_fit")
-        ?.evidence,
+      highPressureFit.components.find(
+        (component) => component.component === "cost_fit",
+      )?.evidence,
     ).toEqual(expect.arrayContaining(["credit_pressure:high"]));
   });
 
@@ -478,7 +478,11 @@ function utility(
     run_access: ["run.start", "run.continue", "access.resolve_card"],
     remote_contest: ["run.start", "access.resolve_card"],
     corp_scoreline: ["score.advance_card", "score.agenda", "install.card"],
-    corp_ice_defense: ["corp_window.rez", "install.card", "economy.gain_credit"],
+    corp_ice_defense: [
+      "corp_window.rez",
+      "install.card",
+      "economy.gain_credit",
+    ],
     tag_punish: ["tag.trash_runner_resource", "card_ability.trigger"],
     damage_pressure: ["card_ability.trigger", "play.corp_operation"],
     target_resolution: ["choice.resolve", "card_ability.unknown"],

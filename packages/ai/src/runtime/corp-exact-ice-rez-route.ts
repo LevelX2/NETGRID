@@ -2,6 +2,7 @@ import type {
   AiDecisionInput,
   VisibleCard,
   VisibleCorpRezCostQuote,
+  VisibleCorpTraceIceRezQuote,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import {
@@ -11,6 +12,7 @@ import {
 } from "./corp-score-protection-assessment";
 import { readKnownCorpCentralAgendaThreat } from "./corp-central-defense-facts-adapter";
 import { visibleCorpIceDefenseProfile } from "./semantic-runtime-corp-effective-defense";
+import type { CorpBluffDefenseNeed } from "../plans/corp-bluff-defense-types";
 
 export type CorpExactIceRezRouteProjection = Readonly<{
   actionId: string;
@@ -22,11 +24,13 @@ export type CorpExactIceRezRouteProjection = Readonly<{
   after?: KnownCorpScoreProtectionAssessment;
   routeKind:
     | "access_reduction"
+    | "trace_access_block"
     | "exact_resource_exchange"
     | "known_access_path_tax"
     | "free_persistent_defense"
     | "qualitative_encounter_defense";
   marginalDefenseThreat?: "visible_agenda_remote" | "terminal_central_access";
+  traceAccessBlock?: Readonly<VisibleCorpTraceIceRezQuote>;
   freeCurrentEncounterDefense?: Readonly<{
     effect: "meaningful_tax_or_damage_or_disruption";
     evidenceSource: "visible_corp_ice_defense_profile";
@@ -59,6 +63,7 @@ export type CorpExactIceRezRouteProjection = Readonly<{
   }>;
   effect: "progress" | "satisfied";
   totalRezCredits: number;
+  bluffDefenseNeed?: CorpBluffDefenseNeed | undefined;
 }>;
 
 export type CorpExactInstalledIceRezQuoteRead = Readonly<{
@@ -123,14 +128,73 @@ export function projectExactCorpIceRezRoute(params: {
   candidate: ActionSemanticCandidate;
   sourceCard: VisibleCard;
   targetServerId: string;
+  bluffDefenseNeed?: CorpBluffDefenseNeed | undefined;
 }): CorpExactIceRezRouteProjection | undefined {
   const { input, candidate, sourceCard, targetServerId } = params;
   const quoteRead = readExactInstalledCorpIceRezQuote(params);
   if (!quoteRead) return undefined;
   const { quote, totalRezCredits } = quoteRead;
+  const traceQuotes = sourceCard.currentTraceIceRezQuotes?.filter(
+    (q) => q.actionId === candidate.actionId,
+  );
+  const trace = traceQuotes?.length === 1 ? traceQuotes[0] : undefined;
+  if (
+    trace &&
+    trace.sourceCardInstanceId === sourceCard.instanceId &&
+    trace.targetServerId === targetServerId &&
+    trace.stateVersion === input.playerView.stateVersion &&
+    trace.runId === input.playerView.run?.runId &&
+    input.playerView.run?.phase === "approach_ice" &&
+    input.playerView.run.position?.kind === "ice" &&
+    input.playerView.run.attackedServerId === targetServerId &&
+    input.playerView.servers.find((s) => s.id === targetServerId)?.ice[
+      input.playerView.run.position.iceIndex
+    ]?.instanceId === sourceCard.instanceId &&
+    trace.rezCredits === totalRezCredits &&
+    trace.corpBid === 0 &&
+    trace.variableValue ===
+      input.legalActions.find((a) => a.actionId === candidate.actionId)?.payload
+        ?.variableRezValue &&
+    nonNegativeSafeInteger(trace.maximumRunnerTraceStrength) &&
+    nonNegativeSafeInteger(trace.corpTraceStrength) &&
+    trace.corpTraceStrength > trace.maximumRunnerTraceStrength &&
+    trace.runnerCanBreak === false &&
+    trace.guaranteedRunEnd === true
+  ) {
+    return {
+      actionId: candidate.actionId,
+      sourceCardInstanceId: sourceCard.instanceId,
+      sourceDefinitionId: sourceCard.definitionId!,
+      targetServerId,
+      quote,
+      routeKind: "trace_access_block",
+      traceAccessBlock: trace,
+      effect: "satisfied",
+      totalRezCredits,
+    };
+  }
   const server = input.playerView.servers.find(
     (candidateServer) => candidateServer.id === targetServerId,
   )!;
+  const requestedBluff = params.bluffDefenseNeed;
+  const bluffDefenseNeed =
+    requestedBluff &&
+    requestedBluff.serverId === targetServerId &&
+    requestedBluff.iceInstanceId === sourceCard.instanceId &&
+    requestedBluff.observedAtStateVersion === input.playerView.stateVersion &&
+    requestedBluff.fundingGap === 0 &&
+    requestedBluff.requiredCredits <= input.playerView.own.credits &&
+    requestedBluff.requiredCredits >=
+      totalRezCredits + requestedBluff.encounterCredits &&
+    input.playerView.run?.attackedServerId === targetServerId &&
+    server.root.some(
+      (card) =>
+        card.instanceId === requestedBluff.sourceInstanceId &&
+        card.known &&
+        card.rezzed === false,
+    )
+      ? requestedBluff
+      : undefined;
   const serverIce = server.ice.map((ice) => ({
     instanceId: ice.instanceId,
     known: ice.known,
@@ -202,7 +266,8 @@ export function projectExactCorpIceRezRoute(params: {
     !resourceExchange &&
     !accessBlock &&
     !freeQualitativeEncounterDefense &&
-    marginalDefenseThreat === undefined
+    marginalDefenseThreat === undefined &&
+    !bluffDefenseNeed
   )
     return undefined;
   if (assessmentsKnown && probabilityComparison === undefined) return undefined;
@@ -231,12 +296,15 @@ export function projectExactCorpIceRezRoute(params: {
           before: knownBefore,
           after: knownAfter,
           totalRezCredits,
+          allowBluffTax: bluffDefenseNeed?.outcome === "access_cost",
         })
       : undefined;
   const qualitativeEncounterDefense =
     (probabilityComparison === 0 ||
       freeQualitativeEncounterDefense ||
-      (!assessmentsKnown && marginalDefenseThreat !== undefined)) &&
+      (!assessmentsKnown &&
+        (marginalDefenseThreat !== undefined ||
+          bluffDefenseNeed !== undefined))) &&
     !resourceExchange &&
     !accessBlock &&
     !freePersistentDefense &&
@@ -292,6 +360,7 @@ export function projectExactCorpIceRezRoute(params: {
         ? "satisfied"
         : "progress",
     totalRezCredits,
+    ...(bluffDefenseNeed ? { bluffDefenseNeed } : {}),
   };
 }
 
@@ -302,6 +371,7 @@ function readKnownCurrentRunAccessPathTax(params: {
   before: KnownCorpScoreProtectionAssessment;
   after: KnownCorpScoreProtectionAssessment;
   totalRezCredits: number;
+  allowBluffTax?: boolean;
 }): number | undefined {
   const { input, sourceCard, targetServerId, before, after, totalRezCredits } =
     params;
@@ -320,7 +390,10 @@ function readKnownCurrentRunAccessPathTax(params: {
   ) {
     return undefined;
   }
-  if (!server.root.some((card) => card.known && card.type === "agenda")) {
+  if (
+    !params.allowBluffTax &&
+    !server.root.some((card) => card.known && card.type === "agenda")
+  ) {
     return undefined;
   }
   const tax =
@@ -376,6 +449,22 @@ function isQualitativeEncounterDefenseOnCurrentRun(params: {
         effect.kind === "corp_paid_add_end_the_run_subroutine" &&
         nonNegativeSafeInteger(effect.creditCost),
     ) === true;
+  // Printed tax/disruption describes an ICE's potential, not necessarily
+  // progress on this run. A complete quote containing only future-encounter
+  // effects has no target after the innermost ICE. Keep mixed immediate
+  // effects and Engine-quoted paid encounter defenses independently useful.
+  if (
+    postRezQuote.complete === true &&
+    run.position.iceIndex === 0 &&
+    !hasEngineQuotedPaidEncounterEtr &&
+    corpIceEffectsOnlyReachFutureEncounters(
+      postRezQuote.effectiveRunQuote.subroutines.map(
+        (subroutine) => subroutine.type,
+      ),
+    )
+  ) {
+    return false;
+  }
   if (
     !profile.hasMeaningfulTaxOrDamage &&
     !profile.hasEncounterDisruption &&
@@ -396,6 +485,20 @@ function isQualitativeEncounterDefenseOnCurrentRun(params: {
     activationCredits !== undefined &&
     totalRezCredits + activationCredits <= input.playerView.own.credits
   );
+}
+
+export function corpIceEffectsOnlyReachFutureEncounters(
+  types: readonly string[],
+): boolean {
+  const futureTypes = new Set([
+    "set_run_encounter_tax",
+    "set_run_future_end_the_run_subroutine",
+    "set_run_future_strength_bonus",
+    "set_next_encounter_unless_fully_break_damage",
+    "set_next_encounter_lock",
+    "set_next_encounter_no_break_subroutines",
+  ]);
+  return types.length > 0 && types.every((type) => futureTypes.has(type));
 }
 
 export function corpEffectiveDefenseActivationCredits(
@@ -821,6 +924,30 @@ function ordinaryRezActionQuote(
   }
   if (
     quote.costKind === "variable" &&
+    quote.variableParameter.kind === "x_strength"
+  ) {
+    const p = quote.variableParameter;
+    const value = payload?.variableRezValue;
+    if (
+      payload?.variableRezKind !== "x_strength" ||
+      !nonNegativeSafeInteger(value) ||
+      value < p.minValue ||
+      value > p.maxValue ||
+      payload.variableRezCap !== p.maxValue ||
+      payload.variableRezAdditionalCost !==
+        value * p.additionalCreditsPerValue ||
+      payload.baseRezCost !== quote.finalCredits ||
+      payload.rezCostPaid !== actionCredits ||
+      payload.effectiveStrengthAfterRez !== value ||
+      (p.traceLimitFromValue &&
+        payload.effectiveTraceLimitAfterRez !== value) ||
+      actionCredits !== quote.finalCredits + value * p.additionalCreditsPerValue
+    )
+      return undefined;
+    return { ...quote, finalCredits: actionCredits };
+  }
+  if (
+    quote.costKind === "variable" &&
     quote.variableParameter.kind === "paid_end_the_run_subroutines"
   ) {
     const value = payload?.variableRezValue;
@@ -836,6 +963,38 @@ function ordinaryRezActionQuote(
       payload.rezCostPaid !== actionCredits ||
       payload.effectiveSubroutineCountAfterRez !== value ||
       actionCredits !== quote.finalCredits + additionalCredits
+    ) {
+      return undefined;
+    }
+    return { ...quote, finalCredits: actionCredits };
+  }
+  if (
+    quote.costKind === "variable" &&
+    quote.variableParameter.kind === "alternate_subtype"
+  ) {
+    const value = payload?.variableRezValue;
+    const additionalCredits = payload?.variableRezAdditionalCost;
+    const alternate = value === 1;
+    const expectedAdditionalCredits = alternate
+      ? quote.variableParameter.alternateSubtypesAdditionalCredits
+      : 0;
+    const expectedFinalCredits = alternate
+      ? quote.variableParameter.alternateSubtypesFinalCredits
+      : quote.variableParameter.baseSubtypesFinalCredits;
+    const expectedSubtypes = (
+      alternate
+        ? quote.variableParameter.alternateSubtypes
+        : quote.variableParameter.baseSubtypes
+    ).join(",");
+    if (
+      payload?.variableRezKind !== "alternate_subtype" ||
+      (value !== 0 && value !== 1) ||
+      !nonNegativeSafeInteger(additionalCredits) ||
+      additionalCredits !== expectedAdditionalCredits ||
+      payload.baseRezCost !== quote.finalCredits ||
+      payload.rezCostPaid !== actionCredits ||
+      payload.selectedSubtypesAfterRez !== expectedSubtypes ||
+      actionCredits !== expectedFinalCredits
     ) {
       return undefined;
     }
@@ -962,6 +1121,7 @@ export function exactCorpIceRezRoutesEqual(
     left.sourceDefinitionId === right.sourceDefinitionId &&
     left.targetServerId === right.targetServerId &&
     left.routeKind === right.routeKind &&
+    traceAccessBlocksEqual(left.traceAccessBlock, right.traceAccessBlock) &&
     left.freeCurrentEncounterDefense?.effect ===
       right.freeCurrentEncounterDefense?.effect &&
     left.freeCurrentEncounterDefense?.evidenceSource ===
@@ -969,6 +1129,17 @@ export function exactCorpIceRezRoutesEqual(
     left.knownAccessPathTax === right.knownAccessPathTax &&
     left.effect === right.effect &&
     left.totalRezCredits === right.totalRezCredits &&
+    left.bluffDefenseNeed?.sourceInstanceId ===
+      right.bluffDefenseNeed?.sourceInstanceId &&
+    left.bluffDefenseNeed?.iceInstanceId ===
+      right.bluffDefenseNeed?.iceInstanceId &&
+    left.bluffDefenseNeed?.observedAtStateVersion ===
+      right.bluffDefenseNeed?.observedAtStateVersion &&
+    left.bluffDefenseNeed?.requiredCredits ===
+      right.bluffDefenseNeed?.requiredCredits &&
+    left.bluffDefenseNeed?.encounterCredits ===
+      right.bluffDefenseNeed?.encounterCredits &&
+    left.bluffDefenseNeed?.outcome === right.bluffDefenseNeed?.outcome &&
     exactAccessBlocksEqual(left.accessBlock, right.accessBlock) &&
     exactOptionalProtectionAssessmentsEqual(left.before, right.before) &&
     exactOptionalProtectionAssessmentsEqual(left.after, right.after) &&
@@ -994,6 +1165,27 @@ export function exactCorpIceRezRoutesEqual(
       left.quote.increaseSourceDefinitionIds,
       right.quote.increaseSourceDefinitionIds,
     )
+  );
+}
+
+function traceAccessBlocksEqual(
+  left: CorpExactIceRezRouteProjection["traceAccessBlock"],
+  right: CorpExactIceRezRouteProjection["traceAccessBlock"],
+): boolean {
+  if (!left || !right) return left === right;
+  return (
+    left.actionId === right.actionId &&
+    left.sourceCardInstanceId === right.sourceCardInstanceId &&
+    left.targetServerId === right.targetServerId &&
+    left.stateVersion === right.stateVersion &&
+    left.runId === right.runId &&
+    left.rezCredits === right.rezCredits &&
+    left.variableValue === right.variableValue &&
+    left.corpBid === right.corpBid &&
+    left.corpTraceStrength === right.corpTraceStrength &&
+    left.maximumRunnerTraceStrength === right.maximumRunnerTraceStrength &&
+    left.runnerCanBreak === right.runnerCanBreak &&
+    left.guaranteedRunEnd === right.guaranteedRunEnd
   );
 }
 

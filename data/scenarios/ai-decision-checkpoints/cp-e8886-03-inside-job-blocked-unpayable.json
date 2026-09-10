@@ -4569,10 +4569,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "targetServerId": "hq"
-      },
-      {
-        "type": "gain_credit"
+        "sourceDefinitionId": "onr_v1_086_forged-activation-orders"
       }
     ],
     "forbiddenActions": [
@@ -4585,11 +4582,8 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.pressure_central", "runner.economy"],
-      "acceptableCapabilities": [
-        "pressure_hq_information",
-        "gain_general_liquid_credits"
-      ],
+      "acceptablePlanKinds": ["runner.pressure_central"],
+      "acceptableCapabilities": ["develop_onr_v1_086_forged-activation-orders"],
       "forbiddenCapabilities": ["pressure_rd_information"]
     }
   }

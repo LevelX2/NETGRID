@@ -29,7 +29,9 @@ export function selectedCorpHardwareTrashChoiceOptionIds(
     choice.source !== RUNNER_INSTALLED_MULTI_TRASH_CHOICE_SOURCE ||
     typeof choice.sourceCardInstanceId !== "string" ||
     choice.sourceCardInstanceId.length === 0 ||
-    !corpInstalledHardwareTrashOperationProfile(choice.sourceCardDefinitionId) ||
+    !corpInstalledHardwareTrashOperationProfile(
+      choice.sourceCardDefinitionId,
+    ) ||
     !Number.isSafeInteger(trashCount) ||
     trashCount < 1 ||
     choice.side !== "corp" ||

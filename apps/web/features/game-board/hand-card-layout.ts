@@ -71,12 +71,9 @@ export function handCardRowLayout({
   const cardsPerRow = Math.ceil(normalizedCount / rowCount);
   const defaultOffset = cardWidth * DEFAULT_OVERLAP_RATIO;
   const defaultRowWidth =
-    cardWidth * cardsPerRow +
-    (cardGap - defaultOffset) * (cardsPerRow - 1);
+    cardWidth * cardsPerRow + (cardGap - defaultOffset) * (cardsPerRow - 1);
   const requiredOffset =
-    (cardWidth * cardsPerRow +
-      cardGap * (cardsPerRow - 1) -
-      availableWidth) /
+    (cardWidth * cardsPerRow + cardGap * (cardsPerRow - 1) - availableWidth) /
     (cardsPerRow - 1);
   const maxOffset = Math.max(defaultOffset, cardWidth + cardGap - minimumStep);
   const overlapOffset =

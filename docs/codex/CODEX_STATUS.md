@@ -1,17 +1,16 @@
 # CODEX_STATUS
 
-Stand: 2026-08-21
+Stand: 2026-09-09
 
 ## Einstieg
 
 Für den aktuellen Projektstand gelten in dieser Reihenfolge:
 
-1. `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-2. `docs/architecture/README.md`
-3. `docs/architecture/engine/README.md`
-4. `docs/architecture/ai/README.md`
-5. passende `docs/runbooks/` und `docs/activities/`
-6. paketlokale `AGENTS.md`, Code, Tests und ausführbare Gates
+1. `docs/architecture/README.md`
+2. `docs/architecture/engine/README.md`
+3. `docs/architecture/ai/README.md`
+4. passende `docs/runbooks/` und `docs/activities/`
+5. paketlokale `AGENTS.md`, Code, Tests und ausführbare Gates
 
 Historische Statuschroniken, abgeschlossene Releasepakete, Prozesse und Reviews werden nicht als zweite Steuerungsschicht im Arbeitsbaum gepflegt. Dafür reicht die Git-Historie.
 
@@ -19,7 +18,12 @@ Historische Statuschroniken, abgeschlossene Releasepakete, Prozesse und Reviews 
 
 NETGRID ist eine private Version-0-Webanwendung mit deterministischer Rules Engine, lokalem/private-LAN-Multiplayer, SQLite-Storage, Deckbibliothek, Kartenkatalog, Replay-/Undo-Grundlage, Human-vs-Human, Human-vs-KI und KI-vs-KI-Analysepfaden.
 
-Die sichtbare Produktreife ist `V0.9`; die technische Buildkennung wird aus Git ermittelt. Führend ist `docs/decisions/product-version-and-build-identification-2026-07-17.md`.
+Die sichtbare Produktversion ist `V1.0`; die fortlaufende technische
+Buildkennung wird aus `git rev-list --count HEAD` ermittelt. Veröffentlichte
+Stände verwenden technisch `1.0.<Buildnummer>`. Die private
+Vorproduktionsumgebung erhält dadurch allein noch keine öffentliche Support-
+oder Rückwärtskompatibilitätszusage. Führend ist
+`docs/decisions/product-version-and-build-identification-2026-07-17.md`.
 
 Es gibt derzeit keine dauerhaft führende monolithische Release-Roadmap. Aktuelle Arbeit wird über `docs/activities/inbox/`, `docs/activities/in-progress/`, den Current-State-Status und bei Bedarf einen explizit aktuellen Scope-/Releaseplan gesteuert. Nach Abschluss wird die historische Release-Evidence entfernt.
 
@@ -28,6 +32,11 @@ Die Engine ist alleinige Regelautorität. UI, Server und KI reichen nur angebote
 ## Engine und Karten
 
 Originalset, Classic und Proteus sind technisch spielbar. Kartenspezifische Autorenwahrheit wird über die zentrale CardSpec-Architektur konsolidiert.
+
+Bezahlbare Assets und Upgrades können in der Corp-Hauptphase auch nach der
+letzten Aktion gerezzt werden, bis die Corp den Zug tatsächlich beendet.
+Der Null-Klick-Zweig verwendet dieselbe Root-Rez-Kostenquote. Bel-Recycling
+gegen Deckout und Remote Facilitys sofortige Extra-Aktion sind regressionsgeprüft.
 
 Das interne `testset` ist im normalen Laufzeitprofil deaktiviert. Es wird in
 Katalog, Deckdaten und Matchaufbau nur mit
@@ -53,6 +62,40 @@ Führend:
 
 ## KI
 
+R&D-Zugriffsfallen mit kostenloser Rez-Rückmischung besitzen jetzt eine
+exakte Install-/Rez-Linie im bestehenden Ambush-Owner, einschließlich
+begrenztem verdecktem Halten und Schutz reservierter Agenda-Orte. Defense
+bindet geeignete geschützte Köder an eine finanzierbare ICE-/Encounter-Folge;
+Economy schließt den begrenzten Bedarf. Geschlossene Rez-Fenster sind eine
+verbindliche Planungsgrenze. Bei bereits leerem R&D bindet Ambush die legale
+Install-/Rez-Rettung als dringliche Bedrohungsantwort vor gewöhnlicher
+Score-Finanzierung; nach Auffüllen entfällt dieser aktuelle Nachweis. Der
+Cleanup bewertet den Nutzen von Archives-Zugriffsfallen am tatsächlichen
+Abwurfziel. Unabhängige Ambush-Vorbereitung löscht keine fremden
+Agenda-Finanzierungsbedarfe mehr. Eigenständige Trace-Tag-Quellen erhalten
+eine Engine-Quote mit kleinstem ausreichendem Gebot und gebundener Trace-
+Fortsetzung. Vollständig mit Agendas überfüllte HQ darf Score durch eine
+begrenzte verdeckte Score-Linie entlasten. Installierte ungerezzte Counterbanken
+können für einen exakten Defense-Verbraucher profitabel vorbereitet werden;
+die Zahlungsquote unterstützt mehrere nötige Counterauszahlungen. Der mehrzügige Contract-Aufbau aus HQ bleibt offen. Aktuelle Fort-Pass-
+Verteidigung und variables Trace-ICE sind ausführbar; Runner unterscheidet
+Gebühr und Run-Abbruch. Der Ambush-Owner bindet bezahlte Zugriffseffekte an
+die private Engine-Choice und lehnt nachweislich leere Icebreaker-Counter-
+Zahlungen ab. Kontrolle 415 umfasst 40 saubere Originalspiele und 40 getrennte
+BBS-Variantenspiele. Corp-Siege 3 → 3, mittlere Punkte
+1,20 → 1,53; derselbe Niederlagen-Satz wird separat verglichen.
+Die Standardliste bleibt unverändert. Score-Finanzierung, Agenda-Risiko,
+Contract-Erstaufbau und die Bluff-Mischung bleiben begrenzt abgenommen.
+Ergebnisse und Testgrenzen stehen in
+`docs/architecture/ai/hidden-node-capability-review.md`.
+
+Die Corp erzeugt aus fehlenden HQ-Agendas keinen blinden Agenda-Suchauftrag.
+Vorhandenes Handpotenzial, Economy und Defense werden ohne diesen künstlichen
+Score-Parent entwickelt. Passives Runner-Einkommen nach erfolgreichen Runs
+und begrenzte Corp-Guthaben werden mit Kosten, Reserven und begrenztem
+Amortisationshorizont bewertet. Führend sind die Abschnitte 27.5, 28.2 und 28.6
+der `docs/architecture/ai/planning-architecture.md`.
+
 Die produktive KI ist Plan-first. Residente Planinstanzen, side-spezifische Scheduler, TurnPlanner, Commitment/Execution Lease, Kampagnenfortsetzung und eng gebundene Choice-Auflösung bilden den aktuellen Entscheidungsweg. Doctrine, Hints, Sensoren und Quotes liefern Information; sie besitzen keine parallele Action-Autorität.
 
 Führend:
@@ -66,6 +109,69 @@ Führend:
 
 Weitere KI-Arbeit ist überwiegend Play-Strength- und Modulerweiterung. Neue Beobachtungen werden als kleine Activities und Regressionstests geführt, nicht als neue globale Heuristikschicht oder dauerhafte Reviewchronik.
 
+Die aktuellen Grenzen von zweckgebundener Corp-Finanzierung und
+zonenspezifischer Fallen-Vorbereitung sind in
+`docs/architecture/ai/hidden-node-capability-review.md` abgegrenzt. Der
+charaktererhaltende Hidden-Node-Vergleich begründet derzeit weder einen
+Standarddeck-Tausch noch pauschale KI-Boni; die Originalliste bleibt
+unverändert. Im aktiven Capability-Paket entsteht eine eng gebundene
+zweckgebundene Economy-Finanzierung mit Rückgabe an den tatsächlichen
+Verbraucher. Auszahlung → tatsächlicher Economy-Rez sowie Auszahlung →
+Defense-Rez mit erhaltenem Parent und beendetem Support sind geprüft, letzteres
+auch mit Mobile Barricade im unveränderten Original-Corpdeck. Ein bereits
+rezzed und erschöpfter Contract wird für einen endlichen terminalen ICE-Rez-
+Bedarf aufgeladen, bei Bedarf um einen allgemeinen Credit ergänzt und über
+den Zugwechsel in Auszahlung/Rezzing überführt. Bedarf und Quelle werden
+nach jedem Schritt neu geprüft; gespeicherte Counter sind keine Liquidität.
+Erstinvestition und weitergehende Verbraucher bleiben begrenzt. Der 70er-
+Vergleich vor dem abschließenden Main-Abgleich ergibt 0→1 Corp-Siege,
+42→45 Corp-Punkte und 57→56 Nullscore-Niederlagen bei gültigen Replays ohne
+Runtimefehler. Die neue Contract-Vorbereitung wurde darin nicht ausgewählt;
+dieser kleine gemischte Systemeffekt ist kein allgemeiner Stärkennachweis.
+Die Current-State-Review grenzt vorbereitete Capability-Fixtures von
+Spielevidence und dem Integrationsstand ab. Die ehemals offenen 18
+Main-Baseline-Erwartungsfehler waren veraltete Testbindungen an historische
+Einzelaktionen, absolute Simulationspositionen und Vollspielstände. Sie sind
+gegen die aktuellen Owner-, Executor-, Capability-, Legalitäts- und
+Replayverträge neu gebunden. Der lokale Gesamttest vom 2026-09-08 ist vollständig
+grün: 5.215 AI-Tests in 619 Dateien über drei feste Shards, 3.777 Tests der
+übrigen Pakete, acht Spec-Tests, sieben Selfplay-Evidence-Tests und 15 E2E-Tests.
+Discovery, AI-Strukturgates, Paketgrenzen, Typechecks und Gesamtbuild sind
+ebenfalls bestanden. SP-082-Finanzierung, R&D-Protocol-Ordering und Test Spin
+verwenden jetzt gezielt hergestellte Engine-Pfade statt vorausgesetzter
+Vollspielverläufe. Dabei wurde zusätzlich ein echter Test-Spin-Fehler behoben:
+direktes Ausspielen, Such-Choice, Coverage-MU-Freigabe und Runstart-Ordering
+erhalten denselben exakt gebundenen Ursprung. Fehlende oder fremde Bindungen
+bleiben fail-closed; Replay und StateHash sind für die Pfade geprüft.
+Der E2E-Runner wartet nach Prozessende begrenzt auf die Dateifreigabe durch
+Windows; ein dauerhaft gesperrtes Artefakt lässt den Befehl weiterhin scheitern.
+Die finale unveränderte 40-Spiele-Population
+der Metaserie enthält 10.851 Entscheidungen ohne technische Audit-Flags;
+die 707 angewandten Choices sind gegen die LegalActions geprüft.
+Für wachsende Kataloge und
+Verhaltenssimulationen gilt der stabile Testvertrag aus
+`docs/architecture/test-tiers-and-package-boundaries-2026-07-10.md`.
+
+Historische Selfplay-Cycle-Reviews, Markdown-Matrix, Reporting-State und
+versionierte HTML-Blockberichte wurden nach dem abschließenden idempotenten
+Import vom 2026-08-30 entfernt. Führend sind die lokale SQLite-Registry, ihre
+Sicherungen und `docs/runbooks/ai-selfplay-evidence-registry.md`.
+
+Die Express-Shutdown-Metaserien (Registry-Paarungen 387, 395, 396) begründen
+keinen automatischen Standarddeck-Tausch. Der Killkern konvertiert tatsächlich;
+offene Arbeit betrifft geschützte Scorelinien, Archives-Schutz gegen sichtbare
+HQ-Umleitung und rechtzeitige Runner-Vorsorge. Eine mögliche verdeckte
+Tagabwehr ist weder eine sichere Abwehr noch ein garantierter Kill:
+Versuchskosten und alternative Gewinnlinien bleiben gemeinsam zu bewerten.
+Die verifizierten SP-251/252 korrigieren lokale Run-Dispositionsgrenzen und
+die Engine-Trennung von Ressourcenpool und gedeckeltem Ausgabenbudget;
+`planning-architecture.md` hält diese bestehenden Owner-Grenzen fest.
+Die fokussierte Integration bestätigt beide Fixes und einen vollständig
+aktions-/owner-/ressourcengleichen Exact-Replay. Die drei damals
+mitgeprüften älteren Score-Erwartungen sind im aktuellen Testvertrag anhand
+der verantwortlichen Root-/Support-Owner statt historischer Leaf-Aktionen
+abgedeckt.
+
 ## Plattform und Betrieb
 
 Aktuelle Betriebs- und Wartungsverträge liegen unter `docs/runbooks/`:
@@ -73,6 +179,32 @@ Aktuelle Betriebs- und Wartungsverträge liegen unter `docs/runbooks/`:
 - `account-alpha-operations.md`
 - `maintenance-control-plane.md`
 - `netgrid-local-transfer.md`
+- `windows-release-output.md`
+
+Ein installerneutraler Windows-x64-Produktoutput ist vorbereitet. Er trennt
+statische Produktdaten, Entwicklungs-/Testbestände und veränderliche lokale
+Daten durch einen positiven Releasevertrag. Web und Server laufen aus dem
+geprüften Output mit einem externen `NETGRID_DATA_ROOT`; interne Testkarten,
+Demo-Snapshots, Testspiele, Selfplay-Evidence und Entwicklungsdatenbanken
+werden nicht ausgeliefert. Führend sind
+`docs/architecture/windows/windows-release-boundary.md` und das zugehörige
+Runbook. Ein eigentlicher Windows-Installer, Launcher, Firewallsetup und
+Updater ist noch nicht implementiert. Die installerunabhängigen
+Produktvoraussetzungen sind umgesetzt: Releasebuilds tragen `V1.0` plus
+fortlaufende Git-Buildnummer, die gespeicherte Retention-Policy wird beim
+Backend-Start sofort asynchron geprüft, und lokale Installationen können ohne
+zweites Accountmodell zwischen einfachem und geschütztem Spielerzugang
+wechseln. Der Entwicklungsstart bleibt standardmäßig `invite_only`; der
+Windows-Releaseoutput erhält `simple` als Ausgangswert. Das beschlossene Zielbild umfasst einen
+klassischen per-machine Installer mit empfohlenem und benutzerdefiniertem
+Setupweg, mitgelieferter Node-Laufzeit, bedarfsgestartetem Tray-Launcher,
+lokalem oder Private-LAN-Betrieb, getrennten einfachen/geschützten
+Spielerprofilen, sicherer Maintenance-Ersteinrichtung, GitHub-Updates nach
+Zustimmung, Datensicherung/Rollback sowie vollständigem `de`/`en`/`fr`-
+Branding. Führend sind
+`docs/architecture/windows/windows-installer-product-contract.md` und der
+Paketprozess WIN-I01 bis WIN-I08. GitHub Releases bleibt der einzige Kanal;
+bis zur Umsetzung des Updaters erfolgen Download und Upgrade manuell.
 
 Der persönliche Kartenbildimport besitzt einen persistenten lokalen Store,
 lokale und explizite gehärtete HTTPS-Quellen sowie drei private
@@ -104,6 +236,9 @@ Je nach Änderungsscope sind insbesondere relevant:
 - `corepack pnpm check:engine-source-structure`;
 - `corepack pnpm check:engine-source-structure:selftest` bei Strukturguard-Arbeit;
 - `corepack pnpm check:ai` und die einschlägigen AI-Struktur-/Hint-Gates bei KI-Änderungen;
+- Releasegrenzen über `check:release-boundary`,
+  `build:windows-release-output` und den isolierten
+  `smoke:windows-release-output` bei Änderungen am Produktoutput;
 - Replay-, StateHash-, Hidden-Info- und deterministische Zufallstests bei betroffenen Enginepfaden;
 - `git diff --check` vor Abschluss eines Änderungsschnitts.
 

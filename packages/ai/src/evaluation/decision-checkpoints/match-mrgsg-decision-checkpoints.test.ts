@@ -56,8 +56,7 @@ describe("match MRGSG exact decision checkpoints", () => {
     expect(
       result.input.legalActions.some(
         (action) =>
-          action.type === "start_run" &&
-          action.payload?.serverId === "rd",
+          action.type === "start_run" && action.payload?.serverId === "rd",
       ),
     ).toBe(true);
   });

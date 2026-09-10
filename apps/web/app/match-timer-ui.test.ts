@@ -1,6 +1,19 @@
 import { describe, expect, it } from "vitest";
-import type { LegalAction, PlayerView, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
-import { formatMatchTimerDuration, formatPlayerClockDuration, matchTimerDecisionKey, matchTimerScopeLabel, playerClockLiveConsumed, playerClockLiveRemaining } from "./match-timer-ui";
+import type {
+  LegalAction,
+  PlayerView,
+  PublicGameEvent,
+  Side,
+  VisibleCard,
+} from "@netgrid/shared";
+import {
+  formatMatchTimerDuration,
+  formatPlayerClockDuration,
+  matchTimerDecisionKey,
+  matchTimerScopeLabel,
+  playerClockLiveConsumed,
+  playerClockLiveRemaining,
+} from "./match-timer-ui";
 
 describe("UI-only match timer helpers", () => {
   it("formats compact match durations", () => {
@@ -24,7 +37,7 @@ describe("UI-only match timer helpers", () => {
       decisionOwnerSide: "runner",
       activityStartedAtMs: 1_000,
       elapsedActivityMs: 4_000,
-      warningLevel: "none"
+      warningLevel: "none",
     } as const;
 
     expect(playerClockLiveConsumed(snapshot, "runner", 8_500)).toBe(33_500);
@@ -40,23 +53,43 @@ describe("UI-only match timer helpers", () => {
         source: "private-source",
         prompt: "Private Prompt",
         kind: "select_option",
-        options: [{ id: "secret-option", label: "Secret", value: "secret-card" }],
+        options: [
+          { id: "secret-option", label: "Secret", value: "secret-card" },
+        ],
         minSelections: 1,
         maxSelections: 1,
         stateVersion: 4,
-        visibility: "hidden_info_barrier"
-      }
+        visibility: "hidden_info_barrier",
+      },
     });
 
-    expect(matchTimerScopeLabel(viewWithPrivateChoice, [])).toBe("Runner entscheidet");
+    expect(matchTimerScopeLabel(viewWithPrivateChoice, [])).toBe(
+      "Runner entscheidet",
+    );
   });
 
   it("resets the decision key on state, side, choice and legal action changes", () => {
     const base = view("corp", { stateVersion: 2, activeSide: "corp" });
-    const baseKey = matchTimerDecisionKey({ matchId: "m1", playerView: base, legalActions: [legalAction("corp", "a1")] });
+    const baseKey = matchTimerDecisionKey({
+      matchId: "m1",
+      playerView: base,
+      legalActions: [legalAction("corp", "a1")],
+    });
 
-    expect(matchTimerDecisionKey({ matchId: "m1", playerView: { ...base, stateVersion: 3 }, legalActions: [legalAction("corp", "a1")] })).not.toBe(baseKey);
-    expect(matchTimerDecisionKey({ matchId: "m1", playerView: { ...base, activeSide: "runner" }, legalActions: [legalAction("corp", "a1")] })).not.toBe(baseKey);
+    expect(
+      matchTimerDecisionKey({
+        matchId: "m1",
+        playerView: { ...base, stateVersion: 3 },
+        legalActions: [legalAction("corp", "a1")],
+      }),
+    ).not.toBe(baseKey);
+    expect(
+      matchTimerDecisionKey({
+        matchId: "m1",
+        playerView: { ...base, activeSide: "runner" },
+        legalActions: [legalAction("corp", "a1")],
+      }),
+    ).not.toBe(baseKey);
     expect(
       matchTimerDecisionKey({
         matchId: "m1",
@@ -72,13 +105,19 @@ describe("UI-only match timer helpers", () => {
             minSelections: 1,
             maxSelections: 1,
             stateVersion: 2,
-            visibility: "public"
-          }
+            visibility: "public",
+          },
         },
-        legalActions: [legalAction("corp", "a1")]
-      })
+        legalActions: [legalAction("corp", "a1")],
+      }),
     ).not.toBe(baseKey);
-    expect(matchTimerDecisionKey({ matchId: "m1", playerView: base, legalActions: [legalAction("corp", "a2")] })).not.toBe(baseKey);
+    expect(
+      matchTimerDecisionKey({
+        matchId: "m1",
+        playerView: base,
+        legalActions: [legalAction("corp", "a2")],
+      }),
+    ).not.toBe(baseKey);
   });
 });
 
@@ -100,10 +139,14 @@ function view(side: Side, overrides: Partial<PlayerView> = {}): PlayerView {
       heapOrArchives: [],
       scoreArea: [],
       maxHandSize: 5,
-      tags: 0
+      tags: 0,
     },
     opponent: {
-      identity: card(`${opponent}-identity`, `${opponent} identity`, "identity"),
+      identity: card(
+        `${opponent}-identity`,
+        `${opponent} identity`,
+        "identity",
+      ),
       credits: 5,
       clicks: opponent === "corp" ? 3 : 4,
       agendaPoints: 0,
@@ -112,18 +155,22 @@ function view(side: Side, overrides: Partial<PlayerView> = {}): PlayerView {
       maxHandSize: 5,
       deckCount: 0,
       discardCount: 0,
-      scoreArea: []
+      scoreArea: [],
     },
     servers: [],
     publicEvents: [] as PublicGameEvent[],
     legalActions: [],
     winner: null,
     agendaPointsToWin: 7,
-    ...overrides
+    ...overrides,
   };
 }
 
-function card(instanceId: string, title: string, type: NonNullable<VisibleCard["type"]>): VisibleCard {
+function card(
+  instanceId: string,
+  title: string,
+  type: NonNullable<VisibleCard["type"]>,
+): VisibleCard {
   return { instanceId, known: true, title, type };
 }
 
@@ -138,6 +185,6 @@ function legalAction(side: Side, actionId: string): LegalAction {
     costs: [],
     targetRequirements: [],
     visibility: "public",
-    expiresAtStateVersion: 2
+    expiresAtStateVersion: 2,
   };
 }

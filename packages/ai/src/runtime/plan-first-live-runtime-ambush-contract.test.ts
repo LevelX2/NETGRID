@@ -86,7 +86,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     });
   });
 
-  it("lets an exact Ambush plan own an agenda install while its unsafe score parent stays blocked", () => {
+  it("does not let Ambush own a nonlethal agenda install while its unsafe score parent stays blocked", () => {
     resetResidentPlanPortfolioMemory();
     const trap = fetalAi();
     const install = installAmbush(trap, "new_remote", "install-fetal-ai");
@@ -97,19 +97,18 @@ describe("plan-first Corp ambush preplanning contract", () => {
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
 
     expect(decision).toMatchObject({
-      actionId: install.actionId,
-      reasonCode: "plan_first.corp.ambush_and_bluff",
+      actionId: "gain-credit",
+      reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
-    expect(decision.evidence).toEqual(
-      expect.arrayContaining([
-        "plan_assessment_evidence:corp_ambush_preplanned_exact_install:onr_proteus_004_fetal-ai:new_remote:assigned_domain_plan",
-        "plan_first_executor:plan:corp.ambush_and_bluff:ambush%3Afetal-ai%3Asetup%3Anew_remote",
-      ]),
-    );
 
     const portfolio = residentPlanPortfolioSnapshot(input);
-    expect(portfolio?.rootForegroundInstanceId).toBe(
+    expect(
+      portfolio?.instances.some(
+        (instance) => instance.moduleId === "corp.ambush_and_bluff",
+      ),
+    ).toBe(false);
+    expect(portfolio?.rootForegroundInstanceId).not.toBe(
       "plan:corp.ambush_and_bluff:ambush%3Afetal-ai",
     );
     expect(
@@ -134,7 +133,38 @@ describe("plan-first Corp ambush preplanning contract", () => {
     });
   });
 
-  it("hands a near-term access-punishing agenda deception to the score owner", () => {
+  it("lets Ambush own an agenda install when the exact access damage is lethal", () => {
+    resetResidentPlanPortfolioMemory();
+    const trap = fetalAi();
+    const install = installAmbush(
+      trap,
+      "new_remote",
+      "install-lethal-fetal-ai",
+    );
+    const input = corpInput([install, gainCredit(), endTurn()], [trap]);
+    input.playerView.own.credits = 5;
+    input.playerView.opponent.handCount = 1;
+    setCorpIntent(input, true);
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: install.actionId,
+      reasonCode: "plan_first.corp.ambush_and_bluff",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_assessment_evidence:corp_ambush_preplanned_exact_install:onr_proteus_004_fetal-ai:new_remote:assigned_domain_plan",
+        "plan_first_executor:plan:corp.ambush_and_bluff:ambush%3Afetal-ai%3Asetup%3Anew_remote",
+      ]),
+    );
+    expect(residentPlanPortfolioSnapshot(input)?.rootForegroundInstanceId).toBe(
+      "plan:corp.ambush_and_bluff:ambush%3Afetal-ai",
+    );
+  });
+
+  it("hands a lethal near-term access-punishing agenda deception to the score owner", () => {
     resetResidentPlanPortfolioMemory();
     const trap = fetalAi();
     const install = installAmbush(
@@ -158,6 +188,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
     const input = corpInput([install, gainCredit(), endTurn()], [trap]);
     input.playerView.own.credits = 5;
     input.playerView.own.clicks = 3;
+    input.playerView.opponent.handCount = 1;
     setCorpIntent(input, true);
 
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
@@ -199,6 +230,52 @@ describe("plan-first Corp ambush preplanning contract", () => {
     });
   });
 
+  it("does not donate a nonlethal access-punishing agenda through the score owner", () => {
+    resetResidentPlanPortfolioMemory();
+    const trap = fetalAi();
+    const install = installAmbush(
+      trap,
+      "new_remote",
+      "install-nonlethal-fetal-ai-score-deception",
+    );
+    install.payload = {
+      ...install.payload,
+      agendaInstallScoreHorizonQuoteSchemaVersion:
+        "corp-agenda-install-score-horizon-quote-v1",
+      agendaInstallScoreHorizonQuoteComplete: true,
+      agendaInstallScoreHorizonQuoteCardId: trap.instanceId,
+      agendaInstallScoreHorizonQuoteTargetServerId: "new_remote",
+      agendaInstallScoreHorizonQuoteExpiresAtStateVersion: 1,
+      agendaInstallScoreHorizonQuoteAdvancementRequirement: 5,
+      agendaInstallScoreHorizonQuoteMaximumCurrentTurnAdvances: 2,
+      agendaInstallScoreHorizonQuoteRemainingAdvancesAfterCurrentTurn: 3,
+      agendaInstallScoreHorizonQuoteNextCorpTurnGuaranteedFlexibleClicks: 3,
+    };
+    const credit = gainCredit();
+    const input = corpInput([install, credit, endTurn()], [trap]);
+    input.playerView.own.credits = 5;
+    input.playerView.own.clicks = 3;
+    input.playerView.opponent.handCount = 5;
+    setCorpIntent(input, true);
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+    expect(decision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
+    const portfolio = residentPlanPortfolioSnapshot(input);
+    expect(
+      portfolio?.instances.some(
+        (instance) => instance.moduleId === "corp.ambush_and_bluff",
+      ),
+    ).toBe(false);
+    expect(JSON.stringify(portfolio)).not.toContain(
+      "corp_access_punishing_agenda_deception_score_install",
+    );
+  });
+
   it("does not let a prepared sibling score parent reject an exact Ambush install", () => {
     resetResidentPlanPortfolioMemory();
     const trap = fetalAi();
@@ -221,6 +298,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
       [trap],
     );
     input.playerView.own.credits = 1;
+    input.playerView.opponent.handCount = 1;
     input.playerView.servers = [
       server("hq"),
       server("rd"),
@@ -626,7 +704,7 @@ describe("plan-first Corp ambush preplanning contract", () => {
       {
         ...mandatoryDraw,
         timingPoint: "corp_draw.mandatory_draw",
-        expiresAtStateVersion: 3,
+        expiresAtStateVersion: 2,
       },
     ];
     input.playerView.legalActions = input.legalActions;
@@ -635,6 +713,125 @@ describe("plan-first Corp ambush preplanning contract", () => {
       actionId: mandatoryDraw.actionId,
       reasonCode: "plan_first.engine_window",
       fallbackUsed: false,
+    });
+  });
+
+  it("keeps Lesley install and conversion on the exact resident scalable Ambush root", () => {
+    resetResidentPlanPortfolioMemory();
+    const trap = vacantSoulkiller();
+    const lesley = visibleCard("lesley-major", "corp", "upgrade", {
+      definitionId: "onr_proteus_062_lesley-major",
+      title: "Lesley Major",
+    });
+    const installTrap = installAmbush(
+      trap,
+      "remote_1",
+      "install-scalable-ambush",
+    );
+    const gain = gainCredit();
+    const input = corpInput([installTrap, gain], [trap, lesley]);
+    input.playerView.own.credits = 6;
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [], []),
+    ];
+    setCorpIntent(input, true);
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: installTrap.actionId,
+      reasonCode: "plan_first.corp.ambush_and_bluff",
+    });
+    const rootInstanceId =
+      "plan:corp.ambush_and_bluff:ambush%3Avacant-soulkiller";
+    expect(residentPlanPortfolioSnapshot(input)?.rootForegroundInstanceId).toBe(
+      rootInstanceId,
+    );
+
+    const installedTrap = { ...trap, advancementCounters: 0 };
+    const installLesley = installAmbush(
+      lesley,
+      "remote_1",
+      "install-lesley-beside-ambush",
+    );
+    input.playerView.stateVersion = 2;
+    input.actionNumber = 2;
+    input.playerView.own.gripOrHq = [lesley];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [], [installedTrap]),
+    ];
+    input.legalActions = [installLesley, gain].map((action) => ({
+      ...action,
+      expiresAtStateVersion: 2,
+    }));
+    input.playerView.legalActions = input.legalActions;
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: installLesley.actionId,
+      reasonCode: "plan_first.corp.ambush_and_bluff",
+      decisionDebug: {
+        planFirstDecision: {
+          route: { planInstanceId: rootInstanceId },
+        },
+      },
+    });
+
+    const installedLesley = { ...lesley, rezzed: true };
+    const triggerLesley = legalAction(
+      "trigger-lesley-beside-ambush",
+      "corp",
+      "trigger_ability",
+      "Lesley Major: 2 Advancement-Counter auf Vacant Soulkiller",
+      { credits: 5, clicks: 0 },
+      {
+        source: lesley.instanceId,
+        payload: {
+          cardId: lesley.instanceId,
+          sourceDefinitionId: lesley.definitionId!,
+          targetCardId: installedTrap.instanceId,
+          targetCardDefinitionId: installedTrap.definitionId!,
+          serverId: "remote_1",
+          fortRunWindowAbility:
+            "add_advancement_counters_after_passing_last_ice_on_this_fort",
+        },
+      },
+    );
+    input.playerView.stateVersion = 3;
+    input.actionNumber = 3;
+    input.playerView.timingPoint = "run.jack_out_window";
+    input.playerView.own.gripOrHq = [];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [], [installedTrap, installedLesley]),
+    ];
+    input.playerView.run = {
+      runId: "run-lesley-ambush",
+      attackedServerId: "remote_1",
+      phase: "movement",
+      position: { kind: "server", serverId: "remote_1" },
+      successful: false,
+    };
+    input.legalActions = [triggerLesley].map((action) => ({
+      ...action,
+      timingPoint: "run.jack_out_window",
+      expiresAtStateVersion: 3,
+    }));
+    input.playerView.legalActions = input.legalActions;
+
+    expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
+      actionId: triggerLesley.actionId,
+      reasonCode: "plan_first.corp.ambush_and_bluff",
+      decisionDebug: {
+        planFirstDecision: {
+          route: { planInstanceId: rootInstanceId },
+        },
+      },
     });
   });
 });

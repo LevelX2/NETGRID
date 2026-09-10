@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 
 import {
   isRunnerMemorySupportCard,
@@ -30,10 +34,9 @@ describe("runnerMemorySupportSearchAction", () => {
       ),
     ).toBe(false);
     expect(
-      runnerMemorySupportSearchAction(
-        action({ label: "Use ability" }),
-        ["memory_search"],
-      ),
+      runnerMemorySupportSearchAction(action({ label: "Use ability" }), [
+        "memory_search",
+      ]),
     ).toBe(true);
     expect(
       runnerMemorySupportSearchAction(action({ label: "Use ability" }), [

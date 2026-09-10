@@ -62,10 +62,7 @@ export function benchmarkCorpArchetypeFromRole(
   if (tokens.has("tag") || tokens.has("punish")) {
     return "tag_punish";
   }
-  if (
-    tokens.has("glacier") ||
-    tokens.has("scoring")
-  ) {
+  if (tokens.has("glacier") || tokens.has("scoring")) {
     return "remote_scoring";
   }
   return "unknown";

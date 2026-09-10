@@ -89,7 +89,10 @@ function costGate(
   return {
     gate: "cannot_pay",
     status: canPay ? "pass" : "block",
-    evidence: [`credit_cost:${creditCost}`, `available_credits:${params.availableCredits}`],
+    evidence: [
+      `credit_cost:${creditCost}`,
+      `available_credits:${params.availableCredits}`,
+    ],
   };
 }
 
@@ -183,7 +186,10 @@ function riskGate(
 function planStepGate(
   params: EvaluateActionGoalHardGatesParams,
 ): ActionGoalHardGateResult {
-  if (!params.expectedActionSignals || params.expectedActionSignals.length === 0) {
+  if (
+    !params.expectedActionSignals ||
+    params.expectedActionSignals.length === 0
+  ) {
     return {
       gate: "plan_step_mismatch",
       status: "not_applicable",

@@ -10,6 +10,7 @@ import {
   engineCardByDefinitionId,
 } from "@netgrid/cards/engine";
 import { describe, expect, it } from "vitest";
+import { applyAction } from "../apply-action";
 import { createGame } from "../create-game";
 import { addCorpCardToHqForTest } from "../../test-fixtures/index-test-helpers";
 import { getLegalActions } from "../legal-actions";
@@ -19,6 +20,113 @@ import {
 } from "./corp-punish-route-quotes";
 
 describe("Corp punish-route quote request", () => {
+  it.each([0, 12])(
+    "certifies public forced success and its extra tag against Runner bid %i",
+    (runnerBid) => {
+      const state = corpActionState("public-forced-success");
+      state.corp.credits = 8;
+      state.corp.clicks = 2;
+      state.runner.credits = 12;
+      state.runnerTurnFlags!.runAttemptsLastTurn = 1;
+      for (const id of state.runner.grip.splice(4)) {
+        state.runner.heap.push(id);
+        state.cardInstances[id]!.zone = { side: "runner", zone: "heap" };
+      }
+      const chance = addCorpCardToHqForTest(
+        state,
+        "onr_v1_284_chance-observation",
+        "chance",
+      );
+      const urban = addCorpCardToHqForTest(
+        state,
+        "onr_v1_307_urban-renewal",
+        "urban",
+      );
+      const crash = addConcealedRunnerResource(
+        state,
+        "onr_classic_044_crash-space",
+        "public",
+      );
+      state.cardInstances[crash]!.faceup = true;
+      const request = routeRequest(state, [
+        canonicalStep(
+          "tag",
+          0,
+          "trace_tag",
+          chance,
+          "onr_v1_284_chance-observation",
+          "abilities_on_play_trace",
+        ),
+        canonicalStep(
+          "damage",
+          1,
+          "meat_damage",
+          urban,
+          "onr_v1_307_urban-renewal",
+          "abilities_on_play_damage",
+        ),
+      ]);
+      const before = structuredClone(state);
+      expect(quoteCorpPunishRoute(state, request)).toMatchObject({
+        ok: true,
+        quote: {
+          complete: true,
+          totalClicks: 2,
+          tagOutcomeEnvelope: { addedTags: { minimum: 2, maximum: 2 } },
+          responsePaymentEnvelope: {
+            corpResponseCredits: { minimum: 0, maximum: 0 },
+            totalCorpCredits: { minimum: 8, maximum: 8 },
+          },
+          damageEnvelope: {
+            runnerHandCount: 4,
+            effectiveDamage: { minimum: 5, maximum: 5 },
+          },
+          responseKnowledge: "public_exact",
+        },
+      });
+      expect(state).toEqual(before);
+      const concealed = structuredClone(state);
+      concealed.cardInstances[crash]!.faceup = false;
+      const other = structuredClone(concealed);
+      other.cardInstances[crash]!.definitionId = "onr_proteus_142_hq-mole";
+      expect(quoteCorpPunishRoute(concealed, request)).toEqual(
+        quoteCorpPunishRoute(other, request),
+      );
+      let current = state;
+      for (const [side, source, bid] of [
+        ["corp", chance, undefined],
+        ["corp", undefined, 0],
+        ["runner", undefined, runnerBid],
+        ["corp", urban, undefined],
+      ] as const) {
+        const action = getLegalActions(current, side).find((a) =>
+          source ? a.source === source : a.type === "resolve_choice",
+        );
+        expect(action).toBeDefined();
+        const result = applyAction(current, {
+          matchId: current.matchId,
+          side,
+          actionId: action!.actionId,
+          clientKnownStateVersion: current.stateVersion,
+          ...(bid === undefined
+            ? {}
+            : {
+                selectedChoices: {
+                  choiceId: current.pendingChoice!.choiceId,
+                  selectedOptionIds: ["bid_" + bid],
+                },
+              }),
+        });
+        expect(result.ok).toBe(true);
+        if (!result.ok) throw new Error(result.error.message);
+        current = result.state;
+      }
+      expect(current.winner).toBe("corp");
+      expect(current.runner.tags).toBe(2);
+      expect(current.corp.credits).toBe(0);
+    },
+  );
+
   it("rejects a forged hardware capability outside CardSpec authority", () => {
     const state = corpActionState("punish-route-hardware-owner-xor");
     state.runner.tags = 1;
@@ -460,77 +568,84 @@ describe("Corp punish-route quote request", () => {
     });
   });
 
-  it("certifies Manhunt's Engine-resolved trace-margin tags for the punish owner", () => {
-    const state = corpActionState("punish-route-manhunt-scorched");
-    state.corp.credits = 13;
-    state.corp.clicks = 2;
-    state.runner.credits = 3;
-    state.runnerTurnFlags = {
-      ...(state.runnerTurnFlags ?? {
-        stoleAgendaThisTurn: false,
-        stoleAgendaLastTurn: false,
-      }),
-      runAttemptsLastTurn: 1,
-    };
-    const manhunt = addCorpCardToHqForTest(
-      state,
-      "onr_proteus_050_manhunt",
-      "manhunt",
-    );
-    const scorched = addCorpCardToHqForTest(
-      state,
-      "onr_v1_302_scorched-earth",
-      "scorched-after-manhunt",
-    );
+  it.each([
+    { runnerCredits: 3, bid: 0 },
+    { runnerCredits: 6, bid: 1 },
+    { runnerCredits: 7, bid: 2 },
+  ])(
+    "certifies Manhunt with the least sufficient bid ($runnerCredits Runner credits)",
+    ({ runnerCredits, bid }) => {
+      const state = corpActionState("punish-route-manhunt-scorched");
+      state.corp.credits = 13;
+      state.corp.clicks = 2;
+      state.runner.credits = runnerCredits;
+      state.runnerTurnFlags = {
+        ...(state.runnerTurnFlags ?? {
+          stoleAgendaThisTurn: false,
+          stoleAgendaLastTurn: false,
+        }),
+        runAttemptsLastTurn: 1,
+      };
+      const manhunt = addCorpCardToHqForTest(
+        state,
+        "onr_proteus_050_manhunt",
+        "manhunt",
+      );
+      const scorched = addCorpCardToHqForTest(
+        state,
+        "onr_v1_302_scorched-earth",
+        "scorched-after-manhunt",
+      );
 
-    const result = quoteCorpPunishRoute(
-      state,
-      routeRequest(state, [
-        canonicalStep(
-          "trace-margin-tags",
-          0,
-          "trace_tag",
-          manhunt,
-          "onr_proteus_050_manhunt",
-          "on_play_trace_six_tags_by_margin",
-        ),
-        canonicalStep(
-          "damage-after-margin-tags",
-          1,
-          "meat_damage",
-          scorched,
-          "onr_v1_302_scorched-earth",
-          "abilities_on_play_damage",
-        ),
-      ]),
-    );
+      const result = quoteCorpPunishRoute(
+        state,
+        routeRequest(state, [
+          canonicalStep(
+            "trace-margin-tags",
+            0,
+            "trace_tag",
+            manhunt,
+            "onr_proteus_050_manhunt",
+            "on_play_trace_six_tags_by_margin",
+          ),
+          canonicalStep(
+            "damage-after-margin-tags",
+            1,
+            "meat_damage",
+            scorched,
+            "onr_v1_302_scorched-earth",
+            "abilities_on_play_damage",
+          ),
+        ]),
+      );
 
-    expect(result).toMatchObject({
-      ok: true,
-      quote: {
-        complete: true,
-        incompleteReasons: [],
-        totalClicks: 2,
-        totalActionCredits: 7,
-        tagTrigger: {
-          kind: "trace_tag_step",
-          sourceStepId: "trace-margin-tags",
-          traceLimit: 6,
+      expect(result).toMatchObject({
+        ok: true,
+        quote: {
+          complete: true,
+          incompleteReasons: [],
+          totalClicks: 2,
+          totalActionCredits: 7,
+          tagTrigger: {
+            kind: "trace_tag_step",
+            sourceStepId: "trace-margin-tags",
+            traceLimit: 6,
+          },
+          responsePaymentEnvelope: {
+            responseKind: "trace_bid",
+            corpResponseCredits: { minimum: 0, maximum: bid },
+            totalCorpCredits: { minimum: 7, maximum: 7 + bid },
+            runnerResponseCredits: { minimum: 0, maximum: runnerCredits },
+          },
+          damageEnvelope: {
+            rawDamage: { meat: 4, total: 4 },
+          },
         },
-        responsePaymentEnvelope: {
-          responseKind: "trace_bid",
-          corpResponseCredits: { minimum: 0, maximum: 6 },
-          totalCorpCredits: { minimum: 7, maximum: 13 },
-          runnerResponseCredits: { minimum: 0, maximum: 3 },
-        },
-        damageEnvelope: {
-          rawDamage: { meat: 4, total: 4 },
-        },
-      },
-    });
-    if (!result.ok) throw new Error(result.error.message);
-    expect(result.quote.tagTrigger.requiredRunnerTags).toBeGreaterThan(0);
-  });
+      });
+      if (!result.ok) throw new Error(result.error.message);
+      expect(result.quote.tagTrigger.requiredRunnerTags).toBeGreaterThan(0);
+    },
+  );
 
   it("bounds a visible tag-prevention response instead of declaring the trace window unknown", () => {
     const state = corpActionState("punish-route-visible-tag-prevention");

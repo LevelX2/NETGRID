@@ -8,11 +8,14 @@ import {
 
 const PAY_REZ_COST_TO_TRASH_REZZED_ICE = "pay_rez_cost_to_trash_rezzed_ice";
 const TRASH_UNREZZED_ICE = "trash_unrezzed_ice";
-const TRASH_UNREZZED_ICE_ABILITY_KEY =
-  "abilities_on_play_trash_unrezzed_ice";
+const CORP_CHOICE_REZ_OR_TRASH_ICE = "corp_choice_rez_or_trash_ice";
+const TRASH_UNREZZED_ICE_ABILITY_KEY = "abilities_on_play_trash_unrezzed_ice";
 const ROUTE_OPENING_PAYOFF_FLOOR = 120;
 
-export type RunnerTargetedIceTrashState = "rezzed" | "unrezzed";
+export type RunnerTargetedIceTrashState =
+  | "rezzed"
+  | "unrezzed"
+  | "rez_or_trash";
 
 export type RunnerTargetedIceTrashCommitment = {
   kind: "targeted_ice_trash";
@@ -67,13 +70,13 @@ export function runnerTargetedIceTrashState(
   }
   const targets = new Set(candidate.effectTargets ?? []);
   if (targets.has(PAY_REZ_COST_TO_TRASH_REZZED_ICE)) return "rezzed";
+  if (targets.has(CORP_CHOICE_REZ_OR_TRASH_ICE)) return "rez_or_trash";
   if (
     targets.has(TRASH_UNREZZED_ICE) ||
     candidate.abilityKey === TRASH_UNREZZED_ICE_ABILITY_KEY ||
     candidate.targetContext?.targetProfileMatches.some(
       (match) =>
-        match.targetProfileId ===
-        "use_target:installed_ice:unrezzed_ice_trash",
+        match.targetProfileId === "use_target:installed_ice:unrezzed_ice_trash",
     )
   ) {
     return "unrezzed";
@@ -148,27 +151,141 @@ export function runnerTargetedIceTrashPlanCommitment(params: {
   const rig = input.playerView.own.rig ?? [];
   const routes = params.planTargets.flatMap<RunnerTargetedIceTrashRoute>(
     (target): RunnerTargetedIceTrashRoute[] => {
-    if (target.payoffValue <= 0) return [];
-    const server = input.playerView.servers.find(
-      (candidateServer) => candidateServer.id === target.serverId,
-    );
-    if (!server || server.ice.length === 0) return [];
-    if (
-      target.ownerModuleId === "runner.contest_remote" &&
-      target.knownAgendaThreat !== true &&
-      server.root.length === 0
-    ) {
-      return [];
-    }
-    if (targetIceState === "unrezzed") {
-      return server.ice.flatMap((ice, targetIcePosition) => {
-        if (ice.rezzed === true) return [];
-        const remainingUnrezzedCount = server.ice.filter(
-          (candidateIce, index) =>
-            index !== targetIcePosition && candidateIce.rezzed !== true,
-        ).length;
+      if (target.payoffValue <= 0) return [];
+      const server = input.playerView.servers.find(
+        (candidateServer) => candidateServer.id === target.serverId,
+      );
+      if (!server || server.ice.length === 0) return [];
+      if (
+        target.ownerModuleId === "runner.contest_remote" &&
+        target.knownAgendaThreat !== true &&
+        server.root.length === 0
+      ) {
+        return [];
+      }
+      if (targetIceState === "unrezzed" || targetIceState === "rez_or_trash") {
+        return server.ice.flatMap((ice, targetIcePosition) => {
+          if (ice.rezzed === true) return [];
+          const remainingUnrezzedCount = server.ice.filter(
+            (candidateIce, index) =>
+              index !== targetIcePosition && candidateIce.rezzed !== true,
+          ).length;
+          const corpCreditPressureValue =
+            targetIceState === "rez_or_trash"
+              ? Math.max(0, 5 - input.playerView.opponent.credits) * 20
+              : 0;
+          const routeNetValue =
+            target.payoffValue +
+            corpCreditPressureValue -
+            remainingUnrezzedCount * 25;
+          if (routeNetValue <= 0) return [];
+          return [
+            {
+              commitment: {
+                kind: "targeted_ice_trash" as const,
+                sourceActionId: candidate.actionId,
+                sourceCardInstanceId: candidate.sourceCardInstanceId!,
+                sourceDefinitionId: candidate.sourceDefinitionId!,
+                plannedAtStateVersion: input.playerView.stateVersion,
+                ownerModuleId: target.ownerModuleId,
+                ownerDedupeKey: target.ownerDedupeKey,
+                serverId: target.serverId,
+                targetIceInstanceId: ice.instanceId,
+                targetIcePosition,
+                targetIceState,
+                targetRezCost: 0,
+                evidenceCodes: [
+                  "runner_targeted_ice_trash_preflight:complete",
+                  `runner_targeted_ice_trash_owner:${target.ownerModuleId}`,
+                  `runner_targeted_ice_trash_server:${target.serverId}`,
+                  `runner_targeted_ice_trash_position:${targetIcePosition}`,
+                  `runner_targeted_ice_trash_state:${targetIceState}`,
+                  ...(targetIceState === "rez_or_trash"
+                    ? [
+                        `runner_targeted_ice_trash_corp_credits:${input.playerView.opponent.credits}`,
+                        `runner_targeted_ice_trash_corp_credit_pressure_value:${corpCreditPressureValue}`,
+                      ]
+                    : []),
+                  `runner_targeted_ice_trash_remaining_unrezzed:${remainingUnrezzedCount}`,
+                  `runner_targeted_ice_trash_route_net_value:${routeNetValue}`,
+                ],
+              },
+              score: routeNetValue + targetIcePosition,
+            },
+          ];
+        });
+      }
+      const originalPathFullyVisible = server.ice.every(
+        (ice) => ice.known !== false && ice.rezzed === true,
+      );
+      if (!originalPathFullyVisible) return [];
+      const originalPath = assessKnownRezzedIcePath(
+        server.ice,
+        rig,
+        runnerRunPathCreditBudgetWithVisiblePools(
+          input.playerView.own.credits,
+          rig,
+        ),
+        server.root,
+        input.playerView.opponent.credits,
+      );
+      return server.ice.flatMap((ice) => {
+        const targetRezCost = ice.rezCost;
+        if (
+          ice.known === false ||
+          ice.rezzed !== true ||
+          !Number.isSafeInteger(targetRezCost) ||
+          (targetRezCost ?? -1) < 0 ||
+          (targetRezCost ?? Number.POSITIVE_INFINITY) >
+            input.playerView.own.credits
+        ) {
+          return [];
+        }
+        const remainingIce = server.ice.filter(
+          (candidateIce) => candidateIce.instanceId !== ice.instanceId,
+        );
+        if (
+          remainingIce.some(
+            (remaining) =>
+              remaining.known === false || remaining.rezzed !== true,
+          )
+        ) {
+          return [];
+        }
+        const remainingCredits =
+          input.playerView.own.credits - (targetRezCost as number);
+        const remainingPath = assessKnownRezzedIcePath(
+          remainingIce,
+          rig,
+          runnerRunPathCreditBudgetWithVisiblePools(remainingCredits, rig),
+          server.root,
+          input.playerView.opponent.credits,
+        );
+        if (
+          !remainingPath.canReachAccess ||
+          (remainingPath.unavoidableVisibleIceHazardCount ?? 0) > 0
+        ) {
+          return [];
+        }
+        const originalPathProvenBlocked = !originalPath.canReachAccess;
+        const guaranteedVisibleBreakSavings = Math.max(
+          0,
+          (originalPath.visibleBreakCost ?? 0) -
+            (remainingPath.visibleBreakCost ?? 0),
+        );
+        if (
+          !originalPathProvenBlocked &&
+          guaranteedVisibleBreakSavings <= (targetRezCost as number)
+        ) {
+          return [];
+        }
+        const remainingPathCost = Math.max(
+          0,
+          remainingPath.visibleBreakCost ?? 0,
+        );
         const routeNetValue =
-          target.payoffValue - remainingUnrezzedCount * 25;
+          target.payoffValue -
+          ((targetRezCost as number) + remainingPathCost) * 10;
         if (routeNetValue <= 0) return [];
         return [
           {
@@ -182,128 +299,27 @@ export function runnerTargetedIceTrashPlanCommitment(params: {
               ownerDedupeKey: target.ownerDedupeKey,
               serverId: target.serverId,
               targetIceInstanceId: ice.instanceId,
-              targetIcePosition,
+              targetIcePosition: server.ice.findIndex(
+                (candidateIce) => candidateIce.instanceId === ice.instanceId,
+              ),
               targetIceState,
-              targetRezCost: 0,
+              targetRezCost: targetRezCost as number,
               evidenceCodes: [
                 "runner_targeted_ice_trash_preflight:complete",
                 `runner_targeted_ice_trash_owner:${target.ownerModuleId}`,
                 `runner_targeted_ice_trash_server:${target.serverId}`,
-                `runner_targeted_ice_trash_position:${targetIcePosition}`,
-                "runner_targeted_ice_trash_state:unrezzed",
-                `runner_targeted_ice_trash_remaining_unrezzed:${remainingUnrezzedCount}`,
+                `runner_targeted_ice_trash_target:${ice.instanceId}`,
+                `runner_targeted_ice_trash_rez_cost:${targetRezCost}`,
+                `runner_targeted_ice_trash_original_path_blocked:${originalPathProvenBlocked}`,
+                `runner_targeted_ice_trash_guaranteed_savings:${guaranteedVisibleBreakSavings}`,
+                `runner_targeted_ice_trash_remaining_path_cost:${remainingPathCost}`,
                 `runner_targeted_ice_trash_route_net_value:${routeNetValue}`,
               ],
             },
-            score: routeNetValue + targetIcePosition,
+            score: routeNetValue - remainingIce.length,
           },
         ];
       });
-    }
-    const originalPathFullyVisible = server.ice.every(
-      (ice) => ice.known !== false && ice.rezzed === true,
-    );
-    if (!originalPathFullyVisible) return [];
-    const originalPath = assessKnownRezzedIcePath(
-      server.ice,
-      rig,
-      runnerRunPathCreditBudgetWithVisiblePools(
-        input.playerView.own.credits,
-        rig,
-      ),
-      server.root,
-      input.playerView.opponent.credits,
-    );
-    return server.ice.flatMap((ice) => {
-      const targetRezCost = ice.rezCost;
-      if (
-        ice.known === false ||
-        ice.rezzed !== true ||
-        !Number.isSafeInteger(targetRezCost) ||
-        (targetRezCost ?? -1) < 0 ||
-        (targetRezCost ?? Number.POSITIVE_INFINITY) >
-          input.playerView.own.credits
-      ) {
-        return [];
-      }
-      const remainingIce = server.ice.filter(
-        (candidateIce) => candidateIce.instanceId !== ice.instanceId,
-      );
-      if (
-        remainingIce.some(
-          (remaining) => remaining.known === false || remaining.rezzed !== true,
-        )
-      ) {
-        return [];
-      }
-      const remainingCredits =
-        input.playerView.own.credits - (targetRezCost as number);
-      const remainingPath = assessKnownRezzedIcePath(
-        remainingIce,
-        rig,
-        runnerRunPathCreditBudgetWithVisiblePools(remainingCredits, rig),
-        server.root,
-        input.playerView.opponent.credits,
-      );
-      if (
-        !remainingPath.canReachAccess ||
-        (remainingPath.unavoidableVisibleIceHazardCount ?? 0) > 0
-      ) {
-        return [];
-      }
-      const originalPathProvenBlocked = !originalPath.canReachAccess;
-      const guaranteedVisibleBreakSavings = Math.max(
-        0,
-        (originalPath.visibleBreakCost ?? 0) -
-          (remainingPath.visibleBreakCost ?? 0),
-      );
-      if (
-        !originalPathProvenBlocked &&
-        guaranteedVisibleBreakSavings <= (targetRezCost as number)
-      ) {
-        return [];
-      }
-      const remainingPathCost = Math.max(
-        0,
-        remainingPath.visibleBreakCost ?? 0,
-      );
-      const routeNetValue =
-        target.payoffValue -
-        ((targetRezCost as number) + remainingPathCost) * 10;
-      if (routeNetValue <= 0) return [];
-      return [
-        {
-          commitment: {
-            kind: "targeted_ice_trash" as const,
-            sourceActionId: candidate.actionId,
-            sourceCardInstanceId: candidate.sourceCardInstanceId!,
-            sourceDefinitionId: candidate.sourceDefinitionId!,
-            plannedAtStateVersion: input.playerView.stateVersion,
-            ownerModuleId: target.ownerModuleId,
-            ownerDedupeKey: target.ownerDedupeKey,
-            serverId: target.serverId,
-            targetIceInstanceId: ice.instanceId,
-            targetIcePosition: server.ice.findIndex(
-              (candidateIce) => candidateIce.instanceId === ice.instanceId,
-            ),
-            targetIceState,
-            targetRezCost: targetRezCost as number,
-            evidenceCodes: [
-              "runner_targeted_ice_trash_preflight:complete",
-              `runner_targeted_ice_trash_owner:${target.ownerModuleId}`,
-              `runner_targeted_ice_trash_server:${target.serverId}`,
-              `runner_targeted_ice_trash_target:${ice.instanceId}`,
-              `runner_targeted_ice_trash_rez_cost:${targetRezCost}`,
-              `runner_targeted_ice_trash_original_path_blocked:${originalPathProvenBlocked}`,
-              `runner_targeted_ice_trash_guaranteed_savings:${guaranteedVisibleBreakSavings}`,
-              `runner_targeted_ice_trash_remaining_path_cost:${remainingPathCost}`,
-              `runner_targeted_ice_trash_route_net_value:${routeNetValue}`,
-            ],
-          },
-          score: routeNetValue - remainingIce.length,
-        },
-      ];
-    });
     },
   );
   return routes.sort(

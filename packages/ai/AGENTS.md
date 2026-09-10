@@ -2,7 +2,7 @@
 
 ## Pflichtquellen vor Änderungen
 
-Vor dem ersten Patch an produktivem KI-Verhalten vollständig lesen:
+Vor dem ersten Patch an produktivem KI-Verhalten den Änderungskompass vollständig und die übrigen Quellen nach betroffenem Owner lesen. Bereits gelesene unveränderte Inhalte wiederverwenden; reine Format- oder Dokumentationskorrekturen benötigen keinen vollständigen Preflight:
 
 1. `docs/architecture/ai/change-compass.md`
 2. `docs/architecture/ai/README.md`

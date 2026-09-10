@@ -297,7 +297,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "broker-load",
       planKind: "runner.credit_bank",
       capability: "credit_bank_build",
-      priorityClass: "P5",
+      priorityClass: "P4",
       assessmentEvidence: "runner_credit_bank_first_load",
     });
 
@@ -412,7 +412,7 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "broker-load",
       planKind: "runner.credit_bank",
       capability: "credit_bank_build",
-      priorityClass: "P5",
+      priorityClass: "P4",
       assessmentEvidence: "runner_credit_bank_first_load",
     });
     expect(actionAlternative(decision, "draw")?.selected).toBe(false);
@@ -1555,6 +1555,50 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
     expect(decision.actionId).not.toContain("store_credits");
     expect(JSON.stringify(decision.decisionDebug)).not.toContain(
       '"actionId":"onr_v1_154_broker:store_credits"',
+    );
+  });
+
+  it("binds Rigged Investments to the resident credit-bank install route without a second authority", () => {
+    const input = aiInput("runner", [
+      legalAction(
+        "install-rigged",
+        "runner",
+        "install_card",
+        "Install Rigged Investments",
+        { credits: 4 },
+        { source: "rigged-1" },
+      ),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.credits = 5;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.gripOrHq = [
+      visibleCard("rigged-1", "runner", "resource", {
+        definitionId: "onr_v1_174_rigged-investments",
+        title: "Rigged Investments",
+      }),
+    ];
+
+    const decision = chooseRunnerAction(input);
+
+    expectPlanDecision(decision, {
+      actionId: "install-rigged",
+      planKind: "runner.credit_bank",
+      capability: "credit_bank_install",
+      priorityClass: "P5",
+      assessmentEvidence: "runner_credit_bank_install_ready",
+    });
+    expect(
+      decision.decisionDebug?.planFirstDecision?.executionOrigin,
+    ).toMatchObject({
+      rootPlanInstanceId: "plan:runner.credit_bank:rigged-1",
+      leafPlanInstanceId: "plan:runner.credit_bank:rigged-1",
+    });
+    expect(actionAlternative(decision, "install-rigged")?.selected).toBe(true);
+    expect(JSON.stringify(decision.decisionDebug)).not.toContain(
+      "cash_out_credit_bank",
     );
   });
 

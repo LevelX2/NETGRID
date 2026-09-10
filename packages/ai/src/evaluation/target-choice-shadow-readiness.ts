@@ -112,7 +112,10 @@ export function buildTargetChoiceSelectedChoicesReadinessReport(
       "selected_targets_created:false",
     ],
   };
-  assertSemanticObjectSideSafe(report, "TargetChoiceSelectedChoicesReadinessReport");
+  assertSemanticObjectSideSafe(
+    report,
+    "TargetChoiceSelectedChoicesReadinessReport",
+  );
   return report;
 }
 
@@ -122,7 +125,8 @@ function readinessCaseForReport(
 ): TargetChoiceSelectedChoicesReadinessCase {
   const category = categoryForReport(report);
   const topOption = report.scorecard.topOption;
-  const targetFitRecommendation = targetChoiceRecommendationForTargetFit(report);
+  const targetFitRecommendation =
+    targetChoiceRecommendationForTargetFit(report);
   return {
     scenarioId,
     actionId: report.actionId,
@@ -159,12 +163,14 @@ function followupCandidatesForReport(
     );
   }
   if (report.scorecard.engineOnlyBlockedCount > 0) {
-    candidates.push(followupCandidate(scenarioId, report, "engine_only_target"));
+    candidates.push(
+      followupCandidate(scenarioId, report, "engine_only_target"),
+    );
   }
-  if (
-    targetChoiceReportHasHiddenInfoBlockedRequirement(report)
-  ) {
-    candidates.push(followupCandidate(scenarioId, report, "hidden_info_blocked"));
+  if (targetChoiceReportHasHiddenInfoBlockedRequirement(report)) {
+    candidates.push(
+      followupCandidate(scenarioId, report, "hidden_info_blocked"),
+    );
   }
   const [top, second] = report.rankedOptions;
   if (
@@ -173,7 +179,9 @@ function followupCandidatesForReport(
     second &&
     top.score - second.score < 20
   ) {
-    candidates.push(followupCandidate(scenarioId, report, "tie_without_preference"));
+    candidates.push(
+      followupCandidate(scenarioId, report, "tie_without_preference"),
+    );
   }
   if (
     candidates.length === 0 &&

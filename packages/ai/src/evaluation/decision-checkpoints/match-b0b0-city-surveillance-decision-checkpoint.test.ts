@@ -5,7 +5,7 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("match B0B0 City Surveillance runner checkpoint", () => {
-  it("uses the available Bodyweight draw engine without adding tags", () => {
+  it("funds the current Shell Traders development without adding tags", () => {
     const result = runAiDecisionCheckpoint(
       structuredClone(checkpointJson) as AiDecisionCheckpointV1,
     );

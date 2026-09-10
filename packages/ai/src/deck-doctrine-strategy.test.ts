@@ -167,10 +167,17 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     },
   );
 
-  it("keeps King of the Road productive through a bounded conditional wall bypass", () => {
-    const profile = buildDeckStrategyProfile(
-      standardDeckByName("King of the Road"),
-    );
+  it("keeps a two-breaker suite productive through a bounded conditional wall bypass", () => {
+    const profile = buildDeckStrategyProfile({
+      deckSnapshotId: "conditional-wall-bypass-contract",
+      side: "runner",
+      cards: [
+        { cardId: "onr_v1_006_black-dahlia", quantity: 1 },
+        { cardId: "onr_v1_016_cyfermaster", quantity: 1 },
+        { cardId: "onr_v1_094_inside-job", quantity: 2 },
+        { cardId: "onr_v1_107_romp-through-hq", quantity: 2 },
+      ],
+    });
     const selectedScores = [
       ...profile.primaryStrategies,
       ...profile.secondaryStrategies,

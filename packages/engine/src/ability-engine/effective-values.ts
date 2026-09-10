@@ -64,14 +64,10 @@ export function icebreakerStrengthModifierFromDeclarativeCounters(
 }
 
 export type EffectiveAgendaDifficultyDependencies = {
-  // Remaining agenda-difficulty rules still live in the host. Injecting them keeps
-  // this module free of index.ts imports while preserving current ordering.
+  // The server's run-counter rule is supplied by the host. Card modifiers are
+  // evaluated here from their declared agenda_difficulty contract.
   definitionFor: (state: GameState, cardId: CardInstanceId) => CardDefinition;
   serverDifficultyIncreaseFromRunCounters: (
-    state: GameState,
-    agendaId: CardInstanceId,
-  ) => number;
-  serverDifficultyReductionFromUpgrades: (
     state: GameState,
     agendaId: CardInstanceId,
   ) => number;
@@ -153,8 +149,8 @@ export function runnerMemoryLimit(state: GameState): number {
  * Calculates the effective agenda difficulty used by score LegalActions and
  * revalidation.
  *
- * CardImplementation modifiers are combined with existing host-supplied
- * adjustments until those older rules can be moved behind the same boundary.
+ * Only declared agenda_difficulty modifiers and the server's run-counter rule
+ * change the printed value. Run-window restrictions do not imply a discount.
  */
 export function effectiveAgendaDifficulty(
   deps: EffectiveAgendaDifficultyDependencies,
@@ -171,7 +167,6 @@ export function effectiveAgendaDifficulty(
     definition,
   );
   difficulty += deps.serverDifficultyIncreaseFromRunCounters(state, agendaId);
-  difficulty -= deps.serverDifficultyReductionFromUpgrades(state, agendaId);
   return Math.max(0, difficulty);
 }
 

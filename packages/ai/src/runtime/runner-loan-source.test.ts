@@ -7,14 +7,11 @@ import {
 
 describe("runner loan source compatibility", () => {
   it("recognizes the CardSpec-derived Loan from Chiba lifecycle", () => {
+    expect(runnerDefinitionIsHighRiskLoan("onr_v1_168_loan-from-chiba")).toBe(
+      true,
+    );
     expect(
-      runnerDefinitionIsHighRiskLoan("onr_v1_168_loan-from-chiba"),
-    ).toBe(true);
-    expect(
-      runnerLoanValueHint(
-        "onr_v1_168_loan-from-chiba",
-        "leavePlayPayCost",
-      ),
+      runnerLoanValueHint("onr_v1_168_loan-from-chiba", "leavePlayPayCost"),
     ).toBe(10);
   });
 });

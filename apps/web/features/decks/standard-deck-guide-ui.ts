@@ -23,10 +23,7 @@ export function standardDeckGuideControlState(input: {
   snapshot?: DeckSlotSnapshot;
 }): StandardDeckGuideControlState | null {
   if (input.source !== "snapshot" || !input.snapshot) return null;
-  if (
-    input.snapshot.guideStatus === "available" &&
-    input.snapshot.guide
-  ) {
+  if (input.snapshot.guideStatus === "available" && input.snapshot.guide) {
     return {
       label: "Deck-Anleitung",
       disabled: false,

@@ -4,7 +4,10 @@ import {
   RESIDENT_PLAN_PORTFOLIO_SCHEMA_VERSION,
   type ResidentPlanPortfolio,
 } from "./resident-plan-portfolio";
-import { PlanResolutionFailure } from "./plan-resolution-failure";
+import {
+  PlanResolutionFailure,
+  type ResidentPortfolioBindingFailure,
+} from "./plan-resolution-failure";
 
 const memory = new Map<string, ResidentPlanPortfolio>();
 
@@ -30,6 +33,7 @@ export function residentPlanPortfolioSnapshot(
       timingPoint: input.playerView.timingPoint,
       legalActionTypes: input.legalActions.map((action) => action.type),
       owner: "plan_registry",
+      portfolioBinding: bindingFailure(input, snapshot, "read"),
       removalCondition:
         "Discard incompatible resident portfolio state; no v1 migration is supported.",
     });
@@ -52,6 +56,7 @@ export function rememberResidentPlanPortfolio(
       timingPoint: input.playerView.timingPoint,
       legalActionTypes: input.legalActions.map((action) => action.type),
       owner: "plan_registry",
+      portfolioBinding: bindingFailure(input, snapshot, "remember"),
       removalCondition:
         "Persist only a current v2 resident portfolio for the matching side.",
     });
@@ -84,12 +89,48 @@ export function restoreResidentPlanPortfolioMemorySnapshot(
       timingPoint: input.playerView.timingPoint,
       legalActionTypes: input.legalActions.map((action) => action.type),
       owner: "plan_registry",
+      portfolioBinding: bindingFailure(input, snapshot, "restore"),
       removalCondition:
         "Restore only a same-side resident v2 portfolio captured no later than the checkpoint state.",
     });
   }
   assertResidentPlanPortfolio(snapshot, input.playerView.timingPoint);
   memory.set(key, structuredClone(snapshot));
+}
+
+function bindingFailure(
+  input: AiDecisionInput,
+  snapshot: ResidentPlanPortfolio,
+  operation: ResidentPortfolioBindingFailure["operation"],
+): ResidentPortfolioBindingFailure {
+  return {
+    schemaVersion: "resident-portfolio-binding-failure-v1",
+    operation,
+    expected: {
+      schemaVersion: RESIDENT_PLAN_PORTFOLIO_SCHEMA_VERSION,
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      relation: operation === "remember" ? "equal" : "at_most",
+    },
+    actual: {
+      schemaVersion: snapshot.schemaVersion,
+      side: snapshot.side,
+      stateVersion: snapshot.stateVersion,
+    },
+    violations: [
+      ...(snapshot.schemaVersion !== RESIDENT_PLAN_PORTFOLIO_SCHEMA_VERSION
+        ? ["schema_version_mismatch"]
+        : []),
+      ...(snapshot.side !== input.side ? ["side_mismatch"] : []),
+      ...(snapshot.stateVersion > input.playerView.stateVersion
+        ? ["future_state_version"]
+        : []),
+      ...(operation === "remember" &&
+      snapshot.stateVersion < input.playerView.stateVersion
+        ? ["stale_state_version"]
+        : []),
+    ],
+  };
 }
 
 function memoryKey(input: AiDecisionInput): string {

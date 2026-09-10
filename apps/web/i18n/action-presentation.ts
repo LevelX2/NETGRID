@@ -3,6 +3,10 @@ import { isAppLocale, type AppLocale } from "./locale";
 export const DEFAULT_ACTION_PRESENTATION_LOCALE: AppLocale = "en";
 
 const EN_ACTION_PRESENTATION_MESSAGES = {
+  choicePromptDelayedInstallDestination:
+    "The Shell Traders: choose where to install the program",
+  choiceInstallInMemory: "Install in program memory (trash programs if needed)",
+  choiceInstallOnHost: "Install on {card}",
   actionMandatoryDraw: "Draw mandatory card",
   actionGainCredit: "Take credit",
   actionDrawCard: "Draw card",
@@ -299,6 +303,11 @@ const DE_ACTION_PRESENTATION_MESSAGES: Record<
   ActionPresentationMessageKey,
   string
 > = {
+  choicePromptDelayedInstallDestination:
+    "The Shell Traders: Installationsziel für das Programm wählen",
+  choiceInstallInMemory:
+    "Im Programmspeicher installieren (bei Bedarf Programme trashen)",
+  choiceInstallOnHost: "Auf {card} installieren",
   actionMandatoryDraw: "Pflichtkarte ziehen",
   actionGainCredit: "Credit nehmen",
   actionDrawCard: "Karte ziehen",
@@ -594,6 +603,11 @@ const FR_ACTION_PRESENTATION_MESSAGES: Record<
   ActionPresentationMessageKey,
   string
 > = {
+  choicePromptDelayedInstallDestination:
+    "The Shell Traders : choisir où installer le programme",
+  choiceInstallInMemory:
+    "Installer en mémoire (détruire des programmes si nécessaire)",
+  choiceInstallOnHost: "Installer sur {card}",
   actionMandatoryDraw: "Piocher la carte obligatoire",
   actionGainCredit: "Prendre un crédit",
   actionDrawCard: "Piocher une carte",

@@ -82,9 +82,9 @@ export function buildSemanticShadowDecision(
         actionId: candidate.actionId,
         reason: fit ? "blocked_by_action_goal_fit" : "no_tactical_goal_fit",
         blockers: fit?.blockers ?? ["no_tactical_goal_fit"],
-        evidence: fit?.components.flatMap((component) => component.evidence) ?? [
-          `candidate:${candidate.semanticActionType}`,
-        ],
+        evidence: fit?.components.flatMap(
+          (component) => component.evidence,
+        ) ?? [`candidate:${candidate.semanticActionType}`],
         whyNot: rejectedActionWhyNot(candidate, fit),
       });
       continue;
@@ -96,7 +96,11 @@ export function buildSemanticShadowDecision(
       opportunities,
       calibrationProfile,
     );
-    const score = calibratedScore(fit, contextualComponents, calibrationProfile);
+    const score = calibratedScore(
+      fit,
+      contextualComponents,
+      calibrationProfile,
+    );
     rankedActions.push({
       actionId: candidate.actionId,
       rank: 0,
@@ -183,7 +187,10 @@ function rankedActionWhyChosen(action: SemanticRankedAction): string[] {
     ...(action.primaryGoalId ? [`primary_goal:${action.primaryGoalId}`] : []),
     ...action.components
       .slice(0, 8)
-      .map((component) => `score_component:${component.component}:${component.delta}`),
+      .map(
+        (component) =>
+          `score_component:${component.component}:${component.delta}`,
+      ),
   ];
 }
 
@@ -204,7 +211,10 @@ function rejectedActionWhyNot(
     ...fit.blockers.map((blocker) => `blocker:${blocker}`),
     ...fit.components
       .slice(0, 8)
-      .map((component) => `score_component:${component.component}:${component.delta}`),
+      .map(
+        (component) =>
+          `score_component:${component.component}:${component.delta}`,
+      ),
   ];
 }
 
@@ -236,9 +246,7 @@ function bestFitForCandidate(
         ...(economyContext?.creditPressure !== undefined
           ? { creditPressure: economyContext.creditPressure }
           : {}),
-        ...(targetChoiceRecommendation
-          ? { targetChoiceRecommendation }
-          : {}),
+        ...(targetChoiceRecommendation ? { targetChoiceRecommendation } : {}),
       }),
     )
     .sort(
@@ -278,10 +286,13 @@ function contextualProjectionComponents(
 ): ScoreComponentDelta[] {
   const components: ScoreComponentDelta[] = [];
   const opportunityBonus = opportunities
-    .filter((opportunity) => opportunityMatchesCandidate(opportunity, candidate))
+    .filter((opportunity) =>
+      opportunityMatchesCandidate(opportunity, candidate),
+    )
     .reduce(
       (sum, opportunity) =>
-        sum + opportunityPriorityBonus(calibrationProfile, opportunity.priority),
+        sum +
+        opportunityPriorityBonus(calibrationProfile, opportunity.priority),
       0,
     );
   if (opportunityBonus !== 0) {
@@ -291,8 +302,12 @@ function contextualProjectionComponents(
       evidence: [
         `opportunity_bonus:${opportunityBonus}`,
         ...opportunities
-          .filter((opportunity) => opportunityMatchesCandidate(opportunity, candidate))
-          .flatMap((opportunity) => opportunityAlignmentEvidence(opportunity, candidate)),
+          .filter((opportunity) =>
+            opportunityMatchesCandidate(opportunity, candidate),
+          )
+          .flatMap((opportunity) =>
+            opportunityAlignmentEvidence(opportunity, candidate),
+          ),
       ],
     });
   }
@@ -332,12 +347,16 @@ function calibratedScore(
   }
   const weightedFitScore = fit.components.reduce(
     (sum, component) =>
-      sum + component.delta * componentWeight(calibrationProfile, component.component),
+      sum +
+      component.delta *
+        componentWeight(calibrationProfile, component.component),
     0,
   );
   const weightedContextScore = contextualComponents.reduce(
     (sum, component) =>
-      sum + component.delta * componentWeight(calibrationProfile, component.component),
+      sum +
+      component.delta *
+        componentWeight(calibrationProfile, component.component),
     0,
   );
   return Math.max(0, Math.round(weightedFitScore + weightedContextScore));
@@ -488,9 +507,7 @@ function targetChoiceShadowTraceSummary(
   const recommendations = reports
     .map(targetChoiceRecommendationForTargetFit)
     .filter(
-      (
-        recommendation,
-      ): recommendation is TargetChoiceTargetFitRecommendation =>
+      (recommendation): recommendation is TargetChoiceTargetFitRecommendation =>
         Boolean(recommendation),
     )
     .sort(
@@ -576,7 +593,9 @@ function syntheticTargetChoiceActionForCandidate(
 }
 
 function legalTargetRequirementKind(
-  targetKind: NonNullable<ActionSemanticCandidate["targetContext"]>["targetKind"],
+  targetKind: NonNullable<
+    ActionSemanticCandidate["targetContext"]
+  >["targetKind"],
 ): LegalAction["targetRequirements"][number]["kind"] | undefined {
   if (targetKind === "card") return "card";
   if (targetKind === "server") return "server";

@@ -55,7 +55,9 @@ export type PilotScopeDecisionMatrix = {
   }>;
 };
 
-export function parsePilotScopes(env: string | undefined): AiPlayStrengthPilotScope[] {
+export function parsePilotScopes(
+  env: string | undefined,
+): AiPlayStrengthPilotScope[] {
   if (!env) return [];
   const seen = new Set<AiPlayStrengthPilotScope>();
   const scopes: AiPlayStrengthPilotScope[] = [];

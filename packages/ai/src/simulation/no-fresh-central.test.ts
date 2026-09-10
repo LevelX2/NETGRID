@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 import {
   noFreshCentralSubstitutionTypeForAction,
   runnerNoFreshCentralContext,
@@ -31,9 +35,9 @@ describe("no-fresh central diagnostics", () => {
   });
 
   it("matches rig-unlock alternatives by bounded breaker prefixes", () => {
-    expect(contextForInstallRoles(["breaker_decoder"]).betterAlternatives).toContain(
-      "rig_unlock",
-    );
+    expect(
+      contextForInstallRoles(["breaker_decoder"]).betterAlternatives,
+    ).toContain("rig_unlock");
     expect(
       contextForInstallRoles(["breakerish_decoder"]).betterAlternatives,
     ).not.toContain("rig_unlock");
@@ -44,9 +48,10 @@ describe("no-fresh central diagnostics", () => {
 
   it("does not emit runner diagnostics for corp inputs or actions", () => {
     const corpInput = { ...input(), side: "corp" } as AiDecisionInput;
-    expect(
-      trueCentralCloseoutProfile(corpInput, "rd", {} as never),
-    ).toEqual({ opportunity: false, reasons: [] });
+    expect(trueCentralCloseoutProfile(corpInput, "rd", {} as never)).toEqual({
+      opportunity: false,
+      reasons: [],
+    });
     expect(runnerNoFreshCentralContext(corpInput, {} as never)).toEqual({
       targets: [],
       betterAlternatives: [],

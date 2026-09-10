@@ -24,7 +24,9 @@ describe("Witness opportunity projection", () => {
 
     expect(projection.status).toBe("blocked");
     expect(projection.candidatePathBindingFromWitness).toBe(false);
-    expect(projection.blockers).toContain("legalaction_witness_missing_real_action_id");
+    expect(projection.blockers).toContain(
+      "legalaction_witness_missing_real_action_id",
+    );
     expect(projection.blockers).toContain("legalaction_witness_missing");
   });
 

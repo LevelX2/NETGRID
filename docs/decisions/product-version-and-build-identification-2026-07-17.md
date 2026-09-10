@@ -1,7 +1,7 @@
 # Produktversion und fortlaufende Build-Kennung
 
 Status: `accepted`
-Datum: 2026-07-17
+Datum: 2026-09-04
 Primärer Agent: `release-implementation-agent`
 
 ## Ausgangslage
@@ -16,16 +16,36 @@ noch den weiterhin gültigen Version-0-Reifegrad zuverlässig.
 
 NETGRID trennt ab sofort Produktreife und technischen Quellstand:
 
-- Die sichtbare Produktversion lautet bis zu einer neuen ausdrücklichen
-  Produktentscheidung `V0.9`.
+- Die sichtbare Produktversion lautet seit der ausdrücklichen
+  Produktentscheidung vom 2026-09-04 `V1.0`.
 - Daneben steht eine automatisch aus `git rev-list --count HEAD` ermittelte
-  Buildnummer, zum Beispiel `V0.9 · Build 5527`.
-- Ein nicht sauberer Arbeitsbaum ergänzt die sichtbare Buildnummer um `-dev`.
+  Buildnummer, zum Beispiel `V1.0 · Build 8090`.
+- Ein beim Webstart nicht sauberer Arbeitsbaum wird getrennt von der
+  Buildnummer als Badge `lokal geändert` ausgewiesen.
+- Der tatsächliche Servermodus wird über den Health-Endpunkt gemeldet. Im
+  Watch-Modus erscheint daneben das eigene Badge `Watch`.
+- Der lokale Watch-Start heißt im Desktop und im Startskript entsprechend
+  `NETGRID Watch starten` beziehungsweise `start-netgrid-watch.ps1`.
 - Die Optionen zeigen zusätzlich Buildnummer, kurzen Commit-Hash,
   Commit-Zeitpunkt und den lokalen Entwicklungsstatus.
 - Die Git-Metadaten werden beim Start beziehungsweise Build des Webclients
   ermittelt. Ein bereits laufender Webprozess übernimmt einen neuen Stand erst
   nach seinem Neustart.
+- Das Backend erfasst denselben Git-Vertrag einmal beim Prozessstart.
+  `/health` meldet unter `release` die Produktversion und unter `build`
+  Buildnummer, Commit, Commit-Zeitpunkt, Änderungsstatus, Herkunft
+  (`git`, `embedded`, `unavailable`) und Prozessstartzeit. Spätere Commits
+  oder lokale Änderungen werden nicht nachträglich als geladener Stand
+  ausgegeben.
+- Die Maintenance zeigt Frontend und Backend gemeinsam an. Unterschiedliche
+  Produktversionen, Buildnummern oder Commits werden markiert; `lokal geändert`
+  bleibt eine separate Information. Gleiche Commitkennungen beweisen bei
+  uncommitteten Änderungen keine identischen Inhalte.
+- Ein Releasebundle trägt die Backend-Metadaten eingebettet und benötigt
+  beim Start weder Git noch einen Checkout. Ungültige eingebettete Metadaten
+  werden abgewiesen. Ohne Git-Metadaten im lokalen Quellstart wird der
+  Backendbuild ausdrücklich als unbekannt gemeldet; insbesondere wird kein
+  sauberer Arbeitsbaum behauptet.
 
 ## Verhältnis zu Releasebezeichnungen
 
@@ -35,17 +55,36 @@ werden nicht mehr automatisch als sichtbare Produktversion verwendet. Ein
 Final Review dokumentiert weiterhin seinen Zielrelease-Stand; die sichtbare
 Produktversion ändert sich nur bei einer eigenen Produktreifeentscheidung.
 
+Ein veröffentlichter GitHub- und Installerstand bildet die beiden
+Informationen als technische Dreierkennung `1.0.<Buildnummer>` ab, zum
+Beispiel `1.0.8090`; die sichtbare Oberfläche bleibt bei der lesbaren Form
+`V1.0 · Build 8090`. Die Buildnummer wird bei einem neuen Produktmeilenstein
+wie `1.1` oder `2.0` nicht zurückgesetzt. Vorab- und Entwicklungsstände
+ergänzen diese technische Kennung um einen eindeutigen Vorabbezeichner und
+das GitHub-Pre-Release-Flag.
+
+Die Bezeichnung `1.0` ist zunächst eine Produkt- und Installationskennung der
+privaten Vorproduktionsumgebung. Sie begründet ohne eine gesonderte
+Releaseentscheidung keine öffentliche Betriebs-, Support- oder
+Rückwärtskompatibilitätszusage.
+
 ## Technischer Vertrag
 
-- Produktversion: `apps/web/lib/app-build-info.ts`
+- Gemeinsame Produktversion und Backend-Buildvertrag:
+  `packages/shared/src/product-version.ts`
+- Frontend-Projektion: `apps/web/lib/app-build-info.ts`
 - Git-Ermittlung und Einbettung: `apps/web/next.config.ts`
+- Backend-Ermittlung: `apps/server/src/server-build-info.ts`
+- Backend-Release-Einbettung: `scripts/build-windows-release-output.mjs`
 - Sichtbare Kurzform: Kopfzeile des Webclients
 - Detaillierte Form: Optionsbereich des Webclients
+- Vergleich beider laufenden Komponenten: Maintenance-Buildleiste
 - Fallback ohne Git-Metadaten: `Build lokal` und `nicht verfügbar`
 
 ## Akzeptanz
 
-- Kopfzeile zeigt `V0.9 · Build <Nummer>` beziehungsweise bei lokalen
-  Änderungen `V0.9 · Build <Nummer>-dev`.
+- Die Kopfzeile zeigt stabil `V1.0 · Build <Nummer>`.
+- Nur bei lokalen Änderungen beim Webstart erscheint zusätzlich
+  `lokal geändert`; nur beim laufenden Server-Watch erscheint `Watch`.
 - Die Optionen zeigen Produktversion, Build, Commit und Quellstand.
 - Test, Typecheck und Produktionsbuild des Webclients sind grün.

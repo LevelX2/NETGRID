@@ -81,8 +81,7 @@ export function createRunnerSimulationDiagnosticsComposition(
         dependencies.runnerRemoteTrashAccessContext,
       runnerTrashBlockedByCredits: dependencies.runnerTrashBlockedByCredits,
       runnerStealBlockedByCredits: dependencies.runnerStealBlockedByCredits,
-      runnerContestBlockedByCredits:
-        dependencies.runnerContestBlockedByCredits,
+      runnerContestBlockedByCredits: dependencies.runnerContestBlockedByCredits,
     });
 
   const runnerHandUseDiagnosticsForSimulationAction =
@@ -147,8 +146,7 @@ export function createRunnerSimulationDiagnosticsComposition(
         dependencies.runnerHasKnownBlockedPathByCoverage,
       runnerMissingCoverageTypesForInput:
         dependencies.runnerMissingCoverageTypesForInput,
-      definitionForSimulationAction:
-        dependencies.definitionForSimulationAction,
+      definitionForSimulationAction: dependencies.definitionForSimulationAction,
       runnerRunKnownPathCost: dependencies.runnerRunKnownPathCost,
       runnerSetupChosenFamilyForEntry:
         dependencies.runnerSetupChosenFamilyForEntry,
@@ -166,8 +164,7 @@ export function createRunnerSimulationDiagnosticsComposition(
       reconstructBeliefState(input).runnerOpponentModel?.knownPositionMemory ??
       [],
     definitionTypeForMetrics: dependencies.definitionTypeForMetrics,
-    remoteRootTrashCostForMetrics:
-      dependencies.remoteRootTrashCostForMetrics,
+    remoteRootTrashCostForMetrics: dependencies.remoteRootTrashCostForMetrics,
     canBreakerDefinitionBreakIce: dependencies.canBreakerDefinitionBreakIce,
     runnerVisibleIceCreatesCoverageNeedForMetrics:
       dependencies.runnerVisibleIceCreatesCoverageNeedForMetrics,

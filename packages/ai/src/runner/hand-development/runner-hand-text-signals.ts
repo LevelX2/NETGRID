@@ -171,9 +171,7 @@ export function runnerHandTextHasDefenseSignal(text: string): boolean {
 export function runnerHandTextHasAccessPayoffSignal(text: string): boolean {
   const tokens = runnerHandTextTokens(text);
   return (
-    runnerHandTokensIncludeAny(tokens, [
-      "access",
-    ]) ||
+    runnerHandTokensIncludeAny(tokens, ["access"]) ||
     runnerHandTokensIncludePhrase(tokens, ["access", "payoff"]) ||
     runnerHandTokensIncludePhrase(tokens, ["r", "d"]) ||
     runnerHandTokensIncludePhrase(tokens, ["rd", "pressure"]) ||

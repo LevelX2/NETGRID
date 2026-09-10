@@ -13,6 +13,9 @@ import type {
   LegalTargetSummary,
 } from "../action-semantic-candidate-types";
 import type { CorpPlanDomain } from "./corp-tactical-plan-modules";
+import { currentCorpCreditObligation } from "./corp-credit-obligation";
+import { PlanResolutionFailure } from "./plan-resolution-failure";
+import { candidatePreservesMandatoryCreditObligation } from "./turn-remainder-search";
 import {
   buildCorpAgendaTurnPlanningSlice,
   type CorpAgendaTurnPlanningLine,
@@ -100,6 +103,7 @@ export type CorpTurnPlannerShadowResult = {
   shadowActionId?: string;
   agreement: boolean;
   heads: TurnPlanningHeadCandidate[];
+  lines: TurnRemainderSearchLine[];
   selectedLine?: TurnRemainderSearchLine;
   selectedHead?: TurnPlanningHeadCandidate;
   selectedPlanInstanceId?: string;
@@ -145,6 +149,7 @@ export function buildCorpTurnPlannerShadow(params: {
           project,
           candidates: params.context.actionCandidates,
           defenseNeeds: domain.defenseNeeds,
+          economyNeeds: domain.economyNeeds,
           rulesContext,
           stateIdentity,
         }),
@@ -264,7 +269,21 @@ export function buildCorpTurnPlannerShadow(params: {
     stateIdentity,
     turnKey: params.context.turnKey,
   });
-  const urgentPriorityClass = highestUrgentPriorityClass(heads);
+  const urgentPriorityClass = highestUrgentPriorityClass(
+    heads.filter((head) => {
+      const candidate = params.context.actionCandidates.find(
+        (c) => c.actionId === head.currentBinding.actionId,
+      );
+      return (
+        candidate !== undefined &&
+        candidatePreservesMandatoryCreditObligation(
+          candidate,
+          input.playerView.own.credits,
+          creditObligationAfterHead(input, head, candidate),
+        )
+      );
+    }),
+  );
   const offers = offersForHeads({
     input,
     heads,
@@ -285,6 +304,17 @@ export function buildCorpTurnPlannerShadow(params: {
   const selectedSearchLine = search.lines.find(
     (line) => line.lineId === search.selectedLineId,
   );
+  if (!selectedSearchLine && currentCorpCreditObligation(input) !== undefined) {
+    throw new PlanResolutionFailure("missing_plan_module_coverage", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((a) => a.type),
+      owner: "plan_module",
+      removalCondition:
+        "Materialize a turn-plan route that preserves the current mandatory credit obligation or a certified same-turn terminal win.",
+    });
+  }
   const plannerBaselineRecord = [...headRecords].sort(
     (left, right) =>
       compareValidatedPlanAssessments(
@@ -381,6 +411,7 @@ export function buildCorpTurnPlannerShadow(params: {
     ...(shadowActionId ? { shadowActionId } : {}),
     agreement: shadowActionId === liveActionId,
     heads: structuredClone(heads),
+    lines: structuredClone(search.lines),
     ...(selectedLine ? { selectedLine: structuredClone(selectedLine) } : {}),
     ...(shadowHead ? { selectedHead: structuredClone(shadowHead) } : {}),
     ...(selectedPlanInstanceId ? { selectedPlanInstanceId } : {}),
@@ -396,7 +427,7 @@ export function buildCorpTurnPlannerShadow(params: {
   };
 }
 
-function corpPlanProgressRoots(params: {
+export function corpPlanProgressRoots(params: {
   domain: CorpPlanDomain | undefined;
   agendaSlices: readonly {
     projectId: string;
@@ -435,18 +466,50 @@ function corpPlanProgressRoots(params: {
       const selectedLine = slice?.lines.find(
         (line) => line.lineId === slice.selectedLineId,
       );
-      const blocked =
+      const selectedLineIsSupport =
+        selectedLine?.parentNeedId !== undefined &&
+        selectedLine.providerModuleId !== undefined;
+      const currentSupportHeads = params.heads
+        .filter(
+          (head) =>
+            head.executorParentPlanInstanceId === planInstanceId &&
+            head.executorParentNeedId !== undefined,
+        )
+        .sort((left, right) =>
+          left.candidateId.localeCompare(right.candidateId),
+        );
+      const selectedHead = selectedLine
+        ? params.heads.find(
+            (head) =>
+              head.currentBinding.actionId === selectedLine.currentActionId &&
+              (selectedLineIsSupport
+                ? head.executorParentPlanInstanceId === planInstanceId &&
+                  head.executorParentNeedId === selectedLine.parentNeedId &&
+                  (!selectedLine.providerPlanInstanceId ||
+                    head.executorPlanInstanceId ===
+                      selectedLine.providerPlanInstanceId)
+                : head.moduleId === "corp.score_agenda" &&
+                  (head.executorPlanInstanceId === planInstanceId ||
+                    head.rootPlanInstanceId === planInstanceId)),
+          )
+        : undefined;
+      const selectedSupportHead = selectedLineIsSupport
+        ? selectedHead
+        : currentSupportHeads[0];
+      const projectBlocked =
         !project.feasible || slice?.selectionReason === "no_complete_line";
+      const selectedLineHasNoHead = selectedLine !== undefined && !selectedHead;
       const requiredNeedId =
-        selectedLine?.family === "safe_setup" && selectedLine.parentNeedId
+        selectedLineIsSupport && selectedLine.parentNeedId
           ? selectedLine.parentNeedId
-          : blocked
-            ? (project.setupNeed?.needId ??
-              project.protectionNeed?.needId ??
-              ((project.fundingGap ?? 0) > 0
-                ? `score-support:${project.projectId}`
-                : undefined))
-            : undefined;
+          : selectedSupportHead?.executorParentNeedId
+            ? selectedSupportHead.executorParentNeedId
+            : projectBlocked || selectedLineHasNoHead
+              ? (project.setupNeed?.needId ??
+                ((project.fundingMilestone?.remainingGap ?? 0) > 0
+                  ? `score-support:${project.projectId}`
+                  : project.protectionNeed?.needId))
+              : undefined;
       const boundSupportHead = requiredNeedId
         ? params.heads.find(
             (head) =>
@@ -454,20 +517,21 @@ function corpPlanProgressRoots(params: {
               head.executorParentNeedId === requiredNeedId,
           )
         : undefined;
-      const selectedHead = selectedLine
-        ? params.heads.find(
-            (head) =>
-              head.currentBinding.actionId === selectedLine.currentActionId &&
-              (selectedLine.family === "safe_setup"
-                ? head.executorParentPlanInstanceId === planInstanceId &&
-                  head.executorParentNeedId === selectedLine.parentNeedId
-                : head.moduleId === "corp.score_agenda" &&
-                  (head.executorPlanInstanceId === planInstanceId ||
-                    head.rootPlanInstanceId === planInstanceId)),
-          )
-        : undefined;
+      // Domain feasibility does not certify the selected line's current
+      // executor. Global Defense allocation can withhold that exact provider
+      // while leaving the agenda itself feasible and other roots executable.
+      const selectedLineUnavailable =
+        selectedLineHasNoHead && !boundSupportHead;
+      const blocked = projectBlocked || selectedLineUnavailable;
+      const effectiveCampaignDisposition = selectedLineUnavailable
+        ? ("blocked_replan" as const)
+        : slice?.campaignDisposition;
+      const dispositionWitness = scoreDispositionWitness(
+        effectiveCampaignDisposition,
+      );
       const witness =
-        selectedLine?.family === "safe_setup" &&
+        selectedLineIsSupport &&
+        selectedLine &&
         selectedLine.parentNeedId &&
         selectedHead?.executorPlanInstanceId
           ? ({
@@ -485,15 +549,18 @@ function corpPlanProgressRoots(params: {
                 providerInstanceId: boundSupportHead.executorPlanInstanceId,
                 actionId: boundSupportHead.currentBinding.actionId,
               } as const)
-            : selectedLine && selectedHead
-              ? ({
-                  kind: "self_head",
-                  planInstanceId,
-                  actionId: selectedLine.currentActionId,
-                } as const)
-              : scoreDispositionWitness(slice?.campaignDisposition);
-      const blockerCode =
-        slice?.selectionReason === "no_complete_line"
+            : blocked && dispositionWitness
+              ? dispositionWitness
+              : selectedLine && selectedHead
+                ? ({
+                    kind: "self_head",
+                    planInstanceId,
+                    actionId: selectedLine.currentActionId,
+                  } as const)
+                : dispositionWitness;
+      const blockerCode = selectedLineUnavailable
+        ? "selected_line_without_executable_provider"
+        : slice?.selectionReason === "no_complete_line"
           ? "no_complete_line"
           : !project.feasible
             ? project.evidenceCode
@@ -504,8 +571,8 @@ function corpPlanProgressRoots(params: {
         blocked,
         ...(blockerCode ? { blockerCode } : {}),
         ...(requiredNeedId ? { requiredNeedId } : {}),
-        ...(slice?.campaignDisposition
-          ? { campaignDisposition: slice.campaignDisposition }
+        ...(effectiveCampaignDisposition
+          ? { campaignDisposition: effectiveCampaignDisposition }
           : {}),
         ...(witness ? { witness } : {}),
       };
@@ -772,6 +839,17 @@ function includeSpecializedCurrentRoutes(params: {
       const ownerModuleId = line.nodes[0]?.ownerModuleId;
       if (line.currentActionId && ownerModuleId === "corp.score_agenda") {
         addRoute(line.currentActionId, ownerModuleId, projectId);
+      } else if (
+        line.currentActionId &&
+        ownerModuleId === "corp.economy" &&
+        line.providerPlanInstanceId
+      ) {
+        addRoute(
+          line.currentActionId,
+          ownerModuleId,
+          undefined,
+          line.providerPlanInstanceId,
+        );
       }
     }
   }
@@ -989,7 +1067,22 @@ function specializedVariants(
     route.instance.moduleId === "corp.defend_servers" ||
     route.instance.moduleId === "corp.economy"
   ) {
-    return (
+    const agendaSupportLines = agendaSlices.flatMap(({ slice }) =>
+      slice.lines.filter(
+        (line) =>
+          line.providerPlanInstanceId === route.instance.instanceId &&
+          specializedPlanningLineMatchesRoute({
+            routeActionId: route.candidate.actionId,
+            routeModuleId: route.instance.moduleId,
+            routePlanInstanceId: route.instance.instanceId,
+            routeDedupeKey: route.instance.dedupeKey,
+            lineActionId: line.currentActionId,
+            lineOwnerModuleId: line.nodes[0]?.ownerModuleId,
+            linePlanInstanceId: line.providerPlanInstanceId,
+          }),
+      ),
+    );
+    const defenseLines =
       defenseSlice?.lines
         .filter((line) =>
           specializedPlanningLineMatchesRoute({
@@ -1002,8 +1095,11 @@ function specializedVariants(
             linePlanInstanceId: line.nodes[0]?.planInstanceId,
           }),
         )
-        .map((line) => defenseVariant(line, route)) ?? []
-    );
+        .map((line) => defenseVariant(line, route)) ?? [];
+    return [
+      ...agendaSupportLines.map((line) => agendaVariant(line, route)),
+      ...defenseLines,
+    ];
   }
   return [];
 }
@@ -1045,11 +1141,15 @@ function agendaVariant(
     instanceHorizon: "multi_turn",
     campaignQuote: structuredClone(line.campaignQuote),
     evaluationValues: {
-      agenda_progress: boundedUtility(
-        line.evaluation.agendaProgress + route.stepValue,
-      ),
+      agenda_progress:
+        line.family === "fund_setup"
+          ? 0
+          : boundedUtility(line.evaluation.agendaProgress + route.stepValue),
       defense: line.evaluation.defense,
-      economy: line.evaluation.economy,
+      economy:
+        line.family === "fund_setup"
+          ? boundedUtility(line.evaluation.economy + route.stepValue)
+          : line.evaluation.economy,
       continuity: line.evaluation.continuity,
       risk: line.evaluation.risk,
     },
@@ -1293,9 +1393,33 @@ function choiceBindings(
   selectedChoices: AiDecision["selectedChoices"] | undefined,
 ): CanonicalChoiceBinding[] | undefined {
   const requirements = action.choiceRequirements ?? [];
-  if (requirements.length === 0) return [];
-  if (!selectedChoices) return undefined;
   const bindings: CanonicalChoiceBinding[] = [];
+  const paymentSourceIds = action.payload?.runnerInstallPaymentSourceIds;
+  const paymentSourceAmounts =
+    action.payload?.runnerInstallPaymentSourceAmounts;
+  if (
+    action.type === "install_card" &&
+    typeof paymentSourceIds === "string" &&
+    typeof paymentSourceAmounts === "string"
+  ) {
+    const amounts = paymentSourceAmounts.split(",");
+    for (const [index, sourceId] of paymentSourceIds.split(",").entries()) {
+      bindings.push({
+        choiceId: `runner_install_payment:${sourceId}`,
+        role: "route_defining",
+        value: { kind: "number", value: Number(amounts[index]) },
+      });
+    }
+  }
+  if (action.payload?.runnerProgramTrashBeforeInstall === true) {
+    bindings.push({
+      choiceId: "runner_program_trash_before_install",
+      role: "route_defining",
+      value: { kind: "boolean", value: true },
+    });
+  }
+  if (requirements.length === 0) return bindings;
+  if (!selectedChoices) return undefined;
   for (const requirement of requirements) {
     const value =
       selectedChoices.choiceId === requirement.choiceId &&
@@ -1348,6 +1472,30 @@ function canonicalChoiceValue(
   return undefined;
 }
 
+function creditObligationAfterHead(
+  input: AiDecisionInput,
+  head: TurnPlanningHeadCandidate,
+  candidate: ActionSemanticCandidate,
+): number | undefined {
+  const due = currentCorpCreditObligation(input);
+  // P1 Score roots certify a same-turn terminal win before the payment deadline.
+  if (
+    due === undefined ||
+    (head.priorityClass === "P1" &&
+      (head.rootPlanModuleId ?? head.moduleId) === "corp.score_agenda")
+  )
+    return undefined;
+  const action = input.legalActions.find(
+    (a) => a.actionId === candidate.actionId,
+  );
+  const repays =
+    action?.type === "trigger_ability" &&
+    action.source === "game_rule" &&
+    action.payload?.obligationDebtAbility === "remove_obligation" &&
+    action.payload.obligationDebtCountBefore === due;
+  return repays ? due - 1 : due;
+}
+
 function offersForHeads(params: {
   input: AiDecisionInput;
   heads: readonly TurnPlanningHeadCandidate[];
@@ -1381,6 +1529,11 @@ function offersForHeads(params: {
       (entry) => entry.actionId === head.currentBinding.actionId,
     );
     if (!candidate) return [];
+    const mandatoryCredits = creditObligationAfterHead(
+      params.input,
+      head,
+      candidate,
+    );
     const dependencyVariants =
       params.urgentPriorityClass &&
       head.priorityClass !== params.urgentPriorityClass
@@ -1413,6 +1566,9 @@ function offersForHeads(params: {
         obligationSignature:
           priorityCoverage.requiredObligationIds.join(",") || "no_urgent",
         priorityCoverage,
+        ...(mandatoryCredits !== undefined
+          ? { creditObligationAfterAction: mandatoryCredits }
+          : {}),
         ...(dependencyCandidateIds.length > 0
           ? { dependencyCandidateIds, rootEligible: false }
           : {}),
@@ -1588,6 +1744,16 @@ function boundaryForCandidate(
       input.playerView.own.clicks - (candidate.costProfile.clickCost ?? 0),
     ),
   };
+  if (candidate.semanticActionType === "corp_window.decline_rez") {
+    return assessTurnObservationBoundary({
+      boundaryKind: "engine_continuation",
+      remainingActionCapacity,
+      residualTurnValueBasis: "remaining_capacity",
+      immediateOutcomeCodes: ["current_corp_rez_window_closed"],
+      uncertainty: [{ code: "next_run_window_requires_current_legal_actions" }],
+      assumptionIds: ["current_decline_rez_route_executable"],
+    });
+  }
   if (
     head?.moduleId === "corp.defend_servers" &&
     head.evidenceCodes.includes(

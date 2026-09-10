@@ -47,8 +47,16 @@
   },
   "publicEventSummary": [
     { "type": "mandatory_draw", "visibilityClass": "private_to_side" },
-    { "type": "play_operation", "visibilityClass": "hidden_info_barrier", "cardDefinitionId": "onr_v1_297_overtime-incentives" },
+    {
+      "type": "play_operation",
+      "visibilityClass": "hidden_info_barrier",
+      "cardDefinitionId": "onr_v1_297_overtime-incentives"
+    },
     { "type": "end_turn", "visibilityClass": "private_to_side" },
-    { "type": "play_event", "visibilityClass": "hidden_info_barrier", "cardDefinitionId": "onr_v1_101_mit-west-tier" }
+    {
+      "type": "play_event",
+      "visibilityClass": "hidden_info_barrier",
+      "cardDefinitionId": "onr_v1_101_mit-west-tier"
+    }
   ]
 }

@@ -1,10 +1,15 @@
 import type { CardInstanceId } from "@netgrid/shared";
 import type { CardEffectFamilyInput } from "./family-runtime";
 
-export function executeIceStrengthEffect(input: CardEffectFamilyInput): boolean {
+export function executeIceStrengthEffect(
+  input: CardEffectFamilyInput,
+): boolean {
   const { context, effect, publicPayload, runtime } = input;
-  const { assertPositiveIntegerAmount, assertPublicVisibility, mergePublicPayload } =
-    runtime;
+  const {
+    assertPositiveIntegerAmount,
+    assertPublicVisibility,
+    mergePublicPayload,
+  } = runtime;
 
   if (effect.kind !== "double_chosen_ice_strength_until_end_of_turn")
     return false;

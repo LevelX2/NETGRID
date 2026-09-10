@@ -7119,8 +7119,6 @@
         "runner_development_funding:card:runner_onr_proteus_134_cortical-cybermodem_2"
       ]
     },
-    "forbiddenActions": [
-      { "actionId": "runner.start_run.remote_1" }
-    ]
+    "forbiddenActions": [{ "actionId": "runner.start_run.remote_1" }]
   }
 }

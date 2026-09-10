@@ -1,3 +1,8 @@
+import {
+  runnerFortPassTollWindow,
+  runnerRunExitAction,
+  runnerRunWindowCreditBudget,
+} from "./runtime/runner-fort-pass-toll";
 import type {
   AiDecisionInput,
   AiDecisionScoreComponent,
@@ -71,6 +76,7 @@ export type RunnerFutureEncounterDamageJackOutAssessment = {
 
 export type RunnerVisibleLethalIceDamageOptions = {
   generalCredits?: number;
+  fullyBrokenIceInstanceIds?: readonly string[];
   runDamagePreventionRemaining?: number;
   handCount?: number;
   requiredHandFloor?: number;
@@ -112,6 +118,9 @@ export function runnerVisibleLethalIceDamageAssessment(
   );
   let projectedDamage = 0;
   let projectedCoreDamage = 0;
+  let handFloorAssessment:
+    | RunnerFutureEncounterDamageJackOutAssessment
+    | undefined;
 
   for (const ice of remainingIce.slice().reverse()) {
     const quote = ice.effectiveRunQuote;
@@ -125,6 +134,7 @@ export function runnerVisibleLethalIceDamageAssessment(
     ) {
       continue;
     }
+    if (options.fullyBrokenIceInstanceIds?.includes(ice.instanceId)) continue;
     for (const subroutine of quote.subroutines) {
       const amount = subroutine.amount;
       if (
@@ -136,16 +146,18 @@ export function runnerVisibleLethalIceDamageAssessment(
       ) {
         continue;
       }
-      const affordableBreak = rig.some((breaker) => {
-        const assessment = creditsToBreakVisibleSubroutinesWithBreaker(
-          breaker,
-          { ...ice, strength: quote.effectiveStrength },
-          [subroutine],
-          breaker.strength,
-          quote.breakSubroutineAdditionalCostPerSubroutine ?? 0,
-        );
-        return assessment !== undefined && assessment.cost <= generalCredits;
-      });
+      const affordableBreak =
+        !visibleEncounterBreakingProhibited(input, ice) &&
+        rig.some((breaker) => {
+          const assessment = creditsToBreakVisibleSubroutinesWithBreaker(
+            breaker,
+            { ...ice, strength: quote.effectiveStrength },
+            [subroutine],
+            breaker.strength,
+            quote.breakSubroutineAdditionalCostPerSubroutine ?? 0,
+          );
+          return assessment !== undefined && assessment.cost <= generalCredits;
+        });
       if (affordableBreak) continue;
       const typedPreventionAvailable =
         subroutine.damageType === "net" || subroutine.damageType === "core"
@@ -186,7 +198,7 @@ export function runnerVisibleLethalIceDamageAssessment(
       }
       const sourceDefinitionId =
         subroutine.sourceDefinitionId ?? ice.definitionId;
-      return {
+      const assessment = {
         sourceDefinitionId,
         projectedDamage,
         ...(subroutine.damageType ? { damageType: subroutine.damageType } : {}),
@@ -215,6 +227,10 @@ export function runnerVisibleLethalIceDamageAssessment(
           "affordable_break:false",
         ].join("|"),
       };
+      if (immediateFlatline || cleanupFlatline) return assessment;
+      // A reserve warning is not a terminal projection. Continue accounting
+      // for later known damage before deciding whether this route is lethal.
+      handFloorAssessment = assessment;
     }
   }
   const postPathDamage = options.postPathDamage;
@@ -250,8 +266,7 @@ export function runnerVisibleLethalIceDamageAssessment(
       input.playerView.own.maxHandSize - projectedCoreDamage;
     const cleanupFlatline = effectiveMaxHandSizeAfter < 0;
     const projectedHandAfterDamage = handCount - projectedDamage;
-    const belowRequiredHandFloor =
-      projectedHandAfterDamage < requiredHandFloor;
+    const belowRequiredHandFloor = projectedHandAfterDamage < requiredHandFloor;
     const nonLethalHandFloorViolation =
       !immediateFlatline && !cleanupFlatline && belowRequiredHandFloor;
     if (immediateFlatline || cleanupFlatline || nonLethalHandFloorViolation) {
@@ -285,7 +300,35 @@ export function runnerVisibleLethalIceDamageAssessment(
       };
     }
   }
-  return undefined;
+  return handFloorAssessment;
+}
+
+function visibleEncounterBreakingProhibited(
+  input: AiDecisionInput,
+  ice: VisibleCard,
+): boolean {
+  const run = input.playerView.run;
+  if (!run) return false;
+  if (
+    run.noBreakSubroutinesActive === true &&
+    run.encounteredIce?.instanceId === ice.instanceId
+  )
+    return true;
+  // In the movement/approach window the Engine position names the next ICE.
+  // During an encounter it still names the current ICE, so the queued lock
+  // must not be applied there. Nor does an Engine-certified auto-pass consume it.
+  if (
+    run.nextEncounterNoBreakSubroutines !== true ||
+    run.phase === "encounter_ice" ||
+    run.position?.kind !== "ice" ||
+    run.pendingAutoPassIceId === ice.instanceId
+  )
+    return false;
+  return (
+    input.playerView.servers.find(
+      (server) => server.id === run.position!.serverId,
+    )?.ice[run.position.iceIndex]?.instanceId === ice.instanceId
+  );
 }
 
 export function runnerVisibleLethalIceDamageJackOutAssessment(
@@ -296,7 +339,7 @@ export function runnerVisibleLethalIceDamageJackOutAssessment(
     input.side !== "runner" ||
     input.playerView.timingPoint !== "run.jack_out_window" ||
     input.playerView.run?.position?.kind !== "ice" ||
-    !input.legalActions.some((action) => action.type === "jack_out") ||
+    !input.legalActions.some(runnerRunExitAction) ||
     !input.legalActions.some((action) => action.type === "continue_run")
   ) {
     return undefined;
@@ -304,7 +347,12 @@ export function runnerVisibleLethalIceDamageJackOutAssessment(
   const assessment = runnerVisibleLethalIceDamageAssessment(
     input,
     remainingIce,
-    { requiredHandFloor: runnerConfirmedDamageRequiredHandFloor(input) },
+    {
+      requiredHandFloor: runnerConfirmedDamageRequiredHandFloor(input),
+      ...(runnerFortPassTollWindow(input)
+        ? { generalCredits: runnerRunWindowCreditBudget(input).credits }
+        : {}),
+    },
   );
   return assessment
     ? {
@@ -472,7 +520,12 @@ export function runnerFutureEncounterDamageJackOutAssessment(
   const lastRunStartIndex = findPreviousEventIndex(
     history,
     history.length,
-    (event) => event.type === "start_run",
+    (event) =>
+      event.type === "start_run" ||
+      // Engine run-core-execution binds every run origin, including events
+      // and abilities, to the state version of its creating action. The
+      // action type alone cannot delimit an event-started run's effects.
+      input.playerView.run?.runId === `run_${event.stateVersionAfter}`,
   );
   const triggerEvent = futureEncounterDamageTrigger(
     history,
@@ -482,6 +535,47 @@ export function runnerFutureEncounterDamageJackOutAssessment(
   const sourceDefinitionId = triggerEvent?.publicPayload?.sourceDefinitionId;
   if (typeof sourceDefinitionId !== "string") return undefined;
   const hint = AI_HINTS.get(sourceDefinitionId);
+  const futureEffects = (hint?.effects ?? []).filter(
+    (effect) => effect.kind === "future_encounter_effect",
+  );
+  const nextIce = input.playerView.servers.find(
+    (server) => server.id === input.playerView.run!.position!.serverId,
+  )?.ice[input.playerView.run.position.iceIndex];
+  const nextQuote = nextIce?.effectiveRunQuote;
+  // The source has resolved, but its conditional damage is still avoidable
+  // by fully breaking the next encounter. Use that encounter's Engine quote,
+  // not a blanket subtraction of the source's printed damage from the grip.
+  if (
+    futureEffects.length > 0 &&
+    futureEffects.every(
+      (effect) => effect.target === "next_encounter_unless_fully_break_damage",
+    ) &&
+    nextIce?.known === true &&
+    nextIce.rezzed === true &&
+    nextQuote?.iceInstanceId === nextIce.instanceId &&
+    nextQuote.iceDefinitionId === nextIce.definitionId &&
+    !nextQuote.conditionalEncounterEffects?.length &&
+    !visibleEncounterBreakingProhibited(input, nextIce) &&
+    (input.playerView.own.rig ?? []).some((breaker) => {
+      const fullBreak = creditsToBreakVisibleSubroutinesWithBreaker(
+        breaker,
+        { ...nextIce, strength: nextQuote.effectiveStrength },
+        nextQuote.subroutines,
+        breaker.strength,
+        nextQuote.breakSubroutineAdditionalCostPerSubroutine ?? 0,
+      );
+      return (
+        fullBreak !== undefined &&
+        fullBreak.conditionalAccessReason === undefined &&
+        fullBreak.cost <=
+          (runnerFortPassTollWindow(input)
+            ? runnerRunWindowCreditBudget(input).credits
+            : input.playerView.own.credits +
+              (input.playerView.run?.badPublicityCredits ?? 0))
+      );
+    })
+  )
+    return undefined;
   const projectedDamage = Math.max(
     0,
     ...(hint?.effects ?? [])
@@ -608,7 +702,7 @@ function knownAccessDamageAmbushAssessment(
     input.playerView.timingPoint !== "run.jack_out_window" ||
     (requireRunWindowActions &&
       (!input.legalActions.some((action) => action.type === "continue_run") ||
-        !input.legalActions.some((action) => action.type === "jack_out")))
+        !input.legalActions.some(runnerRunExitAction)))
   ) {
     return undefined;
   }
@@ -984,8 +1078,19 @@ function corpDamageEventEvidence(
 
 function publicEventCanBeCorpDamage(event: PublicGameEvent): boolean {
   const payload = event.publicPayload ?? {};
-  if (payload.actor === "runner") return false;
-  if (payload.actor !== "corp" && payload.actor !== undefined) return false;
+  const resolvedCorpDamageSource = payload.resolvedEffects?.some(
+    (effect) =>
+      effect.kind === "damage" &&
+      typeof effect.sourceDefinitionId === "string" &&
+      AI_HINTS.get(effect.sourceDefinitionId)?.side === "corp",
+  );
+  if (
+    payload.actor !== "corp" &&
+    payload.actor !== undefined &&
+    !resolvedCorpDamageSource
+  ) {
+    return false;
+  }
   const sourceDefinitionId =
     typeof payload.sourceDefinitionId === "string"
       ? payload.sourceDefinitionId

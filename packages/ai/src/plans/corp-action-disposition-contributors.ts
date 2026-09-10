@@ -251,6 +251,39 @@ function contributeCorpActionDispositionForCandidate(
   ) => void,
   facts: CorpActionDispositionContributorFacts,
 ): void {
+  const action = input.legalActions.find(
+    (entry) => entry.actionId === candidate.actionId,
+  );
+  if (
+    action?.side === "corp" &&
+    action.type === "activated_card_ability" &&
+    action.payload?.cardImplementationEconomyKind ===
+      "gain_credits_per_advancement_counter_on_source" &&
+    (action.payload?.cardImplementationTrashSourceCost === true ||
+      action.payload?.cardImplementationTrashesSource === true) &&
+    action.payload?.advancementCounterCount === 0 &&
+    action.payload?.gainCreditsAmount === 0
+  ) {
+    add(
+      candidate.actionId,
+      "corp.economy",
+      "corp_counter_cashout_zero_payout_is_nonproductive",
+    );
+    return;
+  }
+  const optionalActionCapacitySignal = domain.economyNeeds.find(
+    (signal) =>
+      signal.kind === "resolve_optional_action_capacity_offer" &&
+      signal.rejectedActionId === candidate.actionId,
+  );
+  if (optionalActionCapacitySignal) {
+    add(
+      candidate.actionId,
+      "corp.economy",
+      "corp_optional_action_capacity_unselected_offer_route_is_nonproductive",
+    );
+    return;
+  }
   const deckoutHorizonDisposition = corpVoluntaryDrawDeckoutHorizonDisposition(
     input,
     candidate,
@@ -427,6 +460,16 @@ function contributeCorpActionDispositionForCandidate(
           "corp_basic_credit_rejected_visible_liquidity_demand_satisfied",
         );
       }
+    }
+    return;
+  }
+  if (candidate.economyProjection?.kind === "restricted_credit") {
+    if (!facts.corpOpenEconomyPlanOwnsAction(domain, candidate.actionId)) {
+      addUnknown(
+        candidate.actionId,
+        "corp.economy",
+        "corp_restricted_credit_no_admitted_exact_consumer",
+      );
     }
     return;
   }
@@ -1153,8 +1196,21 @@ function corpVoluntaryDrawDeckoutHorizonDisposition(
     candidate.semanticActionType === "draw.card"
       ? 1
       : candidate.economyProjection?.cardsDrawn;
+  const netDeckConsumption =
+    candidate.semanticActionType === "draw.card" &&
+    candidate.sourceKind === "basic_action"
+      ? 1
+      : candidate.economyProjection?.netDrawPileDelta !== undefined
+        ? Math.max(0, -candidate.economyProjection.netDrawPileDelta)
+        : undefined;
   if (!Number.isSafeInteger(cardsDrawn) || (cardsDrawn ?? 0) <= 0) {
     return undefined;
+  }
+  if (!Number.isSafeInteger(netDeckConsumption)) {
+    return {
+      ownerModuleId: "corp.hand_and_agenda_management",
+      evidenceCode: "corp_draw_net_deck_projection_unknown",
+    };
   }
   const admittedTerminalDraw = (domain.drawArbitrations ?? []).some(
     (assessment) =>
@@ -1183,14 +1239,15 @@ function corpVoluntaryDrawDeckoutHorizonDisposition(
   if (
     !corpVoluntaryDrawLeavesUnsafeMandatoryHorizon({
       remainingDeckCardsBeforeDraw: input.playerView.own.stackOrRdCount,
-      cardsDrawn: cardsDrawn!,
+      netDeckConsumption: netDeckConsumption!,
       terminalNeedBeforeMandatoryDraw:
         admittedTerminalDraw || exactTerminalScoreSupport,
     })
   ) {
     return undefined;
   }
-  const remainingAfterDraw = input.playerView.own.stackOrRdCount - cardsDrawn!;
+  const remainingAfterDraw =
+    input.playerView.own.stackOrRdCount - netDeckConsumption!;
   const economyOwnsAction =
     candidate.semanticActionType === "economy.gain_credit" ||
     domain.economyNeeds.some((signal) =>

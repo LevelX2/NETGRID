@@ -74,6 +74,44 @@ describe("Corp counter-cashout economy ownership", () => {
     );
   });
 
+  it("rejects an exact zero-counter cashout without losing economy ownership", () => {
+    const zeroPayout = legalAction(
+      "cashout-zero",
+      "corp",
+      "activated_card_ability",
+      "Trash for zero credits",
+      { clicks: 1, credits: 0 },
+      {
+        source: INSTANCE_ID,
+        payload: {
+          cardId: INSTANCE_ID,
+          cardImplementationEconomyKind:
+            "gain_credits_per_advancement_counter_on_source",
+          cardImplementationAmountPerAdvancementCounter: 4,
+          advancementCounterCount: 0,
+          cardImplementationTrashSourceCost: true,
+          cardImplementationTrashesSource: false,
+          gainCreditsAmount: 0,
+        },
+      },
+    );
+    const input = inputWithAsset(0, true, [zeroPayout, basicCredit()]);
+
+    const decision = chooseCorpAction(input);
+
+    expectEconomyDecision(decision, "gain-credit", "P6");
+    expect(
+      decision.decisionDebug?.actionAlternatives?.find(
+        (alternative) => alternative.actionId === zeroPayout.actionId,
+      ),
+    ).toMatchObject({
+      excluded: true,
+      whyNot: expect.arrayContaining([
+        "explicitly_nonproductive:corp.economy:corp_counter_cashout_zero_payout_is_nonproductive",
+      ]),
+    });
+  });
+
   it("does not invent a cashout when the current Engine quote is incomplete", () => {
     const incompletePayout = legalAction(
       "cashout-incomplete",
@@ -159,7 +197,7 @@ function basicCredit() {
 function expectEconomyDecision(
   decision: ReturnType<typeof chooseCorpAction>,
   actionId: string,
-  priorityClass: "P4" | "P5",
+  priorityClass: "P4" | "P5" | "P6",
 ) {
   expect(decision.actionId).toBe(actionId);
   expect(decision.reasonCode).toBe("plan_first.corp.economy");

@@ -33,7 +33,9 @@ export function projectEngineEventToServerRecord(
   };
 }
 
-export function projectEngineEventToPublicEvent(event: EngineEvent): PublicGameEvent {
+export function projectEngineEventToPublicEvent(
+  event: EngineEvent,
+): PublicGameEvent {
   return {
     eventId: event.eventId,
     type: event.type,
@@ -43,7 +45,9 @@ export function projectEngineEventToPublicEvent(event: EngineEvent): PublicGameE
       ? { turnSerial: event.turnSerial }
       : {}),
     stateHashAfter: event.stateHashAfter,
-    ...(event.visibilityClass ? { visibilityClass: event.visibilityClass } : {}),
+    ...(event.visibilityClass
+      ? { visibilityClass: event.visibilityClass }
+      : {}),
     publicPayload: event.publicPayload,
   };
 }
@@ -52,6 +56,9 @@ export function projectReplayEventsForPerspective(
   events: ServerEventRecord[],
   perspective: ReplayPerspective,
 ): PublicGameEvent[] {
-  if (perspective === "local_analysis") return events.map((event) => event.publicPayload);
-  return events.map((event) => redactPublicEventForSide(event.publicPayload, perspective));
+  if (perspective === "local_analysis")
+    return events.map((event) => event.publicPayload);
+  return events.map((event) =>
+    redactPublicEventForSide(event.publicPayload, perspective),
+  );
 }

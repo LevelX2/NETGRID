@@ -1,13 +1,7 @@
-import type {
-  AiDecision,
-  AiDecisionInput,
-  LegalAction,
-} from "@netgrid/shared";
+import type { AiDecision, AiDecisionInput, LegalAction } from "@netgrid/shared";
 
 export type RunnerBaselinePlanGuardContextDependencies = {
-  delayedInstallAbilityForAction: (
-    action: LegalAction,
-  ) => string | undefined;
+  delayedInstallAbilityForAction: (action: LegalAction) => string | undefined;
   runnerHasInstalledPrograms: (input: AiDecisionInput) => boolean;
 };
 

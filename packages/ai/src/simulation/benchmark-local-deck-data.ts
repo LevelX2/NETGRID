@@ -8,23 +8,29 @@ import type {
   RealSceneBenchmarkDeckManifest,
 } from "./benchmark-deck-types";
 
-export const LOCAL_REALISTIC_FROZEN_DECK_SNAPSHOTS = deepFreeze((
-  localRealisticBenchmarkDeckSnapshotsData as {
-    snapshots: FrozenLocalBenchmarkDeckSnapshot[];
-  }
-).snapshots);
+export const LOCAL_REALISTIC_FROZEN_DECK_SNAPSHOTS = deepFreeze(
+  (
+    localRealisticBenchmarkDeckSnapshotsData as {
+      snapshots: FrozenLocalBenchmarkDeckSnapshot[];
+    }
+  ).snapshots,
+);
 
-export const REAL_SCENE_FROZEN_DECK_SNAPSHOTS = deepFreeze((
-  realSceneBenchmarkDeckSnapshotsData as {
-    snapshots: FrozenLocalBenchmarkDeckSnapshot[];
-  }
-).snapshots);
+export const REAL_SCENE_FROZEN_DECK_SNAPSHOTS = deepFreeze(
+  (
+    realSceneBenchmarkDeckSnapshotsData as {
+      snapshots: FrozenLocalBenchmarkDeckSnapshot[];
+    }
+  ).snapshots,
+);
 
-export const LOCAL_REALISTIC_BENCHMARK_DECKS =
-  deepFreeze(localRealisticBenchmarkDecksData as LocalRealisticBenchmarkDeckManifest);
+export const LOCAL_REALISTIC_BENCHMARK_DECKS = deepFreeze(
+  localRealisticBenchmarkDecksData as LocalRealisticBenchmarkDeckManifest,
+);
 
-export const REAL_SCENE_BENCHMARK_DECKS =
-  deepFreeze(realSceneBenchmarkDecksData as RealSceneBenchmarkDeckManifest);
+export const REAL_SCENE_BENCHMARK_DECKS = deepFreeze(
+  realSceneBenchmarkDecksData as RealSceneBenchmarkDeckManifest,
+);
 
 function deepFreeze<T>(value: T): T {
   if (value && typeof value === "object" && !Object.isFrozen(value)) {

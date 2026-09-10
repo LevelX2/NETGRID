@@ -52,11 +52,11 @@ Utility-/Effektfamilien klarer und kollisionsärmer abbilden kann.
 ## Akzeptanzkriterien
 
 - [ ] Zentrale Orchestrierung und extrahierbare Effektfamilien sind klar
-  getrennt.
+      getrennt.
 - [ ] Die Entscheidung berücksichtigt Importzyklen, Payload-Autorität und
-  Determinismus.
+      Determinismus.
 - [ ] Eine empfohlene Extraktion erhält exakt denselben Registry- und
-  LegalAction-Vertrag.
+      LegalAction-Vertrag.
 - [ ] Folgearbeit ist pro Effektfamilie klein paketiert.
 
 ## Umsetzungshinweise

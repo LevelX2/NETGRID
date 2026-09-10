@@ -1,6 +1,8 @@
 import { type AiDecisionInput } from "@netgrid/shared";
 
-type PendingChoice = NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>;
+type PendingChoice = NonNullable<
+  AiDecisionInput["playerView"]["pendingChoice"]
+>;
 
 export function selectedSetupMulliganChoiceOptionId(
   choice: PendingChoice,

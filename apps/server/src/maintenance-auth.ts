@@ -9,10 +9,9 @@ import {
   writeFileSync,
 } from "node:fs";
 import { dirname, resolve } from "node:path";
+import { resolveServerRuntimePaths } from "./runtime-paths";
 
 export const MAINTENANCE_SESSION_COOKIE_NAME = "ng_maintenance_session";
-export const DEFAULT_MAINTENANCE_AUTH_PATH =
-  "data/runtime/maintenance/auth.json";
 export const MAINTENANCE_PASSWORD_MIN_LENGTH = 12;
 export const MAINTENANCE_PASSWORD_MAX_LENGTH = 1024;
 export const MAINTENANCE_SESSION_MAX_AGE_MINUTES = 30;
@@ -111,7 +110,7 @@ export class InMemoryMaintenanceCredentialStore implements MaintenanceCredential
 export class JsonFileMaintenanceCredentialStore implements MaintenanceCredentialStore {
   readonly path: string;
 
-  constructor(path = resolve(DEFAULT_MAINTENANCE_AUTH_PATH)) {
+  constructor(path = maintenanceAuthPathFromEnv()) {
     this.path = resolve(path);
   }
 
@@ -376,8 +375,7 @@ export class MaintenanceAuthService {
 export function maintenanceAuthPathFromEnv(
   env: NodeJS.ProcessEnv = process.env,
 ): string {
-  const configured = env.NETGRID_MAINTENANCE_AUTH_PATH?.trim();
-  return resolve(configured || DEFAULT_MAINTENANCE_AUTH_PATH);
+  return resolveServerRuntimePaths({ env }).maintenanceAuthPath;
 }
 
 export function validateNewPassword(password: string): void {

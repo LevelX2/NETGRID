@@ -3617,6 +3617,7 @@
                 "scope": "installed_card",
                 "timing": "during_run",
                 "target": "program",
+                "installCost": "normal",
                 "finite": true
               }
             ],
@@ -3682,6 +3683,7 @@
             "scope": "installed_card",
             "timing": "during_run",
             "target": "program",
+            "installCost": "normal",
             "finite": true
           }
         ],
@@ -10661,11 +10663,40 @@
         "aiSupportStatus": "ai_supported",
         "roles": ["resource"],
         "planRoles": ["build_rig", "economy"],
-        "valueHints": { "economy": 1 },
-        "functionSignals": ["resource.connection"],
+        "valueHints": {
+          "economy": 1
+        },
+        "effects": [
+          {
+            "kind": "economy",
+            "scope": "runner",
+            "timing": "after_successful_run",
+            "resource": "credits",
+            "target": "run.successful_run_credit_gain",
+            "amount": 1,
+            "repeatable": true
+          }
+        ],
+        "functionSignals": [
+          "resource.connection",
+          "economy.successful_run_credits"
+        ],
         "tacticSignals": ["economy.card"],
-        "actionTacticSignals": ["economy.card"],
-        "costProfile": { "clicks": 1, "credits": 2 },
+        "actionTacticSignals": [
+          "economy.card",
+          "effect:economy",
+          "effect_scope:runner",
+          "effect_timing:after_successful_run"
+        ],
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "credits": 2
+        },
         "riskTags": ["resource_trash_if_tagged", "unique_resource"],
         "quality": {
           "hintReviewed": true,
@@ -27428,7 +27459,9 @@
         "planRoles": [
           "remote_upgrade_tax",
           "build_scoring_remote",
-          "protect_remote"
+          "protect_remote",
+          "protect_hq",
+          "protect_rnd"
         ],
         "valueHints": { "remoteRootValue": 3 },
         "strategicRole": ["defensive_tool"],
@@ -27465,7 +27498,8 @@
         "functionSignals": [
           "remote.agenda_steal_tax",
           "remote.scoring_protection",
-          "tax.runner_credit"
+          "tax.runner_credit",
+          "access.agenda_steal_tax"
         ],
         "tacticSignals": ["corp.remote_protection"],
         "actionTacticSignals": [

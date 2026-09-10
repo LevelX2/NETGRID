@@ -1,6 +1,9 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 
-import { runnerRunStartTrashSourceProfile } from "./runner-canonical-card-facts";
+import {
+  runnerRunStartRandomStrengthSourceProfile,
+  runnerRunStartTrashSourceProfile,
+} from "./runner-canonical-card-facts";
 
 type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
@@ -10,6 +13,8 @@ type PendingChoiceOption = PendingChoice["options"][number];
 type BoundRunStartOption = Readonly<{
   optionId: string;
   sourceCardInstanceId: string;
+  sourceKind: "random_strength" | "self_trash";
+  definitionId: string;
 }>;
 
 /**
@@ -65,7 +70,17 @@ export function selectedRunnerRunStartOrderChoiceOptionId(
     return undefined;
   }
 
-  return (bound as BoundRunStartOption[]).sort((left, right) =>
+  const complete = bound as BoundRunStartOption[];
+  const sourceKinds = new Set(complete.map((option) => option.sourceKind));
+  if (sourceKinds.size !== 1) return undefined;
+  if (
+    complete[0]?.sourceKind === "random_strength" &&
+    new Set(complete.map((option) => option.definitionId)).size !== 1
+  ) {
+    return undefined;
+  }
+
+  return complete.sort((left, right) =>
     left.sourceCardInstanceId.localeCompare(right.sourceCardInstanceId),
   )[0]?.optionId;
 }
@@ -74,16 +89,26 @@ function boundRunStartTrashOption(
   input: AiDecisionInput,
   option: PendingChoiceOption,
 ): BoundRunStartOption | undefined {
-  const valuePrefix = "card_implementation:";
+  const selfTrashPrefix = "card_implementation:";
+  const randomStrengthPrefix = "random_strength:";
   if (
     option.selectable === false ||
     typeof option.value !== "string" ||
-    !option.value.startsWith(valuePrefix) ||
     option.id !== `source_${option.value}`
   ) {
     return undefined;
   }
-  const sourceCardInstanceId = option.value.slice(valuePrefix.length);
+  const sourceKind = option.value.startsWith(selfTrashPrefix)
+    ? "self_trash"
+    : option.value.startsWith(randomStrengthPrefix)
+      ? "random_strength"
+      : undefined;
+  if (!sourceKind) return undefined;
+  const sourceCardInstanceId = option.value.slice(
+    sourceKind === "self_trash"
+      ? selfTrashPrefix.length
+      : randomStrengthPrefix.length,
+  );
   if (sourceCardInstanceId.trim().length === 0) return undefined;
   const source = (input.playerView.own.rig ?? []).find(
     (card) =>
@@ -91,9 +116,18 @@ function boundRunStartTrashOption(
       card.known !== false &&
       typeof card.definitionId === "string",
   );
-  return source?.definitionId &&
-    runnerRunStartTrashSourceProfile(source.definitionId)
-    ? { optionId: option.id, sourceCardInstanceId }
+  if (!source?.definitionId) return undefined;
+  const completeProfile =
+    sourceKind === "self_trash"
+      ? runnerRunStartTrashSourceProfile(source.definitionId)
+      : runnerRunStartRandomStrengthSourceProfile(source.definitionId);
+  return completeProfile
+    ? {
+        optionId: option.id,
+        sourceCardInstanceId,
+        sourceKind,
+        definitionId: source.definitionId,
+      }
     : undefined;
 }
 

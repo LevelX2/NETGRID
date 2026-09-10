@@ -206,37 +206,29 @@ describe("scoringWindowRezBudget", () => {
     ["negative reserve", 5, -1],
     ["fractional reserve", 5, 0.5],
     ["unsafe-integer reserve", 5, Number.MAX_SAFE_INTEGER + 1],
-  ])(
-    "does not clamp or round %s",
-    (_label, creditsAfterAction, reserve) => {
-      const input = corpInput({
-        ownCredits: 5,
-        servers: protectedCentralServers([
-          remoteServer("remote_1", [wallIce("remote-wall")]),
-        ]),
-      });
-      const server = input.playerView.servers.find(
-        (candidate) => candidate.id === "remote_1",
-      )!;
+  ])("does not clamp or round %s", (_label, creditsAfterAction, reserve) => {
+    const input = corpInput({
+      ownCredits: 5,
+      servers: protectedCentralServers([
+        remoteServer("remote_1", [wallIce("remote-wall")]),
+      ]),
+    });
+    const server = input.playerView.servers.find(
+      (candidate) => candidate.id === "remote_1",
+    )!;
 
-      expect(
-        scoringWindowRezBudget(
-          input,
-          server,
-          creditsAfterAction,
-          reserve,
-        ),
-      ).toMatchObject({
-        knowledge: "unknown",
-        corpCanRezRelevantIce: false,
-        corpCanRezFullPath: false,
-        evidence: expect.arrayContaining([
-          "remote_rez_budget:knowledge:unknown",
-          "remote_rez_budget:invalid_credit_input",
-        ]),
-      });
-    },
-  );
+    expect(
+      scoringWindowRezBudget(input, server, creditsAfterAction, reserve),
+    ).toMatchObject({
+      knowledge: "unknown",
+      corpCanRezRelevantIce: false,
+      corpCanRezFullPath: false,
+      evidence: expect.arrayContaining([
+        "remote_rez_budget:knowledge:unknown",
+        "remote_rez_budget:invalid_credit_input",
+      ]),
+    });
+  });
 
   it("does not count zero-cost or already rezzed ICE as newly affordable when the reserve exceeds credits", () => {
     const input = corpInput({

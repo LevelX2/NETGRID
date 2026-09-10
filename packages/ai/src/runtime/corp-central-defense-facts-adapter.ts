@@ -224,7 +224,10 @@ function centralInventory(
     ...hqCards,
     ...archivesCards,
     ...input.playerView.own.scoreArea,
-    ...input.playerView.opponent.scoreArea,
+    // Zone/controller does not identify deck ownership: the Runner may score
+    // its own cards or install Corp-owned cards before scoring them.
+    ...input.playerView.opponent.scoreArea.filter(cardIsCorpOwned),
+    ...(input.playerView.opponent.rig ?? []).filter(cardIsCorpOwned),
     ...(input.playerView.specialZones?.removedFromGame ?? []).filter(
       cardIsCorpOwned,
     ),

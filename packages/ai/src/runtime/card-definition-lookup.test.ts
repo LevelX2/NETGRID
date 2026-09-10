@@ -12,8 +12,6 @@ describe("visibleCardDefinition", () => {
     } as VisibleCard;
 
     expect(visibleCardDefinition(card)?.type).toBe("ice");
-    expect(
-      visibleCardDefinition({ ...card, known: false }),
-    ).toBeUndefined();
+    expect(visibleCardDefinition({ ...card, known: false })).toBeUndefined();
   });
 });

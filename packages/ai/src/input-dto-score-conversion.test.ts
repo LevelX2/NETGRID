@@ -10,6 +10,109 @@ import {
 import { buildAiDecisionInputDto } from "./input-dto";
 
 describe("AI input DTO score-conversion contract", () => {
+  it("preserves the public Engine debt-creation and repayment facts", () => {
+    const action = conversionAction();
+    action.type = "purge_runner_virus_counters";
+    action.costs = [];
+    action.payload = {
+      purgeModel: "future_action_debt",
+      actionDebtAdded: 3,
+      actionCapacityMinimumAvailableActions: 1,
+      privateProbe: "discard",
+    };
+    const input = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: playerView(action, "corp"),
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "hard",
+      seed: "purge-debt",
+      decisionId: "purge:1",
+      actionNumber: 1,
+      profileId: "test",
+    });
+    for (const projected of [
+      input.legalActions[0],
+      input.playerView.legalActions[0],
+    ]) {
+      expect(projected?.payload).toMatchObject({
+        purgeModel: "future_action_debt",
+        actionDebtAdded: 3,
+        actionCapacityMinimumAvailableActions: 1,
+      });
+      expect(projected?.payload).not.toHaveProperty("privateProbe");
+    }
+  });
+  it("preserves the Engine's exact remaining encounter subroutine identities", () => {
+    const action = conversionAction();
+    action.side = "runner";
+    action.type = "continue_run";
+    action.payload = {
+      encounterContinue: true,
+      unbrokenSubroutineCount: 2,
+      encounterSubroutineIds: "damage,next-lock",
+      privateProbe: "discard",
+    };
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: playerView(action, "runner"),
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "hard",
+      seed: "remaining-encounter",
+      decisionId: "remaining-encounter:1",
+      actionNumber: 1,
+      profileId: "test",
+    });
+    for (const projected of [
+      input.legalActions[0],
+      input.playerView.legalActions[0],
+    ]) {
+      expect(projected?.payload).toMatchObject({
+        encounterSubroutineIds: "damage,next-lock",
+        unbrokenSubroutineCount: 2,
+      });
+      expect(projected?.payload).not.toHaveProperty("privateProbe");
+    }
+  });
+
+  it("preserves the exact actor-owned program-install payment and trash choice", () => {
+    const action = conversionAction();
+    action.side = "runner";
+    action.type = "install_card";
+    action.payload = {
+      cardId: "program",
+      runnerInstallPaymentSourceIds: "installer",
+      runnerInstallPaymentSourceAmounts: "2",
+      runnerInstallPaymentHostedCredits: 2,
+      runnerProgramTrashBeforeInstall: true,
+      privateProbe: "discard",
+    };
+    const input = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: playerView(action, "runner"),
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "normal",
+      seed: "install-payment-dto",
+      decisionId: "install-payment-dto:1",
+      actionNumber: 1,
+      profileId: "test",
+    });
+    for (const projected of [
+      input.legalActions[0],
+      input.playerView.legalActions[0],
+    ]) {
+      expect(projected?.payload).toMatchObject({
+        runnerInstallPaymentSourceIds: "installer",
+        runnerInstallPaymentSourceAmounts: "2",
+        runnerInstallPaymentHostedCredits: 2,
+        runnerProgramTrashBeforeInstall: true,
+      });
+      expect(projected?.payload).not.toHaveProperty("privateProbe");
+    }
+  });
+
   it("preserves the actor-private Runner draw projection without changing its action binding", () => {
     const action = conversionAction();
     action.actionId = "runner.draw_card";
@@ -197,6 +300,7 @@ describe("AI input DTO score-conversion contract", () => {
         "gain_credits_per_advancement_counter_on_source",
       cardImplementationAmountPerAdvancementCounter: 4,
       advancementCounterCount: 2,
+      cardImplementationTrashSourceCost: true,
       gainCreditsAmount: 8,
     };
     const input = buildAiDecisionInputDto({
@@ -216,6 +320,7 @@ describe("AI input DTO score-conversion contract", () => {
         "gain_credits_per_advancement_counter_on_source",
       cardImplementationAmountPerAdvancementCounter: 4,
       advancementCounterCount: 2,
+      cardImplementationTrashSourceCost: true,
       gainCreditsAmount: 8,
     });
   });
@@ -531,6 +636,125 @@ describe("AI input DTO score-conversion contract", () => {
     );
   });
 
+  it("preserves visible source and ICE target bindings in a public choice", () => {
+    const action = conversionAction();
+    action.side = "runner";
+    action.type = "resolve_choice";
+    action.timingPoint = "runner_action.main";
+    action.payload = { choiceId: "broken_ice_virus_counter_7" };
+    const view = playerView(action, "runner");
+    view.own.rig = [
+      {
+        instanceId: "visible-pattel",
+        known: true,
+        title: "Pattel's Virus",
+        type: "program",
+        owner: "runner",
+        controller: "runner",
+      },
+    ];
+    view.servers = [
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [
+          {
+            instanceId: "visible-glacier",
+            known: true,
+            title: "Glacier",
+            type: "ice",
+            rezzed: true,
+          },
+          { instanceId: "hidden-ice", known: false, rezzed: false },
+        ],
+        root: [],
+      },
+    ] as PlayerView["servers"];
+    view.pendingChoice = {
+      choiceId: "broken_ice_virus_counter_7",
+      side: "runner",
+      source: "broken_ice.virus_counter:7",
+      prompt: "Pattel-Counter platzieren",
+      kind: "select_option",
+      options: [
+        {
+          id: "valid",
+          label: "Glacier",
+          value: "visible-glacier",
+          metadata: {
+            sourceCardInstanceId: "visible-pattel",
+            targetCardInstanceId: "visible-glacier",
+          },
+        },
+        {
+          id: "hidden",
+          label: "Verborgen",
+          value: "hidden-ice",
+          metadata: {
+            sourceCardInstanceId: "unknown-source",
+            targetCardInstanceId: "hidden-ice",
+          },
+        },
+      ],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: 7,
+      visibility: "public",
+    };
+    view.stateVersion = 7;
+    action.expiresAtStateVersion = 7;
+    const built = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "hard",
+      seed: "visible-choice-bindings",
+      decisionId: "visible-choice-bindings:runner:7",
+      actionNumber: 1,
+      profileId: "visible-choice-bindings-test",
+    });
+
+    expect(built.playerView.pendingChoice?.options[0]?.metadata).toEqual({
+      sourceCardInstanceId: "visible-pattel",
+      targetCardInstanceId: "visible-glacier",
+    });
+    expect(built.playerView.pendingChoice?.options[1]).not.toHaveProperty(
+      "metadata",
+    );
+  });
+
+  it("preserves the structured Runner hazard-removal discriminator", () => {
+    const action = conversionAction();
+    action.side = "runner";
+    action.type = "trigger_ability";
+    action.payload = {
+      cardId: "runner-identity",
+      runnerAbility: "remove_runner_trace_counter",
+      counterType: "baskerville",
+      removeCounterAmount: 1,
+      abilityId: "remove_runner_trace_counter",
+    };
+    const view = playerView(action, "runner");
+    const built = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: view,
+      eventTail: [],
+      legalActions: [action],
+      difficulty: "hard",
+      seed: "runner-hazard-removal",
+      decisionId: "runner-hazard-removal:runner:1",
+      actionNumber: 1,
+      profileId: "runner-hazard-removal-test",
+    });
+
+    expect(built.legalActions[0]?.payload).toMatchObject({
+      runnerAbility: "remove_runner_trace_counter",
+      counterType: "baskerville",
+      removeCounterAmount: 1,
+    });
+  });
+
   it("preserves only explicitly public resolved effects for plan-phase communication", () => {
     const action = conversionAction();
     action.side = "runner";
@@ -733,6 +957,10 @@ describe("AI input DTO score-conversion contract", () => {
       successfulRunPrivateLookCount: 5,
       bypassFirstIce: true,
       runSpendingCap: 3,
+      followupRunOnEnd: "optional",
+      bonusRunNoClick: true,
+      optionalBonusRun: true,
+      bonusRunSource: "runner-multi-run-event",
       privateRunProbe: "must-not-cross-dto",
     };
     const input = buildAiDecisionInputDto({
@@ -757,11 +985,19 @@ describe("AI input DTO score-conversion contract", () => {
       successfulRunPrivateLookCount: 5,
       bypassFirstIce: true,
       runSpendingCap: 3,
+      followupRunOnEnd: "optional",
+      bonusRunNoClick: true,
+      optionalBonusRun: true,
+      bonusRunSource: "runner-multi-run-event",
     });
     expect(input.playerView.legalActions[0]?.payload).toMatchObject({
       cardImplementationEffectKind: "make_run",
       successfulRunAccessReplacement: "private_look_top_rd",
       runSpendingCap: 3,
+      followupRunOnEnd: "optional",
+      bonusRunNoClick: true,
+      optionalBonusRun: true,
+      bonusRunSource: "runner-multi-run-event",
     });
     expect(input.legalActions[0]?.payload).not.toHaveProperty(
       "privateRunProbe",

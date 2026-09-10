@@ -11,7 +11,9 @@ const globalStyles = readFileSync(
 describe("active match details strip", () => {
   it("renders the complete match ID instead of a shortened diagnostic value", () => {
     expect(pageSource).toContain('className="matchStripMatchId"');
-    expect(pageSource).toContain('<strong>{gameT("match")}</strong> {payload.matchId}');
+    expect(pageSource).toContain(
+      '<strong>{gameT("match")}</strong> {payload.matchId}',
+    );
     expect(pageSource).not.toContain(
       '<strong>{gameT("match")}</strong> {shortDiagnosticsHash(payload.matchId)}',
     );

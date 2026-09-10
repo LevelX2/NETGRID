@@ -32,9 +32,7 @@ describe("selfplay cycle 128 decision checkpoints", () => {
       actionId: "corp.resolve_choice",
       selectedChoices: {
         choiceId: "trash_installed_program_120",
-        selectedOptionIds: [
-          "card_runner_onr_classic_030_psychic-friend_2",
-        ],
+        selectedOptionIds: ["card_runner_onr_classic_030_psychic-friend_2"],
       },
     });
     expect(decision.decisionDebug?.fallbackUsed).toBe(false);

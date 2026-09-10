@@ -4,12 +4,15 @@ import { resolve } from "node:path";
 import {
   allocateRegistryId,
   backupEvidenceRegistry,
+  completeJob,
   exportEvidenceSnapshot,
+  getStoredReport,
   importLegacyArtifacts,
   importPairingBundle,
   openEvidenceRegistry,
   recordReport,
   registerJob,
+  registryCheck,
   registryStatus,
   resolveDefaultEvidenceDatabasePath,
 } from "./lib/ai-selfplay-evidence-registry.mjs";
@@ -48,12 +51,15 @@ Usage:
   node scripts/ai-selfplay-evidence-registry.mjs init [--db PATH]
   node scripts/ai-selfplay-evidence-registry.mjs status [--db PATH] [--json]
   node scripts/ai-selfplay-evidence-registry.mjs register-job --job-id ID [--worktree PATH] [--branch NAME] [--db PATH]
+  node scripts/ai-selfplay-evidence-registry.mjs complete-job --job-id ID [--status completed|abandoned] [--db PATH]
   node scripts/ai-selfplay-evidence-registry.mjs allocate --kind pairing|case --job-id ID [--db PATH]
   node scripts/ai-selfplay-evidence-registry.mjs upsert --input pairing.json [--db PATH]
   node scripts/ai-selfplay-evidence-registry.mjs record-report --input report.json [--db PATH]
   node scripts/ai-selfplay-evidence-registry.mjs backup --output FILE [--db PATH]
   node scripts/ai-selfplay-evidence-registry.mjs import-legacy --reviews-dir DIR --matrix FILE [--reporting-state FILE] [--reports-dir DIR] [--db PATH]
   node scripts/ai-selfplay-evidence-registry.mjs export [--pairings 031,032] [--output FILE] [--db PATH]
+  node scripts/ai-selfplay-evidence-registry.mjs export-report --report-id ID|latest --output FILE [--db PATH]
+  node scripts/ai-selfplay-evidence-registry.mjs check [--legacy] [--json] [--db PATH]
 
 The default database is the primary checkout's ignored
 data/local/ai-selfplay-evidence.sqlite. Override it with --db or
@@ -90,6 +96,16 @@ try {
       branchName: opts.branch,
     });
     console.log(JSON.stringify({ registered: opts["job-id"], databasePath }));
+  } else if (command === "complete-job") {
+    const jobId = required(opts, "job-id");
+    completeJob(db, { jobId, status: opts.status ?? "completed" });
+    console.log(
+      JSON.stringify({
+        completed: jobId,
+        status: opts.status ?? "completed",
+        databasePath,
+      }),
+    );
   } else if (command === "allocate") {
     const id = allocateRegistryId(
       db,
@@ -165,6 +181,34 @@ try {
       writeFileSync(outputPath, `${output}\n`, "utf8");
       console.log(JSON.stringify({ databasePath, outputPath, pairingIds }));
     } else console.log(output);
+  } else if (command === "export-report") {
+    const report = getStoredReport(db, required(opts, "report-id"));
+    const outputPath = resolve(required(opts, "output"));
+    writeFileSync(outputPath, report.html_body, "utf8");
+    console.log(
+      JSON.stringify({
+        databasePath,
+        reportId: report.report_id,
+        status: report.status,
+        outputPath,
+        coveredPairingIds: report.covered_pairing_ids_json,
+      }),
+    );
+  } else if (command === "check") {
+    const check = registryCheck(db, {
+      verifyLegacySources: Boolean(opts.legacy),
+    });
+    console.log(
+      opts.json
+        ? JSON.stringify({ databasePath, ...check }, null, 2)
+        : Object.entries({ databasePath, ...check })
+            .map(
+              ([key, value]) =>
+                `${key}: ${typeof value === "string" ? value : JSON.stringify(value)}`,
+            )
+            .join("\n"),
+    );
+    if (!check.ok) process.exitCode = 1;
   } else {
     throw new Error(`Unknown command: ${command}`);
   }

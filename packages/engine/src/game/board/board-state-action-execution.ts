@@ -14,6 +14,7 @@ import {
   mustInstance,
   runnerInstalledCardIds,
 } from "../state/card-server-lookup";
+import { corpGeneralCreditAvailability } from "../payment/corp-general-credit-availability";
 
 type NonSpecialZone = Exclude<CardInstance["zone"], { side: "special" }>;
 
@@ -84,6 +85,8 @@ function executeAdvanceCardAction(
   host: BoardStateActionExecutionHost,
   legalAction: LegalAction,
 ): void {
+  if (corpGeneralCreditAvailability(host.state) < 1)
+    throw new Error("Advancement benötigt einen nicht zweckgebundenen Credit.");
   host.payment.spendClick("corp");
   host.payment.spendCredits("corp", 1);
   const advancedCardId = String(legalAction.payload?.cardId) as CardInstanceId;
@@ -103,6 +106,10 @@ function trashResource(
 ): void {
   if (host.state.runner.tags <= 0)
     throw new Error("Der Runner ist nicht getaggt.");
+  if (corpGeneralCreditAvailability(host.state) < 2)
+    throw new Error(
+      "Resource-Trash benötigt zwei nicht zweckgebundene Credits.",
+    );
   const cardId = String(
     legalAction.payload?.resourceId ?? legalAction.payload?.cardId ?? "",
   );

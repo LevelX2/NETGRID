@@ -53,10 +53,12 @@ describe("hidden-zone post-install side effects", () => {
       sourceTrashNeeded: false,
       oncePerRunNeeded: false,
     });
-    expect(records).toEqual([{
-      cardId: installedProgramId,
-      sourceCardDefinitionId: sourceDefinitionId,
-    }]);
+    expect(records).toEqual([
+      {
+        cardId: installedProgramId,
+        sourceCardDefinitionId: sourceDefinitionId,
+      },
+    ]);
     expect(result).toEqual({ temporaryReturnRecorded: true });
   });
 
@@ -67,9 +69,11 @@ describe("hidden-zone post-install side effects", () => {
     });
     const records: unknown[] = [];
 
-    expect(applyTemporaryProgramInstallReturnPlan(plan, {
-      recordTemporaryReturn: (record) => records.push(record),
-    })).toEqual({ temporaryReturnRecorded: false });
+    expect(
+      applyTemporaryProgramInstallReturnPlan(plan, {
+        recordTemporaryReturn: (record) => records.push(record),
+      }),
+    ).toEqual({ temporaryReturnRecorded: false });
     expect(plan.temporaryReturnRecord).toBeUndefined();
     expect(plan.sourceTrashNeeded).toBe(false);
     expect(plan.oncePerRunNeeded).toBe(false);

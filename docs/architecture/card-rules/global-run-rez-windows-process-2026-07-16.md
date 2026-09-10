@@ -131,12 +131,12 @@ Fehlerzustände:
 
 ## Paketfolge
 
-| Paket | Titel | Status | Abhängigkeit |
-|---|---|---|---|
-| GRR-0 | Prozessvertrag und Worktree-Controller | done | Preflight |
-| GRR-1 | Globaler Rez-Aktionsvertrag und Unit-Regressionen | done | GRR-0 |
-| GRR-2 | Hacker-Tracker-End-to-End- und Safety-Regression | done | GRR-1 |
-| GRR-3 | Abschlussreview und Wissensrückführung | done | GRR-2 |
+| Paket | Titel                                             | Status | Abhängigkeit |
+| ----- | ------------------------------------------------- | ------ | ------------ |
+| GRR-0 | Prozessvertrag und Worktree-Controller            | done   | Preflight    |
+| GRR-1 | Globaler Rez-Aktionsvertrag und Unit-Regressionen | done   | GRR-0        |
+| GRR-2 | Hacker-Tracker-End-to-End- und Safety-Regression  | done   | GRR-1        |
+| GRR-3 | Abschlussreview und Wissensrückführung            | done   | GRR-2        |
 
 ## Paketdetails
 
@@ -247,8 +247,7 @@ Konkrete Arbeit:
 Kernartefakte:
 
 - `docs/reviews/engine/global-run-rez-windows-final-review-2026-07-16.md`
-- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- `KI-Wissen-NETGRID/03 Betrieb/Log 2026-07.md`
+- damaliger Projektstatus und Betriebslog (aus dem Arbeitsbaum entfernt; Git bleibt Nachweis)
 - dieses Prozessartefakt.
 
 Checks und Done-Gate:

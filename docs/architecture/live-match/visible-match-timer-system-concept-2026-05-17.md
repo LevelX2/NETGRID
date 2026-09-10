@@ -12,16 +12,16 @@ Der sichere Einstieg ist deshalb eine sichtbare Uhr ohne Regelwirkung. Harte Zei
 
 ## Timerarten und Priorität
 
-| Timerart | Bewertung | Priorität | Regelwirkung im ersten Slice | Begründung |
-| --- | --- | --- | --- | --- |
-| Partie/global | Empfehlenswert als sichtbare Laufzeit seit Matchstart | hoch | keine | Einfach verständlich, keine Hidden-Info-Gefahr, hilfreich im Spiel- und Chatbereich. |
-| Aktive Seite/Spieler | Empfehlenswert als sichtbare Zeit seit letztem Seiten- oder Entscheidungswechsel | hoch | keine | Gute Orientierung, kann später in Spielerzeit überführt werden. |
-| Entscheidungsphase/Pending Choice | Beste Grundlage für spätere harte Timeouts | hoch für Vertrag, nicht für harte Umsetzung | Warnung ja, harte Folge nein | Passt am klarsten zu `LegalActions`, `stateVersion`, aktiver Seite und serverseitiger Revalidierung. |
-| Zug | Als sichtbare Zugdauer sinnvoll, als harte Grenze riskant | mittel | keine | NETGRID-Züge enthalten mehrere Action- und Reaktionsfenster; harte Zuglimits könnten legitime Pending Choices falsch treffen. |
-| Run | Sichtbar sinnvoll, harte Grenze später nur mit Run-spezifischem Vertrag | mittel | keine | Runs enthalten Rez-, Encounter-, Jack-out-, Access- und Präventionsfenster; harte Auto-Folgen müssen Timingpunkte sauber kennen. |
-| Aktion | Als UI-Label eher redundant zur Entscheidungsphase | niedrig bis mittel | keine | Eine einzelne klickbare Action ist nur während eines LegalAction-Fensters relevant. Server sollte nicht Client-Latenz bestrafen. |
-| Spieler-Gesamtzeit/Chess Clock | Später optional für kompetitive/private Modi | niedrig für ersten Slice | keine | Braucht Pause-/Reconnect-/Disconnect-Regeln und klare Fairness-Entscheidung. |
-| Chat-Cooldown oder Chatfenster | Eigener Plattform-/UGC-Scope, nicht Engine | niedrig | keine Engine-Wirkung | Chat ist kein GameEvent, kein Replay, kein StateHash und kein KI-Signal. Chat-Rate-Limits gehören zum V2.2-Chatvertrag. |
+| Timerart                          | Bewertung                                                                        | Priorität                                   | Regelwirkung im ersten Slice | Begründung                                                                                                                       |
+| --------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Partie/global                     | Empfehlenswert als sichtbare Laufzeit seit Matchstart                            | hoch                                        | keine                        | Einfach verständlich, keine Hidden-Info-Gefahr, hilfreich im Spiel- und Chatbereich.                                             |
+| Aktive Seite/Spieler              | Empfehlenswert als sichtbare Zeit seit letztem Seiten- oder Entscheidungswechsel | hoch                                        | keine                        | Gute Orientierung, kann später in Spielerzeit überführt werden.                                                                  |
+| Entscheidungsphase/Pending Choice | Beste Grundlage für spätere harte Timeouts                                       | hoch für Vertrag, nicht für harte Umsetzung | Warnung ja, harte Folge nein | Passt am klarsten zu `LegalActions`, `stateVersion`, aktiver Seite und serverseitiger Revalidierung.                             |
+| Zug                               | Als sichtbare Zugdauer sinnvoll, als harte Grenze riskant                        | mittel                                      | keine                        | NETGRID-Züge enthalten mehrere Action- und Reaktionsfenster; harte Zuglimits könnten legitime Pending Choices falsch treffen.    |
+| Run                               | Sichtbar sinnvoll, harte Grenze später nur mit Run-spezifischem Vertrag          | mittel                                      | keine                        | Runs enthalten Rez-, Encounter-, Jack-out-, Access- und Präventionsfenster; harte Auto-Folgen müssen Timingpunkte sauber kennen. |
+| Aktion                            | Als UI-Label eher redundant zur Entscheidungsphase                               | niedrig bis mittel                          | keine                        | Eine einzelne klickbare Action ist nur während eines LegalAction-Fensters relevant. Server sollte nicht Client-Latenz bestrafen. |
+| Spieler-Gesamtzeit/Chess Clock    | Später optional für kompetitive/private Modi                                     | niedrig für ersten Slice                    | keine                        | Braucht Pause-/Reconnect-/Disconnect-Regeln und klare Fairness-Entscheidung.                                                     |
+| Chat-Cooldown oder Chatfenster    | Eigener Plattform-/UGC-Scope, nicht Engine                                       | niedrig                                     | keine Engine-Wirkung         | Chat ist kein GameEvent, kein Replay, kein StateHash und kein KI-Signal. Chat-Rate-Limits gehören zum V2.2-Chatvertrag.          |
 
 Empfohlene Reihenfolge:
 
@@ -90,13 +90,13 @@ Nicht freigegeben:
 
 Warnungen sind früher zulässig als harte Limits, solange sie keine Regelwirkung haben und side-sicher sind.
 
-| Stufe | Wirkung | Autorität | Anforderungen |
-| --- | --- | --- | --- |
-| Info | Uhr läuft sichtbar | Server-Snapshot plus lokale UI-Interpolation | keine Engine-Änderung |
-| Soft Warning | visuelle/akustische Warnung, optional Chat-/Chronik-Hinweis ohne GameEvent | Server-Konfiguration | side-sicher, abschaltbare Audio-/UI-Darstellung |
-| Grace | Anzeige einer Nachlaufphase | Server-Konfiguration | keine Action-Erzeugung |
-| Hard Timeout | Engine-Auflösung | Server beobachtet, Engine validiert | eigener Timeout-Vertrag, Replay-/StateHash-Tests |
-| Match Loss/Forfeit | Spielende | Engine validiert | nur in explizitem kompetitivem Modus, nicht Default |
+| Stufe              | Wirkung                                                                    | Autorität                                    | Anforderungen                                       |
+| ------------------ | -------------------------------------------------------------------------- | -------------------------------------------- | --------------------------------------------------- |
+| Info               | Uhr läuft sichtbar                                                         | Server-Snapshot plus lokale UI-Interpolation | keine Engine-Änderung                               |
+| Soft Warning       | visuelle/akustische Warnung, optional Chat-/Chronik-Hinweis ohne GameEvent | Server-Konfiguration                         | side-sicher, abschaltbare Audio-/UI-Darstellung     |
+| Grace              | Anzeige einer Nachlaufphase                                                | Server-Konfiguration                         | keine Action-Erzeugung                              |
+| Hard Timeout       | Engine-Auflösung                                                           | Server beobachtet, Engine validiert          | eigener Timeout-Vertrag, Replay-/StateHash-Tests    |
+| Match Loss/Forfeit | Spielende                                                                  | Engine validiert                             | nur in explizitem kompetitivem Modus, nicht Default |
 
 Sinnvolle erste Defaults für UI-only-Slices:
 

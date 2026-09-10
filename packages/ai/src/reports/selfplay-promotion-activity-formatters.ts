@@ -19,14 +19,19 @@ export function formatSelfplayPromotionActivityCandidates(
   queue: readonly SelfplayDecisionSnapshotPromotionQueueEntry[],
 ): SelfplayPromotionActivityCandidate[] {
   const candidates = queue.map(activityCandidateFromQueueEntry);
-  assertSemanticObjectSideSafe(candidates, "SelfplayPromotionActivityCandidates");
+  assertSemanticObjectSideSafe(
+    candidates,
+    "SelfplayPromotionActivityCandidates",
+  );
   return candidates;
 }
 
 function activityCandidateFromQueueEntry(
   entry: SelfplayDecisionSnapshotPromotionQueueEntry,
 ): SelfplayPromotionActivityCandidate {
-  const slug = slugify(`${entry.category}-${entry.scenarioHint}-${entry.snapshotId}`);
+  const slug = slugify(
+    `${entry.category}-${entry.scenarioHint}-${entry.snapshotId}`,
+  );
   const title = `Selfplay Promotion: ${entry.scenarioHint}`;
   const candidate: SelfplayPromotionActivityCandidate = {
     fileName: `docs/activities/inbox/${slug}.md`,
@@ -70,7 +75,9 @@ function activityCandidateFromQueueEntry(
   return candidate;
 }
 
-function activityBody(entry: SelfplayDecisionSnapshotPromotionQueueEntry): string {
+function activityBody(
+  entry: SelfplayDecisionSnapshotPromotionQueueEntry,
+): string {
   switch (entry.category) {
     case "promote_to_real_engine_corpus":
       return "Prüfen, ob der Snapshot als Real-Engine-Corpus-Regressionsfall nachgebaut werden kann.";

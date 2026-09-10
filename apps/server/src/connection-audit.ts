@@ -1,7 +1,7 @@
 import { appendFile, mkdir } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import type { Side } from "@netgrid/shared";
+import { resolveServerRuntimePaths } from "./runtime-paths";
 
 export type ConnectionAuditEventName =
   | "server_start"
@@ -37,10 +37,12 @@ export type ConnectionAuditLogger = {
 };
 
 export const noopConnectionAuditLogger: ConnectionAuditLogger = {
-  record: () => undefined
+  record: () => undefined,
 };
 
-export function createFileConnectionAuditLogger(logPath?: string): ConnectionAuditLogger {
+export function createFileConnectionAuditLogger(
+  logPath?: string,
+): ConnectionAuditLogger {
   const targetPath = resolve(logPath ?? defaultConnectionAuditLogPath());
   let pending = Promise.resolve();
   return {
@@ -48,7 +50,7 @@ export function createFileConnectionAuditLogger(logPath?: string): ConnectionAud
       const entry = sanitizeConnectionAuditEvent({
         ...event,
         timestamp: event.timestamp ?? new Date().toISOString(),
-        pid: event.pid ?? process.pid
+        pid: event.pid ?? process.pid,
       });
       pending = pending
         .then(async () => {
@@ -56,21 +58,32 @@ export function createFileConnectionAuditLogger(logPath?: string): ConnectionAud
           await appendFile(targetPath, `${JSON.stringify(entry)}\n`, "utf8");
         })
         .catch(() => undefined);
-    }
+    },
   };
 }
 
-export function createConnectionAuditLoggerFromEnv(env: NodeJS.ProcessEnv = process.env): ConnectionAuditLogger {
-  if (env.NETGRID_CONNECTION_AUDIT_LOG === "off") return noopConnectionAuditLogger;
-  if (env.VITEST === "true" || env.NODE_ENV === "test") return noopConnectionAuditLogger;
-  return createFileConnectionAuditLogger(env.NETGRID_CONNECTION_AUDIT_LOG_PATH);
+export function createConnectionAuditLoggerFromEnv(
+  env: NodeJS.ProcessEnv = process.env,
+): ConnectionAuditLogger {
+  if (env.NETGRID_CONNECTION_AUDIT_LOG === "off")
+    return noopConnectionAuditLogger;
+  if (env.VITEST === "true" || env.NODE_ENV === "test")
+    return noopConnectionAuditLogger;
+  return createFileConnectionAuditLogger(
+    resolveServerRuntimePaths({ env }).connectionAuditLogPath,
+  );
 }
 
-function sanitizeConnectionAuditEvent(event: ConnectionAuditEvent): ConnectionAuditEvent {
-  return Object.fromEntries(Object.entries(event).filter(([, value]) => value !== undefined && value !== "")) as ConnectionAuditEvent;
+function sanitizeConnectionAuditEvent(
+  event: ConnectionAuditEvent,
+): ConnectionAuditEvent {
+  return Object.fromEntries(
+    Object.entries(event).filter(
+      ([, value]) => value !== undefined && value !== "",
+    ),
+  ) as ConnectionAuditEvent;
 }
 
 function defaultConnectionAuditLogPath(): string {
-  const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-  return resolve(root, "data/runtime/logs/connection-audit.ndjson");
+  return resolveServerRuntimePaths().connectionAuditLogPath;
 }

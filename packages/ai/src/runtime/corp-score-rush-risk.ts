@@ -92,8 +92,7 @@ export function assessCorpScoreRushRisk(params: {
   if (
     beforeScore.visibleBreakCost !== undefined &&
     beforeScore.visibleBreakCost > 0 &&
-    beforeScore.visibleBreakCost * 2 >=
-      beforeScore.visibleRunnerContestCredits
+    beforeScore.visibleBreakCost * 2 >= beforeScore.visibleRunnerContestCredits
   ) {
     return result("accepted", "bounded_one_point_economic_pressure");
   }

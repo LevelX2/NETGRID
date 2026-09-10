@@ -23,6 +23,45 @@ import {
 } from "./turn-planning-contracts";
 
 describe("Corp turn planning coverage", () => {
+  it("keeps program-install payment amounts and program-trash choices as distinct invocations", () => {
+    const variants = [0, 1, 2, 2].map((amount, index) => {
+      const action: LegalAction = {
+        actionId: `install:${index}`,
+        side: "runner",
+        type: "install_card",
+        label: "Install program",
+        source: "program",
+        timingPoint: "runner_action.main",
+        visibility: "public",
+        expiresAtStateVersion: 40,
+        targetRequirements: [],
+        costs: [{ clicks: 1, credits: 5 }],
+        payload: {
+          cardId: "program",
+          runnerInstallPaymentSourceIds: "installer",
+          runnerInstallPaymentSourceAmounts: String(amount),
+          runnerInstallPaymentHostedCredits: amount,
+          ...(index === 3 ? { runnerProgramTrashBeforeInstall: true } : {}),
+        },
+      };
+      return currentTurnPlanningInvocationVariants({
+        stateIdentity: identity(),
+        action,
+        candidate: {
+          ...candidate(action.actionId, "install_card", "install.card"),
+          sourceCardInstanceId: "program",
+        },
+        selectedChoices: undefined,
+      })[0]!;
+    });
+    expect(new Set(variants.map((v) => v.invocationKey)).size).toBe(4);
+    expect(variants[2]?.boundChoices).toContainEqual({
+      choiceId: "runner_install_payment:installer",
+      role: "route_defining",
+      value: { kind: "number", value: 2 },
+    });
+  });
+
   it("binds every registered Corp module to one explicit horizon contract", () => {
     const registered = [
       ...createCorpCorePlanModules(),

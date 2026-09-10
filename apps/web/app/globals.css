@@ -4,6 +4,7 @@
 .app {
   min-height: 100vh;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto 1fr;
 }
 
@@ -251,6 +252,12 @@
   gap: 8px;
 }
 
+.appRuntimeStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .topbarVersion {
   min-height: 32px;
   display: inline-flex;
@@ -263,6 +270,30 @@
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.02em;
+}
+
+.topbarModeBadge {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid color-mix(in srgb, var(--line), transparent 28%);
+  border-radius: 999px;
+  padding: 0 9px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.topbarModeBadge.watch {
+  color: color-mix(in srgb, var(--agenda), white 12%);
+  background: color-mix(in srgb, var(--agenda), transparent 88%);
+}
+
+.topbarModeBadge.localChanges {
+  color: color-mix(in srgb, var(--credit), white 8%);
+  background: color-mix(in srgb, var(--credit), transparent 88%);
 }
 
 .brand h1 {
@@ -1255,6 +1286,28 @@ select {
 .sideSelectionControl {
   position: relative;
   display: block;
+}
+
+.sideSelectionControl select,
+.deckSlotControl select {
+  -webkit-appearance: none;
+  appearance: none;
+  padding-right: 36px;
+}
+
+.sideSelectionControl::after,
+.deckSlotControl::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  z-index: 1;
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
 }
 
 .sideSelectionControl select {
@@ -3128,6 +3181,46 @@ select {
   min-height: calc(100vh - 190px);
 }
 
+.deckStandardPreviewNotice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--focus), transparent 58%);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--focus), transparent 90%);
+}
+
+.deckStandardPreviewNotice > div:first-child {
+  display: grid;
+  gap: 3px;
+}
+
+.deckStandardPreviewNotice span {
+  color: var(--muted);
+}
+
+.deckStandardPreviewActions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.deckBuilderGridStandardPreview .deckTableSaveButton,
+.deckBuilderGridStandardPreview .deckTableSaveState,
+.deckBuilderGridStandardPreview .deckTableCardMenu,
+.deckBuilderGridStandardPreview .deckTablePileInsertButton,
+.deckBuilderGridStandardPreview .deckTableBoardTools > button:last-child {
+  display: none;
+}
+
+.deckTableSaveState.preview {
+  border-color: color-mix(in srgb, var(--focus), transparent 48%);
+  color: var(--focus);
+}
+
 .deckBuilderGridTableMode .deckListColumn {
   order: 1;
   height: calc(100vh - 190px);
@@ -4265,7 +4358,7 @@ select {
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow: auto;
+  overflow: visible;
   padding-top: 2px;
   padding-bottom: 70px;
 }
@@ -5575,7 +5668,7 @@ select {
 }
 
 .damageImpactOverlay.is-prevented {
-  --damage-impact: var(--success);
+  --damage-impact: var(--ok);
 }
 
 .damageImpactHeader,
@@ -5631,6 +5724,25 @@ select {
   border: 1px solid color-mix(in srgb, var(--damage-impact), transparent 62%);
   border-radius: 8px;
   background: rgb(0 0 0 / 0.2);
+  overflow-x: auto;
+}
+
+.damageImpactMeter.is-compact {
+  width: 100%;
+  min-height: 36px;
+  padding: 6px;
+}
+
+.damageImpactMeter.is-compact .damageImpactSegment {
+  min-width: 12px;
+  min-height: 22px;
+}
+
+.damageImpactMeter.is-compact .damageImpactFlatline {
+  min-height: 22px;
+  padding-right: 5px;
+  padding-left: 7px;
+  font-size: 9px;
 }
 
 .damageImpactSegment {
@@ -5641,8 +5753,8 @@ select {
 }
 
 .damageImpactSegment.remaining {
-  border: 1px solid color-mix(in srgb, var(--success), transparent 38%);
-  background: color-mix(in srgb, var(--success), transparent 70%);
+  border: 1px solid color-mix(in srgb, var(--ok), transparent 38%);
+  background: color-mix(in srgb, var(--ok), transparent 70%);
 }
 
 .damageImpactSegment.lost {
@@ -5665,15 +5777,25 @@ select {
   background: color-mix(in srgb, var(--damage-impact), transparent 38%);
 }
 
-.damageImpactZero {
-  flex: 0 0 22px;
+.damageImpactFlatline {
+  flex: 0 0 auto;
   min-height: 26px;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 6px 0 9px;
   border-left: 2px solid color-mix(in srgb, var(--text), transparent 10%);
   color: var(--text);
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.damageImpactFlatline svg {
+  color: color-mix(in srgb, var(--danger), white 12%);
 }
 
 .damageImpactStats {
@@ -8392,9 +8514,8 @@ section[data-testid="legal-actions"].cueHighlight {
 }
 
 .iceLane .iceCardSlot:hover,
-.iceLane .iceCardSlot:focus-within,
-.iceLane .iceCardSlot.actionMenuOpen,
-.iceLane .iceCardSlot.runPositionActiveSlot {
+.iceLane .iceCardSlot:has(:focus-visible),
+.iceLane .iceCardSlot.actionMenuOpen {
   z-index: 38;
 }
 
@@ -11601,6 +11722,18 @@ section[data-testid="legal-actions"].cueHighlight {
   justify-self: center;
 }
 
+.accessRevealBody.hasDamageImpact {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.accessRevealBody.hasDamageImpact .accessRevealCard {
+  width: min(180px, 100%);
+}
+
+.accessRevealBody.hasDamageImpact .accessRevealDecision {
+  width: 100%;
+}
+
 .accessRevealCard .card.preview {
   min-height: 0;
 }
@@ -11630,10 +11763,17 @@ section[data-testid="legal-actions"].cueHighlight {
 
 .accessDamageStage {
   --access-damage: #39d0ff;
+  --damage-impact: var(--access-damage);
   width: 100%;
   display: grid;
   justify-items: center;
-  gap: 10px;
+  gap: 8px;
+}
+
+.accessDamageStage .windowEventIcon {
+  width: 96px;
+  height: 96px;
+  flex-basis: 96px;
 }
 
 .accessDamageStage.damage-meat {
@@ -11642,6 +11782,10 @@ section[data-testid="legal-actions"].cueHighlight {
 
 .accessDamageStage.damage-core {
   --access-damage: #b98cff;
+}
+
+.accessDamageStage.is-flatline {
+  --access-damage: #ff3b30;
 }
 
 .accessDamageTitle {
@@ -12897,6 +13041,9 @@ select,
 
 .setup.v07Entry {
   display: grid;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
   align-content: start;
   justify-items: center;
   gap: 16px;
@@ -13171,6 +13318,14 @@ select,
   gap: 9px;
 }
 
+.cardTooltipSecondaryControls {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(150px, 0.65fr) minmax(240px, 1.35fr);
+  align-items: end;
+  gap: 9px;
+}
+
 .cardTooltipModeSelector {
   width: 100%;
 }
@@ -13197,6 +13352,20 @@ select,
 
 .cardTooltipSettingsControls label {
   width: 100%;
+}
+
+.cardTooltipSecondaryControls .cardTooltipTranslateToggle {
+  min-width: 0;
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  align-self: end;
+  line-height: 1.25;
+}
+
+.cardTooltipTranslateToggle.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .cardSizeSettings {
@@ -13603,9 +13772,9 @@ select,
 }
 
 .optionsDialogHeader {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
   padding: 14px;
   border-bottom: 1px solid var(--line);
@@ -13613,6 +13782,10 @@ select,
 
 .optionsDialogHeader h2 {
   margin: 0;
+}
+
+.optionsDialogClose {
+  justify-self: end;
 }
 
 .confirmationDialogOverlay {
@@ -13710,10 +13883,66 @@ select,
   cursor: pointer;
 }
 
+.optionsHeaderLocaleSelect {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--muted);
+}
+
+.optionsHeaderLocaleIcon {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  filter: drop-shadow(
+    0 1px 2px color-mix(in srgb, var(--runner), transparent 58%)
+  );
+}
+
+.optionsHeaderLocaleIconFill {
+  fill: var(--runner);
+}
+
+.optionsHeaderLocaleIconGrid {
+  fill: none;
+  stroke: var(--mark-text);
+  stroke-width: 1.55;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.localeSelect.optionsHeaderLocaleSelect select {
+  min-width: 132px;
+  min-height: 34px;
+  padding-block: 0.35rem;
+}
+
 .maintenanceLocaleSelect select {
   background: #fff;
   color: #102033;
   border-color: #9db0c3;
+}
+
+@media (max-width: 520px) {
+  .optionsPanel > .catalogHeader > .optionsHeaderLocaleSelect {
+    flex-basis: 100%;
+  }
+
+  .optionsDialogHeader {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .optionsDialogHeader > .optionsHeaderLocaleSelect {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: start;
+  }
+
+  .optionsDialogClose {
+    grid-column: 2;
+    grid-row: 1;
+  }
 }
 
 .segmented button {
@@ -14942,7 +15171,9 @@ select,
   min-height: 28px;
   place-items: center;
   text-align: center;
-  padding: 0 8px;
+  padding: 5px 8px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
   position: relative;
 }
 
@@ -14953,8 +15184,6 @@ select,
 }
 
 .runStepOpportunities {
-  position: absolute;
-  right: 7px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -14970,6 +15199,18 @@ select,
   border-radius: 999px;
   background: color-mix(in srgb, currentColor 14%, transparent);
   font-style: normal;
+  opacity: 0.4;
+  transition:
+    opacity 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.runStepOpportunity.available {
+  opacity: 1;
+  background: color-mix(in srgb, currentColor 22%, transparent);
+  box-shadow:
+    0 0 0 1px currentColor,
+    0 0 7px color-mix(in srgb, currentColor 40%, transparent);
 }
 
 .encounterFocus {
@@ -16973,6 +17214,17 @@ select,
     flex-direction: column;
   }
 
+  .topbarStatusGroup,
+  .topbarMeta {
+    width: 100%;
+    min-width: 0;
+    flex-wrap: wrap;
+  }
+
+  .topbarStatusGroup {
+    justify-content: center;
+  }
+
   .toolbar {
     align-items: center;
     justify-content: flex-start;
@@ -17064,6 +17316,10 @@ select,
   }
 
   .cardTooltipModeSelector {
+    grid-template-columns: 1fr;
+  }
+
+  .cardTooltipSecondaryControls {
     grid-template-columns: 1fr;
   }
 
@@ -17173,6 +17429,20 @@ select,
 
   .entryTabs {
     grid-template-columns: 1fr;
+  }
+
+  .setup.v07Entry > *,
+  .entryContent,
+  .accountPanel,
+  .accountPanelHeader,
+  .accountHeaderActions {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .accountPanelHeader,
+  .accountHeaderActions {
+    width: 100%;
   }
 
   .publicGamesHeader,
@@ -17957,8 +18227,45 @@ select,
   gap: 6px;
 }
 
+.accountField {
+  display: grid;
+  gap: 6px;
+}
+
 .accountForm input {
   width: 100%;
+}
+
+.accountPasswordField {
+  position: relative;
+  display: block;
+}
+
+.accountPasswordField input {
+  padding-right: 42px;
+}
+
+.accountPasswordToggle {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  place-items: center;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.accountPasswordToggle:hover,
+.accountPasswordToggle:focus-visible {
+  background: var(--panel);
+  color: var(--text);
 }
 
 .accountIssuedLink {

@@ -16,9 +16,7 @@ export type RoleContextDependencies = {
   aiHints: ReadonlyMap<string, AiCardHint>;
 };
 
-export function createRoleContext(
-  dependencies: RoleContextDependencies,
-): {
+export function createRoleContext(dependencies: RoleContextDependencies): {
   rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
   rolesForCardId: (cardId: string | undefined) => string[];
 } {

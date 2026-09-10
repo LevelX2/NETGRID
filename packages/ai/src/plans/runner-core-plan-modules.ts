@@ -1,6 +1,7 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
 import { rolesForDeckDoctrineCard } from "../deck-doctrine-card-roles";
+import { AI_HINTS_BY_CARD } from "../ai-hints";
 import type { AiDeckStrategyProfile } from "../deck-doctrine-strategy";
 import { rolesMatch } from "../runtime/role-match";
 import { runnerEffectsProvideDamagePrevention } from "../runner-canonical-hint-semantics";
@@ -27,6 +28,7 @@ import type {
   FundingRouteHorizon,
   FundingRouteReliability,
   FundingRouteStatus,
+  PaymentWindowFundingSetup,
 } from "./funding-route";
 import type { ProjectedHandDisposition } from "./turn-projection";
 import type { RunnerCreditBankProspectivePlan } from "./runner-credit-bank-prospective-planning";
@@ -45,6 +47,10 @@ export type RunnerFundingRouteAssessment = {
   projectedGap: number;
   totalClickCost: number;
   firstStepActionId?: string;
+  paymentInstall?: PaymentWindowFundingSetup & {
+    targetServerId: string;
+    runActionId: string;
+  };
   evidenceCodes: string[];
 };
 
@@ -147,6 +153,7 @@ export type RunnerCoverageGapSignal = {
   installActionIds?: string[];
   installActionValues?: Record<string, number>;
   preparationActionIds?: string[];
+  memorySupportActionIds?: string[];
   fundingGap?: number;
   sameTurnRunConversion?: {
     targetRunActionId: string;
@@ -168,7 +175,7 @@ export type RunnerCoverageGapSignal = {
     | "search_known_upgrade";
   recoveryEvidenceCodes?: string[];
   upgradeQuote?: {
-    schemaVersion: "runner-breaker-upgrade-economic-quote-v1";
+    schemaVersion: "runner-breaker-upgrade-economic-quote-v2";
     targetDefinitionId: string;
     currentKnownPathCost: number;
     projectedKnownPathCost: number;
@@ -182,6 +189,10 @@ export type RunnerCoverageGapSignal = {
     projectedLiquidCreditsAfterUpgradeAndRun: number;
     desiredCreditReserve: number;
     memoryAvailable: number;
+    memorySupportAdditionalMu: number;
+    memorySupportCreditCost: number;
+    memorySupportActionClicks: number;
+    projectedMemoryAvailable: number;
     candidateMemoryCost: number;
   };
   fundingActionIds: string[];
@@ -190,10 +201,16 @@ export type RunnerCoverageGapSignal = {
     actionId: string;
     sourceCardInstanceId: string;
     sourceDefinitionId: string;
+    resolvedSearchChoice?: {
+      choiceId: string;
+      choiceSource: string;
+      stateVersion: number;
+    };
     targetCardInstanceId?: string;
     targetDefinitionId?: string;
     installMemorySacrificeBinding?: {
       targetCardInstanceId: string;
+      targetMemoryCost?: number;
       requiredMemoryToFree: number;
       selectedCards: Array<{
         cardInstanceId: string;
@@ -283,6 +300,7 @@ export type RunnerCreditBankSignal = {
 export type RunnerRecurringEconomySignal = {
   commitmentId: string;
   definitionId: string;
+  commitmentActive: boolean;
   phase: "install" | "hold";
   actionIds: string[];
   priorityClass: "P3" | "P4" | "P5";
@@ -290,9 +308,9 @@ export type RunnerRecurringEconomySignal = {
   evidenceCodes: string[];
   investmentHorizon: Readonly<{
     installCost: number;
-    earliestPayout: "start_of_runner_turn";
+    earliestPayout: "start_of_runner_turn" | "next_compatible_icebreaker_use";
     projectedHoldTurns: number;
-    invalidatingActionType: "start_run";
+    invalidatingActionType: "start_run" | "none";
     realizedPayoutCount: number;
     realizedValue: number;
     futureValueAtRisk: number;
@@ -1379,12 +1397,18 @@ function economyModule(): PlanModule {
         );
       }
       const need = economyState.need;
+      const parentMaterialValue =
+        need.kind === "parent_plan_support"
+          ? portfolio.instances
+              .map((candidate) =>
+                runnerFundingParentMaterialValue(candidate, need),
+              )
+              .find((value): value is number => value !== undefined)
+          : undefined;
       const parentIsResidentAndMaterial =
         need.kind === "portfolio_reserve" ||
         need.kind === "develop_liquidity" ||
-        portfolio.instances.some((candidate) =>
-          runnerFundingParentIsResidentAndMaterial(candidate, need),
-        );
+        parentMaterialValue !== undefined;
       const supportContractValid = validRunnerFundingNeedContract(
         need,
         context.input.playerView.stateVersion,
@@ -1397,7 +1421,9 @@ function economyModule(): PlanModule {
         instance,
         need.priorityClass,
         routeExists,
-        need.kind === "develop_liquidity" ? -9_999 : need.gap * 10,
+        need.kind === "develop_liquidity"
+          ? -9_999
+          : (parentMaterialValue ?? need.gap * 10),
         portfolio.executorInstanceId,
       );
       if (!parentIsResidentAndMaterial && need.kind === "parent_plan_support") {
@@ -1421,7 +1447,7 @@ function economyModule(): PlanModule {
       }
       return result;
     },
-    materialize: (instance, _assessment, context) => {
+    materialize: (instance, currentAssessment, context) => {
       const economyState = state<EconomyState>(instance);
       if (economyState.kind === "installed_card_liquidation_choice") {
         const signal = economyState.signal;
@@ -1443,7 +1469,17 @@ function economyModule(): PlanModule {
         };
       }
       const need = economyState.need;
-      const candidates = economyCandidates(context, need);
+      const candidates = economyCandidates(context, need).map((entry) =>
+        need.kind === "parent_plan_support"
+          ? {
+              ...entry,
+              stepValue: Math.max(
+                entry.stepValue,
+                currentAssessment.withinClassValue,
+              ),
+            }
+          : entry,
+      );
       return {
         step: {
           stepId: `${instance.instanceId}:fund:${need.needId}`,
@@ -1506,21 +1542,13 @@ function coverageModule(
         );
         const draws = coverageDrawCandidates(context, gap);
         const funding = coverageFundingCandidates(context, gap);
-        const sameTurnConversionNeedsFunding =
-          gap.sameTurnRunConversion !== undefined && (gap.fundingGap ?? 0) > 0;
-        const phase = sameTurnConversionNeedsFunding
-          ? "fund_answer"
-          : preparations.length > 0
-            ? "prepare_coverage"
-            : installs.length > 0
-              ? "install_answer"
-              : gap.answerInHand && (gap.fundingGap ?? 0) > 0
-                ? "fund_answer"
-                : gap.directSearchActionIds.length > 0
-                  ? "search_answer"
-                  : gap.searchEngineSetupActionIds.length > 0
-                    ? "setup_search_engine"
-                    : "draw_for_answer";
+        const phase = coveragePhase(
+          context,
+          gap,
+          rolesForDefinitionId,
+          preparations,
+          installs,
+        );
         const routeExists =
           preparations.length > 0 ||
           installs.length > 0 ||
@@ -1595,7 +1623,11 @@ function coverageModule(
                   candidates.map((entry) => entry.candidate.semanticActionType),
                 ),
               ],
-              legalActionTypes: ["trigger_ability"],
+              legalActionTypes: [
+                ...new Set(
+                  candidates.map((entry) => entry.candidate.actionType),
+                ),
+              ],
             },
             purpose: `Prepare the exact installed answer for ${current.gap.requiredRole}.`,
           },
@@ -1657,6 +1689,38 @@ function coverageModule(
       };
     },
   };
+}
+
+function coveragePhase(
+  context: PlanSchedulerContext,
+  gap: RunnerCoverageGapSignal,
+  rolesForDefinitionId: (definitionId: string) => readonly string[],
+  preparations = coveragePreparationCandidates(context, gap),
+  installs = coverageInstallCandidates(context, gap, rolesForDefinitionId),
+): CoverageState["phase"] {
+  const sameTurnConversionNeedsFunding =
+    gap.sameTurnRunConversion !== undefined && (gap.fundingGap ?? 0) > 0;
+  return sameTurnConversionNeedsFunding
+    ? "fund_answer"
+    : preparations.length > 0
+      ? "prepare_coverage"
+      : installs.length > 0
+        ? "install_answer"
+        : gap.answerInHand && (gap.fundingGap ?? 0) > 0
+          ? "fund_answer"
+          : gap.directSearchActionIds.length > 0
+            ? "search_answer"
+            : gap.searchEngineSetupActionIds.length > 0
+              ? "setup_search_engine"
+              : "draw_for_answer";
+}
+
+export function runnerCoverageCurrentPhase(params: {
+  context: PlanSchedulerContext;
+  gap: RunnerCoverageGapSignal;
+  rolesForDefinitionId: (definitionId: string) => readonly string[];
+}): CoverageState["phase"] {
+  return coveragePhase(params.context, params.gap, params.rolesForDefinitionId);
 }
 
 function defenseModule(): PlanModule {
@@ -2035,17 +2099,40 @@ function economyCandidates(
   const routeActionIds = new Set(
     need.kind === "develop_liquidity" ? need.actionIds : need.routeActionIds,
   );
+  const paymentInstall =
+    need.kind === "parent_plan_support" &&
+    (need.driver.kind === "contest" || need.driver.kind === "run")
+      ? need.routeAssessment.paymentInstall
+      : undefined;
+  const isPaymentInstall = (candidate: ActionSemanticCandidate) =>
+    paymentInstall?.actionId === candidate.actionId &&
+    need.kind === "parent_plan_support" &&
+    need.driver.targetId === paymentInstall.targetServerId &&
+    context.actionCandidates.some(
+      (entry) => entry.actionId === paymentInstall.runActionId,
+    ) &&
+    paymentInstall.sourceCardInstanceId === candidate.sourceCardInstanceId &&
+    paymentInstall.sourceDefinitionId === candidate.sourceDefinitionId &&
+    candidate.semanticActionType === "install.card" &&
+    candidate.costProfile.costKnownStatus === "known" &&
+    candidate.costProfile.clickCost === paymentInstall.installClickCost &&
+    candidate.costProfile.creditCost === paymentInstall.installCreditCost;
   return context.actionCandidates
     .filter(
       (candidate) =>
+        !context.actionDispositions?.some(
+          (entry) => entry.actionId === candidate.actionId,
+        ) &&
         routeActionIds.has(candidate.actionId) &&
         (need.kind === "develop_liquidity"
           ? runnerTurnLiquidityCandidateIsMaterializable(candidate)
-          : runnerFundingRouteCandidateIsMaterializable(candidate)),
+          : runnerFundingRouteCandidateIsMaterializable(candidate) ||
+            isPaymentInstall(candidate)),
     )
     .map((candidate) => {
-      const netLiquidCreditGain =
-        candidate.economyProjection!.netLiquidCreditGain!;
+      const netLiquidCreditGain = isPaymentInstall(candidate)
+        ? paymentInstall!.netPaymentGain - paymentInstall!.installCreditCost
+        : candidate.economyProjection!.netLiquidCreditGain!;
       const fundingGapProgress = Math.min(need.gap, netLiquidCreditGain);
       return {
         candidate,
@@ -2185,15 +2272,15 @@ export function runnerExactBasicLiquidCreditCandidate(
   );
 }
 
-function runnerFundingParentIsResidentAndMaterial(
+function runnerFundingParentMaterialValue(
   candidate: PlanInstance,
   need: Extract<RunnerFundingNeedSignal, { kind: "parent_plan_support" }>,
-): boolean {
+): number | undefined {
   if (
     candidate.instanceId !== need.parentPlanInstanceId ||
     (candidate.viability !== "ready" && candidate.viability !== "blocked")
   ) {
-    return false;
+    return undefined;
   }
   const moduleState = candidate.moduleState as
     | {
@@ -2211,14 +2298,22 @@ function runnerFundingParentIsResidentAndMaterial(
         blocker.code === "waiting_for_bound_funding_support" &&
         blocker.resumeCondition?.code === need.needId,
     );
-  return (
-    waitsOnlyForThisFunding &&
-    moduleState?.signal?.supportNeedId === need.needId &&
-    ((typeof moduleState.signal.marginalValue === "number" &&
-      moduleState.signal.marginalValue > 0) ||
-      (typeof moduleState.signal.value === "number" &&
-        moduleState.signal.value > 0))
-  );
+  if (
+    !waitsOnlyForThisFunding ||
+    moduleState?.signal?.supportNeedId !== need.needId
+  ) {
+    return undefined;
+  }
+  if (
+    typeof moduleState.signal.marginalValue === "number" &&
+    moduleState.signal.marginalValue > 0
+  ) {
+    return moduleState.signal.marginalValue;
+  }
+  return typeof moduleState.signal.value === "number" &&
+    moduleState.signal.value > 0
+    ? moduleState.signal.value
+    : undefined;
 }
 
 function shellTradersPipelineCandidates(
@@ -2422,7 +2517,14 @@ function coverageInstallCandidates(
     );
     if (!sourceDefinitionId) return [];
     const roles = rolesForDefinitionId(sourceDefinitionId);
-    if (!runnerRolesCoverCoverageGap(roles, gap.requiredRole)) return [];
+    if (
+      !runnerInstallDefinitionCoversCoverageGap(
+        sourceDefinitionId,
+        roles,
+        gap.requiredRole,
+      )
+    )
+      return [];
     return [
       {
         candidate,
@@ -2438,23 +2540,34 @@ function coveragePreparationCandidates(
   gap: RunnerCoverageGapSignal,
 ): PlanMaterialization["candidates"] {
   const actionIds = new Set(gap.preparationActionIds ?? []);
+  const memorySupportActionIds = new Set(gap.memorySupportActionIds ?? []);
   return context.actionCandidates
     .filter((candidate) => {
       if (!actionIds.has(candidate.actionId)) return false;
       const action = context.input.legalActions.find(
         (entry) => entry.actionId === candidate.actionId,
       );
-      return (
+      const exactMemorySupportInstall =
+        memorySupportActionIds.has(candidate.actionId) &&
         action?.side === "runner" &&
-        action.type === "trigger_ability" &&
+        action.type === "install_card" &&
         action.timingPoint === context.input.playerView.timingPoint &&
-        action.expiresAtStateVersion ===
-          context.input.playerView.stateVersion &&
-        action.payload?.runnerAbility === "change_icebreaker_subtype" &&
-        typeof action.payload.selectedSubtype === "string"
+        action.expiresAtStateVersion === context.input.playerView.stateVersion;
+      return (
+        exactMemorySupportInstall ||
+        (action?.side === "runner" &&
+          action.type === "trigger_ability" &&
+          action.timingPoint === context.input.playerView.timingPoint &&
+          action.expiresAtStateVersion ===
+            context.input.playerView.stateVersion &&
+          action.payload?.runnerAbility === "change_icebreaker_subtype" &&
+          typeof action.payload.selectedSubtype === "string")
       );
     })
-    .map((candidate) => ({ candidate, stepValue: 130 }));
+    .map((candidate) => ({
+      candidate,
+      stepValue: memorySupportActionIds.has(candidate.actionId) ? 120 : 130,
+    }));
 }
 
 function runnerInstallSourceCardInstanceId(
@@ -2518,6 +2631,24 @@ export function runnerRolesCoverCoverageGap(
   return (
     rolesMatch(roles, runnerCoverageRoleNeedles(requiredRole)) ||
     rolesMatch(roles, ["universal_breaker", "breaker_universal"])
+  );
+}
+
+/** Prospective installation coverage; never use this as active rig coverage.
+ * Configurable modes remain alternatives, with their costs and single-mode
+ * limits evaluated by the existing Engine-backed run-path assessment. */
+export function runnerInstallDefinitionCoversCoverageGap(
+  definitionId: string,
+  roles: readonly string[],
+  requiredRole: RunnerCoverageGapSignal["requiredRole"],
+): boolean {
+  if (runnerRolesCoverCoverageGap(roles, requiredRole)) return true;
+  const profile = AI_HINTS_BY_CARD.get(definitionId)?.breakerProfile;
+  return (
+    profile?.configurableCoverage === true &&
+    (profile.coverageCandidates ?? []).some(
+      (coverage) => `breaker_${coverage}` === requiredRole,
+    )
   );
 }
 
@@ -2695,6 +2826,14 @@ function defenseCandidates(
   );
   return actionCandidates
     .filter((candidate) => {
+      if (
+        (phase === "fund_tag_clear" || phase === "build_reaction_reserve") &&
+        (actionDispositions ?? []).some(
+          (entry) => entry.actionId === candidate.actionId,
+        )
+      ) {
+        return false;
+      }
       if (phase === "discard_window")
         return signals.discardChoiceBinding?.actionId === candidate.actionId;
       if (
@@ -2766,6 +2905,20 @@ export function runnerDefenseReactionReserveIsCurrentPhase(params: {
       params.stateVersion,
       params.signals,
     ) === "build_reaction_reserve"
+  );
+}
+
+export function runnerDefenseTagClearFundingIsCurrentPhase(params: {
+  actionCandidates: readonly ActionSemanticCandidate[];
+  stateVersion: number;
+  signals: RunnerDefenseSignals;
+}): boolean {
+  return (
+    defensePhase(
+      params.actionCandidates,
+      params.stateVersion,
+      params.signals,
+    ) === "fund_tag_clear"
   );
 }
 

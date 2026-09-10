@@ -2,11 +2,16 @@ import { describe, expect, it, vi } from "vitest";
 import {
   changeAccountPassword,
   inviteTokenFromLocation,
+  loadAccountAccessPolicy,
+  loadLocalAccountProfiles,
   loadAccountActivePublicMatchIds,
   loginAccount,
+  registerLocalProfile,
+  registerProtectedAccount,
   rejoinAccountPublicMatch,
   resetTokenFromLocation,
   restoreAccountSession,
+  selectLocalProfile,
 } from "./account-client";
 
 describe("account client", () => {
@@ -156,5 +161,58 @@ describe("account client", () => {
     expect(new Headers(postInit.headers).get("x-netgrid-csrf")).toBe(
       "account-csrf",
     );
+  });
+
+  it("uses the mode-specific local profile and protected registration endpoints", async () => {
+    const fetcher = vi.fn(async (url: string | URL | Request) => {
+      const path = String(url);
+      if (path.endsWith("/access-policy"))
+        return new Response(
+          JSON.stringify({
+            mode: "simple",
+            source: "persisted",
+            selfServiceEnabled: true,
+          }),
+          { status: 200 },
+        );
+      if (path.endsWith("/profiles"))
+        return new Response(JSON.stringify({ profiles: [] }), { status: 200 });
+      return new Response(
+        JSON.stringify({ account: {}, session: {}, csrfToken: "csrf" }),
+        { status: 200 },
+      );
+    }) as unknown as typeof fetch;
+
+    await expect(loadAccountAccessPolicy(fetcher)).resolves.toMatchObject({
+      mode: "simple",
+      selfServiceEnabled: true,
+    });
+    await expect(loadLocalAccountProfiles(fetcher)).resolves.toEqual({
+      profiles: [],
+    });
+    await registerLocalProfile({ displayName: "Ada" }, fetcher);
+    await selectLocalProfile({ accountId: "acct_ada" }, fetcher);
+    await registerProtectedAccount(
+      {
+        loginName: "ada",
+        displayName: "Ada",
+        password: "correct horse battery staple",
+      },
+      fetcher,
+    );
+
+    const calls = (fetcher as unknown as ReturnType<typeof vi.fn>).mock.calls;
+    expect(calls.map(([url]) => String(url))).toEqual([
+      expect.stringContaining("/api/account/access-policy"),
+      expect.stringContaining("/api/account/profiles"),
+      expect.stringContaining("/api/account/profiles"),
+      expect.stringContaining("/api/account/profiles/select"),
+      expect.stringContaining("/api/account/register"),
+    ]);
+    expect(calls.slice(2).map(([, init]) => init?.method)).toEqual([
+      "POST",
+      "POST",
+      "POST",
+    ]);
   });
 });

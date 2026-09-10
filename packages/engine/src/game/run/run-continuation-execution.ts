@@ -93,6 +93,24 @@ export function continueRun(
   assertRequiredHostGroups(host);
   const { state } = host;
   const run = mustRun(state);
+  if (
+    legalAction?.side === "corp" &&
+    state.timingPoint === "run.encounter_ice"
+  ) {
+    if (
+      legalAction.type !== "continue_run" ||
+      legalAction.source !== "game_rule" ||
+      legalAction.payload?.serverId !== run.attackedServerId ||
+      run.phase !== "encounter_ice" ||
+      !run.encounteredIceId
+    ) {
+      throw new Error(
+        "Die Corp-Fortsetzung ist nicht an das Encounter-Fenster gebunden.",
+      );
+    }
+    run.corpEncounterPassStateVersion = state.stateVersion + 1;
+    return;
+  }
   if (run.phase !== "encounter_ice" || !run.encounteredIceId) {
     if (run.phase === "access") {
       host.callbacks.finishRun(true, legalAction);

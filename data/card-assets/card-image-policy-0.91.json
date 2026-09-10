@@ -11,10 +11,7 @@
   "assetScope": {
     "allowedGame": "Original NETGRID CCG",
     "allowedPublisher": "Wizards of the Coast",
-    "allowedYears": [
-      1996,
-      1999
-    ],
+    "allowedYears": [1996, 1999],
     "allowedSets": [
       "Limited 1.0",
       "Unlimited 2.0",
@@ -22,10 +19,7 @@
       "Classic 2.2",
       "owned_promos_if_physically_owned"
     ],
-    "allowedSides": [
-      "corp",
-      "runner"
-    ],
+    "allowedSides": ["corp", "runner"],
     "allowedAssetKind": "front_scan_only",
     "requiresPhysicalOwnershipOrPrivateFamilyUse": true
   },
@@ -113,9 +107,7 @@
       "generic_known_card_placeholder",
       "generic_error_placeholder_without_url"
     ],
-    "hiddenCardFallbackOrder": [
-      "uniform_hidden_placeholder"
-    ]
+    "hiddenCardFallbackOrder": ["uniform_hidden_placeholder"]
   },
   "requiredBeforePublicOrSharedDistribution": [
     "explicit_rightsholder_permission",

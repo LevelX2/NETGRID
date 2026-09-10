@@ -12611,17 +12611,13 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "install_card",
-        "sourceDefinitionId": "onr_v1_203_hostile-takeover",
-        "targetServerId": "remote_1"
+        "type": "draw_card"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.score_agenda"],
-      "acceptableCapabilities": ["install_score_agenda"],
-      "requiredAssessmentEvidence": [
-        "corp_engine_certified_mature_remote_score_install:remote_1"
-      ]
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["allocate_server_defense"],
+      "requiredAssessmentEvidence": ["corp_missing_concrete_defense_draw:rd"]
     }
   }
 }

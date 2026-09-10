@@ -16,6 +16,7 @@ const ignoredDirectories = new Set([
 const roots = ["packages", "apps/server/src", "apps/web"];
 const packageRules = [
   { prefix: "packages/shared/", allow: new Set() },
+  { prefix: "packages/runtime-data/", allow: new Set() },
   { prefix: "packages/cards/", allow: new Set(["@netgrid/shared"]) },
   {
     prefix: "packages/card-images/",
@@ -23,7 +24,11 @@ const packageRules = [
   },
   {
     prefix: "packages/catalog/",
-    allow: new Set(["@netgrid/cards", "@netgrid/shared"]),
+    allow: new Set([
+      "@netgrid/cards",
+      "@netgrid/runtime-data",
+      "@netgrid/shared",
+    ]),
   },
   {
     prefix: "packages/decks/",
@@ -40,6 +45,7 @@ const packageRules = [
       "@netgrid/cards",
       "@netgrid/decks",
       "@netgrid/engine",
+      "@netgrid/runtime-data",
       "@netgrid/shared",
     ]),
   },
@@ -85,6 +91,13 @@ function boundaryFindings(file, source) {
     }
     const imported = entry.specifier;
     if (!imported) continue;
+    if (
+      file.startsWith("apps/server/src/") &&
+      imported === "@netgrid/ai/simulation"
+    )
+      findings.push(
+        `${file}: Produktserver darf die Entwicklungs-Simulationsfassade nicht laden`,
+      );
     if (rule && imported.startsWith("@netgrid/")) {
       const packageName = workspacePackageName(imported);
       if (!rule.allow.has(packageName))
@@ -158,6 +171,18 @@ function boundaryFindings(file, source) {
 }
 
 function allowedWorkspaceSubpath(file, specifier) {
+  if (specifier.startsWith("@netgrid/runtime-data/"))
+    return [
+      "@netgrid/runtime-data/ai-deck-pool",
+      "@netgrid/runtime-data/card-set-ai-readiness",
+      "@netgrid/runtime-data/card-spec-ai-hints",
+      "@netgrid/runtime-data/card-support",
+      "@netgrid/runtime-data/deck-format-profiles",
+      "@netgrid/runtime-data/display-assets",
+      "@netgrid/runtime-data/legacy-demo-decks",
+      "@netgrid/runtime-data/standard-decks",
+      "@netgrid/runtime-data/strategy-goals",
+    ].includes(specifier);
   if (specifier.startsWith("@netgrid/cards/"))
     return (
       (file.startsWith("packages/engine/") &&
@@ -285,6 +310,16 @@ function runSelfTest() {
       0,
     ],
     [
+      "packages/ai/src/valid-runtime-data.ts",
+      'import { aiDeckPoolData } from "@netgrid/runtime-data/ai-deck-pool";',
+      0,
+    ],
+    [
+      "packages/ai/src/invalid-runtime-data-subpath.ts",
+      'import { value } from "@netgrid/runtime-data/private";',
+      1,
+    ],
+    [
       "packages/ai/src/invalid-cards-root.ts",
       'import type { CardSpec } from "@netgrid/cards";',
       1,
@@ -350,6 +385,16 @@ function runSelfTest() {
       "apps/server/src/cards.ts",
       'import { listPublicCardViews } from "@netgrid/cards/server";',
       0,
+    ],
+    [
+      "apps/server/src/product-simulation.ts",
+      'import { simulateAiGame } from "@netgrid/ai/product-simulation";',
+      0,
+    ],
+    [
+      "apps/server/src/invalid-simulation.ts",
+      'import { simulateAiGame } from "@netgrid/ai/simulation";',
+      1,
     ],
     [
       "apps/web/features/game/invalid-cards-server.tsx",

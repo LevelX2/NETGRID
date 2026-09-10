@@ -1,8 +1,4 @@
-import type {
-  CardDefinition,
-  CardInstanceId,
-  ServerId,
-} from "@netgrid/shared";
+import type { CardDefinition, CardInstanceId, ServerId } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { createGame } from "../create-game";
 import {

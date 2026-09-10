@@ -375,7 +375,9 @@ describe("runnerDamageThreatAssessment", () => {
       successful: false,
     };
 
-    expect(runnerFutureEncounterDamageJackOutAssessment(current)).toBeUndefined();
+    expect(
+      runnerFutureEncounterDamageJackOutAssessment(current),
+    ).toBeUndefined();
   });
 
   it("does not reuse same-encounter damage for a distinct non-damage future encounter effect", () => {
@@ -402,7 +404,9 @@ describe("runnerDamageThreatAssessment", () => {
       successful: false,
     };
 
-    expect(runnerFutureEncounterDamageJackOutAssessment(current)).toBeUndefined();
+    expect(
+      runnerFutureEncounterDamageJackOutAssessment(current),
+    ).toBeUndefined();
   });
 
   it("requires jack-out before visible core damage can cause a cleanup flatline", () => {

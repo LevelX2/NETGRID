@@ -24,10 +24,7 @@ function pumpAction(pumpStrengthAmount?: number): LegalAction {
 describe("encounter action binding", () => {
   it("uses the exact pump strength projected by the Engine LegalAction", () => {
     expect(
-      pumpStrengthAmountForAction(
-        pumpAction(5),
-        "onr_classic_028_matador",
-      ),
+      pumpStrengthAmountForAction(pumpAction(5), "onr_classic_028_matador"),
     ).toBe(5);
   });
 
@@ -36,10 +33,7 @@ describe("encounter action binding", () => {
       pumpStrengthAmountForAction(pumpAction(), "unknown-breaker"),
     ).toBeUndefined();
     expect(
-      pumpStrengthAmountForAction(
-        pumpAction(Number.NaN),
-        "unknown-breaker",
-      ),
+      pumpStrengthAmountForAction(pumpAction(Number.NaN), "unknown-breaker"),
     ).toBeUndefined();
   });
 });

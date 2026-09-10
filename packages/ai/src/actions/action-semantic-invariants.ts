@@ -80,7 +80,10 @@ function profileInvariantIssues(
   const basePath = `profiles[${profileIndex}]`;
   const issues: ActionSemanticInvariantIssue[] = [];
 
-  if (options.allowFixtureProfiles !== true && fixtureLikeCardId(profile.cardId)) {
+  if (
+    options.allowFixtureProfiles !== true &&
+    fixtureLikeCardId(profile.cardId)
+  ) {
     issues.push(
       issue(
         "fixture_profile_in_production_scope",
@@ -214,7 +217,10 @@ function supportOnlyStrategyIssues(
   signals: readonly string[],
   pairs: readonly StrategySupportPair[],
 ): ActionSemanticInvariantIssue[] {
-  if (!signals.some((signal) => supportOnlySignal(signal)) || pairs.length === 0) {
+  if (
+    !signals.some((signal) => supportOnlySignal(signal)) ||
+    pairs.length === 0
+  ) {
     return [];
   }
 
@@ -244,8 +250,8 @@ function broadSignalStrategySupportIssues(
     return [];
   }
   const broadEvidence = pairs.flatMap((pair) =>
-    broadSignals.filter(
-      (signal) => evidenceReferencesSignal(pair.evidence, signal),
+    broadSignals.filter((signal) =>
+      evidenceReferencesSignal(pair.evidence, signal),
     ),
   );
   if (
@@ -285,7 +291,10 @@ function targetProfileIssues(
     const matchedHiddenInfo =
       match.status === "matched" &&
       new Set(match.issues).has("hidden_info_blocked" as ActionProjectionIssue);
-    if (!matchedHiddenInfo && !evidence.some((value) => hiddenInfoText(value))) {
+    if (
+      !matchedHiddenInfo &&
+      !evidence.some((value) => hiddenInfoText(value))
+    ) {
       return [];
     }
 
@@ -318,20 +327,10 @@ function pureStructuralSignal(signal: string): boolean {
       boundedMarker(normalized, term, [".", ":", "-"], [".", ":", "-"]),
     ) ||
     STRUCTURAL_TERMS.some((term) =>
-      boundedMarker(
-        normalized,
-        `${term}_only`,
-        ["_", "-"],
-        ["_", "-"],
-      ),
+      boundedMarker(normalized, `${term}_only`, ["_", "-"], ["_", "-"]),
     ) ||
     STRUCTURAL_TERMS.some((term) =>
-      boundedMarker(
-        normalized,
-        `${term}-only`,
-        ["_", "-"],
-        ["_", "-"],
-      ),
+      boundedMarker(normalized, `${term}-only`, ["_", "-"], ["_", "-"]),
     ) ||
     startsWithStructuralOwnerMarker(normalized)
   );
@@ -346,12 +345,7 @@ function supportOnlySignal(signal: string): boolean {
       [".", ":", "-"],
       [".", ":", "-"],
     ) ||
-    boundedMarker(
-      normalized,
-      "support-only",
-      [".", ":", "-"],
-      [".", ":", "-"],
-    )
+    boundedMarker(normalized, "support-only", [".", ":", "-"], [".", ":", "-"])
   );
 }
 
@@ -471,7 +465,9 @@ function tokensIncludePhrase(
   phrase: readonly string[],
 ): boolean {
   return tokens.some((token, index) =>
-    phrase.every((phraseToken, offset) => tokens[index + offset] === phraseToken),
+    phrase.every(
+      (phraseToken, offset) => tokens[index + offset] === phraseToken,
+    ),
   );
 }
 

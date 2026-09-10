@@ -30,20 +30,20 @@
     "cardCount": 154,
     "pilotDeckCardCount": 114,
     "hintReviewedCount": 154,
-    "strategyCoveredCount": 54,
+    "strategyCoveredCount": 51,
     "benchmarkCoveredCount": 0,
     "familyCounts": {
-      "access_ambush": 11,
+      "access_ambush": 13,
       "bad_publicity": 8,
-      "baseline": 41,
-      "complex_multi_ability": 8,
-      "hidden_resource": 16,
+      "baseline": 40,
+      "complex_multi_ability": 7,
+      "hidden_resource": 15,
       "random_outcome": 4,
-      "run_modification": 11,
-      "target_choice": 24,
+      "run_modification": 12,
+      "target_choice": 27,
       "temporary_action": 16,
       "virus_counter": 7,
-      "x_cost": 8
+      "x_cost": 5
     }
   },
   "cards": [
@@ -464,8 +464,8 @@
       "cardId": "onr_proteus_020_digiconda",
       "side": "corp",
       "cardType": "ice",
-      "primaryFamily": "x_cost",
-      "classificationReasons": ["variable_x_semantics"],
+      "primaryFamily": "target_choice",
+      "classificationReasons": ["target_profile_present"],
       "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
@@ -474,9 +474,9 @@
         "confidence": "medium",
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
-          "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_x_cost"
+          "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_target_choice"
         ],
-        "targetProfileCount": 0,
+        "targetProfileCount": 1,
         "effectCount": 3
       },
       "removalConditions": ["pilot_benchmark_coverage"]
@@ -572,8 +572,8 @@
       "cardId": "onr_proteus_025_homing-missile",
       "side": "corp",
       "cardType": "ice",
-      "primaryFamily": "x_cost",
-      "classificationReasons": ["variable_x_semantics"],
+      "primaryFamily": "target_choice",
+      "classificationReasons": ["target_profile_present"],
       "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
@@ -582,9 +582,9 @@
         "confidence": "high",
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
-          "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_x_cost"
+          "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_target_choice"
         ],
-        "targetProfileCount": 0,
+        "targetProfileCount": 1,
         "effectCount": 7
       },
       "removalConditions": ["pilot_benchmark_coverage"]
@@ -815,8 +815,8 @@
       "cardId": "onr_proteus_036_sandstorm",
       "side": "corp",
       "cardType": "ice",
-      "primaryFamily": "x_cost",
-      "classificationReasons": ["variable_x_semantics"],
+      "primaryFamily": "target_choice",
+      "classificationReasons": ["target_profile_present"],
       "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
@@ -825,9 +825,9 @@
         "confidence": "medium",
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
-          "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_x_cost"
+          "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_target_choice"
         ],
-        "targetProfileCount": 0,
+        "targetProfileCount": 1,
         "effectCount": 0
       },
       "removalConditions": ["pilot_benchmark_coverage"]
@@ -1203,8 +1203,8 @@
       "cardId": "onr_proteus_053_underworld-mole",
       "side": "corp",
       "cardType": "operation",
-      "primaryFamily": "complex_multi_ability",
-      "classificationReasons": ["multiple_semantic_surfaces"],
+      "primaryFamily": "target_choice",
+      "classificationReasons": ["target_profile_present"],
       "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
@@ -1213,9 +1213,9 @@
         "confidence": "medium",
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
-          "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_complex_multi_ability"
+          "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_target_choice"
         ],
-        "targetProfileCount": 0,
+        "targetProfileCount": 1,
         "effectCount": 1
       },
       "removalConditions": ["pilot_benchmark_coverage"]
@@ -1229,9 +1229,9 @@
       "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
-        "strategyCovered": true,
+        "strategyCovered": false,
         "benchmarkCovered": false,
-        "confidence": "medium",
+        "confidence": "unknown",
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_access_ambush"
@@ -1239,7 +1239,10 @@
         "targetProfileCount": 0,
         "effectCount": 2
       },
-      "removalConditions": ["pilot_benchmark_coverage"]
+      "removalConditions": [
+        "strategy_coverage_or_explicit_non_strategy_decision",
+        "pilot_benchmark_coverage"
+      ]
     },
     {
       "cardId": "onr_proteus_055_cybertech-think-tank",
@@ -1303,7 +1306,7 @@
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_access_ambush"
         ],
         "targetProfileCount": 0,
-        "effectCount": 2
+        "effectCount": 3
       },
       "removalConditions": ["pilot_benchmark_coverage"]
     },
@@ -1316,9 +1319,9 @@
       "pilotDeckIds": ["proteus_corp_region_fast_score_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
-        "strategyCovered": true,
+        "strategyCovered": false,
         "benchmarkCovered": false,
-        "confidence": "medium",
+        "confidence": "unknown",
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_random_outcome"
@@ -1326,7 +1329,10 @@
         "targetProfileCount": 0,
         "effectCount": 0
       },
-      "removalConditions": ["pilot_benchmark_coverage"]
+      "removalConditions": [
+        "strategy_coverage_or_explicit_non_strategy_decision",
+        "pilot_benchmark_coverage"
+      ]
     },
     {
       "cardId": "onr_proteus_059_government-contract",
@@ -1345,7 +1351,7 @@
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_temporary_action"
         ],
         "targetProfileCount": 0,
-        "effectCount": 0
+        "effectCount": 1
       },
       "removalConditions": ["pilot_benchmark_coverage"]
     },
@@ -1669,9 +1675,9 @@
       "pilotDeckIds": ["proteus_corp_antibody_tax_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
-        "strategyCovered": true,
+        "strategyCovered": false,
         "benchmarkCovered": false,
-        "confidence": "medium",
+        "confidence": "unknown",
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_access_ambush"
@@ -1679,14 +1685,17 @@
         "targetProfileCount": 0,
         "effectCount": 2
       },
-      "removalConditions": ["pilot_benchmark_coverage"]
+      "removalConditions": [
+        "strategy_coverage_or_explicit_non_strategy_decision",
+        "pilot_benchmark_coverage"
+      ]
     },
     {
       "cardId": "onr_proteus_076_syd-meyer-superstores",
       "side": "corp",
       "cardType": "asset",
-      "primaryFamily": "baseline",
-      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "primaryFamily": "target_choice",
+      "classificationReasons": ["target_profile_present"],
       "pilotDeckIds": [],
       "evidence": {
         "hintReviewed": true,
@@ -1696,11 +1705,11 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "targetProfileCount": 0,
+        "targetProfileCount": 1,
         "effectCount": 0
       },
       "removalConditions": [
-        "baseline_decision_smoke_green",
+        "target_choice_decision_smoke_green",
         "strategy_coverage_or_explicit_non_strategy_decision"
       ]
     },
@@ -1742,7 +1751,7 @@
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_virus_counter"
         ],
         "targetProfileCount": 0,
-        "effectCount": 1
+        "effectCount": 3
       },
       "removalConditions": [
         "strategy_coverage_or_explicit_non_strategy_decision",
@@ -1841,7 +1850,7 @@
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_baseline"
         ],
         "targetProfileCount": 0,
-        "effectCount": 1
+        "effectCount": 2
       },
       "removalConditions": [
         "strategy_coverage_or_explicit_non_strategy_decision",
@@ -1906,8 +1915,8 @@
       "cardId": "onr_proteus_085_disintegrator",
       "side": "runner",
       "cardType": "program",
-      "primaryFamily": "target_choice",
-      "classificationReasons": ["target_profile_present"],
+      "primaryFamily": "baseline",
+      "classificationReasons": ["no_specialized_readiness_model_required"],
       "pilotDeckIds": [
         "proteus_runner_hq_virus_derez_2026_05_25",
         "proteus_runner_rd_bad_publicity_2026_05_25"
@@ -1919,10 +1928,10 @@
         "confidence": "unknown",
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
-          "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_target_choice"
+          "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_baseline"
         ],
-        "targetProfileCount": 1,
-        "effectCount": 2
+        "targetProfileCount": 0,
+        "effectCount": 3
       },
       "removalConditions": [
         "strategy_coverage_or_explicit_non_strategy_decision",
@@ -2273,7 +2282,7 @@
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_temporary_action"
         ],
         "targetProfileCount": 0,
-        "effectCount": 2
+        "effectCount": 3
       },
       "removalConditions": [
         "strategy_coverage_or_explicit_non_strategy_decision",
@@ -2284,8 +2293,8 @@
       "cardId": "onr_proteus_100_wrecking-ball",
       "side": "runner",
       "cardType": "program",
-      "primaryFamily": "baseline",
-      "classificationReasons": ["no_specialized_readiness_model_required"],
+      "primaryFamily": "target_choice",
+      "classificationReasons": ["target_profile_present"],
       "pilotDeckIds": ["proteus_runner_hq_virus_derez_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
@@ -2294,9 +2303,9 @@
         "confidence": "unknown",
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
-          "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_baseline"
+          "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_target_choice"
         ],
-        "targetProfileCount": 0,
+        "targetProfileCount": 1,
         "effectCount": 1
       },
       "removalConditions": [
@@ -2389,7 +2398,7 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "targetProfileCount": 2,
+        "targetProfileCount": 1,
         "effectCount": 1
       },
       "removalConditions": [
@@ -2425,8 +2434,8 @@
       "cardId": "onr_proteus_106_disgruntled-ice-technician",
       "side": "runner",
       "cardType": "event",
-      "primaryFamily": "target_choice",
-      "classificationReasons": ["target_profile_present"],
+      "primaryFamily": "run_modification",
+      "classificationReasons": ["run_modification_semantics"],
       "pilotDeckIds": ["proteus_runner_rd_bad_publicity_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
@@ -2435,10 +2444,10 @@
         "confidence": "unknown",
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
-          "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_target_choice"
+          "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_run_modification"
         ],
-        "targetProfileCount": 2,
-        "effectCount": 4
+        "targetProfileCount": 1,
+        "effectCount": 5
       },
       "removalConditions": [
         "strategy_coverage_or_explicit_non_strategy_decision",
@@ -2555,7 +2564,7 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "targetProfileCount": 1,
+        "targetProfileCount": 2,
         "effectCount": 0
       },
       "removalConditions": [
@@ -2602,7 +2611,7 @@
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_bad_publicity"
         ],
-        "targetProfileCount": 1,
+        "targetProfileCount": 2,
         "effectCount": 1
       },
       "removalConditions": [
@@ -2840,7 +2849,7 @@
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_bad_publicity"
         ],
-        "targetProfileCount": 1,
+        "targetProfileCount": 0,
         "effectCount": 0
       },
       "removalConditions": [
@@ -2887,7 +2896,7 @@
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_bad_publicity"
         ],
-        "targetProfileCount": 1,
+        "targetProfileCount": 2,
         "effectCount": 1
       },
       "removalConditions": [
@@ -2935,7 +2944,7 @@
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
         "targetProfileCount": 1,
-        "effectCount": 1
+        "effectCount": 2
       },
       "removalConditions": [
         "run_modification_decision_smoke_green",
@@ -2958,7 +2967,7 @@
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
         "targetProfileCount": 2,
-        "effectCount": 2
+        "effectCount": 3
       },
       "removalConditions": [
         "hidden_resource_decision_smoke_green",
@@ -2982,7 +2991,7 @@
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_hidden_resource"
         ],
         "targetProfileCount": 0,
-        "effectCount": 0
+        "effectCount": 1
       },
       "removalConditions": [
         "strategy_coverage_or_explicit_non_strategy_decision",
@@ -3075,7 +3084,7 @@
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_hidden_resource"
         ],
         "targetProfileCount": 0,
-        "effectCount": 2
+        "effectCount": 3
       },
       "removalConditions": [
         "strategy_coverage_or_explicit_non_strategy_decision",
@@ -3168,8 +3177,8 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "targetProfileCount": 1,
-        "effectCount": 0
+        "targetProfileCount": 0,
+        "effectCount": 1
       },
       "removalConditions": [
         "hidden_resource_decision_smoke_green",
@@ -3272,8 +3281,8 @@
       "cardId": "onr_proteus_142_hq-mole",
       "side": "runner",
       "cardType": "resource",
-      "primaryFamily": "hidden_resource",
-      "classificationReasons": ["hidden_resource_semantics"],
+      "primaryFamily": "access_ambush",
+      "classificationReasons": ["access_or_ambush_semantics"],
       "pilotDeckIds": ["proteus_runner_hq_virus_derez_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
@@ -3282,10 +3291,10 @@
         "confidence": "unknown",
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
-          "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_hidden_resource"
+          "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_access_ambush"
         ],
         "targetProfileCount": 0,
-        "effectCount": 1
+        "effectCount": 2
       },
       "removalConditions": [
         "strategy_coverage_or_explicit_non_strategy_decision",
@@ -3309,7 +3318,7 @@
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_hidden_resource"
         ],
         "targetProfileCount": 0,
-        "effectCount": 2
+        "effectCount": 3
       },
       "removalConditions": [
         "strategy_coverage_or_explicit_non_strategy_decision",
@@ -3366,33 +3375,9 @@
       "cardId": "onr_proteus_146_precision-bribery",
       "side": "runner",
       "cardType": "resource",
-      "primaryFamily": "target_choice",
-      "classificationReasons": ["target_profile_present"],
-      "pilotDeckIds": ["proteus_runner_hq_virus_derez_2026_05_25"],
-      "evidence": {
-        "hintReviewed": true,
-        "strategyCovered": false,
-        "benchmarkCovered": false,
-        "confidence": "unknown",
-        "scenarioRefs": [
-          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
-          "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_target_choice"
-        ],
-        "targetProfileCount": 1,
-        "effectCount": 0
-      },
-      "removalConditions": [
-        "strategy_coverage_or_explicit_non_strategy_decision",
-        "pilot_benchmark_coverage"
-      ]
-    },
-    {
-      "cardId": "onr_proteus_147_r-and-d-mole",
-      "side": "runner",
-      "cardType": "resource",
       "primaryFamily": "hidden_resource",
       "classificationReasons": ["hidden_resource_semantics"],
-      "pilotDeckIds": ["proteus_runner_rd_bad_publicity_2026_05_25"],
+      "pilotDeckIds": ["proteus_runner_hq_virus_derez_2026_05_25"],
       "evidence": {
         "hintReviewed": true,
         "strategyCovered": false,
@@ -3404,6 +3389,30 @@
         ],
         "targetProfileCount": 0,
         "effectCount": 1
+      },
+      "removalConditions": [
+        "strategy_coverage_or_explicit_non_strategy_decision",
+        "pilot_benchmark_coverage"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_147_r-and-d-mole",
+      "side": "runner",
+      "cardType": "resource",
+      "primaryFamily": "access_ambush",
+      "classificationReasons": ["access_or_ambush_semantics"],
+      "pilotDeckIds": ["proteus_runner_rd_bad_publicity_2026_05_25"],
+      "evidence": {
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "benchmarkCovered": false,
+        "confidence": "unknown",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported",
+          "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_access_ambush"
+        ],
+        "targetProfileCount": 0,
+        "effectCount": 2
       },
       "removalConditions": [
         "strategy_coverage_or_explicit_non_strategy_decision",
@@ -3449,7 +3458,7 @@
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
         "targetProfileCount": 0,
-        "effectCount": 1
+        "effectCount": 2
       },
       "removalConditions": [
         "hidden_resource_decision_smoke_green",
@@ -3524,7 +3533,7 @@
           "data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_hidden_resource"
         ],
         "targetProfileCount": 0,
-        "effectCount": 4
+        "effectCount": 5
       },
       "removalConditions": [
         "strategy_coverage_or_explicit_non_strategy_decision",
@@ -3570,7 +3579,7 @@
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
         "targetProfileCount": 0,
-        "effectCount": 1
+        "effectCount": 2
       },
       "removalConditions": [
         "hidden_resource_decision_smoke_green",

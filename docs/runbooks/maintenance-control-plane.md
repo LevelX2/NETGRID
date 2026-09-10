@@ -1,6 +1,6 @@
 # Maintenance-Control-Plane betreiben
 
-Stand: 2026-07-11  
+Stand: 2026-09-05  
 Status: verbindlicher ARC-001-Betriebspfad
 
 ## Zweck
@@ -33,6 +33,74 @@ powershell -ExecutionPolicy Bypass -File scripts/start-netgrid.ps1
 ```
 
 Anmeldung lokal: `http://127.0.0.1:3100/maintenance`.
+
+## Bereichsauswahl und Statusabruf
+
+`/maintenance` prüft zunächst die Maintenance-Sitzung und liest die kompakte
+Backend-Buildkennung über `/health`. Fachliche Wartungsdaten
+werden erst nach Auswahl von „Status“, „Spielerzugänge“ oder „Kartenbilder“
+geladen; „Passwort ändern“ ist ebenfalls direkt erreichbar.
+
+Alle Maintenance-Routen verwenden dasselbe persistente Next-Layout mit
+Navigation, einer Sprachauswahl und gemeinsamen Sicherheitskontrollen.
+Tabwechsel erfolgen clientseitig ohne Dokumentneuladung. Der
+Maintenance-Sitzungscontroller bleibt im Layout; eine Sessionprüfung gehört
+zum Einstieg, nicht zu jedem Tabwechsel. HTTP 401, Abmeldung und
+Passwortänderung entfernen geschützte Inhalte weiterhin unmittelbar.
+Während der anfänglichen Sessionprüfung erscheint nur ein neutraler
+Prüfstatus, kein Anmeldeformular.
+
+Die leere Auswahl liegt unter `/maintenance`, die Statusansicht unter
+`/maintenance/status`. Der Statusreiter bleibt auch in der vertieften
+KI-Trace-Ansicht aktiv. Die Farben aller Bereiche und Passwortfenster
+verwenden dieselben CSS-Tokens wie die Spieleroberfläche und übernehmen
+deren Browserpräferenz `netgrid-color-scheme` (`black`/`white`).
+
+Alle Maintenance-Passwortfelder bieten ein Augensymbol zum einzelnen Ein-
+und Ausblenden: Anmeldung, Bestätigung, aktuelles und neues Maintenance-
+Passwort sowie die Spielerpasswörter beim Moduswechsel und Zurücksetzen.
+Das Umschalten verändert weder den Eingabewert noch löst es das Formular aus.
+
+Die Buildleiste zeigt Frontend und Backend getrennt mit Produktversion,
+Buildnummer, Commit und lokalen Änderungen; beim Backend zusätzlich die
+Prozessstartzeit. Der Health-Abruf wird beim Einstieg und bei erneutem
+Fensterfokus aktualisiert. Fehlende oder ungültige Metadaten erscheinen
+ausdrücklich als nicht verfügbar. Der Backendstand ist der beim Prozessstart
+erfasste Quellstand, nicht das Ergebnis einer späteren Git-Abfrage.
+
+„Status“ lädt Matchliste, KI-Trace-Matchliste, Cleanup-Policy und
+Backend-/Datenbankstatus. „Aktualisieren“ gehört zu diesem Bereich;
+Matchfilter laden ausschließlich die Matchliste erneut. Einzelne
+KI-Trace-Inhalte werden erst bei Auswahl eines Matches geladen.
+Match- und Trace-IDs werden in allen Maintenance-Listen, Details und
+Rückmeldungen vollständig angezeigt; lange Kennungen dürfen umbrechen.
+Die frühere Kürzung in der Mitte war ausschließlich eine Darstellungsregel,
+keine Zugriffs- oder Redaktionsgrenze.
+
+Die Größenabfragen für Matchliste und Datenbankstatus verwenden SQLite
+`OCTET_LENGTH` auf den Payload-Spalten: Bytezahlen aus Datensatzmetadaten,
+ohne die vollständigen Snapshot-, Event- und Trace-Texte zum Zeichenzählen
+einzulesen. Es werden keine zusätzlichen Größencaches oder Migrationen
+benötigt. Der Status verwendet die bereits berechneten Matchgrößen auch
+für seine Tabellensummen, statt dieselben Payloads zweimal auszuwerten.
+Die Summen bleiben ungefähre Payloadgrößen, keine physische
+Speicherzuordnung einschließlich Indizes und freier Seiten.
+
+Der Backendstatus hat ein clientseitiges Zeitlimit von zehn Sekunden.
+Ein Fehler wird beim betroffenen Ladeschritt mit Ursache angezeigt;
+die Abschlussanzeige lautet dann „Unvollständig“. Der Fortschrittsbalken
+zählt abgeschlossene Versuche einschließlich Fehlern, nicht nur Erfolge.
+Ein früherer Stillstand bei 75 Prozent konnte entstehen, wenn die ersten
+drei Abrufe erfolgreich waren und der letzte Statusabruf sein Zeitlimit
+erreichte. Ein Clientabbruch beendet keine bereits laufende synchrone
+SQLite-Abfrage auf dem Server.
+
+Der normale Startpfad startet das Backend ohne Datei-Watcher. Änderungen an
+Serverabfragen werden deshalb erst nach einem Backend-Neustart über
+`scripts/start-netgrid.ps1 -RestartServer` wirksam; ein Browser-Reload
+aktualisiert ausschließlich die Weboberfläche. Der Laufzeitmodus ist über
+`/health` unter `runtime.mode` prüfbar. Neustarts einer bereits laufenden
+Hauptinstanz erfolgen nur im ausdrücklich abgestimmten Betriebsfenster.
 
 ## Passwort ändern und Sitzungen widerrufen
 
@@ -139,6 +207,23 @@ Nach dem Lauf die App wieder ausschließlich über `scripts/start-netgrid.ps1` s
 8. Passwortänderung oder lokaler Reset meldet alle Geräte ab.
 9. Direkter LAN-Aufruf von Port `8787` bleibt für Maintenance geschlossen.
 
+## Lokale Spielerzugänge
+
+`/maintenance/accounts` verwaltet die lokale Spieler-Zugangsrichtlinie. Die
+Seite und ihre API bleiben auch bei anderweitig freigeschalteter Remote-
+Maintenance zwingend auf Deploymentprofil `local` und eine direkte
+Loopback-Verbindung beschränkt. Lesen benötigt eine gültige
+Maintenance-Sitzung; Moduswechsel und Spielerpasswort-Reset verlangen
+zusätzlich eine frische Passwortbestätigung.
+
+Der Wechsel nach `protected` nimmt genau ein neues Passwort für jedes aktive
+Profil an und schreibt Credentials, Policy und Sitzungswiderruf atomar. Der
+Wechsel nach `simple` entfernt die Spielercredentials und beendet ebenfalls
+alle Spielersitzungen. Der Passwort-Reset erhält Account, Decks und Historie,
+erhöht aber die Credential-Version und widerruft alle Sitzungen des Accounts.
+Fehlende Profile, unvollständige Passwortmengen und ungültige Policywerte
+werden ohne Teiländerung abgewiesen.
+
 ## Lokale Kartenbildverwaltung
 
 Die Kartenbildverwaltung ist unter `/maintenance/card-images` aus der
@@ -172,6 +257,32 @@ Paketprofilen stehen in
 `docs/architecture/card-images/personal-card-image-import.md`.
 
 ## Laufende Matchanalyse
+
+Die Matchanalyse erfasst gespeicherte Events, KI-Entscheidungen und die im
+KI-Ausführungspfad erfassten fehlgeschlagenen Input-, Choose- und Apply-Versuche.
+Ein erfolgreich gespeichertes Rez-Event beweist nur die Ausführung dieser
+Aktion. Eine Ausnahme in nachfolgenden Schritten, etwa beim Erzeugen beider
+Spieleransichten oder beim Synchronisieren der Spieleruhr, kann vor der
+Persistenz der nächsten Entscheidung auftreten. `server_operation_failed`
+allein erlaubt daher keine Zuordnung zum Karten- oder KI-Pfad.
+
+`GET /api/storage/maintenance/analysis/matches/:matchId/current-ai-input`
+liefert für die aktive KI einen neu aufgebauten, actor-sicheren Input aus dem
+aktuell gespeicherten Zustand, gebunden an StateVersion, StateHash und
+MatchVersion (`netgrid-current-ai-input-v1`, `current_persisted_state`). Der
+eigene Decksnapshot wird validiert; die private Hand des menschlichen Gegners
+wird nicht exportiert. `runtime` beschreibt den aktuellen Prozessspeicher,
+`persistedPortfolio` den gespeicherten Planstand. Beides ist keine historische
+Fehleraufnahme. Der Zugriff wählt und spielt keine Aktion und verändert das
+Match nicht. Ohne aktive KI antwortet er mit `unavailable`; beim Inputaufbau
+mit einem strukturierten Fehler. Die bestehenden lokalen Read-only-Regeln
+gelten auch für diese Route.
+
+Bei Fehlern nach einer KI-Aktion muss eine Reproduktion neben der Actor-Seite
+auch die gegnerischen LegalActions und Spieleransichten des Folgezustands
+prüfen. Eine erfolgreiche KI-Auswahl oder Engine-Anwendung allein genügt
+nicht. Rohe Exceptions und private Kartendaten gehören weiterhin nicht in die
+Fehlermeldung der Spieleroberfläche.
 
 Für normale Analyse laufender NETGRID-Matches sollen Codex und andere
 Diagnosewerkzeuge nicht direkt `data/runtime/multiplayer/netgrid.sqlite`

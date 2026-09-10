@@ -1,7 +1,7 @@
 import type { RunnerCreditReservePhase } from "../run-analysis/runner-run-target-types";
 
 export const RUNNER_BREAKER_UPGRADE_ECONOMIC_QUOTE_SCHEMA_VERSION =
-  "runner-breaker-upgrade-economic-quote-v1" as const;
+  "runner-breaker-upgrade-economic-quote-v2" as const;
 
 const ACTION_OPPORTUNITY_COST_PER_CLICK = 1;
 const CONSUMED_SEARCH_CARD_OPPORTUNITY_COST = 1;
@@ -28,9 +28,11 @@ export type RunnerBreakerUpgradeEconomicQuote = {
   grossRunSavings: number;
   installCreditCost: number;
   searchCreditCost: number;
+  memorySupportCreditCost: number;
   upfrontCreditCost: number;
   installActionClicks: number;
   searchActionClicks: number;
+  memorySupportActionClicks: number;
   actionOpportunityCost: number;
   searchCardOpportunityCost: number;
   totalInvestment: number;
@@ -40,6 +42,8 @@ export type RunnerBreakerUpgradeEconomicQuote = {
   desiredCreditReserve: number;
   projectedLiquidCreditsAfterUpgradeAndRun: number;
   memoryAvailable: number;
+  memorySupportAdditionalMu: number;
+  projectedMemoryAvailable: number;
   candidateMemoryCost: number;
   evidence: string[];
 };
@@ -54,6 +58,9 @@ export type QuoteRunnerBreakerUpgradeEconomicsParams = {
   searchCreditCost: number;
   installActionClicks: number;
   searchActionClicks: number;
+  memorySupportCreditCost?: number;
+  memorySupportActionClicks?: number;
+  memorySupportAdditionalMu?: number;
   consumesSearchCard: boolean;
   currentCredits: number;
   desiredCreditReserve: number;
@@ -69,6 +76,9 @@ export type QuoteRunnerBreakerUpgradeEconomicsParams = {
 export function quoteRunnerBreakerUpgradeEconomics(
   params: QuoteRunnerBreakerUpgradeEconomicsParams,
 ): RunnerBreakerUpgradeEconomicQuote {
+  const memorySupportCreditCost = params.memorySupportCreditCost ?? 0;
+  const memorySupportActionClicks = params.memorySupportActionClicks ?? 0;
+  const memorySupportAdditionalMu = params.memorySupportAdditionalMu ?? 0;
   const numericInputs = [
     params.currentPathCost,
     params.projectedPathCost,
@@ -77,6 +87,9 @@ export function quoteRunnerBreakerUpgradeEconomics(
     params.searchCreditCost,
     params.installActionClicks,
     params.searchActionClicks,
+    memorySupportCreditCost,
+    memorySupportActionClicks,
+    memorySupportAdditionalMu,
     params.currentCredits,
     params.desiredCreditReserve,
     params.memoryAvailable,
@@ -89,9 +102,14 @@ export function quoteRunnerBreakerUpgradeEconomics(
     ? Math.max(0, params.currentPathCost - params.projectedPathCost)
     : 0;
   const grossRunSavings = savingsPerRun * params.plannedRunHorizon;
-  const upfrontCreditCost = params.installCreditCost + params.searchCreditCost;
+  const upfrontCreditCost =
+    params.installCreditCost +
+    params.searchCreditCost +
+    memorySupportCreditCost;
   const actionOpportunityCost =
-    (params.installActionClicks + params.searchActionClicks) *
+    (params.installActionClicks +
+      params.searchActionClicks +
+      memorySupportActionClicks) *
     ACTION_OPPORTUNITY_COST_PER_CLICK;
   const searchCardOpportunityCost = params.consumesSearchCard
     ? CONSUMED_SEARCH_CARD_OPPORTUNITY_COST
@@ -101,6 +119,8 @@ export function quoteRunnerBreakerUpgradeEconomics(
   const netValueBeforeSafetyMargin = grossRunSavings - totalInvestment;
   const projectedLiquidCreditsAfterUpgradeAndRun =
     params.currentCredits - upfrontCreditCost - params.projectedPathCost;
+  const projectedMemoryAvailable =
+    params.memoryAvailable + memorySupportAdditionalMu;
   const rejectionReasons: RunnerBreakerUpgradeEconomicRejection[] = [];
   if (!validInputs) rejectionReasons.push("invalid_quote_input");
   if (params.phase !== "midgame") rejectionReasons.push("not_midgame");
@@ -108,7 +128,7 @@ export function quoteRunnerBreakerUpgradeEconomics(
   if (params.plannedRunHorizon < 2)
     rejectionReasons.push("insufficient_run_horizon");
   if (savingsPerRun <= 0) rejectionReasons.push("no_operating_savings");
-  if (params.candidateMemoryCost > params.memoryAvailable)
+  if (params.candidateMemoryCost > projectedMemoryAvailable)
     rejectionReasons.push("memory_unavailable");
   if (projectedLiquidCreditsAfterUpgradeAndRun < params.desiredCreditReserve) {
     rejectionReasons.push("reserve_breached");
@@ -128,9 +148,11 @@ export function quoteRunnerBreakerUpgradeEconomics(
     grossRunSavings,
     installCreditCost: params.installCreditCost,
     searchCreditCost: params.searchCreditCost,
+    memorySupportCreditCost,
     upfrontCreditCost,
     installActionClicks: params.installActionClicks,
     searchActionClicks: params.searchActionClicks,
+    memorySupportActionClicks,
     actionOpportunityCost,
     searchCardOpportunityCost,
     totalInvestment,
@@ -140,6 +162,8 @@ export function quoteRunnerBreakerUpgradeEconomics(
     desiredCreditReserve: params.desiredCreditReserve,
     projectedLiquidCreditsAfterUpgradeAndRun,
     memoryAvailable: params.memoryAvailable,
+    memorySupportAdditionalMu,
+    projectedMemoryAvailable,
     candidateMemoryCost: params.candidateMemoryCost,
     evidence: [
       `breaker_upgrade_phase:${params.phase}`,
@@ -150,6 +174,7 @@ export function quoteRunnerBreakerUpgradeEconomics(
       `breaker_upgrade_planned_run_horizon:${params.plannedRunHorizon}`,
       `breaker_upgrade_gross_run_savings:${grossRunSavings}`,
       `breaker_upgrade_upfront_credit_cost:${upfrontCreditCost}`,
+      `breaker_upgrade_memory_support_credit_cost:${memorySupportCreditCost}`,
       `breaker_upgrade_action_opportunity_cost:${actionOpportunityCost}`,
       `breaker_upgrade_search_card_opportunity_cost:${searchCardOpportunityCost}`,
       `breaker_upgrade_total_investment:${totalInvestment}`,
@@ -158,6 +183,8 @@ export function quoteRunnerBreakerUpgradeEconomics(
       `breaker_upgrade_projected_credits_after_upgrade_and_run:${projectedLiquidCreditsAfterUpgradeAndRun}`,
       `breaker_upgrade_desired_credit_reserve:${params.desiredCreditReserve}`,
       `breaker_upgrade_memory_available:${params.memoryAvailable}`,
+      `breaker_upgrade_memory_support_additional_mu:${memorySupportAdditionalMu}`,
+      `breaker_upgrade_projected_memory_available:${projectedMemoryAvailable}`,
       `breaker_upgrade_candidate_memory_cost:${params.candidateMemoryCost}`,
       `breaker_upgrade_admitted:${rejectionReasons.length === 0}`,
       ...rejectionReasons.map((reason) => `breaker_upgrade_rejected:${reason}`),

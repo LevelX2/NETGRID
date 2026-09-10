@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { createTutorialSession, getTutorialGlossary, listTutorialScenarios, tutorialAiSparringSuggestion } from "./tutorial";
+import {
+  createTutorialSession,
+  getTutorialGlossary,
+  listTutorialScenarios,
+  tutorialAiSparringSuggestion,
+} from "./tutorial";
 
 describe("V1.6.0 tutorial and rule-help", () => {
   it("provides a separated tutorial scenario catalog for core lessons", () => {
@@ -14,8 +19,8 @@ describe("V1.6.0 tutorial and rule-help", () => {
         "v160_access_basics",
         "v160_score_basics",
         "v160_game_end_basics",
-        "v160_damage_flatline"
-      ])
+        "v160_damage_flatline",
+      ]),
     );
   });
 
@@ -25,8 +30,12 @@ describe("V1.6.0 tutorial and rule-help", () => {
       expect(session.mode).toBe("tutorial_local");
       expect(session.legalActions.length).toBeGreaterThan(0);
       expect(session.hint.legalActionIds.length).toBeGreaterThan(0);
-      const legalIds = new Set(session.legalActions.map((action) => action.actionId));
-      expect(session.hint.legalActionIds.every((actionId) => legalIds.has(actionId))).toBe(true);
+      const legalIds = new Set(
+        session.legalActions.map((action) => action.actionId),
+      );
+      expect(
+        session.hint.legalActionIds.every((actionId) => legalIds.has(actionId)),
+      ).toBe(true);
       expect(session.replayCheck.ok).toBe(true);
       expect(session.replayCheck.finalStateHash).toMatch(/^fnv1a:/);
     }
@@ -39,13 +48,33 @@ describe("V1.6.0 tutorial and rule-help", () => {
       expect(session.legalActions.length).toBe(0);
       return;
     }
-    expect(session.legalActions.some((action) => action.actionId === suggestion.actionId)).toBe(true);
+    expect(
+      session.legalActions.some(
+        (action) => action.actionId === suggestion.actionId,
+      ),
+    ).toBe(true);
   });
 
   it("exposes a project-internal glossary with required terms", () => {
     const glossary = getTutorialGlossary();
     const terms = new Set(glossary.map((entry) => entry.term));
-    for (const term of ["Korp", "Runner", "Klick", "Credit", "HQ", "R&D", "Archive", "Remote", "Run", "Begegnung", "Zugriff", "Agenda", "Tag", "Schaden", "LegalAction"]) {
+    for (const term of [
+      "Korp",
+      "Runner",
+      "Klick",
+      "Credit",
+      "HQ",
+      "R&D",
+      "Archive",
+      "Remote",
+      "Run",
+      "Begegnung",
+      "Zugriff",
+      "Agenda",
+      "Tag",
+      "Schaden",
+      "LegalAction",
+    ]) {
       expect(terms.has(term)).toBe(true);
     }
   });

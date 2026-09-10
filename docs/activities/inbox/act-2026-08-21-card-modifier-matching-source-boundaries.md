@@ -56,9 +56,9 @@ werden können.
 
 - [ ] Matching und Quellensammlung sind mit ihren Verbrauchern abgegrenzt.
 - [ ] Eine Trennung ist anhand von Kohäsion, Zyklenrisiko und Änderungsnutzen
-  begründet angenommen oder verworfen.
+      begründet angenommen oder verworfen.
 - [ ] Ein Collector-Vorschlag erhält alle quellenspezifischen Filter explizit
-  und typisiert.
+      und typisiert.
 - [ ] Empfohlene Codeänderungen sind als kleine Folge-Activities erfasst.
 
 ## Umsetzungshinweise

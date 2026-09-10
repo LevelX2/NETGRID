@@ -100,17 +100,13 @@ export function findDuplicateAiApprovalCards(
 export function buildRuntimeCardIds(
   batches: readonly CatalogGateBatch[],
 ): readonly string[] {
-  return Object.freeze(
-    batches.flatMap((batch) => [...batch.cardIds]),
-  );
+  return Object.freeze(batches.flatMap((batch) => [...batch.cardIds]));
 }
 
 export function buildAiApprovedCardIds(
   batches: readonly CatalogAiApprovalBatch[],
 ): readonly string[] {
-  return Object.freeze(
-    batches.flatMap((batch) => [...batch.cardIds]),
-  );
+  return Object.freeze(batches.flatMap((batch) => [...batch.cardIds]));
 }
 
 export function buildRuntimeGateByCardId(

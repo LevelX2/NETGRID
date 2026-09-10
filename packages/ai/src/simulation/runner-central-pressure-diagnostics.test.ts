@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 import { createRunnerCentralPressureDiagnosticsForSimulationAction } from "./runner-central-pressure-diagnostics";
 
 describe("runner central pressure diagnostics", () => {

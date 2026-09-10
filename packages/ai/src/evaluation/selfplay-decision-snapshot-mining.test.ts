@@ -104,7 +104,11 @@ describe("SelfplayDecisionSnapshotMining", () => {
         "repeated_no_progress_run",
         "repeated_known_no_payoff_remote",
       ],
-      mistakeClasses: ["ignored_remote_threat", "plan_step_mismatch", "unsafe_run"],
+      mistakeClasses: [
+        "ignored_remote_threat",
+        "plan_step_mismatch",
+        "unsafe_run",
+      ],
       executableDecisionSnapshotAvailable: false,
       diagnosticOnly: true,
       noRuntimeEffect: true,
@@ -198,9 +202,9 @@ describe("SelfplayDecisionSnapshotMining", () => {
         category: "defer_missing_engine_state",
       }),
     ]);
-    expect(report.candidates[0]?.candidateSnapshot.legalActionCandidates).toEqual(
-      [],
-    );
+    expect(
+      report.candidates[0]?.candidateSnapshot.legalActionCandidates,
+    ).toEqual([]);
     expect(containsForbiddenSemanticMarker(report)).toBe(false);
   });
 });

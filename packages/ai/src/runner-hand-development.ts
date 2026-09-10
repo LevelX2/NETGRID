@@ -29,6 +29,8 @@ import {
   type RunnerHandDevelopmentEvaluation,
   type RunnerHandDevelopmentFundingNeed,
   type RunnerHandDevelopmentLiquidityTiming,
+  type RunnerHandDevelopmentRigDemandBinding,
+  type RunnerHandRetentionCounterfactual,
   type RunnerHandDevelopmentRole,
   type RunnerHandDevelopmentStrategicFit,
   type RunnerPersistentInstallCapabilityDelta,
@@ -43,6 +45,8 @@ import {
   type RunnerPersistentInstallEvaluation,
   type RunnerPersistentInstallStackabilityClass,
 } from "./runner/hand-development/runner-hand-development-types";
+import type { RunnerRigRoleDemand } from "./runner/rig-demand/runner-rig-demand-projection";
+import { runnerRestrictedRunCreditProfile } from "./runtime/runner-canonical-card-facts";
 
 export {
   RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION,
@@ -55,6 +59,8 @@ export {
   type RunnerHandDevelopmentEvaluation,
   type RunnerHandDevelopmentFundingNeed,
   type RunnerHandDevelopmentLiquidityTiming,
+  type RunnerHandDevelopmentRigDemandBinding,
+  type RunnerHandRetentionCounterfactual,
   type RunnerHandDevelopmentRole,
   type RunnerHandDevelopmentStrategicFit,
   type RunnerPersistentInstallCapabilityDelta,
@@ -155,15 +161,97 @@ export function evaluateRunnerHandDevelopment(
   params: EvaluateRunnerHandDevelopmentParams,
 ): RunnerHandDevelopmentEvaluation[] {
   if (params.input.side !== "runner") return [];
-  return params.input.playerView.own.gripOrHq
+  const evaluations = params.input.playerView.own.gripOrHq
     .filter((card) => card.known !== false)
-    .map((card) => evaluateHandCard(params, card))
-    .sort(
-      (left, right) =>
-        right.priority - left.priority ||
-        left.developmentRole.localeCompare(right.developmentRole) ||
-        left.cardInstanceId.localeCompare(right.cardInstanceId),
-    );
+    .map((card) => evaluateHandCard(params, card));
+  return applyRunnerHandRetentionCounterfactuals(params, evaluations).sort(
+    (left, right) =>
+      right.priority - left.priority ||
+      left.developmentRole.localeCompare(right.developmentRole) ||
+      left.cardInstanceId.localeCompare(right.cardInstanceId),
+  );
+}
+
+function applyRunnerHandRetentionCounterfactuals(
+  params: EvaluateRunnerHandDevelopmentParams,
+  evaluations: readonly RunnerHandDevelopmentEvaluation[],
+): RunnerHandDevelopmentEvaluation[] {
+  const handAtOrAboveCapacity =
+    params.input.playerView.own.gripOrHq.length >=
+    params.input.playerView.own.maxHandSize;
+  return evaluations.map((evaluation) => {
+    const retentionProtected = runnerRigRetentionProtected(evaluation);
+    const persistent = evaluation.persistentInstallEvaluation;
+    const bestAlternative = evaluations
+      .filter(
+        (candidate) =>
+          candidate.cardInstanceId !== evaluation.cardInstanceId &&
+          !runnerRigRetentionProtected(candidate) &&
+          candidate.priority < evaluation.priority,
+      )
+      .sort(
+        (left, right) =>
+          left.priority - right.priority ||
+          left.cardInstanceId.localeCompare(right.cardInstanceId),
+      )[0];
+    const installationAvoidsProtectedCleanup =
+      handAtOrAboveCapacity &&
+      retentionProtected &&
+      persistent !== undefined &&
+      evaluation.legalActionId !== undefined &&
+      !bestAlternative;
+    const installValueAdjustment = installationAvoidsProtectedCleanup ? 140 : 0;
+    const retentionCounterfactual: RunnerHandRetentionCounterfactual = {
+      handAtOrAboveCapacity,
+      retentionProtected,
+      ...(bestAlternative
+        ? {
+            bestKnownCleanupAlternativeCardInstanceId:
+              bestAlternative.cardInstanceId,
+          }
+        : {}),
+      installationAvoidsProtectedCleanup,
+      installValueAdjustment,
+    };
+    return {
+      ...evaluation,
+      retentionCounterfactual,
+      priority: clampPriority(evaluation.priority + installValueAdjustment),
+      ...(persistent
+        ? {
+            persistentInstallEvaluation: {
+              ...persistent,
+              finalInstallFit:
+                persistent.finalInstallFit + installValueAdjustment,
+              evidence: [
+                ...persistent.evidence,
+                `runner_hand_retention_install_adjustment:${installValueAdjustment}`,
+              ],
+            },
+          }
+        : {}),
+      evidence: [
+        ...evaluation.evidence,
+        `runner_hand_retention_protected:${retentionProtected}`,
+        `runner_hand_at_or_above_capacity:${handAtOrAboveCapacity}`,
+        ...(bestAlternative
+          ? [
+              `runner_hand_best_cleanup_alternative:${bestAlternative.cardInstanceId}`,
+            ]
+          : []),
+        `runner_hand_retention_install_adjustment:${installValueAdjustment}`,
+      ],
+    };
+  });
+}
+
+function runnerRigRetentionProtected(
+  evaluation: RunnerHandDevelopmentEvaluation,
+): boolean {
+  return (
+    evaluation.rigDemandBinding?.retentionValue === "required" ||
+    evaluation.rigDemandBinding?.retentionValue === "preferred"
+  );
 }
 
 export function redactedRunnerHandDevelopmentFacts(
@@ -204,6 +292,7 @@ function evaluateHandCard(
   card: VisibleCard,
 ): RunnerHandDevelopmentEvaluation {
   const context = buildCardContext(params, card);
+  const rigDemandBinding = runnerRigDemandBindingForCard(params, card);
   const prospectiveRecoveryInfrastructure =
     doctrineSupportsProspectiveRecoveryInfrastructure(params, context);
   const initialDevelopmentRole = roleForCard(context);
@@ -256,7 +345,18 @@ function evaluateHandCard(
     context.legalAction?.type === "install_card" &&
     defenseSupportNeed(params.input, context) === "none"
       ? "none"
-      : adjustedNeed;
+      : params.rigDemandProjection &&
+          runnerRigDemandScopedCard(context.card, developmentRole) &&
+          (rigDemandBinding?.boundDemandIds.length ?? 0) === 0
+        ? "none"
+        : params.rigDemandProjection &&
+            rigDemandBinding &&
+            !restrictedRunCreditParentReady(
+              params,
+              rigDemandBinding.boundDemandIds,
+            )
+          ? "none"
+          : adjustedNeed;
   const strategicFit = strategicFitForCard(
     params.strategicIntent,
     availability,
@@ -324,6 +424,7 @@ function evaluateHandCard(
     ...(context.legalAction
       ? { legalActionId: context.legalAction.actionId }
       : {}),
+    ...(rigDemandBinding ? { rigDemandBinding } : {}),
     ...(persistentInstallEvaluation ? { persistentInstallEvaluation } : {}),
     evidence: redactedEvidenceForCard({
       context,
@@ -335,6 +436,15 @@ function evaluateHandCard(
       ...(fundingNeed ? { fundingNeed } : {}),
       ...(persistentInstallEvaluation ? { persistentInstallEvaluation } : {}),
     }).concat(
+      rigDemandBinding
+        ? [
+            `runner_rig_retention:${rigDemandBinding.retentionValue}`,
+            `runner_rig_install_readiness:${rigDemandBinding.installReadiness}`,
+            ...rigDemandBinding.boundDemandIds.map(
+              (demandId) => `runner_rig_bound_demand:${demandId}`,
+            ),
+          ]
+        : [],
       prospectiveRecoveryInfrastructure
         ? [
             "runner_engine_doctrine:prospective_recovery_infrastructure",
@@ -563,6 +673,15 @@ function currentNeedForCard(
   );
   if (removesCurrentTags) {
     return params.input.playerView.own.tags > 0 ? "acute" : "none";
+  }
+  const rigDemandNeed = runnerRigDemandNeedForCard(params, context.card, role);
+  if (rigDemandNeed !== undefined) return rigDemandNeed;
+  if (
+    role === "draw_or_search_engine" &&
+    context.legalAction?.type === "play_event" &&
+    context.legalAction.payload?.drawCardsAmount === 0
+  ) {
+    return "none";
   }
   if (
     role === "draw_or_search_engine" &&
@@ -959,7 +1078,11 @@ function evaluateRunnerPersistentInstall(
   );
   const protectedCreditReserve =
     engineNeedsProtectedReserve && !handCapacityMaySpendReserve
-      ? desiredCreditReserveForPersistentEngine(params.input)
+      ? engineAssessment.kind === "successful_run_followup_engine" &&
+        engineAssessment.outputCapabilities.length === 1 &&
+        engineAssessment.outputCapabilities[0] === "credits"
+        ? minimumCreditFloorForPersistentInstall(params.input)
+        : desiredCreditReserveForPersistentEngine(params.input)
       : undefined;
   const safeInstallTargetCredits =
     protectedCreditReserve !== undefined
@@ -1008,13 +1131,16 @@ function evaluateRunnerPersistentInstall(
   const displacementPenalty =
     (action.payload?.runnerProgramTrashBeforeInstall === true ? -1200 : 0) +
     (replacementAssessment.status === "blocked_unvalued_loss" ? -1600 : 0);
+  const rigDemandBinding = runnerRigDemandBindingForCard(params, context.card);
+  const rigDemandFitScore = runnerRigDemandFitScore(params, rigDemandBinding);
   const finalInstallFit =
     marginalUtilityScore +
     opportunityPenalty +
     reservePenalty +
     handBufferPenalty +
     muPressurePenalty +
-    displacementPenalty;
+    displacementPenalty +
+    rigDemandFitScore;
 
   return {
     schemaVersion: RUNNER_PERSISTENT_INSTALL_EVALUATION_SCHEMA_VERSION,
@@ -1046,6 +1172,8 @@ function evaluateRunnerPersistentInstall(
     handBufferPenalty,
     muPressurePenalty,
     displacementPenalty,
+    rigDemandFitScore,
+    boundRigDemandIds: rigDemandBinding?.boundDemandIds ?? [],
     finalInstallFit,
     evidence: persistentInstallEvidence({
       profile,
@@ -1073,13 +1201,138 @@ function evaluateRunnerPersistentInstall(
       handBufferPenalty,
       muPressurePenalty,
       displacementPenalty,
+      rigDemandFitScore,
       finalInstallFit,
       handSizeBonus: Math.max(0, context.card.maxHandSizeBonus ?? 0),
       role,
       installedSameRandomBreakProfileCount,
       breakerVariantEvidence: breakerVariant.evidence,
-    }),
+    }).concat(
+      rigDemandBinding
+        ? [
+            `runner_rig_demand_retention:${rigDemandBinding.retentionValue}`,
+            `runner_rig_demand_install_readiness:${rigDemandBinding.installReadiness}`,
+            ...rigDemandBinding.boundDemandIds.map(
+              (demandId) => `runner_rig_bound_demand:${demandId}`,
+            ),
+          ]
+        : [],
+    ),
   };
+}
+
+function runnerRigDemandBindingForCard(
+  params: EvaluateRunnerHandDevelopmentParams,
+  card: VisibleCard,
+): RunnerHandDevelopmentRigDemandBinding | undefined {
+  const fact = params.rigDemandProjection?.cardRetentionFacts.find(
+    (candidate) => candidate.cardInstanceId === card.instanceId,
+  );
+  if (!fact) return undefined;
+  return {
+    boundDemandIds: [...fact.boundDemandIds],
+    retentionValue: fact.retentionValue,
+    installReadiness: fact.installReadiness,
+  };
+}
+
+function runnerRigDemandNeedForCard(
+  params: EvaluateRunnerHandDevelopmentParams,
+  card: VisibleCard,
+  role: RunnerHandDevelopmentRole,
+): RunnerHandDevelopmentCurrentNeed | undefined {
+  if (!params.rigDemandProjection || !runnerRigDemandScopedCard(card, role)) {
+    return undefined;
+  }
+  const fact = params.rigDemandProjection.cardRetentionFacts.find(
+    (candidate) => candidate.cardInstanceId === card.instanceId,
+  );
+  if (!fact || fact.boundDemandIds.length === 0) return "none";
+  if (fact.installReadiness === "current_step_legal") return "acute";
+  if (fact.installReadiness === "next_milestone_legal") {
+    return restrictedRunCreditParentReady(params, fact.boundDemandIds)
+      ? "useful_now"
+      : "none";
+  }
+  if (fact.retentionValue === "required") return "later";
+  if (fact.retentionValue === "preferred") return "later";
+  return "none";
+}
+
+function restrictedRunCreditParentReady(
+  params: EvaluateRunnerHandDevelopmentParams,
+  boundDemandIds: readonly string[],
+): boolean {
+  const projection = params.rigDemandProjection;
+  if (!projection) return true;
+  const restrictedSupportDemands = projection.roleDemands.filter(
+    (demand) =>
+      boundDemandIds.includes(demand.demandId) &&
+      demand.capabilityId.startsWith("restricted_run_credit:") &&
+      demand.requirement === "conditional_support",
+  );
+  if (restrictedSupportDemands.length === 0) return true;
+  return restrictedSupportDemands.some((supportDemand) => {
+    const parent = projection.roleDemands.find(
+      (demand) => demand.demandId === supportDemand.sourceNeedId,
+    );
+    return parent?.providers.some((provider) =>
+      ["installed", "in_hand"].includes(provider.acquisitionState),
+    );
+  });
+}
+
+function runnerRigDemandScopedCard(
+  card: VisibleCard,
+  role: RunnerHandDevelopmentRole,
+): boolean {
+  return (
+    role === "memory_support" ||
+    role === "breaker_or_rig_piece" ||
+    runnerRestrictedRunCreditProfile(card.definitionId) !== undefined
+  );
+}
+
+function runnerRigDemandFitScore(
+  params: EvaluateRunnerHandDevelopmentParams,
+  binding: RunnerHandDevelopmentRigDemandBinding | undefined,
+): number {
+  if (!binding || binding.boundDemandIds.length === 0) return 0;
+  const demands = params.rigDemandProjection?.roleDemands.filter((demand) =>
+    binding.boundDemandIds.includes(demand.demandId),
+  );
+  if (!demands || demands.length === 0) return 0;
+  return Math.max(...demands.map(runnerRigDemandFitForDemand));
+}
+
+function runnerRigDemandFitForDemand(demand: RunnerRigRoleDemand): number {
+  if (demand.sourceKind === "deck_doctrine") return 0;
+  if (
+    demand.capabilityId.startsWith("restricted_run_credit:") &&
+    demand.requirement === "conditional_support"
+  ) {
+    return demand.horizon === "current_step" ? 320 : 240;
+  }
+  if (
+    demand.horizon === "current_step" &&
+    demand.requirement === "required_simultaneously"
+  ) {
+    return 520;
+  }
+  if (
+    demand.horizon === "next_rig_milestone" &&
+    demand.requirement === "required_simultaneously"
+  ) {
+    return 340;
+  }
+  if (demand.requirement === "preferred_simultaneously") return 220;
+  if (
+    demand.requirement === "alternative_provider" ||
+    demand.requirement === "conditional_support"
+  ) {
+    return 80;
+  }
+  return 0;
 }
 
 function strategicFitForCard(

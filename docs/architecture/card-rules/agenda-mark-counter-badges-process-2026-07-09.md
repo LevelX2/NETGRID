@@ -60,15 +60,19 @@ Aktueller Zustand: `integrated`.
 Ziel: Scope, Annahmen, Paketfolge und Checks versionieren.
 
 Kernartefakte:
+
 - `docs/architecture/card-rules/agenda-mark-counter-badges-process-2026-07-09.md`
 
 Checks:
+
 - `git diff --check`
 
 Done-Gate:
+
 - Prozessartefakt ist committed.
 
 Commit-Message:
+
 - `docs: add agenda mark counter badge process`
 
 ### AMB-2 Project Zurich Badge
@@ -76,6 +80,7 @@ Commit-Message:
 Ziel: Project Zurich zeigt den gespeicherten Overadvance-Credit-Wert als erklärenden Score-Area-Badge statt als generischen Mark-Counter.
 
 Kernartefakte:
+
 - `packages/engine/src/game/view/card-view.ts`
 - `packages/engine/src/index-tests/proteus/agenda-suite.test.ts`
 - `apps/web/features/cards/CardBadges.tsx`
@@ -84,16 +89,19 @@ Kernartefakte:
 - `apps/web/app/globals.css`
 
 Checks:
+
 - fokussierter Project-Zurich-Vitest
 - fokussierter Web-Tooltip-Vitest
 - `git diff --check`
 
 Done-Gate:
+
 - PlayerView-ID ist Project-Zurich-spezifisch.
 - Badge-Text macht Credits pro Corp-Zug verständlich.
 - Bestehender Start-of-turn-Credit-Effekt bleibt unverändert.
 
 Commit-Message:
+
 - `fix(ui): label project zurich credit counter`
 
 ### AMB-3 Ice Transmutation Badge
@@ -101,6 +109,7 @@ Commit-Message:
 Ziel: Das von Ice Transmutation markierte ICE zeigt einen erklärenden Stärke-/Subroutinen-Badge statt generischem ICE-Mark-Counter.
 
 Kernartefakte:
+
 - `packages/engine/src/game/view/card-view.ts`
 - geeigneter Engine-Test für Ice Transmutation PlayerView
 - `apps/web/features/cards/CardBadges.tsx`
@@ -108,17 +117,20 @@ Kernartefakte:
 - `apps/web/app/action-board-ui.test.ts`
 
 Checks:
+
 - fokussierter Ice-Transmutation- oder Mark-Modifier-Vitest
 - fokussierter Web-Tooltip-Vitest
 - Engine/Web-Typecheck
 - `git diff --check`
 
 Done-Gate:
+
 - PlayerView-ID bleibt `ice_mark_modifier`; Label, Badge-Text und Tooltip erklären die Ice-Transmutation-Wirkung.
 - Tooltip erklärt Stärke-Bonus und Subroutine-Wiederholung auch bei mehreren Countern.
 - Stärkeberechnung bleibt unverändert.
 
 Commit-Message:
+
 - `fix(ui): explain ice transmutation counter`
 
 ### AMB-4 Finale Integration
@@ -126,6 +138,7 @@ Commit-Message:
 Ziel: Finale Checks, lokaler Merge nach `main`, Worktree entfernen.
 
 Checks:
+
 - alle fokussierten Pakettests erneut
 - `@netgrid/engine typecheck`
 - `@netgrid/web typecheck`
@@ -133,11 +146,13 @@ Checks:
 - `git status --short`
 
 Done-Gate:
+
 - Arbeitsbranch sauber.
 - Arbeitsbranch lokal nach `main` gemerged.
 - Worktree entfernt.
 
 Commit-Message:
+
 - kein zusätzlicher Commit, sofern AMB-2 und AMB-3 vollständig sind.
 
 ## Verifikationsregeln

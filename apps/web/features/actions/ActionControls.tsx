@@ -189,7 +189,9 @@ export function CostChips({
   return (
     <span
       className="costChips"
-      aria-label={t("cost", {cost: chips.map((chip) => chip.label).join(" + ")})}
+      aria-label={t("cost", {
+        cost: chips.map((chip) => chip.label).join(" + "),
+      })}
       data-testid="cost-chips"
     >
       {chips.map((chip) => (
@@ -323,7 +325,11 @@ export function OverflowAwareActionButton({
         <ZoneIdentityIcon
           side="corp"
           kind={serverZoneIdentityIconKind(targetServerId)}
-          label={targetServerId === "new_remote" ? t("newRemote") : serverDisplayLabel(targetServerId)}
+          label={
+            targetServerId === "new_remote"
+              ? t("newRemote")
+              : serverDisplayLabel(targetServerId)
+          }
           className="actionTargetServerIcon"
         />
       ) : null}

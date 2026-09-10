@@ -43,6 +43,12 @@ Action-Identität, Replay oder StateHash zu verändern.
 - Typen werden aus dem deutschen Referenzkatalog abgeleitet. Alle freigegebenen
   Locales müssen dieselbe Leaf-Key-Struktur besitzen; das finale Gate prüft
   zusätzlich ICU-Parameter und unklassifizierte sichtbare Literale.
+- Unterschiedliche ausführbare CardSpec-Fähigkeiten werden über ihre
+  kanonische `<cardDefinitionId>:<capabilityKey>`-Identität lokalisiert. Die
+  Weboberfläche darf mehrere Fähigkeiten derselben Karte nicht anhand des
+  gemeinsamen Aktionstyps oder Kartentitels auf ein generisches Label
+  reduzieren. Der aktuelle Vertrag und das vollständige Mehrfachfähigkeitsgate
+  liegen in `card-action-execution-labels.md`.
 
 ## Annahmen
 
@@ -421,6 +427,17 @@ als complete.
   fokussierte Server-Payload-Test sind grün. Shared-Typecheck ist grün;
   Engine-, Server- und Web-Typechecks erreichen ausschließlich die bereits auf
   `main` reproduzierten Engine-/AI-Baselinefehler.
+- Die Chronik unterscheidet bei verzögertem ICE-Trash die Ankündigung durch
+  `end_the_run_and_trash_source_at_end_of_turn` vom tatsächlichen Trash am
+  Zugende. Die Ankündigung benennt Runende und späteren Trash; die öffentliche
+  `corpInstalledCardTrashAtTurnEndDefinitionIds`-Liste liefert je getrashter
+  Karte einen eigenen Eintrag mit Kartenverweis. Beide Meldungen sind in
+  `de`, `en` und `fr` lokalisiert und verwenden ausschließlich Engine-Ereignisse.
+- Bei entfernten Shell-Countern benennt die lokalisierte Chronik die Zielkarte
+  aus `ResolvedGameEffect.cardTitle`/`cardDefinitionId` und bindet ihren
+  Kartenverweis an dieses Ziel. `sourceTitle` nennt den Auslöser; die
+  Detailansicht zeigt `remainingCounters`, ohne daraus eine Installation
+  abzuleiten. Verdeckte Effekte bleiben auch in Text und Kartenverweis redigiert.
 - I18N-08: Der englische Katalog ist für die normale Spieleroberfläche
   vervollständigt. `corepack pnpm check:i18n` prüft dauerhaft 1.740
   deckungsgleiche Message-Leaves, ICU-Parameterparität, 60 klassifizierte

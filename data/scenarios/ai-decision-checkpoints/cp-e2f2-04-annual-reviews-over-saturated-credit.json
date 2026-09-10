@@ -6044,9 +6044,7 @@
     "planExecution": {
       "acceptablePlanKinds": ["corp.economy"],
       "acceptableCapabilities": ["develop_or_convert_corp_economy"],
-      "requiredAssessmentEvidence": [
-        "corp_non_strategic_residual_capacity_use"
-      ]
+      "requiredAssessmentEvidence": ["corp_non_strategic_residual_capacity_use"]
     }
   }
 }

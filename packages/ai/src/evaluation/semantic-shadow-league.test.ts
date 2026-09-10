@@ -261,7 +261,7 @@ describe("SemanticShadowLeague", () => {
     });
     expect(
       scenario(report, "runner_real_low_credits").expectedTopActionTypes,
-    ).toEqual(["play_event", "start_run"]);
+    ).toEqual(["gain_credit", "play_event", "start_run"]);
     expect(
       scenario(report, "runner_real_low_credits").expectedPilotEligibleScopes,
     ).toEqual(["runner_safe_access"]);
@@ -270,7 +270,9 @@ describe("SemanticShadowLeague", () => {
     ).toEqual(["missed_safe_access"]);
     expect(
       scenario(report, "runner_real_low_credits").expectationNotes,
-    ).toEqual(["low credits should still take free unknown R&D access"]);
+    ).toEqual([
+      "low credits may take free unknown R&D access or fund the current setup plan",
+    ]);
     expect(scenario(report, "runner_real_low_credits").evidence).toEqual(
       expect.arrayContaining([
         "expectation_source:real_engine_corpus_metadata",
@@ -279,7 +281,7 @@ describe("SemanticShadowLeague", () => {
     );
     expect(
       scenario(report, "runner_real_safe_hq_access").expectedTopActionTypes,
-    ).toEqual(["play_event", "start_run"]);
+    ).toEqual(["install_card", "play_event", "start_run"]);
     expect(
       scenario(report, "runner_real_remote_score_threat")
         .remoteContestPilotCandidate,

@@ -93,10 +93,7 @@ export function runnerRunLockReleaseProjection(
     : visibleRunnerRunLockCreditCost(input);
   if (creditCost <= 0) return undefined;
   const clickCost = action
-    ? action.costs.reduce(
-        (sum, cost) => sum + Math.max(0, cost.clicks ?? 0),
-        0,
-      )
+    ? action.costs.reduce((sum, cost) => sum + Math.max(0, cost.clicks ?? 0), 0)
     : 1;
   const clicksAfterRelease = input.playerView.own.clicks - clickCost;
   const terminalThreat = runnerTerminalContestThreat(input);
@@ -116,16 +113,15 @@ export function runnerRunLockReleaseProjection(
     0,
     followUp.targetCredits - input.playerView.own.credits,
   );
-  const status: RunnerRunLockReleaseProjection["status"] =
-    !followUp.pathReady
-      ? "blocked_path"
-      : clicksAfterRelease < 1
-        ? "blocked_clicks"
-        : fundingGap > 0
-          ? "blocked_funding"
-          : action === undefined
-            ? "blocked_action_unavailable"
-            : "ready";
+  const status: RunnerRunLockReleaseProjection["status"] = !followUp.pathReady
+    ? "blocked_path"
+    : clicksAfterRelease < 1
+      ? "blocked_clicks"
+      : fundingGap > 0
+        ? "blocked_funding"
+        : action === undefined
+          ? "blocked_action_unavailable"
+          : "ready";
   return {
     serverId: followUp.serverId,
     terminal: terminalThreat !== undefined,
@@ -263,9 +259,7 @@ function plausibleFollowUpRun(
           serverId: server.id,
           estimatedProbeCredits,
           reserveAfterProbe:
-            input.playerView.own.credits -
-            creditCost -
-            estimatedProbeCredits,
+            input.playerView.own.credits - creditCost - estimatedProbeCredits,
           targetCredits,
           pathReady,
           evidence: [

@@ -7,10 +7,12 @@ import enMessages from "../messages/en.json";
 import frMessages from "../messages/fr.json";
 import type { AppLocale } from "../i18n/locale";
 import {
+  chronicleAccessOutcomePlan,
   formatChronicleEffectItems,
   formatChronicleEvent,
   type ChronicleTranslate,
 } from "./chronicle";
+import { coalesceAiPumpPresentationEvents } from "./ai-pump-presentation";
 
 const messagesByLocale = { de: deMessages, en: enMessages, fr: frMessages };
 
@@ -36,6 +38,276 @@ function event(
 }
 
 describe("semantic chronicle localization", () => {
+  it.each(["de", "en", "fr"] as const)(
+    "names each Shell Traders counter target and keeps its card link in %s",
+    (locale) => {
+      const targets = ["Simple Fracter", "Simple Decoder"];
+      const resolvedEffects = targets.map((cardTitle, index) => ({
+        effectId: `shell-removal-${index}`,
+        kind: "counter_change",
+        visibility: "public",
+        side: "runner",
+        amount: 1 - index,
+        reason: "start_of_turn",
+        counterType: "shell",
+        removedCounterAmount: 1,
+        remainingCounters: 1 - index,
+        sourceDefinitionId: "onr_v1_176_the-shell-traders",
+        sourceTitle: "The Shell Traders",
+        cardDefinitionId: `target-${index}`,
+        cardTitle,
+      }));
+      const removal = event("end_turn", { actor: "corp", resolvedEffects });
+      for (const side of ["runner", "corp"] as const) {
+        const items = formatChronicleEffectItems(
+          removal,
+          side,
+          undefined,
+          translate(locale),
+        );
+        expect(items).toHaveLength(2);
+        items.forEach((item, index) => {
+          const expected = {
+            de: `The Shell Traders: 1 Shell-Counter von ${targets[index]} entfernt.`,
+            en: `The Shell Traders: removed 1 shell counter from ${targets[index]}.`,
+            fr: `The Shell Traders : 1 compteur Shell retiré de ${targets[index]}.`,
+          }[locale];
+          expect(item).toMatchObject({
+            title: expected,
+            category: "card",
+            cardDefinitionId: `target-${index}`,
+            cardTitle: targets[index],
+            visibility: "public",
+          });
+          expect(item.chips).toContain(
+            translate(locale)("effect.shellCountersRemaining", {
+              amount: 1 - index,
+            }),
+          );
+        });
+      }
+      resolvedEffects.forEach((effect) => {
+        effect.visibility = "private_to_side";
+      });
+      const hidden = formatChronicleEffectItems(
+        removal,
+        "corp",
+        undefined,
+        translate(locale),
+      );
+      expect(hidden.every((item) => item.visibility === "redacted")).toBe(true);
+      expect(JSON.stringify(hidden)).not.toContain("The Shell Traders");
+      for (const target of targets)
+        expect(JSON.stringify(hidden)).not.toContain(target);
+      expect(JSON.stringify(hidden)).not.toContain("target-");
+    },
+  );
+
+  it.each(["de", "en", "fr"] as const)(
+    "explains Puzzle's run end and scheduled trash in %s",
+    (locale) => {
+      const ended = event("continue_run", {
+        encounterContinue: true,
+        result: "ended",
+        resolvedEffects: [
+          {
+            effectId: "puzzle-subroutine-0",
+            kind: "resolve_subroutine",
+            visibility: "public",
+            side: "runner",
+            sourceDefinitionId: "onr_classic_013_puzzle",
+            sourceTitle: "Puzzle",
+            subroutineIndex: 0,
+            subroutineType: "end_the_run_and_trash_source_at_end_of_turn",
+            endedRun: true,
+          },
+        ],
+      });
+      const expected = {
+        de: "Puzzle: Subroutine 1 beendet den Run. Puzzle wird am Ende des Zuges getrasht.",
+        en: "Puzzle: subroutine 1 ends the run. Puzzle will be trashed at the end of the turn.",
+        fr: "Puzzle : le sous-programme 1 met fin au piratage. Puzzle sera détruit à la fin du tour.",
+      }[locale];
+      for (const side of ["runner", "corp"] as const) {
+        const [item] = formatChronicleEffectItems(
+          ended,
+          side,
+          undefined,
+          translate(locale),
+        );
+        expect(item).toMatchObject({
+          title: expected,
+          category: "run",
+          importance: "important",
+          cardDefinitionId: "onr_classic_013_puzzle",
+        });
+        expect(
+          formatChronicleEvent(ended, side, { translate: translate(locale) })
+            .title,
+        ).toBe(expected);
+      }
+      const effect = (
+        ended.publicPayload.resolvedEffects as Array<Record<string, unknown>>
+      )[0]!;
+      effect.visibility = "private_to_side";
+      effect.side = "corp";
+      const hidden = formatChronicleEffectItems(
+        ended,
+        "runner",
+        undefined,
+        translate(locale),
+      );
+      expect(JSON.stringify(hidden)).not.toContain("Puzzle");
+      expect(JSON.stringify(hidden)).not.toContain("onr_classic_013_puzzle");
+    },
+  );
+
+  it.each(["de", "en", "fr"] as const)(
+    "reports each actual Puzzle trash at turn end in %s",
+    (locale) => {
+      const presentations = {
+        onr_classic_013_puzzle: { title: "Puzzle", type: "ice" },
+      };
+      const ended = event("end_turn", {
+        corpInstalledCardsTrashedAtTurnEnd: 2,
+        corpInstalledCardTrashAtTurnEndDefinitionIds:
+          "onr_classic_013_puzzle,onr_classic_013_puzzle",
+      });
+      const expected = {
+        de: "Puzzle wurde am Ende des Zuges getrasht.",
+        en: "Puzzle was trashed at the end of the turn.",
+        fr: "Puzzle a été détruit à la fin du tour.",
+      }[locale];
+      const items = formatChronicleEffectItems(
+        ended,
+        "runner",
+        presentations,
+        translate(locale),
+      );
+      expect(items).toHaveLength(2);
+      expect(new Set(items.map((item) => item.id)).size).toBe(2);
+      for (const item of items)
+        expect(item).toMatchObject({
+          title: expected,
+          category: "card",
+          visibility: "public",
+          icon: "discard",
+          cardDefinitionId: "onr_classic_013_puzzle",
+          cardTitle: "Puzzle",
+        });
+      expect(
+        formatChronicleEffectItems(ended, "runner", presentations)[0]?.title,
+      ).toBe("Puzzle wurde am Ende des Zuges getrasht.");
+      expect(
+        formatChronicleEffectItems(
+          event("end_turn"),
+          "runner",
+          presentations,
+          translate(locale),
+        ),
+      ).toEqual([]);
+    },
+  );
+
+  it.each([
+    {
+      payload: { runDestination: "ice", runDestinationIcePosition: 2 },
+      destination: "zu ICE 2",
+    },
+    {
+      payload: { runDestination: "ice", runDestinationIcePosition: 1 },
+      destination: "zu ICE 1",
+    },
+    { payload: { runDestination: "root" }, destination: "zum Root" },
+  ])(
+    "names the next run destination $destination",
+    ({ payload, destination }) => {
+      const continued = event("continue_run", {
+        serverLabel: "Remote 1",
+        aiReasonCode: "plan_first.runner.convert_run_window",
+        ...payload,
+      });
+      expect(
+        formatChronicleEvent(continued, "corp", { translate: translate("de") })
+          .title,
+      ).toBe(`Die Runner-KI: Run auf Remote 1 ${destination} fortgesetzt.`);
+      for (const locale of ["en", "fr"] as const) {
+        const title = formatChronicleEvent(continued, "corp", {
+          translate: translate(locale),
+        }).title;
+        expect(title).toContain(locale === "fr" ? "À distance 1" : "Remote 1");
+        expect(title).toContain(
+          payload.runDestination === "ice"
+            ? `ICE ${payload.runDestinationIcePosition}`
+            : locale === "en"
+              ? "root"
+              : "racine",
+        );
+      }
+      expect(formatChronicleEvent(continued, "corp").title).toContain(
+        destination,
+      );
+    },
+  );
+
+  it.each(["de", "en", "fr"] as const)(
+    "keeps the Inside Job bypass on a rez pass in %s",
+    (locale) => {
+      const bypass = event("decline_rez", {
+        actor: "corp",
+        runApproachRootRezPass: true,
+        runStartBypassAutoPassedIce: true,
+        runStartBypassPassedIceDefinitionId: "onr_v1_261_quandary",
+        passedIcePosition: 3,
+        serverLabel: "Remote 1",
+      });
+      const items = formatChronicleEffectItems(
+        bypass,
+        "corp",
+        {
+          onr_v1_261_quandary: { title: "Quandary", type: "ice" },
+        },
+        translate(locale),
+      );
+      expect(items).toHaveLength(1);
+      expect(items[0]?.title).toContain("Quandary");
+      expect(items[0]?.title).toContain("Inside Job");
+      expect(items[0]?.actor).toBe("runner");
+    },
+  );
+
+  it.each(["de", "en", "fr"] as const)(
+    "names Misleading Access Menus and its paid credit in %s",
+    (locale) => {
+      const paid = event("continue_run", {
+        encounterContinue: true,
+        resolvedEffects: [
+          {
+            effectId: "subroutine_1",
+            kind: "resolve_subroutine",
+            visibility: "public",
+            side: "runner",
+            sourceDefinitionId: "onr_proteus_032_misleading-access-menus",
+            sourceTitle: "Misleading Access Menus",
+            subroutineIndex: 0,
+            subroutineType: "end_the_run_unless_runner_pays",
+            amount: 1,
+            paidCredits: 1,
+          },
+        ],
+      });
+      const items = formatChronicleEffectItems(
+        paid,
+        "corp",
+        undefined,
+        translate(locale),
+      );
+      expect(items).toHaveLength(1);
+      expect(items[0]?.title).toContain("Misleading Access Menus");
+      expect(items[0]?.title).toContain("1");
+    },
+  );
+
   it("renders the same public event independently in every locale", () => {
     const gained = event("gain_credits", { amount: 3 });
     const de = formatChronicleEvent(gained, "runner", {
@@ -53,6 +325,38 @@ describe("semantic chronicle localization", () => {
     expect(fr.title).toBe("Vous : avez gagné 3 crédits.");
     expect(de.category).toBe(en.category);
     expect(de.id).toBe(en.id);
+  });
+
+  it("uses the summed strength for a coalesced AI breaker pump", () => {
+    const pumpEvents = [1, 2, 3].map((strengthAfter, index) => ({
+      ...event("pump_breaker", {
+        actor: "runner",
+        title: "Loony Goon",
+        aiReasonCode: "runner.encounter.pump_breaker",
+        pumpBreakerId: "loony_goon_1",
+        pumpStrengthAmount: 1,
+        pumpBreakerCreditCost: 1,
+        breakerStrengthAfter: strengthAfter,
+      }),
+      eventId: `evt_pump_breaker_${index + 1}`,
+    }));
+    const [coalesced] = coalesceAiPumpPresentationEvents(pumpEvents);
+
+    expect(coalesced?.publicPayload).toMatchObject({
+      pumpCount: 3,
+      pumpStrengthAmount: 1,
+      pumpStrengthTotal: 3,
+    });
+    expect(
+      formatChronicleEvent(coalesced!, "corp", {
+        translate: translate("de"),
+      }).title,
+    ).toBe("Die Runner-KI: Stärke von Loony Goon um 3 erhöht.");
+    expect(
+      formatChronicleEvent(coalesced!, "corp", {
+        translate: translate("en"),
+      }).title,
+    ).toBe("The Runner AI: increased Loony Goon's strength by 3.");
   });
 
   it("uses public card semantics without changing technical identity", () => {
@@ -129,6 +433,186 @@ describe("semantic chronicle localization", () => {
     );
     expect(runnerItems[0]?.title).toBe(
       "Die Korp: 1 Credit durch Investment Firm erhalten.",
+    );
+  });
+
+  it("shows Karl de Veres' public credit after a successful run", () => {
+    const runEnd = event("continue_run", {
+      actor: "runner",
+      runSuccessful: true,
+      serverLabel: "R&D",
+      successfulRunRunnerCreditGain: 1,
+      gainedCredits: 1,
+      karlSuccessfulRunCreditGain: 1,
+      karlSuccessfulRunSourceDefinitionIds:
+        "onr_v1_166_karl-de-veres-corporate-stooge",
+      runnerCreditsAfter: 6,
+      aiReasonCode: "plan_first.runner.pressure_central",
+    });
+    const presentations = {
+      "onr_v1_166_karl-de-veres-corporate-stooge": {
+        title: "Karl de Veres, Corporate Stooge",
+        type: "resource" as const,
+      },
+    };
+
+    const [de] = formatChronicleEffectItems(
+      runEnd,
+      "corp",
+      presentations,
+      translate("de"),
+    );
+    const [en] = formatChronicleEffectItems(
+      runEnd,
+      "corp",
+      presentations,
+      translate("en"),
+    );
+
+    expect(de).toMatchObject({
+      title:
+        "Die Runner-KI: 1 Credit durch Karl de Veres, Corporate Stooge erhalten.",
+      category: "economy",
+      importance: "important",
+      visibility: "public",
+      actor: "runner",
+      cardDefinitionId: "onr_v1_166_karl-de-veres-corporate-stooge",
+      cardTitle: "Karl de Veres, Corporate Stooge",
+    });
+    expect(de?.chips).toContain("+1 Credit");
+    expect(en?.title).toBe(
+      "The Runner AI: gained 1 credit from Karl de Veres, Corporate Stooge.",
+    );
+  });
+
+  it.each(["de", "en", "fr"] as const)(
+    "distinguishes Broker loading from taking all hosted credits in %s",
+    (locale) => {
+      const presentations = {
+        onr_v1_154_broker: { title: "Broker", type: "resource" as const },
+      };
+      for (const take of [false, true]) {
+        const amount = take ? 6 : 3;
+        const broker = event("activated_card_ability", {
+          actor: "runner",
+          cardDefinitionId: "onr_v1_154_broker",
+          cardImplementationAbility: "activated",
+          ...(take
+            ? { hostedCreditsTaken: amount, gainedCredits: amount }
+            : { hostedCreditsAdded: amount }),
+          hostedCreditsAfter: take ? 0 : 6,
+          aiReasonCode: take
+            ? "runner_credit_bank_cash_out"
+            : "runner_credit_bank_build",
+          resolvedEffects: [
+            {
+              effectId: "broker.hosted-credits",
+              kind: take ? "take_hosted_credits" : "add_hosted_credits",
+              visibility: "public",
+              side: "runner",
+              amount,
+              remainingCounters: take ? 0 : 6,
+              sourceDefinitionId: "onr_v1_154_broker",
+              sourceTitle: "Broker",
+              reason: "card_resolver",
+            },
+          ],
+        });
+        const item = formatChronicleEvent(broker, "corp", {
+          translate: translate(locale),
+          cardPresentationsById: presentations,
+        });
+        const expected = {
+          de: take
+            ? "Die Runner-KI: alle Credits (6) von Broker genommen."
+            : "Die Runner-KI: 3 Credits auf Broker gelegt.",
+          en: take
+            ? "The Runner AI: took all credits (6) from Broker."
+            : "The Runner AI: placed 3 credits on Broker.",
+          fr: take
+            ? "L'IA Runner : a pris tous les crédits (6) de Broker."
+            : "L'IA Runner : a placé 3 crédits sur Broker.",
+        };
+        expect(item).toMatchObject({
+          title: expected[locale],
+          category: "economy",
+          visibility: "public",
+          cardTitle: "Broker",
+        });
+        expect(
+          formatChronicleEffectItems(
+            broker,
+            "corp",
+            presentations,
+            translate(locale),
+          ),
+        ).toEqual([]);
+      }
+    },
+  );
+
+  it("shows credits taken with Short-Term Contract instead of a generic ability", () => {
+    const contract = event("activated_card_ability", {
+      actor: "runner",
+      cardDefinitionId: "onr_v1_178_short-term-contract",
+      cardImplementationAbility: "activated",
+      hostedCreditsTaken: 2,
+      hostedCreditsAfter: 10,
+      remainingCounters: 10,
+      gainedCredits: 2,
+      runnerCreditsAfter: 7,
+      aiReasonCode: "runner_credit_bank_cash_out",
+      resolvedEffects: [
+        {
+          effectId: "short-term-contract.take-hosted-credits",
+          kind: "take_hosted_credits",
+          visibility: "public",
+          side: "runner",
+          amount: 2,
+          remainingCounters: 10,
+          sourceDefinitionId: "onr_v1_178_short-term-contract",
+          sourceTitle: "Short-Term Contract",
+          reason: "card_resolver",
+        },
+      ],
+    });
+    const presentations = {
+      "onr_v1_178_short-term-contract": {
+        title: "Short-Term Contract",
+        type: "resource" as const,
+      },
+    };
+
+    const de = formatChronicleEvent(contract, "corp", {
+      translate: translate("de"),
+      cardPresentationsById: presentations,
+    });
+    const en = formatChronicleEvent(contract, "corp", {
+      translate: translate("en"),
+      cardPresentationsById: presentations,
+    });
+    const effects = formatChronicleEffectItems(
+      contract,
+      "corp",
+      presentations,
+      translate("de"),
+    );
+
+    expect(de).toMatchObject({
+      title: "Die Runner-KI: 2 Credits von Short-Term Contract erhalten.",
+      category: "economy",
+      visibility: "public",
+      cardDefinitionId: "onr_v1_178_short-term-contract",
+      cardTitle: "Short-Term Contract",
+    });
+    expect(de.chips).toContain("Short-Term Contract");
+    expect(de.chips).toContain("+2");
+    expect(en.title).toBe(
+      "The Runner AI: gained 2 credits from Short-Term Contract.",
+    );
+    expect(effects).toEqual([]);
+    expect(`${de.title} ${en.title}`).not.toMatch(
+      /Fähigkeit.+aufgelöst|resolved an ability/,
     );
   });
 
@@ -453,6 +937,57 @@ describe("semantic chronicle localization", () => {
     );
   });
 
+  it("names the program publicly revealed with Temple Microcode Outlet", () => {
+    const templeSearch = event("resolve_choice", {
+      actor: "runner",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "p3_37_search_stack_to_grip",
+      sourceDefinitionId: "temple_microcode_outlet",
+      selectedCount: 1,
+      movedCardCount: 1,
+      searchDestination: "runner_grip",
+      publicRevealKind: "reveal",
+      publicRevealDefinitionId: "codecracker",
+      cardDefinitionId: "codecracker",
+      shuffled: true,
+      aiReasonCode: "runner_stack_search_program",
+    });
+    const presentations = {
+      temple_microcode_outlet: {
+        title: "Temple Microcode Outlet",
+        type: "event",
+      },
+      codecracker: { title: "Codecracker", type: "program" },
+    };
+
+    const de = formatChronicleEvent(templeSearch, "corp", {
+      translate: translate("de"),
+      cardPresentationsById: presentations,
+    });
+    const en = formatChronicleEvent(templeSearch, "corp", {
+      translate: translate("en"),
+      cardPresentationsById: presentations,
+    });
+
+    expect(de).toMatchObject({
+      title:
+        "Die Runner-KI hat mit Temple Microcode Outlet Codecracker aus dem Stack vorgezeigt und auf die Hand genommen.",
+      category: "card",
+      importance: "important",
+      visibility: "public",
+      cardDefinitionId: "codecracker",
+      cardTitle: "Codecracker",
+    });
+    expect(de.chips).toContain("Temple Microcode Outlet");
+    expect(de.chips).toContain("Codecracker");
+    expect(en.title).toBe(
+      "The Runner AI used Temple Microcode Outlet to reveal Codecracker from the stack and add it to their grip.",
+    );
+    expect(`${de.title} ${en.title}`).not.toMatch(
+      /Auswahl aufgelöst|resolved a choice/,
+    );
+  });
+
   it("describes the public steps and lethal access effect of the R&D run", () => {
     const presentations = {
       krash: { title: "Krash", type: "program" },
@@ -536,7 +1071,9 @@ describe("semantic chronicle localization", () => {
     );
 
     expect(pump.title).toBe("Du: Stärke von Krash um 1 erhöht.");
-    expect(broken.title).toBe("Du: erste Subroutine von Brain Wash gebrochen.");
+    expect(broken.title).toBe(
+      "Du: Subroutine 1 von Brain Wash mit Krash gebrochen.",
+    );
     expect(passed.title).toBe("Du: Brain Wash passiert.");
     expect(continued.title).toBe("Du: Run auf R&D fortgesetzt.");
     expect(accessItem.title).toBe("Du: auf Fetal AI in R&D zugegriffen.");
@@ -552,6 +1089,248 @@ describe("semantic chronicle localization", () => {
       importance: "critical",
       visibility: "public",
     });
+  });
+
+  it("describes pay-or-end-run ICE as the runner's concrete payment", () => {
+    const snowbank = event("continue_run", {
+      actor: "runner",
+      aiReasonCode: "runner.continue_encounter",
+      encounterContinue: true,
+      resolvedEffects: [
+        {
+          effectId: "subroutine_1",
+          kind: "resolve_subroutine",
+          visibility: "public",
+          side: "runner",
+          reason: "ice_subroutine",
+          sourceDefinitionId: "snowbank",
+          sourceTitle: "Snowbank",
+          subroutineIndex: 0,
+          subroutineType: "end_the_run_unless_runner_pays",
+          paidCredits: 1,
+        },
+      ],
+    });
+
+    const [de] = formatChronicleEffectItems(
+      snowbank,
+      "corp",
+      undefined,
+      translate("de"),
+    );
+    const [en] = formatChronicleEffectItems(
+      snowbank,
+      "corp",
+      undefined,
+      translate("en"),
+    );
+
+    expect(de).toMatchObject({
+      title: "Die Runner-KI: 1 Credit bezahlt, um Snowbank zu passieren.",
+      category: "run",
+      groupLabel: "Run auf einen Server",
+      importance: "normal",
+      visibility: "public",
+      cardDefinitionId: "snowbank",
+      cardTitle: "Snowbank",
+    });
+    expect(en?.title).toBe("The Runner AI: paid 1 credit to pass Snowbank.");
+    expect(en?.groupLabel).toBe("Run on a server");
+    expect(`${de?.title} ${en?.title}`).not.toMatch(
+      /automatischer Effekt|automatic effect/,
+    );
+  });
+
+  it("describes end-the-run subroutines with ICE, number, and outcome", () => {
+    const creditBlocks = event("continue_run", {
+      actor: "runner",
+      serverLabel: "R&D",
+      resolvedEffects: [
+        {
+          effectId: "subroutine_1",
+          kind: "resolve_subroutine",
+          visibility: "public",
+          side: "runner",
+          reason: "ice_subroutine",
+          sourceDefinitionId: "onr_proteus_017_credit-blocks",
+          sourceTitle: "Credit Blocks",
+          subroutineIndex: 0,
+          subroutineType: "end_the_run",
+          endedRun: true,
+        },
+      ],
+    });
+
+    const [de] = formatChronicleEffectItems(
+      creditBlocks,
+      "corp",
+      undefined,
+      translate("de"),
+    );
+    const [en] = formatChronicleEffectItems(
+      creditBlocks,
+      "corp",
+      undefined,
+      translate("en"),
+    );
+    const [fr] = formatChronicleEffectItems(
+      creditBlocks,
+      "corp",
+      undefined,
+      translate("fr"),
+    );
+
+    expect(de).toMatchObject({
+      title: "Credit Blocks: Subroutine 1 beendet den Run.",
+      category: "run",
+      importance: "important",
+      groupLabel: "Run auf R&D",
+      cardDefinitionId: "onr_proteus_017_credit-blocks",
+      cardTitle: "Credit Blocks",
+    });
+    expect(de?.chips).toEqual(
+      expect.arrayContaining(["Credit Blocks", "Subroutine 1", "Run beendet"]),
+    );
+    expect(en?.title).toBe("Credit Blocks: subroutine 1 ends the run.");
+    expect(fr?.title).toBe(
+      "Credit Blocks : le sous-programme 1 met fin au piratage.",
+    );
+    expect(`${de?.title} ${en?.title} ${fr?.title}`).not.toMatch(
+      /automatischer Effekt|automatic effect|effet automatique/,
+    );
+  });
+
+  it("uses the ending ICE subroutine instead of claiming that the ICE was passed", () => {
+    const kipa = event("continue_run", {
+      actor: "runner",
+      result: "ended",
+      encounterContinue: true,
+      encounterWillEndRun: true,
+      unbrokenSubroutineCount: 1,
+      sourceDefinitionId: "test_kipa",
+      resolvedEffects: [
+        {
+          effectId: "subroutine_1",
+          kind: "resolve_subroutine",
+          visibility: "public",
+          side: "runner",
+          reason: "ice_subroutine",
+          sourceDefinitionId: "test_kipa",
+          sourceTitle: "Kipa",
+          subroutineIndex: 0,
+          subroutineType: "end_the_run",
+          endedRun: true,
+        },
+      ],
+    });
+
+    const de = formatChronicleEvent(kipa, "corp", {
+      translate: translate("de"),
+    });
+    const en = formatChronicleEvent(kipa, "corp", {
+      translate: translate("en"),
+    });
+    const fr = formatChronicleEvent(kipa, "corp", {
+      translate: translate("fr"),
+    });
+
+    expect(de.title).toBe("Kipa: Subroutine 1 beendet den Run.");
+    expect(en.title).toBe("Kipa: subroutine 1 ends the run.");
+    expect(fr.title).toBe(
+      "Kipa\u00a0: le sous-programme 1 met fin au piratage.",
+    );
+    expect(`${de.title} ${en.title} ${fr.title}`).not.toMatch(
+      /passiert|passed|passé/,
+    );
+  });
+
+  it("numbers multiaccess cards and combines access with steal or trash outcomes", () => {
+    const firstAccess = {
+      ...event("access_card", {
+        actor: "runner",
+        aiReasonCode: "runner.access",
+        breachId: "breach_rd",
+        accessIndex: 0,
+        effectiveAccessCount: 2,
+        serverLabel: "R&D",
+        cardDefinitionId: "project_babylon",
+        title: "Project Babylon",
+        redactedKind: "hidden_zone",
+        hiddenZoneBarrier: true,
+      }),
+      eventId: "evt_access_1",
+    };
+    const stolen = {
+      ...event("steal_agenda", {
+        actor: "runner",
+        aiReasonCode: "runner.steal",
+        breachId: "breach_rd",
+        accessIndex: 0,
+        serverLabel: "R&D",
+        cardDefinitionId: "project_babylon",
+        title: "Project Babylon",
+        redactedKind: "hidden_zone",
+        hiddenZoneBarrier: true,
+      }),
+      eventId: "evt_steal_1",
+    };
+    const secondAccess = {
+      ...event("access_card", {
+        actor: "runner",
+        aiReasonCode: "runner.access",
+        breachId: "breach_rd",
+        accessIndex: 1,
+        effectiveAccessCount: 2,
+        serverLabel: "R&D",
+        cardDefinitionId: "pad_campaign",
+        title: "PAD Campaign",
+        redactedKind: "hidden_zone",
+        hiddenZoneBarrier: true,
+      }),
+      eventId: "evt_access_2",
+    };
+    const trashed = {
+      ...event("trash_accessed_card", {
+        actor: "runner",
+        aiReasonCode: "runner.trash",
+        breachId: "breach_rd",
+        accessIndex: 1,
+        serverLabel: "R&D",
+        cardDefinitionId: "pad_campaign",
+        title: "PAD Campaign",
+        redactedKind: "hidden_zone",
+        hiddenZoneBarrier: true,
+      }),
+      eventId: "evt_trash_2",
+    };
+    const events = [firstAccess, stolen, secondAccess, trashed];
+    const plan = chronicleAccessOutcomePlan(events);
+    const firstAccessItem = formatChronicleEvent(firstAccess, "corp", {
+      translate: translate("de"),
+    });
+    const stolenItem = formatChronicleEvent(stolen, "corp", {
+      translate: translate("de"),
+      accessContext: plan.accessContextByOutcomeEventId[stolen.eventId]!,
+    });
+    const trashedItem = formatChronicleEvent(trashed, "corp", {
+      translate: translate("de"),
+      accessContext: plan.accessContextByOutcomeEventId[trashed.eventId]!,
+    });
+
+    expect(firstAccessItem.title).toBe(
+      "Karte 1 von 2: Die Runner-KI hat in R&D auf Project Babylon zugegriffen.",
+    );
+    expect(plan.suppressedAccessEventIds).toEqual(
+      new Set(["evt_access_1", "evt_access_2"]),
+    );
+    expect(stolenItem.title).toBe(
+      "Karte 1 von 2: Die Runner-KI hat in R&D auf Project Babylon zugegriffen und die Agenda gestohlen.",
+    );
+    expect(stolenItem.visibility).toBe("public");
+    expect(trashedItem.title).toBe(
+      "Karte 2 von 2: Die Runner-KI hat in R&D auf PAD Campaign zugegriffen und die Karte getrasht.",
+    );
+    expect(trashedItem.visibility).toBe("public");
   });
 
   it("names damage from a publicly identified installed access card", () => {

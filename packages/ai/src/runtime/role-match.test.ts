@@ -10,12 +10,10 @@ describe("rolesMatch", () => {
     expect(rolesMatch(["runner.pressure_hq.support"], ["pressure_hq"])).toBe(
       true,
     );
-    expect(rolesMatch(["remote_economy_asset_support"], ["economy_asset"])).toBe(
-      true,
-    );
-    expect(rolesMatch(["runner.pre_economy_support"], ["economy"])).toBe(
-      true,
-    );
+    expect(
+      rolesMatch(["remote_economy_asset_support"], ["economy_asset"]),
+    ).toBe(true);
+    expect(rolesMatch(["runner.pre_economy_support"], ["economy"])).toBe(true);
   });
 
   it("ignores substring-only role noise", () => {

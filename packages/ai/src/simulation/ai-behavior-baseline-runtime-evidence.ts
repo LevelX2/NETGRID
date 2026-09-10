@@ -35,23 +35,23 @@ export function actionLimitDiagnosisForSimulation(
   const attributed = actionLimitAttributionEntry(summary);
   const owner = attributed ? actionLimitOwner(attributed) : "unclassified";
   const planInstanceId = attributed
-    ? firstEvidenceValue(attributed, [
+    ? (firstEvidenceValue(attributed, [
         "plan_execution:instance:",
         "plan_first_executor:",
       ]) ??
       (attributed.planKind === "engine_window"
         ? "rules.window_resolution"
         : attributed.planKind) ??
-      "unclassified"
+      "unclassified")
     : "unclassified";
   const stepId = attributed
-    ? firstEvidenceValue(attributed, [
+    ? (firstEvidenceValue(attributed, [
         "plan_execution:step:",
         "plan_step_id:",
       ]) ??
       (attributed.planKind === "engine_window"
         ? "rules.window_resolution"
-        : "unclassified")
+        : "unclassified"))
     : "unclassified";
   return {
     classified:
@@ -116,18 +116,15 @@ function actionLimitAttributionEntry(
   );
   const firstCycleIndex = cycleRoots[0]?.index;
   const lastCycleIndex = cycleRoots.at(-1)?.index;
-  if (firstCycleIndex === undefined || lastCycleIndex === undefined) return last;
+  if (firstCycleIndex === undefined || lastCycleIndex === undefined)
+    return last;
   if (
-    tail
-      .slice(firstCycleIndex + 1)
-      .some(actionLimitEntryIsValueProgression)
+    tail.slice(firstCycleIndex + 1).some(actionLimitEntryIsValueProgression)
   ) {
     return last;
   }
   if (
-    !tail
-      .slice(lastCycleIndex)
-      .every(actionLimitEntryBelongsToRunWindowCycle)
+    !tail.slice(lastCycleIndex).every(actionLimitEntryBelongsToRunWindowCycle)
   ) {
     return last;
   }
@@ -215,12 +212,10 @@ function activeRecordKey<Key extends string>(
   fallback: Key,
 ): Key {
   return (
-    (Object.entries(counts) as Array<[Key, number]>).find(
+    ((Object.entries(counts) as Array<[Key, number]>).find(
       ([, count]) => count > 0,
-    )?.[0] as
-      | Key
-      | undefined
-  ) ?? fallback;
+    )?.[0] as Key | undefined) ?? fallback
+  );
 }
 
 function isPlanResolutionFailureOwner(

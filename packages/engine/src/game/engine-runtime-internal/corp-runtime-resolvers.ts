@@ -534,7 +534,6 @@ import {
   scoredAgendaCounterCreditProfileForDefinition,
   scoredAgendaCounterCreditProfileForPayload,
   SCORED_REVEAL_AGENDA_SOURCES,
-  SERVER_DIFFICULTY_UPGRADE_SOURCES,
 } from "../../mechanics/agenda-scoring";
 import { TAG_HANDSIZE_ASSET_SOURCE } from "../../mechanics/global-modifiers";
 import { COUNTER_UPGRADE_SOURCES } from "../../mechanics/hosting-counters";
@@ -1045,7 +1044,7 @@ export function createCorpRuntimeResolvers(
             ? state.runner.rig.programs.filter((cardId) =>
                 definitionFor(state, cardId).subtypes.includes("daemon"),
               )
-          : state.runner.rig.resources,
+            : state.runner.rig.resources,
     );
     for (const cardId of selectedIds) {
       if (!currentLegalTargets.has(cardId))
@@ -1130,7 +1129,9 @@ export function createCorpRuntimeResolvers(
                       Math.floor(
                         mustInstance(
                           state.cardInstances,
-                          String(legalAction.payload?.cardId ?? "") as CardInstanceId,
+                          String(
+                            legalAction.payload?.cardId ?? "",
+                          ) as CardInstanceId,
                         ).advancementCounters,
                       ),
                     ),
@@ -1591,9 +1592,9 @@ export function createCorpRuntimeResolvers(
         {
           id: "take_credit",
           label: "1 Credit nehmen",
-            publicLabel: "1 Credit genommen",
-            value: "take_credit",
-            metadata: { amount: 1 },
+          publicLabel: "1 Credit genommen",
+          value: "take_credit",
+          metadata: { amount: 1 },
         },
         ...economyCreditSourceIds.map((cardId, index) => ({
           id: `corp_installed_economy_credit_${cardId}`,
@@ -1601,9 +1602,9 @@ export function createCorpRuntimeResolvers(
             economyCreditSourceIds.length === 1
               ? "2 Credits auf die Economy-Quelle legen"
               : `2 Credits auf Economy-Quelle ${index + 1} legen`,
-            publicLabel: "2 Credits auf Economy-Quelle gelegt",
-            value: cardId,
-            metadata: { amount: 2, secondaryAmount: index + 1 },
+          publicLabel: "2 Credits auf Economy-Quelle gelegt",
+          value: cardId,
+          metadata: { amount: 2, secondaryAmount: index + 1 },
         })),
       ],
       minSelections: 1,

@@ -43,9 +43,7 @@ export function publicIceRunSubroutineDerivation(
         const value = Math.max(0, Math.floor(variableIceState.value));
         return {
           ...subroutine,
-          ...(variableRez.traceLimitFromValue
-            ? { traceLimit: value }
-            : {}),
+          ...(variableRez.traceLimitFromValue ? { traceLimit: value } : {}),
         };
       }
     }
@@ -80,8 +78,7 @@ export function publicIceRunSubroutineDerivation(
       appendedSubroutines.push({
         id: `relative_ice_outside_${instance?.definitionId}.trace.${index + 1}`,
         type: "initiate_trace",
-        traceLimit:
-          relativeIce.dynamicTraceSubroutines.traceLimit,
+        traceLimit: relativeIce.dynamicTraceSubroutines.traceLimit,
         traceSuccessEffect:
           relativeIce.dynamicTraceSubroutines.traceSuccessEffect,
       });

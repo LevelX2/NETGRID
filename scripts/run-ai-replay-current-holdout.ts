@@ -110,15 +110,24 @@ writeFileSync(
 );
 mkdirSync(dirname(summaryOut), { recursive: true });
 writeFileSync(summaryOut, renderCurrentAiHoldoutRunnerMarkdown(report), "utf8");
-console.log(JSON.stringify({ outputDir, summaryOut, aggregate: report.aggregate }, null, 2));
+console.log(
+  JSON.stringify(
+    { outputDir, summaryOut, aggregate: report.aggregate },
+    null,
+    2,
+  ),
+);
 
-function selectHoldoutTraces(db: DatabaseSync, maxCreatedAt?: string): TraceRow[] {
+function selectHoldoutTraces(
+  db: DatabaseSync,
+  maxCreatedAt?: string,
+): TraceRow[] {
   const sql = `${selectTraceRowsSql()}
     ${maxCreatedAt ? "WHERE t.created_at <= ?" : ""}
     ORDER BY m.created_at ASC, t.decision_index ASC, t.trace_id ASC`;
-  const rows = (maxCreatedAt
-    ? db.prepare(sql).all(maxCreatedAt)
-    : db.prepare(sql).all()) as TraceRow[];
+  const rows = (
+    maxCreatedAt ? db.prepare(sql).all(maxCreatedAt) : db.prepare(sql).all()
+  ) as TraceRow[];
   return rows
     .map((row) => ({
       ...row,
@@ -153,7 +162,10 @@ function selectTraceRowsSql(): string {
     JOIN matches m ON m.match_id = t.match_id`;
 }
 
-function evaluateTrace(db: DatabaseSync, trace: TraceRow): CurrentAiHoldoutEvaluation {
+function evaluateTrace(
+  db: DatabaseSync,
+  trace: TraceRow,
+): CurrentAiHoldoutEvaluation {
   const base = baseEvaluation(trace);
   try {
     const state = stateForTrace(db, trace);
@@ -231,13 +243,19 @@ function baseEvaluation(trace: TraceRow): CurrentAiHoldoutEvaluation {
     historical: {
       actionType: trace.selectedActionType ?? "none",
       ...(trace.selectedActionId
-        ? { actionIdDigest: currentAiHoldoutActionDigest(trace.selectedActionId) }
+        ? {
+            actionIdDigest: currentAiHoldoutActionDigest(
+              trace.selectedActionId,
+            ),
+          }
         : {}),
       ...(trace.planKind ? { planKind: trace.planKind } : {}),
       ...(challenger?.selectedActionType
         ? { challengerActionType: challenger.selectedActionType }
         : {}),
-      ...(challenger?.planKind ? { challengerPlanKind: challenger.planKind } : {}),
+      ...(challenger?.planKind
+        ? { challengerPlanKind: challenger.planKind }
+        : {}),
     },
   };
 }
@@ -245,7 +263,9 @@ function baseEvaluation(trace: TraceRow): CurrentAiHoldoutEvaluation {
 function safeTraceJson(value: string): Record<string, unknown> {
   try {
     const parsed = JSON.parse(value) as unknown;
-    return parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)
+    return parsed !== null &&
+      typeof parsed === "object" &&
+      !Array.isArray(parsed)
       ? (parsed as Record<string, unknown>)
       : {};
   } catch {
@@ -268,11 +288,16 @@ function rankedAlternative(
     ...(typeof record.selectedActionType === "string"
       ? { selectedActionType: record.selectedActionType }
       : {}),
-    ...(typeof record.planKind === "string" ? { planKind: record.planKind } : {}),
+    ...(typeof record.planKind === "string"
+      ? { planKind: record.planKind }
+      : {}),
   };
 }
 
-function stateForTrace(db: DatabaseSync, trace: TraceRow): GameState | undefined {
+function stateForTrace(
+  db: DatabaseSync,
+  trace: TraceRow,
+): GameState | undefined {
   const row = db
     .prepare(
       `SELECT state_version AS stateVersion, match_version AS matchVersion, game_state_json AS gameStateJson
@@ -311,7 +336,10 @@ function aiControllerFor(
   const record = JSON.parse(row.recordJson) as {
     match?: {
       aiControllers?: Partial<
-        Record<Side, { difficulty?: "easy" | "normal" | "hard"; profileId?: string }>
+        Record<
+          Side,
+          { difficulty?: "easy" | "normal" | "hard"; profileId?: string }
+        >
       >;
     };
   };
@@ -330,7 +358,9 @@ function ownDeckSnapshotFor(
     .get(matchId) as PrivateDeckSnapshotRow | undefined;
   if (!row?.privateDeckSnapshotsJson) return undefined;
   const snapshots = JSON.parse(row.privateDeckSnapshotsJson) as DeckSnapshots;
-  return snapshots[side] as Parameters<typeof buildAiDecisionInput>[2]["ownDeckSnapshot"];
+  return snapshots[side] as Parameters<
+    typeof buildAiDecisionInput
+  >[2]["ownDeckSnapshot"];
 }
 
 function currentDecisionSummary(
@@ -345,7 +375,9 @@ function currentDecisionSummary(
       ? { planKind: decision.decisionDebug.planKind }
       : {}),
     reasonCode: decision.reasonCode,
-    ...(decision.confidence !== undefined ? { confidence: decision.confidence } : {}),
+    ...(decision.confidence !== undefined
+      ? { confidence: decision.confidence }
+      : {}),
     legalActionCount: legalActions.length,
     legal: Boolean(selected),
   };
@@ -369,9 +401,7 @@ function safeRunId(value: string): string {
 }
 
 function safeErrorCode(value: string): string {
-  return value
-    .replace(/[^a-zA-Z0-9_.:-]/g, "_")
-    .slice(0, 80);
+  return value.replace(/[^a-zA-Z0-9_.:-]/g, "_").slice(0, 80);
 }
 
 function findRepoRoot(start: string): string {
@@ -386,7 +416,8 @@ function findRepoRoot(start: string): string {
       // Continue walking up.
     }
     const parent = dirname(current);
-    if (parent === current) throw new Error(`Could not find NETGRID repo root from ${start}`);
+    if (parent === current)
+      throw new Error(`Could not find NETGRID repo root from ${start}`);
     current = parent;
   }
 }

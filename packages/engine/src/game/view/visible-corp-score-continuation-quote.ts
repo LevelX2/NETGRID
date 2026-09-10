@@ -11,7 +11,6 @@ import { corpActionDebtPending } from "../turn/turn-basic-execution";
 import {
   definitionFor,
   serverDifficultyIncreaseFromRunCounters,
-  serverDifficultyReductionFromUpgrades,
 } from "./card-view";
 
 const STANDARD_CORP_TURN_CLICKS = 3;
@@ -50,7 +49,6 @@ export function visibleCorpScoreContinuationQuote(
     {
       definitionFor,
       serverDifficultyIncreaseFromRunCounters,
-      serverDifficultyReductionFromUpgrades,
     },
     state,
     agendaCardId,

@@ -77,7 +77,7 @@ function hasCounterCashout(
     abilities?.some(
       (ability) =>
         ability.kind === "activated" &&
-      ability.timing === "corp_paid" &&
+        ability.timing === "corp_paid" &&
         ability.condition?.kind === "source_has_advancement_counters" &&
         ability.condition.minimum >= 1 &&
         ability.costs.length === 1 &&

@@ -19,14 +19,17 @@ const checkpoints = [
 ] as const;
 
 describe("series 82b2 remediation decision checkpoints", () => {
-  it.each(checkpoints)("keeps %s fixture-valid and replayable", (_label, json) => {
-    const checkpoint = fixture(json);
-    checkpoint.expectation = { acceptableActions: [{}] };
+  it.each(checkpoints)(
+    "keeps %s fixture-valid and replayable",
+    (_label, json) => {
+      const checkpoint = fixture(json);
+      checkpoint.expectation = { acceptableActions: [{}] };
 
-    const result = runAiDecisionCheckpoint(checkpoint);
+      const result = runAiDecisionCheckpoint(checkpoint);
 
-    expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
-  });
+      expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+    },
+  );
 
   it.each(checkpoints)("remediates %s", (_label, json) => {
     const result = runAiDecisionCheckpoint(fixture(json));

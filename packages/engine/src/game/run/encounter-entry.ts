@@ -76,6 +76,40 @@ export function beginEncounter(
 ): EncounterEntryResult {
   const run = mustRun(host.state);
   const encounteredDefinition = host.cards.definitionFor(encounteredIceId);
+  const encounterTaxPayment = payEncounterTaxForFutureIce(
+    runDurationPaymentHost(host.state),
+    legalAction,
+  );
+  if (encounterTaxPayment.handled && legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      targetIceDefinitionId: encounteredDefinition.id,
+    };
+  }
+  if (
+    encounterTaxPayment.handled &&
+    encounterTaxPayment.paid === false &&
+    host.state.runnerCostPenaltySupportWindow
+  ) {
+    run.pendingEncounterEntryIceId = encounteredIceId;
+    return {
+      handled: true,
+      iceId: encounteredIceId,
+      stateChanged: true,
+      resolvedPayload: legalAction?.payload,
+    };
+  }
+  delete run.pendingEncounterEntryIceId;
+  if (encounterTaxPayment.runShouldEnd) {
+    host.callbacks.finishRun(false, legalAction);
+    return {
+      handled: true,
+      runShouldEnd: true,
+      iceId: encounteredIceId,
+      stateChanged: true,
+      resolvedPayload: legalAction?.payload,
+    };
+  }
   bindOrExpireNextSentryFreeBreak(run, encounteredIceId, host);
   run.phase = "encounter_ice";
   run.encounteredIceId = encounteredIceId;
@@ -117,38 +151,6 @@ export function beginEncounter(
   }
   run.nextEncounterFatalDamage = 0;
   delete run.nextEncounterFatalDamageSourceDefinitionId;
-  const encounterTaxPayment = payEncounterTaxForFutureIce(
-    runDurationPaymentHost(host.state),
-    legalAction,
-  );
-  if (encounterTaxPayment.handled && legalAction) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      targetIceDefinitionId: encounteredDefinition.id,
-    };
-  }
-  if (
-    encounterTaxPayment.handled &&
-    encounterTaxPayment.paid === false &&
-    host.state.runnerCostPenaltySupportWindow
-  ) {
-    return {
-      handled: true,
-      iceId: encounteredIceId,
-      stateChanged: true,
-      resolvedPayload: legalAction?.payload,
-    };
-  }
-  if (encounterTaxPayment.runShouldEnd) {
-    host.callbacks.finishRun(false, legalAction);
-    return {
-      handled: true,
-      runShouldEnd: true,
-      iceId: encounteredIceId,
-      stateChanged: true,
-      resolvedPayload: legalAction?.payload,
-    };
-  }
   if (
     encounteredDefinition.type === "ice" &&
     host.cards

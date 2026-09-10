@@ -41,4 +41,3 @@ describe("access outcome projection", () => {
     );
   });
 });
-

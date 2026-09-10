@@ -8,10 +8,7 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("random standard selfplay loop round one", () => {
   it.each([
-    [
-      "starts the bounded staged score line",
-      safeStagedScoreJson,
-    ],
+    ["starts the bounded staged score line", safeStagedScoreJson],
     [
       "builds AP coverage before the reachable public terminal remote",
       terminalRemoteContestJson,

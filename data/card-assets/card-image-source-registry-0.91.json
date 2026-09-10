@@ -15,14 +15,8 @@
       "usageFinding": "The project owner states that the Original NETGRID 1996 cards are physically owned and will be used only privately and with family.",
       "decision": "allowed_for_private_local_front_scan_cache",
       "allowedForV091": true,
-      "allowedAssets": [
-        "front_scans_only"
-      ],
-      "excludedAssets": [
-        "card_backs",
-        "standalone_frames",
-        "standalone_logos"
-      ],
+      "allowedAssets": ["front_scans_only"],
+      "excludedAssets": ["card_backs", "standalone_frames", "standalone_logos"],
       "notes": [
         "No image files are versioned.",
         "Self-scans or local files supplied by the project owner are preferred over public scraping."
@@ -54,10 +48,7 @@
       "usageFinding": "Historical community references identify NETGRIDOnline and Wayback copies as a source for Original NETGRID card images and data. It is not treated as a public license.",
       "decision": "candidate_private_reference_only",
       "allowedForV091": false,
-      "blockReasons": [
-        "requires_manual_source_validation",
-        "not_a_license"
-      ]
+      "blockReasons": ["requires_manual_source_validation", "not_a_license"]
     },
     {
       "sourceId": "emergencyshutdown_archive",
@@ -83,12 +74,8 @@
       "usageFinding": "CCG Trader provides a current database page for Original NETGRID CCG sets and confirms set names and card counts.",
       "decision": "allowed_for_metadata_reference_only",
       "allowedForV091": true,
-      "allowedAssets": [
-        "metadata_reference"
-      ],
-      "excludedAssets": [
-        "bulk_card_images"
-      ]
+      "allowedAssets": ["metadata_reference"],
+      "excludedAssets": ["bulk_card_images"]
     },
     {
       "sourceId": "netgriddb_api_v3_printings",

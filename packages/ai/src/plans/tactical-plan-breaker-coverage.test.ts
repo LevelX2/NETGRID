@@ -62,9 +62,10 @@ describe("isBreakerInstallAction", () => {
       ),
     ).toBe(false);
     expect(
-      isBreakerInstallAction(playerView, "breaker_trace")(
-        installAction("runner-breaker-trace", "Install Trace Tool"),
-      ),
+      isBreakerInstallAction(
+        playerView,
+        "breaker_trace",
+      )(installAction("runner-breaker-trace", "Install Trace Tool")),
     ).toBe(true);
     expect(
       matchesBreaker(installAction("missing-card", "Install Best Fracter")),

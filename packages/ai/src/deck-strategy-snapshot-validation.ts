@@ -114,7 +114,11 @@ export function assertValidAiDeckSnapshotForRuntime(
       throw new AiDeckSnapshotRuntimeError(
         "ai_deck_snapshot_invalid",
         `Deck snapshot ${snapshot.deckSnapshotId} contains wrong-side card ${entry.cardId}.`,
-        [`card:${entry.cardId}`, `card_side:${runtimeCard.side}`, `snapshot_side:${snapshot.side}`],
+        [
+          `card:${entry.cardId}`,
+          `card_side:${runtimeCard.side}`,
+          `snapshot_side:${snapshot.side}`,
+        ],
       );
     }
   }
@@ -225,7 +229,8 @@ function compareOptionalMetadata(
   expected: string | undefined,
 ): void {
   if (expected === undefined) return;
-  if (actual !== expected) mismatches.push(`${field}:${actual ?? "missing"}!=${expected}`);
+  if (actual !== expected)
+    mismatches.push(`${field}:${actual ?? "missing"}!=${expected}`);
 }
 
 function isNonEmptyString(value: unknown): value is string {

@@ -12,7 +12,7 @@ export function OpponentPanel({
   scoreAreaCards,
   scoreAreaOpen,
   scoreAreaHighlighted,
-  onToggleScoreArea
+  onToggleScoreArea,
 }: {
   view: PlayerView;
   displayName?: string;
@@ -29,8 +29,15 @@ export function OpponentPanel({
   const RoleIcon = side === "runner" ? Fingerprint : Building2;
   const status = sideStatusForView(view, side);
   return (
-    <section className={`section sideStatusPanel side-${side} ${isTurn ? "turnActive" : ""}`}>
-      <h2><RoleIcon size={16} />{displayName ? `${displayName} · ${t(`side.${side}`)}` : t(`side.${side}`)}</h2>
+    <section
+      className={`section sideStatusPanel side-${side} ${isTurn ? "turnActive" : ""}`}
+    >
+      <h2>
+        <RoleIcon size={16} />
+        {displayName
+          ? `${displayName} · ${t(`side.${side}`)}`
+          : t(`side.${side}`)}
+      </h2>
       <div className="stats">
         <CreditBadge credits={view.opponent.credits} />
         <ScoreAreaStat
@@ -40,11 +47,30 @@ export function OpponentPanel({
           interactive={scoreAreaCards.length > 0}
           onToggle={onToggleScoreArea}
         />
-        {side === "runner" ? <Stat value={view.opponent.tags} icon={<Goal size={14} />} helpText={t("tagHelp")} /> : null}
-        {side === "runner" ? <Stat value={view.opponent.coreDamage ?? 0} icon={<Brain size={14} />} helpText={t("coreDamageHelp")} /> : null}
+        {side === "runner" ? (
+          <Stat
+            value={view.opponent.tags}
+            icon={<Goal size={14} />}
+            helpText={t("tagHelp")}
+          />
+        ) : null}
+        {side === "runner" ? (
+          <Stat
+            value={view.opponent.coreDamage ?? 0}
+            icon={<Brain size={14} />}
+            helpText={t("coreDamageHelp")}
+          />
+        ) : null}
       </div>
-      <IdentityCounterStrip displays={view.opponent.identity.counterDisplays} side={side} />
-      <p className="meta statusLine">{status.key === "turnOtherDecides" ? t(status.key, {side: t(`side.${status.side}`)}) : t(status.key)}</p>
+      <IdentityCounterStrip
+        displays={view.opponent.identity.counterDisplays}
+        side={side}
+      />
+      <p className="meta statusLine">
+        {status.key === "turnOtherDecides"
+          ? t(status.key, { side: t(`side.${status.side}`) })
+          : t(status.key)}
+      </p>
     </section>
   );
 }
@@ -56,7 +82,7 @@ export function PlayerPanel({
   agendaPointsToWin,
   scoreAreaOpen,
   scoreAreaHighlighted,
-  onToggleScoreArea
+  onToggleScoreArea,
 }: {
   view: PlayerView;
   title: string;
@@ -72,8 +98,13 @@ export function PlayerPanel({
   const RoleIcon = view.side === "runner" ? Fingerprint : Building2;
   const status = sideStatusForView(view, view.side);
   return (
-    <section className={`section sideStatusPanel side-${view.side} ${isTurn ? "turnActive" : ""}`}>
-      <h2><RoleIcon size={16} />{title}</h2>
+    <section
+      className={`section sideStatusPanel side-${view.side} ${isTurn ? "turnActive" : ""}`}
+    >
+      <h2>
+        <RoleIcon size={16} />
+        {title}
+      </h2>
       <div className="stats">
         <CreditBadge credits={view.own.credits} />
         <ScoreAreaStat
@@ -83,11 +114,30 @@ export function PlayerPanel({
           interactive={scoreAreaCards.length > 0}
           onToggle={onToggleScoreArea}
         />
-        {view.side === "runner" ? <Stat value={view.own.tags} icon={<Goal size={14} />} helpText={t("tagHelp")} /> : null}
-        {view.side === "runner" ? <Stat value={view.own.coreDamage ?? 0} icon={<Brain size={14} />} helpText={t("coreDamageHelp")} /> : null}
+        {view.side === "runner" ? (
+          <Stat
+            value={view.own.tags}
+            icon={<Goal size={14} />}
+            helpText={t("tagHelp")}
+          />
+        ) : null}
+        {view.side === "runner" ? (
+          <Stat
+            value={view.own.coreDamage ?? 0}
+            icon={<Brain size={14} />}
+            helpText={t("coreDamageHelp")}
+          />
+        ) : null}
       </div>
-      <IdentityCounterStrip displays={view.own.identity.counterDisplays} side={view.side} />
-      <p className="meta statusLine">{status.key === "turnOtherDecides" ? t(status.key, {side: t(`side.${status.side}`)}) : t(status.key)}</p>
+      <IdentityCounterStrip
+        displays={view.own.identity.counterDisplays}
+        side={view.side}
+      />
+      <p className="meta statusLine">
+        {status.key === "turnOtherDecides"
+          ? t(status.key, { side: t(`side.${status.side}`) })
+          : t(status.key)}
+      </p>
     </section>
   );
 }
@@ -97,18 +147,24 @@ function opponentSide(side: Side): Side {
 }
 
 function turnSideForView(view: PlayerView): Side | null {
-  if (view.phase === "corp_draw_phase" || view.phase === "corp_action_phase") return "corp";
-  if (view.phase === "runner_action_phase" || view.phase === "run") return "runner";
+  if (view.phase === "corp_draw_phase" || view.phase === "corp_action_phase")
+    return "corp";
+  if (view.phase === "runner_action_phase" || view.phase === "run")
+    return "runner";
   return null;
 }
 
-function sideStatusForView(view: PlayerView, side: Side):
+function sideStatusForView(
+  view: PlayerView,
+  side: Side,
+):
   | { key: "deciding" | "waiting" | "turn" }
   | { key: "turnOtherDecides"; side: Side } {
-  if (view.pendingChoice?.side === side) return {key: "deciding"};
+  if (view.pendingChoice?.side === side) return { key: "deciding" };
   const turnSide = turnSideForView(view);
-  if (turnSide !== side) return {key: "waiting"};
+  if (turnSide !== side) return { key: "waiting" };
   const choiceOwner = view.pendingChoice?.side;
-  if (choiceOwner && choiceOwner !== side) return {key: "turnOtherDecides", side: choiceOwner};
-  return {key: "turn"};
+  if (choiceOwner && choiceOwner !== side)
+    return { key: "turnOtherDecides", side: choiceOwner };
+  return { key: "turn" };
 }

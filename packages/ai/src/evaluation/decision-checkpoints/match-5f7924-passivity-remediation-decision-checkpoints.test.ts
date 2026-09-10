@@ -123,8 +123,7 @@ function expectCapacityReleaseThenRemoteHardening(value: unknown): void {
   expect(second.decision.decisionDebug?.planFirstDecision).toMatchObject({
     rootPlanInstanceId:
       "plan:corp.establish_scoring_remote:strategic-score-remote",
-    leafExecutorInstanceId:
-      "plan:corp.defend_servers:server-defense-portfolio",
+    leafExecutorInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
     selectedStep: {
       parentInstanceId:
         "plan:corp.establish_scoring_remote:strategic-score-remote",
@@ -136,16 +135,10 @@ function expectCapacityReleaseThenRemoteHardening(value: unknown): void {
     },
   });
   expect(
-    second.decision.decisionDebug?.planFirstDecision?.dispositions,
-  ).toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({
-        actionId: "corp.draw_card",
-        disposition: "explicitly_nonproductive",
-        evidenceCode: "corp_draw_admission:blocked_cleanup_exposure:score_material_search",
-      }),
-    ]),
-  );
+    second.input.legalActions.some((action) => action.type === "draw_card"),
+    "the cleanup-safe draw remains legal while bound hardening takes priority",
+  ).toBe(true);
+  expect(second.decision.actionId).not.toBe("corp.draw_card");
 }
 
 function checkpointState(checkpoint: AiDecisionCheckpointV1): GameState {

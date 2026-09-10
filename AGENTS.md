@@ -1,42 +1,27 @@
 # AGENTS.md
 
-## Projekt und Wissensbasis
+## Projekt und führende Quellen
 
 Private NETGRID-Webapplikation für regelgeführtes NETGRID-Spiel.
 
-Bei neuen Threads, neuen Aufgaben und Projektfragen zuerst wiki-first arbeiten. Die projektbezogene Wissensbasis liegt unter `KI-Wissen-NETGRID/`; falls lokal vorhanden, zusätzlich `AGENTS.local.md` lesen.
-
-Pflicht-Einstieg für projektbezogene Arbeit:
-
-1. `KI-Wissen-NETGRID/00 Projektstart.md`
-2. `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
-3. `KI-Wissen-NETGRID/02 Wissen/Prozesse/Arbeitsworkflow Wissenspflege und Projektanfragen.md`
-4. `KI-Wissen-NETGRID/00 Steuerung/Regeldatei KI-Wissenspflege.md`
-
-Die Wissensbasis nennt den jeweils gültigen Status, die verbindliche Roadmap und die relevanten Quellen. Bei Konflikten gilt das dort als aktuell führend markierte Artefakt.
+Bei neuen Threads und Projektfragen zuerst `docs/codex/CODEX_STATUS.md`, die
+einschlägigen aktuellen Architektur-, Entscheidungs- und Runbook-Artefakte
+sowie paketlokale `AGENTS.md` lesen. Falls vorhanden, zusätzlich
+`AGENTS.local.md` lesen. Bei Konflikten gelten aktuelle Verträge, Code und
+ausführbare Gates als führend.
 
 ## Arbeitsmodus und Sprache
 
-- Beantworte Projektfragen zuerst aus Wissensbasis, Status und aktiven Planungsartefakten.
-- Ziehe Rohquellen, Workspace-Dateien oder Webquellen nur hinzu, wenn die Wissensbasis Lücken hat, veraltet ist oder verifiziert werden muss.
-- Führe neue belastbare, wiederverwendbare oder entscheidungsrelevante Erkenntnisse in Wissensbasis, Runbooks oder Prozessseiten zurück.
-- Dokumentiere relevante Prozess-, Architektur-, Gate- und Abschlussentscheidungen nach der Logregel der Wissensbasis.
+- Beantworte Projektfragen zuerst aus Current-State-Dokumentation, Status und aktiven Planungsartefakten.
+- Ziehe Rohquellen, Workspace-Dateien oder Webquellen nur hinzu, wenn diese Quellen Lücken haben, veraltet sind oder verifiziert werden müssen.
+- Führe neue belastbare, wiederverwendbare oder entscheidungsrelevante Erkenntnisse in aktuelle Architektur-, Entscheidungs- oder Runbook-Artefakte zurück.
+- Dokumentiere relevante Prozess-, Architektur-, Gate- und Abschlussentscheidungen nur dort, wo sie eine aktuelle Funktion besitzen; Git bleibt der historische Nachweis.
 - Sichtbare UI-Texte und normale deutsche Wissensseiten verwenden echtes Deutsch mit Umlauten und `ß`.
 - Technische Dateinamen, Pfade, Code-Symbole, IDs, Markdown-Links und originale Quellzitate bleiben in ihrer technischen oder originalen Schreibweise.
 
 ## Coordinator und Rollenrouting
 
-Bei jeder neuen projektbezogenen Anfrage klassifiziert der Coordinator die Anfrage, wählt genau einen primären Agenten aus und gibt die aktive Agentenvorgabe kurz aus:
-
-```text
-Aktiver Agent: <agent> (agents/<agent>.md)
-```
-
-Danach arbeitet Codex direkt nach dieser Agentendatei. Es ist keine separate Bestätigung nötig.
-
-Wenn die Intention unklar ist oder mehrere Rollen mit nicht offensichtlichen Folgen passen, stellt der Coordinator genau eine kurze Klärungsfrage. Bei gemischten Anfragen wird ein primärer Agent gewählt; optionale Folgeagenten werden nur empfohlen.
-
-Es gibt keine automatische Agent-Kette, keine implizite Übergabe an Folgeagenten und keine automatische Rollenumstellung während einer laufenden Aufgabe. Der Nutzer kann jederzeit einen anderen Agenten nennen oder zu `AGENTS.md` als Coordinator zurückwechseln.
+Bei klarer Aufgabe direkt arbeiten. Die folgende Rollenübersicht dient als Navigation zu Spezialwissen; eine Rolle nur laden, wenn der Auftrag sie verlangt oder ihre zusätzlichen Regeln fachlich nötig sind. Dann die verwendete Agentendatei kurz nennen. Gemischte Aufgaben rechtfertigen keinen automatischen Stopp; nur eine entscheidungsrelevante Unklarheit gezielt klären. Keine automatische Agent-Kette oder Delegation allein durch Rollenwahl.
 
 ## Agentenrouting
 
@@ -89,47 +74,9 @@ Eine kompakte Rollenübersicht liegt in `agents/README.md`.
 - Ein Fallback ist nur zulässig, wenn er ausdrücklich Teil des fachlichen
   Produktverhaltens ist oder vom Nutzer für den konkreten Fall genehmigt wurde.
 
-### Verbindlicher KI-Architektur-Preflight
+### KI-Architektur-Preflight
 
-Vor jeder Änderung an KI-Verhalten, KI-Entscheidungen, Choice-Auflösung,
-Planung, Bewertung oder `packages/ai/` sind zusätzlich und vor dem ersten
-Codepatch zu lesen:
-
-1. `packages/ai/AGENTS.md`
-2. vollständig
-   `docs/architecture/ai/change-compass.md`
-3. `docs/architecture/ai/README.md`
-4. die für den betroffenen Owner relevanten Abschnitte aus
-   `docs/architecture/ai/planning-architecture.md`
-
-Der Änderungskompass ist das verbindliche Agenten-Konzentrat aus dem
-allgemeinen KI-Zielbild und dem detaillierten Planebenen-Konzept. Bei
-Unklarheit, Kerneländerungen oder neuen Modulgrenzen sind zusätzlich die dort
-verlinkten Gesamtdokumente selbst zu lesen.
-
-Vor der Implementierung muss feststehen:
-
-- welcher bestehende Plan oder Controller fachlicher Owner der Entscheidung
-  ist;
-- ob die Änderung eine Planwahl, eine planinterne Route, eine
-  Engine-Fortsetzung oder nur die Payload einer bereits gewählten Action
-  betrifft;
-- welche bestehende Planinstanz, Continuation beziehungsweise
-  `PlanExecutionOrigin` erhalten oder erweitert werden muss;
-- welche Parallel-, Override-, Fallback- oder Resolverlogik dadurch gerade
-  **nicht** neu entstehen darf.
-
-Ein Choice-Resolver darf ausschließlich die Payload einer bereits vom
-zuständigen Plan gewählten und exakt gebundenen `LegalAction` vervollständigen.
-Er darf keine Server-, Ziel-, Karten-, Ressourcen- oder Strategieentscheidung
-duplizieren, die einem Planmodul gehört. Benötigt eine Choice solche
-Domainlogik, wird zuerst der zuständige Plan erweitert und die Choice daran
-gebunden. Ein lokaler Resolver-Shortcut ist unzulässig, auch wenn er legal und
-deterministisch wäre.
-
-Bei KI-Fixes müssen Tests neben dem Ergebnis auch die Ownership sichern:
-zuständiger Plan/Step/Route bleibt gleich, die Choice ändert weder `actionId`
-noch Executor, und es entsteht keine zweite Entscheidungsautorität.
+Für jede Änderung an produktivem KI-Verhalten, Entscheidungen, Choice-Auflösung, Planung oder Bewertung gelten die Quellen, Owner-Grenzen und Nachweise in `packages/ai/AGENTS.md`, unabhängig davon, in welcher Datei der Patch liegt. Diese Datei vor dem ersten Verhaltenspatch lesen; unveränderten Kontext wiederverwenden. Reine Dokumentations-, Format- oder Testtextkorrekturen lösen keinen vollständigen Architektur-Lesestapel aus.
 
 ## Version-0-Umgebung und Legacy-Stand
 

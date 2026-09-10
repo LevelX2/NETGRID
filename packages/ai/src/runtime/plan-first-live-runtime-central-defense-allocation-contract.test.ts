@@ -30,6 +30,7 @@ const CORPORATE_DOWNSIZING_DEFINITION_ID = "onr_v1_194_corporate-downsizing";
 const TYCHO_EXTENSION_DEFINITION_ID = "onr_v1_220_tycho-extension";
 const FILLER_DEFINITION_ID = "onr_v1_284_chance-observation";
 const DATA_MASONS_DEFINITION_ID = "onr_v1_317_data-masons";
+const RED_HERRINGS_DEFINITION_ID = "onr_v1_366_red-herrings";
 
 describe("plan-first live Corp central-defense allocation contract", () => {
   it("selects HQ from complete exact facts when HQ has the material agenda risk", () => {
@@ -74,6 +75,45 @@ describe("plan-first live Corp central-defense allocation contract", () => {
       actionId: fixture.installRd.actionId,
       reasonCode: "plan_first.corp.defend_servers",
       fallbackUsed: false,
+    });
+  });
+
+  it("installs a fort-wide agenda-steal tax on the allocated R&D through corp.defend_servers", () => {
+    resetResidentPlanPortfolioMemory();
+    const fixture = centralAgendaStealTaxInput();
+
+    expect(
+      liveContext().chooseSemanticRuntimeAction(fixture.input, {}),
+    ).toMatchObject({
+      selectionKind: "direct",
+      actionId: fixture.installRd.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+    });
+
+    const defense = residentPlanPortfolioSnapshot(
+      fixture.input,
+    )?.instances.find(
+      (instance) => instance.moduleId === "corp.defend_servers",
+    );
+    expect(defense).toMatchObject({
+      instanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      moduleState: {
+        kind: "defense",
+        centralAllocation: {
+          status: "known",
+          selectedServerId: "rd",
+        },
+        signals: [
+          {
+            phase: "install_defense_support",
+            serverId: "rd",
+            actionIds: [fixture.installRd.actionId],
+            urgent: true,
+            centralPressure: "terminal",
+          },
+        ],
+      },
     });
   });
 
@@ -673,6 +713,59 @@ function centralDefenseInput(params: {
   return { input, installHq, installRd };
 }
 
+function centralAgendaStealTaxInput() {
+  const source = visibleCard("red-herrings", "corp", "upgrade", {
+    definitionId: RED_HERRINGS_DEFINITION_ID,
+    title: "Red Herrings",
+  });
+  const hqCards = [source, filler("hq-filler")];
+  const rdDefinitionIds = [
+    CORPORATE_DOWNSIZING_DEFINITION_ID,
+    CORPORATE_WAR_DEFINITION_ID,
+    CORPORATE_DOWNSIZING_DEFINITION_ID,
+    FILLER_DEFINITION_ID,
+    FILLER_DEFINITION_ID,
+  ];
+  const installHq = upgradeInstall(source, "hq");
+  const installRd = upgradeInstall(source, "rd");
+  const endTurn = legalAction(
+    "end-turn",
+    "corp",
+    "end_turn",
+    "End turn",
+    { credits: 0, clicks: 0 },
+    { source: "game_rule" },
+  );
+  const actions = [installHq, installRd, endTurn];
+  const input = aiInput("corp", actions);
+  input.matchId = "central-defense-upgrade-runtime-contract";
+  input.decisionId = "central-defense-upgrade-runtime-contract:1:corp";
+  input.playerView.stateVersion = 1;
+  input.playerView.turnSerial = 1;
+  input.playerView.own.credits = 5;
+  input.playerView.own.clicks = 3;
+  input.playerView.own.gripOrHq = hqCards;
+  input.playerView.own.stackOrRdCount = rdDefinitionIds.length;
+  input.playerView.opponent.rig = [];
+  input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+  input.playerView.corpCentralAccessQuotes = [
+    centralAccessQuote("hq", 1),
+    centralAccessQuote("rd", 3),
+  ];
+  for (const action of actions) action.expiresAtStateVersion = 1;
+  input.legalActions = actions;
+  input.playerView.legalActions = actions;
+  attachOwnDeckSnapshot(input, {
+    deckSnapshotId: "central-defense-upgrade-runtime-contract-deck",
+    side: "corp",
+    cards: definitionCounts([
+      ...hqCards.map((card) => card.definitionId!),
+      ...rdDefinitionIds,
+    ]),
+  });
+  return { input, installHq, installRd };
+}
+
 function iceInstall(source: VisibleCard, serverId: "hq" | "rd"): LegalAction {
   return legalAction(
     `install-data-wall-${serverId}`,
@@ -700,6 +793,28 @@ function iceInstall(source: VisibleCard, serverId: "hq" | "rd"): LegalAction {
         postInstallRezQuoteBaseCredits: 1,
         postInstallRezQuoteFinalCredits: 1,
         postInstallRezQuoteMandatoryAgendaPointCost: 0,
+      },
+    },
+  );
+}
+
+function upgradeInstall(
+  source: VisibleCard,
+  serverId: "hq" | "rd",
+): LegalAction {
+  return legalAction(
+    `install-red-herrings-${serverId}`,
+    "corp",
+    "install_card",
+    `Install Red Herrings in ${serverId}`,
+    { credits: 0, clicks: 1 },
+    {
+      source: source.instanceId,
+      payload: {
+        cardId: source.instanceId,
+        sourceDefinitionId: RED_HERRINGS_DEFINITION_ID,
+        placement: "root",
+        serverId,
       },
     },
   );

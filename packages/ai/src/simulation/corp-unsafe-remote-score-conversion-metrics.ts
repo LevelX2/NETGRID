@@ -1,7 +1,4 @@
-import {
-  evidenceValue,
-  hasEvidenceFlag,
-} from "../runtime/evidence-value";
+import { evidenceValue, hasEvidenceFlag } from "../runtime/evidence-value";
 import { roundNumber as round } from "../runtime/number-rounding";
 import type { AiSimulationActionSequenceEntry } from "./ai-simulation-action-sequence-entry";
 import type { AiMatchProgressionMetrics } from "./ai-match-progression-types";

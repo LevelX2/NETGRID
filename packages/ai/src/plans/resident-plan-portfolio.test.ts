@@ -307,6 +307,78 @@ describe("resident plan portfolio", () => {
     expect(clearedSupport).not.toHaveProperty("parentNeedId");
   });
 
+  it("invalidates exact support providers in the same transition that removes their parent", () => {
+    const parent = proposal("runner.pressure", "rd");
+    const support = proposal("runner.economy", "fund-rd", {
+      parentInstanceId: "plan:runner.pressure:rd",
+      parentNeedId: "need:credits:runner-pressure-rd",
+    });
+    const initial = reconcileResidentPlanPortfolio({
+      side: "runner",
+      stateVersion: 78,
+      timingPoint: "runner_action.main",
+      proposals: [parent, support],
+      selectedExecutorInstanceId: "plan:runner.pressure:rd",
+    });
+
+    const completed = applyPlanOutcomeReceipt(
+      initial,
+      {
+        planInstanceId: "plan:runner.pressure:rd",
+        stateVersionBefore: 78,
+        stateVersionAfter: 79,
+        progress: "completed",
+        progressValue: 1,
+        milestoneAfter: "complete",
+        reasonCode: "test_parent_completed",
+      },
+      "runner_action.main",
+    );
+
+    expect(completed.instances).toHaveLength(0);
+    expect(completed.transitions).toContainEqual(
+      expect.objectContaining({
+        instanceId: "plan:runner.economy:fund-rd",
+        reason: "invalidated",
+        detailCode: "support_parent_not_resident",
+      }),
+    );
+  });
+
+  it("does not retain an orphaned exact support provider for its ordinary ttl", () => {
+    const parent = proposal("runner.pressure", "rd", {
+      dormantStateVersionTtl: 0,
+    });
+    const support = proposal("runner.economy", "fund-rd", {
+      parentInstanceId: "plan:runner.pressure:rd",
+      parentNeedId: "need:credits:runner-pressure-rd",
+      dormantStateVersionTtl: 4,
+    });
+    const initial = reconcileResidentPlanPortfolio({
+      side: "runner",
+      stateVersion: 80,
+      timingPoint: "runner_action.main",
+      proposals: [parent, support],
+    });
+
+    const reconciled = reconcileResidentPlanPortfolio({
+      side: "runner",
+      stateVersion: 81,
+      timingPoint: "run.approach_ice",
+      proposals: [],
+      previous: initial,
+    });
+
+    expect(reconciled.instances).toHaveLength(0);
+    expect(reconciled.transitions).toContainEqual(
+      expect.objectContaining({
+        instanceId: "plan:runner.economy:fund-rd",
+        reason: "invalidated",
+        detailCode: "support_parent_not_resident",
+      }),
+    );
+  });
+
   it("does not accept action-id-shaped outcome receipts", () => {
     const portfolio = reconcileResidentPlanPortfolio({
       side: "runner",

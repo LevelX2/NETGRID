@@ -97,7 +97,10 @@ export function ActiveRunnerZoneBoard({
       <SideZoneFrame
         side="runner"
         label={t("grip")}
-        countLabel={t("handCount", {count: view.own.gripOrHq.length, limit: view.own.maxHandSize})}
+        countLabel={t("handCount", {
+          count: view.own.gripOrHq.length,
+          limit: view.own.maxHandSize,
+        })}
         iconKind="grip"
         highlighted={zoneHighlighted(activeHighlight, view.side, "grip")}
         className="runnerGripZone"
@@ -143,7 +146,7 @@ export function ActiveRunnerZoneBoard({
       <SideZoneFrame
         side="runner"
         label={t("stack")}
-        countLabel={t("cardCount", {count: view.own.stackOrRdCount})}
+        countLabel={t("cardCount", { count: view.own.stackOrRdCount })}
         iconKind="stack"
         highlighted={zoneHighlighted(activeHighlight, view.side, "stack")}
         className="runnerStackZone"
@@ -154,7 +157,9 @@ export function ActiveRunnerZoneBoard({
         <div
           className="runnerStackPreview"
           style={zoneCardsStyle}
-          aria-label={t("stackAria", {count: t("cardCount", {count: view.own.stackOrRdCount})})}
+          aria-label={t("stackAria", {
+            count: t("cardCount", { count: view.own.stackOrRdCount }),
+          })}
         >
           {view.own.stackOrRdCount > 0 ? (
             <div className="runnerStackBack" aria-hidden="true">
@@ -168,7 +173,7 @@ export function ActiveRunnerZoneBoard({
       <SideZoneFrame
         side="runner"
         label={t("heap")}
-        countLabel={t("cardCount", {count: view.own.heapOrArchives.length})}
+        countLabel={t("cardCount", { count: view.own.heapOrArchives.length })}
         iconKind="heap"
         highlighted={zoneHighlighted(activeHighlight, view.side, "heap")}
         className="runnerHeapZone"
@@ -221,7 +226,7 @@ export function ActiveRunnerZoneBoard({
         <SideZoneFrame
           side="runner"
           label={t("rig")}
-          countLabel={t("cardCount", {count: view.own.rig.length})}
+          countLabel={t("cardCount", { count: view.own.rig.length })}
           iconKind="rig"
           highlighted={zoneHighlighted(activeHighlight, view.side, "rig")}
           className="runnerRigZone"
@@ -247,7 +252,10 @@ export function ActiveRunnerZoneBoard({
                     {group.key === "program" ? (
                       <span
                         className="zoneLimitBadge rigMemoryBadge"
-                        aria-label={t("memoryAria", {used: view.own.memoryUsed ?? 0, limit: view.own.memoryLimit ?? 0})}
+                        aria-label={t("memoryAria", {
+                          used: view.own.memoryUsed ?? 0,
+                          limit: view.own.memoryLimit ?? 0,
+                        })}
                       >
                         MU{" "}
                         <strong>
@@ -295,8 +303,13 @@ export function ActiveRunnerZoneBoard({
                                         ability,
                                       ),
                                     disabled: actionDisabled,
-                                    label: t("reservePayment", {ability: ability.label}),
-                                    selectedLabel: t("removePaymentReservation", {ability: ability.label}),
+                                    label: t("reservePayment", {
+                                      ability: ability.label,
+                                    }),
+                                    selectedLabel: t(
+                                      "removePaymentReservation",
+                                      { ability: ability.label },
+                                    ),
                                     gainCredits: ability.gainCredits,
                                     onToggle: () =>
                                       onTogglePaymentSupportAbility(

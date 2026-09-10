@@ -1,4 +1,8 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import { createSemanticRuntimeCorpRemoteContestabilityContext } from "./semantic-runtime-corp-remote-contestability-context";
@@ -8,19 +12,17 @@ describe("semanticRuntimeCorpRemoteScoreContestabilityAssessment", () => {
     const action = corpAction("install-scoreline", "install_card", {
       placement: "root",
     });
-    const {
-      semanticRuntimeCorpRemoteScoreContestabilityAssessment,
-    } = createSemanticRuntimeCorpRemoteContestabilityContext(
-      testDependencies({
-        actionIsScoreLine: true,
-      }),
-    );
-
-    const assessment =
-      semanticRuntimeCorpRemoteScoreContestabilityAssessment(
-        corpInput([remoteServer("remote_1", [])]),
-        action,
+    const { semanticRuntimeCorpRemoteScoreContestabilityAssessment } =
+      createSemanticRuntimeCorpRemoteContestabilityContext(
+        testDependencies({
+          actionIsScoreLine: true,
+        }),
       );
+
+    const assessment = semanticRuntimeCorpRemoteScoreContestabilityAssessment(
+      corpInput([remoteServer("remote_1", [])]),
+      action,
+    );
 
     expect(assessment).toEqual(
       expect.objectContaining({

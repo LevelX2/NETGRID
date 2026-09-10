@@ -124,9 +124,7 @@ describe("match D153 card hint consumer contract", () => {
       "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:withdraw_credits",
     );
     expect(result.decision?.fallbackUsed).toBe(false);
-    expect(result.decision?.decisionDebug?.planKind).toBe(
-      "runner.credit_bank",
-    );
+    expect(result.decision?.decisionDebug?.planKind).toBe("runner.credit_bank");
     expect(result.decision?.evidence).toEqual(
       expect.arrayContaining([
         "plan_step_capability:credit_bank_cash_out",

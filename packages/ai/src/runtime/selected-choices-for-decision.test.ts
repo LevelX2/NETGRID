@@ -23,6 +23,7 @@ import {
 } from "../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInputDto } from "../input-dto";
 import {
+  corpScoredAgendaHqShuffleProfile,
   corpScoredAgendaFreeRezProfile,
   corpScoredAgendaIceMarkProfile,
 } from "./corp-canonical-card-facts";
@@ -31,6 +32,84 @@ import { selectedChoicesForDecision } from "./selected-choices-for-decision";
 describe("selectedChoicesForDecision", () => {
   beforeEach(() => {
     resetResidentPlanPortfolioMemory();
+  });
+
+  it("orders two identical AI Boon run-start strength sources without changing the action", () => {
+    const firstId = "runner_onr_v1_002_ai-boon_1";
+    const secondId = "runner_onr_v1_002_ai-boon_2";
+    const input = inputWithChoice(
+      {
+        choiceId: "runner_run_start_order_7",
+        kind: "select_cards",
+        source: "runner_run_start.order:run_7",
+        minSelections: 1,
+        maxSelections: 1,
+        options: [secondId, firstId].map((instanceId) => ({
+          id: `source_random_strength:${instanceId}`,
+          label: "AI Boon",
+          value: `random_strength:${instanceId}`,
+        })),
+      },
+      {
+        side: "runner",
+        rig: [firstId, secondId].map((instanceId) => ({
+          instanceId,
+          definitionId: "onr_v1_002_ai-boon",
+          known: true,
+          type: "program",
+        })) as never,
+      },
+    );
+    input.playerView.timingPoint = "runner_action.main";
+    const action = resolveChoiceActionForInput(input);
+    const actionBefore = structuredClone(action);
+
+    expect(
+      selectedChoicesForDecision(input, action, unusedDependencies()),
+    ).toEqual({
+      choiceId: "runner_run_start_order_7",
+      selectedOptionIds: [`source_random_strength:${firstId}`],
+    });
+    expect(action).toEqual(actionBefore);
+  });
+
+  it("orders two identical Employee Empowerment sources without deciding the later draws", () => {
+    const firstId = "corp_onr_v1_199_employee-empowerment_1";
+    const secondId = "corp_onr_v1_199_employee-empowerment_2";
+    const input = inputWithChoice(
+      {
+        choiceId: "corp_start_order_7",
+        kind: "select_cards",
+        source: "corp_start.order:7",
+        minSelections: 1,
+        maxSelections: 1,
+        options: [secondId, firstId].map((instanceId) => ({
+          id: `source_${instanceId}`,
+          label: "Employee Empowerment",
+          value: instanceId,
+        })),
+      },
+      {
+        side: "corp",
+        scoreArea: [firstId, secondId].map((instanceId) => ({
+          instanceId,
+          definitionId: "onr_v1_199_employee-empowerment",
+          known: true,
+          type: "agenda",
+        })) as never,
+      },
+    );
+    input.playerView.timingPoint = "corp_draw.mandatory_draw";
+    const action = resolveChoiceActionForInput(input);
+    const actionBefore = structuredClone(action);
+
+    expect(
+      selectedChoicesForDecision(input, action, unusedDependencies()),
+    ).toEqual({
+      choiceId: "corp_start_order_7",
+      selectedOptionIds: [`source_${firstId}`],
+    });
+    expect(action).toEqual(actionBefore);
   });
 
   it("preserves current damage in an exactly bound PDCA replacement window", () => {
@@ -234,6 +313,212 @@ describe("selectedChoicesForDecision", () => {
         input,
         resolveChoiceActionForInput(input),
         unusedDependencies(),
+      ),
+    ).toThrowError("window_origin_missing");
+  });
+
+  it("accepts an Engine-offered installed agenda that occupies a Runner program slot", () => {
+    const installedAgendaProgramId = "installed-theorem-proof";
+    const targetAgendaId = "accessed-theorem-proof";
+    const retainedProgramId = "runner-program";
+    const input = inputWithChoice(
+      {
+        kind: "select_cards",
+        source: [
+          "runner.program_install_memory",
+          "access",
+          targetAgendaId,
+          "0",
+          encodeURIComponent(
+            `runner.steal_agenda.${targetAgendaId}.${targetAgendaId}`,
+          ),
+          encodeURIComponent(
+            `access.agenda_install_as_runner_program:${targetAgendaId}:2`,
+          ),
+        ].join(":"),
+        minSelections: 1,
+        maxSelections: 2,
+        options: [
+          {
+            id: `card_${retainedProgramId}`,
+            label: "Runner program",
+            value: retainedProgramId,
+          },
+          {
+            id: `card_${installedAgendaProgramId}`,
+            label: "Installed Theorem Proof",
+            value: installedAgendaProgramId,
+          },
+        ],
+      },
+      {
+        side: "runner",
+        rig: [
+          {
+            instanceId: retainedProgramId,
+            definitionId: "runner-program-definition",
+            known: true,
+            type: "program",
+            controller: "runner",
+          },
+          {
+            instanceId: installedAgendaProgramId,
+            definitionId: "onr_classic_004_theorem-proof",
+            known: true,
+            type: "agenda",
+            controller: "runner",
+          },
+        ] as never,
+      },
+    );
+    const dependencies = {
+      ...unusedDependencies(),
+      selectedRunnerProgramInstallTrashOptionIds: () => [
+        `card_${retainedProgramId}`,
+      ],
+    };
+
+    expect(
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        dependencies,
+      ),
+    ).toEqual({
+      choiceId: input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: [`card_${retainedProgramId}`],
+    });
+  });
+
+  it("materializes delegated hidden-search memory only for the exact parent need", () => {
+    const rootId = "plan:runner.contest_remote:remote%3Aremote_2";
+    const executorId =
+      "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate";
+    const needId = "coverage:breaker_code_gate";
+    const searchActionId = "runner.play_event.sneak_3.sneak_3.install_program";
+    const targetCardId = "rent_i_con_3";
+    const sacrificeCardId = "invisibility_1";
+    const sourceCardId = "sneak_3";
+    const sourceDefinitionId = "onr_v1_110_sneak-preview";
+    const input = inputWithChoice(
+      {
+        kind: "select_cards",
+        source:
+          `runner.program_install_memory:hidden_search:${targetCardId}:0:install_6:` +
+          `p3_38.stack_or_trash_program_install%3A${sourceCardId}%3A${sourceDefinitionId}%3Aheap%3A6`,
+        minSelections: 1,
+        maxSelections: 1,
+        options: [
+          {
+            id: `card_${sacrificeCardId}`,
+            label: "Invisibility",
+            value: sacrificeCardId,
+          },
+        ],
+      },
+      {
+        side: "runner",
+        rig: [
+          {
+            instanceId: sacrificeCardId,
+            definitionId: "onr_v1_035_invisibility",
+            known: true,
+            type: "program",
+            memoryCost: 1,
+          },
+        ] as never,
+      },
+    );
+    input.playerView.own.memoryUsed = 4;
+    input.playerView.own.memoryLimit = 4;
+    input.playerView.own.heapOrArchives = [
+      {
+        instanceId: targetCardId,
+        definitionId: "onr_classic_031_rent-i-con",
+        known: true,
+        type: "program",
+        memoryCost: 1,
+      },
+    ] as never;
+    const portfolio = {
+      schemaVersion: "resident-plan-portfolio-v2",
+      side: "runner",
+      stateVersion: 6,
+      rootForegroundInstanceId: rootId,
+      executorInstanceId: executorId,
+      instances: [
+        {
+          instanceId: rootId,
+          moduleId: "runner.contest_remote",
+          portfolioRole: "foreground",
+          executionState: "observer",
+          openNeedIds: [needId],
+        },
+        {
+          instanceId: executorId,
+          moduleId: "runner.rig_and_coverage",
+          portfolioRole: "support",
+          executionState: "executor",
+          parentInstanceId: rootId,
+          parentNeedId: needId,
+          moduleState: {
+            kind: "coverage",
+            phase: "search_answer",
+            selectedSearchActionId: searchActionId,
+            selectedSearchStateVersion: 6,
+            gap: {
+              requesterPlanInstanceId: rootId,
+              requesterNeedId: needId,
+              directSearchChoiceBindings: [
+                {
+                  actionId: searchActionId,
+                  sourceCardInstanceId: sourceCardId,
+                  sourceDefinitionId,
+                  targetCardInstanceId: targetCardId,
+                  targetDefinitionId: "onr_classic_031_rent-i-con",
+                  installMemorySacrificeBinding: {
+                    targetCardInstanceId: targetCardId,
+                    targetMemoryCost: 1,
+                    requiredMemoryToFree: 1,
+                    selectedCards: [
+                      { cardInstanceId: sacrificeCardId, memoryCost: 1 },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        },
+      ],
+      completionHistory: [],
+      transitions: [],
+    } as never;
+
+    expect(
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+        portfolio,
+      ),
+    ).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: [`card_${sacrificeCardId}`],
+    });
+
+    (
+      portfolio as {
+        instances: Array<{
+          moduleState?: { gap?: { requesterNeedId?: string } };
+        }>;
+      }
+    ).instances[1]!.moduleState!.gap!.requesterNeedId = "coverage:wrong";
+    expect(() =>
+      selectedChoicesForDecision(
+        input,
+        resolveChoiceActionForInput(input),
+        unusedDependencies(),
+        portfolio,
       ),
     ).toThrowError("window_origin_missing");
   });
@@ -454,7 +739,7 @@ describe("selectedChoicesForDecision", () => {
     });
   });
 
-  it("resolves the real Engine access-payment choice for the exact accessed Corp card", () => {
+  it("requires a plan binding for the real Engine access-payment choice", () => {
     let state = createGameAfterSetup({
       seed: "ai-real-access-payment-choice",
     });
@@ -537,6 +822,7 @@ describe("selectedChoicesForDecision", () => {
     });
     expect(input.playerView.pendingChoice?.options[0]?.metadata).toEqual({
       creditCost: 4,
+      accessPaymentNoOpCertified: false,
     });
     expect(input.eventTail.at(-1)?.publicPayload).toMatchObject({
       actionType: "access_card",
@@ -544,18 +830,14 @@ describe("selectedChoicesForDecision", () => {
       ambushPaymentAmount: 4,
     });
 
-    const selectedChoices = selectedChoicesForDecision(
-      input,
-      resolve,
-      unusedDependencies(),
-    );
-    expect(selectedChoices).toEqual({
-      choiceId: playerView.pendingChoice?.choiceId,
+    expect(() =>
+      selectedChoicesForDecision(input, resolve, unusedDependencies()),
+    ).toThrow(expect.objectContaining({ code: "window_origin_missing" }));
+    // The Engine still permits the human player's explicit payment.
+    const selectedChoices = {
+      choiceId: playerView.pendingChoice!.choiceId,
       selectedOptionIds: ["pay"],
-    });
-    if (!selectedChoices) {
-      throw new Error("Missing selected Corp access-payment choice.");
-    }
+    };
 
     const result = applyAction(state, {
       matchId: state.matchId,
@@ -1062,9 +1344,14 @@ describe("selectedChoicesForDecision", () => {
           },
           ...["hq", "rd", "archives", "new_remote"].flatMap((serverId) => [
             {
-              id: `agenda_purge_ice_a_${serverId}_fixed`,
-              label: `ICE A: ${serverId}`,
-              value: `ice_a|${serverId}|fixed`,
+              id: `agenda_purge_ice_a_${serverId}_alternate_subtype:base`,
+              label: `ICE A: ${serverId} as wall`,
+              value: `ice_a|${serverId}|alternate_subtype:base`,
+            },
+            {
+              id: `agenda_purge_ice_a_${serverId}_alternate_subtype:alternate`,
+              label: `ICE A: ${serverId} as code gate`,
+              value: `ice_a|${serverId}|alternate_subtype:alternate`,
             },
             {
               id: `agenda_purge_ice_b_${serverId}_fixed`,
@@ -1087,7 +1374,7 @@ describe("selectedChoicesForDecision", () => {
       {
         cardId: "ice_a",
         serverId: "hq",
-        optionId: "agenda_purge_ice_a_hq_fixed",
+        optionId: "agenda_purge_ice_a_hq_alternate_subtype:base",
       },
       {
         cardId: "ice_b",
@@ -1105,7 +1392,7 @@ describe("selectedChoicesForDecision", () => {
     ).toEqual({
       choiceId: "choice_multi",
       selectedOptionIds: [
-        "agenda_purge_ice_a_hq_fixed",
+        "agenda_purge_ice_a_hq_alternate_subtype:base",
         "agenda_purge_ice_b_rd_fixed",
       ],
     });
@@ -1296,13 +1583,22 @@ describe("selectedChoicesForDecision", () => {
           visibleCard("hq_agenda_1", "agenda"),
           visibleCard("hq_agenda_2", "agenda"),
         ],
-        scoreArea: [visibleCard("downsizing_source", "agenda")],
+        scoreArea: [
+          {
+            ...visibleCard("downsizing_source", "agenda"),
+            definitionId: "onr_v1_194_corporate-downsizing",
+          },
+        ],
       },
     );
     rememberResidentScoreChoiceContinuation(
       input,
       "downsizing_source",
       "corp_scored_agenda_on_score",
+      undefined,
+      undefined,
+      undefined,
+      downsizingChoiceBinding(["hq_agenda_1"]),
     );
 
     expect(
@@ -1313,7 +1609,7 @@ describe("selectedChoicesForDecision", () => {
       ),
     ).toEqual({
       choiceId: "choice_multi",
-      selectedOptionIds: ["card_hq_agenda_1", "card_hq_agenda_2"],
+      selectedOptionIds: ["card_hq_agenda_1"],
     });
   });
 
@@ -1372,10 +1668,10 @@ describe("selectedChoicesForDecision", () => {
     });
   });
 
-  it("completes a scored-agenda free-rez payload only for the exact ICE prebound by the resident score plan", () => {
+  it("completes a scored-agenda free-rez payload only for the exact ICE variant prebound by the resident score plan", () => {
     const sourceAgendaId = "priority-requisition";
-    const targetCardId = "expensive-ice";
-    const targetDefinitionId = "onr_v1_273_triggerman";
+    const targetCardId = "credit-blocks";
+    const targetDefinitionId = "onr_proteus_017_credit-blocks";
     const sourceProfile = corpScoredAgendaFreeRezProfile(
       "onr_v1_212_priority-requisition",
     )!;
@@ -1388,9 +1684,14 @@ describe("selectedChoicesForDecision", () => {
         maxSelections: 1,
         options: [
           {
-            id: "rez_expensive_fixed",
-            label: "Expensive ICE",
-            value: `${targetCardId}|fixed`,
+            id: "rez_credit-blocks_alternate_subtype:base",
+            label: "Credit Blocks as sentry",
+            value: `${targetCardId}|alternate_subtype:base`,
+          },
+          {
+            id: "rez_credit-blocks_alternate_subtype:alternate",
+            label: "Credit Blocks as wall",
+            value: `${targetCardId}|alternate_subtype:alternate`,
           },
           {
             id: "rez_cheaper_fixed",
@@ -1416,7 +1717,7 @@ describe("selectedChoicesForDecision", () => {
                 ...visibleCard(targetCardId, "ice"),
                 definitionId: targetDefinitionId,
                 rezzed: false,
-                rezCost: 7,
+                rezCost: 6,
               },
               {
                 ...visibleCard("cheaper-ice", "ice"),
@@ -1440,6 +1741,8 @@ describe("selectedChoicesForDecision", () => {
         targetPurpose: sourceProfile.targetPurpose,
         targetCardId,
         targetDefinitionId,
+        selectedVariantId: "alternate_subtype:base",
+        selectedOptionId: "rez_credit-blocks_alternate_subtype:base",
       },
     );
 
@@ -1451,7 +1754,7 @@ describe("selectedChoicesForDecision", () => {
       ),
     ).toEqual({
       choiceId: "v162_scored_agenda_free_rez_7",
-      selectedOptionIds: ["rez_expensive_fixed"],
+      selectedOptionIds: ["rez_credit-blocks_alternate_subtype:base"],
     });
   });
 
@@ -1737,6 +2040,10 @@ describe("selectedChoicesForDecision", () => {
       input,
       "downsizing_source",
       "corp_scored_agenda_on_score",
+      undefined,
+      undefined,
+      undefined,
+      downsizingChoiceBinding(["hq_agenda_1"]),
     );
 
     expect(() =>
@@ -1754,6 +2061,10 @@ describe("selectedChoicesForDecision", () => {
       input,
       "downsizing_source",
       "corp_scored_agenda_on_score",
+      undefined,
+      undefined,
+      undefined,
+      downsizingChoiceBinding(["hq_agenda_1"]),
     );
     const action = resolveChoiceActionForInput(input);
     action.choiceRequirements![0]!.optionIds = ["different_option"];
@@ -2471,7 +2782,12 @@ function scoredAgendaCleanupInput(): AiDecisionInput {
     },
     {
       gripOrHq: [visibleCard("hq_agenda_1", "agenda")],
-      scoreArea: [visibleCard("downsizing_source", "agenda")],
+      scoreArea: [
+        {
+          ...visibleCard("downsizing_source", "agenda"),
+          definitionId: "onr_v1_194_corporate-downsizing",
+        },
+      ],
     },
   );
 }
@@ -2524,12 +2840,19 @@ function rememberResidentScoreChoiceContinuation(
     targetPurpose: "rez_best_defensive_ice";
     targetCardId: string;
     targetDefinitionId: string;
+    selectedVariantId: string;
+    selectedOptionId: string;
   },
   iceMarkChoiceBinding?: {
     sourceCapabilityId: string;
     targetPurpose: "strengthen_and_repeat_best_ice_subroutine";
     targetCardId: string;
     targetDefinitionId: string;
+  },
+  hqAgendaShuffleChoiceBinding?: {
+    sourceCapabilityId: string;
+    creditPerAgendaPoint: number;
+    selectedCardInstanceIds: string[];
   },
 ): void {
   const priorInput = structuredClone(input);
@@ -2559,6 +2882,9 @@ function rememberResidentScoreChoiceContinuation(
               : {}),
             ...(freeRezChoiceBinding ? { freeRezChoiceBinding } : {}),
             ...(iceMarkChoiceBinding ? { iceMarkChoiceBinding } : {}),
+            ...(hqAgendaShuffleChoiceBinding
+              ? { hqAgendaShuffleChoiceBinding }
+              : {}),
           },
         },
       },
@@ -2566,6 +2892,17 @@ function rememberResidentScoreChoiceContinuation(
     completionHistory: [],
     transitions: [],
   } as never);
+}
+
+function downsizingChoiceBinding(selectedCardInstanceIds: string[]) {
+  const profile = corpScoredAgendaHqShuffleProfile(
+    "onr_v1_194_corporate-downsizing",
+  )!;
+  return {
+    sourceCapabilityId: profile.sourceCapabilityId,
+    creditPerAgendaPoint: profile.creditPerAgendaPoint,
+    selectedCardInstanceIds,
+  };
 }
 
 function rememberAgendaPurgeDefenseChoice(

@@ -92,7 +92,9 @@ export function sourceDefinitionIdForAction(
   if (actionSource === "basic_action" || actionSource === "game_rule")
     return "";
   return (
-    (actionSource ? findVisibleCard(input, actionSource)?.definitionId : undefined) ??
+    (actionSource
+      ? findVisibleCard(input, actionSource)?.definitionId
+      : undefined) ??
     semanticRuntimeVisibleSourceCard(input, action)?.definitionId ??
     ""
   );

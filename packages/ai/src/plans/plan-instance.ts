@@ -162,8 +162,7 @@ export function planInstanceStateIssues(
     instance.createdAtStateVersion > instance.updatedAtStateVersion ||
     (instance.lastProductiveAtStateVersion !== undefined &&
       (instance.lastProductiveAtStateVersion < instance.createdAtStateVersion ||
-        instance.lastProductiveAtStateVersion >
-          instance.updatedAtStateVersion))
+        instance.lastProductiveAtStateVersion > instance.updatedAtStateVersion))
   ) {
     issues.push("invalid_state_version_order");
   }
@@ -191,7 +190,9 @@ function isTerminal(instance: PlanInstance): boolean {
 }
 
 function uniqueSorted(values: readonly string[]): string[] {
-  return [...new Set(values.map(normalizedIdentityToken).filter(Boolean))].sort();
+  return [
+    ...new Set(values.map(normalizedIdentityToken).filter(Boolean)),
+  ].sort();
 }
 
 function normalizedIdentityToken(value: string): string {

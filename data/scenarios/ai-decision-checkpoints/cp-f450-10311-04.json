@@ -4347,15 +4347,14 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "gain_credit"
+        "type": "start_run",
+        "targetServerId": "hq"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.economy"],
-      "acceptableCapabilities": ["gain_general_liquid_credits"],
-      "requiredAssessmentEvidence": [
-        "runner_development_funding:card:runner_onr_proteus_134_cortical-cybermodem_1"
-      ]
+      "acceptablePlanKinds": ["runner.pressure_central"],
+      "acceptableCapabilities": ["pressure_hq_access"],
+      "requiredAssessmentEvidence": ["target:hq"]
     }
   }
 }

@@ -8,8 +8,9 @@ describe("runnerContestRiskForSimulation", () => {
     expect(contestRiskWithRunnerRig([runnerCard("simple_decoder")])).toBe(
       "high",
     );
-    expect(contestRiskWithRunnerRig([runnerCard("local_icebreakerish_noise")]))
-      .toBe("low");
+    expect(
+      contestRiskWithRunnerRig([runnerCard("local_icebreakerish_noise")]),
+    ).toBe("low");
   });
 });
 

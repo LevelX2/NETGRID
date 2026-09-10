@@ -1,4 +1,4 @@
-import generatedCardSpecAiHints from "../../../data/ai/card-spec-ai-hints-generated.json";
+import { cardSpecAiHintsGeneratedData as generatedCardSpecAiHints } from "@netgrid/runtime-data/card-spec-ai-hints";
 import {
   CARD_SPEC_AI_HINT_ARTIFACT_SCHEMA_VERSION,
   CARD_SPEC_AI_HINT_COMPILER_VERSION,

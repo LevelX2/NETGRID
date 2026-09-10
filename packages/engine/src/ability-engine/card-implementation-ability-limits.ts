@@ -38,7 +38,10 @@ export function markAbilityUsageSourceUsed(
 ): CardInstanceId[] {
   if (abilityUsageSourceUsed(sourceCardIds, sourceCardId))
     return normalizeAbilityUsageSourceIds(sourceCardIds);
-  return normalizeAbilityUsageSourceIds([...(sourceCardIds ?? []), sourceCardId]);
+  return normalizeAbilityUsageSourceIds([
+    ...(sourceCardIds ?? []),
+    sourceCardId,
+  ]);
 }
 
 export function clearAbilityUsageSourceIds(): CardInstanceId[] {
@@ -59,7 +62,9 @@ export const runnerCardImplementationAbilityLimitHost: CardImplementationAbility
       if (limit.kind === "once_per_trace_per_source")
         return state.trace?.postBidLinkSourceIds;
       if (limit.kind === "one_base_link_card_per_trace_attempt")
-        return state.trace?.baseLinkSourceId ? [state.trace.baseLinkSourceId] : [];
+        return state.trace?.baseLinkSourceId
+          ? [state.trace.baseLinkSourceId]
+          : [];
       return state.runnerTurnFlags?.abilityUsedSourceIdsByLimitKey?.[
         cardImplementationAbilityLimitKey(limit)
       ];

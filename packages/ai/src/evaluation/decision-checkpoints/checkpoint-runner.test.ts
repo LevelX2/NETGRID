@@ -20,9 +20,7 @@ import {
   validateAiDecisionCheckpoint,
 } from "./checkpoint-validation";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
-import {
-  AI_RUNTIME_CHECKPOINT_SCHEMA_VERSION,
-} from "./runtime-checkpoint";
+import { AI_RUNTIME_CHECKPOINT_SCHEMA_VERSION } from "./runtime-checkpoint";
 
 describe("AI decision checkpoints", () => {
   beforeEach(() => resetResidentPlanPortfolioMemory());

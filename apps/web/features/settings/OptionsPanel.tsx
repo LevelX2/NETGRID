@@ -6,7 +6,6 @@ import {
   Keyboard,
   Moon,
   Shield,
-  SlidersHorizontal,
   Sun,
   Trash2,
   Volume2,
@@ -212,7 +211,10 @@ export function OptionsPanel({
             <h2>{t("title")}</h2>
             <p className="meta">{t("subtitle")}</p>
           </div>
-          <SlidersHorizontal size={18} />
+          <LocaleSelect
+            className="optionsHeaderLocaleSelect"
+            presentation="header"
+          />
         </div>
       ) : null}
       <div className="optionsTabs" role="tablist" aria-label={t("tabs.label")}>
@@ -296,7 +298,6 @@ export function OptionsPanel({
           </>
         ) : activeTab === "display" ? (
           <>
-            <LocaleSettings />
             <ColorSchemeSettings
               scheme={colorScheme}
               onChange={onColorScheme}
@@ -389,20 +390,6 @@ export function OptionsPanel({
   );
 }
 
-function LocaleSettings() {
-  const t = useTranslations("LocaleSettings");
-
-  return (
-    <div className="colorSchemeSettings">
-      <div>
-        <span className="settingsTitle">{t("title")}</span>
-        <span className="meta">{t("help")}</span>
-      </div>
-      <LocaleSelect />
-    </div>
-  );
-}
-
 function BuildInfoSettings() {
   const t = useTranslations("Settings.build");
   const locale = normalizeAppLocale(useLocale());
@@ -417,7 +404,7 @@ function BuildInfoSettings() {
       <div>
         <span className="settingsTitle">{t("title")}</span>
         <span className="meta">
-          {t(NETGRID_BUILD_INFO.dirty ? "developmentDirty" : "development")}
+          {t(NETGRID_BUILD_INFO.dirty ? "sourceDirty" : "sourceClean")}
         </span>
       </div>
       <dl className="buildInfoDetails">
@@ -751,38 +738,41 @@ function CardTooltipSettings({
       </div>
       <div className="cardTooltipSettingsControls">
         <CardTooltipModeSelector mode={mode} onChange={onMode} />
-        <label>
-          {t("hoverDelay")}
-          <select
-            value={hoverOpenDelayMs}
-            onChange={(event) =>
-              onHoverOpenDelayMs(
-                normalizeCardTooltipHoverDelayMs(Number(event.target.value)),
-              )
-            }
+        <div className="cardTooltipSecondaryControls">
+          <label className="cardTooltipDelayControl">
+            {t("hoverDelay")}
+            <select
+              value={hoverOpenDelayMs}
+              onChange={(event) =>
+                onHoverOpenDelayMs(
+                  normalizeCardTooltipHoverDelayMs(Number(event.target.value)),
+                )
+              }
+            >
+              <option value={300}>{t("seconds", { seconds: "0.3" })}</option>
+              <option value={500}>{t("seconds", { seconds: "0.5" })}</option>
+              <option value={750}>{t("seconds", { seconds: "0.75" })}</option>
+              <option value={1000}>{t("seconds", { seconds: "1.0" })}</option>
+              <option value={1250}>{t("seconds", { seconds: "1.25" })}</option>
+              <option value={1500}>{t("seconds", { seconds: "1.5" })}</option>
+            </select>
+          </label>
+          <label
+            className={`deckBuilderToggle cardTooltipTranslateToggle ${translateRulesToSelectedLanguage ? "checked" : ""} ${mode === "image" ? "disabled" : ""}`}
+            title={t("translateRulesHelp")}
           >
-            <option value={300}>{t("seconds", { seconds: "0.3" })}</option>
-            <option value={500}>{t("seconds", { seconds: "0.5" })}</option>
-            <option value={750}>{t("seconds", { seconds: "0.75" })}</option>
-            <option value={1000}>{t("seconds", { seconds: "1.0" })}</option>
-            <option value={1250}>{t("seconds", { seconds: "1.25" })}</option>
-            <option value={1500}>{t("seconds", { seconds: "1.5" })}</option>
-          </select>
-        </label>
+            <input
+              checked={translateRulesToSelectedLanguage}
+              disabled={mode === "image"}
+              onChange={(event) =>
+                onTranslateRulesToSelectedLanguage(event.target.checked)
+              }
+              type="checkbox"
+            />
+            <span>{t("translateRules")}</span>
+          </label>
+        </div>
       </div>
-      <label
-        className={`deckBuilderToggle ${translateRulesToSelectedLanguage ? "checked" : ""}`}
-        title={t("translateRulesHelp")}
-      >
-        <input
-          checked={translateRulesToSelectedLanguage}
-          onChange={(event) =>
-            onTranslateRulesToSelectedLanguage(event.target.checked)
-          }
-          type="checkbox"
-        />
-        {t("translateRules")}
-      </label>
     </div>
   );
 }

@@ -3,20 +3,36 @@
 import { useEffect, useState } from "react";
 
 import { CARD_SIZE_SETTINGS_STORAGE_KEY } from "../../lib/storage-keys";
-import { readLocalStorage, removeLocalStorageKey } from "../../lib/local-storage";
+import {
+  readLocalStorage,
+  removeLocalStorageKey,
+} from "../../lib/local-storage";
 import {
   CARD_SCALE_DEFAULT_PERCENT,
-  normalizeCardScalePercent
+  normalizeCardScalePercent,
 } from "../settings/settings-model";
 
 export function usePersistentCardScaleSettings() {
-  const [cardTooltipScalePercent, setCardTooltipScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
-  const [cardHandScalePercent, setCardHandScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
-  const [cardArchiveScalePercent, setCardArchiveScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
-  const [cardZoneScalePercent, setCardZoneScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
-  const [cardBoardScalePercent, setCardBoardScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
-  const [cardRigScalePercent, setCardRigScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
-  const [cardSpecialZoneScalePercent, setCardSpecialZoneScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
+  const [cardTooltipScalePercent, setCardTooltipScalePercent] = useState(
+    CARD_SCALE_DEFAULT_PERCENT,
+  );
+  const [cardHandScalePercent, setCardHandScalePercent] = useState(
+    CARD_SCALE_DEFAULT_PERCENT,
+  );
+  const [cardArchiveScalePercent, setCardArchiveScalePercent] = useState(
+    CARD_SCALE_DEFAULT_PERCENT,
+  );
+  const [cardZoneScalePercent, setCardZoneScalePercent] = useState(
+    CARD_SCALE_DEFAULT_PERCENT,
+  );
+  const [cardBoardScalePercent, setCardBoardScalePercent] = useState(
+    CARD_SCALE_DEFAULT_PERCENT,
+  );
+  const [cardRigScalePercent, setCardRigScalePercent] = useState(
+    CARD_SCALE_DEFAULT_PERCENT,
+  );
+  const [cardSpecialZoneScalePercent, setCardSpecialZoneScalePercent] =
+    useState(CARD_SCALE_DEFAULT_PERCENT);
   const [cardSizeSettingsLoaded, setCardSizeSettingsLoaded] = useState(false);
 
   useEffect(() => {
@@ -33,13 +49,27 @@ export function usePersistentCardScaleSettings() {
           specialZonePercent?: unknown;
           opponentPercent?: unknown;
         };
-        setCardTooltipScalePercent(normalizeCardScalePercent(parsed.tooltipPercent));
+        setCardTooltipScalePercent(
+          normalizeCardScalePercent(parsed.tooltipPercent),
+        );
         setCardHandScalePercent(normalizeCardScalePercent(parsed.handPercent));
-        setCardArchiveScalePercent(normalizeCardScalePercent(parsed.archivePercent ?? parsed.zonePercent));
+        setCardArchiveScalePercent(
+          normalizeCardScalePercent(
+            parsed.archivePercent ?? parsed.zonePercent,
+          ),
+        );
         setCardZoneScalePercent(normalizeCardScalePercent(parsed.zonePercent));
-        setCardBoardScalePercent(normalizeCardScalePercent(parsed.boardPercent));
-        setCardRigScalePercent(normalizeCardScalePercent(parsed.rigPercent ?? parsed.opponentPercent));
-        setCardSpecialZoneScalePercent(normalizeCardScalePercent(parsed.specialZonePercent));
+        setCardBoardScalePercent(
+          normalizeCardScalePercent(parsed.boardPercent),
+        );
+        setCardRigScalePercent(
+          normalizeCardScalePercent(
+            parsed.rigPercent ?? parsed.opponentPercent,
+          ),
+        );
+        setCardSpecialZoneScalePercent(
+          normalizeCardScalePercent(parsed.specialZonePercent),
+        );
       } catch {
         removeLocalStorageKey(CARD_SIZE_SETTINGS_STORAGE_KEY);
       }
@@ -58,10 +88,19 @@ export function usePersistentCardScaleSettings() {
         zonePercent: cardZoneScalePercent,
         boardPercent: cardBoardScalePercent,
         rigPercent: cardRigScalePercent,
-        specialZonePercent: cardSpecialZoneScalePercent
-      })
+        specialZonePercent: cardSpecialZoneScalePercent,
+      }),
     );
-  }, [cardSizeSettingsLoaded, cardTooltipScalePercent, cardHandScalePercent, cardArchiveScalePercent, cardZoneScalePercent, cardBoardScalePercent, cardRigScalePercent, cardSpecialZoneScalePercent]);
+  }, [
+    cardSizeSettingsLoaded,
+    cardTooltipScalePercent,
+    cardHandScalePercent,
+    cardArchiveScalePercent,
+    cardZoneScalePercent,
+    cardBoardScalePercent,
+    cardRigScalePercent,
+    cardSpecialZoneScalePercent,
+  ]);
 
   return {
     cardTooltipScalePercent,
@@ -77,6 +116,6 @@ export function usePersistentCardScaleSettings() {
     setCardZoneScalePercent,
     setCardBoardScalePercent,
     setCardRigScalePercent,
-    setCardSpecialZoneScalePercent
+    setCardSpecialZoneScalePercent,
   };
 }

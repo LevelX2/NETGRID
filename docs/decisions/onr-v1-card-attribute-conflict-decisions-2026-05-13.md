@@ -11,11 +11,11 @@ Maschinenlesbarer Begleiter: `data/rules/onr-v1-card-attribute-conflict-decision
 
 ## Entscheidungen
 
-| Karte | Entscheidung | Wirkung |
-| --- | --- | --- |
-| `Hostile Takeover` (`onr_v1_203_hostile-takeover`) | On-score-Gewinn ist `Gain 5`. | Bestehender Engine-/Catalog-Wert bleibt korrekt; abweichendes `Gain 6` ist verworfen. |
+| Karte                                                            | Entscheidung                                   | Wirkung                                                                                                       |
+| ---------------------------------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `Hostile Takeover` (`onr_v1_203_hostile-takeover`)               | On-score-Gewinn ist `Gain 5`.                  | Bestehender Engine-/Catalog-Wert bleibt korrekt; abweichendes `Gain 6` ist verworfen.                         |
 | `Private Cybernet Police` (`onr_v1_213_private-cybernet-police`) | Aktive scored-agenda Faehigkeit ist `Trace 5`. | Bestehender Engine-/Catalog-Wert bleibt korrekt; V1.9.3-Artefakte mit pauschalem `Trace 7` werden korrigiert. |
-| `Data Wall 2.0` (`onr_v1_238_data-wall-2-0`) | Rez-Kosten `2`, Staerke `1`. | Bestehender Engine-/Catalog-Wert bleibt korrekt; aeltere Review-Angabe `Staerke 3` ist verworfen. |
+| `Data Wall 2.0` (`onr_v1_238_data-wall-2-0`)                     | Rez-Kosten `2`, Staerke `1`.                   | Bestehender Engine-/Catalog-Wert bleibt korrekt; aeltere Review-Angabe `Staerke 3` ist verworfen.             |
 
 ## Gate-Hinweis
 

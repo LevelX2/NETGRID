@@ -23,10 +23,16 @@ export function runnerSafeAccessDecision(
     `pilot_scope:${RUNNER_SAFE_ACCESS_PILOT_MODE}`,
     `frame_side:${frame.side}`,
     `action_type:${action.type}`,
-    ...(typeof targetServerId === "string" ? [`target_server:${targetServerId}`] : []),
+    ...(typeof targetServerId === "string"
+      ? [`target_server:${targetServerId}`]
+      : []),
   ];
   if (frame.side !== "runner") {
-    return block(RUNNER_SAFE_ACCESS_PILOT_MODE, "runner_safe_access_wrong_side", evidence);
+    return block(
+      RUNNER_SAFE_ACCESS_PILOT_MODE,
+      "runner_safe_access_wrong_side",
+      evidence,
+    );
   }
   if (action.type !== "start_run") {
     return block(
@@ -36,14 +42,23 @@ export function runnerSafeAccessDecision(
     );
   }
   if (typeof targetServerId !== "string") {
-    return block(RUNNER_SAFE_ACCESS_PILOT_MODE, "runner_safe_access_missing_target", evidence);
+    return block(
+      RUNNER_SAFE_ACCESS_PILOT_MODE,
+      "runner_safe_access_missing_target",
+      evidence,
+    );
   }
   const matchingRunTarget = frame.runner?.runTargets?.find(
     (target) =>
-      target.actionId === top.actionId && target.targetServerId === targetServerId,
+      target.actionId === top.actionId &&
+      target.targetServerId === targetServerId,
   );
   if (!matchingRunTarget) {
-    return block(RUNNER_SAFE_ACCESS_PILOT_MODE, "runner_safe_access_target_missing", evidence);
+    return block(
+      RUNNER_SAFE_ACCESS_PILOT_MODE,
+      "runner_safe_access_target_missing",
+      evidence,
+    );
   }
   const candidate = frame.actionCandidates.find(
     (candidate) => candidate.actionId === action.actionId,
@@ -98,7 +113,9 @@ export function runnerSafeAccessDecision(
   );
 }
 
-function runnerSafeAccessBlockReason(target: RunnerRunTarget): string | undefined {
+function runnerSafeAccessBlockReason(
+  target: RunnerRunTarget,
+): string | undefined {
   if (target.targetKind !== "hq" && target.targetKind !== "rd") {
     return "runner_safe_access_non_central_target";
   }

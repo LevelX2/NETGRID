@@ -32,7 +32,10 @@ import {
   scoreAgenda,
   type ScoredAgendaFlowHost,
 } from "../corp/scored-agenda-flow";
-import { installCard as executeInstallCard, type InstallCardHost } from "../install/install-card";
+import {
+  installCard as executeInstallCard,
+  type InstallCardHost,
+} from "../install/install-card";
 import {
   handlePlayCardExecution,
   type PlayCardExecutionHost,
@@ -112,10 +115,14 @@ export type PerformActionExecutionDependencies = {
     turnBasicExecutionHost: (state: GameState) => TurnBasicExecutionHost;
   };
   economy: {
-    creditEconomyExecutionHost: (state: GameState) => CreditEconomyExecutionHost;
+    creditEconomyExecutionHost: (
+      state: GameState,
+    ) => CreditEconomyExecutionHost;
   };
   abilities: {
-    triggerAbilityExecutionHost: (state: GameState) => TriggerAbilityExecutionHost;
+    triggerAbilityExecutionHost: (
+      state: GameState,
+    ) => TriggerAbilityExecutionHost;
   };
   cardImplementation: {
     activatedCardImplementationExecutionHost: (
@@ -214,11 +221,17 @@ export function createPerformActionExecutorFromDependencies(
     },
     play: {
       handlePlayCardExecution: (legalAction) =>
-        handlePlayCardExecution(dependencies.play.playCardExecutionHost(state), legalAction),
+        handlePlayCardExecution(
+          dependencies.play.playCardExecutionHost(state),
+          legalAction,
+        ),
     },
     install: {
       executeInstallCard: (legalAction) =>
-        executeInstallCard(dependencies.install.installCardHost(state), legalAction),
+        executeInstallCard(
+          dependencies.install.installCardHost(state),
+          legalAction,
+        ),
     },
     board: {
       handleBoardStateActionExecution: (legalAction) =>
@@ -250,7 +263,8 @@ export function createPerformActionExecutorFromDependencies(
           dependencies.run.runnerBreakerActionExecutionHost(state),
           legalAction,
         ),
-      continueRun: (legalAction) => dependencies.run.continueRun(state, legalAction),
+      continueRun: (legalAction) =>
+        dependencies.run.continueRun(state, legalAction),
     },
     rez: {
       handleRezActionExecution: (legalAction) =>
@@ -261,7 +275,10 @@ export function createPerformActionExecutorFromDependencies(
     },
     access: {
       handleAccessExecution: (legalAction) =>
-        handleAccessExecution(dependencies.access.accessFlowHost(state), legalAction),
+        handleAccessExecution(
+          dependencies.access.accessFlowHost(state),
+          legalAction,
+        ),
     },
     choices: {
       resolvePendingChoice: (legalAction, playerAction) =>
@@ -283,7 +300,9 @@ export function performAction(
 
   switch (legalAction.type) {
     case "activated_card_ability":
-      host.cardImplementation.handleActivatedCardImplementationAction(legalAction);
+      host.cardImplementation.handleActivatedCardImplementationAction(
+        legalAction,
+      );
       return;
     case "gain_credit":
       host.economy.handleCreditEconomyExecution(legalAction);

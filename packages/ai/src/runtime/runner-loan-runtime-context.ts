@@ -76,12 +76,11 @@ export function runnerLoanRuntimeContext<
     input,
     deckCapabilities,
   );
-  const handDevelopmentEvaluations =
-    dependencies.handDevelopmentEvaluations({
-      input,
-      deckCapabilities,
-      strategicIntent,
-    });
+  const handDevelopmentEvaluations = dependencies.handDevelopmentEvaluations({
+    input,
+    deckCapabilities,
+    strategicIntent,
+  });
   const economyPosture = dependencies.economyPosture({
     input,
     deckCapabilities,

@@ -58,15 +58,19 @@ Bei roten fokussierten Tests wird eng am betroffenen Paket debuggt. Wenn ein Kon
 Ziel: Scope, Regeln, Paketfolge und Checks versionieren.
 
 Kernartefakte:
+
 - `docs/architecture/card-rules/project-venice-action-timing-process-2026-07-09.md`
 
 Checks:
+
 - `git diff --check`
 
 Done-Gate:
+
 - Prozessartefakt ist committed.
 
 Commit-Message:
+
 - `docs: add project venice action timing process`
 
 ### PV-2 Engine-Timing
@@ -74,18 +78,22 @@ Commit-Message:
 Ziel: Project Venice gibt die berechneten Extra-Aktionen beim Scoren sofort und in künftigen Corp-Zügen.
 
 Kernartefakte:
+
 - `packages/engine/src/game/corp/scored-agenda/overadvance-score-effects.ts`
 - `packages/engine/src/index-tests/proteus/action-economy-debt-suite.test.ts`
 
 Checks:
+
 - Fokussierter Vitest für Project Venice
 - `git diff --check`
 
 Done-Gate:
+
 - Test deckt sofortige aktuelle Aktion und künftigen Turn-Bonus ab.
 - Bestehender Project-Zurich-Vertrag bleibt unberührt.
 
 Commit-Message:
+
 - `fix(engine): grant project venice actions immediately`
 
 ### PV-3 Score-Area-Badge
@@ -93,20 +101,24 @@ Commit-Message:
 Ziel: Project Venice nutzt keinen generischen Mark-Counter-Badge, sondern einen verständlichen, tiefer positionierten Badge für den gespeicherten Aktionswert.
 
 Kernartefakte:
+
 - `packages/engine/src/game/view/card-view.ts`
 - `apps/web/features/cards/CardBadges.tsx`
 - `apps/web/app/globals.css`
 - relevante UI-Tests, falls vorhanden
 
 Checks:
+
 - Fokussierte Web-/Engine-Tests für CardView oder Badge-Rendering
 - `git diff --check`
 
 Done-Gate:
+
 - Badge zeigt Project-Venice-spezifisch den Aktionswert, z. B. `+1 Aktion/Zug`.
 - Badge-Position verdeckt nicht die oberen Zahlen und orientiert sich an Corporate Retreat.
 
 Commit-Message:
+
 - `fix(web): label project venice action counter`
 
 ### PV-4 Finale Integration
@@ -114,16 +126,19 @@ Commit-Message:
 Ziel: Finale Checks, lokaler Merge nach `main`, Worktree entfernen.
 
 Checks:
+
 - relevante fokussierte Engine- und Web-Tests
 - `git diff --check`
 - `git status --short`
 
 Done-Gate:
+
 - Arbeitsbranch ist sauber.
 - Branch ist lokal nach `main` gemerged.
 - Hauptworkspace zeigt nur vorher bekannte fremde ungetrackte Artefakte.
 
 Commit-Message:
+
 - kein zusätzlicher Commit, sofern PV-2/PV-3 vollständig sind.
 
 ## Verifikationsregeln

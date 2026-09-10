@@ -9545,6 +9545,7 @@
                 "scope": "installed_card",
                 "timing": "action",
                 "target": "program",
+                "installCost": "normal",
                 "finite": true
               }
             ],
@@ -9614,6 +9615,7 @@
             "scope": "installed_card",
             "timing": "action",
             "target": "program",
+            "installCost": "normal",
             "finite": true
           }
         ],

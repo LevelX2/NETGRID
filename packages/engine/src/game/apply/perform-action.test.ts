@@ -129,9 +129,9 @@ function host(
         >(calls.board),
       },
       corp: {
-        scoreAgenda: spyAs<
-          PerformActionExecutionHost["corp"]["scoreAgenda"]
-        >(calls.scoreAgenda),
+        scoreAgenda: spyAs<PerformActionExecutionHost["corp"]["scoreAgenda"]>(
+          calls.scoreAgenda,
+        ),
       },
       run: {
         handleStartRunActionExecution: spyAs<
@@ -254,17 +254,19 @@ describe("perform-action dispatcher", () => {
     expect(fallback.calls.continueRun).toHaveBeenCalledWith(action);
   });
 
-  it.each(["access_card", "steal_agenda", "trash_accessed_card", "decline_trash"] as const)(
-    "preserves invalid access error for %s",
-    (type) => {
-      const { host: performHost } = host({ accessHandled: false });
-      const action = legalAction(type);
+  it.each([
+    "access_card",
+    "steal_agenda",
+    "trash_accessed_card",
+    "decline_trash",
+  ] as const)("preserves invalid access error for %s", (type) => {
+    const { host: performHost } = host({ accessHandled: false });
+    const action = legalAction(type);
 
-      expect(() =>
-        performAction(performHost, action, playerAction(action.actionId)),
-      ).toThrow("Die Access-Aktion ist nicht gueltig.");
-    },
-  );
+    expect(() =>
+      performAction(performHost, action, playerAction(action.actionId)),
+    ).toThrow("Die Access-Aktion ist nicht gueltig.");
+  });
 
   it("delegates resolve_choice with player action", () => {
     const { host: performHost, calls } = host();

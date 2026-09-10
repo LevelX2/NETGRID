@@ -80,6 +80,54 @@ describe("quoteRunnerBreakerUpgradeEconomics", () => {
     expect(oneRun.rejectionReasons).toContain("insufficient_run_horizon");
     expect(noMemory.rejectionReasons).toContain("memory_unavailable");
   });
+
+  it("admits exact memory support only when the combined route still amortizes", () => {
+    expect(
+      quoteRunnerBreakerUpgradeEconomics({
+        ...baseQuote(),
+        currentPathCost: 10,
+        projectedPathCost: 2,
+        memoryAvailable: 0,
+        memorySupportAdditionalMu: 1,
+        memorySupportCreditCost: 1,
+        memorySupportActionClicks: 1,
+        currentCredits: 22,
+      }),
+    ).toMatchObject({
+      schemaVersion: "runner-breaker-upgrade-economic-quote-v2",
+      admitted: true,
+      rejectionReasons: [],
+      memoryAvailable: 0,
+      memorySupportAdditionalMu: 1,
+      projectedMemoryAvailable: 1,
+      memorySupportCreditCost: 1,
+      memorySupportActionClicks: 1,
+      upfrontCreditCost: 6,
+      totalInvestment: 10,
+      netValueBeforeSafetyMargin: 6,
+    });
+  });
+
+  it("rejects expensive memory support when its combined reserve and amortization fail", () => {
+    expect(
+      quoteRunnerBreakerUpgradeEconomics({
+        ...baseQuote(),
+        memoryAvailable: 0,
+        memorySupportAdditionalMu: 3,
+        memorySupportCreditCost: 5,
+        memorySupportActionClicks: 1,
+        currentCredits: 18,
+      }),
+    ).toMatchObject({
+      admitted: false,
+      projectedMemoryAvailable: 3,
+      memorySupportCreditCost: 5,
+      rejectionReasons: expect.arrayContaining([
+        "reserve_breached",
+        "amortization_margin_not_met",
+      ]),
+    });
+  });
 });
 
 function baseQuote() {

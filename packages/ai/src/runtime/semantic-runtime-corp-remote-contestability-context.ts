@@ -14,10 +14,7 @@ export type SemanticRuntimeCorpRemoteContestabilityContextDependencies = {
     input: AiDecisionInput,
     serverId: string | undefined,
   ) => VisibleCorpServer | undefined;
-  actionIsScoreLine: (
-    input: AiDecisionInput,
-    action: LegalAction,
-  ) => boolean;
+  actionIsScoreLine: (input: AiDecisionInput, action: LegalAction) => boolean;
   advanceCompletesScore: (
     input: AiDecisionInput,
     action: LegalAction,

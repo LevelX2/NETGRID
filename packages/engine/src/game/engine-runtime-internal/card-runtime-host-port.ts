@@ -115,7 +115,9 @@ export type CardRuntimeHostPort = {
         side: Side,
         sourceCardId: CardInstanceId,
         definition: CardDefinition,
-        timing: ActivatedCardAbilityImplementation["timing"],
+        timing:
+          | ActivatedCardAbilityImplementation["timing"]
+          | readonly ActivatedCardAbilityImplementation["timing"][],
       ) => void;
     };
   };

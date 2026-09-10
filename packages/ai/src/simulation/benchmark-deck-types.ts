@@ -1,8 +1,4 @@
-import type {
-  DeckDefinition,
-  DeckPublicMetadata,
-  Side,
-} from "@netgrid/shared";
+import type { DeckDefinition, DeckPublicMetadata, Side } from "@netgrid/shared";
 
 export type AiBenchmarkDeckSlotType =
   | "smoke"

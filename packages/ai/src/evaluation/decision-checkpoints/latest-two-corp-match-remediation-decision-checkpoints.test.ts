@@ -56,7 +56,7 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
     expectCheckpointToPass(checkpoint);
   });
 
-  it("does not force central support when no agenda can use the remote", () => {
+  it("does not force central support or a blind draw when no agenda can use the remote", () => {
     const checkpoint = mutateFixture(keepScoreRemoteOpenJson, (fixture) => {
       const state = fixture.engine.testOnlyGameState;
       const agendas = state.corp.hq.filter((cardId) =>
@@ -77,12 +77,12 @@ describe("latest two Corp matches remediation decision checkpoints", () => {
       fixture.source.kind = "synthetic_companion";
       fixture.source.findingId = "LATEST-CORP-A2-NO-AGENDA-CONTROL";
       fixture.expectation = {
-        acceptableActions: [{ type: "draw_card" }],
+        acceptableActions: [{ type: "gain_credit" }],
         planExecution: {
-          acceptablePlanKinds: ["corp.hand_and_agenda_management"],
-          acceptableCapabilities: ["draw_for_plan"],
+          acceptablePlanKinds: ["corp.economy"],
+          acceptableCapabilities: ["develop_or_convert_corp_economy"],
           requiredAssessmentEvidence: [
-            "corp_score_campaign_missing_agenda_material",
+            "corp_non_strategic_residual_capacity_use",
           ],
         },
       };

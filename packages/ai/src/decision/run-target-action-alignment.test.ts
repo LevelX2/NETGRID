@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
-import type { SemanticDecisionFrame, TacticalGoalLike } from "./semantic-decision-frame";
+import type {
+  SemanticDecisionFrame,
+  TacticalGoalLike,
+} from "./semantic-decision-frame";
 import { buildSemanticShadowDecision } from "./semantic-shadow-decision";
 import { alignRunTargetAction } from "./run-target-action-alignment";
 
@@ -201,7 +204,8 @@ describe("run target action alignment", () => {
       ]),
     );
     expect(
-      trace.rankedActions.find((action) => action.actionId === "run-rd")?.components,
+      trace.rankedActions.find((action) => action.actionId === "run-rd")
+        ?.components,
     ).not.toEqual(
       expect.arrayContaining([
         expect.objectContaining({ component: "opportunity" }),
@@ -216,7 +220,12 @@ describe("run target action alignment", () => {
           runCandidate("run-remote-1", "remote_1"),
           runCandidate("run-hq", "hq"),
         ],
-        goals: [goal("runner.neutral.remote_contest_if_score_threat", "remote_contest")],
+        goals: [
+          goal(
+            "runner.neutral.remote_contest_if_score_threat",
+            "remote_contest",
+          ),
+        ],
         runTargets: [
           {
             targetServerId: "remote_1",

@@ -9,12 +9,20 @@
   },
   "localDeckLibrary": {
     "counts": {
-      "standard": 48,
+      "standard": 51,
       "internal_ai": 2,
       "retire": 1,
       "test_fixture": 10
     },
     "entries": [
+      {
+        "sourceDeckId": "local_corp_express_shutdown",
+        "name": "Express Shutdown",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "user_requested_flatline_counter",
+        "standardDeckId": "standard_corp_express_shutdown"
+      },
       {
         "sourceDeckId": "local_corp_cheap_bag_tricks",
         "name": "Cheap Bag of Tricks",
@@ -461,6 +469,22 @@
         "classification": "standard",
         "reason": "ai_playtest_derived",
         "standardDeckId": "standard_corp_dead_channel"
+      },
+      {
+        "sourceDeckId": "local_corp_counter_shell",
+        "name": "Counter Shell",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_corp_counter_shell"
+      },
+      {
+        "sourceDeckId": "local_corp_lucidrine_lockdown",
+        "name": "Lucidrine Lockdown",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "curated_user_deck",
+        "standardDeckId": "standard_corp_lucidrine_lockdown"
       },
       {
         "sourceDeckId": "local_runner_unused_resource_cybernetics_lab",

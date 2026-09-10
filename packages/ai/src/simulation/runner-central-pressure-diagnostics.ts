@@ -84,14 +84,14 @@ export function createRunnerCentralPressureDiagnosticsForSimulationAction(
     const eventGoodTarget = eventTargets.some((target) =>
       centralPressureTargetIsGoodForMetrics(input, target),
     );
-    const interfaceInstallOpportunity = input.legalActions.some(
-      (candidate) => {
-        if (candidate.type !== "install_card") return false;
-        const definitionId =
-          dependencies.sourceDefinitionIdForSimulationAction(input, candidate);
-        return isCentralPressureCardForMetrics(definitionId, true);
-      },
-    );
+    const interfaceInstallOpportunity = input.legalActions.some((candidate) => {
+      if (candidate.type !== "install_card") return false;
+      const definitionId = dependencies.sourceDefinitionIdForSimulationAction(
+        input,
+        candidate,
+      );
+      return isCentralPressureCardForMetrics(definitionId, true);
+    });
     const interfaceInstallTaken =
       action.type === "install_card" &&
       isCentralPressureCardForMetrics(sourceDefinitionId, true);
@@ -215,7 +215,9 @@ export function createRunnerCentralPressureDiagnosticsForSimulationAction(
       ...(repeatWindow && !repeatWithFreshValue
         ? { runnerRepeatedCentralRunWithoutFreshValue: true }
         : {}),
-      ...(repeatedLowValue ? { runnerCentralRunStalePenaltyApplied: true } : {}),
+      ...(repeatedLowValue
+        ? { runnerCentralRunStalePenaltyApplied: true }
+        : {}),
       ...(streakWithoutValue > 0
         ? { runnerCentralRunStreakWithoutValue: streakWithoutValue }
         : {}),

@@ -29,8 +29,7 @@ describe("selfplay cycle 100 decision checkpoints", () => {
       capture.input.playerView.servers
         .find((server) => server.id === "rd")
         ?.ice.find(
-          (ice) =>
-            ice.instanceId === "corp_onr_proteus_014_chihuahua_2",
+          (ice) => ice.instanceId === "corp_onr_proteus_014_chihuahua_2",
         )?.effectivePostRezRunQuote,
     ).toMatchObject({
       complete: false,
@@ -79,8 +78,7 @@ describe("selfplay cycle 100 decision checkpoints", () => {
     });
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId: "plan:runner.pressure_central:central%3Aarchives",
-      leafExecutorInstanceId:
-        "plan:runner.pressure_central:central%3Aarchives",
+      leafExecutorInstanceId: "plan:runner.pressure_central:central%3Aarchives",
       route: {
         actionId: selectedAction?.actionId,
         actionType: "start_run",

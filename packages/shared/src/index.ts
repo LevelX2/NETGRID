@@ -1,4 +1,16 @@
 export {
+  CORP_RESTRICTED_CREDIT_ROUTE_QUOTE_VERSION,
+  type CorpRestrictedCreditConsumer,
+  type CorpRestrictedCreditRouteRequest,
+  type CorpRestrictedCreditRouteQuote,
+  type CorpRestrictedCreditRouteResult,
+  type CorpRestrictedCreditBankQuote,
+} from "./corp-restricted-credit-route";
+import type {
+  CorpRestrictedCreditRouteQuote,
+  CorpRestrictedCreditBankQuote,
+} from "./corp-restricted-credit-route";
+export {
   ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
   type AbilityPayloadDiscriminatorField,
   type AbilityPayloadDiscriminators,
@@ -71,9 +83,13 @@ export {
 export { DEMO_DECKS } from "./demo-decks";
 export { ORIGINALSET_DEFAULT_DECKS } from "./originalset-default-decks";
 export {
+  RUNTIME_PROFILE_ENVIRONMENT_VARIABLE,
   TEST_CARD_ENVIRONMENT_VARIABLE,
   TEST_CARD_SET_ID,
+  resolveTestCardAvailability,
+  runtimeProfileFromEnvironment,
   testCardsEnabledFromEnvironment,
+  type RuntimeProfile,
 } from "./test-card-availability";
 export { CURRENT_RULES_BASELINE, type RulesBaseline } from "./baselines";
 import type { RulesBaseline } from "./baselines";
@@ -897,6 +913,7 @@ export type ChoiceKind =
   | "confirm";
 
 export type ChoicePresentationKey =
+  | "delayed_install_destination"
   | "access_ability"
   | "generic_bid_amount"
   | "generic_confirm"
@@ -996,6 +1013,8 @@ export type ChoiceOption = {
   selectable?: boolean;
   metadata?: {
     creditCost?: number;
+    /** Corp-private certificate: this exact paid access effect has no target or other effect. False makes no optimality claim. */
+    accessPaymentNoOpCertified?: boolean;
     amount?: number;
     secondaryAmount?: number;
     cardTitle?: string;
@@ -1008,6 +1027,9 @@ export type ChoiceOption = {
     paymentSources?: Array<{ title?: string; amount: number }>;
     postBidTraceLinkDelta?: number;
     delayedInstallRemainingCounters?: number;
+    /** Corp-private facts on an exact temporary HQ-ICE encounter option. */
+    temporaryEncounterSubroutineTypes?: SubroutineType[];
+    temporaryEncounterHasAdditionalMechanics?: boolean;
     targetServerId?: ServerId;
     targetIcePosition?: number;
     sourceCardInstanceId?: CardInstanceId;
@@ -1527,6 +1549,9 @@ export type RunState = {
     | { kind: "server"; serverId: Exclude<ServerId, "new_remote"> };
   approachedIceId?: CardInstanceId;
   encounteredIceId?: CardInstanceId;
+  /** Corp passed the paid encounter window for this exact next action state. */
+  corpEncounterPassStateVersion?: number;
+  pendingEncounterEntryIceId?: CardInstanceId;
   encounteredBlackIceCount?: number;
   rezzedBlackOpsCount?: number;
   liberatedBlackOpsAgendaCount?: number;
@@ -2617,8 +2642,14 @@ export type CorpRootRezCreditOutcomeQuote = {
 export const RUNNER_DRAW_PROJECTION_SCHEMA_VERSION =
   "runner-draw-projection-v1" as const;
 
+export const CORP_ZONE_TRANSITION_PROJECTION_SCHEMA_VERSION =
+  "corp-zone-transition-projection-v1" as const;
+
 export const RUNNER_AGENDA_POINT_TRANSFER_QUOTE_SCHEMA_VERSION =
   "runner-agenda-point-transfer-quote-v1" as const;
+
+export const RUNNER_FORT_ICE_TRASH_QUOTE_SCHEMA_VERSION =
+  "runner-fort-ice-trash-quote-v1" as const;
 
 /**
  * Actor-private planning projection for one currently legal basic Runner draw.
@@ -2631,6 +2662,37 @@ export type RunnerDrawProjection = {
   projectedPostDrawDispositionCount: number;
   projectedNetHandDelta: number;
   visibleDrawTaxSourceCount: number;
+};
+
+/**
+ * Actor-private, Engine-certified projection for one currently legal Corp
+ * action whose draw and hidden-zone movements form one strategic effect.
+ * Counts describe the complete action relative to the state in which the
+ * LegalAction was quoted; no hidden card identity is exposed.
+ */
+export type CorpZoneTransitionProjection = {
+  schemaVersion: typeof CORP_ZONE_TRANSITION_PROJECTION_SCHEMA_VERSION;
+  complete: boolean;
+  sourceCardInstanceId: CardInstanceId;
+  sourceDefinitionId: CardDefinitionId;
+  stateVersion: number;
+  timingPoint: TimingPointId;
+  actionId: string;
+  kind:
+    | "draw_then_shuffle_one_hq_into_rd"
+    | "shuffle_hq_archives_into_rd_then_draw"
+    | "shuffle_hq_into_rd_then_draw_same_count";
+  resolution: "guaranteed" | "corp_deckout_before_completion";
+  grossDrawCount: number;
+  sourceHqConsumptionCount: number;
+  postDrawDispositionCount: number;
+  hqCardsRecycledBeforeDrawCount: number;
+  archivesCardsRecycledBeforeDrawCount: number;
+  rdCardsReplenishedAfterDrawCount: number;
+  netHqDelta: number;
+  netRdDelta: number;
+  netRdConsumption: number;
+  visibleDrawReplacementSourceCount: number;
 };
 
 export type LegalActionPayload = Record<string, string | number | boolean> &
@@ -2656,6 +2718,25 @@ export type LegalActionPayload = Record<string, string | number | boolean> &
     projectedPostDrawDispositionCount?: number;
     projectedNetHandDelta?: number;
     visibleDrawTaxSourceCount?: number;
+    corpZoneTransitionProjectionSchemaVersion?: typeof CORP_ZONE_TRANSITION_PROJECTION_SCHEMA_VERSION;
+    corpZoneTransitionProjectionComplete?: boolean;
+    corpZoneTransitionProjectionSourceCardInstanceId?: CardInstanceId;
+    corpZoneTransitionProjectionSourceDefinitionId?: CardDefinitionId;
+    corpZoneTransitionProjectionStateVersion?: number;
+    corpZoneTransitionProjectionTimingPoint?: TimingPointId;
+    corpZoneTransitionProjectionActionId?: string;
+    corpZoneTransitionProjectionKind?: CorpZoneTransitionProjection["kind"];
+    corpZoneTransitionProjectionResolution?: CorpZoneTransitionProjection["resolution"];
+    corpZoneTransitionProjectionGrossDrawCount?: number;
+    corpZoneTransitionProjectionSourceHqConsumptionCount?: number;
+    corpZoneTransitionProjectionPostDrawDispositionCount?: number;
+    corpZoneTransitionProjectionHqCardsRecycledBeforeDrawCount?: number;
+    corpZoneTransitionProjectionArchivesCardsRecycledBeforeDrawCount?: number;
+    corpZoneTransitionProjectionRdCardsReplenishedAfterDrawCount?: number;
+    corpZoneTransitionProjectionNetHqDelta?: number;
+    corpZoneTransitionProjectionNetRdDelta?: number;
+    corpZoneTransitionProjectionNetRdConsumption?: number;
+    corpZoneTransitionProjectionVisibleDrawReplacementSourceCount?: number;
     /**
      * Engine-certified actor-private quote for an action that transfers the
      * Runner's currently eligible agenda points to the Corp.
@@ -2665,6 +2746,11 @@ export type LegalActionPayload = Record<string, string | number | boolean> &
     runnerAgendaPointTransferQuoteStateVersion?: number;
     runnerAgendaPointsTransferredToCorp?: number;
     corpAgendaPointsAfterRunnerTransfer?: number;
+    runnerFortIceTrashQuoteSchemaVersion?: typeof RUNNER_FORT_ICE_TRASH_QUOTE_SCHEMA_VERSION;
+    runnerFortIceTrashQuoteStateVersion?: number;
+    runnerFortIceTrashServerId?: ServerId;
+    runnerFortIceTrashRezzedIceCount?: number;
+    runnerFortIceTrashTagsAdded?: number;
   };
 
 export type PlayerAction = {
@@ -3163,6 +3249,11 @@ export type VisibleCorpIcePostRezRunQuote =
       expiresAtStateVersion: number;
       complete: true;
       effectiveRunQuote: VisibleEffectiveIceRunQuote;
+      /** One optional paid ETR at the next encounter; never a free rez effect. */
+      paidEncounterDefense?: {
+        creditCost: number;
+        exchange: VisibleCorpIceRezResourceExchangeQuote;
+      };
     };
 
 export type VisibleMandatoryCorpRezCosts = {
@@ -3348,6 +3439,43 @@ export type VisibleCorpIceRezResourceExchangeQuote =
 export type VisibleCorpIceRezActionResourceExchangeQuote = {
   actionId: string;
   quote: VisibleCorpIceRezResourceExchangeQuote;
+};
+
+/** Current pass-toll exposure; payment is conditional on continuing the run. */
+export type VisibleCorpTraceIceRezQuote = {
+  actionId: string;
+  sourceCardInstanceId: CardInstanceId;
+  targetServerId: Exclude<ServerId, "new_remote">;
+  stateVersion: number;
+  runId: string;
+  rezCredits: number;
+  variableValue: number;
+  corpBid: 0;
+  corpTraceStrength: number;
+  maximumRunnerTraceStrength: number;
+  runnerCanBreak: boolean;
+  guaranteedRunEnd: boolean;
+};
+
+export type VisibleCorpPassTaxRezQuote = {
+  actionId: string;
+  sourceCardInstanceId: CardInstanceId;
+  targetServerId: Exclude<ServerId, "new_remote">;
+  stateVersion: number;
+  runId: string;
+  rezCredits: number;
+  creditsPerPass: number;
+  remainingPasses: number;
+  remainingPassCredits: number;
+  runnerSpendableCredits: number;
+};
+
+/** Exact legal paid ETR addition and the visible response to its new subroutine. */
+export type VisibleCorpEncounterDefenseQuote = {
+  actionId: string;
+  creditCost: number;
+  existingUnbrokenEndTheRunCount: number;
+  exchange: VisibleCorpIceRezResourceExchangeQuote;
 };
 
 /**
@@ -3817,6 +3945,8 @@ export type VisibleCard = {
   playCost?: PlayCostDefinition;
   installCost?: number;
   memoryCost?: number;
+  /** Public current installation role; the printed card type and owner remain unchanged. */
+  installedAsRunnerProgram?: CardInstance["installedAsRunnerProgram"];
   memoryLimitBonus?: number;
   maxHandSizeBonus?: number;
   rezCost?: number;
@@ -3861,17 +3991,28 @@ export type VisibleCard = {
   effectivePostRezRunQuote?: VisibleCorpIcePostRezRunQuote;
   effectiveRezCostQuote?: VisibleCorpRezCostQuote;
   effectiveRezResourceExchangeQuote?: VisibleCorpIceRezResourceExchangeQuote;
+  currentEncounterDefenseQuotes?: VisibleCorpEncounterDefenseQuote[];
   effectiveRezActionResourceExchangeQuotes?: VisibleCorpIceRezActionResourceExchangeQuote[];
+  /** Corp-only, exact legal root rez during the source fort's current run. */
+  currentPassTaxRezQuote?: VisibleCorpPassTaxRezQuote;
+  /** Corp-private exact current trace ICE rez options, with visible responses. */
+  currentTraceIceRezQuotes?: VisibleCorpTraceIceRezQuote[];
   /** Present only for the Corp's installed agendas. */
   scoreContinuationQuote?: VisibleCorpScoreContinuationQuote;
   /** Present only in the Corp's own HQ or on an own installed root card. */
   counterBankPreparationQuote?: VisibleCorpCounterBankPreparationQuote;
+  restrictedCreditBankQuote?: CorpRestrictedCreditBankQuote;
   /** Present only when the installed agenda identity is known to the Runner. */
   effectiveStealCostQuote?: VisibleAgendaStealCostQuote;
 };
 
 export type VisibleTraceState = {
   traceId: string;
+  sourceCardInstanceId?: CardInstanceId;
+  /** Public Engine fact: neither bid changes success or the fixed effect amount. */
+  bidEffect?:
+    | "automatic_success_fixed_effect"
+    | "zero_corp_bid_guaranteed_fixed_effect";
   sourceDefinitionId: CardDefinitionId;
   profile: TraceRulesProfile;
   phase: TraceState["status"];
@@ -3927,6 +4068,13 @@ export type PlayerView = {
     tags: number;
     /** Runner-private, currently available free Net/Core prevention. */
     freeNetOrCoreDamagePreventionRemaining?: number;
+    /** Corp-private current mandatory payment; insufficient credits lose the game. */
+    corpEndTurnCreditObligation?: {
+      creditsDue: number;
+      expiresAtStateVersion: number;
+      deadline: "end_of_corp_turn";
+      consequence: "lose_game";
+    };
     /** Runner-private, authoritative trace payment and base-link choices. */
     runnerTraceSupportQuote?: VisibleRunnerTraceSupportQuote;
     /** Public Bad Publicity converted into run-only credits at run start. */
@@ -4001,6 +4149,10 @@ export type PlayerView = {
     };
     eventApproachIceExposeBeforeRez?: boolean;
     prohibitNoisyIcebreakers?: boolean;
+    /** Public resolved restriction, consumed by the next actual encounter. */
+    nextEncounterNoBreakSubroutines?: boolean;
+    /** Public restriction applying only to the currently encountered ICE. */
+    noBreakSubroutinesActive?: boolean;
     runnerCreditGainOnCorpRez?: number;
     damagePreventionPool?: {
       sourceDefinitionId: CardDefinitionId;
@@ -4041,6 +4193,8 @@ export type CorpCentralAccessQuote = {
 };
 
 export type AiDecisionInput = {
+  /** Actor-private, current Engine funding facts; never future action authority. */
+  corpRestrictedCreditRouteQuotes?: CorpRestrictedCreditRouteQuote[];
   /** Actor-private match binding used only for Engine-certified commands. */
   matchId?: string;
   side: Side;
@@ -4463,12 +4617,16 @@ export type AiTurnPlanningDebug = {
   };
   agendaComparison?: {
     opportunityKey: string;
-    selectedFamily?: "pure_rush" | "combined_rush" | "safe_setup";
+    selectedFamily?:
+      | "pure_rush"
+      | "combined_rush"
+      | "safe_setup"
+      | "fund_setup";
     selectionReason: string;
     randomizationEligible: boolean;
     lines: Array<{
       lineId: string;
-      family: "pure_rush" | "combined_rush" | "safe_setup";
+      family: "pure_rush" | "combined_rush" | "safe_setup" | "fund_setup";
       actionCount: number;
       agendaProgress: number;
       defense: number;
@@ -6061,7 +6219,7 @@ function isAiTurnPlanningAgendaComparison(value: unknown): boolean {
     ]) &&
     typeof candidate.opportunityKey === "string" &&
     (candidate.selectedFamily === undefined ||
-      ["pure_rush", "combined_rush", "safe_setup"].includes(
+      ["pure_rush", "combined_rush", "safe_setup", "fund_setup"].includes(
         String(candidate.selectedFamily),
       )) &&
     typeof candidate.selectionReason === "string" &&
@@ -6084,7 +6242,7 @@ function isAiTurnPlanningAgendaComparison(value: unknown): boolean {
           "expectedValue",
         ]) &&
         typeof line.lineId === "string" &&
-        ["pure_rush", "combined_rush", "safe_setup"].includes(
+        ["pure_rush", "combined_rush", "safe_setup", "fund_setup"].includes(
           String(line.family),
         ) &&
         [
@@ -6720,3 +6878,8 @@ export type AiDecision = AiDecisionBase &
         selectedChoices?: never;
       }
   );
+export {
+  NETGRID_PRODUCT_VERSION,
+  isServerBuildInfo,
+  type ServerBuildInfo,
+} from "./product-version";

@@ -49,11 +49,9 @@ export function evaluateRemoteContestCandidate(params: {
 }): RemoteContestCandidateEvaluation | undefined {
   if (!params.top || params.frame.side !== "runner") return undefined;
   if (params.topActionType !== "start_run") return undefined;
-  if (!rankedActionHasUtilityFamily(params.top, "remote_contest")) return undefined;
-  if (
-    params.scoreGap !== null &&
-    !Number.isFinite(params.scoreGap)
-  ) {
+  if (!rankedActionHasUtilityFamily(params.top, "remote_contest"))
+    return undefined;
+  if (params.scoreGap !== null && !Number.isFinite(params.scoreGap)) {
     throw new RangeError("Remote-contest scoreGap must be finite or null.");
   }
   if (
@@ -69,7 +67,9 @@ export function evaluateRemoteContestCandidate(params: {
     (actionCandidate) => actionCandidate.actionId === params.top?.actionId,
   );
   const alignment =
-    candidate && runTarget ? alignRunTargetAction(candidate, runTarget) : undefined;
+    candidate && runTarget
+      ? alignRunTargetAction(candidate, runTarget)
+      : undefined;
   const scoreGap = params.scoreGap ?? Number.NEGATIVE_INFINITY;
   const blockedReason = remoteContestBlockedReason({
     candidateMissing: candidate === undefined,
@@ -88,10 +88,16 @@ export function evaluateRemoteContestCandidate(params: {
 
   return {
     actionId: params.top.actionId,
-    ...(runTarget?.targetServerId ? { targetServerId: runTarget.targetServerId } : {}),
+    ...(runTarget?.targetServerId
+      ? { targetServerId: runTarget.targetServerId }
+      : {}),
     ...(runTarget?.targetKind ? { targetKind: runTarget.targetKind } : {}),
-    ...(runTarget?.recommendation ? { recommendation: runTarget.recommendation } : {}),
-    ...(runTarget?.pathPassability ? { pathPassability: runTarget.pathPassability } : {}),
+    ...(runTarget?.recommendation
+      ? { recommendation: runTarget.recommendation }
+      : {}),
+    ...(runTarget?.pathPassability
+      ? { pathPassability: runTarget.pathPassability }
+      : {}),
     ...(runTarget ? { scoreThreat: runTarget.scoreThreat } : {}),
     structuredAlignment:
       alignment?.aligned === true && alignment.source !== "evidence",
@@ -154,20 +160,28 @@ function remoteContestBlockedReason(input: {
   if (input.alignment.source === "evidence") {
     return "remote_contest_structured_alignment_required";
   }
-  if (input.runTarget.targetKind !== "remote" && input.runTarget.accessTargetKind !== "remote") {
+  if (
+    input.runTarget.targetKind !== "remote" &&
+    input.runTarget.accessTargetKind !== "remote"
+  ) {
     return "remote_contest_non_remote_target";
   }
-  if (!input.runTarget.scoreThreat) return "remote_contest_score_threat_missing";
+  if (!input.runTarget.scoreThreat)
+    return "remote_contest_score_threat_missing";
   if (input.runTarget.recommendation !== "run_now") {
     return "remote_contest_recommendation_blocked";
   }
   if (input.runTarget.pathPassability !== "reachable") {
     return "remote_contest_path_blocked";
   }
-  if (input.runTarget.riskyUniversalCoverage || input.runTarget.creditsAfterRun < 0) {
+  if (
+    input.runTarget.riskyUniversalCoverage ||
+    input.runTarget.creditsAfterRun < 0
+  ) {
     return "remote_contest_high_risk_blocked";
   }
-  if (input.scoreGap < input.threshold) return "remote_contest_score_gap_below_threshold";
+  if (input.scoreGap < input.threshold)
+    return "remote_contest_score_gap_below_threshold";
   return undefined;
 }
 

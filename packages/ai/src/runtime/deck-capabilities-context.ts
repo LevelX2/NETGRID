@@ -11,9 +11,7 @@ type AiDecisionInputWithDeckCapabilities = AiDecisionInput & {
 };
 
 export type DeckCapabilitiesContext = {
-  deckCapabilitiesForInput: (
-    input: AiDecisionInput,
-  ) => DeckCapabilityProfile;
+  deckCapabilitiesForInput: (input: AiDecisionInput) => DeckCapabilityProfile;
 };
 
 export function createDeckCapabilitiesContext(): DeckCapabilitiesContext {

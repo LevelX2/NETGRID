@@ -540,7 +540,6 @@ import {
   scoredAgendaCounterCreditProfileForDefinition,
   scoredAgendaCounterCreditProfileForPayload,
   SCORED_REVEAL_AGENDA_SOURCES,
-  SERVER_DIFFICULTY_UPGRADE_SOURCES,
 } from "../../mechanics/agenda-scoring";
 import { TAG_HANDSIZE_ASSET_SOURCE } from "../../mechanics/global-modifiers";
 import { COUNTER_UPGRADE_SOURCES } from "../../mechanics/hosting-counters";
@@ -588,16 +587,14 @@ import type {
 } from "../../ability-engine/definition-types";
 
 export type AutomaticEffectCollector = ResolvedGameEffect[];
-// Effective-value helpers are pure/read-only. Legacy agenda-difficulty pieces
-// are still injected through runtime wiring so this module avoids public-facade
-// imports without changing existing score legality or revalidation ordering.
+// Effective-value helpers are pure/read-only. The server run-counter rule is
+// injected through runtime wiring; declared card modifiers are evaluated by
+// the shared helper used for score legality and revalidation.
 export const effectiveAgendaDifficultyDeps: EffectiveAgendaDifficultyDependencies =
   {
     definitionFor,
     serverDifficultyIncreaseFromRunCounters: (state, agendaId) =>
       runtimePorts.serverDifficultyIncreaseFromRunCounters(state, agendaId),
-    serverDifficultyReductionFromUpgrades: (state, agendaId) =>
-      runtimePorts.serverDifficultyReductionFromUpgrades(state, agendaId),
   };
 
 export const DEFAULT_CONTROLLERS: {

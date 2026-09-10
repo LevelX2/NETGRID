@@ -9,6 +9,7 @@ import {
 import { describe, expect, it } from "vitest";
 import { buildLegalAction } from "../turn/action-builders";
 import { proteusTestCardDefinition } from "../../test/proteus-card-definitions";
+import { publicIceRunSubroutineDerivation } from "./public-ice-run-derivation";
 import {
   buildRunnerEncounterActions,
   buildRunnerMovementActions,
@@ -217,6 +218,105 @@ function definitionsFor(
 }
 
 describe("runner encounter action generation", () => {
+  it.each([0, 1, undefined])(
+    "certifies only explicit zero damage, amount=%s",
+    (amount) => {
+      const ice = iceDefinition({
+        strength: 0,
+        subroutines: [
+          {
+            id: "damage",
+            type: "do_damage",
+            damageType: "net",
+            ...(amount !== undefined ? { amount } : {}),
+          },
+          { id: "stop", type: "end_the_run" },
+        ],
+      });
+      const state = makeState({ breakerDefinitionId: "onr_v1_039_krash", ice });
+      const actions = buildRunnerEncounterActions(
+        hostFor(state, definitionsFor(state, ice)),
+      ).legalActions;
+      expect(
+        actions.find(
+          (a) =>
+            a.type === "break_subroutine" && a.payload?.subroutineIndex === 0,
+        )?.payload?.breakSubroutinePurpose,
+      ).toBe(amount === 0 ? "zero_damage_no_secondary_effect" : undefined);
+      expect(
+        actions.find(
+          (a) =>
+            a.type === "break_subroutine" && a.payload?.subroutineIndex === 1,
+        )?.payload?.breakSubroutinePurpose,
+      ).toBeUndefined();
+      state.run!.fatalDamageActiveForEncounter = true;
+      expect(
+        buildRunnerEncounterActions(
+          hostFor(state, definitionsFor(state, ice)),
+        ).legalActions.every(
+          (a) => a.payload?.breakSubroutinePurpose === undefined,
+        ),
+      ).toBe(true);
+    },
+  );
+
+  it.each([
+    "onr_classic_033_superglue",
+    "onr_proteus_106_disgruntled-ice-technician",
+    "onr_v1_046_pattels-virus",
+  ])("retains full-break value from %s", (definitionId) => {
+    const ice = iceDefinition({
+      strength: 0,
+      subroutines: [
+        { id: "damage", type: "do_damage", damageType: "net", amount: 0 },
+      ],
+    });
+    const state = makeState({ breakerDefinitionId: "onr_v1_039_krash", ice });
+    state.runner.rig.programs.push("support" as CardInstanceId);
+    state.cardInstances.support = instance("support", definitionId);
+    const definitions = definitionsFor(state, ice);
+    definitions[definitionId] = CARD_DEFINITIONS_BY_ID[definitionId]!;
+    const host = hostFor(state, definitions);
+    expect(
+      buildRunnerEncounterActions(host).legalActions.every(
+        (a) => a.payload?.breakSubroutinePurpose === undefined,
+      ),
+    ).toBe(true);
+  });
+
+  it.each([0, 1])(
+    "uses the current derived damage with %i outer ICE",
+    (outerCount) => {
+      const ice = proteusTestCardDefinition("onr_proteus_021_dog-pile");
+      const state = makeState({ breakerDefinitionId: "onr_v1_039_krash", ice });
+      state.cardInstances.ice_1!.definitionId = ice.id;
+      if (outerCount) {
+        state.cardInstances.outer = instance("outer", ice.id, {
+          owner: "corp",
+          controller: "corp",
+          zone: { side: "corp", zone: "serverIce", serverId: "rd" },
+        });
+        state.corp.servers[0]!.ice.push("outer" as CardInstanceId);
+      }
+      const host = hostFor(state, definitionsFor(state, ice));
+      host.ice.strengthForIce = () => 0;
+      host.run.currentEncounterSubroutines = (definition) => {
+        const quote = publicIceRunSubroutineDerivation(
+          state,
+          "ice_1" as CardInstanceId,
+          definition.subroutines!,
+        );
+        return [...quote.printedSubroutines, ...quote.appendedSubroutines];
+      };
+      const action = buildRunnerEncounterActions(host).legalActions.find(
+        (a) =>
+          a.type === "break_subroutine" && a.payload?.subroutineIndex === 0,
+      )!;
+      expect(action.payload?.breakSubroutinePurpose).toBe(
+        outerCount ? undefined : "zero_damage_no_secondary_effect",
+      );
+    },
+  );
   it("returns no encounter actions without an active encountered ICE", () => {
     const state = makeState({ encounteredIceId: undefined });
     const ice = iceDefinition();
@@ -525,6 +625,68 @@ describe("runner encounter action generation", () => {
         testCase.definitionId,
       ).toBe(false);
     }
+  });
+
+  it("emits one canonical multi-break action per equivalent subroutine effect multiset", () => {
+    const state = makeState({
+      breakerDefinitionId: "onr_proteus_079_big-frackin-gun",
+      runnerCredits: 20,
+    });
+    const breakerDefinition = proteusTestCardDefinition(
+      "onr_proteus_079_big-frackin-gun",
+    );
+    const matchingIce = iceDefinition({
+      subroutines: Array.from({ length: 16 }, (_unused, index) => ({
+        id: `paid_end_the_run_${index + 1}`,
+        type: "end_the_run" as const,
+      })),
+    });
+
+    const result = buildRunnerEncounterActions(
+      hostFor(state, {
+        [breakerDefinition.id]: breakerDefinition,
+        [matchingIce.id]: matchingIce,
+      }),
+    );
+    const breakActions = result.legalActions.filter(
+      (action) => action.type === "break_subroutine",
+    );
+
+    expect(
+      breakActions.map((action) => action.payload?.subroutineIndexes),
+    ).toEqual(["0", "0,1", "0,1,2", "0,1,2,3", "0,1,2,3,4"]);
+  });
+
+  it("preserves multi-break choices with different subroutine effects", () => {
+    const state = makeState({
+      breakerDefinitionId: "onr_proteus_079_big-frackin-gun",
+      runnerCredits: 20,
+    });
+    const breakerDefinition = proteusTestCardDefinition(
+      "onr_proteus_079_big-frackin-gun",
+    );
+    const matchingIce = iceDefinition({
+      subroutines: [
+        { id: "end", type: "end_the_run" },
+        { id: "net_1", type: "do_damage", damageType: "net", amount: 1 },
+        { id: "net_2", type: "do_damage", damageType: "net", amount: 2 },
+      ],
+    });
+
+    const result = buildRunnerEncounterActions(
+      hostFor(state, {
+        [breakerDefinition.id]: breakerDefinition,
+        [matchingIce.id]: matchingIce,
+      }),
+    );
+    const breakActions = result.legalActions.filter(
+      (action) => action.type === "break_subroutine",
+    );
+
+    expect(breakActions).toHaveLength(7);
+    expect(
+      breakActions.map((action) => action.payload?.subroutineIndexes),
+    ).toEqual(expect.arrayContaining(["0,1", "0,2", "1,2", "0,1,2"]));
   });
 
   it("offers paid and unpaid continue actions for pay-or-end-run subroutines", () => {

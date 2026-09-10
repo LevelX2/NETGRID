@@ -1575,7 +1575,11 @@ describe("Proteus Dynamic Public ETR ICE", () => {
       hiddenPayloadMarkers,
     );
 
-    const staleAfterOne = structuredClone(state);
+    const staleAfterOne = apply(
+      structuredClone(state),
+      "corp",
+      (action) => action.type === "continue_run",
+    );
     const staleContinue = mustAction(
       staleAfterOne,
       "runner",
@@ -1607,6 +1611,7 @@ describe("Proteus Dynamic Public ETR ICE", () => {
     });
     expect(staleResult.ok).toBe(false);
 
+    state = apply(state, "corp", (action) => action.type === "continue_run");
     state = apply(
       state,
       "runner",
@@ -2448,6 +2453,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       "corp",
       (action) => action.actionId === addSubroutine.actionId,
     );
+    state = apply(state, "corp", (action) => action.type === "continue_run");
     const continueAction = mustAction(
       state,
       "runner",

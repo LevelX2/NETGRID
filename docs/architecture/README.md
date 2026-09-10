@@ -1,6 +1,6 @@
 # Architektur-Dokumentation
 
-Stand: 2026-08-12
+Stand: 2026-09-04
 
 `docs/architecture/` enthält releaseübergreifendes Architekturwissen, das den aktuellen Systemzustand, Zielzustand, Schichtgrenzen oder verbindliche technische Verträge beschreibt.
 
@@ -16,6 +16,8 @@ Zu den aktuellen Fachbereichen gehören unter anderem:
 - `deck-library/`: lokale Deckbibliothek und Storage-Verträge;
 - `localization/`: Locale-, Übersetzungs- und Präsentationsverträge der
   normalen Spieleroberfläche;
+- `windows/`: installerneutrale Windows-Releasegrenze sowie das beschlossene
+  Installer-, Launcher- und Updatezielbild mit sequenziellem Paketprozess;
 - weitere fachlich benannte Bereiche für aktuelle Architekturthemen.
 
 ## Current-State-Regel

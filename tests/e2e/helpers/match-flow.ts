@@ -27,8 +27,7 @@ export async function openApp(page: Page): Promise<void> {
   await installE2eMatchStartSettings(page);
   await page.goto(BASE_URL);
   await expect(page.getByTestId("setup-screen")).toBeVisible();
-  const cookies = await page.context().cookies(BASE_URL);
-  if (cookies.some((cookie) => cookie.name === "ng_account_session")) {
+  if (await hasAccountSession(page)) {
     await expect(
       page.getByText(
         "Deine Matchstart-Vorbelegung wird privat im Account gespeichert.",
@@ -65,20 +64,62 @@ export async function createHumanVsHumanLobby(
   seed: string,
   side: "runner" | "corp" = "runner",
 ): Promise<string> {
+  return createHumanVsHumanLobbyWithOptions(page, seed, {
+    side,
+    format: "rules_match",
+    cardPool: "originalset",
+  });
+}
+
+export async function createHumanVsHumanSeriesLobby(
+  page: Page,
+  seed: string,
+  side: "runner" | "corp" = "runner",
+  cardPool: "originalset" | "originalset_classic_proteus" = "originalset",
+): Promise<string> {
+  return createHumanVsHumanLobbyWithOptions(page, seed, {
+    side,
+    format: "two_game_side_swap",
+    cardPool,
+  });
+}
+
+async function createHumanVsHumanLobbyWithOptions(
+  page: Page,
+  seed: string,
+  options: {
+    side: "runner" | "corp";
+    format: "rules_match" | "two_game_side_swap";
+    cardPool: "originalset" | "originalset_classic_proteus";
+  },
+): Promise<string> {
   await openApp(page);
   await page.getByTestId("play-mode-human-vs-human").click();
-  await page.getByTestId("match-format-rules-match").click();
+  await page
+    .getByTestId(`match-format-${options.format.replaceAll("_", "-")}`)
+    .click();
+  if (options.format === "two_game_side_swap") {
+    await page.getByTestId("match-series-games").selectOption("2");
+  }
+  if (options.cardPool === "originalset_classic_proteus") {
+    await page.getByTestId("match-card-pool-classic").press("Space");
+    await page.getByTestId("match-card-pool-proteus").press("Space");
+    await expect(page.getByTestId("match-card-pool-classic")).toBeChecked();
+    await expect(page.getByTestId("match-card-pool-proteus")).toBeChecked();
+  }
   await selectE2eDecks(page, "Dein Runner-Deck", "Dein Korp-Deck");
   const advancedOptions = page.getByTestId("advanced-match-options");
   if ((await advancedOptions.getAttribute("open")) === null)
     await advancedOptions.locator("summary").click();
   await expect(advancedOptions).toHaveAttribute("open", "");
-  await page.getByLabel("Deine Startseite").selectOption(side);
+  await page.getByLabel("Deine Startseite").selectOption(options.side);
   await page.getByLabel("Countdown").selectOption("3");
   await page.getByLabel("Seed").fill(seed);
   const name = page.getByLabel("Name");
   if (/^Teilnehmer [AB]$/.test((await name.inputValue()).trim())) {
-    await name.fill(side === "corp" ? "Host Corp V107" : "Host Runner V107");
+    await name.fill(
+      options.side === "corp" ? "Host Corp V107" : "Host Runner V107",
+    );
   }
   await page.getByTestId("create-match").click();
   await expect(page.getByTestId("start-lobby")).toBeVisible({
@@ -96,24 +137,50 @@ export async function createHumanVsHumanLobby(
 export async function joinHumanVsHumanLobby(
   page: Page,
   joinUrl: string,
+  options: {
+    expectedDestination?: "lobby" | "active";
+    expectedRunnerDeckOption?: RegExp;
+  } = {},
 ): Promise<void> {
   await installE2eMatchStartSettings(page);
   await page.goto(joinUrl);
   await expect(page.getByTestId("setup-screen")).toBeVisible();
   const name = page.getByLabel("Name");
-  if (
-    (await name.isEditable()) &&
-    /^Teilnehmer [AB]$/.test((await name.inputValue()).trim())
-  ) {
-    await name.fill("Joiner V107");
+  if (await hasAccountSession(page)) {
+    await expect(name).not.toBeEditable();
+  } else {
+    await expect(name).toBeEditable();
+    if (/^Teilnehmer [AB]$/.test((await name.inputValue()).trim())) {
+      await name.fill("Joiner V107");
+    }
+  }
+  if (options.expectedRunnerDeckOption) {
+    await expect(
+      page
+        .getByLabel("Dein Runner-Deck")
+        .locator("option")
+        .filter({ hasText: options.expectedRunnerDeckOption })
+        .first(),
+    ).toBeAttached();
   }
   await selectE2eDecks(page, "Dein Runner-Deck", "Dein Korp-Deck");
   await expect(page.getByTestId("join-link-input")).toHaveValue(/joinToken=/);
   await page.getByTestId("join-match").click();
+  if (options.expectedDestination === "active") {
+    await expect(page.getByTestId("active-game")).toBeVisible({
+      timeout: 20_000,
+    });
+    return;
+  }
   await expect(page.getByTestId("start-lobby")).toBeVisible({
     timeout: 20_000,
   });
   await expect(page.getByText("Startbereitschaftslobby")).toBeVisible();
+}
+
+async function hasAccountSession(page: Page): Promise<boolean> {
+  const cookies = await page.context().cookies(BASE_URL);
+  return cookies.some((cookie) => cookie.name === "ng_account_session");
 }
 
 export async function readyAndWaitForActive(
@@ -125,6 +192,13 @@ export async function readyAndWaitForActive(
   await expect(
     host.getByText(/Countdown bis|Startet automatisch/),
   ).toBeVisible();
+  await waitForActiveAndResolveSetup(host, joiner);
+}
+
+export async function waitForActiveAndResolveSetup(
+  host: Page,
+  joiner: Page,
+): Promise<void> {
   await expect(host.getByTestId("active-game")).toBeVisible({
     timeout: 20_000,
   });
@@ -157,46 +231,17 @@ export async function installFirstCorpCard(page: Page): Promise<string> {
     const marker = slot.getByTestId("card-action-marker");
     const title = await knownCardTitle(card);
     if (!title) continue;
-    if (await marker.isVisible().catch(() => false)) {
-      await marker
-        .click({ force: true, timeout: 1_000 })
-        .catch(() => undefined);
-      const install = page
-        .locator(
-          '[data-testid="card-action-button"][data-action-type="install_card"]',
-        )
-        .first();
-      if (await install.isVisible().catch(() => false)) {
-        await install.click();
-        await expect(
-          page
-            .locator('[data-testid="server"] [data-testid="known-card"]')
-            .first(),
-        ).toBeVisible();
-        return title;
-      }
-    }
-    await card.click({ timeout: 1_000 }).catch(() => undefined);
-    const panelInstall = page
-      .locator('[data-testid="action-button"][data-action-type="install_card"]')
-      .first();
-    if (await panelInstall.isVisible().catch(() => false)) {
-      await panelInstall.click();
-      await expect(
-        page
-          .locator('[data-testid="server"] [data-testid="known-card"]')
-          .first(),
-      ).toBeVisible();
-      return title;
-    }
+    const cardClass = (await card.getAttribute("class")) ?? "";
+    if (/\boperation\b/.test(cardClass)) continue;
     if (!(await marker.isVisible().catch(() => false))) continue;
-    await marker.click({ force: true, timeout: 1_000 }).catch(() => undefined);
+    await card.hover({ position: { x: 8, y: 20 }, timeout: 2_000 });
+    await marker.click({ timeout: 2_000 });
     const install = page
       .locator(
         '[data-testid="card-action-button"][data-action-type="install_card"]',
       )
       .first();
-    if (await install.isVisible().catch(() => false)) {
+    if (await locatorBecomesVisible(install, 1_500)) {
       await install.click();
       await expect(
         page
@@ -223,11 +268,20 @@ export async function exerciseCardDisplayModes(page: Page): Promise<void> {
       await moveOpponentCueAwayFromPreview(page);
     }
   }
-  await page.getByTestId("card-display-text").first().click();
-  await expect(page.getByTestId("card-preview")).toContainText("Kartenanzeige");
-  await page.getByTestId("card-display-compact").first().click();
+  await page.getByRole("button", { name: "Optionen öffnen" }).click();
+  await page.getByRole("tab", { name: "Darstellung" }).click();
+  const textMode = page.getByTestId("card-display-text").first();
+  const compactMode = page.getByTestId("card-display-compact").first();
+  const imageMode = page.getByTestId("card-display-image").first();
+  await textMode.click();
+  await expect(textMode).toHaveClass(/active/);
+  await compactMode.click();
+  await expect(compactMode).toHaveClass(/active/);
+  await imageMode.click();
+  await expect(imageMode).toHaveClass(/active/);
+  await page.getByRole("button", { name: "Zurück zum aktiven Spiel" }).click();
   await expect(page.getByTestId("card-preview")).toBeVisible();
-  await page.getByTestId("card-display-image").first().click();
+  await expect(page.getByTestId("card-preview")).toContainText("Kartenanzeige");
 }
 
 export async function expectActiveBoardBasics(page: Page): Promise<void> {
@@ -343,6 +397,16 @@ async function clickActionIfVisible(
   }
 }
 
+async function locatorBecomesVisible(
+  locator: Locator,
+  timeout: number,
+): Promise<boolean> {
+  return locator
+    .waitFor({ state: "visible", timeout })
+    .then(() => true)
+    .catch(() => false);
+}
+
 async function knownCardTitle(card: Locator): Promise<string | null> {
   const ariaTitle = titleFromKnownCardAriaLabel(
     await card.getAttribute("aria-label"),
@@ -450,7 +514,7 @@ async function resolveSetupChoices(...pages: Page[]): Promise<void> {
     let clicked = false;
     for (const page of pages) {
       const keep = page
-        .getByRole("button", { name: "Starthand behalten" })
+        .getByRole("button", { name: "Hand behalten", exact: true })
         .first();
       if (await keep.isVisible().catch(() => false)) {
         await keep.click({ timeout: 2_000 }).catch(() => undefined);
@@ -471,7 +535,7 @@ async function advanceAiUntilHumanTurn(page: Page): Promise<void> {
     const aiStep = page.getByRole("button", {
       name: /KI-Schritt|Jetzt ausführen/,
     });
-    if (await aiStep.isEnabled().catch(() => false)) {
+    if (await aiStep.isEnabled({ timeout: 1_000 }).catch(() => false)) {
       await aiStep.click();
       await page.waitForTimeout(250);
       continue;

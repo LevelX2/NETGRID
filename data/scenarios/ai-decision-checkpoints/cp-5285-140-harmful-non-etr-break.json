@@ -951,9 +951,7 @@
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_257_nerve-labyrinth_2"
-            ],
+            "ice": ["corp_onr_v1_257_nerve-labyrinth_2"],
             "root": []
           },
           {
@@ -981,9 +979,7 @@
               "corp_onr_v1_234_data-darts_1",
               "corp_onr_v1_242_fatal-attractor_3"
             ],
-            "root": [
-              "corp_onr_v1_190_bioweapons-engineering_2"
-            ]
+            "root": ["corp_onr_v1_190_bioweapons-engineering_2"]
           }
         ]
       },
@@ -1043,9 +1039,7 @@
           "runner_onr_proteus_124_stakeout_1",
           "runner_onr_v1_114_temple-microcode-outlet_2"
         ],
-        "scoreArea": [
-          "corp_onr_proteus_004_fetal-ai_1"
-        ],
+        "scoreArea": ["corp_onr_proteus_004_fetal-ai_1"],
         "rig": {
           "programs": [
             "runner_onr_v1_039_krash_3",
@@ -2451,9 +2445,7 @@
         "edgerunnerTempsInstallActionsRemaining": 0,
         "scoredAgendaStartDrawChoiceResolvedSourceIds": [],
         "scoredAgendaStartDrawChoiceSelectedSourceIds": [],
-        "fortActivityServerIdsSinceCorpTurnStart": [
-          "remote_1"
-        ],
+        "fortActivityServerIdsSinceCorpTurnStart": ["remote_1"],
         "corpStartOfTurnResolvedSourceIds": [],
         "pdcaUsedSourceIdsThisTurn": []
       },
@@ -6934,12 +6926,8 @@
             "support": 0,
             "final": 0
           },
-          "supportGaps": [
-            "no_strategy_anchor"
-          ],
-          "evidence": [
-            "neutral_doctrine:no_strategy_anchor"
-          ]
+          "supportGaps": ["no_strategy_anchor"],
+          "evidence": ["neutral_doctrine:no_strategy_anchor"]
         },
         "secondaryStrategies": [],
         "phase": "recover",
@@ -6955,10 +6943,7 @@
           "kind": "none",
           "required": 0,
           "satisfied": true,
-          "evidence": [
-            "reserve_source:runtime_context",
-            "reserve:none"
-          ]
+          "evidence": ["reserve_source:runtime_context", "reserve:none"]
         },
         "blockers": [
           {
@@ -6966,18 +6951,14 @@
             "severity": "hard",
             "reason": "no_strategy_anchor",
             "removalCondition": "provide a strategy profile with concrete anchor evidence",
-            "evidence": [
-              "neutral_doctrine:no_strategy_anchor"
-            ]
+            "evidence": ["neutral_doctrine:no_strategy_anchor"]
           },
           {
             "blockerId": "runner.neutral:support_gap:no_strategy_anchor",
             "severity": "soft",
             "reason": "support_gap",
             "removalCondition": "resolve support gap no_strategy_anchor",
-            "evidence": [
-              "support_gap:no_strategy_anchor"
-            ]
+            "evidence": ["support_gap:no_strategy_anchor"]
           }
         ],
         "transition": {
@@ -7076,10 +7057,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7167,10 +7145,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7258,10 +7233,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7349,10 +7321,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7502,10 +7471,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -7779,9 +7745,7 @@
           "milestone": "productive_routes_exhausted",
           "moduleState": {
             "kind": "turn_completion",
-            "standardEndTurnActionIds": [
-              "runner.end_turn"
-            ]
+            "standardEndTurnActionIds": ["runner.end_turn"]
           },
           "blockers": [],
           "resumeConditions": [],
@@ -7890,9 +7854,7 @@
                 }
               }
             ],
-            "protectedValueClaimIds": [
-              "fnv1a:b5892cc0"
-            ],
+            "protectedValueClaimIds": ["fnv1a:b5892cc0"],
             "transition": {
               "kind": "projected_plan_discovery_required"
             }
@@ -7960,12 +7922,8 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": [
-        "runner.contest_remote"
-      ],
-      "acceptableCapabilities": [
-        "contest_remote"
-      ]
+      "acceptablePlanKinds": ["runner.contest_remote"],
+      "acceptableCapabilities": ["contest_remote"]
     },
     "runTargets": [
       {
@@ -7974,9 +7932,7 @@
         "pathCost": 18,
         "creditsAfterRun": 6,
         "recommendation": "draw_for_damage_buffer",
-        "requiredEvidence": [
-          "visible_break_cost:18"
-        ]
+        "requiredEvidence": ["visible_break_cost:18"]
       }
     ]
   }

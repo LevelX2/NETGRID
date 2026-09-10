@@ -561,6 +561,8 @@ export type {
   RunnerHandDevelopmentDeferReason,
   RunnerHandDevelopmentEvaluation,
   RunnerHandDevelopmentFundingNeed,
+  RunnerHandDevelopmentRigDemandBinding,
+  RunnerHandRetentionCounterfactual,
   RunnerHandDevelopmentRole,
   RunnerHandDevelopmentStrategicFit,
   RunnerPersistentInstallCapabilityDelta,
@@ -575,6 +577,33 @@ export type {
   RunnerPersistentInstallEvaluation,
   RunnerPersistentInstallStackabilityClass,
 } from "./runner-hand-development";
+export {
+  buildRunnerRigDemandProjection,
+  redactedRunnerRigDemandProjectionFacts,
+  RunnerRigDemandProjectionError,
+  RUNNER_RIG_DEMAND_PROJECTION_SCHEMA_VERSION,
+} from "./runner/rig-demand/runner-rig-demand-projection";
+export type {
+  BuildRunnerRigDemandProjectionParams,
+  RunnerRigCardInstallReadiness,
+  RunnerRigCardRetentionFact,
+  RunnerRigCardRetentionValue,
+  RunnerRigDemandBinding,
+  RunnerRigDemandGuarantee,
+  RunnerRigDemandHorizon,
+  RunnerRigDemandOwnerModuleId,
+  RunnerRigDemandProjection,
+  RunnerRigDemandProvider,
+  RunnerRigDemandProviderInput,
+  RunnerRigDemandRequirement,
+  RunnerRigDemandSourceKind,
+  RunnerRigDoctrineSignal,
+  RunnerRigMemoryMode,
+  RunnerRigMemoryProjection,
+  RunnerRigProviderAcquisitionState,
+  RunnerRigRoleDemand,
+  RunnerRigRoleDemandInput,
+} from "./runner/rig-demand/runner-rig-demand-projection";
 export {
   buildRunnerEconomyPosture,
   evaluateRunnerRunTargets,

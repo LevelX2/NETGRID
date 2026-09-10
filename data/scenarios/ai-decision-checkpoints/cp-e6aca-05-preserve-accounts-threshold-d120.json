@@ -13254,16 +13254,13 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "play_operation",
-        "sourceDefinitionId": "onr_v1_281_accounts-receivable"
+        "type": "draw_card"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.economy"],
-      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
-      "requiredAssessmentEvidence": [
-        "corp_terminal_central_rez_reserve_required:rd:corp_onr_proteus_013_caryatid_1:gap_2"
-      ]
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["allocate_server_defense"],
+      "requiredAssessmentEvidence": ["corp_missing_concrete_defense_draw:rd"]
     }
   }
 }

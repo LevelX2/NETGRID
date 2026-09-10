@@ -1,7 +1,7 @@
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import { AI_HINTS_BY_CARD } from "./ai-hints";
 import {
-  runnerHintProvidesNonNoisyBreakerCredits,
+  runnerEffectsProvideBreakerCredits,
   runnerHintProvidesTopTrashRecovery,
 } from "./runner-canonical-hint-semantics";
 
@@ -311,7 +311,7 @@ function providerFor(
   ) {
     capabilities.add("runner.staging.delayed_install");
   }
-  if (runnerHintProvidesNonNoisyBreakerCredits(hint)) {
+  if (runnerEffectsProvideBreakerCredits(hint.effects)) {
     capabilities.add("runner.economy.recurring_breaker");
   }
   if (signals.has("setup.draw")) capabilities.add("runner.throughput.draw");

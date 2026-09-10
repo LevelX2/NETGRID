@@ -46,7 +46,11 @@ export function isCurrentCardImplementationReleaseScopeDefinitionId(
 function implementedCoverageFor(
   implementation: (typeof CARD_IMPLEMENTATIONS)[number],
 ): CardImplementationCoverageEntry {
-  if (!CARD_SPEC_IMPLEMENTATION_DEFINITION_IDS.has(implementation.cardDefinitionId))
+  if (
+    !CARD_SPEC_IMPLEMENTATION_DEFINITION_IDS.has(
+      implementation.cardDefinitionId,
+    )
+  )
     throw new Error(
       `card_spec_coverage_implementation_missing: ${implementation.cardDefinitionId}`,
     );

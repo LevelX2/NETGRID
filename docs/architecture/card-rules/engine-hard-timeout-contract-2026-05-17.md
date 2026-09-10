@@ -3,6 +3,7 @@
 Stand: 2026-05-17
 Status: Planungsvertrag, keine Implementierungsfreigabe
 Quelle:
+
 - `docs/architecture/live-match/visible-match-timer-system-concept-2026-05-17.md`
 - `docs/architecture/live-match/timer-server-sync-contract-2026-05-17.md`
 
@@ -26,16 +27,16 @@ Harte Timeouts sind Regelwirkungen. Deshalb darf der Server bei Fristablauf kein
 
 Für den ersten harten Timeout-Slice sind nur eng begrenzte, engine-deklarierte Fenster zulässig:
 
-| Fensterklasse | Erste Entscheidung | Zulässige Policy | Begründung |
-| --- | --- | --- | --- |
-| Optionale Reaktionsfenster ohne Kosten, Zielauswahl oder private Choice | zulässig | `auto_decline` | Sicherster Einstieg: Die Engine kann eine explizite Ablehnung anwenden, ohne private Daten oder Spielerpräferenz zu erraten. |
-| Explizite Pass-/Prioritätsfenster mit genau einer enginebekannten Pass-Fallbackaktion | zulässig | `auto_pass` | Nur wenn die Engine selbst den Pass als gültige, kostenfreie Fallbackaktion deklariert. |
-| Run- oder Encounter-Fenster mit öffentlichem Continue/Pass-Fallback | später zulässig | `auto_pass` oder enger Spezialvertrag | Nur nach eigener Run-spezifischer Testabdeckung, weil Jack-out, Rez, Encounter und Access Timingfolgen haben. |
-| Normale Zugaktionsfenster | nicht im ersten Slice | später eventuell `end_turn` | Ein globales Auto-End-Turn ist zu grob und kann offene Pflichtentscheidungen überfahren. |
-| Mandatory Choices mit verdeckten Karten, mehreren privaten Optionen oder Zielauswahl | nicht zulässig | keine | Die Engine darf keine verdeckte Spielerentscheidung raten. |
-| Setup, Mulligan, Discard, Handlimit, Access-Auswahl, Hidden-Zone Search/Reorder | nicht im ersten Slice | keine | Diese Fenster enthalten private Auswahl, Fairness- oder Sichtbarkeitsrisiken. |
-| Disconnect, Chat, Lobby, globale Partiezeit | nicht Engine-Scope | keine Engine-Policy | Keine Spielregelwirkung aus Transport- oder UGC-Zeit. |
-| Kompetitiver Spielverlust | nicht Default | später eventuell `forfeit` | Nur in explizitem Modus mit Produkt-, Fairness-, Reconnect- und Missbrauchsgate. |
+| Fensterklasse                                                                         | Erste Entscheidung    | Zulässige Policy                      | Begründung                                                                                                                   |
+| ------------------------------------------------------------------------------------- | --------------------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Optionale Reaktionsfenster ohne Kosten, Zielauswahl oder private Choice               | zulässig              | `auto_decline`                        | Sicherster Einstieg: Die Engine kann eine explizite Ablehnung anwenden, ohne private Daten oder Spielerpräferenz zu erraten. |
+| Explizite Pass-/Prioritätsfenster mit genau einer enginebekannten Pass-Fallbackaktion | zulässig              | `auto_pass`                           | Nur wenn die Engine selbst den Pass als gültige, kostenfreie Fallbackaktion deklariert.                                      |
+| Run- oder Encounter-Fenster mit öffentlichem Continue/Pass-Fallback                   | später zulässig       | `auto_pass` oder enger Spezialvertrag | Nur nach eigener Run-spezifischer Testabdeckung, weil Jack-out, Rez, Encounter und Access Timingfolgen haben.                |
+| Normale Zugaktionsfenster                                                             | nicht im ersten Slice | später eventuell `end_turn`           | Ein globales Auto-End-Turn ist zu grob und kann offene Pflichtentscheidungen überfahren.                                     |
+| Mandatory Choices mit verdeckten Karten, mehreren privaten Optionen oder Zielauswahl  | nicht zulässig        | keine                                 | Die Engine darf keine verdeckte Spielerentscheidung raten.                                                                   |
+| Setup, Mulligan, Discard, Handlimit, Access-Auswahl, Hidden-Zone Search/Reorder       | nicht im ersten Slice | keine                                 | Diese Fenster enthalten private Auswahl, Fairness- oder Sichtbarkeitsrisiken.                                                |
+| Disconnect, Chat, Lobby, globale Partiezeit                                           | nicht Engine-Scope    | keine Engine-Policy                   | Keine Spielregelwirkung aus Transport- oder UGC-Zeit.                                                                        |
+| Kompetitiver Spielverlust                                                             | nicht Default         | später eventuell `forfeit`            | Nur in explizitem Modus mit Produkt-, Fairness-, Reconnect- und Missbrauchsgate.                                             |
 
 Ergebnis: Der erste Implementierungsschnitt darf nur `auto_decline` und enges `auto_pass` unterstützen. `end_turn` und `forfeit` bleiben Deferred Scope.
 
@@ -204,26 +205,26 @@ Kein UI-Redesign, keine neuen Karten, keine KI-Freigabe und keine Plattform-/Cha
 
 ## Testmatrix
 
-| ID | Bereich | Erwartung |
-| --- | --- | --- |
-| HTC-T001 | Policy Default | Alle Entscheidungsfenster ohne explizite Engine-Policy haben `kind: "none"` und keine harte Serverwirkung. |
-| HTC-T002 | Auto Decline | Optionales kostenfreies Reaktionsfenster kann per `server_timeout_resolution` geschlossen werden. |
-| HTC-T003 | Auto Pass | Pass-Fenster akzeptiert Timeout nur, wenn die Engine eine passende Fallbackaction deklariert. |
-| HTC-T004 | Mandatory Choice Block | Private Mandatory Choice mit mehreren Optionen erzeugt keine TimeoutPolicy außer `none`. |
-| HTC-T005 | StateVersion Revalidation | Timeout mit alter `stateVersion` wird abgelehnt. |
-| HTC-T006 | Deadline Revalidation | Timeout mit unbekannter, verbrauchter oder durch Statewechsel invalidierter `deadlineId` wird abgelehnt. |
-| HTC-T007 | Side Revalidation | Timeout für die falsche Seite wird abgelehnt. |
-| HTC-T008 | Timing Revalidation | Timeout am falschen Timingpunkt wird abgelehnt. |
-| HTC-T009 | Illegal Fallback | Timeout wird abgelehnt, wenn die Fallbackwirkung Kosten, Ziele oder private Choices benötigt. |
-| HTC-T010 | Stale Player Action | Nach erfolgreichem Timeout wird eine verspätete Spieleraktion im alten Fenster stale abgelehnt. |
-| HTC-T011 | Replay Determinismus | Replay mit derselben Timeout-Auflösungsfolge reproduziert denselben finalen StateHash. |
-| HTC-T012 | Timer Tick Boundary | Timer-Ticks ohne Timeout-Auflösung verändern weder StateVersion noch StateHash. |
-| HTC-T013 | PublicEvent Redaction | Öffentliche Events enthalten keine private Optionsanzahl, Kartennamen, Ziel-IDs oder Resolverdetails. |
-| HTC-T014 | Reconnect Redaction | Reconnect nach Timeout zeigt keine geschlossenen privaten Choiceoptionen. |
-| HTC-T015 | Undo Invalidation | Undo erzeugt neue `deadlineId`-Werte und akzeptiert alte Timeout-Auflösungen nicht mehr. |
-| HTC-T016 | Disconnect Default | Disconnect löst im privaten Default keinen Forfeit und keine verdeckte Regelwirkung aus. |
-| HTC-T017 | AI Boundary | `AIInput` und `DecisionDebug` enthalten keine menschlichen Deadline- oder Timeout-Deskriptoren. |
-| HTC-T018 | Log Redaction | Logs und Fehlertexte redigieren Tokens, Deckdaten, Hidden Info, FullState und lokale Pfade. |
+| ID       | Bereich                   | Erwartung                                                                                                  |
+| -------- | ------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| HTC-T001 | Policy Default            | Alle Entscheidungsfenster ohne explizite Engine-Policy haben `kind: "none"` und keine harte Serverwirkung. |
+| HTC-T002 | Auto Decline              | Optionales kostenfreies Reaktionsfenster kann per `server_timeout_resolution` geschlossen werden.          |
+| HTC-T003 | Auto Pass                 | Pass-Fenster akzeptiert Timeout nur, wenn die Engine eine passende Fallbackaction deklariert.              |
+| HTC-T004 | Mandatory Choice Block    | Private Mandatory Choice mit mehreren Optionen erzeugt keine TimeoutPolicy außer `none`.                   |
+| HTC-T005 | StateVersion Revalidation | Timeout mit alter `stateVersion` wird abgelehnt.                                                           |
+| HTC-T006 | Deadline Revalidation     | Timeout mit unbekannter, verbrauchter oder durch Statewechsel invalidierter `deadlineId` wird abgelehnt.   |
+| HTC-T007 | Side Revalidation         | Timeout für die falsche Seite wird abgelehnt.                                                              |
+| HTC-T008 | Timing Revalidation       | Timeout am falschen Timingpunkt wird abgelehnt.                                                            |
+| HTC-T009 | Illegal Fallback          | Timeout wird abgelehnt, wenn die Fallbackwirkung Kosten, Ziele oder private Choices benötigt.              |
+| HTC-T010 | Stale Player Action       | Nach erfolgreichem Timeout wird eine verspätete Spieleraktion im alten Fenster stale abgelehnt.            |
+| HTC-T011 | Replay Determinismus      | Replay mit derselben Timeout-Auflösungsfolge reproduziert denselben finalen StateHash.                     |
+| HTC-T012 | Timer Tick Boundary       | Timer-Ticks ohne Timeout-Auflösung verändern weder StateVersion noch StateHash.                            |
+| HTC-T013 | PublicEvent Redaction     | Öffentliche Events enthalten keine private Optionsanzahl, Kartennamen, Ziel-IDs oder Resolverdetails.      |
+| HTC-T014 | Reconnect Redaction       | Reconnect nach Timeout zeigt keine geschlossenen privaten Choiceoptionen.                                  |
+| HTC-T015 | Undo Invalidation         | Undo erzeugt neue `deadlineId`-Werte und akzeptiert alte Timeout-Auflösungen nicht mehr.                   |
+| HTC-T016 | Disconnect Default        | Disconnect löst im privaten Default keinen Forfeit und keine verdeckte Regelwirkung aus.                   |
+| HTC-T017 | AI Boundary               | `AIInput` und `DecisionDebug` enthalten keine menschlichen Deadline- oder Timeout-Deskriptoren.            |
+| HTC-T018 | Log Redaction             | Logs und Fehlertexte redigieren Tokens, Deckdaten, Hidden Info, FullState und lokale Pfade.                |
 
 ## Gate-Ergebnis
 

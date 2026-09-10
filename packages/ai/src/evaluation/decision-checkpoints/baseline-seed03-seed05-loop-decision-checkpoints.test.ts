@@ -38,7 +38,7 @@ describe("baseline seed 03 and seed 05 exact loop checkpoints", () => {
       thirdTraceWithoutPayoffJson,
     ],
     [
-      "converts Broker credits into efficient liquidity",
+      "uses the exact run-lock funding route before releasing the bank",
       backgroundBankYieldsJson,
     ],
   ])("%s", (_label, json) => {

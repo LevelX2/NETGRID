@@ -105,6 +105,20 @@ describe("trigger ability execution", () => {
       cardId: sourceCardId,
     });
 
+    state.corpTemporaryInstallRezCredits = {
+      sourceCardInstanceId: "contract",
+      sourceDefinitionId: "onr_proteus_059_government-contract",
+      remaining: 3,
+      usableFor: "corp_install_or_rez",
+      returnUnusedAtTurnEnd: true,
+    };
+    const beforeRestrictedAttempt = JSON.stringify(state);
+    expect(() =>
+      handleTriggerAbilityExecution(testHost(state), action),
+    ).toThrow("nicht zweckgebundene Credits");
+    expect(JSON.stringify(state)).toBe(beforeRestrictedAttempt);
+    delete state.corpTemporaryInstallRezCredits;
+
     expect(
       handleTriggerAbilityExecution(
         testHost(state, {
@@ -149,6 +163,44 @@ describe("trigger ability execution", () => {
     );
 
     expect(calls).toEqual(["runner-special"]);
+  });
+
+  it("requires twelve general credits for obligation conversion before spending a click", () => {
+    const state = createGame({
+      seed: "restricted-obligation",
+      setupMode: "completed",
+    });
+    state.corp.credits = 13;
+    state.corp.clicks = 3;
+    state.corpTemporaryInstallRezCredits = {
+      sourceCardInstanceId: "contract",
+      sourceDefinitionId: "onr_proteus_059_government-contract",
+      remaining: 3,
+      usableFor: "corp_install_or_rez",
+      returnUnusedAtTurnEnd: true,
+    };
+    const host = testHost(state);
+    let obligations = 1;
+    host.corp.activeObligationCount = () => obligations;
+    host.corp.removeActiveObligation = () => {
+      obligations -= 1;
+    };
+    const action = triggerAction(state, "corp", {
+      obligationDebtAbility: "remove_obligation",
+      obligationDebtCreditCost: 12,
+      obligationDebtScoreAgendaPoints: 1,
+    });
+    const before = JSON.stringify(state);
+    expect(() => handleTriggerAbilityExecution(host, action)).toThrow(
+      "nicht zweckgebundene Credits",
+    );
+    expect(JSON.stringify(state)).toBe(before);
+    expect(obligations).toBe(1);
+    state.corp.credits = 15;
+    expect(handleTriggerAbilityExecution(host, action).handled).toBe(true);
+    expect(state.corp.credits).toBe(3);
+    expect(state.corpTemporaryInstallRezCredits.remaining).toBe(3);
+    expect(obligations).toBe(0);
   });
 
   it("declines only the current Bodyweight bonus-run window without using the ability", () => {

@@ -20,6 +20,7 @@
     "@netgrid/catalog": "workspace:*",
     "@netgrid/decks": "workspace:*",
     "@netgrid/engine": "workspace:*",
+    "@netgrid/runtime-data": "workspace:*",
     "@netgrid/shared": "workspace:*",
     "ws": "^8.20.0"
   },

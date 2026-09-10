@@ -54,7 +54,7 @@ Hidden-Info-Barrieren oder Wiederaufnahmeverträge zu duplizieren.
 
 - [ ] Verantwortlichkeiten und gemeinsame Abhängigkeiten sind dokumentiert.
 - [ ] Eine Aufteilung ist anhand Kohäsion, Zyklenrisiko und Änderungsnutzen
-  begründet angenommen oder verworfen.
+      begründet angenommen oder verworfen.
 - [ ] Ein empfohlener Schnitt erzeugt keinen zweiten Dispatcher oder Resolver.
 - [ ] Umsetzungsarbeit ist pro Familie klein und testbar paketiert.
 

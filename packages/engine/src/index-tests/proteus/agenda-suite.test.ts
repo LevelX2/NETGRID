@@ -480,12 +480,7 @@ describe("Proteus PRO013 agenda suite behavior", () => {
       "onr_v1_086_forged-activation-orders",
       "pro013_lethal_only_grip_card",
     );
-    addCorpCard(
-      state,
-      FETAL_AI,
-      "pro013_lethal_fetal_installed",
-      "remote_1",
-    );
+    addCorpCard(state, FETAL_AI, "pro013_lethal_fetal_installed", "remote_1");
     const creditsBeforeAccess = state.runner.credits;
     openAccess(state, "remote_1");
 

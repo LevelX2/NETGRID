@@ -38,7 +38,7 @@
       "changing": "Modification …",
       "signOut": "Se déconnecter",
       "close": "Fermer",
-      "confirmPassword": "Confirmer le mot de passe",
+      "confirmPassword": "Confirmer le mot de passe Maintenance",
       "cancel": "Annuler",
       "checkingPassword": "Vérification …",
       "confirm": "Confirmer",
@@ -77,8 +77,8 @@
       "build": "Construire",
       "commit": "S'engager",
       "sourceDate": "Révision de la source",
-      "development": "Construction du développement local",
-      "developmentDirty": "Développement local construit avec des changements non engagés",
+      "sourceClean": "État propre au démarrage du client web",
+      "sourceDirty": "Modifications non validées au démarrage du client web",
       "unavailable": "indisponible"
     },
     "session": {
@@ -133,13 +133,13 @@
     },
     "tooltip": {
       "title": "Affichage de l’infobulle",
-      "localHelp": "Indépendant de l’affichage des cartes en jeu ; ne fait pas partie de l’état du match",
+      "localHelp": "Modifie uniquement l’aperçu au survol ; enregistré localement et sans effet sur la partie",
       "mode": "Mode",
       "simple": "Compact",
       "enhanced": "Carte textuelle",
       "image": "Image de la carte",
       "translateRules": "Traduire les règles dans la langue sélectionnée",
-      "translateRulesHelp": "S’applique aux infobulles textuelles. En l’absence de traduction confirmée, le texte anglais des règles est affiché.",
+      "translateRulesHelp": "Disponible pour Carte textuelle et Compact. En l’absence de traduction confirmée, le texte anglais des règles est affiché.",
       "hoverDelay": "Délai de survol",
       "seconds": "{seconds} secondes"
     },
@@ -232,6 +232,12 @@
     }
   },
   "AppShell": {
+    "runtimeStatus": {
+      "watch": "Watch",
+      "watchTitle": "La surveillance du serveur est active ; les modifications du backend sont rechargées automatiquement.",
+      "localChanges": "modifié localement",
+      "localChangesTitle": "Des modifications n’étaient pas validées au démarrage du client web."
+    },
     "navigation": {
       "catalog": "Catalogue",
       "decks": "Decks",
@@ -309,6 +315,7 @@
   },
   "Account": {
     "panel": {
+      "retry": "Recharger",
       "loading": "Session de compte courant…",
       "signedIn": "Compte connecté",
       "admin": "Administrateur",
@@ -318,6 +325,8 @@
       "loginName": "Nom de connexion",
       "authentication": "Authentification",
       "password": "Mot de passe",
+      "showPassword": "Afficher le mot de passe",
+      "hidePassword": "Masquer le mot de passe",
       "sessionValidUntil": "Séance valable jusqu'au",
       "statistics": "Statistiques du jeu",
       "security": "Sécurité",
@@ -345,7 +354,16 @@
       "inviteHelp": "Dans cette version alpha, les comptes ne peuvent être créés que via une invitation d'administrateur.",
       "resetPassword": "Réinitialiser le mot de passe",
       "resetCode": "Réinitialiser le code",
-      "setNewPassword": "Définir un nouveau mot de passe"
+      "setNewPassword": "Définir un nouveau mot de passe",
+      "localProfile": "Profil local sans mot de passe",
+      "simpleMode": "Mode local simple",
+      "chooseProfile": "Choisir un profil",
+      "simpleModeHelp": "Cet appareil mémorise le dernier profil utilisé. Sur un appareil partagé, vous pouvez changer de profil à tout moment.",
+      "noProfiles": "Aucun profil de joueur n'existe encore.",
+      "createProfile": "Nouveau profil de joueur",
+      "createAndUseProfile": "Créer et utiliser le profil",
+      "createProtectedAccount": "Créer un compte protégé",
+      "protectedRegistrationHelp": "Toute personne sur le réseau privé accessible peut créer un compte. Le mot de passe doit comporter au moins 15 caractères."
     },
     "session": {
       "requestFailed": "La demande de compte a échoué.",
@@ -994,6 +1012,8 @@
       "randomStandard": "{side} · Deck standard aléatoire",
       "standard": "{side} · Deck standard · {name}",
       "personal": "{side} · Mon deck · {name}",
+      "openOnTable": "Voir sur la table de deck",
+      "editOnTable": "Modifier sur la table de deck",
       "guide": {
         "available": "Guide du deck",
         "stale": "Le guide doit être mis à jour",
@@ -1057,6 +1077,9 @@
       "clear": "Effacer",
       "unsaved": "Non enregistré",
       "saved": "Enregistré",
+      "standardPreview": "Deck standard · Aperçu",
+      "copyAsOwn": "Copier dans mes decks",
+      "backToMatchStart": "Retour au lancement de partie",
       "save": "Enregistrer",
       "view": "Voir",
       "back": "Retour à la liste",
@@ -1096,7 +1119,7 @@
         "agenda": "Points à l'ordre du jour"
       },
       "copy": "Copier",
-      "upToThree": "Jusqu'à 3",
+      "upToThree": "Compléter à 3",
       "remove": "Supprimer",
       "dropCard": "Déposez la carte ici"
     },
@@ -1121,6 +1144,9 @@
       "importDeck": "Importer un deck",
       "import": "Importer",
       "copyStandardDescription": "La copie est enregistrée en tant que deck personnel et peut ensuite être modifiée.",
+      "standardPreviewTitle": "Deck standard sur la table de deck",
+      "standardPreviewDescription": "La composition du deck est protégée. Vous pouvez disposer les cartes, puis copier cette disposition dans votre propre deck.",
+      "standardPreviewAccountRequired": "La composition du deck est protégée. Vous pouvez disposer les cartes ; connectez-vous pour créer une copie personnelle.",
       "side": "Côté",
       "corp": "Corp",
       "standardDeck": "Deck standard",
@@ -1452,6 +1478,7 @@
       "coreDamageValue": "Dommages au noyau : {value}",
       "handLimit": "Limite de main : {value}",
       "zeroLine": "Ligne zéro",
+      "flatlineBoundary": "Seuil de flatline",
       "damageAmount": "Dommages {amount}",
       "prevented": "Empêché",
       "queued": "{count, plural, one {Encore # notification de dégâts} other {Encore # notifications de dégâts}}",
@@ -1708,8 +1735,11 @@
         "complete": "Terminé"
       },
       "opportunity": {
+        "target": "Choisir la cible du piratage",
+        "complete": "Terminer le piratage",
         "choice": "Décision",
-        "rez": "Rez",
+        "ice_rez": "Activer une GLACE",
+        "card_rez": "Activer d’autres cartes",
         "breaker": "Augmenter la force ou casser",
         "ability": "Capacité de la carte",
         "access": "Accès",
@@ -1718,6 +1748,7 @@
         "pass": "Passer"
       },
       "currentlyPossible": "Actuellement possible : {actions}",
+      "stagePossibility": "Repère pour cette étape : {actions} – non proposé actuellement",
       "optionCost": "{option}, coût : {cost}",
       "runActions": "Exécuter des actions",
       "rezOtherServers": "Rez sur d'autres serveurs",
@@ -2143,6 +2174,9 @@
         "agendaPoints": "Agenda {value}"
       }
     },
+    "access": {
+      "cardPosition": "Carte {number} sur {total}"
+    },
     "event": {
       "gameCreated": "Le jeu a été créé.",
       "timeExpired": "{subject} : l'horloge du joueur a expiré.",
@@ -2156,11 +2190,21 @@
       "agendaScored": "{subject} : noté {card}.",
       "agendaStolen": "{subject} : étole {card}.",
       "runStarted": "{subject} : démarrage d'une exécution sur {server}.",
+      "iceBypassedByInsideJob": "{subject} : a automatiquement passé {ice} avec Inside Job.",
+      "insideJobBypassDescription": "La première GLACE activée a été passée automatiquement ; ses routines n’ont pas été résolues.",
       "runContinued": "{subject} : poursuite de l'exécution sur {server}.",
+      "runContinuedToIce": "{subject} : poursuite de l'exécution sur {server} vers ICE {number}.",
+      "runContinuedToRoot": "{subject} : poursuite de l'exécution sur {server} vers la racine.",
       "runJackedOut": "{subject} : débranché.",
       "runEnded": "La course s'est terminée.",
       "cardAccessed": "{subject} : accès à {card}.",
       "cardAccessedInServer": "{subject} : accès à {card} dans {server}.",
+      "numberedCardAccessedInServerYou": "Carte {number} sur {total} : vous avez accédé à {card} dans {server}.",
+      "numberedCardAccessedInServerOther": "Carte {number} sur {total} : {subject} a accédé à {card} dans {server}.",
+      "cardAccessedAndStolenYou": "{position}Vous avez accédé à {card} dans {server} et volé le projet.",
+      "cardAccessedAndStolenOther": "{position}{subject} a accédé à {card} dans {server} et volé le projet.",
+      "cardAccessedAndTrashedYou": "{position}Vous avez accédé à {card} dans {server} et détruit la carte.",
+      "cardAccessedAndTrashedOther": "{position}{subject} a accédé à {card} dans {server} et détruit la carte.",
       "cardTrashed": "{subject} : {card} détruit.",
       "damage": "{subject} : a subi des dommages {amount}.",
       "tagsGained": "{subject} : gain des balises {amount}.",
@@ -2168,6 +2212,8 @@
       "badPublicity": "{subject} : a obtenu une mauvaise publicité pour {amount}.",
       "traceStarted": "{subject} : lancement d'une trace.",
       "choiceResolved": "{subject} : résolu un choix.",
+      "stackProgramRevealedYou": "Vous avez utilisé {source} pour révéler {program} depuis la pile et l’ajouter à votre main.",
+      "stackProgramRevealedOther": "{subject} a utilisé {source} pour révéler {program} depuis la pile et l’ajouter à sa main.",
       "cardsDiscardedToArchives": "{subject} : a défaussé {count, plural, one {# carte} other {# cartes}} dans les Archives à la fin du tour.",
       "cardsDiscardedToHeap": "{subject} : a défaussé {count, plural, one {# carte} other {# cartes}} dans le Tas à la fin du tour.",
       "discardResultMissing": "{subject} : les détails de la défausse de fin de tour sont manquants.",
@@ -2180,6 +2226,7 @@
       "firstSubroutineBroken": "{subject} : a brisé le premier sous-programme de {ice}.",
       "secondSubroutineBroken": "{subject} : a brisé le deuxième sous-programme de {ice}.",
       "numberedSubroutineBroken": "{subject} : a brisé le sous-programme {number} de {ice}.",
+      "numberedSubroutineBrokenWithBreaker": "{subject} : a brisé le sous-programme {number} de {ice} avec {breaker}.",
       "icePassed": "{subject} : a passé {card}.",
       "subroutineBroken": "{subject} : rupture d'un sous-programme.",
       "subroutineResolved": "Un sous-programme résolu.",
@@ -2194,6 +2241,8 @@
       "redacted": "Un effet caché résolu.",
       "creditsGained": "{subject} : vous avez obtenu {amount, plural, one {# crédit} other {# crédits}} grâce à {source}.",
       "hostedCreditsTaken": "{subject} : a reçu {amount, plural, one {# crédit} other {# crédits}} de {source}.",
+      "allHostedCreditsTaken": "{subject} : a pris tous les crédits ({amount}) de {source}.",
+      "hostedCreditsAdded": "{subject} : a placé {amount, plural, one {# crédit} other {# crédits}} sur {source}.",
       "creditsLost": "{subject} : crédits {amount} perdus de {source}.",
       "cardsDrawn": "{subject} : a tiré des cartes {count} de {source}.",
       "cardTrashed": "{subject} : carte détruite à cause de {source}.",
@@ -2210,9 +2259,23 @@
       "tagGainedChip": "Balise reçue",
       "tagsAddedChip": "+{amount} {amount, plural, one {balise} other {balises}}",
       "tagsCurrentChip": "Maintenant {amount} {amount, plural, one {balise} other {balises}}",
+      "runnerPaidToPassIce": "{subject} : a payé {amount, plural, one {# crédit} other {# crédits}} pour passer {source}.",
+      "runnerDidNotPayToPassIce": "{subject} : n’a pas payé pour {source} ; le piratage est terminé.",
+      "numberedEndRunSubroutine": "{source} : le sous-programme {number} met fin au piratage.",
+      "endRunSubroutine": "{source} : un sous-programme met fin au piratage.",
+      "numberedSubroutineChip": "Sous-programme {number}",
+      "subroutineChip": "Sous-programme",
+      "runEndedChip": "Piratage terminé",
+      "creditsPaidChip": "{amount, plural, one {# crédit payé} other {# crédits payés}}",
+      "notPaidChip": "Non payé",
       "resolved": "Un effet automatique de {source} résolu.",
       "automatic": "Automatique",
       "flatline": "Flatline",
+      "sourceTrashScheduledAtTurnEnd": "{source} sera détruit à la fin du tour.",
+      "cardTrashedAtTurnEnd": "{card} a été détruit à la fin du tour.",
+      "trashAtTurnEndChip": "Destruction en fin de tour",
+      "shellCountersRemoved": "{source} : {amount, plural, one {# compteur Shell retiré} other {# compteurs Shell retirés}} de {card}.",
+      "shellCountersRemaining": "Encore {amount, plural, one {# compteur Shell} other {# compteurs Shell}}",
       "corpEffect": "Effet de la Corpo"
     },
     "damageType": {

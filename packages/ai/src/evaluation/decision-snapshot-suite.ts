@@ -8,10 +8,7 @@ import { buildSemanticShadowDecision } from "../decision/semantic-shadow-decisio
 import { buildTacticalGoalUtilities } from "../decision/tactical-goal-utility";
 import { buildAiThreatProjections } from "../decision/threat-projection";
 import type { DecisionSnapshot } from "./decision-snapshot";
-import type {
-  AiMistakeClass,
-  AiMistakeObservation,
-} from "./mistake-taxonomy";
+import type { AiMistakeClass, AiMistakeObservation } from "./mistake-taxonomy";
 
 export type DecisionSnapshotEvaluation = {
   snapshotId: string;
@@ -26,8 +23,13 @@ export function evaluateDecisionSnapshot(params: {
   frame: SemanticDecisionFrame;
   trace: SemanticDecisionTrace;
 }): DecisionSnapshotEvaluation {
-  const observedMistakes = classifyDecisionTraceMistakes(params.frame, params.trace);
-  const forbidden = new Set(params.snapshot.expectedProperties.forbiddenMistakes);
+  const observedMistakes = classifyDecisionTraceMistakes(
+    params.frame,
+    params.trace,
+  );
+  const forbidden = new Set(
+    params.snapshot.expectedProperties.forbiddenMistakes,
+  );
   const preferredGoalFamilyMatched = preferredGoalFamilyMatches(params);
   const failedForbiddenMistakes = observedMistakes.filter((mistake) =>
     forbidden.has(mistake.mistakeClass),
@@ -83,7 +85,9 @@ export function classifyDecisionTraceMistakes(
   const legalActionIds = new Set(frame.legalActionIds);
   const topAction = trace.rankedActions[0];
   const topCandidate = topAction
-    ? frame.actionCandidates.find((candidate) => candidate.actionId === topAction.actionId)
+    ? frame.actionCandidates.find(
+        (candidate) => candidate.actionId === topAction.actionId,
+      )
     : undefined;
   if (!legalActionInvariantHolds(frame, trace)) {
     mistakes.push({
@@ -92,7 +96,10 @@ export function classifyDecisionTraceMistakes(
       evidence: ["ranked_or_selected_action_not_in_frame_legal_actions"],
     });
   }
-  const hiddenMarkerPath = findForbiddenSemanticPath({ frame, trace }, "snapshot");
+  const hiddenMarkerPath = findForbiddenSemanticPath(
+    { frame, trace },
+    "snapshot",
+  );
   if (hiddenMarkerPath) {
     mistakes.push({
       mistakeClass: "hidden_info_dependency",
@@ -129,7 +136,9 @@ export function classifyDecisionTraceMistakes(
     });
   }
   if (
-    opportunities.some((opportunity) => opportunity.opportunity === "safe_central_access") &&
+    opportunities.some(
+      (opportunity) => opportunity.opportunity === "safe_central_access",
+    ) &&
     topSemantic !== "run.start"
   ) {
     mistakes.push({
@@ -151,7 +160,9 @@ export function classifyDecisionTraceMistakes(
     });
   }
   if (
-    opportunities.some((opportunity) => opportunity.opportunity === "score_window") &&
+    opportunities.some(
+      (opportunity) => opportunity.opportunity === "score_window",
+    ) &&
     topSemantic !== "score.agenda" &&
     topSemantic !== "score.advance_card"
   ) {
@@ -198,11 +209,14 @@ export function classifyDecisionTraceMistakes(
       });
     }
   }
-  return dedupeMistakes(mistakes.filter((mistake) =>
-    mistake.mistakeClass === "illegal_action" ||
-    mistake.actionId === undefined ||
-    legalActionIds.has(mistake.actionId),
-  ));
+  return dedupeMistakes(
+    mistakes.filter(
+      (mistake) =>
+        mistake.mistakeClass === "illegal_action" ||
+        mistake.actionId === undefined ||
+        legalActionIds.has(mistake.actionId),
+    ),
+  );
 }
 
 function rejectedMistakeEvidence(
@@ -220,8 +234,12 @@ function legalActionInvariantHolds(
 ): boolean {
   const legalActionIds = new Set(frame.legalActionIds);
   return (
-    trace.rankedActions.every((action) => legalActionIds.has(action.actionId)) &&
-    trace.rejectedActions.every((action) => legalActionIds.has(action.actionId)) &&
+    trace.rankedActions.every((action) =>
+      legalActionIds.has(action.actionId),
+    ) &&
+    trace.rejectedActions.every((action) =>
+      legalActionIds.has(action.actionId),
+    ) &&
     (trace.selectedActionId === undefined ||
       legalActionIds.has(trace.selectedActionId))
   );
@@ -237,7 +255,9 @@ function preferredGoalFamilyMatches(params: {
   const top = params.trace.rankedActions[0];
   if (!top?.primaryGoalId) return false;
   const utilities = buildTacticalGoalUtilities(params.frame.tacticalGoals);
-  const topUtility = utilities.find((utility) => utility.goalId === top.primaryGoalId);
+  const topUtility = utilities.find(
+    (utility) => utility.goalId === top.primaryGoalId,
+  );
   const preferredGoalFamilySet = new Set(preferred);
   return Boolean(topUtility && preferredGoalFamilySet.has(topUtility.family));
 }
@@ -249,8 +269,9 @@ function dedupeMistakes(
   for (const mistake of mistakes) {
     byKey.set(`${mistake.mistakeClass}:${mistake.actionId ?? ""}`, mistake);
   }
-  return [...byKey.values()].sort((left, right) =>
-    left.mistakeClass.localeCompare(right.mistakeClass) ||
-    (left.actionId ?? "").localeCompare(right.actionId ?? ""),
+  return [...byKey.values()].sort(
+    (left, right) =>
+      left.mistakeClass.localeCompare(right.mistakeClass) ||
+      (left.actionId ?? "").localeCompare(right.actionId ?? ""),
   );
 }

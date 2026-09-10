@@ -387,12 +387,16 @@ function viacoxStateForRoll(
 describe("Proteus PRO017 action economy and debt suite", () => {
   it("AI Board Member offers optional restricted action families and filters the bound extra click", () => {
     const cases = [
-      { roll: 1, expected: ["install_card"] },
-      { roll: 2, expected: ["gain_credit"] },
-      { roll: 3, expected: ["gain_credit"] },
-      { roll: 4, expected: ["draw_card"] },
-      { roll: 5, expected: ["draw_card"] },
-      { roll: 6, expected: ["draw_card"] },
+      {
+        roll: 1,
+        expected: ["install_card"],
+        restriction: "install_only",
+      },
+      { roll: 2, expected: ["gain_credit"], restriction: "unrestricted" },
+      { roll: 3, expected: ["gain_credit"], restriction: "unrestricted" },
+      { roll: 4, expected: ["draw_card"], restriction: "unrestricted" },
+      { roll: 5, expected: ["draw_card"], restriction: "unrestricted" },
+      { roll: 6, expected: ["draw_card"], restriction: "unrestricted" },
     ];
     for (const testCase of cases) {
       let state = aiBoardStateForRoll(testCase.roll);
@@ -402,6 +406,20 @@ describe("Proteus PRO017 action economy and debt suite", () => {
           .map((action) => action.payload?.actionEconomyAbility)
           .sort(),
       ).toEqual(["accept_extra_action_offer", "decline_extra_action_offer"]);
+      expect(
+        offerActions.find(
+          (action) =>
+            action.payload?.actionEconomyAbility ===
+            "accept_extra_action_offer",
+        )?.payload,
+      ).toMatchObject({
+        scoreConversionCapability: "gain_action_capacity",
+        gainActionsAmount: 1,
+        actionCapacityTiming: "immediate",
+        actionCapacityReliability: "guaranteed",
+        actionCapacityRestriction: testCase.restriction,
+        actionCapacityAllowedActionType: testCase.expected[0],
+      });
 
       const declined = apply(
         state,
@@ -474,9 +492,7 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     );
     expect(state.pendingChoice).toMatchObject({
       side: "corp",
-      source: expect.stringContaining(
-        `damage_replacement:${pdcaId}`,
-      ),
+      source: expect.stringContaining(`damage_replacement:${pdcaId}`),
     });
     expect(state.cardInstances[pdcaId]?.counters?.pdca).toBeUndefined();
     expect(state.runner.grip).toHaveLength(1);
@@ -572,7 +588,9 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     );
     const partialOption = `replace_${pdcaId}_1`;
     expect(
-      state.pendingChoice?.options.some((option) => option.id === partialOption),
+      state.pendingChoice?.options.some(
+        (option) => option.id === partialOption,
+      ),
     ).toBe(true);
     state = applyChoice(state, "corp", partialOption);
 
@@ -652,9 +670,7 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     replaceState = applyChoice(replaceState, "runner", "bid_0");
     expect(replaceState.pendingChoice).toMatchObject({
       side: "corp",
-      source: expect.stringContaining(
-        `damage_replacement:${replacePdcaId}`,
-      ),
+      source: expect.stringContaining(`damage_replacement:${replacePdcaId}`),
     });
     expect(replaceState.phase).toBe("run");
     expect(replaceState.timingPoint).toBe("run.encounter_ice");
@@ -761,16 +777,12 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     );
     expect(state.pendingChoice).toMatchObject({
       side: "corp",
-      source: expect.stringContaining(
-        `damage_replacement:${pdcaId}`,
-      ),
+      source: expect.stringContaining(`damage_replacement:${pdcaId}`),
     });
     state = applyChoice(
       state,
       "corp",
-      String(
-        state.pendingChoice?.options.at(-1)?.id,
-      ),
+      String(state.pendingChoice?.options.at(-1)?.id),
     );
     expect(state.cardInstances[pdcaId]?.counters?.pdca).toBe(2);
     expect(state.cardInstances[cybertechId]?.advancementCounters).toBe(0);

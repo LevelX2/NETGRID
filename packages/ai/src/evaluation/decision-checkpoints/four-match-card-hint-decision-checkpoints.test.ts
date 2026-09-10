@@ -63,10 +63,13 @@ describe("four-match card-hint decision checkpoints", () => {
         "plan_assessment_evidence:runner_damage_locked_hand_reaction_reserve",
       ]),
     );
-    const insideJobAction = result.input.legalActions.find((action) =>
-      action.actionId.includes("inside-job") && action.actionId.includes(".rd."),
+    const insideJobAction = result.input.legalActions.find(
+      (action) =>
+        action.actionId.includes("inside-job") &&
+        action.actionId.includes(".rd."),
     );
-    if (!insideJobAction) throw new Error("Expected legal Inside Job R&D action");
+    if (!insideJobAction)
+      throw new Error("Expected legal Inside Job R&D action");
     const scopedInput = {
       ...result.input,
       legalActions: [insideJobAction],
@@ -94,15 +97,15 @@ describe("four-match card-hint decision checkpoints", () => {
     expect(directHqEvaluation).toMatchObject({
       targetServerId: "hq",
       accessServerId: "hq",
-      pathPassability: "blocked_unpayable",
-      pathCost: 8,
-      creditsAfterRun: -2,
+      pathPassability: "reachable",
+      pathCost: 2,
+      creditsAfterRun: 4,
       routeQuote: {
-        reachability: "no_access",
-        fundingGap: 2,
+        reachability: "guaranteed_access",
+        fundingGap: 0,
         unknownIceCount: 0,
       },
-      unavoidableVisibleIceHazardCount: 0,
+      unavoidableVisibleIceHazardCount: 1,
     });
     expect(directHqEvaluation?.score).toBeLessThan(0);
   });

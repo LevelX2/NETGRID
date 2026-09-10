@@ -46,12 +46,13 @@ export function buildTargetChoiceShadowCandidateCoverageReport(
   cases: readonly TargetChoiceShadowCoverageCase[],
 ): TargetChoiceShadowCandidateCoverageReport {
   const reports = cases.flatMap((coverageCase) => coverageCase.reports);
-  const coverageStatusCounts: Record<TargetChoiceShadowCoverageStatus, number> = {
-    covered: 0,
-    partial: 0,
-    blocked: 0,
-    empty: 0,
-  };
+  const coverageStatusCounts: Record<TargetChoiceShadowCoverageStatus, number> =
+    {
+      covered: 0,
+      partial: 0,
+      blocked: 0,
+      empty: 0,
+    };
   const optionTotals = {
     total: 0,
     choice: 0,
@@ -147,7 +148,10 @@ export function buildTargetChoiceShadowCandidateCoverageReport(
       `target_fit_recommendation_count:${targetFitRecommendationCount}`,
     ],
   };
-  assertSemanticObjectSideSafe(report, "TargetChoiceShadowCandidateCoverageReport");
+  assertSemanticObjectSideSafe(
+    report,
+    "TargetChoiceShadowCandidateCoverageReport",
+  );
   return report;
 }
 

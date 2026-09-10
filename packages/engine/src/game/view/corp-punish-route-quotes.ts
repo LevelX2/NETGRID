@@ -38,6 +38,11 @@ import {
   damagePreventionUsedThisTurn,
 } from "../state/turn-flags-counters";
 import { eligibleInstalledRunnerHardwareIds } from "../state/installed-runner-hardware";
+import {
+  definitionFor,
+  runnerInstalledCardIds,
+} from "../state/card-server-lookup";
+import { traceAutoSuccessSource } from "../trace/trace-auto-success";
 import { isConcealedRunnerResource } from "./card-view";
 
 type CertifiedStep = {
@@ -597,6 +602,15 @@ function certifyExactTraceTagResponse(
 
   const { state: simulationState, concealedRunnerResponsesUnknown } =
     publicTraceSimulationState(state);
+  const automaticSuccess = traceAutoSuccessSource({
+    runnerInstalledCardIds: () => runnerInstalledCardIds(simulationState),
+    definitionFor: (cardId) => definitionFor(simulationState, cardId),
+  });
+  const requiredCorpBid = automaticSuccess ? 0 : traceEffect.traceLimit;
+  const exactFixedTagAmount =
+    fixedTagAmount === undefined
+      ? undefined
+      : fixedTagAmount + (automaticSuccess?.additionalTagAmount ?? 0);
   if (!currentHeadAction) {
     simulationState.corp.credits = traceStep.quote.credits;
     currentHeadAction = exactCurrentHeadAction(
@@ -627,11 +641,11 @@ function certifyExactTraceTagResponse(
   )[0];
   if (
     !maximumAvailableCorpBid ||
-    maximumAvailableCorpBid.value < traceEffect.traceLimit
+    maximumAvailableCorpBid.value < requiredCorpBid
   ) {
     const { state: fundedSimulationState } = publicTraceSimulationState(state);
     fundedSimulationState.corp.credits =
-      traceStep.quote.credits + traceEffect.traceLimit;
+      traceStep.quote.credits + requiredCorpBid;
     const fundedHeadAction = exactCurrentHeadAction(
       fundedSimulationState,
       traceStep.quote,
@@ -657,104 +671,81 @@ function certifyExactTraceTagResponse(
       (left, right) => right.value - left.value,
     )[0];
   }
-  const winningCorpBid = corpBidOptions.find(
-    (option) => option.value === traceEffect.traceLimit,
-  );
-  if (
-    !maximumAvailableCorpBid ||
-    maximumAvailableCorpBid.value < traceEffect.traceLimit ||
-    !winningCorpBid ||
-    !corpBidOptions.some((option) => option.value === 0)
-  ) {
-    return undefined;
-  }
-  const afterCorpBid = applyExactChoice(
-    verifiedAfterHead,
-    "corp",
-    winningCorpBid.id,
-  );
-  if (
-    !afterCorpBid ||
-    afterCorpBid.trace?.status !== "runner_bid" ||
-    afterCorpBid.pendingChoice?.side !== "runner" ||
-    afterCorpBid.pendingChoice.kind !== "bid_amount" ||
-    afterCorpBid.trace.corpBid !== winningCorpBid.value ||
-    afterCorpBid.trace.traceValue !==
-      traceEffect.traceLimit + winningCorpBid.value ||
-    !Number.isSafeInteger(afterCorpBid.trace.runnerLink) ||
-    afterCorpBid.trace.runnerLink! < 0
-  ) {
-    return undefined;
-  }
-  const runnerBidOptions = numericBidOptions(afterCorpBid);
-  const maximumRunnerBid = runnerBidOptions.sort(
-    (left, right) => right.value - left.value,
-  )[0];
-  const zeroRunnerBid = runnerBidOptions.find((option) => option.value === 0);
-  if (!maximumRunnerBid || !zeroRunnerBid) return undefined;
-
-  // Original Trace is open and sequential: Corp bids first, then Runner
-  // responds. The quote intentionally certifies the smallest bid at the
-  // printed trace limit; it must not fail merely because the rules also allow
-  // the Corp to overbid with additional visible credits.
-  const runnerLink = afterCorpBid.trace.runnerLink!;
-  if (winningCorpBid.value < runnerLink) return undefined;
-  const tieCorpBid = corpBidOptions.find(
-    (option) => option.value === runnerLink,
-  );
-  if (tieCorpBid) {
-    const tieRunnerWindow = applyExactChoice(
+  // Quote the least costly bid that succeeds against every supported public
+  // response. If none guarantees success, retain the printed-limit attempt
+  // as an explicitly reactive envelope. This quotes a route, never plays it.
+  let selected:
+    | {
+        afterCorpBid: GameState;
+        successfulOutcomes: NonNullable<
+          ReturnType<typeof exactTagApplicationOutcomes>
+        >;
+        maximumResponseOutcomes: NonNullable<
+          ReturnType<typeof exactTagApplicationOutcomes>
+        >;
+      }
+    | undefined;
+  for (const bid of corpBidOptions
+    .filter((option) => option.value <= requiredCorpBid)
+    .sort((left, right) => left.value - right.value)) {
+    const afterBid = applyExactChoice(
       structuredClone(verifiedAfterHead),
       "corp",
-      tieCorpBid.id,
+      bid.id,
     );
-    const tieRunnerZero = tieRunnerWindow
-      ? numericBidOptions(tieRunnerWindow).find((option) => option.value === 0)
-      : undefined;
-    const tied =
-      tieRunnerWindow && tieRunnerZero
-        ? applyExactChoice(tieRunnerWindow, "runner", tieRunnerZero.id)
-        : undefined;
-    const tiedOutcomes = tied ? exactTagApplicationOutcomes(tied) : undefined;
-    if (!tiedOutcomes) {
+    if (
+      !afterBid ||
+      afterBid.trace?.status !== "runner_bid" ||
+      afterBid.pendingChoice?.side !== "runner" ||
+      afterBid.pendingChoice.kind !== "bid_amount" ||
+      afterBid.trace.corpBid !== bid.value
+    )
       return undefined;
-    }
-    const tiedTagAmounts = tiedOutcomes.states.map(
+    const runnerOptions = numericBidOptions(afterBid);
+    const maximumBid = runnerOptions.sort((a, b) => b.value - a.value)[0];
+    const zeroBid = runnerOptions.find((option) => option.value === 0);
+    if (!maximumBid || !zeroBid) return undefined;
+    const zeroState = applyExactChoice(
+      structuredClone(afterBid),
+      "runner",
+      zeroBid.id,
+    );
+    const maximumState = applyExactChoice(
+      structuredClone(afterBid),
+      "runner",
+      maximumBid.id,
+    );
+    const zeroOutcomes = zeroState && exactTagApplicationOutcomes(zeroState);
+    const maximumOutcomes =
+      maximumState && exactTagApplicationOutcomes(maximumState);
+    if (!zeroOutcomes || !maximumOutcomes) return undefined;
+    const amounts = [...zeroOutcomes.states, ...maximumOutcomes.states].map(
       (outcome) => outcome.runner.tags - simulationState.runner.tags,
     );
     if (
-      tiedTagAmounts.some(
+      amounts.some(
         (amount) =>
           !Number.isSafeInteger(amount) ||
           amount < 0 ||
-          (fixedTagAmount !== undefined && amount > fixedTagAmount),
-      ) ||
-      (fixedTagAmount !== undefined
-        ? Math.max(...tiedTagAmounts) !== fixedTagAmount
-        : Math.max(...tiedTagAmounts) <= 0)
-    ) {
+          (exactFixedTagAmount !== undefined && amount > exactFixedTagAmount),
+      )
+    )
       return undefined;
+    if (
+      Math.min(...amounts) > 0 ||
+      (bid.value === requiredCorpBid && Math.max(...amounts) > 0)
+    ) {
+      selected = {
+        afterCorpBid: afterBid,
+        successfulOutcomes: zeroOutcomes,
+        maximumResponseOutcomes: maximumOutcomes,
+      };
+      break;
     }
   }
-
-  const successful = applyExactChoice(
-    structuredClone(afterCorpBid),
-    "runner",
-    zeroRunnerBid.id,
-  );
-  if (!successful) return undefined;
-  const successfulOutcomes = exactTagApplicationOutcomes(successful);
-  if (!successfulOutcomes) return undefined;
-  const maximumRunnerResponse = applyExactChoice(
-    structuredClone(afterCorpBid),
-    "runner",
-    maximumRunnerBid.id,
-  );
-  if (!maximumRunnerResponse) return undefined;
-  const maximumResponseOutcomes = exactTagApplicationOutcomes(
-    maximumRunnerResponse,
-  );
-  if (!maximumResponseOutcomes) return undefined;
+  if (!selected) return undefined;
+  const { afterCorpBid, successfulOutcomes, maximumResponseOutcomes } =
+    selected;
   const responseOutcomes = [
     ...successfulOutcomes.states,
     ...maximumResponseOutcomes.states,
@@ -766,19 +757,6 @@ function certifyExactTraceTagResponse(
     ? 0
     : Math.min(...tagAmounts);
   const maximumTagAmount = Math.max(...tagAmounts);
-  if (
-    tagAmounts.some(
-      (amount) =>
-        !Number.isSafeInteger(amount) ||
-        amount < 0 ||
-        (fixedTagAmount !== undefined && amount > fixedTagAmount),
-    ) ||
-    (fixedTagAmount !== undefined
-      ? maximumTagAmount !== fixedTagAmount
-      : maximumTagAmount <= 0)
-  ) {
-    return undefined;
-  }
   const corpResponseCredits =
     verifiedAfterHead.corp.credits - afterCorpBid.corp.credits;
   const runnerResponseCredits = Math.max(

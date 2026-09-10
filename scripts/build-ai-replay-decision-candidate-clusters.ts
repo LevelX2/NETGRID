@@ -13,12 +13,13 @@ const outputDir = resolve(
   optionValue("--out-dir") ?? `data/local/ai-replay/${runId}`,
 );
 const inputPath =
-  optionValue("--input") ??
-  resolve(outputDir, `${runId}-decision-cases.json`);
+  optionValue("--input") ?? resolve(outputDir, `${runId}-decision-cases.json`);
 const jsonOut = resolve(outputDir, `${runId}-candidate-clusters.json`);
 const mdOut = resolve(outputDir, `${runId}-candidate-clusters.md`);
 
-const source = JSON.parse(readFileSync(inputPath, "utf8")) as ReplayDecisionCaseExtractionReport;
+const source = JSON.parse(
+  readFileSync(inputPath, "utf8"),
+) as ReplayDecisionCaseExtractionReport;
 const report = buildReplayDecisionCandidateClusterReport(source);
 
 mkdirSync(dirname(jsonOut), { recursive: true });
@@ -87,7 +88,8 @@ function findRepoRoot(start: string): string {
       // Continue walking up.
     }
     const parent = dirname(current);
-    if (parent === current) throw new Error(`Could not find NETGRID repo root from ${start}`);
+    if (parent === current)
+      throw new Error(`Could not find NETGRID repo root from ${start}`);
     current = parent;
   }
 }

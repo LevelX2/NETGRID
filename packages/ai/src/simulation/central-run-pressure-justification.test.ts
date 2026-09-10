@@ -4,9 +4,7 @@ import { runnerCentralRunPressureJustificationReasons } from "./central-run-pres
 
 describe("runnerCentralRunPressureJustificationReasons", () => {
   it("matches multiaccess roles by bounded role terms", () => {
-    expect(reasonsForRoles(["interface_multiaccess"])).toContain(
-      "multiaccess",
-    );
+    expect(reasonsForRoles(["interface_multiaccess"])).toContain("multiaccess");
     expect(reasonsForRoles(["multiaccessory_noise"])).not.toContain(
       "multiaccess",
     );
@@ -14,19 +12,14 @@ describe("runnerCentralRunPressureJustificationReasons", () => {
 });
 
 function reasonsForRoles(roles: string[]): string[] {
-  return runnerCentralRunPressureJustificationReasons(
-    input(),
-    "rd",
-    false,
-    {
-      assessKnownRezzedIcePath: () =>
-        ({ blocked: false, visibleBreakCost: 0, creditsAfterPath: 5 }) as never,
-      recentCentralRunSameTargetWithoutRefresh: () => false,
-      rolesForCardId: () => roles,
-      runnerCreditReserveTargetForInput: () => 0,
-      trueCentralCloseoutProfileForMetrics: () => ({ opportunity: false }),
-    },
-  );
+  return runnerCentralRunPressureJustificationReasons(input(), "rd", false, {
+    assessKnownRezzedIcePath: () =>
+      ({ blocked: false, visibleBreakCost: 0, creditsAfterPath: 5 }) as never,
+    recentCentralRunSameTargetWithoutRefresh: () => false,
+    rolesForCardId: () => roles,
+    runnerCreditReserveTargetForInput: () => 0,
+    trueCentralCloseoutProfileForMetrics: () => ({ opportunity: false }),
+  });
 }
 
 function input(): AiDecisionInput {

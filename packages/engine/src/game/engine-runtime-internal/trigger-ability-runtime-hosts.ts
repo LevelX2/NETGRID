@@ -526,7 +526,6 @@ import {
   scoredAgendaCounterCreditProfileForDefinition,
   scoredAgendaCounterCreditProfileForPayload,
   SCORED_REVEAL_AGENDA_SOURCES,
-  SERVER_DIFFICULTY_UPGRADE_SOURCES,
 } from "../../mechanics/agenda-scoring";
 import { TAG_HANDSIZE_ASSET_SOURCE } from "../../mechanics/global-modifiers";
 import { COUNTER_UPGRADE_SOURCES } from "../../mechanics/hosting-counters";
@@ -627,6 +626,7 @@ export function createTriggerAbilityRuntimeHosts(
       },
       runner: {
         runnerMemoryLimit,
+        canHostProgramOnDaemon: deps.canHostProgramOnDaemon,
         runnerProgramUsesMemory: deps.runnerProgramUsesMemory,
         pickAgendaPointCostSource: () =>
           deps.pickRunnerAgendaForAgendaPointCost(state) as

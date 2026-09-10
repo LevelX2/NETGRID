@@ -291,7 +291,7 @@ export function ActiveServerGrid({
                         ? {
                             runPositionLabel:
                               runPositionStatusLabel(view, locale) ??
-                                t("currentIce"),
+                              t("currentIce"),
                           }
                         : {})}
                       viewMarkerActive={

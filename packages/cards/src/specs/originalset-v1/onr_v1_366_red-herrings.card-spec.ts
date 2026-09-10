@@ -73,6 +73,14 @@ export const cardSpec = {
         role: "protect_remote",
       },
       {
+        kind: "plan_role",
+        role: "protect_hq",
+      },
+      {
+        kind: "plan_role",
+        role: "protect_rnd",
+      },
+      {
         kind: "strategic_role",
         role: "defensive_tool",
       },

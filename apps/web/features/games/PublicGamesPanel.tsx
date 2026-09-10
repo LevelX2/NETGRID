@@ -154,7 +154,7 @@ export function PublicGamesPanel({
       )}
       {updatedAt ? (
         <p className="publicGamesTimestamp">
-          {t("lastUpdated", {date: formatTime(updatedAt, locale)})}
+          {t("lastUpdated", { date: formatTime(updatedAt, locale) })}
         </p>
       ) : null}
     </section>
@@ -241,14 +241,18 @@ function PublicGameCard({
                 ))}
               </strong>
             ) : (
-              <strong>{[entry.participantNames.runner, entry.participantNames.corp].filter(Boolean).join(" vs ") || t("participantsPreparing")}</strong>
+              <strong>
+                {[entry.participantNames.runner, entry.participantNames.corp]
+                  .filter(Boolean)
+                  .join(" vs ") || t("participantsPreparing")}
+              </strong>
             )}
           </div>
           <p className="publicGameMeta">
             {t(`matchMode.${entry.matchMode}`)} ·{" "}
             {t(`matchFormat.${entry.matchFormat}`)}
             {entry.seriesGamesPlanned
-              ? ` · ${t("gameCount", {count: entry.seriesGamesPlanned})}`
+              ? ` · ${t("gameCount", { count: entry.seriesGamesPlanned })}`
               : ""}
             {` · ${t(`cardPool.${entry.cardPool}`)}`}
           </p>
@@ -256,25 +260,35 @@ function PublicGameCard({
             <p className="publicGameJoinInfo">
               <Users size={14} />
               <span className="publicGameJoinDetails">
-                {t("host")}: {entry.hostDisplayName ?? t("participantA")} · {t("occupied")}: {" "}
+                {t("host")}: {entry.hostDisplayName ?? t("participantA")} ·{" "}
+                {t("occupied")}:{" "}
                 {entry.hostSide ? t(`side.${entry.hostSide}`) : "–"} ·{" "}
               </span>
-              <span>{t("available")}: {entry.availableSide ? t(`side.${entry.availableSide}`) : "–"}</span>
+              <span>
+                {t("available")}:{" "}
+                {entry.availableSide ? t(`side.${entry.availableSide}`) : "–"}
+              </span>
             </p>
           ) : null}
           {resultScore ? (
             <p className="publicGameResult">
               <span className="publicGameResultScores">
                 {resultScore.matchPoints ? (
-                  <strong>{t("matchPoints")} {resultScore.matchPoints}</strong>
+                  <strong>
+                    {t("matchPoints")} {resultScore.matchPoints}
+                  </strong>
                 ) : null}
-                <span>{t("agendaPoints")} {resultScore.agendaPoints}</span>
+                <span>
+                  {t("agendaPoints")} {resultScore.agendaPoints}
+                </span>
               </span>
               <span className="publicGameResultSeparator" aria-hidden="true">
                 {" "}
                 ·{" "}
               </span>
-              <span className="publicGameWinner">{t(winnerMessageKey(entry))}</span>
+              <span className="publicGameWinner">
+                {t(winnerMessageKey(entry))}
+              </span>
               {conclusion ? (
                 <>
                   <span
@@ -300,7 +314,9 @@ function PublicGameCard({
         <code title={entry.matchId}>{entry.matchId}</code>
       </div>
       <div className="publicGameFooter">
-        <span>{t("updated", {date: formatTime(entry.updatedAt, locale)})}</span>
+        <span>
+          {t("updated", { date: formatTime(entry.updatedAt, locale) })}
+        </span>
         {entry.status === "open" ? (
           <button
             className="button primary"
@@ -326,12 +342,8 @@ function PublicGameCard({
               onClick={() => onRejoin(entry)}
               type="button"
               disabled={rejoining}
-              aria-label={
-                rejoining ? t("rejoining") : t("rejoin")
-              }
-              title={
-                rejoining ? t("rejoining") : t("rejoin")
-              }
+              aria-label={rejoining ? t("rejoining") : t("rejoin")}
+              title={rejoining ? t("rejoining") : t("rejoin")}
             >
               <LogIn size={15} />
               <span className="publicGameActionLabel">
@@ -346,7 +358,9 @@ function PublicGameCard({
                 title={t("action.active")}
               >
                 <Eye size={15} />
-                <span className="publicGameActionLabel">{t("action.active")}</span>
+                <span className="publicGameActionLabel">
+                  {t("action.active")}
+                </span>
               </Link>
             ) : null}
           </>
@@ -381,7 +395,9 @@ function PublicGameCard({
   );
 }
 
-function winnerMessageKey(entry: PublicMatchEntry): "runnerWins" | "corpWins" | "draw" | "ended" {
+function winnerMessageKey(
+  entry: PublicMatchEntry,
+): "runnerWins" | "corpWins" | "draw" | "ended" {
   const winner =
     entry.result?.winnerSide ?? entry.result?.winner ?? entry.winner;
   if (winner === "runner") return "runnerWins";

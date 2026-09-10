@@ -227,9 +227,7 @@ export function buildCorpScoringRemoteProjectSignals(
       phase,
       maturity,
       ...(need ? { need } : {}),
-      ...(leasedConsumer
-        ? { consumerSupport: leasedConsumer.support }
-        : {}),
+      ...(leasedConsumer ? { consumerSupport: leasedConsumer.support } : {}),
       ...(scoreLeaseId ? { scoreLeaseId } : {}),
       cadence,
       feasible,
@@ -447,9 +445,7 @@ function targetServerStillAvailable(
       !claims.some((claim) => claim.serverId === serverId)
     );
   }
-  if (
-    !remoteHasEngineCertifiedVisibleAgendaTarget(input, serverId)
-  ) {
+  if (!remoteHasEngineCertifiedVisibleAgendaTarget(input, serverId)) {
     return false;
   }
   return !claims.some((claim) => claim.serverId === serverId);
@@ -483,22 +479,15 @@ function reboundServerAfterNewRemoteIceInstall(
   input: AiDecisionInput,
   previous: ResidentPlanPortfolio | undefined,
 ): string | undefined {
-  const origin = previous?.selectedActionOrigin;
-  if (!origin || origin.selectedAtStateVersion !== previous?.stateVersion) {
-    return undefined;
-  }
-  const provider = previous.instances.find(
-    (instance) => instance.instanceId === origin.executorInstanceId,
-  );
+  const receipt = appliedRemoteSupportReceipt(input, previous);
   if (
-    provider?.parentInstanceId !==
-    planInstanceIdForProposal({
-      moduleId: "corp.establish_scoring_remote",
-      dedupeKey: STRATEGIC_SCORE_REMOTE_PROJECT_ID,
-    })
-  ) {
+    !receipt ||
+    receipt.lease.actionType !== "install_card" ||
+    receipt.provider.moduleId !== "corp.defend_servers" ||
+    receipt.event.publicPayload?.installPlacement !== "ice"
+  )
     return undefined;
-  }
+  const { provider } = receipt;
   const state = provider.moduleState as {
     kind?: unknown;
     signals?: Array<{
@@ -511,15 +500,20 @@ function reboundServerAfterNewRemoteIceInstall(
   };
   const signal = state.signals?.find(
     (entry) =>
-      (entry.actionIds?.includes(origin.selectedActionId) ||
-        entry.actionId === origin.selectedActionId) &&
+      (entry.actionIds?.includes(receipt.lease.currentBinding.actionId) ||
+        entry.actionId === receipt.lease.currentBinding.actionId) &&
       entry.serverId === "new_remote" &&
       entry.parentKind === "remote",
   );
-  if (!signal?.sourceCardInstanceId) return undefined;
+  if (
+    !signal?.sourceCardInstanceId ||
+    signal.sourceCardInstanceId !== receipt.node.invocation.sourceCardInstanceId
+  )
+    return undefined;
   return input.playerView.servers.find(
     (server) =>
       server.id.startsWith("remote_") &&
+      server.id === receipt.event.publicPayload?.serverId &&
       server.ice.some(
         (ice: VisibleCard) => ice.instanceId === signal.sourceCardInstanceId,
       ),
@@ -537,19 +531,19 @@ function remoteCadence(
     previousSignal?.cadence.turnKey === turnKey
       ? previousSignal.cadence.actionsUsed
       : 0;
-  const origin = previous?.selectedActionOrigin;
-  const provider = origin
-    ? previous?.instances.find(
-        (instance) => instance.instanceId === origin.executorInstanceId,
-      )
-    : undefined;
+  const receipt = appliedRemoteSupportReceipt(input, previous);
   if (
-    origin?.selectedAtStateVersion === previous?.stateVersion &&
-    provider?.parentInstanceId ===
-      planInstanceIdForProposal({
-        moduleId: "corp.establish_scoring_remote",
-        dedupeKey: STRATEGIC_SCORE_REMOTE_PROJECT_ID,
-      })
+    receipt &&
+    (receipt.lease.actionType !== "install_card" ||
+      receipt.event.publicPayload?.installPlacement !== "ice" ||
+      input.playerView.servers.some(
+        (server) =>
+          server.id === receipt.event.publicPayload?.serverId &&
+          server.ice.some(
+            (ice) =>
+              ice.instanceId === receipt.node.invocation.sourceCardInstanceId,
+          ),
+      ))
   ) {
     actionsUsed += 1;
   }
@@ -559,6 +553,54 @@ function remoteCadence(
     actionsUsed,
     open: actionsUsed < maximumActions,
   };
+}
+
+/** Observe the selected TurnPlanner support action; Choice origins do not
+ * represent ordinary actions and cannot certify a remote construction step. */
+function appliedRemoteSupportReceipt(
+  input: AiDecisionInput,
+  previous: ResidentPlanPortfolio | undefined,
+) {
+  const lease = previous?.turnPlanExecutionLease;
+  const commitment = previous?.turnPlanCommitment;
+  const phase = commitment?.phases[commitment.cursor.phaseIndex];
+  const node = phase?.nodes[commitment!.cursor.nodeIndex];
+  const provider = previous?.instances.find(
+    (instance) => instance.instanceId === previous.executorInstanceId,
+  );
+  const rootId = planInstanceIdForProposal({
+    moduleId: "corp.establish_scoring_remote",
+    dedupeKey: STRATEGIC_SCORE_REMOTE_PROJECT_ID,
+  });
+  if (
+    !previous ||
+    !lease ||
+    !commitment ||
+    !phase ||
+    !node ||
+    !provider ||
+    previous.side !== "corp" ||
+    input.side !== "corp" ||
+    provider.parentInstanceId !== rootId ||
+    phase.root.planInstanceId !== rootId ||
+    lease.commitmentId !== commitment.commitmentId ||
+    lease.sourcePlanId !== commitment.sourcePlanId ||
+    lease.phaseId !== phase.phaseId ||
+    lease.nodeId !== node.nodeId ||
+    lease.routeKey !== node.invocation.routeKey ||
+    lease.currentBinding.stateVersion !== previous.stateVersion ||
+    lease.stateIdentity.stateVersion !== previous.stateVersion ||
+    previous.stateVersion + 1 !== input.playerView.stateVersion
+  )
+    return undefined;
+  const event = input.eventTail?.find(
+    (event) =>
+      event.stateVersionBefore === previous.stateVersion &&
+      event.stateVersionAfter === input.playerView.stateVersion &&
+      event.publicPayload?.actor === "corp" &&
+      event.publicPayload.actionType === lease.actionType,
+  );
+  return event ? { lease, node, provider, event } : undefined;
 }
 
 function previousRemoteSignal(

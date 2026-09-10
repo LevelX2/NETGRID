@@ -42,5 +42,6 @@ export const RANDOM_RESOURCE_SOURCE = uniqueDefinitionId(
   (implementation) =>
     CARD_DEFINITIONS_BY_ID[implementation.cardDefinitionId]?.type ===
       "resource" &&
-    implementation.runnerUtilityLongtail?.kind === "start_turn_random_effect_table",
+    implementation.runnerUtilityLongtail?.kind ===
+      "start_turn_random_effect_table",
 );

@@ -5,8 +5,42 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const corepack = "corepack";
-const useShell = process.platform === "win32";
+const corepackCommand =
+  process.platform === "win32" ? process.execPath : "corepack";
+const corepackPrefix =
+  process.platform === "win32"
+    ? [
+        path.join(
+          path.dirname(process.execPath),
+          "node_modules",
+          "corepack",
+          "dist",
+          "corepack.js",
+        ),
+      ]
+    : [];
+const playwrightArgs = process.argv.slice(2);
+if (playwrightArgs[0] === "--") playwrightArgs.shift();
+const browserPairArgumentIndex = playwrightArgs.findIndex((argument) =>
+  argument.startsWith("--browser-pair="),
+);
+const browserPair =
+  browserPairArgumentIndex >= 0
+    ? playwrightArgs.splice(browserPairArgumentIndex, 1)[0]?.split("=", 2)[1]
+    : undefined;
+const browserPairEnvironment =
+  browserPair === undefined
+    ? {}
+    : browserPair === "chrome-edge"
+      ? {
+          NETGRID_E2E_HOST_BROWSER_CHANNEL: "chrome",
+          NETGRID_E2E_JOINER_BROWSER_CHANNEL: "msedge",
+        }
+      : (() => {
+          throw new Error(
+            `Unsupported browser pair '${browserPair}'. Supported: chrome-edge`,
+          );
+        })();
 const started = [];
 
 const serverPort = await freePort();
@@ -42,8 +76,9 @@ try {
   await waitForUrl(`${serverUrl}/health`, "server");
 
   const accountBootstrap = await run(
-    corepack,
+    corepackCommand,
     [
+      ...corepackPrefix,
       "pnpm",
       "account:auth",
       "--",
@@ -84,12 +119,20 @@ try {
   await waitForUrl(webUrl, "web");
 
   const result = await run(
-    corepack,
-    ["pnpm", "exec", "playwright", "test", ...process.argv.slice(2)],
+    corepackCommand,
+    [
+      ...corepackPrefix,
+      "pnpm",
+      "exec",
+      "playwright",
+      "test",
+      ...playwrightArgs,
+    ],
     {
       PLAYWRIGHT_BASE_URL: webUrl,
       NETGRID_E2E_SERVER_URL: serverUrl,
       NETGRID_E2E_RUNTIME_PATH: runtimePath,
+      ...browserPairEnvironment,
     },
   );
   process.exitCode = result;
@@ -97,16 +140,25 @@ try {
   await Promise.allSettled(
     started.reverse().map((child) => stopProcessTree(child)),
   );
-  await rm(runtimeDir, { recursive: true, force: true });
-  await rm(webDistDir, { recursive: true, force: true });
+  // Windows can release SQLite/WAL and Next file handles shortly after the
+  // process tree exits. Wait only for these transient filesystem errors;
+  // persistent locks still reject and fail the E2E command (no swallowed cleanup).
+  const cleanupOptions = {
+    recursive: true,
+    force: true,
+    maxRetries: 10,
+    retryDelay: 100,
+  };
+  await rm(runtimeDir, cleanupOptions);
+  await rm(webDistDir, cleanupOptions);
 }
 
 function start(label, args, env) {
-  const child = spawn(corepack, args, {
+  const child = spawn(corepackCommand, [...corepackPrefix, ...args], {
     cwd: root,
     env: { ...process.env, ...env },
     stdio: ["ignore", "pipe", "pipe"],
-    shell: useShell,
+    shell: false,
   });
   child.stdout.on("data", (chunk) =>
     process.stdout.write(`[${label}] ${redactLogChunk(chunk)}`),
@@ -146,7 +198,7 @@ function run(command, args, env) {
       cwd: root,
       env: { ...process.env, ...env },
       stdio: "inherit",
-      shell: useShell,
+      shell: false,
     });
     child.on("exit", (code) => resolve(code ?? 1));
   });

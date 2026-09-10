@@ -216,10 +216,7 @@ export function ChronicleCardTrigger({
       const margin = 16;
       const left = Math.max(
         margin,
-        Math.min(
-          rect.left + 6,
-          window.innerWidth - tooltipMaxWidth - margin,
-        ),
+        Math.min(rect.left + 6, window.innerWidth - tooltipMaxWidth - margin),
       );
       const tooltipSizeStyle = showImageTooltip
         ? { width: `${tooltipMaxWidth}px` }

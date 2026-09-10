@@ -60,10 +60,11 @@ export type CandidateTargetIdentityResolution = {
   evidence: string[];
 };
 
-export type CandidateTargetIdentityResolverInput = TargetIdentityResolverInput & {
-  abilityId?: string;
-  hardGateSummary?: string;
-};
+export type CandidateTargetIdentityResolverInput =
+  TargetIdentityResolverInput & {
+    abilityId?: string;
+    hardGateSummary?: string;
+  };
 
 const SERVER_PATTERN = /^server:(hq|rd|archives|remote_\d+)$/;
 const ICE_PATTERN = /^ice:(hq|rd|archives|remote_\d+):\d+(?::[a-z0-9_.-]+)?$/i;
@@ -107,10 +108,14 @@ export function resolveTargetIdentity(
     return complete("ownCard", targetIdentity, ["actor-owned card identity"]);
   }
   if (CHOICE_PATTERN.test(targetIdentity)) {
-    return complete("choice", targetIdentity, ["side-safe choice option identity"]);
+    return complete("choice", targetIdentity, [
+      "side-safe choice option identity",
+    ]);
   }
   if (ACCESS_PATTERN.test(targetIdentity)) {
-    return complete("access", targetIdentity, ["side-safe access context identity"]);
+    return complete("access", targetIdentity, [
+      "side-safe access context identity",
+    ]);
   }
   if (targetIdentity === "server:unknown") {
     return blocked("server", "server_target_missing", [
@@ -122,10 +127,16 @@ export function resolveTargetIdentity(
       "choice action lacks a concrete side-safe option id",
     ]);
   }
-  return blocked("unknown_unresolved", "target_identity_unresolved_from_snapshot", [
-    `no stable target identity for ${input.actionType}`,
-    ...(input.targetContextStatus ? [`targetContextStatus:${input.targetContextStatus}`] : []),
-  ]);
+  return blocked(
+    "unknown_unresolved",
+    "target_identity_unresolved_from_snapshot",
+    [
+      `no stable target identity for ${input.actionType}`,
+      ...(input.targetContextStatus
+        ? [`targetContextStatus:${input.targetContextStatus}`]
+        : []),
+    ],
+  );
 }
 
 export function resolveCandidateTargetIdentity(
@@ -165,7 +176,10 @@ export function resolveCandidateTargetIdentity(
       "side-safe ICE position identity without private definition",
     ]);
   }
-  if (INSTALLED_OWN_CARD_PATTERN.test(targetIdentity) || OWN_CARD_PATTERN.test(targetIdentity)) {
+  if (
+    INSTALLED_OWN_CARD_PATTERN.test(targetIdentity) ||
+    OWN_CARD_PATTERN.test(targetIdentity)
+  ) {
     return candidateComplete("installedOwnCard", targetIdentity, true, [
       "actor-known installed or installable card reference from snapshot",
     ]);
@@ -186,14 +200,22 @@ export function resolveCandidateTargetIdentity(
     ]);
   }
   if (targetIdentity === "server:unknown") {
-    return candidateBlocked("server", "server:unknown", "server_target_missing", true, [
-      "run-like action lacks a concrete side-safe server id",
-    ]);
+    return candidateBlocked(
+      "server",
+      "server:unknown",
+      "server_target_missing",
+      true,
+      ["run-like action lacks a concrete side-safe server id"],
+    );
   }
   if (targetIdentity === "choice:unknown") {
-    return candidateBlocked("choice", "choice:unknown", "choice_option_missing", true, [
-      "choice action lacks a concrete side-safe option id",
-    ]);
+    return candidateBlocked(
+      "choice",
+      "choice:unknown",
+      "choice_option_missing",
+      true,
+      ["choice action lacks a concrete side-safe option id"],
+    );
   }
   return candidateBlocked(
     "unknown_unresolved",
@@ -202,8 +224,12 @@ export function resolveCandidateTargetIdentity(
     playerActionTargetRequired(input.actionType),
     [
       `no stable candidate target identity for ${input.actionType}`,
-      ...(input.targetContextStatus ? [`targetContextStatus:${input.targetContextStatus}`] : []),
-      ...(input.hardGateSummary ? [`hardGateSummary:${input.hardGateSummary}`] : []),
+      ...(input.targetContextStatus
+        ? [`targetContextStatus:${input.targetContextStatus}`]
+        : []),
+      ...(input.hardGateSummary
+        ? [`hardGateSummary:${input.hardGateSummary}`]
+        : []),
     ],
   );
 }
@@ -229,7 +255,10 @@ function blocked(
 ): TargetIdentityResolution {
   return {
     schemaVersion: "target-identity-resolution-v1",
-    status: kind === "unknown_hidden_blocked" ? "blocked_hidden_info" : "blocked_unresolved",
+    status:
+      kind === "unknown_hidden_blocked"
+        ? "blocked_hidden_info"
+        : "blocked_unresolved",
     kind,
     identity: kind,
     blocker,
@@ -243,10 +272,17 @@ function normalizeCandidateTargetIdentity(
   const targetIdentity = input.targetIdentity ?? "unknown_target";
   if (targetIdentity !== "unknown_target") return targetIdentity;
   if (!playerActionTargetRequired(input.actionType)) return "none";
-  if (input.actionType === "trigger_ability" && input.sourceDefinitionId && input.abilityId) {
+  if (
+    input.actionType === "trigger_ability" &&
+    input.sourceDefinitionId &&
+    input.abilityId
+  ) {
     return `ability:${slug(input.sourceDefinitionId)}:${slug(input.abilityId)}`;
   }
-  if (input.sourceDefinitionId && actorKnownSourceActions.has(input.actionType)) {
+  if (
+    input.sourceDefinitionId &&
+    actorKnownSourceActions.has(input.actionType)
+  ) {
     return `installedOwnCard:actorKnownRef:${slug(input.sourceDefinitionId)}`;
   }
   return targetIdentity;
@@ -305,7 +341,8 @@ function candidateBlocked(
 ): CandidateTargetIdentityResolution {
   return {
     schemaVersion: "target-identity-resolution-v2",
-    status: kind === "hidden_blocked" ? "blocked_hidden_info" : "blocked_unresolved",
+    status:
+      kind === "hidden_blocked" ? "blocked_hidden_info" : "blocked_unresolved",
     kind,
     identity,
     playerActionTargetRequired: playerActionTargetRequiredValue,

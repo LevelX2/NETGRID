@@ -19312,7 +19312,9 @@
   },
   "expectation": {
     "planExecution": {
-      "acceptablePlanKinds": ["corp.economy"]
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["allocate_server_defense"],
+      "requiredAssessmentEvidence": ["corp_missing_concrete_defense_draw:rd"]
     },
     "forbiddenActions": [
       {
@@ -19324,11 +19326,7 @@
     "contractKind": "correctness",
     "acceptableActions": [
       {
-        "sourceDefinitionId": "onr_v1_309_bbs-whispering-campaign",
-        "type": "activated_card_ability"
-      },
-      {
-        "type": "gain_credit"
+        "type": "draw_card"
       }
     ]
   }

@@ -7,10 +7,7 @@ import {
   scoreConversionCapabilityPayloadForEffects,
 } from "./card-implementation-runtime-activated-targets";
 import { actionCapacityLegalActionPayloadForEffects } from "./card-implementation-action-capacity";
-import {
-  canonicalCapabilityId,
-  capabilityKey,
-} from "@netgrid/cards/engine";
+import { canonicalCapabilityId, capabilityKey } from "@netgrid/cards/engine";
 import type { ActivatedAbilityBinding } from "./card-capability-binding";
 
 function binding(
@@ -26,6 +23,67 @@ function binding(
 }
 
 describe("activatedAbilityPayload advancement semantics", () => {
+  it("publishes restricted grant facts without a general credit gain or future consumer", () => {
+    const ability: ActivatedCardAbilityImplementation = {
+      kind: "activated",
+      timing: "corp_paid",
+      costs: [{ kind: "advancement_counter", amount: 2, source: "source" }],
+      effects: [
+        {
+          kind: "gain_temporary_corp_credits",
+          recipient: "corp",
+          amount: 5,
+          usableFor: "install_or_rez",
+          cleanup: "end_of_turn",
+          visibility: "public",
+        },
+      ],
+    };
+    const payload = activatedAbilityPayload(
+      "arbitrary-source",
+      ability,
+      binding(ability),
+    );
+    expect(payload).toMatchObject({
+      cardId: "arbitrary-source",
+      cardImplementationEffectKind: "gain_temporary_corp_credits",
+      restrictedCreditGainAmount: 5,
+      restrictedCreditGainUsableFor: "corp_install_or_rez",
+      restrictedCreditGainCleanup: "end_of_turn",
+      restrictedCreditGainComplete: true,
+      cardImplementationAdvancementCounterCost: 2,
+    });
+    expect(payload.gainCreditsAmount).toBeUndefined();
+    expect(payload.targetCardId).toBeUndefined();
+    const additionalCost: ActivatedCardAbilityImplementation = {
+      ...ability,
+      costs: [...ability.costs, { kind: "trash_source", amount: 1 }],
+    };
+    expect(
+      activatedAbilityPayload(
+        "arbitrary-source",
+        additionalCost,
+        binding(additionalCost),
+      ).restrictedCreditGainComplete,
+    ).toBeUndefined();
+    const compound = {
+      ...ability,
+      effects: [
+        ...ability.effects,
+        {
+          kind: "draw_cards" as const,
+          recipient: "corp" as const,
+          amount: 1,
+          visibility: "public" as const,
+        },
+      ],
+    };
+    expect(
+      activatedAbilityPayload("arbitrary-source", compound, binding(compound))
+        .restrictedCreditGainComplete,
+    ).toBeUndefined();
+  });
+
   it("publishes a deterministic controller draw for abstract action planning", () => {
     const ability: ActivatedCardAbilityImplementation = {
       kind: "activated",
@@ -47,7 +105,12 @@ describe("activatedAbilityPayload advancement semantics", () => {
     } as unknown as GameState;
 
     expect(
-      activatedAbilityPayload("source" as never, ability, binding(ability), state),
+      activatedAbilityPayload(
+        "source" as never,
+        ability,
+        binding(ability),
+        state,
+      ),
     ).toMatchObject({
       drawCardsAmount: 2,
     });
@@ -75,7 +138,12 @@ describe("activatedAbilityPayload advancement semantics", () => {
     } as unknown as GameState;
 
     expect(
-      activatedAbilityPayload("source" as never, ability, binding(ability), state),
+      activatedAbilityPayload(
+        "source" as never,
+        ability,
+        binding(ability),
+        state,
+      ),
     ).toMatchObject({
       gainCreditsAmount: 12,
       hostedCreditTakeAmount: 12,
@@ -140,16 +208,15 @@ describe("activatedAbilityPayload advancement semantics", () => {
     const ability: ActivatedCardAbilityImplementation = {
       kind: "activated",
       timing: "corp_main",
-      costs: [{ kind: "action", amount: 1 }],
+      costs: [
+        { kind: "action", amount: 1 },
+        { kind: "trash_source", amount: 1 },
+      ],
       effects: [
         {
           kind: "gain_credits_per_advancement_counter_on_source",
           recipient: "corp",
           amountPerCounter: 4,
-          visibility: "public",
-        },
-        {
-          kind: "trash_source",
           visibility: "public",
         },
       ],
@@ -161,14 +228,41 @@ describe("activatedAbilityPayload advancement semantics", () => {
     } as unknown as GameState;
 
     expect(
-      activatedAbilityPayload("source" as never, ability, binding(ability), state),
+      activatedAbilityPayload(
+        "source" as never,
+        ability,
+        binding(ability),
+        state,
+      ),
     ).toMatchObject({
       gainCreditsAmount: 8,
       advancementCounterCount: 2,
       cardImplementationEconomyKind:
         "gain_credits_per_advancement_counter_on_source",
       cardImplementationAmountPerAdvancementCounter: 4,
-      cardImplementationTrashesSource: true,
+      cardImplementationTrashSourceCost: true,
+      cardImplementationTrashesSource: false,
+    });
+    const zeroCounterState = {
+      cardInstances: {
+        source: { controller: "corp", advancementCounters: 0 },
+      },
+    } as unknown as GameState;
+    expect(
+      activatedAbilityPayload(
+        "source" as never,
+        ability,
+        binding(ability),
+        zeroCounterState,
+      ),
+    ).toMatchObject({
+      gainCreditsAmount: 0,
+      advancementCounterCount: 0,
+      cardImplementationEconomyKind:
+        "gain_credits_per_advancement_counter_on_source",
+      cardImplementationAmountPerAdvancementCounter: 4,
+      cardImplementationTrashSourceCost: true,
+      cardImplementationTrashesSource: false,
     });
   });
 

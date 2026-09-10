@@ -177,9 +177,8 @@ function decodePart(value: string): string | undefined {
 function isKnownInstalledRunnerProgram(card: VisibleCard): boolean {
   return (
     card.known === true &&
-    card.owner === "runner" &&
     card.controller === "runner" &&
-    card.type === "program" &&
+    (card.type === "program" || card.installedAsRunnerProgram !== undefined) &&
     typeof card.definitionId === "string" &&
     card.definitionId.length > 0
   );

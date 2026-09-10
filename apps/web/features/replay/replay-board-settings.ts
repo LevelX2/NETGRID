@@ -72,10 +72,9 @@ export function loadReplayBoardSettings(
       cardTooltipSettings.hoverOpenDelayMs,
     ),
     cardTooltipMode: normalizeCardTooltipMode(cardTooltipSettings.mode),
-    translateCardRulesToSelectedLanguage:
-      normalizeCardTooltipRuleTranslation(
-        cardTooltipSettings.translateRulesToSelectedLanguage,
-      ),
+    translateCardRulesToSelectedLanguage: normalizeCardTooltipRuleTranslation(
+      cardTooltipSettings.translateRulesToSelectedLanguage,
+    ),
     chronicleDetailMode: normalizeChronicleDetailMode(
       readStorage(CHRONICLE_DETAIL_MODE_STORAGE_KEY),
     ),

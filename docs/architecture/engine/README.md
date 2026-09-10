@@ -25,7 +25,8 @@ Dieser Ordner enthält nur die aktuell relevanten Architektur- und Strukturvertr
 9. `public-event-payload-architecture.md`
    - öffentlicher Event-/Payloadvertrag und `ResolvedGameEffect`
 10. `engine-source-structure-guard.md`
-   - ausführbar geschützte Source-, Layer- und Kompositionsgrenzen
+
+- ausführbar geschützte Source-, Layer- und Kompositionsgrenzen
 
 `packages/engine/AGENTS.md` enthält die übergeordneten Engine-Invarianten. Der Code und die ausführbaren Struktur-/Typ-/Regressionstests bleiben die letzte Wahrheit über den tatsächlich produktiven Stand.
 
@@ -43,3 +44,15 @@ Dieser Ordner enthält nur die aktuell relevanten Architektur- und Strukturvertr
 Neue Dokumente gehören nur dauerhaft in diesen Ordner, wenn sie einen aktuellen Engine-Architektur- oder Strukturvertrag beschreiben, der nicht sinnvoll in eines der bestehenden Dokumente integriert werden kann.
 
 Abgeschlossene Prozesspläne, Paketfortschritte, Statusaudits, Kartenfixes und Implementierungsreviews werden nach Abschluss und Referenzprüfung gelöscht. Git-Historie ersetzt diese Ausführungschronik.
+
+
+### Asset-/Upgrade-Rez nach der letzten Corp-Aktion
+
+`turn/corp-main-actions.ts` bietet bezahlbare installierte Assets und Upgrades
+auch bei null verbleibenden Klicks über dieselbe Root-Rez-Quote an, bis die
+Corp tatsächlich `end_turn` ausführt. Rez verbraucht keinen Klick; die
+Klickgrenze darf dieses Fenster nicht entfernen. Grundlage sind „Gaining
+Actions“ und „Remote Facility“ in `docs/source/Netrunner Errata 1.70.md`.
+Der Regressionstest deckt die zusätzliche Aktion beim Null-Klick-Rez samt
+Kostenprüfung und Replay ab; der KI-Integrationstest deckt kostenloses
+R&D-Recycling nach letzter-Klick-Installation und das nächste Pflichtziehen ab.

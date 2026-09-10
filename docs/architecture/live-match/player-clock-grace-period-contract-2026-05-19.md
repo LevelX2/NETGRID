@@ -16,21 +16,21 @@ Zeitbegrenzung ist opt-in. Der Standard bleibt `none`: keine Spielerzeit, kein A
 
 Erlaubte Modi:
 
-| Modus | Wirkung |
-| --- | --- |
-| `none` | Keine Zeitbegrenzung, kein Abzug und keine Niederlage durch Zeitablauf. Die UI darf zusätzlich zur Matchlaufzeit die kumulierte verbrauchte Entscheidungszeit je Side hochzählend anzeigen. |
-| `player_clock` | Runner und Korp starten mit gleichem Zeitkonto und gleicher Grundfrist je Entscheidung. |
+| Modus          | Wirkung                                                                                                                                                                                     |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `none`         | Keine Zeitbegrenzung, kein Abzug und keine Niederlage durch Zeitablauf. Die UI darf zusätzlich zur Matchlaufzeit die kumulierte verbrauchte Entscheidungszeit je Side hochzählend anzeigen. |
+| `player_clock` | Runner und Korp starten mit gleichem Zeitkonto und gleicher Grundfrist je Entscheidung.                                                                                                     |
 
 Freigegebene Zeitkonto-Presets:
 
-| Label | Wert |
-| --- | --- |
-| Kurze Testpartie | 5 Minuten je Seite |
-| 10 Minuten | 10 Minuten je Seite |
-| 15 Minuten | 15 Minuten je Seite |
-| 20 Minuten | 20 Minuten je Seite |
-| 30 Minuten | 30 Minuten je Seite |
-| 45 Minuten | 45 Minuten je Seite |
+| Label            | Wert                |
+| ---------------- | ------------------- |
+| Kurze Testpartie | 5 Minuten je Seite  |
+| 10 Minuten       | 10 Minuten je Seite |
+| 15 Minuten       | 15 Minuten je Seite |
+| 20 Minuten       | 20 Minuten je Seite |
+| 30 Minuten       | 30 Minuten je Seite |
+| 45 Minuten       | 45 Minuten je Seite |
 
 Benutzerdefinierte Zeit ist im ersten Umsetzungsslice optional. Falls sie umgesetzt wird, gilt:
 
@@ -41,13 +41,13 @@ Benutzerdefinierte Zeit ist im ersten Umsetzungsslice optional. Falls sie umgese
 
 Freigegebene Grundfrist-Presets:
 
-| Label | Wert |
-| --- | --- |
-| Keine Grundfrist | 0 Sekunden |
-| 5 Sekunden | 5 Sekunden |
-| 10 Sekunden | 10 Sekunden |
-| 15 Sekunden | 15 Sekunden |
-| 30 Sekunden | 30 Sekunden |
+| Label            | Wert        |
+| ---------------- | ----------- |
+| Keine Grundfrist | 0 Sekunden  |
+| 5 Sekunden       | 5 Sekunden  |
+| 10 Sekunden      | 10 Sekunden |
+| 15 Sekunden      | 15 Sekunden |
+| 30 Sekunden      | 30 Sekunden |
 
 Benutzerdefinierte Grundfrist ist im ersten Umsetzungsslice optional. Falls sie umgesetzt wird, gilt:
 
@@ -305,28 +305,28 @@ Der Umsetzungsslice muss injizierbare Serverzeit oder Fake-Timer nutzen. Tests d
 
 ## Testmatrix
 
-| ID | Bereich | Erwartung |
-| --- | --- | --- |
-| PC-T001 | Matchstart Off | `mode: "none"` erzeugt keine Spielerzeit, keinen Abzug und keinen Zeitablauf. |
-| PC-T002 | Matchstart Presets | Zeitkonto- und Grundfrist-Presets werden shared/serverseitig validiert. |
-| PC-T003 | Custom Bounds | Optionale Custom-Werte respektieren Min-/Max-Grenzen. |
-| PC-T004 | Decision Owner | Zeit läuft für `decisionOwnerSide`, nicht pauschal für `activeSide`. |
-| PC-T005 | Grace | Entscheidung innerhalb der Grundfrist zieht 0 ms ab. |
-| PC-T006 | Charge | Nach Grundfrist wird nur die Überschreitung abgezogen. |
-| PC-T007 | Activity Reset | Neue Aktivitätszuweisung startet Grundfrist neu. |
-| PC-T008 | Automatic Effects | Automatische Effekte und reine Anzeigezeiten verbrauchen keine Spielerzeit. |
-| PC-T009 | Time Expired | Zeitkonto 0 beendet das Match mit Gewinner Gegenseite und `time_expired`. |
-| PC-T010 | Already Finished | Bereits terminales Match erhält kein zweites Zeitablauf-Ende. |
-| PC-T011 | ResultSummary | ResultSummary und UI zeigen Zeitablauf side-sicher. |
-| PC-T012 | Chronicle | Start und Zeitablauf werden protokolliert; normale kurze Entscheidungen und Ticks nicht. |
-| PC-T013 | Reconnect | Reconnect zeigt konsistente Restzeit und Grundfrist-/Belastungsstatus. |
-| PC-T014 | Redaction | Timerpayloads enthalten keine Hidden Cards, Tokens, Decklisten, FullState, `AIInput` oder `DecisionDebug`. |
-| PC-T015 | Replay | Timer-Ticks erscheinen nicht im Engine-Replay. |
-| PC-T016 | StateHash | Timer-Ticks ändern `hashState(gameState)` nicht; finaler Engine-StateHash bleibt der letzte echte Hash. |
-| PC-T017 | Undo | Undo-Preview leakt keine Timer-Rohdaten und hebt kein terminales Zeitablauf-Ende auf. |
-| PC-T018 | UI Desktop | Zeitbalken unter der Statusleiste überlappt keine Status-, Action-, Board- oder Result-Elemente. |
-| PC-T019 | UI Mobile | Zeitbalken bleibt auf schmalem Viewport lesbar und ohne Überlappung. |
-| PC-T020 | AI Boundary | `AiDecisionInput` und `AiDecisionDebug` bleiben ohne Spielerzeitdaten. |
+| ID      | Bereich            | Erwartung                                                                                                  |
+| ------- | ------------------ | ---------------------------------------------------------------------------------------------------------- |
+| PC-T001 | Matchstart Off     | `mode: "none"` erzeugt keine Spielerzeit, keinen Abzug und keinen Zeitablauf.                              |
+| PC-T002 | Matchstart Presets | Zeitkonto- und Grundfrist-Presets werden shared/serverseitig validiert.                                    |
+| PC-T003 | Custom Bounds      | Optionale Custom-Werte respektieren Min-/Max-Grenzen.                                                      |
+| PC-T004 | Decision Owner     | Zeit läuft für `decisionOwnerSide`, nicht pauschal für `activeSide`.                                       |
+| PC-T005 | Grace              | Entscheidung innerhalb der Grundfrist zieht 0 ms ab.                                                       |
+| PC-T006 | Charge             | Nach Grundfrist wird nur die Überschreitung abgezogen.                                                     |
+| PC-T007 | Activity Reset     | Neue Aktivitätszuweisung startet Grundfrist neu.                                                           |
+| PC-T008 | Automatic Effects  | Automatische Effekte und reine Anzeigezeiten verbrauchen keine Spielerzeit.                                |
+| PC-T009 | Time Expired       | Zeitkonto 0 beendet das Match mit Gewinner Gegenseite und `time_expired`.                                  |
+| PC-T010 | Already Finished   | Bereits terminales Match erhält kein zweites Zeitablauf-Ende.                                              |
+| PC-T011 | ResultSummary      | ResultSummary und UI zeigen Zeitablauf side-sicher.                                                        |
+| PC-T012 | Chronicle          | Start und Zeitablauf werden protokolliert; normale kurze Entscheidungen und Ticks nicht.                   |
+| PC-T013 | Reconnect          | Reconnect zeigt konsistente Restzeit und Grundfrist-/Belastungsstatus.                                     |
+| PC-T014 | Redaction          | Timerpayloads enthalten keine Hidden Cards, Tokens, Decklisten, FullState, `AIInput` oder `DecisionDebug`. |
+| PC-T015 | Replay             | Timer-Ticks erscheinen nicht im Engine-Replay.                                                             |
+| PC-T016 | StateHash          | Timer-Ticks ändern `hashState(gameState)` nicht; finaler Engine-StateHash bleibt der letzte echte Hash.    |
+| PC-T017 | Undo               | Undo-Preview leakt keine Timer-Rohdaten und hebt kein terminales Zeitablauf-Ende auf.                      |
+| PC-T018 | UI Desktop         | Zeitbalken unter der Statusleiste überlappt keine Status-, Action-, Board- oder Result-Elemente.           |
+| PC-T019 | UI Mobile          | Zeitbalken bleibt auf schmalem Viewport lesbar und ohne Überlappung.                                       |
+| PC-T020 | AI Boundary        | `AiDecisionInput` und `AiDecisionDebug` bleiben ohne Spielerzeitdaten.                                     |
 
 ## Entscheidung
 

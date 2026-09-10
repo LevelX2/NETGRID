@@ -1,8 +1,4 @@
-export type AccessIntent =
-  | "steal"
-  | "trash"
-  | "access_only"
-  | "decline";
+export type AccessIntent = "steal" | "trash" | "access_only" | "decline";
 
 export type AccessDecisionReason =
   | "agenda_payoff"
@@ -46,4 +42,3 @@ export const ACCESS_TARGET_KINDS: readonly AccessTargetKind[] = [
   "upgrade",
   "unknown",
 ];
-

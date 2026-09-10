@@ -374,8 +374,10 @@ function nonEmptyString(value: unknown): value is string {
 }
 
 function normalizeGuideLocale(locale: string): string {
-  return locale.trim().replaceAll("_", "-").toLowerCase() ||
-    STANDARD_DECK_GUIDE_FALLBACK_LOCALE;
+  return (
+    locale.trim().replaceAll("_", "-").toLowerCase() ||
+    STANDARD_DECK_GUIDE_FALLBACK_LOCALE
+  );
 }
 
 function validGuideLocale(locale: string): boolean {

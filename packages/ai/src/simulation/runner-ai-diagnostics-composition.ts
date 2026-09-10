@@ -54,57 +54,51 @@ export function createRunnerAiDiagnosticsComposition(
   const installClassification =
     createRunnerInstallClassificationComposition(dependencies);
 
-  const centralPressure =
-    createRunnerCentralPressureDiagnosticsComposition({
-      ...dependencies,
-      runnerCreditReserveTargetForInput:
-        knownPath.runnerCreditReserveTargetForInput,
-      isRunnerEconomyAction: installClassification.isRunnerEconomyAction,
-    });
+  const centralPressure = createRunnerCentralPressureDiagnosticsComposition({
+    ...dependencies,
+    runnerCreditReserveTargetForInput:
+      knownPath.runnerCreditReserveTargetForInput,
+    isRunnerEconomyAction: installClassification.isRunnerEconomyAction,
+  });
 
-  const simulationDiagnostics =
-    createRunnerSimulationDiagnosticsComposition({
-      ...dependencies,
-      runnerCreditReserveTargetForInput:
-        knownPath.runnerCreditReserveTargetForInput,
-      isRunnerEconomyAction: installClassification.isRunnerEconomyAction,
-      runnerKnownPathDiagnosticsForAction:
-        knownPath.runnerKnownPathDiagnosticsForAction,
-      runnerRemoteThreatTargetingDiagnosticsForAction:
-        centralPressure.runnerRemoteThreatTargetingDiagnosticsForAction,
-      isRunnerLowValueDuplicateInstall:
-        installClassification.isRunnerLowValueDuplicateInstall,
-      runnerRemoteTrashAccessContext:
-        knownPath.runnerRemoteTrashAccessContext,
-      runnerDrawKindForSimulationAction:
-        installClassification.runnerDrawKindForSimulationAction,
-      hasRunnerPlayableEconomyAction:
-        installClassification.hasRunnerPlayableEconomyAction,
-      hasRunnerInstallableBreakerAction:
-        installClassification.hasRunnerInstallableBreakerAction,
-      hasRunnerRunnablePressureAction:
-        installClassification.hasRunnerRunnablePressureAction,
-      runnerDiscardChoiceRoles:
-        installClassification.runnerDiscardChoiceRoles,
-      isRunnerDuplicateInstall:
-        installClassification.isRunnerDuplicateInstall,
-      isRunnerRigInstallAction:
-        installClassification.isRunnerRigInstallAction,
-      isRunnerPressureAction: installClassification.isRunnerPressureAction,
-      runnerCoverageRecoveryActionForMetrics:
-        knownPath.runnerCoverageRecoveryActionForMetrics,
-      runnerCoverageSearchActionForMetrics:
-        knownPath.runnerCoverageSearchActionForMetrics,
-      runnerHasKnownUnaffordableLegalRun:
-        knownPath.runnerHasKnownUnaffordableLegalRun,
-      runnerVisibleMissingBreakerCoverage:
-        knownPath.runnerVisibleMissingBreakerCoverage,
-      runnerHasKnownBlockedPathByCoverage:
-        knownPath.runnerHasKnownBlockedPathByCoverage,
-      runnerMissingCoverageTypesForInput:
-        knownPath.runnerMissingCoverageTypesForInput,
-      runnerRunKnownPathCost: knownPath.runnerRunKnownPathCost,
-    });
+  const simulationDiagnostics = createRunnerSimulationDiagnosticsComposition({
+    ...dependencies,
+    runnerCreditReserveTargetForInput:
+      knownPath.runnerCreditReserveTargetForInput,
+    isRunnerEconomyAction: installClassification.isRunnerEconomyAction,
+    runnerKnownPathDiagnosticsForAction:
+      knownPath.runnerKnownPathDiagnosticsForAction,
+    runnerRemoteThreatTargetingDiagnosticsForAction:
+      centralPressure.runnerRemoteThreatTargetingDiagnosticsForAction,
+    isRunnerLowValueDuplicateInstall:
+      installClassification.isRunnerLowValueDuplicateInstall,
+    runnerRemoteTrashAccessContext: knownPath.runnerRemoteTrashAccessContext,
+    runnerDrawKindForSimulationAction:
+      installClassification.runnerDrawKindForSimulationAction,
+    hasRunnerPlayableEconomyAction:
+      installClassification.hasRunnerPlayableEconomyAction,
+    hasRunnerInstallableBreakerAction:
+      installClassification.hasRunnerInstallableBreakerAction,
+    hasRunnerRunnablePressureAction:
+      installClassification.hasRunnerRunnablePressureAction,
+    runnerDiscardChoiceRoles: installClassification.runnerDiscardChoiceRoles,
+    isRunnerDuplicateInstall: installClassification.isRunnerDuplicateInstall,
+    isRunnerRigInstallAction: installClassification.isRunnerRigInstallAction,
+    isRunnerPressureAction: installClassification.isRunnerPressureAction,
+    runnerCoverageRecoveryActionForMetrics:
+      knownPath.runnerCoverageRecoveryActionForMetrics,
+    runnerCoverageSearchActionForMetrics:
+      knownPath.runnerCoverageSearchActionForMetrics,
+    runnerHasKnownUnaffordableLegalRun:
+      knownPath.runnerHasKnownUnaffordableLegalRun,
+    runnerVisibleMissingBreakerCoverage:
+      knownPath.runnerVisibleMissingBreakerCoverage,
+    runnerHasKnownBlockedPathByCoverage:
+      knownPath.runnerHasKnownBlockedPathByCoverage,
+    runnerMissingCoverageTypesForInput:
+      knownPath.runnerMissingCoverageTypesForInput,
+    runnerRunKnownPathCost: knownPath.runnerRunKnownPathCost,
+  });
 
   return {
     ...knownPath,

@@ -30,14 +30,8 @@ export function AccountDeckLibraryHeader({
     <section className="accountDeckLibraryHeader">
       <div>
         <p className="eyebrow">{t("eyebrow")}</p>
-        <h2>
-          {accountMode
-            ? t("accountTitle")
-            : t("guestTitle")}
-        </h2>
-        <p className="muted">
-          {t("help")}
-        </p>
+        <h2>{accountMode ? t("accountTitle") : t("guestTitle")}</h2>
+        <p className="muted">{t("help")}</p>
       </div>
       <div className="accountDeckStandardControls">
         <label>
@@ -77,12 +71,14 @@ export function AccountDeckLibraryHeader({
       </div>
       {accountMode && quota ? (
         <p className="accountDeckQuota">
-          {t("quota", {used: quota.used, limit: quota.limit, remaining: quota.remaining})}
+          {t("quota", {
+            used: quota.used,
+            limit: quota.limit,
+            remaining: quota.remaining,
+          })}
         </p>
       ) : (
-        <p className="accountDeckQuota">
-          {t("guestStorage")}
-        </p>
+        <p className="accountDeckQuota">{t("guestStorage")}</p>
       )}
     </section>
   );

@@ -87,10 +87,7 @@ const summaries = args.seeds.map((seed) =>
 );
 
 const findings = detectAiSelfplaySuspiciousDecisions(summaries, {
-  longGameActionThreshold: Math.max(
-    20,
-    Math.floor(args.maxActions * 0.75),
-  ),
+  longGameActionThreshold: Math.max(20, Math.floor(args.maxActions * 0.75)),
 });
 const persistentFindings = findings.filter(
   (finding) => finding.category !== "hidden_info_marker",
@@ -162,15 +159,13 @@ const corpus = {
     engineAbortedGames: summaries.filter((summary) => summary.errors.length > 0)
       .length,
     regularlyCompletedGames: summaries.filter(
-      (summary) =>
-        summary.terminationKind === "game_result",
+      (summary) => summary.terminationKind === "game_result",
     ).length,
     actionLimitReached: summaries.filter(
       (summary) => summary.terminationKind === "action_limit",
     ).length,
     actionLimitReachedWithoutError: summaries.filter(
-      (summary) =>
-        summary.terminationKind === "action_limit",
+      (summary) => summary.terminationKind === "action_limit",
     ).length,
     findingsRedactionSafe: isSelfplayTraceRedactionSafe({
       findings: persistentFindings,

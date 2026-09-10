@@ -17,7 +17,10 @@ describe("match 7BFE exact decision checkpoints", () => {
     ["CP-7BFE-02b parent-bound score protection follow-up", cp02bJson],
     ["CP-7BFE-03 strategy-aware discard", cp03Json],
     ["CP-7BFE-04 zero-effect Closed Accounts", cp04Json],
-    ["CP-7BFE-05 directly protects pressured R&D instead of agenda-free HQ", cp05Json],
+    [
+      "CP-7BFE-05 directly protects pressured R&D instead of agenda-free HQ",
+      cp05Json,
+    ],
   ])("satisfies %s", (_label, json) => {
     const result = runAiDecisionCheckpoint(fixture(json));
 

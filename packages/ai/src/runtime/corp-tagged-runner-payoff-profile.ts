@@ -89,9 +89,8 @@ export function createCorpTaggedRunnerPayoffProfileContext(
       input,
       action,
     );
-    const taggedDamagePayoff = corpTaggedDamagePayoffProfile(
-      sourceDefinitionId,
-    );
+    const taggedDamagePayoff =
+      corpTaggedDamagePayoffProfile(sourceDefinitionId);
     const taggedMeatDamageOperation =
       corpTaggedMeatDamageOperationProfile(sourceDefinitionId);
     const directTaggedDamage =
@@ -107,8 +106,7 @@ export function createCorpTaggedRunnerPayoffProfileContext(
     if (taggedMeatDamageOperation !== undefined && runnerTags <= 0)
       return undefined;
     const assessment = dependencies.tagPunishAssessmentForAction(input, action);
-    if (!directTaggedDamage && !assessment?.isPunishPayoff)
-      return undefined;
+    if (!directTaggedDamage && !assessment?.isPunishPayoff) return undefined;
     const affordabilityPressure =
       input.playerView.own.credits >= dependencies.actionCreditCost(action)
         ? 0

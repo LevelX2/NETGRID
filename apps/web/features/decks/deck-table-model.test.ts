@@ -130,8 +130,22 @@ describe("deck table numeric sorting", () => {
   });
 
   it("offers side-appropriate numeric sort fields", () => {
-    expect(deckTableSortKeysForSide("corp")).toEqual(["name", "type", "rez", "trash", "cost", "strength", "agenda"]);
-    expect(deckTableSortKeysForSide("runner")).toEqual(["name", "type", "install", "cost", "strength"]);
+    expect(deckTableSortKeysForSide("corp")).toEqual([
+      "name",
+      "type",
+      "rez",
+      "trash",
+      "cost",
+      "strength",
+      "agenda",
+    ]);
+    expect(deckTableSortKeysForSide("runner")).toEqual([
+      "name",
+      "type",
+      "install",
+      "cost",
+      "strength",
+    ]);
   });
 
   it("marks numeric sorts as detail-dependent and exposes their active value", () => {
@@ -142,7 +156,11 @@ describe("deck table numeric sorting", () => {
   });
 
   it("normalizes a misleading Corp install sort to name", () => {
-    const layout = normalizeDeckTableLayout(deck("install"), cardLookup, detailsById);
+    const layout = normalizeDeckTableLayout(
+      deck("install"),
+      cardLookup,
+      detailsById,
+    );
     expect(layout.piles[0]!.sortMode).toBe("name");
   });
 });

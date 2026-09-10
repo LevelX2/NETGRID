@@ -7,7 +7,8 @@ describe("card text source selection", () => {
     expect(
       visibleKnownCardRulesText({
         catalogText: "A: Draw two cards.",
-        visibleRulesText: "Rezzed transaction asset with a Corp draw/economy ability surface.",
+        visibleRulesText:
+          "Rezzed transaction asset with a Corp draw/economy ability surface.",
       }),
     ).toBe("A: Draw two cards.");
   });

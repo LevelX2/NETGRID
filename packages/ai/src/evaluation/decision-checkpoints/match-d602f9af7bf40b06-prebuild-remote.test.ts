@@ -32,14 +32,11 @@ type ReconstructedDecisionCapture = {
   };
 };
 
-const REMOTE_PARENT_ID =
-  "plan:corp.establish_scoring_remote:strategic-score-remote";
-const REMOTE_NEED_ID = "remote-hardening:strategic-score-remote:0";
 const INSTALL_NERVE_LABYRINTH =
   "corp.install_card.corp_onr_v1_257_nerve-labyrinth_1.remote_2.corp_onr_v1_257_nerve-labyrinth_1.1";
 
 describe("match d602f9af7bf40b06 strategic remote prebuild", () => {
-  it("installs Nerve Labyrinth before the payload through the resident remote parent's defense route", () => {
+  it("draws for the missing concrete HQ defense before prebuilding another remote", () => {
     const capture = structuredClone(
       d114CaptureJson,
     ) as ReconstructedDecisionCapture;
@@ -62,29 +59,29 @@ describe("match d602f9af7bf40b06 strategic remote prebuild", () => {
 
     const decision = chooseAiAction(capture.input as AiDecisionInput);
 
-    expect(decision.actionId).toBe(INSTALL_NERVE_LABYRINTH);
+    expect(decision.actionId).toBe("corp.draw_card");
     expect(decision.decisionDebug?.planKind).toBe("corp.defend_servers");
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_priority_class:P6",
-        `plan_priority_delegated_from:${REMOTE_PARENT_ID}`,
-        `plan_priority_need:${REMOTE_NEED_ID}`,
+        "plan_step_capability:allocate_server_defense",
+        "plan_assessment_evidence:corp_missing_concrete_defense_draw:hq",
       ]),
     );
     expect(
       decision.decisionDebug?.planFirstDecision?.selectedPlan,
     ).toMatchObject({
       moduleId: "corp.defend_servers",
-      parentInstanceId: REMOTE_PARENT_ID,
+      instanceId: "plan:corp.defend_servers:server-defense-portfolio",
     });
     expect(
       decision.decisionDebug?.planFirstDecision?.turnPlanning?.selectedLine?.phases.at(
         0,
       ),
     ).toMatchObject({
-      rootPlanInstanceId: REMOTE_PARENT_ID,
-      rootModuleId: "corp.establish_scoring_remote",
-      nodes: [{ semanticActionType: "install.card" }],
+      rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      rootModuleId: "corp.defend_servers",
+      nodes: [{ semanticActionType: "draw.card" }],
     });
+    expect(decision.actionId).not.toBe(INSTALL_NERVE_LABYRINTH);
   });
 });

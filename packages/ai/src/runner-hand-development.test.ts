@@ -33,6 +33,31 @@ import {
 } from "./runner-hand-development.test-support";
 
 describe("RunnerHandDevelopmentEvaluation", () => {
+  it.each([0, 2])(
+    "uses the current Engine draw yield for a draw event: %s",
+    (drawCardsAmount) => {
+      const card = visibleCard("jack", {
+        definitionId: "onr_v1_095_jack-n-joe",
+        title: "Jack ’n’ Joe",
+        type: "event",
+        cost: 0,
+      });
+      const action = playEventAction("play-jack", card, 0);
+      action.payload = { ...action.payload, drawCardsAmount };
+      const input = runnerInput({
+        credits: 15,
+        hand: [card],
+        legalActions: [action],
+      });
+      input.playerView.own.stackOrRdCount = drawCardsAmount;
+      const evaluation = findByInstance(
+        evaluateRunnerHandDevelopment({ input }),
+        card.instanceId,
+      );
+      expect(evaluation?.currentNeed === "none").toBe(drawCardsAmount === 0);
+    },
+  );
+
   it("prefers a legal hosted program route over an optional program-trash install", () => {
     const program = visibleCard("pattels-virus", {
       definitionId: "onr_v1_046_pattels-virus",
@@ -400,6 +425,30 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       },
       deferReason: "missing_credits",
     });
+  });
+
+  it("does not infer memory support from a target-preference annotation", () => {
+    const installerEvent = visibleCard("installer-event", {
+      definitionId: "onr_proteus_110_hijack",
+      title: "Hijack",
+      type: "event",
+      rulesText:
+        "Install a program or a piece of hardware. Gain [3], which you may use only to pay for its installation cost.",
+    });
+    const input = runnerInput({
+      credits: 3,
+      hand: [installerEvent],
+      legalActions: [
+        playEventAction("play-installer-event", installerEvent, 1),
+      ],
+    });
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({ input }),
+      installerEvent.instanceId,
+    );
+
+    expect(evaluation.developmentRole).not.toBe("memory_support");
   });
 
   it("marks bank and economy tools as acute setup when the Runner is credit-starved", () => {

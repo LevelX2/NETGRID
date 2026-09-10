@@ -50,9 +50,7 @@ describe("assessDecisionOpportunity", () => {
       visibility: "private_to_side",
     };
 
-    expect(
-      assessDecisionOpportunity(decisionInput, resolve),
-    ).toMatchObject({
+    expect(assessDecisionOpportunity(decisionInput, resolve)).toMatchObject({
       kind: "forced_choice",
       actionableAlternativeCount: 0,
     });
@@ -96,10 +94,7 @@ function input(legalActions: LegalAction[]): AiDecisionInput {
   } as unknown as AiDecisionInput;
 }
 
-function action(
-  actionId: string,
-  type: LegalAction["type"],
-): LegalAction {
+function action(actionId: string, type: LegalAction["type"]): LegalAction {
   return {
     actionId,
     side: "corp",

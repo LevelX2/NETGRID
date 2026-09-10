@@ -19,5 +19,7 @@ export async function POST(request: Request) {
     );
   }
 
-  return NextResponse.json(deckStrategyProfileViewerResponse(body.deck), { status: 200 });
+  return NextResponse.json(deckStrategyProfileViewerResponse(body.deck), {
+    status: 200,
+  });
 }

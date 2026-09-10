@@ -54,12 +54,12 @@ Textautorität oder ein nicht lokalisierbarer Nutzervertrag besteht.
 ## Akzeptanzkriterien
 
 - [ ] Jeder Fund ist als Nutzertext, lokalisierter Deskriptor, Machine-Code,
-  Diagnose oder zulässige technische Ausnahme klassifiziert.
+      Diagnose oder zulässige technische Ausnahme klassifiziert.
 - [ ] Es existiert keine pauschale Migration ohne konkreten Consumer und
-  Präsentationsvertrag.
+      Präsentationsvertrag.
 - [ ] Notwendige Änderungen sind pro Vertragsfamilie klein geschnitten.
 - [ ] Hidden-Info-, Replay-, Action-Identitäts- und StateHash-Grenzen bleiben
-  unverändert.
+      unverändert.
 
 ## Umsetzungshinweise
 

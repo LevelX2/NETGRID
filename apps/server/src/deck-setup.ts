@@ -1,8 +1,14 @@
-import profilesData from "../../../data/decks/deck-format-profiles-0.8.json";
-import profilesData130 from "../../../data/decks/deck-format-profiles-1.3.0.json";
-import snapshotsData from "../../../data/decks/deck-snapshots-0.8.json";
-import standardDeckCatalogData from "../../../data/decks/standard-deck-catalog-1.0.0.json";
-import aiDeckPoolData from "../../../data/ai/ai-deck-pool-1.1.0.json";
+import { aiDeckPoolData } from "@netgrid/runtime-data/ai-deck-pool";
+import {
+  deckFormatProfiles08Data as profilesData,
+  deckFormatProfiles130Data as profilesData130,
+} from "@netgrid/runtime-data/deck-format-profiles";
+import { deckSnapshots08Data as snapshotsData } from "@netgrid/runtime-data/legacy-demo-decks";
+import {
+  PRODUCT_DEFAULT_CORP_SNAPSHOT_ID,
+  PRODUCT_DEFAULT_RUNNER_SNAPSHOT_ID,
+} from "@netgrid/runtime-data/product-default-decks";
+import { standardDeckCatalogData } from "@netgrid/runtime-data/standard-decks";
 import { createHash } from "node:crypto";
 import {
   aiSupportStageReady,
@@ -21,7 +27,7 @@ import {
 } from "@netgrid/decks";
 import {
   TEST_CARD_SET_ID,
-  testCardsEnabledFromEnvironment,
+  resolveTestCardAvailability,
   type ApiMatchCardPool,
   type StandardDeckGuideRef,
 } from "@netgrid/shared";
@@ -66,8 +72,8 @@ export type ResolvedParticipantDeckSetup = Record<
   ResolvedParticipantDeckPair
 >;
 
-const DEFAULT_RUNNER_SNAPSHOT_ID = "onr_origin_runner_ai_snapshot_v1";
-const DEFAULT_CORP_SNAPSHOT_ID = "onr_origin_corp_ai_snapshot_v1";
+const DEFAULT_RUNNER_SNAPSHOT_ID = PRODUCT_DEFAULT_RUNNER_SNAPSHOT_ID;
+const DEFAULT_CORP_SNAPSHOT_ID = PRODUCT_DEFAULT_CORP_SNAPSHOT_ID;
 const CLASSIC_PLAYTEST_PROFILE_ID = "netgrid_private_local_classic_playtest_v1";
 const PROTEUS_PLAYTEST_PROFILE_ID = "netgrid_private_local_proteus_playtest_v1";
 const CLASSIC_PROTEUS_PLAYTEST_PROFILE_ID =
@@ -490,7 +496,7 @@ function cardPoolIncludesProteus(cardPool: MatchCardPool): boolean {
 }
 
 function testCardAvailability(override: boolean | undefined): boolean {
-  return override ?? testCardsEnabledFromEnvironment(process.env);
+  return resolveTestCardAvailability(process.env, override);
 }
 
 function deterministicSnapshotId(

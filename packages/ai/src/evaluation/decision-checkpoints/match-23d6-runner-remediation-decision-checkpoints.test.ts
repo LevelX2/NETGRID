@@ -49,7 +49,12 @@ describe("match 23D6 runner remediation decision checkpoints", () => {
       fixture.source.kind = "synthetic_companion";
       fixture.source.findingId = "23D6-F2-LIQUID-FUNDING-CONTROL";
       fixture.expectation = {
-        acceptableActions: [{ actionId: "runner.start_run.hq" }],
+        acceptableActions: [
+          {
+            actionId:
+              "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:store_credits",
+          },
+        ],
         forbiddenActions: [
           {
             actionId:
@@ -57,9 +62,9 @@ describe("match 23D6 runner remediation decision checkpoints", () => {
           },
         ],
         planExecution: {
-          acceptablePlanKinds: ["runner.pressure_central"],
-          acceptableCapabilities: ["pressure_hq_information"],
-          requiredAssessmentEvidence: ["target:hq"],
+          acceptablePlanKinds: ["runner.credit_bank"],
+          acceptableCapabilities: ["credit_bank_build"],
+          requiredAssessmentEvidence: ["runner_credit_bank_first_load"],
         },
       };
     });
@@ -68,7 +73,7 @@ describe("match 23D6 runner remediation decision checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 
-  it("keeps the deferred Broker build represented as a resident P5 plan", () => {
+  it("keeps the Broker build represented as the selected resident plan", () => {
     const result = runAiDecisionCheckpoint(fixture(brokerFundingJson));
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
     expect(result.decision?.evidence).toEqual(
@@ -78,15 +83,11 @@ describe("match 23D6 runner remediation decision checkpoints", () => {
       ]),
     );
     expect(
-      result.decision?.decisionDebug?.actionAlternatives?.find((entry) =>
-        entry.actionId.includes("broker"),
-      )?.whyNot,
-    ).toEqual(
-      expect.arrayContaining([
-        "candidate_plan:plan:runner.credit_bank:runner_onr_v1_154_broker_1:ready",
-        "candidate_plan_evidence:runner_credit_bank_first_load",
-      ]),
-    );
+      result.decision?.decisionDebug?.planFirstDecision?.selectedPlan,
+    ).toMatchObject({
+      instanceId: "plan:runner.credit_bank:runner_onr_v1_154_broker_1",
+      moduleId: "runner.credit_bank",
+    });
   });
 
   it("keeps Viacox legal even when the current HQ information plan wins", () => {

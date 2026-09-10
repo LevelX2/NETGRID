@@ -112,7 +112,9 @@ export function buildRealEngineAccessCorpus(): RealEngineAccessCorpusScenario[] 
         applies: false,
         invalidationReason: "remote_fingerprint_changed",
         suppressesPlanBonus: false,
-        evidence: ["access_corpus_memory_invalidated:remote_fingerprint_changed"],
+        evidence: [
+          "access_corpus_memory_invalidated:remote_fingerprint_changed",
+        ],
       },
     }),
     scenario({
@@ -153,7 +155,9 @@ export function buildRealEngineAccessCorpus(): RealEngineAccessCorpusScenario[] 
         applies: false,
         invalidationReason: "credits_or_reserve_improved",
         suppressesPlanBonus: false,
-        evidence: ["access_corpus_memory_invalidated:credits_or_reserve_improved"],
+        evidence: [
+          "access_corpus_memory_invalidated:credits_or_reserve_improved",
+        ],
       },
     }),
     scenario({

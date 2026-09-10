@@ -60,8 +60,7 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
           "corp.install_card.corp_onr_v1_221_asp_1.rd.corp_onr_v1_221_asp_1.3",
         planKind: "corp.defend_servers",
         capability: "allocate_server_defense",
-        executorInstanceId:
-          "plan:corp.defend_servers:server-defense-portfolio",
+        executorInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
       });
     }
   });
@@ -142,19 +141,22 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
     expectCheckpointToPass(checkpoint);
   });
 
-  it("keeps the engine-certified score advance while the runner is rich", () => {
+  it("keeps exact score-support ownership while the runner is rich", () => {
     const checkpoint = mutateFixture(scorelineSeed004D55Json, (candidate) => {
       candidate.engine.testOnlyGameState.runner.credits = 30;
       candidate.expectation = {
         acceptableActions: [
           {
-            type: "advance_card",
-            sourceDefinitionId: "onr_v1_193_corporate-coup",
+            type: "play_operation",
+            sourceDefinitionId: "onr_v1_290_efficiency-experts",
           },
         ],
         planExecution: {
-          acceptablePlanKinds: ["corp.score_agenda"],
-          acceptableCapabilities: ["advance_score_agenda"],
+          acceptablePlanIds: [
+            "plan:corp.economy:score-support%3Aagenda%3Acorp_onr_v1_193_corporate-coup_2%3Aremote_1",
+          ],
+          acceptablePlanKinds: ["corp.economy"],
+          acceptableCapabilities: ["develop_or_convert_corp_economy"],
           requiredAssessmentEvidence: [
             "corp_engine_certified_mature_remote_score_advance:remote_1",
           ],
@@ -162,7 +164,13 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
       };
     });
 
-    expectCheckpointToPass(checkpoint);
+    const result = expectCheckpointToPass(checkpoint);
+    expect(result.decision?.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_first_root:plan:corp.score_agenda:agenda%3Acorp_onr_v1_193_corporate-coup_2%3Aremote_1",
+        "plan_priority_delegated_from:plan:corp.score_agenda:agenda%3Acorp_onr_v1_193_corporate-coup_2%3Aremote_1",
+      ]),
+    );
   });
 
   it("does not force central protection and takes exact basic liquidity below runner matchpoint", () => {
@@ -203,8 +211,7 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
       actionId: "corp.gain_credit",
       planKind: "corp.economy",
       capability: "develop_or_convert_corp_economy",
-      assessmentEvidence:
-        "corp_engine_certified_basic_liquidity_development",
+      assessmentEvidence: "corp_engine_certified_basic_liquidity_development",
       executorInstanceId:
         "plan:corp.economy:economy-visible-liquidity-development%3A8",
     });

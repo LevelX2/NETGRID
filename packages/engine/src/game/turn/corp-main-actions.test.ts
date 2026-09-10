@@ -15,6 +15,57 @@ import {
 } from "./corp-main-actions";
 
 describe("corp main action generation", () => {
+  it.each(["spy", "obligation"] as const)(
+    "keeps the install/rez reserve out of %s payment offers",
+    (kind) => {
+      const state = minimalCorpMainState(`restricted-${kind}-offer`);
+      const cost = kind === "spy" ? 4 : 12;
+      state.corp.credits = cost + 2;
+      state.corpTemporaryInstallRezCredits = {
+        sourceCardInstanceId: "contract",
+        sourceDefinitionId: "onr_proteus_059_government-contract",
+        remaining: 3,
+        usableFor: "corp_install_or_rez",
+        returnUnusedAtTurnEnd: true,
+      };
+      const host = testCorpMainHost(state);
+      if (kind === "spy") host.counters.spyCountersForServer = () => 1;
+      else host.corp.activeObligationCount = () => 1;
+      const offered = () =>
+        buildCorpMainActions(host).some((action) =>
+          kind === "spy"
+            ? action.payload?.corpAbility === "remove_spy_counter"
+            : action.payload?.obligationDebtAbility === "remove_obligation",
+        );
+      expect(offered()).toBe(false);
+      state.corp.credits += 1;
+      expect(offered()).toBe(true);
+    },
+  );
+  it.each([3, 5])(
+    "offers tagged-resource trash only with two general credits (total %s)",
+    (total) => {
+      const state = minimalCorpMainState("restricted-trash-offer");
+      state.corp.credits = total;
+      state.runner.tags = 1;
+      state.runner.rig.resources = ["resource-instance"];
+      state.corpTemporaryInstallRezCredits = {
+        sourceCardInstanceId: "contract-instance",
+        sourceDefinitionId: "onr_proteus_059_government-contract",
+        remaining: 3,
+        usableFor: "corp_install_or_rez",
+        returnUnusedAtTurnEnd: true,
+      };
+      const host = testCorpMainHost(state);
+      host.cards.definitionFor = () =>
+        CARD_DEFINITIONS_BY_ID["onr_v1_151_aujourdoui"]!;
+      expect(
+        buildCorpMainActions(host).some(
+          (action) => action.type === "trash_resource",
+        ),
+      ).toBe(total === 5);
+    },
+  );
   it("returns only end turn when the Corp has no clicks", () => {
     const state = minimalCorpMainState("arch-53-corp-no-clicks");
     state.corp.clicks = 0;
@@ -130,6 +181,101 @@ describe("corp main action generation", () => {
         cardImplementationAbilityKey: "abilities_on_play_trace",
         cardImplementationAbilityId:
           "onr_v1_284_chance-observation:abilities_on_play_trace",
+      },
+    });
+  });
+
+  it("attaches the exact composite zone projection to Rescheduler", () => {
+    const state = minimalCorpMainState("corp-main-rescheduler-projection");
+    const cardId = "rescheduler-instance";
+    const definition = CARD_DEFINITIONS_BY_ID["onr_v1_336_rescheduler"]!;
+    state.cardInstances[cardId] = {
+      id: cardId,
+      definitionId: definition.id,
+      owner: "corp",
+      controller: "corp",
+      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      installed: true,
+      rezzed: true,
+      advancementCounters: 0,
+      counters: {},
+    } as never;
+    const host = testCorpMainHost(state);
+    host.cards.definitionFor = () => definition;
+    host.cards.rezzedCorpRootCardIds = () => [cardId];
+    host.corp.hasCorpUtilityKind = (
+      _state: GameState,
+      candidateCardId: string,
+      kind: string,
+    ) =>
+      candidateCardId === cardId &&
+      kind === "shuffle_hq_into_rd_then_draw_same_count";
+
+    const rescheduler = buildCorpMainActions(host).find(
+      (candidate) => candidate.source === cardId,
+    );
+
+    expect(rescheduler?.payload).toMatchObject({
+      v1917AssetAbility: "rescheduler_hq_shuffle_draw",
+      corpZoneTransitionProjectionComplete: true,
+      corpZoneTransitionProjectionKind:
+        "shuffle_hq_into_rd_then_draw_same_count",
+      corpZoneTransitionProjectionGrossDrawCount: 0,
+      corpZoneTransitionProjectionHqCardsRecycledBeforeDrawCount: 0,
+      corpZoneTransitionProjectionNetHqDelta: 0,
+      corpZoneTransitionProjectionNetRdDelta: 0,
+      corpZoneTransitionProjectionNetRdConsumption: 0,
+    });
+  });
+
+  it("attaches the exact composite zone projection and double cost to Corporate Shuffle", () => {
+    const state = minimalCorpMainState(
+      "corp-main-corporate-shuffle-projection",
+    );
+    const cardId = "corporate-shuffle-instance";
+    const definition =
+      CARD_DEFINITIONS_BY_ID["onr_classic_017_corporate-shuffle"]!;
+    state.corp.clicks = 2;
+    state.corp.hq = [cardId];
+    state.corp.rd = ["rd-1", "rd-2", "rd-3", "rd-4", "rd-5"];
+    state.cardInstances[cardId] = {
+      id: cardId,
+      definitionId: definition.id,
+      owner: "corp",
+      controller: "corp",
+      zone: { side: "corp", zone: "hq" },
+      installed: false,
+      rezzed: false,
+      advancementCounters: 0,
+      counters: {},
+    } as never;
+    const host = testCorpMainHost(state);
+    host.cards.definitionFor = () => definition;
+    host.corp.canPlayCorpOperation = () => true;
+    host.corp.corpUtilityImplementationForDefinition = () => ({
+      capabilityKey: "draw_five_then_shuffle_hq_card",
+      addressability: ["plan", "action", "quote", "debug"],
+      kind: "draw_corp_cards_then_shuffle_hq_card_into_rd",
+      drawCount: 5,
+      playCost: { kind: "printed", additionalClicks: 1 },
+      visibility: "hidden_info_barrier",
+    });
+
+    const corporateShuffle = buildCorpMainActions(host).find(
+      (candidate) => candidate.source === cardId,
+    );
+
+    expect(corporateShuffle).toMatchObject({
+      type: "play_operation",
+      costs: [{ clicks: 2, credits: 0 }],
+      payload: {
+        cardId,
+        corpZoneTransitionProjectionComplete: true,
+        corpZoneTransitionProjectionKind: "draw_then_shuffle_one_hq_into_rd",
+        corpZoneTransitionProjectionGrossDrawCount: 5,
+        corpZoneTransitionProjectionNetHqDelta: 3,
+        corpZoneTransitionProjectionNetRdDelta: -4,
+        corpZoneTransitionProjectionNetRdConsumption: 4,
       },
     });
   });

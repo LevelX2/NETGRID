@@ -12,7 +12,6 @@ export function createAiFeatureExtractorContext(
   extractAiFeatures: (input: AiDecisionInput) => AiFeatures;
 } {
   return {
-    extractAiFeatures: (input) =>
-      extractAiFeaturesRuntime(input, dependencies),
+    extractAiFeatures: (input) => extractAiFeaturesRuntime(input, dependencies),
   };
 }

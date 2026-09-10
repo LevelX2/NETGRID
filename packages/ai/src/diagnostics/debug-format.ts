@@ -1,4 +1,6 @@
-export function formatDebugFieldValue(value: string | number | boolean): string {
+export function formatDebugFieldValue(
+  value: string | number | boolean,
+): string {
   return String(value)
     .replace(/[|\r\n]+/g, " ")
     .trim();

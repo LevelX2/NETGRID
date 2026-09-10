@@ -31,7 +31,6 @@ import {
   cardImplementationForDefinitionId,
 } from "../../card-implementations/registry";
 import type { RestrictedHostedCreditUse } from "../../ability-engine/definition-types";
-import { SERVER_DIFFICULTY_UPGRADE_SOURCES } from "../../mechanics/agenda-scoring";
 import type { CardImplementationDefinition } from "../../card-implementations/types";
 import { serverChoiceDisplayLabel } from "./server-view";
 import { temporaryBreakerStrengthBonusUntilEndOfTurn } from "../state/temporary-breaker-strength";
@@ -43,7 +42,6 @@ import { persistentFortCounterExposureActive } from "../mechanics/fort-counter-e
 const effectiveAgendaDifficultyDeps: EffectiveAgendaDifficultyDependencies = {
   definitionFor,
   serverDifficultyIncreaseFromRunCounters,
-  serverDifficultyReductionFromUpgrades,
 };
 export function visibleOwnCard(
   state: GameState,
@@ -195,6 +193,9 @@ function visibleKnownCardWithReferenceViewer(
     title: definition.title,
     definitionId: definition.id,
     type: definition.type,
+    ...(instance.installedAsRunnerProgram
+      ? { installedAsRunnerProgram: { ...instance.installedAsRunnerProgram } }
+      : {}),
     subtypes: effectiveSubtypesForCard(state, id, definition),
     ...(alternateIceSubtypeIsActive(instance)
       ? { alternateIceSubtypeActive: true }
@@ -1446,23 +1447,6 @@ export function serverDifficultyIncreaseFromRunCounters(
       ) / 2,
     ),
   );
-}
-
-export function serverDifficultyReductionFromUpgrades(
-  state: GameState,
-  agendaId: CardInstanceId,
-): number {
-  const zone = mustInstance(state.cardInstances, agendaId).zone;
-  if (zone.side !== "corp" || zone.zone !== "serverRoot" || !zone.serverId)
-    return 0;
-  const server = mustServer(state, zone.serverId);
-  return server.root.reduce((sum, rootCardId) => {
-    if (rootCardId === agendaId) return sum;
-    const instance = mustInstance(state.cardInstances, rootCardId);
-    if (!instance.rezzed) return sum;
-    const definitionId = definitionFor(state, rootCardId).id;
-    return SERVER_DIFFICULTY_UPGRADE_SOURCES.has(definitionId) ? sum + 1 : sum;
-  }, 0);
 }
 
 function requiresDataFortInstallTarget(definition: CardDefinition): boolean {

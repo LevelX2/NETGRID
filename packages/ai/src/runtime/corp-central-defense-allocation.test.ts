@@ -141,7 +141,10 @@ describe("allocateCorpCentralDefense", () => {
     );
     const unpressured = allocateCorpCentralDefense(input());
 
-    expect(pressured).toMatchObject({ status: "known", selectedServerId: "rd" });
+    expect(pressured).toMatchObject({
+      status: "known",
+      selectedServerId: "rd",
+    });
     expect(corpCentralDefenseHqAgendaExposureIsDeadline(pressured)).toBe(true);
     expect(corpCentralDefenseHqAgendaExposureIsDeadline(unpressured)).toBe(
       false,

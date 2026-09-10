@@ -1071,11 +1071,12 @@ describe("visible run analysis access-preserving effect choices", () => {
       20,
     );
 
-    expect(outside.visibleBreakCost).toBe(14);
+    expect(outside.visibleBreakCost).toBe(4);
+    expect(outside.fullyBrokenIceInstanceIds).toEqual(["inner-wall"]);
     expect(inside.visibleBreakCost).toBe(4);
   });
 
-  it("breaks a harmful non-ETR setup subroutine with a universal breaker", () => {
+  it("uses the cheaper complete follow-up break for conditional setup damage", () => {
     const assessment = assessKnownRezzedIcePath(
       [
         dataWallTwoPointZeroIce("inner-wall"),
@@ -1088,8 +1089,8 @@ describe("visible run analysis access-preserving effect choices", () => {
     expect(assessment).toMatchObject({
       blocked: false,
       canReachAccess: true,
-      visibleBreakCost: 14,
-      creditsAfterPath: 6,
+      visibleBreakCost: 4,
+      creditsAfterPath: 16,
     });
   });
 
@@ -1732,7 +1733,7 @@ describe("visible run analysis trace hazards", () => {
     });
   });
 
-  it("does not reuse Replicator break credits across multiple traces", () => {
+  it("pumps Replicator once before breaking both traces for free", () => {
     const assessment = assessKnownRezzedIcePath(
       [doubleTraceTagIce("rd-double-trace")],
       [replicator("runner-replicator")],
@@ -1744,8 +1745,6 @@ describe("visible run analysis trace hazards", () => {
       canReachAccess: true,
       visibleIceHazardAvoidanceCost: 3,
       creditsAfterAvoidingVisibleIceHazards: 0,
-      visibleTraceTagHazardUnavoidable: true,
-      unavoidableVisibleIceHazardCount: 1,
     });
     expect(assessment.visibleIceRunHazards).toHaveLength(2);
     expect(assessment.visibleIceRunHazards?.[0]).toMatchObject({
@@ -1758,8 +1757,9 @@ describe("visible run analysis trace hazards", () => {
     expect(assessment.visibleIceRunHazards?.[1]).toMatchObject({
       kind: "trace_tag",
       runnerTraceCapacity: 0,
-      breakAvoidanceCost: 3,
-      unavoidable: true,
+      breakAvoidanceCost: 0,
+      minimumAvoidanceCost: 0,
+      unavoidable: false,
     });
   });
 

@@ -10,10 +10,7 @@ import {
   incrementStringCounter,
   incrementTypedCounter,
 } from "../runtime/counter";
-import {
-  evidenceValue,
-  hasEvidenceFlag,
-} from "../runtime/evidence-value";
+import { evidenceValue, hasEvidenceFlag } from "../runtime/evidence-value";
 import { roundNumber as round } from "../runtime/number-rounding";
 import type { AiMatchProgressionMetrics } from "./ai-match-progression-types";
 import type { AiSimulationSummary } from "./ai-simulation-summary";

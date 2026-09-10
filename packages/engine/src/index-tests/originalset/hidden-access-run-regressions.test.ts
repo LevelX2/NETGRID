@@ -2566,53 +2566,65 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     ).toEqual(legalActionIdsBeforeView);
   });
 
-  it("grants Remote Facility's action immediately when it is rezzed", () => {
-    let state = apply(
-      createGameAfterSetup({
-        seed: "remote-facility-immediate-rez-action",
-        baseline: CURRENT_RULES_BASELINE,
-        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
-        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
-        agendaPointsToWin: 7,
-      }),
-      "corp",
-      (action) => action.type === "mandatory_draw",
-    );
-    state.corp.credits = 5;
-    const remoteId = putCorpRootInRemote(state, "onr_v1_335_remote-facility");
-    const clicksBeforeRez = state.corp.clicks;
-    const initial = structuredClone(state);
-    const replayStart = state.eventLog.length;
-
-    state = apply(
-      state,
-      "corp",
-      (action) =>
-        action.type === "rez_card" && action.payload?.cardId === remoteId,
-    );
-
-    expect(state.cardInstances[remoteId]?.rezzed).toBe(true);
-    expect(state.corp.credits).toBe(0);
-    expect(state.corp.clicks).toBe(clicksBeforeRez + 1);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "rez_card",
-      gainedActions: 1,
-    });
-    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          kind: "gain_actions",
-          amount: 1,
-          reason: "card_resolver",
-          sourceDefinitionId: "onr_v1_335_remote-facility",
-          sourceTitle: "Remote Facility",
+  it.each([0, 3])(
+    "grants Remote Facility's action immediately when rezzed with %i clicks",
+    (clicks) => {
+      let state = apply(
+        createGameAfterSetup({
+          seed: "remote-facility-immediate-rez-action",
+          baseline: CURRENT_RULES_BASELINE,
+          runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+          agendaPointsToWin: 7,
         }),
-      ]),
-    );
-    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-    expect(replay.ok).toBe(true);
-    expect(hashState(replay.state)).toBe(hashState(state));
-  });
+        "corp",
+        (action) => action.type === "mandatory_draw",
+      );
+      state.corp.credits = 5;
+      const remoteId = putCorpRootInRemote(state, "onr_v1_335_remote-facility");
+      state.corp.clicks = clicks;
+      state.corp.credits = 4;
+      expect(
+        getLegalActions(state, "corp").some(
+          (action) =>
+            action.type === "rez_card" && action.payload?.cardId === remoteId,
+        ),
+      ).toBe(false);
+      state.corp.credits = 5;
+      const clicksBeforeRez = state.corp.clicks;
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "rez_card" && action.payload?.cardId === remoteId,
+      );
+
+      expect(state.cardInstances[remoteId]?.rezzed).toBe(true);
+      expect(state.corp.credits).toBe(0);
+      expect(state.corp.clicks).toBe(clicksBeforeRez + 1);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        actionType: "rez_card",
+        gainedActions: 1,
+      });
+      expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            kind: "gain_actions",
+            amount: 1,
+            reason: "card_resolver",
+            sourceDefinitionId: "onr_v1_335_remote-facility",
+            sourceTitle: "Remote Facility",
+          }),
+        ]),
+      );
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(state));
+    },
+  );
 
   it("applies P3.7 turn-start economy CardImplementations once from valid sources", () => {
     let corpState = apply(
@@ -4916,6 +4928,78 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
       (action) => action.actionId === vaporAction!.actionId,
     );
     expect(state.cardInstances[vaporId]?.advancementCounters).toBe(0);
+  });
+
+  it("keeps both player views usable after paying Misleading Access Menus with rezzed Vapor Ops", () => {
+    let state = apply(
+      originalsetReorderCounterRunlockGame("vapor-ops-after-pay-or-end-run"),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state.corp.credits = 20;
+    const vaporId = putCorpRootInRemote(state, "onr_v1_347_vapor-ops");
+    state.cardInstances[vaporId]!.advancementCounters = 1;
+    const iceId = putCorpIceOnServer(state, "remote_1", "simple_code_gate_ice");
+    state.cardInstances[iceId]!.definitionId =
+      "onr_proteus_032_misleading-access-menus";
+    state = toRunnerTurnFromCorpMain(state);
+    state.runner.credits = 1;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(state, "corp", (action) => action.type === "rez_ice");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_card" && action.payload?.cardId === vaporId,
+    );
+    const beforePayment = structuredClone(state);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.payload?.payOrEndRunSubroutinePayment === 1,
+    );
+
+    expect(state.runner.credits).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      runDestination: "root",
+    });
+    expect(
+      hashState(
+        apply(
+          beforePayment,
+          "runner",
+          (action) => action.payload?.payOrEndRunSubroutinePayment === 1,
+        ),
+      ),
+    ).toBe(hashState(state));
+    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          sourceDefinitionId: "onr_proteus_032_misleading-access-menus",
+          paidCredits: 1,
+        }),
+      ]),
+    );
+    expect(state.run?.phase).toBe("movement");
+    expect(() => getPlayerView(state, "runner")).not.toThrow();
+    expect(() => getPlayerView(state, "corp")).not.toThrow();
+    const vaporActions = getLegalActions(state, "corp").filter(
+      (action) =>
+        action.type === "activated_card_ability" && action.source === vaporId,
+    );
+    expect(vaporActions).toHaveLength(1);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === vaporActions[0]!.actionId,
+    );
+    expect(state.cardInstances[vaporId]!.advancementCounters).toBe(0);
+    expect(validateGameState(state).ok).toBe(true);
   });
 
   it("labels Vapor Ops advancement move choices with counter amount and target", () => {

@@ -90,7 +90,8 @@ function dependencies(): Parameters<typeof runnerStartRunScoreComponents>[2] {
     hqMemoryComponents: () => [],
     rndMemoryComponents: () => [],
     archivesComponents: () => [],
-    isRemoteServerTarget: (serverId) => serverId?.startsWith("remote_") ?? false,
+    isRemoteServerTarget: (serverId) =>
+      serverId?.startsWith("remote_") ?? false,
     remoteComponents: () => [],
     knownIcePathComponents: () => [],
     repeatedRunTargetComponents: () => [],

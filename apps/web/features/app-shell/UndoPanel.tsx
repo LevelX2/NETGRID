@@ -14,7 +14,7 @@ export function UndoPanel({
   latestEventId,
   connection,
   onRequest,
-  onResolve
+  onResolve,
 }: {
   open: boolean;
   pendingUndo: PendingUndo | undefined;
@@ -29,15 +29,24 @@ export function UndoPanel({
   const hasIncomingRequest = Boolean(pendingUndo?.needsResponse);
   const hasOutgoingRequest = Boolean(pendingUndo && !pendingUndo.needsResponse);
   const incomingRequest = pendingUndo?.needsResponse ? pendingUndo : null;
-  const undoTitle = hasIncomingRequest || hasOutgoingRequest ? t("requestedTitle") : t("title");
+  const undoTitle =
+    hasIncomingRequest || hasOutgoingRequest ? t("requestedTitle") : t("title");
   const undoDescription = hasIncomingRequest
-    ? t("incoming", {side: incomingRequest!.requestedBy === "corp" ? t("corp") : t("runner")})
+    ? t("incoming", {
+        side: incomingRequest!.requestedBy === "corp" ? t("corp") : t("runner"),
+      })
     : hasOutgoingRequest
       ? t("waiting")
       : t("description");
 
   return (
-    <section className="undoPanel" id="undo-strip" data-testid="undo-panel" role="region" aria-label={t("ariaLabel")}>
+    <section
+      className="undoPanel"
+      id="undo-strip"
+      data-testid="undo-panel"
+      role="region"
+      aria-label={t("ariaLabel")}
+    >
       <div className="undoPanelHeader">
         <h2>{undoTitle}</h2>
         <p className="meta">{undoDescription}</p>
@@ -66,7 +75,11 @@ export function UndoPanel({
           <p className="meta">{t("pending")}</p>
         </div>
       ) : (
-        <button className="button wide" onClick={onRequest} disabled={!latestEventId || connection !== "online"}>
+        <button
+          className="button wide"
+          onClick={onRequest}
+          disabled={!latestEventId || connection !== "online"}
+        >
           <RotateCcw size={15} />
           {t("request")}
         </button>

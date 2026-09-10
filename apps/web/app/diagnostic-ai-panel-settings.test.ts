@@ -16,7 +16,9 @@ const optionsSource = readFileSync(
 
 describe("diagnostic AI panel display settings", () => {
   it("keeps both complete diagnostic panels collapsed by default", () => {
-    expect(catalogSource).toContain("const [isOpen, setIsOpen] = useState(false)");
+    expect(catalogSource).toContain(
+      "const [isOpen, setIsOpen] = useState(false)",
+    );
     expect(deckProfileSource).toContain(
       "const [isOpen, setIsOpen] = useState(false)",
     );

@@ -906,6 +906,15 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
     };
     const gideonInitial = structuredClone(gideon);
     const gideonReplayStart = gideon.eventLog.length;
+    expect(
+      getLegalActions(gideon, "runner").find(
+        (action) =>
+          action.type === "play_event" && action.payload?.cardId === gideonId,
+      )?.payload,
+    ).toMatchObject({
+      cardImplementationEffectKind: "search_trash_to_grip",
+      cardImplementationSearchFilter: "any_card",
+    });
     gideon = apply(
       gideon,
       "runner",
@@ -2240,6 +2249,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     options?: {
       shellTraderQuantity?: number;
       includeCloak?: boolean;
+      includeAfreet?: boolean;
     },
   ): GameState {
     const state = toRunnerTurn(
@@ -2261,6 +2271,12 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
             })),
             ...(options?.includeCloak
               ? [{ id: "onr_v1_011_cloak", quantity: 1 }]
+              : []),
+            ...(options?.includeAfreet
+              ? [
+                  { id: "onr_v1_001_afreet", quantity: 1 },
+                  { id: "onr_v1_023_evil-twin", quantity: 1 },
+                ]
               : []),
             { id: "onr_classic_031_rent-i-con", quantity: 1 },
             { id: "simple_fracter", quantity: 2 },
@@ -2735,6 +2751,156 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     expect(state.runner.memoryUsed).toBe(state.runner.memoryLimit);
     expect(prepareActions).toHaveLength(1);
   });
+
+  it.each([
+    ["paid", true, "host"],
+    ["paid", false, "host"],
+    ["start_turn", true, "host"],
+    ["start_turn", false, "host"],
+    ["paid", true, "rig"],
+    ["paid", false, "rig"],
+  ] as const)(
+    "installs Shell Traders programs via %s with full memory %s on %s",
+    (reason, fullMemory, destination) => {
+      let state = resourceContactState(
+        `shell-afreet-${reason}-${fullMemory}-${destination}`,
+        { includeAfreet: true },
+      );
+      moveRunnerCardToGrip(state, "onr_v1_176_the-shell-traders");
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "install_card" &&
+          sourceDefinition(state, action) === "onr_v1_176_the-shell-traders",
+      );
+      const hostId = installRunnerProgramForTest(state, "onr_v1_001_afreet");
+      const installedId = installRunnerProgramForTest(state, "simple_fracter");
+      const targetId = moveRunnerCardToGrip(state, "onr_v1_023_evil-twin");
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.payload?.delayedInstallAbility === "set_aside_from_grip" &&
+          action.payload?.targetCardId === targetId,
+      );
+      state.runner.memoryLimit = state.runner.memoryUsed + (fullMemory ? 0 : 1);
+      setCardCounterForTest(state, targetId, "shell", 1);
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      const memoryBefore = state.runner.memoryUsed;
+      const heapBefore = [...state.runner.heap];
+      const creditsBefore = state.runner.credits;
+      if (reason === "paid") {
+        state = apply(
+          state,
+          "runner",
+          (action) =>
+            action.payload?.delayedInstallAbility === "remove_shell_counter" &&
+            action.payload?.targetCardId === targetId,
+        );
+      } else {
+        state = apply(state, "runner", (action) => action.type === "end_turn");
+        state = apply(
+          state,
+          "corp",
+          (action) => action.type === "mandatory_draw",
+        );
+        state = apply(state, "corp", (action) => action.type === "end_turn");
+      }
+      expect(state.pendingChoice).toMatchObject({
+        kind: "select_option",
+        presentationKey: "delayed_install_destination",
+      });
+      expect(
+        state.pendingChoice?.options.map((option) => option.value),
+      ).toEqual(["rig", hostId]);
+      expect(
+        getPlayerView(state, "runner").pendingChoice?.options.find(
+          (option) => option.value === hostId,
+        )?.metadata?.cardTitle,
+      ).toBe("Afreet");
+      expect(cardCounterAmount(state, targetId, "shell")).toBe(1);
+      const choice = mustAction(
+        state,
+        "runner",
+        (action) => action.type === "resolve_choice",
+      );
+      const filledHostState = structuredClone(state);
+      const fillerId = installRunnerProgramForTest(
+        filledHostState,
+        "onr_classic_031_rent-i-con",
+      );
+      filledHostState.cardInstances[fillerId]!.hostedOn = hostId;
+      filledHostState.cardInstances[installedId]!.hostedOn = hostId;
+      filledHostState.runner.memoryUsed -= 3;
+      const filledHostHash = hashState(filledHostState);
+      const filledHostResult = applyAction(filledHostState, {
+        matchId: filledHostState.matchId,
+        side: "runner",
+        actionId: choice.actionId,
+        clientKnownStateVersion: filledHostState.stateVersion,
+        idempotencyKey: "shell-afreet-capacity-changed",
+        selectedChoices: {
+          choiceId: filledHostState.pendingChoice?.choiceId,
+          selectedOptionIds: [`host_${hostId}`],
+        },
+      });
+      expect(filledHostResult.ok).toBe(false);
+      expect(hashState(filledHostState)).toBe(filledHostHash);
+      expect(cardCounterAmount(filledHostState, targetId, "shell")).toBe(1);
+      for (const [optionId, version] of [
+        [`host_${installedId}`, state.stateVersion],
+        [`host_${hostId}`, state.stateVersion - 1],
+      ] as const) {
+        const rejected = applyAction(state, {
+          matchId: state.matchId,
+          side: "runner",
+          actionId: choice.actionId,
+          clientKnownStateVersion: version,
+          idempotencyKey: `shell-afreet-invalid-${optionId}-${version}`,
+          selectedChoices: {
+            choiceId: state.pendingChoice?.choiceId,
+            selectedOptionIds: [optionId],
+          },
+        });
+        expect(rejected.ok).toBe(false);
+      }
+      state = applyChoice(
+        state,
+        "runner",
+        destination === "host" ? `host_${hostId}` : "rig",
+      );
+      if (destination === "rig" && fullMemory) {
+        expect(state.pendingChoice?.source).toMatch(
+          /^v1912\.delayed_install_memory:/,
+        );
+        state = applyChoice(state, "runner", `card_${installedId}`);
+      }
+      expect(state.pendingChoice).toBeUndefined();
+      expect(state.phase).toBe("runner_action_phase");
+      expect(state.runner.rig.programs).toContain(targetId);
+      expect(state.cardInstances[targetId]?.hostedOn).toBe(
+        destination === "host" ? hostId : undefined,
+      );
+      expect(state.runner.memoryUsed).toBe(
+        memoryBefore + (destination === "rig" && !fullMemory ? 1 : 0),
+      );
+      expect(state.runner.heap).toEqual(
+        destination === "rig" && fullMemory
+          ? [...heapBefore, installedId]
+          : heapBefore,
+      );
+      expect(state.runner.credits).toBe(
+        creditsBefore - (reason === "paid" ? 1 : 0),
+      );
+      expect(cardCounterAmount(state, targetId, "shell")).toBe(0);
+      expect(state.specialZones?.setAside).not.toContain(targetId);
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(state));
+    },
+  );
 
   it("requires program trash before the last Shell counter installs under MU pressure", () => {
     let state = resourceContactState("shell-final-counter-memory-choice");

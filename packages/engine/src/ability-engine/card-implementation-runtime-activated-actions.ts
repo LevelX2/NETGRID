@@ -68,18 +68,16 @@ export function pushActivatedCardImplementationActions(
     side === "corp"
       ? (["corp_main", "corp_paid"] as const)
       : (["runner_main", "runner_paid"] as const);
-  for (const timing of timings) {
-    pushActivatedCardImplementationActionsForTiming(
-      deps,
-      state,
-      actions,
-      side,
-      sourceCardId,
-      definition,
-      timing,
-      options,
-    );
-  }
+  pushActivatedCardImplementationActionsForTiming(
+    deps,
+    state,
+    actions,
+    side,
+    sourceCardId,
+    definition,
+    timings,
+    options,
+  );
 }
 
 export function pushActivatedCardImplementationActionsForTiming(
@@ -89,18 +87,43 @@ export function pushActivatedCardImplementationActionsForTiming(
   side: Side,
   sourceCardId: CardInstanceId,
   definition: CardDefinition,
-  timing: ActivatedCardAbilityImplementation["timing"],
+  requestedTimings:
+    | ActivatedCardAbilityImplementation["timing"]
+    | readonly ActivatedCardAbilityImplementation["timing"][],
   options: { canStartRun?: boolean } = {},
 ): void {
   if (deps.mustInstance(state.cardInstances, sourceCardId).controller !== side)
     return;
-  for (const binding of activatedCardImplementationAbilitiesForTiming(
-    definition,
-    timing,
-  )) {
-    const ability = activatedAbilityAtTiming(binding.ability, timing);
-    if (!ability)
-      throw new Error("Die aktivierte Fähigkeit besitzt dieses Timing nicht.");
+  const timings =
+    typeof requestedTimings === "string"
+      ? [requestedTimings]
+      : requestedTimings;
+  // Several open timings can authorize the same printed capability. Construct
+  // that capability once, through the first timing whose conditions hold.
+  for (const binding of activatedAbilityBindingsForDefinition(definition)) {
+    const ability = timings
+      .map((timing) => activatedAbilityAtTiming(binding.ability, timing))
+      .find((candidate) => {
+        if (
+          !candidate ||
+          !canResolveActivatedCardImplementationAbility(
+            deps,
+            state,
+            candidate,
+            sourceCardId,
+          )
+        )
+          return false;
+        const condition = additionalTimingCondition(
+          binding.ability,
+          candidate.timing,
+        );
+        return (
+          condition === undefined ||
+          cardImplementationConditionMet(deps, state, condition, sourceCardId)
+        );
+      });
+    if (!ability) continue;
     const createBoundAction = (
       label: string,
       payload: Record<string, string | number | boolean>,
@@ -123,26 +146,6 @@ export function pushActivatedCardImplementationActionsForTiming(
       side === "runner" &&
       options.canStartRun === false &&
       ability.effects.some((effect) => effect.kind === "make_run")
-    )
-      continue;
-    if (
-      !canResolveActivatedCardImplementationAbility(
-        deps,
-        state,
-        ability,
-        sourceCardId,
-      )
-    )
-      continue;
-    const timingCondition = additionalTimingCondition(binding.ability, timing);
-    if (
-      timingCondition !== undefined &&
-      !cardImplementationConditionMet(
-        deps,
-        state,
-        timingCondition,
-        sourceCardId,
-      )
     )
       continue;
     if (

@@ -15,8 +15,12 @@ describe("public games winner display contract", () => {
   it("renders finished participants separately and names the winner accessibly", () => {
     expect(panelSource).toContain('className="publicGameParticipants"');
     expect(panelSource).toContain('className="publicGameWinnerCrown"');
-    expect(panelSource).toContain('participant.isWinner ? `, ${t("winner")}` : ""');
-    expect(panelSource).toContain('participant.isWinner ? `${t("winner")}: ` : ""');
+    expect(panelSource).toContain(
+      'participant.isWinner ? `, ${t("winner")}` : ""',
+    );
+    expect(panelSource).toContain(
+      'participant.isWinner ? `${t("winner")}: ` : ""',
+    );
     expect(panelSource).toContain("publicMatchParticipants(entry)");
   });
 

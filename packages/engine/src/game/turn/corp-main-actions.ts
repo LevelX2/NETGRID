@@ -4,16 +4,19 @@ import type {
   GameState,
   LegalAction,
 } from "@netgrid/shared";
+import type { CardCorpUtilityImplementation } from "../../ability-engine/definition-types";
 import { deterministicOnPlayResourcePayload } from "../../ability-engine/card-implementation-runtime-shared";
 import {
   onPlayAbilityBindingForDefinition,
   onPlayAbilityBindingPayload,
 } from "../../ability-engine/card-capability-binding";
 import { canInstallCorpIceInServer } from "../install/corp-ice-install-restrictions";
+import { corpGeneralCreditAvailability } from "../payment/corp-general-credit-availability";
 import {
   fixedPlayCostCredits,
   minimumPlayCostCredits,
 } from "../payment/play-cost";
+import { corpUtilityPlayClickCost } from "../play/corp-operation-resolution";
 import {
   corpRootRezCreditOutcomeQuotePayload,
   quoteCorpRootRezCreditOutcome,
@@ -22,6 +25,11 @@ import {
   assertFortCounterExposeImplementation,
   persistentFortCounterExposeImplementation,
 } from "../mechanics/fort-counter-exposure";
+import {
+  corpZoneTransitionProjectionPayload,
+  quoteCorporateShuffleZoneTransition,
+  quoteHqShuffleRedrawZoneTransition,
+} from "../hidden-zone/corp-zone-transition-projection";
 
 type HostFn<T = unknown> = (...args: any[]) => T;
 
@@ -74,7 +82,7 @@ export type CorpMainActionGenerationHost = {
     canPlayCorpOperation: HostFn<boolean>;
     cardImplementationOperationLegalActions: HostFn<LegalAction[]>;
     corpUtilityImplementationForDefinition: HostFn<
-      { kind?: string } | undefined
+      CardCorpUtilityImplementation | undefined
     >;
     hardwareTrashByCounterLegalActions: HostFn<LegalAction[]>;
     corpAgendaPointTotal: HostFn<number>;
@@ -233,6 +241,42 @@ export function buildCorpMainActions(
     host.specialZones.edgerunnerTempsInstallActionsRemaining;
   const COUNTER_UPGRADE_SOURCES = host.constants.COUNTER_UPGRADE_SOURCES;
 
+  const rootRezAction = (
+    id: CardInstanceId,
+    serverLabel: string,
+  ): LegalAction | undefined => {
+    const definition = definitionFor(state, id);
+    if (
+      (definition.type !== "asset" && definition.type !== "upgrade") ||
+      mustInstance(state.cardInstances, id).rezzed
+    )
+      return undefined;
+    const rezQuote = quoteCorpRootRezCost(state, id);
+    if (!rezQuote.canPay) return undefined;
+    const rezAction = action(
+      state,
+      "corp",
+      "rez_card",
+      `Karte in ${serverLabel} rezzen`,
+      id,
+      rezQuote.costs.map((cost: Record<string, unknown>) => ({ ...cost })),
+      { ...rezQuote.publicPayload },
+    );
+    const creditOutcomeQuote = quoteCorpRootRezCreditOutcome(
+      state,
+      id,
+      rezAction.actionId,
+      rezQuote.finalCredits,
+    );
+    if (creditOutcomeQuote) {
+      rezAction.payload = {
+        ...(rezAction.payload ?? {}),
+        ...corpRootRezCreditOutcomeQuotePayload(creditOutcomeQuote),
+      };
+    }
+    return rezAction;
+  };
+
   const actions: LegalAction[] = [];
   if (state.actionEconomy?.pendingOffer?.side === "corp") {
     const offer = state.actionEconomy.pendingOffer;
@@ -249,6 +293,12 @@ export function buildCorpMainActions(
           cardId: offer.sourceCardInstanceId,
           sourceDefinitionId: offer.sourceDefinitionId,
           restrictedActionFamily: offer.restriction,
+          scoreConversionCapability: "gain_action_capacity",
+          gainActionsAmount: 1,
+          actionCapacityTiming: "immediate",
+          actionCapacityReliability: "guaranteed",
+          actionCapacityExpiresAt: "side_turn_end",
+          ...optionalExtraActionOfferProjection(offer.restriction),
           ...(offer.dieRoll ? { dieRoll: offer.dieRoll } : {}),
         },
       ),
@@ -314,6 +364,14 @@ export function buildCorpMainActions(
     }
   }
   if (state.corp.clicks <= 0) {
+    // Rezzing does not spend an action. This window remains open until the
+    // Corp explicitly ends the turn, including after its last click.
+    for (const server of state.corp.servers) {
+      for (const id of server.root) {
+        const rezAction = rootRezAction(id, server.label);
+        if (rezAction) actions.push(rezAction);
+      }
+    }
     actions.push(buildCorpEndTurnAction(state));
     return actions;
   }
@@ -330,7 +388,8 @@ export function buildCorpMainActions(
   assertFortCounterExposeImplementation(fortCounterExpose);
   if (
     state.corp.clicks >= fortCounterExpose.corpRemoveAbility.clicks &&
-    state.corp.credits >= fortCounterExpose.corpRemoveAbility.credits
+    corpGeneralCreditAvailability(state) >=
+      fortCounterExpose.corpRemoveAbility.credits
   ) {
     for (const server of state.corp.servers) {
       const count = spyCountersForServer(state, server.id);
@@ -359,7 +418,10 @@ export function buildCorpMainActions(
     }
   }
   actions.push(buildCorpGainCreditAction(state));
-  if (activeObligationCount(state) > 0 && state.corp.credits >= 12) {
+  if (
+    activeObligationCount(state) > 0 &&
+    corpGeneralCreditAvailability(state) >= 12
+  ) {
     actions.push(
       action(
         state,
@@ -378,7 +440,7 @@ export function buildCorpMainActions(
     );
   }
   if (state.corp.rd.length > 0) actions.push(buildCorpDrawAction(state));
-  if (state.runner.tags > 0 && state.corp.credits >= 2) {
+  if (state.runner.tags > 0 && corpGeneralCreditAvailability(state) >= 2) {
     for (const id of state.runner.rig.resources) {
       const hiddenResource = isConcealedRunnerResource(state, id);
       const resourceSlotId = hiddenResource
@@ -430,7 +492,7 @@ export function buildCorpMainActions(
       corpTrashAbility.kind !== "corp_trash_installed_runner_resource" ||
       corpTrashAbility.timing !== "corp_main" ||
       corpTrashAbility.target !== "source" ||
-      state.corp.credits < corpTrashAbility.cost.credits
+      corpGeneralCreditAvailability(state) < corpTrashAbility.cost.credits
     ) {
       continue;
     }
@@ -479,13 +541,11 @@ export function buildCorpMainActions(
     if (
       definition.type === "operation" &&
       operationMinimumPlayCost !== undefined &&
-      state.corp.credits >= operationMinimumPlayCost &&
+      corpGeneralCreditAvailability(state) >= operationMinimumPlayCost &&
       canPlayCorpOperation(state, definition)
     ) {
-      if (
-        corpUtilityImplementationForDefinition(definition.id)?.kind ===
-        "installed_hardware_trash_by_counter"
-      ) {
+      const corpUtility = corpUtilityImplementationForDefinition(definition.id);
+      if (corpUtility?.kind === "installed_hardware_trash_by_counter") {
         actions.push(
           ...hardwareTrashByCounterLegalActions(state, id, definition),
         );
@@ -512,24 +572,44 @@ export function buildCorpMainActions(
         definition,
         id,
       );
-      actions.push(
-        action(
-          state,
-          "corp",
-          "play_operation",
-          `${definition.title} spielen`,
-          id,
-          [{ clicks: 1, credits: fixedPlayCostCredits(definition) }],
+      const operationAction = action(
+        state,
+        "corp",
+        "play_operation",
+        `${definition.title} spielen`,
+        id,
+        [
           {
-            cardId: id,
-            ...deterministicOnPlayResourcePayload(definition, "corp", state),
-            ...operationCapabilityBinding?.payload,
+            clicks: corpUtility ? corpUtilityPlayClickCost(corpUtility) : 1,
+            credits: fixedPlayCostCredits(definition),
           },
-          operationCapabilityBinding
-            ? { abilityRef: operationCapabilityBinding.abilityRef }
-            : undefined,
-        ),
+        ],
+        {
+          cardId: id,
+          ...deterministicOnPlayResourcePayload(definition, "corp", state),
+          ...operationCapabilityBinding?.payload,
+        },
+        operationCapabilityBinding
+          ? { abilityRef: operationCapabilityBinding.abilityRef }
+          : undefined,
       );
+      if (
+        corpUtility?.kind === "draw_corp_cards_then_shuffle_hq_card_into_rd"
+      ) {
+        operationAction.payload = {
+          ...(operationAction.payload ?? {}),
+          ...corpZoneTransitionProjectionPayload(
+            quoteCorporateShuffleZoneTransition(
+              state,
+              operationAction,
+              id,
+              definition.id,
+              corpUtility.drawCount,
+            ),
+          ),
+        };
+      }
+      actions.push(operationAction);
     }
     if (definition.type === "ice") {
       if (
@@ -623,7 +703,7 @@ export function buildCorpMainActions(
     for (const id of server.root) {
       const definition = definitionFor(state, id);
       if (isInstalledCorpCardAdvanceable(state, id, definition)) {
-        if (state.corp.credits >= 1)
+        if (corpGeneralCreditAvailability(state) >= 1)
           actions.push(
             action(
               state,
@@ -636,37 +716,8 @@ export function buildCorpMainActions(
             ),
           );
       }
-      if (
-        (definition.type === "asset" || definition.type === "upgrade") &&
-        !mustInstance(state.cardInstances, id).rezzed
-      ) {
-        const rezQuote = quoteCorpRootRezCost(state, id);
-        if (!rezQuote.canPay) continue;
-        const rezAction = action(
-          state,
-          "corp",
-          "rez_card",
-          `Karte in ${server.label} rezzen`,
-          id,
-          rezQuote.costs.map((cost: Record<string, unknown>) => ({
-            ...cost,
-          })),
-          { ...rezQuote.publicPayload },
-        );
-        const creditOutcomeQuote = quoteCorpRootRezCreditOutcome(
-          state,
-          id,
-          rezAction.actionId,
-          rezQuote.finalCredits,
-        );
-        if (creditOutcomeQuote) {
-          rezAction.payload = {
-            ...(rezAction.payload ?? {}),
-            ...corpRootRezCreditOutcomeQuotePayload(creditOutcomeQuote),
-          };
-        }
-        actions.push(rezAction);
-      }
+      const rezAction = rootRezAction(id, server.label);
+      if (rezAction) actions.push(rezAction);
     }
   }
   const corpTraceDamageAbilityActionsHost = corpTraceDamageAbilityHost(state);
@@ -693,17 +744,26 @@ export function buildCorpMainActions(
         "shuffle_hq_into_rd_then_draw_same_count",
       )
     ) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: HQ in R&D mischen und ziehen`,
-          assetId,
-          [{ clicks: 1 }],
-          { cardId: assetId, v1917AssetAbility: "rescheduler_hq_shuffle_draw" },
-        ),
+      const shuffleRedrawAction = action(
+        state,
+        "corp",
+        "gain_credit",
+        `${definition.title}: HQ in R&D mischen und ziehen`,
+        assetId,
+        [{ clicks: 1 }],
+        { cardId: assetId, v1917AssetAbility: "rescheduler_hq_shuffle_draw" },
       );
+      const quote = quoteHqShuffleRedrawZoneTransition(
+        state,
+        shuffleRedrawAction,
+        assetId,
+        definition.id,
+      );
+      shuffleRedrawAction.payload = {
+        ...(shuffleRedrawAction.payload ?? {}),
+        ...corpZoneTransitionProjectionPayload(quote),
+      };
+      actions.push(shuffleRedrawAction);
     }
     if (hasCorpUtilityKind(state, assetId, "move_installed_corp_card_to_hq")) {
       for (const targetCardId of corpInstalledCardIds(state).sort()) {
@@ -855,6 +915,39 @@ export function buildCorpMainActions(
     );
   }
   return filterActionsForRestrictedExtraActions(state, "corp", actions);
+}
+
+function optionalExtraActionOfferProjection(
+  restriction: NonNullable<GameState["actionEconomy"]>["pendingOffer"] extends
+    | { restriction: infer Restriction }
+    | undefined
+    ? Restriction
+    : never,
+): {
+  actionCapacityRestriction: "unrestricted" | "install_only" | "run_only";
+  actionCapacityAllowedActionType?: string;
+} {
+  if (restriction === "corp_install")
+    return {
+      actionCapacityRestriction: "install_only",
+      actionCapacityAllowedActionType: "install_card",
+    };
+  if (restriction === "gain_credit")
+    return {
+      actionCapacityRestriction: "unrestricted",
+      actionCapacityAllowedActionType: "gain_credit",
+    };
+  if (restriction === "draw_card")
+    return {
+      actionCapacityRestriction: "unrestricted",
+      actionCapacityAllowedActionType: "draw_card",
+    };
+  if (restriction === "start_run" || restriction === "start_run_remote")
+    return {
+      actionCapacityRestriction: "run_only",
+      actionCapacityAllowedActionType: "start_run",
+    };
+  return { actionCapacityRestriction: "unrestricted" };
 }
 
 function cardImplementationOwnsCorpOperationLegalActionProjection(

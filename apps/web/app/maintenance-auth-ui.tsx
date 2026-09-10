@@ -1,8 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type { CSSProperties, FormEvent, ReactNode } from "react";
-import { KeyRound, LoaderCircle, LogOut, ShieldCheck, X } from "lucide-react";
+import { createContext, useContext, useEffect, useId, useState } from "react";
+import type {
+  CSSProperties,
+  FormEvent,
+  InputHTMLAttributes,
+  ReactNode,
+} from "react";
+import {
+  Eye,
+  EyeOff,
+  KeyRound,
+  LoaderCircle,
+  LogOut,
+  ShieldCheck,
+  X,
+} from "lucide-react";
 import { LocaleSelect } from "../i18n/LocaleSelect";
 import { useTranslations } from "use-intl/react";
 
@@ -28,6 +41,15 @@ type AuthPayload = {
   csrfToken?: string;
   error?: { code?: string; message?: string };
 };
+
+export const MaintenanceSessionContext =
+  createContext<MaintenanceAuthController | null>(null);
+
+export function useMaintenanceSession(): MaintenanceAuthController {
+  const session = useContext(MaintenanceSessionContext);
+  if (!session) throw new Error("maintenance_session_provider_missing");
+  return session;
+}
 
 export function useMaintenanceAuth(
   serverHttp: string,
@@ -207,6 +229,47 @@ export function useMaintenanceAuth(
   };
 }
 
+export function MaintenancePasswordInput({
+  style,
+  id,
+  ...props
+}: Omit<InputHTMLAttributes<HTMLInputElement>, "type">) {
+  const t = useTranslations("Account.panel");
+  const generatedId = useId();
+  const inputId = id ?? generatedId;
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    if (props.value === "") setVisible(false);
+  }, [props.value]);
+  const toggleText = t(visible ? "hidePassword" : "showPassword");
+  return (
+    <span style={{ display: "flex", gap: 6, minWidth: 0 }}>
+      <input
+        {...props}
+        id={inputId}
+        type={visible ? "text" : "password"}
+        style={{ ...style, flex: 1, minWidth: 0 }}
+      />
+      <button
+        type="button"
+        style={authButton}
+        disabled={props.disabled}
+        aria-label={toggleText}
+        title={toggleText}
+        aria-pressed={visible}
+        aria-controls={inputId}
+        onClick={() => setVisible((current) => !current)}
+      >
+        {visible ? (
+          <EyeOff size={18} aria-hidden="true" />
+        ) : (
+          <Eye size={18} aria-hidden="true" />
+        )}
+      </button>
+    </span>
+  );
+}
+
 export function MaintenanceAuthBoundary({
   auth,
   title = "Maintenance Control Plane",
@@ -218,6 +281,13 @@ export function MaintenanceAuthBoundary({
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+
+  if (auth.status === "checking")
+    return (
+      <p style={authStatus} role="status">
+        <LoaderCircle size={17} aria-hidden="true" /> {t("checking")}
+      </p>
+    );
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -248,11 +318,6 @@ export function MaintenanceAuthBoundary({
           <h1 style={authTitle}>{title}</h1>
           <p style={authText}>{t("separateAccess")}</p>
         </div>
-        {auth.status === "checking" ? (
-          <p style={authStatus}>
-            <LoaderCircle size={17} aria-hidden="true" /> {t("checking")}
-          </p>
-        ) : null}
         {auth.status === "uninitialized" ? (
           <div style={authNotice}>
             <strong>{t("setupRequired")}</strong>
@@ -282,17 +347,20 @@ export function MaintenanceAuthBoundary({
               readOnly
               hidden
             />
-            <label style={authField}>
-              {t("password")}
-              <input
+            <div style={authField}>
+              <label htmlFor="maintenance-login-password">
+                {t("password")}
+              </label>
+              <MaintenancePasswordInput
+                id="maintenance-login-password"
                 autoFocus
-                type="password"
+                disabled={busy}
                 autoComplete="current-password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 style={authInput}
               />
-            </label>
+            </div>
             {error ? <p style={authError}>{error}</p> : null}
             <button
               type="submit"
@@ -357,16 +425,18 @@ export function MaintenanceSecurityControls({
             readOnly
             hidden
           />
-          <input
-            type="password"
+          <MaintenancePasswordInput
+            aria-label={t("currentPassword")}
+            disabled={busy}
             autoComplete="current-password"
             placeholder={t("currentPassword")}
             value={currentPassword}
             onChange={(event) => setCurrentPassword(event.target.value)}
             style={securityInput}
           />
-          <input
-            type="password"
+          <MaintenancePasswordInput
+            aria-label={t("newPassword")}
+            disabled={busy}
             autoComplete="new-password"
             placeholder={t("newPassword")}
             value={newPassword}
@@ -437,6 +507,7 @@ export function MaintenanceReauthenticationDialog({
           style={dialogClose}
           onClick={onCancel}
           aria-label={t("close")}
+          disabled={busy}
         >
           <X size={18} />
         </button>
@@ -453,17 +524,23 @@ export function MaintenanceReauthenticationDialog({
             readOnly
             hidden
           />
-          <input
+          <MaintenancePasswordInput
             autoFocus
-            type="password"
+            disabled={busy}
             autoComplete="current-password"
+            aria-label={t("confirmPassword")}
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             style={authInput}
           />
           {error ? <p style={authError}>{error}</p> : null}
           <div style={dialogActions}>
-            <button type="button" style={authButton} onClick={onCancel}>
+            <button
+              type="button"
+              style={authButton}
+              onClick={onCancel}
+              disabled={busy}
+            >
               {t("cancel")}
             </button>
             <button
@@ -485,18 +562,18 @@ const authShell: CSSProperties = {
   display: "grid",
   placeItems: "center",
   padding: "1.5rem",
-  background: "#eef3f8",
-  color: "#102033",
+  background: "var(--bg)",
+  color: "var(--text)",
 };
 const authCard: CSSProperties = {
   width: "min(100%, 460px)",
   display: "grid",
   gap: "1rem",
   padding: "1.35rem",
-  border: "1px solid #c7d4e2",
+  border: "1px solid var(--line)",
   borderRadius: 12,
-  background: "#fff",
-  boxShadow: "0 18px 50px rgba(16, 32, 51, 0.12)",
+  background: "var(--panel)",
+  boxShadow: "var(--panel-shadow)",
 };
 const authIcon: CSSProperties = {
   width: 48,
@@ -504,17 +581,17 @@ const authIcon: CSSProperties = {
   display: "grid",
   placeItems: "center",
   borderRadius: 12,
-  color: "#155c3c",
-  background: "#e5f5ed",
+  color: "var(--ok)",
+  background: "var(--status-ok-bg)",
 };
 const authTitle: CSSProperties = {
   margin: 0,
   fontSize: "1.35rem",
-  color: "#102033",
+  color: "var(--text)",
 };
 const authText: CSSProperties = {
   margin: "0.35rem 0 0",
-  color: "#42576b",
+  color: "var(--muted)",
   lineHeight: 1.5,
 };
 const authStatus: CSSProperties = {
@@ -522,56 +599,56 @@ const authStatus: CSSProperties = {
   display: "flex",
   gap: "0.5rem",
   alignItems: "center",
-  color: "#42576b",
+  color: "var(--muted)",
 };
 const authNotice: CSSProperties = {
   display: "grid",
   gap: "0.75rem",
   padding: "0.9rem",
-  border: "1px solid #d7c791",
+  border: "1px solid var(--cue)",
   borderRadius: 8,
-  background: "#fffaf0",
+  background: "var(--cue-soft)",
 };
 const authError: CSSProperties = {
   margin: 0,
   padding: "0.7rem",
-  border: "1px solid #f3b5b5",
+  border: "1px solid var(--danger)",
   borderRadius: 8,
-  background: "#fff5f5",
-  color: "#9b1c1c",
+  background: "var(--status-danger-bg)",
+  color: "var(--danger)",
 };
 const authForm: CSSProperties = { display: "grid", gap: "0.8rem" };
 const authField: CSSProperties = {
   display: "grid",
   gap: "0.35rem",
   fontSize: "0.88rem",
-  color: "#42576b",
+  color: "var(--muted)",
 };
 const authInput: CSSProperties = {
   minHeight: 42,
-  border: "1px solid #9db0c3",
+  border: "1px solid var(--line)",
   borderRadius: 7,
   padding: "0.55rem 0.65rem",
-  background: "#fff",
-  color: "#102033",
+  background: "var(--panel)",
+  color: "var(--text)",
 };
 const authButton: CSSProperties = {
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
   gap: "0.35rem",
-  border: "1px solid #9db0c3",
-  background: "#fff",
-  color: "#102033",
+  border: "1px solid var(--line)",
+  background: "var(--panel)",
+  color: "var(--text)",
   borderRadius: 7,
   padding: "0.5rem 0.7rem",
   cursor: "pointer",
 };
 const authPrimaryButton: CSSProperties = {
   ...authButton,
-  borderColor: "#2f74b5",
-  background: "#2f74b5",
-  color: "#fff",
+  borderColor: "var(--primary-bg)",
+  background: "var(--primary-bg)",
+  color: "var(--primary-text)",
 };
 const securityControls: CSSProperties = {
   display: "flex",
@@ -591,13 +668,13 @@ const securityForm: CSSProperties = {
   display: "grid",
   gap: "0.55rem",
   padding: "0.75rem",
-  border: "1px solid #c7d4e2",
+  border: "1px solid var(--line)",
   borderRadius: 8,
-  background: "#fff",
-  boxShadow: "0 12px 32px rgba(16, 32, 51, 0.18)",
+  background: "var(--panel)",
+  boxShadow: "var(--panel-shadow)",
 };
 const securityInput: CSSProperties = { ...authInput, minHeight: 36 };
-const securityMessage: CSSProperties = { color: "#9b1c1c" };
+const securityMessage: CSSProperties = { color: "var(--danger)" };
 const dialogBackdrop: CSSProperties = {
   position: "fixed",
   zIndex: 1000,
@@ -614,9 +691,9 @@ const dialog: CSSProperties = {
   gap: "0.8rem",
   padding: "1.2rem",
   borderRadius: 12,
-  background: "#fff",
-  color: "#102033",
-  boxShadow: "0 22px 70px rgba(0, 0, 0, 0.3)",
+  background: "var(--panel)",
+  color: "var(--text)",
+  boxShadow: "var(--panel-shadow)",
 };
 const dialogClose: CSSProperties = {
   position: "absolute",
@@ -629,7 +706,7 @@ const dialogClose: CSSProperties = {
   border: 0,
   borderRadius: 7,
   background: "transparent",
-  color: "#42576b",
+  color: "var(--muted)",
   cursor: "pointer",
 };
 const dialogActions: CSSProperties = {

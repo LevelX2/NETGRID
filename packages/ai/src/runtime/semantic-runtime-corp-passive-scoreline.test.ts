@@ -46,7 +46,10 @@ describe("semanticRuntimeCorpPassiveScoreLinePenalty", () => {
 
   it("uses structured roles for passive scoreline economy actions", () => {
     const scoreAgenda = corpAction("score-agenda", "score_agenda");
-    const structuredEconomy = corpAction("structured-economy", "play_operation");
+    const structuredEconomy = corpAction(
+      "structured-economy",
+      "play_operation",
+    );
     const noiseEconomy = corpAction("noise-economy", "play_operation");
 
     expect(
@@ -99,10 +102,7 @@ function corpInput(legalActions: readonly LegalAction[]): AiDecisionInput {
   } as unknown as AiDecisionInput;
 }
 
-function corpAction(
-  actionId: string,
-  type: LegalAction["type"],
-): LegalAction {
+function corpAction(actionId: string, type: LegalAction["type"]): LegalAction {
   return {
     actionId,
     side: "corp",
@@ -130,8 +130,9 @@ function testDependencies(
       agendaInstallActionIds: overrides.agendaInstallActionIds ?? [],
     }),
     actionIsScoreLine: () => false,
-    rolesForAction: (_input: AiDecisionInput, action: LegalAction) =>
-      [...(overrides.rolesByActionId?.[action.actionId] ?? [])],
+    rolesForAction: (_input: AiDecisionInput, action: LegalAction) => [
+      ...(overrides.rolesByActionId?.[action.actionId] ?? []),
+    ],
     scoreLineActionIsRisky: (_input: AiDecisionInput, action: LegalAction) =>
       overrides.riskyActionIds?.includes(action.actionId) === true,
   };

@@ -99,8 +99,7 @@ export function useCatalogWorkspace(payload: CatalogWorkspacePayload | null) {
     [catalogCards],
   );
   const setFilteredCatalogCards = useMemo(
-    () =>
-      filterCatalogCardsByProductSets(catalogCards, catalogSetAddons),
+    () => filterCatalogCardsByProductSets(catalogCards, catalogSetAddons),
     [catalogCards, catalogSetAddons],
   );
   const rarityFilteredCatalogCards = useMemo(
@@ -246,8 +245,7 @@ export function useCatalogWorkspace(payload: CatalogWorkspacePayload | null) {
       onSetAddon: (
         addon: "original" | "classic" | "proteus",
         enabled: boolean,
-      ) =>
-        setCatalogSetAddons((current) => ({ ...current, [addon]: enabled })),
+      ) => setCatalogSetAddons((current) => ({ ...current, [addon]: enabled })),
       onSelect: setSelectedCatalogId,
       onFiltersOpen: setCatalogFiltersOpen,
       onRarity: setCatalogRarityFilter,

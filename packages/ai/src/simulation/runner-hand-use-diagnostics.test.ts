@@ -17,7 +17,9 @@ describe("runner hand use diagnostics", () => {
     expect(substringNoise).not.toHaveProperty(
       "runnerDiscardedInstallableBreaker",
     );
-    const supportPrefix = discardDiagnosticsForRoles(["support_breaker_fracter"]);
+    const supportPrefix = discardDiagnosticsForRoles([
+      "support_breaker_fracter",
+    ]);
     expect(supportPrefix).toMatchObject({ runnerDiscardChoice: true });
     expect(supportPrefix).not.toHaveProperty(
       "runnerDiscardedInstallableBreaker",
@@ -32,7 +34,9 @@ function discardDiagnosticsForRoles(discardRoles: string[]) {
   return diagnostics(input(), {} as AiDecision, action(), undefined);
 }
 
-function dependencies(discardRoles: string[]): RunnerHandUseDiagnosticsDependencies {
+function dependencies(
+  discardRoles: string[],
+): RunnerHandUseDiagnosticsDependencies {
   return {
     runnerDrawKindForSimulationAction: () => ({}),
     hasRunnerPlayableEconomyAction: () => false,

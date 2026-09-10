@@ -417,8 +417,8 @@ export function createHiddenZoneNonSearchRuntime(
       choiceId: `card_implementation_corp_choice_rez_or_trash_ice_decision_${state.stateVersion + 1}`,
       side: "corp",
       source: `card_implementation.corp_choice_rez_or_trash_ice_decision:${selectedId}:${state.stateVersion + 1}`,
-    prompt: `Rez-oder-Trash-Entscheidung für ${choiceTargetLabel}`,
-    presentationKey: "rez_or_trash_ice",
+      prompt: `Rez-oder-Trash-Entscheidung für ${choiceTargetLabel}`,
+      presentationKey: "rez_or_trash_ice",
       kind: "select_option",
       options: [
         ...rezActions.map((action, index) => {
@@ -427,17 +427,17 @@ export function createHiddenZoneNonSearchRuntime(
           return {
             id: optionId,
             label: action.label,
-          publicLabel: `${choiceTargetLabel} gerezzt`,
-          value: optionId,
-          metadata: { cardTitle: choiceTargetLabel, optionKind: "rez" },
+            publicLabel: `${choiceTargetLabel} gerezzt`,
+            value: optionId,
+            metadata: { cardTitle: choiceTargetLabel, optionKind: "rez" },
           };
         }),
         {
           id: "trash_ice",
           label: `${choiceTargetLabel} trashen`,
-        publicLabel: `${choiceTargetLabel} getrasht`,
-        value: "trash_ice",
-        metadata: { cardTitle: choiceTargetLabel, optionKind: "trash" },
+          publicLabel: `${choiceTargetLabel} getrasht`,
+          value: "trash_ice",
+          metadata: { cardTitle: choiceTargetLabel, optionKind: "trash" },
         },
       ],
       minSelections: 1,
@@ -624,8 +624,8 @@ export function createHiddenZoneNonSearchRuntime(
       choiceId: `card_implementation_paid_source_return_to_grip_${state.stateVersion + 1}`,
       side: "runner",
       source: `card_implementation.paid_source_return_to_grip:${sourceCardId}`,
-    prompt: "Quelle zuruecknehmen?",
-    presentationKey: "paid_source_return",
+      prompt: "Quelle zuruecknehmen?",
+      presentationKey: "paid_source_return",
       kind: "select_option",
       options: [
         {

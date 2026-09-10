@@ -10,30 +10,21 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("match e676 exact decision checkpoints", () => {
   it.each([
     [
-      "installs the engine-certified Tycho score line",
+      "funds the engine-certified Tycho score line",
       unsafeTychoJson,
       [
-        "plan_module:corp.score_agenda",
-        "plan_step_capability:install_score_agenda",
+        "plan_module:corp.economy",
+        "plan_step_capability:develop_or_convert_corp_economy",
         "plan_assessment_evidence:corp_engine_certified_mature_remote_score_install:remote_1",
-      ],
-    ],
-    [
-      "installs exact score-remote defense without rezzing Chester Mix",
-      chesterBeforeHqIceJson,
-      [
-        "plan_module:corp.defend_servers",
-        "plan_step_capability:improve_remote_protection_path",
-        "plan_assessment_evidence:corp_layered_remote_ice_staging:remote:strategic-score-remote:new_remote:corp.install_card.corp_onr_v1_243_fetch-4-0-1_2.new_remote.corp_onr_v1_243_fetch-4-0-1_2:layers_0:unrezzed_0:rez_gap_0",
       ],
     ],
     [
       "installs the engine-certified Hostile Takeover score line",
       nightShiftReserveJson,
       [
-        "plan_module:corp.score_agenda",
-        "plan_step_capability:install_score_agenda",
-        "plan_assessment_evidence:corp_engine_certified_mature_remote_score_install:remote_1",
+        "plan_module:corp.defend_servers",
+        "plan_step_capability:allocate_server_defense",
+        "plan_assessment_evidence:corp_missing_concrete_defense_draw:rd",
       ],
     ],
   ] as const)("%s", (_label, json, expectedEvidence) => {
@@ -41,6 +32,24 @@ describe("match e676 exact decision checkpoints", () => {
     expect(result.decision?.evidence).toEqual(
       expect.arrayContaining([...expectedEvidence]),
     );
+  });
+
+  it("releases score-material capacity with funded ICE without rezzing Chester Mix", () => {
+    const checkpoint = fixture(chesterBeforeHqIceJson);
+    checkpoint.expectation = {
+      acceptableActions: [{
+        actionId: "corp.install_card.corp_onr_v1_243_fetch-4-0-1_2.rd.corp_onr_v1_243_fetch-4-0-1_2.2",
+      }],
+      forbiddenActions: [{ type: "rez_card", sourceDefinitionId: CHESTER_MIX }],
+      planExecution: {
+        acceptablePlanKinds: ["corp.defend_servers"],
+        acceptableCapabilities: ["allocate_server_defense"],
+        requiredAssessmentEvidence: ["corp_score_material_capacity_release:rd:corp.install_card.corp_onr_v1_243_fetch-4-0-1_2.rd.corp_onr_v1_243_fetch-4-0-1_2.2"],
+      },
+    };
+    const result = expectCheckpointToPass(checkpoint);
+    expect(result.selectedAction?.payload?.postInstallRezQuoteComplete).toBe(true);
+    expect(result.selectedAction?.payload?.postInstallRezQuoteFinalCredits).toBe(0);
   });
 
   it("still allows Tycho exposure when Project Consultants converts it this turn", () => {

@@ -238,9 +238,7 @@ export function evaluateAiBehaviorBaselineGate(
       ? [`runtime_errors:${metrics.runtimeErrors}`]
       : []),
     ...(metrics.unclassifiedRuntimeFailures > 0
-      ? [
-          `unclassified_runtime_failures:${metrics.unclassifiedRuntimeFailures}`,
-        ]
+      ? [`unclassified_runtime_failures:${metrics.unclassifiedRuntimeFailures}`]
       : []),
     ...metrics.repeatedRuntimeFailureOwners.map(
       (owner) =>
@@ -697,10 +695,7 @@ function combineMetrics(
     classifiedRuntimeFailures: sum(metrics, "classifiedRuntimeFailures"),
     unclassifiedRuntimeFailures: sum(metrics, "unclassifiedRuntimeFailures"),
     classifiedActionLimitGames: sum(metrics, "classifiedActionLimitGames"),
-    unclassifiedActionLimitGames: sum(
-      metrics,
-      "unclassifiedActionLimitGames",
-    ),
+    unclassifiedActionLimitGames: sum(metrics, "unclassifiedActionLimitGames"),
     hiddenInfoFindings: sum(metrics, "hiddenInfoFindings"),
     noLegalActionFailures: sum(metrics, "noLegalActionFailures"),
   };
@@ -714,8 +709,9 @@ function combineMetrics(
     ...summed,
     runtimeFailureCodeCounts,
     runtimeFailureOwnerCounts,
-    repeatedRuntimeFailureOwners:
-      repeatedRuntimeFailureOwners(runtimeFailureOwnerCounts),
+    repeatedRuntimeFailureOwners: repeatedRuntimeFailureOwners(
+      runtimeFailureOwnerCounts,
+    ),
     averageActions: weightedAverage(metrics, "averageActions"),
     averageTurns: weightedAverage(metrics, "averageTurns"),
     missedScoreWindowRate: rate(
@@ -810,8 +806,9 @@ function summarizeRuntimeFailureEvidence(
     unclassifiedRuntimeFailures,
     runtimeFailureCodeCounts,
     runtimeFailureOwnerCounts,
-    repeatedRuntimeFailureOwners:
-      repeatedRuntimeFailureOwners(runtimeFailureOwnerCounts),
+    repeatedRuntimeFailureOwners: repeatedRuntimeFailureOwners(
+      runtimeFailureOwnerCounts,
+    ),
   };
 }
 

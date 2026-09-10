@@ -72,11 +72,7 @@ export function requireCurrentTransientPlanSignals(
       throw invalidTransientPlanSignal(context, signal, invalidReason);
     }
     if (seenIds.has(signal.signalId)) {
-      throw invalidTransientPlanSignal(
-        context,
-        signal,
-        "duplicate_signal_id",
-      );
+      throw invalidTransientPlanSignal(context, signal, "duplicate_signal_id");
     }
     seenIds.add(signal.signalId);
     return structuredClone(signal);

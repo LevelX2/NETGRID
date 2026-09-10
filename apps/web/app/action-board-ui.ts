@@ -17,6 +17,7 @@ import {
   actionPresentationText,
   normalizeActionPresentationLocale,
 } from "../i18n/action-presentation";
+import { localizedCardCapabilityActionLabel } from "../i18n/card-capability-action-translations";
 import type { AppLocale } from "../i18n/locale";
 export {
   DEFAULT_CUE_POSITION,
@@ -133,8 +134,11 @@ export const RUN_TIMELINE_STEPS = [
 export type RunTimelineStepId = (typeof RUN_TIMELINE_STEPS)[number]["id"];
 
 export type RunPhaseOpportunityKind =
+  | "target"
+  | "complete"
   | "choice"
-  | "rez"
+  | "ice_rez"
+  | "card_rez"
   | "breaker"
   | "ability"
   | "access"
@@ -143,8 +147,11 @@ export type RunPhaseOpportunityKind =
   | "pass";
 
 const RUN_PHASE_OPPORTUNITY_ORDER: readonly RunPhaseOpportunityKind[] = [
+  "target",
+  "complete",
   "choice",
-  "rez",
+  "ice_rez",
+  "card_rez",
   "breaker",
   "ability",
   "access",
@@ -153,18 +160,50 @@ const RUN_PHASE_OPPORTUNITY_ORDER: readonly RunPhaseOpportunityKind[] = [
   "pass",
 ];
 
+// Learning cues only. Availability always comes from the current LegalActions.
+const RUN_STEP_OPPORTUNITIES: Record<
+  RunTimelineStepId,
+  readonly RunPhaseOpportunityKind[]
+> = {
+  target: ["target"],
+  approach_ice: ["ice_rez", "card_rez", "ability", "pass"],
+  encounter_ice: ["choice", "ability", "continue"],
+  break: ["breaker", "ability", "continue"],
+  movement: ["card_rez", "ability", "continue", "jack_out", "pass"],
+  access: ["access", "choice", "ability"],
+  complete: ["complete"],
+};
+
+export function runStepOpportunities(
+  step: RunTimelineStepId,
+  currentStep: RunTimelineStepId | null,
+  actions: readonly Pick<LegalAction, "type">[],
+): { kind: RunPhaseOpportunityKind; active: boolean }[] {
+  const available =
+    step === currentStep ? runPhaseOpportunityKinds(actions) : [];
+  const kinds = new Set([...RUN_STEP_OPPORTUNITIES[step], ...available]);
+  return RUN_PHASE_OPPORTUNITY_ORDER.filter((kind) => kinds.has(kind)).map(
+    (kind) => ({ kind, active: available.includes(kind) }),
+  );
+}
+
 export function runPhaseOpportunityKinds(
   actions: readonly Pick<LegalAction, "type">[],
 ): RunPhaseOpportunityKind[] {
   const available = new Set<RunPhaseOpportunityKind>();
   for (const action of actions) {
     switch (action.type) {
+      case "start_run":
+        available.add("target");
+        break;
       case "resolve_choice":
         available.add("choice");
         break;
       case "rez_ice":
+        available.add("ice_rez");
+        break;
       case "rez_card":
-        available.add("rez");
+        available.add("card_rez");
         break;
       case "pump_breaker":
       case "break_subroutine":
@@ -1401,6 +1440,8 @@ function localizedActionButtonLabel(
   locale: Exclude<AppLocale, "de">,
   cardPresentationsById?: PublicCardPresentationsById,
 ): string {
+  const capabilityLabel = localizedCardCapabilityActionLabel(action, locale);
+  if (capabilityLabel) return capabilityLabel;
   if (
     action.type === "trigger_ability" &&
     action.payload?.runnerAbility === "boost_icebreaker_for_run"
@@ -1599,8 +1640,12 @@ export function contextualCardActionLabel(
 ): string {
   if (isRunnerProgramInstallContextAction(action))
     return runnerProgramInstallContextLabel(action, locale);
-  if (locale !== "de")
-    return localizedActionButtonLabel(action, locale, cardPresentationsById);
+  if (locale !== "de") {
+    const capabilityLabel = localizedCardCapabilityActionLabel(action, locale);
+    return capabilityLabel
+      ? stripActionSourcePrefix(capabilityLabel)
+      : localizedActionButtonLabel(action, locale, cardPresentationsById);
+  }
   switch (action.type) {
     case "gain_credit":
       return (
@@ -2333,6 +2378,43 @@ export function aiPacingDelayMs(
   if (autoDismissMs <= 0) return mode === "fast" ? 750 : 900;
   const minimum = mode === "fast" ? 320 : 650;
   return Math.max(autoDismissMs, minimum);
+}
+
+export function humanCorpRunServerActionBlocksAutomaticRunnerAiAdvance(
+  view: PlayerView | undefined,
+  actions: readonly LegalAction[],
+  currentRunAutoPassActive: boolean,
+): boolean {
+  if (
+    !view?.run ||
+    view.side !== "corp" ||
+    view.winner ||
+    view.pendingChoice ||
+    currentRunAutoPassActive
+  )
+    return false;
+  const attackedServer = view.servers.find(
+    (server) => server.id === view.run?.attackedServerId,
+  );
+  if (!attackedServer) return false;
+  const attackedServerCardIds = new Set(
+    [...attackedServer.ice, ...attackedServer.root].map(
+      (card) => card.instanceId,
+    ),
+  );
+  return actions.some((action) => {
+    if (action.side !== "corp" || !action.timingPoint.startsWith("run."))
+      return false;
+    const sourceCardIds = new Set<string>();
+    if (action.abilityRef?.sourceCardInstanceId)
+      sourceCardIds.add(action.abilityRef.sourceCardInstanceId);
+    if (action.source !== "basic_action" && action.source !== "game_rule")
+      sourceCardIds.add(action.source);
+    addStringRef(sourceCardIds, action.payload?.cardId);
+    return Array.from(sourceCardIds).some((cardId) =>
+      attackedServerCardIds.has(cardId),
+    );
+  });
 }
 
 export function aiPacingFallbackDelayMs(
@@ -4003,6 +4085,14 @@ export function choiceOptionPresentationLabel(
   };
 
   switch (choice.presentationKey) {
+    case "delayed_install_destination":
+      if (option.id === "rig")
+        return actionPresentationText(locale, "choiceInstallInMemory");
+      if (cardTitle)
+        return actionPresentationText(locale, "choiceInstallOnHost", {
+          card: cardTitle,
+        });
+      break;
     case "runner_draw_tax":
       if (option.id === "pay_credit")
         return actionPresentationText(locale, "choicePayOneCredit");
@@ -4514,6 +4604,11 @@ export function choicePromptPresentationLabel(
   locale: AppLocale | string = "de",
 ): string {
   switch (choice.presentationKey) {
+    case "delayed_install_destination":
+      return actionPresentationText(
+        locale,
+        "choicePromptDelayedInstallDestination",
+      );
     case "generic_select_cards":
       return actionPresentationText(locale, "choicePromptGenericSelectCards");
     case "generic_bid_amount":

@@ -124,9 +124,7 @@
       "validation": {
         "ok": true,
         "errors": [],
-        "warnings": [
-          "Uses MVP 0.4 expanded local demo card pool."
-        ],
+        "warnings": ["Uses MVP 0.4 expanded local demo card pool."],
         "totalCards": 24,
         "agendaPoints": 7
       },
@@ -238,9 +236,7 @@
       "validation": {
         "ok": true,
         "errors": [],
-        "warnings": [
-          "Uses MVP 0.4 expanded local demo card pool."
-        ],
+        "warnings": ["Uses MVP 0.4 expanded local demo card pool."],
         "totalCards": 19,
         "agendaPoints": null
       },

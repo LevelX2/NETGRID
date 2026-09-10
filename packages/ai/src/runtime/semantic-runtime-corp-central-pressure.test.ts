@@ -131,16 +131,15 @@ describe("semanticRuntimeCorpCentralPressureAssessment", () => {
       runnerRig: [highlighterCard("highlighter")],
     });
 
-    expect(
-      semanticRuntimeCorpCentralDefenseAllocationDirection(input),
-    ).toEqual({
-      kind: "rd_focus_diversion",
-      selectedServerId: "rd",
-      evidenceCode:
-        "corp_visible_rd_focus_diversion:multiaccess_with_visible_or_repeated_pressure",
-    });
+    expect(semanticRuntimeCorpCentralDefenseAllocationDirection(input)).toEqual(
+      {
+        kind: "rd_focus_diversion",
+        selectedServerId: "rd",
+        evidenceCode:
+          "corp_visible_rd_focus_diversion:multiaccess_with_visible_or_repeated_pressure",
+      },
+    );
   });
-
 });
 
 function corpInput(

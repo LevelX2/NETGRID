@@ -7946,15 +7946,18 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "install_card",
-        "sourceDefinitionId": "onr_v1_220_tycho-extension",
-        "targetServerId": "remote_1"
+        "type": "gain_credit"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.score_agenda"],
-      "acceptableCapabilities": ["install_score_agenda"],
-      "requiredAssessmentEvidence": []
+      "acceptablePlanIds": [
+        "plan:corp.economy:score-support%3Aagenda%3Acorp_onr_v1_220_tycho-extension_2%3Aremote_1"
+      ],
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
+      "requiredAssessmentEvidence": [
+        "corp_engine_certified_mature_remote_score_install:remote_1"
+      ]
     }
   }
 }

@@ -49,6 +49,7 @@ import {
   type RunnerMainActionGenerationHost,
 } from "./turn/runner-main-actions";
 import { runnerCostPenaltySupportOriginalActionReady } from "./payment/runner-payment-support";
+import { buildLegalAction } from "./turn/action-builders";
 
 type HostFn<T = unknown> = () => T;
 
@@ -100,6 +101,25 @@ function buildRunnerActionsForCostPenaltySupportWindow(
   host: LegalActionGenerationHost,
 ): LegalAction[] {
   const { state } = host;
+  if (state.run?.pendingEncounterEntryIceId) {
+    const window = state.runnerCostPenaltySupportWindow;
+    if (
+      window?.originalActionId !== "runner.continue_run" ||
+      window.kind !== "cost"
+    )
+      throw new Error(
+        "Der ausstehende Encounter-Eintritt hat keine passende Zahlungsbindung.",
+      );
+    return [
+      buildLegalAction(
+        state,
+        "runner",
+        "continue_run",
+        "Encounter-Eintritt fortsetzen",
+        "game_rule",
+      ),
+    ];
+  }
   if (state.run?.hiddenRunnerResourceAccessStartServerId)
     return buildRunnerAccessStartCardImplementationActions(
       host.hosts.runCardImplementationActionHost(),
@@ -272,17 +292,19 @@ function buildLegalActionsUnchecked(
       : [];
   }
   if (state.timingPoint === "run.encounter_ice") {
+    const corpActions = buildCorpEncounterCardImplementationActions(
+      host.hosts.runCardImplementationActionHost(),
+    ).legalActions;
     if (side === "runner")
-      return [
-        ...buildRunnerEncounterActions(host.hosts.runnerEncounterActionHost())
-          .legalActions,
-        ...host.actions.runnerRunSpecialEffectActions(),
-      ];
-    return side === "corp"
-      ? buildCorpEncounterCardImplementationActions(
-          host.hosts.runCardImplementationActionHost(),
-        ).legalActions
-      : [];
+      return corpActions.length > 0
+        ? []
+        : [
+            ...buildRunnerEncounterActions(
+              host.hosts.runnerEncounterActionHost(),
+            ).legalActions,
+            ...host.actions.runnerRunSpecialEffectActions(),
+          ];
+    return side === "corp" ? corpActions : [];
   }
   if (state.timingPoint === "run.jack_out_window") {
     if (side === "corp")

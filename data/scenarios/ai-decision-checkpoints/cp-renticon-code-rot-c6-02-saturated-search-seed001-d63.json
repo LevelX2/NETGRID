@@ -8436,15 +8436,13 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "gain_credit"
+        "type": "install_card",
+        "sourceDefinitionId": "onr_classic_031_rent-i-con"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.economy"],
-      "acceptableCapabilities": ["gain_general_liquid_credits"],
-      "requiredAssessmentEvidence": [
-        "runner_development_funding:card:runner_onr_classic_031_rent-i-con_1"
-      ]
+      "acceptablePlanKinds": ["runner.rig_and_coverage"],
+      "acceptableCapabilities": ["install_breaker_code_gate"]
     }
   }
 }

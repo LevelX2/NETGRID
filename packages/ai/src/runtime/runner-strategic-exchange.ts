@@ -1,11 +1,15 @@
 import {
   RUNNER_AGENDA_POINT_TRANSFER_QUOTE_SCHEMA_VERSION,
+  RUNNER_FORT_ICE_TRASH_QUOTE_SCHEMA_VERSION,
   type AiDecisionInput,
 } from "@netgrid/shared";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { AiHintStrategicExchangeKind } from "../hint-ontology";
-import { runnerDebtFinancingProfile } from "./runner-canonical-card-facts";
+import {
+  runnerDebtFinancingProfile,
+  runnerSoleFortIceTrashTagAmount,
+} from "./runner-canonical-card-facts";
 
 export type RunnerStrategicExchangeKind = AiHintStrategicExchangeKind;
 
@@ -96,6 +100,29 @@ export function runnerStrategicExchangeHardExclusion(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
 ): string | undefined {
+  const fortTrashTags =
+    candidate.actionType === "play_event"
+      ? runnerSoleFortIceTrashTagAmount(candidate.sourceDefinitionId)
+      : undefined;
+  if (fortTrashTags !== undefined) {
+    const action = input.legalActions.find(
+      (entry) => entry.actionId === candidate.actionId,
+    );
+    const payload = action?.payload;
+    const complete =
+      payload?.runnerFortIceTrashQuoteSchemaVersion ===
+        RUNNER_FORT_ICE_TRASH_QUOTE_SCHEMA_VERSION &&
+      payload.runnerFortIceTrashQuoteStateVersion ===
+        input.playerView.stateVersion &&
+      action?.expiresAtStateVersion === input.playerView.stateVersion &&
+      typeof payload.runnerFortIceTrashServerId === "string" &&
+      Number.isSafeInteger(payload.runnerFortIceTrashRezzedIceCount) &&
+      Number(payload.runnerFortIceTrashRezzedIceCount) >= 0 &&
+      payload.runnerFortIceTrashTagsAdded === fortTrashTags;
+    if (!complete) return "runner_fort_ice_trash_quote_incomplete";
+    if (payload.runnerFortIceTrashRezzedIceCount === 0)
+      return "runner_fort_ice_trash_has_no_rezzed_targets";
+  }
   const kinds = runnerStrategicExchangeKinds(candidate);
   if (kinds.length === 0) return undefined;
   const transfersAgendaPointsToCorp = [

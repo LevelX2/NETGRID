@@ -10,9 +10,7 @@
     "onr_v1_208_on-call-solo-team",
     "onr_v1_217_strike-force-kali"
   ],
-  "deferredCards": [
-    "onr_v1_240_data-darts"
-  ],
+  "deferredCards": ["onr_v1_240_data-darts"],
   "preconditions": [
     "V1.9.3 Mechanikpaket L ist gruen abgeschlossen.",
     "V1.9.4 Preflight friert den 2-Karten-Kernkorb ein und defered Data Darts fuer V1.9.5+."

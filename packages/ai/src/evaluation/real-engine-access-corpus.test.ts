@@ -20,28 +20,32 @@ describe("real engine access corpus", () => {
     expect(
       corpus.every((scenario) => scenario.runtimeConsumerStatus === "none"),
     ).toBe(true);
-    expect(corpus.every((scenario) => scenario.legalAction.type === "start_run"))
-      .toBe(true);
-    expect(corpus.every((scenario) => scenario.remoteFingerprint.length > 0))
-      .toBe(true);
+    expect(
+      corpus.every((scenario) => scenario.legalAction.type === "start_run"),
+    ).toBe(true);
+    expect(
+      corpus.every((scenario) => scenario.remoteFingerprint.length > 0),
+    ).toBe(true);
     expect(containsForbiddenSemanticMarker(corpus)).toBe(false);
   });
 
   it("covers expected recommendation classes without runtime consumption", () => {
     const corpus = buildRealEngineAccessCorpus();
 
-    expect(new Set(corpus.map((scenario) => scenario.expectedRecommendation)))
-      .toEqual(
-        new Set([
-          "run_now",
-          "gain_credits_first",
-          "known_no_current_payoff",
-          "remote_changed_reassess",
-          "declined_trash_memory_active",
-        ]),
-      );
     expect(
-      scenario(corpus, "access_declined_trash_memory_active").accessOutcomeMemory,
+      new Set(corpus.map((scenario) => scenario.expectedRecommendation)),
+    ).toEqual(
+      new Set([
+        "run_now",
+        "gain_credits_first",
+        "known_no_current_payoff",
+        "remote_changed_reassess",
+        "declined_trash_memory_active",
+      ]),
+    );
+    expect(
+      scenario(corpus, "access_declined_trash_memory_active")
+        .accessOutcomeMemory,
     ).toMatchObject({
       applies: true,
       suppressesPlanBonus: true,
@@ -53,11 +57,12 @@ describe("real engine access corpus", () => {
       applies: false,
       invalidationReason: "remote_fingerprint_changed",
     });
-    expect(scenario(corpus, "access_memory_economy_improved").accessOutcomeMemory)
-      .toMatchObject({
-        applies: false,
-        invalidationReason: "credits_or_reserve_improved",
-      });
+    expect(
+      scenario(corpus, "access_memory_economy_improved").accessOutcomeMemory,
+    ).toMatchObject({
+      applies: false,
+      invalidationReason: "credits_or_reserve_improved",
+    });
   });
 
   it("keeps target-choice dry-runs inside access projections", () => {
@@ -112,7 +117,9 @@ describe("real engine access corpus", () => {
       "access_side_safe_payload_contract",
     );
 
-    expect(payloadScenario.legalAction.payload).toEqual({ serverId: "remote_1" });
+    expect(payloadScenario.legalAction.payload).toEqual({
+      serverId: "remote_1",
+    });
     expect(payloadScenario.evidence).toEqual(
       expect.arrayContaining([
         "access_decision_projection_server:remote_1",

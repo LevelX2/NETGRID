@@ -20613,8 +20613,8 @@
   "expectation": {
     "acceptableActions": [
       {
-        "targetServerId": "rd",
-        "type": "install_card"
+        "type": "install_card",
+        "targetServerId": "rd"
       }
     ],
     "forbiddenActions": [

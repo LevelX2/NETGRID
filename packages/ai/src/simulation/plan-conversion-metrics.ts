@@ -157,7 +157,9 @@ export function summarizePlanConversionMetrics(
 
       if (setupActionConvertsToRun(sequence, index, isMeaningfulBoardProgress))
         setupActionConvertedToRun += 1;
-      if (economyActionConvertsToRun(sequence, index, isMeaningfulBoardProgress))
+      if (
+        economyActionConvertsToRun(sequence, index, isMeaningfulBoardProgress)
+      )
         economyActionConvertedToRun += 1;
       if (rigActionConvertsToRun(sequence, index, isMeaningfulBoardProgress))
         rigActionConvertedToRun += 1;
@@ -170,11 +172,7 @@ export function summarizePlanConversionMetrics(
       )
         remoteBuildConvertedToAdvanceOrScore += 1;
       if (
-        advanceConvertsToScore(
-          sequence,
-          index,
-          isCorpRemoteAdvancementProgress,
-        )
+        advanceConvertsToScore(sequence, index, isCorpRemoteAdvancementProgress)
       )
         advanceConvertedToScore += 1;
       if (remoteContestConvertsToStealOrTrash(sequence, index))

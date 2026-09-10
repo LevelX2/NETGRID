@@ -109,21 +109,48 @@ export function activatedAbilityPayload(
   const moveTopTrashEffect = moveTopTrashToGripEffect(ability);
   const exactEndRunEffect =
     ability.effects.length === 1 && ability.effects[0]?.kind === "end_run";
+  const restrictedCreditEffect =
+    ability.effects.length === 1 &&
+    ability.effects[0]?.kind === "gain_temporary_corp_credits"
+      ? ability.effects[0]
+      : undefined;
+  const exactRestrictedCreditEffect =
+    restrictedCreditEffect !== undefined &&
+    ability.costs.every(
+      (cost) =>
+        cost.kind === "action" ||
+        cost.kind === "credit" ||
+        (cost.kind === "advancement_counter" && cost.source === "source"),
+    ) &&
+    restrictedCreditEffect.recipient === "corp" &&
+    restrictedCreditEffect.usableFor === "install_or_rez" &&
+    restrictedCreditEffect.cleanup === "end_of_turn" &&
+    restrictedCreditEffect.visibility === "public" &&
+    Number.isSafeInteger(restrictedCreditEffect.amount) &&
+    restrictedCreditEffect.amount > 0;
+  const totalImmediateCreditGain =
+    hostedCreditTakeAmount +
+    directCreditGain +
+    (advancementCounterCreditGain ?? 0);
   return {
     cardId,
     cardImplementationAbility: "activated",
     ...activatedAbilityBindingPayload(binding),
     cardImplementationAbilityTiming: offeredTiming,
-    ...(ability.label ? { cardImplementationAbilityLabel: ability.label } : {}),
-    ...(hostedCreditTakeAmount +
-      directCreditGain +
-      (advancementCounterCreditGain ?? 0) >
-    0
+    ...(exactRestrictedCreditEffect
       ? {
-          gainCreditsAmount:
-            hostedCreditTakeAmount +
-            directCreditGain +
-            (advancementCounterCreditGain ?? 0),
+          cardImplementationEffectKind: "gain_temporary_corp_credits",
+          restrictedCreditGainAmount: restrictedCreditEffect.amount,
+          restrictedCreditGainUsableFor: "corp_install_or_rez",
+          restrictedCreditGainCleanup: "end_of_turn",
+          restrictedCreditGainComplete: true,
+        }
+      : {}),
+    ...(ability.label ? { cardImplementationAbilityLabel: ability.label } : {}),
+    ...(totalImmediateCreditGain > 0 ||
+    advancementCounterCreditGain !== undefined
+      ? {
+          gainCreditsAmount: totalImmediateCreditGain,
         }
       : {}),
     ...(directCardDraw > 0 ? { drawCardsAmount: directCardDraw } : {}),
@@ -195,9 +222,7 @@ export function activatedAbilityPayload(
     ...(scoresSourceAsAgenda
       ? { cardImplementationScoresSourceAsAgenda: true }
       : {}),
-    ...(exactEndRunEffect
-      ? { cardImplementationEffectKind: "end_run" }
-      : {}),
+    ...(exactEndRunEffect ? { cardImplementationEffectKind: "end_run" } : {}),
     ...(advancementDistribution
       ? {
           cardImplementationEffectKind: "distribute_advancement_counters",
@@ -246,6 +271,8 @@ export function activatedAbilityPayload(
             state.runnerCostPenaltySupportWindow.originalActionId,
           costPenaltySupportAmountDue:
             state.runnerCostPenaltySupportWindow.amountDue,
+          costPenaltySupportRunnerCreditTarget:
+            state.runnerCostPenaltySupportWindow.runnerCreditTarget,
           costPenaltySupportKind: state.runnerCostPenaltySupportWindow.kind,
         }
       : {}),

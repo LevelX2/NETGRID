@@ -2,6 +2,7 @@ import type { CardInstanceId, GameState } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { definitionFor, mustInstance } from "./card-server-lookup";
 import { ensureSpecialZones, removeFromAllZones } from "./zone-mutation";
+import { clearDepartedBreakerStrength } from "./temporary-breaker-strength";
 
 const MICROTECH_BACKUP_KIND =
   "replace_installed_program_trash_with_host_on_source";
@@ -100,6 +101,7 @@ export function placeProgramsOnMicrotechBackupDrive(
       hostedOn: sourceCardId,
       microtechBackupOrder: currentTopOrder + index + 1,
     };
+    clearDepartedBreakerStrength(state, cardId);
   });
 }
 
@@ -142,6 +144,7 @@ export function trashMicrotechBackedProgram(
     rezzed: true,
     zone: { side: "runner", zone: "heap" },
   };
+  clearDepartedBreakerStrength(state, cardId);
 }
 
 function runnerProgramUsesMemory(

@@ -10,6 +10,36 @@ import { describe, expect, it } from "vitest";
 import { buildAiDecisionInputDto } from "./input-dto";
 
 describe("AI input DTO effective ICE run quote contract", () => {
+  it("preserves the public converted-program role without unknown data and rejects malformed facts", () => {
+    const view = playerView("corp", baseIce());
+    const converted: VisibleCard = {
+      instanceId: "converted_agenda",
+      definitionId: "agenda_definition",
+      known: true,
+      type: "agenda",
+      owner: "corp",
+      controller: "runner",
+      installedAsRunnerProgram: { memoryCost: 2, scoreAsAgendaAction: true },
+    };
+    view.opponent.rig = [converted];
+    (
+      converted.installedAsRunnerProgram as unknown as Record<string, unknown>
+    ).secret = "hidden-data";
+    const projected = buildInput(view).playerView.opponent.rig![0]!;
+    expect(projected.installedAsRunnerProgram).toEqual({
+      memoryCost: 2,
+      scoreAsAgendaAction: true,
+    });
+    expect(projected.installedAsRunnerProgram).not.toBe(
+      converted.installedAsRunnerProgram,
+    );
+    converted.installedAsRunnerProgram!.memoryCost = -1;
+    expect(() => buildInput(view)).toThrow(/installed-as-Runner-program/);
+    converted.known = false;
+    expect(
+      buildInput(view).playerView.opponent.rig![0]!.installedAsRunnerProgram,
+    ).toBeUndefined();
+  });
   it("deep-copies the exhaustive current-state quote and drops unknown nested fields", () => {
     const quote = validEffectiveRunQuote();
     const raw = quote as unknown as Record<string, unknown>;

@@ -25,8 +25,11 @@ describe("deck strategy completeness gate", () => {
     cards: Array<{ cardId: string; quantity: number }>;
   }>;
 
-  it("classifies all 48 active standard decks and exposes under-equipped lists deterministically", () => {
-    expect(activeDecks).toHaveLength(48);
+  it("classifies every active standard deck and preserves the catalog floor", () => {
+    // Catalog growth must not invalidate this completeness gate. The lower bound
+    // still catches accidental bulk removal; the loop below proves coverage for
+    // every currently active deck, regardless of the current catalog size.
+    expect(activeDecks.length).toBeGreaterThanOrEqual(50);
     const neutralDeckNames: string[] = [];
 
     for (const deck of activeDecks) {
@@ -58,6 +61,31 @@ describe("deck strategy completeness gate", () => {
       "Krashkurs: Clown-Kreditmaschine",
       "Rent-I-Con: Das Shellspiel",
     ]);
+  });
+
+  it("classifies Counter Shell as a productive counter-to-score doctrine", () => {
+    const profile = buildDeckStrategyProfile(standardSnapshot("Counter Shell"));
+
+    expect(profile.primaryStrategies).toEqual([
+      "corp.ambush_bluff",
+      "corp.remote_scoring",
+      "corp.overadvance_value",
+    ]);
+    expect(profile.secondaryStrategies).toEqual([
+      "corp.fast_advance",
+      "corp.draw_engine",
+      "corp.rush_score",
+    ]);
+    expect(profile.warnings).toEqual([]);
+    for (const strategyId of [
+      ...profile.primaryStrategies,
+      ...profile.secondaryStrategies,
+    ]) {
+      expect(profile.strategyScores[strategyId]?.runtimeStatus).toBe(
+        "productive",
+      );
+      expect(profile.strategyScores[strategyId]?.runtimeBlockers).toEqual([]);
+    }
   });
 
   it("keeps all 21 versioned snapshots deterministic and taxonomy-complete", () => {

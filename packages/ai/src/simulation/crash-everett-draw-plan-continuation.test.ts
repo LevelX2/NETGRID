@@ -121,10 +121,7 @@ describe("Crash Everett draw-plan continuation", () => {
     const corpDeck: DeckDefinition = {
       ...baseCorpDeck,
       id: `${baseCorpDeck.id}_with_city_surveillance`,
-      cards: [
-        ...baseCorpDeck.cards,
-        { id: CITY_SURVEILLANCE, quantity: 1 },
-      ],
+      cards: [...baseCorpDeck.cards, { id: CITY_SURVEILLANCE, quantity: 1 }],
     };
     let state = toRunnerTurn(
       createGameAfterSetup({

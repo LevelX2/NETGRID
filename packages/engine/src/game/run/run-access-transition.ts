@@ -16,6 +16,7 @@ import {
 } from "../access/breach-state";
 import { credits } from "../state/economy-mutation";
 import { successfulRunServerId } from "./run-server-identities";
+import { temporaryEncounterOptionFacts } from "./temporary-encounter-option-facts";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 type SuccessfulRunTagContinuation = Extract<
@@ -531,6 +532,13 @@ export function startSuccessfulRunInterventionChoice(
         metadata: {
           creditCost: cost,
           cardTitle: host.cards.definitionFor(cardId).title,
+          ...(kind === "temporary_hq_ice_encounter_after_successful_run"
+            ? temporaryEncounterOptionFacts(
+                host.state,
+                cardId,
+                host.cards.definitionFor(cardId),
+              )
+            : {}),
         },
       })),
     ],

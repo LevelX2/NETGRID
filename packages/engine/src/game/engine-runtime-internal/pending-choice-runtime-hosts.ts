@@ -248,10 +248,10 @@ export function createPendingChoiceRuntimeHosts(
       presentationKey: "run_bit_spend",
       kind: "select_option",
       options: Array.from({ length: maxAnnouncement + 1 }, (_, amount) => ({
-      id: `spend_${amount}`,
-      label: `${amount}`,
-      value: amount,
-      metadata: { amount },
+        id: `spend_${amount}`,
+        label: `${amount}`,
+        value: amount,
+        metadata: { amount },
       })),
       minSelections: 1,
       maxSelections: 1,
@@ -847,7 +847,7 @@ export function createPendingChoiceRuntimeHosts(
             legalAction,
             playerAction,
           ),
-        resolveDelayedInstallMemoryChoice: (
+        resolveDelayedInstallPlacementChoice: (
           _state,
           legalAction,
           playerAction,
@@ -855,7 +855,7 @@ export function createPendingChoiceRuntimeHosts(
           const resumesStartOfTurn =
             state.pendingChoice?.source.split(":")[3] === "start_turn";
           const effects: ResolvedGameEffect[] = [];
-          deps.resolveDelayedInstallMemoryChoice(
+          deps.resolveDelayedInstallPlacementChoice(
             deps.runnerSpecialTriggerExecutionHost(state),
             legalAction,
             playerAction,

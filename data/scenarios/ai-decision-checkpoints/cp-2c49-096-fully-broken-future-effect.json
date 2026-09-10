@@ -851,9 +851,7 @@
             "id": "hq",
             "kind": "hq",
             "label": "HQ",
-            "ice": [
-              "corp_onr_v1_257_nerve-labyrinth_2"
-            ],
+            "ice": ["corp_onr_v1_257_nerve-labyrinth_2"],
             "root": []
           },
           {
@@ -881,9 +879,7 @@
               "corp_onr_v1_234_data-darts_1",
               "corp_onr_v1_242_fatal-attractor_3"
             ],
-            "root": [
-              "corp_onr_proteus_005_marked-accounts_3"
-            ]
+            "root": ["corp_onr_proteus_005_marked-accounts_3"]
           }
         ]
       },
@@ -947,12 +943,8 @@
         ],
         "scoreArea": [],
         "rig": {
-          "programs": [
-            "runner_onr_v1_039_krash_3"
-          ],
-          "hardware": [
-            "runner_onr_proteus_134_cortical-cybermodem_2"
-          ],
+          "programs": ["runner_onr_v1_039_krash_3"],
+          "hardware": ["runner_onr_proteus_134_cortical-cybermodem_2"],
           "resources": []
         }
       },
@@ -2348,9 +2340,7 @@
         "edgerunnerTempsInstallActionsRemaining": 0,
         "scoredAgendaStartDrawChoiceResolvedSourceIds": [],
         "scoredAgendaStartDrawChoiceSelectedSourceIds": [],
-        "fortActivityServerIdsSinceCorpTurnStart": [
-          "remote_1"
-        ],
+        "fortActivityServerIdsSinceCorpTurnStart": ["remote_1"],
         "corpStartOfTurnResolvedSourceIds": [],
         "pdcaUsedSourceIdsThisTurn": []
       },
@@ -2388,9 +2378,7 @@
             "0": "runner_onr_v1_039_krash_3"
           }
         },
-        "fullyBrokenIceIds": [
-          "corp_onr_v1_242_fatal-attractor_3"
-        ],
+        "fullyBrokenIceIds": ["corp_onr_v1_242_fatal-attractor_3"],
         "fullyBrokenPassedIcePendingId": "corp_onr_v1_242_fatal-attractor_3",
         "fullyBrokenPassedIceTrashPendingId": "corp_onr_v1_242_fatal-attractor_3",
         "lastPassedIceId": "corp_onr_v1_242_fatal-attractor_3"
@@ -5437,12 +5425,8 @@
             "support": 0,
             "final": 0
           },
-          "supportGaps": [
-            "no_strategy_anchor"
-          ],
-          "evidence": [
-            "neutral_doctrine:no_strategy_anchor"
-          ]
+          "supportGaps": ["no_strategy_anchor"],
+          "evidence": ["neutral_doctrine:no_strategy_anchor"]
         },
         "secondaryStrategies": [],
         "phase": "recover",
@@ -5458,10 +5442,7 @@
           "kind": "none",
           "required": 0,
           "satisfied": true,
-          "evidence": [
-            "reserve_source:runtime_context",
-            "reserve:none"
-          ]
+          "evidence": ["reserve_source:runtime_context", "reserve:none"]
         },
         "blockers": [
           {
@@ -5469,18 +5450,14 @@
             "severity": "hard",
             "reason": "no_strategy_anchor",
             "removalCondition": "provide a strategy profile with concrete anchor evidence",
-            "evidence": [
-              "neutral_doctrine:no_strategy_anchor"
-            ]
+            "evidence": ["neutral_doctrine:no_strategy_anchor"]
           },
           {
             "blockerId": "runner.neutral:support_gap:no_strategy_anchor",
             "severity": "soft",
             "reason": "support_gap",
             "removalCondition": "resolve support gap no_strategy_anchor",
-            "evidence": [
-              "support_gap:no_strategy_anchor"
-            ]
+            "evidence": ["support_gap:no_strategy_anchor"]
           }
         ],
         "transition": {
@@ -5579,10 +5556,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5670,10 +5644,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5761,10 +5732,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -5852,10 +5820,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6005,10 +5970,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -6690,9 +6652,7 @@
                 "boundaryAfter": "engine_continuation"
               }
             ],
-            "protectedValueClaimIds": [
-              "fnv1a:f6368932"
-            ],
+            "protectedValueClaimIds": ["fnv1a:f6368932"],
             "transition": {
               "kind": "observation_boundary"
             }
@@ -6713,12 +6673,8 @@
         "quoteIds": [],
         "valueClaimIds": [],
         "priorityCoverage": {
-          "requiredObligationIds": [
-            "priority-band:P3"
-          ],
-          "satisfiedObligationIds": [
-            "priority-band:P3"
-          ],
+          "requiredObligationIds": ["priority-band:P3"],
+          "satisfiedObligationIds": ["priority-band:P3"],
           "violatedObligationIds": [],
           "deferredObligationIds": []
         },
@@ -6769,15 +6725,11 @@
   },
   "expectation": {
     "planExecution": {
-      "acceptablePlanKinds": [
-        "runner.convert_run_window"
-      ],
+      "acceptablePlanKinds": ["runner.convert_run_window"],
       "forbiddenAssessmentEvidence": [
         "runner_future_encounter_damage_requires_jack_out"
       ],
-      "acceptableCapabilities": [
-        "convert_active_run_window"
-      ]
+      "acceptableCapabilities": ["convert_active_run_window"]
     },
     "acceptableActions": [
       {

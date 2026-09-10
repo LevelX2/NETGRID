@@ -1,3 +1,5 @@
+import { corpRdRecyclingSignals } from "./corp-access-zone-preparation";
+import { corpAccessPaymentChoiceSignal } from "./corp-access-payment-choice";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { AI_HINTS_BY_CARD } from "../ai-hints";
@@ -22,19 +24,44 @@ const RECYCLING_CLICK_COST_VALUE = 40;
 const RECYCLING_CREDIT_COST_VALUE = 10;
 
 export function buildCorpAmbushPlanSignals(params: {
+  reservedScoreServerIds?: ReadonlySet<string>;
+  reservedScoreCredits?: number;
   input: AiDecisionInput;
   candidates: readonly ActionSemanticCandidate[];
   previous: ResidentPlanPortfolio | undefined;
 }): CorpAmbushSignal[] {
-  const continued = continuedAmbushSignals(params);
+  const accessPayment = corpAccessPaymentChoiceSignal(
+    params.input,
+    params.candidates,
+  );
+  const accessProgramBounce = accessProgramBounceChoiceSignal(
+    params.input,
+    params.candidates,
+  );
+  const continued = continuedAmbushSignals(params).filter(
+    (signal) =>
+      signal.sourceInstanceId !== accessProgramBounce?.sourceInstanceId &&
+      signal.sourceInstanceId !== accessPayment?.sourceInstanceId,
+  );
   const continuedSourceIds = new Set(
     continued.map((signal) => signal.sourceInstanceId),
   );
   const strategicIntent = (params.input as AiDecisionInputWithDeckCapabilities)
     .ownCorpStrategicIntent;
   if (!strategicIntent || !corpIntentSupportsAmbush(strategicIntent)) {
-    return continued;
+    return [
+      ...(accessPayment ? [accessPayment] : []),
+      ...(accessProgramBounce ? [accessProgramBounce] : []),
+      ...continued,
+    ];
   }
+  const recycling = corpRdRecyclingSignals(
+    params.input,
+    params.candidates,
+    params.previous,
+    params.reservedScoreServerIds,
+    params.reservedScoreCredits,
+  );
   const plannedDecoys = scoreDecoySignals({
     ...params,
     continuedSourceIds,
@@ -62,6 +89,8 @@ export function buildCorpAmbushPlanSignals(params: {
       }
       if (!ambushVisibleConditionsSatisfied(params.input, source.definitionId))
         return [];
+      if (!agendaAmbushInstallHasDecisivePayoff(params.input, source))
+        return [];
       return [
         visibleGripAmbushSignal(
           params.input,
@@ -73,7 +102,189 @@ export function buildCorpAmbushPlanSignals(params: {
     },
   );
 
-  return [...continued, ...plannedDecoys, ...planned];
+  return [
+    ...(accessPayment ? [accessPayment] : []),
+    ...(accessProgramBounce ? [accessProgramBounce] : []),
+    ...continued,
+    ...plannedDecoys,
+    ...recycling,
+    ...planned,
+  ];
+}
+
+function accessProgramBounceChoiceSignal(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+): CorpAmbushSignal | undefined {
+  const choice = input.playerView.pendingChoice;
+  if (
+    input.side !== "corp" ||
+    choice?.kind !== "select_cards" ||
+    !choice.source.startsWith("proteus.return_runner_programs:") ||
+    choice.side !== "corp" ||
+    choice.stateVersion !== input.playerView.stateVersion ||
+    choice.visibility !== "hidden_info_barrier" ||
+    choice.minSelections !== 0 ||
+    choice.maxSelections <= 0
+  ) {
+    return undefined;
+  }
+  const sourceParts = choice.source.split(":");
+  const sourceInstanceId = sourceParts[1];
+  const effectIndex = Number(sourceParts[2]);
+  const accessZone = sourceParts[3];
+  const sourceStateVersion = Number(sourceParts[4]);
+  if (
+    sourceParts.length !== 5 ||
+    !sourceInstanceId ||
+    !Number.isSafeInteger(effectIndex) ||
+    effectIndex < 0 ||
+    !accessZone ||
+    sourceStateVersion !== input.playerView.stateVersion
+  ) {
+    return undefined;
+  }
+  const location = installedCardLocation(input, sourceInstanceId);
+  const sourceDefinitionId = location?.card.definitionId;
+  if (
+    !sourceDefinitionId ||
+    location.card.known !== true ||
+    location.card.owner !== "corp" ||
+    !definitionSupportsProgramBounceAmbush(sourceDefinitionId)
+  ) {
+    return undefined;
+  }
+  const resolveCandidates = candidates.filter(
+    (candidate) =>
+      candidate.semanticActionType === "choice.resolve" &&
+      candidate.actionType === "resolve_choice",
+  );
+  if (resolveCandidates.length !== 1) return undefined;
+  const resolveCandidate = resolveCandidates[0]!;
+  const resolveAction = input.legalActions.find(
+    (action) => action.actionId === resolveCandidate.actionId,
+  );
+  const requirement = resolveAction?.choiceRequirements?.[0];
+  const selectableOptions = choice.options.filter(
+    (option) => option.selectable !== false,
+  );
+  const optionIds = selectableOptions.map((option) => option.id);
+  if (
+    !resolveAction ||
+    resolveAction.side !== "corp" ||
+    resolveAction.type !== "resolve_choice" ||
+    resolveAction.source !== "game_rule" ||
+    resolveAction.timingPoint !== input.playerView.timingPoint ||
+    resolveAction.expiresAtStateVersion !== input.playerView.stateVersion ||
+    resolveAction.choiceRequirements?.length !== 1 ||
+    requirement?.choiceId !== choice.choiceId ||
+    requirement.minSelections !== choice.minSelections ||
+    requirement.maxSelections !== choice.maxSelections ||
+    requirement.optionIds.length !== optionIds.length ||
+    !optionIds.every((optionId) => requirement.optionIds.includes(optionId))
+  ) {
+    return undefined;
+  }
+  const visiblePrograms = new Map(
+    (input.playerView.opponent.rig ?? [])
+      .filter(
+        (card) =>
+          card.known === true &&
+          card.owner === "runner" &&
+          card.controller === "runner" &&
+          card.type === "program",
+      )
+      .map((card) => [card.instanceId, card] as const),
+  );
+  const optionBindings = selectableOptions.map((option) => ({
+    optionId: option.id,
+    cardId: typeof option.value === "string" ? option.value : undefined,
+  }));
+  if (
+    optionBindings.length !== visiblePrograms.size ||
+    optionBindings.some(
+      (binding) =>
+        !binding.cardId ||
+        binding.optionId !== `card_${binding.cardId}` ||
+        !visiblePrograms.has(binding.cardId),
+    )
+  ) {
+    return undefined;
+  }
+  const selected = optionBindings
+    .map((binding) => ({
+      ...binding,
+      card: visiblePrograms.get(binding.cardId!)!,
+    }))
+    .sort(
+      (left, right) =>
+        programBounceTargetScore(right.card) -
+          programBounceTargetScore(left.card) ||
+        left.optionId.localeCompare(right.optionId),
+    )
+    .slice(0, choice.maxSelections);
+  return {
+    commitmentVersion: CORP_AMBUSH_COMMITMENT_VERSION,
+    ambushId: `access-program-bounce:${choice.choiceId}`,
+    sourceDefinitionId,
+    sourceInstanceId,
+    actionIds: [resolveAction.actionId],
+    serverId: location.serverId,
+    phase: "trigger",
+    purposeCode: `resolve_access_program_bounce:${sourceInstanceId}`,
+    assignedDomainPlanIds: ["corp.ambush_bluff"],
+    duplicateAlreadyInstalled: false,
+    affordableOrSupportable: true,
+    plannedAtStateVersion: input.playerView.stateVersion,
+    plannedAdvancementTarget: Math.max(
+      0,
+      location.card.advancementCounters ?? 0,
+    ),
+    value: 1_000,
+    evidenceCode: `corp_ambush_access_program_bounce_owned:${sourceInstanceId}`,
+    accessProgramBounceChoiceBinding: {
+      actionId: resolveAction.actionId,
+      choiceId: choice.choiceId,
+      choiceSource: choice.source,
+      observedAtStateVersion: input.playerView.stateVersion,
+      selectedOptionIds: selected.map((entry) => entry.optionId),
+      targetProgramInstanceIds: selected.map((entry) => entry.cardId!),
+      evidenceCodes: [
+        "corp_ambush_program_bounce_choice_owned_by_ambush_plan",
+        "corp_ambush_program_bounce_bound_to_current_engine_choice",
+        "corp_ambush_program_bounce_targets_ranked_by_visible_board_value",
+      ],
+    },
+  };
+}
+
+function definitionSupportsProgramBounceAmbush(definitionId: string): boolean {
+  const hint = AI_HINTS_BY_CARD.get(definitionId);
+  return (
+    (hint?.strategyAnchors?.includes("corp.ambush_bluff") === true ||
+      hint?.lineSupport?.includes("corp.ambush_bluff") === true) &&
+    hint.targetProfiles?.some(
+      (profile) =>
+        "purpose" in profile &&
+        profile.purpose === "bounce_high_value_runner_program",
+    ) === true
+  );
+}
+
+function programBounceTargetScore(card: VisibleCard): number {
+  const counters = Object.values(card.counters ?? {}).reduce(
+    (sum, value) => sum + (typeof value === "number" ? value : 0),
+    0,
+  );
+  const isIcebreaker = card.subtypes?.some(
+    (subtype) => subtype.toLocaleLowerCase() === "icebreaker",
+  );
+  return (
+    (isIcebreaker ? 100_000 : 0) +
+    counters * 1_000 +
+    Math.max(0, card.installCost ?? 0) * 10 +
+    Math.max(0, card.memoryCost ?? 0)
+  );
 }
 
 function scoreDecoySignals(params: {
@@ -286,9 +497,10 @@ function visibleGripAmbushSignal(
   const serverId = selected?.serverId ?? previous?.serverId ?? "new_remote";
   const plannedAtStateVersion =
     previous?.plannedAtStateVersion ?? input.playerView.stateVersion;
-  const plannedAdvancementTarget =
-    previous?.plannedAdvancementTarget ??
-    ambushAdvancementTarget(source.definitionId!);
+  const plannedAdvancementTarget = Math.max(
+    previous?.plannedAdvancementTarget ?? 0,
+    ambushAdvancementTarget(input, source.definitionId!),
+  );
   const fundingGap = selected
     ? Math.max(0, selected.creditCost - input.playerView.own.credits)
     : undefined;
@@ -370,6 +582,19 @@ export function corpAmbushAdvanceDispositionEvidence(
   );
   if (!signal || signal.actionIds.includes(candidate.actionId))
     return undefined;
+  if (
+    signal.advancementSupportRoute &&
+    (signal.phase === "install_support" ||
+      signal.phase === "rez_support" ||
+      signal.phase === "trigger_support")
+  ) {
+    return [
+      "corp_ambush_advance_deferred_for_exact_support_route",
+      signal.sourceInstanceId,
+      signal.phase,
+      signal.advancementSupportRoute.actionId,
+    ].join(":");
+  }
   if (signal.phase !== "trigger") return undefined;
   return [
     "corp_ambush_advance_target_already_reached",
@@ -411,13 +636,15 @@ function continuedAmbushSignals(params: {
         `Resident ambush plan ${instance.instanceId} has an incomplete sequence commitment.`,
       );
     }
+    if (signal.patternKind === "rd_recycle") return []; // Rediscover the exact current source/zone and legal route.
     const sourceInstanceId = signal.sourceInstanceId;
     const plannedAdvancementTarget = signal.plannedAdvancementTarget!;
     const visibleGripSource = visibleGripCard(params.input, sourceInstanceId);
     if (visibleGripSource) {
       if (
         visibleGripSource.known !== true ||
-        visibleGripSource.definitionId !== signal.sourceDefinitionId
+        visibleGripSource.definitionId !== signal.sourceDefinitionId ||
+        !agendaAmbushInstallHasDecisivePayoff(params.input, visibleGripSource)
       ) {
         return [];
       }
@@ -477,6 +704,40 @@ function continuedAmbushSignals(params: {
         `Resident ambush ${sourceInstanceId} has ambiguous trigger actions; bind the exact on-access ability semantics.`,
       );
     }
+    const accessWindowRezCandidates = params.candidates.filter((candidate) => {
+      if (
+        candidate.sourceCardInstanceId !== sourceInstanceId ||
+        candidate.actionType !== "rez_card" ||
+        candidate.semanticActionType !== "corp_window.rez" ||
+        location.card.rezzed === true ||
+        Math.max(0, location.card.advancementCounters ?? 0) === 0
+      ) {
+        return false;
+      }
+      const run = params.input.playerView.run;
+      if (
+        params.input.playerView.timingPoint !== "run.movement_rez_window" ||
+        run?.phase !== "movement" ||
+        run.position?.kind !== "server" ||
+        run.position.serverId !== location.serverId ||
+        run.attackedServerId !== location.serverId
+      ) {
+        return false;
+      }
+      const action = params.input.legalActions.find(
+        (legalAction) => legalAction.actionId === candidate.actionId,
+      );
+      return action !== undefined && exactLegalActionCreditCost(action) === 0;
+    });
+    if (accessWindowRezCandidates.length > 1) {
+      throw ambushContractFailure(
+        params.input,
+        accessWindowRezCandidates.map((candidate) => candidate.actionId),
+        `Resident ambush ${sourceInstanceId} has ambiguous zero-cost access-window rez actions.`,
+      );
+    }
+    const exactTriggerCandidate =
+      triggerCandidates[0] ?? accessWindowRezCandidates[0];
     const runnerKnowledge = reconstructBeliefState(
       params.input,
     ).corpOpponentModel?.runnerKnownCorpCardMemory.find(
@@ -542,62 +803,100 @@ function continuedAmbushSignals(params: {
         `Resident ambush ${sourceInstanceId} has ambiguous advancement actions.`,
       );
     }
+    const supportRoute = ambushAdvancementSupportRoute({
+      input: params.input,
+      candidates: params.candidates,
+      sourceInstanceId,
+      serverId: location.serverId,
+      currentCounters,
+      advancementTarget,
+    });
     const selectRecycle =
-      triggerCandidates.length === 0 &&
+      supportRoute === undefined &&
+      exactTriggerCandidate === undefined &&
       runnerKnowledge !== undefined &&
       recycleCandidate !== undefined &&
       recycleCostKnown &&
       knownThreatWeak &&
       recycleValue > holdValue;
     const selected =
-      triggerCandidates[0] ??
+      supportRoute?.candidate ??
+      exactTriggerCandidate ??
       (selectRecycle
         ? recycleCandidate
         : currentCounters < advancementTarget
           ? advanceCandidates[0]
           : undefined);
     const phase =
-      triggerCandidates.length > 0
-        ? ("trigger" as const)
-        : selectRecycle
-          ? ("recycle" as const)
-          : currentCounters < advancementTarget
-            ? ("advance" as const)
-            : ("trigger" as const);
+      supportRoute?.phase === "install"
+        ? ("install_support" as const)
+        : supportRoute?.phase === "rez"
+          ? ("rez_support" as const)
+          : supportRoute?.phase === "trigger"
+            ? ("trigger_support" as const)
+            : exactTriggerCandidate !== undefined
+              ? ("trigger" as const)
+              : selectRecycle
+                ? ("recycle" as const)
+                : currentCounters < advancementTarget
+                  ? ("advance" as const)
+                  : ("trigger" as const);
+    const {
+      advancementSupportRoute: _previousAdvancementSupportRoute,
+      ...retainedSignal
+    } = signal as CorpAmbushSignal;
     return [
       {
-        ...(signal as CorpAmbushSignal),
+        ...retainedSignal,
         serverId: location.serverId,
         phase,
         actionIds: selected ? [selected.actionId] : [],
         purposeCode:
-          phase === "recycle"
-            ? "recycle_compromised_ambush_to_hq"
-            : phase === "advance"
-              ? `advance_committed_ambush_to:${advancementTarget}`
-              : "wait_for_or_convert_committed_ambush_access",
+          phase === "install_support"
+            ? `install_ambush_advancement_support:${sourceInstanceId}:${location.serverId}`
+            : phase === "rez_support"
+              ? `rez_ambush_advancement_support:${sourceInstanceId}:${location.serverId}`
+              : phase === "trigger_support"
+                ? `convert_ambush_advancement_support:${sourceInstanceId}:${location.serverId}`
+                : phase === "recycle"
+                  ? "recycle_compromised_ambush_to_hq"
+                  : phase === "advance"
+                    ? `advance_committed_ambush_to:${advancementTarget}`
+                    : "wait_for_or_convert_committed_ambush_access",
         duplicateAlreadyInstalled: false,
         affordableOrSupportable: selected !== undefined || phase === "trigger",
         value:
-          phase === "trigger" && selected
-            ? 800
-            : phase === "recycle"
-              ? 360
-              : phase === "advance"
-                ? runnerKnowledge
-                  ? 220
-                  : 300
-                : knownThreatMaterial
-                  ? (accessThreatProjection?.threatValue ?? 0)
-                  : 0,
+          phase === "trigger_support"
+            ? 900
+            : phase === "rez_support"
+              ? 850
+              : phase === "install_support"
+                ? 340
+                : phase === "trigger" && selected
+                  ? 800
+                  : phase === "recycle"
+                    ? 360
+                    : phase === "advance"
+                      ? runnerKnowledge
+                        ? 220
+                        : 300
+                      : knownThreatMaterial
+                        ? (accessThreatProjection?.threatValue ?? 0)
+                        : 0,
         evidenceCode:
-          phase === "recycle"
-            ? `corp_ambush_recycle_selected:${signal.sourceInstanceId}`
-            : runnerKnowledge && knownThreatMaterial
-              ? `corp_ambush_hold_selected_for_material_known_threat:${signal.sourceInstanceId}`
-              : selected
-                ? `corp_ambush_sequence_exact_${phase}:${signal.sourceInstanceId}`
-                : `corp_ambush_sequence_waiting_for_access:${signal.sourceInstanceId}`,
+          phase === "install_support"
+            ? `corp_ambush_advancement_support_exact_install:${supportRoute?.supportSourceInstanceId}:${sourceInstanceId}:${location.serverId}`
+            : phase === "rez_support"
+              ? `corp_ambush_advancement_support_exact_rez:${supportRoute?.supportSourceInstanceId}:${sourceInstanceId}:${location.serverId}`
+              : phase === "trigger_support"
+                ? `corp_ambush_advancement_support_exact_trigger:${supportRoute?.supportSourceInstanceId}:${sourceInstanceId}:${location.serverId}`
+                : phase === "recycle"
+                  ? `corp_ambush_recycle_selected:${signal.sourceInstanceId}`
+                  : runnerKnowledge && knownThreatMaterial
+                    ? `corp_ambush_hold_selected_for_material_known_threat:${signal.sourceInstanceId}`
+                    : selected
+                      ? `corp_ambush_sequence_exact_${phase}:${signal.sourceInstanceId}`
+                      : `corp_ambush_sequence_waiting_for_access:${signal.sourceInstanceId}`,
         runnerKnowledgeState: runnerKnowledge ? "known_exact" : "unknown",
         bluffCompromised: runnerKnowledge !== undefined,
         ...(runnerKnowledge
@@ -605,7 +904,7 @@ function continuedAmbushSignals(params: {
               compromisedDisposition:
                 phase === "recycle"
                   ? ("recycle_to_hq" as const)
-                  : phase === "trigger" && triggerCandidates.length > 0
+                  : phase === "trigger" && exactTriggerCandidate !== undefined
                     ? ("trigger_on_access" as const)
                     : ("hold_known_threat" as const),
             }
@@ -653,6 +952,20 @@ function continuedAmbushSignals(params: {
                 recyclerSourceDefinitionId:
                   recycleCandidate.sourceDefinitionId!,
                 targetCardInstanceId: sourceInstanceId,
+              },
+            }
+          : {}),
+        ...(supportRoute
+          ? {
+              advancementSupportRoute: {
+                phase: supportRoute.phase,
+                actionId: supportRoute.candidate.actionId,
+                supportSourceInstanceId: supportRoute.supportSourceInstanceId,
+                supportSourceDefinitionId:
+                  supportRoute.supportSourceDefinitionId,
+                targetCardInstanceId: sourceInstanceId,
+                serverId: location.serverId,
+                creditCost: supportRoute.creditCost,
               },
             }
           : {}),
@@ -709,10 +1022,25 @@ function corpIntentSupportsAmbush(intent: CorpStrategicIntentProfile): boolean {
 
 function definitionSupportsAmbushPlan(definitionId: string): boolean {
   const hint = AI_HINTS_BY_CARD.get(definitionId);
-  return (
+  const strategyBound =
     hint?.strategyAnchors?.includes("corp.ambush_bluff") === true ||
-    hint?.lineSupport?.includes("corp.ambush_bluff") === true
-  );
+    hint?.lineSupport?.includes("corp.ambush_bluff") === true;
+  const accessEffect =
+    hint?.conditions?.some(
+      (condition) => condition.kind === "requires_accessed_card",
+    ) === true &&
+    hint?.effects?.some(
+      (effect) =>
+        effect.timing === "on_access" &&
+        [
+          "ambush",
+          "access_punish",
+          "damage",
+          "hardware_trash",
+          "program_trash",
+        ].includes(effect.kind),
+    ) === true;
+  return strategyBound && accessEffect;
 }
 
 function ambushVisibleConditionsSatisfied(
@@ -745,13 +1073,191 @@ function ambushVisibleConditionsSatisfied(
   return true;
 }
 
-function ambushAdvancementTarget(definitionId: string): number {
+function agendaAmbushInstallHasDecisivePayoff(
+  input: AiDecisionInput,
+  source: VisibleCard,
+): boolean {
+  if (source.type !== "agenda") return true;
+  if (!source.definitionId) return false;
+  const projection = projectKnownCorpCardAccessEffect({
+    input,
+    sourceDefinitionId: source.definitionId,
+    sourceCard: source,
+  });
+  return (
+    projection.status === "complete" &&
+    projection.corpCanPayActivation !== false &&
+    projection.damage?.runnerSurvivable === false
+  );
+}
+
+function ambushAdvancementTarget(
+  input: AiDecisionInput,
+  definitionId: string,
+): number {
   const hint = AI_HINTS_BY_CARD.get(definitionId);
-  return hint?.conditions?.some(
+  const requiresCounters = hint?.conditions?.some(
     (condition) => condition.kind === "requires_advancement_counter",
+  );
+  if (!requiresCounters) return 0;
+  const scalablePayoff = hint?.requiredMechanics?.some((mechanic) =>
+    [
+      "source_advancement_counter_count",
+      "damage_from_source_advancement_counters",
+    ].includes(mechanic),
+  );
+  return scalablePayoff && corpHasAmbushAdvancementSupport(input) ? 2 : 1;
+}
+
+function corpHasAmbushAdvancementSupport(input: AiDecisionInput): boolean {
+  return [
+    ...input.playerView.own.gripOrHq,
+    ...input.playerView.servers.flatMap((server) => server.root),
+  ].some(
+    (card) =>
+      card.known === true &&
+      card.definitionId !== undefined &&
+      AI_HINTS_BY_CARD.get(card.definitionId)?.planRoles.includes(
+        "ambush_advancement_support",
+      ) === true,
+  );
+}
+
+function ambushAdvancementSupportRoute(params: {
+  input: AiDecisionInput;
+  candidates: readonly ActionSemanticCandidate[];
+  sourceInstanceId: string;
+  serverId: string;
+  currentCounters: number;
+  advancementTarget: number;
+}):
+  | {
+      phase: "install" | "rez" | "trigger";
+      candidate: ActionSemanticCandidate;
+      supportSourceInstanceId: string;
+      supportSourceDefinitionId: string;
+      creditCost: number;
+    }
+  | undefined {
+  if (params.advancementTarget - params.currentCounters < 2) return undefined;
+  const server = params.input.playerView.servers.find(
+    (entry) => entry.id === params.serverId,
+  );
+  if (!server) return undefined;
+  const supports = server.root.filter(
+    (card) =>
+      card.instanceId !== params.sourceInstanceId &&
+      card.known === true &&
+      card.definitionId !== undefined &&
+      AI_HINTS_BY_CARD.get(card.definitionId)?.planRoles.includes(
+        "ambush_advancement_support",
+      ) === true,
+  );
+  const installedSupportIds = new Set(supports.map((card) => card.instanceId));
+  const rankedTrigger = params.candidates
+    .filter((candidate) => {
+      if (
+        candidate.semanticActionType !== "card_ability.trigger" ||
+        !candidate.sourceCardInstanceId ||
+        !installedSupportIds.has(candidate.sourceCardInstanceId)
+      ) {
+        return false;
+      }
+      const action = params.input.legalActions.find(
+        (legalAction) => legalAction.actionId === candidate.actionId,
+      );
+      return (
+        action?.payload?.fortRunWindowAbility ===
+          "add_advancement_counters_after_passing_last_ice_on_this_fort" &&
+        action.payload.targetCardId === params.sourceInstanceId &&
+        action.payload.serverId === params.serverId
+      );
+    })
+    .sort((left, right) => left.actionId.localeCompare(right.actionId));
+  const trigger = rankedTrigger[0];
+  if (trigger?.sourceCardInstanceId && trigger.sourceDefinitionId) {
+    return {
+      phase: "trigger",
+      candidate: trigger,
+      supportSourceInstanceId: trigger.sourceCardInstanceId,
+      supportSourceDefinitionId: trigger.sourceDefinitionId,
+      creditCost: trigger.costProfile.creditCost ?? 0,
+    };
+  }
+  const unrezzedSupports = new Set(
+    supports
+      .filter((card) => card.rezzed !== true)
+      .map((card) => card.instanceId),
+  );
+  const rez = params.candidates
+    .filter(
+      (candidate) =>
+        candidate.semanticActionType === "corp_window.rez" &&
+        candidate.sourceCardInstanceId !== undefined &&
+        unrezzedSupports.has(candidate.sourceCardInstanceId),
+    )
+    .sort((left, right) => left.actionId.localeCompare(right.actionId))[0];
+  if (rez?.sourceCardInstanceId && rez.sourceDefinitionId) {
+    return {
+      phase: "rez",
+      candidate: rez,
+      supportSourceInstanceId: rez.sourceCardInstanceId,
+      supportSourceDefinitionId: rez.sourceDefinitionId,
+      creditCost: rez.costProfile.creditCost ?? 0,
+    };
+  }
+  if (supports.length > 0) return undefined;
+  const gripSupportIds = new Set(
+    params.input.playerView.own.gripOrHq
+      .filter(
+        (card) =>
+          card.known === true &&
+          card.definitionId !== undefined &&
+          AI_HINTS_BY_CARD.get(card.definitionId)?.planRoles.includes(
+            "ambush_advancement_support",
+          ) === true,
+      )
+      .map((card) => card.instanceId),
+  );
+  const installs = params.candidates
+    .filter(
+      (candidate) =>
+        candidate.semanticActionType === "install.card" &&
+        candidate.sourceCardInstanceId !== undefined &&
+        gripSupportIds.has(candidate.sourceCardInstanceId) &&
+        candidateTargetIds(candidate).includes(params.serverId),
+    )
+    .flatMap((candidate) => {
+      const action = params.input.legalActions.find(
+        (legalAction) => legalAction.actionId === candidate.actionId,
+      );
+      const creditCost = action
+        ? exactLegalActionCreditCost(action)
+        : undefined;
+      if (
+        creditCost === undefined ||
+        params.input.playerView.own.credits - creditCost < 5
+      ) {
+        return [];
+      }
+      return [{ candidate, creditCost }];
+    })
+    .sort((left, right) =>
+      left.candidate.actionId.localeCompare(right.candidate.actionId),
+    );
+  const install = installs[0];
+  if (
+    !install?.candidate.sourceCardInstanceId ||
+    !install.candidate.sourceDefinitionId
   )
-    ? 1
-    : 0;
+    return undefined;
+  return {
+    phase: "install",
+    candidate: install.candidate,
+    supportSourceInstanceId: install.candidate.sourceCardInstanceId,
+    supportSourceDefinitionId: install.candidate.sourceDefinitionId,
+    creditCost: install.creditCost,
+  };
 }
 
 function visibleGripCard(

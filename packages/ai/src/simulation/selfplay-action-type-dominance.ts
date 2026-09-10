@@ -104,7 +104,8 @@ function actionTypeRowsForSide(
     }))
     .sort(
       (left, right) =>
-        right.count - left.count || left.actionType.localeCompare(right.actionType),
+        right.count - left.count ||
+        left.actionType.localeCompare(right.actionType),
     );
 }
 

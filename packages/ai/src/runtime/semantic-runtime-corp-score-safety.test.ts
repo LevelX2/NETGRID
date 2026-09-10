@@ -39,7 +39,11 @@ describe("semanticRuntimeCorpScoreNowSafetyGate", () => {
       ]),
     });
     expect(
-      semanticRuntimeCorpScoreNowSafetyGate(input(), action("score"), dependencies),
+      semanticRuntimeCorpScoreNowSafetyGate(
+        input(),
+        action("score"),
+        dependencies,
+      ),
     ).toMatchObject({
       allowed: false,
       evidence: expect.arrayContaining([

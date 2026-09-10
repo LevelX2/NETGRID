@@ -18,6 +18,7 @@ import type {
 } from "./plan-scheduler";
 import type { CorpCorePlanDomain } from "./corp-core-plan-modules";
 import { PlanResolutionFailure } from "./plan-resolution-failure";
+import type { CorpBluffDefenseNeed } from "./corp-bluff-defense-types";
 
 export type CorpVirusPressureSignal = {
   pressureId: string;
@@ -66,6 +67,12 @@ export type CorpPunishCampaignSignal = {
     fundingNeedId: string;
     currentHeadStepId?: string;
     currentHeadActionId?: string;
+    traceBidBinding?: {
+      sourceCardInstanceId: string;
+      sourceDefinitionId: string;
+      quotedAtStateVersion: number;
+      amount: number;
+    };
   };
 };
 
@@ -76,8 +83,19 @@ export type CorpAmbushSignal = {
   sourceInstanceId: string;
   actionIds: string[];
   serverId: string;
-  phase: "install" | "advance" | "trigger" | "recycle";
-  patternKind?: "access_ambush" | "score_decoy";
+  phase:
+    | "install"
+    | "install_support"
+    | "advance"
+    | "rez_support"
+    | "trigger_support"
+    | "trigger"
+    | "recycle"
+    | "recycle_rd";
+  patternKind?: "access_ambush" | "score_decoy" | "rd_recycle";
+  recycleBluffUntilTurnSerial?: number;
+  emptyRdRecovery?: { observedAtStateVersion: number };
+  defenseNeed?: CorpBluffDefenseNeed;
   followupAgendaInstanceId?: string;
   runnerCreditsAtPlanStart?: number;
   purposeCode?: string;
@@ -96,11 +114,38 @@ export type CorpAmbushSignal = {
     | "recycle_to_hq"
     | "trigger_on_access";
   accessThreatProjection?: KnownCorpCardAccessEffectProjection;
+  accessPaymentChoiceBinding?: {
+    actionId: string;
+    choiceId: string;
+    choiceSource: string;
+    observedAtStateVersion: number;
+    selectedOptionIds: string[];
+    creditCost: number;
+    noOpCertified: boolean;
+  };
+  accessProgramBounceChoiceBinding?: {
+    actionId: string;
+    choiceId: string;
+    choiceSource: string;
+    observedAtStateVersion: number;
+    selectedOptionIds: string[];
+    targetProgramInstanceIds: string[];
+    evidenceCodes: string[];
+  };
   recycleRoute?: {
     actionId: string;
     recyclerSourceInstanceId: string;
     recyclerSourceDefinitionId: string;
     targetCardInstanceId: string;
+  };
+  advancementSupportRoute?: {
+    phase: "install" | "rez" | "trigger";
+    actionId: string;
+    supportSourceInstanceId: string;
+    supportSourceDefinitionId: string;
+    targetCardInstanceId: string;
+    serverId: string;
+    creditCost: number;
   };
   installRoute?: {
     actionId: string;
@@ -564,7 +609,7 @@ function ambushModule(): PlanModule {
           affordableOrSupportable: signal.affordableOrSupportable,
         });
         if (!admission.admitted) return [];
-        const priorityClass = ambushPriority(signal);
+        const priorityClass = ambushPriority(signal, context);
         const rootInstanceId = planInstanceIdForProposal({
           moduleId: "corp.ambush_and_bluff",
           dedupeKey: signal.ambushId,
@@ -595,12 +640,13 @@ function ambushModule(): PlanModule {
         if (
           signal.phase !== "install" ||
           !signal.installRoute ||
-          signal.installRoute.fundingGap > 0
+          signal.installRoute.fundingGap > 0 ||
+          (signal.defenseNeed?.fundingGap ?? 0) > 0
         ) {
           return [rootProposal];
         }
         const setupNeedId = ambushSetupNeedId(signal);
-        const setupPriority = ambushSetupPriority(signal);
+        const setupPriority = ambushSetupPriority(signal, context);
         const setupProposal = proposal(
           "corp.ambush_and_bluff",
           `${signal.ambushId}:setup:${signal.serverId}`,
@@ -625,22 +671,31 @@ function ambushModule(): PlanModule {
       if (current.kind === "ambush_setup") {
         return assessment(
           instance,
-          ambushSetupPriority(current.signal),
+          ambushSetupPriority(current.signal, context),
           ambushCandidates(context, current.signal).length > 0,
           current.signal.value,
           portfolio.executorInstanceId,
-          "belief_supported",
+          currentEmptyRdRecovery(current.signal, context)
+            ? "rules_proven"
+            : "belief_supported",
         );
       }
       const resourceGaps = ambushRootResourceGaps(current.signal);
+      const exactCurrentTrigger =
+        (current.signal.phase === "trigger" ||
+          current.signal.phase === "trigger_support" ||
+          current.signal.phase === "rez_support") &&
+        ambushCandidates(context, current.signal).length > 0;
       return assessment(
         instance,
-        ambushPriority(current.signal),
+        ambushPriority(current.signal, context),
         current.signal.phase !== "install" &&
           ambushCandidates(context, current.signal).length > 0,
         current.signal.value,
         portfolio.executorInstanceId,
-        "belief_supported",
+        exactCurrentTrigger || currentEmptyRdRecovery(current.signal, context)
+          ? "rules_proven"
+          : "belief_supported",
         false,
         resourceGaps,
       );
@@ -660,18 +715,43 @@ function ambushModule(): PlanModule {
                 : "ambush_setup"
               : `ambush_${current.signal.phase}`,
             semanticActionTypes: ambushSemanticTypes(current.signal.phase),
-            requiredSourceDefinitionIds:
-              current.signal.phase === "recycle" && current.signal.recycleRoute
-                ? [current.signal.recycleRoute.recyclerSourceDefinitionId]
-                : [current.signal.sourceDefinitionId],
-          },
-          target:
-            current.signal.phase === "install"
-              ? { kind: "server", id: current.signal.serverId }
+            ...(current.signal.accessProgramBounceChoiceBinding ||
+            current.signal.accessPaymentChoiceBinding
+              ? {}
               : {
-                  kind: "card",
-                  id: current.signal.sourceInstanceId,
-                },
+                  requiredSourceDefinitionIds: current.signal
+                    .advancementSupportRoute
+                    ? [
+                        current.signal.advancementSupportRoute
+                          .supportSourceDefinitionId,
+                      ]
+                    : current.signal.phase === "recycle" &&
+                        current.signal.recycleRoute
+                      ? [current.signal.recycleRoute.recyclerSourceDefinitionId]
+                      : [current.signal.sourceDefinitionId],
+                }),
+          },
+          ...(current.signal.accessProgramBounceChoiceBinding ||
+          current.signal.accessPaymentChoiceBinding
+            ? {}
+            : {
+                target:
+                  current.signal.phase === "install" ||
+                  current.signal.phase === "install_support"
+                    ? { kind: "server" as const, id: current.signal.serverId }
+                    : (current.signal.phase === "rez_support" ||
+                          current.signal.phase === "trigger_support") &&
+                        current.signal.advancementSupportRoute
+                      ? {
+                          kind: "card" as const,
+                          id: current.signal.advancementSupportRoute
+                            .supportSourceInstanceId,
+                        }
+                      : {
+                          kind: "card" as const,
+                          id: current.signal.sourceInstanceId,
+                        },
+              }),
           purpose: `Execute admitted ambush purpose ${current.signal.purposeCode ?? "domain assigned"}.`,
         },
         candidates: ambushCandidates(context, current.signal),
@@ -680,18 +760,61 @@ function ambushModule(): PlanModule {
   };
 }
 
-function ambushPriority(signal: CorpAmbushSignal): "P3" | "P4" | "P5" {
-  if (signal.phase === "trigger") return "P3";
-  if (signal.phase === "recycle") return "P4";
+function currentEmptyRdRecovery(
+  signal: CorpAmbushSignal,
+  context: PlanSchedulerContext,
+): boolean {
+  return (
+    signal.patternKind === "rd_recycle" &&
+    signal.emptyRdRecovery?.observedAtStateVersion ===
+      context.input.playerView.stateVersion &&
+    context.input.playerView.own.stackOrRdCount === 0 &&
+    signal.actionIds.some((id) =>
+      context.input.legalActions.some(
+        (action) =>
+          action.actionId === id &&
+          action.payload?.cardId === signal.sourceInstanceId &&
+          action.expiresAtStateVersion ===
+            context.input.playerView.stateVersion,
+      ),
+    )
+  );
+}
+
+function ambushPriority(
+  signal: CorpAmbushSignal,
+  context: PlanSchedulerContext,
+): "P2" | "P3" | "P4" | "P5" {
+  if (currentEmptyRdRecovery(signal, context)) return "P2";
+  if (signal.phase === "trigger" || signal.phase === "trigger_support")
+    return "P3";
+  if (signal.phase === "rez_support") return "P3";
+  if (signal.phase === "install_support") return "P4";
+  if (signal.phase === "recycle" || signal.phase === "recycle_rd") return "P4";
   if (signal.phase === "advance") return "P4";
   return "P5";
 }
 
-function ambushSetupPriority(signal: CorpAmbushSignal): "P4" | "P5" {
+function ambushSetupPriority(
+  signal: CorpAmbushSignal,
+  context: PlanSchedulerContext,
+): "P2" | "P4" | "P5" {
+  if (currentEmptyRdRecovery(signal, context)) return "P2";
   return signal.patternKind === "score_decoy" ? "P4" : "P5";
 }
 
 function ambushRootResourceGaps(signal: CorpAmbushSignal): ResourceGap[] {
+  if (signal.defenseNeed && signal.defenseNeed.fundingGap > 0) {
+    return [
+      {
+        needId: `ambush-defense-funding:${signal.sourceInstanceId}`,
+        capability: "credits",
+        minimum: signal.defenseNeed.fundingGap,
+        available: 0,
+        deadline: "current_turn",
+      },
+    ];
+  }
   if (signal.phase !== "install" || !signal.installRoute) return [];
   if (signal.installRoute.fundingGap > 0) {
     return [
@@ -710,7 +833,7 @@ function ambushRootResourceGaps(signal: CorpAmbushSignal): ResourceGap[] {
       capability: "install_ambush_setup",
       minimum: 1,
       available: 0,
-      deadline: "multi_turn",
+      deadline: signal.emptyRdRecovery ? "current_turn" : "multi_turn",
     },
   ];
 }
@@ -1058,16 +1181,21 @@ function purgeCandidates(
 }
 
 function ambushSemanticTypes(phase: CorpAmbushSignal["phase"]): string[] {
-  if (phase === "install") return ["install.card"];
+  if (phase === "install" || phase === "install_support")
+    return ["install.card"];
   if (phase === "advance") return ["score.advance_card"];
+  if (phase === "recycle_rd") return ["corp_window.rez"];
   if (phase === "recycle") return ["corp_board.return_installed_card_to_hq"];
-  return ["corp_window.rez", "card_ability.trigger"];
+  if (phase === "rez_support") return ["corp_window.rez"];
+  return ["corp_window.rez", "card_ability.trigger", "choice.resolve"];
 }
 
 function ambushCandidates(
   context: PlanSchedulerContext,
   signal: CorpAmbushSignal,
 ): PlanMaterialization["candidates"] {
+  if (signal.phase === "install" && (signal.defenseNeed?.fundingGap ?? 0) > 0)
+    return [];
   return context.actionCandidates
     .filter((candidate) => signal.actionIds.includes(candidate.actionId))
     .map((candidate) => ({ candidate, stepValue: signal.value }));

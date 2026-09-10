@@ -115,14 +115,15 @@ function makeHost(input: HostInput = {}) {
       "onr_v1_213_private-cybernet-police",
       "Private Cybernet Police",
     ),
-    on_call: definition(
-      "onr_v1_208_on-call-solo-team",
-      "On-Call Solo Team",
-    ),
+    on_call: definition("onr_v1_208_on-call-solo-team", "On-Call Solo Team"),
     kali: definition("onr_v1_217_strike-force-kali", "Strike Force Kali"),
     blood_cat: definition("onr_v1_310_blood-cat", "Blood Cat", "asset"),
     solo_squad: definition("onr_v1_342_solo-squad", "Solo Squad", "asset"),
-    i_got_a_rock: definition("onr_v1_327_i-got-a-rock", "I Got a Rock", "asset"),
+    i_got_a_rock: definition(
+      "onr_v1_327_i-got-a-rock",
+      "I Got a Rock",
+      "asset",
+    ),
     schlaghund: definition("onr_v1_339_schlaghund", "Schlaghund", "asset"),
     ...input.definitions,
   };
@@ -130,8 +131,14 @@ function makeHost(input: HostInput = {}) {
     input.scoreArea ??
     (["netwatch", "private", "on_call", "kali"] as CardInstanceId[]);
   const implementations: Record<string, CardImplementationDefinition> = {
-    [definitions.netwatch!.id]: traceTagImplementation(definitions.netwatch!.id, 2),
-    [definitions.private!.id]: traceTagImplementation(definitions.private!.id, 5),
+    [definitions.netwatch!.id]: traceTagImplementation(
+      definitions.netwatch!.id,
+      2,
+    ),
+    [definitions.private!.id]: traceTagImplementation(
+      definitions.private!.id,
+      5,
+    ),
     [definitions.on_call!.id]: taggedMeatDamageImplementation(
       definitions.on_call!.id,
       1,
@@ -150,10 +157,7 @@ function makeHost(input: HostInput = {}) {
     ),
   };
   const defaultInstances: Record<string, CardInstance> = {
-    netwatch: instance(
-      "netwatch" as CardInstanceId,
-      definitions.netwatch!.id,
-    ),
+    netwatch: instance("netwatch" as CardInstanceId, definitions.netwatch!.id),
     private: instance("private" as CardInstanceId, definitions.private!.id),
     on_call: instance("on_call" as CardInstanceId, definitions.on_call!.id),
     kali: instance("kali" as CardInstanceId, definitions.kali!.id),
@@ -195,7 +199,11 @@ function makeHost(input: HostInput = {}) {
         implementations[cardDefinition.id],
     },
     callbacks: {
-      pushActivatedCardImplementationActions: (actions, cardId, cardDefinition) => {
+      pushActivatedCardImplementationActions: (
+        actions,
+        cardId,
+        cardDefinition,
+      ) => {
         calls.pushed.push(cardId);
         const profile = corpTraceDamageAbilityProfileForDefinition(
           cardDefinition,

@@ -59,7 +59,10 @@ const annotations = JSON.parse(
   readFileSync(resolve(repoRoot, args.annotations), "utf8"),
 ) as AnnotationFile;
 const corpus = JSON.parse(readFileSync(inputPath, "utf8")) as Corpus;
-const annotationByDecision = new Map<string, { id: string; classification: string }>();
+const annotationByDecision = new Map<
+  string,
+  { id: string; classification: string }
+>();
 
 for (const finding of annotations.findings) {
   for (const decision of finding.decisions) {
@@ -77,10 +80,16 @@ let rejectedDecisionAttemptCount = 0;
 for (let gameIndex = 0; gameIndex < corpus.games.length; gameIndex += 1) {
   const game = corpus.games[gameIndex];
   if (!game) continue;
-  for (let decisionIndex = 0; decisionIndex < game.actionSequence.length; decisionIndex += 1) {
+  for (
+    let decisionIndex = 0;
+    decisionIndex < game.actionSequence.length;
+    decisionIndex += 1
+  ) {
     const decision = game.actionSequence[decisionIndex];
     if (!decision) continue;
-    const selected = decision.actionAlternatives?.find((alternative) => alternative.selected);
+    const selected = decision.actionAlternatives?.find(
+      (alternative) => alternative.selected,
+    );
     const annotation = annotationByDecision.get(
       decisionKey(game.seed, decision.stateVersionBefore),
     );
@@ -139,9 +148,11 @@ for (let gameIndex = 0; gameIndex < corpus.games.length; gameIndex += 1) {
 
 for (const key of annotationByDecision.keys()) {
   const found = ledgerRows.some(
-    (row) => decisionKey(String(row.seed), Number(row.stateVersionBefore)) === key,
+    (row) =>
+      decisionKey(String(row.seed), Number(row.stateVersionBefore)) === key,
   );
-  if (!found) throw new Error(`Annotated decision is missing from corpus: ${key}`);
+  if (!found)
+    throw new Error(`Annotated decision is missing from corpus: ${key}`);
 }
 
 const sanitizedGames = corpus.games.map((game) => ({
@@ -150,7 +161,8 @@ const sanitizedGames = corpus.games.map((game) => ({
     ({ actionAlternatives: _privateAlternatives, ...decision }) => decision,
   ),
 }));
-const decisionAttemptCount = appliedDecisionCount + rejectedDecisionAttemptCount;
+const decisionAttemptCount =
+  appliedDecisionCount + rejectedDecisionAttemptCount;
 const sanitizedCorpus = {
   ...corpus,
   coverage: {
@@ -197,14 +209,21 @@ if (!isSelfplayTraceRedactionSafe(ledger)) {
 
 writeJson(outputPath, sanitizedCorpus);
 writeJson(ledgerPath, ledger);
-console.log(JSON.stringify({ outputPath, ledgerPath, coverage: ledger.coverage }, null, 2));
+console.log(
+  JSON.stringify(
+    { outputPath, ledgerPath, coverage: ledger.coverage },
+    null,
+    2,
+  ),
+);
 
 function parseArgs(argv: string[]) {
   const values = new Map<string, string>();
   for (let index = 0; index < argv.length; index += 2) {
     const key = argv[index];
     const value = argv[index + 1];
-    if (!key?.startsWith("--") || !value) throw new Error(`Invalid argument near ${key ?? "<end>"}`);
+    if (!key?.startsWith("--") || !value)
+      throw new Error(`Invalid argument near ${key ?? "<end>"}`);
     values.set(key, value);
   }
   const required = (key: string) => {

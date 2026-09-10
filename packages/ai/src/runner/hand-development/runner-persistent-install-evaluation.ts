@@ -14,6 +14,7 @@ import { AI_HINTS_BY_CARD, RUNTIME_CARDS } from "../../ai-hints";
 import { randomBreakOrDamageRiskProfileForDefinitionId } from "../../actions/risk-action-projection";
 import { persistentDevelopmentActionProjection } from "../../actions/persistent-development-action";
 import { actionClickCost } from "../../runtime/action-cost";
+import { runnerRestrictedRunCreditProfile } from "../../runtime/runner-canonical-card-facts";
 import {
   runnerHintProvidesDamagePrevention,
   runnerHintProvidesExposeInformation,
@@ -203,7 +204,11 @@ export function persistentFunctionalProfileForCard(
     runnerHandTextHasBreakerStrengthSupportSignal(text);
   const iceStrengthReduction =
     runnerHandTextHasIceStrengthReductionSignal(text);
+  const restrictedRunCreditProfile = runnerRestrictedRunCreditProfile(
+    card.definitionId,
+  );
   const recurringBreakerEconomy =
+    restrictedRunCreditProfile !== undefined ||
     runnerHintProvidesNonNoisyBreakerCredits(hint);
   const runOnlyEconomyPool = cardHasRunOnlyEconomyPool(card);
   const bankTool = !runOnlyEconomyPool && looksLikeBankTool(text);
@@ -298,6 +303,7 @@ export function persistentFunctionalProfileForCard(
     breakerStrengthSupport,
     iceStrengthReduction,
     recurringBreakerEconomy,
+    restrictedRunCreditUses: [...(restrictedRunCreditProfile?.uses ?? [])],
     bankTool,
     accessSupport,
     searchSupport,
@@ -504,6 +510,25 @@ export function persistentEngineProfileForCard(
         (condition) => condition.kind === "requires_successful_run",
       ) === true,
   );
+  const successfulRunCredits = hint.effects?.find(
+    (effect) =>
+      effect.kind === "economy" &&
+      effect.timing === "after_successful_run" &&
+      effect.target === "run.successful_run_credit_gain" &&
+      effect.resource === "credits" &&
+      effect.repeatable === true &&
+      typeof effect.amount === "number" &&
+      effect.amount > 0,
+  );
+  if (successfulRunCredits && consumptionBlockers.length === 0) {
+    return {
+      kind: "successful_run_followup_engine",
+      outputCapabilities: ["credits"],
+      repeatable: true,
+      consumptionBlockers,
+      coverage: "persistent_engine:successful_run_credits",
+    };
+  }
   if (successfulRunFollowup && consumptionBlockers.length === 0) {
     return {
       kind: "successful_run_followup_engine",
@@ -626,6 +651,7 @@ export function persistentEngineAssessmentForInstall(params: {
 }
 
 function cardHasRunOnlyEconomyPool(card: VisibleCard): boolean {
+  if (runnerRestrictedRunCreditProfile(card.definitionId)) return true;
   const hint = card.definitionId
     ? AI_HINTS_BY_CARD.get(card.definitionId)
     : undefined;
@@ -1262,8 +1288,26 @@ export function cumulativeNeedLevel(
     profile.iceStrengthReduction ||
     profile.recurringBreakerEconomy
   ) {
+    const hasBoundRestrictedRunCreditDemand =
+      profile.recurringBreakerEconomy &&
+      params.rigDemandProjection?.roleDemands.some(
+        (demand) =>
+          demand.capabilityId.startsWith("restricted_run_credit:") &&
+          profile.restrictedRunCreditUses.some((use) =>
+            demand.capabilityId.endsWith(use),
+          ),
+      ) === true;
+    if (hasBoundRestrictedRunCreditDemand) return "high";
+    if (profile.recurringBreakerEconomy && params.rigDemandProjection) {
+      return "low";
+    }
     const hasInstalledBreaker = (params.input.playerView.own.rig ?? []).some(
-      (card) => looksLikeBreaker(card, signalsForCard(card, []).text),
+      (card) =>
+        looksLikeBreaker(card, signalsForCard(card, []).text) &&
+        restrictedRunCreditsCanUseBreaker(
+          profile.restrictedRunCreditUses,
+          card,
+        ),
     );
     if (hasInstalledBreaker && params.input.playerView.own.credits <= 5) {
       return "high";
@@ -1277,6 +1321,27 @@ export function cumulativeNeedLevel(
     return "medium";
   }
   return "low";
+}
+
+function restrictedRunCreditsCanUseBreaker(
+  uses: readonly string[],
+  breaker: VisibleCard,
+): boolean {
+  if (uses.length === 0) return true;
+  const signals = signalsForCard(breaker, []);
+  const traits = new Set([
+    ...(breaker.subtypes ?? []).map((subtype) =>
+      subtype.toLocaleLowerCase("en-US"),
+    ),
+    ...signals.roles.map((role) => role.toLocaleLowerCase("en-US")),
+  ]);
+  return uses.some((use) =>
+    use === "using_killer_during_run"
+      ? traits.has("killer") || traits.has("breaker_killer")
+      : use === "using_icebreaker_during_run_non_noisy"
+        ? !traits.has("noisy") && !traits.has("breaker_noisy")
+        : false,
+  );
 }
 
 export function runnerHasDelayedInstallDoctrine(
@@ -1491,6 +1556,7 @@ export function persistentInstallEvidence(params: {
   handBufferPenalty: number;
   muPressurePenalty: number;
   displacementPenalty: number;
+  rigDemandFitScore: number;
   finalInstallFit: number;
   handSizeBonus: number;
   role: RunnerHandDevelopmentRole;
@@ -1556,6 +1622,7 @@ export function persistentInstallEvidence(params: {
     `hand_buffer_penalty:${params.handBufferPenalty}`,
     `mu_pressure_penalty:${params.muPressurePenalty}`,
     `displacement_penalty:${params.displacementPenalty}`,
+    `rig_demand_fit_score:${params.rigDemandFitScore}`,
     `final_install_fit:${params.finalInstallFit}`,
     ...(params.profile.handSizeSupport && params.handSizeBonus > 0
       ? [
@@ -1772,8 +1839,10 @@ export function looksLikeMemorySupport(
   text: string,
 ): boolean {
   return (
-    card.memoryLimitBonus !== undefined ||
-    runnerHandTextHasMemorySupportSignal(text)
+    (typeof card.memoryLimitBonus === "number" &&
+      Number.isFinite(card.memoryLimitBonus) &&
+      card.memoryLimitBonus > 0) ||
+    runnerHandTextHasMemorySupportSignal(card.rulesText ?? text)
   );
 }
 

@@ -13,6 +13,7 @@ import {
   openRunnerCostPenaltySupportWindow,
 } from "../payment/runner-payment-support";
 import { fixedPlayCostCredits } from "../payment/play-cost";
+import { corpGeneralCreditAvailability } from "../payment/corp-general-credit-availability";
 import { restrictedHostedCredits } from "../run/run-duration-payment";
 import { definitionFor, mustInstance } from "../state/card-server-lookup";
 import {
@@ -39,7 +40,9 @@ export type PlayCardExecutionHost = {
     ) => void;
   };
   events: {
-    runnerEventResolver: (definition: CardDefinition) => PlayCardResolver | undefined;
+    runnerEventResolver: (
+      definition: CardDefinition,
+    ) => PlayCardResolver | undefined;
   };
   operations: {
     canPlayCorpOperation: (definition: CardDefinition) => boolean;
@@ -171,7 +174,11 @@ function executePlayEventAction(
   )
     return;
   if (host.cardImplementation.canPlayPrintedCostOnPlay(definition)) {
-    host.cardImplementation.executeOnPlayAbility(legalAction, definition, cardId);
+    host.cardImplementation.executeOnPlayAbility(
+      legalAction,
+      definition,
+      cardId,
+    );
     host.cardImplementation.resolvePostOnPlayGenericFollowups(
       definition,
       legalAction,
@@ -216,7 +223,9 @@ function executePlayOperationAction(
     const cardId = String(legalAction.payload.cardId) as CardInstanceId;
     const definition = definitionFor(host.state, cardId);
     if (!host.operations.canPlayCorpOperation(definition))
-      throw new Error("Diese Operation ist im aktuellen Zustand nicht spielbar.");
+      throw new Error(
+        "Diese Operation ist im aktuellen Zustand nicht spielbar.",
+      );
     const utility = corpUtilityImplementationForDefinition(definition.id);
     const expectedUtilityClicks = corpUtilityPlayClickCost(utility);
     if (
@@ -249,6 +258,10 @@ function executePlayOperationAction(
         throw new Error("Das Operation-Ziel ist nicht mehr gueltig.");
     }
   }
+  if (corpGeneralCreditAvailability(host.state) < operationCreditCost)
+    throw new Error(
+      "Die Operation benötigt ausreichend nicht zweckgebundene Credits.",
+    );
   spendPlayClicks(host, "corp", legalAction.costs[0]?.clicks ?? 1);
   host.payment.spendCredits("corp", operationCreditCost);
   if (legalAction.payload?.cardId) {
@@ -266,10 +279,7 @@ function executePlayOperationAction(
   }
 }
 
-function requiredCreditCost(
-  legalAction: LegalAction,
-  message: string,
-): number {
+function requiredCreditCost(legalAction: LegalAction, message: string): number {
   const creditCost = legalAction.costs[0]?.credits;
   if (
     typeof creditCost !== "number" ||

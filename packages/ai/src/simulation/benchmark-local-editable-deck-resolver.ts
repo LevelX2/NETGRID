@@ -50,7 +50,10 @@ export function benchmarkDeckFromLocalEditableDeck(
 
   if (
     path.dirname(filePath) !== decksDir ||
-    path.basename(reference.fileName) !== reference.fileName
+    // This input contract is portable: reject both separator syntaxes even
+    // when the host OS treats the other platform's separator as a literal.
+    path.posix.basename(reference.fileName) !== reference.fileName ||
+    path.win32.basename(reference.fileName) !== reference.fileName
   ) {
     return emptyFailure(
       "unclear",

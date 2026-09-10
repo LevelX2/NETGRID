@@ -13,7 +13,10 @@ import {
 
 const sourceDefinitionId = "source_definition" as CardDefinitionId;
 
-function card(id: string, type: TopNSelectedCardMove["type"]): TopNSelectedCardMove {
+function card(
+  id: string,
+  type: TopNSelectedCardMove["type"],
+): TopNSelectedCardMove {
   return {
     cardId: id as CardInstanceId,
     definitionId: `${id}_definition` as CardDefinitionId,
@@ -48,7 +51,10 @@ function removeFromZone(
 
 describe("hidden-zone top-N move intents", () => {
   it("moves Aujourd'Oui-style program selections to grip and preserves payload metadata", () => {
-    const selected = [card("program_a", "program"), card("program_b", "program")];
+    const selected = [
+      card("program_a", "program"),
+      card("program_b", "program"),
+    ];
     const stack = [
       selected[0]!.cardId,
       "event_card" as CardInstanceId,
@@ -86,14 +92,20 @@ describe("hidden-zone top-N move intents", () => {
     });
 
     expect(stack).toEqual(["event_card"]);
-    expect(grip).toEqual(["grip_card", selected[0]!.cardId, selected[1]!.cardId]);
+    expect(grip).toEqual([
+      "grip_card",
+      selected[0]!.cardId,
+      selected[1]!.cardId,
+    ]);
     expect(cardInstances[selected[0]!.cardId]?.zone).toEqual({
       side: "runner",
       zone: "grip",
     });
-    expect(buildTopNTakeMatchingResolvedPayload(result, {
-      runnerCreditsAfter: 8,
-    })).toEqual({
+    expect(
+      buildTopNTakeMatchingResolvedPayload(result, {
+        runnerCreditsAfter: 8,
+      }),
+    ).toEqual({
       hiddenZoneBarrier: true,
       hiddenZoneAction: "p3_37_look_top_stack_take_matching",
       sourceDefinitionId,
@@ -113,28 +125,33 @@ describe("hidden-zone top-N move intents", () => {
   });
 
   it("accepts N.E.T.O.-style prep/resource selections and rejects programs", () => {
-    const selected = [card("prep_card", "event"), card("resource_card", "resource")];
+    const selected = [
+      card("prep_card", "event"),
+      card("resource_card", "resource"),
+    ];
     const topCardIds = selected.map((move) => move.cardId);
 
-    expect(createTopNTakeMatchingMoveIntent({
-      selection: {
-        sourceCardId: "source_card" as CardInstanceId,
-        sourceDefinitionId,
-        count: 4,
-        allowedTypes: ["event", "resource"],
-        costPerTaken: 1,
-        selectedCardIds: topCardIds,
-        paidCredits: 2,
-        shuffleNeeded: true,
-      },
-      topCardIds,
-      sourceDefinition: {
-        id: sourceDefinitionId,
-        type: "resource",
-      },
-      installedRunnerResourceIds: ["source_card" as CardInstanceId],
-      selectedCards: selected,
-    }).selectedCards.map((move) => move.cardId)).toEqual(topCardIds);
+    expect(
+      createTopNTakeMatchingMoveIntent({
+        selection: {
+          sourceCardId: "source_card" as CardInstanceId,
+          sourceDefinitionId,
+          count: 4,
+          allowedTypes: ["event", "resource"],
+          costPerTaken: 1,
+          selectedCardIds: topCardIds,
+          paidCredits: 2,
+          shuffleNeeded: true,
+        },
+        topCardIds,
+        sourceDefinition: {
+          id: sourceDefinitionId,
+          type: "resource",
+        },
+        installedRunnerResourceIds: ["source_card" as CardInstanceId],
+        selectedCards: selected,
+      }).selectedCards.map((move) => move.cardId),
+    ).toEqual(topCardIds);
 
     expect(() =>
       createTopNTakeMatchingMoveIntent({

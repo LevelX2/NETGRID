@@ -2,7 +2,9 @@ import { type AiDecisionInput } from "@netgrid/shared";
 
 import { playfulAiGainValue } from "./choice-option";
 
-type PendingChoice = NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>;
+type PendingChoice = NonNullable<
+  AiDecisionInput["playerView"]["pendingChoice"]
+>;
 
 export function selectedPlayfulAiChoiceOptionId(
   choice: PendingChoice,

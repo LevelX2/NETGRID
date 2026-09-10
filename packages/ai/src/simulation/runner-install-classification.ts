@@ -74,14 +74,16 @@ export function isRunnerRigInstallActionForSimulation(
 ): boolean {
   if (action.type !== "install_card") return false;
   const roles = dependencies.rolesForAction(input, action);
-  return roles.some(
-    (role) =>
-      role === "memory" ||
-      role === "memory_support" ||
-      role === "setup" ||
-      role === "build_rig" ||
-      isRunnerPressureRole(role),
-  ) || rolesMatch(roles, ["breaker_"]);
+  return (
+    roles.some(
+      (role) =>
+        role === "memory" ||
+        role === "memory_support" ||
+        role === "setup" ||
+        role === "build_rig" ||
+        isRunnerPressureRole(role),
+    ) || rolesMatch(roles, ["breaker_"])
+  );
 }
 
 export function isRunnerPressureActionForSimulation(
@@ -301,10 +303,7 @@ export function createRunnerInstallClassificationContext(dependencies: {
         decision,
         dependencies.rolesForCardId,
       ),
-    isRunnerDuplicateInstall: (
-      input: AiDecisionInput,
-      action: LegalAction,
-    ) =>
+    isRunnerDuplicateInstall: (input: AiDecisionInput, action: LegalAction) =>
       isRunnerDuplicateInstallForSimulation(
         input,
         action,

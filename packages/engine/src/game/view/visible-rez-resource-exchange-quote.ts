@@ -13,6 +13,7 @@ import {
 import { visibleRunnerRigCardForViewer } from "./card-view";
 import { visibleEffectiveIceRunQuote } from "./visible-run-quote";
 import {
+  availableRunnerRunCreditPool,
   availableRunnerRunCredits,
   hostedPaymentCredits,
   runDurationPaymentHost,
@@ -43,6 +44,7 @@ export function visibleCorpIceRezResourceExchangeQuote(
   visibleIce: VisibleCard,
   options: {
     hardEndTheRunSubroutineCountAfterRez?: number;
+    subtypesAfterRez?: readonly string[];
   } = {},
 ): VisibleCorpIceRezResourceExchangeQuote | undefined {
   const server = state.corp.servers.find((candidate) =>
@@ -76,11 +78,19 @@ export function visibleCorpIceRezResourceExchangeQuote(
       reason: "not_current_approached_ice",
     };
   }
-  const projectedRunQuote = visibleEffectiveIceRunQuote(state, iceId, {
+  const projectedVisibleIce: VisibleCard = {
     ...visibleIce,
     known: true,
     rezzed: true,
-  });
+    ...(options.subtypesAfterRez
+      ? { subtypes: [...options.subtypesAfterRez] }
+      : {}),
+  };
+  const projectedRunQuote = visibleEffectiveIceRunQuote(
+    state,
+    iceId,
+    projectedVisibleIce,
+  );
   if (!projectedRunQuote)
     return {
       ...binding,
@@ -102,6 +112,52 @@ export function visibleCorpIceRezResourceExchangeQuote(
       ...binding,
       complete: false,
       reason: "unsupported_encounter_cost_projection",
+    };
+  }
+  return visibleCurrentIceBreakExchange(
+    state,
+    iceId,
+    projectedVisibleIce,
+    projectedRunQuote,
+    endTheRunCount,
+  );
+}
+
+/** Exact visible breaker payment facts shared by rez and paid encounter defense. */
+export function visibleCurrentIceBreakExchange(
+  state: GameState,
+  iceId: CardInstanceId,
+  projectedVisibleIce: VisibleCard,
+  projectedRunQuote: VisibleEffectiveIceRunQuote,
+  endTheRunCount: number,
+): VisibleCorpIceRezResourceExchangeQuote {
+  const server = state.corp.servers.find((server) =>
+    server.ice.includes(iceId),
+  );
+  if (!server)
+    throw new Error(
+      "Current ICE break exchange has no installed server binding.",
+    );
+  const binding = {
+    context: "installed" as const,
+    cardId: iceId,
+    targetServerId: server.id,
+    projectedServerId: server.id,
+    expiresAtStateVersion: state.stateVersion,
+  };
+  if (
+    state.run?.phase === "encounter_ice" &&
+    state.run.encounteredIceId === iceId &&
+    state.run.noBreakSubroutinesActive
+  ) {
+    return {
+      ...binding,
+      complete: true,
+      hardEndTheRunSubroutineCount: endTheRunCount,
+      runnerBreakUnavailable: {
+        reason: "no_visible_eligible_breaker",
+        evidenceSource: "engine_icebreaker_ability",
+      },
     };
   }
   const runnerRig = [
@@ -133,12 +189,16 @@ export function visibleCorpIceRezResourceExchangeQuote(
   const reads = activeRunnerRig.map((breaker) =>
     quoteRunnerBreak({
       breaker,
-      ice: visibleIce,
+      ice: projectedVisibleIce,
       endTheRunCount,
       additionalBreakCost:
         projectedRunQuote.breakSubroutineAdditionalCostPerSubroutine ?? 0,
       runnerCredits: state.runner.credits,
-      runnerAvailableCredits: availableRunnerRunCredits(
+      runnerAvailableCredits: availableRunnerRunCreditPool(
+        runDurationPaymentHost(state),
+        breaker.instanceId,
+      ),
+      runnerSpendableCredits: availableRunnerRunCredits(
         runDurationPaymentHost(state),
         breaker.instanceId,
       ),
@@ -218,6 +278,7 @@ function quoteRunnerBreak(params: {
   additionalBreakCost: number;
   runnerCredits: number;
   runnerAvailableCredits: number;
+  runnerSpendableCredits: number;
   runnerStealthCreditsAvailable: number;
 }): BreakRead {
   const {
@@ -227,6 +288,7 @@ function quoteRunnerBreak(params: {
     additionalBreakCost,
     runnerCredits,
     runnerAvailableCredits,
+    runnerSpendableCredits,
     runnerStealthCreditsAvailable,
   } = params;
   if (!breaker.definitionId || !ice.definitionId) return { kind: "unknown" };
@@ -248,6 +310,17 @@ function quoteRunnerBreak(params: {
     return { kind: "unknown" };
   }
   const abilities = icebreakerAbilitiesForDefinition(breakerDefinition);
+  // An unset subtype is unresolved, not proof that no eligible breaker
+  // exists. A publicly configured subtype is an exact matching capability.
+  if (
+    abilities.some(
+      (ability) =>
+        ability.type === "break_subroutine" &&
+        ((ability.selectedIceSubtypeFromBreaker && !breaker.selectedSubtype) ||
+          ability.subroutineBreakTags),
+    )
+  )
+    return { kind: "unknown" };
   const matchingBreakAbilities = abilities.filter(
     (ability) =>
       ability.type === "break_subroutine" &&
@@ -255,6 +328,7 @@ function quoteRunnerBreak(params: {
         ability,
         ice.subtypes ?? iceDefinition.subtypes,
         iceDefinition.id,
+        breaker.selectedSubtype,
       ),
   );
   if (matchingBreakAbilities.length === 0) return { kind: "not_applicable" };
@@ -269,6 +343,7 @@ function quoteRunnerBreak(params: {
       additionalBreakCost,
       runnerCredits,
       runnerAvailableCredits,
+      runnerSpendableCredits,
       runnerStealthCreditsAvailable,
     });
     if (quote.kind === "unknown") return quote;
@@ -282,13 +357,23 @@ function breakAbilityMatchesIce(
   ability: RuntimeIcebreakerAbility,
   iceSubtypes: readonly string[],
   iceDefinitionId: string,
+  selectedSubtype?: string,
 ): boolean {
   if (
     ability.iceDefinitionIds?.length &&
     !ability.iceDefinitionIds.includes(iceDefinitionId)
   )
     return false;
-  if (ability.selectedIceSubtypeFromBreaker || ability.subroutineBreakTags) {
+  if (ability.selectedIceSubtypeFromBreaker) {
+    return (
+      selectedSubtype !== undefined &&
+      iceSubtypes.some(
+        (subtype) =>
+          normalizeSubtype(subtype) === normalizeSubtype(selectedSubtype),
+      )
+    );
+  }
+  if (ability.subroutineBreakTags) {
     return false;
   }
   if (ability.iceSubtype) {
@@ -316,6 +401,7 @@ function quoteBreakAbility(params: {
   additionalBreakCost: number;
   runnerCredits: number;
   runnerAvailableCredits: number;
+  runnerSpendableCredits: number;
   runnerStealthCreditsAvailable: number;
 }): BreakRead {
   const {
@@ -327,6 +413,7 @@ function quoteBreakAbility(params: {
     additionalBreakCost,
     runnerCredits,
     runnerAvailableCredits,
+    runnerSpendableCredits,
     runnerStealthCreditsAvailable,
   } = params;
   const breakCount = ability.count;
@@ -361,6 +448,8 @@ function quoteBreakAbility(params: {
   if (
     !nonNegativeSafeInteger(runnerCredits) ||
     !nonNegativeSafeInteger(runnerAvailableCredits) ||
+    !nonNegativeSafeInteger(runnerSpendableCredits) ||
+    runnerSpendableCredits > runnerAvailableCredits ||
     runnerAvailableCredits < runnerCredits
   ) {
     return { kind: "unknown" };
@@ -372,7 +461,7 @@ function quoteBreakAbility(params: {
   // consequence can be represented as part of the exchange.
   if (
     ability.postBreakStealthLoss !== undefined &&
-    runnerAvailableCredits >= requiredCredits &&
+    runnerSpendableCredits >= requiredCredits &&
     !(
       ability.postBreakStealthLossSourceMode !== undefined &&
       ability.postBreakStealthLossOptionalIfUnavailable === true &&
@@ -381,6 +470,9 @@ function quoteBreakAbility(params: {
   ) {
     return { kind: "unknown" };
   }
+  // The eligible pool determines payment composition. A separate spending cap
+  // limits affordability, but cannot remove money from the Runner's holdings
+  // or turn a fully known current-run payment into an unknown quote.
   const nonNormalRunCreditsAvailable = runnerAvailableCredits - runnerCredits;
   const nonNormalRunCreditsApplied = Math.min(
     requiredCredits,
@@ -398,7 +490,7 @@ function quoteBreakAbility(params: {
       breakUses,
       normalCreditsRequired,
       nonNormalRunCreditsApplied,
-      canPayFromCurrentCredits: runnerAvailableCredits >= requiredCredits,
+      canPayFromCurrentCredits: runnerSpendableCredits >= requiredCredits,
       paymentEvidenceSource: "engine_icebreaker_ability",
       consumedCards: ability.specialEffects?.some(
         (effect) => effect.kind === "run_end_trash_source_if_used",

@@ -1,5 +1,5 @@
 import type { Side } from "@netgrid/shared";
-import strategyGoalsData from "../../../data/ai/strategy-goals-v1.json";
+import { strategyGoalsData } from "@netgrid/runtime-data/strategy-goals";
 import {
   AI_HINTS_BY_CARD as EFFECTIVE_AI_HINTS_BY_CARD,
   RUNTIME_CARDS,

@@ -59,13 +59,19 @@
           { "cardId": "onr_proteus_100_wrecking-ball", "quantity": 2 },
           { "cardId": "onr_proteus_101_all-hands", "quantity": 1 },
           { "cardId": "onr_proteus_105_demolition-run", "quantity": 1 },
-          { "cardId": "onr_proteus_106_disgruntled-ice-technician", "quantity": 1 },
+          {
+            "cardId": "onr_proteus_106_disgruntled-ice-technician",
+            "quantity": 1
+          },
           { "cardId": "onr_proteus_108_faked-hit", "quantity": 1 },
           { "cardId": "onr_proteus_117_poisoned-water-supply", "quantity": 1 },
           { "cardId": "onr_proteus_134_cortical-cybermodem", "quantity": 1 },
           { "cardId": "onr_proteus_135_cortical-stimulators", "quantity": 1 },
           { "cardId": "onr_proteus_138_deck-the", "quantity": 1 },
-          { "cardId": "onr_proteus_151_sunburst-cranial-interface", "quantity": 1 },
+          {
+            "cardId": "onr_proteus_151_sunburst-cranial-interface",
+            "quantity": 1
+          },
           { "cardId": "onr_v1_108_score", "quantity": 2 },
           { "cardId": "onr_v1_154_broker", "quantity": 2 }
         ]
@@ -107,7 +113,10 @@
           { "cardId": "onr_proteus_103_cruising-for-netwatch", "quantity": 1 },
           { "cardId": "onr_proteus_104_decoy-signal", "quantity": 1 },
           { "cardId": "onr_proteus_105_demolition-run", "quantity": 2 },
-          { "cardId": "onr_proteus_106_disgruntled-ice-technician", "quantity": 2 },
+          {
+            "cardId": "onr_proteus_106_disgruntled-ice-technician",
+            "quantity": 2
+          },
           { "cardId": "onr_proteus_108_faked-hit", "quantity": 2 },
           { "cardId": "onr_proteus_109_frame-up", "quantity": 2 },
           { "cardId": "onr_proteus_112_identity-donor", "quantity": 1 },
@@ -160,7 +169,10 @@
         "cards": [
           { "cardId": "onr_proteus_002_charity-takeover", "quantity": 2 },
           { "cardId": "onr_proteus_005_marked-accounts", "quantity": 2 },
-          { "cardId": "onr_proteus_006_please-dont-choke-anyone", "quantity": 2 },
+          {
+            "cardId": "onr_proteus_006_please-dont-choke-anyone",
+            "quantity": 2
+          },
           { "cardId": "onr_proteus_007_project-venice", "quantity": 2 },
           { "cardId": "onr_proteus_008_project-zurich", "quantity": 2 },
           { "cardId": "onr_proteus_011_brain-wash", "quantity": 1 },
@@ -221,7 +233,10 @@
           { "cardId": "onr_proteus_003_corporate-headhunters", "quantity": 1 },
           { "cardId": "onr_proteus_004_fetal-ai", "quantity": 2 },
           { "cardId": "onr_proteus_005_marked-accounts", "quantity": 2 },
-          { "cardId": "onr_proteus_006_please-dont-choke-anyone", "quantity": 1 },
+          {
+            "cardId": "onr_proteus_006_please-dont-choke-anyone",
+            "quantity": 1
+          },
           { "cardId": "onr_proteus_009_viral-breeding-ground", "quantity": 2 },
           { "cardId": "onr_proteus_012_bug-zapper", "quantity": 2 },
           { "cardId": "onr_proteus_017_credit-blocks", "quantity": 2 },
@@ -236,7 +251,10 @@
           { "cardId": "onr_proteus_050_manhunt", "quantity": 1 },
           { "cardId": "onr_proteus_054_bel-digmo-antibody", "quantity": 3 },
           { "cardId": "onr_proteus_055_cybertech-think-tank", "quantity": 1 },
-          { "cardId": "onr_proteus_056_department-of-misinformation", "quantity": 1 },
+          {
+            "cardId": "onr_proteus_056_department-of-misinformation",
+            "quantity": 1
+          },
           { "cardId": "onr_proteus_057_doppelganger-antibody", "quantity": 2 },
           { "cardId": "onr_proteus_059_government-contract", "quantity": 1 },
           { "cardId": "onr_proteus_065_networked-center", "quantity": 1 },

@@ -164,13 +164,26 @@ describe("hardened decision contracts on real Engine inputs", () => {
       withIceInput.legalActions.find(
         (action) => action.actionId === eligible.actionId,
       )?.type,
-    ).toBe("draw_card");
-    expect(eligible.actionId).not.toBe(rasminWithIce.actionId);
+    ).toBe("install_card");
+    expect(
+      withIceInput.legalActions.find((a) => a.actionId === eligible.actionId)
+        ?.source,
+    ).toBe(rasminWithIce.source);
+    expect(
+      eligible.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+    ).toMatch(/^plan:corp\.defend_servers:/);
+    // Existing funded central ICE is not a missing-ICE search reason.
+    // The eligible defensive upgrade wins without an invented agenda-search parent.
+    expect(
+      corpUpgradePlacementExclusion(
+        upgradePlacementParams(withIceInput, rasminWithIce),
+      ),
+    ).toBeUndefined();
     expect(
       eligible.decisionDebug?.detailSections?.find(
         (section) => section.id === "plan_portfolio",
       )?.items,
-    ).toContain(
+    ).not.toContain(
       "plan:corp.defend_servers:server-defense-portfolio|evidence:corp_missing_concrete_defense_draw:rd|source:visible_state",
     );
   });
@@ -386,6 +399,46 @@ describe("hardened decision contracts on real Engine inputs", () => {
 
     state = applyDecision(state, "corp", hqShuffleDecision);
     expect(state.pendingChoice).toBeUndefined();
+  });
+
+  it("preserves the Corporate Shuffle quote but draws only for the concrete defense need", () => {
+    let state = createGameAfterSetup({
+      seed: "contract-corporate-shuffle-low-hq",
+      agendaPointsToWin: 7,
+      corpDeck: CORP_DECK,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    RealEngineFixtureBuilder.forState(state)
+      .withCorpHqSize(0)
+      .withCorpCardInHq("onr_classic_017_corporate-shuffle")
+      .withCorpCardInHq("onr_v1_285_closed-accounts")
+      .withCorpCardInHq("onr_v1_304_systematic-layoffs")
+      .withCorpCredits(0);
+    state.corp.clicks = 2;
+
+    const input = decisionInput(state, "corp", CORP_DECK);
+    const shuffle = input.legalActions.find(
+      (action) =>
+        action.type === "play_operation" &&
+        action.payload?.corpZoneTransitionProjectionKind ===
+          "draw_then_shuffle_one_hq_into_rd",
+    );
+    const decision = chooseCorpAction(input);
+
+    expect(shuffle?.costs).toEqual([{ clicks: 2, credits: 0 }]);
+    expect(shuffle?.payload).toMatchObject({
+      corpZoneTransitionProjectionComplete: true,
+      corpZoneTransitionProjectionGrossDrawCount: 5,
+      corpZoneTransitionProjectionNetHqDelta: 3,
+      corpZoneTransitionProjectionNetRdConsumption: 4,
+    });
+    expect(input.playerView.own.gripOrHq).toHaveLength(3);
+    expect(decision).toMatchObject({
+      actionId: input.legalActions.find((a) => a.type === "draw_card")
+        ?.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+    });
   });
 
   it("installs missing Code Gate coverage before a second Wall-breaker variant", () => {

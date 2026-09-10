@@ -9,7 +9,11 @@ Persönliche, bearbeitbare Decks werden nicht mehr nur im Browser-`localStorage`
 ## Speicherorte
 
 - Standard Windows: `%APPDATA%\NetGrid\Decks`
-- Konfigurierbar: `NETGRID_DECK_LIBRARY_PATH`; `NETGRID_DECK_LIBRARY_PATH` bleibt als Legacy-Fallback lesbar.
+- Konfigurierbar: `NETGRID_DECK_LIBRARY_PATH` hat Vorrang vor den Standardorten.
+  Der Wert wird mit den nativen Pfadregeln des laufenden Betriebssystems
+  normalisiert und absolut aufgelöst; relative Pfade beziehen sich auf das
+  Arbeitsverzeichnis des Prozesses. Windows-Pfade werden unter Linux nicht
+  als Windows-Speicherorte interpretiert.
 - Fallback außerhalb Windows: lokaler Benutzer-Datenordner beziehungsweise `~/.netgrid/decks`
 
 Jedes Deck wird als eigene JSON-Datei gespeichert. Der Dateiname basiert auf der lokalen `deckId`.

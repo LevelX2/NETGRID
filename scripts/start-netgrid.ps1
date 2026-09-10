@@ -1,7 +1,7 @@
 param(
   [string]$OpenUrl = "",
   [string]$OpenPath = "/",
-  [switch]$ServerDevMode,
+  [switch]$ServerWatchMode,
   [switch]$RestartServer,
   [switch]$RestartWeb
 )
@@ -44,6 +44,22 @@ function Test-EndpointOk {
   } catch {
     return $false
   }
+}
+
+function Get-NetgridServerRuntimeMode {
+  param([Parameter(Mandatory = $true)][string]$Url)
+
+  try {
+    $health = Invoke-RestMethod -Uri $Url -TimeoutSec 4
+    $mode = [string]$health.runtime.mode
+    if ($mode -eq "normal" -or $mode -eq "watch") {
+      return $mode
+    }
+  } catch {
+    return $null
+  }
+
+  return $null
 }
 
 function Start-NetgridProcess {
@@ -274,8 +290,8 @@ $targetWebUrl = Get-UrlOrigin -Url $targetOpenUrl
 if (-not $targetWebUrl) {
   $targetWebUrl = $webUrl
 }
-$serverMode = if ($ServerDevMode) { "dev-watch" } else { "normal" }
-$serverCommand = if ($ServerDevMode) {
+$serverMode = if ($ServerWatchMode) { "watch" } else { "normal" }
+$serverCommand = if ($ServerWatchMode) {
   "corepack pnpm --filter @netgrid/server dev"
 } else {
   "corepack pnpm --filter @netgrid/server exec tsx src/index.ts"
@@ -286,6 +302,7 @@ $serverEnvironment = @{
   HOST = "0.0.0.0"
   NETGRID_PUBLIC_HOST = $lanIp
   NETGRID_DEPLOYMENT_PROFILE = "local"
+  NETGRID_SERVER_RUNTIME_MODE = $serverMode
   NETGRID_WEB_BASE_URL = $webUrl
   NETGRID_SERVER_BASE_URL = "http://${lanIp}:8787"
   NETGRID_ALLOWED_ORIGINS = "$webUrl,http://127.0.0.1:3100,http://localhost:3100"
@@ -312,9 +329,11 @@ $webEnvironment = @{
 $serverPortListeningBefore = Test-NetgridLocalPortListener -Port 8787
 $serverReadyLanBefore = if ($serverPortListeningBefore) { Test-Endpoint -Url $serverUrl } else { $false }
 $serverReadyLocalBefore = if ($serverPortListeningBefore) { Test-Endpoint -Url $localServerUrl } else { $false }
-Write-LauncherLog "Server precheck lan=$serverReadyLanBefore local=$serverReadyLocalBefore maintenanceRequested=$maintenanceRequested"
+$activeServerMode = if ($serverReadyLocalBefore) { Get-NetgridServerRuntimeMode -Url $localServerUrl } else { $null }
+$serverModeMismatch = $serverReadyLocalBefore -and $activeServerMode -ne $serverMode
+Write-LauncherLog "Server precheck lan=$serverReadyLanBefore local=$serverReadyLocalBefore activeMode=$activeServerMode requestedMode=$serverMode modeMismatch=$serverModeMismatch maintenanceRequested=$maintenanceRequested"
 
-if ($RestartServer) {
+if ($RestartServer -or $serverModeMismatch) {
   Stop-PortListeners -Ports @(8787)
   Stop-NetgridServerProcessTrees
   $serverReadyLanBefore = $false

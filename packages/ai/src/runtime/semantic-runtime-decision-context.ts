@@ -24,11 +24,7 @@ export function createSemanticRuntimeDecisionContext(
     options: AiDecisionRuntimeOptions,
   ): AiDecision {
     return withDecisionDerivedCache(() => {
-      return choosePlanFirstLiveAction(
-        input,
-        options,
-        dependencies,
-      );
+      return choosePlanFirstLiveAction(input, options, dependencies);
     });
   }
 

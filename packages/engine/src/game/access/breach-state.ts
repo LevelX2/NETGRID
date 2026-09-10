@@ -128,7 +128,9 @@ export function accessCountPayloadForBreach(
     breach.serverId === "rd"
       ? Math.max(
           0,
-          Math.floor(host.state.purgeableRunnerVirusCounters?.corp?.highlighter ?? 0),
+          Math.floor(
+            host.state.purgeableRunnerVirusCounters?.corp?.highlighter ?? 0,
+          ),
         )
       : 0;
   const highlighterAccessBonus = Math.max(0, highlighterCounterCount - 1);
@@ -157,8 +159,10 @@ export function installedAccessBonusForServer(
   host: BreachStateHost,
   serverId: Exclude<ServerId, "new_remote">,
 ): number {
-  const installedBonus =
-    installedAccessBonusSourceDefinitionIdsForServer(host, serverId).length;
+  const installedBonus = installedAccessBonusSourceDefinitionIdsForServer(
+    host,
+    serverId,
+  ).length;
   if (serverId !== "rd") return installedBonus;
   const highlighterCounters = Math.max(
     0,
@@ -201,7 +205,9 @@ function randomHqAccessQueue(
   const selected: CardInstanceId[] = [];
   const limit = Math.min(accessCount, available.length);
   for (let index = 0; index < limit; index += 1) {
-    const value = host.rng.nextRandom(`hq_multiaccess:${runId}:selection:${index}`);
+    const value = host.rng.nextRandom(
+      `hq_multiaccess:${runId}:selection:${index}`,
+    );
     const selectedIndex = Math.floor(value * available.length);
     const cardId = available[selectedIndex];
     if (!cardId) throw new Error("HQ access selection missing.");

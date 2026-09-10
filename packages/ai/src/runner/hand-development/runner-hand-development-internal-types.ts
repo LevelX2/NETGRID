@@ -55,6 +55,7 @@ export type PersistentFunctionalProfile = {
   breakerStrengthSupport: boolean;
   iceStrengthReduction: boolean;
   recurringBreakerEconomy: boolean;
+  restrictedRunCreditUses: string[];
   bankTool: boolean;
   accessSupport: boolean;
   searchSupport: boolean;

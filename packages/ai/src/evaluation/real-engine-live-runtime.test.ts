@@ -34,15 +34,24 @@ describe("real Engine inputs through the live Semantic Runtime", () => {
     const expectedRouteByScenario = new Map([
       [
         "runner_real_target_choice_hq_remote_mix",
-        { targetServerId: "remote_1", actionTypes: ["play_event", "start_run"] },
+        {
+          targetServerId: "remote_1",
+          actionTypes: ["play_event", "start_run"],
+        },
       ],
       [
         "runner_real_remote_score_threat",
-        { targetServerId: "remote_1", actionTypes: ["play_event", "start_run"] },
+        {
+          targetServerId: "remote_1",
+          actionTypes: ["play_event", "start_run"],
+        },
       ],
       [
         "runner_real_remote_known_agenda_contest",
-        { targetServerId: "remote_2", actionTypes: ["play_event", "start_run"] },
+        {
+          targetServerId: "remote_2",
+          actionTypes: ["play_event", "start_run"],
+        },
       ],
     ]);
     const scenarios = buildRealEngineDecisionCorpusScenarios().filter(
@@ -83,9 +92,7 @@ describe("real Engine inputs through the live Semantic Runtime", () => {
         capabilityId: "contest_remote",
         actionType: selected?.type,
         semanticActionType:
-          selected?.type === "play_event"
-            ? "play.runner_event"
-            : "run.start",
+          selected?.type === "play_event" ? "play.runner_event" : "run.start",
         target: { kind: "server", id: expectedRoute.targetServerId },
       });
     }

@@ -43,7 +43,12 @@ const catalog = JSON.parse(
 ) as StandardDeckCatalog;
 const runner = findDeck(catalog, args.runnerDeckId, "runner");
 const corp = findDeck(catalog, args.corpDeckId, "corp");
-let captured: AiSimulationDecisionCheckpointCapture | undefined;
+let captured:
+  | {
+      snapshot: AiSimulationDecisionCheckpointCapture;
+      runtime: ReturnType<typeof exportAiRuntimeCheckpoint>;
+    }
+  | undefined;
 let simulationFailure: unknown;
 
 try {
@@ -62,7 +67,18 @@ try {
     testOnlyDecisionCheckpointCapture: {
       actionIndices: [args.actionIndex],
       capture: (snapshot) => {
-        captured = snapshot;
+        const stableSnapshot = structuredClone(snapshot);
+        captured = {
+          snapshot: stableSnapshot,
+          // The simulator callback runs immediately before the selected
+          // decision. Capture resident memory here as well; exporting after
+          // the simulation would bind the pre-decision state to the selected
+          // action's post-decision commitment.
+          runtime: exportAiRuntimeCheckpoint(
+            stableSnapshot.input,
+            stableSnapshot.deckSnapshot.deckSnapshotId,
+          ),
+        };
       },
     },
   });
@@ -80,7 +96,11 @@ if (!captured) {
 const expectation = JSON.parse(
   Buffer.from(args.expectationBase64, "base64").toString("utf8"),
 ) as AiDecisionCheckpointExpectationV1;
-const checkpoint = buildCheckpoint(captured, expectation);
+const checkpoint = buildCheckpoint(
+  captured.snapshot,
+  captured.runtime,
+  expectation,
+);
 const outputPath = resolve(args.out);
 mkdirSync(dirname(outputPath), { recursive: true });
 writeFileSync(outputPath, `${JSON.stringify(checkpoint, null, 2)}\n`, "utf8");
@@ -101,8 +121,15 @@ process.stdout.write(
 
 function buildCheckpoint(
   capture: AiSimulationDecisionCheckpointCapture,
+  runtime: ReturnType<typeof exportAiRuntimeCheckpoint>,
   expectation: AiDecisionCheckpointExpectationV1,
 ): AiDecisionCheckpointV1 {
+  // Persist the same JSON-safe state that the checkpoint runner will hash
+  // after loading the fixture. Hashing the richer in-memory object first can
+  // retain explicit undefined fields that JSON necessarily drops.
+  const testOnlyGameState = JSON.parse(
+    JSON.stringify(capture.state),
+  ) as typeof capture.state;
   return {
     schemaVersion: AI_DECISION_CHECKPOINT_SCHEMA_VERSION,
     checkpointId: args.checkpointId,
@@ -125,16 +152,13 @@ function buildCheckpoint(
     deckSnapshot: capture.deckSnapshot,
     engine: {
       stateVersion: capture.state.stateVersion,
-      stateHash: hashGameState(capture.state),
-      testOnlyGameState: capture.state,
+      stateHash: hashGameState(testOnlyGameState),
+      testOnlyGameState,
       eventPrefix: capture.input.playerView.publicEvents.map((event) =>
         structuredClone(event),
       ),
     },
-    runtime: exportAiRuntimeCheckpoint(
-      capture.input,
-      capture.deckSnapshot.deckSnapshotId,
-    ),
+    runtime,
     expectation,
   };
 }

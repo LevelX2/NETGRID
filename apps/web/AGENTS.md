@@ -11,5 +11,4 @@
   anzeigen, nicht jedoch die Hand des menschlichen Spielers. Diese Daten dürfen
   nicht in PlayerView, PublicEvents, öffentliche Replays, normale
   WebSocket-/Reconnect-Payloads, Logs oder Clientfehler übernommen werden.
-- MVP 0.1 UI may be minimal and desktop-oriented.
-- MVP 0.2 UI must support two browser windows/devices, join link, connection status, waiting states, reconnect state, and undo prompts.
+- Preserve the current multiplayer contract for join links, connection and waiting states, reconnect and undo prompts; validate only the UI flows affected by a change.

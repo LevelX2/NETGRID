@@ -1,5 +1,5 @@
 import type { ApiMatchStatus, ApiPlayerClockSnapshot } from "@netgrid/shared";
-import readinessData from "../../../data/ai/card-set-ai-readiness-v1.json";
+import { cardSetAiReadinessData as readinessData } from "@netgrid/runtime-data/card-set-ai-readiness";
 
 export type PlayMode = "human_vs_human" | "human_vs_ai" | "ai_vs_ai";
 export type HumanSideSelection = "runner" | "corp" | "random";

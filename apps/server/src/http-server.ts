@@ -5,11 +5,9 @@ import {
   type ServerResponse,
 } from "node:http";
 import { networkInterfaces } from "node:os";
-import { fileURLToPath } from "node:url";
-import { dirname, resolve } from "node:path";
 import { WebSocket, WebSocketServer } from "ws";
 import { isAiDeckSnapshotRuntimeError } from "@netgrid/ai";
-import { simulateAiGame } from "@netgrid/ai/simulation";
+import { simulateAiGame } from "@netgrid/ai/product-simulation";
 import type {
   ApiAccountActivePublicMatchIds,
   ApiMatchCardPool,
@@ -17,6 +15,7 @@ import type {
 } from "@netgrid/shared";
 import {
   isApiUserErrorCode,
+  runtimeProfileFromEnvironment,
   testCardsEnabledFromEnvironment,
 } from "@netgrid/shared";
 import {
@@ -41,12 +40,7 @@ import {
   gamebookDownloadFilename,
   normalizeGamebookLocale,
 } from "./gamebook-localization";
-import {
-  DEFAULT_SQLITE_STORAGE_PATH,
-  DEFAULT_STORAGE_BACKUP_DIR,
-  SqliteMatchStorage,
-  StorageError,
-} from "./storage-sqlite";
+import { SqliteMatchStorage, StorageError } from "./storage-sqlite";
 import type {
   StorageMaintenanceCleanupApplyInput,
   StorageMaintenanceCleanupFilters,
@@ -85,7 +79,10 @@ import {
   MaintenanceAuthService,
   maintenanceAuthPathFromEnv,
 } from "./maintenance-auth";
-import { AccountAuthService } from "./account-password";
+import {
+  AccountAuthService,
+  accountAccessModeFromEnvironment,
+} from "./account-password";
 import {
   AccountDeckError,
   AccountDeckService,
@@ -122,11 +119,8 @@ import {
   PRIVATE_CARD_IMAGE_PACK_PROFILES,
   type PrivateCardImagePackProfileId,
 } from "@netgrid/card-images";
+import { resolveServerRuntimePaths } from "./runtime-paths";
 
-const NETGRID_REPOSITORY_ROOT = resolve(
-  dirname(fileURLToPath(import.meta.url)),
-  "../../..",
-);
 const MAINTENANCE_ANALYSIS_BUNDLE_ROUTE =
   /^\/api\/storage\/maintenance\/analysis\/matches\/([^/]+)\/bundle$/;
 const MAINTENANCE_DECISION_ANALYSIS_ROUTE =
@@ -136,33 +130,22 @@ const MAINTENANCE_AI_TRACE_INDEX_ROUTE =
 const CARD_IMAGE_MAINTENANCE_JOB_ROUTE =
   /^\/api\/storage\/maintenance\/card-images\/jobs\/([^/]+)$/;
 
-function resolveRepositoryStoragePath(path: string): string {
-  return resolve(NETGRID_REPOSITORY_ROOT, path);
-}
-
 export function resolveConfiguredMatchSqlitePath(
   env: NodeJS.ProcessEnv = process.env,
 ): string {
-  return resolveRepositoryStoragePath(
-    envValue(env, "NETGRID_SQLITE_STORAGE_PATH") ?? DEFAULT_SQLITE_STORAGE_PATH,
-  );
+  return resolveServerRuntimePaths({ env }).matchSqlitePath;
 }
 
 export function resolveConfiguredAccountSqlitePath(
   env: NodeJS.ProcessEnv = process.env,
 ): string {
-  const accountPath = envValue(env, "NETGRID_ACCOUNT_SQLITE_PATH");
-  return accountPath
-    ? resolveRepositoryStoragePath(accountPath)
-    : resolveConfiguredMatchSqlitePath(env);
+  return resolveServerRuntimePaths({ env }).accountSqlitePath;
 }
 
 function resolveConfiguredStorageBackupDir(
   env: NodeJS.ProcessEnv = process.env,
 ): string {
-  return resolveRepositoryStoragePath(
-    envValue(env, "NETGRID_STORAGE_BACKUP_DIR") ?? DEFAULT_STORAGE_BACKUP_DIR,
-  );
+  return resolveServerRuntimePaths({ env }).storageBackupDir;
 }
 
 type ClientWsMessage =
@@ -958,7 +941,7 @@ export function createNetgridHttpServer(
   realtime.attach(server);
   const cleanupTimer =
     deploymentConfig.profile === "local"
-      ? startMaintenanceCleanupTimer(activeService)
+      ? startMaintenanceCleanupTimer(activeService, server)
       : undefined;
   return {
     server,
@@ -1013,8 +996,15 @@ export async function startNetgridServer(
       options.accountStatistics ?? createConfiguredAccountStatistics(),
   });
   await handle.accountStatisticsReady;
-  const port = options.port ?? Number(process.env.PORT ?? 8787);
-  const host = (options.host ?? process.env.HOST ?? "0.0.0.0").trim();
+  const port =
+    options.port ??
+    Number(process.env.NETGRID_SERVER_PORT ?? process.env.PORT ?? 8787);
+  const host = (
+    options.host ??
+    process.env.NETGRID_SERVER_HOST ??
+    process.env.HOST ??
+    "0.0.0.0"
+  ).trim();
   await new Promise<void>((resolveListen) =>
     handle.server.listen(port, host, resolveListen),
   );
@@ -1032,6 +1022,7 @@ export function createConfiguredAccountAuth(
   const backupDir = resolveConfiguredStorageBackupDir(env);
   return new AccountAuthService(
     new SqliteAccountStorage({ dbPath, backupDir }),
+    { defaultAccessMode: accountAccessModeFromEnvironment(env) },
   );
 }
 
@@ -1069,22 +1060,26 @@ export function createConfiguredAccountMatchStartPreferences(
 
 function startMaintenanceCleanupTimer(
   service: MultiplayerService,
+  server: Server,
 ): ReturnType<typeof setInterval> | undefined {
   if (!service.runStorageMaintenanceCleanupPolicy) return undefined;
+  server.once("listening", () => runMaintenanceCleanupPolicy(service));
   const timer = setInterval(
-    () => {
-      void service.runStorageMaintenanceCleanupPolicy().catch((error) => {
-        const code =
-          error instanceof Error ? error.message : "cleanup_policy_failed";
-        console.warn(
-          `maintenance_cleanup_policy_failed:${redactSensitiveText(code)}`,
-        );
-      });
-    },
+    () => runMaintenanceCleanupPolicy(service),
     60 * 60 * 1000,
   );
   timer.unref?.();
   return timer;
+}
+
+function runMaintenanceCleanupPolicy(service: MultiplayerService): void {
+  void service.runStorageMaintenanceCleanupPolicy().catch((error) => {
+    const code =
+      error instanceof Error ? error.message : "cleanup_policy_failed";
+    console.warn(
+      `maintenance_cleanup_policy_failed:${redactSensitiveText(code)}`,
+    );
+  });
 }
 
 async function routeHttp(
@@ -1128,6 +1123,187 @@ async function routeHttp(
         200,
         redactedHealth(await service.storageHealth(), deploymentConfig),
       );
+      return;
+    }
+
+    if (
+      url.pathname === "/api/account/access-policy" &&
+      request.method === "GET"
+    ) {
+      if (!accountAuth)
+        return sendJson(response, 503, accountUnavailablePayload());
+      const policy = await accountAuth.accessPolicy();
+      response.setHeader("cache-control", "no-store");
+      sendJson(response, 200, {
+        ...policy,
+        selfServiceEnabled:
+          deploymentConfig.profile === "local" && policy.mode !== "invite_only",
+      });
+      return;
+    }
+
+    if (
+      accountAuth &&
+      isInviteOnlyAccountRoute(url.pathname, request.method) &&
+      (await accountAuth.accessPolicy()).mode !== "invite_only"
+    ) {
+      sendJson(response, 404, accountFlowUnavailablePayload());
+      return;
+    }
+
+    if (
+      accountAuth &&
+      isPasswordAccountRoute(url.pathname) &&
+      (await accountAuth.accessPolicy()).mode === "simple"
+    ) {
+      sendJson(response, 409, accountFlowUnavailablePayload());
+      return;
+    }
+
+    if (url.pathname === "/api/account/profiles" && request.method === "GET") {
+      if (!accountAuth)
+        return sendJson(response, 503, accountUnavailablePayload());
+      if (!ensureLocalAccountSelfService(response, deploymentConfig)) return;
+      try {
+        response.setHeader("cache-control", "no-store");
+        sendJson(response, 200, {
+          profiles: await accountAuth.listLocalProfiles(),
+        });
+      } catch (error) {
+        return sendAccountFlowError(response, error);
+      }
+      return;
+    }
+
+    if (url.pathname === "/api/account/profiles" && request.method === "POST") {
+      if (!accountAuth)
+        return sendJson(response, 503, accountUnavailablePayload());
+      if (
+        !ensureLocalAccountSelfService(response, deploymentConfig) ||
+        !ensureAccountOrigin(response, request, deploymentConfig)
+      )
+        return;
+      if (
+        !checkRateLimit(
+          response,
+          rateLimiter,
+          "token_probe",
+          request,
+          deploymentConfig,
+          "account-simple-register",
+        )
+      )
+        return;
+      const body = await readJson(request);
+      try {
+        const created = await accountAuth.registerLocalProfile({
+          displayName:
+            typeof body.displayName === "string" ? body.displayName : "",
+          ...(typeof body.deviceLabel === "string"
+            ? { deviceLabel: body.deviceLabel }
+            : {}),
+        });
+        setAccountSessionResponse(
+          response,
+          request,
+          deploymentConfig,
+          created,
+          201,
+        );
+      } catch (error) {
+        const payload = accountInputErrorPayload(error);
+        if (payload) return sendJson(response, 400, payload);
+        return sendAccountFlowError(response, error);
+      }
+      return;
+    }
+
+    if (
+      url.pathname === "/api/account/profiles/select" &&
+      request.method === "POST"
+    ) {
+      if (!accountAuth)
+        return sendJson(response, 503, accountUnavailablePayload());
+      if (
+        !ensureLocalAccountSelfService(response, deploymentConfig) ||
+        !ensureAccountOrigin(response, request, deploymentConfig)
+      )
+        return;
+      if (
+        !checkRateLimit(
+          response,
+          rateLimiter,
+          "token_probe",
+          request,
+          deploymentConfig,
+          "account-simple-select",
+        )
+      )
+        return;
+      const body = await readJson(request);
+      try {
+        const selected = await accountAuth.selectLocalProfile({
+          accountId: typeof body.accountId === "string" ? body.accountId : "",
+          ...(typeof body.deviceLabel === "string"
+            ? { deviceLabel: body.deviceLabel }
+            : {}),
+        });
+        if (!selected)
+          return sendJson(response, 404, accountFlowUnavailablePayload());
+        setAccountSessionResponse(
+          response,
+          request,
+          deploymentConfig,
+          selected,
+        );
+      } catch (error) {
+        return sendAccountFlowError(response, error);
+      }
+      return;
+    }
+
+    if (url.pathname === "/api/account/register" && request.method === "POST") {
+      if (!accountAuth)
+        return sendJson(response, 503, accountUnavailablePayload());
+      if (
+        !ensureLocalAccountSelfService(response, deploymentConfig) ||
+        !ensureAccountOrigin(response, request, deploymentConfig)
+      )
+        return;
+      if (
+        !checkRateLimit(
+          response,
+          rateLimiter,
+          "token_probe",
+          request,
+          deploymentConfig,
+          "account-protected-register",
+        )
+      )
+        return;
+      const body = await readJson(request);
+      try {
+        const created = await accountAuth.registerProtectedAccount({
+          loginName: typeof body.loginName === "string" ? body.loginName : "",
+          displayName:
+            typeof body.displayName === "string" ? body.displayName : "",
+          password: typeof body.password === "string" ? body.password : "",
+          ...(typeof body.deviceLabel === "string"
+            ? { deviceLabel: body.deviceLabel }
+            : {}),
+        });
+        setAccountSessionResponse(
+          response,
+          request,
+          deploymentConfig,
+          created,
+          201,
+        );
+      } catch (error) {
+        const payload = accountInputErrorPayload(error);
+        if (payload) return sendJson(response, 400, payload);
+        return sendAccountFlowError(response, error);
+      }
       return;
     }
 
@@ -2215,6 +2391,108 @@ async function routeHttp(
     }
 
     if (
+      url.pathname === "/api/storage/maintenance/accounts/access-policy" &&
+      request.method === "GET"
+    ) {
+      if (!accountAuth)
+        return sendJson(response, 503, accountUnavailablePayload());
+      if (
+        !ensureLocalAccountPolicyMaintenanceAccess(
+          response,
+          request,
+          deploymentConfig,
+        )
+      )
+        return;
+      response.setHeader("cache-control", "no-store");
+      sendJson(response, 200, {
+        policy: await accountAuth.accessPolicy(),
+        accounts: await accountAuth.listAccountsForMaintenance(),
+      });
+      return;
+    }
+
+    if (
+      url.pathname === "/api/storage/maintenance/accounts/access-policy" &&
+      request.method === "POST"
+    ) {
+      if (!accountAuth)
+        return sendJson(response, 503, accountUnavailablePayload());
+      if (
+        !ensureLocalAccountPolicyMaintenanceAccess(
+          response,
+          request,
+          deploymentConfig,
+        )
+      )
+        return;
+      const body = await readJson(request);
+      try {
+        const mode = body.mode;
+        if (mode !== "simple" && mode !== "protected")
+          throw new Error("account_access_mode_invalid");
+        const credentials = Array.isArray(body.credentials)
+          ? body.credentials.map((entry) => {
+              const value =
+                entry && typeof entry === "object"
+                  ? (entry as Record<string, unknown>)
+                  : {};
+              return {
+                accountId:
+                  typeof value.accountId === "string" ? value.accountId : "",
+                password:
+                  typeof value.password === "string" ? value.password : "",
+              };
+            })
+          : undefined;
+        sendJson(
+          response,
+          200,
+          await accountAuth.changeLocalAccessMode({
+            mode,
+            ...(credentials ? { credentials } : {}),
+          }),
+        );
+      } catch (error) {
+        return sendAccountPolicyError(response, error);
+      }
+      return;
+    }
+
+    const maintenanceAccountPasswordRoute =
+      /^\/api\/storage\/maintenance\/accounts\/([^/]+)\/password$/.exec(
+        url.pathname,
+      );
+    if (maintenanceAccountPasswordRoute && request.method === "POST") {
+      if (!accountAuth)
+        return sendJson(response, 503, accountUnavailablePayload());
+      if (
+        !ensureLocalAccountPolicyMaintenanceAccess(
+          response,
+          request,
+          deploymentConfig,
+        )
+      )
+        return;
+      const body = await readJson(request);
+      try {
+        const changed = await accountAuth.resetProtectedAccountPassword({
+          accountId: decodeURIComponent(
+            maintenanceAccountPasswordRoute[1] ?? "",
+          ),
+          newPassword:
+            typeof body.newPassword === "string" ? body.newPassword : "",
+        });
+        if (!changed)
+          return sendJson(response, 404, accountFlowUnavailablePayload());
+        sendJson(response, 200, { ok: true, sessionsRevoked: true });
+      } catch (error) {
+        return sendAccountPolicyError(response, error);
+      }
+      return;
+    }
+
+    if (
       url.pathname === `${CARD_IMAGE_MAINTENANCE_API_PREFIX}/inventory` &&
       request.method === "GET"
     ) {
@@ -2543,6 +2821,32 @@ async function routeHttp(
         return;
       }
       sendJson(response, 200, trace);
+      return;
+    }
+
+    const currentAiInputRoute =
+      /^\/api\/storage\/maintenance\/analysis\/matches\/([^/]+)\/current-ai-input$/.exec(
+        url.pathname,
+      );
+    if (currentAiInputRoute && request.method === "GET") {
+      const matchId = decodeURIComponent(currentAiInputRoute[1] ?? "");
+      if (
+        !checkRateLimit(
+          response,
+          rateLimiter,
+          "token_probe",
+          request,
+          deploymentConfig,
+          `storage-current-ai-input:${matchId}`,
+        )
+      )
+        return;
+      const context = await service.storageMaintenanceCurrentAiInput(matchId);
+      sendJson(
+        response,
+        context ? 200 : 404,
+        context ?? { error: { code: "not_found" } },
+      );
       return;
     }
 
@@ -3141,6 +3445,18 @@ async function routeHttp(
         config.runnerDeckMetadata = deckSetup.runnerSnapshot.publicMetadata;
         config.corpDeckMetadata = deckSetup.corpSnapshot.publicMetadata;
         config.agendaPointsToWin = config.agendaPointsToWin ?? 7;
+      } else if (runtimeProfileFromEnvironment(process.env) === "release") {
+        const deckSetup = resolveDeckSetup(
+          {},
+          {
+            seed: config.seed ?? "ai-vs-ai-smoke",
+            cardPool: "originalset",
+          },
+        );
+        config.runnerDeck = deckSetup.runnerDeck;
+        config.corpDeck = deckSetup.corpDeck;
+        config.runnerDeckMetadata = deckSetup.runnerSnapshot.publicMetadata;
+        config.corpDeckMetadata = deckSetup.corpSnapshot.publicMetadata;
       } else {
         if (testCardsEnabledFromEnvironment(process.env)) {
           if (
@@ -4279,6 +4595,85 @@ function ensureAccountOrigin(
   return true;
 }
 
+function ensureLocalAccountSelfService(
+  response: ServerResponse,
+  deploymentConfig: DeploymentConfig,
+): boolean {
+  if (deploymentConfig.profile === "local") return true;
+  sendJson(response, 403, accountFlowUnavailablePayload());
+  return false;
+}
+
+function ensureLocalAccountPolicyMaintenanceAccess(
+  response: ServerResponse,
+  request: IncomingMessage,
+  deploymentConfig: DeploymentConfig,
+): boolean {
+  const address = normalizeClientAddress(request.socket.remoteAddress);
+  if (
+    deploymentConfig.profile === "local" &&
+    (address === "127.0.0.1" || address === "::1")
+  )
+    return true;
+  sendJson(response, 403, maintenanceRequestRejectedPayload());
+  return false;
+}
+
+function isInviteOnlyAccountRoute(
+  pathname: string,
+  method: string | undefined,
+): boolean {
+  return (
+    pathname.startsWith("/api/account/invites/") ||
+    pathname.startsWith("/api/account/resets/") ||
+    pathname.startsWith("/api/account/admin/") ||
+    (pathname === "/api/account" && method === "DELETE")
+  );
+}
+
+function isPasswordAccountRoute(pathname: string): boolean {
+  return (
+    pathname === "/api/account/login" || pathname === "/api/account/password"
+  );
+}
+
+function setAccountSessionResponse(
+  response: ServerResponse,
+  request: IncomingMessage,
+  deploymentConfig: DeploymentConfig,
+  result: {
+    account: {
+      accountId: string;
+      loginName: string;
+      displayName: string;
+      status: "active" | "disabled" | "deleted";
+      role: "user" | "admin";
+      createdAt: string;
+      updatedAt: string;
+    };
+    session: {
+      sessionToken: string;
+      csrfToken: string;
+      session: unknown;
+    };
+  },
+  status = 200,
+): void {
+  response.setHeader(
+    "set-cookie",
+    accountSessionCookie(
+      result.session.sessionToken,
+      request,
+      deploymentConfig,
+    ),
+  );
+  sendJson(response, status, {
+    account: result.account,
+    session: result.session.session,
+    csrfToken: result.session.csrfToken,
+  });
+}
+
 function accountSessionToken(request: IncomingMessage): string | undefined {
   const cookieHeader = request.headers.cookie;
   if (!cookieHeader) return undefined;
@@ -4342,6 +4737,51 @@ function accountUnavailablePayload(): {
         "Die Account-Anmeldung ist in diesem Serverprozess nicht aktiviert.",
     },
   };
+}
+
+function accountFlowUnavailablePayload(): {
+  error: { code: "account_flow_unavailable"; message: string };
+} {
+  return {
+    error: {
+      code: "account_flow_unavailable",
+      message:
+        "Dieser Account-Zugangsweg ist in der aktuellen Betriebsart nicht verfügbar.",
+    },
+  };
+}
+
+function sendAccountFlowError(response: ServerResponse, error: unknown): void {
+  const code = error instanceof Error ? error.message : "account_flow_failed";
+  sendJson(response, 409, {
+    error: {
+      code,
+      message:
+        "Der Account-Zugangsweg ist in der aktuellen Richtlinie nicht verfügbar.",
+    },
+  });
+}
+
+function sendAccountPolicyError(
+  response: ServerResponse,
+  error: unknown,
+): void {
+  const input = accountInputErrorPayload(error);
+  if (input) {
+    sendJson(response, 400, input);
+    return;
+  }
+  const code = error instanceof Error ? error.message : "account_policy_failed";
+  const conflict =
+    code === "account_access_mode_unchanged" ||
+    code === "account_access_mode_accounts_changed";
+  sendJson(response, conflict ? 409 : 400, {
+    error: {
+      code,
+      message:
+        "Die Account-Zugangsrichtlinie konnte nicht sicher geändert werden.",
+    },
+  });
 }
 
 function accountAuthRequiredPayload(): {
@@ -4684,6 +5124,8 @@ function isSensitiveMaintenanceOperation(
     pathname === "/api/storage/maintenance/cleanup/policy" ||
     pathname === "/api/storage/maintenance/cleanup/policy/run" ||
     pathname === "/api/storage/maintenance/snapshot-compaction/apply" ||
+    pathname === "/api/storage/maintenance/accounts/access-policy" ||
+    /^\/api\/storage\/maintenance\/accounts\/[^/]+\/password$/.test(pathname) ||
     /\/api\/storage\/maintenance\/matches\/[^/]+\/recovery-access$/.test(
       pathname,
     )
@@ -4705,6 +5147,9 @@ export function mayAccessLocalReadOnlyAnalysisWithoutMaintenanceAuth(
 function isExplicitLocalReadOnlyAnalysisRoute(pathname: string): boolean {
   return (
     MAINTENANCE_ANALYSIS_BUNDLE_ROUTE.test(pathname) ||
+    /^\/api\/storage\/maintenance\/analysis\/matches\/[^/]+\/current-ai-input$/.test(
+      pathname,
+    ) ||
     MAINTENANCE_DECISION_ANALYSIS_ROUTE.test(pathname) ||
     MAINTENANCE_AI_TRACE_INDEX_ROUTE.test(pathname)
   );

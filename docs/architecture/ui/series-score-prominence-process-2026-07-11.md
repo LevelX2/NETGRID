@@ -35,7 +35,7 @@ Die Vorgabe ist für eine automatische, kleine UI-Umsetzung ausreichend präzise
   Replay, StateHash, PlayerViews oder ein Redesign des gesamten Ergebnisfensters.
 - Abnahme: Eine beendete Serie zeigt eine klar beschriftete, große
   `Endergebnis`-Anzeige im Format `<eigene Matchpunkte> : <gegnerische
-  Matchpunkte>`; ergänzende Siege-, Draw- und Agenda-Angaben bleiben sekundär
+Matchpunkte>`; ergänzende Siege-, Draw- und Agenda-Angaben bleiben sekundär
   erhalten; kleine Viewports bleiben lesbar.
 
 ## Gesamtziel

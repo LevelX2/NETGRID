@@ -104,12 +104,12 @@ Eigene KI-Decks werden gegen das ausgewählte Format validiert und dürfen nur K
 
 ### KI-unterstützte Kartenpools
 
-| Auswählbarer Kartenpool | Menschliches Spiel | KI-Spiel |
-| --- | ---: | ---: |
-| Originalset | Ja | Ja |
-| Originalset + Classic | Ja | Ja |
-| Originalset + Proteus | Ja | Ja |
-| Originalset + Classic + Proteus | Ja | Ja |
+| Auswählbarer Kartenpool         | Menschliches Spiel | KI-Spiel |
+| ------------------------------- | -----------------: | -------: |
+| Originalset                     |                 Ja |       Ja |
+| Originalset + Classic           |                 Ja |       Ja |
+| Originalset + Proteus           |                 Ja |       Ja |
+| Originalset + Classic + Proteus |                 Ja |       Ja |
 
 Proteus hat die aktuellen KI-Readiness-Prüfungen für kontrollierte Karten-Hints, ausgewählte Playtest-Decks, deterministische Simulationen, Replayintegrität und Hidden-Info-Schutz bestanden.
 
@@ -397,7 +397,7 @@ corepack pnpm --filter @netgrid/web test
 
 Aktuelle Architektur- und Betriebsreferenzen:
 
-- [Aktueller Projektstatus](KI-Wissen-NETGRID/02%20Wissen/00%20Uebersichten/Aktueller%20Projektstatus.md)
+- [Aktueller Codex-Status](docs/codex/CODEX_STATUS.md)
 - [Architekturindex](docs/architecture/README.md)
 - [Engine-Architektur](docs/architecture/engine/README.md)
 - [KI-Architektur](docs/architecture/ai/README.md)

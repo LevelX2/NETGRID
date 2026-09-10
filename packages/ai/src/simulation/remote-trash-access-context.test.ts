@@ -21,7 +21,11 @@ describe("buildRunnerRemoteTrashAccessContext", () => {
     });
 
     const trashContext = buildRunnerRemoteTrashAccessContext(input, trash, 2);
-    const declineContext = buildRunnerRemoteTrashAccessContext(input, decline, 2);
+    const declineContext = buildRunnerRemoteTrashAccessContext(
+      input,
+      decline,
+      2,
+    );
 
     expect(trashContext).toMatchObject({
       trashable: true,

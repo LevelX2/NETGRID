@@ -9,6 +9,7 @@ import type { AiDecisionInputWithDeckCapabilities } from "../runtime/ai-decision
 import { corpSameTurnScoreConversionPaths } from "./tactical-plan-corp-score-conversion";
 import { corpRemoteContestabilityAssessment } from "./tactical-plan-corp-score-window";
 import type { CorpScoreProjectSignal } from "./corp-core-plan-modules";
+import type { CorpAmbushSignal } from "./corp-tactical-plan-modules";
 import { readCorpCounterBankPreparationQuote } from "./corp-counter-bank-preparation-quote";
 
 export { readCorpCounterBankPreparationQuote } from "./corp-counter-bank-preparation-quote";
@@ -27,13 +28,19 @@ type InstalledCounterBank = {
 export function corpCounterBankScoreProjects(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
+  currentAmbushes: readonly CorpAmbushSignal[],
 ): CorpScoreProjectSignal[] {
   if (!isCorpMainActionWindow(input)) return [];
 
   const installed = installedCounterBanks(input);
   return [
     ...counterBankHandoffProjects(input, candidates, installed),
-    ...counterBankLiquidationProjects(input, candidates, installed),
+    ...counterBankLiquidationProjects(
+      input,
+      candidates,
+      installed,
+      currentAmbushes,
+    ),
     ...counterBankAdvanceProjects(input, candidates, installed),
     ...counterBankInstallProjects(input, candidates, installed),
   ];
@@ -280,12 +287,20 @@ function counterBankLiquidationProjects(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   installed: readonly InstalledCounterBank[],
+  currentAmbushes: readonly CorpAmbushSignal[],
 ): CorpScoreProjectSignal[] {
   return installed.flatMap((bank) => {
     if (
       bank.quote.advancementCounters <
         bank.quote.cashout.advancementCounterCost ||
       counterBankRemoteIsSecure(input, bank.serverId) ||
+      (bank.card.rezzed !== true &&
+        currentAmbushes.some(
+          (ambush) =>
+            ambush.patternKind === "score_decoy" &&
+            ambush.sourceInstanceId === bank.card.instanceId &&
+            ambush.serverId === bank.serverId,
+        )) ||
       counterBankHasCurrentScoreHandoff(input, bank.card.instanceId)
     ) {
       return [];

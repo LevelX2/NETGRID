@@ -256,8 +256,7 @@ export function CardView({
     isSubroutineRuleLine(card.type ?? "", rulesText, line),
   );
   const tooltipHasSubroutineMarkers = rulesTextLines(tooltipRulesText).some(
-    (line) =>
-      isSubroutineRuleLine(card.type ?? "", tooltipRulesText, line),
+    (line) => isSubroutineRuleLine(card.type ?? "", tooltipRulesText, line),
   );
   const tooltipText = card.known
     ? [
@@ -879,9 +878,7 @@ export function CardView({
                 <span
                   key={`${card.instanceId}-tooltip-rules-${index}`}
                   className={
-                    tooltipHasSubroutineMarkers
-                      ? "subroutineLine"
-                      : undefined
+                    tooltipHasSubroutineMarkers ? "subroutineLine" : undefined
                   }
                 >
                   {shouldAddFallbackSubroutineMarker(

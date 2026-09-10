@@ -27,12 +27,11 @@ export type CorpCentralPressureAssessment = {
   evidence: string[];
 };
 
-export type CorpCentralDefenseAllocationDirection =
-  | Readonly<{
-      kind: "rd_focus_diversion";
-      selectedServerId: "rd";
-      evidenceCode: "corp_visible_rd_focus_diversion:multiaccess_with_visible_or_repeated_pressure";
-    }>;
+export type CorpCentralDefenseAllocationDirection = Readonly<{
+  kind: "rd_focus_diversion";
+  selectedServerId: "rd";
+  evidenceCode: "corp_visible_rd_focus_diversion:multiaccess_with_visible_or_repeated_pressure";
+}>;
 
 type AiCardHintWithSignals = AiCardHint & {
   tacticSignals?: readonly string[];

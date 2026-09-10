@@ -6,7 +6,10 @@ import {
 
 import { remoteTrashCostBucket } from "../runtime/remote-trash-cost";
 import { rolesMatch } from "../runtime/role-match";
-import { isRunnerEconomyRole, isRunnerPressureRole } from "../runtime/runner-role-classification";
+import {
+  isRunnerEconomyRole,
+  isRunnerPressureRole,
+} from "../runtime/runner-role-classification";
 import { isRemoteServerTarget } from "../runtime/server-target";
 import type { AiSimulationActionSequenceEntry } from "./ai-simulation-action-sequence-entry";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
@@ -241,7 +244,8 @@ export function createRunnerHandUseDiagnosticsForSimulationAction(
             runnerRemoteTrashCostBucket: remoteTrashCostBucket(
               remoteTrash.trashCost,
             ),
-            runnerRemoteTrashLegalActionCount: remoteTrash.legalTrashActionCount,
+            runnerRemoteTrashLegalActionCount:
+              remoteTrash.legalTrashActionCount,
           }
         : {}),
       ...(remoteTrash.role === "economy"
@@ -252,8 +256,7 @@ export function createRunnerHandUseDiagnosticsForSimulationAction(
         : {}),
       ...(remoteTrash.corpValueRemaining > 0
         ? {
-            runnerRemoteTrashCorpValueRemaining:
-              remoteTrash.corpValueRemaining,
+            runnerRemoteTrashCorpValueRemaining: remoteTrash.corpValueRemaining,
           }
         : {}),
       ...(remoteTrash.bbsWhisperingCampaign
@@ -276,15 +279,13 @@ export function createRunnerHandUseDiagnosticsForSimulationAction(
       ...(remoteTrash.finitePoolEconomy
         ? { runnerFinitePoolAssetAccessed: true }
         : {}),
-      ...(remoteTrash.finitePoolEconomy &&
-      remoteTrash.legalTrashActionCount > 0
+      ...(remoteTrash.finitePoolEconomy && remoteTrash.legalTrashActionCount > 0
         ? { runnerFinitePoolAssetTrashLegal: true }
         : {}),
       ...(remoteTrash.finitePoolEconomy && remoteTrashTaken
         ? { runnerFinitePoolAssetTrashTaken: true }
         : {}),
-      ...(remoteTrash.finitePoolEconomy &&
-      remoteTrash.skippedAffordableRelevant
+      ...(remoteTrash.finitePoolEconomy && remoteTrash.skippedAffordableRelevant
         ? { runnerFinitePoolAssetTrashSkippedAffordable: true }
         : {}),
       ...(remoteTrash.skippedAffordableRelevant

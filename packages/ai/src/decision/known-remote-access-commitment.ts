@@ -10,6 +10,9 @@ import type {
 } from "../access/access-decision-types";
 import { projectRemoteRootValue } from "../access/remote-root-value-projection";
 import { rolesMatch } from "../role-match";
+import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
+import { assessRunnerAccessTrashImpactFromPlanningCard } from "../runtime/runner-access-trash-impact";
+import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
 
@@ -117,17 +120,64 @@ export function projectKnownRemoteTrashCommitment(
   );
   const preservesReserve =
     technicallyAffordable && creditsAfterTrash >= desiredCreditReserve;
+  const planningCard = cardSpecPlanningCardByDefinitionId(params.definitionId);
+  if (!planningCard) {
+    throw new PlanResolutionFailure("missing_card_definition", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      owner: "plan_module",
+      removalCondition: `Supply canonical trash-impact facts for observed card ${params.definitionId} in ${params.serverId}.`,
+    });
+  }
+  const impact = assessRunnerAccessTrashImpactFromPlanningCard({
+    planningCard,
+    accessed: {
+      known: true,
+      definitionId: params.definitionId,
+      ...(params.visibleCard?.advancementCounters !== undefined
+        ? { advancementCounters: params.visibleCard.advancementCounters }
+        : {}),
+      ...(params.visibleCard?.counters
+        ? { counters: params.visibleCard.counters }
+        : {}),
+    },
+    trashCost: params.trashCost,
+    dedicatedTrashCredits: params.trashCost - generalTrashCost,
+    runnerCredits: params.creditsAfterPath,
+    economyReserve: desiredCreditReserve,
+  });
+  if (!impact) {
+    throw new PlanResolutionFailure("invalid_player_view_card_projection", {
+      side: input.side,
+      stateVersion: input.playerView.stateVersion,
+      timingPoint: input.playerView.timingPoint,
+      legalActionTypes: input.legalActions.map((action) => action.type),
+      owner: "plan_module",
+      removalCondition: `Bind the observed Corp trash target ${params.definitionId} to its canonical planning card.`,
+    });
+  }
+  const reserveBreakAllowed =
+    impact.recommendation === "trash" && !preservesReserve;
   const baseEvidence = [
     ...support.evidence,
     ...targetProfile.evidence,
     ...reserveQuote.evidence,
+    ...impact.evidenceCodes,
   ];
 
-  if (targetProfile.finitePoolDepleted) {
+  if (
+    technicallyAffordable &&
+    impact.recommendation === "decline" &&
+    impact.margin + impact.liquidityPenalty <= 0
+  ) {
     const commitment = trashCommitment(params.serverId, {
       knownAccessState: "known_no_current_payoff",
       intendedAccessAction: "decline",
-      reason: "finite_pool_depleted",
+      reason: targetProfile.finitePoolDepleted
+        ? "finite_pool_depleted"
+        : "low_value_target",
       evidence: baseEvidence,
     });
     return {
@@ -139,7 +189,9 @@ export function projectKnownRemoteTrashCommitment(
       score: 0,
       penalty: 520,
       reasons: [
-        "known_remote_root_finite_pool_depleted",
+        ...(targetProfile.finitePoolDepleted
+          ? ["known_remote_root_finite_pool_depleted"]
+          : ["known_remote_root_visible_impact_below_cost"]),
         "known_remote_low_value",
         "remote_known_no_current_payoff",
       ],
@@ -185,12 +237,12 @@ export function projectKnownRemoteTrashCommitment(
       finitePoolValueRemaining: targetProfile.corpValueRemaining,
       technicallyAffordable,
       preservesReserve,
-      reserveBreakAllowed: targetProfile.reserveBreakAllowed,
+      reserveBreakAllowed,
       commitment,
     };
   }
 
-  if (!preservesReserve && !targetProfile.reserveBreakAllowed) {
+  if (impact.recommendation === "decline") {
     const commitment = trashCommitment(params.serverId, {
       knownAccessState: "known_no_current_payoff",
       intendedAccessAction: "decline",
@@ -219,7 +271,7 @@ export function projectKnownRemoteTrashCommitment(
       finitePoolValueRemaining: targetProfile.corpValueRemaining,
       technicallyAffordable,
       preservesReserve,
-      reserveBreakAllowed: targetProfile.reserveBreakAllowed,
+      reserveBreakAllowed,
       commitment,
     };
   }
@@ -252,7 +304,7 @@ export function projectKnownRemoteTrashCommitment(
     finitePoolValueRemaining: targetProfile.corpValueRemaining,
     technicallyAffordable,
     preservesReserve,
-    reserveBreakAllowed: targetProfile.reserveBreakAllowed,
+    reserveBreakAllowed,
     commitment,
   };
 }

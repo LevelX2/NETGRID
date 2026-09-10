@@ -131,6 +131,34 @@ describe("selectedSearchChoiceOptionIds", () => {
     ).toEqual(["rent-i-con-a"]);
   });
 
+  it("executes the exact hidden-zone copy prebound by the coverage plan", () => {
+    const choice = searchChoice(
+      [
+        hiddenOption("rent-i-con-3", "Rent-I-Con"),
+        hiddenOption("rent-i-con-2", "Rent-I-Con"),
+        hiddenOption("rent-i-con-1", "Rent-I-Con"),
+      ],
+      1,
+    );
+
+    expect(
+      selectedSearchChoiceOptionIds(choice, choice.options, {
+        features: {
+          credits: 8,
+          memoryRemaining: 1,
+          hasInstalledNonNoisyIcebreaker: true,
+          rigRoles: new Set(),
+          rigDefinitionIds: new Set(),
+        },
+        effectsForCardId: () => [],
+        rolesForCardId: () => [],
+        requiredCoverage: "breaker_code_gate",
+        preferredCardInstanceId: "rent-i-con-3",
+        preferredCardDefinitionId: "onr_classic_031_rent-i-con",
+      }),
+    ).toEqual(["option-rent-i-con-3"]);
+  });
+
   it("prefers a new installable support program over breaker copies already in rig and grip", () => {
     const choice = searchChoice(
       [
@@ -448,4 +476,15 @@ function option(
       ...cardOverrides,
     },
   } as unknown as PendingChoice["options"][number];
+}
+
+function hiddenOption(
+  instanceId: string,
+  label: string,
+): PendingChoice["options"][number] {
+  return {
+    id: `option-${instanceId}`,
+    label,
+    value: instanceId,
+  } as PendingChoice["options"][number];
 }

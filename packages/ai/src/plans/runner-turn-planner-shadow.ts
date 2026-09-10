@@ -7,6 +7,7 @@ import {
 } from "@netgrid/shared";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import { runnerStrategicExchangeRequiresBoundParent } from "../runtime/runner-strategic-exchange";
 import { currentTurnPlanningInvocationVariants } from "./corp-turn-planner-shadow";
 import type { PlanModuleId } from "./plan-kernel-types";
 import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
@@ -169,6 +170,7 @@ export function buildRunnerTurnPlannerShadow(params: {
   const urgentPriorityClass = highestUrgentPriorityClass(heads);
   const offers = offersForHeads({
     input,
+    moduleSelectedActionId: params.runtimeResult.route.head.actionId,
     records,
     candidates: params.context.actionCandidates,
     urgentPriorityClass,
@@ -234,7 +236,7 @@ export function buildRunnerTurnPlannerShadow(params: {
   };
 }
 
-function runnerCoverageDispositions(params: {
+export function runnerCoverageDispositions(params: {
   input: AiDecisionInput;
   existing: readonly NonNullable<
     PlanSchedulerContext["actionDispositions"]
@@ -257,23 +259,54 @@ function runnerCoverageDispositions(params: {
     const isUnboundBreakerSubtypeChange =
       action?.type === "trigger_ability" &&
       action.payload?.runnerAbility === "change_icebreaker_subtype";
-    const ownerModuleId =
-      candidate.semanticActionType.startsWith("search.") ||
-      isUnboundBreakerSubtypeChange
+    const isUnboundStrategicExchange =
+      runnerStrategicExchangeRequiresBoundParent(candidate);
+    const runAbilityServerId =
+      candidate.semanticActionType.startsWith("card_ability.") &&
+      (candidate.effectTargets ?? []).some(
+        (target) =>
+          target === "make_run" ||
+          target === "make_chosen_server_run" ||
+          (target.startsWith("make_") && target.endsWith("_run")),
+      )
+        ? (action?.payload?.accessServerId ??
+          action?.payload?.runServerId ??
+          action?.payload?.serverId)
+        : undefined;
+    const runAbilityOwnerModuleId =
+      typeof runAbilityServerId === "string"
+        ? runAbilityServerId.startsWith("remote_")
+          ? ("runner.contest_remote" as const)
+          : runAbilityServerId === "hq" ||
+              runAbilityServerId === "rd" ||
+              runAbilityServerId === "archives"
+            ? ("runner.pressure_central" as const)
+            : undefined
+        : undefined;
+    const ownerModuleId = isUnboundStrategicExchange
+      ? ("runner.economy" as const)
+      : candidate.semanticActionType.startsWith("search.") ||
+          isUnboundBreakerSubtypeChange
         ? ("runner.rig_and_coverage" as const)
-        : candidate.semanticActionType === "play.runner_event"
-          ? ("runner.develop_board_and_hand" as const)
-          : undefined;
+        : runAbilityOwnerModuleId
+          ? runAbilityOwnerModuleId
+          : candidate.semanticActionType === "play.runner_event"
+            ? ("runner.develop_board_and_hand" as const)
+            : undefined;
     if (!ownerModuleId) continue;
     dispositions.push({
       actionId: candidate.actionId,
       disposition: "explicitly_nonproductive",
       ownerModuleId,
-      evidenceCode: isUnboundBreakerSubtypeChange
-        ? "runner_breaker_subtype_change_requires_current_bound_run_coverage_head"
-        : candidate.semanticActionType.startsWith("search.")
-          ? "runner_search_has_no_current_bound_coverage_or_development_need"
-          : "runner_event_has_no_current_bound_run_or_development_route",
+      evidenceCode: isUnboundStrategicExchange
+        ? "runner_strategic_exchange_requires_current_exact_parent_head"
+        : isUnboundBreakerSubtypeChange
+          ? "runner_breaker_subtype_change_requires_current_bound_run_coverage_head"
+          : runAbilityOwnerModuleId
+            ? `runner_card_run_ability_has_no_current_bound_route:${runAbilityServerId}`
+            : candidate.semanticActionType.startsWith("search.")
+              ? "runner_search_has_no_current_bound_coverage_or_development_need"
+              : "runner_event_has_no_current_bound_run_or_development_route",
     });
     classified.add(candidate.actionId);
   }
@@ -738,6 +771,7 @@ function deduplicateHeadRecords<
 
 function offersForHeads(params: {
   input: AiDecisionInput;
+  moduleSelectedActionId: string;
   records: readonly RunnerPlanningHeadRecord[];
   candidates: readonly ActionSemanticCandidate[];
   urgentPriorityClass: string | undefined;
@@ -781,7 +815,10 @@ function offersForHeads(params: {
       return {
         head,
         candidate,
-        moduleCandidatePreferenceRank: 0,
+        moduleCandidatePreferenceRank:
+          head.currentBinding.actionId === params.moduleSelectedActionId
+            ? 1
+            : 0,
         obligationSignature:
           priorityCoverage.requiredObligationIds.join(",") || "no_urgent",
         priorityCoverage,
@@ -897,6 +934,18 @@ function boundaryForRunnerCandidate(
     remainingActionCapacity,
   );
   if (delayedInstallBoundary) return delayedInstallBoundary;
+  if ((candidate.costProfile.hostedCreditCost ?? 0) > 0) {
+    return assessTurnObservationBoundary({
+      boundaryKind: "projected_plan_discovery_required",
+      remainingActionCapacity,
+      residualTurnValueBasis: "remaining_capacity",
+      immediateOutcomeCodes: ["runner_install_payment_pool_consumed"],
+      uncertainty: [
+        { code: "post_install_payment_pool_revalidation_required" },
+      ],
+      assumptionIds: ["current_engine_install_payment_binding_exact"],
+    });
+  }
   if (
     candidate.randomBadPublicityModel?.randomOutcome ||
     candidate.actionCapacityProjection?.reliability === "random"
@@ -924,7 +973,8 @@ function commutativeGroupKey(
   }
   if (
     candidate.semanticActionType === "install.card" &&
-    candidate.costProfile.costKnownStatus === "known"
+    candidate.costProfile.costKnownStatus === "known" &&
+    (candidate.costProfile.hostedCreditCost ?? 0) === 0
   ) {
     return "runner-independent-current-install";
   }

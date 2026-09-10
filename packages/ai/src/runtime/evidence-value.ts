@@ -2,10 +2,7 @@ export type EvidenceCarrier = {
   evidence: readonly string[];
 };
 
-export function hasEvidenceFlag(
-  entry: EvidenceCarrier,
-  flag: string,
-): boolean {
+export function hasEvidenceFlag(entry: EvidenceCarrier, flag: string): boolean {
   const evidence = new Set(entry.evidence);
   return evidence.has(flag);
 }

@@ -15,7 +15,6 @@ import {
 import {
   definitionFor,
   serverDifficultyIncreaseFromRunCounters,
-  serverDifficultyReductionFromUpgrades,
 } from "../view/card-view";
 import { guaranteedNextCorpTurnFlexibleClicks } from "../view/visible-corp-score-continuation-quote";
 import { buildLegalAction } from "./action-builders";
@@ -201,7 +200,6 @@ function corpAgendaInstallScoreHorizonPayload(
     {
       definitionFor,
       serverDifficultyIncreaseFromRunCounters,
-      serverDifficultyReductionFromUpgrades,
     },
     projectedState,
     cardId,

@@ -1,4 +1,5 @@
-export const NETGRID_PRODUCT_VERSION = "0.9";
+import { NETGRID_PRODUCT_VERSION } from "@netgrid/shared";
+export { NETGRID_PRODUCT_VERSION } from "@netgrid/shared";
 
 export type AppBuildInfo = {
   productVersion: string;
@@ -8,7 +9,7 @@ export type AppBuildInfo = {
   sourceDateIso?: string | undefined;
   dirty: boolean;
   statusLabel: string;
-  developmentStatus: string;
+  sourceStatus: string;
 };
 
 type AppBuildEnvironment = {
@@ -25,7 +26,6 @@ export function createAppBuildInfo(
   const commit = normalizedValue(environment.commit, "nicht verfügbar");
   const sourceDate = formatGitCommitDate(environment.sourceDate);
   const dirty = environment.dirty === "true";
-  const buildLabel = `${buildNumber}${dirty ? "-dev" : ""}`;
 
   return {
     productVersion: NETGRID_PRODUCT_VERSION,
@@ -34,10 +34,10 @@ export function createAppBuildInfo(
     sourceDate,
     sourceDateIso: environment.sourceDate?.trim() || undefined,
     dirty,
-    statusLabel: `V${NETGRID_PRODUCT_VERSION} · Build ${buildLabel}`,
-    developmentStatus: dirty
-      ? "Lokaler Entwicklungsstand mit nicht committeten Änderungen"
-      : "Lokaler Entwicklungsstand",
+    statusLabel: `V${NETGRID_PRODUCT_VERSION} · Build ${buildNumber}`,
+    sourceStatus: dirty
+      ? "Beim Webstart waren Änderungen nicht committet"
+      : "Beim Webstart sauber",
   };
 }
 

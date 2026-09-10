@@ -62,8 +62,6 @@ describe("gamebook localization contract", () => {
     );
     expect(messages.gainsCredits("runner", 2)).toContain(expected.effect);
     expect(messages.resultReason("agenda_points")).not.toBe("");
-    expect(messages.unknownEvent("", "custom_event")).toContain(
-      "custom_event",
-    );
+    expect(messages.unknownEvent("", "custom_event")).toContain("custom_event");
   });
 });

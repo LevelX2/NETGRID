@@ -1,4 +1,8 @@
-import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  VisibleCard,
+  CorpRestrictedCreditRouteQuote,
+} from "@netgrid/shared";
 import type { CorpScoreProjectSignal } from "../plans/corp-core-plan-modules";
 import {
   assessCorpScoreProtection,
@@ -41,8 +45,9 @@ type ImmediateRezClaim = Readonly<{
  */
 export function assessCorpExactIceRezAgainstScoreReserves(params: {
   input: AiDecisionInput;
-  route: CorpExactIceRezRouteProjection;
+  route: Omit<CorpExactIceRezRouteProjection, "actionId">;
   scoreProjects: readonly CorpScoreProjectSignal[];
+  restrictedCreditFunding?: CorpRestrictedCreditRouteQuote;
 }): CorpDefenseScoreReserveAssessment {
   const { input, route } = params;
   const scoreClaims = scoreContinuationClaims(params.scoreProjects);
@@ -83,10 +88,13 @@ export function assessCorpExactIceRezAgainstScoreReserves(params: {
     : exactCurrentRunFollowupStoppingRez(input, route.sourceCardInstanceId);
   const requiredCreditsAfterRez =
     scoreCredits +
+    (route.bluffDefenseNeed?.encounterCredits ?? 0) +
     immediateRezClaims.reduce((sum, claim) => sum + claim.credits, 0) +
     (currentRunFollowup?.credits ?? 0);
-  const availableCreditsAfterRez =
-    input.playerView.own.credits - route.totalRezCredits;
+  const availableCreditsAfterRez = params.restrictedCreditFunding
+    ? params.restrictedCreditFunding.consumer
+        .generalCreditsRemainingAfterConsumer
+    : input.playerView.own.credits - route.totalRezCredits;
   const consumesNoReservedResources =
     route.totalRezCredits === 0 &&
     route.quote.mandatoryAdditionalCosts.agendaPoints === 0;
@@ -243,9 +251,12 @@ function assessProtectionAfterRezzing(
 }
 
 function routePreventsImmediateAccess(
-  route: CorpExactIceRezRouteProjection,
+  route: Omit<CorpExactIceRezRouteProjection, "actionId">,
 ): boolean {
-  return route.after?.runnerAccessSuccessProbability.numerator === 0;
+  return (
+    route.accessBlock !== undefined ||
+    route.after?.runnerAccessSuccessProbability.numerator === 0
+  );
 }
 
 function safeNonNegativeInteger(value: unknown): number {

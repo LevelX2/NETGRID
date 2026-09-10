@@ -1,4 +1,7 @@
-export type TargetRefRedactionPolicy = "public" | "actor_private" | "hidden_blocked";
+export type TargetRefRedactionPolicy =
+  | "public"
+  | "actor_private"
+  | "hidden_blocked";
 
 export type TargetRefKind =
   | "none"
@@ -27,10 +30,25 @@ export type TargetRef = {
 export type TargetRefInput =
   | { kind: "none"; evidence?: readonly string[] }
   | { kind: "server"; serverId: string; evidence?: readonly string[] }
-  | { kind: "ice"; serverId: string; position: number; evidence?: readonly string[] }
+  | {
+      kind: "ice";
+      serverId: string;
+      position: number;
+      evidence?: readonly string[];
+    }
   | { kind: "ownInstalled"; actorSafeRef: string; evidence?: readonly string[] }
-  | { kind: "choice"; choiceId: string; optionId: string; evidence?: readonly string[] }
-  | { kind: "access"; serverId: string; accessContext: string; evidence?: readonly string[] }
+  | {
+      kind: "choice";
+      choiceId: string;
+      optionId: string;
+      evidence?: readonly string[];
+    }
+  | {
+      kind: "access";
+      serverId: string;
+      accessContext: string;
+      evidence?: readonly string[];
+    }
   | {
       kind: "abilitySource";
       sourceDefinitionId: string;
@@ -38,7 +56,11 @@ export type TargetRefInput =
       evidence?: readonly string[];
     }
   | { kind: "hidden_blocked"; blocker?: string; evidence?: readonly string[] }
-  | { kind: "unknown_unprojected"; blocker?: string; evidence?: readonly string[] };
+  | {
+      kind: "unknown_unprojected";
+      blocker?: string;
+      evidence?: readonly string[];
+    };
 
 const HIDDEN_INFO_MARKERS = [
   "cardinstances",
@@ -94,14 +116,20 @@ export function buildTargetRef(input: TargetRefInput): TargetRef {
     if (!SERVER_PATTERN.test(serverId) || input.position < 0) {
       return unknownTargetRef("ice_target_missing", evidenceFor(input));
     }
-    return completeTargetRef("ice", `ice:${serverId}:${input.position}`, "public", [
-      ...evidenceFor(input),
-      "side_safe_ice_position_target",
-    ]);
+    return completeTargetRef(
+      "ice",
+      `ice:${serverId}:${input.position}`,
+      "public",
+      [...evidenceFor(input), "side_safe_ice_position_target"],
+    );
   }
   if (input.kind === "ownInstalled") {
     const actorSafeRef = sanitizeId(input.actorSafeRef);
-    if (!actorSafeRef) return unknownTargetRef("own_installed_target_missing", evidenceFor(input));
+    if (!actorSafeRef)
+      return unknownTargetRef(
+        "own_installed_target_missing",
+        evidenceFor(input),
+      );
     return completeTargetRef(
       "ownInstalled",
       `ownInstalled:${actorSafeRef}`,
@@ -113,29 +141,45 @@ export function buildTargetRef(input: TargetRefInput): TargetRef {
     const choiceId = sanitizeId(input.choiceId);
     const optionId = sanitizeId(input.optionId);
     if (!choiceId || !optionId || optionId === "unknown") {
-      return unknownTargetRef("choice_option_missing", evidenceFor(input), "choice");
+      return unknownTargetRef(
+        "choice_option_missing",
+        evidenceFor(input),
+        "choice",
+      );
     }
-    return completeTargetRef("choice", `choice:${choiceId}:${optionId}`, "actor_private", [
-      ...evidenceFor(input),
-      "side_safe_choice_option_target",
-    ]);
+    return completeTargetRef(
+      "choice",
+      `choice:${choiceId}:${optionId}`,
+      "actor_private",
+      [...evidenceFor(input), "side_safe_choice_option_target"],
+    );
   }
   if (input.kind === "access") {
     const serverId = sanitizeId(input.serverId);
     const accessContext = sanitizeId(input.accessContext);
     if (!SERVER_PATTERN.test(serverId) || !accessContext) {
-      return unknownTargetRef("access_target_missing", evidenceFor(input), "access");
+      return unknownTargetRef(
+        "access_target_missing",
+        evidenceFor(input),
+        "access",
+      );
     }
-    return completeTargetRef("access", `access:${serverId}:${accessContext}`, "actor_private", [
-      ...evidenceFor(input),
-      "side_safe_access_context_target",
-    ]);
+    return completeTargetRef(
+      "access",
+      `access:${serverId}:${accessContext}`,
+      "actor_private",
+      [...evidenceFor(input), "side_safe_access_context_target"],
+    );
   }
   if (input.kind === "abilitySource") {
     const sourceDefinitionId = sanitizeId(input.sourceDefinitionId);
     const abilityId = sanitizeId(input.abilityId);
     if (!sourceDefinitionId || !abilityId) {
-      return unknownTargetRef("ability_source_missing", evidenceFor(input), "abilitySource");
+      return unknownTargetRef(
+        "ability_source_missing",
+        evidenceFor(input),
+        "abilitySource",
+      );
     }
     return completeTargetRef(
       "abilitySource",
@@ -145,31 +189,61 @@ export function buildTargetRef(input: TargetRefInput): TargetRef {
     );
   }
   if (input.kind === "hidden_blocked") {
-    return hiddenBlockedTargetRef(input.blocker ?? "hidden_target_blocked", evidenceFor(input));
+    return hiddenBlockedTargetRef(
+      input.blocker ?? "hidden_target_blocked",
+      evidenceFor(input),
+    );
   }
-  return unknownTargetRef(input.blocker ?? "target_ref_unknown_unprojected", evidenceFor(input));
+  return unknownTargetRef(
+    input.blocker ?? "target_ref_unknown_unprojected",
+    evidenceFor(input),
+  );
 }
 
 export function targetRefFromIdentity(
   identity: string | undefined,
   evidence: readonly string[] = [],
 ): TargetRef {
-  if (!identity || identity === "unknown_target" || identity === "target_context_unresolved") {
-    return buildTargetRef({ kind: "unknown_unprojected", blocker: "target_identity_unresolved", evidence });
+  if (
+    !identity ||
+    identity === "unknown_target" ||
+    identity === "target_context_unresolved"
+  ) {
+    return buildTargetRef({
+      kind: "unknown_unprojected",
+      blocker: "target_identity_unresolved",
+      evidence,
+    });
   }
   if (identity === "none") return buildTargetRef({ kind: "none", evidence });
   if (identity === "unknown_hidden_blocked") {
-    return buildTargetRef({ kind: "hidden_blocked", blocker: "hidden_target_identity_blocked", evidence });
+    return buildTargetRef({
+      kind: "hidden_blocked",
+      blocker: "hidden_target_identity_blocked",
+      evidence,
+    });
   }
   if (identity === "blocked_by_hard_gate") {
-    return buildTargetRef({ kind: "unknown_unprojected", blocker: "target_blocked_by_hard_gate", evidence });
+    return buildTargetRef({
+      kind: "unknown_unprojected",
+      blocker: "target_blocked_by_hard_gate",
+      evidence,
+    });
   }
   const parts = identity.split(":");
   if (parts[0] === "server") {
     if (parts[1] === "unknown") {
-      return buildTargetRef({ kind: "unknown_unprojected", blocker: "server_target_missing", evidence });
+      return buildTargetRef({
+        kind: "unknown_unprojected",
+        blocker: "server_target_missing",
+        evidence,
+      });
     }
-    return buildTargetRef({ kind: "server", serverId: parts[1] ?? "", evidence });
+    return buildTargetRef({
+      kind: "server",
+      serverId: parts[1] ?? "",
+      evidence,
+    });
   }
   if (parts[0] === "ice") {
     return buildTargetRef({
@@ -219,7 +293,11 @@ export function targetRefFromIdentity(
 
 export function targetRefIsCompleteOrIrrelevant(targetRef: TargetRef): boolean {
   if (targetRef.kind === "none") return true;
-  return targetRef.sideSafe && targetRef.snapshotStable && targetRef.blocker === undefined;
+  return (
+    targetRef.sideSafe &&
+    targetRef.snapshotStable &&
+    targetRef.blocker === undefined
+  );
 }
 
 export function targetRefIsRedactionSafe(value: unknown): boolean {
@@ -227,7 +305,10 @@ export function targetRefIsRedactionSafe(value: unknown): boolean {
 }
 
 function completeTargetRef(
-  kind: Exclude<TargetRefKind, "none" | "hidden_blocked" | "unknown_unprojected">,
+  kind: Exclude<
+    TargetRefKind,
+    "none" | "hidden_blocked" | "unknown_unprojected"
+  >,
   identity: string,
   redactionPolicy: TargetRefRedactionPolicy,
   evidence: readonly string[],
@@ -245,7 +326,10 @@ function completeTargetRef(
   };
 }
 
-function hiddenBlockedTargetRef(blocker: string, evidence: readonly string[]): TargetRef {
+function hiddenBlockedTargetRef(
+  blocker: string,
+  evidence: readonly string[],
+): TargetRef {
   return {
     schemaVersion: "target-ref-v1",
     kind: "hidden_blocked",

@@ -3,7 +3,9 @@ import { type AiDecisionInput } from "@netgrid/shared";
 import { selectEfficientPostBidLinkOption } from "../trace-bid-efficiency";
 import { type LatestTraceContext } from "./trace-context";
 
-type PendingChoice = NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>;
+type PendingChoice = NonNullable<
+  AiDecisionInput["playerView"]["pendingChoice"]
+>;
 
 export function selectedPostBidLinkChoiceOptionId(
   choice: PendingChoice,

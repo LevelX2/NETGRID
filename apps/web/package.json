@@ -17,6 +17,7 @@
     "@netgrid/catalog": "workspace:*",
     "@netgrid/decks": "workspace:*",
     "@netgrid/engine": "workspace:*",
+    "@netgrid/runtime-data": "workspace:*",
     "@netgrid/shared": "workspace:*",
     "lucide-react": "^1.14.0",
     "next": "^16.2.4",
@@ -25,6 +26,7 @@
     "use-intl": "^4.13.7"
   },
   "devDependencies": {
+    "@netgrid/cards": "workspace:*",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3"
   }

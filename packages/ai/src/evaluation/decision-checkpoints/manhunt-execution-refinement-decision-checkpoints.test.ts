@@ -71,7 +71,7 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
     expect(result.ok, diagnostic(result)).toBe(true);
   });
 
-  it("keeps the live score-remote owner when City Surveillance has no legal punish route", () => {
+  it("draws toward missing R&D defense when City Surveillance has no legal punish route", () => {
     const unfundedEngine = mutateFixture(cp04Json, (current) => {
       current.engine.testOnlyGameState.corp.credits = 0;
       restoreCorpScoredAgendaToRd(current);
@@ -80,18 +80,11 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
       // only legal hand-management route an overflow-credit conversion.
       moveFirstCorpCardToArchives(current, URBAN_RENEWAL);
       current.expectation = {
-        acceptableActions: [
-          {
-            actionId:
-              "corp.install_card.corp_onr_v1_279_wall-of-static_2.new_remote.corp_onr_v1_279_wall-of-static_2",
-          },
-        ],
+        acceptableActions: [{ type: "draw_card" }],
         planExecution: {
           acceptablePlanKinds: ["corp.defend_servers"],
-          acceptableCapabilities: ["improve_remote_protection_path"],
-          requiredAssessmentEvidence: [
-            "corp_layered_remote_ice_staging:remote:strategic-score-remote:new_remote:corp.install_card.corp_onr_v1_279_wall-of-static_2.new_remote.corp_onr_v1_279_wall-of-static_2:layers_0:unrezzed_0:rez_gap_3",
-          ],
+          acceptableCapabilities: ["allocate_server_defense"],
+          requiredAssessmentEvidence: ["corp_missing_concrete_defense_draw:rd"],
         },
       };
     });
@@ -105,7 +98,9 @@ describe("Manhunt execution refinement exact decision checkpoints", () => {
     const result = runAiDecisionCheckpoint(fixture(cp05Json));
 
     expect(result.ok, diagnostic(result)).toBe(true);
-    expect(result.decision?.decisionDebug?.planKind).toBe("corp.defend_servers");
+    expect(result.decision?.decisionDebug?.planKind).toBe(
+      "corp.defend_servers",
+    );
   });
 
   it("does not invent an unmeasurable HQ layer for a restored matchpoint agenda", () => {

@@ -4,9 +4,7 @@ import {
   type AiDecisionActionAlternative,
 } from "@netgrid/shared";
 import type { AiSimulationConfig } from "./ai-simulation-config";
-import {
-  selfplayTraceFactsForSimulationDecision as selfplayTraceFactsForSimulationDecisionRuntime,
-} from "./selfplay-trace-facts";
+import { selfplayTraceFactsForSimulationDecision as selfplayTraceFactsForSimulationDecisionRuntime } from "./selfplay-trace-facts";
 import { safeSelfplayFacts } from "./selfplay-trace-mining";
 
 export function selfplayTraceFactsForSimulationDecision(

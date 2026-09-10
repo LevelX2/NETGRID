@@ -99,8 +99,7 @@ describe("Closed Accounts decision-local real-Engine punish quote", () => {
       quoteCorpPunishRoute(state, request),
     );
     expect(
-      quoted.playerView.corpPunishRouteQuoteSet?.routes[0]
-        ?.nonDamageEnvelope,
+      quoted.playerView.corpPunishRouteQuoteSet?.routes[0]?.nonDamageEnvelope,
     ).toEqual({
       runnerCreditLoss: {
         knowledge: "exact_public",

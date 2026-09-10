@@ -73,7 +73,9 @@ export function traceSuccessEffectForCardImplementation(
   ) {
     const amount = counterEffects[0]?.amount ?? 0;
     if (!Number.isInteger(amount) || amount <= 0)
-      throw new Error("Trace counter success effect requires a positive amount.");
+      throw new Error(
+        "Trace counter success effect requires a positive amount.",
+      );
     return {
       type: "add_counter",
       counterType: counterEffects[0]!.counterType,
@@ -97,7 +99,9 @@ export function traceSuccessEffectForCardImplementation(
     if (!Number.isInteger(tagAmount) || tagAmount <= 0)
       throw new Error("Trace tag success effect requires a positive amount.");
     if (!Number.isInteger(counterAmount) || counterAmount <= 0)
-      throw new Error("Trace counter success effect requires a positive amount.");
+      throw new Error(
+        "Trace counter success effect requires a positive amount.",
+      );
     return {
       type: "add_tag_and_counter",
       tagAmount,
@@ -134,9 +138,13 @@ export function traceSuccessEffectForCardImplementation(
     const effect = preventableDamageEffects[0]!;
     const amount = effect.amount;
     if (effect.damageType !== "net")
-      throw new Error("Printed trace preventable damage supports Net damage only.");
+      throw new Error(
+        "Printed trace preventable damage supports Net damage only.",
+      );
     if (!Number.isInteger(amount) || amount <= 0)
-      throw new Error("Trace Net damage success effect requires a positive amount.");
+      throw new Error(
+        "Trace Net damage success effect requires a positive amount.",
+      );
     return { type: "net_damage", amount };
   }
   if (
@@ -153,7 +161,9 @@ export function traceSuccessEffectForCardImplementation(
   ) {
     const amount = runLockEffects[0]?.amount ?? 0;
     if (!Number.isInteger(amount) || amount <= 0)
-      throw new Error("Trace run-lock success effect requires a positive amount.");
+      throw new Error(
+        "Trace run-lock success effect requires a positive amount.",
+      );
     return { type: "end_run_and_run_lock", amount };
   }
   if (
@@ -170,7 +180,9 @@ export function traceSuccessEffectForCardImplementation(
   ) {
     const amount = runLockEffects[0]?.amount ?? 0;
     if (!Number.isInteger(amount) || amount <= 0)
-      throw new Error("Trace run-lock success effect requires a positive amount.");
+      throw new Error(
+        "Trace run-lock success effect requires a positive amount.",
+      );
     return { type: "end_run_trash_program_and_run_lock", amount };
   }
   if (
@@ -187,7 +199,9 @@ export function traceSuccessEffectForCardImplementation(
   ) {
     const amount = unpreventableMeatEffects[0]?.amount ?? 0;
     if (!Number.isInteger(amount) || amount <= 0)
-      throw new Error("Trace unpreventable meat damage success effect requires a positive amount.");
+      throw new Error(
+        "Trace unpreventable meat damage success effect requires a positive amount.",
+      );
     return {
       type: "end_run_trash_hardware_and_unpreventable_meat_damage",
       amount,
@@ -214,5 +228,7 @@ export function traceSuccessEffectForCardImplementation(
       targetCardInstanceId: options.targetCardInstanceId,
     };
   }
-  throw new Error("Unsupported CardImplementation trace success effect sequence.");
+  throw new Error(
+    "Unsupported CardImplementation trace success effect sequence.",
+  );
 }

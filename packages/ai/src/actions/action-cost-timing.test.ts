@@ -6,6 +6,85 @@ import {
 } from "./action-cost-timing";
 
 describe("action cost and timing profiles", () => {
+  it.each([0, 3])(
+    "does not classify an exactly normalized %i-credit payment twice",
+    (credits) => {
+      const profile = costProfileForAction({
+        ...action("trigger_ability", { paymentAmount: credits }),
+        costs: [{ credits }],
+      });
+      expect(profile).toMatchObject({
+        creditCost: credits,
+        costKnownStatus: "known",
+        additionalCosts: [],
+      });
+    },
+  );
+
+  it("retains conflicting cash evidence and noncash requirements for explicit resolution", () => {
+    const profile = costProfileForAction({
+      ...action("trigger_ability", {
+        paymentAmount: 1,
+        cardImplementationTapSourceCost: true,
+      }),
+      costs: [{ credits: 3 }],
+    });
+    expect(profile.additionalCosts).toEqual([
+      "paymentAmount",
+      "cardImplementationTapSourceCost",
+    ]);
+  });
+  it.each([
+    { runnerInstallPaymentSourceAmounts: undefined },
+    { runnerInstallPaymentSourceAmounts: "1" },
+    {
+      runnerInstallPaymentSourceIds: "installer,installer",
+      runnerInstallPaymentSourceAmounts: "1,1",
+    },
+    { runnerInstallPaymentSourceAmounts: "-2" },
+    {
+      runnerInstallPaymentSourceAmounts: "6",
+      runnerInstallPaymentHostedCredits: 6,
+    },
+  ])(
+    "rejects an incomplete or inconsistent program-install pool payment: %j",
+    (override) => {
+      expect(() =>
+        costProfileForAction({
+          ...action("install_card", {
+            runnerInstallPaymentSourceIds: "installer",
+            runnerInstallPaymentHostedCredits: 2,
+            ...override,
+          } as never),
+          side: "runner",
+          costs: [{ clicks: 1, credits: 5 }],
+        }),
+      ).toThrow(
+        expect.objectContaining({
+          code: "invalid_runner_install_payment",
+          owner: "action_semantics",
+        }),
+      );
+    },
+  );
+
+  it("separates an exact program-install pool payment from liquid credits", () => {
+    const profile = costProfileForAction({
+      ...action("install_card", {
+        runnerInstallPaymentSourceIds: "installer",
+        runnerInstallPaymentSourceAmounts: "2",
+        runnerInstallPaymentHostedCredits: 2,
+      }),
+      side: "runner",
+      costs: [{ clicks: 1, credits: 5 }],
+    });
+    expect(profile).toMatchObject({
+      creditCost: 3,
+      hostedCreditCost: 2,
+      costKnownStatus: "known",
+    });
+  });
+
   it("binds X bounds, selected value and explicit reserve from LegalAction payload", () => {
     const profile = costProfileForAction(
       action("play_operation", {

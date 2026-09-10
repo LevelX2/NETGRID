@@ -1,3 +1,4 @@
+import { runnerRunExitAction } from "../runtime/runner-fort-pass-toll";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type {
   GuaranteeLevel,
@@ -70,6 +71,7 @@ export type RunnerPressureSignal = {
   runActionIds?: string[];
   runActionValues?: Record<string, number>;
   runActionEvidence?: Record<string, string[]>;
+  runActionDifferentialPayoffIds?: string[];
   runActionRouteDiagnostics?: Record<string, RunnerRunActionRouteDiagnostic>;
   runActionExclusions?: Record<string, string[]>;
   preparationActionIds?: string[];
@@ -221,7 +223,8 @@ export type RunnerDevelopmentSignal = {
     | "open_restricted_sequence"
     | "execute_restricted_sequence"
     | "complete_restricted_sequence"
-    | "resolve_event_install_choice";
+    | "resolve_event_install_choice"
+    | "resolve_delayed_program_search_choice";
   purposeCode?: string;
   assignedDomainPlanIds: string[];
   duplicateAlreadyInstalled: boolean;
@@ -244,8 +247,18 @@ export type RunnerDevelopmentSignal = {
     sourceDefinitionId: string;
     sourceCapabilityKey: string;
     selectedAtStateVersion?: number;
+    engineContinuationAtStateVersion?: number;
     targetCardInstanceId: string;
     targetDefinitionId: string;
+    installMemorySacrificeBinding?: {
+      targetCardInstanceId: string;
+      targetMemoryCost: number;
+      requiredMemoryToFree: number;
+      selectedCards: Array<{
+        cardInstanceId: string;
+        memoryCost: number;
+      }>;
+    };
   };
   eventInstallChoiceBinding?: {
     choiceId: string;
@@ -255,9 +268,30 @@ export type RunnerDevelopmentSignal = {
     sourceCapabilityKey: string;
     sourceStateVersion: number;
     originSelectedAtStateVersion: number;
+    choiceSource: string;
     selectedOptionId: string;
     targetCardInstanceId: string;
     targetDefinitionId: string;
+  };
+  delayedProgramSearchChoiceBinding?: {
+    choiceId: string;
+    choiceSource: string;
+    actionId: string;
+    sourceCardInstanceId: string;
+    sourceDefinitionId: string;
+    sourceStateVersion: number;
+    selectedOptionId: string;
+    targetCardInstanceId: string;
+    targetDefinitionId: string;
+    installMemorySacrificeBinding?: {
+      targetCardInstanceId: string;
+      targetMemoryCost: number;
+      requiredMemoryToFree: number;
+      selectedCards: Array<{
+        cardInstanceId: string;
+        memoryCost: number;
+      }>;
+    };
   };
   programSearchCommitment?: {
     sourceCardInstanceId: string;
@@ -271,6 +305,7 @@ export type RunnerDevelopmentSignal = {
     plannedAtStateVersion: number;
     selectedActionId?: string;
     selectedAtStateVersion?: number;
+    engineContinuationAtStateVersion?: number;
   };
   recoverySearchCommitment?: {
     sourceCardInstanceId: string;
@@ -282,6 +317,7 @@ export type RunnerDevelopmentSignal = {
     plannedAtStateVersion: number;
     selectedActionId?: string;
     selectedAtStateVersion?: number;
+    engineContinuationAtStateVersion?: number;
   };
 };
 
@@ -335,6 +371,10 @@ export type RunnerExposeInformationSignal = {
 export type RunnerTerminalWinSignal = {
   terminalId: string;
   semanticActionTypes: string[];
+  actionIds?: string[];
+  terminalCondition?:
+    | "corp_empty_rd_mandatory_draw"
+    | "runner_immediate_agenda_point";
   evidenceCode: string;
 };
 
@@ -416,21 +456,31 @@ function terminalWinModule(): PlanModule {
     },
     materialize: (instance, _assessment, context) => {
       const current = state<TerminalWinState>(instance);
+      const forcesCorpMandatoryDraw =
+        current.signal.terminalCondition === undefined ||
+        current.signal.terminalCondition === "corp_empty_rd_mandatory_draw";
       return {
         step: {
           stepId: `${instance.instanceId}:force_terminal`,
           capability: {
-            capabilityId: "force_corp_mandatory_draw_deckout",
+            capabilityId: forcesCorpMandatoryDraw
+              ? "force_corp_mandatory_draw_deckout"
+              : "convert_immediate_runner_agenda_point",
             semanticActionTypes: current.signal.semanticActionTypes,
           },
-          purpose:
-            "End the Runner turn to force the rules-proven empty-R&D mandatory draw.",
+          purpose: forcesCorpMandatoryDraw
+            ? "End the Runner turn to force the rules-proven empty-R&D mandatory draw."
+            : "Resolve the exact legal action that immediately reaches the Runner agenda-point threshold.",
         },
         candidates: terminalWinCandidates(context, current.signal),
-        earlyEndTurnJustification: {
-          kind: "rules_proven_terminal_win",
-          terminalCondition: "corp_empty_rd_mandatory_draw",
-        },
+        ...(forcesCorpMandatoryDraw
+          ? {
+              earlyEndTurnJustification: {
+                kind: "rules_proven_terminal_win" as const,
+                terminalCondition: "corp_empty_rd_mandatory_draw" as const,
+              },
+            }
+          : {}),
       };
     },
   };
@@ -479,6 +529,13 @@ export function runnerVoluntaryActionFamilyOwner(
   candidate: ActionSemanticCandidate,
   planDomain: RunnerPlanDomain,
 ): PlanModule["moduleId"] | undefined {
+  if (
+    (planDomain.terminalWins ?? []).some((signal) =>
+      signal.actionIds?.includes(candidate.actionId),
+    )
+  ) {
+    return "runner.secure_terminal_win";
+  }
   if (candidate.semanticActionType === "turn_flow.end_turn") {
     return planDomain.terminalWins.length > 0
       ? "runner.secure_terminal_win"
@@ -590,6 +647,13 @@ export function runnerVoluntaryActionFamilyOwner(
       return "runner.develop_board_and_hand";
   }
   if (candidate.semanticActionType === "draw.card") {
+    if (
+      planDomain.developments.some((signal) =>
+        signal.actionIds.includes(candidate.actionId),
+      )
+    ) {
+      return "runner.develop_board_and_hand";
+    }
     const concreteDrawPurpose =
       planDomain.coverageGaps.some((gap) => gap.deckHasAnswer) ||
       planDomain.defense.handSize < planDomain.defense.minimumHandBuffer;
@@ -1110,7 +1174,10 @@ function runWindowModule(): PlanModule {
           { kind: "run_window", signal } satisfies RunWindowState,
           "P3",
           [],
-          { kind: "window", id: signal.windowId },
+          signal.serverId &&
+            signal.purposeCode === "continue_engine_restricted_run_sequence"
+            ? { kind: "server", id: signal.serverId }
+            : { kind: "window", id: signal.windowId },
           runWindowCandidates(context, signal).length > 0,
           signal.evidenceCode,
           signal.rootPlanInstanceId,
@@ -1118,11 +1185,18 @@ function runWindowModule(): PlanModule {
       ),
     assess: (instance, context, portfolio) => {
       const current = state<RunWindowState>(instance);
+      const candidates = runWindowCandidates(context, current.signal);
+      const value =
+        current.signal.purposeCode === "continue_engine_restricted_run_sequence"
+          ? candidates.length > 0
+            ? Math.max(...candidates.map((entry) => entry.stepValue))
+            : 0
+          : 100;
       return assessment(
         instance,
         "P3",
-        runWindowCandidates(context, current.signal).length > 0,
-        100,
+        candidates.length > 0,
+        value,
         portfolio.executorInstanceId,
       );
     },
@@ -1412,6 +1486,9 @@ function pressureCandidates(
         stepValue: signal.marginalValue,
       }));
   }
+  const exactDifferentialPayoffActionIds = new Set(
+    signal.runActionDifferentialPayoffIds ?? [],
+  );
   const runCandidates = context.actionCandidates.filter(
     (candidate) =>
       (signal.runActionIds?.length
@@ -1436,10 +1513,12 @@ function pressureCandidates(
       (candidate) =>
         candidate.semanticActionType !== "play.runner_event" ||
         !directRunAvailable ||
+        exactDifferentialPayoffActionIds.has(candidate.actionId) ||
         runnerCardRunHasVisibleDifferentialPayoff(
           context.input,
           candidate,
           signal.serverId,
+          domain(context).runTargetEvaluations,
         ),
     )
     .map((candidate) => ({
@@ -1451,6 +1530,7 @@ function pressureCandidates(
           candidate,
           signal.serverId,
           directRunAvailable,
+          domain(context).runTargetEvaluations,
         ) +
         (signal.runActionValues?.[candidate.actionId] ?? 0),
     }));
@@ -1461,6 +1541,7 @@ function runnerCardRunRoutePreference(
   candidate: ActionSemanticCandidate,
   serverId: RunnerPressureSignal["serverId"],
   directRunAvailable: boolean,
+  runTargetEvaluations?: readonly RunnerRunTargetEvaluation[],
 ): number {
   if (candidate.semanticActionType !== "play.runner_event") return 0;
   if (
@@ -1469,6 +1550,7 @@ function runnerCardRunRoutePreference(
       context.input,
       candidate,
       serverId,
+      runTargetEvaluations,
     )
   ) {
     return 5;
@@ -1486,6 +1568,7 @@ export function runnerCardRunHasVisibleDifferentialPayoff(
   input: PlanSchedulerContext["input"],
   candidate: ActionSemanticCandidate,
   serverId: string,
+  runTargetEvaluations?: readonly RunnerRunTargetEvaluation[],
 ): boolean {
   const server = input.playerView.servers.find(
     (entry) => entry.id === serverId,
@@ -1523,12 +1606,58 @@ export function runnerCardRunHasVisibleDifferentialPayoff(
     if (target === "derez" || target.includes("trash_rezzed_ice_on_fort")) {
       return server.ice.some((ice) => ice.rezzed === true);
     }
-    if (target === "bypass_first_ice") return server.ice.length > 0;
+    if (target === "bypass_first_ice") {
+      if (server.ice.length === 0) return false;
+      const bypassEvaluation = runTargetEvaluations?.find(
+        (evaluation) => evaluation.actionId === candidate.actionId,
+      );
+      if (!bypassEvaluation) return true;
+      const directRunDominates = runTargetEvaluations?.some(
+        (evaluation) =>
+          evaluation.actionId !== bypassEvaluation.actionId &&
+          evaluation.runActionProjection.sourceKind === "basic_action" &&
+          evaluation.targetServerId === bypassEvaluation.targetServerId &&
+          evaluation.accessServerId === bypassEvaluation.accessServerId &&
+          runnerBasicRunDominatesBypassRoute(evaluation, bypassEvaluation),
+      );
+      return directRunDominates !== true;
+    }
     if (target === "run.trace_link_bonus") {
       return visibleRunnerTraceThreatOnServer(input, serverId);
     }
     return true;
   });
+}
+
+function runnerBasicRunDominatesBypassRoute(
+  directRun: RunnerRunTargetEvaluation,
+  bypassRun: RunnerRunTargetEvaluation,
+): boolean {
+  if (
+    directRun.pathPassability !== "reachable" ||
+    bypassRun.pathPassability !== "reachable" ||
+    directRun.recommendation !== bypassRun.recommendation ||
+    directRun.accessPayoff !== bypassRun.accessPayoff ||
+    directRun.knownAccessState !== bypassRun.knownAccessState ||
+    directRun.multiaccessAvailable !== bypassRun.multiaccessAvailable ||
+    directRun.runCommitment !== bypassRun.runCommitment ||
+    directRun.creditsAfterRun < bypassRun.creditsAfterRun ||
+    (directRun.unknownUnrezzedIceCount ?? 0) >
+      (bypassRun.unknownUnrezzedIceCount ?? 0) ||
+    (directRun.visibleIceHazardPenalty ?? 0) >
+      (bypassRun.visibleIceHazardPenalty ?? 0) ||
+    (directRun.futureClicksLost ?? 0) > (bypassRun.futureClicksLost ?? 0) ||
+    (directRun.expectedTagsFromVisibleIce ?? 0) >
+      (bypassRun.expectedTagsFromVisibleIce ?? 0) ||
+    (directRun.unavoidableVisibleIceHazardCount ?? 0) >
+      (bypassRun.unavoidableVisibleIceHazardCount ?? 0) ||
+    directRun.visibleTraceTagHazardUnavoidable === true ||
+    directRun.randomBreakOrDamageRiskAssessment !== undefined ||
+    bypassRun.randomBreakOrDamageRiskAssessment !== undefined
+  ) {
+    return false;
+  }
+  return true;
 }
 
 function remoteCandidates(
@@ -1570,6 +1699,9 @@ function developmentCandidates(
     .filter(
       (candidate) =>
         signal.actionIds.includes(candidate.actionId) &&
+        !context.actionDispositions?.some(
+          (disposition) => disposition.actionId === candidate.actionId,
+        ) &&
         (signal.phase === "fund" ||
           signal.phase === "open_restricted_sequence" ||
           signal.phase === "execute_restricted_sequence" ||
@@ -1757,7 +1889,10 @@ function runWindowCandidateValue(
   assessedValue?: number,
 ): number {
   if (safetyIntent === "jack_out") {
-    if (candidate.actionType === "jack_out")
+    const action = context.input.legalActions.find(
+      (entry) => entry.actionId === candidate.actionId,
+    );
+    if (action && runnerRunExitAction(action))
       return (assessedValue ?? 0) + 5_000;
     if (candidate.actionType === "continue_run")
       return (assessedValue ?? 0) - 5_000;
@@ -1768,6 +1903,8 @@ function runWindowCandidateValue(
     if (candidate.actionType === "continue_run") return 0;
   }
   if (candidate.actionType === "steal_agenda") return 400;
+  if (candidate.actionType === "start_run" && assessedValue !== undefined)
+    return assessedValue;
   if (!commitment) return assessedValue ?? 100;
   if (commitment.intendedAction === "decline") {
     if (candidate.actionType === "decline_trash")
@@ -1804,14 +1941,23 @@ function terminalWinCandidates(
   context: PlanSchedulerContext,
   signal: RunnerTerminalWinSignal,
 ): PlanMaterialization["candidates"] {
+  const exactActionIds = new Set(signal.actionIds ?? []);
   return context.actionCandidates
     .filter(
       (candidate) =>
         signal.semanticActionTypes.includes(candidate.semanticActionType) &&
-        candidate.actionType === "end_turn" &&
-        candidate.sourceKind === "game_rule",
+        (exactActionIds.size > 0
+          ? exactActionIds.has(candidate.actionId)
+          : candidate.actionType === "end_turn" &&
+            candidate.sourceKind === "game_rule"),
     )
-    .map((candidate) => ({ candidate, stepValue: 1 }));
+    .map((candidate) => ({
+      candidate,
+      stepValue:
+        signal.terminalCondition === "runner_immediate_agenda_point"
+          ? 10_000
+          : 1,
+    }));
 }
 
 function domain(context: PlanSchedulerContext): RunnerPlanDomain {

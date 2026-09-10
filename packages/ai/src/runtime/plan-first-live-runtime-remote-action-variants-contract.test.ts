@@ -82,7 +82,7 @@ describe("plan-first Remote same-server action variants", () => {
     }).chooseSemanticRuntimeAction(input, {});
 
     expect(decision).toMatchObject({
-      actionId: insideJob.actionId,
+      actionId: direct.actionId,
       reasonCode: "plan_first.runner.contest_remote",
       fallbackUsed: false,
       decisionDebug: {
@@ -91,10 +91,11 @@ describe("plan-first Remote same-server action variants", () => {
     });
     const alternatives = decision.decisionDebug?.actionAlternatives ?? [];
     expect(
-      alternatives.find((entry) => entry.actionId === direct.actionId)?.whyNot,
+      alternatives.find((entry) => entry.actionId === insideJob.actionId)
+        ?.whyNot,
     ).toEqual(
       expect.arrayContaining([
-        "not_selected_by_plan:plan:runner.contest_remote:remote%3Aremote_1",
+        "runner_remote_card_run_has_no_visible_differential_payoff_over_basic_run",
       ]),
     );
 

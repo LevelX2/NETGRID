@@ -61,10 +61,7 @@ export function executeTagEffect(input: CardEffectFamilyInput): boolean {
         throw new Error(
           "remove_tags effect requires a removeRunnerTags execution context.",
         );
-      const removeResult = context.removeRunnerTags(
-        effect.mode,
-        effect.amount,
-      );
+      const removeResult = context.removeRunnerTags(effect.mode, effect.amount);
       publicPayload.removedTags =
         Number(publicPayload.removedTags ?? 0) + removeResult.removedTags;
       publicPayload.runnerTagsAfter = removeResult.runnerTagsAfter;

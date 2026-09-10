@@ -23,6 +23,7 @@ import {
   type ActiveMatchWorkspace,
   type ConnectionState,
 } from "./AppShell";
+import { AppRuntimeStatus } from "./AppRuntimeStatus";
 
 type PendingUndoState =
   | {
@@ -125,7 +126,7 @@ export function ActiveMatchTopbar({
           wordmarkSrc={appWordmarkSrc}
         />
         <div className="topbarMeta">
-          <span className="topbarVersion">{appStatusLabel}</span>
+          <AppRuntimeStatus statusLabel={appStatusLabel} />
           <ConnectionBadge text={statusText} state={connection} />
         </div>
       </div>

@@ -11,6 +11,10 @@ describe("independent card and tooltip display preferences", () => {
       new URL("../features/cards/CardPreviewPanel.tsx", import.meta.url),
       "utf8",
     );
+    const styles = readFileSync(
+      new URL("./globals.css", import.meta.url),
+      "utf8",
+    );
 
     expect(settingsSource).toContain("export function CardDisplayModeSelector");
     expect(settingsSource).toContain("function CardTooltipModeSelector");
@@ -24,6 +28,13 @@ describe("independent card and tooltip display preferences", () => {
       settingsSource.indexOf("<CardImageSkinSettings"),
     );
     expect(settingsSource).toContain('className="cardTooltipSettingsControls"');
+    expect(settingsSource).toContain(
+      'className="cardTooltipSecondaryControls"',
+    );
+    expect(settingsSource).toContain('disabled={mode === "image"}');
+    expect(styles).toMatch(
+      /\.cardTooltipSecondaryControls\s*\{[\s\S]*?grid-template-columns: minmax\(150px, 0\.65fr\) minmax\(240px, 1\.35fr\);/u,
+    );
     expect(previewSource).not.toContain("CardDisplayModeSelector");
     expect(previewSource).not.toContain("CardTooltipModeSelector");
     expect(previewSource).not.toContain("onDisplayMode");
@@ -43,13 +54,13 @@ describe("independent card and tooltip display preferences", () => {
       "utf8",
     );
     const deckSource = readFileSync(
-      new URL(
-        "../features/decks/DeckCardTooltipTrigger.tsx",
-        import.meta.url,
-      ),
+      new URL("../features/decks/DeckCardTooltipTrigger.tsx", import.meta.url),
       "utf8",
     );
-    const styles = readFileSync(new URL("./globals.css", import.meta.url), "utf8");
+    const styles = readFileSync(
+      new URL("./globals.css", import.meta.url),
+      "utf8",
+    );
 
     for (const source of [cardSource, chronicleSource, deckSource]) {
       expect(source).toContain('width: "max-content"');

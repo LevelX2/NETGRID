@@ -8732,16 +8732,14 @@
     "contractKind": "correctness",
     "acceptableActions": [
       {
-        "type": "play_event",
-        "sourceDefinitionId": "onr_v1_108_score"
+        "actionId": "runner.start_run.rd"
       }
     ],
+    "forbiddenActions": [{ "type": "start_run", "targetServerId": "archives" }],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.develop_board_and_hand"],
-      "acceptableCapabilities": ["develop_onr_v1_108_score"],
-      "requiredAssessmentEvidence": [
-        "source:own_runner_hand:card_specific_purpose:economy_engine:setup"
-      ]
+      "acceptablePlanKinds": ["runner.pressure_central"],
+      "acceptableCapabilities": ["pressure_rd_access"],
+      "requiredAssessmentEvidence": ["target:rd"]
     }
   }
 }

@@ -199,7 +199,10 @@ describe("runner run target guidance", () => {
   });
 
   it("varies only the disposition of safe probes and becomes more cautious on visible signals", () => {
-    const contexts = Array.from({ length: 24 }, (_, index) => `context-${index}`);
+    const contexts = Array.from(
+      { length: 24 },
+      (_, index) => `context-${index}`,
+    );
     const withoutSignal = contexts.map((context) =>
       runnerPressureProbeDisposition(context, "none"),
     );
@@ -209,15 +212,18 @@ describe("runner run target guidance", () => {
 
     expect(new Set(withoutSignal)).toEqual(new Set(["probe", "hold"]));
     expect(new Set(withSuspectedDamage)).toEqual(new Set(["probe", "hold"]));
-    expect(withoutSignal.filter((value) => value === "probe").length).toBeGreaterThan(
+    expect(
+      withoutSignal.filter((value) => value === "probe").length,
+    ).toBeGreaterThan(
       withSuspectedDamage.filter((value) => value === "probe").length,
     );
-    expect(
+    expect(runnerPressureProbeDisposition("same-context", "confirmed")).toBe(
       runnerPressureProbeDisposition("same-context", "confirmed"),
-    ).toBe(runnerPressureProbeDisposition("same-context", "confirmed"));
+    );
     expect(
       contexts.every(
-        (context) => runnerPressureProbeDisposition(context, "critical") === "hold",
+        (context) =>
+          runnerPressureProbeDisposition(context, "critical") === "hold",
       ),
     ).toBe(true);
   });

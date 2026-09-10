@@ -123,9 +123,9 @@ function selectAiMatchesWithoutTraceRows(
      HAVING traceCount = 0
      ORDER BY m.updated_at DESC
      LIMIT 20`;
-  const rows = (maxCreatedAt
-    ? db.prepare(sql).all(maxCreatedAt)
-    : db.prepare(sql).all()) as Array<{
+  const rows = (
+    maxCreatedAt ? db.prepare(sql).all(maxCreatedAt) : db.prepare(sql).all()
+  ) as Array<{
     matchId: string;
     mode: string;
     status: string;
@@ -267,7 +267,8 @@ function findRepoRoot(start: string): string {
       // Continue walking up.
     }
     const parent = dirname(current);
-    if (parent === current) throw new Error(`Could not find NETGRID repo root from ${start}`);
+    if (parent === current)
+      throw new Error(`Could not find NETGRID repo root from ${start}`);
     current = parent;
   }
 }

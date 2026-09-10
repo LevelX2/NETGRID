@@ -21,9 +21,7 @@ import {
   isPublicRunnerInstalledModifier,
   isPublicScoredCorpAgendaModifier,
 } from "./card-implementation-modifiers";
-import {
-  currentTemporaryBreakerStrengthModifiers,
-} from "../game/state/temporary-breaker-strength";
+import { currentTemporaryBreakerStrengthModifiers } from "../game/state/temporary-breaker-strength";
 
 export type ActiveModifierDuration =
   | "encounter"
@@ -215,7 +213,9 @@ export function collectActiveModifiers(state: GameState): ActiveModifier[] {
       amount: active.modifier.operation === "reduce" ? -amount : amount,
       duration: "while_rezzed",
       target: {
-        kind: active.modifier.appliesTo.sameServerAsSource ? "server" : "subtype",
+        kind: active.modifier.appliesTo.sameServerAsSource
+          ? "server"
+          : "subtype",
         ...(active.modifier.appliesTo.subtype
           ? { subtype: active.modifier.appliesTo.subtype }
           : {}),
@@ -251,9 +251,10 @@ export function collectActiveModifiers(state: GameState): ActiveModifier[] {
     ).filter((candidate) =>
       isPublicRunnerInstalledModifier(candidate.modifier),
     ),
-    ...activeCardImplementationModifiersForCorpRoot(state, "ice_strength").filter(
-      (candidate) => isPublicRezzedCorpRootModifier(candidate.modifier),
-    ),
+    ...activeCardImplementationModifiersForCorpRoot(
+      state,
+      "ice_strength",
+    ).filter((candidate) => isPublicRezzedCorpRootModifier(candidate.modifier)),
     ...activeCardImplementationModifiersForScoredCorpAgendas(
       state,
       "ice_strength",
@@ -353,7 +354,8 @@ export function collectActiveModifiers(state: GameState): ActiveModifier[] {
 
   const breakCostAmount = positiveInteger(run.breakSubroutineAdditionalCost);
   if (breakCostAmount > 0) {
-    const sourceDefinitionId = run.breakSubroutineAdditionalCostSourceDefinitionId;
+    const sourceDefinitionId =
+      run.breakSubroutineAdditionalCostSourceDefinitionId;
     if (!sourceDefinitionId)
       throw new Error(
         "Run break-subroutine cost modifier requires its source definition.",

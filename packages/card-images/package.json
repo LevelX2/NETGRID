@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./paths": "./src/paths.ts",
     "./runtime": "./src/runtime-entry.ts"
   },
   "types": "./src/index.ts",

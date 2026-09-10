@@ -26,6 +26,101 @@ import { readKnownCorpCentralAgendaThreat } from "./corp-central-defense-facts-a
 import { assessCorpScoreProtection } from "./corp-score-protection-assessment";
 
 describe("exact Corp ICE rez route", () => {
+  it("declines future-only encounter tax at the innermost ICE", () => {
+    resetResidentPlanPortfolioMemory();
+    const fixture = engineIceRezWindow("onr_v1_222_ball-and-chain", 0, {
+      corpCredits: 5,
+      includeDecline: true,
+    });
+    expect(fixture.input.playerView.run?.position).toMatchObject({
+      iceIndex: 0,
+    });
+    expect(fixture.sourceCard.effectivePostRezRunQuote).toMatchObject({
+      complete: true,
+      effectiveRunQuote: {
+        subroutines: [
+          expect.objectContaining({ type: "set_run_encounter_tax" }),
+        ],
+      },
+    });
+    expect(
+      projectExactCorpIceRezRoute({ ...fixture, targetServerId: "rd" }),
+    ).toBeUndefined();
+    const decline = fixture.input.legalActions.find(
+      (action) => action.type === "decline_rez",
+    )!;
+    expect(
+      chooseAiAction(fixture.input, {
+        persistTacticalPlanMemory: false,
+        corpTurnPlannerMode: "legacy_compare",
+      }),
+    ).toMatchObject({
+      actionId: decline.actionId,
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId:
+            "plan:corp.defend_servers:server-defense-portfolio",
+          leafExecutorInstanceId:
+            "plan:corp.defend_servers:server-defense-portfolio",
+        },
+      },
+    });
+  });
+
+  it("keeps future encounter tax when an inner ICE remains on the same run", () => {
+    const fixture = engineIceRezWindow("onr_v1_222_ball-and-chain", 0, {
+      futureIceDefinitionId: "simple_barrier_ice",
+      futureIceRezzed: true,
+      includeDecline: true,
+    });
+    expect(fixture.input.playerView.run?.position).toMatchObject({
+      iceIndex: 1,
+    });
+    expect(
+      projectExactCorpIceRezRoute({ ...fixture, targetServerId: "rd" }),
+    ).toMatchObject({
+      routeKind: "qualitative_encounter_defense",
+    });
+  });
+
+  it("keeps Corp defense ownership for a visible run-cap block despite abundant Runner credits", () => {
+    resetResidentPlanPortfolioMemory();
+    const fixture = engineIceRezWindow("onr_v1_279_wall-of-static", 0, {
+      corpCredits: 27,
+      runnerCredits: 11,
+      runnerPrograms: ["onr_v1_039_krash"],
+      runnerRunOnlyAction: true,
+      includeDecline: true,
+    });
+    expect(fixture.sourceCard.effectiveRezResourceExchangeQuote).toMatchObject({
+      complete: true,
+      runnerBreak: { requiredCredits: 6, canPayFromCurrentCredits: false },
+    });
+    const decision = chooseAiAction(fixture.input, {
+      persistTacticalPlanMemory: false,
+      corpTurnPlannerMode: "legacy_compare",
+    });
+    expect(decision).toMatchObject({
+      actionId: fixture.engineAction.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId:
+            "plan:corp.defend_servers:server-defense-portfolio",
+          leafExecutorInstanceId:
+            "plan:corp.defend_servers:server-defense-portfolio",
+          selectedStep: {
+            planInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+            stepId:
+              "plan:corp.defend_servers:server-defense-portfolio:allocate",
+          },
+        },
+      },
+    });
+  });
+
   it("accepts the Engine's ordinary rez_ice action without an optional server payload", () => {
     const { input, candidate, sourceCard, engineAction } = engineIceRezWindow(
       "simple_barrier_ice",
@@ -109,6 +204,65 @@ describe("exact Corp ICE rez route", () => {
       effect: "satisfied",
       accessBlock: {
         hardEndTheRunSubroutineCount: 1,
+        reason: "no_visible_eligible_breaker",
+      },
+    });
+    expect(
+      chooseAiAction(fixture.input, {
+        persistTacticalPlanMemory: false,
+        corpTurnPlannerMode: "legacy_compare",
+      }),
+    ).toMatchObject({
+      actionId: fixture.engineAction.actionId,
+      reasonCode: "plan_first.corp.defend_servers",
+      fallbackUsed: false,
+    });
+  });
+
+  it("compares exact alternate-subtype rez variants and chooses the one that blocks the visible rig", () => {
+    resetResidentPlanPortfolioMemory();
+    const fixture = engineIceRezWindow("onr_proteus_017_credit-blocks", 0, {
+      corpCredits: 14,
+      runnerCredits: 9,
+      runnerPrograms: ["onr_v1_040_loony-goon", "onr_v1_014_codecracker"],
+      selectedSubtypesAfterRez: "wall",
+      includeAllRezVariants: true,
+      includeDecline: true,
+    });
+
+    expect(fixture.engineAction).toMatchObject({
+      costs: [{ credits: 7 }],
+      payload: {
+        variableRezKind: "alternate_subtype",
+        variableRezValue: 1,
+        selectedSubtypesAfterRez: "wall",
+      },
+    });
+    expect(
+      fixture.sourceCard.effectiveRezActionResourceExchangeQuotes?.find(
+        (entry) => entry.actionId === fixture.engineAction.actionId,
+      ),
+    ).toMatchObject({
+      quote: {
+        complete: true,
+        runnerBreakUnavailable: {
+          reason: "no_visible_eligible_breaker",
+        },
+      },
+    });
+    expect(
+      projectExactCorpIceRezRoute({
+        input: fixture.input,
+        candidate: fixture.candidate,
+        sourceCard: fixture.sourceCard,
+        targetServerId: "rd",
+      }),
+    ).toMatchObject({
+      actionId: fixture.engineAction.actionId,
+      totalRezCredits: 7,
+      routeKind: "access_reduction",
+      effect: "satisfied",
+      accessBlock: {
         reason: "no_visible_eligible_breaker",
       },
     });
@@ -1701,6 +1855,7 @@ function engineIceRezWindow(
   options?: {
     corpCredits?: number;
     runnerCredits?: number;
+    runnerRunOnlyAction?: boolean;
     runnerScoredAgendaPoints?: number;
     runnerPrograms?: readonly string[];
     runnerProgramStrengthModifiers?: readonly number[];
@@ -1708,6 +1863,8 @@ function engineIceRezWindow(
     futureIceDefinitionId?: string;
     futureIceRezzed?: boolean;
     rezSubroutineCount?: number;
+    selectedSubtypesAfterRez?: string;
+    includeAllRezVariants?: boolean;
     includeDecline?: boolean;
     useEntrapmentFixtureDeck?: boolean;
     useExistingIceFromDeck?: boolean;
@@ -1814,9 +1971,26 @@ function engineIceRezWindow(
   } else {
     addUnrezzedIce(state, iceId, definitionId, "rd");
   }
+  if (options?.runnerRunOnlyAction) {
+    const resourceId = "exact_run_only_source" as CardInstanceId;
+    state.runner.rig.resources.push(resourceId);
+    state.cardInstances[resourceId] = {
+      instanceId: resourceId,
+      definitionId: "onr_v1_187_wilson-weeflerunner-apprentice",
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "rig" },
+      faceup: true,
+      rezzed: true,
+      advancementCounters: 0,
+      strengthModifier: 0,
+    };
+  }
   const startRun = getLegalActions(state, "runner").find(
     (action) =>
-      action.type === "start_run" && action.payload?.serverId === "rd",
+      action.type === "start_run" &&
+      action.payload?.serverId === "rd" &&
+      (!options?.runnerRunOnlyAction || action.payload?.runOnlyAction === true),
   );
   if (!startRun) throw new Error("Engine did not expose the R&D run");
   const result = applyAction(state, {
@@ -1835,7 +2009,10 @@ function engineIceRezWindow(
       action.payload?.cardId === iceId &&
       (options?.rezSubroutineCount === undefined ||
         action.payload.effectiveSubroutineCountAfterRez ===
-          options.rezSubroutineCount),
+          options.rezSubroutineCount) &&
+      (options?.selectedSubtypesAfterRez === undefined ||
+        action.payload.selectedSubtypesAfterRez ===
+          options.selectedSubtypesAfterRez),
   );
   if (!rezAction) {
     throw new Error("Engine did not expose a payable ICE rez action");
@@ -1846,7 +2023,12 @@ function engineIceRezWindow(
     playerView,
     eventTail: [],
     legalActions: [
-      rezAction,
+      ...(options?.includeAllRezVariants
+        ? currentActions.filter(
+            (action) =>
+              action.type === "rez_ice" && action.payload?.cardId === iceId,
+          )
+        : [rezAction]),
       ...(options?.includeDecline
         ? currentActions.filter((action) => action.type === "decline_rez")
         : []),

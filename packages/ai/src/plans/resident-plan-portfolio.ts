@@ -181,7 +181,8 @@ export type ResidentSelectedActionOrigin = Readonly<{
     | Readonly<{
         immediateChoicePolicy: "resolve_runner_run_start_order";
         sourceStepId: string;
-        sourceActionType: "start_run";
+        sourceActionType: "start_run" | "play_event" | "activated_card_ability";
+        continuedThroughStateVersion: number;
       }>
     | Readonly<{
         immediateChoicePolicy: "resolve_runner_vacuum_link_rewind";
@@ -343,11 +344,23 @@ export function reconcileResidentPlanPortfolio(
     }
   }
 
+  const pruned = pruneOrphanedSupportProviders(nextInstances);
+  for (const orphan of pruned.removed) {
+    transitions.push(
+      transition(
+        orphan,
+        params.stateVersion,
+        "invalidated",
+        "support_parent_not_resident",
+      ),
+    );
+  }
+
   let portfolio: ResidentPlanPortfolio = {
     schemaVersion: RESIDENT_PLAN_PORTFOLIO_SCHEMA_VERSION,
     side: params.side,
     stateVersion: params.stateVersion,
-    instances: stableInstances(nextInstances),
+    instances: stableInstances(pruned.instances),
     completionHistory: pruneHistory(
       params.previous?.completionHistory ?? [],
       params.stateVersion,
@@ -460,16 +473,18 @@ export function applyPlanOutcomeReceipt(
         completedRecord(updated, receipt.stateVersionAfter),
       ]
     : portfolio.completionHistory;
+  const retainedInstances = terminal
+    ? portfolio.instances.filter(
+        (candidate) => candidate.instanceId !== updated.instanceId,
+      )
+    : portfolio.instances.map((candidate) =>
+        candidate.instanceId === updated.instanceId ? updated : candidate,
+      );
+  const pruned = pruneOrphanedSupportProviders(retainedInstances);
   const next: ResidentPlanPortfolio = {
     ...portfolio,
     stateVersion: receipt.stateVersionAfter,
-    instances: terminal
-      ? portfolio.instances.filter(
-          (candidate) => candidate.instanceId !== updated.instanceId,
-        )
-      : portfolio.instances.map((candidate) =>
-          candidate.instanceId === updated.instanceId ? updated : candidate,
-        ),
+    instances: stableInstances(pruned.instances),
     completionHistory: pruneHistory(history, receipt.stateVersionAfter),
     transitions: [
       ...portfolio.transitions,
@@ -485,6 +500,14 @@ export function applyPlanOutcomeReceipt(
               : "outcome_progress",
         receipt.reasonCode,
       ),
+      ...pruned.removed.map((orphan) =>
+        transition(
+          orphan,
+          receipt.stateVersionAfter,
+          "invalidated",
+          "support_parent_not_resident",
+        ),
+      ),
     ],
   };
   if (portfolio.executorInstanceId === updated.instanceId && terminal) {
@@ -495,6 +518,34 @@ export function applyPlanOutcomeReceipt(
   }
   assertResidentPlanPortfolio(next, timingPoint);
   return next;
+}
+
+function pruneOrphanedSupportProviders(
+  instances: readonly PlanInstance[],
+): Readonly<{
+  instances: PlanInstance[];
+  removed: PlanInstance[];
+}> {
+  let retained = [...instances];
+  const removed: PlanInstance[] = [];
+  while (true) {
+    const residentIds = new Set(
+      retained.map((instance) => instance.instanceId),
+    );
+    const orphans = retained.filter(
+      (instance) =>
+        instance.parentNeedId !== undefined &&
+        (!instance.parentInstanceId ||
+          !residentIds.has(instance.parentInstanceId)),
+    );
+    if (orphans.length === 0) break;
+    const orphanIds = new Set(orphans.map((instance) => instance.instanceId));
+    removed.push(...orphans.map((instance) => structuredClone(instance)));
+    retained = retained.filter(
+      (instance) => !orphanIds.has(instance.instanceId),
+    );
+  }
+  return { instances: retained, removed };
 }
 
 export function assertResidentPlanPortfolio(
@@ -628,7 +679,17 @@ export function assertResidentPlanPortfolio(
       (selectedActionOrigin.immediateChoicePolicy ===
         "resolve_runner_run_start_order" &&
         selectedActionOrigin.sourceStepId.trim().length > 0 &&
-        selectedActionOrigin.sourceActionType === "start_run") ||
+        Number.isSafeInteger(
+          selectedActionOrigin.continuedThroughStateVersion,
+        ) &&
+        selectedActionOrigin.continuedThroughStateVersion >=
+          selectedActionOrigin.selectedAtStateVersion &&
+        selectedActionOrigin.continuedThroughStateVersion ===
+          portfolio.stateVersion &&
+        (selectedActionOrigin.sourceActionType === "start_run" ||
+          selectedActionOrigin.sourceActionType === "play_event" ||
+          selectedActionOrigin.sourceActionType ===
+            "activated_card_ability")) ||
       (selectedActionOrigin.immediateChoicePolicy ===
         "resolve_runner_vacuum_link_rewind" &&
         selectedActionOrigin.sourceStepId.trim().length > 0 &&
@@ -686,7 +747,11 @@ export function assertResidentPlanPortfolio(
             selectedActionOrigin.eligibleArchiveCardInstanceIds.length));
     if (
       selectedActionOrigin.selectedActionId.trim().length === 0 ||
-      selectedActionOrigin.selectedAtStateVersion !== portfolio.stateVersion ||
+      (selectedActionOrigin.immediateChoicePolicy ===
+      "resolve_runner_run_start_order"
+        ? selectedActionOrigin.selectedAtStateVersion > portfolio.stateVersion
+        : selectedActionOrigin.selectedAtStateVersion !==
+          portfolio.stateVersion) ||
       !originPolicyValid ||
       !root ||
       !executor ||

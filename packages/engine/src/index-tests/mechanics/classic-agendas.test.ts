@@ -245,6 +245,17 @@ describe("Classic Agenda Implementation Smokes", () => {
     expect(state.runner.scoreArea).not.toContain(theoremId);
     expect(state.runner.rig.programs).toContain(theoremId);
     expect(state.runner.memoryUsed).toBe(2);
+    for (const side of ["runner", "corp"] as const) {
+      const view = getPlayerView(state, side);
+      const rig = side === "runner" ? view.own.rig : view.opponent.rig;
+      expect(rig?.find((card) => card.instanceId === theoremId)).toMatchObject({
+        known: true,
+        type: "agenda",
+        owner: "corp",
+        controller: "runner",
+        installedAsRunnerProgram: { memoryCost: 2, scoreAsAgendaAction: true },
+      });
+    }
     expect(
       state.cardInstances[theoremId]?.installedAsRunnerProgram,
     ).toMatchObject({
@@ -278,7 +289,9 @@ describe("Classic Agenda Implementation Smokes", () => {
   });
 
   it("scores declined Theorem Proof from the same fort at the next Runner turn with replay-safe state", () => {
-    let state = classicAgendaGame("classic-theorem-proof-declined-delayed-score");
+    let state = classicAgendaGame(
+      "classic-theorem-proof-declined-delayed-score",
+    );
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state = toRunnerTurnFromCorpMain(state);
     state.runner.credits = 20;
@@ -315,7 +328,9 @@ describe("Classic Agenda Implementation Smokes", () => {
         resolveAt: "runner_start_turn",
       }),
     ]);
-    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(hiddenHqId);
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+      hiddenHqId,
+    );
 
     state = apply(state, "runner", (action) => action.type === "end_turn");
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");

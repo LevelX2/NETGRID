@@ -21,6 +21,7 @@ import {
   corpEconomyActionIsOwned,
   assessCorpSpendAgainstScoreFundingMilestones,
   corpScoreFundingMilestone,
+  knownScoreProtectionFundingGap,
   corpGenericDefensePriorityClass,
   corpScorePriorityClass,
   createCorpCorePlanModules,
@@ -133,12 +134,34 @@ describe("Corp core plan modules", () => {
     const revealedCardIds = ["keeper-1", "razor-wire-1"];
     const serverIds = ["hq", "rd", "remote_1", "new_remote"];
     const options = revealedCardIds.flatMap((cardId) =>
-      serverIds.map((serverId) => ({
-        id: `agenda_purge_${cardId}_${serverId}_fixed`,
-        label: `${cardId} -> ${serverId}`,
-        value: `${cardId}|${serverId}|fixed`,
-        selectable: true,
-      })),
+      serverIds.flatMap((serverId) =>
+        cardId === "keeper-1"
+          ? [
+              {
+                id: `agenda_purge_${cardId}_${serverId}_alternate_subtype:base`,
+                label: `${cardId} -> ${serverId} as wall`,
+                value: `${cardId}|${serverId}|alternate_subtype:base`,
+                selectable: true,
+                metadata: { creditCost: 0 },
+              },
+              {
+                id: `agenda_purge_${cardId}_${serverId}_alternate_subtype:alternate`,
+                label: `${cardId} -> ${serverId} as code gate`,
+                value: `${cardId}|${serverId}|alternate_subtype:alternate`,
+                selectable: true,
+                metadata: { creditCost: 1 },
+              },
+            ]
+          : [
+              {
+                id: `agenda_purge_${cardId}_${serverId}_fixed`,
+                label: `${cardId} -> ${serverId}`,
+                value: `${cardId}|${serverId}|fixed`,
+                selectable: true,
+                metadata: { creditCost: 0 },
+              },
+            ],
+      ),
     );
     const choiceId = "security-purge-targets";
     const actionId = "resolve-security-purge";
@@ -191,6 +214,7 @@ describe("Corp core plan modules", () => {
           { id: "remote_1", label: "Remote 1", ice: [], root: [] },
         ],
         own: {
+          credits: 4,
           scoreArea: [
             {
               instanceId: "security-purge-1",
@@ -220,7 +244,7 @@ describe("Corp core plan modules", () => {
           {
             cardId: "keeper-1",
             serverId: "hq",
-            optionId: "agenda_purge_keeper-1_hq_fixed",
+            optionId: "agenda_purge_keeper-1_hq_alternate_subtype:base",
           },
           {
             cardId: "razor-wire-1",
@@ -1426,6 +1450,49 @@ describe("Corp core plan modules", () => {
           evidenceCode:
             "engine_certified_global_defense_access_probability_reduced",
         },
+      ],
+    });
+    const instance = instantiatePlanProposal(
+      module.discover(corpContext)[0]!,
+      10,
+    );
+    const materialized = module.materialize(instance, {} as never, corpContext);
+
+    expect(
+      bindBestCurrentPlanRoute({
+        side: "corp",
+        stateVersion: 10,
+        timingPoint: "corp_action.main",
+        planInstanceId: instance.instanceId,
+        ...materialized,
+      }).head.actionId,
+    ).toBe("install-hq");
+  });
+
+  it("applies the global central allocation before per-signal urgency bands", () => {
+    const installHq = {
+      ...cardAction("install-hq", "install.card", "ice-shared"),
+      sourceCardInstanceId: "ice-shared-1",
+      targetContext: targetContext("hq", "server"),
+    };
+    const installRd = {
+      ...cardAction("install-rd", "install.card", "ice-shared"),
+      sourceCardInstanceId: "ice-shared-1",
+      targetContext: targetContext("rd", "server"),
+    };
+    const allocation = knownCentralAllocation("hq");
+    const module = corpModule("corp.defend_servers");
+    const corpContext = context([installHq, installRd], {
+      centralDefenseAllocation: {
+        ...allocation,
+        evidence: {
+          hq: { ...allocation.evidence.hq, threat: "material" },
+          rd: { ...allocation.evidence.rd, threat: "acute" },
+        },
+      },
+      defenseNeeds: [
+        productiveDefenseSignal(installHq, "hq"),
+        productiveDefenseSignal(installRd, "rd", "acute"),
       ],
     });
     const instance = instantiatePlanProposal(
@@ -4879,6 +4946,7 @@ describe("Corp core plan modules", () => {
     const nextMilestone = corpScoreFundingMilestone(next, 3);
 
     expect(firstMilestone).toMatchObject({
+      basis: { kind: "score_route_gap" },
       targetCredits: 5,
       observedCredits: 2,
       remainingGap: 3,
@@ -4890,6 +4958,111 @@ describe("Corp core plan modules", () => {
       targetCredits: 5,
       observedCredits: 3,
       remainingGap: 2,
+    });
+  });
+
+  it("publishes the known installed protection gap even without a currently legal ICE-install head", () => {
+    const project = scoreProject(
+      "agenda:agenda-1:remote_1",
+      "P4",
+      "corp_score_protection_required:remote_1",
+    );
+    project.phase = "install_agenda";
+    project.feasible = false;
+    project.protectionNeed = knownProtectionNeed({
+      projectId: project.projectId,
+      needId: `score-protection:${project.projectId}`,
+      observedAtStateVersion: 10,
+      minimumAdditionalCreditsToSatisfy: 6,
+    });
+
+    expect(knownScoreProtectionFundingGap(project)).toBe(6);
+    expect(corpScoreFundingMilestone(project, 0)).toMatchObject({
+      basis: {
+        kind: "score_protection_gap",
+        needId: `score-protection:${project.projectId}`,
+        observedAtStateVersion: 10,
+      },
+      targetCredits: 6,
+      observedCredits: 0,
+      remainingGap: 6,
+    });
+  });
+
+  it("does not turn an unknown protection future into a score funding objective", () => {
+    const project = scoreProject(
+      "agenda:agenda-unknown:remote_1",
+      "P4",
+      "corp_score_protection_unknown:remote_1",
+    );
+    project.phase = "install_agenda";
+    project.feasible = false;
+    project.protectionNeed = {
+      ...knownProtectionNeed({
+        projectId: project.projectId,
+        needId: `score-protection:${project.projectId}`,
+        observedAtStateVersion: 10,
+        minimumAdditionalCreditsToSatisfy: 6,
+      }),
+      baseline: {
+        knowledge: "unknown",
+        availableCorpCredits: 0,
+        availableCorpClicks: 3,
+        availableCorpAgendaPoints: 0,
+        totalScoreReserveCredits: 0,
+        hardClickReserve: 0,
+        fundedProtection: false,
+        unknownReason: "missing_rez_cost_quote",
+        evidence: [],
+      },
+    };
+
+    expect(knownScoreProtectionFundingGap(project)).toBeUndefined();
+    expect(corpScoreFundingMilestone(project, 0)).toBeUndefined();
+  });
+
+  it("keeps independently known score-conversion funding progress when protection remains unknown", () => {
+    const project = scoreProject(
+      "agenda:agenda-unknown-with-conversion:remote_1",
+      "P4",
+      "corp_score_protection_unknown:remote_1",
+    );
+    project.phase = "install_agenda";
+    project.feasible = false;
+    project.conversion = {
+      remainingAdvancementClicks: 4,
+      remainingScoreCredits: 4,
+      existingRemoteIceCount: 1,
+      existingRemoteRezzedIceCount: 0,
+      residentParent: false,
+      runnerStealPoints: 2,
+      runnerStealIsMatchpoint: false,
+      realizedStrategySupportCount: 0,
+    };
+    project.protectionNeed = {
+      ...knownProtectionNeed({
+        projectId: project.projectId,
+        needId: `score-protection:${project.projectId}`,
+        observedAtStateVersion: 10,
+        minimumAdditionalCreditsToSatisfy: 6,
+      }),
+      baseline: {
+        knowledge: "unknown",
+        availableCorpCredits: 0,
+        availableCorpClicks: 3,
+        availableCorpAgendaPoints: 0,
+        totalScoreReserveCredits: 0,
+        hardClickReserve: 0,
+        fundedProtection: false,
+        unknownReason: "missing_rez_cost_quote",
+        evidence: [],
+      },
+    };
+
+    expect(corpScoreFundingMilestone(project, 0)).toMatchObject({
+      basis: { kind: "score_conversion_floor" },
+      targetCredits: 4,
+      remainingGap: 4,
     });
   });
 
@@ -5988,15 +6161,18 @@ function fundingOnlyDefenseSignal(
 
 function productiveDefenseSignal(
   install: ActionSemanticCandidate,
+  serverId = "rd",
+  centralPressure?: "material" | "acute" | "terminal",
 ): CorpDefenseSignal {
   return {
     kind: "generic",
-    defenseId: `install:rd:${install.actionId}`,
-    serverId: "rd",
+    defenseId: `install:${serverId}:${install.actionId}`,
+    serverId,
     phase: "install_ice",
     sourceDefinitionIds: [install.sourceDefinitionId!],
     actionIds: [install.actionId],
     urgent: false,
+    ...(centralPressure ? { centralPressure } : {}),
     installRoute: {
       disposition: "productive",
       progressKind: "funded_structured_central_defense",
@@ -6005,7 +6181,7 @@ function productiveDefenseSignal(
         actionId: install.actionId,
         sourceCardInstanceId: install.sourceCardInstanceId!,
         sourceDefinitionId: install.sourceDefinitionId!,
-        targetServerId: "rd",
+        targetServerId: serverId,
         effect: "progress",
         probability: { numerator: 0, denominator: 1 },
         totalCredits: 0,
@@ -6027,6 +6203,43 @@ function emptyPortfolio(): ResidentPlanPortfolio {
     instances: [],
     completionHistory: [],
     transitions: [],
+  };
+}
+
+function knownProtectionNeed(params: {
+  projectId: string;
+  needId: string;
+  observedAtStateVersion: number;
+  minimumAdditionalCreditsToSatisfy: number;
+}): NonNullable<CorpCorePlanDomain["scoreProjects"][number]["protectionNeed"]> {
+  const projection = knownInstallProjection({
+    actionId: "not-currently-legal-install",
+    sourceCardInstanceId: "ice-1",
+    sourceDefinitionId: "ice-def",
+    targetServerId: "remote_1",
+    effect: "no_progress",
+    probability: { numerator: 1, denominator: 1 },
+    totalCredits: params.minimumAdditionalCreditsToSatisfy,
+    availableCredits: 0,
+    availableClicks: 3,
+    preservesReserves: false,
+    minimumAdditionalCreditsToSatisfy: params.minimumAdditionalCreditsToSatisfy,
+  });
+  return {
+    needId: params.needId,
+    parentProjectId: params.projectId,
+    targetServerId: "remote_1",
+    observedAtStateVersion: params.observedAtStateVersion,
+    objective: {
+      kind: "funded_remote_access_risk",
+      maximumRunnerAccessSuccessProbability: {
+        numerator: 1,
+        denominator: 2,
+      },
+      policySource: "test",
+    },
+    scoreReserve: { creditBreakdown: [], hardClickReserve: 0 },
+    baseline: projection.after,
   };
 }
 

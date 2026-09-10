@@ -170,7 +170,9 @@ export function handleCorpTraceDamageActivatedAbility(
     sourceDefinitionId: definition.id,
     ...profileResultFields(profile),
     ...(legalAction.payload
-      ? { resolvedPayload: legalAction.payload as CorpTraceDamageAbilityPayload }
+      ? {
+          resolvedPayload: legalAction.payload as CorpTraceDamageAbilityPayload,
+        }
       : {}),
     ...(legalAction.resolvedEffects
       ? { resolvedEffects: legalAction.resolvedEffects }
@@ -203,7 +205,9 @@ function profileResultFields(
     return {
       traceStarted: true,
       traceBase: profile.traceBase,
-      ...(profile.traceLimit !== undefined ? { traceLimit: profile.traceLimit } : {}),
+      ...(profile.traceLimit !== undefined
+        ? { traceLimit: profile.traceLimit }
+        : {}),
     };
   }
   return {

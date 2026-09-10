@@ -105,6 +105,8 @@ export type RunActionProjection = {
     sourceDefinitionId?: string;
   };
   runnerCreditGainOnCorpRez?: number;
+  successfulRunRunnerCreditGain?: number;
+  successfulRunRunnerCreditGainRequiresOpponentCredits?: boolean;
   damagePreventionPool?: number;
   eventApproachIceExposeBeforeRez?: boolean;
   spendLimit?: number;
@@ -161,7 +163,7 @@ export type RandomBreakOrDamageRiskAssessment = {
   randomBreakUsesLikely: number;
   visibleSubroutinesLikely: number;
   maxSingleFailureDamage: number;
-  unbrokenTargetDamageLikely: number;
+  unbrokenEncounterDamageLikely: number;
   worstCaseDamageEstimate: number;
   lethalOnAnyFailure: boolean;
   lethalOnHighFailure: boolean;

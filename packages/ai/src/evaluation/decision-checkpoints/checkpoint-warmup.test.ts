@@ -27,7 +27,9 @@ describe("decision checkpoint warmup", () => {
       inputForStateVersion: input,
       choose: (value, persist) => {
         if (persist) persisted.push(value.playerView.stateVersion);
-        return decision(value.playerView.stateVersion === 2 ? "current" : "same");
+        return decision(
+          value.playerView.stateVersion === 2 ? "current" : "same",
+        );
       },
       resetMemory,
     });

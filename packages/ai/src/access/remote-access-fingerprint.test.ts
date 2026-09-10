@@ -34,10 +34,12 @@ describe("remote access fingerprint", () => {
       root: [{ instanceId: "b", definitionId: "same", known: true }],
     });
 
-    expect(remoteAccessFingerprintChanged({
-      previousFingerprint: previous,
-      currentFingerprint: current,
-    })).toBe(true);
+    expect(
+      remoteAccessFingerprintChanged({
+        previousFingerprint: previous,
+        currentFingerprint: current,
+      }),
+    ).toBe(true);
   });
 
   it("changes when visible counters or root count changes", () => {
@@ -65,9 +67,11 @@ describe("remote access fingerprint", () => {
       ],
     });
 
-    expect(remoteAccessFingerprintChanged({
-      previousFingerprint: previous,
-      currentFingerprint: current,
-    })).toBe(true);
+    expect(
+      remoteAccessFingerprintChanged({
+        previousFingerprint: previous,
+        currentFingerprint: current,
+      }),
+    ).toBe(true);
   });
 });

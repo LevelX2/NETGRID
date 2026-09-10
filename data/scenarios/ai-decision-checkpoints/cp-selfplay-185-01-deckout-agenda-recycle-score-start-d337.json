@@ -39,9 +39,7 @@
             "title": "Data Fort Reclamation",
             "definitionId": "onr_v1_197_data-fort-reclamation",
             "type": "agenda",
-            "subtypes": [
-              "gray_ops"
-            ],
+            "subtypes": ["gray_ops"],
             "rulesText": "Gain [10] and choose up to four cards stored in HQ when you score Data Fort Reclamation. Create a new data fort using the cards chosen. Install the cards one at a time; you may rez them when you install them. Then, return to the bank any of the [10] not spent.",
             "rezzed": false,
             "advancementCounters": 0,
@@ -56,9 +54,7 @@
             "title": "Corporate War",
             "definitionId": "onr_v1_196_corporate-war",
             "type": "agenda",
-            "subtypes": [
-              "black_ops"
-            ],
+            "subtypes": ["black_ops"],
             "rulesText": "If you have [12] or more bits in your pool when you score Corporate War, gain [12]; otherwise, lose all bits.",
             "rezzed": false,
             "advancementCounters": 0,
@@ -73,9 +69,7 @@
             "title": "Corporate War",
             "definitionId": "onr_v1_196_corporate-war",
             "type": "agenda",
-            "subtypes": [
-              "black_ops"
-            ],
+            "subtypes": ["black_ops"],
             "rulesText": "If you have [12] or more bits in your pool when you score Corporate War, gain [12]; otherwise, lose all bits.",
             "rezzed": false,
             "advancementCounters": 0,
@@ -90,9 +84,7 @@
             "title": "Corporate Downsizing",
             "definitionId": "onr_v1_194_corporate-downsizing",
             "type": "agenda",
-            "subtypes": [
-              "gray_ops"
-            ],
+            "subtypes": ["gray_ops"],
             "rulesText": "When you score Corporate Downsizing, show to Runner any number of agenda cards stored in HQ. Gain bits equal to twice the combined agenda points of these cards; then shuffle them into R&D.",
             "rezzed": false,
             "advancementCounters": 0,
@@ -107,9 +99,7 @@
             "title": "Hostile Takeover",
             "definitionId": "onr_v1_203_hostile-takeover",
             "type": "agenda",
-            "subtypes": [
-              "gray_ops"
-            ],
+            "subtypes": ["gray_ops"],
             "rulesText": "Gain [5] when you score Hostile Takeover.",
             "rezzed": false,
             "advancementCounters": 0,
@@ -196,9 +186,7 @@
             "title": "Olivia Salazar",
             "definitionId": "onr_v1_363_olivia-salazar",
             "type": "upgrade",
-            "subtypes": [
-              "sysop"
-            ],
+            "subtypes": ["sysop"],
             "rulesText": "For half cost, rounded down, rez a piece of ice installed on this fort. Derez that ice at the end of the run. Use this ability only once during each run on this fort.",
             "rezCost": 0,
             "rezzed": true,
@@ -246,10 +234,7 @@
             "title": "Washed-Up Solo Construct",
             "definitionId": "onr_proteus_045_washed-up-solo-construct",
             "type": "ice",
-            "subtypes": [
-              "killer",
-              "sentry"
-            ],
+            "subtypes": ["killer", "sentry"],
             "rulesText": "*Trash a program unless Runner pays [1]. Gain [3] when you rez Washed-Up Solo Construct.",
             "rezCost": 0,
             "rezzed": true,
@@ -282,9 +267,7 @@
             "title": "Olivia Salazar",
             "definitionId": "onr_v1_363_olivia-salazar",
             "type": "upgrade",
-            "subtypes": [
-              "sysop"
-            ],
+            "subtypes": ["sysop"],
             "rulesText": "For half cost, rounded down, rez a piece of ice installed on this fort. Derez that ice at the end of the run. Use this ability only once during each run on this fort.",
             "rezCost": 0,
             "rezzed": true,
@@ -299,10 +282,7 @@
             "title": "Washed-Up Solo Construct",
             "definitionId": "onr_proteus_045_washed-up-solo-construct",
             "type": "ice",
-            "subtypes": [
-              "killer",
-              "sentry"
-            ],
+            "subtypes": ["killer", "sentry"],
             "rulesText": "*Trash a program unless Runner pays [1]. Gain [3] when you rez Washed-Up Solo Construct.",
             "rezCost": 0,
             "rezzed": true,
@@ -335,9 +315,7 @@
             "title": "Olivia Salazar",
             "definitionId": "onr_v1_363_olivia-salazar",
             "type": "upgrade",
-            "subtypes": [
-              "sysop"
-            ],
+            "subtypes": ["sysop"],
             "rulesText": "For half cost, rounded down, rez a piece of ice installed on this fort. Derez that ice at the end of the run. Use this ability only once during each run on this fort.",
             "rezCost": 0,
             "rezzed": true,
@@ -352,9 +330,7 @@
             "title": "Tokyo-Chiba Infighting",
             "definitionId": "onr_v1_371_tokyo-chiba-infighting",
             "type": "upgrade",
-            "subtypes": [
-              "region"
-            ],
+            "subtypes": ["region"],
             "rulesText": "Gain [2] after each unsuccessful run on this fort.\nRez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.",
             "rezCost": 0,
             "rezzed": true,
@@ -468,9 +444,7 @@
             "title": "Temple Microcode Outlet",
             "definitionId": "onr_v1_114_temple-microcode-outlet",
             "type": "event",
-            "subtypes": [
-              "bbs"
-            ],
+            "subtypes": ["bbs"],
             "rulesText": "Search your stack for a program. Show that program to the Corp, and then bring it into your hand. Shuffle your stack afterwards.",
             "cost": 1,
             "playCost": {
@@ -542,9 +516,7 @@
             "title": "Temple Microcode Outlet",
             "definitionId": "onr_v1_114_temple-microcode-outlet",
             "type": "event",
-            "subtypes": [
-              "bbs"
-            ],
+            "subtypes": ["bbs"],
             "rulesText": "Search your stack for a program. Show that program to the Corp, and then bring it into your hand. Shuffle your stack afterwards.",
             "cost": 1,
             "playCost": {
@@ -598,9 +570,7 @@
             "title": "Temple Microcode Outlet",
             "definitionId": "onr_v1_114_temple-microcode-outlet",
             "type": "event",
-            "subtypes": [
-              "bbs"
-            ],
+            "subtypes": ["bbs"],
             "rulesText": "Search your stack for a program. Show that program to the Corp, and then bring it into your hand. Shuffle your stack afterwards.",
             "cost": 1,
             "playCost": {
@@ -704,9 +674,7 @@
             "title": "Corolla Speed Chip",
             "definitionId": "onr_v1_124_corolla-speed-chip",
             "type": "hardware",
-            "subtypes": [
-              "chip"
-            ],
+            "subtypes": ["chip"],
             "rulesText": "Put [1] from the bank on Corolla Speed Chip when it is installed. Use this bit only to pay for using killers during runs. If you use the bit, replace it from the bank at the start of your next turn.",
             "installCost": 1,
             "rezzed": true,
@@ -720,9 +688,7 @@
             "title": "Zetatech Mem Chip",
             "definitionId": "onr_v1_146_zetatech-mem-chip",
             "type": "hardware",
-            "subtypes": [
-              "chip"
-            ],
+            "subtypes": ["chip"],
             "rulesText": "Provides +2 MU.",
             "installCost": 3,
             "memoryLimitBonus": 2,
@@ -879,9 +845,7 @@
             "title": "Corporate Downsizing",
             "definitionId": "onr_v1_194_corporate-downsizing",
             "type": "agenda",
-            "subtypes": [
-              "gray_ops"
-            ],
+            "subtypes": ["gray_ops"],
             "rulesText": "When you score Corporate Downsizing, show to Runner any number of agenda cards stored in HQ. Gain bits equal to twice the combined agenda points of these cards; then shuffle them into R&D.",
             "rezzed": true,
             "advancementCounters": 0,
@@ -896,9 +860,7 @@
             "title": "Corporate Downsizing",
             "definitionId": "onr_v1_194_corporate-downsizing",
             "type": "agenda",
-            "subtypes": [
-              "gray_ops"
-            ],
+            "subtypes": ["gray_ops"],
             "rulesText": "When you score Corporate Downsizing, show to Runner any number of agenda cards stored in HQ. Gain bits equal to twice the combined agenda points of these cards; then shuffle them into R&D.",
             "rezzed": true,
             "advancementCounters": 0,
@@ -913,9 +875,7 @@
             "title": "Hostile Takeover",
             "definitionId": "onr_v1_203_hostile-takeover",
             "type": "agenda",
-            "subtypes": [
-              "gray_ops"
-            ],
+            "subtypes": ["gray_ops"],
             "rulesText": "Gain [5] when you score Hostile Takeover.",
             "rezzed": true,
             "advancementCounters": 0,
@@ -930,9 +890,7 @@
             "title": "Hostile Takeover",
             "definitionId": "onr_v1_203_hostile-takeover",
             "type": "agenda",
-            "subtypes": [
-              "gray_ops"
-            ],
+            "subtypes": ["gray_ops"],
             "rulesText": "Gain [5] when you score Hostile Takeover.",
             "rezzed": true,
             "advancementCounters": 0,
@@ -949,10 +907,7 @@
             "title": "Corrosion",
             "definitionId": "onr_proteus_083_corrosion",
             "type": "program",
-            "subtypes": [
-              "icebreaker",
-              "worm"
-            ],
+            "subtypes": ["icebreaker", "worm"],
             "rulesText": "[0]: Break wall subroutine. [1]: +1 strength",
             "installCost": 3,
             "memoryCost": 1,
@@ -968,9 +923,7 @@
             "title": "Codecracker",
             "definitionId": "onr_v1_014_codecracker",
             "type": "program",
-            "subtypes": [
-              "icebreaker"
-            ],
+            "subtypes": ["icebreaker"],
             "rulesText": "[0]: Break code gate subroutine.\n[1]: +1 strength.",
             "installCost": 2,
             "memoryCost": 1,
@@ -986,10 +939,7 @@
             "title": "Big Frackin' Gun",
             "definitionId": "onr_proteus_079_big-frackin-gun",
             "type": "program",
-            "subtypes": [
-              "icebreaker",
-              "killer"
-            ],
+            "subtypes": ["icebreaker", "killer"],
             "rulesText": "[6]: Break up to five sentry subroutines on a single piece of ice. [1]: +1 strength",
             "installCost": 2,
             "memoryCost": 1,
@@ -1005,9 +955,7 @@
             "title": "Vewy Vewy Quiet",
             "definitionId": "onr_v1_071_vewy-vewy-quiet",
             "type": "program",
-            "subtypes": [
-              "stealth"
-            ],
+            "subtypes": ["stealth"],
             "rulesText": "Put [2] from the bank on Vewy Vewy Quiet when it is installed. Use these bits only to pay for using icebreakers during runs, but not for using noisy icebreakers. If you use any of these bits, replace them at the start of your next turn.",
             "installCost": 4,
             "memoryCost": 1,
@@ -1028,9 +976,7 @@
                 "creditPool": {
                   "kind": "restricted_credit",
                   "capacity": 2,
-                  "uses": [
-                    "using_icebreaker_during_run_non_noisy"
-                  ],
+                  "uses": ["using_icebreaker_during_run_non_noisy"],
                   "refresh": {
                     "timing": "start_of_runner_turn",
                     "behavior": "refill_to_capacity_if_used"
@@ -1084,9 +1030,7 @@
               "title": "Minotaur",
               "definitionId": "onr_proteus_031_minotaur",
               "type": "ice",
-              "subtypes": [
-                "sentry"
-              ],
+              "subtypes": ["sentry"],
               "rulesText": "For each rezzed code gate or wall installed outside Minotaur, Minotaur has one \"*End the run\" subroutine.",
               "rezCost": 6,
               "rezzed": false,
@@ -1147,10 +1091,7 @@
               "title": "Coyote",
               "definitionId": "onr_proteus_016_coyote",
               "type": "ice",
-              "subtypes": [
-                "sentry",
-                "watchdog"
-              ],
+              "subtypes": ["sentry", "watchdog"],
               "rulesText": "*For the remainder of the run, all further ice is encountered at +1 strength, unless Runner pays [2] while passing Coyote. Gain [3] when you rez Coyote.",
               "rezCost": 0,
               "rezzed": true,
@@ -1192,12 +1133,7 @@
               "title": "Mastermind",
               "definitionId": "onr_proteus_030_mastermind",
               "type": "ice",
-              "subtypes": [
-                "ap",
-                "black_ice",
-                "sentry",
-                "zombie"
-              ],
+              "subtypes": ["ap", "black_ice", "sentry", "zombie"],
               "rulesText": "*Do 1 brain damage for each rezzed piece of ice installed outside Mastermind. *End the run. Mastermind has +1 strength for each rezzed piece of ice installed outside it.",
               "rezCost": 7,
               "rezzed": true,
@@ -1246,9 +1182,7 @@
               "title": "Misleading Access Menus",
               "definitionId": "onr_proteus_032_misleading-access-menus",
               "type": "ice",
-              "subtypes": [
-                "code_gate"
-              ],
+              "subtypes": ["code_gate"],
               "rulesText": "*End the run unless Runner pays [1]. Gain [3] when you rez Misleading Access Menus.",
               "rezCost": 0,
               "rezzed": true,
@@ -1286,9 +1220,7 @@
               "title": "Snowbank",
               "definitionId": "onr_proteus_038_snowbank",
               "type": "ice",
-              "subtypes": [
-                "wall"
-              ],
+              "subtypes": ["wall"],
               "rulesText": "*End the run unless Runner pays [1]. Gain [3] when you rez Snowbank.",
               "rezCost": 0,
               "rezzed": false,
@@ -1336,10 +1268,7 @@
               "title": "Dog Pile",
               "definitionId": "onr_proteus_021_dog-pile",
               "type": "ice",
-              "subtypes": [
-                "ap",
-                "sentry"
-              ],
+              "subtypes": ["ap", "sentry"],
               "rulesText": "*Do 1 Net damage for each rezzed piece of ice installed outside Dog Pile. *End the run. Dog Pile has +1 strength for each rezzed piece of ice installed outside it.",
               "rezCost": 5,
               "rezzed": false,
@@ -1412,9 +1341,7 @@
               "title": "Tokyo-Chiba Infighting",
               "definitionId": "onr_v1_371_tokyo-chiba-infighting",
               "type": "upgrade",
-              "subtypes": [
-                "region"
-              ],
+              "subtypes": ["region"],
               "rulesText": "Gain [2] after each unsuccessful run on this fort.\nRez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.",
               "rezCost": 0,
               "rezzed": true,
@@ -1435,9 +1362,7 @@
               "title": "Minotaur",
               "definitionId": "onr_proteus_031_minotaur",
               "type": "ice",
-              "subtypes": [
-                "sentry"
-              ],
+              "subtypes": ["sentry"],
               "rulesText": "For each rezzed code gate or wall installed outside Minotaur, Minotaur has one \"*End the run\" subroutine.",
               "rezCost": 6,
               "rezzed": false,
@@ -1490,12 +1415,7 @@
               "title": "Mastermind",
               "definitionId": "onr_proteus_030_mastermind",
               "type": "ice",
-              "subtypes": [
-                "ap",
-                "black_ice",
-                "sentry",
-                "zombie"
-              ],
+              "subtypes": ["ap", "black_ice", "sentry", "zombie"],
               "rulesText": "*Do 1 brain damage for each rezzed piece of ice installed outside Mastermind. *End the run. Mastermind has +1 strength for each rezzed piece of ice installed outside it.",
               "rezCost": 7,
               "rezzed": true,
@@ -1544,10 +1464,7 @@
               "title": "Coyote",
               "definitionId": "onr_proteus_016_coyote",
               "type": "ice",
-              "subtypes": [
-                "sentry",
-                "watchdog"
-              ],
+              "subtypes": ["sentry", "watchdog"],
               "rulesText": "*For the remainder of the run, all further ice is encountered at +1 strength, unless Runner pays [2] while passing Coyote. Gain [3] when you rez Coyote.",
               "rezCost": 0,
               "rezzed": true,
@@ -1648,9 +1565,7 @@
               "title": "Olivia Salazar",
               "definitionId": "onr_v1_363_olivia-salazar",
               "type": "upgrade",
-              "subtypes": [
-                "sysop"
-              ],
+              "subtypes": ["sysop"],
               "rulesText": "For half cost, rounded down, rez a piece of ice installed on this fort. Derez that ice at the end of the run. Use this ability only once during each run on this fort.",
               "rezCost": 0,
               "rezzed": true,
@@ -1698,10 +1613,7 @@
               "title": "Washed-Up Solo Construct",
               "definitionId": "onr_proteus_045_washed-up-solo-construct",
               "type": "ice",
-              "subtypes": [
-                "killer",
-                "sentry"
-              ],
+              "subtypes": ["killer", "sentry"],
               "rulesText": "*Trash a program unless Runner pays [1]. Gain [3] when you rez Washed-Up Solo Construct.",
               "rezCost": 0,
               "rezzed": true,
@@ -1734,9 +1646,7 @@
               "title": "Olivia Salazar",
               "definitionId": "onr_v1_363_olivia-salazar",
               "type": "upgrade",
-              "subtypes": [
-                "sysop"
-              ],
+              "subtypes": ["sysop"],
               "rulesText": "For half cost, rounded down, rez a piece of ice installed on this fort. Derez that ice at the end of the run. Use this ability only once during each run on this fort.",
               "rezCost": 0,
               "rezzed": true,
@@ -1751,10 +1661,7 @@
               "title": "Washed-Up Solo Construct",
               "definitionId": "onr_proteus_045_washed-up-solo-construct",
               "type": "ice",
-              "subtypes": [
-                "killer",
-                "sentry"
-              ],
+              "subtypes": ["killer", "sentry"],
               "rulesText": "*Trash a program unless Runner pays [1]. Gain [3] when you rez Washed-Up Solo Construct.",
               "rezCost": 0,
               "rezzed": true,
@@ -1787,9 +1694,7 @@
               "title": "Olivia Salazar",
               "definitionId": "onr_v1_363_olivia-salazar",
               "type": "upgrade",
-              "subtypes": [
-                "sysop"
-              ],
+              "subtypes": ["sysop"],
               "rulesText": "For half cost, rounded down, rez a piece of ice installed on this fort. Derez that ice at the end of the run. Use this ability only once during each run on this fort.",
               "rezCost": 0,
               "rezzed": true,
@@ -1804,9 +1709,7 @@
               "title": "Tokyo-Chiba Infighting",
               "definitionId": "onr_v1_371_tokyo-chiba-infighting",
               "type": "upgrade",
-              "subtypes": [
-                "region"
-              ],
+              "subtypes": ["region"],
               "rulesText": "Gain [2] after each unsuccessful run on this fort.\nRez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.",
               "rezCost": 0,
               "rezzed": true,
@@ -1896,9 +1799,7 @@
               "title": "Snowbank",
               "definitionId": "onr_proteus_038_snowbank",
               "type": "ice",
-              "subtypes": [
-                "wall"
-              ],
+              "subtypes": ["wall"],
               "rulesText": "*End the run unless Runner pays [1]. Gain [3] when you rez Snowbank.",
               "rezCost": 0,
               "rezzed": false,
@@ -1946,10 +1847,7 @@
               "title": "Washed-Up Solo Construct",
               "definitionId": "onr_proteus_045_washed-up-solo-construct",
               "type": "ice",
-              "subtypes": [
-                "killer",
-                "sentry"
-              ],
+              "subtypes": ["killer", "sentry"],
               "rulesText": "*Trash a program unless Runner pays [1]. Gain [3] when you rez Washed-Up Solo Construct.",
               "rezCost": 0,
               "rezzed": false,
@@ -1997,9 +1895,7 @@
               "title": "Misleading Access Menus",
               "definitionId": "onr_proteus_032_misleading-access-menus",
               "type": "ice",
-              "subtypes": [
-                "code_gate"
-              ],
+              "subtypes": ["code_gate"],
               "rulesText": "*End the run unless Runner pays [1]. Gain [3] when you rez Misleading Access Menus.",
               "rezCost": 0,
               "rezzed": false,
@@ -2047,9 +1943,7 @@
               "title": "Misleading Access Menus",
               "definitionId": "onr_proteus_032_misleading-access-menus",
               "type": "ice",
-              "subtypes": [
-                "code_gate"
-              ],
+              "subtypes": ["code_gate"],
               "rulesText": "*End the run unless Runner pays [1]. Gain [3] when you rez Misleading Access Menus.",
               "rezCost": 0,
               "rezzed": false,
@@ -2104,10 +1998,7 @@
               "title": "Dog Pile",
               "definitionId": "onr_proteus_021_dog-pile",
               "type": "ice",
-              "subtypes": [
-                "ap",
-                "sentry"
-              ],
+              "subtypes": ["ap", "sentry"],
               "rulesText": "*Do 1 Net damage for each rezzed piece of ice installed outside Dog Pile. *End the run. Dog Pile has +1 strength for each rezzed piece of ice installed outside it.",
               "rezCost": 5,
               "rezzed": true,
@@ -2155,10 +2046,7 @@
               "title": "Coyote",
               "definitionId": "onr_proteus_016_coyote",
               "type": "ice",
-              "subtypes": [
-                "sentry",
-                "watchdog"
-              ],
+              "subtypes": ["sentry", "watchdog"],
               "rulesText": "*For the remainder of the run, all further ice is encountered at +1 strength, unless Runner pays [2] while passing Coyote. Gain [3] when you rez Coyote.",
               "rezCost": 0,
               "rezzed": false,
@@ -2206,9 +2094,7 @@
               "title": "Snowbank",
               "definitionId": "onr_proteus_038_snowbank",
               "type": "ice",
-              "subtypes": [
-                "wall"
-              ],
+              "subtypes": ["wall"],
               "rulesText": "*End the run unless Runner pays [1]. Gain [3] when you rez Snowbank.",
               "rezCost": 0,
               "rezzed": false,
@@ -2261,9 +2147,7 @@
           "complete": true,
           "effectiveAccessCount": 2,
           "isMultiaccess": true,
-          "sourceDefinitionIds": [
-            "onr_v1_129_hq-interface"
-          ],
+          "sourceDefinitionIds": ["onr_v1_129_hq-interface"],
           "serverBoundEffects": []
         },
         {
@@ -2272,9 +2156,7 @@
           "complete": true,
           "effectiveAccessCount": 2,
           "isMultiaccess": true,
-          "sourceDefinitionIds": [
-            "onr_v1_139_r-and-d-interface"
-          ],
+          "sourceDefinitionIds": ["onr_v1_139_r-and-d-interface"],
           "serverBoundEffects": []
         }
       ],
@@ -14555,10 +14437,7 @@
         "rezReserveProfile": {
           "iceKnownInDeck": 7,
           "rezEconomyToolsKnown": 2,
-          "evidence": [
-            "ice_known:7",
-            "rez_economy_tools:2"
-          ]
+          "evidence": ["ice_known:7", "rez_economy_tools:2"]
         },
         "economyBankTools": [
           {
@@ -14586,17 +14465,13 @@
           "codeGateIceKnown": 2,
           "sentryIceKnown": 5,
           "taxingIceKnown": 0,
-          "evidence": [
-            "ice_records:7"
-          ]
+          "evidence": ["ice_records:7"]
         },
         "remotePlanProfile": {
           "remoteProtectionToolsKnown": 10,
           "remoteEconomyToolsKnown": 1,
           "ambushToolsKnown": 0,
-          "evidence": [
-            "corp_remote_profile:conservative"
-          ]
+          "evidence": ["corp_remote_profile:conservative"]
         }
       },
       "missingCapabilities": [],
@@ -14924,9 +14799,7 @@
               "reason": "support:remoteSlots"
             }
           ],
-          "supportGaps": [
-            "low_ambush_support"
-          ],
+          "supportGaps": ["low_ambush_support"],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -15018,10 +14891,7 @@
               "reason": "support:remoteProtection"
             }
           ],
-          "supportGaps": [
-            "low_assetDensity_support",
-            "low_bait_support"
-          ],
+          "supportGaps": ["low_assetDensity_support", "low_bait_support"],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -15412,10 +15282,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "low_ambush_support",
-            "low_tagOrTrace_support"
-          ],
+          "supportGaps": ["low_ambush_support", "low_tagOrTrace_support"],
           "confidence": "high",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -15957,9 +15824,7 @@
           "supportGaps": [],
           "confidence": "medium",
           "runtimeStatus": "supporting",
-          "runtimeBlockers": [
-            "supporting_only:corp.economy_rez_reserve"
-          ]
+          "runtimeBlockers": ["supporting_only:corp.economy_rez_reserve"]
         },
         "corp.fast_advance": {
           "anchorScore": 0,
@@ -16136,9 +16001,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "low_scoreAcceleration_support"
-          ],
+          "supportGaps": ["low_scoreAcceleration_support"],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -16786,9 +16649,7 @@
               "reason": "support:scorePlan"
             }
           ],
-          "supportGaps": [
-            "missing_advancement_window"
-          ],
+          "supportGaps": ["missing_advancement_window"],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -17401,10 +17262,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "low_tag_sources",
-            "low_traceSupport_support"
-          ],
+          "supportGaps": ["low_tag_sources", "low_traceSupport_support"],
           "confidence": "low",
           "runtimeStatus": "diagnostic_only",
           "runtimeBlockers": [
@@ -17420,10 +17278,7 @@
         "corp.remote_scoring",
         "corp.central_stabilize"
       ],
-      "secondaryStrategies": [
-        "corp.damage_kill",
-        "corp.rush_score"
-      ],
+      "secondaryStrategies": ["corp.damage_kill", "corp.rush_score"],
       "functionSignalCounts": {
         "action.corp_extra_action_support": 2,
         "archives.corp_recovery": 2,
@@ -17590,10 +17445,7 @@
           "confidence": "high",
           "anchorEvidenceCount": 4,
           "supportEvidenceCount": 9,
-          "supportGaps": [
-            "low_ambush_support",
-            "low_tagOrTrace_support"
-          ]
+          "supportGaps": ["low_ambush_support", "low_tagOrTrace_support"]
         },
         {
           "strategyId": "corp.rush_score",
@@ -17659,9 +17511,7 @@
           "confidence": "low",
           "anchorEvidenceCount": 0,
           "supportEvidenceCount": 16,
-          "supportGaps": [
-            "low_ambush_support"
-          ]
+          "supportGaps": ["low_ambush_support"]
         },
         {
           "strategyId": "corp.overadvance_value",
@@ -17672,9 +17522,7 @@
           "confidence": "low",
           "anchorEvidenceCount": 0,
           "supportEvidenceCount": 19,
-          "supportGaps": [
-            "missing_advancement_window"
-          ]
+          "supportGaps": ["missing_advancement_window"]
         },
         {
           "strategyId": "corp.fast_advance",
@@ -17685,9 +17533,7 @@
           "confidence": "low",
           "anchorEvidenceCount": 0,
           "supportEvidenceCount": 24,
-          "supportGaps": [
-            "low_scoreAcceleration_support"
-          ]
+          "supportGaps": ["low_scoreAcceleration_support"]
         },
         {
           "strategyId": "corp.asset_economy",
@@ -17698,10 +17544,7 @@
           "confidence": "low",
           "anchorEvidenceCount": 0,
           "supportEvidenceCount": 11,
-          "supportGaps": [
-            "low_assetDensity_support",
-            "low_bait_support"
-          ]
+          "supportGaps": ["low_assetDensity_support", "low_bait_support"]
         },
         {
           "strategyId": "corp.tag_trace_punish",
@@ -17712,10 +17555,7 @@
           "confidence": "low",
           "anchorEvidenceCount": 0,
           "supportEvidenceCount": 9,
-          "supportGaps": [
-            "low_tag_sources",
-            "low_traceSupport_support"
-          ]
+          "supportGaps": ["low_tag_sources", "low_traceSupport_support"]
         }
       ],
       "rolesStatus": {
@@ -17725,9 +17565,7 @@
         "completeCards": 11,
         "partialCards": 8,
         "anchorlessCards": 0,
-        "cardsWithoutRoles": [
-          "onr_v1_196_corporate-war"
-        ],
+        "cardsWithoutRoles": ["onr_v1_196_corporate-war"],
         "roleSignalCount": 234,
         "functionSignalCount": 142,
         "strategyAnchorCount": 33
@@ -17745,13 +17583,8 @@
             "sentry_ice",
             "tax_tool"
           ],
-          "functionSignals": [
-            "corp_ice.rez_economy",
-            "economy.generic"
-          ],
-          "strategyAnchors": [
-            "corp.ice_tax_glacier"
-          ],
+          "functionSignals": ["corp_ice.rez_economy", "economy.generic"],
+          "strategyAnchors": ["corp.ice_tax_glacier"],
           "warnings": []
         },
         {
@@ -17780,10 +17613,7 @@
             "ice.etr",
             "ice.strength_modifier"
           ],
-          "strategyAnchors": [
-            "corp.damage_kill",
-            "corp.ice_tax_glacier"
-          ],
+          "strategyAnchors": ["corp.damage_kill", "corp.ice_tax_glacier"],
           "warnings": []
         },
         {
@@ -17812,10 +17642,7 @@
             "ice.etr",
             "ice.strength_modifier"
           ],
-          "strategyAnchors": [
-            "corp.damage_kill",
-            "corp.ice_tax_glacier"
-          ],
+          "strategyAnchors": ["corp.damage_kill", "corp.ice_tax_glacier"],
           "warnings": []
         },
         {
@@ -17830,9 +17657,7 @@
             "tax_tool"
           ],
           "functionSignals": [],
-          "strategyAnchors": [
-            "corp.ice_tax_glacier"
-          ],
+          "strategyAnchors": ["corp.ice_tax_glacier"],
           "warnings": []
         },
         {
@@ -17857,9 +17682,7 @@
             "economy.generic",
             "ice.etr"
           ],
-          "strategyAnchors": [
-            "corp.ice_tax_glacier"
-          ],
+          "strategyAnchors": ["corp.ice_tax_glacier"],
           "warnings": []
         },
         {
@@ -17883,9 +17706,7 @@
             "economy.generic",
             "ice.etr"
           ],
-          "strategyAnchors": [
-            "corp.ice_tax_glacier"
-          ],
+          "strategyAnchors": ["corp.ice_tax_glacier"],
           "warnings": []
         },
         {
@@ -17900,30 +17721,17 @@
             "sentry_ice",
             "tax_tool"
           ],
-          "functionSignals": [
-            "corp_ice.rez_economy",
-            "economy.generic"
-          ],
-          "strategyAnchors": [
-            "corp.ice_tax_glacier"
-          ],
+          "functionSignals": ["corp_ice.rez_economy", "economy.generic"],
+          "strategyAnchors": ["corp.ice_tax_glacier"],
           "warnings": []
         },
         {
           "cardId": "onr_v1_194_corporate-downsizing",
           "quantity": 3,
           "status": "complete",
-          "roles": [
-            "corp.central_stabilize",
-            "defensive_tool"
-          ],
-          "functionSignals": [
-            "economy.burst_credit",
-            "zone.shuffle"
-          ],
-          "strategyAnchors": [
-            "corp.central_stabilize"
-          ],
+          "roles": ["corp.central_stabilize", "defensive_tool"],
+          "functionSignals": ["economy.burst_credit", "zone.shuffle"],
+          "strategyAnchors": ["corp.central_stabilize"],
           "warnings": []
         },
         {
@@ -17958,23 +17766,15 @@
             "score.remote_fort_creation",
             "score.remote_install_budget"
           ],
-          "strategyAnchors": [
-            "corp.remote_scoring"
-          ],
+          "strategyAnchors": ["corp.remote_scoring"],
           "warnings": []
         },
         {
           "cardId": "onr_v1_203_hostile-takeover",
           "quantity": 3,
           "status": "partial",
-          "roles": [
-            "build_scoring_remote",
-            "score_next_turn"
-          ],
-          "functionSignals": [
-            "economy.burst_credit",
-            "score.credit_gain"
-          ],
+          "roles": ["build_scoring_remote", "score_next_turn"],
+          "functionSignals": ["economy.burst_credit", "score.credit_gain"],
           "strategyAnchors": [],
           "warnings": []
         },
@@ -18003,9 +17803,7 @@
           "cardId": "onr_v1_289_edgerunner-inc-temps",
           "quantity": 2,
           "status": "partial",
-          "roles": [
-            "operation"
-          ],
+          "roles": ["operation"],
           "functionSignals": [],
           "strategyAnchors": [],
           "warnings": []
@@ -18036,10 +17834,7 @@
           "cardId": "onr_v1_296_off-site-backups",
           "quantity": 2,
           "status": "partial",
-          "roles": [
-            "ice_recovery",
-            "operation"
-          ],
+          "roles": ["ice_recovery", "operation"],
           "functionSignals": [
             "archives.corp_recovery",
             "info.reveal_recovered_cards_to_runner",
@@ -18063,9 +17858,7 @@
             "ice.corp_rez_discount",
             "remote.scoring_protection"
           ],
-          "strategyAnchors": [
-            "corp.ice_tax_glacier"
-          ],
+          "strategyAnchors": ["corp.ice_tax_glacier"],
           "warnings": []
         },
         {
@@ -18086,9 +17879,7 @@
             "remote.scoring_protection",
             "tax.runner_credit"
           ],
-          "strategyAnchors": [
-            "corp.remote_scoring"
-          ],
+          "strategyAnchors": ["corp.remote_scoring"],
           "warnings": []
         },
         {
@@ -18110,20 +17901,14 @@
             "run.corp_pay_or_end_run",
             "tax.runner_credit"
           ],
-          "strategyAnchors": [
-            "corp.ice_tax_glacier",
-            "corp.remote_scoring"
-          ],
+          "strategyAnchors": ["corp.ice_tax_glacier", "corp.remote_scoring"],
           "warnings": []
         },
         {
           "cardId": "onr_v1_371_tokyo-chiba-infighting",
           "quantity": 2,
           "status": "partial",
-          "roles": [
-            "bait_runner",
-            "build_scoring_remote"
-          ],
+          "roles": ["bait_runner", "build_scoring_remote"],
           "functionSignals": [],
           "strategyAnchors": [],
           "warnings": []
@@ -18229,10 +18014,7 @@
             "support": 65,
             "final": 66
           },
-          "supportGaps": [
-            "low_ambush_support",
-            "low_tagOrTrace_support"
-          ],
+          "supportGaps": ["low_ambush_support", "low_tagOrTrace_support"],
           "evidence": [
             "strategy:corp.damage_kill",
             "confidence:high",
@@ -18283,9 +18065,7 @@
         "status": "continued",
         "reason": "same_primary_strategy",
         "previousStrategyId": "corp.ice_tax_glacier",
-        "evidence": [
-          "continued:corp.ice_tax_glacier"
-        ]
+        "evidence": ["continued:corp.ice_tax_glacier"]
       },
       "commitment": {
         "strategyId": "corp.ice_tax_glacier",
@@ -18463,10 +18243,7 @@
               "kind": "none",
               "required": 0,
               "satisfied": true,
-              "evidence": [
-                "reserve_source:runtime_context",
-                "reserve:none"
-              ]
+              "evidence": ["reserve_source:runtime_context", "reserve:none"]
             },
             "evidence": [
               "portfolio_candidate:runtime_context",
@@ -18613,9 +18390,7 @@
             "family": "corp_economy_reserve",
             "candidateRole": "blocked",
             "runtimeStatus": "supporting",
-            "runtimeBlockers": [
-              "supporting_only:corp.economy_rez_reserve"
-            ],
+            "runtimeBlockers": ["supporting_only:corp.economy_rez_reserve"],
             "confidence": "medium",
             "score": {
               "anchor": 0,
@@ -18646,10 +18421,7 @@
               "kind": "none",
               "required": 0,
               "satisfied": true,
-              "evidence": [
-                "reserve_source:runtime_context",
-                "reserve:none"
-              ]
+              "evidence": ["reserve_source:runtime_context", "reserve:none"]
             },
             "evidence": [
               "portfolio_candidate:runtime_context",
@@ -18706,10 +18478,7 @@
               "kind": "none",
               "required": 0,
               "satisfied": true,
-              "evidence": [
-                "reserve_source:runtime_context",
-                "reserve:none"
-              ]
+              "evidence": ["reserve_source:runtime_context", "reserve:none"]
             },
             "evidence": [
               "portfolio_candidate:runtime_context",
@@ -18767,10 +18536,7 @@
               "kind": "none",
               "required": 0,
               "satisfied": true,
-              "evidence": [
-                "reserve_source:runtime_context",
-                "reserve:none"
-              ]
+              "evidence": ["reserve_source:runtime_context", "reserve:none"]
             },
             "evidence": [
               "portfolio_candidate:runtime_context",
@@ -18825,10 +18591,7 @@
               "kind": "none",
               "required": 0,
               "satisfied": true,
-              "evidence": [
-                "reserve_source:runtime_context",
-                "reserve:none"
-              ]
+              "evidence": ["reserve_source:runtime_context", "reserve:none"]
             },
             "evidence": [
               "portfolio_candidate:runtime_context",
@@ -18883,10 +18646,7 @@
               "kind": "none",
               "required": 0,
               "satisfied": true,
-              "evidence": [
-                "reserve_source:runtime_context",
-                "reserve:none"
-              ]
+              "evidence": ["reserve_source:runtime_context", "reserve:none"]
             },
             "evidence": [
               "portfolio_candidate:runtime_context",
@@ -19074,10 +18834,7 @@
               "kind": "none",
               "required": 0,
               "satisfied": true,
-              "evidence": [
-                "reserve_source:runtime_context",
-                "reserve:none"
-              ]
+              "evidence": ["reserve_source:runtime_context", "reserve:none"]
             },
             "evidence": [
               "portfolio_candidate:runtime_context",
@@ -19132,18 +18889,11 @@
         "corp.ice_tax_glacier",
         "corp.remote_protect"
       ],
-      "economyPlan": [
-        "corp.asset_economy",
-        "corp.rez_reserve"
-      ],
+      "economyPlan": ["corp.asset_economy", "corp.rez_reserve"],
       "enginePlan": [],
-      "punishPlan": [
-        "corp.damage_kill"
-      ],
+      "punishPlan": ["corp.damage_kill"],
       "riskProfile": [],
-      "rejectedIntents": [
-        "corp.economy_rez_reserve_support_only"
-      ],
+      "rejectedIntents": ["corp.economy_rez_reserve_support_only"],
       "confidence": "high",
       "evidence": [
         "deck_strategy_profile:present",
@@ -19280,10 +19030,7 @@
               "support": 65,
               "final": 66
             },
-            "supportGaps": [
-              "low_ambush_support",
-              "low_tagOrTrace_support"
-            ],
+            "supportGaps": ["low_ambush_support", "low_tagOrTrace_support"],
             "evidence": [
               "strategy:corp.damage_kill",
               "confidence:high",
@@ -19334,9 +19081,7 @@
           "status": "continued",
           "reason": "same_primary_strategy",
           "previousStrategyId": "corp.ice_tax_glacier",
-          "evidence": [
-            "continued:corp.ice_tax_glacier"
-          ]
+          "evidence": ["continued:corp.ice_tax_glacier"]
         },
         "commitment": {
           "strategyId": "corp.ice_tax_glacier",
@@ -19514,10 +19259,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -19664,9 +19406,7 @@
               "family": "corp_economy_reserve",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:corp.economy_rez_reserve"
-              ],
+              "runtimeBlockers": ["supporting_only:corp.economy_rez_reserve"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -19697,10 +19437,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -19757,10 +19494,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -19818,10 +19552,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -19876,10 +19607,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -19934,10 +19662,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -20125,10 +19850,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -20216,9 +19938,7 @@
               "currentCreditsAtRevalidation": 11,
               "gap": 3,
               "projectedCreditGain": 1,
-              "actionIds": [
-                "corp.gain_credit"
-              ],
+              "actionIds": ["corp.gain_credit"],
               "priorityClass": "P6",
               "cadence": {
                 "kind": "remaining_turn_capacity",
@@ -20300,9 +20020,7 @@
             "signal": {
               "handPlanId": "discard-window:discard_corp_332:332",
               "phase": "discard_window",
-              "actionIds": [
-                "corp.resolve_choice"
-              ],
+              "actionIds": ["corp.resolve_choice"],
               "exactActionRoute": true,
               "agendaCount": 5,
               "handSize": 6,
@@ -20518,9 +20236,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "missing_existing_remote",
-                "evidence": [
-                  "target_server:new_remote"
-                ]
+                "evidence": ["target_server:new_remote"]
               }
             }
           },
@@ -20705,10 +20421,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:12",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:12", "opening_corp_turn_ceiling:4"]
               },
               "fundingGap": 8,
               "fundingMilestone": {
@@ -20902,10 +20615,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:46",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:46", "opening_corp_turn_ceiling:4"]
               }
             }
           },
@@ -21097,10 +20807,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:46",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:46", "opening_corp_turn_ceiling:4"]
               }
             }
           },
@@ -21292,10 +20999,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:46",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:46", "opening_corp_turn_ceiling:4"]
               }
             }
           },
@@ -21487,10 +21191,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:46",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:46", "opening_corp_turn_ceiling:4"]
               }
             }
           },
@@ -21682,10 +21383,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:46",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:46", "opening_corp_turn_ceiling:4"]
               }
             }
           },
@@ -21877,10 +21575,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:46",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:46", "opening_corp_turn_ceiling:4"]
               }
             }
           },
@@ -22074,10 +21769,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:30",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:30", "opening_corp_turn_ceiling:4"]
               }
             }
           },
@@ -22260,10 +21952,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:46",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:46", "opening_corp_turn_ceiling:4"]
               }
             }
           },
@@ -22455,10 +22144,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:46",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:46", "opening_corp_turn_ceiling:4"]
               }
             }
           },
@@ -22650,10 +22336,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:46",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:46", "opening_corp_turn_ceiling:4"]
               }
             }
           },
@@ -22845,10 +22528,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:46",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:46", "opening_corp_turn_ceiling:4"]
               }
             }
           },
@@ -23042,10 +22722,7 @@
               "openingRush": {
                 "status": "blocked",
                 "reason": "outside_opening_window",
-                "evidence": [
-                  "turn_serial:30",
-                  "opening_corp_turn_ceiling:4"
-                ]
+                "evidence": ["turn_serial:30", "opening_corp_turn_ceiling:4"]
               }
             }
           },

@@ -69,6 +69,46 @@ describe("Trace bid efficiency", () => {
     });
   });
 
+  it("uses card-derived Classic Link delta instead of treating payment as Link", () => {
+    const selection = selectEfficientTraceBidOption({
+      side: "runner",
+      bidOptions: [
+        { id: "bid_0", amount: 0, linkDelta: 0 },
+        { id: "bid_2", amount: 2, linkDelta: 1 },
+        { id: "bid_4", amount: 4, linkDelta: 2 },
+      ],
+      desiredAmount: 4,
+      traceValue: 2,
+      runnerLink: 1,
+      traceRulesProfile: "classic_blind_corp_ties",
+    });
+
+    expect(selection).toEqual({
+      option: { id: "bid_4", amount: 4, linkDelta: 2 },
+      reason: "trace_bid_existing_choice",
+    });
+  });
+
+  it("does not mistake an expensive Classic payment for enough Link to beat a tie", () => {
+    const selection = selectEfficientTraceBidOption({
+      side: "runner",
+      bidOptions: [
+        { id: "bid_0", amount: 0, linkDelta: 0 },
+        { id: "bid_2", amount: 2, linkDelta: 1 },
+        { id: "bid_4", amount: 4, linkDelta: 2 },
+      ],
+      desiredAmount: 4,
+      traceValue: 3,
+      runnerLink: 1,
+      traceRulesProfile: "classic_blind_corp_ties",
+    });
+
+    expect(selection).toEqual({
+      option: { id: "bid_0", amount: 0, linkDelta: 0 },
+      reason: "trace_bid_no_outcome_delta",
+    });
+  });
+
   it("falls back to the existing desired bid when context is unknown", () => {
     const selection = selectEfficientTraceBidOption({
       side: "runner",

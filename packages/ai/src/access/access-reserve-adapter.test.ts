@@ -98,4 +98,3 @@ function playerView(): PlayerView {
     agendaPointsToWin: 7,
   };
 }
-

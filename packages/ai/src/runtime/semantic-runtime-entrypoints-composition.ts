@@ -1,6 +1,4 @@
-import {
-  createAiActionEntrypointsComposition,
-} from "./ai-action-entrypoints-composition";
+import { createAiActionEntrypointsComposition } from "./ai-action-entrypoints-composition";
 import {
   createSemanticRuntimeDecisionComposition,
   type SemanticRuntimeDecisionCompositionDependencies,

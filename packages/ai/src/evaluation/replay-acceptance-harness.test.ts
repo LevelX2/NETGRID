@@ -92,10 +92,7 @@ function extractionReport(): ReplayDecisionCaseExtractionReport {
       bySelectedActionType: {},
       byPlanKind: {},
     },
-    cases: [
-      caseEntry("case-1", "discovery"),
-      caseEntry("case-2", "holdout"),
-    ],
+    cases: [caseEntry("case-1", "discovery"), caseEntry("case-2", "holdout")],
     redactionStatus: "passed",
     noRuntimeEffect: true,
     productiveUseAllowed: false,

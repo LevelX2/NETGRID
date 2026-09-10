@@ -43,7 +43,7 @@ describe("standard deck copy UI contract", () => {
     expect(panelSource).toContain("selectedStandardCopy.guideStatus");
     expect(panelSource).toContain("<StandardDeckGuideDialog");
     expect(panelSource).toContain(
-      't(`guide.${standardCopyGuideControl.status}`)',
+      "t(`guide.${standardCopyGuideControl.status}`)",
     );
     expect(panelSource).toContain("setStandardCopyGuideOpen(false)");
   });

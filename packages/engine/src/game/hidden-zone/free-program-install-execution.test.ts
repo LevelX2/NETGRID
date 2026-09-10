@@ -142,7 +142,9 @@ describe("free program install execution", () => {
           selfTrashed: false,
         }),
       ),
-    ).toThrow("Der offengelegte Stack-Plan hat kein installiertes Programm im Plan.");
+    ).toThrow(
+      "Der offengelegte Stack-Plan hat kein installiertes Programm im Plan.",
+    );
   });
 
   it("fails when the install callback does not return an installed id", () => {

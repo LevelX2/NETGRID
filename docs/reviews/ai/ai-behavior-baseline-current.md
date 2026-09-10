@@ -1,7 +1,13 @@
-# AI Behavior Baseline v1 – aktuelle Commit-Referenz
+# AI Behavior Baseline v1 – letzte akzeptierte Commit-Referenz
 
 Stand: 2026-08-13
-Status: Hard Gates grün; reproduzierbare Commit-Referenz
+Status: Hard Gates auf dem Referenzcommit grün; vor neuem Vergleich zu erneuern
+
+Die Referenz bleibt vorläufig als kompakter Messvertrag erhalten. Seit ihrem
+Lauf wurden Engine-, Karten-, Deck- und KI-Verträge breit verändert; sie ist
+daher keine aktuelle Vergleichsbasis für den Stand vom 2026-08-30. Vor einer
+neuen Stärke- oder Regressionsaussage wird die Baseline auf einem sauberen
+aktuellen Commit neu erzeugt oder diese Review bewusst entfernt.
 
 ## Prüfvertrag
 

@@ -30,7 +30,11 @@ export type RunnerEncounterCompositionContextDependencies = Omit<
     > extends {
       breakAccessPathAssessment: unknown;
     }
-      ? (action: Parameters<RunnerEncounterBreakContextDependencies["actionCreditCost"]>[0]) => Set<number>
+      ? (
+          action: Parameters<
+            RunnerEncounterBreakContextDependencies["actionCreditCost"]
+          >[0],
+        ) => Set<number>
       : never;
     currentEncounteredIceCard: (
       input: Parameters<
@@ -56,14 +60,12 @@ export function createRunnerEncounterCompositionContext(
     createRunnerCreditReserveTargetForInput({
       rolesForCardId: dependencies.rolesForCardId,
     });
-  const {
-    estimatedEncounterBreakCost,
-    encounterBreakReserveContext,
-  } = createRunnerEncounterBreakContext({
-    actionCreditCost: dependencies.actionCreditCost,
-    findVisibleCard: dependencies.findVisibleCard,
-    runnerCreditReserveTarget: runnerCreditReserveTargetForInput,
-  });
+  const { estimatedEncounterBreakCost, encounterBreakReserveContext } =
+    createRunnerEncounterBreakContext({
+      actionCreditCost: dependencies.actionCreditCost,
+      findVisibleCard: dependencies.findVisibleCard,
+      runnerCreditReserveTarget: runnerCreditReserveTargetForInput,
+    });
   const {
     breakAccessPathAssessment,
     encounterRemotePayoffAfterBreakAssessment,
@@ -79,12 +81,11 @@ export function createRunnerEncounterCompositionContext(
     definitionType: dependencies.definitionType,
     remoteRootTrashCost: dependencies.remoteRootTrashCost,
   });
-  const {
-    encounterFuturePathAfterPumpBreakAssessment,
-  } = createRunnerPumpFuturePathContext({
-    assessKnownRezzedIcePath: dependencies.assessKnownRezzedIcePath,
-    knownIcePathReason: dependencies.knownIcePathReason,
-  });
+  const { encounterFuturePathAfterPumpBreakAssessment } =
+    createRunnerPumpFuturePathContext({
+      assessKnownRezzedIcePath: dependencies.assessKnownRezzedIcePath,
+      knownIcePathReason: dependencies.knownIcePathReason,
+    });
   const { pumpViabilityAssessment } = createRunnerPumpViabilityContext({
     findVisibleCard: dependencies.findVisibleCard,
     encounterRunRemainderEffectAssessment:

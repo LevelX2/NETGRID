@@ -40,21 +40,27 @@ export function assessCorpTraceBid(params: {
   sourceDefinitionId?: string;
 }): CorpTraceBidAssessment {
   const runnerLink = params.traceContext.runnerLink;
-  if (
-    !Number.isInteger(runnerLink) ||
-    typeof runnerLink !== "number"
-  ) {
+  if (!Number.isInteger(runnerLink) || typeof runnerLink !== "number") {
     return {
       recommendedBid: 0,
       reason: "unknown_trace_context",
     };
   }
 
+  const tieMargin =
+    params.traceContext.traceRulesProfile === "classic_blind_corp_ties" ? 0 : 1;
+  const visibleRunnerMaximumStrength =
+    typeof params.traceContext.runnerMaximumPreRevealStrength === "number" &&
+    Number.isInteger(params.traceContext.runnerMaximumPreRevealStrength)
+      ? Math.max(0, params.traceContext.runnerMaximumPreRevealStrength)
+      : Math.max(0, runnerLink) +
+        (params.traceContext.traceRulesProfile === "classic_blind" ||
+        params.traceContext.traceRulesProfile === "classic_blind_corp_ties"
+          ? 0
+          : Math.max(0, params.input.playerView.opponent.credits));
   const minimumGuaranteedBid = Math.max(
     0,
-    Math.max(0, runnerLink) +
-      Math.max(0, params.input.playerView.opponent.credits) +
-      1,
+    visibleRunnerMaximumStrength + tieMargin,
   );
   if (
     params.sourceDefinitionId !== undefined &&
@@ -114,7 +120,9 @@ export function assessCorpTraceBid(params: {
   };
 }
 
-function sourceHasNativeTraceSuccessPayoff(sourceDefinitionId: string): boolean {
+function sourceHasNativeTraceSuccessPayoff(
+  sourceDefinitionId: string,
+): boolean {
   const hint = AI_HINTS_BY_CARD.get(sourceDefinitionId);
   if (!hint || hint.cardType !== "ice") return false;
   const hasTrace = (hint.effects ?? []).some(

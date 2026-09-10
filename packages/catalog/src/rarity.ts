@@ -99,7 +99,10 @@ export const PROJECT_CARD_RARITY_SOURCE_DEFINITIONS = [
 export function normalizeCatalogRarityCode(
   value: string | null | undefined,
 ): CatalogRarityCode | null {
-  const key = (value ?? "").trim().toLowerCase().replace(/[^a-z]/g, "");
+  const key = (value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z]/g, "");
   if (key === "c" || key === "common") return "common";
   if (key === "u" || key === "uncommon") return "uncommon";
   if (key === "r" || key === "rare") return "rare";
@@ -123,9 +126,10 @@ export function createCatalogRarity(
   };
 }
 
-export function parseCardRaritySpoilerSource(
-  source: CardRaritySpoilerSource,
-): { entries: CardRaritySpoilerEntry[]; unknownValues: CardRarityUnknownValue[] } {
+export function parseCardRaritySpoilerSource(source: CardRaritySpoilerSource): {
+  entries: CardRaritySpoilerEntry[];
+  unknownValues: CardRarityUnknownValue[];
+} {
   const entries: CardRaritySpoilerEntry[] = [];
   const unknownValues: CardRarityUnknownValue[] = [];
   const lines = source.text.replace(/\r\n/g, "\n").split("\n");
@@ -242,9 +246,7 @@ export function readProjectCardRaritySources(
       text: readFileSync(filePath, "utf8"),
       ...("side" in definition ? { side: definition.side } : {}),
     };
-    return [
-      source,
-    ];
+    return [source];
   });
 }
 
@@ -305,7 +307,10 @@ function normalizeCardTitleForRarityKey(title: string): string {
     .trim();
 }
 
-function projectSourcePathCandidates(cwd: string, relativePath: string): string[] {
+function projectSourcePathCandidates(
+  cwd: string,
+  relativePath: string,
+): string[] {
   return Array.from(
     new Set([
       path.resolve(cwd, relativePath),

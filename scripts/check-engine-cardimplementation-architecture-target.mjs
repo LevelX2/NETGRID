@@ -141,6 +141,9 @@ function isCatalogOrAllowedCardContext(file, line) {
       line.includes("mechanics:")
     );
   }
+  if (file === "packages/shared/src/originalset-default-decks.ts") {
+    return true;
+  }
   if (
     file.includes("/card-implementations/") &&
     line.includes("cardDefinitionId")

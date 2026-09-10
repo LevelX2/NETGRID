@@ -9,7 +9,7 @@ import { MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS } from "./benchmark-deck-slots";
 import { resolveBenchmarkDeckSlot } from "./benchmark-deck-slot-resolver";
 
 describe("Corp mixed draw score-protection coverage", () => {
-  it("converts exact economy before a revalidated answer-search draw", () => {
+  it("converts exact economy without inventing an agenda-search draw", () => {
     const slot = MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS.find(
       (candidate) =>
         candidate.slotId === "strategy_panel_fast_advance_chrome_rush",
@@ -101,7 +101,7 @@ describe("Corp mixed draw score-protection coverage", () => {
     const conversion = summary.actionSequence.find(
       (entry) => entry.stateVersionBefore === 4,
     );
-    const revalidatedDraw = summary.actionSequence.find(
+    const continuedEconomy = summary.actionSequence.find(
       (entry) => entry.stateVersionBefore === 5,
     );
     expect(conversion).toMatchObject({
@@ -111,11 +111,11 @@ describe("Corp mixed draw score-protection coverage", () => {
       reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
-    expect(revalidatedDraw).toMatchObject({
-      selectedActionId: "corp.draw_card",
-      actionType: "draw_card",
-      planKind: "corp.hand_and_agenda_management",
-      reasonCode: "plan_first.corp.hand_and_agenda_management",
+    expect(continuedEconomy).toMatchObject({
+      selectedActionId: "corp.gain_credit",
+      actionType: "gain_credit",
+      planKind: "corp.economy",
+      reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
     expect(

@@ -16,7 +16,10 @@ describe("neutral goal synthesis", () => {
     const goals = synthesizeNeutralTacticalGoals(frame);
 
     expect(goals.map((goal) => goal.goalId)).toEqual(
-      expect.arrayContaining(["runner.neutral.economy", "runner.neutral.setup"]),
+      expect.arrayContaining([
+        "runner.neutral.economy",
+        "runner.neutral.setup",
+      ]),
     );
     expect(JSON.stringify(goals)).not.toContain("actionId:");
   });
@@ -34,24 +37,28 @@ describe("neutral goal synthesis", () => {
   });
 
   it("synthesizes remote contest for runner remote score threat", () => {
-    const frame = frameFor("runner", [
-      legalAction("run-remote", "start_run", "runner"),
-      legalAction("gain-1", "gain_credit", "runner"),
-    ], {
-      runner: {
-        runTargets: [
-          {
-            targetServerId: "remote_1",
-            targetKind: "remote",
-            scoreThreat: true,
-            recommendation: "run_now",
-            pathPassability: "reachable",
-            accessPayoff: "score_threat",
-            evidence: ["fixture:remote_score_threat"],
-          } as any,
-        ],
+    const frame = frameFor(
+      "runner",
+      [
+        legalAction("run-remote", "start_run", "runner"),
+        legalAction("gain-1", "gain_credit", "runner"),
+      ],
+      {
+        runner: {
+          runTargets: [
+            {
+              targetServerId: "remote_1",
+              targetKind: "remote",
+              scoreThreat: true,
+              recommendation: "run_now",
+              pathPassability: "reachable",
+              accessPayoff: "score_threat",
+              evidence: ["fixture:remote_score_threat"],
+            } as any,
+          ],
+        },
       },
-    });
+    );
 
     expect(synthesizeNeutralTacticalGoals(frame)[0]).toMatchObject({
       goalId: "runner.neutral.remote_contest_if_score_threat",
@@ -71,9 +78,11 @@ describe("neutral goal synthesis", () => {
       expect.arrayContaining(["gain-1", "draw-1"]),
     );
     expect(trace.rejectedActions).toEqual([]);
-    expect(trace.rankedActions.every((action) =>
-      frame.legalActionIds.includes(action.actionId),
-    )).toBe(true);
+    expect(
+      trace.rankedActions.every((action) =>
+        frame.legalActionIds.includes(action.actionId),
+      ),
+    ).toBe(true);
   });
 
   it("does not turn report-only DeckDoctrine diagnostics into neutral goals", () => {
@@ -179,7 +188,8 @@ function inputFor(
     playerView: {
       side,
       stateVersion: 7,
-      timingPoint: side === "runner" ? "runner_action.main" : "corp_action.main",
+      timingPoint:
+        side === "runner" ? "runner_action.main" : "corp_action.main",
       activeSide: side,
       phase: side === "runner" ? "runner_action_phase" : "corp_action_phase",
       own: {

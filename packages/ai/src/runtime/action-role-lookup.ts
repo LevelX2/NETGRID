@@ -1,4 +1,8 @@
-import { type AiDecisionInput, type LegalAction, type VisibleCard } from "@netgrid/shared";
+import {
+  type AiDecisionInput,
+  type LegalAction,
+  type VisibleCard,
+} from "@netgrid/shared";
 
 export type ActionRoleLookupDependencies = {
   readonly findVisibleCard: (

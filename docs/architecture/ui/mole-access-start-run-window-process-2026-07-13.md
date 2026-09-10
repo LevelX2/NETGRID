@@ -181,7 +181,7 @@ successful_run_before_breach
   - fokussierte Tests und Typechecks erneut ausführen.
 - Kernartefakte:
   - `docs/reviews/ui/mole-access-start-run-window-final-review-2026-07-13.md`;
-  - `KI-Wissen-NETGRID/03 Betrieb/Log 2026-07.md`;
+  - historische Projektlog-Chronik (aus dem Arbeitsbaum entfernt; Git bleibt Nachweis);
   - dieses Prozessartefakt.
 - Checks: Engine-/Web-Fokustests, Engine-/Web-Typechecks,
   `git diff --check`.

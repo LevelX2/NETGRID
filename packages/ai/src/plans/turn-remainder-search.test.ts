@@ -27,6 +27,135 @@ import {
 } from "./turn-projection";
 
 describe("deterministic remainder-turn search", () => {
+  it.each([3, 4, 5, 7])(
+    "requires gross upfront credits at each projected step (cash %s)",
+    (credits) => {
+      const setup = searchSetup({ credits, clicks: 3 });
+      const install = offer(setup, "ice-install", {
+        root: "root:defense",
+        milestone: "installed",
+        defense: 8,
+      });
+      install.candidate.costProfile.creditCost = 2;
+      const income = offer(setup, "operation", {
+        root: "root:economy",
+        milestone: "paid",
+        netCredits: 4,
+        economy: 5,
+      });
+      income.candidate.actionType = "play_operation";
+      income.candidate.costProfile.creditCost = 5;
+      income.candidate.economyProjection = {
+        ...income.candidate.economyProjection!,
+        creditCost: 5,
+        grossLiquidCreditGain: 9,
+        source: "legal_action_payload",
+        confidence: "high",
+      };
+      const result = searchDeterministicRemainderTurnPlans({
+        entryFrame: setup.frame,
+        offers: [install, income],
+      });
+      expect(
+        result.lines.some(
+          (line) => line.steps[0]?.candidateId === income.head.candidateId,
+        ),
+      ).toBe(credits >= 5);
+      expect(
+        result.lines.some(
+          (line) =>
+            line.steps[0]?.candidateId === install.head.candidateId &&
+            line.steps[1]?.candidateId === income.head.candidateId,
+        ),
+      ).toBe(credits >= 7);
+      expect(
+        result.lines.some(
+          (line) =>
+            line.steps[0]?.candidateId === income.head.candidateId &&
+            line.steps[1]?.candidateId === install.head.candidateId,
+        ),
+      ).toBe(credits >= 5);
+    },
+  );
+
+  it.each([1, 3, 4])(
+    "keeps purge legal with %s clicks and deducts the payable debt before paid follow-ups",
+    (clicks) => {
+      const setup = searchSetup({ clicks });
+      const purge = offer(setup, "purge", {
+        root: "root:defense",
+        milestone: "purged",
+        defense: 8,
+        capacityProjection: {
+          ...regularActionCapacity(),
+          kind: "action_debt",
+          timing: "debt",
+          listedActionCost: 0,
+          preExistingActionCost: 0,
+          minimumAvailableActions: 1,
+          actionDebt: 3,
+        },
+      });
+      purge.candidate.costProfile.clickCost = 0;
+      const followup = offer(setup, "paid-followup", {
+        root: "root:economy",
+        milestone: "funded",
+        economy: 3,
+      });
+      const result = searchDeterministicRemainderTurnPlans({
+        entryFrame: setup.frame,
+        offers: [purge, followup],
+      });
+      const lines = result.lines.filter(
+        (line) => line.steps[0]?.candidateId === purge.head.candidateId,
+      );
+      expect(lines.length).toBeGreaterThan(0);
+      expect(
+        lines.some(
+          (line) => line.steps[1]?.candidateId === followup.head.candidateId,
+        ),
+      ).toBe(clicks > 3);
+      expect(
+        result.lines.some(
+          (line) =>
+            line.steps[0]?.candidateId === followup.head.candidateId &&
+            line.steps[1]?.candidateId === purge.head.candidateId,
+        ),
+      ).toBe(clicks > 1);
+      expect(
+        lines.every(
+          (line) =>
+            line.projectedFrame.actionCapacityLedger.unrestricted.minimum ===
+            Math.max(0, clicks - 3 - (line.steps.length - 1)),
+        ),
+      ).toBe(true);
+    },
+  );
+
+  it("rejects a debt-creating offer without an exact Engine amount", () => {
+    const setup = searchSetup();
+    const purge = offer(setup, "unknown-debt", {
+      root: "root:defense",
+      milestone: "purged",
+      capacityProjection: {
+        ...regularActionCapacity(),
+        kind: "action_debt",
+        timing: "debt",
+        reliability: "unknown",
+      },
+    });
+    const result = searchDeterministicRemainderTurnPlans({
+      entryFrame: setup.frame,
+      offers: [purge],
+    });
+    expect(result.lines).toEqual([]);
+    expect(result.pruneEvents).toContainEqual(
+      expect.objectContaining({
+        reasonCode: "capacity_projection_not_guaranteed",
+      }),
+    );
+  });
+
   it("returns the same protected fronts regardless of root enumeration order", () => {
     const setup = searchSetup();
     const offers = [

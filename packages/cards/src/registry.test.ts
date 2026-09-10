@@ -621,9 +621,7 @@ describe("CardRegistry", () => {
     expect(text("onr_v1_187_wilson-weeflerunner-apprentice")).toContain(
       "cannot spend more than [3]",
     );
-    expect(text("onr_v1_288_day-shift")).toBe(
-      "Draw two cards and gain [1].",
-    );
+    expect(text("onr_v1_288_day-shift")).toBe("Draw two cards and gain [1].");
   });
 
   it("preserves Mastiff's printed Trace 5 in canonical card text", () => {

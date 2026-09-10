@@ -144,7 +144,9 @@ describe("SemanticShadowCalibration", () => {
 
   it("exposes the calibrated profile only through explicit env opt-in", () => {
     delete process.env[SEMANTIC_SHADOW_CALIBRATION_PROFILE_ENV];
-    expect(semanticShadowCalibrationProfileFromEnv().profileId).toBe("baseline_v1");
+    expect(semanticShadowCalibrationProfileFromEnv().profileId).toBe(
+      "baseline_v1",
+    );
 
     const [sample] = buildRealEngineDecisionCorpus(
       buildRealEngineDecisionCorpusScenarios(),

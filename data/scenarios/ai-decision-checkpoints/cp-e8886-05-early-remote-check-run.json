@@ -3754,8 +3754,15 @@
   "expectation": {
     "acceptableActions": [
       {
-        "actionId": "runner.start_run.remote_1"
+        "sourceDefinitionId": "onr_v1_086_forged-activation-orders"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["runner.contest_remote"],
+      "acceptableCapabilities": ["contest_remote"],
+      "requiredAssessmentEvidence": [
+        "runner_targeted_ice_trash_preflight:remote_1:hidden_d4a44c12"
+      ]
+    }
   }
 }

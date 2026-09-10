@@ -15,7 +15,7 @@ import type {
 } from "@netgrid/decks";
 import { assertDeckPayloadSafe } from "@netgrid/decks";
 import type { Side } from "@netgrid/shared";
-import strategyGoalsData from "../../../../../../data/ai/strategy-goals-v1.json";
+import { strategyGoalsData } from "@netgrid/runtime-data/strategy-goals";
 import { createRuntimeCardsById } from "../../card-pool-runtime";
 import { deckValidationResponse } from "../deck-data";
 import {

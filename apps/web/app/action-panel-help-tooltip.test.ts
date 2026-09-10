@@ -18,4 +18,24 @@ describe("action panel help tooltip", () => {
     expect(floatButtonSource).toContain("aria-describedby");
     expect(floatButtonSource).not.toContain("title=");
   });
+
+  it("uses overflow-aware tooltips for generic choice options", () => {
+    const source = readFileSync(
+      new URL("../features/actions/LegalActionsPanel.tsx", import.meta.url),
+      "utf8",
+    );
+
+    const genericChoiceSource = source.slice(
+      source.indexOf("genericChoice.options.map"),
+      source.indexOf('if (view.phase === "setup")'),
+    );
+    expect(genericChoiceSource).toContain("<OverflowAwareActionButton");
+    expect(genericChoiceSource).toContain(
+      "const label = choiceOptionPresentationLabel(",
+    );
+    expect(genericChoiceSource).toContain("label={label}");
+    expect(genericChoiceSource).toContain(
+      'data-testid="generic-choice-button"',
+    );
+  });
 });

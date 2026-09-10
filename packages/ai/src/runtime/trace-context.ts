@@ -10,6 +10,8 @@ export type LatestTraceContext = {
   traceLimit?: number;
   traceValue?: number;
   runnerLink?: number;
+  /** Maximum visible pre-reveal strength the Runner can reach under the active profile. */
+  runnerMaximumPreRevealStrength?: number;
   corpBid?: number;
   runnerBid?: number;
   runnerStrength?: number;
@@ -18,8 +20,14 @@ export type LatestTraceContext = {
   effectiveTraceLimit?: number;
 };
 
+type VisibleRunnerTraceEstimate = {
+  runnerLink: number;
+  maximumPreRevealStrength: number;
+};
+
 export function latestTraceContext(input: AiDecisionInput): LatestTraceContext {
-  const visibleRunnerLink = visibleRunnerLinkAtCorpBid(input);
+  const visibleRunnerEstimate = visibleRunnerTraceEstimateAtCorpBid(input);
+  const visibleRunnerLink = visibleRunnerEstimate.runnerLink;
   const visibleTrace = input.playerView.trace;
   const eventTrace = latestTraceContextFromEventTail(input, visibleRunnerLink);
   if (visibleTrace) {
@@ -42,12 +50,10 @@ export function latestTraceContext(input: AiDecisionInput): LatestTraceContext {
         visibleTrace.runnerLink ??
         matchingEventTrace.runnerLink ??
         visibleRunnerLink,
-      ...(corpBid !== undefined
-        ? { corpBid }
-        : {}),
-      ...(traceValue !== undefined
-        ? { traceValue }
-        : {}),
+      runnerMaximumPreRevealStrength:
+        visibleRunnerEstimate.maximumPreRevealStrength,
+      ...(corpBid !== undefined ? { corpBid } : {}),
+      ...(traceValue !== undefined ? { traceValue } : {}),
       ...(visibleTrace.runnerBid !== undefined
         ? { runnerBid: visibleTrace.runnerBid }
         : {}),
@@ -59,7 +65,11 @@ export function latestTraceContext(input: AiDecisionInput): LatestTraceContext {
         : {}),
     };
   }
-  return eventTrace;
+  return {
+    ...eventTrace,
+    runnerMaximumPreRevealStrength:
+      visibleRunnerEstimate.maximumPreRevealStrength,
+  };
 }
 
 function latestTraceContextFromEventTail(
@@ -106,21 +116,43 @@ function latestTraceContextFromEventTail(
   return { runnerLink: visibleRunnerLink };
 }
 
-function visibleRunnerLinkAtCorpBid(input: AiDecisionInput): number {
+function visibleRunnerTraceEstimateAtCorpBid(
+  input: AiDecisionInput,
+): VisibleRunnerTraceEstimate {
+  const profile =
+    input.playerView.trace?.profile ?? input.playerView.traceRulesProfile;
   const identityLink = normalizedLink(
     input.side === "corp"
       ? input.playerView.opponent.identity.baseLink
       : input.playerView.own.identity.baseLink,
   );
+  const runLinkBonus = normalizedLink(input.playerView.run?.runTraceLinkBonus);
   const runnerRig =
     input.side === "corp"
       ? (input.playerView.opponent.rig ?? [])
       : (input.playerView.own.rig ?? []);
-  const runnerCredits =
-    input.side === "corp"
-      ? input.playerView.opponent.credits
-      : input.playerView.own.credits;
-  let bestInstalledLink = 0;
+  const runnerCredits = Math.max(
+    0,
+    Math.floor(
+      input.side === "corp"
+        ? input.playerView.opponent.credits
+        : input.playerView.own.credits,
+    ),
+  );
+  const paymentCapacity = Math.max(
+    0,
+    Math.floor(
+      input.playerView.trace?.visibleOpponentBidCapacity ??
+        (input.side === "runner"
+          ? runnerCredits +
+            (input.playerView.own.runnerTraceSupportQuote?.traceCreditPool ?? 0)
+          : runnerCredits),
+    ),
+  );
+
+  let bestStaticInstalledLink = 0;
+  let bestBaseLink = 0;
+  let maximumClassicStrength = identityLink + runLinkBonus;
   for (const card of runnerRig) {
     if (card.known === false) continue;
     const quotes = card.definitionId
@@ -131,19 +163,40 @@ function visibleRunnerLinkAtCorpBid(input: AiDecisionInput): number {
     if (quotes.length > 0) {
       for (const quote of quotes) {
         if (quote.creditCost > runnerCredits) continue;
-        bestInstalledLink = Math.max(
-          bestInstalledLink,
-          normalizedLink(quote.baseLinkValue),
+        const baseLink = normalizedLink(quote.baseLinkValue);
+        bestBaseLink = Math.max(bestBaseLink, baseLink);
+        const modifier = quote.classicLinkModifier;
+        const remainingPaymentCapacity = Math.max(
+          0,
+          paymentCapacity - quote.creditCost,
+        );
+        const modifierLink =
+          modifier && modifier.creditCost > 0
+            ? Math.floor(remainingPaymentCapacity / modifier.creditCost) *
+              Math.max(0, modifier.linkDelta)
+            : 0;
+        maximumClassicStrength = Math.max(
+          maximumClassicStrength,
+          identityLink + runLinkBonus + baseLink + modifierLink,
         );
       }
       continue;
     }
-    bestInstalledLink = Math.max(
-      bestInstalledLink,
+    bestStaticInstalledLink = Math.max(
+      bestStaticInstalledLink,
       normalizedLink(card.baseLink),
     );
   }
-  return identityLink + bestInstalledLink;
+
+  const staticLink = identityLink + runLinkBonus + bestStaticInstalledLink;
+  const selectedBaseLink = identityLink + runLinkBonus + bestBaseLink;
+  const runnerLink = Math.max(staticLink, selectedBaseLink);
+  maximumClassicStrength = Math.max(maximumClassicStrength, staticLink);
+  const maximumPreRevealStrength =
+    profile === "classic_blind" || profile === "classic_blind_corp_ties"
+      ? maximumClassicStrength
+      : runnerLink + paymentCapacity;
+  return { runnerLink, maximumPreRevealStrength };
 }
 
 function normalizedLink(value: number | undefined): number {

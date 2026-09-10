@@ -50,6 +50,9 @@ jobs:
       - name: Engine source structure
         run: pnpm check:engine-source-structure
 
+      - name: Card-function abstraction and guard self-tests
+        run: pnpm check:card-function-abstraction && pnpm check:card-function-abstraction:selftest
+
       - name: Package boundaries
         run: pnpm check:package-boundaries
 
@@ -59,10 +62,20 @@ jobs:
       - name: Contract tests
         run: pnpm test:contracts
 
-  tests:
-    name: Test suite
+  package-tests:
+    name: ${{ matrix.name }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - suite: ai
+            name: AI tests
+            command: pnpm --filter @netgrid/ai test
+          - suite: workspace
+            name: Workspace tests (without AI)
+            command: pnpm -r --filter '!@netgrid/ai' --filter '!netgrid-app' --no-bail --if-present test
 
     steps:
       - name: Checkout
@@ -81,7 +94,24 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
+        id: install
         run: pnpm install --frozen-lockfile
 
       - name: Run tests
-        run: pnpm test
+        run: ${{ matrix.command }}
+
+      - name: Test discovery and specs
+        if: ${{ !cancelled() && matrix.suite == 'workspace' && steps.install.outcome == 'success' }}
+        run: pnpm check:test-discovery && pnpm exec vitest run tests/specs --passWithNoTests
+
+  # Preserve the existing overall check name: it may only pass when both
+  # independent test groups succeeded, even if one failed or was cancelled.
+  tests:
+    name: Test suite
+    if: ${{ always() }}
+    needs: package-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require every test group to pass
+        run: test "${{ needs.package-tests.result }}" = "success"

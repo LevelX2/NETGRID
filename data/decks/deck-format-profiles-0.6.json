@@ -7,14 +7,8 @@
       "profileId": "local-demo-v0.6",
       "name": "Local Demo V0.6",
       "cardPoolSnapshotId": "card-snapshot-0.5",
-      "rulesBaselineIds": [
-        "rules-baseline-mvp-0.1",
-        "rules-baseline-mvp-0.4"
-      ],
-      "allowedCardStatuses": [
-        "playable",
-        "deck_legal"
-      ],
+      "rulesBaselineIds": ["rules-baseline-mvp-0.1", "rules-baseline-mvp-0.4"],
+      "allowedCardStatuses": ["playable", "deck_legal"],
       "maxCopiesPerCard": 3,
       "minimumDeckCards": {
         "runner": 12,
@@ -25,12 +19,8 @@
       },
       "requireIdentity": true,
       "allowedIdentityCards": {
-        "runner": [
-          "runner_identity_001"
-        ],
-        "corp": [
-          "corp_identity_001"
-        ]
+        "runner": ["runner_identity_001"],
+        "corp": ["corp_identity_001"]
       },
       "hiddenInfoPolicy": {
         "opponentDecklistPrivateByDefault": true,

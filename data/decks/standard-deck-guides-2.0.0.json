@@ -2,8 +2,122 @@
   "schemaVersion": "netgrid-standard-deck-guides-v2",
   "guideSetId": "netgrid-standard-deck-guides-2.0.0",
   "catalogId": "netgrid-standard-decks-1.0.0",
-  "analyzedAt": "2026-08-23",
+  "analyzedAt": "2026-09-04",
   "guides": [
+    {
+      "standardDeckId": "standard_corp_express_shutdown",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:01356c2e",
+      "sourceAnalysisHash": "deck-analysis:1b4ec27a",
+      "sourceAnalysisInputHash": "deck-analysis-input:6967d9ed",
+      "reviewedAt": "2026-09-05",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.tag_trace_punish",
+          "corp.ambush_bluff",
+          "corp.damage_kill"
+        ],
+        "secondaryStrategyIds": [
+          "corp.remote_scoring",
+          "corp.rush_score"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "contentByLocale": {
+        "en": {
+          "summary": "Express Shutdown attacks fast central multiaccess through access damage and a complete tag-and-bag sequence during the Corp turn. Its primary finish is flatline; protected agenda scoring remains a secondary route.",
+          "deckIdea": "Retain a tag source and enough damage to exceed the Runner's current grip. Chance Observation follows an attempted run; Trojan Horse follows a stolen agenda. Scorched Earth plus Punitive Counterstrike delivers six meat damage for three credits after tagging. Fetal AI, Setup! and TRAP! make central accesses dangerous even when the Runner can break every ICE.",
+          "gamePlan": {
+            "opening": "Establish liquidity and affordable HQ/R&D protection. Misleading Access Menus and Snowbank provide one-time rez income; Quandary and Wall of Static buy early stopping windows.",
+            "midgame": "Keep the tag and damage components together, price the complete route and preserve its clicks. Use access damage to force recovery and create smaller lethal thresholds. Score Corporate War only with its twelve-credit threshold covered after advancement unless an immediate game win justifies otherwise.",
+            "endgame": "Execute the shortest complete lethal route in the Corp turn. If damage cannot finish, convert a protected agenda window; never wait for a tag after the Runner has already stolen the winning points."
+          },
+          "keyCards": [
+            {
+              "cardId": "onr_v1_302_scorched-earth",
+              "title": "Scorched Earth",
+              "role": "Four meat damage; combine with Punitive Counterstrike for six or a second copy for eight."
+            },
+            {
+              "cardId": "onr_v1_301_punitive-counterstrike",
+              "title": "Punitive Counterstrike",
+              "role": "A zero-credit two-damage component makes a finish against five cards affordable."
+            },
+            {
+              "cardId": "onr_v1_284_chance-observation",
+              "title": "Chance Observation",
+              "role": "Creates the tag through a trace during the Corp turn after the Runner attempted a run."
+            },
+            {
+              "cardId": "onr_v1_306_trojan-horse",
+              "title": "Trojan Horse",
+              "role": "A trace-free tag after an agenda was stolen during the previous Runner turn."
+            },
+            {
+              "cardId": "onr_v1_345_trap",
+              "title": "TRAP!",
+              "role": "Three net damage and a tag on access for four credits, including HQ and R&D."
+            }
+          ],
+          "pilotingTips": [
+            "Eight total credits and three actions fund Trojan Horse plus two Scorched Earth; Trojan Horse plus Scorched Earth plus Punitive Counterstrike needs five credits and deals six damage.",
+            "Count damage strictly above the current grip after visible prevention. Exactly five damage does not flatline five cards.",
+            "Do not spend a necessary kill click on an unrelated action or spend the reserved credits on an unnecessary rez. Open-Ended Mileage Program cannot be played in the Corp turn."
+          ],
+          "weaknesses": [
+            "The kill requires a trigger, multiple cards and enough credits at the same time; unplayed components are not automatically dead slots.",
+            "Twelve cheap ICE buy time but cannot lock out a developed rig. The seven three-point agendas still allow a fast steal victory.",
+            "Damage prevention, trace defense, large grips and avoiding the trigger can disrupt the plan. Matchup superiority is a test hypothesis, not a deck guarantee."
+          ]
+        },
+        "de": {
+          "summary": "Express Shutdown greift schnellen Zentral-Multiaccess mit Zugriffsschaden und einer vollständigen Tag-and-Bag-Folge im Corp-Zug an. Primärer Abschluss ist die Flatline; geschütztes Agenda-Scoring bleibt ein zweiter Weg.",
+          "deckIdea": "Halte eine Tagquelle und genug Schaden zusammen, um die aktuelle Runner-Hand zu übertreffen. Chance Observation folgt auf einen versuchten Run, Trojan Horse auf eine gestohlene Agenda. Scorched Earth und Punitive Counterstrike erzeugen nach dem Tag sechs Meat Damage für drei Credits. Fetal AI, Setup! und TRAP! machen Zentralzugriffe auch dann gefährlich, wenn der Runner jedes ICE brechen kann.",
+          "gamePlan": {
+            "opening": "Baue Liquidität und bezahlbaren HQ-/R&D-Schutz auf. Misleading Access Menus und Snowbank liefern einmaliges Rez-Einkommen; Quandary und Wall of Static kaufen frühe Stopfenster.",
+            "midgame": "Halte Tag- und Schadensbausteine zusammen und finanziere die gesamte Folge samt Aktionen. Zugriffsschaden erzwingt Erholung und senkt die tödliche Schadensschwelle. Score Corporate War mit zwölf verbliebenen Credits nach dem Advancement, außer ein unmittelbarer Spielsieg rechtfertigt die Ausnahme.",
+            "endgame": "Führe im Corp-Zug die kürzeste vollständige tödliche Folge aus. Ist der Schadensabschluss nicht erreichbar, nutze ein geschütztes Agenda-Fenster. Warte nicht auf einen Tag, nachdem der Runner bereits die Siegpunkte gestohlen hat."
+          },
+          "keyCards": [
+            {
+              "cardId": "onr_v1_302_scorched-earth",
+              "title": "Scorched Earth",
+              "role": "Vier Meat Damage; mit Punitive Counterstrike sechs, mit einer zweiten Kopie acht Schaden."
+            },
+            {
+              "cardId": "onr_v1_301_punitive-counterstrike",
+              "title": "Punitive Counterstrike",
+              "role": "Kostenloser Zwei-Schaden-Baustein für einen finanzierbaren Abschluss gegen eine volle Fünferhand."
+            },
+            {
+              "cardId": "onr_v1_284_chance-observation",
+              "title": "Chance Observation",
+              "role": "Erzeugt nach einem Run im Corp-Zug per Trace den Tag für die Schadensfolge."
+            },
+            {
+              "cardId": "onr_v1_306_trojan-horse",
+              "title": "Trojan Horse",
+              "role": "Tag ohne Trace nach einem Agenda-Diebstahl im vorherigen Runner-Zug."
+            },
+            {
+              "cardId": "onr_v1_345_trap",
+              "title": "TRAP!",
+              "role": "Drei Net Damage und ein Tag beim Zugriff für vier Credits, auch aus HQ und R&D."
+            }
+          ],
+          "pilotingTips": [
+            "Trojan Horse und zweimal Scorched Earth benötigen acht Credits und drei Aktionen. Trojan Horse, Scorched Earth und Punitive Counterstrike kosten fünf Credits und verursachen sechs Schaden.",
+            "Schaden muss die aktuelle Hand nach sichtbarer Prävention übertreffen. Genau fünf Schaden töten eine Fünferhand nicht.",
+            "Verbrauche keinen nötigen Kill-Klick für eine fremde Aktion und keine reservierten Credits für unnötiges Rez. Open-Ended Mileage Program ist im Corp-Zug nicht spielbar."
+          ],
+          "weaknesses": [
+            "Der Abschluss benötigt gleichzeitig einen Auslöser, mehrere Karten und ausreichend Credits. Zurückgehaltene Bausteine sind nicht automatisch tote Karten.",
+            "Zwölf günstige ICE kaufen Zeit, sperren ein fertiges Rig aber nicht dauerhaft aus. Sieben Drei-Punkte-Agenden erlauben weiterhin einen schnellen Steal-Sieg.",
+            "Schadensprävention, Trace-Abwehr, große Hände und das Vermeiden des Auslösers können den Plan stören. Überlegenheit im Matchup ist eine Testhypothese, keine Garantie."
+          ]
+        }
+      }
+    },
     {
       "standardDeckId": "standard_corp_cheap_bag_tricks",
       "sourceDeckVersion": "1.0.0",
@@ -129,7 +243,9 @@
           "corp.fast_advance",
           "corp.overadvance_value"
         ],
-        "secondaryStrategyIds": ["corp.rush_score"],
+        "secondaryStrategyIds": [
+          "corp.rush_score"
+        ],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:ea1207ca",
@@ -226,111 +342,111 @@
     },
     {
       "standardDeckId": "standard_classic_corp_remote_lab_deflection_2026_07_01",
-      "sourceDeckVersion": "1.1.0",
-      "sourceDeckHash": "standard-deck:76267ba3",
-      "sourceAnalysisHash": "deck-analysis:167d359b",
-      "reviewedAt": "2026-08-20",
+      "sourceDeckVersion": "1.2.0",
+      "sourceDeckHash": "standard-deck:002eb697",
+      "sourceAnalysisHash": "deck-analysis:804a6ca4",
+      "reviewedAt": "2026-09-08",
       "analysis": {
         "primaryStrategyIds": [
           "corp.remote_scoring",
           "corp.damage_kill",
-          "corp.tag_trace_punish"
+          "corp.draw_engine"
         ],
         "secondaryStrategyIds": [
-          "corp.draw_engine",
+          "corp.tag_trace_punish",
           "corp.ambush_bluff",
           "corp.rush_score"
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:8b303d72",
+      "sourceAnalysisInputHash": "deck-analysis-input:529d6021",
       "contentByLocale": {
         "en": {
-          "summary": "Classic Corp - Remote Lab Deflection relies primarily on concrete flatline pressure, a protected remote scoring line and tag and trace punishment. Additionally, the deck utilizes uncertain remotes with ambush pressure, a repeatable draw engine, and early rush scoring windows.",
-          "deckIdea": "Classic Corp - Remote Lab Deflection combines concrete flatline pressure, a protected remote scoring line, and tag and trace punishment. Keep damage cards and credits together so hand pressure turns into a credible flatline threat. Establish a credible scoring remote and only deploy agendas when protection and follow-up moves match up. Only create tags or robust trace windows when real punishment can follow.",
+          "summary": "Protected remote scoring and run redirection are supported by immediate operation economy and a finite credit campaign. Research Labs keep cards available while credits finance their use.",
+          "deckIdea": "Protect central servers, establish a scoring remote and redirect runs only toward a useful defended destination. Use operation credits to fund protection and Rockerboy Promotion; retain damage and tags as conditional secondary pressure.",
           "gamePlan": {
-            "opening": "First secure economy, a sensible early ICE pattern and a credit reserve. Pay particular attention to Data Fort Remapping and Baskerville without leaving an unbalanced starting hand.",
-            "midgame": "Keep damage cards and credits together so hand pressure turns into a credible flatline threat. Establish a credible scoring remote and only deploy agendas when protection and follow-up moves match up. Only create tags or robust trace windows when real punishment can follow.",
-            "endgame": "Complete using the safest available scoring or flatline window. Have enough reserves so that the decisive move doesn't fail due to Rez, Trace or Advancement costs."
+            "opening": "Efficiency Experts works even at zero credits. Secure central access and reserve credits before developing a campaign in a remote that can survive several withdrawals.",
+            "midgame": "Withdraw three credits per action from Rockerboy Promotion to fund rezzes and advancement. Preserve a real scoring window rather than spreading ICE across too many new forts.",
+            "endgame": "Convert a protected agenda into the winning points. Use Remap counters and redirection for concrete defense; Self-Destruct remains a conditional alternative."
           },
+          "pilotingTips": [
+            "Rockerboy costs four credits to rez and an action per withdrawal; it is not automatic income. Expect multiple withdrawals before investing.",
+            "Accounts Receivable needs five credits upfront. Reclamation returns ICE to HQ and does not refill R&D."
+          ],
+          "weaknesses": [
+            "An early campaign trash can lose both money and development time. Keep enough liquid credits to defend it.",
+            "Tags and damage remain conditional; redirection needs a useful target, and some routes require additional credits."
+          ],
           "keyCards": [
             {
               "cardId": "onr_classic_001_data-fort-remapping",
               "title": "Data Fort Remapping",
-              "role": "Carries remote scoring as a concrete deck line and should be saved for a suitable execution window."
+              "role": "Scores points and stores an end-the-run counter."
             },
             {
-              "cardId": "onr_classic_005_baskerville",
-              "title": "Baskerville",
-              "role": "Carries Rez-Reserve as a concrete deck line and should be kept for a suitable execution window."
+              "cardId": "onr_classic_010_entrapment",
+              "title": "Entrapment",
+              "role": "Redirects a run to an appropriate fort for two credits."
             },
             {
-              "cardId": "onr_classic_022_self-destruct",
-              "title": "Self-Destruct",
-              "role": "Carries Ambush and Bluff as a concrete deck line and should be saved for a suitable execution window."
+              "cardId": "onr_v1_337_rockerboy-promotion",
+              "title": "Rockerboy Promotion",
+              "role": "Stores fifteen credits and pays three per withdrawal action."
+            },
+            {
+              "cardId": "onr_v1_290_efficiency-experts",
+              "title": "Efficiency Experts",
+              "role": "Provides three immediate credits without starting capital."
             },
             {
               "cardId": "onr_classic_003_unlisted-research-lab",
               "title": "Unlisted Research Lab",
-              "role": "Carries draw engine as a concrete deck line and should be saved for a suitable execution window."
-            },
-            {
-              "cardId": "onr_classic_004_theorem-proof",
-              "title": "Theorem Proof",
-              "role": "Carries remote scoring as a concrete deck line and should be saved for a suitable execution window."
+              "role": "Provides additional card draw after scoring."
             }
-          ],
-          "pilotingTips": [
-            "Before each move, check whether remote scoring still fits the current board or whether an additional line is better prepared.",
-            "Don't just rezz because you can; every expenditure should improve a specific access, tempo or score window."
-          ],
-          "weaknesses": [
-            "If Data Fort Remapping and Baskerville fail or come too late, the deck loses part of its clearest line.",
-            "Multiple simultaneous main lines can disperse credits and actions. Decide for each turn which plan actually fits the current board."
           ]
         },
         "de": {
-          "summary": "Classic Corp - Remote Lab Deflection setzt vor allem auf konkreten Flatline-Druck, eine geschützte Remote-Scorelinie und Tag- und Trace-Bestrafung. Ergänzend nutzt das Deck unsichere Remotes mit Ambush-Druck, eine wiederholbare Draw-Engine und frühe Rush-Scorefenster.",
-          "deckIdea": "Classic Corp - Remote Lab Deflection verbindet konkreten Flatline-Druck, eine geschützte Remote-Scorelinie und Tag- und Trace-Bestrafung. Halte Schadenskarten und Credits zusammen, damit Handdruck in eine glaubwürdige Flatline-Drohung mündet. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen. Erzeuge Tags oder belastbare Tracefenster erst dann, wenn eine echte Bestrafung folgen kann.",
+          "summary": "Geschütztes Remote-Scoring und Run-Umleitung erhalten Unterstützung durch sofortige Operationswirtschaft und eine endliche Kreditkampagne. Research Labs liefern Karten, während Credits deren Einsatz ermöglichen.",
+          "deckIdea": "Schütze die Zentralen, baue einen Scoring-Remote auf und leite Runs nur zu einem tatsächlich hilfreichen verteidigten Ziel um. Finanziere Schutz und Rockerboy Promotion durch Operationen; Schaden und Tags bleiben bedingter zusätzlicher Druck.",
           "gamePlan": {
-            "opening": "Sichere zuerst Economy, ein sinnvolles frühes ICE-Muster und eine Creditreserve. Achte besonders auf Data Fort Remapping und Baskerville, ohne dafür eine unausgewogene Starthand zu behalten.",
-            "midgame": "Halte Schadenskarten und Credits zusammen, damit Handdruck in eine glaubwürdige Flatline-Drohung mündet. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen. Erzeuge Tags oder belastbare Tracefenster erst dann, wenn eine echte Bestrafung folgen kann.",
-            "endgame": "Schließe über das sicherste reale Score- oder Flatlinefenster ab. Halte genug Reserve, damit der entscheidende Zug nicht an Rez-, Trace- oder Advancement-Kosten scheitert."
+            "opening": "Efficiency Experts funktioniert auch bei null Credits. Sichere Zentralzugriffe und Reserven, bevor du eine Kampagne in einem Remote mit Aussicht auf mehrere Auszahlungen entwickelst.",
+            "midgame": "Nimm mit Rockerboy Promotion drei Credits pro Aktion, um Rezzes und Advancement zu finanzieren. Bewahre ein echtes Scorefenster, statt ICE auf zu viele neue Forts zu verteilen.",
+            "endgame": "Verwandle eine geschützte Agenda in die entscheidenden Punkte. Nutze Remap-Counter und Umleitung zur konkreten Abwehr; Self-Destruct bleibt eine bedingte Alternative."
           },
+          "pilotingTips": [
+            "Rockerboy kostet vier Rez-Credits und eine Aktion je Auszahlung; er liefert kein automatisches Einkommen. Plane mehrere Auszahlungen vor der Investition ein.",
+            "Accounts Receivable verlangt fünf Startcredits. Reclamation holt ICE nach HQ zurück und füllt R&D nicht auf."
+          ],
+          "weaknesses": [
+            "Ein früher Trash der Kampagne kann Geld und Aufbauzeit kosten. Halte genug liquide Credits für ihren Schutz.",
+            "Tags und Schaden bleiben bedingt. Umleitung braucht ein hilfreiches Ziel, manche Pfade außerdem zusätzliche Credits."
+          ],
           "keyCards": [
             {
               "cardId": "onr_classic_001_data-fort-remapping",
               "title": "Data Fort Remapping",
-              "role": "Trägt Remote Scoring als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+              "role": "Liefert Punkte und einen gespeicherten End-the-run-Counter."
             },
             {
-              "cardId": "onr_classic_005_baskerville",
-              "title": "Baskerville",
-              "role": "Trägt Rez-Reserve als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+              "cardId": "onr_classic_010_entrapment",
+              "title": "Entrapment",
+              "role": "Leitet einen Run für zwei Credits zu einem passenden Fort um."
             },
             {
-              "cardId": "onr_classic_022_self-destruct",
-              "title": "Self-Destruct",
-              "role": "Trägt Ambush und Bluff als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+              "cardId": "onr_v1_337_rockerboy-promotion",
+              "title": "Rockerboy Promotion",
+              "role": "Speichert 15 Credits und zahlt drei pro Auszahlungsaktion."
+            },
+            {
+              "cardId": "onr_v1_290_efficiency-experts",
+              "title": "Efficiency Experts",
+              "role": "Liefert drei sofortige Credits ohne Startkapital."
             },
             {
               "cardId": "onr_classic_003_unlisted-research-lab",
               "title": "Unlisted Research Lab",
-              "role": "Trägt Draw-Engine als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
-            },
-            {
-              "cardId": "onr_classic_004_theorem-proof",
-              "title": "Theorem Proof",
-              "role": "Trägt Remote Scoring als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+              "role": "Liefert nach dem Score zusätzlichen Kartennachschub."
             }
-          ],
-          "pilotingTips": [
-            "Prüfe vor jedem Zug, ob Remote Scoring noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
-            "Rezze nicht nur, weil es möglich ist; jede Ausgabe soll ein konkretes Zugriffs-, Tempo- oder Scorefenster verbessern."
-          ],
-          "weaknesses": [
-            "Fallen Data Fort Remapping und Baskerville aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
-            "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
           ]
         }
       }
@@ -458,7 +574,10 @@
           "corp.remote_scoring",
           "corp.damage_kill"
         ],
-        "secondaryStrategyIds": ["corp.ambush_bluff", "corp.rush_score"],
+        "secondaryStrategyIds": [
+          "corp.ambush_bluff",
+          "corp.rush_score"
+        ],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:00ed9f21",
@@ -555,10 +674,10 @@
     },
     {
       "standardDeckId": "standard_corp_mr96xg94",
-      "sourceDeckVersion": "1.1.0",
-      "sourceDeckHash": "standard-deck:b00ad3a2",
-      "sourceAnalysisHash": "deck-analysis:9cef28ad",
-      "reviewedAt": "2026-08-20",
+      "sourceDeckVersion": "1.2.0",
+      "sourceDeckHash": "standard-deck:b27802eb",
+      "sourceAnalysisHash": "deck-analysis:c4d700cf",
+      "reviewedAt": "2026-09-04",
       "analysis": {
         "primaryStrategyIds": [
           "corp.overadvance_value",
@@ -566,21 +685,21 @@
           "corp.remote_scoring"
         ],
         "secondaryStrategyIds": [
-          "corp.ambush_bluff",
           "corp.action_tempo",
           "corp.fast_advance",
+          "corp.ambush_bluff",
           "corp.asset_economy",
           "corp.rush_score"
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:39d1b84b",
+      "sourceAnalysisInputHash": "deck-analysis-input:ddf6219c",
       "contentByLocale": {
         "en": {
           "summary": "Fast Advance, Baby relies primarily on taxing ICE layers, targeted overadvance values and a protected remote scoring line. Additionally, the deck uses uncertain remotes with ambush pressure, accelerated scoring, a distributed asset economy, early rush scoring windows and concrete flatline pressure.",
           "deckIdea": "Fast Advance, Baby combines taxing ICE layers, targeted overadvance value and a protected remote scoring line. Stagger ICE so that the Runner has to pay repeatedly and your scoring window actually gets bigger. Only use additional advancement counters if their bonus justifies the delayed score. Establish a credible scoring remote and only deploy agendas when protection and follow-up moves match up.",
           "gamePlan": {
-            "opening": "First secure economy, a sensible early ICE pattern and a credit reserve. Pay particular attention to Caryatid and Lesley Major without leaving an unbalanced starting hand.",
+            "opening": "First secure economy, a sensible early ICE pattern and a credit reserve. Pay particular attention to Caryatid and Vapor Ops without leaving an unbalanced starting hand.",
             "midgame": "Stagger ICE so that the Runner has to pay repeatedly and your scoring window actually gets bigger. Only use additional advancement counters if their bonus justifies the delayed score. Establish a credible scoring remote and only deploy agendas when protection and follow-up moves match up.",
             "endgame": "Complete using the safest available scoring or flatline window. Have enough reserves so that the decisive move doesn't fail due to Rez, Trace or Advancement costs."
           },
@@ -591,8 +710,8 @@
               "role": "Carries ICE tax glacier as a concrete deck line and should be saved for a suitable execution window."
             },
             {
-              "cardId": "onr_proteus_062_lesley-major",
-              "title": "Lesley Major",
+              "cardId": "onr_v1_347_vapor-ops",
+              "title": "Vapor Ops",
               "role": "Carries Fast Advance as a concrete deck line and should be saved for a suitable execution window."
             },
             {
@@ -616,7 +735,7 @@
             "Don't just rezz because you can; every expenditure should improve a specific access, tempo or score window."
           ],
           "weaknesses": [
-            "If Caryatid and Lesley Major fail or come too late, the deck loses part of its clearest line.",
+            "If Caryatid and Vapor Ops fail or come too late, the deck loses part of its clearest line.",
             "Multiple simultaneous main lines can disperse credits and actions. Decide for each turn which plan actually fits the current board."
           ]
         },
@@ -624,7 +743,7 @@
           "summary": "Fast Advance, Baby setzt vor allem auf taxierende ICE-Staffeln, gezielten Overadvance-Wert und eine geschützte Remote-Scorelinie. Ergänzend nutzt das Deck unsichere Remotes mit Ambush-Druck, beschleunigtes Scoring, eine verteilte Asset-Economy, frühe Rush-Scorefenster und konkreten Flatline-Druck.",
           "deckIdea": "Fast Advance, Baby verbindet taxierende ICE-Staffeln, gezielten Overadvance-Wert und eine geschützte Remote-Scorelinie. Staffele ICE so, dass der Runner wiederholt zahlen muss und dein Scoringfenster tatsächlich größer wird. Nutze zusätzliche Advancement Counter nur, wenn ihr Bonus den verzögerten Score rechtfertigt. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen.",
           "gamePlan": {
-            "opening": "Sichere zuerst Economy, ein sinnvolles frühes ICE-Muster und eine Creditreserve. Achte besonders auf Caryatid und Lesley Major, ohne dafür eine unausgewogene Starthand zu behalten.",
+            "opening": "Sichere zuerst Economy, ein sinnvolles frühes ICE-Muster und eine Creditreserve. Achte besonders auf Caryatid und Vapor Ops, ohne dafür eine unausgewogene Starthand zu behalten.",
             "midgame": "Staffele ICE so, dass der Runner wiederholt zahlen muss und dein Scoringfenster tatsächlich größer wird. Nutze zusätzliche Advancement Counter nur, wenn ihr Bonus den verzögerten Score rechtfertigt. Errichte einen glaubwürdigen Scoring-Remote und lege Agendas erst aus, wenn Schutz und Folgezug zusammenpassen.",
             "endgame": "Schließe über das sicherste reale Score- oder Flatlinefenster ab. Halte genug Reserve, damit der entscheidende Zug nicht an Rez-, Trace- oder Advancement-Kosten scheitert."
           },
@@ -635,8 +754,8 @@
               "role": "Trägt ICE-Tax-Glacier als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
             },
             {
-              "cardId": "onr_proteus_062_lesley-major",
-              "title": "Lesley Major",
+              "cardId": "onr_v1_347_vapor-ops",
+              "title": "Vapor Ops",
               "role": "Trägt Fast Advance als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
             },
             {
@@ -660,7 +779,7 @@
             "Rezze nicht nur, weil es möglich ist; jede Ausgabe soll ein konkretes Zugriffs-, Tempo- oder Scorefenster verbessern."
           ],
           "weaknesses": [
-            "Fallen Caryatid und Lesley Major aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
+            "Fallen Caryatid und Vapor Ops aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
             "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
           ]
         }
@@ -670,15 +789,18 @@
       "standardDeckId": "standard_corp_ivory_bastion",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:8bb5499b",
-      "sourceAnalysisHash": "deck-analysis:32a19380",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:b32f5806",
+      "reviewedAt": "2026-09-04",
       "analysis": {
         "primaryStrategyIds": [
           "corp.ice_tax_glacier",
           "corp.remote_scoring",
           "corp.asset_economy"
         ],
-        "secondaryStrategyIds": ["corp.rush_score", "corp.fast_advance"],
+        "secondaryStrategyIds": [
+          "corp.rush_score",
+          "corp.fast_advance"
+        ],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:491a2a97",
@@ -785,7 +907,10 @@
           "corp.damage_kill",
           "corp.rush_score"
         ],
-        "secondaryStrategyIds": ["corp.remote_scoring", "corp.fast_advance"],
+        "secondaryStrategyIds": [
+          "corp.remote_scoring",
+          "corp.fast_advance"
+        ],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:d06b5e6d",
@@ -892,7 +1017,10 @@
           "corp.fast_advance",
           "corp.rush_score"
         ],
-        "secondaryStrategyIds": ["corp.ambush_bluff", "corp.damage_kill"],
+        "secondaryStrategyIds": [
+          "corp.ambush_bluff",
+          "corp.damage_kill"
+        ],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:539fb27b",
@@ -991,7 +1119,7 @@
       "standardDeckId": "standard_corp_neon_guillotine",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:e3eaa4fe",
-      "sourceAnalysisHash": "deck-analysis:2da69b69",
+      "sourceAnalysisHash": "deck-analysis:3f48e49a",
       "reviewedAt": "2026-08-20",
       "analysis": {
         "primaryStrategyIds": [
@@ -999,7 +1127,9 @@
           "corp.damage_kill",
           "corp.rush_score"
         ],
-        "secondaryStrategyIds": ["corp.remote_scoring"],
+        "secondaryStrategyIds": [
+          "corp.remote_scoring"
+        ],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:4acc3fa8",
@@ -1429,7 +1559,10 @@
           "corp.action_tempo",
           "corp.rush_score"
         ],
-        "secondaryStrategyIds": ["corp.remote_scoring", "corp.ambush_bluff"],
+        "secondaryStrategyIds": [
+          "corp.remote_scoring",
+          "corp.ambush_bluff"
+        ],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:e959d898",
@@ -1536,7 +1669,10 @@
           "corp.damage_kill",
           "corp.rush_score"
         ],
-        "secondaryStrategyIds": ["corp.remote_scoring", "corp.fast_advance"],
+        "secondaryStrategyIds": [
+          "corp.remote_scoring",
+          "corp.fast_advance"
+        ],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:2cbebc83",
@@ -1746,15 +1882,18 @@
       "standardDeckId": "standard_corp_salazar_toll_road",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:011780e8",
-      "sourceAnalysisHash": "deck-analysis:3d535fb0",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:7194eb8c",
+      "reviewedAt": "2026-09-04",
       "analysis": {
         "primaryStrategyIds": [
           "corp.ice_tax_glacier",
           "corp.remote_scoring",
           "corp.central_stabilize"
         ],
-        "secondaryStrategyIds": ["corp.damage_kill", "corp.rush_score"],
+        "secondaryStrategyIds": [
+          "corp.damage_kill",
+          "corp.rush_score"
+        ],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:d44eb468",
@@ -1972,7 +2111,10 @@
           "corp.economy_rez_reserve",
           "corp.damage_kill"
         ],
-        "secondaryStrategyIds": ["corp.rush_score", "corp.action_tempo"],
+        "secondaryStrategyIds": [
+          "corp.rush_score",
+          "corp.action_tempo"
+        ],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:63fe6d56",
@@ -2190,7 +2332,9 @@
           "corp.asset_economy",
           "corp.rush_score"
         ],
-        "secondaryStrategyIds": ["corp.fast_advance"],
+        "secondaryStrategyIds": [
+          "corp.fast_advance"
+        ],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:e827918c",
@@ -2297,7 +2441,9 @@
           "corp.remote_scoring",
           "corp.rush_score"
         ],
-        "secondaryStrategyIds": ["corp.damage_kill"],
+        "secondaryStrategyIds": [
+          "corp.damage_kill"
+        ],
         "reviewStatus": "observe"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:eb35fd5f",
@@ -2432,7 +2578,9 @@
       "sourceAnalysisHash": "deck-analysis:679ae65a",
       "reviewedAt": "2026-08-20",
       "analysis": {
-        "primaryStrategyIds": ["runner.survival_defense"],
+        "primaryStrategyIds": [
+          "runner.survival_defense"
+        ],
         "secondaryStrategyIds": [],
         "reviewStatus": "observe"
       },
@@ -2532,7 +2680,7 @@
       "standardDeckId": "standard_classic_runner_cybernetics_risk_rig_2026_07_01",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:afcb633a",
-      "sourceAnalysisHash": "deck-analysis:a594643d",
+      "sourceAnalysisHash": "deck-analysis:da4799fe",
       "reviewedAt": "2026-08-20",
       "analysis": {
         "primaryStrategyIds": [
@@ -2960,7 +3108,9 @@
       "sourceAnalysisHash": "deck-analysis:957eb2e4",
       "reviewedAt": "2026-08-20",
       "analysis": {
-        "primaryStrategyIds": ["runner.survival_defense"],
+        "primaryStrategyIds": [
+          "runner.survival_defense"
+        ],
         "secondaryStrategyIds": [],
         "reviewStatus": "observe"
       },
@@ -3121,10 +3271,10 @@
     },
     {
       "standardDeckId": "standard_runner_adb10896",
-      "sourceDeckVersion": "1.0.0",
-      "sourceDeckHash": "standard-deck:d8fb54e8",
-      "sourceAnalysisHash": "deck-analysis:dc4b1dcd",
-      "reviewedAt": "2026-08-20",
+      "sourceDeckVersion": "1.1.0",
+      "sourceDeckHash": "standard-deck:fcf8258d",
+      "sourceAnalysisHash": "deck-analysis:4fc81c63",
+      "reviewedAt": "2026-08-30",
       "analysis": {
         "primaryStrategyIds": [
           "runner.run_event_tempo",
@@ -3132,19 +3282,19 @@
           "runner.rnd_pressure"
         ],
         "secondaryStrategyIds": [
-          "runner.search.breaker",
           "runner.rig_first",
+          "runner.search.breaker",
           "runner.interface_closeout"
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:1617b68a",
+      "sourceAnalysisInputHash": "deck-analysis-input:9b420dc6",
       "contentByLocale": {
         "en": {
-          "summary": "King of the Road primarily relies on short run event pace lines, repeated R&D pressure and targeted HQ pressure. In addition, the deck uses a multi-access closure, targeted breaker search and a reliable rig structure.",
+          "summary": "King of the Road primarily relies on short run event pace lines, repeated R&D pressure and targeted HQ pressure. Its breaker suite deliberately covers Barrier, Code Gate and Sentry ICE so that targeted search can close the currently missing route instead of merely adding redundant coverage.",
           "deckIdea": "King of the Road combines short run event pace lines, repeated R&D pressure and targeted HQ pressure. Combine run events with the right goal and use the gained speed in the same turn. Attack R&D repeatedly and turn information or multiaccess into real agenda opportunities. Keep HQ under surveillance and use appropriate access windows before the Korp exploits their hand.",
           "gamePlan": {
-            "opening": "Secure credits first, basic coverage and affordable first access. Pay particular attention to All-Nighter and Custodial Position without leaving an unbalanced starting hand.",
+            "opening": "Secure credits first, basic ICE coverage and an affordable first access. Prefer the breaker subtype that closes an actually exposed route; Hammer and Pile Driver provide the deck's dedicated Barrier coverage.",
             "midgame": "Combine run events with the right goal and use the gained speed in the same turn. Attack R&D repeatedly and turn information or multiaccess into real agenda opportunities. Keep HQ under surveillance and use appropriate access windows before the Korp exploits their hand.",
             "endgame": "Pool your remaining credits into the line with the highest agenda chance. Do not automatically repeat the same run if ICE, tags or damage risk have changed."
           },
@@ -3155,19 +3305,19 @@
               "role": "Carries run event tempo as a concrete deck line and should be saved for a suitable execution window."
             },
             {
-              "cardId": "onr_v1_081_custodial-position",
-              "title": "Custodial Position",
-              "role": "Carries R&D print as a concrete deck line and should be saved for a suitable execution window."
-            },
-            {
-              "cardId": "onr_v1_084_edited-shipping-manifests",
-              "title": "Edited Shipping Manifests",
-              "role": "Carries HQ print as a concrete deck line and should be saved for a suitable execution window."
-            },
-            {
               "cardId": "onr_v1_114_temple-microcode-outlet",
               "title": "Temple Microcode Outlet",
               "role": "Carries breaker search as a concrete deck line and should be saved for a suitable execution window."
+            },
+            {
+              "cardId": "onr_v1_031_hammer",
+              "title": "Hammer",
+              "role": "Provides the efficient everyday Barrier answer and should be installed when Wall coverage opens a concrete run route."
+            },
+            {
+              "cardId": "onr_v1_047_pile-driver",
+              "title": "Pile Driver",
+              "role": "Provides a high-strength Barrier alternative for demanding Walls and complements Hammer instead of duplicating Sentry coverage."
             },
             {
               "cardId": "onr_v1_085_executive-wiretaps",
@@ -3177,7 +3327,8 @@
           ],
           "pilotingTips": [
             "Before each move, check whether the run event tempo still matches the current board or whether an additional line is better prepared.",
-            "Plan run costs and possible punishment together; a legal run is not automatically a good run."
+            "Plan run costs and possible punishment together; a legal run is not automatically a good run.",
+            "Install memory and breakers against current plus near-term coverage demand; do not spend scarce credits or MU on redundant subtypes without a strategic route."
           ],
           "weaknesses": [
             "If All-Nighter and Custodial Position fail or come too late, the deck loses part of its clearest line.",
@@ -3185,10 +3336,10 @@
           ]
         },
         "de": {
-          "summary": "King of the Road setzt vor allem auf kurze Run-Event-Tempolinien, wiederholten R&D-Druck und gezielten HQ-Druck. Ergänzend nutzt das Deck einen Multiaccess-Abschluss, gezielte Breaker-Suche und einen verlässlichen Rig-Aufbau.",
+          "summary": "King of the Road setzt vor allem auf kurze Run-Event-Tempolinien, wiederholten R&D-Druck und gezielten HQ-Druck. Die Breaker-Suite deckt Barrieren, Code Gates und Sentry-ICE bewusst ab, damit die gezielte Suche die aktuell fehlende Route schließt statt nur redundante Coverage aufzubauen.",
           "deckIdea": "King of the Road verbindet kurze Run-Event-Tempolinien, wiederholten R&D-Druck und gezielten HQ-Druck. Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Greife R&D wiederholt an und verwandle Informationen oder Multiaccess in echte Agenda-Chancen. Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet.",
           "gamePlan": {
-            "opening": "Sichere zuerst Credits, Grund-Coverage und einen bezahlbaren ersten Zugriff. Achte besonders auf All-Nighter und Custodial Position, ohne dafür eine unausgewogene Starthand zu behalten.",
+            "opening": "Sichere zuerst Credits, grundlegende ICE-Coverage und einen bezahlbaren ersten Zugriff. Bevorzuge den Breaker-Subtyp, der eine tatsächlich sichtbare Route öffnet; Hammer und Pile Driver bilden die gezielte Barrieren-Abdeckung.",
             "midgame": "Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Greife R&D wiederholt an und verwandle Informationen oder Multiaccess in echte Agenda-Chancen. Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet.",
             "endgame": "Bündele deine verbleibenden Credits in die Linie mit der höchsten Agenda-Chance. Wiederhole nicht automatisch denselben Run, wenn sich ICE, Tags oder Schadensrisiko verändert haben."
           },
@@ -3199,19 +3350,19 @@
               "role": "Trägt Run-Event-Tempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
             },
             {
-              "cardId": "onr_v1_081_custodial-position",
-              "title": "Custodial Position",
-              "role": "Trägt R&D-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
-            },
-            {
-              "cardId": "onr_v1_084_edited-shipping-manifests",
-              "title": "Edited Shipping Manifests",
-              "role": "Trägt HQ-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
-            },
-            {
               "cardId": "onr_v1_114_temple-microcode-outlet",
               "title": "Temple Microcode Outlet",
               "role": "Trägt Breaker-Suche als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+            },
+            {
+              "cardId": "onr_v1_031_hammer",
+              "title": "Hammer",
+              "role": "Ist die effiziente Standardantwort auf Barrieren und sollte installiert werden, wenn Wall-Coverage eine konkrete Run-Route öffnet."
+            },
+            {
+              "cardId": "onr_v1_047_pile-driver",
+              "title": "Pile Driver",
+              "role": "Ist die Alternative mit hoher Grundstärke für anspruchsvolle Walls und ergänzt Hammer, statt Sentry-Coverage weiter zu verdoppeln."
             },
             {
               "cardId": "onr_v1_085_executive-wiretaps",
@@ -3221,7 +3372,8 @@
           ],
           "pilotingTips": [
             "Prüfe vor jedem Zug, ob Run-Event-Tempo noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
-            "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run."
+            "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run.",
+            "Installiere MU und Breaker nach aktuellem sowie absehbarem Coverage-Bedarf; verschwende knappe Credits oder MU nicht ohne strategische Route auf redundante Subtypen."
           ],
           "weaknesses": [
             "Fallen All-Nighter und Custodial Position aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
@@ -3234,7 +3386,7 @@
       "standardDeckId": "standard_runner_krashkurs_clown_kreditmaschine_2026_07_11",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:99165f80",
-      "sourceAnalysisHash": "deck-analysis:c20dc9d6",
+      "sourceAnalysisHash": "deck-analysis:e12dee99",
       "reviewedAt": "2026-08-20",
       "analysis": {
         "primaryStrategyIds": [],
@@ -3325,7 +3477,10 @@
           "runner.run_event_tempo",
           "runner.interface_closeout"
         ],
-        "secondaryStrategyIds": ["runner.rig_first", "runner.search.breaker"],
+        "secondaryStrategyIds": [
+          "runner.rig_first",
+          "runner.search.breaker"
+        ],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:1d76fbbf",
@@ -3446,7 +3601,10 @@
           "runner.interface_closeout",
           "runner.survival_defense"
         ],
-        "secondaryStrategyIds": ["runner.run_event_tempo", "runner.rig_first"],
+        "secondaryStrategyIds": [
+          "runner.run_event_tempo",
+          "runner.rig_first"
+        ],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:f0f4f332",
@@ -3543,7 +3701,10 @@
           "runner.rnd_pressure",
           "runner.run_event_tempo"
         ],
-        "secondaryStrategyIds": ["runner.hq_pressure", "runner.rig_first"],
+        "secondaryStrategyIds": [
+          "runner.hq_pressure",
+          "runner.rig_first"
+        ],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:1f09316e",
@@ -3640,110 +3801,111 @@
     },
     {
       "standardDeckId": "standard_proteus_runner_breaker_lab_2026_05_25",
-      "sourceDeckVersion": "1.0.0",
-      "sourceDeckHash": "standard-deck:3c6d47c9",
-      "sourceAnalysisHash": "deck-analysis:8d986207",
-      "reviewedAt": "2026-08-20",
+      "sourceDeckVersion": "1.1.0",
+      "sourceDeckHash": "standard-deck:1bd2b10a",
+      "sourceAnalysisHash": "deck-analysis:23bba578",
+      "reviewedAt": "2026-09-08",
       "analysis": {
         "primaryStrategyIds": [
-          "runner.run_event_tempo",
           "runner.hq_pressure",
-          "runner.rnd_pressure"
+          "runner.rnd_pressure",
+          "runner.run_event_tempo"
         ],
         "secondaryStrategyIds": [
           "runner.interface_closeout",
-          "runner.rig_first"
+          "runner.rig_first",
+          "runner.search.breaker"
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:deab2df1",
+      "sourceAnalysisInputHash": "deck-analysis-input:c29b5637",
       "contentByLocale": {
         "en": {
-          "summary": "Proteus Runner - Breaker Lab & Virus Pressure relies primarily on short run event pace lines, targeted HQ pressure and repeated R&D pressure. In addition, the deck uses a multi-access closure and a reliable rig structure.",
-          "deckIdea": "Proteus Runner - Breaker Lab & Virus Pressure combines a multi-access finish, short run event pace lines and targeted HQ pressure. Use interface effects as a finishing engine and bundle them with affordable central runs. Combine run events with the right goal and use the gained speed in the same turn. Keep HQ under surveillance and use appropriate access windows before the Korp exploits their hand.",
+          "summary": "A broad breaker toolbox supports repeated central accesses and virus pressure. Cheap economy with card draw and targeted program search make the toolbox easier to assemble.",
+          "deckIdea": "Find the missing breaker, finance the complete run, then turn HQ and R&D successes into virus counters and extra accesses. Keep flexible breakers and a selective derez option without building an unrelated Bad Publicity win plan.",
           "gamePlan": {
-            "opening": "Secure credits first, basic coverage and affordable first access. Pay particular attention to Highlighter and Disintegrator without leaving an unbalanced starting hand.",
-            "midgame": "Use interface effects as a finishing engine and bundle them with affordable central runs. Combine run events with the right goal and use the gained speed in the same turn. Keep HQ under surveillance and use appropriate access windows before the Korp exploits their hand.",
-            "endgame": "Pool your remaining credits into the line with the highest agenda chance. Do not automatically repeat the same run if ICE, tags or damage risk have changed."
+            "opening": "Use Stakeout and Cruising for Netwatch for credits and cards. Develop the needed breaker; install The Short Circuit when a program search can prepare an affordable follow-up.",
+            "midgame": "Add Highlighter or Vienna to a working rig. Install Karl before a realistic series of successful runs. Keep memory, search costs and the next run budget in view.",
+            "endgame": "Convert extra accesses into agenda points. Contest a concrete scoring remote when necessary and preserve enough credits and cards for the full route."
           },
+          "pilotingTips": [
+            "The Short Circuit searches to hand; program installation still costs credits and an action.",
+            "Karl pays after successful runs. He cannot fund an unaffordable first run. Keep tags and damage consequences in the run budget."
+          ],
+          "weaknesses": [
+            "Twenty-nine programs still compete for memory and development time; drawing a useful program does not mean it should be installed immediately.",
+            "The deck has no new dedicated Meat damage prevention. Preserve the hand and remove dangerous tags."
+          ],
           "keyCards": [
             {
               "cardId": "onr_proteus_090_highlighter",
               "title": "Highlighter",
-              "role": "Carries interface termination as a concrete deck line and should be saved for a suitable execution window."
+              "role": "Turns repeated R&D successes into extra accesses."
             },
             {
-              "cardId": "onr_proteus_085_disintegrator",
-              "title": "Disintegrator",
-              "role": "Carries run event tempo as a concrete deck line and should be saved for a suitable execution window."
+              "cardId": "onr_proteus_098_vienna-22",
+              "title": "Vienna 22",
+              "role": "Rewards repeated HQ accesses with more access pressure."
             },
             {
-              "cardId": "onr_proteus_084_crumble",
-              "title": "Crumble",
-              "role": "Carries HQ print as a concrete deck line and should be saved for a suitable execution window."
+              "cardId": "onr_v1_177_the-short-circuit",
+              "title": "The Short Circuit",
+              "role": "Finds the required breaker or virus in the stack."
             },
             {
-              "cardId": "onr_proteus_089_garbage-in",
-              "title": "Garbage In",
-              "role": "Carries R&D print as a concrete deck line and should be saved for a suitable execution window."
+              "cardId": "onr_proteus_124_stakeout",
+              "title": "Stakeout",
+              "role": "Adds credits and replaces itself without requiring starting capital."
             },
             {
-              "cardId": "onr_proteus_101_all-hands",
-              "title": "All-Hands",
-              "role": "Carries run event tempo as a concrete deck line and should be saved for a suitable execution window."
+              "cardId": "onr_v1_166_karl-de-veres-corporate-stooge",
+              "title": "Karl de Veres, Corporate Stooge",
+              "role": "Provides recurring income after successful runs."
             }
-          ],
-          "pilotingTips": [
-            "Before each move, check whether the interface finish still fits the current board or whether an additional line is better prepared.",
-            "Plan run costs and possible punishment together; a legal run is not automatically a good run."
-          ],
-          "weaknesses": [
-            "If Highlighter and Disintegrator fail or come too late, the deck loses part of its clearest line.",
-            "Multiple simultaneous main lines can disperse credits and actions. Decide for each turn which plan actually fits the current board."
           ]
         },
         "de": {
-          "summary": "Proteus Runner - Breaker Lab & Virus Pressure setzt vor allem auf kurze Run-Event-Tempolinien, gezielten HQ-Druck und wiederholten R&D-Druck. Ergänzend nutzt das Deck einen Multiaccess-Abschluss und einen verlässlichen Rig-Aufbau.",
-          "deckIdea": "Proteus Runner - Breaker Lab & Virus Pressure verbindet einen Multiaccess-Abschluss, kurze Run-Event-Tempolinien und gezielten HQ-Druck. Nutze Interface-Effekte als Abschlussmotor und bündele sie mit bezahlbaren Zentralruns. Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet.",
+          "summary": "Eine breite Breaker-Werkzeugkiste trägt wiederholte Zentralzugriffe und Virusdruck. Günstige Wirtschaft mit Kartennachschub und gezielte Programmsuche erleichtern den Aufbau.",
+          "deckIdea": "Finde den fehlenden Breaker, finanziere den vollständigen Run und verwandle Erfolge auf HQ und R&D in Viruscounter und zusätzliche Zugriffe. Flexible Breaker und eine gezielte Derez-Option bleiben erhalten; ein separates Bad-Publicity-Siegpaket ist nicht vorgesehen.",
           "gamePlan": {
-            "opening": "Sichere zuerst Credits, Grund-Coverage und einen bezahlbaren ersten Zugriff. Achte besonders auf Highlighter und Disintegrator, ohne dafür eine unausgewogene Starthand zu behalten.",
-            "midgame": "Nutze Interface-Effekte als Abschlussmotor und bündele sie mit bezahlbaren Zentralruns. Kombiniere Run-Events mit dem passenden Ziel und nutze das gewonnene Tempo noch im selben Zug. Halte HQ unter Beobachtung und nutze passende Zugriffsfenster, bevor die Korp ihre Hand verwertet.",
-            "endgame": "Bündele deine verbleibenden Credits in die Linie mit der höchsten Agenda-Chance. Wiederhole nicht automatisch denselben Run, wenn sich ICE, Tags oder Schadensrisiko verändert haben."
+            "opening": "Nutze Stakeout und Cruising for Netwatch für Credits und Karten. Entwickle den benötigten Breaker; installiere The Short Circuit, wenn eine Suche einen bezahlbaren Folgezug vorbereitet.",
+            "midgame": "Ergänze ein funktionierendes Rig um Highlighter oder Vienna. Installiere Karl vor einer realistischen Folge erfolgreicher Runs. Behalte MU, Suchkosten und das nächste Runbudget im Blick.",
+            "endgame": "Verwandle Mehrfachzugriffe in Agendapunkte. Bestreite bei Bedarf einen konkreten Scoring-Remote und halte Credits und Handreserve für den vollständigen Pfad bereit."
           },
+          "pilotingTips": [
+            "The Short Circuit sucht auf die Hand; die Programminstallation kostet anschließend weiterhin Credits und eine Aktion.",
+            "Karl zahlt nach erfolgreichen Runs. Einen unbezahlbaren ersten Run finanziert er nicht. Plane Tags und Schadensfolgen mit ein."
+          ],
+          "weaknesses": [
+            "29 Programme konkurrieren weiterhin um MU und Aufbauzeit. Ein nützliches gezogenes Programm muss nicht sofort installiert werden.",
+            "Neue gezielte Meat-Prävention kommt nicht hinzu. Bewahre die Handreserve und entferne gefährliche Tags."
+          ],
           "keyCards": [
             {
               "cardId": "onr_proteus_090_highlighter",
               "title": "Highlighter",
-              "role": "Trägt Interface-Abschluss als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+              "role": "Verwandelt wiederholte R&D-Erfolge in zusätzliche Zugriffe."
             },
             {
-              "cardId": "onr_proteus_085_disintegrator",
-              "title": "Disintegrator",
-              "role": "Trägt Run-Event-Tempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+              "cardId": "onr_proteus_098_vienna-22",
+              "title": "Vienna 22",
+              "role": "Belohnt wiederholte HQ-Erfolge mit zusätzlichen Zugriffen."
             },
             {
-              "cardId": "onr_proteus_084_crumble",
-              "title": "Crumble",
-              "role": "Trägt HQ-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+              "cardId": "onr_v1_177_the-short-circuit",
+              "title": "The Short Circuit",
+              "role": "Findet den benötigten Breaker oder Virus im Stack."
             },
             {
-              "cardId": "onr_proteus_089_garbage-in",
-              "title": "Garbage In",
-              "role": "Trägt R&D-Druck als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+              "cardId": "onr_proteus_124_stakeout",
+              "title": "Stakeout",
+              "role": "Liefert Credits und eine Ersatzkarte ohne Startkapital."
             },
             {
-              "cardId": "onr_proteus_101_all-hands",
-              "title": "All-Hands",
-              "role": "Trägt Run-Event-Tempo als konkrete Decklinie und sollte für ein passendes Umsetzungsfenster aufbewahrt werden."
+              "cardId": "onr_v1_166_karl-de-veres-corporate-stooge",
+              "title": "Karl de Veres, Corporate Stooge",
+              "role": "Liefert wiederkehrendes Einkommen nach erfolgreichen Runs."
             }
-          ],
-          "pilotingTips": [
-            "Prüfe vor jedem Zug, ob Interface-Abschluss noch zum aktuellen Board passt oder eine Ergänzungslinie besser vorbereitet ist.",
-            "Plane Run-Kosten und mögliche Bestrafung gemeinsam; ein legaler Run ist nicht automatisch ein guter Run."
-          ],
-          "weaknesses": [
-            "Fallen Highlighter und Disintegrator aus oder kommen zu spät, verliert das Deck einen Teil seiner klarsten Linie.",
-            "Mehrere gleichzeitige Hauptlinien können Credits und Aktionen zerstreuen. Entscheide pro Zug, welcher Plan tatsächlich zum aktuellen Board passt."
           ]
         }
       }
@@ -3755,7 +3917,9 @@
       "sourceAnalysisHash": "deck-analysis:a5f93a6c",
       "reviewedAt": "2026-08-20",
       "analysis": {
-        "primaryStrategyIds": ["runner.survival_defense"],
+        "primaryStrategyIds": [
+          "runner.survival_defense"
+        ],
         "secondaryStrategyIds": [],
         "reviewStatus": "observe"
       },
@@ -3865,7 +4029,7 @@
       "standardDeckId": "standard_runner_rd_express",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:0cb00588",
-      "sourceAnalysisHash": "deck-analysis:16814a4e",
+      "sourceAnalysisHash": "deck-analysis:af7356f0",
       "reviewedAt": "2026-08-20",
       "analysis": {
         "primaryStrategyIds": [
@@ -3990,7 +4154,7 @@
       "standardDeckId": "standard_runner_rd_express_v2",
       "sourceDeckVersion": "2.0.0",
       "sourceDeckHash": "standard-deck:cc6565ae",
-      "sourceAnalysisHash": "deck-analysis:5af362f2",
+      "sourceAnalysisHash": "deck-analysis:f6ee5aae",
       "reviewedAt": "2026-08-18",
       "analysis": {
         "primaryStrategyIds": [
@@ -4125,7 +4289,10 @@
           "runner.search.breaker",
           "runner.interface_closeout"
         ],
-        "secondaryStrategyIds": ["runner.run_event_tempo", "runner.rig_first"],
+        "secondaryStrategyIds": [
+          "runner.run_event_tempo",
+          "runner.rig_first"
+        ],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:16560fc3",
@@ -4335,7 +4502,7 @@
       "standardDeckId": "standard_runner_rent_i_con_shellspiel_2026_07_17",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:0697af2f",
-      "sourceAnalysisHash": "deck-analysis:4000dd24",
+      "sourceAnalysisHash": "deck-analysis:ce513776",
       "reviewedAt": "2026-08-20",
       "analysis": {
         "primaryStrategyIds": [],
@@ -4446,7 +4613,9 @@
           "runner.interface_closeout",
           "runner.search.breaker"
         ],
-        "secondaryStrategyIds": ["runner.rig_first"],
+        "secondaryStrategyIds": [
+          "runner.rig_first"
+        ],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:b73d72bd",
@@ -4636,7 +4805,7 @@
       "standardDeckId": "standard_runner_stealth_interface_starter",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:a657c8a8",
-      "sourceAnalysisHash": "deck-analysis:cb93529f",
+      "sourceAnalysisHash": "deck-analysis:21f6ed83",
       "reviewedAt": "2026-08-20",
       "analysis": {
         "primaryStrategyIds": [
@@ -4755,7 +4924,10 @@
           "runner.interface_closeout",
           "runner.run_event_tempo"
         ],
-        "secondaryStrategyIds": ["runner.search.breaker", "runner.rig_first"],
+        "secondaryStrategyIds": [
+          "runner.search.breaker",
+          "runner.rig_first"
+        ],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:3adc1961",
@@ -4959,7 +5131,10 @@
           "corp.tag_trace_punish",
           "corp.ambush_bluff"
         ],
-        "secondaryStrategyIds": ["corp.remote_scoring", "corp.rush_score"],
+        "secondaryStrategyIds": [
+          "corp.remote_scoring",
+          "corp.rush_score"
+        ],
         "reviewStatus": "plausible"
       },
       "sourceAnalysisInputHash": "deck-analysis-input:7fd0dc47",
@@ -5054,6 +5229,257 @@
             "Acht Agendakarten erhöhen gegenüber der ursprünglichen Testliste die Zugriffsfläche. Unvorbereitete Zentralen können dem Runner deshalb schneller echte Punkte geben.",
             "Runner mit großer Hand, Damage Prevention oder konsequenter Tag-Entfernung können die Kompressionslinie strecken und einen Deckout erzwingen.",
             "Die Economy muss gleichzeitig ICE, Advancement, Traces und Scorched Earth tragen. Unverbundene Ausgaben schwächen alle Linien zugleich."
+          ]
+        }
+      }
+    },
+    {
+      "standardDeckId": "standard_corp_counter_shell",
+      "sourceDeckVersion": "1.3.0",
+      "sourceDeckHash": "standard-deck:67fadaeb",
+      "sourceAnalysisHash": "deck-analysis:f89cd49e",
+      "reviewedAt": "2026-08-29",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.ambush_bluff",
+          "corp.remote_scoring",
+          "corp.overadvance_value"
+        ],
+        "secondaryStrategyIds": [
+          "corp.fast_advance",
+          "corp.draw_engine",
+          "corp.rush_score"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "sourceAnalysisInputHash": "deck-analysis-input:5e07c974",
+      "contentByLocale": {
+        "en": {
+          "summary": "Counter Shell stores advancement counters on credible traps and Vapor Ops, then converts that prepared board into same-turn scores and efficient overadvance payoffs.",
+          "deckIdea": "Counter Shell treats advancement counters as flexible capital. Three Virus Test Sites and two Vacant Soulkillers make early counters dangerous to access, while Vapor Ops safely banks counters for later. Once an agenda and a transfer effect line up, Vapor Ops or the single Falsified-Transactions Expert moves stored counters onto the agenda for an immediate score. Team Restructuring advances the current agenda and a second trap or bank at the same time. The nine-agenda suite preserves Project Babylon, Project Zurich and Project Venice as overadvance payoffs while Employee Empowerment and Main-Office Relocation concentrate more points in fewer cards.",
+          "gamePlan": {
+            "opening": "Protect the centrals and the first scoring remote with real stopping ICE before expanding. Quandary and Wall of Static supply affordable stops, while Fire Wall, Credit Blocks and Reinforced Wall form the durable middle and upper rez curve; Snowbank and Misleading Access Menus are supplemental economy taxes, not reliable barriers. Establish one purposeful counter remote only after the essential servers are covered.",
+            "midgame": "Force the Runner to choose between testing the advanced remote and respecting it. Preserve enough credits and actions to install an agenda and complete the counter handoff in the same turn. Team Restructuring is strongest when one counter closes the agenda gap and the other improves a real trap or bank.",
+            "endgame": "Convert stored counters immediately when a safe scoring window appears. Use exact-fit transfers for ordinary agendas, but take free excess counters on Project Babylon, Project Zurich, or Project Venice when the same transfer already crosses an overadvance threshold. Information Laundering is the fallback cashout only when no credible score handoff remains."
+          },
+          "keyCards": [
+            {
+              "cardId": "onr_v1_347_vapor-ops",
+              "title": "Vapor Ops",
+              "role": "Primary counter bank: it stores any number of advancement counters and transfers the required amount to an installed agenda."
+            },
+            {
+              "cardId": "onr_v1_291_falsified-transactions-expert",
+              "title": "Falsified-Transactions Expert",
+              "role": "The single-copy bridge turns up to three counters from a prepared trap or bank into an immediate score conversion when that rare exact window appears."
+            },
+            {
+              "cardId": "onr_v1_305_team-restructuring",
+              "title": "Team Restructuring",
+              "role": "Advances the current score target while putting its second counter on another useful trap or bank."
+            },
+            {
+              "cardId": "onr_v1_348_virus-test-site",
+              "title": "Virus Test Site",
+              "role": "Makes stored counters dangerous before they are transferred and punishes a Runner who calls the remote incorrectly."
+            },
+            {
+              "cardId": "onr_v1_214_project-babylon",
+              "title": "Project Babylon",
+              "role": "Converts every two excess counters into an additional agenda point and is the strongest large-bank payoff."
+            },
+            {
+              "cardId": "onr_v1_281_accounts-receivable",
+              "title": "Accounts Receivable",
+              "role": "The three-copy burst-economy package funds expensive stopper rezzes and preserves liquidity for the later counter-transfer turn."
+            }
+          ],
+          "pilotingTips": [
+            "Count the complete line before committing: agenda installation, transfer or placement costs, required clicks, and the free score window must all fit.",
+            "Treat exposed or avoided traps as stored resources, not failed bluffs; preserve them until a score handoff or deliberate cashout is available.",
+            "Keep the counter source and the new agenda in different remotes so installing the agenda does not replace the bank.",
+            "Use Snowbank and Misleading Access Menus to fund the real barriers; do not count their one-credit tax as protection for an agenda."
+          ],
+          "weaknesses": [
+            "Thirteen ICE is a healthier package, but only nine are unconditional stoppers. Protect HQ, R&D and one scoring remote first; careless remote sprawl can still expose the deck.",
+            "Removing Annual Reviews trades selection for raw economy. Night Shift and Employee Empowerment provide draw, but traps, banks, and transfer operations can still arrive in the wrong order.",
+            "Aggressive Runner pressure can force counters to remain damage deterrents instead of becoming points, while premature cashout removes the strongest score conversion resource."
+          ]
+        },
+        "de": {
+          "summary": "Counter Shell speichert Advancement-Counter auf glaubwürdigen Traps und Vapor Ops und verwandelt diesen vorbereiteten Boardzustand später in Same-Turn-Scores und effiziente Overadvance-Payoffs.",
+          "deckIdea": "Counter Shell behandelt Advancement-Counter als flexibles Kapital. Drei Virus Test Sites und zwei Vacant Soulkiller machen frühe Counter beim Zugriff gefährlich, während Vapor Ops sie sicher für später lagert. Sobald Agenda und Transfer zusammenkommen, verschieben Vapor Ops oder der einzelne Falsified-Transactions Expert gespeicherte Counter auf die Agenda, die sofort gescort wird. Team Restructuring entwickelt zugleich die aktuelle Agenda und einen zweiten Trap oder eine Bank weiter. Das Neun-Agenda-Paket behält Project Babylon, Project Zurich und Project Venice als Overadvance-Payoffs; Employee Empowerment und Main-Office Relocation bündeln zugleich mehr Punkte in weniger Karten.",
+          "gamePlan": {
+            "opening": "Schütze Zentralserver und das erste Score-Remote zuerst mit echtem Stopper-ICE. Quandary und Wall of Static liefern günstige Stopps; Fire Wall, Credit Blocks und Reinforced Wall bilden die belastbare mittlere und obere Rez-Kurve. Snowbank und Misleading Access Menus sind ergänzende Economy-Taxes, keine verlässlichen Barrieren. Errichte erst danach genau ein Counter-Remote mit klarem Zweck.",
+            "midgame": "Zwinge den Runner zur Entscheidung zwischen Testen und Respektieren des advanced Remotes. Bewahre genug Credits und Aktionen, um eine Agenda zu installieren und den Counter-Transfer im selben Zug abzuschließen. Team Restructuring ist am stärksten, wenn ein Counter die Agendalücke schließt und der zweite einen echten Trap oder eine Bank verbessert.",
+            "endgame": "Konvertiere gespeicherte Counter sofort, sobald ein sicheres Scorefenster entsteht. Nutze für gewöhnliche Agendas möglichst die exakte Menge; nimm kostenlose Überschüsse auf Project Babylon, Project Zurich oder Project Venice mit, wenn derselbe Transfer ohnehin eine Overadvance-Schwelle erreicht. Information Laundering ist nur dann der Cashout, wenn keine glaubwürdige Scoreübergabe mehr besteht."
+          },
+          "keyCards": [
+            {
+              "cardId": "onr_v1_347_vapor-ops",
+              "title": "Vapor Ops",
+              "role": "Primäre Counter-Bank: Speichert beliebig viele Advancement-Counter und überträgt die benötigte Menge auf eine installierte Agenda."
+            },
+            {
+              "cardId": "onr_v1_291_falsified-transactions-expert",
+              "title": "Falsified-Transactions Expert",
+              "role": "Die einzelne Brückenkarte verwandelt bis zu drei Counter eines vorbereiteten Traps oder einer Bank in eine unmittelbare Scorekonversion, wenn dieses seltene exakte Fenster entsteht."
+            },
+            {
+              "cardId": "onr_v1_305_team-restructuring",
+              "title": "Team Restructuring",
+              "role": "Entwickelt das aktuelle Scoreziel und legt den zweiten Counter zugleich auf einen weiteren sinnvollen Trap oder eine Bank."
+            },
+            {
+              "cardId": "onr_v1_348_virus-test-site",
+              "title": "Virus Test Site",
+              "role": "Macht gespeicherte Counter vor dem Transfer gefährlich und bestraft den Runner für einen falsch eingeschätzten Remote."
+            },
+            {
+              "cardId": "onr_v1_214_project-babylon",
+              "title": "Project Babylon",
+              "role": "Wandelt je zwei überschüssige Counter in einen zusätzlichen Agendapunkt um und ist der stärkste Payoff für große Banken."
+            },
+            {
+              "cardId": "onr_v1_281_accounts-receivable",
+              "title": "Accounts Receivable",
+              "role": "Das auf drei Exemplare erhöhte Burst-Economy-Paket finanziert teure Stopper-Rezzes und hält Liquidität für den späteren Counter-Transferzug bereit."
+            }
+          ],
+          "pilotingTips": [
+            "Zähle vor der Bindung die ganze Linie: Agendainstallation, Transfer- oder Platzierungskosten, benötigte Klicks und das kostenlose Scorefenster müssen gemeinsam passen.",
+            "Behandle exposed oder gemiedene Traps als gespeicherte Ressource statt als gescheiterten Bluff; halte sie bis zur Scoreübergabe oder zu einem bewussten Cashout.",
+            "Halte Counterquelle und neue Agenda in getrennten Remotes, damit die Agendainstallation die Bank nicht ersetzt.",
+            "Nutze Snowbank und Misleading Access Menus zur Finanzierung der echten Barrieren; rechne ihre Ein-Credit-Tax nicht als Agendaschutz."
+          ],
+          "weaknesses": [
+            "Dreizehn ICE sind deutlich stabiler, aber nur neun davon stoppen unbedingt. Schütze zuerst HQ, R&D und genau ein Score-Remote; unbedachte Remote-Ausbreitung kann das Deck weiterhin öffnen.",
+            "Der Verzicht auf Annual Reviews tauscht Kartenauswahl gegen rohe Economy. Night Shift und Employee Empowerment ziehen Karten, doch Traps, Banken und Transferoperationen können weiterhin in der falschen Reihenfolge erscheinen.",
+            "Aggressiver Runnerdruck kann erzwingen, dass Counter Schadensdrohung statt Punktressource bleiben; ein vorschneller Cashout entfernt dagegen die stärkste Scorekonversion."
+          ]
+        }
+      }
+    },
+    {
+      "standardDeckId": "standard_corp_lucidrine_lockdown",
+      "sourceDeckVersion": "1.5.0",
+      "sourceDeckHash": "standard-deck:e47da3f0",
+      "sourceAnalysisHash": "deck-analysis:100fb621",
+      "reviewedAt": "2026-09-04",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring",
+          "corp.fast_advance"
+        ],
+        "secondaryStrategyIds": [
+          "corp.rush_score",
+          "corp.ambush_bluff"
+        ],
+        "reviewStatus": "observe"
+      },
+      "sourceAnalysisInputHash": "deck-analysis-input:df8d03ba",
+      "contentByLocale": {
+        "en": {
+          "summary": "Lucidrine Lockdown combines minimum agenda density, access punishment, central taxation, and fort-wide steal costs against repeated R&D multiaccess.",
+          "deckIdea": "Lucidrine Lockdown carries only seven three-point agendas, the legal minimum for twenty-one agenda points. Three Fetal AI punish every HQ or R&D hit with damage and an additional steal cost, while Red Herrings adds a fort-wide tax. Eighteen ICE include six zero-cost, credit-positive tax layers plus direct end-the-run ICE. Sphinx 2006 is the only expensive flexible stopper, so the Corp can protect both centrals without waiting for an unrealistic all-layers rez reserve.",
+          "gamePlan": {
+            "opening": "Install a zero-cost tax layer or an affordable stopper on R&D and cover HQ before expanding. If the Runner reveals R&D Interface or repeats R&D runs, give R&D the next meaningful layer, but do not abandon HQ. Fetal AI and the lower agenda density make early blind accesses less reliable even before both centrals are fully built.",
+            "midgame": "Layer different ICE types across R&D and HQ so one breaker cannot solve both centrals cheaply. Place Red Herrings on the central selected by the current access-pressure assessment, usually R&D against Interface turns, and keep one credit available to rez it at the final relevant run window. Use the resulting credit and action gap to build one scoring remote and convert Vapor Ops counters rather than continuing to stack ICE without a scoring plan.",
+            "endgame": "Shift protection with the Runner's actual pressure. If R&D is locked and attacks move to HQ, reinforce HQ before adding another redundant R&D layer. Close the game through the safest fast or rush score window while retaining enough credits for the central ICE that still matters."
+          },
+          "keyCards": [
+            {
+              "cardId": "onr_proteus_004_fetal-ai",
+              "title": "Fetal AI",
+              "role": "Reduces agenda density while punishing central access with two net damage and two additional steal credits."
+            },
+            {
+              "cardId": "onr_v1_366_red-herrings",
+              "title": "Red Herrings",
+              "role": "Adds five credits to every agenda steal from its fort and is the deck's direct answer to repeated R&D multiaccess."
+            },
+            {
+              "cardId": "onr_proteus_039_sphinx-2006",
+              "title": "Sphinx 2006",
+              "role": "Provides a strength-five end-the-run barrier and can switch from code gate to sentry when the visible breaker mix makes that worthwhile."
+            },
+            {
+              "cardId": "onr_proteus_032_misleading-access-menus",
+              "title": "Misleading Access Menus",
+              "role": "Rezzes for zero, gains three credits, and forces the Runner to pay or end the run."
+            },
+            {
+              "cardId": "onr_proteus_038_snowbank",
+              "title": "Snowbank",
+              "role": "Provides the same credit-positive tax from the wall axis and keeps both centrals live at low Corp credits."
+            },
+            {
+              "cardId": "onr_v1_347_vapor-ops",
+              "title": "Vapor Ops",
+              "role": "Stores advancement counters safely and converts a taxed Runner turn into an immediate agenda score."
+            }
+          ],
+          "pilotingTips": [
+            "Treat R&D Interface and repeated central accesses as current pressure signals, not as permission to neglect the other central.",
+            "Install only ICE that can be funded on the relevant horizon; an unrezzed fourth layer is less useful than a live second layer on the other attacked central.",
+            "Once the Runner is paying heavily, spend the gained tempo on an actual score line instead of defending forever."
+          ],
+          "weaknesses": [
+            "A Runner who can alternate efficiently between R&D and HQ can exploit overcommitment to either central.",
+            "Fetal AI and Priority Requisition require five advancements, so Corporate War remains the preferred fast scoring payload and Vapor Ops is important for the slower agendas.",
+            "The zero-cost ICE taxes only one credit per encounter. A rich Runner with complete breakers can still pay through repeated layers, so their credit gain must become a score window rather than endless defense."
+          ]
+        },
+        "de": {
+          "summary": "Lucidrine Lockdown verbindet minimale Agendadichte, Zugriffsschaden, Zentralserver-Tax und fortweite Stehlkosten gegen wiederholten R&D-Multiaccess.",
+          "deckIdea": "Lucidrine Lockdown spielt nur sieben 3-Punkte-Agenden und damit die regelkonforme Mindestzahl für ein Deck mit 21 Agendapunkten. Drei Fetal AI bestrafen jeden Treffer in HQ oder R&D mit Schaden und zusätzlichen Stehlkosten, während Red Herrings den gesamten Server verteuert. Achtzehn ICE enthalten sechs kostenlose, kreditpositive Tax-Schichten sowie direkte End-the-Run-ICE. Sphinx 2006 bleibt der einzige teure flexible Stopper, damit die Corp beide Zentralen schützen kann, ohne zuerst eine unrealistische Reserve für sämtliche ICE-Schichten anzusparen.",
+          "gamePlan": {
+            "opening": "Installiere eine kostenlose Tax-Schicht oder ein bezahlbares Stopper-ICE auf R&D und decke HQ ab, bevor du expandierst. Zeigt der Runner R&D Interface oder läuft wiederholt auf R&D, erhält R&D die nächste relevante Schicht; HQ darf dabei nicht aufgegeben werden. Fetal AI und die niedrigere Agendadichte machen frühe Blindzugriffe bereits riskanter, bevor beide Zentralen vollständig aufgebaut sind.",
+            "midgame": "Staffele unterschiedliche ICE-Typen über R&D und HQ, damit ein einzelner Breaker nicht beide Zentralen günstig löst. Lege Red Herrings auf die von der aktuellen Zugriffsdruck-Bewertung gewählte Zentrale – gegen Interface-Züge meist R&D – und halte einen Credit für das Rezzen im letzten relevanten Runfenster bereit. Nutze die gewonnene Credit- und Aktionslücke für genau ein Score-Remote und die Konversion von Vapor-Ops-Countern, statt ohne Scoreplan immer weiter ICE zu stapeln.",
+            "endgame": "Verschiebe den Schutz entlang des tatsächlichen Runnerdrucks. Ist R&D abgeriegelt und wechseln die Angriffe zu HQ, verstärke HQ vor einer weiteren redundanten R&D-Schicht. Schließe über das sicherste Fast- oder Rush-Scorefenster ab und halte genug Credits für das weiterhin relevante Zentralserver-ICE zurück."
+          },
+          "keyCards": [
+            {
+              "cardId": "onr_proteus_004_fetal-ai",
+              "title": "Fetal AI",
+              "role": "Senkt die Agendadichte und bestraft Zentralserver-Zugriffe mit zwei Netzwerkschaden sowie zwei zusätzlichen Stehl-Credits."
+            },
+            {
+              "cardId": "onr_v1_366_red-herrings",
+              "title": "Red Herrings",
+              "role": "Verteuert jeden Agendadiebstahl aus seinem Fort um fünf Credits und ist die direkte Antwort des Decks auf wiederholten R&D-Multiaccess."
+            },
+            {
+              "cardId": "onr_proteus_039_sphinx-2006",
+              "title": "Sphinx 2006",
+              "role": "Liefert eine End-the-Run-Barriere mit Stärke fünf und kann vom Code Gate zum Sentry wechseln, wenn die sichtbare Breaker-Verteilung das sinnvoll macht."
+            },
+            {
+              "cardId": "onr_proteus_032_misleading-access-menus",
+              "title": "Misleading Access Menus",
+              "role": "Wird für null Credits gerezzt, erzeugt drei Credits und zwingt den Runner zum Zahlen oder beendet den Run."
+            },
+            {
+              "cardId": "onr_proteus_038_snowbank",
+              "title": "Snowbank",
+              "role": "Liefert dieselbe kreditpositive Tax auf der Wall-Achse und hält beide Zentralen auch bei niedrigen Corp-Credits aktiv."
+            },
+            {
+              "cardId": "onr_v1_347_vapor-ops",
+              "title": "Vapor Ops",
+              "role": "Speichert Advancement-Counter sicher und verwandelt einen taxierten Runnerzug in einen unmittelbaren Agendascore."
+            }
+          ],
+          "pilotingTips": [
+            "Behandle R&D Interface und wiederholte Zentralserver-Zugriffe als aktuelle Drucksignale, nicht als Erlaubnis, die andere Zentrale zu vernachlässigen.",
+            "Installiere nur ICE, das im relevanten Zeithorizont bezahlt werden kann; eine ungerezzte vierte Schicht ist weniger wert als eine aktive zweite Schicht auf der anderen angegriffenen Zentrale.",
+            "Sobald der Runner viel bezahlt, investiere das gewonnene Tempo in eine echte Scorelinie statt in endlose Verteidigung."
+          ],
+          "weaknesses": [
+            "Ein Runner, der effizient zwischen R&D und HQ wechselt, kann eine Überinvestition in eine der beiden Zentralen ausnutzen.",
+            "Fetal AI und Priority Requisition benötigen fünf Advancements. Corporate War bleibt deshalb die bevorzugte schnelle Score-Nutzlast, während Vapor Ops die langsameren Agenden vorbereitet.",
+            "Die kostenlosen ICE-Schichten taxieren pro Begegnung nur einen Credit. Ein reicher Runner mit vollständigen Breakern kann weiter durchzahlen; der Creditgewinn muss deshalb in ein Scorefenster statt in endlose Verteidigung umgesetzt werden."
           ]
         }
       }

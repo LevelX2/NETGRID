@@ -1,6 +1,103 @@
 import type { RunnerRunTargetEvaluation } from "../run-analysis/runner-run-target-types";
 import { describe, expect, it } from "vitest";
-import { assessRunnerRecurringEconomyRunHorizon } from "./runner-recurring-economy-investment";
+import {
+  assessRunnerRecurringEconomyRunHorizon,
+  assessRunnerRestrictedRunEconomyInvestment,
+} from "./runner-recurring-economy-investment";
+
+describe("assessRunnerRestrictedRunEconomyInvestment", () => {
+  it("admits a quickly amortizing recurring breaker-credit engine", () => {
+    expect(
+      assessRunnerRestrictedRunEconomyInvestment({
+        engineLineActive: true,
+        providerMatches: true,
+        installedCompatibleBreakerCount: 1,
+        installCost: 4,
+        recurringCredits: 2,
+        clicksRemaining: 4,
+        runnerDeckCount: 30,
+        urgentRunAvailable: false,
+        productiveCentralRunAvailable: false,
+      }),
+    ).toMatchObject({
+      decision: "install",
+      priorityClass: "P4",
+      value: 300,
+      projectedBreakEvenRuns: 2,
+      evidenceCodes: expect.arrayContaining([
+        "runner_restricted_run_economy_install_ready",
+        "runner_restricted_run_economy_break_even_runs:2",
+      ]),
+    });
+  });
+
+  it("holds until a compatible breaker can actually consume the credits", () => {
+    expect(
+      assessRunnerRestrictedRunEconomyInvestment({
+        engineLineActive: true,
+        providerMatches: true,
+        installedCompatibleBreakerCount: 0,
+        installCost: 4,
+        recurringCredits: 2,
+        clicksRemaining: 4,
+        runnerDeckCount: 30,
+        urgentRunAvailable: false,
+        productiveCentralRunAvailable: false,
+      }),
+    ).toMatchObject({
+      decision: "hold",
+      priorityClass: "P5",
+      value: 0,
+      evidenceCodes: expect.arrayContaining([
+        "runner_restricted_run_economy_requires_installed_compatible_breaker",
+      ]),
+    });
+  });
+
+  it("does not displace an urgent access window", () => {
+    expect(
+      assessRunnerRestrictedRunEconomyInvestment({
+        engineLineActive: true,
+        providerMatches: true,
+        installedCompatibleBreakerCount: 2,
+        installCost: 4,
+        recurringCredits: 2,
+        clicksRemaining: 4,
+        runnerDeckCount: 30,
+        urgentRunAvailable: true,
+        productiveCentralRunAvailable: false,
+      }),
+    ).toMatchObject({
+      decision: "hold",
+      priorityClass: "P5",
+      evidenceCodes: expect.arrayContaining([
+        "runner_restricted_run_economy_yields_to_urgent_run",
+      ]),
+    });
+  });
+
+  it("does not displace a productive central-pressure run", () => {
+    expect(
+      assessRunnerRestrictedRunEconomyInvestment({
+        engineLineActive: true,
+        providerMatches: true,
+        installedCompatibleBreakerCount: 2,
+        installCost: 4,
+        recurringCredits: 2,
+        clicksRemaining: 4,
+        runnerDeckCount: 30,
+        urgentRunAvailable: false,
+        productiveCentralRunAvailable: true,
+      }),
+    ).toMatchObject({
+      decision: "hold",
+      priorityClass: "P5",
+      evidenceCodes: expect.arrayContaining([
+        "runner_restricted_run_economy_yields_to_productive_central_run",
+      ]),
+    });
+  });
+});
 
 describe("assessRunnerRecurringEconomyRunHorizon", () => {
   it("waits for the first payout even when a weak run is legal", () => {

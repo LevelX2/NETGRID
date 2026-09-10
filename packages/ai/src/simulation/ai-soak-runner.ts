@@ -9,9 +9,7 @@ export type AiSoakRunnerDependencies = {
   simulateAiGame: (config?: AiSimulationConfig) => AiSimulationSummary;
 };
 
-export function createAiSoakRunner(
-  dependencies: AiSoakRunnerDependencies,
-): {
+export function createAiSoakRunner(dependencies: AiSoakRunnerDependencies): {
   simulateAiSoak: (config?: Partial<AiSimulationConfig>) => AiSoakResult;
 } {
   function simulateAiSoak(

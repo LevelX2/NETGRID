@@ -104,12 +104,12 @@ Custom AI decks are validated against the selected format and must contain AI-su
 
 ### AI-supported card pools
 
-| Selectable card pool | Human play | AI play |
-| --- | ---: | ---: |
-| Original Set | Yes | Yes |
-| Original Set + Classic | Yes | Yes |
-| Original Set + Proteus | Yes | Yes |
-| Original Set + Classic + Proteus | Yes | Yes |
+| Selectable card pool             | Human play | AI play |
+| -------------------------------- | ---------: | ------: |
+| Original Set                     |        Yes |     Yes |
+| Original Set + Classic           |        Yes |     Yes |
+| Original Set + Proteus           |        Yes |     Yes |
+| Original Set + Classic + Proteus |        Yes |     Yes |
 
 Proteus has passed the current AI-readiness gates for reviewed card hints, selected playtest decks, deterministic simulations, replay integrity, and hidden-information protection.
 
@@ -373,7 +373,16 @@ corepack pnpm typecheck
 corepack pnpm test
 corepack pnpm build
 corepack pnpm e2e
+corepack pnpm test:e2e:multiplayer
+corepack pnpm test:e2e:multiplayer:chrome-edge
 ```
+
+`test:e2e:multiplayer` startet zwei voneinander getrennte Browserprozesse mit
+isolierten Sitzungen. Die Variante `:chrome-edge` verwendet das lokal
+installierte Google Chrome als Host und Microsoft Edge als beitretenden
+Browser. Beide Befehle starten Webclient und Multiplayer-Backend auf freien
+Ports mit einer eigenen temporären SQLite-Datenbank und räumen die Laufzeit
+danach wieder auf.
 
 Important architecture-specific checks include:
 
@@ -397,7 +406,7 @@ corepack pnpm --filter @netgrid/web test
 
 Current architecture and operating references:
 
-- [Current project status](KI-Wissen-NETGRID/02%20Wissen/00%20Uebersichten/Aktueller%20Projektstatus.md)
+- [Codex current status](docs/codex/CODEX_STATUS.md)
 - [Architecture index](docs/architecture/README.md)
 - [Engine architecture](docs/architecture/engine/README.md)
 - [AI architecture](docs/architecture/ai/README.md)

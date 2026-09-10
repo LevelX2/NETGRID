@@ -39,7 +39,9 @@ export function isCorpReactiveBaselineDecision(decision: AiDecision): boolean {
   );
 }
 
-export function isRunnerReactiveBaselineDecision(decision: AiDecision): boolean {
+export function isRunnerReactiveBaselineDecision(
+  decision: AiDecision,
+): boolean {
   return (
     decision.reasonCode === "runner.choice.resolve" ||
     decision.reasonCode === "runner.trace.post_bid_link" ||

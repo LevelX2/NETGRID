@@ -533,7 +533,6 @@ import {
   scoredAgendaCounterCreditProfileForDefinition,
   scoredAgendaCounterCreditProfileForPayload,
   SCORED_REVEAL_AGENDA_SOURCES,
-  SERVER_DIFFICULTY_UPGRADE_SOURCES,
 } from "../../mechanics/agenda-scoring";
 import { TAG_HANDSIZE_ASSET_SOURCE } from "../../mechanics/global-modifiers";
 import { COUNTER_UPGRADE_SOURCES } from "../../mechanics/hosting-counters";
@@ -813,8 +812,17 @@ export function createCardLifecycleRuntimeHosts(
       },
       payment: {
         rezCostForCard: (cardId) => rezCostForCard(state, cardId),
-        assertCorpRezCostQuoteValid: (cardId, legalAction) =>
-          assertCorpRezCostQuoteValid(state, cardId, legalAction),
+        assertCorpRezCostQuoteValid: (
+          cardId,
+          legalAction,
+          additionalCreditCost,
+        ) =>
+          assertCorpRezCostQuoteValid(
+            state,
+            cardId,
+            legalAction,
+            additionalCreditCost,
+          ),
         assertCorpRootRezCostQuoteValid: (cardId, legalAction) =>
           assertCorpRootRezCostQuoteValid(state, cardId, legalAction),
         creditCostForAction: deps.creditCostForAction,

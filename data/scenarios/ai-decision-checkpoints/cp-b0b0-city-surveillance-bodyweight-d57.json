@@ -8452,10 +8452,16 @@
   "expectation": {
     "contractKind": "correctness",
     "planExecution": {
-      "requiredAssessmentEvidence": ["source:own_runner_hand:card_specific_purpose:draw_or_search_engine:useful_now"],
-      "acceptableCapabilities": ["develop_onr_v1_079_bodyweight-synthetic-blood"],
-      "acceptablePlanKinds": ["runner.develop_board_and_hand"]
+      "acceptablePlanKinds": ["runner.economy"],
+      "acceptableCapabilities": ["gain_general_liquid_credits"],
+      "requiredAssessmentEvidence": [
+        "runner_development_funding:card:runner_onr_v1_176_the-shell-traders_3"
+      ]
     },
-    "exactActionId": "runner.play_event.runner_onr_v1_079_bodyweight-synthetic-blood_3.runner_onr_v1_079_bodyweight-synthetic-blood_3.onr_v1_079_bodyweight-synthetic-blood:abilities_on_play_draw_cards"
+    "acceptableActions": [
+      {
+        "type": "gain_credit"
+      }
+    ]
   }
 }

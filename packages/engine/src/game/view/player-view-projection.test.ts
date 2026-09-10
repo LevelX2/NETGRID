@@ -425,6 +425,96 @@ describe("PlayerView projection", () => {
     expect(runnerIce?.effectivePostRezRunQuote).toBeUndefined();
   });
 
+  it("projects action-bound breaker exchanges for alternate ICE subtypes", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({ seed: "alternate-subtype-rez-action-quotes" }),
+    );
+    state.corp.credits = 14;
+    state.runner.credits = 9;
+    const iceId = "alternate-subtype-credit-blocks" as CardInstanceId;
+    state.cardInstances[iceId] = {
+      instanceId: iceId,
+      definitionId: "onr_proteus_017_credit-blocks",
+      owner: "corp",
+      controller: "corp",
+      zone: { side: "corp", zone: "serverIce", serverId: "rd" },
+      faceup: false,
+      rezzed: false,
+      advancementCounters: 0,
+      strengthModifier: 0,
+    };
+    state.corp.servers.find((server) => server.id === "rd")!.ice.push(iceId);
+    for (const [index, definitionId] of [
+      "onr_v1_040_loony-goon",
+      "onr_v1_014_codecracker",
+    ].entries()) {
+      const cardId = `alternate-subtype-breaker-${index}` as CardInstanceId;
+      state.cardInstances[cardId] = {
+        instanceId: cardId,
+        definitionId,
+        owner: "runner",
+        controller: "runner",
+        zone: { side: "runner", zone: "rig" },
+        faceup: true,
+        rezzed: true,
+        advancementCounters: 0,
+        strengthModifier: 0,
+      };
+      state.runner.rig.programs.push(cardId);
+    }
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+
+    const legalRezActions = getLegalActions(state, "corp").filter(
+      (action) => action.type === "rez_ice" && action.source === iceId,
+    );
+    const corpIce = getPlayerView(state, "corp")
+      .servers.find((server) => server.id === "rd")
+      ?.ice.find((ice) => ice.instanceId === iceId);
+    const wallAction = legalRezActions.find(
+      (action) => action.payload?.selectedSubtypesAfterRez === "wall",
+    );
+    const sentryAction = legalRezActions.find(
+      (action) => action.payload?.selectedSubtypesAfterRez === "sentry",
+    );
+
+    expect(wallAction).toBeDefined();
+    expect(sentryAction).toBeDefined();
+    expect(
+      corpIce?.effectiveRezActionResourceExchangeQuotes?.find(
+        (entry) => entry.actionId === wallAction?.actionId,
+      ),
+    ).toMatchObject({
+      quote: {
+        complete: true,
+        runnerBreakUnavailable: {
+          reason: "no_visible_eligible_breaker",
+        },
+      },
+    });
+    expect(
+      corpIce?.effectiveRezActionResourceExchangeQuotes?.find(
+        (entry) => entry.actionId === sentryAction?.actionId,
+      ),
+    ).toMatchObject({
+      quote: {
+        complete: true,
+        runnerBreak: {
+          breakerDefinitionId: "onr_v1_040_loony-goon",
+        },
+      },
+    });
+    expect(
+      getPlayerView(state, "runner")
+        .servers.find((server) => server.id === "rd")
+        ?.ice.find((ice) => !ice.known),
+    ).not.toHaveProperty("effectiveRezActionResourceExchangeQuotes");
+  });
+
   it("matches a deterministic rez with rezzed-only strength and subroutine modifiers", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({

@@ -1,18 +1,20 @@
 import type { AiDecisionInput } from "@netgrid/shared";
-
-type PendingChoice = NonNullable<
-  AiDecisionInput["playerView"]["pendingChoice"]
->;
-type PendingChoiceOption = PendingChoice["options"][number];
+import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import type { CorpAmbushSignal } from "../plans/corp-tactical-plan-modules";
 
 const ACCESS_PAYMENT_SOURCE = "p3_35.access_payment";
 const ACCESS_ZONES = new Set(["installed", "hq", "rd", "archives"]);
 
-export function selectedCorpAccessPaymentChoiceOptionId(
+export function corpAccessPaymentChoiceSignal(
   input: AiDecisionInput,
-  choice: PendingChoice,
-  selectableOptions: readonly PendingChoiceOption[],
-): string | undefined {
+  candidates: readonly ActionSemanticCandidate[],
+): CorpAmbushSignal | undefined {
+  const choice = input.playerView.pendingChoice;
+  if (!choice || !choice.source.startsWith(ACCESS_PAYMENT_SOURCE + ":"))
+    return undefined;
+  const selectableOptions = choice.options.filter(
+    (option) => option.selectable !== false,
+  );
   if (
     input.side !== "corp" ||
     input.playerView.timingPoint !== "access.resolve_card" ||
@@ -48,6 +50,9 @@ export function selectedCorpAccessPaymentChoiceOptionId(
     (option) => option.id === "decline" && option.value === "decline",
   );
   const creditCost = pay?.metadata?.creditCost;
+  const noOpCertified = pay?.metadata?.accessPaymentNoOpCertified;
+  const sourceDefinitionId = choice.sourceCardDefinitionId;
+  const sourceInstanceId = choice.sourceCardInstanceId;
   if (
     selectableOptions.length !== 2 ||
     !pay ||
@@ -55,7 +60,11 @@ export function selectedCorpAccessPaymentChoiceOptionId(
     !Number.isInteger(creditCost) ||
     creditCost === undefined ||
     creditCost <= 0 ||
-    creditCost > input.playerView.own.credits
+    creditCost > input.playerView.own.credits ||
+    typeof noOpCertified !== "boolean" ||
+    !sourceDefinitionId ||
+    !sourceInstanceId ||
+    sourceInstanceId !== sourceParts[1]
   ) {
     return undefined;
   }
@@ -69,7 +78,64 @@ export function selectedCorpAccessPaymentChoiceOptionId(
   ) {
     return undefined;
   }
-  return pay.id;
+  const run = input.playerView.run;
+  const resolveCandidates = candidates.filter(
+    (candidate) =>
+      candidate.semanticActionType === "choice.resolve" &&
+      candidate.actionType === "resolve_choice",
+  );
+  if (resolveCandidates.length !== 1) return undefined;
+  const action = input.legalActions.find(
+    (action) => action.actionId === resolveCandidates[0]!.actionId,
+  );
+  const requirement = action?.choiceRequirements?.[0];
+  if (
+    !run ||
+    action?.side !== "corp" ||
+    action.type !== "resolve_choice" ||
+    action.source !== "game_rule" ||
+    action.expiresAtStateVersion !== input.playerView.stateVersion ||
+    action.timingPoint !== input.playerView.timingPoint ||
+    action.choiceRequirements?.length !== 1 ||
+    requirement?.choiceId !== choice.choiceId ||
+    requirement.minSelections !== 1 ||
+    requirement.maxSelections !== 1 ||
+    requirement.optionIds.length !== 2 ||
+    !selectableOptions.every((option) =>
+      requirement.optionIds.includes(option.id),
+    )
+  )
+    return undefined;
+  return {
+    commitmentVersion: "corp_ambush_commitment_v1",
+    ambushId: `access-payment:${choice.choiceId}`,
+    sourceDefinitionId,
+    sourceInstanceId,
+    actionIds: [action.actionId],
+    serverId: run.attackedServerId,
+    phase: "trigger",
+    purposeCode: noOpCertified
+      ? "decline_engine_certified_empty_access_effect"
+      : "activate_current_paid_access_effect",
+    assignedDomainPlanIds: ["corp.ambush_bluff"],
+    duplicateAlreadyInstalled: false,
+    affordableOrSupportable: true,
+    plannedAtStateVersion: input.playerView.stateVersion,
+    plannedAdvancementTarget: 0,
+    value: 1_000,
+    evidenceCode: noOpCertified
+      ? "corp_access_payment_declines_certified_no_op"
+      : "corp_access_payment_current_activation",
+    accessPaymentChoiceBinding: {
+      actionId: action.actionId,
+      choiceId: choice.choiceId,
+      choiceSource: choice.source,
+      observedAtStateVersion: input.playerView.stateVersion,
+      selectedOptionIds: [noOpCertified ? decline.id : pay.id],
+      creditCost,
+      noOpCertified,
+    },
+  };
 }
 
 function nonNegativeInteger(value: string | undefined): boolean {

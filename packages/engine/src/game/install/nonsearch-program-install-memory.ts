@@ -18,7 +18,10 @@ import {
 export type NonSearchProgramInstallMemoryHost = {
   definitionFor: (state: GameState, cardId: CardInstanceId) => CardDefinition;
   runnerMemoryLimit: (state: GameState) => number;
-  runnerProgramUsesMemory: (state: GameState, cardId: CardInstanceId) => boolean;
+  runnerProgramUsesMemory: (
+    state: GameState,
+    cardId: CardInstanceId,
+  ) => boolean;
   trashRunnerInstalledCardToHeap: (
     state: GameState,
     cardId: CardInstanceId,
@@ -64,7 +67,9 @@ export function deferNonSearchProgramInstallForMemory(
       ),
     })
   )
-    throw new Error("Durch Programmtrash kann nicht genug MU freigemacht werden.");
+    throw new Error(
+      "Durch Programmtrash kann nicht genug MU freigemacht werden.",
+    );
   state.pendingChoice = buildRunnerProgramInstallMemoryChoice({
     stateVersion: state.stateVersion,
     kind: "nonsearch",

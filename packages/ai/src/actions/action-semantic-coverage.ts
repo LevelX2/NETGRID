@@ -453,7 +453,10 @@ function forbiddenMarkersIn(value: unknown): string[] {
   const serialized = JSON.stringify(value);
   const tokens = forbiddenReportMarkerTokens(serialized);
   return FORBIDDEN_REPORT_MARKERS.filter((marker) =>
-    forbiddenReportTokensContainMarker(tokens, forbiddenReportMarkerTokens(marker)),
+    forbiddenReportTokensContainMarker(
+      tokens,
+      forbiddenReportMarkerTokens(marker),
+    ),
   );
 }
 
@@ -466,8 +469,14 @@ function forbiddenReportTokensContainMarker(
     const tokenSet = new Set(tokens);
     return tokenSet.has(markerTokens[0]!);
   }
-  for (let index = 0; index <= tokens.length - markerTokens.length; index += 1) {
-    if (markerTokens.every((token, offset) => tokens[index + offset] === token)) {
+  for (
+    let index = 0;
+    index <= tokens.length - markerTokens.length;
+    index += 1
+  ) {
+    if (
+      markerTokens.every((token, offset) => tokens[index + offset] === token)
+    ) {
       return true;
     }
   }

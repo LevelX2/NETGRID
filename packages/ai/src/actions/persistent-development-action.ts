@@ -48,11 +48,14 @@ export function persistentDevelopmentActionProjection(
   }
   const targetCardId = firstString(action.payload?.targetCardId);
   if (!targetCardId) return undefined;
-  const targetDefinitionId = firstString(action.payload?.targetCardDefinitionId);
+  const targetDefinitionId = firstString(
+    action.payload?.targetCardDefinitionId,
+  );
   return projection({
-    route: delayedAbility === "set_aside_from_grip"
-      ? "prepare_delayed_install"
-      : "progress_delayed_install",
+    route:
+      delayedAbility === "set_aside_from_grip"
+        ? "prepare_delayed_install"
+        : "progress_delayed_install",
     targetCardId,
     ...(targetDefinitionId ? { targetDefinitionId } : {}),
     developsGripCard: delayedAbility === "set_aside_from_grip",
@@ -61,7 +64,9 @@ export function persistentDevelopmentActionProjection(
 }
 
 export function actionDevelopsPersistentCardNow(action: LegalAction): boolean {
-  return persistentDevelopmentActionProjection(action)?.appliesInstallFitNow === true;
+  return (
+    persistentDevelopmentActionProjection(action)?.appliesInstallFitNow === true
+  );
 }
 
 function projection(

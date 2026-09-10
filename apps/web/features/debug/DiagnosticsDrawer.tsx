@@ -2,11 +2,26 @@ import type { ApiSidePayload } from "@netgrid/shared";
 
 type ClientPayload = ApiSidePayload;
 
-export function DiagnosticsDrawer({ open, payload, connection }: { open: boolean; payload: ClientPayload; connection: "offline" | "connecting" | "online" }) {
+export function DiagnosticsDrawer({
+  open,
+  payload,
+  connection,
+}: {
+  open: boolean;
+  payload: ClientPayload;
+  connection: "offline" | "connecting" | "online";
+}) {
   if (!open) return null;
-  const hash = payload.finalStateHash ?? payload.eventTail.at(-1)?.stateHashAfter ?? payload.playerView.publicEvents.at(-1)?.stateHashAfter ?? "pending";
+  const hash =
+    payload.finalStateHash ??
+    payload.eventTail.at(-1)?.stateHashAfter ??
+    payload.playerView.publicEvents.at(-1)?.stateHashAfter ??
+    "pending";
   return (
-    <section className="section diagnosticsDrawer" data-testid="diagnostics-drawer">
+    <section
+      className="section diagnosticsDrawer"
+      data-testid="diagnostics-drawer"
+    >
       <h2>Diagnostics</h2>
       <dl>
         <div>

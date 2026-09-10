@@ -10,7 +10,9 @@ import {
 describe("local benchmark deck data", () => {
   it("freezes module-global JSON registries recursively", () => {
     expect(Object.isFrozen(LOCAL_REALISTIC_FROZEN_DECK_SNAPSHOTS)).toBe(true);
-    expect(Object.isFrozen(LOCAL_REALISTIC_FROZEN_DECK_SNAPSHOTS[0])).toBe(true);
+    expect(Object.isFrozen(LOCAL_REALISTIC_FROZEN_DECK_SNAPSHOTS[0])).toBe(
+      true,
+    );
     expect(Object.isFrozen(REAL_SCENE_FROZEN_DECK_SNAPSHOTS)).toBe(true);
     expect(Object.isFrozen(REAL_SCENE_FROZEN_DECK_SNAPSHOTS[0])).toBe(true);
     expect(Object.isFrozen(LOCAL_REALISTIC_BENCHMARK_DECKS)).toBe(true);

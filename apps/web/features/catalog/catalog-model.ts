@@ -1,8 +1,5 @@
 import { createAppCollator } from "../../i18n/format";
-import {
-  DEFAULT_APP_LOCALE,
-  type AppLocale,
-} from "../../i18n/locale";
+import { DEFAULT_APP_LOCALE, type AppLocale } from "../../i18n/locale";
 
 export type CatalogTypeFilterKey =
   | "ice"
@@ -358,9 +355,7 @@ export function catalogCardMatchesProductSets(
 export function filterCatalogCardsByProductSets<
   T extends CatalogCardForSetFilter,
 >(cards: T[], selection: CatalogProductSetSelection): T[] {
-  return cards.filter((card) =>
-    catalogCardMatchesProductSets(card, selection),
-  );
+  return cards.filter((card) => catalogCardMatchesProductSets(card, selection));
 }
 
 export function summarizeCatalogProductSets(

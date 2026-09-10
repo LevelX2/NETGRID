@@ -3,15 +3,23 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "use-intl/react";
 import {
+  AccountClientError,
   acceptAccountInvite,
   acceptAccountReset,
   changeAccountPassword,
   createAccountInvite,
   createAccountReset,
+  loadAccountAccessPolicy,
+  loadLocalAccountProfiles,
   loginAccount,
   logoutAccount,
+  registerLocalProfile,
+  registerProtectedAccount,
   restoreAccountSession,
   revokeAllAccountSessions,
+  selectLocalProfile,
+  type AccountAccessPolicy,
+  type LocalAccountProfile,
   type AccountSelf,
   type AccountSessionSelf,
 } from "./account-client";
@@ -22,6 +30,8 @@ export type AccountSessionState = {
   session: AccountSessionSelf | null;
   error: string;
   busy: boolean;
+  accessPolicy: AccountAccessPolicy | null;
+  profiles: LocalAccountProfile[];
 };
 
 export function useAccountSession() {
@@ -32,41 +42,92 @@ export function useAccountSession() {
     session: null,
     error: "",
     busy: false,
+    accessPolicy: null,
+    profiles: [],
   });
   const [csrfToken, setCsrfToken] = useState("");
+  const [refreshVersion, setRefreshVersion] = useState(0);
 
   const becomeGuest = useCallback((error = "") => {
     setCsrfToken("");
-    setState({
+    setState((current) => ({
+      ...current,
       status: "guest",
       account: null,
       session: null,
       error,
       busy: false,
-    });
+    }));
   }, []);
 
   useEffect(() => {
+    if (state.busy) return;
     let active = true;
-    void restoreAccountSession()
-      .then((payload) => {
-        if (!active) return;
-        setCsrfToken(payload.csrfToken);
-        setState({
-          status: "authenticated",
-          account: payload.account,
-          session: payload.session,
-          error: "",
+    let revision = 0;
+    const refresh = async () => {
+      const requestRevision = ++revision;
+      const isCurrent = () => active && requestRevision === revision;
+      try {
+        const [policyResult, sessionResult] = await Promise.allSettled([
+          loadAccountAccessPolicy(),
+          restoreAccountSession(),
+        ]);
+        if (!isCurrent()) return;
+        if (policyResult.status === "rejected") throw policyResult.reason;
+        if (
+          sessionResult.status === "rejected" &&
+          !(
+            sessionResult.reason instanceof AccountClientError &&
+            sessionResult.reason.status === 401
+          )
+        ) {
+          throw sessionResult.reason;
+        }
+        const accessPolicy = policyResult.value;
+        const profiles =
+          accessPolicy.mode === "simple"
+            ? (await loadLocalAccountProfiles()).profiles
+            : [];
+        if (!isCurrent()) return;
+        const payload =
+          sessionResult.status === "fulfilled" ? sessionResult.value : null;
+        setCsrfToken(payload?.csrfToken ?? "");
+        setState((current) => ({
+          status: payload ? "authenticated" : "guest",
+          account: payload?.account ?? null,
+          session: payload?.session ?? null,
+          // Preserve action feedback when refreshing after an operation.
+          error: current.error,
           busy: false,
+          accessPolicy,
+          profiles,
+        }));
+      } catch (error) {
+        if (!isCurrent()) return;
+        setCsrfToken("");
+        setState({
+          status: "guest",
+          account: null,
+          session: null,
+          busy: false,
+          accessPolicy: null,
+          profiles: [],
+          error: error instanceof Error ? error.message : t("requestFailed"),
         });
-      })
-      .catch(() => {
-        if (active) becomeGuest();
-      });
+      }
+    };
+    const onFocus = () => {
+      if (document.visibilityState === "visible") void refresh();
+    };
+    void refresh();
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
     return () => {
       active = false;
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
     };
-  }, [becomeGuest]);
+  }, [state.busy, refreshVersion, t]);
 
   const runSessionStart = useCallback(
     async (operation: () => ReturnType<typeof loginAccount>) => {
@@ -80,21 +141,55 @@ export function useAccountSession() {
           session: payload.session,
           error: "",
           busy: false,
+          accessPolicy: state.accessPolicy,
+          profiles: state.profiles,
         });
         return true;
       } catch (error) {
         setState((current) => ({
           ...current,
           busy: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : t("requestFailed"),
+          error: error instanceof Error ? error.message : t("requestFailed"),
         }));
         return false;
       }
     },
-    [t],
+    [state.accessPolicy, state.profiles, t],
+  );
+
+  const registerProfile = useCallback(
+    (displayName: string) =>
+      runSessionStart(() =>
+        registerLocalProfile({
+          displayName,
+          deviceLabel: browserDeviceLabel(t("unknownDevice")),
+        }),
+      ),
+    [runSessionStart, t],
+  );
+
+  const selectProfile = useCallback(
+    (accountId: string) =>
+      runSessionStart(() =>
+        selectLocalProfile({
+          accountId,
+          deviceLabel: browserDeviceLabel(t("unknownDevice")),
+        }),
+      ),
+    [runSessionStart, t],
+  );
+
+  const registerProtected = useCallback(
+    (loginName: string, displayName: string, password: string) =>
+      runSessionStart(() =>
+        registerProtectedAccount({
+          loginName,
+          displayName,
+          password,
+          deviceLabel: browserDeviceLabel(t("unknownDevice")),
+        }),
+      ),
+    [runSessionStart, t],
   );
 
   const login = useCallback(
@@ -132,9 +227,7 @@ export function useAccountSession() {
           ...current,
           busy: false,
           error:
-            error instanceof Error
-              ? error.message
-              : t("passwordResetFailed"),
+            error instanceof Error ? error.message : t("passwordResetFailed"),
         }));
         return false;
       }
@@ -152,10 +245,7 @@ export function useAccountSession() {
       setState((current) => ({
         ...current,
         busy: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : t("logoutFailed"),
+        error: error instanceof Error ? error.message : t("logoutFailed"),
       }));
       return false;
     }
@@ -171,10 +261,7 @@ export function useAccountSession() {
       setState((current) => ({
         ...current,
         busy: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : t("logoutAllFailed"),
+        error: error instanceof Error ? error.message : t("logoutAllFailed"),
       }));
       return false;
     }
@@ -196,9 +283,7 @@ export function useAccountSession() {
           ...current,
           busy: false,
           error:
-            error instanceof Error
-              ? error.message
-              : t("passwordChangeFailed"),
+            error instanceof Error ? error.message : t("passwordChangeFailed"),
         }));
         return false;
       }
@@ -221,10 +306,7 @@ export function useAccountSession() {
         setState((current) => ({
           ...current,
           busy: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : t("inviteFailed"),
+          error: error instanceof Error ? error.message : t("inviteFailed"),
         }));
         return null;
       }
@@ -243,10 +325,7 @@ export function useAccountSession() {
         setState((current) => ({
           ...current,
           busy: false,
-          error:
-            error instanceof Error
-              ? error.message
-              : t("resetLinkFailed"),
+          error: error instanceof Error ? error.message : t("resetLinkFailed"),
         }));
         return null;
       }
@@ -257,7 +336,14 @@ export function useAccountSession() {
   return {
     ...state,
     csrfToken,
+    retry: () => {
+      setState((current) => ({ ...current, error: "" }));
+      setRefreshVersion((current) => current + 1);
+    },
     login,
+    registerProfile,
+    selectProfile,
+    registerProtected,
     acceptInvite,
     acceptReset,
     logout,

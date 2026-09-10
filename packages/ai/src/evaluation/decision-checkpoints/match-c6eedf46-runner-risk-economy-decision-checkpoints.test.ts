@@ -14,7 +14,9 @@ describe("match C6EEDF46 runner risk and economy checkpoints", () => {
     expect(
       result.decision?.decisionDebug?.planFirstDecision?.executionOrigin
         ?.rootPlanInstanceId,
-    ).toBe("plan:runner.develop_board_and_hand:card%3Arunner_onr_v1_139_r-and-d-interface_2");
+    ).toBe(
+      "plan:runner.develop_board_and_hand:card%3Arunner_onr_v1_139_r-and-d-interface_2",
+    );
   });
 
   it("uses the funded R&D-interface preparation route after R&D cadence is consumed", () => {
@@ -23,8 +25,7 @@ describe("match C6EEDF46 runner risk and economy checkpoints", () => {
       (checkpoint) => {
         checkpoint.engine.testOnlyGameState.runner.credits = 10;
         checkpoint.source.kind = "synthetic_companion";
-        checkpoint.source.findingId =
-          "C6EEDF46-C01-FUNDED-DELAYED-ECONOMY";
+        checkpoint.source.findingId = "C6EEDF46-C01-FUNDED-DELAYED-ECONOMY";
         checkpoint.expectation = {
           acceptableActions: [
             {
@@ -47,8 +48,7 @@ describe("match C6EEDF46 runner risk and economy checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
     const riggedInvestmentsInstanceId =
       result.input.playerView.own.gripOrHq.find(
-        (card) =>
-          card.definitionId === "onr_v1_174_rigged-investments",
+        (card) => card.definitionId === "onr_v1_174_rigged-investments",
       )?.instanceId;
     expect(riggedInvestmentsInstanceId).toBeDefined();
     expect(
@@ -66,14 +66,18 @@ describe("match C6EEDF46 runner risk and economy checkpoints", () => {
     expect(
       result.decision?.decisionDebug?.planFirstDecision?.executionOrigin
         ?.rootPlanInstanceId,
-    ).toBe("plan:runner.develop_board_and_hand:card%3Arunner_onr_v1_145_wutech-mem-chip_1");
+    ).toBe("plan:runner.economy:runner-portfolio-credit-reserve");
   });
 
   it("does not expose the later damage cards to the historical decision", () => {
     const checkpoint = fixture(delayedEconomyReserveJson);
-    const serializedPublicPrefix = JSON.stringify(checkpoint.engine.eventPrefix);
+    const serializedPublicPrefix = JSON.stringify(
+      checkpoint.engine.eventPrefix,
+    );
 
-    expect(serializedPublicPrefix).not.toContain("onr_v1_284_chance-observation");
+    expect(serializedPublicPrefix).not.toContain(
+      "onr_v1_284_chance-observation",
+    );
     expect(serializedPublicPrefix).not.toContain("onr_v1_307_urban-renewal");
     expect(serializedPublicPrefix).not.toContain("Chance Observation");
     expect(serializedPublicPrefix).not.toContain("Urban Renewal");

@@ -11,9 +11,7 @@ const BREAKER_ROLE_NEEDLES = [
   "breaker_end_run",
 ] as const;
 
-export function matchingBreakerRoleNeedles(
-  roles: readonly string[],
-): string[] {
+export function matchingBreakerRoleNeedles(roles: readonly string[]): string[] {
   return BREAKER_ROLE_NEEDLES.filter((needle) => rolesMatch(roles, [needle]));
 }
 

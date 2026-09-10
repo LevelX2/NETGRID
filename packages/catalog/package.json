@@ -9,6 +9,7 @@
   "types": "./src/index.ts",
   "dependencies": {
     "@netgrid/cards": "workspace:*",
+    "@netgrid/runtime-data": "workspace:*",
     "@netgrid/shared": "workspace:*"
   },
   "scripts": {

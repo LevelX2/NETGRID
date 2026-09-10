@@ -20,10 +20,7 @@ export function visibleRunnerExposureCreditValue(
             effect.resource === "credits" &&
             (effect.kind === "economy" || effect.kind === "action_economy"),
         )
-        .reduce(
-          (maximum, effect) => Math.max(maximum, effect.amount ?? 0),
-          0,
-        );
+        .reduce((maximum, effect) => Math.max(maximum, effect.amount ?? 0), 0);
       return Math.max(best, amount ?? 0);
     },
     1,

@@ -154,10 +154,7 @@
             "title": "Boring Bit",
             "definitionId": "onr_proteus_081_boring-bit",
             "type": "program",
-            "subtypes": [
-              "icebreaker",
-              "worm"
-            ],
+            "subtypes": ["icebreaker", "worm"],
             "rulesText": "[2]: Break wall subroutine. [1]: +1 strength",
             "installCost": 6,
             "memoryCost": 1,
@@ -173,9 +170,7 @@
             "title": "HQ Mole",
             "definitionId": "onr_proteus_142_hq-mole",
             "type": "resource",
-            "subtypes": [
-              "hidden"
-            ],
+            "subtypes": ["hidden"],
             "rulesText": "[4], [T]: Access two additional cards from HQ. Use this ability only when accessing cards from HQ. Hidden resources are installed face down, but are put into the trash face up.",
             "installCost": 0,
             "rezzed": false,
@@ -191,9 +186,7 @@
             "title": "R&D Mole",
             "definitionId": "onr_proteus_147_r-and-d-mole",
             "type": "resource",
-            "subtypes": [
-              "hidden"
-            ],
+            "subtypes": ["hidden"],
             "rulesText": "[4], [T]: Access two additional cards from R&D. Use this ability only when accessing cards from R&D. Hidden resources are installed face down, but are put into the trash face up.",
             "installCost": 0,
             "rezzed": false,
@@ -260,9 +253,7 @@
               "title": "Wall of Static",
               "definitionId": "onr_v1_279_wall-of-static",
               "type": "ice",
-              "subtypes": [
-                "wall"
-              ],
+              "subtypes": ["wall"],
               "rulesText": "[Subroutine] End the run.",
               "rezCost": 3,
               "rezzed": true,
@@ -321,9 +312,7 @@
               "title": "Data Wall 2.0",
               "definitionId": "onr_v1_238_data-wall-2-0",
               "type": "ice",
-              "subtypes": [
-                "wall"
-              ],
+              "subtypes": ["wall"],
               "rulesText": "[Subroutine] End the run.",
               "rezCost": 2,
               "rezzed": true,
@@ -371,9 +360,7 @@
               "title": "Efficiency Experts",
               "definitionId": "onr_v1_290_efficiency-experts",
               "type": "operation",
-              "subtypes": [
-                "transactions"
-              ],
+              "subtypes": ["transactions"],
               "rulesText": "Gain 3.",
               "cost": 0,
               "playCost": {
@@ -391,9 +378,7 @@
               "title": "Efficiency Experts",
               "definitionId": "onr_v1_290_efficiency-experts",
               "type": "operation",
-              "subtypes": [
-                "transactions"
-              ],
+              "subtypes": ["transactions"],
               "rulesText": "Gain 3.",
               "cost": 0,
               "playCost": {
@@ -442,9 +427,7 @@
           "title": "Wall of Static",
           "definitionId": "onr_v1_279_wall-of-static",
           "type": "ice",
-          "subtypes": [
-            "wall"
-          ],
+          "subtypes": ["wall"],
           "rulesText": "[Subroutine] End the run.",
           "rezCost": 3,
           "rezzed": true,
@@ -4434,10 +4417,7 @@
           {
             "cardId": "onr_classic_028_matador",
             "title": "Matador",
-            "coverage": [
-              "sentry",
-              "subtype_limited"
-            ],
+            "coverage": ["sentry", "subtype_limited"],
             "installCost": 4,
             "memoryCost": 1,
             "baseStrength": 0,
@@ -4446,9 +4426,7 @@
             "risks": [],
             "restrictions": [],
             "quantityKnownInDeck": 3,
-            "locations": [
-              "in_deck"
-            ],
+            "locations": ["in_deck"],
             "confidence": "high",
             "evidence": [
               "capability_source:structured",
@@ -4460,24 +4438,16 @@
           {
             "cardId": "onr_classic_030_psychic-friend",
             "title": "Psychic Friend",
-            "coverage": [
-              "code_gate",
-              "subtype_limited"
-            ],
+            "coverage": ["code_gate", "subtype_limited"],
             "installCost": 2,
             "memoryCost": 1,
             "baseStrength": 1,
             "breakCost": 1,
             "pumpCost": 2,
-            "risks": [
-              "side_effect_penalty",
-              "temporary_strength"
-            ],
+            "risks": ["side_effect_penalty", "temporary_strength"],
             "restrictions": [],
             "quantityKnownInDeck": 3,
-            "locations": [
-              "in_deck"
-            ],
+            "locations": ["in_deck"],
             "confidence": "high",
             "evidence": [
               "capability_source:structured",
@@ -4489,10 +4459,7 @@
           {
             "cardId": "onr_proteus_081_boring-bit",
             "title": "Boring Bit",
-            "coverage": [
-              "subtype_limited",
-              "wall"
-            ],
+            "coverage": ["subtype_limited", "wall"],
             "installCost": 6,
             "memoryCost": 1,
             "baseStrength": 5,
@@ -4501,10 +4468,7 @@
             "risks": [],
             "restrictions": [],
             "quantityKnownInDeck": 2,
-            "locations": [
-              "in_deck",
-              "installed"
-            ],
+            "locations": ["in_deck", "installed"],
             "confidence": "high",
             "evidence": [
               "capability_source:structured",
@@ -4523,9 +4487,7 @@
             "searchableNow": false,
             "drawOnly": false,
             "missing": false,
-            "bestKnownCards": [
-              "onr_proteus_081_boring-bit"
-            ],
+            "bestKnownCards": ["onr_proteus_081_boring-bit"],
             "blockers": []
           },
           "code_gate": {
@@ -4536,12 +4498,8 @@
             "searchableNow": false,
             "drawOnly": true,
             "missing": false,
-            "bestKnownCards": [
-              "onr_classic_030_psychic-friend"
-            ],
-            "blockers": [
-              "draw_only"
-            ]
+            "bestKnownCards": ["onr_classic_030_psychic-friend"],
+            "blockers": ["draw_only"]
           },
           "sentry": {
             "coverage": "sentry",
@@ -4551,12 +4509,8 @@
             "searchableNow": false,
             "drawOnly": true,
             "missing": false,
-            "bestKnownCards": [
-              "onr_classic_028_matador"
-            ],
-            "blockers": [
-              "draw_only"
-            ]
+            "bestKnownCards": ["onr_classic_028_matador"],
+            "blockers": ["draw_only"]
           },
           "ap": {
             "coverage": "ap",
@@ -4567,9 +4521,7 @@
             "drawOnly": false,
             "missing": true,
             "bestKnownCards": [],
-            "blockers": [
-              "missing_ap_coverage"
-            ]
+            "blockers": ["missing_ap_coverage"]
           },
           "trace": {
             "coverage": "trace",
@@ -4580,9 +4532,7 @@
             "drawOnly": false,
             "missing": true,
             "bestKnownCards": [],
-            "blockers": [
-              "missing_trace_coverage"
-            ]
+            "blockers": ["missing_trace_coverage"]
           },
           "universal": {
             "coverage": "universal",
@@ -4593,9 +4543,7 @@
             "drawOnly": false,
             "missing": true,
             "bestKnownCards": [],
-            "blockers": [
-              "missing_universal_coverage"
-            ]
+            "blockers": ["missing_universal_coverage"]
           },
           "subtype_limited": {
             "coverage": "subtype_limited",
@@ -4621,9 +4569,7 @@
             "drawOnly": false,
             "missing": true,
             "bestKnownCards": [],
-            "blockers": [
-              "missing_special_coverage"
-            ]
+            "blockers": ["missing_special_coverage"]
           }
         },
         "searchAccess": {
@@ -4657,10 +4603,7 @@
           "memoryAvailable": 3,
           "memoryToolsKnown": 1,
           "missingMemoryPressure": false,
-          "evidence": [
-            "memory_available:3",
-            "memory_tools_known:1"
-          ]
+          "evidence": ["memory_available:3", "memory_tools_known:1"]
         },
         "attackPlanProfile": {
           "centralPressureToolsKnown": 4,
@@ -4678,33 +4621,25 @@
           "capabilityId": "runner.ap_coverage",
           "kind": "ap_coverage",
           "severity": "hard",
-          "evidence": [
-            "coverage_state:ap:missing"
-          ]
+          "evidence": ["coverage_state:ap:missing"]
         },
         {
           "capabilityId": "runner.trace_coverage",
           "kind": "trace_coverage",
           "severity": "hard",
-          "evidence": [
-            "coverage_state:trace:missing"
-          ]
+          "evidence": ["coverage_state:trace:missing"]
         },
         {
           "capabilityId": "runner.universal_coverage",
           "kind": "universal_coverage",
           "severity": "hard",
-          "evidence": [
-            "coverage_state:universal:missing"
-          ]
+          "evidence": ["coverage_state:universal:missing"]
         },
         {
           "capabilityId": "runner.special_coverage",
           "kind": "special_coverage",
           "severity": "soft",
-          "evidence": [
-            "coverage_state:special:missing"
-          ]
+          "evidence": ["coverage_state:special:missing"]
         }
       ],
       "confidence": "medium",
@@ -4827,14 +4762,10 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["weak_tag_damage_defense"],
           "confidence": "medium",
           "runtimeStatus": "supporting",
-          "runtimeBlockers": [
-            "supporting_only:runner.economy_first"
-          ]
+          "runtimeBlockers": ["supporting_only:runner.economy_first"]
         },
         "runner.hq_pressure": {
           "anchorScore": 75,
@@ -4960,9 +4891,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["weak_tag_damage_defense"],
           "confidence": "high",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -5181,9 +5110,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["weak_tag_damage_defense"],
           "confidence": "high",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -5279,9 +5206,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["weak_tag_damage_defense"],
           "confidence": "medium",
           "runtimeStatus": "blocked",
           "runtimeBlockers": [
@@ -5472,9 +5397,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["weak_tag_damage_defense"],
           "confidence": "medium",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -5626,9 +5549,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["weak_tag_damage_defense"],
           "confidence": "high",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -5791,9 +5712,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["weak_tag_damage_defense"],
           "confidence": "high",
           "runtimeStatus": "productive",
           "runtimeBlockers": []
@@ -5974,9 +5893,7 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["weak_tag_damage_defense"],
           "confidence": "low",
           "runtimeStatus": "supporting",
           "runtimeBlockers": [
@@ -5990,10 +5907,7 @@
         "runner.rnd_pressure",
         "runner.run_event_tempo"
       ],
-      "secondaryStrategies": [
-        "runner.hq_pressure",
-        "runner.rig_first"
-      ],
+      "secondaryStrategies": ["runner.hq_pressure", "runner.rig_first"],
       "functionSignalCounts": {
         "access.hq_hidden_multiaccess": 3,
         "access.hq_multiaccess": 3,
@@ -6129,9 +6043,7 @@
             "providerId": "runner.provider:onr_classic_028_matador",
             "cardId": "onr_classic_028_matador",
             "copies": 3,
-            "capabilities": [
-              "runner.coverage.breaker"
-            ],
+            "capabilities": ["runner.coverage.breaker"],
             "supportCapabilities": [],
             "persistence": "persistent",
             "additivity": "distinct_provider_first",
@@ -6146,9 +6058,7 @@
             "providerId": "runner.provider:onr_classic_030_psychic-friend",
             "cardId": "onr_classic_030_psychic-friend",
             "copies": 3,
-            "capabilities": [
-              "runner.coverage.breaker"
-            ],
+            "capabilities": ["runner.coverage.breaker"],
             "supportCapabilities": [],
             "persistence": "persistent",
             "additivity": "distinct_provider_first",
@@ -6163,9 +6073,7 @@
             "providerId": "runner.provider:onr_classic_042_panzer-run",
             "cardId": "onr_classic_042_panzer-run",
             "copies": 3,
-            "capabilities": [
-              "runner.throughput.draw"
-            ],
+            "capabilities": ["runner.throughput.draw"],
             "supportCapabilities": [],
             "persistence": "one_shot",
             "additivity": "distinct_provider_first",
@@ -6180,9 +6088,7 @@
             "providerId": "runner.provider:onr_proteus_081_boring-bit",
             "cardId": "onr_proteus_081_boring-bit",
             "copies": 3,
-            "capabilities": [
-              "runner.coverage.breaker"
-            ],
+            "capabilities": ["runner.coverage.breaker"],
             "supportCapabilities": [],
             "persistence": "persistent",
             "additivity": "distinct_provider_first",
@@ -6197,9 +6103,7 @@
         "dependencies": [
           {
             "dependencyId": "runner.dependency.breaker_coverage",
-            "requiredCapabilityIds": [
-              "runner.coverage.breaker"
-            ],
+            "requiredCapabilityIds": ["runner.coverage.breaker"],
             "providerIds": [
               "runner.provider:onr_classic_028_matador",
               "runner.provider:onr_classic_030_psychic-friend",
@@ -6225,15 +6129,9 @@
               "runner.provider:onr_classic_030_psychic-friend",
               "runner.provider:onr_proteus_081_boring-bit"
             ],
-            "dependencyIds": [
-              "runner.dependency.breaker_coverage"
-            ],
-            "entryConditionIds": [
-              "coverage_dependency_open"
-            ],
-            "exitConditionIds": [
-              "required_coverage_installed"
-            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "entryConditionIds": ["coverage_dependency_open"],
+            "exitConditionIds": ["required_coverage_installed"],
             "evidence": [
               "engine_line:runner.engine.persistent_rig",
               "provider_count:3",
@@ -6244,15 +6142,9 @@
             "lineId": "runner.engine.consumption_recovery",
             "status": "unsupported",
             "providerIds": [],
-            "dependencyIds": [
-              "runner.dependency.breaker_coverage"
-            ],
-            "entryConditionIds": [
-              "consumable_coverage_provider_present"
-            ],
-            "exitConditionIds": [
-              "coverage_provider_recoverable_or_replaced"
-            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "entryConditionIds": ["consumable_coverage_provider_present"],
+            "exitConditionIds": ["coverage_provider_recoverable_or_replaced"],
             "evidence": [
               "engine_line:runner.engine.consumption_recovery",
               "provider_count:0",
@@ -6267,12 +6159,8 @@
               "runner.provider:onr_classic_030_psychic-friend",
               "runner.provider:onr_proteus_081_boring-bit"
             ],
-            "dependencyIds": [
-              "runner.dependency.breaker_coverage"
-            ],
-            "entryConditionIds": [
-              "stageable_required_provider_visible"
-            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "entryConditionIds": ["stageable_required_provider_visible"],
             "exitConditionIds": [
               "staged_provider_installed_or_no_longer_required"
             ],
@@ -6290,12 +6178,8 @@
               "runner.provider:onr_classic_030_psychic-friend",
               "runner.provider:onr_proteus_081_boring-bit"
             ],
-            "dependencyIds": [
-              "runner.dependency.breaker_coverage"
-            ],
-            "entryConditionIds": [
-              "compatible_breaker_credit_demand_present"
-            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "entryConditionIds": ["compatible_breaker_credit_demand_present"],
             "exitConditionIds": [
               "compatible_recurring_supply_meets_useful_demand"
             ],
@@ -6308,18 +6192,10 @@
           {
             "lineId": "runner.engine.throughput_until_ready",
             "status": "coherent",
-            "providerIds": [
-              "runner.provider:onr_classic_042_panzer-run"
-            ],
-            "dependencyIds": [
-              "runner.dependency.breaker_coverage"
-            ],
-            "entryConditionIds": [
-              "required_dependency_not_ready"
-            ],
-            "exitConditionIds": [
-              "required_dependency_ready"
-            ],
+            "providerIds": ["runner.provider:onr_classic_042_panzer-run"],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "entryConditionIds": ["required_dependency_not_ready"],
+            "exitConditionIds": ["required_dependency_ready"],
             "evidence": [
               "engine_line:runner.engine.throughput_until_ready",
               "provider_count:1",
@@ -6332,12 +6208,8 @@
             "tendencyId": "runner.development.install_persistent_provider",
             "strength": "high",
             "ownerModuleId": "runner.rig_and_coverage",
-            "dependencyIds": [
-              "runner.dependency.breaker_coverage"
-            ],
-            "exitConditionIds": [
-              "required_coverage_installed"
-            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "exitConditionIds": ["required_coverage_installed"],
             "evidence": [
               "development_tendency:runner.development.install_persistent_provider",
               "active:true",
@@ -6348,12 +6220,8 @@
             "tendencyId": "runner.development.recover_consumed_provider",
             "strength": "low",
             "ownerModuleId": "runner.rig_and_coverage",
-            "dependencyIds": [
-              "runner.dependency.breaker_coverage"
-            ],
-            "exitConditionIds": [
-              "coverage_provider_recoverable_or_replaced"
-            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "exitConditionIds": ["coverage_provider_recoverable_or_replaced"],
             "evidence": [
               "development_tendency:runner.development.recover_consumed_provider",
               "active:false",
@@ -6364,12 +6232,8 @@
             "tendencyId": "runner.development.stage_before_overflow_draw",
             "strength": "low",
             "ownerModuleId": "runner.shell_traders_pipeline",
-            "dependencyIds": [
-              "runner.dependency.breaker_coverage"
-            ],
-            "exitConditionIds": [
-              "no_stageable_required_provider"
-            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "exitConditionIds": ["no_stageable_required_provider"],
             "evidence": [
               "development_tendency:runner.development.stage_before_overflow_draw",
               "active:false",
@@ -6380,12 +6244,8 @@
             "tendencyId": "runner.development.throughput_until_dependency_ready",
             "strength": "high",
             "ownerModuleId": "runner.develop_board_and_hand",
-            "dependencyIds": [
-              "runner.dependency.breaker_coverage"
-            ],
-            "exitConditionIds": [
-              "required_dependency_ready"
-            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "exitConditionIds": ["required_dependency_ready"],
             "evidence": [
               "development_tendency:runner.development.throughput_until_dependency_ready",
               "active:true",
@@ -6398,21 +6258,11 @@
             "contributionId": "runner.contribution.maintain_breaker_coverage",
             "ownerModuleId": "runner.rig_and_coverage",
             "objective": "maintain_required_coverage",
-            "capabilityIds": [
-              "runner.coverage.breaker"
-            ],
-            "dependencyIds": [
-              "runner.dependency.breaker_coverage"
-            ],
-            "activationConditionIds": [
-              "coverage_dependency_open"
-            ],
-            "exitConditionIds": [
-              "required_coverage_installed"
-            ],
-            "evidence": [
-              "contribution_from:runner.engine.persistent_rig"
-            ]
+            "capabilityIds": ["runner.coverage.breaker"],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "activationConditionIds": ["coverage_dependency_open"],
+            "exitConditionIds": ["required_coverage_installed"],
+            "evidence": ["contribution_from:runner.engine.persistent_rig"]
           },
           {
             "contributionId": "runner.contribution.throughput_until_ready",
@@ -6422,15 +6272,9 @@
               "runner.throughput.draw",
               "runner.throughput.search"
             ],
-            "dependencyIds": [
-              "runner.dependency.breaker_coverage"
-            ],
-            "activationConditionIds": [
-              "required_dependency_not_ready"
-            ],
-            "exitConditionIds": [
-              "required_dependency_ready"
-            ],
+            "dependencyIds": ["runner.dependency.breaker_coverage"],
+            "activationConditionIds": ["required_dependency_not_ready"],
+            "exitConditionIds": ["required_dependency_ready"],
             "evidence": [
               "contribution_from:runner.engine.throughput_until_ready"
             ]
@@ -6468,9 +6312,7 @@
           "confidence": "high",
           "anchorEvidenceCount": 15,
           "supportEvidenceCount": 13,
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ]
+          "supportGaps": ["weak_tag_damage_defense"]
         },
         {
           "strategyId": "runner.rnd_pressure",
@@ -6481,9 +6323,7 @@
           "confidence": "high",
           "anchorEvidenceCount": 8,
           "supportEvidenceCount": 11,
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ]
+          "supportGaps": ["weak_tag_damage_defense"]
         },
         {
           "strategyId": "runner.run_event_tempo",
@@ -6494,9 +6334,7 @@
           "confidence": "high",
           "anchorEvidenceCount": 5,
           "supportEvidenceCount": 16,
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ]
+          "supportGaps": ["weak_tag_damage_defense"]
         },
         {
           "strategyId": "runner.hq_pressure",
@@ -6507,9 +6345,7 @@
           "confidence": "high",
           "anchorEvidenceCount": 6,
           "supportEvidenceCount": 10,
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ]
+          "supportGaps": ["weak_tag_damage_defense"]
         },
         {
           "strategyId": "runner.economy_first",
@@ -6520,9 +6356,7 @@
           "confidence": "medium",
           "anchorEvidenceCount": 0,
           "supportEvidenceCount": 14,
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ]
+          "supportGaps": ["weak_tag_damage_defense"]
         },
         {
           "strategyId": "runner.rig_first",
@@ -6533,9 +6367,7 @@
           "confidence": "medium",
           "anchorEvidenceCount": 0,
           "supportEvidenceCount": 11,
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ]
+          "supportGaps": ["weak_tag_damage_defense"]
         },
         {
           "strategyId": "runner.remote_trash",
@@ -6568,9 +6400,7 @@
           "confidence": "medium",
           "anchorEvidenceCount": 0,
           "supportEvidenceCount": 12,
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ]
+          "supportGaps": ["weak_tag_damage_defense"]
         },
         {
           "strategyId": "runner.survival_defense",
@@ -6581,9 +6411,7 @@
           "confidence": "low",
           "anchorEvidenceCount": 0,
           "supportEvidenceCount": 11,
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ]
+          "supportGaps": ["weak_tag_damage_defense"]
         }
       ],
       "rolesStatus": {
@@ -6603,15 +6431,8 @@
           "cardId": "onr_classic_028_matador",
           "quantity": 3,
           "status": "partial",
-          "roles": [
-            "break_ice",
-            "breaker_killer",
-            "icebreaker",
-            "program"
-          ],
-          "functionSignals": [
-            "breaker.sentry"
-          ],
+          "roles": ["break_ice", "breaker_killer", "icebreaker", "program"],
+          "functionSignals": ["breaker.sentry"],
           "strategyAnchors": [],
           "warnings": []
         },
@@ -6619,16 +6440,8 @@
           "cardId": "onr_classic_030_psychic-friend",
           "quantity": 3,
           "status": "partial",
-          "roles": [
-            "break_ice",
-            "breaker_decoder",
-            "icebreaker",
-            "program"
-          ],
-          "functionSignals": [
-            "breaker.code_gate",
-            "breaker.scaling_strength"
-          ],
+          "roles": ["break_ice", "breaker_decoder", "icebreaker", "program"],
+          "functionSignals": ["breaker.code_gate", "breaker.scaling_strength"],
           "strategyAnchors": [],
           "warnings": []
         },
@@ -6653,21 +6466,14 @@
             "run.make_run",
             "run.rnd"
           ],
-          "strategyAnchors": [
-            "runner.rnd_pressure",
-            "runner.run_event_tempo"
-          ],
+          "strategyAnchors": ["runner.rnd_pressure", "runner.run_event_tempo"],
           "warnings": []
         },
         {
           "cardId": "onr_classic_041_networking",
           "quantity": 3,
           "status": "partial",
-          "roles": [
-            "economy",
-            "event",
-            "find_economy"
-          ],
+          "roles": ["economy", "event", "find_economy"],
           "functionSignals": [
             "economy.burst_credit",
             "economy.controller_credit_burst",
@@ -6709,9 +6515,7 @@
             "program",
             "safe_probe_run"
           ],
-          "functionSignals": [
-            "breaker.wall"
-          ],
+          "functionSignals": ["breaker.wall"],
           "strategyAnchors": [],
           "warnings": []
         },
@@ -6727,10 +6531,7 @@
             "runner.hq_pressure",
             "runner.interface_closeout"
           ],
-          "functionSignals": [
-            "run.hq",
-            "run.make_run"
-          ],
+          "functionSignals": ["run.hq", "run.make_run"],
           "strategyAnchors": [
             "runner.hq_pressure",
             "runner.interface_closeout",
@@ -6742,15 +6543,8 @@
           "cardId": "onr_proteus_118_prearranged-drop",
           "quantity": 3,
           "status": "partial",
-          "roles": [
-            "economy",
-            "event",
-            "same_turn_agenda_access_payoff"
-          ],
-          "functionSignals": [
-            "access.next_agenda_credit",
-            "economy.generic"
-          ],
+          "roles": ["economy", "event", "same_turn_agenda_access_payoff"],
+          "functionSignals": ["access.next_agenda_credit", "economy.generic"],
           "strategyAnchors": [],
           "warnings": []
         },
@@ -6768,9 +6562,7 @@
             "access.next_agenda_bonus",
             "score.bonus_agenda_point"
           ],
-          "strategyAnchors": [
-            "runner.interface_closeout"
-          ],
+          "strategyAnchors": ["runner.interface_closeout"],
           "warnings": []
         },
         {
@@ -6785,10 +6577,7 @@
             "runner.interface_closeout",
             "runner.rnd_pressure"
           ],
-          "functionSignals": [
-            "run.make_run",
-            "run.rnd"
-          ],
+          "functionSignals": ["run.make_run", "run.rnd"],
           "strategyAnchors": [
             "runner.interface_closeout",
             "runner.rnd_pressure",
@@ -6867,9 +6656,7 @@
             "run.make_run",
             "run.rnd"
           ],
-          "strategyAnchors": [
-            "runner.rnd_pressure"
-          ],
+          "strategyAnchors": ["runner.rnd_pressure"],
           "warnings": []
         },
         {
@@ -6953,9 +6740,7 @@
           "support": 90,
           "final": 89
         },
-        "supportGaps": [
-          "weak_tag_damage_defense"
-        ],
+        "supportGaps": ["weak_tag_damage_defense"],
         "evidence": [
           "strategy:runner.interface_closeout",
           "confidence:high",
@@ -6977,9 +6762,7 @@
             "support": 90,
             "final": 86
           },
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["weak_tag_damage_defense"],
           "evidence": [
             "strategy:runner.rnd_pressure",
             "confidence:high",
@@ -7000,9 +6783,7 @@
             "support": 90,
             "final": 83
           },
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["weak_tag_damage_defense"],
           "evidence": [
             "strategy:runner.run_event_tempo",
             "confidence:high",
@@ -7023,9 +6804,7 @@
             "support": 85,
             "final": 79
           },
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["weak_tag_damage_defense"],
           "evidence": [
             "strategy:runner.hq_pressure",
             "confidence:high",
@@ -7123,9 +6902,7 @@
           "severity": "soft",
           "reason": "support_gap",
           "removalCondition": "resolve support gap weak_tag_damage_defense",
-          "evidence": [
-            "support_gap:weak_tag_damage_defense"
-          ]
+          "evidence": ["support_gap:weak_tag_damage_defense"]
         }
       ],
       "transition": {
@@ -7223,10 +7000,7 @@
               "kind": "none",
               "required": 0,
               "satisfied": true,
-              "evidence": [
-                "reserve_source:runtime_context",
-                "reserve:none"
-              ]
+              "evidence": ["reserve_source:runtime_context", "reserve:none"]
             },
             "evidence": [
               "portfolio_candidate:runtime_context",
@@ -7585,10 +7359,7 @@
               "kind": "none",
               "required": 0,
               "satisfied": true,
-              "evidence": [
-                "reserve_source:runtime_context",
-                "reserve:none"
-              ]
+              "evidence": ["reserve_source:runtime_context", "reserve:none"]
             },
             "evidence": [
               "portfolio_candidate:runtime_context",
@@ -7610,9 +7381,7 @@
             "family": "runner_setup",
             "candidateRole": "blocked",
             "runtimeStatus": "supporting",
-            "runtimeBlockers": [
-              "supporting_only:runner.economy_first"
-            ],
+            "runtimeBlockers": ["supporting_only:runner.economy_first"],
             "confidence": "medium",
             "score": {
               "anchor": 0,
@@ -7675,10 +7444,7 @@
               "kind": "none",
               "required": 0,
               "satisfied": true,
-              "evidence": [
-                "reserve_source:runtime_context",
-                "reserve:none"
-              ]
+              "evidence": ["reserve_source:runtime_context", "reserve:none"]
             },
             "evidence": [
               "portfolio_candidate:runtime_context",
@@ -7857,10 +7623,7 @@
               "kind": "none",
               "required": 0,
               "satisfied": true,
-              "evidence": [
-                "reserve_source:runtime_context",
-                "reserve:none"
-              ]
+              "evidence": ["reserve_source:runtime_context", "reserve:none"]
             },
             "evidence": [
               "portfolio_candidate:runtime_context",
@@ -8007,10 +7770,7 @@
               "kind": "none",
               "required": 0,
               "satisfied": true,
-              "evidence": [
-                "reserve_source:runtime_context",
-                "reserve:none"
-              ]
+              "evidence": ["reserve_source:runtime_context", "reserve:none"]
             },
             "evidence": [
               "portfolio_candidate:runtime_context",
@@ -8066,9 +7826,7 @@
           "providerId": "runner.provider:onr_classic_028_matador",
           "cardId": "onr_classic_028_matador",
           "copies": 3,
-          "capabilities": [
-            "runner.coverage.breaker"
-          ],
+          "capabilities": ["runner.coverage.breaker"],
           "supportCapabilities": [],
           "persistence": "persistent",
           "additivity": "distinct_provider_first",
@@ -8083,9 +7841,7 @@
           "providerId": "runner.provider:onr_classic_030_psychic-friend",
           "cardId": "onr_classic_030_psychic-friend",
           "copies": 3,
-          "capabilities": [
-            "runner.coverage.breaker"
-          ],
+          "capabilities": ["runner.coverage.breaker"],
           "supportCapabilities": [],
           "persistence": "persistent",
           "additivity": "distinct_provider_first",
@@ -8100,9 +7856,7 @@
           "providerId": "runner.provider:onr_classic_042_panzer-run",
           "cardId": "onr_classic_042_panzer-run",
           "copies": 3,
-          "capabilities": [
-            "runner.throughput.draw"
-          ],
+          "capabilities": ["runner.throughput.draw"],
           "supportCapabilities": [],
           "persistence": "one_shot",
           "additivity": "distinct_provider_first",
@@ -8117,9 +7871,7 @@
           "providerId": "runner.provider:onr_proteus_081_boring-bit",
           "cardId": "onr_proteus_081_boring-bit",
           "copies": 3,
-          "capabilities": [
-            "runner.coverage.breaker"
-          ],
+          "capabilities": ["runner.coverage.breaker"],
           "supportCapabilities": [],
           "persistence": "persistent",
           "additivity": "distinct_provider_first",
@@ -8134,9 +7886,7 @@
       "engineDependencies": [
         {
           "dependencyId": "runner.dependency.breaker_coverage",
-          "requiredCapabilityIds": [
-            "runner.coverage.breaker"
-          ],
+          "requiredCapabilityIds": ["runner.coverage.breaker"],
           "providerIds": [
             "runner.provider:onr_classic_028_matador",
             "runner.provider:onr_classic_030_psychic-friend",
@@ -8162,12 +7912,8 @@
           "tendencyId": "runner.development.install_persistent_provider",
           "strength": "high",
           "ownerModuleId": "runner.rig_and_coverage",
-          "dependencyIds": [
-            "runner.dependency.breaker_coverage"
-          ],
-          "exitConditionIds": [
-            "required_coverage_installed"
-          ],
+          "dependencyIds": ["runner.dependency.breaker_coverage"],
+          "exitConditionIds": ["required_coverage_installed"],
           "evidence": [
             "development_tendency:runner.development.install_persistent_provider",
             "active:true",
@@ -8178,12 +7924,8 @@
           "tendencyId": "runner.development.throughput_until_dependency_ready",
           "strength": "high",
           "ownerModuleId": "runner.develop_board_and_hand",
-          "dependencyIds": [
-            "runner.dependency.breaker_coverage"
-          ],
-          "exitConditionIds": [
-            "required_dependency_ready"
-          ],
+          "dependencyIds": ["runner.dependency.breaker_coverage"],
+          "exitConditionIds": ["required_dependency_ready"],
           "evidence": [
             "development_tendency:runner.development.throughput_until_dependency_ready",
             "active:true",
@@ -8196,21 +7938,11 @@
           "contributionId": "runner.contribution.maintain_breaker_coverage",
           "ownerModuleId": "runner.rig_and_coverage",
           "objective": "maintain_required_coverage",
-          "capabilityIds": [
-            "runner.coverage.breaker"
-          ],
-          "dependencyIds": [
-            "runner.dependency.breaker_coverage"
-          ],
-          "activationConditionIds": [
-            "coverage_dependency_open"
-          ],
-          "exitConditionIds": [
-            "required_coverage_installed"
-          ],
-          "evidence": [
-            "contribution_from:runner.engine.persistent_rig"
-          ]
+          "capabilityIds": ["runner.coverage.breaker"],
+          "dependencyIds": ["runner.dependency.breaker_coverage"],
+          "activationConditionIds": ["coverage_dependency_open"],
+          "exitConditionIds": ["required_coverage_installed"],
+          "evidence": ["contribution_from:runner.engine.persistent_rig"]
         },
         {
           "contributionId": "runner.contribution.throughput_until_ready",
@@ -8220,27 +7952,15 @@
             "runner.throughput.draw",
             "runner.throughput.search"
           ],
-          "dependencyIds": [
-            "runner.dependency.breaker_coverage"
-          ],
-          "activationConditionIds": [
-            "required_dependency_not_ready"
-          ],
-          "exitConditionIds": [
-            "required_dependency_ready"
-          ],
-          "evidence": [
-            "contribution_from:runner.engine.throughput_until_ready"
-          ]
+          "dependencyIds": ["runner.dependency.breaker_coverage"],
+          "activationConditionIds": ["required_dependency_not_ready"],
+          "exitConditionIds": ["required_dependency_ready"],
+          "evidence": ["contribution_from:runner.engine.throughput_until_ready"]
         }
       ],
-      "pressureVectors": [
-        "runner.central_probe_pressure"
-      ],
+      "pressureVectors": ["runner.central_probe_pressure"],
       "riskProfile": [],
-      "rejectedIntents": [
-        "runner.bad_publicity_pressure"
-      ],
+      "rejectedIntents": ["runner.bad_publicity_pressure"],
       "confidence": "medium",
       "evidence": [
         "deck_strategy_profile:present",
@@ -8306,9 +8026,7 @@
             "support": 90,
             "final": 89
           },
-          "supportGaps": [
-            "weak_tag_damage_defense"
-          ],
+          "supportGaps": ["weak_tag_damage_defense"],
           "evidence": [
             "strategy:runner.interface_closeout",
             "confidence:high",
@@ -8330,9 +8048,7 @@
               "support": 90,
               "final": 86
             },
-            "supportGaps": [
-              "weak_tag_damage_defense"
-            ],
+            "supportGaps": ["weak_tag_damage_defense"],
             "evidence": [
               "strategy:runner.rnd_pressure",
               "confidence:high",
@@ -8353,9 +8069,7 @@
               "support": 90,
               "final": 83
             },
-            "supportGaps": [
-              "weak_tag_damage_defense"
-            ],
+            "supportGaps": ["weak_tag_damage_defense"],
             "evidence": [
               "strategy:runner.run_event_tempo",
               "confidence:high",
@@ -8376,9 +8090,7 @@
               "support": 85,
               "final": 79
             },
-            "supportGaps": [
-              "weak_tag_damage_defense"
-            ],
+            "supportGaps": ["weak_tag_damage_defense"],
             "evidence": [
               "strategy:runner.hq_pressure",
               "confidence:high",
@@ -8476,9 +8188,7 @@
             "severity": "soft",
             "reason": "support_gap",
             "removalCondition": "resolve support gap weak_tag_damage_defense",
-            "evidence": [
-              "support_gap:weak_tag_damage_defense"
-            ]
+            "evidence": ["support_gap:weak_tag_damage_defense"]
           }
         ],
         "transition": {
@@ -8576,10 +8286,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8938,10 +8645,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -8963,9 +8667,7 @@
               "family": "runner_setup",
               "candidateRole": "blocked",
               "runtimeStatus": "supporting",
-              "runtimeBlockers": [
-                "supporting_only:runner.economy_first"
-              ],
+              "runtimeBlockers": ["supporting_only:runner.economy_first"],
               "confidence": "medium",
               "score": {
                 "anchor": 0,
@@ -9028,10 +8730,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9210,10 +8909,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9360,10 +9056,7 @@
                 "kind": "none",
                 "required": 0,
                 "satisfied": true,
-                "evidence": [
-                  "reserve_source:runtime_context",
-                  "reserve:none"
-                ]
+                "evidence": ["reserve_source:runtime_context", "reserve:none"]
               },
               "evidence": [
                 "portfolio_candidate:runtime_context",
@@ -9729,9 +9422,7 @@
           "moduleId": "runner.pressure_central",
           "moduleVersion": "1",
           "side": "runner",
-          "strategyLineIds": [
-            "runner.steal_agendas_default"
-          ],
+          "strategyLineIds": ["runner.steal_agendas_default"],
           "executionClass": "strategic_campaign",
           "viability": "blocked",
           "portfolioRole": "foreground",
@@ -9758,16 +9449,12 @@
               "pressureId": "central:hq",
               "serverId": "hq",
               "purpose": "multiaccess",
-              "strategyLineIds": [
-                "runner.steal_agendas_default"
-              ],
+              "strategyLineIds": ["runner.steal_agendas_default"],
               "priorityClass": "P4",
               "reachable": true,
               "marginalValue": 270,
               "evidenceCode": "target:hq",
-              "runActionIds": [
-                "runner.start_run.hq"
-              ],
+              "runActionIds": ["runner.start_run.hq"],
               "runActionValues": {
                 "runner.start_run.hq": 0
               },
@@ -10213,9 +9900,7 @@
                 }
               }
             ],
-            "protectedValueClaimIds": [
-              "fnv1a:5eea929e"
-            ],
+            "protectedValueClaimIds": ["fnv1a:5eea929e"],
             "transition": {
               "kind": "projected_plan_discovery_required"
             }

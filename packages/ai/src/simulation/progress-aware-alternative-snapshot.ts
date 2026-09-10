@@ -46,7 +46,7 @@ export function progressAwareAlternativeSnapshot(
   );
   const blockedReason =
     alternative.excluded || hardGates.length > 0
-      ? alternative.whyNot?.[0] ?? hardGates[0] ?? "blocked_by_gate"
+      ? (alternative.whyNot?.[0] ?? hardGates[0] ?? "blocked_by_gate")
       : undefined;
   const side = sideForAlternative(alternative);
   const sourceKind = alternativeSourceKind(alternative.source);
@@ -82,7 +82,9 @@ export function progressAwareAlternativeSnapshot(
     similarLaterProgress: "unknown_shadow_only",
     whyChosen: [...(alternative.whyChosen ?? [])],
     whyNot: [...(alternative.whyNot ?? [])],
-    ...(alternative.economy !== undefined ? { economy: alternative.economy } : {}),
+    ...(alternative.economy !== undefined
+      ? { economy: alternative.economy }
+      : {}),
   };
 }
 
@@ -99,10 +101,21 @@ function semanticActionTypeForAlternative(
   ) {
     return "coverage_setup";
   }
-  if (tokensIncludeAny(tokens, ["run", "access", "trash", "steal", "break", "pump"])) {
+  if (
+    tokensIncludeAny(tokens, [
+      "run",
+      "access",
+      "trash",
+      "steal",
+      "break",
+      "pump",
+    ])
+  ) {
     return "run_progress";
   }
-  if (tokensIncludeAny(tokens, ["protect", "rez", "ice", "remote", "central"])) {
+  if (
+    tokensIncludeAny(tokens, ["protect", "rez", "ice", "remote", "central"])
+  ) {
     return "server_protection";
   }
   if (tokensIncludeAny(tokens, ["credit", "economy"])) return "economy";
@@ -116,7 +129,12 @@ function targetContextStatusForAlternative(
   whyChosen: readonly string[],
   whyNot: readonly string[],
 ): string {
-  const tokens = alternativeTokens([actionType, ...scoreKeys, ...whyChosen, ...whyNot]);
+  const tokens = alternativeTokens([
+    actionType,
+    ...scoreKeys,
+    ...whyChosen,
+    ...whyNot,
+  ]);
   if (
     tokensIncludeAny(tokens, ["unsafe", "illegal", "excluded"]) ||
     tokensIncludePhrase(tokens, ["hard", "gate"]) ||
@@ -130,7 +148,9 @@ function targetContextStatusForAlternative(
   if (tokensIncludeAny(tokens, ["coverage", "breaker", "icebreaker"])) {
     return "coverage_relevant";
   }
-  if (tokensIncludeAny(tokens, ["protect", "rez", "ice", "remote", "central"])) {
+  if (
+    tokensIncludeAny(tokens, ["protect", "rez", "ice", "remote", "central"])
+  ) {
     return "protection_relevant";
   }
   if (tokensIncludeAny(tokens, ["run", "access", "trash", "steal"])) {
@@ -151,10 +171,29 @@ function sideForAlternative(
     ...(alternative.whyChosen ?? []),
     ...(alternative.whyNot ?? []),
   ]);
-  if (tokensIncludeAny(tokens, ["corp", "score", "scoreline", "advance", "rez", "protect"])) {
+  if (
+    tokensIncludeAny(tokens, [
+      "corp",
+      "score",
+      "scoreline",
+      "advance",
+      "rez",
+      "protect",
+    ])
+  ) {
     return "corp";
   }
-  if (tokensIncludeAny(tokens, ["runner", "run", "access", "trash", "steal", "breaker", "coverage"])) {
+  if (
+    tokensIncludeAny(tokens, [
+      "runner",
+      "run",
+      "access",
+      "trash",
+      "steal",
+      "breaker",
+      "coverage",
+    ])
+  ) {
     return "runner";
   }
   return undefined;
@@ -207,6 +246,8 @@ function tokensIncludePhrase(
   phrase: readonly string[],
 ): boolean {
   return tokens.some((token, index) =>
-    phrase.every((phraseToken, offset) => tokens[index + offset] === phraseToken),
+    phrase.every(
+      (phraseToken, offset) => tokens[index + offset] === phraseToken,
+    ),
   );
 }

@@ -168,11 +168,15 @@ describe("action capacity projection", () => {
     });
   });
 
-  it("projects a forgo action as explicit action debt", () => {
+  it("projects the Engine purge contract as future action debt without an upfront cost", () => {
     const projection = project(
-      legalAction("forgo", "forgo_action", {
+      legalAction("purge", "purge_runner_virus_counters", {
         costs: [],
-        payload: { forgoActionsPending: 3 },
+        payload: {
+          purgeModel: "future_action_debt",
+          actionDebtAdded: 3,
+          actionCapacityMinimumAvailableActions: 1,
+        },
       }),
     );
 
@@ -182,8 +186,43 @@ describe("action capacity projection", () => {
       actionDebt: 3,
       source: "action_debt_contract",
       reliability: "guaranteed",
+      preExistingActionCost: 0,
+      minimumAvailableActions: 1,
     });
   });
+
+  it("does not create debt again when a mandatory forgo pays one click", () => {
+    expect(
+      project(
+        legalAction("forgo", "forgo_action", {
+          costs: [{ clicks: 1 }],
+          payload: { actionDebtPaid: 1, corpActionDebtTotalBefore: 3 },
+        }),
+      ),
+    ).toMatchObject({
+      kind: "non_action_capacity",
+      actionDebt: 0,
+      preExistingActionCost: 1,
+    });
+  });
+
+  it.each([undefined, -1, 1.5, "3"])(
+    "does not certify a missing or malformed debt amount %s",
+    (actionDebtAdded) => {
+      expect(
+        project(
+          legalAction("purge", "purge_runner_virus_counters", {
+            costs: [],
+            payload: {
+              purgeModel: "future_action_debt",
+              actionCapacityMinimumAvailableActions: 1,
+              ...(actionDebtAdded === undefined ? {} : { actionDebtAdded }),
+            },
+          }),
+        ),
+      ).toMatchObject({ kind: "action_debt", reliability: "unknown" });
+    },
+  );
 });
 
 function project(action: LegalAction) {

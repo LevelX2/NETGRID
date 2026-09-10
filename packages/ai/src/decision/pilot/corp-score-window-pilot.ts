@@ -22,7 +22,11 @@ export function corpScoreWindowDecision(
     ...utilityFamilyEvidence(top),
   ];
   if (frame.side !== "corp") {
-    return block(CORP_SCORE_WINDOW_PILOT_MODE, "corp_score_window_wrong_side", evidence);
+    return block(
+      CORP_SCORE_WINDOW_PILOT_MODE,
+      "corp_score_window_wrong_side",
+      evidence,
+    );
   }
   if (action.type !== "score_agenda") {
     return block(

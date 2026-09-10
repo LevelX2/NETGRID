@@ -15,7 +15,11 @@ describe("choice validation", () => {
 
   it("rejects missing, wrong-side and stale choices with existing messages", () => {
     expect(
-      validateChoiceAction(undefined, resolveChoiceAction(), playerChoiceAction()),
+      validateChoiceAction(
+        undefined,
+        resolveChoiceAction(),
+        playerChoiceAction(),
+      ),
     ).toBe("Es ist keine Choice offen.");
     expect(
       validateChoiceAction(
@@ -55,7 +59,10 @@ describe("choice validation", () => {
       validateChoiceAction(
         testChoice(),
         resolveChoiceAction(),
-        playerChoiceAction({ choiceId: "choice_1", selectedOptionIds: ["bad"] }),
+        playerChoiceAction({
+          choiceId: "choice_1",
+          selectedOptionIds: ["bad"],
+        }),
       ),
     ).toBe("Eine gewaehlte Option ist nicht legal.");
     expect(

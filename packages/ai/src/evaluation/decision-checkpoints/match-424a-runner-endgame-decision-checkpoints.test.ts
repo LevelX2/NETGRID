@@ -23,11 +23,11 @@ describe("match 424A runner endgame decision checkpoints", () => {
       insideJobArchivesJson,
     ],
     [
-      "424A-F04 converts the current Broker bank before the matchpoint remote",
+      "424A-F04 pressures the matchpoint ICE before committing the remote run",
       remoteInformationJson,
     ],
     [
-      "424A-F05 converts the current Broker bank before the blocked matchpoint",
+      "424A-F05 pressures the blocked matchpoint ICE before the run",
       blockedMatchpointJson,
     ],
   ])("satisfies %s", (_label, json) => {
@@ -119,15 +119,14 @@ describe("match 424A runner endgame decision checkpoints", () => {
       delete checkpoint.expectation.runTargets;
       checkpoint.expectation = {
         acceptableActions: [
-          {
-            actionId:
-              "runner.activated_card_ability.runner_onr_v1_165_junkyard-bbs_2.runner_onr_v1_165_junkyard-bbs_2.runner_onr_v1_039_krash_1.activated.onr_v1_165_junkyard-bbs:abilities_activated_runner_main_move_top_trash_to_grip.runner_onr_v1_039_krash_1",
-          },
+          { sourceDefinitionId: "onr_v1_086_forged-activation-orders" },
         ],
         planExecution: {
-          acceptablePlanKinds: ["runner.rig_and_coverage"],
-          acceptableCapabilities: ["search_answer_breaker_ap"],
-          requiredAssessmentEvidence: ["terminal_remote_coverage:remote_1"],
+          acceptablePlanKinds: ["runner.contest_remote"],
+          acceptableCapabilities: ["contest_remote"],
+          requiredAssessmentEvidence: [
+            "runner_targeted_ice_trash_preflight:remote_1:hidden_77be81d8",
+          ],
         },
       };
     });

@@ -207,6 +207,17 @@ die historischen legalen Angebote im LegalAction-Audit.
 
 ### Fehlversuche vor und während der Engine-Anwendung
 
+Fehler an der residenten Portfolio-Bindung tragen zusätzlich
+`attempt.planResolution.portfolioBinding`
+(`resident-portfolio-binding-failure-v1`). Der Producer hält für Lesen,
+Speichern und Wiederherstellen die erwartete und tatsächlich vorgefundene
+Schema-, Seiten- und StateVersion-Bindung einschließlich verletzter Bedingungen
+fest, bevor die lokale Snapshotreferenz verloren geht. Diese begrenzte
+Fehlerevidence enthält keine Planinhalte, Karten oder Handdaten und bleibt
+nach dem Verwerfen des ungültigen Portfolios in der Maintenance-Analyse
+verfügbar. Sie erzeugt keinen Ersatzplan und repariert keine historischen
+Fehlversuche ohne gespeicherte Bindung oder Replay-Checkpoint.
+
 Ein fail-closed abgebrochener KI-Schritt bleibt als privater
 `ai-decision-failure-attempt-v1`-Eintrag analysierbar. Scheitert bereits die
 Planwahl, bindet der Eintrag Phase `choose`, aktuellen LegalAction-Satz,

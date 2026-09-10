@@ -5,6 +5,52 @@ import { buildCorpScoringRemoteProjectSignals } from "./corp-remote-project-sign
 import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
 
 describe("resident Corp scoring remote project", () => {
+  it("rebinds the executed TurnPlanner defense install and consumes its cadence once", () => {
+    const { currentInput, previous } = executedRemoteInstall();
+    const [signal] = buildCorpScoringRemoteProjectSignals({
+      input: currentInput,
+      previous,
+      remoteDoctrine: doctrine(),
+      scoreProjects: [],
+      maturityByServerId: new Map(),
+    });
+    expect(signal).toMatchObject({
+      serverId: "remote_2",
+      target: { status: "bound", targetBindingRevision: 1 },
+      cadence: { actionsUsed: 1, open: false },
+    });
+  });
+
+  it.each([
+    "stale_lease",
+    "different_node",
+    "different_parent",
+    "missing_event",
+    "different_server",
+  ])("does not accept a remote execution receipt with %s", (mismatch) => {
+    const { currentInput, previous } = executedRemoteInstall();
+    if (mismatch === "stale_lease")
+      previous.turnPlanExecutionLease!.currentBinding.stateVersion = 8;
+    if (mismatch === "different_node")
+      previous.turnPlanExecutionLease!.nodeId = "other";
+    if (mismatch === "different_parent")
+      previous.instances[1]!.parentInstanceId = "other";
+    if (mismatch === "missing_event") currentInput.eventTail = [];
+    if (mismatch === "different_server")
+      currentInput.eventTail![0]!.publicPayload!.serverId = "remote_3";
+    const [signal] = buildCorpScoringRemoteProjectSignals({
+      input: currentInput,
+      previous,
+      remoteDoctrine: doctrine(),
+      scoreProjects: [],
+      maturityByServerId: new Map(),
+    });
+    expect(signal).toMatchObject({
+      serverId: "new_remote",
+      cadence: { actionsUsed: 0 },
+    });
+  });
+
   it.each([
     ["none dependency", doctrine({ dependency: "none" })],
     ["no protection", doctrine({ protectionTarget: "none" })],
@@ -144,8 +190,7 @@ describe("resident Corp scoring remote project", () => {
         kind: "awaiting_remote_protection",
         agendaInstanceId: "agenda-in-hq",
         targetServerId: "remote_2",
-        protectionNeedId:
-          "score-protection:score-agenda-1:remote_2:revision-4",
+        protectionNeedId: "score-protection:score-agenda-1:remote_2:revision-4",
       },
     });
   });
@@ -202,6 +247,98 @@ describe("resident Corp scoring remote project", () => {
     expect(second?.scoreLeaseId).not.toContain(":11:");
   });
 });
+
+function executedRemoteInstall() {
+  const currentInput = input();
+  currentInput.playerView.own.gripOrHq = [];
+  currentInput.legalActions = [];
+  currentInput.eventTail = [
+    {
+      eventId: "evt_10",
+      type: "install_card",
+      stateVersionBefore: 9,
+      stateVersionAfter: 10,
+      stateHashAfter: "fnv1a:remote-installed",
+      publicPayload: {
+        actor: "corp",
+        actionType: "install_card",
+        installPlacement: "ice",
+        serverId: "remote_2",
+      },
+    },
+  ] as AiDecisionInput["eventTail"];
+  const rootId = "plan:corp.establish_scoring_remote:strategic-score-remote";
+  const previous = {
+    side: "corp",
+    stateVersion: 9,
+    executorInstanceId: "defense",
+    rootForegroundInstanceId: rootId,
+    instances: [
+      {
+        instanceId: rootId,
+        moduleId: "corp.establish_scoring_remote",
+        dedupeKey: "strategic-score-remote",
+        moduleState: {
+          kind: "remote",
+          signal: {
+            serverId: "new_remote",
+            target: { status: "unbound", targetBindingRevision: 0 },
+            cadence: { turnKey: "corp:8", actionsUsed: 0 },
+          },
+        },
+      },
+      {
+        instanceId: "defense",
+        moduleId: "corp.defend_servers",
+        parentInstanceId: rootId,
+        moduleState: {
+          kind: "defense",
+          signals: [
+            {
+              parentKind: "remote",
+              parentProjectId: "strategic-score-remote",
+              serverId: "new_remote",
+              sourceCardInstanceId: "ice-1",
+              actionIds: ["install-ice"],
+            },
+          ],
+        },
+      },
+    ],
+    turnPlanCommitment: {
+      commitmentId: "commitment",
+      sourcePlanId: "plan",
+      cursor: { phaseIndex: 0, nodeIndex: 0 },
+      phases: [
+        {
+          phaseId: "phase",
+          root: { planInstanceId: rootId },
+          nodes: [
+            {
+              nodeId: "node",
+              invocation: {
+                routeKey: "route",
+                semanticActionType: "install.card",
+                sourceCardInstanceId: "ice-1",
+              },
+            },
+          ],
+        },
+      ],
+    },
+    turnPlanExecutionLease: {
+      commitmentId: "commitment",
+      sourcePlanId: "plan",
+      phaseId: "phase",
+      nodeId: "node",
+      routeKey: "route",
+      actionType: "install_card",
+      stateIdentity: { stateVersion: 9 },
+      currentBinding: { stateVersion: 9, actionId: "install-ice" },
+    },
+  } as unknown as ResidentPlanPortfolio;
+  return { currentInput, previous };
+}
 
 function doctrine(
   overrides: {

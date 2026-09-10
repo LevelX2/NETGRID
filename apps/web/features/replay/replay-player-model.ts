@@ -17,7 +17,5 @@ export function publicEventsThroughReplayFrame(
   events: readonly PublicGameEvent[],
   frameStateVersion: number,
 ): PublicGameEvent[] {
-  return events.filter(
-    (event) => event.stateVersionAfter <= frameStateVersion,
-  );
+  return events.filter((event) => event.stateVersionAfter <= frameStateVersion);
 }

@@ -9953,7 +9953,7 @@
     "planExecution": {
       "acceptablePlanKinds": ["runner.defense_and_recovery"],
       "acceptableCapabilities": ["build_required_hand_buffer"],
-      "requiredAssessmentEvidence": ["runner_damage_threat_hand_buffer:4"]
+      "requiredAssessmentEvidence": ["runner_no_defense_support_current_need"]
     }
   }
 }

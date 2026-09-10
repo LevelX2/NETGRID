@@ -62,7 +62,7 @@ export function buildRandomBreakOrDamageRiskAssessment(params: {
   stableCoverageAvailable: boolean;
   context: "run_path" | "encounter_break";
   riskProfile: RandomBreakOrDamageRiskProfile;
-  unbrokenTargetDamageLikely?: number;
+  unbrokenEncounterDamageLikely?: number;
   targetServerId?: string;
   evidence?: readonly string[];
 }): RandomBreakOrDamageRiskAssessment {
@@ -80,24 +80,21 @@ export function buildRandomBreakOrDamageRiskAssessment(params: {
     1,
     Math.floor(params.randomBreakUsesLikely),
   );
-  const unbrokenTargetDamageLikely = Math.max(
+  const unbrokenEncounterDamageLikely = Math.max(
     0,
-    Math.floor(params.unbrokenTargetDamageLikely ?? 0),
+    Math.floor(params.unbrokenEncounterDamageLikely ?? 0),
   );
   const visibleSubroutinesLikely = Math.max(
     1,
     Math.floor(params.visibleSubroutinesLikely),
   );
   const worstCaseDamageEstimate =
-    randomBreakUsesLikely * maxSingleFailureDamage +
-    unbrokenTargetDamageLikely;
+    randomBreakUsesLikely * maxSingleFailureDamage + unbrokenEncounterDamageLikely;
   const lethalOnAnyFailure = handAfterActionCost <= 0;
   const lethalOnHighFailure =
-    handAfterActionCost <
-    maxSingleFailureDamage + unbrokenTargetDamageLikely;
+    handAfterActionCost < maxSingleFailureDamage + unbrokenEncounterDamageLikely;
   const survivesOneFailedUse =
-    handAfterActionCost >=
-    maxSingleFailureDamage + unbrokenTargetDamageLikely;
+    handAfterActionCost >= maxSingleFailureDamage + unbrokenEncounterDamageLikely;
   const riskSeverity = randomBreakOrDamageRiskSeverityFor({
     handAfterActionCost,
     worstCaseDamageEstimate,
@@ -143,7 +140,7 @@ export function buildRandomBreakOrDamageRiskAssessment(params: {
     `randomBreakOrDamageRiskProfile:${riskProfile.profileId}`,
     `randomBreakOrDamageFailureDamageType:${riskProfile.failureDamageType}`,
     `maxSingleFailureDamage:${maxSingleFailureDamage}`,
-    `unbrokenTargetDamageLikely:${unbrokenTargetDamageLikely}`,
+    `unbrokenEncounterDamageLikely:${unbrokenEncounterDamageLikely}`,
     `worstCaseDamageEstimate:${worstCaseDamageEstimate}`,
     `lethalOnAnyFailure:${lethalOnAnyFailure}`,
     `lethalOnHighFailure:${lethalOnHighFailure}`,
@@ -181,7 +178,7 @@ export function buildRandomBreakOrDamageRiskAssessment(params: {
     randomBreakUsesLikely,
     visibleSubroutinesLikely,
     maxSingleFailureDamage,
-    unbrokenTargetDamageLikely,
+    unbrokenEncounterDamageLikely,
     worstCaseDamageEstimate,
     lethalOnAnyFailure,
     lethalOnHighFailure,

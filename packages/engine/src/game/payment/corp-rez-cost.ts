@@ -1757,6 +1757,7 @@ export function assertCorpRezCostQuoteValid(
   state: GameState,
   iceId: CardInstanceId,
   legalAction: LegalAction,
+  additionalCreditCost = 0,
 ): CostQuote {
   const instance = state.cardInstances[iceId];
   if (!instance) throw new Error("Rez-Ziel existiert nicht mehr.");
@@ -1806,8 +1807,12 @@ export function assertCorpRezCostQuoteValid(
   const quote = quoteCorpRezCost(state, iceId, {
     ...(discountedRezSourceCardId ? { discountedRezSourceCardId } : {}),
   });
-  if (!quote.canPay) throw new Error("Corp kann die Rez-Kosten nicht zahlen.");
-  if ((legalAction.costs[0]?.credits ?? 0) !== quote.finalCredits)
+  if (!Number.isSafeInteger(additionalCreditCost) || additionalCreditCost < 0)
+    throw new Error("Zusaetzliche variable Rez-Kosten sind ungueltig.");
+  const totalCreditCost = quote.finalCredits + additionalCreditCost;
+  if (!quote.canPay || state.corp.credits < totalCreditCost)
+    throw new Error("Corp kann die Rez-Kosten nicht zahlen.");
+  if ((legalAction.costs[0]?.credits ?? 0) !== totalCreditCost)
     throw new Error("Corp-Rez-Kosten sind nicht mehr gueltig.");
   const quotedAgendaPointCost = Number(
     quote.publicPayload.agendaPointCost ?? 0,

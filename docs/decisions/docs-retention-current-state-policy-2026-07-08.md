@@ -24,7 +24,7 @@ Der Arbeitsbaum dokumentiert den aktuellen Projektzustand, nicht seine vollstän
 
 Im Arbeitsbaum bleiben insbesondere:
 
-- aktuelle Status- und Indexseiten der Wissensbasis;
+- aktuelle Current-State-, Architektur- und Indexseiten unter `docs/`;
 - aktuelle Roadmaps und aktive Release-/Gate-Verträge;
 - aktuelle Architektur-, Schnittstellen-, Safety- und Semantikverträge;
 - aktive Runbooks und Entscheidungen;
@@ -50,7 +50,7 @@ Eine Kopie nach `archive/` ist keine Retention-Anforderung.
 
 Vor der Löschung wird gesondert geprüft, wenn mindestens eines gilt:
 
-- aktueller Verweis aus `AGENTS.md`, `KI-Wissen-NETGRID/`, `docs/codex/CODEX_STATUS.md`, `package.json`, Scripts, Packages, Apps oder Data;
+- aktueller Verweis aus `AGENTS.md`, `docs/codex/CODEX_STATUS.md`, `package.json`, Scripts, Packages, Apps oder Data;
 - die Datei ist die einzige bekannte aktuelle Decision-, Gate-, Contract- oder Removal-Condition-Evidence;
 - ihre Funktion ist aus Name und Kontext nicht belastbar erkennbar.
 
@@ -64,7 +64,7 @@ Eine Cleanup-Welle erfolgt als geschlossener, nachvollziehbarer Schnitt:
 2. Aktive Verweise auf Zielpfade suchen.
 3. Führende aktuelle Verweise im selben Commit anpassen.
 4. Historische Artefakte entfernen statt verschieben.
-5. Bereichs-READMEs und Wissensbasis auf die Current-State-Regel synchronisieren.
+5. Bereichs-READMEs und Current-State-Dokumentation auf die Regel synchronisieren.
 6. Diff auf unbeabsichtigte Änderungen und neue Dead Links prüfen.
 
 Historische Logs dürfen weiterhin beschreiben, dass ein inzwischen entfernter Pfad damals existierte. Sie sind Chronik, keine aktive Navigation.

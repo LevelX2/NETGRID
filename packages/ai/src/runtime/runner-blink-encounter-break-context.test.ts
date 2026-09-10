@@ -60,20 +60,27 @@ describe("runner Blink encounter break context", () => {
     const encounteredIce = visibleCard("filter", "corp", "ice", {
       rezzed: true,
     });
-    const input = aiInput("runner", [action]);
+    const input = aiInput("runner", [
+      action,
+      encounterContinue(["filter-sub-0", "filter-sub-1"]),
+    ]);
     input.playerView.own.gripOrHq = [
       visibleCard("grip-1", "runner", "event"),
       visibleCard("grip-2", "runner", "event"),
       visibleCard("grip-3", "runner", "event"),
     ];
     input.playerView.servers = [
-      server("remote_1", [encounteredIce], [
-        {
-          instanceId: "hidden-advanced-root",
-          known: false,
-          advancementCounters: 2,
-        },
-      ]),
+      server(
+        "remote_1",
+        [encounteredIce],
+        [
+          {
+            instanceId: "hidden-advanced-root",
+            known: false,
+            advancementCounters: 2,
+          },
+        ],
+      ),
     ];
     input.playerView.run = {
       attackedServerId: "remote_1",
@@ -104,10 +111,55 @@ describe("runner Blink encounter break context", () => {
       visibleRootIsKnownAgenda: (card) => card.known && card.type === "agenda",
     }).randomBreakOrDamageRiskAssessmentForEncounterBreak(input, action);
 
-    expect(assessment?.unbrokenTargetDamageLikely).toBe(2);
+    expect(assessment?.unbrokenEncounterDamageLikely).toBe(2);
     expect(assessment?.riskSeverity).toBe("high");
     expect(randomBreakOrDamageRiskShouldAvoidRun(assessment)).toBe(true);
   });
+
+  it.each([
+    { openDamage: true, excluded: true, damage: 1 },
+    { openDamage: false, excluded: false, damage: 0 },
+  ])(
+    "counts other unbroken damage but not an already broken subroutine: $openDamage",
+    ({ openDamage, excluded, damage }) => {
+      const action = blinkBreakAction();
+      const input = aiInput("runner", [
+        action,
+        encounterContinue(openDamage ? ["damage", "next-lock"] : ["next-lock"]),
+      ]);
+      input.playerView.own.gripOrHq = Array.from({ length: 3 }, (_, index) =>
+        visibleCard(`grip-${index}`, "runner", "event"),
+      );
+      const context = createRunnerRandomBreakOrDamageEncounterContext({
+        sourceDefinitionIdForAction: () => "onr_v1_007_blink",
+        randomBreakOrDamageRiskProfileForDefinitionId: () =>
+          DEFAULT_RANDOM_BREAK_OR_DAMAGE_RISK_PROFILE,
+        breakSubroutineIndexesForAction: () => new Set([1]),
+        encounteredSubroutines: () => [
+          { id: "damage", type: "do_damage", damageType: "net", amount: 1 },
+          { id: "next-lock", type: "set_next_encounter_no_break_subroutines" },
+        ],
+        buildRandomBreakOrDamageRiskAssessment,
+        isImmediateSafetyThreatSubroutine: () => false,
+        isRemoteServerTarget: () => false,
+        visibleRootIsKnownAgenda: () => false,
+      });
+      const assessment =
+        context.randomBreakOrDamageRiskAssessmentForEncounterBreak(
+          input,
+          action,
+        );
+      expect(assessment?.unbrokenEncounterDamageLikely).toBe(damage);
+      expect(randomBreakOrDamageRiskShouldAvoidRun(assessment)).toBe(excluded);
+      input.legalActions = [action];
+      expect(() =>
+        context.randomBreakOrDamageRiskAssessmentForEncounterBreak(
+          input,
+          action,
+        ),
+      ).toThrow("Invalid Engine-bound remaining encounter subroutines");
+    },
+  );
 });
 
 function assessmentForRootCard(rootCard: VisibleCard) {
@@ -115,7 +167,10 @@ function assessmentForRootCard(rootCard: VisibleCard) {
   const encounteredIce = visibleCard("filter", "corp", "ice", {
     rezzed: true,
   });
-  const input = aiInput("runner", [action]);
+  const input = aiInput("runner", [
+    action,
+    encounterContinue(["filter-sub-0", "filter-sub-1"]),
+  ]);
   input.playerView.own.gripOrHq = [
     visibleCard("grip-1", "runner", "event"),
     visibleCard("grip-2", "runner", "event"),
@@ -144,6 +199,23 @@ function assessmentForRootCard(rootCard: VisibleCard) {
       serverId?.startsWith("remote_") ?? false,
     visibleRootIsKnownAgenda: (card) => card.known && card.type === "agenda",
   }).randomBreakOrDamageRiskAssessmentForEncounterBreak(input, action);
+}
+
+function encounterContinue(ids: string[]): LegalAction {
+  return legalAction(
+    "continue",
+    "runner",
+    "continue_run",
+    "Resolve open subroutines",
+    { credits: 0 },
+    {
+      payload: {
+        encounterContinue: true,
+        encounterSubroutineIds: ids.join(","),
+        unbrokenSubroutineCount: ids.length,
+      },
+    },
+  );
 }
 
 function blinkBreakAction(): LegalAction {

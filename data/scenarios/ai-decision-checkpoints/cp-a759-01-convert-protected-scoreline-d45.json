@@ -6546,7 +6546,9 @@
     "planExecution": {
       "acceptablePlanKinds": ["corp.defend_servers"],
       "acceptableCapabilities": ["develop_score_protection"],
-      "requiredAssessmentEvidence": ["score_protection_staging_install:agenda:corp_onr_v1_203_hostile-takeover_1:remote_1:remote_1:development_risk_unmodeled_access_path"]
+      "requiredAssessmentEvidence": [
+        "score_protection_staging_install:agenda:corp_onr_v1_203_hostile-takeover_1:remote_1:remote_1:development_risk_unmodeled_access_path"
+      ]
     }
   }
 }

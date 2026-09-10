@@ -100,7 +100,11 @@ export function discardKeepScore(
     runnerCardProvidesVisiblePathUtility(input, card.definitionId);
   const runnerMissingBreakerSearchAccess =
     input.side === "runner" &&
-    rolesMatch(roles, ["program_search", "breaker_search"]) &&
+    (
+      input as AiDecisionInputWithDeckCapabilities
+    ).ownDeckCapabilities?.runner?.searchAccess?.tools.some(
+      (tool) => tool.cardId === card.definitionId && tool.canSearchBreakers,
+    ) === true &&
     runnerHasDeckBreakerCoverageUnavailableOutsideStack(input);
   const duplicateCount =
     input.side === "corp"

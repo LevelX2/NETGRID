@@ -110,7 +110,9 @@ export function isRunnerStackTopChooseOneArrangeRestChoice(
   );
 }
 
-function readonlyRdCardOptions(choice: VisibleChoice): VisibleChoice["options"] {
+function readonlyRdCardOptions(
+  choice: VisibleChoice,
+): VisibleChoice["options"] {
   if (
     choice.kind !== "select_cards" ||
     !choice.source.startsWith("p3_33.private_look:") ||

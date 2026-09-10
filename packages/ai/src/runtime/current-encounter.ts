@@ -20,9 +20,8 @@ export function encounterHasImmediateUnbrokenThreat(
   return Boolean(
     quote?.subroutines.some((subroutine) => {
       const type = subroutine.type.toLowerCase();
-      const damageTypeValue = (
-        subroutine as { damageType?: unknown }
-      ).damageType;
+      const damageTypeValue = (subroutine as { damageType?: unknown })
+        .damageType;
       const damageType =
         typeof damageTypeValue === "string"
           ? damageTypeValue.toLowerCase()

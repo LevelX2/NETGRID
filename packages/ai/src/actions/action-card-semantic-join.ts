@@ -366,6 +366,7 @@ function uniqueFunctionalEffects(
       effect.timing,
       effect.scope,
       effect.resource ?? null,
+      effect.installCost ?? null,
       effect.amount ?? null,
       effect.amountKind ?? null,
       effect.economyMode ?? null,

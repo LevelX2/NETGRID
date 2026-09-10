@@ -1212,7 +1212,7 @@ describe("Runner core plan modules", () => {
   it("removes parent support as soon as revalidation removes the material need", () => {
     const economy = coreModule("runner.economy");
     const [proposal] = economy.discover(
-      context([candidate("credit")], {
+      context([exactBasicCreditCandidate("credit")], {
         fundingNeeds: [
           {
             kind: "parent_plan_support",
@@ -1238,12 +1238,20 @@ describe("Runner core plan modules", () => {
         ],
       }),
     );
-    const open = reconcileResidentPlanPortfolio({
-      side: "runner",
-      stateVersion: 10,
-      timingPoint: "runner_action.main",
-      proposals: [proposal!],
-    });
+    const support = instantiatePlanProposal(proposal!, 10);
+    const parent = structuredClone(support);
+    parent.instanceId = "plan:runner.contest_remote:remote%3Aremote_1";
+    parent.moduleId = "runner.contest_remote";
+    parent.dedupeKey = "remote:remote_1";
+    delete parent.parentInstanceId;
+    delete parent.parentNeedId;
+    parent.moduleState = {
+      kind: "remote_contest",
+      signal: { supportNeedId: "fund-remote-1", marginalValue: 120 },
+    };
+    const open = emptyPortfolio();
+    open.stateVersion = 10;
+    open.instances = [parent, support];
     const afterMaterialityLoss = reconcileResidentPlanPortfolio({
       side: "runner",
       stateVersion: 11,
@@ -1533,6 +1541,54 @@ describe("Runner core plan modules", () => {
     ]);
   });
 
+  it("does not materialize a dispositioned composite draw as economy funding", () => {
+    const composite = candidate(
+      "composite-draw-credit",
+      "play_event",
+      "draw.card",
+      "test-composite-economy",
+    );
+    composite.economyProjection =
+      candidate("projection-source").economyProjection!;
+    const economy = coreModule("runner.economy");
+    const runnerContext = context([composite], {
+      fundingNeeds: [
+        {
+          kind: "portfolio_reserve",
+          ...fundingRouteContract(composite.actionId),
+          needId: "runner-portfolio-credit-reserve",
+          targetCredits: 5,
+          currentCreditsAtRevalidation: 4,
+          gap: 1,
+          priorityClass: "P6",
+          revalidation: {
+            stateVersion: 10,
+            status: "portfolio_reserve_open",
+          },
+          evidenceCode: "runner_finite_portfolio_credit_reserve",
+        },
+      ],
+    });
+    runnerContext.actionDispositions = [
+      {
+        actionId: composite.actionId,
+        disposition: "explicitly_nonproductive",
+        ownerModuleId: "runner.defense_and_recovery",
+        evidenceCode: "runner_confirmed_damage_draw_tax_tag_unsafe",
+      },
+    ];
+    const [proposal] = economy.discover(runnerContext);
+    const instance = instantiatePlanProposal(proposal!, 10);
+
+    expect(proposal).toMatchObject({
+      initialViability: "blocked",
+      blockers: [{ code: "no_compatible_credit_route" }],
+    });
+    expect(
+      economy.materialize(instance, {} as never, runnerContext).candidates,
+    ).toEqual([]);
+  });
+
   it("does not claim a composite card action without exact delegation", () => {
     const composite = candidate(
       "composite-draw-credit",
@@ -1598,6 +1654,69 @@ describe("Runner core plan modules", () => {
       initialViability: "blocked",
       blockers: [{ code: "no_exact_coverage_route" }],
     });
+  });
+
+  it("keeps an exact memory-support install inside runner.rig_and_coverage", () => {
+    const memoryInstall = candidate(
+      "install-memory-support",
+      "install_card",
+      "install.card",
+      "onr_v1_146_zetatech-mem-chip",
+    );
+    const coverage = coreModule("runner.rig_and_coverage");
+    const runnerContext = context([memoryInstall], {
+      coverageGaps: [
+        {
+          gapId: "code-gate-memory-bound",
+          requiredRole: "breaker_code_gate",
+          priorityClass: "P2",
+          evidenceCode: "memory_required_for_bound_decoder",
+          deckHasAnswer: true,
+          answerInHand: true,
+          fundingActionIds: [],
+          directSearchActionIds: [],
+          searchEngineSetupActionIds: [],
+          drawForAnswerActionIds: [],
+          preparationActionIds: [memoryInstall.actionId],
+          memorySupportActionIds: [memoryInstall.actionId],
+        },
+      ],
+    });
+    runnerContext.input.legalActions = [
+      {
+        actionId: memoryInstall.actionId,
+        side: "runner",
+        type: "install_card",
+        label: "Install memory support",
+        source: "memory-chip-instance",
+        timingPoint: "runner_action.main",
+        costs: [{ clicks: 1 }],
+        targetRequirements: [],
+        visibility: "private_to_actor",
+        expiresAtStateVersion: 10,
+        payload: { cardId: "memory-chip-instance" },
+      },
+    ];
+
+    const [proposal] = coverage.discover(runnerContext);
+    const instance = instantiatePlanProposal(proposal!, 10);
+    const materialized = coverage.materialize(
+      instance,
+      {} as never,
+      runnerContext,
+    );
+
+    expect(proposal).toMatchObject({
+      moduleId: "runner.rig_and_coverage",
+      initialViability: "ready",
+    });
+    expect(instance.phase).toBe("prepare_coverage");
+    expect(materialized.step.capability.legalActionTypes).toEqual([
+      "install_card",
+    ]);
+    expect(
+      materialized.candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual([memoryInstall.actionId]);
   });
 
   it("keeps a known universal breaker draw route despite general hand-development disposition", () => {

@@ -57,11 +57,11 @@ phasenweise Assembly weiterhin die kleinere und sicherere Autorität bleibt.
 
 - [ ] Die aktuellen Ordering-Phasen und Invarianten sind vollständig erfasst.
 - [ ] Es liegt eine begründete Entscheidung `bestehende Assembly beibehalten`
-  oder `Beitragsmodell einführen` vor.
+      oder `Beitragsmodell einführen` vor.
 - [ ] Ein empfohlenes Modell erhält Subroutine-IDs, Attribution,
-  Replaydeterminismus und LegalAction-Revalidierung nachweislich.
+      Replaydeterminismus und LegalAction-Revalidierung nachweislich.
 - [ ] Notwendige Umsetzung wird in kleine Folgepakete geschnitten; die breite
-  Interaktionsmatrix steht bei diesen Paketen als Akzeptanzschutz.
+      Interaktionsmatrix steht bei diesen Paketen als Akzeptanzschutz.
 
 ## Umsetzungshinweise
 

@@ -1,6 +1,12 @@
 "use client";
 
-import { ChevronDown, ChevronUp, Search, SlidersHorizontal, X } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Search,
+  SlidersHorizontal,
+  X,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "use-intl/react";
 import type { Side } from "@netgrid/shared";
@@ -16,7 +22,7 @@ import {
   type CatalogRarityFilterKey,
   type CatalogProductSetSelection,
   type CatalogTypeFilterKey,
-  type CatalogTypeFilterState
+  type CatalogTypeFilterState,
 } from "./catalog-model";
 import { type CatalogAiInspector } from "../../app/ai-hint-inspector-ui";
 import {
@@ -29,7 +35,7 @@ import {
   isSubroutineRuleLine,
   renderRuleTextSegments,
   rulesTextLines,
-  shouldAddFallbackSubroutineMarker
+  shouldAddFallbackSubroutineMarker,
 } from "../cards/CardTextRendering";
 import { usePreferredCardImageSource } from "../cards/card-display-settings";
 import { CatalogAiHintPanel } from "./CatalogSupportPanels";
@@ -78,25 +84,35 @@ type CatalogFilters = {
   types: string[];
 };
 
-const RUNNER_CATALOG_TYPE_FILTERS: Array<{ key: CatalogTypeFilterKey; label: string }> = [
+const RUNNER_CATALOG_TYPE_FILTERS: Array<{
+  key: CatalogTypeFilterKey;
+  label: string;
+}> = [
   { key: "event", label: "Prep" },
   { key: "hardware", label: "Hardware" },
   { key: "resource", label: "Ressource" },
   { key: "program", label: "Programm" },
-  { key: "icebreaker", label: "Icebrecher" }
+  { key: "icebreaker", label: "Icebrecher" },
 ];
 
-const CORP_CATALOG_TYPE_FILTERS: Array<{ key: CatalogTypeFilterKey; label: string }> = [
+const CORP_CATALOG_TYPE_FILTERS: Array<{
+  key: CatalogTypeFilterKey;
+  label: string;
+}> = [
   { key: "ice", label: "ICE" },
   { key: "agenda", label: "Agenda" },
   { key: "asset", label: "Asset" },
   { key: "upgrade", label: "Upgrade" },
-  { key: "operation", label: "Operation" }
+  { key: "operation", label: "Operation" },
 ];
 
-const CATALOG_TYPE_FILTER_GROUPS: Array<{ title: string; side: Side; filters: Array<{ key: CatalogTypeFilterKey; label: string }> }> = [
+const CATALOG_TYPE_FILTER_GROUPS: Array<{
+  title: string;
+  side: Side;
+  filters: Array<{ key: CatalogTypeFilterKey; label: string }>;
+}> = [
   { title: "Runner", side: "runner", filters: RUNNER_CATALOG_TYPE_FILTERS },
-  { title: "Korp", side: "corp", filters: CORP_CATALOG_TYPE_FILTERS }
+  { title: "Korp", side: "corp", filters: CORP_CATALOG_TYPE_FILTERS },
 ];
 
 export function CatalogPanel({
@@ -121,7 +137,7 @@ export function CatalogPanel({
   onRarity,
   onTypeFilter,
   onSelectAllTypes,
-  onClearTypeFilters
+  onClearTypeFilters,
 }: {
   cards: CatalogCardSummary[];
   detail: CatalogCardDetail | null;
@@ -138,10 +154,7 @@ export function CatalogPanel({
   typeFilters: CatalogTypeFilterState;
   onSearch(value: string): void;
   onSide(value: Side | "all"): void;
-  onSetAddon(
-    addon: "original" | "classic" | "proteus",
-    enabled: boolean,
-  ): void;
+  onSetAddon(addon: "original" | "classic" | "proteus", enabled: boolean): void;
   onSelect(value: string): void;
   onFiltersOpen(value: boolean): void;
   onRarity(value: CatalogRarityFilterKey): void;
@@ -155,25 +168,51 @@ export function CatalogPanel({
   const [catalogImageUnavailable, setCatalogImageUnavailable] = useState(false);
   useEffect(() => {
     setCatalogImageUnavailable(false);
-  }, [detail?.catalogCardId, catalogImageSource.src, catalogImageSource.fallbackSrc]);
+  }, [
+    detail?.catalogCardId,
+    catalogImageSource.src,
+    catalogImageSource.fallbackSrc,
+  ]);
 
-  const catalogImageUrl = catalogImageUnavailable ? undefined : catalogImageSource.src;
+  const catalogImageUrl = catalogImageUnavailable
+    ? undefined
+    : catalogImageSource.src;
   const catalogImageTooltip = cardMetricLine(detail) || undefined;
-  const showCatalogHardwareOverlay = Boolean(catalogImageUrl) && Boolean(detail) && isHardwareCardType(detail?.type) && hasGeneratedCardArt(detail?.catalogCardId);
-  const showCatalogOperationOverlay = Boolean(catalogImageUrl) && Boolean(detail) && isOperationCardType(detail?.type) && hasGeneratedCardArt(detail?.catalogCardId);
-  const catalogImagePreviewMode = showCatalogHardwareOverlay ? "hardware" : showCatalogOperationOverlay ? "operation" : "";
-  const detailRarityLabel = detail ? (locale === "en" ? detail.rarity?.labelEn || detail.rarity?.labelDe : detail.rarity?.labelDe) ?? catalogRarityLabel(detail) : null;
+  const showCatalogHardwareOverlay =
+    Boolean(catalogImageUrl) &&
+    Boolean(detail) &&
+    isHardwareCardType(detail?.type) &&
+    hasGeneratedCardArt(detail?.catalogCardId);
+  const showCatalogOperationOverlay =
+    Boolean(catalogImageUrl) &&
+    Boolean(detail) &&
+    isOperationCardType(detail?.type) &&
+    hasGeneratedCardArt(detail?.catalogCardId);
+  const catalogImagePreviewMode = showCatalogHardwareOverlay
+    ? "hardware"
+    : showCatalogOperationOverlay
+      ? "operation"
+      : "";
+  const detailRarityLabel = detail
+    ? ((locale === "en"
+        ? detail.rarity?.labelEn || detail.rarity?.labelDe
+        : detail.rarity?.labelDe) ?? catalogRarityLabel(detail))
+    : null;
   const detailRef = useRef<HTMLElement | null>(null);
-  const [catalogListHeight, setCatalogListHeight] = useState<number | null>(null);
+  const [catalogListHeight, setCatalogListHeight] = useState<number | null>(
+    null,
+  );
   const selectedRarityLabel = t(`rarityFilter.${rarityFilter}`);
-  const hasTypeFilter = Object.values(typeFilters).some((selected) => !selected);
+  const hasTypeFilter = Object.values(typeFilters).some(
+    (selected) => !selected,
+  );
   const activeSpecialFilterLabels = [
     !setAddons.original ? t("setPicker.withoutOriginal") : null,
     !setAddons.classic ? t("setPicker.withoutClassic") : null,
     !setAddons.proteus ? t("setPicker.withoutProteus") : null,
     side !== "all" ? side : null,
     rarityFilter !== "all" ? selectedRarityLabel : null,
-    hasTypeFilter ? t("cardTypes") : null
+    hasTypeFilter ? t("cardTypes") : null,
   ].filter((label): label is string => Boolean(label));
   const resetSpecialFilters = () => {
     onSetAddon("original", true);
@@ -192,7 +231,9 @@ export function CatalogPanel({
         setCatalogListHeight(null);
         return;
       }
-      setCatalogListHeight(Math.max(380, Math.ceil(detailElement.getBoundingClientRect().height)));
+      setCatalogListHeight(
+        Math.max(380, Math.ceil(detailElement.getBoundingClientRect().height)),
+      );
     };
     syncListHeight();
     const observer = new ResizeObserver(syncListHeight);
@@ -209,9 +250,7 @@ export function CatalogPanel({
       <div className="catalogHeader">
         <div>
           <h2>{t("title")}</h2>
-          <p className="meta">
-            {t("summary", {cards: cards.length})}
-          </p>
+          <p className="meta">{t("summary", { cards: cards.length })}</p>
         </div>
         <div className="catalogQuickTools">
           <div className="searchBox catalogQuickSearch">
@@ -224,7 +263,13 @@ export function CatalogPanel({
               aria-label={t("search")}
             />
             {search ? (
-              <button className="searchClearButton" onClick={() => onSearch("")} type="button" aria-label={t("clearSearch")} title={t("clearSearch")}>
+              <button
+                className="searchClearButton"
+                onClick={() => onSearch("")}
+                type="button"
+                aria-label={t("clearSearch")}
+                title={t("clearSearch")}
+              >
                 <X size={14} />
               </button>
             ) : null}
@@ -235,11 +280,21 @@ export function CatalogPanel({
             type="button"
             aria-expanded={filtersOpen}
             aria-controls="catalogAdvancedFilters"
-            title={activeSpecialFilterLabels.length > 0 ? t("activeSpecialFilters", {count: activeSpecialFilterLabels.length}) : t("filter")}
+            title={
+              activeSpecialFilterLabels.length > 0
+                ? t("activeSpecialFilters", {
+                    count: activeSpecialFilterLabels.length,
+                  })
+                : t("filter")
+            }
           >
             <SlidersHorizontal size={16} />
             <span>{t("filter")}</span>
-            {activeSpecialFilterLabels.length > 0 ? <strong className="catalogFilterBadge">{activeSpecialFilterLabels.length}</strong> : null}
+            {activeSpecialFilterLabels.length > 0 ? (
+              <strong className="catalogFilterBadge">
+                {activeSpecialFilterLabels.length}
+              </strong>
+            ) : null}
             {filtersOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </button>
         </div>
@@ -252,7 +307,12 @@ export function CatalogPanel({
                 ? activeSpecialFilterLabels.join(" · ")
                 : t("noSpecialFilters")}
             </span>
-            <button className="button" type="button" onClick={resetSpecialFilters} disabled={activeSpecialFilterLabels.length === 0}>
+            <button
+              className="button"
+              type="button"
+              onClick={resetSpecialFilters}
+              disabled={activeSpecialFilterLabels.length === 0}
+            >
               {t("resetSpecialFilters")}
             </button>
           </div>
@@ -273,7 +333,10 @@ export function CatalogPanel({
           />
           <label>
             {t("side")}
-            <select value={side} onChange={(event) => onSide(event.target.value as Side | "all")}>
+            <select
+              value={side}
+              onChange={(event) => onSide(event.target.value as Side | "all")}
+            >
               <option value="all">{t("all")}</option>
               {(filters?.sides ?? ["runner", "corp"]).map((value) => (
                 <option value={value} key={value}>
@@ -284,7 +347,12 @@ export function CatalogPanel({
           </label>
           <label>
             {t("rarity")}
-            <select value={rarityFilter} onChange={(event) => onRarity(event.target.value as CatalogRarityFilterKey)}>
+            <select
+              value={rarityFilter}
+              onChange={(event) =>
+                onRarity(event.target.value as CatalogRarityFilterKey)
+              }
+            >
               {CATALOG_RARITY_FILTERS.map((filter) => (
                 <option value={filter.key} key={filter.key}>
                   {t(`rarityFilter.${filter.key}`)} ({rarityCounts[filter.key]})
@@ -304,12 +372,26 @@ export function CatalogPanel({
             </div>
             <div className="typeFilterGroups">
               {CATALOG_TYPE_FILTER_GROUPS.map((group) => (
-                <div className={`typeFilterGroup ${group.side}`} key={group.title}>
-                  <div className="typeFilterGroupTitle">{t(`sideValue.${group.side}`)}</div>
+                <div
+                  className={`typeFilterGroup ${group.side}`}
+                  key={group.title}
+                >
+                  <div className="typeFilterGroupTitle">
+                    {t(`sideValue.${group.side}`)}
+                  </div>
                   <div className="typeFilterGrid">
                     {group.filters.map((filter) => (
-                      <label className={`typeToggle ${group.side} ${typeFilters[filter.key] ? "checked" : ""}`} key={filter.key}>
-                        <input checked={typeFilters[filter.key]} onChange={(event) => onTypeFilter(filter.key, event.target.checked)} type="checkbox" />
+                      <label
+                        className={`typeToggle ${group.side} ${typeFilters[filter.key] ? "checked" : ""}`}
+                        key={filter.key}
+                      >
+                        <input
+                          checked={typeFilters[filter.key]}
+                          onChange={(event) =>
+                            onTypeFilter(filter.key, event.target.checked)
+                          }
+                          type="checkbox"
+                        />
                         <span>{t(`type.${filter.key}`)}</span>
                         <small>{typeCounts[filter.key] ?? 0}</small>
                       </label>
@@ -322,16 +404,29 @@ export function CatalogPanel({
         </div>
       ) : null}
       <div className="catalogLayout">
-        <div className="catalogList" style={catalogListHeight ? { maxHeight: `${catalogListHeight}px` } : undefined}>
+        <div
+          className="catalogList"
+          style={
+            catalogListHeight
+              ? { maxHeight: `${catalogListHeight}px` }
+              : undefined
+          }
+        >
           {cards.map((card) => (
-            <button className={`catalogItem ${selectedId === card.catalogCardId ? "active" : ""}`} key={card.catalogCardId} onClick={() => onSelect(card.catalogCardId)}>
+            <button
+              className={`catalogItem ${selectedId === card.catalogCardId ? "active" : ""}`}
+              key={card.catalogCardId}
+              onClick={() => onSelect(card.catalogCardId)}
+            >
               <strong>{card.title}</strong>
               <span>
                 {t(`sideValue.${card.side}`)} · {formatCardTypeLine(card)}
               </span>
             </button>
           ))}
-          {cards.length === 0 ? <p className="meta catalogEmpty">{t("noResults")}</p> : null}
+          {cards.length === 0 ? (
+            <p className="meta catalogEmpty">{t("noResults")}</p>
+          ) : null}
         </div>
         <article className="catalogDetail" ref={detailRef}>
           {detail ? (
@@ -340,12 +435,19 @@ export function CatalogPanel({
                 <div>
                   <h3>{detail.title}</h3>
                   <p className="meta">
-                    {t(`sideValue.${detail.side}`)} · {formatCardTypeLine(detail)} · {detail.setName} #{detail.collectorNumber}
+                    {t(`sideValue.${detail.side}`)} ·{" "}
+                    {formatCardTypeLine(detail)} · {detail.setName} #
+                    {detail.collectorNumber}
                   </p>
                 </div>
-                <span className={`sideBadge ${detail.side}`}>{t(`sideValue.${detail.side}`)}</span>
+                <span className={`sideBadge ${detail.side}`}>
+                  {t(`sideValue.${detail.side}`)}
+                </span>
               </div>
-              <div className={`catalogImagePreview ${catalogImagePreviewMode} ${catalogImageUrl ? "hasImage" : "textFallback"}`} {...(catalogImageTooltip ? { title: catalogImageTooltip } : {})}>
+              <div
+                className={`catalogImagePreview ${catalogImagePreviewMode} ${catalogImageUrl ? "hasImage" : "textFallback"}`}
+                {...(catalogImageTooltip ? { title: catalogImageTooltip } : {})}
+              >
                 {catalogImageUrl ? (
                   <>
                     <CardImage
@@ -355,21 +457,27 @@ export function CatalogPanel({
                       decorative
                       priority
                       onUnavailable={() => setCatalogImageUnavailable(true)}
-                      {...(catalogImageTooltip ? { title: catalogImageTooltip } : {})}
+                      {...(catalogImageTooltip
+                        ? { title: catalogImageTooltip }
+                        : {})}
                     />
                     {showCatalogHardwareOverlay ? (
                       <HardwareImageOverlay
                         title={detail.title}
                         rulesText={detail.text}
                         className="catalogHardwareOverlay"
-                        {...(detail.numeric.installCost !== null ? { installCost: detail.numeric.installCost } : {})}
+                        {...(detail.numeric.installCost !== null
+                          ? { installCost: detail.numeric.installCost }
+                          : {})}
                       />
                     ) : showCatalogOperationOverlay ? (
                       <OperationImageOverlay
                         title={detail.title}
                         rulesText={detail.text}
                         className="catalogHardwareOverlay"
-                        {...(detail.numeric.cost !== null ? { cost: detail.numeric.cost } : {})}
+                        {...(detail.numeric.cost !== null
+                          ? { cost: detail.numeric.cost }
+                          : {})}
                       />
                     ) : null}
                   </>
@@ -386,9 +494,25 @@ export function CatalogPanel({
               </div>
               <p className="catalogText">
                 {rulesTextLines(detail.text).map((line, index) => (
-                  <span key={`${detail.catalogCardId}-rules-${index}`} className={isSubroutineRuleLine(detail.type, detail.text, line) ? "subroutineLine" : undefined}>
-                    {shouldAddFallbackSubroutineMarker(detail.type, detail.text, line) ? <SubroutineIcon /> : null}
-                    {renderRuleTextSegments(line, `${detail.catalogCardId}-rules-${index}`)}
+                  <span
+                    key={`${detail.catalogCardId}-rules-${index}`}
+                    className={
+                      isSubroutineRuleLine(detail.type, detail.text, line)
+                        ? "subroutineLine"
+                        : undefined
+                    }
+                  >
+                    {shouldAddFallbackSubroutineMarker(
+                      detail.type,
+                      detail.text,
+                      line,
+                    ) ? (
+                      <SubroutineIcon />
+                    ) : null}
+                    {renderRuleTextSegments(
+                      line,
+                      `${detail.catalogCardId}-rules-${index}`,
+                    )}
                   </span>
                 ))}
               </p>
@@ -415,7 +539,11 @@ export function CatalogPanel({
                   aiSupportedLabel={t("status.ai_supported")}
                 />
               ) : null}
-              {detail.blockReasons.length > 0 ? <p className="notice catalogNotice">{detail.blockReasons.join(" ")}</p> : null}
+              {detail.blockReasons.length > 0 ? (
+                <p className="notice catalogNotice">
+                  {detail.blockReasons.join(" ")}
+                </p>
+              ) : null}
             </>
           ) : (
             <p className="meta">{t("noCardSelected")}</p>

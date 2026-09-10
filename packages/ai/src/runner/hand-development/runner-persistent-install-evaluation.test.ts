@@ -1064,8 +1064,8 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
     expect(evaluation).toMatchObject({
       developmentRole: "defense_support",
-      currentNeed: "useful_now",
-      deferReason: "none",
+      currentNeed: "none",
+      deferReason: "no_current_need",
       persistentInstallEvaluation: {
         capabilityDelta: "cumulative_capacity",
         duplicateRole: "useful_backup",

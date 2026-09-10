@@ -52,7 +52,7 @@ Verdrahtung erkennbar ist.
 - [ ] Alle Compile-Time-Verbraucher sind atomar umgestellt.
 - [ ] Keine persistierte oder öffentliche Kennung wurde verändert.
 - [ ] Fokussierte Modifier-/Run-Start-Tests und erforderliche Typechecks sind
-  grün.
+      grün.
 
 ## Umsetzungshinweise
 

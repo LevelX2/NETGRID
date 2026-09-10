@@ -154,9 +154,17 @@ function addCorpRootCard(
 ): CardInstanceId {
   const cardId = id as CardInstanceId;
   removeEverywhere(state, cardId);
-  let server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  let server = state.corp.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
   if (!server) {
-    server = { id: serverId, kind: "remote", label: "Remote 1", ice: [], root: [] };
+    server = {
+      id: serverId,
+      kind: "remote",
+      label: "Remote 1",
+      ice: [],
+      root: [],
+    };
     state.corp.servers.push(server);
   }
   server.root.unshift(cardId);
@@ -184,9 +192,17 @@ function addCorpIce(
 ): CardInstanceId {
   const cardId = id as CardInstanceId;
   removeEverywhere(state, cardId);
-  let server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  let server = state.corp.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
   if (!server) {
-    server = { id: serverId, kind: "remote", label: "Remote 1", ice: [], root: [] };
+    server = {
+      id: serverId,
+      kind: "remote",
+      label: "Remote 1",
+      ice: [],
+      root: [],
+    };
     state.corp.servers.push(server);
   }
   server.ice.push(cardId);
@@ -269,7 +285,9 @@ function takeRunnerAction(
     throw new Error(
       `Missing runner legal action; available=${getLegalActions(state, "runner")
         .map((candidate) => candidate.type)
-        .join(",")}; timing=${state.timingPoint}; phase=${state.phase}; active=${state.activeSide}; runPhase=${state.run?.phase}; server=${state.run?.attackedServerId}; hq=${state.corp.hq.length}; rd=${state.corp.rd.length}; pending=${state.pendingChoice?.source ?? ""}`,
+        .join(
+          ",",
+        )}; timing=${state.timingPoint}; phase=${state.phase}; active=${state.activeSide}; runPhase=${state.run?.phase}; server=${state.run?.attackedServerId}; hq=${state.corp.hq.length}; rd=${state.corp.rd.length}; pending=${state.pendingChoice?.source ?? ""}`,
     );
   return applyLegal(state, "runner", action);
 }
@@ -282,7 +300,10 @@ function accessAndStealAgenda(state: GameState): GameState {
 
 function trashAccessedCard(state: GameState): GameState {
   let next = takeRunnerAction(state, (action) => action.type === "access_card");
-  next = takeRunnerAction(next, (action) => action.type === "trash_accessed_card");
+  next = takeRunnerAction(
+    next,
+    (action) => action.type === "trash_accessed_card",
+  );
   return next;
 }
 
@@ -394,7 +415,10 @@ function executeRunScopedBlackOpsRezHook(
 }
 
 function expectReplayStable(before: GameState, after: GameState): void {
-  const replay = replayEvents(before, after.eventLog.slice(before.eventLog.length));
+  const replay = replayEvents(
+    before,
+    after.eventLog.slice(before.eventLog.length),
+  );
   expect(replay.ok).toBe(true);
   expect(hashState(replay.state)).toBe(hashState(after));
 }
@@ -402,7 +426,9 @@ function expectReplayStable(before: GameState, after: GameState): void {
 describe("Proteus PRO015 Bad-Publicity Run/Replacement Suite", () => {
   it("registers exactly the five PRO015 CardImplementation definitions", () => {
     const implementations = new Set(
-      CARD_IMPLEMENTATIONS.map((implementation) => implementation.cardDefinitionId),
+      CARD_IMPLEMENTATIONS.map(
+        (implementation) => implementation.cardDefinitionId,
+      ),
     );
     for (const cardDefinitionId of PRO015_IDS)
       expect(implementations.has(cardDefinitionId)).toBe(true);
@@ -410,7 +436,11 @@ describe("Proteus PRO015 Bad-Publicity Run/Replacement Suite", () => {
 
   it("keeps Identity Donor out of normal Runner actions", () => {
     const state = baseState("pro015-identity-normal-action");
-    const identityId = addRunnerGripCard(state, IDENTITY_DONOR, "identity_normal");
+    const identityId = addRunnerGripCard(
+      state,
+      IDENTITY_DONOR,
+      "identity_normal",
+    );
     expect(
       getLegalActions(state, "runner").some(
         (action) =>
@@ -425,7 +455,8 @@ describe("Proteus PRO015 Bad-Publicity Run/Replacement Suite", () => {
 
     expect(
       getLegalActions(state, "runner").some(
-        (action) => action.type === "play_event" && action.payload?.cardId === frameId,
+        (action) =>
+          action.type === "play_event" && action.payload?.cardId === frameId,
       ),
     ).toBe(false);
 
@@ -433,44 +464,54 @@ describe("Proteus PRO015 Bad-Publicity Run/Replacement Suite", () => {
     addCorpHqCard(state, BLACK_OPS_AGENDA, "frame_up_black_ops_hq");
     state = takeRunnerAction(
       state,
-      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
     );
     state = accessAndStealAgenda(state);
     clearCorpZone(state, "rd");
     addCorpRdCard(state, SCORCHED_EARTH, "frame_up_rd_access");
     state = takeRunnerAction(
       state,
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     state = takeRunnerAction(state, (action) => action.type === "access_card");
     const legal = mustAction(
       state,
       "runner",
-      (action) => action.type === "play_event" && action.payload?.cardId === frameId,
+      (action) =>
+        action.type === "play_event" && action.payload?.cardId === frameId,
     );
     expect(legal.costs).toEqual([{ clicks: 1, credits: 2 }]);
     state = applyLegal(state, "runner", legal);
     expect(state.runnerTurnFlags?.successfulHqRunThisTurn).toBe(true);
     expect(state.runnerTurnFlags?.successfulRdRunThisTurn).toBe(true);
     expect(
-      state.runnerTurnFlags?.blackOpsLiberatedOrTrashedDuringSuccessfulHqOrRdRunThisTurn,
+      state.runnerTurnFlags
+        ?.blackOpsLiberatedOrTrashedDuringSuccessfulHqOrRdRunThisTurn,
     ).toBe(true);
     expect(state.corp.badPublicity).toBe(2);
 
     state = baseState("pro015-frame-up-no-bonus");
-    const noBonusFrameId = addRunnerGripCard(state, FRAME_UP, "frame_up_no_bonus");
+    const noBonusFrameId = addRunnerGripCard(
+      state,
+      FRAME_UP,
+      "frame_up_no_bonus",
+    );
     clearCorpZone(state, "hq");
     addCorpHqCard(state, SCORCHED_EARTH, "frame_up_plain_hq");
     state = takeRunnerAction(
       state,
-      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
     );
     state = takeRunnerAction(state, (action) => action.type === "access_card");
     clearCorpZone(state, "rd");
     addCorpRdCard(state, SCORCHED_EARTH, "frame_up_plain_rd");
     state = takeRunnerAction(
       state,
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     state = takeRunnerAction(state, (action) => action.type === "access_card");
     state = playRunnerEvent(state, noBonusFrameId);
@@ -490,7 +531,13 @@ describe("Proteus PRO015 Bad-Publicity Run/Replacement Suite", () => {
         action.type === "install_card" && action.payload?.cardId === fallGuyId,
     );
     const sourceId = addRunnerGripCard(state, LIVE_NEWS_FEED, "live_news");
-    const blackIceId = addCorpIce(state, BLACK_ICE, "live_news_black_ice", "hq", true);
+    const blackIceId = addCorpIce(
+      state,
+      BLACK_ICE,
+      "live_news_black_ice",
+      "hq",
+      true,
+    );
     clearCorpZone(state, "hq");
     addCorpHqCard(state, BLACK_OPS_AGENDA, "live_news_black_ops_agenda");
     const before = structuredClone(state);
@@ -586,8 +633,18 @@ describe("Proteus PRO015 Bad-Publicity Run/Replacement Suite", () => {
 
   it("counts only Advertisements trashed during the Subliminal Corruption run", () => {
     let state = baseState("pro015-subliminal");
-    const sourceId = addRunnerGripCard(state, SUBLIMINAL_CORRUPTION, "subliminal");
-    addCorpRootCard(state, ADVERTISEMENT, "advertisement_remote", "remote_1", true);
+    const sourceId = addRunnerGripCard(
+      state,
+      SUBLIMINAL_CORRUPTION,
+      "subliminal",
+    );
+    addCorpRootCard(
+      state,
+      ADVERTISEMENT,
+      "advertisement_remote",
+      "remote_1",
+      true,
+    );
     state.runner.credits = 30;
     const before = structuredClone(state);
 
@@ -647,7 +704,11 @@ describe("Proteus PRO015 Bad-Publicity Run/Replacement Suite", () => {
     state.timingPoint = "corp_action.main";
     state.runner.tags = 1;
     state.corp.badPublicity = 5;
-    const identityId = addRunnerGripCard(state, IDENTITY_DONOR, "identity_donor");
+    const identityId = addRunnerGripCard(
+      state,
+      IDENTITY_DONOR,
+      "identity_donor",
+    );
     addCorpHqCard(state, SCORCHED_EARTH, "scorched");
     for (let index = 0; index < 5; index += 1)
       addRunnerGripCard(state, "onr_v1_012_clown", `grip_${index}`);
@@ -679,15 +740,23 @@ describe("Proteus PRO015 Bad-Publicity Run/Replacement Suite", () => {
 
   it("offers Senatorial Field Trip only for the concrete Black ICE rezzed this turn and revalidates stale choices", () => {
     let state = baseState("pro015-senatorial-derez");
-    const sourceId = addRunnerGripCard(state, SENATORIAL_FIELD_TRIP, "senatorial");
+    const sourceId = addRunnerGripCard(
+      state,
+      SENATORIAL_FIELD_TRIP,
+      "senatorial",
+    );
     const iceId = addCorpIce(state, BLACK_ICE, "black_ice", "hq", true);
     expect(
       getLegalActions(state, "runner").some(
-        (action) => action.type === "play_event" && action.payload?.cardId === sourceId,
+        (action) =>
+          action.type === "play_event" && action.payload?.cardId === sourceId,
       ),
     ).toBe(false);
 
-    state.runnerTurnFlags ??= { stoleAgendaThisTurn: false, stoleAgendaLastTurn: false };
+    state.runnerTurnFlags ??= {
+      stoleAgendaThisTurn: false,
+      stoleAgendaLastTurn: false,
+    };
     state.runnerTurnFlags.lastRezzedBlackIceThisTurn = {
       cardId: iceId,
       definitionId: BLACK_ICE,
@@ -738,9 +807,16 @@ describe("Proteus PRO015 Bad-Publicity Run/Replacement Suite", () => {
 
   it("rejects Senatorial Field Trip when the stored Black ICE target became stale", () => {
     let state = baseState("pro015-senatorial-stale-target");
-    const sourceId = addRunnerGripCard(state, SENATORIAL_FIELD_TRIP, "senatorial_stale");
+    const sourceId = addRunnerGripCard(
+      state,
+      SENATORIAL_FIELD_TRIP,
+      "senatorial_stale",
+    );
     const iceId = addCorpIce(state, BLACK_ICE, "black_ice_stale", "hq", true);
-    state.runnerTurnFlags ??= { stoleAgendaThisTurn: false, stoleAgendaLastTurn: false };
+    state.runnerTurnFlags ??= {
+      stoleAgendaThisTurn: false,
+      stoleAgendaLastTurn: false,
+    };
     state.runnerTurnFlags.lastRezzedBlackIceThisTurn = {
       cardId: iceId,
       definitionId: BLACK_ICE,
@@ -750,7 +826,8 @@ describe("Proteus PRO015 Bad-Publicity Run/Replacement Suite", () => {
 
     expect(
       getLegalActions(state, "runner").some(
-        (action) => action.type === "play_event" && action.payload?.cardId === sourceId,
+        (action) =>
+          action.type === "play_event" && action.payload?.cardId === sourceId,
       ),
     ).toBe(false);
   });
@@ -759,11 +836,13 @@ describe("Proteus PRO015 Bad-Publicity Run/Replacement Suite", () => {
     let state = baseState("pro015-frame-up-run-history");
     const frameId = addRunnerGripCard(state, FRAME_UP, "frame_up_after_runs");
     addCorpHqCard(state, BLACK_OPS_AGENDA, "black_ops_hq");
-    state.runnerTurnFlags ??= { stoleAgendaThisTurn: false, stoleAgendaLastTurn: false };
+    state.runnerTurnFlags ??= {
+      stoleAgendaThisTurn: false,
+      stoleAgendaLastTurn: false,
+    };
     state.runnerTurnFlags.successfulHqRunThisTurn = true;
     state.runnerTurnFlags.successfulRdRunThisTurn = true;
-    state.runnerTurnFlags.blackOpsLiberatedOrTrashedDuringSuccessfulHqOrRdRunThisTurn =
-      true;
+    state.runnerTurnFlags.blackOpsLiberatedOrTrashedDuringSuccessfulHqOrRdRunThisTurn = true;
 
     state = playRunnerEvent(state, frameId);
     expect(state.corp.badPublicity).toBe(2);

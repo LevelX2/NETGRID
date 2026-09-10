@@ -1,4 +1,4 @@
-import aiSupportScenarioData from "../../../data/scenarios/card-support-ai-supported-current.json";
+import { cardSupportAiSupportedData as aiSupportScenarioData } from "@netgrid/runtime-data/card-support";
 import {
   KNOWN_HINT_LINE_SUPPORT,
   KNOWN_HINT_BREAKER_COVERAGES,
@@ -771,6 +771,10 @@ function deriveGenericTypedHintOverlay(
       );
     }
     if (modifier.kind === "steal_cost") {
+      const isSameFortAgendaStealTax =
+        modifier.side === "corp" &&
+        modifier.sourceZone === "corp_root" &&
+        modifier.sameServerAsSource === true;
       overlay.effects.push(
         {
           kind: "run_tax",
@@ -793,6 +797,7 @@ function deriveGenericTypedHintOverlay(
         "remote.agenda_steal_tax",
         "remote.scoring_protection",
         "tax.runner_credit",
+        ...(isSameFortAgendaStealTax ? ["access.agenda_steal_tax"] : []),
       );
     }
     if (modifier.kind === "ice_strength") {
@@ -1086,6 +1091,25 @@ function deriveGenericTypedHintOverlay(
   }
 
   const uniqueDirect = engine.uniqueDirectLongtail;
+  if (uniqueDirect?.kind === "successful_run_end_credit_resource") {
+    if (
+      !Number.isSafeInteger(uniqueDirect.amount) ||
+      uniqueDirect.amount <= 0 ||
+      uniqueDirect.visibility !== "public"
+    )
+      throw new Error("card_spec_unknown_successful_run_credit_shape");
+    overlay.effects.push({
+      kind: "economy",
+      scope: "runner",
+      timing: "after_successful_run",
+      resource: "credits",
+      target: "run.successful_run_credit_gain",
+      amount: uniqueDirect.amount,
+      repeatable: true,
+    });
+    overlay.conditions.push({ kind: "requires_successful_run" });
+    overlay.functionSignals.push("economy.successful_run_credits");
+  }
   if (uniqueDirect?.kind === "tagged_meat_damage") {
     if (
       uniqueDirect.requiredRunnerTags <= 0 ||
@@ -1773,6 +1797,7 @@ function appendGenericAbilityEffect(
         scope: "installed_card",
         timing,
         target: effect.filter,
+        installCost: effect.installCost,
         finite: true,
       },
     );
@@ -8164,6 +8189,7 @@ function deriveHintEffects(
             scope: "installed_card",
             timing: "action",
             target: "program",
+            installCost: effect.installCost,
           },
           {
             kind: "install_discount",

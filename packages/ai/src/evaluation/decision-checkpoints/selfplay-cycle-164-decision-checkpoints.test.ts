@@ -35,8 +35,7 @@ describe("selfplay cycle 164 decision checkpoints", () => {
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
-          rootPlanInstanceId:
-            "plan:runner.contest_remote:remote%3Aremote_1",
+          rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
           leafExecutorInstanceId:
             "plan:runner.convert_run_window:run%3Arun_196",
           route: {

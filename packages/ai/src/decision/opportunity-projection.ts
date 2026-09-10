@@ -27,14 +27,18 @@ export function buildAiOpportunityProjections(
 
   for (const target of runTargets) {
     if (target.accessPayoff === "agenda") {
-      projections.push(runTargetOpportunity(target, "known_agenda_payoff", "critical"));
+      projections.push(
+        runTargetOpportunity(target, "known_agenda_payoff", "critical"),
+      );
     }
     if (
       (target.targetKind === "hq" || target.targetKind === "rd") &&
       target.recommendation === "run_now" &&
       target.pathPassability === "reachable"
     ) {
-      projections.push(runTargetOpportunity(target, "safe_central_access", "high"));
+      projections.push(
+        runTargetOpportunity(target, "safe_central_access", "high"),
+      );
     }
     if (target.targetKind === "remote" && target.scoreThreat) {
       projections.push(
@@ -68,8 +72,8 @@ export function buildAiOpportunityProjections(
   }
 
   if (
-    frame.actionCandidates.some((candidate) =>
-      candidate.semanticActionType === "economy.gain_credit",
+    frame.actionCandidates.some(
+      (candidate) => candidate.semanticActionType === "economy.gain_credit",
     )
   ) {
     projections.push({
@@ -80,9 +84,10 @@ export function buildAiOpportunityProjections(
     });
   }
   if (
-    frame.actionCandidates.some((candidate) =>
-      candidate.semanticActionType === "install.card" ||
-      candidate.semanticActionType === "draw.card",
+    frame.actionCandidates.some(
+      (candidate) =>
+        candidate.semanticActionType === "install.card" ||
+        candidate.semanticActionType === "draw.card",
     )
   ) {
     projections.push({
@@ -133,7 +138,10 @@ function dedupeOpportunities(
   for (const projection of projections) {
     const key = `${projection.opportunity}:${projection.targetId ?? ""}`;
     const existing = byKey.get(key);
-    if (!existing || priorityRank(projection.priority) > priorityRank(existing.priority)) {
+    if (
+      !existing ||
+      priorityRank(projection.priority) > priorityRank(existing.priority)
+    ) {
       byKey.set(key, projection);
     }
   }

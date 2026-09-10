@@ -17,7 +17,7 @@ export function OpponentCueTitle({
   card,
   previewCard,
   displayMode,
-  onFocusCard
+  onFocusCard,
 }: {
   cue: OpponentActionCue;
   card: OpponentCueTitleCard | null;
@@ -40,7 +40,7 @@ export function OpponentCueTitle({
     ...(cue.cardDefinitionId ? { cardDefinitionId: cue.cardDefinitionId } : {}),
     cardTitle: cue.cardTitle,
     cardDetailLines: [],
-    groupLabel: cue.actorLabel
+    groupLabel: cue.actorLabel,
   };
   return (
     <>

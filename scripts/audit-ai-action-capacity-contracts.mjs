@@ -31,39 +31,6 @@ const TARGET_CARD_IDS = [
   "onr_proteus_131_bargain-with-viacox",
 ];
 
-const EXTRA_ACTION_CONTRACTS = [
-  {
-    cardId: "onr_v1_192_corporate-boon",
-    amount: 1,
-    scope: "corp",
-    timing: "scored_activated",
-  },
-  {
-    cardId: "onr_v1_218_subsidiary-branch",
-    amount: 1,
-    scope: "corp",
-    timing: "start_of_turn",
-  },
-  {
-    cardId: "onr_v1_297_overtime-incentives",
-    amount: 2,
-    scope: "corp",
-    timing: "action",
-  },
-  {
-    cardId: "onr_v1_331_nevinyrral",
-    amount: 1,
-    scope: "corp",
-    timing: "action",
-  },
-  {
-    cardId: "onr_v1_334_pacifica-regional-ai",
-    amount: 1,
-    scope: "corp",
-    timing: "action",
-  },
-];
-
 const ACTION_CAPACITY_PROFILE_CONTRACTS = [
   {
     cardId: "onr_v1_117_valu-pak-software-bundle",
@@ -92,6 +59,15 @@ const ACTION_CAPACITY_PROFILE_CONTRACTS = [
     amount: 1,
     restriction: "unrestricted",
     sourceResource: "counter",
+    timing: "scored_activated",
+  },
+  {
+    cardId: "onr_v1_218_subsidiary-branch",
+    class: "recurring_gain",
+    amount: 1,
+    restriction: "unrestricted",
+    sourceResource: "source_card",
+    timing: "start_of_turn",
   },
   {
     cardId: "onr_v1_289_edgerunner-inc-temps",
@@ -106,6 +82,15 @@ const ACTION_CAPACITY_PROFILE_CONTRACTS = [
     amount: 2,
     restriction: "unrestricted",
     sourceResource: "source_card",
+    timing: "immediate",
+  },
+  {
+    cardId: "onr_v1_331_nevinyrral",
+    class: "recurring_gain",
+    amount: 1,
+    restriction: "unrestricted",
+    sourceResource: "source_card",
+    timing: "start_of_turn",
   },
   {
     cardId: "onr_v1_334_pacifica-regional-ai",
@@ -113,6 +98,7 @@ const ACTION_CAPACITY_PROFILE_CONTRACTS = [
     amount: 1,
     restriction: "unrestricted",
     sourceResource: "advancement_counter",
+    timing: "immediate",
   },
   {
     cardId: "onr_proteus_046_corporate-guard-r-temps",
@@ -325,26 +311,6 @@ export function buildAiActionCapacityContractAudit() {
 function actionContractViolations(hintCards) {
   const violations = [];
   const cardsById = new Map(hintCards.map((card) => [card.cardId, card]));
-  for (const contract of EXTRA_ACTION_CONTRACTS) {
-    const card = cardsById.get(contract.cardId);
-    if (!card) {
-      violations.push(`${contract.cardId}: missing hint`);
-      continue;
-    }
-    const matching = actionEffects(card).filter(
-      (effect) =>
-        effect.kind === "extra_action" &&
-        effect.resource === "actions" &&
-        effect.amount === contract.amount &&
-        effect.scope === contract.scope &&
-        effect.timing === contract.timing,
-    );
-    if (matching.length !== 1) {
-      violations.push(
-        `${contract.cardId}: expected one ${contract.amount}-action ${contract.timing} effect, found ${matching.length}`,
-      );
-    }
-  }
   for (const contract of ACTION_CAPACITY_PROFILE_CONTRACTS) {
     const card = cardsById.get(contract.cardId);
     if (!card) {
@@ -357,7 +323,8 @@ function actionContractViolations(hintCards) {
         profile.amount === contract.amount &&
         profile.amountKind === "fixed" &&
         profile.restriction === contract.restriction &&
-        profile.sourceResource === contract.sourceResource,
+        profile.sourceResource === contract.sourceResource &&
+        (contract.timing === undefined || profile.timing === contract.timing),
     );
     if (matching.length !== 1)
       violations.push(
@@ -373,7 +340,7 @@ function actionEffects(card) {
     if (effect.kind === "extra_action" || effect.kind === "forgo_actions")
       return true;
     if (effect.resource !== "actions") return false;
-    return ACTION_EFFECT_KINDS.has(effect.kind) || effect.kind === "run_lock";
+    return ACTION_EFFECT_KINDS.has(effect.kind);
   });
 }
 

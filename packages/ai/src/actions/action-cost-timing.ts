@@ -47,12 +47,20 @@ export function costProfileForAction(action: LegalAction): ActionCostProfile {
     numberPayload(action, "rezCostPaid") ??
     numberPayload(action, "corpCreditsSpent") ??
     numberPayload(action, "runnerCreditsSpent");
-  const creditCost =
+  const grossCreditCost =
     creditCostDimension.status === "known"
       ? creditCostDimension.explicit
         ? creditCostDimension.value
         : (payloadCreditCost ?? creditCostDimension.value)
       : payloadCreditCost;
+  const hostedCreditCost = runnerInstallHostedCreditCost(
+    action,
+    grossCreditCost,
+  );
+  const creditCost =
+    hostedCreditCost === undefined
+      ? grossCreditCost
+      : grossCreditCost! - hostedCreditCost;
   const trashCost = numberPayload(action, "accessTrashTotalCost");
   const agendaPointCost =
     numberPayload(action, "agendaPointCost") ??
@@ -80,6 +88,7 @@ export function costProfileForAction(action: LegalAction): ActionCostProfile {
   return {
     ...(clickCost !== undefined ? { clickCost } : {}),
     ...(creditCost !== undefined ? { creditCost } : {}),
+    ...(hostedCreditCost !== undefined ? { hostedCreditCost } : {}),
     ...(trashCost !== undefined ? { trashCost } : {}),
     ...(agendaPointCost !== undefined ? { agendaPointCost } : {}),
     ...(temporaryCredits !== undefined ? { temporaryCredits } : {}),
@@ -96,17 +105,71 @@ export function costProfileForAction(action: LegalAction): ActionCostProfile {
         ? "not_applicable"
         : "unknown",
     ...(variableCost !== undefined ? { variableCost } : {}),
-    additionalCosts: additionalCostFields(action),
+    additionalCosts: additionalCostFields(action, grossCreditCost),
   };
+}
+
+function runnerInstallHostedCreditCost(
+  action: LegalAction,
+  grossCreditCost: number | undefined,
+): number | undefined {
+  const ids = action.payload?.runnerInstallPaymentSourceIds;
+  const amounts = action.payload?.runnerInstallPaymentSourceAmounts;
+  const total = action.payload?.runnerInstallPaymentHostedCredits;
+  if (ids === undefined && amounts === undefined && total === undefined)
+    return undefined;
+  const fail = (): never => {
+    throw Object.assign(
+      new Error(
+        "AI040: Invalid Engine-bound program-install payment projection.",
+      ),
+      {
+        name: "ActionCostProjectionError",
+        code: "invalid_runner_install_payment",
+        owner: "action_semantics",
+        actionId: action.actionId,
+      },
+    );
+  };
+  if (
+    action.side !== "runner" ||
+    action.type !== "install_card" ||
+    typeof ids !== "string" ||
+    typeof amounts !== "string" ||
+    typeof total !== "number" ||
+    !Number.isSafeInteger(total) ||
+    total < 0 ||
+    grossCreditCost === undefined ||
+    !Number.isSafeInteger(grossCreditCost) ||
+    total > grossCreditCost
+  )
+    return fail();
+  const sourceIds = ids.split(",");
+  const sourceAmounts = amounts.split(",");
+  if (
+    sourceIds.length !== sourceAmounts.length ||
+    sourceIds.some((id) => id.length === 0) ||
+    new Set(sourceIds).size !== sourceIds.length ||
+    sourceAmounts.some(
+      (amount) =>
+        !/^(0|[1-9][0-9]*)$/.test(amount) ||
+        !Number.isSafeInteger(Number(amount)),
+    )
+  )
+    return fail();
+  const sum = sourceAmounts.reduce((sum, amount) => sum + Number(amount), 0);
+  if (!Number.isSafeInteger(sum) || sum !== total) return fail();
+  return total;
 }
 
 function exactCostDimension(
   action: LegalAction,
   key: "clicks" | "credits",
 ):
-  | { status: "not_applicable" | "invalid" }
+  | { status: "invalid" }
   | { status: "known"; value: number; explicit: boolean } {
-  if (action.costs.length === 0) return { status: "not_applicable" };
+  // The Engine's complete empty cost list certifies zero expenditure.
+  // Preserve that fact for planners which require exact resource dimensions.
   let value = 0;
   let explicit = false;
   for (const cost of action.costs) {
@@ -275,7 +338,18 @@ function beneficiaryForAction(
   return "unknown";
 }
 
-function additionalCostFields(action: LegalAction): string[] {
+function additionalCostFields(
+  action: LegalAction,
+  normalizedGrossCredits: number | undefined,
+): string[] {
+  const normalizedCreditFields = new Set([
+    "accessTrashTotalCost",
+    "stealCost",
+    "paymentAmount",
+    "rezCostPaid",
+    "corpCreditsSpent",
+    "runnerCreditsSpent",
+  ]);
   const fields = [
     "accessTrashTotalCost",
     "stealCost",
@@ -319,7 +393,19 @@ function additionalCostFields(action: LegalAction): string[] {
     "creditsRemainingAfterCost",
     "postActionCredits",
   ];
-  return fields.filter((field) => action.payload?.[field] !== undefined);
+  return fields.filter((field) => {
+    const value = action.payload?.[field];
+    if (value === undefined) return false;
+    // Keep unsupported or conflicting facts explicit. A matching Engine cash
+    // quote is already represented by creditCost, not an additional payment.
+    return !(
+      normalizedCreditFields.has(field) &&
+      typeof value === "number" &&
+      Number.isSafeInteger(value) &&
+      value >= 0 &&
+      value === normalizedGrossCredits
+    );
+  });
 }
 
 function numberPayload(action: LegalAction, key: string): number | undefined {

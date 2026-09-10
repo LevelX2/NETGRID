@@ -105,6 +105,7 @@ export type DamageAmount = {
 export type ActionCostProfile = {
   clickCost?: number;
   creditCost?: number;
+  hostedCreditCost?: number;
   trashCost?: number;
   agendaPointCost?: number;
   temporaryCredits?: {
@@ -163,11 +164,21 @@ export type ActionEconomyProjection = {
   creditCost: number;
   grossLiquidCreditGain?: number;
   netLiquidCreditGain?: number;
+  restrictedCreditPayout?: {
+    amount: number;
+    usableFor: "corp_install_or_rez";
+    cleanup: "end_of_turn";
+    sourceAdvancementCounterCost: number;
+  };
   storedCreditsAdded?: number;
   storedCreditsTaken?: number;
   cardsDrawn: number;
   cardsConsumed: number;
   netHandDelta: number;
+  postDrawDispositionCount?: number;
+  drawPileCardsConsumed?: number;
+  drawPileCardsReplenished?: number;
+  netDrawPileDelta?: number;
   payoutMode?: "fixed" | "all_available";
   sourcePool?: "finite" | "renewable" | "unknown";
   maxCurrentTurnUses?: number;
@@ -213,6 +224,8 @@ export type ActionCapacityProjection = {
   temporaryCredits?: number;
   listedActionCost: number;
   preExistingActionCost: number;
+  /** Availability prerequisite; unlike the cost, it is not consumed. */
+  minimumAvailableActions?: number;
   grossActionsGained: number;
   generatedActionsConsumedByCurrentAction: number;
   followupActionCapacity: number;

@@ -10,6 +10,63 @@ import {
 } from "./plan-first-live-runtime";
 
 describe("Runner cost/penalty support plan continuation", () => {
+  it("preserves the run owner when a zero-cost movement starts an encounter-tax payment", () => {
+    const action = {
+      ...paymentAction(90),
+      actionId: "runner.continue_run",
+      type: "continue_run",
+      source: "game_rule",
+      costs: [],
+      payload: {},
+      timingPoint: "run.jack_out_window",
+    } as LegalAction;
+    const before = traceBidInput(90, [action]);
+    delete before.playerView.pendingChoice;
+    before.playerView.timingPoint = "run.jack_out_window";
+    before.playerView.run!.phase = "movement";
+    const selected = planResult(90, action.actionId, "rig-root");
+    selected.portfolio = runPortfolio(90);
+    selected.route = {
+      ...selected.route,
+      planInstanceId: selected.portfolio.executorInstanceId!,
+      head: { ...selected.route.head, actionType: "continue_run" },
+      step: { ...selected.route.step, stepId: "run_211:convert" },
+    };
+    reconcileSelectedRunnerCostPenaltySupportOrigin(
+      before,
+      selected,
+      runPortfolio(89),
+    );
+    expect(selected.portfolio.pendingRunnerCostPenaltySupportOrigin).toEqual({
+      rootPlanInstanceId: selected.portfolio.rootForegroundInstanceId,
+      executorInstanceId: selected.portfolio.executorInstanceId,
+      sourceStepId: "run_211:convert",
+      originalActionId: action.actionId,
+      selectedAtStateVersion: 90,
+    });
+    const support = supportAction(91, action.actionId);
+    const next = traceBidInput(91, [support]);
+    delete next.playerView.pendingChoice;
+    next.playerView.timingPoint = "run.movement_rez_window";
+    const resolution = resolvePlanBoundRunnerCostPenaltyContinuation(
+      { input: next, actionCandidates: [], turnKey: "runner:turn:14" },
+      selected.portfolio,
+    );
+    expect(resolution?.actionId).toBe(support.actionId);
+    expect(resolution?.origin.rootPlanInstanceId).toBe(
+      selected.portfolio.rootForegroundInstanceId,
+    );
+    expect(resolution?.origin.leafPlanInstanceId).toBe(
+      selected.portfolio.executorInstanceId,
+    );
+    next.playerView.stateVersion = 93;
+    expect(() =>
+      resolvePlanBoundRunnerCostPenaltyContinuation(
+        { input: next, actionCandidates: [], turnKey: "runner:turn:14" },
+        selected.portfolio,
+      ),
+    ).toThrow();
+  });
   it("preserves the original plan origin across a payment-support action", () => {
     const originalAction = paymentAction(90);
     const originalResult = planResult(90, originalAction.actionId, "rig-root");
@@ -67,6 +124,258 @@ describe("Runner cost/penalty support plan continuation", () => {
         timingPoint: "runner_action.main",
       },
     });
+  });
+
+  it("preserves an exact coverage-search binding while payment support preempts its executor", () => {
+    const originalAction = paymentAction(90);
+    const ownerId = "plan:runner.rig_and_coverage:rig-root";
+    const targetCardId = "runner_rent_i_con_3";
+    const previous = portfolio(90, "rig-root");
+    previous.instances = [
+      {
+        instanceId: ownerId,
+        side: "runner",
+        moduleId: "runner.rig_and_coverage",
+        executionState: "executor",
+        moduleState: {
+          kind: "coverage",
+          phase: "search_answer",
+          selectedSearchActionId: originalAction.actionId,
+          selectedSearchStateVersion: 90,
+          gap: {
+            directSearchChoiceBindings: [
+              {
+                actionId: originalAction.actionId,
+                sourceCardInstanceId: "sneak_preview_1",
+                sourceDefinitionId: "onr_v1_110_sneak-preview",
+                targetCardInstanceId: targetCardId,
+                targetDefinitionId: "onr_classic_031_rent-i-con",
+              },
+            ],
+          },
+        },
+      },
+    ] as never;
+    previous.pendingRunnerCostPenaltySupportOrigin = {
+      rootPlanInstanceId: ownerId,
+      executorInstanceId: ownerId,
+      sourceStepId: `${ownerId}:find`,
+      originalActionId: originalAction.actionId,
+      selectedAtStateVersion: 90,
+    };
+    const continuation = continuedPaymentAction(91, originalAction.actionId);
+    const support = supportAction(91, originalAction.actionId);
+    const supportResult = planResult(91, support.actionId, "economy-root");
+    supportResult.portfolio.instances = [];
+
+    reconcileSelectedRunnerCostPenaltySupportOrigin(
+      input(91, [continuation, support]),
+      supportResult,
+      previous,
+    );
+
+    expect(supportResult.portfolio.instances[0]?.moduleState).toMatchObject({
+      kind: "coverage",
+      phase: "search_answer",
+      selectedSearchActionId: originalAction.actionId,
+      selectedSearchStateVersion: 90,
+      gap: {
+        directSearchChoiceBindings: [
+          {
+            actionId: originalAction.actionId,
+            targetCardInstanceId: targetCardId,
+          },
+        ],
+      },
+    });
+
+    const mismatchedResult = planResult(91, support.actionId, "economy-root");
+    mismatchedResult.portfolio.instances = structuredClone(
+      supportResult.portfolio.instances,
+    );
+    const mismatchedState = mismatchedResult.portfolio.instances[0]
+      ?.moduleState as {
+      gap?: {
+        requiredRole?: string;
+        directSearchChoiceBindings?: Array<{ targetCardInstanceId?: string }>;
+      };
+    };
+    mismatchedState.gap!.directSearchChoiceBindings![0]!.targetCardInstanceId =
+      "runner_rent_i_con_2";
+    expect(() =>
+      reconcileSelectedRunnerCostPenaltySupportOrigin(
+        input(91, [continuation, support]),
+        mismatchedResult,
+        previous,
+      ),
+    ).not.toThrow();
+    expect(mismatchedResult.portfolio.instances[0]?.moduleState).toMatchObject({
+      gap: {
+        directSearchChoiceBindings: [{ targetCardInstanceId: targetCardId }],
+      },
+    });
+
+    const wrongRoleResult = planResult(91, support.actionId, "economy-root");
+    wrongRoleResult.portfolio.instances = structuredClone(
+      supportResult.portfolio.instances,
+    );
+    const wrongRoleState = wrongRoleResult.portfolio.instances[0]
+      ?.moduleState as { gap?: { requiredRole?: string } };
+    wrongRoleState.gap!.requiredRole = "breaker_wall";
+    expect(() =>
+      reconcileSelectedRunnerCostPenaltySupportOrigin(
+        input(91, [continuation, support]),
+        wrongRoleResult,
+        previous,
+      ),
+    ).toThrow(expect.objectContaining({ code: "invalid_support_graph" }));
+  });
+
+  it("preserves an exact targeted-bypass binding while payment support preempts its executor", () => {
+    const originalAction = paymentAction(90);
+    const ownerId = "plan:runner.pressure_central:central%3Ahq";
+    const previous = portfolio(90, "central:hq");
+    previous.rootForegroundInstanceId = ownerId;
+    previous.executorInstanceId = ownerId;
+    previous.instances = [
+      {
+        instanceId: ownerId,
+        side: "runner",
+        moduleId: "runner.pressure_central",
+        dedupeKey: "central:hq",
+        executionState: "executor",
+        moduleState: {
+          kind: "central_pressure",
+          choiceContinuation: {
+            family: "runner_targeted_bypass",
+            kind: "targeted_bypass_run",
+            sourceActionId: originalAction.actionId,
+            selectedActionId: originalAction.actionId,
+            sourceCardInstanceId: "social-1",
+            sourceDefinitionId: "onr_v1_111_social-engineering",
+            plannedAtStateVersion: 90,
+            selectedAtStateVersion: 90,
+            ownerModuleId: "runner.pressure_central",
+            ownerDedupeKey: "central:hq",
+            serverId: "hq",
+            icePosition: 0,
+            visibleIceInstanceId: "hq-wall",
+            intendedHiddenAmount: 2,
+            expectedCorpGuessAmount: 3,
+            evidenceCodes: ["runner_targeted_bypass_preflight:complete"],
+          },
+        },
+      },
+    ] as never;
+    previous.pendingRunnerCostPenaltySupportOrigin = {
+      rootPlanInstanceId: ownerId,
+      executorInstanceId: ownerId,
+      sourceStepId: `${ownerId}:play-social`,
+      originalActionId: originalAction.actionId,
+      selectedAtStateVersion: 90,
+    };
+    const continuation = continuedPaymentAction(91, originalAction.actionId);
+    const support = supportAction(91, originalAction.actionId);
+    const supportResult = planResult(91, support.actionId, "economy-root");
+    supportResult.portfolio.instances = [];
+
+    reconcileSelectedRunnerCostPenaltySupportOrigin(
+      input(91, [continuation, support]),
+      supportResult,
+      previous,
+    );
+
+    expect(supportResult.portfolio.instances).toHaveLength(1);
+    expect(supportResult.portfolio.instances[0]).toMatchObject({
+      instanceId: ownerId,
+      executionState: "preempted",
+      portfolioRole: "background",
+      moduleState: {
+        kind: "central_pressure",
+        choiceContinuation: {
+          family: "runner_targeted_bypass",
+          selectedActionId: originalAction.actionId,
+        },
+      },
+    });
+  });
+
+  it("preserves an exact coverage-install binding while payment support preempts its executor", () => {
+    const originalAction = paymentAction(90);
+    const ownerId = "plan:runner.rig_and_coverage:rig-root";
+    const previous = portfolio(90, "rig-root");
+    previous.instances = [
+      {
+        instanceId: ownerId,
+        side: "runner",
+        moduleId: "runner.rig_and_coverage",
+        executionState: "executor",
+        moduleState: {
+          kind: "coverage",
+          phase: "install_answer",
+          gap: {
+            requiredRole: "breaker_code_gate",
+            targetServerId: "rd",
+            targetRunActionId: "runner.start_run.rd",
+            installActionIds: [originalAction.actionId],
+          },
+        },
+      },
+    ] as never;
+    previous.pendingRunnerCostPenaltySupportOrigin = {
+      rootPlanInstanceId: ownerId,
+      executorInstanceId: ownerId,
+      sourceStepId: `${ownerId}:install`,
+      originalActionId: originalAction.actionId,
+      selectedAtStateVersion: 90,
+    };
+    const continuation = continuedPaymentAction(91, originalAction.actionId);
+    const support = supportAction(91, originalAction.actionId);
+    const supportResult = planResult(91, support.actionId, "economy-root");
+    supportResult.portfolio.instances = [
+      {
+        ...structuredClone(previous.instances[0]),
+        executionState: "preempted",
+        moduleState: {
+          kind: "coverage",
+          phase: "install_answer",
+          gap: { requiredRole: "breaker_code_gate" },
+        },
+      },
+    ] as never;
+
+    expect(() =>
+      reconcileSelectedRunnerCostPenaltySupportOrigin(
+        input(91, [continuation, support]),
+        supportResult,
+        previous,
+      ),
+    ).not.toThrow();
+    expect(supportResult.portfolio.instances[0]?.moduleState).toMatchObject({
+      kind: "coverage",
+      phase: "install_answer",
+      gap: {
+        requiredRole: "breaker_code_gate",
+        targetServerId: "rd",
+        targetRunActionId: "runner.start_run.rd",
+        installActionIds: [originalAction.actionId],
+      },
+    });
+
+    const mismatchedResult = planResult(91, support.actionId, "economy-root");
+    mismatchedResult.portfolio.instances = structuredClone(
+      supportResult.portfolio.instances,
+    );
+    const mismatchedState = mismatchedResult.portfolio.instances[0]
+      ?.moduleState as { gap?: { requiredRole?: string } };
+    mismatchedState.gap!.requiredRole = "breaker_wall";
+    expect(() =>
+      reconcileSelectedRunnerCostPenaltySupportOrigin(
+        input(91, [continuation, support]),
+        mismatchedResult,
+        previous,
+      ),
+    ).toThrow(expect.objectContaining({ code: "invalid_support_graph" }));
   });
 
   it("preserves the origin when support is required before the continuation becomes legal", () => {
@@ -153,6 +462,73 @@ describe("Runner cost/penalty support plan continuation", () => {
     });
   });
 
+  it("advances a run-start order origin through payment support without changing its owner", () => {
+    const originalAction = paymentAction(90);
+    const previous = directRunRootPortfolio(90);
+    const rootPlanInstanceId = previous.rootForegroundInstanceId!;
+    const executorInstanceId = previous.executorInstanceId!;
+    previous.selectedActionOrigin = {
+      rootPlanInstanceId,
+      executorInstanceId,
+      selectedActionId: originalAction.actionId,
+      selectedAtStateVersion: 90,
+      immediateChoicePolicy: "resolve_runner_run_start_order",
+      continuedThroughStateVersion: 90,
+      sourceStepId: `${rootPlanInstanceId}:contest`,
+      sourceActionType: "play_event",
+    };
+    previous.pendingRunnerCostPenaltySupportOrigin = {
+      rootPlanInstanceId,
+      executorInstanceId,
+      sourceStepId: `${rootPlanInstanceId}:contest`,
+      originalActionId: originalAction.actionId,
+      selectedAtStateVersion: 90,
+    };
+    const support = supportAction(91, originalAction.actionId);
+    const result: Extract<PlanSchedulerResult, { lane: "engine_window" }> = {
+      lane: "engine_window",
+      actionId: support.actionId,
+      origin: {
+        rootPlanInstanceId,
+        leafPlanInstanceId: executorInstanceId,
+        side: "runner",
+        windowKind: "optional_ability",
+        windowId: "runner_cost_penalty_support.91",
+        stateVersion: 91,
+        timingPoint: "runner_action.main",
+      },
+      portfolio: structuredClone(previous),
+      diagnostics: [
+        {
+          stage: "window",
+          code: "plan_bound_runner_cost_penalty_support_action",
+        },
+      ],
+    };
+
+    reconcileSelectedRunnerCostPenaltySupportOrigin(
+      input(91, [support]),
+      result,
+      previous,
+    );
+
+    expect(result.portfolio).toMatchObject({
+      stateVersion: 91,
+      rootForegroundInstanceId: rootPlanInstanceId,
+      executorInstanceId,
+      selectedActionOrigin: {
+        rootPlanInstanceId,
+        executorInstanceId,
+        selectedActionId: originalAction.actionId,
+        selectedAtStateVersion: 91,
+        continuedThroughStateVersion: 91,
+        immediateChoicePolicy: "resolve_runner_run_start_order",
+        sourceStepId: `${rootPlanInstanceId}:contest`,
+        sourceActionType: "play_event",
+      },
+    });
+  });
+
   it("preserves the run-plan owner when a trace bid opens payment support", () => {
     const originalAction = traceBidAction(225);
     const previous = runPortfolio(223);
@@ -220,6 +596,7 @@ describe("Runner cost/penalty support plan continuation", () => {
       selectedActionId: "runner.start_run.remote_1",
       selectedAtStateVersion: 65,
       immediateChoicePolicy: "resolve_runner_run_start_order",
+      continuedThroughStateVersion: 65,
       sourceStepId: "plan:runner.contest_remote:remote%3Aremote_1:contest",
       sourceActionType: "start_run",
     };

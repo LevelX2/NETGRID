@@ -1,4 +1,7 @@
-import type { AccessDecisionReason, AccessIntent } from "./access-decision-types";
+import type {
+  AccessDecisionReason,
+  AccessIntent,
+} from "./access-decision-types";
 
 export type ProjectedAccessOutcome = {
   kind: "projected_access_outcome";
@@ -79,4 +82,3 @@ export function observedAccessOutcomeEvidence(params: {
     `observed_access_outcome_state_version:${params.stateVersion}`,
   ];
 }
-

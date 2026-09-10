@@ -32,7 +32,7 @@ type ReconstructedDecisionCapture = {
 };
 
 describe("match b244055277fb21bd terminal remote contest", () => {
-  it("funds the exact terminal contest instead of developing Broker", () => {
+  it("takes the already executable terminal contest instead of developing Broker", () => {
     const capture = structuredClone(
       d184CaptureJson,
     ) as ReconstructedDecisionCapture;
@@ -43,13 +43,12 @@ describe("match b244055277fb21bd terminal remote contest", () => {
 
     const decision = chooseAiAction(capture.input as AiDecisionInput);
 
-    expect(decision.actionId).toBe("runner.gain_credit");
-    expect(decision.decisionDebug?.planKind).toBe("runner.economy");
+    expect(decision.actionId).toBe("runner.start_run.remote_1");
+    expect(decision.decisionDebug?.planKind).toBe("runner.contest_remote");
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "plan_priority_class:P2",
-        "plan_priority_delegated_from:plan:runner.contest_remote:remote%3Aremote_1",
-        "plan_priority_need:run-support:remote:remote_1",
+        "plan_step_capability:contest_remote",
+        "plan_assessment_evidence:runner_terminal_remote_contest_mandatory:remote_1:runner.start_run.remote_1",
       ]),
     );
     expect(decision.evidence).not.toEqual(
@@ -58,8 +57,8 @@ describe("match b244055277fb21bd terminal remote contest", () => {
     expect(
       decision.decisionDebug?.planFirstDecision?.selectedPlan,
     ).toMatchObject({
-      moduleId: "runner.economy",
-      parentInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      instanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      moduleId: "runner.contest_remote",
     });
     expect(
       decision.decisionDebug?.planFirstDecision?.turnPlanning?.selectedLine?.phases.at(
@@ -67,8 +66,8 @@ describe("match b244055277fb21bd terminal remote contest", () => {
       ),
     ).toMatchObject({
       rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-      rootModuleId: "runner.economy",
-      nodes: [{ semanticActionType: "economy.gain_credit" }],
+      rootModuleId: "runner.contest_remote",
+      nodes: [{ semanticActionType: "run.start" }],
     });
   });
 });

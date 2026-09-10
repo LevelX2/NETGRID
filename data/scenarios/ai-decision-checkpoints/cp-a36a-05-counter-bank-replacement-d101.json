@@ -18643,9 +18643,7 @@
   "expectation": {
     "acceptableActions": [
       {
-        "sourceDefinitionId": "onr_v1_196_corporate-war",
-        "type": "install_card",
-        "targetServerId": "new_remote"
+        "type": "draw_card"
       }
     ],
     "forbiddenActions": [
@@ -18656,15 +18654,9 @@
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.score_agenda"],
-      "acceptableCapabilities": ["install_counter_bank_score_agenda"],
-      "requiredAssessmentEvidence": [
-        "engine_certified_counter_bank_cross_remote_handoff:corp_onr_v1_347_vapor-ops_3:corp_onr_v1_196_corporate-war_2:remote_1:new_remote",
-        "transient_plan_signal:goal:tactical:corp-score:counter-bank:handoff:corp_onr_v1_347_vapor-ops_3:corp_onr_v1_196_corporate-war_2:remote_1:new_remote",
-        "transient_plan_signal_plan:corp.score_agenda",
-        "transient_plan_signal_evidence:engine_certified_counter_bank_cross_remote_handoff:corp_onr_v1_347_vapor-ops_3:corp_onr_v1_196_corporate-war_2:remote_1:new_remote",
-        "transient_plan_signal_guarantee:robust_but_reactive"
-      ]
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["allocate_server_defense"],
+      "requiredAssessmentEvidence": ["corp_missing_concrete_defense_draw:rd"]
     }
   }
 }

@@ -44,10 +44,16 @@
           { "cardId": "onr_classic_029_ms-todon", "quantity": 2 },
           { "cardId": "onr_classic_030_psychic-friend", "quantity": 2 },
           { "cardId": "onr_classic_031_rent-i-con", "quantity": 2 },
-          { "cardId": "onr_classic_032_schematics-search-engine", "quantity": 2 },
+          {
+            "cardId": "onr_classic_032_schematics-search-engine",
+            "quantity": 2
+          },
           { "cardId": "onr_classic_033_superglue", "quantity": 3 },
           { "cardId": "onr_classic_037_finders-keepers", "quantity": 3 },
-          { "cardId": "onr_classic_038_gypsytm-schedule-analyzer", "quantity": 2 },
+          {
+            "cardId": "onr_classic_038_gypsytm-schedule-analyzer",
+            "quantity": 2
+          },
           { "cardId": "onr_classic_039_library-search", "quantity": 3 },
           { "cardId": "onr_classic_040_meat-upgrade", "quantity": 2 },
           { "cardId": "onr_classic_041_networking", "quantity": 3 },
@@ -92,13 +98,22 @@
           { "cardId": "onr_classic_029_ms-todon", "quantity": 3 },
           { "cardId": "onr_classic_030_psychic-friend", "quantity": 3 },
           { "cardId": "onr_classic_031_rent-i-con", "quantity": 3 },
-          { "cardId": "onr_classic_032_schematics-search-engine", "quantity": 2 },
+          {
+            "cardId": "onr_classic_032_schematics-search-engine",
+            "quantity": 2
+          },
           { "cardId": "onr_classic_033_superglue", "quantity": 2 },
-          { "cardId": "onr_classic_034_boostergang-connections", "quantity": 2 },
+          {
+            "cardId": "onr_classic_034_boostergang-connections",
+            "quantity": 2
+          },
           { "cardId": "onr_classic_035_corruption", "quantity": 2 },
           { "cardId": "onr_classic_036_do-the-drine", "quantity": 2 },
           { "cardId": "onr_classic_037_finders-keepers", "quantity": 2 },
-          { "cardId": "onr_classic_038_gypsytm-schedule-analyzer", "quantity": 2 },
+          {
+            "cardId": "onr_classic_038_gypsytm-schedule-analyzer",
+            "quantity": 2
+          },
           { "cardId": "onr_classic_039_library-search", "quantity": 2 },
           { "cardId": "onr_classic_040_meat-upgrade", "quantity": 2 },
           { "cardId": "onr_classic_041_networking", "quantity": 2 },
@@ -106,7 +121,10 @@
           { "cardId": "onr_classic_043_running-interference", "quantity": 3 },
           { "cardId": "onr_classic_044_crash-space", "quantity": 1 },
           { "cardId": "onr_classic_046_executive-file-clerk", "quantity": 2 },
-          { "cardId": "onr_classic_048_omnitech-spinal-tap-cybermodem", "quantity": 1 },
+          {
+            "cardId": "onr_classic_048_omnitech-spinal-tap-cybermodem",
+            "quantity": 1
+          },
           { "cardId": "onr_classic_049_omnitech-wet-drive", "quantity": 1 },
           { "cardId": "onr_classic_050_sandbox-dig", "quantity": 1 },
           { "cardId": "onr_classic_052_zetatech-portastation", "quantity": 1 }
@@ -157,13 +175,19 @@
           { "cardId": "onr_classic_016_badtimes", "quantity": 2 },
           { "cardId": "onr_classic_017_corporate-shuffle", "quantity": 3 },
           { "cardId": "onr_classic_018_reclamation-project", "quantity": 2 },
-          { "cardId": "onr_classic_019_indiscriminate-response-team", "quantity": 2 },
+          {
+            "cardId": "onr_classic_019_indiscriminate-response-team",
+            "quantity": 2
+          },
           { "cardId": "onr_classic_020_london-city-grid", "quantity": 1 },
           { "cardId": "onr_classic_021_satellite-monitors", "quantity": 2 },
           { "cardId": "onr_classic_022_self-destruct", "quantity": 1 },
           { "cardId": "onr_classic_023_shock-treatment", "quantity": 1 },
           { "cardId": "onr_classic_024_sterdroid", "quantity": 2 },
-          { "cardId": "onr_classic_025_strategic-planning-group", "quantity": 2 }
+          {
+            "cardId": "onr_classic_025_strategic-planning-group",
+            "quantity": 2
+          }
         ]
       }
     },
@@ -211,13 +235,19 @@
           { "cardId": "onr_classic_016_badtimes", "quantity": 1 },
           { "cardId": "onr_classic_017_corporate-shuffle", "quantity": 2 },
           { "cardId": "onr_classic_018_reclamation-project", "quantity": 3 },
-          { "cardId": "onr_classic_019_indiscriminate-response-team", "quantity": 1 },
+          {
+            "cardId": "onr_classic_019_indiscriminate-response-team",
+            "quantity": 1
+          },
           { "cardId": "onr_classic_020_london-city-grid", "quantity": 2 },
           { "cardId": "onr_classic_021_satellite-monitors", "quantity": 2 },
           { "cardId": "onr_classic_022_self-destruct", "quantity": 2 },
           { "cardId": "onr_classic_023_shock-treatment", "quantity": 1 },
           { "cardId": "onr_classic_024_sterdroid", "quantity": 1 },
-          { "cardId": "onr_classic_025_strategic-planning-group", "quantity": 1 },
+          {
+            "cardId": "onr_classic_025_strategic-planning-group",
+            "quantity": 1
+          },
           { "cardId": "onr_classic_026_street-enforcer", "quantity": 1 }
         ]
       }

@@ -1,4 +1,4 @@
-import readinessData from "../../../data/ai/card-set-ai-readiness-v1.json";
+import { cardSetAiReadinessData as readinessData } from "@netgrid/runtime-data/card-set-ai-readiness";
 
 export const AI_SUPPORT_READINESS_STAGES = [
   "hint_ready",

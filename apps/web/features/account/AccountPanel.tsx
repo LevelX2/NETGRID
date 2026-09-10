@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { useLocale, useTranslations } from "use-intl/react";
 import { formatAppDateTime } from "../../i18n/format";
 import type { AppLocale } from "../../i18n/locale";
@@ -20,6 +21,7 @@ export function AccountPanel({
   const t = useTranslations("Account.panel");
   const [loginName, setLoginName] = useState("");
   const [password, setPassword] = useState("");
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [inviteToken, setInviteToken] = useState("");
   const [invitePassword, setInvitePassword] = useState("");
   const [resetToken, setResetToken] = useState("");
@@ -29,6 +31,10 @@ export function AccountPanel({
   const [adminLoginName, setAdminLoginName] = useState("");
   const [adminDisplayName, setAdminDisplayName] = useState("");
   const [issuedLink, setIssuedLink] = useState("");
+  const [profileName, setProfileName] = useState("");
+  const [registrationName, setRegistrationName] = useState("");
+  const [registrationLogin, setRegistrationLogin] = useState("");
+  const [registrationPassword, setRegistrationPassword] = useState("");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -41,6 +47,19 @@ export function AccountPanel({
     return (
       <section className="accountPanel">
         <p className="muted">{t("loading")}</p>
+      </section>
+    );
+  }
+
+  if (!accountSession.accessPolicy) {
+    return (
+      <section className="accountPanel">
+        <p className="notice" role="alert">
+          {accountSession.error}
+        </p>
+        <button className="button" type="button" onClick={accountSession.retry}>
+          {t("retry")}
+        </button>
       </section>
     );
   }
@@ -62,7 +81,9 @@ export function AccountPanel({
           </div>
           <div className="accountHeaderActions">
             <span className="accountRoleBadge">
-              {accountSession.account.role === "admin" ? t("admin") : t("player")}
+              {accountSession.account.role === "admin"
+                ? t("admin")
+                : t("player")}
             </span>
             <button
               className="button"
@@ -85,9 +106,11 @@ export function AccountPanel({
               <div>
                 <dt>{t("authentication")}</dt>
                 <dd>
-                  {accountSession.session?.authStrength === "password"
-                    ? t("password")
-                    : accountSession.session?.authStrength}
+                  {accountSession.session?.authStrength === "local_profile"
+                    ? t("localProfile")
+                    : accountSession.session?.authStrength === "password"
+                      ? t("password")
+                      : accountSession.session?.authStrength}
                 </dd>
               </div>
               <div>
@@ -108,134 +131,135 @@ export function AccountPanel({
         {accountSession.error ? (
           <p className="notice">{accountSession.error}</p>
         ) : null}
-        <details className="accountSegment">
-          <summary>{t("security")}</summary>
-          <div className="accountSegmentContent">
-            <div className="accountActions">
-              <button
-                className="button"
-                disabled={accountSession.busy}
-                onClick={() => void accountSession.revokeAll()}
-                type="button"
+        {accountSession.accessPolicy?.mode !== "simple" ? (
+          <details className="accountSegment">
+            <summary>{t("security")}</summary>
+            <div className="accountSegmentContent">
+              <div className="accountActions">
+                <button
+                  className="button"
+                  disabled={accountSession.busy}
+                  onClick={() => void accountSession.revokeAll()}
+                  type="button"
+                >
+                  {t("logoutAll")}
+                </button>
+              </div>
+              <form
+                className="accountForm"
+                onSubmit={(event) => void submitPassword(event)}
               >
-                {t("logoutAll")}
-              </button>
+                <h3>{t("changePassword")}</h3>
+                <label>
+                  {t("currentPassword")}
+                  <input
+                    autoComplete="current-password"
+                    onChange={(event) => setCurrentPassword(event.target.value)}
+                    required
+                    type="password"
+                    value={currentPassword}
+                  />
+                </label>
+                <label>
+                  {t("newPassword")}
+                  <input
+                    autoComplete="new-password"
+                    minLength={15}
+                    onChange={(event) => setNewPassword(event.target.value)}
+                    required
+                    type="password"
+                    value={newPassword}
+                  />
+                </label>
+                <small>{t("passwordHelp")}</small>
+                <button
+                  className="button primary"
+                  disabled={accountSession.busy}
+                  type="submit"
+                >
+                  {t("changePassword")}
+                </button>
+              </form>
             </div>
-            <form
-              className="accountForm"
-              onSubmit={(event) => void submitPassword(event)}
-            >
-              <h3>{t("changePassword")}</h3>
-              <label>
-                {t("currentPassword")}
-                <input
-                  autoComplete="current-password"
-                  onChange={(event) => setCurrentPassword(event.target.value)}
-                  required
-                  type="password"
-                  value={currentPassword}
-                />
-              </label>
-              <label>
-                {t("newPassword")}
-                <input
-                  autoComplete="new-password"
-                  minLength={15}
-                  onChange={(event) => setNewPassword(event.target.value)}
-                  required
-                  type="password"
-                  value={newPassword}
-                />
-              </label>
-              <small>
-                {t("passwordHelp")}
-              </small>
-              <button
-                className="button primary"
-                disabled={accountSession.busy}
-                type="submit"
-              >
-                {t("changePassword")}
-              </button>
-            </form>
-          </div>
-        </details>
-        {accountSession.account.role === "admin" ? (
+          </details>
+        ) : null}
+        {accountSession.account.role === "admin" &&
+        accountSession.accessPolicy?.mode === "invite_only" ? (
           <details className="accountSegment">
             <summary>{t("administration")}</summary>
             <div className="accountSegmentContent accountFormGrid">
               <form
-              className="accountForm"
-              onSubmit={(event) => {
-                event.preventDefault();
-                void accountSession
-                  .createInvite(adminLoginName, adminDisplayName)
-                  .then((created) => {
-                    if (created)
-                      setIssuedLink(
-                        `${window.location.origin}/?invite=${encodeURIComponent(created.inviteToken)}`,
-                      );
-                  });
-              }}
-            >
-              <h3>{t("inviteAccount")}</h3>
-              <label>
-                {t("loginName")}
-                <input
-                  onChange={(event) => setAdminLoginName(event.target.value)}
-                  required
-                  value={adminLoginName}
-                />
-              </label>
-              <label>
-                {t("displayName")}
-                <input
-                  onChange={(event) => setAdminDisplayName(event.target.value)}
-                  required
-                  value={adminDisplayName}
-                />
-              </label>
-              <button
-                className="button primary"
-                disabled={accountSession.busy}
-                type="submit"
+                className="accountForm"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  void accountSession
+                    .createInvite(adminLoginName, adminDisplayName)
+                    .then((created) => {
+                      if (created)
+                        setIssuedLink(
+                          `${window.location.origin}/?invite=${encodeURIComponent(created.inviteToken)}`,
+                        );
+                    });
+                }}
               >
-                {t("createInviteLink")}
-              </button>
+                <h3>{t("inviteAccount")}</h3>
+                <label>
+                  {t("loginName")}
+                  <input
+                    onChange={(event) => setAdminLoginName(event.target.value)}
+                    required
+                    value={adminLoginName}
+                  />
+                </label>
+                <label>
+                  {t("displayName")}
+                  <input
+                    onChange={(event) =>
+                      setAdminDisplayName(event.target.value)
+                    }
+                    required
+                    value={adminDisplayName}
+                  />
+                </label>
+                <button
+                  className="button primary"
+                  disabled={accountSession.busy}
+                  type="submit"
+                >
+                  {t("createInviteLink")}
+                </button>
               </form>
               <form
-              className="accountForm"
-              onSubmit={(event) => {
-                event.preventDefault();
-                void accountSession
-                  .createReset(adminLoginName)
-                  .then((created) => {
-                    if (created)
-                      setIssuedLink(
-                        `${window.location.origin}/?reset=${encodeURIComponent(created.resetToken)}`,
-                      );
-                  });
-              }}
-            >
-              <h3>{t("passwordReset")}</h3>
-              <label>
-                {t("loginName")}
-                <input
-                  onChange={(event) => setAdminLoginName(event.target.value)}
-                  required
-                  value={adminLoginName}
-                />
-              </label>
-              <small>
-                {t("resetLinkHelp")}
-              </small>
-              <button
-                className="button"
-                disabled={accountSession.busy}
-                type="submit"
+                className="accountForm"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  void accountSession
+                    .createReset(adminLoginName)
+                    .then((created) => {
+                      if (created)
+                        setIssuedLink(
+                          `${window.location.origin}/?reset=${encodeURIComponent(created.resetToken)}`,
+                        );
+                    });
+                }}
               >
-                {t("createResetLink")}
-              </button>
+                <h3>{t("passwordReset")}</h3>
+                <label>
+                  {t("loginName")}
+                  <input
+                    onChange={(event) => setAdminLoginName(event.target.value)}
+                    required
+                    value={adminLoginName}
+                  />
+                </label>
+                <small>{t("resetLinkHelp")}</small>
+                <button
+                  className="button"
+                  disabled={accountSession.busy}
+                  type="submit"
+                >
+                  {t("createResetLink")}
+                </button>
               </form>
             </div>
           </details>
@@ -252,7 +276,10 @@ export function AccountPanel({
 
   const submitLogin = async (event: FormEvent) => {
     event.preventDefault();
-    if (await accountSession.login(loginName, password)) setPassword("");
+    if (await accountSession.login(loginName, password)) {
+      setPassword("");
+      setIsPasswordVisible(false);
+    }
   };
   const submitInvite = async (event: FormEvent) => {
     event.preventDefault();
@@ -264,6 +291,79 @@ export function AccountPanel({
     if (await accountSession.acceptReset(resetToken, resetPassword))
       setResetPassword("");
   };
+  const submitProfile = async (event: FormEvent) => {
+    event.preventDefault();
+    if (await accountSession.registerProfile(profileName)) setProfileName("");
+  };
+  const submitRegistration = async (event: FormEvent) => {
+    event.preventDefault();
+    if (
+      await accountSession.registerProtected(
+        registrationLogin,
+        registrationName,
+        registrationPassword,
+      )
+    ) {
+      setRegistrationPassword("");
+    }
+  };
+
+  if (accountSession.accessPolicy?.mode === "simple") {
+    return (
+      <section className="accountPanel">
+        <div className="accountPanelHeader">
+          <div>
+            <p className="eyebrow">{t("simpleMode")}</p>
+            <h2>{t("chooseProfile")}</h2>
+          </div>
+        </div>
+        <p className="muted">{t("simpleModeHelp")}</p>
+        {accountSession.error ? (
+          <p className="notice">{accountSession.error}</p>
+        ) : null}
+        <div className="accountActions">
+          {accountSession.profiles.map((profile) => (
+            <button
+              className="button"
+              disabled={accountSession.busy}
+              key={profile.accountId}
+              onClick={() =>
+                void accountSession.selectProfile(profile.accountId)
+              }
+              type="button"
+            >
+              {profile.displayName}
+            </button>
+          ))}
+        </div>
+        {accountSession.profiles.length === 0 ? (
+          <p className="muted">{t("noProfiles")}</p>
+        ) : null}
+        <form
+          className="accountForm"
+          onSubmit={(event) => void submitProfile(event)}
+        >
+          <h3>{t("createProfile")}</h3>
+          <label>
+            {t("displayName")}
+            <input
+              autoComplete="nickname"
+              onChange={(event) => setProfileName(event.target.value)}
+              required
+              value={profileName}
+            />
+          </label>
+          <button
+            className="button primary"
+            disabled={accountSession.busy}
+            type="submit"
+          >
+            {t("createAndUseProfile")}
+          </button>
+        </form>
+      </section>
+    );
+  }
   return (
     <section className="accountPanel">
       <div className="accountPanelHeader">
@@ -278,120 +378,188 @@ export function AccountPanel({
       <details className="accountSegment" open>
         <summary>{t("guestAndLogin")}</summary>
         <div className="accountSegmentContent">
-          <p className="muted">
-            {t("guestHelp")}
-          </p>
-          <form
-          className="accountForm"
-          onSubmit={(event) => void submitLogin(event)}
-        >
-          <h3>{t("login")}</h3>
-          <label>
-            {t("loginName")}
-            <input
-              autoComplete="username"
-              onChange={(event) => setLoginName(event.target.value)}
-              required
-              value={loginName}
-            />
-          </label>
-          <label>
-            {t("password")}
-            <input
-              autoComplete="current-password"
-              onChange={(event) => setPassword(event.target.value)}
-              required
-              type="password"
-              value={password}
-            />
-          </label>
-          <button
-            className="button primary"
-            disabled={accountSession.busy}
-            type="submit"
-          >
-            {t("login")}
-          </button>
-          </form>
-        </div>
-      </details>
-      <details className="accountSegment" open={Boolean(inviteToken)}>
-        <summary>{t("activateAccount")}</summary>
-        <div className="accountSegmentContent">
-          <form
-          className="accountForm"
-          onSubmit={(event) => void submitInvite(event)}
-        >
-          <h3>{t("acceptInvite")}</h3>
-          <label>
-            {t("inviteCode")}
-            <input
-              autoComplete="off"
-              onChange={(event) => setInviteToken(event.target.value)}
-              required
-              value={inviteToken}
-            />
-          </label>
-          <label>
-            {t("newPassword")}
-            <input
-              autoComplete="new-password"
-              minLength={15}
-              onChange={(event) => setInvitePassword(event.target.value)}
-              required
-              type="password"
-              value={invitePassword}
-            />
-          </label>
-          <small>
-            {t("inviteHelp")}
-          </small>
-          <button
-            className="button primary"
-            disabled={accountSession.busy}
-            type="submit"
-          >
-            {t("activateAccount")}
-          </button>
-          </form>
-        </div>
-      </details>
-      {resetToken ? (
-        <details className="accountSegment" open>
-          <summary>{t("resetPassword")}</summary>
-          <div className="accountSegmentContent">
+          <p className="muted">{t("guestHelp")}</p>
           <form
             className="accountForm"
-            onSubmit={(event) => void submitReset(event)}
+            onSubmit={(event) => void submitLogin(event)}
           >
-            <h3>{t("resetPassword")}</h3>
+            <h3>{t("login")}</h3>
             <label>
-              {t("resetCode")}
+              {t("loginName")}
               <input
-                autoComplete="off"
-                onChange={(event) => setResetToken(event.target.value)}
+                autoComplete="username"
+                onChange={(event) => setLoginName(event.target.value)}
                 required
-                value={resetToken}
+                value={loginName}
               />
             </label>
-            <label>
-              {t("newPassword")}
-              <input
-                autoComplete="new-password"
-                minLength={15}
-                onChange={(event) => setResetPassword(event.target.value)}
-                required
-                type="password"
-                value={resetPassword}
-              />
-            </label>
+            <div className="accountField">
+              <label htmlFor="account-login-password">{t("password")}</label>
+              <span className="accountPasswordField">
+                <input
+                  autoComplete="current-password"
+                  id="account-login-password"
+                  onChange={(event) => setPassword(event.target.value)}
+                  required
+                  type={isPasswordVisible ? "text" : "password"}
+                  value={password}
+                />
+                <button
+                  aria-label={t(
+                    isPasswordVisible ? "hidePassword" : "showPassword",
+                  )}
+                  aria-pressed={isPasswordVisible}
+                  className="accountPasswordToggle"
+                  onClick={() => setIsPasswordVisible((visible) => !visible)}
+                  title={t(isPasswordVisible ? "hidePassword" : "showPassword")}
+                  type="button"
+                >
+                  {isPasswordVisible ? (
+                    <EyeOff aria-hidden="true" size={18} />
+                  ) : (
+                    <Eye aria-hidden="true" size={18} />
+                  )}
+                </button>
+              </span>
+            </div>
             <button
               className="button primary"
               disabled={accountSession.busy}
               type="submit"
             >
-              {t("setNewPassword")}
+              {t("login")}
             </button>
+          </form>
+        </div>
+      </details>
+      {accountSession.accessPolicy?.mode === "protected" ? (
+        <details className="accountSegment">
+          <summary>{t("createProtectedAccount")}</summary>
+          <div className="accountSegmentContent">
+            <form
+              className="accountForm"
+              onSubmit={(event) => void submitRegistration(event)}
+            >
+              <label>
+                {t("displayName")}
+                <input
+                  autoComplete="nickname"
+                  onChange={(event) => setRegistrationName(event.target.value)}
+                  required
+                  value={registrationName}
+                />
+              </label>
+              <label>
+                {t("loginName")}
+                <input
+                  autoComplete="username"
+                  onChange={(event) => setRegistrationLogin(event.target.value)}
+                  required
+                  value={registrationLogin}
+                />
+              </label>
+              <label>
+                {t("password")}
+                <input
+                  autoComplete="new-password"
+                  minLength={15}
+                  onChange={(event) =>
+                    setRegistrationPassword(event.target.value)
+                  }
+                  required
+                  type="password"
+                  value={registrationPassword}
+                />
+              </label>
+              <small>{t("protectedRegistrationHelp")}</small>
+              <button
+                className="button primary"
+                disabled={accountSession.busy}
+                type="submit"
+              >
+                {t("createProtectedAccount")}
+              </button>
+            </form>
+          </div>
+        </details>
+      ) : null}
+      {accountSession.accessPolicy?.mode !== "protected" ? (
+        <details className="accountSegment" open={Boolean(inviteToken)}>
+          <summary>{t("activateAccount")}</summary>
+          <div className="accountSegmentContent">
+            <form
+              className="accountForm"
+              onSubmit={(event) => void submitInvite(event)}
+            >
+              <h3>{t("acceptInvite")}</h3>
+              <label>
+                {t("inviteCode")}
+                <input
+                  autoComplete="off"
+                  onChange={(event) => setInviteToken(event.target.value)}
+                  required
+                  value={inviteToken}
+                />
+              </label>
+              <label>
+                {t("newPassword")}
+                <input
+                  autoComplete="new-password"
+                  minLength={15}
+                  onChange={(event) => setInvitePassword(event.target.value)}
+                  required
+                  type="password"
+                  value={invitePassword}
+                />
+              </label>
+              <small>{t("inviteHelp")}</small>
+              <button
+                className="button primary"
+                disabled={accountSession.busy}
+                type="submit"
+              >
+                {t("activateAccount")}
+              </button>
+            </form>
+          </div>
+        </details>
+      ) : null}
+      {resetToken && accountSession.accessPolicy?.mode !== "protected" ? (
+        <details className="accountSegment" open>
+          <summary>{t("resetPassword")}</summary>
+          <div className="accountSegmentContent">
+            <form
+              className="accountForm"
+              onSubmit={(event) => void submitReset(event)}
+            >
+              <h3>{t("resetPassword")}</h3>
+              <label>
+                {t("resetCode")}
+                <input
+                  autoComplete="off"
+                  onChange={(event) => setResetToken(event.target.value)}
+                  required
+                  value={resetToken}
+                />
+              </label>
+              <label>
+                {t("newPassword")}
+                <input
+                  autoComplete="new-password"
+                  minLength={15}
+                  onChange={(event) => setResetPassword(event.target.value)}
+                  required
+                  type="password"
+                  value={resetPassword}
+                />
+              </label>
+              <button
+                className="button primary"
+                disabled={accountSession.busy}
+                type="submit"
+              >
+                {t("setNewPassword")}
+              </button>
             </form>
           </div>
         </details>
@@ -400,10 +568,7 @@ export function AccountPanel({
   );
 }
 
-function formatDate(
-  value: string | undefined,
-  locale: AppLocale,
-): string {
+function formatDate(value: string | undefined, locale: AppLocale): string {
   if (!value) return "–";
   return formatAppDateTime(value, locale, {
     dateStyle: "medium",

@@ -1,5 +1,7 @@
+import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import type { DeckDefinition } from "@netgrid/shared";
 import {
   runAiSelfplayTraceMining,
@@ -27,64 +29,50 @@ const seeds = [
   "proteus-pilot-holdout-01",
   "proteus-pilot-holdout-02",
 ];
-const maxActions = 180;
+const maxActions = 480;
+const workerResultMarker = "NETGRID_PROTEUS_PILOT_WORKER_RESULT ";
 
 assert(runnerDecks.length === 2, "Expected two Proteus Runner pilot decks.");
 assert(corpDecks.length === 2, "Expected two Proteus Corp pilot decks.");
 
-const pilotFailureDiagnostics: Array<{
-  pairId: string;
-  seed: string;
-  errors: string[];
-}> = [];
-const pairResults = runnerDecks.flatMap((runnerDeck) =>
-  corpDecks.map((corpDeck) => {
-    const pairId = `${runnerDeck.id}__${corpDeck.id}`;
-    const result = runAiSelfplayTraceMining({
-      seeds,
-      maxActions,
-      runnerDeck,
-      corpDeck,
-      runnerControllerMode: "current_candidate",
-      corpControllerMode: "current_candidate",
-      maxFindings: 20,
-    });
-    for (const summary of result.summaries) {
-      if (summary.errors.length > 0)
-        pilotFailureDiagnostics.push({
-          pairId,
-          seed: summary.seed,
-          errors: [...summary.errors],
-        });
-    }
-    return {
-      pairId,
-      runnerDeckId: runnerDeck.id,
-      corpDeckId: corpDeck.id,
-      aggregate: result.aggregate,
-      games: result.summaries.map((summary) => ({
-        seed: summary.seed,
-        holdout: summary.seed.includes("holdout"),
-        winner: summary.winner,
-        gameEndReason: summary.gameEndReason ?? null,
-        terminationKind: summary.terminationKind,
-        actions: summary.actions,
-        turns: summary.turns,
-        finalAgendaPoints: summary.finalAgendaPoints,
-        finalStateHash: summary.finalStateHash,
-        replayOk: summary.replayOk,
-        illegalActions: summary.metrics.illegalActions,
-        fallbackRate: summary.metrics.fallbackRate,
-        noProgress:
-          summary.terminationKind === "action_limit" &&
-          summary.finalAgendaPoints.runner === 0 &&
-          summary.finalAgendaPoints.corp === 0,
-      })),
-    };
-  }),
-);
+if (process.argv.includes("--game-worker")) {
+  const runnerDeckId = requiredArgument("--runner-deck-id");
+  const corpDeckId = requiredArgument("--corp-deck-id");
+  const seed = requiredArgument("--seed");
+  const runnerDeck = requiredDeck(runnerDecks, runnerDeckId);
+  const corpDeck = requiredDeck(corpDecks, corpDeckId);
+  process.stdout.write(
+    `${workerResultMarker}${JSON.stringify(simulatePairGame(runnerDeck, corpDeck, seed))}\n`,
+  );
+  process.exit(0);
+}
 
-const controlGames = seeds.map((seed) => {
+if (process.argv.includes("--control-worker")) {
+  const seed = requiredArgument("--seed");
+  process.stdout.write(
+    `${workerResultMarker}${JSON.stringify(simulateControlGame(seed))}\n`,
+  );
+  process.exit(0);
+}
+
+const pairWorkerResults = runnerDecks.flatMap((runnerDeck) =>
+  corpDecks.map((corpDeck) =>
+    combinePairGameResults(
+      runnerDeck.id,
+      corpDeck.id,
+      seeds.map((seed) => runGameWorker(runnerDeck.id, corpDeck.id, seed)),
+    ),
+  ),
+);
+const pairResults = pairWorkerResults.map(
+  ({ failureDiagnostics: _failureDiagnostics, ...pair }) => pair,
+);
+const pilotFailureDiagnostics = pairWorkerResults.flatMap(
+  (result) => result.failureDiagnostics,
+);
+const controlGames = seeds.map(runControlWorker);
+
+function simulateControlGame(seed: string) {
   const summary = simulateAiGame({
     seed: `originalset-control:${seed}`,
     maxActions,
@@ -97,7 +85,171 @@ const controlGames = seeds.map((seed) => {
     replayOk: summary.replayOk,
     illegalActions: summary.metrics.illegalActions,
   };
-});
+}
+
+function simulatePairGame(
+  runnerDeck: DeckDefinition,
+  corpDeck: DeckDefinition,
+  seed: string,
+) {
+  const pairId = `${runnerDeck.id}__${corpDeck.id}`;
+  const result = runAiSelfplayTraceMining({
+    seeds: [seed],
+    maxActions,
+    runnerDeck,
+    corpDeck,
+    runnerControllerMode: "current_candidate",
+    corpControllerMode: "current_candidate",
+    maxFindings: 20,
+  });
+  const summary = result.summaries[0];
+  assert(summary, `Missing Proteus pilot summary for ${pairId}/${seed}.`);
+  return {
+    aggregate: result.aggregate,
+    game: {
+      seed: summary.seed,
+      holdout: summary.seed.includes("holdout"),
+      winner: summary.winner,
+      gameEndReason: summary.gameEndReason ?? null,
+      terminationKind: summary.terminationKind,
+      actions: summary.actions,
+      turns: summary.turns,
+      finalAgendaPoints: summary.finalAgendaPoints,
+      finalStateHash: summary.finalStateHash,
+      replayOk: summary.replayOk,
+      illegalActions: summary.metrics.illegalActions,
+      fallbackRate: summary.metrics.fallbackRate,
+      noProgress:
+        summary.terminationKind === "action_limit" &&
+        summary.finalAgendaPoints.runner === 0 &&
+        summary.finalAgendaPoints.corp === 0,
+    },
+    failureDiagnostic:
+      summary.errors.length > 0
+        ? { pairId, seed: summary.seed, errors: [...summary.errors] }
+        : undefined,
+  };
+}
+
+function runGameWorker(runnerDeckId: string, corpDeckId: string, seed: string) {
+  return runWorker<ReturnType<typeof simulatePairGame>>([
+    "--game-worker",
+    `--runner-deck-id=${runnerDeckId}`,
+    `--corp-deck-id=${corpDeckId}`,
+    `--seed=${seed}`,
+  ]);
+}
+
+function combinePairGameResults(
+  runnerDeckId: string,
+  corpDeckId: string,
+  results: Array<ReturnType<typeof simulatePairGame>>,
+) {
+  const aggregates = results.map((result) => result.aggregate);
+  const sum = (select: (aggregate: (typeof aggregates)[number]) => number) =>
+    aggregates.reduce((total, aggregate) => total + select(aggregate), 0);
+  const sumRecord = <Key extends string>(
+    select: (aggregate: (typeof aggregates)[number]) => Record<Key, number>,
+  ): Record<Key, number> => {
+    const records = aggregates.map(select);
+    return Object.fromEntries(
+      Object.keys(records[0] ?? {}).map((key) => [
+        key,
+        records.reduce((total, record) => total + (record[key as Key] ?? 0), 0),
+      ]),
+    ) as Record<Key, number>;
+  };
+  const games = sum((aggregate) => aggregate.games);
+  return {
+    pairId: `${runnerDeckId}__${corpDeckId}`,
+    runnerDeckId,
+    corpDeckId,
+    aggregate: {
+      games,
+      decisions: sum((aggregate) => aggregate.decisions),
+      findings: sum((aggregate) => aggregate.findings),
+      findingsBySeverity: sumRecord(
+        (aggregate) => aggregate.findingsBySeverity,
+      ),
+      findingsByDetector: sumRecord(
+        (aggregate) => aggregate.findingsByDetector,
+      ),
+      illegalActions: sum((aggregate) => aggregate.illegalActions),
+      replayFailures: sum((aggregate) => aggregate.replayFailures),
+      actionLimitReached: sum((aggregate) => aggregate.actionLimitReached),
+      allRedactionSafe: aggregates.every(
+        (aggregate) => aggregate.allRedactionSafe,
+      ),
+      redactionSafe: aggregates.every((aggregate) => aggregate.redactionSafe),
+      averageGameLength:
+        games === 0
+          ? 0
+          : sum((aggregate) => aggregate.averageGameLength * aggregate.games) /
+            games,
+      corpAgendaScores: sum((aggregate) => aggregate.corpAgendaScores),
+      runnerAgendaSteals: sum((aggregate) => aggregate.runnerAgendaSteals),
+      corpFlatlines: sum((aggregate) => aggregate.corpFlatlines),
+      scoreWindowMissed: sum((aggregate) => aggregate.scoreWindowMissed),
+      unsafeScoreChosen: sum((aggregate) => aggregate.unsafeScoreChosen),
+      passiveActionWithScoreLineAvailable: sum(
+        (aggregate) => aggregate.passiveActionWithScoreLineAvailable,
+      ),
+      actionLimitClusters: sumRecord(
+        (aggregate) => aggregate.actionLimitClusters,
+      ),
+      actionLimitSubclusters: sumRecord(
+        (aggregate) => aggregate.actionLimitSubclusters,
+      ),
+    },
+    games: results.map((result) => result.game),
+    failureDiagnostics: results.flatMap((result) =>
+      result.failureDiagnostic ? [result.failureDiagnostic] : [],
+    ),
+  };
+}
+
+function runControlWorker(seed: string) {
+  return runWorker<ReturnType<typeof simulateControlGame>>([
+    "--control-worker",
+    `--seed=${seed}`,
+  ]);
+}
+
+function runWorker<Result>(arguments_: string[]): Result {
+  const output = execFileSync(
+    process.execPath,
+    ["--import", "tsx", fileURLToPath(import.meta.url), ...arguments_],
+    {
+      cwd: root,
+      encoding: "utf8",
+      maxBuffer: 10 * 1024 * 1024,
+    },
+  );
+  const resultLine = output
+    .split(/\r?\n/)
+    .find((line) => line.startsWith(workerResultMarker));
+  assert(
+    resultLine,
+    `Proteus pilot worker emitted no structured result: ${output.slice(-1000)}`,
+  );
+  return JSON.parse(resultLine.slice(workerResultMarker.length)) as Result;
+}
+
+function requiredArgument(name: string): string {
+  const prefix = `${name}=`;
+  const value = process.argv.find((argument) => argument.startsWith(prefix));
+  assert(value, `Missing worker argument ${name}.`);
+  return value.slice(prefix.length);
+}
+
+function requiredDeck(
+  decks: readonly DeckDefinition[],
+  deckId: string,
+): DeckDefinition {
+  const deck = decks.find((candidate) => candidate.id === deckId);
+  assert(deck, `Unknown Proteus pilot deck ${deckId}.`);
+  return deck;
+}
 
 const games = pairResults.flatMap((pair) => pair.games);
 const terminationTotals = proteusPilotTerminationTotals(games);
@@ -144,6 +296,23 @@ const gateChecks = {
     originalsetControlFailures <= thresholds.originalsetControlFailuresMax,
 };
 const gatePassed = Object.values(gateChecks).every(Boolean);
+const gateFailureMessage = `Proteus selected pilot gate failed: ${JSON.stringify(
+  gateChecks,
+)}; totals=${JSON.stringify(totals)}; rates=${JSON.stringify(
+  rates,
+)}; actionLimitGames=${JSON.stringify(
+  pairResults.flatMap((pair) =>
+    pair.games
+      .filter((game) => game.terminationKind === "action_limit")
+      .map((game) => ({
+        pairId: pair.pairId,
+        seed: game.seed,
+        actions: game.actions,
+        turns: game.turns,
+        finalAgendaPoints: game.finalAgendaPoints,
+      })),
+  ),
+)}; diagnostics=${JSON.stringify(pilotFailureDiagnostics)}.`;
 
 const report = {
   schemaVersion: "netgrid.proteus-ai-selected-pilot.v1",
@@ -176,10 +345,7 @@ const report = {
 
 const serialized = `${JSON.stringify(report, null, 2)}\n`;
 if (shouldWrite) {
-  assert(
-    gatePassed,
-    `Proteus selected pilot gate failed: ${JSON.stringify(gateChecks)}; diagnostics=${JSON.stringify(pilotFailureDiagnostics)}.`,
-  );
+  assert(gatePassed, gateFailureMessage);
   writeFileSync(outputPath, serialized, "utf8");
   console.log(`Wrote ${outputRelative}; gatePassed=${gatePassed}.`);
 } else if (shouldCheck) {
@@ -194,10 +360,7 @@ if (shouldWrite) {
 } else {
   process.stdout.write(serialized);
 }
-assert(
-  gatePassed,
-  `Proteus selected pilot gate failed: ${JSON.stringify(gateChecks)}; diagnostics=${JSON.stringify(pilotFailureDiagnostics)}.`,
-);
+assert(gatePassed, gateFailureMessage);
 
 function readJson<T>(relativePath: string): T {
   return JSON.parse(readFileSync(resolve(root, relativePath), "utf8")) as T;

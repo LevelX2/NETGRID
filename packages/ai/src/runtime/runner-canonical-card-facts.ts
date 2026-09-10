@@ -4,12 +4,150 @@ type RunnerPlanningCard = NonNullable<
   ReturnType<typeof cardSpecPlanningCardByDefinitionId>
 >;
 
+export function runnerEventStartsRunAfterProgramSearch(
+  definitionId: string | undefined,
+): boolean {
+  if (!definitionId) return false;
+  const planning = cardSpecPlanningCardByDefinitionId(definitionId)?.planning;
+  return (
+    planning?.side === "runner" &&
+    planning.engine.runnerEventLongtail?.kind ===
+      "search_stack_install_program_free_then_run_return_or_penalty"
+  );
+}
+
+export function runnerSoleFortIceTrashTagAmount(
+  definitionId: string | undefined,
+): number | undefined {
+  if (!definitionId) return undefined;
+  const planning = cardSpecPlanningCardByDefinitionId(definitionId)?.planning;
+  if (planning?.side !== "runner") return undefined;
+  const abilities = (planning.engine.abilities ?? []).filter(
+    (entry) => entry.kind === "on_play",
+  );
+  if (abilities.length !== 1) return undefined;
+  const effects = abilities[0]!.effects;
+  if (effects.length !== 1) return undefined;
+  const effect = effects[0]!;
+  return effect.kind ===
+    "trash_rezzed_ice_on_last_successful_run_fort_and_add_tags"
+    ? effect.tagAmount
+    : undefined;
+}
+
+export type RunnerRestrictedRunCreditUse =
+  | "using_icebreaker_during_run_non_noisy"
+  | "using_killer_during_run";
+
+export type RunnerRestrictedRunCreditProfile = Readonly<{
+  capacity: number;
+  uses: readonly RunnerRestrictedRunCreditUse[];
+  refreshTiming: "start_of_runner_turn";
+}>;
+
 export type RunnerNoRunRecurringEconomyProfile = Readonly<{
   installCost: number;
   turnStartCredits: number;
   earliestPayout: "start_of_runner_turn";
   invalidatingActionType: "start_run";
 }>;
+
+export type RunnerVoluntarySelfTrashLifecycleProfile = Readonly<{
+  turnStartCreditGain: number;
+  leavePlayCreditLoss: number;
+  exposesRunnerToAutomaticTraceSuccess: boolean;
+}>;
+
+export function runnerVoluntarySelfTrashLifecycleProfile(
+  definitionId: string | undefined,
+): RunnerVoluntarySelfTrashLifecycleProfile | undefined {
+  if (!definitionId) return undefined;
+  const planning = cardSpecPlanningCardByDefinitionId(definitionId)?.planning;
+  if (planning?.side !== "runner") return undefined;
+  const abilities = planning.engine.abilities ?? [];
+  const pureVoluntarySelfTrashAbilities = abilities.filter(
+    (ability) =>
+      ability.kind === "activated" &&
+      ability.timing === "runner_main" &&
+      ability.costs.length === 1 &&
+      ability.costs[0]?.kind === "action" &&
+      ability.costs[0].amount > 0 &&
+      ability.effects.length === 1 &&
+      ability.effects[0]?.kind === "trash_source",
+  );
+  if (pureVoluntarySelfTrashAbilities.length !== 1) return undefined;
+  const startTurnEffects = (
+    planning.engine.lifecycle?.start_of_runner_turn ?? []
+  ).flatMap((ability) => ability.effects);
+  const startTurnCreditAmounts = startTurnEffects.flatMap((effect) =>
+    effect.kind === "gain_credits" &&
+    (effect.recipient === "runner" || effect.recipient === "controller") &&
+    positiveSafeInteger(effect.amount)
+      ? [effect.amount]
+      : [],
+  );
+  if (
+    startTurnCreditAmounts.length === 0 ||
+    startTurnCreditAmounts.length !== startTurnEffects.length
+  ) {
+    return undefined;
+  }
+  const leavePlayEffects = planning.engine.lifecycle?.on_leave_play ?? [];
+  const leavePlayCreditLossAmounts = leavePlayEffects.flatMap((effect) =>
+    effect.kind === "lose_credits" &&
+    (effect.recipient === "runner" || effect.recipient === "controller") &&
+    positiveSafeInteger(effect.amount)
+      ? [effect.amount]
+      : [],
+  );
+  if (
+    leavePlayCreditLossAmounts.length === 0 ||
+    leavePlayCreditLossAmounts.length !== leavePlayEffects.length
+  ) {
+    return undefined;
+  }
+  return {
+    turnStartCreditGain: startTurnCreditAmounts.reduce(
+      (sum, amount) => sum + amount,
+      0,
+    ),
+    leavePlayCreditLoss: leavePlayCreditLossAmounts.reduce(
+      (sum, amount) => sum + amount,
+      0,
+    ),
+    exposesRunnerToAutomaticTraceSuccess:
+      planning.engine.runnerUtilityLongtail?.kind ===
+      "trace_attempts_auto_success_add_tag",
+  };
+}
+
+export function runnerRestrictedRunCreditProfile(
+  definitionId: string | undefined,
+): RunnerRestrictedRunCreditProfile | undefined {
+  if (!definitionId) return undefined;
+  const planning = cardSpecPlanningCardByDefinitionId(definitionId)?.planning;
+  if (planning?.side !== "runner") return undefined;
+  const source = planning.engine.restrictedHostedCreditSource;
+  if (
+    !source ||
+    !positiveSafeInteger(source.capacity) ||
+    source.refresh?.timing !== "start_of_runner_turn"
+  ) {
+    return undefined;
+  }
+  const uses = [...new Set(source.usableFor)].filter(
+    (use): use is RunnerRestrictedRunCreditUse =>
+      use === "using_icebreaker_during_run_non_noisy" ||
+      use === "using_killer_during_run",
+  );
+  return uses.length > 0
+    ? {
+        capacity: source.capacity,
+        uses: uses.sort(),
+        refreshTiming: "start_of_runner_turn",
+      }
+    : undefined;
+}
 
 export type RunnerDebtFinancingProfile = Readonly<{
   installCost: number;
@@ -52,6 +190,11 @@ export type RunnerStartOfTurnDelayedInstallCountdownProfile = Readonly<{
 
 export type RunnerRunStartTrashSourceProfile = Readonly<{
   sourceEffect: "trash_source";
+}>;
+
+export type RunnerRunStartRandomStrengthSourceProfile = Readonly<{
+  sourceEffect: "random_run_strength";
+  dieSides: number;
 }>;
 
 export function runnerInstalledDebtFinancingLiability(
@@ -430,6 +573,42 @@ export function runnerRunStartTrashSourceProfileFromPlanningCard(
   ).flatMap((ability) => ability.effects);
   return effects.length === 1 && effects[0]?.kind === "trash_source"
     ? { sourceEffect: "trash_source" }
+    : undefined;
+}
+
+/**
+ * Canonical profile for a random-strength breaker that the Engine resolves at
+ * the start of every run. Multiple copies of the same definition are
+ * order-equivalent; the Engine still requires one exact source payload.
+ */
+export function runnerRunStartRandomStrengthSourceProfile(
+  definitionId: string | undefined,
+): RunnerRunStartRandomStrengthSourceProfile | undefined {
+  if (!definitionId) return undefined;
+  return runnerRunStartRandomStrengthSourceProfileFromPlanningCard(
+    cardSpecPlanningCardByDefinitionId(definitionId),
+  );
+}
+
+export function runnerRunStartRandomStrengthSourceProfileFromPlanningCard(
+  card: RunnerPlanningCard | undefined,
+): RunnerRunStartRandomStrengthSourceProfile | undefined {
+  const planning = card?.planning;
+  const strength = planning?.engine.characteristics?.strength;
+  const hasRunStartRandomStrengthAbility =
+    planning?.engine.icebreakerAbilities?.some(
+      (ability) =>
+        ability.kind === "break_subroutine" &&
+        ability.special?.kind === "run_start_random_strength_bonus",
+    ) === true;
+  return planning?.side === "runner" &&
+    strength?.kind === "random_die" &&
+    positiveSafeInteger(strength.dieSides) &&
+    hasRunStartRandomStrengthAbility
+    ? {
+        sourceEffect: "random_run_strength",
+        dieSides: strength.dieSides,
+      }
     : undefined;
 }
 

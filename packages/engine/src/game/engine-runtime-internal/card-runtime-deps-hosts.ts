@@ -525,7 +525,6 @@ import {
   scoredAgendaCounterCreditProfileForDefinition,
   scoredAgendaCounterCreditProfileForPayload,
   SCORED_REVEAL_AGENDA_SOURCES,
-  SERVER_DIFFICULTY_UPGRADE_SOURCES,
 } from "../../mechanics/agenda-scoring";
 import { TAG_HANDSIZE_ASSET_SOURCE } from "../../mechanics/global-modifiers";
 import { COUNTER_UPGRADE_SOURCES } from "../../mechanics/hosting-counters";
@@ -1107,7 +1106,9 @@ export function createCardRuntimeDepsHosts(
           side: Side,
           sourceCardId: CardInstanceId,
           definition: CardDefinition,
-          timing: ActivatedCardAbilityImplementation["timing"],
+          timing:
+            | ActivatedCardAbilityImplementation["timing"]
+            | readonly ActivatedCardAbilityImplementation["timing"][],
         ) =>
           pushActivatedCardImplementationActionsForTiming(
             deps.cardImplementationRuntimeDeps,

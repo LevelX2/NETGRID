@@ -1,7 +1,4 @@
-import type {
-  CardInstanceId,
-  ChoiceRequest,
-} from "@netgrid/shared";
+import type { CardInstanceId, ChoiceRequest } from "@netgrid/shared";
 
 export const RUNNER_PROGRAM_INSTALL_MEMORY_CHOICE_PREFIX =
   "runner.program_install_memory";
@@ -60,7 +57,9 @@ export function buildRunnerProgramInstallMemoryChoice(input: {
   options: ChoiceRequest["options"];
 }): ChoiceRequest {
   if (input.options.length === 0)
-    throw new Error("Es gibt kein installiertes Programm zum Freimachen von MU.");
+    throw new Error(
+      "Es gibt kein installiertes Programm zum Freimachen von MU.",
+    );
   const automaticFreedMemory = Math.max(
     0,
     Math.floor(input.automaticFreedMemory ?? 0),
@@ -161,8 +160,7 @@ export function resolveRunnerProgramInstallMemoryTrashSelection(input: {
       memoryUsed: input.memoryUsed,
       targetMemoryCost: input.targetMemoryCost,
       memoryLimit: input.memoryLimit,
-      automaticFreedMemory:
-        continuation.automaticFreedMemory + freedMemory,
+      automaticFreedMemory: continuation.automaticFreedMemory + freedMemory,
     }) > 0
   )
     throw new Error("Die MU-Auswahl macht nicht genug MU frei.");

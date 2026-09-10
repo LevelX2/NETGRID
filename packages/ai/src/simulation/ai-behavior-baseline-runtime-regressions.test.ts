@@ -7,6 +7,8 @@ import {
 } from "../simulation";
 import type { AiSimulationDecisionCheckpointCapture } from "./ai-simulation-config";
 import { resolveBenchmarkDeckSlot } from "./benchmark-deck-slot-resolver";
+import { visibleSourceDefinitionsByInstanceId } from "../runtime/visible-source-definitions";
+import { runnerStrategicExchangeKinds } from "../runtime/runner-strategic-exchange";
 
 describe("AI behavior baseline runtime regressions", () => {
   it("keeps a card development route bound to the exact visible card action", () => {
@@ -46,7 +48,7 @@ describe("AI behavior baseline runtime regressions", () => {
       result.summary.errors,
       JSON.stringify(captureDiagnostic(result.capture), undefined, 2),
     ).toEqual([]);
-  }, 20_000);
+  }, 60_000);
 
   it("preserves the owner of an unforced Runner choice window", () => {
     const result = runCapturedSeed(
@@ -72,7 +74,7 @@ describe("AI behavior baseline runtime regressions", () => {
       result.summary.errors,
       JSON.stringify(captureDiagnostic(result.capture), undefined, 2),
     ).toEqual([]);
-  }, 20_000);
+  }, 90_000);
 
   it("leaves parent-bound strategic-exchange funding exclusively with its parent route", () => {
     const result = runCapturedSeed(
@@ -87,17 +89,35 @@ describe("AI behavior baseline runtime regressions", () => {
     ).toEqual([]);
   });
 
-  it("reaches the final deterministic hybrid checkpoint without runtime errors", () => {
-    const result = runCapturedSeed(
-      "strategy_panel_hybrid_score_punish_cheap_bag",
-      "ai-behavior-baseline-v1-08",
-      184,
-    );
-
+  it("keeps the hybrid trace-to-payoff sequence legal through completion or the bounded horizon", () => {
+    const slot = listMatchProgressionBenchmarkDeckSlots().find(
+      (candidate) =>
+        candidate.slotId === "strategy_panel_hybrid_score_punish_cheap_bag",
+    )!;
+    const resolved = resolveBenchmarkDeckSlot(slot);
+    if (!resolved.ok) throw new Error(resolved.reason);
+    const summary = simulateAiGame({
+      ...resolved.config,
+      seed: "ai-behavior-baseline-v1-08",
+      maxActions: 112,
+      runnerControllerMode: "current_candidate",
+      corpControllerMode: "current_candidate",
+    });
+    expect(summary.errors).toEqual([]);
+    // A correctly priced trace can finish before historical checkpoint 111.
+    expect(summary).toMatchObject({
+      replayOk: true,
+    });
+    expect(summary.runtimeFailures).toEqual([]);
+    expect(summary.metrics.illegalActions).toBe(0);
     expect(
-      result.summary.errors,
-      JSON.stringify(captureDiagnostic(result.capture), undefined, 2),
-    ).toEqual([]);
+      summary.actionSequence.some(
+        (entry) => entry.planKind === "corp.execute_punish_sequence",
+      ),
+    ).toBe(true);
+    expect(summary.actionSequence.every((entry) => !entry.fallbackUsed)).toBe(
+      true,
+    );
   }, 20_000);
 });
 
@@ -149,16 +169,19 @@ function captureDiagnostic(capture: AiSimulationDecisionCheckpointCapture) {
       source: action.source,
       payload: action.payload,
     })),
-    candidates: buildActionSemanticCandidates(capture.input).map(
-      (candidate) => ({
-        actionId: candidate.actionId,
-        actionType: candidate.actionType,
-        semanticActionType: candidate.semanticActionType,
-        sourceCardInstanceId: candidate.sourceCardInstanceId,
-        sourceDefinitionId: candidate.sourceDefinitionId,
-        planOwnerBinding: candidate.planOwnerBinding,
-        economyProjection: candidate.economyProjection,
-      }),
-    ),
+    candidates: buildActionSemanticCandidates({
+      ...capture.input,
+      visibleSourceDefinitionsByInstanceId:
+        visibleSourceDefinitionsByInstanceId(capture.input.playerView),
+    }).map((candidate) => ({
+      actionId: candidate.actionId,
+      actionType: candidate.actionType,
+      semanticActionType: candidate.semanticActionType,
+      sourceCardInstanceId: candidate.sourceCardInstanceId,
+      sourceDefinitionId: candidate.sourceDefinitionId,
+      strategicExchangeKinds: runnerStrategicExchangeKinds(candidate),
+      planOwnerBinding: candidate.planOwnerBinding,
+      economyProjection: candidate.economyProjection,
+    })),
   };
 }

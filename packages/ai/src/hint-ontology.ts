@@ -681,6 +681,7 @@ export type AiHintStructuredEffect = {
   timing: KnownHintEffectTiming;
   scope: KnownHintEffectScope;
   resource?: KnownHintEffectResource;
+  installCost?: KnownHintTargetInstallCost;
   amount?: number;
   amountKind?: KnownHintAmountKind;
   economyMode?: KnownHintEconomyMode;
@@ -1227,6 +1228,13 @@ function validateEffects(
         false,
       );
     }
+    validateOptionalKnown(
+      effect.installCost,
+      KNOWN_HINT_TARGET_INSTALL_COSTS,
+      `${effectPath}.installCost`,
+      "unknown_target_install_cost",
+      issues,
+    );
     requireKnownField(
       effect.economyMode,
       KNOWN_HINT_ECONOMY_MODES,

@@ -37,7 +37,11 @@ export function createSemanticRuntimePlanMemoryExclusionContext(
     input: AiDecisionInput,
     action: LegalAction,
   ): SemanticRuntimeExclusion | undefined {
-    return semanticRuntimePlanMemoryActionExclusion(input, action, dependencies);
+    return semanticRuntimePlanMemoryActionExclusion(
+      input,
+      action,
+      dependencies,
+    );
   }
 
   return { semanticRuntimePlanMemoryActionExclusion: actionExclusion };

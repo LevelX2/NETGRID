@@ -1,14 +1,10 @@
 import {
   CORP_ADVANCEMENT_COUNTER_OPERATION_SOURCES,
-  CORP_FORT_RUN_WINDOW_UPGRADE_SOURCES,
 } from "./card-implementation-derived-sets";
 
 export const OVERADVANCE_AGENDA_SOURCES = new Set<string>();
 
 export const SCORED_REVEAL_AGENDA_SOURCES = new Set<string>();
-
-export const SERVER_DIFFICULTY_UPGRADE_SOURCES =
-  CORP_FORT_RUN_WINDOW_UPGRADE_SOURCES;
 
 export const COUNTER_OPERATION_SOURCES =
   CORP_ADVANCEMENT_COUNTER_OPERATION_SOURCES;
@@ -25,7 +21,8 @@ export type ScoredAgendaActionProfile = {
   label: string;
 };
 
-export const SCORED_AGENDA_COUNTER_CREDIT_PROFILES: ScoredAgendaActionProfile[] = [];
+export const SCORED_AGENDA_COUNTER_CREDIT_PROFILES: ScoredAgendaActionProfile[] =
+  [];
 
 export function scoredAgendaCounterCreditProfileForDefinition(
   sourceDefinitionId: string,

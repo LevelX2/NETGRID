@@ -98,7 +98,9 @@ describe("Proteus Phase 8c Viral Breeding Ground", () => {
     });
     const serverId = "remote_1";
     installRemote(state, serverId);
-    const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+    const server = state.corp.servers.find(
+      (candidate) => candidate.id === serverId,
+    );
     if (!server) throw new Error("Missing remote");
     const agendaId = "proteus_8c_vbg" as CardInstanceId;
     const hiddenRootId = "proteus_8c_hidden_root" as CardInstanceId;
@@ -161,7 +163,9 @@ describe("Proteus Phase 8c Viral Breeding Ground", () => {
     });
     const serverId = "remote_1";
     installRemote(state, serverId);
-    const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+    const server = state.corp.servers.find(
+      (candidate) => candidate.id === serverId,
+    );
     if (!server) throw new Error("Missing remote");
     const agendaId = "proteus_8c_vbg_access" as CardInstanceId;
     state.cardInstances[agendaId] = {

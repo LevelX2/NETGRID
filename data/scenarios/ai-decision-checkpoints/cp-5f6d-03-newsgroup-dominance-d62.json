@@ -7040,13 +7040,11 @@
     }
   },
   "expectation": {
-    "exactActionId": "runner.install_card.runner_onr_v1_040_loony-goon_1.runner_onr_v1_040_loony-goon_1",
+    "exactActionId": "runner.install_card.runner_onr_v1_028_force-shield_2.runner_onr_v1_028_force-shield_2",
     "planExecution": {
-      "acceptablePlanKinds": ["runner.rig_and_coverage"],
-      "acceptableCapabilities": ["install_breaker_sentry"],
-      "requiredAssessmentEvidence": [
-        "deck_strategy_open_sentry_coverage"
-      ]
+      "acceptablePlanKinds": ["runner.defense_and_recovery"],
+      "acceptableCapabilities": ["install_defense_support"],
+      "requiredAssessmentEvidence": ["runner_defense_support_current_need"]
     }
   }
 }

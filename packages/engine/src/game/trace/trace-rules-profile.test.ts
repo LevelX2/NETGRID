@@ -9,22 +9,24 @@ import {
 import { describeTraceResultFromTrace } from "./trace-result";
 
 describe("trace rules profiles", () => {
-  it("models Modern Open with printed strength, unbounded payment, and Runner ties", () => {
+  it("models Modern Open with printed strength, generic link payment, and Runner ties", () => {
     expect(traceRulesDefinition("modern_open")).toMatchObject({
       corpBaseStrengthMode: "printed_trace",
       corpBidLimitMode: "payment_capacity",
       corpBidVisibility: "immediate",
+      runnerLinkSpendMode: "generic_credit_per_link",
       tieWinner: "runner",
     });
     expect(traceCorpBaseStrength(trace("modern_open", 3))).toBe(3);
     expect(traceComparisonIsSuccessful("modern_open", 3, 3)).toBe(false);
   });
 
-  it("models Classic Blind without free strength and with Runner ties", () => {
+  it("models Classic Blind without free strength and with printed card link modifiers", () => {
     expect(traceRulesDefinition("classic_blind")).toMatchObject({
       resolutionMode: "hidden_commit_reveal",
       corpBaseStrengthMode: "none",
       corpBidLimitMode: "effective_trace_limit",
+      runnerLinkSpendMode: "printed_card_modifiers",
       tieWinner: "runner",
     });
     expect(traceCorpBaseStrength(trace("classic_blind", 3))).toBe(0);
@@ -42,7 +44,7 @@ describe("trace rules profiles", () => {
     );
   });
 
-  it("computes final strengths from the selected profile", () => {
+  it("keeps Classic payment amount separate from the card-derived Runner strength", () => {
     expect(
       describeTraceResultFromTrace({
         ...trace("modern_open", 3),
@@ -55,10 +57,16 @@ describe("trace rules profiles", () => {
       describeTraceResultFromTrace({
         ...trace("classic_blind_corp_ties", 3),
         corpBid: 3,
-        runnerLink: 1,
-        runnerBid: 2,
+        runnerLink: 3,
+        runnerBid: 4,
+        runnerStrength: 3,
       }),
-    ).toMatchObject({ traceValue: 3, runnerStrength: 3, successful: true });
+    ).toMatchObject({
+      traceValue: 3,
+      runnerBid: 4,
+      runnerStrength: 3,
+      successful: true,
+    });
   });
 });
 

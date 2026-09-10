@@ -47,7 +47,7 @@ export function assessTraceBidCandidates(
   ) {
     return undefined;
   }
-  const options = choice.options
+  const allOptions = choice.options
     .flatMap((option) =>
       Number.isSafeInteger(option.value) && Number(option.value) >= 0
         ? [{ optionId: option.id, bid: Number(option.value) }]
@@ -57,7 +57,10 @@ export function assessTraceBidCandidates(
       (left, right) =>
         left.bid - right.bid || left.optionId.localeCompare(right.optionId),
     );
-  if (options.length === 0) return undefined;
+  if (allOptions.length === 0) return undefined;
+  const fixedAutomaticSuccess =
+    trace.bidEffect === "automatic_success_fixed_effect";
+  const options = fixedAutomaticSuccess ? [allOptions[0]!] : allOptions;
 
   const currentLink = Math.max(
     0,
@@ -101,13 +104,15 @@ export function assessTraceBidCandidates(
       }),
     ),
   }));
-  const minimumSafeBid = runnerMinimumSafeBid({
-    input,
-    profile,
-    currentLink,
-    effect,
-    tagPunishFollowup,
-  });
+  const minimumSafeBid = fixedAutomaticSuccess
+    ? undefined
+    : runnerMinimumSafeBid({
+        input,
+        profile,
+        currentLink,
+        effect,
+        tagPunishFollowup,
+      });
   const safeUtilities =
     minimumSafeBid === undefined
       ? utilities
@@ -213,6 +218,10 @@ function corpSuccessProbability(input: {
   bid: number;
   currentLink: number;
 }): number {
+  if (
+    input.input.playerView.trace?.bidEffect === "automatic_success_fixed_effect"
+  )
+    return 1;
   const visibleRunnerBidCapacity = Math.max(
     0,
     Math.floor(input.input.playerView.trace!.visibleOpponentBidCapacity),
@@ -232,6 +241,10 @@ function runnerPreventionProbability(input: {
   currentLink: number;
   effectiveTraceLimit: number;
 }): number {
+  if (
+    input.input.playerView.trace?.bidEffect === "automatic_success_fixed_effect"
+  )
+    return 0;
   const visibleCorpCapacity = Math.min(
     Math.max(0, Math.floor(input.effectiveTraceLimit)),
     Math.max(

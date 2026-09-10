@@ -646,7 +646,8 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     state = apply(
       state,
@@ -669,7 +670,8 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
     expect(secondForceShieldOption).toBeDefined();
     state = applyChoice(state, "runner", String(secondForceShieldOption?.id));
 
-    const optionIds = state.pendingChoice?.options.map((option) => option.id) ?? [];
+    const optionIds =
+      state.pendingChoice?.options.map((option) => option.id) ?? [];
     expect(new Set(optionIds).size).toBe(optionIds.length);
     expect(state.pendingChoice?.options).toEqual(
       expect.arrayContaining([
@@ -680,8 +682,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
     );
     const greenKnightOption = state.pendingChoice?.options.find(
       (option) =>
-        option.label ===
-        "“Green Knight” Surge Buffers: 1 Schaden verhindern",
+        option.label === "“Green Knight” Surge Buffers: 1 Schaden verhindern",
     );
     state = applyChoice(state, "runner", String(greenKnightOption?.id));
     expect(state.pendingChoice).toBeUndefined();

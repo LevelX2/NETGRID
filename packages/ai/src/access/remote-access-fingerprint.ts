@@ -2,7 +2,12 @@ import type { VisibleCard } from "@netgrid/shared";
 
 export type RemoteAccessFingerprintCard = Pick<
   VisibleCard,
-  "advancementCounters" | "counters" | "definitionId" | "instanceId" | "known" | "rezzed"
+  | "advancementCounters"
+  | "counters"
+  | "definitionId"
+  | "instanceId"
+  | "known"
+  | "rezzed"
 >;
 
 export function remoteAccessFingerprint(params: {
@@ -43,4 +48,3 @@ function counterFingerprint(
     .map(([key, value]) => `${key}:${value}`)
     .join(",");
 }
-

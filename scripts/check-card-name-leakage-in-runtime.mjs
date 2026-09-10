@@ -1,17 +1,22 @@
 #!/usr/bin/env node
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
+import {
+  catalogDataLiteralRanges,
+  findingFingerprint as fingerprint,
+  guardRegressions,
+} from "./lib/card-abstraction-contract.mjs";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const reportJsonPath =
-  "docs/reviews/engine/card-function-abstraction-2026-06-12.json";
-const reportMdPath =
-  "docs/reviews/engine/card-function-abstraction-2026-06-12.md";
+const reportJsonPath = "scripts/card-function-abstraction-guard-baseline.json";
 
-const writeReport = process.argv.includes("--write-report");
+const writeBaseline = process.argv.includes("--write-baseline");
 const selfTestNewLeak = process.argv.includes("--self-test-new-leak");
+const selfTestLocationDrift = process.argv.includes(
+  "--self-test-location-drift",
+);
 
 const scopedRoots = [
   "packages/engine/src/ability-engine",
@@ -244,7 +249,9 @@ function deriveCatalogWatchTokens() {
     .filter(Boolean);
   for (const path of specPaths) {
     const text = readFileSync(resolve(repoRoot, path), "utf8");
-    const id = text.match(/cardDefinitionId:\s*cardDefinitionId\("([^"]+)"\)/)?.[1];
+    const id = text.match(
+      /cardDefinitionId:\s*cardDefinitionId\("([^"]+)"\)/,
+    )?.[1];
     const title = text.match(/\btitle:\s*"([^"]+)"/)?.[1];
     if (id && title) cards.push({ id, title });
   }
@@ -497,7 +504,9 @@ function lineText(text, lineNumber) {
 }
 
 function isTestFile(path) {
-  return /\.test\.tsx?$/.test(path) || path.includes("/test-fixtures/");
+  return (
+    /\.test\.(?:[cm]?js|tsx?)$/.test(path) || path.includes("/test-fixtures/")
+  );
 }
 
 function isCatalogPath(path) {
@@ -516,8 +525,9 @@ function isCommentOnly(line) {
   return line.startsWith("//") || line.startsWith("*") || line.startsWith("/*");
 }
 
-function classify({ path, token, snippet, tokenSource }) {
+function classify({ path, token, snippet, tokenSource, catalogDataReference }) {
   if (isTestFile(path)) return "test_only_card_name";
+  if (catalogDataReference) return "allowed_catalog_reference";
   if (isRegistryPath(path)) return "allowed_catalog_reference";
   // Versioned data-maintenance scripts intentionally address concrete cards;
   // they are not runtime dispatch or reusable engine mechanics.
@@ -579,6 +589,7 @@ function findOccurrences(tokens) {
   const findings = [];
   for (const path of listFiles()) {
     const text = readFileSync(`${repoRoot}/${path}`, "utf8");
+    const catalogRanges = catalogDataLiteralRanges(path, text);
     for (const watch of tokens) {
       let index = text.indexOf(watch.token);
       while (index !== -1) {
@@ -589,6 +600,9 @@ function findOccurrences(tokens) {
           token: watch.token,
           snippet,
           tokenSource: watch.tokenSource,
+          catalogDataReference: catalogRanges.some(
+            ([start, end]) => index >= start && index < end,
+          ),
         });
         if (
           !shouldIncludeFinding({
@@ -623,15 +637,31 @@ function findOccurrences(tokens) {
   );
 }
 
-function fingerprint(finding) {
-  return [
-    finding.path,
-    finding.line,
-    finding.column,
-    finding.token,
-    finding.cardTitle,
-    finding.category,
-  ].join("|");
+function stableFinding(finding) {
+  return {
+    path: finding.path,
+    token: finding.token,
+    cardTitle: finding.cardTitle,
+    tokenSource: finding.tokenSource,
+    category: finding.category,
+    targetAbstraction: finding.targetAbstraction,
+  };
+}
+
+function stableGuardContract(value) {
+  return {
+    ...value,
+    generatedAt: "baseline",
+    derivedCatalogGuard: {
+      ...value.derivedCatalogGuard,
+      fingerprints: [...value.derivedCatalogGuard.fingerprints].sort(),
+    },
+    findings: value.findings
+      .map(stableFinding)
+      .sort((left, right) =>
+        JSON.stringify(left).localeCompare(JSON.stringify(right)),
+      ),
+  };
 }
 
 function summary(findings) {
@@ -653,7 +683,7 @@ function renderMarkdown(report) {
     "",
     "Dieser Review ist ein Inventar mit erstem vertikalem Refactor-Slice, kein Abschlussbericht über vollständige Bereinigung. Der Preying-Mantis-Pfad ist generisch umgestellt; die übrigen Kandidaten bleiben sichtbar offen.",
     "",
-    "Der zugehörige Guard ist ein konservativer Baseline-/Inventory-Guard. Er blockiert Änderungen am geprüften Inventar und ergänzt eine automatisch aus dem Kartenkatalog abgeleitete New-Leak-Erkennung; er ersetzt weiterhin keine semantische Architekturprüfung für alle künftigen Mechaniken.",
+    "Der Guard blockiert neue oder zusätzliche problematische Vorkommen gegenüber der geprüften Baseline. Erlaubte Referenzen, Diagnosezählungen und entfernte Leaks lösen keinen Fehler aus; der Guard ersetzt keine semantische Architekturprüfung für alle künftigen Mechaniken.",
     "",
     "## Zählung",
     "",
@@ -723,9 +753,9 @@ function renderMarkdown(report) {
 const findings = findOccurrences(knownWatchTokens());
 const derivedFindings = findOccurrences(derivedWatchTokens());
 const report = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   generatedAt: "2026-06-12",
-  status: "inventory_with_vertical_slice",
+  status: "current_guard_baseline",
   guardCharacter:
     "conservative_baseline_inventory_guard_with_derived_new_leak_detection",
   completionNote:
@@ -756,22 +786,20 @@ const report = {
   findings,
 };
 
-if (writeReport) {
-  mkdirSync(`${repoRoot}/docs/reviews/engine`, { recursive: true });
+if (writeBaseline) {
   writeFileSync(
     `${repoRoot}/${reportJsonPath}`,
     `${JSON.stringify(report, null, 2)}\n`,
   );
-  writeFileSync(`${repoRoot}/${reportMdPath}`, renderMarkdown(report));
   console.log(
-    `Wrote ${report.findings.length} findings to ${reportJsonPath} and ${reportMdPath}.`,
+    `Wrote ${report.findings.length} classified findings to ${reportJsonPath}.`,
   );
   process.exit(0);
 }
 
 if (!existsSync(`${repoRoot}/${reportJsonPath}`)) {
   console.error(
-    `Missing baseline report ${reportJsonPath}. Run with --write-report.`,
+    `Missing guard baseline ${reportJsonPath}. Run with --write-baseline.`,
   );
   process.exit(1);
 }
@@ -780,7 +808,29 @@ const expected = JSON.parse(
   readFileSync(`${repoRoot}/${reportJsonPath}`, "utf8"),
 );
 const normalize = (value) =>
-  JSON.stringify({ ...value, generatedAt: "baseline" }, null, 2);
+  JSON.stringify(stableGuardContract(value), null, 2);
+
+if (selfTestLocationDrift) {
+  const relocatedReport = {
+    ...report,
+    findings: report.findings.map((finding) => ({
+      ...finding,
+      line: finding.line + 100,
+      column: finding.column + 3,
+      snippet: `relocated: ${finding.snippet}`,
+    })),
+  };
+  if (normalize(relocatedReport) !== normalize(report)) {
+    console.error(
+      "Self-test failed: line, column or snippet drift changed the semantic guard contract.",
+    );
+    process.exit(1);
+  }
+  console.log(
+    "Self-test passed: location-only drift leaves the semantic guard contract unchanged.",
+  );
+  process.exit(0);
+}
 
 if (selfTestNewLeak) {
   const syntheticFinding = {
@@ -807,7 +857,7 @@ if (selfTestNewLeak) {
       fingerprints: syntheticFingerprints,
     },
   };
-  if (normalize(syntheticReport) === normalize(expected)) {
+  if (guardRegressions(syntheticReport, report).length !== 1) {
     console.error(
       "Self-test failed: synthetic derived card-name leak was not detectable.",
     );
@@ -819,13 +869,21 @@ if (selfTestNewLeak) {
   process.exit(0);
 }
 
-if (normalize(report) !== normalize(expected)) {
+const regressions = guardRegressions(report, expected);
+if (regressions.length > 0) {
+  console.error("Card function abstraction regressions:");
+  for (const regression of regressions) {
+    const locations = [...findings, ...derivedFindings]
+      .filter((finding) => fingerprint(finding) === regression.fingerprint)
+      .map(({ path, line, snippet }) => ({ path, line, snippet }));
+    console.error(JSON.stringify({ ...regression, locations }));
+  }
   console.error(
-    "Card function abstraction inventory changed. Run scripts/check-card-name-leakage-in-runtime.mjs --write-report and review the diff.",
+    "Fix the responsible abstraction; do not refresh the baseline without reviewing each regression.",
   );
   process.exit(1);
 }
 
 console.log(
-  `Card function abstraction inventory matches ${report.findings.length} baseline findings.`,
+  `Card function abstraction: no new leaks (${report.findings.length} known-token findings; ${derivedFindings.length} derived occurrences).`,
 );

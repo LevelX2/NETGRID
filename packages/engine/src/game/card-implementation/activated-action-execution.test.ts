@@ -58,7 +58,9 @@ function action(
 function host(
   gameState: GameState,
   legalAction: LegalAction,
-  overrides: Partial<ActivatedCardImplementationExecutionHost["callbacks"]> = {},
+  overrides: Partial<
+    ActivatedCardImplementationExecutionHost["callbacks"]
+  > = {},
 ): ActivatedCardImplementationExecutionHost {
   return {
     state: gameState,

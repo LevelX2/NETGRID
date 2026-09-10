@@ -70,14 +70,16 @@ function definition(id: CardDefinitionId = sourceDefinitionId): CardDefinition {
   } as CardDefinition;
 }
 
-function host(input: {
-  affordableRezzed?: CardInstanceId[];
-  unrezzed?: CardInstanceId[];
-  installed?: CardInstanceId[];
-  rezzedBlack?: CardInstanceId[];
-  installablePrograms?: CardInstanceId[];
-  calls?: string[];
-} = {}): InstallRezRuntimeDepsHost {
+function host(
+  input: {
+    affordableRezzed?: CardInstanceId[];
+    unrezzed?: CardInstanceId[];
+    installed?: CardInstanceId[];
+    rezzedBlack?: CardInstanceId[];
+    installablePrograms?: CardInstanceId[];
+    calls?: string[];
+  } = {},
+): InstallRezRuntimeDepsHost {
   return {
     cards: {
       definitionFor: () => definition(),
@@ -92,8 +94,7 @@ function host(input: {
       unrezzedInstalledIceIds: () =>
         input.unrezzed ?? ["unrezzed" as CardInstanceId],
       installedIceIds: () => input.installed ?? ["installed" as CardInstanceId],
-      rezzedBlackIceIds: () =>
-        input.rezzedBlack ?? ["black" as CardInstanceId],
+      rezzedBlackIceIds: () => input.rezzedBlack ?? ["black" as CardInstanceId],
       startPayRezCostToTrashRezzedIceChoice: () => {
         input.calls?.push("core_command");
       },

@@ -66,9 +66,7 @@ describe("summarizeRunnerActionValuationBaselineMetrics", () => {
     forcedEndTurn.actionableAlternativeCount = 0;
 
     expect(
-      summarizeRunnerActionValuationBaselineMetrics([
-        summary([forcedEndTurn]),
-      ]),
+      summarizeRunnerActionValuationBaselineMetrics([summary([forcedEndTurn])]),
     ).toMatchObject({
       runnerEndTurnsWithClicks: 1,
       runnerInevitableCorpDeckoutEndTurnsWithClicks: 0,

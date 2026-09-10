@@ -9,6 +9,7 @@ import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
 import { withEffectiveRunQuote } from "../effective-run-quote.test-support";
+import { aiInput } from "../semantic-ai-runtime-cutover.test-support";
 import type { ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
 import {
   rememberResidentPlanPortfolio,
@@ -26,7 +27,10 @@ import {
   type RunnerTargetedIceTrashCommitment,
   type RunnerTargetedIceTrashChoiceContinuation,
 } from "./runner-targeted-ice-trash-plan";
-import { bindSelectedRunnerTargetedIceTrashChoiceContinuation } from "./plan-first-live-runtime";
+import {
+  bindSelectedRunnerTargetedIceTrashChoiceContinuation,
+  runnerActionDispositions,
+} from "./plan-first-live-runtime";
 import { selectedChoicesForDecision } from "./selected-choices-for-decision";
 
 afterEach(() => {
@@ -34,6 +38,70 @@ afterEach(() => {
 });
 
 describe("Runner targeted rezzed-ICE trash plan", () => {
+  it.each([
+    ["rezzed removal", targetedTrashCandidate],
+    ["unrezzed removal", targetedUnrezzedTrashCandidate],
+    ["rez-or-trash", canonicalForgedCandidate],
+  ])(
+    "gives unbound %s an explicit pressure-owner disposition without overriding a bound route",
+    (_label, buildCandidate) => {
+      const candidate = { ...canonicalForgedCandidate(), ...buildCandidate() };
+      const input = aiInput("runner", []);
+      const domain = {
+        creditBanks: [],
+        recurringEconomy: [],
+        resourceLifecycle: [],
+        shellTradersPipelines: [],
+        runWindows: [],
+        developments: [],
+        coverageGaps: [],
+        centralPressure: [],
+        remoteContests: [],
+        installedAgendaScores: [],
+        installedCardLiquidationChoices: [],
+        fundingNeeds: [],
+        defense: {
+          activeTags: 0,
+          forgoUnsafeRunCapacity: false,
+          handBufferActionIds: [],
+        },
+      };
+      const dispositions = (overrides = {}) =>
+        runnerActionDispositions(
+          input,
+          [candidate],
+          { ...domain, ...overrides } as never,
+          [],
+          [],
+          () => undefined,
+        );
+      expect(dispositions()).toEqual([
+        {
+          actionId: candidate.actionId,
+          disposition: "explicitly_nonproductive",
+          ownerModuleId: "runner.pressure_central",
+          evidenceCode: "runner_no_bound_targeted_ice_trash_route",
+        },
+      ]);
+      for (const owner of ["centralPressure", "remoteContests"]) {
+        expect(
+          dispositions({
+            [owner]: [
+              {
+                preparationActionIds: [candidate.actionId],
+                runActionAssessments: {},
+              },
+            ],
+          }),
+        ).not.toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ actionId: candidate.actionId }),
+          ]),
+        );
+      }
+    },
+  );
+
   it("keeps the effect family out of generic development and binds the exact ICE whose removal opens the path", () => {
     const candidate = targetedTrashCandidate();
     const commitment = runnerTargetedIceTrashPlanCommitment({
@@ -259,8 +327,7 @@ describe("Runner targeted rezzed-ICE trash plan", () => {
       payload: {
         cardId: "worm-1",
         cardImplementationCapabilityBindingKind: "card_spec_capability_key",
-        cardImplementationAbilityKey:
-          "abilities_on_play_trash_unrezzed_ice",
+        cardImplementationAbilityKey: "abilities_on_play_trash_unrezzed_ice",
         cardImplementationAbilityId:
           "onr_v1_109_security-code-worm-chip:abilities_on_play_trash_unrezzed_ice",
       },
@@ -274,15 +341,10 @@ describe("Runner targeted rezzed-ICE trash plan", () => {
     });
     const input = planningInput({
       credits: 6,
-      ice: [
-        blockingIce("rd-wall", "wall", 1),
-        unrezzedIce("rd-hidden-outer"),
-      ],
+      ice: [blockingIce("rd-wall", "wall", 1), unrezzedIce("rd-hidden-outer")],
     });
 
-    expect(candidate?.abilityKey).toBe(
-      "abilities_on_play_trash_unrezzed_ice",
-    );
+    expect(candidate?.abilityKey).toBe("abilities_on_play_trash_unrezzed_ice");
     expect(runnerActionRequiresTargetedIceTrashPlan(candidate!)).toBe(true);
     expect(runnerUnrezzedIceTrashRouteOpeningPayoff(input, "rd")).toBe(120);
     expect(
@@ -304,6 +366,80 @@ describe("Runner targeted rezzed-ICE trash plan", () => {
       targetIceState: "unrezzed",
       targetIcePosition: 1,
     });
+  });
+
+  it("binds a Corp rez-or-trash event to an unrezzed ICE on the current pressure server and values low Corp credits", () => {
+    const input = planningInput({
+      ice: [
+        blockingIce("rd-wall", "wall", 1),
+        unrezzedIce("rd-hidden-inner"),
+        unrezzedIce("rd-hidden-outer"),
+      ],
+    });
+    input.playerView.opponent.credits = 1;
+    const candidate = canonicalForgedCandidate();
+    const commitment = runnerTargetedIceTrashPlanCommitment({
+      input,
+      candidate,
+      planTargets: [
+        {
+          ownerModuleId: "runner.pressure_central",
+          ownerDedupeKey: "central:rd",
+          serverId: "rd",
+          payoffValue: 120,
+        },
+      ],
+    });
+
+    expect(runnerActionRequiresTargetedIceTrashPlan(candidate)).toBe(true);
+    expect(runnerGenericDevelopmentMayOwnAction(candidate)).toBe(false);
+    expect(commitment).toMatchObject({
+      ownerModuleId: "runner.pressure_central",
+      ownerDedupeKey: "central:rd",
+      serverId: "rd",
+      targetIceState: "rez_or_trash",
+      targetIceInstanceId: "rd-hidden-outer",
+      targetIcePosition: 2,
+      evidenceCodes: expect.arrayContaining([
+        "runner_targeted_ice_trash_corp_credits:1",
+        "runner_targeted_ice_trash_corp_credit_pressure_value:80",
+      ]),
+    });
+
+    const portfolio = pressurePortfolio(commitment!);
+    const result = {
+      lane: "plan",
+      route: {
+        planInstanceId: portfolio.executorInstanceId,
+        step: {},
+        head: {
+          planInstanceId: portfolio.executorInstanceId,
+          stepId: "force-rez-or-trash",
+          actionId: candidate.actionId,
+          actionType: candidate.actionType,
+          semanticActionType: candidate.semanticActionType,
+          stateVersion: 10,
+        },
+      },
+      portfolio,
+      diagnostics: [],
+    } as unknown as Parameters<
+      typeof bindSelectedRunnerTargetedIceTrashChoiceContinuation
+    >[1];
+    bindSelectedRunnerTargetedIceTrashChoiceContinuation(input, result, [
+      candidate,
+    ]);
+    rememberResidentPlanPortfolio(input, portfolio);
+    const choiceInput = targetedRezOrTrashChoiceInput();
+
+    expect(
+      selectedRunnerTargetedIceTrashChoiceOptionId(
+        choiceInput,
+        resolveChoiceAction(),
+        choiceInput.playerView.pendingChoice!,
+        choiceInput.playerView.pendingChoice!.options,
+      ),
+    ).toBe("ice_3");
   });
 
   it("fails closed when generic development selects the targeted action or the planned ICE is absent", () => {
@@ -425,6 +561,44 @@ function targetedUnrezzedTrashCandidate(): ActionSemanticCandidate {
       ],
     },
   } as unknown as ActionSemanticCandidate;
+}
+
+function canonicalForgedCandidate(): ActionSemanticCandidate {
+  const action = {
+    actionId:
+      "runner.play_event.forged-1.forged-1.onr_v1_086_forged-activation-orders:abilities_on_play_corp_choice_rez_or_trash_ice",
+    type: "play_event",
+    side: "runner",
+    label: "Forged Activation Orders spielen",
+    source: "forged-1",
+    timingPoint: "runner_action.main",
+    costs: [{ clicks: 1, credits: 1 }],
+    targetRequirements: [],
+    visibility: "private_to_actor",
+    expiresAtStateVersion: 10,
+    abilityRef: {
+      sourceCardInstanceId: "forged-1",
+      sourceAbilityId:
+        "onr_v1_086_forged-activation-orders:abilities_on_play_corp_choice_rez_or_trash_ice",
+    },
+    payload: {
+      cardId: "forged-1",
+      cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+      cardImplementationAbilityKey:
+        "abilities_on_play_corp_choice_rez_or_trash_ice",
+      cardImplementationAbilityId:
+        "onr_v1_086_forged-activation-orders:abilities_on_play_corp_choice_rez_or_trash_ice",
+    },
+  } satisfies LegalAction;
+  const [candidate] = buildActionSemanticCandidates({
+    legalActions: [action],
+    observerSide: "runner",
+    stateVersion: 10,
+    cardSemanticProfilesByDefinitionId:
+      buildActionCardSemanticProfilesByDefinitionId(),
+  });
+  if (!candidate) throw new Error("Missing canonical Forged candidate");
+  return candidate;
 }
 
 function planningInput(
@@ -550,7 +724,9 @@ function pressurePortfolio(
 }
 
 function targetedChoiceInput(
-  options: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>["options"] = [
+  options: NonNullable<
+    AiDecisionInput["playerView"]["pendingChoice"]
+  >["options"] = [
     { id: "card_rd-wall", label: "Crystal Wall", value: "rd-wall" },
     {
       id: "card_rd-sentry",
@@ -614,6 +790,16 @@ function targetedUnrezzedChoiceInput(): AiDecisionInput {
     ...input.playerView.pendingChoice!,
     choiceId: "trash-unrezzed-ice-11",
     source: "card_implementation.trash_unrezzed_ice:worm-1:11",
+  };
+  return input;
+}
+
+function targetedRezOrTrashChoiceInput(): AiDecisionInput {
+  const input = targetedUnrezzedChoiceInput();
+  input.playerView.pendingChoice = {
+    ...input.playerView.pendingChoice!,
+    source:
+      "card_implementation.corp_choice_rez_or_trash_ice_target:forged-1:11",
   };
   return input;
 }
