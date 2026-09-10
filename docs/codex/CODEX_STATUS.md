@@ -93,8 +93,9 @@ Die Corp erzeugt aus fehlenden HQ-Agendas keinen blinden Agenda-Suchauftrag.
 Vorhandenes Handpotenzial, Economy und Defense werden ohne diesen künstlichen
 Score-Parent entwickelt. Passives Runner-Einkommen nach erfolgreichen Runs
 und begrenzte Corp-Guthaben werden mit Kosten, Reserven und begrenztem
-Amortisationshorizont bewertet. Führend sind die Abschnitte 27.5, 28.2 und 28.6
-der `docs/architecture/ai/planning-architecture.md`.
+Amortisationshorizont bewertet. Führend sind die [Runner-Entwicklung](../architecture/ai/runner-plan-contracts.md#5-runnerdevelop_board_and_hand)
+sowie [Corp-Scoring](../architecture/ai/corp-plan-contracts.md#2-corpscore_agenda)
+und [Corp-Economy](../architecture/ai/corp-plan-contracts.md#6-corpeconomy).
 
 Die produktive KI ist Plan-first. Residente Planinstanzen, side-spezifische Scheduler, TurnPlanner, Commitment/Execution Lease, Kampagnenfortsetzung und eng gebundene Choice-Auflösung bilden den aktuellen Entscheidungsweg. Doctrine, Hints, Sensoren und Quotes liefern Information; sie besitzen keine parallele Action-Autorität.
 

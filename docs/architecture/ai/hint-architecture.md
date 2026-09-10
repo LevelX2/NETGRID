@@ -1,43 +1,44 @@
-# AI-Hints-Strukturentscheidung 2026-05-15
+# AI-Hints: Quelle und Runtime-Vertrag
 
-## Entscheidung
+Status: **aktueller generierter CardSpec-Vertrag**  
+Stand: 2026-09-10
 
-AI-Hints sollen künftig nicht nach historischen Entwicklungs- oder Release-Schnitten organisiert werden.
+## Autorenquelle und Datenpfad
 
-Die bisherigen Dateinamen und Artefaktgruppen wie `ai-card-hints-deck-legal-v1915.json`, `ai-card-hints-deck-legal-v1916.json` oder ähnliche Release-/Batch-Zuschnitte gelten für die zukünftige KI-Runtime-Struktur als Ballast. Die Information, aus welchem kurzen Entwicklungsrelease ein Hint ursprünglich stammt, ist für das aktuelle Spielverhalten, die KI-Entscheidungslogik und die Wartung nicht relevant.
+Die kartenspezifische Autorenwahrheit liegt in CardSpec. Maßgeblich ist die
+[zentrale CardSpec-Architektur](../central-card-specification-and-registry-target-state-2026-08-09.md).
+Hints projizieren daraus wiederverwendbare Funktionen und Planungsmetadaten;
+sie sind weder zweite manuelle Kartenwahrheit noch Regel- oder Action-Autorität.
 
-## Zielstruktur
+| Schritt                          | Aktuelle Quelle                                                                                                                                                                                      |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CardSpec zu Hint transformieren  | `deriveCardSpecAiHint` in [card-spec-ai-hint-compiler.ts](../../../packages/ai/src/card-spec-ai-hint-compiler.ts)                                                                                    |
+| Artefakt bauen und serialisieren | [card-spec-ai-hint-artifact-builder.ts](../../../scripts/lib/card-spec-ai-hint-artifact-builder.ts)                                                                                                  |
+| Generieren / auf Drift prüfen    | [generate-card-spec-ai-hints.mts](../../../scripts/generate-card-spec-ai-hints.mts)                                                                                                                  |
+| Generiertes Bündel               | [card-spec-ai-hints-generated.json](../../../data/ai/card-spec-ai-hints-generated.json)                                                                                                              |
+| Runtime-Datenpaket               | [@netgrid/runtime-data](../../../packages/runtime-data/package.json), Export `./card-spec-ai-hints`                                                                                                  |
+| Validieren und konsumieren       | [catalog-ai-hint-authority.ts](../../../packages/ai/src/catalog-ai-hint-authority.ts), [generated-ai-hint-artifact-validation.ts](../../../packages/ai/src/generated-ai-hint-artifact-validation.ts) |
+| AI-Fassade                       | [ai-hints.ts](../../../packages/ai/src/ai-hints.ts): `AI_HINTS_BY_CARD`, `createAiHintsByCard`                                                                                                       |
 
-Die AI-Hints sollen nach einem fachlich und technisch aktuellen Kriterium organisiert werden. Bevorzugte Ordnung:
+## Pflege und Grenzen
 
-- aktive, von der KI geladene Hints in einer zentralen Runtime-Quelle;
-- optional getrennte fachliche Gruppen nur dort, wo sie für Wartung und KI-Verhalten helfen, zum Beispiel `corp`, `runner`, `ice`, `agenda`, `economy`, `run`, `damage`, `tag`, `breaker`;
-- keine Release-, Sprint-, Batch- oder historische Provenienz als primäres Ordnungsprinzip;
-- keine dauerhaften Sonderdateien nur deshalb, weil sie während der Entwicklung an einem bestimmten Tag oder in einem bestimmten Release entstanden sind;
-- Draft-, No-Promotion- und alte Gate-Artefakte sollen aus dem aktiven Runtime-Pfad entfernt oder gelöscht werden, sofern sie keinen heutigen produktiven Zweck erfüllen.
+Mechanische oder annotierte Fakten werden an ihrer Autorenquelle geändert,
+anschließend wird das Bündel erzeugt. Generierte Hintdatensätze werden nicht
+von Hand korrigiert. Schema-/Compilerstand und Quellenfingerprints werden
+beim Laden validiert; ein fehlerhaftes Artefakt verlangt einen Ursachenfix.
 
-## Begründung
+Aktuelle Befehle aus [package.json](../../../package.json):
 
-Die historische Gliederung war während der schnellen Kartenfreischaltung nützlich, erzeugt jetzt aber unnötige Komplexität:
+- `corepack pnpm generate:card-spec-ai-hints`: Artefakt schreiben.
+- `corepack pnpm check:card-spec-ai-hints`: Reproduzierbarkeit / Drift prüfen.
+- `corepack pnpm check:ai-hint-metadata-contracts`: Metadatenvertrag prüfen.
 
-- viele Importlisten statt klarer Datenquelle;
-- schwer lesbare Namen;
-- künstliche Kopplung der KI-Runtime an alte Entwicklungsabschnitte;
-- mehr Such-, Prüf- und Pflegeaufwand;
-- höhere Gefahr, neue Hints an der falschen Stelle zu ergänzen.
+Runtime-Quellen werden nach fachlichem Zweck organisiert, nicht nach
+historischen Release-, Batch-, Draft- oder Approval-Schnitten. Alte Snapshots
+begründen keine Aufbewahrungspflicht. Es gibt keine zusätzliche normative
+Runtime-Quelle `ai-card-hints-active.json` und keine Pflicht zur Erhaltung des
+entfernten Snapshots `ai-card-hints-1.3.1.json`.
 
-Für das Projekt zählt jetzt die optimale aktuelle Struktur, nicht die Herkunft eines Hints aus einem früheren Freigabeschnitt.
-
-## Umsetzungslinie
-
-Der nächste Strukturierungsschritt soll die aktiven AI-Hints konsolidieren und die KI-Codepfade auf diese neue Ordnung umstellen. Historische Release-/Batch-Namen sollen dabei nicht in neue Runtime-Dateien übernommen werden.
-
-Alte Dateien, Statusverweise und Approval-Artefakte sollen nicht aus Rücksicht auf ihre Entstehung bewahrt werden. Sie dürfen entfernt oder zusammengeführt werden, sobald die aktive KI-Funktion, Tests und notwendige Datenvalidierung erhalten bleiben.
-
-## Umgesetzter Zielzustand
-
-Die aktive KI-Runtime lädt die Kartenhinweise aus `data/ai/ai-card-hints-active.json`.
-
-Diese Datei ist das aktuelle Bündel für produktiv genutzte AI-Hints. Die früheren Release-, Batch-, Draft-, No-Promotion- und Approval-Splitdateien wurden aus dem aktiven Runtime-Pfad entfernt und, soweit sie keinen heutigen produktiven Zweck mehr hatten, gelöscht.
-
-`data/ai/ai-card-hints-1.3.1.json` und der zugehörige Report bleiben vorerst als alter Card-Pipeline-Snapshot erhalten. Sie sind nicht mehr die Runtime-Quelle der KI, sondern dienen nur noch der bestehenden Import-/Katalogpipeline und deren historischen Snapshot-Checks.
+Hint- und Doctrine-Daten unterstützen den zuständigen Planowner. Die aktuelle
+Ability-, Kosten-, Ziel- und LegalAction-Bindung bleibt Aufgabe der Semantik
+und der Engine; ein Hint allein zertifiziert keinen ausführbaren Step.

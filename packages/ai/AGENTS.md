@@ -8,7 +8,10 @@ Vor dem ersten Patch an produktivem KI-Verhalten den Änderungskompass vollstän
 2. `docs/architecture/ai/README.md`
 3. die einschlägigen Abschnitte in
    `docs/architecture/ai/planning-architecture.md`
-4. bei Plan-first-, Choice- oder Ownership-Arbeit zusätzlich
+4. den betroffenen [Runner-Owner](../../docs/architecture/ai/runner-plan-contracts.md)
+   beziehungsweise [Corp-Owner](../../docs/architecture/ai/corp-plan-contracts.md),
+   mit Codezuordnung in der AI-README;
+5. bei Plan-first-, Choice- oder Ownership-Arbeit zusätzlich
    `docs/architecture/ai/turn-campaign-planner.md`
 
 Der Änderungskompass verdichtet das allgemeine KI-Zielbild und das
