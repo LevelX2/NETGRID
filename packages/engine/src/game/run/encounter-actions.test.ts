@@ -218,6 +218,33 @@ function definitionsFor(
 }
 
 describe("runner encounter action generation", () => {
+  it.each([
+    { active: false, broken: [], expected: 0 },
+    { active: true, broken: [], expected: 3 },
+    { active: true, broken: [0], expected: 3 },
+    { active: true, broken: [0, 1], expected: 0 },
+  ])(
+    "quotes outstanding full-break damage: %j",
+    ({ active, broken, expected }) => {
+      const ice = iceDefinition({
+        subroutines: [
+          { id: "damage", type: "do_damage", damageType: "net", amount: 3 },
+          { id: "lock", type: "set_next_encounter_no_break_subroutines" },
+        ],
+      });
+      const state = makeState({ breakerDefinitionId: "onr_v1_039_krash", ice });
+      state.run!.fatalDamageActiveForEncounter = active;
+      state.run!.fatalDamageAmountForEncounter = 3;
+      state.run!.brokenSubroutineIndexes = broken;
+      const actions = buildRunnerEncounterActions(
+        hostFor(state, definitionsFor(state, ice)),
+      ).legalActions;
+      expect(
+        actions.find((action) => action.type === "continue_run")?.payload
+          ?.encounterFullBreakDamage,
+      ).toBe(expected);
+    },
+  );
   it.each([0, 1, undefined])(
     "certifies only explicit zero damage, amount=%s",
     (amount) => {

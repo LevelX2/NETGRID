@@ -27,6 +27,8 @@ import {
 import { actionCreditCost } from "./action-cost";
 import {
   currentEncounteredIceCard,
+  currentEncounterRequiresFullBreak,
+  currentEncounterUnbrokenSubroutineIndexes,
   currentRunRemainingIce,
 } from "./current-encounter";
 import {
@@ -1128,6 +1130,8 @@ function threatClassForSubroutine(
   >["subroutines"][number],
   plan?: RunnerRunPlan,
 ): RunnerRunSubroutineThreatClass {
+  if (subroutine.type === "set_next_encounter_unless_fully_break_damage")
+    return "future_path_modifier";
   if (isEndRunSubroutine(subroutine)) return "must_break_for_access";
   if (
     visibleDeflectorSubroutineCanResolve(
@@ -1337,6 +1341,8 @@ function currentRequiredBreakSubroutineIndexes(
   if (quoteSubroutines) {
     const continueWillEndRun =
       continueAction?.payload?.encounterWillEndRun === true;
+    if (currentEncounterRequiresFullBreak(input))
+      return currentEncounterUnbrokenSubroutineIndexes(input);
     return new Set(
       quoteSubroutines.flatMap((subroutine, index) => {
         if (

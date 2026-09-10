@@ -1,6 +1,10 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
-import { currentEncounteredIceCard } from "./current-encounter";
+import {
+  currentEncounteredIceCard,
+  currentEncounterRequiresFullBreak,
+} from "./current-encounter";
+import { encounterRunRemainderEffectAssessment } from "./runner-run-remainder-effect-assessment";
 import { isUnacceptableImmediateSafetyThreatSubroutine } from "./encounter-subroutine";
 import { breakSubroutineIndexesForAction } from "./subroutine-indexes";
 
@@ -84,6 +88,21 @@ export function runnerEncounterActionExclusion(
     };
   }
   if (action.type === "break_subroutine") {
+    const deferred =
+      encounterRunRemainderEffectAssessment(input, action)
+        .deferredFullBreakSubroutineIndexes ?? [];
+    const targetIndexes = breakSubroutineIndexesForAction(action);
+    if (
+      targetIndexes.size > 0 &&
+      [...targetIndexes].every((index) => deferred.includes(index))
+    ) {
+      return {
+        key: "break_effect_has_cheaper_full_break_continuation",
+        label: "Der vollständige Folge-Break erfüllt den Effekt günstiger",
+        reason:
+          "encounter_action:break_subroutine|conditional_damage_mitigated_by_payable_next_full_break",
+      };
+    }
     if (
       action.payload?.breakSubroutinePurpose ===
       "zero_damage_no_secondary_effect"
@@ -140,6 +159,7 @@ function breakOnlyPreventsAbsentNextEncounter(
   input: AiDecisionInput,
   action: LegalAction,
 ): boolean {
+  if (currentEncounterRequiresFullBreak(input)) return false;
   const run = input.playerView.run;
   if (
     run?.phase !== "encounter_ice" ||

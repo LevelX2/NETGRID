@@ -1,4 +1,5 @@
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 import { resolveServerRuntimePaths } from "./runtime-paths";
@@ -24,7 +25,7 @@ describe("server runtime paths", () => {
   });
 
   it("resolves development defaults from a package-local start directory", () => {
-    const repositoryRoot = path.resolve(".");
+    const repositoryRoot = fileURLToPath(new URL("../../../", import.meta.url));
     const paths = resolveServerRuntimePaths({
       env: {},
       startDirectory: path.join(repositoryRoot, "apps", "server"),

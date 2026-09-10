@@ -13,7 +13,11 @@ import {
   visibleDeflectorSubroutineCanResolve,
   visibleRunnerRunPathCreditBudgetForRig,
 } from "../visible-run-analysis";
-import { currentEncounteredIceCard } from "./current-encounter";
+import {
+  currentEncounteredIceCard,
+  currentEncounterRequiresFullBreak,
+  currentEncounterUnbrokenSubroutineIndexes,
+} from "./current-encounter";
 import {
   breakerIdForEncounterAction,
   pumpStrengthAmountForAction,
@@ -208,23 +212,36 @@ export function createRunnerPumpViabilityContext(
         ],
       };
 
+    const requiresFullBreak = currentEncounterRequiresFullBreak(input);
+    const fullBreakIndexes = requiresFullBreak
+      ? currentEncounterUnbrokenSubroutineIndexes(input)
+      : undefined;
     const requiredBreakCount =
-      currentQuote?.subroutines.filter(
-        (subroutine) =>
-          isUnacceptableImmediateSafetyThreatSubroutine(input, subroutine) ||
-          visibleDeflectorSubroutineCanResolve(subroutine, deflectorContext) ||
-          (encounterContinue?.payload?.encounterWillEndRun === true &&
-            isEndRunSubroutine(subroutine)),
+      currentQuote?.subroutines.filter((subroutine, index) =>
+        fullBreakIndexes
+          ? fullBreakIndexes.has(index)
+          : isUnacceptableImmediateSafetyThreatSubroutine(input, subroutine) ||
+            visibleDeflectorSubroutineCanResolve(
+              subroutine,
+              deflectorContext,
+            ) ||
+            (encounterContinue?.payload?.encounterWillEndRun === true &&
+              isEndRunSubroutine(subroutine)),
       ).length ??
       (encounterContinue?.payload?.encounterWillEndRun === true
         ? endTheRunCount
         : 0);
     const requiredBreakSubroutines = currentQuote?.subroutines.filter(
-      (subroutine) =>
-        isUnacceptableImmediateSafetyThreatSubroutine(input, subroutine) ||
-        visibleDeflectorSubroutineCanResolve(subroutine, deflectorContext) ||
-        (encounterContinue?.payload?.encounterWillEndRun === true &&
-          isEndRunSubroutine(subroutine)),
+      (subroutine, index) =>
+        fullBreakIndexes
+          ? fullBreakIndexes.has(index)
+          : isUnacceptableImmediateSafetyThreatSubroutine(input, subroutine) ||
+            visibleDeflectorSubroutineCanResolve(
+              subroutine,
+              deflectorContext,
+            ) ||
+            (encounterContinue?.payload?.encounterWillEndRun === true &&
+              isEndRunSubroutine(subroutine)),
     );
     const estimatedBreakCost = requiredBreakSubroutines?.length
       ? creditsToBreakVisibleSubroutinesWithBreaker(

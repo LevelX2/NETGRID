@@ -17,6 +17,7 @@ import {
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { icebreakerStrengthModifierFromDeclarativeCounters } from "../../ability-engine/effective-values";
 import { temporaryBreakerStrengthBonusUntilEndOfTurn } from "../state/temporary-breaker-strength";
+import { encounterWasFullyBrokenByRunner } from "./encounter-resolution";
 import {
   subroutineIsUnavailable,
   trodeSetIgnoresSubroutine,
@@ -464,6 +465,11 @@ export function buildRunnerEncounterActions(
   const encounterSubroutineIds = nextSubroutines
     .map((subroutine) => subroutine.id)
     .join(",");
+  const encounterFullBreakDamage =
+    run.fatalDamageActiveForEncounter &&
+    !encounterWasFullyBrokenByRunner(run, encounterSubroutines)
+      ? Math.max(0, Math.floor(run.fatalDamageAmountForEncounter ?? 0))
+      : 0;
   const continueLabel =
     nextSubroutines.length === 0
       ? "ICE passieren"
@@ -490,6 +496,7 @@ export function buildRunnerEncounterActions(
           encounterWillEndRun: false,
           encounterSourceWillTrashAtEndOfTurn,
           encounterSubroutineIds,
+          encounterFullBreakDamage,
           payOrEndRunSubroutineIndexes: payOrEndRunEntries
             .map((entry) => entry.index)
             .join(","),
@@ -515,6 +522,7 @@ export function buildRunnerEncounterActions(
         encounterWillEndRun: willEndRun,
         encounterSourceWillTrashAtEndOfTurn,
         encounterSubroutineIds,
+        encounterFullBreakDamage,
       },
     ),
   );

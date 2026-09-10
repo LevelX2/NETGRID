@@ -112,7 +112,7 @@ try {
       String(webPort),
     ],
     {
-      NEXT_PUBLIC_NETGRID_SERVER_URL: serverUrl,
+      NETGRID_SERVER_BASE_URL: serverUrl,
       NETGRID_NEXT_DIST_DIR: webDistDirName,
     },
   );
