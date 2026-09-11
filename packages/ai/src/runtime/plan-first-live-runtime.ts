@@ -1,3 +1,60 @@
+import {
+  addRunnerCoverageMemoryDispositions,
+  runnerCoverageInstallDeferrals,
+  applyRunnerCoverageCandidateDisposition,
+  addRunnerCoverageRejectedSearchDispositions,
+  runnerMatchpointReserveBlocksOverlappingBreakerInstall,
+} from "../runner/rig-coverage/coverage-dispositions";
+
+import { INFORMATION_PROBE_KNOWN_PATH_CREDIT_BUDGET } from "../plans/runner-run-purpose";
+import {
+  runnerCoverageGapIsTerminalRemoteThreat,
+  runnerCoverageRecoveryTarget,
+} from "../runner/rig-coverage/coverage-support";
+import { uniqueCoverageGaps } from "../runner/rig-coverage/coverage-signals";
+import {
+  runnerCoverageOwnedActionIds,
+  runnerDrawActionHasCurrentCoveragePurpose,
+} from "../runner/rig-coverage/coverage-actions";
+import {
+  preserveSelectedRunnerCoverageBindingAcrossPaymentStep,
+  bindSelectedCoverageSearchAction,
+  bindSelectedRunnerCoverageSearchChoiceContinuation,
+  bindRunnerCoverageSearchProgramTrashSacrifices,
+  reconcileRunnerCoverageRequesterBindings,
+} from "../runner/rig-coverage/coverage-bindings";
+import {
+  runnerCandidateExecutesProgramSearch,
+  runnerCandidateSourceSupportsProgramSearch,
+  runnerProgramSearchSourceCardInstanceId,
+} from "./runner-program-search-facts";
+import {
+  runPurposeForEvaluation,
+  runnerInformationProbeCanUseQuotedPath,
+} from "../plans/runner-run-purpose";
+import { legalActionCreditCost } from "./legal-action-credit-cost";
+import {
+  runnerCandidateSourceDefinitionId,
+  visibleOwnCardByInstanceId,
+  runnerInstallSourceInstanceId,
+} from "./runner-action-source-facts";
+import type {
+  RunnerExactFundingRouteRequest,
+  RunnerRunFundingSupport,
+} from "../plans/runner-funding-service-contract";
+import {
+  runnerEconomyReserveFacts,
+  buildRunnerEconomySignals,
+} from "../runner/economy/economy-signals";
+import {
+  runnerDefenseSupportSignals,
+  runnerDefenseHandBufferFacts,
+  buildRunnerDefenseSignals,
+} from "../runner/defense-recovery/defense-signals";
+import { runnerDefenseSupportDispositions } from "../runner/defense-recovery/defense-dispositions";
+import { uniqueBy } from "./collection";
+import { buildCorpVirusPressureSignals } from "../corp/virus-pressure/virus-pressure-signals";
+import { runnerShellTradersActionDispositions } from "../runner/shell-traders/shell-traders-dispositions";
 import type { RunnerExposeInformationSignal } from "../runner/expose-information/expose-information-types";
 import { runnerExposeInformationSignals } from "../runner/expose-information/expose-information-signals";
 import { runnerExposeInformationActionDispositions } from "../runner/expose-information/expose-information-dispositions";
@@ -43,7 +100,6 @@ import {
   type CardDefinition,
   type CorpPunishRouteQuote,
   type LegalAction,
-  type Side,
   type VisibleCard,
   type VisibleCorpRezCostQuote,
 } from "@netgrid/shared";
@@ -59,12 +115,8 @@ import { actionHasConditionalDefenseFollowupQuotePayload } from "../actions/cond
 import { AI_HINTS_BY_CARD } from "../ai-hints";
 import { rolesForDeckDoctrineCard } from "../deck-doctrine-card-roles";
 import { getStructuredTagPunishProfileForCard } from "../tag-punish-ontology-consumer";
-import type {
-  BreakerCapability,
-  DeckCapabilityProfile,
-} from "../deck-capabilities";
+import type { DeckCapabilityProfile } from "../deck-capabilities";
 import type { RunnerHandDevelopmentEvaluation } from "../runner-hand-development";
-import { visibleRunnerTraceThreatOnServer } from "../runner/hand-development/runner-persistent-install-evaluation";
 
 import type {
   RunnerEconomyPosture,
@@ -84,16 +136,14 @@ import {
 import {
   assessRandomBreakOrDamageRiskForVisibleRunPath,
   randomBreakOrDamageRiskCanCarryRunPath,
-  randomBreakOrDamageRiskProfileForDefinitionId,
 } from "../actions/risk-action-projection";
 import {
   runnerDebtFinancingProfile,
   runnerEventStartsRunAfterProgramSearch,
-  runnerInstalledDebtFinancingLiability,
 } from "./runner-canonical-card-facts";
 import { rememberStrategicIntentState } from "../strategic-intent-memory";
-import { runnerDrawTaxLiabilityProjection } from "./runner-draw-tax-liability-score";
-import { runnerDiscardChoicePlanBinding } from "./runner-discard-choice-plan";
+
+import { runnerDiscardChoicePlanBinding } from "../runner/defense-recovery/runner-discard-choice-plan";
 import {
   assessRunnerHandRotation,
   type RunnerHandRotationAssessment,
@@ -120,7 +170,6 @@ import {
   corpScorePlanTarget,
   corpDefenseActionDispositions,
   corpDefenseMaterializedActionIds,
-  corpDefensePortfolioHasExecutableRoute,
   corpExactBasicLiquidCreditCandidate,
   corpGenericDefensePriorityClass,
   corpEconomyPriorityClass,
@@ -131,11 +180,9 @@ import {
   type CorpCorePlanDomain,
   type CorpDefenseSignal,
   type CorpGenericDefenseSignal,
-  type CorpExactIceRezRouteProjection,
   type CorpEconomyImmediateOperationSignal,
   type CorpEconomyVisibleCardWithdrawalSignal,
   type CorpEconomyOperationThresholdSignal,
-  type CorpEconomyReserveSignal,
   type CorpScoreProjectSignal,
 } from "../plans/corp-core-plan-modules";
 import {
@@ -148,25 +195,30 @@ import {
 } from "../plans/corp-tactical-plan-modules";
 import {
   createRunnerCorePlanModules,
-  runnerCoverageCurrentPhase,
-  runnerRolesCoverCoverageGap,
-  runnerInstallDefinitionCoversCoverageGap,
+  type RunnerCorePlanDomain,
+} from "../plans/runner-core-plan-modules";
+import { runnerCoverageCurrentPhase } from "../runner/rig-coverage/coverage-plan-module";
+import {
   runnerDevelopmentCardAdmission,
   runnerDevelopmentFundingMilestone,
+} from "../plans/runner-development-contracts";
+import {
+  runnerExactBasicLiquidCreditCandidate,
+  runnerFundingRouteCandidateIsMaterializable,
+} from "../plans/runner-funding-candidates";
+import { runnerInstalledCardLiquidationChoiceSignal } from "../runner/economy/installed-card-liquidation";
+import {
   runnerDefenseReactionReserveIsCurrentPhase,
   runnerDefenseTagClearFundingIsCurrentPhase,
-  runnerExactBasicLiquidCreditCandidate,
-  runnerTurnLiquidityCandidateIsMaterializable,
-  runnerFundingRouteCandidateIsMaterializable,
-  runnerInstalledCardLiquidationChoiceSignal,
+} from "../runner/defense-recovery/defense-plan-module";
+import { type RunnerDiscardChoiceBinding } from "../runner/defense-recovery/defense-types";
+import {
+  runnerRolesCoverCoverageGap,
   type RunnerCoverageGapSignal,
-  type RunnerCorePlanDomain,
-  type RunnerDiscardChoiceBinding,
-} from "../plans/runner-core-plan-modules";
+} from "../plans/runner-coverage-contracts";
 import type { RequiredCapabilityKind } from "../plans/tactical-plan-types";
 import {
   createRunnerTacticalPlanModules,
-  runnerCardRunHasVisibleDifferentialPayoff,
   type RunnerDevelopmentSignal,
   type RunnerPlanDomain,
   type RunnerRemoteContestSignal,
@@ -179,10 +231,8 @@ import {
   type RunnerRunRiskReassessmentSignal,
   type RunnerRunWindowActionAssessment,
 } from "../plans/runner-tactical-plan-modules";
-import {
-  createRunnerCreditDemand,
-  type CreateSideCreditDemandParams,
-} from "../plans/credit-demand";
+import { runnerCardRunHasVisibleDifferentialPayoff } from "../plans/runner-run-payoff";
+import { createRunnerCreditDemand } from "../plans/credit-demand";
 import { searchFundingRoutes } from "../plans/funding-route";
 import { runnerPaymentInstallSetups } from "../plans/runner-payment-install-planning";
 import {
@@ -228,7 +278,7 @@ import {
 } from "../plans/corp-remote-project-signals";
 import { assessCorpRemoteMaturityFromVisibleServer } from "./corp-remote-maturity-assessment";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
-import { buildRunnerShellTradersPipelineSignals } from "./shell-traders-plan-signals";
+import { buildRunnerShellTradersPipelineSignals } from "../runner/shell-traders/shell-traders-plan-signals";
 import {
   corpArchivesToHqOperationProfile,
   corpCandidateProvidesScoreConversion,
@@ -304,21 +354,15 @@ import {
   type ResidentPlanPortfolio,
 } from "../plans/resident-plan-portfolio";
 import { createTurnCompletionPlanModule } from "../plans/turn-completion-plan-module";
-import {
-  missingBreakerCoverageKind,
-  runnerHandBreakerForCoverage,
-} from "../plans/tactical-plan-breaker-coverage";
+
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 import type { RunnerProgramInstallTrashAssessment } from "./runner-program-install-trash-policy";
 import { assessRunnerAccessTrashImpact } from "./runner-access-trash-impact";
-import {
-  quoteRunnerBreakerUpgradeEconomics,
-  type RunnerBreakerUpgradeEconomicQuote,
-} from "./runner-breaker-upgrade-economics";
+
 import { visibleSourceDefinitionsByInstanceId } from "./visible-source-definitions";
 import { rolesMatch } from "./role-match";
 import { rolesHaveBreakerRole } from "./breaker-role-match";
-import { visibleCardCoversRequiredCoverage } from "./runner-search-coverage-need";
+
 import { runnerTerminalContestThreat } from "./runner-terminal-contest-threat";
 import { semanticRuntimeDecisionDebugTopLevelWhyNot } from "../diagnostics/semantic-runtime-decision-debug";
 import type { AiDecisionRuntimeOptions } from "./choose-ai-action";
@@ -326,10 +370,6 @@ import {
   buildBoundedCorpPunishRouteRequests,
   withDecisionLocalCorpPunishRouteQuotes,
 } from "./corp-punish-route-quote-input";
-import {
-  corpPurgeHasVisibleStrategicPressure,
-  corpPurgeRecurringActionLoss,
-} from "./corp-purge-impact";
 import {
   buildCorpHandInventoryFacts,
   corpHandDuplicateCount,
@@ -346,7 +386,6 @@ import {
 import { assessCorpOpeningRush } from "./corp-opening-rush";
 import {
   buildCorpAmbushPlanSignals,
-  corpAmbushAdvanceDispositionEvidence,
   corpCandidateIsAmbushInstall,
 } from "./corp-ambush-plan-signals";
 import { projectKnownCorpCardAccessEffect } from "./known-corp-card-access-effect-projection";
@@ -367,7 +406,6 @@ import {
 import {
   assessEngineCertifiedPostRezIcePath,
   assessKnownRezzedIcePath,
-  runnerKnownPathAssessmentIsCostNoAccess,
   runnerRunPathCreditBudgetWithVisiblePools,
   visibleRunnerRunPathCreditBudgetForRig,
   visibleDeflectorSubroutineCanResolve,
@@ -2483,123 +2521,6 @@ function preserveSelectedRunnerTargetedBypassBindingAcrossPaymentStep(
   result.portfolio.instances.push(preserved);
 }
 
-function preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
-  input: AiDecisionInput,
-  result: Extract<PlanSchedulerResult, { lane: "plan" }>,
-  previous: ResidentPlanPortfolio | undefined,
-  pending: NonNullable<
-    ResidentPlanPortfolio["pendingRunnerCostPenaltySupportOrigin"]
-  >,
-): void {
-  const previousExecutor = previous?.instances.find(
-    (instance) => instance.instanceId === pending.executorInstanceId,
-  );
-  if (previousExecutor?.moduleId !== "runner.rig_and_coverage") return;
-  let nextExecutor = result.portfolio.instances.find(
-    (instance) => instance.instanceId === pending.executorInstanceId,
-  );
-  const previousState = previousExecutor.moduleState as
-    | {
-        kind?: unknown;
-        phase?: unknown;
-        selectedSearchActionId?: unknown;
-        selectedSearchStateVersion?: unknown;
-        gap?: {
-          requiredRole?: unknown;
-          targetServerId?: unknown;
-          targetRunActionId?: unknown;
-          installActionIds?: unknown;
-          directSearchChoiceBindings?: Array<{
-            actionId?: unknown;
-            sourceCardInstanceId?: unknown;
-            sourceDefinitionId?: unknown;
-            targetCardInstanceId?: unknown;
-            targetDefinitionId?: unknown;
-          }>;
-        };
-      }
-    | undefined;
-  const previousBindings =
-    previousState?.gap?.directSearchChoiceBindings?.filter(
-      (binding) => binding.actionId === pending.originalActionId,
-    ) ?? [];
-  const previousBinding =
-    previousBindings.length === 1 ? previousBindings[0] : undefined;
-  const previousInstallActionIds = Array.isArray(
-    previousState?.gap?.installActionIds,
-  )
-    ? previousState.gap.installActionIds.filter(
-        (actionId): actionId is string => typeof actionId === "string",
-      )
-    : [];
-  const previousCoverageExecutorIsPreservable =
-    previous?.side === "runner" &&
-    (previousExecutor.executionState === "executor" ||
-      previousExecutor.executionState === "preempted") &&
-    previousState?.kind === "coverage";
-  const previousInstallOriginIsExact =
-    previousCoverageExecutorIsPreservable &&
-    previousState.phase === "install_answer" &&
-    previousInstallActionIds.includes(pending.originalActionId);
-  const previousSearchOriginIsExact =
-    previousCoverageExecutorIsPreservable &&
-    previousState.phase === "search_answer" &&
-    previousState.selectedSearchActionId === pending.originalActionId &&
-    previousState.selectedSearchStateVersion ===
-      pending.selectedAtStateVersion &&
-    previousBinding !== undefined;
-  if (
-    !nextExecutor &&
-    (previousInstallOriginIsExact || previousSearchOriginIsExact)
-  ) {
-    const preservedExecutor = structuredClone(previousExecutor);
-    preservedExecutor.executionState = "preempted";
-    preservedExecutor.portfolioRole = "background";
-    result.portfolio.instances.push(preservedExecutor);
-    nextExecutor = preservedExecutor;
-  }
-  const nextState = nextExecutor?.moduleState as typeof previousState;
-  const exactInstallBinding =
-    previousInstallOriginIsExact &&
-    nextExecutor?.moduleId === "runner.rig_and_coverage" &&
-    nextState?.kind === "coverage" &&
-    nextState.phase === "install_answer" &&
-    previousState.gap?.requiredRole === nextState.gap?.requiredRole;
-  if (exactInstallBinding && nextExecutor && nextState) {
-    nextExecutor.moduleState = {
-      ...nextState,
-      gap: structuredClone(previousState.gap),
-    };
-    return;
-  }
-  const exactSearchBinding =
-    previousSearchOriginIsExact &&
-    nextExecutor?.moduleId === "runner.rig_and_coverage" &&
-    nextState?.kind === "coverage" &&
-    nextState.phase === "search_answer" &&
-    previousState.gap?.requiredRole === nextState.gap?.requiredRole;
-  if (!nextExecutor || !nextState || !exactSearchBinding) {
-    throw new PlanResolutionFailure("invalid_support_graph", {
-      side: input.side,
-      stateVersion: input.playerView.stateVersion,
-      timingPoint: input.playerView.timingPoint,
-      legalActionTypes: input.legalActions.map((action) => action.type),
-      unresolvedActionIds: [pending.originalActionId],
-      owner: "support_graph",
-      planInstanceId: pending.executorInstanceId,
-      stepId: pending.sourceStepId,
-      removalCondition:
-        "Carry the exact selected coverage search or install action and its unchanged target binding through every intervening payment-support step.",
-    });
-  }
-  nextExecutor.moduleState = {
-    ...nextState,
-    gap: structuredClone(previousState.gap),
-    selectedSearchActionId: pending.originalActionId,
-    selectedSearchStateVersion: pending.selectedAtStateVersion,
-  };
-}
-
 function rebaseSelectedRunnerImmediateChoiceOriginForPaymentStep(
   input: AiDecisionInput,
   result: Extract<PlanSchedulerResult, { lane: "engine_window" }>,
@@ -4084,301 +4005,6 @@ function bindSelectedRunnerEventInstallChoiceContinuation(
   };
 }
 
-function bindSelectedCoverageSearchAction(
-  input: AiDecisionInput,
-  result: PlanSchedulerResult,
-): void {
-  const continuation =
-    result.lane === "engine_window" &&
-    result.diagnostics.some(
-      (diagnostic) =>
-        diagnostic.code ===
-        "plan_bound_runner_cost_penalty_support_continuation",
-    )
-      ? result.portfolio?.pendingRunnerCostPenaltySupportOrigin
-      : undefined;
-  if (result.lane === "engine_window" && !continuation) return;
-  const portfolio = result.portfolio;
-  if (!portfolio) return;
-  const executorInstanceId =
-    result.lane === "plan"
-      ? portfolio.executorInstanceId
-      : continuation!.executorInstanceId;
-  const executor = portfolio.instances.find(
-    (instance) =>
-      instance.instanceId === executorInstanceId &&
-      instance.moduleId === "runner.rig_and_coverage",
-  );
-  if (!executor) return;
-  const moduleState = executor.moduleState as
-    | {
-        kind?: unknown;
-        phase?: unknown;
-        gap?: {
-          directSearchActionIds?: Array<unknown>;
-          directSearchChoiceBindings?: Array<{
-            actionId?: unknown;
-            targetCardInstanceId?: unknown;
-          }>;
-          rejectedSearchActionIds?: Array<unknown>;
-        };
-        selectedSearchActionId?: unknown;
-        selectedSearchStateVersion?: unknown;
-      }
-    | undefined;
-  if (moduleState?.kind !== "coverage") {
-    return;
-  }
-  const selectedActionId =
-    result.lane === "plan" ? result.route.head.actionId : result.actionId;
-  const selectedStateVersion =
-    result.lane === "plan"
-      ? result.route.head.stateVersion
-      : input.playerView.stateVersion;
-  const selectedStepId =
-    result.lane === "plan"
-      ? result.route.head.stepId
-      : continuation!.sourceStepId;
-  const selectedActionIsSearch =
-    moduleState.gap?.directSearchActionIds?.includes(selectedActionId) ===
-      true ||
-    moduleState.gap?.rejectedSearchActionIds?.includes(selectedActionId) ===
-      true ||
-    moduleState.gap?.directSearchChoiceBindings?.some(
-      (binding) => binding.actionId === selectedActionId,
-    ) === true;
-  if (!selectedActionIsSearch && moduleState.phase !== "search_answer") return;
-  const exactBindings =
-    moduleState.gap?.directSearchChoiceBindings?.filter(
-      (binding) => binding.actionId === selectedActionId,
-    ) ?? [];
-  const exactContinuationBinding =
-    result.lane === "plan" ||
-    (continuation!.originalActionId === selectedActionId &&
-      result.origin.rootPlanInstanceId === continuation!.rootPlanInstanceId &&
-      result.origin.leafPlanInstanceId === continuation!.executorInstanceId &&
-      moduleState.selectedSearchActionId === selectedActionId &&
-      moduleState.selectedSearchStateVersion ===
-        continuation!.selectedAtStateVersion);
-  if (
-    moduleState.phase !== "search_answer" ||
-    exactBindings.length !== 1 ||
-    !exactContinuationBinding
-  ) {
-    throw new PlanResolutionFailure("invalid_support_graph", {
-      side: input.side,
-      stateVersion: input.playerView.stateVersion,
-      timingPoint: input.playerView.timingPoint,
-      legalActionTypes: input.legalActions.map((action) => action.type),
-      unresolvedActionIds: [selectedActionId],
-      owner: "support_graph",
-      planInstanceId: executor.instanceId,
-      stepId: selectedStepId,
-      removalCondition:
-        "Persist exactly one coverage-search choice binding for the selected LegalAction and its exact Engine continuation before its choice window can open.",
-    });
-  }
-  executor.moduleState = {
-    ...moduleState,
-    selectedSearchActionId: selectedActionId,
-    selectedSearchStateVersion: selectedStateVersion,
-  };
-}
-
-function bindSelectedRunnerCoverageSearchChoiceContinuation(
-  input: AiDecisionInput,
-  result: PlanSchedulerResult,
-  decision: AiDecision,
-  assessCard: PlanFirstLiveDependencies["runnerProgramInstallTrashAssessmentForCard"],
-): void {
-  const choice = input.playerView.pendingChoice;
-  const portfolio = result.portfolio;
-  if (
-    input.side !== "runner" ||
-    !choice ||
-    choice.kind !== "select_cards" ||
-    (!choice.source.startsWith("p3_38.search_stack_install:") &&
-      !choice.source.startsWith(
-        "card_implementation.pro018_stack_install_run_cleanup:",
-      )) ||
-    !portfolio
-  ) {
-    return;
-  }
-  const executor = portfolio.instances.find(
-    (instance) =>
-      instance.instanceId === portfolio.executorInstanceId &&
-      instance.moduleId === "runner.rig_and_coverage" &&
-      instance.executionState === "executor",
-  );
-  if (!executor) return;
-  const moduleState = executor.moduleState as
-    | {
-        kind?: unknown;
-        phase?: unknown;
-        selectedSearchActionId?: unknown;
-        selectedSearchStateVersion?: unknown;
-        gap?: {
-          requesterPlanInstanceId?: unknown;
-          requesterNeedId?: unknown;
-          directSearchChoiceBindings?: Array<{
-            actionId?: unknown;
-            sourceCardInstanceId?: unknown;
-            sourceDefinitionId?: unknown;
-            targetCardInstanceId?: unknown;
-            targetDefinitionId?: unknown;
-            installMemorySacrificeBinding?: unknown;
-          }>;
-        };
-      }
-    | undefined;
-  const selectedChoices = decision.selectedChoices as
-    | { choiceId?: unknown; selectedOptionIds?: unknown }
-    | undefined;
-  const selectedOptionIds =
-    Array.isArray(selectedChoices?.selectedOptionIds) &&
-    selectedChoices.selectedOptionIds.every(
-      (optionId): optionId is string => typeof optionId === "string",
-    )
-      ? selectedChoices.selectedOptionIds
-      : [];
-  const selectedOption =
-    selectedOptionIds.length === 1
-      ? choice.options.find(
-          (option) =>
-            option.id === selectedOptionIds[0] && option.selectable !== false,
-        )
-      : undefined;
-  const selectedTarget = selectedOption?.card;
-  const bindings = moduleState?.gap?.directSearchChoiceBindings?.filter(
-    (binding) =>
-      binding.actionId === moduleState.selectedSearchActionId &&
-      binding.sourceCardInstanceId === choice.sourceCardInstanceId &&
-      binding.sourceDefinitionId === choice.sourceCardDefinitionId &&
-      binding.targetDefinitionId === selectedTarget?.definitionId &&
-      (binding.targetCardInstanceId === undefined ||
-        binding.targetCardInstanceId === selectedTarget?.instanceId),
-  );
-  const binding = bindings?.length === 1 ? bindings[0] : undefined;
-  const root = portfolio.instances.find(
-    (instance) =>
-      instance.instanceId === portfolio.rootForegroundInstanceId &&
-      instance.portfolioRole === "foreground",
-  );
-  const exactCoverageExecutorOwnership =
-    portfolio.rootForegroundInstanceId === executor.instanceId ||
-    (root !== undefined &&
-      executor.parentInstanceId === root.instanceId &&
-      typeof executor.parentNeedId === "string" &&
-      root.openNeedIds.includes(executor.parentNeedId) &&
-      moduleState?.gap?.requesterPlanInstanceId === root.instanceId &&
-      moduleState.gap.requesterNeedId === executor.parentNeedId);
-  const exactChoice =
-    result.lane === "engine_window" &&
-    decision.actionId === result.actionId &&
-    selectedChoices?.choiceId === choice.choiceId &&
-    choice.side === "runner" &&
-    choice.stateVersion === input.playerView.stateVersion &&
-    selectedTarget?.known !== false &&
-    selectedTarget?.type === "program" &&
-    typeof selectedTarget?.instanceId === "string" &&
-    typeof selectedTarget.definitionId === "string" &&
-    portfolio.side === "runner" &&
-    portfolio.executorInstanceId === executor.instanceId &&
-    exactCoverageExecutorOwnership &&
-    moduleState?.kind === "coverage" &&
-    moduleState.phase === "search_answer" &&
-    typeof moduleState.selectedSearchActionId === "string" &&
-    typeof moduleState.selectedSearchStateVersion === "number" &&
-    moduleState.selectedSearchStateVersion === portfolio.stateVersion &&
-    binding !== undefined;
-  if (!exactChoice || !selectedTarget || !binding) {
-    throw new PlanResolutionFailure("invalid_support_graph", {
-      side: input.side,
-      stateVersion: input.playerView.stateVersion,
-      timingPoint: input.playerView.timingPoint,
-      legalActionTypes: input.legalActions.map((action) => action.type),
-      unresolvedActionIds: [decision.actionId ?? "missing_decision_action"],
-      owner: "support_graph",
-      planInstanceId: executor.instanceId,
-      removalCondition:
-        "Bind a direct stack-search target only from the exact coverage executor, selected search action and current hidden Engine choice.",
-    });
-  }
-  const assessment = assessCard(input, selectedTarget);
-  const selectedCards = assessment.selectedCandidates.flatMap((candidate) =>
-    candidate.acceptable &&
-    candidate.card?.type === "program" &&
-    typeof candidate.card.instanceId === "string" &&
-    Number.isInteger(candidate.memoryCost) &&
-    candidate.memoryCost > 0
-      ? [
-          {
-            cardInstanceId: candidate.card.instanceId,
-            memoryCost: candidate.memoryCost,
-          },
-        ]
-      : [],
-  );
-  const memoryFreed = selectedCards.reduce(
-    (total, card) => total + card.memoryCost,
-    0,
-  );
-  if (
-    assessment.memoryRequired &&
-    (typeof selectedTarget.memoryCost !== "number" ||
-      !Number.isInteger(selectedTarget.memoryCost) ||
-      selectedTarget.memoryCost <= 0 ||
-      !assessment.canFreeRequiredMemory ||
-      selectedCards.length === 0 ||
-      memoryFreed < assessment.requiredMemoryToFree ||
-      memoryFreed !== assessment.memoryFreedBySelectedCandidates)
-  ) {
-    throw new PlanResolutionFailure("invalid_support_graph", {
-      side: input.side,
-      stateVersion: input.playerView.stateVersion,
-      timingPoint: input.playerView.timingPoint,
-      legalActionTypes: input.legalActions.map((action) => action.type),
-      unresolvedActionIds: [decision.actionId ?? "missing_decision_action"],
-      owner: "support_graph",
-      planInstanceId: executor.instanceId,
-      removalCondition:
-        "Continue a coverage stack install only after the exact visible target has a sufficient prebound acceptable program-sacrifice set.",
-    });
-  }
-  const boundTarget = {
-    ...binding,
-    targetCardInstanceId: selectedTarget.instanceId,
-    resolvedSearchChoice: {
-      choiceId: choice.choiceId,
-      choiceSource: choice.source,
-      stateVersion: input.playerView.stateVersion,
-    },
-    ...(assessment.memoryRequired
-      ? {
-          installMemorySacrificeBinding: {
-            targetCardInstanceId: selectedTarget.instanceId,
-            targetMemoryCost: selectedTarget.memoryCost!,
-            requiredMemoryToFree: assessment.requiredMemoryToFree,
-            selectedCards,
-          },
-        }
-      : {}),
-  };
-  executor.moduleState = {
-    ...moduleState,
-    selectedSearchStateVersion: input.playerView.stateVersion,
-    gap: {
-      ...moduleState.gap,
-      directSearchChoiceBindings:
-        moduleState.gap?.directSearchChoiceBindings?.map((candidate) =>
-          candidate === binding ? boundTarget : candidate,
-        ),
-    },
-  };
-  portfolio.stateVersion = input.playerView.stateVersion;
-}
-
 function bindSelectedRunnerProgramSearchAction(
   input: AiDecisionInput,
   result: PlanSchedulerResult,
@@ -4724,98 +4350,6 @@ function runnerRigDemandProjectionInputAvailable(
   );
 }
 
-function bindRunnerCoverageSearchProgramTrashSacrifices(
-  input: AiDecisionInput,
-  domain: RunnerPlanDomain,
-  assessCard: PlanFirstLiveDependencies["runnerProgramInstallTrashAssessmentForCard"],
-): RunnerPlanDomain {
-  return {
-    ...domain,
-    coverageGaps: domain.coverageGaps.map((gap) => {
-      const rejectedActionIds = new Set(gap.rejectedSearchActionIds ?? []);
-      const memoryRejectedActionIds = new Set(
-        gap.programInstallMemoryRejectedActionIds ?? [],
-      );
-      const bindings = gap.directSearchChoiceBindings?.flatMap((binding) => {
-        const target = binding.targetCardInstanceId
-          ? input.playerView.own.heapOrArchives.find(
-              (card) =>
-                card.known !== false &&
-                card.instanceId === binding.targetCardInstanceId &&
-                card.definitionId === binding.targetDefinitionId &&
-                card.type === "program",
-            )
-          : undefined;
-        if (!target) return [binding];
-        const assessment = assessCard(input, target);
-        if (!assessment.memoryRequired) return [binding];
-        const selectedCards = assessment.selectedCandidates.flatMap(
-          (candidate) =>
-            candidate.acceptable &&
-            candidate.card?.type === "program" &&
-            typeof candidate.card.instanceId === "string" &&
-            Number.isInteger(candidate.memoryCost) &&
-            candidate.memoryCost > 0
-              ? [
-                  {
-                    cardInstanceId: candidate.card.instanceId,
-                    memoryCost: candidate.memoryCost,
-                  },
-                ]
-              : [],
-        );
-        const memoryFreed = selectedCards.reduce(
-          (total, card) => total + card.memoryCost,
-          0,
-        );
-        if (
-          !assessment.canFreeRequiredMemory ||
-          selectedCards.length === 0 ||
-          memoryFreed < assessment.requiredMemoryToFree ||
-          memoryFreed !== assessment.memoryFreedBySelectedCandidates
-        ) {
-          rejectedActionIds.add(binding.actionId);
-          memoryRejectedActionIds.add(binding.actionId);
-          return [];
-        }
-        return [
-          {
-            ...binding,
-            installMemorySacrificeBinding: {
-              targetCardInstanceId: target.instanceId,
-              requiredMemoryToFree: assessment.requiredMemoryToFree,
-              selectedCards,
-            },
-          },
-        ];
-      });
-      const acceptedActionIds = new Set(
-        bindings?.map((binding) => binding.actionId) ?? [],
-      );
-      return {
-        ...gap,
-        directSearchActionIds: gap.directSearchActionIds.filter(
-          (actionId) =>
-            !rejectedActionIds.has(actionId) &&
-            (gap.directSearchChoiceBindings === undefined ||
-              acceptedActionIds.has(actionId)),
-        ),
-        ...(bindings ? { directSearchChoiceBindings: bindings } : {}),
-        ...(memoryRejectedActionIds.size > 0
-          ? {
-              programInstallMemoryRejectedActionIds: [
-                ...memoryRejectedActionIds,
-              ].sort((left, right) => left.localeCompare(right)),
-            }
-          : {}),
-        rejectedSearchActionIds: [...rejectedActionIds].sort((left, right) =>
-          left.localeCompare(right),
-        ),
-      };
-    }),
-  };
-}
-
 function runnerTransientPlanSignals(
   input: AiDecisionInput,
   domain: RunnerPlanDomain,
@@ -4892,181 +4426,6 @@ function runnerTransientPlanSignals(
     }),
   );
   return [...remoteSignals, ...survivalSignals, ...terminalSignals];
-}
-
-function runnerCandidateSourceSupportsProgramSearch(
-  input: AiDecisionInput,
-  candidate: ActionSemanticCandidate,
-): boolean {
-  const effectTargets = new Set(candidate.effectTargets ?? []);
-  const sourceDefinitionId = runnerCandidateSourceDefinitionId(
-    input,
-    candidate,
-  );
-  const hint = sourceDefinitionId
-    ? AI_HINTS_BY_CARD.get(sourceDefinitionId)
-    : undefined;
-  return (
-    effectTargets.has("setup.program_search") ||
-    effectTargets.has("program_search") ||
-    hint?.functionSignals?.includes("setup.program_search") === true ||
-    hint?.roles?.includes("program_search") === true
-  );
-}
-
-function runnerCandidateExecutesProgramSearch(
-  input: AiDecisionInput,
-  candidate: ActionSemanticCandidate,
-): boolean {
-  return (
-    (candidate.actionType === "play_event" ||
-      candidate.actionType === "activated_card_ability" ||
-      candidate.actionType === "trigger_ability") &&
-    runnerCandidateSourceSupportsProgramSearch(input, candidate)
-  );
-}
-
-function runnerProgramSearchSourceCardInstanceId(
-  input: AiDecisionInput,
-  candidate: ActionSemanticCandidate,
-): string | undefined {
-  const legalAction = input.legalActions.find(
-    (action) => action.actionId === candidate.actionId,
-  );
-  const payloadCardId = legalAction?.payload?.cardId;
-  return (
-    candidate.sourceCardInstanceId ??
-    (typeof payloadCardId === "string" ? payloadCardId : undefined) ??
-    (typeof legalAction?.source === "string" &&
-    legalAction.source !== "basic_action" &&
-    legalAction.source !== "game_rule"
-      ? legalAction.source
-      : undefined)
-  );
-}
-
-function runnerCandidateSourceDefinitionId(
-  input: AiDecisionInput,
-  candidate: ActionSemanticCandidate,
-): string | undefined {
-  const legalAction = input.legalActions.find(
-    (action) => action.actionId === candidate.actionId,
-  );
-  const payloadDefinitionId = legalAction?.payload?.sourceDefinitionId;
-  const sourceInstanceId =
-    candidate.sourceCardInstanceId ?? legalAction?.source;
-  return (
-    candidate.sourceDefinitionId ??
-    (typeof payloadDefinitionId === "string"
-      ? payloadDefinitionId
-      : undefined) ??
-    (sourceInstanceId
-      ? visibleOwnCardByInstanceId(input, sourceInstanceId)?.definitionId
-      : undefined)
-  );
-}
-
-function runnerCoverageOwnedActionIds(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  coverageGaps: readonly RunnerPlanDomain["coverageGaps"][number][],
-): Set<string> {
-  return new Set(
-    coverageGaps.flatMap((gap) => {
-      const preparationActionIds = gap.preparationActionIds ?? [];
-      if (preparationActionIds.length > 0) {
-        return preparationActionIds;
-      }
-      if (!gap.answerInHand) {
-        return [
-          ...preparationActionIds,
-          ...(gap.directSearchActionIds ?? []),
-          ...(gap.searchEngineSetupActionIds ?? []),
-          ...(gap.drawForAnswerActionIds ?? []),
-        ];
-      }
-      return [
-        ...preparationActionIds,
-        ...candidates
-          .filter((candidate) => {
-            if (candidate.semanticActionType !== "install.card") return false;
-            if (
-              gap.installActionIds !== undefined &&
-              !gap.installActionIds.includes(candidate.actionId)
-            ) {
-              return false;
-            }
-            const sourceDefinitionId = runnerCandidateSourceDefinitionId(
-              input,
-              candidate,
-            );
-            return (
-              sourceDefinitionId !== undefined &&
-              runnerInstallDefinitionCoversCoverageGap(
-                sourceDefinitionId,
-                rolesForDeckDoctrineCard(sourceDefinitionId),
-                gap.requiredRole,
-              )
-            );
-          })
-          .map((candidate) => candidate.actionId),
-      ];
-    }),
-  );
-}
-
-const RUNNER_BREAKER_COVERAGE_ROLES = [
-  "breaker_wall",
-  "breaker_code_gate",
-  "breaker_sentry",
-  "breaker_ap",
-  "breaker_trace",
-  "breaker_universal",
-] as const satisfies readonly RunnerCoverageGapSignal["requiredRole"][];
-
-function runnerMatchpointReserveBlocksOverlappingBreakerInstall(
-  input: AiDecisionInput,
-  candidate: ActionSemanticCandidate,
-  coverageOwnedActionIds: ReadonlySet<string>,
-  coverageGaps: readonly RunnerCoverageGapSignal[],
-): boolean {
-  const sourceDefinitionId = runnerCandidateSourceDefinitionId(
-    input,
-    candidate,
-  );
-  const sourceRoles = sourceDefinitionId
-    ? rolesForDeckDoctrineCard(sourceDefinitionId)
-    : [];
-  const ownsTargetedCoverageNeed = coverageGaps.some(
-    (gap) =>
-      gap.targetServerId !== undefined &&
-      ((gap.installActionIds ?? []).includes(candidate.actionId) ||
-        (gap.answerInHand &&
-          runnerRolesCoverCoverageGap(sourceRoles, gap.requiredRole))),
-  );
-  if (
-    candidate.semanticActionType !== "install.card" ||
-    (coverageOwnedActionIds.has(candidate.actionId) &&
-      ownsTargetedCoverageNeed) ||
-    runnerTerminalContestThreat(input) === undefined ||
-    candidate.costProfile.costKnownStatus !== "known" ||
-    (candidate.costProfile.creditCost ?? 0) <= 0
-  ) {
-    return false;
-  }
-  if (!sourceDefinitionId) return false;
-  const candidateCoverage = RUNNER_BREAKER_COVERAGE_ROLES.filter((role) =>
-    runnerRolesCoverCoverageGap(sourceRoles, role),
-  );
-  if (candidateCoverage.length === 0) return false;
-
-  return (input.playerView.own.rig ?? []).some((installedCard) => {
-    if (!installedCard.known || !installedCard.definitionId) return false;
-    const installedRoles = rolesForDeckDoctrineCard(installedCard.definitionId);
-    return candidateCoverage.some((role) =>
-      runnerRolesCoverCoverageGap(installedRoles, role),
-    );
-  });
 }
 
 function runnerOptionalProgramTrashInstallDuplicatesInstalledDefinition(
@@ -5436,20 +4795,6 @@ function runnerHandDevelopmentRejectionForCandidate(
   );
 }
 
-function runnerInstallSourceInstanceId(
-  candidate: ActionSemanticCandidate,
-  action: LegalAction | undefined,
-): string | undefined {
-  if (candidate.sourceCardInstanceId) return candidate.sourceCardInstanceId;
-  const cardId = action?.payload?.cardId;
-  if (typeof cardId === "string" && cardId.length > 0) return cardId;
-  return typeof action?.source === "string" &&
-    action.source.length > 0 &&
-    action.source !== "basic_action"
-    ? action.source
-    : undefined;
-}
-
 type RunnerRunLockReleaseBoundRouteDisposition = {
   executable: boolean;
   ownerModuleId: "runner.pressure_central" | "runner.contest_remote";
@@ -5547,15 +4892,7 @@ export function runnerActionDispositions(
       evidenceCode,
     });
   };
-  for (const gap of domain.coverageGaps) {
-    for (const actionId of gap.programInstallMemoryRejectedActionIds ?? []) {
-      add(
-        actionId,
-        "runner.rig_and_coverage",
-        "runner_coverage_search_install_has_no_acceptable_sacrifice",
-      );
-    }
-  }
+  addRunnerCoverageMemoryDispositions(domain, add);
   const specializedEconomyActionIds = new Set([
     ...domain.creditBanks.flatMap((signal) => [
       ...signal.actionIds,
@@ -5628,124 +4965,29 @@ export function runnerActionDispositions(
   const terminalWinOwnedActionIds = new Set(
     (domain.terminalWins ?? []).flatMap((signal) => signal.actionIds ?? []),
   );
-  const deferredSameTurnCoverageInstallActionIds = new Set(
-    domain.coverageGaps.flatMap((gap) =>
-      gap.sameTurnRunConversion !== undefined && (gap.fundingGap ?? 0) > 0
-        ? (gap.installActionIds ?? [])
-        : [],
-    ),
-  );
-  const coveragePlanningContext: PlanSchedulerContext = {
+  const coverageInstallDeferrals = runnerCoverageInstallDeferrals(
     input,
-    actionCandidates: candidates,
-    actionDispositions: dispositions,
-    transientSignals: [],
-    turnKey: turnKey(input),
+    candidates,
     domain,
-  };
-  const coverageGapsByAssignedPlanId = new Map(
-    domain.coverageGaps.map((gap) => [
-      `runner.rig_and_coverage:${gap.gapId}`,
-      gap,
-    ]),
+    dispositions,
+    turnKey(input),
   );
-  const deferredCoveragePreparationInstallActionIds = new Set(
-    domain.developments.flatMap((signal) => {
-      if (signal.assignedDomainPlanIds.length === 0) return [];
-      const assignedCoverageGaps = signal.assignedDomainPlanIds.flatMap(
-        (planId) => {
-          const gap = coverageGapsByAssignedPlanId.get(planId);
-          return gap ? [gap] : [];
-        },
-      );
-      if (
-        assignedCoverageGaps.length !== signal.assignedDomainPlanIds.length ||
-        !assignedCoverageGaps.every(
-          (gap) =>
-            runnerCoverageCurrentPhase({
-              context: coveragePlanningContext,
-              gap,
-              rolesForDefinitionId: rolesForDeckDoctrineCard,
-            }) === "prepare_coverage",
-        )
-      ) {
-        return [];
-      }
-      return signal.actionIds.filter(
-        (actionId) =>
-          candidates.find((candidate) => candidate.actionId === actionId)
-            ?.semanticActionType === "install.card",
-      );
-    }),
-  );
+  const { coveragePlanningContext, coverageGapsByAssignedPlanId } =
+    coverageInstallDeferrals;
   for (const candidate of candidates) {
-    const boundCoverageInstallGaps =
-      candidate.semanticActionType === "install.card"
-        ? domain.coverageGaps.filter((gap) =>
-            gap.installActionIds?.includes(candidate.actionId),
-          )
-        : [];
     if (
-      boundCoverageInstallGaps.length > 0 &&
-      boundCoverageInstallGaps.every(
-        (gap) =>
-          gap.requesterModuleId === "runner.pressure_central" &&
-          domain.centralPressure.some(
-            (parent) =>
-              parent.supportNeedId === gap.gapId &&
-              gap.requesterNeedId === gap.gapId &&
-              gap.requesterPlanInstanceId ===
-                planInstanceIdForProposal({
-                  moduleId: "runner.pressure_central",
-                  dedupeKey: parent.pressureId,
-                }) &&
-              parent.marginalValue <= 0,
-          ),
+      applyRunnerCoverageCandidateDisposition(
+        {
+          input,
+          candidate,
+          domain,
+          coverageOwnedActionIds,
+          deferrals: coverageInstallDeferrals,
+        },
+        add,
       )
-    ) {
-      // A child cannot execute for a parent that currently rejects the payoff.
-      // Keep the exact installation diagnosed by its existing coverage owner;
-      // another positive or independent coverage need must remain eligible.
-      add(
-        candidate.actionId,
-        "runner.rig_and_coverage",
-        "runner_coverage_install_deferred_by_nonpositive_bound_parent",
-      );
+    )
       continue;
-    }
-    if (deferredCoveragePreparationInstallActionIds.has(candidate.actionId)) {
-      add(
-        candidate.actionId,
-        "runner.rig_and_coverage",
-        "runner_coverage_install_deferred_for_current_preparation_phase",
-      );
-      continue;
-    }
-    if (deferredSameTurnCoverageInstallActionIds.has(candidate.actionId)) {
-      add(
-        candidate.actionId,
-        "runner.rig_and_coverage",
-        "runner_coverage_install_waits_for_bound_same_turn_funding",
-      );
-      continue;
-    }
-    const subtypeAction = input.legalActions.find(
-      (action) => action.actionId === candidate.actionId,
-    );
-    if (
-      subtypeAction?.side === "runner" &&
-      subtypeAction.type === "trigger_ability" &&
-      subtypeAction.payload?.runnerAbility === "change_icebreaker_subtype"
-    ) {
-      if (!coverageOwnedActionIds.has(candidate.actionId)) {
-        add(
-          candidate.actionId,
-          "runner.rig_and_coverage",
-          "runner_breaker_subtype_change_requires_bound_run_coverage_need",
-        );
-      }
-      continue;
-    }
     const strategicExchangeExclusion = runnerStrategicExchangeHardExclusion(
       input,
       candidate,
@@ -6084,17 +5326,10 @@ export function runnerActionDispositions(
   )) {
     addDisposition(disposition);
   }
-  for (const signal of domain.shellTradersPipelines ?? []) {
-    for (const actionId of signal.rejectedActionIds ?? []) {
-      add(
-        actionId,
-        "runner.shell_traders_pipeline",
-        signal.evidenceCodes.find(
-          (evidenceCode) =>
-            evidenceCode.includes("rejected") || evidenceCode.includes("holds"),
-        ) ?? "runner_shell_traders_pipeline_action_held",
-      );
-    }
+  for (const disposition of runnerShellTradersActionDispositions(
+    domain.shellTradersPipelines ?? [],
+  )) {
+    addDisposition(disposition);
   }
   if (domain.defense.forgoUnsafeRunCapacity) {
     for (const candidate of candidates) {
@@ -6198,61 +5433,19 @@ export function runnerActionDispositions(
   const defenseHandBufferActionIds = new Set(
     domain.defense.handBufferActionIds ?? [],
   );
-  for (const actionId of domain.defense
-    .defenseSupportRejectedInstallActionIds ?? []) {
-    if (optionalProgramTrashInstallDispositionActionIds.has(actionId)) {
-      continue;
-    }
-    add(
-      actionId,
-      "runner.defense_and_recovery",
-      "runner_defense_support_install_deferred_no_current_need_or_constraint",
-    );
+  for (const disposition of runnerDefenseSupportDispositions(
+    domain.defense,
+    candidates,
+    optionalProgramTrashInstallDispositionActionIds,
+  )) {
+    addDisposition(disposition);
   }
-  if ((domain.defense.defenseSupportInstallActionIds?.length ?? 0) > 0) {
-    for (const candidate of candidates) {
-      const evidenceCode =
-        candidate.semanticActionType === "tag.remove"
-          ? "runner_tag_removal_deferred_for_defense_support_install"
-          : candidate.semanticActionType === "counter.remove_trace_tag" ||
-              candidate.semanticActionType === "counter.remove_runner_hazard"
-            ? "runner_persistent_hazard_counter_deferred_for_defense_support_install"
-            : undefined;
-      if (!evidenceCode) {
-        continue;
-      }
-      add(candidate.actionId, "runner.defense_and_recovery", evidenceCode);
-    }
-  }
-  const rejectedCoverageGapsByActionId = new Map<
-    string,
-    RunnerPlanDomain["coverageGaps"]
-  >();
-  for (const gap of domain.coverageGaps) {
-    for (const actionId of gap.rejectedSearchActionIds ?? []) {
-      if (
-        coverageOwnedActionIds.has(actionId) ||
-        developmentOwnedActionIds.has(actionId)
-      ) {
-        continue;
-      }
-      const rejectedGaps = rejectedCoverageGapsByActionId.get(actionId) ?? [];
-      rejectedGaps.push(gap);
-      rejectedCoverageGapsByActionId.set(actionId, rejectedGaps);
-    }
-  }
-  for (const [actionId, rejectedGaps] of rejectedCoverageGapsByActionId) {
-    add(
-      actionId,
-      "runner.rig_and_coverage",
-      `runner_coverage_search_rejected_without_deck_answer:${rejectedGaps
-        .map(
-          (gap) => `${gap.requiredRole}@${gap.targetServerId ?? "no_server"}`,
-        )
-        .sort()
-        .join("+")}`,
-    );
-  }
+  addRunnerCoverageRejectedSearchDispositions(
+    domain,
+    coverageOwnedActionIds,
+    developmentOwnedActionIds,
+    add,
+  );
   const centralPreparationActionIds = new Set(
     domain.centralPressure.flatMap((signal) => [
       ...(signal.preparationActionIds ?? []),
@@ -7158,18 +6351,6 @@ function runnerDrawActionHasCurrentPlanPurpose(
   );
 }
 
-function runnerDrawActionHasCurrentCoveragePurpose(
-  candidate: ActionSemanticCandidate,
-  domain: RunnerPlanDomain,
-): boolean {
-  return domain.coverageGaps.some(
-    (gap) =>
-      !gap.answerInHand &&
-      gap.deckHasAnswer &&
-      gap.drawForAnswerActionIds.includes(candidate.actionId),
-  );
-}
-
 function runnerDrawActionHasCurrentNonCoveragePlanPurpose(
   candidate: ActionSemanticCandidate,
   domain: RunnerPlanDomain,
@@ -7194,46 +6375,6 @@ function runnerDrawActionHasCurrentNonCoveragePlanPurpose(
       signal.preparationActionIds?.includes(candidate.actionId),
     )
   );
-}
-
-function runnerResidentTurnLiquidityTarget(
-  previous: ResidentPlanPortfolio | undefined,
-  currentTurnKey: string,
-  currentCredits: number,
-): number | undefined {
-  const needId = `economy-liquidity-development:${currentTurnKey}`;
-  const instance = previous?.instances.find(
-    (candidate) =>
-      candidate.moduleId === "runner.economy" && candidate.dedupeKey === needId,
-  );
-  const moduleState = instance?.moduleState as
-    | {
-        kind?: unknown;
-        need?: Partial<
-          Extract<
-            RunnerCorePlanDomain["fundingNeeds"][number],
-            { kind: "develop_liquidity" }
-          >
-        >;
-      }
-    | undefined;
-  const need = moduleState?.need;
-  if (
-    moduleState?.kind !== "economy" ||
-    need?.kind !== "develop_liquidity" ||
-    need.needId !== needId ||
-    need.priorityClass !== "P6" ||
-    need.cadence?.kind !== "remaining_turn_capacity" ||
-    need.completion?.kind !== "target_credits_or_no_clicks" ||
-    !Number.isSafeInteger(need.targetCredits) ||
-    (need.targetCredits ?? -1) < 0
-  ) {
-    return undefined;
-  }
-  const targetCredits = need.targetCredits;
-  return targetCredits !== undefined && targetCredits > currentCredits
-    ? targetCredits
-    : undefined;
 }
 
 type RunnerLiquiditySaturationOptionDevelopment = Readonly<{
@@ -7349,71 +6490,6 @@ function runnerLiquiditySaturationOptionDevelopment(
   };
 }
 
-function runnerDefinitionProvidesTraceDefense(definitionId: string): boolean {
-  const hint = AI_HINTS_BY_CARD.get(definitionId);
-  return (
-    hint?.functionSignals?.includes("defense.trace_defense") === true ||
-    hint?.effects?.some(
-      (effect) =>
-        effect.timing === "trace_window" &&
-        (effect.kind === "base_link" || effect.kind === "link"),
-    ) === true
-  );
-}
-
-function runnerTraceDefenseInstallValue(
-  input: AiDecisionInput,
-  evaluation: RunnerHandDevelopmentEvaluation,
-): number {
-  const hint = evaluation.definitionId
-    ? AI_HINTS_BY_CARD.get(evaluation.definitionId)
-    : undefined;
-  const installedBaseLink = Math.max(
-    0,
-    ...(
-      input.playerView.own.runnerTraceSupportQuote?.baseLinkOptions ?? []
-    ).map((option) => option.baseLink),
-  );
-  const efficiencies = (hint?.actionCapabilitySemantics ?? []).flatMap(
-    (capability) => {
-      const activationCost = Math.max(1, capability.costProfile?.credits ?? 0);
-      return (capability.effects ?? []).flatMap((effect) => {
-        if (effect.timing !== "trace_window") return [];
-        if (effect.kind === "base_link") {
-          return [
-            Math.max(0, (effect.amount ?? 0) - installedBaseLink) /
-              activationCost,
-          ];
-        }
-        if (effect.kind === "link") {
-          return [Math.max(0, effect.amount ?? 0) / activationCost];
-        }
-        return [];
-      });
-    },
-  );
-  const bestEfficiency = Math.max(0, ...efficiencies);
-  const card = input.playerView.own.gripOrHq.find(
-    (entry) => entry.instanceId === evaluation.cardInstanceId,
-  );
-  const installCost = Math.max(0, card?.installCost ?? card?.cost ?? 0);
-  const memoryCost = Math.max(0, card?.memoryCost ?? 0);
-  const establishesHigherBaseLink = (hint?.effects ?? []).some(
-    (effect) =>
-      effect.kind === "base_link" && (effect.amount ?? 0) > installedBaseLink,
-  );
-  return Math.max(
-    1,
-    Math.round(
-      40 +
-        bestEfficiency * 30 +
-        (establishesHigherBaseLink ? 10 : 0) -
-        installCost * 5 -
-        memoryCost * 5,
-    ),
-  );
-}
-
 function buildRunnerDomain(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
@@ -7436,212 +6512,30 @@ function buildRunnerDomain(
 ): RunnerPlanDomain {
   const currentCredits = input.playerView.own.credits;
   const remainingClicks = input.playerView.own.clicks;
-  const debtLiability = runnerInstalledDebtFinancingLiability(
-    (input.playerView.own.rig ?? []).map((card) => card.definitionId),
-  );
-  const portfolioReserveTargetCredits =
-    economy.desiredCreditReserve + debtLiability.nextTurnCreditLoss;
+  const economyReserve = runnerEconomyReserveFacts(input, economy);
   const installedCardLiquidationChoice =
     runnerInstalledCardLiquidationChoiceSignal(input, candidates);
-  const defenseSupportEvaluations = handDevelopment.filter(
-    (evaluation) => evaluation.developmentRole === "defense_support",
-  );
-  const defenseSupportInstallEvaluationActionIds = new Set(
-    defenseSupportEvaluations.flatMap((evaluation) => {
-      if (evaluation.legalActionId === undefined) return [];
-      const candidate = candidates.find(
-        (entry) => entry.actionId === evaluation.legalActionId,
-      );
-      return candidate?.actionType === "install_card" &&
-        candidate.semanticActionType === "install.card"
-        ? [evaluation.legalActionId]
-        : [];
-    }),
-  );
-  const defenseSupportAllInstallActionIds = uniqueBy(
-    defenseSupportEvaluations
-      .map((evaluation) => evaluation.legalActionId)
-      .filter(
-        (actionId): actionId is string =>
-          actionId !== undefined &&
-          defenseSupportInstallEvaluationActionIds.has(actionId),
-      ),
-    (actionId) => actionId,
-  );
-  const defenseSupportInstallActionIds = defenseSupportEvaluations
-    .filter(
-      (evaluation) =>
-        evaluation.legalActionId !== undefined &&
-        defenseSupportInstallEvaluationActionIds.has(
-          evaluation.legalActionId,
-        ) &&
-        evaluation.availability === "legal_now" &&
-        evaluation.currentNeed !== "none" &&
-        evaluation.deferReason === "none",
-    )
-    .map((evaluation) => evaluation.legalActionId!);
-  const defenseSupportInstallActionIdSet = new Set(
-    defenseSupportInstallActionIds,
-  );
-  const defenseSupportRejectedInstallActionIds =
-    defenseSupportAllInstallActionIds.filter(
-      (actionId) => !defenseSupportInstallActionIdSet.has(actionId),
-    );
-  const defenseSupportInstallValues = Object.fromEntries(
-    defenseSupportEvaluations.flatMap((evaluation) =>
-      evaluation.legalActionId &&
-      defenseSupportInstallActionIdSet.has(evaluation.legalActionId)
-        ? [
-            [
-              evaluation.legalActionId,
-              evaluation.definitionId !== undefined &&
-              runnerDefinitionProvidesTraceDefense(evaluation.definitionId)
-                ? runnerTraceDefenseInstallValue(input, evaluation)
-                : Math.max(1, 40 + evaluation.priority),
-            ],
-          ]
-        : [],
-    ),
-  );
-  const handDevelopmentOwnedImmediateEconomyActionIds = new Set(
-    handDevelopment.flatMap((evaluation) =>
-      evaluation.legalActionId !== undefined &&
-      candidates.some(
-        (candidate) =>
-          candidate.actionId === evaluation.legalActionId &&
-          runnerGenericDevelopmentMayOwnAction(candidate),
-      ) &&
-      evaluation.availability === "legal_now" &&
-      evaluation.deferReason === "none" &&
-      evaluation.liquidityTiming === "immediate" &&
-      (evaluation.currentNeed === "acute" ||
-        evaluation.currentNeed === "useful_now" ||
-        evaluation.currentNeed === "setup")
-        ? [evaluation.legalActionId]
-        : [],
-    ),
-  );
-  const turnLiquidityActionIds = uniqueBy(
-    candidates
-      .filter(
-        (candidate) =>
-          !handDevelopmentOwnedImmediateEconomyActionIds.has(
-            candidate.actionId,
-          ) &&
-          runnerTurnLiquidityCandidateIsMaterializable(candidate) &&
-          !runnerStrategicExchangeRequiresBoundParent(candidate),
-      )
-      .map((candidate) => candidate.actionId),
-    (actionId) => actionId,
-  );
-  const forgoTerminalDeckPressureCapacity =
-    input.playerView.own.clicks > 0 &&
-    input.playerView.own.agendaPoints >=
-      input.playerView.agendaPointsToWin - 1 &&
-    input.playerView.opponent.deckCount > 0 &&
-    input.playerView.opponent.deckCount <= input.playerView.own.stackOrRdCount;
-  const reserveDevelopmentOpen =
-    currentCredits < Math.max(10, economy.desiredCreditReserve + 3);
-  const boundedTurnLiquidityActionIds = forgoTerminalDeckPressureCapacity
-    ? []
-    : reserveDevelopmentOpen
-      ? turnLiquidityActionIds
-      : turnLiquidityActionIds.filter((actionId) => {
-          const candidate = candidates.find(
-            (entry) => entry.actionId === actionId,
-          );
-          // The remaining-click contract may use any exact cost-free liquid
-          // route without spending a hand card or another resource. Requiring
-          // the basic-action identity would discard stronger installed tools.
-          return (
-            candidate?.economyProjection?.cardsConsumed === 0 &&
-            candidate.economyProjection.netHandDelta === 0
-          );
-        });
-  const residentTurnLiquidityTarget = runnerResidentTurnLiquidityTarget(
-    previous,
-    turnKey(input),
-    currentCredits,
-  );
-  const turnLiquidityTargetCredits =
-    residentTurnLiquidityTarget ??
-    (boundedTurnLiquidityActionIds.length > 0
-      ? currentCredits + remainingClicks
-      : currentCredits);
-  const turnLiquidityGap = Math.max(
-    0,
-    turnLiquidityTargetCredits - currentCredits,
-  );
-  const turnLiquidityFundingNeeds: RunnerCorePlanDomain["fundingNeeds"] =
-    remainingClicks > 0 &&
-    boundedTurnLiquidityActionIds.length > 0 &&
-    turnLiquidityGap > 0
-      ? [
-          {
-            kind: "develop_liquidity",
-            needId: `economy-liquidity-development:${turnKey(input)}`,
-            actionIds: boundedTurnLiquidityActionIds,
-            currentCreditsAtRevalidation: currentCredits,
-            targetCredits: turnLiquidityTargetCredits,
-            gap: turnLiquidityGap,
-            priorityClass: "P6",
-            cadence: {
-              kind: "remaining_turn_capacity",
-              maximumConversions: turnLiquidityGap,
-            },
-            completion: {
-              kind: "target_credits_or_no_clicks",
-            },
-            revalidation: {
-              stateVersion: input.playerView.stateVersion,
-              status: "turn_liquidity_open",
-            },
-            evidenceCode: reserveDevelopmentOpen
-              ? "runner_engine_certified_immediate_liquidity_development"
-              : "runner_engine_certified_remaining_capacity_liquidity",
-          },
-        ]
-      : [];
-  const portfolioReserveRoute = runnerExactFundingRouteContract(
+  const defenseSupport = runnerDefenseSupportSignals(
     input,
     candidates,
-    {
-      demandId: "runner-portfolio-credit-reserve",
-      sourcePlanId: "runner.economy:runner-portfolio-credit-reserve",
-      purpose: "phase_reserve",
-      priority: "phase_reserve",
-      hardness: "soft",
-      deadline: "end_of_current_turn",
-      targetCredits: portfolioReserveTargetCredits,
-      remainingClicks: input.playerView.own.clicks,
-      allowIncrementalProgress: true,
-      evidence: [
-        "runner_finite_portfolio_credit_reserve",
-        `runner_debt_next_turn_credit_loss:${debtLiability.nextTurnCreditLoss}`,
-        `runner_debt_total_leave_play_cost:${debtLiability.totalLeavePlayPayCost}`,
-      ],
-    },
+    handDevelopment,
   );
-  const portfolioReserveFundingNeeds: RunnerCorePlanDomain["fundingNeeds"] =
-    input.playerView.own.clicks > 0 &&
-    currentCredits < portfolioReserveTargetCredits
-      ? [
-          {
-            kind: "portfolio_reserve",
-            needId: "runner-portfolio-credit-reserve",
-            targetCredits: portfolioReserveTargetCredits,
-            currentCreditsAtRevalidation: currentCredits,
-            gap: portfolioReserveTargetCredits - currentCredits,
-            priorityClass: "P6",
-            revalidation: {
-              stateVersion: input.playerView.stateVersion,
-              status: "portfolio_reserve_open",
-            },
-            ...portfolioReserveRoute,
-            evidenceCode: "runner_finite_portfolio_credit_reserve",
-          },
-        ]
-      : [];
+  const { defenseSupportAllInstallActionIds } = defenseSupport;
+  const {
+    turnLiquidityFundingNeeds,
+    portfolioReserveFundingNeeds,
+    forgoTerminalDeckPressureCapacity,
+  } = buildRunnerEconomySignals({
+    input,
+    candidates,
+    economy,
+    handDevelopment,
+    previous,
+    currentTurnKey: turnKey(input),
+    reserve: economyReserve,
+    findFundingRoute: (request) =>
+      runnerExactFundingRouteContract(input, candidates, request),
+  });
   const installedRoles = new Set(
     (input.playerView.own.rig ?? []).flatMap((card) =>
       rolesForDeckDoctrineCard(card.definitionId ?? ""),
@@ -7665,6 +6559,15 @@ function buildRunnerDomain(
     strategicIntent,
     economy,
     handRotationAssessment,
+    {
+      runnerRemoteHasCurrentContestMaterial,
+      runnerRemoteHasKnownIceScheduledForRunnerTurnEndTrash,
+      runnerRunTargetCanConvertNow,
+      runnerRunFundingSupport,
+      runnerCentralPressureHasMaterialMarginalValue,
+      runnerCentralPressureCadence,
+      runnerExactFundingRouteContract,
+    },
   );
   const coverageGaps = rigDemandProjection
     ? bindRunnerRigDemandProjectionToCoverageGaps({
@@ -7722,26 +6625,8 @@ function buildRunnerDomain(
       candidates,
       immediateAgendaPointTerminalWins,
     );
-  const handSize = input.playerView.own.gripOrHq.length;
-  const maxHandSize = Math.max(0, input.playerView.own.maxHandSize ?? 5);
-  const damageThreat = runnerDamageThreatAssessment(input);
-  const riskAdjustedHandBuffer =
-    runnerRiskAdjustedHandBufferForAttractiveRuns(runTargets);
-  const volatileBreakerFailureDamage = Math.max(
-    0,
-    ...(input.playerView.own.rig ?? []).map(
-      (card) =>
-        randomBreakOrDamageRiskProfileForDefinitionId(card.definitionId)
-          ?.maxSingleFailureDamage ?? 0,
-    ),
-  );
-  const volatileBreakerHandFloor =
-    volatileBreakerFailureDamage > 0 ? volatileBreakerFailureDamage + 1 : 0;
-  const minimumHandBuffer = Math.max(
-    riskAdjustedHandBuffer.minimumHandBuffer,
-    damageThreat.flatlineRisk.recommendedHandFloor,
-    volatileBreakerHandFloor,
-  );
+  const defenseHandBuffer = runnerDefenseHandBufferFacts(input, runTargets);
+  const { handSize, damageThreat, minimumHandBuffer } = defenseHandBuffer;
   const creditBanks = runnerCreditBankSignals(
     input,
     candidates,
@@ -7762,316 +6647,28 @@ function buildRunnerDomain(
         runnerSameTurnDevelopmentFundingRoute(input, candidates, target),
     },
   );
-  const riskAdjustedHandBufferOpen = handSize < minimumHandBuffer;
-  const damageBufferForecast =
-    damageThreat.flatlineRisk.level === "critical" ||
-    damageThreat.flatlineRisk.level === "confirmed" ||
-    runTargets.some(
-      (evaluation) =>
-        evaluation.recommendation === "draw_for_damage_buffer" ||
-        evaluation.pathPassability ===
-          "blocked_by_random_break_damage_hand_buffer" ||
-        evaluation.pathPassability ===
-          "blocked_by_visible_damage_hand_buffer" ||
-        (evaluation.riskyUniversalCoverage && handSize < 3) ||
-        evaluation.randomBreakOrDamageRiskAssessment?.blockedByHandBuffer ===
-          true ||
-        evaluation.randomBreakOrDamageRiskAssessment?.riskSeverity === "high" ||
-        evaluation.randomBreakOrDamageRiskAssessment?.riskSeverity === "lethal",
-    ) ||
-    (handSize < 3 &&
-      input.playerView.servers.some((server) =>
-        server.ice.some(
-          (ice) =>
-            ice.rezzed === true &&
-            ((strategicIntent.riskProfile ?? []).includes(
-              "runner.risky_universal_breaker_pressure",
-            ) ||
-              rolesForDeckDoctrineCard(ice.definitionId ?? "").includes(
-                "sentry_ice",
-              )),
-        ),
-      ));
-  const productiveLegalActions = input.legalActions.filter(
-    (action) => action.type !== "end_turn",
-  );
-  const runOnlyActionCapacity =
-    productiveLegalActions.length > 0 &&
-    productiveLegalActions.every((action) => action.type === "start_run") &&
-    (input.playerView.own.clicks === 0 ||
-      productiveLegalActions.every(
-        (action) =>
-          action.source !== "basic_action" &&
-          action.costs.reduce(
-            (total, cost) => total + Math.max(0, cost.clicks ?? 0),
-            0,
-          ) === 0,
-      ));
-  const visibleImmediatePayoffRunAvailable = runTargets.some(
-    (evaluation) =>
-      evaluation.pathPassability === "reachable" &&
-      evaluation.recommendation === "run_now" &&
-      ["agenda", "score_threat", "trash_affordable", "fresh"].includes(
-        evaluation.accessPayoff,
-      ),
-  );
-  const directlyConvertibleBypassEventRunAvailable = runTargets.some(
-    (evaluation) =>
-      evaluation.runActionProjection?.sourceKind === "event" &&
-      evaluation.runActionProjection?.bypassFirstIce === true &&
-      evaluation.bypassedFirstIce === true &&
-      evaluation.recommendation === "run_now" &&
-      runnerRunTargetCanConvertNow(input, economy, evaluation, candidates),
-  );
-  const visiblySafePositiveRunAvailable = runTargets.some((evaluation) => {
-    const visibleServer = input.playerView.servers.find(
-      (server) => server.id === evaluation.targetServerId,
-    );
-    const noUnrezzedIceVisible =
-      visibleServer !== undefined &&
-      visibleServer.ice.every((ice) => ice.rezzed === true);
-    return (
-      evaluation.pathPassability === "reachable" &&
-      evaluation.score > 0 &&
-      (evaluation.recommendation === "run_now" ||
-        evaluation.recommendation === "run_if_free") &&
-      noUnrezzedIceVisible &&
-      (evaluation.unavoidableVisibleIceHazardCount ?? 0) === 0 &&
-      evaluation.visibleTraceTagHazardUnavoidable !== true &&
-      evaluation.randomBreakOrDamageRiskAssessment?.blockedByHandBuffer !==
-        true &&
-      evaluation.randomBreakOrDamageRiskAssessment?.riskSeverity !== "high" &&
-      evaluation.randomBreakOrDamageRiskAssessment?.riskSeverity !== "lethal"
-    );
-  });
-  const forgoUnsafeRunCapacity =
-    runOnlyActionCapacity &&
-    riskAdjustedHandBufferOpen &&
-    !visiblySafePositiveRunAvailable &&
-    !visibleImmediatePayoffRunAvailable;
-  const forgoExhaustedStandardCapacity =
-    input.playerView.own.clicks > 0 &&
-    input.playerView.own.stackOrRdCount === 0;
-  const tagClearTargetCredits = 2;
-  const tagClearFundingActionIds = runnerExactFundingRouteContract(
-    input,
-    candidates,
-    {
-      demandId: "runner-defense-tag-clear-funding",
-      sourcePlanId: "runner.defense_and_recovery:runner",
-      purpose: "foreground_plan",
-      priority: "acute_hard_plan_blocker",
-      hardness: "hard",
-      deadline: "end_of_current_turn",
-      targetCredits: tagClearTargetCredits,
-      remainingClicks: Math.max(0, input.playerView.own.clicks - 1),
-      allowIncrementalProgress: true,
-      evidence: ["runner_visible_tag_punish_requires_clear_funding"],
-    },
-  ).routeActionIds;
-  const directTagClearAvailable = candidates.some(
-    (candidate) => candidate.semanticActionType === "tag.remove",
-  );
-  const tagClearFundingOpen =
-    input.playerView.own.tags > 0 &&
-    !directTagClearAvailable &&
-    input.playerView.own.credits < tagClearTargetCredits &&
-    input.playerView.own.clicks > 1 &&
-    tagClearFundingActionIds.length > 0;
-  const tagClearFundingNeed: RunnerCorePlanDomain["defense"]["tagClearFundingNeed"] =
-    tagClearFundingOpen
-      ? {
-          needId: "runner-defense-tag-clear-funding",
-          parentPlanInstanceId: "plan:runner.defense_and_recovery:runner",
-          targetCredits: tagClearTargetCredits,
-          currentCreditsAtRevalidation: currentCredits,
-          gap: Math.max(0, tagClearTargetCredits - currentCredits),
-          actionIds: tagClearFundingActionIds,
-          revalidation: {
-            stateVersion: input.playerView.stateVersion,
-            status: "defense_parent_open",
-          },
-          evidenceCode: "runner_visible_tag_punish_requires_clear_funding",
-        }
-      : undefined;
-  const reactionReserveTargetCredits = 10;
-  const reactionReserveActionIds = runnerExactFundingRouteContract(
-    input,
-    candidates,
-    {
-      demandId: "runner-defense-reaction-reserve",
-      sourcePlanId: "runner.defense_and_recovery:runner",
-      purpose: "tactical_reserve",
-      priority: "tactical_reserve",
-      hardness: "soft",
-      deadline: "end_of_current_turn",
-      targetCredits: reactionReserveTargetCredits,
-      remainingClicks: input.playerView.own.clicks,
-      allowIncrementalProgress: true,
-      evidence: ["runner_damage_locked_hand_reaction_reserve"],
-    },
-  ).routeActionIds;
-  const criticalDamageAtHandFloor =
-    damageThreat.flatlineRisk.level === "critical" &&
-    damageThreat.flatlineRisk.handCount <=
-      damageThreat.flatlineRisk.recommendedHandFloor;
-  const confirmedDamageAtLockedHand =
-    (damageThreat.flatlineRisk.level === "confirmed" ||
-      damageThreat.flatlineRisk.level === "critical") &&
-    damageThreat.flatlineRisk.effectiveMaxHandSize <=
-      damageThreat.flatlineRisk.recommendedHandFloor &&
-    damageThreat.flatlineRisk.handCount >=
-      damageThreat.flatlineRisk.effectiveMaxHandSize &&
-    damageThreat.flatlineRisk.handBufferHeadroom === 0;
-  const reactionReserveOpen =
-    damageThreat.deckBelief.level === "confirmed" &&
-    (criticalDamageAtHandFloor || confirmedDamageAtLockedHand) &&
-    input.playerView.own.clicks > 0 &&
-    input.playerView.own.credits < 10 &&
-    !visibleImmediatePayoffRunAvailable &&
-    !directlyConvertibleBypassEventRunAvailable &&
-    reactionReserveActionIds.length > 0;
-  const reactionReserveNeed: RunnerCorePlanDomain["defense"]["reactionReserveNeed"] =
-    reactionReserveOpen
-      ? {
-          needId: "runner-defense-reaction-reserve",
-          parentPlanInstanceId: "plan:runner.defense_and_recovery:runner",
-          targetCredits: reactionReserveTargetCredits,
-          currentCreditsAtRevalidation: currentCredits,
-          gap: Math.max(0, reactionReserveTargetCredits - currentCredits),
-          actionIds: reactionReserveActionIds,
-          revalidation: {
-            stateVersion: input.playerView.stateVersion,
-            status: "defense_parent_open",
-          },
-          evidenceCode: "runner_damage_locked_hand_reaction_reserve",
-        }
-      : undefined;
-  const confirmedDamageTaxedDrawActionIds =
-    damageThreat.flatlineRisk.level === "confirmed" ||
-    damageThreat.flatlineRisk.level === "critical"
-      ? candidates
-          .filter((candidate) => {
-            const legalAction = input.legalActions.find(
-              (action) => action.actionId === candidate.actionId,
-            );
-            return (
-              legalAction !== undefined &&
-              runnerDrawTaxLiabilityProjection(input, legalAction, candidate)
-                .projectedTagsAdded > 0
-            );
-          })
-          .map((candidate) => candidate.actionId)
-      : [];
-  const confirmedDamageTaxedDrawActionIdSet = new Set(
-    confirmedDamageTaxedDrawActionIds,
-  );
-  const defense: RunnerCorePlanDomain["defense"] = {
-    activeTags: input.playerView.own.tags,
-    visibleTagPunish: input.playerView.own.tags > 0,
-    persistentHazardCounterRemovalAvailable: candidates.some(
-      (candidate) =>
-        candidate.semanticActionType === "counter.remove_trace_tag" ||
-        candidate.semanticActionType === "counter.remove_runner_hazard",
-    ),
-    pendingDamage: visiblePendingDamage(candidates),
-    damagePreventionNeeded: candidates.some(
-      (candidate) =>
-        candidate.semanticActionType.startsWith("damage.prevent") ||
-        candidate.actionTacticSignals.includes("damage_prevention"),
-    ),
-    handSize,
-    minimumHandBuffer,
-    drawAllowed:
-      input.playerView.own.stackOrRdCount > 0 &&
-      candidates.some(
-        (candidate) =>
-          candidate.semanticActionType === "draw.card" &&
-          handSize < maxHandSize,
-      ),
-    handBufferActionIds: candidates
-      .filter((candidate) => {
-        return (
-          handSize < maxHandSize &&
-          handSize < minimumHandBuffer &&
-          !exactCoverageRecoveryActionIds.has(candidate.actionId) &&
-          !confirmedDamageTaxedDrawActionIdSet.has(candidate.actionId) &&
-          ((input.playerView.own.stackOrRdCount > 0 &&
-            (candidate.semanticActionType === "draw.card" ||
-              ((candidate.economyProjection?.netHandDelta ?? 0) > 0 &&
-                candidate.economyProjection?.timing === "immediate" &&
-                candidate.semanticActionType !== "install.card"))) ||
-            ((candidate.actionType === "activated_card_ability" ||
-              candidate.actionType === "trigger_ability") &&
-              runnerEffectsProvideTopTrashRecovery(
-                candidate.functionalEffects,
-              )))
-        );
-      })
-      .map((candidate) => candidate.actionId),
-    confirmedDamageTaxedDrawActionIds,
+  const {
+    defense,
     forgoUnsafeRunCapacity,
-    forgoExhaustedStandardCapacity,
+    runOnlyActionCapacity,
+    confirmedDamageTaxedDrawActionIdSet,
+  } = buildRunnerDefenseSignals({
+    input,
+    candidates,
+    runTargets,
+    strategicIntent,
+    handBuffer: defenseHandBuffer,
+    support: defenseSupport,
+    exactCoverageRecoveryActionIds,
     forgoTerminalDeckPressureCapacity,
-    ...(discardChoiceBinding ? { discardChoiceBinding } : {}),
-    ...(tagClearFundingNeed ? { tagClearFundingNeed } : {}),
-    ...(reactionReserveNeed ? { reactionReserveNeed } : {}),
-    defenseSupportInstallActionIds,
-    defenseSupportRejectedInstallActionIds,
-    defenseSupportInstallValues,
-    handBufferPriorityClass:
-      riskAdjustedHandBufferOpen && riskAdjustedHandBuffer.minimumHandBuffer > 3
-        ? "P3"
-        : (damageThreat.flatlineRisk.level === "critical" ||
-              damageThreat.flatlineRisk.criticalRunSuppression) &&
-            handSize < damageThreat.flatlineRisk.recommendedHandFloor
-          ? "P3"
-          : volatileBreakerHandFloor > 0 && handSize < volatileBreakerHandFloor
-            ? "P4"
-            : "P5",
-    evidenceCodes: [
-      ...(candidates.some(
-        (candidate) =>
-          candidate.semanticActionType === "counter.remove_trace_tag" ||
-          candidate.semanticActionType === "counter.remove_runner_hazard",
-      )
-        ? ["runner_persistent_trace_counter_removal_available"]
-        : []),
-      ...(forgoUnsafeRunCapacity
-        ? ["runner_restricted_run_capacity_below_hand_buffer"]
-        : []),
-      ...(forgoTerminalDeckPressureCapacity
-        ? ["runner_match_point_favorable_deck_race_wait_available"]
-        : []),
-      ...(reactionReserveNeed
-        ? ["runner_damage_locked_hand_reaction_reserve"]
-        : []),
-      ...(tagClearFundingNeed
-        ? ["runner_visible_tag_punish_requires_clear_funding"]
-        : []),
-      ...(defenseSupportInstallActionIds.length > 0
-        ? ["runner_defense_support_current_need"]
-        : ["runner_no_defense_support_current_need"]),
-      ...(discardChoiceBinding?.evidenceCodes ?? []),
-      ...(riskAdjustedHandBufferOpen
-        ? [
-            volatileBreakerHandFloor === minimumHandBuffer
-              ? `runner_volatile_breaker_hand_buffer:${minimumHandBuffer}`
-              : minimumHandBuffer > riskAdjustedHandBuffer.minimumHandBuffer
-                ? `runner_damage_threat_hand_buffer:${minimumHandBuffer}`
-                : riskAdjustedHandBuffer.evidenceCode,
-          ]
-        : []),
-      ...(damageBufferForecast
-        ? [
-            damageThreat.flatlineRisk.level === "critical" ||
-            damageThreat.flatlineRisk.level === "confirmed"
-              ? `runner_flatline_risk:${damageThreat.flatlineRisk.level}`
-              : "runner_run_target_requires_damage_buffer",
-          ]
-        : ["runner_visible_defense_state"]),
-    ],
-  };
+    discardChoiceBinding,
+    services: {
+      findFundingRoute: (request) =>
+        runnerExactFundingRouteContract(input, candidates, request),
+      runCanConvertNow: (target) =>
+        runnerRunTargetCanConvertNow(input, economy, target, candidates),
+    },
+  });
   const recentSafetyAbort = runnerRecentFutureEncounterDamageSafetyAbort(input);
   const runFundingNeeds = bestRunTargetsByServer(
     input,
@@ -10142,54 +8739,6 @@ function buildRunnerDomain(
   };
 }
 
-export function reconcileRunnerCoverageRequesterBindings(params: {
-  coverageGaps: readonly RunnerPlanDomain["coverageGaps"][number][];
-  centralPressure: readonly RunnerPlanDomain["centralPressure"][number][];
-  remoteContests: readonly RunnerPlanDomain["remoteContests"][number][];
-}): RunnerPlanDomain["coverageGaps"] {
-  const acceptedRequesterBindings = new Set([
-    ...params.centralPressure.flatMap((signal) =>
-      signal.supportNeedId
-        ? [
-            `${planInstanceIdForProposal({
-              moduleId: "runner.pressure_central",
-              dedupeKey: signal.pressureId,
-            })}\u0000${signal.supportNeedId}`,
-          ]
-        : [],
-    ),
-    ...params.remoteContests.flatMap((signal) =>
-      signal.supportNeedId
-        ? [
-            `${planInstanceIdForProposal({
-              moduleId: "runner.contest_remote",
-              dedupeKey: signal.contestId,
-            })}\u0000${signal.supportNeedId}`,
-          ]
-        : [],
-    ),
-  ]);
-  return params.coverageGaps.map((gap) => {
-    const exactBinding =
-      gap.requesterPlanInstanceId && gap.requesterNeedId
-        ? `${gap.requesterPlanInstanceId}\u0000${gap.requesterNeedId}`
-        : undefined;
-    if (
-      !gap.requesterPlanInstanceId ||
-      (exactBinding && acceptedRequesterBindings.has(exactBinding))
-    ) {
-      return gap;
-    }
-    const {
-      requesterModuleId: _requesterModuleId,
-      requesterPlanInstanceId: _requesterPlanInstanceId,
-      requesterNeedId: _requesterNeedId,
-      ...independentGap
-    } = gap;
-    return independentGap;
-  });
-}
-
 function runnerAccumulatedCentralPressureConversionSignals(
   candidates: readonly ActionSemanticCandidate[],
   pressureSignals: RunnerPlanDomain["centralPressure"],
@@ -12047,36 +10596,6 @@ function runnerSameTurnDevelopmentFundingRoute(
   };
 }
 
-type RunnerExactFundingRouteRequest = Pick<
-  CreateSideCreditDemandParams,
-  | "demandId"
-  | "sourcePlanId"
-  | "purpose"
-  | "priority"
-  | "hardness"
-  | "deadline"
-  | "targetCredits"
-  | "evidence"
-> & {
-  remainingClicks: number;
-  allowIncrementalProgress?: boolean;
-  allowStrategicExchange?: boolean;
-  paymentWindowTarget?: RunnerRunTargetEvaluation;
-  debtFinancingParent?: Readonly<{
-    planInstanceId: string;
-    runActionId: string;
-    targetServerId: string;
-    accessPayoff: RunnerRunTargetEvaluation["accessPayoff"];
-    scoreThreat: boolean;
-    score: number;
-    pathPassability: RunnerRunTargetEvaluation["pathPassability"];
-    creditsAfterRun: number;
-    unknownUnrezzedIceCount: number;
-    riskyUniversalCoverage: boolean;
-    remainingClicksAfterRun: number;
-  }>;
-};
-
 function runnerExactFundingRouteContract(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
@@ -12627,22 +11146,6 @@ function corpCentralPressureKnowledgeRefresh(
   );
 }
 
-type RunnerRunFundingSupport = {
-  needId: string;
-  gap: number;
-  targetCredits: number;
-  priorityClass: "P2" | "P4";
-  parentPlanInstanceId: string;
-  driver: {
-    kind: "run" | "contest";
-    targetId: string;
-    reasonCode: string;
-  };
-  routeActionIds: string[];
-  routeAssessment: RunnerFundingRouteAssessment;
-  evidenceCode: string;
-};
-
 function runnerRemoteProbeCanConvertNow(
   input: AiDecisionInput,
   economy: RunnerEconomyPosture,
@@ -13053,46 +11556,6 @@ function runnerRunHasExactUrgency(
         evaluation.targetServerId,
       ) === true)
   );
-}
-
-function runnerRiskAdjustedHandBufferForAttractiveRuns(
-  runTargets: readonly RunnerRunTargetEvaluation[],
-): { minimumHandBuffer: number; evidenceCode: string } {
-  let minimumHandBuffer = 3;
-  let evidenceCode = "runner_base_hand_buffer:3";
-  let strongestRisk = -1;
-
-  for (const evaluation of runTargets) {
-    if (
-      evaluation.pathPassability !== "reachable" ||
-      !["run_now", "run_if_free"].includes(evaluation.recommendation) ||
-      evaluation.score <= 0
-    )
-      continue;
-    const unknownIce = evaluation.unknownUnrezzedIceCount ?? 0;
-    const risk = evaluation.unrezzedIceRisk ?? 0;
-    if (unknownIce < 2 || risk < 0.75) continue;
-
-    const requiredBuffer =
-      evaluation.multiaccessAvailable || unknownIce >= 3 ? 5 : 4;
-    if (
-      requiredBuffer < minimumHandBuffer ||
-      (requiredBuffer === minimumHandBuffer && risk <= strongestRisk)
-    )
-      continue;
-
-    minimumHandBuffer = requiredBuffer;
-    strongestRisk = risk;
-    evidenceCode = [
-      `runner_high_risk_run_hand_buffer:${requiredBuffer}`,
-      `unknown_unrezzed_ice:${unknownIce}`,
-      `unrezzed_ice_risk:${risk}`,
-      `multiaccess:${evaluation.multiaccessAvailable}`,
-      `server:${evaluation.targetServerId}`,
-    ].join("|");
-  }
-
-  return { minimumHandBuffer, evidenceCode };
 }
 
 type RunnerRunLockReleaseRoute = {
@@ -16899,28 +15362,7 @@ function buildCorpDomain(
         fundingRouteAssessment,
       };
     });
-  const purgeAction = input.legalActions.find(
-    (action) =>
-      action.type === "purge_virus_counters" ||
-      action.type === "purge_runner_virus_counters",
-  );
-  const visibleVirusCounters = visibleRunnerVirusCounters(input);
-  const virusPressure: CorpPlanDomain["virusPressure"] = purgeAction
-    ? [
-        {
-          pressureId: "visible-virus-pressure",
-          virusCounters: visibleVirusCounters,
-          strategicDamage:
-            visibleVirusCounters +
-            corpPurgeRecurringActionLoss(input, purgeAction) * 3,
-          critical:
-            visibleVirusCounters >= 3 ||
-            corpPurgeRecurringActionLoss(input, purgeAction) > 0,
-          purgeUseful: corpPurgeHasVisibleStrategicPressure(input, purgeAction),
-          evidenceCode: "visible_runner_virus_counters",
-        },
-      ]
-    : [];
+  const virusPressure = buildCorpVirusPressureSignals(input);
   const defenseDispositionActionIds = new Set(
     corpDefenseActionDispositions(
       {
@@ -18937,21 +17379,6 @@ function candidateMatchesScoreConversionStep(
   if (step.kind === "move_advancement")
     return capability === "move_advancement";
   return false;
-}
-
-function visibleOwnCardByInstanceId(
-  input: AiDecisionInput,
-  instanceId: string,
-): VisibleCard | undefined {
-  return [
-    ...input.playerView.own.gripOrHq,
-    ...input.playerView.own.scoreArea,
-    ...(input.playerView.own.rig ?? []),
-    ...input.playerView.servers.flatMap((server) => [
-      ...server.root,
-      ...server.ice,
-    ]),
-  ].find((card) => card.instanceId === instanceId);
 }
 
 function corpScoreConversionFacts(params: {
@@ -26080,1631 +24507,6 @@ function planSafeRunExclusionEvidence(evidence: readonly string[]): string[] {
   );
 }
 
-type RunnerCoverageDrawCadence = Readonly<{
-  drawAvailable: boolean;
-  evidenceCode: string;
-}>;
-
-function runnerCoverageDrawCadence(
-  input: AiDecisionInput,
-): RunnerCoverageDrawCadence {
-  const turnSerial = input.playerView.turnSerial;
-  if (!Number.isSafeInteger(turnSerial) || (turnSerial ?? -1) < 0) {
-    return {
-      drawAvailable: false,
-      evidenceCode: "runner_coverage_draw_cadence_turn_invalid",
-    };
-  }
-  const currentTurnSerial = turnSerial as number;
-  const drawObserved = mergedPublicHistory(input).some((event) => {
-    if (
-      event.turnSerial !== currentTurnSerial ||
-      event.publicPayload.actor !== "runner"
-    ) {
-      return false;
-    }
-    const actionType =
-      typeof event.publicPayload.actionType === "string"
-        ? event.publicPayload.actionType
-        : event.type;
-    if (actionType === "draw_card") return true;
-    const resolvedEffects = Array.isArray(event.publicPayload.resolvedEffects)
-      ? event.publicPayload.resolvedEffects
-      : [];
-    return resolvedEffects.some(
-      (effect) =>
-        effect.kind === "draw_cards" &&
-        typeof effect.amount === "number" &&
-        effect.amount > 0,
-    );
-  });
-  return drawObserved
-    ? {
-        drawAvailable: false,
-        evidenceCode: `runner_coverage_draw_cadence_consumed:${currentTurnSerial}`,
-      }
-    : {
-        drawAvailable: true,
-        evidenceCode: `runner_coverage_draw_cadence_available:${currentTurnSerial}`,
-      };
-}
-
-function uniqueCoverageGaps(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  runTargets: readonly RunnerRunTargetEvaluation[],
-  installedRoles: ReadonlySet<string>,
-  deckCapabilities: DeckCapabilityProfile,
-  strategicIntent: RunnerStrategicIntentProfile,
-  economy: RunnerEconomyPosture,
-  handRotation: RunnerHandRotationAssessment,
-): RunnerCorePlanDomain["coverageGaps"] {
-  const result = new Map<
-    string,
-    RunnerCorePlanDomain["coverageGaps"][number]
-  >();
-  const coverageDrawCadence = runnerCoverageDrawCadence(input);
-  const coverageSearchInterrupt = runTargets.some((evaluation) => {
-    if (
-      (evaluation.pathPassability !== "blocked_missing_coverage" &&
-        evaluation.pathPassability !== "blocked_unbreakable") ||
-      !evaluation.evidence.some((entry) =>
-        entry.startsWith("missing_coverage:"),
-      )
-    ) {
-      return false;
-    }
-    const preciseCoverage = missingBreakerCoverageKind(
-      input.playerView,
-      evaluation.targetServerId,
-    );
-    const role = planFirstCoverageRole(preciseCoverage, evaluation.evidence);
-    return (
-      runnerDeckHasCoverageAnswer(deckCapabilities, role) &&
-      coverageSupportActionIds(input, candidates, deckCapabilities, role, {
-        handRotation,
-      }).searchEngineSetupActionIds.length > 0
-    );
-  });
-  const terminalContestThreat = runnerTerminalContestThreat(input);
-  for (const evaluation of runTargets) {
-    if (
-      !runnerCoverageRunTargetHasDifferentialPayoff(
-        input,
-        candidates,
-        evaluation,
-        runTargets,
-      )
-    ) {
-      continue;
-    }
-    if (
-      evaluation.targetKind === "remote" &&
-      !runnerRemoteHasCurrentContestMaterial(input, evaluation.targetServerId)
-    ) {
-      continue;
-    }
-    if (
-      evaluation.targetKind === "remote" &&
-      runnerRemoteHasKnownIceScheduledForRunnerTurnEndTrash(
-        input,
-        evaluation.targetServerId,
-      )
-    ) {
-      continue;
-    }
-    const preparation = evaluation.routeQuote?.preRunPreparation;
-    if (
-      !preparation?.subtypeChanges?.length ||
-      (evaluation.recommendation !== "run_now" &&
-        evaluation.recommendation !== "run_if_free" &&
-        !evaluation.scoreThreat)
-    ) {
-      continue;
-    }
-    // A coverage child may prepare only a route its parent would admit.
-    // Reuse the parent's information-probe policy on the prepared path;
-    // the setup cost is already paid at that future run-start boundary.
-    const preparedEvaluation = {
-      ...evaluation,
-      pathCost: Math.max(0, evaluation.pathCost - preparation.credits),
-    };
-    if (
-      runPurposeForEvaluation(evaluation) === "information" &&
-      !runnerInformationProbeCanUseQuotedPath(
-        preparedEvaluation,
-        runnerRunTargetCanConvertNow(input, economy, evaluation, candidates),
-        evaluation.targetKind !== "remote" &&
-          input.playerView.own.agendaPoints >=
-            input.playerView.agendaPointsToWin - 1,
-      )
-    ) {
-      continue;
-    }
-    const requesterModuleId =
-      evaluation.targetKind === "remote"
-        ? ("runner.contest_remote" as const)
-        : ("runner.pressure_central" as const);
-    const requesterDedupeKey =
-      evaluation.targetKind === "remote"
-        ? `remote:${evaluation.targetServerId}`
-        : `central:${evaluation.targetServerId}`;
-    for (const change of preparation.subtypeChanges) {
-      const requiredRole =
-        change.selectedSubtype === "wall"
-          ? ("breaker_wall" as const)
-          : change.selectedSubtype === "code_gate"
-            ? ("breaker_code_gate" as const)
-            : change.selectedSubtype === "sentry"
-              ? ("breaker_sentry" as const)
-              : undefined;
-      if (!requiredRole) continue;
-      const preparationActionIds = candidates.flatMap((candidate) => {
-        const action = input.legalActions.find(
-          (entry) => entry.actionId === candidate.actionId,
-        );
-        return action?.side === "runner" &&
-          action.type === "trigger_ability" &&
-          action.source === change.sourceCardInstanceId &&
-          runnerCandidateSourceDefinitionId(input, candidate) ===
-            change.sourceDefinitionId &&
-          action.payload?.runnerAbility === "change_icebreaker_subtype" &&
-          action.payload.selectedSubtype === change.selectedSubtype
-          ? [candidate.actionId]
-          : [];
-      });
-      if (preparationActionIds.length === 0) continue;
-      const gapId = `coverage:${requiredRole}:prepare-run:${encodeURIComponent(evaluation.actionId)}:${encodeURIComponent(change.sourceCardInstanceId)}`;
-      result.set(`${requesterModuleId}:${requesterDedupeKey}:${gapId}`, {
-        gapId,
-        needKind: "missing_coverage",
-        requiredRole,
-        targetServerId: evaluation.targetServerId,
-        targetRunActionId: evaluation.actionId,
-        requesterModuleId,
-        requesterPlanInstanceId: planInstanceIdForProposal({
-          moduleId: requesterModuleId,
-          dedupeKey: requesterDedupeKey,
-        }),
-        requesterNeedId: gapId,
-        priorityClass: evaluation.scoreThreat ? "P2" : "P4",
-        evidenceCode: `pre_run_coverage_preparation:${evaluation.targetServerId}:${change.selectedSubtype}`,
-        deckHasAnswer: true,
-        answerInHand: true,
-        preparationActionIds,
-        fundingActionIds: [],
-        directSearchActionIds: [],
-        searchEngineSetupActionIds: [],
-        drawForAnswerActionIds: [],
-      });
-    }
-  }
-  for (const evaluation of [...runTargets].sort(
-    (left, right) =>
-      right.score - left.score || left.actionId.localeCompare(right.actionId),
-  )) {
-    if (
-      !runnerCoverageRunTargetHasDifferentialPayoff(
-        input,
-        candidates,
-        evaluation,
-        runTargets,
-      )
-    ) {
-      continue;
-    }
-    if (
-      evaluation.targetKind === "remote" &&
-      !runnerRemoteHasCurrentContestMaterial(input, evaluation.targetServerId)
-    ) {
-      continue;
-    }
-    if (
-      evaluation.targetKind === "remote" &&
-      runnerRemoteHasKnownIceScheduledForRunnerTurnEndTrash(
-        input,
-        evaluation.targetServerId,
-      )
-    ) {
-      continue;
-    }
-    const outsideMissingCoverageScope =
-      evaluation.recommendation !== "find_breaker_first" &&
-      evaluation.pathPassability !== "blocked_missing_coverage" &&
-      evaluation.pathPassability !== "blocked_unbreakable";
-    // A terminal contest needs the existing path funded before it needs a
-    // cheaper future breaker. Check every exact same-server run, since an
-    // expensive event can otherwise hide a feasible basic-run setup.
-    if (
-      outsideMissingCoverageScope &&
-      runnerCoverageGapIsTerminalRemoteThreat(input, evaluation) &&
-      runTargets.some(
-        (target) =>
-          target.targetServerId === evaluation.targetServerId &&
-          target.routeQuote?.unknownIceCount === 0 &&
-          target.routeQuote.conditionalReasons.length === 0 &&
-          (target.unavoidableVisibleIceHazardCount ?? 0) === 0 &&
-          !target.visibleTraceTagHazardUnavoidable &&
-          (runnerRunTargetCanConvertNow(input, economy, target, candidates) ||
-            (runnerRunFundingSupport(
-              input,
-              economy,
-              target,
-              runTargets,
-              candidates,
-            )?.routeActionIds.length ?? 0) > 0),
-      )
-    )
-      continue;
-    const preciseCoverage = missingBreakerCoverageKind(
-      input.playerView,
-      evaluation.targetServerId,
-    );
-    const role = planFirstCoverageRole(preciseCoverage, evaluation.evidence);
-    const costRecovery = runnerCostEffectiveCoverageRecovery(
-      input,
-      candidates,
-      evaluation,
-      deckCapabilities,
-    );
-    const coverageUpgrade = costRecovery
-      ? undefined
-      : runnerBreakerCoverageUpgrade(
-          input,
-          candidates,
-          evaluation,
-          deckCapabilities,
-          economy,
-        );
-    const coverageDevelopment = costRecovery ?? coverageUpgrade;
-    if (outsideMissingCoverageScope && !coverageDevelopment) {
-      continue;
-    }
-    const requiredRole = coverageDevelopment?.requiredRole ?? role;
-    const terminalRemoteCoverageThreat =
-      runnerCoverageGapIsTerminalRemoteThreat(input, evaluation);
-    const terminalRemotePatternThreat =
-      terminalContestThreat?.remoteServerIds.includes(
-        evaluation.targetServerId,
-      ) === true;
-    if (installedRoles.has(requiredRole) && !coverageDevelopment) continue;
-    const installActionValues = runnerCoverageInstallActionValues(
-      input,
-      candidates,
-      evaluation.targetServerId,
-      requiredRole,
-    );
-    const legalCoverageInstallActionIds = Object.keys(installActionValues).sort(
-      (left, right) =>
-        (installActionValues[right] ?? Number.NEGATIVE_INFINITY) -
-          (installActionValues[left] ?? Number.NEGATIVE_INFINITY) ||
-        left.localeCompare(right),
-    );
-    const bestLegalCoverageCandidate = candidates.find(
-      (candidate) => candidate.actionId === legalCoverageInstallActionIds[0],
-    );
-    const bestLegalCoverageCard = bestLegalCoverageCandidate
-      ? input.playerView.own.gripOrHq.find(
-          (card) =>
-            card.instanceId ===
-            runnerInstallSourceInstanceId(
-              bestLegalCoverageCandidate,
-              input.legalActions.find(
-                (action) =>
-                  action.actionId === bestLegalCoverageCandidate.actionId,
-              ),
-            ),
-        )
-      : undefined;
-    const visibleAnswer =
-      coverageDevelopment?.visibleAnswer ??
-      bestLegalCoverageCard ??
-      runnerHandBreakerForCoverage(input.playerView, preciseCoverage);
-    const answerInstallCost = coverageDevelopment
-      ? visibleAnswer?.installCost
-      : bestLegalCoverageCandidate?.costProfile.costKnownStatus === "known"
-        ? (bestLegalCoverageCandidate.costProfile.creditCost ?? 0)
-        : visibleAnswer?.installCost;
-    const baseSupportActions = coverageSupportActionIds(
-      input,
-      candidates,
-      deckCapabilities,
-      requiredRole,
-      {
-        ...(coverageDevelopment?.deckHasAlternative !== undefined
-          ? {
-              deckHasStackAnswerOverride:
-                coverageDevelopment.deckHasAlternative,
-            }
-          : {}),
-        ...(coverageDevelopment?.targetDefinitionId
-          ? {
-              targetDefinitionIdOverride:
-                coverageDevelopment.targetDefinitionId,
-            }
-          : {}),
-        handRotation,
-        terminalRemoteCoverageThreat,
-      },
-    );
-    const supportActionsBeforeCadence = coverageUpgrade
-      ? runnerBreakerUpgradeSupportActions(
-          baseSupportActions,
-          coverageUpgrade.searchActionId,
-        )
-      : baseSupportActions;
-    const supportActions =
-      terminalRemoteCoverageThreat || coverageDrawCadence.drawAvailable
-        ? supportActionsBeforeCadence
-        : {
-            ...supportActionsBeforeCadence,
-            drawForAnswerActionIds: [],
-          };
-    if (
-      coverageUpgrade?.recoveryMode === "search_known_upgrade" &&
-      supportActions.directSearchActionIds.length === 0
-    ) {
-      continue;
-    }
-    const deckHasAnswer =
-      visibleAnswer !== undefined ||
-      (coverageDevelopment
-        ? coverageDevelopment.deckHasAlternative
-        : runnerDeckHasCoverageAnswer(deckCapabilities, requiredRole)) ||
-      supportActions.directSearchActionIds.length > 0;
-    const installActionIds = visibleAnswer
-      ? coverageDevelopment
-        ? candidates
-            .filter((candidate) => {
-              const action = input.legalActions.find(
-                (legalAction) => legalAction.actionId === candidate.actionId,
-              );
-              return (
-                candidate.semanticActionType === "install.card" &&
-                runnerInstallSourceInstanceId(candidate, action) ===
-                  visibleAnswer.instanceId
-              );
-            })
-            .map((candidate) => candidate.actionId)
-        : legalCoverageInstallActionIds
-      : undefined;
-    const sameTurnRunConversion = runnerUrgentRemoteCoverageConversionQuote(
-      input,
-      candidates,
-      evaluation,
-      visibleAnswer,
-      answerInstallCost,
-      installActionIds,
-    );
-    const fundingTargetCredits =
-      sameTurnRunConversion?.requiredCredits ?? answerInstallCost;
-    const fundingGap =
-      fundingTargetCredits === undefined
-        ? undefined
-        : Math.max(0, fundingTargetCredits - input.playerView.own.credits);
-    const baseGapId = coverageUpgrade
-      ? `coverage:${requiredRole}:upgrade:${evaluation.targetServerId}`
-      : costRecovery
-        ? `coverage:${requiredRole}:efficiency:${evaluation.targetServerId}`
-        : `coverage:${requiredRole}`;
-    const requesterModuleId =
-      evaluation.targetKind === "remote"
-        ? ("runner.contest_remote" as const)
-        : ("runner.pressure_central" as const);
-    const requesterDedupeKey =
-      evaluation.targetKind === "remote"
-        ? `remote:${evaluation.targetServerId}`
-        : `central:${evaluation.targetServerId}`;
-    const bindToRequester =
-      coverageUpgrade !== undefined ||
-      terminalRemotePatternThreat ||
-      sameTurnRunConversion !== undefined ||
-      (requesterModuleId === "runner.pressure_central" &&
-        evaluation.score > 0 &&
-        evaluation.knownAccessState !== "known_no_current_payoff" &&
-        evaluation.accessPayoff !== "known_low_value");
-    const needKind = coverageUpgrade
-      ? ("coverage_upgrade" as const)
-      : costRecovery
-        ? ("cost_ineffective_coverage" as const)
-        : ("missing_coverage" as const);
-    const gapId =
-      bindToRequester && !terminalRemotePatternThreat
-        ? `${baseGapId}:run:${encodeURIComponent(evaluation.actionId)}`
-        : baseGapId;
-    if (result.has(gapId)) continue;
-    result.set(gapId, {
-      gapId,
-      needKind,
-      requiredRole,
-      targetServerId: evaluation.targetServerId,
-      targetRunActionId: evaluation.actionId,
-      ...(bindToRequester
-        ? {
-            requesterModuleId,
-            requesterPlanInstanceId: planInstanceIdForProposal({
-              moduleId: requesterModuleId,
-              dedupeKey: requesterDedupeKey,
-            }),
-            requesterNeedId: gapId,
-          }
-        : {}),
-      priorityClass:
-        sameTurnRunConversion !== undefined || terminalRemoteCoverageThreat
-          ? "P2"
-          : coverageUpgrade
-            ? "P5"
-            : visibleAnswer
-              ? "P4"
-              : "P5",
-      evidenceCode: terminalRemoteCoverageThreat
-        ? `terminal_remote_coverage:${evaluation.targetServerId}`
-        : coverageUpgrade
-          ? `coverage_upgrade:${evaluation.targetServerId}:${coverageUpgrade.targetDefinitionId}`
-          : costRecovery
-            ? `cost_ineffective_coverage:${evaluation.targetServerId}:${evaluation.pathCost}`
-            : (evaluation.evidence[0] ?? `missing_${requiredRole}`),
-      deckHasAnswer,
-      answerInHand: visibleAnswer !== undefined,
-      ...(answerInstallCost !== undefined ? { answerInstallCost } : {}),
-      ...(installActionIds !== undefined ? { installActionIds } : {}),
-      ...(fundingGap !== undefined ? { fundingGap } : {}),
-      ...(sameTurnRunConversion ? { sameTurnRunConversion } : {}),
-      ...(coverageDevelopment
-        ? {
-            currentKnownPathCost: evaluation.pathCost,
-            currentPathFundingGap: Math.max(
-              0,
-              evaluation.routeQuote?.fundingGap ?? 0,
-            ),
-            recoveryMode: coverageDevelopment.recoveryMode,
-            recoveryEvidenceCodes: [
-              ...coverageDevelopment.evidenceCodes,
-              ...(!terminalRemoteCoverageThreat &&
-              !coverageDrawCadence.drawAvailable
-                ? [coverageDrawCadence.evidenceCode]
-                : []),
-            ],
-          }
-        : !terminalRemoteCoverageThreat && !coverageDrawCadence.drawAvailable
-          ? {
-              recoveryEvidenceCodes: [coverageDrawCadence.evidenceCode],
-            }
-          : {}),
-      ...(coverageUpgrade
-        ? {
-            upgradeQuote: runnerBreakerUpgradeSignalQuote(coverageUpgrade),
-            ...(coverageUpgrade.memorySupportActionId
-              ? {
-                  memorySupportActionIds: [
-                    coverageUpgrade.memorySupportActionId,
-                  ],
-                  preparationActionIds: [coverageUpgrade.memorySupportActionId],
-                }
-              : {}),
-          }
-        : {}),
-      fundingActionIds: runnerCoverageFundingActionIds(
-        input,
-        candidates,
-        gapId,
-        fundingTargetCredits,
-        fundingGap,
-        false,
-        sameTurnRunConversion?.requiredClicksAfterFunding ?? 1,
-      ),
-      installActionValues,
-      ...supportActions,
-    });
-  }
-  if (
-    (strategicIntent.setupEngine ?? []).includes("runner.rig_first") ||
-    (strategicIntent.setupEngine ?? []).includes(
-      "runner.search_breaker_setup",
-    ) ||
-    strategicIntent.planContributions?.some(
-      (contribution) =>
-        contribution.ownerModuleId === "runner.rig_and_coverage" &&
-        contribution.objective === "maintain_required_coverage",
-    ) === true ||
-    strategicIntent.executionStyle === "runner.setup_first" ||
-    coverageSearchInterrupt
-  ) {
-    const matrix = deckCapabilities.runner?.breakerCoverageMatrix;
-    for (const [coverage, role] of [
-      ["wall", "breaker_wall"],
-      ["code_gate", "breaker_code_gate"],
-      ["sentry", "breaker_sentry"],
-    ] as const) {
-      const state = matrix?.[coverage];
-      if (
-        !state ||
-        state.installed ||
-        installedRoles.has(role) ||
-        (!state.inDeckKnown && !state.inHand)
-      ) {
-        continue;
-      }
-      const existing = [...result.entries()].filter(
-        ([, gap]) => gap.requiredRole === role,
-      );
-      if (existing.length > 0) {
-        if (state.inHand) {
-          for (const [key, gap] of existing) {
-            if (gap.priorityClass === "P5") {
-              result.set(key, { ...gap, priorityClass: "P4" });
-            }
-          }
-        }
-        continue;
-      }
-      const visibleAnswer = runnerHandBreakerForCoverage(
-        input.playerView,
-        role,
-      );
-      const answerInstallCost = visibleAnswer?.installCost;
-      const fundingGap =
-        answerInstallCost === undefined
-          ? undefined
-          : Math.max(0, answerInstallCost - input.playerView.own.credits);
-      const supportActions = coverageSupportActionIds(
-        input,
-        candidates,
-        deckCapabilities,
-        role,
-        { handRotation },
-      );
-      const cadenceBoundSupportActions = coverageDrawCadence.drawAvailable
-        ? supportActions
-        : {
-            ...supportActions,
-            drawForAnswerActionIds: [],
-          };
-      const deckHasAnswer =
-        state.inDeckKnown ||
-        state.inHand ||
-        cadenceBoundSupportActions.directSearchActionIds.length > 0;
-      const installActionValues = runnerCoverageInstallActionValues(
-        input,
-        candidates,
-        undefined,
-        role,
-      );
-      result.set(role, {
-        gapId: `coverage:${role}`,
-        requiredRole: role,
-        priorityClass:
-          state.inHand || (coverageSearchInterrupt && state.searchableNow)
-            ? "P4"
-            : "P5",
-        evidenceCode:
-          coverageSearchInterrupt && state.searchableNow
-            ? `visible_${coverage}_coverage_search_interrupt`
-            : `deck_strategy_open_${coverage}_coverage`,
-        deckHasAnswer,
-        answerInHand: visibleAnswer !== undefined,
-        ...(answerInstallCost !== undefined ? { answerInstallCost } : {}),
-        ...(fundingGap !== undefined ? { fundingGap } : {}),
-        fundingActionIds: runnerCoverageFundingActionIds(
-          input,
-          candidates,
-          `coverage:${role}`,
-          answerInstallCost,
-          fundingGap,
-          true,
-        ),
-        installActionValues,
-        installActionIds: Object.keys(installActionValues),
-        ...(!coverageDrawCadence.drawAvailable
-          ? {
-              recoveryEvidenceCodes: [coverageDrawCadence.evidenceCode],
-            }
-          : {}),
-        ...cadenceBoundSupportActions,
-      });
-    }
-  }
-  return dedupeCoverageGapsByGapId([...result.values()]);
-}
-
-function dedupeCoverageGapsByGapId(
-  gaps: readonly RunnerCorePlanDomain["coverageGaps"][number][],
-): RunnerCorePlanDomain["coverageGaps"] {
-  const byGapId = new Map<
-    string,
-    RunnerCorePlanDomain["coverageGaps"][number]
-  >();
-  for (const gap of gaps) {
-    const current = byGapId.get(gap.gapId);
-    if (!current || coverageGapPrecedes(gap, current)) {
-      byGapId.set(gap.gapId, gap);
-    }
-  }
-  return [...byGapId.values()];
-}
-
-function coverageGapPrecedes(
-  candidate: RunnerCorePlanDomain["coverageGaps"][number],
-  current: RunnerCorePlanDomain["coverageGaps"][number],
-): boolean {
-  const priorityRank = (priority: PriorityClass) =>
-    ({ P1: 1, P2: 2, P3: 3, P4: 4, P5: 5, P6: 6 })[priority];
-  const candidateRank = priorityRank(candidate.priorityClass);
-  const currentRank = priorityRank(current.priorityClass);
-  if (candidateRank !== currentRank) return candidateRank < currentRank;
-
-  const requesterRank = (gap: RunnerCorePlanDomain["coverageGaps"][number]) =>
-    gap.requesterModuleId === "runner.contest_remote" ? 0 : 1;
-  const candidateRequesterRank = requesterRank(candidate);
-  const currentRequesterRank = requesterRank(current);
-  if (candidateRequesterRank !== currentRequesterRank)
-    return candidateRequesterRank < currentRequesterRank;
-
-  return (
-    [candidate.targetServerId ?? "", candidate.targetRunActionId ?? ""].join(
-      ":",
-    ) <
-    [current.targetServerId ?? "", current.targetRunActionId ?? ""].join(":")
-  );
-}
-
-type RunnerBreakerCoverageUpgrade = Readonly<{
-  requiredRole: RunnerCoverageGapSignal["requiredRole"];
-  visibleAnswer?: VisibleCard;
-  deckHasAlternative: true;
-  targetDefinitionId: string;
-  searchActionId?: string;
-  recoveryMode: "install_visible_upgrade" | "search_known_upgrade";
-  memorySupportActionId?: string;
-  memorySupportDefinitionId?: string;
-  economicQuote: RunnerBreakerUpgradeEconomicQuote;
-  evidenceCodes: string[];
-}>;
-
-type RunnerBreakerUpgradeMemorySupportRoute = Readonly<{
-  actionId: string;
-  definitionId: string;
-  additionalMu: number;
-  creditCost: number;
-  clickCost: number;
-}>;
-
-function runnerBreakerCoverageUpgrade(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  evaluation: RunnerRunTargetEvaluation,
-  deckCapabilities: DeckCapabilityProfile,
-  economy: RunnerEconomyPosture,
-): RunnerBreakerCoverageUpgrade | undefined {
-  if (
-    evaluation.runActionProjection?.sourceKind !== "basic_action" ||
-    evaluation.targetKind === "remote" ||
-    evaluation.targetServerId === "archives" ||
-    evaluation.pathPassability !== "reachable" ||
-    evaluation.pathCost <= 0 ||
-    !Number.isSafeInteger(evaluation.pathCost) ||
-    evaluation.scoreThreat ||
-    evaluation.knownAccessState === "known_no_current_payoff" ||
-    evaluation.accessPayoff === "known_low_value" ||
-    evaluation.accessPayoffContestable === false ||
-    !runnerCentralPressureHasMaterialMarginalValue(input, evaluation) ||
-    !runnerCentralPressureCadence(
-      input,
-      evaluation.targetServerId as "hq" | "rd",
-    ).routeAvailable
-  ) {
-    return undefined;
-  }
-  const server = input.playerView.servers.find(
-    (candidate) => candidate.id === evaluation.targetServerId,
-  );
-  if (
-    !server ||
-    server.ice.length === 0 ||
-    server.ice.some((ice) => !ice.known || ice.rezzed !== true)
-  ) {
-    return undefined;
-  }
-  const memoryUsed = input.playerView.own.memoryUsed;
-  const memoryLimit = input.playerView.own.memoryLimit;
-  if (
-    !Number.isSafeInteger(memoryUsed) ||
-    !Number.isSafeInteger(memoryLimit) ||
-    (memoryUsed ?? -1) < 0 ||
-    (memoryLimit ?? -1) < 0
-  ) {
-    return undefined;
-  }
-  const memoryAvailable = Math.max(
-    0,
-    (memoryLimit as number) - (memoryUsed as number),
-  );
-  const installedDefinitionIds = new Set(
-    (input.playerView.own.rig ?? []).flatMap((card) =>
-      card.definitionId ? [card.definitionId] : [],
-    ),
-  );
-  const upgradeCandidates = (deckCapabilities.runner?.breakerInventory ?? [])
-    .flatMap((breaker) => {
-      const visibleAnswer = input.playerView.own.gripOrHq.find(
-        (card) => card.known && card.definitionId === breaker.cardId,
-      );
-      const knownInDeck =
-        breaker.quantityKnownInDeck > 0 &&
-        breaker.locations.includes("in_deck");
-      if (
-        breaker.confidence !== "high" ||
-        installedDefinitionIds.has(breaker.cardId) ||
-        (!visibleAnswer && !knownInDeck) ||
-        breaker.risks.length > 0 ||
-        breaker.restrictions.length > 0
-      ) {
-        return [];
-      }
-      const projectedBreaker = runnerVisibleDeckBreaker(breaker);
-      const candidateMemoryCost = projectedBreaker?.memoryCost;
-      if (
-        !projectedBreaker ||
-        !Number.isSafeInteger(candidateMemoryCost) ||
-        (candidateMemoryCost ?? -1) < 0
-      ) {
-        return [];
-      }
-      const requiredRole = runnerBreakerUpgradeRequiredRole(breaker, server);
-      if (
-        !requiredRole ||
-        !runnerRolesCoverCoverageGap(
-          rolesForDeckDoctrineCard(breaker.cardId),
-          requiredRole,
-        )
-      ) {
-        return [];
-      }
-      const memoryDeficit = Math.max(
-        0,
-        (candidateMemoryCost as number) - memoryAvailable,
-      );
-      const memorySupportRoutes: readonly (
-        | RunnerBreakerUpgradeMemorySupportRoute
-        | undefined
-      )[] =
-        memoryDeficit > 0
-          ? runnerBreakerUpgradeMemorySupportRoutes(
-              input,
-              candidates,
-              memoryDeficit,
-            )
-          : [undefined];
-      if (memorySupportRoutes.length === 0) return [];
-      const currentInstallRoute = visibleAnswer
-        ? runnerVisibleBreakerUpgradeInstallRoute(
-            input,
-            candidates,
-            visibleAnswer,
-          )
-        : undefined;
-      const installRoute =
-        currentInstallRoute ??
-        (visibleAnswer && memoryDeficit > 0
-          ? runnerVisibleBreakerUpgradeMemoryBlockedInstallRoute(
-              input,
-              candidates,
-              visibleAnswer,
-            )
-          : undefined);
-      const searchRoute = visibleAnswer
-        ? undefined
-        : runnerBreakerUpgradeSearchRoute(
-            input,
-            candidates,
-            deckCapabilities,
-            requiredRole,
-            breaker.cardId,
-          );
-      if (visibleAnswer && !installRoute) return [];
-      if (!visibleAnswer && !searchRoute) return [];
-      const installCreditCost =
-        installRoute?.creditCost ?? projectedBreaker.installCost;
-      if (
-        !Number.isSafeInteger(installCreditCost) ||
-        (installCreditCost ?? -1) < 0
-      ) {
-        return [];
-      }
-      const path = assessKnownRezzedIcePath(
-        server.ice,
-        [...(input.playerView.own.rig ?? []), projectedBreaker],
-        Math.max(evaluation.pathCost, input.playerView.own.credits),
-        server.root,
-        input.playerView.opponent.credits,
-      );
-      const projectedPathCost = path.visibleBreakCost;
-      if (
-        !path.canReachAccess ||
-        !Number.isSafeInteger(projectedPathCost) ||
-        (projectedPathCost ?? -1) < 0
-      ) {
-        return [];
-      }
-      return memorySupportRoutes.flatMap((memorySupportRoute) => {
-        const economicQuote = quoteRunnerBreakerUpgradeEconomics({
-          phase: economy.creditReservePolicy.phase,
-          scoreThreat: evaluation.scoreThreat,
-          currentPathCost: evaluation.pathCost,
-          projectedPathCost: projectedPathCost as number,
-          plannedRunHorizon: 2,
-          installCreditCost: installCreditCost as number,
-          searchCreditCost: visibleAnswer ? 0 : (searchRoute?.creditCost ?? 0),
-          installActionClicks: installRoute?.clickCost ?? 1,
-          searchActionClicks: visibleAnswer ? 0 : (searchRoute?.clickCost ?? 0),
-          memorySupportCreditCost: memorySupportRoute?.creditCost ?? 0,
-          memorySupportActionClicks: memorySupportRoute?.clickCost ?? 0,
-          memorySupportAdditionalMu: memorySupportRoute?.additionalMu ?? 0,
-          consumesSearchCard:
-            !visibleAnswer && searchRoute?.consumesCard === true,
-          currentCredits: input.playerView.own.credits,
-          desiredCreditReserve: economy.desiredCreditReserve,
-          memoryAvailable,
-          candidateMemoryCost: candidateMemoryCost as number,
-        });
-        if (!economicQuote.admitted) return [];
-        const answer = visibleAnswer
-          ? {
-              ...visibleAnswer,
-              installCost: installCreditCost as number,
-            }
-          : undefined;
-        return [
-          {
-            requiredRole,
-            ...(answer ? { visibleAnswer: answer } : {}),
-            deckHasAlternative: true as const,
-            targetDefinitionId: breaker.cardId,
-            ...(!answer && searchRoute
-              ? { searchActionId: searchRoute.actionId }
-              : {}),
-            ...(memorySupportRoute
-              ? {
-                  memorySupportActionId: memorySupportRoute.actionId,
-                  memorySupportDefinitionId: memorySupportRoute.definitionId,
-                }
-              : {}),
-            recoveryMode: answer
-              ? ("install_visible_upgrade" as const)
-              : ("search_known_upgrade" as const),
-            economicQuote,
-            evidenceCodes: [
-              `coverage_upgrade_target:${evaluation.targetServerId}`,
-              `coverage_upgrade_breaker:${breaker.cardId}`,
-              `coverage_upgrade_required_role:${requiredRole}`,
-              "coverage_upgrade_no_replacement_required:true",
-              ...(memorySupportRoute
-                ? [
-                    `coverage_upgrade_memory_support:${memorySupportRoute.definitionId}`,
-                    `coverage_upgrade_memory_support_action:${memorySupportRoute.actionId}`,
-                    `coverage_upgrade_memory_support_mu:${memorySupportRoute.additionalMu}`,
-                  ]
-                : []),
-              ...economicQuote.evidence,
-            ],
-          },
-        ];
-      });
-    })
-    .sort(
-      (left, right) =>
-        right.economicQuote.netValueBeforeSafetyMargin -
-          left.economicQuote.netValueBeforeSafetyMargin ||
-        left.economicQuote.projectedPathCost -
-          right.economicQuote.projectedPathCost ||
-        left.economicQuote.totalInvestment -
-          right.economicQuote.totalInvestment ||
-        left.targetDefinitionId.localeCompare(right.targetDefinitionId),
-    );
-  return upgradeCandidates[0];
-}
-
-function runnerBreakerUpgradeSearchRoute(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  deckCapabilities: DeckCapabilityProfile,
-  requiredRole: RunnerCoverageGapSignal["requiredRole"],
-  targetDefinitionId: string,
-):
-  | {
-      actionId: string;
-      creditCost: number;
-      clickCost: number;
-      consumesCard: boolean;
-    }
-  | undefined {
-  const legalSearchToolDefinitionIds = new Set(
-    (deckCapabilities.runner?.searchAccess.tools ?? [])
-      .filter(
-        (tool) =>
-          tool.canSearchBreakers && tool.legalNow && tool.status !== "in_deck",
-      )
-      .map((tool) => tool.cardId),
-  );
-  const exactTargetSearchActionIds = new Set(
-    coverageSupportActionIds(
-      input,
-      candidates,
-      deckCapabilities,
-      requiredRole,
-      {
-        deckHasStackAnswerOverride: true,
-        targetDefinitionIdOverride: targetDefinitionId,
-      },
-    ).directSearchActionIds,
-  );
-  return candidates
-    .flatMap((candidate) => {
-      const sourceDefinitionId = runnerCandidateSourceDefinitionId(
-        input,
-        candidate,
-      );
-      const action = input.legalActions.find(
-        (legalAction) => legalAction.actionId === candidate.actionId,
-      );
-      if (
-        !sourceDefinitionId ||
-        !legalSearchToolDefinitionIds.has(sourceDefinitionId) ||
-        !exactTargetSearchActionIds.has(candidate.actionId) ||
-        !runnerCandidateExecutesProgramSearch(input, candidate) ||
-        !action ||
-        !runnerProgramSearchSourceCardInstanceId(input, candidate)
-      ) {
-        return [];
-      }
-      const clickCost = action.costs.reduce(
-        (sum, cost) => sum + Math.max(0, cost.clicks ?? 0),
-        0,
-      );
-      return [
-        {
-          actionId: candidate.actionId,
-          creditCost: legalActionCreditCost(action),
-          clickCost,
-          consumesCard: action.type === "play_event",
-        },
-      ];
-    })
-    .sort(
-      (left, right) =>
-        left.creditCost +
-          left.clickCost +
-          Number(left.consumesCard) -
-          (right.creditCost + right.clickCost + Number(right.consumesCard)) ||
-        left.actionId.localeCompare(right.actionId),
-    )[0];
-}
-
-function runnerVisibleBreakerUpgradeInstallRoute(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  card: VisibleCard,
-): { actionId: string; creditCost: number; clickCost: number } | undefined {
-  return candidates
-    .flatMap((candidate) => {
-      if (candidate.semanticActionType !== "install.card") return [];
-      const action = input.legalActions.find(
-        (legalAction) => legalAction.actionId === candidate.actionId,
-      );
-      if (
-        !action ||
-        runnerInstallSourceInstanceId(candidate, action) !== card.instanceId ||
-        action.payload?.runnerProgramTrashBeforeInstall === true ||
-        candidate.actionId.endsWith(".runner_program_trash_before_install")
-      ) {
-        return [];
-      }
-      return [
-        {
-          actionId: candidate.actionId,
-          creditCost: legalActionCreditCost(action),
-          clickCost: action.costs.reduce(
-            (sum, cost) => sum + Math.max(0, cost.clicks ?? 0),
-            0,
-          ),
-        },
-      ];
-    })
-    .sort(
-      (left, right) =>
-        left.creditCost +
-          left.clickCost -
-          (right.creditCost + right.clickCost) ||
-        left.actionId.localeCompare(right.actionId),
-    )[0];
-}
-
-function runnerVisibleBreakerUpgradeMemoryBlockedInstallRoute(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  card: VisibleCard,
-): { actionId: string; creditCost: number; clickCost: number } | undefined {
-  return candidates
-    .flatMap((candidate) => {
-      if (candidate.semanticActionType !== "install.card") return [];
-      const action = input.legalActions.find(
-        (legalAction) => legalAction.actionId === candidate.actionId,
-      );
-      if (
-        !action ||
-        runnerInstallSourceInstanceId(candidate, action) !== card.instanceId ||
-        (action.payload?.runnerProgramTrashBeforeInstall !== true &&
-          !candidate.actionId.endsWith(".runner_program_trash_before_install"))
-      ) {
-        return [];
-      }
-      return [
-        {
-          actionId: candidate.actionId,
-          creditCost: legalActionCreditCost(action),
-          clickCost: action.costs.reduce(
-            (sum, cost) => sum + Math.max(0, cost.clicks ?? 0),
-            0,
-          ),
-        },
-      ];
-    })
-    .sort(
-      (left, right) =>
-        left.creditCost +
-          left.clickCost -
-          (right.creditCost + right.clickCost) ||
-        left.actionId.localeCompare(right.actionId),
-    )[0];
-}
-
-function runnerBreakerUpgradeMemorySupportRoutes(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  requiredAdditionalMu: number,
-): RunnerBreakerUpgradeMemorySupportRoute[] {
-  if (!Number.isSafeInteger(requiredAdditionalMu) || requiredAdditionalMu <= 0)
-    return [];
-  return candidates
-    .flatMap((candidate) => {
-      if (candidate.semanticActionType !== "install.card") return [];
-      const action = input.legalActions.find(
-        (legalAction) => legalAction.actionId === candidate.actionId,
-      );
-      if (!action || action.side !== "runner" || action.type !== "install_card")
-        return [];
-      const sourceInstanceId = runnerInstallSourceInstanceId(candidate, action);
-      const card = input.playerView.own.gripOrHq.find(
-        (entry) =>
-          entry.known !== false && entry.instanceId === sourceInstanceId,
-      );
-      const definition = card?.definitionId
-        ? CARD_DEFINITIONS_BY_ID[card.definitionId]
-        : undefined;
-      const additionalMu = Math.max(
-        0,
-        card?.memoryLimitBonus ?? definition?.memoryLimitBonus ?? 0,
-      );
-      if (
-        !card?.definitionId ||
-        !Number.isSafeInteger(additionalMu) ||
-        additionalMu < requiredAdditionalMu
-      ) {
-        return [];
-      }
-      return [
-        {
-          actionId: action.actionId,
-          definitionId: card.definitionId,
-          additionalMu,
-          creditCost: legalActionCreditCost(action),
-          clickCost: action.costs.reduce(
-            (sum, cost) => sum + Math.max(0, cost.clicks ?? 0),
-            0,
-          ),
-        },
-      ];
-    })
-    .sort(
-      (left, right) =>
-        left.creditCost +
-          left.clickCost -
-          (right.creditCost + right.clickCost) ||
-        left.additionalMu - right.additionalMu ||
-        left.definitionId.localeCompare(right.definitionId) ||
-        left.actionId.localeCompare(right.actionId),
-    );
-}
-
-function runnerBreakerUpgradeRequiredRole(
-  breaker: BreakerCapability,
-  server: AiDecisionInput["playerView"]["servers"][number],
-): RunnerCoverageGapSignal["requiredRole"] | undefined {
-  const subtypes = new Set(
-    server.ice.flatMap((ice) =>
-      (ice.subtypes ?? []).map((subtype) =>
-        subtype.toLowerCase().replaceAll("-", "_").replaceAll(" ", "_"),
-      ),
-    ),
-  );
-  for (const [coverage, role, subtype] of [
-    ["wall", "breaker_wall", "wall"],
-    ["code_gate", "breaker_code_gate", "code_gate"],
-    ["sentry", "breaker_sentry", "sentry"],
-    ["ap", "breaker_ap", "ap"],
-    ["trace", "breaker_trace", "trace"],
-  ] as const) {
-    if (breaker.coverage.includes(coverage) && subtypes.has(subtype)) {
-      return role;
-    }
-  }
-  if (breaker.coverage.includes("universal")) return "breaker_universal";
-  return undefined;
-}
-
-function runnerBreakerUpgradeSupportActions(
-  support: ReturnType<typeof coverageSupportActionIds>,
-  searchActionId: string | undefined,
-): ReturnType<typeof coverageSupportActionIds> {
-  const acceptedSearchActionIds = new Set(
-    searchActionId ? [searchActionId] : [],
-  );
-  const directSearchChoiceBindings = support.directSearchChoiceBindings?.filter(
-    (binding) => acceptedSearchActionIds.has(binding.actionId),
-  );
-  return {
-    directSearchActionIds: support.directSearchActionIds.filter((actionId) =>
-      acceptedSearchActionIds.has(actionId),
-    ),
-    ...(directSearchChoiceBindings ? { directSearchChoiceBindings } : {}),
-    rejectedSearchActionIds: [
-      ...new Set([
-        ...(support.rejectedSearchActionIds ?? []),
-        ...support.directSearchActionIds.filter(
-          (actionId) => !acceptedSearchActionIds.has(actionId),
-        ),
-        ...support.searchEngineSetupActionIds,
-      ]),
-    ],
-    searchEngineSetupActionIds: [],
-    drawForAnswerActionIds: [],
-  };
-}
-
-function runnerBreakerUpgradeSignalQuote(
-  upgrade: RunnerBreakerCoverageUpgrade,
-): NonNullable<RunnerCoverageGapSignal["upgradeQuote"]> {
-  const quote = upgrade.economicQuote;
-  return {
-    schemaVersion: quote.schemaVersion,
-    targetDefinitionId: upgrade.targetDefinitionId,
-    currentKnownPathCost: quote.currentPathCost,
-    projectedKnownPathCost: quote.projectedPathCost,
-    savingsPerRun: quote.savingsPerRun,
-    plannedRunHorizon: quote.plannedRunHorizon,
-    grossRunSavings: quote.grossRunSavings,
-    upfrontCreditCost: quote.upfrontCreditCost,
-    totalInvestment: quote.totalInvestment,
-    netValueBeforeSafetyMargin: quote.netValueBeforeSafetyMargin,
-    requiredNetSafetyMargin: quote.requiredNetSafetyMargin,
-    projectedLiquidCreditsAfterUpgradeAndRun:
-      quote.projectedLiquidCreditsAfterUpgradeAndRun,
-    desiredCreditReserve: quote.desiredCreditReserve,
-    memoryAvailable: quote.memoryAvailable,
-    memorySupportAdditionalMu: quote.memorySupportAdditionalMu,
-    memorySupportCreditCost: quote.memorySupportCreditCost,
-    memorySupportActionClicks: quote.memorySupportActionClicks,
-    projectedMemoryAvailable: quote.projectedMemoryAvailable,
-    candidateMemoryCost: quote.candidateMemoryCost,
-  };
-}
-
-type RunnerCostEffectiveCoverageRecovery = Readonly<{
-  requiredRole: RunnerCoverageGapSignal["requiredRole"];
-  totalRecoveryCost: number;
-  visibleAnswer?: VisibleCard;
-  deckHasAlternative: boolean;
-  targetDefinitionId?: string;
-  recoveryMode:
-    | "install_visible_answer"
-    | "search_known_alternative"
-    | "draw_for_known_role";
-  evidenceCodes: string[];
-}>;
-
-function runnerCostEffectiveCoverageRecovery(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  evaluation: RunnerRunTargetEvaluation,
-  deckCapabilities: DeckCapabilityProfile,
-): RunnerCostEffectiveCoverageRecovery | undefined {
-  // Missing coverage identifies one blocking role. Cost recovery instead
-  // compares every role against the entire known path: a cheaper answer to
-  // another ICE can make that same path payable. Preserve the existing
-  // visible-answer/search/draw order, then compare the complete cost.
-  const modeOrder = {
-    install_visible_answer: 0,
-    search_known_alternative: 1,
-    draw_for_known_role: 2,
-  };
-  return RUNNER_BREAKER_COVERAGE_ROLES.flatMap((role) => {
-    const recovery = runnerCostEffectiveCoverageRecoveryForRole(
-      input,
-      candidates,
-      evaluation,
-      role,
-      deckCapabilities,
-    );
-    return recovery ? [recovery] : [];
-  }).sort(
-    (left, right) =>
-      modeOrder[left.recoveryMode] - modeOrder[right.recoveryMode] ||
-      left.totalRecoveryCost - right.totalRecoveryCost ||
-      RUNNER_BREAKER_COVERAGE_ROLES.findIndex(
-        (role) => role === left.requiredRole,
-      ) -
-        RUNNER_BREAKER_COVERAGE_ROLES.findIndex(
-          (role) => role === right.requiredRole,
-        ),
-  )[0];
-}
-
-function runnerCostEffectiveCoverageRecoveryForRole(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  evaluation: RunnerRunTargetEvaluation,
-  role: RunnerCoverageGapSignal["requiredRole"],
-  deckCapabilities: DeckCapabilityProfile,
-): RunnerCostEffectiveCoverageRecovery | undefined {
-  if (
-    evaluation.pathPassability !== "blocked_unpayable" ||
-    evaluation.pathCost <= 0 ||
-    !Number.isSafeInteger(evaluation.pathCost) ||
-    evaluation.knownAccessState === "known_no_current_payoff" ||
-    evaluation.accessPayoff === "known_low_value" ||
-    evaluation.accessPayoffContestable === false
-  ) {
-    return undefined;
-  }
-  const server = input.playerView.servers.find(
-    (candidate) => candidate.id === evaluation.targetServerId,
-  );
-  if (
-    !server ||
-    server.ice.length === 0 ||
-    server.ice.some((ice) => !ice.known || ice.rezzed !== true)
-  ) {
-    return undefined;
-  }
-  const installedDefinitionIds = new Set(
-    (input.playerView.own.rig ?? [])
-      .filter((card) =>
-        runnerRolesCoverCoverageGap(
-          rolesForDeckDoctrineCard(card.definitionId ?? ""),
-          role,
-        ),
-      )
-      .flatMap((card) => (card.definitionId ? [card.definitionId] : [])),
-  );
-  if (installedDefinitionIds.size === 0) return undefined;
-
-  const visibleOptions = input.playerView.own.gripOrHq
-    .filter(
-      (card) =>
-        card.known &&
-        // An unaffordable visible answer may still create its existing
-        // fund-install need. Once affordable, bind only a legal installation.
-        ((card.installCost ?? 0) > input.playerView.own.credits ||
-          candidates.some(
-            (candidate) =>
-              candidate.semanticActionType === "install.card" &&
-              candidate.costProfile.costKnownStatus === "known" &&
-              input.legalActions.some(
-                (action) =>
-                  action.actionId === candidate.actionId &&
-                  runnerInstallSourceInstanceId(candidate, action) ===
-                    card.instanceId,
-              ),
-          )) &&
-        Number.isSafeInteger(card.installCost) &&
-        (card.installCost ?? -1) >= 0 &&
-        visibleCardCoversRequiredCoverage(card, role, (definitionId) =>
-          rolesForDeckDoctrineCard(definitionId ?? ""),
-        ),
-    )
-    .flatMap((card) => {
-      const installCost = card.installCost;
-      if (installCost === undefined) return [];
-      const path = assessKnownRezzedIcePath(
-        server.ice,
-        [...(input.playerView.own.rig ?? []), card],
-        evaluation.pathCost,
-        server.root,
-        input.playerView.opponent.credits,
-      );
-      const breakCost = path.visibleBreakCost;
-      if (
-        breakCost === undefined ||
-        (!path.canReachAccess && !runnerKnownPathAssessmentIsCostNoAccess(path))
-      ) {
-        return [];
-      }
-      const totalRecoveryCost = installCost + breakCost;
-      return totalRecoveryCost < evaluation.pathCost
-        ? [{ card, totalRecoveryCost, breakCost }]
-        : [];
-    })
-    .sort(
-      (left, right) =>
-        left.totalRecoveryCost - right.totalRecoveryCost ||
-        left.card.instanceId.localeCompare(right.card.instanceId),
-    );
-  const visibleAnswer = visibleOptions[0];
-  const deckAlternative = runnerCostEffectiveDeckCoverageAlternative(
-    input,
-    server,
-    deckCapabilities,
-    role,
-    installedDefinitionIds,
-    evaluation.pathCost,
-  );
-  if (!visibleAnswer && !deckAlternative) return undefined;
-
-  const searchToolIds = new Set(
-    (deckCapabilities.runner?.searchAccess.tools ?? [])
-      .filter(
-        (tool) =>
-          tool.canSearchBreakers && tool.legalNow && tool.status !== "in_deck",
-      )
-      .map((tool) => tool.cardId),
-  );
-  const searchRouteAvailable =
-    deckAlternative !== undefined &&
-    candidates.some((candidate) => {
-      const sourceDefinitionId = runnerCandidateSourceDefinitionId(
-        input,
-        candidate,
-      );
-      return (
-        sourceDefinitionId !== undefined &&
-        searchToolIds.has(sourceDefinitionId) &&
-        candidate.semanticActionType !== "install.card"
-      );
-    });
-  const recoveryMode = visibleAnswer
-    ? "install_visible_answer"
-    : searchRouteAvailable
-      ? "search_known_alternative"
-      : "draw_for_known_role";
-  const deckAlternativeOperatingCost = deckAlternative?.breakCost;
-  return {
-    requiredRole: role,
-    totalRecoveryCost:
-      visibleAnswer?.totalRecoveryCost ?? deckAlternative!.totalCost,
-    ...(visibleAnswer ? { visibleAnswer: visibleAnswer.card } : {}),
-    deckHasAlternative: deckAlternative !== undefined,
-    ...(deckAlternative
-      ? { targetDefinitionId: deckAlternative.breaker.cardId }
-      : {}),
-    recoveryMode,
-    evidenceCodes: [
-      `coverage_efficiency_target:${evaluation.targetServerId}`,
-      `coverage_efficiency_current_known_path_cost:${evaluation.pathCost}`,
-      `coverage_efficiency_current_funding_gap:${Math.max(0, evaluation.routeQuote?.fundingGap ?? 0)}`,
-      `coverage_efficiency_installed_definition_count:${installedDefinitionIds.size}`,
-      ...(visibleAnswer
-        ? [
-            `coverage_efficiency_visible_answer:${visibleAnswer.card.instanceId}`,
-            `coverage_efficiency_visible_answer_install_cost:${visibleAnswer.card.installCost}`,
-            `coverage_efficiency_visible_answer_break_cost:${visibleAnswer.breakCost}`,
-            `coverage_efficiency_visible_answer_total_cost:${visibleAnswer.totalRecoveryCost}`,
-          ]
-        : []),
-      ...(deckAlternative && deckAlternativeOperatingCost !== undefined
-        ? [
-            `coverage_efficiency_deck_alternative:${deckAlternative.breaker.cardId}`,
-            `coverage_efficiency_deck_alternative_operating_cost:${deckAlternativeOperatingCost}`,
-            `coverage_efficiency_deck_alternative_total_known_cost:${deckAlternative.totalCost}`,
-          ]
-        : []),
-      `coverage_efficiency_recovery_mode:${recoveryMode}`,
-    ],
-  };
-}
-
-function runnerCostEffectiveDeckCoverageAlternative(
-  input: AiDecisionInput,
-  server: AiDecisionInput["playerView"]["servers"][number],
-  deckCapabilities: DeckCapabilityProfile,
-  role: RunnerCoverageGapSignal["requiredRole"],
-  installedDefinitionIds: ReadonlySet<string>,
-  currentKnownPathCost: number,
-):
-  | { breaker: BreakerCapability; breakCost: number; totalCost: number }
-  | undefined {
-  const inventory = deckCapabilities.runner?.breakerInventory ?? [];
-  return inventory
-    .flatMap((breaker) => {
-      const projectedBreaker = runnerVisibleDeckBreaker(breaker);
-      if (!projectedBreaker) return [];
-      const path = assessKnownRezzedIcePath(
-        server.ice,
-        [...(input.playerView.own.rig ?? []), projectedBreaker],
-        Math.max(currentKnownPathCost, input.playerView.own.credits),
-        server.root,
-        input.playerView.opponent.credits,
-      );
-      const breakCost = path.visibleBreakCost;
-      const eligible =
-        breaker.confidence === "high" &&
-        breaker.quantityKnownInDeck > 0 &&
-        breaker.locations.includes("in_deck") &&
-        !installedDefinitionIds.has(breaker.cardId) &&
-        runnerBreakerCapabilityCoversRole(breaker, role) &&
-        Number.isSafeInteger(breaker.installCost) &&
-        (breaker.installCost ?? -1) >= 0 &&
-        breakCost !== undefined &&
-        path.canReachAccess &&
-        (breaker.installCost ?? 0) + breakCost < currentKnownPathCost;
-      return eligible
-        ? [
-            {
-              breaker,
-              breakCost,
-              totalCost: (breaker.installCost ?? 0) + breakCost,
-            },
-          ]
-        : [];
-    })
-    .sort(
-      (left, right) =>
-        left.totalCost - right.totalCost ||
-        left.breaker.cardId.localeCompare(right.breaker.cardId),
-    )[0];
-}
-
-function runnerVisibleDeckBreaker(
-  breaker: BreakerCapability,
-): VisibleCard | undefined {
-  const definition = CARD_DEFINITIONS_BY_ID[breaker.cardId];
-  if (
-    !definition ||
-    definition.side !== "runner" ||
-    definition.type !== "program"
-  ) {
-    return undefined;
-  }
-  return {
-    instanceId: `deck-coverage:${breaker.cardId}`,
-    definitionId: breaker.cardId,
-    title: definition.title,
-    owner: "runner",
-    controller: "runner",
-    type: "program",
-    subtypes: [...(definition.subtypes ?? [])],
-    known: true,
-    rezzed: true,
-    ...(typeof definition.strength === "number"
-      ? { strength: definition.strength }
-      : {}),
-    ...(typeof breaker.installCost === "number"
-      ? { installCost: breaker.installCost }
-      : {}),
-    ...(typeof definition.memoryCost === "number"
-      ? { memoryCost: definition.memoryCost }
-      : {}),
-  };
-}
-
-function runnerBreakerCapabilityCoversRole(
-  breaker: BreakerCapability,
-  role: RunnerCoverageGapSignal["requiredRole"],
-): boolean {
-  const coverage = coverageKindForPlanRole(role);
-  return (
-    breaker.coverage.includes(coverage) ||
-    breaker.coverage.includes("universal")
-  );
-}
-
-function runnerCoverageInstallActionValues(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  serverId: string | undefined,
-  role: RunnerCoverageGapSignal["requiredRole"],
-): Record<string, number> {
-  const values: Record<string, number> = {};
-  for (const candidate of candidates) {
-    if (candidate.semanticActionType !== "install.card") continue;
-    const definitionId = runnerCandidateSourceDefinitionId(input, candidate);
-    if (
-      !definitionId ||
-      !runnerInstallDefinitionCoversCoverageGap(
-        definitionId,
-        rolesForDeckDoctrineCard(definitionId),
-        role,
-      )
-    )
-      continue;
-    const sourceInstanceId = candidate.sourceCardInstanceId;
-    const card = input.playerView.own.gripOrHq.find(
-      (entry) => entry.instanceId === sourceInstanceId,
-    );
-    const cost =
-      candidate.costProfile.costKnownStatus === "known"
-        ? (candidate.costProfile.creditCost ?? 0)
-        : 0;
-    if (!card || cost > input.playerView.own.credits) {
-      values[candidate.actionId] = 100 - cost;
-      continue;
-    }
-    const targetId = candidate.targetContext?.selectedTargets?.[0]?.targetId;
-    const projectedCard = {
-      ...card,
-      ...(typeof targetId === "string"
-        ? { selectedTargetCardId: targetId }
-        : {}),
-    };
-    const eligibleServers = input.playerView.servers.filter(
-      (server) =>
-        (serverId === undefined || server.id === serverId) &&
-        server.ice.every((ice) => ice.known && ice.rezzed) &&
-        (targetId === undefined ||
-          server.ice.some((ice) => ice.instanceId === targetId)),
-    );
-    if (eligibleServers.length === 0) {
-      values[candidate.actionId] = 100 - cost;
-      continue;
-    }
-    values[candidate.actionId] = Math.max(
-      ...eligibleServers.map((server) => {
-        const path = assessKnownRezzedIcePath(
-          server.ice,
-          [...(input.playerView.own.rig ?? []), projectedCard],
-          input.playerView.own.credits - cost,
-          server.root,
-          input.playerView.opponent.credits,
-        );
-        if (path.canReachAccess) {
-          return 300 - cost - (path.visibleBreakCost ?? 0);
-        }
-        if (runnerKnownPathAssessmentIsCostNoAccess(path)) {
-          return 200 - cost - (path.visibleBreakCost ?? 0);
-        }
-        return 10 - cost;
-      }),
-    );
-  }
-  return values;
-}
-
-function runnerCoverageGapIsTerminalRemoteThreat(
-  input: AiDecisionInput,
-  evaluation: RunnerRunTargetEvaluation,
-): boolean {
-  if (evaluation.targetKind !== "remote") return false;
-  const terminalThreat = runnerTerminalContestThreat(input);
-  if (!terminalThreat) return false;
-  const server = input.playerView.servers.find(
-    (candidate) => candidate.id === evaluation.targetServerId,
-  );
-  const visiblyAdvancedRoot =
-    server?.root.some(
-      (card) =>
-        (card.known === false || card.type === "agenda") &&
-        (card.advancementCounters ?? 0) > 0,
-    ) === true;
-  const repeatedMatchpointRemote = terminalThreat.remoteServerIds.includes(
-    evaluation.targetServerId,
-  );
-  if (!visiblyAdvancedRoot && !repeatedMatchpointRemote) {
-    return false;
-  }
-  return (
-    terminalThreat.kind === "opponent_matchpoint" || repeatedMatchpointRemote
-  );
-}
-
 function runnerTerminalRemoteUnreachableCentralLastChance(
   input: AiDecisionInput,
   evaluation: RunnerRunTargetEvaluation,
@@ -27922,603 +24724,6 @@ function runnerTerminalRemoteContestVisibleHazardFundingGap(
     ),
   );
   return gap > 0 ? gap : undefined;
-}
-
-function runnerUrgentRemoteCoverageConversionQuote(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  evaluation: RunnerRunTargetEvaluation,
-  visibleAnswer: VisibleCard | undefined,
-  answerInstallCost: number | undefined,
-  installActionIds: readonly string[] | undefined,
-): RunnerCoverageGapSignal["sameTurnRunConversion"] | undefined {
-  if (
-    evaluation.targetKind !== "remote" ||
-    !evaluation.scoreThreat ||
-    evaluation.accessPayoffContestable === false ||
-    (evaluation.pathPassability !== "blocked_missing_coverage" &&
-      evaluation.pathPassability !== "blocked_unbreakable") ||
-    !visibleAnswer ||
-    !Number.isSafeInteger(answerInstallCost) ||
-    (answerInstallCost ?? -1) < 0
-  ) {
-    return undefined;
-  }
-  const server = input.playerView.servers.find(
-    (candidate) => candidate.id === evaluation.targetServerId,
-  );
-  if (
-    !server ||
-    server.ice.length === 0 ||
-    server.ice.some((ice) => !ice.known || ice.rezzed !== true)
-  ) {
-    return undefined;
-  }
-  const installRoute = runnerUrgentCoverageInstallProjection(
-    input,
-    visibleAnswer,
-    answerInstallCost as number,
-    installActionIds,
-  );
-  const runAction = input.legalActions.find(
-    (action) => action.actionId === evaluation.actionId,
-  );
-  const runClickCost = runAction?.costs.reduce(
-    (sum, cost) => sum + Math.max(0, cost.clicks ?? 0),
-    0,
-  );
-  if (!installRoute || !runAction || !runClickCost || runClickCost <= 0) {
-    return undefined;
-  }
-  const requiredClicksAfterFunding = installRoute.clickCost + runClickCost;
-  if (input.playerView.own.clicks < requiredClicksAfterFunding) {
-    return undefined;
-  }
-  const projectedPath = assessKnownRezzedIcePath(
-    server.ice,
-    [...(input.playerView.own.rig ?? []), visibleAnswer],
-    Number.MAX_SAFE_INTEGER,
-    server.root,
-    input.playerView.opponent.credits,
-  );
-  const projectedKnownPathCost = projectedPath.visibleBreakCost ?? 0;
-  if (
-    !projectedPath.canReachAccess ||
-    projectedPath.blocked ||
-    (projectedPath.futureClicksLost ?? 0) > 0 ||
-    !Number.isSafeInteger(projectedKnownPathCost) ||
-    projectedKnownPathCost < 0
-  ) {
-    return undefined;
-  }
-  const requiredCreditsWithoutFloor =
-    (answerInstallCost as number) +
-    legalActionCreditCost(runAction) +
-    projectedKnownPathCost;
-  const remainingFundingClicks = Math.max(
-    0,
-    input.playerView.own.clicks - requiredClicksAfterFunding,
-  );
-  const fundingCanReach = (targetCredits: number): boolean =>
-    targetCredits <= input.playerView.own.credits ||
-    runnerExactFundingRouteContract(input, candidates, {
-      demandId: `urgent-remote-coverage-projection:${evaluation.actionId}`,
-      sourcePlanId: `runner.rig_and_coverage:urgent-remote-coverage-projection:${evaluation.targetServerId}`,
-      purpose: "breaker_for_current_plan",
-      priority: "current_foreground_plan",
-      hardness: "hard",
-      deadline: "end_of_current_turn",
-      targetCredits,
-      remainingClicks: remainingFundingClicks,
-      evidence: [
-        `urgent_remote_coverage_projection:${evaluation.targetServerId}`,
-        `coverage_conversion_clicks_reserved:${requiredClicksAfterFunding}`,
-      ],
-    }).routeActionIds.length > 0;
-  const postRunCreditFloor = fundingCanReach(requiredCreditsWithoutFloor + 1)
-    ? 1
-    : fundingCanReach(requiredCreditsWithoutFloor)
-      ? 0
-      : undefined;
-  if (postRunCreditFloor === undefined) return undefined;
-  const requiredCredits = requiredCreditsWithoutFloor + postRunCreditFloor;
-  if (!Number.isSafeInteger(requiredCredits) || requiredCredits < 0) {
-    return undefined;
-  }
-  return {
-    targetRunActionId: evaluation.actionId,
-    requiredCredits,
-    requiredClicksAfterFunding,
-    projectedKnownPathCost,
-    postRunCreditFloor,
-    installProjection: installRoute.projection,
-  };
-}
-
-function runnerUrgentCoverageInstallProjection(
-  input: AiDecisionInput,
-  visibleAnswer: VisibleCard,
-  answerInstallCost: number,
-  installActionIds: readonly string[] | undefined,
-):
-  | {
-      clickCost: number;
-      projection:
-        | "current_legal_action"
-        | "card_spec_requires_rematerialization";
-    }
-  | undefined {
-  const currentRoute = (installActionIds ?? [])
-    .flatMap((actionId) => {
-      const action = input.legalActions.find(
-        (candidate) => candidate.actionId === actionId,
-      );
-      if (!action) return [];
-      const clickCost = action.costs.reduce(
-        (sum, cost) => sum + Math.max(0, cost.clicks ?? 0),
-        0,
-      );
-      return clickCost > 0 ? [{ actionId, clickCost }] : [];
-    })
-    .sort(
-      (left, right) =>
-        left.clickCost - right.clickCost ||
-        left.actionId.localeCompare(right.actionId),
-    )[0];
-  if (currentRoute) {
-    return {
-      clickCost: currentRoute.clickCost,
-      projection: "current_legal_action",
-    };
-  }
-
-  const definition = visibleAnswer.definitionId
-    ? CARD_DEFINITIONS_BY_ID[visibleAnswer.definitionId]
-    : undefined;
-  const memoryCost = definition?.memoryCost;
-  const memoryUsed = input.playerView.own.memoryUsed;
-  const memoryLimit = input.playerView.own.memoryLimit;
-  const cardIsStillInHand = input.playerView.own.gripOrHq.some(
-    (card) => card.instanceId === visibleAnswer.instanceId,
-  );
-  if (
-    !cardIsStillInHand ||
-    definition?.side !== "runner" ||
-    definition.type !== "program" ||
-    !Number.isSafeInteger(definition.installCost) ||
-    definition.installCost !== answerInstallCost ||
-    input.playerView.own.credits >= answerInstallCost ||
-    !Number.isSafeInteger(memoryCost) ||
-    !Number.isSafeInteger(memoryUsed) ||
-    !Number.isSafeInteger(memoryLimit) ||
-    (memoryUsed as number) + (memoryCost as number) > (memoryLimit as number)
-  ) {
-    return undefined;
-  }
-  return {
-    clickCost: 1,
-    projection: "card_spec_requires_rematerialization",
-  };
-}
-
-function runnerCoverageFundingActionIds(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  gapId: string,
-  targetCredits: number | undefined,
-  fundingGap: number | undefined,
-  allowIncrementalProgress: boolean,
-  requiredClicksAfterFunding = 1,
-): string[] {
-  if (
-    targetCredits === undefined ||
-    fundingGap === undefined ||
-    fundingGap <= 0
-  ) {
-    return [];
-  }
-  return runnerExactFundingRouteContract(input, candidates, {
-    demandId: `${gapId}:fund-answer`,
-    sourcePlanId: `runner.rig_and_coverage:${gapId}`,
-    purpose: "breaker_for_current_plan",
-    priority: "current_foreground_plan",
-    hardness: "hard",
-    deadline: "end_of_current_turn",
-    targetCredits,
-    remainingClicks: Math.max(
-      0,
-      input.playerView.own.clicks - requiredClicksAfterFunding,
-    ),
-    allowIncrementalProgress,
-    allowStrategicExchange: !allowIncrementalProgress,
-    evidence: [
-      `coverage_gap:${gapId}`,
-      `coverage_conversion_clicks_reserved:${requiredClicksAfterFunding}`,
-    ],
-  }).routeActionIds;
-}
-
-function coverageSupportActionIds(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  deckCapabilities: DeckCapabilityProfile,
-  requiredRole: RunnerCorePlanDomain["coverageGaps"][number]["requiredRole"],
-  options: Readonly<{
-    deckHasStackAnswerOverride?: boolean;
-    targetDefinitionIdOverride?: string;
-    handRotation?: RunnerHandRotationAssessment;
-    terminalRemoteCoverageThreat?: boolean;
-  }> = {},
-): Pick<
-  RunnerCorePlanDomain["coverageGaps"][number],
-  | "directSearchActionIds"
-  | "directSearchChoiceBindings"
-  | "rejectedSearchActionIds"
-  | "searchEngineSetupActionIds"
-  | "drawForAnswerActionIds"
-> {
-  const deckHasStackAnswer =
-    options.deckHasStackAnswerOverride ??
-    runnerDeckHasCoverageAnswer(deckCapabilities, requiredRole);
-  const targetDefinitionId =
-    options.targetDefinitionIdOverride ??
-    runnerPreferredCoverageSearchDefinitionId(deckCapabilities, requiredRole);
-  const targetBreaker = targetDefinitionId
-    ? deckCapabilities.runner?.breakerInventory.find(
-        (breaker) => breaker.cardId === targetDefinitionId,
-      )
-    : undefined;
-  const recoveryBindings = candidates.flatMap((candidate) => {
-    const target = runnerCoverageRecoveryTarget(input, candidate, requiredRole);
-    return target ? [{ candidate, target }] : [];
-  });
-  const searchTools = (
-    deckCapabilities.runner?.searchAccess.tools ?? []
-  ).filter((tool) => tool.canSearchBreakers);
-  const searchToolIds = new Set(searchTools.map((tool) => tool.cardId));
-  const matchingStackSearchCandidates = candidates.filter((candidate) => {
-    const sourceDefinitionId = runnerCandidateSourceDefinitionId(
-      input,
-      candidate,
-    );
-    return (
-      sourceDefinitionId !== undefined &&
-      searchToolIds.has(sourceDefinitionId) &&
-      candidate.semanticActionType !== "install.card" &&
-      runnerCoverageSearchTargetIsPayable(input, candidate, targetBreaker)
-    );
-  });
-  const stackSearchCandidates = deckHasStackAnswer
-    ? matchingStackSearchCandidates
-    : [];
-  const directSearchCandidates = uniqueBy(
-    [
-      ...stackSearchCandidates,
-      ...recoveryBindings.map((binding) => binding.candidate),
-    ],
-    (candidate) => candidate.actionId,
-  );
-  const recoveryByActionId = new Map(
-    recoveryBindings.map((binding) => [
-      binding.candidate.actionId,
-      binding.target,
-    ]),
-  );
-  const matchingSearchActionIds = new Set([
-    ...matchingStackSearchCandidates.map((candidate) => candidate.actionId),
-    ...recoveryBindings.map((binding) => binding.candidate.actionId),
-  ]);
-  const searchEngineSetupCandidates = (
-    deckHasStackAnswer ? candidates : []
-  ).filter((candidate) => {
-    const sourceDefinitionId = runnerCandidateSourceDefinitionId(
-      input,
-      candidate,
-    );
-    return (
-      candidate.semanticActionType === "install.card" &&
-      sourceDefinitionId !== undefined &&
-      searchToolIds.has(sourceDefinitionId)
-    );
-  });
-  const searchEngineSetupActionIds = new Set(
-    searchEngineSetupCandidates.map((candidate) => candidate.actionId),
-  );
-  const cardDrawForAnswerCandidates = (
-    deckHasStackAnswer ? candidates : []
-  ).filter(
-    (candidate) =>
-      !matchingSearchActionIds.has(candidate.actionId) &&
-      !searchEngineSetupActionIds.has(candidate.actionId) &&
-      candidate.sourceKind === "card" &&
-      (candidate.tagEffectProfile?.acuteTagRemoval !== true ||
-        input.playerView.own.tags <= 0) &&
-      (candidate.semanticActionType === "draw.card" ||
-        (candidate.semanticActionType === "play.runner_event" &&
-          (candidate.actionTacticSignals.includes("draw.card") ||
-            candidate.actionTacticSignals.includes("setup.draw"))) ||
-        (candidate.economyProjection?.cardsDrawn ?? 0) > 1),
-  );
-  const safeCardDrawForAnswerCandidates = cardDrawForAnswerCandidates.filter(
-    (candidate) => {
-      const action = input.legalActions.find(
-        (legalAction) => legalAction.actionId === candidate.actionId,
-      );
-      return (
-        action !== undefined &&
-        runnerDrawTaxLiabilityProjection(input, action, candidate)
-          .projectedTagsAdded === 0
-      );
-    },
-  );
-  const rejectedTaxedDrawExists =
-    safeCardDrawForAnswerCandidates.length < cardDrawForAnswerCandidates.length;
-  const safeBasicDrawSubstitutes = rejectedTaxedDrawExists
-    ? candidates.filter((candidate) => {
-        if (candidate.semanticActionType !== "draw.card") return false;
-        const action = input.legalActions.find(
-          (legalAction) => legalAction.actionId === candidate.actionId,
-        );
-        return (
-          action?.type === "draw_card" &&
-          action.source === "basic_action" &&
-          runnerDrawTaxLiabilityProjection(input, action, candidate)
-            .projectedTagsAdded === 0
-        );
-      })
-    : [];
-  const sideSafeRoleBasicDraws =
-    deckHasStackAnswer &&
-    (options.handRotation?.exactKnownNeedDrawAdmissible === true ||
-      (options.terminalRemoteCoverageThreat === true &&
-        options.handRotation?.stackHasCards === true)) &&
-    directSearchCandidates.length === 0 &&
-    searchEngineSetupCandidates.length === 0
-      ? candidates.filter((candidate) => {
-          if (candidate.semanticActionType !== "draw.card") return false;
-          const action = input.legalActions.find(
-            (legalAction) => legalAction.actionId === candidate.actionId,
-          );
-          return (
-            action?.type === "draw_card" &&
-            action.source === "basic_action" &&
-            runnerDrawTaxLiabilityProjection(input, action, candidate)
-              .projectedTagsAdded === 0
-          );
-        })
-      : [];
-  return {
-    directSearchActionIds: directSearchCandidates.map(
-      (candidate) => candidate.actionId,
-    ),
-    directSearchChoiceBindings: directSearchCandidates.flatMap((candidate) => {
-      const legalAction = input.legalActions.find(
-        (action) => action.actionId === candidate.actionId,
-      );
-      const sourceCardInstanceId =
-        candidate.sourceCardInstanceId ?? legalAction?.source;
-      const sourceDefinitionId = runnerCandidateSourceDefinitionId(
-        input,
-        candidate,
-      );
-      const recoveryTarget = recoveryByActionId.get(candidate.actionId);
-      return sourceCardInstanceId && sourceDefinitionId
-        ? [
-            {
-              actionId: candidate.actionId,
-              sourceCardInstanceId,
-              sourceDefinitionId,
-              ...(recoveryTarget
-                ? {
-                    targetCardInstanceId: recoveryTarget.instanceId,
-                    ...(recoveryTarget.definitionId
-                      ? {
-                          targetDefinitionId: recoveryTarget.definitionId,
-                        }
-                      : {}),
-                  }
-                : targetDefinitionId
-                  ? { targetDefinitionId }
-                  : {}),
-            },
-          ]
-        : [];
-    }),
-    rejectedSearchActionIds: deckHasStackAnswer
-      ? []
-      : matchingStackSearchCandidates.map((candidate) => candidate.actionId),
-    searchEngineSetupActionIds: searchEngineSetupCandidates.map(
-      (candidate) => candidate.actionId,
-    ),
-    drawForAnswerActionIds: [
-      ...safeCardDrawForAnswerCandidates,
-      ...safeBasicDrawSubstitutes,
-      ...sideSafeRoleBasicDraws,
-    ].map((candidate) => candidate.actionId),
-  };
-}
-
-function runnerCoverageSearchTargetIsPayable(
-  input: AiDecisionInput,
-  candidate: ActionSemanticCandidate,
-  targetBreaker: BreakerCapability | undefined,
-): boolean {
-  const installEffects = (candidate.functionalEffects ?? []).filter(
-    (effect) =>
-      effect.kind === "install" &&
-      effect.scope === "installed_card" &&
-      effect.target === "program",
-  );
-  if (installEffects.length === 0) return true;
-  const installCostModes = new Set(
-    installEffects.flatMap((effect) =>
-      effect.installCost ? [effect.installCost] : [],
-    ),
-  );
-  if (installCostModes.size !== 1) return false;
-  if (installCostModes.has("free")) return true;
-  if (
-    !installCostModes.has("normal") ||
-    targetBreaker?.installCost === undefined ||
-    !Number.isSafeInteger(targetBreaker.installCost) ||
-    targetBreaker.installCost < 0
-  ) {
-    return false;
-  }
-  const action = input.legalActions.find(
-    (legalAction) => legalAction.actionId === candidate.actionId,
-  );
-  if (!action) return false;
-  const sourceCreditCost = action.costs.reduce(
-    (total, cost) => total + Math.max(0, cost.credits ?? 0),
-    0,
-  );
-  return (
-    input.playerView.own.credits >= sourceCreditCost + targetBreaker.installCost
-  );
-}
-
-function runnerPreferredCoverageSearchDefinitionId(
-  deckCapabilities: DeckCapabilityProfile,
-  requiredRole: RunnerCorePlanDomain["coverageGaps"][number]["requiredRole"],
-): string | undefined {
-  return (deckCapabilities.runner?.breakerInventory ?? [])
-    .filter(
-      (breaker) =>
-        breaker.confidence === "high" &&
-        breaker.quantityKnownInDeck > 0 &&
-        breaker.locations.includes("in_deck") &&
-        runnerBreakerCapabilityCoversRole(breaker, requiredRole),
-    )
-    .sort(
-      (left, right) =>
-        (left.installCost ?? Number.POSITIVE_INFINITY) -
-          (right.installCost ?? Number.POSITIVE_INFINITY) ||
-        left.cardId.localeCompare(right.cardId),
-    )[0]?.cardId;
-}
-
-function runnerCoverageRecoveryTarget(
-  input: AiDecisionInput,
-  candidate: ActionSemanticCandidate,
-  requiredRole: RunnerCorePlanDomain["coverageGaps"][number]["requiredRole"],
-): VisibleCard | undefined {
-  if (
-    candidate.semanticActionType === "install.card" ||
-    (candidate.actionType !== "play_event" &&
-      candidate.actionType !== "activated_card_ability" &&
-      candidate.actionType !== "trigger_ability")
-  ) {
-    return undefined;
-  }
-  const sourceDefinitionId = runnerCandidateSourceDefinitionId(
-    input,
-    candidate,
-  );
-  const hint = sourceDefinitionId
-    ? AI_HINTS_BY_CARD.get(sourceDefinitionId)
-    : undefined;
-  const action = input.legalActions.find(
-    (legalAction) => legalAction.actionId === candidate.actionId,
-  );
-  const declaredRecoveryKind =
-    action?.payload?.cardImplementationEffectKind === "search_trash_to_grip"
-      ? "search"
-      : undefined;
-  const recoveryKind = runnerEffectsProvideTopTrashRecovery(
-    candidate.functionalEffects,
-  )
-    ? "top"
-    : (declaredRecoveryKind ??
-      (hint?.functionSignals?.includes("setup.card_recovery") === true ||
-      hint?.functionSignals?.includes("setup.recovery") === true ||
-      hint?.functionSignals?.includes("setup.temporary_program_install") ===
-        true
-        ? "search"
-        : undefined));
-  if (!recoveryKind) return undefined;
-  const exactTargetCardId =
-    typeof action?.payload?.targetCardId === "string"
-      ? action.payload.targetCardId
-      : typeof action?.payload?.cardImplementationTopTrashTargetId === "string"
-        ? action.payload.cardImplementationTopTrashTargetId
-        : undefined;
-  const visibleHeapCards = input.playerView.own.heapOrArchives.filter(
-    (card) => card.known,
-  );
-  const targets =
-    recoveryKind === "top" || exactTargetCardId
-      ? visibleHeapCards.filter((card) => card.instanceId === exactTargetCardId)
-      : visibleHeapCards;
-  return targets.find((card) =>
-    visibleCardCoversRequiredCoverage(card, requiredRole, (cardId) =>
-      rolesForDeckDoctrineCard(cardId ?? ""),
-    ),
-  );
-}
-
-function runnerDeckHasCoverageAnswer(
-  deckCapabilities: DeckCapabilityProfile,
-  requiredRole: RunnerCorePlanDomain["coverageGaps"][number]["requiredRole"],
-): boolean {
-  const requiredCoverage = coverageKindForPlanRole(requiredRole);
-  return (
-    deckCapabilities.runner?.breakerInventory.some(
-      (breaker) =>
-        (breaker.coverage.includes(requiredCoverage) ||
-          breaker.coverage.includes("universal")) &&
-        breaker.quantityKnownInDeck > 0 &&
-        (breaker.locations.includes("in_deck") ||
-          breaker.locations.includes("in_hand")),
-    ) ?? false
-  );
-}
-
-function coverageKindForPlanRole(
-  role: RunnerCorePlanDomain["coverageGaps"][number]["requiredRole"],
-): "wall" | "code_gate" | "sentry" | "ap" | "trace" | "universal" {
-  switch (role) {
-    case "breaker_wall":
-      return "wall";
-    case "breaker_code_gate":
-      return "code_gate";
-    case "breaker_sentry":
-      return "sentry";
-    case "breaker_ap":
-      return "ap";
-    case "breaker_trace":
-      return "trace";
-    case "breaker_universal":
-      return "universal";
-  }
-}
-
-function planFirstCoverageRole(
-  preciseCoverage: ReturnType<typeof missingBreakerCoverageKind>,
-  evidence: readonly string[],
-): RunnerCorePlanDomain["coverageGaps"][number]["requiredRole"] {
-  if (preciseCoverage === "breaker_wall") return "breaker_wall";
-  if (preciseCoverage === "breaker_code_gate") return "breaker_code_gate";
-  if (preciseCoverage === "breaker_sentry") return "breaker_sentry";
-  if (preciseCoverage === "breaker_ap") return "breaker_ap";
-  if (preciseCoverage === "breaker_trace") return "breaker_trace";
-  return requiredBreakerRole(evidence);
-}
-
-function requiredBreakerRole(
-  evidence: readonly string[],
-): RunnerCorePlanDomain["coverageGaps"][number]["requiredRole"] {
-  const joined = evidence.join(" ").toLowerCase();
-  if (joined.includes("code_gate") || joined.includes("code-gate"))
-    return "breaker_code_gate";
-  if (joined.includes("sentry")) return "breaker_sentry";
-  if (joined.includes("breaker_ap") || joined.includes("anti-personnel"))
-    return "breaker_ap";
-  if (joined.includes("breaker_trace") || joined.includes("trace"))
-    return "breaker_trace";
-  if (joined.includes("wall") || joined.includes("barrier"))
-    return "breaker_wall";
-  return "breaker_universal";
 }
 
 function bindRunnerRemoteRunActionAssessments(
@@ -29048,18 +25253,6 @@ function sourceDefinitionForEvaluation(
   return candidates.find(
     (candidate) => candidate.actionId === evaluation.actionId,
   )?.sourceDefinitionId;
-}
-
-function visiblePendingDamage(
-  candidates: readonly ActionSemanticCandidate[],
-): number {
-  return candidates.some(
-    (candidate) =>
-      candidate.semanticActionType.startsWith("damage.prevent") ||
-      candidate.actionTacticSignals.includes("damage_prevention"),
-  )
-    ? 1
-    : 0;
 }
 
 function isRunWindowSemantic(candidate: ActionSemanticCandidate): boolean {
@@ -30590,63 +26783,7 @@ function runnerFullPathCommitmentRequiresEncounterBreak(
   );
 }
 
-function legalActionCreditCost(
-  action: AiDecisionInput["legalActions"][number],
-): number {
-  return action.costs.reduce(
-    (sum, cost) => sum + Math.max(0, cost.credits ?? 0),
-    0,
-  );
-}
-
-function runPurposeForEvaluation(
-  evaluation: RunnerRunTargetEvaluation,
-): "access" | "multiaccess" | "information" | "contest" {
-  if (evaluation.scoreThreat) return "contest";
-  if (
-    evaluation.runCommitment === "probe_only" &&
-    evaluation.accessPayoff === "unknown"
-  ) {
-    return "information";
-  }
-  if (evaluation.multiaccessAvailable) return "multiaccess";
-  if (
-    evaluation.recommendation === "run_if_free" &&
-    (evaluation.knownAccessState === "unknown" ||
-      evaluation.knownAccessState === "fresh")
-  ) {
-    return "information";
-  }
-  return evaluation.targetKind === "remote" ? "contest" : "access";
-}
-
 /** Bound ceiling for an explicitly constrained bonus-capacity probe. */
-const INFORMATION_PROBE_KNOWN_PATH_CREDIT_BUDGET = 1;
-
-function runnerInformationProbeCanUseQuotedPath(
-  evaluation: RunnerRunTargetEvaluation,
-  directlyConvertible: boolean,
-  terminalCentralAccess = false,
-): boolean {
-  if (
-    evaluation.pathPassability !== "reachable" ||
-    (evaluation.routeQuote?.fundingGap ?? 0) > 0
-  ) {
-    return false;
-  }
-  if (
-    terminalCentralAccess ||
-    evaluation.pathCost <= INFORMATION_PROBE_KNOWN_PATH_CREDIT_BUDGET
-  ) {
-    return true;
-  }
-  if (!directlyConvertible) return false;
-  return evaluation.evidence.some(
-    (entry) =>
-      entry === "central_memory_payoff:partial_known" ||
-      entry === "remote_memory_payoff:partial_unknown",
-  );
-}
 
 function currentEncounterHasUnbrokenResolvableDeflector(
   input: AiDecisionInput,
@@ -31611,26 +27748,6 @@ function visibleInstalledCard(input: AiDecisionInput, cardId: string) {
     .find((card) => card.instanceId === cardId);
 }
 
-function visibleRunnerVirusCounters(input: AiDecisionInput): number {
-  const installedCounters = (input.playerView.opponent.rig ?? []).reduce(
-    (sum, card) => sum + (card.counters?.virus ?? 0),
-    0,
-  );
-  const identityCounters =
-    input.playerView.own.identity.counterDisplays?.reduce((sum, display) => {
-      if (display.displayKind !== "virus") return sum;
-      const amount = Math.max(0, Math.floor(display.amount ?? 0));
-      const activeThreshold =
-        display.counterType === "highlighter" ||
-        display.counterType === "garbage" ||
-        display.counterType === "cascade"
-          ? 2
-          : 1;
-      return amount >= activeThreshold ? sum + amount : sum;
-    }, 0) ?? 0;
-  return installedCounters + identityCounters;
-}
-
 function isServerId(value: string): boolean {
   return (
     value === "hq" ||
@@ -32070,15 +28187,6 @@ function corpResidentCentralDefenseHqHoldState(
   };
 }
 
-function uniqueBy<T>(
-  values: readonly T[],
-  keyForValue: (value: T) => string,
-): T[] {
-  return [
-    ...new Map(values.map((value) => [keyForValue(value), value])).values(),
-  ];
-}
-
 function sameScoreProjectMergeFacts(
   left: CorpScoreProjectSignal,
   right: CorpScoreProjectSignal,
@@ -32263,32 +28371,6 @@ function runnerRemoteHasCurrentContestMaterial(
   return (
     (input.playerView.servers.find((server) => server.id === serverId)?.root
       .length ?? 0) > 0
-  );
-}
-
-function runnerCoverageRunTargetHasDifferentialPayoff(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  evaluation: RunnerRunTargetEvaluation,
-  runTargets: readonly RunnerRunTargetEvaluation[],
-): boolean {
-  const candidate = candidates.find(
-    (entry) => entry.actionId === evaluation.actionId,
-  );
-  if (candidate?.semanticActionType !== "play.runner_event") return true;
-  const directRunAvailable = candidates.some(
-    (entry) =>
-      entry.semanticActionType === "run.start" &&
-      entry.runProjectionSummary?.serverId === evaluation.targetServerId,
-  );
-  return (
-    !directRunAvailable ||
-    runnerCardRunHasVisibleDifferentialPayoff(
-      input,
-      candidate,
-      evaluation.targetServerId,
-      runTargets,
-    )
   );
 }
 

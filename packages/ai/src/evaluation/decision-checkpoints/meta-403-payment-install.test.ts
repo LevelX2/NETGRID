@@ -7,7 +7,7 @@ import { visibleSourceDefinitionsByInstanceId } from "../../runtime/visible-sour
 import { runnerPaymentInstallSetups } from "../../plans/runner-payment-install-planning";
 import { searchFundingRoutes } from "../../plans/funding-route";
 import { createRunnerCreditDemand } from "../../plans/credit-demand";
-import { runnerFundingRouteCandidateIsMaterializable } from "../../plans/runner-core-plan-modules";
+import { runnerFundingRouteCandidateIsMaterializable } from "../../plans/runner-funding-candidates";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import {

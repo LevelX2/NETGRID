@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { buildActionSemanticCandidates } from "../action-semantic-candidate";
+import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
 import {
   aiInput,
   legalAction,
   visibleCard,
-} from "../semantic-ai-runtime-cutover.test-support";
-import { runnerActionDispositions } from "./plan-first-live-runtime";
+} from "../../semantic-ai-runtime-cutover.test-support";
+import { runnerActionDispositions } from "../../runtime/plan-first-live-runtime";
 
 describe("recurring-economy deferral of multipurpose coverage hardware", () => {
   it.each([

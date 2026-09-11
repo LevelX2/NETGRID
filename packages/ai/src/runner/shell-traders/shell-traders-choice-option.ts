@@ -3,8 +3,8 @@ import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import {
   rolesHaveBreakerRole,
   rolesHaveUnmatchedBreakerRole,
-} from "./breaker-role-match";
-import { rolesMatch } from "./role-match";
+} from "../../runtime/breaker-role-match";
+import { rolesMatch } from "../../runtime/role-match";
 import { shellTradersTargetValue } from "./shell-traders-action";
 
 type PendingChoice = NonNullable<

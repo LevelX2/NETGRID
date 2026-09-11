@@ -5,9 +5,9 @@ import type {
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
-import { buildActionSemanticCandidates } from "../action-semantic-candidate";
-import type { RunnerCoverageGapSignal } from "../plans/runner-core-plan-modules";
-import type { RunnerStrategicIntentProfile } from "../runner-strategic-intent";
+import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
+import type { RunnerCoverageGapSignal } from "../../plans/runner-coverage-contracts";
+import type { RunnerStrategicIntentProfile } from "../../runner-strategic-intent";
 import {
   assessShellTradersRigReplacement,
   buildRunnerShellTradersPipelineSignals,

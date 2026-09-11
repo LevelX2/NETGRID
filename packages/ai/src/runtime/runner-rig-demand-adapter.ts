@@ -6,7 +6,7 @@ import type {
   BreakerCoverageKind,
   DeckCapabilityProfile,
 } from "../deck-capabilities";
-import type { RunnerCoverageGapSignal } from "../plans/runner-core-plan-modules";
+import type { RunnerCoverageGapSignal } from "../plans/runner-coverage-contracts";
 import { planInstanceIdForProposal } from "../plans/plan-instance";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import type { RunnerStrategicIntentProfile } from "../runner-strategic-intent";

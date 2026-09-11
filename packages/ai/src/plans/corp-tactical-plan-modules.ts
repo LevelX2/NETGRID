@@ -1,33 +1,25 @@
+import { createCorpVirusPressureModule } from "../corp/virus-pressure/virus-pressure-plan-module";
+import type { CorpVirusPressureSignal } from "../corp/virus-pressure/virus-pressure-types";
+import {
+  corpTacticalProposal as proposal,
+  corpTacticalAssessment as assessment,
+  corpTacticalPlanDomain,
+} from "./corp-tactical-module-support";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type { KnownCorpCardAccessEffectProjection } from "../runtime/known-corp-card-access-effect-projection";
 import type { CorpHandInventoryFacts } from "../runtime/corp-hand-inventory-facts";
 import type { CorpDrawAdmissionAssessment } from "../runtime/corp-draw-admission";
-import type {
-  GuaranteeLevel,
-  PlanAssessment,
-  PriorityClass,
-  PriorityClaim,
-  ResourceGap,
-} from "./plan-assessment";
+import type { GuaranteeLevel, ResourceGap } from "./plan-assessment";
 import { planInstanceIdForProposal } from "./plan-instance";
-import type { PlanInstance, PlanProposal } from "./plan-kernel-types";
+import type { PlanInstance } from "./plan-kernel-types";
 import type {
   PlanMaterialization,
   PlanModule,
   PlanSchedulerContext,
 } from "./plan-scheduler";
 import type { CorpCorePlanDomain } from "./corp-core-plan-modules";
-import { PlanResolutionFailure } from "./plan-resolution-failure";
-import type { CorpBluffDefenseNeed } from "./corp-bluff-defense-types";
 
-export type CorpVirusPressureSignal = {
-  pressureId: string;
-  virusCounters: number;
-  strategicDamage: number;
-  critical: boolean;
-  purgeUseful: boolean;
-  evidenceCode: string;
-};
+import type { CorpBluffDefenseNeed } from "./corp-bluff-defense-types";
 
 export type CorpPunishCampaignSignal = {
   campaignId: string;
@@ -238,7 +230,6 @@ export type CorpTacticalPlanDomain = {
 
 export type CorpPlanDomain = CorpCorePlanDomain & CorpTacticalPlanDomain;
 
-type VirusState = { kind: "virus"; signal: CorpVirusPressureSignal };
 type PunishState = {
   kind: "punish_campaign" | "punish_sequence";
   signal: CorpPunishCampaignSignal;
@@ -250,7 +241,7 @@ type HandState = { kind: "hand"; signal: CorpHandManagementSignal };
 
 export function createCorpTacticalPlanModules(): PlanModule[] {
   return [
-    virusModule(),
+    createCorpVirusPressureModule(),
     punishCampaignModule(),
     punishSequenceModule(),
     ambushModule(),
@@ -352,55 +343,6 @@ export function corpPunishCampaignOwnsCandidate(
     candidate.semanticActionType === "choice.resolve" ||
     signal.sourceDefinitionIds.includes(candidate.sourceDefinitionId ?? "")
   );
-}
-
-function virusModule(): PlanModule {
-  return {
-    moduleId: "corp.respond_to_virus_pressure",
-    side: "corp",
-    discover: (context) =>
-      domain(context)
-        .virusPressure.filter(
-          (signal) => signal.purgeUseful && signal.virusCounters > 0,
-        )
-        .map((signal) =>
-          proposal(
-            "corp.respond_to_virus_pressure",
-            signal.pressureId,
-            { kind: "virus", signal } satisfies VirusState,
-            signal.critical ? "P2" : "P5",
-            purgeCandidates(context),
-            signal.evidenceCode,
-            { kind: "capability", id: "runner_virus_pressure" },
-            "recurring_cadence",
-          ),
-        ),
-    assess: (instance, context, portfolio) => {
-      const current = state<VirusState>(instance);
-      return assessment(
-        instance,
-        current.signal.critical ? "P2" : "P5",
-        purgeCandidates(context).length > 0,
-        current.signal.strategicDamage,
-        portfolio.executorInstanceId,
-        "visible_state_forced",
-      );
-    },
-    materialize: (instance, _assessment, context) => ({
-      step: {
-        stepId: `${instance.instanceId}:purge`,
-        capability: {
-          capabilityId: "purge_visible_runner_viruses",
-          semanticActionTypes: [
-            "counter.purge_virus",
-            "counter.purge_runner_virus",
-          ],
-        },
-        purpose: "Remove strategically material visible virus pressure.",
-      },
-      candidates: purgeCandidates(context),
-    }),
-  };
 }
 
 function punishCampaignModule(): PlanModule {
@@ -911,174 +853,6 @@ function handModule(): PlanModule {
   };
 }
 
-function proposal(
-  moduleId: PlanProposal["moduleId"],
-  dedupeKey: string,
-  moduleState: unknown,
-  priorityClass: PriorityClass,
-  candidates: PlanMaterialization["candidates"],
-  evidenceCode: string | readonly string[],
-  target: NonNullable<PlanProposal["target"]>,
-  persistencePolicy: PlanProposal["persistencePolicy"],
-  parentInstanceId?: string,
-  parentNeedId?: string,
-  blockerCode = "no_current_tactical_route",
-  supportable = false,
-): PlanProposal {
-  const ready = candidates.length > 0;
-  return {
-    moduleId,
-    moduleVersion: "1",
-    dedupeKey,
-    side: "corp",
-    strategyLineIds: [],
-    executionClass:
-      priorityClass === "P1" || priorityClass === "P2"
-        ? "urgent_response"
-        : priorityClass === "P3"
-          ? "bounded_sequence"
-          : "development_project",
-    initialViability: ready || supportable ? "ready" : "blocked",
-    persistencePolicy,
-    retentionPolicy: {
-      blockedStateVersionTtl: 3,
-      dormantStateVersionTtl: 4,
-      completedHistoryStateVersionTtl: 4,
-      abandonWhenTargetMissing: false,
-      protectedWhileNeedOpen: true,
-      protectedWhileCommitted: true,
-    },
-    target,
-    ...(parentInstanceId ? { parentInstanceId } : {}),
-    ...(parentNeedId ? { parentNeedId } : {}),
-    phase: modulePhase(moduleState),
-    milestone: "admitted",
-    moduleState: structuredClone(moduleState),
-    blockers:
-      ready || supportable
-        ? []
-        : [
-            {
-              code: blockerCode,
-              owner: "plan_module",
-              removable: true,
-              resumeCondition: { code: "route_becomes_available" },
-            },
-          ],
-    resumeConditions: [{ code: "route_becomes_available" }],
-    completionConditions: [{ code: "domain_goal_satisfied" }],
-    abandonmentConditions: [{ code: "domain_invalidated" }],
-    evidenceRefs: (typeof evidenceCode === "string"
-      ? [evidenceCode]
-      : evidenceCode
-    ).map((code) => ({ code, source: "visible_state" as const })),
-  };
-}
-
-function assessment(
-  instance: PlanInstance,
-  priorityClass: PriorityClass,
-  routeExists: boolean,
-  value: number,
-  executorId: string | undefined,
-  guarantee: GuaranteeLevel,
-  terminalProjection = false,
-  resourceGaps: readonly ResourceGap[] = [],
-): PlanAssessment {
-  const claim: PriorityClaim =
-    priorityClass === "P1"
-      ? {
-          requestedClass: "P1",
-          reasonCode: "terminal_win",
-          horizon: "current_turn",
-          witness: {
-            kind: "terminal_path",
-            evidenceCode: instance.evidenceRefs[0]?.code ?? "terminal",
-            guarantee,
-            target: { kind: "player", id: "runner" },
-          },
-        }
-      : priorityClass === "P2"
-        ? {
-            requestedClass: "P2",
-            reasonCode: "irreversible_threat",
-            horizon: "current_turn",
-            witness: {
-              kind: "irreversible_threat",
-              evidenceCode: instance.evidenceRefs[0]?.code ?? "threat",
-              guarantee,
-            },
-          }
-        : priorityClass === "P3"
-          ? {
-              requestedClass: "P3",
-              reasonCode: "expiring_conversion",
-              horizon: "current_window",
-            }
-          : priorityClass === "P4"
-            ? {
-                requestedClass: "P4",
-                reasonCode: "strategic_campaign",
-                horizon: "multi_turn",
-              }
-            : priorityClass === "P5"
-              ? {
-                  requestedClass: "P5",
-                  reasonCode: "development_need",
-                  horizon: "multi_turn",
-                }
-              : {
-                  requestedClass: "P6",
-                  reasonCode: "neutral_progress",
-                  horizon: "multi_turn",
-                };
-  return {
-    instanceId: instance.instanceId,
-    side: "corp",
-    priorityClaim: claim,
-    intentFit:
-      priorityClass === "P4" || priorityClass === "P5" ? "aligned" : "none",
-    readiness: routeExists
-      ? "executable_now"
-      : resourceGaps.length > 0
-        ? "executable_with_support"
-        : "blocked",
-    feasibility: {
-      currentRouteHeadPossible: routeExists,
-      projectedActionCount: routeExists
-        ? 1
-        : resourceGaps.length > 0
-          ? resourceGaps.length + 1
-          : 0,
-      opponentCanReact: guarantee !== "rules_proven",
-      confidence: guarantee,
-    },
-    resourceGaps: resourceGaps.map((gap) => ({ ...gap })),
-    expectedOutcome: {
-      outcomeKind: terminalProjection
-        ? "terminal_projection"
-        : "domain_progress",
-      minimumValue: routeExists || resourceGaps.length > 0 ? value : 0,
-      expectedValue: routeExists || resourceGaps.length > 0 ? value : 0,
-      maximumValue: routeExists || resourceGaps.length > 0 ? value : 0,
-      terminal: terminalProjection,
-      guarantee,
-    },
-    continuity: {
-      isCurrentForeground: executorId === instance.instanceId,
-      sameObjectiveAsForeground: executorId === instance.instanceId,
-      switchingCost: executorId === instance.instanceId ? 2 : 0,
-      progressAtRisk: executorId === instance.instanceId ? 2 : 0,
-    },
-    blockers:
-      routeExists || resourceGaps.length > 0
-        ? []
-        : structuredClone(instance.blockers),
-    withinClassValue: value,
-    evidenceCodes: instance.evidenceRefs.map((entry) => entry.code),
-  };
-}
-
 function punishCapability(signal: CorpPunishCampaignSignal) {
   if (signal.routeContract?.currentHeadActionId) {
     return {
@@ -1166,18 +940,6 @@ function corpPrepareTargetValue(
     (current) => current.id === target,
   );
   return (server?.ice.length ?? 0) > 0 ? 50 : 10;
-}
-
-function purgeCandidates(
-  context: PlanSchedulerContext,
-): PlanMaterialization["candidates"] {
-  return context.actionCandidates
-    .filter(
-      (candidate) =>
-        candidate.semanticActionType === "counter.purge_virus" ||
-        candidate.semanticActionType === "counter.purge_runner_virus",
-    )
-    .map((candidate) => ({ candidate, stepValue: 1 }));
 }
 
 function ambushSemanticTypes(phase: CorpAmbushSignal["phase"]): string[] {
@@ -1319,32 +1081,7 @@ function candidateTargets(candidate: ActionSemanticCandidate): string[] {
 }
 
 function domain(context: PlanSchedulerContext): CorpPlanDomain {
-  const value = context.domain as CorpPlanDomain | undefined;
-  if (
-    value?.virusPressure &&
-    value.punishCampaigns &&
-    value.ambushes &&
-    value.handManagement
-  )
-    return value;
-  throw new PlanResolutionFailure("missing_plan_module_coverage", {
-    side: context.input.side,
-    stateVersion: context.input.playerView.stateVersion,
-    timingPoint: context.input.playerView.timingPoint,
-    legalActionTypes: context.input.legalActions.map((action) => action.type),
-    owner: "plan_module",
-    removalCondition:
-      "Build the Corp tactical domain before discovering tactical plans.",
-  });
-}
-
-function modulePhase(moduleState: unknown): string {
-  const value = moduleState as Partial<
-    VirusState | PunishState | AmbushState | HandState
-  >;
-  if ("signal" in value && value.signal && "phase" in value.signal)
-    return String(value.signal.phase);
-  return value.kind ?? "execute";
+  return corpTacticalPlanDomain<CorpPlanDomain>(context);
 }
 
 function state<T>(instance: PlanInstance): T {

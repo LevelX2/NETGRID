@@ -9,7 +9,7 @@ import { deriveObservedRemoteNoProgressAccessMemory } from "../../access/access-
 import {
   corpPurgeHasVisibleStrategicPressure,
   corpPurgeImpactScoreComponent,
-} from "../../runtime/corp-purge-impact";
+} from "../../corp/virus-pressure/corp-purge-impact";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import {
   resetResidentPlanPortfolioMemory,

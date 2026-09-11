@@ -3,7 +3,7 @@ import { type AiDecisionInput } from "@netgrid/shared";
 import { matchingBreakerRoleNeedles } from "./breaker-role-match";
 import { boundedSelectionCount } from "./choice-option";
 import { rolesMatch } from "./role-match";
-import { visibleCardCoversRequiredCoverage } from "./runner-search-coverage-need";
+import { visibleCardCoversRequiredCoverage } from "../runner/rig-coverage/runner-search-coverage-need";
 import type { RequiredCapabilityKind } from "../plans/tactical-plan-types";
 import type { AiHintStructuredEffect } from "../hint-ontology";
 import { runnerEffectsProvideNonNoisyBreakerCredits } from "../runner-canonical-hint-semantics";

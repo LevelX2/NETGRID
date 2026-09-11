@@ -184,6 +184,22 @@ Finanzierungslücke bleibt auch bei diesem terminalen Contest verbindlich.
 
 ## 4. `runner.rig_and_coverage`
 
+Der vertikale Owner liegt in `packages/ai/src/runner/rig-coverage/`.
+Die Dateien trennen Lückenbildung (`coverage-signals.ts`), Breaker-Aufrüstung,
+Kosten-Recovery, Search-/Install-/Funding-Unterstützung, Actionzuordnung,
+Dispositionen und exakte Fortsetzungsbindungen (`coverage-bindings.ts`).
+`coverage-plan-module.ts` besitzt die Planphasen und Materialisierung.
+Suchbedarf und Upgrade-Ökonomie liegen ebenfalls in diesem Verzeichnis.
+
+`coverage-services.ts` benennt sieben Dienste: aktuelles Remote-Material,
+bekannten verzögerten ICE-Abgang, direkte Run-Verwertbarkeit, Run-Funding,
+materiellen Zentraldruck, dessen Kadenz und die gemeinsame Funding-Suche.
+Diese Parentbewertungen werden aus der Live-Komposition eingespeist;
+Coverage entscheidet daraus über seine eigene Vorbereitung. Der Owner importiert
+weder die Live-Runtime noch die Core-/Tactical-Registry. Gemeinsame Funding-,
+Rollen-, Quellen- und Run-Payoff-Fakten liegen außerhalb der Registries.
+Die Live-Runtime koordiniert weiterhin Ausschlüsse zwischen mehreren Ownern.
+
 **Klasse:** `development_project` oder dringender `bounded_sequence`
 **Rolle:** Vordergrund/Background je Dringlichkeit
 **Status:** registrierter produktiver Owner; Fähigkeitsgrenzen siehe Einstieg.
@@ -468,6 +484,18 @@ Admission-geprüfte kartenbezogene Planinstanzen ersetzt.
 
 ## 6. `runner.economy`
 
+Der vertikale Owner liegt in `packages/ai/src/runner/economy/`.
+`economy-signals.ts` bildet endliche Zugliquidität und die durch bestehende
+Verbindlichkeiten angepasste Reserve. `installed-card-liquidation.ts` bindet
+die aktuelle Choice und bewertet Erhalt gegen Liquidation;
+`economy-plan-module.ts` prüft den noch materiellen Parent, revalidiert den
+Funding-Vertrag und materialisiert ausschließlich passende Kandidaten.
+Die Signalbildung erhält die gemeinsame Funding-Suche als einen Dienst.
+Bedarfe anderer Pläne entstehen weiterhin bei deren fachlicher Koordination.
+Geteilte Funding-Kriterien liegen in `plans/runner-funding-candidates.ts`,
+Entwicklungszulassung und begrenzte Funding-Meilensteine in
+`plans/runner-development-contracts.ts`; beide sind unabhängig von der Registry.
+
 **Klasse:** je Instanz `bounded_sequence`, `recurring_cycle` oder
 `development_project`
 **Rolle:** Support, Vordergrund oder Background
@@ -534,6 +562,17 @@ solche konvertierbare Zielroute, bleibt der Cashout nicht produktiv; die
 Runtime darf ihn nicht mit allgemeinem „später nützlich“-Wert rechtfertigen.
 
 ## 7. `runner.defense_and_recovery`
+
+Der vertikale Owner liegt in `packages/ai/src/runner/defense-recovery/`.
+`defense-signals.ts` bündelt Schutzinstallationen, Handpuffer, Tag-Clear-
+Funding und Reaktionsreserve. `defense-plan-module.ts` besitzt Phasenwahl,
+Funding-Revalidierung, Priorität und Materialisierung;
+`runner-discard-choice-plan.ts` bindet die Pflichtauswahl an die aktuelle
+Action und Choice. `defense-dispositions.ts` priorisiert verfügbare
+Schutzinstallationen gegenüber Statusbereinigung. Die Live-Runtime reicht
+Funding-Suche und sofortige Run-Verwertbarkeit als zwei benannte Dienste
+ein und koordiniert weiterhin die Ausschlüsse zwischen verschiedenen Plänen.
+Gemeinsam benötigte Handpuffer-Fakten werden aus demselben Owner geliefert.
 
 **Klasse:** `urgent_response`, `bounded_sequence` oder
 `development_project`
@@ -1045,6 +1084,17 @@ Quelle, das vorbereitete Programm-/Hardwareziel und die Phase
 Assessment und Materialisierung verlangen die aktuelle passende Route.
 Fortschritt darf kein wertvolleres Rig opfern; eine nicht gebundene Karte
 wird nicht als Ersatz installiert.
+
+Die vertikale Implementierung liegt in `runner/shell-traders/`, mit
+[`createRunnerShellTradersPipelineModule`](../../../packages/ai/src/runner/shell-traders/shell-traders-plan-module.ts)
+als Einstieg. Signalbildung, Rig-Ersatzbewertung, Zielwert, Start-of-turn-Choice,
+Planstatus und Dispositionen liegen beim Owner. Die Registry registriert nur
+die Factory; Runtime und Choice-Einstieg konsumieren die Ownerfunktionen.
+Coverage-Anforderungen und Rollenabgleich kommen aus dem gemeinsam verwendeten
+`plans/runner-coverage-contracts.ts`. Prioritäten, Zielidentitäten und
+Wirtschaftlichkeitsformeln bleiben unverändert. Damit lässt sich die gesamte
+Installationspipeline verfolgen, ohne ihre Regeln über Registry und Runtime
+verteilt zu bearbeiten; ein zusätzlicher Runtime-Dienst ist nicht nötig.
 
 ## 14. `runner.score_installed_agenda` und `runner.secure_terminal_win`
 

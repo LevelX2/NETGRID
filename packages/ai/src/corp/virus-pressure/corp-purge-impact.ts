@@ -4,10 +4,10 @@ import type {
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
-import { endTheRunSubroutineCount } from "../visible-run-analysis";
-import type { CorpBoardTriage } from "./semantic-runtime-corp-board-triage";
-import { semanticRuntimeCorpCentralPressureAssessment } from "./semantic-runtime-corp-central-pressure";
-import { currentCorpMandatoryDrawCardsPerWindow } from "./corp-scoreline-feasibility";
+import { endTheRunSubroutineCount } from "../../visible-run-analysis";
+import type { CorpBoardTriage } from "../../runtime/semantic-runtime-corp-board-triage";
+import { semanticRuntimeCorpCentralPressureAssessment } from "../../runtime/semantic-runtime-corp-central-pressure";
+import { currentCorpMandatoryDrawCardsPerWindow } from "../../runtime/corp-scoreline-feasibility";
 
 type VisibleVirusCounterCard = {
   card: VisibleCard;

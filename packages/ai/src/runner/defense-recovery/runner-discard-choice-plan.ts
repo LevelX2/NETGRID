@@ -1,16 +1,16 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
-import { AI_HINTS_BY_CARD } from "../ai-hints";
-import type { RunnerDiscardChoiceBinding } from "../plans/runner-core-plan-modules";
-import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
-import { runnerDamageThreatAssessment } from "../runner-damage-threat-assessment";
-import { selectableChoiceOptions } from "./choice-option";
-import { discardOptionInstanceId } from "./discard-choice-option";
+import { AI_HINTS_BY_CARD } from "../../ai-hints";
+import type { RunnerDiscardChoiceBinding } from "./defense-types";
+import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
+import { runnerDamageThreatAssessment } from "../../runner-damage-threat-assessment";
+import { selectableChoiceOptions } from "../../runtime/choice-option";
+import { discardOptionInstanceId } from "../../runtime/discard-choice-option";
 import {
   selectedDiscardChoiceOptionIds,
   type DiscardChoiceKeepScore,
-} from "./discard-choice-selection";
-import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+} from "../../runtime/discard-choice-selection";
+import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 
 type FlatlineRiskLevel = ReturnType<
   typeof runnerDamageThreatAssessment

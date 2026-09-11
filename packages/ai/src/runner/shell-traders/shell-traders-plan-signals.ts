@@ -1,16 +1,16 @@
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 
-import type { ActionSemanticCandidate } from "../action-semantic-candidate";
-import { delayedInstallAbilityForAction } from "../actions/delayed-install-action";
-import { rolesForDeckDoctrineCard } from "../deck-doctrine-card-roles";
+import type { ActionSemanticCandidate } from "../../action-semantic-candidate";
+import { delayedInstallAbilityForAction } from "../../actions/delayed-install-action";
+import { rolesForDeckDoctrineCard } from "../../deck-doctrine-card-roles";
+import { type RunnerShellTradersPipelineSignal } from "./shell-traders-types";
 import {
   runnerRolesCoverCoverageGap,
   type RunnerCoverageGapSignal,
-  type RunnerShellTradersPipelineSignal,
-} from "../plans/runner-core-plan-modules";
-import type { RunnerHandDevelopmentEvaluation } from "../runner/hand-development/runner-hand-development-types";
-import type { RunnerStrategicIntentProfile } from "../runner-strategic-intent";
+} from "../../plans/runner-coverage-contracts";
+import type { RunnerHandDevelopmentEvaluation } from "../hand-development/runner-hand-development-types";
+import type { RunnerStrategicIntentProfile } from "../../runner-strategic-intent";
 import { shellTradersTargetValue } from "./shell-traders-action";
 
 const SHELL_TRADERS_DEFINITION_ID = "onr_v1_176_the-shell-traders" as const;

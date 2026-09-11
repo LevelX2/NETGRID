@@ -27,7 +27,7 @@ import {
   type PlanRouteStep,
   type SemanticContinuation,
 } from "./plan-route";
-import { runnerCoveragePlanHandDisposition } from "./runner-core-plan-modules";
+import { runnerCoveragePlanHandDisposition } from "../runner/rig-coverage/coverage-plan-module";
 import { runnerDelayedInstallReplanningBoundary } from "./runner-delayed-install-replanning-boundary";
 import {
   buildRunnerTurnPlanningCoverageReport,

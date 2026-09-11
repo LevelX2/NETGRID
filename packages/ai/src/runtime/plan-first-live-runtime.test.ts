@@ -52,12 +52,12 @@ import { corpClassicDeflectorDefenseChoiceSignal } from "../plans/corp-core-plan
 import type { RunnerRestrictedProgramInstallSequenceCommitment } from "../plans/runner-tactical-plan-modules";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import {
-  reconcileRunnerCoverageRequesterBindings,
   reconcileSelectedTurnPlannerActionDispositions,
   runnerActionDispositions,
   runnerCentralPressureHasExecutableEventRun,
   runnerDelegatedFundingActionIds,
 } from "./plan-first-live-runtime";
+import { reconcileRunnerCoverageRequesterBindings } from "../runner/rig-coverage/coverage-bindings";
 import { createSemanticRuntimeDecisionContext } from "./semantic-runtime-decision-context";
 import type { SemanticRuntimeDecisionContextDependencies } from "./semantic-runtime-decision-context";
 import { selectedChoicesForDecision } from "./selected-choices-for-decision";
