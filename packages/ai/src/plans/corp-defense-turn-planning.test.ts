@@ -14,7 +14,7 @@ import type { ActionSemanticCandidate } from "../action-semantic-candidate-types
 import {
   assessFundingOnlyIceStaging,
   buildCorpDefenseTurnPlanningSlice,
-} from "./corp-defense-turn-planning";
+} from "../corp/defense/corp-defense-turn-planning";
 import { buildPlanningStateIdentity } from "./turn-planning-contracts";
 
 describe("Corp defense/economy turn-planning vertical slice", () => {

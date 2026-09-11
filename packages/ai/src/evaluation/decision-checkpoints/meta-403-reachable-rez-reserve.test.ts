@@ -12,7 +12,7 @@ import type { AiRuntimeCheckpointV1 } from "./runtime-checkpoint";
 import { costProfileForAction } from "../../actions/action-cost-timing";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 
-import { corpGlobalDefenseInstallRouteAssessment } from "../../plans/corp-defense-domain-signals";
+import { corpGlobalDefenseInstallRouteAssessment } from "../../corp/defense/corp-defense-domain-signals";
 
 describe("meta 403 reachable central rez reserve", () => {
   it.each([

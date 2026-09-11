@@ -27,14 +27,18 @@ import {
 } from "./plan-assessment";
 import {
   CORP_CORE_ACTION_OWNERSHIP,
+  corpCoreActionOwner,
+  createCorpCorePlanModules,
+} from "./corp-core-plan-modules";
+import {
   corpAgendaPurgeDefenseChoiceSignal,
   corpClassicDeflectorDefenseChoiceSignal,
-  corpCoreActionOwner,
+} from "../corp/defense/defense-choice-signals";
+import {
   corpDefenseActionDispositions,
   corpDefensePortfolioHasExecutableRoute,
   corpDefensePlacementDispositions,
-  createCorpCorePlanModules,
-} from "./corp-core-plan-modules";
+} from "../corp/defense/defense-plan-module";
 import { instantiatePlanProposal } from "./plan-instance";
 import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
 import { bindBestCurrentPlanRoute } from "./plan-route";

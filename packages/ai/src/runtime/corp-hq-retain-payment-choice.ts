@@ -1,6 +1,6 @@
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 
-import { quoteCorpDefensePackageRetention } from "./corp-defense-package-retention";
+import { quoteCorpDefensePackageRetention } from "../corp/defense/corp-defense-package-retention";
 import { discardOptionInstanceId } from "./discard-choice-option";
 
 type PendingChoice = NonNullable<

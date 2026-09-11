@@ -1,5 +1,5 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
-import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
+import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 
 /** Facts and valuation for the existing corp.defend_servers owner. */
 export function assessCorpPaidEncounterDefense(

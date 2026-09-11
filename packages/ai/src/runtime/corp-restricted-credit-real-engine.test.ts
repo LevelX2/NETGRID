@@ -21,8 +21,8 @@ import { buildAiDecisionInput } from "./ai-decision-input";
 import { buildAiDecisionInputDto } from "../input-dto";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import standardDeckCatalog from "../../../../data/decks/standard-deck-catalog-1.0.0.json";
-import { corpRestrictedRezDefenseSignals } from "./corp-restricted-rez-defense";
-import { allocateCorpCentralDefenseFromAiFacts } from "./corp-central-defense-facts-adapter";
+import { corpRestrictedRezDefenseSignals } from "../corp/defense/corp-restricted-rez-defense";
+import { allocateCorpCentralDefenseFromAiFacts } from "../corp/defense/corp-central-defense-facts-adapter";
 import { corpRestrictedRezPreparationCandidates } from "./corp-restricted-credit-reserve";
 
 const CONTRACT = "onr_proteus_059_government-contract";

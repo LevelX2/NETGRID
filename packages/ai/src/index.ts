@@ -295,7 +295,7 @@ export {
   type CorpDefenseLineDisposition,
   type CorpDefenseTurnPlanningLine,
   type CorpDefenseTurnPlanningSlice,
-} from "./plans/corp-defense-turn-planning";
+} from "./corp/defense/corp-defense-turn-planning";
 export {
   buildCorpAgendaTurnPlanningSlice,
   campaignDisposition,

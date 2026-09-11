@@ -14,7 +14,7 @@ import {
   corpDefenseActionDispositions,
   corpDefenseMaterializedActionIds,
   corpDefensePortfolioHasExecutableRoute,
-} from "./corp-core-plan-modules";
+} from "../corp/defense/defense-plan-module";
 import {
   corpAmbushAdvanceDispositionEvidence,
   corpCandidateIsAmbushInstall,
@@ -28,7 +28,7 @@ import {
   corpGlobalDefenseInstallRouteAssessment,
   corpIceInstallHasCurrentCompleteRezQuote,
   type CorpDefenseDomainSignalFacts,
-} from "./corp-defense-domain-signals";
+} from "../corp/defense/corp-defense-domain-signals";
 import { corpSameTurnScoreConversionPaths } from "./tactical-plan-corp-score-conversion";
 import type { PlanActionDisposition } from "./plan-scheduler";
 import { planInstanceIdForProposal } from "./plan-instance";

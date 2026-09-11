@@ -185,8 +185,8 @@ Ambush und reicht die entdeckten Ambush-Fakten zur Score-Reconciliation zurück.
 Anschließend komponiert sie die verbleibenden Defense-, Economy- und Handbedarfe.
 Es entsteht kein zweiter Planvergleich außerhalb des Schedulers/TurnPlanners.
 
-`runtime/corp-score-protection-routes.ts` und
-`runtime/corp-defense-layer-certification.ts` bleiben Schutzdienste außerhalb
+`corp/defense/corp-score-protection-routes.ts` und
+`corp/defense/corp-defense-layer-certification.ts` bleiben Schutzdienste außerhalb
 des Score-Owners. Sie bewerten konkrete Defense-Routen; Score liefert seine
 Agenda, Deadline und Schutzziele. Die vorhandene Scoreline-Vorprojektion bleibt
 ein ausdrücklich konsumierter Dienst. Gemeinsame sichtbare Agenda- und exakte
@@ -374,13 +374,31 @@ Unter `packages/ai/src/corp/scoring-remote/` liegen:
 - `scoring-remote-plan-module.ts`: Discovery, Assessment und Support-Step.
 
 Das verfügbare Rez-Budget kommt aus
-`runtime/corp-defense-remote-rez-budget.ts`; globale Central-Allokation bleibt
+`corp/defense/corp-defense-remote-rez-budget.ts`; globale Central-Allokation bleibt
 außerhalb dieses Owners. Die bestehende Reifebewertung unter
 `runtime/corp-remote-maturity-assessment.ts` bleibt ein gemeinsamer gequoteter
 Projektionsdienst. Das Remote-Modul besitzt weiterhin keine eigene ICE-,
 Agenda- oder Assetaktion. Sein Step fordert den gebundenen Provider an.
 
 ## 4. `corp.defend_servers`
+
+### Vertikale Implementierung
+
+[`defenseModule`](../../../packages/ai/src/corp/defense/defense-plan-module.ts)
+ist der Einstieg in `corp/defense/`. Der Owner bündelt globale Central-Allokation,
+Schutzrouten, Planphasen, Assessment, Dispositionen und exakte Validierung.
+`defense-discovery.ts` bildet residente Defense-Fakten, Schutzunterstützung für
+Score und die aktuellen Defense-Needs in derselben Reihenfolge wie die bisherige
+Runtime. `defense-memory.ts` bindet Draw-Versuche und HQ-Halteentscheidungen.
+`defense-run-response.ts` besitzt aktuelle Rez- und Encounterbewertungen;
+Choice-Signale, Fortsetzungen und Payload-Bindungen liegen ebenfalls hier.
+
+Score, Remote und Ambush liefern weiterhin ihre typisierten Projekte und Bedarfe.
+Die Live-Runtime komponiert diese Schritte; sie importiert den Owner, der keine
+Runtime-Dispatcher oder Planregistries zurückimportiert. Geteilte Defense- und
+Funding-Vertragstypen bleiben unter `plans/`, reine Engine-Quote-/Pfadprojektionen
+bleiben wiederverwendbare Dienste. Die 25 registrierten Module, Prioritäten und
+Entscheidungsregeln bleiben unverändert.
 
 Aktuelle Passgebühren gehören als Rez-Response diesem Owner. Die Engine
 bindet den Root-Rez an Action, StateVersion, Run und Server und liefert die
@@ -852,7 +870,7 @@ liegen ebenfalls im Owner. Typen stehen in `economy-types.ts`.
 
 Score-Reserve und Defense-Funding bleiben fremde Fachverträge in
 `corp/score/corp-score-funding.ts`, `plans/corp-defense-funding-contract.ts`
-und `runtime/corp-defense-funding-facts.ts`. Economy erhält aktuelle
+und `corp/defense/corp-defense-funding-facts.ts`. Economy erhält aktuelle
 Parent-/Need-/Provider-Bindungen und bestimmt daraus seine Finanzierungsroute;
 es bewertet weder eigene Agenda-Ziele noch globale ICE-Allokation.
 

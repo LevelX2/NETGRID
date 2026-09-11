@@ -1,20 +1,20 @@
-import { corpEconomyCandidateHasExecutablePayload } from "../corp/economy/economy-routes";
-import type { CorpEconomyNeedSignal } from "../corp/economy/economy-types";
+import { corpEconomyCandidateHasExecutablePayload } from "../economy/economy-routes";
+import type { CorpEconomyNeedSignal } from "../economy/economy-types";
 import type {
   CorpDefenseSignal,
   CorpGenericDefenseSignal,
   CorpScoreProtectionDrawSignal,
   CorpScoreProtectionInstallSignal,
   CorpScoreProtectionStagingInstallSignal,
-} from "./corp-defense-contracts";
+} from "../../plans/corp-defense-contracts";
 import type { AiDecisionInput } from "@netgrid/shared";
 
-import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 
-import type { PriorityClass } from "./plan-assessment";
-import { planInstanceIdForProposal } from "./plan-instance";
-import { assessFundingOnlyIceStaging } from "../runtime/corp-defense-staging-policy";
-export { assessFundingOnlyIceStaging } from "../runtime/corp-defense-staging-policy";
+import type { PriorityClass } from "../../plans/plan-assessment";
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
+import { assessFundingOnlyIceStaging } from "./corp-defense-staging-policy";
+export { assessFundingOnlyIceStaging } from "./corp-defense-staging-policy";
 import {
   buildCanonicalLegalActionInvocation,
   turnPlanningFingerprint,
@@ -22,7 +22,7 @@ import {
   type CampaignValueClaim,
   type CanonicalLegalActionInvocation,
   type PlanningStateIdentity,
-} from "./turn-planning-contracts";
+} from "../../plans/turn-planning-contracts";
 
 export const CORP_DEFENSE_TURN_SLICE_VERSION =
   "corp-defense-turn-slice-v1" as const;

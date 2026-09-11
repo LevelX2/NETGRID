@@ -4,8 +4,8 @@ import { describe, expect, it } from "vitest";
 import {
   corpDefenseActionDispositions,
   corpDefenseMaterializedActionIds,
-  createCorpCorePlanModules,
-} from "../../plans/corp-core-plan-modules";
+} from "../../corp/defense/defense-plan-module";
+import { createCorpCorePlanModules } from "../../plans/corp-core-plan-modules";
 import { instantiatePlanProposal } from "../../plans/plan-instance";
 import {
   checkpointDefenseCandidate,

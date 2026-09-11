@@ -12,7 +12,7 @@ import type {
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { assessRunnerDevelopmentCashOutAdmission } from "../../runtime/runner-development-cashout-admission";
 import { assessRunnerRunFundingAdmission } from "../../runtime/runner-run-funding-admission";
-import { runnerDefinitionRequiresTargetedBypassPlan } from "../../runtime/runner-targeted-bypass-plan";
+import { runnerDefinitionRequiresTargetedBypassPlan } from "../run-window/runner-targeted-bypass-plan";
 import { runnerNoRunRecurringEconomyProfile } from "../../runtime/runner-canonical-card-facts";
 import { createRunnerCreditDemand } from "../../plans/credit-demand";
 import { searchFundingRoutes } from "../../plans/funding-route";

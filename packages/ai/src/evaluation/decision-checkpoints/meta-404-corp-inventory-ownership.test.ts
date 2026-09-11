@@ -3,7 +3,7 @@ import checkpoint from "../../../../../data/scenarios/ai-decision-checkpoints/cp
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
-import { readKnownCorpCentralAgendaThreat } from "../../runtime/corp-central-defense-facts-adapter";
+import { readKnownCorpCentralAgendaThreat } from "../../corp/defense/corp-central-defense-facts-adapter";
 import {
   restoreAiRuntimeCheckpoint,
   type AiRuntimeCheckpointV1,

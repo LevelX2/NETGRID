@@ -5,7 +5,7 @@ import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 
-import { corpBluffDefenseNeed } from "../../plans/corp-bluff-defense";
+import { corpBluffDefenseNeed } from "../defense/corp-bluff-defense";
 
 /** Mechanical profile only. No remote damage is inferred from central access. */
 export function corpAccessZonePreparationProfile(definitionId: string) {

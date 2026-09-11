@@ -3,7 +3,7 @@ import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import {
   runnerRunStartRandomStrengthSourceProfile,
   runnerRunStartTrashSourceProfile,
-} from "./runner-canonical-card-facts";
+} from "../../runtime/runner-canonical-card-facts";
 
 type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]

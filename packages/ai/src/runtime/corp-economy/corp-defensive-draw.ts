@@ -10,7 +10,7 @@ import { RUNTIME_CARDS } from "../../ai-hints";
 import type { AiDeckStrategyDeckSnapshot } from "../../deck-strategy-snapshot";
 import type { CorpBoardTriage } from "../semantic-runtime-corp-board-triage";
 import type { CorpFundedRemoteAccessRiskNeed } from "../corp-funded-score-protection";
-import type { CorpCentralDefenseAllocation } from "../corp-central-defense-allocation";
+import type { CorpCentralDefenseAllocation } from "../../corp/defense/corp-central-defense-allocation";
 import type { CorpRestrictedRezPreparation } from "../corp-restricted-credit-reserve";
 import {
   assessCorpScoreProtection,

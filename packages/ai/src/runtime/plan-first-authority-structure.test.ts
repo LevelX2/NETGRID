@@ -16,6 +16,8 @@ const readSource = (...segments: string[]): string =>
   readFileSync(path.join(srcDir, ...segments), "utf8");
 
 const extractedOwnerSources = [
+  ["corp", "defense"],
+  ["runner", "run-window"],
   ["corp", "punish"],
   ["corp", "hand-management"],
   ["corp", "economy"],
@@ -245,13 +247,14 @@ describe("plan-first live authority structure", () => {
       "plan-first-live-runtime.ts",
     );
     const reserveSource = readSource(
-      "runtime",
+      "corp",
+      "defense",
       "corp-defense-funding-facts.ts",
     );
     const economySignals = readSource("corp", "economy", "economy-signals.ts");
     expect(reserveSource).toContain("export function corpDefenseReserveNeeds(");
     expect(economySignals).toContain(
-      'from "../../runtime/corp-defense-funding-facts";',
+      'from "../defense/corp-defense-funding-facts";',
     );
     expect(economySignals).toContain("corpDefenseReserveNeeds(");
     expect(
@@ -282,14 +285,15 @@ describe("plan-first live authority structure", () => {
       "conditional-defense-followup-quote.ts",
     );
     const planFirstRuntime = readSource(
-      "runtime",
-      "plan-first-live-runtime.ts",
+      "corp",
+      "defense",
+      "defense-run-response.ts",
     );
     const assessmentStart = planFirstRuntime.indexOf(
       "function corpFortRunRezSupportAssessment(",
     );
     const assessmentEnd = planFirstRuntime.indexOf(
-      "\ntype CorpExactCardRezSupportAssessment",
+      "\nexport function corpExactCardRezSupportAssessment",
       assessmentStart,
     );
 

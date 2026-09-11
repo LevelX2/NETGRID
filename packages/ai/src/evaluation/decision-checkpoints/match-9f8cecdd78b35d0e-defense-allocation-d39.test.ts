@@ -3,11 +3,11 @@ import { describe, expect, it } from "vitest";
 import {
   corpDefenseActionDispositions,
   corpDefenseMaterializedActionIds,
-} from "../../plans/corp-core-plan-modules";
+} from "../../corp/defense/defense-plan-module";
 import {
   allocateCorpCentralDefense,
   type CorpCentralDefenseFacts,
-} from "../../runtime/corp-central-defense-allocation";
+} from "../../corp/defense/corp-central-defense-allocation";
 import {
   checkpointDefenseCandidate,
   checkpointDefenseContext,

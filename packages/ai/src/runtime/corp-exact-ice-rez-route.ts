@@ -10,7 +10,7 @@ import {
   compareExactProbabilities,
   type KnownCorpScoreProtectionAssessment,
 } from "./corp-score-protection-assessment";
-import { readKnownCorpCentralAgendaThreat } from "./corp-central-defense-facts-adapter";
+import { readKnownCorpCentralAgendaThreat } from "../corp/defense/corp-central-defense-facts-adapter";
 import { visibleCorpIceDefenseProfile } from "./semantic-runtime-corp-effective-defense";
 import type { CorpBluffDefenseNeed } from "../plans/corp-bluff-defense-types";
 

@@ -6,7 +6,7 @@ import {
   runnerActionRequiresTargetedBypassPlan,
   type RunnerTargetedBypassChoiceContinuation,
   type RunnerTargetedBypassCommitment,
-} from "../runtime/runner-targeted-bypass-plan";
+} from "../runner/run-window/runner-targeted-bypass-plan";
 import {
   runnerActionRequiresTargetedIceTrashPlan,
   type RunnerTargetedIceTrashChoiceContinuation,

@@ -1,15 +1,15 @@
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
-import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
-import { corpRemoteHasEngineQuotedFundableScoreFriction } from "../corp/score/corp-score-defense-continuity";
-import { type CorpScoreProjectSignal } from "../plans/corp-score-contracts";
+import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
+import { corpRemoteHasEngineQuotedFundableScoreFriction } from "../score/corp-score-defense-continuity";
+import { type CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import {
   assessEngineCertifiedPostRezIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,
-} from "../visible-run-analysis";
-import { corpEffectiveDefenseActivationCredits } from "./corp-exact-ice-rez-route";
-import { assessCorpScoreRushRisk } from "./corp-score-rush-risk";
-import { isFiniteNonNegativeInteger } from "./exact-action-cost-facts";
-import { visiblePreparedRunnerBreakerCandidates } from "./corp-score-protection-assessment";
+} from "../../visible-run-analysis";
+import { corpEffectiveDefenseActivationCredits } from "../../runtime/corp-exact-ice-rez-route";
+import { assessCorpScoreRushRisk } from "../../runtime/corp-score-rush-risk";
+import { isFiniteNonNegativeInteger } from "../../runtime/exact-action-cost-facts";
+import { visiblePreparedRunnerBreakerCandidates } from "../../runtime/corp-score-protection-assessment";
 type CorpCertifiedDefenseLayer = Readonly<{
   iceInstanceId: string;
   credits: number;

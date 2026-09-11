@@ -8,7 +8,7 @@ import { runnerTurnLiquidityCandidateIsMaterializable } from "../../plans/runner
 import { type CreateSideCreditDemandParams } from "../../plans/credit-demand";
 import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import { runnerStrategicExchangeRequiresBoundParent } from "../../runtime/runner-strategic-exchange";
-import { runnerGenericDevelopmentMayOwnAction } from "../../runtime/runner-targeted-bypass-plan";
+import { runnerGenericDevelopmentMayOwnAction } from "../run-window/runner-targeted-bypass-plan";
 import type {
   RunnerFundingNeedSignal,
   RunnerFundingRouteContract,

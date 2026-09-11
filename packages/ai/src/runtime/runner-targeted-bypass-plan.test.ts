@@ -16,14 +16,14 @@ import {
   isRunnerTargetedBypassHideChoice,
   selectedRunnerTargetedBypassChoiceOptionId,
   selectedRunnerTargetedBypassHideChoiceOptionId,
-} from "./runner-targeted-bypass-choice";
+} from "../runner/run-window/runner-targeted-bypass-choice";
 import {
   runnerActionRequiresTargetedBypassPlan,
   runnerDefinitionRequiresTargetedBypassPlan,
   runnerGenericDevelopmentMayOwnAction,
   runnerTargetedBypassPlanCommitment,
   type RunnerTargetedBypassChoiceContinuation,
-} from "./runner-targeted-bypass-plan";
+} from "../runner/run-window/runner-targeted-bypass-plan";
 import { socialEngineeringCorpGuessAmount } from "./bid-choice-option";
 import { bindSelectedRunnerTargetedBypassChoiceContinuation } from "../run-analysis/runner-run-preparation-choice-binding";
 import { selectedChoicesForDecision } from "./selected-choices-for-decision";

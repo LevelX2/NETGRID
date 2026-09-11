@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
-import { assessRunnerAdditionalAccessRunWindowAction } from "../runtime/runner-run-window-additional-access";
+import { assessRunnerAdditionalAccessRunWindowAction } from "../runner/run-window/runner-run-window-additional-access";
 
 describe("Proteus R&D Mole plan-first run-window coverage", () => {
   it("converts its exact funded R&D multiaccess action before continue", () => {

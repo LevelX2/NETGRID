@@ -1,4 +1,4 @@
-import type { CorpScoreProjectSignal } from "../plans/corp-score-contracts";
+import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import type {
   AiDecisionInput,
   VisibleCard,
@@ -8,11 +8,11 @@ import type {
 import {
   assessCorpScoreProtection,
   type KnownCorpScoreProtectionAssessment,
-} from "./corp-score-protection-assessment";
+} from "../../runtime/corp-score-protection-assessment";
 import {
   readExactCurrentInstalledCorpIceRezQuote,
   type CorpExactIceRezRouteProjection,
-} from "./corp-exact-ice-rez-route";
+} from "../../runtime/corp-exact-ice-rez-route";
 
 export type CorpDefenseScoreReserveAssessment = Readonly<{
   preservesReserve: boolean;

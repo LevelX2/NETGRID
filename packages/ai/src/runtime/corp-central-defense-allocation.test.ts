@@ -5,7 +5,7 @@ import {
   corpCentralDefenseHqAgendaExposureIsDeadline,
   type CorpCentralDefenseAllocationInput,
   type CorpCentralDefenseFacts,
-} from "./corp-central-defense-allocation.js";
+} from "../corp/defense/corp-central-defense-allocation.js";
 
 function central(
   serverId: "hq" | "rd",

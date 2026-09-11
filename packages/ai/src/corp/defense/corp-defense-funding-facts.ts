@@ -1,11 +1,11 @@
 import { type AiDecisionInput } from "@netgrid/shared";
-import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
-import { type CorpCorePlanDomain } from "../plans/corp-core-plan-contracts";
-import { type CorpDefenseSignal } from "../plans/corp-defense-contracts";
-import { knownInstallRouteHasUsefulEffectBlockedByFunding } from "../plans/corp-defense-domain-signals";
-import { corpGenericDefensePriorityClass } from "../plans/corp-defense-funding-contract";
-import { planInstanceIdForProposal } from "../plans/plan-instance";
-import { corpRestrictedRezPreparationCandidates } from "./corp-restricted-credit-reserve";
+import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
+import { type CorpCorePlanDomain } from "../../plans/corp-core-plan-contracts";
+import { type CorpDefenseSignal } from "../../plans/corp-defense-contracts";
+import { knownInstallRouteHasUsefulEffectBlockedByFunding } from "./corp-defense-domain-signals";
+import { corpGenericDefensePriorityClass } from "../../plans/corp-defense-funding-contract";
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
+import { corpRestrictedRezPreparationCandidates } from "../../runtime/corp-restricted-credit-reserve";
 
 export function corpDefenseReserveNeeds(
   input: AiDecisionInput,

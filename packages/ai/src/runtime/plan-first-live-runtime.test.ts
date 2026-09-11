@@ -49,7 +49,7 @@ import {
 } from "../plans/resident-plan-portfolio-memory";
 import { instantiatePlanProposal } from "../plans/plan-instance";
 import type { PlanInstance } from "../plans/plan-kernel-types";
-import { corpClassicDeflectorDefenseChoiceSignal } from "../plans/corp-core-plan-modules";
+import { corpClassicDeflectorDefenseChoiceSignal } from "../corp/defense/defense-choice-signals";
 
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import {
@@ -72,7 +72,7 @@ import {
   restoreAiRuntimeCheckpoint,
 } from "../evaluation/decision-checkpoints/runtime-checkpoint";
 import { withEffectiveRunQuote } from "../effective-run-quote.test-support";
-import { allocateCorpCentralDefenseFromAiFacts } from "./corp-central-defense-facts-adapter";
+import { allocateCorpCentralDefenseFromAiFacts } from "../corp/defense/corp-central-defense-facts-adapter";
 import { visibleCorpIceDefenseProfile } from "./semantic-runtime-corp-effective-defense";
 import { assessKnownRezzedIcePath } from "../visible-run-analysis";
 import {
