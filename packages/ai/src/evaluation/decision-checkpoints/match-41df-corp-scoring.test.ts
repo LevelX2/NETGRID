@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
-import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
+import { resetResidentPlanPortfolioMemory, restoreResidentPlanPortfolioMemorySnapshot } from "../../plans/resident-plan-portfolio-memory";
 import { restoreAiRuntimeCheckpoint, type AiRuntimeCheckpointV1 } from "./runtime-checkpoint";
 
 type Replay = {
@@ -41,7 +41,7 @@ describe("match 41df Corp scoring", () => {
 
   it.each([19, 89, 91, 127, 172, 176, 210])("records current legal selection at D%i", (index) => {
     const { input, decision } = decide(index);
-    
+
     expect(input.legalActions.some((action) => action.actionId === decision.actionId)).toBe(true);
   });
 
@@ -57,5 +57,19 @@ describe("match 41df Corp scoring", () => {
     const { decision } = decide(13);
     expect(decision.actionId).toBe("corp.gain_credit");
     expect(decision.reasonCode).toBe("plan_first.corp.economy");
+  });
+
+  it.each([false, true])("continues the installed agenda at D91 with live commitment = %s", (live) => {
+    const replay = capture(91);
+    const input = replay.input;
+    restoreAiRuntimeCheckpoint(input, input.ownDeckSnapshot!.deckSnapshotId, replay.runtime);
+    if (live) {
+      expect(replay.runtime.residentPlanPortfolio?.turnPlanCommitment).toBeDefined();
+      restoreResidentPlanPortfolioMemorySnapshot(input, replay.runtime.residentPlanPortfolio);
+    }
+    const decision = chooseAiAction(input);
+    const selected = input.legalActions.find(action => action.actionId === decision.actionId)!;
+    expect(selected.type).toBe("advance_card");
+    expect(decision.reasonCode).toBe("plan_first.corp.score_agenda");
   });
 });
