@@ -1,3 +1,9 @@
+import {
+  runnerRolesCoverCoverageGap,
+  type RunnerCoverageGapSignal,
+} from "./runner-coverage-contracts";
+import type { RunnerShellTradersPipelineSignal } from "../runner/shell-traders/shell-traders-types";
+import { createRunnerShellTradersPipelineModule } from "../runner/shell-traders/shell-traders-plan-module";
 import type { RunnerInstalledAgendaScoreSignal } from "../runner/installed-agenda/installed-agenda-types";
 import { createRunnerInstalledAgendaScoreModule } from "../runner/installed-agenda/installed-agenda-plan-module";
 import type {
@@ -39,103 +45,6 @@ import type {
   RunnerHandDevelopmentRole,
   RunnerHandDevelopmentStrategicFit,
 } from "../runner/hand-development/runner-hand-development-types";
-
-export type RunnerCoverageGapSignal = {
-  gapId: string;
-  needKind?:
-    | "missing_coverage"
-    | "cost_ineffective_coverage"
-    | "coverage_upgrade";
-  requiredRole:
-    | "breaker_wall"
-    | "breaker_code_gate"
-    | "breaker_sentry"
-    | "breaker_ap"
-    | "breaker_trace"
-    | "breaker_universal";
-  targetServerId?: string;
-  targetRunActionId?: string;
-  requesterModuleId?: "runner.pressure_central" | "runner.contest_remote";
-  requesterPlanInstanceId?: string;
-  requesterNeedId?: string;
-  priorityClass: "P2" | "P4" | "P5";
-  evidenceCode: string;
-  deckHasAnswer: boolean;
-  answerInHand: boolean;
-  answerInstallCost?: number;
-  installActionIds?: string[];
-  installActionValues?: Record<string, number>;
-  preparationActionIds?: string[];
-  memorySupportActionIds?: string[];
-  fundingGap?: number;
-  sameTurnRunConversion?: {
-    targetRunActionId: string;
-    requiredCredits: number;
-    requiredClicksAfterFunding: number;
-    projectedKnownPathCost: number;
-    postRunCreditFloor: number;
-    installProjection:
-      | "current_legal_action"
-      | "card_spec_requires_rematerialization";
-  };
-  currentKnownPathCost?: number;
-  currentPathFundingGap?: number;
-  recoveryMode?:
-    | "install_visible_answer"
-    | "search_known_alternative"
-    | "draw_for_known_role"
-    | "install_visible_upgrade"
-    | "search_known_upgrade";
-  recoveryEvidenceCodes?: string[];
-  upgradeQuote?: {
-    schemaVersion: "runner-breaker-upgrade-economic-quote-v2";
-    targetDefinitionId: string;
-    currentKnownPathCost: number;
-    projectedKnownPathCost: number;
-    savingsPerRun: number;
-    plannedRunHorizon: number;
-    grossRunSavings: number;
-    upfrontCreditCost: number;
-    totalInvestment: number;
-    netValueBeforeSafetyMargin: number;
-    requiredNetSafetyMargin: number;
-    projectedLiquidCreditsAfterUpgradeAndRun: number;
-    desiredCreditReserve: number;
-    memoryAvailable: number;
-    memorySupportAdditionalMu: number;
-    memorySupportCreditCost: number;
-    memorySupportActionClicks: number;
-    projectedMemoryAvailable: number;
-    candidateMemoryCost: number;
-  };
-  fundingActionIds: string[];
-  directSearchActionIds: string[];
-  directSearchChoiceBindings?: Array<{
-    actionId: string;
-    sourceCardInstanceId: string;
-    sourceDefinitionId: string;
-    resolvedSearchChoice?: {
-      choiceId: string;
-      choiceSource: string;
-      stateVersion: number;
-    };
-    targetCardInstanceId?: string;
-    targetDefinitionId?: string;
-    installMemorySacrificeBinding?: {
-      targetCardInstanceId: string;
-      targetMemoryCost?: number;
-      requiredMemoryToFree: number;
-      selectedCards: Array<{
-        cardInstanceId: string;
-        memoryCost: number;
-      }>;
-    };
-  }>;
-  programInstallMemoryRejectedActionIds?: string[];
-  rejectedSearchActionIds?: string[];
-  searchEngineSetupActionIds: string[];
-  drawForAnswerActionIds: string[];
-};
 
 export type RunnerDefenseSignals = {
   activeTags: number;
@@ -217,39 +126,6 @@ export type RunnerInstalledCardLiquidationChoiceSignal = {
   }>;
   priorityClass: "P4";
   value: number;
-  evidenceCodes: string[];
-};
-
-export type RunnerShellTradersPipelineSignal = {
-  pipelineId: string;
-  phase: "prepare" | "progress" | "hold";
-  sourceCardInstanceId: string;
-  sourceDefinitionId: "onr_v1_176_the-shell-traders";
-  targetCardInstanceId: string;
-  targetDefinitionId: string;
-  targetCardType: "program" | "hardware";
-  actionIds: string[];
-  rejectedActionIds?: string[];
-  priorityClass: "P2" | "P4" | "P5";
-  value: number;
-  shellCountersBefore: number;
-  shellCountersAfterAction: number;
-  targetInstallCost: number;
-  targetMemoryCost: number;
-  freeMemory: number;
-  replacementAssessment: Readonly<{
-    status: "not_needed" | "available" | "harmful" | "unknown";
-    requiredMemory: number;
-    selectedProgramInstanceIds: string[];
-    freedMemory: number;
-    displacedValue: number;
-  }>;
-  coverageBinding?: Readonly<{
-    gapId: string;
-    requiredRole: RunnerCoverageGapSignal["requiredRole"];
-    targetServerId?: string;
-  }>;
-  targetRoles: string[];
   evidenceCodes: string[];
 };
 
@@ -680,12 +556,6 @@ type DefenseState = {
   signals: RunnerDefenseSignals;
 };
 
-type ShellTradersPipelineState = {
-  kind: "shell_traders_pipeline";
-  phase: RunnerShellTradersPipelineSignal["phase"];
-  signal: RunnerShellTradersPipelineSignal;
-};
-
 export function createRunnerCorePlanModules(
   dependencies: RunnerCorePlanDependencies = {},
 ): PlanModule[] {
@@ -693,7 +563,7 @@ export function createRunnerCorePlanModules(
     dependencies.rolesForDefinitionId ?? rolesForDeckDoctrineCard;
   return [
     createRunnerInstalledAgendaScoreModule(),
-    shellTradersPipelineModule(),
+    createRunnerShellTradersPipelineModule(),
     createRunnerResourceLifecycleModule(),
     createRunnerCreditBankModule(),
     createRunnerRecurringEconomyModule(),
@@ -701,81 +571,6 @@ export function createRunnerCorePlanModules(
     coverageModule(rolesForDefinitionId),
     defenseModule(),
   ];
-}
-
-function shellTradersPipelineModule(): PlanModule {
-  return {
-    moduleId: "runner.shell_traders_pipeline",
-    side: "runner",
-    discover: (context) =>
-      (domain(context).shellTradersPipelines ?? []).map((signal) =>
-        proposal({
-          moduleId: "runner.shell_traders_pipeline",
-          dedupeKey: signal.pipelineId,
-          moduleState: {
-            kind: "shell_traders_pipeline",
-            phase: signal.phase,
-            signal,
-          } satisfies ShellTradersPipelineState,
-          priorityClass: signal.priorityClass,
-          target: {
-            kind: "card",
-            id: signal.targetCardInstanceId,
-          },
-          routeExists:
-            shellTradersPipelineCandidates(context, signal).length > 0,
-          blockerCode:
-            signal.phase === "hold"
-              ? "shell_traders_pipeline_held"
-              : "shell_traders_exact_route_unavailable",
-          evidenceCode:
-            signal.evidenceCodes[0] ??
-            "runner_shell_traders_pipeline_visible_state",
-          evidenceCodes: signal.evidenceCodes,
-        }),
-      ),
-    assess: (instance, context, portfolio) => {
-      const signal = state<ShellTradersPipelineState>(instance).signal;
-      const candidates = shellTradersPipelineCandidates(context, signal);
-      return assessment(
-        instance,
-        signal.priorityClass,
-        candidates.length > 0,
-        signal.value,
-        portfolio.executorInstanceId,
-      );
-    },
-    materialize: (instance, _assessment, context) => {
-      const signal = state<ShellTradersPipelineState>(instance).signal;
-      const candidates = shellTradersPipelineCandidates(context, signal);
-      return {
-        step: {
-          stepId: `${instance.instanceId}:${signal.phase}:${signal.targetCardInstanceId}`,
-          capability: {
-            capabilityId: `shell_traders_${signal.phase}`,
-            semanticActionTypes: [
-              ...new Set(
-                candidates.map((entry) => entry.candidate.semanticActionType),
-              ),
-            ],
-            legalActionTypes: ["trigger_ability"],
-            requiredSourceDefinitionIds: [signal.sourceDefinitionId],
-          },
-          target: {
-            kind: "card",
-            id: signal.targetCardInstanceId,
-          },
-          purpose:
-            signal.phase === "prepare"
-              ? "Prepare the exact program or hardware target for delayed free installation."
-              : signal.phase === "progress"
-                ? "Progress the exact prepared target without sacrificing a more valuable rig."
-                : "Hold the prepared target until its completion or replacement is useful.",
-        },
-        candidates,
-      };
-    },
-  };
 }
 
 export function runnerDevelopmentCardAdmission(params: {
@@ -1548,64 +1343,6 @@ function runnerFundingParentMaterialValue(
     : undefined;
 }
 
-function shellTradersPipelineCandidates(
-  context: PlanSchedulerContext,
-  signal: RunnerShellTradersPipelineSignal,
-): PlanMaterialization["candidates"] {
-  const actionIds = new Set(signal.actionIds);
-  return context.actionCandidates
-    .filter(
-      (candidate) =>
-        actionIds.has(candidate.actionId) &&
-        candidate.actionType === "trigger_ability" &&
-        shellTradersCandidateMatchesExactBinding(context, candidate, signal) &&
-        !context.actionDispositions?.some(
-          (disposition) =>
-            disposition.actionId === candidate.actionId &&
-            disposition.disposition === "explicitly_nonproductive",
-        ),
-    )
-    .map((candidate) => ({
-      candidate,
-      stepValue: signal.value,
-    }));
-}
-
-function shellTradersCandidateMatchesExactBinding(
-  context: PlanSchedulerContext,
-  candidate: ActionSemanticCandidate,
-  signal: RunnerShellTradersPipelineSignal,
-): boolean {
-  if (
-    candidate.sourceCardInstanceId !== signal.sourceCardInstanceId ||
-    (candidate.sourceDefinitionId !== undefined &&
-      candidate.sourceDefinitionId !== signal.sourceDefinitionId)
-  ) {
-    return false;
-  }
-  const legalAction = context.input.legalActions.find(
-    (action) => action.actionId === candidate.actionId,
-  );
-  const payloadTargetCardId = legalAction?.payload?.targetCardId;
-  const payloadTargetDefinitionId =
-    legalAction?.payload?.targetCardDefinitionId;
-  if (typeof payloadTargetCardId === "string") {
-    return (
-      payloadTargetCardId === signal.targetCardInstanceId &&
-      (typeof payloadTargetDefinitionId !== "string" ||
-        payloadTargetDefinitionId === signal.targetDefinitionId)
-    );
-  }
-  const exactTarget = candidate.targetContext?.selectedTargets.find(
-    (target) => target.targetId === signal.targetCardInstanceId,
-  );
-  return (
-    exactTarget !== undefined &&
-    (exactTarget.targetDefinitionId === undefined ||
-      exactTarget.targetDefinitionId === signal.targetDefinitionId)
-  );
-}
-
 function coverageInstallCandidates(
   context: PlanSchedulerContext,
   gap: RunnerCoverageGapSignal,
@@ -1751,37 +1488,6 @@ function runnerInstallSourceDefinitionId(
     ...context.input.playerView.own.gripOrHq,
     ...(context.input.playerView.specialZones?.setAside ?? []),
   ].find((card) => card.instanceId === sourceCardInstanceId)?.definitionId;
-}
-
-export function runnerCoverageRoleNeedles(
-  requiredRole: RunnerCoverageGapSignal["requiredRole"],
-): readonly string[] {
-  switch (requiredRole) {
-    case "breaker_wall":
-      return ["breaker_wall", "breaker_fracter"];
-    case "breaker_code_gate":
-      return ["breaker_code_gate", "breaker_decoder"];
-    case "breaker_sentry":
-      return ["breaker_sentry", "breaker_killer"];
-    case "breaker_ap":
-      return ["breaker_ap"];
-    case "breaker_trace":
-      return ["breaker_trace"];
-    case "breaker_universal":
-      return ["breaker_universal"];
-  }
-  const exhaustiveRole: never = requiredRole;
-  return exhaustiveRole;
-}
-
-export function runnerRolesCoverCoverageGap(
-  roles: readonly string[],
-  requiredRole: RunnerCoverageGapSignal["requiredRole"],
-): boolean {
-  return (
-    rolesMatch(roles, runnerCoverageRoleNeedles(requiredRole)) ||
-    rolesMatch(roles, ["universal_breaker", "breaker_universal"])
-  );
 }
 
 /** Prospective installation coverage; never use this as active rig coverage.

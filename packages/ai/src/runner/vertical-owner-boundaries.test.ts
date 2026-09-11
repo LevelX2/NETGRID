@@ -11,6 +11,7 @@ describe.each([
   "credit-bank",
   "recurring-economy",
   "resource-lifecycle",
+  "shell-traders",
   "expose-information",
   "terminal-win",
   "installed-agenda",
@@ -64,7 +65,7 @@ describe("vertical Runner owners", () => {
       .filter(
         (name) =>
           name &&
-          /^(runnerCreditBank|runnerMatureCreditBank|creditBankBuilt|runnerRecurringEconomy|recurringEconomy|runnerInstalledCompatibleRestrictedCredit|runnerResourceLifecycle|runnerCandidateIsLeavePlayPaymentLifecycle|runnerLifecycleLeavePlayPayment|runnerExposeInformation|runnerProactiveExposeInformation|runnerCurrentExposeInformation|bindSelectedRunnerExposeInformation|runnerTerminalWin|runnerImmediateAgendaPointTerminalWin|runnerInstalledAgendaScore)/.test(
+          /^(runnerCreditBank|runnerMatureCreditBank|creditBankBuilt|runnerRecurringEconomy|recurringEconomy|runnerInstalledCompatibleRestrictedCredit|runnerResourceLifecycle|runnerCandidateIsLeavePlayPaymentLifecycle|runnerLifecycleLeavePlayPayment|runnerShellTraders|buildRunnerShellTraders|runnerExposeInformation|runnerProactiveExposeInformation|runnerCurrentExposeInformation|bindSelectedRunnerExposeInformation|runnerTerminalWin|runnerImmediateAgendaPointTerminalWin|runnerInstalledAgendaScore)/.test(
             name,
           ),
       );

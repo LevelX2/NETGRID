@@ -8,7 +8,7 @@ import {
   strategicIntent,
   visibleCard,
 } from "../runner-hand-development.test-support";
-import type { RunnerCoverageGapSignal } from "../plans/runner-core-plan-modules";
+import type { RunnerCoverageGapSignal } from "../plans/runner-coverage-contracts";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import {
   bindRunnerRigDemandProjectionToCoverageGaps,

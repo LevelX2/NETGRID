@@ -1,6 +1,16 @@
 ---
 activityId: act-2026-09-11-ai-des01-shell-traders-owner
-status: in_progress
+status: done
+completedAt: 2026-09-11
+resultArtifacts:
+  - packages/ai/src/runner/shell-traders/
+  - packages/ai/src/plans/runner-coverage-contracts.ts
+checks:
+  - 460 Ausgangstests und 482 fokussierte Tests bestanden
+  - AI-Typecheck und AI-Strukturgates bestanden
+  - Card-ID-Gate nach Anpassung der verschobenen Allowance bestanden
+  - 550 Funktionskörper sowie extrahierte Planfunktionen verglichen
+  - Prettier und git diff --check bestanden
 primaryAgent: release-implementation-agent
 priority: high
 createdAt: 2026-09-11
@@ -21,3 +31,12 @@ Abnahme: fokussierte Tests vor/nach dem Schnitt, Ownergrenzen, AI-Typecheck,
 Strukturgates, Logikvergleich, aktueller Vertrag und Codekarte. Eigener Commit.
 Danach Virusdruck, Runner-Abwehr, Runner-Economy und Coverage jeweils separat
 reservieren und abschließen. Zum Ende lokale Main-Integration und Cleanup.
+
+## Ergebnis
+
+Pipeline, Rig-Ersatz, Zielwert, Start-of-turn-Choice, Zustand und Dispositionen
+liegen zusammen. Gemeinsame Coverage-Fakten sind von der Registry entkoppelt.
+Ein Quell-ID-Vorkommen liegt jetzt in der ohnehin vom generischen Gate
+ausgenommenen Typdatei; dessen alte Registry-Allowance wurde entfernt, die
+bestehende Signal-Allowance auf den neuen Pfad umgestellt. Aktueller Fachvertrag
+und Ownerkarte enthalten die dauerhafte Einordnung. Kein Verhalten geändert.

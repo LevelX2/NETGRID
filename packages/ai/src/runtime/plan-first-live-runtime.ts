@@ -1,3 +1,4 @@
+import { runnerShellTradersActionDispositions } from "../runner/shell-traders/shell-traders-dispositions";
 import type { RunnerExposeInformationSignal } from "../runner/expose-information/expose-information-types";
 import { runnerExposeInformationSignals } from "../runner/expose-information/expose-information-signals";
 import { runnerExposeInformationActionDispositions } from "../runner/expose-information/expose-information-dispositions";
@@ -149,7 +150,6 @@ import {
 import {
   createRunnerCorePlanModules,
   runnerCoverageCurrentPhase,
-  runnerRolesCoverCoverageGap,
   runnerInstallDefinitionCoversCoverageGap,
   runnerDevelopmentCardAdmission,
   runnerDevelopmentFundingMilestone,
@@ -159,10 +159,13 @@ import {
   runnerTurnLiquidityCandidateIsMaterializable,
   runnerFundingRouteCandidateIsMaterializable,
   runnerInstalledCardLiquidationChoiceSignal,
-  type RunnerCoverageGapSignal,
   type RunnerCorePlanDomain,
   type RunnerDiscardChoiceBinding,
 } from "../plans/runner-core-plan-modules";
+import {
+  runnerRolesCoverCoverageGap,
+  type RunnerCoverageGapSignal,
+} from "../plans/runner-coverage-contracts";
 import type { RequiredCapabilityKind } from "../plans/tactical-plan-types";
 import {
   createRunnerTacticalPlanModules,
@@ -228,7 +231,7 @@ import {
 } from "../plans/corp-remote-project-signals";
 import { assessCorpRemoteMaturityFromVisibleServer } from "./corp-remote-maturity-assessment";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
-import { buildRunnerShellTradersPipelineSignals } from "./shell-traders-plan-signals";
+import { buildRunnerShellTradersPipelineSignals } from "../runner/shell-traders/shell-traders-plan-signals";
 import {
   corpArchivesToHqOperationProfile,
   corpCandidateProvidesScoreConversion,
@@ -6084,17 +6087,10 @@ export function runnerActionDispositions(
   )) {
     addDisposition(disposition);
   }
-  for (const signal of domain.shellTradersPipelines ?? []) {
-    for (const actionId of signal.rejectedActionIds ?? []) {
-      add(
-        actionId,
-        "runner.shell_traders_pipeline",
-        signal.evidenceCodes.find(
-          (evidenceCode) =>
-            evidenceCode.includes("rejected") || evidenceCode.includes("holds"),
-        ) ?? "runner_shell_traders_pipeline_action_held",
-      );
-    }
+  for (const disposition of runnerShellTradersActionDispositions(
+    domain.shellTradersPipelines ?? [],
+  )) {
+    addDisposition(disposition);
   }
   if (domain.defense.forgoUnsafeRunCapacity) {
     for (const candidate of candidates) {

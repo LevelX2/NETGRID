@@ -1046,6 +1046,17 @@ Assessment und Materialisierung verlangen die aktuelle passende Route.
 Fortschritt darf kein wertvolleres Rig opfern; eine nicht gebundene Karte
 wird nicht als Ersatz installiert.
 
+Die vertikale Implementierung liegt in `runner/shell-traders/`, mit
+[`createRunnerShellTradersPipelineModule`](../../../packages/ai/src/runner/shell-traders/shell-traders-plan-module.ts)
+als Einstieg. Signalbildung, Rig-Ersatzbewertung, Zielwert, Start-of-turn-Choice,
+Planstatus und Dispositionen liegen beim Owner. Die Registry registriert nur
+die Factory; Runtime und Choice-Einstieg konsumieren die Ownerfunktionen.
+Coverage-Anforderungen und Rollenabgleich kommen aus dem gemeinsam verwendeten
+`plans/runner-coverage-contracts.ts`. Prioritäten, Zielidentitäten und
+Wirtschaftlichkeitsformeln bleiben unverändert. Damit lässt sich die gesamte
+Installationspipeline verfolgen, ohne ihre Regeln über Registry und Runtime
+verteilt zu bearbeiten; ein zusätzlicher Runtime-Dienst ist nicht nötig.
+
 ## 14. `runner.score_installed_agenda` und `runner.secure_terminal_win`
 
 **Status:** registrierte Core- beziehungsweise Tactical-Owner.

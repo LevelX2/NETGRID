@@ -20,13 +20,6 @@ const allowedCategories = new Set([
 
 const allowedCardIdUses = createAllowances([
   {
-    relativePath: "plans/runner-core-plan-modules.ts",
-    cardId: "onr_v1_176_the-shell-traders",
-    category: "individual_plan_model",
-    reason:
-      "The definition ID identifies the exact source of a dedicated card plan.",
-  },
-  {
     relativePath: "runtime/runner-targeted-bypass-plan.ts",
     cardId: "onr_v1_111_social-engineering",
     category: "individual_plan_model",
@@ -34,7 +27,7 @@ const allowedCardIdUses = createAllowances([
       "The definition ID identifies the source of a dedicated secret-choice plan.",
   },
   {
-    relativePath: "runtime/shell-traders-plan-signals.ts",
+    relativePath: "runner/shell-traders/shell-traders-plan-signals.ts",
     cardId: "onr_v1_176_the-shell-traders",
     category: "individual_plan_model",
     reason:
