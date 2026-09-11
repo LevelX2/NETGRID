@@ -322,6 +322,7 @@ foreach ($maintenanceEnvironmentKey in @(
 }
 
 $webEnvironment = @{
+  NETGRID_SERVER_BASE_URL = $serverEnvironment.NETGRID_SERVER_BASE_URL
   NEXT_PUBLIC_NETGRID_SERVER_URL = "http://${lanIp}:8787"
   NETGRID_ALLOWED_DEV_ORIGINS = "localhost,127.0.0.1,${lanIp}"
 }

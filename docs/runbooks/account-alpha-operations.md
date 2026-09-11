@@ -17,6 +17,14 @@ Stand: 2026-09-05
   lokalen Start wird deshalb die vom Startskript ausgegebene gemeinsame
   LAN- oder Loopback-Hostvariante verwendet; im Internet übernimmt ein
   HTTPS-Reverse-Proxy die beiden Pfade unter der freigegebenen Origin.
+- Das Startskript übergibt `NETGRID_SERVER_BASE_URL` auch dem Webprozess.
+  Das Root-Layout projiziert diese Laufzeitadresse in
+  `data-netgrid-server-origin`; die alte Variable
+  `NEXT_PUBLIC_NETGRID_SERVER_URL` steuert diesen Pfad nicht. Zeigt die
+  LAN-Spielseite hier auf `127.0.0.1`, können Anmeldung und anschließende
+  Sitzungs-/Deckabfragen wegen der unterschiedlichen Sites auseinanderfallen.
+  Nach Korrektur der Startkonfiguration muss der Webprozess über
+  `scripts/start-netgrid.ps1 -RestartWeb` neu gestartet werden.
 
 ## Zugangsmodi
 
