@@ -57,7 +57,7 @@ export function corpEmptyRdDrawOperationDispositionEvidence(
     : undefined;
 }
 
-export function corpCardDevelopmentSignals(
+function corpCardDevelopmentSignals(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   agendaCount: number,

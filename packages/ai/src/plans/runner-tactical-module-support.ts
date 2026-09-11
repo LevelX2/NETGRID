@@ -1,3 +1,4 @@
+import { type RunnerCorePlanDomain } from "./runner-core-plan-contracts";
 import type {
   GuaranteeLevel,
   PlanAssessment,
@@ -227,7 +228,6 @@ export function runnerTacticalPlanDomain<T>(context: PlanSchedulerContext): T {
   });
 }
 
-import { type RunnerCorePlanDomain } from "./runner-core-plan-modules";
 import { RunnerPlanDomain } from "./runner-tactical-plan-contracts";
 
 export function exactRunnerParentSupportResourceGaps(

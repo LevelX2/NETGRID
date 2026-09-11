@@ -211,7 +211,7 @@ export function corpExactBasicLiquidCreditCandidate(
   );
 }
 
-export function certifiedImmediateRootRezCampaignCandidate(
+function certifiedImmediateRootRezCampaignCandidate(
   candidate: ActionSemanticCandidate,
   signal: CorpEconomyDevelopmentSignal,
 ): boolean {
@@ -441,7 +441,7 @@ export function corpEconomyCandidateHasExecutablePayload(
   return !(drawCardsAmount > 0 && input.playerView.own.stackOrRdCount <= 0);
 }
 
-export function economyDevelopmentStepValue(
+function economyDevelopmentStepValue(
   context: PlanSchedulerContext,
   candidate: ActionSemanticCandidate,
   signal: CorpEconomyDevelopmentSignal,
@@ -517,7 +517,7 @@ export function economyMaterialization(
   };
 }
 
-export function optionalActionCapacityCandidateMatchesSignal(
+function optionalActionCapacityCandidateMatchesSignal(
   candidate: ActionSemanticCandidate,
   signal: CorpEconomyOptionalActionCapacitySignal,
 ): boolean {
@@ -549,7 +549,7 @@ export function optionalActionCapacityCandidateMatchesSignal(
   );
 }
 
-export function immediateOperationCandidateMatchesSignal(
+function immediateOperationCandidateMatchesSignal(
   candidate: ActionSemanticCandidate,
   signal: CorpEconomyImmediateOperationSignal,
 ): boolean {
@@ -580,7 +580,7 @@ export function immediateOperationCandidateMatchesSignal(
   );
 }
 
-export function visibleCardPayoutCandidateMatchesSignal(
+function visibleCardPayoutCandidateMatchesSignal(
   candidate: ActionSemanticCandidate,
   signal: CorpEconomyVisibleCardWithdrawalSignal,
 ): boolean {
@@ -612,7 +612,7 @@ export function visibleCardPayoutCandidateMatchesSignal(
   );
 }
 
-export function economyImmediateOperationStepValue(
+function economyImmediateOperationStepValue(
   signal: CorpEconomyImmediateOperationSignal,
 ): number {
   return (
@@ -621,7 +621,7 @@ export function economyImmediateOperationStepValue(
   );
 }
 
-export function economyVisibleCardPayoutStepValue(
+function economyVisibleCardPayoutStepValue(
   signal: CorpEconomyVisibleCardWithdrawalSignal,
 ): number {
   return (
@@ -630,7 +630,7 @@ export function economyVisibleCardPayoutStepValue(
   );
 }
 
-export function economyOperationThresholdStepValue(
+function economyOperationThresholdStepValue(
   signal: CorpEconomyOperationThresholdSignal,
 ): number {
   return 50 + signal.futureConversion.strategicEconomyValue * 10;

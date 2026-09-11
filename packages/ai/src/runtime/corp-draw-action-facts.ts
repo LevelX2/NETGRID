@@ -142,7 +142,7 @@ export function exactCurrentBasicCorpDrawCandidate(
   );
 }
 
-export function exactCurrentCorpScoreMaterialDrawCandidate(
+function exactCurrentCorpScoreMaterialDrawCandidate(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
 ): boolean {

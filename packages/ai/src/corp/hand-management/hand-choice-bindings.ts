@@ -122,7 +122,7 @@ export function bindSelectedCorpArchivesToHqChoiceContinuation(
   };
 }
 
-export function selectedCorpArchivesToHqCards(
+function selectedCorpArchivesToHqCards(
   input: AiDecisionInput,
   profile: NonNullable<ReturnType<typeof corpArchivesToHqOperationProfile>>,
   discardKeepScore: DiscardKeepScorer,
@@ -179,7 +179,7 @@ export function selectedCorpArchivesToHqCards(
   };
 }
 
-export function compareCorpArchivesToHqCandidates(
+function compareCorpArchivesToHqCandidates(
   left: { card: VisibleCard; score: DiscardChoiceKeepScore },
   right: { card: VisibleCard; score: DiscardChoiceKeepScore },
 ): number {
@@ -192,7 +192,7 @@ export function compareCorpArchivesToHqCandidates(
   );
 }
 
-export function corpArchiveRetentionRank(
+function corpArchiveRetentionRank(
   disposition: DiscardChoiceKeepScore["planDisposition"],
 ): number {
   switch (disposition) {
@@ -360,7 +360,7 @@ export function corpCorporateShuffleHqChoiceSignal(
   };
 }
 
-export function corpHandChoiceSelection(
+function corpHandChoiceSelection(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   discardKeepScore: DiscardKeepScorer | undefined,

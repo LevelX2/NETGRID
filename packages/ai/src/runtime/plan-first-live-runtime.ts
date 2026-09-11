@@ -1,4 +1,8 @@
-import { assessCorpSpendAgainstScoreFundingMilestones, corpScoreFundingMilestone } from "../plans/corp-score-funding";
+import { type RunnerCorePlanDomain } from "../plans/runner-core-plan-contracts";
+import {
+  assessCorpSpendAgainstScoreFundingMilestones,
+  corpScoreFundingMilestone,
+} from "../plans/corp-score-funding";
 import {
   buildCorpEconomySignals,
   corpEconomyFundingActionIds,
@@ -252,7 +256,14 @@ import {
   type CorpActionDispositionContributorFacts,
 } from "../plans/corp-action-disposition-contributors";
 import { buildCorpAgendaTurnPlanningSlice } from "../plans/corp-agenda-turn-planning";
-import { corpAgendaPurgeDefenseChoiceSignal, corpClassicDeflectorDefenseChoiceSignal, corpDefenseActionDispositions, corpDefenseMaterializedActionIds, corpScorePlanTarget, createCorpCorePlanModules } from "../plans/corp-core-plan-modules";
+import {
+  corpAgendaPurgeDefenseChoiceSignal,
+  corpClassicDeflectorDefenseChoiceSignal,
+  corpDefenseActionDispositions,
+  corpDefenseMaterializedActionIds,
+  corpScorePlanTarget,
+  createCorpCorePlanModules,
+} from "../plans/corp-core-plan-modules";
 import {
   corpGlobalDefenseInstallRoute,
   corpGlobalDefenseInstallRouteAssessment,
@@ -312,10 +323,7 @@ import {
   rememberResidentPlanPortfolio,
   residentPlanPortfolioSnapshot,
 } from "../plans/resident-plan-portfolio-memory";
-import {
-  createRunnerCorePlanModules,
-  type RunnerCorePlanDomain,
-} from "../plans/runner-core-plan-modules";
+import { createRunnerCorePlanModules } from "../plans/runner-core-plan-modules";
 import {
   runnerRolesCoverCoverageGap,
   type RunnerCoverageGapSignal,

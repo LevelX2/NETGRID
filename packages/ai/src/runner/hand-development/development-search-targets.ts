@@ -141,9 +141,7 @@ export function runnerEventInstallChoiceCommitment(
   };
 }
 
-export function exactCommaSeparatedTokens(
-  value: unknown,
-): string[] | undefined {
+function exactCommaSeparatedTokens(value: unknown): string[] | undefined {
   if (typeof value !== "string" || value.length === 0) return undefined;
   const tokens = value.split(",");
   return tokens.every(
@@ -311,7 +309,7 @@ export function runnerRecoverySearchCommitment(
   };
 }
 
-export function runnerRecoveryScoringInput(
+function runnerRecoveryScoringInput(
   input: AiDecisionInput,
   target: VisibleCard,
   candidate: ActionSemanticCandidate,
@@ -338,7 +336,7 @@ export function runnerRecoveryScoringInput(
   };
 }
 
-export function compareRunnerRecoverySearchTargets(
+function compareRunnerRecoverySearchTargets(
   left: { card: VisibleCard; score: DiscardChoiceKeepScore },
   right: { card: VisibleCard; score: DiscardChoiceKeepScore },
 ): number {
@@ -351,7 +349,7 @@ export function compareRunnerRecoverySearchTargets(
   );
 }
 
-export function runnerRecoveryPlanDispositionRank(
+function runnerRecoveryPlanDispositionRank(
   disposition: DiscardChoiceKeepScore["planDisposition"],
 ): number {
   switch (disposition) {

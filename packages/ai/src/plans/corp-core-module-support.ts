@@ -222,7 +222,7 @@ export function domain(context: PlanSchedulerContext): CorpCorePlanDomain {
   });
 }
 
-export function modulePhase(moduleState: unknown): string {
+function modulePhase(moduleState: unknown): string {
   const value = moduleState as Partial<
     ScoreState | RemoteState | DefenseState | EconomyState
   >;

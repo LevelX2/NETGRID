@@ -115,7 +115,7 @@ export function economyModule(): PlanModule {
   };
 }
 
-export function validatedEconomyNeeds(
+function validatedEconomyNeeds(
   context: PlanSchedulerContext,
 ): CorpCorePlanDomain {
   const currentDomain = domain(context);
@@ -539,7 +539,7 @@ export function corpEconomyPriorityClass(
   return "P5";
 }
 
-export function economyAssessmentValue(signal: CorpEconomyNeedSignal): number {
+function economyAssessmentValue(signal: CorpEconomyNeedSignal): number {
   if (signal.kind === "parent_funding" && signal.restrictedCreditFunding) {
     return signal.gap * 20;
   }

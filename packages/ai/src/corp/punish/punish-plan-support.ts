@@ -74,7 +74,7 @@ export function punishMaterialization(
   };
 }
 
-export function punishCapability(signal: CorpPunishCampaignSignal) {
+function punishCapability(signal: CorpPunishCampaignSignal) {
   if (signal.routeContract?.currentHeadActionId) {
     return {
       capabilityId: `execute_punish_route:${signal.routeContract.routeId}:${signal.routeContract.currentHeadStepId ?? "head"}`,
@@ -113,7 +113,7 @@ export function punishCapability(signal: CorpPunishCampaignSignal) {
   };
 }
 
-export function punishNextCapability(phase: CorpPunishCampaignSignal["phase"]) {
+function punishNextCapability(phase: CorpPunishCampaignSignal["phase"]) {
   if (phase === "trace")
     return {
       capabilityId: "resolve_trace_tag",
@@ -148,7 +148,7 @@ export function punishCandidates(
     }));
 }
 
-export function corpPrepareTargetValue(
+function corpPrepareTargetValue(
   context: PlanSchedulerContext,
   candidate: ActionSemanticCandidate,
 ): number {

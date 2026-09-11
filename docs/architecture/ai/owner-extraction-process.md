@@ -75,3 +75,10 @@ Card-ID-, Paketgrenzen- und Discovery-Gates grün. 779 produktive Dateien,
 keine Laufzeit- oder Typzyklen. Abschließende Shards stehen noch aus.
 AST-Vergleich: 577 unveränderte Funktionskörper, keine verlorenen Funktionen;
 drei erwartete Änderungen betreffen Domain-Komposition und Defense-Dienstbindung.
+
+Abschlussreview: gemeinsame Runner-Core-Domänentypen aus der Registry gelöst;
+62 nur intern verwendete Funktionen nicht mehr exportiert. Erneuter finaler
+AI-Typecheck und alle AI-, Paketgrenzen-, Discovery- und Formatgates grün.
+780 produktive AI-Dateien ohne Typ-/Laufzeitzyklen. Alle lokalen Links in den
+geänderten Architekturverträgen geprüft. Live-Runtime: 28.908 → 20.213 Zeilen.
+Der vollständige Drei-Shard-Lauf läuft noch; noch keine finale Abnahme.

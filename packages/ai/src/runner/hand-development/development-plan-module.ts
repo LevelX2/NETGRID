@@ -167,7 +167,7 @@ export function developmentModule(): PlanModule {
   };
 }
 
-export function developmentCandidates(
+function developmentCandidates(
   context: PlanSchedulerContext,
   signal: RunnerDevelopmentSignal,
 ): PlanMaterialization["candidates"] {
@@ -205,7 +205,7 @@ export function developmentCandidates(
     }));
 }
 
-export function runnerOptionalProgramTrashInstallHasDirectSibling(
+function runnerOptionalProgramTrashInstallHasDirectSibling(
   context: PlanSchedulerContext,
   candidate: ActionSemanticCandidate,
 ): boolean {
@@ -241,7 +241,7 @@ export function runnerOptionalProgramTrashInstallHasDirectSibling(
   });
 }
 
-export function runnerInstallSourceCardInstanceId(
+function runnerInstallSourceCardInstanceId(
   context: PlanSchedulerContext,
   candidate: ActionSemanticCandidate,
 ): string | undefined {

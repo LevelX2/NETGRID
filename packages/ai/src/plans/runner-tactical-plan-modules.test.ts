@@ -1,3 +1,4 @@
+import type { RunnerCorePlanDomain } from "./runner-core-plan-contracts";
 import {
   type RunnerPlanDomain,
   type RunnerTacticalPlanDomain,
@@ -12,7 +13,7 @@ import {
   RUNNER_PLAN_PRIORITY_POLICY,
 } from "./plan-assessment";
 import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
-import type { RunnerCorePlanDomain } from "./runner-core-plan-modules";
+
 import type { PlanSchedulerContext } from "./plan-scheduler";
 import {
   createRunnerTacticalPlanModules,

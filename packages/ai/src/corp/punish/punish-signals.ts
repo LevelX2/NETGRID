@@ -53,7 +53,7 @@ export function punishSignals(
   return [...quoted, ...legacyRoots];
 }
 
-export function mergeStableLegacyPunishRoots(
+function mergeStableLegacyPunishRoots(
   signals: readonly CorpPunishCampaignSignal[],
 ): CorpPunishCampaignSignal[] {
   const merged = new Map<string, CorpPunishCampaignSignal>();
@@ -102,7 +102,7 @@ export function mergeStableLegacyPunishRoots(
   );
 }
 
-export function quotedPunishSignals(
+function quotedPunishSignals(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   previous: ResidentPlanPortfolio | undefined,
@@ -147,7 +147,7 @@ export function quotedPunishSignals(
     });
 }
 
-export function retainedUnknownPunishSignals(
+function retainedUnknownPunishSignals(
   input: AiDecisionInput,
   previous: ResidentPlanPortfolio | undefined,
   incompleteReasons: readonly string[] | undefined,
@@ -203,7 +203,7 @@ export function retainedUnknownPunishSignals(
   });
 }
 
-export function selectQuotedPunishSignal(
+function selectQuotedPunishSignal(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   campaignId: string,
@@ -228,14 +228,14 @@ export function selectQuotedPunishSignal(
     })[0]?.signal;
 }
 
-export function quotedPunishSignalReadinessRank(
+function quotedPunishSignalReadinessRank(
   signal: CorpPunishCampaignSignal,
 ): number {
   if (signal.visibleTerminalProjection) return 0;
   return signal.feasible ? 1 : 2;
 }
 
-export function quotedPunishHorizonRank(
+function quotedPunishHorizonRank(
   horizon: "execute" | "fund" | "wait" | undefined,
 ): number {
   return horizon === "execute" ? 0 : horizon === "fund" ? 1 : 2;
@@ -450,7 +450,7 @@ function assessQuotedPunishOpportunity(
   };
 }
 
-export function compareQuotedPunishRoutes(
+function compareQuotedPunishRoutes(
   left: CorpPunishRouteQuote,
   right: CorpPunishRouteQuote,
 ): number {
@@ -475,7 +475,7 @@ export function compareQuotedPunishRoutes(
   return left.routeId.localeCompare(right.routeId);
 }
 
-export function quotedPunishSignal(
+function quotedPunishSignal(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   campaignId: string,
@@ -621,7 +621,7 @@ export function quotedPunishSignal(
   };
 }
 
-export function punishPhaseForQuotedHead(
+function punishPhaseForQuotedHead(
   kind: CorpPunishRouteQuote["steps"][number]["kind"],
 ): CorpPunishCampaignSignal["phase"] {
   if (kind === "trace_tag") return "trace";
@@ -636,7 +636,7 @@ export function punishPhaseForQuotedHead(
   return "kill";
 }
 
-export function legacyPunishSignals(
+function legacyPunishSignals(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   scorelineFeasibility: CorpScorelineFeasibility | undefined,
@@ -872,7 +872,7 @@ export function corpPunishQuoteRequestExists(input: AiDecisionInput): boolean {
   return buildBoundedCorpPunishRouteRequests(input).length > 0;
 }
 
-export function corpPunishCandidateHasVisibleEffect(
+function corpPunishCandidateHasVisibleEffect(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
 ): boolean {

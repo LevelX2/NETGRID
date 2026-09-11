@@ -1,8 +1,9 @@
+import { type RunnerCorePlanDomain } from "../../plans/runner-core-plan-contracts";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { rolesForDeckDoctrineCard } from "../../deck-doctrine-card-roles";
 import { planInstanceIdForProposal } from "../../plans/plan-instance";
-import { type RunnerCorePlanDomain } from "../../plans/runner-core-plan-modules";
+
 import { runnerRolesCoverCoverageGap } from "../../plans/runner-coverage-contracts";
 import { runnerDevelopmentFundingMilestone } from "../../plans/runner-development-contracts";
 import { type RunnerPlanDomain } from "../../plans/runner-tactical-plan-contracts";

@@ -1,4 +1,7 @@
-import { assessCorpSpendAgainstScoreFundingMilestones, corpScoreFundingMilestone } from "./corp-score-funding";
+import {
+  assessCorpSpendAgainstScoreFundingMilestones,
+  corpScoreFundingMilestone,
+} from "./corp-score-funding";
 import {
   corpEconomyActionIsOwned,
   assessCorpEconomyFundingRoute,
@@ -22,7 +25,16 @@ import {
   compareValidatedPlanAssessments,
   requireValidatedPlanAssessment,
 } from "./plan-assessment";
-import { CORP_CORE_ACTION_OWNERSHIP, corpAgendaPurgeDefenseChoiceSignal, corpClassicDeflectorDefenseChoiceSignal, corpCoreActionOwner, corpDefenseActionDispositions, corpDefensePortfolioHasExecutableRoute, corpDefensePlacementDispositions, createCorpCorePlanModules } from "./corp-core-plan-modules";
+import {
+  CORP_CORE_ACTION_OWNERSHIP,
+  corpAgendaPurgeDefenseChoiceSignal,
+  corpClassicDeflectorDefenseChoiceSignal,
+  corpCoreActionOwner,
+  corpDefenseActionDispositions,
+  corpDefensePortfolioHasExecutableRoute,
+  corpDefensePlacementDispositions,
+  createCorpCorePlanModules,
+} from "./corp-core-plan-modules";
 import { instantiatePlanProposal } from "./plan-instance";
 import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
 import { bindBestCurrentPlanRoute } from "./plan-route";

@@ -1,11 +1,9 @@
+import { type RunnerCorePlanDomain } from "./runner-core-plan-contracts";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { instantiatePlanProposal } from "./plan-instance";
-import {
-  createRunnerCorePlanModules,
-  type RunnerCorePlanDomain,
-} from "./runner-core-plan-modules";
+import { createRunnerCorePlanModules } from "./runner-core-plan-modules";
 import { runnerCoveragePlanHandDisposition } from "../runner/rig-coverage/coverage-plan-module";
 import {
   runnerDevelopmentCardAdmission,

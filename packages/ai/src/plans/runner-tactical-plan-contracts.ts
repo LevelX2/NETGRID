@@ -1,3 +1,4 @@
+import { type RunnerCorePlanDomain } from "./runner-core-plan-contracts";
 import type { RunnerAccessFacts } from "../access/runner-access-facts";
 import type {
   RunnerPrerunReserveQuote,
@@ -8,7 +9,6 @@ import { RunnerDevelopmentSignal } from "../runner/hand-development/development-
 import type { RunnerTerminalWinSignal } from "../runner/terminal-win/terminal-win-types";
 import type { RunnerTargetedBypassCommitment } from "../runtime/runner-targeted-bypass-plan";
 import type { RunnerTargetedIceTrashCommitment } from "../runtime/runner-targeted-ice-trash-plan";
-import { type RunnerCorePlanDomain } from "./runner-core-plan-modules";
 
 export type RunnerRunRiskContractSignal = {
   schemaVersion: "runner-run-risk-contract-v1";

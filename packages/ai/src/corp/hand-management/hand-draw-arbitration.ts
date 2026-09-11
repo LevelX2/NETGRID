@@ -328,7 +328,7 @@ export function arbitrateCorpHandConversionBeforeDraw(
   };
 }
 
-export function corpExactHandCapacityReleaseRoutes(
+function corpExactHandCapacityReleaseRoutes(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   domain: CorpPlanDomain,
@@ -422,7 +422,7 @@ export function corpExactHandCapacityReleaseRoutes(
     );
 }
 
-export function corpEffectiveHandPriorityClass(
+function corpEffectiveHandPriorityClass(
   domain: CorpPlanDomain,
   signal: CorpPlanDomain["handManagement"][number],
 ): CorpDrawAdmissionPriority {

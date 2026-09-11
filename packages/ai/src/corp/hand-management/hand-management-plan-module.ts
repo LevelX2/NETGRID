@@ -82,9 +82,7 @@ export function handModule(): PlanModule {
   };
 }
 
-export function handSemanticTypes(
-  phase: CorpHandManagementSignal["phase"],
-): string[] {
+function handSemanticTypes(phase: CorpHandManagementSignal["phase"]): string[] {
   if (phase === "draw_for_plan")
     return ["draw.card", "play.corp_operation", "card_ability.trigger"];
   if (phase === "develop_card")
@@ -100,7 +98,7 @@ export function handSemanticTypes(
   return ["choice.resolve", "play.corp_operation"];
 }
 
-export function handCandidates(
+function handCandidates(
   context: PlanSchedulerContext,
   signal: CorpHandManagementSignal,
 ): PlanMaterialization["candidates"] {
@@ -157,7 +155,7 @@ export function handCandidates(
     }));
 }
 
-export function handStepSemanticTypes(
+function handStepSemanticTypes(
   context: PlanSchedulerContext,
   signal: CorpHandManagementSignal,
 ): string[] {

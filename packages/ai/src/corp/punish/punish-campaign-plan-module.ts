@@ -69,7 +69,7 @@ export function punishCampaignModule(): PlanModule {
   };
 }
 
-export function punishCampaignPriority(
+function punishCampaignPriority(
   signal: CorpPunishCampaignSignal,
 ): "P1" | "P3" | "P4" | "P5" {
   if (
@@ -86,7 +86,7 @@ export function punishCampaignPriority(
   return signal.priorityClass ?? "P4";
 }
 
-export function punishRootResourceGaps(
+function punishRootResourceGaps(
   signal: CorpPunishCampaignSignal,
 ): ResourceGap[] {
   const route = signal.routeContract;

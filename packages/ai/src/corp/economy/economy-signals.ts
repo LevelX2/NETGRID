@@ -695,7 +695,7 @@ export function corpEconomyDevelopmentCampaigns(
   return admitted;
 }
 
-export function corpEconomyCampaignTargetServerId(
+function corpEconomyCampaignTargetServerId(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
 ): string | undefined {
@@ -711,7 +711,7 @@ export function corpEconomyCampaignTargetServerId(
   )?.targetId;
 }
 
-export function corpCounterCashoutProfile(
+function corpCounterCashoutProfile(
   definitionId: string,
 ): { creditsPerCounter: number } | undefined {
   const hint = AI_HINTS_BY_CARD.get(definitionId);
@@ -1370,7 +1370,7 @@ export function corpRequiredEconomyNeeds(
   );
 }
 
-export function corpPunishFundingParentPriority(
+function corpPunishFundingParentPriority(
   signal: CorpPunishCampaignSignal,
 ): "P1" | "P4" | "P5" {
   if (

@@ -1,3 +1,4 @@
+import { type RunnerCorePlanDomain } from "../../plans/runner-core-plan-contracts";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { runnerImmediateAgendaPointGain } from "../../actions/runner-agenda-point-effect";
@@ -6,7 +7,7 @@ import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 import { rolesForDeckDoctrineCard } from "../../deck-doctrine-card-roles";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
-import { type RunnerCorePlanDomain } from "../../plans/runner-core-plan-modules";
+
 import { type RunnerPlanDomain } from "../../plans/runner-tactical-plan-contracts";
 import { runnerEffectsProvideNonNoisyBreakerCredits } from "../../runner-canonical-hint-semantics";
 import type { RunnerHandDevelopmentEvaluation } from "./hand-development-evaluation";
@@ -50,7 +51,7 @@ export function runnerProgramSearchRecentlyResolved(
   );
 }
 
-export function runnerUnrepresentedProgramDevelopmentTargets(
+function runnerUnrepresentedProgramDevelopmentTargets(
   input: AiDecisionInput,
 ): string[] | undefined {
   const deckSnapshot = (input as AiDecisionInputWithDeckCapabilities)
@@ -93,7 +94,7 @@ export type RunnerStrategicProgramSearchTarget = {
   evidenceCodes: string[];
 };
 
-export function runnerStrategicProgramSearchTargets(
+function runnerStrategicProgramSearchTargets(
   input: AiDecisionInput,
   strategicIntent: RunnerStrategicIntentProfile,
 ): RunnerStrategicProgramSearchTarget[] | undefined {
@@ -217,7 +218,7 @@ export function runnerStrategicProgramSearchTargets(
     );
 }
 
-export function runnerHasCompatibleNonNoisyBreakerDemand(
+function runnerHasCompatibleNonNoisyBreakerDemand(
   input: AiDecisionInput,
 ): boolean {
   return [

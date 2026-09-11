@@ -303,7 +303,7 @@ export function runnerRestrictedProgramInstallSequenceCommitment(
   };
 }
 
-export function runnerDevelopmentNeedSequenceValue(
+function runnerDevelopmentNeedSequenceValue(
   need: RunnerHandDevelopmentEvaluation["currentNeed"],
 ): number {
   switch (need) {
@@ -320,7 +320,7 @@ export function runnerDevelopmentNeedSequenceValue(
   }
 }
 
-export function activeRestrictedProgramInstallActions(
+function activeRestrictedProgramInstallActions(
   input: AiDecisionInput,
 ): AiDecisionInput["legalActions"] {
   return input.legalActions.filter(
@@ -336,7 +336,7 @@ export function activeRestrictedProgramInstallActions(
   );
 }
 
-export function restrictedProgramInstallCommitmentFromPortfolio(
+function restrictedProgramInstallCommitmentFromPortfolio(
   previous: ResidentPlanPortfolio | undefined,
 ): RunnerRestrictedProgramInstallSequenceCommitment | undefined {
   if (!previous?.executorInstanceId) return undefined;
@@ -388,7 +388,7 @@ export function restrictedProgramInstallCommitmentFromPortfolio(
   return structuredClone(commitment);
 }
 
-export function restrictedProgramInstallCommitmentHasFiniteResources(
+function restrictedProgramInstallCommitmentHasFiniteResources(
   commitment: RunnerRestrictedProgramInstallSequenceCommitment,
 ): boolean {
   return (
@@ -404,7 +404,7 @@ export function restrictedProgramInstallCommitmentHasFiniteResources(
   );
 }
 
-export function runnerRestrictedProgramInstallSequenceProgress(
+function runnerRestrictedProgramInstallSequenceProgress(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   previous: ResidentPlanPortfolio | undefined,
@@ -548,7 +548,7 @@ export function runnerRestrictedProgramInstallSequenceSignals(
   ];
 }
 
-export function runnerRestrictedSequenceFailure(
+function runnerRestrictedSequenceFailure(
   input: AiDecisionInput,
   removalCondition: string,
   unresolvedActionIds: string[],

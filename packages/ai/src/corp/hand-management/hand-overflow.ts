@@ -368,7 +368,7 @@ export function corpHqOverflowReservedScoreServerDispositionEvidence(
     : undefined;
 }
 
-export function corpResidentHqOverflowResolution(
+function corpResidentHqOverflowResolution(
   previous: ResidentPlanPortfolio | undefined,
   input: AiDecisionInput,
 ):

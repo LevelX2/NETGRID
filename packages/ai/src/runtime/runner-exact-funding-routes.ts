@@ -120,7 +120,7 @@ export function runnerExactFundingRouteContract(
   };
 }
 
-export function runnerExactFundingRouteCandidates(
+function runnerExactFundingRouteCandidates(
   candidates: readonly ActionSemanticCandidate[],
   request: RunnerExactFundingRouteRequest,
   demand: ReturnType<typeof createRunnerCreditDemand>,
@@ -177,7 +177,7 @@ export function runnerExactFundingRouteCandidates(
     : [...ordinary, smallestSufficientExchange];
 }
 
-export function runnerDebtFinancingCandidateHasSafeBoundRunExit(
+function runnerDebtFinancingCandidateHasSafeBoundRunExit(
   candidate: ActionSemanticCandidate,
   request: RunnerExactFundingRouteRequest,
 ): boolean {
@@ -213,7 +213,7 @@ export function runnerDebtFinancingCandidateHasSafeBoundRunExit(
   );
 }
 
-export function runnerCandidateStrategicExchangeBurden(
+function runnerCandidateStrategicExchangeBurden(
   candidate: ActionSemanticCandidate,
 ): number {
   const debt = runnerDebtFinancingProfile(candidate.sourceDefinitionId);
@@ -223,7 +223,7 @@ export function runnerCandidateStrategicExchangeBurden(
   return runnerCandidateSelfDamageAmount(candidate) * 1_000;
 }
 
-export function runnerCandidateSelfDamageAmount(
+function runnerCandidateSelfDamageAmount(
   candidate: ActionSemanticCandidate,
 ): number {
   return (candidate.costProfile.selfDamage ?? []).reduce(
