@@ -1,6 +1,6 @@
 # Fünf weitere AI-Owner bündeln
 
-Status: P1–P2 abgenommen; P3 aktiv. Auftrag: Nutzerfreigabe vom 2026-09-11.
+Status: P1–P3 abgenommen; P4 aktiv. Auftrag: Nutzerfreigabe vom 2026-09-11.
 
 ## Ziel und Grenzen
 
@@ -46,4 +46,7 @@ P1: 70 Tests in sieben Dateien grün; AI-Typecheck und Source-/Reachability-Gate
 
 
 P2: 88 Tests über zehn Dateien geprüft; zwei fehlende Imports beim Herauslösen korrigiert, betroffene 15 Tests anschließend grün. Finale Funding-Extraktion ebenfalls mit diesen 15 Tests geprüft. Finaler AI-Typecheck und Source-/Reachability-Gates grün (794 produktive Dateien, keine Zyklen). Ein Typecheck-Aufruf ohne den vorgesehenen 8-GB-Heap wurde nach Speicherabbruch korrekt mit 8 GB wiederholt.
+
+
+P3: 71 Tests in acht Dateien, AI-Typecheck und Source-/Reachability-Gates grün (798 produktive Dateien, keine Zyklen). Remote-Letztchancenregeln liegen beim Owner; gemeinsame Finanzierung konsumiert diesen Vertrag.
 

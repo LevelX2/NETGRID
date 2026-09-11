@@ -204,6 +204,24 @@ Finanzierungslücke bleibt auch bei diesem terminalen Contest verbindlich.
 - ein Draw diese Antwort plausibel liefern kann;
 - Handüberlauf und verbleibende Folgeaktionen den Plan nicht entwerten.
 
+### Vertikale Implementierung des Remote-Contests
+
+`packages/ai/src/runner/remote-contest/` enthält:
+
+- `remote-contest-signals.ts`: Bedrohungs- und Zielbewertung, Vorbereitung,
+  Runvarianten, Proberouten und Wiederaufnahme des gebundenen Parents;
+- `remote-contest-admission.ts`: unmittelbare Pflicht, Letztchancenfenster,
+  nicht tödlicher Handpuffer und konkret verbleibende Gefahrenfinanzierung;
+- `remote-contest-plan-module.ts`: Discovery, Assessment, Routen und Priorität.
+
+Central und Remote konsumieren dieselben Run-, Funding-, Vorbereitungs- und
+Choice-Dienste unter `run-analysis/`. Diese Finanzierung konsumiert die
+Remote-Zulassung aus `remote-contest-admission.ts`; sie erhält dadurch keine
+eigene Ausnahmestrategie. Die Runtime liefert Coverage, sichtbare Runbewertungen
+und den aktiven Parent. Das Run-Window führt den begonnenen Run weiter aus und
+konsumiert dabei denselben Remote-Vertrag. Der Remote-Owner importiert keine
+Registry, Live-Runtime oder Central-Implementierung zurück.
+
 ## 4. `runner.rig_and_coverage`
 
 Der vertikale Owner liegt in `packages/ai/src/runner/rig-coverage/`.
