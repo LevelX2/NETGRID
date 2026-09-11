@@ -41,7 +41,7 @@ describe("match 41df Corp scoring", () => {
 
   it.each([19, 89, 91, 127, 172, 176, 210])("records current legal selection at D%i", (index) => {
     const { input, decision } = decide(index);
-    console.log(`D${index}`, JSON.stringify(decision).slice(0, 800));
+    
     expect(input.legalActions.some((action) => action.actionId === decision.actionId)).toBe(true);
   });
 
@@ -51,5 +51,11 @@ describe("match 41df Corp scoring", () => {
     const { input, decision } = decide(index);
     const selected = input.legalActions.find((action) => action.actionId === decision.actionId)!;
     expect(selected.payload?.placement === "ice" && selected.payload?.serverId === serverId).toBe(false);
+  });
+
+  it("funds the known stopping ICE instead of a second non-stopping layer at D13", () => {
+    const { decision } = decide(13);
+    expect(decision.actionId).toBe("corp.gain_credit");
+    expect(decision.reasonCode).toBe("plan_first.corp.economy");
   });
 });

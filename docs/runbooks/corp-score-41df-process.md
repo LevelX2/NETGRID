@@ -1,6 +1,6 @@
 # Corp-Scoring aus Match 41df
 
-Status: aktiv, P2. Quelle: Nutzerauftrag vom 11.09.2026 und Maintenance-Audit
+Status: aktiv, P3. Quelle: Nutzerauftrag vom 11.09.2026 und Maintenance-Audit
 von `match_41df30053a8efe3e` (D19, D89, D91, D127, D172, D176, D210).
 
 ## Ziel und Grenzen
@@ -60,3 +60,8 @@ wird am Abschluss zugunsten aktueller Fachverträge entfernt; Git hält Evidence
   (41df + Defense-Domain). D19/D127 erhalten Finanzierung; D172 verbaut
   keinen sechsten HQ-Layer. Änderung am bestehenden Defense-Owner, keine neue
   Prioritätsklasse. P2 aktiv: Score-Schutzaufbau und fehlender Stopper.
+
+- P2 geprüft: D13 zuerst rot, danach 33 direkte/angrenzende Tests und der
+  Live-Gegenfall mit produktivem zusätzlichem ICE grün. Eine weitere reine
+  Abschreckungsschicht verdrängt keine zertifizierte Stopper-Finanzierung.
+  P3 aktiv: historische Runtime-Bindung ohne Neustart prüfen.

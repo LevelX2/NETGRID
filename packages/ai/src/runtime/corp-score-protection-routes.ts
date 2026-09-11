@@ -291,6 +291,15 @@ export function corpScoreProtectionStagingInstallSignal(
   if (
     source?.definitionId !== candidate.sourceDefinitionId ||
     definition?.type !== "ice" ||
+    // An additional conditional layer must not spend the funding reserved for
+    // a certified stopping route. The existing layer already supplies staging;
+    // the unresolved need is now money for effective protection.
+    (!startsFirstScoreProtectionLayer &&
+      !sourceDefense.hasImmediateStop &&
+      scan.directInstallRouteState.knowledge === "known" &&
+      scan.directInstallRouteState.disposition === "funding_only" &&
+      typeof scan.fundingGap === "number" &&
+      scan.fundingGap > 0) ||
     (!sourceDefense.hasImmediateStop && !boundedConditionalDeterrence)
   ) {
     return undefined;

@@ -1238,3 +1238,8 @@ einen belegten Draw-, Refresh-, Agenda- oder Overflow-Zweck.
 `raise_visible_floor` benötigt Defense-Evidence; allgemeine Boardentwicklung
 benötigt ein Domainmodul. Fehlt die Planabdeckung, wird dies nicht durch
 Credit, Draw oder Boardentwicklung verdeckt.
+
+Ein bereits begonnener Score-Remote erhält bei einer bekannten, ausschließlich
+finanzierungsblockierten Schutzroute keine zusätzliche reine Abschreckungsschicht
+zulasten dieser Finanzierung. Die erste begrenzte Vorbereitung und ein konkret
+wirksamer zusätzlicher Stopper bleiben zulässig (Regression: Match 41df, D13).
