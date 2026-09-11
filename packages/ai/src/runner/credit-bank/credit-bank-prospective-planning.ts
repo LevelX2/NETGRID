@@ -1,11 +1,11 @@
 import { planningCardByDefinitionId } from "@netgrid/cards/planning";
 
-import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import {
   buildCanonicalLegalActionInvocation,
   type CanonicalLegalActionInvocation,
   type PlanningStateIdentity,
-} from "./turn-planning-contracts";
+} from "../../plans/turn-planning-contracts";
 
 export type ProspectivePlanningStatus =
   | "available_by_spec"
