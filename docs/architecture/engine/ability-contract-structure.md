@@ -54,16 +54,30 @@ Quote und Ausführung behalten ihre strikten Bindungsprüfungen.
 ## Verzögerte Programminstallation
 
 Beim letzten Shell-Counter prüft die verzögerte Installation legale
-Program-Hosts über den gemeinsamen `canHostProgramOnDaemon`-Vertrag. Sind
-Hosts verfügbar, wählt der Runner vor Counterentfernung und Installation
-zwischen dem normalen Programmspeicher und einem passenden installierten
-Host. Nur die normale Installation fordert bei MU-Mangel Programmtrash.
-Hostkapazität, Zielkarte, Quelle und letzter Counter werden bei der Wahl
-erneut validiert. Die gemeinsame Rig-Finalisierung setzt `hostedOn` und
+Program-Hosts über den gemeinsamen `canHostProgramOnDaemon`-Vertrag. Die
+Zielquote berücksichtigt ausdrücklich entfernbare installierte Programme im
+jeweiligen Host. Auch ein voller Host bleibt damit wählbar, wenn die neue
+Karte nach entsprechendem Trash dessen MU- und Kartenanzahlgrenzen einhält.
+Karteneignung und übrige Hostingregeln werden dabei nicht gelockert.
+
+Der Runner wählt vor Counterentfernung und Installation zwischen normalem
+Programmspeicher und einem passenden installierten Host. Reicht dessen
+Kapazität nicht aus, folgt eine an diesen Host gebundene Programmtrashwahl;
+sie bietet ausschließlich dessen installierte Programme an. Das Freigeben
+von Hostspeicher verändert die normalen Runner-MU nicht. Die normale
+Installation verwendet weiterhin ihre eigene MU-Freigabe.
+
+Hostexistenz, ausgewählte Programme, verbleibende Kapazität, Zielkarte,
+Quelle und letzter Counter werden bei der Auflösung erneut validiert.
+Unzureichende, fremde, doppelte und veraltete Auswahlen scheitern ohne
+Zustandsänderung. Erst nach erfolgreicher Freigabe werden letzter Counter
+und Installation abgeschlossen. Die gemeinsame Rig-Finalisierung setzt `hostedOn` und
 belastet bei Hosting keine Runner-MU; On-install-Effekte bleiben erhalten.
 Bezahlte Counterentfernung und Zugbeginn nutzen dieselbe Platzierungswahl;
 der Zugbeginn wird erst nach abgeschlossener Platzierung beziehungsweise
-anschließender Speicherfreigabe fortgesetzt.
+anschließender Speicherfreigabe fortgesetzt. Die Originalset-Regressionen
+prüfen volle/freie normale MU, bezahlte und Startzug-Installation, Evil Twin,
+Cloaks Installations-Credits, Mehrfachtrash, Revalidierung und Replay/StateHash.
 
 ## Verpflichtende Kreditzahlungen
 

@@ -31,6 +31,13 @@ Die Engine ist alleinige Regelautorität. UI, Server und KI reichen nur angebote
 
 ## Engine und Karten
 
+Shell Traders kann beim letzten Counter auch volle zulässige Program-Hosts
+als Installationsziel anbieten. Eine an den gewählten Host gebundene
+Programmtrashwahl schafft dort Platz, ohne normale Runner-MU zu belegen.
+Kapazität, Hostbindung und Installations-Lifecycle sind einschließlich
+Zugbeginn und Replay geprüft; führend ist
+`docs/architecture/engine/ability-contract-structure.md`.
+
 Originalset, Classic und Proteus sind technisch spielbar. Kartenspezifische Autorenwahrheit wird über die zentrale CardSpec-Architektur konsolidiert.
 
 Bezahlbare Assets und Upgrades können in der Corp-Hauptphase auch nach der
