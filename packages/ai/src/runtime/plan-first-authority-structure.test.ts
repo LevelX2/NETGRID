@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
@@ -14,6 +14,20 @@ const srcDir = path.resolve(runtimeDir, "..");
 
 const readSource = (...segments: string[]): string =>
   readFileSync(path.join(srcDir, ...segments), "utf8");
+
+const extractedOwnerSources = [
+  ["corp", "punish"],
+  ["corp", "hand-management"],
+  ["corp", "economy"],
+  ["runner", "hand-development"],
+]
+  .flatMap((segments) =>
+    readdirSync(path.join(srcDir, ...segments))
+      .filter((file) => file.endsWith(".ts") && !file.includes(".test."))
+      .sort()
+      .map((file) => readSource(...segments, file)),
+  )
+  .join("\n");
 
 const occurrences = (source: string, pattern: RegExp): number =>
   [...source.matchAll(pattern)].length;
@@ -74,6 +88,7 @@ describe("plan-first live authority structure", () => {
     );
     for (const forbidden of forbiddenProductiveSelectors) {
       expect(planFirstRuntime, forbidden).not.toContain(forbidden);
+      expect(extractedOwnerSources, forbidden).not.toContain(forbidden);
     }
     expect(planFirstRuntime).not.toMatch(/\bfallbackUsed\s*:\s*true\b/);
   });
@@ -87,6 +102,7 @@ describe("plan-first live authority structure", () => {
       readSource("runtime", "semantic-runtime-decision-composition.ts"),
       readSource("runtime", "semantic-runtime-decision-context.ts"),
       readSource("runtime", "plan-first-live-runtime.ts"),
+      extractedOwnerSources,
     ].join("\n");
     const publicIndex = readSource("index.ts");
     const decisionInput = readSource("runtime", "ai-decision-input.ts");
@@ -130,6 +146,7 @@ describe("plan-first live authority structure", () => {
     const productiveSources = [
       readSource("runtime", "semantic-runtime-decision-context.ts"),
       readSource("runtime", "plan-first-live-runtime.ts"),
+      extractedOwnerSources,
     ];
     const forbiddenLegacyInputs = [
       "semanticRuntimeCorpCentralRezReserveAssessment",
@@ -167,7 +184,11 @@ describe("plan-first live authority structure", () => {
       "corpCanRezFullPathWithDynamicReserve",
     ];
 
-    for (const source of [decisionContext, planFirstRuntime]) {
+    for (const source of [
+      decisionContext,
+      planFirstRuntime,
+      extractedOwnerSources,
+    ]) {
       for (const forbidden of forbiddenLegacyScoreWindowAuthority) {
         expect(source, forbidden).not.toContain(forbidden);
       }
@@ -212,22 +233,19 @@ describe("plan-first live authority structure", () => {
       "runtime",
       "plan-first-live-runtime.ts",
     );
-    const reserveStart = planFirstRuntime.indexOf(
-      "function corpDefenseReserveNeeds(",
+    const reserveSource = readSource(
+      "runtime",
+      "corp-defense-funding-facts.ts",
     );
-    const reserveEnd = planFirstRuntime.indexOf(
-      "\nfunction punishSignals(",
-      reserveStart,
+    const economySignals = readSource("corp", "economy", "economy-signals.ts");
+    expect(reserveSource).toContain("export function corpDefenseReserveNeeds(");
+    expect(economySignals).toContain(
+      'from "../../runtime/corp-defense-funding-facts";',
     );
-
-    expect(reserveStart).toBeGreaterThanOrEqual(0);
-    expect(reserveEnd).toBeGreaterThan(reserveStart);
-
-    const reserveSource = planFirstRuntime.slice(reserveStart, reserveEnd);
-
-    expect(planFirstRuntime).not.toContain(
-      "function corpCentralRezReserveNeeds(",
-    );
+    expect(economySignals).toContain("corpDefenseReserveNeeds(");
+    expect(
+      [planFirstRuntime, reserveSource, economySignals].join("\n"),
+    ).not.toContain("function corpCentralRezReserveNeeds(");
     expect(reserveSource).toContain(
       'need.installRoute?.disposition === "funding_only"',
     );
@@ -320,6 +338,7 @@ describe("plan-first live authority structure", () => {
     const productionPlanSources = [
       readSource("plans", "corp-core-plan-modules.ts"),
       readSource("plans", "corp-tactical-plan-modules.ts"),
+      extractedOwnerSources,
     ].join("\n");
 
     expect(CORP_CORE_ACTION_OWNERSHIP["install.ice"]).toBe(
@@ -366,6 +385,7 @@ describe("plan-first live authority structure", () => {
     const productiveDefenseSources = [
       readSource("plans", "corp-core-plan-modules.ts"),
       readSource("runtime", "plan-first-live-runtime.ts"),
+      extractedOwnerSources,
       icePlacement,
     ].join("\n");
     for (const forbidden of [

@@ -82,3 +82,9 @@ AI-Typecheck und alle AI-, Paketgrenzen-, Discovery- und Formatgates grün.
 780 produktive AI-Dateien ohne Typ-/Laufzeitzyklen. Alle lokalen Links in den
 geänderten Architekturverträgen geprüft. Live-Runtime: 28.908 → 20.213 Zeilen.
 Der vollständige Drei-Shard-Lauf läuft noch; noch keine finale Abnahme.
+
+Der vollständige Lauf fand einen veralteten Dateipfad im bestehenden
+Authority-Strukturtest: Defense-Funding wird nun in seinem eigenen
+Faktenmodul geprüft und die Schutzprüfungen erfassen auch die neuen Owner.
+Alle fachlichen Assertions bleiben bestehen. Gezielt erneut 11/11 Tests grün.
+Nur Testcode geändert; keine erneute Ausführung bereits grüner Fachtests nötig.
