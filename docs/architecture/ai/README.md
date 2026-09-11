@@ -123,7 +123,7 @@ Fachverträge benennen Signale, Bindungen und Dienste. Die Runner-Core-Datei
 enthält nur noch die Domänentypen und die Registrierung ihrer acht Module.
 Geteilte taktische Standards, Funding- und Entwicklungskriterien sowie
 Run-Payoff-Fakten sind von den Registries getrennt. Die gemeinsame Live-Runtime
-komponiert die Daten und Dienste und koordiniert weiterhin plangreifende
+komponiert die Daten und Dienste und koordiniert weiterhin planübergreifende
 Ausschlüsse. Das ist eine Quellcodestruktur innerhalb von `@netgrid/ai`, keine
 Aufteilung in separat geladene Laufzeitbibliotheken.
 
