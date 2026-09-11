@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { RemoteDoctrineProfile } from "../remote-doctrine-profile";
-import { buildCorpScoringRemoteProjectSignals } from "./corp-remote-project-signals";
+import { buildCorpScoringRemoteProjectSignals } from "../corp/scoring-remote/scoring-remote-signals";
 import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
 
 describe("resident Corp scoring remote project", () => {

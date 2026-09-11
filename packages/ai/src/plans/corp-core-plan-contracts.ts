@@ -4,7 +4,7 @@ import type {
   CorpCentralDefenseHqHoldCadence,
 } from "../runtime/corp-central-defense-allocation";
 import { CorpDefenseSignal } from "./corp-defense-contracts";
-import type { CorpRemoteProjectSignal } from "./corp-remote-project-signals";
+import type { CorpRemoteProjectSignal } from "../corp/scoring-remote/scoring-remote-types";
 import { CorpScoreProjectSignal } from "./corp-score-contracts";
 
 export type CorpCorePlanDomain = {

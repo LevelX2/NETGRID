@@ -294,6 +294,24 @@ Ein vorbereitetes Zielremote bleibt über Economy-, Draw-, Punish- und
 Central-Responses erhalten. Remote-Optionswert, Defense-Wert, Fundingwert und
 Scorewert werden getrennt zugerechnet.
 
+### Vertikale Implementierung des Scoring-Remotes
+
+Unter `packages/ai/src/corp/scoring-remote/` liegen:
+
+- `scoring-remote-discovery.ts`: Zusammenstellung von Belegung, Doctrine und
+  aktueller Reifequote aus sichtbaren Serverfakten;
+- `scoring-remote-signals.ts`: Zielbindung, Cadence, Wiederverwendung, Score-Lease
+  und exakt gebundener Ausbau- oder Finanzierungsbedarf;
+- `scoring-remote-types.ts`: Projekt-, Belegungs- und Consumer-Verträge;
+- `scoring-remote-plan-module.ts`: Discovery, Assessment und Support-Step.
+
+Das verfügbare Rez-Budget kommt aus
+`runtime/corp-defense-remote-rez-budget.ts`; globale Central-Allokation bleibt
+außerhalb dieses Owners. Die bestehende Reifebewertung unter
+`runtime/corp-remote-maturity-assessment.ts` bleibt ein gemeinsamer gequoteter
+Projektionsdienst. Das Remote-Modul besitzt weiterhin keine eigene ICE-,
+Agenda- oder Assetaktion. Sein Step fordert den gebundenen Provider an.
+
 ## 4. `corp.defend_servers`
 
 Aktuelle Passgebühren gehören als Rez-Response diesem Owner. Die Engine

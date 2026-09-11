@@ -1,6 +1,6 @@
 # Fünf weitere AI-Owner bündeln
 
-Status: P1–P3 abgenommen; P4 aktiv. Auftrag: Nutzerfreigabe vom 2026-09-11.
+Status: P1–P4 abgenommen; P5 aktiv. Auftrag: Nutzerfreigabe vom 2026-09-11.
 
 ## Ziel und Grenzen
 
@@ -49,4 +49,7 @@ P2: 88 Tests über zehn Dateien geprüft; zwei fehlende Imports beim Herauslöse
 
 
 P3: 71 Tests in acht Dateien, AI-Typecheck und Source-/Reachability-Gates grün (798 produktive Dateien, keine Zyklen). Remote-Letztchancenregeln liegen beim Owner; gemeinsame Finanzierung konsumiert diesen Vertrag.
+
+
+P4: 51 Tests in sechs Dateien, AI-Typecheck und Source-/Reachability-Gates grün (802 produktive Dateien, keine Zyklen). Remote erhält das bestehende Defense-Rezbudget als Zahl; Projekt und aktuelle Typverträge sind gebündelt.
 

@@ -1,26 +1,36 @@
 import type { AiDecisionInput, VisibleCorpRezCostQuote } from "@netgrid/shared";
+import { remoteModule } from "../corp/scoring-remote/scoring-remote-plan-module";
+
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+
 import { economyModule } from "../corp/economy/economy-plan-module";
+
 import {
   corpEconomyCandidateHasExecutablePayload,
   economyCandidates,
   immediateCorpLiquidCreditGain,
 } from "../corp/economy/economy-routes";
+
 import type { CorpCentralDefenseAllocation } from "../runtime/corp-central-defense-allocation";
+
 import { assessFundingOnlyIceStaging } from "../runtime/corp-defense-staging-policy";
+
 import {
   exactCorpIceRezRoutesEqual,
   projectExactCorpIceRezRoute,
   type CorpExactIceRezRouteProjection,
 } from "../runtime/corp-exact-ice-rez-route";
+
 import {
   assessBestFundedCorpScoreProtection,
   type KnownCorpFundedIceInstallRouteProjection,
 } from "../runtime/corp-funded-score-protection";
+
 import {
   compareExactProbabilities,
   type ExactProbability,
 } from "../runtime/corp-score-protection-assessment";
+
 import {
   assessment,
   candidateTargetIds,
@@ -29,11 +39,9 @@ import {
   proposal,
   state,
 } from "./corp-core-module-support";
-import {
-  DefenseState,
-  RemoteState,
-  ScoreState,
-} from "./corp-core-plan-contracts";
+
+import { DefenseState, ScoreState } from "./corp-core-plan-contracts";
+
 import {
   CorpDefenseSignal,
   CorpGenericDefenseSignal,
@@ -41,33 +49,40 @@ import {
   CorpScoreProtectionInstallSignal,
   CorpScoreProtectionStagingInstallSignal,
 } from "./corp-defense-contracts";
+
 import {
   corpGenericDefensePriorityClass,
   genericDefenseFundingRequirement,
   genericDefenseFundingRequirementIsCurrent,
 } from "./corp-defense-funding-contract";
-import type { CorpRemoteProjectSignal } from "./corp-remote-project-signals";
+
 import {
   CorpScorePhase,
   CorpScorePriorityClass,
   CorpScoreProjectSignal,
 } from "./corp-score-contracts";
+
 import { corpScorePriorityClass } from "./corp-score-priority";
+
 import type {
   PlanAssessment,
   PriorityClass,
   ResourceGap,
 } from "./plan-assessment";
+
 import { planInstanceIdForProposal } from "./plan-instance";
+
 import { PlanResolutionFailure } from "./plan-resolution-failure";
+
 import type { PlanStepCapability } from "./plan-route";
+
 import type {
   PlanMaterialization,
   PlanModule,
   PlanSchedulerContext,
 } from "./plan-scheduler";
 
-export type { CorpRemoteProjectSignal } from "./corp-remote-project-signals";
+export type { CorpRemoteProjectSignal } from "../corp/scoring-remote/scoring-remote-types";
 
 export type { CorpExactIceRezRouteProjection };
 
@@ -727,65 +742,6 @@ function scoreBlockerCode(signal: CorpScoreProjectSignal): string | undefined {
   if (signal.evidenceCode.startsWith("corp_last_click_score_install_deferred:"))
     return "corp_score_development_click_unavailable";
   return "corp_score_route_unavailable";
-}
-
-function remoteModule(): PlanModule {
-  return {
-    moduleId: "corp.establish_scoring_remote",
-    side: "corp",
-    discover: (context) =>
-      domain(context).remoteProjects.map((signal) =>
-        proposal({
-          moduleId: "corp.establish_scoring_remote",
-          dedupeKey: signal.projectId,
-          moduleState: { kind: "remote", signal } satisfies RemoteState,
-          priorityClass: "P6",
-          target: { kind: "server", id: signal.serverId },
-          routeExists: false,
-          supportable: signal.feasible && signal.need !== undefined,
-          evidenceCode: signal.evidenceCode,
-          blockerCode:
-            signal.phase === "assessment_unknown"
-              ? "remote_protection_assessment_unknown"
-              : "remote_support_route_unavailable",
-          abandonWhenTargetMissing: false,
-          persistencePolicy: "recurring_cadence",
-          moduleVersion: "2",
-          cadence: {
-            turnKey: signal.cadence.turnKey,
-            maxExecutionsPerTurn: signal.cadence.maximumActions,
-            executionsUsed: signal.cadence.actionsUsed,
-          },
-        }),
-      ),
-    assess: (instance, context, portfolio) => {
-      const current = state<RemoteState>(instance);
-      const resourceGaps = remoteResourceGaps(current.signal);
-      return assessment(
-        instance,
-        "P6",
-        false,
-        current.signal.value,
-        portfolio.executorInstanceId,
-        resourceGaps,
-      );
-    },
-    materialize: (instance) => {
-      const current = state<RemoteState>(instance);
-      return {
-        step: {
-          stepId: `${instance.instanceId}:${current.signal.phase}`,
-          capability: {
-            capabilityId: "maintain_strategic_scoring_remote",
-            semanticActionTypes: [],
-          },
-          target: { kind: "server", id: current.signal.serverId },
-          purpose: `Maintain resident scoring-remote objective ${current.signal.serverId}; concrete actions belong to bound support providers.`,
-        },
-        candidates: [],
-      };
-    },
-  };
 }
 
 function defenseModule(): PlanModule {
@@ -2468,19 +2424,6 @@ function scoreResourceGaps(
   return resourceGaps;
 }
 
-function remoteResourceGaps(signal: CorpRemoteProjectSignal): ResourceGap[] {
-  if (!signal.need) return [];
-  return [
-    {
-      needId: signal.need.needId,
-      capability: signal.need.capability,
-      minimum: signal.need.minimum,
-      available: 0,
-      deadline: "multi_turn",
-    },
-  ];
-}
-
 function genericScoreMaterialIntentFit(
   context: PlanSchedulerContext,
   signal: CorpScoreProjectSignal,
@@ -2786,13 +2729,6 @@ function selectedGenericDefensePortfolioBand(
   };
 }
 
-/**
- * The central allocator compares HQ and R&D from one complete fact set. Do
- * not let per-signal urgency bands discard its selected placement before the
- * exact route materializer can apply that comparison. Independently urgent
- * non-central defense remains eligible, and an unavailable selected central
- * route still permits the existing exact fallback to the other central.
- */
 function allocatedCentralPlacementSignals(
   context: PlanSchedulerContext,
   signals: readonly CorpGenericDefenseSignal[],

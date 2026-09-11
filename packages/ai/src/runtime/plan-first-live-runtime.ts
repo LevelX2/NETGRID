@@ -1,8 +1,12 @@
+import { buildCorpScoringRemoteDiscovery } from "../corp/scoring-remote/scoring-remote-discovery";
+import { corpAvailableRemoteRezCredits } from "./corp-defense-remote-rez-budget";
+
 import {
   buildRunnerRemoteContestSignals,
   runnerRemoteHasCurrentContestMaterial,
   runnerRemoteHasKnownIceScheduledForRunnerTurnEndTrash,
 } from "../runner/remote-contest/remote-contest-signals";
+
 import {
   runnerCandidateIsCardAbility,
   runnerCandidateIsCentralInformationAbility,
@@ -418,11 +422,6 @@ import {
 } from "../plans/corp-opponent-campaign-continuity";
 
 import {
-  buildCorpScoringRemoteProjectSignals,
-  type CorpRemoteOccupancyClaim,
-} from "../plans/corp-remote-project-signals";
-
-import {
   corpRemoteHasEngineQuotedFundableScoreFriction,
   corpRemoteHasEngineQuotedReusableScoreFriction,
   corpResidentScoreDefenseBinding,
@@ -539,8 +538,6 @@ import {
   corpScoredAgendaHqShuffleProfile,
   corpScoredAgendaIceMarkProfile,
 } from "./corp-canonical-card-facts";
-
-import { assessCorpRemoteMaturityFromVisibleServer } from "./corp-remote-maturity-assessment";
 
 import { type DiscardChoiceKeepScore } from "./discard-choice-selection";
 
@@ -6841,69 +6838,15 @@ function buildCorpDomain(
         : [],
     ),
   );
-  const remoteOccupancyClaims: CorpRemoteOccupancyClaim[] = [
-    ...scoreProjects.flatMap((project) =>
-      project.feasible && project.serverId && project.serverId !== "new_remote"
-        ? [
-            {
-              serverId: project.serverId,
-              owner: "score" as const,
-              ownerId: project.projectId,
-            },
-          ]
-        : [],
-    ),
-    ...ambushes.flatMap((ambush) =>
-      ambush.serverId && ambush.serverId !== "new_remote"
-        ? [
-            {
-              serverId: ambush.serverId,
-              owner: "ambush" as const,
-              ownerId: ambush.ambushId,
-            },
-          ]
-        : [],
-    ),
-  ];
-  const remoteDoctrine = (input as AiDecisionInputWithDeckCapabilities)
-    .ownRemoteDoctrineProfile;
-  const availableRemoteRezCredits = corpAvailableRemoteRezCredits(
+  const remoteProjects = buildCorpScoringRemoteDiscovery({
     input,
-    centralDefenseAllocation,
-  );
-  const runnerRig = input.playerView.opponent.rig ?? [];
-  const runnerCreditBudget = runnerRunPathCreditBudgetWithVisiblePools(
-    input.playerView.opponent.credits,
-    runnerRig,
-  );
-  const remoteMaturityByServerId = new Map(
-    [
-      ...input.playerView.servers.filter((server) =>
-        server.id.startsWith("remote_"),
-      ),
-      { id: "new_remote", ice: [], root: [] },
-    ].map((server) => [
-      server.id,
-      assessCorpRemoteMaturityFromVisibleServer({
-        observedAtStateVersion: input.playerView.stateVersion,
-        targetServerId: server.id,
-        targetBand: remoteDoctrine?.protectionTarget ?? "none",
-        serverIce: server.ice,
-        serverRoot: server.root,
-        runnerRig,
-        runnerCreditBudget,
-        availableCorpRezCredits: availableRemoteRezCredits,
-        visibleCorpBidCapacity: input.playerView.own.credits,
-      }),
-    ]),
-  );
-  const remoteProjects = buildCorpScoringRemoteProjectSignals({
-    input,
-    ...(previous ? { previous } : {}),
-    ...(remoteDoctrine ? { remoteDoctrine } : {}),
+    previous,
     scoreProjects,
-    remoteOccupancyClaims,
-    maturityByServerId: remoteMaturityByServerId,
+    ambushes,
+    availableRemoteRezCredits: corpAvailableRemoteRezCredits(
+      input,
+      centralDefenseAllocation,
+    ),
   });
   const mergedDefenseNeeds: CorpCorePlanDomain["defenseNeeds"] =
     mergeDefenseSignals([
@@ -7651,41 +7594,6 @@ function corpLayeredIceStagingParent(
         targetRecoveryTurns: remoteParent.targetRecoveryTurns,
       }
     : undefined;
-}
-
-function corpAvailableRemoteRezCredits(
-  input: AiDecisionInput,
-  centralAllocation: CorpCorePlanDomain["centralDefenseAllocation"],
-): number {
-  if (centralAllocation?.status !== "known") {
-    return input.playerView.own.credits;
-  }
-  const selectedServerId = centralAllocation.selectedServerId;
-  if (centralAllocation.evidence[selectedServerId].threat === "none") {
-    return input.playerView.own.credits;
-  }
-  const centralServer = input.playerView.servers.find(
-    (server) => server.id === selectedServerId,
-  );
-  const centralRezCosts =
-    centralServer?.ice
-      .filter((ice) => ice.rezzed !== true)
-      .flatMap((ice) => {
-        const quote = ice.effectiveRezCostQuote;
-        return quote?.context === "installed" &&
-          quote.complete === true &&
-          quote.cardId === ice.instanceId &&
-          quote.targetServerId === selectedServerId &&
-          quote.projectedServerId === selectedServerId &&
-          quote.expiresAtStateVersion === input.playerView.stateVersion &&
-          quote.mandatoryAdditionalCosts.agendaPoints === 0 &&
-          Number.isSafeInteger(quote.finalCredits) &&
-          quote.finalCredits >= 0
-          ? [quote.finalCredits]
-          : [];
-      }) ?? [];
-  const reserve = centralRezCosts.length > 0 ? Math.min(...centralRezCosts) : 0;
-  return Math.max(0, input.playerView.own.credits - reserve);
 }
 
 function corpRemoteCreationLockRemovalAction(

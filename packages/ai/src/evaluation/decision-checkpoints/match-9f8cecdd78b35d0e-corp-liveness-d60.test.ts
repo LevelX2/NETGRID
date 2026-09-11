@@ -8,7 +8,7 @@ import type { ActionSemanticCandidate } from "../../action-semantic-candidate-ty
 import { buildCorpAgendaTurnPlanningSlice } from "../../plans/corp-agenda-turn-planning";
 import { corpTurnLiquidityDevelopmentNeed } from "../../corp/economy/economy-domain-signals";
 
-import { scoreConsumerSupportState } from "../../plans/corp-remote-project-signals";
+import { scoreConsumerSupportState } from "../../corp/scoring-remote/scoring-remote-signals";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import { buildPlanningRulesContext } from "../../plans/turn-planning-contracts";
 import {
