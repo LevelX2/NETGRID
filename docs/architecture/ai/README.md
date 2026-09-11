@@ -83,7 +83,7 @@ vollständige Abdeckung aller denkbaren Kartenfolgen.
 | `runner.complete_turn`            | [createTurnCompletionPlanModule](../../../packages/ai/src/plans/turn-completion-plan-module.ts)                             | [EndTurn](planning-architecture.md#17-endturn-vertrag)                                               |
 | `corp.score_agenda`               | [scoreModule](../../../packages/ai/src/corp/score/score-plan-module.ts)                                                     | [Corp §2](corp-plan-contracts.md#2-corpscore_agenda)                                                 |
 | `corp.establish_scoring_remote`   | [remoteModule](../../../packages/ai/src/corp/scoring-remote/scoring-remote-plan-module.ts)                                  | [Corp §3](corp-plan-contracts.md#3-corpestablish_scoring_remote)                                     |
-| `corp.defend_servers`             | [defenseModule](../../../packages/ai/src/plans/corp-core-plan-modules.ts#L617)                                              | [Corp §4](corp-plan-contracts.md#4-corpdefend_servers)                                               |
+| `corp.defend_servers`             | [defenseModule](../../../packages/ai/src/corp/defense/defense-plan-module.ts)                                               | [Corp §4](corp-plan-contracts.md#4-corpdefend_servers)                                               |
 | `corp.economy`                    | [economyModule](../../../packages/ai/src/corp/economy/economy-plan-module.ts)                                               | [Corp §6](corp-plan-contracts.md#6-corpeconomy)                                                      |
 | `corp.respond_to_virus_pressure`  | [createCorpVirusPressureModule](../../../packages/ai/src/corp/virus-pressure/virus-pressure-plan-module.ts)                 | [Corp §5](corp-plan-contracts.md#5-corprespond_to_virus_pressure)                                    |
 | `corp.punish_campaign`            | [punishCampaignModule](../../../packages/ai/src/corp/punish/punish-campaign-plan-module.ts)                                 | [Corp §7](corp-plan-contracts.md#7-corppunish_campaign)                                              |
@@ -144,8 +144,8 @@ nun ebenfalls vertikale Owner unter `corp/ambush/`, `runner/central-pressure/`,
 Fachverträge verlinken die Signalbildung, Finanzierung, Projektion und gebundene
 Choice-Ausführung. Gemeinsame Run-Funding-/Routen-/Vorbereitungsdienste liegen
 unter `run-analysis/`; Defense behält globale Allokation und Schutzrouten.
-Von den 23 fachlichen Ownern sind damit 21 vertikal gebündelt. Die verbleibenden
-beiden sind `corp.defend_servers` und `runner.convert_run_window`; dazu kommen
+Von den 23 fachlichen Ownern sind damit 22 vertikal gebündelt. Der verbleibende
+Owner ist `runner.convert_run_window`; dazu kommen
 unverändert die beiden bereits separaten Turn-Completion-Module.
 
 Nicht registriert sind die konzeptionellen Opening-Module

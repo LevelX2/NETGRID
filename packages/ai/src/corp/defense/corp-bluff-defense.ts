@@ -1,8 +1,8 @@
 import type { AiDecisionInput } from "@netgrid/shared";
-import { assessCorpScoreProtection } from "../runtime/corp-score-protection-assessment";
-import { readExactCurrentInstalledCorpIceRezQuote } from "../runtime/corp-exact-ice-rez-route";
+import { assessCorpScoreProtection } from "../../runtime/corp-score-protection-assessment";
+import { readExactCurrentInstalledCorpIceRezQuote } from "../../runtime/corp-exact-ice-rez-route";
 
-import type { CorpBluffDefenseNeed } from "./corp-bluff-defense-types";
+import type { CorpBluffDefenseNeed } from "../../plans/corp-bluff-defense-types";
 
 /**
  * Existing corp.defend_servers target service. It values one optional layer,

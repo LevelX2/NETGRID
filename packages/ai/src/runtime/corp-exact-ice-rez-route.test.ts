@@ -21,8 +21,8 @@ import {
   readExactCurrentInstalledCorpIceRezQuote,
   readExactInstalledCorpIceRezQuote,
 } from "./corp-exact-ice-rez-route";
-import { assessCorpExactIceRezAgainstScoreReserves } from "./corp-defense-score-reserve";
-import { readKnownCorpCentralAgendaThreat } from "./corp-central-defense-facts-adapter";
+import { assessCorpExactIceRezAgainstScoreReserves } from "../corp/defense/corp-defense-score-reserve";
+import { readKnownCorpCentralAgendaThreat } from "../corp/defense/corp-central-defense-facts-adapter";
 import { assessCorpScoreProtection } from "./corp-score-protection-assessment";
 
 describe("exact Corp ICE rez route", () => {

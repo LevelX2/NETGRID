@@ -1,4 +1,4 @@
-import { AI_HINTS_BY_CARD } from "../ai-hints";
+import { AI_HINTS_BY_CARD } from "../../ai-hints";
 
 export type CorpActionIceRezSupportLiability =
   | "bounded"

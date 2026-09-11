@@ -12,7 +12,7 @@ import type {
   CorpFundedRemoteAccessRiskNeed,
   KnownCorpFundedScoreProtectionAssessment,
 } from "../corp-funded-score-protection";
-import type { CorpCentralDefenseAllocation } from "../corp-central-defense-allocation";
+import type { CorpCentralDefenseAllocation } from "../../corp/defense/corp-central-defense-allocation";
 import {
   corpAction,
   corpCard,

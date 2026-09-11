@@ -4,12 +4,12 @@ import { recentlyCompromisedCorpRemoteIds } from "../../plans/corp-opponent-camp
 import { type CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { type CorpPlanDomain } from "../../plans/corp-tactical-plan-contracts";
 import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
-import { type CorpCentralDefenseAllocation } from "../../runtime/corp-central-defense-allocation";
+import { type CorpCentralDefenseAllocation } from "../defense/corp-central-defense-allocation";
 import { assessCorpOpeningRush } from "../../runtime/corp-opening-rush";
 import {
   corpPreparedScoreProjectHasExecutableCurrentStep,
   corpPreparedScoreProjectHasImmediateFundingSupport,
-} from "../../runtime/corp-score-protection-routes";
+} from "../defense/corp-score-protection-routes";
 import { type CorpScorelineFeasibility } from "../../runtime/corp-scoreline-feasibility";
 import { visibleCardIsAgenda } from "../../runtime/visible-action-facts";
 import { corpExactCurrentBasicLiquidCreditCandidate } from "../economy/economy-domain-signals";

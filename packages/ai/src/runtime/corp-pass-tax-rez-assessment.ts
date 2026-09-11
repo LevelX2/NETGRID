@@ -1,6 +1,6 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
-import { readKnownCorpCentralAgendaThreat } from "./corp-central-defense-facts-adapter";
+import { readKnownCorpCentralAgendaThreat } from "../corp/defense/corp-central-defense-facts-adapter";
 
 export function corpPassTaxRezAssessment(
   input: AiDecisionInput,

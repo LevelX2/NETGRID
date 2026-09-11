@@ -49,12 +49,20 @@ const allowedCardIdUses = createAllowances([
       "The definition ID binds the selected LegalAction and encountered ICE to the exact Vacuum Link rewind continuation.",
   },
   {
-    relativePath: "runtime/plan-first-live-runtime.ts",
+    relativePath: "corp/defense/defense-discovery-support.ts",
     cardId: "onr_v1_358_dr-dreff",
     category: "lifecycle_binding",
-    expectedCount: 2,
+    expectedCount: 1,
     reason:
-      "The definition ID restores Dr. Dreff's resident delayed-success plan source and validates the visible rezzed source of its already selected resolution choice.",
+      "The definition ID restores Dr. Dreff's resident delayed-success plan source.",
+  },
+  {
+    relativePath: "corp/defense/defense-choice-continuation.ts",
+    cardId: "onr_v1_358_dr-dreff",
+    category: "lifecycle_binding",
+    expectedCount: 1,
+    reason:
+      "The definition ID validates the visible rezzed source of Dr. Dreff's already selected resolution choice.",
   },
   {
     relativePath: "runtime/selected-choices-for-decision.ts",

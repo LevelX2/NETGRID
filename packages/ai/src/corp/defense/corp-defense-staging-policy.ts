@@ -1,5 +1,5 @@
 import type { AiDecisionInput } from "@netgrid/shared";
-import type { KnownCorpFundedIceInstallRouteProjection } from "./corp-funded-score-protection";
+import type { KnownCorpFundedIceInstallRouteProjection } from "../../runtime/corp-funded-score-protection";
 
 export type CorpFundingOnlyIceStagingInput = {
   phase: string;

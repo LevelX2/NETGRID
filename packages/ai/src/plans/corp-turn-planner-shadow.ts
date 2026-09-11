@@ -26,7 +26,7 @@ import {
   buildCorpDefenseTurnPlanningSlice,
   type CorpDefenseTurnPlanningLine,
   type CorpDefenseTurnPlanningSlice,
-} from "./corp-defense-turn-planning";
+} from "../corp/defense/corp-defense-turn-planning";
 import {
   buildCorpTurnPlanningCoverageReport,
   corpTurnPlanningModuleCoverage,

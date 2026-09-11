@@ -1,18 +1,18 @@
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 import {
   type AiDecisionInput,
   type CardDefinitionId,
   type VisibleCard,
 } from "@netgrid/shared";
 
-import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
+import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import {
   allocateCorpCentralDefense,
   type CorpCentralDefenseAllocation,
   type CorpCentralDefenseHqHoldCadence,
   type CorpCentralDefenseServerId,
 } from "./corp-central-defense-allocation";
-import { assessCorpScoreProtection } from "./corp-score-protection-assessment";
+import { assessCorpScoreProtection } from "../../runtime/corp-score-protection-assessment";
 
 const FULL_ACCESS_PROBABILITY = { numerator: 1, denominator: 1 } as const;
 const IMPORTANT_TRASHABLE_MECHANICS = new Set([

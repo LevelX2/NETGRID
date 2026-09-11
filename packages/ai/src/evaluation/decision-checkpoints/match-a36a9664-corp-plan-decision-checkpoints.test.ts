@@ -9,7 +9,7 @@ import terminalRdDefenseJson from "../../../../../data/scenarios/ai-decision-che
 import counterBankReadyJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-a36a-07-counter-bank-ready-d89.json";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
-import { readKnownCorpCentralAgendaThreat } from "../../runtime/corp-central-defense-facts-adapter";
+import { readKnownCorpCentralAgendaThreat } from "../../corp/defense/corp-central-defense-facts-adapter";
 
 describe("match a36a9664 Corp plan decision checkpoints", () => {
   it.each([

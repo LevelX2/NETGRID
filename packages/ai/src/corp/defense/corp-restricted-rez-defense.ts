@@ -1,8 +1,8 @@
-import type { CorpGenericDefenseSignal } from "../plans/corp-defense-contracts";
-import type { CorpScoreProjectSignal } from "../plans/corp-score-contracts";
+import type { CorpGenericDefenseSignal } from "../../plans/corp-defense-contracts";
+import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import type { AiDecisionInput } from "@netgrid/shared";
 
-import { readExactCurrentInstalledCorpIceRezQuote } from "./corp-exact-ice-rez-route";
+import { readExactCurrentInstalledCorpIceRezQuote } from "../../runtime/corp-exact-ice-rez-route";
 import { assessCorpExactIceRezAgainstScoreReserves } from "./corp-defense-score-reserve";
 
 /** Defense admits the consumer; Economy may only execute its exact funding need. */

@@ -19,11 +19,11 @@ import {
 import {
   corpCentralDefenseHqAgendaExposureIsDeadline,
   type CorpCentralDefenseAllocation,
-} from "../../runtime/corp-central-defense-allocation";
+} from "../defense/corp-central-defense-allocation";
 import {
   corpMatureRemoteAffordableDefenseLayerCertification,
   corpRemoteHasBoundedStagedIce,
-} from "../../runtime/corp-defense-layer-certification";
+} from "../defense/corp-defense-layer-certification";
 import { type CorpFundedRemoteAccessRiskNeed } from "../../runtime/corp-funded-score-protection";
 import { compareExactProbabilities } from "../../runtime/corp-score-protection-assessment";
 import {

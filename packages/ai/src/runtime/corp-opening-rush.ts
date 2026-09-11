@@ -2,7 +2,7 @@ import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type { CorpFundedRemoteAccessRiskNeed } from "./corp-funded-score-protection";
-import type { CorpCentralDefenseAllocation } from "./corp-central-defense-allocation";
+import type { CorpCentralDefenseAllocation } from "../corp/defense/corp-central-defense-allocation";
 import { compareExactProbabilities } from "./corp-score-protection-assessment";
 
 export const CORP_OPENING_RUSH_SCHEMA_VERSION = "corp-opening-rush-v1";

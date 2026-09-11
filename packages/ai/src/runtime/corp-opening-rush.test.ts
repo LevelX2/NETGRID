@@ -1,7 +1,7 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
-import type { CorpCentralDefenseAllocation } from "./corp-central-defense-allocation";
+import type { CorpCentralDefenseAllocation } from "../corp/defense/corp-central-defense-allocation";
 import {
   CORP_OPENING_RUSH_SCHEMA_VERSION,
   assessCorpOpeningRush,

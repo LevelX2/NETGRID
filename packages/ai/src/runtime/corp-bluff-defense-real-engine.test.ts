@@ -11,7 +11,7 @@ import catalog from "../../../../data/decks/standard-deck-catalog-1.0.0.json";
 import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { chooseCorpAction, chooseRunnerAction } from "../index";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
-import { corpBluffDefenseNeed } from "../plans/corp-bluff-defense";
+import { corpBluffDefenseNeed } from "../corp/defense/corp-bluff-defense";
 import { buildAiDecisionInput } from "./ai-decision-input";
 import { corpRdRecyclingSignals } from "../corp/ambush/corp-access-zone-preparation";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";

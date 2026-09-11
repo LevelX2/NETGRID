@@ -15,7 +15,7 @@ import {
   corpIceInstallHasCurrentCompleteRezQuote,
   corpQualitativeIceStagingSignal,
   type CorpDefenseDomainSignalFacts,
-} from "./corp-defense-domain-signals";
+} from "../corp/defense/corp-defense-domain-signals";
 
 vi.mock("../runtime/corp-funded-score-protection", async () => {
   const actual = await vi.importActual<

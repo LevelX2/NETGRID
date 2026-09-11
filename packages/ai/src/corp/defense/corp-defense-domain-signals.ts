@@ -1,13 +1,13 @@
-import type { CorpCorePlanDomain } from "./corp-core-plan-contracts";
-import type { CorpDefenseSignal } from "./corp-defense-contracts";
+import type { CorpCorePlanDomain } from "../../plans/corp-core-plan-contracts";
+import type { CorpDefenseSignal } from "../../plans/corp-defense-contracts";
 import type {
   AiDecisionInput,
   LegalAction,
   VisibleCard,
   VisibleEffectiveIceRunQuote,
 } from "@netgrid/shared";
-import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
-import { costProfileForAction } from "../actions/action-cost-timing";
+import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
+import { costProfileForAction } from "../../actions/action-cost-timing";
 
 import {
   assessBestFundedCorpScoreProtection,
@@ -16,25 +16,25 @@ import {
   type CorpFundedRemoteAccessRiskNeed,
   type CorpScoreReserve,
   type KnownCorpFundedIceInstallRouteProjection,
-} from "../runtime/corp-funded-score-protection";
-import { corpHandDuplicateCount } from "../corp/hand-management/hand-inventory-facts";
-import { corpKnownAgendaInventory } from "../runtime/corp-known-agenda-inventory";
-import { isCorpOpeningTurnSerial } from "../runtime/corp-opening-rush";
-import { readKnownCorpCentralAgendaThreat } from "../runtime/corp-central-defense-facts-adapter";
-import { compareExactProbabilities } from "../runtime/corp-score-protection-assessment";
+} from "../../runtime/corp-funded-score-protection";
+import { corpHandDuplicateCount } from "../hand-management/hand-inventory-facts";
+import { corpKnownAgendaInventory } from "../../runtime/corp-known-agenda-inventory";
+import { isCorpOpeningTurnSerial } from "../../runtime/corp-opening-rush";
+import { readKnownCorpCentralAgendaThreat } from "./corp-central-defense-facts-adapter";
+import { compareExactProbabilities } from "../../runtime/corp-score-protection-assessment";
 import {
   visibleBreakerCardCanAddressIce,
   visibleBreakerRoles,
-} from "../runtime/runner-visible-breaker-coverage";
-import { visibleCorpIceDefenseProfile } from "../runtime/semantic-runtime-corp-effective-defense";
+} from "../../runtime/runner-visible-breaker-coverage";
+import { visibleCorpIceDefenseProfile } from "../../runtime/semantic-runtime-corp-effective-defense";
 import {
   assessKnownRezzedIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,
-} from "../visible-run-analysis";
+} from "../../visible-run-analysis";
 import {
   quoteCorpRemotePath,
   remoteProtectionPathImproves,
-} from "../runtime/corp-remote-maturity-assessment";
+} from "../../runtime/corp-remote-maturity-assessment";
 
 export type CorpDefenseDomainSignalFacts = Readonly<{
   hasExactNonNegativeCostProfile: (

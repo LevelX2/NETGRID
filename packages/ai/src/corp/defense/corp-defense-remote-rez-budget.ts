@@ -1,5 +1,5 @@
 import { type AiDecisionInput } from "@netgrid/shared";
-import { type CorpCorePlanDomain } from "../plans/corp-core-plan-contracts";
+import { type CorpCorePlanDomain } from "../../plans/corp-core-plan-contracts";
 export function corpAvailableRemoteRezCredits(
   input: AiDecisionInput,
   centralAllocation: CorpCorePlanDomain["centralDefenseAllocation"],

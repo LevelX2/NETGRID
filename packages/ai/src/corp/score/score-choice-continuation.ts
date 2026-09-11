@@ -1,7 +1,7 @@
 import { visibleBreakerEncounterQuote } from "@netgrid/engine";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
-import { corpScoredAgendaIceMarkDefenseTarget } from "../../plans/corp-defense-domain-signals";
+import { corpScoredAgendaIceMarkDefenseTarget } from "../defense/corp-defense-domain-signals";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { type PlanSchedulerResult } from "../../plans/plan-scheduler";
 import {

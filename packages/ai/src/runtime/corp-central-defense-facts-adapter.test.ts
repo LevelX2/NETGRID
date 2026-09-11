@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, StateHash, VisibleCard } from "@netgrid/shared";
 import { buildAiDecisionInputDto } from "../input-dto.js";
-import { allocateCorpCentralDefenseFromAiFacts } from "./corp-central-defense-facts-adapter.js";
+import { allocateCorpCentralDefenseFromAiFacts } from "../corp/defense/corp-central-defense-facts-adapter.js";
 
 const agenda = (id: string): VisibleCard => ({
   instanceId: id,

@@ -1,41 +1,41 @@
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
-import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 import {
   corpEconomyActionIsOwned,
   corpEconomyCandidateHasExecutablePayload,
   immediateCorpLiquidCreditGain,
-} from "../corp/economy/economy-routes";
+} from "../economy/economy-routes";
 import {
   corpImmediateOperationEconomyConversions,
   corpVisibleCardEconomyWithdrawals,
-} from "../corp/economy/economy-signals";
-import { corpHandDuplicateCount } from "../corp/hand-management/hand-inventory-facts";
-import { corpScorePriorityClass } from "../corp/score/corp-score-priority";
-import { corpScoreHorizonCertificationIsCurrent } from "../corp/score/score-project-signals";
+} from "../economy/economy-signals";
+import { corpHandDuplicateCount } from "../hand-management/hand-inventory-facts";
+import { corpScorePriorityClass } from "../score/corp-score-priority";
+import { corpScoreHorizonCertificationIsCurrent } from "../score/score-project-signals";
 import {
   corpScoreProjectNeedsProtectionMaturity,
   corpScoreProtectionIsSatisfied,
   corpScoreRemainingAdvancementClicks,
-} from "../corp/score/score-protection-needs";
-import { type CorpDefenseSignal } from "../plans/corp-defense-contracts";
+} from "../score/score-protection-needs";
+import { type CorpDefenseSignal } from "../../plans/corp-defense-contracts";
 import {
   corpIceInstallHasCurrentCompleteRezQuote,
   knownInstallRouteHasUsefulEffectBlockedByFunding,
-} from "../plans/corp-defense-domain-signals";
-import { type CorpScoreProjectSignal } from "../plans/corp-score-contracts";
-import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
+} from "./corp-defense-domain-signals";
+import { type CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
+import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import {
   projectCorpFundedIceInstallRoute,
   type CorpFundedIceInstallRouteProjection,
   type CorpFundedRemoteAccessRiskNeed,
   type KnownCorpFundedIceInstallRouteProjection,
-} from "./corp-funded-score-protection";
-import { assessCorpScoreRushRisk } from "./corp-score-rush-risk";
-import { finiteNonNegativeIntegerOrResolutionFailure } from "./exact-action-cost-facts";
-import { visibleOwnCardByInstanceId } from "./runner-action-source-facts";
-import { visibleCorpIceDefenseProfile } from "./semantic-runtime-corp-effective-defense";
-import { candidateIsVisibleCorpIceInstall } from "./visible-action-facts";
+} from "../../runtime/corp-funded-score-protection";
+import { assessCorpScoreRushRisk } from "../../runtime/corp-score-rush-risk";
+import { finiteNonNegativeIntegerOrResolutionFailure } from "../../runtime/exact-action-cost-facts";
+import { visibleOwnCardByInstanceId } from "../../runtime/runner-action-source-facts";
+import { visibleCorpIceDefenseProfile } from "../../runtime/semantic-runtime-corp-effective-defense";
+import { candidateIsVisibleCorpIceInstall } from "../../runtime/visible-action-facts";
 type CorpProductiveScoreProtectionInstallRoute = Readonly<{
   project: CorpScoreProjectSignal;
   candidate: ActionSemanticCandidate;
