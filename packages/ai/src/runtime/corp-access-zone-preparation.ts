@@ -1,9 +1,10 @@
+import type { CorpAmbushSignal } from "../plans/corp-tactical-plan-contracts";
 import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import { reconstructBeliefState } from "../belief-state";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type { ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
-import type { CorpAmbushSignal } from "../plans/corp-tactical-plan-modules";
+
 import { corpBluffDefenseNeed } from "../plans/corp-bluff-defense";
 
 /** Mechanical profile only. No remote damage is inferred from central access. */

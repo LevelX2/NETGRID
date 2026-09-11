@@ -1,3 +1,4 @@
+import type { CorpPlanDomain } from "./corp-tactical-plan-contracts";
 import {
   AI_TURN_PLANNING_DEBUG_SCHEMA_VERSION,
   type AiDecision,
@@ -12,7 +13,7 @@ import type {
   LegalTarget,
   LegalTargetSummary,
 } from "../action-semantic-candidate-types";
-import type { CorpPlanDomain } from "./corp-tactical-plan-modules";
+
 import { currentCorpCreditObligation } from "./corp-credit-obligation";
 import { PlanResolutionFailure } from "./plan-resolution-failure";
 import { candidatePreservesMandatoryCreditObligation } from "./turn-remainder-search";

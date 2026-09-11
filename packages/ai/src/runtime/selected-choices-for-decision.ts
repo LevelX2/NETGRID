@@ -1,3 +1,7 @@
+import type {
+  CorpAmbushSignal,
+  CorpHandManagementSignal,
+} from "../plans/corp-tactical-plan-contracts";
 import {
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND,
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION,
@@ -25,10 +29,7 @@ import {
   selectedDiscardChoiceOptionIds,
   type DiscardChoiceKeepScore,
 } from "./discard-choice-selection";
-import type {
-  CorpAmbushSignal,
-  CorpHandManagementSignal,
-} from "../plans/corp-tactical-plan-modules";
+
 import type {
   CorpEconomyDevelopmentSignal,
   CorpEconomyStartRezChoiceSignal,

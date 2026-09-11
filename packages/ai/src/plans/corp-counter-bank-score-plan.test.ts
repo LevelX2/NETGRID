@@ -1,3 +1,4 @@
+import type { CorpAmbushSignal } from "./corp-tactical-plan-contracts";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import {
   CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
@@ -15,7 +16,6 @@ import {
   visibleCard,
 } from "../semantic-ai-runtime-cutover.test-support";
 import { corpCounterBankScoreProjects } from "./corp-counter-bank-score-plan";
-import type { CorpAmbushSignal } from "./corp-tactical-plan-modules";
 
 const VAPOR_OPS = "onr_v1_347_vapor-ops";
 const DATA_WALL = "onr_v1_238_data-wall-2-0";

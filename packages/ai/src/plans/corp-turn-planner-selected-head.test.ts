@@ -1,3 +1,4 @@
+import type { CorpPlanDomain } from "./corp-tactical-plan-contracts";
 import { hashGameState } from "@netgrid/engine";
 import { describe, expect, it } from "vitest";
 
@@ -12,7 +13,7 @@ import {
   specializedPlanningLineMatchesRoute,
 } from "./corp-turn-planner-shadow";
 import type { CorpAgendaTurnPlanningSlice } from "./corp-agenda-turn-planning";
-import type { CorpPlanDomain } from "./corp-tactical-plan-modules";
+
 import type { TurnPlanningHeadCandidate } from "./turn-planning-contracts";
 import { planningHeadMatchesCommittedPhaseRoot } from "./corp-turn-planner-cutover";
 

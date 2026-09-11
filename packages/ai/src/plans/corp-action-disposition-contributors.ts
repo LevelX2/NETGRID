@@ -1,3 +1,5 @@
+import { corpPunishCampaignOwnsCandidate } from "../corp/punish/punish-plan-support";
+import { type CorpPlanDomain } from "./corp-tactical-plan-contracts";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -17,10 +19,7 @@ import {
   corpAmbushAdvanceDispositionEvidence,
   corpCandidateIsAmbushInstall,
 } from "../runtime/corp-ambush-plan-signals";
-import {
-  corpPunishCampaignOwnsCandidate,
-  type CorpPlanDomain,
-} from "./corp-tactical-plan-modules";
+
 import {
   corpExactCurrentBasicLiquidCreditCandidate,
   corpVisibleLiquidityDemandTarget,

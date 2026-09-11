@@ -1,8 +1,9 @@
+import type { CorpPlanDomain } from "./corp-tactical-plan-contracts";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { describe, expect, it, vi } from "vitest";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
-import type { CorpPlanDomain } from "./corp-tactical-plan-modules";
+
 import {
   collectCorpActionDispositions,
   type CorpActionDispositionContributorFacts,

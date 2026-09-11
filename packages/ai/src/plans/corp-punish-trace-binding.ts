@@ -1,7 +1,8 @@
+import type { CorpPunishCampaignSignal } from "../corp/punish/punish-types";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { PlanExecutionOrigin } from "./plan-continuation";
 import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
-import type { CorpPunishCampaignSignal } from "./corp-tactical-plan-modules";
+
 import { PlanResolutionFailure } from "./plan-resolution-failure";
 import type {
   EngineWindowResolution,

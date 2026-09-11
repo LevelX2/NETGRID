@@ -1,239 +1,32 @@
-import { createCorpVirusPressureModule } from "../corp/virus-pressure/virus-pressure-plan-module";
-import type { CorpVirusPressureSignal } from "../corp/virus-pressure/virus-pressure-types";
-import {
-  corpTacticalProposal as proposal,
-  corpTacticalAssessment as assessment,
-  corpTacticalPlanDomain,
-} from "./corp-tactical-module-support";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
-import type { KnownCorpCardAccessEffectProjection } from "../runtime/known-corp-card-access-effect-projection";
-import type { CorpHandInventoryFacts } from "../runtime/corp-hand-inventory-facts";
-import type { CorpDrawAdmissionAssessment } from "../runtime/corp-draw-admission";
-import type { GuaranteeLevel, ResourceGap } from "./plan-assessment";
+import { punishCampaignModule } from "../corp/punish/punish-campaign-plan-module";
+import {
+  corpPunishCampaignOwnsCandidate,
+  punishCandidates,
+  punishMaterialization,
+} from "../corp/punish/punish-plan-support";
+import { PunishState } from "../corp/punish/punish-types";
+import { createCorpVirusPressureModule } from "../corp/virus-pressure/virus-pressure-plan-module";
+import {
+  corpTacticalAssessment as assessment,
+  corpSpecialDevelopmentAdmission,
+  domain,
+  corpTacticalProposal as proposal,
+  state,
+} from "./corp-tactical-module-support";
+import {
+  CorpAmbushSignal,
+  CorpHandManagementSignal,
+  CorpPlanDomain,
+} from "./corp-tactical-plan-contracts";
+import type { ResourceGap } from "./plan-assessment";
 import { planInstanceIdForProposal } from "./plan-instance";
-import type { PlanInstance } from "./plan-kernel-types";
 import type {
   PlanMaterialization,
   PlanModule,
   PlanSchedulerContext,
 } from "./plan-scheduler";
-import type { CorpCorePlanDomain } from "./corp-core-plan-modules";
 
-import type { CorpBluffDefenseNeed } from "./corp-bluff-defense-types";
-
-export type CorpPunishCampaignSignal = {
-  campaignId: string;
-  phase:
-    | "prepare"
-    | "watch_window"
-    | "assemble_components"
-    | "fund"
-    | "trace"
-    | "tag"
-    | "damage"
-    | "kill";
-  sourceDefinitionIds: string[];
-  actionIds?: string[];
-  initiatingSemanticActionType?: string;
-  feasible: boolean;
-  guarantee: GuaranteeLevel;
-  terminalCondition?: "runner_flatline" | "runner_deckout";
-  visibleTerminalProjection: boolean;
-  priorityClass?: "P4" | "P5";
-  value: number;
-  evidenceCode: string;
-  evidenceCodes?: string[];
-  routeContract?: {
-    contractVersion: "corp_punish_route_signal_v1";
-    quoteStatus: "complete" | "unknown";
-    quoteStateVersion: number;
-    routeId: string;
-    totalClicks: number;
-    totalActionCredits: number;
-    corpResponseCredits: number;
-    totalCorpCredits: number;
-    fundingGap: number;
-    fundingActionIds: string[];
-    horizon: "execute" | "fund" | "wait";
-    executionNeedId: string;
-    fundingNeedId: string;
-    currentHeadStepId?: string;
-    currentHeadActionId?: string;
-    traceBidBinding?: {
-      sourceCardInstanceId: string;
-      sourceDefinitionId: string;
-      quotedAtStateVersion: number;
-      amount: number;
-    };
-  };
-};
-
-export type CorpAmbushSignal = {
-  commitmentVersion: "corp_ambush_commitment_v1";
-  ambushId: string;
-  sourceDefinitionId: string;
-  sourceInstanceId: string;
-  actionIds: string[];
-  serverId: string;
-  phase:
-    | "install"
-    | "install_support"
-    | "advance"
-    | "rez_support"
-    | "trigger_support"
-    | "trigger"
-    | "recycle"
-    | "recycle_rd";
-  patternKind?: "access_ambush" | "score_decoy" | "rd_recycle";
-  recycleBluffUntilTurnSerial?: number;
-  emptyRdRecovery?: { observedAtStateVersion: number };
-  defenseNeed?: CorpBluffDefenseNeed;
-  followupAgendaInstanceId?: string;
-  runnerCreditsAtPlanStart?: number;
-  purposeCode?: string;
-  assignedDomainPlanIds: string[];
-  duplicateAlreadyInstalled: boolean;
-  affordableOrSupportable: boolean;
-  plannedAtStateVersion: number;
-  plannedAdvancementTarget: number;
-  value: number;
-  evidenceCode: string;
-  decisionEvidenceCodes?: string[];
-  runnerKnowledgeState?: "unknown" | "known_exact";
-  bluffCompromised?: boolean;
-  compromisedDisposition?:
-    | "hold_known_threat"
-    | "recycle_to_hq"
-    | "trigger_on_access";
-  accessThreatProjection?: KnownCorpCardAccessEffectProjection;
-  accessPaymentChoiceBinding?: {
-    actionId: string;
-    choiceId: string;
-    choiceSource: string;
-    observedAtStateVersion: number;
-    selectedOptionIds: string[];
-    creditCost: number;
-    noOpCertified: boolean;
-  };
-  accessProgramBounceChoiceBinding?: {
-    actionId: string;
-    choiceId: string;
-    choiceSource: string;
-    observedAtStateVersion: number;
-    selectedOptionIds: string[];
-    targetProgramInstanceIds: string[];
-    evidenceCodes: string[];
-  };
-  recycleRoute?: {
-    actionId: string;
-    recyclerSourceInstanceId: string;
-    recyclerSourceDefinitionId: string;
-    targetCardInstanceId: string;
-  };
-  advancementSupportRoute?: {
-    phase: "install" | "rez" | "trigger";
-    actionId: string;
-    supportSourceInstanceId: string;
-    supportSourceDefinitionId: string;
-    targetCardInstanceId: string;
-    serverId: string;
-    creditCost: number;
-  };
-  installRoute?: {
-    actionId: string;
-    creditCost: number;
-    fundingGap: number;
-    costSource: "legal_action";
-  };
-};
-
-export type CorpHandManagementSignal = {
-  handPlanId: string;
-  parentPlanInstanceId?: string;
-  parentNeedId?: string;
-  phase:
-    | "draw_for_plan"
-    | "develop_card"
-    | "resolve_hq_overflow"
-    | "agenda_flood_relief"
-    | "discard_window"
-    | "draw_filter_window"
-    | "hq_shuffle_window";
-  sourceDefinitionIds?: string[];
-  sourceInstanceId?: string;
-  actionIds?: string[];
-  exactActionRoute?: boolean;
-  agendaCount: number;
-  handSize: number;
-  maximumHandSize: number;
-  concretePurposeCode: string;
-  priorityClass?: "P3" | "P5" | "P6";
-  routeAllowed?: boolean;
-  uncertainty?: {
-    kind: "draw_then_observe";
-    unknownOutcome: "drawn_card_identity";
-    revalidateAfterCurrentHead: true;
-  };
-  drawAttemptState?: {
-    turnKey: string;
-    remainingAttempts: 0 | 1;
-    selectedAtStateVersion?: number;
-  };
-  overflowResolutionState?: {
-    turnKey: string;
-    initialOverflowCount: number;
-    maximumConversions: number;
-    remainingConversions: number;
-    selectedAtStateVersion?: number;
-    expectedOverflowAfterSelectedConversion?: number;
-  };
-  discardChoiceBinding?: {
-    actionId: string;
-    choiceId: string;
-    observedAtStateVersion: number;
-    selectedOptionIds: string[];
-    discardedCardInstanceIds: string[];
-    retainedCardInstanceIds: string[];
-    evidenceCodes: string[];
-  };
-  drawFilterChoiceBinding?: {
-    actionId: string;
-    choiceId: string;
-    observedAtStateVersion: number;
-    selectedOptionIds: string[];
-    bottomedCardInstanceIds: string[];
-    retainedCardInstanceIds: string[];
-    evidenceCodes: string[];
-  };
-  hqShuffleChoiceBinding?: {
-    actionId: string;
-    choiceId: string;
-    observedAtStateVersion: number;
-    selectedOptionIds: string[];
-    shuffledCardInstanceIds: string[];
-    retainedCardInstanceIds: string[];
-    evidenceCodes: string[];
-  };
-  actionPriorityOrder?: string[];
-  value: number;
-  evidenceCode: string;
-};
-
-export type CorpTacticalPlanDomain = {
-  virusPressure: CorpVirusPressureSignal[];
-  punishCampaigns: CorpPunishCampaignSignal[];
-  ambushes: CorpAmbushSignal[];
-  handManagement: CorpHandManagementSignal[];
-  handInventoryFacts?: CorpHandInventoryFacts;
-  drawArbitrations?: CorpDrawAdmissionAssessment[];
-};
-
-export type CorpPlanDomain = CorpCorePlanDomain & CorpTacticalPlanDomain;
-
-type PunishState = {
-  kind: "punish_campaign" | "punish_sequence";
-  signal: CorpPunishCampaignSignal;
-};
 type AmbushState =
   | { kind: "ambush"; signal: CorpAmbushSignal }
   | { kind: "ambush_setup"; signal: CorpAmbushSignal };
@@ -247,28 +40,6 @@ export function createCorpTacticalPlanModules(): PlanModule[] {
     ambushModule(),
     handModule(),
   ];
-}
-
-export function corpSpecialDevelopmentAdmission(params: {
-  assignedDomainPlanIds: readonly string[];
-  concretePurposeCode?: string;
-  duplicateAlreadyInstalled: boolean;
-  affordableOrSupportable: boolean;
-}):
-  | { admitted: true; reasonCode: string }
-  | { admitted: false; reasonCode: string } {
-  if (params.duplicateAlreadyInstalled)
-    return { admitted: false, reasonCode: "redundant_corp_copy" };
-  if (!params.affordableOrSupportable)
-    return { admitted: false, reasonCode: "unfunded_corp_development" };
-  if (params.assignedDomainPlanIds.length > 0)
-    return { admitted: true, reasonCode: "assigned_domain_plan" };
-  if (!params.concretePurposeCode)
-    return { admitted: false, reasonCode: "no_concrete_corp_purpose" };
-  return {
-    admitted: true,
-    reasonCode: `specific_purpose:${params.concretePurposeCode}`,
-  };
 }
 
 export function corpTacticalActionFamilyOwner(
@@ -309,117 +80,6 @@ export function corpTacticalActionFamilyOwner(
   )
     return "corp.hand_and_agenda_management";
   return undefined;
-}
-
-export function corpPunishCampaignOwnsCandidate(
-  signal: CorpPunishCampaignSignal,
-  candidate: ActionSemanticCandidate,
-): boolean {
-  if (signal.routeContract) {
-    return (
-      signal.routeContract.quoteStatus === "complete" &&
-      signal.routeContract.horizon === "execute" &&
-      signal.routeContract.currentHeadActionId === candidate.actionId &&
-      signal.feasible &&
-      punishCapability(signal).semanticActionTypes.includes(
-        candidate.semanticActionType,
-      ) &&
-      (signal.sourceDefinitionIds.length === 0 ||
-        signal.sourceDefinitionIds.includes(candidate.sourceDefinitionId ?? ""))
-    );
-  }
-  if (
-    !signal.feasible ||
-    (signal.actionIds !== undefined &&
-      !signal.actionIds.includes(candidate.actionId)) ||
-    !punishCapability(signal).semanticActionTypes.includes(
-      candidate.semanticActionType,
-    )
-  ) {
-    return false;
-  }
-  return (
-    signal.sourceDefinitionIds.length === 0 ||
-    candidate.semanticActionType === "choice.resolve" ||
-    signal.sourceDefinitionIds.includes(candidate.sourceDefinitionId ?? "")
-  );
-}
-
-function punishCampaignModule(): PlanModule {
-  return {
-    moduleId: "corp.punish_campaign",
-    side: "corp",
-    discover: (context) =>
-      domain(context).punishCampaigns.map((signal) =>
-        proposal(
-          "corp.punish_campaign",
-          signal.campaignId,
-          { kind: "punish_campaign", signal } satisfies PunishState,
-          punishCampaignPriority(signal),
-          signal.routeContract ? [] : punishCandidates(context, signal),
-          signal.evidenceCodes ?? signal.evidenceCode,
-          { kind: "player", id: "runner" },
-          "sticky_goal",
-          undefined,
-          undefined,
-          signal.routeContract?.quoteStatus === "unknown"
-            ? "corp_punish_route_quote_unknown"
-            : "no_current_tactical_route",
-          punishRootResourceGaps(signal).length > 0,
-        ),
-      ),
-    assess: (instance, context, portfolio) => {
-      const current = state<PunishState>(instance);
-      const routeExists =
-        !current.signal.routeContract &&
-        current.signal.feasible &&
-        punishCandidates(context, current.signal).length > 0;
-      return assessment(
-        instance,
-        punishCampaignPriority(current.signal),
-        routeExists,
-        current.signal.value,
-        portfolio.executorInstanceId,
-        current.signal.guarantee,
-        current.signal.visibleTerminalProjection,
-        punishRootResourceGaps(current.signal),
-      );
-    },
-    materialize: (instance, _assessment, context) => {
-      const current = state<PunishState>(instance);
-      return current.signal.routeContract
-        ? {
-            step: {
-              stepId: `${instance.instanceId}:${current.signal.phase}`,
-              capability: {
-                capabilityId: "hold_punish_campaign",
-                semanticActionTypes: [],
-              },
-              purpose:
-                "Hold the quoted punish opportunity while its exact support or execution child acts.",
-            },
-            candidates: [],
-          }
-        : punishMaterialization(instance, context);
-    },
-  };
-}
-
-function punishCampaignPriority(
-  signal: CorpPunishCampaignSignal,
-): "P1" | "P3" | "P4" | "P5" {
-  if (
-    signal.routeContract &&
-    signal.terminalCondition === "runner_flatline" &&
-    signal.visibleTerminalProjection &&
-    (signal.guarantee === "visible_state_forced" ||
-      signal.guarantee === "robust_but_reactive") &&
-    signal.routeContract.quoteStatus === "complete" &&
-    signal.routeContract.horizon !== "wait"
-  ) {
-    return "P1";
-  }
-  return signal.priorityClass ?? "P4";
 }
 
 function punishSequenceModule(): PlanModule {
@@ -474,66 +134,6 @@ function punishSequenceModule(): PlanModule {
     materialize: (instance, _assessment, context) =>
       punishMaterialization(instance, context),
   };
-}
-
-function punishMaterialization(
-  instance: PlanInstance,
-  context: PlanSchedulerContext,
-): PlanMaterialization {
-  const current = state<PunishState>(instance);
-  const next = current.signal.routeContract
-    ? undefined
-    : punishNextCapability(current.signal.phase);
-  return {
-    step: {
-      stepId: `${instance.instanceId}:${current.signal.phase}`,
-      capability: punishCapability(current.signal),
-      purpose: `Execute punish phase ${current.signal.phase}.`,
-    },
-    candidates: punishCandidates(context, current.signal),
-    ...(next
-      ? {
-          continuation: {
-            continuationId: `${instance.instanceId}:branch`,
-            trigger: "outcome_observed" as const,
-            nextCapability: next,
-            target: { kind: "player" as const, id: "runner" },
-            purpose:
-              "Continue only after observing tag, prevention or damage outcome.",
-          },
-        }
-      : {}),
-  };
-}
-
-function punishRootResourceGaps(
-  signal: CorpPunishCampaignSignal,
-): ResourceGap[] {
-  const route = signal.routeContract;
-  if (!route || route.quoteStatus !== "complete") return [];
-  if (route.horizon === "fund" && route.fundingGap > 0) {
-    return [
-      {
-        needId: route.fundingNeedId,
-        capability: "credits",
-        minimum: route.fundingGap,
-        available: 0,
-        deadline: "current_turn",
-      },
-    ];
-  }
-  if (route.horizon === "execute" && route.currentHeadActionId) {
-    return [
-      {
-        needId: route.executionNeedId,
-        capability: "execute_complete_punish_route",
-        minimum: 1,
-        available: 0,
-        deadline: "current_turn",
-      },
-    ];
-  }
-  return [];
 }
 
 function ambushModule(): PlanModule {
@@ -853,95 +453,6 @@ function handModule(): PlanModule {
   };
 }
 
-function punishCapability(signal: CorpPunishCampaignSignal) {
-  if (signal.routeContract?.currentHeadActionId) {
-    return {
-      capabilityId: `execute_punish_route:${signal.routeContract.routeId}:${signal.routeContract.currentHeadStepId ?? "head"}`,
-      semanticActionTypes: signal.initiatingSemanticActionType
-        ? [signal.initiatingSemanticActionType]
-        : [],
-      ...(signal.sourceDefinitionIds.length > 0
-        ? { requiredSourceDefinitionIds: signal.sourceDefinitionIds }
-        : {}),
-    };
-  }
-  const phaseSemantic = {
-    prepare: ["install.card", "corp_window.rez", "play.corp_operation"],
-    watch_window: [],
-    assemble_components: [],
-    fund: ["economy.gain_credit"],
-    trace: ["trace.initiate", "choice.resolve"],
-    tag: ["tag.apply", "choice.resolve"],
-    damage: ["damage.net", "damage.meat", "choice.resolve"],
-    kill: ["damage.net", "damage.meat"],
-  }[signal.phase];
-  const semantic = [
-    ...new Set([
-      ...phaseSemantic,
-      ...(signal.initiatingSemanticActionType
-        ? [signal.initiatingSemanticActionType]
-        : []),
-    ]),
-  ];
-  return {
-    capabilityId: `punish_${signal.phase}`,
-    semanticActionTypes: semantic,
-    ...(signal.sourceDefinitionIds.length > 0
-      ? { requiredSourceDefinitionIds: signal.sourceDefinitionIds }
-      : {}),
-  };
-}
-
-function punishNextCapability(phase: CorpPunishCampaignSignal["phase"]) {
-  if (phase === "trace")
-    return {
-      capabilityId: "resolve_trace_tag",
-      semanticActionTypes: ["tag.apply", "choice.resolve"],
-    };
-  if (phase === "tag")
-    return {
-      capabilityId: "convert_tag_damage",
-      semanticActionTypes: ["damage.net", "damage.meat"],
-    };
-  if (phase === "damage")
-    return {
-      capabilityId: "resolve_damage_outcome",
-      semanticActionTypes: ["choice.resolve"],
-    };
-  return undefined;
-}
-
-function punishCandidates(
-  context: PlanSchedulerContext,
-  signal: CorpPunishCampaignSignal,
-): PlanMaterialization["candidates"] {
-  return context.actionCandidates
-    .filter((candidate) => corpPunishCampaignOwnsCandidate(signal, candidate))
-    .map((candidate) => ({
-      candidate,
-      stepValue:
-        signal.value +
-        (signal.phase === "prepare"
-          ? corpPrepareTargetValue(context, candidate)
-          : 0),
-    }));
-}
-
-function corpPrepareTargetValue(
-  context: PlanSchedulerContext,
-  candidate: ActionSemanticCandidate,
-): number {
-  if (candidate.semanticActionType !== "install.card") return 0;
-  const target = candidateTargets(candidate).find(
-    (targetId) => targetId === "new_remote" || targetId.startsWith("remote_"),
-  );
-  if (!target || target === "new_remote") return 0;
-  const server = context.input.playerView.servers.find(
-    (current) => current.id === target,
-  );
-  return (server?.ice.length ?? 0) > 0 ? 50 : 10;
-}
-
 function ambushSemanticTypes(phase: CorpAmbushSignal["phase"]): string[] {
   if (phase === "install" || phase === "install_support")
     return ["install.card"];
@@ -1064,26 +575,4 @@ export function corpHandPriorityClass(
   if (signal.phase === "agenda_flood_relief") return "P2";
   if (signal.phase === "resolve_hq_overflow") return "P5";
   return signal.priorityClass ?? "P5";
-}
-
-function candidateTargets(candidate: ActionSemanticCandidate): string[] {
-  return [
-    ...(candidate.targetContext?.selectedTargets.map(
-      (target) => target.targetId,
-    ) ?? []),
-    ...(candidate.targetContext?.availableTargets?.map(
-      (target) => target.targetId,
-    ) ?? []),
-    ...(candidate.runProjectionSummary?.serverId
-      ? [candidate.runProjectionSummary.serverId]
-      : []),
-  ];
-}
-
-function domain(context: PlanSchedulerContext): CorpPlanDomain {
-  return corpTacticalPlanDomain<CorpPlanDomain>(context);
-}
-
-function state<T>(instance: PlanInstance): T {
-  return instance.moduleState as T;
 }

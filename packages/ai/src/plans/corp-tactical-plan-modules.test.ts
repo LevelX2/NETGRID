@@ -1,13 +1,15 @@
+import { corpSpecialDevelopmentAdmission } from "./corp-tactical-module-support";
+import {
+  type CorpPlanDomain,
+  type CorpTacticalPlanDomain,
+} from "./corp-tactical-plan-contracts";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type { CorpCorePlanDomain } from "./corp-core-plan-modules";
 import {
-  corpSpecialDevelopmentAdmission,
   corpTacticalActionFamilyOwner,
   createCorpTacticalPlanModules,
-  type CorpPlanDomain,
-  type CorpTacticalPlanDomain,
 } from "./corp-tactical-plan-modules";
 import { instantiatePlanProposal } from "./plan-instance";
 import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";

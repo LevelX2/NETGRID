@@ -1,6 +1,6 @@
+import type { CorpAmbushSignal } from "../plans/corp-tactical-plan-contracts";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
-import type { CorpAmbushSignal } from "../plans/corp-tactical-plan-modules";
 
 const ACCESS_PAYMENT_SOURCE = "p3_35.access_payment";
 const ACCESS_ZONES = new Set(["installed", "hq", "rd", "archives"]);

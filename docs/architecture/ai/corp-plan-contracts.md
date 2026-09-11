@@ -841,6 +841,14 @@ blockierten Vordergrundplan oder fehlenden Provider verdecken.
 
 ## 7. `corp.punish_campaign`
 
+Die Implementierung liegt unter `packages/ai/src/corp/punish/`:
+`punish-signals.ts` bewertet aktuelle Engine-Quotes und beobachtete
+Gelegenheiten; `punish-preparation.ts` bündelt die vorhandene Vorbereitung.
+`punish-campaign-plan-module.ts` besitzt Discovery, Assessment und
+Materialisierung des Roots. Typen und Routenkriterien werden innerhalb der
+Familie mit dem Ausführungs-Owner geteilt. Gemeinsame side-sichere Karten-,
+Ziel- und Kostenfakten liegen in `runtime/visible-action-facts.ts`.
+
 **Klasse:** `strategic_campaign` oder `development_project`
 **Rolle:** dormant/Background/Vordergrund
 **Status:** registrierter produktiver Owner; Fähigkeitsgrenzen siehe Einstieg.

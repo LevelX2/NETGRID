@@ -1,89 +1,36 @@
+import { corpPunishCampaignOwnsCandidate } from "../corp/punish/punish-plan-support";
+import {
+  corpConditionalPunishTagSourceHasNoVisiblePayoff,
+  corpDefinitionSupportsPunishPlan,
+  corpPunishQuoteRequestExists,
+  punishSignals,
+} from "../corp/punish/punish-signals";
+import { type CorpPunishCampaignSignal } from "../corp/punish/punish-types";
+import {
+  type CorpHandManagementSignal,
+  type CorpPlanDomain,
+} from "../plans/corp-tactical-plan-contracts";
 import {
   addRunnerCoverageMemoryDispositions,
-  runnerCoverageInstallDeferrals,
-  applyRunnerCoverageCandidateDisposition,
   addRunnerCoverageRejectedSearchDispositions,
+  applyRunnerCoverageCandidateDisposition,
+  runnerCoverageInstallDeferrals,
   runnerMatchpointReserveBlocksOverlappingBreakerInstall,
 } from "../runner/rig-coverage/coverage-dispositions";
+import {
+  candidateIsVisibleCorpAgendaInstall,
+  candidateIsVisibleCorpIceInstall,
+  candidateTargetIds,
+  isCorpInstallServerId,
+  isServerId,
+  requireVisibleCandidateSource,
+  serverForInstalledCard,
+  visibleCardIsAgenda,
+  visibleInstalledCard,
+  visibleKnownCardType,
+} from "./visible-action-facts";
 
-import { INFORMATION_PROBE_KNOWN_PATH_CREDIT_BUDGET } from "../plans/runner-run-purpose";
-import {
-  runnerCoverageGapIsTerminalRemoteThreat,
-  runnerCoverageRecoveryTarget,
-} from "../runner/rig-coverage/coverage-support";
-import { uniqueCoverageGaps } from "../runner/rig-coverage/coverage-signals";
-import {
-  runnerCoverageOwnedActionIds,
-  runnerDrawActionHasCurrentCoveragePurpose,
-} from "../runner/rig-coverage/coverage-actions";
-import {
-  preserveSelectedRunnerCoverageBindingAcrossPaymentStep,
-  bindSelectedCoverageSearchAction,
-  bindSelectedRunnerCoverageSearchChoiceContinuation,
-  bindRunnerCoverageSearchProgramTrashSacrifices,
-  reconcileRunnerCoverageRequesterBindings,
-} from "../runner/rig-coverage/coverage-bindings";
-import {
-  runnerCandidateExecutesProgramSearch,
-  runnerCandidateSourceSupportsProgramSearch,
-  runnerProgramSearchSourceCardInstanceId,
-} from "./runner-program-search-facts";
-import {
-  runPurposeForEvaluation,
-  runnerInformationProbeCanUseQuotedPath,
-} from "../plans/runner-run-purpose";
-import { legalActionCreditCost } from "./legal-action-credit-cost";
-import {
-  runnerCandidateSourceDefinitionId,
-  visibleOwnCardByInstanceId,
-  runnerInstallSourceInstanceId,
-} from "./runner-action-source-facts";
-import type {
-  RunnerExactFundingRouteRequest,
-  RunnerRunFundingSupport,
-} from "../plans/runner-funding-service-contract";
-import {
-  runnerEconomyReserveFacts,
-  buildRunnerEconomySignals,
-} from "../runner/economy/economy-signals";
-import {
-  runnerDefenseSupportSignals,
-  runnerDefenseHandBufferFacts,
-  buildRunnerDefenseSignals,
-} from "../runner/defense-recovery/defense-signals";
-import { runnerDefenseSupportDispositions } from "../runner/defense-recovery/defense-dispositions";
-import { uniqueBy } from "./collection";
-import { buildCorpVirusPressureSignals } from "../corp/virus-pressure/virus-pressure-signals";
-import { runnerShellTradersActionDispositions } from "../runner/shell-traders/shell-traders-dispositions";
-import type { RunnerExposeInformationSignal } from "../runner/expose-information/expose-information-types";
-import { runnerExposeInformationSignals } from "../runner/expose-information/expose-information-signals";
-import { runnerExposeInformationActionDispositions } from "../runner/expose-information/expose-information-dispositions";
-import { bindSelectedRunnerExposeInformationMemory } from "../runner/expose-information/expose-information-memory";
-import { runnerImmediateAgendaPointGain } from "../actions/runner-agenda-point-effect";
-import {
-  runnerTerminalWinSignals,
-  runnerImmediateAgendaPointTerminalWinSignals,
-} from "../runner/terminal-win/terminal-win-signals";
-import { runnerInstalledAgendaScoreSignals } from "../runner/installed-agenda/installed-agenda-signals";
-import type {
-  RunnerFundingNeedSignal,
-  RunnerFundingRouteAssessment,
-} from "../plans/runner-funding-contracts";
-import { runnerResourceLifecycleSignals } from "../runner/resource-lifecycle/resource-lifecycle-signals";
-import { runnerResourceLifecycleFundingNeeds } from "../runner/resource-lifecycle/resource-lifecycle-funding-needs";
-import { runnerResourceLifecycleActionDispositions } from "../runner/resource-lifecycle/resource-lifecycle-dispositions";
-import { runnerRecurringEconomySignals } from "../runner/recurring-economy/recurring-economy-signals";
-import { runnerRecurringEconomyActionDispositions } from "../runner/recurring-economy/recurring-economy-dispositions";
-import { runnerRecurringEconomyRunDeferral } from "../runner/recurring-economy/recurring-economy-run-deferral";
-import {
-  runnerFortPassTollWindow,
-  runnerRunExitAction,
-  runnerRunWindowCreditBudget,
-} from "./runner-fort-pass-toll";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
-import { assessCorpPaidEncounterDefense } from "./corp-paid-encounter-defense";
-import { currentCorpCreditObligation } from "../plans/corp-credit-obligation";
-import { assessRunnerSuccessfulRunCreditInvestment } from "./runner-successful-run-credit-investment";
+import { visibleBreakerEncounterQuote } from "@netgrid/engine";
 import {
   AI_DECISION_DEBUG_SCHEMA_VERSION,
   AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
@@ -91,150 +38,216 @@ import {
   CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION,
   CORP_FORT_RUN_TEMPORARY_ENCOUNTER_REZ_SUPPORT_KIND,
   ENGINE_RANDOMIZED_ICE_INSTALL_SELECTION_SCHEMA_VERSION,
-  ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION,
   ENGINE_RANDOMIZED_TRACE_BID_SELECTION_SCHEMA_VERSION,
+  ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION,
   type AiDecision,
   type AiDecisionInput,
   type AiPlanFirstDecisionDebug,
   type AiTurnPlanningDebug,
   type CardDefinition,
-  type CorpPunishRouteQuote,
   type LegalAction,
   type VisibleCard,
   type VisibleCorpRezCostQuote,
 } from "@netgrid/shared";
-import { visibleBreakerEncounterQuote } from "@netgrid/engine";
-import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import type { BuildActionSemanticCandidatesParams } from "../action-semantic-candidate";
+import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
 import {
   corpZoneTransitionProjectionStatus,
   rootRezCreditOutcomeProjectionStatus,
 } from "../actions/action-economy-projection";
 import { actionHasConditionalDefenseFollowupQuotePayload } from "../actions/conditional-defense-followup-quote";
+import { runnerImmediateAgendaPointGain } from "../actions/runner-agenda-point-effect";
 import { AI_HINTS_BY_CARD } from "../ai-hints";
-import { rolesForDeckDoctrineCard } from "../deck-doctrine-card-roles";
-import { getStructuredTagPunishProfileForCard } from "../tag-punish-ontology-consumer";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { buildCorpVirusPressureSignals } from "../corp/virus-pressure/virus-pressure-signals";
 import type { DeckCapabilityProfile } from "../deck-capabilities";
+import { rolesForDeckDoctrineCard } from "../deck-doctrine-card-roles";
+import { currentCorpCreditObligation } from "../plans/corp-credit-obligation";
+import type {
+  RunnerFundingNeedSignal,
+  RunnerFundingRouteAssessment,
+} from "../plans/runner-funding-contracts";
+import type {
+  RunnerExactFundingRouteRequest,
+  RunnerRunFundingSupport,
+} from "../plans/runner-funding-service-contract";
+import {
+  INFORMATION_PROBE_KNOWN_PATH_CREDIT_BUDGET,
+  runnerInformationProbeCanUseQuotedPath,
+  runPurposeForEvaluation,
+} from "../plans/runner-run-purpose";
 import type { RunnerHandDevelopmentEvaluation } from "../runner-hand-development";
+import { runnerDefenseSupportDispositions } from "../runner/defense-recovery/defense-dispositions";
+import {
+  buildRunnerDefenseSignals,
+  runnerDefenseHandBufferFacts,
+  runnerDefenseSupportSignals,
+} from "../runner/defense-recovery/defense-signals";
+import {
+  buildRunnerEconomySignals,
+  runnerEconomyReserveFacts,
+} from "../runner/economy/economy-signals";
+import { runnerExposeInformationActionDispositions } from "../runner/expose-information/expose-information-dispositions";
+import { bindSelectedRunnerExposeInformationMemory } from "../runner/expose-information/expose-information-memory";
+import { runnerExposeInformationSignals } from "../runner/expose-information/expose-information-signals";
+import type { RunnerExposeInformationSignal } from "../runner/expose-information/expose-information-types";
+import { runnerInstalledAgendaScoreSignals } from "../runner/installed-agenda/installed-agenda-signals";
+import { runnerRecurringEconomyActionDispositions } from "../runner/recurring-economy/recurring-economy-dispositions";
+import { runnerRecurringEconomyRunDeferral } from "../runner/recurring-economy/recurring-economy-run-deferral";
+import { runnerRecurringEconomySignals } from "../runner/recurring-economy/recurring-economy-signals";
+import { runnerResourceLifecycleActionDispositions } from "../runner/resource-lifecycle/resource-lifecycle-dispositions";
+import { runnerResourceLifecycleFundingNeeds } from "../runner/resource-lifecycle/resource-lifecycle-funding-needs";
+import { runnerResourceLifecycleSignals } from "../runner/resource-lifecycle/resource-lifecycle-signals";
+import {
+  runnerCoverageOwnedActionIds,
+  runnerDrawActionHasCurrentCoveragePurpose,
+} from "../runner/rig-coverage/coverage-actions";
+import {
+  bindRunnerCoverageSearchProgramTrashSacrifices,
+  bindSelectedCoverageSearchAction,
+  bindSelectedRunnerCoverageSearchChoiceContinuation,
+  preserveSelectedRunnerCoverageBindingAcrossPaymentStep,
+  reconcileRunnerCoverageRequesterBindings,
+} from "../runner/rig-coverage/coverage-bindings";
+import { uniqueCoverageGaps } from "../runner/rig-coverage/coverage-signals";
+import {
+  runnerCoverageGapIsTerminalRemoteThreat,
+  runnerCoverageRecoveryTarget,
+} from "../runner/rig-coverage/coverage-support";
+import { runnerShellTradersActionDispositions } from "../runner/shell-traders/shell-traders-dispositions";
+import {
+  runnerImmediateAgendaPointTerminalWinSignals,
+  runnerTerminalWinSignals,
+} from "../runner/terminal-win/terminal-win-signals";
+import { uniqueBy } from "./collection";
+import { assessCorpPaidEncounterDefense } from "./corp-paid-encounter-defense";
+import { legalActionCreditCost } from "./legal-action-credit-cost";
+import {
+  runnerCandidateSourceDefinitionId,
+  runnerInstallSourceInstanceId,
+  visibleOwnCardByInstanceId,
+} from "./runner-action-source-facts";
+import {
+  runnerFortPassTollWindow,
+  runnerRunExitAction,
+  runnerRunWindowCreditBudget,
+} from "./runner-fort-pass-toll";
+import {
+  runnerCandidateExecutesProgramSearch,
+  runnerCandidateSourceSupportsProgramSearch,
+  runnerProgramSearchSourceCardInstanceId,
+} from "./runner-program-search-facts";
+import { assessRunnerSuccessfulRunCreditInvestment } from "./runner-successful-run-credit-investment";
 
+import {
+  assessRandomBreakOrDamageRiskForVisibleRunPath,
+  randomBreakOrDamageRiskCanCarryRunPath,
+} from "../actions/risk-action-projection";
+import { reconstructBeliefState } from "../belief-state";
+import { quoteRunnerRunRiskReserve } from "../run-analysis/runner-run-risk-reserve";
+import {
+  runnerEffectsProvideNonNoisyBreakerCredits,
+  runnerEffectsProvideTopTrashRecovery,
+} from "../runner-canonical-hint-semantics";
 import type {
   RunnerEconomyPosture,
   RunnerRunTargetEvaluation,
 } from "../runner-run-target-evaluation";
-import { reconstructBeliefState } from "../belief-state";
-import { quoteRunnerRunRiskReserve } from "../run-analysis/runner-run-risk-reserve";
 import {
   runnerRunTargetHasOptionalBonusRunValue,
   runnerRunTargetMultiRunPayoffClass,
   runnerRunTargetPlausibleForMultiRun,
 } from "../runner-run-target-guidance";
-import {
-  runnerEffectsProvideNonNoisyBreakerCredits,
-  runnerEffectsProvideTopTrashRecovery,
-} from "../runner-canonical-hint-semantics";
-import {
-  assessRandomBreakOrDamageRiskForVisibleRunPath,
-  randomBreakOrDamageRiskCanCarryRunPath,
-} from "../actions/risk-action-projection";
+import { rememberStrategicIntentState } from "../strategic-intent-memory";
 import {
   runnerDebtFinancingProfile,
   runnerEventStartsRunAfterProgramSearch,
 } from "./runner-canonical-card-facts";
-import { rememberStrategicIntentState } from "../strategic-intent-memory";
 
-import { runnerDiscardChoicePlanBinding } from "../runner/defense-recovery/runner-discard-choice-plan";
 import {
-  assessRunnerHandRotation,
-  type RunnerHandRotationAssessment,
-} from "./runner-hand-rotation-assessment";
-import {
-  bindRunnerRigDemandProjectionToCoverageGaps,
-  buildRunnerRigDemandProjectionForCoverage,
-  runnerCoverageRigDemandInputsComplete,
-} from "./runner-rig-demand-adapter";
-import type { RunnerRigDemandProjection } from "../runner/rig-demand/runner-rig-demand-projection";
-import type { RunnerStrategicIntentProfile } from "../runner-strategic-intent";
-import {
-  CORP_PLAN_PRIORITY_POLICY,
-  RUNNER_PLAN_PRIORITY_POLICY,
-  type PriorityClass,
-} from "../plans/plan-assessment";
+  collectCorpActionDispositions,
+  type CorpActionDispositionContributorFacts,
+} from "../plans/corp-action-disposition-contributors";
+import { buildCorpAgendaTurnPlanningSlice } from "../plans/corp-agenda-turn-planning";
 import {
   assessCorpEconomyFundingRoute,
   assessCorpSpendAgainstScoreFundingMilestones,
   corpAgendaPurgeDefenseChoiceSignal,
   corpClassicDeflectorDefenseChoiceSignal,
-  corpScorePriorityClass,
-  corpScoreFundingMilestone,
-  corpScorePlanTarget,
   corpDefenseActionDispositions,
   corpDefenseMaterializedActionIds,
-  corpExactBasicLiquidCreditCandidate,
-  corpGenericDefensePriorityClass,
-  corpEconomyPriorityClass,
   corpEconomyActionIsOwned,
   corpEconomyCandidateHasExecutablePayload,
+  corpEconomyPriorityClass,
+  corpExactBasicLiquidCreditCandidate,
+  corpGenericDefensePriorityClass,
+  corpScoreFundingMilestone,
+  corpScorePlanTarget,
+  corpScorePriorityClass,
   createCorpCorePlanModules,
   immediateCorpLiquidCreditGain,
   type CorpCorePlanDomain,
   type CorpDefenseSignal,
-  type CorpGenericDefenseSignal,
   type CorpEconomyImmediateOperationSignal,
-  type CorpEconomyVisibleCardWithdrawalSignal,
   type CorpEconomyOperationThresholdSignal,
+  type CorpEconomyVisibleCardWithdrawalSignal,
+  type CorpGenericDefenseSignal,
   type CorpScoreProjectSignal,
 } from "../plans/corp-core-plan-modules";
 import {
-  corpPunishCampaignOwnsCandidate,
+  corpGlobalDefenseInstallRoute,
+  corpGlobalDefenseInstallRouteAssessment,
+  corpIceInstallHasCurrentCompleteRezQuote,
+  corpQualitativeIceStagingSignal,
+  corpScoredAgendaIceMarkDefenseTarget,
+  knownInstallRouteHasUsefulEffectBlockedByFunding,
+  type CorpDefenseDomainSignalFacts,
+  type CorpLayeredIceStagingParent,
+} from "../plans/corp-defense-domain-signals";
+import { buildCorpDefenseTurnPlanningSlice } from "../plans/corp-defense-turn-planning";
+import {
+  corpExactCurrentBasicLiquidCreditCandidate,
+  corpTurnLiquidityDevelopmentNeed,
+  corpVisibleLiquidityDemandTarget,
+} from "../plans/corp-economy-domain-signals";
+import {
+  corpCampaignDescriptors,
+  recentlyCompromisedCorpRemoteIds,
+  reconcileCorpCampaignContinuity,
+} from "../plans/corp-opponent-campaign-continuity";
+import {
+  boundCorpPunishTraceChoices,
+  resolveCorpPunishTraceWindow,
+} from "../plans/corp-punish-trace-binding";
+import {
+  buildCorpScoringRemoteProjectSignals,
+  type CorpRemoteOccupancyClaim,
+} from "../plans/corp-remote-project-signals";
+import {
+  corpRemoteHasEngineQuotedFundableScoreFriction,
+  corpRemoteHasEngineQuotedReusableScoreFriction,
+  corpResidentScoreDefenseBinding,
+} from "../plans/corp-score-defense-continuity";
+import {
   corpHandPriorityClass,
   createCorpTacticalPlanModules,
-  type CorpHandManagementSignal,
-  type CorpPlanDomain,
-  type CorpPunishCampaignSignal,
 } from "../plans/corp-tactical-plan-modules";
 import {
-  createRunnerCorePlanModules,
-  type RunnerCorePlanDomain,
-} from "../plans/runner-core-plan-modules";
-import { runnerCoverageCurrentPhase } from "../runner/rig-coverage/coverage-plan-module";
-import {
-  runnerDevelopmentCardAdmission,
-  runnerDevelopmentFundingMilestone,
-} from "../plans/runner-development-contracts";
-import {
-  runnerExactBasicLiquidCreditCandidate,
-  runnerFundingRouteCandidateIsMaterializable,
-} from "../plans/runner-funding-candidates";
-import { runnerInstalledCardLiquidationChoiceSignal } from "../runner/economy/installed-card-liquidation";
-import {
-  runnerDefenseReactionReserveIsCurrentPhase,
-  runnerDefenseTagClearFundingIsCurrentPhase,
-} from "../runner/defense-recovery/defense-plan-module";
-import { type RunnerDiscardChoiceBinding } from "../runner/defense-recovery/defense-types";
-import {
-  runnerRolesCoverCoverageGap,
-  type RunnerCoverageGapSignal,
-} from "../plans/runner-coverage-contracts";
-import type { RequiredCapabilityKind } from "../plans/tactical-plan-types";
-import {
-  createRunnerTacticalPlanModules,
-  type RunnerDevelopmentSignal,
-  type RunnerPlanDomain,
-  type RunnerRemoteContestSignal,
-  type RunnerRestrictedProgramInstallSequenceCommitment,
-  type RunnerRestrictedProgramInstallSequenceStep,
-  type RunnerRunAccessCommitmentSignal,
-  type RunnerInformationBoundaryReassessmentSignal,
-  type RunnerPressureSignal,
-  type RunnerRunRiskContractSignal,
-  type RunnerRunRiskReassessmentSignal,
-  type RunnerRunWindowActionAssessment,
-} from "../plans/runner-tactical-plan-modules";
-import { runnerCardRunHasVisibleDifferentialPayoff } from "../plans/runner-run-payoff";
+  resolveTurnPlannerCutover,
+  type TurnPlannerCutoverResult,
+} from "../plans/corp-turn-planner-cutover";
+import { buildCorpTurnPlannerShadow } from "../plans/corp-turn-planner-shadow";
+import { assertCorpTurnPlanningModuleRegistry } from "../plans/corp-turn-planning-coverage";
 import { createRunnerCreditDemand } from "../plans/credit-demand";
 import { searchFundingRoutes } from "../plans/funding-route";
-import { runnerPaymentInstallSetups } from "../plans/runner-payment-install-planning";
+import {
+  CORP_PLAN_PRIORITY_POLICY,
+  RUNNER_PLAN_PRIORITY_POLICY,
+  type PriorityClass,
+} from "../plans/plan-assessment";
+import { planInstanceIdForProposal } from "../plans/plan-instance";
+import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import {
   createSidePlanRegistry,
   runPlanScheduler,
@@ -245,93 +258,54 @@ import {
   type SidePlanRegistry,
 } from "../plans/plan-scheduler";
 import {
+  selectResidentPlanPortfolioExecutor,
+  type ResidentPlanPortfolio,
+} from "../plans/resident-plan-portfolio";
+import {
+  rememberResidentPlanPortfolio,
+  residentPlanPortfolioSnapshot,
+} from "../plans/resident-plan-portfolio-memory";
+import {
+  createRunnerCorePlanModules,
+  type RunnerCorePlanDomain,
+} from "../plans/runner-core-plan-modules";
+import {
+  runnerRolesCoverCoverageGap,
+  type RunnerCoverageGapSignal,
+} from "../plans/runner-coverage-contracts";
+import { runnerDelayedInstallReplanningBoundary } from "../plans/runner-delayed-install-replanning-boundary";
+import {
+  runnerDevelopmentCardAdmission,
+  runnerDevelopmentFundingMilestone,
+} from "../plans/runner-development-contracts";
+import {
+  runnerExactBasicLiquidCreditCandidate,
+  runnerFundingRouteCandidateIsMaterializable,
+} from "../plans/runner-funding-candidates";
+import { runnerPaymentInstallSetups } from "../plans/runner-payment-install-planning";
+import { runnerCardRunHasVisibleDifferentialPayoff } from "../plans/runner-run-payoff";
+import {
+  createRunnerTacticalPlanModules,
+  type RunnerDevelopmentSignal,
+  type RunnerInformationBoundaryReassessmentSignal,
+  type RunnerPlanDomain,
+  type RunnerPressureSignal,
+  type RunnerRemoteContestSignal,
+  type RunnerRestrictedProgramInstallSequenceCommitment,
+  type RunnerRestrictedProgramInstallSequenceStep,
+  type RunnerRunAccessCommitmentSignal,
+  type RunnerRunRiskContractSignal,
+  type RunnerRunRiskReassessmentSignal,
+  type RunnerRunWindowActionAssessment,
+} from "../plans/runner-tactical-plan-modules";
+import { buildRunnerTurnPlannerShadow } from "../plans/runner-turn-planner-shadow";
+import { assertRunnerTurnPlanningModuleRegistry } from "../plans/runner-turn-planning-coverage";
+import type { RequiredCapabilityKind } from "../plans/tactical-plan-types";
+import {
   TRANSIENT_PLAN_SIGNAL_SCHEMA_VERSION,
   type TransientPlanSignal,
 } from "../plans/transient-plan-signals";
-import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
-import { assessTraceBidCandidates } from "./trace-bid-assessment";
-import {
-  boundCorpPunishTraceChoices,
-  resolveCorpPunishTraceWindow,
-} from "../plans/corp-punish-trace-binding";
-import { latestTraceContext } from "./trace-context";
-import { buildCorpAgendaTurnPlanningSlice } from "../plans/corp-agenda-turn-planning";
-import { buildCorpDefenseTurnPlanningSlice } from "../plans/corp-defense-turn-planning";
-import {
-  corpExactCurrentBasicLiquidCreditCandidate,
-  corpTurnLiquidityDevelopmentNeed,
-  corpVisibleLiquidityDemandTarget,
-} from "../plans/corp-economy-domain-signals";
-import {
-  corpGlobalDefenseInstallRoute,
-  corpGlobalDefenseInstallRouteAssessment,
-  corpIceInstallHasCurrentCompleteRezQuote,
-  corpQualitativeIceStagingSignal,
-  corpScoredAgendaIceMarkDefenseTarget,
-  type CorpLayeredIceStagingParent,
-  knownInstallRouteHasUsefulEffectBlockedByFunding,
-  type CorpDefenseDomainSignalFacts,
-} from "../plans/corp-defense-domain-signals";
-import {
-  buildCorpScoringRemoteProjectSignals,
-  type CorpRemoteOccupancyClaim,
-} from "../plans/corp-remote-project-signals";
-import { assessCorpRemoteMaturityFromVisibleServer } from "./corp-remote-maturity-assessment";
-import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
-import { buildRunnerShellTradersPipelineSignals } from "../runner/shell-traders/shell-traders-plan-signals";
-import {
-  corpArchivesToHqOperationProfile,
-  corpCandidateProvidesScoreConversion,
-  corpConditionalScoreCreditProfile,
-  corpDefinitionHasTraceSource,
-  corpHostedCreditBankProfile,
-  corpImmediateEconomyGainFromHint,
-  corpScoredAgendaHqShuffleProfile,
-  corpScoredAgendaIceMarkProfile,
-  corpScoredAgendaFreeRezProfile,
-  corpScoreConversionProfile,
-} from "./corp-canonical-card-facts";
-import { assessCorpEconomyAssetPayback } from "./corp-economy-asset-payback";
-import { selectableChoiceOptions } from "./choice-option";
-import {
-  runnerMultiRunEventAssessment,
-  type RunnerMultiRunEventAssessment,
-} from "./runner-multi-run-event-assessment";
-import { runnerMultiRunEventScoreValue } from "./runner-multi-run-event-score";
-import { discardOptionInstanceId } from "./discard-choice-option";
-import { selectedSearchChoiceOptionIds } from "./search-choice-option";
-import { extractAiFeatures } from "./ai-features";
-import {
-  selectedDiscardChoiceOptionIds,
-  type DiscardChoiceKeepScore,
-} from "./discard-choice-selection";
-import { selectedCorpDiscardChoiceOptionIds } from "./corp-discard-choice-selection";
-import { corpHandDispositionScore } from "./corp-hand-disposition-score";
-import {
-  collectCorpActionDispositions,
-  type CorpActionDispositionContributorFacts,
-} from "../plans/corp-action-disposition-contributors";
-import {
-  corpRemoteHasEngineQuotedFundableScoreFriction,
-  corpRemoteHasEngineQuotedReusableScoreFriction,
-  corpResidentScoreDefenseBinding,
-} from "../plans/corp-score-defense-continuity";
-import {
-  corpCampaignDescriptors,
-  recentlyCompromisedCorpRemoteIds,
-  reconcileCorpCampaignContinuity,
-} from "../plans/corp-opponent-campaign-continuity";
-import { assertCorpTurnPlanningModuleRegistry } from "../plans/corp-turn-planning-coverage";
-import { buildCorpTurnPlannerShadow } from "../plans/corp-turn-planner-shadow";
-import {
-  resolveTurnPlannerCutover,
-  type TurnPlannerCutoverResult,
-} from "../plans/corp-turn-planner-cutover";
-import { assertRunnerTurnPlanningModuleRegistry } from "../plans/runner-turn-planning-coverage";
-import { buildRunnerTurnPlannerShadow } from "../plans/runner-turn-planner-shadow";
-import { runnerDelayedInstallReplanningBoundary } from "../plans/runner-delayed-install-replanning-boundary";
-import { runnerCreditBankSignals } from "../runner/credit-bank/credit-bank-signals";
-import { runnerCreditBankActionDispositions } from "../runner/credit-bank/credit-bank-dispositions";
+import { createTurnCompletionPlanModule } from "../plans/turn-completion-plan-module";
 import {
   buildCanonicalLegalActionInvocation,
   buildPlanningStateIdentity,
@@ -344,56 +318,77 @@ import {
   buildProjectedDecisionFrame,
   certifiedTurnProjectionDeltaFromCandidate,
 } from "../plans/turn-projection";
-import { planInstanceIdForProposal } from "../plans/plan-instance";
+import type { RunnerStrategicIntentProfile } from "../runner-strategic-intent";
+import { runnerCreditBankActionDispositions } from "../runner/credit-bank/credit-bank-dispositions";
+import { runnerCreditBankSignals } from "../runner/credit-bank/credit-bank-signals";
 import {
-  rememberResidentPlanPortfolio,
-  residentPlanPortfolioSnapshot,
-} from "../plans/resident-plan-portfolio-memory";
+  runnerDefenseReactionReserveIsCurrentPhase,
+  runnerDefenseTagClearFundingIsCurrentPhase,
+} from "../runner/defense-recovery/defense-plan-module";
+import { type RunnerDiscardChoiceBinding } from "../runner/defense-recovery/defense-types";
+import { runnerDiscardChoicePlanBinding } from "../runner/defense-recovery/runner-discard-choice-plan";
+import { runnerInstalledCardLiquidationChoiceSignal } from "../runner/economy/installed-card-liquidation";
+import { runnerCoverageCurrentPhase } from "../runner/rig-coverage/coverage-plan-module";
+import type { RunnerRigDemandProjection } from "../runner/rig-demand/runner-rig-demand-projection";
+import { buildRunnerShellTradersPipelineSignals } from "../runner/shell-traders/shell-traders-plan-signals";
+import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
+import { extractAiFeatures } from "./ai-features";
+import { selectableChoiceOptions } from "./choice-option";
 import {
-  selectResidentPlanPortfolioExecutor,
-  type ResidentPlanPortfolio,
-} from "../plans/resident-plan-portfolio";
-import { createTurnCompletionPlanModule } from "../plans/turn-completion-plan-module";
+  corpArchivesToHqOperationProfile,
+  corpCandidateProvidesScoreConversion,
+  corpConditionalScoreCreditProfile,
+  corpHostedCreditBankProfile,
+  corpImmediateEconomyGainFromHint,
+  corpScoreConversionProfile,
+  corpScoredAgendaFreeRezProfile,
+  corpScoredAgendaHqShuffleProfile,
+  corpScoredAgendaIceMarkProfile,
+} from "./corp-canonical-card-facts";
+import { selectedCorpDiscardChoiceOptionIds } from "./corp-discard-choice-selection";
+import { assessCorpEconomyAssetPayback } from "./corp-economy-asset-payback";
+import { corpHandDispositionScore } from "./corp-hand-disposition-score";
+import { assessCorpRemoteMaturityFromVisibleServer } from "./corp-remote-maturity-assessment";
+import { discardOptionInstanceId } from "./discard-choice-option";
+import {
+  selectedDiscardChoiceOptionIds,
+  type DiscardChoiceKeepScore,
+} from "./discard-choice-selection";
+import {
+  assessRunnerHandRotation,
+  type RunnerHandRotationAssessment,
+} from "./runner-hand-rotation-assessment";
+import {
+  runnerMultiRunEventAssessment,
+  type RunnerMultiRunEventAssessment,
+} from "./runner-multi-run-event-assessment";
+import { runnerMultiRunEventScoreValue } from "./runner-multi-run-event-score";
+import {
+  bindRunnerRigDemandProjectionToCoverageGaps,
+  buildRunnerRigDemandProjectionForCoverage,
+  runnerCoverageRigDemandInputsComplete,
+} from "./runner-rig-demand-adapter";
+import { selectedSearchChoiceOptionIds } from "./search-choice-option";
+import { assessTraceBidCandidates } from "./trace-bid-assessment";
+import { latestTraceContext } from "./trace-context";
 
-import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
-import type { RunnerProgramInstallTrashAssessment } from "./runner-program-install-trash-policy";
 import { assessRunnerAccessTrashImpact } from "./runner-access-trash-impact";
+import type { RunnerProgramInstallTrashAssessment } from "./runner-program-install-trash-policy";
+import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 
-import { visibleSourceDefinitionsByInstanceId } from "./visible-source-definitions";
-import { rolesMatch } from "./role-match";
 import { rolesHaveBreakerRole } from "./breaker-role-match";
+import { rolesMatch } from "./role-match";
+import { visibleSourceDefinitionsByInstanceId } from "./visible-source-definitions";
 
-import { runnerTerminalContestThreat } from "./runner-terminal-contest-threat";
 import { semanticRuntimeDecisionDebugTopLevelWhyNot } from "../diagnostics/semantic-runtime-decision-debug";
-import type { AiDecisionRuntimeOptions } from "./choose-ai-action";
 import {
-  buildBoundedCorpPunishRouteRequests,
-  withDecisionLocalCorpPunishRouteQuotes,
-} from "./corp-punish-route-quote-input";
+  corpCounterBankScoreProjects,
+  isQuotedCorpCounterBankInHq,
+} from "../plans/corp-counter-bank-score-plan";
 import {
-  buildCorpHandInventoryFacts,
-  corpHandDuplicateCount,
-  type CorpHandDomainRouteClaimInput,
-  type CorpHandInventoryFacts,
-} from "./corp-hand-inventory-facts";
-import {
-  assessCorpDrawAdmission,
-  corpVoluntaryDrawLeavesUnsafeMandatoryHorizon,
-  type CorpDrawAdmissionAssessment,
-  type CorpDrawAdmissionPriority,
-  type CorpDrawCapacityReleaseRoute,
-} from "./corp-draw-admission";
-import { assessCorpOpeningRush } from "./corp-opening-rush";
-import {
-  buildCorpAmbushPlanSignals,
-  corpCandidateIsAmbushInstall,
-} from "./corp-ambush-plan-signals";
-import { projectKnownCorpCardAccessEffect } from "./known-corp-card-access-effect-projection";
-import {
-  corpScorelineActionCanCloseThisTurn,
-  corpScorelineFeasibilityForDecisionInput,
-  type CorpScorelineFeasibility,
-} from "./corp-scoreline-feasibility";
+  corpSameTurnScoreConversionPaths,
+  type CorpScoreConversionStep,
+} from "../plans/tactical-plan-corp-score-conversion";
 import {
   runnerConfirmedDamageRequiredHandFloor,
   runnerDamageThreatAssessment,
@@ -407,45 +402,31 @@ import {
   assessEngineCertifiedPostRezIcePath,
   assessKnownRezzedIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,
-  visibleRunnerRunPathCreditBudgetForRig,
   visibleDeflectorSubroutineCanResolve,
+  visibleRunnerRunPathCreditBudgetForRig,
 } from "../visible-run-analysis";
+import type { AiDecisionRuntimeOptions } from "./choose-ai-action";
 import {
-  runnerCurrentRunHasSafeCompletionReward,
-  runnerRemoteHasKnownNoCurrentPayoff,
-} from "./runner-known-access-payoff-context";
-import {
-  runnerStrategicExchangeHardExclusion,
-  runnerStrategicExchangeKinds,
-  runnerStrategicExchangeRequiresBoundParent,
-} from "./runner-strategic-exchange";
-import {
-  currentEncounteredIceCard,
-  currentEncounterRequiresFullBreak,
-  currentRunHasPendingAutoPassIce,
-  currentRunRemainingIce,
-} from "./current-encounter";
-import {
-  breakSubroutineIndexesForAction,
-  parseSubroutineIndexes,
-} from "./subroutine-indexes";
-import {
-  corpRegionReplacementComponent,
-  corpUpgradeInstallPlacementComponent,
-  corpUpgradePlacementAssessment,
-} from "./corp-upgrade-placement";
-import { allocateCorpCentralDefenseFromAiFacts } from "./corp-central-defense-facts-adapter";
+  buildCorpAmbushPlanSignals,
+  corpCandidateIsAmbushInstall,
+} from "./corp-ambush-plan-signals";
 import {
   corpCentralDefenseHqAgendaExposureIsDeadline,
   type CorpCentralDefenseAllocation,
 } from "./corp-central-defense-allocation";
+import { allocateCorpCentralDefenseFromAiFacts } from "./corp-central-defense-facts-adapter";
 import {
   actionIceRezSupportLiability,
   definitionHasActionIceRezSupport,
 } from "./corp-defense-rez-support-facts";
-import { visibleCorpIceDefenseProfile } from "./semantic-runtime-corp-effective-defense";
-import { corpRootRezTimingComponent } from "./corp-scoreline/semantic-runtime-corp-score-ice-components";
-import { corpPassTaxRezAssessment } from "./corp-pass-tax-rez-assessment";
+import { assessCorpExactIceRezAgainstScoreReserves } from "./corp-defense-score-reserve";
+import {
+  assessCorpDrawAdmission,
+  corpVoluntaryDrawLeavesUnsafeMandatoryHorizon,
+  type CorpDrawAdmissionAssessment,
+  type CorpDrawAdmissionPriority,
+  type CorpDrawCapacityReleaseRoute,
+} from "./corp-draw-admission";
 import {
   corpMissingConcreteDefenseDrawNeed,
   corpMissingConcreteScoreDefenseDrawNeed,
@@ -453,63 +434,96 @@ import {
   type CorpCentralDefenseDirectInstallRouteState,
 } from "./corp-economy/corp-defensive-draw";
 import {
+  corpEffectiveDefenseActivationCredits,
+  corpIceEffectsOnlyReachFutureEncounters,
+  projectExactCorpIceRezRoute,
+} from "./corp-exact-ice-rez-route";
+import {
   assessBestFundedCorpScoreProtection,
   corpFundedScoreProtectionCertifiesBinding,
   projectCorpFundedIceInstallRoute,
   type CorpFundedIceInstallRouteProjection,
   type CorpFundedRemoteAccessRiskNeed,
-  type KnownCorpFundedIceInstallRouteProjection,
   type CorpScoreReserve,
+  type KnownCorpFundedIceInstallRouteProjection,
 } from "./corp-funded-score-protection";
-import { compareExactProbabilities } from "./corp-score-protection-assessment";
 import {
-  corpEffectiveDefenseActivationCredits,
-  corpIceEffectsOnlyReachFutureEncounters,
-  projectExactCorpIceRezRoute,
-} from "./corp-exact-ice-rez-route";
-import { assessCorpScoreRushRisk } from "./corp-score-rush-risk";
-import { assessCorpExactIceRezAgainstScoreReserves } from "./corp-defense-score-reserve";
-import { corpRestrictedRezDefenseSignals } from "./corp-restricted-rez-defense";
+  buildCorpHandInventoryFacts,
+  corpHandDuplicateCount,
+  type CorpHandDomainRouteClaimInput,
+  type CorpHandInventoryFacts,
+} from "./corp-hand-inventory-facts";
+import { assessCorpOpeningRush } from "./corp-opening-rush";
+import { corpPassTaxRezAssessment } from "./corp-pass-tax-rez-assessment";
+import { withDecisionLocalCorpPunishRouteQuotes } from "./corp-punish-route-quote-input";
 import {
-  currentCorpRestrictedCreditBanks,
   corpRestrictedRezPreparationCandidates,
+  currentCorpRestrictedCreditBanks,
 } from "./corp-restricted-credit-reserve";
-import { runnerRunLockReleaseProjection } from "./runner-run-lock-release-score";
+import { corpRestrictedRezDefenseSignals } from "./corp-restricted-rez-defense";
+import { compareExactProbabilities } from "./corp-score-protection-assessment";
+import { assessCorpScoreRushRisk } from "./corp-score-rush-risk";
+import {
+  corpScorelineActionCanCloseThisTurn,
+  corpScorelineFeasibilityForDecisionInput,
+  type CorpScorelineFeasibility,
+} from "./corp-scoreline-feasibility";
+import { corpRootRezTimingComponent } from "./corp-scoreline/semantic-runtime-corp-score-ice-components";
+import {
+  corpRegionReplacementComponent,
+  corpUpgradeInstallPlacementComponent,
+  corpUpgradePlacementAssessment,
+} from "./corp-upgrade-placement";
+import {
+  currentEncounteredIceCard,
+  currentEncounterRequiresFullBreak,
+  currentRunHasPendingAutoPassIce,
+  currentRunRemainingIce,
+} from "./current-encounter";
+import { projectKnownCorpCardAccessEffect } from "./known-corp-card-access-effect-projection";
+import { mergedPublicHistory, serverIdFromEvent } from "./public-event-history";
+import { runnerArchivesHasQualifiedHiddenPayoff } from "./runner-archives-score";
+import {
+  runnerCurrentRunHasSafeCompletionReward,
+  runnerRemoteHasKnownNoCurrentPayoff,
+} from "./runner-known-access-payoff-context";
 import {
   assessRunnerRunFundingAdmission,
   runnerRunTargetIsDirectlyConvertible,
 } from "./runner-run-funding-admission";
+import { runnerRunLockReleaseProjection } from "./runner-run-lock-release-score";
+import {
+  assessRunnerAdditionalAccessRunWindowAction,
+  runnerCandidateHasVisibleAdditionalAccessEffect,
+} from "./runner-run-window-additional-access";
+import { runnerHqSuccessWindowSetupAssessment } from "./runner-start-run-score";
+import {
+  runnerStrategicExchangeHardExclusion,
+  runnerStrategicExchangeKinds,
+  runnerStrategicExchangeRequiresBoundParent,
+} from "./runner-strategic-exchange";
 import {
   runnerActionRequiresTargetedBypassPlan,
   runnerDefinitionRequiresTargetedBypassPlan,
   runnerGenericDevelopmentMayOwnAction,
   runnerTargetedBypassPlanCommitment,
-  type RunnerTargetedBypassCommitment,
   type RunnerTargetedBypassChoiceContinuation,
+  type RunnerTargetedBypassCommitment,
 } from "./runner-targeted-bypass-plan";
 import {
   runnerActionRequiresTargetedIceTrashPlan,
+  runnerTargetedIceTrashPlanCommitment,
   runnerTargetedIceTrashState,
   runnerUnrezzedIceTrashRouteOpeningPayoff,
-  runnerTargetedIceTrashPlanCommitment,
-  type RunnerTargetedIceTrashCommitment,
   type RunnerTargetedIceTrashChoiceContinuation,
+  type RunnerTargetedIceTrashCommitment,
 } from "./runner-targeted-ice-trash-plan";
-import { runnerHqSuccessWindowSetupAssessment } from "./runner-start-run-score";
-import { runnerArchivesHasQualifiedHiddenPayoff } from "./runner-archives-score";
+import { runnerTerminalContestThreat } from "./runner-terminal-contest-threat";
+import { visibleCorpIceDefenseProfile } from "./semantic-runtime-corp-effective-defense";
 import {
-  assessRunnerAdditionalAccessRunWindowAction,
-  runnerCandidateHasVisibleAdditionalAccessEffect,
-} from "./runner-run-window-additional-access";
-import { mergedPublicHistory, serverIdFromEvent } from "./public-event-history";
-import {
-  corpSameTurnScoreConversionPaths,
-  type CorpScoreConversionStep,
-} from "../plans/tactical-plan-corp-score-conversion";
-import {
-  corpCounterBankScoreProjects,
-  isQuotedCorpCounterBankInHq,
-} from "../plans/corp-counter-bank-score-plan";
+  breakSubroutineIndexesForAction,
+  parseSubroutineIndexes,
+} from "./subroutine-indexes";
 
 export type PlanFirstLiveDependencies = {
   buildActionSemanticCandidates: (
@@ -18433,70 +18447,6 @@ function corpScoreProjectId(
   return `agenda:${agendaInstanceOrDefinitionId}:${serverId ?? "unbound"}`;
 }
 
-function visibleCardIsAgenda(
-  input: AiDecisionInput,
-  card: VisibleCard,
-): boolean {
-  return visibleKnownCardType(input, card) === "agenda";
-}
-
-function visibleKnownCardType(
-  input: AiDecisionInput,
-  card: VisibleCard,
-): string | undefined {
-  if (!card.known) return undefined;
-  if (!card.definitionId || !card.type)
-    throw new PlanResolutionFailure("invalid_player_view_card_projection", {
-      side: input.side,
-      stateVersion: input.playerView.stateVersion,
-      timingPoint: input.playerView.timingPoint,
-      legalActionTypes: input.legalActions.map((action) => action.type),
-      owner: "rules_contract",
-      removalCondition:
-        "Every own known card must expose both definitionId and type in PlayerView.",
-    });
-  const definition = CARD_DEFINITIONS_BY_ID[card.definitionId];
-  if (!definition?.type)
-    throw new PlanResolutionFailure("missing_card_definition", {
-      side: input.side,
-      stateVersion: input.playerView.stateVersion,
-      timingPoint: input.playerView.timingPoint,
-      legalActionTypes: input.legalActions.map((action) => action.type),
-      owner: "rules_contract",
-      removalCondition: `Provide an authoritative typed card definition for ${card.definitionId}.`,
-    });
-  if (definition.type !== card.type)
-    throw new PlanResolutionFailure("invalid_player_view_card_projection", {
-      side: input.side,
-      stateVersion: input.playerView.stateVersion,
-      timingPoint: input.playerView.timingPoint,
-      legalActionTypes: input.legalActions.map((action) => action.type),
-      owner: "rules_contract",
-      removalCondition: `Make PlayerView type match the authoritative definition for ${card.definitionId}.`,
-    });
-  return card.type;
-}
-
-function requireVisibleCandidateSource(
-  input: AiDecisionInput,
-  candidate: ActionSemanticCandidate,
-): VisibleCard {
-  const sourceId = candidate.sourceCardInstanceId;
-  const visibleSource = sourceId
-    ? visibleOwnCardByInstanceId(input, sourceId)
-    : undefined;
-  if (visibleSource) return visibleSource;
-  throw new PlanResolutionFailure("missing_action_semantics", {
-    side: input.side,
-    stateVersion: input.playerView.stateVersion,
-    timingPoint: input.playerView.timingPoint,
-    legalActionTypes: input.legalActions.map((action) => action.type),
-    owner: "action_semantics",
-    removalCondition:
-      "Every card-sourced install or rez candidate must bind its visible sourceCardInstanceId.",
-  });
-}
-
 function corpConditionalScoreCreditReserve(
   input: AiDecisionInput,
   agenda: VisibleCard,
@@ -20184,1079 +20134,6 @@ function corpDefenseReserveNeeds(
   });
 }
 
-function punishSignals(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  scorelineFeasibility: CorpScorelineFeasibility | undefined,
-  previous: ResidentPlanPortfolio | undefined,
-): CorpPunishCampaignSignal[] {
-  const quoted = quotedPunishSignals(input, candidates, previous);
-  const legacyRoots = mergeStableLegacyPunishRoots(
-    legacyPunishSignals(input, candidates, scorelineFeasibility).filter(
-      (signal) =>
-        signal.phase === "prepare" ||
-        signal.evidenceCode.startsWith(
-          "corp_tagged_runner_visible_resource_trash",
-        ) ||
-        signal.evidenceCode.startsWith(
-          "corp_tagged_runner_visible_credit_bank_trash",
-        ),
-    ),
-  );
-  return [...quoted, ...legacyRoots];
-}
-
-function mergeStableLegacyPunishRoots(
-  signals: readonly CorpPunishCampaignSignal[],
-): CorpPunishCampaignSignal[] {
-  const merged = new Map<string, CorpPunishCampaignSignal>();
-  for (const signal of signals) {
-    const current = merged.get(signal.campaignId);
-    if (!current) {
-      merged.set(signal.campaignId, structuredClone(signal));
-      continue;
-    }
-    const semanticActionTypes = new Set(
-      [
-        current.initiatingSemanticActionType,
-        signal.initiatingSemanticActionType,
-      ].filter((value): value is string => value !== undefined),
-    );
-    const {
-      initiatingSemanticActionType: _currentSemanticActionType,
-      ...currentWithoutSemanticActionType
-    } = current;
-    merged.set(signal.campaignId, {
-      ...currentWithoutSemanticActionType,
-      sourceDefinitionIds: [
-        ...new Set([
-          ...current.sourceDefinitionIds,
-          ...signal.sourceDefinitionIds,
-        ]),
-      ],
-      actionIds: [
-        ...new Set([...(current.actionIds ?? []), ...(signal.actionIds ?? [])]),
-      ],
-      ...(semanticActionTypes.size === 1
-        ? { initiatingSemanticActionType: [...semanticActionTypes][0]! }
-        : {}),
-      feasible: current.feasible || signal.feasible,
-      value: Math.max(current.value, signal.value),
-      evidenceCodes: [
-        ...new Set([
-          ...(current.evidenceCodes ?? [current.evidenceCode]),
-          ...(signal.evidenceCodes ?? [signal.evidenceCode]),
-        ]),
-      ],
-    });
-  }
-  return [...merged.values()].sort((left, right) =>
-    left.campaignId.localeCompare(right.campaignId),
-  );
-}
-
-function quotedPunishSignals(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  previous: ResidentPlanPortfolio | undefined,
-): CorpPunishCampaignSignal[] {
-  const quoteSet = input.playerView.corpPunishRouteQuoteSet;
-  if (
-    quoteSet?.complete !== true ||
-    quoteSet.side !== "corp" ||
-    quoteSet.stateVersion !== input.playerView.stateVersion ||
-    quoteSet.timingPoint !== input.playerView.timingPoint
-  ) {
-    return retainedUnknownPunishSignals(
-      input,
-      previous,
-      quoteSet?.incompleteReasons,
-    );
-  }
-  const routesByCampaign = new Map<string, CorpPunishRouteQuote[]>();
-  for (const route of quoteSet.routes) {
-    if (
-      !route.complete ||
-      route.stateVersion !== input.playerView.stateVersion ||
-      route.campaignIdOrigin !== "request_binding" ||
-      route.steps.length === 0
-    ) {
-      continue;
-    }
-    const current = routesByCampaign.get(route.campaignId) ?? [];
-    current.push(route);
-    routesByCampaign.set(route.campaignId, current);
-  }
-  return [...routesByCampaign.entries()]
-    .sort(([left], [right]) => left.localeCompare(right))
-    .flatMap(([campaignId, routes]) => {
-      const signal = selectQuotedPunishSignal(
-        input,
-        candidates,
-        campaignId,
-        routes,
-      );
-      return signal ? [signal] : [];
-    });
-}
-
-function retainedUnknownPunishSignals(
-  input: AiDecisionInput,
-  previous: ResidentPlanPortfolio | undefined,
-  incompleteReasons: readonly string[] | undefined,
-): CorpPunishCampaignSignal[] {
-  if (!previous) return [];
-  const reason =
-    incompleteReasons && incompleteReasons.length > 0
-      ? incompleteReasons.join(",")
-      : "route_quote_unavailable";
-  return previous.instances.flatMap((instance) => {
-    if (instance.moduleId !== "corp.punish_campaign") return [];
-    const previousState = instance.moduleState as
-      | { kind?: unknown; signal?: CorpPunishCampaignSignal }
-      | undefined;
-    const previousSignal = previousState?.signal;
-    const previousRoute = previousSignal?.routeContract;
-    if (!previousSignal || !previousRoute) return [];
-    const {
-      terminalCondition: _previousTerminalCondition,
-      actionIds: _previousActionIds,
-      initiatingSemanticActionType: _previousSemanticActionType,
-      ...retainedSignal
-    } = previousSignal;
-    const {
-      currentHeadStepId: _previousHeadStepId,
-      currentHeadActionId: _previousHeadActionId,
-      ...retainedRoute
-    } = previousRoute;
-    return [
-      {
-        ...structuredClone(retainedSignal),
-        phase: "watch_window" as const,
-        actionIds: [],
-        feasible: false,
-        guarantee: "speculative" as const,
-        visibleTerminalProjection: false,
-        value: 0,
-        evidenceCode: `corp_punish_route_quote_unknown:${reason}`,
-        evidenceCodes: [
-          `corp_punish_route_quote_state_version:${input.playerView.stateVersion}`,
-          `corp_punish_route_quote_unknown:${reason}`,
-        ],
-        routeContract: {
-          ...structuredClone(retainedRoute),
-          quoteStatus: "unknown" as const,
-          quoteStateVersion: input.playerView.stateVersion,
-          fundingGap: 0,
-          fundingActionIds: [],
-          horizon: "wait" as const,
-        },
-      },
-    ];
-  });
-}
-
-function selectQuotedPunishSignal(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  campaignId: string,
-  routes: readonly CorpPunishRouteQuote[],
-): CorpPunishCampaignSignal | undefined {
-  return routes
-    .map((route) => ({
-      route,
-      signal: quotedPunishSignal(input, candidates, campaignId, route),
-    }))
-    .sort((left, right) => {
-      const readinessOrder =
-        quotedPunishSignalReadinessRank(left.signal) -
-        quotedPunishSignalReadinessRank(right.signal);
-      if (readinessOrder !== 0) return readinessOrder;
-      const horizonOrder =
-        quotedPunishHorizonRank(left.signal.routeContract?.horizon) -
-        quotedPunishHorizonRank(right.signal.routeContract?.horizon);
-      return horizonOrder !== 0
-        ? horizonOrder
-        : compareQuotedPunishRoutes(left.route, right.route);
-    })[0]?.signal;
-}
-
-function quotedPunishSignalReadinessRank(
-  signal: CorpPunishCampaignSignal,
-): number {
-  if (signal.visibleTerminalProjection) return 0;
-  return signal.feasible ? 1 : 2;
-}
-
-function quotedPunishHorizonRank(
-  horizon: "execute" | "fund" | "wait" | undefined,
-): number {
-  return horizon === "execute" ? 0 : horizon === "fund" ? 1 : 2;
-}
-
-type QuotedPunishOpportunityAssessment = {
-  disposition: "opportunity" | "watch";
-  priorityClass: "P1" | "P3" | "P4" | "P5";
-  value: number;
-  visibleTerminalProjection: boolean;
-  evidenceCode: string;
-};
-
-const QUOTED_PUNISH_PRIORITY_RANK = {
-  P1: 1,
-  P3: 3,
-  P4: 4,
-  P5: 5,
-} as const;
-
-/**
- * Rates the strategic outcome of an Engine-certified route without turning
- * non-terminal damage into a binary rejection. The bounded value is only a
- * within-class comparison: priority remains the scheduler's cross-plan
- * authority.
- */
-function assessQuotedPunishOpportunity(
-  route: CorpPunishRouteQuote,
-): QuotedPunishOpportunityAssessment {
-  const minimumDamage = route.damageEnvelope.effectiveDamage.minimum;
-  const runnerHandCount = route.damageEnvelope.runnerHandCount;
-  const hasDamageStep = route.steps.some(
-    (step) =>
-      step.kind === "meat_damage" ||
-      step.kind === "net_damage" ||
-      step.kind === "core_damage",
-  );
-  if (!hasDamageStep) {
-    if (route.guarantee === "unknown") {
-      return {
-        disposition: "watch",
-        priorityClass: "P5",
-        value: 0,
-        visibleTerminalProjection: false,
-        evidenceCode: "corp_punish_opportunity_watch:guarantee_unknown",
-      };
-    }
-    const positiveRunnerCreditLoss =
-      (route.nonDamageEnvelope?.runnerCreditLoss.minimum ?? 0) > 0;
-    const positiveHardwareTrash = route.steps.some(
-      (step) =>
-        step.hardwareTrashProjection !== undefined &&
-        step.hardwareTrashProjection.eligibleTargetCount > 0,
-    );
-    const expiringDirectTag =
-      route.tagTrigger.kind === "direct_tag_step" &&
-      route.tagTrigger.status === "projected";
-    const additionalTagPressure =
-      (route.tagTrigger.kind === "existing_tag" &&
-        (route.tagOutcomeEnvelope?.addedTags.maximum ?? 0) > 0) ||
-      (route.tagTrigger.kind === "trace_tag_step" &&
-        (route.tagOutcomeEnvelope?.addedTags.minimum ?? 0) >= 2 &&
-        (route.tagOutcomeEnvelope?.addedTags.minimum ?? 0) >=
-          route.responsePaymentEnvelope.totalCorpCredits.maximum);
-    if (expiringDirectTag) {
-      return {
-        disposition: "opportunity",
-        priorityClass: "P3",
-        value: Math.max(
-          1,
-          Math.min(
-            120,
-            105 -
-              Math.min(20, route.totalClicks * 5) -
-              Math.min(
-                20,
-                route.responsePaymentEnvelope.totalCorpCredits.maximum * 3,
-              ),
-          ),
-        ),
-        visibleTerminalProjection: false,
-        evidenceCode: "corp_punish_opportunity:expiring_direct_tag_pressure",
-      };
-    }
-    if (additionalTagPressure) {
-      const minimumAddedTags = route.tagOutcomeEnvelope!.addedTags.minimum;
-      const maximumAddedTags = route.tagOutcomeEnvelope!.addedTags.maximum;
-      const currentRunnerTags = route.tagOutcomeEnvelope!.currentRunnerTags;
-      const guaranteeFactor = minimumAddedTags > 0 ? 1 : 0.75;
-      return {
-        disposition: "opportunity",
-        priorityClass: currentRunnerTags <= 1 ? "P4" : "P5",
-        value: Math.max(
-          1,
-          Math.min(
-            120,
-            Math.round(
-              (108 + minimumAddedTags * 20 + maximumAddedTags * 6) *
-                guaranteeFactor -
-                Math.min(36, currentRunnerTags * 18) -
-                Math.min(18, route.totalClicks * 5) -
-                Math.min(
-                  18,
-                  route.responsePaymentEnvelope.totalCorpCredits.maximum * 4,
-                ),
-            ),
-          ),
-        ),
-        visibleTerminalProjection: false,
-        evidenceCode: "corp_punish_opportunity:additional_tag_pressure",
-      };
-    }
-    if (!positiveRunnerCreditLoss && !positiveHardwareTrash) {
-      return {
-        disposition: "watch",
-        priorityClass: "P5",
-        value: 0,
-        visibleTerminalProjection: false,
-        evidenceCode:
-          "corp_punish_opportunity_watch:no_positive_non_damage_payoff",
-      };
-    }
-    return {
-      disposition: "opportunity",
-      priorityClass: "P4",
-      value: Math.max(
-        1,
-        Math.min(
-          120,
-          Math.round(
-            120 -
-              Math.min(18, route.totalClicks * 4) -
-              Math.min(
-                18,
-                route.responsePaymentEnvelope.totalCorpCredits.maximum / 2,
-              ),
-          ),
-        ),
-      ),
-      visibleTerminalProjection: false,
-      evidenceCode: "corp_punish_opportunity:non_damage_payoff",
-    };
-  }
-  if (minimumDamage <= 0 || route.guarantee === "unknown") {
-    return {
-      disposition: "watch",
-      priorityClass: "P5",
-      value: 0,
-      visibleTerminalProjection: false,
-      evidenceCode:
-        minimumDamage <= 0
-          ? "corp_punish_opportunity_watch:no_positive_minimum_damage"
-          : "corp_punish_opportunity_watch:guarantee_unknown",
-    };
-  }
-
-  const visibleTerminalProjection = minimumDamage > runnerHandCount;
-  const safelyDestroyedCards = Math.min(minimumDamage, runnerHandCount);
-  const destroyedHandShare =
-    runnerHandCount === 0 ? 1 : safelyDestroyedCards / runnerHandCount;
-  const remainingHandCount = Math.max(0, runnerHandCount - minimumDamage);
-  const materialHandDestruction =
-    destroyedHandShare >= 0.5 || remainingHandCount <= 1;
-  const priorityClass = visibleTerminalProjection
-    ? ("P1" as const)
-    : materialHandDestruction
-      ? ("P4" as const)
-      : ("P5" as const);
-  const outcomeValue = visibleTerminalProjection
-    ? 220
-    : materialHandDestruction
-      ? 125 + destroyedHandShare * 75 + (remainingHandCount <= 1 ? 10 : 0)
-      : 12 + destroyedHandShare * 40 + Math.min(10, safelyDestroyedCards * 2);
-  const guaranteeFactor =
-    route.guarantee === "guaranteed"
-      ? 1
-      : route.guarantee === "conditional_on_runner_response"
-        ? 0.94
-        : 0.88;
-  const responseKnowledgeFactor =
-    route.responseKnowledge === "public_exact"
-      ? 1
-      : route.responseKnowledge === "public_bounded"
-        ? 0.95
-        : 0.9;
-  const clickLoad = Math.min(18, route.totalClicks * 4);
-  const creditLoad = Math.min(
-    18,
-    route.responsePaymentEnvelope.totalCorpCredits.maximum / 2,
-  );
-  const boundedValue = Math.max(
-    1,
-    Math.min(
-      200,
-      Math.round(
-        outcomeValue * guaranteeFactor * responseKnowledgeFactor -
-          clickLoad -
-          creditLoad,
-      ),
-    ),
-  );
-  return {
-    disposition: "opportunity",
-    priorityClass,
-    value: boundedValue,
-    visibleTerminalProjection,
-    evidenceCode: visibleTerminalProjection
-      ? "corp_punish_opportunity:terminal_flatline"
-      : materialHandDestruction
-        ? "corp_punish_opportunity:material_hand_destruction"
-        : "corp_punish_opportunity:chip_damage",
-  };
-}
-
-function compareQuotedPunishRoutes(
-  left: CorpPunishRouteQuote,
-  right: CorpPunishRouteQuote,
-): number {
-  const leftAssessment = assessQuotedPunishOpportunity(left);
-  const rightAssessment = assessQuotedPunishOpportunity(right);
-  const priorityOrder =
-    QUOTED_PUNISH_PRIORITY_RANK[leftAssessment.priorityClass] -
-    QUOTED_PUNISH_PRIORITY_RANK[rightAssessment.priorityClass];
-  if (priorityOrder !== 0) return priorityOrder;
-  const valueOrder = rightAssessment.value - leftAssessment.value;
-  if (valueOrder !== 0) return valueOrder;
-  const clickOrder = left.totalClicks - right.totalClicks;
-  if (clickOrder !== 0) return clickOrder;
-  const creditOrder =
-    left.responsePaymentEnvelope.totalCorpCredits.maximum -
-    right.responsePaymentEnvelope.totalCorpCredits.maximum;
-  if (creditOrder !== 0) return creditOrder;
-  const minimumDamageOrder =
-    right.damageEnvelope.effectiveDamage.minimum -
-    left.damageEnvelope.effectiveDamage.minimum;
-  if (minimumDamageOrder !== 0) return minimumDamageOrder;
-  return left.routeId.localeCompare(right.routeId);
-}
-
-function quotedPunishSignal(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  campaignId: string,
-  route: CorpPunishRouteQuote,
-): CorpPunishCampaignSignal {
-  const head = route.steps[0]!;
-  const opportunity = assessQuotedPunishOpportunity(route);
-  const actionable = opportunity.disposition === "opportunity";
-  const headActionId = head.currentLegalAction?.actionId;
-  const headCandidate = headActionId
-    ? candidates.find(
-        (candidate) =>
-          candidate.actionId === headActionId &&
-          candidate.sourceCardInstanceId === head.sourceCardInstanceId &&
-          candidate.sourceDefinitionId === head.sourceCardDefinitionId,
-      )
-    : undefined;
-  const exactHeadAction = headActionId
-    ? input.legalActions.find(
-        (action) =>
-          action.actionId === headActionId &&
-          action.source === head.sourceCardInstanceId &&
-          action.expiresAtStateVersion === input.playerView.stateVersion,
-      )
-    : undefined;
-  const currentHeadAvailable =
-    headCandidate !== undefined && exactHeadAction !== undefined;
-  const fundingGap = actionable
-    ? Math.max(
-        0,
-        route.responsePaymentEnvelope.totalCorpCredits.maximum -
-          input.playerView.own.credits,
-      )
-    : 0;
-  const fundingActions =
-    actionable && fundingGap > 0
-      ? candidates.filter((candidate) => {
-          const gain = immediateCorpLiquidCreditGain(candidate);
-          if (gain < fundingGap) return false;
-          const action = input.legalActions.find(
-            (legalAction) => legalAction.actionId === candidate.actionId,
-          );
-          const clicks = action
-            ? currentLegalActionResourceCost(action, "clicks")
-            : undefined;
-          return (
-            clicks !== undefined &&
-            clicks > 0 &&
-            route.totalClicks + clicks <= input.playerView.own.clicks
-          );
-        })
-      : [];
-  const horizon: "execute" | "fund" | "wait" =
-    actionable &&
-    fundingGap === 0 &&
-    route.totalClicks <= input.playerView.own.clicks &&
-    currentHeadAvailable
-      ? "execute"
-      : fundingGap > 0 && fundingActions.length > 0
-        ? "fund"
-        : "wait";
-  const terminalGuarantee =
-    route.guarantee === "guaranteed" ||
-    route.guarantee === "conditional_on_runner_response";
-  const terminal =
-    opportunity.visibleTerminalProjection &&
-    terminalGuarantee &&
-    horizon !== "wait";
-  const phase =
-    horizon === "fund"
-      ? ("fund" as const)
-      : horizon === "wait"
-        ? ("watch_window" as const)
-        : punishPhaseForQuotedHead(head.kind);
-  const executionNeedId = `punish-execution:${campaignId}:${route.routeId}`;
-  const fundingNeedId = `punish-funding:${campaignId}:${route.routeId}`;
-  const evidenceCodes = [
-    `corp_punish_route_quote_state_version:${route.stateVersion}`,
-    `corp_punish_route_selected:${route.routeId}`,
-    `corp_punish_route_horizon:${horizon}`,
-    opportunity.evidenceCode,
-  ];
-  const secondaryLiquidGain = headCandidate
-    ? immediateCorpLiquidCreditGain(headCandidate)
-    : 0;
-  return {
-    campaignId,
-    phase,
-    sourceDefinitionIds: [
-      ...new Set(route.steps.map((step) => step.sourceCardDefinitionId)),
-    ],
-    ...(actionable && currentHeadAvailable
-      ? { actionIds: [headActionId!] }
-      : {}),
-    ...(actionable && headCandidate
-      ? { initiatingSemanticActionType: headCandidate.semanticActionType }
-      : {}),
-    feasible: horizon === "execute" || horizon === "fund",
-    guarantee:
-      route.guarantee === "guaranteed"
-        ? "visible_state_forced"
-        : route.guarantee === "conditional_on_runner_response"
-          ? "robust_but_reactive"
-          : route.guarantee === "not_guaranteed"
-            ? "belief_supported"
-            : "speculative",
-    ...(opportunity.priorityClass === "P4" || opportunity.priorityClass === "P5"
-      ? { priorityClass: opportunity.priorityClass }
-      : {}),
-    ...(terminal ? { terminalCondition: "runner_flatline" as const } : {}),
-    visibleTerminalProjection: terminal,
-    value: Math.min(200, opportunity.value + secondaryLiquidGain * 6),
-    evidenceCode: `corp_punish_route_selected:${route.routeId}`,
-    evidenceCodes,
-    routeContract: {
-      contractVersion: "corp_punish_route_signal_v1",
-      quoteStatus: "complete",
-      quoteStateVersion: route.stateVersion,
-      routeId: route.routeId,
-      totalClicks: route.totalClicks,
-      totalActionCredits: route.totalActionCredits,
-      corpResponseCredits:
-        route.responsePaymentEnvelope.corpResponseCredits.maximum,
-      totalCorpCredits: route.responsePaymentEnvelope.totalCorpCredits.maximum,
-      fundingGap,
-      fundingActionIds: fundingActions.map((candidate) => candidate.actionId),
-      horizon,
-      executionNeedId,
-      fundingNeedId,
-      currentHeadStepId: head.stepId,
-      ...(head.kind === "trace_tag" && currentHeadAvailable
-        ? {
-            traceBidBinding: {
-              sourceCardInstanceId: head.sourceCardInstanceId,
-              sourceDefinitionId: head.sourceCardDefinitionId,
-              quotedAtStateVersion: route.stateVersion,
-              amount: route.responsePaymentEnvelope.corpResponseCredits.maximum,
-            },
-          }
-        : {}),
-      ...(currentHeadAvailable ? { currentHeadActionId: headActionId! } : {}),
-    },
-  };
-}
-
-function punishPhaseForQuotedHead(
-  kind: CorpPunishRouteQuote["steps"][number]["kind"],
-): CorpPunishCampaignSignal["phase"] {
-  if (kind === "trace_tag") return "trace";
-  if (kind === "tag") return "tag";
-  if (
-    kind === "meat_damage" ||
-    kind === "net_damage" ||
-    kind === "core_damage"
-  ) {
-    return "damage";
-  }
-  return "kill";
-}
-
-function currentLegalActionResourceCost(
-  action: LegalAction,
-  resource: "clicks" | "credits",
-): number {
-  return action.costs.reduce((sum, cost) => sum + (cost[resource] ?? 0), 0);
-}
-
-function legacyPunishSignals(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  scorelineFeasibility: CorpScorelineFeasibility | undefined,
-): CorpPunishCampaignSignal[] {
-  return candidates.flatMap((candidate): CorpPunishCampaignSignal[] => {
-    if (corpCandidateIsAmbushInstall(candidate)) return [];
-    const legalAction = input.legalActions.find(
-      (action) => action.actionId === candidate.actionId,
-    );
-    if (
-      candidate.semanticActionType === "tag.trash_runner_resource" &&
-      input.playerView.opponent.tags > 0 &&
-      legalAction &&
-      actionIsCurrentlyAffordable(input, legalAction)
-    ) {
-      const targetId =
-        candidateTargetIds(candidate)[0] ??
-        (typeof legalAction.payload?.targetCardId === "string"
-          ? legalAction.payload.targetCardId
-          : undefined);
-      if (!targetId) return [];
-      const target = input.playerView.opponent.rig?.find(
-        (card) => card.instanceId === targetId,
-      );
-      if (!target) return [];
-      const storedValue = target
-        ? Object.values(target.counters ?? {}).reduce(
-            (sum, amount) => sum + Math.max(0, amount),
-            0,
-          )
-        : 0;
-      return [
-        {
-          campaignId: `punish:resource-trash:${targetId}`,
-          phase: "damage",
-          sourceDefinitionIds: [],
-          actionIds: [candidate.actionId],
-          initiatingSemanticActionType: candidate.semanticActionType,
-          feasible: true,
-          guarantee: "visible_state_forced",
-          visibleTerminalProjection: false,
-          value: 400 + storedValue * 20,
-          evidenceCode:
-            storedValue > 0
-              ? "corp_tagged_runner_visible_credit_bank_trash"
-              : "corp_tagged_runner_visible_resource_trash",
-        },
-      ];
-    }
-    const profile = getStructuredTagPunishProfileForCard(
-      candidate.sourceDefinitionId,
-    );
-    const tagPunishPayoff =
-      profile?.payoff === true && profile.requiresRunnerTagged;
-    const traceSupport = corpDefinitionIsTraceSupport(
-      candidate.sourceDefinitionId,
-    );
-    const runnerTagged = input.playerView.opponent.tags > 0;
-    const visibleDefinitions = visibleOwnDefinitionIds(input);
-    const visibleTagSource = [...visibleDefinitions].some(
-      (definitionId) =>
-        getStructuredTagPunishProfileForCard(definitionId)?.tagSource ===
-          true || corpDefinitionIsTraceSource(definitionId),
-    );
-    const visiblePayoff = [...visibleDefinitions].some((definitionId) => {
-      const visibleProfile = getStructuredTagPunishProfileForCard(definitionId);
-      return (
-        visibleProfile?.payoff === true && visibleProfile.requiresRunnerTagged
-      );
-    });
-    if (!legalAction || !actionIsCurrentlyAffordable(input, legalAction))
-      return [];
-    if (
-      corpInstallTargetProfileHasPurpose(
-        candidate,
-        "establish_tag_source_in_protected_empty_remote",
-      ) &&
-      candidate.semanticActionType === "install.card" &&
-      !corpProtectedEmptyRemoteTagSourcePlacementIsPreferred(input, candidate)
-    ) {
-      return [];
-    }
-    if (!corpPunishCandidateHasVisibleEffect(input, candidate)) return [];
-    if (
-      candidateIsVisibleCorpIceInstall(input, candidate) ||
-      candidateIsVisibleCorpAgendaInstall(input, candidate) ||
-      legalAction.type === "rez_ice" ||
-      candidate.semanticActionType === "score.advance_card"
-    )
-      return [];
-    const immediatePayoffConversion =
-      profile?.tagSource === true &&
-      visibleTagPayoffConversionIsAffordable(input, legalAction);
-    const startsImmediateTagSequence =
-      profile?.tagSource === true &&
-      candidate.semanticActionType !== "install.card" &&
-      candidate.semanticActionType !== "corp_window.rez";
-    if (startsImmediateTagSequence && !immediatePayoffConversion) return [];
-    const preparationAction =
-      candidate.semanticActionType === "install.card" ||
-      candidate.semanticActionType === "corp_window.rez" ||
-      candidate.semanticActionType === "score.advance_card";
-    const targetBoundTraceSupport =
-      traceSupport &&
-      corpTraceSupportTargetHasVisibleTraceSource(input, candidate);
-    if (
-      targetBoundTraceSupport &&
-      corpInstallTargetProfileHasPurpose(
-        candidate,
-        "establish_fort_trace_support",
-      ) &&
-      candidate.semanticActionType === "install.card" &&
-      !corpFortTraceSupportPlacementIsPreferred(input, candidate)
-    ) {
-      return [];
-    }
-    const profilePhase: CorpPunishCampaignSignal["phase"] | undefined =
-      preparationAction &&
-      (profile?.tagSource ||
-        tagPunishPayoff ||
-        (targetBoundTraceSupport && visibleTagSource))
-        ? "prepare"
-        : tagPunishPayoff && runnerTagged
-          ? "damage"
-          : profile?.tagSource && visiblePayoff
-            ? profile.traceTagSource
-              ? "trace"
-              : "tag"
-            : undefined;
-    const phase =
-      profilePhase ??
-      (candidate.semanticActionType.startsWith("trace.")
-        ? "trace"
-        : candidate.semanticActionType.startsWith("tag.")
-          ? "tag"
-          : candidate.semanticActionType.startsWith("damage.") && runnerTagged
-            ? "damage"
-            : undefined);
-    if (!phase) return [];
-    if (
-      phase === "prepare" &&
-      corpStrategicFundingPhaseBlocksPreparation(input, candidate, legalAction)
-    ) {
-      return [];
-    }
-    if (tagPunishPayoff && !runnerTagged) return [];
-    if (profile?.tagSource && !visiblePayoff && !preparationAction) return [];
-    if (tagPunishPayoff && !visibleTagSource && !runnerTagged) return [];
-    if (
-      phase === "prepare" &&
-      profile?.requiresScoredAgenda &&
-      input.playerView.own.scoreArea.length === 0
-    )
-      return [];
-    if (
-      phase === "prepare" &&
-      profile?.requiresScoredAgenda &&
-      scorelineFeasibility?.remainingMandatoryDraws === 0
-    )
-      return [];
-    if (
-      phase === "prepare" &&
-      scorelineFeasibility?.feasible === true &&
-      scorelineFeasibility.currentAgendaPoints >=
-        scorelineFeasibility.pointsToWin - 1
-    )
-      return [];
-    if (phase !== "prepare") return [];
-    const stableSourceId =
-      candidate.sourceCardInstanceId ?? candidate.sourceDefinitionId;
-    const stablePurpose = profile?.tagSource
-      ? "tag-source"
-      : tagPunishPayoff
-        ? "tag-payoff"
-        : targetBoundTraceSupport
-          ? "trace-support"
-          : undefined;
-    if (!stableSourceId || !stablePurpose) return [];
-    const value = profile?.requiresScoredAgenda
-      ? 180
-      : scorelineFeasibility?.deadline === "current_turn_only"
-        ? 220
-        : 150;
-    return [
-      {
-        campaignId: `punish:prepare:${stableSourceId}:${stablePurpose}`,
-        phase,
-        sourceDefinitionIds: candidate.sourceDefinitionId
-          ? [candidate.sourceDefinitionId]
-          : [],
-        actionIds: [candidate.actionId],
-        initiatingSemanticActionType: candidate.semanticActionType,
-        feasible: true,
-        guarantee: "robust_but_reactive",
-        visibleTerminalProjection: false,
-        ...(profile === undefined ? { priorityClass: "P5" as const } : {}),
-        value,
-        evidenceCode: profile
-          ? `tag_punish_ontology_${phase}:${candidate.sourceDefinitionId}`
-          : `visible_${phase}_action`,
-      },
-    ];
-  });
-}
-
-function corpInstallTargetProfileHasPurpose(
-  candidate: ActionSemanticCandidate,
-  purpose: string,
-): boolean {
-  if (!candidate.sourceDefinitionId) return false;
-  return (
-    AI_HINTS_BY_CARD.get(candidate.sourceDefinitionId)?.targetProfiles?.some(
-      (profile) =>
-        "schemaVersion" in profile &&
-        profile.schemaVersion === "target-profile-v1" &&
-        profile.kind === "install_target" &&
-        profile.targetType === "server" &&
-        profile.timing === "on_install" &&
-        profile.purpose === purpose,
-    ) === true
-  );
-}
-
-function corpFortTraceSupportPlacementIsPreferred(
-  input: AiDecisionInput,
-  candidate: ActionSemanticCandidate,
-): boolean {
-  const targetServerId = candidateTargetIds(candidate).find(isServerId);
-  if (!targetServerId) return false;
-  const installableAgendaVisible = input.playerView.own.gripOrHq.some(
-    (card) => card.known && visibleCardIsAgenda(input, card),
-  );
-  if (installableAgendaVisible) return true;
-  const protectedEmptyTraceRemote = input.playerView.servers
-    .filter(
-      (server) =>
-        server.id.startsWith("remote_") &&
-        server.root.length === 0 &&
-        server.ice.some(
-          (ice) =>
-            corpDefinitionIsTraceSource(ice.definitionId) ||
-            ice.effectiveRunQuote?.subroutines.some(
-              (subroutine) => subroutine.type === "initiate_trace",
-            ) === true,
-        ),
-    )
-    .sort(
-      (left, right) =>
-        right.ice.length - left.ice.length || left.id.localeCompare(right.id),
-    )[0];
-  return targetServerId === (protectedEmptyTraceRemote?.id ?? targetServerId);
-}
-
-function corpProtectedEmptyRemoteTagSourcePlacementIsPreferred(
-  input: AiDecisionInput,
-  candidate: ActionSemanticCandidate,
-): boolean {
-  const targetServerId = candidateTargetIds(candidate).find(
-    isCorpInstallServerId,
-  );
-  if (!targetServerId) return false;
-  const protectedEmptyRemote = input.playerView.servers
-    .filter(
-      (server) =>
-        server.id.startsWith("remote_") &&
-        server.root.length === 0 &&
-        server.ice.length > 0,
-    )
-    .sort(
-      (left, right) =>
-        right.ice.length - left.ice.length || left.id.localeCompare(right.id),
-    )[0];
-  return targetServerId === (protectedEmptyRemote?.id ?? "new_remote");
-}
-
-function corpDefinitionSupportsPunishPlan(
-  definitionId: string | undefined,
-): boolean {
-  if (!definitionId) return false;
-  const hint = AI_HINTS_BY_CARD.get(definitionId);
-  return (
-    getStructuredTagPunishProfileForCard(definitionId) !== undefined ||
-    hint?.lineSupport?.includes("corp.tag_trace_punish") === true ||
-    hint?.strategyAnchors?.includes("corp.tag_trace_punish") === true
-  );
-}
-
-function corpConditionalPunishTagSourceHasNoVisiblePayoff(
-  input: AiDecisionInput,
-  candidate: ActionSemanticCandidate,
-): boolean {
-  const exactTagSource = candidate.functionalEffects?.some(
-    (effect) => effect.kind === "tag_source" && effect.scope === "runner",
-  );
-  if (exactTagSource !== true) return false;
-  return ![...visibleOwnDefinitionIds(input)].some((definitionId) => {
-    const profile = getStructuredTagPunishProfileForCard(definitionId);
-    return profile?.payoff === true && profile.requiresRunnerTagged;
-  });
-}
-
-function corpPunishQuoteRequestExists(input: AiDecisionInput): boolean {
-  return buildBoundedCorpPunishRouteRequests(input).length > 0;
-}
-
-function corpStrategicFundingPhaseBlocksPreparation(
-  input: AiDecisionInput,
-  candidate: ActionSemanticCandidate,
-  legalAction: AiDecisionInput["legalActions"][number],
-): boolean {
-  const intent = (input as AiDecisionInputWithDeckCapabilities)
-    .ownStrategicIntentState;
-  if (
-    intent?.side !== "corp" ||
-    intent.phase !== "fund" ||
-    intent.reserve.kind !== "credits" ||
-    intent.reserve.satisfied
-  ) {
-    return false;
-  }
-  const exactFundedPunishEngineActivation =
-    intent.primaryStrategy.strategyId === "corp.tag_trace_punish" &&
-    intent.targetVector.kind === "tag" &&
-    candidate.semanticActionType === "corp_window.rez" &&
-    candidate.cardContextFunctionalEffects?.some(
-      (effect) =>
-        effect.kind === "tag_source" &&
-        effect.scope === "runner" &&
-        effect.timing === "runner_turn",
-    ) === true &&
-    candidate.cardContextFunctionalEffects.some(
-      (effect) =>
-        effect.kind === "remote_tax" &&
-        effect.scope === "runner" &&
-        effect.resource === "credits" &&
-        effect.timing === "runner_turn",
-    ) &&
-    candidate.sourceCardInstanceId !== undefined &&
-    serverForInstalledCard(input, candidate.sourceCardInstanceId) !== undefined;
-  if (exactFundedPunishEngineActivation) return false;
-  return legalAction.costs.some((cost) => (cost.credits ?? 0) > 0);
-}
-
-function corpDefinitionIsTraceSupport(
-  definitionId: string | undefined,
-): boolean {
-  if (!definitionId) return false;
-  const hint = AI_HINTS_BY_CARD.get(definitionId);
-  return (
-    hint?.actionTacticSignals?.includes("trace.credit_support") === true ||
-    hint?.functionSignals?.includes("economy.trace_credit") === true
-  );
-}
-
-function corpDefinitionIsTraceSource(
-  definitionId: string | undefined,
-): boolean {
-  return corpDefinitionHasTraceSource(definitionId);
-}
-
-function corpTraceSupportTargetHasVisibleTraceSource(
-  input: AiDecisionInput,
-  candidate: ActionSemanticCandidate,
-): boolean {
-  const sourceServerId = candidate.sourceCardInstanceId
-    ? serverForInstalledCard(input, candidate.sourceCardInstanceId)
-    : undefined;
-  const serverId =
-    candidateTargetIds(candidate).find(isServerId) ?? sourceServerId;
-  if (!serverId || serverId === "new_remote") return false;
-  const server = input.playerView.servers.find(
-    (candidateServer) => candidateServer.id === serverId,
-  );
-  if (!server) return false;
-  return server.ice.some(
-    (ice) =>
-      corpDefinitionIsTraceSource(ice.definitionId) ||
-      ice.effectiveRunQuote?.subroutines.some(
-        (subroutine) => subroutine.type === "initiate_trace",
-      ) === true,
-  );
-}
-
-function corpPunishCandidateHasVisibleEffect(
-  input: AiDecisionInput,
-  candidate: ActionSemanticCandidate,
-): boolean {
-  if (!candidate.sourceDefinitionId) return true;
-  const hint = AI_HINTS_BY_CARD.get(candidate.sourceDefinitionId);
-  const runnerCreditPunish = hint?.effects?.some(
-    (effect) =>
-      effect.scope === "runner" &&
-      effect.resource === "credits" &&
-      (effect.kind === "counter_economy" ||
-        effect.kind === "tag_punish_payoff"),
-  );
-  if (!runnerCreditPunish) return true;
-  const hasIndependentVisiblePayoff = hint?.effects?.some(
-    (effect) =>
-      !(
-        effect.scope === "runner" &&
-        effect.resource === "credits" &&
-        (effect.kind === "counter_economy" ||
-          effect.kind === "tag_punish_payoff")
-      ),
-  );
-  return (
-    input.playerView.opponent.credits > 0 ||
-    hasIndependentVisiblePayoff === true
-  );
-}
-
-function visibleTagPayoffConversionIsAffordable(
-  input: AiDecisionInput,
-  tagSourceAction: AiDecisionInput["legalActions"][number],
-): boolean {
-  const sourceCost = tagSourceAction.costs.reduce<{
-    credits: number;
-    clicks: number;
-  }>(
-    (total, entry) => ({
-      credits: total.credits + (entry.credits ?? 0),
-      clicks: total.clicks + (entry.clicks ?? 0),
-    }),
-    { credits: 0, clicks: 0 },
-  );
-  const remainingCredits = input.playerView.own.credits - sourceCost.credits;
-  const remainingClicks = input.playerView.own.clicks - sourceCost.clicks;
-  if (remainingClicks < 1 || remainingCredits < 0) return false;
-  return input.playerView.own.gripOrHq.some((card) => {
-    const profile = getStructuredTagPunishProfileForCard(card.definitionId);
-    if (!profile?.payoff || !profile.requiresRunnerTagged || !card.known)
-      return false;
-    const minimumPlayCost = minimumVisiblePlayCost(card);
-    return minimumPlayCost !== undefined && minimumPlayCost <= remainingCredits;
-  });
-}
-
-function minimumVisiblePlayCost(
-  card: AiDecisionInput["playerView"]["own"]["gripOrHq"][number],
-): number | undefined {
-  const playCost = card.playCost;
-  if (playCost === undefined) return undefined;
-  if (playCost.kind === "fixed") {
-    return Number.isInteger(playCost.credits) && playCost.credits >= 0
-      ? playCost.credits
-      : undefined;
-  }
-  if (
-    !Number.isInteger(playCost.minimumX) ||
-    playCost.minimumX < 0 ||
-    !Number.isInteger(playCost.creditsPerX) ||
-    playCost.creditsPerX < 1 ||
-    playCost.maximumX.kind !== "context"
-  ) {
-    return undefined;
-  }
-  return playCost.minimumX * playCost.creditsPerX;
-}
-
 function recentServerAccessCount(
   input: AiDecisionInput,
   serverId: string,
@@ -21275,37 +20152,6 @@ function recentServerAccessCount(
       eventServer === serverId.toLowerCase() || eventServer === normalizedServer
     );
   }).length;
-}
-
-function visibleOwnDefinitionIds(input: AiDecisionInput): Set<string> {
-  return new Set(
-    [
-      ...input.playerView.own.gripOrHq,
-      ...input.playerView.own.scoreArea,
-      ...input.playerView.servers
-        .filter((server) => server.id !== "archives")
-        .flatMap((server) => [...server.ice, ...server.root]),
-    ]
-      .filter((card) => card.known && card.definitionId)
-      .map((card) => card.definitionId!),
-  );
-}
-
-function actionIsCurrentlyAffordable(
-  input: AiDecisionInput,
-  action: AiDecisionInput["legalActions"][number],
-): boolean {
-  const cost = action.costs.reduce<{ credits: number; clicks: number }>(
-    (total, entry) => ({
-      credits: total.credits + (entry.credits ?? 0),
-      clicks: total.clicks + (entry.clicks ?? 0),
-    }),
-    { credits: 0, clicks: 0 },
-  );
-  return (
-    cost.credits <= input.playerView.own.credits &&
-    cost.clicks <= input.playerView.own.clicks
-  );
 }
 
 function resolvePlanBoundRunnerHiddenDrawChoice(
@@ -26822,40 +25668,6 @@ function currentActiveRunHasKnownNoPayoff(input: AiDecisionInput): boolean {
   );
 }
 
-function candidateTargetIds(candidate: ActionSemanticCandidate): string[] {
-  const selectedTargets =
-    candidate.targetContext?.selectedTargets.map((target) => target.targetId) ??
-    [];
-  return [
-    ...(selectedTargets.length > 0
-      ? selectedTargets
-      : (candidate.targetContext?.availableTargets?.map(
-          (target) => target.targetId,
-        ) ?? [])),
-    ...(candidate.runProjectionSummary?.serverId
-      ? [candidate.runProjectionSummary.serverId]
-      : []),
-  ];
-}
-
-function candidateIsVisibleCorpIceInstall(
-  input: AiDecisionInput,
-  candidate: ActionSemanticCandidate,
-): boolean {
-  if (candidate.semanticActionType !== "install.card") return false;
-  const visibleSource = requireVisibleCandidateSource(input, candidate);
-  return visibleKnownCardType(input, visibleSource) === "ice";
-}
-
-function candidateIsVisibleCorpAgendaInstall(
-  input: AiDecisionInput,
-  candidate: ActionSemanticCandidate,
-): boolean {
-  if (candidate.semanticActionType !== "install.card") return false;
-  const visibleSource = requireVisibleCandidateSource(input, candidate);
-  return visibleCardIsAgenda(input, visibleSource);
-}
-
 function corpVisibleHandHasActionIceRezSupport(
   input: AiDecisionInput,
 ): boolean {
@@ -27731,34 +26543,6 @@ function corpConditionalRezSupportWithoutCurrentRouteEvidence(
     return assessment?.productive ? undefined : assessment?.evidenceCode;
   }
   return undefined;
-}
-
-function serverForInstalledCard(
-  input: AiDecisionInput,
-  cardId: string,
-): string | undefined {
-  return input.playerView.servers.find((server) =>
-    [...server.ice, ...server.root].some((card) => card.instanceId === cardId),
-  )?.id;
-}
-
-function visibleInstalledCard(input: AiDecisionInput, cardId: string) {
-  return input.playerView.servers
-    .flatMap((server) => [...server.ice, ...server.root])
-    .find((card) => card.instanceId === cardId);
-}
-
-function isServerId(value: string): boolean {
-  return (
-    value === "hq" ||
-    value === "rd" ||
-    value === "archives" ||
-    value.startsWith("remote_")
-  );
-}
-
-function isCorpInstallServerId(value: string): boolean {
-  return value === "new_remote" || isServerId(value);
 }
 
 function archivesIsKnownWithoutAgenda(input: AiDecisionInput): boolean {

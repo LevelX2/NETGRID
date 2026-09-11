@@ -1,16 +1,16 @@
 import type {
   GuaranteeLevel,
   PlanAssessment,
-  PriorityClass,
   PriorityClaim,
+  PriorityClass,
   ResourceGap,
 } from "./plan-assessment";
 import type { PlanInstance, PlanProposal } from "./plan-kernel-types";
+import { PlanResolutionFailure } from "./plan-resolution-failure";
 import type {
   PlanMaterialization,
   PlanSchedulerContext,
 } from "./plan-scheduler";
-import { PlanResolutionFailure } from "./plan-resolution-failure";
 export function corpTacticalProposal(
   moduleId: PlanProposal["moduleId"],
   dedupeKey: string,
@@ -211,4 +211,51 @@ function modulePhase(moduleState: unknown): string {
   if ("signal" in value && value.signal && "phase" in value.signal)
     return String(value.signal.phase);
   return value.kind ?? "execute";
+}
+
+import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import { CorpPlanDomain } from "./corp-tactical-plan-contracts";
+
+export function corpSpecialDevelopmentAdmission(params: {
+  assignedDomainPlanIds: readonly string[];
+  concretePurposeCode?: string;
+  duplicateAlreadyInstalled: boolean;
+  affordableOrSupportable: boolean;
+}):
+  | { admitted: true; reasonCode: string }
+  | { admitted: false; reasonCode: string } {
+  if (params.duplicateAlreadyInstalled)
+    return { admitted: false, reasonCode: "redundant_corp_copy" };
+  if (!params.affordableOrSupportable)
+    return { admitted: false, reasonCode: "unfunded_corp_development" };
+  if (params.assignedDomainPlanIds.length > 0)
+    return { admitted: true, reasonCode: "assigned_domain_plan" };
+  if (!params.concretePurposeCode)
+    return { admitted: false, reasonCode: "no_concrete_corp_purpose" };
+  return {
+    admitted: true,
+    reasonCode: `specific_purpose:${params.concretePurposeCode}`,
+  };
+}
+
+export function candidateTargets(candidate: ActionSemanticCandidate): string[] {
+  return [
+    ...(candidate.targetContext?.selectedTargets.map(
+      (target) => target.targetId,
+    ) ?? []),
+    ...(candidate.targetContext?.availableTargets?.map(
+      (target) => target.targetId,
+    ) ?? []),
+    ...(candidate.runProjectionSummary?.serverId
+      ? [candidate.runProjectionSummary.serverId]
+      : []),
+  ];
+}
+
+export function domain(context: PlanSchedulerContext): CorpPlanDomain {
+  return corpTacticalPlanDomain<CorpPlanDomain>(context);
+}
+
+export function state<T>(instance: PlanInstance): T {
+  return instance.moduleState as T;
 }

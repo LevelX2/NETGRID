@@ -1,6 +1,6 @@
+import type { CorpPlanDomain } from "./corp-tactical-plan-contracts";
 import type { AiDecisionInput, PublicGameEvent } from "@netgrid/shared";
 
-import type { CorpPlanDomain } from "./corp-tactical-plan-modules";
 import {
   RESIDENT_CORP_CAMPAIGN_SCHEMA_VERSION,
   type ResidentCorpCampaign,
