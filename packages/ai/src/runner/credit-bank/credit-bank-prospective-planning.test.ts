@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import {
   rematerializedRunnerCreditBankBuildCandidate,
   runnerCreditBankProspectivePlan,
-} from "./runner-credit-bank-prospective-planning";
+} from "./credit-bank-prospective-planning";
 
 const stateIdentity = {
   stateVersion: 12,

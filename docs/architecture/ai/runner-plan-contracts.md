@@ -831,10 +831,95 @@ bindend.
 **Status:** separate registrierte Core-Owner innerhalb der Economy-Domäne.
 `credit_bank` besitzt Laden und Auszahlung einer konkreten Bank, einschließlich
 endlichem Ziel, Reserve und Cadence. `recurring_economy` bewertet die aktuelle
-wiederkehrende Einkommensquelle. Beide konsumieren ihre typisierten Signale
-aus `runnerContext`; Finanzierung eines fremden Ziels bleibt an dessen Bedarf
-gebunden. Die Beschreibung von Economy als gemeinsamer Fachaufgabe in
+wiederkehrende Einkommensquelle. `runnerContext` verdrahtet beide Owner;
+Finanzierung eines fremden Ziels bleibt an dessen Bedarf gebunden.
+Die Beschreibung von Economy als gemeinsamer Fachaufgabe in
 Abschnitt 6 hebt diese tatsächlichen Modulidentitäten nicht auf.
+
+### Vertikale Implementierung der Bank
+
+Die produktive Bankentscheidung liegt unter `packages/ai/src/runner/credit-bank/`:
+
+| Quelle                                                                                                                 | Verantwortung                                                                                                               |
+| ---------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| [credit-bank-types.ts](../../../packages/ai/src/runner/credit-bank/credit-bank-types.ts)                               | Bankinstanz, Phase, aktuelle Action-IDs, abgelehnte Alternativen und privater Modulzustand                                  |
+| [credit-bank-signals.ts](../../../packages/ai/src/runner/credit-bank/credit-bank-signals.ts)                           | Installieren, Laden, Auszahlen oder Halten; instanzgebundene Cadence, endliches Bankziel und Prüfung konkreter Finanzierung |
+| [credit-bank-plan-module.ts](../../../packages/ai/src/runner/credit-bank/credit-bank-plan-module.ts)                   | Discovery, Assessment, exakte Phasenrouten und Fortsetzung nach der Installation                                            |
+| [credit-bank-dispositions.ts](../../../packages/ai/src/runner/credit-bank/credit-bank-dispositions.ts)                 | Begründete Ablehnung konkreter Bankalternativen; aktive Actions anderer Economy-Owner bleiben erhalten                      |
+| [credit-bank-prospective-planning.ts](../../../packages/ai/src/runner/credit-bank/credit-bank-prospective-planning.ts) | Side-sichere CardSpec-Projektion von Installation, Aufbau und Auszahlung; keine zukünftigen LegalAction-IDs                 |
+
+Die Core-Registry registriert `createRunnerCreditBankModule`. Die Live-Runtime
+ruft Signalerzeugung und Disposition auf und aggregiert deren Action-IDs für
+die übrigen Owner. Sie entscheidet keine Bankphase. Der Owner importiert weder
+die Core-Registry noch die zentrale Runtime oder deren Composition-Factories.
+Diese Grenze wird durch `credit-bank-owner-boundaries.test.ts` und das
+allgemeine Importzyklus-Gate geschützt.
+
+### Benannte gemeinsame Dienste
+
+`RunnerCreditBankServices` erhält fünf Funktionen, die im selben
+`runnerContext` an aktuellen Input, Kandidaten und Economy-Facts gebunden werden:
+
+- `hasExactRunUrgency`: belegte Dringlichkeit des konkreten Runziels;
+- `requiredPostRunReserve`: notwendige Reserve nach diesem Run;
+- `terminalVisibleHazardFundingGap`: konkrete Finanzierungslücke eines
+  terminalen Remote-Contests;
+- `isDirectlyMandatoryRun`: bereits direkt konvertierbare Pflichtlinie;
+- `developmentFundingRoute`: aktuelle Action-IDs einer vollständig
+  finanzierbaren Same-Turn-Kartenentwicklung.
+
+Die Implementierungen dieser bereits geteilten Run-/Development-Funktionen
+stehen weiterhin in der
+[Live-Runtime](../../../packages/ai/src/runtime/plan-first-live-runtime.ts).
+Die Schnittstelle überträgt Fakten und Routen; sie trifft keine Bankentscheidung.
+Run-Admission, Development-Cashout-Admission, kanonische Kartenfunktionen,
+`CreditDemand` und `searchFundingRoutes` bleiben explizit importierte Dienste.
+Die unveränderten Runner-Defaults für Proposal, Assessment und vorhandenen
+Domainkontext liegen in
+[runner-plan-module-support.ts](../../../packages/ai/src/plans/runner-plan-module-support.ts).
+Dieser Helfer besitzt keine bankabhängigen Schwellen, Phasen oder Routen.
+
+### Bindungen und Grenzen
+
+Installationssignale binden die sichtbare Karteninstanz und aktuelle Action-IDs.
+Laden und Auszahlen verlangen zusätzlich die passende `planOwnerBinding`-Route.
+Die Installationsfortsetzung bleibt an Bankziel und Capability gebunden;
+nach Engine-Anwendung werden die aktuellen Kandidaten erneut materialisiert.
+Eine prognostizierte spätere Fähigkeit ist keine bereits legale Action.
+Finanzierungsentscheidungen verwenden die bestehenden exakten Demand- und
+Route-Suchen; der Schnitt ergänzt keine neue Parentkante im Scheduler.
+
+Für den heutigen Bankpfad existiert kein eigener strategischer Choice-Resolver.
+Die gebundene generische Ausführung bleibt zuständig. CardSpec-Installchoices
+mit `requires_engine_quote` behalten ihre bisherige Projektionsgrenze; daraus
+folgt keine neue Choice-Unterstützung durch das Verschieben der Dateien.
+
+Der vorhandene `runtime/runner-bank-investment-context.ts` gehört zur separat
+verdrahteten Economy-Commitment-/Score-Oberfläche und ist nicht der Produzent
+der hier beschriebenen Plan-first-Bankphasen. Seine Composition-Pass-throughs
+werden durch diesen Schnitt weder zur Autorität erhoben noch bereinigt.
+
+### Bewertung und Anwendung auf weitere Owner
+
+Der Schnitt entfernt rund 660 Zeilen Banklogik aus der zentralen Runtime und
+bündelt den Plan mit seinen Signalen und Fortsetzungen. Die fachlichen
+Schwellen und Prioritäten bleiben unverändert. Die vorhandenen Cadence-,
+Prospective- und Finanzierungsregressionen prüfen weiterhin denselben Pfad.
+Ein Strukturgewinn ist damit erreichbar, ohne zuerst den Scheduler oder alle
+Owner umzubauen; ein Laufzeit- oder Spielstärkegewinn wird nicht behauptet.
+
+Der wesentliche Aufwand liegt in der Abgrenzung wirklich geteilter Fakten und
+der Prüfung der Bindungen. Fünf explizite Fact-/Routendienste sind hier
+überschaubar. Für weitere Owner empfiehlt sich derselbe Schnitt einzeln,
+wenn ihre fachlichen Entscheidungen ähnlich abgrenzbar sind. Wächst die
+Abhängigkeitsschnittstelle dagegen mit jeder internen Hilfsfunktion, müssen
+zuerst die gemeinsamen Fachverantwortlichkeiten geklärt werden. Eine große
+Callback-Sammlung würde die Verteilung nur verstecken.
+
+Das Muster ist für weitere überschaubare Owner sinnvoll. Es ist keine Abnahme
+einer vollständigen Migration aller Owner. Eine allgemeine Modul-Framework-API,
+ein Umbau aller Modulzustände oder die Bereinigung der übrigen Runtime-
+Compositions ist dafür keine Voraussetzung.
 
 ## 12. `runner.resource_lifecycle`
 

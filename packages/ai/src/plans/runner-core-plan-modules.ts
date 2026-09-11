@@ -6,24 +6,14 @@ import type { AiDeckStrategyProfile } from "../deck-doctrine-strategy";
 import { rolesMatch } from "../runtime/role-match";
 import { runnerEffectsProvideDamagePrevention } from "../runner-canonical-hint-semantics";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
-import type {
-  PlanAssessment,
-  PriorityClass,
-  PriorityClaim,
-  ResourceGap,
-} from "./plan-assessment";
-import type {
-  PlanBlocker,
-  PlanInstance,
-  PlanProposal,
-} from "./plan-kernel-types";
+import type { ResourceGap } from "./plan-assessment";
+import type { PlanInstance } from "./plan-kernel-types";
 import type {
   PlanMaterialization,
   PlanActionDisposition,
   PlanModule,
   PlanSchedulerContext,
 } from "./plan-scheduler";
-import { PlanResolutionFailure } from "./plan-resolution-failure";
 import type {
   FundingRouteHorizon,
   FundingRouteReliability,
@@ -31,7 +21,13 @@ import type {
   PaymentWindowFundingSetup,
 } from "./funding-route";
 import type { ProjectedHandDisposition } from "./turn-projection";
-import type { RunnerCreditBankProspectivePlan } from "./runner-credit-bank-prospective-planning";
+import type { RunnerCreditBankSignal } from "../runner/credit-bank/credit-bank-types";
+import { createRunnerCreditBankModule } from "../runner/credit-bank/credit-bank-plan-module";
+import {
+  runnerPlanProposal as proposal,
+  runnerPlanAssessment as assessment,
+  runnerPlanDomain,
+} from "./runner-plan-module-support";
 import type {
   RunnerHandDevelopmentCurrentNeed,
   RunnerHandDevelopmentRole,
@@ -280,20 +276,6 @@ export type RunnerDiscardChoiceBinding = {
   discardedCardInstanceIds: string[];
   retainedCardInstanceIds: string[];
   emergencyKeepCardInstanceIds: string[];
-  evidenceCodes: string[];
-};
-
-export type RunnerCreditBankSignal = {
-  bankId: string;
-  phase: "install" | "build" | "cash_out" | "hold";
-  actionIds: string[];
-  rejectedActionIds?: string[];
-  priorityClass: "P2" | "P4" | "P5";
-  currentStoredCredits: number;
-  portfolioStoredCredits: number;
-  estimatedPayout: number;
-  prospectivePlan?: RunnerCreditBankProspectivePlan;
-  value: number;
   evidenceCodes: string[];
 };
 
@@ -829,11 +811,6 @@ type DefenseState = {
     | "forgo_terminal_deck_pressure";
   signals: RunnerDefenseSignals;
 };
-type CreditBankState = {
-  kind: "credit_bank";
-  phase: RunnerCreditBankSignal["phase"];
-  signal: RunnerCreditBankSignal;
-};
 type RecurringEconomyState = {
   kind: "recurring_economy";
   phase: RunnerRecurringEconomySignal["phase"];
@@ -864,7 +841,7 @@ export function createRunnerCorePlanModules(
     installedAgendaScoreModule(),
     shellTradersPipelineModule(),
     resourceLifecycleModule(),
-    creditBankModule(),
+    createRunnerCreditBankModule(),
     recurringEconomyModule(),
     economyModule(),
     coverageModule(rolesForDefinitionId),
@@ -1139,93 +1116,6 @@ function recurringEconomyModule(): PlanModule {
               : "Develop through explicit non-run steps until the installed recurring economy commitment resolves its automatic value.",
         },
         candidates,
-      };
-    },
-  };
-}
-
-function creditBankModule(): PlanModule {
-  return {
-    moduleId: "runner.credit_bank",
-    side: "runner",
-    discover: (context) =>
-      domain(context).creditBanks.map((signal) =>
-        proposal({
-          moduleId: "runner.credit_bank",
-          dedupeKey: signal.bankId,
-          moduleState: {
-            kind: "credit_bank",
-            phase: signal.phase,
-            signal,
-          } satisfies CreditBankState,
-          priorityClass: signal.priorityClass,
-          target: { kind: "bank", id: signal.bankId },
-          routeExists: bankCandidates(context, signal).length > 0,
-          blockerCode: `no_credit_bank_${signal.phase}_route`,
-          evidenceCode:
-            signal.evidenceCodes[0] ?? `runner_credit_bank_${signal.phase}`,
-        }),
-      ),
-    assess: (instance, context, portfolio) => {
-      const signal = state<CreditBankState>(instance).signal;
-      return assessment(
-        instance,
-        signal.priorityClass,
-        bankCandidates(context, signal).length > 0,
-        signal.value,
-        portfolio.executorInstanceId,
-      );
-    },
-    materialize: (instance, _assessment, context) => {
-      const signal = state<CreditBankState>(instance).signal;
-      const candidates = bankCandidates(context, signal);
-      const prospectiveBuild =
-        signal.phase === "install" &&
-        signal.prospectivePlan?.build.kind === "activated" &&
-        signal.prospectivePlan?.build.projection === "feasible_in_projection"
-          ? signal.prospectivePlan.build
-          : undefined;
-      return {
-        step: {
-          stepId: `${instance.instanceId}:${signal.phase}`,
-          capability: {
-            capabilityId: `credit_bank_${signal.phase}`,
-            semanticActionTypes: [
-              ...new Set(
-                candidates.map((entry) => entry.candidate.semanticActionType),
-              ),
-            ],
-          },
-          target: { kind: "bank", id: signal.bankId },
-          purpose:
-            signal.phase === "install"
-              ? "Install the bound multi-turn credit bank."
-              : signal.phase === "build"
-                ? "Invest the current once-per-turn bank action."
-                : signal.phase === "cash_out"
-                  ? "Convert the stored bank value into a bound funding need."
-                  : "Keep the credit-bank plan resident until its next admissible phase.",
-        },
-        candidates,
-        ...(prospectiveBuild
-          ? {
-              continuation: {
-                continuationId: `${instance.instanceId}:prospective:${prospectiveBuild.capabilityKey}`,
-                trigger: "action_applied" as const,
-                nextCapability: {
-                  capabilityId: "credit_bank_build",
-                  semanticActionTypes: ["card_ability.trigger"],
-                  legalActionTypes: ["activated_card_ability"],
-                  requiredSourceDefinitionIds: [
-                    signal.prospectivePlan!.sourceDefinitionId,
-                  ],
-                },
-                target: { kind: "bank" as const, id: signal.bankId },
-                purpose:
-                  "Rematerialize the exact current build capability after the bank installation is applied.",
-              },
-            }
-          : {}),
       };
     },
   };
@@ -1877,184 +1767,6 @@ function defenseModule(): PlanModule {
   };
 }
 
-function proposal(params: {
-  moduleId: PlanProposal["moduleId"];
-  dedupeKey: string;
-  moduleState: unknown;
-  priorityClass: PriorityClass;
-  target?: PlanProposal["target"];
-  routeExists: boolean;
-  blockerCode: string;
-  evidenceCode: string;
-  evidenceCodes?: readonly string[];
-  parentInstanceId?: string;
-  parentNeedId?: string;
-}): PlanProposal {
-  const blockers: PlanBlocker[] = params.routeExists
-    ? []
-    : [
-        {
-          code: params.blockerCode,
-          owner: "plan_module",
-          removable: true,
-          resumeCondition: { code: "compatible_route_available" },
-        },
-      ];
-  return {
-    moduleId: params.moduleId,
-    moduleVersion: "1",
-    dedupeKey: params.dedupeKey,
-    side: "runner",
-    strategyLineIds: [],
-    executionClass:
-      params.priorityClass === "P1" || params.priorityClass === "P2"
-        ? "urgent_response"
-        : params.priorityClass === "P3"
-          ? "bounded_sequence"
-          : "development_project",
-    initialViability: params.routeExists ? "ready" : "blocked",
-    persistencePolicy:
-      params.priorityClass === "P2" || params.priorityClass === "P3"
-        ? "locked_sequence"
-        : "sticky_goal",
-    retentionPolicy: {
-      blockedStateVersionTtl: 2,
-      dormantStateVersionTtl: 2,
-      completedHistoryStateVersionTtl: 4,
-      abandonWhenTargetMissing: params.target !== undefined,
-      protectedWhileNeedOpen: true,
-      protectedWhileCommitted: true,
-    },
-    ...(params.target ? { target: params.target } : {}),
-    ...(params.parentInstanceId
-      ? { parentInstanceId: params.parentInstanceId }
-      : {}),
-    ...(params.parentNeedId !== undefined
-      ? { parentNeedId: params.parentNeedId }
-      : {}),
-    phase: moduleStatePhase(params.moduleState),
-    milestone: "need_open",
-    moduleState: structuredClone(params.moduleState),
-    blockers,
-    resumeConditions: [{ code: "compatible_route_available" }],
-    completionConditions: [{ code: "need_satisfied" }],
-    abandonmentConditions: [{ code: "need_disappeared" }],
-    evidenceRefs: (params.evidenceCodes ?? [params.evidenceCode]).map(
-      (code) => ({ code, source: "visible_state" as const }),
-    ),
-  };
-}
-
-function assessment(
-  instance: PlanInstance,
-  priorityClass: "P1" | "P2" | "P3" | "P4" | "P5" | "P6",
-  routeExists: boolean,
-  withinClassValue: number,
-  currentExecutorId: string | undefined,
-  resourceGaps: readonly ResourceGap[] = [],
-): PlanAssessment {
-  const priorityClaim: PriorityClaim =
-    priorityClass === "P1"
-      ? {
-          requestedClass: "P1",
-          reasonCode: "terminal_win",
-          horizon: "current_turn",
-          witness: {
-            kind: "terminal_path",
-            evidenceCode:
-              instance.evidenceRefs[0]?.code ??
-              "installed_agenda_terminal_score",
-            guarantee: "rules_proven",
-          },
-        }
-      : priorityClass === "P2"
-        ? {
-            requestedClass: "P2",
-            reasonCode: "survival_threat",
-            horizon: "current_turn",
-            witness: {
-              kind: "survival_threat",
-              evidenceCode: instance.evidenceRefs[0]?.code ?? "visible_threat",
-              guarantee: "visible_state_forced",
-            },
-          }
-        : priorityClass === "P3"
-          ? {
-              requestedClass: "P3",
-              reasonCode: "expiring_conversion",
-              horizon: "current_turn",
-            }
-          : priorityClass === "P5"
-            ? {
-                requestedClass: "P5",
-                reasonCode: "development_need",
-                horizon: "multi_turn",
-              }
-            : priorityClass === "P4"
-              ? {
-                  requestedClass: "P4",
-                  reasonCode: "strategic_campaign",
-                  horizon: "multi_turn",
-                }
-              : {
-                  requestedClass: "P6",
-                  reasonCode: "neutral_progress",
-                  horizon: "current_turn",
-                };
-  return {
-    instanceId: instance.instanceId,
-    side: "runner",
-    priorityClaim,
-    intentFit:
-      priorityClass === "P4" || priorityClass === "P5" ? "aligned" : "none",
-    readiness: routeExists
-      ? "executable_now"
-      : resourceGaps.length > 0
-        ? "executable_with_support"
-        : "blocked",
-    ...(routeExists
-      ? {
-          nextStepPreview: {
-            stepId: `${instance.instanceId}:${instance.phase}`,
-            capability: instance.phase,
-            purpose: "Execute the current module phase.",
-          },
-        }
-      : {}),
-    feasibility: {
-      currentRouteHeadPossible: routeExists,
-      projectedActionCount: routeExists
-        ? 1
-        : resourceGaps.length > 0
-          ? resourceGaps.length + 1
-          : 0,
-      opponentCanReact: false,
-      confidence: "visible_state_forced",
-    },
-    resourceGaps: resourceGaps.map((gap) => ({ ...gap })),
-    expectedOutcome: {
-      outcomeKind: "plan_progress",
-      minimumValue: routeExists || resourceGaps.length > 0 ? 1 : 0,
-      expectedValue: routeExists || resourceGaps.length > 0 ? 1 : 0,
-      maximumValue: routeExists || resourceGaps.length > 0 ? 1 : 0,
-      terminal: priorityClass === "P1",
-      guarantee: "visible_state_forced",
-    },
-    continuity: {
-      isCurrentForeground: currentExecutorId === instance.instanceId,
-      sameObjectiveAsForeground: currentExecutorId === instance.instanceId,
-      switchingCost: currentExecutorId === instance.instanceId ? 1 : 0,
-      progressAtRisk: currentExecutorId === instance.instanceId ? 1 : 0,
-    },
-    blockers:
-      routeExists || resourceGaps.length > 0
-        ? []
-        : structuredClone(instance.blockers),
-    withinClassValue,
-    evidenceCodes: instance.evidenceRefs.map((entry) => entry.code),
-  };
-}
-
 function exactRunnerParentFundingResourceGaps(
   context: PlanSchedulerContext,
   parent: PlanInstance,
@@ -2372,32 +2084,6 @@ function shellTradersCandidateMatchesExactBinding(
     (exactTarget.targetDefinitionId === undefined ||
       exactTarget.targetDefinitionId === signal.targetDefinitionId)
   );
-}
-
-function bankCandidates(
-  context: PlanSchedulerContext,
-  signal: RunnerCreditBankSignal,
-): PlanMaterialization["candidates"] {
-  const actionIds = new Set(signal.actionIds);
-  return context.actionCandidates
-    .filter((candidate) => {
-      if (!actionIds.has(candidate.actionId)) return false;
-      if (signal.phase !== "build" && signal.phase !== "cash_out") return true;
-      return (
-        candidate.planOwnerBinding?.owner === "runner.credit_bank" &&
-        candidate.planOwnerBinding.route === signal.phase
-      );
-    })
-    .map((candidate) => ({
-      candidate,
-      stepValue:
-        signal.value +
-        (signal.phase === "cash_out"
-          ? signal.estimatedPayout
-          : signal.phase === "build"
-            ? Math.max(0, 12 - signal.currentStoredCredits)
-            : 1),
-    }));
 }
 
 function installedAgendaScoreCandidates(
@@ -3077,35 +2763,10 @@ function validRunnerTagClearFundingNeed(
   );
 }
 
-function moduleStatePhase(moduleState: unknown): string {
-  const value = moduleState as Partial<
-    | EconomyState
-    | CoverageState
-    | DefenseState
-    | CreditBankState
-    | RecurringEconomyState
-    | InstalledAgendaScoreState
-  >;
-  if ("phase" in value && typeof value.phase === "string") return value.phase;
-  return value.kind ?? "execute";
-}
-
 function state<T>(instance: PlanInstance): T {
   return instance.moduleState as T;
 }
 
 function domain(context: PlanSchedulerContext): RunnerCorePlanDomain {
-  const value = context.domain as RunnerCorePlanDomain | undefined;
-  if (!value) {
-    throw new PlanResolutionFailure("missing_plan_module_coverage", {
-      side: context.input.side,
-      stateVersion: context.input.playerView.stateVersion,
-      timingPoint: context.input.playerView.timingPoint,
-      legalActionTypes: context.input.legalActions.map((action) => action.type),
-      owner: "plan_module",
-      removalCondition:
-        "Build the Runner core domain signals before discovering Runner plans.",
-    });
-  }
-  return value;
+  return runnerPlanDomain<RunnerCorePlanDomain>(context);
 }
