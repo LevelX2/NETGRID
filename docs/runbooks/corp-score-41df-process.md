@@ -1,6 +1,6 @@
 # Corp-Scoring aus Match 41df
 
-Status: aktiv, P1. Quelle: Nutzerauftrag vom 11.09.2026 und Maintenance-Audit
+Status: aktiv, P2. Quelle: Nutzerauftrag vom 11.09.2026 und Maintenance-Audit
 von `match_41df30053a8efe3e` (D19, D89, D91, D127, D172, D176, D210).
 
 ## Ziel und Grenzen
@@ -55,3 +55,8 @@ wird am Abschluss zugunsten aktueller Fachverträge entfernt; Git hält Evidence
   D19/D89/D127/D172/D176/D210; D91 wählt nach Runtime-Restore bereits Advance.
   P3 prüft deshalb zusätzlich die unverändert fortgesetzte Commitment-Bindung.
   P1 aktiv: Central-Konversion trotz `no_progress` und leerer Scorereserve.
+
+- P1 geprüft: drei historische Regressionen zuerst rot, danach 25 Tests grün
+  (41df + Defense-Domain). D19/D127 erhalten Finanzierung; D172 verbaut
+  keinen sechsten HQ-Layer. Änderung am bestehenden Defense-Owner, keine neue
+  Prioritätsklasse. P2 aktiv: Score-Schutzaufbau und fehlender Stopper.

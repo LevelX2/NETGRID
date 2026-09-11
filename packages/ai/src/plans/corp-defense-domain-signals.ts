@@ -940,9 +940,11 @@ export function corpGlobalDefenseInstallRouteAssessment(
       { numerator: 0, denominator: 1 },
     ) === 0 &&
     !scorelineCentralTaxAllocation &&
-    !scoreMaterialCapacityRelease &&
-    !agendaCapacityDefenseConversion
+    !scoreMaterialCapacityRelease
   ) {
+    // Hand pressure does not establish additional defense value when the
+    // current funded route already prevents access. In particular it must
+    // not spend a score project's developing budget merely to empty HQ.
     return {
       knowledge: "known",
       disposition: "effect_missing",
@@ -1110,6 +1112,17 @@ export function corpGlobalDefenseInstallRouteAssessment(
   const agendaCapacityDefenseProgress =
     agendaCapacityDefenseConversion &&
     projection.preservesReserves &&
+    // Existing unfunded options already release HQ capacity. Without new
+    // observed pressure, staging more of them does not advance this goal.
+    !(
+      serverIce.filter((ice) => ice.rezzed !== true).length >= 2 &&
+      targetCentralEvidence?.recentRunOrAccessEvents === 0 &&
+      targetCentralEvidence.recentSuccessfulAccessRunnerTurns === 0 &&
+      targetCentralEvidence.isMultiaccess === false &&
+      targetCentralEvidence.serverBoundEffectIds.length === 0 &&
+      selectedCentralThreat !== "acute" &&
+      selectedCentralThreat !== "terminal"
+    ) &&
     corpAgendaCapacityIceStagingHasProportionateOpportunityCost({
       serverIce,
       sourceRezCredits,

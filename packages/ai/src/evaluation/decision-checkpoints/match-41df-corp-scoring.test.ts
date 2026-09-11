@@ -44,4 +44,12 @@ describe("match 41df Corp scoring", () => {
     console.log(`D${index}`, JSON.stringify(decision).slice(0, 800));
     expect(input.legalActions.some((action) => action.actionId === decision.actionId)).toBe(true);
   });
+
+  it.each([
+    [19, "rd"], [127, "hq"], [172, "hq"],
+  ] as const)("preserves scoring resources instead of redundant central ICE at D%i", (index, serverId) => {
+    const { input, decision } = decide(index);
+    const selected = input.legalActions.find((action) => action.actionId === decision.actionId)!;
+    expect(selected.payload?.placement === "ice" && selected.payload?.serverId === serverId).toBe(false);
+  });
 });

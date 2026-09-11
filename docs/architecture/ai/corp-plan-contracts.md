@@ -441,6 +441,13 @@ Teil eines eigenen weiterhin echten Defense-Steps sind, werden vom globalen
 `corp.defend_servers`-Modul mit ihrem konkreten Allokationsgrund
 dispositioniert. Weder „ICE-Installation“ als Actionfamilie noch eine
 allgemeine Defense-Rolle deckt diese Geschwistervarianten ab.
+Handentlastung allein rechtfertigt keine weitere Central-Schicht, wenn die
+finanzierte aktuelle Route Zugriff bereits verhindert. Bei mindestens zwei
+noch ungerezzten Alternativen darf reine Agenda-Handentlastung ohne aktuelle
+Run-/Multiaccess-Evidence oder akute/terminale Gefahr keine weiteren
+Staging-Kosten erzeugen. Produktiver Score-Support und belegter Central-Schutz
+bleiben eigene Defense-Routen.
+
 Auch ein HQ-Overflow macht Handmanagement nicht zum ICE-Owner:
 `corp.hand_and_agenda_management` darf ICE weder als Discard-Konversion
 installieren noch die Serverwahl treffen. Es meldet nur den Overflow-Bedarf;
