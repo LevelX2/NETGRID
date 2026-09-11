@@ -83,6 +83,7 @@ export type RunnerSpecialTriggerExecutionHost = {
       state: GameState,
       hostCardId: CardInstanceId,
       definition: CardDefinition,
+      programsToTrash?: readonly CardInstanceId[],
     ) => boolean;
     runnerMemoryLimit: (state: GameState) => number;
     runnerProgramUsesMemory: (
@@ -372,12 +373,15 @@ export function resolveDelayedInstallPlacementChoice(
   )
     throw new Error("Nur der Runner darf Shell-Traders-MU freimachen.");
 
-  const [, sourceCardId, targetCardId, reason] = choice.source.split(":") as [
-    string,
-    CardInstanceId | undefined,
-    CardInstanceId | undefined,
-    "paid" | "start_turn" | undefined,
-  ];
+  const [, sourceCardId, targetCardId, reason, , hostOnCardId] =
+    choice.source.split(":") as [
+      string,
+      CardInstanceId | undefined,
+      CardInstanceId | undefined,
+      "paid" | "start_turn" | undefined,
+      string | undefined,
+      CardInstanceId | undefined,
+    ];
   if (
     !sourceCardId ||
     !state.runner.rig.resources.includes(sourceCardId) ||
@@ -412,7 +416,9 @@ export function resolveDelayedInstallPlacementChoice(
   for (const cardId of uniqueCardIds) {
     if (
       !state.runner.rig.programs.includes(cardId) ||
-      !host.runner.runnerProgramUsesMemory(state, cardId)
+      (hostOnCardId
+        ? state.cardInstances[cardId]?.hostedOn !== hostOnCardId
+        : !host.runner.runnerProgramUsesMemory(state, cardId))
     )
       throw new Error(
         "Die Shell-Traders-MU-Wahl enthält kein gültiges installiertes Programm.",
@@ -423,7 +429,22 @@ export function resolveDelayedInstallPlacementChoice(
       sum + (host.cards.definitionFor(state, cardId).memoryCost ?? 0),
     0,
   );
-  if (
+  if (hostOnCardId) {
+    if (
+      ![...state.runner.rig.programs, ...state.runner.rig.hardware].includes(
+        hostOnCardId,
+      ) ||
+      !host.runner.canHostProgramOnDaemon(
+        state,
+        hostOnCardId,
+        targetDefinition,
+        uniqueCardIds,
+      )
+    )
+      throw new Error(
+        "Die Programmauswahl schafft keinen legalen Platz im gewählten Host.",
+      );
+  } else if (
     state.runner.memoryUsed + (targetDefinition.memoryCost ?? 0) - freedMemory >
     host.runner.runnerMemoryLimit(state)
   )
@@ -436,7 +457,13 @@ export function resolveDelayedInstallPlacementChoice(
     host.zones.trashRunnerInstalledCardToHeap(state, cardId);
   delete state.pendingChoice;
   host.counters.spendCardCounter(state, targetCardId, "shell", 1);
-  installDelayedPreparedCardForFree(host, targetCardId, legalAction);
+  installDelayedPreparedCardForFree(
+    host,
+    targetCardId,
+    legalAction,
+    undefined,
+    hostOnCardId,
+  );
   const result = { remainingCounters: 0, installed: true };
   if (reason === "start_turn") {
     effects?.push(
@@ -699,7 +726,7 @@ function removeShellCounterAndMaybeInstall(
   if (
     countersBefore === 1 &&
     !context.destinationChosen &&
-    delayedInstallHostIds(host, definition).length > 0
+    delayedInstallHostIds(host, definition, true).length > 0
   ) {
     startDelayedInstallDestinationChoice(
       host,
@@ -824,12 +851,27 @@ function removeDelayedInstallTargetFromGame(
 function delayedInstallHostIds(
   host: RunnerSpecialTriggerExecutionHost,
   definition: CardDefinition,
+  allowReplacement = false,
 ): CardInstanceId[] {
   if (definition.type !== "program") return [];
   return [...host.state.runner.rig.programs, ...host.state.runner.rig.hardware]
     .filter((cardId) =>
-      host.runner.canHostProgramOnDaemon(host.state, cardId, definition),
+      host.runner.canHostProgramOnDaemon(
+        host.state,
+        cardId,
+        definition,
+        allowReplacement ? delayedInstallHostedProgramIds(host, cardId) : [],
+      ),
     )
+    .sort();
+}
+
+function delayedInstallHostedProgramIds(
+  host: RunnerSpecialTriggerExecutionHost,
+  hostId: CardInstanceId,
+): CardInstanceId[] {
+  return host.state.runner.rig.programs
+    .filter((cardId) => host.state.cardInstances[cardId]?.hostedOn === hostId)
     .sort();
 }
 
@@ -840,16 +882,18 @@ function startDelayedInstallDestinationChoice(
   context: { sourceCardId: CardInstanceId; reason: "paid" | "start_turn" },
 ): void {
   const nextStateVersion = host.state.stateVersion + 1;
-  const options = delayedInstallHostIds(host, definition).map((hostId) => ({
-    id: `host_${hostId}`,
-    label: `In ${host.cards.definitionFor(host.state, hostId).title} installieren`,
-    value: hostId,
-    metadata: {
-      cardTitle: host.cards.publicTitle(
-        host.cards.definitionFor(host.state, hostId).id,
-      ),
-    },
-  }));
+  const options = delayedInstallHostIds(host, definition, true).map(
+    (hostId) => ({
+      id: `host_${hostId}`,
+      label: `In ${host.cards.definitionFor(host.state, hostId).title} installieren`,
+      value: hostId,
+      metadata: {
+        cardTitle: host.cards.publicTitle(
+          host.cards.definitionFor(host.state, hostId).id,
+        ),
+      },
+    }),
+  );
   host.state.pendingChoice = {
     choiceId: `delayed_install_destination_${nextStateVersion}_${targetCardId}`,
     side: "runner",
@@ -945,7 +989,7 @@ function resolveDelayedInstallDestinationChoice(
       );
   } else if (
     typeof hostOnCardId !== "string" ||
-    !delayedInstallHostIds(host, definition).includes(hostOnCardId)
+    !delayedInstallHostIds(host, definition, true).includes(hostOnCardId)
   ) {
     throw new Error("Der gewählte Program-Host ist nicht mehr legal.");
   }
@@ -988,21 +1032,31 @@ function startDelayedInstallMemoryChoice(
   context: {
     sourceCardId: CardInstanceId;
     reason: "paid" | "start_turn";
+    hostOnCardId?: CardInstanceId;
   },
 ): void {
   if (
-    !delayedInstallCanResolveFinalCounter(
-      host,
-      targetCardId,
-      targetDefinition,
-      false,
-    )
+    context.hostOnCardId
+      ? !delayedInstallHostIds(host, targetDefinition, true).includes(
+          context.hostOnCardId,
+        )
+      : !delayedInstallCanResolveFinalCounter(
+          host,
+          targetCardId,
+          targetDefinition,
+          false,
+        )
   )
     throw new Error(
       "Durch Programmtrash kann nicht genug MU freigemacht werden.",
     );
-  const options = host.state.runner.rig.programs
-    .filter((cardId) => host.runner.runnerProgramUsesMemory(host.state, cardId))
+  const options = (
+    context.hostOnCardId
+      ? delayedInstallHostedProgramIds(host, context.hostOnCardId)
+      : host.state.runner.rig.programs.filter((cardId) =>
+          host.runner.runnerProgramUsesMemory(host.state, cardId),
+        )
+  )
     .sort()
     .map((cardId) => ({
       id: `card_${cardId}`,
@@ -1015,8 +1069,10 @@ function startDelayedInstallMemoryChoice(
   host.state.pendingChoice = {
     choiceId: `v1912_delayed_install_memory_${nextStateVersion}_${targetCardId}`,
     side: "runner",
-    source: `v1912.delayed_install_memory:${context.sourceCardId}:${targetCardId}:${context.reason}:${nextStateVersion}`,
-    prompt: "Programme für The Shell Traders überschreiben",
+    source: `v1912.delayed_install_memory:${context.sourceCardId}:${targetCardId}:${context.reason}:${nextStateVersion}${context.hostOnCardId ? `:${context.hostOnCardId}` : ""}`,
+    prompt: context.hostOnCardId
+      ? `Programme in ${host.cards.definitionFor(host.state, context.hostOnCardId).title} für The Shell Traders überschreiben`
+      : "Programme für The Shell Traders überschreiben",
     kind: "select_cards",
     options,
     minSelections: 1,
@@ -1170,7 +1226,7 @@ function delayedInstallCanResolveFinalCounter(
     )
   )
     return false;
-  if (allowHosting && delayedInstallHostIds(host, definition).length > 0)
+  if (allowHosting && delayedInstallHostIds(host, definition, true).length > 0)
     return true;
   const reclaimableMemory = host.state.runner.rig.programs.reduce(
     (sum, installedCardId) =>

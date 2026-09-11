@@ -44,3 +44,10 @@ Cleanup abschließen. Ergebnisse je Paket hier, dauerhafter Vertrag in
 H01 bestanden: Beide neuen Regressionen scheitern gezielt an der fehlenden
 Installationszielwahl (bezahlter Counter und Zugbeginn). H02 als Nächstes.
 Keine breiten Gates ausgeführt.
+
+H02 bestanden: 82 Tests in fünf direkt betroffenen Engine-Dateien grün.
+Abgedeckt: bezahlter Counter, Zugbeginn, volle/freie normale MU, Evil Twin,
+Cloak mit genau drei Installations-Credits, Mehrfachtrash, illegale/stale
+Choices, geänderte Hostbindung, entfernte Hosts und Replay/StateHash.
+Engine-Typecheck, Strukturgate und diff-check grün. Keine KI-Bewertungsänderung,
+kein Server-/Browserstart, keine breiten Workspace-/AI-Gates. H03 als Nächstes.

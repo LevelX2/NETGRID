@@ -50,6 +50,7 @@ export type LookupRuntimePort = {
     state: GameState,
     hostId: CardInstanceId,
     programDefinition: CardDefinition,
+    programsToTrash?: readonly CardInstanceId[],
   ) => boolean;
   hostedProgramStrengthModifier: (
     state: GameState,

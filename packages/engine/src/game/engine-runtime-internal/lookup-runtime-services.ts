@@ -739,8 +739,19 @@ export function createLookupRuntimeServices(
     state: GameState,
     hostId: CardInstanceId,
     programDefinition: CardDefinition,
+    programsToTrash: readonly CardInstanceId[] = [],
   ): boolean {
     if (programDefinition.type !== "program") return false;
+    if (
+      new Set(programsToTrash).size !== programsToTrash.length ||
+      programsToTrash.some(
+        (cardId) =>
+          !state.runner.rig.programs.includes(cardId) ||
+          state.cardInstances[cardId]?.hostedOn !== hostId ||
+          definitionFor(state, cardId).type !== "program",
+      )
+    )
+      return false;
     if (cardHasSubtype(programDefinition, "daemon")) return false;
     const hostInstance = mustInstance(state.cardInstances, hostId);
     if (hostInstance.hostedOn) return false;
@@ -767,14 +778,19 @@ export function createLookupRuntimeServices(
       implementation.hostedProgramCapacity.maxHostedPrograms;
     if (
       typeof maxHostedPrograms === "number" &&
-      hostedCardsOn(state, hostId).length >= maxHostedPrograms
+      hostedCardsOn(state, hostId).length - programsToTrash.length >=
+        maxHostedPrograms
     )
       return false;
     const capacity = daemonHostingCapacity(hostDefinition);
     if (capacity <= 0) return false;
     return (
       daemonHostedMemoryUsed(state, hostId) +
-        (programDefinition.memoryCost ?? 0) <=
+        (programDefinition.memoryCost ?? 0) -
+        programsToTrash.reduce(
+          (sum, cardId) => sum + (definitionFor(state, cardId).memoryCost ?? 0),
+          0,
+        ) <=
       capacity
     );
   }

@@ -2846,7 +2846,15 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
           selectedOptionIds: [`host_${hostId}`],
         },
       });
-      expect(filledHostResult.ok).toBe(false);
+      expect(filledHostResult.ok).toBe(true);
+      if (!filledHostResult.ok) throw new Error("Host-Speicherwahl fehlt.");
+      expect(filledHostResult.state.pendingChoice?.kind).toBe("select_cards");
+      expect(filledHostResult.state.runner.rig.programs).not.toContain(
+        targetId,
+      );
+      expect(cardCounterAmount(filledHostResult.state, targetId, "shell")).toBe(
+        1,
+      );
       expect(hashState(filledHostState)).toBe(filledHostHash);
       expect(cardCounterAmount(filledHostState, targetId, "shell")).toBe(1);
       for (const [optionId, version] of [
@@ -2902,11 +2910,17 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     },
   );
 
-  it.each(["paid", "start_turn"] as const)(
-    "replaces a program in full Afreet through Shell Traders via %s",
-    (reason) => {
+  it.each([
+    ["paid", "onr_v1_023_evil-twin", true],
+    ["start_turn", "onr_v1_023_evil-twin", false],
+    ["paid", "onr_v1_011_cloak", false],
+    ["start_turn", "onr_v1_011_cloak", true],
+  ] as const)(
+    "replaces a program in full Afreet through Shell Traders via %s with %s and full rig %s",
+    (reason, targetDefinitionId, fullRig) => {
       let state = resourceContactState(`shell-full-host-${reason}`, {
         includeAfreet: true,
+        includeCloak: true,
       });
       installRunnerResourceForTest(state, "onr_v1_176_the-shell-traders");
       const hostId = installRunnerProgramForTest(state, "onr_v1_001_afreet");
@@ -2922,8 +2936,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
             state.cardInstances[id]!.definitionId
           ]!.memoryCost!;
       }
-      state.runner.memoryLimit = state.runner.memoryUsed;
-      const targetId = moveRunnerCardToGrip(state, "onr_v1_023_evil-twin");
+      state.runner.memoryLimit = state.runner.memoryUsed + (fullRig ? 0 : 4);
+      const targetId = moveRunnerCardToGrip(state, targetDefinitionId);
       state = apply(
         state,
         "runner",
@@ -2965,6 +2979,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
         state.pendingChoice?.options.map((option) => option.value).sort(),
       ).toEqual([hostedId, otherHostedId].sort());
       expect(cardCounterAmount(state, targetId, "shell")).toBe(1);
+      expect(cardCounterAmount(state, targetId, "bit")).toBe(0);
       state = applyChoice(state, "runner", `card_${hostedId}`);
       expect(state.pendingChoice).toBeUndefined();
       expect(state.phase).toBe("runner_action_phase");
@@ -2976,11 +2991,119 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
         creditsBefore - (reason === "paid" ? 1 : 0),
       );
       expect(cardCounterAmount(state, targetId, "shell")).toBe(0);
+      if (targetDefinitionId === "onr_v1_011_cloak")
+        expect(cardCounterAmount(state, targetId, "bit")).toBe(3);
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
       expect(replay.ok).toBe(true);
       expect(hashState(replay.state)).toBe(hashState(state));
     },
   );
+
+  it("revalidates Shell Traders host replacement sets and requires enough host memory", () => {
+    let state = resourceContactState("shell-host-replacement-revalidation", {
+      includeAfreet: true,
+      includeCloak: true,
+    });
+    installRunnerResourceForTest(state, "onr_v1_176_the-shell-traders");
+    const hostId = installRunnerProgramForTest(state, "onr_v1_001_afreet");
+    const outsideId = installRunnerProgramForTest(
+      state,
+      "onr_v1_023_evil-twin",
+    );
+    const hostedIds = [
+      installRunnerProgramForTest(state, "simple_fracter"),
+      installRunnerProgramCopyForTest(state, "simple_fracter"),
+      installRunnerProgramForTest(state, "onr_v1_011_cloak"),
+    ];
+    for (const id of hostedIds) {
+      state.cardInstances[id]!.hostedOn = hostId;
+      state.runner.memoryUsed -= 1;
+    }
+    const targetId = moveRunnerCardToGrip(state, "onr_classic_031_rent-i-con");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.payload?.delayedInstallAbility === "set_aside_from_grip" &&
+        action.payload?.targetCardId === targetId,
+    );
+    setCardCounterForTest(state, targetId, "shell", 1);
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const memoryBefore = state.runner.memoryUsed;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.payload?.delayedInstallAbility === "remove_shell_counter" &&
+        action.payload?.targetCardId === targetId,
+    );
+    state = applyChoice(state, "runner", `host_${hostId}`);
+    const action = mustAction(
+      state,
+      "runner",
+      (candidate) => candidate.type === "resolve_choice",
+    );
+    const select = (
+      target: GameState,
+      ids: string[],
+      version = target.stateVersion,
+      side: "runner" | "corp" = "runner",
+    ) =>
+      applyAction(target, {
+        matchId: target.matchId,
+        side,
+        actionId: action.actionId,
+        clientKnownStateVersion: version,
+        idempotencyKey: `replacement-${ids.join("-")}-${version}-${side}`,
+        selectedChoices: {
+          choiceId: target.pendingChoice?.choiceId,
+          selectedOptionIds: ids,
+        },
+      });
+    const before = hashState(state);
+    for (const ids of [
+      [],
+      [`card_${hostedIds[0]}`],
+      [`card_${outsideId}`],
+      [`card_${hostId}`],
+      [`card_${hostedIds[0]}`, `card_${hostedIds[0]}`],
+    ]) {
+      expect(select(state, ids).ok).toBe(false);
+      expect(hashState(state)).toBe(before);
+    }
+    const validIds = hostedIds.slice(0, 2).map((id) => `card_${id}`);
+    expect(select(state, validIds, state.stateVersion - 1).ok).toBe(false);
+    expect(select(state, validIds, state.stateVersion, "corp").ok).toBe(false);
+    const moved = structuredClone(state);
+    delete moved.cardInstances[hostedIds[0]!]!.hostedOn;
+    moved.runner.memoryUsed += 1;
+    const movedHash = hashState(moved);
+    expect(select(moved, validIds).ok).toBe(false);
+    expect(hashState(moved)).toBe(movedHash);
+    const missingHost = structuredClone(state);
+    missingHost.runner.rig.programs = missingHost.runner.rig.programs.filter(
+      (id) => id !== hostId,
+    );
+    const missingHash = hashState(missingHost);
+    expect(select(missingHost, validIds).ok).toBe(false);
+    expect(hashState(missingHost)).toBe(missingHash);
+    const result = select(state, validIds);
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(result.error.message);
+    state = result.state;
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.runner.memoryUsed).toBe(memoryBefore);
+    expect(state.cardInstances[targetId]?.hostedOn).toBe(hostId);
+    expect(state.cardInstances[hostedIds[2]!]!.hostedOn).toBe(hostId);
+    expect(state.runner.heap).toEqual(
+      expect.arrayContaining(hostedIds.slice(0, 2)),
+    );
+    expect(cardCounterAmount(state, targetId, "shell")).toBe(0);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
 
   it("requires program trash before the last Shell counter installs under MU pressure", () => {
     let state = resourceContactState("shell-final-counter-memory-choice");
