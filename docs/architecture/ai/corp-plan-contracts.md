@@ -714,6 +714,15 @@ separates Ownership- oder Override-Recht.
 
 ## 5. `corp.respond_to_virus_pressure`
 
+Der vertikale Owner liegt in `packages/ai/src/corp/virus-pressure/`:
+`virus-pressure-signals.ts` bildet den sichtbaren Druck,
+`corp-purge-impact.ts` bewertet aktive Counter, wiederkehrenden Aktionsverlust
+und Purge-Kosten, `virus-pressure-plan-module.ts` verantwortet Entdeckung,
+Bewertung und Materialisierung. Die Live-Runtime ruft die Signalbildung auf;
+die Registry registriert die Factory. Gemeinsame taktische Planstandards liegen
+in `plans/corp-tactical-module-support.ts`. Sichtbare zentrale Druck- und
+Pflichtzieh-Fakten bleiben gemeinsam nutzbare Eingaben der Purge-Bewertung.
+
 **Klasse:** `urgent_response` oder `bounded_sequence`
 **Rolle:** Vordergrund/Urgent Response
 **Status:** registrierter produktiver Owner; Fähigkeitsgrenzen siehe Einstieg.

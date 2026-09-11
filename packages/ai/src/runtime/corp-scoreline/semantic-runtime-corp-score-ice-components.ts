@@ -5,7 +5,7 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate";
-import { corpPurgeImpactScoreComponent } from "../corp-purge-impact";
+import { corpPurgeImpactScoreComponent } from "../../corp/virus-pressure/corp-purge-impact";
 import { semanticRuntimeCorpEffectiveDefenseContext } from "../semantic-runtime-corp-effective-defense";
 import { visibleCardDefinition } from "../card-definition-lookup";
 import { createAiHintsByCard } from "../../ai-hints";

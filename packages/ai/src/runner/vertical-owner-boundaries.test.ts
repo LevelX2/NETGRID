@@ -8,6 +8,7 @@ const runnerDir = path.dirname(fileURLToPath(import.meta.url));
 const srcDir = path.resolve(runnerDir, "..");
 
 describe.each([
+  "../corp/virus-pressure",
   "credit-bank",
   "recurring-economy",
   "resource-lifecycle",
@@ -36,7 +37,7 @@ describe.each([
         const specifier = statement.moduleSpecifier;
         if (!specifier || !ts.isStringLiteral(specifier)) continue;
         if (
-          /plan-first-live-runtime|runner-core-plan-modules|runner-tactical-plan-modules|semantic-runtime-decision-context|selected-choices-for-decision|composition/.test(
+          /plan-first-live-runtime|corp-core-plan-modules|corp-tactical-plan-modules|runner-core-plan-modules|runner-tactical-plan-modules|semantic-runtime-decision-context|selected-choices-for-decision|composition/.test(
             specifier.text,
           )
         ) {
@@ -48,7 +49,7 @@ describe.each([
   });
 });
 
-describe("vertical Runner owners", () => {
+describe("vertical plan owners", () => {
   it("keeps extracted phase decisions out of the live orchestrator", () => {
     const source = ts.createSourceFile(
       "plan-first-live-runtime.ts",
@@ -65,7 +66,7 @@ describe("vertical Runner owners", () => {
       .filter(
         (name) =>
           name &&
-          /^(runnerCreditBank|runnerMatureCreditBank|creditBankBuilt|runnerRecurringEconomy|recurringEconomy|runnerInstalledCompatibleRestrictedCredit|runnerResourceLifecycle|runnerCandidateIsLeavePlayPaymentLifecycle|runnerLifecycleLeavePlayPayment|runnerShellTraders|buildRunnerShellTraders|runnerExposeInformation|runnerProactiveExposeInformation|runnerCurrentExposeInformation|bindSelectedRunnerExposeInformation|runnerTerminalWin|runnerImmediateAgendaPointTerminalWin|runnerInstalledAgendaScore)/.test(
+          /^(buildCorpVirusPressure|visibleRunnerVirusCounters|runnerCreditBank|runnerMatureCreditBank|creditBankBuilt|runnerRecurringEconomy|recurringEconomy|runnerInstalledCompatibleRestrictedCredit|runnerResourceLifecycle|runnerCandidateIsLeavePlayPaymentLifecycle|runnerLifecycleLeavePlayPayment|runnerShellTraders|buildRunnerShellTraders|runnerExposeInformation|runnerProactiveExposeInformation|runnerCurrentExposeInformation|bindSelectedRunnerExposeInformation|runnerTerminalWin|runnerImmediateAgendaPointTerminalWin|runnerInstalledAgendaScore)/.test(
             name,
           ),
       );

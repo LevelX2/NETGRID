@@ -4,7 +4,7 @@ import type {
   LegalAction,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
-import { corpPurgeImpactScoreComponent } from "./corp-purge-impact";
+import { corpPurgeImpactScoreComponent } from "../corp/virus-pressure/corp-purge-impact";
 import {
   actionHasImmediateCreditGain,
   actionProvidesCredits,
