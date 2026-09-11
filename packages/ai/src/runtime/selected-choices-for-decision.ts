@@ -1,10 +1,22 @@
+import {
+  selectedCorpAccessPaymentOptionsFromAmbushPlan,
+  selectedCorpAccessProgramBounceOptionIdsFromResidentAmbushPlan,
+} from "../corp/ambush/ambush-choice-binding";
+import {
+  PendingChoice,
+  PendingChoiceOptions,
+  unresolvedChoiceFailure,
+} from "./plan-bound-choice-contract";
+
 import type {
   CorpEconomyDevelopmentSignal,
   CorpEconomyStartRezChoiceSignal,
 } from "../corp/economy/economy-types";
+
 import type { RunnerDevelopmentSignal } from "../runner/hand-development/development-types";
+
 import type { CorpHandManagementSignal } from "../corp/hand-management/hand-management-types";
-import type { CorpAmbushSignal } from "../plans/corp-tactical-plan-contracts";
+
 import {
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND,
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION,
@@ -16,18 +28,26 @@ import {
 } from "@netgrid/shared";
 
 import { selectedBidChoiceOptionId } from "./bid-choice-option";
+
 import { selectableChoiceOptions } from "./choice-option";
+
 import { selectedCorpAdvancementCounterChoiceOptionId } from "./corp-advancement-counter-choice";
+
 import { selectedCorpHqRetainPaymentOptionIds } from "./corp-hq-retain-payment-choice";
+
 import { selectedCorpHardwareTrashChoiceOptionIds } from "./corp-hardware-trash-choice";
+
 import {
   corpInstalledHardwareTrashOperationProfile,
+  corpScoredAgendaFreeRezProfile,
   corpScoredAgendaHqShuffleProfile,
   corpScoredAgendaIceMarkProfile,
-  corpScoredAgendaFreeRezProfile,
 } from "./corp-canonical-card-facts";
+
 import { selectedCorpProgramTrashChoiceOptionIds } from "./corp-program-trash-choice";
+
 import { selectedCorpStartOfTurnOrderChoiceOptionId } from "./corp-start-of-turn-order-choice";
+
 import {
   selectedDiscardChoiceOptionIds,
   type DiscardChoiceKeepScore,
@@ -37,107 +57,57 @@ import {
   runnerDamagePreventionChoiceResolution,
   type RunnerOptionalChoiceResolution,
 } from "./damage-prevention-choice-option";
+
 import { selectedPlayfulAiChoiceOptionId } from "./playful-ai-choice-option";
+
 import { selectedPostBidLinkChoiceOptionId } from "./post-bid-link-choice-option";
+
 import {
   selectedSearchChoiceOptionIds,
   type SearchChoiceFeatureSnapshot,
 } from "./search-choice-option";
+
 import { selectedRunnerExposeInstalledCardChoiceOptionIds } from "../runner/expose-information/expose-installed-card-choice";
+
 import { selectedForcedChoiceOptionIds } from "./select-card-choice-option";
+
 import { selectedSetupMulliganChoiceOptionId } from "./setup-mulligan-choice-option";
+
 import { selectedShellTradersStartTurnChoiceOptionId } from "../runner/shell-traders/shell-traders-choice-option";
+
 import { runnerTagAvoidanceChoiceResolution } from "./tag-avoidance-choice-option";
+
 import { latestTraceContext } from "./trace-context";
+
 import { residentPlanPortfolioSnapshot } from "../plans/resident-plan-portfolio-memory";
+
 import type { ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
+
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
+
 import { getStrategicIntentMemorySnapshot } from "../strategic-intent-memory";
+
 import type { StrategicIntentState } from "../strategic-intent-state";
+
 import type { RequiredCapabilityKind } from "../plans/tactical-plan-types";
 
 import type { AiHintStructuredEffect } from "../hint-ontology";
+
 import {
   isRunnerTargetedBypassChoice,
   isRunnerTargetedBypassHideChoice,
   selectedRunnerTargetedBypassChoiceOptionId,
   selectedRunnerTargetedBypassHideChoiceOptionId,
 } from "./runner-targeted-bypass-choice";
+
 import {
   isRunnerTargetedIceTrashChoice,
   selectedRunnerTargetedIceTrashChoiceOptionId,
 } from "./runner-targeted-ice-trash-choice";
+
 import { selectedRunnerStartOfTurnOrderChoiceOptionId } from "./runner-start-of-turn-order-choice";
+
 import { selectedRunnerRunStartOrderChoiceOptionId } from "./runner-run-start-order-choice";
-
-type PendingChoice = NonNullable<
-  AiDecisionInput["playerView"]["pendingChoice"]
->;
-type PendingChoiceOptions = PendingChoice["options"];
-
-function selectedCorpAccessPaymentOptionsFromAmbushPlan(
-  input: AiDecisionInput,
-  action: LegalAction,
-  choice: PendingChoice,
-  selectableOptions: PendingChoiceOptions,
-  currentPortfolio?: ResidentPlanPortfolio,
-): string[] {
-  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
-  const executor = portfolio?.instances.find(
-    (instance) => instance.instanceId === portfolio.executorInstanceId,
-  );
-  const moduleState = executor?.moduleState as
-    | { kind?: unknown; signal?: CorpAmbushSignal }
-    | undefined;
-  const binding = moduleState?.signal?.accessPaymentChoiceBinding;
-  const pay = selectableOptions.find(
-    (option) => option.id === "pay" && option.value === "pay",
-  );
-  const requirement = action.choiceRequirements?.[0];
-  if (
-    portfolio?.side !== "corp" ||
-    portfolio.stateVersion !== input.playerView.stateVersion ||
-    executor?.moduleId !== "corp.ambush_and_bluff" ||
-    executor.executionState !== "executor" ||
-    moduleState?.kind !== "ambush" ||
-    moduleState.signal?.phase !== "trigger" ||
-    binding?.actionId !== action.actionId ||
-    binding.choiceId !== choice.choiceId ||
-    binding.choiceSource !== choice.source ||
-    binding.observedAtStateVersion !== input.playerView.stateVersion ||
-    choice.stateVersion !== input.playerView.stateVersion ||
-    choice.side !== "corp" ||
-    action.side !== "corp" ||
-    action.type !== "resolve_choice" ||
-    action.source !== "game_rule" ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
-    action.timingPoint !== input.playerView.timingPoint ||
-    action.choiceRequirements?.length !== 1 ||
-    requirement?.choiceId !== choice.choiceId ||
-    requirement.minSelections !== 1 ||
-    requirement.maxSelections !== 1 ||
-    requirement.optionIds.length !== 2 ||
-    selectableOptions.length !== 2 ||
-    !selectableOptions.every((option) =>
-      requirement.optionIds.includes(option.id),
-    ) ||
-    pay?.metadata?.creditCost !== binding.creditCost ||
-    pay.metadata.accessPaymentNoOpCertified !== binding.noOpCertified ||
-    choice.sourceCardDefinitionId !== moduleState.signal.sourceDefinitionId ||
-    choice.sourceCardInstanceId !== moduleState.signal.sourceInstanceId ||
-    binding.selectedOptionIds.length !== 1 ||
-    !selectableOptions.some(
-      (option) => option.id === binding.selectedOptionIds[0],
-    )
-  ) {
-    throw unresolvedChoiceFailure(
-      input,
-      action,
-      "The Corp ambush plan must bind the exact current paid-access option and Engine certificate before payload resolution.",
-    );
-  }
-  return [...binding.selectedOptionIds];
-}
 
 export type SelectedChoicesForDecisionDependencies = {
   readonly evaluateCorpOpeningHand: (input: AiDecisionInput) => {
@@ -198,68 +168,6 @@ function selectedCorpDiscardOptionIdsFromResidentHandPlan(
       input,
       action,
       "The Corp hand plan must bind the exact discard choice and legal action before the resolver completes its payload.",
-    );
-  }
-  return [...binding.selectedOptionIds];
-}
-
-function selectedCorpAccessProgramBounceOptionIdsFromResidentAmbushPlan(
-  input: AiDecisionInput,
-  action: LegalAction,
-  choice: PendingChoice,
-  selectableOptions: PendingChoiceOptions,
-  currentPortfolio?: ResidentPlanPortfolio,
-): string[] {
-  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
-  const executor = portfolio?.instances.find(
-    (instance) => instance.instanceId === portfolio.executorInstanceId,
-  );
-  const moduleState = executor?.moduleState as
-    | { kind?: unknown; signal?: CorpAmbushSignal }
-    | undefined;
-  const binding = moduleState?.signal?.accessProgramBounceChoiceBinding;
-  const requirement = action.choiceRequirements?.[0];
-  const optionIds = selectableOptions.map((option) => option.id);
-  const selectedCardIds = binding?.selectedOptionIds.flatMap((optionId) => {
-    const option = selectableOptions.find((entry) => entry.id === optionId);
-    return typeof option?.value === "string" ? [option.value] : [];
-  });
-  const exactBinding =
-    portfolio?.side === "corp" &&
-    executor?.moduleId === "corp.ambush_and_bluff" &&
-    executor.executionState === "executor" &&
-    moduleState?.kind === "ambush" &&
-    moduleState.signal?.phase === "trigger" &&
-    binding?.actionId === action.actionId &&
-    binding.choiceId === choice.choiceId &&
-    binding.choiceSource === choice.source &&
-    binding.observedAtStateVersion === input.playerView.stateVersion &&
-    selectedCardIds?.length === binding.targetProgramInstanceIds.length &&
-    selectedCardIds.every(
-      (cardId, index) => cardId === binding.targetProgramInstanceIds[index],
-    ) &&
-    choice.side === "corp" &&
-    choice.stateVersion === input.playerView.stateVersion &&
-    choice.visibility === "hidden_info_barrier" &&
-    choice.minSelections === 0 &&
-    binding.selectedOptionIds.length <= choice.maxSelections &&
-    action.side === "corp" &&
-    action.type === "resolve_choice" &&
-    action.source === "game_rule" &&
-    action.timingPoint === input.playerView.timingPoint &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
-    action.choiceRequirements?.length === 1 &&
-    requirement?.choiceId === choice.choiceId &&
-    requirement.minSelections === choice.minSelections &&
-    requirement.maxSelections === choice.maxSelections &&
-    requirement.optionIds.length === optionIds.length &&
-    optionIds.every((optionId) => requirement.optionIds.includes(optionId)) &&
-    binding.selectedOptionIds.every((optionId) => optionIds.includes(optionId));
-  if (!exactBinding) {
-    throw unresolvedChoiceFailure(
-      input,
-      action,
-      "The Corp ambush plan must own and bind the exact program-bounce targets before the choice resolver completes the current Engine payload.",
     );
   }
   return [...binding.selectedOptionIds];
@@ -3477,22 +3385,6 @@ function selectedRunnerTraceSuccessCancelOptionId(
     );
   }
   return [selectedOption.id];
-}
-
-function unresolvedChoiceFailure(
-  input: AiDecisionInput,
-  action: LegalAction,
-  removalCondition: string,
-): PlanResolutionFailure {
-  return new PlanResolutionFailure("window_origin_missing", {
-    side: input.side,
-    stateVersion: input.playerView.stateVersion,
-    timingPoint: input.playerView.timingPoint,
-    legalActionTypes: input.legalActions.map((legalAction) => legalAction.type),
-    unresolvedActionIds: [action.actionId],
-    owner: "window_resolution",
-    removalCondition,
-  });
 }
 
 function selectedCorpScoredAgendaStartDrawChoiceOptionId(

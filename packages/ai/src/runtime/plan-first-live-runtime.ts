@@ -427,7 +427,7 @@ import type { AiDecisionRuntimeOptions } from "./choose-ai-action";
 import {
   buildCorpAmbushPlanSignals,
   corpCandidateIsAmbushInstall,
-} from "./corp-ambush-plan-signals";
+} from "../corp/ambush/corp-ambush-plan-signals";
 import {
   corpCentralDefenseHqAgendaExposureIsDeadline,
   type CorpCentralDefenseAllocation,

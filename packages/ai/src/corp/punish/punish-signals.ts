@@ -7,7 +7,7 @@ import type { ActionSemanticCandidate } from "../../action-semantic-candidate-ty
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 
 import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
-import { corpCandidateIsAmbushInstall } from "../../runtime/corp-ambush-plan-signals";
+import { corpCandidateIsAmbushInstall } from "../ambush/corp-ambush-plan-signals";
 import { buildBoundedCorpPunishRouteRequests } from "./punish-route-quote-input";
 import { type CorpScorelineFeasibility } from "../../runtime/corp-scoreline-feasibility";
 import {

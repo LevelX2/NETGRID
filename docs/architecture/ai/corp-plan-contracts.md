@@ -1070,6 +1070,22 @@ exakte Auswahl des aktuellen Ambush-Executors vervollständigen. Fehlende oder
 veraltete Bindungen scheitern fail-closed. Die menschliche Zahlung bleibt
 regellegal; Engine-Ausführung und Zielprüfung bleiben unverändert maßgeblich.
 
+### Vertikale Implementierung von Ambush und Bluff
+
+Der Owner liegt unter `packages/ai/src/corp/ambush/`:
+
+- `ambush-plan-module.ts`: Parent, Setup-Step, Priorität, Needs und aktuelle Routen;
+- `corp-ambush-plan-signals.ts`: Intent- und Quellenbindung, Köder, Fortsetzung und Disposition;
+- `corp-access-zone-preparation.ts`: begrenzte Install-/Halte-/Rückmischfolge und Zugriffszonenwert;
+- `corp-access-payment-choice.ts`: Bewertung und Bindung bezahlter Zugriffseffekte;
+- `ambush-choice-binding.ts`: exakte Vervollständigung der gewählten Payment-/Bounce-Choice.
+
+Defense liefert weiterhin den typisierten Bluff-Schutzbedarf; Economy erfüllt
+seine Finanzierung. Die Runtime komponiert diese Fakten und delegiert Choices
+an den ausgewählten Ambush-Executor. Gemeinsame Choice-Typen und strukturierte
+Bindungsfehler liegen in `runtime/plan-bound-choice-contract.ts`. Der Owner
+importiert weder die Tactical-Registry noch den allgemeinen Choice-Dispatcher.
+
 ## 10. `corp.hand_and_agenda_management`
 
 Der Owner liegt unter `packages/ai/src/corp/hand-management/`.

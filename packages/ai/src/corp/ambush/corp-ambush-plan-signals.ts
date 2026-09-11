@@ -1,18 +1,18 @@
-import type { CorpAmbushSignal } from "../plans/corp-tactical-plan-contracts";
+import type { CorpAmbushSignal } from "../../plans/corp-tactical-plan-contracts";
 import { corpRdRecyclingSignals } from "./corp-access-zone-preparation";
 import { corpAccessPaymentChoiceSignal } from "./corp-access-payment-choice";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
-import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
-import { AI_HINTS_BY_CARD } from "../ai-hints";
-import type { CorpStrategicIntentProfile } from "../corp-strategic-intent";
+import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
+import { AI_HINTS_BY_CARD } from "../../ai-hints";
+import type { CorpStrategicIntentProfile } from "../../corp-strategic-intent";
 
-import { readCorpCounterBankPreparationQuote } from "../plans/corp-counter-bank-score-plan";
-import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
-import type { ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
-import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
-import { assessBestFundedCorpScoreProtection } from "./corp-funded-score-protection";
-import { reconstructBeliefState } from "../belief-state";
-import { projectKnownCorpCardAccessEffect } from "./known-corp-card-access-effect-projection";
+import { readCorpCounterBankPreparationQuote } from "../../plans/corp-counter-bank-score-plan";
+import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
+import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
+import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
+import { assessBestFundedCorpScoreProtection } from "../../runtime/corp-funded-score-protection";
+import { reconstructBeliefState } from "../../belief-state";
+import { projectKnownCorpCardAccessEffect } from "../../runtime/known-corp-card-access-effect-projection";
 
 export const CORP_AMBUSH_COMMITMENT_VERSION =
   "corp_ambush_commitment_v1" as const;

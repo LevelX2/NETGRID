@@ -13,7 +13,7 @@ import { chooseCorpAction, chooseRunnerAction } from "../index";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { corpBluffDefenseNeed } from "../plans/corp-bluff-defense";
 import { buildAiDecisionInput } from "./ai-decision-input";
-import { corpRdRecyclingSignals } from "./corp-access-zone-preparation";
+import { corpRdRecyclingSignals } from "../corp/ambush/corp-access-zone-preparation";
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 
 const BEL = "onr_proteus_054_bel-digmo-antibody";
