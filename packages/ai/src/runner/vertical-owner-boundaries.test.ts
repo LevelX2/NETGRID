@@ -11,6 +11,7 @@ describe.each([
   "credit-bank",
   "recurring-economy",
   "resource-lifecycle",
+  "terminal-win",
   "installed-agenda",
 ])("%s owner boundary", (owner) => {
   const ownerDir = path.join(runnerDir, owner);
@@ -62,7 +63,7 @@ describe("vertical Runner owners", () => {
       .filter(
         (name) =>
           name &&
-          /^(runnerCreditBank|runnerMatureCreditBank|creditBankBuilt|runnerRecurringEconomy|recurringEconomy|runnerInstalledCompatibleRestrictedCredit|runnerResourceLifecycle|runnerCandidateIsLeavePlayPaymentLifecycle|runnerLifecycleLeavePlayPayment|runnerInstalledAgendaScore)/.test(
+          /^(runnerCreditBank|runnerMatureCreditBank|creditBankBuilt|runnerRecurringEconomy|recurringEconomy|runnerInstalledCompatibleRestrictedCredit|runnerResourceLifecycle|runnerCandidateIsLeavePlayPaymentLifecycle|runnerLifecycleLeavePlayPayment|runnerTerminalWin|runnerImmediateAgendaPointTerminalWin|runnerInstalledAgendaScore)/.test(
             name,
           ),
       );

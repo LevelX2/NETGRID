@@ -1,3 +1,8 @@
+import { runnerImmediateAgendaPointGain } from "../actions/runner-agenda-point-effect";
+import {
+  runnerTerminalWinSignals,
+  runnerImmediateAgendaPointTerminalWinSignals,
+} from "../runner/terminal-win/terminal-win-signals";
 import { runnerInstalledAgendaScoreSignals } from "../runner/installed-agenda/installed-agenda-signals";
 import type {
   RunnerFundingNeedSignal,
@@ -10178,20 +10183,11 @@ function buildRunnerDomain(
     installedAgendaScores,
     shellTradersPipelines,
     defense,
-    terminalWins: [
-      ...(input.playerView.opponent.deckCount === 0 &&
-      candidates.some((candidate) => candidate.actionType === "end_turn")
-        ? [
-            {
-              terminalId: "force-corp-empty-rd-draw",
-              semanticActionTypes: ["turn_flow.end_turn"],
-              terminalCondition: "corp_empty_rd_mandatory_draw" as const,
-              evidenceCode: "corp_visible_empty_rd_forced_mandatory_draw",
-            },
-          ]
-        : []),
-      ...immediateAgendaPointTerminalWins,
-    ],
+    terminalWins: runnerTerminalWinSignals(
+      input,
+      candidates,
+      immediateAgendaPointTerminalWins,
+    ),
     centralPressure,
     remoteContests,
     developments,
@@ -11465,52 +11461,6 @@ function runnerGenericDrawDevelopmentSignals(
           : { evidenceCodes: [...handRotation.evidenceCodes] }),
     },
   ];
-}
-
-function runnerImmediateAgendaPointTerminalWinSignals(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-): RunnerPlanDomain["terminalWins"] {
-  return candidates.flatMap((candidate) => {
-    const agendaPointAmount = runnerImmediateAgendaPointGain(candidate);
-    if (
-      agendaPointAmount === undefined ||
-      input.playerView.own.agendaPoints + agendaPointAmount <
-        input.playerView.agendaPointsToWin
-    ) {
-      return [];
-    }
-    return [
-      {
-        terminalId: `immediate-agenda-point:${candidate.actionId}`,
-        semanticActionTypes: [candidate.semanticActionType],
-        actionIds: [candidate.actionId],
-        terminalCondition: "runner_immediate_agenda_point" as const,
-        evidenceCode: "runner_legal_immediate_agenda_point_closeout",
-      },
-    ];
-  });
-}
-
-function runnerImmediateAgendaPointGain(
-  candidate: ActionSemanticCandidate,
-): number | undefined {
-  if (
-    candidate.actorSide !== "runner" ||
-    candidate.sourceKind !== "card" ||
-    candidate.actionType !== "play_event"
-  ) {
-    return undefined;
-  }
-  const effect = candidate.functionalEffects?.find(
-    (entry) =>
-      entry.kind === "scored_agenda_action" &&
-      entry.scope === "runner" &&
-      entry.resource === "agenda_points" &&
-      typeof entry.amount === "number" &&
-      entry.amount > 0,
-  );
-  return effect?.amount;
 }
 
 function runnerImmediateAgendaPointDevelopmentSignals(

@@ -1038,3 +1038,24 @@ behalten ihre strukturierten Fehler. Die Core-Registry registriert die Factory;
 ein Rückimport vom Owner in Registry oder Live-Runtime ist nicht erforderlich.
 Damit kann eine Änderung an dieser Score-Konversion lokal verfolgt werden,
 ohne die Regeln für allgemeine Runner-Siege oder Run-Scoring zu übernehmen.
+
+### Vertikale Implementierung der unmittelbaren Siegkonversion
+
+[`createRunnerTerminalWinModule`](../../../packages/ai/src/runner/terminal-win/terminal-win-plan-module.ts)
+registriert `runner.secure_terminal_win`. Im Verzeichnis `runner/terminal-win/`
+liegen Signalbildung, Signal-/Zustandstypen und Planmodul zusammen. Die
+Signalbildung erkennt dieselben zwei aktuellen Nachweise: das sichtbar leere
+gegnerische Deck mit möglichem EndTurn und die legale sofortige Konversion
+bis zur Agenda-Siegschwelle. Der Plan besitzt P1, die genaue Route und die
+EndTurn-Begründung für den erzwungenen Pflichtzug. Ein Karteneffekt-EndTurn
+wird dadurch weiterhin nicht zum normalen EndTurn umgedeutet.
+
+Der Owner braucht keinen injizierten Runtime-Dienst. Der gemeinsame Fakt
+[`runnerImmediateAgendaPointGain`](../../../packages/ai/src/actions/runner-agenda-point-effect.ts)
+wird auch von der nichtterminalen Entwicklung konsumiert. Die unveränderten
+taktischen Proposal-/Assessment-Defaults einschließlich Domainprüfung liegen
+in [`runner-tactical-module-support.ts`](../../../packages/ai/src/plans/runner-tactical-module-support.ts).
+Die Live-Runtime verbindet diese Ergebnisse mit den übrigen Plänen; sie
+enthält die terminale Entscheidungsformel nicht mehr. Das erleichtert spätere
+Änderungen an unmittelbaren Siegkonversionen, ohne einen zweiten Scheduler
+oder eine neue Regelautorität einzuführen.

@@ -1,3 +1,10 @@
+import {
+  runnerTacticalProposal as proposal,
+  runnerTacticalAssessment as assessment,
+  runnerTacticalPlanDomain,
+} from "./runner-tactical-module-support";
+import { createRunnerTerminalWinModule } from "../runner/terminal-win/terminal-win-plan-module";
+import type { RunnerTerminalWinSignal } from "../runner/terminal-win/terminal-win-types";
 import type {
   RunnerDevelopmentFundingMilestone,
   RunnerFundingRouteAssessment,
@@ -5,13 +12,7 @@ import type {
 import type { RunnerAccessFacts } from "../access/runner-access-facts";
 import { runnerRunExitAction } from "../runtime/runner-fort-pass-toll";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
-import type {
-  GuaranteeLevel,
-  PlanAssessment,
-  PriorityClass,
-  PriorityClaim,
-  ResourceGap,
-} from "./plan-assessment";
+import type { ResourceGap } from "./plan-assessment";
 import type { PlanInstance, PlanProposal } from "./plan-kernel-types";
 import type { PlanOutcomeReceipt } from "./resident-plan-portfolio";
 import {
@@ -371,16 +372,6 @@ export type RunnerExposeInformationSignal = {
   evidenceCodes: string[];
 };
 
-export type RunnerTerminalWinSignal = {
-  terminalId: string;
-  semanticActionTypes: string[];
-  actionIds?: string[];
-  terminalCondition?:
-    | "corp_empty_rd_mandatory_draw"
-    | "runner_immediate_agenda_point";
-  evidenceCode: string;
-};
-
 export type RunnerTacticalPlanDomain = {
   terminalWins: RunnerTerminalWinSignal[];
   centralPressure: RunnerPressureSignal[];
@@ -413,80 +404,16 @@ type ExposeInformationState = {
   kind: "expose_information";
   signal: RunnerExposeInformationSignal;
 };
-type TerminalWinState = {
-  kind: "terminal_win";
-  signal: RunnerTerminalWinSignal;
-};
 
 export function createRunnerTacticalPlanModules(): PlanModule[] {
   return [
-    terminalWinModule(),
+    createRunnerTerminalWinModule(),
     centralPressureModule(),
     remoteContestModule(),
     developmentModule(),
     exposeInformationModule(),
     runWindowModule(),
   ];
-}
-
-function terminalWinModule(): PlanModule {
-  return {
-    moduleId: "runner.secure_terminal_win",
-    side: "runner",
-    discover: (context) =>
-      domain(context).terminalWins.map((signal) => {
-        const candidates = terminalWinCandidates(context, signal);
-        return proposal(
-          "runner.secure_terminal_win",
-          signal.terminalId,
-          { kind: "terminal_win", signal } satisfies TerminalWinState,
-          "P1",
-          [],
-          { kind: "player", id: "corp" },
-          candidates.length > 0,
-          signal.evidenceCode,
-        );
-      }),
-    assess: (instance, context, portfolio) => {
-      const current = state<TerminalWinState>(instance);
-      return assessment(
-        instance,
-        "P1",
-        terminalWinCandidates(context, current.signal).length > 0,
-        1,
-        portfolio.executorInstanceId,
-      );
-    },
-    materialize: (instance, _assessment, context) => {
-      const current = state<TerminalWinState>(instance);
-      const forcesCorpMandatoryDraw =
-        current.signal.terminalCondition === undefined ||
-        current.signal.terminalCondition === "corp_empty_rd_mandatory_draw";
-      return {
-        step: {
-          stepId: `${instance.instanceId}:force_terminal`,
-          capability: {
-            capabilityId: forcesCorpMandatoryDraw
-              ? "force_corp_mandatory_draw_deckout"
-              : "convert_immediate_runner_agenda_point",
-            semanticActionTypes: current.signal.semanticActionTypes,
-          },
-          purpose: forcesCorpMandatoryDraw
-            ? "End the Runner turn to force the rules-proven empty-R&D mandatory draw."
-            : "Resolve the exact legal action that immediately reaches the Runner agenda-point threshold.",
-        },
-        candidates: terminalWinCandidates(context, current.signal),
-        ...(forcesCorpMandatoryDraw
-          ? {
-              earlyEndTurnJustification: {
-                kind: "rules_proven_terminal_win" as const,
-                terminalCondition: "corp_empty_rd_mandatory_draw" as const,
-              },
-            }
-          : {}),
-      };
-    },
-  };
 }
 
 export function runnerPressureProgressReceipt(params: {
@@ -1228,194 +1155,6 @@ function runWindowModule(): PlanModule {
   };
 }
 
-function proposal(
-  moduleId: PlanProposal["moduleId"],
-  dedupeKey: string,
-  moduleState: unknown,
-  priorityClass: PriorityClass,
-  strategyLineIds: string[],
-  target: NonNullable<PlanProposal["target"]>,
-  routeExists: boolean,
-  evidenceCode: string,
-  parentInstanceId?: string,
-  options?: {
-    phase?: string;
-    blockerCode?: string;
-    evidenceCodes?: string[];
-  },
-): PlanProposal {
-  return {
-    moduleId,
-    moduleVersion: "1",
-    dedupeKey,
-    side: "runner",
-    strategyLineIds,
-    executionClass:
-      priorityClass === "P1" || priorityClass === "P2"
-        ? "urgent_response"
-        : priorityClass === "P3"
-          ? "bounded_sequence"
-          : "strategic_campaign",
-    initialViability: routeExists ? "ready" : "blocked",
-    persistencePolicy:
-      priorityClass === "P1" || priorityClass === "P3"
-        ? "locked_sequence"
-        : "sticky_goal",
-    retentionPolicy: {
-      blockedStateVersionTtl: 2,
-      dormantStateVersionTtl: 2,
-      completedHistoryStateVersionTtl: 4,
-      abandonWhenTargetMissing: true,
-      protectedWhileNeedOpen: true,
-      protectedWhileCommitted: true,
-    },
-    target,
-    ...(parentInstanceId ? { parentInstanceId } : {}),
-    phase: options?.phase ?? "execute",
-    milestone: "admitted",
-    moduleState: structuredClone(moduleState),
-    blockers: routeExists
-      ? []
-      : [
-          {
-            code: options?.blockerCode ?? "no_current_tactical_route",
-            owner: "plan_module",
-            removable: true,
-            resumeCondition: { code: "route_becomes_available" },
-          },
-        ],
-    resumeConditions: [{ code: "route_becomes_available" }],
-    completionConditions: [{ code: "purpose_converted" }],
-    abandonmentConditions: [
-      { code: "target_invalidated" },
-      { code: "marginal_value_exhausted" },
-    ],
-    evidenceRefs: [
-      { code: evidenceCode, source: "visible_state" },
-      ...(options?.evidenceCodes ?? []).map((code) => ({
-        code,
-        source: "visible_state" as const,
-      })),
-    ],
-  };
-}
-
-function assessment(
-  instance: PlanInstance,
-  priorityClass: "P1" | "P2" | "P3" | "P4" | "P5" | "P6",
-  routeExists: boolean,
-  value: number,
-  executorId: string | undefined,
-  p2Reason: "score_threat" | undefined = undefined,
-  guarantee: GuaranteeLevel = "visible_state_forced",
-  resourceGaps: readonly ResourceGap[] = [],
-): PlanAssessment {
-  const claim: PriorityClaim =
-    priorityClass === "P1"
-      ? {
-          requestedClass: "P1",
-          reasonCode: "terminal_win",
-          horizon: "current_turn",
-          witness: {
-            kind: "terminal_path",
-            evidenceCode:
-              instance.evidenceRefs[0]?.code ?? "rules_proven_terminal_path",
-            guarantee: "rules_proven",
-            ...(instance.target ? { target: instance.target } : {}),
-          },
-        }
-      : priorityClass === "P2"
-        ? {
-            requestedClass: "P2",
-            reasonCode: p2Reason ?? "irreversible_threat",
-            horizon: "current_turn",
-            witness: {
-              kind:
-                p2Reason === "score_threat"
-                  ? "score_threat"
-                  : "irreversible_threat",
-              evidenceCode: instance.evidenceRefs[0]?.code ?? "visible_threat",
-              guarantee,
-              ...(instance.target ? { target: instance.target } : {}),
-            },
-          }
-        : priorityClass === "P3"
-          ? {
-              requestedClass: "P3",
-              reasonCode: "expiring_conversion",
-              horizon: "current_window",
-            }
-          : priorityClass === "P4"
-            ? {
-                requestedClass: "P4",
-                reasonCode: "strategic_campaign",
-                horizon: "multi_turn",
-              }
-            : priorityClass === "P5"
-              ? {
-                  requestedClass: "P5",
-                  reasonCode: "development_need",
-                  horizon: "multi_turn",
-                }
-              : {
-                  requestedClass: "P6",
-                  reasonCode: "neutral_progress",
-                  horizon: "current_turn",
-                };
-  return {
-    instanceId: instance.instanceId,
-    side: "runner",
-    priorityClaim: claim,
-    intentFit:
-      priorityClass === "P4" || priorityClass === "P5" ? "aligned" : "none",
-    readiness: routeExists
-      ? "executable_now"
-      : resourceGaps.length > 0
-        ? "executable_with_support"
-        : "blocked",
-    ...(routeExists
-      ? {
-          nextStepPreview: {
-            stepId: `${instance.instanceId}:execute`,
-            capability: instance.moduleId,
-            purpose: "Execute admitted tactical purpose.",
-          },
-        }
-      : {}),
-    feasibility: {
-      currentRouteHeadPossible: routeExists,
-      projectedActionCount: routeExists
-        ? 1
-        : resourceGaps.length > 0
-          ? resourceGaps.length + 1
-          : 0,
-      opponentCanReact: priorityClass !== "P3",
-      confidence: guarantee,
-    },
-    resourceGaps: resourceGaps.map((gap) => ({ ...gap })),
-    expectedOutcome: {
-      outcomeKind: "tactical_progress",
-      minimumValue: routeExists || resourceGaps.length > 0 ? value : 0,
-      expectedValue: routeExists || resourceGaps.length > 0 ? value : 0,
-      maximumValue: routeExists || resourceGaps.length > 0 ? value : 0,
-      terminal: false,
-      guarantee,
-    },
-    continuity: {
-      isCurrentForeground: executorId === instance.instanceId,
-      sameObjectiveAsForeground: executorId === instance.instanceId,
-      switchingCost: executorId === instance.instanceId ? 2 : 0,
-      progressAtRisk: executorId === instance.instanceId ? 2 : 0,
-    },
-    blockers:
-      routeExists || resourceGaps.length > 0
-        ? []
-        : structuredClone(instance.blockers),
-    withinClassValue: value,
-    evidenceCodes: instance.evidenceRefs.map((entry) => entry.code),
-  };
-}
-
 function exactRunnerParentSupportResourceGaps(
   context: PlanSchedulerContext,
   parent: PlanInstance,
@@ -1941,48 +1680,8 @@ function actionCreditCost(candidate: ActionSemanticCandidate): number {
   return Math.max(0, candidate.costProfile.creditCost ?? 0);
 }
 
-function terminalWinCandidates(
-  context: PlanSchedulerContext,
-  signal: RunnerTerminalWinSignal,
-): PlanMaterialization["candidates"] {
-  const exactActionIds = new Set(signal.actionIds ?? []);
-  return context.actionCandidates
-    .filter(
-      (candidate) =>
-        signal.semanticActionTypes.includes(candidate.semanticActionType) &&
-        (exactActionIds.size > 0
-          ? exactActionIds.has(candidate.actionId)
-          : candidate.actionType === "end_turn" &&
-            candidate.sourceKind === "game_rule"),
-    )
-    .map((candidate) => ({
-      candidate,
-      stepValue:
-        signal.terminalCondition === "runner_immediate_agenda_point"
-          ? 10_000
-          : 1,
-    }));
-}
-
 function domain(context: PlanSchedulerContext): RunnerPlanDomain {
-  const value = context.domain as RunnerPlanDomain | undefined;
-  if (
-    value?.terminalWins &&
-    value.centralPressure &&
-    value.remoteContests &&
-    value.developments &&
-    value.runWindows
-  )
-    return value;
-  throw new PlanResolutionFailure("missing_plan_module_coverage", {
-    side: context.input.side,
-    stateVersion: context.input.playerView.stateVersion,
-    timingPoint: context.input.playerView.timingPoint,
-    legalActionTypes: context.input.legalActions.map((action) => action.type),
-    owner: "plan_module",
-    removalCondition:
-      "Build the Runner tactical domain before discovering tactical plans.",
-  });
+  return runnerTacticalPlanDomain<RunnerPlanDomain>(context);
 }
 
 function state<T>(instance: PlanInstance): T {
