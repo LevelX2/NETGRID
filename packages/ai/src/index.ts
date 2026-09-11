@@ -303,7 +303,7 @@ export {
   type CorpAgendaLineFamily,
   type CorpAgendaTurnPlanningLine,
   type CorpAgendaTurnPlanningSlice,
-} from "./plans/corp-agenda-turn-planning";
+} from "./corp/score/corp-agenda-turn-planning";
 export {
   advanceTurnPlanCommitment,
   assertTurnPlanCommitment,

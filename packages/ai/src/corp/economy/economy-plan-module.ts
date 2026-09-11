@@ -14,7 +14,7 @@ import {
   genericDefenseFundingRequirement,
   genericDefenseFundingRequirementIsCurrent,
 } from "../../plans/corp-defense-funding-contract";
-import { corpScorePriorityClass } from "../../plans/corp-score-priority";
+import { corpScorePriorityClass } from "../score/corp-score-priority";
 import type {
   GuaranteeLevel,
   PriorityClass,

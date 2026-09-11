@@ -160,6 +160,40 @@ Ein nach sichtbarem Zustand erzwungener Same-Turn-Score ist ein Commitment.
 Einzelne Economy- oder
 ICE-Aktionen dürfen ihn nicht aufbrechen.
 
+### Vertikale Implementierung der Agendaentscheidung
+
+`packages/ai/src/corp/score/` bündelt den Owner:
+
+- `score-discovery.ts`: direkte Scorevorhaben, Variantenvergleich und
+  Wiederaufnahme einer konkreten residenten Agenda-/Serverbindung;
+- `score-project-signals.ts`: Install-/Advance-/Konversionspfade, Scorehorizont,
+  Deckout-Konversion, Finanzierungsvorbereitung und explizite Dispositionen;
+- `score-protection-needs.ts`: gewünschter Schutz, verbleibende Scorekosten,
+  eigene Reserven und Prüfung des gequoteten Schutzstatus;
+- `score-plan-module.ts`: Discovery, Assessment, Steps und aktuelle Routen;
+- `corp-score-funding.ts`, `corp-score-priority.ts` und
+  `corp-score-defense-continuity.ts`: Funding-Meilensteine, Priorität und
+  konkrete Agenda-/Remote-Kontinuität;
+- `corp-counter-bank-score-plan.ts`: Engine-gequotete Counterbank-Scorefolgen;
+- `corp-agenda-turn-planning.ts`: Agenda-Zuglinien und Kampagnenquotes für den
+  gemeinsamen TurnPlanner, einschließlich gebundener Support-Provider;
+- `score-choice-continuation.ts` und `score-choice-binding.ts`: Bindung und
+  Vervollständigung der ausgewählten Advancement-/Agenda-/Folge-Choices.
+
+Die Runtime entdeckt zuerst direkte Scorevorhaben, gibt deren Reserven an
+Ambush und reicht die entdeckten Ambush-Fakten zur Score-Reconciliation zurück.
+Anschließend komponiert sie die verbleibenden Defense-, Economy- und Handbedarfe.
+Es entsteht kein zweiter Planvergleich außerhalb des Schedulers/TurnPlanners.
+
+`runtime/corp-score-protection-routes.ts` und
+`runtime/corp-defense-layer-certification.ts` bleiben Schutzdienste außerhalb
+des Score-Owners. Sie bewerten konkrete Defense-Routen; Score liefert seine
+Agenda, Deadline und Schutzziele. Die vorhandene Scoreline-Vorprojektion bleibt
+ein ausdrücklich konsumierter Dienst. Gemeinsame sichtbare Agenda- und exakte
+Kostenfakten liegen in `runtime/visible-agenda-facts.ts` beziehungsweise
+`runtime/exact-action-cost-facts.ts`. Kein Score-Modul importiert eine Registry,
+die Live-Runtime oder den allgemeinen Choice-Dispatcher zurück.
+
 ## 3. `corp.establish_scoring_remote`
 
 **Klasse:** `development_project`
@@ -776,7 +810,7 @@ Actions, Kosten und Auszahlungen; Asset-Payback und installierte Erträge
 liegen ebenfalls im Owner. Typen stehen in `economy-types.ts`.
 
 Score-Reserve und Defense-Funding bleiben fremde Fachverträge in
-`plans/corp-score-funding.ts`, `plans/corp-defense-funding-contract.ts`
+`corp/score/corp-score-funding.ts`, `plans/corp-defense-funding-contract.ts`
 und `runtime/corp-defense-funding-facts.ts`. Economy erhält aktuelle
 Parent-/Need-/Provider-Bindungen und bestimmt daraus seine Finanzierungsroute;
 es bewertet weder eigene Agenda-Ziele noch globale ICE-Allokation.

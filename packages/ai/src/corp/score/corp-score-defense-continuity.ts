@@ -1,6 +1,6 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
-import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
+import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 
 export type CorpVisibleAgendaPredicate = (
   input: AiDecisionInput,

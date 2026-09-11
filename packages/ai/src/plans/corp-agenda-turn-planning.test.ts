@@ -11,8 +11,8 @@ import {
   buildPlanningRulesContext,
   buildPlanningStateIdentity,
 } from "./turn-planning-contracts";
-import { buildCorpAgendaTurnPlanningSlice } from "./corp-agenda-turn-planning";
-import { campaignDisposition } from "./corp-agenda-turn-planning";
+import { buildCorpAgendaTurnPlanningSlice } from "../corp/score/corp-agenda-turn-planning";
+import { campaignDisposition } from "../corp/score/corp-agenda-turn-planning";
 import type { KnownCorpFundedIceInstallRouteProjection } from "../runtime/corp-funded-score-protection";
 
 describe("Corp agenda turn-planning vertical slice", () => {

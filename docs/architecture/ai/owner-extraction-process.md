@@ -1,6 +1,6 @@
 # Fünf weitere AI-Owner bündeln
 
-Status: P1–P4 abgenommen; P5 aktiv. Auftrag: Nutzerfreigabe vom 2026-09-11.
+Status: P1–P5 abgenommen; Integrationsprüfung aktiv. Auftrag: Nutzerfreigabe vom 2026-09-11.
 
 ## Ziel und Grenzen
 
@@ -52,4 +52,7 @@ P3: 71 Tests in acht Dateien, AI-Typecheck und Source-/Reachability-Gates grün 
 
 
 P4: 51 Tests in sechs Dateien, AI-Typecheck und Source-/Reachability-Gates grün (802 produktive Dateien, keine Zyklen). Remote erhält das bestehende Defense-Rezbudget als Zahl; Projekt und aktuelle Typverträge sind gebündelt.
+
+
+P5: 212 plan-/konversionsnahe Tests, 360 Runtime-/Kampagnen-/Fundingtests und 25 Autoritäts-/Faktenprüfungen grün. AI-Typecheck und Source-/Reachability-Gates grün (812 produktive Dateien, keine Zyklen). 546 ursprüngliche Funktionskörper verglichen: 544 unverändert, keine Funktion fehlt; nur die beiden Domain-Kompositionen rufen jetzt die extrahierte Signalbildung auf. Schutzrouten bleiben außerhalb von Score.
 

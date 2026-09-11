@@ -7,7 +7,7 @@ import {
   corpRemoteHasEngineQuotedReusableScoreFriction,
   corpResidentScoreAgendaInstanceId,
   corpResidentScoreDefenseBinding,
-} from "./corp-score-defense-continuity";
+} from "../corp/score/corp-score-defense-continuity";
 
 const visibleCardIsAgenda = (
   _input: AiDecisionInput,

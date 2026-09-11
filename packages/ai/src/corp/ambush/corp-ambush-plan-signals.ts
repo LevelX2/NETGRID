@@ -6,7 +6,7 @@ import type { ActionSemanticCandidate } from "../../action-semantic-candidate-ty
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import type { CorpStrategicIntentProfile } from "../../corp-strategic-intent";
 
-import { readCorpCounterBankPreparationQuote } from "../../plans/corp-counter-bank-score-plan";
+import { readCorpCounterBankPreparationQuote } from "../score/corp-counter-bank-score-plan";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";

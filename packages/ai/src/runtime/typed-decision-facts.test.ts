@@ -10,11 +10,9 @@ import { evaluateRunnerRunTargets } from "../runner-run-target-evaluation";
 import type { RunnerAccessFacts } from "../access/runner-access-facts";
 
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
-import {
-  reservedAccessTrashCredits,
-  corpScoreProjectNeedsProtectionMaturity,
-  uniqueScoreProjects,
-} from "./plan-first-live-runtime";
+import { reservedAccessTrashCredits } from "./plan-first-live-runtime";
+import { uniqueScoreProjects } from "../corp/score/score-project-signals";
+import { corpScoreProjectNeedsProtectionMaturity } from "../corp/score/score-protection-needs";
 import { accessCommitmentForEvaluation } from "../run-analysis/runner-plan-run-route-facts";
 
 function remoteRun() {

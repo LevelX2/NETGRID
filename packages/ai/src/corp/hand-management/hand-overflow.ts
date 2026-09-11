@@ -3,7 +3,7 @@ import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 
-import { isQuotedCorpCounterBankInHq } from "../../plans/corp-counter-bank-score-plan";
+import { isQuotedCorpCounterBankInHq } from "../score/corp-counter-bank-score-plan";
 import { type CorpPlanDomain } from "../../plans/corp-tactical-plan-contracts";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { type PlanSchedulerResult } from "../../plans/plan-scheduler";

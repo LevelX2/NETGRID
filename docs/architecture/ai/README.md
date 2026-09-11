@@ -79,11 +79,11 @@ vollständige Abdeckung aller denkbaren Kartenfolgen.
 | `runner.pressure_central`         | [centralPressureModule](../../../packages/ai/src/runner/central-pressure/central-pressure-plan-module.ts)                   | [Runner §2](runner-plan-contracts.md#2-runnerpressure_central)                                       |
 | `runner.contest_remote`           | [remoteContestModule](../../../packages/ai/src/runner/remote-contest/remote-contest-plan-module.ts)                         | [Runner §3](runner-plan-contracts.md#3-runnercontest_remote)                                         |
 | `runner.develop_board_and_hand`   | [developmentModule](../../../packages/ai/src/runner/hand-development/development-plan-module.ts)                            | [Runner §5](runner-plan-contracts.md#5-runnerdevelop_board_and_hand)                                 |
-| `runner.convert_run_window`       | [runWindowModule](../../../packages/ai/src/plans/runner-tactical-plan-modules.ts#L506)                                      | [Runner §8](runner-plan-contracts.md#8-runnerconvert_run_window)                                     |
+| `runner.convert_run_window`       | [runWindowModule](../../../packages/ai/src/plans/runner-tactical-plan-modules.ts#L186)                                      | [Runner §8](runner-plan-contracts.md#8-runnerconvert_run_window)                                     |
 | `runner.complete_turn`            | [createTurnCompletionPlanModule](../../../packages/ai/src/plans/turn-completion-plan-module.ts)                             | [EndTurn](planning-architecture.md#17-endturn-vertrag)                                               |
-| `corp.score_agenda`               | [scoreModule](../../../packages/ai/src/plans/corp-core-plan-modules.ts#L609)                                                | [Corp §2](corp-plan-contracts.md#2-corpscore_agenda)                                                 |
+| `corp.score_agenda`               | [scoreModule](../../../packages/ai/src/corp/score/score-plan-module.ts)                                                     | [Corp §2](corp-plan-contracts.md#2-corpscore_agenda)                                                 |
 | `corp.establish_scoring_remote`   | [remoteModule](../../../packages/ai/src/corp/scoring-remote/scoring-remote-plan-module.ts)                                  | [Corp §3](corp-plan-contracts.md#3-corpestablish_scoring_remote)                                     |
-| `corp.defend_servers`             | [defenseModule](../../../packages/ai/src/plans/corp-core-plan-modules.ts#L791)                                              | [Corp §4](corp-plan-contracts.md#4-corpdefend_servers)                                               |
+| `corp.defend_servers`             | [defenseModule](../../../packages/ai/src/plans/corp-core-plan-modules.ts#L617)                                              | [Corp §4](corp-plan-contracts.md#4-corpdefend_servers)                                               |
 | `corp.economy`                    | [economyModule](../../../packages/ai/src/corp/economy/economy-plan-module.ts)                                               | [Corp §6](corp-plan-contracts.md#6-corpeconomy)                                                      |
 | `corp.respond_to_virus_pressure`  | [createCorpVirusPressureModule](../../../packages/ai/src/corp/virus-pressure/virus-pressure-plan-module.ts)                 | [Corp §5](corp-plan-contracts.md#5-corprespond_to_virus_pressure)                                    |
 | `corp.punish_campaign`            | [punishCampaignModule](../../../packages/ai/src/corp/punish/punish-campaign-plan-module.ts)                                 | [Corp §7](corp-plan-contracts.md#7-corppunish_campaign)                                              |
@@ -113,7 +113,7 @@ und [Informationsentscheidungen](../../../packages/ai/src/runner/expose-informat
 ihre fachlichen Pfade in eigenen Verzeichnissen. Beim Informationsowner gehören
 auch Erinnerung und installierte Karten-Choices dazu. Gemeinsame taktische
 Planstandards liegen in [runner-tactical-module-support.ts](../../../packages/ai/src/plans/runner-tactical-module-support.ts).
-Bei den übrigen Ownern erklärt allein die Moduldatei den heutigen Pfad noch
+Bei Defense und Run-Window erklärt allein die Moduldatei den heutigen Pfad noch
 nicht vollständig.
 
 Auch Shell-Traders-Pipeline, Corp-Virusdruck, Runner-Abwehr, Runner-Economy
@@ -137,6 +137,16 @@ importiert die Core-/Tactical-Registries oder die Live-Runtime zurück.
 Geteilte Domänentypen, Score-/Defense-Fundingverträge und sichtbare
 Action-Fakten liegen außerhalb der Registries. Es bleiben dieselben 25
 registrierten Planmodule und dieselbe gemeinsame Runtime-Bibliothek.
+
+Ambush, Central Pressure, Remote Contest, Scoring Remote und Score besitzen
+nun ebenfalls vertikale Owner unter `corp/ambush/`, `runner/central-pressure/`,
+`runner/remote-contest/`, `corp/scoring-remote/` und `corp/score/`. Ihre
+Fachverträge verlinken die Signalbildung, Finanzierung, Projektion und gebundene
+Choice-Ausführung. Gemeinsame Run-Funding-/Routen-/Vorbereitungsdienste liegen
+unter `run-analysis/`; Defense behält globale Allokation und Schutzrouten.
+Von den 23 fachlichen Ownern sind damit 21 vertikal gebündelt. Die verbleibenden
+beiden sind `corp.defend_servers` und `runner.convert_run_window`; dazu kommen
+unverändert die beiden bereits separaten Turn-Completion-Module.
 
 Nicht registriert sind die konzeptionellen Opening-Module
 `runner.opening_strategy` und `corp.opening_and_board_foundation`. Ihre

@@ -1,12 +1,12 @@
 import {
   CorpScoreFundingMilestone,
   CorpScoreProjectSignal,
-} from "./corp-score-contracts";
+} from "../../plans/corp-score-contracts";
+import type { PriorityClass } from "../../plans/plan-assessment";
 import {
   corpScorePriorityClass,
   knownScoreProtectionFundingGap,
 } from "./corp-score-priority";
-import type { PriorityClass } from "./plan-assessment";
 
 export function corpScoreFundingMilestone(
   signal: CorpScoreProjectSignal,

@@ -5,7 +5,7 @@ import { CURRENT_RULES_BASELINE, type AiDecisionInput } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
-import { buildCorpAgendaTurnPlanningSlice } from "../../plans/corp-agenda-turn-planning";
+import { buildCorpAgendaTurnPlanningSlice } from "../../corp/score/corp-agenda-turn-planning";
 import { corpTurnLiquidityDevelopmentNeed } from "../../corp/economy/economy-domain-signals";
 
 import { scoreConsumerSupportState } from "../../corp/scoring-remote/scoring-remote-signals";

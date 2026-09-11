@@ -1,11 +1,11 @@
-import type { CorpEconomyNeedSignal } from "../corp/economy/economy-types";
-import type { CorpDefenseSignal } from "./corp-defense-contracts";
-import type { CorpScoreProjectSignal } from "./corp-score-contracts";
 import type { AiDecisionInput } from "@netgrid/shared";
+import type { CorpDefenseSignal } from "../../plans/corp-defense-contracts";
+import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
+import type { CorpEconomyNeedSignal } from "../economy/economy-types";
 
-import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 
-import { planInstanceIdForProposal } from "./plan-instance";
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import {
   buildCanonicalLegalActionInvocation,
   turnPlanningFingerprint,
@@ -14,7 +14,7 @@ import {
   type CanonicalLegalActionInvocation,
   type PlanningRulesContext,
   type PlanningStateIdentity,
-} from "./turn-planning-contracts";
+} from "../../plans/turn-planning-contracts";
 
 export const CORP_AGENDA_TURN_SLICE_VERSION =
   "corp-agenda-turn-slice-v1" as const;

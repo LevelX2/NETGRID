@@ -1,6 +1,6 @@
 import { corpEconomyPriorityClass } from "../economy/economy-plan-module";
 import { corpGenericDefensePriorityClass } from "../../plans/corp-defense-funding-contract";
-import { corpScorePriorityClass } from "../../plans/corp-score-priority";
+import { corpScorePriorityClass } from "../score/corp-score-priority";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 

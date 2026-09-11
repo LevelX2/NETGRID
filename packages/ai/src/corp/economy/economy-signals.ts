@@ -1,4 +1,4 @@
-import { assessCorpSpendAgainstScoreFundingMilestones } from "../../plans/corp-score-funding";
+import { assessCorpSpendAgainstScoreFundingMilestones } from "../score/corp-score-funding";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { rootRezCreditOutcomeProjectionStatus } from "../../actions/action-economy-projection";
@@ -9,7 +9,7 @@ import { type CorpCorePlanDomain } from "../../plans/corp-core-plan-contracts";
 import { type CorpDefenseSignal } from "../../plans/corp-defense-contracts";
 import { corpVisibleLiquidityDemandTarget } from "./economy-domain-signals";
 import { type CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
-import { corpScorePriorityClass } from "../../plans/corp-score-priority";
+import { corpScorePriorityClass } from "../score/corp-score-priority";
 import { type CorpPlanDomain } from "../../plans/corp-tactical-plan-contracts";
 import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
