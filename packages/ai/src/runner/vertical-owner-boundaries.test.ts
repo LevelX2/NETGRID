@@ -7,41 +7,43 @@ import { describe, expect, it } from "vitest";
 const runnerDir = path.dirname(fileURLToPath(import.meta.url));
 const srcDir = path.resolve(runnerDir, "..");
 
-describe.each(["credit-bank", "recurring-economy", "resource-lifecycle"])(
-  "%s owner boundary",
-  (owner) => {
-    const ownerDir = path.join(runnerDir, owner);
-    it("does not import the central runtime, composition or core registry", () => {
-      const violations: string[] = [];
-      for (const name of readdirSync(ownerDir)) {
-        if (!name.endsWith(".ts") || name.endsWith(".test.ts")) continue;
-        const source = ts.createSourceFile(
-          name,
-          readFileSync(path.join(ownerDir, name), "utf8"),
-          ts.ScriptTarget.Latest,
-          true,
-        );
-        for (const statement of source.statements) {
-          if (
-            !ts.isImportDeclaration(statement) &&
-            !ts.isExportDeclaration(statement)
+describe.each([
+  "credit-bank",
+  "recurring-economy",
+  "resource-lifecycle",
+  "installed-agenda",
+])("%s owner boundary", (owner) => {
+  const ownerDir = path.join(runnerDir, owner);
+  it("does not import the central runtime, composition or core registry", () => {
+    const violations: string[] = [];
+    for (const name of readdirSync(ownerDir)) {
+      if (!name.endsWith(".ts") || name.endsWith(".test.ts")) continue;
+      const source = ts.createSourceFile(
+        name,
+        readFileSync(path.join(ownerDir, name), "utf8"),
+        ts.ScriptTarget.Latest,
+        true,
+      );
+      for (const statement of source.statements) {
+        if (
+          !ts.isImportDeclaration(statement) &&
+          !ts.isExportDeclaration(statement)
+        )
+          continue;
+        const specifier = statement.moduleSpecifier;
+        if (!specifier || !ts.isStringLiteral(specifier)) continue;
+        if (
+          /plan-first-live-runtime|runner-core-plan-modules|semantic-runtime-decision-context|selected-choices-for-decision|composition/.test(
+            specifier.text,
           )
-            continue;
-          const specifier = statement.moduleSpecifier;
-          if (!specifier || !ts.isStringLiteral(specifier)) continue;
-          if (
-            /plan-first-live-runtime|runner-core-plan-modules|semantic-runtime-decision-context|selected-choices-for-decision|composition/.test(
-              specifier.text,
-            )
-          ) {
-            violations.push(`${name}: ${specifier.text}`);
-          }
+        ) {
+          violations.push(`${name}: ${specifier.text}`);
         }
       }
-      expect(violations).toEqual([]);
-    });
-  },
-);
+    }
+    expect(violations).toEqual([]);
+  });
+});
 
 describe("vertical Runner owners", () => {
   it("keeps extracted phase decisions out of the live orchestrator", () => {
@@ -60,7 +62,7 @@ describe("vertical Runner owners", () => {
       .filter(
         (name) =>
           name &&
-          /^(runnerCreditBank|runnerMatureCreditBank|creditBankBuilt|runnerRecurringEconomy|recurringEconomy|runnerInstalledCompatibleRestrictedCredit|runnerResourceLifecycle|runnerCandidateIsLeavePlayPaymentLifecycle|runnerLifecycleLeavePlayPayment)/.test(
+          /^(runnerCreditBank|runnerMatureCreditBank|creditBankBuilt|runnerRecurringEconomy|recurringEconomy|runnerInstalledCompatibleRestrictedCredit|runnerResourceLifecycle|runnerCandidateIsLeavePlayPaymentLifecycle|runnerLifecycleLeavePlayPayment|runnerInstalledAgendaScore)/.test(
             name,
           ),
       );

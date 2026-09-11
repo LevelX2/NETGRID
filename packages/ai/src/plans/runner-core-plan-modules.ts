@@ -1,3 +1,5 @@
+import type { RunnerInstalledAgendaScoreSignal } from "../runner/installed-agenda/installed-agenda-types";
+import { createRunnerInstalledAgendaScoreModule } from "../runner/installed-agenda/installed-agenda-plan-module";
 import type {
   RunnerFundingNeedSignal,
   RunnerDevelopmentFundingMilestone,
@@ -216,15 +218,6 @@ export type RunnerInstalledCardLiquidationChoiceSignal = {
   priorityClass: "P4";
   value: number;
   evidenceCodes: string[];
-};
-
-export type RunnerInstalledAgendaScoreSignal = {
-  opportunityId: string;
-  sourceCardInstanceId: string;
-  actionIds: string[];
-  agendaPoints: number;
-  terminal: boolean;
-  evidenceCode: string;
 };
 
 export type RunnerShellTradersPipelineSignal = {
@@ -686,11 +679,6 @@ type DefenseState = {
     | "forgo_terminal_deck_pressure";
   signals: RunnerDefenseSignals;
 };
-type InstalledAgendaScoreState = {
-  kind: "installed_agenda_score";
-  phase: "score_installed_agenda";
-  signal: RunnerInstalledAgendaScoreSignal;
-};
 
 type ShellTradersPipelineState = {
   kind: "shell_traders_pipeline";
@@ -704,7 +692,7 @@ export function createRunnerCorePlanModules(
   const rolesForDefinitionId =
     dependencies.rolesForDefinitionId ?? rolesForDeckDoctrineCard;
   return [
-    installedAgendaScoreModule(),
+    createRunnerInstalledAgendaScoreModule(),
     shellTradersPipelineModule(),
     createRunnerResourceLifecycleModule(),
     createRunnerCreditBankModule(),
@@ -785,63 +773,6 @@ function shellTradersPipelineModule(): PlanModule {
                 : "Hold the prepared target until its completion or replacement is useful.",
         },
         candidates,
-      };
-    },
-  };
-}
-
-function installedAgendaScoreModule(): PlanModule {
-  return {
-    moduleId: "runner.score_installed_agenda",
-    side: "runner",
-    discover: (context) =>
-      (domain(context).installedAgendaScores ?? []).map((signal) =>
-        proposal({
-          moduleId: "runner.score_installed_agenda",
-          dedupeKey: signal.opportunityId,
-          moduleState: {
-            kind: "installed_agenda_score",
-            phase: "score_installed_agenda",
-            signal,
-          } satisfies InstalledAgendaScoreState,
-          priorityClass: signal.terminal ? "P1" : "P3",
-          target: { kind: "card", id: signal.sourceCardInstanceId },
-          routeExists:
-            installedAgendaScoreCandidates(context, signal).length > 0,
-          blockerCode: "installed_agenda_score_route_unavailable",
-          evidenceCode: signal.evidenceCode,
-        }),
-      ),
-    assess: (instance, context, portfolio) => {
-      const signal = state<InstalledAgendaScoreState>(instance).signal;
-      return assessment(
-        instance,
-        signal.terminal ? "P1" : "P3",
-        installedAgendaScoreCandidates(context, signal).length > 0,
-        (signal.terminal ? 2_000 : 1_000) + signal.agendaPoints * 100,
-        portfolio.executorInstanceId,
-      );
-    },
-    materialize: (instance, _assessment, context) => {
-      const signal = state<InstalledAgendaScoreState>(instance).signal;
-      return {
-        step: {
-          stepId: `${instance.instanceId}:score`,
-          capability: {
-            capabilityId: "score_installed_agenda",
-            semanticActionTypes: [
-              ...new Set(
-                installedAgendaScoreCandidates(context, signal).map(
-                  (entry) => entry.candidate.semanticActionType,
-                ),
-              ),
-            ],
-          },
-          target: { kind: "card", id: signal.sourceCardInstanceId },
-          purpose:
-            "Convert the installed agenda replacement into agenda points.",
-        },
-        candidates: installedAgendaScoreCandidates(context, signal),
       };
     },
   };
@@ -1673,19 +1604,6 @@ function shellTradersCandidateMatchesExactBinding(
     (exactTarget.targetDefinitionId === undefined ||
       exactTarget.targetDefinitionId === signal.targetDefinitionId)
   );
-}
-
-function installedAgendaScoreCandidates(
-  context: PlanSchedulerContext,
-  signal: RunnerInstalledAgendaScoreSignal,
-): PlanMaterialization["candidates"] {
-  const actionIds = new Set(signal.actionIds);
-  return context.actionCandidates
-    .filter((candidate) => actionIds.has(candidate.actionId))
-    .map((candidate) => ({
-      candidate,
-      stepValue: (signal.terminal ? 2_000 : 1_000) + signal.agendaPoints * 100,
-    }));
 }
 
 function coverageInstallCandidates(

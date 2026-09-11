@@ -1022,3 +1022,19 @@ terminale Route mit validiertem Prioritätsanspruch. Beide verlangen genaue
 Quellen-/Ziel-/Kostenbindung; ein Terminalsignal übernimmt keine fremde
 Run- oder Entwicklungsentscheidung. Der Systemowner `runner.complete_turn`
 folgt ausschließlich dem [EndTurn-Vertrag](planning-architecture.md#17-endturn-vertrag).
+
+### Vertikale Implementierung der installierten Agenda-Konversion
+
+[`createRunnerInstalledAgendaScoreModule`](../../../packages/ai/src/runner/installed-agenda/installed-agenda-plan-module.ts)
+ist der Einstieg im Verzeichnis `runner/installed-agenda/`. Die Signaldatei
+besitzt die Engine-markierte Score-Konversion, die erforderliche sichtbare
+Quellkarte, deren Punkte und die Prüfung der Siegschwelle. Typen und Planstatus
+liegen daneben. Das Planmodul bindet Discovery, P3 beziehungsweise P1 bei
+terminaler Konversion, Assessment und Materialisierung an diese Action-IDs.
+
+Die Live-Runtime injiziert nur die vorhandene Suche nach der sichtbaren eigenen
+Karteninstanz. Fehlende Quelle, unbekannte Karte oder fehlende Punktangabe
+behalten ihre strukturierten Fehler. Die Core-Registry registriert die Factory;
+ein Rückimport vom Owner in Registry oder Live-Runtime ist nicht erforderlich.
+Damit kann eine Änderung an dieser Score-Konversion lokal verfolgt werden,
+ohne die Regeln für allgemeine Runner-Siege oder Run-Scoring zu übernehmen.

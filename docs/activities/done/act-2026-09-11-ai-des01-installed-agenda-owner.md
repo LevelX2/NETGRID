@@ -1,6 +1,15 @@
 ---
 activityId: act-2026-09-11-ai-des01-installed-agenda-owner
-status: in_progress
+status: done
+completedAt: 2026-09-11
+resultArtifacts:
+  - packages/ai/src/runner/installed-agenda/
+  - docs/architecture/ai/runner-plan-contracts.md
+checks:
+  - 452 Ausgangstests und 457 Tests nach Extraktion bestanden
+  - AI-Typecheck und check:ai bestanden
+  - Verschobene und übrige zentrale Funktionskörper verglichen
+  - Prettier, Owneranker und git diff --check bestanden
 priority: high
 primaryAgent: release-implementation-agent
 createdAt: 2026-09-11
@@ -22,3 +31,10 @@ Typecheck und Strukturgates, Vergleich der verschobenen Logik, aktuelle
 Ownerkarte und Fachvertrag. Eigener Paketcommit. Danach folgen getrennt
 reservierte Pakete für `runner.secure_terminal_win` und `runner.expose_information`;
 abschließend lokale Main-Integration und Worktree-Cleanup, kein Push.
+
+## Ergebnis
+
+Quellprüfung, Punktermittlung, terminale Einstufung und Planlogik liegen zusammen.
+Ein injizierter Lookup bindet die unveränderte Suche nach sichtbaren eigenen
+Karten an. Bestehende Action-IDs, Fehler, P1/P3 und Werte bleiben erhalten.
+Fachvertrag und Ownerkarte führen die dauerhaften Informationen.
