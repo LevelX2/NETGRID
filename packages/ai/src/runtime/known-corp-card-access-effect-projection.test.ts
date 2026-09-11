@@ -120,5 +120,5 @@ function card(
   instanceId: string,
   type: NonNullable<VisibleCard["type"]>,
 ): VisibleCard {
-  return { instanceId, known: true, type };
+  return { instanceId, known: true, type, rezzed: true };
 }

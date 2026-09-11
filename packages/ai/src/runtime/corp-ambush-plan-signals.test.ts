@@ -619,8 +619,11 @@ describe("Corp compromised Ambush disposition", () => {
     });
   });
 
-  it("holds a payable material exposed TRAP as a known threat", () => {
+  it("holds a payable material rezzed TRAP as a known threat", () => {
     const fixture = installedTrapFixture({ exposed: true, corpCredits: 4 });
+    fixture.input.playerView.servers.find(
+      (server) => server.id === "remote_1",
+    )!.root[0]!.rezzed = true;
     fixture.input.playerView.opponent.handCount = 3;
     const [signal] = buildCorpAmbushPlanSignals(fixture);
     expect(signal).toMatchObject({

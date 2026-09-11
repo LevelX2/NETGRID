@@ -35,6 +35,7 @@ describe("known exposed Corp card decision checkpoints", () => {
             owner: "corp",
             controller: "corp",
             known: false,
+            rezzed: true,
           },
         ],
       ),

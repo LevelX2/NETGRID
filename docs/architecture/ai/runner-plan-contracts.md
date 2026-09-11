@@ -198,6 +198,18 @@ Die Letztchancen-Ausnahme betrifft ausschließlich den normalen Schadenspuffer.
 Eine zusätzlich bekannte ETR-Sperre ohne passende Coverage oder eine offene
 Finanzierungslücke bleibt auch bei diesem terminalen Contest verbindlich.
 
+Ein Remote mit genau einem bekannten, gerezzten Damage-Ambush konsumiert
+bereits vor dem Runstart dieselbe quellgebundene Abbruchbewertung wie das
+Run-Window. Der Remote-Owner sperrt dafür seine Run- und Vorbereitungsvarianten
+mit expliziter Evidence; ein bereits laufender Run behält seinen gebundenen
+Parent und die bestehende Jack-out-Entscheidung. Unbekannte, ungerezzte oder
+gemischte Roots erfüllen diese spezifische Abbruchbedingung nicht.
+Die Access-Effektprojektion wählt die zur sichtbaren Rez-Lage aktive installierte
+Card-Spec-Variante einschließlich des Engine-Defaults für Agenda und rezzbare
+Karten. Eine inaktive erste Variante darf spätere aktive Varianten nicht
+verdecken; unbekannter Rez-Zustand oder mehrere gleichzeitig aktive, nicht
+gemeinsam projizierbare Varianten werden ausdrücklich als unbekannt ausgewiesen.
+
 `draw_for_answer` ist nur zulässig, wenn:
 
 - eine konkrete fehlende Antwort benannt ist;

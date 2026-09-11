@@ -34,7 +34,10 @@ import {
   runnerTargetedBypassPayoffValue,
   runnerTargetedIceTrashPayoffValue,
 } from "../../run-analysis/runner-run-preparation";
-import { runnerRecentFutureEncounterDamageSafetyAbort } from "../../runner-damage-threat-assessment";
+import {
+  runnerKnownRemoteAccessDamageAmbushAssessment,
+  runnerRecentFutureEncounterDamageSafetyAbort,
+} from "../../runner-damage-threat-assessment";
 import type {
   RunnerEconomyPosture,
   RunnerRunTargetEvaluation,
@@ -1092,6 +1095,21 @@ export function buildRunnerRemoteContestSignals({
   const remoteContests = uniqueBy(
     [
       ...uniqueBy(remoteContestDrafts, (signal) => signal.contestId)
+        .map((signal) => {
+          const knownAmbush = runnerKnownRemoteAccessDamageAmbushAssessment(
+            input,
+            signal.serverId,
+          );
+          return knownAmbush
+            ? {
+                ...signal,
+                reachable: false,
+                marginalValue: 0,
+                runActionDeferralEvidenceCode: knownAmbush.evidenceCode,
+                evidenceCode: `${signal.evidenceCode}|${knownAmbush.evidenceCode}`,
+              }
+            : signal;
+        })
         .filter(
           (signal) =>
             signal.routePreparation !== undefined ||
@@ -1104,7 +1122,8 @@ export function buildRunnerRemoteContestSignals({
           bindRunnerRemoteRunActionAssessments(
             input,
             economy,
-            recurringEconomyRunDeferralEvidenceCode
+            recurringEconomyRunDeferralEvidenceCode &&
+              !signal.runActionDeferralEvidenceCode
               ? {
                   ...signal,
                   runActionDeferralEvidenceCode:

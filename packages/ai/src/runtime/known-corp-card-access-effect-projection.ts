@@ -32,19 +32,54 @@ export function projectKnownCorpCardAccessEffect(params: {
 }): KnownCorpCardAccessEffectProjection {
   const card = cardSpecPlanningCardByDefinitionId(params.sourceDefinitionId);
   const accessEffects = card?.planning.engine.accessEffects ?? [];
-  const accessEffect = accessEffects.find(
+  const installedEffects = accessEffects.filter(
     (effect) =>
       effect.kind === "on_access" &&
       effect.sourceZones.includes("installed") &&
       !effect.ignoreIfAccessedFrom?.includes("installed"),
   );
-  if (!accessEffect) {
+  if (installedEffects.length === 0) {
     return result(params.sourceDefinitionId, "not_applicable", 0, [
       "known_corp_card_access_effect_not_applicable",
     ]);
   }
 
   const evidence = ["known_corp_card_access_effect_structured_card_spec"];
+  const activation = (effect: (typeof installedEffects)[number]) =>
+    effect.installedSourceActivation ??
+    (card?.definition.type === "agenda" ? "any_rez_state" : "requires_rezzed");
+  if (
+    params.sourceCard?.rezzed === undefined &&
+    installedEffects.some((effect) => activation(effect) !== "any_rez_state")
+  ) {
+    return result(params.sourceDefinitionId, "unknown", 0, [
+      ...evidence,
+      "known_access_effect_source_rez_state_unknown",
+    ]);
+  }
+  const activeEffects = installedEffects.filter((effect) => {
+    const requiredState = activation(effect);
+    return (
+      requiredState === "any_rez_state" ||
+      (requiredState === "requires_rezzed" &&
+        params.sourceCard?.rezzed === true) ||
+      (requiredState === "unrezzed_only" && params.sourceCard?.rezzed === false)
+    );
+  });
+  if (activeEffects.length !== 1) {
+    return result(
+      params.sourceDefinitionId,
+      activeEffects.length === 0 ? "not_applicable" : "unknown",
+      0,
+      [
+        ...evidence,
+        activeEffects.length === 0
+          ? "known_access_effect_no_active_installed_variant"
+          : "known_access_effect_multiple_active_installed_variants",
+      ],
+    );
+  }
+  const accessEffect = activeEffects[0]!;
   const corpCredits =
     params.input.side === "corp"
       ? params.input.playerView.own.credits
@@ -65,31 +100,6 @@ export function projectKnownCorpCardAccessEffect(params: {
     0,
     Math.floor(params.sourceCard?.advancementCounters ?? 0),
   );
-
-  if (accessEffect.installedSourceActivation === "requires_rezzed") {
-    if (params.sourceCard?.rezzed === false)
-      return result(params.sourceDefinitionId, "not_applicable", 0, [
-        ...evidence,
-        "known_access_effect_requires_rezzed_source",
-      ]);
-    if (params.sourceCard?.rezzed !== true)
-      return result(params.sourceDefinitionId, "unknown", 0, [
-        ...evidence,
-        "known_access_effect_source_rez_state_unknown",
-      ]);
-  }
-  if (accessEffect.installedSourceActivation === "unrezzed_only") {
-    if (params.sourceCard?.rezzed === true)
-      return result(params.sourceDefinitionId, "not_applicable", 0, [
-        ...evidence,
-        "known_access_effect_requires_unrezzed_source",
-      ]);
-    if (params.sourceCard?.rezzed !== false)
-      return result(params.sourceDefinitionId, "unknown", 0, [
-        ...evidence,
-        "known_access_effect_source_rez_state_unknown",
-      ]);
-  }
 
   if (accessEffect.condition) {
     if (accessEffect.condition.kind === "runner_is_tagged") {

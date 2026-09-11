@@ -196,7 +196,11 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
     ];
     input.playerView.opponent.credits = 4;
     input.playerView.servers[0]!.root = [
-      visibleCard("trap-1", { known: false, advancementCounters: 0 }),
+      visibleCard("trap-1", {
+        known: false,
+        rezzed: true,
+        advancementCounters: 0,
+      }),
     ];
     const payoff = evaluateKnownRemoteAccessPayoff(
       input,
@@ -238,7 +242,7 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
     const input = inputWithDepletedFreeTrashTarget();
     input.playerView.opponent.credits = 3;
     input.playerView.servers[0]!.root = [
-      visibleCard("trap-1", { known: false }),
+      visibleCard("trap-1", { known: false, rezzed: true }),
     ];
     const payoff = evaluateKnownRemoteAccessPayoff(
       input,
@@ -281,6 +285,7 @@ describe("evaluateKnownRemoteAccessPayoff", () => {
     input.playerView.servers[0]!.root = [
       visibleCard("experimental-ai-1", {
         known: false,
+        rezzed: true,
         advancementCounters: 3,
       }),
     ];

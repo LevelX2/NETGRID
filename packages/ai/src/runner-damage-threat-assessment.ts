@@ -708,8 +708,19 @@ function knownAccessDamageAmbushAssessment(
   }
   const run = input.playerView.run;
   if (!run?.position || run.position.kind !== "server") return undefined;
+  return runnerKnownRemoteAccessDamageAmbushAssessment(
+    input,
+    run.attackedServerId,
+  );
+}
+
+export function runnerKnownRemoteAccessDamageAmbushAssessment(
+  input: AiDecisionInput,
+  serverId: string,
+): RunnerKnownAccessDamageJackOutAssessment | undefined {
+  if (input.side !== "runner") return undefined;
   const server = input.playerView.servers.find(
-    (candidate) => candidate.id === run.attackedServerId,
+    (candidate) => candidate.id === serverId,
   );
   if (
     !server?.id.startsWith("remote_") ||
