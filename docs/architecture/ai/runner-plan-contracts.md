@@ -535,6 +535,17 @@ Runtime darf ihn nicht mit allgemeinem „später nützlich“-Wert rechtfertige
 
 ## 7. `runner.defense_and_recovery`
 
+Der vertikale Owner liegt in `packages/ai/src/runner/defense-recovery/`.
+`defense-signals.ts` bündelt Schutzinstallationen, Handpuffer, Tag-Clear-
+Funding und Reaktionsreserve. `defense-plan-module.ts` besitzt Phasenwahl,
+Funding-Revalidierung, Priorität und Materialisierung;
+`runner-discard-choice-plan.ts` bindet die Pflichtauswahl an die aktuelle
+Action und Choice. `defense-dispositions.ts` priorisiert verfügbare
+Schutzinstallationen gegenüber Statusbereinigung. Die Live-Runtime reicht
+Funding-Suche und sofortige Run-Verwertbarkeit als zwei benannte Dienste
+ein und koordiniert weiterhin die Ausschlüsse zwischen verschiedenen Plänen.
+Gemeinsam benötigte Handpuffer-Fakten werden aus demselben Owner geliefert.
+
 **Klasse:** `urgent_response`, `bounded_sequence` oder
 `development_project`
 **Rolle:** Urgent Response/Vordergrund
