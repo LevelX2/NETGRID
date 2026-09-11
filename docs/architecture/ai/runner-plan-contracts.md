@@ -468,6 +468,18 @@ Admission-geprüfte kartenbezogene Planinstanzen ersetzt.
 
 ## 6. `runner.economy`
 
+Der vertikale Owner liegt in `packages/ai/src/runner/economy/`.
+`economy-signals.ts` bildet endliche Zugliquidität und die durch bestehende
+Verbindlichkeiten angepasste Reserve. `installed-card-liquidation.ts` bindet
+die aktuelle Choice und bewertet Erhalt gegen Liquidation;
+`economy-plan-module.ts` prüft den noch materiellen Parent, revalidiert den
+Funding-Vertrag und materialisiert ausschließlich passende Kandidaten.
+Die Signalbildung erhält die gemeinsame Funding-Suche als einen Dienst.
+Bedarfe anderer Pläne entstehen weiterhin bei deren fachlicher Koordination.
+Geteilte Funding-Kriterien liegen in `plans/runner-funding-candidates.ts`,
+Entwicklungszulassung und begrenzte Funding-Meilensteine in
+`plans/runner-development-contracts.ts`; beide sind unabhängig von der Registry.
+
 **Klasse:** je Instanz `bounded_sequence`, `recurring_cycle` oder
 `development_project`
 **Rolle:** Support, Vordergrund oder Background

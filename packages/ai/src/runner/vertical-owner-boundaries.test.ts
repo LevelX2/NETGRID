@@ -12,6 +12,7 @@ describe.each([
   "credit-bank",
   "recurring-economy",
   "resource-lifecycle",
+  "economy",
   "defense-recovery",
   "shell-traders",
   "expose-information",
@@ -67,7 +68,7 @@ describe("vertical plan owners", () => {
       .filter(
         (name) =>
           name &&
-          /^(buildCorpVirusPressure|visibleRunnerVirusCounters|runnerCreditBank|runnerMatureCreditBank|creditBankBuilt|runnerRecurringEconomy|recurringEconomy|runnerInstalledCompatibleRestrictedCredit|runnerResourceLifecycle|runnerCandidateIsLeavePlayPaymentLifecycle|runnerLifecycleLeavePlayPayment|runnerDefenseSupport|runnerDefenseHandBuffer|buildRunnerDefense|runnerRiskAdjustedHandBufferForAttractiveRuns|runnerTraceDefenseInstallValue|runnerDefinitionProvidesTraceDefense|visiblePendingDamage|runnerShellTraders|buildRunnerShellTraders|runnerExposeInformation|runnerProactiveExposeInformation|runnerCurrentExposeInformation|bindSelectedRunnerExposeInformation|runnerTerminalWin|runnerImmediateAgendaPointTerminalWin|runnerInstalledAgendaScore)/.test(
+          /^(buildCorpVirusPressure|visibleRunnerVirusCounters|runnerCreditBank|runnerMatureCreditBank|creditBankBuilt|runnerRecurringEconomy|recurringEconomy|runnerInstalledCompatibleRestrictedCredit|runnerResourceLifecycle|runnerCandidateIsLeavePlayPaymentLifecycle|runnerLifecycleLeavePlayPayment|runnerEconomyReserveFacts|buildRunnerEconomySignals|runnerResidentTurnLiquidityTarget|runnerDefenseSupport|runnerDefenseHandBuffer|buildRunnerDefense|runnerRiskAdjustedHandBufferForAttractiveRuns|runnerTraceDefenseInstallValue|runnerDefinitionProvidesTraceDefense|visiblePendingDamage|runnerShellTraders|buildRunnerShellTraders|runnerExposeInformation|runnerProactiveExposeInformation|runnerCurrentExposeInformation|bindSelectedRunnerExposeInformation|runnerTerminalWin|runnerImmediateAgendaPointTerminalWin|runnerInstalledAgendaScore)/.test(
             name,
           ),
       );

@@ -17,10 +17,8 @@ import type { ActionSemanticCandidate } from "../action-semantic-candidate-types
 import type { ResourceGap } from "./plan-assessment";
 import type { PlanInstance, PlanProposal } from "./plan-kernel-types";
 import type { PlanOutcomeReceipt } from "./resident-plan-portfolio";
-import {
-  runnerDevelopmentCardAdmission,
-  type RunnerCorePlanDomain,
-} from "./runner-core-plan-modules";
+import { type RunnerCorePlanDomain } from "./runner-core-plan-modules";
+import { runnerDevelopmentCardAdmission } from "./runner-development-contracts";
 import type {
   PlanMaterialization,
   PlanModule,
