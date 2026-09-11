@@ -11,7 +11,7 @@ import { beforeEach, expect, it } from "vitest";
 import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { chooseCorpAction } from "../index";
 import { buildAiDecisionInput } from "./ai-decision-input";
-import { withDecisionLocalCorpPunishRouteQuotes } from "./corp-punish-route-quote-input";
+import { withDecisionLocalCorpPunishRouteQuotes } from "../corp/punish/punish-route-quote-input";
 beforeEach(() => resetResidentPlanPortfolioMemory());
 const BEL = "onr_proteus_054_bel-digmo-antibody",
   MAN = "onr_proteus_050_manhunt";

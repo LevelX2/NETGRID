@@ -24,10 +24,10 @@ eigenen Commit. Fehler werden vor dem nächsten Paket behoben.
 1. **NF01 abgeschlossen – Corp Punish Campaign:** gemeinsame Punish-Verträge,
    Opportunity-/Quote-Signale und Kampagnenmodul bündeln. Nachweis: Punish-
    Opportunity, unbekannte Quotes, Parent-Funding und reale Tag-/Damage-Linien.
-2. **NF02 aktiv – Corp Punish Sequence:** Ausführungsmodul, exakte Head- und
+2. **NF02 abgeschlossen – Corp Punish Sequence:** Ausführungsmodul, exakte Head- und
    Trace-/Continuation-Bindung innerhalb derselben Familie. Nachweis: aktuelle
    Action/StateVersion, Parent/Need und Requote nach beobachtetem Ergebnis.
-3. **NF03 offen – Corp Hand Management:** Handplanung, Signale und gebundene
+3. **NF03 aktiv – Corp Hand Management:** Handplanung, Signale und gebundene
    Hand-Choices; Score bleibt zuständig für Agenda-Ziel und Punktehorizont.
    Nachweis: Overflow, Draw/Discard/Shuffle, Deckout und Agenda-Flood.
 4. **NF04 offen – Runner Development:** Plan und Entwicklungs-/Suchsignale
@@ -58,3 +58,6 @@ konkrete Entscheidung einholen; Tests nicht abschwächen oder Fallbacks bauen.
 
 NF01: 33 Tests in fünf Punish-Dateien grün; AI-Typecheck und Strukturgate
 (743 produktive Dateien, keine Zyklen) grün. Keine Verhaltensänderung.
+
+NF02: 51 Tests in vier Quote-/Trace-/Sequenz-/Taktikdateien grün;
+Strukturgate grün (744 produktive Dateien, keine Zyklen).

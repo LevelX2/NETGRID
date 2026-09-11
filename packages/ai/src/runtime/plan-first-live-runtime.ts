@@ -219,7 +219,7 @@ import {
 import {
   boundCorpPunishTraceChoices,
   resolveCorpPunishTraceWindow,
-} from "../plans/corp-punish-trace-binding";
+} from "../corp/punish/punish-trace-binding";
 import {
   buildCorpScoringRemoteProjectSignals,
   type CorpRemoteOccupancyClaim,
@@ -455,7 +455,7 @@ import {
 } from "./corp-hand-inventory-facts";
 import { assessCorpOpeningRush } from "./corp-opening-rush";
 import { corpPassTaxRezAssessment } from "./corp-pass-tax-rez-assessment";
-import { withDecisionLocalCorpPunishRouteQuotes } from "./corp-punish-route-quote-input";
+import { withDecisionLocalCorpPunishRouteQuotes } from "../corp/punish/punish-route-quote-input";
 import {
   corpRestrictedRezPreparationCandidates,
   currentCorpRestrictedCreditBanks,

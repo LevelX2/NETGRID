@@ -19,7 +19,7 @@ import { selectedBidChoiceOptionId } from "./bid-choice-option";
 import { assessTraceBidCandidates } from "./trace-bid-assessment";
 import { latestTraceContext } from "./trace-context";
 import { buildAiDecisionInput } from "./ai-decision-input";
-import { withDecisionLocalCorpPunishRouteQuotes } from "./corp-punish-route-quote-input";
+import { withDecisionLocalCorpPunishRouteQuotes } from "../corp/punish/punish-route-quote-input";
 
 const CHANCE = "onr_v1_284_chance-observation";
 const URBAN = "onr_v1_307_urban-renewal";

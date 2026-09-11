@@ -18,9 +18,9 @@ import {
   resetResidentPlanPortfolioMemory,
   residentPlanPortfolioSnapshot,
 } from "../plans/resident-plan-portfolio-memory";
-import { boundCorpPunishTraceChoices } from "../plans/corp-punish-trace-binding";
+import { boundCorpPunishTraceChoices } from "../corp/punish/punish-trace-binding";
 import { buildAiDecisionInput } from "./ai-decision-input";
-import { withDecisionLocalCorpPunishRouteQuotes } from "./corp-punish-route-quote-input";
+import { withDecisionLocalCorpPunishRouteQuotes } from "../corp/punish/punish-route-quote-input";
 
 const MANHUNT = "onr_proteus_050_manhunt";
 const MARKED = "onr_proteus_005_marked-accounts";

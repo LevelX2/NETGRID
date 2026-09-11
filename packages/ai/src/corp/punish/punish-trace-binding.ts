@@ -1,13 +1,13 @@
-import type { CorpPunishCampaignSignal } from "../corp/punish/punish-types";
+import type { CorpPunishCampaignSignal } from "./punish-types";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
-import type { PlanExecutionOrigin } from "./plan-continuation";
-import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
+import type { PlanExecutionOrigin } from "../../plans/plan-continuation";
+import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 
-import { PlanResolutionFailure } from "./plan-resolution-failure";
+import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import type {
   EngineWindowResolution,
   PlanSchedulerContext,
-} from "./plan-scheduler";
+} from "../../plans/plan-scheduler";
 
 export function resolveCorpPunishTraceWindow(
   context: PlanSchedulerContext,

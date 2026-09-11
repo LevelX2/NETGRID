@@ -17,7 +17,7 @@ import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
 import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-builder";
 import { chooseCorpAction } from "../index";
 import { buildAiDecisionInput } from "./ai-decision-input";
-import { withDecisionLocalCorpPunishRouteQuotes } from "./corp-punish-route-quote-input";
+import { withDecisionLocalCorpPunishRouteQuotes } from "../corp/punish/punish-route-quote-input";
 
 const DATAPOOL = "onr_v1_287_datapool-by-zetatech";
 const VOUCHER = "onr_v1_293_netwatch-credit-voucher";

@@ -10,15 +10,15 @@ import {
   type PlayerView,
   type VisibleCard,
 } from "@netgrid/shared";
-import { AI_HINTS_BY_CARD } from "../ai-hints";
-import { sanitizeCorpPunishRouteQuoteSet } from "../input-dto";
+import { AI_HINTS_BY_CARD } from "../../ai-hints";
+import { sanitizeCorpPunishRouteQuoteSet } from "../../input-dto";
 import {
   corpDirectTagOperationProfile,
   corpInstalledHardwareTrashOperationProfile,
   corpTaggedCreditDenialOperationProfile,
   corpTraceTagSourceProfile,
   corpTaggedMeatDamageOperationProfile,
-} from "./corp-canonical-card-facts";
+} from "../../runtime/corp-canonical-card-facts";
 
 const MAX_PUNISH_ROUTES = 8;
 const MAX_PUNISH_ROUTE_STEPS = 6;

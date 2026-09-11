@@ -20,7 +20,7 @@ import { selectedCorpHardwareTrashChoiceOptionIds } from "./corp-hardware-trash-
 import {
   buildBoundedCorpPunishRouteRequests,
   withDecisionLocalCorpPunishRouteQuotes,
-} from "./corp-punish-route-quote-input";
+} from "../corp/punish/punish-route-quote-input";
 
 const POWER_GRID = "onr_v1_299_power-grid-overload";
 const POWER_GRID_CAPABILITY_ID = `${POWER_GRID}:corp_utility_installed_hardware_trash_by_counter`;

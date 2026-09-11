@@ -9,12 +9,12 @@ import {
 } from "@netgrid/shared";
 import { corpPunishRouteRequestFingerprint } from "@netgrid/engine";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { chooseCorpAction } from "../index";
-import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
+import { chooseCorpAction } from "../../index";
+import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import {
   buildBoundedCorpPunishRouteRequests,
   withDecisionLocalCorpPunishRouteQuotes,
-} from "./corp-punish-route-quote-input";
+} from "./punish-route-quote-input";
 
 const DATA_SIFTERS = "onr_proteus_048_data-sifters";
 const CHANCE_OBSERVATION = "onr_v1_284_chance-observation";

@@ -912,6 +912,14 @@ Fortschrittsbegriffe nicht mehr sinnvoll gemeinsam modellierbar sind.
 
 ## 8. `corp.execute_punish_sequence`
 
+`corp/punish/punish-sequence-plan-module.ts` besitzt den ausführenden
+Kindplan. `punish-plan-support.ts` bindet aktuelle Head-Kandidaten und
+beobachtungsabhängige Fortsetzungen; `punish-route-quote-input.ts` erzeugt
+begrenzte Quote-Anfragen und `punish-trace-binding.ts` bindet das bereits
+gequotete Gebot an die aktuelle private Engine-Choice. Der Root bleibt
+`corp.punish_campaign`; Funding-Need, Execution-Need und Plan-IDs ändern sich
+durch diese Quellcodestruktur nicht.
+
 **Klasse:** `bounded_sequence`
 **Rolle:** P1-/P3-Vordergrund; Kind von `corp.punish_campaign`
 **Status:** registrierter produktiver Owner; Fähigkeitsgrenzen siehe Einstieg.

@@ -7,7 +7,7 @@ import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import { immediateCorpLiquidCreditGain } from "../../plans/corp-core-plan-modules";
 import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import { corpCandidateIsAmbushInstall } from "../../runtime/corp-ambush-plan-signals";
-import { buildBoundedCorpPunishRouteRequests } from "../../runtime/corp-punish-route-quote-input";
+import { buildBoundedCorpPunishRouteRequests } from "./punish-route-quote-input";
 import { type CorpScorelineFeasibility } from "../../runtime/corp-scoreline-feasibility";
 import {
   actionIsCurrentlyAffordable,
