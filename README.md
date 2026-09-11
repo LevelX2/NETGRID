@@ -412,6 +412,7 @@ Current architecture and operating references:
 - [AI architecture](docs/architecture/ai/README.md)
 - [Localisation architecture](docs/architecture/localization/translatable-ui.md)
 - [Maintenance Control Plane](docs/runbooks/maintenance-control-plane.md)
+- [GitHub CI troubleshooting](docs/runbooks/github-ci.md)
 - [Account operation](docs/runbooks/account-alpha-operations.md)
 - [Local transfer](docs/runbooks/netgrid-local-transfer.md)
 - [Personal card-image import](docs/architecture/card-images/personal-card-image-import.md)

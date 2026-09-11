@@ -374,6 +374,7 @@ import {
 } from "./runner-strategic-exchange";
 import {
   currentEncounteredIceCard,
+  currentEncounterRequiresFullBreak,
   currentRunHasPendingAutoPassIce,
   currentRunRemainingIce,
 } from "./current-encounter";
@@ -32399,6 +32400,7 @@ function runnerCurrentEncounterRequiresDamagePreservingBreak(
   input: AiDecisionInput,
   runOrigin: RunnerRunOrigin | undefined,
 ): boolean {
+  if (currentEncounterRequiresFullBreak(input)) return true;
   const encounteredIce = currentEncounteredIceCard(input);
   if (!encounteredIce?.effectiveRunQuote) return false;
   return (

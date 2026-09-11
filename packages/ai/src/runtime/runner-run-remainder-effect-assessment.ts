@@ -6,6 +6,7 @@ import type {
 
 import {
   currentEncounteredIceCard,
+  currentEncounterRequiresFullBreak,
   currentRunHasFutureVisibleIce,
   currentRunRemainingIce,
 } from "./current-encounter";
@@ -13,6 +14,10 @@ import { isTrashUnlessRunnerPaysSubroutine } from "./encounter-subroutine";
 import { currentRunFuturePathAssessment } from "./runner-future-path-assessment";
 import { runnerHasInstalledPrograms } from "./runner-installed-program";
 import { parseSubroutineIndexes } from "./subroutine-indexes";
+import {
+  assessKnownRezzedIcePath,
+  runnerRunPathCreditBudgetWithVisiblePools,
+} from "../visible-run-analysis";
 
 type RunRemainderEffectEntry = {
   index: number;
@@ -35,6 +40,7 @@ export type EncounterRunRemainderEffectAssessment = {
   paidConditionalPaymentRemediatesEffect: boolean;
   paidConditionalPaymentWithoutBeneficialEffect: boolean;
   evidence: string[];
+  deferredFullBreakSubroutineIndexes?: number[];
 };
 
 export function encounterRunRemainderEffectAssessment(
@@ -84,8 +90,10 @@ export function encounterRunRemainderEffectAssessment(
     action?.payload?.payOrEndRunSubroutinePayment ?? 0,
   );
   const hasInstalledPrograms = runnerHasInstalledPrograms(input);
+  const deferredFullBreakSubroutineIndexes = deferredFullBreakIndexes(input);
   const actionableEffects = effects.filter(
     (entry) =>
+      !deferredFullBreakSubroutineIndexes.includes(entry.index) &&
       !(
         isTrashUnlessRunnerPaysSubroutine(entry.subroutineType) &&
         !hasInstalledPrograms
@@ -151,6 +159,9 @@ export function encounterRunRemainderEffectAssessment(
       currentRunHasFutureVisibleIce(input)) ||
     (seriousNonCostRiskAfterAction && !basePath.blocked);
   const evidence = [
+    ...deferredFullBreakSubroutineIndexes.map(
+      (index) => `current_subroutine_deferred_to_payable_full_break:${index}`,
+    ),
     "run_remainder_subroutine_effect:true",
     `run_remainder_effect_subroutines:${effects.map(({ index }) => index).join(",")}`,
     `future_effect_remaining_ice:${remainingIceCount}`,
@@ -192,5 +203,52 @@ export function encounterRunRemainderEffectAssessment(
     remainingIceCount,
     remainingVisibleIceCount,
     evidence,
+    deferredFullBreakSubroutineIndexes,
   };
+}
+
+function deferredFullBreakIndexes(input: AiDecisionInput): number[] {
+  const current = currentEncounteredIceCard(input);
+  const indexes =
+    current?.effectiveRunQuote?.subroutines.flatMap((subroutine, index) =>
+      subroutine.type === "set_next_encounter_unless_fully_break_damage"
+        ? [index]
+        : [],
+    ) ?? [];
+  const run = input.playerView.run;
+  if (
+    !current ||
+    indexes.length === 0 ||
+    run?.phase !== "encounter_ice" ||
+    run.noBreakSubroutinesActive ||
+    run.nextEncounterNoBreakSubroutines ||
+    currentEncounterRequiresFullBreak(input)
+  )
+    return [];
+  const remaining = currentRunRemainingIce(input);
+  const next = remaining.at(-1);
+  if (!next) return [];
+  const rig = input.playerView.own.rig ?? [];
+  const path = assessKnownRezzedIcePath(
+    [...remaining, current],
+    rig,
+    runnerRunPathCreditBudgetWithVisiblePools(
+      input.playerView.own.credits,
+      rig,
+    ),
+    [],
+    input.playerView.opponent.credits,
+    {
+      visibleRemoteServerCount: input.playerView.servers.filter((server) =>
+        server.id.startsWith("remote_"),
+      ).length,
+    },
+  );
+  return path.canReachAccess &&
+    !path.blocked &&
+    !path.preRunPreparation &&
+    !path.conditionalRiskReasons?.length &&
+    path.fullyBrokenIceInstanceIds?.includes(next.instanceId)
+    ? indexes
+    : [];
 }

@@ -11,6 +11,8 @@ export type VisibleEncounterSubroutine = NonNullable<
 export function isImmediateSafetyThreatSubroutine(
   subroutine: VisibleEncounterSubroutine,
 ): boolean {
+  if (subroutine.type === "set_next_encounter_unless_fully_break_damage")
+    return false;
   const type = subroutine.type.toLowerCase();
   const damageTypeValue = (subroutine as { damageType?: unknown }).damageType;
   const damageType =

@@ -620,6 +620,21 @@ Verantwortung:
 Das Modul besitzt kein unabhängiges langfristiges Ziel. Es gehört logisch zum
 auslösenden Run-/Contest-Plan und kehrt anschließend dorthin zurück.
 
+Bedingter Schaden im nächsten Encounter wird gemeinsam mit der vollständig
+bezahlbaren Folgelösung bewertet. Wählt die bekannte Pfadprojektion den
+vollständigen Break des nächsten ICE, darf die Encounter-Auflösung nicht
+zusätzlich den teureren Break der Quelle erzwingen. Unbekannte Ziele,
+fehlende Engine-Quotes, aktive Break-Verbote und unfinanzierbare oder
+bedingte Folgerouten liefern keine solche Zusage.
+Im Ziel-Encounter liefert die Engine auf der aktuellen `continue_run`-Action
+`encounterFullBreakDamage`: den noch drohenden Schaden bei unvollständigem
+Break, beziehungsweise null nach Erfüllung oder ohne aktive Verpflichtung.
+Der DTO erhält diese öffentliche Regeltatsache und die exakten verbleibenden
+Subroutine-IDs. Der vorhandene Run-Owner berücksichtigt dadurch auch einen
+sonst wirkungslosen letzten Break als notwendige Schadensvermeidung; bereits
+gebrochene Subroutinen werden nicht erneut budgetiert. Action-Version,
+Planinstanz, Executor und Route bleiben weiterhin bindend.
+
 Im aktuellen Fort-Pass-Fenster unterscheiden sich die beiden angebotenen
 `continue_run`-Actions fachlich: `decision:pay` erhält den Run, `decision:end_run`
 beendet ihn. Der DTO erhält dazu `fortRunWindowAbility`, Entscheidung und
@@ -641,6 +656,15 @@ aktuelle Economy-Reserve; endliche Kreditpools, tatsächlich vorhandene
 transferierbare Advancement-Counter und kanonische Schadens-/Tag-Effekte
 bleiben getrennte Wertquellen. Ein leerer Kreditpool erzeugt kein weiteres
 Einkommen. Fehlende kanonische Kartendaten scheitern strukturiert.
+
+Die reine Trash-Bewertung liegt unter `access/`; der Runtime-Adapter bindet
+sie an die tatsächlich angebotene Trash-Action und deren zweckgebundene
+Credit-Quote. Wiederkehrende Draw-Tag-Effekte werden über die kanonische
+Capability `runner_draw_tax_tag` als Schadens-/Tag-Gefahr erkannt. Dadurch
+kann deren Beseitigung einen vorübergehenden Reservefehlbetrag rechtfertigen,
+ohne den Reservebedarf oder dessen Liquiditätskosten zu senken. Nach dem
+Run bleibt der endliche Auffüllbedarf beim Economy-Owner verfügbar; eine
+stärkere aktuelle Run-Gelegenheit kann weiterhin vorgehen.
 Trash-Impact ist ausschließlich an eine vorhandene `trash_accessed_card`-
 LegalAction gebunden. `decline_trash` bei einem Agenda-Steal ist keine
 Trash-Alternative und erhält keinen daraus abgeleiteten Verzichtswert.

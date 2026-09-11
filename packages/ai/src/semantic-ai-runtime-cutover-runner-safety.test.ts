@@ -737,7 +737,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     expect(debugText).toContain("break_future_path_blocked_after_cost:true");
   });
 
-  it("declines an affordable Crybaby without visible current impact", () => {
+  it("trashes an affordable Crybaby with canonical visible impact", () => {
     const crybaby = visibleCard("crybaby-root", "corp", "upgrade", {
       definitionId: "onr_v1_354_crybaby",
       title: "Crybaby",
@@ -781,10 +781,15 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
 
     const decision = chooseRunnerAction(input);
 
-    expect(decision.actionId).toBe(decline.actionId);
+    expect(decision.actionId).toBe(trash.actionId);
+    const planFirst = decision.decisionDebug!.planFirstDecision!;
+    expect(planFirst.selectedPlan!.moduleId).toBe("runner.convert_run_window");
+    expect(planFirst.selectedStep!.planInstanceId).toBe(
+      planFirst.selectedPlan!.instanceId,
+    );
     expect(decision.reasonCode).toBe("plan_first.runner.convert_run_window");
     expect(JSON.stringify(decision.decisionDebug)).toContain(
-      "runner_access_trash_recommendation:decline",
+      "runner_access_trash_recommendation:trash",
     );
   });
 

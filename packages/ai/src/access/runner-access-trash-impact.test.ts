@@ -7,6 +7,65 @@ import { describe, expect, it } from "vitest";
 import { assessRunnerAccessTrashImpactFromPlanningCard } from "./runner-access-trash-impact";
 
 describe("assessRunnerAccessTrashImpactFromPlanningCard", () => {
+  it("values a recurring draw-tag threat across a temporary reserve deficit", () => {
+    expect(
+      assess({
+        definitionId: "onr_v1_313_city-surveillance",
+        trashCost: 2,
+        runnerCredits: 10,
+        economyReserve: 10,
+      }),
+    ).toMatchObject({
+      recommendation: "trash",
+      creditsAfterTrash: 8,
+      economyReserve: 10,
+      liquidityPenalty: 360,
+      impactClasses: ["damage_or_tags"],
+    });
+  });
+  it.each([true, false])(
+    "derives recurring draw-tag impact from capability facts, present=%s",
+    (present) => {
+      const source = lookupPlanningCard("onr_v1_313_city-surveillance");
+      const definitionId = "fixture-recurring-draw-tax";
+      const planningCard = {
+        ...source,
+        planning: {
+          ...source.planning,
+          cardDefinitionId: definitionId,
+          planningAnnotations: {
+            schemaVersion: "card-planning-annotations-v1",
+            card: [],
+            capabilities: [],
+          },
+          prospectiveCapabilities: {
+            ...source.planning.prospectiveCapabilities,
+            capabilities: present
+              ? source.planning.prospectiveCapabilities.capabilities
+              : [],
+          },
+        },
+      } as CardSpecPlanningCompatibilityCard;
+      const result = assess({
+        definitionId,
+        planningCard,
+        trashCost: 2,
+        runnerCredits: 10,
+        economyReserve: 10,
+      });
+      expect(result?.recommendation).toBe(present ? "trash" : "decline");
+      expect(result?.impactClasses.includes("damage_or_tags")).toBe(present);
+      expect(
+        assessRunnerAccessTrashImpactFromPlanningCard({
+          planningCard,
+          accessed: { known: false, definitionId },
+          trashCost: 2,
+          runnerCredits: 10,
+          economyReserve: 10,
+        }),
+      ).toBeUndefined();
+    },
+  );
   it("does not invent recurring income for a depleted finite pool even at zero trash cost", () => {
     expect(
       assess({

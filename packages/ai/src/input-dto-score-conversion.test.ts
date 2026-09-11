@@ -51,6 +51,7 @@ describe("AI input DTO score-conversion contract", () => {
       encounterContinue: true,
       unbrokenSubroutineCount: 2,
       encounterSubroutineIds: "damage,next-lock",
+      encounterFullBreakDamage: 3,
       privateProbe: "discard",
     };
     const input = buildAiDecisionInputDto({
@@ -70,6 +71,7 @@ describe("AI input DTO score-conversion contract", () => {
     ]) {
       expect(projected?.payload).toMatchObject({
         encounterSubroutineIds: "damage,next-lock",
+        encounterFullBreakDamage: 3,
         unbrokenSubroutineCount: 2,
       });
       expect(projected?.payload).not.toHaveProperty("privateProbe");
