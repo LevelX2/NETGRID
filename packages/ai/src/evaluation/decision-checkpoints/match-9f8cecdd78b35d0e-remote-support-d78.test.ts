@@ -1,10 +1,10 @@
+import { type CorpCorePlanDomain } from "../../plans/corp-core-plan-contracts";
 import { describe, expect, it } from "vitest";
 
 import {
   corpDefenseActionDispositions,
   corpDefenseMaterializedActionIds,
   createCorpCorePlanModules,
-  type CorpCorePlanDomain,
 } from "../../plans/corp-core-plan-modules";
 import { instantiatePlanProposal } from "../../plans/plan-instance";
 import {

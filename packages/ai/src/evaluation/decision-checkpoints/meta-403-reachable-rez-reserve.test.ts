@@ -1,3 +1,4 @@
+import type { CorpCorePlanDomain } from "../../plans/corp-core-plan-contracts";
 import { describe, expect, it } from "vitest";
 import checkpointJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-403-reachable-rez-reserve-d80.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -10,7 +11,7 @@ import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decis
 import type { AiRuntimeCheckpointV1 } from "./runtime-checkpoint";
 import { costProfileForAction } from "../../actions/action-cost-timing";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
-import type { CorpCorePlanDomain } from "../../plans/corp-core-plan-modules";
+
 import { corpGlobalDefenseInstallRouteAssessment } from "../../plans/corp-defense-domain-signals";
 
 describe("meta 403 reachable central rez reserve", () => {

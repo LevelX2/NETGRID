@@ -1,3 +1,4 @@
+import type { CorpScoreProjectSignal } from "./corp-score-contracts";
 import type { CorpAmbushSignal } from "./corp-tactical-plan-contracts";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import {
@@ -9,7 +10,6 @@ import type { ActionSemanticCandidate } from "../action-semantic-candidate-types
 import type { AiDecisionInputWithDeckCapabilities } from "../runtime/ai-decision-input";
 import { corpSameTurnScoreConversionPaths } from "./tactical-plan-corp-score-conversion";
 import { corpRemoteContestabilityAssessment } from "./tactical-plan-corp-score-window";
-import type { CorpScoreProjectSignal } from "./corp-core-plan-modules";
 
 import { readCorpCounterBankPreparationQuote } from "./corp-counter-bank-preparation-quote";
 

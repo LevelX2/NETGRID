@@ -36,7 +36,7 @@ import {
   runtimeCardDefinitionForAi,
   visibleCardDefinition,
 } from "./runtime/card-definition-lookup";
-import { corpInstalledEconomyCreditAmount } from "./runtime/corp-installed-economy-credit";
+import { corpInstalledEconomyCreditAmount } from "./corp/economy/installed-economy-credit";
 import {
   currentEncounteredIceCard,
   encounterHasImmediateUnbrokenThreat,

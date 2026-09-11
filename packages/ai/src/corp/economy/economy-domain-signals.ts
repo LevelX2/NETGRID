@@ -1,11 +1,10 @@
+import { corpExactBasicLiquidCreditCandidate } from "./economy-routes";
+import { type CorpEconomyLiquidityDevelopmentSignal } from "./economy-types";
 import { type AiDecisionInput } from "@netgrid/shared";
 
-import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
-import {
-  corpExactBasicLiquidCreditCandidate,
-  type CorpEconomyLiquidityDevelopmentSignal,
-} from "./corp-core-plan-modules";
-import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
+import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
+
+import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 
 export function corpExactCurrentBasicLiquidCreditCandidate(
   input: AiDecisionInput,

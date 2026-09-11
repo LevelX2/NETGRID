@@ -76,19 +76,19 @@ vollständige Abdeckung aller denkbaren Kartenfolgen.
 | `runner.defense_and_recovery`     | [createRunnerDefenseModule](../../../packages/ai/src/runner/defense-recovery/defense-plan-module.ts)                        | [Runner §7](runner-plan-contracts.md#7-runnerdefense_and_recovery)                                   |
 | `runner.secure_terminal_win`      | [createRunnerTerminalWinModule](../../../packages/ai/src/runner/terminal-win/terminal-win-plan-module.ts)                   | [Runner §14](runner-plan-contracts.md#14-runnerscore_installed_agenda-und-runnersecure_terminal_win) |
 | `runner.expose_information`       | [createRunnerExposeInformationModule](../../../packages/ai/src/runner/expose-information/expose-information-plan-module.ts) | [Runner §9](runner-plan-contracts.md#9-runnerexpose_information)                                     |
-| `runner.pressure_central`         | [centralPressureModule](../../../packages/ai/src/plans/runner-tactical-plan-modules.ts#L567)                                | [Runner §2](runner-plan-contracts.md#2-runnerpressure_central)                                       |
-| `runner.contest_remote`           | [remoteContestModule](../../../packages/ai/src/plans/runner-tactical-plan-modules.ts#L738)                                  | [Runner §3](runner-plan-contracts.md#3-runnercontest_remote)                                         |
+| `runner.pressure_central`         | [centralPressureModule](../../../packages/ai/src/plans/runner-tactical-plan-modules.ts#L230)                                | [Runner §2](runner-plan-contracts.md#2-runnerpressure_central)                                       |
+| `runner.contest_remote`           | [remoteContestModule](../../../packages/ai/src/plans/runner-tactical-plan-modules.ts#L401)                                  | [Runner §3](runner-plan-contracts.md#3-runnercontest_remote)                                         |
 | `runner.develop_board_and_hand`   | [developmentModule](../../../packages/ai/src/runner/hand-development/development-plan-module.ts)                                    | [Runner §5](runner-plan-contracts.md#5-runnerdevelop_board_and_hand)                                 |
-| `runner.convert_run_window`       | [runWindowModule](../../../packages/ai/src/plans/runner-tactical-plan-modules.ts#L996)                                      | [Runner §8](runner-plan-contracts.md#8-runnerconvert_run_window)                                     |
+| `runner.convert_run_window`       | [runWindowModule](../../../packages/ai/src/plans/runner-tactical-plan-modules.ts#L506)                                      | [Runner §8](runner-plan-contracts.md#8-runnerconvert_run_window)                                     |
 | `runner.complete_turn`            | [createTurnCompletionPlanModule](../../../packages/ai/src/plans/turn-completion-plan-module.ts)                             | [EndTurn](planning-architecture.md#17-endturn-vertrag)                                               |
-| `corp.score_agenda`               | [scoreModule](../../../packages/ai/src/plans/corp-core-plan-modules.ts#L1191)                                               | [Corp §2](corp-plan-contracts.md#2-corpscore_agenda)                                                 |
-| `corp.establish_scoring_remote`   | [remoteModule](../../../packages/ai/src/plans/corp-core-plan-modules.ts#L1514)                                              | [Corp §3](corp-plan-contracts.md#3-corpestablish_scoring_remote)                                     |
-| `corp.defend_servers`             | [defenseModule](../../../packages/ai/src/plans/corp-core-plan-modules.ts#L1573)                                             | [Corp §4](corp-plan-contracts.md#4-corpdefend_servers)                                               |
-| `corp.economy`                    | [economyModule](../../../packages/ai/src/plans/corp-core-plan-modules.ts#L1944)                                             | [Corp §6](corp-plan-contracts.md#6-corpeconomy)                                                      |
+| `corp.score_agenda`               | [scoreModule](../../../packages/ai/src/plans/corp-core-plan-modules.ts#L609)                                               | [Corp §2](corp-plan-contracts.md#2-corpscore_agenda)                                                 |
+| `corp.establish_scoring_remote`   | [remoteModule](../../../packages/ai/src/plans/corp-core-plan-modules.ts#L732)                                              | [Corp §3](corp-plan-contracts.md#3-corpestablish_scoring_remote)                                     |
+| `corp.defend_servers`             | [defenseModule](../../../packages/ai/src/plans/corp-core-plan-modules.ts#L791)                                             | [Corp §4](corp-plan-contracts.md#4-corpdefend_servers)                                               |
+| `corp.economy`                    | [economyModule](../../../packages/ai/src/corp/economy/economy-plan-module.ts)                                             | [Corp §6](corp-plan-contracts.md#6-corpeconomy)                                                      |
 | `corp.respond_to_virus_pressure`  | [createCorpVirusPressureModule](../../../packages/ai/src/corp/virus-pressure/virus-pressure-plan-module.ts)                 | [Corp §5](corp-plan-contracts.md#5-corprespond_to_virus_pressure)                                    |
 | `corp.punish_campaign`            | [punishCampaignModule](../../../packages/ai/src/corp/punish/punish-campaign-plan-module.ts)                                   | [Corp §7](corp-plan-contracts.md#7-corppunish_campaign)                                              |
 | `corp.execute_punish_sequence`    | [punishSequenceModule](../../../packages/ai/src/corp/punish/punish-sequence-plan-module.ts)                                   | [Corp §8](corp-plan-contracts.md#8-corpexecute_punish_sequence)                                      |
-| `corp.ambush_and_bluff`           | [ambushModule](../../../packages/ai/src/plans/corp-tactical-plan-modules.ts#L539)                                           | [Corp §9](corp-plan-contracts.md#9-corpambush_and_bluff)                                             |
+| `corp.ambush_and_bluff`           | [ambushModule](../../../packages/ai/src/plans/corp-tactical-plan-modules.ts#L80)                                           | [Corp §9](corp-plan-contracts.md#9-corpambush_and_bluff)                                             |
 | `corp.hand_and_agenda_management` | [handModule](../../../packages/ai/src/corp/hand-management/hand-management-plan-module.ts)                                             | [Corp §10](corp-plan-contracts.md#10-corphand_and_agenda_management)                                 |
 | `corp.complete_turn`              | [createTurnCompletionPlanModule](../../../packages/ai/src/plans/turn-completion-plan-module.ts)                             | [EndTurn](planning-architecture.md#17-endturn-vertrag)                                               |
 
@@ -126,6 +126,16 @@ Run-Payoff-Fakten sind von den Registries getrennt. Die gemeinsame Live-Runtime
 komponiert die Daten und Dienste und koordiniert weiterhin planübergreifende
 Ausschlüsse. Das ist eine Quellcodestruktur innerhalb von `@netgrid/ai`, keine
 Aufteilung in separat geladene Laufzeitbibliotheken.
+
+Auch Punish-Kampagne und -Ausführung, Corp-Handmanagement, Runner-Entwicklung
+und Corp-Economy sind vertikal gebündelt. Die beiden Punish-Owner teilen
+`corp/punish/`; die übrigen liegen in `corp/hand-management/`,
+`runner/hand-development/` und `corp/economy/`. Ihre Fachverträge beschreiben
+Signalbildung, Discovery, Routen und Choice-Bindungen. Keiner dieser Owner
+importiert die Core-/Tactical-Registries oder die Live-Runtime zurück.
+Geteilte Domänentypen, Score-/Defense-Fundingverträge und sichtbare
+Action-Fakten liegen außerhalb der Registries. Es bleiben dieselben 25
+registrierten Planmodule und dieselbe gemeinsame Runtime-Bibliothek.
 
 Nicht registriert sind die konzeptionellen Opening-Module
 `runner.opening_strategy` und `corp.opening_and_board_foundation`. Ihre

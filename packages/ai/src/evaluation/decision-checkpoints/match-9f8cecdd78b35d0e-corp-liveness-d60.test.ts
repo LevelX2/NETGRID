@@ -1,14 +1,13 @@
+import type { CorpEconomyLiquidityDevelopmentSignal } from "../../corp/economy/economy-types";
+import type { CorpDefenseSignal } from "../../plans/corp-defense-contracts";
+import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { CURRENT_RULES_BASELINE, type AiDecisionInput } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { buildCorpAgendaTurnPlanningSlice } from "../../plans/corp-agenda-turn-planning";
-import { corpTurnLiquidityDevelopmentNeed } from "../../plans/corp-economy-domain-signals";
-import type {
-  CorpDefenseSignal,
-  CorpEconomyLiquidityDevelopmentSignal,
-  CorpScoreProjectSignal,
-} from "../../plans/corp-core-plan-modules";
+import { corpTurnLiquidityDevelopmentNeed } from "../../corp/economy/economy-domain-signals";
+
 import { scoreConsumerSupportState } from "../../plans/corp-remote-project-signals";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import { buildPlanningRulesContext } from "../../plans/turn-planning-contracts";

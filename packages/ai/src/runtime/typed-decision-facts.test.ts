@@ -1,3 +1,4 @@
+import type { CorpScoreProjectSignal } from "../plans/corp-score-contracts";
 import { describe, expect, it } from "vitest";
 import {
   aiInput,
@@ -7,7 +8,7 @@ import {
 } from "../semantic-ai-runtime-cutover.test-support";
 import { evaluateRunnerRunTargets } from "../runner-run-target-evaluation";
 import type { RunnerAccessFacts } from "../access/runner-access-facts";
-import type { CorpScoreProjectSignal } from "../plans/corp-core-plan-modules";
+
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import {
   accessCommitmentForEvaluation,

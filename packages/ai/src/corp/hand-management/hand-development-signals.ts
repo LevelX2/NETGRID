@@ -1,13 +1,12 @@
+import { corpEconomyCandidateHasExecutablePayload } from "../economy/economy-routes";
+import { type CorpCorePlanDomain } from "../../plans/corp-core-plan-contracts";
+import { type CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 import { rolesForDeckDoctrineCard } from "../../deck-doctrine-card-roles";
-import {
-  corpEconomyCandidateHasExecutablePayload,
-  type CorpCorePlanDomain,
-  type CorpScoreProjectSignal,
-} from "../../plans/corp-core-plan-modules";
+
 import { type CorpPlanDomain } from "../../plans/corp-tactical-plan-contracts";
 import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";

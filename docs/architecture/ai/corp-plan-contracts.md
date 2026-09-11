@@ -748,6 +748,21 @@ klassifizieren.
 
 ## 6. `corp.economy`
 
+Die Implementierung liegt unter `packages/ai/src/corp/economy/`.
+`economy-discovery.ts` komponiert die aktuellen endlichen Needs und bindet
+ihre Funding-Routen; `economy-signals.ts` besitzt Investitionen, Auszahlungen,
+Operationen und die Übernahme konkreter Parent-Bedarfe.
+`economy-plan-module.ts` validiert diese Needs und führt Discovery,
+Assessment und Materialisierung aus. `economy-routes.ts` bindet aktuelle
+Actions, Kosten und Auszahlungen; Asset-Payback und installierte Erträge
+liegen ebenfalls im Owner. Typen stehen in `economy-types.ts`.
+
+Score-Reserve und Defense-Funding bleiben fremde Fachverträge in
+`plans/corp-score-funding.ts`, `plans/corp-defense-funding-contract.ts`
+und `runtime/corp-defense-funding-facts.ts`. Economy erhält aktuelle
+Parent-/Need-/Provider-Bindungen und bestimmt daraus seine Finanzierungsroute;
+es bewertet weder eigene Agenda-Ziele noch globale ICE-Allokation.
+
 Die Liquidation einer Engine-gequoteten Counter-Bank respektiert den aktuell
 revalidierten Score-Decoy-Claim auf genau derselben verdeckten Instanz und
 demselben Server. Ein aufgestellter Bluff wird nicht allein wegen fehlender

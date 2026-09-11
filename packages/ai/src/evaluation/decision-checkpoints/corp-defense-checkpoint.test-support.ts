@@ -1,13 +1,12 @@
+import type { CorpCorePlanDomain } from "../../plans/corp-core-plan-contracts";
+import type { CorpDefenseSignal } from "../../plans/corp-defense-contracts";
 import type { AiDecisionInput } from "@netgrid/shared";
 
 import type {
   ActionSemanticCandidate,
   LegalTarget,
 } from "../../action-semantic-candidate-types";
-import type {
-  CorpCorePlanDomain,
-  CorpDefenseSignal,
-} from "../../plans/corp-core-plan-modules";
+
 import type { PlanSchedulerContext } from "../../plans/plan-scheduler";
 import type { KnownCorpFundedIceInstallRouteProjection } from "../../runtime/corp-funded-score-protection";
 

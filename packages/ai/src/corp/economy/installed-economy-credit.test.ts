@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { LegalAction } from "@netgrid/shared";
 
-import { corpInstalledEconomyCreditAmount } from "./corp-installed-economy-credit";
+import { corpInstalledEconomyCreditAmount } from "./installed-economy-credit";
 
 describe("corpInstalledEconomyCreditAmount", () => {
   it("uses structured gain payloads instead of label text", () => {

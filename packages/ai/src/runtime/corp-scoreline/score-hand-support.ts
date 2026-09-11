@@ -1,5 +1,5 @@
+import { type CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { type AiDecisionInput } from "@netgrid/shared";
-import { type CorpScoreProjectSignal } from "../../plans/corp-core-plan-modules";
 
 export function corpReservedScoreServerIds(
   input: AiDecisionInput,

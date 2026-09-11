@@ -1,15 +1,16 @@
-import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
-import { describe, expect, it } from "vitest";
-
-import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import type { CorpEconomyNeedSignal } from "../corp/economy/economy-types";
 import type {
   CorpDefenseSignal,
-  CorpEconomyNeedSignal,
   CorpGenericDefenseSignal,
   CorpScoreProtectionDrawSignal,
   CorpScoreProtectionInstallSignal,
   CorpScoreProtectionStagingInstallSignal,
-} from "./corp-core-plan-modules";
+} from "./corp-defense-contracts";
+import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
+import { describe, expect, it } from "vitest";
+
+import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+
 import {
   assessFundingOnlyIceStaging,
   buildCorpDefenseTurnPlanningSlice,

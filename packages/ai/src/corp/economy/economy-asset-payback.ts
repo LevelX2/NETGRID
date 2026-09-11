@@ -1,6 +1,6 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 
-import { corpRemoteContestabilityAssessment } from "../plans/tactical-plan-corp-score-window";
+import { corpRemoteContestabilityAssessment } from "../../plans/tactical-plan-corp-score-window";
 
 export type CorpEconomyAssetPaybackRisk = Readonly<{
   serverId: string;

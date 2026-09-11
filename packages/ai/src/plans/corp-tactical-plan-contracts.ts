@@ -1,3 +1,4 @@
+import type { CorpCorePlanDomain } from "./corp-core-plan-contracts";
 import { CorpHandManagementSignal } from "../corp/hand-management/hand-management-types";
 import { CorpPunishCampaignSignal } from "../corp/punish/punish-types";
 import type { CorpVirusPressureSignal } from "../corp/virus-pressure/virus-pressure-types";
@@ -5,7 +6,6 @@ import type { CorpDrawAdmissionAssessment } from "../runtime/corp-draw-admission
 import type { CorpHandInventoryFacts } from "../corp/hand-management/hand-inventory-facts";
 import type { KnownCorpCardAccessEffectProjection } from "../runtime/known-corp-card-access-effect-projection";
 import type { CorpBluffDefenseNeed } from "./corp-bluff-defense-types";
-import type { CorpCorePlanDomain } from "./corp-core-plan-modules";
 
 export type CorpAmbushSignal = {
   commitmentVersion: "corp_ambush_commitment_v1";

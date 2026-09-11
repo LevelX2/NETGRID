@@ -1,10 +1,11 @@
+import { immediateCorpLiquidCreditGain } from "../economy/economy-routes";
 import {
   type AiDecisionInput,
   type CorpPunishRouteQuote,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
-import { immediateCorpLiquidCreditGain } from "../../plans/corp-core-plan-modules";
+
 import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import { corpCandidateIsAmbushInstall } from "../../runtime/corp-ambush-plan-signals";
 import { buildBoundedCorpPunishRouteRequests } from "./punish-route-quote-input";

@@ -1,13 +1,13 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
-import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
-import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
+import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
+import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import {
   corpExactCurrentBasicLiquidCreditCandidate,
   corpTurnLiquidityDevelopmentNeed,
   corpVisibleLiquidityDemandTarget,
-} from "./corp-economy-domain-signals";
+} from "./economy-domain-signals";
 
 describe("corp economy domain signals", () => {
   it("requires the exact current basic-credit LegalAction contract", () => {

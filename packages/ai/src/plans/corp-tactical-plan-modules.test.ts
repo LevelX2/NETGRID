@@ -1,3 +1,4 @@
+import type { CorpCorePlanDomain } from "./corp-core-plan-contracts";
 import { corpSpecialDevelopmentAdmission } from "./corp-tactical-module-support";
 import {
   type CorpPlanDomain,
@@ -6,7 +7,7 @@ import {
 import type { AiDecisionInput } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
-import type { CorpCorePlanDomain } from "./corp-core-plan-modules";
+
 import {
   corpTacticalActionFamilyOwner,
   createCorpTacticalPlanModules,

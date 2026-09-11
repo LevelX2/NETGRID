@@ -1,3 +1,6 @@
+import { corpEconomyActionIsOwned } from "../corp/economy/economy-routes";
+import { type CorpDefenseSignal } from "./corp-defense-contracts";
+import { type CorpScoreProjectSignal } from "./corp-score-contracts";
 import { corpPunishCampaignOwnsCandidate } from "../corp/punish/punish-plan-support";
 import { type CorpPlanDomain } from "./corp-tactical-plan-contracts";
 import type {
@@ -11,9 +14,6 @@ import {
   corpDefenseActionDispositions,
   corpDefenseMaterializedActionIds,
   corpDefensePortfolioHasExecutableRoute,
-  corpEconomyActionIsOwned,
-  type CorpDefenseSignal,
-  type CorpScoreProjectSignal,
 } from "./corp-core-plan-modules";
 import {
   corpAmbushAdvanceDispositionEvidence,
@@ -23,7 +23,7 @@ import {
 import {
   corpExactCurrentBasicLiquidCreditCandidate,
   corpVisibleLiquidityDemandTarget,
-} from "./corp-economy-domain-signals";
+} from "../corp/economy/economy-domain-signals";
 import {
   corpGlobalDefenseInstallRouteAssessment,
   corpIceInstallHasCurrentCompleteRezQuote,

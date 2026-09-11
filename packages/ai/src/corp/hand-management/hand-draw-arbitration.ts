@@ -1,10 +1,9 @@
+import { corpEconomyPriorityClass } from "../economy/economy-plan-module";
+import { corpGenericDefensePriorityClass } from "../../plans/corp-defense-funding-contract";
+import { corpScorePriorityClass } from "../../plans/corp-score-priority";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
-import {
-  corpEconomyPriorityClass,
-  corpGenericDefensePriorityClass,
-  corpScorePriorityClass,
-} from "../../plans/corp-core-plan-modules";
+
 import { type CorpPlanDomain } from "../../plans/corp-tactical-plan-contracts";
 import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { exactCurrentCorpDrawAdmissionProjection } from "../../runtime/corp-draw-action-facts";

@@ -1,7 +1,7 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
-import { assessCorpEconomyAssetPayback } from "./corp-economy-asset-payback";
+import { assessCorpEconomyAssetPayback } from "./economy-asset-payback";
 
 describe("Corp economy asset payback", () => {
   it("prices a costly campaign against protection and actual remaining withdrawal clicks", () => {

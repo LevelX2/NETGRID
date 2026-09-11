@@ -1,11 +1,10 @@
+import type { CorpEconomyNeedSignal } from "../corp/economy/economy-types";
+import type { CorpDefenseSignal } from "./corp-defense-contracts";
+import type { CorpScoreProjectSignal } from "./corp-score-contracts";
 import type { AiDecisionInput } from "@netgrid/shared";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
-import type {
-  CorpDefenseSignal,
-  CorpEconomyNeedSignal,
-  CorpScoreProjectSignal,
-} from "./corp-core-plan-modules";
+
 import { planInstanceIdForProposal } from "./plan-instance";
 import {
   buildCanonicalLegalActionInvocation,

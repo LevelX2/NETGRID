@@ -1,3 +1,15 @@
+import { assessCorpSpendAgainstScoreFundingMilestones, corpScoreFundingMilestone } from "./corp-score-funding";
+import {
+  corpEconomyActionIsOwned,
+  assessCorpEconomyFundingRoute,
+} from "../corp/economy/economy-routes";
+import { corpGenericDefensePriorityClass } from "./corp-defense-funding-contract";
+import {
+  knownScoreProtectionFundingGap,
+  corpScorePriorityClass,
+} from "./corp-score-priority";
+import { type CorpCorePlanDomain } from "./corp-core-plan-contracts";
+import { type CorpDefenseSignal } from "./corp-defense-contracts";
 import { readFileSync } from "node:fs";
 import type { AiDecisionInput, VisibleCorpRezCostQuote } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
@@ -10,25 +22,7 @@ import {
   compareValidatedPlanAssessments,
   requireValidatedPlanAssessment,
 } from "./plan-assessment";
-import {
-  CORP_CORE_ACTION_OWNERSHIP,
-  corpAgendaPurgeDefenseChoiceSignal,
-  corpClassicDeflectorDefenseChoiceSignal,
-  corpCoreActionOwner,
-  corpDefenseActionDispositions,
-  corpDefensePortfolioHasExecutableRoute,
-  corpDefensePlacementDispositions,
-  corpEconomyActionIsOwned,
-  assessCorpSpendAgainstScoreFundingMilestones,
-  corpScoreFundingMilestone,
-  knownScoreProtectionFundingGap,
-  corpGenericDefensePriorityClass,
-  corpScorePriorityClass,
-  createCorpCorePlanModules,
-  assessCorpEconomyFundingRoute,
-  type CorpDefenseSignal,
-  type CorpCorePlanDomain,
-} from "./corp-core-plan-modules";
+import { CORP_CORE_ACTION_OWNERSHIP, corpAgendaPurgeDefenseChoiceSignal, corpClassicDeflectorDefenseChoiceSignal, corpCoreActionOwner, corpDefenseActionDispositions, corpDefensePortfolioHasExecutableRoute, corpDefensePlacementDispositions, createCorpCorePlanModules } from "./corp-core-plan-modules";
 import { instantiatePlanProposal } from "./plan-instance";
 import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
 import { bindBestCurrentPlanRoute } from "./plan-route";

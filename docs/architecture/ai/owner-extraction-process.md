@@ -33,7 +33,7 @@ eigenen Commit. Fehler werden vor dem nächsten Paket behoben.
 4. **NF04 abgeschlossen – Runner Development:** Plan und Entwicklungs-/Suchsignale
    sowie Fortsetzungen mit vorhandener Handbewertung zusammenführen.
    Nachweis: Admission, Funding, Install/Search und private Choice-Bindung.
-5. **NF05 aktiv – Corp Economy:** Need-Verträge, Einkommen, Investition,
+5. **NF05 abgeschlossen – Corp Economy:** Need-Verträge, Einkommen, Investition,
    Auszahlung und Fundingplan bündeln. Nachweis: endliche Economy, Reserve,
    Counter-Finanzierung und exakte fremde Consumer-Bindung.
 
@@ -68,3 +68,10 @@ AI-Typecheck und Strukturgate grün (753 produktive Dateien, keine Zyklen).
 NF04: 197 Tests grün (118 thematische und 79 Live-/Choice-Regressionen);
 AI-Typecheck, Reachability und Strukturgate grün (766 Dateien, keine Zyklen).
 Main vor NF05 unverändert und sauber auf 94cbeb26a.
+
+NF05: 203 Tests grün (170 Economy-/Core-/Hidden-Node-Tests, 33 Counter-/
+Restricted-Credit-Tests). AI-Typecheck, Hint-, Quellen-, Reachability-,
+Card-ID-, Paketgrenzen- und Discovery-Gates grün. 779 produktive Dateien,
+keine Laufzeit- oder Typzyklen. Abschließende Shards stehen noch aus.
+AST-Vergleich: 577 unveränderte Funktionskörper, keine verlorenen Funktionen;
+drei erwartete Änderungen betreffen Domain-Komposition und Defense-Dienstbindung.

@@ -1,8 +1,9 @@
+import type { CorpCorePlanDomain } from "./corp-core-plan-contracts";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { describe, expect, it, vi } from "vitest";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
-import type { CorpCorePlanDomain } from "./corp-core-plan-modules";
+
 import {
   assessBestFundedCorpScoreProtection,
   projectCorpFundedIceInstallRoute,

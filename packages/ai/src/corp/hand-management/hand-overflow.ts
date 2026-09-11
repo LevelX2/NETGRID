@@ -1,7 +1,8 @@
+import { type CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
-import { type CorpScoreProjectSignal } from "../../plans/corp-core-plan-modules";
+
 import { isQuotedCorpCounterBankInHq } from "../../plans/corp-counter-bank-score-plan";
 import { type CorpPlanDomain } from "../../plans/corp-tactical-plan-contracts";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";

@@ -1,3 +1,7 @@
+import type {
+  CorpEconomyDevelopmentSignal,
+  CorpEconomyStartRezChoiceSignal,
+} from "../corp/economy/economy-types";
 import type { RunnerDevelopmentSignal } from "../runner/hand-development/development-types";
 import type { CorpHandManagementSignal } from "../corp/hand-management/hand-management-types";
 import type { CorpAmbushSignal } from "../plans/corp-tactical-plan-contracts";
@@ -29,10 +33,6 @@ import {
   type DiscardChoiceKeepScore,
 } from "./discard-choice-selection";
 
-import type {
-  CorpEconomyDevelopmentSignal,
-  CorpEconomyStartRezChoiceSignal,
-} from "../plans/corp-core-plan-modules";
 import {
   runnerDamagePreventionChoiceResolution,
   type RunnerOptionalChoiceResolution,
