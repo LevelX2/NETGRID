@@ -7,7 +7,7 @@ import { describe, expect, it } from "vitest";
 const runnerDir = path.dirname(fileURLToPath(import.meta.url));
 const srcDir = path.resolve(runnerDir, "..");
 
-describe.each(["credit-bank", "recurring-economy"])(
+describe.each(["credit-bank", "recurring-economy", "resource-lifecycle"])(
   "%s owner boundary",
   (owner) => {
     const ownerDir = path.join(runnerDir, owner);
@@ -60,7 +60,7 @@ describe("vertical Runner owners", () => {
       .filter(
         (name) =>
           name &&
-          /^(runnerCreditBank|runnerMatureCreditBank|creditBankBuilt|runnerRecurringEconomy|recurringEconomy|runnerInstalledCompatibleRestrictedCredit)/.test(
+          /^(runnerCreditBank|runnerMatureCreditBank|creditBankBuilt|runnerRecurringEconomy|recurringEconomy|runnerInstalledCompatibleRestrictedCredit|runnerResourceLifecycle|runnerCandidateIsLeavePlayPaymentLifecycle|runnerLifecycleLeavePlayPayment)/.test(
             name,
           ),
       );

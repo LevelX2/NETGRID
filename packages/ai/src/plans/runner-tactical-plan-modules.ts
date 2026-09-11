@@ -1,3 +1,7 @@
+import type {
+  RunnerDevelopmentFundingMilestone,
+  RunnerFundingRouteAssessment,
+} from "./runner-funding-contracts";
 import type { RunnerAccessFacts } from "../access/runner-access-facts";
 import { runnerRunExitAction } from "../runtime/runner-fort-pass-toll";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
@@ -13,8 +17,6 @@ import type { PlanOutcomeReceipt } from "./resident-plan-portfolio";
 import {
   runnerDevelopmentCardAdmission,
   type RunnerCorePlanDomain,
-  type RunnerDevelopmentFundingMilestone,
-  type RunnerFundingRouteAssessment,
 } from "./runner-core-plan-modules";
 import type {
   PlanMaterialization,

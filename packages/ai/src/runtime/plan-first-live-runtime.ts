@@ -1,3 +1,10 @@
+import type {
+  RunnerFundingNeedSignal,
+  RunnerFundingRouteAssessment,
+} from "../plans/runner-funding-contracts";
+import { runnerResourceLifecycleSignals } from "../runner/resource-lifecycle/resource-lifecycle-signals";
+import { runnerResourceLifecycleFundingNeeds } from "../runner/resource-lifecycle/resource-lifecycle-funding-needs";
+import { runnerResourceLifecycleActionDispositions } from "../runner/resource-lifecycle/resource-lifecycle-dispositions";
 import { runnerRecurringEconomySignals } from "../runner/recurring-economy/recurring-economy-signals";
 import { runnerRecurringEconomyActionDispositions } from "../runner/recurring-economy/recurring-economy-dispositions";
 import { runnerRecurringEconomyRunDeferral } from "../runner/recurring-economy/recurring-economy-run-deferral";
@@ -73,7 +80,6 @@ import {
   runnerDebtFinancingProfile,
   runnerEventStartsRunAfterProgramSearch,
   runnerInstalledDebtFinancingLiability,
-  runnerVoluntarySelfTrashLifecycleProfile,
 } from "./runner-canonical-card-facts";
 import { rememberStrategicIntentState } from "../strategic-intent-memory";
 import { runnerDrawTaxLiabilityProjection } from "./runner-draw-tax-liability-score";
@@ -146,8 +152,6 @@ import {
   type RunnerCoverageGapSignal,
   type RunnerCorePlanDomain,
   type RunnerDiscardChoiceBinding,
-  type RunnerFundingNeedSignal,
-  type RunnerFundingRouteAssessment,
 } from "../plans/runner-core-plan-modules";
 import type { RequiredCapabilityKind } from "../plans/tactical-plan-types";
 import {
@@ -6128,16 +6132,10 @@ export function runnerActionDispositions(
   )) {
     addDisposition(disposition);
   }
-  for (const signal of domain.resourceLifecycle ?? []) {
-    if (signal.phase !== "retain") continue;
-    for (const actionId of signal.rejectedActionIds ?? []) {
-      add(
-        actionId,
-        "runner.resource_lifecycle",
-        signal.evidenceCodes[0] ??
-          "runner_resource_lifecycle_retain_current_source",
-      );
-    }
+  for (const disposition of runnerResourceLifecycleActionDispositions(
+    domain.resourceLifecycle ?? [],
+  )) {
+    addDisposition(disposition);
   }
   for (const signal of domain.shellTradersPipelines ?? []) {
     for (const actionId of signal.rejectedActionIds ?? []) {
@@ -7759,7 +7757,11 @@ function buildRunnerDomain(
   );
   const recurringEconomyRunDeferralEvidenceCode =
     runnerRecurringEconomyRunDeferral(recurringEconomy);
-  const resourceLifecycle = runnerResourceLifecycleSignals(input, candidates);
+  const resourceLifecycle = runnerResourceLifecycleSignals(
+    input,
+    candidates,
+    (request) => runnerExactFundingRouteContract(input, candidates, request),
+  );
   const installedAgendaScores = runnerInstalledAgendaScoreSignals(
     input,
     candidates,
@@ -8218,49 +8220,11 @@ function buildRunnerDomain(
           ]
         : [],
     );
-  const resourceLifecycleFundingNeeds: RunnerCorePlanDomain["fundingNeeds"] =
-    resourceLifecycle.flatMap((signal) => {
-      if (
-        !signal.supportNeedId ||
-        (signal.marginalValue ?? 0) <= 0 ||
-        signal.leavePlayPaymentAmount === undefined ||
-        signal.fundingGap === undefined ||
-        signal.fundingGap <= 0 ||
-        !signal.fundingRouteAssessment ||
-        !signal.fundingRouteActionIds ||
-        signal.fundingRouteActionIds.length === 0
-      ) {
-        return [];
-      }
-      return [
-        {
-          kind: "parent_plan_support" as const,
-          needId: signal.supportNeedId,
-          parentPlanInstanceId: planInstanceIdForProposal({
-            moduleId: "runner.resource_lifecycle",
-            dedupeKey: signal.lifecycleId,
-          }),
-          driver: {
-            kind: "resource_lifecycle" as const,
-            targetId: signal.sourceCardInstanceId,
-            reasonCode: "fund_exact_lifecycle_leave_play_payment",
-          },
-          targetCredits: signal.leavePlayPaymentAmount,
-          currentCreditsAtRevalidation: currentCredits,
-          gap: signal.fundingGap,
-          priorityClass: "P5" as const,
-          revalidation: {
-            stateVersion: input.playerView.stateVersion,
-            status: "material_parent_open" as const,
-          },
-          routeActionIds: signal.fundingRouteActionIds,
-          routeAssessment: signal.fundingRouteAssessment,
-          evidenceCode:
-            signal.evidenceCodes[0] ??
-            "runner_resource_lifecycle_exact_funding_support",
-        },
-      ];
-    });
+  const resourceLifecycleFundingNeeds = runnerResourceLifecycleFundingNeeds(
+    resourceLifecycle,
+    currentCredits,
+    input.playerView.stateVersion,
+  );
   const accessPayoffFundingNeeds: RunnerCorePlanDomain["fundingNeeds"] =
     accessPayoffCampaignSignals.flatMap((signal) => {
       const campaign = signal.accessPayoffCampaign;
@@ -26618,273 +26582,6 @@ function planSafeRunExclusionEvidence(evidence: readonly string[]): string[] {
   return evidence.filter((entry) =>
     allowedPrefixes.some((prefix) => entry.startsWith(prefix)),
   );
-}
-
-function runnerResourceLifecycleSignals(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-): NonNullable<RunnerCorePlanDomain["resourceLifecycle"]> {
-  const leavePlayPaymentActions = candidates.filter((candidate) =>
-    runnerCandidateIsLeavePlayPaymentLifecycleAction(input, candidate),
-  );
-  const voluntarySelfTrashSignals = candidates.flatMap((candidate) => {
-    const sourceCardInstanceId = candidate.sourceCardInstanceId;
-    const definitionId = candidate.sourceDefinitionId;
-    const action = input.legalActions.find(
-      (entry) => entry.actionId === candidate.actionId,
-    );
-    const profile = runnerVoluntarySelfTrashLifecycleProfile(definitionId);
-    const visibleSource = sourceCardInstanceId
-      ? (input.playerView.own.rig ?? []).find(
-          (card) => card.instanceId === sourceCardInstanceId,
-        )
-      : undefined;
-    const visibleTraceThreat = input.playerView.servers.some((server) =>
-      [...server.ice, ...server.root].some(
-        (card) =>
-          card.known === true &&
-          corpDefinitionHasTraceSource(card.definitionId),
-      ),
-    );
-    if (
-      !sourceCardInstanceId ||
-      !definitionId ||
-      !profile ||
-      !visibleSource ||
-      visibleSource.definitionId !== definitionId ||
-      action?.side !== "runner" ||
-      action.type !== "activated_card_ability" ||
-      action.source !== sourceCardInstanceId ||
-      action.expiresAtStateVersion !== input.playerView.stateVersion ||
-      action.payload?.cardId !== sourceCardInstanceId ||
-      action.payload?.cardImplementationCapabilityBindingKind !==
-        "card_spec_capability_key" ||
-      action.payload?.cardImplementationAbilityKey !== "trash_source_action" ||
-      action.payload?.cardImplementationTrashesSource !== true ||
-      (profile.exposesRunnerToAutomaticTraceSuccess && visibleTraceThreat)
-    ) {
-      return [];
-    }
-    return [
-      {
-        lifecycleId: `voluntary-self-trash:${definitionId}:${sourceCardInstanceId}`,
-        sourceCardInstanceId,
-        definitionId,
-        phase: "retain" as const,
-        actionIds: [],
-        rejectedActionIds: [candidate.actionId],
-        priorityClass: "P5" as const,
-        value: 0,
-        evidenceCodes: [
-          "runner_resource_self_trash_deferred_without_visible_hazard",
-          `runner_resource_retained_start_turn_credit_gain:${profile.turnStartCreditGain}`,
-          `runner_resource_avoided_leave_play_credit_loss:${profile.leavePlayCreditLoss}`,
-        ],
-      },
-    ];
-  });
-  const visibleRemainingRunnerTurnCeiling = input.playerView.opponent.deckCount;
-  const actionsBySourceInstance = new Map<string, ActionSemanticCandidate[]>();
-  for (const candidate of leavePlayPaymentActions) {
-    const sourceCardInstanceId = candidate.sourceCardInstanceId;
-    if (sourceCardInstanceId === undefined) continue;
-    const actions = actionsBySourceInstance.get(sourceCardInstanceId) ?? [];
-    actions.push(candidate);
-    actionsBySourceInstance.set(sourceCardInstanceId, actions);
-  }
-  const leavePlayPaymentSignals = [...actionsBySourceInstance.entries()]
-    .map(([sourceCardInstanceId, actions]) => {
-      const definitionId = actions[0]?.sourceDefinitionId;
-      if (
-        definitionId === undefined ||
-        actions.some(
-          (candidate) => candidate.sourceDefinitionId !== definitionId,
-        )
-      ) {
-        return undefined;
-      }
-      const lifecycleId = `${definitionId}:${sourceCardInstanceId}`;
-      const quote = runnerLifecycleLeavePlayPaymentQuote(
-        input,
-        sourceCardInstanceId,
-        actions,
-      );
-      const leavePlayEconomicallyProductive =
-        quote !== undefined && visibleRemainingRunnerTurnCeiling > quote.amount;
-      const marginalValue = leavePlayEconomicallyProductive
-        ? visibleRemainingRunnerTurnCeiling - quote.amount
-        : 0;
-      const capacitySpent = input.playerView.own.clicks === 0;
-      const supportNeedId = `resource-lifecycle-support:${sourceCardInstanceId}`;
-      const fundingGap =
-        quote?.status === "unpayable"
-          ? Math.max(0, quote.amount - input.playerView.own.credits)
-          : 0;
-      const fundingRoute =
-        quote?.status === "unpayable" &&
-        leavePlayEconomicallyProductive &&
-        !capacitySpent &&
-        fundingGap > 0
-          ? runnerExactFundingRouteContract(input, candidates, {
-              demandId: supportNeedId,
-              sourcePlanId: planInstanceIdForProposal({
-                moduleId: "runner.resource_lifecycle",
-                dedupeKey: lifecycleId,
-              }),
-              purpose: "foreground_plan",
-              priority: "current_foreground_plan",
-              hardness: "hard",
-              deadline: "end_of_current_turn",
-              targetCredits: quote.amount,
-              remainingClicks: input.playerView.own.clicks,
-              evidence: [
-                `runner_resource_lifecycle_source:${sourceCardInstanceId}`,
-                `runner_resource_lifecycle_exact_payment_amount:${quote.amount}`,
-              ],
-            })
-          : undefined;
-      const fullFundingRouteExists =
-        fundingRoute?.routeAssessment.status === "covered_guaranteed" &&
-        fundingRoute.routeAssessment.reliability === "guaranteed" &&
-        fundingRoute.routeAssessment.horizon === "same_turn" &&
-        fundingRoute.routeAssessment.projectedGap === 0 &&
-        fundingRoute.routeActionIds.length > 0;
-      const leavePlayNow =
-        quote?.status === "payable" &&
-        capacitySpent &&
-        leavePlayEconomicallyProductive;
-      const evidenceCode =
-        quote === undefined
-          ? "runner_resource_leave_payment_quote_unknown"
-          : !leavePlayEconomicallyProductive
-            ? `runner_resource_leave_cost_not_recovered_within_visible_horizon:${visibleRemainingRunnerTurnCeiling}`
-            : quote.status === "payable"
-              ? capacitySpent
-                ? `runner_resource_leave_avoids_visible_long_horizon_liability:${visibleRemainingRunnerTurnCeiling}`
-                : "runner_resource_leave_deferred_until_capacity_spent"
-              : capacitySpent
-                ? "runner_resource_leave_unpayable_without_action_capacity"
-                : fullFundingRouteExists
-                  ? "runner_resource_waiting_for_exact_funding_support"
-                  : "runner_resource_exact_funding_route_unavailable";
-      return {
-        lifecycleId,
-        sourceCardInstanceId,
-        definitionId,
-        phase: leavePlayNow ? "leave_play" : "retain",
-        actionIds: leavePlayNow
-          ? actions.map((candidate) => candidate.actionId)
-          : [],
-        ...(!leavePlayNow
-          ? {
-              rejectedActionIds: actions.map((candidate) => candidate.actionId),
-            }
-          : {}),
-        ...(fullFundingRouteExists && fundingRoute && quote
-          ? {
-              supportNeedId,
-              marginalValue,
-              leavePlayPaymentAmount: quote.amount,
-              fundingGap,
-              fundingRouteActionIds: fundingRoute.routeActionIds,
-              fundingRouteAssessment: fundingRoute.routeAssessment,
-            }
-          : {}),
-        priorityClass: "P5",
-        value: leavePlayNow || fullFundingRouteExists ? marginalValue : 0,
-        evidenceCodes: [
-          evidenceCode,
-          ...(quote
-            ? [
-                `runner_resource_leave_play_payment_amount:${quote.amount}`,
-                `runner_resource_leave_play_payment_status:${quote.status}`,
-              ]
-            : []),
-        ],
-      };
-    })
-    .filter(
-      (
-        signal,
-      ): signal is NonNullable<
-        RunnerCorePlanDomain["resourceLifecycle"]
-      >[number] => signal !== undefined,
-    );
-  return uniqueBy(
-    [...leavePlayPaymentSignals, ...voluntarySelfTrashSignals],
-    (signal) => signal.lifecycleId,
-  );
-}
-
-function runnerCandidateIsLeavePlayPaymentLifecycleAction(
-  input: AiDecisionInput,
-  candidate: ActionSemanticCandidate,
-): boolean {
-  if (
-    candidate.semanticActionType !== "turn_flow.end_turn" ||
-    candidate.sourceKind !== "card" ||
-    candidate.sourceCardInstanceId === undefined ||
-    candidate.sourceDefinitionId === undefined
-  ) {
-    return false;
-  }
-  const action = input.legalActions.find(
-    (entry) => entry.actionId === candidate.actionId,
-  );
-  return (
-    action?.side === "runner" &&
-    action.type === "end_turn" &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
-    action.source === candidate.sourceCardInstanceId &&
-    action.payload?.cardId === candidate.sourceCardInstanceId &&
-    action.payload?.cardImplementationLifecycleAction === "end_of_runner_turn"
-  );
-}
-
-function runnerLifecycleLeavePlayPaymentQuote(
-  input: AiDecisionInput,
-  sourceCardInstanceId: string,
-  candidates: readonly ActionSemanticCandidate[],
-): { amount: number; status: "payable" | "unpayable" } | undefined {
-  const quotes = candidates.map((candidate) => {
-    const action = input.legalActions.find(
-      (entry) => entry.actionId === candidate.actionId,
-    );
-    const amount =
-      action?.payload?.cardImplementationLifecycleLeavePlayPaymentAmount;
-    const status =
-      action?.payload?.cardImplementationLifecycleLeavePlayPaymentStatus;
-    if (
-      !action ||
-      action.source !== sourceCardInstanceId ||
-      action.payload?.cardId !== sourceCardInstanceId ||
-      action.payload?.cardImplementationLifecycleAction !==
-        "end_of_runner_turn" ||
-      typeof amount !== "number" ||
-      !Number.isSafeInteger(amount) ||
-      amount <= 0 ||
-      (status !== "payable" && status !== "unpayable") ||
-      (input.playerView.own.credits >= amount
-        ? status !== "payable"
-        : status !== "unpayable")
-    ) {
-      return undefined;
-    }
-    return { amount, status };
-  });
-  const [first] = quotes;
-  if (
-    !first ||
-    quotes.some(
-      (quote) =>
-        !quote ||
-        quote.amount !== first.amount ||
-        quote.status !== first.status,
-    )
-  ) {
-    return undefined;
-  }
-  return first;
 }
 
 type RunnerCoverageDrawCadence = Readonly<{

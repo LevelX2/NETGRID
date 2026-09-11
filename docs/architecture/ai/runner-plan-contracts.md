@@ -1,7 +1,7 @@
 # Runner-Planowner: Aufgaben und Grenzen
 
 Status: **aktuelle fachliche Verträge mit ausdrücklich offenen Fähigkeiten**  
-Stand: 2026-09-10
+Stand: 2026-09-11
 
 Die [Ownerkarte](README.md#planowner-und-implementierungen) verbindet jede
 registrierte Modul-ID mit ihrer Implementierung. Diese Seite definiert die
@@ -961,6 +961,48 @@ Verlassen und verpflichtende Folgezustände einer eigenen Ressource, etwa
 eine Engine-gequotete End-of-turn-Zahlung. Erwerb und anfängliche Finanzierung
 bleiben beim jeweiligen Entwicklungs-/Economy-Parent. Eine Folgewirkung
 berechtigt den Choice-Resolver nicht zur unabhängigen Ressourcenwahl.
+
+### Vertikale Implementierung des Ressourcenlebenszyklus
+
+Der produktive Einstieg ist
+[`createRunnerResourceLifecycleModule`](../../../packages/ai/src/runner/resource-lifecycle/resource-lifecycle-plan-module.ts).
+Im Verzeichnis `packages/ai/src/runner/resource-lifecycle/` liegen:
+
+- `resource-lifecycle-signals.ts`: Quellen- und Versionsprüfung der LegalAction,
+  konsistente Engine-Zahlungsquotes, sichtbarer Wirtschaftlichkeitshorizont,
+  Halten/Verlassen und Behandlung freiwilligen Selbsttrashs.
+- `resource-lifecycle-types.ts`: Signal, Planstatus und der schmale Vertrag
+  für eine gemeinsame Finanzierungssuche.
+- `resource-lifecycle-funding-needs.ts`: Projektion des belegten Zahlungsbedarfs
+  auf die konkrete Ressourceninstanz und ihren Elternplan.
+- `resource-lifecycle-plan-module.ts`: Discovery, Assessment, genaue
+  Parent-/Need-Revalidierung und quellengebundene Materialisierung.
+- `resource-lifecycle-dispositions.ts`: begründete Ablehnung der aktuell
+  nicht produktiven Leave-play-Actions einer gehaltenen Ressource.
+
+Die Signalbildung erhält **einen injizierten Dienst** für die bestehende exakte
+Finanzierungssuche. Der Owner liefert Bedarf, Elternplan-ID, Zielbetrag,
+Priorität, Frist, verfügbare Klicks und Belege. Zurück kommen Route-Action-IDs
+und eine Bewertung mit StateVersion, Deckung, Zuverlässigkeit, Horizont und
+Restlücke. Nur eine vollständig garantierte Route im aktuellen Zug begründet
+den unterstützbaren Zahlungsbedarf. Der gemeinsame Economy-Owner führt die
+Finanzierungsactions aus; das Ressourcenmodul entscheidet über das spätere
+Verlassen der Ressource.
+
+Die bereits bestehende gemeinsame Validierung und ihre Datentypen stehen in
+[`runner-funding-contracts.ts`](../../../packages/ai/src/plans/runner-funding-contracts.ts).
+Dadurch benötigen Ressourcen- und Economy-Owner keinen gegenseitigen Import.
+Kanonische Kartenfakten und `planInstanceIdForProposal` bleiben gemeinsame
+Fakten beziehungsweise Identitätsfunktionen. Live-Runtime und Core-Registry
+verdrahten den Owner und konsumieren seine Ergebnisse. Die Regelautorität
+und das Erstellen gültiger Actions bleiben bei der Engine.
+
+Der Schnitt erhält Priorität P5, die vorhandenen Phasen, Bewertungsformeln
+und Actionbindungen. Er ist eine begrenzte Strukturmaßnahme: Änderungen an
+Ressourcenfolgekosten betreffen nun einen zusammenhängenden Owner, ohne eine
+zweite Finanzierungssuche oder neue Abstraktionsschicht einzuführen.
+Owner-Grenztests sowie Tests gegen vertauschte Elternpläne, veraltete
+Finanzierungsquotes und fehlende Routen sichern diese Trennung ab.
 
 ## 13. `runner.shell_traders_pipeline`
 
