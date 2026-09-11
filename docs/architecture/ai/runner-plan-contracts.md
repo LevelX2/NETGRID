@@ -735,6 +735,39 @@ als allgemeine Hidden-Info-Quelle verwendet werden. Im TurnPlanner wird der
 Informationswert in der vorhandenen Flexibilitätsdimension bewertet; eine
 neue globale Bewertungsautorität entsteht nicht.
 
+### Vertikale Implementierung der Informationsentscheidung
+
+[`createRunnerExposeInformationModule`](../../../packages/ai/src/runner/expose-information/expose-information-plan-module.ts)
+ist der Einstieg in `runner/expose-information/`. Der Owner bündelt:
+
+- `expose-information-signals.ts`: den konkreten Approach-ICE-Entscheid,
+  die Revalidierung des Runursprungs und die proaktiven Informationsfenster.
+- `expose-information-plan-module.ts`: Discovery als Run-Child beziehungsweise
+  eigener Informationsplan, P3-Assessment und aktuelle Action-/Quellenbindung.
+- `expose-information-dispositions.ts`: den begründeten Verzicht auf wiederholte
+  Information beziehungsweise die Ablehnung des Verzichts bei unbekanntem ICE.
+- `expose-information-memory.ts`: Erinnerung ausschließlich an eine tatsächlich
+  ausgewählte, aktuelle Aufdeckaction dieses Owners.
+- `expose-information-types.ts`: Signale, Planstatus und Erinnerungsdatensatz.
+- `expose-installed-card-choice.ts`: die vorhandene Positions-/Historienbewertung
+  und die Auswahl angebotener Optionswerte beim Aufdecken installierter Karten.
+
+Der Owner erhält side-sicheren Input, aktuelle Kandidaten und das vorherige
+Planportfolio. Er benötigt keinen injizierten Runtime-Dienst. Run-Root,
+Parent, Executor, Quelle, ICE und StateVersion werden wie bisher exakt
+gebunden. Proaktive Signale berücksichtigen unbekannte installierte Karten,
+passende Informationswerkzeuge und bereits vorhandene Duplikate.
+
+Die Live-Runtime ruft die Signalbildung, Dispositionen und den Erinnerungsschreiber
+auf. Der zentrale Choice-Einstieg delegiert an die bestehende Ownerfunktion.
+Das gemeinsame Portfolio persistiert und validiert das Erinnerungsschema;
+fachliches Schreiben und Lesen der Erinnerung liegen beim Informationsowner.
+Die taktischen Planstandards kommen aus `runner-tactical-module-support.ts`.
+Die Extraktion verändert keine Bewertung, keine Optionsauswahl und keine
+Informationsberechtigung. Ihr Nutzen liegt darin, dieselbe fachliche
+Entscheidung von der Aufnahme der Fakten bis zum späteren Wiedererkennen
+einer aufgedeckten Instanz an einer Stelle verfolgen zu können.
+
 ## 10. Kein Runner-Fallbackplan
 
 Der Runner-Scheduler erzeugt keinen „do something“-Plan. Economy,

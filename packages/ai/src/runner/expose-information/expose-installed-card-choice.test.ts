@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
   runnerExposeInstalledOpportunity,
   selectedRunnerExposeInstalledCardChoiceOptionIds,
-} from "./runner-expose-installed-card-choice";
+} from "./expose-installed-card-choice";
 
 describe("runner installed-card expose choice", () => {
   it("prefers an unseen remote root over a previously exposed central ICE", () => {

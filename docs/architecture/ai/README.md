@@ -75,11 +75,11 @@ vollständige Abdeckung aller denkbaren Kartenfolgen.
 | `runner.rig_and_coverage`         | [coverageModule](../../../packages/ai/src/plans/runner-core-plan-modules.ts#L1076)                                          | [Runner §4](runner-plan-contracts.md#4-runnerrig_and_coverage)                                       |
 | `runner.defense_and_recovery`     | [defenseModule](../../../packages/ai/src/plans/runner-core-plan-modules.ts#L1273)                                           | [Runner §7](runner-plan-contracts.md#7-runnerdefense_and_recovery)                                   |
 | `runner.secure_terminal_win`      | [createRunnerTerminalWinModule](../../../packages/ai/src/runner/terminal-win/terminal-win-plan-module.ts)                   | [Runner §14](runner-plan-contracts.md#14-runnerscore_installed_agenda-und-runnersecure_terminal_win) |
-| `runner.expose_information`       | [exposeInformationModule](../../../packages/ai/src/plans/runner-tactical-plan-modules.ts#L595)                              | [Runner §9](runner-plan-contracts.md#9-runnerexpose_information)                                     |
-| `runner.pressure_central`         | [centralPressureModule](../../../packages/ai/src/plans/runner-tactical-plan-modules.ts#L666)                                | [Runner §2](runner-plan-contracts.md#2-runnerpressure_central)                                       |
-| `runner.contest_remote`           | [remoteContestModule](../../../packages/ai/src/plans/runner-tactical-plan-modules.ts#L837)                                  | [Runner §3](runner-plan-contracts.md#3-runnercontest_remote)                                         |
-| `runner.develop_board_and_hand`   | [developmentModule](../../../packages/ai/src/plans/runner-tactical-plan-modules.ts#L942)                                    | [Runner §5](runner-plan-contracts.md#5-runnerdevelop_board_and_hand)                                 |
-| `runner.convert_run_window`       | [runWindowModule](../../../packages/ai/src/plans/runner-tactical-plan-modules.ts#L1095)                                     | [Runner §8](runner-plan-contracts.md#8-runnerconvert_run_window)                                     |
+| `runner.expose_information`       | [createRunnerExposeInformationModule](../../../packages/ai/src/runner/expose-information/expose-information-plan-module.ts) | [Runner §9](runner-plan-contracts.md#9-runnerexpose_information)                                     |
+| `runner.pressure_central`         | [centralPressureModule](../../../packages/ai/src/plans/runner-tactical-plan-modules.ts#L569)                                | [Runner §2](runner-plan-contracts.md#2-runnerpressure_central)                                       |
+| `runner.contest_remote`           | [remoteContestModule](../../../packages/ai/src/plans/runner-tactical-plan-modules.ts#L740)                                  | [Runner §3](runner-plan-contracts.md#3-runnercontest_remote)                                         |
+| `runner.develop_board_and_hand`   | [developmentModule](../../../packages/ai/src/plans/runner-tactical-plan-modules.ts#L845)                                    | [Runner §5](runner-plan-contracts.md#5-runnerdevelop_board_and_hand)                                 |
+| `runner.convert_run_window`       | [runWindowModule](../../../packages/ai/src/plans/runner-tactical-plan-modules.ts#L998)                                      | [Runner §8](runner-plan-contracts.md#8-runnerconvert_run_window)                                     |
 | `runner.complete_turn`            | [createTurnCompletionPlanModule](../../../packages/ai/src/plans/turn-completion-plan-module.ts)                             | [EndTurn](planning-architecture.md#17-endturn-vertrag)                                               |
 | `corp.score_agenda`               | [scoreModule](../../../packages/ai/src/plans/corp-core-plan-modules.ts#L1191)                                               | [Corp §2](corp-plan-contracts.md#2-corpscore_agenda)                                                 |
 | `corp.establish_scoring_remote`   | [remoteModule](../../../packages/ai/src/plans/corp-core-plan-modules.ts#L1514)                                              | [Corp §3](corp-plan-contracts.md#3-corpestablish_scoring_remote)                                     |
@@ -106,8 +106,15 @@ bündelt Signale, Investmentbewertung, Dispositionen und Runzurückstellung im
 Owner-Verzeichnis. Der [Ressourcenlebenszyklus](../../../packages/ai/src/runner/resource-lifecycle/resource-lifecycle-plan-module.ts)
 bündelt Halten/Verlassen, Quellen- und Zahlungsbindung sowie seinen konkreten
 Finanzierungsbedarf. Die gemeinsamen [Finanzierungsverträge](../../../packages/ai/src/plans/runner-funding-contracts.ts)
-liegen außerhalb der Core-Registry. Bei den übrigen Ownern erklärt allein die Moduldatei den
-heutigen Pfad noch nicht vollständig.
+liegen außerhalb der Core-Registry. Ebenso bündeln
+[installierte Agenda-Konversion](../../../packages/ai/src/runner/installed-agenda/installed-agenda-plan-module.ts),
+[unmittelbare Siege](../../../packages/ai/src/runner/terminal-win/terminal-win-plan-module.ts)
+und [Informationsentscheidungen](../../../packages/ai/src/runner/expose-information/expose-information-plan-module.ts)
+ihre fachlichen Pfade in eigenen Verzeichnissen. Beim Informationsowner gehören
+auch Erinnerung und installierte Karten-Choices dazu. Gemeinsame taktische
+Planstandards liegen in [runner-tactical-module-support.ts](../../../packages/ai/src/plans/runner-tactical-module-support.ts).
+Bei den übrigen Ownern erklärt allein die Moduldatei den heutigen Pfad noch
+nicht vollständig.
 
 Nicht registriert sind die konzeptionellen Opening-Module
 `runner.opening_strategy` und `corp.opening_and_board_foundation`. Ihre

@@ -11,6 +11,7 @@ describe.each([
   "credit-bank",
   "recurring-economy",
   "resource-lifecycle",
+  "expose-information",
   "terminal-win",
   "installed-agenda",
 ])("%s owner boundary", (owner) => {
@@ -34,7 +35,7 @@ describe.each([
         const specifier = statement.moduleSpecifier;
         if (!specifier || !ts.isStringLiteral(specifier)) continue;
         if (
-          /plan-first-live-runtime|runner-core-plan-modules|semantic-runtime-decision-context|selected-choices-for-decision|composition/.test(
+          /plan-first-live-runtime|runner-core-plan-modules|runner-tactical-plan-modules|semantic-runtime-decision-context|selected-choices-for-decision|composition/.test(
             specifier.text,
           )
         ) {
@@ -63,7 +64,7 @@ describe("vertical Runner owners", () => {
       .filter(
         (name) =>
           name &&
-          /^(runnerCreditBank|runnerMatureCreditBank|creditBankBuilt|runnerRecurringEconomy|recurringEconomy|runnerInstalledCompatibleRestrictedCredit|runnerResourceLifecycle|runnerCandidateIsLeavePlayPaymentLifecycle|runnerLifecycleLeavePlayPayment|runnerTerminalWin|runnerImmediateAgendaPointTerminalWin|runnerInstalledAgendaScore)/.test(
+          /^(runnerCreditBank|runnerMatureCreditBank|creditBankBuilt|runnerRecurringEconomy|recurringEconomy|runnerInstalledCompatibleRestrictedCredit|runnerResourceLifecycle|runnerCandidateIsLeavePlayPaymentLifecycle|runnerLifecycleLeavePlayPayment|runnerExposeInformation|runnerProactiveExposeInformation|runnerCurrentExposeInformation|bindSelectedRunnerExposeInformation|runnerTerminalWin|runnerImmediateAgendaPointTerminalWin|runnerInstalledAgendaScore)/.test(
             name,
           ),
       );
