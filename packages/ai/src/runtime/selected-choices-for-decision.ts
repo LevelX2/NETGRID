@@ -1,7 +1,5 @@
-import type {
-  CorpAmbushSignal,
-  CorpHandManagementSignal,
-} from "../plans/corp-tactical-plan-contracts";
+import type { CorpHandManagementSignal } from "../corp/hand-management/hand-management-types";
+import type { CorpAmbushSignal } from "../plans/corp-tactical-plan-contracts";
 import {
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND,
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION,

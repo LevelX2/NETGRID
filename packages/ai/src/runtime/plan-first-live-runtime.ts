@@ -1,3 +1,25 @@
+import {
+  bindSelectedCorpArchivesToHqChoiceContinuation,
+  corpCorporateShuffleHqChoiceSignal,
+  corpDiscardWindowSignal,
+  corpStrategicPlanningGroupDrawChoiceSignal,
+  resolvePlanBoundCorpArchivesToHqChoice,
+} from "../corp/hand-management/hand-choice-bindings";
+import {
+  buildCorpHandManagementSignals,
+  corpEmptyRdDrawOperationDispositionEvidence,
+} from "../corp/hand-management/hand-development-signals";
+import {
+  arbitrateCorpHandConversionBeforeDraw,
+  corpHandDomainRouteClaims,
+} from "../corp/hand-management/hand-draw-arbitration";
+import {
+  bindSelectedCorpHqOverflowConversion,
+  corpDrawCandidatePreservesHandCapacity,
+  corpExactOverflowHandConversionPlanOwnsCandidate,
+  corpHandSignalMatchesCandidate,
+  corpHqOverflowReservedScoreServerDispositionEvidence,
+} from "../corp/hand-management/hand-overflow";
 import { corpPunishCampaignOwnsCandidate } from "../corp/punish/punish-plan-support";
 import {
   corpConditionalPunishTagSourceHasNoVisiblePayoff,
@@ -6,10 +28,7 @@ import {
   punishSignals,
 } from "../corp/punish/punish-signals";
 import { type CorpPunishCampaignSignal } from "../corp/punish/punish-types";
-import {
-  type CorpHandManagementSignal,
-  type CorpPlanDomain,
-} from "../plans/corp-tactical-plan-contracts";
+import { type CorpPlanDomain } from "../plans/corp-tactical-plan-contracts";
 import {
   addRunnerCoverageMemoryDispositions,
   addRunnerCoverageRejectedSearchDispositions,
@@ -17,6 +36,17 @@ import {
   runnerCoverageInstallDeferrals,
   runnerMatchpointReserveBlocksOverlappingBreakerInstall,
 } from "../runner/rig-coverage/coverage-dispositions";
+import {
+  corpCandidatePreservesVoluntaryDrawHorizon,
+  corpCandidateProjectsCardDraw,
+  exactCurrentBasicCorpDrawCandidate,
+} from "./corp-draw-action-facts";
+import {
+  corpReservedScoreServerIds,
+  CorpScoreAccelerationSetupBinding,
+} from "./corp-scoreline/score-hand-support";
+import type { DiscardKeepScorer } from "./discard-choice-selection";
+import { technicalIdCompare, turnKey } from "./runtime-identifiers";
 import {
   candidateIsVisibleCorpAgendaInstall,
   candidateIsVisibleCorpIceInstall,
@@ -52,10 +82,7 @@ import {
 import type { BuildActionSemanticCandidatesParams } from "../action-semantic-candidate";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
-import {
-  corpZoneTransitionProjectionStatus,
-  rootRezCreditOutcomeProjectionStatus,
-} from "../actions/action-economy-projection";
+import { rootRezCreditOutcomeProjectionStatus } from "../actions/action-economy-projection";
 import { actionHasConditionalDefenseFollowupQuotePayload } from "../actions/conditional-defense-followup-quote";
 import { runnerImmediateAgendaPointGain } from "../actions/runner-agenda-point-effect";
 import { AI_HINTS_BY_CARD } from "../ai-hints";
@@ -166,6 +193,10 @@ import {
 } from "./runner-canonical-card-facts";
 
 import {
+  boundCorpPunishTraceChoices,
+  resolveCorpPunishTraceWindow,
+} from "../corp/punish/punish-trace-binding";
+import {
   collectCorpActionDispositions,
   type CorpActionDispositionContributorFacts,
 } from "../plans/corp-action-disposition-contributors";
@@ -217,10 +248,6 @@ import {
   reconcileCorpCampaignContinuity,
 } from "../plans/corp-opponent-campaign-continuity";
 import {
-  boundCorpPunishTraceChoices,
-  resolveCorpPunishTraceWindow,
-} from "../corp/punish/punish-trace-binding";
-import {
   buildCorpScoringRemoteProjectSignals,
   type CorpRemoteOccupancyClaim,
 } from "../plans/corp-remote-project-signals";
@@ -229,10 +256,7 @@ import {
   corpRemoteHasEngineQuotedReusableScoreFriction,
   corpResidentScoreDefenseBinding,
 } from "../plans/corp-score-defense-continuity";
-import {
-  corpHandPriorityClass,
-  createCorpTacticalPlanModules,
-} from "../plans/corp-tactical-plan-modules";
+import { createCorpTacticalPlanModules } from "../plans/corp-tactical-plan-modules";
 import {
   resolveTurnPlannerCutover,
   type TurnPlannerCutoverResult,
@@ -335,7 +359,6 @@ import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import { extractAiFeatures } from "./ai-features";
 import { selectableChoiceOptions } from "./choice-option";
 import {
-  corpArchivesToHqOperationProfile,
   corpCandidateProvidesScoreConversion,
   corpConditionalScoreCreditProfile,
   corpHostedCreditBankProfile,
@@ -345,15 +368,10 @@ import {
   corpScoredAgendaHqShuffleProfile,
   corpScoredAgendaIceMarkProfile,
 } from "./corp-canonical-card-facts";
-import { selectedCorpDiscardChoiceOptionIds } from "./corp-discard-choice-selection";
 import { assessCorpEconomyAssetPayback } from "./corp-economy-asset-payback";
-import { corpHandDispositionScore } from "./corp-hand-disposition-score";
+import { corpHandDispositionScore } from "../corp/hand-management/hand-disposition-score";
 import { assessCorpRemoteMaturityFromVisibleServer } from "./corp-remote-maturity-assessment";
-import { discardOptionInstanceId } from "./discard-choice-option";
-import {
-  selectedDiscardChoiceOptionIds,
-  type DiscardChoiceKeepScore,
-} from "./discard-choice-selection";
+import { type DiscardChoiceKeepScore } from "./discard-choice-selection";
 import {
   assessRunnerHandRotation,
   type RunnerHandRotationAssessment,
@@ -380,11 +398,9 @@ import { rolesHaveBreakerRole } from "./breaker-role-match";
 import { rolesMatch } from "./role-match";
 import { visibleSourceDefinitionsByInstanceId } from "./visible-source-definitions";
 
+import { withDecisionLocalCorpPunishRouteQuotes } from "../corp/punish/punish-route-quote-input";
 import { semanticRuntimeDecisionDebugTopLevelWhyNot } from "../diagnostics/semantic-runtime-decision-debug";
-import {
-  corpCounterBankScoreProjects,
-  isQuotedCorpCounterBankInHq,
-} from "../plans/corp-counter-bank-score-plan";
+import { corpCounterBankScoreProjects } from "../plans/corp-counter-bank-score-plan";
 import {
   corpSameTurnScoreConversionPaths,
   type CorpScoreConversionStep,
@@ -420,13 +436,7 @@ import {
   definitionHasActionIceRezSupport,
 } from "./corp-defense-rez-support-facts";
 import { assessCorpExactIceRezAgainstScoreReserves } from "./corp-defense-score-reserve";
-import {
-  assessCorpDrawAdmission,
-  corpVoluntaryDrawLeavesUnsafeMandatoryHorizon,
-  type CorpDrawAdmissionAssessment,
-  type CorpDrawAdmissionPriority,
-  type CorpDrawCapacityReleaseRoute,
-} from "./corp-draw-admission";
+import { corpVoluntaryDrawLeavesUnsafeMandatoryHorizon } from "./corp-draw-admission";
 import {
   corpMissingConcreteDefenseDrawNeed,
   corpMissingConcreteScoreDefenseDrawNeed,
@@ -450,12 +460,9 @@ import {
 import {
   buildCorpHandInventoryFacts,
   corpHandDuplicateCount,
-  type CorpHandDomainRouteClaimInput,
-  type CorpHandInventoryFacts,
-} from "./corp-hand-inventory-facts";
+} from "../corp/hand-management/hand-inventory-facts";
 import { assessCorpOpeningRush } from "./corp-opening-rush";
 import { corpPassTaxRezAssessment } from "./corp-pass-tax-rez-assessment";
-import { withDecisionLocalCorpPunishRouteQuotes } from "../corp/punish/punish-route-quote-input";
 import {
   corpRestrictedRezPreparationCandidates,
   currentCorpRestrictedCreditBanks,
@@ -3036,266 +3043,6 @@ function bindSelectedCorpDefenseDrawAttempt(
   };
 }
 
-function bindSelectedCorpHqOverflowConversion(
-  input: AiDecisionInput,
-  result: PlanSchedulerResult,
-): void {
-  if (
-    result.lane !== "plan" ||
-    result.portfolio.executorInstanceId === undefined
-  ) {
-    return;
-  }
-  const executor = result.portfolio.instances.find(
-    (instance) =>
-      instance.instanceId === result.portfolio.executorInstanceId &&
-      instance.moduleId === "corp.hand_and_agenda_management",
-  );
-  const moduleState = executor?.moduleState as
-    | {
-        kind?: unknown;
-        signal?: CorpPlanDomain["handManagement"][number];
-      }
-    | undefined;
-  const signal = moduleState?.signal;
-  const state = signal?.overflowResolutionState;
-  if (
-    !executor ||
-    moduleState?.kind !== "hand" ||
-    signal?.handPlanId !== `resolve-hq-overflow:${turnKey(input)}` ||
-    signal.phase !== "resolve_hq_overflow" ||
-    !state ||
-    signal.actionIds?.includes(result.route.head.actionId) !== true
-  ) {
-    return;
-  }
-  const validState =
-    state.turnKey === turnKey(input) &&
-    Number.isSafeInteger(state.initialOverflowCount) &&
-    state.initialOverflowCount > 0 &&
-    Number.isSafeInteger(state.maximumConversions) &&
-    state.maximumConversions > 0 &&
-    state.maximumConversions <= state.initialOverflowCount &&
-    Number.isSafeInteger(state.remainingConversions) &&
-    state.remainingConversions > 0 &&
-    state.remainingConversions <= state.maximumConversions &&
-    state.selectedAtStateVersion === undefined;
-  if (!validState) {
-    throw new PlanResolutionFailure("invalid_plan_identity", {
-      side: input.side,
-      stateVersion: input.playerView.stateVersion,
-      timingPoint: input.playerView.timingPoint,
-      legalActionTypes: input.legalActions.map((action) => action.type),
-      owner: "plan_registry",
-      planInstanceId: executor.instanceId,
-      stepId: result.route.head.stepId,
-      removalCondition:
-        "Bind HQ-overflow conversion only from a finite positive receipt whose remaining count does not exceed its admitted maximum.",
-    });
-  }
-  signal.overflowResolutionState = {
-    ...state,
-    remainingConversions: state.remainingConversions - 1,
-    selectedAtStateVersion: input.playerView.stateVersion,
-    expectedOverflowAfterSelectedConversion: Math.max(
-      0,
-      signal.handSize - signal.maximumHandSize - 1,
-    ),
-  };
-}
-
-function bindSelectedCorpArchivesToHqChoiceContinuation(
-  input: AiDecisionInput,
-  result: PlanSchedulerResult,
-  candidates: readonly ActionSemanticCandidate[],
-  discardKeepScore: PlanFirstLiveDependencies["discardKeepScore"],
-): void {
-  if (input.side !== "corp" || result.lane !== "plan") return;
-  const selectedAction = input.legalActions.find(
-    (action) => action.actionId === result.route.head.actionId,
-  );
-  const selectedCandidate = candidates.find(
-    (candidate) => candidate.actionId === result.route.head.actionId,
-  );
-  const profile = corpArchivesToHqOperationProfile(
-    selectedCandidate?.sourceDefinitionId,
-  );
-  if (!profile) return;
-
-  const rootPlanInstanceId = result.portfolio.rootForegroundInstanceId;
-  const executorInstanceId = result.portfolio.executorInstanceId;
-  const executor = result.portfolio.instances.find(
-    (instance) => instance.instanceId === executorInstanceId,
-  );
-  const moduleState = executor?.moduleState as
-    | { kind?: unknown; signal?: CorpPlanDomain["handManagement"][number] }
-    | undefined;
-  const signal = moduleState?.signal;
-  const source = selectedCandidate?.sourceCardInstanceId
-    ? input.playerView.own.gripOrHq.find(
-        (card) => card.instanceId === selectedCandidate.sourceCardInstanceId,
-      )
-    : undefined;
-  const sourceDefinitionId = source?.definitionId;
-  const exactOwningRoute =
-    executor?.moduleId === "corp.hand_and_agenda_management" &&
-    executor.executionState === "executor" &&
-    moduleState?.kind === "hand" &&
-    signal?.phase === "resolve_hq_overflow" &&
-    signal.actionIds?.includes(result.route.head.actionId) === true &&
-    rootPlanInstanceId !== undefined &&
-    executorInstanceId !== undefined &&
-    selectedAction?.side === "corp" &&
-    selectedAction.type === "play_operation" &&
-    selectedAction.source === selectedCandidate?.sourceCardInstanceId &&
-    selectedAction.expiresAtStateVersion === input.playerView.stateVersion &&
-    selectedCandidate?.sourceKind === "card" &&
-    source?.known === true &&
-    sourceDefinitionId === selectedCandidate.sourceDefinitionId &&
-    selectedCandidate.sourceDefinitionId !== undefined &&
-    result.portfolio.instances.some(
-      (instance) =>
-        instance.instanceId === rootPlanInstanceId && instance.side === "corp",
-    );
-  if (!exactOwningRoute || !selectedAction || !selectedCandidate) return;
-  if (!discardKeepScore) {
-    throw new PlanResolutionFailure("missing_plan_module_coverage", {
-      side: input.side,
-      stateVersion: input.playerView.stateVersion,
-      timingPoint: input.playerView.timingPoint,
-      legalActionTypes: input.legalActions.map((action) => action.type),
-      unresolvedActionIds: [selectedAction.actionId],
-      owner: "plan_module",
-      planInstanceId: executor.instanceId,
-      stepId: result.route.head.stepId,
-      removalCondition:
-        "The Corp hand plan must provide its generic keep-value scorer before binding an Archives-to-HQ target.",
-    });
-  }
-  const selection = selectedCorpArchivesToHqCards(
-    input,
-    profile,
-    discardKeepScore,
-  );
-  if (!selection) {
-    throw new PlanResolutionFailure("window_origin_missing", {
-      side: input.side,
-      stateVersion: input.playerView.stateVersion,
-      timingPoint: input.playerView.timingPoint,
-      legalActionTypes: input.legalActions.map((action) => action.type),
-      unresolvedActionIds: [selectedAction.actionId],
-      owner: "continuation",
-      planInstanceId: executor.instanceId,
-      stepId: result.route.head.stepId,
-      removalCondition:
-        "Bind an Archives-to-HQ continuation only from complete canonical source effects and the exact current known Archives card set.",
-    });
-  }
-  result.portfolio.selectedActionOrigin = {
-    rootPlanInstanceId,
-    executorInstanceId,
-    selectedActionId: selectedAction.actionId,
-    selectedAtStateVersion: input.playerView.stateVersion,
-    immediateChoicePolicy: "select_bound_corp_archives_cards_to_hq",
-    sourceCardInstanceId: source.instanceId,
-    sourceCardDefinitionId: sourceDefinitionId!,
-    selectionMode: profile.maxSelections === "all" ? "all" : "one",
-    eligibleArchiveCardInstanceIds: selection.eligibleCardInstanceIds,
-    selectedArchiveCardInstanceIds: selection.selectedCardInstanceIds,
-  };
-}
-
-function selectedCorpArchivesToHqCards(
-  input: AiDecisionInput,
-  profile: NonNullable<ReturnType<typeof corpArchivesToHqOperationProfile>>,
-  discardKeepScore: NonNullable<PlanFirstLiveDependencies["discardKeepScore"]>,
-):
-  | {
-      eligibleCardInstanceIds: string[];
-      selectedCardInstanceIds: string[];
-    }
-  | undefined {
-  const eligible = input.playerView.own.heapOrArchives.filter(
-    (card) =>
-      card.known === true &&
-      typeof card.definitionId === "string" &&
-      (profile.filterCardType === undefined ||
-        card.type === profile.filterCardType),
-  );
-  if (
-    eligible.length === 0 ||
-    new Set(eligible.map((card) => card.instanceId)).size !== eligible.length
-  ) {
-    return undefined;
-  }
-  const scoringInput: AiDecisionInput = {
-    ...input,
-    playerView: {
-      ...input.playerView,
-      own: {
-        ...input.playerView.own,
-        gripOrHq: [
-          ...input.playerView.own.gripOrHq,
-          ...eligible.filter(
-            (archiveCard) =>
-              !input.playerView.own.gripOrHq.some(
-                (handCard) => handCard.instanceId === archiveCard.instanceId,
-              ),
-          ),
-        ],
-      },
-    },
-  };
-  const ranked = eligible
-    .map((card) => ({ card, score: discardKeepScore(scoringInput, card) }))
-    .sort(compareCorpArchivesToHqCandidates);
-  const selected =
-    profile.maxSelections === "all"
-      ? ranked
-      : ranked.length > 0
-        ? [ranked[0]!]
-        : [];
-  if (selected.length === 0) return undefined;
-  return {
-    eligibleCardInstanceIds: eligible.map((card) => card.instanceId),
-    selectedCardInstanceIds: selected.map((entry) => entry.card.instanceId),
-  };
-}
-
-function compareCorpArchivesToHqCandidates(
-  left: { card: VisibleCard; score: DiscardChoiceKeepScore },
-  right: { card: VisibleCard; score: DiscardChoiceKeepScore },
-): number {
-  return (
-    corpArchiveRetentionRank(right.score.planDisposition) -
-      corpArchiveRetentionRank(left.score.planDisposition) ||
-    right.score.total - left.score.total ||
-    (left.card.title ?? "").localeCompare(right.card.title ?? "", "de") ||
-    left.card.instanceId.localeCompare(right.card.instanceId)
-  );
-}
-
-function corpArchiveRetentionRank(
-  disposition: DiscardChoiceKeepScore["planDisposition"],
-): number {
-  switch (disposition) {
-    case "current_plan_route":
-      return 5;
-    case "support_for_need":
-    case "campaign_hold":
-      return 4;
-    case "blocked_but_developable":
-      return 2;
-    case "assessment_unknown":
-      return 1;
-    case "redundant":
-    case "currently_dead":
-    case "discard_candidate":
-    case undefined:
-      return 0;
-  }
-}
-
 function bindSelectedCorpDefenseHqHold(
   input: AiDecisionInput,
   result: PlanSchedulerResult,
@@ -3401,7 +3148,7 @@ function corpDefenseSignalOwnsAction(
 function bindSelectedCorpScoreChoiceContinuation(
   input: AiDecisionInput,
   result: PlanSchedulerResult,
-  discardKeepScore: PlanFirstLiveDependencies["discardKeepScore"],
+  discardKeepScore: DiscardKeepScorer | undefined,
 ): void {
   if (result.lane !== "plan") return;
   const continuationFamily =
@@ -3606,7 +3353,7 @@ function corpScoredAgendaHqShuffleChoiceBinding(params: {
   input: AiDecisionInput;
   profile: NonNullable<ReturnType<typeof corpScoredAgendaHqShuffleProfile>>;
   fundingGap: number;
-  discardKeepScore: PlanFirstLiveDependencies["discardKeepScore"];
+  discardKeepScore: DiscardKeepScorer | undefined;
 }): {
   sourceCapabilityId: string;
   creditPerAgendaPoint: number;
@@ -6520,7 +6267,7 @@ function buildRunnerDomain(
   exposeInformation: readonly RunnerExposeInformationSignal[],
   previous: ResidentPlanPortfolio | undefined,
   discardChoiceBinding: RunnerDiscardChoiceBinding | undefined,
-  discardKeepScore: PlanFirstLiveDependencies["discardKeepScore"],
+  discardKeepScore: DiscardKeepScorer | undefined,
   rigDemandProjection: RunnerRigDemandProjection | undefined,
   assessProgramInstallTarget: PlanFirstLiveDependencies["runnerProgramInstallTrashAssessmentForCard"],
 ): RunnerPlanDomain {
@@ -9428,7 +9175,7 @@ function runnerHeapRecoveryActionContract(
 function runnerRecoverySearchCommitment(
   input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
-  discardKeepScore: NonNullable<PlanFirstLiveDependencies["discardKeepScore"]>,
+  discardKeepScore: DiscardKeepScorer,
 ):
   | NonNullable<RunnerDevelopmentSignal["recoverySearchCommitment"]>
   | undefined {
@@ -12814,7 +12561,7 @@ function corpContext(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   previous: ResidentPlanPortfolio | undefined,
-  discardKeepScore: PlanFirstLiveDependencies["discardKeepScore"],
+  discardKeepScore: DiscardKeepScorer | undefined,
 ): PlanSchedulerContext {
   const sourceBoundCandidates = candidates.map((candidate) => {
     if (candidate.sourceDefinitionId || !candidate.sourceCardInstanceId) {
@@ -12890,794 +12637,6 @@ function corpContext(
     transientSignals: corpTransientPlanSignals(input, domain),
     turnKey: turnKey(input),
     domain,
-  };
-}
-
-function corpDiscardWindowSignal(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  discardKeepScore: PlanFirstLiveDependencies["discardKeepScore"],
-): CorpHandManagementSignal | undefined {
-  const selection = corpHandChoiceSelection(
-    input,
-    candidates,
-    discardKeepScore,
-    "discard",
-  );
-  if (!selection) return undefined;
-  const { choice, resolveAction } = selection;
-  return {
-    handPlanId: `discard-window:${choice.choiceId}:${input.playerView.stateVersion}`,
-    phase: "discard_window",
-    actionIds: [resolveAction.actionId],
-    exactActionRoute: true,
-    agendaCount: input.playerView.own.gripOrHq.filter(
-      (card) =>
-        card.known &&
-        (card.type === "agenda" ||
-          (card.definitionId !== undefined &&
-            CARD_DEFINITIONS_BY_ID[card.definitionId]?.type === "agenda")),
-    ).length,
-    handSize: input.playerView.own.gripOrHq.length,
-    maximumHandSize: input.playerView.own.maxHandSize,
-    concretePurposeCode:
-      "Resolve the current Corp overflow with the plan-bound lowest keep-value cards.",
-    priorityClass: "P5",
-    routeAllowed: true,
-    discardChoiceBinding: {
-      actionId: resolveAction.actionId,
-      choiceId: choice.choiceId,
-      observedAtStateVersion: input.playerView.stateVersion,
-      selectedOptionIds: selection.selectedOptionIds,
-      discardedCardInstanceIds: selection.selectedCardInstanceIds,
-      retainedCardInstanceIds: selection.retainedCardInstanceIds,
-      evidenceCodes: [
-        "corp_discard_owned_by_hand_plan",
-        "corp_discard_selection_bound_to_current_choice",
-        "corp_discard_ranked_by_plan_protection_and_batch_exposure",
-      ],
-    },
-    value: 1_000,
-    evidenceCode: "corp_discard_owned_by_hand_plan",
-  };
-}
-
-function corpStrategicPlanningGroupDrawChoiceSignal(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  discardKeepScore: PlanFirstLiveDependencies["discardKeepScore"],
-): CorpHandManagementSignal | undefined {
-  const selection = corpHandChoiceSelection(
-    input,
-    candidates,
-    discardKeepScore,
-    "strategic_planning_group",
-  );
-  if (!selection) return undefined;
-  const { choice, resolveAction } = selection;
-  return {
-    handPlanId: `spg-draw-filter:${choice.choiceId}:${input.playerView.stateVersion}`,
-    phase: "draw_filter_window",
-    actionIds: [resolveAction.actionId],
-    exactActionRoute: true,
-    agendaCount: input.playerView.own.gripOrHq.filter(
-      (card) =>
-        card.known &&
-        (card.type === "agenda" ||
-          (card.definitionId !== undefined &&
-            CARD_DEFINITIONS_BY_ID[card.definitionId]?.type === "agenda")),
-    ).length,
-    handSize: input.playerView.own.gripOrHq.length,
-    maximumHandSize: input.playerView.own.maxHandSize,
-    concretePurposeCode:
-      "Resolve Strategic Planning Group by bottoming the lowest keep-value card from the exact draw.",
-    priorityClass: "P5",
-    routeAllowed: true,
-    drawFilterChoiceBinding: {
-      actionId: resolveAction.actionId,
-      choiceId: choice.choiceId,
-      observedAtStateVersion: input.playerView.stateVersion,
-      selectedOptionIds: selection.selectedOptionIds,
-      bottomedCardInstanceIds: selection.selectedCardInstanceIds,
-      retainedCardInstanceIds: selection.retainedCardInstanceIds,
-      evidenceCodes: [
-        "corp_spg_draw_filter_owned_by_hand_plan",
-        "corp_spg_draw_filter_bound_to_current_choice",
-        "corp_spg_draw_filter_ranked_by_generic_keep_value",
-      ],
-    },
-    value: 1_000,
-    evidenceCode: "corp_spg_draw_filter_owned_by_hand_plan",
-  };
-}
-
-function corpCorporateShuffleHqChoiceSignal(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  discardKeepScore: PlanFirstLiveDependencies["discardKeepScore"],
-): CorpHandManagementSignal | undefined {
-  const selection = corpHandChoiceSelection(
-    input,
-    candidates,
-    discardKeepScore,
-    "corporate_shuffle",
-  );
-  if (!selection) return undefined;
-  const { choice, resolveAction } = selection;
-  return {
-    handPlanId: `corporate-shuffle-hq:${choice.choiceId}:${input.playerView.stateVersion}`,
-    phase: "hq_shuffle_window",
-    actionIds: [resolveAction.actionId],
-    exactActionRoute: true,
-    agendaCount: input.playerView.own.gripOrHq.filter(
-      (card) =>
-        card.known &&
-        (card.type === "agenda" ||
-          (card.definitionId !== undefined &&
-            CARD_DEFINITIONS_BY_ID[card.definitionId]?.type === "agenda")),
-    ).length,
-    handSize: input.playerView.own.gripOrHq.length,
-    maximumHandSize: input.playerView.own.maxHandSize,
-    concretePurposeCode:
-      "Complete Corporate Shuffle by returning the lowest keep-value HQ card to R&D.",
-    priorityClass: "P5",
-    routeAllowed: true,
-    hqShuffleChoiceBinding: {
-      actionId: resolveAction.actionId,
-      choiceId: choice.choiceId,
-      observedAtStateVersion: input.playerView.stateVersion,
-      selectedOptionIds: selection.selectedOptionIds,
-      shuffledCardInstanceIds: selection.selectedCardInstanceIds,
-      retainedCardInstanceIds: selection.retainedCardInstanceIds,
-      evidenceCodes: [
-        "corp_corporate_shuffle_hq_owned_by_hand_plan",
-        "corp_corporate_shuffle_hq_bound_to_current_choice",
-        "corp_corporate_shuffle_hq_ranked_by_generic_keep_value",
-      ],
-    },
-    value: 1_000,
-    evidenceCode: "corp_corporate_shuffle_hq_owned_by_hand_plan",
-  };
-}
-
-function corpHandChoiceSelection(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  discardKeepScore: PlanFirstLiveDependencies["discardKeepScore"],
-  kind: "discard" | "strategic_planning_group" | "corporate_shuffle",
-):
-  | {
-      choice: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>;
-      resolveAction: AiDecisionInput["legalActions"][number];
-      selectedOptionIds: string[];
-      selectedCardInstanceIds: string[];
-      retainedCardInstanceIds: string[];
-    }
-  | undefined {
-  const choice = input.playerView.pendingChoice;
-  const sourceMatches =
-    kind === "discard"
-      ? choice?.source === "discard_phase"
-      : kind === "strategic_planning_group"
-        ? choice?.source.startsWith(
-            "card_implementation.strategic_planning_group_draw:",
-          ) === true
-        : choice?.source.startsWith("classic.corporate_shuffle_hq_to_rd:") ===
-          true;
-  if (
-    input.side !== "corp" ||
-    choice?.kind !== "select_cards" ||
-    !sourceMatches
-  )
-    return undefined;
-
-  const resolveAction = input.legalActions.find(
-    (action) => action.type === "resolve_choice",
-  );
-  const exactCandidate = resolveAction
-    ? candidates.find(
-        (candidate) =>
-          candidate.actionId === resolveAction.actionId &&
-          candidate.semanticActionType === "choice.resolve",
-      )
-    : undefined;
-  const label =
-    kind === "discard"
-      ? "discard"
-      : kind === "strategic_planning_group"
-        ? "Strategic Planning Group"
-        : "Corporate Shuffle";
-  if (!resolveAction || !exactCandidate || !discardKeepScore) {
-    throw new PlanResolutionFailure("missing_plan_module_coverage", {
-      side: input.side,
-      stateVersion: input.playerView.stateVersion,
-      timingPoint: input.playerView.timingPoint,
-      legalActionTypes: input.legalActions.map((action) => action.type),
-      unresolvedActionIds: input.legalActions.map((action) => action.actionId),
-      owner: "plan_module",
-      removalCondition: `The Corp hand plan requires the exact ${label} LegalAction, semantic candidate, and generic keep-value scorer.`,
-    });
-  }
-  const selectableOptions = selectableChoiceOptions(choice.options);
-  const choiceCards =
-    kind === "strategic_planning_group"
-      ? selectableOptions.flatMap((option) =>
-          option.card?.known && option.card.definitionId ? [option.card] : [],
-        )
-      : [];
-  const scoringInput =
-    kind === "strategic_planning_group"
-      ? {
-          ...input,
-          playerView: {
-            ...input.playerView,
-            own: {
-              ...input.playerView.own,
-              gripOrHq: [
-                ...input.playerView.own.gripOrHq,
-                ...choiceCards.filter(
-                  (card) =>
-                    !input.playerView.own.gripOrHq.some(
-                      (handCard) => handCard.instanceId === card.instanceId,
-                    ),
-                ),
-              ],
-            },
-          },
-        }
-      : input;
-  const knownHandByInstanceId = new Map(
-    scoringInput.playerView.own.gripOrHq
-      .filter((card) => card.known && card.definitionId)
-      .map((card) => [card.instanceId, card]),
-  );
-  const optionInstanceIds = selectableOptions.map(discardOptionInstanceId);
-  if (
-    optionInstanceIds.some(
-      (instanceId) => !instanceId || !knownHandByInstanceId.has(instanceId),
-    )
-  ) {
-    throw new PlanResolutionFailure("missing_plan_module_coverage", {
-      side: input.side,
-      stateVersion: input.playerView.stateVersion,
-      timingPoint: input.playerView.timingPoint,
-      legalActionTypes: input.legalActions.map((action) => action.type),
-      unresolvedActionIds: [resolveAction.actionId],
-      owner: "plan_module",
-      removalCondition: `Bind a Corp ${label} choice only when every selectable option maps to a known card in the exact current choice or HQ PlayerView.`,
-    });
-  }
-  const corpDiscardBatch =
-    kind === "discard"
-      ? selectedCorpDiscardChoiceOptionIds(
-          scoringInput,
-          choice,
-          selectableOptions,
-          discardKeepScore,
-        )
-      : undefined;
-  if (kind === "discard" && !corpDiscardBatch) {
-    throw new PlanResolutionFailure("missing_plan_module_coverage", {
-      side: input.side,
-      stateVersion: input.playerView.stateVersion,
-      timingPoint: input.playerView.timingPoint,
-      legalActionTypes: input.legalActions.map((action) => action.type),
-      unresolvedActionIds: [resolveAction.actionId],
-      owner: "plan_module",
-      removalCondition:
-        "The Corp hand plan requires known agenda points for every agenda in the exact discard batch; unknown cleanup exposure must remain fail-closed.",
-    });
-  }
-  const selectedOptionIds =
-    corpDiscardBatch?.selectedOptionIds ??
-    selectedDiscardChoiceOptionIds(
-      scoringInput,
-      choice,
-      selectableOptions,
-      (decisionInput, card) =>
-        corpHandDispositionScore({
-          input: decisionInput,
-          card,
-          destination:
-            kind === "discard"
-              ? "archives"
-              : kind === "strategic_planning_group"
-                ? "rd_bottom"
-                : "rd_shuffle",
-          baseKeepScore: discardKeepScore(decisionInput, card),
-        }),
-    );
-  const selectedOptionIdSet = new Set(selectedOptionIds);
-  const selectedCardInstanceIds = selectableOptions
-    .filter((option) => selectedOptionIdSet.has(option.id))
-    .map(discardOptionInstanceId)
-    .filter((instanceId): instanceId is string => instanceId !== undefined);
-  const selectedCardInstanceIdSet = new Set(selectedCardInstanceIds);
-  return {
-    choice,
-    resolveAction,
-    selectedOptionIds,
-    selectedCardInstanceIds,
-    retainedCardInstanceIds: optionInstanceIds.filter(
-      (instanceId): instanceId is string =>
-        instanceId !== undefined && !selectedCardInstanceIdSet.has(instanceId),
-    ),
-  };
-}
-
-function corpHandDomainRouteClaims(
-  domain: CorpPlanDomain,
-): CorpHandDomainRouteClaimInput[] {
-  const claims: CorpHandDomainRouteClaimInput[] = [];
-  const add = (claim: {
-    ownerModuleId: `corp.${string}`;
-    dedupeKey: string;
-    actionIds?: readonly string[];
-    sourceInstanceIds?: readonly (string | undefined)[];
-    readiness: CorpHandDomainRouteClaimInput["readiness"];
-    evidenceCode: string;
-    parentNeedId?: string;
-  }) => {
-    claims.push({
-      ownerModuleId: claim.ownerModuleId,
-      planInstanceId: planInstanceIdForProposal({
-        moduleId: claim.ownerModuleId,
-        dedupeKey: claim.dedupeKey,
-      }),
-      ...(claim.parentNeedId ? { parentNeedId: claim.parentNeedId } : {}),
-      readiness: claim.readiness,
-      actionIds: [...new Set(claim.actionIds ?? [])].sort(),
-      sourceInstanceIds: [
-        ...new Set(
-          (claim.sourceInstanceIds ?? []).filter(
-            (instanceId): instanceId is string => Boolean(instanceId),
-          ),
-        ),
-      ].sort(),
-      evidenceCode: claim.evidenceCode,
-    });
-  };
-
-  for (const signal of domain.scoreProjects) {
-    const actionIds = signal.actionIds ?? [];
-    add({
-      ownerModuleId: "corp.score_agenda",
-      dedupeKey: signal.projectId,
-      actionIds,
-      sourceInstanceIds: [
-        signal.agendaInstanceId,
-        signal.setupNeed?.sourceCardInstanceId,
-        signal.counterBank?.sourceCardInstanceId,
-      ],
-      readiness:
-        signal.feasible && actionIds.length > 0
-          ? "executable_now"
-          : (signal.fundingGap ?? 0) > 0
-            ? "executable_with_support"
-            : "blocked",
-      evidenceCode: signal.evidenceCode,
-      ...(signal.setupNeed?.needId
-        ? { parentNeedId: signal.setupNeed.needId }
-        : {}),
-    });
-  }
-  for (const signal of domain.economyNeeds) {
-    const sourceInstanceId =
-      "sourceInstanceId" in signal ? signal.sourceInstanceId : undefined;
-    const supportRequired = "gap" in signal && signal.gap > 0;
-    add({
-      ownerModuleId: "corp.economy",
-      dedupeKey: signal.needId,
-      actionIds: signal.actionIds,
-      sourceInstanceIds: [sourceInstanceId],
-      readiness:
-        signal.actionIds.length > 0
-          ? "executable_now"
-          : supportRequired
-            ? "executable_with_support"
-            : "blocked",
-      evidenceCode: signal.evidenceCode,
-      ...("parentNeedId" in signal && signal.parentNeedId
-        ? { parentNeedId: signal.parentNeedId }
-        : {}),
-    });
-  }
-  for (const signal of domain.defenseNeeds) {
-    const actionIds =
-      signal.kind === "generic" ? (signal.actionIds ?? []) : [signal.actionId];
-    const sourceInstanceId =
-      signal.kind === "score_protection_install" ||
-      signal.kind === "score_protection_staging_install"
-        ? signal.sourceCardInstanceId
-        : undefined;
-    add({
-      ownerModuleId: "corp.defend_servers",
-      dedupeKey: "server-defense-portfolio",
-      actionIds,
-      sourceInstanceIds: [sourceInstanceId],
-      readiness: actionIds.length > 0 ? "executable_now" : "blocked",
-      evidenceCode: signal.evidenceCode,
-      ...(signal.kind !== "generic"
-        ? { parentNeedId: signal.parentNeedId }
-        : {}),
-    });
-  }
-  for (const signal of domain.punishCampaigns) {
-    const actionIds = [
-      ...(signal.actionIds ?? []),
-      ...(signal.routeContract?.currentHeadActionId
-        ? [signal.routeContract.currentHeadActionId]
-        : []),
-    ];
-    add({
-      ownerModuleId: "corp.punish_campaign",
-      dedupeKey: signal.campaignId,
-      actionIds,
-      readiness:
-        signal.feasible && actionIds.length > 0
-          ? "executable_now"
-          : signal.routeContract && signal.routeContract.fundingGap > 0
-            ? "executable_with_support"
-            : "blocked",
-      evidenceCode: signal.evidenceCode,
-      ...(signal.routeContract?.executionNeedId
-        ? { parentNeedId: signal.routeContract.executionNeedId }
-        : {}),
-    });
-  }
-  for (const signal of domain.ambushes) {
-    add({
-      ownerModuleId: "corp.ambush_and_bluff",
-      dedupeKey: signal.ambushId,
-      actionIds: signal.actionIds,
-      sourceInstanceIds: [signal.sourceInstanceId],
-      readiness:
-        signal.actionIds.length > 0 && signal.affordableOrSupportable
-          ? "executable_now"
-          : !signal.affordableOrSupportable
-            ? "executable_with_support"
-            : "blocked",
-      evidenceCode: signal.evidenceCode,
-    });
-  }
-  for (const signal of domain.handManagement) {
-    const actionIds = signal.actionIds ?? [];
-    add({
-      ownerModuleId: "corp.hand_and_agenda_management",
-      dedupeKey: signal.handPlanId,
-      actionIds,
-      sourceInstanceIds: [signal.sourceInstanceId],
-      readiness:
-        signal.routeAllowed === false
-          ? "blocked"
-          : actionIds.length > 0
-            ? "executable_now"
-            : "blocked",
-      evidenceCode: signal.evidenceCode,
-      ...(signal.parentNeedId ? { parentNeedId: signal.parentNeedId } : {}),
-    });
-  }
-  return claims;
-}
-
-function arbitrateCorpHandConversionBeforeDraw(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  domain: CorpPlanDomain,
-  facts: CorpHandInventoryFacts,
-): CorpPlanDomain {
-  const releaseRoutes = corpExactHandCapacityReleaseRoutes(
-    input,
-    candidates,
-    domain,
-    facts,
-  );
-  const assessments: CorpDrawAdmissionAssessment[] = [];
-  const knownAgendaInstanceIds = new Set(
-    input.playerView.own.gripOrHq
-      .filter((card) => card.known === true && card.type === "agenda")
-      .map((card) => card.instanceId),
-  );
-  const knownNonAgendaCount = input.playerView.own.gripOrHq.filter(
-    (card) => card.known === true && card.type !== "agenda",
-  ).length;
-  const consequenceFacts = {
-    knownAgendaCount: knownAgendaInstanceIds.size,
-    remainingDeckCardsBeforeDraw: input.playerView.own.stackOrRdCount,
-  };
-  const assess = (params: {
-    routeId: string;
-    ownerModuleId: CorpDrawAdmissionAssessment["ownerModuleId"];
-    actionId: string;
-    purpose: CorpDrawAdmissionAssessment["purpose"];
-    priorityClass: CorpDrawAdmissionPriority;
-    remainingAttempts: 0 | 1;
-    parentProvidesExactSameTurnCapacityRelease?: boolean;
-    allowFinalClickScoreMaterialReplacement?: boolean;
-    terminalNeedBeforeMandatoryDraw?: boolean;
-  }) => {
-    const candidate = candidates.find(
-      (entry) => entry.actionId === params.actionId,
-    );
-    const projectedSourceConsumption =
-      candidate?.economyProjection?.cardsConsumed;
-    const knownNonAgendaCleanupCandidates = Math.max(
-      0,
-      knownNonAgendaCount -
-        (Number.isSafeInteger(projectedSourceConsumption) &&
-        (projectedSourceConsumption ?? -1) >= 0
-          ? projectedSourceConsumption!
-          : 0),
-    );
-    const assessment = assessCorpDrawAdmission({
-      ...params,
-      handSize: facts.pressure.handSize,
-      maximumHandSize: facts.pressure.maximumHandSize,
-      currentClicks: input.playerView.own.clicks,
-      drawProjection: candidate
-        ? exactCurrentCorpDrawAdmissionProjection(input, candidate)
-        : undefined,
-      capacityReleaseRoutes: releaseRoutes,
-      parentProvidesExactSameTurnCapacityRelease:
-        params.parentProvidesExactSameTurnCapacityRelease ?? false,
-      consequenceFacts: {
-        ...consequenceFacts,
-        safeDiscardCandidateCount: Math.max(
-          knownNonAgendaCleanupCandidates,
-          facts.cleanupProjection.discardCandidateInstanceIds.filter(
-            (instanceId) => !knownAgendaInstanceIds.has(instanceId),
-          ).length,
-        ),
-        terminalNeedBeforeMandatoryDraw:
-          params.terminalNeedBeforeMandatoryDraw ?? false,
-      },
-    });
-    assessments.push(assessment);
-    return assessment.disposition === "admitted";
-  };
-
-  const defenseNeeds: CorpPlanDomain["defenseNeeds"] =
-    domain.defenseNeeds.flatMap((signal): CorpPlanDomain["defenseNeeds"] => {
-      if (signal.kind === "score_protection_draw") {
-        return assess({
-          routeId: signal.defenseId,
-          ownerModuleId: "corp.defend_servers",
-          actionId: signal.actionId,
-          purpose: "score_defense_answer_search",
-          priorityClass: signal.delegatedPriorityClass,
-          remainingAttempts: signal.drawAttemptState.remainingAttempts,
-          parentProvidesExactSameTurnCapacityRelease:
-            signal.cleanupReplacementDraw === true,
-          terminalNeedBeforeMandatoryDraw:
-            signal.delegatedPriorityClass === "P1" ||
-            signal.delegatedPriorityClass === "P2",
-        })
-          ? [signal]
-          : [];
-      }
-      if (
-        signal.kind !== "generic" ||
-        signal.phase !== "draw_for_ice" ||
-        !signal.actionIds ||
-        signal.actionIds.length === 0
-      ) {
-        return [signal];
-      }
-      const admittedActionIds = signal.actionIds.filter((actionId) =>
-        assess({
-          routeId: `${signal.defenseId}:${actionId}`,
-          ownerModuleId: "corp.defend_servers",
-          actionId,
-          purpose: "central_defense_answer_search",
-          priorityClass: corpGenericDefensePriorityClass([signal]),
-          remainingAttempts: signal.drawAttemptState?.remainingAttempts ?? 0,
-          terminalNeedBeforeMandatoryDraw:
-            signal.urgent === true && signal.centralPressure === "terminal",
-        }),
-      );
-      return [{ ...signal, actionIds: admittedActionIds }];
-    });
-  const handManagement = domain.handManagement.map((signal) => {
-    if (
-      signal.phase !== "draw_for_plan" ||
-      !signal.actionIds ||
-      signal.actionIds.length === 0
-    ) {
-      return signal;
-    }
-    const priorityClass = corpEffectiveHandPriorityClass(domain, signal);
-    const admittedActionIds = signal.actionIds.filter((actionId) =>
-      assess({
-        routeId: `${signal.handPlanId}:${actionId}`,
-        ownerModuleId: "corp.hand_and_agenda_management",
-        actionId,
-        purpose: "score_material_search",
-        priorityClass,
-        remainingAttempts: signal.drawAttemptState?.remainingAttempts ?? 0,
-        allowFinalClickScoreMaterialReplacement:
-          signal.handPlanId === "draw-for-score-material",
-        terminalNeedBeforeMandatoryDraw:
-          priorityClass === "P1" || priorityClass === "P2",
-      }),
-    );
-    return { ...signal, actionIds: admittedActionIds };
-  });
-  return {
-    ...domain,
-    defenseNeeds,
-    handManagement,
-    drawArbitrations: assessments.sort(
-      (left, right) =>
-        left.routeId.localeCompare(right.routeId) ||
-        left.actionId.localeCompare(right.actionId),
-    ),
-  };
-}
-
-function corpExactHandCapacityReleaseRoutes(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  domain: CorpPlanDomain,
-  facts: CorpHandInventoryFacts,
-): CorpDrawCapacityReleaseRoute[] {
-  const routesByActionId = new Map<
-    string,
-    Omit<CorpDrawCapacityReleaseRoute, "clickCost" | "netHandDelta">
-  >();
-  for (const signal of domain.economyNeeds) {
-    const priorityClass = corpEconomyPriorityClass(signal);
-    const withinClassValue =
-      signal.kind === "convert_immediate_operation"
-        ? signal.conversion.netLiquidCreditGain * 20 +
-          signal.conversion.cardsDrawn * 20
-        : signal.kind === "prepare_immediate_operation"
-          ? 50 + signal.futureConversion.strategicEconomyValue * 10
-          : 0;
-    for (const actionId of signal.actionIds) {
-      routesByActionId.set(actionId, {
-        actionId,
-        priorityClass,
-        withinClassValue,
-      });
-    }
-  }
-  for (const signal of domain.defenseNeeds) {
-    if (
-      signal.kind !== "generic" ||
-      signal.phase !== "install_ice" ||
-      signal.installRoute?.progressKind !== "score_material_capacity_release"
-    ) {
-      continue;
-    }
-    for (const actionId of signal.actionIds ?? []) {
-      if (routesByActionId.has(actionId)) continue;
-      routesByActionId.set(actionId, {
-        actionId,
-        priorityClass: "P5",
-        withinClassValue: signal.value,
-      });
-    }
-  }
-  for (const signal of domain.handManagement) {
-    const priorityClass = corpEffectiveHandPriorityClass(domain, signal);
-    for (const actionId of signal.actionIds ?? []) {
-      if (routesByActionId.has(actionId)) continue;
-      routesByActionId.set(actionId, {
-        actionId,
-        priorityClass,
-        withinClassValue: signal.value,
-      });
-    }
-  }
-  return facts.records
-    .flatMap((record) => record.actionHandDeltas)
-    .flatMap((delta) => {
-      if (delta.netHandDelta >= 0) return [];
-      const route = routesByActionId.get(delta.actionId);
-      const candidate = candidates.find(
-        (entry) => entry.actionId === delta.actionId,
-      );
-      const legalActionCurrent = input.legalActions.some(
-        (action) =>
-          action.actionId === delta.actionId &&
-          action.expiresAtStateVersion === input.playerView.stateVersion,
-      );
-      if (
-        !route ||
-        !candidate ||
-        !legalActionCurrent ||
-        candidate.costProfile.costKnownStatus !== "known" ||
-        candidate.costProfile.additionalCosts.length > 0 ||
-        !Number.isSafeInteger(candidate.costProfile.clickCost) ||
-        (candidate.costProfile.clickCost ?? 0) <= 0
-      ) {
-        return [];
-      }
-      return [
-        {
-          ...route,
-          clickCost: candidate.costProfile.clickCost!,
-          netHandDelta: delta.netHandDelta,
-        },
-      ];
-    })
-    .sort(
-      (left, right) =>
-        left.priorityClass.localeCompare(right.priorityClass) ||
-        left.actionId.localeCompare(right.actionId),
-    );
-}
-
-function corpEffectiveHandPriorityClass(
-  domain: CorpPlanDomain,
-  signal: CorpPlanDomain["handManagement"][number],
-): CorpDrawAdmissionPriority {
-  if (signal.parentPlanInstanceId) {
-    const parent = domain.scoreProjects.find(
-      (project) =>
-        planInstanceIdForProposal({
-          moduleId: "corp.score_agenda",
-          dedupeKey: project.projectId,
-        }) === signal.parentPlanInstanceId,
-    );
-    if (parent) return corpScorePriorityClass(parent);
-  }
-  return corpHandPriorityClass(signal);
-}
-
-function exactCurrentCorpDrawAdmissionProjection(
-  input: AiDecisionInput,
-  candidate: ActionSemanticCandidate,
-):
-  | {
-      cardsDrawn: number;
-      netDeckConsumption: number;
-      netHandDelta: number;
-      selfContainedDispositionCount: number;
-      clickCost: number;
-    }
-  | undefined {
-  if (exactCurrentBasicCorpDrawCandidate(input, candidate)) {
-    return {
-      cardsDrawn: 1,
-      netDeckConsumption: 1,
-      netHandDelta: 1,
-      selfContainedDispositionCount: 0,
-      clickCost: 1,
-    };
-  }
-  const projection = candidate.economyProjection;
-  const action = input.legalActions.find(
-    (legalAction) => legalAction.actionId === candidate.actionId,
-  );
-  if (!action) return undefined;
-  const zoneTransition = corpZoneTransitionProjectionStatus(candidate, action);
-  if (
-    !exactCurrentCorpScoreMaterialDrawCandidate(input, candidate) ||
-    projection?.source !== "legal_action_payload" ||
-    projection.reliability !== "guaranteed" ||
-    projection.confidence !== "high" ||
-    !Number.isSafeInteger(projection.cardsDrawn) ||
-    (projection.cardsDrawn ?? 0) <= 0 ||
-    !Number.isSafeInteger(projection.netHandDelta) ||
-    (projection.netHandDelta ?? -1) < 0 ||
-    !Number.isSafeInteger(candidate.costProfile.clickCost) ||
-    (candidate.costProfile.clickCost ?? 0) <= 0
-  ) {
-    return undefined;
-  }
-  return {
-    cardsDrawn: projection.cardsDrawn!,
-    netDeckConsumption:
-      projection.netDrawPileDelta !== undefined
-        ? Math.max(0, -projection.netDrawPileDelta)
-        : projection.cardsDrawn!,
-    netHandDelta: projection.netHandDelta,
-    selfContainedDispositionCount:
-      zoneTransition.status === "guaranteed"
-        ? zoneTransition.projection.postDrawDispositionCount
-        : 0,
-    clickCost: candidate.costProfile.clickCost!,
   };
 }
 
@@ -13797,50 +12756,6 @@ function corpExactExecutableNonEconomyPlanOwnsAction(
   );
 }
 
-function corpEmptyRdDrawOperationDispositionEvidence(
-  input: AiDecisionInput,
-  candidate: ActionSemanticCandidate,
-): string | undefined {
-  if (
-    corpEconomyCandidateHasExecutablePayload(input, candidate) ||
-    candidate.actionType !== "play_operation" ||
-    !candidate.sourceDefinitionId ||
-    CARD_DEFINITIONS_BY_ID[candidate.sourceDefinitionId]?.type !== "operation"
-  ) {
-    return undefined;
-  }
-  const action = input.legalActions.find(
-    (legalAction) => legalAction.actionId === candidate.actionId,
-  );
-  const drawCardsAmount = Number(action?.payload?.drawCardsAmount ?? 0);
-  const hint = AI_HINTS_BY_CARD.get(candidate.sourceDefinitionId);
-  const definitionRequiresDraw =
-    hint?.effects?.some(
-      (effect) =>
-        effect.kind === "draw" &&
-        typeof effect.amount === "number" &&
-        effect.amount > 0,
-    ) === true;
-  return drawCardsAmount > 0 && definitionRequiresDraw
-    ? `corp_empty_rd_draw_operation_has_no_executable_payload:${candidate.sourceDefinitionId}`
-    : undefined;
-}
-
-function corpHandSignalMatchesCandidate(
-  signal: CorpPlanDomain["handManagement"][number],
-  candidate: ActionSemanticCandidate,
-): boolean {
-  if (signal.actionIds !== undefined) {
-    return signal.actionIds.includes(candidate.actionId);
-  }
-  return (
-    signal.sourceDefinitionIds?.includes(candidate.sourceDefinitionId ?? "") ===
-      true &&
-    (!signal.sourceInstanceId ||
-      signal.sourceInstanceId === candidate.sourceCardInstanceId)
-  );
-}
-
 function corpCandidateIsScoreAccelerationSupport(
   candidate: ActionSemanticCandidate,
 ): boolean {
@@ -13857,45 +12772,6 @@ function corpCandidateIsScoreAccelerationSupport(
     return false;
   }
   return corpCandidateProvidesScoreConversion(candidate);
-}
-
-function corpCandidateProjectsCardDraw(
-  candidate: ActionSemanticCandidate,
-): boolean {
-  if (candidate.semanticActionType === "draw.card") return true;
-  const cardsDrawn = candidate.economyProjection?.cardsDrawn;
-  return (
-    typeof cardsDrawn === "number" &&
-    Number.isFinite(cardsDrawn) &&
-    cardsDrawn > 0
-  );
-}
-
-function corpCandidatePreservesVoluntaryDrawHorizon(
-  input: AiDecisionInput,
-  candidate: ActionSemanticCandidate,
-  terminalNeedBeforeMandatoryDraw = false,
-): boolean {
-  const cardsDrawn =
-    candidate.semanticActionType === "draw.card"
-      ? 1
-      : candidate.economyProjection?.cardsDrawn;
-  const netDeckConsumption =
-    candidate.semanticActionType === "draw.card" &&
-    candidate.sourceKind === "basic_action"
-      ? 1
-      : candidate.economyProjection?.netDrawPileDelta !== undefined
-        ? Math.max(0, -candidate.economyProjection.netDrawPileDelta)
-        : undefined;
-  if (!Number.isSafeInteger(cardsDrawn) || (cardsDrawn ?? 0) <= 0) {
-    return true;
-  }
-  if (!Number.isSafeInteger(netDeckConsumption)) return false;
-  return !corpVoluntaryDrawLeavesUnsafeMandatoryHorizon({
-    remainingDeckCardsBeforeDraw: input.playerView.own.stackOrRdCount,
-    netDeckConsumption: netDeckConsumption!,
-    terminalNeedBeforeMandatoryDraw,
-  });
 }
 
 function buildCorpDomain(
@@ -15396,7 +14272,7 @@ function buildCorpDomain(
   if (scoreSetupBinding) {
     scoreSetupBinding.parent.setupNeed = scoreSetupBinding.setupNeed;
   }
-  const cardDevelopmentSignals = corpCardDevelopmentSignals(
+  const handManagement = buildCorpHandManagementSignals(
     input,
     candidates,
     ownAgendas,
@@ -15404,28 +14280,11 @@ function buildCorpDomain(
     defenseDispositionActionIds,
     scoreSetupBinding,
     scoreProjects,
-  );
-  const hqOverflowResolution = corpHqOverflowResolutionSignal(
-    input,
-    candidates,
-    ownAgendas,
     previous,
-    cardDevelopmentSignals,
-    scoreProjects,
+    (candidate) =>
+      corpDefensiveUpgradePlacement(input, candidate, scoreProjects) !==
+      undefined,
   );
-  const hqOverflowActionIds = new Set(hqOverflowResolution?.actionIds ?? []);
-  const handManagement: CorpPlanDomain["handManagement"] = [
-    ...(hqOverflowResolution ? [hqOverflowResolution] : []),
-    ...cardDevelopmentSignals.filter(
-      (signal) =>
-        !signal.evidenceCode.startsWith(
-          "corp_hq_overflow_admissible_current_conversion:",
-        ) &&
-        !signal.actionIds?.some((actionId) =>
-          hqOverflowActionIds.has(actionId),
-        ),
-    ),
-  ];
   return {
     scoreProjects,
     remoteProjects,
@@ -15543,28 +14402,6 @@ function corpResidentDelayedSuccessDefenseSignals(
   );
 }
 
-function corpDrawCandidatePreservesHandCapacity(
-  input: AiDecisionInput,
-  candidate: ActionSemanticCandidate,
-): boolean {
-  if (
-    candidate.semanticActionType === "draw.card" &&
-    candidate.sourceKind === "basic_action"
-  ) {
-    return (
-      input.playerView.own.gripOrHq.length + 1 <=
-      input.playerView.own.maxHandSize
-    );
-  }
-  const netHandDelta = candidate.economyProjection?.netHandDelta;
-  return (
-    typeof netHandDelta === "number" &&
-    Number.isFinite(netHandDelta) &&
-    input.playerView.own.gripOrHq.length + netHandDelta <=
-      input.playerView.own.maxHandSize
-  );
-}
-
 function corpLayeredIceStagingParent(
   scoreProjects: readonly CorpScoreProjectSignal[],
   remoteProjects: CorpCorePlanDomain["remoteProjects"],
@@ -15644,376 +14481,6 @@ function corpAvailableRemoteRezCredits(
       }) ?? [];
   const reserve = centralRezCosts.length > 0 ? Math.min(...centralRezCosts) : 0;
   return Math.max(0, input.playerView.own.credits - reserve);
-}
-
-function exactCurrentBasicCorpDrawCandidate(
-  input: AiDecisionInput,
-  candidate: ActionSemanticCandidate,
-): boolean {
-  if (
-    candidate.sourceKind !== "basic_action" ||
-    candidate.semanticActionType !== "draw.card" ||
-    candidate.costProfile.clickCost !== 1 ||
-    (candidate.costProfile.creditCost !== undefined &&
-      candidate.costProfile.creditCost !== 0) ||
-    candidate.costProfile.additionalCosts.length > 0
-  ) {
-    return false;
-  }
-  const action = input.legalActions.find(
-    (legalAction) => legalAction.actionId === candidate.actionId,
-  );
-  if (
-    action?.side !== "corp" ||
-    action.type !== "draw_card" ||
-    action.source !== "basic_action" ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
-    action.targetRequirements.length > 0 ||
-    (action.choiceRequirements?.length ?? 0) > 0
-  ) {
-    return false;
-  }
-  const totalClicks = action.costs.reduce(
-    (sum, cost) => sum + (cost.clicks ?? 0),
-    0,
-  );
-  const totalCredits = action.costs.reduce(
-    (sum, cost) => sum + (cost.credits ?? 0),
-    0,
-  );
-  return (
-    totalClicks === 1 &&
-    totalCredits === 0 &&
-    input.playerView.own.stackOrRdCount > 0 &&
-    Number.isSafeInteger(input.playerView.own.gripOrHq.length) &&
-    Number.isSafeInteger(input.playerView.own.maxHandSize)
-  );
-}
-
-function exactCurrentCorpScoreMaterialDrawCandidate(
-  input: AiDecisionInput,
-  candidate: ActionSemanticCandidate,
-): boolean {
-  if (exactCurrentBasicCorpDrawCandidate(input, candidate)) return true;
-  if (
-    !corpCandidateProjectsCardDraw(candidate) ||
-    candidate.costProfile.additionalCosts.length > 0
-  ) {
-    return false;
-  }
-  const projection = candidate.economyProjection;
-  const action = input.legalActions.find(
-    (legalAction) => legalAction.actionId === candidate.actionId,
-  );
-  const cardsDrawn = projection?.cardsDrawn;
-  const netHandDelta = projection?.netHandDelta;
-  const clickCost = candidate.costProfile.clickCost;
-  const creditCost = candidate.costProfile.creditCost;
-  if (
-    action?.side !== "corp" ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
-    action.targetRequirements.length > 0 ||
-    (action.choiceRequirements?.length ?? 0) > 0 ||
-    projection?.timing !== "immediate" ||
-    projection.reliability !== "guaranteed" ||
-    !Number.isSafeInteger(cardsDrawn) ||
-    (cardsDrawn ?? 0) <= 0 ||
-    !Number.isSafeInteger(netHandDelta) ||
-    (netHandDelta ?? -1) < 0 ||
-    !Number.isSafeInteger(clickCost) ||
-    (clickCost ?? 0) <= 0 ||
-    !Number.isSafeInteger(creditCost) ||
-    (creditCost ?? -1) < 0
-  ) {
-    return false;
-  }
-  const totalClicks = action.costs.reduce(
-    (sum, cost) => sum + (cost.clicks ?? 0),
-    0,
-  );
-  const totalCredits = action.costs.reduce(
-    (sum, cost) => sum + (cost.credits ?? 0),
-    0,
-  );
-  return (
-    totalClicks === clickCost &&
-    totalCredits === creditCost &&
-    totalClicks <= input.playerView.own.clicks &&
-    totalCredits <= input.playerView.own.credits
-  );
-}
-
-function corpExactOverflowHandConversionPlanOwnsCandidate(
-  domain: CorpPlanDomain,
-  candidate: ActionSemanticCandidate,
-): boolean {
-  return domain.handManagement.some(
-    (signal) =>
-      signal.routeAllowed !== false &&
-      signal.exactActionRoute === true &&
-      signal.phase === "resolve_hq_overflow" &&
-      signal.overflowResolutionState !== undefined &&
-      signal.overflowResolutionState.remainingConversions > 0 &&
-      signal.actionIds?.includes(candidate.actionId) === true,
-  );
-}
-
-function corpHqOverflowResolutionSignal(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  agendaCount: number,
-  previous: ResidentPlanPortfolio | undefined,
-  developmentSignals: readonly CorpPlanDomain["handManagement"][number][],
-  scoreProjects: readonly CorpScoreProjectSignal[],
-): CorpPlanDomain["handManagement"][number] | undefined {
-  const handSize = input.playerView.own.gripOrHq.length;
-  const maximumHandSize = input.playerView.own.maxHandSize;
-  const remainingClicks = input.playerView.own.clicks;
-  if (
-    input.side !== "corp" ||
-    input.playerView.timingPoint !== "corp_action.main" ||
-    !Number.isSafeInteger(handSize) ||
-    !Number.isSafeInteger(maximumHandSize) ||
-    maximumHandSize < 0 ||
-    !Number.isSafeInteger(remainingClicks) ||
-    remainingClicks <= 0
-  ) {
-    return undefined;
-  }
-  const overflowCount = handSize - maximumHandSize;
-  if (!Number.isSafeInteger(overflowCount) || overflowCount <= 0) {
-    return undefined;
-  }
-  const reservedScoreServerIds = corpReservedScoreServerIds(
-    input,
-    scoreProjects,
-  );
-  const admissible = developmentSignals
-    .filter(
-      (signal) =>
-        signal.phase === "develop_card" && signal.routeAllowed !== false,
-    )
-    .flatMap((signal) =>
-      candidates
-        .filter(
-          (candidate) =>
-            corpHandSignalMatchesCandidate(signal, candidate) &&
-            corpHqOverflowCandidateIsExactCurrentConversion(
-              input,
-              candidate,
-              reservedScoreServerIds,
-            ),
-        )
-        .map((candidate) => ({
-          candidate,
-          priority: signal.value,
-        })),
-    )
-    .sort(
-      (left, right) =>
-        right.priority - left.priority ||
-        technicalIdCompare(left.candidate.actionId, right.candidate.actionId),
-    );
-  if (admissible.length === 0) return undefined;
-  const actionIds = [
-    ...new Set(admissible.map(({ candidate }) => candidate.actionId)),
-  ];
-  const eligibleSourceCount = new Set(
-    admissible.map(({ candidate }) => candidate.sourceCardInstanceId),
-  ).size;
-  const receipt = corpResidentHqOverflowResolution(previous, input);
-  const reactivatedOverflowCount =
-    receipt?.remainingConversions === 0 &&
-    receipt.selectedAtStateVersion !== undefined &&
-    receipt.selectedAtStateVersion < input.playerView.stateVersion &&
-    receipt.expectedOverflowAfterSelectedConversion !== undefined &&
-    overflowCount > receipt.expectedOverflowAfterSelectedConversion
-      ? overflowCount - receipt.expectedOverflowAfterSelectedConversion
-      : undefined;
-  const initialOverflowCount =
-    reactivatedOverflowCount ?? receipt?.initialOverflowCount ?? overflowCount;
-  const maximumConversions =
-    reactivatedOverflowCount !== undefined
-      ? Math.min(
-          reactivatedOverflowCount,
-          input.playerView.own.clicks,
-          eligibleSourceCount,
-        )
-      : (receipt?.maximumConversions ??
-        Math.min(
-          initialOverflowCount,
-          input.playerView.own.clicks,
-          eligibleSourceCount,
-        ));
-  const remainingConversions = Math.min(
-    overflowCount,
-    input.playerView.own.clicks,
-    eligibleSourceCount,
-    reactivatedOverflowCount !== undefined
-      ? maximumConversions
-      : (receipt?.remainingConversions ?? maximumConversions),
-  );
-  if (maximumConversions <= 0 || remainingConversions <= 0) return undefined;
-  return {
-    handPlanId: `resolve-hq-overflow:${turnKey(input)}`,
-    phase: "resolve_hq_overflow",
-    agendaCount,
-    handSize: input.playerView.own.gripOrHq.length,
-    maximumHandSize: input.playerView.own.maxHandSize,
-    actionIds,
-    actionPriorityOrder: actionIds,
-    exactActionRoute: true,
-    concretePurposeCode:
-      "Reduce the known Corp HQ overflow through one exact current non-agenda hand conversion, then observe and revalidate.",
-    priorityClass: "P5",
-    overflowResolutionState: {
-      turnKey: turnKey(input),
-      initialOverflowCount,
-      maximumConversions,
-      remainingConversions,
-    },
-    value: 120,
-    evidenceCode: `corp_hq_overflow_exact_conversion:${overflowCount}`,
-  };
-}
-
-function corpHqOverflowCandidateIsExactCurrentConversion(
-  input: AiDecisionInput,
-  candidate: ActionSemanticCandidate,
-  reservedScoreServerIds: ReadonlySet<string> = new Set(),
-): boolean {
-  if (
-    candidate.sourceKind !== "card" ||
-    !candidate.sourceCardInstanceId ||
-    !candidate.sourceDefinitionId ||
-    (candidate.actionCapacityProjection !== undefined &&
-      candidate.actionCapacityProjection.kind !== "non_action_capacity") ||
-    candidate.semanticActionType === "score_conversion.place_advancement" ||
-    candidate.semanticActionType === "score_conversion.move_advancement"
-  ) {
-    return false;
-  }
-  const source = input.playerView.own.gripOrHq.find(
-    (card) => card.instanceId === candidate.sourceCardInstanceId,
-  );
-  if (isQuotedCorpCounterBankInHq(input, source)) return false;
-  const definition = CARD_DEFINITIONS_BY_ID[candidate.sourceDefinitionId];
-  const action = input.legalActions.find(
-    (legalAction) => legalAction.actionId === candidate.actionId,
-  );
-  if (
-    !source?.known ||
-    source.definitionId !== candidate.sourceDefinitionId ||
-    !definition ||
-    definition.type === "agenda" ||
-    action?.side !== "corp" ||
-    action.source !== candidate.sourceCardInstanceId ||
-    action.expiresAtStateVersion !== input.playerView.stateVersion ||
-    action.timingPoint !== input.playerView.timingPoint ||
-    action.targetRequirements.length > 0 ||
-    (action.choiceRequirements?.length ?? 0) > 0
-  ) {
-    return false;
-  }
-  const totalClicks = action.costs.reduce(
-    (sum, cost) => sum + (cost.clicks ?? 0),
-    0,
-  );
-  const totalCredits = action.costs.reduce(
-    (sum, cost) => sum + (cost.credits ?? 0),
-    0,
-  );
-  if (
-    totalClicks !== 1 ||
-    !Number.isSafeInteger(totalCredits) ||
-    totalCredits < 0 ||
-    totalCredits > input.playerView.own.credits ||
-    candidate.costProfile.clickCost !== totalClicks ||
-    (candidate.costProfile.creditCost !== undefined &&
-      candidate.costProfile.creditCost !== totalCredits)
-  ) {
-    return false;
-  }
-  if (action.type === "play_operation") {
-    const projection = candidate.economyProjection;
-    return (
-      projection?.cardsConsumed === 1 &&
-      typeof projection.netHandDelta === "number" &&
-      projection.netHandDelta <= -1 &&
-      candidate.functionalEffects?.some(
-        (effect) =>
-          effect.kind === "card_recovery" &&
-          effect.timing === "action" &&
-          effect.resource === "cards",
-      ) !== true
-    );
-  }
-  // Converting an ICE out of HQ may relieve hand pressure, but choosing a
-  // server for that ICE is exclusively corp.defend_servers' responsibility.
-  // The hand-management plan must never turn a legal install into an
-  // unassessed "discard route" for an arbitrary server.
-  if (action.type === "install_card" && action.payload?.placement === "ice")
-    return false;
-  if (
-    action.type !== "install_card" ||
-    candidate.semanticActionType !== "install.card" ||
-    action.payload?.cardId !== candidate.sourceCardInstanceId ||
-    typeof action.payload.serverId !== "string" ||
-    action.payload.serverId === "new_remote" ||
-    reservedScoreServerIds.has(action.payload.serverId) ||
-    !input.playerView.servers.some(
-      (server) => server.id === action.payload!.serverId,
-    ) ||
-    (action.payload.placement !== "root" &&
-      action.payload.placement !== "ice") ||
-    !candidateTargetIds(candidate).includes(action.payload.serverId)
-  ) {
-    return false;
-  }
-  return true;
-}
-
-function corpReservedScoreServerIds(
-  input: AiDecisionInput,
-  scoreProjects: readonly CorpScoreProjectSignal[],
-): ReadonlySet<string> {
-  return new Set(
-    scoreProjects.flatMap((project) => {
-      const server = input.playerView.servers.find(
-        (candidate) => candidate.id === project.serverId,
-      );
-      const exactLastClickContinuation =
-        project.routeAssessment === "corp_last_click_score_install_deferred";
-      const preparedScoreServer = (server?.ice.length ?? 0) > 0;
-      return project.agendaInstanceId !== undefined &&
-        project.phase === "install_agenda" &&
-        project.serverId?.startsWith("remote_") === true &&
-        (exactLastClickContinuation || preparedScoreServer)
-        ? [project.serverId]
-        : [];
-    }),
-  );
-}
-
-function corpHqOverflowReservedScoreServerDispositionEvidence(
-  input: AiDecisionInput,
-  candidate: ActionSemanticCandidate,
-  scoreProjects: readonly CorpScoreProjectSignal[],
-): string | undefined {
-  if (
-    input.playerView.own.gripOrHq.length <= input.playerView.own.maxHandSize ||
-    !corpHqOverflowCandidateIsExactCurrentConversion(input, candidate)
-  ) {
-    return undefined;
-  }
-  const action = input.legalActions.find(
-    (legalAction) => legalAction.actionId === candidate.actionId,
-  );
-  const serverId = action?.payload?.serverId;
-  return typeof serverId === "string" &&
-    corpReservedScoreServerIds(input, scoreProjects).has(serverId)
-    ? `corp_hq_overflow_install_rejected_reserved_score_server:${serverId}`
-    : undefined;
 }
 
 function corpRemoteCreationLockRemovalAction(
@@ -17762,10 +16229,6 @@ function compareCorpScoreProtectionProjects(
     if (agendaPointComparison !== 0) return agendaPointComparison;
   }
   return technicalIdCompare(left.projectId, right.projectId);
-}
-
-function technicalIdCompare(left: string, right: string): number {
-  return left < right ? -1 : left > right ? 1 : 0;
 }
 
 type CorpProductiveScoreProtectionInstallRoute = Readonly<{
@@ -20243,124 +18706,6 @@ function resolvePlanBoundRunnerHiddenDrawChoice(
       rootPlanInstanceId: origin.rootPlanInstanceId,
       leafPlanInstanceId: origin.executorInstanceId,
       side: "runner",
-      windowKind: "mandatory_choice",
-      windowId: choice.choiceId,
-      stateVersion: context.input.playerView.stateVersion,
-      timingPoint: context.input.playerView.timingPoint,
-    },
-  };
-}
-
-function resolvePlanBoundCorpArchivesToHqChoice(
-  context: PlanSchedulerContext,
-  previous: ResidentPlanPortfolio | undefined,
-): EngineWindowResolution | undefined {
-  const choice = context.input.playerView.pendingChoice;
-  if (
-    context.input.side !== "corp" ||
-    !choice?.source.startsWith("v1922.corp_archives_to_hq:")
-  ) {
-    return undefined;
-  }
-  const origin = previous?.selectedActionOrigin;
-  const executor = previous?.instances.find(
-    (instance) =>
-      instance.instanceId === origin?.executorInstanceId &&
-      instance.executionState === "executor",
-  );
-  const root = previous?.instances.find(
-    (instance) => instance.instanceId === origin?.rootPlanInstanceId,
-  );
-  const choiceActions = context.input.legalActions.filter(
-    (action) => action.type === "resolve_choice",
-  );
-  const action = choiceActions.length === 1 ? choiceActions[0] : undefined;
-  const [requirement] = action?.choiceRequirements ?? [];
-  const optionIds = choice.options.map((option) => option.id);
-  const originIsArchivesToHq =
-    origin?.immediateChoicePolicy === "select_bound_corp_archives_cards_to_hq";
-  const expectedChoiceSource = originIsArchivesToHq
-    ? `v1922.corp_archives_to_hq:${origin.sourceCardInstanceId}:${context.input.playerView.stateVersion}`
-    : undefined;
-  const expectedChoiceId = originIsArchivesToHq
-    ? `v1922_corp_archives_to_hq_${context.input.playerView.stateVersion}`
-    : undefined;
-  const optionCardInstanceIds = choice.options.map((option) => option.value);
-  const exactOptionSet =
-    originIsArchivesToHq &&
-    optionCardInstanceIds.every(
-      (cardId): cardId is string => typeof cardId === "string",
-    ) &&
-    optionCardInstanceIds.length ===
-      origin.eligibleArchiveCardInstanceIds.length &&
-    new Set(optionCardInstanceIds).size === optionCardInstanceIds.length &&
-    optionCardInstanceIds.every((cardId) =>
-      origin.eligibleArchiveCardInstanceIds.includes(cardId),
-    );
-  const expectedMinimum = originIsArchivesToHq
-    ? origin.selectionMode === "all"
-      ? 0
-      : 1
-    : undefined;
-  const expectedMaximum = originIsArchivesToHq
-    ? origin.selectionMode === "all"
-      ? origin.eligibleArchiveCardInstanceIds.length
-      : 1
-    : undefined;
-  const exactBinding =
-    originIsArchivesToHq &&
-    choice.side === "corp" &&
-    choice.kind === "select_cards" &&
-    choice.choiceId === expectedChoiceId &&
-    choice.source === expectedChoiceSource &&
-    choice.visibility === "hidden_info_barrier" &&
-    choice.stateVersion === context.input.playerView.stateVersion &&
-    choice.minSelections === expectedMinimum &&
-    choice.maxSelections === expectedMaximum &&
-    exactOptionSet &&
-    previous !== undefined &&
-    previous.side === "corp" &&
-    previous.stateVersion === context.input.playerView.stateVersion - 1 &&
-    origin.selectedAtStateVersion === previous.stateVersion &&
-    previous.rootForegroundInstanceId === origin.rootPlanInstanceId &&
-    previous.executorInstanceId === origin.executorInstanceId &&
-    root !== undefined &&
-    root.side === "corp" &&
-    executor?.moduleId === "corp.hand_and_agenda_management" &&
-    action !== undefined &&
-    action.side === "corp" &&
-    action.source === "game_rule" &&
-    action.expiresAtStateVersion === context.input.playerView.stateVersion &&
-    action.choiceRequirements?.length === 1 &&
-    requirement?.choiceId === choice.choiceId &&
-    requirement.minSelections === choice.minSelections &&
-    requirement.maxSelections === choice.maxSelections &&
-    requirement.optionIds.length === optionIds.length &&
-    optionIds.every((optionId) => requirement.optionIds.includes(optionId));
-  if (!exactBinding || !action || !previous || !origin) {
-    throw new PlanResolutionFailure("window_origin_missing", {
-      side: context.input.side,
-      stateVersion: context.input.playerView.stateVersion,
-      timingPoint: context.input.playerView.timingPoint,
-      legalActionTypes: context.input.legalActions.map(
-        (legalAction) => legalAction.type,
-      ),
-      unresolvedActionIds: choiceActions.map(
-        (legalAction) => legalAction.actionId,
-      ),
-      owner: "continuation",
-      ...(executor ? { planInstanceId: executor.instanceId } : {}),
-      removalCondition:
-        "Resolve Corp Archives-to-HQ only from the immediately preceding hand-plan executor, exact selected source operation and complete current Engine choice contract.",
-    });
-  }
-  return {
-    actionId: action.actionId,
-    reasonCode: "plan_bound_corp_archives_to_hq_choice",
-    origin: {
-      rootPlanInstanceId: origin.rootPlanInstanceId,
-      leafPlanInstanceId: origin.executorInstanceId,
-      side: "corp",
       windowKind: "mandatory_choice",
       windowId: choice.choiceId,
       stateVersion: context.input.playerView.stateVersion,
@@ -26674,88 +25019,6 @@ function selectedRunnerRunDebugQuote(
   };
 }
 
-function turnKey(input: AiDecisionInput): string {
-  return `${input.side}:${input.playerView.turnSerial ?? input.actionNumber}`;
-}
-
-function corpResidentHqOverflowResolution(
-  previous: ResidentPlanPortfolio | undefined,
-  input: AiDecisionInput,
-):
-  | {
-      initialOverflowCount: number;
-      maximumConversions: number;
-      remainingConversions: number;
-      selectedAtStateVersion?: number;
-      expectedOverflowAfterSelectedConversion?: number;
-    }
-  | undefined {
-  const instance = previous?.instances.find(
-    (candidate) =>
-      candidate.moduleId === "corp.hand_and_agenda_management" &&
-      candidate.dedupeKey === `resolve-hq-overflow:${turnKey(input)}`,
-  );
-  if (!instance) return undefined;
-  const moduleState = instance.moduleState as
-    | {
-        kind?: unknown;
-        signal?: CorpPlanDomain["handManagement"][number];
-      }
-    | undefined;
-  const signal = moduleState?.signal;
-  const state = signal?.overflowResolutionState;
-  const selectedAtStateVersion = state?.selectedAtStateVersion;
-  const expectedOverflowAfterSelectedConversion =
-    state?.expectedOverflowAfterSelectedConversion;
-  const valid =
-    moduleState?.kind === "hand" &&
-    signal?.phase === "resolve_hq_overflow" &&
-    signal.handPlanId === `resolve-hq-overflow:${turnKey(input)}` &&
-    state?.turnKey === turnKey(input) &&
-    Number.isSafeInteger(state.initialOverflowCount) &&
-    state.initialOverflowCount > 0 &&
-    Number.isSafeInteger(state.maximumConversions) &&
-    state.maximumConversions > 0 &&
-    state.maximumConversions <= state.initialOverflowCount &&
-    Number.isSafeInteger(state.remainingConversions) &&
-    state.remainingConversions >= 0 &&
-    state.remainingConversions <= state.maximumConversions &&
-    (selectedAtStateVersion === undefined
-      ? state.remainingConversions === state.maximumConversions &&
-        expectedOverflowAfterSelectedConversion === undefined
-      : Number.isSafeInteger(selectedAtStateVersion) &&
-        selectedAtStateVersion >= 0 &&
-        selectedAtStateVersion <= previous!.stateVersion &&
-        state.remainingConversions < state.maximumConversions &&
-        Number.isSafeInteger(expectedOverflowAfterSelectedConversion) &&
-        expectedOverflowAfterSelectedConversion! >= 0);
-  if (!valid) {
-    throw new PlanResolutionFailure("invalid_plan_identity", {
-      side: input.side,
-      stateVersion: input.playerView.stateVersion,
-      timingPoint: input.playerView.timingPoint,
-      legalActionTypes: input.legalActions.map((action) => action.type),
-      owner: "plan_registry",
-      planInstanceId: instance.instanceId,
-      removalCondition:
-        "The HQ-overflow plan receipt must preserve its exact Corp turn, initial overflow bound, remaining finite conversions, and selected state after each consumed head.",
-    });
-  }
-  const sameStateRetry =
-    selectedAtStateVersion === input.playerView.stateVersion;
-  return {
-    initialOverflowCount: state!.initialOverflowCount,
-    maximumConversions: state!.maximumConversions,
-    remainingConversions: sameStateRetry
-      ? Math.min(state!.maximumConversions, state!.remainingConversions + 1)
-      : state!.remainingConversions,
-    ...(selectedAtStateVersion !== undefined ? { selectedAtStateVersion } : {}),
-    ...(expectedOverflowAfterSelectedConversion !== undefined
-      ? { expectedOverflowAfterSelectedConversion }
-      : {}),
-  };
-}
-
 function corpResidentDefenseDrawAttempt(
   previous: ResidentPlanPortfolio | undefined,
   input: AiDecisionInput,
@@ -27444,11 +25707,6 @@ function corpCardRoutePreservesScoreReserve(
   return { preservesReserve, requiredCreditsAfterAction };
 }
 
-type CorpScoreAccelerationSetupBinding = Readonly<{
-  parent: CorpScoreProjectSignal;
-  setupNeed: NonNullable<CorpScoreProjectSignal["setupNeed"]>;
-}>;
-
 function corpDeferredLastClickScoreProject(
   scoreProjects: readonly CorpScoreProjectSignal[],
 ): CorpScoreProjectSignal | undefined {
@@ -27527,162 +25785,6 @@ function corpScoreAccelerationSetupBinding(
       sourceDefinitionId: setupCandidate.sourceDefinitionId,
     },
   };
-}
-
-function corpCardDevelopmentSignals(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  agendaCount: number,
-  economyNeeds: CorpCorePlanDomain["economyNeeds"],
-  defenseDispositionActionIds: ReadonlySet<string>,
-  scoreSetupBinding: CorpScoreAccelerationSetupBinding | undefined,
-  scoreProjects: readonly CorpScoreProjectSignal[],
-): CorpPlanDomain["handManagement"] {
-  const reservedScoreServerIds = corpReservedScoreServerIds(
-    input,
-    scoreProjects,
-  );
-  return uniqueBy(
-    candidates.flatMap((candidate): CorpPlanDomain["handManagement"] => {
-      if (defenseDispositionActionIds.has(candidate.actionId)) {
-        return [];
-      }
-      const exactOverflowConversion =
-        input.playerView.own.gripOrHq.length >
-          input.playerView.own.maxHandSize &&
-        corpHqOverflowCandidateIsExactCurrentConversion(
-          input,
-          candidate,
-          reservedScoreServerIds,
-        );
-      if (
-        !candidate.sourceDefinitionId ||
-        !candidate.sourceCardInstanceId ||
-        (![
-          "install.card",
-          "play.corp_operation",
-          "card_ability.trigger",
-          "economy.gain_credit",
-          "draw.card",
-        ].includes(candidate.semanticActionType) &&
-          !exactOverflowConversion)
-      ) {
-        return [];
-      }
-      if (corpEmptyRdDrawOperationDispositionEvidence(input, candidate)) {
-        return [];
-      }
-      if (
-        candidate.actionCapacityProjection?.kind === "future_recurring_gain"
-      ) {
-        return [];
-      }
-      if (
-        corpCandidateProjectsCardDraw(candidate) &&
-        !corpDrawCandidatePreservesHandCapacity(input, candidate)
-      ) {
-        return [];
-      }
-      const roles = rolesForDeckDoctrineCard(candidate.sourceDefinitionId);
-      const hint = AI_HINTS_BY_CARD.get(candidate.sourceDefinitionId);
-      const sourceCard = input.playerView.own.gripOrHq.find(
-        (card) => card.instanceId === candidate.sourceCardInstanceId,
-      );
-      if (!sourceCard) return [];
-      if (corpDefensiveUpgradePlacement(input, candidate, scoreProjects))
-        return [];
-      const ownedByPunishPlan = corpDefinitionSupportsPunishPlan(
-        candidate.sourceDefinitionId,
-      );
-      const economyRole =
-        hint?.roles?.includes("economy") === true ||
-        hint?.planRoles?.includes("remote_asset_economy") === true ||
-        corpHostedCreditBankProfile(candidate.sourceDefinitionId) !==
-          undefined ||
-        hint?.effects?.some((effect) =>
-          [
-            "economy",
-            "action_economy",
-            "start_of_turn_economy",
-            "recurring_economy",
-          ].includes(effect.kind),
-        ) === true;
-      const ownedByEconomyPlan = economyNeeds.some(
-        (signal) =>
-          (signal.kind === "develop_campaign" ||
-            signal.kind === "convert_immediate_operation" ||
-            signal.kind === "convert_visible_card_payout" ||
-            signal.kind === "prepare_immediate_operation") &&
-          signal.actionIds.includes(candidate.actionId),
-      );
-      if (
-        roles.some((role) => role.includes("ambush")) ||
-        candidateIsVisibleCorpAgendaInstall(input, candidate) ||
-        ownedByEconomyPlan ||
-        ownedByPunishPlan
-      ) {
-        return [];
-      }
-      if (exactOverflowConversion) {
-        return [
-          {
-            handPlanId: `overflow-admissible:${candidate.sourceCardInstanceId}:${candidate.actionId}`,
-            phase: "develop_card" as const,
-            sourceDefinitionIds: [candidate.sourceDefinitionId],
-            sourceInstanceId: candidate.sourceCardInstanceId,
-            actionIds: [candidate.actionId],
-            exactActionRoute: true,
-            agendaCount,
-            handSize: input.playerView.own.gripOrHq.length,
-            maximumHandSize: input.playerView.own.maxHandSize,
-            concretePurposeCode:
-              "Expose this exact known non-agenda hand conversion only to the finite HQ-overflow parent.",
-            value: Math.max(
-              economyRole ? 40 : 10,
-              (candidate.economyProjection?.netLiquidCreditGain ?? 0) * 10,
-            ),
-            evidenceCode: `corp_hq_overflow_admissible_current_conversion:${candidate.sourceDefinitionId}`,
-          },
-        ];
-      }
-      if (candidateIsVisibleCorpIceInstall(input, candidate)) {
-        return [];
-      }
-      if (
-        scoreSetupBinding?.setupNeed.actionId === candidate.actionId &&
-        scoreSetupBinding.setupNeed.sourceCardInstanceId ===
-          candidate.sourceCardInstanceId &&
-        scoreSetupBinding.setupNeed.sourceDefinitionId ===
-          candidate.sourceDefinitionId
-      ) {
-        const parentPlanInstanceId = planInstanceIdForProposal({
-          moduleId: "corp.score_agenda",
-          dedupeKey: scoreSetupBinding.parent.projectId,
-        });
-        return [
-          {
-            handPlanId: scoreSetupBinding.setupNeed.needId,
-            parentPlanInstanceId,
-            parentNeedId: scoreSetupBinding.setupNeed.needId,
-            phase: "develop_card" as const,
-            sourceDefinitionIds: [candidate.sourceDefinitionId],
-            sourceInstanceId: candidate.sourceCardInstanceId,
-            actionIds: [candidate.actionId],
-            exactActionRoute: true,
-            agendaCount,
-            handSize: input.playerView.own.gripOrHq.length,
-            maximumHandSize: input.playerView.own.maxHandSize,
-            concretePurposeCode: `Install ${candidate.sourceDefinitionId} as the exact current setup step for score parent ${scoreSetupBinding.parent.projectId}, then observe and revalidate.`,
-            priorityClass: "P5" as const,
-            value: 100,
-            evidenceCode: `corp_score_acceleration_campaign_setup:${candidate.sourceDefinitionId}:${scoreSetupBinding.parent.projectId}`,
-          },
-        ];
-      }
-      return [];
-    }),
-    (signal) => signal.handPlanId,
-  );
 }
 
 function difficultyLevel(input: AiDecisionInput): number {

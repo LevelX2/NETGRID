@@ -1,6 +1,6 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 
-import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 
 export const CORP_HAND_INVENTORY_FACTS_SCHEMA_VERSION =
   "corp-hand-inventory-facts-v3" as const;

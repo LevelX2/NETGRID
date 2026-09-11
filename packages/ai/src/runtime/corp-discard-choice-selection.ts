@@ -1,6 +1,6 @@
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 
-import { corpHandDispositionScore } from "./corp-hand-disposition-score";
+import { corpHandDispositionScore } from "../corp/hand-management/hand-disposition-score";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import type { ProjectedHandDisposition } from "../plans/turn-projection";
 import { boundedSelectionCount } from "./choice-option";

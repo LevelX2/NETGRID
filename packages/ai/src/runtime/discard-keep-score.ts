@@ -21,7 +21,7 @@ import {
   corpHandDuplicateCount,
   corpHandPressureAssessment,
   type CorpHandPressureAssessment,
-} from "./corp-hand-inventory-facts";
+} from "../corp/hand-management/hand-inventory-facts";
 import type { ProjectedHandDisposition } from "../plans/turn-projection";
 import {
   corpDefinitionHasTagSource,

@@ -89,7 +89,7 @@ vollständige Abdeckung aller denkbaren Kartenfolgen.
 | `corp.punish_campaign`            | [punishCampaignModule](../../../packages/ai/src/corp/punish/punish-campaign-plan-module.ts)                                   | [Corp §7](corp-plan-contracts.md#7-corppunish_campaign)                                              |
 | `corp.execute_punish_sequence`    | [punishSequenceModule](../../../packages/ai/src/corp/punish/punish-sequence-plan-module.ts)                                   | [Corp §8](corp-plan-contracts.md#8-corpexecute_punish_sequence)                                      |
 | `corp.ambush_and_bluff`           | [ambushModule](../../../packages/ai/src/plans/corp-tactical-plan-modules.ts#L539)                                           | [Corp §9](corp-plan-contracts.md#9-corpambush_and_bluff)                                             |
-| `corp.hand_and_agenda_management` | [handModule](../../../packages/ai/src/plans/corp-tactical-plan-modules.ts#L787)                                             | [Corp §10](corp-plan-contracts.md#10-corphand_and_agenda_management)                                 |
+| `corp.hand_and_agenda_management` | [handModule](../../../packages/ai/src/corp/hand-management/hand-management-plan-module.ts)                                             | [Corp §10](corp-plan-contracts.md#10-corphand_and_agenda_management)                                 |
 | `corp.complete_turn`              | [createTurnCompletionPlanModule](../../../packages/ai/src/plans/turn-completion-plan-module.ts)                             | [EndTurn](planning-architecture.md#17-endturn-vertrag)                                               |
 
 Die Faktenproduzenten sind in `runnerContext` / `corpContext` der

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
-import { corpHandDispositionScore } from "./corp-hand-disposition-score";
+import { corpHandDispositionScore } from "./hand-disposition-score";
 
 describe("Corp hand disposition score", () => {
   it("can return an agenda to R&D when HQ is flooded", () => {

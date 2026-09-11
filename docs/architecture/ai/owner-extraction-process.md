@@ -27,10 +27,10 @@ eigenen Commit. Fehler werden vor dem nächsten Paket behoben.
 2. **NF02 abgeschlossen – Corp Punish Sequence:** Ausführungsmodul, exakte Head- und
    Trace-/Continuation-Bindung innerhalb derselben Familie. Nachweis: aktuelle
    Action/StateVersion, Parent/Need und Requote nach beobachtetem Ergebnis.
-3. **NF03 aktiv – Corp Hand Management:** Handplanung, Signale und gebundene
+3. **NF03 abgeschlossen – Corp Hand Management:** Handplanung, Signale und gebundene
    Hand-Choices; Score bleibt zuständig für Agenda-Ziel und Punktehorizont.
    Nachweis: Overflow, Draw/Discard/Shuffle, Deckout und Agenda-Flood.
-4. **NF04 offen – Runner Development:** Plan und Entwicklungs-/Suchsignale
+4. **NF04 aktiv – Runner Development:** Plan und Entwicklungs-/Suchsignale
    sowie Fortsetzungen mit vorhandener Handbewertung zusammenführen.
    Nachweis: Admission, Funding, Install/Search und private Choice-Bindung.
 5. **NF05 offen – Corp Economy:** Need-Verträge, Einkommen, Investition,
@@ -61,3 +61,6 @@ NF01: 33 Tests in fünf Punish-Dateien grün; AI-Typecheck und Strukturgate
 
 NF02: 51 Tests in vier Quote-/Trace-/Sequenz-/Taktikdateien grün;
 Strukturgate grün (744 produktive Dateien, keine Zyklen).
+
+NF03: 65 Tests grün (48 thematische Tests und 17 gezielte Live-/Choice-Tests);
+AI-Typecheck und Strukturgate grün (753 produktive Dateien, keine Zyklen).

@@ -1,13 +1,13 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
-import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import {
   buildCorpHandInventoryFacts,
   CORP_HAND_INVENTORY_FACTS_SCHEMA_VERSION,
   corpHandDuplicateCount,
   corpHandPressureAssessment,
-} from "./corp-hand-inventory-facts";
+} from "./hand-inventory-facts";
 
 describe("Corp hand inventory facts", () => {
   it("records exact own-HQ actions, projections and plan-effective cleanup facts", () => {

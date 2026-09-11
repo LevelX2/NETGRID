@@ -1057,6 +1057,20 @@ regellegal; Engine-Ausführung und Zielprüfung bleiben unverändert maßgeblich
 
 ## 10. `corp.hand_and_agenda_management`
 
+Der Owner liegt unter `packages/ai/src/corp/hand-management/`.
+`hand-development-signals.ts` komponiert Kartenentwicklung und den endlichen
+Overflow-Parent; `hand-overflow.ts` revalidiert dessen konkrete Konversionen.
+`hand-draw-arbitration.ts` vergleicht Handentlastung und Draw, während
+`hand-choice-bindings.ts` Discard, Draw-Filter, Shuffle und Archives-Recovery
+an ihre exakte Engine-Choice bindet. Inventarfakten und Zielgebietsdisposition
+liegen ebenfalls hier; `hand-management-plan-module.ts` führt die Planroute.
+
+Score liefert seine Serverreservierung und Setup-Bindung über
+`runtime/corp-scoreline/score-hand-support.ts`. Die Runtime reicht außerdem
+einen eng typisierten Defense-Prüfdienst ein, damit Handentwicklung keine
+bereits von Defense bewertete Upgrade-Platzierung übernimmt. Hand besitzt
+dadurch weder eine zweite ICE-/Serverbewertung noch den Scorehorizont.
+
 **Klasse:** `bounded_sequence` oder `development_project`
 **Rolle:** Vordergrund/Support
 **Status:** registrierter produktiver Owner; Fähigkeitsgrenzen siehe Einstieg.

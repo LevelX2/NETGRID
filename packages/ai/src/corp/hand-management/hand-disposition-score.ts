@@ -1,12 +1,12 @@
-import { corpArchivesPreparationDiscardValue } from "./corp-access-zone-preparation";
+import { corpArchivesPreparationDiscardValue } from "../../runtime/corp-access-zone-preparation";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
-import type { DiscardChoiceKeepScore } from "./discard-choice-selection";
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import type { DiscardChoiceKeepScore } from "../../runtime/discard-choice-selection";
 import {
   corpHandDuplicateCount,
   corpHandPressureAssessment,
-} from "./corp-hand-inventory-facts";
+} from "./hand-inventory-facts";
 
 export type CorpHandDispositionDestination =
   | "archives"

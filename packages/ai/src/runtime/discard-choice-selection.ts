@@ -126,3 +126,8 @@ function inputWithoutDiscardedCard(
     },
   };
 }
+
+export type DiscardKeepScorer = (
+  input: AiDecisionInput,
+  card: VisibleCard,
+) => DiscardChoiceKeepScore;

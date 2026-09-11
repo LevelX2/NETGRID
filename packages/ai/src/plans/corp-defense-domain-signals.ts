@@ -18,7 +18,7 @@ import {
   type CorpScoreReserve,
   type KnownCorpFundedIceInstallRouteProjection,
 } from "../runtime/corp-funded-score-protection";
-import { corpHandDuplicateCount } from "../runtime/corp-hand-inventory-facts";
+import { corpHandDuplicateCount } from "../corp/hand-management/hand-inventory-facts";
 import { corpKnownAgendaInventory } from "../runtime/corp-known-agenda-inventory";
 import { isCorpOpeningTurnSerial } from "../runtime/corp-opening-rush";
 import { readKnownCorpCentralAgendaThreat } from "../runtime/corp-central-defense-facts-adapter";
