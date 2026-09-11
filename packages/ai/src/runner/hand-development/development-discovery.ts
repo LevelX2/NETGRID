@@ -22,7 +22,7 @@ import { assessRunnerSuccessfulRunCreditInvestment } from "../../runtime/runner-
 import {
   runnerDefinitionRequiresTargetedBypassPlan,
   runnerGenericDevelopmentMayOwnAction,
-} from "../../runtime/runner-targeted-bypass-plan";
+} from "../run-window/runner-targeted-bypass-plan";
 import type { RunnerExposeInformationSignal } from "../expose-information/expose-information-types";
 import { runnerMatchpointReserveBlocksOverlappingBreakerInstall } from "../rig-coverage/coverage-dispositions";
 import { runnerCoverageRecoveryTarget } from "../rig-coverage/coverage-support";

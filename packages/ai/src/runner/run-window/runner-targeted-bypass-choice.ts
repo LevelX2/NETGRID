@@ -1,7 +1,7 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 
-import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
-import { residentPlanPortfolioSnapshot } from "../plans/resident-plan-portfolio-memory";
+import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
+import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
 import {
   SOCIAL_ENGINEERING_DEFINITION_ID,
   type RunnerTargetedBypassChoiceContinuation,

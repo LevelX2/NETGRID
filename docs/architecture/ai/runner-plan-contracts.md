@@ -690,6 +690,30 @@ verfügbare Abwehraktion.
 
 ## 8. `runner.convert_run_window`
 
+### Vertikale Implementierung
+
+[`runWindowModule`](../../../packages/ai/src/runner/run-window/run-window-plan-module.ts)
+ist der Einstieg in `runner/run-window/`. `run-window-discovery.ts` bildet
+die aktuellen Fenster aus dem gebundenen Runursprung und den bewerteten Actions.
+`run-window-assessment.ts` besitzt Zulässigkeit, Risiko-Revalidierung,
+Encounter- und Accessbewertung sowie die exakte Phasenroute.
+`run-window-dispositions.ts` veröffentlicht planlokale Ausschlüsse unter
+Erhalt bereits ausführbarer Remote-Routen.
+
+`run-window-origin.ts` erhält Root, Parent, Zugriffsreserve und
+Informationsgrenzen. Die Dateien `run-window-*-continuation.ts` sowie
+`run-window-selected-origin.ts` und `run-window-choice-binding.ts` binden
+Runstart, Zahlungen, Breakerfolgen, Trace, Vacuum Link und die zugehörigen
+Choices an die ausgewählte Action und StateVersion. Der Owner konsumiert
+eng typisierte Dienste aus `run-window-services.ts`; er importiert keinen
+Runtime-Dispatcher und keine Planregistry zurück.
+
+Der Adapter `runner-access-trash-impact.ts` bindet die gemeinsame fachliche
+Trashbewertung unter `access/` an die angebotene Action und deren Kostenquote.
+Runpfad-Analyse und Fakten bleiben geteilte Dienste. Die Wahl des ursprünglichen
+Central-/Remote-Ziels bleibt beim jeweiligen Root-Owner; Prioritäten,
+Entscheidungsregeln und die 25 registrierten Module bleiben unverändert.
+
 Ein Run mit unbekanntem verbleibendem ICE bindet die beim Start akzeptierte
 side-sichere Risiko- und Reservequote an seine Root-Planinstanz. Das gebundene
 `runner.convert_run_window`-Leaf quotiert denselben Vertrag an jedem

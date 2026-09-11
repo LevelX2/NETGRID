@@ -2,8 +2,8 @@ import type {
   RunnerPressureSignal,
   RunnerRemoteContestSignal,
   RunnerRunWindowActionAssessment,
-} from "../plans/runner-tactical-plan-contracts";
-import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+} from "../../plans/runner-tactical-plan-contracts";
+import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 
 type RunnerRunOriginPurpose =
   | RunnerPressureSignal["purpose"]

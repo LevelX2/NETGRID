@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
   assessRunnerAdditionalAccessRunWindowAction,
   runnerCandidateHasVisibleAdditionalAccessEffect,
-} from "./runner-run-window-additional-access";
+} from "../runner/run-window/runner-run-window-additional-access";
 
 describe("Runner additional-access run-window admission", () => {
   it("admits a visible R&D additional-access effect for its bound multiaccess parent", () => {

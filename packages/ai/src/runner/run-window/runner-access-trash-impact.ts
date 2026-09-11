@@ -3,8 +3,8 @@ import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import {
   assessRunnerAccessTrashImpactFromPlanningCard,
   type RunnerAccessTrashImpactAssessment,
-} from "../access/runner-access-trash-impact";
-import { remoteTrashActionTotalCost } from "./remote-trash-cost";
+} from "../../access/runner-access-trash-impact";
+import { remoteTrashActionTotalCost } from "../../runtime/remote-trash-cost";
 
 export function assessRunnerAccessTrashImpact(params: {
   input: AiDecisionInput;

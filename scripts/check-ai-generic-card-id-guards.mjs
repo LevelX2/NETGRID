@@ -20,7 +20,7 @@ const allowedCategories = new Set([
 
 const allowedCardIdUses = createAllowances([
   {
-    relativePath: "runtime/runner-targeted-bypass-plan.ts",
+    relativePath: "runner/run-window/runner-targeted-bypass-plan.ts",
     cardId: "onr_v1_111_social-engineering",
     category: "individual_plan_model",
     reason:
@@ -41,12 +41,20 @@ const allowedCardIdUses = createAllowances([
       "The definition ID validates the persisted origin of the exact Vacuum Link encounter continuation.",
   },
   {
-    relativePath: "runtime/plan-first-live-runtime.ts",
+    relativePath: "runner/run-window/run-window-selected-origin.ts",
     cardId: "onr_v1_275_vacuum-link",
     category: "lifecycle_binding",
-    expectedCount: 6,
+    expectedCount: 3,
     reason:
       "The definition ID binds the selected LegalAction and encountered ICE to the exact Vacuum Link rewind continuation.",
+  },
+  {
+    relativePath: "runner/run-window/run-window-vacuum-link-continuation.ts",
+    cardId: "onr_v1_275_vacuum-link",
+    category: "lifecycle_binding",
+    expectedCount: 3,
+    reason:
+      "The definition ID validates and advances the selected Vacuum Link encounter continuation.",
   },
   {
     relativePath: "corp/defense/defense-discovery-support.ts",

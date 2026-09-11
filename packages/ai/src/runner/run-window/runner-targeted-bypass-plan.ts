@@ -1,12 +1,12 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 
-import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
+import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import {
   assessKnownRezzedIcePath,
   runnerRunPathCreditBudgetWithVisiblePools,
-} from "../visible-run-analysis";
-import { socialEngineeringCorpGuessAmount } from "./bid-choice-option";
-import { runnerActionRequiresTargetedIceTrashPlan } from "./runner-targeted-ice-trash-plan";
+} from "../../visible-run-analysis";
+import { socialEngineeringCorpGuessAmount } from "../../runtime/bid-choice-option";
+import { runnerActionRequiresTargetedIceTrashPlan } from "../../runtime/runner-targeted-ice-trash-plan";
 
 export const SOCIAL_ENGINEERING_DEFINITION_ID = "onr_v1_111_social-engineering";
 

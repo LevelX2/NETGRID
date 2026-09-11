@@ -3,11 +3,11 @@ import { describe, expect, it } from "vitest";
 
 import type { PlanSchedulerResult } from "../plans/plan-scheduler";
 import type { ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
+import { reconcileSelectedEngineWindowActionDispositions } from "./plan-first-live-runtime";
 import {
-  reconcileSelectedEngineWindowActionDispositions,
   reconcileSelectedRunnerCostPenaltySupportOrigin,
   resolvePlanBoundRunnerCostPenaltyContinuation,
-} from "./plan-first-live-runtime";
+} from "../runner/run-window/run-window-cost-continuation";
 
 describe("Runner cost/penalty support plan continuation", () => {
   it("preserves the run owner when a zero-cost movement starts an encounter-tax payment", () => {

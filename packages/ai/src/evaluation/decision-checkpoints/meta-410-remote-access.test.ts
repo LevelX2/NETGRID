@@ -6,7 +6,7 @@ import { reconstructBeliefState } from "../../belief-state";
 import { evaluateKnownRemoteAccessPayoff } from "../../known-remote-access-payoff";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
-import { assessRunnerAccessTrashImpact } from "../../runtime/runner-access-trash-impact";
+import { assessRunnerAccessTrashImpact } from "../../runner/run-window/runner-access-trash-impact";
 import {
   restoreAiRuntimeCheckpoint,
   type AiRuntimeCheckpointV1,

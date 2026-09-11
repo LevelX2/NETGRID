@@ -15,11 +15,11 @@ import {
   rememberResidentPlanPortfolio,
   resetResidentPlanPortfolioMemory,
 } from "../plans/resident-plan-portfolio-memory";
-import { runnerGenericDevelopmentMayOwnAction } from "./runner-targeted-bypass-plan";
+import { runnerGenericDevelopmentMayOwnAction } from "../runner/run-window/runner-targeted-bypass-plan";
 import {
   isRunnerTargetedIceTrashChoice,
   selectedRunnerTargetedIceTrashChoiceOptionId,
-} from "./runner-targeted-ice-trash-choice";
+} from "../runner/run-window/runner-targeted-ice-trash-choice";
 import {
   runnerActionRequiresTargetedIceTrashPlan,
   runnerTargetedIceTrashPlanCommitment,

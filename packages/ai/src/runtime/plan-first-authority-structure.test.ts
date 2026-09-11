@@ -17,6 +17,7 @@ const readSource = (...segments: string[]): string =>
 
 const extractedOwnerSources = [
   ["corp", "defense"],
+  ["runner", "run-window"],
   ["corp", "punish"],
   ["corp", "hand-management"],
   ["corp", "economy"],

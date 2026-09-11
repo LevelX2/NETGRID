@@ -12,7 +12,7 @@ import {
   runnerCentralPayoffServerForDefinition,
 } from "../../runtime/runner-access-payoff-facts";
 import { runnerCandidateSourceDefinitionId } from "../../runtime/runner-action-source-facts";
-import { runnerDefinitionRequiresTargetedBypassPlan } from "../../runtime/runner-targeted-bypass-plan";
+import { runnerDefinitionRequiresTargetedBypassPlan } from "../run-window/runner-targeted-bypass-plan";
 import type { RunnerHandDevelopmentEvaluation } from "../hand-development/hand-development-evaluation";
 export function runnerCentralPressureDevelopmentSignals(
   input: AiDecisionInput,

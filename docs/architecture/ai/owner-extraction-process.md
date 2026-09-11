@@ -1,6 +1,6 @@
 # Defense und Run-Window konsolidieren
 
-Status: P1 abgenommen; P2 aktiv; Integration offen.
+Status: P1 und P2 abgenommen; Integration aktiv.
 
 ## Auftrag und Ziel
 
@@ -60,3 +60,21 @@ Dateien umgetragen. 514 ursprüngliche Funktionskörper sind tokenidentisch;
 nur `buildCorpDomain` komponiert die drei ausgelagerten Discovery-Schritte.
 Keine ursprüngliche Funktion fehlt. Breite Shards folgen am gemeinsamen
 Integrationscheckpoint gemäß Projekt-Testvertrag.
+
+## P2-Abnahme
+
+456 fokussierte Tests in elf Dateien grün, einschließlich Owner-Materialisierung,
+Run-/Access-Commitment, Informationsgrenzen, Restricted Runs, Remote-Fortsetzung,
+Zahlungssupport, zusätzlichem Zugriff, Targeted Bypass, erzwungenem Vacuum Link
+und Authority-Grenzen. AI-Typecheck nach den finalen Extraktionen grün.
+Alle 838 produktiven Quellen sind erreichbar und Value-/Typzyklen fehlen.
+Card-ID-Gate samt Selbsttest, Hint-Verträge, Paketgrenzen (2.196 Dateien),
+Test-Discovery und Formatprüfung sind grün. 142 aktuelle Dokumentlinks geprüft.
+
+Über beide Pakete: 584 ursprüngliche Funktionskörper tokenidentisch; nur
+`buildCorpDomain`, `buildRunnerDomain` und `runnerActionDispositions` komponieren
+exakt ausgelagerte Blöcke. Keine ursprüngliche Funktion fehlt. Die sechs
+bestehenden Vacuum-Link-Lifecycle-Vorkommen sind auf zwei Ownerdateien verteilt,
+die bestehende Social-Engineering-Klassifikation folgt ihrem Quellpfad.
+Die Live-Runtime umfasst jetzt 5.442 statt 13.276 Zeilen.
+Der gemeinsame AI-Shard-Lauf läuft; Abschluss und lokale Integration stehen aus.

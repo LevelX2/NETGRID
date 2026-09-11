@@ -45,7 +45,7 @@ import {
   runnerActionRequiresTargetedBypassPlan,
   runnerDefinitionRequiresTargetedBypassPlan,
   runnerTargetedBypassPlanCommitment,
-} from "../../runtime/runner-targeted-bypass-plan";
+} from "../run-window/runner-targeted-bypass-plan";
 import {
   runnerActionRequiresTargetedIceTrashPlan,
   runnerTargetedIceTrashPlanCommitment,

@@ -1,8 +1,8 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 
-import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
-import { residentPlanPortfolioSnapshot } from "../plans/resident-plan-portfolio-memory";
-import type { RunnerTargetedIceTrashChoiceContinuation } from "./runner-targeted-ice-trash-plan";
+import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
+import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
+import type { RunnerTargetedIceTrashChoiceContinuation } from "../../runtime/runner-targeted-ice-trash-plan";
 
 type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]

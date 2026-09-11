@@ -7,7 +7,7 @@ import type {
 import type { RunnerExposeInformationSignal } from "../runner/expose-information/expose-information-types";
 import { RunnerDevelopmentSignal } from "../runner/hand-development/development-types";
 import type { RunnerTerminalWinSignal } from "../runner/terminal-win/terminal-win-types";
-import type { RunnerTargetedBypassCommitment } from "../runtime/runner-targeted-bypass-plan";
+import type { RunnerTargetedBypassCommitment } from "../runner/run-window/runner-targeted-bypass-plan";
 import type { RunnerTargetedIceTrashCommitment } from "../runtime/runner-targeted-ice-trash-plan";
 
 export type RunnerRunRiskContractSignal = {
