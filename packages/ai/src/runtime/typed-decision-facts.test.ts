@@ -11,11 +11,11 @@ import type { RunnerAccessFacts } from "../access/runner-access-facts";
 
 import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import {
-  accessCommitmentForEvaluation,
   reservedAccessTrashCredits,
   corpScoreProjectNeedsProtectionMaturity,
   uniqueScoreProjects,
 } from "./plan-first-live-runtime";
+import { accessCommitmentForEvaluation } from "../run-analysis/runner-plan-run-route-facts";
 
 function remoteRun() {
   const action = legalAction(

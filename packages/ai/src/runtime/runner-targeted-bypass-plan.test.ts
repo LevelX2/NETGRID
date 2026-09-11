@@ -25,7 +25,7 @@ import {
   type RunnerTargetedBypassChoiceContinuation,
 } from "./runner-targeted-bypass-plan";
 import { socialEngineeringCorpGuessAmount } from "./bid-choice-option";
-import { bindSelectedRunnerTargetedBypassChoiceContinuation } from "./plan-first-live-runtime";
+import { bindSelectedRunnerTargetedBypassChoiceContinuation } from "../run-analysis/runner-run-preparation-choice-binding";
 import { selectedChoicesForDecision } from "./selected-choices-for-decision";
 
 afterEach(() => {

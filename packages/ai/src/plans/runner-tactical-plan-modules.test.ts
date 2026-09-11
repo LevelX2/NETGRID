@@ -17,9 +17,9 @@ import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
 import type { PlanSchedulerContext } from "./plan-scheduler";
 import {
   createRunnerTacticalPlanModules,
-  runnerPressureProgressReceipt,
   runnerVoluntaryActionFamilyOwner,
 } from "./runner-tactical-plan-modules";
+import { runnerPressureProgressReceipt } from "../runner/central-pressure/central-pressure-plan-module";
 
 describe("Runner tactical plan modules", () => {
   it("owns a proactive Guide play only through runner.expose_information", () => {

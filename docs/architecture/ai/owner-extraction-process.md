@@ -1,6 +1,6 @@
 # Fünf weitere AI-Owner bündeln
 
-Status: P1 abgenommen; P2 aktiv. Auftrag: Nutzerfreigabe vom 2026-09-11.
+Status: P1–P2 abgenommen; P3 aktiv. Auftrag: Nutzerfreigabe vom 2026-09-11.
 
 ## Ziel und Grenzen
 
@@ -43,4 +43,7 @@ den Ownerverträgen und der AI-README; dieses Prozessartefakt wird nach Abschlus
 entfernt, Git bewahrt die Nachweise.
 
 P1: 70 Tests in sieben Dateien grün; AI-Typecheck und Source-/Reachability-Gates grün (783 produktive Dateien, keine Wert-/Typzyklen). Keine Verhaltensänderung. Gemeinsame Choice-Bindungsfehler und Typen vom Dispatcher getrennt.
+
+
+P2: 88 Tests über zehn Dateien geprüft; zwei fehlende Imports beim Herauslösen korrigiert, betroffene 15 Tests anschließend grün. Finale Funding-Extraktion ebenfalls mit diesen 15 Tests geprüft. Finaler AI-Typecheck und Source-/Reachability-Gates grün (794 produktive Dateien, keine Zyklen). Ein Typecheck-Aufruf ohne den vorgesehenen 8-GB-Heap wurde nach Speicherabbruch korrekt mit 8 GB wiederholt.
 
