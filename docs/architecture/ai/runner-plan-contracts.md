@@ -209,6 +209,11 @@ Card-Spec-Variante einschließlich des Engine-Defaults für Agenda und rezzbare
 Karten. Eine inaktive erste Variante darf spätere aktive Varianten nicht
 verdecken; unbekannter Rez-Zustand oder mehrere gleichzeitig aktive, nicht
 gemeinsam projizierbare Varianten werden ausdrücklich als unbekannt ausgewiesen.
+Ein weiterhin gültiges `declined_trash_memory_active` erhält beim Remote-Owner
+eine explizit nicht produktive Bewertung für jede aktuelle Run-Variante, auch
+wenn Pfad und Trashzahlung inzwischen rechnerisch bezahlbar sind. Das bloße
+Weglassen eines nicht zugelassenen Contests ersetzt diese Action-Zuordnung
+nicht; andere produktive Zielserver behalten ihre eigenen ausführbaren Heads.
 
 `draw_for_answer` ist nur zulässig, wenn:
 

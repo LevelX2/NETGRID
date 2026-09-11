@@ -1091,6 +1091,28 @@ export function buildRunnerRemoteContestSignals({
       baseRemoteContestDrafts,
       runTargets,
     ),
+    // A remembered access decline is an explicit target rejection even when
+    // the current path and trash payment are affordable. Keep its exact run
+    // assessments available when no productive contest was admitted above.
+    ...runTargets
+      .filter(
+        (evaluation) =>
+          evaluation.targetKind === "remote" &&
+          evaluation.recommendation === "declined_trash_memory_active",
+      )
+      .map((evaluation): RunnerRemoteContestSignalDraft => {
+        const evidenceCode = `runner_remote_run_declined_trash_memory_active:${evaluation.targetServerId}`;
+        return {
+          contestId: `remote:${evaluation.targetServerId}`,
+          serverId: evaluation.targetServerId,
+          purpose: "contest",
+          knownAgendaThreat: false,
+          reachable: false,
+          marginalValue: 0,
+          evidenceCode,
+          runActionDeferralEvidenceCode: evidenceCode,
+        };
+      }),
   ];
   const remoteContests = uniqueBy(
     [
