@@ -1,6 +1,7 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { CorpDefenseSignal } from "../../plans/corp-defense-contracts";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
+import { scoreRouteExposure } from "./score-route-risk";
 import type { CorpEconomyNeedSignal } from "../economy/economy-types";
 
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -440,12 +441,18 @@ function createLine(
       sum + (candidate.economyProjection?.netLiquidCreditGain ?? 0),
     0,
   );
+  const exposure = scoreRouteExposure(
+    params.project,
+    params.input.playerView.stateVersion,
+  );
   const accessProbability =
     params.project.openingRush?.status === "qualified"
       ? params.project.openingRush.quote.runnerAccessSuccessProbability
-      : { numerator: 1, denominator: 2 };
+      : exposure.knowledge === "known"
+        ? exposure.probability
+        : undefined;
   const accessRisk =
-    accessProbability.denominator > 0
+    accessProbability && accessProbability.denominator > 0
       ? accessProbability.numerator / accessProbability.denominator
       : 1;
   const fundingProgress =
@@ -473,7 +480,13 @@ function createLine(
       ? 0
       : line.family === "safe_setup"
         ? 4
-        : Math.round(accessRisk * 40) -
+        : Math.round(accessRisk * 40) +
+          (exposure.knowledge === "known" && accessRisk > 0
+            ? Math.min(30, exposure.runnerCreditsRemaining)
+            : exposure.knowledge === "unknown" &&
+                params.project.openingRush?.status !== "qualified"
+              ? 30
+              : 0) -
           (line.family === "combined_rush" ? 10 : 0);
   const continuity =
     line.family === "safe_setup" || line.family === "fund_setup" ? 12 : 16;
@@ -631,6 +644,7 @@ function createLine(
       ...(agendaProgress > 0 ? ["agenda_payoff_owned_by_score_root"] : []),
       "defense_claim_incremental_only",
       "economy_claim_liquidity_only",
+      `score_route_exposure:${exposure.knowledge}`,
     ],
   };
 }

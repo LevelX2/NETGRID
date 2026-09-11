@@ -1,6 +1,6 @@
 # Corp-Scoring aus Match 41df
 
-Status: aktiv, P5. Quelle: Nutzerauftrag vom 11.09.2026 und Maintenance-Audit
+Status: P5 geprüft, Integration aktiv. Quelle: Nutzerauftrag vom 11.09.2026 und Maintenance-Audit
 von `match_41df30053a8efe3e` (D19, D89, D91, D127, D172, D176, D210).
 
 ## Ziel und Grenzen
@@ -71,10 +71,21 @@ wird am Abschluss zugunsten aktueller Fachverträge entfernt; Git hält Evidence
   Dafür ist im aktuellen Code kein zusätzlicher Verhaltenspatch nötig; die
   historische Regression schützt beide Betriebsarten. P4 aktiv.
 
-- P4 geprüft: 107 AI-Tests und 32 Engine-Tests grün; AI-/Engine-Typechecks,
-  Struktur-, Reachability-, Hint- und Card-ID-Gates erfolgreich. Freie öffentliche
+- P4 geprüft: 107 AI-Tests und 32 Engine-Tests grün; Engine-Typecheck,
+  Struktur-, Reachability-, Hint- und Card-ID-Gates erfolgreich. Der verzögert
+  beendete AI-Typecheck meldete noch zu schmale Replay-Testtypen; P5 korrigiert
+  diese vor dem abschließenden Typgate. Freie öffentliche
   Hosts samt Stärkeänderung und Engine-Basisklickhorizont fließen in Scorebedarf
   und Reifeprüfung ein. Zusätzlich kombinierte ETR-Subroutinen an Breakerkosten
   durchgereicht. D89-Gegenprobe mit explizitem Dreiklick-Horizont verwirft den
   erreichbaren Agenda-Remote. Keine Änderung der historischen Capture-Datei.
   P5 aktiv: Notfallvergleich und Integration.
+
+- P5 geprüft: 296 AI-Tests grün, 38 davon nach der Testtyp-Korrektur erneut
+  geprüft. Abschließender AI-Typecheck mit Exit 0; Engine-Typecheck und
+  32 Engine-Tests ebenfalls erfolgreich. Zuglinie und Score-Owner vergleichen
+  die gleiche gebundene Exposition. D176/D210 behalten Remote 2 wegen höherer
+  Durchbruchkosten, bei bekannter Zugriffschance 1 auf beiden Remotes.
+- Main ist mit dem unabhängigen LAN-Startfix 2d9fc18c9 weitergelaufen.
+  Seine Integration in den Arbeitsbranch erhält beide Entwicklungsstände;
+  danach erfolgt der Fast-Forward des primären Main-Checkouts.

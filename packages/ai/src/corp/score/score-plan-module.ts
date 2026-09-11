@@ -27,6 +27,7 @@ import type {
   PlanSchedulerContext,
 } from "../../plans/plan-scheduler";
 import { corpScorePriorityClass } from "./corp-score-priority";
+import { scoreInstallExposurePenalty } from "./score-route-risk";
 export function scoreModule(): PlanModule {
   return {
     moduleId: "corp.score_agenda",
@@ -68,7 +69,10 @@ export function scoreModule(): PlanModule {
         resourceGaps.length === 0 &&
           current.signal.feasible &&
           scoreCandidates(context, current.signal).length > 0,
-        scoreAssessmentValue(current.signal),
+        scoreAssessmentValue(
+          current.signal,
+          context.input.playerView.stateVersion,
+        ),
         portfolio.executorInstanceId,
         resourceGaps,
       );
@@ -120,22 +124,25 @@ export function scoreModule(): PlanModule {
   };
 }
 
-function scoreAssessmentValue(signal: CorpScoreProjectSignal): number {
+function scoreAssessmentValue(
+  signal: CorpScoreProjectSignal,
+  stateVersion: number,
+): number {
   const agendaPointValue = Math.max(1, signal.agendaPoints) * 20;
   const conversionValue = signal.conversion
-    ? signal.conversion.existingRemoteRezzedIceCount * 12 +
-      signal.conversion.existingRemoteIceCount * 4 +
-      signal.conversion.realizedStrategySupportCount * 4 -
+    ? signal.conversion.realizedStrategySupportCount * 4 -
       signal.conversion.remainingAdvancementClicks * 8 -
       signal.conversion.remainingScoreCredits * 2 +
       (signal.conversion.residentParent ? 40 : 0)
     : 0;
-  if (signal.terminalScore) return 1_000 + agendaPointValue + conversionValue;
+  const routeValue =
+    conversionValue - scoreInstallExposurePenalty(signal, stateVersion);
+  if (signal.terminalScore) return 1_000 + agendaPointValue + routeValue;
   if (signal.preventsTerminalSteal)
-    return 2_000 + agendaPointValue + conversionValue;
-  if (signal.deadlinePressure) return 700 + agendaPointValue + conversionValue;
-  if (signal.sameTurnCloseout) return 500 + agendaPointValue + conversionValue;
-  return 100 + agendaPointValue + conversionValue;
+    return 2_000 + agendaPointValue + routeValue;
+  if (signal.deadlinePressure) return 700 + agendaPointValue + routeValue;
+  if (signal.sameTurnCloseout) return 500 + agendaPointValue + routeValue;
+  return 100 + agendaPointValue + routeValue;
 }
 
 function scoreBlockerCode(signal: CorpScoreProjectSignal): string | undefined {

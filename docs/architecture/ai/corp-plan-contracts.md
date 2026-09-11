@@ -199,16 +199,34 @@ finanzierungsblockierten Schutzroute keine zusätzliche reine Abschreckungsschic
 zulasten dieser Finanzierung. Die erste begrenzte Vorbereitung und ein konkret
 wirksamer zusätzlicher Stopper bleiben zulässig (Regression: Match 41df, D13).
 
-Die Schutzprojektion ber�cksichtigt �ffentliche Shell-Vorbereitungen einschlie�lich
-Engine-gepr�fter freier Host-Kapazit�t und St�rke�nderung. F�r die kommende
-Runner-Phase liefert die Engine `runnerNextTurnCreditClicks`: Basisklicks abz�glich
+Die Schutzprojektion berücksichtigt öffentliche Shell-Vorbereitungen einschließlich
+Engine-geprüfter freier Host-Kapazität und Stärkeänderung. Für die kommende
+Runner-Phase liefert die Engine `runnerNextTurnCreditClicks`: Basisklicks abzüglich
 bestehender Aktionsschuld und eines reservierten Run-Klicks. Optionale Einkommen,
-zus�tzliche Aktionen und unbekannte Handkarten sind nicht Teil dieses Basishorizonts.
+zusätzliche Aktionen und unbekannte Handkarten sind nicht Teil dieses Basishorizonts.
 Scorebedarf und seine Installationsprojektion verwenden denselben Horizont; laufende
-Runs behalten ihr aktuelles Budget. Die Reifepr�fung mehrerer ICE ber�cksichtigt
-dieselben vorbereiteten Breaker. Kombinierte ETR-Subroutinen m�ssen vollst�ndig an
+Runs behalten ihr aktuelles Budget. Die Reifeprüfung mehrerer ICE berücksichtigt
+dieselben vorbereiteten Breaker. Kombinierte ETR-Subroutinen müssen vollständig an
 die Breaker-Kostenrechnung weitergereicht werden. Fehlende Host-Fakten bleiben
 explizit unbekannt (Regressionen: Match 41df D89, Afreet/Cyfermaster/Puzzle).
+
+Notfall-Installationen behalten ihre ausdrückliche Fristzulassung, erhalten dadurch
+aber keinen Schutzbonus. Der Score-Owner vergleicht die an Parent, Server und
+StateVersion gebundene finanzierte Zugriffschance und die danach verbleibenden
+Runner-Credits. Reine ICE-Anzahl und Rez-Anzahl liefern keinen Konversionsbonus.
+Ein möglicher terminaler Steal erhöht das Gewicht der Exposition. Unbekannte oder
+veraltete Quotes bleiben unbekannt und tragen eine konservative Risikogrenze;
+sie werden weder als sicher noch pauschal als 50-Prozent-Chance behandelt.
+Die Zuglinien übernehmen dieselbe Exposition. Ein bereits im eigenen Zug
+vollständig schließender Score hat kein dazwischenliegendes Runner-Fenster.
+
+Die Zugriffsrechnung behandelt auch reinen Trace-Net-Schaden konservativ wie
+direkten Schaden: Er garantiert keinen verhinderten Zugriff. Das ist kein
+Flatline-Nachweis und behauptet keine vollständige Simulation aller Run-Folgen.
+In den historischen D176/D210-Zuständen sind beide Score-Remotes erreichbar;
+Remote 2 bleibt wegen der höheren Durchbruchkosten der bessere Notfallversuch.
+D210 lässt dem Runner dort 23 statt 25 Credits. Diese Regression verlangt
+keinen willkürlichen Serverwechsel und behauptet keinen alternativen Matchsieg.
 
 ## 3. `corp.establish_scoring_remote`
 

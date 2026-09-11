@@ -1332,6 +1332,12 @@ Credit für Rezreserve
 → Scorefenster einen Zug später, aber besserer Worst-Case-Floor
 ```
 
+Die Corp-Agenda-Zuglinie liest außerhalb des ausdrücklich gequoteten Opening-Rush
+ihre Zugriffswahrscheinlichkeit aus dem aktuellen gebundenen Defense-Bedarf.
+Verbleibende Runner-Credits unterscheiden auch zwei erreichbare Notfall-Remotes.
+Eine fehlende oder veraltete Quote wird als unbekannte Exposition mit konservativer
+Risikogrenze ausgewiesen; eine feste 50-Prozent-Ersatzwahrscheinlichkeit entfällt.
+
 Der Scheduler vergleicht nicht „Install“ gegen „Credit“, sondern die
 projizierten Linien:
 

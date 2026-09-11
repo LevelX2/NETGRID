@@ -79,6 +79,21 @@ anschließender Speicherfreigabe fortgesetzt. Die Originalset-Regressionen
 prüfen volle/freie normale MU, bezahlte und Startzug-Installation, Evil Twin,
 Cloaks Installations-Credits, Mehrfachtrash, Revalidierung und Replay/StateHash.
 
+## Öffentliche Runner-Vorbereitung
+
+`visibleProgramHostInstallVariants` projiziert aus sichtbarem Programm und Rig
+freie zulässige Hosts, belegte MU, Anzahlgrenzen, Subtypgrenzen und die resultierende
+Breaker-Stärke. Unbekannte erforderliche Fakten liefern eine explizite unvollständige
+Quote. Dies autorisiert keine Installation; LegalActions und applyAction bleiben
+maßgeblich. Die Projektion umfasst freie Hostplätze, keine zukünftigen Programm-
+Trash- oder Austauschentscheidungen.
+
+Die PlayerView veröffentlicht außerdem `runnerNextTurnCreditClicks` als konservativen
+Basishorizont: normale nächste Runner-Aktionen abzüglich bestehender Aktionsschuld
+und eines reservierten Run-Klicks. Zusätzliche freiwillige Kartenaktionen, neue
+Handkarten und optionale Einkommen sind nicht enthalten. Die Projektion liest
+keine gegnerische Hand und verändert den Spielzustand nicht.
+
 ## Verpflichtende Kreditzahlungen
 
 Aktive verpflichtende Corp-Kreditzahlungen stammen aus dem aktuellen

@@ -69,6 +69,61 @@ function knownCentralAllocation(
 }
 
 describe("Corp core plan modules", () => {
+  it("ranks emergency score routes by protection and access cost instead of rezzed ICE counts", () => {
+    const score = corpModule("corp.score_agenda");
+    const value = (
+      access: number,
+      creditsLeft: number,
+      iceCount: number,
+      stale = false,
+    ) => {
+      const signal = {
+        ...scoreProject("emergency", "P4", "test-risk"),
+        phase: "install_agenda" as const,
+        deadlinePressure: true,
+        sameTurnCloseout: false,
+        serverId: "remote_1",
+        feasible: false,
+        conversion: {
+          remainingAdvancementClicks: 3,
+          remainingScoreCredits: 3,
+          existingRemoteIceCount: iceCount,
+          existingRemoteRezzedIceCount: iceCount,
+          residentParent: false,
+          runnerStealPoints: 2,
+          runnerStealIsMatchpoint: true,
+          realizedStrategySupportCount: 0,
+        },
+        protectionNeed: {
+          parentProjectId: "emergency",
+          targetServerId: "remote_1",
+          observedAtStateVersion: stale ? 9 : 10,
+          baseline: {
+            knowledge: "known",
+            protection: {
+              runnerAccessSuccessProbability: {
+                numerator: access,
+                denominator: 1,
+              },
+              runnerCreditsRemainingOnBestAccessPath: creditsLeft,
+            },
+          },
+        },
+      } as unknown as CorpCorePlanDomain["scoreProjects"][number];
+      const ctx = context([], { scoreProjects: [signal] });
+      const instance = instantiatePlanProposal(score.discover(ctx)[0]!, 10);
+      return requireValidatedPlanAssessment(
+        score.assess(instance, ctx, emptyPortfolio()),
+        CORP_PLAN_PRIORITY_POLICY,
+        10,
+      ).withinClassValue;
+    };
+    expect(value(0, 0, 1)).toBeGreaterThan(value(1, 10, 6));
+    expect(value(1, 2, 1)).toBeGreaterThan(value(1, 10, 6));
+    expect(value(1, 2, 1)).toBe(value(1, 2, 6));
+    expect(value(0, 0, 1, true)).toBeLessThan(value(0, 0, 1));
+  });
+
   it("keeps score and defense ownership disjoint", () => {
     expect(CORP_CORE_ACTION_OWNERSHIP).toMatchObject({
       "install.agenda": "corp.score_agenda",

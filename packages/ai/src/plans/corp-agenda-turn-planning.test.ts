@@ -16,6 +16,32 @@ import { campaignDisposition } from "../corp/score/corp-agenda-turn-planning";
 import type { KnownCorpFundedIceInstallRouteProjection } from "../runtime/corp-funded-score-protection";
 
 describe("Corp agenda turn-planning vertical slice", () => {
+  it("carries exact emergency access risk into competing turn lines", () => {
+    const input = decisionInput();
+    const risk = (access: number, creditsLeft: number, unknown = false) => {
+      const signal = project(2);
+      delete signal.openingRush;
+      signal.feasible = true;
+      signal.deadlinePressure = true;
+      const baseline = {
+        knowledge: unknown ? "unknown" : "known",
+        protection: {
+          runnerAccessSuccessProbability: { numerator: access, denominator: 1 },
+          runnerCreditsRemainingOnBestAccessPath: creditsLeft,
+        },
+      } as unknown as NonNullable<
+        CorpScoreProjectSignal["protectionNeed"]
+      >["baseline"];
+      signal.protectionNeed = { ...signal.protectionNeed!, baseline };
+      const slice = buildSlice(input, signal, [agendaCandidate()], []);
+      return slice.lines.find((line) => line.family === "pure_rush")!.evaluation
+        .risk;
+    };
+    expect(risk(0, 0)).toBeLessThan(risk(1, 0));
+    expect(risk(1, 2)).toBeLessThan(risk(1, 10));
+    expect(risk(0, 0, true)).toBeGreaterThanOrEqual(risk(1, 0));
+  });
+
   it("builds pure rush, combined rush, and safe setup without duplicate payoff ownership", () => {
     const input = decisionInput();
     const scoreProject = project(2);

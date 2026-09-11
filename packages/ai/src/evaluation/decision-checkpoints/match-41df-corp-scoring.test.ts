@@ -1,9 +1,12 @@
 import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it } from "vitest";
-import type { AiDecisionInput } from "@netgrid/shared";
+import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
+import { scoreRouteExposure } from "../../corp/score/score-route-risk";
+import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import {
   resetResidentPlanPortfolioMemory,
+  residentPlanPortfolioSnapshot,
   restoreResidentPlanPortfolioMemorySnapshot,
 } from "../../plans/resident-plan-portfolio-memory";
 import {
@@ -14,7 +17,7 @@ import {
 type Replay = {
   schemaVersion: string;
   stateVersion: number;
-  input: AiDecisionInput;
+  input: AiDecisionInputWithDeckCapabilities;
   runtime: AiRuntimeCheckpointV1;
   validation: Record<string, boolean>;
 };
@@ -148,4 +151,47 @@ describe("match 41df Corp scoring", () => {
         ),
     ).toBe(false);
   });
+  it.each([
+    [176, 9],
+    [210, 23],
+  ])(
+    "compares unsafe emergency routes without inventing protection at D%i",
+    (index, remaining) => {
+      const { input, decision } = decide(index!);
+      const selected = input.legalActions.find(
+        (action) => action.actionId === decision.actionId,
+      )!;
+      const projects = residentPlanPortfolioSnapshot(input)!
+        .instances.filter(
+          (instance) => instance.moduleId === "corp.score_agenda",
+        )
+        .map(
+          (instance) =>
+            (instance.moduleState as { signal: CorpScoreProjectSignal }).signal,
+        )
+        .filter(
+          (project) => project.phase === "install_agenda" && project.feasible,
+        );
+      expect(projects.length).toBeGreaterThan(1);
+      for (const project of projects)
+        expect(
+          scoreRouteExposure(project, input.playerView.stateVersion),
+        ).toMatchObject({
+          knowledge: "known",
+          probability: { numerator: 1, denominator: 1 },
+        });
+      const selectedProject = projects.find(
+        (project) =>
+          project.agendaInstanceId === selected.source &&
+          project.serverId === selected.payload?.serverId,
+      )!;
+      expect(
+        scoreRouteExposure(selectedProject, input.playerView.stateVersion),
+      ).toMatchObject({
+        knowledge: "known",
+        runnerCreditsRemaining: remaining,
+      });
+      expect(selected.payload?.serverId).toBe("remote_2");
+    },
+  );
 });

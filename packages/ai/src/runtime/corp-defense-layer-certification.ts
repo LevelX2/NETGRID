@@ -78,7 +78,9 @@ function corpCertifiedDefenseLayerPairProvidesMatureRunnerPath(
   const runnerRig = input.playerView.opponent.rig ?? [];
   const runnerCredits =
     input.playerView.opponent.credits +
-    (input.playerView.runnerNextTurnCreditClicks ?? 0);
+    (input.playerView.activeSide === "corp"
+      ? (input.playerView.runnerNextTurnCreditClicks ?? 0)
+      : 0);
   const prepared = visiblePreparedRunnerBreakerCandidates({
     serverIce: [],
     runnerRig,

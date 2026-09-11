@@ -1,6 +1,6 @@
 # CODEX_STATUS
 
-Stand: 2026-09-09
+Stand: 2026-09-11
 
 ## Einstieg
 
@@ -68,6 +68,13 @@ Führend:
 - `packages/engine/AGENTS.md`
 
 ## KI
+
+Corp-Scoring erhält seine Finanzierung gegenüber wirkungslosem Central-Ausbau und
+weiteren reinen Abschreckungslayern. Öffentliche Shell-/Host-Vorbereitung und der
+Engine-Basisklickhorizont beeinflussen den Remote-Schutz. Notfall-Scoreziele werden
+nach finanzierter Zugriffsexposition statt ICE-Mengen verglichen. Die Regressionen
+zu Match 41df und die aktuellen Verträge stehen in
+[Corp-Scoring](../architecture/ai/corp-plan-contracts.md#2-corpscore_agenda).
 
 R&D-Zugriffsfallen mit kostenloser Rez-Rückmischung besitzen jetzt eine
 exakte Install-/Rez-Linie im bestehenden Ambush-Owner, einschließlich

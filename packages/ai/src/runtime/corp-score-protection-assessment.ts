@@ -575,6 +575,9 @@ function supportedSubroutine(
     if (effect === undefined) return false;
     return (
       effect.type === "none" ||
+      // Like a direct damage subroutine, trace damage supplies no guaranteed
+      // access prevention in this conservative direct-access model.
+      effect.type === "net_damage" ||
       effect.type === "add_tag" ||
       effect.type === "add_counter" ||
       effect.type === "add_tag_and_counter" ||
