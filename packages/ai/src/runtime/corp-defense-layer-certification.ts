@@ -9,6 +9,7 @@ import {
 import { corpEffectiveDefenseActivationCredits } from "./corp-exact-ice-rez-route";
 import { assessCorpScoreRushRisk } from "./corp-score-rush-risk";
 import { isFiniteNonNegativeInteger } from "./exact-action-cost-facts";
+import { visiblePreparedRunnerBreakerCandidates } from "./corp-score-protection-assessment";
 type CorpCertifiedDefenseLayer = Readonly<{
   iceInstanceId: string;
   credits: number;
@@ -75,28 +76,52 @@ function corpCertifiedDefenseLayerPairProvidesMatureRunnerPath(
   visibleCorpCredits: number,
 ): boolean {
   const runnerRig = input.playerView.opponent.rig ?? [];
-  const runnerCredits = input.playerView.opponent.credits;
-  const assessment = assessEngineCertifiedPostRezIcePath(
-    [...server.ice],
-    server.id,
-    input.playerView.stateVersion,
-    new Set(financedLayerInstanceIds),
+  const runnerCredits =
+    input.playerView.opponent.credits +
+    (input.playerView.runnerNextTurnCreditClicks ?? 0);
+  const prepared = visiblePreparedRunnerBreakerCandidates({
+    serverIce: [],
     runnerRig,
-    runnerRunPathCreditBudgetWithVisiblePools(runnerCredits, runnerRig),
-    [...server.root],
-    visibleCorpCredits,
-    {
-      targetServerId: server.id,
+    runnerCredits,
+    runnerSetAside: input.playerView.specialZones?.setAside ?? [],
+    ...(input.playerView.opponent.memoryUsed !== undefined
+      ? { runnerMemoryUsed: input.playerView.opponent.memoryUsed }
+      : {}),
+    ...(input.playerView.opponent.memoryLimit !== undefined
+      ? { runnerMemoryLimit: input.playerView.opponent.memoryLimit }
+      : {}),
+    maximumRunnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
+  });
+  if (prepared.status === "unknown") return false;
+  return [
+    { rig: runnerRig, credits: runnerCredits },
+    ...prepared.candidates.map((candidate) => ({
+      rig: [...runnerRig, candidate.card],
+      credits: runnerCredits - candidate.installCreditCost,
+    })),
+  ].every((runner) => {
+    const assessment = assessEngineCertifiedPostRezIcePath(
+      [...server.ice],
+      server.id,
+      input.playerView.stateVersion,
+      new Set(financedLayerInstanceIds),
+      runner.rig,
+      runnerRunPathCreditBudgetWithVisiblePools(runner.credits, runner.rig),
+      [...server.root],
       visibleCorpCredits,
-      visibleRemoteServerCount: input.playerView.servers.filter(
-        (candidate) =>
-          candidate.id !== "hq" &&
-          candidate.id !== "rd" &&
-          candidate.id !== "archives",
-      ).length,
-    },
-  );
-  return !assessment.canReachAccess;
+      {
+        targetServerId: server.id,
+        visibleCorpCredits,
+        visibleRemoteServerCount: input.playerView.servers.filter(
+          (candidate) =>
+            candidate.id !== "hq" &&
+            candidate.id !== "rd" &&
+            candidate.id !== "archives",
+        ).length,
+      },
+    );
+    return !assessment.canReachAccess;
+  });
 }
 
 function corpCertifiedDefenseLayer(

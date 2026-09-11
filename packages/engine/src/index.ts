@@ -82,6 +82,7 @@ export {
   visibleBreakerEncounterQuote,
   type VisibleBreakerEncounterQuote,
 } from "./game/view/visible-breaker-encounter-quote";
+export { visibleProgramHostInstallVariants } from "./game/view/visible-program-host-install";
 
 export type {
   ActionType,

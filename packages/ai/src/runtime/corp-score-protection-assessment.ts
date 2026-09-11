@@ -5,7 +5,10 @@ import {
   type VisibleEffectiveIceRunQuote,
   type VisibleEffectiveSubroutine,
 } from "@netgrid/shared";
-import { visibleBreakerEncounterQuote } from "@netgrid/engine";
+import {
+  visibleBreakerEncounterQuote,
+  visibleProgramHostInstallVariants,
+} from "@netgrid/engine";
 import { AI_HINTS_BY_CARD } from "../catalog-ai-hint-authority";
 import { creditsToBreakEndTheRunSubroutinesWithBreaker } from "../visible-run-analysis";
 import type {
@@ -122,6 +125,8 @@ export type CorpScoreProtectionAssessmentInput = Readonly<{
   runnerMemoryUsed?: number;
   runnerMemoryLimit?: number;
   runnerCredits: number;
+  /** Engine-published next-turn basic income after reserving the run action. */
+  runnerPreparationCreditClicks?: number;
   maximumRunnerAccessSuccessProbability: ExactProbability;
 }>;
 
@@ -186,6 +191,27 @@ const MAX_SAFE_BIGINT = BigInt(Number.MAX_SAFE_INTEGER);
 export function assessCorpScoreProtection(
   input: CorpScoreProtectionAssessmentInput,
 ): CorpScoreProtectionAssessment {
+  if (input.runnerPreparationCreditClicks !== undefined) {
+    const { runnerPreparationCreditClicks, ...currentRun } = input;
+    if (!nonNegativeSafeInteger(runnerPreparationCreditClicks)) {
+      return unknownAssessment(
+        input.maximumRunnerAccessSuccessProbability,
+        "invalid_runner_credits",
+        ["invalidRunnerPreparationCreditClicks:true"],
+      );
+    }
+    const prepared = assessCorpScoreProtection({
+      ...currentRun,
+      runnerCredits: input.runnerCredits + runnerPreparationCreditClicks,
+    });
+    return {
+      ...prepared,
+      evidence: [
+        ...prepared.evidence,
+        `runnerPreparationCreditClicks:${runnerPreparationCreditClicks}`,
+      ],
+    };
+  }
   const threshold = rationalFromExactProbability(
     input.maximumRunnerAccessSuccessProbability,
   );
@@ -1195,7 +1221,7 @@ type PreparedRunnerBreakerCandidateRead =
  * resulting paid counter-removal credits instead of reconstructing a threat
  * from historic events or card-name heuristics.
  */
-function visiblePreparedRunnerBreakerCandidates(
+export function visiblePreparedRunnerBreakerCandidates(
   input: CorpScoreProtectionAssessmentInput,
 ): PreparedRunnerBreakerCandidateRead {
   const setAside = input.runnerSetAside;
@@ -1264,27 +1290,37 @@ function visiblePreparedRunnerBreakerCandidates(
     if (!nonNegativeSafeInteger(card.memoryCost)) {
       return { status: "unknown", reason: "staged_breaker_memory_unknown" };
     }
-    if (input.runnerMemoryUsed + card.memoryCost > input.runnerMemoryLimit) {
-      continue;
-    }
+    const hosted = visibleProgramHostInstallVariants(card, input.runnerRig);
+    if (!hosted.complete)
+      return { status: "unknown", reason: "staged_breaker_memory_unknown" };
+    const installVariants = [
+      ...(input.runnerMemoryUsed + card.memoryCost <= input.runnerMemoryLimit
+        ? [card]
+        : []),
+      ...hosted.cards,
+    ];
     const startTurnRemovals = Math.min(shellCounters, automaticRemovals);
     const installCreditCost = shellCounters - startTurnRemovals;
     if (installCreditCost > input.runnerCredits) continue;
-    candidates.push({
-      card,
-      installCreditCost,
-      evidence: [
-        "publicStagedBreaker:true",
-        `publicStagedBreakerInstanceId:${card.instanceId}`,
-        `publicStagedBreakerDefinitionId:${card.definitionId}`,
-        `publicStagedBreakerShellCounters:${shellCounters}`,
-        `publicStagedBreakerStartTurnRemovals:${startTurnRemovals}`,
-        `publicStagedBreakerPaidCounterRemovals:${installCreditCost}`,
-        `publicStagedBreakerInstallCreditCost:${installCreditCost}`,
-        "publicStagedBreakerMemoryFits:true",
-        "publicStagedBreakerImmediateInstall:true",
-      ],
-    });
+    for (const installedCard of installVariants)
+      candidates.push({
+        card: installedCard,
+        installCreditCost,
+        evidence: [
+          "publicStagedBreaker:true",
+          `publicStagedBreakerInstanceId:${card.instanceId}`,
+          `publicStagedBreakerDefinitionId:${card.definitionId}`,
+          `publicStagedBreakerShellCounters:${shellCounters}`,
+          `publicStagedBreakerStartTurnRemovals:${startTurnRemovals}`,
+          `publicStagedBreakerPaidCounterRemovals:${installCreditCost}`,
+          `publicStagedBreakerInstallCreditCost:${installCreditCost}`,
+          "publicStagedBreakerMemoryFits:true",
+          ...(installedCard.hostedOn
+            ? [`publicStagedBreakerHost:${installedCard.hostedOn}`]
+            : []),
+          "publicStagedBreakerImmediateInstall:true",
+        ],
+      });
   }
   return { status: "known", candidates };
 }

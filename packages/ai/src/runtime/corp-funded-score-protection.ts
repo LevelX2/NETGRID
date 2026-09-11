@@ -168,6 +168,7 @@ export type CorpBestFundedScoreProtectionInput = Readonly<{
   runnerSetAside?: readonly VisibleCard[];
   runnerMemoryUsed?: number;
   runnerMemoryLimit?: number;
+  runnerPreparationCreditClicks?: number;
   runnerCredits: number;
   targetServerId: VisibleCorpRezCostQuote["targetServerId"];
   observedAtStateVersion: number;
@@ -293,6 +294,7 @@ export type CorpFundedIceInstallRouteInput = Readonly<{
   runnerSetAside?: readonly VisibleCard[];
   runnerMemoryUsed?: number;
   runnerMemoryLimit?: number;
+  runnerPreparationCreditClicks?: number;
   runnerCredits: number;
   projectedInstallCredits: number;
   projectedInstallClicks: number;
@@ -528,6 +530,9 @@ export function assessBestFundedCorpScoreProtection(
         ? { runnerMemoryLimit: input.runnerMemoryLimit }
         : {}),
       runnerCredits: input.runnerCredits,
+      ...(input.runnerPreparationCreditClicks !== undefined
+        ? { runnerPreparationCreditClicks: input.runnerPreparationCreditClicks }
+        : {}),
       maximumRunnerAccessSuccessProbability:
         objective.maximumRunnerAccessSuccessProbability,
     });
@@ -809,6 +814,9 @@ export function projectCorpFundedIceInstallRoute(
       ? { runnerMemoryLimit: input.runnerMemoryLimit }
       : {}),
     runnerCredits: input.runnerCredits,
+    ...(input.runnerPreparationCreditClicks !== undefined
+      ? { runnerPreparationCreditClicks: input.runnerPreparationCreditClicks }
+      : {}),
     targetServerId: need.targetServerId,
     observedAtStateVersion: input.currentStateVersion,
     availableCorpCredits: input.currentCorpCredits,
@@ -986,6 +994,9 @@ export function projectCorpFundedIceInstallRoute(
       ? { runnerMemoryLimit: input.runnerMemoryLimit }
       : {}),
     runnerCredits: input.runnerCredits,
+    ...(input.runnerPreparationCreditClicks !== undefined
+      ? { runnerPreparationCreditClicks: input.runnerPreparationCreditClicks }
+      : {}),
     targetServerId: need.targetServerId,
     observedAtStateVersion: input.currentStateVersion,
     availableCorpCredits: creditsAfterInstall,

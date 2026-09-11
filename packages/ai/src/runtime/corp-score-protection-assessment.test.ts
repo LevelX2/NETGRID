@@ -788,6 +788,40 @@ describe("assessCorpScoreProtection", () => {
     );
   });
 
+  it.each([0, 3])(
+    "accounts for hosted prepared Cyfermaster and %i credit clicks",
+    (preparation) => {
+      const prepared = {
+        ...runnerProgram("cyfer", "onr_v1_016_cyfermaster"),
+        memoryCost: 1,
+        counters: { shell: 1 },
+      } as VisibleCard;
+      const assessment = assessCorpScoreProtection({
+        serverIce: [ice("puzzle", "onr_classic_013_puzzle")],
+        runnerRig: [
+          shellTraders(),
+          { ...runnerProgram("afreet", "onr_v1_001_afreet"), memoryCost: 1 },
+        ],
+        runnerSetAside: [prepared],
+        runnerMemoryUsed: 4,
+        runnerMemoryLimit: 4,
+        runnerCredits: 4,
+        runnerPreparationCreditClicks: preparation,
+        maximumRunnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
+      });
+      expect(assessment).toMatchObject({
+        knowledge: "known",
+        protectsScore: preparation === 0,
+        runnerAccessSuccessProbability: {
+          numerator: preparation === 0 ? 0 : 1,
+          denominator: 1,
+        },
+      });
+      if (preparation === 3)
+        expect(assessment.evidence).toContain("publicStagedBreakerHost:afreet");
+    },
+  );
+
   it.each([
     ["is hidden", { known: false }, 0, 4, 3, "unknown"],
     ["does not fit memory", {}, 3, 4, 3, "protected"],

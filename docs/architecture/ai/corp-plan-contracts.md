@@ -194,6 +194,22 @@ Kostenfakten liegen in `runtime/visible-agenda-facts.ts` beziehungsweise
 `runtime/exact-action-cost-facts.ts`. Kein Score-Modul importiert eine Registry,
 die Live-Runtime oder den allgemeinen Choice-Dispatcher zurÃ¼ck.
 
+Ein bereits begonnener Score-Remote erhÃ¤lt bei einer bekannten, ausschlieÃŸlich
+finanzierungsblockierten Schutzroute keine zusÃ¤tzliche reine Abschreckungsschicht
+zulasten dieser Finanzierung. Die erste begrenzte Vorbereitung und ein konkret
+wirksamer zusÃ¤tzlicher Stopper bleiben zulÃ¤ssig (Regression: Match 41df, D13).
+
+Die Schutzprojektion berücksichtigt öffentliche Shell-Vorbereitungen einschließlich
+Engine-geprüfter freier Host-Kapazität und Stärkeänderung. Für die kommende
+Runner-Phase liefert die Engine `runnerNextTurnCreditClicks`: Basisklicks abzüglich
+bestehender Aktionsschuld und eines reservierten Run-Klicks. Optionale Einkommen,
+zusätzliche Aktionen und unbekannte Handkarten sind nicht Teil dieses Basishorizonts.
+Scorebedarf und seine Installationsprojektion verwenden denselben Horizont; laufende
+Runs behalten ihr aktuelles Budget. Die Reifeprüfung mehrerer ICE berücksichtigt
+dieselben vorbereiteten Breaker. Kombinierte ETR-Subroutinen müssen vollständig an
+die Breaker-Kostenrechnung weitergereicht werden. Fehlende Host-Fakten bleiben
+explizit unbekannt (Regressionen: Match 41df D89, Afreet/Cyfermaster/Puzzle).
+
 ## 3. `corp.establish_scoring_remote`
 
 **Klasse:** `development_project`
@@ -1238,8 +1254,3 @@ einen belegten Draw-, Refresh-, Agenda- oder Overflow-Zweck.
 `raise_visible_floor` benÃ¶tigt Defense-Evidence; allgemeine Boardentwicklung
 benÃ¶tigt ein Domainmodul. Fehlt die Planabdeckung, wird dies nicht durch
 Credit, Draw oder Boardentwicklung verdeckt.
-
-Ein bereits begonnener Score-Remote erhÃ¤lt bei einer bekannten, ausschlieÃŸlich
-finanzierungsblockierten Schutzroute keine zusÃ¤tzliche reine Abschreckungsschicht
-zulasten dieser Finanzierung. Die erste begrenzte Vorbereitung und ein konkret
-wirksamer zusÃ¤tzlicher Stopper bleiben zulÃ¤ssig (Regression: Match 41df, D13).

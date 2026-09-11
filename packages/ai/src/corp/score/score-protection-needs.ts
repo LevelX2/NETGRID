@@ -140,6 +140,13 @@ export function corpFundedScoreProtectionNeed(
       ? { runnerMemoryLimit: input.playerView.opponent.memoryLimit }
       : {}),
     runnerCredits: input.playerView.opponent.credits,
+    ...(input.playerView.activeSide === "corp" &&
+    input.playerView.runnerNextTurnCreditClicks !== undefined
+      ? {
+          runnerPreparationCreditClicks:
+            input.playerView.runnerNextTurnCreditClicks,
+        }
+      : {}),
     targetServerId:
       serverId as CorpFundedRemoteAccessRiskNeed["targetServerId"],
     observedAtStateVersion: input.playerView.stateVersion,

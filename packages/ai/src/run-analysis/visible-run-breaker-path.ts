@@ -393,7 +393,12 @@ export function minimumCreditsToBreakEndTheRunSubroutines(
     breakerStrengths,
     targetSubroutines ??
       (visibleRunCardDefinition(ice.definitionId ?? "")?.subroutines ?? [])
-        .filter((subroutine) => subroutine.type === "end_the_run")
+        .filter(
+          (subroutine) =>
+            subroutine.type === "end_the_run" ||
+            subroutine.type === "end_the_run_and_trash_source_at_end_of_turn" ||
+            subroutine.type === "end_the_run_and_runner_forgoes_next_action",
+        )
         .map((subroutine) => ({
           id: subroutine.id,
           type: subroutine.type,
@@ -500,7 +505,12 @@ export function creditsToBreakEndTheRunSubroutinesWithBreaker(
     subroutines:
       targetSubroutines ??
       (iceDefinition.subroutines ?? [])
-        .filter((subroutine) => subroutine.type === "end_the_run")
+        .filter(
+          (subroutine) =>
+            subroutine.type === "end_the_run" ||
+            subroutine.type === "end_the_run_and_trash_source_at_end_of_turn" ||
+            subroutine.type === "end_the_run_and_runner_forgoes_next_action",
+        )
         .map((subroutine) => ({
           id: subroutine.id,
           type: subroutine.type,

@@ -4043,6 +4043,9 @@ export type VisibleTraceState = {
 };
 
 export type PlayerView = {
+  /** Public baseline next-turn clicks available for credits, reserving one run.
+   * Excludes optional income, extra-action cards and unseen draws. */
+  runnerNextTurnCreditClicks?: number;
   side: Side;
   stateVersion: number;
   turnSerial?: number;

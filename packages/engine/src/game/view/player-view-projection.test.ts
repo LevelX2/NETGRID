@@ -1,3 +1,4 @@
+import { ensureRunnerTurnFlags } from "../state/turn-flags-counters";
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import { describe, expect, it, vi } from "vitest";
 
@@ -59,6 +60,21 @@ const TEST_CARD_IMPLEMENTATIONS_BY_DEFINITION_ID =
       NonNullable<ReturnType<typeof cardImplementationForDefinitionId>>
     >
   >;
+
+describe("public next-turn basic run preparation", () => {
+  it("reserves the run click and subtracts existing action debt without exposing grip", () => {
+    const state = createGameAfterSetup({ seed: "next-run-preparation" });
+    expect(getPlayerView(state, "corp").runnerNextTurnCreditClicks).toBe(3);
+    ensureRunnerTurnFlags(state).forgoNextActionsPending = 2;
+    const before = hashState(state);
+    const view = getPlayerView(state, "corp");
+    expect(view.runnerNextTurnCreditClicks).toBe(1);
+    expect(view.opponent).not.toHaveProperty("gripOrHq");
+    expect(hashState(state)).toBe(before);
+    state.runnerActionsPerTurnOverride = 2;
+    expect(getPlayerView(state, "corp").runnerNextTurnCreditClicks).toBe(0);
+  });
+});
 
 describe("PlayerView projection", () => {
   it("projects only side-safe specialized opponent Trace capacity", () => {

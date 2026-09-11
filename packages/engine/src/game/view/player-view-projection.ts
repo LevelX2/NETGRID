@@ -410,6 +410,16 @@ export function buildPlayerViewProjection(
 
   return {
     side,
+    runnerNextTurnCreditClicks: Math.max(
+      0,
+      Math.floor(state.runnerActionsPerTurnOverride ?? 4) -
+        1 -
+        Math.max(
+          0,
+          Math.floor(state.runnerTurnFlags?.forgoNextActionsPending ?? 0),
+        ) -
+        Number(state.runnerTurnFlags?.forgoNextActionPending === true),
+    ),
     stateVersion: state.stateVersion,
     turnSerial: Math.max(0, Math.floor(state.turnSerial ?? 0)),
     traceRulesProfile,
