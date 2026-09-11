@@ -43,7 +43,7 @@ import {
   selectedSearchChoiceOptionIds,
   type SearchChoiceFeatureSnapshot,
 } from "./search-choice-option";
-import { selectedRunnerExposeInstalledCardChoiceOptionIds } from "./runner-expose-installed-card-choice";
+import { selectedRunnerExposeInstalledCardChoiceOptionIds } from "../runner/expose-information/expose-installed-card-choice";
 import { selectedForcedChoiceOptionIds } from "./select-card-choice-option";
 import { selectedSetupMulliganChoiceOptionId } from "./setup-mulligan-choice-option";
 import { selectedShellTradersStartTurnChoiceOptionId } from "./shell-traders-choice-option";

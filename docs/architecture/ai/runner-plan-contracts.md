@@ -735,6 +735,39 @@ als allgemeine Hidden-Info-Quelle verwendet werden. Im TurnPlanner wird der
 Informationswert in der vorhandenen Flexibilitätsdimension bewertet; eine
 neue globale Bewertungsautorität entsteht nicht.
 
+### Vertikale Implementierung der Informationsentscheidung
+
+[`createRunnerExposeInformationModule`](../../../packages/ai/src/runner/expose-information/expose-information-plan-module.ts)
+ist der Einstieg in `runner/expose-information/`. Der Owner bündelt:
+
+- `expose-information-signals.ts`: den konkreten Approach-ICE-Entscheid,
+  die Revalidierung des Runursprungs und die proaktiven Informationsfenster.
+- `expose-information-plan-module.ts`: Discovery als Run-Child beziehungsweise
+  eigener Informationsplan, P3-Assessment und aktuelle Action-/Quellenbindung.
+- `expose-information-dispositions.ts`: den begründeten Verzicht auf wiederholte
+  Information beziehungsweise die Ablehnung des Verzichts bei unbekanntem ICE.
+- `expose-information-memory.ts`: Erinnerung ausschließlich an eine tatsächlich
+  ausgewählte, aktuelle Aufdeckaction dieses Owners.
+- `expose-information-types.ts`: Signale, Planstatus und Erinnerungsdatensatz.
+- `expose-installed-card-choice.ts`: die vorhandene Positions-/Historienbewertung
+  und die Auswahl angebotener Optionswerte beim Aufdecken installierter Karten.
+
+Der Owner erhält side-sicheren Input, aktuelle Kandidaten und das vorherige
+Planportfolio. Er benötigt keinen injizierten Runtime-Dienst. Run-Root,
+Parent, Executor, Quelle, ICE und StateVersion werden wie bisher exakt
+gebunden. Proaktive Signale berücksichtigen unbekannte installierte Karten,
+passende Informationswerkzeuge und bereits vorhandene Duplikate.
+
+Die Live-Runtime ruft die Signalbildung, Dispositionen und den Erinnerungsschreiber
+auf. Der zentrale Choice-Einstieg delegiert an die bestehende Ownerfunktion.
+Das gemeinsame Portfolio persistiert und validiert das Erinnerungsschema;
+fachliches Schreiben und Lesen der Erinnerung liegen beim Informationsowner.
+Die taktischen Planstandards kommen aus `runner-tactical-module-support.ts`.
+Die Extraktion verändert keine Bewertung, keine Optionsauswahl und keine
+Informationsberechtigung. Ihr Nutzen liegt darin, dieselbe fachliche
+Entscheidung von der Aufnahme der Fakten bis zum späteren Wiedererkennen
+einer aufgedeckten Instanz an einer Stelle verfolgen zu können.
+
 ## 10. Kein Runner-Fallbackplan
 
 Der Runner-Scheduler erzeugt keinen „do something“-Plan. Economy,
@@ -1022,3 +1055,40 @@ terminale Route mit validiertem Prioritätsanspruch. Beide verlangen genaue
 Quellen-/Ziel-/Kostenbindung; ein Terminalsignal übernimmt keine fremde
 Run- oder Entwicklungsentscheidung. Der Systemowner `runner.complete_turn`
 folgt ausschließlich dem [EndTurn-Vertrag](planning-architecture.md#17-endturn-vertrag).
+
+### Vertikale Implementierung der installierten Agenda-Konversion
+
+[`createRunnerInstalledAgendaScoreModule`](../../../packages/ai/src/runner/installed-agenda/installed-agenda-plan-module.ts)
+ist der Einstieg im Verzeichnis `runner/installed-agenda/`. Die Signaldatei
+besitzt die Engine-markierte Score-Konversion, die erforderliche sichtbare
+Quellkarte, deren Punkte und die Prüfung der Siegschwelle. Typen und Planstatus
+liegen daneben. Das Planmodul bindet Discovery, P3 beziehungsweise P1 bei
+terminaler Konversion, Assessment und Materialisierung an diese Action-IDs.
+
+Die Live-Runtime injiziert nur die vorhandene Suche nach der sichtbaren eigenen
+Karteninstanz. Fehlende Quelle, unbekannte Karte oder fehlende Punktangabe
+behalten ihre strukturierten Fehler. Die Core-Registry registriert die Factory;
+ein Rückimport vom Owner in Registry oder Live-Runtime ist nicht erforderlich.
+Damit kann eine Änderung an dieser Score-Konversion lokal verfolgt werden,
+ohne die Regeln für allgemeine Runner-Siege oder Run-Scoring zu übernehmen.
+
+### Vertikale Implementierung der unmittelbaren Siegkonversion
+
+[`createRunnerTerminalWinModule`](../../../packages/ai/src/runner/terminal-win/terminal-win-plan-module.ts)
+registriert `runner.secure_terminal_win`. Im Verzeichnis `runner/terminal-win/`
+liegen Signalbildung, Signal-/Zustandstypen und Planmodul zusammen. Die
+Signalbildung erkennt dieselben zwei aktuellen Nachweise: das sichtbar leere
+gegnerische Deck mit möglichem EndTurn und die legale sofortige Konversion
+bis zur Agenda-Siegschwelle. Der Plan besitzt P1, die genaue Route und die
+EndTurn-Begründung für den erzwungenen Pflichtzug. Ein Karteneffekt-EndTurn
+wird dadurch weiterhin nicht zum normalen EndTurn umgedeutet.
+
+Der Owner braucht keinen injizierten Runtime-Dienst. Der gemeinsame Fakt
+[`runnerImmediateAgendaPointGain`](../../../packages/ai/src/actions/runner-agenda-point-effect.ts)
+wird auch von der nichtterminalen Entwicklung konsumiert. Die unveränderten
+taktischen Proposal-/Assessment-Defaults einschließlich Domainprüfung liegen
+in [`runner-tactical-module-support.ts`](../../../packages/ai/src/plans/runner-tactical-module-support.ts).
+Die Live-Runtime verbindet diese Ergebnisse mit den übrigen Plänen; sie
+enthält die terminale Entscheidungsformel nicht mehr. Das erleichtert spätere
+Änderungen an unmittelbaren Siegkonversionen, ohne einen zweiten Scheduler
+oder eine neue Regelautorität einzuführen.

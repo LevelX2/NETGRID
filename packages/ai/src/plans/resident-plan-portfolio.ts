@@ -1,3 +1,4 @@
+import type { RunnerExposeInformationMemoryRecord } from "../runner/expose-information/expose-information-types";
 import type { Side } from "@netgrid/shared";
 import {
   assertValidPlanInstance,
@@ -143,13 +144,6 @@ export type ResidentPlanPortfolio = {
   pendingRunnerCostPenaltySupportOrigin?: PendingRunnerCostPenaltySupportOrigin;
   runnerExposeInformationMemory?: RunnerExposeInformationMemoryRecord[];
 };
-
-export type RunnerExposeInformationMemoryRecord = Readonly<{
-  targetIceInstanceId: string;
-  serverId: string;
-  sourceCardInstanceId: string;
-  selectedAtStateVersion: number;
-}>;
 
 export type PendingRunnerCostPenaltySupportOrigin = Readonly<{
   rootPlanInstanceId: string;

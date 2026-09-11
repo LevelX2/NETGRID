@@ -1,3 +1,13 @@
+import type { RunnerExposeInformationSignal } from "../runner/expose-information/expose-information-types";
+import { runnerExposeInformationSignals } from "../runner/expose-information/expose-information-signals";
+import { runnerExposeInformationActionDispositions } from "../runner/expose-information/expose-information-dispositions";
+import { bindSelectedRunnerExposeInformationMemory } from "../runner/expose-information/expose-information-memory";
+import { runnerImmediateAgendaPointGain } from "../actions/runner-agenda-point-effect";
+import {
+  runnerTerminalWinSignals,
+  runnerImmediateAgendaPointTerminalWinSignals,
+} from "../runner/terminal-win/terminal-win-signals";
+import { runnerInstalledAgendaScoreSignals } from "../runner/installed-agenda/installed-agenda-signals";
 import type {
   RunnerFundingNeedSignal,
   RunnerFundingRouteAssessment,
@@ -55,7 +65,7 @@ import type {
 } from "../deck-capabilities";
 import type { RunnerHandDevelopmentEvaluation } from "../runner-hand-development";
 import { visibleRunnerTraceThreatOnServer } from "../runner/hand-development/runner-persistent-install-evaluation";
-import { runnerExposeInstalledOpportunity } from "./runner-expose-installed-card-choice";
+
 import type {
   RunnerEconomyPosture,
   RunnerRunTargetEvaluation,
@@ -158,7 +168,6 @@ import {
   createRunnerTacticalPlanModules,
   runnerCardRunHasVisibleDifferentialPayoff,
   type RunnerDevelopmentSignal,
-  type RunnerExposeInformationSignal,
   type RunnerPlanDomain,
   type RunnerRemoteContestSignal,
   type RunnerRestrictedProgramInstallSequenceCommitment,
@@ -1405,53 +1414,6 @@ function resolvePlanBoundRunnerEventInstallMemoryChoice(
       timingPoint: context.input.playerView.timingPoint,
     },
   };
-}
-
-function bindSelectedRunnerExposeInformationMemory(
-  input: AiDecisionInput,
-  result: PlanSchedulerResult,
-): void {
-  if (input.side !== "runner" || result.lane !== "plan") return;
-  const executor = result.portfolio.instances.find(
-    (instance) => instance.instanceId === result.portfolio.executorInstanceId,
-  );
-  const selectedAction = input.legalActions.find(
-    (action) => action.actionId === result.route.head.actionId,
-  );
-  const targetIceInstanceId = selectedAction?.payload?.iceId;
-  const sourceCardInstanceId = selectedAction?.payload?.cardId;
-  const serverId = input.playerView.run?.attackedServerId;
-  if (
-    executor?.moduleId !== "runner.expose_information" ||
-    selectedAction?.type !== "trigger_ability" ||
-    selectedAction.payload?.approachIceExposeDecision !== "expose" ||
-    typeof targetIceInstanceId !== "string" ||
-    typeof sourceCardInstanceId !== "string" ||
-    typeof serverId !== "string" ||
-    selectedAction.expiresAtStateVersion !== input.playerView.stateVersion
-  ) {
-    return;
-  }
-  const previousRecords = result.portfolio.runnerExposeInformationMemory ?? [];
-  result.portfolio.runnerExposeInformationMemory = [
-    ...previousRecords.filter(
-      (record) => record.targetIceInstanceId !== targetIceInstanceId,
-    ),
-    {
-      targetIceInstanceId,
-      serverId,
-      sourceCardInstanceId,
-      selectedAtStateVersion: input.playerView.stateVersion,
-    },
-  ].sort((left, right) =>
-    left.targetIceInstanceId.localeCompare(right.targetIceInstanceId),
-  );
-  result.diagnostics.push({
-    stage: "route",
-    code: "runner_expose_information_memory_bound",
-    instanceId: executor.instanceId,
-    moduleId: executor.moduleId,
-  });
 }
 
 function bindSelectedRunnerProgramInstallTrashChoiceContinuation(
@@ -5617,25 +5579,10 @@ export function runnerActionDispositions(
       (signal) => signal.actionIds ?? [signal.selectedActionId],
     ),
   );
-  for (const signal of domain.exposeInformation ?? []) {
-    for (const rejectedActionId of signal.rejectedActionIds) {
-      add(
-        rejectedActionId,
-        "runner.expose_information",
-        signal.phase === "expose_unknown_ice"
-          ? "runner_expose_information_decline_rejected_for_unknown_ice"
-          : "runner_expose_information_repeat_rejected_for_known_ice",
-      );
-    }
-    if (!signal.admissible) {
-      for (const actionId of signal.actionIds ?? [signal.selectedActionId]) {
-        add(
-          actionId,
-          "runner.expose_information",
-          "runner_expose_information_deferred_no_unknown_target",
-        );
-      }
-    }
+  for (const disposition of runnerExposeInformationActionDispositions(
+    domain.exposeInformation ?? [],
+  )) {
+    addDisposition(disposition);
   }
   const activeRestrictedSequence = domain.developments.find(
     (signal) =>
@@ -7765,6 +7712,7 @@ function buildRunnerDomain(
   const installedAgendaScores = runnerInstalledAgendaScoreSignals(
     input,
     candidates,
+    (instanceId) => visibleOwnCardByInstanceId(input, instanceId),
   );
   const immediateAgendaPointTerminalWins =
     runnerImmediateAgendaPointTerminalWinSignals(input, candidates);
@@ -10176,20 +10124,11 @@ function buildRunnerDomain(
     installedAgendaScores,
     shellTradersPipelines,
     defense,
-    terminalWins: [
-      ...(input.playerView.opponent.deckCount === 0 &&
-      candidates.some((candidate) => candidate.actionType === "end_turn")
-        ? [
-            {
-              terminalId: "force-corp-empty-rd-draw",
-              semanticActionTypes: ["turn_flow.end_turn"],
-              terminalCondition: "corp_empty_rd_mandatory_draw" as const,
-              evidenceCode: "corp_visible_empty_rd_forced_mandatory_draw",
-            },
-          ]
-        : []),
-      ...immediateAgendaPointTerminalWins,
-    ],
+    terminalWins: runnerTerminalWinSignals(
+      input,
+      candidates,
+      immediateAgendaPointTerminalWins,
+    ),
     centralPressure,
     remoteContests,
     developments,
@@ -11463,121 +11402,6 @@ function runnerGenericDrawDevelopmentSignals(
           : { evidenceCodes: [...handRotation.evidenceCodes] }),
     },
   ];
-}
-
-function runnerInstalledAgendaScoreSignals(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-): NonNullable<RunnerCorePlanDomain["installedAgendaScores"]> {
-  return candidates.flatMap((candidate) => {
-    const action = input.legalActions.find(
-      (legalAction) => legalAction.actionId === candidate.actionId,
-    );
-    if (action?.payload?.cardImplementationScoresSourceAsAgenda !== true)
-      return [];
-    const sourceCardInstanceId =
-      candidate.sourceCardInstanceId ??
-      (typeof action.source === "string" ? action.source : undefined);
-    if (!sourceCardInstanceId)
-      throw new PlanResolutionFailure("missing_action_semantics", {
-        side: input.side,
-        stateVersion: input.playerView.stateVersion,
-        timingPoint: input.playerView.timingPoint,
-        legalActionTypes: input.legalActions.map(
-          (legalAction) => legalAction.type,
-        ),
-        owner: "action_semantics",
-        removalCondition:
-          "Every installed-agenda score action must expose its source card instance.",
-      });
-    const sourceCard = visibleOwnCardByInstanceId(input, sourceCardInstanceId);
-    if (!sourceCard?.known || !sourceCard.definitionId)
-      throw new PlanResolutionFailure("invalid_player_view_card_projection", {
-        side: input.side,
-        stateVersion: input.playerView.stateVersion,
-        timingPoint: input.playerView.timingPoint,
-        legalActionTypes: input.legalActions.map(
-          (legalAction) => legalAction.type,
-        ),
-        owner: "rules_contract",
-        removalCondition:
-          "An installed-agenda score action must point to a visible own card with a definition.",
-      });
-    const agendaPoints =
-      sourceCard.agendaPoints ??
-      (sourceCard.definitionId
-        ? CARD_DEFINITIONS_BY_ID[sourceCard.definitionId]?.agendaPoints
-        : undefined);
-    if (agendaPoints === undefined)
-      throw new PlanResolutionFailure("missing_card_definition", {
-        side: input.side,
-        stateVersion: input.playerView.stateVersion,
-        timingPoint: input.playerView.timingPoint,
-        legalActionTypes: input.legalActions.map(
-          (legalAction) => legalAction.type,
-        ),
-        owner: "rules_contract",
-        removalCondition: `Provide agenda points for ${sourceCard.definitionId ?? sourceCardInstanceId}.`,
-      });
-    return [
-      {
-        opportunityId: sourceCardInstanceId,
-        sourceCardInstanceId,
-        actionIds: [candidate.actionId],
-        agendaPoints,
-        terminal:
-          input.playerView.own.agendaPoints + agendaPoints >=
-          input.playerView.agendaPointsToWin,
-        evidenceCode: "runner_installed_agenda_score_conversion",
-      },
-    ];
-  });
-}
-
-function runnerImmediateAgendaPointTerminalWinSignals(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-): RunnerPlanDomain["terminalWins"] {
-  return candidates.flatMap((candidate) => {
-    const agendaPointAmount = runnerImmediateAgendaPointGain(candidate);
-    if (
-      agendaPointAmount === undefined ||
-      input.playerView.own.agendaPoints + agendaPointAmount <
-        input.playerView.agendaPointsToWin
-    ) {
-      return [];
-    }
-    return [
-      {
-        terminalId: `immediate-agenda-point:${candidate.actionId}`,
-        semanticActionTypes: [candidate.semanticActionType],
-        actionIds: [candidate.actionId],
-        terminalCondition: "runner_immediate_agenda_point" as const,
-        evidenceCode: "runner_legal_immediate_agenda_point_closeout",
-      },
-    ];
-  });
-}
-
-function runnerImmediateAgendaPointGain(
-  candidate: ActionSemanticCandidate,
-): number | undefined {
-  if (
-    candidate.actorSide !== "runner" ||
-    candidate.sourceKind !== "card" ||
-    candidate.actionType !== "play_event"
-  ) {
-    return undefined;
-  }
-  const effect = candidate.functionalEffects?.find(
-    (entry) =>
-      entry.kind === "scored_agenda_action" &&
-      entry.scope === "runner" &&
-      entry.resource === "agenda_points" &&
-      typeof entry.amount === "number" &&
-      entry.amount > 0,
-  );
-  return effect?.amount;
 }
 
 function runnerImmediateAgendaPointDevelopmentSignals(
@@ -24736,334 +24560,6 @@ function engineWindowSemanticIsAutomatic(semantic: string): boolean {
     semantic === "corp_window.decline_rez" ||
     semantic === "turn_flow.forgo_action"
   );
-}
-
-function runnerExposeInformationSignals(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  previous: ResidentPlanPortfolio | undefined,
-): RunnerExposeInformationSignal[] {
-  const currentServerId = input.playerView.run?.attackedServerId;
-  const rememberedTargetIds = new Set(
-    (previous?.runnerExposeInformationMemory ?? []).flatMap((record) =>
-      previous !== undefined &&
-      previous.side === "runner" &&
-      record.selectedAtStateVersion < input.playerView.stateVersion &&
-      record.serverId === currentServerId
-        ? [record.targetIceInstanceId]
-        : [],
-    ),
-  );
-  const current = runnerCurrentExposeInformationSignal(
-    input,
-    previous,
-    rememberedTargetIds,
-  );
-  return [
-    ...(current ? [current] : []),
-    ...runnerProactiveExposeInformationSignals(input, candidates),
-  ];
-}
-
-function runnerProactiveExposeInformationSignals(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-): RunnerExposeInformationSignal[] {
-  if (input.side !== "runner" || input.playerView.run) return [];
-  const opportunity = runnerExposeInstalledOpportunity(input);
-  const unknownIcePositions = opportunity.unseenPositions.filter(
-    (position) => position.area === "ice",
-  );
-  const unknownOutermostPositions = unknownIcePositions.filter((position) => {
-    const server = input.playerView.servers.find(
-      (entry) => entry.id === position.serverId,
-    );
-    return server !== undefined && position.index === server.ice.length - 1;
-  });
-  const informationCandidates = candidates.filter((candidate) => {
-    if (
-      candidate.actorSide !== "runner" ||
-      !candidate.sourceCardInstanceId ||
-      !candidate.sourceDefinitionId
-    ) {
-      return false;
-    }
-    const hint = AI_HINTS_BY_CARD.get(candidate.sourceDefinitionId);
-    if (hint?.planRoles?.includes("information") !== true) return false;
-    if (
-      candidate.actionType === "install_card" &&
-      (input.playerView.own.rig ?? []).some(
-        (installed) => installed.definitionId === candidate.sourceDefinitionId,
-      )
-    ) {
-      return false;
-    }
-    const guide =
-      candidate.actionType === "play_event" &&
-      candidate.abilityKey ===
-        "abilities_on_play_expose_outermost_ice_each_fort";
-    const multiExpose =
-      candidate.actionType === "play_event" &&
-      candidate.abilityKey === "abilities_on_play_expose_installed_cards";
-    const installTool = candidate.actionType === "install_card";
-    return guide || multiExpose || installTool;
-  });
-  const bySource = new Map<string, ActionSemanticCandidate[]>();
-  for (const candidate of informationCandidates) {
-    const source = candidate.sourceCardInstanceId!;
-    bySource.set(source, [...(bySource.get(source) ?? []), candidate]);
-  }
-  return [...bySource.values()].map((sourceCandidates) => {
-    const candidate = [...sourceCandidates].sort((left, right) => {
-      const leftAction = input.legalActions.find(
-        (action) => action.actionId === left.actionId,
-      );
-      const rightAction = input.legalActions.find(
-        (action) => action.actionId === right.actionId,
-      );
-      const leftTrash = leftAction?.payload?.runnerProgramTrashBeforeInstall
-        ? 1
-        : 0;
-      const rightTrash = rightAction?.payload?.runnerProgramTrashBeforeInstall
-        ? 1
-        : 0;
-      return (
-        leftTrash - rightTrash || left.actionId.localeCompare(right.actionId)
-      );
-    })[0]!;
-    const guide =
-      candidate.actionType === "play_event" &&
-      candidate.abilityKey ===
-        "abilities_on_play_expose_outermost_ice_each_fort";
-    const multiExpose =
-      candidate.actionType === "play_event" &&
-      candidate.abilityKey === "abilities_on_play_expose_installed_cards";
-    const installTool = candidate.actionType === "install_card";
-    const targetPositions = guide
-      ? unknownOutermostPositions
-      : multiExpose
-        ? opportunity.unseenPositions
-        : unknownIcePositions;
-    const admissible = targetPositions.length > 0;
-    return {
-      kind: "proactive" as const,
-      informationId: `card:${candidate.sourceCardInstanceId}`,
-      sourceCardInstanceId: candidate.sourceCardInstanceId!,
-      sourceDefinitionId: candidate.sourceDefinitionId!,
-      targetPositionKeys: targetPositions.map(
-        (position) => `${position.serverId}:${position.area}:${position.index}`,
-      ),
-      phase: admissible
-        ? installTool
-          ? ("install_information_tool" as const)
-          : ("play_information_event" as const)
-        : ("defer_known_information" as const),
-      selectedActionId: candidate.actionId,
-      actionIds: sourceCandidates.map((entry) => entry.actionId).sort(),
-      rejectedActionIds: [],
-      admissible,
-      evidenceCodes: [
-        admissible
-          ? "runner_expose_information_unknown_target_available"
-          : "runner_expose_information_no_unknown_target",
-        `runner_expose_information_unknown_targets:${targetPositions.length}`,
-        `runner_expose_information_source:${candidate.sourceCardInstanceId}`,
-      ],
-    };
-  });
-}
-
-function runnerCurrentExposeInformationSignal(
-  input: AiDecisionInput,
-  previous: ResidentPlanPortfolio | undefined,
-  rememberedTargetIds: ReadonlySet<string>,
-): RunnerExposeInformationSignal | undefined {
-  if (
-    input.side !== "runner" ||
-    input.playerView.timingPoint !== "run.approach_ice" ||
-    !input.playerView.run
-  ) {
-    return undefined;
-  }
-  const exposeActions = input.legalActions.filter(
-    (action) =>
-      action.side === "runner" &&
-      action.type === "trigger_ability" &&
-      action.payload?.approachIceExposeDecision === "expose",
-  );
-  const declineActions = input.legalActions.filter(
-    (action) =>
-      action.side === "runner" &&
-      action.type === "trigger_ability" &&
-      action.payload?.approachIceExposeDecision === "decline",
-  );
-  if (exposeActions.length === 0 && declineActions.length === 0) {
-    return undefined;
-  }
-  const expose = exposeActions.length === 1 ? exposeActions[0] : undefined;
-  const decline = declineActions.length === 1 ? declineActions[0] : undefined;
-  const iceId =
-    typeof expose?.payload?.iceId === "string"
-      ? expose.payload.iceId
-      : typeof decline?.payload?.iceId === "string"
-        ? decline.payload.iceId
-        : undefined;
-  const sourceCardInstanceId =
-    typeof expose?.payload?.cardId === "string"
-      ? expose.payload.cardId
-      : typeof decline?.payload?.cardId === "string"
-        ? decline.payload.cardId
-        : undefined;
-  const origin = previous?.selectedActionOrigin;
-  const rootPlanInstanceId =
-    origin?.rootPlanInstanceId ?? previous?.rootForegroundInstanceId;
-  const executorInstanceId =
-    origin?.executorInstanceId ?? previous?.executorInstanceId;
-  const root = previous?.instances.find(
-    (instance) => instance.instanceId === rootPlanInstanceId,
-  );
-  const executor = previous?.instances.find(
-    (instance) => instance.instanceId === executorInstanceId,
-  );
-  const executorState = executor?.moduleState as
-    | {
-        kind?: unknown;
-        signal?: { serverId?: unknown };
-      }
-    | undefined;
-  const exactWindow =
-    input.legalActions.length === 2 &&
-    expose !== undefined &&
-    decline !== undefined &&
-    iceId !== undefined &&
-    expose.payload?.iceId === decline.payload?.iceId &&
-    sourceCardInstanceId !== undefined &&
-    expose.payload?.cardId === decline.payload?.cardId &&
-    expose.expiresAtStateVersion === input.playerView.stateVersion &&
-    decline.expiresAtStateVersion === input.playerView.stateVersion;
-  const exactSelectedOrigin =
-    previous !== undefined &&
-    origin !== undefined &&
-    origin.immediateChoicePolicy === "resolve_runner_run_start_order" &&
-    (origin.sourceActionType === "start_run" ||
-      origin.sourceActionType === "play_event" ||
-      origin.sourceActionType === "activated_card_ability") &&
-    previous.side === "runner" &&
-    previous.stateVersion + 1 === input.playerView.stateVersion &&
-    origin.selectedAtStateVersion === previous.stateVersion &&
-    previous.rootForegroundInstanceId === origin.rootPlanInstanceId &&
-    previous.executorInstanceId === origin.executorInstanceId;
-  const executionLease = previous?.turnPlanExecutionLease;
-  const turnPlanCommitment = previous?.turnPlanCommitment;
-  const continuationEvents = (input.eventTail ?? []).filter(
-    (event) =>
-      previous !== undefined &&
-      event.stateVersionBefore >= previous.stateVersion &&
-      event.stateVersionAfter <= input.playerView.stateVersion,
-  );
-  const exactTurnPlanLease =
-    previous !== undefined &&
-    previous.stateVersion < input.playerView.stateVersion &&
-    turnPlanCommitment?.status === "active" &&
-    turnPlanCommitment.sequenceRootPlanInstanceId === rootPlanInstanceId &&
-    executionLease !== undefined &&
-    executionLease.commitmentId === turnPlanCommitment.commitmentId &&
-    executionLease.sourcePlanId === turnPlanCommitment.sourcePlanId &&
-    executionLease.currentBinding.stateVersion === previous.stateVersion &&
-    (executionLease.actionType === "start_run" ||
-      executionLease.actionType === "play_event" ||
-      executionLease.actionType === "continue_run") &&
-    continuationEvents.length >= 1 &&
-    continuationEvents[0]?.stateVersionBefore === previous.stateVersion &&
-    continuationEvents.every(
-      (event, index) =>
-        event.stateVersionAfter === event.stateVersionBefore + 1 &&
-        (index === 0 ||
-          continuationEvents[index - 1]?.stateVersionAfter ===
-            event.stateVersionBefore),
-    ) &&
-    continuationEvents.at(-1)?.stateVersionAfter ===
-      input.playerView.stateVersion &&
-    continuationEvents[0]?.publicPayload?.actor === "runner" &&
-    continuationEvents[0]?.publicPayload?.actionType ===
-      executionLease.actionType &&
-    continuationEvents
-      .slice(1)
-      .every(
-        (event) =>
-          event.publicPayload?.actor === "corp" &&
-          (event.publicPayload?.actionType === "rez_ice" ||
-            event.publicPayload?.actionType === "decline_rez"),
-      );
-  const exactPlanBinding =
-    previous !== undefined &&
-    previous.side === "runner" &&
-    rootPlanInstanceId !== undefined &&
-    executorInstanceId !== undefined &&
-    previous.rootForegroundInstanceId === rootPlanInstanceId &&
-    previous.executorInstanceId === executorInstanceId &&
-    root !== undefined &&
-    executor !== undefined &&
-    root.side === "runner" &&
-    executor.side === "runner" &&
-    executor.executionState === "executor" &&
-    (executor.moduleId === "runner.pressure_central" ||
-      executor.moduleId === "runner.contest_remote" ||
-      executor.moduleId === "runner.convert_run_window") &&
-    (executor.instanceId === root.instanceId ||
-      executor.parentInstanceId === root.instanceId) &&
-    (executorState?.kind === "central_pressure" ||
-      executorState?.kind === "remote_contest" ||
-      executorState?.kind === "run_window") &&
-    executorState.signal?.serverId === input.playerView.run.attackedServerId &&
-    (exactSelectedOrigin || exactTurnPlanLease);
-  const runPosition = input.playerView.run.position;
-  const approachedServer = input.playerView.servers.find(
-    (server) => server.id === input.playerView.run?.attackedServerId,
-  );
-  const approachedIce =
-    runPosition?.kind === "ice"
-      ? approachedServer?.ice[runPosition.iceIndex]
-      : undefined;
-  if (!exactWindow || !exactPlanBinding || !approachedIce) {
-    throw new PlanResolutionFailure("window_origin_missing", {
-      side: input.side,
-      stateVersion: input.playerView.stateVersion,
-      timingPoint: input.playerView.timingPoint,
-      legalActionTypes: input.legalActions.map((action) => action.type),
-      unresolvedActionIds: input.legalActions.map((action) => action.actionId),
-      owner: "continuation",
-      ...(executorInstanceId ? { planInstanceId: executorInstanceId } : {}),
-      removalCondition:
-        "Resolve an approach-ICE expose window only from the exact active Runner run-plan origin, current source card and current visible approached ICE.",
-    });
-  }
-  const exposeUnknownIce =
-    approachedIce.known === false && !rememberedTargetIds.has(iceId);
-  const action = exposeUnknownIce ? expose : decline;
-  const rejectedAction = exposeUnknownIce ? decline : expose;
-  return {
-    kind: "run_window",
-    informationId: `ice:${iceId}`,
-    rootPlanInstanceId,
-    parentPlanInstanceId: executorInstanceId,
-    serverId: input.playerView.run.attackedServerId,
-    runId: input.playerView.run.runId ?? String(input.playerView.stateVersion),
-    sourceCardInstanceId,
-    targetIceInstanceId: iceId,
-    phase: exposeUnknownIce ? "expose_unknown_ice" : "decline_known_ice",
-    selectedActionId: action.actionId,
-    rejectedActionIds: [rejectedAction.actionId],
-    admissible: true,
-    evidenceCodes: [
-      exposeUnknownIce
-        ? "runner_expose_information_unknown_ice_target"
-        : "runner_expose_information_repeated_known_ice_declined",
-      `runner_expose_information_server:${input.playerView.run.attackedServerId}`,
-      `runner_expose_information_target:${iceId}`,
-      `runner_expose_information_source:${sourceCardInstanceId}`,
-    ],
-  };
 }
 
 function attachActiveRunContext(
