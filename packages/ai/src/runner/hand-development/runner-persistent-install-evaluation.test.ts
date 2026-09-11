@@ -10,7 +10,7 @@ import type {
 import {
   evaluateRunnerHandDevelopment,
   redactedRunnerHandDevelopmentFacts,
-} from "../../runner-hand-development";
+} from "./hand-development-evaluation";
 import {
   RUNNER_STRATEGIC_INTENT_SCHEMA_VERSION,
   type RunnerStrategicIntentProfile,

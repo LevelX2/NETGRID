@@ -1,6 +1,6 @@
 import { createRunnerHandFundingContext } from "./runner-hand-funding-context";
 import type { DeckCapabilityProfile } from "../deck-capabilities";
-import type { RunnerHandDevelopmentEvaluation } from "../runner-hand-development";
+import type { RunnerHandDevelopmentEvaluation } from "../runner/hand-development/hand-development-evaluation";
 import type { RunnerStrategicIntentProfile } from "../runner-strategic-intent";
 import type { RunnerHandFundingTargetDependencies } from "./runner-hand-funding-target";
 import {

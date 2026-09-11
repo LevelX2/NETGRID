@@ -1,13 +1,13 @@
 import type {
   GuaranteeLevel,
   PlanAssessment,
-  PriorityClass,
   PriorityClaim,
+  PriorityClass,
   ResourceGap,
 } from "./plan-assessment";
 import type { PlanInstance, PlanProposal } from "./plan-kernel-types";
-import type { PlanSchedulerContext } from "./plan-scheduler";
 import { PlanResolutionFailure } from "./plan-resolution-failure";
+import type { PlanSchedulerContext } from "./plan-scheduler";
 
 // Existing tactical lifecycle and priority defaults; domain policy stays in owners.
 export function runnerTacticalProposal(
@@ -225,4 +225,70 @@ export function runnerTacticalPlanDomain<T>(context: PlanSchedulerContext): T {
     removalCondition:
       "Build the Runner tactical domain before discovering tactical plans.",
   });
+}
+
+import { type RunnerCorePlanDomain } from "./runner-core-plan-modules";
+import { RunnerPlanDomain } from "./runner-tactical-plan-contracts";
+
+export function exactRunnerParentSupportResourceGaps(
+  context: PlanSchedulerContext,
+  parent: PlanInstance,
+  supportNeedId: string | undefined,
+  currentRouteExists: boolean,
+): ResourceGap[] {
+  // A bound support need describes why the parent had no route. Once the
+  // parent owns an executable route again, that historical need must not also
+  // classify the same assessment as support-dependent.
+  if (currentRouteExists) return [];
+  if (supportNeedId === undefined) return [];
+  const exactNeeds = domain(context).fundingNeeds.filter(
+    (
+      need,
+    ): need is Extract<
+      RunnerCorePlanDomain["fundingNeeds"][number],
+      { kind: "parent_plan_support" }
+    > =>
+      need.kind === "parent_plan_support" &&
+      need.needId === supportNeedId &&
+      need.parentPlanInstanceId === parent.instanceId &&
+      need.gap > 0,
+  );
+  if (exactNeeds.length === 1) {
+    const [need] = exactNeeds;
+    if (!need) return [];
+    return [
+      {
+        needId: need.needId,
+        capability: "credits",
+        minimum: need.gap,
+        available: 0,
+        deadline:
+          need.driver.kind === "development" ? "multi_turn" : "current_turn",
+      },
+    ];
+  }
+  const coverageGaps = domain(context).coverageGaps.filter(
+    (gap) =>
+      gap.gapId === supportNeedId &&
+      gap.requesterPlanInstanceId === parent.instanceId &&
+      gap.requesterNeedId === supportNeedId,
+  );
+  if (coverageGaps.length !== 1) return [];
+  return [
+    {
+      needId: supportNeedId,
+      capability: coverageGaps[0]!.requiredRole,
+      minimum: 1,
+      available: 0,
+      deadline: "current_turn",
+    },
+  ];
+}
+
+export function domain(context: PlanSchedulerContext): RunnerPlanDomain {
+  return runnerTacticalPlanDomain<RunnerPlanDomain>(context);
+}
+
+export function state<T>(instance: PlanInstance): T {
+  return instance.moduleState as T;
 }

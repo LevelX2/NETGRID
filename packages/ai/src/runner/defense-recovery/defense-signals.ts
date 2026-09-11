@@ -2,7 +2,7 @@ import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { AI_HINTS_BY_CARD } from "../../ai-hints";
 import { rolesForDeckDoctrineCard } from "../../deck-doctrine-card-roles";
-import type { RunnerHandDevelopmentEvaluation } from "../../runner-hand-development";
+import type { RunnerHandDevelopmentEvaluation } from "../hand-development/hand-development-evaluation";
 import type { RunnerRunTargetEvaluation } from "../../runner-run-target-evaluation";
 import { runnerEffectsProvideTopTrashRecovery } from "../../runner-canonical-hint-semantics";
 import { randomBreakOrDamageRiskProfileForDefinitionId } from "../../actions/risk-action-projection";

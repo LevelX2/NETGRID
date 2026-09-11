@@ -1,4 +1,4 @@
-import type { RunnerHandDevelopmentEvaluation } from "../runner-hand-development";
+import type { RunnerHandDevelopmentEvaluation } from "../runner/hand-development/hand-development-evaluation";
 
 export type RunnerDevelopmentCashOutExceptionKind =
   | "acute_survival"

@@ -1,6 +1,6 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
-import type { RunnerHandDevelopmentEvaluation } from "../../runner-hand-development";
+import type { RunnerHandDevelopmentEvaluation } from "../hand-development/hand-development-evaluation";
 import type {
   RunnerEconomyPosture,
   RunnerRunTargetEvaluation,

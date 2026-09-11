@@ -1,6 +1,6 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 
-import type { RunnerHandDevelopmentEvaluation } from "../runner-hand-development";
+import type { RunnerHandDevelopmentEvaluation } from "../runner/hand-development/hand-development-evaluation";
 
 export const RUNNER_HAND_ROTATION_ASSESSMENT_SCHEMA_VERSION =
   "runner-hand-rotation-assessment-v1" as const;

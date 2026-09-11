@@ -324,6 +324,23 @@ diesen nachgewiesenen Installationspfad nicht erneut verwerfen.
 
 ## 5. `runner.develop_board_and_hand`
 
+Der Owner ist unter `packages/ai/src/runner/hand-development/` gebündelt:
+`hand-development-evaluation.ts` und die persistente Installationsbewertung
+liefern den Kartenwert; `development-discovery.ts` erzeugt zugelassene
+Kartenpläne und ihre Funding-Needs aus typisierten aktuellen Fakten der
+anderen Owner. `development-signals.ts` liefert Draw-, Such- und
+Entwicklungssignale. `development-plan-module.ts` besitzt Discovery,
+Assessment und Materialisierung der registrierten Planinstanzen.
+
+`development-search-targets.ts`, `development-restricted-sequence.ts` und
+`development-choice-bindings.ts` bündeln Zielwahl, begrenzte Installfolgen und
+die unveränderte Bindung durch Engine-Zahlungs-/Choice-Fenster. Zwei explizite
+Installations-Prüfdienste und der gemeinsame Keep-Scorer liefern Bewertungen;
+sie wählen keine neue Action. `development-funding.ts` benutzt die geteilten
+exakten Funding-Routen in `runtime/runner-exact-funding-routes.ts`. Die
+Runtime komponiert die Owner-Fakten und führt weiterhin die gemeinsame
+Zugplanung aus; sie enthält keine zweite Handentwicklungs-Discovery.
+
 **Klasse:** `bounded_sequence` oder `development_project`
 **Rolle:** Vordergrund/Support
 **Status:** registrierter produktiver Owner; Fähigkeitsgrenzen siehe Einstieg.

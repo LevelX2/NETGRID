@@ -4,7 +4,7 @@ import type {
   DeckCapabilityProfile,
   EconomyBankTool,
 } from "../../deck-capabilities";
-import type { RunnerHandDevelopmentEvaluation } from "../../runner-hand-development";
+import type { RunnerHandDevelopmentEvaluation } from "../hand-development/hand-development-evaluation";
 import type {
   RunnerEconomyPosture,
   RunnerRunTargetEvaluation,

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { DeckCapabilityProfile } from "../deck-capabilities";
-import { evaluateRunnerHandDevelopment } from "../runner-hand-development";
+import { evaluateRunnerHandDevelopment } from "../runner/hand-development/hand-development-evaluation";
 import {
   installAction,
   runnerInput,

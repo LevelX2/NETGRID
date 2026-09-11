@@ -1,3 +1,4 @@
+import type { RunnerDevelopmentSignal } from "../runner/hand-development/development-types";
 import type { CorpHandManagementSignal } from "../corp/hand-management/hand-management-types";
 import type { CorpAmbushSignal } from "../plans/corp-tactical-plan-contracts";
 import {
@@ -54,7 +55,7 @@ import { PlanResolutionFailure } from "../plans/plan-resolution-failure";
 import { getStrategicIntentMemorySnapshot } from "../strategic-intent-memory";
 import type { StrategicIntentState } from "../strategic-intent-state";
 import type { RequiredCapabilityKind } from "../plans/tactical-plan-types";
-import type { RunnerDevelopmentSignal } from "../plans/runner-tactical-plan-modules";
+
 import type { AiHintStructuredEffect } from "../hint-ontology";
 import {
   isRunnerTargetedBypassChoice,

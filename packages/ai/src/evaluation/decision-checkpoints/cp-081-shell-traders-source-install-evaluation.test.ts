@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { AiDecisionInput } from "@netgrid/shared";
 
 import shellTradersDecisionJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-081-g3-terminal-reserve-consumption-d336.json";
-import { evaluateRunnerHandDevelopment } from "../../runner-hand-development";
+import { evaluateRunnerHandDevelopment } from "../../runner/hand-development/hand-development-evaluation";
 import { createDeckCapabilitiesContext } from "../../runtime/deck-capabilities-context";
 import { createRunnerStrategicIntentContext } from "../../runtime/runner-strategic-intent-context";
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { evaluateRunnerHandDevelopment } from "./runner-hand-development";
+import { evaluateRunnerHandDevelopment } from "./runner/hand-development/hand-development-evaluation";
 import {
   findByInstance,
   playEventAction,

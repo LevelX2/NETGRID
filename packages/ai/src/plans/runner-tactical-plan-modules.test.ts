@@ -1,3 +1,7 @@
+import {
+  type RunnerPlanDomain,
+  type RunnerTacticalPlanDomain,
+} from "./runner-tactical-plan-contracts";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
@@ -14,8 +18,6 @@ import {
   createRunnerTacticalPlanModules,
   runnerPressureProgressReceipt,
   runnerVoluntaryActionFamilyOwner,
-  type RunnerPlanDomain,
-  type RunnerTacticalPlanDomain,
 } from "./runner-tactical-plan-modules";
 
 describe("Runner tactical plan modules", () => {

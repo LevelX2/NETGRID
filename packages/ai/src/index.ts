@@ -552,7 +552,7 @@ export {
   redactedRunnerHandDevelopmentFacts,
   RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION,
   RUNNER_PERSISTENT_INSTALL_EVALUATION_SCHEMA_VERSION,
-} from "./runner-hand-development";
+} from "./runner/hand-development/hand-development-evaluation";
 export type {
   EvaluateRunnerHandDevelopmentParams,
   RunnerHandDevelopmentActivationPrerequisite,
@@ -576,7 +576,7 @@ export type {
   RunnerPersistentDeckReplacementStatus,
   RunnerPersistentInstallEvaluation,
   RunnerPersistentInstallStackabilityClass,
-} from "./runner-hand-development";
+} from "./runner/hand-development/hand-development-evaluation";
 export {
   buildRunnerRigDemandProjection,
   redactedRunnerRigDemandProjectionFacts,

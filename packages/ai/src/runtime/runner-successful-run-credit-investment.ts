@@ -1,6 +1,6 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import { AI_HINTS_BY_CARD } from "../ai-hints";
-import type { RunnerHandDevelopmentEvaluation } from "../runner-hand-development";
+import type { RunnerHandDevelopmentEvaluation } from "../runner/hand-development/hand-development-evaluation";
 import type {
   RunnerEconomyPosture,
   RunnerRunTargetEvaluation,

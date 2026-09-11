@@ -4,7 +4,7 @@ import deferredFixture from "../../../../../data/scenarios/ai-decision-checkpoin
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
-import { evaluateRunnerHandDevelopment } from "../../runner-hand-development";
+import { evaluateRunnerHandDevelopment } from "../../runner/hand-development/hand-development-evaluation";
 import {
   evaluateRunnerRunTargets,
   buildRunnerEconomyPosture,

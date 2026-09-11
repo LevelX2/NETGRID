@@ -9,7 +9,7 @@ import type {
   RunnerEconomyPosture,
   RunnerRunTargetEvaluation,
 } from "../runner-run-target-evaluation";
-import type { RunnerHandDevelopmentEvaluation } from "../runner-hand-development";
+import type { RunnerHandDevelopmentEvaluation } from "../runner/hand-development/hand-development-evaluation";
 import type { RunnerTacticalGoal } from "../runner-tactical-goals";
 import type { RunnerStrategicIntentProfile } from "../runner-strategic-intent";
 import type { StrategicIntentState } from "../strategic-intent-state";

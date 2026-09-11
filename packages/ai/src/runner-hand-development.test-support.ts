@@ -6,7 +6,7 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import { expect } from "vitest";
-import { evaluateRunnerHandDevelopment } from "./runner-hand-development";
+import { evaluateRunnerHandDevelopment } from "./runner/hand-development/hand-development-evaluation";
 import {
   RUNNER_STRATEGIC_INTENT_SCHEMA_VERSION,
   type RunnerStrategicIntentProfile,

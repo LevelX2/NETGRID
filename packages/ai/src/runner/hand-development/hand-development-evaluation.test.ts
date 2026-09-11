@@ -10,16 +10,16 @@ import type {
 import {
   evaluateRunnerHandDevelopment,
   redactedRunnerHandDevelopmentFacts,
-} from "./runner-hand-development";
+} from "./hand-development-evaluation";
 import {
   RUNNER_STRATEGIC_INTENT_SCHEMA_VERSION,
   type RunnerStrategicIntentProfile,
-} from "./runner-strategic-intent";
-import { discardKeepScore } from "./runtime/discard-keep-score";
-import { selectedSearchChoiceOptionIds } from "./runtime/search-choice-option";
-import type { DeckCapabilityProfile } from "./deck-capabilities";
-import { AI_HINTS_BY_CARD, type AiCardHint } from "./ai-hints";
-import { buildActionSemanticCandidates } from "./action-semantic-candidate";
+} from "../../runner-strategic-intent";
+import { discardKeepScore } from "../../runtime/discard-keep-score";
+import { selectedSearchChoiceOptionIds } from "../../runtime/search-choice-option";
+import type { DeckCapabilityProfile } from "../../deck-capabilities";
+import { AI_HINTS_BY_CARD, type AiCardHint } from "../../ai-hints";
+import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
 import {
   breakerVariantDeckCapabilities,
   findByInstance,
@@ -30,7 +30,7 @@ import {
   strategicIntent,
   visibleCard,
   visibleIdentity,
-} from "./runner-hand-development.test-support";
+} from "../../runner-hand-development.test-support";
 
 describe("RunnerHandDevelopmentEvaluation", () => {
   it.each([0, 2])(

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { RunnerHandDevelopmentEvaluation } from "../runner-hand-development";
+import type { RunnerHandDevelopmentEvaluation } from "../runner/hand-development/hand-development-evaluation";
 import { assessRunnerDevelopmentCashOutAdmission } from "./runner-development-cashout-admission";
 
 describe("runner development cashout admission", () => {

@@ -1,3 +1,4 @@
+import type { RunnerRestrictedProgramInstallSequenceCommitment } from "../runner/hand-development/development-types";
 import { describe, expect, it, vi } from "vitest";
 import {
   CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
@@ -20,7 +21,7 @@ import {
   evaluateRunnerHandDevelopment,
   type RunnerHandDevelopmentEvaluation,
   type RunnerHandDevelopmentRole,
-} from "../runner-hand-development";
+} from "../runner/hand-development/hand-development-evaluation";
 import type { RunnerStrategicIntentProfile } from "../runner-strategic-intent";
 import {
   evaluateRunnerRunTargets,
@@ -49,7 +50,7 @@ import {
 import { instantiatePlanProposal } from "../plans/plan-instance";
 import type { PlanInstance } from "../plans/plan-kernel-types";
 import { corpClassicDeflectorDefenseChoiceSignal } from "../plans/corp-core-plan-modules";
-import type { RunnerRestrictedProgramInstallSequenceCommitment } from "../plans/runner-tactical-plan-modules";
+
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import {
   reconcileSelectedTurnPlannerActionDispositions,

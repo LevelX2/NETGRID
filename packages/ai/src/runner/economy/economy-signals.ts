@@ -1,7 +1,7 @@
 import { uniqueBy } from "../../runtime/collection";
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
-import type { RunnerHandDevelopmentEvaluation } from "../../runner-hand-development";
+import type { RunnerHandDevelopmentEvaluation } from "../hand-development/hand-development-evaluation";
 import type { RunnerEconomyPosture } from "../../runner-run-target-evaluation";
 import { runnerInstalledDebtFinancingLiability } from "../../runtime/runner-canonical-card-facts";
 import { runnerTurnLiquidityCandidateIsMaterializable } from "../../plans/runner-funding-candidates";

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
-import type { RunnerHandDevelopmentEvaluation } from "../runner-hand-development";
+import type { RunnerHandDevelopmentEvaluation } from "../runner/hand-development/hand-development-evaluation";
 import { assessRunnerHandRotation } from "./runner-hand-rotation-assessment";
 
 describe("assessRunnerHandRotation", () => {

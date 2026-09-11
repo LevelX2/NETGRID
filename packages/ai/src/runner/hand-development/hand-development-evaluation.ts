@@ -3,21 +3,21 @@ import type {
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
-import type { ActionSemanticCandidate } from "./action-semantic-candidate";
+import type { ActionSemanticCandidate } from "../../action-semantic-candidate";
 import type {
   BreakerCapability,
   BreakerCoverageKind,
   DeckCapabilityProfile,
-} from "./deck-capabilities";
-import type { RunnerStrategicIntentProfile } from "./runner-strategic-intent";
-import { RUNTIME_CARDS } from "./ai-hints";
-import { runnerDamageThreatAssessment } from "./runner-damage-threat-assessment";
+} from "../../deck-capabilities";
+import type { RunnerStrategicIntentProfile } from "../../runner-strategic-intent";
+import { RUNTIME_CARDS } from "../../ai-hints";
+import { runnerDamageThreatAssessment } from "../../runner-damage-threat-assessment";
 import {
   actionDevelopsPersistentCardNow,
   persistentDevelopmentActionProjection,
-} from "./actions/persistent-development-action";
-import { randomBreakOrDamageRiskProfileForDefinitionId } from "./actions/risk-action-projection";
-import { actionClickCost } from "./runtime/action-cost";
+} from "../../actions/persistent-development-action";
+import { randomBreakOrDamageRiskProfileForDefinitionId } from "../../actions/risk-action-projection";
+import { actionClickCost } from "../../runtime/action-cost";
 import {
   RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION,
   RUNNER_PERSISTENT_INSTALL_EVALUATION_SCHEMA_VERSION,
@@ -44,9 +44,9 @@ import {
   type RunnerPersistentDeckReplacementStatus,
   type RunnerPersistentInstallEvaluation,
   type RunnerPersistentInstallStackabilityClass,
-} from "./runner/hand-development/runner-hand-development-types";
-import type { RunnerRigRoleDemand } from "./runner/rig-demand/runner-rig-demand-projection";
-import { runnerRestrictedRunCreditProfile } from "./runtime/runner-canonical-card-facts";
+} from "./runner-hand-development-types";
+import type { RunnerRigRoleDemand } from "../rig-demand/runner-rig-demand-projection";
+import { runnerRestrictedRunCreditProfile } from "../../runtime/runner-canonical-card-facts";
 
 export {
   RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION,
@@ -74,7 +74,7 @@ export {
   type RunnerPersistentDeckReplacementStatus,
   type RunnerPersistentInstallEvaluation,
   type RunnerPersistentInstallStackabilityClass,
-} from "./runner/hand-development/runner-hand-development-types";
+} from "./runner-hand-development-types";
 
 export function runnerHandDevelopmentBreaksProtectedReserve(
   evaluation: RunnerHandDevelopmentEvaluation,
@@ -89,7 +89,7 @@ export function runnerHandDevelopmentBreaksProtectedReserve(
 import type {
   CardContext,
   CardSignals,
-} from "./runner/hand-development/runner-hand-development-internal-types";
+} from "./runner-hand-development-internal-types";
 import {
   actionCreditCost,
   actionMatchesCard,
@@ -144,7 +144,7 @@ import {
   visibleRunnerTagThreat,
   visibleRunnerTraceThreat,
   visibleRunnerThreat,
-} from "./runner/hand-development/runner-persistent-install-evaluation";
+} from "./runner-persistent-install-evaluation";
 import {
   runnerEffectsProvideDamagePrevention,
   runnerEffectsProvideBreakerCredits,
@@ -155,7 +155,7 @@ import {
   runnerEffectsProvideSearch,
   runnerEffectsProvideTagPrevention,
   runnerEffectsProvideTopTrashRecovery,
-} from "./runner-canonical-hint-semantics";
+} from "../../runner-canonical-hint-semantics";
 
 export function evaluateRunnerHandDevelopment(
   params: EvaluateRunnerHandDevelopmentParams,

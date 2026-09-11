@@ -5,7 +5,7 @@ import {
 } from "./deck-opening-hand";
 import { evaluateKnownCentralAccessPayoff } from "./known-central-access-payoff";
 import { buildObservedFacts } from "./observed-facts-public";
-import { evaluateRunnerHandDevelopment } from "./runner-hand-development";
+import { evaluateRunnerHandDevelopment } from "./runner/hand-development/hand-development-evaluation";
 import {
   assessRandomBreakOrDamageRiskForRunAction,
   randomBreakOrDamageRiskShouldAvoidRun,

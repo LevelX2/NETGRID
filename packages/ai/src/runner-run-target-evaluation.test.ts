@@ -18,7 +18,7 @@ import { rankKnownRemoteAccessTargets } from "./access/access-target-ranking";
 import {
   RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION,
   type RunnerHandDevelopmentEvaluation,
-} from "./runner-hand-development";
+} from "./runner/hand-development/hand-development-evaluation";
 import { withEffectiveRunQuote } from "./effective-run-quote.test-support";
 import { buildDeckCapabilityProfileFromInput } from "./deck-capabilities";
 import { buildAiDecisionInputDto } from "./input-dto";

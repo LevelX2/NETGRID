@@ -30,10 +30,10 @@ eigenen Commit. Fehler werden vor dem nächsten Paket behoben.
 3. **NF03 abgeschlossen – Corp Hand Management:** Handplanung, Signale und gebundene
    Hand-Choices; Score bleibt zuständig für Agenda-Ziel und Punktehorizont.
    Nachweis: Overflow, Draw/Discard/Shuffle, Deckout und Agenda-Flood.
-4. **NF04 aktiv – Runner Development:** Plan und Entwicklungs-/Suchsignale
+4. **NF04 abgeschlossen – Runner Development:** Plan und Entwicklungs-/Suchsignale
    sowie Fortsetzungen mit vorhandener Handbewertung zusammenführen.
    Nachweis: Admission, Funding, Install/Search und private Choice-Bindung.
-5. **NF05 offen – Corp Economy:** Need-Verträge, Einkommen, Investition,
+5. **NF05 aktiv – Corp Economy:** Need-Verträge, Einkommen, Investition,
    Auszahlung und Fundingplan bündeln. Nachweis: endliche Economy, Reserve,
    Counter-Finanzierung und exakte fremde Consumer-Bindung.
 
@@ -64,3 +64,7 @@ Strukturgate grün (744 produktive Dateien, keine Zyklen).
 
 NF03: 65 Tests grün (48 thematische Tests und 17 gezielte Live-/Choice-Tests);
 AI-Typecheck und Strukturgate grün (753 produktive Dateien, keine Zyklen).
+
+NF04: 197 Tests grün (118 thematische und 79 Live-/Choice-Regressionen);
+AI-Typecheck, Reachability und Strukturgate grün (766 Dateien, keine Zyklen).
+Main vor NF05 unverändert und sauber auf 94cbeb26a.
