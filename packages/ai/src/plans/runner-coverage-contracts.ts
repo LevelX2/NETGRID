@@ -127,3 +127,12 @@ export function runnerRolesCoverCoverageGap(
     rolesMatch(roles, ["universal_breaker", "breaker_universal"])
   );
 }
+
+export const RUNNER_BREAKER_COVERAGE_ROLES = [
+  "breaker_wall",
+  "breaker_code_gate",
+  "breaker_sentry",
+  "breaker_ap",
+  "breaker_trace",
+  "breaker_universal",
+] as const satisfies readonly RunnerCoverageGapSignal["requiredRole"][];

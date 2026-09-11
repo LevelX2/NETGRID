@@ -2,7 +2,7 @@ import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import { runnerVisibleSearchCoverageNeed } from "./runner-search-coverage-need";
-import { withEffectiveRunQuote } from "../effective-run-quote.test-support";
+import { withEffectiveRunQuote } from "../../effective-run-quote.test-support";
 
 describe("runnerVisibleSearchCoverageNeed", () => {
   it("ignores already reachable wall ICE and reports the actual missing code-gate coverage", () => {

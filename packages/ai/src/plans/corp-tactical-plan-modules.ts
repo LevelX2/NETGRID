@@ -9,22 +9,16 @@ import type { ActionSemanticCandidate } from "../action-semantic-candidate-types
 import type { KnownCorpCardAccessEffectProjection } from "../runtime/known-corp-card-access-effect-projection";
 import type { CorpHandInventoryFacts } from "../runtime/corp-hand-inventory-facts";
 import type { CorpDrawAdmissionAssessment } from "../runtime/corp-draw-admission";
-import type {
-  GuaranteeLevel,
-  PlanAssessment,
-  PriorityClass,
-  PriorityClaim,
-  ResourceGap,
-} from "./plan-assessment";
+import type { GuaranteeLevel, ResourceGap } from "./plan-assessment";
 import { planInstanceIdForProposal } from "./plan-instance";
-import type { PlanInstance, PlanProposal } from "./plan-kernel-types";
+import type { PlanInstance } from "./plan-kernel-types";
 import type {
   PlanMaterialization,
   PlanModule,
   PlanSchedulerContext,
 } from "./plan-scheduler";
 import type { CorpCorePlanDomain } from "./corp-core-plan-modules";
-import { PlanResolutionFailure } from "./plan-resolution-failure";
+
 import type { CorpBluffDefenseNeed } from "./corp-bluff-defense-types";
 
 export type CorpPunishCampaignSignal = {

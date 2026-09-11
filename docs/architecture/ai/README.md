@@ -72,7 +72,7 @@ vollständige Abdeckung aller denkbaren Kartenfolgen.
 | `runner.recurring_economy`        | [createRunnerRecurringEconomyModule](../../../packages/ai/src/runner/recurring-economy/recurring-economy-plan-module.ts)    | [Runner §11](runner-plan-contracts.md#11-runnercredit_bank-und-runnerrecurring_economy)              |
 | `runner.credit_bank`              | [createRunnerCreditBankModule](../../../packages/ai/src/runner/credit-bank/credit-bank-plan-module.ts)                      | [Runner §11](runner-plan-contracts.md#11-runnercredit_bank-und-runnerrecurring_economy)              |
 | `runner.economy`                  | [createRunnerEconomyModule](../../../packages/ai/src/runner/economy/economy-plan-module.ts)                                 | [Runner §6](runner-plan-contracts.md#6-runnereconomy)                                                |
-| `runner.rig_and_coverage`         | [coverageModule](../../../packages/ai/src/plans/runner-core-plan-modules.ts#L168)                                           | [Runner §4](runner-plan-contracts.md#4-runnerrig_and_coverage)                                       |
+| `runner.rig_and_coverage`         | [createRunnerCoverageModule](../../../packages/ai/src/runner/rig-coverage/coverage-plan-module.ts)                          | [Runner §4](runner-plan-contracts.md#4-runnerrig_and_coverage)                                       |
 | `runner.defense_and_recovery`     | [createRunnerDefenseModule](../../../packages/ai/src/runner/defense-recovery/defense-plan-module.ts)                        | [Runner §7](runner-plan-contracts.md#7-runnerdefense_and_recovery)                                   |
 | `runner.secure_terminal_win`      | [createRunnerTerminalWinModule](../../../packages/ai/src/runner/terminal-win/terminal-win-plan-module.ts)                   | [Runner §14](runner-plan-contracts.md#14-runnerscore_installed_agenda-und-runnersecure_terminal_win) |
 | `runner.expose_information`       | [createRunnerExposeInformationModule](../../../packages/ai/src/runner/expose-information/expose-information-plan-module.ts) | [Runner §9](runner-plan-contracts.md#9-runnerexpose_information)                                     |
@@ -86,10 +86,10 @@ vollständige Abdeckung aller denkbaren Kartenfolgen.
 | `corp.defend_servers`             | [defenseModule](../../../packages/ai/src/plans/corp-core-plan-modules.ts#L1573)                                             | [Corp §4](corp-plan-contracts.md#4-corpdefend_servers)                                               |
 | `corp.economy`                    | [economyModule](../../../packages/ai/src/plans/corp-core-plan-modules.ts#L1944)                                             | [Corp §6](corp-plan-contracts.md#6-corpeconomy)                                                      |
 | `corp.respond_to_virus_pressure`  | [createCorpVirusPressureModule](../../../packages/ai/src/corp/virus-pressure/virus-pressure-plan-module.ts)                 | [Corp §5](corp-plan-contracts.md#5-corprespond_to_virus_pressure)                                    |
-| `corp.punish_campaign`            | [punishCampaignModule](../../../packages/ai/src/plans/corp-tactical-plan-modules.ts#L354)                                   | [Corp §7](corp-plan-contracts.md#7-corppunish_campaign)                                              |
-| `corp.execute_punish_sequence`    | [punishSequenceModule](../../../packages/ai/src/plans/corp-tactical-plan-modules.ts#L431)                                   | [Corp §8](corp-plan-contracts.md#8-corpexecute_punish_sequence)                                      |
-| `corp.ambush_and_bluff`           | [ambushModule](../../../packages/ai/src/plans/corp-tactical-plan-modules.ts#L545)                                           | [Corp §9](corp-plan-contracts.md#9-corpambush_and_bluff)                                             |
-| `corp.hand_and_agenda_management` | [handModule](../../../packages/ai/src/plans/corp-tactical-plan-modules.ts#L793)                                             | [Corp §10](corp-plan-contracts.md#10-corphand_and_agenda_management)                                 |
+| `corp.punish_campaign`            | [punishCampaignModule](../../../packages/ai/src/plans/corp-tactical-plan-modules.ts#L348)                                   | [Corp §7](corp-plan-contracts.md#7-corppunish_campaign)                                              |
+| `corp.execute_punish_sequence`    | [punishSequenceModule](../../../packages/ai/src/plans/corp-tactical-plan-modules.ts#L425)                                   | [Corp §8](corp-plan-contracts.md#8-corpexecute_punish_sequence)                                      |
+| `corp.ambush_and_bluff`           | [ambushModule](../../../packages/ai/src/plans/corp-tactical-plan-modules.ts#L539)                                           | [Corp §9](corp-plan-contracts.md#9-corpambush_and_bluff)                                             |
+| `corp.hand_and_agenda_management` | [handModule](../../../packages/ai/src/plans/corp-tactical-plan-modules.ts#L787)                                             | [Corp §10](corp-plan-contracts.md#10-corphand_and_agenda_management)                                 |
 | `corp.complete_turn`              | [createTurnCompletionPlanModule](../../../packages/ai/src/plans/turn-completion-plan-module.ts)                             | [EndTurn](planning-architecture.md#17-endturn-vertrag)                                               |
 
 Die Faktenproduzenten sind in `runnerContext` / `corpContext` der
@@ -115,6 +115,17 @@ auch Erinnerung und installierte Karten-Choices dazu. Gemeinsame taktische
 Planstandards liegen in [runner-tactical-module-support.ts](../../../packages/ai/src/plans/runner-tactical-module-support.ts).
 Bei den übrigen Ownern erklärt allein die Moduldatei den heutigen Pfad noch
 nicht vollständig.
+
+Auch Shell-Traders-Pipeline, Corp-Virusdruck, Runner-Abwehr, Runner-Economy
+und Rig/Coverage besitzen vertikale Implementierungen unter `runner/` bzw.
+`corp/virus-pressure/`; die Ownerkarte verlinkt ihre Factories, die jeweiligen
+Fachverträge benennen Signale, Bindungen und Dienste. Die Runner-Core-Datei
+enthält nur noch die Domänentypen und die Registrierung ihrer acht Module.
+Geteilte taktische Standards, Funding- und Entwicklungskriterien sowie
+Run-Payoff-Fakten sind von den Registries getrennt. Die gemeinsame Live-Runtime
+komponiert die Daten und Dienste und koordiniert weiterhin plangreifende
+Ausschlüsse. Das ist eine Quellcodestruktur innerhalb von `@netgrid/ai`, keine
+Aufteilung in separat geladene Laufzeitbibliotheken.
 
 Nicht registriert sind die konzeptionellen Opening-Module
 `runner.opening_strategy` und `corp.opening_and_board_foundation`. Ihre

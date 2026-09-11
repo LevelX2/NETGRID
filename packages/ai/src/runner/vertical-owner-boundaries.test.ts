@@ -12,6 +12,7 @@ describe.each([
   "credit-bank",
   "recurring-economy",
   "resource-lifecycle",
+  "rig-coverage",
   "economy",
   "defense-recovery",
   "shell-traders",
@@ -52,6 +53,23 @@ describe.each([
 });
 
 describe("vertical plan owners", () => {
+  it("keeps the Runner core registry free of owner implementation functions", () => {
+    const source = ts.createSourceFile(
+      "runner-core-plan-modules.ts",
+      readFileSync(
+        path.join(srcDir, "plans/runner-core-plan-modules.ts"),
+        "utf8",
+      ),
+      ts.ScriptTarget.Latest,
+      true,
+    );
+    expect(
+      source.statements
+        .filter(ts.isFunctionDeclaration)
+        .map((declaration) => declaration.name?.text),
+    ).toEqual(["createRunnerCorePlanModules"]);
+  });
+
   it("keeps extracted phase decisions out of the live orchestrator", () => {
     const source = ts.createSourceFile(
       "plan-first-live-runtime.ts",
@@ -68,7 +86,7 @@ describe("vertical plan owners", () => {
       .filter(
         (name) =>
           name &&
-          /^(buildCorpVirusPressure|visibleRunnerVirusCounters|runnerCreditBank|runnerMatureCreditBank|creditBankBuilt|runnerRecurringEconomy|recurringEconomy|runnerInstalledCompatibleRestrictedCredit|runnerResourceLifecycle|runnerCandidateIsLeavePlayPaymentLifecycle|runnerLifecycleLeavePlayPayment|runnerEconomyReserveFacts|buildRunnerEconomySignals|runnerResidentTurnLiquidityTarget|runnerDefenseSupport|runnerDefenseHandBuffer|buildRunnerDefense|runnerRiskAdjustedHandBufferForAttractiveRuns|runnerTraceDefenseInstallValue|runnerDefinitionProvidesTraceDefense|visiblePendingDamage|runnerShellTraders|buildRunnerShellTraders|runnerExposeInformation|runnerProactiveExposeInformation|runnerCurrentExposeInformation|bindSelectedRunnerExposeInformation|runnerTerminalWin|runnerImmediateAgendaPointTerminalWin|runnerInstalledAgendaScore)/.test(
+          /^(buildCorpVirusPressure|visibleRunnerVirusCounters|runnerCreditBank|runnerMatureCreditBank|creditBankBuilt|runnerRecurringEconomy|recurringEconomy|runnerInstalledCompatibleRestrictedCredit|runnerResourceLifecycle|runnerCandidateIsLeavePlayPaymentLifecycle|runnerLifecycleLeavePlayPayment|uniqueCoverageGaps|runnerCoverage|runnerCostEffectiveCoverage|runnerCostEffectiveDeckCoverage|runnerBreakerUpgrade|runnerBreakerCoverage|runnerVisibleBreakerUpgrade|bindSelectedCoverage|bindSelectedRunnerCoverage|bindRunnerCoverage|reconcileRunnerCoverage|preserveSelectedRunnerCoverage|runnerEconomyReserveFacts|buildRunnerEconomySignals|runnerResidentTurnLiquidityTarget|runnerDefenseSupport|runnerDefenseHandBuffer|buildRunnerDefense|runnerRiskAdjustedHandBufferForAttractiveRuns|runnerTraceDefenseInstallValue|runnerDefinitionProvidesTraceDefense|visiblePendingDamage|runnerShellTraders|buildRunnerShellTraders|runnerExposeInformation|runnerProactiveExposeInformation|runnerCurrentExposeInformation|bindSelectedRunnerExposeInformation|runnerTerminalWin|runnerImmediateAgendaPointTerminalWin|runnerInstalledAgendaScore)/.test(
             name,
           ),
       );

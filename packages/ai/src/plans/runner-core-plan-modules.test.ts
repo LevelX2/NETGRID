@@ -4,9 +4,9 @@ import type { ActionSemanticCandidate } from "../action-semantic-candidate-types
 import { instantiatePlanProposal } from "./plan-instance";
 import {
   createRunnerCorePlanModules,
-  runnerCoveragePlanHandDisposition,
   type RunnerCorePlanDomain,
 } from "./runner-core-plan-modules";
+import { runnerCoveragePlanHandDisposition } from "../runner/rig-coverage/coverage-plan-module";
 import {
   runnerDevelopmentCardAdmission,
   runnerDevelopmentFundingMilestone,

@@ -184,6 +184,22 @@ Finanzierungslücke bleibt auch bei diesem terminalen Contest verbindlich.
 
 ## 4. `runner.rig_and_coverage`
 
+Der vertikale Owner liegt in `packages/ai/src/runner/rig-coverage/`.
+Die Dateien trennen Lückenbildung (`coverage-signals.ts`), Breaker-Aufrüstung,
+Kosten-Recovery, Search-/Install-/Funding-Unterstützung, Actionzuordnung,
+Dispositionen und exakte Fortsetzungsbindungen (`coverage-bindings.ts`).
+`coverage-plan-module.ts` besitzt die Planphasen und Materialisierung.
+Suchbedarf und Upgrade-Ökonomie liegen ebenfalls in diesem Verzeichnis.
+
+`coverage-services.ts` benennt sieben Dienste: aktuelles Remote-Material,
+bekannten verzögerten ICE-Abgang, direkte Run-Verwertbarkeit, Run-Funding,
+materiellen Zentraldruck, dessen Kadenz und die gemeinsame Funding-Suche.
+Diese Parentbewertungen werden aus der Live-Komposition eingespeist;
+Coverage entscheidet daraus über seine eigene Vorbereitung. Der Owner importiert
+weder die Live-Runtime noch die Core-/Tactical-Registry. Gemeinsame Funding-,
+Rollen-, Quellen- und Run-Payoff-Fakten liegen außerhalb der Registries.
+Die Live-Runtime koordiniert weiterhin Ausschlüsse zwischen mehreren Ownern.
+
 **Klasse:** `development_project` oder dringender `bounded_sequence`
 **Rolle:** Vordergrund/Background je Dringlichkeit
 **Status:** registrierter produktiver Owner; Fähigkeitsgrenzen siehe Einstieg.

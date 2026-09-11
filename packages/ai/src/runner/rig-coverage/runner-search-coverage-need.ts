@@ -1,13 +1,13 @@
 import type { AiDecisionInput, PlayerView, VisibleCard } from "@netgrid/shared";
-import { cardProvidesBreakerCoverage } from "../plans/tactical-plan-breaker-cards";
-import { missingBreakerCoverageKind } from "../plans/tactical-plan-breaker-coverage";
-import type { RequiredCapabilityKind } from "../plans/tactical-plan-types";
+import { cardProvidesBreakerCoverage } from "../../plans/tactical-plan-breaker-cards";
+import { missingBreakerCoverageKind } from "../../plans/tactical-plan-breaker-coverage";
+import type { RequiredCapabilityKind } from "../../plans/tactical-plan-types";
 import {
   assessKnownRezzedIcePath,
   runnerKnownPathAssessmentIsUnbreakableNoAccess,
   runnerRunPathCreditBudgetWithVisiblePools,
-} from "../visible-run-analysis";
-import { rolesMatch } from "./role-match";
+} from "../../visible-run-analysis";
+import { rolesMatch } from "../../runtime/role-match";
 
 export type RunnerVisibleSearchCoverageNeed = {
   readonly requiredCoverage: RequiredCapabilityKind;

@@ -1,4 +1,4 @@
-import type { RunnerCreditReservePhase } from "../run-analysis/runner-run-target-types";
+import type { RunnerCreditReservePhase } from "../../run-analysis/runner-run-target-types";
 
 export const RUNNER_BREAKER_UPGRADE_ECONOMIC_QUOTE_SCHEMA_VERSION =
   "runner-breaker-upgrade-economic-quote-v2" as const;
