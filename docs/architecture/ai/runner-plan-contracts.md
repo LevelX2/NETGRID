@@ -852,7 +852,7 @@ Die Core-Registry registriert `createRunnerCreditBankModule`. Die Live-Runtime
 ruft Signalerzeugung und Disposition auf und aggregiert deren Action-IDs für
 die übrigen Owner. Sie entscheidet keine Bankphase. Der Owner importiert weder
 die Core-Registry noch die zentrale Runtime oder deren Composition-Factories.
-Diese Grenze wird durch `credit-bank-owner-boundaries.test.ts` und das
+Diese Grenze wird durch `runner/vertical-owner-boundaries.test.ts` und das
 allgemeine Importzyklus-Gate geschützt.
 
 ### Benannte gemeinsame Dienste
@@ -920,6 +920,39 @@ Das Muster ist für weitere überschaubare Owner sinnvoll. Es ist keine Abnahme
 einer vollständigen Migration aller Owner. Eine allgemeine Modul-Framework-API,
 ein Umbau aller Modulzustände oder die Bereinigung der übrigen Runtime-
 Compositions ist dafür keine Voraussetzung.
+
+### Vertikale Implementierung der wiederkehrenden Economy
+
+`runner.recurring_economy` liegt unter
+`packages/ai/src/runner/recurring-economy/`. Einstieg ist
+[createRunnerRecurringEconomyModule](../../../packages/ai/src/runner/recurring-economy/recurring-economy-plan-module.ts).
+`recurring-economy-signals.ts` besitzt die Installations-/Halteentscheidung,
+sichtbare Auszahlungshistorie und Bindung geeigneter wiederkehrender
+Breaker-Credits an Deckdoktrin und installierte Breaker. Die bereits vorhandene
+Investitions- und Runhorizontbewertung liegt daneben in
+`recurring-economy-investment.ts`; Zustand und Signale in
+`recurring-economy-types.ts`.
+
+`recurring-economy-run-deferral.ts` entscheidet aus den aktuellen Signalen,
+ob ein aktives Investment Runs bis zur Auszahlung zurückstellt. Der Run-Owner
+wendet diese Zurückstellung auf seine eigenen aktuellen Routen an. Halten
+übernimmt keine unabhängigen Draw-, Entwicklungs- oder Economy-Actions.
+`recurring-economy-dispositions.ts` weist unproduktive Installationsalternativen
+zurück; bereits aktive Installationsrouten, exakte Coverage-Zwecke und zuvor
+dispositionierte Actions bleiben geschützt.
+
+Als einzige Rückfrage wird die exakte Dringlichkeit eines Runziels an denselben
+aktuellen Entscheidungsinput gebunden übergeben. Kanonische Kartenprofile,
+Rollen, nichtnegative LegalAction-Kosten und gemeinsame Planstandards bleiben
+explizite Dienste. Es gibt keinen Rückimport zur zentralen Runtime und keinen
+eigenen strategischen Choice-Resolver. Die Runtime verdrahtet Signale und
+Dispositionen; der Scheduler besitzt weiter Auswahl und Planlebenszyklus.
+
+Der Schnitt ist kleiner als bei der Bank: Die Fachentscheidung benötigt nur
+einen Hostdienst und lässt sich mit den vorhandenen Investment-, Run- und
+Coverage-Regressionen prüfen. Schwellen, Prioritäten und bisherige Grenzen
+der historischen Quellenzuordnung bleiben unverändert. Der Nutzen liegt in
+lokal nachvollziehbarer Einkommensplanung, nicht in zusätzlicher Spielstärke.
 
 ## 12. `runner.resource_lifecycle`
 

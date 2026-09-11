@@ -1,4 +1,4 @@
-import type { RunnerRunTargetEvaluation } from "../run-analysis/runner-run-target-types";
+import type { RunnerRunTargetEvaluation } from "../../run-analysis/runner-run-target-types";
 
 export type RunnerRecurringEconomyRunDecision = Readonly<{
   decision: "wait" | "allow_run" | "preempt_for_urgent_run";
@@ -66,9 +66,7 @@ export function assessRunnerRestrictedRunEconomyInvestment(params: {
           ? ["runner_restricted_run_economy_yields_to_urgent_run"]
           : []),
         ...(params.productiveCentralRunAvailable
-          ? [
-              "runner_restricted_run_economy_yields_to_productive_central_run",
-            ]
+          ? ["runner_restricted_run_economy_yields_to_productive_central_run"]
           : []),
       ],
     };

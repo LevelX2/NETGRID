@@ -1,3 +1,5 @@
+import type { RunnerRecurringEconomySignal } from "../runner/recurring-economy/recurring-economy-types";
+import { createRunnerRecurringEconomyModule } from "../runner/recurring-economy/recurring-economy-plan-module";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
 import { rolesForDeckDoctrineCard } from "../deck-doctrine-card-roles";
@@ -277,28 +279,6 @@ export type RunnerDiscardChoiceBinding = {
   retainedCardInstanceIds: string[];
   emergencyKeepCardInstanceIds: string[];
   evidenceCodes: string[];
-};
-
-export type RunnerRecurringEconomySignal = {
-  commitmentId: string;
-  definitionId: string;
-  commitmentActive: boolean;
-  phase: "install" | "hold";
-  actionIds: string[];
-  priorityClass: "P3" | "P4" | "P5";
-  value: number;
-  evidenceCodes: string[];
-  investmentHorizon: Readonly<{
-    installCost: number;
-    earliestPayout: "start_of_runner_turn" | "next_compatible_icebreaker_use";
-    projectedHoldTurns: number;
-    invalidatingActionType: "start_run" | "none";
-    realizedPayoutCount: number;
-    realizedValue: number;
-    futureValueAtRisk: number;
-    bestVisibleRunPayoff: number;
-    decision: "install" | "wait" | "allow_run" | "preempt_for_urgent_run";
-  }>;
 };
 
 export type RunnerInstalledCardLiquidationChoiceSignal = {
@@ -811,11 +791,6 @@ type DefenseState = {
     | "forgo_terminal_deck_pressure";
   signals: RunnerDefenseSignals;
 };
-type RecurringEconomyState = {
-  kind: "recurring_economy";
-  phase: RunnerRecurringEconomySignal["phase"];
-  signal: RunnerRecurringEconomySignal;
-};
 type InstalledAgendaScoreState = {
   kind: "installed_agenda_score";
   phase: "score_installed_agenda";
@@ -842,7 +817,7 @@ export function createRunnerCorePlanModules(
     shellTradersPipelineModule(),
     resourceLifecycleModule(),
     createRunnerCreditBankModule(),
-    recurringEconomyModule(),
+    createRunnerRecurringEconomyModule(),
     economyModule(),
     coverageModule(rolesForDefinitionId),
     defenseModule(),
@@ -1049,73 +1024,6 @@ function installedAgendaScoreModule(): PlanModule {
             "Convert the installed agenda replacement into agenda points.",
         },
         candidates: installedAgendaScoreCandidates(context, signal),
-      };
-    },
-  };
-}
-
-function recurringEconomyModule(): PlanModule {
-  return {
-    moduleId: "runner.recurring_economy",
-    side: "runner",
-    discover: (context) =>
-      (domain(context).recurringEconomy ?? []).map((signal) =>
-        proposal({
-          moduleId: "runner.recurring_economy",
-          dedupeKey: signal.commitmentId,
-          moduleState: {
-            kind: "recurring_economy",
-            phase: signal.phase,
-            signal,
-          } satisfies RecurringEconomyState,
-          priorityClass: signal.priorityClass,
-          target: { kind: "card", id: signal.definitionId },
-          routeExists: recurringEconomyCandidates(context, signal).length > 0,
-          blockerCode:
-            signal.phase === "hold"
-              ? "recurring_economy_waiting_for_value"
-              : "recurring_economy_install_route_unavailable",
-          evidenceCode:
-            signal.evidenceCodes[0] ?? "runner_recurring_economy_commitment",
-        }),
-      ),
-    assess: (instance, context, portfolio) => {
-      const signal = state<RecurringEconomyState>(instance).signal;
-      const candidates = recurringEconomyCandidates(context, signal);
-      return assessment(
-        instance,
-        signal.priorityClass,
-        candidates.length > 0,
-        signal.value,
-        portfolio.executorInstanceId,
-      );
-    },
-    materialize: (instance, _assessment, context) => {
-      const signal = state<RecurringEconomyState>(instance).signal;
-      const candidates = recurringEconomyCandidates(context, signal);
-      return {
-        step: {
-          stepId: `${instance.instanceId}:${signal.phase}`,
-          capability: {
-            capabilityId: `recurring_economy_${signal.phase}`,
-            semanticActionTypes: [
-              ...new Set(
-                candidates.map((entry) => entry.candidate.semanticActionType),
-              ),
-            ],
-            ...(signal.phase === "install"
-              ? { requiredSourceDefinitionIds: [signal.definitionId] }
-              : {}),
-          },
-          ...(signal.phase === "install"
-            ? { target: { kind: "card" as const, id: signal.definitionId } }
-            : {}),
-          purpose:
-            signal.phase === "install"
-              ? "Install the recurring economy commitment with a productive setup window."
-              : "Develop through explicit non-run steps until the installed recurring economy commitment resolves its automatic value.",
-        },
-        candidates,
       };
     },
   };
@@ -2116,29 +2024,6 @@ function resourceLifecycleCandidates(
     .map((candidate) => ({
       candidate,
       stepValue: signal.value,
-    }));
-}
-
-function recurringEconomyCandidates(
-  context: PlanSchedulerContext,
-  signal: RunnerRecurringEconomySignal,
-): PlanMaterialization["candidates"] {
-  const actionIds = new Set(signal.actionIds);
-  return context.actionCandidates
-    .filter(
-      (candidate) =>
-        actionIds.has(candidate.actionId) &&
-        !context.actionDispositions?.some(
-          (disposition) => disposition.actionId === candidate.actionId,
-        ),
-    )
-    .map((candidate) => ({
-      candidate,
-      stepValue:
-        signal.value +
-        (signal.phase === "hold" && candidate.semanticActionType === "draw.card"
-          ? 10
-          : 0),
     }));
 }
 
