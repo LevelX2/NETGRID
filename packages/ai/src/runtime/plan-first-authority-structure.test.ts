@@ -20,6 +20,11 @@ const extractedOwnerSources = [
   ["corp", "hand-management"],
   ["corp", "economy"],
   ["runner", "hand-development"],
+  ["corp", "ambush"],
+  ["corp", "scoring-remote"],
+  ["corp", "score"],
+  ["runner", "central-pressure"],
+  ["runner", "remote-contest"],
 ]
   .flatMap((segments) =>
     readdirSync(path.join(srcDir, ...segments))
@@ -33,6 +38,12 @@ const occurrences = (source: string, pattern: RegExp): number =>
   [...source.matchAll(pattern)].length;
 
 describe("plan-first live authority structure", () => {
+  it("keeps extracted owners independent from runtime dispatchers and plan registries", () => {
+    expect(extractedOwnerSources).not.toMatch(
+      /from\s+["'][^"']*(?:plan-first-live-runtime|selected-choices-for-decision|(?:corp|runner)-(?:core|tactical)-plan-modules)["']/,
+    );
+  });
+
   it("locks the public live action boundary to the plan-first scheduler", () => {
     const publicIndex = readSource("index.ts");
     const publicEntrypoints = readSource("ai-runtime-public-entrypoints.ts");

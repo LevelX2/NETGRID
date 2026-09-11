@@ -9,7 +9,7 @@ import {
 import {
   corpAccessZonePreparationProfile,
   corpRdRecyclingSignals,
-} from "./corp-access-zone-preparation";
+} from "../corp/ambush/corp-access-zone-preparation";
 import { selectedCorpDiscardChoiceOptionIds } from "./corp-discard-choice-selection";
 import type { ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
 

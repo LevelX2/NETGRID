@@ -1,4 +1,4 @@
-import { corpArchivesPreparationDiscardValue } from "../../runtime/corp-access-zone-preparation";
+import { corpArchivesPreparationDiscardValue } from "../ambush/corp-access-zone-preparation";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 
 import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";

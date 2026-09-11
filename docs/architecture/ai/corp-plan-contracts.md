@@ -160,6 +160,40 @@ Ein nach sichtbarem Zustand erzwungener Same-Turn-Score ist ein Commitment.
 Einzelne Economy- oder
 ICE-Aktionen dürfen ihn nicht aufbrechen.
 
+### Vertikale Implementierung der Agendaentscheidung
+
+`packages/ai/src/corp/score/` bündelt den Owner:
+
+- `score-discovery.ts`: direkte Scorevorhaben, Variantenvergleich und
+  Wiederaufnahme einer konkreten residenten Agenda-/Serverbindung;
+- `score-project-signals.ts`: Install-/Advance-/Konversionspfade, Scorehorizont,
+  Deckout-Konversion, Finanzierungsvorbereitung und explizite Dispositionen;
+- `score-protection-needs.ts`: gewünschter Schutz, verbleibende Scorekosten,
+  eigene Reserven und Prüfung des gequoteten Schutzstatus;
+- `score-plan-module.ts`: Discovery, Assessment, Steps und aktuelle Routen;
+- `corp-score-funding.ts`, `corp-score-priority.ts` und
+  `corp-score-defense-continuity.ts`: Funding-Meilensteine, Priorität und
+  konkrete Agenda-/Remote-Kontinuität;
+- `corp-counter-bank-score-plan.ts`: Engine-gequotete Counterbank-Scorefolgen;
+- `corp-agenda-turn-planning.ts`: Agenda-Zuglinien und Kampagnenquotes für den
+  gemeinsamen TurnPlanner, einschließlich gebundener Support-Provider;
+- `score-choice-continuation.ts` und `score-choice-binding.ts`: Bindung und
+  Vervollständigung der ausgewählten Advancement-/Agenda-/Folge-Choices.
+
+Die Runtime entdeckt zuerst direkte Scorevorhaben, gibt deren Reserven an
+Ambush und reicht die entdeckten Ambush-Fakten zur Score-Reconciliation zurück.
+Anschließend komponiert sie die verbleibenden Defense-, Economy- und Handbedarfe.
+Es entsteht kein zweiter Planvergleich außerhalb des Schedulers/TurnPlanners.
+
+`runtime/corp-score-protection-routes.ts` und
+`runtime/corp-defense-layer-certification.ts` bleiben Schutzdienste außerhalb
+des Score-Owners. Sie bewerten konkrete Defense-Routen; Score liefert seine
+Agenda, Deadline und Schutzziele. Die vorhandene Scoreline-Vorprojektion bleibt
+ein ausdrücklich konsumierter Dienst. Gemeinsame sichtbare Agenda- und exakte
+Kostenfakten liegen in `runtime/visible-agenda-facts.ts` beziehungsweise
+`runtime/exact-action-cost-facts.ts`. Kein Score-Modul importiert eine Registry,
+die Live-Runtime oder den allgemeinen Choice-Dispatcher zurück.
+
 ## 3. `corp.establish_scoring_remote`
 
 **Klasse:** `development_project`
@@ -293,6 +327,24 @@ ICE-Anzahl allein.
 Ein vorbereitetes Zielremote bleibt über Economy-, Draw-, Punish- und
 Central-Responses erhalten. Remote-Optionswert, Defense-Wert, Fundingwert und
 Scorewert werden getrennt zugerechnet.
+
+### Vertikale Implementierung des Scoring-Remotes
+
+Unter `packages/ai/src/corp/scoring-remote/` liegen:
+
+- `scoring-remote-discovery.ts`: Zusammenstellung von Belegung, Doctrine und
+  aktueller Reifequote aus sichtbaren Serverfakten;
+- `scoring-remote-signals.ts`: Zielbindung, Cadence, Wiederverwendung, Score-Lease
+  und exakt gebundener Ausbau- oder Finanzierungsbedarf;
+- `scoring-remote-types.ts`: Projekt-, Belegungs- und Consumer-Verträge;
+- `scoring-remote-plan-module.ts`: Discovery, Assessment und Support-Step.
+
+Das verfügbare Rez-Budget kommt aus
+`runtime/corp-defense-remote-rez-budget.ts`; globale Central-Allokation bleibt
+außerhalb dieses Owners. Die bestehende Reifebewertung unter
+`runtime/corp-remote-maturity-assessment.ts` bleibt ein gemeinsamer gequoteter
+Projektionsdienst. Das Remote-Modul besitzt weiterhin keine eigene ICE-,
+Agenda- oder Assetaktion. Sein Step fordert den gebundenen Provider an.
 
 ## 4. `corp.defend_servers`
 
@@ -758,7 +810,7 @@ Actions, Kosten und Auszahlungen; Asset-Payback und installierte Erträge
 liegen ebenfalls im Owner. Typen stehen in `economy-types.ts`.
 
 Score-Reserve und Defense-Funding bleiben fremde Fachverträge in
-`plans/corp-score-funding.ts`, `plans/corp-defense-funding-contract.ts`
+`corp/score/corp-score-funding.ts`, `plans/corp-defense-funding-contract.ts`
 und `runtime/corp-defense-funding-facts.ts`. Economy erhält aktuelle
 Parent-/Need-/Provider-Bindungen und bestimmt daraus seine Finanzierungsroute;
 es bewertet weder eigene Agenda-Ziele noch globale ICE-Allokation.
@@ -1069,6 +1121,22 @@ Der Window-Resolver besitzt keine eigene Zahlungsstrategie und darf nur die
 exakte Auswahl des aktuellen Ambush-Executors vervollständigen. Fehlende oder
 veraltete Bindungen scheitern fail-closed. Die menschliche Zahlung bleibt
 regellegal; Engine-Ausführung und Zielprüfung bleiben unverändert maßgeblich.
+
+### Vertikale Implementierung von Ambush und Bluff
+
+Der Owner liegt unter `packages/ai/src/corp/ambush/`:
+
+- `ambush-plan-module.ts`: Parent, Setup-Step, Priorität, Needs und aktuelle Routen;
+- `corp-ambush-plan-signals.ts`: Intent- und Quellenbindung, Köder, Fortsetzung und Disposition;
+- `corp-access-zone-preparation.ts`: begrenzte Install-/Halte-/Rückmischfolge und Zugriffszonenwert;
+- `corp-access-payment-choice.ts`: Bewertung und Bindung bezahlter Zugriffseffekte;
+- `ambush-choice-binding.ts`: exakte Vervollständigung der gewählten Payment-/Bounce-Choice.
+
+Defense liefert weiterhin den typisierten Bluff-Schutzbedarf; Economy erfüllt
+seine Finanzierung. Die Runtime komponiert diese Fakten und delegiert Choices
+an den ausgewählten Ambush-Executor. Gemeinsame Choice-Typen und strukturierte
+Bindungsfehler liegen in `runtime/plan-bound-choice-contract.ts`. Der Owner
+importiert weder die Tactical-Registry noch den allgemeinen Choice-Dispatcher.
 
 ## 10. `corp.hand_and_agenda_management`
 

@@ -27,10 +27,8 @@ import {
   type RunnerTargetedIceTrashCommitment,
   type RunnerTargetedIceTrashChoiceContinuation,
 } from "./runner-targeted-ice-trash-plan";
-import {
-  bindSelectedRunnerTargetedIceTrashChoiceContinuation,
-  runnerActionDispositions,
-} from "./plan-first-live-runtime";
+import { runnerActionDispositions } from "./plan-first-live-runtime";
+import { bindSelectedRunnerTargetedIceTrashChoiceContinuation } from "../run-analysis/runner-run-preparation-choice-binding";
 import { selectedChoicesForDecision } from "./selected-choices-for-decision";
 
 afterEach(() => {

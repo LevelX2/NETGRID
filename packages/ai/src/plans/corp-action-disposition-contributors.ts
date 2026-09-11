@@ -18,7 +18,7 @@ import {
 import {
   corpAmbushAdvanceDispositionEvidence,
   corpCandidateIsAmbushInstall,
-} from "../runtime/corp-ambush-plan-signals";
+} from "../corp/ambush/corp-ambush-plan-signals";
 
 import {
   corpExactCurrentBasicLiquidCreditCandidate,

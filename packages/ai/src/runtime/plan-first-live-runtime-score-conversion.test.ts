@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { sameTurnScoreConversionPreventsTerminalSteal } from "./plan-first-live-runtime";
+import { sameTurnScoreConversionPreventsTerminalSteal } from "../corp/score/score-project-signals";
 
 describe("same-turn score conversion terminal-steal ownership", () => {
   it("does not promote a sibling new-remote install above an exact committed score root", () => {

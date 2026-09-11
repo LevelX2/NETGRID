@@ -1,94 +1,24 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
-import type { AiDecisionInputWithDeckCapabilities } from "../runtime/ai-decision-input";
-import type { CorpRemoteMaturityAssessment } from "../runtime/corp-remote-maturity-assessment";
-import type {
-  RemoteDoctrineProfile,
-  RemoteProtectionTarget,
-  RemotePurpose,
-} from "../remote-doctrine-profile";
-import { isCorpOpeningTurnSerial } from "../runtime/corp-opening-rush";
-import { planInstanceIdForProposal } from "./plan-instance";
-import type { ResidentPlanPortfolio } from "./resident-plan-portfolio";
+import {
+  CorpRemoteOccupancyClaim,
+  CorpRemoteProjectNeed,
+  CorpRemoteProjectSignal,
+  STRATEGIC_SCORE_REMOTE_PROJECT_ID,
+  ScoreConsumer,
+  ScoreConsumerSupportState,
+} from "./scoring-remote-types";
 
-export const STRATEGIC_SCORE_REMOTE_PROJECT_ID =
-  "strategic-score-remote" as const;
+import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 
-export type CorpRemoteProjectNeed = Readonly<{
-  needId: string;
-  parentProjectId: typeof STRATEGIC_SCORE_REMOTE_PROJECT_ID;
-  targetServerId: string;
-  observedAtStateVersion: number;
-  capability: "improve_remote_protection_path" | "credits";
-  minimum: number;
-}>;
+import type { CorpRemoteMaturityAssessment } from "../../runtime/corp-remote-maturity-assessment";
 
-export type ScoreConsumerSupportState =
-  | Readonly<{ kind: "executable" }>
-  | Readonly<{
-      kind: "awaiting_remote_protection";
-      agendaInstanceId: string;
-      targetServerId: string;
-      protectionNeedId: string;
-    }>
-  | Readonly<{
-      kind: "awaiting_funding";
-      parentNeedId: string;
-      targetCredits: number;
-    }>
-  | Readonly<{
-      kind: "replan_required";
-      reasonCode: string;
-    }>;
+import type { RemoteDoctrineProfile } from "../../remote-doctrine-profile";
 
-type ScoreConsumer = Readonly<{
-  projectId: string;
-  serverId?: string;
-  agendaInstanceId?: string;
-  protectionNeed?: unknown;
-  fundingGap?: number;
-  fundingMilestone?: Readonly<{ targetCredits?: number }>;
-  feasible?: boolean;
-}>;
+import { isCorpOpeningTurnSerial } from "../../runtime/corp-opening-rush";
 
-export type CorpRemoteProjectSignal = Readonly<{
-  projectId: typeof STRATEGIC_SCORE_REMOTE_PROJECT_ID;
-  purpose: "scoring_remote";
-  purposes: readonly RemotePurpose[];
-  target: Readonly<{
-    status: "unbound" | "bound";
-    serverId: string;
-    targetBindingRevision: number;
-  }>;
-  serverId: string;
-  protectionTarget: RemoteProtectionTarget;
-  buildTiming: RemoteDoctrineProfile["buildTiming"];
-  targetRecoveryTurns: number;
-  phase:
-    | "harden_to_protection_target"
-    | "fund_rez_path"
-    | "payload_ready"
-    | "leased_to_score_project"
-    | "assessment_unknown";
-  maturity: CorpRemoteMaturityAssessment;
-  need?: CorpRemoteProjectNeed;
-  consumerSupport?: ScoreConsumerSupportState;
-  scoreLeaseId?: string;
-  cadence: Readonly<{
-    turnKey: string;
-    maximumActions: number;
-    actionsUsed: number;
-    open: boolean;
-  }>;
-  feasible: boolean;
-  value: number;
-  evidenceCode: string;
-}>;
+import { planInstanceIdForProposal } from "../../plans/plan-instance";
 
-export type CorpRemoteOccupancyClaim = Readonly<{
-  serverId: string;
-  owner: "score" | "economy" | "ambush";
-  ownerId: string;
-}>;
+import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 
 export function buildCorpScoringRemoteProjectSignals(
   params: Readonly<{
@@ -555,8 +485,6 @@ function remoteCadence(
   };
 }
 
-/** Observe the selected TurnPlanner support action; Choice origins do not
- * represent ordinary actions and cannot certify a remote construction step. */
 function appliedRemoteSupportReceipt(
   input: AiDecisionInput,
   previous: ResidentPlanPortfolio | undefined,

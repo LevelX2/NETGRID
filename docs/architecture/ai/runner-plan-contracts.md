@@ -136,6 +136,28 @@ verlieren kann, wird die Route als P3-Konvertierungsfenster bewertet. Daraus
 entsteht weder ein kartenbezogener Parallelplan noch eine neue Server- oder
 Runautorität.
 
+### Vertikale Implementierung des Zentraldrucks
+
+`packages/ai/src/runner/central-pressure/` bündelt den Owner:
+
+- `central-pressure-signals.ts`: Ziel- und Routenvergleich, Zugriffskadenz,
+  Vorbereitung, angesammelte Druckkonversion und ausdrückliche Disposition;
+- `central-pressure-development.ts`: Aufbau einer konkreten Access-Engine;
+- `central-pressure-funding.ts`: exakt gebundene Finanzierung dieser Vorbereitung;
+- `central-pressure-plan-module.ts`: Discovery, Assessment, Materialisierung
+  und Fortschrittsbeleg der residenten Central-Instanz.
+
+Die Runtime liefert aktuelle Runbewertungen, Coverage- und Safety-Fakten,
+Vorbereitungsrouten und den residenten Parent. Finanzierung und Reserveprüfung
+nutzen gemeinsam mit Remote die Dienste in
+`run-analysis/runner-plan-run-funding.ts`; aktuelle Route, Risk-Quote und
+Access-Commitment kommen aus `runner-plan-run-route-facts.ts`. Sabotage- und
+Bypassvorbereitung sowie ihre exakten Choices teilen
+`runner-run-preparation.ts` und `runner-run-preparation-choice-binding.ts`.
+Diese Dienste wählen keinen Executor. Die gemeinsame Herkunft eines laufenden
+Runs ist in `plans/runner-run-origin-contract.ts` typisiert. Kein Central-Modul
+importiert die Live-Runtime oder eine Planregistry zurück.
+
 ## 3. `runner.contest_remote`
 
 **Klasse:** `bounded_sequence` oder bei wiederkehrendem Ziel
@@ -181,6 +203,24 @@ Finanzierungslücke bleibt auch bei diesem terminalen Contest verbindlich.
 - eine konkrete fehlende Antwort benannt ist;
 - ein Draw diese Antwort plausibel liefern kann;
 - Handüberlauf und verbleibende Folgeaktionen den Plan nicht entwerten.
+
+### Vertikale Implementierung des Remote-Contests
+
+`packages/ai/src/runner/remote-contest/` enthält:
+
+- `remote-contest-signals.ts`: Bedrohungs- und Zielbewertung, Vorbereitung,
+  Runvarianten, Proberouten und Wiederaufnahme des gebundenen Parents;
+- `remote-contest-admission.ts`: unmittelbare Pflicht, Letztchancenfenster,
+  nicht tödlicher Handpuffer und konkret verbleibende Gefahrenfinanzierung;
+- `remote-contest-plan-module.ts`: Discovery, Assessment, Routen und Priorität.
+
+Central und Remote konsumieren dieselben Run-, Funding-, Vorbereitungs- und
+Choice-Dienste unter `run-analysis/`. Diese Finanzierung konsumiert die
+Remote-Zulassung aus `remote-contest-admission.ts`; sie erhält dadurch keine
+eigene Ausnahmestrategie. Die Runtime liefert Coverage, sichtbare Runbewertungen
+und den aktiven Parent. Das Run-Window führt den begonnenen Run weiter aus und
+konsumiert dabei denselben Remote-Vertrag. Der Remote-Owner importiert keine
+Registry, Live-Runtime oder Central-Implementierung zurück.
 
 ## 4. `runner.rig_and_coverage`
 

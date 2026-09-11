@@ -55,9 +55,9 @@ import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import {
   reconcileSelectedTurnPlannerActionDispositions,
   runnerActionDispositions,
-  runnerCentralPressureHasExecutableEventRun,
   runnerDelegatedFundingActionIds,
 } from "./plan-first-live-runtime";
+import { runnerCentralPressureHasExecutableEventRun } from "../runner/central-pressure/central-pressure-signals";
 import { reconcileRunnerCoverageRequesterBindings } from "../runner/rig-coverage/coverage-bindings";
 import { createSemanticRuntimeDecisionContext } from "./semantic-runtime-decision-context";
 import type { SemanticRuntimeDecisionContextDependencies } from "./semantic-runtime-decision-context";

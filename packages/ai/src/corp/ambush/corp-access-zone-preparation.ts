@@ -1,11 +1,11 @@
-import type { CorpAmbushSignal } from "../plans/corp-tactical-plan-contracts";
+import type { CorpAmbushSignal } from "../../plans/corp-tactical-plan-contracts";
 import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
-import { reconstructBeliefState } from "../belief-state";
+import { reconstructBeliefState } from "../../belief-state";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
-import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
-import type { ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
+import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
+import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 
-import { corpBluffDefenseNeed } from "../plans/corp-bluff-defense";
+import { corpBluffDefenseNeed } from "../../plans/corp-bluff-defense";
 
 /** Mechanical profile only. No remote damage is inferred from central access. */
 export function corpAccessZonePreparationProfile(definitionId: string) {

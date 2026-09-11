@@ -23,7 +23,7 @@ import {
   buildCorpAmbushPlanSignals,
   corpAmbushAdvanceDispositionEvidence,
   CORP_AMBUSH_COMMITMENT_VERSION,
-} from "./corp-ambush-plan-signals";
+} from "../corp/ambush/corp-ambush-plan-signals";
 
 describe("Corp ambush plan signal duplicate scope", () => {
   it("admits an agenda ambush only when its exact access effect prevents the steal", () => {

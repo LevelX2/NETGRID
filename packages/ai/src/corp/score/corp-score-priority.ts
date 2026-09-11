@@ -1,7 +1,7 @@
 import {
   CorpScorePriorityClass,
   CorpScoreProjectSignal,
-} from "./corp-score-contracts";
+} from "../../plans/corp-score-contracts";
 
 export function corpScorePriorityClass(
   signal: CorpScoreProjectSignal,

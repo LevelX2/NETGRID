@@ -21,7 +21,7 @@ import {
   buildCorpAgendaTurnPlanningSlice,
   type CorpAgendaTurnPlanningLine,
   type CorpAgendaTurnPlanningSlice,
-} from "./corp-agenda-turn-planning";
+} from "../corp/score/corp-agenda-turn-planning";
 import {
   buildCorpDefenseTurnPlanningSlice,
   type CorpDefenseTurnPlanningLine,

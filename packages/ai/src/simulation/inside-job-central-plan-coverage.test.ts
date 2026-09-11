@@ -13,7 +13,7 @@ import {
   server,
   visibleCard,
 } from "../semantic-ai-runtime-cutover.test-support";
-import { runnerCentralPressureHasExecutableEventRun } from "../runtime/plan-first-live-runtime";
+import { runnerCentralPressureHasExecutableEventRun } from "../runner/central-pressure/central-pressure-signals";
 import { createSemanticRuntimeDecisionContext } from "../runtime/semantic-runtime-decision-context";
 import type { SemanticRuntimeDecisionContextDependencies } from "../runtime/semantic-runtime-decision-context";
 import { withEffectiveRunQuote } from "../effective-run-quote.test-support";

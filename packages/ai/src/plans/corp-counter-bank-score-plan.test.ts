@@ -15,7 +15,7 @@ import {
   server,
   visibleCard,
 } from "../semantic-ai-runtime-cutover.test-support";
-import { corpCounterBankScoreProjects } from "./corp-counter-bank-score-plan";
+import { corpCounterBankScoreProjects } from "../corp/score/corp-counter-bank-score-plan";
 
 const VAPOR_OPS = "onr_v1_347_vapor-ops";
 const DATA_WALL = "onr_v1_238_data-wall-2-0";

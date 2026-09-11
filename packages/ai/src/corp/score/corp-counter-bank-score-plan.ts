@@ -1,19 +1,19 @@
-import type { CorpScoreProjectSignal } from "./corp-score-contracts";
-import type { CorpAmbushSignal } from "./corp-tactical-plan-contracts";
-import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import {
   type AiDecisionInput,
   type VisibleCard,
   type VisibleCorpCounterBankPreparationQuote,
 } from "@netgrid/shared";
-import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
-import type { AiDecisionInputWithDeckCapabilities } from "../runtime/ai-decision-input";
-import { corpSameTurnScoreConversionPaths } from "./tactical-plan-corp-score-conversion";
-import { corpRemoteContestabilityAssessment } from "./tactical-plan-corp-score-window";
+import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
+import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
+import type { CorpAmbushSignal } from "../../plans/corp-tactical-plan-contracts";
+import { corpSameTurnScoreConversionPaths } from "../../plans/tactical-plan-corp-score-conversion";
+import { corpRemoteContestabilityAssessment } from "../../plans/tactical-plan-corp-score-window";
+import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 
-import { readCorpCounterBankPreparationQuote } from "./corp-counter-bank-preparation-quote";
+import { readCorpCounterBankPreparationQuote } from "../../plans/corp-counter-bank-preparation-quote";
 
-export { readCorpCounterBankPreparationQuote } from "./corp-counter-bank-preparation-quote";
+export { readCorpCounterBankPreparationQuote } from "../../plans/corp-counter-bank-preparation-quote";
 
 type InstalledCounterBank = {
   card: VisibleCard;

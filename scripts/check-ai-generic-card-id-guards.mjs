@@ -64,7 +64,7 @@ const allowedCardIdUses = createAllowances([
       "The definition ID validates the scored source of the already selected damage-replacement choice.",
   },
   {
-    relativePath: "runtime/selected-choices-for-decision.ts",
+    relativePath: "corp/score/score-choice-binding.ts",
     cardId: "onr_classic_021_satellite-monitors",
     category: "lifecycle_binding",
     reason:

@@ -12,7 +12,7 @@ import {
   corpPlanningHeadPriorityCoverage,
   specializedPlanningLineMatchesRoute,
 } from "./corp-turn-planner-shadow";
-import type { CorpAgendaTurnPlanningSlice } from "./corp-agenda-turn-planning";
+import type { CorpAgendaTurnPlanningSlice } from "../corp/score/corp-agenda-turn-planning";
 
 import type { TurnPlanningHeadCandidate } from "./turn-planning-contracts";
 import { planningHeadMatchesCommittedPhaseRoot } from "./corp-turn-planner-cutover";

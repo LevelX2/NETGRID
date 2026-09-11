@@ -1,7 +1,7 @@
 import {
   assessCorpSpendAgainstScoreFundingMilestones,
   corpScoreFundingMilestone,
-} from "./corp-score-funding";
+} from "../corp/score/corp-score-funding";
 import {
   corpEconomyActionIsOwned,
   assessCorpEconomyFundingRoute,
@@ -10,7 +10,7 @@ import { corpGenericDefensePriorityClass } from "./corp-defense-funding-contract
 import {
   knownScoreProtectionFundingGap,
   corpScorePriorityClass,
-} from "./corp-score-priority";
+} from "../corp/score/corp-score-priority";
 import { type CorpCorePlanDomain } from "./corp-core-plan-contracts";
 import { type CorpDefenseSignal } from "./corp-defense-contracts";
 import { readFileSync } from "node:fs";

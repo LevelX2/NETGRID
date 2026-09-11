@@ -8,7 +8,7 @@ import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio"
 import {
   CORP_AMBUSH_COMMITMENT_VERSION,
   buildCorpAmbushPlanSignals,
-} from "../../runtime/corp-ambush-plan-signals";
+} from "../../corp/ambush/corp-ambush-plan-signals";
 import {
   aiInput,
   legalAction,
