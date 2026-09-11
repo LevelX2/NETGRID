@@ -1,9 +1,9 @@
-import type { RunnerRunTargetEvaluation } from "../run-analysis/runner-run-target-types";
+import type { RunnerRunTargetEvaluation } from "../../run-analysis/runner-run-target-types";
 import { describe, expect, it } from "vitest";
 import {
   assessRunnerRecurringEconomyRunHorizon,
   assessRunnerRestrictedRunEconomyInvestment,
-} from "./runner-recurring-economy-investment";
+} from "./recurring-economy-investment";
 
 describe("assessRunnerRestrictedRunEconomyInvestment", () => {
   it("admits a quickly amortizing recurring breaker-credit engine", () => {

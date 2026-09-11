@@ -1,3 +1,13 @@
+import type {
+  RunnerFundingNeedSignal,
+  RunnerFundingRouteAssessment,
+} from "../plans/runner-funding-contracts";
+import { runnerResourceLifecycleSignals } from "../runner/resource-lifecycle/resource-lifecycle-signals";
+import { runnerResourceLifecycleFundingNeeds } from "../runner/resource-lifecycle/resource-lifecycle-funding-needs";
+import { runnerResourceLifecycleActionDispositions } from "../runner/resource-lifecycle/resource-lifecycle-dispositions";
+import { runnerRecurringEconomySignals } from "../runner/recurring-economy/recurring-economy-signals";
+import { runnerRecurringEconomyActionDispositions } from "../runner/recurring-economy/recurring-economy-dispositions";
+import { runnerRecurringEconomyRunDeferral } from "../runner/recurring-economy/recurring-economy-run-deferral";
 import {
   runnerFortPassTollWindow,
   runnerRunExitAction,
@@ -70,9 +80,6 @@ import {
   runnerDebtFinancingProfile,
   runnerEventStartsRunAfterProgramSearch,
   runnerInstalledDebtFinancingLiability,
-  runnerNoRunRecurringEconomyProfile,
-  runnerRestrictedRunCreditProfile,
-  runnerVoluntarySelfTrashLifecycleProfile,
 } from "./runner-canonical-card-facts";
 import { rememberStrategicIntentState } from "../strategic-intent-memory";
 import { runnerDrawTaxLiabilityProjection } from "./runner-draw-tax-liability-score";
@@ -145,9 +152,6 @@ import {
   type RunnerCoverageGapSignal,
   type RunnerCorePlanDomain,
   type RunnerDiscardChoiceBinding,
-  type RunnerFundingNeedSignal,
-  type RunnerFundingRouteAssessment,
-  type RunnerRecurringEconomySignal,
 } from "../plans/runner-core-plan-modules";
 import type { RequiredCapabilityKind } from "../plans/tactical-plan-types";
 import {
@@ -298,10 +302,6 @@ import {
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 import type { RunnerProgramInstallTrashAssessment } from "./runner-program-install-trash-policy";
 import { assessRunnerAccessTrashImpact } from "./runner-access-trash-impact";
-import {
-  assessRunnerRecurringEconomyRunHorizon,
-  assessRunnerRestrictedRunEconomyInvestment,
-} from "./runner-recurring-economy-investment";
 import {
   quoteRunnerBreakerUpgradeEconomics,
   type RunnerBreakerUpgradeEconomicQuote,
@@ -6132,16 +6132,10 @@ export function runnerActionDispositions(
   )) {
     addDisposition(disposition);
   }
-  for (const signal of domain.resourceLifecycle ?? []) {
-    if (signal.phase !== "retain") continue;
-    for (const actionId of signal.rejectedActionIds ?? []) {
-      add(
-        actionId,
-        "runner.resource_lifecycle",
-        signal.evidenceCodes[0] ??
-          "runner_resource_lifecycle_retain_current_source",
-      );
-    }
+  for (const disposition of runnerResourceLifecycleActionDispositions(
+    domain.resourceLifecycle ?? [],
+  )) {
+    addDisposition(disposition);
   }
   for (const signal of domain.shellTradersPipelines ?? []) {
     for (const actionId of signal.rejectedActionIds ?? []) {
@@ -6407,34 +6401,15 @@ export function runnerActionDispositions(
       "runner_successful_run_extra_run_declined_by_central_pressure",
     );
   }
-  const recurringEconomyInstallActionIds = new Set(
-    (domain.recurringEconomy ?? [])
-      .filter((signal) => signal.phase === "install")
-      .flatMap((signal) => signal.actionIds),
-  );
-  for (const signal of domain.recurringEconomy ?? []) {
-    if (signal.phase !== "hold") continue;
-    for (const candidate of candidates) {
-      if (
-        candidate.semanticActionType !== "install.card" ||
-        candidate.sourceDefinitionId !== signal.definitionId ||
-        recurringEconomyInstallActionIds.has(candidate.actionId) ||
-        // A local income deferral cannot reject another exact purpose of
-        // the same hardware, such as the coverage owner's MU preparation.
-        coverageOwnedActionIds.has(candidate.actionId) ||
-        dispositions.some(
-          (disposition) => disposition.actionId === candidate.actionId,
-        )
-      ) {
-        continue;
-      }
-      add(
-        candidate.actionId,
-        "runner.recurring_economy",
-        signal.evidenceCodes[0] ??
-          `runner_recurring_economy_install_deferred:${signal.definitionId}`,
-      );
-    }
+  for (const disposition of runnerRecurringEconomyActionDispositions(
+    domain.recurringEconomy ?? [],
+    candidates,
+    new Set([
+      ...coverageOwnedActionIds,
+      ...dispositions.map((entry) => entry.actionId),
+    ]),
+  )) {
+    addDisposition(disposition);
   }
   for (const candidate of candidates) {
     if (
@@ -7778,19 +7753,15 @@ function buildRunnerDomain(
     economy,
     handDevelopment,
     strategicIntent,
-  );
-  const recurringEconomyRunDeferral = recurringEconomy.find(
-    (signal) =>
-      signal.commitmentActive &&
-      signal.phase === "hold" &&
-      signal.investmentHorizon.decision === "wait" &&
-      signal.investmentHorizon.futureValueAtRisk > 0,
+    (target) => runnerRunHasExactUrgency(input, target),
   );
   const recurringEconomyRunDeferralEvidenceCode =
-    recurringEconomyRunDeferral === undefined
-      ? undefined
-      : `runner_recurring_economy_defers_run_until_payout:${recurringEconomyRunDeferral.definitionId}`;
-  const resourceLifecycle = runnerResourceLifecycleSignals(input, candidates);
+    runnerRecurringEconomyRunDeferral(recurringEconomy);
+  const resourceLifecycle = runnerResourceLifecycleSignals(
+    input,
+    candidates,
+    (request) => runnerExactFundingRouteContract(input, candidates, request),
+  );
   const installedAgendaScores = runnerInstalledAgendaScoreSignals(
     input,
     candidates,
@@ -8249,49 +8220,11 @@ function buildRunnerDomain(
           ]
         : [],
     );
-  const resourceLifecycleFundingNeeds: RunnerCorePlanDomain["fundingNeeds"] =
-    resourceLifecycle.flatMap((signal) => {
-      if (
-        !signal.supportNeedId ||
-        (signal.marginalValue ?? 0) <= 0 ||
-        signal.leavePlayPaymentAmount === undefined ||
-        signal.fundingGap === undefined ||
-        signal.fundingGap <= 0 ||
-        !signal.fundingRouteAssessment ||
-        !signal.fundingRouteActionIds ||
-        signal.fundingRouteActionIds.length === 0
-      ) {
-        return [];
-      }
-      return [
-        {
-          kind: "parent_plan_support" as const,
-          needId: signal.supportNeedId,
-          parentPlanInstanceId: planInstanceIdForProposal({
-            moduleId: "runner.resource_lifecycle",
-            dedupeKey: signal.lifecycleId,
-          }),
-          driver: {
-            kind: "resource_lifecycle" as const,
-            targetId: signal.sourceCardInstanceId,
-            reasonCode: "fund_exact_lifecycle_leave_play_payment",
-          },
-          targetCredits: signal.leavePlayPaymentAmount,
-          currentCreditsAtRevalidation: currentCredits,
-          gap: signal.fundingGap,
-          priorityClass: "P5" as const,
-          revalidation: {
-            stateVersion: input.playerView.stateVersion,
-            status: "material_parent_open" as const,
-          },
-          routeActionIds: signal.fundingRouteActionIds,
-          routeAssessment: signal.fundingRouteAssessment,
-          evidenceCode:
-            signal.evidenceCodes[0] ??
-            "runner_resource_lifecycle_exact_funding_support",
-        },
-      ];
-    });
+  const resourceLifecycleFundingNeeds = runnerResourceLifecycleFundingNeeds(
+    resourceLifecycle,
+    currentCredits,
+    input.playerView.stateVersion,
+  );
   const accessPayoffFundingNeeds: RunnerCorePlanDomain["fundingNeeds"] =
     accessPayoffCampaignSignals.flatMap((signal) => {
       const campaign = signal.accessPayoffCampaign;
@@ -26649,678 +26582,6 @@ function planSafeRunExclusionEvidence(evidence: readonly string[]): string[] {
   return evidence.filter((entry) =>
     allowedPrefixes.some((prefix) => entry.startsWith(prefix)),
   );
-}
-
-function runnerRecurringEconomySignals(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-  runTargets: readonly RunnerRunTargetEvaluation[],
-  economy: RunnerEconomyPosture,
-  handDevelopment: readonly RunnerHandDevelopmentEvaluation[],
-  strategicIntent: RunnerStrategicIntentProfile,
-): NonNullable<RunnerCorePlanDomain["recurringEconomy"]> {
-  const installedSources = (input.playerView.own.rig ?? []).filter((card) =>
-    hasNoRunRecurringEconomyCommitment(card.definitionId),
-  );
-  const installedSignals =
-    installedSources.flatMap<RunnerRecurringEconomySignal>((card) => {
-      const definitionId = card.definitionId;
-      if (!definitionId) return [];
-      const profile = runnerNoRunRecurringEconomyProfile(definitionId);
-      if (!profile) return [];
-      const installedThisTurn = runnerRecurringEconomyInstalledInCurrentTurn(
-        input,
-        definitionId,
-      );
-      const realization = recurringEconomyRealization(input, definitionId);
-      const runDecision = runnerRecurringEconomyRunDecision(
-        input,
-        runTargets,
-        profile.installCost,
-        profile.turnStartCredits,
-        realization.value,
-        installedThisTurn || realization.payoutCount === 0,
-      );
-      // The investment owns only the decision to defer a run. It must not
-      // become a second authority for otherwise independent development or
-      // economy actions during the waiting turn.
-      const holdActionIds: string[] = [];
-      const futureValueAtRisk = profile.turnStartCredits;
-      return [
-        {
-          commitmentId: card.instanceId,
-          definitionId,
-          commitmentActive: true,
-          phase: "hold" as const,
-          actionIds: holdActionIds,
-          priorityClass:
-            runDecision.decision === "wait" ? ("P3" as const) : ("P4" as const),
-          value: futureValueAtRisk * 350,
-          investmentHorizon: {
-            installCost: profile.installCost,
-            earliestPayout: profile.earliestPayout,
-            projectedHoldTurns: runDecision.decision === "wait" ? 1 : 0,
-            invalidatingActionType: profile.invalidatingActionType,
-            realizedPayoutCount: realization.payoutCount,
-            realizedValue: realization.value,
-            futureValueAtRisk,
-            bestVisibleRunPayoff: runDecision.bestVisibleRunPayoff,
-            decision: runDecision.decision,
-          },
-          evidenceCodes: [
-            `runner_recurring_economy_investment_decision:${runDecision.decision}`,
-            `runner_recurring_economy_install_cost:${profile.installCost}`,
-            `runner_recurring_economy_earliest_payout:${profile.earliestPayout}`,
-            `runner_recurring_economy_projected_hold_turns:${runDecision.decision === "wait" ? 1 : 0}`,
-            `runner_recurring_economy_invalidating_action:${profile.invalidatingActionType}`,
-            `runner_recurring_economy_realized_payout_count:${realization.payoutCount}`,
-            `runner_recurring_economy_realized_value:${realization.value}`,
-            `runner_recurring_economy_future_value_at_risk:${futureValueAtRisk}`,
-            `runner_recurring_economy_best_visible_run_payoff:${runDecision.bestVisibleRunPayoff}`,
-            ...runDecision.evidenceCodes,
-            "runner_recurring_economy_hold_defers_runs_only",
-          ],
-        },
-      ];
-    });
-  const installSignals = candidates.flatMap<RunnerRecurringEconomySignal>(
-    (candidate) => {
-      if (
-        candidate.semanticActionType !== "install.card" ||
-        !candidate.sourceDefinitionId ||
-        !hasNoRunRecurringEconomyCommitment(candidate.sourceDefinitionId)
-      )
-        return [];
-      const profile = runnerNoRunRecurringEconomyProfile(
-        candidate.sourceDefinitionId,
-      );
-      if (!profile) return [];
-      const action = input.legalActions.find(
-        (legalAction) => legalAction.actionId === candidate.actionId,
-      );
-      if (!action) return [];
-      const runDecision = runnerRecurringEconomyRunDecision(
-        input,
-        runTargets,
-        profile.installCost,
-        profile.turnStartCredits,
-        0,
-        true,
-      );
-      const productiveSetupAlternative = input.legalActions.some(
-        (action) =>
-          action.actionId !== candidate.actionId &&
-          action.type !== "start_run" &&
-          action.type !== "end_turn",
-      );
-      const investmentCost = legalActionCreditCost(action);
-      const firstPayoutJustifiesInvestment =
-        profile.turnStartCredits > investmentCost;
-      const rebuildWindow =
-        economy.buildEconomyBeforePressure ||
-        economy.recommendation === "build_economy" ||
-        runDecision.bestVisibleRunPayoff <= 0;
-      const setupWindow =
-        input.playerView.own.clicks >= 2 &&
-        firstPayoutJustifiesInvestment &&
-        runDecision.decision === "wait" &&
-        (productiveSetupAlternative || rebuildWindow);
-      return [
-        {
-          commitmentId:
-            candidate.sourceCardInstanceId ??
-            candidate.sourceCardId ??
-            candidate.sourceDefinitionId,
-          definitionId: candidate.sourceDefinitionId,
-          commitmentActive: false,
-          phase: setupWindow ? ("install" as const) : ("hold" as const),
-          actionIds: setupWindow ? [candidate.actionId] : [],
-          priorityClass: setupWindow ? ("P4" as const) : ("P5" as const),
-          value: setupWindow ? profile.turnStartCredits * 150 : 0,
-          investmentHorizon: {
-            installCost: investmentCost,
-            earliestPayout: profile.earliestPayout,
-            projectedHoldTurns: setupWindow ? 1 : 0,
-            invalidatingActionType: profile.invalidatingActionType,
-            realizedPayoutCount: 0,
-            realizedValue: 0,
-            futureValueAtRisk: profile.turnStartCredits,
-            bestVisibleRunPayoff: runDecision.bestVisibleRunPayoff,
-            decision: setupWindow ? "install" : runDecision.decision,
-          },
-          evidenceCodes: [
-            setupWindow
-              ? "runner_recurring_economy_install_ready"
-              : "runner_recurring_economy_install_deferred_no_setup_window",
-            `runner_recurring_economy_investment_decision:${setupWindow ? "install" : runDecision.decision}`,
-            `runner_recurring_economy_install_cost:${investmentCost}`,
-            `runner_recurring_economy_earliest_payout:${profile.earliestPayout}`,
-            `runner_recurring_economy_projected_hold_turns:${setupWindow ? 1 : 0}`,
-            `runner_recurring_economy_invalidating_action:${profile.invalidatingActionType}`,
-            `runner_recurring_economy_future_value_at_risk:${profile.turnStartCredits}`,
-            `runner_recurring_economy_best_visible_run_payoff:${runDecision.bestVisibleRunPayoff}`,
-            ...runDecision.evidenceCodes,
-          ],
-        },
-      ];
-    },
-  );
-  const recurringBreakerEngineActive =
-    strategicIntent.engineLineIds?.includes(
-      "runner.engine.compatible_recurring_economy",
-    ) === true;
-  const recurringBreakerProviderIds = new Set(
-    (strategicIntent.engineProviders ?? [])
-      .filter((provider) =>
-        provider.capabilities.includes("runner.economy.recurring_breaker"),
-      )
-      .map((provider) => provider.cardId),
-  );
-  const restrictedRunCreditInstallSignals =
-    candidates.flatMap<RunnerRecurringEconomySignal>((candidate) => {
-      if (
-        candidate.semanticActionType !== "install.card" ||
-        !candidate.sourceDefinitionId ||
-        hasNoRunRecurringEconomyCommitment(candidate.sourceDefinitionId)
-      ) {
-        return [];
-      }
-      const profile = runnerRestrictedRunCreditProfile(
-        candidate.sourceDefinitionId,
-      );
-      if (
-        !profile ||
-        !recurringBreakerEngineActive ||
-        !recurringBreakerProviderIds.has(candidate.sourceDefinitionId)
-      ) {
-        return [];
-      }
-      const action = input.legalActions.find(
-        (legalAction) => legalAction.actionId === candidate.actionId,
-      );
-      const handEvaluation = handDevelopment.find(
-        (evaluation) =>
-          evaluation.definitionId === candidate.sourceDefinitionId &&
-          evaluation.cardInstanceId === candidate.sourceCardInstanceId &&
-          evaluation.legalActionId === candidate.actionId,
-      );
-      if (!action || !handEvaluation) return [];
-      const installedCompatibleBreakerCount =
-        runnerInstalledCompatibleRestrictedCreditBreakerCount(
-          input,
-          profile.uses,
-        );
-      const urgentRunAvailable = runTargets.some(
-        (evaluation) =>
-          evaluation.pathPassability === "reachable" &&
-          runnerRunHasExactUrgency(input, evaluation),
-      );
-      const productiveCentralRunAvailable = runTargets.some(
-        (evaluation) =>
-          evaluation.pathPassability === "reachable" &&
-          evaluation.recommendation === "run_now" &&
-          evaluation.score >= 180 &&
-          evaluation.targetKind !== "remote",
-      );
-      const investment = assessRunnerRestrictedRunEconomyInvestment({
-        engineLineActive: recurringBreakerEngineActive,
-        providerMatches: recurringBreakerProviderIds.has(
-          candidate.sourceDefinitionId,
-        ),
-        installedCompatibleBreakerCount,
-        installCost: legalActionCreditCost(action),
-        recurringCredits: profile.capacity,
-        clicksRemaining: input.playerView.own.clicks,
-        runnerDeckCount: input.playerView.own.stackOrRdCount,
-        urgentRunAvailable,
-        productiveCentralRunAvailable,
-      });
-      const handRouteReady =
-        handEvaluation.availability === "legal_now" &&
-        (handEvaluation.deferReason === "none" ||
-          handEvaluation.deferReason === "no_current_need") &&
-        handEvaluation.persistentInstallEvaluation?.duplicateRole !==
-          "redundant_duplicate";
-      const installReady = investment.decision === "install" && handRouteReady;
-      return [
-        {
-          commitmentId:
-            candidate.sourceCardInstanceId ??
-            candidate.sourceCardId ??
-            candidate.sourceDefinitionId,
-          definitionId: candidate.sourceDefinitionId,
-          commitmentActive: false,
-          phase: installReady ? ("install" as const) : ("hold" as const),
-          actionIds: installReady ? [candidate.actionId] : [],
-          priorityClass: installReady
-            ? investment.priorityClass
-            : ("P5" as const),
-          value: installReady ? investment.value : 0,
-          investmentHorizon: {
-            installCost: legalActionCreditCost(action),
-            earliestPayout: "next_compatible_icebreaker_use" as const,
-            projectedHoldTurns: 0,
-            invalidatingActionType: "none" as const,
-            realizedPayoutCount: 0,
-            realizedValue: 0,
-            futureValueAtRisk: profile.capacity,
-            bestVisibleRunPayoff: Math.max(
-              0,
-              ...runTargets.map((evaluation) => evaluation.score),
-            ),
-            decision: installReady ? ("install" as const) : ("wait" as const),
-          },
-          evidenceCodes: [
-            ...(handRouteReady
-              ? []
-              : ["runner_restricted_run_economy_hand_route_deferred"]),
-            ...investment.evidenceCodes,
-            `runner_restricted_run_economy_hand_route_ready:${handRouteReady}`,
-            `runner_restricted_run_economy_uses:${profile.uses.join("|")}`,
-          ],
-        },
-      ];
-    });
-  return uniqueBy(
-    [
-      ...installedSignals,
-      ...installSignals,
-      ...restrictedRunCreditInstallSignals,
-    ],
-    (signal) => signal.commitmentId,
-  );
-}
-
-function runnerInstalledCompatibleRestrictedCreditBreakerCount(
-  input: AiDecisionInput,
-  uses: readonly (
-    | "using_icebreaker_during_run_non_noisy"
-    | "using_killer_during_run"
-  )[],
-): number {
-  const supportsNonNoisy = uses.includes(
-    "using_icebreaker_during_run_non_noisy",
-  );
-  const supportsKiller = uses.includes("using_killer_during_run");
-  return (input.playerView.own.rig ?? []).filter((card) => {
-    const roles = rolesForDeckDoctrineCard(card.definitionId ?? "");
-    const subtypes = new Set(
-      (card.subtypes ?? []).map((subtype) =>
-        subtype.trim().toLocaleLowerCase("en-US"),
-      ),
-    );
-    const breaker =
-      rolesHaveBreakerRole(roles) ||
-      ["icebreaker", "fracter", "decoder", "killer", "worm"].some((subtype) =>
-        subtypes.has(subtype),
-      );
-    if (!breaker) return false;
-    return (
-      (supportsNonNoisy && !subtypes.has("noisy")) ||
-      (supportsKiller &&
-        (rolesMatch(roles, ["breaker_killer"]) || subtypes.has("killer")))
-    );
-  }).length;
-}
-
-function runnerRecurringEconomyRunDecision(
-  input: AiDecisionInput,
-  runTargets: readonly RunnerRunTargetEvaluation[],
-  installCost: number,
-  futureValueAtRisk: number,
-  realizedValue: number,
-  payoutStillUnrealized: boolean,
-): {
-  decision: "wait" | "allow_run" | "preempt_for_urgent_run";
-  bestVisibleRunPayoff: number;
-  evidenceCodes: string[];
-} {
-  return assessRunnerRecurringEconomyRunHorizon({
-    runTargets,
-    legalRunActionIds: new Set(
-      input.legalActions
-        .filter((action) => action.type === "start_run")
-        .map((action) => action.actionId),
-    ),
-    runnerAgendaPoints: input.playerView.own.agendaPoints,
-    opponentAgendaPoints: input.playerView.opponent.agendaPoints,
-    agendaPointsToWin: input.playerView.agendaPointsToWin,
-    installCost,
-    futureValueAtRisk,
-    realizedValue,
-    payoutStillUnrealized,
-  });
-}
-
-function recurringEconomyCommitmentValue(definitionId: string): number {
-  const profile = runnerNoRunRecurringEconomyProfile(definitionId);
-  if (!profile)
-    throw new Error(
-      `runner_no_run_recurring_economy_profile_missing:${definitionId}`,
-    );
-  return profile.turnStartCredits;
-}
-
-function runnerResourceLifecycleSignals(
-  input: AiDecisionInput,
-  candidates: readonly ActionSemanticCandidate[],
-): NonNullable<RunnerCorePlanDomain["resourceLifecycle"]> {
-  const leavePlayPaymentActions = candidates.filter((candidate) =>
-    runnerCandidateIsLeavePlayPaymentLifecycleAction(input, candidate),
-  );
-  const voluntarySelfTrashSignals = candidates.flatMap((candidate) => {
-    const sourceCardInstanceId = candidate.sourceCardInstanceId;
-    const definitionId = candidate.sourceDefinitionId;
-    const action = input.legalActions.find(
-      (entry) => entry.actionId === candidate.actionId,
-    );
-    const profile = runnerVoluntarySelfTrashLifecycleProfile(definitionId);
-    const visibleSource = sourceCardInstanceId
-      ? (input.playerView.own.rig ?? []).find(
-          (card) => card.instanceId === sourceCardInstanceId,
-        )
-      : undefined;
-    const visibleTraceThreat = input.playerView.servers.some((server) =>
-      [...server.ice, ...server.root].some(
-        (card) =>
-          card.known === true &&
-          corpDefinitionHasTraceSource(card.definitionId),
-      ),
-    );
-    if (
-      !sourceCardInstanceId ||
-      !definitionId ||
-      !profile ||
-      !visibleSource ||
-      visibleSource.definitionId !== definitionId ||
-      action?.side !== "runner" ||
-      action.type !== "activated_card_ability" ||
-      action.source !== sourceCardInstanceId ||
-      action.expiresAtStateVersion !== input.playerView.stateVersion ||
-      action.payload?.cardId !== sourceCardInstanceId ||
-      action.payload?.cardImplementationCapabilityBindingKind !==
-        "card_spec_capability_key" ||
-      action.payload?.cardImplementationAbilityKey !== "trash_source_action" ||
-      action.payload?.cardImplementationTrashesSource !== true ||
-      (profile.exposesRunnerToAutomaticTraceSuccess && visibleTraceThreat)
-    ) {
-      return [];
-    }
-    return [
-      {
-        lifecycleId: `voluntary-self-trash:${definitionId}:${sourceCardInstanceId}`,
-        sourceCardInstanceId,
-        definitionId,
-        phase: "retain" as const,
-        actionIds: [],
-        rejectedActionIds: [candidate.actionId],
-        priorityClass: "P5" as const,
-        value: 0,
-        evidenceCodes: [
-          "runner_resource_self_trash_deferred_without_visible_hazard",
-          `runner_resource_retained_start_turn_credit_gain:${profile.turnStartCreditGain}`,
-          `runner_resource_avoided_leave_play_credit_loss:${profile.leavePlayCreditLoss}`,
-        ],
-      },
-    ];
-  });
-  const visibleRemainingRunnerTurnCeiling = input.playerView.opponent.deckCount;
-  const actionsBySourceInstance = new Map<string, ActionSemanticCandidate[]>();
-  for (const candidate of leavePlayPaymentActions) {
-    const sourceCardInstanceId = candidate.sourceCardInstanceId;
-    if (sourceCardInstanceId === undefined) continue;
-    const actions = actionsBySourceInstance.get(sourceCardInstanceId) ?? [];
-    actions.push(candidate);
-    actionsBySourceInstance.set(sourceCardInstanceId, actions);
-  }
-  const leavePlayPaymentSignals = [...actionsBySourceInstance.entries()]
-    .map(([sourceCardInstanceId, actions]) => {
-      const definitionId = actions[0]?.sourceDefinitionId;
-      if (
-        definitionId === undefined ||
-        actions.some(
-          (candidate) => candidate.sourceDefinitionId !== definitionId,
-        )
-      ) {
-        return undefined;
-      }
-      const lifecycleId = `${definitionId}:${sourceCardInstanceId}`;
-      const quote = runnerLifecycleLeavePlayPaymentQuote(
-        input,
-        sourceCardInstanceId,
-        actions,
-      );
-      const leavePlayEconomicallyProductive =
-        quote !== undefined && visibleRemainingRunnerTurnCeiling > quote.amount;
-      const marginalValue = leavePlayEconomicallyProductive
-        ? visibleRemainingRunnerTurnCeiling - quote.amount
-        : 0;
-      const capacitySpent = input.playerView.own.clicks === 0;
-      const supportNeedId = `resource-lifecycle-support:${sourceCardInstanceId}`;
-      const fundingGap =
-        quote?.status === "unpayable"
-          ? Math.max(0, quote.amount - input.playerView.own.credits)
-          : 0;
-      const fundingRoute =
-        quote?.status === "unpayable" &&
-        leavePlayEconomicallyProductive &&
-        !capacitySpent &&
-        fundingGap > 0
-          ? runnerExactFundingRouteContract(input, candidates, {
-              demandId: supportNeedId,
-              sourcePlanId: planInstanceIdForProposal({
-                moduleId: "runner.resource_lifecycle",
-                dedupeKey: lifecycleId,
-              }),
-              purpose: "foreground_plan",
-              priority: "current_foreground_plan",
-              hardness: "hard",
-              deadline: "end_of_current_turn",
-              targetCredits: quote.amount,
-              remainingClicks: input.playerView.own.clicks,
-              evidence: [
-                `runner_resource_lifecycle_source:${sourceCardInstanceId}`,
-                `runner_resource_lifecycle_exact_payment_amount:${quote.amount}`,
-              ],
-            })
-          : undefined;
-      const fullFundingRouteExists =
-        fundingRoute?.routeAssessment.status === "covered_guaranteed" &&
-        fundingRoute.routeAssessment.reliability === "guaranteed" &&
-        fundingRoute.routeAssessment.horizon === "same_turn" &&
-        fundingRoute.routeAssessment.projectedGap === 0 &&
-        fundingRoute.routeActionIds.length > 0;
-      const leavePlayNow =
-        quote?.status === "payable" &&
-        capacitySpent &&
-        leavePlayEconomicallyProductive;
-      const evidenceCode =
-        quote === undefined
-          ? "runner_resource_leave_payment_quote_unknown"
-          : !leavePlayEconomicallyProductive
-            ? `runner_resource_leave_cost_not_recovered_within_visible_horizon:${visibleRemainingRunnerTurnCeiling}`
-            : quote.status === "payable"
-              ? capacitySpent
-                ? `runner_resource_leave_avoids_visible_long_horizon_liability:${visibleRemainingRunnerTurnCeiling}`
-                : "runner_resource_leave_deferred_until_capacity_spent"
-              : capacitySpent
-                ? "runner_resource_leave_unpayable_without_action_capacity"
-                : fullFundingRouteExists
-                  ? "runner_resource_waiting_for_exact_funding_support"
-                  : "runner_resource_exact_funding_route_unavailable";
-      return {
-        lifecycleId,
-        sourceCardInstanceId,
-        definitionId,
-        phase: leavePlayNow ? "leave_play" : "retain",
-        actionIds: leavePlayNow
-          ? actions.map((candidate) => candidate.actionId)
-          : [],
-        ...(!leavePlayNow
-          ? {
-              rejectedActionIds: actions.map((candidate) => candidate.actionId),
-            }
-          : {}),
-        ...(fullFundingRouteExists && fundingRoute && quote
-          ? {
-              supportNeedId,
-              marginalValue,
-              leavePlayPaymentAmount: quote.amount,
-              fundingGap,
-              fundingRouteActionIds: fundingRoute.routeActionIds,
-              fundingRouteAssessment: fundingRoute.routeAssessment,
-            }
-          : {}),
-        priorityClass: "P5",
-        value: leavePlayNow || fullFundingRouteExists ? marginalValue : 0,
-        evidenceCodes: [
-          evidenceCode,
-          ...(quote
-            ? [
-                `runner_resource_leave_play_payment_amount:${quote.amount}`,
-                `runner_resource_leave_play_payment_status:${quote.status}`,
-              ]
-            : []),
-        ],
-      };
-    })
-    .filter(
-      (
-        signal,
-      ): signal is NonNullable<
-        RunnerCorePlanDomain["resourceLifecycle"]
-      >[number] => signal !== undefined,
-    );
-  return uniqueBy(
-    [...leavePlayPaymentSignals, ...voluntarySelfTrashSignals],
-    (signal) => signal.lifecycleId,
-  );
-}
-
-function runnerCandidateIsLeavePlayPaymentLifecycleAction(
-  input: AiDecisionInput,
-  candidate: ActionSemanticCandidate,
-): boolean {
-  if (
-    candidate.semanticActionType !== "turn_flow.end_turn" ||
-    candidate.sourceKind !== "card" ||
-    candidate.sourceCardInstanceId === undefined ||
-    candidate.sourceDefinitionId === undefined
-  ) {
-    return false;
-  }
-  const action = input.legalActions.find(
-    (entry) => entry.actionId === candidate.actionId,
-  );
-  return (
-    action?.side === "runner" &&
-    action.type === "end_turn" &&
-    action.expiresAtStateVersion === input.playerView.stateVersion &&
-    action.source === candidate.sourceCardInstanceId &&
-    action.payload?.cardId === candidate.sourceCardInstanceId &&
-    action.payload?.cardImplementationLifecycleAction === "end_of_runner_turn"
-  );
-}
-
-function runnerLifecycleLeavePlayPaymentQuote(
-  input: AiDecisionInput,
-  sourceCardInstanceId: string,
-  candidates: readonly ActionSemanticCandidate[],
-): { amount: number; status: "payable" | "unpayable" } | undefined {
-  const quotes = candidates.map((candidate) => {
-    const action = input.legalActions.find(
-      (entry) => entry.actionId === candidate.actionId,
-    );
-    const amount =
-      action?.payload?.cardImplementationLifecycleLeavePlayPaymentAmount;
-    const status =
-      action?.payload?.cardImplementationLifecycleLeavePlayPaymentStatus;
-    if (
-      !action ||
-      action.source !== sourceCardInstanceId ||
-      action.payload?.cardId !== sourceCardInstanceId ||
-      action.payload?.cardImplementationLifecycleAction !==
-        "end_of_runner_turn" ||
-      typeof amount !== "number" ||
-      !Number.isSafeInteger(amount) ||
-      amount <= 0 ||
-      (status !== "payable" && status !== "unpayable") ||
-      (input.playerView.own.credits >= amount
-        ? status !== "payable"
-        : status !== "unpayable")
-    ) {
-      return undefined;
-    }
-    return { amount, status };
-  });
-  const [first] = quotes;
-  if (
-    !first ||
-    quotes.some(
-      (quote) =>
-        !quote ||
-        quote.amount !== first.amount ||
-        quote.status !== first.status,
-    )
-  ) {
-    return undefined;
-  }
-  return first;
-}
-
-function hasNoRunRecurringEconomyCommitment(
-  definitionId: string | undefined,
-): boolean {
-  return runnerNoRunRecurringEconomyProfile(definitionId) !== undefined;
-}
-
-function runnerRecurringEconomyInstalledInCurrentTurn(
-  input: AiDecisionInput,
-  definitionId: string,
-): boolean {
-  const turnSerial = input.playerView.turnSerial;
-  if (turnSerial === undefined) return false;
-  const events = uniqueBy(
-    [...input.playerView.publicEvents, ...input.eventTail],
-    (event) => event.eventId,
-  );
-  return events.some(
-    (event) =>
-      event.turnSerial === turnSerial &&
-      event.publicPayload?.actor === "runner" &&
-      event.publicPayload.actionType === "install_card" &&
-      event.publicPayload.cardDefinitionId === definitionId,
-  );
-}
-
-function recurringEconomyRealization(
-  input: AiDecisionInput,
-  definitionId: string,
-): { payoutCount: number; value: number } {
-  const events = uniqueBy(
-    [...input.playerView.publicEvents, ...input.eventTail],
-    (event) => event.eventId,
-  );
-  let payoutCount = 0;
-  let value = 0;
-  for (const event of events) {
-    const effects = event.publicPayload?.resolvedEffects;
-    if (!Array.isArray(effects)) continue;
-    for (const effect of effects) {
-      const resolved = effect as Record<string, unknown>;
-      if (
-        resolved.sourceDefinitionId === definitionId &&
-        resolved.kind === "gain_credits" &&
-        resolved.reason === "start_of_turn" &&
-        typeof resolved.amount === "number" &&
-        resolved.amount > 0
-      ) {
-        payoutCount += 1;
-        value += resolved.amount;
-      }
-    }
-  }
-  return { payoutCount, value: Math.max(0, Math.floor(value)) };
 }
 
 type RunnerCoverageDrawCadence = Readonly<{

@@ -1,3 +1,12 @@
+import type {
+  RunnerFundingNeedSignal,
+  RunnerDevelopmentFundingMilestone,
+} from "./runner-funding-contracts";
+import { validRunnerFundingNeedContract } from "./runner-funding-contracts";
+import type { RunnerResourceLifecycleSignal } from "../runner/resource-lifecycle/resource-lifecycle-types";
+import { createRunnerResourceLifecycleModule } from "../runner/resource-lifecycle/resource-lifecycle-plan-module";
+import type { RunnerRecurringEconomySignal } from "../runner/recurring-economy/recurring-economy-types";
+import { createRunnerRecurringEconomyModule } from "../runner/recurring-economy/recurring-economy-plan-module";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
 import { rolesForDeckDoctrineCard } from "../deck-doctrine-card-roles";
@@ -6,7 +15,7 @@ import type { AiDeckStrategyProfile } from "../deck-doctrine-strategy";
 import { rolesMatch } from "../runtime/role-match";
 import { runnerEffectsProvideDamagePrevention } from "../runner-canonical-hint-semantics";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
-import type { ResourceGap } from "./plan-assessment";
+
 import type { PlanInstance } from "./plan-kernel-types";
 import type {
   PlanMaterialization,
@@ -14,12 +23,7 @@ import type {
   PlanModule,
   PlanSchedulerContext,
 } from "./plan-scheduler";
-import type {
-  FundingRouteHorizon,
-  FundingRouteReliability,
-  FundingRouteStatus,
-  PaymentWindowFundingSetup,
-} from "./funding-route";
+
 import type { ProjectedHandDisposition } from "./turn-projection";
 import type { RunnerCreditBankSignal } from "../runner/credit-bank/credit-bank-types";
 import { createRunnerCreditBankModule } from "../runner/credit-bank/credit-bank-plan-module";
@@ -33,95 +37,6 @@ import type {
   RunnerHandDevelopmentRole,
   RunnerHandDevelopmentStrategicFit,
 } from "../runner/hand-development/runner-hand-development-types";
-
-export type RunnerFundingRouteAssessment = {
-  stateVersion: number;
-  routeId: string;
-  status: FundingRouteStatus;
-  reliability: FundingRouteReliability;
-  horizon: FundingRouteHorizon;
-  projectedGap: number;
-  totalClickCost: number;
-  firstStepActionId?: string;
-  paymentInstall?: PaymentWindowFundingSetup & {
-    targetServerId: string;
-    runActionId: string;
-  };
-  evidenceCodes: string[];
-};
-
-type RunnerFundingRouteContract = {
-  routeActionIds: string[];
-  routeAssessment: RunnerFundingRouteAssessment;
-};
-
-export type RunnerDevelopmentFundingMilestone = {
-  kind: "bounded_development_credit_milestone";
-  targetCredits: number;
-  observedCredits: number;
-  remainingGap: number;
-  priorityClass: "P4";
-  hardness: "soft";
-  deadline: "within_three_own_turns";
-  maximumOwnTurns: 3;
-  releaseCondition: "parent_invalidated_or_material_value_lost_or_urgent_preemption";
-};
-
-export type RunnerFundingNeedSignal =
-  | (RunnerFundingRouteContract & {
-      kind: "parent_plan_support";
-      needId: string;
-      parentPlanInstanceId: string;
-      driver: {
-        kind: "run" | "contest" | "development" | "resource_lifecycle";
-        targetId: string;
-        reasonCode: string;
-      };
-      targetCredits: number;
-      currentCreditsAtRevalidation: number;
-      gap: number;
-      priorityClass: "P2" | "P4" | "P5";
-      developmentFundingMilestone?: RunnerDevelopmentFundingMilestone;
-      revalidation: {
-        stateVersion: number;
-        status: "material_parent_open";
-      };
-      evidenceCode: string;
-    })
-  | (RunnerFundingRouteContract & {
-      kind: "portfolio_reserve";
-      needId: "runner-portfolio-credit-reserve";
-      targetCredits: number;
-      currentCreditsAtRevalidation: number;
-      gap: number;
-      priorityClass: "P6";
-      revalidation: {
-        stateVersion: number;
-        status: "portfolio_reserve_open";
-      };
-      evidenceCode: string;
-    })
-  | {
-      kind: "develop_liquidity";
-      needId: string;
-      actionIds: string[];
-      currentCreditsAtRevalidation: number;
-      targetCredits: number;
-      gap: number;
-      priorityClass: "P6";
-      cadence: {
-        kind: "remaining_turn_capacity";
-        maximumConversions: number;
-      };
-      completion: {
-        kind: "target_credits_or_no_clicks";
-      };
-      revalidation: {
-        stateVersion: number;
-        status: "turn_liquidity_open";
-      };
-      evidenceCode: string;
-    };
 
 export type RunnerCoverageGapSignal = {
   gapId: string;
@@ -279,28 +194,6 @@ export type RunnerDiscardChoiceBinding = {
   evidenceCodes: string[];
 };
 
-export type RunnerRecurringEconomySignal = {
-  commitmentId: string;
-  definitionId: string;
-  commitmentActive: boolean;
-  phase: "install" | "hold";
-  actionIds: string[];
-  priorityClass: "P3" | "P4" | "P5";
-  value: number;
-  evidenceCodes: string[];
-  investmentHorizon: Readonly<{
-    installCost: number;
-    earliestPayout: "start_of_runner_turn" | "next_compatible_icebreaker_use";
-    projectedHoldTurns: number;
-    invalidatingActionType: "start_run" | "none";
-    realizedPayoutCount: number;
-    realizedValue: number;
-    futureValueAtRisk: number;
-    bestVisibleRunPayoff: number;
-    decision: "install" | "wait" | "allow_run" | "preempt_for_urgent_run";
-  }>;
-};
-
 export type RunnerInstalledCardLiquidationChoiceSignal = {
   conversionId: string;
   sourceResourceInstanceId: string;
@@ -332,24 +225,6 @@ export type RunnerInstalledAgendaScoreSignal = {
   agendaPoints: number;
   terminal: boolean;
   evidenceCode: string;
-};
-
-export type RunnerResourceLifecycleSignal = {
-  lifecycleId: string;
-  sourceCardInstanceId: string;
-  definitionId: string;
-  phase: "retain" | "leave_play";
-  actionIds: string[];
-  rejectedActionIds?: string[];
-  supportNeedId?: string;
-  marginalValue?: number;
-  leavePlayPaymentAmount?: number;
-  fundingGap?: number;
-  fundingRouteActionIds?: string[];
-  fundingRouteAssessment?: RunnerFundingRouteAssessment;
-  priorityClass: "P5";
-  value: number;
-  evidenceCodes: string[];
 };
 
 export type RunnerShellTradersPipelineSignal = {
@@ -811,21 +686,12 @@ type DefenseState = {
     | "forgo_terminal_deck_pressure";
   signals: RunnerDefenseSignals;
 };
-type RecurringEconomyState = {
-  kind: "recurring_economy";
-  phase: RunnerRecurringEconomySignal["phase"];
-  signal: RunnerRecurringEconomySignal;
-};
 type InstalledAgendaScoreState = {
   kind: "installed_agenda_score";
   phase: "score_installed_agenda";
   signal: RunnerInstalledAgendaScoreSignal;
 };
-type ResourceLifecycleState = {
-  kind: "resource_lifecycle";
-  phase: RunnerResourceLifecycleSignal["phase"];
-  signal: RunnerResourceLifecycleSignal;
-};
+
 type ShellTradersPipelineState = {
   kind: "shell_traders_pipeline";
   phase: RunnerShellTradersPipelineSignal["phase"];
@@ -840,9 +706,9 @@ export function createRunnerCorePlanModules(
   return [
     installedAgendaScoreModule(),
     shellTradersPipelineModule(),
-    resourceLifecycleModule(),
+    createRunnerResourceLifecycleModule(),
     createRunnerCreditBankModule(),
-    recurringEconomyModule(),
+    createRunnerRecurringEconomyModule(),
     economyModule(),
     coverageModule(rolesForDefinitionId),
     defenseModule(),
@@ -924,79 +790,6 @@ function shellTradersPipelineModule(): PlanModule {
   };
 }
 
-function resourceLifecycleModule(): PlanModule {
-  return {
-    moduleId: "runner.resource_lifecycle",
-    side: "runner",
-    discover: (context) =>
-      (domain(context).resourceLifecycle ?? []).map((signal) => {
-        const lifecycleProposal = proposal({
-          moduleId: "runner.resource_lifecycle",
-          dedupeKey: signal.lifecycleId,
-          moduleState: {
-            kind: "resource_lifecycle",
-            phase: signal.phase,
-            signal,
-          } satisfies ResourceLifecycleState,
-          priorityClass: signal.priorityClass,
-          target: { kind: "card", id: signal.sourceCardInstanceId },
-          routeExists:
-            resourceLifecycleCandidates(context, signal).length > 0 ||
-            signal.supportNeedId !== undefined,
-          blockerCode: `resource_lifecycle_${signal.phase}`,
-          evidenceCode:
-            signal.evidenceCodes[0] ??
-            "runner_resource_lifecycle_visible_state",
-        });
-        if (!signal.supportNeedId) return lifecycleProposal;
-        return {
-          ...lifecycleProposal,
-          resumeConditions: [{ code: signal.supportNeedId }],
-        };
-      }),
-    assess: (instance, context, portfolio) => {
-      const signal = state<ResourceLifecycleState>(instance).signal;
-      const resourceGaps = exactRunnerParentFundingResourceGaps(
-        context,
-        instance,
-        signal.supportNeedId,
-      );
-      return assessment(
-        instance,
-        signal.priorityClass,
-        resourceLifecycleCandidates(context, signal).length > 0,
-        signal.value,
-        portfolio.executorInstanceId,
-        resourceGaps,
-      );
-    },
-    materialize: (instance, _assessment, context) => {
-      const signal = state<ResourceLifecycleState>(instance).signal;
-      const candidates = resourceLifecycleCandidates(context, signal);
-      return {
-        step: {
-          stepId: `${instance.instanceId}:${signal.phase}`,
-          capability: {
-            capabilityId: `resource_lifecycle_${signal.phase}`,
-            semanticActionTypes: [
-              ...new Set(
-                candidates.map((entry) => entry.candidate.semanticActionType),
-              ),
-            ],
-            requiredSourceDefinitionIds: [signal.definitionId],
-          },
-          target: { kind: "card", id: signal.sourceCardInstanceId },
-          purpose:
-            signal.phase === "leave_play"
-              ? "Resolve the explicitly profitable end-of-turn resource lifecycle route."
-              : "Retain the resource while its leave-play route is not productive.",
-        },
-        candidates,
-      };
-    },
-  };
-}
-
 function installedAgendaScoreModule(): PlanModule {
   return {
     moduleId: "runner.score_installed_agenda",
@@ -1049,73 +842,6 @@ function installedAgendaScoreModule(): PlanModule {
             "Convert the installed agenda replacement into agenda points.",
         },
         candidates: installedAgendaScoreCandidates(context, signal),
-      };
-    },
-  };
-}
-
-function recurringEconomyModule(): PlanModule {
-  return {
-    moduleId: "runner.recurring_economy",
-    side: "runner",
-    discover: (context) =>
-      (domain(context).recurringEconomy ?? []).map((signal) =>
-        proposal({
-          moduleId: "runner.recurring_economy",
-          dedupeKey: signal.commitmentId,
-          moduleState: {
-            kind: "recurring_economy",
-            phase: signal.phase,
-            signal,
-          } satisfies RecurringEconomyState,
-          priorityClass: signal.priorityClass,
-          target: { kind: "card", id: signal.definitionId },
-          routeExists: recurringEconomyCandidates(context, signal).length > 0,
-          blockerCode:
-            signal.phase === "hold"
-              ? "recurring_economy_waiting_for_value"
-              : "recurring_economy_install_route_unavailable",
-          evidenceCode:
-            signal.evidenceCodes[0] ?? "runner_recurring_economy_commitment",
-        }),
-      ),
-    assess: (instance, context, portfolio) => {
-      const signal = state<RecurringEconomyState>(instance).signal;
-      const candidates = recurringEconomyCandidates(context, signal);
-      return assessment(
-        instance,
-        signal.priorityClass,
-        candidates.length > 0,
-        signal.value,
-        portfolio.executorInstanceId,
-      );
-    },
-    materialize: (instance, _assessment, context) => {
-      const signal = state<RecurringEconomyState>(instance).signal;
-      const candidates = recurringEconomyCandidates(context, signal);
-      return {
-        step: {
-          stepId: `${instance.instanceId}:${signal.phase}`,
-          capability: {
-            capabilityId: `recurring_economy_${signal.phase}`,
-            semanticActionTypes: [
-              ...new Set(
-                candidates.map((entry) => entry.candidate.semanticActionType),
-              ),
-            ],
-            ...(signal.phase === "install"
-              ? { requiredSourceDefinitionIds: [signal.definitionId] }
-              : {}),
-          },
-          ...(signal.phase === "install"
-            ? { target: { kind: "card" as const, id: signal.definitionId } }
-            : {}),
-          purpose:
-            signal.phase === "install"
-              ? "Install the recurring economy commitment with a productive setup window."
-              : "Develop through explicit non-run steps until the installed recurring economy commitment resolves its automatic value.",
-        },
-        candidates,
       };
     },
   };
@@ -1767,43 +1493,6 @@ function defenseModule(): PlanModule {
   };
 }
 
-function exactRunnerParentFundingResourceGaps(
-  context: PlanSchedulerContext,
-  parent: PlanInstance,
-  supportNeedId: string | undefined,
-): ResourceGap[] {
-  if (supportNeedId === undefined) return [];
-  const exactNeeds = domain(context).fundingNeeds.filter(
-    (
-      need,
-    ): need is Extract<
-      RunnerFundingNeedSignal,
-      { kind: "parent_plan_support" }
-    > =>
-      need.kind === "parent_plan_support" &&
-      need.needId === supportNeedId &&
-      need.parentPlanInstanceId === parent.instanceId &&
-      need.gap > 0,
-  );
-  if (exactNeeds.length !== 1) return [];
-  const [need] = exactNeeds;
-  if (
-    !need ||
-    !validRunnerFundingNeedContract(need, context.input.playerView.stateVersion)
-  ) {
-    return [];
-  }
-  return [
-    {
-      needId: need.needId,
-      capability: "credits",
-      minimum: need.gap,
-      available: 0,
-      deadline: "current_turn",
-    },
-  ];
-}
-
 function economyCandidates(
   context: PlanSchedulerContext,
   need: RunnerFundingNeedSignal,
@@ -1851,106 +1540,6 @@ function economyCandidates(
         stepValue: fundingGapProgress * 100 + netLiquidCreditGain,
       };
     });
-}
-
-function validRunnerFundingNeedContract(
-  need: RunnerFundingNeedSignal,
-  stateVersion: number,
-): boolean {
-  if (need.kind === "develop_liquidity") {
-    const actionIds = [...new Set(need.actionIds)];
-    return (
-      need.needId.startsWith("economy-liquidity-development:") &&
-      actionIds.length === need.actionIds.length &&
-      actionIds.length > 0 &&
-      Number.isSafeInteger(need.currentCreditsAtRevalidation) &&
-      Number.isSafeInteger(need.targetCredits) &&
-      Number.isSafeInteger(need.gap) &&
-      need.currentCreditsAtRevalidation >= 0 &&
-      need.targetCredits >= 0 &&
-      need.gap > 0 &&
-      need.targetCredits === need.currentCreditsAtRevalidation + need.gap &&
-      need.priorityClass === "P6" &&
-      need.cadence.kind === "remaining_turn_capacity" &&
-      Number.isSafeInteger(need.cadence.maximumConversions) &&
-      need.cadence.maximumConversions === need.gap &&
-      need.completion.kind === "target_credits_or_no_clicks" &&
-      need.revalidation.stateVersion === stateVersion &&
-      need.revalidation.status === "turn_liquidity_open" &&
-      need.evidenceCode.trim().length > 0
-    );
-  }
-  if (
-    !Number.isFinite(need.targetCredits) ||
-    !Number.isFinite(need.currentCreditsAtRevalidation) ||
-    !Number.isFinite(need.gap) ||
-    need.targetCredits < 0 ||
-    need.currentCreditsAtRevalidation < 0 ||
-    need.gap <= 0 ||
-    need.revalidation.stateVersion !== stateVersion ||
-    need.routeAssessment.stateVersion !== stateVersion ||
-    need.gap !==
-      Math.max(0, need.targetCredits - need.currentCreditsAtRevalidation)
-  ) {
-    return false;
-  }
-  const routeActionIds = [...new Set(need.routeActionIds)];
-  if (
-    routeActionIds.length !== need.routeActionIds.length ||
-    routeActionIds.length > 1 ||
-    need.routeAssessment.routeId.length === 0 ||
-    need.routeAssessment.evidenceCodes.length === 0 ||
-    !Number.isFinite(need.routeAssessment.projectedGap) ||
-    need.routeAssessment.projectedGap < 0 ||
-    !Number.isFinite(need.routeAssessment.totalClickCost) ||
-    need.routeAssessment.totalClickCost < 0
-  ) {
-    return false;
-  }
-  if (routeActionIds.length > 0) {
-    if (
-      need.routeAssessment.status !== "covered_guaranteed" ||
-      need.routeAssessment.reliability !== "guaranteed" ||
-      need.routeAssessment.horizon !== "same_turn" ||
-      need.routeAssessment.projectedGap !== 0 ||
-      need.routeAssessment.firstStepActionId !== routeActionIds[0]
-    ) {
-      return false;
-    }
-  } else if (need.routeAssessment.firstStepActionId !== undefined) {
-    return false;
-  }
-  if (need.kind === "portfolio_reserve") {
-    return (
-      need.priorityClass === "P6" &&
-      need.revalidation.status === "portfolio_reserve_open"
-    );
-  }
-  if (need.driver.kind === "development") {
-    const milestone = need.developmentFundingMilestone;
-    if (
-      milestone?.kind !== "bounded_development_credit_milestone" ||
-      milestone.targetCredits !== need.targetCredits ||
-      milestone.observedCredits !== need.currentCreditsAtRevalidation ||
-      milestone.remainingGap !== need.gap ||
-      milestone.priorityClass !== "P4" ||
-      milestone.hardness !== "soft" ||
-      milestone.deadline !== "within_three_own_turns" ||
-      milestone.maximumOwnTurns !== 3 ||
-      milestone.releaseCondition !==
-        "parent_invalidated_or_material_value_lost_or_urgent_preemption"
-    ) {
-      return false;
-    }
-  } else if (need.developmentFundingMilestone !== undefined) {
-    return false;
-  }
-  return (
-    need.parentPlanInstanceId.length > 0 &&
-    need.driver.targetId.length > 0 &&
-    need.driver.reasonCode.length > 0 &&
-    need.revalidation.status === "material_parent_open"
-  );
 }
 
 export function runnerExactBasicLiquidCreditCandidate(
@@ -2096,49 +1685,6 @@ function installedAgendaScoreCandidates(
     .map((candidate) => ({
       candidate,
       stepValue: (signal.terminal ? 2_000 : 1_000) + signal.agendaPoints * 100,
-    }));
-}
-
-function resourceLifecycleCandidates(
-  context: PlanSchedulerContext,
-  signal: RunnerResourceLifecycleSignal,
-): PlanMaterialization["candidates"] {
-  const actionIds = new Set(signal.actionIds);
-  return context.actionCandidates
-    .filter(
-      (candidate) =>
-        actionIds.has(candidate.actionId) &&
-        candidate.sourceKind === "card" &&
-        candidate.sourceDefinitionId === signal.definitionId &&
-        candidate.sourceCardInstanceId === signal.sourceCardInstanceId &&
-        candidate.planOwnerBinding?.owner === "runner.resource_lifecycle",
-    )
-    .map((candidate) => ({
-      candidate,
-      stepValue: signal.value,
-    }));
-}
-
-function recurringEconomyCandidates(
-  context: PlanSchedulerContext,
-  signal: RunnerRecurringEconomySignal,
-): PlanMaterialization["candidates"] {
-  const actionIds = new Set(signal.actionIds);
-  return context.actionCandidates
-    .filter(
-      (candidate) =>
-        actionIds.has(candidate.actionId) &&
-        !context.actionDispositions?.some(
-          (disposition) => disposition.actionId === candidate.actionId,
-        ),
-    )
-    .map((candidate) => ({
-      candidate,
-      stepValue:
-        signal.value +
-        (signal.phase === "hold" && candidate.semanticActionType === "draw.card"
-          ? 10
-          : 0),
     }));
 }
 
