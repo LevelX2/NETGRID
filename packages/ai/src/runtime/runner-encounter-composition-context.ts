@@ -93,7 +93,6 @@ export function createRunnerEncounterCompositionContext(
     encounterHasImmediateUnbrokenThreat:
       dependencies.encounterHasImmediateUnbrokenThreat,
     actionCreditCost: dependencies.actionCreditCost,
-    estimatedEncounterBreakCost,
     encounterFuturePathAfterPumpBreakAssessment,
     encounterRemotePayoffAfterBreakAssessment,
     runnerCreditReserveTarget: runnerCreditReserveTargetForInput,

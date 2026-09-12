@@ -54,10 +54,6 @@ export type RunnerPumpViabilityContextDependencies = {
   ) => EncounterRunRemainderEffectAssessment;
   encounterHasImmediateUnbrokenThreat: (input: AiDecisionInput) => boolean;
   actionCreditCost: (action: LegalAction) => number;
-  estimatedEncounterBreakCost: (
-    input: AiDecisionInput,
-    action: LegalAction,
-  ) => number | undefined;
   encounterFuturePathAfterPumpBreakAssessment: (
     input: AiDecisionInput,
     server: VisibleServer,
@@ -249,6 +245,7 @@ export function createRunnerPumpViabilityContext(
           encounteredIce,
           requiredBreakSubroutines,
           (breaker.strength ?? 0) + requiredPumps * pumpAmount,
+          currentQuote.breakSubroutineAdditionalCostPerSubroutine ?? 0,
         )?.cost
       : requiredBreakCount > 0
         ? creditsToBreakEndTheRunSubroutinesWithBreaker(
@@ -257,7 +254,26 @@ export function createRunnerPumpViabilityContext(
             requiredBreakCount,
             (breaker.strength ?? 0) + requiredPumps * pumpAmount,
           )?.cost
-        : dependencies.estimatedEncounterBreakCost(input, action);
+        : minimumRemainingBreakCost();
+
+    function minimumRemainingBreakCost(): number | undefined {
+      // Even an optional mitigation pump must leave enough to break at least
+      // one current subroutine. Printed ability summaries do not contain the
+      // Engine's effective breaker costs and cannot supply this quote.
+      const unbroken = currentEncounterUnbrokenSubroutineIndexes(input);
+      const costs = currentQuote!.subroutines.flatMap((subroutine, index) => {
+        if (!unbroken.has(index)) return [];
+        const quote = creditsToBreakVisibleSubroutinesWithBreaker(
+          breaker!,
+          encounteredIce!,
+          [subroutine],
+          (breaker!.strength ?? 0) + requiredPumps * pumpAmount!,
+          currentQuote!.breakSubroutineAdditionalCostPerSubroutine ?? 0,
+        );
+        return quote ? [quote.cost] : [];
+      });
+      return costs.length > 0 ? Math.min(...costs) : undefined;
+    }
     if (
       estimatedBreakCost === undefined ||
       !spendIcebreakerCredits(pumpPayment.budget, breaker, estimatedBreakCost)

@@ -893,6 +893,12 @@ Break gegen das aktuelle Runbudget einschließlich verfügbarer
 Bad-Publicity-Credits und passend gebundener Breaker-Pools. Nur Bargeld zu
 prüfen würde eine vom Run-Owner bereits finanzierte Route wieder sperren.
 
+Auch ein Pump zur optionalen Schadensminderung muss nach allen nötigen
+Pump-Schritten mindestens einen verbleibenden Break finanzieren. Der
+Run-Window verwendet dazu die effektive Breaker-Quote und die zusätzlichen
+Breakgebühren des aktuellen ICE. Eine gedruckte Fähigkeitszusammenfassung
+oder ein Ersatzpreis ist kein Kostennachweis.
+
 Das Modul besitzt kein unabhängiges langfristiges Ziel. Es gehört logisch zum
 auslösenden Run-/Contest-Plan und kehrt anschließend dorthin zurück.
 

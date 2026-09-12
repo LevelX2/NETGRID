@@ -852,6 +852,9 @@ export function scoreProjectForCandidate(
         sameTurnCloseout,
         deadlinePressure,
         ...(preventsTerminalSteal ? { preventsTerminalSteal: true } : {}),
+        ...(lastViableDeckoutMatchpointWindow
+          ? { lastDrawScoreSurvival: true }
+          : {}),
         ...(protectionNeed ? { protectionNeed } : {}),
         ...(matureRemoteScoreHorizonCertification
           ? {

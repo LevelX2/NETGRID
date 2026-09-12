@@ -1426,6 +1426,10 @@ dafür nicht. So verbraucht eine konkurrierende Rez-Finanzierung nicht die
 für diese letzte Linie zwingend benötigten Klicks. Die folgenden Advance-
 Phasen behalten ihren bestehenden Fristvertrag und werden aus dem neuen
 Zustand erneut bewertet; der Installationsnachweis wird nicht blind vererbt.
+Bestätigt diese Neubewertung erneut ein machbares letztes Matchpointfenster,
+veröffentlicht auch die Advance-Phase `lastDrawScoreSurvival`. Nur den
+Fristtext zu erhalten, würde die erforderliche P2-Priorität gegenüber
+gewöhnlicher Rez-Finanzierung verlieren.
 
 Ungewöhnliche Midgame-Utility-, Action-Engine- oder Boardtransformationskarten
 werden zuerst bestehenden Domainplänen als Route oder Admission-geprüfte
