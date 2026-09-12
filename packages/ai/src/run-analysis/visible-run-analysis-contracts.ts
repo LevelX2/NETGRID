@@ -245,6 +245,8 @@ export type KnownRezzedIcePathAssessment = {
   knownPathBlockedByMissingCoverage: boolean;
   knownPathBlockedByEtr: boolean;
   knownPathBlockedByHardUnbrokenEffect?: boolean;
+  /** All known encounters were checked; only unbroken direct damage blocks this quote. */
+  knownPathBlockedOnlyByDamage?: true;
   knownPathBlockedByUnavoidableTraceRunLock?: boolean;
   preventsFutureBreaking?: boolean;
   hardUnbrokenRunEffects?: HardUnbrokenRunEffectKind[];

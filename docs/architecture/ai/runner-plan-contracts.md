@@ -224,6 +224,10 @@ Es entsteht keine zusätzliche Runwahl oder Ausnahme im Choice-Resolver.
 Die Letztchancen-Ausnahme betrifft ausschließlich den normalen Schadenspuffer.
 Eine zusätzlich bekannte ETR-Sperre ohne passende Coverage oder eine offene
 Finanzierungslücke bleibt auch bei diesem terminalen Contest verbindlich.
+Die Quote zertifiziert `blockedOnlyByDamage` erst nach Prüfung aller bekannten
+Folge-Encounters. Der allgemeine Grund `harmful_unbroken_run_effect` genügt
+nicht: Eine Break-/Jack-out-Sperre ist kein bloßer Handpufferverstoß, und eine
+frühe Schadensquelle darf eine spätere ETR- oder Zahlungssperre nicht verdecken.
 
 Ein Remote mit genau einem bekannten, gerezzten Damage-Ambush konsumiert
 bereits vor dem Runstart dieselbe quellgebundene Abbruchbewertung wie das

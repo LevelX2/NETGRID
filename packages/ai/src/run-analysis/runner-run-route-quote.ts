@@ -34,6 +34,7 @@ export type RunnerRunRouteQuote = {
   conditionalReasons: string[];
   conditionalRiskReasons?: string[];
   noAccessReason?: string;
+  blockedOnlyByDamage?: true;
   preRunPreparation?: KnownRezzedIcePathAssessment["preRunPreparation"];
   evidence: string[];
 };
@@ -130,6 +131,9 @@ export function quoteRunnerRunRoute(params: {
     effects,
     conditionalReasons,
     ...(conditionalRiskReasons.length > 0 ? { conditionalRiskReasons } : {}),
+    ...(params.path.knownPathBlockedOnlyByDamage
+      ? { blockedOnlyByDamage: true as const }
+      : {}),
     ...(reachability === "no_access"
       ? {
           noAccessReason:

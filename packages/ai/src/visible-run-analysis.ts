@@ -418,6 +418,7 @@ function assessKnownRezzedIcePathInternal(
   let creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
   const visibleIceRunHazards: VisibleIceRunHazard[] = [];
   let assessedKnownIceCount = 0;
+  let damageOnlyBlock: KnownRezzedIcePathAssessment | undefined;
   let firstKnownIceBreakable = false;
   let activeRunPathEffects = initialRunPathEffects.slice();
   const conditionalAccessReasons = new Set<string>();
@@ -1035,6 +1036,18 @@ function assessKnownRezzedIcePathInternal(
                 ? "later_ice_unaffordable_after_prior_ice_cost"
                 : "ice_unaffordable",
         });
+        if (
+          sourceSubroutine.type === "do_damage" &&
+          hardEffectKinds.length === 1 &&
+          hardEffectKinds[0] === "damage_or_program_trash" &&
+          effect.preventsFutureBreaking !== true &&
+          effect.preventsJackOut !== true
+        ) {
+          // Damage tolerance belongs to the remote owner. Before it can waive
+          // that floor, finish checking every remaining known access barrier.
+          damageOnlyBlock ??= blockedAssessment;
+          continue;
+        }
         return {
           ...blockedAssessment,
           ...visibleIceRunHazardSummary(
@@ -1084,6 +1097,24 @@ function assessKnownRezzedIcePathInternal(
           sum + Math.max(0, Math.floor(subroutine.amount ?? 0)),
         0,
       );
+  }
+  if (damageOnlyBlock) {
+    return {
+      ...damageOnlyBlock,
+      knownPathBlockedOnlyByDamage: true,
+      visibleBreakCost,
+      futureClicksLost,
+      ...(preRunPreparation ? { preRunPreparation } : {}),
+      conditionalAccessReasons: [...conditionalAccessReasons].sort(),
+      conditionalRiskReasons: [...conditionalRiskReasons].sort(),
+      ...visibleIceRunHazardSummary(
+        visibleIceRunHazards,
+        creditsAfterAvoidingVisibleIceHazards,
+      ),
+      creditsAfterPath: creditBudget.credits,
+      creditBudgetAfterPath: cloneRunnerRunPathCreditBudget(creditBudget),
+      assessedKnownIceCount,
+    };
   }
   return {
     blocked: false,

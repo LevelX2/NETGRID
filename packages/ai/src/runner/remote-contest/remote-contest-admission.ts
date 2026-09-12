@@ -85,7 +85,7 @@ function runnerTerminalRemoteContestIsNonlethalDamageFloorLastChance(
     evaluation.pathPassability === "blocked_by_visible_damage_hand_buffer" &&
     evaluation.routeQuote !== undefined &&
     (evaluation.routeQuote.reachability !== "no_access" ||
-      evaluation.routeQuote.noAccessReason === "harmful_unbroken_run_effect") &&
+      evaluation.routeQuote.blockedOnlyByDamage === true) &&
     evaluation.routeQuote.fundingGap <= 0 &&
     evaluation.evidence.some(
       (entry) =>
