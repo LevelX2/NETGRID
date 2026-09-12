@@ -4,6 +4,21 @@ Dieses Runbook ergänzt den [Evidence-Registry-Prozess](ai-selfplay-evidence-reg
 für gezielte Audits vorhandener Spiele. Es ändert keine KI-Bewertung und
 ersetzt keine Engine- oder Owner-Verträge.
 
+## Aufbewahrung während der laufenden Analyse
+
+Für den laufenden Corp-/Remote-/Zentralen-Audit gilt der ausdrückliche
+Nutzerauftrag vom 2026-09-12: Rohdaten, vollständige Captures, Checkpoints,
+Gegenproben und isolierte Audit-Datenbanken bleiben bis zur ausdrücklich
+bestätigten Beendigung der Analyse erhalten. Ein Teilbericht oder einzelner
+abgeschlossener Auswertungsschritt löst keine Bereinigung aus. Das gilt auch
+für Wiederherstellungen zuvor bereinigter Spiele. Diese Anweisung ersetzt
+für diesen Auftrag den sonstigen Cleanup am Ende eines Analysezyklus.
+
+Eigene Serverprozesse können zwischen Arbeitsschritten beendet werden;
+die Daten bleiben bestehen. Registry, Berichte und Backups werden weiterhin
+gesichert. Speicherort, Code-Stand, Seed, Match-ID und Gegenprobenzweige werden
+in einem gemeinsamen Auditmanifest nachvollziehbar festgehalten.
+
 ## Einheiten und vollständige Abdeckung
 
 - Agenda-Karteninstanz, Agenda-/Server-Planinstanz und tatsächlich installierten
@@ -203,7 +218,57 @@ Steal ist ohne Zugriffsnenner kein nachgewiesener Verteidigungserfolg. Frühere
 Zentralverteidigung gegen ihre Kosten und den verschobenen Remote-Scorebeginn
 prüfen; keine Kenntnis später sichtbar gewordener Hand-/Deckkarten verwenden.
 
+## Ausgeführter Zentralen-/Scoreaudit
+
+Der [Folgeaudit zu 431](../../data/local/central-score-audit-20260912/central-score-audit-431.md)
+rekonstruiert die 16 Nachher-Spiele auf `0b468d1b1`. Alle 5.361 Entscheidungen
+und Enginezustände stimmen mit dem bisherigen Audit überein. 196 tatsächliche
+Runs sind vollständig erfasst, einschließlich sofort beendeter Event-Runs und
+automatischer Archives-Zugriffe. Kartenzugriffe zählen wiederholte Zugriffe
+mit; sie sind keine Anzahl einzigartiger Karten.
+
+| Server | Runs | Kartenzugriffe | Steals / Punkte | Corp-Creditabfluss im Run / davon Rez |
+| --- | ---: | ---: | ---: | ---: |
+| HQ | 82 | 77 | 6 / 17 | 112 / 87 |
+| R&D | 26 | 22 | 2 / 6 | 58 / 58 |
+| Archives | 33 | 308 | 0 / 0 | 0 / 0 |
+| Remotes | 55 | 36 | 17 / 62 | 169 / 169 |
+
+Abflüsse sind negative Änderungen allgemeiner Credits je Aktion, keine
+Bruttozahlungsquote einschließlich aller eingeschränkten Ressourcen.
+Elf HQ-Zugriffsersatz-Runs entziehen der Corp 25 Credits außerhalb Rez;
+zentrale Schwäche kann daher Score-Finanzierung auch ohne Steal beeinträchtigen.
+
+Vier einmalige legale Eingriffe sind mit anschließend selbständig antwortenden
+KIs bis zum Spielende geprüft. Die Kontrollen reproduzieren jeden historischen
+Folgezustand. Diese ausgewählten verschiedenen Eingriffe bilden keine neue
+Stichprobe für eine generische Siegquote.
+
+| Gegenprobe | Kontrolle Corp:Runner | Alternative | Bewertung |
+| --- | ---: | ---: | --- |
+| new-02 D7: Tesseract ungerezzt lassen, acht Credits für Reinforced Wall erhalten | 6:9 | 7:6 | Zusätzlicher Reservepfad unter SP-158 bestätigt; erster Score T17 statt T23 |
+| new-03 D4: erste Endless nach HQ statt R&D | 3:10 | 9:4 | Partiebelegter besserer Gesamtpfad; Coup T13 statt frühem HQ-Verlust, kein allgemeiner HQ-Vorrang |
+| new-04 D10: R&D-Rez zugunsten HQ-Reserve verweigern | 3:9 | 0:10 | Gegenbeleg; kein besserer Gesamtplan |
+| new-08 D9: R&D-Rez zugunsten HQ-Reserve verweigern | 10:6 | 0:8 | Gegenbeleg; früher R&D-Verlust bereits T4 |
+
+Der konkrete Reservefehler liegt im bestehenden Defense-Owner:
+`corpRezEstablishesPersistentDefenseSupport` prüft Hint-Rolle und vorhandene
+ICE; `defense-discovery.ts` erklärt diese Route mit Wert 120 für produktiv.
+Für new-02/D7 ist damit nicht nachgewiesen, dass die unterstützte ICE nach
+dem Upgrade-Rez noch finanzierbar bleibt: zwei Credits Upgrade senken acht
+auf sechs, Reinforced Wall benötigt weiterhin acht. Nächster generischer
+Fix: verbleibende wirksame Gesamtverteidigung nach der Zahlung quotieren,
+mit Kontrasten für weiterhin finanzierte ICE, kostenlose Unterstützung und
+unabhängigen Upgrade-Nutzen. Dieser Audit ändert kein produktives Verhalten.
+SP-040/SP-052 bleiben für ihre breiteren Fragen offen.
+
+Rohdaten, Checkpoints, Gegenproben, isolierte SQLite-Dateien und historische
+Codekopie bleiben unter
+`C:/Projekte/NETGRID-deep-remote-20260912/data/local/central-score-audit-20260912/`
+erhalten. `audit-manifest.json` führt Herkunft, Status und Aufbewahrung.
+
 Abschluss: kompakte Einzelurteile und Probe-Grenzen in die bestehende Registry
 zurückführen, Bericht samt exaktem Inhalt und Status sichern, Round-trip prüfen
-und Backup erzeugen. Erst danach eigene Runtime-Daten bereinigen. Keine rohen
+und Backup erzeugen. Eigene Runtime-Daten für den laufenden Auftrag erst nach
+ausdrücklicher Nutzerfreigabe zum Analyseende bereinigen. Keine rohen
 PlayerViews oder vollständigen versteckten Hände in die kompakte Registry kopieren.
