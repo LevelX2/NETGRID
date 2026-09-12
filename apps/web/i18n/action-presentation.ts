@@ -7,6 +7,13 @@ const EN_ACTION_PRESENTATION_MESSAGES = {
     "The Shell Traders: choose where to install the program",
   choiceInstallInMemory: "Install in program memory (trash programs if needed)",
   choiceInstallOnHost: "Install on {card}",
+  choiceInstallIceAtServer: "Install in {server}",
+  choiceInstallLocationArchives: "Archives",
+  choiceInstallLocationNewRemote: "a new remote",
+  choiceInstallIceAtServerWithX: "Install in {server} (X={amount})",
+  choiceInstallIceAtServerWithEtr:
+    "Install in {server} ({amount} ETR subroutines)",
+  choiceInstallIceAtServerAsSubtype: "Install in {server} ({subtypes})",
   actionMandatoryDraw: "Draw mandatory card",
   actionGainCredit: "Take credit",
   actionDrawCard: "Draw card",
@@ -308,6 +315,13 @@ const DE_ACTION_PRESENTATION_MESSAGES: Record<
   choiceInstallInMemory:
     "Im Programmspeicher installieren (bei Bedarf Programme trashen)",
   choiceInstallOnHost: "Auf {card} installieren",
+  choiceInstallIceAtServer: "In {server} installieren",
+  choiceInstallLocationArchives: "den Archiven",
+  choiceInstallLocationNewRemote: "einem neuen Remote",
+  choiceInstallIceAtServerWithX: "In {server} installieren (X={amount})",
+  choiceInstallIceAtServerWithEtr:
+    "In {server} installieren ({amount} ETR-Subroutinen)",
+  choiceInstallIceAtServerAsSubtype: "In {server} installieren ({subtypes})",
   actionMandatoryDraw: "Pflichtkarte ziehen",
   actionGainCredit: "Credit nehmen",
   actionDrawCard: "Karte ziehen",
@@ -608,6 +622,13 @@ const FR_ACTION_PRESENTATION_MESSAGES: Record<
   choiceInstallInMemory:
     "Installer en mémoire (détruire des programmes si nécessaire)",
   choiceInstallOnHost: "Installer sur {card}",
+  choiceInstallIceAtServer: "Installer dans {server}",
+  choiceInstallLocationArchives: "les Archives",
+  choiceInstallLocationNewRemote: "un nouveau serveur distant",
+  choiceInstallIceAtServerWithX: "Installer dans {server} (X={amount})",
+  choiceInstallIceAtServerWithEtr:
+    "Installer dans {server} ({amount} routines ETR)",
+  choiceInstallIceAtServerAsSubtype: "Installer dans {server} ({subtypes})",
   actionMandatoryDraw: "Piocher la carte obligatoire",
   actionGainCredit: "Prendre un crédit",
   actionDrawCard: "Piocher une carte",

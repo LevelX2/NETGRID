@@ -4549,7 +4549,52 @@ export function choiceOptionPresentationLabel(
       if (cardTitle) return rezVariantLabel(cardTitle);
       break;
     case "security_purge_targets":
-      if (cardTitle) return rezVariantLabel(cardTitle);
+      if (metadata?.targetServerId) {
+        const server =
+          metadata.targetServerId === "archives"
+            ? actionPresentationText(locale, "choiceInstallLocationArchives")
+            : metadata.targetServerId === "new_remote"
+              ? actionPresentationText(locale, "choiceInstallLocationNewRemote")
+              : localizedServerDisplayLabel(
+                  metadata.targetServerId,
+                  normalizedLocale,
+                );
+        const variant = metadata.optionKind ?? "fixed";
+        const amount = Number(variant.split(":")[1]);
+        if (variant.startsWith("x_strength:") && Number.isFinite(amount))
+          return actionPresentationText(
+            locale,
+            "choiceInstallIceAtServerWithX",
+            {
+              server,
+              amount,
+            },
+          );
+        if (
+          variant.startsWith("paid_end_the_run_subroutines:") &&
+          Number.isFinite(amount)
+        )
+          return actionPresentationText(
+            locale,
+            "choiceInstallIceAtServerWithEtr",
+            {
+              server,
+              amount,
+            },
+          );
+        if (variant.startsWith("alternate_subtype:") && metadata.targetTitle)
+          return actionPresentationText(
+            locale,
+            "choiceInstallIceAtServerAsSubtype",
+            {
+              server,
+              subtypes: metadata.targetTitle.replaceAll(",", "/"),
+            },
+          );
+        return actionPresentationText(locale, "choiceInstallIceAtServer", {
+          server,
+        });
+      }
       break;
   }
   switch (option.id) {
