@@ -11,6 +11,7 @@ describe("same-turn score conversion terminal-steal ownership", () => {
         agendaPointsToWin: 7,
         visibleHqAgendaIds: ["agenda-sibling"],
         agendaCardId: "agenda-sibling",
+        hasOtherInstalledAgenda: true,
       }),
     ).toBe(false);
   });
@@ -23,7 +24,44 @@ describe("same-turn score conversion terminal-steal ownership", () => {
         agendaPointsToWin: 7,
         visibleHqAgendaIds: ["agenda-exact"],
         agendaCardId: "agenda-exact",
+        hasOtherInstalledAgenda: false,
       }),
     ).toBe(true);
+  });
+
+  it("allows the complete sole-agenda score to remove terminal HQ exposure in a new remote", () => {
+    const facts = {
+      targetServerId: "new_remote",
+      opponentAgendaPoints: 6,
+      agendaPointsToWin: 7,
+      visibleHqAgendaIds: ["sole-agenda"],
+      agendaCardId: "sole-agenda",
+      hasOtherInstalledAgenda: false,
+    };
+    expect(sameTurnScoreConversionPreventsTerminalSteal(facts)).toBe(true);
+    expect(
+      sameTurnScoreConversionPreventsTerminalSteal({
+        ...facts,
+        opponentAgendaPoints: 5,
+      }),
+    ).toBe(false);
+    expect(
+      sameTurnScoreConversionPreventsTerminalSteal({
+        ...facts,
+        visibleHqAgendaIds: ["sole-agenda", "second"],
+      }),
+    ).toBe(false);
+    expect(
+      sameTurnScoreConversionPreventsTerminalSteal({
+        ...facts,
+        agendaCardId: "different",
+      }),
+    ).toBe(false);
+    expect(
+      sameTurnScoreConversionPreventsTerminalSteal({
+        ...facts,
+        hasOtherInstalledAgenda: true,
+      }),
+    ).toBe(false);
   });
 });

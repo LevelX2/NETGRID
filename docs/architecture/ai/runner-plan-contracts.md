@@ -395,6 +395,13 @@ diesen nachgewiesenen Installationspfad nicht erneut verwerfen.
 
 ## 5. `runner.develop_board_and_hand`
 
+Einmalige Suchereignisse werden auch anhand ihres aktuellen kanonischen
+`effectKind` für Stack- oder Heap-Suche erkannt. Ohne exakt gebundenen
+Zielplan erhält die Aktion die bestehende ausdrückliche Zurückstellung;
+produktive Coverage- und Entwicklungs-Recovery behalten ihre Zielbindung.
+Zusätzliche Kartenhinweise sind für diese bereits bekannte Aktionssemantik
+keine Voraussetzung.
+
 Der Owner ist unter `packages/ai/src/runner/hand-development/` gebündelt:
 `hand-development-evaluation.ts` und die persistente Installationsbewertung
 liefern den Kartenwert; `development-discovery.ts` erzeugt zugelassene

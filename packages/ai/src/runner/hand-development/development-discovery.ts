@@ -279,15 +279,6 @@ export function buildRunnerCardDevelopmentSignals({
       ) {
         return [];
       }
-      const unboundOneShotSearch =
-        executableNow &&
-        evaluation.developmentRole === "draw_or_search_engine" &&
-        candidate?.actionType === "play_event" &&
-        runnerCandidateIsOneShotSearch(candidate) &&
-        !coverageOwnedActionIds.has(candidate.actionId);
-      if (unboundOneShotSearch) {
-        return [];
-      }
       const ownedByActiveEconomyPlan =
         candidate !== undefined &&
         delegatedFundingActionIds.has(candidate.actionId);
@@ -343,6 +334,16 @@ export function buildRunnerCardDevelopmentSignals({
           ? runnerRecoverySearchCommitment(input, candidate, discardKeepScore)
           : undefined;
       if (recoverySearchAction && !recoverySearchCommitment) {
+        return [];
+      }
+      const unboundOneShotSearch =
+        executableNow &&
+        evaluation.developmentRole === "draw_or_search_engine" &&
+        candidate?.actionType === "play_event" &&
+        runnerCandidateIsOneShotSearch(candidate) &&
+        !recoverySearchCommitment &&
+        !coverageOwnedActionIds.has(candidate.actionId);
+      if (unboundOneShotSearch) {
         return [];
       }
       if (

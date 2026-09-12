@@ -160,6 +160,15 @@ Ein nach sichtbarem Zustand erzwungener Same-Turn-Score ist ein Commitment.
 Einzelne Economy- oder
 ICE-Aktionen dürfen ihn nicht aufbrechen.
 
+Eine vollständig Engine-gequotete Same-Turn-Konversion der einzigen
+HQ-Agenda darf am gegnerischen Matchpoint auch in einer neuen Remote den
+Terminal-Steal-Verhinderungsnachweis tragen, wenn keine weitere Agenda
+installiert ist. Dann entfernt der vollständige Score die Exposition vor
+dem Runnerfenster. Bei einer installierten Geschwisteragenda bleibt die
+neue Remote von diesem Claim ausgeschlossen, damit sie deren gebundene
+Fortsetzung nicht unterbricht. Ein bloßer Installationsschritt ohne
+vollständigen Scorepfad begründet diesen Nachweis nicht.
+
 Vor einem nichtterminalen Same-Turn-Score berücksichtigt der Score-Owner bedingte
 Creditwirkungen aus dem kanonischen strukturierten Scoreprofil. Ist die Agenda
 bereits kostenlos scorebar und ihre Bonusschwelle mit den verbleibenden,

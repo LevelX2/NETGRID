@@ -1169,6 +1169,13 @@ export function sameTurnScoreConversionProjectForCandidate(
       agendaPointsToWin: input.playerView.agendaPointsToWin,
       visibleHqAgendaIds: visibleHqAgendas.map((card) => card.instanceId),
       agendaCardId: path.agendaCardId,
+      hasOtherInstalledAgenda: input.playerView.servers.some((server) =>
+        server.root.some(
+          (card) =>
+            card.instanceId !== path.agendaCardId &&
+            visibleCardIsAgenda(input, card),
+        ),
+      ),
     });
     matchingProjects.push({
       projectId: `agenda:${path.agendaCardId}:${path.targetServerId}`,
@@ -1256,12 +1263,15 @@ export function sameTurnScoreConversionPreventsTerminalSteal(params: {
   agendaPointsToWin: number;
   visibleHqAgendaIds: readonly string[];
   agendaCardId: string;
+  hasOtherInstalledAgenda: boolean;
 }): boolean {
   return (
-    // A newly created remote has no existing protection. Moving the only HQ
-    // agenda there relocates an immediate steal instead of preventing it, so
-    // this route must not interrupt an already committed score root as P2.
-    params.targetServerId !== "new_remote" &&
+    // This caller certifies a complete same-turn score, not an isolated install.
+    // With no installed sibling it removes the only exposed agenda even in a
+    // new remote. An installed sibling may consume the shared continuation;
+    // do not preempt that score with another unprotected agenda.
+    (params.targetServerId !== "new_remote" ||
+      !params.hasOtherInstalledAgenda) &&
     params.opponentAgendaPoints >= params.agendaPointsToWin - 1 &&
     params.visibleHqAgendaIds.length === 1 &&
     params.visibleHqAgendaIds[0] === params.agendaCardId

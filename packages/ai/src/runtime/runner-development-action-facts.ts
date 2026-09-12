@@ -55,6 +55,8 @@ export function runnerCandidateIsOneShotSearch(
         (typeof effect.target === "string" && effect.target.includes("search")),
     ) === true;
   return (
+    candidate.effectKind === "search_trash_to_grip" ||
+    candidate.effectKind === "search_stack_to_grip" ||
     effectTargets.has("card_search") ||
     effectTargets.has("setup.card_search") ||
     effectTargets.has("setup.program_search") ||
