@@ -1059,7 +1059,11 @@ function specializedVariants(
               linePlanInstanceId: undefined,
               projectId: route.instance.dedupeKey,
             }) &&
-            (slice.selectedFamily === undefined ||
+            // An admitted line keeps its exact risk quote even when another
+            // family is preferred; otherwise it returns as a generic head.
+            // Only Engine-authorized opening randomization commits a family.
+            (slice.randomizationEligibility === undefined ||
+              slice.selectedFamily === undefined ||
               line.family === slice.selectedFamily),
         )
         .map((line) => agendaVariant(line, route)) ?? []

@@ -113,6 +113,23 @@ Eine HQ- und eine R&D-Instanz dürfen gleichzeitig Kandidaten sein. Nur eine
 ist Executor. Ein Zielwechsel verlangt Planarbitration, nicht bloß eine andere
 Run-Action.
 
+Ein verpflichtender Ersatz des Zugriffs durch eigenen Creditverbrauch gegen
+Corp-Credits erhält ausschließlich seinen tatsächlichen Denial-Payoff. Die
+Runprojektion bindet diese geschlossene Funktion an die gedruckte Make-Run-
+Capability und ihre generierten CardSpec-Effekte. Die sichtbare Obergrenze
+des Entzugs berücksichtigt beide Creditpools nach bekannten Pfadkosten;
+weitere Corp-Rezzes können sie vermindern. Bei null Entzug besteht kein
+Zugriffswert. Verdeckte HQ-Karten, Multiaccess und ein möglicher Agenda-Steal
+begründen für diese Ersatzroute keinen Matchpoint-Bonus. Die normale HQ-
+Action behält ihre eigenständige Bewertung und denselben Central-Owner.
+
+Bei festem Creditentzug begrenzt zusätzlich die kanonische Effektmenge den
+Payoff; eigene Credits werden dafür nicht ausgegeben. Verlangt die gebundene
+Ersatzwirkung ein nichtleeres Corp-Konto, bleibt bei bereits leerem Konto der
+normale Zugriff erhalten. Ein unbedingter Entzug ersetzt ihn auch dann. Beide
+Fälle teilen dieselbe Central-Projektion; fehlende oder widersprüchliche
+Effektmengen scheitern sichtbar, statt einen Zugriffswert zu erfinden.
+
 Ein Zentralzugriff am Runner-Matchpoint darf ohne aktuelle Remote-Scorebedrohung
 das vorhandene Runbudget verbrauchen. Die allgemeine gewünschte Auffüllreserve
 ist dann keine zusätzliche Restguthabenpflicht; der Sicherheitsfloor, reale

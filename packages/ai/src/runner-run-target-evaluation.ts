@@ -242,6 +242,7 @@ function evaluateRunnerRunTarget(
       projection,
       accessServerId,
       accessTargetKind,
+      creditsAfterRun,
     ) ??
     payoffForTarget(params, accessServerId, accessTargetKind, economyPosture);
   const runActionGripCost = runActionGripCardCost(params.input, projection);
@@ -317,6 +318,7 @@ function evaluateRunnerRunTarget(
   const combinedRunPayoff = combineRunPayoffs(
     installedRunPayoff,
     runActionPayoff,
+    !replacesAccessWithCreditDenial(params.input, projection),
   );
   const scoreThreat =
     accessTargetKind === "remote" && remoteHasScoreThreat(accessServer);
@@ -449,6 +451,7 @@ function evaluateRunnerRunTarget(
     path.visibleTraceTagHazardUnavoidable === true;
   const futureClicksLost = path.futureClicksLost ?? 0;
   const runnerMatchpointCentralAccess =
+    !replacesAccessWithCreditDenial(params.input, projection) &&
     (accessTargetKind === "rd" || accessTargetKind === "hq") &&
     payoff.knownAccessState !== "known_no_current_payoff" &&
     params.input.playerView.own.agendaPoints >=
@@ -968,12 +971,14 @@ function projectionSignalTokens(signal: string): string[] {
 function combineRunPayoffs(
   installedRunPayoff: RunnerInstalledRunPayoff,
   runActionPayoff: RunnerInstalledRunPayoff,
+  normalAccessAvailable: boolean,
 ): RunnerInstalledRunPayoff {
   return finalizeRunPayoff(
     {
-      immediateAccessValue:
-        installedRunPayoff.immediateAccessValue +
-        runActionPayoff.immediateAccessValue,
+      immediateAccessValue: normalAccessAvailable
+        ? installedRunPayoff.immediateAccessValue +
+          runActionPayoff.immediateAccessValue
+        : 0,
       futureSetupValue:
         installedRunPayoff.futureSetupValue + runActionPayoff.futureSetupValue,
       purgeTaxValue:
@@ -982,8 +987,9 @@ function combineRunPayoffs(
         installedRunPayoff.economyValue + runActionPayoff.economyValue,
       riskPenalty: installedRunPayoff.riskPenalty + runActionPayoff.riskPenalty,
     },
-    installedRunPayoff.multiaccessAvailable ||
-      runActionPayoff.multiaccessAvailable,
+    normalAccessAvailable &&
+      (installedRunPayoff.multiaccessAvailable ||
+        runActionPayoff.multiaccessAvailable),
     uniqueStrings([
       ...installedRunPayoff.evidence,
       ...runActionPayoff.evidence,
@@ -1180,12 +1186,62 @@ function payoffForTarget(
   };
 }
 
+function replacesAccessWithCreditDenial(
+  input: AiDecisionInput,
+  projection: RunActionProjection,
+): boolean {
+  return (
+    projection.accessReplacement === "runner_spend_corp_lose_credits" ||
+    (projection.accessReplacement === "corp_lose_credits" &&
+      (!projection.accessReplacementRequiresCorpCredits ||
+        input.playerView.opponent.credits > 0))
+  );
+}
+
 function accessReplacementPayoffForTarget(
   params: EvaluateRunnerRunTargetsParams,
   projection: RunActionProjection,
   targetServerId: string,
   targetKind: RunnerRunTargetKind,
+  creditsAfterRun: number,
 ): ReturnType<typeof payoffForTarget> | undefined {
+  if (replacesAccessWithCreditDenial(params.input, projection)) {
+    // This run never accesses HQ. Its visible upper-bound payload must fit
+    // both pools after known path costs; future Corp rez can only reduce it.
+    const ownSpend =
+      projection.accessReplacement === "runner_spend_corp_lose_credits";
+    if (!ownSpend && projection.accessReplacementCreditLoss === undefined) {
+      throw new Error("run_access_replacement_credit_loss_missing");
+    }
+    const denial = Math.max(
+      0,
+      Math.min(
+        params.input.playerView.opponent.credits,
+        ownSpend ? creditsAfterRun : projection.accessReplacementCreditLoss!,
+      ),
+    );
+    return {
+      accessPayoff: denial > 0 ? "access_bonus" : "known_low_value",
+      accessFacts: {
+        knownTargetDefinitionIds: [],
+        trashBudget: "not_applicable",
+      },
+      knownAccessState: denial > 0 ? "known_payoff" : "known_no_current_payoff",
+      accessNoveltyRatio: 0,
+      // Use the same bounded per-credit scale as successful-run economy,
+      // rather than assigning every positive payload a full access bonus.
+      scoreAdjustment:
+        denial > 0
+          ? Math.min(INSTALLED_RUN_PAYOFF_SCORE_CAP, denial * 8) -
+            scoreForPayoff("access_bonus")
+          : -640,
+      evidence: [
+        `central_access_replacement:${projection.accessReplacement}`,
+        `central_access_replacement_visible_denial_upper_bound:${denial}`,
+        "central_access_replacement_normal_access:false",
+      ],
+    };
+  }
   if (
     projection.accessReplacement !== "private_look_top_rd" ||
     targetServerId !== "rd" ||

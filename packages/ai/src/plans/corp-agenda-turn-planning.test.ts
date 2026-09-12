@@ -18,11 +18,28 @@ import type { KnownCorpFundedIceInstallRouteProjection } from "../runtime/corp-f
 describe("Corp agenda turn-planning vertical slice", () => {
   it("carries exact emergency access risk into competing turn lines", () => {
     const input = decisionInput();
-    const risk = (access: number, creditsLeft: number, unknown = false) => {
+    const risk = (
+      access: number,
+      creditsLeft: number,
+      unknown = false,
+      terminal = false,
+      sameTurnCloseout = false,
+    ) => {
       const signal = project(2);
       delete signal.openingRush;
       signal.feasible = true;
       signal.deadlinePressure = true;
+      signal.sameTurnCloseout = sameTurnCloseout;
+      signal.conversion = {
+        remainingAdvancementClicks: 5,
+        remainingScoreCredits: 5,
+        existingRemoteIceCount: 3,
+        existingRemoteRezzedIceCount: 3,
+        residentParent: false,
+        runnerStealPoints: terminal ? 3 : 2,
+        runnerStealIsMatchpoint: terminal,
+        realizedStrategySupportCount: 0,
+      };
       const baseline = {
         knowledge: unknown ? "unknown" : "known",
         protection: {
@@ -40,6 +57,10 @@ describe("Corp agenda turn-planning vertical slice", () => {
     expect(risk(0, 0)).toBeLessThan(risk(1, 0));
     expect(risk(1, 2)).toBeLessThan(risk(1, 10));
     expect(risk(0, 0, true)).toBeGreaterThanOrEqual(risk(1, 0));
+    expect(risk(1, 2, false, true)).toBeGreaterThan(risk(1, 2));
+    expect(risk(0, 0, true, true)).toBeGreaterThan(risk(0, 0, true));
+    expect(risk(0, 0, false, true)).toBe(0);
+    expect(risk(1, 2, false, true, true)).toBe(0);
   });
 
   it("builds pure rush, combined rush, and safe setup without duplicate payoff ownership", () => {
