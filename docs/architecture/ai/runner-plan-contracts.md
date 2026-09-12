@@ -850,6 +850,22 @@ Verschlechterung gegenüber dem akzeptierten Startvertrag begründet eine
 Jack-out-Präferenz; ein unveränderter Grenzfall erzeugt weder einen neuen Plan
 noch eine zweite Entscheidungsautorität.
 
+Die gemeinsame bekannte Pfadquote enthält auch die kanonischen Passgebühren
+bekannter gerezzter Root-Karten. Jede verbleibende Passage zählt, einschließlich
+unbekannter und für die Encounter-Projektion umgangener ICE. Gebühren werden
+nach dem jeweiligen Encounter aus allgemeinen beziehungsweise Run-Credits
+bezahlt; Breaker-Pools finanzieren sie nicht. Die Reihenfolge bleibt gegenüber
+Creditverlusten erhalten. Rekursive Suffixvergleiche übernehmen die noch
+unbezahlte Passage ihres Quell-Encounter genau einmal. Im aktuellen
+Fort-Pass-Fenster zieht das Budget die bereits fällige Gebühr ab; die
+Restpfadquote berechnet anschließend nur die zukünftigen Passagen.
+
+Ein exakt auf null gequoteter direkter Schaden erzeugt auch in der
+langfristigen Pfadprojektion keinen zusätzlichen Breakbedarf. Nur sein
+Schadensmarker entfällt; unabhängige Run-Effekte und vollständige
+Break-Verpflichtungen bleiben wirksam. Positive oder unbekannte Schadensmengen
+behalten ihre bisherige Bewertung.
+
 **Klasse:** `urgent_response` oder gebundener Kindplan
 **Rolle:** Urgent Response
 **Status:** registrierter produktiver Owner; Fähigkeitsgrenzen siehe Einstieg.

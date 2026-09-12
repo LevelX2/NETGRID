@@ -205,6 +205,7 @@ function evaluateRunnerRunTarget(
       visibleRemoteServerCount: params.input.playerView.servers.filter(
         (candidate) => candidate.id.startsWith("remote_"),
       ).length,
+      additionalPassedIceCount: bypassedFirstIce ? 1 : 0,
       visibleCorpCredits: params.input.playerView.opponent.credits,
       netOrCoreDamagePreventionRemaining: Math.max(
         0,

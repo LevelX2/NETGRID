@@ -6,6 +6,7 @@ import type {
   VisibleEffectiveSubroutine,
   VisibleRunnerTraceSupportQuote,
 } from "@netgrid/shared";
+import { isVisibleDirectDamageSubroutine } from "./visible-subroutine-semantics";
 import type {
   BreakAssessment,
   HardUnbrokenRunEffectKind,
@@ -41,7 +42,15 @@ export function pathProjectionEffectsForQuote(
 ): RunPathProjection[] {
   const effects: RunPathProjection[] = [];
   for (const subroutine of quote?.subroutines ?? []) {
-    const effect = subroutine.unbrokenRunEffect;
+    const quotedEffect = subroutine.unbrokenRunEffect;
+    // A relative damage quote can resolve to zero. Preserve independent
+    // effects, while removing only its now harmless damage marker.
+    const effect =
+      quotedEffect &&
+      isVisibleDirectDamageSubroutine(subroutine) &&
+      subroutine.amount === 0
+        ? { ...quotedEffect, causesDamageOrProgramTrash: false }
+        : quotedEffect;
     if (effect && runPathProjectionEffectCanMatter(effect)) {
       effects.push({ effect, sourceSubroutine: subroutine });
     }

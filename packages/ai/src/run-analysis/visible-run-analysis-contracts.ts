@@ -34,6 +34,8 @@ export type RunPathProjection = {
 };
 
 export type VisibleDeflectorContext = {
+  /** ICE omitted from encounter costs that the route still passes (bypass). */
+  additionalPassedIceCount?: number;
   visibleRemoteServerCount?: number;
   visibleCorpCredits?: number;
   targetServerId?: string;

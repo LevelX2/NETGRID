@@ -1,5 +1,6 @@
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import {
+  isVisibleDirectDamageSubroutine as isDirectDamageSubroutine,
   isVisibleHardEndRunSubroutine,
   isVisiblePayEndRunSubroutine,
 } from "../run-analysis/visible-subroutine-semantics";
@@ -84,21 +85,6 @@ export function encounterContinueAcceptsOnlyNonlethalDamageThreats(
     immediateThreats.every((subroutine) =>
       isAcceptableNonlethalDamageSubroutine(input, subroutine),
     )
-  );
-}
-
-function isDirectDamageSubroutine(
-  subroutine: VisibleEncounterSubroutine,
-): boolean {
-  const type = subroutine.type.toLowerCase();
-  const damageTypeValue = (subroutine as { damageType?: unknown }).damageType;
-  return (
-    type === "brain_damage" ||
-    type === "core_damage" ||
-    type === "do_brain_damage" ||
-    type === "do_core_damage" ||
-    type === "do_damage" ||
-    typeof damageTypeValue === "string"
   );
 }
 

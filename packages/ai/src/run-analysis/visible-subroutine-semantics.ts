@@ -1,5 +1,20 @@
 import type { VisibleEffectiveSubroutine } from "@netgrid/shared";
 
+export function isVisibleDirectDamageSubroutine(
+  subroutine: VisibleEffectiveSubroutine,
+): boolean {
+  const type = subroutine.type.toLowerCase();
+  const damageTypeValue = (subroutine as { damageType?: unknown }).damageType;
+  return (
+    type === "brain_damage" ||
+    type === "core_damage" ||
+    type === "do_brain_damage" ||
+    type === "do_core_damage" ||
+    type === "do_damage" ||
+    typeof damageTypeValue === "string"
+  );
+}
+
 export function isVisibleHardEndRunSubroutine(
   subroutine: VisibleEffectiveSubroutine,
 ): boolean {

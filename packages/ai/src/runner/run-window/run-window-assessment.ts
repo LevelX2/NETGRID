@@ -224,13 +224,10 @@ export function runnerRunRiskContractReassessment(
   const unknownIcePositions = remainingIce.flatMap((card, index) =>
     card.known === false && card.rezzed !== true ? [index] : [],
   );
-  const knownRezzedRemainingIce = remainingIce.filter(
-    (card) => card.known !== false && card.rezzed === true,
-  );
   const continuationBudget = runnerRunWindowCreditBudget(input);
   const generalCredits = continuationBudget.credits;
   const knownPath = assessKnownRezzedIcePath(
-    knownRezzedRemainingIce,
+    remainingIce,
     input.playerView.own.rig ?? [],
     continuationBudget,
     server.root,

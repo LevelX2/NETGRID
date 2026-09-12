@@ -184,6 +184,7 @@ export function assessKnownRezzedIcePath(
             allowBreakingRunPathEffects: true,
             bartmossOutcome,
             deferConditionalFullBreak,
+            initialPassCount: context.additionalPassedIceCount ?? 0,
             ...(variant.preRunPreparation
               ? { preRunPreparation: variant.preRunPreparation }
               : {}),
@@ -393,6 +394,8 @@ function assessKnownRezzedIcePathInternal(
     bartmossOutcome?: "retained" | "trashed";
     deferConditionalFullBreak?: boolean;
     preRunPreparation?: KnownRezzedIcePathAssessment["preRunPreparation"];
+    /** Passages before this suffix, whose encounter cost was handled by its caller. */
+    initialPassCount?: number;
   },
   initialBreakerStrengths?: Map<string, number>,
   deflectorContext: VisibleDeflectorContext = {},
@@ -414,6 +417,16 @@ function assessKnownRezzedIcePathInternal(
   }
   if (preRunPreparation) creditBudget.credits -= preRunPreparation.credits;
   let visibleBreakCost = preRunPreparation?.credits ?? 0;
+  const passFee = rootCards.reduce((sum, card) => {
+    if (!card.known || card.rezzed !== true || !card.definitionId) return sum;
+    const effect = cardImplementationForDefinitionId(
+      card.definitionId,
+    )?.fortRunWindows?.find(
+      (window) =>
+        window.kind === "runner_pay_or_end_run_after_passing_ice_on_this_fort",
+    );
+    return sum + (effect ? Math.max(0, Math.floor(effect.amount)) : 0);
+  }, 0);
   let futureClicksLost = 0;
   let creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
   const visibleIceRunHazards: VisibleIceRunHazard[] = [];
@@ -454,9 +467,44 @@ function assessKnownRezzedIcePathInternal(
       carriedBreakerStrengths.set(instanceId, strength);
     }
   }
+  const payPassFees = (count: number, iceIndex: number) => {
+    const cost = passFee * count;
+    if (cost <= 0) return undefined;
+    const payment = projectGeneralCreditPayment(creditBudget, cost);
+    if (!payment.affordable) {
+      return blockedPathAssessment(
+        visibleBreakCost + cost,
+        payment.creditsAfterPath,
+        iceIndex,
+        iceCards[iceIndex]?.definitionId,
+        iceCards[iceIndex]?.subtypes,
+        visibleBreakCost,
+        firstKnownIceBreakable,
+        assessedKnownIceCount,
+        "later_ice_unaffordable_after_prior_ice_cost",
+      );
+    }
+    spendGeneralCredits(creditBudget, cost);
+    visibleBreakCost += cost;
+    creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
+    return undefined;
+  };
+  const initialPassFailure = payPassFees(
+    Math.max(0, Math.floor(options.initialPassCount ?? 0)),
+    iceCards.length,
+  );
+  if (initialPassFailure) return initialPassFailure;
+  let pendingPassIndex: number | undefined;
   for (const { ice, iceIndex } of iceCards
     .map((ice, iceIndex) => ({ ice, iceIndex }))
     .reverse()) {
+    // Charge after the previous encounter, including skipped unknown ICE.
+    // Reserving the money up front would incorrectly shield it from credit loss.
+    if (pendingPassIndex !== undefined) {
+      const failure = payPassFees(1, pendingPassIndex);
+      if (failure) return failure;
+    }
+    pendingPassIndex = iceIndex;
     // Encounter pumps serve every subroutine here, but expire before the next ICE.
     const breakerStrengths = new Map(carriedBreakerStrengths);
     const iceDefinitionId = ice.definitionId;
@@ -1098,6 +1146,10 @@ function assessKnownRezzedIcePathInternal(
         0,
       );
   }
+  if (pendingPassIndex !== undefined) {
+    const failure = payPassFees(1, pendingPassIndex);
+    if (failure) return failure;
+  }
   if (damageOnlyBlock) {
     return {
       ...damageOnlyBlock,
@@ -1386,7 +1438,7 @@ function runPathEffectBreakAssessment(params: {
     params.rootCards,
     params.visibleCorpBidCapacity,
     params.activeRunPathEffects,
-    { allowBreakingRunPathEffects: false },
+    { allowBreakingRunPathEffects: false, initialPassCount: 1 },
     new Map(params.carriedBreakerStrengths),
     params.deflectorContext,
   );
@@ -1397,7 +1449,7 @@ function runPathEffectBreakAssessment(params: {
     params.rootCards,
     params.visibleCorpBidCapacity,
     [...params.activeRunPathEffects, params.effect],
-    { allowBreakingRunPathEffects: false },
+    { allowBreakingRunPathEffects: false, initialPassCount: 1 },
     new Map(params.carriedBreakerStrengths),
     params.deflectorContext,
   );
@@ -1417,7 +1469,7 @@ function runPathEffectBreakAssessment(params: {
     params.rootCards,
     params.visibleCorpBidCapacity,
     params.activeRunPathEffects,
-    { allowBreakingRunPathEffects: false },
+    { allowBreakingRunPathEffects: false, initialPassCount: 1 },
     breakerStrengthsAfterBreak,
     params.deflectorContext,
   );
