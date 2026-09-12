@@ -8,6 +8,7 @@ import { type PlanSchedulerResult } from "../../plans/plan-scheduler";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
+import { selectResidentPlanPortfolioExecutor } from "../../plans/resident-plan-portfolio";
 import type { RunnerProgramInstallTrashAssessment } from "../../runtime/runner-program-install-trash-policy";
 export function preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
   input: AiDecisionInput,
@@ -233,6 +234,32 @@ export function bindSelectedCoverageSearchAction(
     selectedSearchActionId: selectedActionId,
     selectedSearchStateVersion: selectedStateVersion,
   };
+  if (continuation) {
+    // Payment support may temporarily execute under Economy. The exact
+    // original search must regain its resident executor before its choice
+    // chain reads the prebound target and memory-sacrifice contract.
+    const resumed = selectResidentPlanPortfolioExecutor({
+      portfolio,
+      selectedExecutorInstanceId: executor.instanceId,
+      timingPoint: input.playerView.timingPoint,
+      reason: "executor_selected",
+    });
+    if (resumed.rootForegroundInstanceId !== continuation.rootPlanInstanceId) {
+      throw new PlanResolutionFailure("invalid_support_graph", {
+        side: input.side,
+        stateVersion: input.playerView.stateVersion,
+        timingPoint: input.playerView.timingPoint,
+        legalActionTypes: input.legalActions.map((action) => action.type),
+        unresolvedActionIds: [selectedActionId],
+        owner: "support_graph",
+        planInstanceId: executor.instanceId,
+        stepId: selectedStepId,
+        removalCondition:
+          "Resume the exact preserved coverage search only under its original root and intact support ancestry.",
+      });
+    }
+    result.portfolio = resumed;
+  }
 }
 
 export function bindSelectedRunnerCoverageSearchChoiceContinuation(

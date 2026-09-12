@@ -255,6 +255,13 @@ unverändert. Für `install_answer` gelten entsprechend die Install-IDs,
 für `search_answer` zusätzlich die konkrete Suchziel- und Versionsbindung.
 Fehlende oder abweichende Bindungen scheitern mit `invalid_support_graph`;
 die Zahlungsunterstützung erzeugt weder einen neuen Bedarf noch ein Suchziel.
+Nach der exakt gebundenen Kostenfortsetzung einer Suche erhält der bisherige
+Coverage-Executor auch seine aktive Portfolio-Zuordnung zurück. Dafür wird
+die vorhandene Executor-Auswahl mit dem erhaltenen Plan verwendet; ihr Root
+muss dem ursprünglichen Zahlungs-Origin entsprechen. Ein zwischenzeitlicher
+Economy-Executor darf nicht die folgenden Quellen-, Ziel- oder Speicher-Choices
+besitzen. Das vorab gebundene Suchziel und seine akzeptablen Speicheropfer
+bleiben erhalten; abweichende Root- oder Suchversionsbindungen scheitern.
 
 `coverage-services.ts` benennt sieben Dienste: aktuelles Remote-Material,
 bekannten verzögerten ICE-Abgang, direkte Run-Verwertbarkeit, Run-Funding,
