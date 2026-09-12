@@ -160,6 +160,24 @@ Ein nach sichtbarem Zustand erzwungener Same-Turn-Score ist ein Commitment.
 Einzelne Economy- oder
 ICE-Aktionen dürfen ihn nicht aufbrechen.
 
+Der Score-Owner darf eine aktuelle Archives→HQ-Aktion als
+`recover_score_support` voranstellen, wenn die Engine für genau diese Action
+und StateVersion eine eigene bekannte Archives-Operation mit unbedingter
+Advancement-Verteilung und vollständigen Klick-/Creditkosten quotiert.
+Die gesamte Rückholung→Installation→Beschleunigung→Score-Folge muss mit den
+vorhandenen Ressourcen im selben Zug das Spiel gewinnen. Ein fehlendes oder
+veraltetes Quote eröffnet diese Route nicht; der DTO-Eingang weist beschädigte
+Bindings sichtbar zurück. Nichtterminale Rückholprojekte sowie kombinierte
+Kapazitäts- und Finanzierungsvorbereitungen sind damit nicht nachgewiesen.
+
+Der Score-Parent bindet vor dem Ausspielen die konkrete Archives-Karte. Der
+bestehende Choice-Pfad vervollständigt ausschließlich dieses Ziel bei identischem
+Root, Executor, Quellaktion und unmittelbar folgender Engine-StateVersion mit
+exakt demselben Optionssatz. Er darf weder die Karte neu bewerten noch auf eine
+andere Rückholung ausweichen. Die Regression aus Paarung 422, Runde 12, Spiel 16,
+D327 belegt diese terminale Vorbereitung; das getrennte Handmanagement-Verbot
+einer nutzlosen Rückholschleife zum angeblichen HQ-Abbau bleibt erhalten.
+
 Eine vollständig Engine-gequotete Same-Turn-Konversion der einzigen
 HQ-Agenda darf am gegnerischen Matchpoint auch in einer neuen Remote den
 Terminal-Steal-Verhinderungsnachweis tragen, wenn keine weitere Agenda

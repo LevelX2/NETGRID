@@ -20,6 +20,8 @@ import {
   type DiscardChoiceKeepScore,
 } from "../../runtime/discard-choice-selection";
 import { type CorpHandManagementSignal } from "./hand-management-types";
+import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
+import { isExactScoreRecoveryChoiceOwner } from "../score/score-recovery-choice-owner";
 
 export function bindSelectedCorpArchivesToHqChoiceContinuation(
   input: AiDecisionInput,
@@ -45,9 +47,26 @@ export function bindSelectedCorpArchivesToHqChoiceContinuation(
     (instance) => instance.instanceId === executorInstanceId,
   );
   const moduleState = executor?.moduleState as
-    | { kind?: unknown; signal?: CorpPlanDomain["handManagement"][number] }
+    | {
+        kind?: unknown;
+        signal?:
+          | CorpPlanDomain["handManagement"][number]
+          | CorpScoreProjectSignal;
+      }
     | undefined;
   const signal = moduleState?.signal;
+  const scoreSignal =
+    moduleState?.kind === "score"
+      ? (signal as CorpScoreProjectSignal)
+      : undefined;
+  const scoreBinding = scoreSignal?.recoveryChoiceBinding;
+  const exactScoreOwner =
+    executor?.moduleId === "corp.score_agenda" &&
+    scoreSignal?.phase === "recover_score_support" &&
+    scoreSignal.sameTurnCloseout === true &&
+    scoreSignal.terminalScore === true &&
+    scoreBinding?.stateVersion === input.playerView.stateVersion &&
+    scoreBinding.sourceCardId === selectedCandidate?.sourceCardInstanceId;
   const source = selectedCandidate?.sourceCardInstanceId
     ? input.playerView.own.gripOrHq.find(
         (card) => card.instanceId === selectedCandidate.sourceCardInstanceId,
@@ -55,11 +74,12 @@ export function bindSelectedCorpArchivesToHqChoiceContinuation(
     : undefined;
   const sourceDefinitionId = source?.definitionId;
   const exactOwningRoute =
-    executor?.moduleId === "corp.hand_and_agenda_management" &&
+    (exactScoreOwner ||
+      (executor?.moduleId === "corp.hand_and_agenda_management" &&
+        moduleState?.kind === "hand" &&
+        signal?.phase === "resolve_hq_overflow")) &&
     executor.executionState === "executor" &&
-    moduleState?.kind === "hand" &&
-    signal?.phase === "resolve_hq_overflow" &&
-    signal.actionIds?.includes(result.route.head.actionId) === true &&
+    signal?.actionIds?.includes(result.route.head.actionId) === true &&
     rootPlanInstanceId !== undefined &&
     executorInstanceId !== undefined &&
     selectedAction?.side === "corp" &&
@@ -75,7 +95,7 @@ export function bindSelectedCorpArchivesToHqChoiceContinuation(
         instance.instanceId === rootPlanInstanceId && instance.side === "corp",
     );
   if (!exactOwningRoute || !selectedAction || !selectedCandidate) return;
-  if (!discardKeepScore) {
+  if (!discardKeepScore && !exactScoreOwner) {
     throw new PlanResolutionFailure("missing_plan_module_coverage", {
       side: input.side,
       stateVersion: input.playerView.stateVersion,
@@ -89,11 +109,27 @@ export function bindSelectedCorpArchivesToHqChoiceContinuation(
         "The Corp hand plan must provide its generic keep-value scorer before binding an Archives-to-HQ target.",
     });
   }
-  const selection = selectedCorpArchivesToHqCards(
-    input,
-    profile,
-    discardKeepScore,
+  const eligibleScoreCards = input.playerView.own.heapOrArchives.filter(
+    (card) =>
+      card.known &&
+      typeof card.definitionId === "string" &&
+      (profile.filterCardType === undefined ||
+        card.type === profile.filterCardType),
   );
+  const selection = exactScoreOwner
+    ? profile.maxSelections === 1 &&
+      scoreBinding &&
+      eligibleScoreCards.some(
+        (card) => card.instanceId === scoreBinding.recoveredCardId,
+      )
+      ? {
+          eligibleCardInstanceIds: eligibleScoreCards.map(
+            (card) => card.instanceId,
+          ),
+          selectedCardInstanceIds: [scoreBinding.recoveredCardId],
+        }
+      : undefined
+    : selectedCorpArchivesToHqCards(input, profile, discardKeepScore!);
   if (!selection) {
     throw new PlanResolutionFailure("window_origin_missing", {
       side: input.side,
@@ -600,7 +636,12 @@ export function resolvePlanBoundCorpArchivesToHqChoice(
     previous.executorInstanceId === origin.executorInstanceId &&
     root !== undefined &&
     root.side === "corp" &&
-    executor?.moduleId === "corp.hand_and_agenda_management" &&
+    (executor?.moduleId === "corp.hand_and_agenda_management" ||
+      isExactScoreRecoveryChoiceOwner(
+        executor,
+        origin,
+        previous.stateVersion,
+      )) &&
     action !== undefined &&
     action.side === "corp" &&
     action.source === "game_rule" &&
@@ -625,7 +666,7 @@ export function resolvePlanBoundCorpArchivesToHqChoice(
       owner: "continuation",
       ...(executor ? { planInstanceId: executor.instanceId } : {}),
       removalCondition:
-        "Resolve Corp Archives-to-HQ only from the immediately preceding hand-plan executor, exact selected source operation and complete current Engine choice contract.",
+        "Resolve Corp Archives-to-HQ only from the immediately preceding hand or exact score-recovery executor, selected source operation and complete current Engine choice contract.",
     });
   }
   return {

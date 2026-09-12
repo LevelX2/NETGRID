@@ -2564,6 +2564,8 @@ export type TargetRequirement = {
 };
 
 export type LegalAction = {
+  /** Actor-private Engine quote for recovery of unconditional score support. */
+  corpScoreRecoveryQuote?: import("./corp-score-recovery-quote").CorpScoreRecoveryQuote;
   actionId: string;
   side: Side;
   type: ActionType;
@@ -6886,3 +6888,4 @@ export {
   isServerBuildInfo,
   type ServerBuildInfo,
 } from "./product-version";
+export type { CorpScoreRecoveryQuote } from "./corp-score-recovery-quote";

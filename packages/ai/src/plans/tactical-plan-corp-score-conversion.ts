@@ -14,10 +14,15 @@ import {
 } from "./action-capacity-route";
 import { createCorpActionDemand } from "./action-demand";
 import { readCorpCounterBankPreparationQuote } from "./corp-counter-bank-preparation-quote";
+import {
+  corpScoreRecoveryPreparations,
+  type CorpScoreRecoveryPreparation,
+} from "./corp-score-recovery-quote";
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
 
 export type CorpScoreConversionStepKind =
+  | "recover_score_support"
   | "gain_action_capacity"
   | "install_score_target"
   | "place_advancement"
@@ -29,6 +34,7 @@ export type CorpScoreConversionStep = {
   kind: CorpScoreConversionStepKind;
   actionId?: string;
   sourceCardId?: string;
+  recoveredCardId?: string;
   targetCardId: string;
   targetServerId: string;
   advancementAmount: number;
@@ -82,6 +88,7 @@ type ConversionCapability = {
   clickCost: number;
   creditCost: number;
   projected: boolean;
+  recoveredFromArchives?: boolean;
 };
 
 type ActionCapacity = {
@@ -103,11 +110,21 @@ export function corpSameTurnScoreConversionPaths(
   fundingCandidates: readonly ActionSemanticCandidate[] = [],
 ): CorpScoreConversionPath[] {
   if (input.side !== "corp") return [];
+  const recoveryPreparations = corpScoreRecoveryPreparations(input);
   return scoreTargets(input)
-    .flatMap(
-      (target) =>
-        conversionPathForTarget(input, target, fundingCandidates) ?? [],
-    )
+    .flatMap((target) => {
+      const direct = conversionPathForTarget(input, target, fundingCandidates);
+      const recovered =
+        input.playerView.own.agendaPoints +
+          visibleAgendaPoints(input, target.card) >=
+        input.playerView.agendaPointsToWin
+          ? recoveryPreparations.flatMap(
+              (preparation) =>
+                conversionPathForTarget(input, target, [], preparation) ?? [],
+            )
+          : [];
+      return [...(direct ? [direct] : []), ...recovered];
+    })
     .sort(comparePaths);
 }
 
@@ -121,6 +138,7 @@ function conversionPathForTarget(
   input: AiDecisionInput,
   target: ScoreTarget,
   fundingCandidates: readonly ActionSemanticCandidate[],
+  recoveryPreparation?: CorpScoreRecoveryPreparation,
 ): CandidatePath | undefined {
   const requirement = advancementRequirement(target.card);
   if (requirement === undefined) return undefined;
@@ -140,6 +158,7 @@ function conversionPathForTarget(
         desiredCounters,
         initialCounters,
         fundingCandidates,
+        recoveryPreparation,
       ),
     )
     .filter((path): path is CandidatePath => path !== undefined)
@@ -153,9 +172,11 @@ function conversionPathForDesiredTarget(
   desiredCounters: number,
   initialCounters: number,
   fundingCandidates: readonly ActionSemanticCandidate[],
+  recoveryPreparation?: CorpScoreRecoveryPreparation,
 ): CandidatePath | undefined {
   const deficit = Math.max(0, desiredCounters - initialCounters);
   if (deficit === 0) {
+    if (recoveryPreparation) return undefined;
     const scoreAction = scoreActionForCard(input, target.card.instanceId);
     if (!scoreAction) return undefined;
     return completedPath(
@@ -172,6 +193,17 @@ function conversionPathForDesiredTarget(
     ? installTargetStep(target, target.installAction)
     : undefined;
   const advancementCapabilities = conversionCapabilities(input, target);
+  if (recoveryPreparation)
+    advancementCapabilities.push({
+      kind: "place_advancement",
+      capabilityId: `recovered:${recoveryPreparation.option.cardId}`,
+      sourceCardId: recoveryPreparation.option.cardId,
+      amount: recoveryPreparation.option.advancementAmount,
+      clickCost: recoveryPreparation.option.playClicks,
+      creditCost: recoveryPreparation.option.playCredits,
+      projected: true,
+      recoveredFromArchives: true,
+    });
   const actionCapacities = actionCapacityCapabilities(input);
   const actionCapacitySets = routedActionCapacitySets(input, actionCapacities);
   const sourceCounterBudget = visibleAdvancementCounterBudget(input);
@@ -226,6 +258,8 @@ function conversionPathForDesiredTarget(
   }
   for (const fundingPrefix of fundingPrefixes)
     for (const capacitySet of actionCapacitySets) {
+      if (recoveryPreparation && (fundingPrefix || capacitySet.length > 0))
+        continue;
       // Current burst funding is a separate support prefix. Capacity effects
       // retain their own search; their source order is not silently rearranged.
       if (fundingPrefix && capacitySet.length > 0) continue;
@@ -244,6 +278,28 @@ function conversionPathForDesiredTarget(
         if (clicks < 0) continue;
       }
       const steps = [...capacityResult.steps];
+      if (recoveryPreparation) {
+        const action = recoveryPreparation.action;
+        const clickCost = actionCost(action, "clicks"),
+          creditCost = actionCost(action, "credits");
+        if (clickCost <= 0 || clickCost > clicks || creditCost > credits)
+          continue;
+        clicks -= clickCost;
+        credits -= creditCost;
+        steps.push({
+          kind: "recover_score_support",
+          actionId: action.actionId,
+          sourceCardId: action.source,
+          recoveredCardId: recoveryPreparation.option.cardId,
+          targetCardId: target.card.instanceId,
+          targetServerId: target.serverId,
+          advancementAmount: 0,
+          clickCost,
+          creditCost,
+          generatedClicks: 0,
+          evidence: ["corp_score_engine_quoted_archives_recovery_prefix"],
+        });
+      }
       const sourceCounters = { ...capacityResult.sourceCounters };
       if (installStep) {
         if (installStep.clickCost > clicks || installStep.creditCost > credits)
@@ -276,6 +332,15 @@ function conversionPathForDesiredTarget(
         desiredCounters,
         initialCounters,
         onCandidate: (candidate) => {
+          if (
+            recoveryPreparation &&
+            !candidate.steps.some(
+              (step) =>
+                step.kind === "place_advancement" &&
+                step.sourceCardId === recoveryPreparation.option.cardId,
+            )
+          )
+            return;
           if (replacementRouteDestroysPlanProgress(input, candidate)) return;
           if (fundingPrefix) {
             candidate = {
@@ -1094,7 +1159,11 @@ function conversionStep(
           ]
         : []),
       ...(capability.projected
-        ? ["score_conversion:projected_from_visible_hand"]
+        ? [
+            capability.recoveredFromArchives
+              ? "score_conversion:engine_quoted_archives_recovery"
+              : "score_conversion:projected_from_visible_hand",
+          ]
         : []),
     ],
   };

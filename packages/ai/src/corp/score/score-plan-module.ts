@@ -158,6 +158,11 @@ function scoreBlockerCode(signal: CorpScoreProjectSignal): string | undefined {
 }
 
 function scoreCapability(signal: CorpScoreProjectSignal): PlanStepCapability {
+  if (signal.phase === "recover_score_support")
+    return {
+      capabilityId: "recover_score_support",
+      semanticActionTypes: signal.routeSemanticActionTypes ?? [],
+    };
   if (signal.phase === "select_agenda")
     return {
       capabilityId: "select_score_agenda_material",
@@ -310,7 +315,8 @@ function scoreCandidates(
         return false;
       if (!semantic.includes(candidate.semanticActionType)) return false;
       if (
-        signal.phase === "convert_agenda" &&
+        (signal.phase === "convert_agenda" ||
+          signal.phase === "recover_score_support") &&
         signal.actionIds?.includes(candidate.actionId) === true
       ) {
         return true;

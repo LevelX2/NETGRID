@@ -3,6 +3,7 @@ import type { CorpOpeningRushDecision } from "../runtime/corp-opening-rush";
 
 export type CorpScorePhase =
   | "select_agenda"
+  | "recover_score_support"
   | "unlock_remote_creation"
   | "install_counter_bank"
   | "advance_counter_bank"
@@ -126,6 +127,12 @@ export type CorpScoreProjectSignal = {
         kind: "place_advancement";
         placements: Array<{ targetCardId: string; amount: number }>;
       };
+  /** Exact current recovery target chosen by this Score parent. */
+  recoveryChoiceBinding?: {
+    sourceCardId: string;
+    recoveredCardId: string;
+    stateVersion: number;
+  };
   /**
    * Published only by corp.score_agenda from an Engine continuation quote.
    * corp.defend_servers may preserve this request but must never reconstruct it.

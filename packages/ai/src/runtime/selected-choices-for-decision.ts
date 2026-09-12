@@ -21,6 +21,7 @@ import type {
   CorpEconomyStartRezChoiceSignal,
 } from "../corp/economy/economy-types";
 import type { CorpHandManagementSignal } from "../corp/hand-management/hand-management-types";
+import { isExactScoreRecoveryChoiceOwner } from "../corp/score/score-recovery-choice-owner";
 import {
   residentCorpScoreChoiceBinding,
   residentCorpScoredAgendaHqShuffleBinding,
@@ -323,7 +324,12 @@ function selectedCorpArchivesToHqOptionIdsFromBoundContinuation(
     portfolio.executorInstanceId === origin.executorInstanceId &&
     root !== undefined &&
     root.side === "corp" &&
-    executor?.moduleId === "corp.hand_and_agenda_management" &&
+    (executor?.moduleId === "corp.hand_and_agenda_management" ||
+      isExactScoreRecoveryChoiceOwner(
+        executor,
+        origin,
+        portfolio.stateVersion,
+      )) &&
     action.side === "corp" &&
     action.type === "resolve_choice" &&
     action.source === "game_rule" &&

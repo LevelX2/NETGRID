@@ -30,6 +30,7 @@ import {
   quoteCorporateShuffleZoneTransition,
   quoteHqShuffleRedrawZoneTransition,
 } from "../hidden-zone/corp-zone-transition-projection";
+import { quoteCorpScoreRecovery } from "../hidden-zone/corp-score-recovery-quote";
 
 type HostFn<T = unknown> = (...args: any[]) => T;
 
@@ -609,6 +610,14 @@ export function buildCorpMainActions(
           ),
         };
       }
+      const scoreRecoveryQuote = quoteCorpScoreRecovery(
+        state,
+        operationAction,
+        corpUtility,
+        definitionFor,
+      );
+      if (scoreRecoveryQuote)
+        operationAction.corpScoreRecoveryQuote = scoreRecoveryQuote;
       actions.push(operationAction);
     }
     if (definition.type === "ice") {

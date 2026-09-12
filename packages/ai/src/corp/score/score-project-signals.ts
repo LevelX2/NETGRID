@@ -1192,6 +1192,17 @@ export function sameTurnScoreConversionProjectForCandidate(
       phase: scorePhaseForConversionStep(step),
       sameTurnCloseout: true,
       sameTurnConversionProof: "engine_quoted_path",
+      ...(step.kind === "recover_score_support" &&
+      step.sourceCardId &&
+      step.recoveredCardId
+        ? {
+            recoveryChoiceBinding: {
+              sourceCardId: step.sourceCardId,
+              recoveredCardId: step.recoveredCardId,
+              stateVersion: input.playerView.stateVersion,
+            },
+          }
+        : {}),
       ...(path.fundingPrefix
         ? {
             fundingGap: Math.max(
@@ -1321,6 +1332,7 @@ function compareSameTurnScoreConversionParents(
 function scorePhaseForConversionStep(
   step: CorpScoreConversionStep,
 ): CorpScoreProjectSignal["phase"] {
+  if (step.kind === "recover_score_support") return "recover_score_support";
   if (step.kind === "install_score_target") return "install_agenda";
   if (step.kind === "basic_advance") return "advance_agenda";
   if (step.kind === "score_ready") return "score_agenda";
@@ -1537,6 +1549,7 @@ function sameScoreProjectMergeFacts(
     project.sameTurnFundingActionIds,
     project.conversion,
     project.advancementCounterChoiceBinding,
+    project.recoveryChoiceBinding,
     project.continuationReserve,
     project.protectionNeed?.needId,
     project.protectionNeed?.observedAtStateVersion,
@@ -1566,6 +1579,7 @@ export function uniqueScoreProjects(
   const phaseRank: Record<CorpScoreProjectSignal["phase"], number> = {
     select_agenda: -1,
     unlock_remote_creation: 0,
+    recover_score_support: 1,
     install_counter_bank: 1,
     advance_counter_bank: 2,
     install_agenda_from_counter_bank: 3,

@@ -41,6 +41,7 @@ import {
   parseCanonicalCapabilityId,
 } from "@netgrid/cards/planning";
 import { sanitizeCorpRestrictedCreditRouteQuotes } from "./runtime/corp-restricted-credit-quote-input";
+import { sanitizeCorpScoreRecoveryQuote } from "./runtime/corp-score-recovery-quote-input";
 
 export type BuildAiDecisionInputDtoParams = {
   corpRestrictedCreditRouteQuotes?: AiDecisionInput["corpRestrictedCreditRouteQuotes"];
@@ -3622,12 +3623,16 @@ const OPTIONAL_REZ_COMPLETE_QUOTE_FIELDS = [
 
 function sanitizeLegalAction(action: LegalAction): LegalAction {
   if (action.abilityRef) assertAbilityRefIdentity(action.abilityRef);
+  const scoreRecoveryQuote = sanitizeCorpScoreRecoveryQuote(action);
   const payload =
     action.payload || action.abilityRef
       ? sanitizeLegalActionPayload(action)
       : undefined;
   return {
     actionId: action.actionId,
+    ...(scoreRecoveryQuote
+      ? { corpScoreRecoveryQuote: scoreRecoveryQuote }
+      : {}),
     side: action.side,
     type: action.type,
     label: action.label,
