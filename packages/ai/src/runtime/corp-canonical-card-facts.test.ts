@@ -9,6 +9,7 @@ import {
   corpDefinitionHasTagSource,
   corpDefinitionHasTraceTagSource,
   corpHostedCreditBankProfile,
+  corpScoreHostedCreditPayoutProfile,
   corpImmediateEconomyGainFromHint,
   corpScoreConversionProfile,
   corpTaggedDamagePayoffProfile,
@@ -20,6 +21,17 @@ import {
 const hints = createAiHintsByCard();
 
 describe("canonical Corp card facts", () => {
+  it("distinguishes a plain scored credit pool from installed banks and conditional score rewards", () => {
+    expect(
+      corpScoreHostedCreditPayoutProfile("onr_v1_209_political-coup"),
+    ).toEqual({ poolCredits: 12, payoutCredits: 3 });
+    expect(
+      corpScoreHostedCreditPayoutProfile("onr_v1_309_bbs-whispering-campaign"),
+    ).toBeUndefined();
+    expect(
+      corpScoreHostedCreditPayoutProfile("onr_v1_196_corporate-war"),
+    ).toBeUndefined();
+  });
   it("reads the complete Archives-to-HQ choice contract from CardSpec mechanics", () => {
     expect(
       corpArchivesToHqOperationProfile("onr_v1_296_off-site-backups"),

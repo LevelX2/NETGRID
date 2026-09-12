@@ -3250,6 +3250,48 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       "corp",
       (action) => action.type === "mandatory_draw",
     );
+    const payoutSetup = structuredClone(coupState);
+    payoutSetup.corp.credits = 3;
+    payoutSetup.corp.clicks = 1;
+    const scoreableCoup = putCorpRootInRemote(
+      payoutSetup,
+      "onr_v1_209_political-coup",
+    );
+    payoutSetup.cardInstances[scoreableCoup]!.advancementCounters = 4;
+    const scoreCoup = (action: LegalAction) =>
+      action.type === "score_agenda" && action.source === scoreableCoup;
+    const scoreThenPayout = apply(
+      apply(structuredClone(payoutSetup), "corp", scoreCoup),
+      "corp",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.payload?.cardId === scoreableCoup,
+    );
+    const creditThenScore = apply(
+      apply(
+        structuredClone(payoutSetup),
+        "corp",
+        (action) => action.type === "gain_credit",
+      ),
+      "corp",
+      scoreCoup,
+    );
+    expect(getPlayerView(scoreThenPayout, "corp").own).toMatchObject({
+      credits: 6,
+      clicks: 0,
+      agendaPoints: 2,
+    });
+    expect(getPlayerView(creditThenScore, "corp").own).toMatchObject({
+      credits: 4,
+      clicks: 0,
+      agendaPoints: 2,
+    });
+    const payoutReplay = replayEvents(
+      payoutSetup,
+      scoreThenPayout.eventLog.slice(payoutSetup.eventLog.length),
+    );
+    expect(payoutReplay.ok).toBe(true);
+    expect(hashState(payoutReplay.state)).toBe(hashState(scoreThenPayout));
     const firstCoup = scoreCorpAgendaForTest(
       coupState,
       "onr_v1_209_political-coup",

@@ -324,6 +324,54 @@ export function corpHostedCreditBankProfile(
     : undefined;
 }
 
+/** A plain score-created pool with a single-click, otherwise free payout. */
+export function corpScoreHostedCreditPayoutProfile(
+  definitionId: string | undefined,
+): { poolCredits: number; payoutCredits: number } | undefined {
+  const planning = planningCard(definitionId);
+  const engine = planning?.planning.engine;
+  const effects = engine?.lifecycle?.on_score;
+  if (
+    planning?.planning.side !== "corp" ||
+    planning.planning.cardType !== "agenda" ||
+    !engine ||
+    engine?.scoredAgenda !== undefined ||
+    !effects?.length ||
+    !effects.every(
+      (effect) =>
+        effect.kind === "add_hosted_credits" &&
+        effect.target === "source" &&
+        positiveSafeInteger(effect.amount),
+    )
+  )
+    return undefined;
+  const poolCredits = effects.reduce(
+    (sum, effect) =>
+      sum + (effect.kind === "add_hosted_credits" ? effect.amount : 0),
+    0,
+  );
+  const payouts = (engine.abilities ?? []).flatMap((ability) => {
+    const effect =
+      ability.effects.length === 1 ? ability.effects[0] : undefined;
+    return ability.kind === "activated" &&
+      ability.timing === "corp_main" &&
+      ability.costs.length === 1 &&
+      ability.costs[0]?.kind === "action" &&
+      ability.costs[0].amount === 1 &&
+      ability.condition?.kind === "source_has_hosted_credits" &&
+      effect?.kind === "take_hosted_credits" &&
+      effect.source === "source" &&
+      effect.recipient === "controller" &&
+      effect.mode === "up_to_amount_if_available" &&
+      positiveSafeInteger(effect.amount)
+      ? [effect.amount]
+      : [];
+  });
+  return payouts.length === 1 && positiveSafeInteger(poolCredits)
+    ? { poolCredits, payoutCredits: payouts[0]! }
+    : undefined;
+}
+
 export function corpDefinitionHasTraceSource(
   definitionId: string | undefined,
 ): boolean {

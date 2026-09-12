@@ -16,10 +16,6 @@ describe("match FD7671 runner decision checkpoints", () => {
       noNeedTutorJson,
     ],
     [
-      "preserves the matchpoint run reserve over central economy trash",
-      centralTrashJson,
-    ],
-    [
       "pressures the score-remote ICE before run-lock release",
       releaseRunLockJson,
     ],
@@ -82,32 +78,36 @@ describe("match FD7671 runner decision checkpoints", () => {
     expectCheckpointToPass(missingDecoder);
   });
 
-  it("does not infer a current payout from an unrezzed HQ campaign when more credits are available", () => {
+  it("denies the prospective HQ campaign pool while distinguishing it from current cash", () => {
+    expectProspectiveCampaignTrash(fixture(centralTrashJson));
+  });
+
+  it("denies the prospective HQ campaign pool when more credits are available", () => {
     const surplusCredits = mutateFixture(centralTrashJson, (checkpoint) => {
       checkpoint.engine.testOnlyGameState.runner.credits = 12;
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "FD7671-C03-TRASH-SURPLUS";
       checkpoint.expectation = {
-        acceptableActions: [{ actionId: "runner.decline_trash" }],
+        acceptableActions: [{ type: "trash_accessed_card" }],
         planExecution: { acceptablePlanKinds: ["runner.convert_run_window"] },
       };
     });
 
-    expectCheckpointToPass(surplusCredits);
+    expectProspectiveCampaignTrash(surplusCredits);
   });
 
-  it("keeps the no-current-payout assessment when no follow-up click remains", () => {
+  it("denies the prospective pool without inventing a current payout when no click remains", () => {
     const noFollowUpClick = mutateFixture(centralTrashJson, (checkpoint) => {
       checkpoint.engine.testOnlyGameState.runner.clicks = 0;
       checkpoint.source.kind = "synthetic_companion";
       checkpoint.source.findingId = "FD7671-C05-TRASH-WITHOUT-RUN-CLICK";
       checkpoint.expectation = {
-        acceptableActions: [{ actionId: "runner.decline_trash" }],
+        acceptableActions: [{ type: "trash_accessed_card" }],
         planExecution: { acceptablePlanKinds: ["runner.convert_run_window"] },
       };
     });
 
-    expectCheckpointToPass(noFollowUpClick);
+    expectProspectiveCampaignTrash(noFollowUpClick);
   });
 
   it("keeps the sole legal expose target selectable", () => {
@@ -127,6 +127,32 @@ describe("match FD7671 runner decision checkpoints", () => {
     expectCheckpointToPass(soleTarget);
   });
 });
+
+function expectProspectiveCampaignTrash(
+  checkpoint: AiDecisionCheckpointV1,
+): void {
+  checkpoint.expectation = {
+    acceptableActions: [
+      {
+        type: "trash_accessed_card",
+        actionId:
+          "runner.trash_accessed_card.corp_onr_v1_337_rockerboy-promotion_1.3",
+      },
+    ],
+    planExecution: { acceptablePlanKinds: ["runner.convert_run_window"] },
+  };
+  const result = runAiDecisionCheckpoint(checkpoint);
+  expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+  expect(result.selectedAction?.costs).toEqual([{ credits: 3 }]);
+  expect(result.decision?.evidence).toEqual(
+    expect.arrayContaining([
+      "plan_action_assessment_evidence:runner_access_trash_visible_stored_credits:0",
+      "plan_action_assessment_evidence:runner_access_trash_prospective_hosted_credits:15",
+      "plan_action_assessment_evidence:runner_access_trash_prospective_rez_cost:4",
+      "plan_action_assessment_evidence:runner_access_trash_impact_classes:prospective_economy",
+    ]),
+  );
+}
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {
   return bindHistoricalRunEventCadence(

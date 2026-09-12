@@ -11,7 +11,7 @@ import {
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
-import { corpBasicCreditsErasedByCurrentScore } from "../../corp/score/score-conditional-credit-funding";
+import { corpBasicCreditsDominatedByCurrentScore } from "../../corp/score/score-conditional-credit-funding";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 
 it("scores before the last basic reserve credit that the free score would erase", () => {
@@ -108,6 +108,6 @@ it.each([
     candidates.push(candidate);
   }
   expect([
-    ...corpBasicCreditsErasedByCurrentScore(input, candidates, [project]),
+    ...corpBasicCreditsDominatedByCurrentScore(input, candidates, [project]),
   ]).toEqual(variant === "last_credit" ? ["corp.gain_credit"] : []);
 });

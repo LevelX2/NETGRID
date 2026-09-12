@@ -1,20 +1,22 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
-import { corpConditionalScoreCreditProfile } from "../../runtime/corp-canonical-card-facts";
+import {
+  corpConditionalScoreCreditProfile,
+  corpScoreHostedCreditPayoutProfile,
+} from "../../runtime/corp-canonical-card-facts";
 import { corpExactCurrentBasicLiquidCreditCandidate } from "../economy/economy-domain-signals";
 import { immediateCorpLiquidCreditGain } from "../economy/economy-routes";
 
-/** A last basic credit cannot survive an already executable cash-reset score.
+/** A free current score can dominate a basic credit's resource ordering.
  * Keep other funding routes and real current-window defense independent.
  */
-export function corpBasicCreditsErasedByCurrentScore(
+export function corpBasicCreditsDominatedByCurrentScore(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   projects: readonly CorpScoreProjectSignal[],
 ): ReadonlySet<string> {
-  if (input.playerView.run || input.playerView.own.clicks !== 1)
-    return new Set();
+  if (input.playerView.run || input.playerView.own.clicks < 1) return new Set();
   const freeScores = input.legalActions.filter(
     (action) =>
       action.type === "score_agenda" &&
@@ -34,6 +36,22 @@ export function corpBasicCreditsErasedByCurrentScore(
       project.actionIds?.includes(score.actionId),
   );
   if (!project?.agendaDefinitionId) return new Set();
+  const basicCreditIds = () =>
+    new Set(
+      candidates
+        .filter((candidate) =>
+          corpExactCurrentBasicLiquidCreditCandidate(input, candidate),
+        )
+        .map((candidate) => candidate.actionId),
+    );
+  const payout = corpScoreHostedCreditPayoutProfile(project.agendaDefinitionId);
+  if (payout && Math.min(payout.poolCredits, payout.payoutCredits) > 1) {
+    // Scoring spends no click or cash and opens a strictly better next
+    // single-click payout. The future payout gets its real LegalAction only
+    // after the score; the existing Economy owner then revalidates it.
+    return basicCreditIds();
+  }
+  if (input.playerView.own.clicks !== 1) return new Set();
   const profile = corpConditionalScoreCreditProfile(project.agendaDefinitionId);
   if (!profile || input.playerView.own.credits + 1 >= profile.threshold)
     return new Set();
@@ -51,13 +69,7 @@ export function corpBasicCreditsErasedByCurrentScore(
     )
   )
     return new Set();
-  return new Set(
-    candidates
-      .filter((candidate) =>
-        corpExactCurrentBasicLiquidCreditCandidate(input, candidate),
-      )
-      .map((candidate) => candidate.actionId),
-  );
+  return basicCreditIds();
 }
 
 /** Keep a reachable score reward inside the existing Score -> Economy route. */

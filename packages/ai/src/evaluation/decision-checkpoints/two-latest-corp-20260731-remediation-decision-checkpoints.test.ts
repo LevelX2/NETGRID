@@ -15,6 +15,7 @@ import retainTychoDiscardCfoD97Json from "../../../../../data/scenarios/ai-decis
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
+import { corpSameTurnScoreConversionPaths } from "../../plans/tactical-plan-corp-score-conversion";
 
 describe("two latest Corp matches 2026-07-31 remediation checkpoints", () => {
   it.each([
@@ -28,14 +29,32 @@ describe("two latest Corp matches 2026-07-31 remediation checkpoints", () => {
     },
   );
 
-  it("preserves the same-turn score head while keeping the central rez reserve reachable", () => {
+  it("funds the terminal central reserve before a same-turn score that consumes it", () => {
     // Liche needs 14 credits; 12 credits and three actions can fund it.
     // The rejected extra HQ installation would leave at most 13 credits.
     const checkpoint = fixture(sameTurnScoreD34Json);
-    // The canonical checkpoint already requires the certified score action.
-    // Reachable installed Liche funding must not invent a missing-ICE draw.
+    checkpoint.expectation = {
+      acceptableActions: [{ actionId: "corp.gain_credit" }],
+      forbiddenActions: [{ type: "draw_card" }],
+      planExecution: {
+        acceptablePlanKinds: ["corp.economy"],
+        acceptableCapabilities: ["develop_or_convert_corp_economy"],
+      },
+    };
     const result = runAiDecisionCheckpoint(checkpoint);
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+    // The available closeout spends 12 on Consultants before gaining 5.
+    // Even its remaining basic-credit click cannot fund the 14-credit Liche.
+    const paths = corpSameTurnScoreConversionPaths(result.input);
+    expect(paths.length).toBeGreaterThan(0);
+    for (const path of paths)
+      expect(path).toMatchObject({ creditsRequired: 12, clicksRequired: 2 });
+    expect(result.decision?.evidence).toEqual(
+      expect.arrayContaining([
+        "plan_priority_delegated_from:plan:corp.defend_servers:server-defense-portfolio",
+        "plan_assessment_evidence:corp_terminal_central_rez_reserve_required:rd:corp_onr_v1_254_liche_2:gap_2",
+      ]),
+    );
     expect(
       result.decision?.decisionDebug?.planFirstDecision?.turnPlanning?.heads,
     ).toEqual(

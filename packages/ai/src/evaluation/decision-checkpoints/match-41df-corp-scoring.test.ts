@@ -180,6 +180,28 @@ describe("match 41df Corp scoring", () => {
           knowledge: "known",
           probability: { numerator: 1, denominator: 1 },
         });
+      if (index === 210) {
+        // A concrete installed central reserve now precedes unsafe emergency
+        // installs. The route comparison remains independently observable.
+        expect(selected.actionId).toBe("corp.gain_credit");
+        expect(decision.evidence).toEqual(
+          expect.arrayContaining([
+            "plan_priority_delegated_from:plan:corp.defend_servers:server-defense-portfolio",
+            "plan_assessment_evidence:corp_terminal_central_rez_reserve_required:hq:corp_onr_proteus_015_colonel-failure_1:gap_4",
+          ]),
+        );
+        const remote = projects.find(
+          (project) => project.serverId === "remote_2",
+        );
+        expect(remote).toBeDefined();
+        expect(
+          scoreRouteExposure(remote!, input.playerView.stateVersion),
+        ).toMatchObject({
+          knowledge: "known",
+          runnerCreditsRemaining: remaining,
+        });
+        return;
+      }
       const selectedProject = projects.find(
         (project) =>
           project.agendaInstanceId === selected.source &&

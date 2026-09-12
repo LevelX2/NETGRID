@@ -187,6 +187,16 @@ bleiben erhalten. Ein aktuelles kostenloses Einkommen oder ein weiterer
 kostenloser Score verhindern diesen engen Dominanznachweis. Nach dem Score
 wird die Reserve aus dem neuen Zustand regulär aufgebaut.
 
+Dasselbe aktuelle Reihenfolgenurteil gilt für einen einzigen kostenlosen
+Score, dessen kanonischer Effekt ausschließlich einen eigenen Creditpool
+erzeugt und eine sonst kostenfreie Auszahlung pro Klick von mehr als einem
+Credit eröffnet. Ein Basiscredit vor diesem Score verliert eine bessere
+Finanzierung desselben Klicks. Der Score-Owner stellt deshalb nur diese
+dominierte Basiscredit-Vorbereitung zurück. Pool und spätere Auszahlung sind
+keine aktuelle Liquidität; nach dem Score muss der Economy-Owner die echte
+neue LegalAction erneut quotieren. Bedingte Scoreeffekte, mehrere freie Scores,
+andere Auszahlungskosten und ein laufender Run tragen diesen Nachweis nicht.
+
 Beim Variantenvergleich zweier vollständig finanzierter, nichtterminaler
 Same-Turn-Scores derselben Agenda prüft der Score-Owner auch den Verlust eines
 installierten Wirtschaftsmittels. Stimmen Klicks, Credits, Fortschritt,
