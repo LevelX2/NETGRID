@@ -114,6 +114,63 @@ Mehr Scores, kürzere Einzelfenster und mehr Siege bleiben getrennte Kennzahlen.
 Ein vermiedener Draw oder eine verschobene Installation ist erst dann ein
 Tempoerfolg, wenn sich der vollständige Abschlusszeitpunkt tatsächlich verbessert.
 
+## Verlustursachen und nächste Gegenproben
+
+Die 16 Nachher-Spiele der Paarung 431 enthalten neun Corp-Niederlagen, davon
+fünf ohne eigenen Score. Von 17 Remote-Steals erfolgen 16 bereits im ersten
+Runnerzug nach Installation. Remote-Steals liefern 62 der insgesamt 85
+Runner-Agendapunkte über alle 16 Spiele. Diese Nenner beschreiben diese Paarung
+und diesen eingefrorenen Stand, keine allgemeine Seitenbalance.
+
+31 installierte Versuche haben eine aktuelle modellierte Zugriffschance 0/1;
+sieben davon enden trotzdem als Steal. Die Quote ist keine empirische
+Wahrscheinlichkeit. Ein späterer Steal allein beweist keinen fehlerhaften
+Rechenschritt: Modellgrenze, zwischenzeitliche Entwicklung und tatsächliche
+Rez-Ausführung müssen getrennt werden. Die sieben Fälle sind jedoch eine
+vollständig bestimmte Prüfmenge:
+
+| Nachher-Seed | Installation → Steal | Agenda |
+| --- | --- | --- |
+| known-427 | D377 → D395 | Tycho Extension |
+| known-427 | D431 → D456 | Tycho Extension |
+| new-03 | D137 → D163 | Tycho Extension |
+| new-04 | D197 → D233 | Corporate Coup |
+| new-09 | D377 → D417 | Priority Requisition |
+| new-10 | D221 → D246 | Priority Requisition |
+| new-11 | D212 → D237 | Security Net Optimization |
+
+In known-427/D377 ist die relevante öffentliche Budgetgrenze konkret belegt:
+sechs Runnercredits plus drei modellierte Basiskreditklicks ergeben neun;
+die tatsächliche Broker-Auszahlung und ein Kreditklick ergeben vor dem Run
+zehn. Fire Wall wird für zehn durchbrochen. Optionale öffentliche Einkommen
+sind laut aktuellem Corp-Vertrag ausdrücklich außerhalb dieses Basishorizonts.
+Das ist eine belegte Modelllücke; die beste alternative Corp-Handlung und deren
+Gesamteffekt sind davon getrennt zu prüfen. Unbekannte Runner-Handkarten dürfen
+für diese Prüfung kein Entscheidungswissen der Corp werden.
+
+Weitere acht der 17 Remote-Steals stammen aus ausdrücklich zugelassenen
+Notversuchen wegen Agenda-Abwurf oder Deckout. Hier rückwärts den letzten
+noch beeinflussbaren Aufbau-/Finanzierungszeitpunkt suchen. Einen bereits
+hoffnungslosen Endzustand anders zu bewerten, erklärt den vorherigen Verlust
+des Scorefensters nicht. Auch Zentralverluste separat führen: new-02 scoret
+beide installierten Agenden, verliert aber durch drei zentrale Steals.
+
+Für jeden Gegenpfad drei Aussagen getrennt abnehmen:
+
+1. **Prognose:** Welche öffentlich belegte Ressource, Kostenfolge oder
+   Zustandsänderung erklärt die Abweichung von der Schutzquote?
+2. **Entscheidung:** Welche damals legale alternative Gesamtlinie vermeidet
+   den lokalen Schaden, mit welchen Kosten und verbleibenden Risiken?
+3. **Spielstärke:** Wie verändert diese Korrektur Scorepunkte, Steals,
+   Nullscore-Niederlagen und Siege im gepaarten Kontrollsatz?
+
+Ein eindeutiger Informations- oder Prognosefehler benötigt keinen Beweis eines
+garantierten Gesamtsiegs, um als solcher benannt zu werden. Umgekehrt bedeutet
+die Ledgerklasse `plausible` nur mechanisch nachvollziehbares Verhalten und
+keinen Nachweis strategischer Qualität. Neue zufällige Spiele erst nach der
+gezielten Auflösung dieser bekannten Gegenbeispiele als unabhängige Kontrolle
+verwenden. Deckstärke, Paarung und KI-Verhalten dabei getrennt vergleichen.
+
 Abschluss: kompakte Einzelurteile und Probe-Grenzen in die bestehende Registry
 zurückführen, Bericht samt exaktem Inhalt und Status sichern, Round-trip prüfen
 und Backup erzeugen. Erst danach eigene Runtime-Daten bereinigen. Keine rohen
