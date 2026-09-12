@@ -917,6 +917,16 @@ State-Wechsel wird die neue LegalAction über gebundene ICE-Instanz und Fort
 erneut exakt materialisiert; verschwindet diese Fortsetzung, entsteht
 `commitment_invalidated` statt einer anderen ICE- oder Serverroute.
 
+Reine persistente ICE-Unterstützung benötigt nach ihrer eigenen Zahlung
+weiterhin finanzierte passende ICE. Bereits gerezzte Ziele verursachen keinen
+zusätzlichen Rezbedarf; ungerezzte Ziele benötigen vollständige aktuelle,
+an Instanz und Server gebundene Engine-Kostenquotes. Die vom Zielprofil
+geforderte Mindestzahl muss gemeinsam finanzierbar bleiben. Fehlende oder
+veraltete Quotes und zusätzliche ungequotete Kosten begründen keinen
+produktiven Support. Das gilt für den allgemeinen persistenten Pfad ebenso
+wie für strukturierte ICE-Zielprofile und Fort-Stärke-Unterstützung.
+Eigenständige Upgrade-Wirkungen behalten ihre getrennten Owner-Assessments.
+
 Gemeinsame Hint-Begriffe rechtfertigen keine gemeinsame Rez-Heuristik.
 Dr. Dreff wird nur im letzten relevanten Begegnungsfenster desselben Forts
 produktiv, wenn sichtbares HQ-ICE unter seinem eigenen Halb-Rez-Kostenvertrag

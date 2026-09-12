@@ -237,7 +237,57 @@ export function corpRezEstablishesPersistentDefenseSupport(
   const server = input.playerView.servers.find(
     (candidateServer) => candidateServer.id === serverId,
   );
-  return (server?.ice.length ?? 0) > 0;
+  return corpSupportRetainsFundedIce(
+    input,
+    candidate,
+    server ? [server] : [],
+    1,
+  );
+}
+
+function corpSupportRetainsFundedIce(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+  servers: AiDecisionInput["playerView"]["servers"],
+  minimumTargetCount: number,
+  matchingIceIds?: ReadonlySet<string>,
+): boolean {
+  const cost = candidate.costProfile;
+  if (
+    cost.costKnownStatus !== "known" ||
+    cost.additionalCosts.length > 0 ||
+    !isFiniteNonNegativeInteger(cost.creditCost)
+  )
+    return false;
+  const remaining = input.playerView.own.credits - cost.creditCost;
+  if (remaining < 0) return false;
+  const targetCosts = servers
+    .flatMap((server) =>
+      server.ice.flatMap((ice) => {
+        if (matchingIceIds && !matchingIceIds.has(ice.instanceId)) return [];
+        if (ice.rezzed) return [0];
+        const quote = ice.effectiveRezCostQuote;
+        if (
+          quote?.complete !== true ||
+          quote.context !== "installed" ||
+          quote.cardId !== ice.instanceId ||
+          quote.targetServerId !== server.id ||
+          quote.projectedServerId !== server.id ||
+          quote.expiresAtStateVersion !== input.playerView.stateVersion ||
+          quote.mandatoryAdditionalCosts.agendaPoints !== 0 ||
+          !isFiniteNonNegativeInteger(quote.finalCredits)
+        )
+          return [];
+        return [quote.finalCredits];
+      }),
+    )
+    .sort((a, b) => a - b);
+  return (
+    targetCosts.length >= minimumTargetCount &&
+    targetCosts
+      .slice(0, minimumTargetCount)
+      .reduce((sum, value) => sum + value, 0) <= remaining
+  );
 }
 
 export function corpRunDefenseAbilityAssessment(
@@ -679,6 +729,7 @@ export function corpExactCardRezSupportAssessment(
   }
   const structuredIceSupport = corpStructuredIceSupportAssessment(
     input,
+    candidate,
     serverId,
     hint,
   );
@@ -702,6 +753,15 @@ export function corpExactCardRezSupportAssessment(
         value: 0,
         evidenceCode:
           "corp_rez_fort_ice_strength_support_has_no_ice_on_exact_fort",
+      };
+    }
+    if (!corpSupportRetainsFundedIce(input, candidate, [server], 1)) {
+      return {
+        productive: false,
+        serverId,
+        value: 0,
+        evidenceCode:
+          "corp_rez_ice_strength_support_has_no_funded_target_after_payment",
       };
     }
     const run = input.playerView.run;
@@ -738,6 +798,7 @@ export function corpExactCardRezSupportAssessment(
 
 function corpStructuredIceSupportAssessment(
   input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
   sourceServerId: string,
   hint: ReturnType<(typeof AI_HINTS_BY_CARD)["get"]>,
 ):
@@ -791,6 +852,24 @@ function corpStructuredIceSupportAssessment(
       serverId: sourceServerId,
       value: 0,
       evidenceCode: `corp_rez_structured_ice_support_missing_targets:${requiredSubtypes.join("+") || "ice"}:${profile.serverScope ?? "any_visible_server"}`,
+    };
+  }
+
+  if (
+    !corpSupportRetainsFundedIce(
+      input,
+      candidate,
+      servers,
+      minimumTargetCount,
+      new Set(matchingIceIds),
+    )
+  ) {
+    return {
+      productive: false,
+      serverId: sourceServerId,
+      value: 0,
+      evidenceCode:
+        "corp_rez_structured_ice_support_has_no_funded_targets_after_payment",
     };
   }
 

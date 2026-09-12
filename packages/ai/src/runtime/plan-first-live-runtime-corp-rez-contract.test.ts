@@ -729,6 +729,21 @@ describe("plan-first Corp conditional root-rez contract", () => {
       ),
     ];
 
+    input.playerView.servers.find(
+      (s) => s.id === "remote_1",
+    )!.ice[0]!.effectiveRezCostQuote = {
+      context: "installed",
+      cardId: "remote-ice",
+      targetServerId: "remote_1",
+      projectedServerId: "remote_1",
+      expiresAtStateVersion: input.playerView.stateVersion,
+      complete: true,
+      baseCredits: 1,
+      finalCredits: 1,
+      mandatoryAdditionalCosts: { agendaPoints: 0 },
+      costKind: "fixed",
+    };
+
     expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
       actionId: "rez-tesseract",
       reasonCode: "plan_first.corp.defend_servers",
