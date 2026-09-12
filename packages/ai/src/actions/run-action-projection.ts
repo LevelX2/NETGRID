@@ -77,10 +77,7 @@ export function projectInternalRunnerRunActions(
       "damagePreventionPool",
     ]);
     const corpRezCostSurcharge = corpRezCostSurchargeForRunAction(action);
-    const accessReplacement = stringPayloadValue(
-      action,
-      "successfulRunAccessReplacement",
-    );
+    const accessReplacement = runAccessReplacement(action, hint);
     const accessReplacementLookCount = numberPayloadValue(action, [
       "successfulRunPrivateLookCount",
     ]);
@@ -873,6 +870,41 @@ function structuredAccessReplacementSignals(action: LegalAction): string[] {
       ? ["access.rnd_topdeck_info"]
       : []),
   ]);
+}
+
+function runAccessReplacement(
+  action: LegalAction,
+  hint: AiCardHint | undefined,
+): string | undefined {
+  const payloadReplacement = stringPayloadValue(
+    action,
+    "successfulRunAccessReplacement",
+  );
+  // The printed-cost make-run capability carries its mandatory spending
+  // replacement in the generated CardSpec effects, not in the event payload.
+  // Bind only this closed functional shape to that exact capability.
+  const boundCapability = stringPayloadValue(
+    action,
+    "cardImplementationAbilityKey",
+  );
+  const spendingReplacement =
+    boundCapability === "abilities_on_play_make_run" &&
+    hint?.effects?.some(
+      (effect) =>
+        effect.kind === "access_replacement" &&
+        effect.timing === "successful_run" &&
+        effect.target === "runner_spend_corp_lose_credits",
+    );
+  if (spendingReplacement) {
+    if (
+      payloadReplacement &&
+      payloadReplacement !== "runner_spend_corp_lose_credits"
+    ) {
+      throw new Error("run_access_replacement_source_conflict");
+    }
+    return "runner_spend_corp_lose_credits";
+  }
+  return payloadReplacement;
 }
 
 function accessSignalsForHintEffect(
