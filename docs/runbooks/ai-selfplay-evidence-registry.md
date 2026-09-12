@@ -9,6 +9,16 @@ der Grenze ist ein diagnostischer Erfassungsabbruch, kein Spielausgang.
 Erst der vollständige erneute Lauf mit dokumentierter größerer Grenze darf
 in den finalen Nenner eingehen; Regeln und KI werden dafür nicht abgeschwächt.
 
+Bei der Schadensauswertung verbindet der kanonische Metaserien-Analyzer
+Prävention und Auflösung über dieselbe exakte `imminentEventId`. Eine
+ausdrücklich als Schaden aufgelöste Fortsetzung muss
+`imminentEventType: damage` nicht erneut liefern. Oberflächenfelder und
+`resolvedEffects` desselben Ereignisses werden nur einmal gezählt. Nicht
+zuordenbare Prävention bleibt ein sichtbarer Analysefehler; ähnliche Mengen
+oder benachbarte Ereignisse sind kein Ersatz für die Identitätsbindung.
+Die Skill-Fixture mit Teilprävention und anschließender Auflösung ohne
+wiederholten Ereignistyp sichert diesen Vertrag.
+
 ## Zweck
 
 Die zentrale Evidenzregistrierung ist der alleinige operative
