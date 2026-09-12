@@ -1348,6 +1348,15 @@ export function runnerCurrentEncounterRequiresDamagePreservingBreak(
   runOrigin: RunnerRunOrigin | undefined,
 ): boolean {
   if (input.playerView.run?.phase !== "encounter_ice") return false;
+  // The payment window suspends encounter choices. Its continuation owner
+  // resumes the already selected action with the persisted plan binding;
+  // this is not a fresh choice to leave any subroutine unbroken.
+  if (
+    input.legalActions.some(
+      (action) => action.payload?.runnerCostPenaltySupportContinuation === true,
+    )
+  )
+    return false;
   if (currentEncounterRequiresFullBreak(input)) return true;
   const encounteredIce = currentEncounteredIceCard(input);
   if (!encounteredIce?.effectiveRunQuote) return false;

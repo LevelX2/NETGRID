@@ -1,6 +1,8 @@
 import { expect, it } from "vitest";
 import checkpointJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-pairing-422-information-damage-d89.json";
+import paymentJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-pairing-422-damage-payment-d278.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
+import { runnerCurrentEncounterRequiresDamagePreservingBreak } from "../../runner/run-window/run-window-assessment";
 import {
   resetResidentPlanPortfolioMemory,
   residentPlanPortfolioSnapshot,
@@ -10,6 +12,48 @@ import {
   restoreAiRuntimeCheckpoint,
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
+
+it("continues the selected pump in its payment window without reassessing encounter damage", () => {
+  const { input, runtime } = structuredClone(paymentJson) as unknown as {
+    input: AiDecisionInputWithDeckCapabilities;
+    runtime: AiRuntimeCheckpointV1;
+  };
+  const pending =
+    runtime.residentPlanPortfolio!.pendingRunnerCostPenaltySupportOrigin!;
+  expect(input.legalActions.map((a) => a.type)).toEqual([
+    "activated_card_ability",
+    "pump_breaker",
+  ]);
+  const pump = input.legalActions.find((a) => a.type === "pump_breaker")!;
+  expect(pump.payload?.runnerCostPenaltySupportContinuation).toBe(true);
+  expect(pump.actionId).toBe(pending.originalActionId);
+  resetResidentPlanPortfolioMemory();
+  restoreAiRuntimeCheckpoint(
+    input,
+    input.ownDeckSnapshot!.deckSnapshotId,
+    runtime,
+  );
+  const decision = chooseAiAction(input);
+  expect(decision.actionId).toBe(pump.actionId);
+  expect(decision.fallbackUsed).toBe(false);
+  expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
+    rootPlanInstanceId: pending.rootPlanInstanceId,
+    leafExecutorInstanceId: pending.executorInstanceId,
+  });
+});
+
+it("still fails closed when a real encounter omits its remaining-subroutine quote", () => {
+  const input = structuredClone(
+    checkpointJson.input,
+  ) as unknown as AiDecisionInputWithDeckCapabilities;
+  const continuation = input.legalActions.find(
+    (a) => a.type === "continue_run",
+  )!;
+  delete continuation.payload!.encounterSubroutineIds;
+  expect(() =>
+    runnerCurrentEncounterRequiresDamagePreservingBreak(input, undefined),
+  ).toThrow("missing_action_semantics");
+});
 
 it("preserves a payable damage response after an information boundary rejects full access", () => {
   const { input, runtime } = structuredClone(checkpointJson) as unknown as {

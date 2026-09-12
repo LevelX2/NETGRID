@@ -998,6 +998,13 @@ allein noch nicht tödlich wäre. Eine bereits gequotete einmalige Zahlungsquell
 wird im exakten Kostenfenster verwendet, wenn sie die nach der Zahlung fehlende
 Creditreserve für den weiterhin unbekannten Restpfad vollständig finanziert.
 Plan, Quelle, ursprüngliche Action und Engine-Fenster bleiben dabei gebunden.
+Ein durch Zahlungsunterstützung unterbrochenes Encounter ist keine neue
+Entscheidung über ungeblockten Schaden. Während die Engine ausschließlich
+die markierte Kostenfortsetzung und ihre Zahlungshilfen anbietet, verlangt
+die Schadensbewertung keine dort nicht angebotene Encounter-Continue-Quote;
+der bestehende Continuation-Owner validiert und erhält die ursprüngliche
+Action-, Plan- und Step-Bindung. Im regulären Encounter bleiben fehlende
+Restquoten ein strukturierter Fehler.
 
 Das Informationsbudget darf ebenso einen bereits zugelassenen bezahlbaren
 Break gegen die unmittelbare Zerstörung eines installierten Programms nicht
