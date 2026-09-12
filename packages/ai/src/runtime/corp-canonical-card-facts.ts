@@ -227,6 +227,75 @@ export function corpConditionalScoreCreditProfile(
   };
 }
 
+/** A deliberately closed proof: no activation, lifecycle or other conversion.
+ * Printed encounter effects and ICE install discounts cannot create main-phase
+ * income. Past on-score payouts are inert in the scored area.
+ */
+export function corpDefinitionIsMainPhasePassive(
+  definitionId: string | undefined,
+  scoreEffect: "none" | "past" | "unreachable" = "none",
+): boolean {
+  const card = planningCard(definitionId);
+  if (card?.planning.side !== "corp") return false;
+  const engine = card.planning.engine;
+  const allowedKeys = new Set([
+    "schemaVersion",
+    "characteristics",
+    "printedSubroutines",
+    "modifiers",
+  ]);
+  if (scoreEffect !== "none") allowedKeys.add("scoredAgenda");
+  if (Object.keys(engine).some((key) => !allowedKeys.has(key))) return false;
+  if (
+    (engine.modifiers ?? []).some(
+      (modifier) => modifier.kind !== "install_cost",
+    )
+  )
+    return false;
+  if (
+    scoreEffect !== "unreachable" &&
+    engine.scoredAgenda &&
+    engine.scoredAgenda.kind !== "gain_credits_on_score" &&
+    engine.scoredAgenda.kind !==
+      "score_credit_swing_if_corp_credit_threshold_met"
+  )
+    return false;
+  return true;
+}
+
+/** With no later click, plain hand recovery or advancement cannot fund a score.
+ * The caller must exclude other installed agendas and advancement triggers.
+ */
+export function corpOperationCannotFundWithLastClick(
+  definitionId: string | undefined,
+): boolean {
+  const card = planningCard(definitionId);
+  if (card?.planning.side !== "corp" || card.planning.cardType !== "operation")
+    return false;
+  const engine = card.planning.engine;
+  const keys = new Set([
+    "schemaVersion",
+    "characteristics",
+    "abilities",
+    "corpUtility",
+  ]);
+  if (Object.keys(engine).some((key) => !keys.has(key))) return false;
+  if (!engine.abilities?.length)
+    return engine.corpUtility?.kind === "corp_archives_to_hq";
+  return (
+    !engine.corpUtility &&
+    engine.abilities.every(
+      (ability) =>
+        ability.kind === "on_play" &&
+        ability.costs === "printed" &&
+        ability.effects.length > 0 &&
+        ability.effects.every(
+          (effect) => effect.kind === "distribute_advancement_counters",
+        ),
+    )
+  );
+}
+
 export function corpImmediateEconomyGainFromHint(
   hint: AiCardHint | undefined,
 ): number | undefined {

@@ -194,6 +194,22 @@ bleiben erhalten. Ein aktuelles kostenloses Einkommen oder ein weiterer
 kostenloser Score verhindern diesen engen Dominanznachweis. Nach dem Score
 wird die Reserve aus dem neuen Zustand regulär aufgebaut.
 
+Der Nachweis umfasst auch genau zwei verbleibende Klicks, wenn selbst beide
+Basiscredits die Schwelle nicht erreichen und nach dem ersten Credit nur noch
+ein Klick ohne andere mögliche Konversion bleibt. Dafür müssen Handkarten
+kanonisch als passive ICE oder nicht in einem Klick scorebare Agenden belegt
+sein. Weitere installierte Agenden, aktive Score-Area-Fähigkeiten, latentes
+Rez-/Aktivierungseinkommen und unbekannte mechanische Formen sperren diesen
+erweiterten Nachweis. Bereits erfolgte einfache Score-Auszahlungen und reine
+ICE-Installationsrabatte erzeugen keine neue Liquidität. Drei oder mehr Klicks
+werden daraus nicht extrapoliert. Die Regression aus Paarung 422, Runde 11,
+D157 hält beide Creditklicks nach dem Score; der Engine-Variantenvergleich
+belegt zwei statt einen Credit bei gleicher Agenda und gleichem Klickverbrauch.
+Reine Archives→HQ-Rückholung und reine Advancement-Verteilung auf dem letzten
+Klick eröffnen unter denselben Grenzen keine liquide Finanzierung: weitere
+installierte Agenden und Advancement-Trigger sind bereits ausgeschlossen.
+Die wiederholte Situation in Runde 11, D340, belegt diese beiden Handangebote.
+
 Dasselbe aktuelle Reihenfolgenurteil gilt für einen einzigen kostenlosen
 Score, dessen kanonischer Effekt ausschließlich einen eigenen Creditpool
 erzeugt und eine sonst kostenfreie Auszahlung pro Klick von mehr als einem

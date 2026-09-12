@@ -5387,6 +5387,40 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       );
     }
     expect(missState.corp.credits).toBeLessThan(12);
+    for (const credits of [1, 3]) {
+      const orderingStart = structuredClone(missState);
+      orderingStart.corp.credits = credits;
+      orderingStart.corp.clicks = 2;
+      const eventOffset = orderingStart.eventLog.length;
+      let creditFirst = apply(
+        structuredClone(orderingStart),
+        "corp",
+        (a) => a.type === "gain_credit",
+      );
+      creditFirst = apply(
+        creditFirst,
+        "corp",
+        (a) => a.type === "score_agenda",
+      );
+      creditFirst = apply(creditFirst, "corp", (a) => a.type === "gain_credit");
+      let scoreFirst = apply(
+        structuredClone(orderingStart),
+        "corp",
+        (a) => a.type === "score_agenda",
+      );
+      scoreFirst = apply(scoreFirst, "corp", (a) => a.type === "gain_credit");
+      scoreFirst = apply(scoreFirst, "corp", (a) => a.type === "gain_credit");
+      expect(creditFirst.corp.credits).toBe(1);
+      expect(scoreFirst.corp.credits).toBe(2);
+      expect(scoreFirst.corp.clicks).toBe(creditFirst.corp.clicks);
+      expect(scoreFirst.corp.scoreArea).toEqual(creditFirst.corp.scoreArea);
+      const reorderedReplay = replayEvents(
+        orderingStart,
+        scoreFirst.eventLog.slice(eventOffset),
+      );
+      expect(reorderedReplay.ok).toBe(true);
+      expect(hashState(reorderedReplay.state)).toBe(hashState(scoreFirst));
+    }
     const missCreditsBeforeScore = missState.corp.credits;
     missState = apply(
       missState,

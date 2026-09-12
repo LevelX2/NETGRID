@@ -4,6 +4,8 @@ import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import {
   corpConditionalScoreCreditProfile,
   corpScoreHostedCreditPayoutProfile,
+  corpDefinitionIsMainPhasePassive,
+  corpOperationCannotFundWithLastClick,
 } from "../../runtime/corp-canonical-card-facts";
 import { corpExactCurrentBasicLiquidCreditCandidate } from "../economy/economy-domain-signals";
 import { immediateCorpLiquidCreditGain } from "../economy/economy-routes";
@@ -51,9 +53,12 @@ export function corpBasicCreditsDominatedByCurrentScore(
     // after the score; the existing Economy owner then revalidates it.
     return basicCreditIds();
   }
-  if (input.playerView.own.clicks !== 1) return new Set();
+  const clicks = input.playerView.own.clicks;
+  if (clicks !== 1 && clicks !== 2) return new Set();
   const profile = corpConditionalScoreCreditProfile(project.agendaDefinitionId);
-  if (!profile || input.playerView.own.credits + 1 >= profile.threshold)
+  if (!profile || input.playerView.own.credits + clicks >= profile.threshold)
+    return new Set();
+  if (clicks === 2 && !onlyBasicFundingAfterFirstCredit(input, score.source))
     return new Set();
   // A currently available zero-click payout could still cross the threshold
   // after the basic credit. Do not claim ordering dominance in that case.
@@ -70,6 +75,47 @@ export function corpBasicCreditsDominatedByCurrentScore(
   )
     return new Set();
   return basicCreditIds();
+}
+
+function onlyBasicFundingAfterFirstCredit(
+  input: AiDecisionInput,
+  scoringAgendaId: string | undefined,
+): boolean {
+  // After the first basic credit only one click remains. Do not extrapolate
+  // this proof to longer routes, playable hand cards, another installed agenda,
+  // score-area abilities, or latent rez/activation income. An unknown canonical
+  // shape simply cannot establish this optional dominance proof.
+  if (
+    input.playerView.own.gripOrHq.some((card) =>
+      card.type === "agenda"
+        ? !(
+            typeof card.advancementRequirement === "number" &&
+            card.advancementRequirement > 1 &&
+            corpDefinitionIsMainPhasePassive(card.definitionId, "unreachable")
+          )
+        : card.type === "operation"
+          ? !corpOperationCannotFundWithLastClick(card.definitionId)
+          : card.type !== "ice" ||
+            !corpDefinitionIsMainPhasePassive(card.definitionId),
+    )
+  )
+    return false;
+  if (
+    input.playerView.own.scoreArea.some(
+      (card) => !corpDefinitionIsMainPhasePassive(card.definitionId, "past"),
+    )
+  )
+    return false;
+  return input.playerView.servers
+    .filter((server) => server.id !== "archives")
+    .every((server) =>
+      [...server.ice, ...server.root].every(
+        (card) =>
+          card.instanceId === scoringAgendaId ||
+          (card.type !== "agenda" &&
+            corpDefinitionIsMainPhasePassive(card.definitionId)),
+      ),
+    );
 }
 
 /** Keep a reachable score reward inside the existing Score -> Economy route. */
