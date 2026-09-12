@@ -82,7 +82,7 @@ export function assessCorpDrawAdmission(params: {
   const validProjection =
     projection !== undefined &&
     positiveSafeInteger(projection.cardsDrawn) &&
-    nonNegativeSafeInteger(projection.netDeckConsumption) &&
+    Number.isSafeInteger(projection.netDeckConsumption) &&
     nonNegativeSafeInteger(projection.netHandDelta) &&
     nonNegativeSafeInteger(projection.selfContainedDispositionCount) &&
     positiveSafeInteger(projection.clickCost) &&
@@ -292,7 +292,7 @@ export function corpVoluntaryDrawLeavesUnsafeMandatoryHorizon(params: {
 }): boolean {
   return (
     nonNegativeSafeInteger(params.remainingDeckCardsBeforeDraw) &&
-    nonNegativeSafeInteger(params.netDeckConsumption) &&
+    Number.isSafeInteger(params.netDeckConsumption) &&
     params.remainingDeckCardsBeforeDraw - params.netDeckConsumption < 3 &&
     !params.terminalNeedBeforeMandatoryDraw
   );

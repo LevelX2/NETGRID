@@ -181,6 +181,7 @@ export function corpHandPriorityClass(
   signal: CorpHandManagementSignal,
 ): "P2" | "P3" | "P5" | "P6" {
   if (signal.phase === "agenda_flood_relief") return "P2";
+  if (signal.phase === "preserve_draw_horizon") return "P2";
   if (signal.phase === "resolve_hq_overflow") return "P5";
   return signal.priorityClass ?? "P5";
 }

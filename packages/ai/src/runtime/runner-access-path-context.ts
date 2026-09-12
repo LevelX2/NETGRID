@@ -10,8 +10,12 @@ import {
   randomBreakOrDamageRiskCanCarryRunPath,
 } from "../actions/risk-action-projection";
 import { projectKnownRemoteTrashCommitment } from "../decision/known-remote-access-commitment";
-import { isVisiblePayEndRunSubroutine } from "../run-analysis/visible-subroutine-semantics";
+import {
+  isVisiblePayEndRunSubroutine,
+  isVisibleDirectDamageSubroutine,
+} from "../run-analysis/visible-subroutine-semantics";
 import { currentEncounterUnbrokenSubroutineIndexes } from "./current-encounter";
+import { currentEncounterRequiresDamagePreservingBreak } from "./current-encounter-damage";
 import {
   isEndRunSubroutine,
   isUnacceptableImmediateSafetyThreatSubroutine,
@@ -91,7 +95,13 @@ export function createRunnerAccessPathContext(
     if (
       targetSubroutines.some((subroutine) =>
         isUnacceptableImmediateSafetyThreatSubroutine(input, subroutine),
-      )
+      ) ||
+      (currentEncounterRequiresDamagePreservingBreak(input) &&
+        targetSubroutines.some(
+          (subroutine) =>
+            isVisibleDirectDamageSubroutine(subroutine) &&
+            (subroutine.amount ?? 0) > 0,
+        ))
     )
       return { blocksBreak: false, evidence: [] };
     if (!targetSubroutines.every(isEndRunSubroutine))
@@ -216,7 +226,13 @@ export function createRunnerAccessPathContext(
     if (
       targetSubroutines.some((subroutine) =>
         isUnacceptableImmediateSafetyThreatSubroutine(input, subroutine),
-      )
+      ) ||
+      (currentEncounterRequiresDamagePreservingBreak(input) &&
+        targetSubroutines.some(
+          (subroutine) =>
+            isVisibleDirectDamageSubroutine(subroutine) &&
+            (subroutine.amount ?? 0) > 0,
+        ))
     )
       return {
         canPreserveAccessPath: true,
@@ -228,7 +244,8 @@ export function createRunnerAccessPathContext(
     const remainingSubroutinesAfterBreak =
       quote && breakIndexes.size > 0
         ? quote.subroutines.filter(
-            (_, index) => unbrokenIndexes.has(index) && !breakIndexes.has(index),
+            (_, index) =>
+              unbrokenIndexes.has(index) && !breakIndexes.has(index),
           )
         : [];
     const remainingHardEndRunAfterBreak = remainingSubroutinesAfterBreak.filter(

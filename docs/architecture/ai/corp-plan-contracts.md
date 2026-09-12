@@ -1380,6 +1380,17 @@ Verantwortung:
 - überzählige Karten im Cleanup zweckgebunden priorisieren;
 - Deckout-Risiko und notwendige R&D-Erholung.
 
+`hand-draw-horizon.ts` bindet eine unmittelbar verfügbare, garantierte
+Engine-Zonenänderung als `preserve_draw_horizon`, wenn weniger als drei Karten
+in R&D verbleiben und die exakte Aktion diesen Horizont auf mindestens drei
+Karten wiederherstellt. Quelle, Action und StateVersion bleiben gebunden;
+unaufgelöste Ziel-/Choice-Anforderungen und unbekannte Nettoquoten liefern
+keinen solchen Nachweis. Der Hand-Owner führt diese Erholung mit P2 aus und
+revalidiert danach. Die Handkapazität richtet sich nach der tatsächlichen
+Nettoänderung; ein Refresh kann trotz Ziehen die Hand verkleinern. Auch die
+allgemeine Draw-Zulassung erhält das Vorzeichen der R&D-Nettoänderung:
+Wiederauffüllen ist negative Deckkonsumption, kein Draw mit Nullverbrauch.
+
 Der bestehende Zielgebietsvergleich bewertet einen eigenen kostenlosen
 Archives-Zugriffseffekt als Nutzen des Abwerfens. Diese Anpassung gilt nur
 für das Ziel Archives; eine R&D-Rückführung bleibt separat bewertet. Cleanup

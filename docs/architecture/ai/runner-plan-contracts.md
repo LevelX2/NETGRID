@@ -1140,6 +1140,18 @@ bleiben Gefahren; eigenständige Vollbruchpflichten und Breakerwirkungen
 bleiben beim bestehenden Encounter-Owner. Ein wirkungsloser Schadensbreak
 darf dadurch keinen bezahlbaren ETR-Break ausschließen.
 
+Die konkrete Break-Zulassung und die Pump-Vorbereitung verwenden denselben
+kumulativen Schadens-/Handreservennachweis. Ein Break positiver aktueller
+Schadenssubroutinen darf diese Reserve auch schützen, wenn der spätere
+Zugriffspfad nicht mehr bezahlbar ist. Das entlastet weder einen alleinigen
+Folge-ICE-Lock noch einen Schadensbreak oberhalb der gebundenen Reserve.
+
+Die bekannte Pfadquote unterscheidet einen nicht bezahlbaren Quell-Break von
+fehlender Breaker-Abdeckung. Würde ein Zukunftseffekt den sonst passierbaren
+bekannten Restpfad sperren, bleibt die exakte unbezahlte Breakquote als
+Finanzierungsbedarf erhalten. Sie darf nicht verworfen und dadurch die
+Folgeschicht fälschlich als physisch unbrechbar eingeordnet werden.
+
 Die vorab gebundene Reserve für unbekanntes ICE gilt auch vor dessen
 Informationsgrenze: Bekannter Schaden darf den reservierten Handpuffer nicht
 verbrauchen; seine Vermeidung darf nur aus Credits außerhalb derselben

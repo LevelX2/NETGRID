@@ -48,7 +48,7 @@ export function exactCurrentCorpDrawAdmissionProjection(
     cardsDrawn: projection.cardsDrawn!,
     netDeckConsumption:
       projection.netDrawPileDelta !== undefined
-        ? Math.max(0, -projection.netDrawPileDelta)
+        ? -projection.netDrawPileDelta
         : projection.cardsDrawn!,
     netHandDelta: projection.netHandDelta,
     selfContainedDispositionCount:
@@ -85,7 +85,7 @@ export function corpCandidatePreservesVoluntaryDrawHorizon(
     candidate.sourceKind === "basic_action"
       ? 1
       : candidate.economyProjection?.netDrawPileDelta !== undefined
-        ? Math.max(0, -candidate.economyProjection.netDrawPileDelta)
+        ? -candidate.economyProjection.netDrawPileDelta
         : undefined;
   if (!Number.isSafeInteger(cardsDrawn) || (cardsDrawn ?? 0) <= 0) {
     return true;

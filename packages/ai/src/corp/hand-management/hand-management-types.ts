@@ -9,7 +9,8 @@ export type CorpHandManagementSignal = {
     | "agenda_flood_relief"
     | "discard_window"
     | "draw_filter_window"
-    | "hq_shuffle_window";
+    | "hq_shuffle_window"
+    | "preserve_draw_horizon";
   sourceDefinitionIds?: string[];
   sourceInstanceId?: string;
   actionIds?: string[];

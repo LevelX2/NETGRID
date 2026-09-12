@@ -1124,6 +1124,25 @@ function assessKnownRezzedIcePathInternal(
           })
         : undefined;
       if (breakAssessment) {
+        const payment = projectBreakerCreditPayment(
+          creditBudget,
+          breakAssessment,
+        );
+        if (!payment.affordable) {
+          return blockedPathAssessment(
+            visibleBreakCost + breakAssessment.cost,
+            payment.creditsAfterPath,
+            iceIndex,
+            effectiveIce.definitionId,
+            effectiveIce.subtypes,
+            visibleBreakCost,
+            firstKnownIceBreakable,
+            assessedKnownIceCount,
+            visibleBreakCost > 0
+              ? "later_ice_unaffordable_after_prior_ice_cost"
+              : "ice_unaffordable",
+          );
+        }
         visibleBreakCost += breakAssessment.cost;
         futureClicksLost += breakAssessment.futureClicksLost ?? 0;
         spendBreakerCreditsAndApplySideEffects(creditBudget, breakAssessment);
@@ -1429,7 +1448,6 @@ function runPathEffectBreakAssessment(params: {
     params.creditBudget,
     breakAssessment,
   );
-  if (!payment.affordable) return undefined;
 
   const futureWithoutEffect = assessKnownRezzedIcePathInternal(
     futureIce,
@@ -1453,6 +1471,17 @@ function runPathEffectBreakAssessment(params: {
     new Map(params.carriedBreakerStrengths),
     params.deflectorContext,
   );
+  const effectCreatesNoAccess =
+    (futureWithoutEffect.canReachAccess ||
+      (runnerKnownPathAssessmentIsCostNoAccess(futureWithoutEffect) &&
+        runnerKnownPathAssessmentIsUnbreakableNoAccess(futureWithEffect))) &&
+    !futureWithEffect.canReachAccess &&
+    futureWithEffect.assessedKnownIceCount > 0;
+  // An unfunded source break remains a funding need. Dropping its quote
+  // would apply the lock and misreport the following ICE as missing coverage.
+  if (!payment.affordable) {
+    return effectCreatesNoAccess ? breakAssessment : undefined;
+  }
   const breakerStrengthsAfterBreak = new Map(params.carriedBreakerStrengths);
   if (breakAssessment.carriesStrengthAcrossIce) {
     breakerStrengthsAfterBreak.set(
@@ -1479,10 +1508,6 @@ function runPathEffectBreakAssessment(params: {
   ) {
     return undefined;
   }
-  const effectCreatesNoAccess =
-    futureWithoutEffect.canReachAccess &&
-    !futureWithEffect.canReachAccess &&
-    futureWithEffect.assessedKnownIceCount > 0;
   if (effectCreatesNoAccess) return breakAssessment;
   const futureCostDelta = Math.max(
     0,

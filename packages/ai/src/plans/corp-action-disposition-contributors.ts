@@ -953,7 +953,7 @@ function contributeCorpActionDispositionForCandidate(
   }
   if (
     candidate.semanticActionType === "draw.card" &&
-    input.playerView.own.gripOrHq.length >= input.playerView.own.maxHandSize &&
+    !facts.corpDrawCandidatePreservesHandCapacity(input, candidate) &&
     !domain.handManagement.some(
       (signal) => signal.actionIds?.includes(candidate.actionId) === true,
     ) &&
@@ -1203,7 +1203,7 @@ function corpVoluntaryDrawDeckoutHorizonDisposition(
     candidate.sourceKind === "basic_action"
       ? 1
       : candidate.economyProjection?.netDrawPileDelta !== undefined
-        ? Math.max(0, -candidate.economyProjection.netDrawPileDelta)
+        ? -candidate.economyProjection.netDrawPileDelta
         : undefined;
   if (!Number.isSafeInteger(cardsDrawn) || (cardsDrawn ?? 0) <= 0) {
     return undefined;

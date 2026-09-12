@@ -13,6 +13,7 @@ import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio"
 import { uniqueBy } from "../../runtime/collection";
 import { corpHostedCreditBankProfile } from "../../runtime/corp-canonical-card-facts";
 import { corpCandidateProjectsCardDraw } from "../../runtime/corp-draw-action-facts";
+import { corpDrawHorizonPreservationSignals } from "./hand-draw-horizon";
 import {
   corpReservedScoreServerIds,
   CorpScoreAccelerationSetupBinding,
@@ -244,6 +245,7 @@ export function buildCorpHandManagementSignals(
   );
   const hqOverflowActionIds = new Set(hqOverflowResolution?.actionIds ?? []);
   const handManagement: CorpPlanDomain["handManagement"] = [
+    ...corpDrawHorizonPreservationSignals(input, candidates, ownAgendas),
     ...(hqOverflowResolution ? [hqOverflowResolution] : []),
     ...cardDevelopmentSignals.filter(
       (signal) =>
