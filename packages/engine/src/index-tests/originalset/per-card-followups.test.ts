@@ -3187,6 +3187,40 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       replayEvents(unfunded, fundFirst.eventLog.slice(unfunded.eventLog.length))
         .ok,
     ).toBe(true);
+    // Pairing 422 D189: below an unreachable threshold, reverse the order.
+    const belowThreshold = structuredClone(unfunded);
+    belowThreshold.corp.credits = 6;
+    const resetThenCredit = apply(
+      apply(structuredClone(belowThreshold), "corp", scoreWar),
+      "corp",
+      (action) => action.type === "gain_credit",
+    );
+    const creditThenReset = apply(
+      apply(
+        structuredClone(belowThreshold),
+        "corp",
+        (action) => action.type === "gain_credit",
+      ),
+      "corp",
+      scoreWar,
+    );
+    expect(getPlayerView(resetThenCredit, "corp").own).toMatchObject({
+      credits: 1,
+      clicks: 0,
+      agendaPoints: 3,
+    });
+    expect(getPlayerView(creditThenReset, "corp").own).toMatchObject({
+      credits: 0,
+      clicks: 0,
+      agendaPoints: 3,
+    });
+    expect(resetThenCredit.turnSerial).toBe(creditThenReset.turnSerial);
+    const resetReplay = replayEvents(
+      belowThreshold,
+      resetThenCredit.eventLog.slice(belowThreshold.eventLog.length),
+    );
+    expect(resetReplay.ok).toBe(true);
+    expect(hashState(resetReplay.state)).toBe(hashState(resetThenCredit));
     const warInitial = structuredClone(warState);
     const warReplayStart = warState.eventLog.length;
     warState = apply(

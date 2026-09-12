@@ -33,6 +33,7 @@ import { runnerRunTargetHasOptionalBonusRunValue } from "../../runner-run-target
 import {
   currentEncounteredIceCard,
   currentEncounterRequiresFullBreak,
+  currentEncounterUnbrokenSubroutineIndexes,
   currentRunHasPendingAutoPassIce,
   currentRunRemainingIce,
 } from "../../runtime/current-encounter";
@@ -1142,6 +1143,7 @@ function runnerRunWindowPlanStepExclusion(
     (action.type === "pump_breaker" || action.type === "break_subroutine") &&
     informationReassessment?.decision === "retain_information" &&
     !runnerInformationProbeRequiresEncounterBreak(input, runOrigin) &&
+    !runnerCurrentEncounterRequiresDamagePreservingBreak(input, runOrigin) &&
     !runnerCurrentEncounterRequiresProgramPreservingBreak(input) &&
     (!informationReassessment.knownPathReachable ||
       informationReassessment.fundingGap > 0 ||
@@ -1345,11 +1347,32 @@ export function runnerCurrentEncounterRequiresDamagePreservingBreak(
   input: AiDecisionInput,
   runOrigin: RunnerRunOrigin | undefined,
 ): boolean {
+  if (input.playerView.run?.phase !== "encounter_ice") return false;
   if (currentEncounterRequiresFullBreak(input)) return true;
   const encounteredIce = currentEncounteredIceCard(input);
   if (!encounteredIce?.effectiveRunQuote) return false;
+  if (
+    !encounteredIce.effectiveRunQuote.subroutines.some(
+      (subroutine) =>
+        (subroutine.type === "do_damage" ||
+          subroutine.type === "random_damage") &&
+        typeof subroutine.amount === "number" &&
+        subroutine.amount > 0,
+    )
+  )
+    return false;
+  const unbrokenIndexes = currentEncounterUnbrokenSubroutineIndexes(input);
+  const remainingDamageIce = {
+    ...encounteredIce,
+    effectiveRunQuote: {
+      ...encounteredIce.effectiveRunQuote,
+      subroutines: encounteredIce.effectiveRunQuote.subroutines.filter(
+        (_, index) => unbrokenIndexes.has(index),
+      ),
+    },
+  };
   return (
-    runnerVisibleLethalIceDamageAssessment(input, [encounteredIce], {
+    runnerVisibleLethalIceDamageAssessment(input, [remainingDamageIce], {
       // Quote the consequence of deliberately leaving the current damage
       // subroutine unbroken. Affordability is evaluated by the exact
       // pump/break LegalActions, not by this consequence check.

@@ -6,13 +6,24 @@ import { knownInstallRouteHasUsefulEffectBlockedByFunding } from "./corp-defense
 import { corpGenericDefensePriorityClass } from "../../plans/corp-defense-funding-contract";
 import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { corpRestrictedRezPreparationCandidates } from "../../runtime/corp-restricted-credit-reserve";
+import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
+import { corpBasicCreditsErasedByCurrentScore } from "../score/score-conditional-credit-funding";
 
 export function corpDefenseReserveNeeds(
   input: AiDecisionInput,
   defenseNeeds: readonly CorpDefenseSignal[],
   immediateFundingActionIds: string[],
   candidates: readonly ActionSemanticCandidate[],
+  scoreProjects: readonly CorpScoreProjectSignal[],
 ): CorpCorePlanDomain["economyNeeds"] {
+  const erasedCredits = corpBasicCreditsErasedByCurrentScore(
+    input,
+    candidates,
+    scoreProjects,
+  );
+  const retainedFundingActionIds = immediateFundingActionIds.filter(
+    (actionId) => !erasedCredits.has(actionId),
+  );
   const priorityRank = { P2: 2, P3: 3, P5: 5, P6: 6 } as const;
   const productivePriorities = defenseNeeds.flatMap((need) =>
     need.kind === "generic" &&
@@ -93,12 +104,17 @@ export function corpDefenseReserveNeeds(
           requiredRezCredits: reserve.requiredCredits,
         })
       : [];
+    const fundingActionIds =
+      restrictedCreditPreparations.length > 0
+        ? immediateFundingActionIds
+        : retainedFundingActionIds;
+    if (erasedCredits.size > 0 && fundingActionIds.length === 0) return [];
     return [
       {
         kind: "parent_funding",
         needId: `defense-reserve:${need.serverId}:${iceInstanceId}`,
         gap,
-        actionIds: immediateFundingActionIds,
+        actionIds: fundingActionIds,
         ...(restrictedCreditPreparations.length > 0
           ? { restrictedCreditPreparations }
           : {}),

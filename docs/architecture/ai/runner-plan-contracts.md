@@ -787,6 +787,14 @@ ein verbrauchter Pool nicht erneut aus dem alten Zustand ausgegeben wird.
 Das Modul besitzt kein unabhängiges langfristiges Ziel. Es gehört logisch zum
 auslösenden Run-/Contest-Plan und kehrt anschließend dorthin zurück.
 
+Auch nach einer Informations-Neuquote ohne bezahlbaren vollständigen Zugriff
+bleibt die Abwehr aktueller sichtbarer Schäden beim Run-Window. Der Verlust
+des Accesspfads darf eine bezahlbare Pump-/Teilbruchfolge zur Vermeidung von
+Flatline oder gebundenem Handpufferverlust nicht ausschließen. Dafür werden
+nur die aktuellen, über Engine-IDs gebundenen ungebrochenen Subroutinen
+bewertet. Bereits gebrochener Schaden begründet keine weiteren Ausgaben;
+fehlende Restbindungen scheitern strukturiert statt Schaden zu erfinden.
+
 Bedingter Schaden im nächsten Encounter wird gemeinsam mit der vollständig
 bezahlbaren Folgelösung bewertet. Wählt die bekannte Pfadprojektion den
 vollständigen Break des nächsten ICE, darf die Encounter-Auflösung nicht

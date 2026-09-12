@@ -23,6 +23,20 @@ describe("selfplay cycle 164 decision checkpoints", () => {
     ) as ReconstructedDecisionCapture;
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
     expect(deckSnapshotId).toBeDefined();
+    // This older capture predates the remaining-subroutine-ID DTO field.
+    // Its sole quoted subroutine and unbroken count bind the current contract
+    // exactly; the historical fixture itself remains unmodified.
+    expect(
+      capture.input.playerView.run?.encounteredIce?.effectiveRunQuote?.subroutines.map(
+        (s) => s.id,
+      ),
+    ).toEqual(["subroutine_random_brain_damage"]);
+    const continuation = capture.input.legalActions.find(
+      (a) => a.type === "continue_run",
+    )!;
+    expect(continuation.payload?.unbrokenSubroutineCount).toBe(1);
+    continuation.payload!.encounterSubroutineIds =
+      "subroutine_random_brain_damage";
     resetResidentPlanPortfolioMemory();
     restoreAiRuntimeCheckpoint(capture.input, deckSnapshotId!, capture.runtime);
 

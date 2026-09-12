@@ -191,6 +191,7 @@ it("preserves funding against nominal capacity but gives genuinely productive sa
       [reserve, install],
       ["corp.gain_credit"],
       [],
+      [],
     ),
   ).toHaveLength(1);
   const productive = structuredClone(install);
@@ -203,6 +204,7 @@ it("preserves funding against nominal capacity but gives genuinely productive sa
       input,
       [reserve, productive],
       ["corp.gain_credit"],
+      [],
       [],
     ),
   ).toEqual([]);

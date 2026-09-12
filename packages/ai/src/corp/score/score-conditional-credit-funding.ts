@@ -3,6 +3,62 @@ import type { ActionSemanticCandidate } from "../../action-semantic-candidate-ty
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { corpConditionalScoreCreditProfile } from "../../runtime/corp-canonical-card-facts";
 import { corpExactCurrentBasicLiquidCreditCandidate } from "../economy/economy-domain-signals";
+import { immediateCorpLiquidCreditGain } from "../economy/economy-routes";
+
+/** A last basic credit cannot survive an already executable cash-reset score.
+ * Keep other funding routes and real current-window defense independent.
+ */
+export function corpBasicCreditsErasedByCurrentScore(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  projects: readonly CorpScoreProjectSignal[],
+): ReadonlySet<string> {
+  if (input.playerView.run || input.playerView.own.clicks !== 1)
+    return new Set();
+  const freeScores = input.legalActions.filter(
+    (action) =>
+      action.type === "score_agenda" &&
+      action.side === "corp" &&
+      action.expiresAtStateVersion === input.playerView.stateVersion &&
+      action.costs.length === 0,
+  );
+  if (freeScores.length !== 1) return new Set();
+  const score = freeScores[0]!;
+  const project = projects.find(
+    (project) =>
+      project.phase === "score_agenda" &&
+      project.feasible &&
+      project.sameTurnCloseout &&
+      !project.terminalScore &&
+      project.agendaInstanceId === score.source &&
+      project.actionIds?.includes(score.actionId),
+  );
+  if (!project?.agendaDefinitionId) return new Set();
+  const profile = corpConditionalScoreCreditProfile(project.agendaDefinitionId);
+  if (!profile || input.playerView.own.credits + 1 >= profile.threshold)
+    return new Set();
+  // A currently available zero-click payout could still cross the threshold
+  // after the basic credit. Do not claim ordering dominance in that case.
+  if (
+    candidates.some(
+      (candidate) =>
+        immediateCorpLiquidCreditGain(candidate) > 0 &&
+        input.legalActions.some(
+          (action) =>
+            action.actionId === candidate.actionId &&
+            action.costs.every((cost) => (cost.clicks ?? 0) === 0),
+        ),
+    )
+  )
+    return new Set();
+  return new Set(
+    candidates
+      .filter((candidate) =>
+        corpExactCurrentBasicLiquidCreditCandidate(input, candidate),
+      )
+      .map((candidate) => candidate.actionId),
+  );
+}
 
 /** Keep a reachable score reward inside the existing Score -> Economy route. */
 export function corpConditionalScoreCreditFunding(

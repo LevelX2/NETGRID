@@ -178,6 +178,15 @@ der Score folgt weiterhin im selben Corp-Zug. Terminale Scores und aktuell
 unerreichbare Schwellen warten nicht auf diesen Bonus. Die Umsetzung liegt
 in `score-conditional-credit-funding.ts`; es entsteht kein eigener Chooser.
 
+Bei genau einem verbleibenden Klick darf ein Basiscredit keine Defense-Reserve
+vortäuschen, wenn der einzige aktuelle kostenlose Same-Turn-Score diesen
+Credit anschließend vollständig löscht und die Bonusschwelle auch nach dem
+Credit unerreicht bleibt. Der Score-Owner liefert diesen Variantenvergleich
+an die bestehende Defense-Finanzierung; deren sonstige Routen und Priorität
+bleiben erhalten. Ein aktuelles kostenloses Einkommen oder ein weiterer
+kostenloser Score verhindern diesen engen Dominanznachweis. Nach dem Score
+wird die Reserve aus dem neuen Zustand regulär aufgebaut.
+
 Beim Variantenvergleich zweier vollständig finanzierter, nichtterminaler
 Same-Turn-Scores derselben Agenda prüft der Score-Owner auch den Verlust eines
 installierten Wirtschaftsmittels. Stimmen Klicks, Credits, Fortschritt,

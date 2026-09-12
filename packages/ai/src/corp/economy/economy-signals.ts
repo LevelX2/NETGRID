@@ -1270,6 +1270,7 @@ export function corpRequiredEconomyNeeds(
     defenseNeeds,
     immediateFundingActionIds,
     candidates,
+    scoreProjects,
   );
   const remoteFunding = remoteProjects.flatMap((project) => {
     const need = project.need;
