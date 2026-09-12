@@ -48,14 +48,14 @@ describe("pairing 425 targeted ICE trash replaces a coverage support need", () =
     const { portfolio } = replay(beforeJson);
     expect(portfolio).toMatchObject({
       rootForegroundInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-      executorInstanceId: "plan:runner.rig_and_coverage:coverage%3Abreaker_ap",
+      executorInstanceId: "plan:runner.rig_and_coverage:coverage%3Abreaker_sentry",
     });
     const executor = portfolio!.instances.find(
       (instance) => instance.instanceId === portfolio!.executorInstanceId,
     );
     expect(executor).toMatchObject({
       parentInstanceId: portfolio!.rootForegroundInstanceId,
-      parentNeedId: "coverage:breaker_ap",
+      parentNeedId: "coverage:breaker_sentry",
     });
   });
 
