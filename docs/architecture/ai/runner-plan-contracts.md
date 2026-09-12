@@ -262,6 +262,12 @@ muss dem ursprünglichen Zahlungs-Origin entsprechen. Ein zwischenzeitlicher
 Economy-Executor darf nicht die folgenden Quellen-, Ziel- oder Speicher-Choices
 besitzen. Das vorab gebundene Suchziel und seine akzeptablen Speicheropfer
 bleiben erhalten; abweichende Root- oder Suchversionsbindungen scheitern.
+Während der Zahlungsunterstützung bleibt auch die ursprüngliche Parentkette
+der Coverage-Aktion erhalten. Eine allgemeine Neuentdeckung derselben
+Coverage-Instanz darf deren Remote-Parent nicht entfernen. Jede Kante wird
+gegen die bisherige Bindung, beide residenten Elterninstanzen und den weiterhin
+offenen Supportbedarf geprüft. Fehlende Eltern oder geschlossene Bedarfe werden
+nicht rekonstruiert; sie scheitern mit `invalid_support_graph`.
 
 `coverage-services.ts` benennt sieben Dienste: aktuelles Remote-Material,
 bekannten verzögerten ICE-Abgang, direkte Run-Verwertbarkeit, Run-Funding,

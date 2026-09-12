@@ -10,6 +10,7 @@ import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import { selectResidentPlanPortfolioExecutor } from "../../plans/resident-plan-portfolio";
 import type { RunnerProgramInstallTrashAssessment } from "../../runtime/runner-program-install-trash-policy";
+import { preserveCoveragePaymentAncestry } from "./coverage-payment-ancestry";
 export function preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
   input: AiDecisionInput,
   result: Extract<PlanSchedulerResult, { lane: "plan" }>,
@@ -101,6 +102,12 @@ export function preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
     nextState.phase === previousState.phase &&
     previousState.gap?.requiredRole === nextState.gap?.requiredRole;
   if (exactActionBinding && nextExecutor && nextState) {
+    preserveCoveragePaymentAncestry(
+      input,
+      previous!,
+      result.portfolio,
+      pending,
+    );
     nextExecutor.moduleState = {
       ...nextState,
       gap: structuredClone(previousState.gap),
@@ -127,6 +134,7 @@ export function preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
         "Carry the exact selected coverage search, install or draw action and its unchanged coverage binding through every intervening payment-support step.",
     });
   }
+  preserveCoveragePaymentAncestry(input, previous!, result.portfolio, pending);
   nextExecutor.moduleState = {
     ...nextState,
     gap: structuredClone(previousState.gap),
