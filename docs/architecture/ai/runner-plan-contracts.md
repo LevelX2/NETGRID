@@ -880,6 +880,13 @@ Verantwortung:
 - Credit-, Trash- oder Folge-Run-Payoffs;
 - Ziel- und Choice-Auflösung innerhalb des begonnenen Runplans.
 
+Die Nutzenprüfung für Pump, Break und verbleibende Run-Effekte verwendet
+denselben aktuellen Zielnachweis. Ausschließlich auf das nächste Encounter
+wirkende Locks oder Breakverbote besitzen am innersten ICE ohne Redirect
+oder Rewind keinen Nutzen. Dafür werden bereits die vorbereitenden Pumps
+abgelehnt. Aktueller Schaden und bestehende Full-Break-Pflichten bleiben
+wirksam; ein tatsächlich folgendes ICE bleibt ein gültiges Effektziel.
+
 Die aktuelle Kostenprojektion für Pump und Break trennt liquide Credits von
 den tatsächlich verwendbaren sichtbaren Run-/Breaker-Pools. Sie verwendet
 dieselbe zweckgebundene Zahlungsprojektion wie die Encounterbewertung;

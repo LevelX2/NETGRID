@@ -2,6 +2,7 @@ import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 import {
   currentEncounteredIceCard,
+  currentEncounterNextOnlySubroutineHasNoTarget,
   currentEncounterRequiresFullBreak,
 } from "./current-encounter";
 import { encounterRunRemainderEffectAssessment } from "./runner-run-remainder-effect-assessment";
@@ -159,35 +160,17 @@ function breakOnlyPreventsAbsentNextEncounter(
   input: AiDecisionInput,
   action: LegalAction,
 ): boolean {
-  if (currentEncounterRequiresFullBreak(input)) return false;
-  const run = input.playerView.run;
-  if (
-    run?.phase !== "encounter_ice" ||
-    run.position?.kind !== "ice" ||
-    run.position.iceIndex !== 0
-  )
-    return false;
   const ice = currentEncounteredIceCard(input);
   if (!ice || action.payload?.iceId !== ice.instanceId) return false;
   const subroutines = ice.effectiveRunQuote?.subroutines;
-  if (
-    !subroutines?.length ||
-    subroutines.some(
-      (subroutine) =>
-        subroutine.type === "deflect_run" ||
-        subroutine.type === "rewind_run_to_rezzed_ice_by_die",
-    )
-  )
-    return false;
+  if (!subroutines?.length) return false;
   const indexes = breakSubroutineIndexesForAction(action);
   return (
     indexes.size > 0 &&
     [...indexes].every((index) => {
-      const type = subroutines[index]?.type;
-      return (
-        type === "set_next_encounter_no_break_subroutines" ||
-        type === "set_next_encounter_lock" ||
-        type === "set_next_encounter_unless_fully_break_damage"
+      return currentEncounterNextOnlySubroutineHasNoTarget(
+        input,
+        subroutines[index]?.type,
       );
     })
   );

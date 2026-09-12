@@ -21,6 +21,8 @@ export function encounterHasImmediateUnbrokenThreat(
   if (currentEncounterRequiresFullBreak(input)) return true;
   return Boolean(
     quote?.subroutines.some((subroutine) => {
+      if (currentEncounterNextOnlySubroutineHasNoTarget(input, subroutine.type))
+        return false;
       // This obligation belongs to the following encounter and is assessed
       // together with its complete, payable alternative by the path owner.
       if (subroutine.type === "set_next_encounter_unless_fully_break_damage")
@@ -53,6 +55,36 @@ export function encounterHasImmediateUnbrokenThreat(
         (subroutine.unbrokenRunEffect?.createsRunLockOrActionTax ?? 0) > 0
       );
     }),
+  );
+}
+
+export function currentEncounterNextOnlySubroutineHasNoTarget(
+  input: AiDecisionInput,
+  type: string | undefined,
+): boolean {
+  if (
+    type !== "set_next_encounter_no_break_subroutines" &&
+    type !== "set_next_encounter_lock" &&
+    type !== "set_next_encounter_unless_fully_break_damage"
+  )
+    return false;
+  if (currentEncounterRequiresFullBreak(input)) return false;
+  const run = input.playerView.run;
+  if (
+    run?.phase !== "encounter_ice" ||
+    run.position?.kind !== "ice" ||
+    run.position.iceIndex !== 0
+  )
+    return false;
+  const subroutines =
+    currentEncounteredIceCard(input)?.effectiveRunQuote?.subroutines;
+  return (
+    Boolean(subroutines?.length) &&
+    !subroutines!.some(
+      (subroutine) =>
+        subroutine.type === "deflect_run" ||
+        subroutine.type === "rewind_run_to_rezzed_ice_by_die",
+    )
   );
 }
 

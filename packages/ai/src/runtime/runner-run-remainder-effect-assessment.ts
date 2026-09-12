@@ -6,6 +6,7 @@ import type {
 
 import {
   currentEncounteredIceCard,
+  currentEncounterNextOnlySubroutineHasNoTarget,
   currentEncounterRequiresFullBreak,
   currentRunHasFutureVisibleIce,
   currentRunRemainingIce,
@@ -60,6 +61,8 @@ export function encounterRunRemainderEffectAssessment(
   const effects: RunRemainderEffectEntry[] = targetIndexes.flatMap((index) => {
     const effect = quote?.subroutines[index]?.unbrokenRunEffect;
     const subroutineType = quote?.subroutines[index]?.type;
+    if (currentEncounterNextOnlySubroutineHasNoTarget(input, subroutineType))
+      return [];
     return effect ? [{ index, effect, subroutineType }] : [];
   });
   if (!quote || effects.length === 0) {
