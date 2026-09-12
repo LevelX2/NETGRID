@@ -61,41 +61,56 @@ describe("game event builder", () => {
     expect(toPublicEvent(event)).not.toHaveProperty("privatePayload");
   });
 
-  it("labels a deferred action as an opened payment window", () => {
-    const previous = createGame({
-      seed: "arch-60-payment-window-event",
-      setupMode: "completed",
-    });
-    const next = nextState(previous);
-    const legalAction = {
-      ...mandatoryDrawLegalAction(previous),
-      type: "break_subroutine",
-      label: "Rent-I-Con: Subroutine brechen",
-      payload: {
+  it.each(["same_action", "runner_encounter_entry"] as const)(
+    "labels the bound payment window: %s",
+    (origin) => {
+      const previous = createGame({
+        seed: "arch-60-payment-window-event",
+        setupMode: "completed",
+      });
+      const next = nextState(previous);
+      const legalAction = {
+        ...mandatoryDrawLegalAction(previous),
+        type: "break_subroutine",
+        label: "Rent-I-Con: Subroutine brechen",
+        payload: {
+          runnerCostPenaltySupportWindowOpened: true,
+          runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.1",
+        },
+      } satisfies LegalAction;
+
+      next.runnerCostPenaltySupportWindow = {
+        windowId: "runner_cost_penalty_support.1",
+        originalActionId:
+          origin === "same_action"
+            ? legalAction.actionId
+            : "runner.continue_run",
+        amountDue: 2,
+        kind: "cost",
+        createdAtStateVersion: previous.stateVersion,
+      };
+
+      const event = buildEventWithHost(
+        testBuildEventHost(),
+        previous.stateVersion,
+        next.stateVersion,
+        hashState(next),
+        previous,
+        next,
+        legalAction,
+        playerActionFor(previous, legalAction),
+      );
+
+      expect(event.publicPayload).toMatchObject({
+        actionType: "break_subroutine",
+        label: "Kostenfenster geöffnet.",
         runnerCostPenaltySupportWindowOpened: true,
         runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.1",
-      },
-    } satisfies LegalAction;
-
-    const event = buildEventWithHost(
-      testBuildEventHost(),
-      previous.stateVersion,
-      next.stateVersion,
-      hashState(next),
-      previous,
-      next,
-      legalAction,
-      playerActionFor(previous, legalAction),
-    );
-
-    expect(event.publicPayload).toMatchObject({
-      actionType: "break_subroutine",
-      label: "Kostenfenster geöffnet.",
-      runnerCostPenaltySupportWindowOpened: true,
-      runnerCostPenaltySupportWindowId: "runner_cost_penalty_support.1",
-      runnerCostPenaltySupportOriginalActionId: legalAction.actionId,
-    });
-  });
+        runnerCostPenaltySupportOriginalActionId:
+          next.runnerCostPenaltySupportWindow.originalActionId,
+      });
+    },
+  );
 
   it("publishes canonical counter mutations on the existing action event", () => {
     const previous = createGame({

@@ -169,6 +169,13 @@ neue Remote von diesem Claim ausgeschlossen, damit sie deren gebundene
 Fortsetzung nicht unterbricht. Ein bloßer Installationsschritt ohne
 vollständigen Scorepfad begründet diesen Nachweis nicht.
 
+Nach der exakten Installation bleibt derselbe Nachweis erhalten, wenn die
+Agenda nun im gebundenen Zielserver liegt und weder eine weitere HQ-Agenda
+noch eine installierte Geschwisteragenda exponiert ist. Der Wechsel aus HQ
+in die Remote ist kein Verlust der Scoring-Dringlichkeit. Jeder weitere
+Advance-/Consultants-/Score-Schritt benötigt weiterhin den aktuellen
+vollständigen Engine-Pfad; eine leere HQ allein genügt nicht.
+
 Vor einem nichtterminalen Same-Turn-Score berücksichtigt der Score-Owner bedingte
 Creditwirkungen aus dem kanonischen strukturierten Scoreprofil. Ist die Agenda
 bereits kostenlos scorebar und ihre Bonusschwelle mit den verbleibenden,

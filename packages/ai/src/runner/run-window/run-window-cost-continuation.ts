@@ -13,6 +13,78 @@ import {
 } from "../hand-development/development-choice-bindings";
 import { preserveSelectedRunnerCoverageBindingAcrossPaymentStep } from "../rig-coverage/coverage-bindings";
 
+/** A completed Runner movement may cross only Corp rez windows before the
+ * Engine opens its exact Runner encounter-entry payment continuation. */
+function originalPaymentSelectionReachesWindow(
+  input: AiDecisionInput,
+  previous: ResidentPlanPortfolio | undefined,
+  windowId: string | undefined,
+): boolean {
+  const origin = previous?.pendingRunnerCostPenaltySupportOrigin;
+  if (
+    !previous ||
+    !origin ||
+    origin.windowId !== undefined ||
+    previous.stateVersion !== origin.selectedAtStateVersion
+  )
+    return false;
+  if (input.playerView.stateVersion === previous.stateVersion + 1) return true;
+  const run = input.playerView.run;
+  const executor = previous.instances.find(
+    (p) => p.instanceId === origin.executorInstanceId,
+  );
+  const state = executor?.moduleState as
+    | { kind?: string; signal?: { windowId?: string; serverId?: string } }
+    | undefined;
+  if (
+    !run ||
+    origin.originalActionId !== "runner.continue_run" ||
+    executor?.moduleId !== "runner.convert_run_window" ||
+    executor.parentInstanceId !== origin.rootPlanInstanceId ||
+    previous.rootForegroundInstanceId !== origin.rootPlanInstanceId ||
+    previous.executorInstanceId !== origin.executorInstanceId ||
+    state?.kind !== "run_window" ||
+    state.signal?.windowId !== `run:${run.runId}` ||
+    state.signal.serverId !== run.attackedServerId
+  )
+    return false;
+  const events = (input.eventTail ?? []).filter(
+    (e) =>
+      e.stateVersionBefore >= previous.stateVersion &&
+      e.stateVersionAfter <= input.playerView.stateVersion,
+  );
+  const first = events[0],
+    last = events.at(-1);
+  return (
+    events.length >= 2 &&
+    first?.stateVersionBefore === previous.stateVersion &&
+    last?.stateVersionAfter === input.playerView.stateVersion &&
+    events.every(
+      (e, index) =>
+        e.stateVersionAfter === e.stateVersionBefore + 1 &&
+        (index === 0 ||
+          e.stateVersionBefore === events[index - 1]!.stateVersionAfter),
+    ) &&
+    first.publicPayload.actor === "runner" &&
+    first.publicPayload.actionType === "continue_run" &&
+    first.publicPayload.serverId === run.attackedServerId &&
+    events
+      .slice(1)
+      .every(
+        (e) =>
+          e.publicPayload.actor === "corp" &&
+          ["rez_ice", "rez_card", "decline_rez"].includes(
+            String(e.publicPayload.actionType),
+          ),
+      ) &&
+    last.publicPayload.runnerCostPenaltySupportWindowOpened === true &&
+    last.publicPayload.runnerCostPenaltySupportWindowId === windowId &&
+    last.publicPayload.runnerCostPenaltySupportOriginalActionId ===
+      origin.originalActionId &&
+    typeof last.publicPayload.targetIceDefinitionId === "string"
+  );
+}
+
 export function reconcileSelectedRunnerCostPenaltySupportOrigin(
   input: AiDecisionInput,
   result: PlanSchedulerResult,
@@ -59,10 +131,7 @@ export function reconcileSelectedRunnerCostPenaltySupportOrigin(
       )
     ) {
       const directSupportFromOriginalSelection =
-        pending?.windowId === undefined &&
-        previous !== undefined &&
-        previous?.stateVersion === pending?.selectedAtStateVersion &&
-        input.playerView.stateVersion === previous.stateVersion + 1;
+        originalPaymentSelectionReachesWindow(input, previous, supportWindowId);
       if (
         !pending ||
         !selectedAction ||
@@ -471,10 +540,7 @@ export function resolvePlanBoundRunnerCostPenaltyContinuation(
     const action = boundSupportActions[0]!;
     const windowId = action.payload!.costPenaltySupportWindowId as string;
     const directSupportFromOriginalSelection =
-      origin?.windowId === undefined &&
-      previous !== undefined &&
-      previous?.stateVersion === origin?.selectedAtStateVersion &&
-      context.input.playerView.stateVersion === previous.stateVersion + 1;
+      originalPaymentSelectionReachesWindow(context.input, previous, windowId);
     if (
       !origin ||
       previous?.side !== "runner" ||
@@ -537,10 +603,7 @@ export function resolvePlanBoundRunnerCostPenaltyContinuation(
       ) === true,
   );
   const directContinuationFromOriginalSelection =
-    origin?.windowId === undefined &&
-    previous?.stateVersion === origin?.selectedAtStateVersion &&
-    previous !== undefined &&
-    context.input.playerView.stateVersion === previous.stateVersion + 1;
+    originalPaymentSelectionReachesWindow(context.input, previous, windowId);
   if (
     !action ||
     !origin ||

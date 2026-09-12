@@ -394,9 +394,14 @@ describe("PRO011 hidden resource timing hardening", () => {
       expectReplayStable(initial, state);
     },
   );
-  it.each([13, 1])(
-    "resumes encounter entry after bank support with %i pool credits",
-    (credits) => {
+  it.each([
+    { credits: 13, entry: "runner_continue" },
+    { credits: 1, entry: "runner_continue" },
+    { credits: 13, entry: "corp_decline" },
+    { credits: 1, entry: "corp_decline" },
+  ] as const)(
+    "resumes encounter entry after bank support: $entry, $credits credits",
+    ({ credits, entry }) => {
       let state = runnerState(`encounter-tax-bank-${credits}`);
       const chibaId = installHiddenResource(
         state,
@@ -429,19 +434,34 @@ describe("PRO011 hidden resource timing hardening", () => {
         encounterTaxSourceDefinitionId: "onr_v1_222_ball-and-chain",
         nextEncounterJackOutLock: true,
       };
+      if (entry === "corp_decline") {
+        state.timingPoint = "run.approach_ice";
+        state.activeSide = "corp";
+        state.run.phase = "approach_ice";
+        state.run.approachedIceId = iceId;
+      }
       const before = structuredClone(state);
-      const start = getLegalActions(state, "runner").find(
-        (a) => a.actionId === "runner.continue_run",
+      const side = entry === "corp_decline" ? "corp" : "runner";
+      const start = getLegalActions(state, side).find(
+        (a) =>
+          a.actionId ===
+          `${side}.${side === "corp" ? "decline_rez" : "continue_run"}`,
       )!;
       expect(start).toBeDefined();
-      state = applyLegal(state, "runner", start).state;
+      const entered = applyLegal(state, side, start);
+      expect(entered.ok).toBe(true);
+      state = entered.state;
       expect(state.runnerCostPenaltySupportWindow?.amountDue).toBe(2);
+      expect(state.runnerCostPenaltySupportWindow?.originalActionId).toBe(
+        "runner.continue_run",
+      );
+      expect(getLegalActions(state, "corp")).toEqual([]);
       expect(state.run?.nextEncounterJackOutLock).toBe(true);
       expect(state.run?.encounteredIceId).toBeUndefined();
       if (credits === 1) {
         expect(
           getLegalActions(state, "runner").some(
-            (a) => a.actionId === start.actionId,
+            (a) => a.actionId === "runner.continue_run",
           ),
         ).toBe(false);
         state = applyLegal(
@@ -451,7 +471,7 @@ describe("PRO011 hidden resource timing hardening", () => {
         ).state;
       }
       const resume = getLegalActions(state, "runner").find(
-        (a) => a.actionId === start.actionId,
+        (a) => a.actionId === "runner.continue_run",
       );
       expect(resume?.payload?.runnerCostPenaltySupportContinuation).toBe(true);
       state = applyLegal(state, "runner", resume!).state;

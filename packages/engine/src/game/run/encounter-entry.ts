@@ -76,13 +76,27 @@ export function beginEncounter(
 ): EncounterEntryResult {
   const run = mustRun(host.state);
   const encounteredDefinition = host.cards.definitionFor(encounteredIceId);
+  // Closing a Corp rez window can enter the next encounter. Its tax is a
+  // Runner payment, so any optional bank support resumes a Runner action,
+  // never the already completed Corp rez/decline action.
+  const paymentAction =
+    legalAction && legalAction.side !== "runner"
+      ? buildLegalAction(
+          host.state,
+          "runner",
+          "continue_run",
+          "Encounter-Eintritt fortsetzen",
+          "game_rule",
+        )
+      : legalAction;
   const encounterTaxPayment = payEncounterTaxForFutureIce(
     runDurationPaymentHost(host.state),
-    legalAction,
+    paymentAction,
   );
   if (encounterTaxPayment.handled && legalAction) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
+      ...(paymentAction?.payload ?? {}),
       targetIceDefinitionId: encounteredDefinition.id,
     };
   }

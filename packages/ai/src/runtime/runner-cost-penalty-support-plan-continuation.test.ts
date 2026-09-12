@@ -10,6 +10,112 @@ import {
 } from "../runner/run-window/run-window-cost-continuation";
 
 describe("Runner cost/penalty support plan continuation", () => {
+  it.each([
+    "support",
+    "continue",
+    "gap",
+    "wrong_server",
+    "wrong_run",
+    "wrong_window",
+    "wrong_original",
+    "intervening_runner",
+    "missing_entry_target",
+  ] as const)(
+    "binds encounter payment across only the exact Corp rez sequence: %s",
+    (variant) => {
+      const previous = runPortfolio(90);
+      previous.pendingRunnerCostPenaltySupportOrigin = {
+        rootPlanInstanceId: previous.rootForegroundInstanceId!,
+        executorInstanceId: previous.executorInstanceId!,
+        sourceStepId: "run_211:convert",
+        originalActionId: "runner.continue_run",
+        selectedAtStateVersion: 90,
+      };
+      const action =
+        variant === "continue"
+          ? continuedPaymentAction(93, "runner.continue_run")
+          : supportAction(93, "runner.continue_run");
+      const windowId = String(
+        action.payload![
+          variant === "continue"
+            ? "runnerCostPenaltySupportWindowId"
+            : "costPenaltySupportWindowId"
+        ],
+      );
+      const next = traceBidInput(93, [action]);
+      delete next.playerView.pendingChoice;
+      next.playerView.timingPoint = "run.approach_ice";
+      next.eventTail = [
+        {
+          eventId: "evt_91",
+          type: "continue_run",
+          stateVersionBefore: 90,
+          stateVersionAfter: 91,
+          publicPayload: {
+            actor: "runner",
+            actionType: "continue_run",
+            serverId: "hq",
+          },
+        },
+        {
+          eventId: "evt_92",
+          type: "decline_rez",
+          stateVersionBefore: 91,
+          stateVersionAfter: 92,
+          publicPayload: {
+            actor: "corp",
+            actionType: "decline_rez",
+            runRootRezPass: true,
+          },
+        },
+        {
+          eventId: "evt_93",
+          type: "decline_rez",
+          stateVersionBefore: 92,
+          stateVersionAfter: 93,
+          publicPayload: {
+            actor: "corp",
+            actionType: "decline_rez",
+            runnerCostPenaltySupportWindowOpened: true,
+            runnerCostPenaltySupportWindowId: windowId,
+            runnerCostPenaltySupportOriginalActionId: "runner.continue_run",
+            targetIceDefinitionId: "onr_v1_237_data-wall",
+          },
+        },
+      ] as never;
+      if (variant === "gap") next.eventTail.splice(1, 1);
+      if (variant === "wrong_server")
+        next.eventTail[0]!.publicPayload.serverId = "rd";
+      if (variant === "wrong_run") next.playerView.run!.runId = "different";
+      if (variant === "wrong_window")
+        next.eventTail[2]!.publicPayload.runnerCostPenaltySupportWindowId =
+          "different";
+      if (variant === "wrong_original")
+        next.eventTail[2]!.publicPayload.runnerCostPenaltySupportOriginalActionId =
+          "different";
+      if (variant === "intervening_runner")
+        next.eventTail[1]!.publicPayload.actor = "runner";
+      if (variant === "missing_entry_target")
+        delete next.eventTail[2]!.publicPayload.targetIceDefinitionId;
+      const resolve = () =>
+        resolvePlanBoundRunnerCostPenaltyContinuation(
+          { input: next, actionCandidates: [], turnKey: "runner:turn:14" },
+          previous,
+        );
+      if (variant !== "support" && variant !== "continue") {
+        expect(resolve).toThrow();
+        return;
+      }
+      const result = resolve()!;
+      expect(result.actionId).toBe(action.actionId);
+      expect(result.origin.rootPlanInstanceId).toBe(
+        previous.rootForegroundInstanceId,
+      );
+      expect(result.origin.leafPlanInstanceId).toBe(
+        previous.executorInstanceId,
+      );
+    },
+  );
   it("preserves the run owner when a zero-cost movement starts an encounter-tax payment", () => {
     const action = {
       ...paymentAction(90),

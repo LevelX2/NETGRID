@@ -1169,6 +1169,10 @@ export function sameTurnScoreConversionProjectForCandidate(
       agendaPointsToWin: input.playerView.agendaPointsToWin,
       visibleHqAgendaIds: visibleHqAgendas.map((card) => card.instanceId),
       agendaCardId: path.agendaCardId,
+      installedAgendaId: input.playerView.servers
+        .find((server) => server.id === path.targetServerId)
+        ?.root.find((card) => card.instanceId === path.agendaCardId)
+        ?.instanceId,
       hasOtherInstalledAgenda: input.playerView.servers.some((server) =>
         server.root.some(
           (card) =>
@@ -1263,6 +1267,7 @@ export function sameTurnScoreConversionPreventsTerminalSteal(params: {
   agendaPointsToWin: number;
   visibleHqAgendaIds: readonly string[];
   agendaCardId: string;
+  installedAgendaId?: string | undefined;
   hasOtherInstalledAgenda: boolean;
 }): boolean {
   return (
@@ -1273,8 +1278,11 @@ export function sameTurnScoreConversionPreventsTerminalSteal(params: {
     (params.targetServerId !== "new_remote" ||
       !params.hasOtherInstalledAgenda) &&
     params.opponentAgendaPoints >= params.agendaPointsToWin - 1 &&
-    params.visibleHqAgendaIds.length === 1 &&
-    params.visibleHqAgendaIds[0] === params.agendaCardId
+    ((params.visibleHqAgendaIds.length === 1 &&
+      params.visibleHqAgendaIds[0] === params.agendaCardId) ||
+      (params.visibleHqAgendaIds.length === 0 &&
+        params.installedAgendaId === params.agendaCardId &&
+        !params.hasOtherInstalledAgenda))
   );
 }
 

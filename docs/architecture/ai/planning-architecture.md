@@ -370,6 +370,16 @@ Der Encounter-Eintritt kann erst danach eine Zahlung auslösen. Die exakte
 Engine-Fortsetzung behält Action-ID, Root, Executor und Step; ein fehlender
 Ursprung wird nicht aus der einzigen verbleibenden Bankaktion geraten.
 
+Öffnet erst das abschließende Corp-Rezfenster die Encounter-Steuer, erzeugt
+die Engine die gebundene Runner-Encounter-Fortsetzung und veröffentlicht
+deren Action-ID aus dem tatsächlichen Zahlungsfenster. Die bereits
+abgeschlossene Corp-Aktion wird nicht erneut ausgeführt. Der Run-Owner darf
+den ursprünglichen Bewegungsschritt über eine lückenlose öffentliche Folge
+aus genau dieser Runner-Bewegung und nachfolgenden Corp-Rez-/Pass-Aktionen
+erhalten. Run, Server, Root, Executor und abschließende Fenster-ID müssen
+übereinstimmen. Fremde Runner-Aktionen, fehlende Ereignisse oder ein anderer
+Run erlauben keine solche Fortsetzung.
+
 Bekannte installierte `runnerPaymentSupportAbilities` gehen als bedingte,
 einmalige Quellen in die Restpfadquote ein. Die Quote benötigt ausdrücklich
 den liquiden Creditbestand für ihre Aktivierung, zählt alternative Fähigkeiten

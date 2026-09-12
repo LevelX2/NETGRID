@@ -105,7 +105,7 @@ export function buildEventWithHost(
     actionType: publicEventType,
     label: publicLabel(legalAction),
     ...actionUseContext,
-    ...runnerCostPenaltySupportEventContext(legalAction),
+    ...runnerCostPenaltySupportEventContext(state, legalAction),
     ...actionContext,
     ...installedPositionContext,
     ...buildPublicAbilitySchemaContext(
@@ -161,6 +161,7 @@ export function buildEventWithHost(
 }
 
 function runnerCostPenaltySupportEventContext(
+  state: GameState,
   legalAction: LegalAction,
 ): Record<string, unknown> {
   if (legalAction.payload?.runnerCostPenaltySupportWindowOpened !== true) {
@@ -172,10 +173,15 @@ function runnerCostPenaltySupportEventContext(
       "Runner-Kostenfenster benötigt eine öffentliche Window-ID.",
     );
   }
+  const window = state.runnerCostPenaltySupportWindow;
+  if (!window || window.windowId !== windowId)
+    throw new Error(
+      "Das geöffnete Runner-Kostenfenster hat keine aktuelle Zustandsbindung.",
+    );
   return {
     runnerCostPenaltySupportWindowOpened: true,
     runnerCostPenaltySupportWindowId: windowId,
-    runnerCostPenaltySupportOriginalActionId: legalAction.actionId,
+    runnerCostPenaltySupportOriginalActionId: window.originalActionId,
   };
 }
 
