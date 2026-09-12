@@ -185,6 +185,16 @@ Der Plan muss unterscheiden:
 - Ambush-/Damage-Risiko;
 - deckstrategisch begründeten wiederholten Remote-Druck.
 
+Ersetzt eine aktuell ausführbare gezielte ICE-Entfernung die blockierte
+Runroute, entfernt ihr Remote-Signal den bisherigen `supportNeedId` bereits
+bei der Routenbildung. Der ersetzte Coverage-Bedarf darf nicht zugleich eine
+Child-Bindung verlangen, während der Parent seinen eigenen Vorbereitungsschritt
+ausführt und keine offene Need mehr veröffentlicht. Die bestehende
+Coverage-Reconciliation erhält unabhängig weiterhin sinnvolle Breakersuchen;
+vor dem Routenwechsel bleibt eine tatsächlich benötigte Child-Bindung erhalten.
+Die gespeicherten Entscheidungen D159/D160 aus Paarung 425 prüfen beide Seiten
+dieses Übergangs mit den historischen LegalActions und Runtime-Checkpoints.
+
 Die Runpfad-Projektion trennt einen nicht tödlichen Handpufferverstoß von
 unmittelbarer beziehungsweise Cleanup-Flatline. Ein bekannter Zugriff bleibt
 bei überlebbarem Schaden grundsätzlich abfangbar; der bestehende

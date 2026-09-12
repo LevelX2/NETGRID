@@ -130,6 +130,9 @@ function runnerTargetedIceTrashRemotePreparationSignals(
         (signal) => signal.contestId === commitment.ownerDedupeKey,
       );
       if (!owner) return [];
+      // The executable preparation replaces the blocked run route and its
+      // support request. Coverage reconciles any independent remaining need.
+      const { supportNeedId: _supersededSupportNeed, ...preparedOwner } = owner;
       const payoffValue =
         planTargets.find(
           (target) =>
@@ -138,7 +141,7 @@ function runnerTargetedIceTrashRemotePreparationSignals(
         )?.payoffValue ?? 0;
       return [
         {
-          ...owner,
+          ...preparedOwner,
           reachable: true,
           marginalValue: payoffValue,
           evidenceCode: `runner_targeted_ice_trash_preflight:${commitment.serverId}:${commitment.targetIceInstanceId}`,
