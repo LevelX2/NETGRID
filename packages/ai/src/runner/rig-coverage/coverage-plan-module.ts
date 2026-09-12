@@ -361,6 +361,17 @@ function coveragePreparationCandidates(
         action.expiresAtStateVersion === context.input.playerView.stateVersion;
       return (
         exactMemorySupportInstall ||
+        (gap.heapRecoveryPreparation?.actionId === candidate.actionId &&
+          gap.heapRecoveryPreparation.stateVersion ===
+            context.input.playerView.stateVersion &&
+          action?.type === "activated_card_ability" &&
+          action.source === gap.heapRecoveryPreparation.sourceCardInstanceId &&
+          action.payload?.cardImplementationEffectKind ===
+            "move_top_trash_to_grip" &&
+          action.payload.targetCardId ===
+            gap.heapRecoveryPreparation.currentTopCardInstanceId &&
+          action.expiresAtStateVersion ===
+            context.input.playerView.stateVersion) ||
         (action?.side === "runner" &&
           action.type === "trigger_ability" &&
           action.timingPoint === context.input.playerView.timingPoint &&

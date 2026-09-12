@@ -27,6 +27,18 @@ export type RunnerCoverageGapSignal = {
   installActionValues?: Record<string, number>;
   preparationActionIds?: string[];
   memorySupportActionIds?: string[];
+  heapRecoveryPreparation?: {
+    actionId: string;
+    sourceCardInstanceId: string;
+    currentTopCardInstanceId: string;
+    targetCardInstanceId: string;
+    targetDefinitionId: string;
+    recoveryCount: number;
+    requiredClicks: number;
+    upfrontCredits: number;
+    projectedKnownPathCost: number;
+    stateVersion: number;
+  };
   fundingGap?: number;
   sameTurnRunConversion?: {
     targetRunActionId: string;

@@ -2925,7 +2925,12 @@ function buildRunnerDomain(
     : projectedCoverageGaps;
   const terminalContestThreat = runnerTerminalContestThreat(input);
   const exactCoverageRecoveryActionIds = new Set(
-    coverageGaps.flatMap((gap) => gap.directSearchActionIds),
+    coverageGaps.flatMap((gap) => [
+      ...gap.directSearchActionIds,
+      ...(gap.heapRecoveryPreparation
+        ? [gap.heapRecoveryPreparation.actionId]
+        : []),
+    ]),
   );
   const accessPayoffCampaignSignals = runnerCentralPressureDevelopmentSignals(
     input,

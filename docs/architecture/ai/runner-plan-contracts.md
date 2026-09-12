@@ -361,6 +361,17 @@ nicht zugleich als passende Heap-Rückholung und als Suche ohne Deckantwort
 klassifiziert werden. Der Coverage-Support trennt diese Mengen vor der
 Speicher- und Opferbindung; deren tatsächliche Ablehnungen bleiben wirksam.
 
+Liegt die Antwort unter anderen sichtbaren Heap-Karten, darf derselbe
+Coverage-Owner eine begrenzte Top-Heap-Vorbereitung an seinen Remote-Parent
+binden. Voraussetzung sind eine kanonisch wiederholbare Rückholfähigkeit ohne
+Limit oder zusätzliche Bedingung, die exakte aktuelle Top-Karte, freie MU und
+ein vollständig bekannter, finanzierter ICE-Pfad. Die Quote reserviert alle
+Rückhol-, Installations- und Run-Klicks sowie ihre Credits; eingeschränkte
+Creditpools bezahlen ausschließlich den passenden Runpfad. Jede Folgeaktion
+wird aus den nächsten LegalActions neu materialisiert. Die erste Rückholung
+ist ausdrücklich eine Vorbereitung und wird nicht als bereits erhaltene
+Coverage-Antwort ausgegeben.
+
 Ein Coverage-Bedarf darf höchstens einen Draw pro Runner-Zug ausführen. Das
 gilt sowohl für den allgemeinen Rig-first-/Setup-Anker als auch für einen
 nicht terminalen konkreten Runbedarf. Der Draw ist eine private
@@ -675,6 +686,14 @@ Schutzinstallationen gegenüber Statusbereinigung. Die Live-Runtime reicht
 Funding-Suche und sofortige Run-Verwertbarkeit als zwei benannte Dienste
 ein und koordiniert weiterhin die Ausschlüsse zwischen verschiedenen Plänen.
 Gemeinsam benötigte Handpuffer-Fakten werden aus demselben Owner geliefert.
+
+Ein Run-Reservequote mit gedeckten Credits und fehlendem Handpuffer wird als
+Handbedarf ausgewiesen. Für eine konkrete erreichbare Agenda- oder
+Score-Threat-Route übernimmt der Defense-Owner den gequoteten Puffer, wenn
+die nötigen Draws und der Run noch in denselben Zug passen. Nur für diese
+gebundene Vorbereitung darf der temporäre Puffer über dem Cleanup-Handlimit
+liegen. Fehlende Stack-Karten, Folgeaktionen oder Run-Credits lassen diese
+Vorbereitung nicht entstehen; zusätzliche Credits ersetzen keinen Handbedarf.
 
 **Klasse:** `urgent_response`, `bounded_sequence` oder
 `development_project`

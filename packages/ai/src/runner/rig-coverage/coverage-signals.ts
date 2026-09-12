@@ -29,6 +29,7 @@ import { runnerBreakerCoverageUpgrade } from "./coverage-breaker-upgrades";
 import { runnerBreakerUpgradeSupportActions } from "./coverage-breaker-upgrades";
 import { runnerBreakerUpgradeSignalQuote } from "./coverage-breaker-upgrades";
 import { runnerCostEffectiveCoverageRecovery } from "./coverage-recovery";
+import { runnerCoverageHeapPreparation } from "./coverage-heap-preparation";
 import { runnerCoverageInstallActionValues } from "./coverage-recovery";
 import { runnerCoverageGapIsTerminalRemoteThreat } from "./coverage-support";
 import { runnerUrgentRemoteCoverageConversionQuote } from "./coverage-support";
@@ -424,6 +425,15 @@ export function uniqueCoverageGaps(
         ? coverageDevelopment.deckHasAlternative
         : runnerDeckHasCoverageAnswer(deckCapabilities, requiredRole)) ||
       supportActions.directSearchActionIds.length > 0;
+    const heapRecoveryPreparation =
+      !visibleAnswer && supportActions.directSearchActionIds.length === 0
+        ? runnerCoverageHeapPreparation(
+            input,
+            candidates,
+            evaluation,
+            requiredRole,
+          )
+        : undefined;
     const installActionIds = visibleAnswer
       ? coverageDevelopment
         ? candidates
@@ -472,6 +482,7 @@ export function uniqueCoverageGaps(
       coverageUpgrade !== undefined ||
       terminalRemotePatternThreat ||
       sameTurnRunConversion !== undefined ||
+      heapRecoveryPreparation !== undefined ||
       (requesterModuleId === "runner.pressure_central" &&
         evaluation.score > 0 &&
         evaluation.knownAccessState !== "known_no_current_payoff" &&
@@ -503,7 +514,9 @@ export function uniqueCoverageGaps(
           }
         : {}),
       priorityClass:
-        sameTurnRunConversion !== undefined || terminalRemoteCoverageThreat
+        sameTurnRunConversion !== undefined ||
+        heapRecoveryPreparation !== undefined ||
+        terminalRemoteCoverageThreat
           ? "P2"
           : coverageUpgrade
             ? "P5"
@@ -569,6 +582,19 @@ export function uniqueCoverageGaps(
       ),
       installActionValues,
       ...supportActions,
+      ...(heapRecoveryPreparation
+        ? {
+            heapRecoveryPreparation,
+            preparationActionIds: [heapRecoveryPreparation.actionId],
+            deckHasAnswer: true,
+            recoveryEvidenceCodes: [
+              `coverage_heap_preparation_target:${heapRecoveryPreparation.targetCardInstanceId}`,
+              `coverage_heap_preparation_recoveries:${heapRecoveryPreparation.recoveryCount}`,
+              `coverage_heap_preparation_clicks:${heapRecoveryPreparation.requiredClicks}`,
+              `coverage_heap_preparation_upfront_credits:${heapRecoveryPreparation.upfrontCredits}`,
+            ],
+          }
+        : {}),
     });
   }
   if (

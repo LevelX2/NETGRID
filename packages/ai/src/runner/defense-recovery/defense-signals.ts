@@ -111,8 +111,10 @@ export function runnerDefenseHandBufferFacts(
   const handSize = input.playerView.own.gripOrHq.length;
   const maxHandSize = Math.max(0, input.playerView.own.maxHandSize ?? 5);
   const damageThreat = runnerDamageThreatAssessment(input);
-  const riskAdjustedHandBuffer =
-    runnerRiskAdjustedHandBufferForAttractiveRuns(runTargets);
+  const riskAdjustedHandBuffer = runnerRiskAdjustedHandBufferForAttractiveRuns(
+    input,
+    runTargets,
+  );
   const volatileBreakerFailureDamage = Math.max(
     0,
     ...(input.playerView.own.rig ?? []).map(
@@ -390,12 +392,14 @@ export function buildRunnerDefenseSignals(params: {
       candidates.some(
         (candidate) =>
           candidate.semanticActionType === "draw.card" &&
-          handSize < maxHandSize,
+          (handSize < maxHandSize ||
+            riskAdjustedHandBuffer.sameTurnRunPreparation),
       ),
     handBufferActionIds: candidates
       .filter((candidate) => {
         return (
-          handSize < maxHandSize &&
+          (handSize < maxHandSize ||
+            riskAdjustedHandBuffer.sameTurnRunPreparation) &&
           handSize < minimumHandBuffer &&
           !exactCoverageRecoveryActionIds.has(candidate.actionId) &&
           !confirmedDamageTaxedDrawActionIdSet.has(candidate.actionId) &&
@@ -549,11 +553,44 @@ function runnerTraceDefenseInstallValue(
 }
 
 function runnerRiskAdjustedHandBufferForAttractiveRuns(
+  input: AiDecisionInput,
   runTargets: readonly RunnerRunTargetEvaluation[],
-): { minimumHandBuffer: number; evidenceCode: string } {
+): {
+  minimumHandBuffer: number;
+  evidenceCode: string;
+  sameTurnRunPreparation: boolean;
+} {
   let minimumHandBuffer = 3;
   let evidenceCode = "runner_base_hand_buffer:3";
   let strongestRisk = -1;
+  let sameTurnRunPreparation = false;
+
+  for (const evaluation of runTargets) {
+    const quote = evaluation.prerunReserveQuote;
+    const action = input.legalActions.find(
+      (a) => a.actionId === evaluation.actionId,
+    );
+    const runClicks = action?.costs.reduce((n, c) => n + (c.clicks ?? 0), 0);
+    if (
+      !quote ||
+      quote.status !== "blocked" ||
+      quote.handBufferGap <= 0 ||
+      quote.creditGap !== 0 ||
+      evaluation.pathPassability !== "reachable" ||
+      evaluation.score <= 0 ||
+      !["agenda", "score_threat"].includes(evaluation.accessPayoff) ||
+      evaluation.accessPayoffContestable === false ||
+      !runClicks ||
+      quote.handBufferGap + runClicks > input.playerView.own.clicks ||
+      quote.handBufferGap > input.playerView.own.stackOrRdCount
+    )
+      continue;
+    if (quote.requiredHandBuffer >= minimumHandBuffer) {
+      minimumHandBuffer = quote.requiredHandBuffer;
+      sameTurnRunPreparation = true;
+      evidenceCode = `runner_quoted_prerun_hand_buffer:${minimumHandBuffer}|server:${evaluation.targetServerId}|action:${evaluation.actionId}`;
+    }
+  }
 
   for (const evaluation of runTargets) {
     if (
@@ -574,6 +611,7 @@ function runnerRiskAdjustedHandBufferForAttractiveRuns(
     )
       continue;
 
+    if (requiredBuffer > minimumHandBuffer) sameTurnRunPreparation = false;
     minimumHandBuffer = requiredBuffer;
     strongestRisk = risk;
     evidenceCode = [
@@ -585,7 +623,7 @@ function runnerRiskAdjustedHandBufferForAttractiveRuns(
     ].join("|");
   }
 
-  return { minimumHandBuffer, evidenceCode };
+  return { minimumHandBuffer, evidenceCode, sameTurnRunPreparation };
 }
 
 function visiblePendingDamage(

@@ -1593,6 +1593,12 @@ function recommendationForRunTarget(params: {
       : "gain_credits_first";
   }
   if (params.prerunReserveQuote.status === "blocked") {
+    if (
+      params.prerunReserveQuote.handBufferGap > 0 &&
+      params.prerunReserveQuote.creditGap === 0
+    ) {
+      return "draw_for_damage_buffer";
+    }
     return "gain_credits_first";
   }
   if (
