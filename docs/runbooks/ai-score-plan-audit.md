@@ -171,6 +171,38 @@ keinen Nachweis strategischer Qualität. Neue zufällige Spiele erst nach der
 gezielten Auflösung dieser bekannten Gegenbeispiele als unabhängige Kontrolle
 verwenden. Deckstärke, Paarung und KI-Verhalten dabei getrennt vergleichen.
 
+## Zentrale Steals und Verteilung der Endstände
+
+Der ergänzende [Server-/Ergebnisbericht zu 431](../../data/local/score-continuity-ab-20260912/steal-zones-431.md)
+enthält für alle 32 Ausführungen Steals und Punkte je HQ, R&D, Archives und
+Remote sowie alle 52 Stealentscheidungen mit Zeitpunkten. Serverzuordnung aus
+Runstart und übereinstimmendem gebundenem Owner, Remotes zusätzlich gegen den
+Installations-/Stealledger geprüft. Punktedifferenzen und Ereigniszähler stimmen
+für jedes Spiel mit den bestehenden Endzuständen überein.
+
+Nachher: HQ sechs Steals/17 Punkte, R&D zwei/sechs, Archives null, Remotes
+17/62. Fünf der neun Runner-Siege entstehen ausschließlich aus Remotes, einer
+aus Zentralen, drei aus beiden. New-02 verliert 6:9 ohne Remote-Steal:
+zwei R&D-Steals bereits T2 ergeben sechs Runnerpunkte, HQ liefert T34 drei
+weitere. Der erste Corp-Score erfolgt T23. New-08 gewinnt die Corp dagegen
+10:6 trotz sechs HQ-Verlustpunkten.
+
+Zu-null-Ergebnisse steigen von acht auf neun der 16 Seeds (50 → 56,25 Prozent).
+Nachher vier Corp- und fünf Runner-Siege zu null; nur zwei Endstände enthalten
+mindestens vier Verliererpunkte, vorher fünf. Das ist ein beschreibender
+Schwellenwert, keine allgemeine Definition ausgeglichener Spielstärke. Alle
+fünf zu-null-Niederlagen der Corp enden erst zwischen T54 und T70; geringe
+Corp-Punkte sind hier kein Beleg für ein schnelles Spiel. T zählt globale
+abwechselnde Spielerzüge. Sechs der neun Runner-Siege benötigen nur zwei Steals;
+die großen Agenda-Punktwerte machen wenige Zugriffe entscheidend.
+
+Weitere Audits müssen zentrale und Remote-Verluste gemeinsam bewerten.
+Neben Stealanzahl und Punkten auch tatsächliche Zugriffe, Mehrfachzugriffe,
+Kosten und Zeitpunkt gegenüber dem Corp-Scorebeginn erfassen. Ein Server ohne
+Steal ist ohne Zugriffsnenner kein nachgewiesener Verteidigungserfolg. Frühere
+Zentralverteidigung gegen ihre Kosten und den verschobenen Remote-Scorebeginn
+prüfen; keine Kenntnis später sichtbar gewordener Hand-/Deckkarten verwenden.
+
 Abschluss: kompakte Einzelurteile und Probe-Grenzen in die bestehende Registry
 zurückführen, Bericht samt exaktem Inhalt und Status sichern, Round-trip prüfen
 und Backup erzeugen. Erst danach eigene Runtime-Daten bereinigen. Keine rohen
