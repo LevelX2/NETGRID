@@ -14,6 +14,7 @@ import { type CorpScorelineFeasibility } from "../../runtime/corp-scoreline-feas
 import { visibleCardIsAgenda } from "../../runtime/visible-action-facts";
 import { corpExactCurrentBasicLiquidCreditCandidate } from "../economy/economy-domain-signals";
 import { corpCounterBankScoreProjects } from "./corp-counter-bank-score-plan";
+import { corpAssetPreservingSameTurnScoreRoutes } from "./score-asset-preservation";
 import {
   corpRemoteHasEngineQuotedReusableScoreFriction,
   corpResidentScoreDefenseBinding,
@@ -117,7 +118,7 @@ export function reconcileCorpScoreProjects({
   );
   const nextTurnScoreContinuationProjects =
     corpNextTurnScoreContinuationProjects(input, candidates);
-  const proposedScoreProjects = [
+  const discoveredScoreProjects = [
     ...directScoreProjects,
     ...counterBankScoreProjects,
     ...remoteCreationUnlockScoreProjects,
@@ -132,6 +133,14 @@ export function reconcileCorpScoreProjects({
       return conversion ? [conversion] : [];
     }),
   ];
+  const assetPreservation = corpAssetPreservingSameTurnScoreRoutes(
+    input,
+    candidates,
+    discoveredScoreProjects,
+  );
+  const proposedScoreProjects = discoveredScoreProjects.filter(
+    (project) => !assetPreservation.dominatedProjectIds.has(project.projectId),
+  );
   const ownAgendas = input.playerView.own.gripOrHq.filter(
     (card) => card.known && visibleCardIsAgenda(input, card),
   ).length;
@@ -205,6 +214,7 @@ export function reconcileCorpScoreProjects({
         !(
           project.phase === "install_agenda" &&
           project.serverId === "new_remote" &&
+          !assetPreservation.preservingProjectIds.has(project.projectId) &&
           project.agendaInstanceId !== undefined &&
           (residentScoreDefenseBinding?.agendaInstanceId ===
             project.agendaInstanceId ||

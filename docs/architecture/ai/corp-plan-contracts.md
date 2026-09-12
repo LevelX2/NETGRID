@@ -160,6 +160,17 @@ Ein nach sichtbarem Zustand erzwungener Same-Turn-Score ist ein Commitment.
 Einzelne Economy- oder
 ICE-Aktionen dürfen ihn nicht aufbrechen.
 
+Beim Variantenvergleich zweier vollständig finanzierter, nichtterminaler
+Same-Turn-Scores derselben Agenda prüft der Score-Owner auch den Verlust eines
+installierten Wirtschaftsmittels. Stimmen Klicks, Credits, Fortschritt,
+Quellenverbrauch und Counterbindungen exakt überein, dominiert die Variante
+ohne Ersetzung eines Assets mit aktuell Engine-belegter positiver Poolauszahlung.
+Sie bleibt auch gegenüber der sonst bevorzugten vorbereiteten Remotevariante
+zugelassen. Der Economy-Owner liefert nur seine bestehenden Auszahlungsfakten;
+`score-asset-preservation.ts` entscheidet den Variantenvergleich. Daraus folgt
+keine Lockerung regulärer Schutzanforderungen über ein Runnerfenster und keine
+vermutete Auszahlung ungeresster oder nicht ausführbarer Assets.
+
 ### Vertikale Implementierung der Agendaentscheidung
 
 `packages/ai/src/corp/score/` bündelt den Owner:
