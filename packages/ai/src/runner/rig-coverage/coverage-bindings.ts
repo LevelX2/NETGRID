@@ -35,6 +35,7 @@ export function preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
           targetServerId?: unknown;
           targetRunActionId?: unknown;
           installActionIds?: unknown;
+          drawForAnswerActionIds?: unknown;
           directSearchChoiceBindings?: Array<{
             actionId?: unknown;
             sourceCardInstanceId?: unknown;
@@ -63,6 +64,11 @@ export function preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
     (previousExecutor.executionState === "executor" ||
       previousExecutor.executionState === "preempted") &&
     previousState?.kind === "coverage";
+  const previousDrawOriginIsExact =
+    previousCoverageExecutorIsPreservable &&
+    previousState.phase === "draw_for_answer" &&
+    Array.isArray(previousState.gap?.drawForAnswerActionIds) &&
+    previousState.gap.drawForAnswerActionIds.includes(pending.originalActionId);
   const previousInstallOriginIsExact =
     previousCoverageExecutorIsPreservable &&
     previousState.phase === "install_answer" &&
@@ -76,7 +82,9 @@ export function preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
     previousBinding !== undefined;
   if (
     !nextExecutor &&
-    (previousInstallOriginIsExact || previousSearchOriginIsExact)
+    (previousInstallOriginIsExact ||
+      previousSearchOriginIsExact ||
+      previousDrawOriginIsExact)
   ) {
     const preservedExecutor = structuredClone(previousExecutor);
     preservedExecutor.executionState = "preempted";
@@ -85,13 +93,13 @@ export function preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
     nextExecutor = preservedExecutor;
   }
   const nextState = nextExecutor?.moduleState as typeof previousState;
-  const exactInstallBinding =
-    previousInstallOriginIsExact &&
+  const exactActionBinding =
+    (previousInstallOriginIsExact || previousDrawOriginIsExact) &&
     nextExecutor?.moduleId === "runner.rig_and_coverage" &&
     nextState?.kind === "coverage" &&
-    nextState.phase === "install_answer" &&
+    nextState.phase === previousState.phase &&
     previousState.gap?.requiredRole === nextState.gap?.requiredRole;
-  if (exactInstallBinding && nextExecutor && nextState) {
+  if (exactActionBinding && nextExecutor && nextState) {
     nextExecutor.moduleState = {
       ...nextState,
       gap: structuredClone(previousState.gap),
@@ -115,7 +123,7 @@ export function preserveSelectedRunnerCoverageBindingAcrossPaymentStep(
       planInstanceId: pending.executorInstanceId,
       stepId: pending.sourceStepId,
       removalCondition:
-        "Carry the exact selected coverage search or install action and its unchanged target binding through every intervening payment-support step.",
+        "Carry the exact selected coverage search, install or draw action and its unchanged coverage binding through every intervening payment-support step.",
     });
   }
   nextExecutor.moduleState = {

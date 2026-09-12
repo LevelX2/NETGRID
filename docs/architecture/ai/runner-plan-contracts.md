@@ -248,6 +248,14 @@ Dispositionen und exakte Fortsetzungsbindungen (`coverage-bindings.ts`).
 `coverage-plan-module.ts` besitzt die Planphasen und Materialisierung.
 Suchbedarf und Upgrade-Ökonomie liegen ebenfalls in diesem Verzeichnis.
 
+Ein Zahlungsfenster erhält die exakt ausgewählte Coverage-Aktion auch in
+`draw_for_answer`. Der bisherige Executor muss die Originalaktion in
+`drawForAnswerActionIds` führen; Phase und benötigte Breaker-Rolle bleiben
+unverändert. Für `install_answer` gelten entsprechend die Install-IDs,
+für `search_answer` zusätzlich die konkrete Suchziel- und Versionsbindung.
+Fehlende oder abweichende Bindungen scheitern mit `invalid_support_graph`;
+die Zahlungsunterstützung erzeugt weder einen neuen Bedarf noch ein Suchziel.
+
 `coverage-services.ts` benennt sieben Dienste: aktuelles Remote-Material,
 bekannten verzögerten ICE-Abgang, direkte Run-Verwertbarkeit, Run-Funding,
 materiellen Zentraldruck, dessen Kadenz und die gemeinsame Funding-Suche.

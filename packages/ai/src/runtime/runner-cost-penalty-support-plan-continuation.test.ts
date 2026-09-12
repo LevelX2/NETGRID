@@ -300,83 +300,102 @@ describe("Runner cost/penalty support plan continuation", () => {
     });
   });
 
-  it("preserves an exact coverage-install binding while payment support preempts its executor", () => {
-    const originalAction = paymentAction(90);
-    const ownerId = "plan:runner.rig_and_coverage:rig-root";
-    const previous = portfolio(90, "rig-root");
-    previous.instances = [
-      {
-        instanceId: ownerId,
-        side: "runner",
-        moduleId: "runner.rig_and_coverage",
-        executionState: "executor",
-        moduleState: {
-          kind: "coverage",
-          phase: "install_answer",
-          gap: {
-            requiredRole: "breaker_code_gate",
-            targetServerId: "rd",
-            targetRunActionId: "runner.start_run.rd",
-            installActionIds: [originalAction.actionId],
+  it.each([
+    { phase: "install_answer", actionIdsField: "installActionIds" },
+    { phase: "draw_for_answer", actionIdsField: "drawForAnswerActionIds" },
+  ])(
+    "preserves an exact coverage $phase binding while payment support preempts its executor",
+    ({ phase, actionIdsField }) => {
+      const originalAction = paymentAction(90);
+      const ownerId = "plan:runner.rig_and_coverage:rig-root";
+      const previous = portfolio(90, "rig-root");
+      previous.instances = [
+        {
+          instanceId: ownerId,
+          side: "runner",
+          moduleId: "runner.rig_and_coverage",
+          executionState: "executor",
+          moduleState: {
+            kind: "coverage",
+            phase,
+            gap: {
+              requiredRole: "breaker_code_gate",
+              targetServerId: "rd",
+              targetRunActionId: "runner.start_run.rd",
+              [actionIdsField]: [originalAction.actionId],
+            },
           },
         },
-      },
-    ] as never;
-    previous.pendingRunnerCostPenaltySupportOrigin = {
-      rootPlanInstanceId: ownerId,
-      executorInstanceId: ownerId,
-      sourceStepId: `${ownerId}:install`,
-      originalActionId: originalAction.actionId,
-      selectedAtStateVersion: 90,
-    };
-    const continuation = continuedPaymentAction(91, originalAction.actionId);
-    const support = supportAction(91, originalAction.actionId);
-    const supportResult = planResult(91, support.actionId, "economy-root");
-    supportResult.portfolio.instances = [
-      {
-        ...structuredClone(previous.instances[0]),
-        executionState: "preempted",
-        moduleState: {
-          kind: "coverage",
-          phase: "install_answer",
-          gap: { requiredRole: "breaker_code_gate" },
+      ] as never;
+      previous.pendingRunnerCostPenaltySupportOrigin = {
+        rootPlanInstanceId: ownerId,
+        executorInstanceId: ownerId,
+        sourceStepId: `${ownerId}:${phase === "install_answer" ? "install" : "find"}`,
+        originalActionId: originalAction.actionId,
+        selectedAtStateVersion: 90,
+      };
+      const continuation = continuedPaymentAction(91, originalAction.actionId);
+      const support = supportAction(91, originalAction.actionId);
+      const supportResult = planResult(91, support.actionId, "economy-root");
+      supportResult.portfolio.instances = [
+        {
+          ...structuredClone(previous.instances[0]),
+          executionState: "preempted",
+          moduleState: {
+            kind: "coverage",
+            phase,
+            gap: { requiredRole: "breaker_code_gate" },
+          },
         },
-      },
-    ] as never;
+      ] as never;
 
-    expect(() =>
-      reconcileSelectedRunnerCostPenaltySupportOrigin(
-        input(91, [continuation, support]),
-        supportResult,
-        previous,
-      ),
-    ).not.toThrow();
-    expect(supportResult.portfolio.instances[0]?.moduleState).toMatchObject({
-      kind: "coverage",
-      phase: "install_answer",
-      gap: {
-        requiredRole: "breaker_code_gate",
-        targetServerId: "rd",
-        targetRunActionId: "runner.start_run.rd",
-        installActionIds: [originalAction.actionId],
-      },
-    });
+      expect(() =>
+        reconcileSelectedRunnerCostPenaltySupportOrigin(
+          input(91, [continuation, support]),
+          supportResult,
+          previous,
+        ),
+      ).not.toThrow();
+      expect(supportResult.portfolio.instances[0]?.moduleState).toMatchObject({
+        kind: "coverage",
+        phase,
+        gap: {
+          requiredRole: "breaker_code_gate",
+          targetServerId: "rd",
+          targetRunActionId: "runner.start_run.rd",
+          [actionIdsField]: [originalAction.actionId],
+        },
+      });
 
-    const mismatchedResult = planResult(91, support.actionId, "economy-root");
-    mismatchedResult.portfolio.instances = structuredClone(
-      supportResult.portfolio.instances,
-    );
-    const mismatchedState = mismatchedResult.portfolio.instances[0]
-      ?.moduleState as { gap?: { requiredRole?: string } };
-    mismatchedState.gap!.requiredRole = "breaker_wall";
-    expect(() =>
-      reconcileSelectedRunnerCostPenaltySupportOrigin(
-        input(91, [continuation, support]),
-        mismatchedResult,
-        previous,
-      ),
-    ).toThrow(expect.objectContaining({ code: "invalid_support_graph" }));
-  });
+      const mismatchedResult = planResult(91, support.actionId, "economy-root");
+      mismatchedResult.portfolio.instances = structuredClone(
+        supportResult.portfolio.instances,
+      );
+      const mismatchedState = mismatchedResult.portfolio.instances[0]
+        ?.moduleState as { gap?: { requiredRole?: string } };
+      mismatchedState.gap!.requiredRole = "breaker_wall";
+      expect(() =>
+        reconcileSelectedRunnerCostPenaltySupportOrigin(
+          input(91, [continuation, support]),
+          mismatchedResult,
+          previous,
+        ),
+      ).toThrow(expect.objectContaining({ code: "invalid_support_graph" }));
+
+      const unboundPrevious = structuredClone(previous);
+      const unboundState = unboundPrevious.instances[0]!.moduleState as {
+        gap: Record<string, unknown>;
+      };
+      unboundState.gap[actionIdsField] = ["different-original-action"];
+      expect(() =>
+        reconcileSelectedRunnerCostPenaltySupportOrigin(
+          input(91, [continuation, support]),
+          structuredClone(supportResult),
+          unboundPrevious,
+        ),
+      ).toThrow(expect.objectContaining({ code: "invalid_support_graph" }));
+    },
+  );
 
   it("preserves the origin when support is required before the continuation becomes legal", () => {
     const originalAction = paymentAction(90);
