@@ -1,4 +1,5 @@
 import { expect, it } from "vitest";
+import type { SubroutineType } from "@netgrid/shared";
 import { CARD_DEFINITIONS_BY_ID } from "@netgrid/engine";
 import checkpoint from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-403-dreff-future-only.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -65,7 +66,7 @@ it("fails closed on missing current effect facts instead of silently declining",
   expect(() => chooseAiAction(input)).toThrow(/window_origin_missing/);
 });
 
-it.each([
+it.each<{ definitionId: string; types: SubroutineType[]; useIce: boolean }>([
   {
     definitionId: "onr_proteus_016_coyote",
     types: ["set_run_future_strength_bonus"],
