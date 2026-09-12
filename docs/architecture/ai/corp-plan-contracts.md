@@ -225,8 +225,17 @@ Runner-Credits. Reine ICE-Anzahl und Rez-Anzahl liefern keinen Konversionsbonus.
 Ein möglicher terminaler Steal erhöht das Gewicht der Exposition. Unbekannte oder
 veraltete Quotes bleiben unbekannt und tragen eine konservative Risikogrenze;
 sie werden weder als sicher noch pauschal als 50-Prozent-Chance behandelt.
-Die Zuglinien übernehmen dieselbe Exposition. Ein bereits im eigenen Zug
+Die Zuglinien übernehmen dieselbe Exposition einschließlich des höheren Gewichts
+eines terminalen Steals. Funding-/Defense-Setup exponiert die Agenda noch nicht
+und erhält diesen Aufschlag nicht. Gleiche Zugriffschancen dürfen beim Vergleich
+gehaltener Agenden nicht die unmittelbare Verlustfolge unterschlagen (Regression:
+Pairing 432, D464; Coup und Security Net bei sechs Corp-/vier Runnerpunkten).
+Ein bereits im eigenen Zug
 vollständig schließender Score hat kein dazwischenliegendes Runner-Fenster.
+Nicht bevorzugte, aber zugelassene Agenda-Zuglinien behalten ihre eigene Quote
+im Restzugvergleich. Nur eine autorisierte Opening-Randomisierung bindet die
+Familie vorab; eine andere Setup-Präferenz darf dieselbe Install-Action nicht
+mit einem generischen Einzelwert wieder einführen.
 
 Die Zugriffsrechnung behandelt auch reinen Trace-Net-Schaden konservativ wie
 direkten Schaden: Er garantiert keinen verhinderten Zugriff. Das ist kein

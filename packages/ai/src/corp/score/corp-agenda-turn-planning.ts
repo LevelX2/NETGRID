@@ -475,18 +475,24 @@ function createLine(
         : line.family === "safe_setup"
           ? 18
           : 6;
+  // Score's conversion facts distinguish losing the match from conceding points.
+  // Carry that same stake into exposed turn lines, not into unexposed setup.
+  const exposureStake = params.project.conversion?.runnerStealIsMatchpoint
+    ? 2
+    : 1;
   const risk =
     line.family === "fund_setup"
       ? 0
       : line.family === "safe_setup"
         ? 4
-        : Math.round(accessRisk * 40) +
-          (exposure.knowledge === "known" && accessRisk > 0
-            ? Math.min(30, exposure.runnerCreditsRemaining)
-            : exposure.knowledge === "unknown" &&
-                params.project.openingRush?.status !== "qualified"
-              ? 30
-              : 0) -
+        : exposureStake *
+            (Math.round(accessRisk * 40) +
+              (exposure.knowledge === "known" && accessRisk > 0
+                ? Math.min(30, exposure.runnerCreditsRemaining)
+                : exposure.knowledge === "unknown" &&
+                    params.project.openingRush?.status !== "qualified"
+                  ? 30
+                  : 0)) -
           (line.family === "combined_rush" ? 10 : 0);
   const continuity =
     line.family === "safe_setup" || line.family === "fund_setup" ? 12 : 16;
