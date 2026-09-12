@@ -1,0 +1,2908 @@
+{
+  "creation": {
+    "matchId": "match_3a69c2cbead05c77",
+    "seed": "deep-427-base",
+    "baseline": {
+      "rulesVersion": "26.03",
+      "cardTextSource": "manual",
+      "cardTextSnapshotId": "mvp-0.99-demo",
+      "engineSchemaVersion": "0.99.0",
+      "cardImplementationVersion": "0.99.0",
+      "deviationRegistryVersion": "0.99.0",
+      "playerViewSchemaVersion": "0.99.0",
+      "multiplayerSchemaVersion": "0.99.0",
+      "aiControllerSchemaVersion": "0.99.0",
+      "simulationSchemaVersion": "0.99.0"
+    },
+    "traceRulesProfile": "modern_open",
+    "agendaPointsToWin": 7,
+    "runnerDeck": {
+      "id": "standard_standard_runner_bit_denial_lock_1.0.0",
+      "name": "Bit-Denial Lock",
+      "side": "runner",
+      "identity": "runner_identity_001",
+      "cards": [
+        {
+          "id": "onr_v1_039_krash",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_068_startup-immolator",
+          "quantity": 3
+        },
+        {
+          "id": "onr_v1_080_core-command-jettison-ice",
+          "quantity": 3
+        },
+        {
+          "id": "onr_v1_084_edited-shipping-manifests",
+          "quantity": 3
+        },
+        {
+          "id": "onr_v1_086_forged-activation-orders",
+          "quantity": 3
+        },
+        {
+          "id": "onr_v1_095_jack-n-joe",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_097_livewires-contacts",
+          "quantity": 3
+        },
+        {
+          "id": "onr_v1_105_priority-wreck",
+          "quantity": 3
+        },
+        {
+          "id": "onr_v1_108_score",
+          "quantity": 3
+        },
+        {
+          "id": "onr_v1_109_security-code-worm-chip",
+          "quantity": 1
+        },
+        {
+          "id": "onr_v1_118_weather-to-finance-pipe",
+          "quantity": 3
+        },
+        {
+          "id": "onr_v1_135_nasuko-cycle",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_144_tycho-mem-chip",
+          "quantity": 1
+        },
+        {
+          "id": "onr_v1_145_wutech-mem-chip",
+          "quantity": 1
+        },
+        {
+          "id": "onr_v1_154_broker",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_161_fall-guy",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_165_junkyard-bbs",
+          "quantity": 3
+        },
+        {
+          "id": "onr_v1_168_loan-from-chiba",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_173_restrictive-net-zoning",
+          "quantity": 3
+        }
+      ]
+    },
+    "corpDeck": {
+      "id": "standard_standard_corp_ivory_bastion_1.1.0",
+      "name": "Ivory Bastion",
+      "side": "corp",
+      "identity": "corp_identity_001",
+      "cards": [
+        {
+          "id": "onr_v1_193_corporate-coup",
+          "quantity": 1
+        },
+        {
+          "id": "onr_v1_212_priority-requisition",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_215_security-net-optimization",
+          "quantity": 1
+        },
+        {
+          "id": "onr_v1_219_superior-net-barriers",
+          "quantity": 1
+        },
+        {
+          "id": "onr_v1_220_tycho-extension",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_230_cortical-scanner",
+          "quantity": 1
+        },
+        {
+          "id": "onr_v1_232_crystal-wall",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_237_data-wall",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_238_data-wall-2-0",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_239_endless-corridor",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_245_fire-wall",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_263_reinforced-wall",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_265_rock-is-strong",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_278_wall-of-ice",
+          "quantity": 1
+        },
+        {
+          "id": "onr_v1_279_wall-of-static",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_281_accounts-receivable",
+          "quantity": 3
+        },
+        {
+          "id": "onr_v1_282_annual-reviews",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_290_efficiency-experts",
+          "quantity": 3
+        },
+        {
+          "id": "onr_v1_297_overtime-incentives",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_309_bbs-whispering-campaign",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_311_braindance-campaign",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_317_data-masons",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_324_fortress-architects",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_329_investment-firm",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_350_antiquated-interface-routines",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_355_crystal-palace-station-grid",
+          "quantity": 1
+        },
+        {
+          "id": "onr_v1_360_jerusalem-city-grid",
+          "quantity": 1
+        },
+        {
+          "id": "onr_v1_366_red-herrings",
+          "quantity": 2
+        },
+        {
+          "id": "onr_v1_370_tesseract-fort-construction",
+          "quantity": 1
+        }
+      ]
+    },
+    "runnerDeckMetadata": {
+      "side": "runner",
+      "identityCardId": "runner_identity_001",
+      "deckName": "Bit-Denial Lock",
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "cardPoolVersion": "private-local-onr-v1",
+      "formatProfileId": "netgrid_private_local_v1",
+      "formatProfileVersion": "1.3.0",
+      "deckHash": "fnv1a:d4d08930"
+    },
+    "corpDeckMetadata": {
+      "side": "corp",
+      "identityCardId": "corp_identity_001",
+      "deckName": "Ivory Bastion",
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "cardPoolVersion": "private-local-onr-v1",
+      "formatProfileId": "netgrid_private_local_v1",
+      "formatProfileVersion": "1.3.0",
+      "deckHash": "fnv1a:a20b4880"
+    },
+    "controllers": {
+      "runner": {
+        "controllerId": "runner-ai",
+        "side": "runner",
+        "type": "ai",
+        "displayName": "Runner KI",
+        "difficulty": "hard",
+        "profileId": "runner-ai-v0.9-hard"
+      },
+      "corp": {
+        "controllerId": "corp-ai",
+        "side": "corp",
+        "type": "ai",
+        "displayName": "Korp KI",
+        "difficulty": "hard",
+        "profileId": "corp-ai-v0.9-hard"
+      }
+    }
+  },
+  "commands": [
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.resolve_choice",
+      "actionType": "resolve_choice",
+      "selectedChoices": {
+        "choiceId": "setup_mulligan_runner_0",
+        "selectedOptionIds": [
+          "keep"
+        ]
+      }
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.resolve_choice",
+      "actionType": "resolve_choice",
+      "selectedChoices": {
+        "choiceId": "setup_mulligan_corp_1",
+        "selectedOptionIds": [
+          "mulligan"
+        ]
+      }
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.mandatory_draw",
+      "actionType": "mandatory_draw"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.play_operation.corp_onr_v1_281_accounts-receivable_1.corp_onr_v1_281_accounts-receivable_1.onr_v1_281_accounts-receivable:abilities_on_play_gain_credits",
+      "actionType": "play_operation"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.play_operation.corp_onr_v1_281_accounts-receivable_3.corp_onr_v1_281_accounts-receivable_3.onr_v1_281_accounts-receivable:abilities_on_play_gain_credits",
+      "actionType": "play_operation"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.play_operation.corp_onr_v1_290_efficiency-experts_2.corp_onr_v1_290_efficiency-experts_2.onr_v1_290_efficiency-experts:abilities_on_play_gain_credits",
+      "actionType": "play_operation"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.install_card.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2",
+      "actionType": "install_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.start_run.rd",
+      "actionType": "start_run"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.access_card",
+      "actionType": "access_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.start_run.hq",
+      "actionType": "start_run"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.access_card",
+      "actionType": "access_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.decline_trash",
+      "actionType": "decline_trash"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.mandatory_draw",
+      "actionType": "mandatory_draw"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.play_operation.corp_onr_v1_290_efficiency-experts_1.corp_onr_v1_290_efficiency-experts_1.onr_v1_290_efficiency-experts:abilities_on_play_gain_credits",
+      "actionType": "play_operation"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.play_operation.corp_onr_v1_290_efficiency-experts_3.corp_onr_v1_290_efficiency-experts_3.onr_v1_290_efficiency-experts:abilities_on_play_gain_credits",
+      "actionType": "play_operation"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.play_event.runner_onr_v1_105_priority-wreck_2.hq.runner_onr_v1_105_priority-wreck_2.onr_v1_105_priority-wreck:abilities_on_play_make_run",
+      "actionType": "play_event"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.resolve_choice",
+      "actionType": "resolve_choice",
+      "selectedChoices": {
+        "choiceId": "successful_run_credit_loss_spend_run_21_21",
+        "selectedOptionIds": [
+          "pay_3"
+        ]
+      }
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.start_run.hq",
+      "actionType": "start_run"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.access_card",
+      "actionType": "access_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.decline_trash",
+      "actionType": "decline_trash"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.start_run.rd",
+      "actionType": "start_run"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.access_card",
+      "actionType": "access_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.mandatory_draw",
+      "actionType": "mandatory_draw"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.install_card.corp_onr_v1_279_wall-of-static_1.rd.corp_onr_v1_279_wall-of-static_1.0",
+      "actionType": "install_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.start_run.hq",
+      "actionType": "start_run"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.access_card",
+      "actionType": "access_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.decline_trash",
+      "actionType": "decline_trash"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.play_event.runner_onr_v1_086_forged-activation-orders_2.runner_onr_v1_086_forged-activation-orders_2.onr_v1_086_forged-activation-orders:abilities_on_play_corp_choice_rez_or_trash_ice",
+      "actionType": "play_event"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.resolve_choice",
+      "actionType": "resolve_choice",
+      "selectedChoices": {
+        "choiceId": "card_implementation_corp_choice_rez_or_trash_ice_target_38",
+        "selectedOptionIds": [
+          "ice_1"
+        ]
+      }
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.resolve_choice",
+      "actionType": "resolve_choice",
+      "selectedChoices": {
+        "choiceId": "card_implementation_corp_choice_rez_or_trash_ice_decision_39",
+        "selectedOptionIds": [
+          "rez_ice"
+        ]
+      }
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.draw_card",
+      "actionType": "draw_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.install_card.runner_onr_v1_173_restrictive-net-zoning_1.archives.runner_onr_v1_173_restrictive-net-zoning_1",
+      "actionType": "install_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.mandatory_draw",
+      "actionType": "mandatory_draw"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.play_operation.corp_onr_v1_281_accounts-receivable_2.corp_onr_v1_281_accounts-receivable_2.onr_v1_281_accounts-receivable:abilities_on_play_gain_credits",
+      "actionType": "play_operation"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.draw_card",
+      "actionType": "draw_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.start_run.hq",
+      "actionType": "start_run"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.access_card",
+      "actionType": "access_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.decline_trash",
+      "actionType": "decline_trash"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.draw_card",
+      "actionType": "draw_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.mandatory_draw",
+      "actionType": "mandatory_draw"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.draw_card",
+      "actionType": "draw_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.start_run.hq",
+      "actionType": "start_run"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.access_card",
+      "actionType": "access_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.decline_trash",
+      "actionType": "decline_trash"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.mandatory_draw",
+      "actionType": "mandatory_draw"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.install_card.corp_onr_v1_245_fire-wall_1.new_remote.corp_onr_v1_245_fire-wall_1",
+      "actionType": "install_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.draw_card",
+      "actionType": "draw_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.install_card.corp_onr_v1_263_reinforced-wall_1.rd.corp_onr_v1_263_reinforced-wall_1.1",
+      "actionType": "install_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.start_run.hq",
+      "actionType": "start_run"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.access_card",
+      "actionType": "access_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.decline_trash",
+      "actionType": "decline_trash"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.mandatory_draw",
+      "actionType": "mandatory_draw"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.install_card.corp_onr_v1_317_data-masons_2.remote_1.corp_onr_v1_317_data-masons_2",
+      "actionType": "install_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.rez_card.corp_onr_v1_317_data-masons_2.remote_1.corp_onr_v1_317_data-masons_2",
+      "actionType": "rez_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.start_run.remote_1",
+      "actionType": "start_run"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.rez_ice.corp_onr_v1_245_fire-wall_1.corp_onr_v1_245_fire-wall_1",
+      "actionType": "rez_ice"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.continue_run.printed_subroutines_end_the_run",
+      "actionType": "continue_run"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.start_run.hq",
+      "actionType": "start_run"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.access_card",
+      "actionType": "access_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.decline_trash",
+      "actionType": "decline_trash"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.draw_card",
+      "actionType": "draw_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.draw_card",
+      "actionType": "draw_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.mandatory_draw",
+      "actionType": "mandatory_draw"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.install_card.corp_onr_v1_366_red-herrings_1.rd.corp_onr_v1_366_red-herrings_1",
+      "actionType": "install_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.play_event.runner_onr_v1_118_weather-to-finance-pipe_2.hq.runner_onr_v1_118_weather-to-finance-pipe_2.onr_v1_118_weather-to-finance-pipe:abilities_on_play_make_run",
+      "actionType": "play_event"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.continue_run",
+      "actionType": "continue_run"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.decline_rez.hq",
+      "actionType": "decline_rez"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.start_run.hq",
+      "actionType": "start_run"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.continue_run",
+      "actionType": "continue_run"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.decline_rez.hq",
+      "actionType": "decline_rez"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.access_card",
+      "actionType": "access_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.decline_trash",
+      "actionType": "decline_trash"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.draw_card",
+      "actionType": "draw_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.draw_card",
+      "actionType": "draw_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.resolve_choice",
+      "actionType": "resolve_choice",
+      "selectedChoices": {
+        "choiceId": "discard_runner_110",
+        "selectedOptionIds": [
+          "card_runner_onr_v1_068_startup-immolator_2"
+        ]
+      }
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.mandatory_draw",
+      "actionType": "mandatory_draw"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.install_card.corp_onr_v1_263_reinforced-wall_2.new_remote.corp_onr_v1_263_reinforced-wall_2",
+      "actionType": "install_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.start_run.hq",
+      "actionType": "start_run"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.continue_run",
+      "actionType": "continue_run"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.decline_rez.hq",
+      "actionType": "decline_rez"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.access_card",
+      "actionType": "access_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.decline_trash",
+      "actionType": "decline_trash"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.install_card.runner_onr_v1_165_junkyard-bbs_2.runner_onr_v1_165_junkyard-bbs_2",
+      "actionType": "install_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.draw_card",
+      "actionType": "draw_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.mandatory_draw",
+      "actionType": "mandatory_draw"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.install_card.corp_onr_v1_279_wall-of-static_2.rd.corp_onr_v1_279_wall-of-static_2.2",
+      "actionType": "install_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.start_run.hq",
+      "actionType": "start_run"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.continue_run",
+      "actionType": "continue_run"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.decline_rez.hq",
+      "actionType": "decline_rez"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.access_card",
+      "actionType": "access_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.trash_accessed_card.corp_onr_v1_350_antiquated-interface-routines_2.1",
+      "actionType": "trash_accessed_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.start_run.hq",
+      "actionType": "start_run"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.continue_run",
+      "actionType": "continue_run"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.decline_rez.hq",
+      "actionType": "decline_rez"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.access_card",
+      "actionType": "access_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.decline_trash",
+      "actionType": "decline_trash"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.install_card.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1",
+      "actionType": "install_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:store_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.mandatory_draw",
+      "actionType": "mandatory_draw"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.install_card.corp_onr_v1_309_bbs-whispering-campaign_1.remote_2.corp_onr_v1_309_bbs-whispering-campaign_1",
+      "actionType": "install_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.draw_card",
+      "actionType": "draw_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.rez_card.corp_onr_v1_309_bbs-whispering-campaign_1.remote_2.corp_onr_v1_309_bbs-whispering-campaign_1",
+      "actionType": "rez_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_1.corp_onr_v1_309_bbs-whispering-campaign_1.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:withdraw_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.start_run.remote_2",
+      "actionType": "start_run"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.rez_ice.corp_onr_v1_263_reinforced-wall_2.corp_onr_v1_263_reinforced-wall_2",
+      "actionType": "rez_ice"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.decline_rez",
+      "actionType": "decline_rez"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.continue_run.printed_subroutines_end_the_run,printed_subroutines_end_the_run_a",
+      "actionType": "continue_run"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.start_run.hq",
+      "actionType": "start_run"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.continue_run",
+      "actionType": "continue_run"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.decline_rez.hq",
+      "actionType": "decline_rez"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.access_card",
+      "actionType": "access_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.mandatory_draw",
+      "actionType": "mandatory_draw"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_1.corp_onr_v1_309_bbs-whispering-campaign_1.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.install_card.corp_onr_v1_355_crystal-palace-station-grid_1.hq.corp_onr_v1_355_crystal-palace-station-grid_1",
+      "actionType": "install_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_1.corp_onr_v1_309_bbs-whispering-campaign_1.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:store_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.start_run.hq",
+      "actionType": "start_run"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.continue_run",
+      "actionType": "continue_run"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.decline_rez.hq",
+      "actionType": "decline_rez"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.access_card",
+      "actionType": "access_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.decline_trash",
+      "actionType": "decline_trash"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.access_card",
+      "actionType": "access_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.draw_card",
+      "actionType": "draw_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.play_event.runner_onr_v1_095_jack-n-joe_1.runner_onr_v1_095_jack-n-joe_1.onr_v1_095_jack-n-joe:abilities_on_play_draw_cards",
+      "actionType": "play_event"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.resolve_choice",
+      "actionType": "resolve_choice",
+      "selectedChoices": {
+        "choiceId": "discard_runner_175",
+        "selectedOptionIds": [
+          "card_runner_onr_v1_135_nasuko-cycle_1",
+          "card_runner_onr_v1_086_forged-activation-orders_1"
+        ]
+      }
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.mandatory_draw",
+      "actionType": "mandatory_draw"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_1.corp_onr_v1_309_bbs-whispering-campaign_1.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_1.corp_onr_v1_309_bbs-whispering-campaign_1.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.install_card.corp_onr_v1_360_jerusalem-city-grid_1.rd.corp_onr_v1_360_jerusalem-city-grid_1",
+      "actionType": "install_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.start_run.hq",
+      "actionType": "start_run"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.continue_run",
+      "actionType": "continue_run"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.decline_rez.hq",
+      "actionType": "decline_rez"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.access_card",
+      "actionType": "access_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.decline_trash",
+      "actionType": "decline_trash"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.access_card",
+      "actionType": "access_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.decline_trash",
+      "actionType": "decline_trash"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.play_event.runner_onr_v1_095_jack-n-joe_2.runner_onr_v1_095_jack-n-joe_2.onr_v1_095_jack-n-joe:abilities_on_play_draw_cards",
+      "actionType": "play_event"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:store_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.resolve_choice",
+      "actionType": "resolve_choice",
+      "selectedChoices": {
+        "choiceId": "discard_runner_192",
+        "selectedOptionIds": [
+          "card_runner_onr_v1_109_security-code-worm-chip_1",
+          "card_runner_onr_v1_118_weather-to-finance-pipe_1"
+        ]
+      }
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.mandatory_draw",
+      "actionType": "mandatory_draw"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.install_card.corp_onr_v1_245_fire-wall_2.hq.corp_onr_v1_245_fire-wall_2.0",
+      "actionType": "install_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_1.corp_onr_v1_309_bbs-whispering-campaign_1.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_1.corp_onr_v1_309_bbs-whispering-campaign_1.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.play_event.runner_onr_v1_086_forged-activation-orders_3.runner_onr_v1_086_forged-activation-orders_3.onr_v1_086_forged-activation-orders:abilities_on_play_corp_choice_rez_or_trash_ice",
+      "actionType": "play_event"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.resolve_choice",
+      "actionType": "resolve_choice",
+      "selectedChoices": {
+        "choiceId": "card_implementation_corp_choice_rez_or_trash_ice_target_199",
+        "selectedOptionIds": [
+          "ice_1"
+        ]
+      }
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.resolve_choice",
+      "actionType": "resolve_choice",
+      "selectedChoices": {
+        "choiceId": "card_implementation_corp_choice_rez_or_trash_ice_decision_200",
+        "selectedOptionIds": [
+          "rez_ice"
+        ]
+      }
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:store_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.draw_card",
+      "actionType": "draw_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.activated_card_ability.runner_onr_v1_165_junkyard-bbs_2.runner_onr_v1_165_junkyard-bbs_2.runner_onr_v1_086_forged-activation-orders_3.activated.onr_v1_165_junkyard-bbs:abilities_activated_runner_main_move_top_trash_to_grip.runner_onr_v1_086_forged-activation-orders_3",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.resolve_choice",
+      "actionType": "resolve_choice",
+      "selectedChoices": {
+        "choiceId": "discard_runner_205",
+        "selectedOptionIds": [
+          "card_runner_onr_v1_161_fall-guy_1"
+        ]
+      }
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.mandatory_draw",
+      "actionType": "mandatory_draw"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.install_card.corp_onr_v1_366_red-herrings_2.hq.corp_onr_v1_366_red-herrings_2",
+      "actionType": "install_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_1.corp_onr_v1_309_bbs-whispering-campaign_1.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.install_card.corp_onr_v1_309_bbs-whispering-campaign_2.remote_2.corp_onr_v1_309_bbs-whispering-campaign_2",
+      "actionType": "install_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.rez_card.corp_onr_v1_309_bbs-whispering-campaign_2.remote_2.corp_onr_v1_309_bbs-whispering-campaign_2",
+      "actionType": "rez_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:withdraw_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.draw_card",
+      "actionType": "draw_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.resolve_choice",
+      "actionType": "resolve_choice",
+      "selectedChoices": {
+        "choiceId": "discard_runner_217",
+        "selectedOptionIds": [
+          "card_runner_onr_v1_161_fall-guy_2"
+        ]
+      }
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.mandatory_draw",
+      "actionType": "mandatory_draw"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_2.corp_onr_v1_309_bbs-whispering-campaign_2.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.draw_card",
+      "actionType": "draw_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_2.corp_onr_v1_309_bbs-whispering-campaign_2.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.resolve_choice",
+      "actionType": "resolve_choice",
+      "selectedChoices": {
+        "choiceId": "discard_corp_223",
+        "selectedOptionIds": [
+          "card_corp_onr_v1_297_overtime-incentives_2"
+        ]
+      }
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.start_run.remote_1",
+      "actionType": "start_run"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.decline_rez",
+      "actionType": "decline_rez"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_1.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionType": "pump_breaker"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_1.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionType": "pump_breaker"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_1.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionType": "pump_breaker"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_1.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionType": "pump_breaker"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_1.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionType": "pump_breaker"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.break_subroutine.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_1.0.printed_subroutines_end_the_run.onr_v1_039_krash:icebreaker_abilities_break_subroutine",
+      "actionType": "break_subroutine"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.continue_run",
+      "actionType": "continue_run"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.continue_run",
+      "actionType": "continue_run"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.decline_rez.remote_1",
+      "actionType": "decline_rez"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.access_card",
+      "actionType": "access_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.trash_accessed_card.corp_onr_v1_317_data-masons_2.1",
+      "actionType": "trash_accessed_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:store_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.mandatory_draw",
+      "actionType": "mandatory_draw"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.install_card.corp_onr_v1_230_cortical-scanner_1.rd.corp_onr_v1_230_cortical-scanner_1.3",
+      "actionType": "install_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_2.corp_onr_v1_309_bbs-whispering-campaign_2.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_2.corp_onr_v1_309_bbs-whispering-campaign_2.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:withdraw_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.draw_card",
+      "actionType": "draw_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.resolve_choice",
+      "actionType": "resolve_choice",
+      "selectedChoices": {
+        "choiceId": "discard_runner_251",
+        "selectedOptionIds": [
+          "card_runner_onr_v1_165_junkyard-bbs_1"
+        ]
+      }
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.mandatory_draw",
+      "actionType": "mandatory_draw"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.install_card.corp_onr_v1_278_wall-of-ice_1.rd.corp_onr_v1_278_wall-of-ice_1.4",
+      "actionType": "install_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_2.corp_onr_v1_309_bbs-whispering-campaign_2.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_2.corp_onr_v1_309_bbs-whispering-campaign_2.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:store_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.draw_card",
+      "actionType": "draw_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.resolve_choice",
+      "actionType": "resolve_choice",
+      "selectedChoices": {
+        "choiceId": "discard_runner_262",
+        "selectedOptionIds": [
+          "card_runner_onr_v1_135_nasuko-cycle_2"
+        ]
+      }
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.mandatory_draw",
+      "actionType": "mandatory_draw"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.install_card.corp_onr_v1_237_data-wall_2.rd.corp_onr_v1_237_data-wall_2.5",
+      "actionType": "install_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_2.corp_onr_v1_309_bbs-whispering-campaign_2.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.activated_card_ability.corp_onr_v1_309_bbs-whispering-campaign_2.corp_onr_v1_309_bbs-whispering-campaign_2.activated.onr_v1_309_bbs-whispering-campaign:abilities_activated_corp_main_take_hosted_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.draw_card",
+      "actionType": "draw_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.resolve_choice",
+      "actionType": "resolve_choice",
+      "selectedChoices": {
+        "choiceId": "discard_runner_273",
+        "selectedOptionIds": [
+          "card_runner_onr_v1_086_forged-activation-orders_3"
+        ]
+      }
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.mandatory_draw",
+      "actionType": "mandatory_draw"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.install_card.corp_onr_v1_311_braindance-campaign_1.remote_1.corp_onr_v1_311_braindance-campaign_1",
+      "actionType": "install_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.draw_card",
+      "actionType": "draw_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.play_event.runner_onr_v1_097_livewires-contacts_2.runner_onr_v1_097_livewires-contacts_2.onr_v1_097_livewires-contacts:abilities_on_play_gain_credits",
+      "actionType": "play_event"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.start_run.hq",
+      "actionType": "start_run"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.decline_rez",
+      "actionType": "decline_rez"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_2.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionType": "pump_breaker"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_2.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionType": "pump_breaker"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_2.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionType": "pump_breaker"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_2.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionType": "pump_breaker"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.break_subroutine.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_2.0.printed_subroutines_end_the_run.onr_v1_039_krash:icebreaker_abilities_break_subroutine",
+      "actionType": "break_subroutine"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.continue_run",
+      "actionType": "continue_run"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.continue_run",
+      "actionType": "continue_run"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.decline_rez.hq",
+      "actionType": "decline_rez"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.access_card",
+      "actionType": "access_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.decline_trash",
+      "actionType": "decline_trash"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.access_card",
+      "actionType": "access_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.trash_accessed_card.corp_onr_v1_366_red-herrings_2.1",
+      "actionType": "trash_accessed_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.access_card",
+      "actionType": "access_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.decline_trash",
+      "actionType": "decline_trash"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:store_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.mandatory_draw",
+      "actionType": "mandatory_draw"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.install_card.corp_onr_v1_237_data-wall_1.new_remote.corp_onr_v1_237_data-wall_1",
+      "actionType": "install_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:store_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.draw_card",
+      "actionType": "draw_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.resolve_choice",
+      "actionType": "resolve_choice",
+      "selectedChoices": {
+        "choiceId": "discard_runner_309",
+        "selectedOptionIds": [
+          "card_runner_onr_v1_165_junkyard-bbs_3"
+        ]
+      }
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.mandatory_draw",
+      "actionType": "mandatory_draw"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.install_card.corp_onr_v1_238_data-wall-2-0_1.rd.corp_onr_v1_238_data-wall-2-0_1.6",
+      "actionType": "install_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.draw_card",
+      "actionType": "draw_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.resolve_choice",
+      "actionType": "resolve_choice",
+      "selectedChoices": {
+        "choiceId": "discard_runner_320",
+        "selectedOptionIds": [
+          "card_runner_onr_v1_084_edited-shipping-manifests_1"
+        ]
+      }
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.mandatory_draw",
+      "actionType": "mandatory_draw"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.resolve_choice",
+      "actionType": "resolve_choice",
+      "selectedChoices": {
+        "choiceId": "discard_corp_326",
+        "selectedOptionIds": [
+          "card_corp_onr_v1_282_annual-reviews_1"
+        ]
+      }
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.draw_card",
+      "actionType": "draw_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.resolve_choice",
+      "actionType": "resolve_choice",
+      "selectedChoices": {
+        "choiceId": "discard_runner_332",
+        "selectedOptionIds": [
+          "card_runner_onr_v1_118_weather-to-finance-pipe_3"
+        ]
+      }
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.mandatory_draw",
+      "actionType": "mandatory_draw"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.draw_card",
+      "actionType": "draw_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.resolve_choice",
+      "actionType": "resolve_choice",
+      "selectedChoices": {
+        "choiceId": "discard_corp_338",
+        "selectedOptionIds": [
+          "card_corp_onr_v1_282_annual-reviews_2",
+          "card_corp_onr_v1_324_fortress-architects_1"
+        ]
+      }
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.draw_card",
+      "actionType": "draw_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.resolve_choice",
+      "actionType": "resolve_choice",
+      "selectedChoices": {
+        "choiceId": "discard_runner_344",
+        "selectedOptionIds": [
+          "card_runner_onr_v1_144_tycho-mem-chip_1"
+        ]
+      }
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.mandatory_draw",
+      "actionType": "mandatory_draw"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.draw_card",
+      "actionType": "draw_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.install_card.corp_onr_v1_232_crystal-wall_1.hq.corp_onr_v1_232_crystal-wall_1.1",
+      "actionType": "install_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.resolve_choice",
+      "actionType": "resolve_choice",
+      "selectedChoices": {
+        "choiceId": "discard_corp_350",
+        "selectedOptionIds": [
+          "card_corp_onr_v1_324_fortress-architects_2"
+        ]
+      }
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.play_event.runner_onr_v1_105_priority-wreck_1.hq.runner_onr_v1_105_priority-wreck_1.onr_v1_105_priority-wreck:abilities_on_play_make_run",
+      "actionType": "play_event"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.rez_ice.corp_onr_v1_232_crystal-wall_1.corp_onr_v1_232_crystal-wall_1",
+      "actionType": "rez_ice"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.decline_rez",
+      "actionType": "decline_rez"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_232_crystal-wall_1.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionType": "pump_breaker"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_232_crystal-wall_1.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionType": "pump_breaker"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_232_crystal-wall_1.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionType": "pump_breaker"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.break_subroutine.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_232_crystal-wall_1.0.printed_subroutines_end_the_run.onr_v1_039_krash:icebreaker_abilities_break_subroutine",
+      "actionType": "break_subroutine"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.continue_run",
+      "actionType": "continue_run"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.continue_run",
+      "actionType": "continue_run"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.decline_rez.hq",
+      "actionType": "decline_rez"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.decline_rez",
+      "actionType": "decline_rez"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_2.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionType": "pump_breaker"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_2.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionType": "pump_breaker"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_2.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionType": "pump_breaker"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_2.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionType": "pump_breaker"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.break_subroutine.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_245_fire-wall_2.0.printed_subroutines_end_the_run.onr_v1_039_krash:icebreaker_abilities_break_subroutine",
+      "actionType": "break_subroutine"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.continue_run",
+      "actionType": "continue_run"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.continue_run",
+      "actionType": "continue_run"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.decline_rez.hq",
+      "actionType": "decline_rez"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.resolve_choice",
+      "actionType": "resolve_choice",
+      "selectedChoices": {
+        "choiceId": "successful_run_credit_loss_spend_run_352_370",
+        "selectedOptionIds": [
+          "pay_1"
+        ]
+      }
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:withdraw_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.install_card.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2",
+      "actionType": "install_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:store_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.mandatory_draw",
+      "actionType": "mandatory_draw"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.install_card.corp_onr_v1_212_priority-requisition_1.remote_2.corp_onr_v1_212_priority-requisition_1",
+      "actionType": "install_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.install_card.corp_onr_v1_220_tycho-extension_1.remote_1.corp_onr_v1_220_tycho-extension_1",
+      "actionType": "install_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.advance_card.corp_onr_v1_212_priority-requisition_1.corp_onr_v1_212_priority-requisition_1",
+      "actionType": "advance_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:withdraw_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:store_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.mandatory_draw",
+      "actionType": "mandatory_draw"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.advance_card.corp_onr_v1_220_tycho-extension_1.corp_onr_v1_220_tycho-extension_1",
+      "actionType": "advance_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.play_operation.corp_onr_v1_297_overtime-incentives_1.corp_onr_v1_297_overtime-incentives_1",
+      "actionType": "play_operation"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.advance_card.corp_onr_v1_220_tycho-extension_1.corp_onr_v1_220_tycho-extension_1",
+      "actionType": "advance_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.advance_card.corp_onr_v1_220_tycho-extension_1.corp_onr_v1_220_tycho-extension_1",
+      "actionType": "advance_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.advance_card.corp_onr_v1_220_tycho-extension_1.corp_onr_v1_220_tycho-extension_1",
+      "actionType": "advance_card"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.score_agenda.corp_onr_v1_220_tycho-extension_1.corp_onr_v1_220_tycho-extension_1",
+      "actionType": "score_agenda"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.start_run.remote_2",
+      "actionType": "start_run"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.decline_rez",
+      "actionType": "decline_rez"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_263_reinforced-wall_2.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionType": "pump_breaker"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_263_reinforced-wall_2.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionType": "pump_breaker"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_263_reinforced-wall_2.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionType": "pump_breaker"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.pump_breaker.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_263_reinforced-wall_2.onr_v1_039_krash:icebreaker_abilities_increase_strength",
+      "actionType": "pump_breaker"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.break_subroutine.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_263_reinforced-wall_2.0.printed_subroutines_end_the_run.onr_v1_039_krash:icebreaker_abilities_break_subroutine",
+      "actionType": "break_subroutine"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.break_subroutine.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.runner_onr_v1_039_krash_2.corp_onr_v1_263_reinforced-wall_2.1.printed_subroutines_end_the_run_a.onr_v1_039_krash:icebreaker_abilities_break_subroutine",
+      "actionType": "break_subroutine"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.continue_run",
+      "actionType": "continue_run"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.continue_run",
+      "actionType": "continue_run"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.decline_rez.remote_2",
+      "actionType": "decline_rez"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.access_card",
+      "actionType": "access_card"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.steal_agenda.corp_onr_v1_212_priority-requisition_1",
+      "actionType": "steal_agenda"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:withdraw_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:store_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "kind": "action",
+      "side": "runner",
+      "actionId": "runner.end_turn",
+      "actionType": "end_turn"
+    },
+    {
+      "kind": "action",
+      "side": "corp",
+      "actionId": "corp.mandatory_draw",
+      "actionType": "mandatory_draw"
+    }
+  ],
+  "runnerReply": [
+    {
+      "side": "runner",
+      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_2.runner_onr_v1_154_broker_2.activated.onr_v1_154_broker:withdraw_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "side": "runner",
+      "actionId": "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:store_credits",
+      "actionType": "activated_card_ability"
+    },
+    {
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "side": "runner",
+      "actionId": "runner.gain_credit",
+      "actionType": "gain_credit"
+    },
+    {
+      "side": "runner",
+      "actionId": "runner.end_turn",
+      "actionType": "end_turn"
+    }
+  ]
+}

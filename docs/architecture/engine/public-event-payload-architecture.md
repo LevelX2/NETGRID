@@ -85,6 +85,13 @@ gemeinsamen Vertrag typgeprüft werden.
 - Interne Discriminator-Schlüssel bleiben im privaten Replay-Input erhalten,
   damit die aktuelle Aktion deterministisch erneut angewendet werden kann.
 
+Dr. Dreffs temporäre HQ-Begegnung veröffentlicht ausschließlich die tatsächlich
+aufgedeckte ICE über `publicRevealKind: reveal` und
+`publicRevealDefinitionId`. Der Chronik-Consumer verbindet diesen Reveal mit
+der öffentlichen Quelle und zeigt die zusätzliche Begegnung auch im
+lokalisierten Pfad an. Nicht gewählte HQ-Karten und die privaten Choice-Optionen
+bleiben verborgen; ein Verzicht enthält keine Reveal-Identität.
+
 ## Wartungsregeln
 
 1. Einen neuen Ability-Discriminator nur ergänzen, wenn aktueller

@@ -789,7 +789,8 @@ export function resolveSuccessfulRunInterventionChoice(
       fortWindowSourceTitle: definition.title,
       sourceDefinitionId: definition.id,
       sourceCardId,
-      selectedIceDefinitionId: host.cards.definitionFor(
+      publicRevealKind: "reveal",
+      publicRevealDefinitionId: host.cards.definitionFor(
         hqIceId as CardInstanceId,
       ).id,
       rezCostPaid: cost,

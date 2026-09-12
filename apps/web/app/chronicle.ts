@@ -511,6 +511,12 @@ function formatSemanticChronicleEvent(
     stringValue(payload.hiddenZoneAction) === "p3_37_search_stack_to_grip" &&
     stringValue(payload.publicRevealKind) === "reveal" &&
     stringValue(payload.publicRevealDefinitionId) !== undefined;
+  const temporaryEncounterChosen =
+    actionType === "resolve_choice" &&
+    payload.hiddenZoneAction === "successful_run_temporary_encounter";
+  const temporaryEncounterDeclined =
+    actionType === "resolve_choice" &&
+    payload.hiddenZoneAction === "successful_run_intervention_declined";
   const publicStackRevealDefinitionId = publicStackToGripReveal
     ? stringValue(payload.publicRevealDefinitionId)
     : undefined;
@@ -573,7 +579,36 @@ function formatSemanticChronicleEvent(
         total: Math.max(accessNumber, accessTotal),
       })}: `
     : "";
-  if (publicStackToGripReveal) {
+  if (temporaryEncounterChosen || temporaryEncounterDeclined) {
+    const source =
+      publicCardTitle(
+        stringValue(payload.sourceDefinitionId),
+        context.cardPresentationsById,
+      ) ??
+      stringValue(payload.fortWindowSourceTitle) ??
+      translate("card.unknown");
+    if (temporaryEncounterChosen) {
+      const ice =
+        publicCardTitle(
+          stringValue(payload.publicRevealDefinitionId),
+          context.cardPresentationsById,
+        ) ?? translate("card.unknown");
+      explicitTitle = translate("event.temporaryEncounterChosen", {
+        subject,
+        source,
+        ice,
+      });
+      description = translate("event.temporaryEncounterDescription", { ice });
+      detailChips = [source, ice];
+    } else {
+      explicitTitle = translate("event.temporaryEncounterDeclined", {
+        subject,
+        source,
+      });
+      detailChips = [source];
+    }
+    category = "run";
+  } else if (publicStackToGripReveal) {
     const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
     const sourceTitle =
       publicCardTitle(sourceDefinitionId, context.cardPresentationsById) ??
@@ -840,7 +875,9 @@ function formatSemanticChronicleEvent(
       ? "system"
       : publiclyIdentifiedAccessResult ||
           publiclyRevealedTraceResult ||
-          publicStackToGripReveal
+          publicStackToGripReveal ||
+          temporaryEncounterChosen ||
+          temporaryEncounterDeclined
         ? "public"
         : stringValue(payload.redactedKind) ||
             payload.hiddenZoneBarrier === true
@@ -865,7 +902,10 @@ function formatSemanticChronicleEvent(
     id: event.eventId,
     category,
     importance:
-      category === "danger" || category === "agenda" || publicStackToGripReveal
+      category === "danger" ||
+      category === "agenda" ||
+      publicStackToGripReveal ||
+      temporaryEncounterChosen
         ? "important"
         : "normal",
     visibility,
@@ -2914,7 +2954,7 @@ export function formatChronicleEvent(
           stringValue(payload.fortWindowSourceTitle) ??
           "Dr. Dreff";
         const selectedIceTitle = titleForDefinitionId(
-          stringValue(payload.selectedIceDefinitionId),
+          stringValue(payload.publicRevealDefinitionId),
         );
         const selectedIce = selectedIceTitle ?? "ein ICE aus HQ";
         const selectedIceWithOrigin = selectedIceTitle

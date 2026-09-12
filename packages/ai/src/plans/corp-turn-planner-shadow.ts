@@ -15,6 +15,7 @@ import type {
 } from "../action-semantic-candidate-types";
 
 import { currentCorpCreditObligation } from "./corp-credit-obligation";
+import { scoreMilestoneBoundary } from "../corp/score/score-milestone-boundary";
 import { PlanResolutionFailure } from "./plan-resolution-failure";
 import { candidatePreservesMandatoryCreditObligation } from "./turn-remainder-search";
 import {
@@ -1739,6 +1740,10 @@ function boundaryForCandidate(
   candidate: ActionSemanticCandidate,
   head?: TurnPlanningHeadCandidate,
 ): BoundaryActionAssessment | undefined {
+  if (head && isExactScoreRootHead(head)) {
+    const scoreBoundary = scoreMilestoneBoundary(input, candidate);
+    if (scoreBoundary) return scoreBoundary;
+  }
   const remainingActionCapacity = {
     minimum: Math.max(
       0,

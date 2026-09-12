@@ -39,6 +39,63 @@ function event(
 
 describe("semantic chronicle localization", () => {
   it.each(["de", "en", "fr"] as const)(
+    "names the ICE publicly chosen by Dr. Dreff in %s",
+    (locale) => {
+      const chosen = event("resolve_choice", {
+        actor: "corp",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "successful_run_temporary_encounter",
+        sourceDefinitionId: "onr_v1_358_dr-dreff",
+        publicRevealKind: "reveal",
+        publicRevealDefinitionId: "onr_proteus_016_coyote",
+        rezCostPaid: 0,
+        aiReasonCode: "plan_bound_corp_delayed_success_choice",
+      });
+      const context = {
+        translate: translate(locale),
+        cardPresentationsById: {
+          "onr_v1_358_dr-dreff": { title: "Dr. Dreff", type: "upgrade" },
+          onr_proteus_016_coyote: { title: "Coyote", type: "ice" },
+        },
+      };
+      for (const side of ["corp", "runner"] as const) {
+        const item = formatChronicleEvent(chosen, side, context);
+        expect(item).toMatchObject({
+          category: "run",
+          visibility: "public",
+          importance: "important",
+          cardDefinitionId: "onr_v1_358_dr-dreff",
+          chips: expect.arrayContaining(["Dr. Dreff", "Coyote"]),
+        });
+        expect(item.title).toContain("Dr. Dreff");
+        expect(item.title).toContain("Coyote");
+        expect(item.description).toContain("Coyote");
+        expect(item.title).not.toMatch(
+          /Auswahl aufgelöst|resolved a choice|résolu un choix/,
+        );
+      }
+      if (locale === "de") {
+        expect(formatChronicleEvent(chosen, "runner", context).title).toBe(
+          "Die Korp-KI: mit Dr. Dreff Coyote aus HQ für eine zusätzliche Begegnung gewählt.",
+        );
+      }
+      const declined = event("resolve_choice", {
+        actor: "corp",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "successful_run_intervention_declined",
+        sourceDefinitionId: "onr_v1_358_dr-dreff",
+      });
+      const declineItem = formatChronicleEvent(declined, "runner", context);
+      expect(declineItem).toMatchObject({
+        category: "run",
+        visibility: "public",
+      });
+      expect(declineItem.title).toContain("Dr. Dreff");
+      expect(JSON.stringify(declineItem)).not.toContain("Coyote");
+    },
+  );
+
+  it.each(["de", "en", "fr"] as const)(
     "names each Shell Traders counter target and keeps its card link in %s",
     (locale) => {
       const targets = ["Simple Fracter", "Simple Decoder"];
