@@ -31,7 +31,7 @@ it("keeps the central executor and actual access instead of consuming a zero-yie
   });
 });
 
-it.each([0, 8])(
+it.each([0, 1, 8])(
   "quotes only the actual denial payoff at %i visible Corp credits",
   (credits) => {
     const input = structuredClone(
@@ -54,6 +54,7 @@ it.each([0, 8])(
       knownTargetDefinitionIds: [],
       trashBudget: "not_applicable",
     });
+    if (credits <= 1) expect(denial.score).toBeLessThan(basic.score);
     if (credits === 0) {
       expect(denial.knownAccessState).toBe("known_no_current_payoff");
       expect(denial.score).toBeLessThan(basic.score);

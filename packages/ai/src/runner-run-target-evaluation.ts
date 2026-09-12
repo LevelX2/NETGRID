@@ -1208,7 +1208,13 @@ function accessReplacementPayoffForTarget(
       },
       knownAccessState: denial > 0 ? "known_payoff" : "known_no_current_payoff",
       accessNoveltyRatio: 0,
-      scoreAdjustment: denial > 0 ? 0 : -640,
+      // Use the same bounded per-credit scale as successful-run economy,
+      // rather than assigning every positive payload a full access bonus.
+      scoreAdjustment:
+        denial > 0
+          ? Math.min(INSTALLED_RUN_PAYOFF_SCORE_CAP, denial * 8) -
+            scoreForPayoff("access_bonus")
+          : -640,
       evidence: [
         "central_access_replacement:runner_spend_corp_lose_credits",
         `central_access_replacement_visible_denial_upper_bound:${denial}`,
