@@ -22,7 +22,6 @@ import { quoteRunnerRunRiskReserve } from "../../run-analysis/runner-run-risk-re
 import {
   runnerConfirmedDamageRequiredHandFloor,
   runnerDamageThreatAssessment,
-  runnerVisibleLethalIceDamageAssessment,
   runnerVisibleLethalIceDamageJackOutAssessment,
 } from "../../runner-damage-threat-assessment";
 import type {
@@ -32,12 +31,11 @@ import type {
 import { runnerRunTargetHasOptionalBonusRunValue } from "../../runner-run-target-guidance";
 import {
   currentEncounteredIceCard,
-  currentEncounterRequiresFullBreak,
-  currentEncounterUnbrokenSubroutineIndexes,
   currentRunHasPendingAutoPassIce,
   currentRunRemainingIce,
 } from "../../runtime/current-encounter";
 import { legalActionCreditCost } from "../../runtime/legal-action-credit-cost";
+import { currentEncounterRequiresDamagePreservingBreak } from "../../runtime/current-encounter-damage";
 import type { RunWindowAssessmentServices } from "./run-window-services";
 import { assessRunnerAccessTrashImpact } from "./runner-access-trash-impact";
 import {
@@ -1344,55 +1342,15 @@ export function runnerCurrentEncounterRequiresDamagePreservingBreak(
   input: AiDecisionInput,
   runOrigin: RunnerRunOrigin | undefined,
 ): boolean {
-  if (input.playerView.run?.phase !== "encounter_ice") return false;
-  // The payment window suspends encounter choices. Its continuation owner
-  // resumes the already selected action with the persisted plan binding;
-  // this is not a fresh choice to leave any subroutine unbroken.
-  if (
-    input.legalActions.some(
-      (action) => action.payload?.runnerCostPenaltySupportContinuation === true,
-    )
-  )
-    return false;
-  if (currentEncounterRequiresFullBreak(input)) return true;
-  const encounteredIce = currentEncounteredIceCard(input);
-  if (!encounteredIce?.effectiveRunQuote) return false;
-  if (
-    !encounteredIce.effectiveRunQuote.subroutines.some(
-      (subroutine) =>
-        (subroutine.type === "do_damage" ||
-          subroutine.type === "random_damage") &&
-        typeof subroutine.amount === "number" &&
-        subroutine.amount > 0,
-    )
-  )
-    return false;
-  const unbrokenIndexes = currentEncounterUnbrokenSubroutineIndexes(input);
-  const remainingDamageIce = {
-    ...encounteredIce,
-    effectiveRunQuote: {
-      ...encounteredIce.effectiveRunQuote,
-      subroutines: encounteredIce.effectiveRunQuote.subroutines.filter(
-        (_, index) => unbrokenIndexes.has(index),
-      ),
-    },
-  };
-  return (
-    runnerVisibleLethalIceDamageAssessment(input, [remainingDamageIce], {
-      // Quote the consequence of deliberately leaving the current damage
-      // subroutine unbroken. Affordability is evaluated by the exact
-      // pump/break LegalActions, not by this consequence check.
-      generalCredits: 0,
-      // An information run already reserved a hand buffer for the unknown
-      // remainder. Its encounter budget cannot discard that bound reserve
-      // merely because the immediate damage is not itself a flatline.
-      requiredHandFloor: Math.max(
-        runnerConfirmedDamageRequiredHandFloor(input),
-        runOrigin?.purpose === "information"
-          ? (runOrigin.runRiskContract?.reserveQuote.requiredHandBuffer ?? 0)
-          : 0,
-      ),
-    }) !== undefined
+  return currentEncounterRequiresDamagePreservingBreak(
+    input,
+    // The bound information-run reserve remains an additional requirement.
+    Math.max(
+      runnerConfirmedDamageRequiredHandFloor(input),
+      runOrigin?.purpose === "information"
+        ? (runOrigin.runRiskContract?.reserveQuote.requiredHandBuffer ?? 0)
+        : 0,
+    ),
   );
 }
 

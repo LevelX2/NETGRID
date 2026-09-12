@@ -899,6 +899,11 @@ Run-Window verwendet dazu die effektive Breaker-Quote und die zusätzlichen
 Breakgebühren des aktuellen ICE. Eine gedruckte Fähigkeitszusammenfassung
 oder ein Ersatzpreis ist kein Kostennachweis.
 
+Eine von der Engine markierte Zahlungsfortsetzung gehört dagegen zur bereits
+gewählten Pumpaktion. Ihr eigener Continuation-Owner prüft die gespeicherte
+Actionbindung; die Pump-Zulassung verlangt in diesem unterbrochenen Fenster
+keine neue Encounter-Restquote.
+
 Das Modul besitzt kein unabhängiges langfristiges Ziel. Es gehört logisch zum
 auslösenden Run-/Contest-Plan und kehrt anschließend dorthin zurück.
 
@@ -909,6 +914,14 @@ Flatline oder gebundenem Handpufferverlust nicht ausschließen. Dafür werden
 nur die aktuellen, über Engine-IDs gebundenen ungebrochenen Subroutinen
 bewertet. Bereits gebrochener Schaden begründet keine weiteren Ausgaben;
 fehlende Restbindungen scheitern strukturiert statt Schaden zu erfinden.
+
+Der gemeinsame Konsequenzfakt in `runtime/current-encounter-damage.ts`
+verwendet die bestehende sichtbare Schadensprojektion auch für die lokale
+Pump-Zulassung. Mehrere Schadenssubroutinen teilen sich denselben Handpuffer
+und dieselbe Prävention. Die bloße Einzelprüfung jeder Subroutine darf eine
+kumulative Flatline nicht als überlebbar einstufen. Das Prädikat für rein
+nicht tödliches Continue prüft die Letalitätsgrenze; zusätzliche bestätigte
+oder im Run gebundene Handreserven bleiben beim Run-Owner.
 
 Bedingter Schaden im nächsten Encounter wird gemeinsam mit der vollständig
 bezahlbaren Folgelösung bewertet. Wählt die bekannte Pfadprojektion den

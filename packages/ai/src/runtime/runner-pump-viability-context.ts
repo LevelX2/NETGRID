@@ -18,6 +18,7 @@ import {
   currentEncounterRequiresFullBreak,
   currentEncounterUnbrokenSubroutineIndexes,
 } from "./current-encounter";
+import { currentEncounterRequiresDamagePreservingBreak } from "./current-encounter-damage";
 import {
   breakerIdForEncounterAction,
   pumpStrengthAmountForAction,
@@ -85,6 +86,15 @@ export function createRunnerPumpViabilityContext(
     input: AiDecisionInput,
     action: LegalAction,
   ): RunnerEncounterViabilityAssessment => {
+    // The Engine is resuming the pump already admitted by this run owner.
+    // Its payment window has no fresh encounter remainder to quote. The
+    // continuation owner still validates the exact persisted action binding.
+    if (action.payload?.runnerCostPenaltySupportContinuation === true) {
+      return {
+        canLeadToBreak: true,
+        evidence: ["pump_bound_cost_continuation:true"],
+      };
+    }
     const breaker = dependencies.findVisibleCard(input, action.source);
     const encounteredIce = input.playerView.run?.encounteredIce;
     if (!breaker?.definitionId || !encounteredIce?.definitionId)
@@ -323,9 +333,11 @@ export function createRunnerPumpViabilityContext(
         : undefined;
     if (server) {
       const hasImmediateSafetyThreat =
-        currentQuote?.subroutines.some((subroutine) =>
+        currentEncounterRequiresDamagePreservingBreak(input) ||
+        (currentQuote?.subroutines.some((subroutine) =>
           isUnacceptableImmediateSafetyThreatSubroutine(input, subroutine),
-        ) ?? false;
+        ) ??
+          false);
       const futurePath = hasImmediateSafetyThreat
         ? {
             blocksPump: false,

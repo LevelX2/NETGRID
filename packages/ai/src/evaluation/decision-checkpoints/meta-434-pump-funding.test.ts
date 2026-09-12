@@ -1,11 +1,21 @@
 import { expect, it } from "vitest";
-import checkpoint from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-434-g17-d80.json";
+import { readFileSync } from "node:fs";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import {
   restoreAiRuntimeCheckpoint,
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
+
+const checkpoint: unknown = JSON.parse(
+  readFileSync(
+    new URL(
+      "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-434-g17-d80.json",
+      import.meta.url,
+    ),
+    "utf8",
+  ),
+);
 
 function inputWithCredits(credits: number) {
   const { input, runtime } = structuredClone(checkpoint) as unknown as {

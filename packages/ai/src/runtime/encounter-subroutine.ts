@@ -1,5 +1,10 @@
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import {
+  currentEncounteredIceCard,
+  currentEncounterUnbrokenSubroutineIndexes,
+} from "./current-encounter";
+import { currentEncounterRequiresDamagePreservingBreak } from "./current-encounter-damage";
+import {
   isVisibleDirectDamageSubroutine as isDirectDamageSubroutine,
   isVisibleHardEndRunSubroutine,
   isVisiblePayEndRunSubroutine,
@@ -71,14 +76,16 @@ export function encounterContinueAcceptsOnlyNonlethalDamageThreats(
   if (!continueAction || continueAction.payload?.encounterWillEndRun !== true) {
     return false;
   }
-  const encounteredIceId = input.playerView.run.encounteredIce?.instanceId;
-  const subroutines = input.playerView.servers
-    .flatMap((server) => server.ice)
-    .find((ice) => ice.instanceId === encounteredIceId)
-    ?.effectiveRunQuote?.subroutines;
+  const subroutines =
+    currentEncounteredIceCard(input)?.effectiveRunQuote?.subroutines;
   if (!subroutines?.length) return false;
+  // This predicate only classifies nonlethal damage. The run owner applies
+  // any additional bound hand reserve separately.
+  if (currentEncounterRequiresDamagePreservingBreak(input, 0)) return false;
+  const unbroken = currentEncounterUnbrokenSubroutineIndexes(input);
   const immediateThreats = subroutines.filter(
-    isImmediateSafetyThreatSubroutine,
+    (subroutine, index) =>
+      unbroken.has(index) && isImmediateSafetyThreatSubroutine(subroutine),
   );
   return (
     immediateThreats.length > 0 &&
