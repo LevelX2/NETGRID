@@ -544,6 +544,17 @@ Funding-/Reservevertrag verfehlt, ist das `funding_only`: Der Parent fordert
 Economy-Support an; weiterer gezielter Draw ist unzulässig. Unbekannte oder
 unvollständige Quotes werden nicht als Effektlücke umgedeutet.
 
+Terminale Rez-Reservebedarfe werden aus den aktuellen typisierten
+Bedrohungsfakten beider Zentralen entdeckt. Weder ein Abstand von mehr als
+einem Agendapunkt zum Runner-Sieg noch die nominelle Auswahl der anderen
+Zentrale darf einen exakt gequoteten Bedarf unsichtbar machen. Ein bereits
+installierter Schutzpfad bleibt über den bestehenden Defense-Parent und dessen
+Economy-Kind finanzierbar. Eine als Kapazitätskonversion zugelassene
+ICE-Installation mit belegtem `no_progress` unterdrückt diesen Support nicht;
+eine tatsächlich produktive Installation derselben oder einer höheren
+Prioritätsklasse behält ihren Vorrang. Kosten, Zustandsversion und Ziel-ICE
+werden an der bestehenden Funding-Grenze erneut gebunden und geprüft.
+
 Ein typisierter Schutzbedarf eines Score- oder Remoteplans erzeugt eine
 explizite Parent-Kind-Delegation. Nur die konkret gebundene
 Defense-Supportroute erbt `parentInstanceId` und Prioritätsklasse des

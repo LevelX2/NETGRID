@@ -190,17 +190,22 @@ export function corpTerminalCentralRezReserveSignals(
     input.side !== "corp" ||
     input.playerView.timingPoint !== "corp_action.main" ||
     input.playerView.run !== undefined ||
-    input.playerView.agendaPointsToWin -
-      input.playerView.opponent.agendaPoints !==
-      1 ||
     centralDefenseAllocation?.status !== "known"
   ) {
     return [];
   }
-  const serverId = centralDefenseAllocation.selectedServerId;
-  if (centralDefenseAllocation.evidence[serverId].threat !== "terminal") {
-    return [];
-  }
+  return (["hq", "rd"] as const).flatMap((serverId) =>
+    centralDefenseAllocation.evidence[serverId].threat === "terminal"
+      ? corpTerminalServerRezReserveSignals(input, serverId, candidates)
+      : [],
+  );
+}
+
+function corpTerminalServerRezReserveSignals(
+  input: AiDecisionInput,
+  serverId: "hq" | "rd",
+  candidates: readonly ActionSemanticCandidate[],
+): CorpGenericDefenseSignal[] {
   const server = input.playerView.servers.find(
     (candidate) => candidate.id === serverId,
   );

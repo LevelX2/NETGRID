@@ -17,7 +17,8 @@ export function corpDefenseReserveNeeds(
   const productivePriorities = defenseNeeds.flatMap((need) =>
     need.kind === "generic" &&
     need.phase === "install_ice" &&
-    need.installRoute?.disposition === "productive"
+    need.installRoute?.disposition === "productive" &&
+    need.installRoute.projection.effect !== "no_progress"
       ? [corpGenericDefensePriorityClass([need])]
       : [],
   );
