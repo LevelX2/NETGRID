@@ -604,7 +604,8 @@ describe("successful run interventions", () => {
     expect(fixture.state.run?.phase).toBe("encounter_ice");
     expect(fixture.begunEncounters).toEqual(["hq_ice"]);
     expect(legalAction.payload).toMatchObject({
-      selectedIceDefinitionId: "hq_ice_def",
+      publicRevealKind: "reveal",
+      publicRevealDefinitionId: "hq_ice_def",
       hiddenZoneBarrier: true,
       hiddenZoneAction: "successful_run_temporary_encounter",
     });
@@ -739,7 +740,7 @@ describe("successful run interventions", () => {
       sourceDefinitionId: "onr_v1_358_dr-dreff",
       delayedSuccessfulRun: false,
     });
-    expect(legalAction.payload).not.toHaveProperty("selectedIceDefinitionId");
+    expect(legalAction.payload).not.toHaveProperty("publicRevealDefinitionId");
   });
 
   it("builds and resolves False Echo, Netspace and I Spy followups", () => {
