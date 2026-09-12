@@ -136,6 +136,9 @@ export function projectKnownRemoteTrashCommitment(
     accessed: {
       known: true,
       definitionId: params.definitionId,
+      ...(params.visibleCard?.rezzed !== undefined
+        ? { rezzed: params.visibleCard.rezzed }
+        : {}),
       ...(params.visibleCard?.advancementCounters !== undefined
         ? { advancementCounters: params.visibleCard.advancementCounters }
         : {}),

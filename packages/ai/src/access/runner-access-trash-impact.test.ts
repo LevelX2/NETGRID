@@ -7,6 +7,124 @@ import { describe, expect, it } from "vitest";
 import { assessRunnerAccessTrashImpactFromPlanningCard } from "./runner-access-trash-impact";
 
 describe("assessRunnerAccessTrashImpactFromPlanningCard", () => {
+  it.each([0, 2])(
+    "charges only the reserve deficit caused by spending %s credits",
+    (trashCost) => {
+      expect(
+        assess({
+          definitionId: "onr_v1_313_city-surveillance",
+          trashCost,
+          runnerCredits: 3,
+          economyReserve: 10,
+        }),
+      ).toMatchObject({
+        recommendation: "trash",
+        reserveDeficitBefore: 7,
+        additionalReserveDeficit: trashCost,
+        liquidityPenalty: trashCost * 180,
+      });
+    },
+  );
+
+  it.each([false, true, undefined])(
+    "distinguishes future initialization from an exhausted pool: rezzed=%s",
+    (rezzed) => {
+      expect(
+        assess({
+          definitionId: "onr_v1_309_bbs-whispering-campaign",
+          rezzed,
+          counters: { bit: 0 },
+          trashCost: 4,
+          runnerCredits: 4,
+          economyReserve: 10,
+        }),
+      ).toMatchObject({
+        recommendation: rezzed === false ? "trash" : "decline",
+        prospectiveHostedCredits: rezzed === false ? 16 : 0,
+        visibleImpactValue: rezzed === false ? 2240 : 0,
+      });
+    },
+  );
+
+  it.each([0, 10])(
+    "derives future credits generically and deducts the canonical rez cost %s",
+    (rezCost) => {
+      const source = lookupPlanningCard("onr_v1_309_bbs-whispering-campaign");
+      const definitionId = "fixture-unrezzed-stored-economy";
+      const planningCard = {
+        ...source,
+        definition: { ...source.definition, rezCost },
+        planning: { ...source.planning, cardDefinitionId: definitionId },
+      };
+      expect(
+        assess({
+          definitionId,
+          planningCard,
+          rezzed: false,
+          trashCost: 4,
+          runnerCredits: 4,
+          economyReserve: 10,
+        }),
+      ).toMatchObject({
+        prospectiveHostedCredits: 16,
+        visibleImpactValue: 2240 - rezCost * 180,
+        recommendation: rezCost === 0 ? "trash" : "decline",
+      });
+    },
+  );
+
+  it("fails closed when a prospective pool has no canonical rez cost", () => {
+    const source = lookupPlanningCard("onr_v1_309_bbs-whispering-campaign");
+    const planningCard = {
+      ...source,
+      definition: { ...source.definition, rezCost: undefined },
+    } as unknown as CardSpecPlanningCompatibilityCard;
+    expect(() =>
+      assess({
+        definitionId: source.planning.cardDefinitionId,
+        planningCard,
+        rezzed: false,
+        trashCost: 4,
+        runnerCredits: 4,
+        economyReserve: 10,
+      }),
+    ).toThrow("runner_access_trash_missing_prospective_rez_cost");
+  });
+
+  it("does not attribute another target's initialization to the accessed source", () => {
+    const source = lookupPlanningCard("onr_v1_309_bbs-whispering-campaign");
+    const planningCard = {
+      ...source,
+      planning: {
+        ...source.planning,
+        prospectiveCapabilities: {
+          ...source.planning.prospectiveCapabilities,
+          capabilities:
+            source.planning.prospectiveCapabilities.capabilities.map(
+              (capability) => ({
+                ...capability,
+                descriptors: capability.descriptors.map((descriptor) =>
+                  descriptor.kind === "target"
+                    ? { ...descriptor, value: "other" }
+                    : descriptor,
+                ),
+              }),
+            ),
+        },
+      },
+    } as CardSpecPlanningCompatibilityCard;
+    expect(
+      assess({
+        definitionId: source.planning.cardDefinitionId,
+        planningCard,
+        rezzed: false,
+        trashCost: 4,
+        runnerCredits: 4,
+        economyReserve: 10,
+      }),
+    ).toMatchObject({ recommendation: "decline", prospectiveHostedCredits: 0 });
+  });
+
   it("values a recurring draw-tag threat across a temporary reserve deficit", () => {
     expect(
       assess({
@@ -262,6 +380,7 @@ describe("assessRunnerAccessTrashImpactFromPlanningCard", () => {
 function assess(params: {
   definitionId: string;
   counters?: VisibleCard["counters"];
+  rezzed?: boolean | undefined;
   trashCost: number;
   runnerCredits: number;
   economyReserve: number;
@@ -275,6 +394,7 @@ function assess(params: {
     accessed: {
       definitionId: params.definitionId,
       known: true,
+      ...(params.rezzed !== undefined ? { rezzed: params.rezzed } : {}),
       ...(params.counters ? { counters: params.counters } : {}),
     },
     trashCost: params.trashCost,

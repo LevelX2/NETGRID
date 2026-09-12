@@ -806,15 +806,23 @@ Die bekannte Remote-Vorprojektion und die aktuelle Access-Konversion nutzen
 dieselbe kanonische Trash-Impact-Bewertung. Die Vorprojektion erhält die
 aktuelle Economy-Reserve; endliche Kreditpools, tatsächlich vorhandene
 transferierbare Advancement-Counter und kanonische Schadens-/Tag-Effekte
-bleiben getrennte Wertquellen. Ein leerer Kreditpool erzeugt kein weiteres
-Einkommen. Fehlende kanonische Kartendaten scheitern strukturiert.
+bleiben getrennte Wertquellen. Ein leerer bereits gerezzter Kreditpool erzeugt
+kein weiteres Einkommen. Bei einer bekannten ungerezzten Quelle zählt eine
+kanonisch belegte `on_rez`-Initialisierung separat als zukünftiger Poolwert,
+abzüglich der kanonischen Rezkosten. Dafür müssen Initialisierung, Menge und
+Ziel `source` belegt sein; fehlender Rezzustand erzeugt keinen Zukunftspool.
+Fehlende kanonische Kartendaten scheitern strukturiert.
 
 Die reine Trash-Bewertung liegt unter `access/`; der Runtime-Adapter bindet
 sie an die tatsächlich angebotene Trash-Action und deren zweckgebundene
 Credit-Quote. Wiederkehrende Draw-Tag-Effekte werden über die kanonische
 Capability `runner_draw_tax_tag` als Schadens-/Tag-Gefahr erkannt. Dadurch
 kann deren Beseitigung einen vorübergehenden Reservefehlbetrag rechtfertigen,
-ohne den Reservebedarf oder dessen Liquiditätskosten zu senken. Nach dem
+ohne den Reservebedarf zu senken. Die Liquiditätskosten erfassen nur die durch
+die neue Ausgabe zusätzlich entstehende Reservelücke; ein bereits vorher
+bestehender Fehlbetrag gilt für beide Alternativen und wird nicht nochmals
+als Kosten des Trash-Schritts berechnet. Economy- und Parentreserven bleiben
+unverändert gebunden. Nach dem
 Run bleibt der endliche Auffüllbedarf beim Economy-Owner verfügbar; eine
 stärkere aktuelle Run-Gelegenheit kann weiterhin vorgehen.
 Trash-Impact ist ausschließlich an eine vorhandene `trash_accessed_card`-
