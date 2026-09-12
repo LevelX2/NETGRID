@@ -21,6 +21,13 @@ describe("selfplay cycle 096 decision checkpoints", () => {
     const capture = structuredClone(
       payEtrAfterBreakJson,
     ) as ReconstructedDecisionCapture;
+    // Both quoted subroutines are still open in this checkpoint. Supply the
+    // exact remaining-ID projection required by the current Engine contract.
+    const continuation = capture.input.legalActions.find(
+      (action) => action.payload?.encounterContinue === true,
+    )!;
+    continuation.payload!.encounterSubroutineIds =
+      "printed_subroutines_end_the_run,card_implementation.onr_v1_370_tesseract-fort-construction.additional_subroutine.1.end_the_run_unless_runner_pays";
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
     expect(deckSnapshotId).toBeDefined();
     resetResidentPlanPortfolioMemory();

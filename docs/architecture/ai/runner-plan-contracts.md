@@ -772,6 +772,16 @@ sonst wirkungslosen letzten Break als notwendige Schadensvermeidung; bereits
 gebrochene Subroutinen werden nicht erneut budgetiert. Action-Version,
 Planinstanz, Executor und Route bleiben weiterhin bindend.
 
+Auch die allgemeine Zugriffspfadprüfung nach einem Break verwendet diese
+Engine-Restliste. Sie zieht nur das aktuelle Breakziel von den noch offenen
+Subroutinen ab; bereits gebrochene ETR- oder Zahlungssubroutinen erzeugen weder
+einen weiteren Breakbedarf noch zusätzliche Restkosten. Eine fehlende oder
+widersprüchliche Restliste scheitert sichtbar am vorhandenen Faktenvertrag.
+Bereits gebundene Zahlungsfortsetzungen eröffnen diese strategische Prüfung
+nicht erneut: Ihr Zahlungsfenster bietet keine normale Encounter-Continue-
+Action. Der bestehende Cost-Continuation-Owner validiert weiterhin Original-
+Action, Fenster, Root und Executor vor der Ausführung.
+
 Im aktuellen Fort-Pass-Fenster unterscheiden sich die beiden angebotenen
 `continue_run`-Actions fachlich: `decision:pay` erhält den Run, `decision:end_run`
 beendet ihn. Der DTO erhält dazu `fortRunWindowAbility`, Entscheidung und
