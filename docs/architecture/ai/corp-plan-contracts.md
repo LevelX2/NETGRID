@@ -185,6 +185,8 @@ ICE-Aktionen dürfen ihn nicht aufbrechen.
 - `corp-counter-bank-score-plan.ts`: Engine-gequotete Counterbank-Scorefolgen;
 - `corp-agenda-turn-planning.ts`: Agenda-Zuglinien und Kampagnenquotes für den
   gemeinsamen TurnPlanner, einschließlich gebundener Support-Provider;
+- `score-milestone-boundary.ts`: Revalidierung noch offener Advance-/Scorearbeit
+  nach einem aktuell materialisierten Install- oder Advance-Head;
 - `score-choice-continuation.ts` und `score-choice-binding.ts`: Bindung und
   Vervollständigung der ausgewählten Advancement-/Agenda-/Folge-Choices.
 
@@ -192,6 +194,18 @@ Die Runtime entdeckt zuerst direkte Scorevorhaben, gibt deren Reserven an
 Ambush und reicht die entdeckten Ambush-Fakten zur Score-Reconciliation zurück.
 Anschließend komponiert sie die verbleibenden Defense-, Economy- und Handbedarfe.
 Es entsteht kein zweiter Planvergleich außerhalb des Schedulers/TurnPlanners.
+
+Die aktuelle Restzugsuche projiziert bei Installationen und Advances Kosten,
+aber noch keine vollständige Boardänderung samt folgenden Score-LegalActions.
+Ein exakter Score-Head endet deshalb an einer expliziten Projektionsgrenze,
+bevor ein fremder Plan die verbleibenden Klicks gebunden übernehmen kann.
+Ein prognostizierter Meilenstein wie `agenda_advanced` ist nach der bloßen
+Installation noch nicht erreicht. Der Folgezustand wird regulär neu entdeckt
+und bewertet; Prioritätsklassen, Schutz- und Fundingzulassung bleiben beim
+bestehenden Owner. Das ist keine zusätzliche Sperre für mehrzügige Scores und
+kein Nachweis, dass jede Nebenaktion einen Scorezug kostet. Eine zukünftige
+vollständige semantische Scoreprojektion kann diese Grenze ersetzen, wenn sie
+Boardfortschritt, Kosten und Meilensteinerfüllung gemeinsam nachweist.
 
 `corp/defense/corp-score-protection-routes.ts` und
 `corp/defense/corp-defense-layer-certification.ts` bleiben Schutzdienste außerhalb
