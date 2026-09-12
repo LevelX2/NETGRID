@@ -83,6 +83,37 @@ Sie beweisen weder einen universell dominierenden Gesamtplan noch einen anderen
 Gesamtsieger. SP-040 und SP-052 bleiben ohne weiteren generischen Ursachenbeweis
 Verdachtsfälle; der bereits verifizierte Runner-Fix SP-346 ist davon getrennt.
 
+## Gepaarter Fortsetzungsvergleich
+
+Paarung 431 vergleicht den eingefrorenen Ausgangsstand `96e4c20a0` mit
+`0b468d1b1`: vier bekannte und zwölf vorab ausgeloste neue Seeds, jeweils
+Vorher/Nachher mit identischem Runner. Der
+[Kurzbericht](../../data/local/score-continuity-ab-20260912/score-continuity-431-kurz.html)
+und der [vollständige Planledger](../../data/local/score-continuity-ab-20260912/score-continuity-431.html)
+enthalten 400 Planinstanzen und 15.138 Plansignale über 32 Ausführungen.
+
+- SP-356 behebt die vorzeitige Übergabe unvollständig projizierter
+  Install-/Advance-Meilensteine. Die neue Projektionsgrenze revalidiert den
+  Folgezustand; sie ist kein allgemeiner Vorrang für Advancen und noch keine
+  vollständige mehrzügige Wertberechnung.
+- Die zwölf neuen Seedpaare liefern 49 → 57 Corp-Punkte und unverändert
+  fünf Siege. Alle 16 Seedpaare liefern 73 → 75 Punkte, 22 → 24 Scores und
+  unverändert sieben Siege. Der positive neue Effekt hängt stark an einem
+  Seed mit geänderter Vorbereitung; eine höhere Gewinnquote ist nicht belegt.
+- 426 scoret Superior T23 statt T25. Die vollständige KI-Gegenprobe ab dem
+  ursprünglichen 427/D412 scoret Coup T57. Das gesamte 427-Replay zweigt
+  dagegen bereits D377 ab und verschlechtert sich von 8:5 auf 0:8.
+- Bei `new_remote` den tatsächlichen Installationsowner und die physische
+  Remote aus dem Ereignis verbinden. Sonst fehlen neu angelegte Scoreversuche
+  in der Statistik. Offene Agenden bei Spielende bleiben zensierte Versuche.
+- Öffentlich nutzbare Kreditbanken und sichtbare Advances beeinflussen die
+  Runner-Antwort. Ein begrenztes Modell aus Guthaben und Basiskreditklicks ist
+  keine Garantie gegen einen finanzierten Zugriff im nächsten Runnerzug.
+
+Mehr Scores, kürzere Einzelfenster und mehr Siege bleiben getrennte Kennzahlen.
+Ein vermiedener Draw oder eine verschobene Installation ist erst dann ein
+Tempoerfolg, wenn sich der vollständige Abschlusszeitpunkt tatsächlich verbessert.
+
 Abschluss: kompakte Einzelurteile und Probe-Grenzen in die bestehende Registry
 zurückführen, Bericht samt exaktem Inhalt und Status sichern, Round-trip prüfen
 und Backup erzeugen. Erst danach eigene Runtime-Daten bereinigen. Keine rohen
