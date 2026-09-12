@@ -693,6 +693,16 @@ Funding-Suche und sofortige Run-Verwertbarkeit als zwei benannte Dienste
 ein und koordiniert weiterhin die Ausschlüsse zwischen verschiedenen Plänen.
 Gemeinsam benötigte Handpuffer-Fakten werden aus demselben Owner geliefert.
 
+Ist der gewöhnliche Basisdraw die einzige aktuelle Handpufferroute und würde
+seine bereits sichtbare Steuer einen Tag erzeugen, darf Defense zuerst eine
+passende Reaktionsreserve finanzieren. Die vorhandene Funding-Suche muss die
+vollständige Finanzierung noch im selben Zug garantieren und einen Klick für
+den Draw übrig lassen. Der Bedarf bleibt beim Defense-Parent und wird nach
+jedem Schritt neu geprüft. Verdeckte Steuerquellen, nur bedingte Finanzierung,
+andere unmittelbar nutzbare Handpufferrouten oder fehlende Folgekapazität
+erzeugen diesen Vorbereitungsnachweis nicht. Die tatsächliche Steuerzahlung
+erfolgt weiter ausschließlich über die spätere Engine-Choice.
+
 Ein Run-Reservequote mit gedeckten Credits und fehlendem Handpuffer wird als
 Handbedarf ausgewiesen. Für eine konkrete erreichbare Agenda- oder
 Score-Threat-Route übernimmt der Defense-Owner den gequoteten Puffer, wenn

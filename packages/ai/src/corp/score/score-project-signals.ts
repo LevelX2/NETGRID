@@ -1192,6 +1192,26 @@ export function sameTurnScoreConversionProjectForCandidate(
       phase: scorePhaseForConversionStep(step),
       sameTurnCloseout: true,
       sameTurnConversionProof: "engine_quoted_path",
+      ...(!path.fundingPrefix &&
+      path.clicksGenerated === 0 &&
+      path.steps.every(
+        (routeStep) =>
+          [
+            "install_score_target",
+            "place_advancement",
+            "basic_advance",
+            "score_ready",
+          ].includes(routeStep.kind) &&
+          (routeStep.offTargetAdvancementAmount ?? 0) === 0,
+      )
+        ? {
+            sameTurnConversionResourceCost: {
+              stateVersion: input.playerView.stateVersion,
+              credits: path.creditsRequired,
+              clicks: path.clicksRequired,
+            },
+          }
+        : {}),
       ...(step.kind === "recover_score_support" &&
       step.sourceCardId &&
       step.recoveredCardId

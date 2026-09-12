@@ -480,12 +480,95 @@ export function buildRunnerDefenseSignals(params: {
     ],
   };
 
+  bindVisibleDrawTaxPreparation(input, defense, services);
   return {
     defense,
     forgoUnsafeRunCapacity,
     runOnlyActionCapacity,
     confirmedDamageTaxedDrawActionIdSet,
   };
+}
+
+function bindVisibleDrawTaxPreparation(
+  input: AiDecisionInput,
+  defense: RunnerDefenseSignals,
+  services: RunnerDefenseServices,
+): void {
+  if (
+    input.playerView.run ||
+    defense.reactionReserveNeed ||
+    defense.activeTags > 0 ||
+    defense.pendingDamage > 0 ||
+    defense.handSize >= defense.minimumHandBuffer ||
+    input.playerView.own.clicks < 2
+  )
+    return;
+  const draw = input.legalActions.find(
+    (action) =>
+      action.type === "draw_card" &&
+      action.source === "basic_action" &&
+      action.side === "runner" &&
+      action.expiresAtStateVersion === input.playerView.stateVersion,
+  );
+  if (
+    !draw ||
+    defense.handBufferActionIds?.length !== 1 ||
+    defense.handBufferActionIds[0] !== draw.actionId
+  )
+    return;
+  const liability = runnerDrawTaxLiabilityProjection(input, draw);
+  if (liability.projectedTagsAdded <= 0) return;
+  const targetCredits =
+    liability.projectedCreditsPaid + liability.projectedTagsAdded;
+  const remainingClicks = input.playerView.own.clicks - 1;
+  const route = services.findFundingRoute({
+    demandId: "runner-defense-reaction-reserve",
+    sourcePlanId: "runner.defense_and_recovery:runner",
+    purpose: "foreground_plan",
+    priority: "tactical_reserve",
+    hardness: "hard",
+    deadline: "end_of_current_turn",
+    targetCredits,
+    remainingClicks,
+    allowIncrementalProgress: false,
+    evidence: ["runner_visible_draw_tax_preparation"],
+  });
+  const quote = route.routeAssessment;
+  if (
+    quote.stateVersion !== input.playerView.stateVersion ||
+    quote.status !== "covered_guaranteed" ||
+    quote.reliability !== "guaranteed" ||
+    quote.horizon !== "same_turn" ||
+    quote.projectedGap !== 0 ||
+    quote.totalClickCost > remainingClicks ||
+    route.routeActionIds.length === 0 ||
+    !route.routeActionIds.every((id) =>
+      input.legalActions.some(
+        (action) =>
+          action.actionId === id &&
+          action.side === "runner" &&
+          action.expiresAtStateVersion === input.playerView.stateVersion,
+      ),
+    )
+  )
+    return;
+  defense.reactionReserveNeed = {
+    needId: "runner-defense-reaction-reserve",
+    parentPlanInstanceId: "plan:runner.defense_and_recovery:runner",
+    targetCredits,
+    currentCreditsAtRevalidation: input.playerView.own.credits,
+    gap: targetCredits - input.playerView.own.credits,
+    actionIds: route.routeActionIds,
+    revalidation: {
+      stateVersion: input.playerView.stateVersion,
+      status: "defense_parent_open",
+    },
+    evidenceCode: "runner_visible_draw_tax_preparation",
+  };
+  // Preserve the hand-buffer goal, but execute its proven funding first.
+  // A new state revalidates the actual draw and its Engine payment choice.
+  defense.handBufferActionIds = [];
+  defense.evidenceCodes.unshift("runner_visible_draw_tax_preparation");
 }
 function runnerDefinitionProvidesTraceDefense(definitionId: string): boolean {
   const hint = AI_HINTS_BY_CARD.get(definitionId);

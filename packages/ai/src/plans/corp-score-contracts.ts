@@ -65,6 +65,12 @@ export type CorpScoreProjectSignal = {
     | "corp_resident_score_parent_dominates_sibling_route";
   /** Positive certificate from the existing Engine-quoted same-turn conversion path. */
   sameTurnConversionProof?: "engine_quoted_path";
+  /** Exact ordinary costs of an uninterrupted installation/advancement/score route. */
+  sameTurnConversionResourceCost?: {
+    stateVersion: number;
+    credits: number;
+    clicks: number;
+  };
   projectId: string;
   agendaDefinitionId?: string;
   agendaPoints: number;

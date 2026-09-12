@@ -228,6 +228,16 @@ Klick eröffnen unter denselben Grenzen keine liquide Finanzierung: weitere
 installierte Agenden und Advancement-Trigger sind bereits ausgeschlossen.
 Die wiederholte Situation in Runde 11, D340, belegt diese beiden Handangebote.
 
+Für eine noch auszuführende gewöhnliche Install-/Advancement-/Score-Folge
+publiziert Score die vollständigen aktuellen Klick- und Creditkosten aus
+seinem Engine-gequoteten Pfad. Bleibt genau ein freier Creditklick übrig und
+würde dessen Ertrag auch nach Finanzierung der ganzen Konversion unter die
+Bonusschwelle fallen, erfolgt dieser Klick nach dem Score. Der Nachweis gilt
+nur ohne Fundingpräfix, zusätzliche Klickerzeugung, Off-Target-Advancement,
+weitere installierte Agenden oder aktive Einkommenseffekte auf dem Board.
+Eine zusätzliche freie Aktion, unzureichende Finanzierung, eine erreichbare
+Bonusschwelle oder veraltete Kosten verhindern diesen Variantenvergleich.
+
 Dasselbe aktuelle Reihenfolgenurteil gilt für einen einzigen kostenlosen
 Score, dessen kanonischer Effekt ausschließlich einen eigenen Creditpool
 erzeugt und eine sonst kostenfreie Auszahlung pro Klick von mehr als einem

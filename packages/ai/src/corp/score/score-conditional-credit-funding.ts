@@ -19,6 +19,12 @@ export function corpBasicCreditsDominatedByCurrentScore(
   projects: readonly CorpScoreProjectSignal[],
 ): ReadonlySet<string> {
   if (input.playerView.run || input.playerView.own.clicks < 1) return new Set();
+  const conversionCreditIds = basicCreditsLostBeforeCompleteConversion(
+    input,
+    candidates,
+    projects,
+  );
+  if (conversionCreditIds.size > 0) return conversionCreditIds;
   const freeScores = input.legalActions.filter(
     (action) =>
       action.type === "score_agenda" &&
@@ -75,6 +81,76 @@ export function corpBasicCreditsDominatedByCurrentScore(
   )
     return new Set();
   return basicCreditIds();
+}
+
+function basicCreditsLostBeforeCompleteConversion(
+  input: AiDecisionInput,
+  candidates: readonly ActionSemanticCandidate[],
+  projects: readonly CorpScoreProjectSignal[],
+): ReadonlySet<string> {
+  const hasZeroClickIncome = candidates.some(
+    (candidate) =>
+      immediateCorpLiquidCreditGain(candidate) > 0 &&
+      input.legalActions.some(
+        (action) =>
+          action.actionId === candidate.actionId &&
+          action.costs.every((cost) => (cost.clicks ?? 0) === 0),
+      ),
+  );
+  if (hasZeroClickIncome) return new Set();
+  const conversion = projects.find((project) => {
+    const cost = project.sameTurnConversionResourceCost;
+    const profile = corpConditionalScoreCreditProfile(
+      project.agendaDefinitionId,
+    );
+    return (
+      project.feasible &&
+      project.sameTurnCloseout &&
+      !project.terminalScore &&
+      project.sameTurnConversionProof === "engine_quoted_path" &&
+      (project.phase === "install_agenda" ||
+        project.phase === "convert_agenda" ||
+        project.phase === "advance_agenda") &&
+      cost !== undefined &&
+      cost.stateVersion === input.playerView.stateVersion &&
+      Number.isSafeInteger(cost.clicks) &&
+      cost.clicks > 0 &&
+      Number.isSafeInteger(cost.credits) &&
+      cost.credits >= 0 &&
+      cost.clicks + 1 === input.playerView.own.clicks &&
+      input.playerView.own.credits >= cost.credits &&
+      profile !== undefined &&
+      input.playerView.own.credits + 1 - cost.credits < profile.threshold &&
+      input.legalActions.some(
+        (action) =>
+          project.actionIds?.includes(action.actionId) &&
+          action.expiresAtStateVersion === input.playerView.stateVersion,
+      ) &&
+      input.playerView.own.scoreArea.every((card) =>
+        corpDefinitionIsMainPhasePassive(card.definitionId, "past"),
+      ) &&
+      input.playerView.servers
+        .filter((server) => server.id !== "archives")
+        .every((server) =>
+          [...server.ice, ...server.root].every(
+            (card) =>
+              card.instanceId === project.agendaInstanceId ||
+              (card.type !== "agenda" &&
+                corpDefinitionIsMainPhasePassive(card.definitionId)),
+          ),
+        )
+    );
+  });
+  if (!conversion) return new Set();
+  // The credit leaves exactly the conversion's click budget. No other paid
+  // action fits before this score; the same credit remains spendable after it.
+  return new Set(
+    candidates
+      .filter((candidate) =>
+        corpExactCurrentBasicLiquidCreditCandidate(input, candidate),
+      )
+      .map((candidate) => candidate.actionId),
+  );
 }
 
 function onlyBasicFundingAfterFirstCredit(
