@@ -58,7 +58,11 @@ export function missingCoverageBlockerKind(
 export function coverageKindForAssessment(
   assessment: KnownRezzedIcePathAssessment,
 ): RequiredCapabilityKind | undefined {
-  const [coverage] = assessment.missingCoverage ?? [];
+  // Missing coverage is sorted for diagnostics. Structural ICE categories
+  // determine the answer before supplementary AP/trace tags on the same ICE.
+  const coverage = (
+    ["wall", "code_gate", "sentry", "ap", "trace", "unknown_special"] as const
+  ).find((kind) => assessment.missingCoverage?.includes(kind));
   switch (coverage) {
     case "wall":
       return "breaker_wall";

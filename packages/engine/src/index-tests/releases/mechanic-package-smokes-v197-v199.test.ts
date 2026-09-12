@@ -412,6 +412,64 @@ describe("V1.9.9 Mechanikpaket R", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("does not rez Coyote or pay its rez income during Dr. Dreff's encounter", () => {
+    let state = toRunnerTurn(onrV1Game("dreff-coyote"));
+    addRezzedCorpRootForTest(state, "onr_v1_358_dr-dreff", "remote_1", "dr");
+    const iceId = addCorpCardToHqForTest(
+      state,
+      "onr_proteus_016_coyote",
+      "coyote",
+    );
+    const unselectedIceId = addCorpCardToHqForTest(
+      state,
+      "onr_v1_223_banpei",
+      "unselected_banpei",
+    );
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const creditsBefore = state.corp.credits;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const option = state.pendingChoice!.options.find(
+      (candidate) => candidate.value === iceId,
+    )!;
+    expect(option.metadata).toMatchObject({
+      creditCost: 0,
+      temporaryEncounterSubroutineTypes: ["set_run_future_strength_bonus"],
+      temporaryEncounterHasAdditionalMechanics: false,
+    });
+    const runnerView = JSON.stringify(getPlayerView(state, "runner"));
+    expect(runnerView).not.toContain("onr_proteus_016_coyote");
+    state = applyChoice(state, "corp", option.id);
+    expect(state.corp.credits).toBe(creditsBefore);
+    expect(state.cardInstances[iceId]).toMatchObject({
+      faceup: true,
+      rezzed: false,
+    });
+    expect(state.run).toMatchObject({
+      encounteredIceId: iceId,
+      successful: false,
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      sourceDefinitionId: "onr_v1_358_dr-dreff",
+      publicRevealKind: "reveal",
+      publicRevealDefinitionId: "onr_proteus_016_coyote",
+      hiddenZoneAction: "successful_run_temporary_encounter",
+      rezCostPaid: 0,
+    });
+    const publicEvent = JSON.stringify(state.eventLog.at(-1)?.publicPayload);
+    expect(publicEvent).not.toContain("onr_v1_223_banpei");
+    expect(publicEvent).not.toContain(unselectedIceId);
+    expect(validateGameState(state).ok).toBe(true);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("delays successful run finalization through Dr. Dreff temporary HQ ICE", () => {
     let state = toRunnerTurn(onrV1Game("p354-dr-dreff"));
     state.runner.credits = 20;

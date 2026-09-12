@@ -22,6 +22,7 @@ import type { CardDisplayMode } from "../settings/settings-model";
 import type { FieldChoiceCardProps } from "./RunnerBoardStrips";
 import { RunnerHostedCardCluster } from "./RunnerHostedCardCluster";
 import { HandCardsRow, SideZoneFrame, zoneSideClass } from "./ZoneFrame";
+import { HAND_CARD_ROW_GAP_PX } from "./hand-card-layout";
 import { zoneHighlighted } from "./board-view-helpers";
 import {
   hiddenResourcePaymentPreselectionEquals,
@@ -105,6 +106,11 @@ export function ActiveRunnerZoneBoard({
         highlighted={zoneHighlighted(activeHighlight, view.side, "grip")}
         className={`runnerGripZone ${view.own.gripOrHq.length > 1 ? "runnerGripZoneExpanding" : ""}`}
         style={zoneCardsStyle}
+        {...(view.own.gripOrHq.length > 1
+          ? {
+              maxBodyWidth: `calc(${(handCardsStyle as Record<string, string>)["--cards-min-width"]} * ${view.own.gripOrHq.length} + ${HAND_CARD_ROW_GAP_PX * (view.own.gripOrHq.length - 1)}px)`,
+            }
+          : {})}
         collapsed={boardZoneCollapsedFor("runner:grip")}
         onToggleCollapse={() => toggleBoardZoneCollapsed("runner:grip")}
       >

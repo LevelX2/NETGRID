@@ -811,6 +811,10 @@ Die nachfolgende Dr.-Dreff-Choice bleibt an `corp.defend_servers` gebunden.
 Die Engine liefert zu jedem angebotenen HQ-ICE die effektiven
 Subroutinentypen seines temporären Encounters und kennzeichnet zusätzliche
 mechanische Effektfamilien. Die AI-DTO erhält diese privaten Choice-Facts.
+Installations- und Rez-Lifecycle-Hooks zählen bei dieser weder installierten
+noch gerezzten ICE nicht als zusätzliche Begegnungswirkung. Insbesondere
+macht Coyotes Rez-Einkommen seine reine Folgestärke-Subroutine hier nicht
+produktiv; der Defense-Owner erhält dafür keinen künstlichen Nutzen.
 Der Defense-Owner verwirft ausschließlich Optionen ohne aktuelle Wirkung:
 Leere oder reine Zukunfts-Subroutinen ohne zusätzliche Mechanik können nach
 dem letzten ICE nichts mehr bewirken. Sind alle Optionen so eingeordnet,

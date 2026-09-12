@@ -294,6 +294,15 @@ validate_run_path
 Das Modul darf nicht bei jeder spielbaren Programminstallation wachsen. Es
 arbeitet auf eine konkrete Coverage- oder Rig-Fähigkeit hin.
 
+Die diagnostisch sortierte Liste fehlender ICE-Abdeckung bestimmt keine
+Suchpriorität. Bei der Ableitung des Rollenbedarfs stehen Wall, Code Gate und
+Sentry vor ergänzenden AP-/Trace-Merkmalen. Ein bekannter Sentry mit dem
+Untertyp `killer` benötigt dadurch eine Sentry-Antwort; das alphabetisch frühere
+`ap` darf keinen unerfüllbaren Suchbedarf erzeugen. Rein spezielle AP-, Trace-
+und unbekannte ICE behalten ihren spezifischen beziehungsweise universellen
+Bedarf. Suche und Optionsbindung folgen weiterhin exakt dem gewählten
+Coverage-Plan, Step und Executor.
+
 Eine exakt gebundene Upgrade-/Kosten-Recovery-Route bleibt an ihre gewählte
 Karteninstanz gebunden. Weitere Handkopien derselben Definition, die nur
 diesem Bedarf zugeordnet sind, erhalten eine ausdrückliche Zurückstellung

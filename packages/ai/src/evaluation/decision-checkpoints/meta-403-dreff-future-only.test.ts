@@ -1,4 +1,5 @@
 import { expect, it } from "vitest";
+import { CARD_DEFINITIONS_BY_ID } from "@netgrid/engine";
 import checkpoint from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-403-dreff-future-only.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
@@ -63,6 +64,64 @@ it("fails closed on missing current effect facts instead of silently declining",
     .temporaryEncounterSubroutineTypes;
   expect(() => chooseAiAction(input)).toThrow(/window_origin_missing/);
 });
+
+it.each([
+  {
+    definitionId: "onr_proteus_016_coyote",
+    types: ["set_run_future_strength_bonus"],
+    useIce: false,
+  },
+  {
+    definitionId: "onr_v1_223_banpei",
+    types: ["trash_installed_program", "end_the_run"],
+    useIce: true,
+  },
+])(
+  "keeps the bound Defense owner for $definitionId",
+  ({ definitionId, types, useIce }) => {
+    const input = fixture();
+    const choice = input.playerView.pendingChoice!;
+    const option = choice.options[1]!;
+    const definition = CARD_DEFINITIONS_BY_ID[definitionId]!;
+    const card = input.playerView.own.gripOrHq.find(
+      (candidate) => candidate.instanceId === option.value,
+    )!;
+    Object.assign(card, {
+      definitionId,
+      title: definition.title,
+      rezCost: definition.rezCost,
+    });
+    option.label = definition.title;
+    // Exact Engine facts are also exercised with real Coyote and Banpei in
+    // temporary-encounter-option-facts.test.ts, including the inactive rez hook.
+    option.metadata = {
+      creditCost: Math.floor(definition.rezCost! / 2),
+      cardTitle: definition.title,
+      temporaryEncounterSubroutineTypes: types,
+      temporaryEncounterHasAdditionalMechanics: false,
+    };
+    const actionId = input.legalActions[0]!.actionId;
+    const choiceBefore = structuredClone(choice);
+    const decision = chooseAiAction(input);
+    expect(decision).toMatchObject({
+      actionId,
+      fallbackUsed: false,
+      selectedChoices: {
+        choiceId: choice.choiceId,
+        selectedOptionIds: [useIce ? option.id : "decline"],
+      },
+      decisionDebug: {
+        planFirstDecision: {
+          rootPlanInstanceId:
+            "plan:corp.defend_servers:server-defense-portfolio",
+          leafExecutorInstanceId:
+            "plan:corp.defend_servers:server-defense-portfolio",
+        },
+      },
+    });
+    expect(choice).toEqual(choiceBefore);
+  },
+);
 
 it("does not reuse the legal decline binding for a stale choice", () => {
   const input = fixture();

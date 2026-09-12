@@ -109,6 +109,7 @@ export function SideZoneFrame({
   highlighted = false,
   className = "",
   style,
+  maxBodyWidth,
   title,
   ariaLabel,
   testId,
@@ -124,6 +125,7 @@ export function SideZoneFrame({
   highlighted?: boolean;
   className?: string;
   style?: CSSProperties;
+  maxBodyWidth?: string;
   title?: string;
   ariaLabel?: string;
   testId?: string;
@@ -133,10 +135,43 @@ export function SideZoneFrame({
   children?: ReactNode;
 }) {
   const hasBody = children !== undefined && children !== null && !collapsed;
+  const frameRef = useRef<HTMLDivElement | null>(null);
+  const bodyRef = useRef<HTMLDivElement | null>(null);
+  const [inlineChromeWidth, setInlineChromeWidth] = useState<number | null>(
+    null,
+  );
+
+  useEffect(() => {
+    const frame = frameRef.current;
+    const body = bodyRef.current;
+    if (!maxBodyWidth || !frame || !body) return;
+
+    // Measure only the label, frame and gap; card spacing stays CSS-owned.
+    const syncChromeWidth = () => {
+      setInlineChromeWidth(
+        frame.getBoundingClientRect().width -
+          body.getBoundingClientRect().width,
+      );
+    };
+    syncChromeWidth();
+    const observer = new ResizeObserver(syncChromeWidth);
+    observer.observe(frame);
+    observer.observe(body);
+    return () => observer.disconnect();
+  }, [hasBody, maxBodyWidth]);
+
   return (
     <div
+      ref={frameRef}
       className={`sideZoneFrame ${side} ${hasBody ? "" : "sideZoneFrameCountOnly"} ${highlighted ? "cueHighlightSoft" : ""} ${className}`}
-      style={style}
+      style={
+        hasBody && maxBodyWidth && inlineChromeWidth !== null
+          ? {
+              ...style,
+              maxWidth: `min(100%, calc(${maxBodyWidth} + ${inlineChromeWidth}px))`,
+            }
+          : style
+      }
       title={title}
       aria-label={ariaLabel}
       data-testid={testId}
@@ -164,7 +199,11 @@ export function SideZoneFrame({
           ) : null}
         </div>
       </div>
-      {hasBody ? <div className="sideZoneBody">{children}</div> : null}
+      {hasBody ? (
+        <div ref={bodyRef} className="sideZoneBody">
+          {children}
+        </div>
+      ) : null}
     </div>
   );
 }
