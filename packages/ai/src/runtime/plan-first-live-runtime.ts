@@ -15,6 +15,7 @@ import {
 import type { BuildActionSemanticCandidatesParams } from "../action-semantic-candidate";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate-types";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
+import { projectRunnerEncounterCashCost } from "../actions/runner-encounter-cost-projection";
 import { buildCorpAmbushPlanSignals } from "../corp/ambush/corp-ambush-plan-signals";
 import { corpAvailableRemoteRezCredits } from "../corp/defense/corp-defense-remote-rez-budget";
 import { buildCorpDefenseTurnPlanningSlice } from "../corp/defense/corp-defense-turn-planning";
@@ -3834,7 +3835,8 @@ function attachActiveRunContext(
 ): ActionSemanticCandidate[] {
   const serverId = input.playerView.run?.attackedServerId;
   if (!serverId) return [...candidates];
-  return candidates.map((candidate) => {
+  return candidates.map((rawCandidate) => {
+    const candidate = projectRunnerEncounterCashCost(input, rawCandidate);
     if (
       candidate.runProjectionSummary ||
       !isRunnerRunWindowCandidate(input, candidate)

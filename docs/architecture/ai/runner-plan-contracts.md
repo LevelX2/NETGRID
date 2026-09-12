@@ -340,6 +340,12 @@ liegt. Er darf dafür jedoch keinen lediglich allgemein legalen Draw anhand des
 semantischen Typs übernehmen; die konkrete `actionId` muss vom Coverage-Support
 gebunden sein.
 
+Eine exakt gebundene Antwort im eigenen sichtbaren Heap bleibt unabhängig
+von verbleibenden Stack-Antworten eine Recovery-Route. Eine Suchaktion darf
+nicht zugleich als passende Heap-Rückholung und als Suche ohne Deckantwort
+klassifiziert werden. Der Coverage-Support trennt diese Mengen vor der
+Speicher- und Opferbindung; deren tatsächliche Ablehnungen bleiben wirksam.
+
 Ein Coverage-Bedarf darf höchstens einen Draw pro Runner-Zug ausführen. Das
 gilt sowohl für den allgemeinen Rig-first-/Setup-Anker als auch für einen
 nicht terminalen konkreten Runbedarf. Der Draw ist eine private
@@ -753,6 +759,15 @@ Verantwortung:
 - Multiaccess-Aktivierungen;
 - Credit-, Trash- oder Folge-Run-Payoffs;
 - Ziel- und Choice-Auflösung innerhalb des begonnenen Runplans.
+
+Die aktuelle Kostenprojektion für Pump und Break trennt liquide Credits von
+den tatsächlich verwendbaren sichtbaren Run-/Breaker-Pools. Sie verwendet
+dieselbe zweckgebundene Zahlungsprojektion wie die Encounterbewertung;
+separate Bankaktivierungen erzeugen dabei kein vorweggenommenes Guthaben.
+Die Restzugplanung erhält nur den liquiden Zahlungsanteil als Cash-Bedarf.
+Action-ID, Ziel, Kosten der Engine und Run-Owner bleiben unverändert. Nach
+der Aktion endet die Projektion an der Engine-Fortsetzungsgrenze, sodass
+ein verbrauchter Pool nicht erneut aus dem alten Zustand ausgegeben wird.
 
 Das Modul besitzt kein unabhängiges langfristiges Ziel. Es gehört logisch zum
 auslösenden Run-/Contest-Plan und kehrt anschließend dorthin zurück.

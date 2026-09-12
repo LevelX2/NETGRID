@@ -452,7 +452,9 @@ export function coverageSupportActionIds(
     }),
     rejectedSearchActionIds: deckHasStackAnswer
       ? []
-      : matchingStackSearchCandidates.map((candidate) => candidate.actionId),
+      : matchingStackSearchCandidates
+          .filter((candidate) => !recoveryByActionId.has(candidate.actionId))
+          .map((candidate) => candidate.actionId),
     searchEngineSetupActionIds: searchEngineSetupCandidates.map(
       (candidate) => candidate.actionId,
     ),
