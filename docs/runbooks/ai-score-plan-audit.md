@@ -1,0 +1,274 @@
+# Corp-Scorepläne vollständig auditieren
+
+Dieses Runbook ergänzt den [Evidence-Registry-Prozess](ai-selfplay-evidence-registry.md)
+für gezielte Audits vorhandener Spiele. Es ändert keine KI-Bewertung und
+ersetzt keine Engine- oder Owner-Verträge.
+
+## Aufbewahrung während der laufenden Analyse
+
+Für den laufenden Corp-/Remote-/Zentralen-Audit gilt der ausdrückliche
+Nutzerauftrag vom 2026-09-12: Rohdaten, vollständige Captures, Checkpoints,
+Gegenproben und isolierte Audit-Datenbanken bleiben bis zur ausdrücklich
+bestätigten Beendigung der Analyse erhalten. Ein Teilbericht oder einzelner
+abgeschlossener Auswertungsschritt löst keine Bereinigung aus. Das gilt auch
+für Wiederherstellungen zuvor bereinigter Spiele. Diese Anweisung ersetzt
+für diesen Auftrag den sonstigen Cleanup am Ende eines Analysezyklus.
+
+Eigene Serverprozesse können zwischen Arbeitsschritten beendet werden;
+die Daten bleiben bestehen. Registry, Berichte und Backups werden weiterhin
+gesichert. Speicherort, Code-Stand, Seed, Match-ID und Gegenprobenzweige werden
+in einem gemeinsamen Auditmanifest nachvollziehbar festgehalten.
+
+## Einheiten und vollständige Abdeckung
+
+- Agenda-Karteninstanz, Agenda-/Server-Planinstanz und tatsächlich installierten
+  Scoreversuch getrennt zählen. Alternative Serverrouten derselben Agenda sind
+  keine unabhängigen Scoringchancen.
+- Jede Corp-Entscheidung genau einmal im Entscheidungsledger erfassen. Darunter
+  alle `corp.score_agenda`-Instanzen aus dem historischen Portfolio aufnehmen,
+  auch verworfene oder später inaktive Instanzen.
+- Erste Handbeobachtung, Mulligan-Rückgabe, erneuten Draw, erste Planaufnahme,
+  gewählte Unterstützung, Installation, Advances und Score/Steal getrennt
+  ausweisen. Wartezeit beginnt nicht während einer zurückgegebenen Mulligan-Hand.
+- Nicht gewählte Routen erhalten ein eigenes Urteil. Das Ergebnis der Agenda
+  darf ihnen nicht als tatsächlich ausgeführter Score oder Steal zugerechnet werden.
+
+## Quellen und Zustandsbezug
+
+Die vollständigen Plansignale aus dem historischen Runtime-Checkpoint über die
+read-only Maintenance Analysis API mit dem Entscheidungsportfolio verbinden.
+`rootPlanInstanceId`, Executor, tatsächliche Aktion, Ressourcen und legale
+Agenda-Angebote gemeinsam prüfen. Bei fehlenden Signalen den Audit sichtbar als
+unvollständig kennzeichnen.
+
+Alte Quotes untätiger Instanzen sind gespeichertes Gedächtnis. Ihre Version
+gegen den betrachteten Zustand prüfen, bevor sie als aktuelle Sicherheits- oder
+Finanzierungsaussage verwendet werden. Ein projizierter verbleibender Advancebedarf
+nach dem nächsten Schritt ist vom Score-Reservebetrag der Schutzquote zu trennen.
+Ein im eigenen Zug abschließbarer Score benötigt nicht zwingend eine Schutzquote.
+
+Falls Rohdaten bereits bereinigt wurden, denselben Seed auf dem historischen
+Verhaltensstand isoliert wiederherstellen. Aktions-/Planledger, Ressourcen,
+vorhandene Checkpoint-Hashes und den Endzustand abgleichen. Eine Normalisierung
+der Match-ID ausdrücklich dokumentieren. Wiederherstellungen und Fix-Replays
+zählen nicht als neue unabhängige Spiele.
+
+## Bewertung eines Plans
+
+1. Scorezeit und verbleibende Runnerfenster bis zum Abschluss bestimmen.
+2. Advance-, Install- und Rezfinanzierung gemeinsam prüfen; bereits gerezzte
+   ICE und tatsächliche Engine-Kostenreduktionen berücksichtigen.
+3. Runner-Guthaben, sichtbares Rig, vorbereitende Kreditklicks und öffentlich
+   nutzbare Ressourcen einbeziehen. Unbekannte Handkarten nicht als Wissen der
+   Corp behandeln. Modellierte Zugänglichkeit ist keine empirische Gewinnquote.
+4. Bei einem belegten Remote die legale Asset-Ersetzung mit Verlust von
+   Einkommen, Rabatten und Effekten bewerten. Ein belegter Root schließt eine
+   Agenda-Installation nicht grundsätzlich aus.
+5. Delegierte Economy-/Defense-Aktionen dem tatsächlichen Parent zuordnen.
+   Gemeinsam verfügbare Credits beim Parentwechsel nicht mehrfach als Aufwand
+   zählen. Abgebrochene Routen ohne eigene Ausgabe sind keine versenkten Kosten.
+6. Verdrängte Advances als vollständige Konversionslinie prüfen. Zwei getrennte
+   Unterbrechungen können gemeinsam einen ganzen Scorezug kosten, obwohl jede
+   isolierte Gegenprobe keinen früheren Score zeigt.
+7. Bei Hand-/Deckoutdruck Steal-Punkte, Matchpoint, zusätzlichen Advancebedarf
+   und tatsächlich verbleibende Uhr gemeinsam bewerten. Eine zugelassene
+   Notinstallation ist keine Behauptung sicheren Schutzes.
+
+## Aktuelle Referenzevidenz und Grenzen
+
+Der Registry-Bericht `score-plan-audit-426-429` und dessen Kurzfassung
+`score-plan-audit-426-429-kurz` decken 63 ursprüngliche Serverrouten für
+22 Agenda-Karten ab; der korrigierte Verlauf von 427 hat einen separaten Nenner.
+Die lokale [vollständige Auswertung](../../data/local/deep-remote-20260912/score-plan-audit-426-429.html)
+enthält die Einzelurteile und Ledger.
+
+- **426, D138/D153:** Kombinierte Advances statt Asset-/Upgrade-Installation
+  erlauben Superior Net Barriers T23 statt T25. Die Gegenlinie berücksichtigt
+  den notwendigen Discard und opfert die Braindance.
+- **427, Fix-Verlauf D413/D423:** Kombinierte Advances statt Schutzsuch-Draw
+  und HQ-Upgrade erlauben Corporate Coup T57 vor dem tatsächlichen Steal T58.
+- **428, D438:** Coup statt zweiter Tycho plus dieselbe vollständige
+  Runner-Antwort ergibt sechs statt acht Runnerpunkte; kein unmittelbares Spielende.
+- **429, D171:** Wall of Static an R1 kostet nach Masons-Reduktion einen
+  Rezcredit und erhöht den Runnerpreis um zehn Credits. Der Runner kann
+  trotzdem 22 von 27 Credits bezahlen und stehlen.
+
+Diese ausgeführten Zweige belegen lokale Zeit-, Punkte- oder Kosteneffekte.
+Sie beweisen weder einen universell dominierenden Gesamtplan noch einen anderen
+Gesamtsieger. SP-040 und SP-052 bleiben ohne weiteren generischen Ursachenbeweis
+Verdachtsfälle; der bereits verifizierte Runner-Fix SP-346 ist davon getrennt.
+
+## Gepaarter Fortsetzungsvergleich
+
+Paarung 431 vergleicht den eingefrorenen Ausgangsstand `96e4c20a0` mit
+`0b468d1b1`: vier bekannte und zwölf vorab ausgeloste neue Seeds, jeweils
+Vorher/Nachher mit identischem Runner. Der
+[Kurzbericht](../../data/local/score-continuity-ab-20260912/score-continuity-431-kurz.html)
+und der [vollständige Planledger](../../data/local/score-continuity-ab-20260912/score-continuity-431.html)
+enthalten 400 Planinstanzen und 15.138 Plansignale über 32 Ausführungen.
+
+- SP-356 behebt die vorzeitige Übergabe unvollständig projizierter
+  Install-/Advance-Meilensteine. Die neue Projektionsgrenze revalidiert den
+  Folgezustand; sie ist kein allgemeiner Vorrang für Advancen und noch keine
+  vollständige mehrzügige Wertberechnung.
+- Die zwölf neuen Seedpaare liefern 49 → 57 Corp-Punkte und unverändert
+  fünf Siege. Alle 16 Seedpaare liefern 73 → 75 Punkte, 22 → 24 Scores und
+  unverändert sieben Siege. Der positive neue Effekt hängt stark an einem
+  Seed mit geänderter Vorbereitung; eine höhere Gewinnquote ist nicht belegt.
+- 426 scoret Superior T23 statt T25. Die vollständige KI-Gegenprobe ab dem
+  ursprünglichen 427/D412 scoret Coup T57. Das gesamte 427-Replay zweigt
+  dagegen bereits D377 ab und verschlechtert sich von 8:5 auf 0:8.
+- Bei `new_remote` den tatsächlichen Installationsowner und die physische
+  Remote aus dem Ereignis verbinden. Sonst fehlen neu angelegte Scoreversuche
+  in der Statistik. Offene Agenden bei Spielende bleiben zensierte Versuche.
+- Öffentlich nutzbare Kreditbanken und sichtbare Advances beeinflussen die
+  Runner-Antwort. Ein begrenztes Modell aus Guthaben und Basiskreditklicks ist
+  keine Garantie gegen einen finanzierten Zugriff im nächsten Runnerzug.
+
+Mehr Scores, kürzere Einzelfenster und mehr Siege bleiben getrennte Kennzahlen.
+Ein vermiedener Draw oder eine verschobene Installation ist erst dann ein
+Tempoerfolg, wenn sich der vollständige Abschlusszeitpunkt tatsächlich verbessert.
+
+## Verlustursachen und nächste Gegenproben
+
+Die 16 Nachher-Spiele der Paarung 431 enthalten neun Corp-Niederlagen, davon
+fünf ohne eigenen Score. Von 17 Remote-Steals erfolgen 16 bereits im ersten
+Runnerzug nach Installation. Remote-Steals liefern 62 der insgesamt 85
+Runner-Agendapunkte über alle 16 Spiele. Diese Nenner beschreiben diese Paarung
+und diesen eingefrorenen Stand, keine allgemeine Seitenbalance.
+
+31 installierte Versuche haben eine aktuelle modellierte Zugriffschance 0/1;
+sieben davon enden trotzdem als Steal. Die Quote ist keine empirische
+Wahrscheinlichkeit. Ein späterer Steal allein beweist keinen fehlerhaften
+Rechenschritt: Modellgrenze, zwischenzeitliche Entwicklung und tatsächliche
+Rez-Ausführung müssen getrennt werden. Die sieben Fälle sind jedoch eine
+vollständig bestimmte Prüfmenge:
+
+| Nachher-Seed | Installation → Steal | Agenda |
+| --- | --- | --- |
+| known-427 | D377 → D395 | Tycho Extension |
+| known-427 | D431 → D456 | Tycho Extension |
+| new-03 | D137 → D163 | Tycho Extension |
+| new-04 | D197 → D233 | Corporate Coup |
+| new-09 | D377 → D417 | Priority Requisition |
+| new-10 | D221 → D246 | Priority Requisition |
+| new-11 | D212 → D237 | Security Net Optimization |
+
+In known-427/D377 ist die relevante öffentliche Budgetgrenze konkret belegt:
+sechs Runnercredits plus drei modellierte Basiskreditklicks ergeben neun;
+die tatsächliche Broker-Auszahlung und ein Kreditklick ergeben vor dem Run
+zehn. Fire Wall wird für zehn durchbrochen. Optionale öffentliche Einkommen
+sind laut aktuellem Corp-Vertrag ausdrücklich außerhalb dieses Basishorizonts.
+Das ist eine belegte Modelllücke; die beste alternative Corp-Handlung und deren
+Gesamteffekt sind davon getrennt zu prüfen. Unbekannte Runner-Handkarten dürfen
+für diese Prüfung kein Entscheidungswissen der Corp werden.
+
+Weitere acht der 17 Remote-Steals stammen aus ausdrücklich zugelassenen
+Notversuchen wegen Agenda-Abwurf oder Deckout. Hier rückwärts den letzten
+noch beeinflussbaren Aufbau-/Finanzierungszeitpunkt suchen. Einen bereits
+hoffnungslosen Endzustand anders zu bewerten, erklärt den vorherigen Verlust
+des Scorefensters nicht. Auch Zentralverluste separat führen: new-02 scoret
+beide installierten Agenden, verliert aber durch drei zentrale Steals.
+
+Für jeden Gegenpfad drei Aussagen getrennt abnehmen:
+
+1. **Prognose:** Welche öffentlich belegte Ressource, Kostenfolge oder
+   Zustandsänderung erklärt die Abweichung von der Schutzquote?
+2. **Entscheidung:** Welche damals legale alternative Gesamtlinie vermeidet
+   den lokalen Schaden, mit welchen Kosten und verbleibenden Risiken?
+3. **Spielstärke:** Wie verändert diese Korrektur Scorepunkte, Steals,
+   Nullscore-Niederlagen und Siege im gepaarten Kontrollsatz?
+
+Ein eindeutiger Informations- oder Prognosefehler benötigt keinen Beweis eines
+garantierten Gesamtsiegs, um als solcher benannt zu werden. Umgekehrt bedeutet
+die Ledgerklasse `plausible` nur mechanisch nachvollziehbares Verhalten und
+keinen Nachweis strategischer Qualität. Neue zufällige Spiele erst nach der
+gezielten Auflösung dieser bekannten Gegenbeispiele als unabhängige Kontrolle
+verwenden. Deckstärke, Paarung und KI-Verhalten dabei getrennt vergleichen.
+
+## Zentrale Steals und Verteilung der Endstände
+
+Der ergänzende [Server-/Ergebnisbericht zu 431](../../data/local/score-continuity-ab-20260912/steal-zones-431.md)
+enthält für alle 32 Ausführungen Steals und Punkte je HQ, R&D, Archives und
+Remote sowie alle 52 Stealentscheidungen mit Zeitpunkten. Serverzuordnung aus
+Runstart und übereinstimmendem gebundenem Owner, Remotes zusätzlich gegen den
+Installations-/Stealledger geprüft. Punktedifferenzen und Ereigniszähler stimmen
+für jedes Spiel mit den bestehenden Endzuständen überein.
+
+Nachher: HQ sechs Steals/17 Punkte, R&D zwei/sechs, Archives null, Remotes
+17/62. Fünf der neun Runner-Siege entstehen ausschließlich aus Remotes, einer
+aus Zentralen, drei aus beiden. New-02 verliert 6:9 ohne Remote-Steal:
+zwei R&D-Steals bereits T2 ergeben sechs Runnerpunkte, HQ liefert T34 drei
+weitere. Der erste Corp-Score erfolgt T23. New-08 gewinnt die Corp dagegen
+10:6 trotz sechs HQ-Verlustpunkten.
+
+Zu-null-Ergebnisse steigen von acht auf neun der 16 Seeds (50 → 56,25 Prozent).
+Nachher vier Corp- und fünf Runner-Siege zu null; nur zwei Endstände enthalten
+mindestens vier Verliererpunkte, vorher fünf. Das ist ein beschreibender
+Schwellenwert, keine allgemeine Definition ausgeglichener Spielstärke. Alle
+fünf zu-null-Niederlagen der Corp enden erst zwischen T54 und T70; geringe
+Corp-Punkte sind hier kein Beleg für ein schnelles Spiel. T zählt globale
+abwechselnde Spielerzüge. Sechs der neun Runner-Siege benötigen nur zwei Steals;
+die großen Agenda-Punktwerte machen wenige Zugriffe entscheidend.
+
+Weitere Audits müssen zentrale und Remote-Verluste gemeinsam bewerten.
+Neben Stealanzahl und Punkten auch tatsächliche Zugriffe, Mehrfachzugriffe,
+Kosten und Zeitpunkt gegenüber dem Corp-Scorebeginn erfassen. Ein Server ohne
+Steal ist ohne Zugriffsnenner kein nachgewiesener Verteidigungserfolg. Frühere
+Zentralverteidigung gegen ihre Kosten und den verschobenen Remote-Scorebeginn
+prüfen; keine Kenntnis später sichtbar gewordener Hand-/Deckkarten verwenden.
+
+## Ausgeführter Zentralen-/Scoreaudit
+
+Der [Folgeaudit zu 431](../../data/local/central-score-audit-20260912/central-score-audit-431.md)
+rekonstruiert die 16 Nachher-Spiele auf `0b468d1b1`. Alle 5.361 Entscheidungen
+und Enginezustände stimmen mit dem bisherigen Audit überein. 196 tatsächliche
+Runs sind vollständig erfasst, einschließlich sofort beendeter Event-Runs und
+automatischer Archives-Zugriffe. Kartenzugriffe zählen wiederholte Zugriffe
+mit; sie sind keine Anzahl einzigartiger Karten.
+
+| Server | Runs | Kartenzugriffe | Steals / Punkte | Corp-Creditabfluss im Run / davon Rez |
+| --- | ---: | ---: | ---: | ---: |
+| HQ | 82 | 77 | 6 / 17 | 112 / 87 |
+| R&D | 26 | 22 | 2 / 6 | 58 / 58 |
+| Archives | 33 | 308 | 0 / 0 | 0 / 0 |
+| Remotes | 55 | 36 | 17 / 62 | 169 / 169 |
+
+Abflüsse sind negative Änderungen allgemeiner Credits je Aktion, keine
+Bruttozahlungsquote einschließlich aller eingeschränkten Ressourcen.
+Elf HQ-Zugriffsersatz-Runs entziehen der Corp 25 Credits außerhalb Rez;
+zentrale Schwäche kann daher Score-Finanzierung auch ohne Steal beeinträchtigen.
+
+Vier einmalige legale Eingriffe sind mit anschließend selbständig antwortenden
+KIs bis zum Spielende geprüft. Die Kontrollen reproduzieren jeden historischen
+Folgezustand. Diese ausgewählten verschiedenen Eingriffe bilden keine neue
+Stichprobe für eine generische Siegquote.
+
+| Gegenprobe | Kontrolle Corp:Runner | Alternative | Bewertung |
+| --- | ---: | ---: | --- |
+| new-02 D7: Tesseract ungerezzt lassen, acht Credits für Reinforced Wall erhalten | 6:9 | 7:6 | Zusätzlicher Reservepfad unter SP-158 bestätigt; erster Score T17 statt T23 |
+| new-03 D4: erste Endless nach HQ statt R&D | 3:10 | 9:4 | Partiebelegter besserer Gesamtpfad; Coup T13 statt frühem HQ-Verlust, kein allgemeiner HQ-Vorrang |
+| new-04 D10: R&D-Rez zugunsten HQ-Reserve verweigern | 3:9 | 0:10 | Gegenbeleg; kein besserer Gesamtplan |
+| new-08 D9: R&D-Rez zugunsten HQ-Reserve verweigern | 10:6 | 0:8 | Gegenbeleg; früher R&D-Verlust bereits T4 |
+
+Der konkrete Reservefehler liegt im bestehenden Defense-Owner:
+`corpRezEstablishesPersistentDefenseSupport` prüft Hint-Rolle und vorhandene
+ICE; `defense-discovery.ts` erklärt diese Route mit Wert 120 für produktiv.
+Für new-02/D7 ist damit nicht nachgewiesen, dass die unterstützte ICE nach
+dem Upgrade-Rez noch finanzierbar bleibt: zwei Credits Upgrade senken acht
+auf sechs, Reinforced Wall benötigt weiterhin acht. Nächster generischer
+Fix: verbleibende wirksame Gesamtverteidigung nach der Zahlung quotieren,
+mit Kontrasten für weiterhin finanzierte ICE, kostenlose Unterstützung und
+unabhängigen Upgrade-Nutzen. Dieser Audit ändert kein produktives Verhalten.
+SP-040/SP-052 bleiben für ihre breiteren Fragen offen.
+
+Rohdaten, Checkpoints, Gegenproben, isolierte SQLite-Dateien und historische
+Codekopie bleiben unter
+`C:/Projekte/NETGRID-deep-remote-20260912/data/local/central-score-audit-20260912/`
+erhalten. `audit-manifest.json` führt Herkunft, Status und Aufbewahrung.
+
+Abschluss: kompakte Einzelurteile und Probe-Grenzen in die bestehende Registry
+zurückführen, Bericht samt exaktem Inhalt und Status sichern, Round-trip prüfen
+und Backup erzeugen. Eigene Runtime-Daten für den laufenden Auftrag erst nach
+ausdrücklicher Nutzerfreigabe zum Analyseende bereinigen. Keine rohen
+PlayerViews oder vollständigen versteckten Hände in die kompakte Registry kopieren.

@@ -17,7 +17,9 @@ import { useTranslations } from "use-intl/react";
 
 import {
   HAND_CARD_MINIMUM_VISIBLE_STEP_PX,
+  HAND_CARD_ROW_GAP_PX,
   handCardRowLayout,
+  handCardRowPreferredWidth,
 } from "./hand-card-layout";
 
 const CARD_DISPLAY_BASE_MIN_WIDTH = 108;
@@ -107,6 +109,7 @@ export function SideZoneFrame({
   highlighted = false,
   className = "",
   style,
+  maxBodyWidth,
   title,
   ariaLabel,
   testId,
@@ -122,6 +125,7 @@ export function SideZoneFrame({
   highlighted?: boolean;
   className?: string;
   style?: CSSProperties;
+  maxBodyWidth?: string;
   title?: string;
   ariaLabel?: string;
   testId?: string;
@@ -131,10 +135,43 @@ export function SideZoneFrame({
   children?: ReactNode;
 }) {
   const hasBody = children !== undefined && children !== null && !collapsed;
+  const frameRef = useRef<HTMLDivElement | null>(null);
+  const bodyRef = useRef<HTMLDivElement | null>(null);
+  const [inlineChromeWidth, setInlineChromeWidth] = useState<number | null>(
+    null,
+  );
+
+  useEffect(() => {
+    const frame = frameRef.current;
+    const body = bodyRef.current;
+    if (!maxBodyWidth || !frame || !body) return;
+
+    // Measure only the label, frame and gap; card spacing stays CSS-owned.
+    const syncChromeWidth = () => {
+      setInlineChromeWidth(
+        frame.getBoundingClientRect().width -
+          body.getBoundingClientRect().width,
+      );
+    };
+    syncChromeWidth();
+    const observer = new ResizeObserver(syncChromeWidth);
+    observer.observe(frame);
+    observer.observe(body);
+    return () => observer.disconnect();
+  }, [hasBody, maxBodyWidth]);
+
   return (
     <div
+      ref={frameRef}
       className={`sideZoneFrame ${side} ${hasBody ? "" : "sideZoneFrameCountOnly"} ${highlighted ? "cueHighlightSoft" : ""} ${className}`}
-      style={style}
+      style={
+        hasBody && maxBodyWidth && inlineChromeWidth !== null
+          ? {
+              ...style,
+              maxWidth: `min(100%, calc(${maxBodyWidth} + ${inlineChromeWidth}px))`,
+            }
+          : style
+      }
       title={title}
       aria-label={ariaLabel}
       data-testid={testId}
@@ -162,7 +199,11 @@ export function SideZoneFrame({
           ) : null}
         </div>
       </div>
-      {hasBody ? <div className="sideZoneBody">{children}</div> : null}
+      {hasBody ? (
+        <div ref={bodyRef} className="sideZoneBody">
+          {children}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -172,6 +213,7 @@ export function HandCardsRow({
   style,
   count,
   maxRows = 1,
+  expandToAvailableWidth = false,
   minimumVisibleStep = HAND_CARD_MINIMUM_VISIBLE_STEP_PX,
   children,
 }: {
@@ -179,6 +221,7 @@ export function HandCardsRow({
   style?: CSSProperties;
   count: number;
   maxRows?: number;
+  expandToAvailableWidth?: boolean;
   minimumVisibleStep?: number;
   children: ReactNode;
 }) {
@@ -188,7 +231,7 @@ export function HandCardsRow({
 
   useEffect(() => {
     const row = rowRef.current;
-    if (!row || count <= 1) {
+    if (!row || count <= 1 || expandToAvailableWidth) {
       setOverlapOffset(null);
       setCardsPerRow(Math.max(1, count));
       return;
@@ -244,15 +287,25 @@ export function HandCardsRow({
       observer?.disconnect();
       window.removeEventListener("resize", syncOverlap);
     };
-  }, [count, maxRows, minimumVisibleStep, style]);
+  }, [count, maxRows, minimumVisibleStep, style, expandToAvailableWidth]);
 
   const rowStyle = useMemo(() => {
-    if (!overlapOffset) return style;
     return {
       ...style,
-      "--cards-overlap-offset": overlapOffset,
+      ...(overlapOffset && !expandToAvailableWidth
+        ? { "--cards-overlap-offset": overlapOffset }
+        : {}),
+      ...(expandToAvailableWidth
+        ? {
+            "--hand-card-preferred-width": `calc(var(--cards-min-width, ${CARD_DISPLAY_BASE_MIN_WIDTH}px) * ${handCardRowPreferredWidth({ cardWidth: 1, cardGap: 0, count })} + ${HAND_CARD_ROW_GAP_PX * Math.max(0, count - 1)}px)`,
+            "--hand-card-count": count,
+            "--hand-card-steps": Math.max(1, count - 1),
+            "--hand-card-gap": `${HAND_CARD_ROW_GAP_PX}px`,
+            "--hand-card-minimum-step": `${Math.max(1, minimumVisibleStep)}px`,
+          }
+        : {}),
     } as CSSProperties;
-  }, [overlapOffset, style]);
+  }, [overlapOffset, style, expandToAvailableWidth, count, minimumVisibleStep]);
   const cardChildren = Children.toArray(children);
   const wrapped = cardsPerRow < cardChildren.length;
   const rows = wrapped
@@ -266,7 +319,7 @@ export function HandCardsRow({
   return (
     <div
       ref={rowRef}
-      className={`cards fixedZoneCards handCardsRow ${wrapped ? "handCardsRowWrapped" : ""} ${className}`.trim()}
+      className={`cards fixedZoneCards handCardsRow ${expandToAvailableWidth ? "handCardsRowExpanding" : ""} ${wrapped ? "handCardsRowWrapped" : ""} ${className}`.trim()}
       style={rowStyle}
     >
       {wrapped

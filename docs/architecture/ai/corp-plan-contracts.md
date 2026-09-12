@@ -69,6 +69,14 @@ ein terminaler Abschluss erhält P1. Ohne aktuelle Quote, ausreichende Klicks
 oder exakte Basiscredit-Route entsteht dieser Nachweis nicht. Die Reserve für
 den nächsten Zug bleibt ein eigener, unveränderter Horizont.
 
+Die Klassifizierung eines normalen Advances prüft Konversionspfade mit
+denselben aktuellen Funding-Kandidaten wie die Score-Discovery. Ersetzt eine
+vollständig gequotete Konversion mit Economy-Präfix diesen Advance, bleibt
+er unter dem Score-Owner ausdrücklich bis zum gebundenen ersten Schritt
+zurückgestellt. Eine Prüfung ohne Funding-Eingaben darf die bereits
+nachgewiesene Linie nicht verlieren und dadurch eine ownerlose LegalAction
+erzeugen (Regression: Paarung 425, D196).
+
 Eine vollständig gequotete leere Kostenliste zertifiziert null Klicks und
 Credits. Ein nur mit Klickkosten ausgewiesener Advance kostet null Credits;
 beide Fälle bleiben reguläre Scorefortentwicklung. Ein Engine-Payload-Feld,
@@ -276,6 +284,8 @@ vermutete Auszahlung ungeresster oder nicht ausführbarer Assets.
 - `corp-counter-bank-score-plan.ts`: Engine-gequotete Counterbank-Scorefolgen;
 - `corp-agenda-turn-planning.ts`: Agenda-Zuglinien und Kampagnenquotes für den
   gemeinsamen TurnPlanner, einschließlich gebundener Support-Provider;
+- `score-milestone-boundary.ts`: Revalidierung noch offener Advance-/Scorearbeit
+  nach einem aktuell materialisierten Install- oder Advance-Head;
 - `score-choice-continuation.ts` und `score-choice-binding.ts`: Bindung und
   Vervollständigung der ausgewählten Advancement-/Agenda-/Folge-Choices.
 
@@ -283,6 +293,18 @@ Die Runtime entdeckt zuerst direkte Scorevorhaben, gibt deren Reserven an
 Ambush und reicht die entdeckten Ambush-Fakten zur Score-Reconciliation zurück.
 Anschließend komponiert sie die verbleibenden Defense-, Economy- und Handbedarfe.
 Es entsteht kein zweiter Planvergleich außerhalb des Schedulers/TurnPlanners.
+
+Die aktuelle Restzugsuche projiziert bei Installationen und Advances Kosten,
+aber noch keine vollständige Boardänderung samt folgenden Score-LegalActions.
+Ein exakter Score-Head endet deshalb an einer expliziten Projektionsgrenze,
+bevor ein fremder Plan die verbleibenden Klicks gebunden übernehmen kann.
+Ein prognostizierter Meilenstein wie `agenda_advanced` ist nach der bloßen
+Installation noch nicht erreicht. Der Folgezustand wird regulär neu entdeckt
+und bewertet; Prioritätsklassen, Schutz- und Fundingzulassung bleiben beim
+bestehenden Owner. Das ist keine zusätzliche Sperre für mehrzügige Scores und
+kein Nachweis, dass jede Nebenaktion einen Scorezug kostet. Eine zukünftige
+vollständige semantische Scoreprojektion kann diese Grenze ersetzen, wenn sie
+Boardfortschritt, Kosten und Meilensteinerfüllung gemeinsam nachweist.
 
 `corp/defense/corp-score-protection-routes.ts` und
 `corp/defense/corp-defense-layer-certification.ts` bleiben Schutzdienste außerhalb
@@ -316,8 +338,17 @@ Runner-Credits. Reine ICE-Anzahl und Rez-Anzahl liefern keinen Konversionsbonus.
 Ein möglicher terminaler Steal erhöht das Gewicht der Exposition. Unbekannte oder
 veraltete Quotes bleiben unbekannt und tragen eine konservative Risikogrenze;
 sie werden weder als sicher noch pauschal als 50-Prozent-Chance behandelt.
-Die Zuglinien übernehmen dieselbe Exposition. Ein bereits im eigenen Zug
+Die Zuglinien übernehmen dieselbe Exposition einschließlich des höheren Gewichts
+eines terminalen Steals. Funding-/Defense-Setup exponiert die Agenda noch nicht
+und erhält diesen Aufschlag nicht. Gleiche Zugriffschancen dürfen beim Vergleich
+gehaltener Agenden nicht die unmittelbare Verlustfolge unterschlagen (Regression:
+Pairing 432, D464; Coup und Security Net bei sechs Corp-/vier Runnerpunkten).
+Ein bereits im eigenen Zug
 vollständig schließender Score hat kein dazwischenliegendes Runner-Fenster.
+Nicht bevorzugte, aber zugelassene Agenda-Zuglinien behalten ihre eigene Quote
+im Restzugvergleich. Nur eine autorisierte Opening-Randomisierung bindet die
+Familie vorab; eine andere Setup-Präferenz darf dieselbe Install-Action nicht
+mit einem generischen Einzelwert wieder einführen.
 
 Die Zugriffsrechnung behandelt auch reinen Trace-Net-Schaden konservativ wie
 direkten Schaden: Er garantiert keinen verhinderten Zugriff. Das ist kein
@@ -899,6 +930,10 @@ Die nachfolgende Dr.-Dreff-Choice bleibt an `corp.defend_servers` gebunden.
 Die Engine liefert zu jedem angebotenen HQ-ICE die effektiven
 Subroutinentypen seines temporären Encounters und kennzeichnet zusätzliche
 mechanische Effektfamilien. Die AI-DTO erhält diese privaten Choice-Facts.
+Installations- und Rez-Lifecycle-Hooks zählen bei dieser weder installierten
+noch gerezzten ICE nicht als zusätzliche Begegnungswirkung. Insbesondere
+macht Coyotes Rez-Einkommen seine reine Folgestärke-Subroutine hier nicht
+produktiv; der Defense-Owner erhält dafür keinen künstlichen Nutzen.
 Der Defense-Owner verwirft ausschließlich Optionen ohne aktuelle Wirkung:
 Leere oder reine Zukunfts-Subroutinen ohne zusätzliche Mechanik können nach
 dem letzten ICE nichts mehr bewirken. Sind alle Optionen so eingeordnet,

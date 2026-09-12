@@ -58,8 +58,16 @@ export function temporaryEncounterOptionFacts(
     // must not be discarded merely because the printed subroutines are future-only.
     temporaryEncounterHasAdditionalMechanics:
       implementation === undefined ||
-      Object.keys(implementation).some(
-        (key) => key !== "cardDefinitionId" && key !== "printedSubroutines",
-      ),
+      Object.keys(implementation).some((key) => {
+        if (key === "cardDefinitionId" || key === "printedSubroutines")
+          return false;
+        // Temporary HQ ICE is neither installed nor rezzed. These hooks
+        // cannot contribute an effect to this encounter (e.g. rez income).
+        if (key === "lifecycle")
+          return Object.keys(implementation.lifecycle ?? {}).some(
+            (timing) => timing !== "on_rez" && timing !== "on_install",
+          );
+        return true;
+      }),
   };
 }

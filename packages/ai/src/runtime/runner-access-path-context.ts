@@ -11,6 +11,7 @@ import {
 } from "../actions/risk-action-projection";
 import { projectKnownRemoteTrashCommitment } from "../decision/known-remote-access-commitment";
 import { isVisiblePayEndRunSubroutine } from "../run-analysis/visible-subroutine-semantics";
+import { currentEncounterUnbrokenSubroutineIndexes } from "./current-encounter";
 import {
   isEndRunSubroutine,
   isUnacceptableImmediateSafetyThreatSubroutine,
@@ -187,6 +188,15 @@ export function createRunnerAccessPathContext(
     input: AiDecisionInput,
     action: LegalAction,
   ): RunnerEncounterBreakAccessAssessment => {
+    // Payment windows resume an already selected break. They expose no ordinary
+    // encounter continuation; the cost-continuation owner validates the exact
+    // original action, window and plan binding before it can execute.
+    if (action.payload?.runnerCostPenaltySupportContinuation === true) {
+      return {
+        canPreserveAccessPath: true,
+        evidence: ["break_access_path_owned_by_bound_payment_continuation"],
+      };
+    }
     const run = input.playerView.run;
     if (run?.position?.kind !== "ice")
       return { canPreserveAccessPath: true, evidence: [] };
@@ -214,9 +224,12 @@ export function createRunnerAccessPathContext(
       };
 
     const breakPayment = runnerEncounterPaymentForAction(input, action);
+    const unbrokenIndexes = currentEncounterUnbrokenSubroutineIndexes(input);
     const remainingSubroutinesAfterBreak =
       quote && breakIndexes.size > 0
-        ? quote.subroutines.filter((_, index) => !breakIndexes.has(index))
+        ? quote.subroutines.filter(
+            (_, index) => unbrokenIndexes.has(index) && !breakIndexes.has(index),
+          )
         : [];
     const remainingHardEndRunAfterBreak = remainingSubroutinesAfterBreak.filter(
       (subroutine) =>

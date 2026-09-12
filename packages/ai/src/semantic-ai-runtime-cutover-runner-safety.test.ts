@@ -708,6 +708,8 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
     );
     breakCurrent.timingPoint = "run.encounter_ice";
     continueIntoEtr.timingPoint = "run.encounter_ice";
+    continueIntoEtr.payload!.encounterSubroutineIds =
+      currentCrystalWall.effectiveRunQuote!.subroutines[0]!.id;
     const input = aiInput("runner", [breakCurrent, continueIntoEtr]);
     input.playerView.timingPoint = "run.encounter_ice";
     input.playerView.own.credits = 1;

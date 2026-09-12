@@ -21,6 +21,18 @@
 
 ## Run-Stufen und Aktionssymbole
 
+Der eigene Runner-Grip verwendet seine kompakte Handbreite als Grundlage
+für den Flex-Umbruch mit Stack, Rig und Heap. Erst danach nimmt der geöffnete
+Grip mit mehreren Karten den freien Platz seiner Zeile auf.
+Die Grip-Breite ist auf vollständig sichtbare Karten samt normalen Abständen,
+Zonenbeschriftung und Rahmen begrenzt. `SideZoneFrame` misst dafür nur die
+Breite außerhalb seines Inhalts; der Kartenabstand selbst bleibt CSS-gesteuert.
+`HandCardsRow` reduziert dort die Überlagerung per CSS direkt aus der
+verfügbaren Breite bis zum normalen Kartenabstand, ohne eine nachgelagerte
+ResizeObserver-Messung. Die explizite kompakte Wunschbreite bleibt unabhängig
+vom berechneten Kartenabstand, damit
+Resize, Kartenzahl und Skalierung keinen rückgekoppelten Umbruch erzeugen.
+
 `RunTimelineOverlay` zeigt in jeder Stufe dauerhaft blasse Orientierungssymbole.
 Sie erklären typische Möglichkeiten und sind keine Legalitätsanzeige. Nur
 Symbole für aktuell angebotene `LegalActions` in der aktiven Stufe werden

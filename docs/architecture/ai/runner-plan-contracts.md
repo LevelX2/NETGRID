@@ -113,6 +113,23 @@ Eine HQ- und eine R&D-Instanz dürfen gleichzeitig Kandidaten sein. Nur eine
 ist Executor. Ein Zielwechsel verlangt Planarbitration, nicht bloß eine andere
 Run-Action.
 
+Ein verpflichtender Ersatz des Zugriffs durch eigenen Creditverbrauch gegen
+Corp-Credits erhält ausschließlich seinen tatsächlichen Denial-Payoff. Die
+Runprojektion bindet diese geschlossene Funktion an die gedruckte Make-Run-
+Capability und ihre generierten CardSpec-Effekte. Die sichtbare Obergrenze
+des Entzugs berücksichtigt beide Creditpools nach bekannten Pfadkosten;
+weitere Corp-Rezzes können sie vermindern. Bei null Entzug besteht kein
+Zugriffswert. Verdeckte HQ-Karten, Multiaccess und ein möglicher Agenda-Steal
+begründen für diese Ersatzroute keinen Matchpoint-Bonus. Die normale HQ-
+Action behält ihre eigenständige Bewertung und denselben Central-Owner.
+
+Bei festem Creditentzug begrenzt zusätzlich die kanonische Effektmenge den
+Payoff; eigene Credits werden dafür nicht ausgegeben. Verlangt die gebundene
+Ersatzwirkung ein nichtleeres Corp-Konto, bleibt bei bereits leerem Konto der
+normale Zugriff erhalten. Ein unbedingter Entzug ersetzt ihn auch dann. Beide
+Fälle teilen dieselbe Central-Projektion; fehlende oder widersprüchliche
+Effektmengen scheitern sichtbar, statt einen Zugriffswert zu erfinden.
+
 Ein Zentralzugriff am Runner-Matchpoint darf ohne aktuelle Remote-Scorebedrohung
 das vorhandene Runbudget verbrauchen. Die allgemeine gewünschte Auffüllreserve
 ist dann keine zusätzliche Restguthabenpflicht; der Sicherheitsfloor, reale
@@ -184,6 +201,16 @@ Der Plan muss unterscheiden:
 - leeres oder bekannt wertloses Remote;
 - Ambush-/Damage-Risiko;
 - deckstrategisch begründeten wiederholten Remote-Druck.
+
+Ersetzt eine aktuell ausführbare gezielte ICE-Entfernung die blockierte
+Runroute, entfernt ihr Remote-Signal den bisherigen `supportNeedId` bereits
+bei der Routenbildung. Der ersetzte Coverage-Bedarf darf nicht zugleich eine
+Child-Bindung verlangen, während der Parent seinen eigenen Vorbereitungsschritt
+ausführt und keine offene Need mehr veröffentlicht. Die bestehende
+Coverage-Reconciliation erhält unabhängig weiterhin sinnvolle Breakersuchen;
+vor dem Routenwechsel bleibt eine tatsächlich benötigte Child-Bindung erhalten.
+Die gespeicherten Entscheidungen D159/D160 aus Paarung 425 prüfen beide Seiten
+dieses Übergangs mit den historischen LegalActions und Runtime-Checkpoints.
 
 Die Runpfad-Projektion trennt einen nicht tödlichen Handpufferverstoß von
 unmittelbarer beziehungsweise Cleanup-Flatline. Ein bekannter Zugriff bleibt
@@ -304,6 +331,15 @@ validate_run_path
 
 Das Modul darf nicht bei jeder spielbaren Programminstallation wachsen. Es
 arbeitet auf eine konkrete Coverage- oder Rig-Fähigkeit hin.
+
+Die diagnostisch sortierte Liste fehlender ICE-Abdeckung bestimmt keine
+Suchpriorität. Bei der Ableitung des Rollenbedarfs stehen Wall, Code Gate und
+Sentry vor ergänzenden AP-/Trace-Merkmalen. Ein bekannter Sentry mit dem
+Untertyp `killer` benötigt dadurch eine Sentry-Antwort; das alphabetisch frühere
+`ap` darf keinen unerfüllbaren Suchbedarf erzeugen. Rein spezielle AP-, Trace-
+und unbekannte ICE behalten ihren spezifischen beziehungsweise universellen
+Bedarf. Suche und Optionsbindung folgen weiterhin exakt dem gewählten
+Coverage-Plan, Step und Executor.
 
 Eine exakt gebundene Upgrade-/Kosten-Recovery-Route bleibt an ihre gewählte
 Karteninstanz gebunden. Weitere Handkopien derselben Definition, die nur
@@ -851,6 +887,16 @@ Subroutine-IDs. Der vorhandene Run-Owner berücksichtigt dadurch auch einen
 sonst wirkungslosen letzten Break als notwendige Schadensvermeidung; bereits
 gebrochene Subroutinen werden nicht erneut budgetiert. Action-Version,
 Planinstanz, Executor und Route bleiben weiterhin bindend.
+
+Auch die allgemeine Zugriffspfadprüfung nach einem Break verwendet diese
+Engine-Restliste. Sie zieht nur das aktuelle Breakziel von den noch offenen
+Subroutinen ab; bereits gebrochene ETR- oder Zahlungssubroutinen erzeugen weder
+einen weiteren Breakbedarf noch zusätzliche Restkosten. Eine fehlende oder
+widersprüchliche Restliste scheitert sichtbar am vorhandenen Faktenvertrag.
+Bereits gebundene Zahlungsfortsetzungen eröffnen diese strategische Prüfung
+nicht erneut: Ihr Zahlungsfenster bietet keine normale Encounter-Continue-
+Action. Der bestehende Cost-Continuation-Owner validiert weiterhin Original-
+Action, Fenster, Root und Executor vor der Ausführung.
 
 Im aktuellen Fort-Pass-Fenster unterscheiden sich die beiden angebotenen
 `continue_run`-Actions fachlich: `decision:pay` erhält den Run, `decision:end_run`

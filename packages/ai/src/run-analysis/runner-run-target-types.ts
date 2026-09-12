@@ -95,6 +95,8 @@ export type RunActionProjection = {
   structure: RunnerRunActionStructure;
   accessPayoffSignals: string[];
   accessReplacement?: string;
+  accessReplacementCreditLoss?: number;
+  accessReplacementRequiresCorpCredits?: boolean;
   accessReplacementLookCount?: number;
   constraintSignals: string[];
   riskSignals: string[];

@@ -18,6 +18,8 @@ function stateWithRun() {
 
 it.each([
   ["onr_v1_222_ball-and-chain", ["set_run_encounter_tax"]],
+  ["onr_proteus_016_coyote", ["set_run_future_strength_bonus"]],
+  ["onr_proteus_035_roadblock", ["end_the_run"]],
   [
     "onr_v1_234_data-darts",
     ["do_damage", "set_next_encounter_no_break_subroutines"],
@@ -40,7 +42,8 @@ it.each([
     const before = hashState(state);
     expect(temporaryEncounterOptionFacts(state, iceId, definition)).toEqual({
       temporaryEncounterSubroutineTypes: types,
-      temporaryEncounterHasAdditionalMechanics: false,
+      temporaryEncounterHasAdditionalMechanics:
+        id === "onr_proteus_035_roadblock",
     });
     expect(hashState(state)).toBe(before);
   },
