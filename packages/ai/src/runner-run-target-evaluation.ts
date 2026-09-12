@@ -318,7 +318,7 @@ function evaluateRunnerRunTarget(
   const combinedRunPayoff = combineRunPayoffs(
     installedRunPayoff,
     runActionPayoff,
-    projection.accessReplacement !== "runner_spend_corp_lose_credits",
+    !replacesAccessWithCreditDenial(params.input, projection),
   );
   const scoreThreat =
     accessTargetKind === "remote" && remoteHasScoreThreat(accessServer);
@@ -451,7 +451,7 @@ function evaluateRunnerRunTarget(
     path.visibleTraceTagHazardUnavoidable === true;
   const futureClicksLost = path.futureClicksLost ?? 0;
   const runnerMatchpointCentralAccess =
-    projection.accessReplacement !== "runner_spend_corp_lose_credits" &&
+    !replacesAccessWithCreditDenial(params.input, projection) &&
     (accessTargetKind === "rd" || accessTargetKind === "hq") &&
     payoff.knownAccessState !== "known_no_current_payoff" &&
     params.input.playerView.own.agendaPoints >=
@@ -1186,6 +1186,18 @@ function payoffForTarget(
   };
 }
 
+function replacesAccessWithCreditDenial(
+  input: AiDecisionInput,
+  projection: RunActionProjection,
+): boolean {
+  return (
+    projection.accessReplacement === "runner_spend_corp_lose_credits" ||
+    (projection.accessReplacement === "corp_lose_credits" &&
+      (!projection.accessReplacementRequiresCorpCredits ||
+        input.playerView.opponent.credits > 0))
+  );
+}
+
 function accessReplacementPayoffForTarget(
   params: EvaluateRunnerRunTargetsParams,
   projection: RunActionProjection,
@@ -1193,12 +1205,20 @@ function accessReplacementPayoffForTarget(
   targetKind: RunnerRunTargetKind,
   creditsAfterRun: number,
 ): ReturnType<typeof payoffForTarget> | undefined {
-  if (projection.accessReplacement === "runner_spend_corp_lose_credits") {
+  if (replacesAccessWithCreditDenial(params.input, projection)) {
     // This run never accesses HQ. Its visible upper-bound payload must fit
     // both pools after known path costs; future Corp rez can only reduce it.
+    const ownSpend =
+      projection.accessReplacement === "runner_spend_corp_lose_credits";
+    if (!ownSpend && projection.accessReplacementCreditLoss === undefined) {
+      throw new Error("run_access_replacement_credit_loss_missing");
+    }
     const denial = Math.max(
       0,
-      Math.min(params.input.playerView.opponent.credits, creditsAfterRun),
+      Math.min(
+        params.input.playerView.opponent.credits,
+        ownSpend ? creditsAfterRun : projection.accessReplacementCreditLoss!,
+      ),
     );
     return {
       accessPayoff: denial > 0 ? "access_bonus" : "known_low_value",
@@ -1216,7 +1236,7 @@ function accessReplacementPayoffForTarget(
             scoreForPayoff("access_bonus")
           : -640,
       evidence: [
-        "central_access_replacement:runner_spend_corp_lose_credits",
+        `central_access_replacement:${projection.accessReplacement}`,
         `central_access_replacement_visible_denial_upper_bound:${denial}`,
         "central_access_replacement_normal_access:false",
       ],

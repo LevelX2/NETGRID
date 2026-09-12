@@ -94,7 +94,7 @@ export function projectInternalRunnerRunActions(
         hint,
         signals,
       ),
-      ...(accessReplacement ? { accessReplacement } : {}),
+      ...accessReplacement,
       ...(accessReplacementLookCount !== undefined
         ? { accessReplacementLookCount }
         : {}),
@@ -875,36 +875,68 @@ function structuredAccessReplacementSignals(action: LegalAction): string[] {
 function runAccessReplacement(
   action: LegalAction,
   hint: AiCardHint | undefined,
-): string | undefined {
+): Pick<
+  RunActionProjection,
+  | "accessReplacement"
+  | "accessReplacementCreditLoss"
+  | "accessReplacementRequiresCorpCredits"
+> {
   const payloadReplacement = stringPayloadValue(
     action,
     "successfulRunAccessReplacement",
   );
-  // The printed-cost make-run capability carries its mandatory spending
-  // replacement in the generated CardSpec effects, not in the event payload.
-  // Bind only this closed functional shape to that exact capability.
+  // Printed-cost make-run capabilities carry replacement effects in the
+  // generated CardSpec hints, rather than duplicating them in event payloads.
   const boundCapability = stringPayloadValue(
     action,
     "cardImplementationAbilityKey",
   );
-  const spendingReplacement =
-    boundCapability === "abilities_on_play_make_run" &&
-    hint?.effects?.some(
-      (effect) =>
-        effect.kind === "access_replacement" &&
-        effect.timing === "successful_run" &&
-        effect.target === "runner_spend_corp_lose_credits",
-    );
-  if (spendingReplacement) {
-    if (
-      payloadReplacement &&
-      payloadReplacement !== "runner_spend_corp_lose_credits"
-    ) {
+  const replacements =
+    boundCapability === "abilities_on_play_make_run"
+      ? (hint?.effects?.filter(
+          (effect) =>
+            effect.kind === "access_replacement" &&
+            effect.timing === "successful_run" &&
+            (effect.target === "runner_spend_corp_lose_credits" ||
+              effect.target === "corp_lose_credits"),
+        ) ?? [])
+      : [];
+  if (replacements.length > 1)
+    throw new Error("run_access_replacement_source_ambiguous");
+  const replacement = replacements[0]?.target;
+  if (replacement) {
+    if (payloadReplacement && payloadReplacement !== replacement) {
       throw new Error("run_access_replacement_source_conflict");
     }
-    return "runner_spend_corp_lose_credits";
+    if (replacement === "runner_spend_corp_lose_credits") {
+      return { accessReplacement: replacement };
+    }
+    const losses = hint?.effects?.filter(
+      (effect) =>
+        effect.kind === "economy" &&
+        effect.scope === "corp" &&
+        effect.timing === "successful_run" &&
+        effect.target === "economy.corp_credit_loss",
+    );
+    const amount = losses?.[0]?.amount;
+    if (
+      losses?.length !== 1 ||
+      typeof amount !== "number" ||
+      !Number.isFinite(amount) ||
+      amount < 0
+    ) {
+      throw new Error(
+        "run_access_replacement_credit_loss_missing_or_ambiguous",
+      );
+    }
+    return {
+      accessReplacement: replacement,
+      accessReplacementCreditLoss: amount,
+      accessReplacementRequiresCorpCredits:
+        hint?.riskTags?.includes("corp_empty_credit_pool_whiff") === true,
+    };
   }
-  return payloadReplacement;
+  return payloadReplacement ? { accessReplacement: payloadReplacement } : {};
 }
 
 function accessSignalsForHintEffect(

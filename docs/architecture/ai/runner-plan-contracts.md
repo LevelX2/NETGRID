@@ -123,6 +123,13 @@ Zugriffswert. Verdeckte HQ-Karten, Multiaccess und ein möglicher Agenda-Steal
 begründen für diese Ersatzroute keinen Matchpoint-Bonus. Die normale HQ-
 Action behält ihre eigenständige Bewertung und denselben Central-Owner.
 
+Bei festem Creditentzug begrenzt zusätzlich die kanonische Effektmenge den
+Payoff; eigene Credits werden dafür nicht ausgegeben. Verlangt die gebundene
+Ersatzwirkung ein nichtleeres Corp-Konto, bleibt bei bereits leerem Konto der
+normale Zugriff erhalten. Ein unbedingter Entzug ersetzt ihn auch dann. Beide
+Fälle teilen dieselbe Central-Projektion; fehlende oder widersprüchliche
+Effektmengen scheitern sichtbar, statt einen Zugriffswert zu erfinden.
+
 Ein Zentralzugriff am Runner-Matchpoint darf ohne aktuelle Remote-Scorebedrohung
 das vorhandene Runbudget verbrauchen. Die allgemeine gewünschte Auffüllreserve
 ist dann keine zusätzliche Restguthabenpflicht; der Sicherheitsfloor, reale
