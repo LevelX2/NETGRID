@@ -103,12 +103,16 @@ export function ActiveRunnerZoneBoard({
         })}
         iconKind="grip"
         highlighted={zoneHighlighted(activeHighlight, view.side, "grip")}
-        className="runnerGripZone"
+        className={`runnerGripZone ${view.own.gripOrHq.length > 1 ? "runnerGripZoneExpanding" : ""}`}
         style={zoneCardsStyle}
         collapsed={boardZoneCollapsedFor("runner:grip")}
         onToggleCollapse={() => toggleBoardZoneCollapsed("runner:grip")}
       >
-        <HandCardsRow style={handCardsStyle} count={view.own.gripOrHq.length}>
+        <HandCardsRow
+          style={handCardsStyle}
+          count={view.own.gripOrHq.length}
+          expandToAvailableWidth={view.own.gripOrHq.length > 1}
+        >
           {view.own.gripOrHq.map((card) => {
             const displayCard = enrichCard(card);
             const discardOption = discardOptionForCard(card);

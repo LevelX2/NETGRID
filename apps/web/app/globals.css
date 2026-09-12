@@ -12554,6 +12554,36 @@ section[data-testid="legal-actions"].cueHighlight {
   max-width: 100%;
 }
 
+/* Flex lines use the compact hand width; only then does Grip take free space. */
+.runnerGripHeapLayout
+  > .runnerGripZone.runnerGripZoneExpanding:not(.sideZoneFrameCountOnly) {
+  flex: 1 1 auto;
+}
+
+.runnerGripHeapLayout .fixedZoneCards.handCardsRowExpanding {
+  --cards-overlap-offset: clamp(
+    min(
+      calc(var(--cards-min-width, 108px) * -0.42),
+      calc(
+        var(--hand-card-minimum-step) - var(--cards-min-width, 108px) -
+          var(--hand-card-gap)
+      )
+    ),
+    calc(
+      (
+          100% - var(--cards-min-width, 108px) * var(--hand-card-count) -
+            var(--hand-card-gap) * var(--hand-card-steps)
+        ) /
+        var(--hand-card-steps)
+    ),
+    0px
+  );
+  column-gap: var(--hand-card-gap);
+  width: var(--hand-card-preferred-width);
+  min-width: 100%;
+  max-width: 100%;
+}
+
 .runnerStackZone {
   order: 2;
   flex: 0 0 auto;

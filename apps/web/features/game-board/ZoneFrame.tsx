@@ -17,7 +17,9 @@ import { useTranslations } from "use-intl/react";
 
 import {
   HAND_CARD_MINIMUM_VISIBLE_STEP_PX,
+  HAND_CARD_ROW_GAP_PX,
   handCardRowLayout,
+  handCardRowPreferredWidth,
 } from "./hand-card-layout";
 
 const CARD_DISPLAY_BASE_MIN_WIDTH = 108;
@@ -172,6 +174,7 @@ export function HandCardsRow({
   style,
   count,
   maxRows = 1,
+  expandToAvailableWidth = false,
   minimumVisibleStep = HAND_CARD_MINIMUM_VISIBLE_STEP_PX,
   children,
 }: {
@@ -179,6 +182,7 @@ export function HandCardsRow({
   style?: CSSProperties;
   count: number;
   maxRows?: number;
+  expandToAvailableWidth?: boolean;
   minimumVisibleStep?: number;
   children: ReactNode;
 }) {
@@ -188,7 +192,7 @@ export function HandCardsRow({
 
   useEffect(() => {
     const row = rowRef.current;
-    if (!row || count <= 1) {
+    if (!row || count <= 1 || expandToAvailableWidth) {
       setOverlapOffset(null);
       setCardsPerRow(Math.max(1, count));
       return;
@@ -244,15 +248,25 @@ export function HandCardsRow({
       observer?.disconnect();
       window.removeEventListener("resize", syncOverlap);
     };
-  }, [count, maxRows, minimumVisibleStep, style]);
+  }, [count, maxRows, minimumVisibleStep, style, expandToAvailableWidth]);
 
   const rowStyle = useMemo(() => {
-    if (!overlapOffset) return style;
     return {
       ...style,
-      "--cards-overlap-offset": overlapOffset,
+      ...(overlapOffset && !expandToAvailableWidth
+        ? { "--cards-overlap-offset": overlapOffset }
+        : {}),
+      ...(expandToAvailableWidth
+        ? {
+            "--hand-card-preferred-width": `calc(var(--cards-min-width, ${CARD_DISPLAY_BASE_MIN_WIDTH}px) * ${handCardRowPreferredWidth({ cardWidth: 1, cardGap: 0, count })} + ${HAND_CARD_ROW_GAP_PX * Math.max(0, count - 1)}px)`,
+            "--hand-card-count": count,
+            "--hand-card-steps": Math.max(1, count - 1),
+            "--hand-card-gap": `${HAND_CARD_ROW_GAP_PX}px`,
+            "--hand-card-minimum-step": `${Math.max(1, minimumVisibleStep)}px`,
+          }
+        : {}),
     } as CSSProperties;
-  }, [overlapOffset, style]);
+  }, [overlapOffset, style, expandToAvailableWidth, count, minimumVisibleStep]);
   const cardChildren = Children.toArray(children);
   const wrapped = cardsPerRow < cardChildren.length;
   const rows = wrapped
@@ -266,7 +280,7 @@ export function HandCardsRow({
   return (
     <div
       ref={rowRef}
-      className={`cards fixedZoneCards handCardsRow ${wrapped ? "handCardsRowWrapped" : ""} ${className}`.trim()}
+      className={`cards fixedZoneCards handCardsRow ${expandToAvailableWidth ? "handCardsRowExpanding" : ""} ${wrapped ? "handCardsRowWrapped" : ""} ${className}`.trim()}
       style={rowStyle}
     >
       {wrapped
