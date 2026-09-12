@@ -11904,11 +11904,24 @@ describe("authoritative plan-first live runtime", () => {
           visibleCard("olivia-card", "corp", "upgrade", {
             definitionId: "onr_v1_363_olivia-salazar",
             title: "Olivia Salazar",
-            rezzed: true,
+            rezzed: false,
           }),
         ],
       ),
     ];
+
+    input.playerView.servers[0]!.ice[0]!.effectiveRezCostQuote = {
+      context: "installed",
+      cardId: "hq-ice",
+      targetServerId: "hq",
+      projectedServerId: "hq",
+      expiresAtStateVersion: input.playerView.stateVersion,
+      complete: true,
+      baseCredits: 1,
+      finalCredits: 1,
+      mandatoryAdditionalCosts: { agendaPoints: 0 },
+      costKind: "fixed",
+    };
 
     expect(liveContext().chooseSemanticRuntimeAction(input, {})).toMatchObject({
       actionId: "rez-olivia",
