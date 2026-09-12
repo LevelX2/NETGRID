@@ -322,6 +322,13 @@ Verantwortung:
 - Bezahlbarkeit des anschließenden Runpfads;
 - deckstrategischer Rig-first- oder Minimal-Rig-Modus.
 
+Die MU-Opferbewertung unterscheidet feste Breakerfunktionen anhand der
+kanonischen Break-Fähigkeiten. Das gemeinsame gedruckte Merkmal `icebreaker`
+macht eine Wall- und eine Code-Gate-Antwort nicht gegenseitig redundant.
+Diese Einordnung wirkt vor der Installationswahl und Opferbindung; ein bereits
+ausgewählter `PlanExecutionOrigin` wird im folgenden Choice-Fenster weiterhin
+unverändert ausgeführt.
+
 Mögliche Phasen:
 
 ```text
@@ -865,6 +872,10 @@ Die Restzugplanung erhält nur den liquiden Zahlungsanteil als Cash-Bedarf.
 Action-ID, Ziel, Kosten der Engine und Run-Owner bleiben unverändert. Nach
 der Aktion endet die Projektion an der Engine-Fortsetzungsgrenze, sodass
 ein verbrauchter Pool nicht erneut aus dem alten Zustand ausgegeben wird.
+Auch ein kostenloser Subtypewechsel im Encounter prüft seinen anschließenden
+Break gegen das aktuelle Runbudget einschließlich verfügbarer
+Bad-Publicity-Credits und passend gebundener Breaker-Pools. Nur Bargeld zu
+prüfen würde eine vom Run-Owner bereits finanzierte Route wieder sperren.
 
 Das Modul besitzt kein unabhängiges langfristiges Ziel. Es gehört logisch zum
 auslösenden Run-/Contest-Plan und kehrt anschließend dorthin zurück.
@@ -1080,6 +1091,12 @@ gemischter Break mit wirksamer ETR, positive oder unbekannte Schadensmengen
 und eigenständige Vollbruchwirkungen erhalten dieses Zertifikat nicht.
 Legalität, Quelle, Subroutinen und StateVersion bleiben unverändert gebunden;
 ein bestehendes Run-Commitment überstimmt die fehlende Wirkung nicht.
+Die allgemeine Safety-Einordnung berücksichtigt ebenfalls die aktuelle
+Engine-Schadensmenge: ausdrücklich null direkter Schaden ist keine
+unmittelbare Gefahr, auch bei Core-Schaden. Positive und unbekannte Mengen
+bleiben Gefahren; eigenständige Vollbruchpflichten und Breakerwirkungen
+bleiben beim bestehenden Encounter-Owner. Ein wirkungsloser Schadensbreak
+darf dadurch keinen bezahlbaren ETR-Break ausschließen.
 
 Die vorab gebundene Reserve für unbekanntes ICE gilt auch vor dessen
 Informationsgrenze: Bekannter Schaden darf den reservierten Handpuffer nicht

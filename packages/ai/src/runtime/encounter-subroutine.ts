@@ -11,6 +11,11 @@ export type VisibleEncounterSubroutine = NonNullable<
 export function isImmediateSafetyThreatSubroutine(
   subroutine: VisibleEncounterSubroutine,
 ): boolean {
+  // The current Engine quote can resolve a relative damage effect to zero.
+  // Its damage type and generic effect marker do not create actual harm.
+  // Independent full-break obligations are assessed by the run-window owner.
+  if (isDirectDamageSubroutine(subroutine) && subroutine.amount === 0)
+    return false;
   if (subroutine.type === "set_next_encounter_unless_fully_break_damage")
     return false;
   const type = subroutine.type.toLowerCase();

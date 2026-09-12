@@ -837,7 +837,7 @@ function runnerEncounterSubtypeChangeAssessment(
         ? { ...card, selectedSubtype }
         : card,
     ),
-    input.playerView.own.credits,
+    runnerRunWindowCreditBudget(input),
   );
   if (!path.canReachAccess || path.blocked) {
     return {
