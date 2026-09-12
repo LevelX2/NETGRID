@@ -99,10 +99,16 @@ it.each(["root", "version"])(
     const pending =
       afterPayment.residentPlanPortfolio!
         .pendingRunnerCostPenaltySupportOrigin!;
-    if (mismatch === "root")
-      pending.rootPlanInstanceId =
-        afterPayment.residentPlanPortfolio!.rootForegroundInstanceId!;
-    else pending.selectedAtStateVersion--;
+    afterPayment.residentPlanPortfolio!.pendingRunnerCostPenaltySupportOrigin =
+      {
+        ...pending,
+        ...(mismatch === "root"
+          ? {
+              rootPlanInstanceId:
+                afterPayment.residentPlanPortfolio!.rootForegroundInstanceId!,
+            }
+          : { selectedAtStateVersion: pending.selectedAtStateVersion - 1 }),
+      };
     restoreAiRuntimeCheckpoint(
       nextInputs[0]!,
       input.ownDeckSnapshot!.deckSnapshotId,
