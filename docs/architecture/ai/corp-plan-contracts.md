@@ -69,6 +69,14 @@ ein terminaler Abschluss erhält P1. Ohne aktuelle Quote, ausreichende Klicks
 oder exakte Basiscredit-Route entsteht dieser Nachweis nicht. Die Reserve für
 den nächsten Zug bleibt ein eigener, unveränderter Horizont.
 
+Die Klassifizierung eines normalen Advances prüft Konversionspfade mit
+denselben aktuellen Funding-Kandidaten wie die Score-Discovery. Ersetzt eine
+vollständig gequotete Konversion mit Economy-Präfix diesen Advance, bleibt
+er unter dem Score-Owner ausdrücklich bis zum gebundenen ersten Schritt
+zurückgestellt. Eine Prüfung ohne Funding-Eingaben darf die bereits
+nachgewiesene Linie nicht verlieren und dadurch eine ownerlose LegalAction
+erzeugen (Regression: Paarung 425, D196).
+
 Eine vollständig gequotete leere Kostenliste zertifiziert null Klicks und
 Credits. Ein nur mit Klickkosten ausgewiesener Advance kostet null Credits;
 beide Fälle bleiben reguläre Scorefortentwicklung. Ein Engine-Payload-Feld,

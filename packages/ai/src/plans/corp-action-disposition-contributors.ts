@@ -789,7 +789,10 @@ function contributeCorpActionDispositionForCandidate(
     return;
   }
   if (candidate.semanticActionType === "score.advance_card") {
-    const exactScorePath = corpSameTurnScoreConversionPaths(input).find(
+    const exactScorePath = corpSameTurnScoreConversionPaths(
+      input,
+      candidates,
+    ).find(
       (path) =>
         path.agendaCardId === candidate.sourceCardInstanceId &&
         path.sameTurnGuaranteed,
