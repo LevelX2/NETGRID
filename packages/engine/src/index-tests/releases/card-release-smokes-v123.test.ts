@@ -1869,6 +1869,49 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(nextTurn.randomDrawRecords.length).toBe(randomAfterFirstQuest);
   });
 
+  it.each([{ runLockActionsPending: 3 }, { runnerRunLockCreditCost: 2 }])(
+    "withholds Social Engineering while a run-start lock remains: %j",
+    (lock) => {
+      const state = toRunnerTurn(
+        createGameAfterSetup({
+          seed: "pairing-422-social-run-lock",
+          runnerDeck: MECHANIC_SMOKE_DECKS.runAccess.runner,
+          corpDeck: MECHANIC_SMOKE_DECKS.runAccess.corp,
+          agendaPointsToWin: 7,
+        }),
+      );
+      state.runner.credits = 12;
+      const eventId = moveRunnerCardToGrip(
+        state,
+        "onr_v1_111_social-engineering",
+      );
+      const unlockedAction = getLegalActions(state, "runner").find(
+        (action) =>
+          action.type === "play_event" && action.payload?.cardId === eventId,
+      )!;
+      expect(unlockedAction).toBeDefined();
+      expect(state.runnerTurnFlags).toBeDefined();
+      Object.assign(state.runnerTurnFlags!, lock);
+      expect(
+        getLegalActions(state, "runner").some(
+          (action) =>
+            action.type === "play_event" && action.payload?.cardId === eventId,
+        ),
+      ).toBe(false);
+      const result = applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: unlockedAction.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: "pairing-422-locked-social",
+      });
+      expect(result.ok).toBe(false);
+      expect(state.runner.grip).toContain(eventId);
+      expect(state.runner.credits).toBe(12);
+      expect(state.pendingChoice).toBeUndefined();
+    },
+  );
+
   it("resolves Social Engineering secret guess, rez window and one encounter auto-pass", () => {
     const socialRunnerDeck = MECHANIC_SMOKE_DECKS.runAccess.runner;
     const socialCorpDeck = {

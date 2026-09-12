@@ -1802,6 +1802,11 @@ Run-Event oder servergebundene Variante – müssen bereits bei ihrer
 Engine-Erzeugung dieselbe aktuelle `evaluateRunStartEligibility` bestehen.
 `applyAction` revalidiert weiterhin; die KI ergänzt keine zweite
 Zulässigkeitsautorität und fängt keine widersprüchliche LegalAction ab.
+Auch ein Event, das den Run erst nach einer geheimen Ausgabe-/Rate-Choice
+beginnt, deklariert im Engine-Resolver `startsRun: true`. So sperren offene
+Pflichtaktionen und Run-Lock-Zahlungen bereits das Ausspielen; die nachgelagerte
+Choice darf keinen zuvor unzulässigen Run eröffnen. Regression: Social
+Engineering nach Haunting Inquisition, Paarung 422 D356–D359.
 
 ### 24.2 Corp
 

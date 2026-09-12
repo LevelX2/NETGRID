@@ -160,6 +160,15 @@ Ein nach sichtbarem Zustand erzwungener Same-Turn-Score ist ein Commitment.
 Einzelne Economy- oder
 ICE-Aktionen dürfen ihn nicht aufbrechen.
 
+Vor einem nichtterminalen Same-Turn-Score berücksichtigt der Score-Owner bedingte
+Creditwirkungen aus dem kanonischen strukturierten Scoreprofil. Ist die Agenda
+bereits kostenlos scorebar und ihre Bonusschwelle mit den verbleibenden,
+exakt gequoteten Basiscredit-Aktionen erreichbar, bindet derselbe Parent
+zuerst Economy-Support bis zur Schwelle. Jeder Schritt wird neu geprüft;
+der Score folgt weiterhin im selben Corp-Zug. Terminale Scores und aktuell
+unerreichbare Schwellen warten nicht auf diesen Bonus. Die Umsetzung liegt
+in `score-conditional-credit-funding.ts`; es entsteht kein eigener Chooser.
+
 Beim Variantenvergleich zweier vollständig finanzierter, nichtterminaler
 Same-Turn-Scores derselben Agenda prüft der Score-Owner auch den Verlust eines
 installierten Wirtschaftsmittels. Stimmen Klicks, Credits, Fortschritt,

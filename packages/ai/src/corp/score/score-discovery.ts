@@ -15,6 +15,7 @@ import { visibleCardIsAgenda } from "../../runtime/visible-action-facts";
 import { corpExactCurrentBasicLiquidCreditCandidate } from "../economy/economy-domain-signals";
 import { corpCounterBankScoreProjects } from "./corp-counter-bank-score-plan";
 import { corpAssetPreservingSameTurnScoreRoutes } from "./score-asset-preservation";
+import { corpConditionalScoreCreditFunding } from "./score-conditional-credit-funding";
 import {
   corpRemoteHasEngineQuotedReusableScoreFriction,
   corpResidentScoreDefenseBinding,
@@ -138,9 +139,14 @@ export function reconcileCorpScoreProjects({
     candidates,
     discoveredScoreProjects,
   );
-  const proposedScoreProjects = discoveredScoreProjects.filter(
-    (project) => !assetPreservation.dominatedProjectIds.has(project.projectId),
-  );
+  const proposedScoreProjects = discoveredScoreProjects
+    .filter(
+      (project) =>
+        !assetPreservation.dominatedProjectIds.has(project.projectId),
+    )
+    .map((project) =>
+      corpConditionalScoreCreditFunding(input, candidates, project),
+    );
   const ownAgendas = input.playerView.own.gripOrHq.filter(
     (card) => card.known && visibleCardIsAgenda(input, card),
   ).length;

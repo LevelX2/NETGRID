@@ -1203,6 +1203,7 @@ export function createCardRuntimeResolvers(
     ) {
       return {
         name: "card_implementation_runner_event_secret_spend_guess_then_targeted_bypass_run",
+        startsRun: true,
         canPlay: (state) =>
           state.runner.credits >=
           Math.max(0, Math.floor(definition.cost ?? 0)) + 2,

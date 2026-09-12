@@ -3149,6 +3149,44 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       ...warState.cardInstances[warId]!,
       advancementCounters: 3,
     };
+    // Pairing 422 D222: a free nonterminal score can retain the whole
+    // current-turn reward by taking its one missing basic credit first.
+    const unfunded = structuredClone(warState);
+    unfunded.corp.credits = 11;
+    unfunded.corp.clicks = 1;
+    const scoreWar = (action: LegalAction) =>
+      action.type === "score_agenda" &&
+      sourceDefinition(unfunded, action) === "onr_v1_196_corporate-war";
+    expect(getLegalActions(unfunded, "corp").find(scoreWar)?.costs).toEqual([]);
+    let scoreFirst = apply(structuredClone(unfunded), "corp", scoreWar);
+    expect(scoreFirst.corp.credits).toBe(0);
+    scoreFirst = apply(
+      scoreFirst,
+      "corp",
+      (action) => action.type === "gain_credit",
+    );
+    let fundFirst = apply(
+      structuredClone(unfunded),
+      "corp",
+      (action) => action.type === "gain_credit",
+    );
+    expect(fundFirst.corp).toMatchObject({ credits: 12, clicks: 0 });
+    fundFirst = apply(fundFirst, "corp", scoreWar);
+    expect(getPlayerView(fundFirst, "corp").own).toMatchObject({
+      credits: 24,
+      clicks: 0,
+      agendaPoints: 3,
+    });
+    expect(getPlayerView(scoreFirst, "corp").own).toMatchObject({
+      credits: 1,
+      clicks: 0,
+      agendaPoints: 3,
+    });
+    expect(fundFirst.turnSerial).toBe(scoreFirst.turnSerial);
+    expect(
+      replayEvents(unfunded, fundFirst.eventLog.slice(unfunded.eventLog.length))
+        .ok,
+    ).toBe(true);
     const warInitial = structuredClone(warState);
     const warReplayStart = warState.eventLog.length;
     warState = apply(
