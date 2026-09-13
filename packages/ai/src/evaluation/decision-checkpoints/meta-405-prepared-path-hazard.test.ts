@@ -26,13 +26,25 @@ it("SP-296 retains affordable hazard avoidance instead of paying to lose it befo
   expect(remote.routeQuote?.preRunPreparation).toBeUndefined();
   expect(remote.visibleTraceTagHazardUnavoidable).toBe(false);
   const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("runner.start_run.remote_1");
-  expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-    leafExecutorInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-    route: {
-      actionId: decision.actionId,
-      stateVersion: input.playerView.stateVersion,
-    },
-  });
+  if (remote.prerunReserveQuote?.status === "blocked") {
+    expect(decision.actionId).toBe("runner.gain_credit");
+    expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
+      rootPlanInstanceId: "plan:runner.economy:runner-portfolio-credit-reserve",
+      leafExecutorInstanceId: "plan:runner.economy:runner-portfolio-credit-reserve",
+      route: {
+        actionId: decision.actionId,
+        stateVersion: input.playerView.stateVersion,
+      },
+    });
+  } else {
+    expect(decision.actionId).toBe("runner.start_run.remote_1");
+    expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
+      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      leafExecutorInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      route: {
+        actionId: decision.actionId,
+        stateVersion: input.playerView.stateVersion,
+      },
+    });
+  }
 });

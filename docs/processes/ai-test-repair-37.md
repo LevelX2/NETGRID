@@ -57,6 +57,18 @@ werden im Paketfortschritt ergänzt.
   `runner_known_remote_coverage_project:remote_1`. Aktionen, Fähigkeiten und
   Owner blieben unverändert. Der fokussierte Test ist mit 41/41 Tests grün.
 - Verbleibend: 30 bekannte fehlgeschlagene Assertions.
+- Paket 2 (Runner-Reserve, Choice-Bindungen und deterministische Simulation):
+  13 Assertions geschlossen. Die Ursachen waren fehlende bekannte
+  `installCost`-Fakten in einer Reserve-Fixture, eine korrekt geänderte
+  Reserve-/Routenentscheidung, unvollständige Encounter-Subroutine- und
+  Schadenssemantik, veraltete konkrete Card-/Action-Bindungen in zwei
+  Checkpoints, eine inzwischen strengere Credit-Reserve im Hazard-Test, drei
+  stale Plan-first-Erwartungen sowie ein zu breiter Replay-Filter. Beim
+  Replay-Fall bleibt die fachliche Regression erhalten, indem nur das
+  historische Mischfenster aus `Rigged Investments` und `Top Runners
+  Conference` verboten wird; eine gleichartige `Rigged Investments`-Ordnung
+  ist eine gültige Engine-Wahl. Alle fokussierten Einzeltests sind grün.
+- Verbleibend: 17 bekannte fehlgeschlagene Assertions.
 
 ## Paketfolge und Done-Gates
 

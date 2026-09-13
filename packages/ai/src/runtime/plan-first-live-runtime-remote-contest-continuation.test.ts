@@ -244,6 +244,7 @@ describe("plan-first Remote contest continuation", () => {
         payload: {
           encounterContinue: true,
           encounterWillEndRun: true,
+          encounterSubroutineIds: "terminal-information-end-run",
           unbrokenSubroutineCount: 1,
         },
       },
@@ -731,6 +732,8 @@ describe("plan-first Remote contest continuation", () => {
       {
         encounterContinue: true,
         encounterWillEndRun: false,
+        encounterSubroutineIds:
+          "neural-blade-net-damage,neural-blade-break-prohibition",
         unbrokenSubroutineCount: 2,
       },
     );
@@ -775,6 +778,7 @@ describe("plan-first Remote contest continuation", () => {
           {
             id: "neural-blade-net-damage",
             type: "do_damage",
+            amount: 1,
             sourceDefinitionId: "onr_v1_258_neural-blade",
             sourceTitle: "Neural Blade",
           },
@@ -1010,6 +1014,7 @@ describe("plan-first Remote contest continuation", () => {
         payload: {
           encounterContinue: true,
           encounterWillEndRun: true,
+          encounterSubroutineIds: "known-filter-end-the-run",
           unbrokenSubroutineCount: 1,
         },
       },

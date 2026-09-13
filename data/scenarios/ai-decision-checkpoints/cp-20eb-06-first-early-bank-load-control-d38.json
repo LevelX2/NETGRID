@@ -5565,6 +5565,10 @@
       {
         "type": "play_event",
         "sourceDefinitionId": "onr_v1_114_temple-microcode-outlet"
+      },
+      {
+        "type": "activated_card_ability",
+        "sourceDefinitionId": "onr_v1_177_the-short-circuit"
       }
     ],
     "planExecution": {

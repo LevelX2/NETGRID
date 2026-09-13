@@ -128,9 +128,9 @@ it("retains independent effects beside exact zero damage", () => {
 it.each([
   [
     tollCapture,
-    "runner.start_run.hq",
-    "plan:runner.pressure_central:central%3Ahq",
-    "pressure:hq",
+    "runner.gain_credit",
+    "plan:runner.economy:runner-portfolio-credit-reserve",
+    "fund:runner-portfolio-credit-reserve",
   ],
   [
     zeroCapture,
