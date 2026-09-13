@@ -183,6 +183,13 @@ export function buildRunnerRunWindowSignals({
           ...(accessWindowCommitment
             ? { accessCommitment: accessWindowCommitment }
             : {}),
+          ...(activeRunRoot?.postBreakTrashCommitment
+            ? {
+                postBreakTrashCommitment: structuredClone(
+                  activeRunRoot.postBreakTrashCommitment,
+                ),
+              }
+            : {}),
           ...(runRiskReassessment ? { runRiskReassessment } : {}),
           ...(safetyAssessment
             ? {

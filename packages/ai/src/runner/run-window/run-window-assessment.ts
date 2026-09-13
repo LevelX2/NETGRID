@@ -66,6 +66,7 @@ import {
   isRunnerRunWindowCandidate,
   runnerOptionalBonusRunDeclineAction,
   runnerPostPassDerezAndEndRunAction,
+  runnerPostPassTrashAction,
   runnerRestrictedRunSequenceAction,
   runnerRunPaymentSupportAction,
   runnerRunRemainderStrengthBoostAction,
@@ -584,6 +585,36 @@ function runnerRunWindowActionAssessment(
     action,
   );
   if (subtypeChangeAssessment) return subtypeChangeAssessment;
+  const postPassTrash = runnerPostPassTrashAction(input, candidate);
+  if (postPassTrash) {
+    const commitment = runOrigin?.postBreakTrashCommitment;
+    const run = input.playerView.run;
+    const target = input.playerView.servers
+      .find((s) => s.id === run.attackedServerId)
+      ?.ice.find(
+        (ice) => ice.instanceId === postPassTrash.payload?.targetIceId,
+      );
+    const bound =
+      !!commitment &&
+      commitment.serverId === run.attackedServerId &&
+      commitment.sourceCardInstanceId === postPassTrash.source &&
+      commitment.targetIceInstanceId === target?.instanceId &&
+      commitment.observedAtStateVersion <= input.playerView.stateVersion &&
+      legalActionCreditCost(postPassTrash) <= commitment.trashCredits &&
+      legalActionCreditCost(postPassTrash) <= input.playerView.own.credits &&
+      input.playerView.timingPoint === "run.jack_out_window" &&
+      run.phase === "movement" &&
+      target?.known === true &&
+      target.rezzed === true;
+    return {
+      admissible: bound,
+      evidenceCodes: [
+        bound
+          ? "runner_post_break_trash_bound_preparation_completion"
+          : "runner_post_break_trash_requires_current_target_and_funded_parent",
+      ],
+    };
+  }
   const successfulRunBeforeAccessEffect =
     runnerSuccessfulRunBeforeAccessEffectAction(input, candidate);
   if (successfulRunBeforeAccessEffect) {
@@ -1024,6 +1055,11 @@ export function runnerExactRunWindowPhaseActionIds(
       .map((candidate) => candidate.actionId);
   }
   if (run.phase === "movement" && run.position?.kind === "server") {
+    const preparedTrash = admissibleRunWindowCandidates.filter(
+      (candidate) => runnerPostPassTrashAction(input, candidate) !== undefined,
+    );
+    if (preparedTrash.length > 0)
+      return preparedTrash.map((candidate) => candidate.actionId);
     return admissibleRunWindowCandidates
       .filter(
         (candidate) =>

@@ -195,6 +195,17 @@ neue Remote von diesem Claim ausgeschlossen, damit sie deren gebundene
 Fortsetzung nicht unterbricht. Ein bloßer Installationsschritt ohne
 vollständigen Scorepfad begründet diesen Nachweis nicht.
 
+Die Notfallinstallation zusätzlicher HQ-Agenden bei nahendem Deckout setzt
+voraus, dass keine bereits installierte Gewinnagenda eine aktuell von der
+Engine bestätigte Fortsetzung bis zum nächsten Corp-Zug besitzt, deren
+Creditreserve jetzt vorhanden oder mit den verbleibenden legalen
+Basis-Creditaktionen erreichbar ist. In diesem Fall konkurriert die bestehende
+Score-Fortsetzung mit ihrer eigenen Economy-Unterstützung. Neue Installationen
+erhalten keine pauschale Notfallfreigabe für unfinanzierte weitere Scorepfade.
+Eine veraltete, unvollständige oder nicht finanzierbare Fortsetzung sperrt
+die Notfallentwicklung nicht; ein überlebender Remote wird dadurch nicht
+als garantiert behauptet.
+
 Nach der exakten Installation bleibt derselbe Nachweis erhalten, wenn die
 Agenda nun im gebundenen Zielserver liegt und weder eine weitere HQ-Agenda
 noch eine installierte Geschwisteragenda exponiert ist. Der Wechsel aus HQ

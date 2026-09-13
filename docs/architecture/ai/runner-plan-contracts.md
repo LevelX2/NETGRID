@@ -155,6 +155,42 @@ Runautorität.
 
 ### Vertikale Implementierung des Zentraldrucks
 
+Die Informationsroute bewertet ein öffentlich beobachtetes kostenloses
+Run-Ende im laufenden Zug: Folgt auf den Basisrun ausschließlich kostenloses
+ICE-Rezzen und ein von der Engine bestätigtes End-the-Run-Fenster ohne
+Zugriff, rechtfertigt unveränderter Aufbau keine erneute identische Probe.
+`central-probe-outcome.ts` bindet diese Admission-Evidence an Zielserver,
+Zug und Endereignis. Aktuell garantierter Zugriff, Kartenruns und geänderte
+Board-/Effektzustände bleiben eigenständig bewertete Routen. Ein neuer Zug
+öffnet eine neue Beobachtung; Kartenidentitäten oder verborgene ICE-Quotes
+werden aus der Historie nicht rekonstruiert. Das Eingabe-DTO bewahrt dafür
+die öffentlichen Engine-Felder `result`, `encounterContinue` und
+`encounterWillEndRun`. Fehlende Outcome-Facts beweisen kein Run-Ende.
+
+Post-Break-ICE-Trash wird als Vorbereitung einer bereits zugelassenen
+Central-Instanz behandelt. `post-break-trash-preparation.ts` vergleicht die
+verbleibenden Zugriffe im aktuellen Zug mit Installation und exakt reservierten
+Trash-Credits. Die erste Route setzt ein einzelnes bekanntes, gerezztes ICE mit
+vollständig brechbaren End-the-Run-Subroutinen voraus. Verdeckte, bedingte oder
+nur teilweise mitigierte Pfade begründen diese Vorbereitung nicht. Quelle,
+ICE-Ziel, Server, Kosten und Beobachtungs-StateVersion bleiben am Parent
+gebunden; Installation und Run werden nach jeder Engine-Änderung neu bewertet.
+Priorität und Grenzwert des bestehenden Central-Owners bleiben erhalten.
+Nach der Installation übersteht die gebundene Entfernung auch eine notwendige
+Unterbrechung durch Handbuffer- oder Sicherheitsaktionen. Der Central-Owner
+prüft die weiterhin installierte Quelle, dasselbe ICE-Ziel sowie den aktuell
+vollständig finanzierten Pfad erneut; er verlangt keine zweite Amortisierung
+der bereits ausgeführten Installation. Eine vorübergehend blockierte
+Runroute behält ihr Ziel, erhält dadurch aber weder höhere Priorität noch
+eine Ausführungsfreigabe. Fehlende Quelle, geändertes Ziel oder fehlendes
+Budget verwerfen die Bindung.
+
+`runner.convert_run_window` übernimmt diese Bindung. Im echten Post-Pass-Fenster
+verifiziert er die kanonische CardSpec-Fähigkeit, das aktuelle gerezzte Ziel und
+die tatsächlich angebotenen Kosten gegen den reservierten Betrag. Erst dann
+vollendet der Step die vorbereitete Entfernung vor dem weiteren Zugriff.
+Aus der Vorabquote werden keine zukünftigen LegalActions erzeugt.
+
 `packages/ai/src/runner/central-pressure/` bündelt den Owner:
 
 - `central-pressure-signals.ts`: Ziel- und Routenvergleich, Zugriffskadenz,

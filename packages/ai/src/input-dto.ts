@@ -181,6 +181,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "corpRezCostSurchargeSourceDefinitionId",
   "rootRezCreditOutcomeQuoteSchemaVersion",
   "rootRezIceInstallCostQuoteJson",
+  "runnerPostBreakTrashQuoteJson",
   "rootRezCreditOutcomeQuoteComplete",
   "rootRezCreditOutcomeQuoteSourceCardInstanceId",
   "rootRezCreditOutcomeQuoteTargetServerId",
@@ -381,6 +382,9 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
 ]);
 
 const PUBLIC_PAYLOAD_PRIMITIVE_KEYS = new Set<string>([
+  "result",
+  "encounterContinue",
+  "encounterWillEndRun",
   "actor",
   "side",
   "actionType",

@@ -15,6 +15,16 @@ passenden Familie definiert.
 
 ## Familien
 
+Die normale Runner-Run-Aktion kann eine akteursprivate
+`runnerPostBreakTrashQuoteJson` tragen. Der Producer
+`game/turn/runner-post-break-trash-quote.ts` bindet eigene Hand-/Rig-Quellen und
+aktuell gerezzte ICE-Ziele an Aktion, Server und StateVersion. Die Kosten kommen
+aus demselben `rezCostForCard` wie das spätere Post-Pass-Fenster; unbekannte
+ICE-Identitäten und gegnerische Handkarten werden nicht projiziert. Diese Quote
+garantiert keine zukünftige Legalität. Die später tatsächlich angebotene
+Post-Pass-Trash-Aktion trägt ihre kanonische Capability-ID und `abilityRef`;
+`applyAction` validiert und bezahlt die aktuelle Engine-Aktion erneut.
+
 | Modul                              | Verantwortung                                                                                    |
 | ---------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `definition-core-contracts.ts`     | gemeinsam verwendete Blattverträge für Bedingungen, Kosten, Limits, Access-Zonen und Subroutinen |
