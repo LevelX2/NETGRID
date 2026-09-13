@@ -2644,6 +2644,22 @@ export type CorpRootRezCreditOutcomeQuote = {
 export const RUNNER_DRAW_PROJECTION_SCHEMA_VERSION =
   "runner-draw-projection-v1" as const;
 
+/** Actor-private cost projection, conditional on a free modifier-only root rez.
+ * The subsequent installation must be rediscovered and revalidated after rez.
+ */
+export type CorpRootRezIceInstallCostQuote = {
+  schemaVersion: "corp-root-rez-ice-install-cost-quote-v1";
+  actionId: string;
+  sourceCardInstanceId: CardInstanceId;
+  targetServerId: Exclude<ServerId, "new_remote">;
+  stateVersion: number;
+  installs: Array<{
+    cardInstanceId: CardInstanceId;
+    beforeCredits: number;
+    afterCredits: number;
+  }>;
+};
+
 export const CORP_ZONE_TRANSITION_PROJECTION_SCHEMA_VERSION =
   "corp-zone-transition-projection-v1" as const;
 

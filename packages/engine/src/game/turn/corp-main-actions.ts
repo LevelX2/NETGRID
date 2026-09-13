@@ -31,6 +31,7 @@ import {
   quoteHqShuffleRedrawZoneTransition,
 } from "../hidden-zone/corp-zone-transition-projection";
 import { quoteCorpScoreRecovery } from "../hidden-zone/corp-score-recovery-quote";
+import { quoteCorpRootRezIceInstallCosts } from "../payment/root-rez-ice-install-cost-quote";
 
 type HostFn<T = unknown> = (...args: any[]) => T;
 
@@ -273,6 +274,13 @@ export function buildCorpMainActions(
       rezAction.payload = {
         ...(rezAction.payload ?? {}),
         ...corpRootRezCreditOutcomeQuotePayload(creditOutcomeQuote),
+      };
+    }
+    const installCostQuote = quoteCorpRootRezIceInstallCosts(state, rezAction);
+    if (installCostQuote) {
+      rezAction.payload = {
+        ...rezAction.payload,
+        rootRezIceInstallCostQuoteJson: JSON.stringify(installCostQuote),
       };
     }
     return rezAction;

@@ -464,6 +464,7 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
           encounterContinue: true,
           encounterWillEndRun: false,
           unbrokenSubroutineCount: 1,
+          encounterSubroutineIds: "outer-canis-major-future-strength",
           sourceDefinitionId: "onr_v1_225_canis-major",
         },
       },

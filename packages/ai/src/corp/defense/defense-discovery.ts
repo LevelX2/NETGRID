@@ -46,6 +46,7 @@ import {
 import { corpRemoteHasBoundedStagedIce } from "./corp-defense-layer-certification";
 import { assessCorpExactIceRezAgainstScoreReserves } from "./corp-defense-score-reserve";
 import { corpRestrictedRezDefenseSignals } from "./corp-restricted-rez-defense";
+import { corpIceInstallCostSupportSignals } from "./corp-ice-install-cost-support";
 import {
   corpScoreProtectionHasMaterialImmediateLiquidityAlternative,
   corpScoreProtectionInstallRouteScan,
@@ -723,6 +724,9 @@ export function buildCorpDefenseNeeds({
           }
         : signal,
     );
+  defenseNeeds.push(
+    ...corpIceInstallCostSupportSignals(input, candidates, defenseNeeds),
+  );
   return { defenseNeeds };
 }
 

@@ -48,6 +48,7 @@ import {
 import { corpScorePriorityClass } from "../score/corp-score-priority";
 import type { CorpCentralDefenseAllocation } from "./corp-central-defense-allocation";
 import { assessFundingOnlyIceStaging } from "./corp-defense-staging-policy";
+import { prepareSelectedCorpIceInstallation } from "./corp-ice-install-cost-support";
 import {
   canonicalSubtypeArray,
   canonicalSubtypeCsv,
@@ -1200,9 +1201,19 @@ function selectedDefensePortfolioBand(
       signal.phase === "install_ice" &&
       signal.installRoute?.progressKind === "scoreline_central_tax_allocation",
   );
+  const scorelineCentralTaxSignalsWithSupport = [
+    ...scorelineCentralTaxSignals,
+    ...genericSignals.filter(
+      (signal) =>
+        signal.iceInstallCostSupportActionId !== undefined &&
+        scorelineCentralTaxSignals.some((install) =>
+          install.actionIds?.includes(signal.iceInstallCostSupportActionId!),
+        ),
+    ),
+  ];
   const scorelineCentralTaxCandidates = genericDefensePortfolioCandidates(
     context,
-    scorelineCentralTaxSignals,
+    scorelineCentralTaxSignalsWithSupport,
     centralAllocation,
   );
   if (
@@ -1211,7 +1222,7 @@ function selectedDefensePortfolioBand(
   ) {
     return {
       kind: "generic",
-      eligibleSignals: scorelineCentralTaxSignals,
+      eligibleSignals: scorelineCentralTaxSignalsWithSupport,
       priorityClass: "P3",
       candidates: scorelineCentralTaxCandidates,
     };
@@ -1285,7 +1296,12 @@ function selectedGenericDefensePortfolioBand(
 }> {
   const windowEligibleSignals = allocatedCentralPlacementSignals(
     context,
-    urgentDefenseBand(context, signals),
+    urgentDefenseBand(
+      context,
+      signals.filter(
+        (signal) => signal.iceInstallCostSupportActionId === undefined,
+      ),
+    ),
     centralAllocation,
   );
   const priorityClasses = ["P2", "P3", "P5", "P6"] as const;
@@ -1294,9 +1310,19 @@ function selectedGenericDefensePortfolioBand(
       (signal) => corpGenericDefensePriorityClass([signal]) === priorityClass,
     );
     if (prioritySignals.length === 0) continue;
+    const prioritySignalsWithSupport = [
+      ...prioritySignals,
+      ...signals.filter(
+        (signal) =>
+          signal.iceInstallCostSupportActionId !== undefined &&
+          prioritySignals.some((install) =>
+            install.actionIds?.includes(signal.iceInstallCostSupportActionId!),
+          ),
+      ),
+    ];
     const candidates = genericDefensePortfolioCandidates(
       context,
-      prioritySignals,
+      prioritySignalsWithSupport,
       centralAllocation,
     );
     const supportable = genericDefenseBandHasExactFundingSupport(
@@ -1305,7 +1331,7 @@ function selectedGenericDefensePortfolioBand(
     );
     if (candidates.length > 0 || supportable) {
       return {
-        eligibleSignals: prioritySignals,
+        eligibleSignals: prioritySignalsWithSupport,
         priorityClass,
         candidates,
         supportable,
@@ -1363,6 +1389,21 @@ function genericDefenseBandHasExactFundingSupport(
 }
 
 function genericDefensePortfolioCandidates(
+  context: PlanSchedulerContext,
+  eligibleSignals: readonly CorpGenericDefenseSignal[],
+  centralAllocation?: CorpCentralDefenseAllocation,
+): PlanMaterialization["candidates"] {
+  const selected = genericDefensePortfolioWithoutInstallPreparation(
+    context,
+    eligibleSignals.filter(
+      (signal) => signal.iceInstallCostSupportActionId === undefined,
+    ),
+    centralAllocation,
+  );
+  return prepareSelectedCorpIceInstallation(context, selected, eligibleSignals);
+}
+
+function genericDefensePortfolioWithoutInstallPreparation(
   context: PlanSchedulerContext,
   eligibleSignals: readonly CorpGenericDefenseSignal[],
   centralAllocation?: CorpCentralDefenseAllocation,

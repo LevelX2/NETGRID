@@ -787,6 +787,7 @@ export const GENERIC_DEFENSE_SIGNAL_KEYS = new Set([
   "urgent",
   "centralPressure",
   "immediateInstallSupport",
+  "iceInstallCostSupportActionId",
   "rezWindowVerdict",
   "installRoute",
   "rezReserveNeed",
@@ -923,6 +924,11 @@ export function isValidDefenseSignal(
     return (
       hasOnlyKeys(value, GENERIC_DEFENSE_SIGNAL_KEYS) &&
       genericDefensePhase(value.phase) &&
+      (value.iceInstallCostSupportActionId === undefined ||
+        (value.phase === "rez_response" &&
+          value.immediateInstallSupport === true &&
+          nonEmptyString(value.iceInstallCostSupportActionId) &&
+          nonEmptyString(value.followupIceInstanceId))) &&
       (value.restrictedRezFunding === undefined ||
         (value.phase === "rez_response" &&
           value.rezWindowVerdict === "productive" &&

@@ -530,6 +530,18 @@ Funding-Vertragstypen bleiben unter `plans/`, reine Engine-Quote-/Pfadprojektion
 bleiben wiederverwendbare Dienste. Die 25 registrierten Module, Prioritäten und
 Entscheidungsregeln bleiben unverändert.
 
+Vor einer ausgewählten ICE-Installation kann Defense eine kostenlose Root-Rez
+als exakt gebundene Kostenvorbereitung ausführen. Die Engine veröffentlicht
+dafür `CorpRootRezIceInstallCostQuote` nur für reine, öffentliche
+Installationskostenmodifikatoren ohne weitere Lifecycle-Funktion. Die Quote
+vergleicht aktuelle und nach Rez geltende Kosten derselben HQ-Karte im selben
+Fort; sie bleibt Corp-privat und bindet Quelle, Rez-Action und StateVersion.
+`corp-ice-install-cost-support.ts` ergänzt nur den bereits ausgewählten
+Installationspfad. Serverallokation, Plan, Schritt und Prioritätsklasse bleiben
+führend; ein Rabatt für eine andere Installation begründet keinen Wechsel.
+Nach der Rez werden Installation und Kosten regulär neu ermittelt. Fehlende,
+veraltete oder widersprüchliche Quotes erlauben keine Kostenvorbereitung.
+
 Aktuelle Passgebühren gehören als Rez-Response diesem Owner. Die Engine
 bindet den Root-Rez an Action, StateVersion, Run und Server und liefert die
 verbleibenden ICE-Passagen sowie tatsächlich verfügbare Runner-Run-Credits.
