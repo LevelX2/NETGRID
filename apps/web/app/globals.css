@@ -15136,10 +15136,11 @@ select,
 }
 
 .runTimelineHead {
-  display: flex;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) 15px;
   align-items: center;
   justify-content: center;
-  gap: 1ch;
+  gap: 1px 1ch;
   font-weight: 800;
 }
 
@@ -15153,22 +15154,35 @@ select,
   cursor: grabbing;
 }
 
-.runTimelineDragHandle > span {
+.runTimelineDragHandle > strong {
   text-align: center;
 }
 
 .runTimelineTitle {
-  display: grid;
-  justify-items: center;
-  gap: 1px;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
   min-width: 0;
-}
-
-.runTimelineTitle strong {
   line-height: 1.1;
 }
 
 .runTimelineTitle small {
+  flex-shrink: 0;
+  white-space: pre;
+  font-size: 12px;
+}
+
+.runTimelineTitle > span,
+.runTimelineDetail {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.runTimelineDetail {
+  grid-column: 1 / -1;
+  text-align: center;
   color: var(--muted);
   font-size: 12px;
   font-weight: 700;
