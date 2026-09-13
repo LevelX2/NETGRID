@@ -500,6 +500,72 @@ function semanticTraceChoicePresentation(
   };
 }
 
+function semanticSocialEngineeringChoicePresentation(
+  payload: Record<string, unknown>,
+  subject: string,
+  server: string,
+  translate: ChronicleTranslate,
+): Pick<
+  ChronicleItem,
+  "title" | "description" | "chips" | "category" | "visibility"
+> {
+  const card = "Social Engineering";
+  const base = {
+    chips: [card],
+    category: "card" as const,
+    visibility: "public" as const,
+  };
+  if (payloadBooleanValue(payload, "autoPassChosenIce") === true) {
+    const position = payloadNumberValue(payload, "chosenIcePosition");
+    if (position !== undefined && Number.isInteger(position) && position >= 0) {
+      return {
+        ...base,
+        category: "run",
+        title: translate("socialEngineering.targetChosen", {
+          subject,
+          server,
+          number: position + 1,
+        }),
+        description: translate("socialEngineering.rezOpportunity"),
+      };
+    }
+    return { ...base, title: translate("socialEngineering.resultMissing") };
+  }
+  const correct = payloadBooleanValue(
+    payload,
+    "secretSpendGuessRunGuessCorrect",
+  );
+  if (correct !== undefined) {
+    const hidden = payloadNumberValue(payload, "secretHiddenAmountRevealed");
+    const guess = payloadNumberValue(payload, "secretGuessAmount");
+    if (hidden === undefined || guess === undefined) {
+      return { ...base, title: translate("socialEngineering.resultMissing") };
+    }
+    const outcome = translate(
+      correct ? "socialEngineering.correct" : "socialEngineering.incorrect",
+    );
+    return {
+      ...base,
+      title: translate("socialEngineering.result", { hidden, guess, outcome }),
+      description: correct
+        ? translate("socialEngineering.creditsLost", { amount: hidden })
+        : translate(
+            payloadBooleanValue(payload, "secretSpendGuessRunNoIceTarget") ===
+              true
+              ? "socialEngineering.noIceTarget"
+              : "socialEngineering.chooseTarget",
+          ),
+      chips: [card, outcome],
+    };
+  }
+  return {
+    ...base,
+    visibility: "redacted",
+    title: translate("socialEngineering.hiddenChoice", { subject }),
+    description: translate("socialEngineering.hiddenUntilGuess"),
+  };
+}
+
 function formatSemanticChronicleEvent(
   event: PublicGameEvent,
   side: Side,
@@ -510,6 +576,9 @@ function formatSemanticChronicleEvent(
   const actionType = stringValue(payload.actionType) ?? event.type;
   const abilityId = payloadAbilityId(payload);
   const actor = sideValue(payload.actor);
+  const socialEngineeringChoice =
+    actionType === "resolve_choice" &&
+    stringValue(payload.sourceDefinitionId) === SOCIAL_ENGINEERING_ID;
   const publicStackToGripReveal =
     actionType === "resolve_choice" &&
     stringValue(payload.hiddenZoneAction) === "p3_37_search_stack_to_grip" &&
@@ -546,6 +615,7 @@ function formatSemanticChronicleEvent(
     stringValue(payload.sourceDefinitionId) ??
     stringValue(payload.targetCardDefinitionId);
   const cardTitle =
+    (socialEngineeringChoice ? "Social Engineering" : undefined) ??
     context.cardTitle ??
     publicCardTitle(cardDefinitionId, context.cardPresentationsById) ??
     stringValue(payload.title) ??
@@ -583,7 +653,20 @@ function formatSemanticChronicleEvent(
         total: Math.max(accessNumber, accessTotal),
       })}: `
     : "";
-  if (temporaryEncounterChosen || temporaryEncounterDeclined) {
+  const socialEngineeringPresentation = socialEngineeringChoice
+    ? semanticSocialEngineeringChoicePresentation(
+        payload,
+        subject,
+        server,
+        translate,
+      )
+    : undefined;
+  if (socialEngineeringPresentation) {
+    explicitTitle = socialEngineeringPresentation.title;
+    description = socialEngineeringPresentation.description;
+    detailChips = socialEngineeringPresentation.chips;
+    category = socialEngineeringPresentation.category;
+  } else if (temporaryEncounterChosen || temporaryEncounterDeclined) {
     const source =
       publicCardTitle(
         stringValue(payload.sourceDefinitionId),
@@ -878,6 +961,7 @@ function formatSemanticChronicleEvent(
     actionType === "resolve_choice" && payload.setupStep === "mulligan"
       ? "system"
       : publiclyIdentifiedAccessResult ||
+          socialEngineeringPresentation?.visibility === "public" ||
           publiclyRevealedTraceResult ||
           publicStackToGripReveal ||
           temporaryEncounterChosen ||
