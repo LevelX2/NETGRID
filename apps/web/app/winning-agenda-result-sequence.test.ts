@@ -1,7 +1,7 @@
 import type { PublicGameEvent } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { retainedAccessRevealEvent } from "./action-board-ui";
-import { latestStolenAgendaAccessEvent } from "./access-presentation";
+import { latestStolenAgendaEvent } from "./access-presentation";
 import { matchOverlayPresentation } from "./match-overlay-presentation";
 import { accessRevealFromLatestEvent } from "../features/actions/access-review-derivation";
 
@@ -31,6 +31,9 @@ describe("winning agenda access result sequence", () => {
       {
         actor: "runner",
         cardDefinitionId: "onr_v1_199_employee-empowerment",
+        title: "Employee Empowerment",
+        serverId: "rd",
+        accessOrigin: "rd",
       },
       2,
     );
@@ -52,19 +55,17 @@ describe("winning agenda access result sequence", () => {
     };
 
     expect(retained?.eventId).toBe("evt_access");
-    expect(latestStolenAgendaAccessEvent(events, [])?.eventId).toBe(
-      "evt_access",
-    );
+    expect(latestStolenAgendaEvent(events, [])?.eventId).toBe("evt_steal");
     for (const side of ["runner", "corp"] as const) {
       const reveal = accessRevealFromLatestEvent(
-        retained ?? undefined,
+        latestStolenAgendaEvent(events, []) ?? undefined,
         details,
         [],
         side,
         events,
       );
       expect(reveal).toMatchObject({
-        eventId: "evt_access",
+        eventId: "evt_steal",
         outcomeKind: "stolen",
         dismissLabel: "Agenda bestätigen",
         actions: [],
@@ -93,7 +94,10 @@ describe("winning agenda access result sequence", () => {
     }
 
     expect(retainedAccessRevealEvent(events, "evt_access")).toBeNull();
-    expect(latestStolenAgendaAccessEvent(events, ["evt_access"])).toBeNull();
+    expect(latestStolenAgendaEvent(events, ["evt_access"])?.eventId).toBe(
+      "evt_steal",
+    );
+    expect(latestStolenAgendaEvent(events, ["evt_steal"])).toBeNull();
     expect(
       matchOverlayPresentation({
         accessRevealAvailable: false,
@@ -111,6 +115,94 @@ describe("winning agenda access result sequence", () => {
       showAccessReveal: false,
       showResultModal: true,
     });
+  });
+
+  it("shows the publicly stolen winning agenda after a redacted third R&D access for the Corp", () => {
+    const hiddenAccess = event(
+      "evt_access_3",
+      "access_card",
+      {
+        actor: "runner",
+        serverId: "rd",
+        serverLabel: "R&D",
+        accessOrigin: "rd",
+        breachId: "breach_final",
+        accessIndex: 2,
+        effectiveAccessCount: 3,
+        redactedKind: "accessed_card",
+      },
+      325,
+    );
+    const steal = event(
+      "evt_final_steal",
+      "steal_agenda",
+      {
+        actor: "runner",
+        serverId: "rd",
+        accessOrigin: "rd",
+        accessIndex: 2,
+        breachId: "breach_final",
+        cardDefinitionId: "main_office_relocation",
+        title: "Main-Office Relocation",
+      },
+      326,
+    );
+    const earlierSteal = event("evt_earlier_steal", "steal_agenda", {
+      actor: "runner",
+      title: "Earlier agenda",
+      cardDefinitionId: "earlier",
+      serverId: "hq",
+    });
+    const events = [earlierSteal, hiddenAccess, steal];
+    const before = structuredClone(events);
+    expect(
+      accessRevealFromLatestEvent(hiddenAccess, {}, [], "corp", events),
+    ).toBeNull();
+    const revealEvent = latestStolenAgendaEvent(events, ["evt_access_3"]);
+    const reveal = accessRevealFromLatestEvent(
+      revealEvent ?? undefined,
+      {},
+      [],
+      "corp",
+      events,
+    );
+    expect(reveal).toMatchObject({
+      eventId: "evt_final_steal",
+      kind: "access",
+      serverLabel: "R&D",
+      outcomeKind: "stolen",
+      card: {
+        definitionId: "main_office_relocation",
+        title: "Main-Office Relocation",
+      },
+      actions: [],
+      dismissLabel: "Agenda bestätigen",
+      hasMoreAccesses: false,
+    });
+    const presentation = (confirmed: boolean) =>
+      matchOverlayPresentation({
+        accessRevealAvailable: Boolean(reveal),
+        accessRevealDismissed: confirmed,
+        accessRevealKind: reveal?.kind ?? null,
+        accessOutcomeKind: reveal?.outcomeKind ?? null,
+        matchEnded: true,
+        damagePresentationPending: false,
+        resultAvailable: true,
+        resultDismissed: false,
+        runnerWonByAgendaPoints: true,
+        terminalAccessFlatline: false,
+      });
+    expect(presentation(false)).toMatchObject({
+      showAccessReveal: true,
+      showResultModal: false,
+    });
+    expect(presentation(true)).toMatchObject({
+      showAccessReveal: false,
+      showResultModal: true,
+    });
+    expect(latestStolenAgendaEvent(events, ["evt_final_steal"])).toBeNull();
+    expect(events).toEqual(before);
+    expect(hiddenAccess.publicPayload).not.toHaveProperty("cardDefinitionId");
   });
 });
 

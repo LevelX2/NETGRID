@@ -99,7 +99,7 @@ import {
   accessPresentationOwnsActionCue,
   coalesceAccessActionCues,
   interactionPresentationBlocksAi,
-  latestStolenAgendaAccessEvent,
+  latestStolenAgendaEvent,
   observerAccessAutoDismissMs,
 } from "./access-presentation";
 import {
@@ -2878,15 +2878,20 @@ export default function Page() {
     resultSummary?.winner === "runner" &&
     resultSummary.reason === "agenda_points",
   );
-  const concludingAgendaAccessEvent =
+  const concludingAgendaStealEvent =
     matchEnded && runnerWonByAgendaPoints && payload
-      ? latestStolenAgendaAccessEvent(
-          payload.eventTail,
-          dismissedAccessEventIds,
-        )
+      ? latestStolenAgendaEvent(payload.eventTail, dismissedAccessEventIds)
       : null;
+  const concludingAgendaReveal = payload
+    ? accessRevealFromLatestEvent(
+        concludingAgendaStealEvent ?? undefined,
+        catalogDetailsById,
+        [],
+        payload.side,
+        payload.eventTail,
+      )
+    : null;
   const queuedAccessRevealEvent =
-    concludingAgendaAccessEvent ??
     (pendingAccessContinuationRef.current &&
     latestAccessRevealEvent?.eventId !==
       pendingAccessContinuationRef.current.accessEventId
@@ -2971,12 +2976,14 @@ export default function Page() {
       )
     : null;
   const accessReveal =
-    gypsyReveal ??
-    hqAgendaReveal ??
-    archivesReveal ??
-    securityPurgeReveal ??
-    currentAccessReveal ??
-    retainedEventAccessReveal;
+    matchEnded && runnerWonByAgendaPoints
+      ? concludingAgendaReveal
+      : (gypsyReveal ??
+        hqAgendaReveal ??
+        archivesReveal ??
+        securityPurgeReveal ??
+        currentAccessReveal ??
+        retainedEventAccessReveal);
   const overlayPresentation = matchOverlayPresentation({
     accessRevealAvailable: Boolean(accessReveal),
     accessRevealDismissed: Boolean(

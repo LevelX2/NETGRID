@@ -286,6 +286,19 @@ Folge-Encounters. Der allgemeine Grund `harmful_unbroken_run_effect` genügt
 nicht: Eine Break-/Jack-out-Sperre ist kein bloßer Handpufferverstoß, und eine
 frühe Schadensquelle darf eine spätere ETR- oder Zahlungssperre nicht verdecken.
 
+Bestätigt dieselbe kumulative Schadensprüfung dagegen, dass der gesamte
+bekannte Schaden innerhalb des aktuellen Handpuffers liegt, führt die gemeinsame
+Runbewertung diesen Nachweis mit der vollständigen Pfadquote zusammen. Eine
+ausschließlich zur Schadensvermeidung verlangte, unbezahlbare Brechung ist dann
+keine Zugriffssperre. Unabhängige ETR-, Kosten- und unbekannte Folgerisiken bleiben
+erhalten; der vorhandene Run-Owner entscheidet über die resultierende Route.
+
+Interne Vergleichsrechnungen für einen Quell-Break dürfen die rekursive Suche
+nach optionalen Folgeeffekt-Breaks begrenzen. Direkt gequotete, notwendige
+Subroutine-Breaks an der Folgeschicht bleiben dabei zulässig. Andernfalls würde
+eine vorhandene Breaker-Abdeckung allein durch die Vergleichsmethode verloren
+gehen und ein Finanzierungs- oder Zugriffsplan zur unnötigen Breakersuche werden.
+
 Ein Remote mit genau einem bekannten, gerezzten Damage-Ambush konsumiert
 bereits vor dem Runstart dieselbe quellgebundene Abbruchbewertung wie das
 Run-Window. Der Remote-Owner sperrt dafür seine Run- und Vorbereitungsvarianten

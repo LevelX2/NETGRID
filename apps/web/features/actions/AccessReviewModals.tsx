@@ -356,7 +356,9 @@ export function AccessRevealModal({
                     >
                       <Check size={15} />
                       <span className="accessRevealActionLabel">
-                        {reveal.dismissLabel ?? "OK"}
+                        {reveal.outcomeKind === "stolen"
+                          ? t("confirmAgenda")
+                          : (reveal.dismissLabel ?? "OK")}
                       </span>
                     </button>
                   ) : null}
