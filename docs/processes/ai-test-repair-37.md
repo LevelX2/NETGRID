@@ -69,6 +69,14 @@ werden im Paketfortschritt ergänzt.
   Conference` verboten wird; eine gleichartige `Rigged Investments`-Ordnung
   ist eine gültige Engine-Wahl. Alle fokussierten Einzeltests sind grün.
 - Verbleibend: 17 bekannte fehlgeschlagene Assertions.
+- Paket 3 (Corp-Economy-Evidence): 1 Assertion geschlossen. Die
+  BBS-Fixture band den Economy-Owner zusätzlich an einen einzelnen
+  Remote-/Schutzstatus, obwohl zwei aktuelle BBS-Rez-Kandidaten denselben
+  gültigen Economy-Vertrag erfüllen. Der Checkpoint unterstützt dafür jetzt
+  eine explizite OR-Menge zulässiger Assessment-Evidence; Aktion, Owner und
+  Capability bleiben weiterhin fest gebunden. Der fokussierte e6aca-Test ist
+  grün.
+- Verbleibend: 16 bekannte fehlgeschlagene Assertions.
 
 ## Paketfolge und Done-Gates
 
