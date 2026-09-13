@@ -1547,6 +1547,7 @@ function quoteRunnerPrerunReserve(params: {
     riskCreditBuffer: params.unrezzedIceRiskCreditBuffer,
     runnerGripCount: params.input.playerView.own.gripOrHq.length,
     informationProbeAllowed,
+    runnerRig: params.input.playerView.own.rig,
   });
 }
 

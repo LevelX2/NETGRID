@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { assessShellTradersAccess } from "../../runner/shell-traders/shell-traders-access";
+import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import {
@@ -43,6 +44,42 @@ function replay(unchecked: unknown) {
 }
 
 describe("e553 human-pattern historical evidence", () => {
+  it("revalues D96 against current Corp liquidity and the installed program investment", () => {
+    const { input, decision } = replay(unknownIceJson);
+    const rd = evaluateRunnerRunTargets({ input }).find(
+      (target) => target.targetServerId === "rd",
+    )!;
+    expect(rd.prerunReserveQuote).toMatchObject({
+      status: "blocked",
+      requiredCredits: 5,
+      creditGap: 2,
+      corpRezCredits: 17,
+    });
+    expect(rd.prerunReserveQuote!.evidence).toContain(
+      "prerun_reserve_program_install_investment_credits:5",
+    );
+    expect(decision.actionId).toBe("runner.gain_credit");
+    expect(
+      decision.decisionDebug?.planFirstDecision?.selectedPlan,
+    ).toMatchObject({
+      moduleId: "runner.rig_and_coverage",
+      phase: "fund_answer",
+    });
+    for (const variant of ["bare_rig", "poor_corp", "known_path"] as const) {
+      const counter = structuredClone(input);
+      if (variant === "bare_rig") counter.playerView.own.rig = [];
+      if (variant === "poor_corp") counter.playerView.opponent.credits = 0;
+      if (variant === "known_path")
+        counter.playerView.servers.find((s) => s.id === "rd")!.ice = [];
+      const quote = evaluateRunnerRunTargets({ input: counter }).find(
+        (target) => target.targetServerId === "rd",
+      )!.prerunReserveQuote;
+      expect(quote!.evidence).toContain(
+        "prerun_reserve_program_investment_buffer:0",
+      );
+      expect(quote!.creditGap).toBe(0);
+    }
+  });
   it("keeps the early blocked remote and its exact coverage child resident", () => {
     const { decision } = replay(earlyRemoteJson);
     const parent = "plan:runner.contest_remote:remote%3Aremote_1";

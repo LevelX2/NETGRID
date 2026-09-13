@@ -258,8 +258,11 @@ export function runnerRunRiskContractReassessment(
     runnerGripCount: input.playerView.own.gripOrHq.length,
     informationProbeAllowed:
       contract.reserveQuote.status === "information_probe_only",
+    runnerRig: input.playerView.own.rig,
   });
   const materialReserveDegradation =
+    (currentReserveQuote.status === "blocked" &&
+      contract.reserveQuote.status !== "blocked") ||
     currentReserveQuote.creditGap > contract.reserveQuote.creditGap ||
     currentReserveQuote.handBufferGap > contract.reserveQuote.handBufferGap;
   const decision = materialReserveDegradation

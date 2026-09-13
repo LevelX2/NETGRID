@@ -1254,6 +1254,24 @@ den Restpfad mit dem aktuellen Budget unbezahlbar, entsteht daraus keine
 physische Zugangssperre und keine Pflicht, ihre Quelle teurer zu brechen.
 Die Pfadquote erhält die günstigere zulässige Zahlung für die Finanzierung.
 
+Der bestehende Run-Risiko-Owner bewertet vor dem Start und in jedem gebundenen
+Fortsetzungsfenster das aktuelle Programm-Investment neu. Bei unbekanntem ICE
+und aktiver Rez-Möglichkeit beträgt dessen zusätzlicher Creditpuffer höchstens
+die aktuellen Corp-Credits und höchstens die Summe der sichtbaren
+Installationskosten der eigenen Programme. Maßgeblich ist das Maximum aus
+diesem Wert und dem bestehenden Risikopuffer; beide werden nicht addiert.
+Ein Informations-Probe darf einen Fehlbetrag dieses Investmentpuffers nicht
+übergehen. Fehlende Programmkosten belegen keinen sicheren Pfad. Die explizite
+Ausnahme für Matchpoint-Zugriffe mit stabiler universeller Coverage bleibt.
+Die Reserve ist eine Risikopolicy, keine Vorhersage der verdeckten ICE-Identität,
+keine garantierte Breakquote und kein Nachweis, dass verlorene Karten erneut
+verfügbar wären. Historisch sichere Zugriffe ersetzen die aktuelle Prüfung
+nicht. D96 des Matches e553 startet mit drei Credits und fünf Credits sichtbarem
+Programm-Investment bei 17 Corp-Credits nun eine Funding-Aktion für die
+Remote-Coverage statt des ursprünglichen R&D-Runs. Leeres Rig, fehlende
+Rez-Liquidität und ein Pfad ohne unbekanntes ICE erzeugen keinen solchen
+Zusatzpuffer. Verschlechterte Reserven bleiben beim bestehenden Run-Executor
+und führen am legalen Abbruchfenster zur Neubewertung des Jack-out.
 Die vorab gebundene Reserve für unbekanntes ICE gilt auch vor dessen
 Informationsgrenze: Bekannter Schaden darf den reservierten Handpuffer nicht
 verbrauchen; seine Vermeidung darf nur aus Credits außerhalb derselben

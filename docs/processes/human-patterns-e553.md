@@ -1,6 +1,6 @@
 # Menschliche Spielmuster in ausführbare KI-Linien überführen
 
-Status: aktiv; HU00 bis HU03 geprüft, HU04 als nächstes. Quelle: Match `match_e553ff2853e6bbba` und ausdrücklicher Umsetzungsauftrag vom 2026-09-13.
+Status: aktiv; HU00 bis HU04 geprüft, HU05 aktiv. Quelle: Match `match_e553ff2853e6bbba` und ausdrücklicher Umsetzungsauftrag vom 2026-09-13.
 
 ## Ziel und Arbeitsvertrag
 
@@ -41,3 +41,5 @@ Alle Pakete vollständig und sequenziell abarbeiten, beendete Pakete getrennt co
 - HU02: 13 fokussierte Tests einschließlich D49/D59, unbekannter ICE und leerem Remote sowie Suchregression grün; fokussierter Strict-Typecheck grün. D59 sucht die Sentry-Antwort, D49 behält zulässigen HQ-Druck bei und trägt bereits den gebundenen Remote-Bedarf.
 
 - HU03: bestehende Cashout-Projektion um Defense-Freigabe für statischen Restschutz erweitert; genau ein Verkauf je gebundener Fundingroute. Keine Freigabe für dynamische Pfade ohne Post-Removal-Quote. Engine-Einkommensquote im KI-DTO wieder erhalten. 112 Tests in vier fokussierten Dateien und Strict-Typecheck sowie Struktur-/Erreichbarkeitsgate grün; zusätzlicher DTO-Fehlerfall vor Commit nachgeprüft.
+
+- HU04: 25 fokussierte Tests (historische Punkte, Investmentreserve, bekanntes ICE) sowie fünf Run-Fortsetzungsfälle geprüft. D96 nimmt Credit für Remote-Coverage statt R&D-Run; keine verdeckte ICE-Identität verwendet. Bestehende synthetische Fortsetzungsfälle geben ihr leeres Rig nun ausdrücklich an; fehlende Riginformation ist kein leerer Zustand. Risikoreserve bleibt Policy und beweist keinen sicheren Originalmatch-Ausgang.

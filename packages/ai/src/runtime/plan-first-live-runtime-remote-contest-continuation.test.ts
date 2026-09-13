@@ -1534,6 +1534,28 @@ describe("plan-first Remote contest continuation", () => {
     });
   });
 
+  it("reassesses newly exposed program investment before unknown inner ICE", () => {
+    const { decision, leaf } = runRiskContractScenario({
+      currentCredits: 4,
+      currentGripCount: 3,
+      currentRig: [
+        visibleCard("exposed-program", "runner", "program", { installCost: 5 }),
+      ],
+    });
+    expect(decision.actionId).toBe("jack-out-remote-1-risk-contract");
+    expect(leaf?.moduleState).toMatchObject({
+      signal: {
+        runRiskReassessment: {
+          currentReserveQuote: {
+            status: "blocked",
+            requiredCredits: 5,
+            creditGap: 1,
+          },
+        },
+      },
+    });
+  });
+
   it("keeps running after Corp rez exposure disappears, but not when visible free-rez support remains", () => {
     const noRezExposure = runRiskContractScenario({
       currentCredits: 2,
@@ -1591,6 +1613,7 @@ function runRiskContractScenario(params: {
   currentGripCount: number;
   currentCorpCredits?: number;
   currentVisibleRezSupport?: boolean;
+  currentRig?: VisibleCard[];
 }) {
   resetResidentPlanPortfolioMemory();
   const startRun = legalAction(
@@ -1663,6 +1686,7 @@ function runRiskContractScenario(params: {
   );
   const startInput = aiInput("runner", [startRun]);
   startInput.playerView.own.credits = 4;
+  startInput.playerView.own.rig = [];
   startInput.playerView.own.gripOrHq = testGrip(3, "start-risk-contract");
   startInput.playerView.opponent.credits = 14;
   startInput.playerView.servers = [
@@ -1704,6 +1728,7 @@ function runRiskContractScenario(params: {
     action.timingPoint = "run.jack_out_window";
   }
   continuationInput.playerView.own.credits = params.currentCredits;
+  continuationInput.playerView.own.rig = params.currentRig ?? [];
   continuationInput.playerView.own.gripOrHq = testGrip(
     params.currentGripCount,
     "current-risk-contract",
