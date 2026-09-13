@@ -248,6 +248,11 @@ function visibleKnownCardWithReferenceViewer(
       : {}),
     ...overadvance,
     ...(visibleStrength !== undefined ? { strength: visibleStrength } : {}),
+    ...(visibleStrength !== undefined &&
+    instance.strengthModifier !== 0 &&
+    state.runner.rig.programs.includes(id)
+      ? { strengthAfterEncounter: visibleStrength - instance.strengthModifier }
+      : {}),
     ...(visibleStrengthModifier !== undefined
       ? { strengthModifier: visibleStrengthModifier }
       : {}),

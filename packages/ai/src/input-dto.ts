@@ -2013,6 +2013,9 @@ function sanitizeVisibleCardWithOptions(
       ? { advancementRequirement: card.advancementRequirement }
       : {}),
     ...(card.strength !== undefined ? { strength: card.strength } : {}),
+    ...(card.known && card.strengthAfterEncounter !== undefined
+      ? { strengthAfterEncounter: card.strengthAfterEncounter }
+      : {}),
     ...(card.selectedSubtype !== undefined
       ? { selectedSubtype: card.selectedSubtype }
       : {}),

@@ -173,6 +173,10 @@ Board-/Effektzustände bleiben eigenständig bewertete Routen. Ein neuer Zug
 werden aus der Historie nicht rekonstruiert. Das Eingabe-DTO bewahrt dafür
 die öffentlichen Engine-Felder `result`, `encounterContinue` und
 `encounterWillEndRun`. Fehlende Outcome-Facts beweisen kein Run-Ende.
+Ein öffentliches `decline_rez` ohne aufgelösten Effekt beendet diese
+Beobachtung nicht. Auch reine Finanzierung durch ein Ereignis erhält sie,
+wenn die öffentlichen Engine-Effekte ausschließlich Runner-Credits vergeben.
+Gemischte oder nicht quotierte Ereignisse eröffnen die Bewertung erneut.
 
 Post-Break-ICE-Trash wird als Vorbereitung einer bereits zugelassenen
 Central-Instanz behandelt. `post-break-trash-preparation.ts` vergleicht die
@@ -948,6 +952,24 @@ Pump-Schritten mindestens einen verbleibenden Break finanzieren. Der
 Run-Window verwendet dazu die effektive Breaker-Quote und die zusätzlichen
 Breakgebühren des aktuellen ICE. Eine gedruckte Fähigkeitszusammenfassung
 oder ein Ersatzpreis ist kein Kostennachweis.
+
+Die Engine kennzeichnet bei installierten Runner-Programmen eine vom aktuellen
+Wert abweichende Stärke nach dem Encounter mit `strengthAfterEncounter`.
+Fehlt dieses Feld, bleibt die Stärke unverändert. Der Wert entfernt nur den
+beim Encounter-Ende zurückgesetzten Anteil; Run-, Zug-, Host- und Counter-Boni
+bleiben erhalten. Das DTO bewahrt diesen Fakt. Projektionen des inneren Pfads
+und der nächsten Encounters verwenden ihn, während aktuelle LegalActions
+weiter mit der aktuellen Stärke arbeiten. Ein optionaler Break reserviert
+außerdem die aktuell legal gequoteten, noch nötigen Breaks desselben ICE und
+den inneren Pfad aus denselben Zahlungspools. Eine bereits gezahlte oder
+gebrochene Subroutine wird dabei nicht erneut angesetzt.
+
+Öffentlich aufgelöster Corp-Schaden wird nach seiner Quelle zugeordnet.
+Der Runner als Actor einer `continue_run`-Action macht die darin aufgelösten
+Corp-ICE-Subroutinen nicht zu Runner-Selbstschaden. Erst ein tatsächlicher
+Schadensfakt bestätigt die Gefahr; eine Corp-Quelle oder ein reines Run-Ende
+allein genügen nicht. Die bestehenden Defense- und Run-Owner verwenden die
+korrigierte Schadenshistorie für ihren Handpuffer.
 
 Eine von der Engine markierte Zahlungsfortsetzung gehört dagegen zur bereits
 gewählten Pumpaktion. Ihr eigener Continuation-Owner prüft die gespeicherte

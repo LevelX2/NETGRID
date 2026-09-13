@@ -24,6 +24,50 @@ function fixture(game = 3) {
 }
 afterEach(resetResidentPlanPortfolioMemory);
 describe("central information admission after an observed free stop", () => {
+  it.each(["score", "livewire", "decline"])(
+    "retains the observed stop across the original %s transition",
+    (transition) => {
+      const cp = JSON.parse(
+        readFileSync(
+          new URL(
+            `../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-434-r10-free-probe-${transition}.json`,
+            import.meta.url,
+          ),
+          "utf8",
+        ),
+      );
+      const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
+      const serverId = transition === "decline" ? "hq" : "rd";
+      const target = evaluateRunnerRunTargets({ input }).find(
+        (e) => e.actionId === `runner.start_run.${serverId}`,
+      )!;
+      expect(runnerRepeatedFreeStopProbeEvidence(input, target)).toContain(
+        "free_stop_already_observed",
+      );
+      restoreAiRuntimeCheckpoint(
+        input,
+        input.ownDeckSnapshot!.deckSnapshotId,
+        cp.runtime,
+      );
+      const decision = chooseAiAction(input);
+      expect(decision.actionId).not.toBe(target.actionId);
+      expect(decision.fallbackUsed).toBe(false);
+      const owner = residentPlanPortfolioSnapshot(input)!.instances.find(
+        (i) =>
+          i.moduleId === "runner.pressure_central" && i.target?.id === serverId,
+      )!;
+      expect(owner.moduleState).toMatchObject({
+        signal: {
+          reachable: false,
+          runActionExclusions: {
+            [target.actionId]: [
+              expect.stringContaining("free_stop_already_observed"),
+            ],
+          },
+        },
+      });
+    },
+  );
   it.each([3, 16])(
     "declines the repeated basic probe in original G%i through the existing owner",
     (game) => {
@@ -58,6 +102,44 @@ describe("central information admission after an observed free stop", () => {
           },
         },
       });
+    },
+  );
+  it.each(["mixed_effect", "unquoted_event"])(
+    "requires a pure quoted financing event: %s",
+    (condition) => {
+      const cp = JSON.parse(
+        readFileSync(
+          new URL(
+            "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-434-r10-free-probe-score.json",
+            import.meta.url,
+          ),
+          "utf8",
+        ),
+      );
+      for (const list of [
+        cp.input.eventTail,
+        cp.input.playerView.publicEvents,
+      ]) {
+        const p = list.find(
+          (e: { eventId: string }) => e.eventId === "evt_144",
+        ).publicPayload;
+        if (condition === "unquoted_event") delete p.resolvedEffects;
+        else
+          p.resolvedEffects.push({
+            effectId: "mixed-draw",
+            visibility: "public",
+            kind: "draw_cards",
+            side: "runner",
+            amount: 1,
+          });
+      }
+      const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
+      const target = evaluateRunnerRunTargets({ input }).find(
+        (e) => e.actionId === "runner.start_run.rd",
+      )!;
+      expect(
+        runnerRepeatedFreeStopProbeEvidence(input, target),
+      ).toBeUndefined();
     },
   );
   it("preserves only the approved typed Engine outcome through both event lists", () => {

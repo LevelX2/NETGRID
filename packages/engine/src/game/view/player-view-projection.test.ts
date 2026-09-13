@@ -77,6 +77,50 @@ describe("public next-turn basic run preparation", () => {
 });
 
 describe("PlayerView projection", () => {
+  it("quotes the encounter reset separately from retained turn strength without mutating state", () => {
+    const state = createGameAfterSetup({ seed: "encounter-strength-view" });
+    state.turnSerial = 0;
+    const id = "visible-krash" as CardInstanceId;
+    state.cardInstances[id] = {
+      instanceId: id,
+      definitionId: "onr_v1_039_krash",
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "rig" },
+      faceup: true,
+      rezzed: true,
+      advancementCounters: 0,
+      strengthModifier: 4,
+    };
+    state.runner.rig.programs.push(id);
+    const before = hashState(state);
+    expect(
+      getPlayerView(state, "runner").own.rig!.find((c) => c.instanceId === id),
+    ).toMatchObject({ strength: 4, strengthAfterEncounter: 0 });
+    expect(hashState(state)).toBe(before);
+    state.temporaryBreakerStrengthModifiersUntilEndOfTurn = [
+      {
+        sourceCardInstanceId: id,
+        sourceDefinitionId: "onr_v1_039_krash",
+        targetBreakerId: id,
+        amount: 3,
+        turnSerial: state.turnSerial,
+        expires: "turn_end",
+      },
+    ];
+    expect(
+      getPlayerView(state, "runner").own.rig!.find((c) => c.instanceId === id),
+    ).toMatchObject({ strength: 7, strengthAfterEncounter: 3 });
+    state.cardInstances[id]!.strengthModifier = 0;
+    const unchanged = getPlayerView(state, "runner").own.rig!.find(
+      (c) => c.instanceId === id,
+    )!;
+    expect(unchanged.strength).toBe(3);
+    expect(unchanged).not.toHaveProperty("strengthAfterEncounter");
+    expect(getPlayerView(state, "corp").opponent).not.toHaveProperty(
+      "gripOrHq",
+    );
+  });
   it("projects only side-safe specialized opponent Trace capacity", () => {
     const state = createGameAfterSetup({
       seed: "visible-opponent-trace-capacity",

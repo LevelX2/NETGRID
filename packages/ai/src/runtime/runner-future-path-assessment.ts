@@ -1,4 +1,5 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
+import { runnerRigAfterEncounter } from "./runner-rig-after-encounter";
 
 import {
   assessKnownRezzedIcePath,
@@ -29,7 +30,7 @@ export function currentRunFuturePathAssessment(
     .map((ice) => projectFutureIceForUnbrokenEffects(ice, effects));
   const assessment = assessKnownRezzedIcePath(
     futureIce,
-    input.playerView.own.rig ?? [],
+    runnerRigAfterEncounter(input.playerView.own.rig ?? []),
     runnerRunPathCreditBudgetWithVisiblePools(
       input.playerView.own.credits,
       input.playerView.own.rig ?? [],

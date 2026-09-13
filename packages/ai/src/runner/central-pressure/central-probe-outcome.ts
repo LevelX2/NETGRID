@@ -41,6 +41,14 @@ export function runnerRepeatedFreeStopProbeEvidence(
       continue;
     }
     if (active) {
+      // Declining an optional rez neither changes the defense nor converts
+      // the run. Keep the already observed free rez through this window.
+      if (
+        type === "decline_rez" &&
+        p.actor === "corp" &&
+        !p.resolvedEffects?.length
+      )
+        continue;
       if (
         type === "rez_ice" &&
         p.actor === "corp" &&
@@ -69,12 +77,22 @@ export function runnerRepeatedFreeStopProbeEvidence(
       stoppedEventId = undefined;
       continue;
     }
-    // Draw and basic financing do not change installed route tools or the
+    // Draw and financing do not change installed route tools or the
     // opponent's defense. Current guaranteed access above always overrides
     // this observation; any other board/effect change requires a new probe.
     if (
       p.actor === "runner" &&
-      (type === "draw_card" || type === "gain_credit" || type === "remove_tag")
+      (type === "draw_card" ||
+        type === "gain_credit" ||
+        type === "remove_tag" ||
+        (type === "play_event" &&
+          p.effectKind === "gain_credits" &&
+          p.resolvedEffects !== undefined &&
+          p.resolvedEffects.length > 0 &&
+          p.resolvedEffects.every(
+            (effect) =>
+              effect.kind === "gain_credits" && effect.side === "runner",
+          )))
     )
       continue;
     stoppedEventId = undefined;

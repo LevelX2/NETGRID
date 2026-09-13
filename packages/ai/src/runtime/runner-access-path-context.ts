@@ -16,6 +16,8 @@ import {
 } from "../run-analysis/visible-subroutine-semantics";
 import { currentEncounterUnbrokenSubroutineIndexes } from "./current-encounter";
 import { currentEncounterRequiresDamagePreservingBreak } from "./current-encounter-damage";
+import { runnerRigAfterEncounter } from "./runner-rig-after-encounter";
+import { encounterRunRemainderEffectAssessment } from "./runner-run-remainder-effect-assessment";
 import {
   isEndRunSubroutine,
   isUnacceptableImmediateSafetyThreatSubroutine,
@@ -301,6 +303,104 @@ export function createRunnerAccessPathContext(
       };
 
     const futureIce = server.ice.slice(0, Math.max(0, run.position.iceIndex));
+    const futureRig = runnerRigAfterEncounter(input.playerView.own.rig ?? []);
+    const remainingForcedIndexes = new Set(
+      quote?.subroutines.flatMap((subroutine, index) => {
+        if (!unbrokenIndexes.has(index) || breakIndexes.has(index)) return [];
+        if (
+          isEndRunSubroutine(subroutine) &&
+          !isVisiblePayEndRunSubroutine(subroutine)
+        )
+          return [index];
+        if (
+          !subroutine.unbrokenRunEffect ||
+          isVisibleDirectDamageSubroutine(subroutine)
+        )
+          return [];
+        const boundBreak = input.legalActions.find(
+          (candidate) =>
+            candidate.type === "break_subroutine" &&
+            dependencies.breakSubroutineIndexesForAction(candidate).has(index),
+        );
+        return boundBreak &&
+          encounterRunRemainderEffectAssessment(input, boundBreak).mustBreak
+          ? [index]
+          : [];
+      }) ?? [],
+    );
+    if (futureIce.length > 0 && remainingForcedIndexes.size > 0) {
+      // Current forced breaks and the inner path consume the same pools.
+      // This is a cost projection over current Engine actions, not an executor.
+      const pending = [
+        {
+          remaining: remainingForcedIndexes,
+          unbroken: new Set(
+            [...unbrokenIndexes].filter((index) => !breakIndexes.has(index)),
+          ),
+          budget: budgetAfterBreak,
+        },
+      ];
+      const visited = new Set<string>();
+      let payableContinuation = false;
+      while (pending.length > 0 && !payableContinuation) {
+        const state = pending.pop()!;
+        const key = JSON.stringify([
+          [...state.remaining].sort((a, b) => a - b),
+          [...state.unbroken].sort((a, b) => a - b),
+          state.budget,
+        ]);
+        if (visited.has(key)) continue;
+        visited.add(key);
+        if (state.remaining.size === 0) {
+          payableContinuation = dependencies.assessKnownRezzedIcePath(
+            futureIce,
+            futureRig,
+            state.budget,
+            server.root,
+            input.playerView.opponent.credits,
+          ).canReachAccess;
+          continue;
+        }
+        for (const candidate of input.legalActions) {
+          if (
+            candidate.type !== "break_subroutine" ||
+            candidate.choiceRequirements?.length
+          )
+            continue;
+          const indexes =
+            dependencies.breakSubroutineIndexesForAction(candidate);
+          if (
+            ![...indexes].some((index) => state.remaining.has(index)) ||
+            [...indexes].some((index) => !state.unbroken.has(index))
+          )
+            continue;
+          const payment = spendRunnerEncounterActionCost({
+            input,
+            action: candidate,
+            budget: state.budget,
+            cost: dependencies.actionCreditCost(candidate),
+          });
+          if (!payment.affordable) continue;
+          pending.push({
+            remaining: new Set(
+              [...state.remaining].filter((index) => !indexes.has(index)),
+            ),
+            unbroken: new Set(
+              [...state.unbroken].filter((index) => !indexes.has(index)),
+            ),
+            budget: payment.budget,
+          });
+        }
+      }
+      if (!payableContinuation)
+        return {
+          canPreserveAccessPath: false,
+          evidence: [
+            "break_current_and_future_path_exceed_shared_budget:true",
+            `break_remaining_forced_indexes:${[...remainingForcedIndexes].join(",")}`,
+          ],
+        };
+    }
     if (futureIce.length <= 0) {
       const remotePayoff = encounterRemotePayoffAfterBreakAssessment(
         input,
@@ -325,7 +425,7 @@ export function createRunnerAccessPathContext(
 
     const pathAssessment = dependencies.assessKnownRezzedIcePath(
       futureIce,
-      input.playerView.own.rig ?? [],
+      futureRig,
       budgetAfterBreak,
       server.root,
     );

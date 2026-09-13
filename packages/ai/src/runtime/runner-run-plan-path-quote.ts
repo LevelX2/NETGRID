@@ -6,6 +6,7 @@ import type {
 } from "@netgrid/shared";
 
 import { createAiHintsByCard } from "../ai-hints";
+import { runnerRigAfterEncounter } from "./runner-rig-after-encounter";
 import {
   assessKnownRezzedIcePath,
   canVisibleBreakerBreakQuotedSubroutines,
@@ -123,7 +124,23 @@ export function quoteRunnerRunPath(
   const otherIceQuotes = serverIce
     .filter((ice) => ice.instanceId !== currentIceInstanceId)
     .map((ice) =>
-      quoteIceEncounter({ input, plan, ice, currentEncounter: false }),
+      quoteIceEncounter({
+        input: currentEncounter
+          ? {
+              ...input,
+              playerView: {
+                ...input.playerView,
+                own: {
+                  ...input.playerView.own,
+                  rig: runnerRigAfterEncounter(input.playerView.own.rig ?? []),
+                },
+              },
+            }
+          : input,
+        plan,
+        ice,
+        currentEncounter: false,
+      }),
     );
   const iceQuotes = [currentQuote, ...otherIceQuotes].filter(
     (quote): quote is RunnerRunIceEncounterQuote => quote !== undefined,

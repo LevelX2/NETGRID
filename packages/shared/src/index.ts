@@ -3981,6 +3981,10 @@ export type VisibleCard = {
     | "start_of_corp_turn_credits";
   strength?: number;
   strengthModifier?: number;
+  /** Engine-quoted strength after an encounter pump resets. Present only when
+   * it differs from strength; absence means unchanged strength. Retains hosted,
+   * counter, turn and run modifiers; known installed Runner programs only. */
+  strengthAfterEncounter?: number;
   /** Explicit run-scoped state for breakers with a run-start random strength. */
   randomRunStrengthState?: VisibleRunStartRandomStrengthState;
   agendaPoints?: number;

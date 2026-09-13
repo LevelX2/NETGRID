@@ -1,4 +1,5 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import { runnerRigAfterEncounter } from "./runner-rig-after-encounter";
 
 import type {
   assessKnownRezzedIcePath,
@@ -50,7 +51,7 @@ export function createRunnerPumpFuturePathContext(
       };
     const pathAssessment = dependencies.assessKnownRezzedIcePath(
       futureIce,
-      input.playerView.own.rig ?? [],
+      runnerRigAfterEncounter(input.playerView.own.rig ?? []),
       creditBudgetAfterPumpAndBreak,
       server.root,
     );

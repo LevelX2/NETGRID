@@ -1089,6 +1089,15 @@ function corpDamageEventEvidence(
 
 function publicEventCanBeCorpDamage(event: PublicGameEvent): boolean {
   const payload = event.publicPayload ?? {};
+  const sourceDefinitionId =
+    typeof payload.sourceDefinitionId === "string"
+      ? payload.sourceDefinitionId
+      : undefined;
+  // The action actor is not necessarily the damage source: Runner
+  // continue_run resolves Corp ICE subroutines in the same public event.
+  const corpSource =
+    sourceDefinitionId !== undefined &&
+    AI_HINTS.get(sourceDefinitionId)?.side === "corp";
   const resolvedCorpDamageSource = payload.resolvedEffects?.some(
     (effect) =>
       effect.kind === "damage" &&
@@ -1098,14 +1107,11 @@ function publicEventCanBeCorpDamage(event: PublicGameEvent): boolean {
   if (
     payload.actor !== "corp" &&
     payload.actor !== undefined &&
-    !resolvedCorpDamageSource
+    !resolvedCorpDamageSource &&
+    !corpSource
   ) {
     return false;
   }
-  const sourceDefinitionId =
-    typeof payload.sourceDefinitionId === "string"
-      ? payload.sourceDefinitionId
-      : undefined;
   if (
     payload.actor === undefined &&
     sourceDefinitionId &&
