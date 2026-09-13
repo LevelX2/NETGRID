@@ -526,7 +526,7 @@ import {
   scoredAgendaCounterCreditProfileForPayload,
   SCORED_REVEAL_AGENDA_SOURCES,
 } from "../../mechanics/agenda-scoring";
-import { TAG_HANDSIZE_ASSET_SOURCE } from "../../mechanics/global-modifiers";
+import { RUN_START_CREDIT_LOSS_SOURCE } from "../../mechanics/global-modifiers";
 import { COUNTER_UPGRADE_SOURCES } from "../../mechanics/hosting-counters";
 import {
   corpInstalledEconomyActionPayload,
@@ -1176,7 +1176,7 @@ export function createCardRuntimeDepsHosts(
       .rezzedCorpRootCardIds(state)
       .filter(
         (cardId: CardInstanceId) =>
-          definitionFor(state, cardId).id === TAG_HANDSIZE_ASSET_SOURCE ||
+          definitionFor(state, cardId).id === RUN_START_CREDIT_LOSS_SOURCE ||
           deps.hasCorpUtilityKind(state, cardId, "run_start_tax"),
       )
       .map((cardId: CardInstanceId) => definitionFor(state, cardId).id);
