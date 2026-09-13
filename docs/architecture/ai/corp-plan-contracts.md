@@ -1373,6 +1373,12 @@ importiert weder die Tactical-Registry noch den allgemeinen Choice-Dispatcher.
 Der Owner liegt unter `packages/ai/src/corp/hand-management/`.
 `hand-development-signals.ts` komponiert Kartenentwicklung und den endlichen
 Overflow-Parent; `hand-overflow.ts` revalidiert dessen konkrete Konversionen.
+Der endliche Konversionsrest zählt ausschließlich ausgewählte Schritte
+dieses Owners. Handverkleinerung oder Klickverbrauch durch Score/Economy
+begrenzen das aktuelle Angebot, verbrauchen aber keinen Overflow-Schritt.
+Der letzte eigene Auswahlbeleg bleibt über Nebenaktionen erhalten, bis eine
+neue eigene Auswahl ihn ersetzt. So bleibt auch ein zwischenzeitlich nur im
+Hintergrund gehaltener Overflow-Plan konsistent.
 `hand-draw-arbitration.ts` vergleicht Handentlastung und Draw, während
 `hand-choice-bindings.ts` Discard, Draw-Filter, Shuffle und Archives-Recovery
 an ihre exakte Engine-Choice bindet. Inventarfakten und Zielgebietsdisposition

@@ -49,6 +49,10 @@ import {
   selectedRunnerVacuumLinkRewindOptionId,
 } from "../runner/run-window/run-window-choice-binding";
 import { selectedShellTradersStartTurnChoiceOptionId } from "../runner/shell-traders/shell-traders-choice-option";
+import {
+  exactShellTradersDestinationAction,
+  type ShellTradersDestinationState,
+} from "../runner/shell-traders/shell-traders-destination-binding";
 import { getStrategicIntentMemorySnapshot } from "../strategic-intent-memory";
 import type { StrategicIntentState } from "../strategic-intent-state";
 import { selectedBidChoiceOptionId } from "./bid-choice-option";
@@ -760,6 +764,41 @@ export function selectedChoicesForDecision(
     return resolved(
       selectedOptionId !== undefined ? [selectedOptionId] : [],
       "runner_delayed_install",
+    );
+  }
+  if (choice.source.startsWith("runner.delayed_install_destination:")) {
+    const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+    const executor = portfolio?.instances.find(
+      (instance) => instance.instanceId === portfolio.executorInstanceId,
+    );
+    const binding = executor?.moduleState as
+      | ShellTradersDestinationState
+      | undefined;
+    if (
+      input.side !== "runner" ||
+      portfolio?.side !== "runner" ||
+      portfolio.stateVersion !== input.playerView.stateVersion ||
+      executor?.moduleId !== "runner.shell_traders_pipeline" ||
+      binding?.kind !== "shell_traders_destination" ||
+      binding.sourceCardInstanceId !== choice.sourceCardInstanceId ||
+      !choice.source.startsWith(
+        `runner.delayed_install_destination:${binding.sourceCardInstanceId}:${binding.targetCardInstanceId}:`,
+      ) ||
+      exactShellTradersDestinationAction(input, binding)?.actionId !==
+        action.actionId ||
+      !selectableOptions.some(
+        (option) => option.id === binding.selectedOptionId,
+      )
+    ) {
+      throw unresolvedChoiceFailure(
+        input,
+        action,
+        "Preserve the current Shell Traders pipeline executor and its exact destination, target, action and state binding.",
+      );
+    }
+    return resolved(
+      [binding.selectedOptionId],
+      "resident_runner_delayed_install_destination",
     );
   }
   if (

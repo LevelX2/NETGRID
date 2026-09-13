@@ -891,6 +891,13 @@ function startDelayedInstallDestinationChoice(
         cardTitle: host.cards.publicTitle(
           host.cards.definitionFor(host.state, hostId).id,
         ),
+        delayedInstallRequiresProgramTrash:
+          !delayedInstallCanInstallPreparedCardForFree(
+            host,
+            targetCardId,
+            definition,
+            hostId,
+          ),
       },
     }),
   );
@@ -919,6 +926,14 @@ function startDelayedInstallDestinationChoice(
               label:
                 "Im Programmspeicher installieren (bei Bedarf Programme trashen)",
               value: "rig",
+              metadata: {
+                delayedInstallRequiresProgramTrash:
+                  !delayedInstallCanInstallPreparedCardForFree(
+                    host,
+                    targetCardId,
+                    definition,
+                  ),
+              },
             },
           ]
         : []),

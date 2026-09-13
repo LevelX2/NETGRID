@@ -1410,6 +1410,16 @@ Wirtschaftlichkeitsformeln bleiben unverändert. Damit lässt sich die gesamte
 Installationspipeline verfolgen, ohne ihre Regeln über Registry und Runtime
 verteilt zu bearbeiten; ein zusätzlicher Runtime-Dienst ist nicht nötig.
 
+Die verpflichtende Installationszielwahl besitzt den Step
+`resolve_destination` desselben Pipeline-Owners. Die Engine quotiert je
+Option `delayedInstallRequiresProgramTrash`; der KI-Input erhält diesen
+Fakt unverändert. Der Plan bevorzugt Ziele ohne Programmverdrängung und bei
+gleicher Verdrängung das Rig, um freie Hostkapazität zu erhalten. Quelle,
+vorbereitete Zielinstanz, Choice, Action und StateVersion bleiben exakt
+gebunden. Der Payload-Resolver führt ausschließlich diese residente Auswahl
+aus; fehlende Quotes oder Bindungen scheitern sichtbar. Eine notwendige
+anschließende MU-Auswahl verbleibt bei der bestehenden Programmersatzlogik.
+
 ## 14. `runner.score_installed_agenda` und `runner.secure_terminal_win`
 
 **Status:** registrierte Core- beziehungsweise Tactical-Owner.

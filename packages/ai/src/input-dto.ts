@@ -3935,6 +3935,10 @@ function sanitizeChoiceOptionMetadata(
     delayedInstallRemainingCounters >= 0
   )
     result.delayedInstallRemainingCounters = delayedInstallRemainingCounters;
+  if (typeof metadata.delayedInstallRequiresProgramTrash === "boolean") {
+    result.delayedInstallRequiresProgramTrash =
+      metadata.delayedInstallRequiresProgramTrash;
+  }
   const targetServerId = metadata.targetServerId;
   const targetIcePosition = metadata.targetIcePosition;
   const targetServer =

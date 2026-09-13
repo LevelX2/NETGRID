@@ -32,7 +32,8 @@ Die Engine ist alleinige Regelautorität. UI, Server und KI reichen nur angebote
 ## Engine und Karten
 
 „Dr. Dreffs letzte Visite“ ist als Standarddeck mit 45 Karten,
-20 Agendapunkten und deutscher/englischer Anleitung verfügbar. Die Liste
+20 Agendapunkten und deutscher/englischer Anleitung verfügbar. Version 1.1.0
+ersetzt die beiden Banpei durch zwei Marionette. Die Liste
 verbindet temporäre HQ-ICE-Begegnungen mit Remote-Scoring und Recycling;
 ihre Spielstärke ist noch nicht durch eine Matchserie belegt. Marionette
 und die verwandten deklarativen ICE-Rückkehrmodi lösen nach einer
