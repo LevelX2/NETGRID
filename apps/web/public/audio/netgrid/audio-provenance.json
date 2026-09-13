@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "metadataScope": "Top-level generation and license fields describe the ElevenLabs pack defaults. Explicit per-asset fields override those defaults.",
   "generatedAt": "2026-08-22",
   "provider": "ElevenLabs",
   "product": "ElevenLabs Sound Effects",
@@ -138,12 +139,24 @@
     },
     {
       "cueKey": "game-won",
-      "filename": "results/game-won.wav",
-      "prompt": "Short sophisticated science-fiction victory sting. Controlled rising harmonic energy, polished digital sparkle and a confident final chord. Mysterious, strategic and elegant rather than heroic. No vocals, no orchestral fanfare, no retro arcade tone, no long tail.",
-      "requestedDurationSeconds": 1.5,
-      "finalDurationSeconds": 0.633167,
+      "filename": "results/game-won-fanfare.wav",
+      "generatedAt": "2026-09-13",
+      "provider": "Local NETGRID synthesis",
+      "product": "scripts/generate-victory-fanfare.mjs",
+      "model": null,
+      "accountTier": null,
+      "licenseBasis": {
+        "source": "Original procedural composition and additive/FM synthesis without samples or third-party recordings.",
+        "providerTerms": "ElevenLabs terms and attribution do not apply to this asset."
+      },
+      "prompt": "Electronic victory fanfare with six steady repeated opening notes, a short ascending C-major finish, pulsing bass and digital shimmer reserved for the final chord.",
+      "originalExport": "WAV, 48 kHz, 16-bit PCM, stereo",
+      "technicalPostProcessing": "Deterministic local synthesis with smooth envelopes and stereo reflections; sample-peak normalization to -3 dBFS, no external processing.",
+      "selection": "User-approved clear electronic audition with one opening repetition removed.",
+      "requestedDurationSeconds": 3.79,
+      "finalDurationSeconds": 3.79,
       "channels": 2,
-      "sha256": "58d01a302432feec1717b79b2c3386db2f7a226402955594b8df42a7a4f2bdd3"
+      "sha256": "45f2f08ff6dad83db450367f3a9cacd133304c2b11036e3d136f0794bf7af549"
     },
     {
       "cueKey": "game-lost",
