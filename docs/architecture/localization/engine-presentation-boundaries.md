@@ -41,29 +41,55 @@ Regeln, LegalActions, Sichtbarkeit, RNG, Match-StateHash und Replay bleiben
 unberührt. Snapshot-Validierungsmetadaten sind keine zweite Regelautorität;
 aktuelle V0-Fixtures dürfen bei einer Vertragsumstellung neu erzeugt werden.
 
-## Bekannte Lücken im semantischen Chronikformatter
+## Semantische Chronikdetails und Regressionen
 
 `formatChronicleEvent` verwendet bei gesetztem `context.translate` direkt
 `formatSemanticChronicleEvent`. Die Spezialfälle des älteren deutschen
-Formatters werden dabei nicht automatisch übernommen. Regressionen müssen
-deshalb den tatsächlichen Übersetzungspfad mit `createTranslator` prüfen;
-grüne Tests ohne Translator belegen dessen Informationsgehalt nicht.
-Social Engineering ist in diesem Pfad jetzt durch
-`chronicle-localization.test.ts` für beide Spielerperspektiven abgesichert.
+Formatters werden dabei nicht automatisch übernommen. Der produktive Pfad
+bindet deshalb `chronicle-detail-presentation.ts` für strukturierte
+Ereignisdetails, Zusatzinformationen und Effektergebnisse ein.
 
-Eine gezielte Stichprobe mit identischen Ereignissen aus `chronicle.test.ts`
-und deutschem Translator bestätigt weitere offene Lücken:
+Die Formatierung in DE/EN/FR umfasst insbesondere:
 
-- **Playful AI**, Test „shows current engine Playful AI random dice payload
-  fields in the chronicle“: Die aufgelöste Wahl zeigt nur „Auswahl aufgelöst“;
-  Creditgewinn, beiseitegelegte Würfel und Folgewürfe fehlen.
-- **Blink**, Test „describes failed Blink die rolls without claiming a
-  break“: `blinkBreakSuccess: false` mit Wurf 2 wird als gebrochene Subroutine
-  ausgegeben. Fehlversuch und 2 Net Damage fehlen im Ereigniseintrag.
-- **Gypsy Schedule Analyzer**, Test „describes Gypsy Schedule Analyzer R&D
-  reveal with an agenda moved to HQ“: Statt Aufdecken, Agenda nach HQ und
-  Rückmischen der übrigen Karten erscheint nur eine generische Runfortsetzung.
+- Würfel und Wahlfolgen (Social Engineering, Playful AI, Blink, Startzugwürfe),
+  erfolgreiche und fehlgeschlagene Breaks sowie Run-Ende ohne ICE-Passieren;
+- Umleitungen, Rücksetzen, Begegnungskosten, Run-Sperren und zusätzliche
+  Begegnungen sowie Trace-Gebote und ihre Folgen;
+- Aufdecken, Zugriffsaustausch, Gypsy-Agenda nach HQ, Such- und
+  Installationsschritte, MU-Bereinigung, temporäre Installationen und Rückgaben;
+- Agenda-Aktionen, Counter-Ziele, Purge/Aktionsschuld, installierte und
+  wiederkehrende Credits, Kosten und öffentliche Karteneffekte;
+- ursprünglichen, verhinderten und verbleibenden Subroutinenschaden sowie
+  öffentliche Folgen von Zugriffseffekten.
 
-Das ist eine bestätigte Stichprobe, kein vollständiger Vergleich aller
-Chronikfälle. Diese drei Befunde sind offen; Engine-Änderungen sind daraus
-nicht abgeleitet.
+Karteneffekte, die mit einem Spieleintrag zusammengefasst werden, stehen mit
+ihrem tatsächlichen Ergebnis im Titel und bleiben damit auch im einfachen
+Chronikmodus sichtbar. Unterstützende Informationen (etwa Zahlungsquellen,
+MU danach oder Listen aufgedeckter Karten) stehen in der Beschreibung.
+Geplante Mengen sind kein Ergebnis: Bei unterbrochenem Kartenziehen zählt
+`resolvedEffects[].amount`, nicht die ursprünglich geplante `drawCardsAmount`.
+Verzögertes Agenda-Stehlen darf noch keine gewonnenen Agendapunkte melden.
+
+Nur öffentliche oder für die Betrachtungsseite freigegebene Ereignisfelder
+sind Datenquellen. Texte aus `label`, Regeltexten oder KI-Begründungen werden
+nicht als Mechanikergebnisse geparst. Verdeckte Bewegungen behalten ihre
+Redaktion, einschließlich entfernter Kartenmetadaten. Öffentliche
+Zugriffsschäden, getrashte installierte Programme und Zugriffscounter werden
+anhand ihres strukturierten Zugriffskontexts beschrieben; die Ausnahme wird
+nicht auf beliebige private Effekte erweitert.
+
+`chronicle-detail-localization.test.ts` prüft 419 Ereignis- und Effektfälle
+mit echten Übersetzern in allen drei Sprachen. Die Fixture entstand aus dem
+Abgleich der bestehenden Chroniktests; historische Playful-AI-Feldaliasse und
+rein labelbasierte Ableitungen gehören nicht zum aktuellen V0-Vertrag.
+Zusätzliche Ergebnisprüfungen sichern Würfelfolgen, Blink/Dropp, Gypsy,
+Schadensverhinderung, Umleitungen, tatsächliche Ziehmengen, MU, Kosten,
+Trace-Sperren und Counter-Ziele ab. Social Engineering und weitere gemeinsame
+Pfade bleiben außerdem durch `chronicle-localization.test.ts` abgesichert.
+Tests ohne Translator allein belegen den produktiven Informationsgehalt nicht.
+
+Das I18N-Gate liest ICU-Parameter aus dem Parser-AST, einschließlich
+verschachtelter Auswahl- und Pluralzweige. Einfache Wörter in Zweigtexten
+(z. B. `1 {Credit}`) sind keine Parameter. Der Parser wird bereits von der
+Übersetzungslaufzeit verwendet und ist für das Gate explizit deklariert;
+`node --test scripts/lib/icu-parameters.test.mjs` prüft diesen Vertrag.

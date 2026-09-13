@@ -618,7 +618,7 @@ describe("localized action presentation", () => {
       expect(
         choiceOptionPresentationLabel(
           pendingChoice,
-          { id: "guess_2", label: "2", value },
+          { id: "guess_2", label: "2", ...(value !== undefined ? { value } : {}) },
           "en",
         ),
       ).toBe("[missing choice option: generic_bid_amount/guess_2]");

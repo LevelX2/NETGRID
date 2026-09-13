@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import process from "node:process";
 import ts from "typescript";
+import { icuParameters } from "./lib/icu-parameters.mjs";
 
 const root = process.cwd();
 const webRoot = resolve(root, "apps/web");
@@ -291,19 +292,6 @@ function leafMessages(value, prefix = "", target = new Map()) {
     leafMessages(child, prefix ? `${prefix}.${key}` : key, target);
   }
   return target;
-}
-
-function icuParameters(message) {
-  const parameters = new Set();
-  for (const match of message.matchAll(
-    /\{([A-Za-z][A-Za-z0-9_]*)\s*(?:,|\})/gu,
-  )) {
-    const prefix = message.slice(Math.max(0, match.index - 12), match.index);
-    if (/(?:^|[\s{])(?:one|other|zero|two|few|many|=\d+)\s*$/u.test(prefix))
-      continue;
-    parameters.add(match[1]);
-  }
-  return parameters;
 }
 
 function visitPagePresentationCalls(sourceFile) {

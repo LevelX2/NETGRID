@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { createTranslator } from "use-intl/core";
+import enMessages from "../messages/en.json";
 import type { PlayerView, PublicGameEvent, Side } from "@netgrid/shared";
 import {
   actionSoundCountForAction,
@@ -211,19 +213,21 @@ describe("deriveOpponentActionCues", () => {
           ],
         }),
       ],
-      translate: testTranslate({
-        "actor.you": "You",
-        "actor.game": "The game",
-        "effect.damageTyped":
-          "{subject}: suffered {amount} {damageType} from {source}.",
-        "effect.redacted": "A hidden effect resolved.",
-        "effect.automatic": "Automatic",
-        "damageType.net": "net damage",
-      }),
+      translate: createTranslator({
+        locale: "en",
+        messages: enMessages,
+        namespace: "Chronicle",
+        onError: (error) => {
+          throw error;
+        },
+      }) as unknown as ChronicleTranslate,
     });
 
     expect(cues).toHaveLength(1);
-    expect(cues[0]?.title).toBe("A hidden effect resolved.");
+    expect(cues[0]?.title).toBe(
+      "You: suffered 1 net damage from Simple Damage Source on access.",
+    );
+    expect(cues[0]?.visibility).toBe("public");
     expect(cues[0]?.actorLabel).toBe("The game");
     expect(cues[0]?.title).not.toContain("erlitten");
   });

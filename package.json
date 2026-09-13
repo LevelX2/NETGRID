@@ -101,6 +101,7 @@
     "format:changed": "node scripts/check-format-changed.mjs"
   },
   "devDependencies": {
+    "@formatjs/icu-messageformat-parser": "3.5.17",
     "@playwright/test": "1.59.1",
     "@types/node": "24.12.2",
     "esbuild": "0.27.7",

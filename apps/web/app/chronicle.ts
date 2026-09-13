@@ -18,6 +18,11 @@ import {
   payloadRandomRoll,
 } from "./action-payload";
 import { lowercaseInitial } from "../i18n/format";
+import {
+  chronicleEventDetail,
+  chronicleEffectDetail,
+  chronicleEventSupplement,
+} from "./chronicle-detail-presentation";
 
 export type ChronicleCategory =
   | "turn"
@@ -986,7 +991,7 @@ function formatSemanticChronicleEvent(
               number: turnNumber ?? "",
             })
           : translate(`group.${category}`);
-  return {
+  const item: ChronicleItem = {
     id: event.eventId,
     category,
     importance:
@@ -1018,6 +1023,24 @@ function formatSemanticChronicleEvent(
       visibility === "redacted" ? [] : (context.cardDetailLines ?? []),
     groupLabel,
   };
+  const result = {
+    ...item,
+    ...chronicleEventDetail(event, side, context, subject, server),
+  };
+  if (result.visibility === "redacted") {
+    delete result.cardDefinitionId;
+    delete result.cardTitle;
+    delete result.cardText;
+    result.cardDetailLines = [];
+  }
+  return chronicleEventSupplement(
+    event,
+    result,
+    context,
+    resolvedEffectsFromPayload(payload.resolvedEffects).filter((effect) =>
+      shouldMergeCardResolverEffect(event, effect),
+    ),
+  );
 }
 
 export function formatChronicleEvent(
@@ -5704,6 +5727,23 @@ export function formatChronicleEffectItems(
     translate,
   );
   if (translate) {
+    const extraItems = [
+      aiBoonRunStrengthChronicleItem(event, translate),
+      encounterTaxChronicleItem(event, side, cardPresentationsById, translate),
+      endTurnCreditPayoutChronicleItem(
+        event,
+        side,
+        cardPresentationsById,
+        translate,
+      ),
+      traceHardwareWreckerChronicleItem(
+        event,
+        side,
+        cardPresentationsById,
+        translate,
+      ),
+      runnerForgoneActionChronicleItem(event, effects, translate),
+    ].filter((item): item is ChronicleItem => item !== undefined);
     const insideJobAutoPassItem = insideJobAutoPassChronicleItem(
       event,
       side,
@@ -5717,16 +5757,27 @@ export function formatChronicleEffectItems(
           !shouldMergeCardResolverEffect(event, effect) &&
           !shouldSuppressPaymentSupportCreditEffect(event, effect),
       )
-      .map((effect, index) =>
-        formatSemanticChronicleEffect(
+      .map((effect, index) => {
+        const item = formatSemanticChronicleEffect(
           event,
           effect,
           index,
           side,
           translate,
           cardPresentationsById,
-        ),
-      );
+        );
+        return {
+          ...item,
+          ...chronicleEffectDetail(
+            event,
+            effect,
+            item,
+            side,
+            translate,
+            cardPresentationsById,
+          ),
+        };
+      });
     const tagGainItem = tagGainChronicleItem(
       event,
       side,
@@ -5736,6 +5787,7 @@ export function formatChronicleEffectItems(
     );
     const terminalItem = terminalFlatlineChronicleItem(event, side, translate);
     return [
+      ...extraItems,
       ...(insideJobAutoPassItem ? [insideJobAutoPassItem] : []),
       ...(successfulRunCreditItem ? [successfulRunCreditItem] : []),
       ...(tagGainItem ? [tagGainItem] : []),
@@ -5957,6 +6009,7 @@ function terminalFlatlineChronicleItem(
 function runnerForgoneActionChronicleItem(
   event: PublicGameEvent,
   effects: ResolvedGameEffect[],
+  translate?: ChronicleTranslate,
 ): ChronicleItem | undefined {
   const effect = effects.find(
     (candidate) =>
@@ -5975,18 +6028,24 @@ function runnerForgoneActionChronicleItem(
     importance: "important",
     visibility: "public",
     actor: "runner",
-    title: `Aktion ${actionOrdinal}: Der Runner überspringt diese Aktion (${sourceTitle}).`,
-    chips: ["Runner", `Aktion ${actionOrdinal}`, "Übersprungen", sourceTitle],
+    title: translate
+      ? translate("details.runnerForgone", {
+          number: actionOrdinal,
+          source: sourceTitle,
+        })
+      : `Aktion ${actionOrdinal}: Der Runner überspringt diese Aktion (${sourceTitle}).`,
+    chips: translate
+      ? [
+          sourceTitle,
+          translate("details.actionNumber", { number: actionOrdinal }),
+        ]
+      : ["Runner", `Aktion ${actionOrdinal}`, "Übersprungen", sourceTitle],
     ...(sourceDefinitionId ? { cardDefinitionId: sourceDefinitionId } : {}),
     cardTitle: sourceTitle,
     cardDetailLines: [],
-    groupLabel: groupLabelFor(
-      "danger",
-      "runner",
-      undefined,
-      undefined,
-      undefined,
-    ),
+    groupLabel: translate
+      ? translate("group.danger", { server: translate("server.newRemote") })
+      : groupLabelFor("danger", "runner", undefined, undefined, undefined),
   };
 }
 
@@ -6011,6 +6070,7 @@ function encounterTaxChronicleItem(
   event: PublicGameEvent,
   side: Side,
   cardPresentationsById?: PublicCardPresentationsById,
+  translate?: ChronicleTranslate,
 ): ChronicleItem | undefined {
   const payload = event.publicPayload ?? {};
   const requiredAmount = positiveIntegerValue(payload.encounterTaxForFutureIce);
@@ -6045,28 +6105,51 @@ function encounterTaxChronicleItem(
     importance: paid ? "important" : "critical",
     visibility: "public",
     actor: "runner",
-    title: paid
-      ? `${runnerSubject} wegen ${sourceTitle} ${creditText(paidAmount)} für die Begegnung${encounteredIceSuffix} bezahlt.`
-      : `${runnerCouldNotPay} die von ${sourceTitle} verlangten ${creditText(requiredAmount)} nicht bezahlen; der Run endete bei der Begegnung${encounteredIceSuffix}.`,
-    description: paid
-      ? `Die ungebrochene Subroutine von ${sourceTitle} gilt für den restlichen Run; nach der Zahlung läuft der Run weiter.`
-      : `Die ungebrochene Subroutine von ${sourceTitle} verlangt bei jeder weiteren ICE-Begegnung ${creditText(requiredAmount)}; ohne Zahlung endet der Run.`,
-    chips: uniqueChips([
-      ...baseChips("runner", false),
-      sourceTitle,
-      paid
-        ? `${paidAmount} ${creditLabel(paidAmount)} bezahlt`
-        : `${requiredAmount} ${creditLabel(requiredAmount)} fehlen`,
-      ...(encounteredIceTitle && encounteredIceTitle !== sourceTitle
-        ? [encounteredIceTitle]
-        : []),
-      ...(serverLabel ? [serverLabel] : []),
-      paid ? "Run läuft weiter" : "Run endet",
-    ]),
+    title: translate
+      ? translate(
+          paid ? "details.encounterTaxPaid" : "details.encounterTaxUnpaid",
+          {
+            source: sourceTitle,
+            amount: paid ? paidAmount : requiredAmount,
+            ice: encounteredIceTitle ?? translate("card.unknown"),
+          },
+        )
+      : paid
+        ? `${runnerSubject} wegen ${sourceTitle} ${creditText(paidAmount)} für die Begegnung${encounteredIceSuffix} bezahlt.`
+        : `${runnerCouldNotPay} die von ${sourceTitle} verlangten ${creditText(requiredAmount)} nicht bezahlen; der Run endete bei der Begegnung${encounteredIceSuffix}.`,
+    description: translate
+      ? translate("details.encounterTaxRule", {
+          source: sourceTitle,
+          amount: requiredAmount,
+        })
+      : paid
+        ? `Die ungebrochene Subroutine von ${sourceTitle} gilt für den restlichen Run; nach der Zahlung läuft der Run weiter.`
+        : `Die ungebrochene Subroutine von ${sourceTitle} verlangt bei jeder weiteren ICE-Begegnung ${creditText(requiredAmount)}; ohne Zahlung endet der Run.`,
+    chips: translate
+      ? [
+          sourceTitle,
+          translate(paid ? "details.runContinues" : "details.runEnded"),
+        ]
+      : uniqueChips([
+          ...baseChips("runner", false),
+          sourceTitle,
+          paid
+            ? `${paidAmount} ${creditLabel(paidAmount)} bezahlt`
+            : `${requiredAmount} ${creditLabel(requiredAmount)} fehlen`,
+          ...(encounteredIceTitle && encounteredIceTitle !== sourceTitle
+            ? [encounteredIceTitle]
+            : []),
+          ...(serverLabel ? [serverLabel] : []),
+          paid ? "Run läuft weiter" : "Run endet",
+        ]),
     cardDefinitionId: sourceDefinitionId,
     cardTitle: sourceTitle,
     cardDetailLines: [],
-    groupLabel: groupLabelFor("run", "runner", undefined, serverLabel),
+    groupLabel: translate
+      ? translate("group.run", {
+          server: serverLabel ?? translate("server.newRemote"),
+        })
+      : groupLabelFor("run", "runner", undefined, serverLabel),
   };
 }
 
@@ -6120,6 +6203,7 @@ function insideJobAutoPassChronicleItem(
 
 function aiBoonRunStrengthChronicleItem(
   event: PublicGameEvent,
+  translate?: ChronicleTranslate,
 ): ChronicleItem | undefined {
   const payload = event.publicPayload ?? {};
   const dieRoll = payloadRandomRoll(payload);
@@ -6139,17 +6223,23 @@ function aiBoonRunStrengthChronicleItem(
     importance: "important",
     visibility: "public",
     actor: "runner",
-    title: `AI Boon würfelt eine ${dieRoll} und hat für diesen Run Grundstärke ${runStrength}.`,
-    chips: uniqueChips([
-      ...baseChips("runner", false),
-      "AI Boon",
-      `Wurf ${dieRoll}`,
-      `Grundstärke ${runStrength}`,
-    ]),
+    title: translate
+      ? translate("details.aiBoon", { roll: dieRoll, strength: runStrength })
+      : `AI Boon würfelt eine ${dieRoll} und hat für diesen Run Grundstärke ${runStrength}.`,
+    chips: translate
+      ? ["AI Boon", translate("details.dieResult", { roll: dieRoll })]
+      : uniqueChips([
+          ...baseChips("runner", false),
+          "AI Boon",
+          `Wurf ${dieRoll}`,
+          `Grundstärke ${runStrength}`,
+        ]),
     cardDefinitionId: "onr_v1_002_ai-boon",
     cardTitle: "AI Boon",
     cardDetailLines: [],
-    groupLabel: groupLabelFor("run", "runner", undefined, serverLabel),
+    groupLabel: translate
+      ? translate("group.run", { server: translate("server.newRemote") })
+      : groupLabelFor("run", "runner", undefined, serverLabel),
   };
 }
 
@@ -6294,6 +6384,7 @@ function traceHardwareWreckerChronicleItem(
   event: PublicGameEvent,
   side: Side,
   cardPresentationsById?: PublicCardPresentationsById,
+  translate?: ChronicleTranslate,
 ): ChronicleItem | undefined {
   const payload = event.publicPayload ?? {};
   if (
@@ -6329,32 +6420,53 @@ function traceHardwareWreckerChronicleItem(
     importance: "critical",
     visibility: "public",
     ...(actor ? { actor } : {}),
-    title: ensurePeriod(`${sourceTitle}: ${trashText} und ${damageText}`),
-    description: ensurePeriod(
-      `Der erfolgreiche Trace beendet den Run${payload.damageCannotBePrevented === true ? "; der Schaden kann nicht verhindert werden" : ""}`,
-    ),
-    chips: uniqueChips([
-      ...baseChips(actor, false),
-      sourceTitle,
-      "Trace-Erfolg",
-      trashedTitle ??
-        (trashedCount > 0 ? `${trashedCount} Hardware` : "Keine Hardware"),
-      `${damageAmount} ${damageType}`,
-      ...(payload.damageCannotBePrevented === true
-        ? ["Nicht verhinderbar"]
-        : []),
-      "Run endet",
-    ]),
+    title: translate
+      ? translate("details.traceHardware", {
+          source: sourceTitle,
+          card: trashedTitle ?? translate("card.unknown"),
+          count: trashedCount,
+          amount: damageAmount,
+          damage: semanticDamageTypeLabel(
+            stringValue(payload.damageType),
+            translate,
+          ),
+        })
+      : ensurePeriod(`${sourceTitle}: ${trashText} und ${damageText}`),
+    description: translate
+      ? translate(
+          payload.damageCannotBePrevented === true
+            ? "details.traceHardwareUnpreventable"
+            : "details.runEnded",
+        )
+      : ensurePeriod(
+          `Der erfolgreiche Trace beendet den Run${payload.damageCannotBePrevented === true ? "; der Schaden kann nicht verhindert werden" : ""}`,
+        ),
+    chips: translate
+      ? [sourceTitle, translate("details.runEnded")]
+      : uniqueChips([
+          ...baseChips(actor, false),
+          sourceTitle,
+          "Trace-Erfolg",
+          trashedTitle ??
+            (trashedCount > 0 ? `${trashedCount} Hardware` : "Keine Hardware"),
+          `${damageAmount} ${damageType}`,
+          ...(payload.damageCannotBePrevented === true
+            ? ["Nicht verhinderbar"]
+            : []),
+          "Run endet",
+        ]),
     ...(sourceDefinitionId ? { cardDefinitionId: sourceDefinitionId } : {}),
     cardTitle: sourceTitle,
     cardDetailLines: [],
-    groupLabel: groupLabelFor(
-      "run",
-      actor,
-      undefined,
-      displayServerLabel(stringValue(payload.serverLabel)),
-      undefined,
-    ),
+    groupLabel: translate
+      ? translate("group.danger", { server: translate("server.newRemote") })
+      : groupLabelFor(
+          "run",
+          actor,
+          undefined,
+          displayServerLabel(stringValue(payload.serverLabel)),
+          undefined,
+        ),
   };
 }
 
@@ -7572,6 +7684,7 @@ function endTurnCreditPayoutChronicleItem(
   event: PublicGameEvent,
   side: Side,
   cardPresentationsById?: PublicCardPresentationsById,
+  translate?: ChronicleTranslate,
 ): ChronicleItem | undefined {
   const payload = event.publicPayload ?? {};
   const actionType = stringValue(payload.actionType) ?? event.type;
@@ -7603,25 +7716,29 @@ function endTurnCreditPayoutChronicleItem(
     importance: "important",
     visibility: "public",
     ...(actor ? { actor } : {}),
-    title: `${iceClause}${recipientClause}${sourceClause} ${creditText(gainedCredits)}.`,
-    chips: uniqueChips([
-      "Zugende",
-      `+${gainedCredits} ${creditLabel(gainedCredits)}`,
-      ...(rezzedIceCount !== undefined && rezzedIceCount > 0
-        ? [`${rezzedIceCount} ICE gerezzt`]
-        : []),
-      ...(sourceTitle ? [sourceTitle] : []),
-    ]),
+    title: translate
+      ? translate("details.endTurnPayout", {
+          source: sourceTitle ?? translate("card.unknown"),
+          amount: gainedCredits,
+          count: rezzedIceCount ?? translate("details.unknown"),
+        })
+      : `${iceClause}${recipientClause}${sourceClause} ${creditText(gainedCredits)}.`,
+    chips: translate
+      ? [translate("details.endTurn"), ...(sourceTitle ? [sourceTitle] : [])]
+      : uniqueChips([
+          "Zugende",
+          `+${gainedCredits} ${creditLabel(gainedCredits)}`,
+          ...(rezzedIceCount !== undefined && rezzedIceCount > 0
+            ? [`${rezzedIceCount} ICE gerezzt`]
+            : []),
+          ...(sourceTitle ? [sourceTitle] : []),
+        ]),
     ...(sourceDefinitionId ? { cardDefinitionId: sourceDefinitionId } : {}),
     ...(sourceTitle ? { cardTitle: sourceTitle } : {}),
     cardDetailLines: [],
-    groupLabel: groupLabelFor(
-      "economy",
-      actor,
-      undefined,
-      undefined,
-      undefined,
-    ),
+    groupLabel: translate
+      ? translate("group.economy", { server: translate("server.newRemote") })
+      : groupLabelFor("economy", actor, undefined, undefined, undefined),
   };
 }
 
