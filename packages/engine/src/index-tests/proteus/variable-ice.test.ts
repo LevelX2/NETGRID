@@ -2500,6 +2500,12 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
           action.payload?.corpPostPassIceAbility === "return_passed_ice_to_hq",
       );
       expect(
+        corpActions.every(
+          (action) =>
+            action.payload?.postPassIceTrashedUnlessReturned === false,
+        ),
+      ).toBe(true);
+      expect(
         corpActions.map((action) => action.payload?.decision).sort(),
       ).toEqual(
         mode === "required_pay_or_return"

@@ -3790,6 +3790,13 @@ function resolveEngineWindow(
   ) {
     return undefined;
   }
+  if (
+    context.input.playerView.pendingChoice?.source.startsWith(
+      "runner.delayed_install_destination:",
+    )
+  ) {
+    return undefined;
+  }
   const actionIds = new Set(
     context.input.legalActions.map((action) => action.actionId),
   );

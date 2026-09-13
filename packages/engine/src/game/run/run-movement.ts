@@ -191,6 +191,9 @@ export function buildCorpPostPassIceReturnToHqActions(
     sourceDefinitionId: pending.sourceDefinitionId,
     passedIceId: pending.passedIceId,
     passedIceDefinitionId: host.cards.definitionFor(pending.passedIceId).id,
+    postPassIceTrashedUnlessReturned:
+      host.state.run?.delayedSuccessfulRun?.temporaryIceId ===
+      pending.passedIceId,
     serverId: pending.serverId,
     ...(serverLabel ? { serverLabel } : {}),
   };

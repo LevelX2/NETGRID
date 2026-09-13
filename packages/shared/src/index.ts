@@ -1027,6 +1027,8 @@ export type ChoiceOption = {
     paymentSources?: Array<{ title?: string; amount: number }>;
     postBidTraceLinkDelta?: number;
     delayedInstallRemainingCounters?: number;
+    /** Engine fact for this exact delayed-install destination; no program is displaced when false. */
+    delayedInstallRequiresProgramTrash?: boolean;
     /** Corp-private facts on an exact temporary HQ-ICE encounter option. */
     temporaryEncounterSubroutineTypes?: SubroutineType[];
     temporaryEncounterHasAdditionalMechanics?: boolean;

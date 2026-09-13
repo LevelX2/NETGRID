@@ -2820,6 +2820,11 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
           (option) => option.value === hostId,
         )?.metadata?.cardTitle,
       ).toBe("Afreet");
+      expect(
+        getPlayerView(state, "runner").pendingChoice?.options.map(
+          (option) => option.metadata?.delayedInstallRequiresProgramTrash,
+        ),
+      ).toEqual([fullMemory, false]);
       expect(cardCounterAmount(state, targetId, "shell")).toBe(1);
       const choice = mustAction(
         state,

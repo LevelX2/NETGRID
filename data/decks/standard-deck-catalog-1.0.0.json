@@ -5878,7 +5878,7 @@
     },
     {
       "standardDeckId": "standard_corp_dr_dreffs_letzte_visite",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "status": "active",
       "name": "Dr. Dreffs letzte Visite",
       "side": "corp",
@@ -5913,7 +5913,7 @@
           "quantity": 3
         },
         {
-          "cardId": "onr_v1_223_banpei",
+          "cardId": "onr_proteus_029_marionette",
           "quantity": 2
         },
         {
@@ -5972,7 +5972,7 @@
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_dr_dreffs_letzte_visite",
-        "sourceDeckVersion": "1.0.0"
+        "sourceDeckVersion": "1.1.0"
       }
     }
   ]

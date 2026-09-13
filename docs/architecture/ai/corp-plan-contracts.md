@@ -964,6 +964,16 @@ auf Jenny übertragen werden; weitere Karten derselben groben Effektfamilie
 benötigen ebenfalls ein eigenes Modell.
 
 Die nachfolgende Dr.-Dreff-Choice bleibt an `corp.defend_servers` gebunden.
+Auch das anschließende ICE-Lifecycle-Fenster gehört diesem Owner. Die Engine
+liefert in jeder Post-Pass-LegalAction das exakte boolesche Fact
+`postPassIceTrashedUnlessReturned`. Temporäres Encounter-ICE würde bei
+Bezahlen oder Liegenlassen durch das Encounter-Cleanup getrasht; die kostenlose
+HQ-Rückkehr erhält dagegen die Karte. Die Bewertung in
+`corp/defense/post-pass-ice-lifecycle.ts` unterscheidet diesen Fall von
+dauerhaft installiertem Schutz. Fehlt das Fact, scheitert die Bewertung
+strukturiert statt normalen Installationsschutz anzunehmen. Die bestehende
+StateVersion-, Quell- und Serverbindung des Defense-Plans bleibt erforderlich.
+
 Die Engine liefert zu jedem angebotenen HQ-ICE die effektiven
 Subroutinentypen seines temporären Encounters und kennzeichnet zusätzliche
 mechanische Effektfamilien. Die AI-DTO erhält diese privaten Choice-Facts.
@@ -1384,6 +1394,12 @@ importiert weder die Tactical-Registry noch den allgemeinen Choice-Dispatcher.
 Der Owner liegt unter `packages/ai/src/corp/hand-management/`.
 `hand-development-signals.ts` komponiert Kartenentwicklung und den endlichen
 Overflow-Parent; `hand-overflow.ts` revalidiert dessen konkrete Konversionen.
+Der endliche Konversionsrest zählt ausschließlich ausgewählte Schritte
+dieses Owners. Handverkleinerung oder Klickverbrauch durch Score/Economy
+begrenzen das aktuelle Angebot, verbrauchen aber keinen Overflow-Schritt.
+Der letzte eigene Auswahlbeleg bleibt über Nebenaktionen erhalten, bis eine
+neue eigene Auswahl ihn ersetzt. So bleibt auch ein zwischenzeitlich nur im
+Hintergrund gehaltener Overflow-Plan konsistent.
 `hand-draw-arbitration.ts` vergleicht Handentlastung und Draw, während
 `hand-choice-bindings.ts` Discard, Draw-Filter, Shuffle und Archives-Recovery
 an ihre exakte Engine-Choice bindet. Inventarfakten und Zielgebietsdisposition

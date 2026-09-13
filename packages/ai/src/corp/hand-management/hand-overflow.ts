@@ -55,7 +55,8 @@ export function bindSelectedCorpHqOverflowConversion(
     Number.isSafeInteger(state.remainingConversions) &&
     state.remainingConversions > 0 &&
     state.remainingConversions <= state.maximumConversions &&
-    state.selectedAtStateVersion === undefined;
+    (state.selectedAtStateVersion === undefined ||
+      state.selectedAtStateVersion < input.playerView.stateVersion);
   if (!validState) {
     throw new PlanResolutionFailure("invalid_plan_identity", {
       side: input.side,
@@ -219,15 +220,21 @@ export function corpHqOverflowResolutionSignal(
           input.playerView.own.clicks,
           eligibleSourceCount,
         ));
-  const remainingConversions = Math.min(
+  // The receipt records this owner's unspent conversion budget. An unrelated
+  // score/economy action can reduce current hand overflow or remaining clicks,
+  // but cannot consume an HQ-overflow head that was never selected.
+  const remainingConversions =
+    reactivatedOverflowCount !== undefined
+      ? maximumConversions
+      : (receipt?.remainingConversions ?? maximumConversions);
+  const currentlyAvailableConversions = Math.min(
     overflowCount,
     input.playerView.own.clicks,
     eligibleSourceCount,
-    reactivatedOverflowCount !== undefined
-      ? maximumConversions
-      : (receipt?.remainingConversions ?? maximumConversions),
+    remainingConversions,
   );
-  if (maximumConversions <= 0 || remainingConversions <= 0) return undefined;
+  if (maximumConversions <= 0 || currentlyAvailableConversions <= 0)
+    return undefined;
   return {
     handPlanId: `resolve-hq-overflow:${turnKey(input)}`,
     phase: "resolve_hq_overflow",
@@ -245,6 +252,15 @@ export function corpHqOverflowResolutionSignal(
       initialOverflowCount,
       maximumConversions,
       remainingConversions,
+      ...(reactivatedOverflowCount === undefined &&
+      receipt?.selectedAtStateVersion !== undefined &&
+      receipt.selectedAtStateVersion < input.playerView.stateVersion
+        ? {
+            selectedAtStateVersion: receipt.selectedAtStateVersion,
+            expectedOverflowAfterSelectedConversion:
+              receipt.expectedOverflowAfterSelectedConversion,
+          }
+        : {}),
     },
     value: 120,
     evidenceCode: `corp_hq_overflow_exact_conversion:${overflowCount}`,

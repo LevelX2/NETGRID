@@ -5486,10 +5486,10 @@
     },
     {
       "standardDeckId": "standard_corp_dr_dreffs_letzte_visite",
-      "sourceDeckVersion": "1.0.0",
-      "sourceDeckHash": "standard-deck:cfd7da1a",
-      "sourceAnalysisHash": "deck-analysis:e6cfd941",
-      "sourceAnalysisInputHash": "deck-analysis-input:76bb03a5",
+      "sourceDeckVersion": "1.1.0",
+      "sourceDeckHash": "standard-deck:860ee091",
+      "sourceAnalysisHash": "deck-analysis:3f9cfaf5",
+      "sourceAnalysisInputHash": "deck-analysis-input:5a2ba204",
       "reviewedAt": "2026-09-13",
       "analysis": {
         "primaryStrategyIds": [
@@ -5505,7 +5505,7 @@
       "contentByLocale": {
         "en": {
           "summary": "Dr. Dreffs letzte Visite combines affordable central defense with surprising temporary ICE encounters to create protected agenda-scoring windows. Program destruction and brain damage reinforce this control plan.",
-          "deckIdea": "Keep a choice of strong ICE in HQ. Once the Runner has passed the installed defenses, Dr. Dreff forces an additional encounter at half the printed rez cost. Reclamation Project recovers spent ICE, while Crystal Palace Station Grid taxes multi-subroutine encounters. This initial list has no matchup win-rate evidence.",
+          "deckIdea": "Keep a choice of strong ICE in HQ. Once the Runner has passed the installed defenses, Dr. Dreff forces an additional encounter at half the printed rez cost. Reclamation Project recovers spent ICE, while Crystal Palace Station Grid taxes multi-subroutine encounters. This initial list has no matchup win-rate evidence. Marionette adds an affordable encounter for one Dreff credit: after being passed, it can return to HQ before the trash and be used on a later run.",
           "gamePlan": {
             "opening": "Establish credits with Efficiency Experts, Accounts Receivable and BBS Whispering Campaign. Protect HQ and R&D with affordable ICE and prepare a Dreff scoring remote. Keep Glacier available as a zero-credit temporary stop.",
             "midgame": "Reserve both advancement money and the selected Dreff encounter payment. Use Haunting Inquisition to create scoring windows. Employee Empowerment supplies optional draw and Main-Office Relocation expands HQ for ICE choices; Project Zurich is a three-advancement, two-point score without requiring overadvancement.",
@@ -5536,13 +5536,19 @@
               "cardId": "onr_classic_018_reclamation-project",
               "title": "Reclamation Project",
               "role": "Spend two consecutive actions to return selected ICE from Archives to HQ, revealing them. Respect HQ capacity when choosing the next defensive supply."
+            },
+            {
+              "cardId": "onr_proteus_029_marionette",
+              "title": "Marionette",
+              "role": "Strength zero, program trash and end the run for one Dreff credit. Return it to HQ after it is passed; if it ends the run, it is trashed without a return window."
             }
           ],
           "pilotingTips": [
             "Dreff payments are Glacier 0, Haunting Inquisition 4, Zombie 4, Toughonium Wall 6 and Colonel Failure 8 credits. Temporary ICE is normally trashed after its encounter.",
             "Dreff does not install or rez the selected ICE. Rez-income effects do not trigger. Keep at least one useful HQ option and decline low-value encounters.",
             "Shock.r must be the last installed ICE before Dreff, and its subroutine must resolve for the combination. Once the Runner can reliably break it, the lock is not guaranteed.",
-            "Reclamation Project and Corporate Shuffle each cost two consecutive actions. Avoid spending the same actions on recycling and agenda advancement in your plan."
+            "Reclamation Project and Corporate Shuffle each cost two consecutive actions. Avoid spending the same actions on recycling and agenda advancement in your plan.",
+            "When installed normally, Marionette costs one credit after every pass or returns to HQ. Its reuse does not protect Dreff from the Runner’s subsequent access."
           ],
           "weaknesses": [
             "Without Dreff, expensive ICE can clog HQ. A developed breaker suite may pass the temporary encounter and trash the upgrade.",
@@ -5552,7 +5558,7 @@
         },
         "de": {
           "summary": "Dr. Dreffs letzte Visite verbindet günstigen Zentralschutz mit überraschenden temporären ICE-Begegnungen und schafft dadurch geschützte Agenda-Fenster. Programmzerstörung und Hirnschaden verstärken diesen Kontrollplan.",
-          "deckIdea": "Halte unterschiedliche starke ICE in HQ. Nach der installierten Verteidigung erzwingt Dr. Dreff eine weitere Begegnung für die halben gedruckten Rezkosten. Reclamation Project holt verbrauchte ICE zurück; Crystal Palace Station Grid verteuert Begegnungen mit vielen Subroutinen. Für diese erste Liste liegt noch kein Nachweis einer Matchup-Siegquote vor.",
+          "deckIdea": "Halte unterschiedliche starke ICE in HQ. Nach der installierten Verteidigung erzwingt Dr. Dreff eine weitere Begegnung für die halben gedruckten Rezkosten. Reclamation Project holt verbrauchte ICE zurück; Crystal Palace Station Grid verteuert Begegnungen mit vielen Subroutinen. Für diese erste Liste liegt noch kein Nachweis einer Matchup-Siegquote vor. Marionette ergänzt für einen Dreff-Credit eine günstige Begegnung: Nach dem Passieren kann sie vor dem Trash nach HQ zurückkehren und bei einem späteren Run erneut eingesetzt werden.",
           "gamePlan": {
             "opening": "Baue mit Efficiency Experts, Accounts Receivable und BBS Whispering Campaign Credits auf. Schütze HQ und R&D mit bezahlbaren ICE und bereite einen Scoring-Remote mit Dreff vor. Halte Glacier als temporären Stopp für null Credits bereit.",
             "midgame": "Reserviere sowohl Advancement-Geld als auch die Zahlung für die gewählte Dreff-Begegnung. Haunting Inquisition schafft Scoringfenster. Employee Empowerment liefert optional Karten und Main-Office Relocation mehr HQ-Platz für ICE. Project Zurich bringt schon für drei Advancements zwei Punkte; Überentwicklung ist keine Voraussetzung.",
@@ -5583,13 +5589,19 @@
               "cardId": "onr_classic_018_reclamation-project",
               "title": "Reclamation Project",
               "role": "Hole für zwei aufeinanderfolgende Aktionen gewählte ICE aus Archives offen nach HQ zurück. Berücksichtige bei der Auswahl das Handlimit."
+            },
+            {
+              "cardId": "onr_proteus_029_marionette",
+              "title": "Marionette",
+              "role": "Stärke 0, Programmtrash und Run-Stopp für einen Dreff-Credit. Nach dem Passieren nach HQ zurücknehmen; beendet sie den Run, wird sie ohne Rückkehrfenster getrasht."
             }
           ],
           "pilotingTips": [
             "Dreff-Zahlungen: Glacier 0, Haunting Inquisition 4, Zombie 4, Toughonium Wall 6 und Colonel Failure 8 Credits. Temporäre ICE werden nach ihrer Begegnung normalerweise getrasht.",
             "Dreff installiert und rezzt das gewählte ICE nicht. Rez-Einkommen wird nicht ausgelöst. Halte mindestens eine wirksame HQ-Option bereit und verzichte auf Begegnungen mit geringem Nutzen.",
             "Shock.r muss das letzte installierte ICE vor Dreff sein und seine Subroutine durchkommen. Kann der Runner sie zuverlässig brechen, ist die Sperre nicht garantiert.",
-            "Reclamation Project und Corporate Shuffle kosten jeweils zwei aufeinanderfolgende Aktionen. Verplane diese Aktionen nicht gleichzeitig für Recycling und Agenda-Advancement."
+            "Reclamation Project und Corporate Shuffle kosten jeweils zwei aufeinanderfolgende Aktionen. Verplane diese Aktionen nicht gleichzeitig für Recycling und Agenda-Advancement.",
+            "Normal installiert kostet Marionette nach jedem Passieren einen Credit oder kehrt nach HQ zurück. Ihre Wiederverwendung schützt Dreff nicht vor dem anschließenden Zugriff des Runners."
           ],
           "weaknesses": [
             "Ohne Dreff können teure ICE die HQ verstopfen. Ein fertiges Breaker-Rig kann die temporäre Begegnung überwinden und anschließend das Upgrade trashen.",

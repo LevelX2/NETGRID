@@ -6,6 +6,7 @@ import {
   ENGINE_RANDOMIZED_TURN_PLAN_SELECTION_SCHEMA_VERSION,
   sanitizeAiDecisionDebug,
   type AiDecisionInput,
+  type LegalAction,
   type EngineRandomizedTurnPlanSelectionQuoteResult,
   type EngineRandomizedTurnPlanSelectionRequest,
   type PublicGameEvent,
@@ -16,6 +17,7 @@ import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
 import type { CorpStrategicIntentProfile } from "../corp-strategic-intent";
 import { buildAiDecisionInputDto } from "../input-dto";
+import { corpHqOverflowResolutionSignal } from "../corp/hand-management/hand-overflow";
 import { buildRunnerEconomyPosture } from "../runner-economy-posture";
 import {
   evaluateRunnerHandDevelopment,
@@ -3112,172 +3114,213 @@ describe("authoritative plan-first live runtime", () => {
     );
   });
 
-  it("binds Datacomb's exact post-pass pay action to corp.defend_servers", () => {
-    resetResidentPlanPortfolioMemory();
-    const pay = legalAction(
-      "corp.datacomb.pay",
-      "corp",
-      "continue_run",
-      "Datacomb behalten",
-      { credits: 1, clicks: 0 },
-      {
-        source: "datacomb-ice",
-        payload: {
-          corpPostPassIceAbility: "return_passed_ice_to_hq",
-          sourceDefinitionId: "onr_proteus_018_datacomb",
-          decision: "pay",
-          paymentAmount: 1,
-          serverId: "hq",
-        },
-      },
-    );
-    const returnToHq = legalAction(
-      "corp.datacomb.return_to_hq",
-      "corp",
-      "continue_run",
-      "Datacomb auf die HQ zurücknehmen",
-      { credits: 0, clicks: 0 },
-      {
-        source: "datacomb-ice",
-        payload: {
-          corpPostPassIceAbility: "return_passed_ice_to_hq",
-          sourceDefinitionId: "onr_proteus_018_datacomb",
-          decision: "return_to_hq",
-          serverId: "hq",
-        },
-      },
-    );
-    const input = aiInput("corp", [returnToHq, pay]);
-    pay.expiresAtStateVersion = input.playerView.stateVersion;
-    returnToHq.expiresAtStateVersion = input.playerView.stateVersion;
-    input.playerView.phase = "run";
-    input.playerView.timingPoint = "run.jack_out_window";
-    input.playerView.own.credits = 5;
-    input.playerView.run = {
-      attackedServerId: "hq",
-      phase: "movement",
-      position: { kind: "server", serverId: "hq" },
-      successful: false,
-    };
-    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
-    Object.assign(input, {
-      planningStateIdentity: buildPlanningStateIdentity(input),
-    });
-    expect(
-      buildActionSemanticCandidates(input).map((candidate) => ({
-        actionId: candidate.actionId,
-        actionType: candidate.actionType,
-        semanticActionType: candidate.semanticActionType,
-      })),
-    ).toEqual([
-      {
-        actionId: returnToHq.actionId,
-        actionType: "continue_run",
-        semanticActionType: "run.continue",
-      },
-      {
-        actionId: pay.actionId,
-        actionType: "continue_run",
-        semanticActionType: "run.continue",
-      },
-    ]);
-
-    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
-
-    expect(decision).toMatchObject({
-      actionId: pay.actionId,
-      reasonCode: "plan_first.corp.defend_servers",
-      fallbackUsed: false,
-      decisionDebug: {
-        planKind: "corp.defend_servers",
-        planFirstDecision: {
-          selectedPlan: {
-            instanceId: "plan:corp.defend_servers:server-defense-portfolio",
-          },
-          route: {
-            actionId: pay.actionId,
+  it.each([
+    ["onr_proteus_018_datacomb", false],
+    ["onr_proteus_018_datacomb", true],
+    ["onr_proteus_029_marionette", false],
+    ["onr_proteus_029_marionette", true],
+    ["onr_proteus_043_twisty-passages", true],
+  ] as const)(
+    "binds %s post-pass retention with temporary=%s to corp.defend_servers",
+    (definitionId, temporary) => {
+      resetResidentPlanPortfolioMemory();
+      const pay = legalAction(
+        "corp.datacomb.pay",
+        "corp",
+        "continue_run",
+        "Datacomb behalten",
+        { credits: 1, clicks: 0 },
+        {
+          source: "datacomb-ice",
+          payload: {
+            corpPostPassIceAbility: "return_passed_ice_to_hq",
+            postPassIceTrashedUnlessReturned: temporary,
+            sourceDefinitionId: definitionId,
+            decision: "pay",
+            paymentAmount: 1,
+            serverId: "hq",
           },
         },
-      },
-    });
-    expect(decision.evidence).toEqual(
-      expect.arrayContaining([
-        "plan_first_lane:plan",
-        "plan_module:corp.defend_servers",
-      ]),
-    );
-  });
-
-  it("binds Scaffolding's optional post-pass decline to corp.defend_servers", () => {
-    resetResidentPlanPortfolioMemory();
-    const decline = legalAction(
-      "corp.scaffolding.decline",
-      "corp",
-      "continue_run",
-      "Scaffolding liegen lassen",
-      { credits: 0, clicks: 0 },
-      {
-        source: "scaffolding-ice",
-        payload: {
-          corpPostPassIceAbility: "return_passed_ice_to_hq",
-          sourceDefinitionId: "onr_proteus_037_scaffolding",
-          decision: "decline",
-          serverId: "hq",
-        },
-      },
-    );
-    const returnToHq = legalAction(
-      "corp.scaffolding.return_to_hq",
-      "corp",
-      "continue_run",
-      "Scaffolding auf die HQ zurücknehmen",
-      { credits: 0, clicks: 0 },
-      {
-        source: "scaffolding-ice",
-        payload: {
-          corpPostPassIceAbility: "return_passed_ice_to_hq",
-          sourceDefinitionId: "onr_proteus_037_scaffolding",
-          decision: "return_to_hq",
-          gainCredits: 1,
-          serverId: "hq",
-        },
-      },
-    );
-    const input = aiInput("corp", [returnToHq, decline]);
-    decline.expiresAtStateVersion = input.playerView.stateVersion;
-    returnToHq.expiresAtStateVersion = input.playerView.stateVersion;
-    input.playerView.phase = "run";
-    input.playerView.timingPoint = "run.jack_out_window";
-    input.playerView.run = {
-      attackedServerId: "hq",
-      phase: "movement",
-      position: { kind: "server", serverId: "hq" },
-      successful: false,
-    };
-    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
-    Object.assign(input, {
-      planningStateIdentity: buildPlanningStateIdentity(input),
-    });
-
-    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
-
-    expect(decision).toMatchObject({
-      actionId: decline.actionId,
-      reasonCode: "plan_first.corp.defend_servers",
-      fallbackUsed: false,
-      decisionDebug: {
-        planKind: "corp.defend_servers",
-        planFirstDecision: {
-          selectedPlan: {
-            instanceId: "plan:corp.defend_servers:server-defense-portfolio",
-          },
-          route: {
-            actionId: decline.actionId,
+      );
+      const returnToHq = legalAction(
+        "corp.datacomb.return_to_hq",
+        "corp",
+        "continue_run",
+        "Datacomb auf die HQ zurücknehmen",
+        { credits: 0, clicks: 0 },
+        {
+          source: "datacomb-ice",
+          payload: {
+            corpPostPassIceAbility: "return_passed_ice_to_hq",
+            postPassIceTrashedUnlessReturned: temporary,
+            sourceDefinitionId: definitionId,
+            decision: "return_to_hq",
+            serverId: "hq",
           },
         },
-      },
-    });
-  });
+      );
+      const input = aiInput("corp", [returnToHq, pay]);
+      pay.expiresAtStateVersion = input.playerView.stateVersion;
+      returnToHq.expiresAtStateVersion = input.playerView.stateVersion;
+      input.playerView.phase = "run";
+      input.playerView.timingPoint = "run.jack_out_window";
+      input.playerView.own.credits = 5;
+      input.playerView.run = {
+        attackedServerId: "hq",
+        phase: "movement",
+        position: { kind: "server", serverId: "hq" },
+        successful: false,
+      };
+      input.playerView.servers = [
+        server("hq"),
+        server("rd"),
+        server("archives"),
+      ];
+      Object.assign(input, {
+        planningStateIdentity: buildPlanningStateIdentity(input),
+      });
+      expect(
+        buildActionSemanticCandidates(input).map((candidate) => ({
+          actionId: candidate.actionId,
+          actionType: candidate.actionType,
+          semanticActionType: candidate.semanticActionType,
+        })),
+      ).toEqual([
+        {
+          actionId: returnToHq.actionId,
+          actionType: "continue_run",
+          semanticActionType: "run.continue",
+        },
+        {
+          actionId: pay.actionId,
+          actionType: "continue_run",
+          semanticActionType: "run.continue",
+        },
+      ]);
+
+      const expectedAction = temporary ? returnToHq : pay;
+      const dto = buildAiDecisionInputDto({
+        ...input,
+        actionNumber: input.playerView.stateVersion,
+      });
+      expect(
+        dto.legalActions.every(
+          (a) => a.payload?.postPassIceTrashedUnlessReturned === temporary,
+        ),
+      ).toBe(true);
+      const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+      expect(decision).toMatchObject({
+        actionId: expectedAction.actionId,
+        reasonCode: "plan_first.corp.defend_servers",
+        fallbackUsed: false,
+        decisionDebug: {
+          planKind: "corp.defend_servers",
+          planFirstDecision: {
+            selectedPlan: {
+              instanceId: "plan:corp.defend_servers:server-defense-portfolio",
+            },
+            route: {
+              actionId: expectedAction.actionId,
+            },
+          },
+        },
+      });
+      expect(decision.evidence).toEqual(
+        expect.arrayContaining([
+          "plan_first_lane:plan",
+          "plan_module:corp.defend_servers",
+        ]),
+      );
+      resetResidentPlanPortfolioMemory();
+      for (const action of input.legalActions)
+        delete action.payload!.postPassIceTrashedUnlessReturned;
+      expect(() =>
+        liveContext().chooseSemanticRuntimeAction(input, {}),
+      ).toThrow(PlanResolutionFailure);
+    },
+  );
+
+  it.each([false, true])(
+    "binds optional post-pass lifecycle with temporary=%s to corp.defend_servers",
+    (temporary) => {
+      resetResidentPlanPortfolioMemory();
+      const decline = legalAction(
+        "corp.scaffolding.decline",
+        "corp",
+        "continue_run",
+        "Scaffolding liegen lassen",
+        { credits: 0, clicks: 0 },
+        {
+          source: "scaffolding-ice",
+          payload: {
+            corpPostPassIceAbility: "return_passed_ice_to_hq",
+            postPassIceTrashedUnlessReturned: temporary,
+            sourceDefinitionId: "onr_proteus_037_scaffolding",
+            decision: "decline",
+            serverId: "hq",
+          },
+        },
+      );
+      const returnToHq = legalAction(
+        "corp.scaffolding.return_to_hq",
+        "corp",
+        "continue_run",
+        "Scaffolding auf die HQ zurücknehmen",
+        { credits: 0, clicks: 0 },
+        {
+          source: "scaffolding-ice",
+          payload: {
+            corpPostPassIceAbility: "return_passed_ice_to_hq",
+            postPassIceTrashedUnlessReturned: temporary,
+            sourceDefinitionId: "onr_proteus_037_scaffolding",
+            decision: "return_to_hq",
+            gainCredits: 1,
+            serverId: "hq",
+          },
+        },
+      );
+      const input = aiInput("corp", [returnToHq, decline]);
+      decline.expiresAtStateVersion = input.playerView.stateVersion;
+      returnToHq.expiresAtStateVersion = input.playerView.stateVersion;
+      input.playerView.phase = "run";
+      input.playerView.timingPoint = "run.jack_out_window";
+      input.playerView.run = {
+        attackedServerId: "hq",
+        phase: "movement",
+        position: { kind: "server", serverId: "hq" },
+        successful: false,
+      };
+      input.playerView.servers = [
+        server("hq"),
+        server("rd"),
+        server("archives"),
+      ];
+      Object.assign(input, {
+        planningStateIdentity: buildPlanningStateIdentity(input),
+      });
+
+      const expectedAction = temporary ? returnToHq : decline;
+      const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+
+      expect(decision).toMatchObject({
+        actionId: expectedAction.actionId,
+        reasonCode: "plan_first.corp.defend_servers",
+        fallbackUsed: false,
+        decisionDebug: {
+          planKind: "corp.defend_servers",
+          planFirstDecision: {
+            selectedPlan: {
+              instanceId: "plan:corp.defend_servers:server-defense-portfolio",
+            },
+            route: {
+              actionId: expectedAction.actionId,
+            },
+          },
+        },
+      });
+    },
+  );
 
   it("classifies a duplicate optional program-trash install only through its exact variant owner", () => {
     resetResidentPlanPortfolioMemory();
@@ -8574,6 +8617,274 @@ describe("authoritative plan-first live runtime", () => {
       reasonCode: "plan_first.corp.complete_turn",
     });
   });
+
+  it.each([false, true])(
+    "binds a delayed install destination to its pipeline owner with rig displacement %s",
+    (fullRig) => {
+      resetResidentPlanPortfolioMemory();
+      const input = aiInput("runner", []);
+      const version = input.playerView.stateVersion;
+      const sourceId = "shell-source",
+        targetId = "prepared-target",
+        hostId = "daemon-host";
+      input.playerView.own.rig = [
+        visibleCard(sourceId, "runner", "resource", {
+          definitionId: "onr_v1_176_the-shell-traders",
+        }),
+        visibleCard(hostId, "runner", "program", {
+          definitionId: "onr_v1_001_afreet",
+        }),
+      ];
+      input.playerView.specialZones = {
+        setAsideCount: 1,
+        removedFromGameCount: 0,
+        setAside: [
+          visibleCard(targetId, "runner", "program", {
+            definitionId: "onr_v1_059_self-modifying-code",
+          }),
+        ],
+        removedFromGame: [],
+      };
+      input.playerView.pendingChoice = {
+        choiceId: `destination-${version}`,
+        side: "runner",
+        kind: "select_option",
+        source: `runner.delayed_install_destination:${sourceId}:${targetId}:start_turn:${version}`,
+        sourceCardInstanceId: sourceId,
+        sourceCardDefinitionId: "onr_v1_176_the-shell-traders",
+        prompt: "Installationsziel",
+        stateVersion: version,
+        visibility: "public",
+        minSelections: 1,
+        maxSelections: 1,
+        options: [
+          {
+            id: "rig",
+            value: "rig",
+            label: "Rig",
+            metadata: { delayedInstallRequiresProgramTrash: fullRig },
+          },
+          {
+            id: `host_${hostId}`,
+            value: hostId,
+            label: "Host",
+            metadata: { delayedInstallRequiresProgramTrash: false },
+          },
+        ],
+      };
+      const action = {
+        actionId: "runner.resolve_choice",
+        label: "Installationsziel wählen",
+        type: "resolve_choice",
+        side: "runner",
+        source: "game_rule",
+        timingPoint: input.playerView.timingPoint,
+        expiresAtStateVersion: version,
+        costs: [],
+        targetRequirements: [],
+        visibility: "private_to_actor",
+        choiceRequirements: [
+          {
+            choiceId: `destination-${version}`,
+            minSelections: 1,
+            maxSelections: 1,
+            optionIds: ["rig", `host_${hostId}`],
+          },
+        ],
+        payload: {
+          choiceId: `destination-${version}`,
+          choiceKind: "select_option",
+        },
+      } as LegalAction;
+      input.legalActions = [action];
+      input.playerView.legalActions = [action];
+      const dto = buildAiDecisionInputDto({ ...input, actionNumber: version });
+      expect(
+        dto.playerView.pendingChoice?.options.map(
+          (option) => option.metadata?.delayedInstallRequiresProgramTrash,
+        ),
+      ).toEqual([fullRig, false]);
+      const context = liveContext({
+        selectedChoicesForDecision: (
+          i: AiDecisionInput,
+          a: LegalAction,
+          p: ReturnType<typeof residentPlanPortfolioSnapshot>,
+        ) => selectedChoicesForDecision(i, a, {} as never, p),
+      });
+      const decision = context.chooseSemanticRuntimeAction(input, {});
+      expect(decision).toMatchObject({
+        actionId: action.actionId,
+        reasonCode: "plan_first.runner.shell_traders_pipeline",
+        fallbackUsed: false,
+      });
+      const portfolio = residentPlanPortfolioSnapshot(input)!;
+      const executor = portfolio.instances.find(
+        (instance) => instance.instanceId === portfolio.executorInstanceId,
+      )!;
+      expect(executor.moduleId).toBe("runner.shell_traders_pipeline");
+      expect(executor.dedupeKey).toBe(`${sourceId}:${targetId}`);
+      expect(executor.moduleState).toMatchObject({
+        kind: "shell_traders_destination",
+        actionId: action.actionId,
+        stateVersion: version,
+        sourceCardInstanceId: sourceId,
+        targetCardInstanceId: targetId,
+        selectedOptionId: fullRig ? `host_${hostId}` : "rig",
+      });
+      expect(
+        selectedChoicesForDecision(input, action, {} as never, portfolio),
+      ).toEqual({
+        choiceId: `destination-${version}`,
+        selectedOptionIds: [fullRig ? `host_${hostId}` : "rig"],
+      });
+      expect(() =>
+        selectedChoicesForDecision(input, action, {} as never, {
+          ...portfolio,
+          executorInstanceId: "unrelated",
+        }),
+      ).toThrow("window_origin_missing");
+      const missingQuote = structuredClone(input);
+      delete missingQuote.playerView.pendingChoice!.options[0]!.metadata!
+        .delayedInstallRequiresProgramTrash;
+      resetResidentPlanPortfolioMemory();
+      expect(() =>
+        context.chooseSemanticRuntimeAction(missingQuote, {}),
+      ).toThrow("window_origin_missing");
+      const stale = structuredClone(input);
+      stale.legalActions[0]!.expiresAtStateVersion = version - 1;
+      resetResidentPlanPortfolioMemory();
+      expect(() => context.chooseSemanticRuntimeAction(stale, {})).toThrow();
+    },
+  );
+
+  it.each([false, true])(
+    "preserves HQ-overflow receipt ownership across unrelated hand progress after own conversion %s",
+    (previouslySelected) => {
+      const installA = pacificaOverflowInstall(
+        "a-install",
+        "pacifica-a",
+        "remote_1",
+      );
+      const installB = pacificaOverflowInstall(
+        "b-install",
+        "pacifica-b",
+        "remote_1",
+      );
+      const input = aiInput("corp", [installA, installB]);
+      input.playerView.own.clicks = 3;
+      input.playerView.own.credits = 10;
+      input.playerView.own.gripOrHq = [
+        pacificaCard("pacifica-a"),
+        pacificaCard("pacifica-b"),
+        ...corpOverflowFillers(5),
+      ];
+      input.playerView.servers = [
+        server("hq"),
+        server("rd"),
+        server("archives"),
+        server("remote_1"),
+      ];
+      const candidates = () =>
+        buildActionSemanticCandidates({
+          legalActions: input.legalActions,
+          observerSide: "corp",
+          stateVersion: input.playerView.stateVersion,
+          visibleSourceDefinitionsByInstanceId: {
+            "pacifica-a": "onr_v1_334_pacifica-regional-ai",
+            "pacifica-b": "onr_v1_334_pacifica-regional-ai",
+          },
+        });
+      const development = [
+        {
+          phase: "develop_card",
+          handPlanId: "develop-pacifica",
+          agendaCount: 0,
+          handSize: 7,
+          maximumHandSize: 5,
+          concretePurposeCode: "Install the available asset.",
+          evidenceCode: "test_exact_pacifica_install",
+          actionIds: [installA.actionId, installB.actionId],
+          value: 120,
+        },
+      ] as Parameters<typeof corpHqOverflowResolutionSignal>[4];
+      for (const action of input.legalActions)
+        action.expiresAtStateVersion = input.playerView.stateVersion;
+      const initial = corpHqOverflowResolutionSignal(
+        input,
+        candidates(),
+        0,
+        undefined,
+        development,
+        [],
+      )!;
+      expect(initial.overflowResolutionState).toMatchObject({
+        maximumConversions: 2,
+        remainingConversions: 2,
+      });
+      if (previouslySelected)
+        Object.assign(initial.overflowResolutionState!, {
+          remainingConversions: 1,
+          selectedAtStateVersion: input.playerView.stateVersion,
+          expectedOverflowAfterSelectedConversion: 1,
+        });
+      const previous = {
+        stateVersion: input.playerView.stateVersion,
+        instances: [
+          {
+            moduleId: "corp.hand_and_agenda_management",
+            dedupeKey: initial.handPlanId,
+            moduleState: { kind: "hand", signal: initial },
+          },
+        ],
+      } as unknown as Parameters<typeof corpHqOverflowResolutionSignal>[3];
+      input.playerView.own.gripOrHq.pop();
+      input.playerView.own.clicks = 2;
+      input.playerView.stateVersion += 1;
+      for (const action of input.legalActions)
+        action.expiresAtStateVersion = input.playerView.stateVersion;
+      const updated = corpHqOverflowResolutionSignal(
+        input,
+        candidates(),
+        0,
+        previous,
+        development,
+        [],
+      )!;
+      expect(updated.overflowResolutionState).toMatchObject({
+        maximumConversions: 2,
+        remainingConversions: previouslySelected ? 1 : 2,
+      });
+      if (previouslySelected)
+        expect(updated.overflowResolutionState?.selectedAtStateVersion).toBe(1);
+      previous!.stateVersion = input.playerView.stateVersion;
+      previous!.instances[0]!.moduleState = { kind: "hand", signal: updated };
+      input.playerView.stateVersion += 1;
+      input.playerView.own.clicks = 1;
+      for (const action of input.legalActions)
+        action.expiresAtStateVersion = input.playerView.stateVersion;
+      expect(
+        corpHqOverflowResolutionSignal(
+          input,
+          candidates(),
+          0,
+          previous,
+          development,
+          [],
+        )?.overflowResolutionState,
+      ).toMatchObject({ remainingConversions: previouslySelected ? 1 : 2 });
+      input.playerView.own.gripOrHq.pop();
+      expect(
+        corpHqOverflowResolutionSignal(
+          input,
+          candidates(),
+          0,
+          previous,
+          development,
+          [],
+        ),
+      ).toBeUndefined();
+    },
+  );
 
   it("resolves a two-card HQ overflow through two exact revalidated steps", () => {
     resetResidentPlanPortfolioMemory();
