@@ -1,4 +1,27 @@
-import type { ApiSidePayload } from "@netgrid/shared";
+import type {
+  ApiServerMessage,
+  ApiSidePayload,
+  PlayerView,
+} from "@netgrid/shared";
+
+export function withPlayerView<
+  T extends Pick<ApiSidePayload, "playerView" | "legalActions">,
+>(payload: T, playerView: PlayerView): T {
+  return { ...payload, playerView, legalActions: playerView.legalActions };
+}
+
+export function withVersionedLegalActions(
+  payload: ApiSidePayload,
+  update: Extract<ApiServerMessage, { type: "legal_actions" }>["payload"],
+): ApiSidePayload {
+  // The PlayerView already carries its actions. A separate delivery must
+  // never replace them with actions belonging to another state.
+  if (update.stateVersion !== payload.playerView.stateVersion) return payload;
+  return withPlayerView(payload, {
+    ...payload.playerView,
+    legalActions: update.legalActions,
+  });
+}
 
 export function effectiveAiTurnPresentation(
   payload: ApiSidePayload | null,

@@ -450,7 +450,14 @@ import { shouldRefreshPublicGames } from "../features/games/public-games-model";
 import {
   effectiveAiTurnPresentation,
   removePendingUndo,
+  withPlayerView,
+  withVersionedLegalActions,
 } from "../features/match-session/client-payload-helpers";
+import {
+  noticeAfterActionReceipt,
+  noticeAfterServerError,
+  type MatchNotice,
+} from "../features/match-session/match-notice";
 import { useMatchTransport } from "../features/match-session/useMatchTransport";
 import {
   ChroniclePanel,
@@ -701,7 +708,9 @@ export default function Page() {
     useState<LocalMatchClockAnchor | null>(null);
   const [lobbyChatText, setLobbyChatText] = useState("");
   const [connection, setConnection] = useState<ConnectionState>("offline");
-  const [notice, setNotice] = useState("");
+  const [matchNotice, setMatchNotice] = useState<MatchNotice>({ text: "" });
+  const notice = matchNotice.text;
+  const setNotice = useCallback((text: string) => setMatchNotice({ text }), []);
   const [undoNotice, setUndoNotice] = useState("");
   const [deckSnapshots, setDeckSnapshots] = useState<DeckSnapshot[]>([]);
   const [deckTemplates, setDeckTemplates] = useState<DeckTemplate[]>([]);
@@ -6114,7 +6123,7 @@ export default function Page() {
                   ...(message.payload.playerClock
                     ? { playerClock: message.payload.playerClock }
                     : {}),
-                  legalActions: [],
+                  legalActions: message.payload.playerView.legalActions,
                   eventTail: [],
                   opponentStatus: currentLobby?.opponentStatus ?? {
                     side: side === "runner" ? "corp" : "runner",
@@ -6124,15 +6133,17 @@ export default function Page() {
               : null;
           return nextFromLobby;
         }
-        const next = {
-          ...current,
-          matchStatus: message.payload.matchStatus,
-          matchVersion: message.payload.matchVersion,
-          playerView: message.payload.playerView,
-          ...(message.payload.playerClock
-            ? { playerClock: message.payload.playerClock }
-            : {}),
-        };
+        const next = withPlayerView(
+          {
+            ...current,
+            matchStatus: message.payload.matchStatus,
+            matchVersion: message.payload.matchVersion,
+            ...(message.payload.playerClock
+              ? { playerClock: message.payload.playerClock }
+              : {}),
+          },
+          message.payload.playerView,
+        );
         const nextWithUndo = message.payload.pendingUndo
           ? { ...next, pendingUndo: message.payload.pendingUndo }
           : removePendingUndo(next);
@@ -6150,9 +6161,7 @@ export default function Page() {
     }
     if (message.type === "legal_actions") {
       setPayload((current) =>
-        current
-          ? { ...current, legalActions: message.payload.legalActions }
-          : current,
+        current ? withVersionedLegalActions(current, message.payload) : current,
       );
       return;
     }
@@ -6218,12 +6227,20 @@ export default function Page() {
       }
       return;
     }
+    if (message.type === "action_receipt") {
+      setMatchNotice((current) =>
+        noticeAfterActionReceipt(current, message.payload),
+      );
+      return;
+    }
     if (message.type === "error") {
       pendingAiAdvanceKeyRef.current = null;
       setPaymentSupportContinuation(null);
       paymentSupportContinuationSubmittedKeyRef.current = null;
       const localizedError = errorT(userErrorMessageKey(message.payload.code));
-      setNotice(localizedError);
+      setMatchNotice((current) =>
+        noticeAfterServerError(current, message.payload.code, localizedError),
+      );
       if (message.payload.code.startsWith("undo_")) {
         setUndoNotice(localizedError);
         setUndoPanelOpen(true);
@@ -6231,11 +6248,7 @@ export default function Page() {
       if (message.payload.playerView) {
         setPayload((current) =>
           current
-            ? {
-                ...current,
-                playerView: message.payload.playerView!,
-                legalActions: message.payload.playerView!.legalActions,
-              }
+            ? withPlayerView(current, message.payload.playerView!)
             : current,
         );
       }

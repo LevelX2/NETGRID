@@ -21,6 +21,15 @@
 
 ## Run-Stufen und Aktionssymbole
 
+Match-Updates übernehmen `PlayerView` und dessen `legalActions` atomar.
+Die zusätzliche WebSocket-Nachricht `legal_actions` darf die Aktionsliste
+nur bei derselben expliziten `stateVersion` aktualisieren. Dadurch kombiniert
+die Oberfläche keine neuen Klickzahlen mit Aktionen eines früheren Zustands;
+ein autoritativer Undo-PlayerView darf weiterhin eine frühere Version liefern.
+Aktionsfehlermeldungen bleiben bis zur nächsten erfolgreichen
+`action_receipt` derselben Match-/Spielerseite sichtbar. Neuere allgemeine
+Hinweise sowie Verbindungs- und KI-Fehler werden dadurch nicht gelöscht.
+
 Der eigene Runner-Grip verwendet seine kompakte Handbreite als Grundlage
 für den Flex-Umbruch mit Stack, Rig und Heap. Erst danach nimmt der geöffnete
 Grip mit mehreren Karten den freien Platz seiner Zeile auf.
