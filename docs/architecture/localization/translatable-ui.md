@@ -92,6 +92,10 @@ und benötigt keine verdeckten Kartentitel.
 
 ## Controller-Invarianten
 
+Der aktuelle Restbefund und die Klassifikation technischer Texte stehen in
+[Präsentationsgrenzen](engine-presentation-boundaries.md). Ein bestandenes
+Literal-Gate deckt dynamisch gerenderte Validator-Diagnosen nicht ab.
+
 - Die Engine bleibt reine, deterministische Regelautorität und kennt keine
   aktive Nutzer-Locale.
 - Locale, Übersetzungsschlüssel und gerenderte Sätze verändern weder
