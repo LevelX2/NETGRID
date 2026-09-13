@@ -488,6 +488,7 @@ function evaluateRunnerRunTarget(
     unrezzedIceRiskCreditBuffer,
     riskyUniversalCoverage,
     visibleDuringRunRezSupport,
+    runnerGripCount: projectedGripAfterRunAction,
   });
   // The unknown remainder requires both liquid credits and a surviving grip.
   // Known damage avoidance may spend only the money outside that same reserve.
@@ -1498,6 +1499,7 @@ function quoteRunnerPrerunReserve(params: {
   unrezzedIceRiskCreditBuffer: number;
   riskyUniversalCoverage: boolean;
   visibleDuringRunRezSupport: boolean;
+  runnerGripCount: number;
 }): RunnerPrerunReserveQuote {
   const installedBreakers =
     params.deckCapabilities?.runner?.breakerInventory.filter((breaker) =>
@@ -1565,7 +1567,7 @@ function quoteRunnerPrerunReserve(params: {
     corpRezCredits,
     corpRezExposureActive,
     riskCreditBuffer: params.unrezzedIceRiskCreditBuffer,
-    runnerGripCount: params.input.playerView.own.gripOrHq.length,
+    runnerGripCount: params.runnerGripCount,
     informationProbeAllowed,
     runnerRig: params.input.playerView.own.rig,
   });

@@ -872,6 +872,12 @@ Finanzierung. Der garantierte Nettoertrag muss nach dem gesamten bekannten
 Run die vollständige Ausstiegsreserve erhalten; der Konversionsklick bleibt
 reserviert. Fehlende Coverage, andere Pfadsperren, unzureichende Reserve und
 ungebundene oder spekulative Darlehensverwendung bleiben ausgeschlossen.
+Ein an der ersten unbezahlbaren Subroutine abgebrochener Pfad ist dabei nur
+ein bekannter Kostenpräfix. Die Finanzierungszulassung prüft denselben
+Action-/Server-Parent erneut mit dem garantierten Nettobudget und dem
+Handverbrauch der Finanzierungsaktion. Nur dessen vollständiger erreichbarer
+Pfad darf die Ausstiegsreserve belegen; die aktuelle LegalAction und ihre
+StateVersion bleiben die Ausführungsautorität.
 
 ## 7. `runner.defense_and_recovery`
 
@@ -1075,6 +1081,9 @@ wirksam; ein tatsächlich folgendes ICE bleibt ein gültiges Effektziel.
 Bereits beim Runstart verwendet die bestätigte Schadensreserve die Handgröße nach dem
 Verbrauch der konkreten Run-Karte. Die Risikostufe und der verbleibende
 Handpuffer dürfen dabei nicht aus unterschiedlichen Handgrößen stammen.
+Auch die Reserve für unbekanntes ICE verwendet diese verbleibende Hand.
+Eine unveränderte Gefahr darf deshalb nicht erst im nächsten Runfenster
+einen bereits durch den Eventverbrauch entstandenen Reservemangel aufdecken.
 
 Die aktuelle Kostenprojektion für Pump und Break trennt liquide Credits von
 den tatsächlich verwendbaren sichtbaren Run-/Breaker-Pools. Sie verwendet
