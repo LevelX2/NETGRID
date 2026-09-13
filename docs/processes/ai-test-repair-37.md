@@ -101,6 +101,14 @@ werden im Paketfortschritt ergänzt.
   auf. Es wurde deshalb weder ein globales Timeout erhöht noch eine Assertion
   abgeschwächt.
 - Verbleibend: 0 bekannte fehlgeschlagene Assertions.
+- Nachgelagerte Main-Prüfung (unabhängige Baseline): 2 stale Assertions
+  ebenfalls geschlossen. `meta-434-r19` erwartete noch den alten Status
+  `blocked_unbreakable`, obwohl der aktuelle, absichtlich eingeführte
+  Funding-Vertrag `blocked_unpayable` bewahrt. Der D88-Checkpoint band eine
+  einzelne Remote-ID zu eng, obwohl `Cinderella -> remote_2` dieselbe explizite
+  Score-Schutzroute für die CFO-Kampagne erfüllt. Beide Einzeldateien sind
+  grün; diese zwei Fälle wurden getrennt vom abgeschlossenen 37er-Paket
+  behandelt.
 
 ## Paketfolge und Done-Gates
 

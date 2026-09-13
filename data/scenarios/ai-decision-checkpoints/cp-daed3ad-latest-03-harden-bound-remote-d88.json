@@ -9335,6 +9335,11 @@
       },
       {
         "type": "install_card",
+        "sourceDefinitionId": "onr_v1_228_cinderella",
+        "targetServerId": "remote_2"
+      },
+      {
+        "type": "install_card",
         "sourceDefinitionId": "onr_v1_247_haunting-inquisition",
         "targetServerId": "new_remote"
       },
