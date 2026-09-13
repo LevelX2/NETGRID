@@ -1,13 +1,14 @@
 ---
 activityId: act-2026-08-22-scored-fort-diagnostic-terminology
-status: inbox
+status: in_progress
 kind: cleanup
 area: engine
 priority: low
 primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-08-22
-startedAt:
+startedAt: 2026-09-13
+owner: netgrid-activities-20260913-89c20ec1
 completedAt:
 branch:
 releaseTarget:
@@ -63,3 +64,4 @@ zentrale Forts zulässt.
 ## Ergebnisnotiz
 
 Noch offen.
+
