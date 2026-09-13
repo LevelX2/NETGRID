@@ -21,6 +21,12 @@
 
 ## Run-Stufen und Aktionssymbole
 
+Im Run-Fenster beginnen die Phasennamen links auf derselben Textachse;
+die Phasensymbole stehen rechts. Aktionsbuttons reservieren feste Spalten
+für Aktions- und Serversymbol, auch wenn das Serversymbol fehlt. Ihre
+Beschriftungen sind linksbündig, Kosten bleiben rechts. Überschrift und
+Auto-pass bleiben zentriert.
+
 Match-Updates übernehmen `PlayerView` und dessen `legalActions` atomar.
 Die zusätzliche WebSocket-Nachricht `legal_actions` darf die Aktionsliste
 nur bei derselben expliziten `stateVersion` aktualisieren. Dadurch kombiniert

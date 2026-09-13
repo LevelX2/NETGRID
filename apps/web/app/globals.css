@@ -15199,8 +15199,9 @@ select,
 
 .runTimeline.overlay .runSteps span {
   min-height: 28px;
-  place-items: center;
-  text-align: center;
+  align-items: center;
+  justify-items: start;
+  text-align: start;
   padding: 5px 8px;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
@@ -15320,6 +15321,8 @@ select,
   background: var(--primary-bg);
   color: var(--primary-text);
   font-size: 12px;
+  grid-template-columns: 16px 24px minmax(0, 1fr) auto;
+  text-align: start;
 }
 
 .runActionButton:hover,
@@ -15329,6 +15332,8 @@ select,
 }
 
 .runActionButton .actionButtonLabel {
+  grid-column: 3;
+  justify-self: start;
   min-width: 0;
   max-width: 100%;
   display: -webkit-box;
@@ -15340,6 +15345,10 @@ select,
   white-space: normal;
   word-break: normal;
   line-height: 1.25;
+}
+
+.runActionButton .costChips {
+  grid-column: 4;
 }
 
 .runAutoPassControl {
@@ -18096,8 +18105,7 @@ select,
 }
 
 .actions > .actionButton.hasServerTarget,
-.selectedActionGroup > .actionButton.hasServerTarget,
-.runActionButton.hasServerTarget {
+.selectedActionGroup > .actionButton.hasServerTarget {
   grid-template-columns: auto auto minmax(0, 1fr) auto;
 }
 
