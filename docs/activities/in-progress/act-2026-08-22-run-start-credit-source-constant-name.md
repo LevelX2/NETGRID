@@ -1,15 +1,16 @@
 ---
 activityId: act-2026-08-22-run-start-credit-source-constant-name
-status: inbox
+status: in_progress
 kind: cleanup
 area: engine
 priority: low
 primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-08-22
-startedAt:
+startedAt: 2026-09-13
 completedAt:
-branch:
+owner: netgrid-activities-20260913-89c20ec1
+branch: main
 releaseTarget:
 blockedBy: []
 resultArtifacts: []
@@ -64,3 +65,4 @@ Verdrahtung erkennbar ist.
 ## Ergebnisnotiz
 
 Noch offen.
+
