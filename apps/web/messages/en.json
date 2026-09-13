@@ -1003,7 +1003,8 @@
       "valid": "Valid",
       "invalid": "Invalid",
       "cards": "{count, plural, one {# card} other {# cards}}",
-      "agendaPoints": "{count} agenda points"
+      "agendaPoints": "{count} agenda points",
+      "notMatchReady": "{name} is not ready to start a match. {details}"
     },
     "guide": {
       "close": "Close deck guide",
@@ -1197,6 +1198,39 @@
       "createOrImport": "Create a new deck or import a local deck.",
       "noDeckInSelection": "There is no deck in this selection yet.",
       "freePile": "Free pile"
+    },
+    "issues": {
+      "deck_name_required": "Enter a deck name.",
+      "card_pool_mismatch": "The card pool does not match the format profile.",
+      "card_pool_version_mismatch": "The card pool version does not match the format profile.",
+      "format_profile_unsupported": "This deck format is not supported.",
+      "format_profile_version_mismatch": "The deck format version does not match.",
+      "identity_missing": "Identity {cardId} is missing.",
+      "identity_wrong_side": "Identity {cardId} belongs to the other side.",
+      "identity_not_deck_legal": "Identity {cardId} is not legal for decks.",
+      "identity_not_allowed": "Identity {cardId} is not allowed in this format.",
+      "identity_rule_missing": "Format rules are missing for identity {cardId}.",
+      "invalid_quantity": "The quantity for {cardId} is invalid.",
+      "too_many_copies": "Too many copies of {cardId}; the maximum is {maximum}.",
+      "unknown_card": "Card {cardId} is unknown.",
+      "wrong_side_card": "Card {cardId} belongs to the other side.",
+      "card_missing_required_status": "Card {cardId} lacks the required status {status}.",
+      "deck_legal_without_human_playable": "Card {cardId} is deck legal but not available for human play.",
+      "format_legal_requires_deck_legal": "The format requires deck legality for {cardId}.",
+      "format_legal_requires_human_playable": "The format requires {cardId} to be available for human play.",
+      "influence_data_missing": "Influence or faction data is missing for {cardId}.",
+      "agenda_points_missing": "Agenda points are missing for agenda {cardId}.",
+      "minimum_deck_size": "The deck has {actual} cards; at least {minimum} are required.",
+      "agenda_points_too_low": "Too few agenda points: {actual}. A {cards}-card deck requires {minimum}–{maximum}.",
+      "agenda_points_too_high": "Too many agenda points: {actual}. A {cards}-card deck allows {minimum}–{maximum}.",
+      "minimum_agenda_points": "The Corp deck has {actual} agenda points; at least {minimum} are required.",
+      "agenda_density_too_low": "The agenda point density is below the format minimum.",
+      "agenda_density_too_high": "The agenda point density exceeds the format maximum.",
+      "influence_limit_exceeded": "The deck uses {actual} influence; the limit is {maximum}.",
+      "runner_agenda_points": "The Runner deck contains agenda points.",
+      "snapshot_not_immutable": "The deck snapshot is not immutable.",
+      "snapshot_hash_mismatch": "The deck snapshot checksum does not match.",
+      "forbidden_payload": "The deck data contains prohibited fields."
     }
   },
   "Catalog": {

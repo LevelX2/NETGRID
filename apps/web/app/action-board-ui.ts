@@ -3503,6 +3503,20 @@ export function runAwareActionButtonLabel(
   cardPresentationsById?: PublicCardPresentationsById,
   locale: AppLocale = "de",
 ): string {
+  if (
+    action.type === "decline_rez" &&
+    action.payload?.runRootRezPass === true &&
+    view.timingPoint === "run.movement_rez_window" &&
+    view.run?.phase === "movement" &&
+    view.run.position
+  ) {
+    return actionPresentationText(
+      locale,
+      view.run.position.kind === "ice"
+        ? "actionContinueToApproach"
+        : "actionContinueToAccess",
+    );
+  }
   const target = installedIceActionTargetDetail(view, action, locale);
   if (target)
     return `${actionButtonLabel(action, cardPresentationsById, locale)} (${target})`;

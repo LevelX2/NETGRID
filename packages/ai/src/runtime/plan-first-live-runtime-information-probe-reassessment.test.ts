@@ -87,6 +87,7 @@ describe("plan-first information-probe reassessment", () => {
           encounterContinue: true,
           encounterWillEndRun: true,
           unbrokenSubroutineCount: 1,
+          encounterSubroutineIds: "quandary-etr",
         },
       );
       const input = aiInput("runner", [breakIce, endEncounter]);
@@ -233,6 +234,7 @@ describe("plan-first information-probe reassessment", () => {
         encounterContinue: true,
         encounterWillEndRun: true,
         unbrokenSubroutineCount: 1,
+        encounterSubroutineIds: "data-wall-2-etr",
       },
     );
     const encounterInput = aiInput("runner", [pump, endEncounter]);
@@ -357,6 +359,7 @@ describe("plan-first information-probe reassessment", () => {
         encounterContinue: true,
         encounterWillEndRun: true,
         unbrokenSubroutineCount: 1,
+        encounterSubroutineIds: "keeper-after-data-wall-etr",
       },
     );
     const secondEncounterInput = aiInput("runner", [
@@ -495,6 +498,7 @@ describe("plan-first information-probe reassessment", () => {
       encounterContinue: true,
       encounterWillEndRun: true,
       unbrokenSubroutineCount: 1,
+      encounterSubroutineIds: "keeper-etr",
     });
     const encounterInput = aiInput("runner", [pump, endEncounter]);
     encounterInput.playerView.stateVersion = 2;

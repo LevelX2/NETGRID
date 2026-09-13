@@ -145,13 +145,43 @@ export function visibleCurrentIceBreakExchange(
     projectedServerId: server.id,
     expiresAtStateVersion: state.stateVersion,
   };
+  return {
+    ...binding,
+    ...visibleRunnerBreakExchangeFacts(
+      state,
+      iceId,
+      projectedVisibleIce,
+      projectedRunQuote,
+      endTheRunCount,
+    ),
+  };
+}
+
+type WithoutInstalledBinding<T> = T extends unknown
+  ? Omit<
+      T,
+      | "context"
+      | "cardId"
+      | "targetServerId"
+      | "projectedServerId"
+      | "expiresAtStateVersion"
+    >
+  : never;
+
+/** Payment facts only; callers retain their own installed/temporary binding. */
+export function visibleRunnerBreakExchangeFacts(
+  state: GameState,
+  iceId: CardInstanceId,
+  projectedVisibleIce: VisibleCard,
+  projectedRunQuote: VisibleEffectiveIceRunQuote,
+  endTheRunCount: number,
+): WithoutInstalledBinding<VisibleCorpIceRezResourceExchangeQuote> {
   if (
     state.run?.phase === "encounter_ice" &&
     state.run.encounteredIceId === iceId &&
     state.run.noBreakSubroutinesActive
   ) {
     return {
-      ...binding,
       complete: true,
       hardEndTheRunSubroutineCount: endTheRunCount,
       runnerBreakUnavailable: {
@@ -170,7 +200,6 @@ export function visibleCurrentIceBreakExchange(
   );
   if (activeRunnerRig.some((card) => !validVisibleRunnerCard(card))) {
     return {
-      ...binding,
       complete: false,
       reason: "visible_runner_break_projection_unknown",
     };
@@ -207,7 +236,6 @@ export function visibleCurrentIceBreakExchange(
   );
   if (reads.some((read) => read.kind === "unknown")) {
     return {
-      ...binding,
       complete: false,
       reason: "visible_runner_break_projection_unknown",
     };
@@ -218,13 +246,11 @@ export function visibleCurrentIceBreakExchange(
   const best = choices[0];
   return best
     ? {
-        ...binding,
         complete: true,
         hardEndTheRunSubroutineCount: endTheRunCount,
         runnerBreak: best,
       }
     : {
-        ...binding,
         complete: true,
         hardEndTheRunSubroutineCount: endTheRunCount,
         runnerBreakUnavailable: {

@@ -74,7 +74,6 @@ type MakeHostInput = {
   hq?: CardInstanceId[];
   rd?: CardInstanceId[];
   implementations?: Record<string, CardScoredAgendaImplementation>;
-  overadvanceDefinitionIds?: string[];
   effectiveDifficulty?: number;
   corpCredits?: number;
 };
@@ -193,8 +192,6 @@ function makeHost(input: MakeHostInput = {}): ScoredAgendaFlowHost {
             : cardDefinition?.subtypes;
         return subtypes?.includes(subtype) ?? false;
       },
-      isOveradvanceAgendaDefinition: (definitionId) =>
-        input.overadvanceDefinitionIds?.includes(definitionId) ?? false,
     },
     zones: {
       removeFromAllZones: (cardId) => removed.push(cardId),

@@ -92,9 +92,10 @@ und benötigt keine verdeckten Kartentitel.
 
 ## Controller-Invarianten
 
-Der aktuelle Restbefund und die Klassifikation technischer Texte stehen in
-[Präsentationsgrenzen](engine-presentation-boundaries.md). Ein bestandenes
-Literal-Gate deckt dynamisch gerenderte Validator-Diagnosen nicht ab.
+Der aktuelle Vertrag und die Klassifikation technischer Texte stehen in
+[Präsentationsgrenzen](engine-presentation-boundaries.md). Die Deckdiagnose
+verwendet strukturierte Issues und ein zusätzliches Consumer-Gate; reine
+Literal-Prüfung genügt für dynamische Validator-Ausgaben nicht.
 
 - Die Engine bleibt reine, deterministische Regelautorität und kennt keine
   aktive Nutzer-Locale.

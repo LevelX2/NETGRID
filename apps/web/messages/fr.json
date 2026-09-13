@@ -1033,7 +1033,8 @@
       "valid": "Valide",
       "invalid": "Invalide",
       "cards": "{count, plural, one {# carte} other {# cartes}}",
-      "agendaPoints": "Points à l'ordre du jour {count}"
+      "agendaPoints": "Points à l'ordre du jour {count}",
+      "notMatchReady": "{name} ne permet pas de lancer une partie. {details}"
     },
     "guide": {
       "close": "Fermer le guide du deck",
@@ -1230,6 +1231,39 @@
       "createOrImport": "Créez un nouveau deck ou importez un deck local.",
       "noDeckInSelection": "Il n'y a pas encore de deck dans cette sélection.",
       "freePile": "Pile gratuite"
+    },
+    "issues": {
+      "deck_name_required": "Saisissez un nom de deck.",
+      "card_pool_mismatch": "Le pool de cartes ne correspond pas au profil de format.",
+      "card_pool_version_mismatch": "La version du pool de cartes ne correspond pas au profil de format.",
+      "format_profile_unsupported": "Ce format de deck n’est pas pris en charge.",
+      "format_profile_version_mismatch": "La version du format de deck ne correspond pas.",
+      "identity_missing": "L’identité {cardId} est introuvable.",
+      "identity_wrong_side": "L’identité {cardId} appartient à l’autre camp.",
+      "identity_not_deck_legal": "L’identité {cardId} n’est pas autorisée dans les decks.",
+      "identity_not_allowed": "L’identité {cardId} n’est pas autorisée dans ce format.",
+      "identity_rule_missing": "Les règles de format manquent pour l’identité {cardId}.",
+      "invalid_quantity": "La quantité de {cardId} est invalide.",
+      "too_many_copies": "Trop d’exemplaires de {cardId} ; le maximum est de {maximum}.",
+      "unknown_card": "La carte {cardId} est inconnue.",
+      "wrong_side_card": "La carte {cardId} appartient à l’autre camp.",
+      "card_missing_required_status": "La carte {cardId} ne possède pas le statut requis {status}.",
+      "deck_legal_without_human_playable": "La carte {cardId} est autorisée dans les decks, mais indisponible pour le jeu humain.",
+      "format_legal_requires_deck_legal": "Le format exige que {cardId} soit autorisée dans les decks.",
+      "format_legal_requires_human_playable": "Le format exige que {cardId} soit disponible pour le jeu humain.",
+      "influence_data_missing": "Les données d’influence ou de faction manquent pour {cardId}.",
+      "agenda_points_missing": "Les points de projet manquent pour le projet {cardId}.",
+      "minimum_deck_size": "Le deck contient {actual} cartes ; au moins {minimum} sont requises.",
+      "agenda_points_too_low": "Trop peu de points de projet : {actual}. Un deck de {cards} cartes en exige {minimum}–{maximum}.",
+      "agenda_points_too_high": "Trop de points de projet : {actual}. Un deck de {cards} cartes en autorise {minimum}–{maximum}.",
+      "minimum_agenda_points": "Le deck Corp contient {actual} points de projet ; au moins {minimum} sont requis.",
+      "agenda_density_too_low": "La densité de points de projet est inférieure au minimum du format.",
+      "agenda_density_too_high": "La densité de points de projet dépasse le maximum du format.",
+      "influence_limit_exceeded": "Le deck utilise {actual} points d’influence ; la limite est de {maximum}.",
+      "runner_agenda_points": "Le deck Runner contient des points de projet.",
+      "snapshot_not_immutable": "L’instantané du deck n’est pas immuable.",
+      "snapshot_hash_mismatch": "La somme de contrôle de l’instantané du deck ne correspond pas.",
+      "forbidden_payload": "Les données du deck contiennent des champs interdits."
     }
   },
   "Catalog": {

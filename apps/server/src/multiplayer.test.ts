@@ -5001,10 +5001,10 @@ describe("MVP 0.2 multiplayer service", () => {
 
     expect(created.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(created.playerView.deckMetadata?.own.deckHash).toBe(
-      "fnv1a:b6bc479a",
+      "fnv1a:d3ad4e1c",
     );
     expect(created.playerView.deckMetadata?.opponent.deckHash).toBe(
-      "fnv1a:d77d0873",
+      "fnv1a:54c7851f",
     );
     expect(stored?.match.deckSetup.runnerSnapshotId).toBe(
       "demo_runner_004_snapshot_v0_6",
@@ -7622,7 +7622,7 @@ describe("MVP 0.2 multiplayer service", () => {
       reconnectToken: joined.reconnectToken,
     };
     const before = await bootstrap(service, created.matchId, runner);
-    expect(before.playerView.deckMetadata?.own.deckHash).toBe("fnv1a:f57f1d98");
+    expect(before.playerView.deckMetadata?.own.deckHash).toBe("fnv1a:349726b4");
     const mit = mustAction(
       before,
       (action) =>

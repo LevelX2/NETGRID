@@ -11,7 +11,6 @@ import {
 } from "../hidden-zone/corp-zone-transition-projection";
 import { abilityUsageSourceUsed } from "../../ability-engine/card-implementation-ability-limits";
 import type { CardScoredAgendaImplementation } from "../../ability-engine/definition-types";
-import type { ScoredAgendaActionProfile } from "../../mechanics/agenda-scoring";
 
 type ScoredAgendaAbilityPayload = Record<string, string | number | boolean>;
 
@@ -26,7 +25,6 @@ export type ScoredAgendaAbilityHost = {
     scoredAgendaForDefinition: (
       definition: CardDefinition,
     ) => CardScoredAgendaImplementation | undefined;
-    isScoredRevealAgendaDefinition: (definitionId: string) => boolean;
   };
   actions: {
     createLegalAction: (
@@ -43,11 +41,6 @@ export type ScoredAgendaAbilityHost = {
       cardId: CardInstanceId,
       counterType: "mark" | "power" | "pdca",
     ) => number;
-    spendVisibleCardCounter: (
-      cardId: CardInstanceId,
-      counterType: "power",
-      amount: number,
-    ) => ScoredAgendaAbilityPayload;
   };
   credits: {
     gainCorpCredits: (amount: number) => void;
@@ -62,19 +55,6 @@ export type ScoredAgendaAbilityHost = {
       flatline: boolean;
     };
   };
-  actionProfiles: {
-    scoredAgendaCounterCreditProfileForDefinition: (
-      definitionId: string,
-    ) => ScoredAgendaActionProfile | undefined;
-    scoredAgendaCounterCreditProfileForPayload: (
-      definitionId: string,
-      payload: Record<string, unknown> | undefined,
-    ) => ScoredAgendaActionProfile | undefined;
-    scoredAgendaCounterCreditPayload: (
-      profile: ScoredAgendaActionProfile,
-      cardId: CardInstanceId,
-    ) => NonNullable<LegalAction["payload"]>;
-  };
   callbacks: {
     pushActivatedCardImplementationActions: (
       actions: LegalAction[],
@@ -87,7 +67,6 @@ export type ScoredAgendaAbilityHost = {
       definition: CardDefinition,
     ) => void;
     resolveActivatedCardImplementationAbility: () => boolean;
-    revealCorpRdTop: () => void;
     resolveHqArchivesShuffleDraw: (sourceCardId: CardInstanceId) => void;
   };
 };
@@ -234,52 +213,6 @@ export function buildScoredAgendaAbilityActionsForCard(
     }
     return { handled: true, actions };
   }
-  const scoredCounterCreditProfile =
-    host.actionProfiles.scoredAgendaCounterCreditProfileForDefinition(
-      definition.id,
-    );
-  if (scoredCounterCreditProfile) {
-    if (
-      host.counters.cardCounter(
-        agendaId,
-        scoredCounterCreditProfile.counterType,
-      ) >= scoredCounterCreditProfile.removeCounterAmount
-    ) {
-      actions.push(
-        host.actions.createLegalAction(
-          "corp",
-          "gain_credit",
-          `${definition.title}: ${scoredCounterCreditProfile.label}`,
-          agendaId,
-          [{ clicks: scoredCounterCreditProfile.clickCost }],
-          host.actionProfiles.scoredAgendaCounterCreditPayload(
-            scoredCounterCreditProfile,
-            agendaId,
-          ),
-        ),
-      );
-    }
-    return { handled: true, actions };
-  }
-  if (host.cards.isScoredRevealAgendaDefinition(definition.id)) {
-    if (host.state.corp.rd.length > 0) {
-      actions.push(
-        host.actions.createLegalAction(
-          "corp",
-          "gain_credit",
-          `${definition.title}: R&D-Spitze revealn`,
-          agendaId,
-          [{ clicks: 1 }],
-          {
-            cardId: agendaId,
-            agendaAbility: "v1919_scored_agenda_reveal_rd_top",
-            hiddenZoneAction: "v1919_scored_agenda_reveal_rd_top",
-          },
-        ),
-      );
-    }
-    return { handled: true, actions };
-  }
   if (
     host.cards.scoredAgendaKindForDefinition(definition) ===
     "scored_agenda_credit_until_install_or_rez"
@@ -332,22 +265,11 @@ export function handleScoredAgendaActivatedAbilityAction(
       result.resolvedEffects = legalAction.resolvedEffects;
     return result;
   }
-  if (resolveScoredAgendaCounterCreditAction(host).handled) {
-    return {
-      handled: true,
-      stateChanged: true,
-      resolvedPayload: legalAction.payload as ScoredAgendaAbilityPayload,
-    };
-  }
   if (
     legalAction.payload?.agendaAbility ===
     "scored_agenda_credit_until_install_or_rez"
   )
     return resolveScoredAgendaInstallRezCreditAction(host);
-  if (
-    legalAction.payload?.agendaAbility === "v1919_scored_agenda_reveal_rd_top"
-  )
-    return resolveScoredAgendaRevealRdTopAction(host);
   if (legalAction.payload?.agendaAbility === "hq_archives_shuffle_draw")
     return resolveHqArchivesShuffleDrawAction(host);
   if (legalAction.payload?.agendaAbility === "proteus_corporate_headhunters")
@@ -454,38 +376,6 @@ function resolveScoredAgendaInstallRezCreditAction(
   };
 }
 
-function resolveScoredAgendaRevealRdTopAction(
-  host: ScoredAgendaAbilityHost,
-): ScoredAgendaActivatedAbilityHandlerResult {
-  const legalAction = requireLegalAction(host);
-  if (legalAction.side !== "corp")
-    throw new Error(
-      "Nur die Korp darf V1.9.19-Scored-Agenda-Faehigkeiten nutzen.",
-    );
-  const sourceCardId = String(
-    legalAction.payload?.cardId ?? "",
-  ) as CardInstanceId;
-  if (!host.state.corp.scoreArea.includes(sourceCardId))
-    throw new Error("Die V1.9.19-Scored-Agenda ist nicht gescort.");
-  const definition = host.cards.definitionFor(sourceCardId);
-  if (!host.cards.isScoredRevealAgendaDefinition(definition.id))
-    throw new Error(
-      "Die V1.9.19-Scored-Agenda-Faehigkeit passt nicht zur Karte.",
-    );
-  host.callbacks.revealCorpRdTop();
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    hiddenZoneAction: "v1919_scored_agenda_reveal_rd_top",
-  };
-  return {
-    handled: true,
-    stateChanged: true,
-    sourceCardId,
-    sourceDefinitionId: definition.id,
-    resolvedPayload: legalAction.payload as ScoredAgendaAbilityPayload,
-  };
-}
-
 function resolveHqArchivesShuffleDrawAction(
   host: ScoredAgendaAbilityHost,
 ): ScoredAgendaActivatedAbilityHandlerResult {
@@ -516,87 +406,6 @@ function resolveHqArchivesShuffleDrawAction(
     drawCount: implementation.drawCount,
     resolvedPayload: legalAction.payload as ScoredAgendaAbilityPayload,
   };
-}
-
-function resolveScoredAgendaCounterCreditAction(
-  host: ScoredAgendaAbilityHost,
-): ScoredAgendaActivatedAbilityHandlerResult {
-  const legalAction = requireLegalAction(host);
-  const sourceCardId = String(
-    legalAction.payload?.cardId ?? "",
-  ) as CardInstanceId;
-  if (!sourceCardId || !host.state.cardInstances[sourceCardId])
-    return { handled: false };
-  const definition = host.cards.definitionFor(sourceCardId);
-  const profile =
-    host.actionProfiles.scoredAgendaCounterCreditProfileForPayload(
-      definition.id,
-      legalAction.payload,
-    );
-  if (!profile) return { handled: false };
-  validateScoredAgendaCounterCreditAction(host, sourceCardId, profile);
-  const counterPayload = host.counters.spendVisibleCardCounter(
-    sourceCardId,
-    profile.counterType,
-    profile.removeCounterAmount,
-  );
-  host.credits.gainCorpCredits(profile.creditGain);
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    ...counterPayload,
-    spentPowerCounters: profile.removeCounterAmount,
-    gainedCredits: profile.creditGain,
-    remainingPowerCounters: Number(counterPayload.remainingCounters ?? 0),
-  };
-  return {
-    handled: true,
-    stateChanged: true,
-    sourceCardId,
-    sourceDefinitionId: definition.id,
-    gainedCredits: profile.creditGain,
-    removedCounters: profile.removeCounterAmount,
-    resolvedPayload: legalAction.payload as ScoredAgendaAbilityPayload,
-  };
-}
-
-function validateScoredAgendaCounterCreditAction(
-  host: ScoredAgendaAbilityHost,
-  sourceCardId: CardInstanceId,
-  profile: ScoredAgendaActionProfile,
-): void {
-  const legalAction = requireLegalAction(host);
-  if (legalAction.side !== profile.side)
-    throw new Error("Nur die Korp darf diese scored Agenda-Aktion nutzen.");
-  if (
-    host.state.phase !== "corp_action_phase" ||
-    host.state.activeSide !== "corp"
-  )
-    throw new Error(
-      "Diese scored Agenda-Aktion ist nur in der Korp-Aktionsphase nutzbar.",
-    );
-  if (!host.state.corp.scoreArea.includes(sourceCardId))
-    throw new Error("Die scored Agenda-Aktion ist nicht gescort.");
-  if (host.cards.definitionFor(sourceCardId).id !== profile.sourceDefinitionId)
-    throw new Error("Die scored Agenda-Aktion passt nicht zur Karte.");
-  if (legalAction.payload?.agendaAbility !== profile.agendaAbility)
-    throw new Error("Die scored Agenda-Aktion passt nicht zum Profil.");
-  const removeAmount = Number(
-    legalAction.payload?.removePowerCounterAmount ?? 0,
-  );
-  if (
-    !Number.isInteger(removeAmount) ||
-    removeAmount !== profile.removeCounterAmount
-  )
-    throw new Error("Die scored Agenda-Aktion hat ungueltige Counterkosten.");
-  if (
-    host.counters.cardCounter(sourceCardId, profile.counterType) < removeAmount
-  )
-    throw new Error("Auf der scored Agenda sind nicht genug Counter.");
-  const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
-  if (!Number.isInteger(gainAmount) || gainAmount !== profile.creditGain)
-    throw new Error(
-      "Die scored Agenda-Aktion hat einen ungueltigen Creditbetrag.",
-    );
 }
 
 function isScoredAgendaInstallRezCreditAvailable(

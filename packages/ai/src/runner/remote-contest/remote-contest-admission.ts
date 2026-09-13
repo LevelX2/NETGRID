@@ -59,6 +59,7 @@ export function runnerTerminalRemoteContestIsDirectlyMandatory(
     runnerTerminalRemoteContestIsNonlethalDamageFloorLastChance(evaluation);
   return (
     runnerCoverageGapIsTerminalRemoteThreat(input, evaluation) &&
+    evaluation.prerunReserveQuote?.status !== "blocked" &&
     !runnerTerminalNonlethalDamageContestAlreadyFailedThisTurn(
       input,
       evaluation,

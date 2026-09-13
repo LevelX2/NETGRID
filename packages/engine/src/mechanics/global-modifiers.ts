@@ -15,7 +15,7 @@ function uniqueDefinitionId(
   return matches[0]!;
 }
 
-export const TAG_HANDSIZE_ASSET_SOURCE = uniqueDefinitionId(
+export const RUN_START_CREDIT_LOSS_SOURCE = uniqueDefinitionId(
   "corp run-start tax",
   (implementation) => implementation.corpUtility?.kind === "run_start_tax",
 );

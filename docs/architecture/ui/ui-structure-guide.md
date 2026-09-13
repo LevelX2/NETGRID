@@ -26,8 +26,11 @@ die Phasensymbole stehen rechts. Aktionsbuttons reservieren feste Spalten
 für Aktions- und Serversymbol, auch wenn das Serversymbol fehlt. Ihre
 Beschriftungen sind linksbündig, Kosten bleiben rechts. Überschrift und
 Auto-pass bleiben zentriert.
-Der Kopf bleibt auf zwei Zeilen begrenzt: Run-Ziel und ICE-Nummer oben,
-darunter der bekannte ICE-Name über die volle Breite, auch in der Bewegung.
+Der Kopf bleibt auf zwei einzeilige Textreihen begrenzt: Server und aktuelle
+Stufe, darunter ICE-Position und bekannter Name über die volle Breite.
+Bei Movement bezeichnet ein vorangestellter Pfeil das nächste Ziel; erst
+Approach ist die Annäherung mit ICE-Rezfenster. Lange Servernamen werden vor
+der stets sichtbaren Phase gekürzt.
 Die Identität stammt ausschließlich aus dem PlayerView; unbekanntes ICE
 bleibt verdeckt. Lange Namen werden einzeilig mit Ellipse dargestellt und
 stehen vollständig im Tooltip. Der Positions-Tooltip erhält zusätzlich
@@ -76,6 +79,10 @@ verfügbaren Breite bis zum normalen Kartenabstand, ohne eine nachgelagerte
 ResizeObserver-Messung. Die explizite kompakte Wunschbreite bleibt unabhängig
 vom berechneten Kartenabstand, damit
 Resize, Kartenzahl und Skalierung keinen rückgekoppelten Umbruch erzeugen.
+
+Der Movement-Root-Rez-Pass
+heißt „Weiter zur Annäherung“ beziehungsweise vor dem Server „Weiter zum
+Zugriff“. Er ist kein Verzicht auf das anschließende ICE-Rezfenster.
 
 `RunTimelineOverlay` zeigt in jeder Stufe dauerhaft blasse Orientierungssymbole.
 Sie erklären typische Möglichkeiten und sind keine Legalitätsanzeige. Nur

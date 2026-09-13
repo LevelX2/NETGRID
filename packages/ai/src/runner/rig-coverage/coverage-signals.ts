@@ -26,6 +26,7 @@ import {
 import { runnerTerminalContestThreat } from "../../runtime/runner-terminal-contest-threat";
 import { mergedPublicHistory } from "../../runtime/public-event-history";
 import { runnerBreakerCoverageUpgrade } from "./coverage-breaker-upgrades";
+import { runnerRemoteBreakerPreparation } from "./coverage-remote-breaker-preparation";
 import { runnerBreakerUpgradeSupportActions } from "./coverage-breaker-upgrades";
 import { runnerBreakerUpgradeSignalQuote } from "./coverage-breaker-upgrades";
 import { runnerCostEffectiveCoverageRecovery } from "./coverage-recovery";
@@ -313,12 +314,19 @@ export function uniqueCoverageGaps(
       evaluation.targetServerId,
     );
     const role = planFirstCoverageRole(preciseCoverage, evaluation.evidence);
-    const costRecovery = runnerCostEffectiveCoverageRecovery(
-      input,
-      candidates,
-      evaluation,
-      deckCapabilities,
-    );
+    const costRecovery =
+      runnerRemoteBreakerPreparation(
+        input,
+        candidates,
+        evaluation,
+        deckCapabilities,
+      ) ??
+      runnerCostEffectiveCoverageRecovery(
+        input,
+        candidates,
+        evaluation,
+        deckCapabilities,
+      );
     const coverageUpgrade = costRecovery
       ? undefined
       : runnerBreakerCoverageUpgrade(
@@ -493,6 +501,7 @@ export function uniqueCoverageGaps(
       );
     const bindToRequester =
       coverageUpgrade !== undefined ||
+      costRecovery?.remotePreparation === true ||
       knownRemoteCoverageProject ||
       terminalRemotePatternThreat ||
       sameTurnRunConversion !== undefined ||

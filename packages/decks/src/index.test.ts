@@ -448,8 +448,8 @@ describe("deck validation and snapshots", () => {
       ok: true,
       errors: [],
     });
-    expect(computeDeckHash(runner)).toBe("fnv1a:f57f1d98");
-    expect(computeDeckHash(corp)).toBe("fnv1a:03efc0db");
+    expect(computeDeckHash(runner)).toBe("fnv1a:349726b4");
+    expect(computeDeckHash(corp)).toBe("fnv1a:1c48dea7");
     expect(corp.validation.agendaPoints).toBe(7);
     expect(runner.cards.map((entry) => entry.cardId)).toEqual([
       "onr_v1_021_dwarf",
@@ -495,8 +495,8 @@ describe("deck validation and snapshots", () => {
       ok: true,
       errors: [],
     });
-    expect(computeDeckHash(runner)).toBe("fnv1a:1f64d517");
-    expect(computeDeckHash(corp)).toBe("fnv1a:ceddeef6");
+    expect(computeDeckHash(runner)).toBe("fnv1a:55bfa3a5");
+    expect(computeDeckHash(corp)).toBe("fnv1a:187a16b4");
     expect(runner.formatProfileId).toBe("netgrid_private_local_v1");
     expect(runner.formatProfileVersion).toBe("1.3.0");
     expect(runner.cardPoolVersion).toBe("private-local-onr-v1");
@@ -645,7 +645,7 @@ describe("deck validation and snapshots", () => {
       ok: true,
       errors: [],
     });
-    expect(computeDeckHash(snapshot)).toBe("fnv1a:23f11fed");
+    expect(computeDeckHash(snapshot)).toBe("fnv1a:7c029283");
     expect(snapshot.cards).toHaveLength(14);
     expect(snapshot.cards.reduce((sum, entry) => sum + entry.quantity, 0)).toBe(
       19,
@@ -728,10 +728,10 @@ describe("deck validation and snapshots", () => {
       ok: true,
       errors: [],
     });
-    expect(computeDeckHash(runner)).toBe("fnv1a:7a0470da");
-    expect(computeDeckHash(corp)).toBe("fnv1a:ff59def2");
-    expect(computeDeckHash(runnerVariant)).toBe("fnv1a:784e8bbe");
-    expect(computeDeckHash(corpVariant)).toBe("fnv1a:ba83b70e");
+    expect(computeDeckHash(runner)).toBe("fnv1a:25185df8");
+    expect(computeDeckHash(corp)).toBe("fnv1a:c75d3d9c");
+    expect(computeDeckHash(runnerVariant)).toBe("fnv1a:69fcf450");
+    expect(computeDeckHash(corpVariant)).toBe("fnv1a:36c22e6c");
     expect(runner.cards.reduce((sum, entry) => sum + entry.quantity, 0)).toBe(
       20,
     );
@@ -795,8 +795,8 @@ describe("deck validation and snapshots", () => {
       ok: true,
       errors: [],
     });
-    expect(computeDeckHash(runner)).toBe("fnv1a:f187f2e2");
-    expect(computeDeckHash(corp)).toBe("fnv1a:12ea266f");
+    expect(computeDeckHash(runner)).toBe("fnv1a:e1ecdc2c");
+    expect(computeDeckHash(corp)).toBe("fnv1a:712bfe19");
     expect(runner.cards.reduce((sum, entry) => sum + entry.quantity, 0)).toBe(
       45,
     );

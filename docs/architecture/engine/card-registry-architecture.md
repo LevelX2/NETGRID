@@ -42,6 +42,31 @@ Eine separate `coverage-source-locations.ts` ist ausdrücklich nicht mehr zuläs
 
 ## Verantwortungsgrenze
 
+### CardSpec-Verträge statt leerer Mechanics-Profile
+
+`mechanics/agenda-scoring.ts`, `payment-costs.ts` und `hosting-counters.ts`
+sind samt ihren leeren Profilpfaden entfernt. Neue Karten verwenden die
+CardSpec-Projektionen; leere Tabellen, Lookup-Stubs und synthetische
+Hostprofile dürfen keine zweite Kartenautorität begründen.
+
+- Installed-Economy-Fähigkeiten laufen über aktive CardSpec-Verträge.
+  Der leere profilbasierte Resolver samt Validator und Ports ist entfernt.
+  Die eigenständige Investment-Firm-Credit-Choice bleibt aktiv.
+- `hosting-counters.ts` und `COUNTER_UPGRADE_SOURCES` sind entfernt.
+  Die daran gebundenen `v1918UpgradeAbility=add_power_counter`-Angebote und
+  ihre Ausführung besaßen keinen produktiven Kartenvertrag. Der bestehende
+  Dr.-Dreff-Test schützt weiterhin vor diesem unzulässigen Aktionsangebot.
+- `agenda-scoring.ts` ist entfernt, einschließlich leerer Overadvance-/Reveal-
+  Mengen, Counter-Credit-Profile, gebundener Hostzweige und synthetischer
+  Profiltests. Generische CardSpec-Overadvance- und aktivierte Agenda-Fähigkeiten
+  bleiben erhalten. Der Counter-Operation-Verbraucher importiert direkt
+  `CORP_ADVANCEMENT_COUNTER_OPERATION_SOURCES` aus der CardSpec-Ableitung.
+
+Eine Entfernung umfasst jeweils Producer, Hostports, Verdrahtung und nur die
+synthetischen Tests des toten Pfads. Es entstehen keine Ersatzprofile oder
+Kompatibilitätsaliase. Reale Karten-, Replay- und Public-Verträge sind über
+fokussierte bestehende Regressionen sowie Typ- und Strukturgates zu prüfen.
+
 - CardSpec ist kartenspezifische Autorenwahrheit.
 - `CardImplementationDefinition` ist die von der Engine interpretierte mechanische Projektion.
 - `registry.ts` stellt deterministischen Lookup bereit.

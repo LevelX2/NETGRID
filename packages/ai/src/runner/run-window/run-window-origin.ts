@@ -19,6 +19,7 @@ import {
 import { uniqueBy } from "../../runtime/collection";
 import {
   currentEncounteredIceCard,
+  currentEncounterUnbrokenSubroutineIndexes,
   currentRunRemainingIce,
 } from "../../runtime/current-encounter";
 import {
@@ -169,8 +170,30 @@ export function reassessActiveInformationRunParent(
     return root;
   }
 
+  // The card quote describes the whole ICE. Only the engine's current
+  // continuation knows which subroutines still need to be paid for.
+  // A payment/choice interruption retains its bound parent until that
+  // continuation is offered again.
+  if (
+    !input.legalActions.some(
+      (action) =>
+        action.type === "continue_run" &&
+        action.payload?.encounterContinue === true,
+    )
+  )
+    return root;
+  const unbroken = currentEncounterUnbrokenSubroutineIndexes(input);
+  const remainingEncounter = {
+    ...encounteredIce,
+    effectiveRunQuote: {
+      ...encounteredIce.effectiveRunQuote,
+      subroutines: encounteredIce.effectiveRunQuote.subroutines.filter(
+        (_, index) => unbroken.has(index),
+      ),
+    },
+  };
   const remainingIce = uniqueBy(
-    [...currentRunRemainingIce(input), encounteredIce],
+    [...currentRunRemainingIce(input), remainingEncounter],
     (ice) => ice.instanceId,
   );
   const pathBeforeDamageBudget = assessKnownRezzedIcePath(

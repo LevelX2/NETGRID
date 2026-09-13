@@ -1,10 +1,5 @@
-type DeckValidationView = {
-  ok: boolean;
-  totalCards: number;
-  agendaPoints: number | null;
-  errors: string[];
-  warnings: string[];
-};
+import type { DeckValidationResult } from "@netgrid/decks";
+import { localizedDeckValidationIssues } from "../../i18n/deck-validation";
 
 type DeckSnapshotView = {
   deckHash: string;
@@ -16,10 +11,11 @@ export function DeckValidationSummary({
   validation,
   snapshot,
 }: {
-  validation: DeckValidationView | null;
+  validation: DeckValidationResult | null;
   snapshot: DeckSnapshotView | null;
 }) {
   const t = useTranslations("Decks.validation");
+  const issueT = useTranslations("Decks.issues");
   if (!validation) return null;
   return (
     <div className={`deckValidation ${validation.ok ? "ok" : "bad"}`}>
@@ -31,7 +27,7 @@ export function DeckValidationSummary({
           : ""}
       </span>
       {snapshot ? <small>{snapshot.deckHash}</small> : null}
-      {[...validation.errors, ...validation.warnings].map((message) => (
+      {localizedDeckValidationIssues(validation, issueT).map((message) => (
         <small key={message}>{message}</small>
       ))}
     </div>

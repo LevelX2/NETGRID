@@ -1033,6 +1033,8 @@ export type ChoiceOption = {
     /** Corp-private facts on an exact temporary HQ-ICE encounter option. */
     temporaryEncounterSubroutineTypes?: SubroutineType[];
     temporaryEncounterHasAdditionalMechanics?: boolean;
+    /** Corp-private Engine response for an exact temporary HQ encounter. */
+    temporaryEncounterBreakQuoteJson?: string;
     targetServerId?: ServerId;
     targetIcePosition?: number;
     sourceCardInstanceId?: CardInstanceId;

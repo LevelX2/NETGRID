@@ -129,9 +129,9 @@ export const PREMIUM_AUDIO_MANIFEST = {
     category: "damage",
   },
   "game-won": {
-    files: [`${ROOT}/results/game-won.wav`],
+    files: [`${ROOT}/results/game-won-fanfare.wav`],
     gain: 0.76,
-    cooldownMs: 1700,
+    cooldownMs: 3800,
     preload: true,
     category: "result",
   },

@@ -1,8 +1,22 @@
 # NETGRID premium audio pack
 
-The WAV files in this directory were generated specifically for NETGRID with
-ElevenLabs Sound Effects on 2026-08-22. They are not stock sounds and do not
-contain voices or third-party recordings.
+Except for the victory fanfare described below, the WAV files in this
+directory were generated specifically for NETGRID with ElevenLabs Sound
+Effects on 2026-08-22. They are not stock sounds and do not contain voices or
+third-party recordings.
+
+## Locally synthesized victory fanfare
+
+`results/game-won-fanfare.wav` is an original, locally synthesized electronic
+fanfare created on 2026-09-13. It uses six repeated opening notes followed by
+an ascending C-major finish. It contains no samples or provider-generated
+audio; the ElevenLabs-specific terms below apply to the other assets only.
+Regenerate it with `node scripts/generate-victory-fanfare.mjs` from the
+repository root. Output is 48 kHz, stereo, 16-bit PCM, 3.79 seconds, normalized
+to a sample peak of -3 dBFS. The manifest uses a dedicated filename so browser
+caches cannot serve the previous victory sound and a 3.8-second cooldown to
+prevent the fanfare from overlapping itself. Per-asset provenance fields
+override the pack defaults in `audio-provenance.json`.
 
 ## License basis reviewed
 

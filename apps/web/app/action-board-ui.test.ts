@@ -1,5 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import { runHeaderIceTitle } from "../features/game-board/run-header";
+import { runHeaderTargetLabel } from "../features/game-board/run-header";
+import deMessages from "../messages/de.json";
+import enMessages from "../messages/en.json";
+import frMessages from "../messages/fr.json";
 import type {
   LegalAction,
   PlayerView,
@@ -1962,6 +1966,95 @@ describe("V1.0.5 action board UI helpers", () => {
       expect(runHeaderIceTitle(running)).toBe(ice.title);
       ice.known = false;
       expect(runHeaderIceTitle(running)).toBeNull();
+    },
+  );
+
+  it.each([
+    ["de", deMessages, "Weiter zur Annäherung", "Weiter zum Zugriff"],
+    ["en", enMessages, "Continue to approach", "Continue to access"],
+    ["fr", frMessages, "Passer à l’approche", "Passer à l’accès"],
+  ] as const)(
+    "distinguishes movement and approach in two header rows (%s)",
+    (locale, messages, approachPass, accessPass) => {
+      const shock = card("shock", "Shock.r", "ice", false);
+      const running = view("corp", {
+        timingPoint: "run.movement_rez_window",
+        servers: [
+          {
+            id: "remote_1",
+            label: "Remote 1",
+            ice: [card("inner", "Inner ICE", "ice"), shock],
+            root: [],
+          },
+        ],
+        run: {
+          attackedServerId: "remote_1",
+          phase: "movement",
+          position: { kind: "ice", serverId: "remote_1", iceIndex: 1 },
+          successful: false,
+        },
+      });
+      const pass = legalAction(
+        "corp",
+        "decline_rez",
+        "game_rule",
+        "Nichts rezzen / Weiter",
+        { runRootRezPass: true },
+        "run.movement_rez_window",
+      );
+      expect(runAwareActionButtonLabel(running, pass, undefined, locale)).toBe(
+        approachPass,
+      );
+      expect(runWindowActionButtonLabel(running, pass, undefined, locale)).toBe(
+        approachPass,
+      );
+      expect(runHeaderTargetLabel(running, messages.Board.run.hiddenIce)).toBe(
+        "→ ICE 2 · Shock.r",
+      );
+      running.run!.phase = "approach_ice";
+      running.timingPoint = "run.approach_ice";
+      const declineIce = legalAction(
+        "corp",
+        "decline_rez",
+        "game_rule",
+        "ICE nicht rezzen",
+        undefined,
+        "run.approach_ice",
+      );
+      expect(runHeaderTargetLabel(running, messages.Board.run.hiddenIce)).toBe(
+        "ICE 2 · Shock.r",
+      );
+      expect(
+        runWindowActionButtonLabel(running, declineIce, undefined, locale),
+      ).not.toBe(approachPass);
+
+      running.run!.phase = "movement";
+      running.timingPoint = "run.movement_rez_window";
+      running.run!.encounteredIce = card("passed", "Haunting Inquisition", "ice");
+      expect(runHeaderIceTitle(running)).toBe("Shock.r");
+      shock.known = false;
+      expect(runHeaderTargetLabel(running, messages.Board.run.hiddenIce)).toBe(
+        `→ ICE 2 · ${messages.Board.run.hiddenIce}`,
+      );
+      running.run!.position = { kind: "server", serverId: "remote_1" };
+      expect(
+        runHeaderTargetLabel(running, messages.Board.run.hiddenIce),
+      ).toBeNull();
+      expect(runWindowActionButtonLabel(running, pass, undefined, locale)).toBe(
+        accessPass,
+      );
+      running.timingPoint = "run.jack_out_window";
+      const fortPass = legalAction(
+        "corp",
+        "decline_rez",
+        "game_rule",
+        "Keine Fort-Aktion / Weiter",
+        { runFortPassPass: true },
+        "run.jack_out_window",
+      );
+      expect(
+        runWindowActionButtonLabel(running, fortPass, undefined, locale),
+      ).not.toBe(accessPass);
     },
   );
 

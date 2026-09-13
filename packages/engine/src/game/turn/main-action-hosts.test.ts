@@ -375,7 +375,6 @@ function hostFor(
       runnerMemoryLimit: () => state.runner.memoryLimit,
       constants: {
         CODE_VIRAL_CACHE_ID: "code_viral_cache",
-        COUNTER_UPGRADE_SOURCES: new Set(),
         RUNNER_EVENT_RESOLVERS: {},
       },
     },

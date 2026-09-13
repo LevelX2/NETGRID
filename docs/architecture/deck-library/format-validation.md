@@ -49,3 +49,24 @@ keinen Kompatibilitätspfad für alte Snapshot-Hashes.
 
 Nachweise: `packages/decks/src/agenda-point-range.test.ts`,
 `packages/decks/src/index.test.ts` und die fokussierten Server-Matchstarttests.
+
+## Lokalisierbare Validierungs-Issues
+
+`DeckValidationResult.issues` ist der vollständige Präsentationsvertrag:
+stabiler `code`, `severity` und exakt benannte `params`. Die Parameterdefinition
+liegt in `packages/decks/src/validation-issues.ts`; Zahlen und Karten-/Status-IDs
+werden bereits beim Erzeugen getrennt typisiert. Auch Warnungen,
+Snapshot-Unveränderlichkeit, Hashfehler und abgewiesene Payloads besitzen Codes.
+Die vorhandenen `errors`-/`warnings`-Sätze bleiben technische Diagnose für
+Logs und interne Checks. Sie sind kein alternativer Web-Präsentationspfad.
+
+Der Web-Formatter `i18n/deck-validation.ts` validiert den Issue-Vertrag und
+übersetzt ihn mit `Decks.issues` in DE/EN/FR. Fehlende Issues, unbekannte Codes,
+abweichende Parameter oder unvollständige Schweregradlisten scheitern mit
+`deck_validation_issue_contract_invalid`. Es gibt keine Regexübersetzung und
+keinen Rückgriff auf rohe Diagnosesätze. Deckübersicht und lokale
+Matchstartdetails verwenden denselben Formatter; JSON erhält alle Parameter.
+Das I18N-Gate schützt diese beiden Consumer zusätzlich gegen direkten Zugriff
+auf rohe Validierungsarrays. V0-Demo-Snapshots wurden einschließlich ihrer
+Validierungsmetadaten und Prüfsummen neu erzeugt; alte Hashes werden nicht
+über einen Kompatibilitätspfad angenommen.

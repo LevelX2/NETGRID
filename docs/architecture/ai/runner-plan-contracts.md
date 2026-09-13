@@ -324,6 +324,13 @@ nicht; andere produktive Zielserver behalten ihre eigenen ausführbaren Heads.
 
 ### Vertikale Implementierung des Remote-Contests
 
+Auch ein als terminal eingestufter Remote-Contest darf eine explizit
+blockierte Vorabreserve für unbekanntes ICE nicht übergehen. Seine Dringlichkeit
+ersetzt keinen ausführbaren Zugriffspfad. Ein finanzierbarer Bedarf bleibt am
+Remote-Parent; nach Auszahlung werden Kosten und Reserve erneut geprüft.
+Identische unterfinanzierte Wiederholungen erhalten dadurch keine neue
+Zulassung, während eine inzwischen finanzierte Route weiterhin zulässig ist.
+
 `packages/ai/src/runner/remote-contest/` enthält:
 
 - `remote-contest-signals.ts`: Bedrohungs- und Zielbewertung, Vorbereitung,
@@ -456,6 +463,25 @@ dürfen weiterhin ihren bestehenden Installations-Finanzierungsbedarf erzeugen;
 bei gleicher Antwort und gleichen Kosten bleibt die kanonische Rollenreihenfolge
 stabil. Der gewählte Rollenbedarf, die konkrete
 Installation und der anschließende Run bleiben an denselben Parent gebunden.
+
+Ein konkreter Remote-Parent darf außerdem eine sichtbare Handinstallation als
+Kosten-Vorbereitung binden, auch wenn seine ICE-Kette noch unbekannte Teile
+enthält. Der Coverage-Owner vergleicht dafür den bekannten Pfad mit dem
+aktuellen und dem ergänzten Rig einschließlich sichtbarer zusätzlicher
+Break-Gebühren. Die Installation muss legal, ohne Programmopfer und mit freier
+MU ausführbar sein. Ihre Kosten müssen sich bereits auf dem bekannten Pfad
+dieses einen Runs ausgleichen; Installations- und Run-Klick sowie die gesamte
+bekannte Creditquote müssen im aktuellen Zug verfügbar bleiben. Ein bekannter
+nicht finanzierter Zugriff oder ein fehlender positiver Remote-Payoff lässt
+diese Vorbereitung nicht zu.
+
+Die Quote garantiert nur die Einsparung am bekannten Pfad. Unbekannte ICE und
+spätere Rez-Entscheidungen bleiben ausdrücklich bedingt. Nach der Installation
+bewertet der bestehende Remote-Parent Pfad, Zugriff und Reserven mit dem neuen
+Rig erneut; eine Reserve aus dem alten Rig darf eine konkret gebundene,
+kostenneutrale Vorbereitung nicht als beliebige überlappende Installation
+verwerfen. Direkte terminale Runs auf vollständig bekannten, bereits
+bezahlbaren Pfaden behalten ihre bestehende Priorität.
 
 Eine lokale Economy-Zurückstellung von Mehrzweck-Hardware gilt nur für ihren
 Einkommenszweck. Eine bereits exakt gebundene Coverage- oder MU-Vorbereitung
@@ -941,6 +967,15 @@ Die bekannte Pfadquote erhält bereits bezahlte einzelne Subroutine-Breaks mit
 ICE- und Subroutine-ID. Nachgelagerte Schadens- und Handreserveprüfungen
 rechnen diese Wirkungen nicht erneut an. Unbezahlte Subroutinen derselben
 ICE bleiben wirksam; ein Teilbruch bescheinigt keinen vollständigen Bruch.
+
+Die Informations-Neubewertung des laufenden Encounters konsumiert die
+exakten offenen Subroutine-IDs der aktuellen Engine-Continue-Action. Die volle
+Kartenquote beschreibt weiterhin das ICE; bereits gebrochene oder aufgelöste
+Subroutinen dürfen aber nicht erneut als Restkosten, Schaden oder Pfadsperre
+zählen. Die übrigen ICE behalten ihre vollständigen Quotes. Fehlende oder
+widersprüchliche IDs scheitern am bestehenden Rules-Contract fail-closed.
+Während eines Zahlungs-/Choice-Unterfensters ohne Encounter-Continue bleibt
+der gebundene Parent bis zur erneuten Engine-Fortsetzung erhalten.
 
 ### Vertikale Implementierung
 

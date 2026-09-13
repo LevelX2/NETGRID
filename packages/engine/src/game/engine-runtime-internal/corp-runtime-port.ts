@@ -1,5 +1,4 @@
 /** Declarative typed port for the corpRuntimeResolvers composition group. */
-import type { EconomyActionProfile } from "../../mechanics/payment-costs";
 import type { CorpAgendaPointCostResult } from "./runtime-shared";
 import type { TurnCorpRuntimePort } from "./turn-corp-runtime-port";
 import type {
@@ -130,16 +129,6 @@ export type CorpRuntimePort = TurnCorpRuntimePort & {
     abilityId: string,
     encounteredIceId?: CardInstanceId,
   ) => Pick<LegalAction, "abilityRef" | "effectRef" | "targetRequirements">;
-  resolveCorpInstalledEconomyAction: (
-    state: GameState,
-    legalAction: LegalAction,
-  ) => boolean;
-  validateCorpInstalledEconomyAction: (
-    state: GameState,
-    legalAction: LegalAction,
-    sourceCardId: string,
-    profile: EconomyActionProfile,
-  ) => void;
   rezzedCorpInstalledEconomyCreditSourceIds: (
     state: GameState,
   ) => CardInstanceId[];

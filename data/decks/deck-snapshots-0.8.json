@@ -47,8 +47,10 @@
         "ok": true,
         "errors": [],
         "warnings": [],
+        "issues": [],
         "totalCards": 18,
-        "agendaPoints": 6
+        "agendaPoints": 6,
+        "influenceSpent": null
       },
       "publicMetadata": {
         "side": "corp",
@@ -56,9 +58,9 @@
         "deckName": "Corp Demo Deck 01 - Build & Score",
         "cardPoolSnapshotId": "card-snapshot-0.5",
         "formatProfileId": "local-demo-v0.6",
-        "deckHash": "fnv1a:4d48ca27"
+        "deckHash": "fnv1a:b07b9fbb"
       },
-      "deckHash": "fnv1a:4d48ca27"
+      "deckHash": "fnv1a:b07b9fbb"
     },
     {
       "deckSnapshotId": "demo_corp_004_snapshot_v0_6",
@@ -124,11 +126,11 @@
       "validation": {
         "ok": true,
         "errors": [],
-        "warnings": [
-          "Uses MVP 0.4 expanded local demo card pool."
-        ],
+        "warnings": [],
+        "issues": [],
         "totalCards": 24,
-        "agendaPoints": 7
+        "agendaPoints": 7,
+        "influenceSpent": null
       },
       "publicMetadata": {
         "side": "corp",
@@ -136,9 +138,9 @@
         "deckName": "Corp Demo Deck 04 - Build, Tax & Tag",
         "cardPoolSnapshotId": "card-snapshot-0.5",
         "formatProfileId": "local-demo-v0.6",
-        "deckHash": "fnv1a:d77d0873"
+        "deckHash": "fnv1a:54c7851f"
       },
-      "deckHash": "fnv1a:d77d0873"
+      "deckHash": "fnv1a:54c7851f"
     },
     {
       "deckSnapshotId": "demo_runner_001_snapshot_v0_6",
@@ -177,8 +179,10 @@
         "ok": true,
         "errors": [],
         "warnings": [],
+        "issues": [],
         "totalCards": 12,
-        "agendaPoints": null
+        "agendaPoints": null,
+        "influenceSpent": null
       },
       "publicMetadata": {
         "side": "runner",
@@ -186,9 +190,9 @@
         "deckName": "Runner Demo Deck 01 - Run & Steal",
         "cardPoolSnapshotId": "card-snapshot-0.5",
         "formatProfileId": "local-demo-v0.6",
-        "deckHash": "fnv1a:6ec6785c"
+        "deckHash": "fnv1a:b4f61cd0"
       },
-      "deckHash": "fnv1a:6ec6785c"
+      "deckHash": "fnv1a:b4f61cd0"
     },
     {
       "deckSnapshotId": "demo_runner_004_snapshot_v0_6",
@@ -238,11 +242,11 @@
       "validation": {
         "ok": true,
         "errors": [],
-        "warnings": [
-          "Uses MVP 0.4 expanded local demo card pool."
-        ],
+        "warnings": [],
+        "issues": [],
         "totalCards": 19,
-        "agendaPoints": null
+        "agendaPoints": null,
+        "influenceSpent": null
       },
       "publicMetadata": {
         "side": "runner",
@@ -250,9 +254,9 @@
         "deckName": "Runner Demo Deck 04 - Setup & Pressure",
         "cardPoolSnapshotId": "card-snapshot-0.5",
         "formatProfileId": "local-demo-v0.6",
-        "deckHash": "fnv1a:b6bc479a"
+        "deckHash": "fnv1a:d3ad4e1c"
       },
-      "deckHash": "fnv1a:b6bc479a"
+      "deckHash": "fnv1a:d3ad4e1c"
     },
     {
       "deckSnapshotId": "demo_runner_008_snapshot_v0_8",
@@ -331,8 +335,10 @@
         "ok": true,
         "errors": [],
         "warnings": [],
+        "issues": [],
         "totalCards": 27,
-        "agendaPoints": null
+        "agendaPoints": null,
+        "influenceSpent": null
       },
       "publicMetadata": {
         "side": "runner",
@@ -340,9 +346,9 @@
         "deckName": "Runner Demo Deck 08 - Starter Pressure",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "formatProfileId": "local-demo-v0.8",
-        "deckHash": "fnv1a:baf93410"
+        "deckHash": "fnv1a:8354f22c"
       },
-      "deckHash": "fnv1a:baf93410"
+      "deckHash": "fnv1a:8354f22c"
     },
     {
       "deckSnapshotId": "demo_corp_008_snapshot_v0_8",
@@ -433,8 +439,10 @@
         "ok": true,
         "errors": [],
         "warnings": [],
+        "issues": [],
         "totalCards": 26,
-        "agendaPoints": 7
+        "agendaPoints": 7,
+        "influenceSpent": null
       },
       "publicMetadata": {
         "side": "corp",
@@ -442,9 +450,9 @@
         "deckName": "Corp Demo Deck 08 - Starter Score Grid",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "formatProfileId": "local-demo-v0.8",
-        "deckHash": "fnv1a:29b7fc41"
+        "deckHash": "fnv1a:028a75f1"
       },
-      "deckHash": "fnv1a:29b7fc41"
+      "deckHash": "fnv1a:028a75f1"
     },
     {
       "deckSnapshotId": "demo_runner_123_snapshot_v1_2_3",
@@ -491,8 +499,10 @@
         "ok": true,
         "errors": [],
         "warnings": [],
+        "issues": [],
         "totalCards": 12,
-        "agendaPoints": null
+        "agendaPoints": null,
+        "influenceSpent": null
       },
       "publicMetadata": {
         "side": "runner",
@@ -500,9 +510,9 @@
         "deckName": "Runner Demo Deck 1.2.3 - Mechanic Unlock 1",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "formatProfileId": "local-demo-v0.8",
-        "deckHash": "fnv1a:f57f1d98"
+        "deckHash": "fnv1a:349726b4"
       },
-      "deckHash": "fnv1a:f57f1d98"
+      "deckHash": "fnv1a:349726b4"
     },
     {
       "deckSnapshotId": "demo_corp_123_snapshot_v1_2_3",
@@ -557,8 +567,10 @@
         "ok": true,
         "errors": [],
         "warnings": [],
+        "issues": [],
         "totalCards": 18,
-        "agendaPoints": 7
+        "agendaPoints": 7,
+        "influenceSpent": null
       },
       "publicMetadata": {
         "side": "corp",
@@ -566,9 +578,9 @@
         "deckName": "Corp Demo Deck 1.2.3 - Mechanic Unlock 1",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "formatProfileId": "local-demo-v0.8",
-        "deckHash": "fnv1a:03efc0db"
+        "deckHash": "fnv1a:1c48dea7"
       },
-      "deckHash": "fnv1a:03efc0db"
+      "deckHash": "fnv1a:1c48dea7"
     },
     {
       "deckSnapshotId": "demo_runner_130_snapshot_v1_3_0",
@@ -617,6 +629,7 @@
         "ok": true,
         "errors": [],
         "warnings": [],
+        "issues": [],
         "totalCards": 12,
         "agendaPoints": null,
         "influenceSpent": 0
@@ -629,9 +642,9 @@
         "cardPoolVersion": "private-local-onr-v1",
         "formatProfileId": "netgrid_private_local_v1",
         "formatProfileVersion": "1.3.0",
-        "deckHash": "fnv1a:1f64d517"
+        "deckHash": "fnv1a:55bfa3a5"
       },
-      "deckHash": "fnv1a:1f64d517"
+      "deckHash": "fnv1a:55bfa3a5"
     },
     {
       "deckSnapshotId": "demo_corp_130_snapshot_v1_3_0",
@@ -682,6 +695,7 @@
         "ok": true,
         "errors": [],
         "warnings": [],
+        "issues": [],
         "totalCards": 18,
         "agendaPoints": 7,
         "influenceSpent": null
@@ -692,9 +706,9 @@
         "deckName": "Corp Demo Deck 1.3.0 - Private Local Format",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "formatProfileId": "local-demo-v0.8",
-        "deckHash": "fnv1a:ceddeef6"
+        "deckHash": "fnv1a:187a16b4"
       },
-      "deckHash": "fnv1a:ceddeef6"
+      "deckHash": "fnv1a:187a16b4"
     },
     {
       "deckSnapshotId": "king_of_the_road_runner_ai_snapshot_v1",
@@ -771,6 +785,7 @@
         "ok": true,
         "errors": [],
         "warnings": [],
+        "issues": [],
         "totalCards": 19,
         "agendaPoints": null,
         "influenceSpent": 0
@@ -783,9 +798,9 @@
         "cardPoolVersion": "private-local-onr-v1",
         "formatProfileId": "netgrid_private_local_v1",
         "formatProfileVersion": "1.3.0",
-        "deckHash": "fnv1a:23f11fed"
+        "deckHash": "fnv1a:7c029283"
       },
-      "deckHash": "fnv1a:23f11fed"
+      "deckHash": "fnv1a:7c029283"
     },
     {
       "deckSnapshotId": "onr_origin_runner_ai_snapshot_v1",
@@ -854,6 +869,7 @@
         "ok": true,
         "errors": [],
         "warnings": [],
+        "issues": [],
         "totalCards": 20,
         "agendaPoints": null,
         "influenceSpent": 0
@@ -866,9 +882,9 @@
         "cardPoolVersion": "private-local-onr-v1",
         "formatProfileId": "netgrid_private_local_v1",
         "formatProfileVersion": "1.3.0",
-        "deckHash": "fnv1a:7a0470da"
+        "deckHash": "fnv1a:25185df8"
       },
-      "deckHash": "fnv1a:7a0470da"
+      "deckHash": "fnv1a:25185df8"
     },
     {
       "deckSnapshotId": "onr_origin_corp_ai_snapshot_v1",
@@ -943,6 +959,7 @@
         "ok": true,
         "errors": [],
         "warnings": [],
+        "issues": [],
         "totalCards": 23,
         "agendaPoints": 8,
         "influenceSpent": null
@@ -953,9 +970,9 @@
         "deckName": "Corp Origins AI - Tax & Punish",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "formatProfileId": "local-demo-v0.8",
-        "deckHash": "fnv1a:ff59def2"
+        "deckHash": "fnv1a:c75d3d9c"
       },
-      "deckHash": "fnv1a:ff59def2"
+      "deckHash": "fnv1a:c75d3d9c"
     },
     {
       "deckSnapshotId": "onr_origin_runner_ai_event_pressure_snapshot_v1",
@@ -1024,6 +1041,7 @@
         "ok": true,
         "errors": [],
         "warnings": [],
+        "issues": [],
         "totalCards": 21,
         "agendaPoints": null,
         "influenceSpent": 0
@@ -1036,9 +1054,9 @@
         "cardPoolVersion": "private-local-onr-v1",
         "formatProfileId": "netgrid_private_local_v1",
         "formatProfileVersion": "1.3.0",
-        "deckHash": "fnv1a:784e8bbe"
+        "deckHash": "fnv1a:69fcf450"
       },
-      "deckHash": "fnv1a:784e8bbe"
+      "deckHash": "fnv1a:69fcf450"
     },
     {
       "deckSnapshotId": "onr_origin_corp_ai_tag_ops_snapshot_v1",
@@ -1117,6 +1135,7 @@
         "ok": true,
         "errors": [],
         "warnings": [],
+        "issues": [],
         "totalCards": 24,
         "agendaPoints": 7,
         "influenceSpent": null
@@ -1127,9 +1146,9 @@
         "deckName": "Corp Origins AI - Tag Ops Control",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "formatProfileId": "local-demo-v0.8",
-        "deckHash": "fnv1a:ba83b70e"
+        "deckHash": "fnv1a:36c22e6c"
       },
-      "deckHash": "fnv1a:ba83b70e"
+      "deckHash": "fnv1a:36c22e6c"
     },
     {
       "deckSnapshotId": "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
@@ -1302,6 +1321,7 @@
         "ok": true,
         "errors": [],
         "warnings": [],
+        "issues": [],
         "totalCards": 45,
         "agendaPoints": null,
         "influenceSpent": 0
@@ -1314,9 +1334,9 @@
         "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
         "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
         "formatProfileVersion": "1.0.0",
-        "deckHash": "fnv1a:e657e692"
+        "deckHash": "fnv1a:245f95fc"
       },
-      "deckHash": "fnv1a:e657e692"
+      "deckHash": "fnv1a:245f95fc"
     },
     {
       "deckSnapshotId": "proteus_runner_rd_bad_publicity_snapshot_v2026_05_25",
@@ -1489,6 +1509,7 @@
         "ok": true,
         "errors": [],
         "warnings": [],
+        "issues": [],
         "totalCards": 45,
         "agendaPoints": null,
         "influenceSpent": 0
@@ -1501,9 +1522,9 @@
         "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
         "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
         "formatProfileVersion": "1.0.0",
-        "deckHash": "fnv1a:27180acf"
+        "deckHash": "fnv1a:3177fef9"
       },
-      "deckHash": "fnv1a:27180acf"
+      "deckHash": "fnv1a:3177fef9"
     },
     {
       "deckSnapshotId": "proteus_corp_region_fast_score_snapshot_v2026_05_25",
@@ -1678,6 +1699,7 @@
         "ok": true,
         "errors": [],
         "warnings": [],
+        "issues": [],
         "totalCards": 45,
         "agendaPoints": 16,
         "influenceSpent": null
@@ -1688,9 +1710,9 @@
         "deckName": "Proteus Korp - Region Fast Score",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "formatProfileId": "local-demo-v0.8",
-        "deckHash": "fnv1a:e99fcbf1"
+        "deckHash": "fnv1a:3a460197"
       },
-      "deckHash": "fnv1a:e99fcbf1"
+      "deckHash": "fnv1a:3a460197"
     },
     {
       "deckSnapshotId": "proteus_corp_antibody_tax_snapshot_v2026_05_25",
@@ -1873,6 +1895,7 @@
         "ok": true,
         "errors": [],
         "warnings": [],
+        "issues": [],
         "totalCards": 45,
         "agendaPoints": 17,
         "influenceSpent": null
@@ -1883,9 +1906,9 @@
         "deckName": "Proteus Korp - Antibody Tax & Ambush",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "formatProfileId": "local-demo-v0.8",
-        "deckHash": "fnv1a:f35c6abd"
+        "deckHash": "fnv1a:0602f943"
       },
-      "deckHash": "fnv1a:f35c6abd"
+      "deckHash": "fnv1a:0602f943"
     },
     {
       "deckSnapshotId": "classic_runner_ai_snapshot_v1",
@@ -2010,6 +2033,7 @@
         "ok": true,
         "errors": [],
         "warnings": [],
+        "issues": [],
         "totalCards": 45,
         "agendaPoints": null,
         "influenceSpent": 0
@@ -2022,9 +2046,9 @@
         "cardPoolVersion": "private-local-onr-v1-plus-classic-playtest",
         "formatProfileId": "netgrid_private_local_classic_playtest_v1",
         "formatProfileVersion": "1.0.0",
-        "deckHash": "fnv1a:f187f2e2"
+        "deckHash": "fnv1a:e1ecdc2c"
       },
-      "deckHash": "fnv1a:f187f2e2"
+      "deckHash": "fnv1a:e1ecdc2c"
     },
     {
       "deckSnapshotId": "classic_corp_ai_snapshot_v1",
@@ -2147,6 +2171,7 @@
         "ok": true,
         "errors": [],
         "warnings": [],
+        "issues": [],
         "totalCards": 45,
         "agendaPoints": 13,
         "influenceSpent": null
@@ -2157,9 +2182,9 @@
         "deckName": "Classic Corp AI - Agenda Tax Control",
         "cardPoolSnapshotId": "card-snapshot-0.8",
         "formatProfileId": "local-demo-v0.8",
-        "deckHash": "fnv1a:12ea266f"
+        "deckHash": "fnv1a:712bfe19"
       },
-      "deckHash": "fnv1a:12ea266f"
+      "deckHash": "fnv1a:712bfe19"
     }
   ]
 }

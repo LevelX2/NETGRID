@@ -12,15 +12,8 @@ export type DeckTemplate = {
   cards: DeckCardEntry[];
 };
 
-export type DeckValidationResult = {
-  ok: boolean;
-  errors: string[];
-  errorCodes?: string[];
-  warnings: string[];
-  totalCards: number;
-  agendaPoints: number | null;
-  influenceSpent?: number | null;
-};
+import type { DeckValidationResult } from "@netgrid/decks";
+export type { DeckValidationResult } from "@netgrid/decks";
 
 export type DeckSnapshot = {
   deckSnapshotId: string;
