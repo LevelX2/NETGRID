@@ -174,8 +174,9 @@ Die Informationsroute bewertet ein öffentlich beobachtetes kostenloses
 Run-Ende im laufenden Zug: Folgt auf den Basisrun ausschließlich kostenloses
 ICE-Rezzen und ein von der Engine bestätigtes End-the-Run-Fenster ohne
 Zugriff, rechtfertigt unveränderter Aufbau keine erneute identische Probe.
-`central-probe-outcome.ts` bindet diese Admission-Evidence an Zielserver,
-Zug und Endereignis. Aktuell garantierter Zugriff, Kartenruns und geänderte
+`run-analysis/runner-free-stop-observation.ts` liefert das öffentliche
+Endereignis für Zielserver und Zug; `central-probe-outcome.ts` entscheidet
+dessen Zulassung im Central-Owner. Aktuell garantierter Zugriff, Kartenruns und geänderte
 Board-/Effektzustände bleiben eigenständig bewertete Routen. Ein neuer Zug
 öffnet eine neue Beobachtung; Kartenidentitäten oder verborgene ICE-Quotes
 werden aus der Historie nicht rekonstruiert. Das Eingabe-DTO bewahrt dafür
@@ -187,6 +188,14 @@ wenn die öffentlichen Engine-Effekte ausschließlich Runner-Credits vergeben
 oder Credits auf einer eigenen Karte einlagern beziehungsweise abheben. Andere Counter-Veränderungen
 werden dadurch nicht als Finanzierung freigegeben.
 Gemischte oder nicht quotierte Ereignisse eröffnen die Bewertung erneut.
+
+Der Remote-Owner verwendet dieselbe Beobachtung für einen wiederholten
+Basisrun mit bezahlbarem Trashziel und weiterhin nur bedingtem Probe-Zugriff.
+`remote-contest-admission.ts` lehnt diese einzelne Runvariante ab, ohne ihren
+bekannten Trashwert oder die Engine-Pfadquote zu verändern. Scorebedrohungen,
+terminale Contests und garantierter Zugriff bleiben separat zugelassen.
+Eine bezahlte Verteidigung belegt keine kostenlose Wiederholung: Der erneute
+Run kann die Corp weiter Credits kosten und wird regulär bewertet.
 
 Post-Break-ICE-Trash wird als Vorbereitung einer bereits zugelassenen
 Central-Instanz behandelt. `post-break-trash-preparation.ts` vergleicht die

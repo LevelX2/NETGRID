@@ -63,6 +63,7 @@ import type { RunnerHandDevelopmentEvaluation } from "../hand-development/hand-d
 import { runnerCoverageGapIsTerminalRemoteThreat } from "../rig-coverage/coverage-support";
 import {
   runnerCriticalDamageContestBlocked,
+  runnerRemoteRepeatedFreeStopEvidence,
   runnerTerminalNonlethalDamageContestAlreadyFailedThisTurn,
   runnerTerminalRemoteContestIsDirectlyMandatory,
 } from "./remote-contest-admission";
@@ -581,7 +582,12 @@ function bindRunnerRemoteRunActionAssessments(
     const specialRouteMembership =
       signal.constrainedActionCapacity === true ||
       signal.evidenceCode === "visible_known_agenda_remote";
+    const repeatedFreeStopEvidence = runnerRemoteRepeatedFreeStopEvidence(
+      input,
+      evaluation,
+    );
     const executable =
+      repeatedFreeStopEvidence === undefined &&
       signal.runActionDeferralEvidenceCode === undefined &&
       signal.routePreparation === undefined &&
       signal.reachable &&
@@ -602,15 +608,16 @@ function bindRunnerRemoteRunActionAssessments(
           ...evaluation.evidence,
         ]
       : [
-          lacksDifferentialPayoff
-            ? "runner_remote_card_run_has_no_visible_differential_payoff_over_basic_run"
-            : (signal.runActionDeferralEvidenceCode ??
-              runnerRemoteRunVariantNonproductiveEvidence(
-                signal,
-                evaluation,
-                fundingSupport,
-                preferredActionIds,
-              )),
+          repeatedFreeStopEvidence ??
+            (lacksDifferentialPayoff
+              ? "runner_remote_card_run_has_no_visible_differential_payoff_over_basic_run"
+              : (signal.runActionDeferralEvidenceCode ??
+                runnerRemoteRunVariantNonproductiveEvidence(
+                  signal,
+                  evaluation,
+                  fundingSupport,
+                  preferredActionIds,
+                ))),
           ...evaluation.evidence,
         ];
     const opportunityQuote = evaluation.consumableRunOpportunityQuote;

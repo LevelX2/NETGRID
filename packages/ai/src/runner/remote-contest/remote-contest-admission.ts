@@ -1,5 +1,6 @@
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { RunnerRunTargetEvaluation } from "../../runner-run-target-evaluation";
+import { runnerObservedFreeStopEventId } from "../../run-analysis/runner-free-stop-observation";
 import {
   mergedPublicHistory,
   serverIdFromEvent,
@@ -9,6 +10,33 @@ import {
   runnerDamageThreatAssessment,
   type RunnerDamageThreatAssessment,
 } from "../../runner-damage-threat-assessment";
+
+export function runnerRemoteRepeatedFreeStopEvidence(
+  input: AiDecisionInput,
+  evaluation: RunnerRunTargetEvaluation,
+): string | undefined {
+  const action = input.legalActions.find(
+    (a) => a.actionId === evaluation.actionId,
+  );
+  if (
+    evaluation.accessTargetKind !== "remote" ||
+    evaluation.runCommitment !== "probe_only" ||
+    evaluation.routeQuote?.reachability === "guaranteed_access" ||
+    evaluation.accessPayoff !== "trash_affordable" ||
+    evaluation.scoreThreat ||
+    runnerCoverageGapIsTerminalRemoteThreat(input, evaluation) ||
+    action?.type !== "start_run" ||
+    action.source !== "basic_action"
+  )
+    return undefined;
+  const stoppedEventId = runnerObservedFreeStopEventId(
+    input,
+    evaluation.targetServerId,
+  );
+  return stoppedEventId
+    ? `runner_remote_trash_probe_free_stop_already_observed:${evaluation.targetServerId}:${stoppedEventId}`
+    : undefined;
+}
 
 export function runnerCriticalDamageContestBlocked(
   input: AiDecisionInput,
