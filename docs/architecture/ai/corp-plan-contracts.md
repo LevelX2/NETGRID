@@ -1077,6 +1077,22 @@ und `corp/defense/corp-defense-funding-facts.ts`. Economy erhält aktuelle
 Parent-/Need-/Provider-Bindungen und bestimmt daraus seine Finanzierungsroute;
 es bewertet weder eigene Agenda-Ziele noch globale ICE-Allokation.
 
+Die Verwertung eines eigenen rezzten ICE für Credits benötigt zusätzlich die
+Freigabe `corp/defense/corp-ice-liquidation.ts`. Der begrenzte Nachweis erlaubt
+eine einzelne statische Schicht, wenn der verbleibende bekannte Pfad den
+Runner einschließlich öffentlich vorbereiteter Breaker und Engine-gequotetem
+Einkommen des nächsten Zuges weiter vollständig blockiert. Letzte Schichten,
+fehlende Quotes und dynamische oder Lifecycle-ICE erhalten keine Freigabe;
+für diese Fälle ist eine vollständige Engine-Projektion nach Entfernung nötig.
+Economy nutzt den Verkauf ausschließlich für einen gebundenen Parent-Need,
+nicht als freie Auszahlung. Eine Fundingroute darf höchstens einen solchen
+Verkauf enthalten; danach wird der reale neue Zustand erneut bewertet.
+`ice-liquidation-real-engine.test.ts` belegt vier Credits aus einer redundanten
+Schicht, erhaltenen Restschutz und das Verbot, beide Schichten in derselben
+Fundingroute zu verbrauchen. Dieser Slice behauptet keine allgemeine optimale
+ICE-Liquidation oder ein Nachspielen der menschlichen Corp-Entscheidungen.
+Die öffentliche Engine-Quote `runnerNextTurnCreditClicks` bleibt im KI-DTO
+mit ihrem exakten Wert erhalten; ungültige Werte scheitern sichtbar.
 Die Liquidation einer Engine-gequoteten Counter-Bank respektiert den aktuell
 revalidierten Score-Decoy-Claim auf genau derselben verdeckten Instanz und
 demselben Server. Ein aufgestellter Bluff wird nicht allein wegen fehlender

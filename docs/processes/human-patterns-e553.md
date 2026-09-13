@@ -1,6 +1,6 @@
 # Menschliche Spielmuster in ausführbare KI-Linien überführen
 
-Status: aktiv; HU00 bis HU02 geprüft, HU03 aktiv. Quelle: Match `match_e553ff2853e6bbba` und ausdrücklicher Umsetzungsauftrag vom 2026-09-13.
+Status: aktiv; HU00 bis HU03 geprüft, HU04 als nächstes. Quelle: Match `match_e553ff2853e6bbba` und ausdrücklicher Umsetzungsauftrag vom 2026-09-13.
 
 ## Ziel und Arbeitsvertrag
 
@@ -39,3 +39,5 @@ Alle Pakete vollständig und sequenziell abarbeiten, beendete Pakete getrennt co
 - HU01 belegt vollständig aktuell liquide Kombinationen vorbereiteter Breaker einschließlich Pfadkosten, MU und Run-Klick; noch benötigte zusätzliche Funding-/Installationsvarianten werden nicht als bewiesen ausgegeben. D147 erhält zunächst einen regulären Draw statt sieben unproduktiver Counterzahlungen. Keine Behauptung eines rettbaren Originalspiels.
 
 - HU02: 13 fokussierte Tests einschließlich D49/D59, unbekannter ICE und leerem Remote sowie Suchregression grün; fokussierter Strict-Typecheck grün. D59 sucht die Sentry-Antwort, D49 behält zulässigen HQ-Druck bei und trägt bereits den gebundenen Remote-Bedarf.
+
+- HU03: bestehende Cashout-Projektion um Defense-Freigabe für statischen Restschutz erweitert; genau ein Verkauf je gebundener Fundingroute. Keine Freigabe für dynamische Pfade ohne Post-Removal-Quote. Engine-Einkommensquote im KI-DTO wieder erhalten. 112 Tests in vier fokussierten Dateien und Strict-Typecheck sowie Struktur-/Erreichbarkeitsgate grün; zusätzlicher DTO-Fehlerfall vor Commit nachgeprüft.

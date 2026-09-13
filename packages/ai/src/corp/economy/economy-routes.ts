@@ -1,4 +1,5 @@
 import { candidateTargetIds } from "../../plans/corp-core-module-support";
+import { assessCorpIceLiquidation } from "../defense/corp-ice-liquidation";
 
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
@@ -240,13 +241,35 @@ export function assessCorpEconomyFundingRoute(
   context: PlanSchedulerContext,
   signal: CorpEconomyParentFundingSignal | CorpEconomyReserveSignal,
 ): CorpEconomyFundingRouteAssessment {
-  const candidates = context.actionCandidates.filter(
-    (candidate) =>
-      signal.actionIds.includes(candidate.actionId) &&
-      immediateCorpLiquidCreditGain(candidate) > 0 &&
-      candidate.economyProjection?.reliability === "guaranteed" &&
-      corpEconomyCandidateHasExecutablePayload(context.input, candidate),
-  );
+  let liquidationAdmitted = false;
+  const candidates = context.actionCandidates
+    .filter(
+      (candidate) =>
+        signal.actionIds.includes(candidate.actionId) &&
+        immediateCorpLiquidCreditGain(candidate) > 0 &&
+        candidate.economyProjection?.reliability === "guaranteed" &&
+        corpEconomyCandidateHasExecutablePayload(context.input, candidate),
+    )
+    .filter((candidate) => {
+      const action = context.input.legalActions.find(
+        (a) => a.actionId === candidate.actionId,
+      );
+      if (!action) return false;
+      const assessment = assessCorpIceLiquidation(context.input, action);
+      if (assessment.status === "not_applicable") return true;
+      // Two individually redundant layers must never be sold together in a
+      // precomputed funding route. Execute one head, then requote the board.
+      if (
+        assessment.status !== "preserved" ||
+        signal.kind !== "parent_funding" ||
+        !signal.parentPlanInstanceId ||
+        !signal.parentNeedId ||
+        liquidationAdmitted
+      )
+        return false;
+      liquidationAdmitted = true;
+      return true;
+    });
   const currentCredits = context.input.playerView.own.credits;
   const demandForTarget = (
     targetCredits: number,
@@ -438,6 +461,10 @@ export function corpEconomyCandidateHasExecutablePayload(
     (legalAction) => legalAction.actionId === candidate.actionId,
   );
   const drawCardsAmount = Number(action?.payload?.drawCardsAmount ?? 0);
+  if (!action) return false;
+  const liquidation = assessCorpIceLiquidation(input, action);
+  if (liquidation.status === "blocked" || liquidation.status === "unknown")
+    return false;
   return !(drawCardsAmount > 0 && input.playerView.own.stackOrRdCount <= 0);
 }
 

@@ -715,6 +715,12 @@ function sanitizePlayerView(
   publicEvents: PublicGameEvent[],
 ): PlayerView {
   const corpPunishRouteQuoteSet = sanitizeCorpPunishRouteQuoteSet(view);
+  if (
+    view.runnerNextTurnCreditClicks !== undefined &&
+    (!Number.isSafeInteger(view.runnerNextTurnCreditClicks) ||
+      view.runnerNextTurnCreditClicks < 0)
+  )
+    throw new Error("Invalid Engine Runner next-turn credit-click forecast.");
   const obligation = view.own.corpEndTurnCreditObligation;
   if (
     obligation !== undefined &&
@@ -730,6 +736,9 @@ function sanitizePlayerView(
   return {
     side: view.side,
     stateVersion: view.stateVersion,
+    ...(view.runnerNextTurnCreditClicks !== undefined
+      ? { runnerNextTurnCreditClicks: view.runnerNextTurnCreditClicks }
+      : {}),
     traceRulesProfile: view.traceRulesProfile ?? "modern_open",
     ...(view.turnSerial !== undefined ? { turnSerial: view.turnSerial } : {}),
     timingPoint: view.timingPoint,
