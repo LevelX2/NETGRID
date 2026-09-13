@@ -603,7 +603,9 @@ describe("deriveOpponentActionCues", () => {
         "side.runner": "Runner",
         "event.choiceResolved": "{subject}: resolved a choice.",
         "trace.resolvedWithTags":
-          "Trace resolved: {corp} {corpBid} credits, {runner} {runnerBid} credits; {outcome}; {tagOutcome}.",
+          "Trace strength {traceValue} against Runner link {runnerStrength}: {outcome}; {tagOutcome}.",
+        "trace.payments":
+          "Bids: {corp} {corpBid} credits, {runner} {runnerBid} credits.",
         "trace.successful": "trace successful",
         "trace.tagsRunner": "the Runner gained {amount} tags",
         "trace.resolvedStatus":
@@ -627,8 +629,9 @@ describe("deriveOpponentActionCues", () => {
 
     expect(localizedCues[0]).toMatchObject({
       title:
-        "Trace resolved: You 3 credits, Runner 0 credits; trace successful; the Runner gained 6 tags.",
-      description: "Final result: trace 6 against Runner strength 0.",
+        "Trace strength 6 against Runner link 0: trace successful; the Runner gained 6 tags.",
+      description:
+        "Bids: You 3 credits, Runner 0 credits. Final result: trace 6 against Runner strength 0.",
       presentationKind: "trace_result",
       presentationLabel: "Trace result",
       iconBadge: "6:0",
@@ -672,7 +675,9 @@ describe("deriveOpponentActionCues", () => {
         "category.danger": "Danger",
         "group.turn": "Turn",
         "trace.resolved":
-          "Trace resolved: {corp} {corpBid}, {runner} {runnerBid}; {outcome}.",
+          "Trace strength {traceValue} against Runner link {runnerStrength}: {outcome}.",
+        "trace.payments":
+          "Bids: {corp} {corpBid} credits, {runner} {runnerBid} credits.",
         "trace.successful": "successful",
         "trace.resolvedStatusWithRunLock":
           "Final: {traceValue}:{runnerStrength}; run ended; lock {runLockCreditCost}.",
@@ -693,8 +698,9 @@ describe("deriveOpponentActionCues", () => {
       presentationKind: "trace_result",
       presentationLabel: "Trace result",
       iconBadge: "2:1",
-      title: "Trace resolved: Corp 2, You 1; successful.",
-      description: "Final: 2:1; run ended; lock 1.",
+      title: "Trace strength 2 against Runner link 1: successful.",
+      description:
+        "Bids: Corp 2 credits, You 1 credits. Final: 2:1; run ended; lock 1.",
     });
   });
 

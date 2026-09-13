@@ -447,18 +447,22 @@ function semanticTraceChoicePresentation(
           amount: tagsAdded,
         })
       : undefined;
+  const bidDescription = translate("trace.payments", {
+    corp: corpLabel,
+    corpBid,
+    runner: runnerLabel,
+    runnerBid,
+  });
   return {
     title: translate(tagOutcome ? "trace.resolvedWithTags" : "trace.resolved", {
-      corp: corpLabel,
-      corpBid,
-      runner: runnerLabel,
-      runnerBid,
+      traceValue: traceValue ?? translate("trace.strengthUnknown"),
+      runnerStrength: runnerStrength ?? translate("trace.strengthUnknown"),
       outcome,
       ...(tagOutcome ? { tagOutcome } : {}),
     }),
     ...(traceValue !== undefined && runnerStrength !== undefined
       ? {
-          description: translate(
+          description: `${bidDescription} ${translate(
             runEnded && runLockCreditCost !== undefined
               ? "trace.resolvedStatusWithRunLock"
               : runEnded
@@ -469,9 +473,9 @@ function semanticTraceChoicePresentation(
               runnerStrength,
               ...(runLockCreditCost !== undefined ? { runLockCreditCost } : {}),
             },
-          ),
+          )}`,
         }
-      : {}),
+      : { description: bidDescription }),
     chips: [
       translate("trace.label"),
       translate("trace.corpBidChip", { amount: corpBid }),
