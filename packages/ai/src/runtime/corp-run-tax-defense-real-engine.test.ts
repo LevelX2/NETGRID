@@ -36,6 +36,13 @@ const decks = Object.fromEntries(
   }),
 );
 beforeEach(() => resetResidentPlanPortfolioMemory());
+const fixedTraceCorpDeck = {
+  ...decks.corp!,
+  id: `${decks.corp!.id}-fixed-trace`,
+  cards: decks.corp!.cards.map((c) =>
+    c.id === HOMING ? { ...c, id: "onr_v1_228_cinderella" } : c,
+  ),
+};
 function act(
   s: GameState,
   side: Side,
@@ -52,23 +59,27 @@ function act(
   if (!result.ok) throw Error(result.error.message);
   return result.state;
 }
-function input(s: GameState) {
+function input(s: GameState, fixedTrace = false) {
+  const corpDeck = fixedTrace ? fixedTraceCorpDeck : decks.corp!;
   return buildAiDecisionInput(s, "corp", {
     difficulty: "hard",
     ownDeckSnapshot: {
-      deckSnapshotId: decks.corp!.id,
+      deckSnapshotId: corpDeck.id,
       side: "corp",
-      cards: decks.corp!.cards.map((c) => ({
+      cards: corpDeck.cards.map((c) => ({
         cardId: c.id,
         quantity: c.quantity,
       })),
     },
   });
 }
-function fixture(kind: "pass_tax" | "trace", runnerCredits: number) {
+function fixture(
+  kind: "pass_tax" | "trace" | "fixed_trace",
+  runnerCredits: number,
+) {
   let s = createGameAfterSetup({
     seed: `run-tax-${kind}`,
-    corpDeck: decks.corp!,
+    corpDeck: kind === "fixed_trace" ? fixedTraceCorpDeck : decks.corp!,
     runnerDeck: decks.runner!,
     traceRulesProfile: "modern_open",
   });
@@ -82,7 +93,11 @@ function fixture(kind: "pass_tax" | "trace", runnerCredits: number) {
       .withCorpIceOnServer("hq", "onr_proteus_012_bug-zapper")
       .withCorpIceOnServer("hq", "onr_proteus_017_credit-blocks")
       .withCorpIceOnServer("hq", "onr_proteus_021_dog-pile");
-  else f.withCorpIceOnServer("hq", HOMING);
+  else
+    f.withCorpIceOnServer(
+      "hq",
+      kind === "fixed_trace" ? "onr_v1_228_cinderella" : HOMING,
+    );
   s.corp.clicks = 0;
   s = act(s, "corp", "corp.end_turn");
   const start = getLegalActions(s, "runner").find(
@@ -147,6 +162,81 @@ it("does not pay four credits for a weak current toll against a rich Runner", ()
   expect(
     JSON.stringify(runnerView.servers.find((x) => x.id === "hq")!.root),
   ).not.toContain(RASMIN);
+});
+
+it("quotes and rezzes a fixed trace that the public Runner cannot beat", () => {
+  let s = fixture("fixed_trace", 5);
+  const initial = structuredClone(s);
+  const before = hashState(s);
+  const source = getPlayerView(s, "corp").servers.find((x) => x.id === "hq")!
+    .ice[0]!;
+  expect(source.currentTraceIceRezQuotes).toEqual([
+    expect.objectContaining({
+      rezCredits: 8,
+      corpBid: 0,
+      corpTraceStrength: 6,
+      maximumRunnerTraceStrength: 5,
+      runnerCanBreak: false,
+      guaranteedRunEnd: true,
+    }),
+  ]);
+  const decision = chooseCorpAction(input(s, true));
+  const action = getLegalActions(s, "corp").find(
+    (a) => a.actionId === decision.actionId,
+  )!;
+  expect(action.type).toBe("rez_ice");
+  expect(action.payload?.variableRezValue).toBeUndefined();
+  expect(
+    decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
+  ).toBe("corp.defend_servers");
+  expect(decision.fallbackUsed).toBe(false);
+  expect(hashState(s)).toBe(before);
+  expect(JSON.stringify(getPlayerView(s, "runner"))).not.toContain(
+    "currentTraceIceRezQuotes",
+  );
+  s = act(s, "corp", action.actionId);
+  s = act(
+    s,
+    "runner",
+    getLegalActions(s, "runner").find((a) => a.type === "continue_run")!
+      .actionId,
+  );
+  const bid = chooseCorpAction(input(s, true));
+  s = act(s, "corp", bid.actionId!, bid.selectedChoices);
+  expect(s.corp.credits).toBe(4);
+  const runnerBid = getLegalActions(s, "runner").find(
+    (a) => a.type === "resolve_choice",
+  )!;
+  s = act(s, "runner", runnerBid.actionId, {
+    choiceId: getPlayerView(s, "runner").pendingChoice!.choiceId,
+    selectedOptionIds: ["bid_5"],
+  });
+  expect(s.run).toBeUndefined();
+  expect(s.runner.credits).toBe(0);
+  const replay = replayEvents(
+    initial,
+    s.eventLog.slice(initial.eventLog.length),
+  );
+  expect(replay.ok).toBe(true);
+  expect(hashState(replay.state)).toBe(hashState(s));
+});
+
+it("does not certify a fixed trace at a tie or in the blind profile", () => {
+  const s = fixture("fixed_trace", 6);
+  expect(
+    getPlayerView(s, "corp").servers.find((x) => x.id === "hq")!.ice[0]!
+      .currentTraceIceRezQuotes?.[0]?.guaranteedRunEnd,
+  ).toBe(false);
+  expect(
+    getLegalActions(s, "corp").find(
+      (a) => a.actionId === chooseCorpAction(input(s, true)).actionId,
+    )?.type,
+  ).toBe("decline_rez");
+  s.traceRulesProfile = "classic_blind";
+  expect(
+    getPlayerView(s, "corp").servers.find((x) => x.id === "hq")!.ice[0]!
+      .currentTraceIceRezQuotes,
+  ).toBeUndefined();
 });
 
 it("rezzes a priced variable trace ICE that stops a broke Runner without a breaker", () => {

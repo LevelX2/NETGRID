@@ -3461,7 +3461,7 @@ export type VisibleCorpIceRezActionResourceExchangeQuote = {
   quote: VisibleCorpIceRezResourceExchangeQuote;
 };
 
-/** Current pass-toll exposure; payment is conditional on continuing the run. */
+/** Exact current trace defense after the action-bound ICE rez. */
 export type VisibleCorpTraceIceRezQuote = {
   actionId: string;
   sourceCardInstanceId: CardInstanceId;
@@ -3469,7 +3469,7 @@ export type VisibleCorpTraceIceRezQuote = {
   stateVersion: number;
   runId: string;
   rezCredits: number;
-  variableValue: number;
+  variableValue?: number;
   corpBid: 0;
   corpTraceStrength: number;
   maximumRunnerTraceStrength: number;

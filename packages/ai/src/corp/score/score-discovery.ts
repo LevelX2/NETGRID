@@ -61,8 +61,12 @@ export function discoverCorpDirectScoreProjects({
   );
   const preferredDeckoutAgendaRecycleRouteAvailable =
     corpPreferredDeckoutAgendaRecycleRouteAvailable(input, candidates);
-  const preparedTerminalScoreContinuationAvailable =
+  const preparedScoreContinuationAvailable =
     corpNextTurnScoreContinuationProjects(input, candidates).some((project) => {
+      // An installed agenda that can finish now also dominates opening an
+      // unfunded emergency project, even below the winning point threshold.
+      // The producer has already quoted every advance and funding click.
+      if (project.sameTurnCloseout) return true;
       const reserve = project.continuationReserve;
       if (!project.terminalScore || !reserve) return false;
       const gap = Math.max(
@@ -85,7 +89,7 @@ export function discoverCorpDirectScoreProjects({
       scorelineFeasibility,
       centralDefenseAllocation,
       preferredDeckoutAgendaRecycleRouteAvailable,
-      preparedTerminalScoreContinuationAvailable,
+      preparedScoreContinuationAvailable,
       residentScoreDefenseBinding,
       recentlyCompromisedRemoteIds,
     ),
@@ -137,6 +141,9 @@ export function reconcileCorpScoreProjects({
   );
   const nextTurnScoreContinuationProjects =
     corpNextTurnScoreContinuationProjects(input, candidates);
+  const currentInstalledScore = nextTurnScoreContinuationProjects.find(
+    (project) => project.sameTurnCloseout,
+  );
   const discoveredScoreProjects = [
     ...directScoreProjects,
     ...counterBankScoreProjects,
@@ -162,9 +169,27 @@ export function reconcileCorpScoreProjects({
       (project) =>
         !assetPreservation.dominatedProjectIds.has(project.projectId),
     )
-    .map((project) =>
-      corpConditionalScoreCreditFunding(input, candidates, project),
-    );
+    .map((project) => {
+      const funded = corpConditionalScoreCreditFunding(
+        input,
+        candidates,
+        project,
+      );
+      if (
+        currentInstalledScore &&
+        funded.phase === "install_agenda" &&
+        !funded.sameTurnCloseout
+      ) {
+        return {
+          ...funded,
+          feasible: false,
+          routeAssessment:
+            "corp_resident_score_parent_dominates_sibling_route" as const,
+          evidenceCode: `corp_resident_score_parent_dominates_sibling_route:${currentInstalledScore.agendaInstanceId}:${currentInstalledScore.serverId}`,
+        };
+      }
+      return funded;
+    });
   const ownAgendas = input.playerView.own.gripOrHq.filter(
     (card) => card.known && visibleCardIsAgenda(input, card),
   ).length;

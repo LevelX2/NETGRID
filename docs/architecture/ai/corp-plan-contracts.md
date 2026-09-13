@@ -206,6 +206,13 @@ Eine veraltete, unvollständige oder nicht finanzierbare Fortsetzung sperrt
 die Notfallentwicklung nicht; ein überlebender Remote wird dadurch nicht
 als garantiert behauptet.
 
+Dieselbe Grenze gilt für eine bereits installierte Agenda, deren vollständige
+Konversion einschließlich nötiger Basis-Creditaktionen noch im aktuellen Zug
+Engine-gequotet möglich ist. Dafür ist kein unmittelbarer Spielsieg nötig:
+Der vorhandene Score-Parent und sein gebundener Funding-Step bleiben vor
+pauschalen Notfallinstallationen erhalten. Ein bloßer Next-Turn-Pfad einer
+nicht terminalen Agenda reicht für diese zusätzliche Zulassungsgrenze nicht.
+
 Nach der exakten Installation bleibt derselbe Nachweis erhalten, wenn die
 Agenda nun im gebundenen Zielserver liegt und weder eine weitere HQ-Agenda
 noch eine installierte Geschwisteragenda exponiert ist. Der Wechsel aus HQ
@@ -564,16 +571,20 @@ Defense darf damit einen bezahlbaren Durchlauf, einen erzwungenen Abbruch
 oder einen wirtschaftlich sinnvollen Gebührentausch bewerten. Die spätere
 Access-Rez-Heuristik gilt nicht für vor dem ICE-Pass fällige Gebühren.
 
-Für X-Trace-ICE validiert Defense die vollständige aktuelle Rez-Aktion
-einschließlich X, Cap, zusätzlicher Kosten, Stärke und Trace-Wert. Eine eigene
+Für feste und variable Trace-ICE validiert Defense die vollständige aktuelle
+Rez-Aktion; bei X zusätzlich Cap, Zusatzkosten, Stärke und Trace-Wert. Eine eigene
 `trace_access_block`-Route verwendet ausschließlich die Engine-Quote für
 einen bei Corp-Gebot 0 garantierten Run-Abbruch und die sichtbare Breaker-
 Antwort. Sie bezeichnet den Trace nicht als bedingungslose ETR-Subroutine.
 Die bestehende Score-Reserve bleibt bindend; unter gleich wirksamen Routen
-entscheidet der geringere Rez-Aufwand. Die erste Ausbaustufe zertifiziert nur
+entscheidet der geringere Rez-Aufwand. Die aktuelle Quote zertifiziert nur
 `modern_open` mit vollständig bekanntem installiertem Runner-Support, einer
-einzelnen Run-Ende-/Runsperre-Trace-Subroutine und ohne unbekannte
+einzelnen Run-Ende-/Runsperre- oder Run-Ende/Hardwaretrash/Schadens-Trace-Subroutine und ohne unbekannte
 Encounter-, Post-Bid- oder Cancel-Pfade. Andere Fälle erhalten keine Garantie.
+Feste Rez-Quotes tragen keinen erfundenen X-Wert. Die Engine berechnet den
+Trace mit dem effektiv projizierten Kartentext und der gesamten öffentlich
+belegten Runner-Antwortkapazität. Die Corp-seitige Quote bleibt aus der
+Runner-View ausgeschlossen; Gleichstand ist keine Corp-Erfolgsgarantie.
 Für einen tatsächlich begonnenen Trace mit fester Wirkung kann die Engine
 auch das wirkungsgleiche Mindestgebot 0 zertifizieren. Die Choice-Auflösung
 verwendet dann die vorhandene, exakt gebundene Nulloption; sie bewertet keine

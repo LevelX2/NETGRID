@@ -17,7 +17,7 @@ import {
   traceCorpBaseStrength,
 } from "../trace/trace-rules-profile";
 
-/** Exact current X-rez response, never a claim about a hard ETR subroutine.
+/** Exact current fixed/X-rez response, never a claim about a hard ETR subroutine.
  * A zero-Corp-bid guarantee avoids inventing a future trace spending policy.
  * Unsupported/hidden response families receive no guarantee.
  */
@@ -43,14 +43,14 @@ export function visibleCorpTraceIceRezQuotes(
   const maximumRunnerStrength = visibleRunnerMaximumTraceStrength(state);
   if (maximumRunnerStrength === undefined) return [];
   const cost = projectInstalledCorpIceRezCost(state, id);
+  if (!cost?.complete) return [];
+  const parameter =
+    cost.costKind === "variable" ? cost.variableParameter : undefined;
   if (
-    !cost?.complete ||
-    cost.costKind !== "variable" ||
-    cost.variableParameter.kind !== "x_strength" ||
-    !cost.variableParameter.traceLimitFromValue
+    parameter &&
+    (parameter.kind !== "x_strength" || !parameter.traceLimitFromValue)
   )
     return [];
-  const parameter = cost.variableParameter;
   return actions.flatMap((action) => {
     const value = action.payload?.variableRezValue;
     if (
@@ -58,22 +58,27 @@ export function visibleCorpTraceIceRezQuotes(
       action.source !== id ||
       action.side !== "corp" ||
       action.expiresAtStateVersion !== state.stateVersion ||
-      action.payload?.variableRezKind !== "x_strength" ||
-      typeof value !== "number" ||
-      !Number.isSafeInteger(value) ||
-      value < parameter.minValue ||
-      value > parameter.maxValue
+      (parameter
+        ? action.payload?.variableRezKind !== "x_strength" ||
+          typeof value !== "number" ||
+          !Number.isSafeInteger(value) ||
+          value < parameter.minValue ||
+          value > parameter.maxValue
+        : value !== undefined || action.payload?.variableRezKind !== undefined)
     )
       return [];
     const rezCredits = action.costs.reduce((n, c) => n + (c.credits ?? 0), 0);
-    const additional = value * parameter.additionalCreditsPerValue;
+    const additional = parameter
+      ? (value as number) * parameter.additionalCreditsPerValue
+      : 0;
     if (
       action.choiceRequirements?.length ||
       action.targetRequirements.length ||
       action.costs.some((c) => (c.clicks ?? 0) !== 0) ||
       rezCredits !== cost.finalCredits + additional ||
-      action.payload.rezCostPaid !== rezCredits ||
-      action.payload.effectiveTraceLimitAfterRez !== value
+      (parameter &&
+        (action.payload?.rezCostPaid !== rezCredits ||
+          action.payload?.effectiveTraceLimitAfterRez !== value))
     )
       return [];
     const source = state.cardInstances[id]!;
@@ -84,14 +89,18 @@ export function visibleCorpTraceIceRezQuotes(
         [id]: {
           ...source,
           rezzed: true,
-          variableIceState: {
-            family: "x_strength",
-            value,
-            strength: value,
-            traceLimit: value,
-            additionalCostPaid: additional,
-            cap: parameter.maxValue,
-          },
+          ...(parameter
+            ? {
+                variableIceState: {
+                  family: "x_strength",
+                  value: value as number,
+                  strength: value as number,
+                  traceLimit: value as number,
+                  additionalCostPaid: additional,
+                  cap: parameter.maxValue,
+                },
+              }
+            : {}),
         },
       },
     };
@@ -107,7 +116,9 @@ export function visibleCorpTraceIceRezQuotes(
     const subroutine = effective.subroutines[0]!;
     if (
       subroutine.type !== "initiate_trace" ||
-      subroutine.traceSuccessEffect?.type !== "end_run_and_run_lock" ||
+      (subroutine.traceSuccessEffect?.type !== "end_run_and_run_lock" &&
+        subroutine.traceSuccessEffect?.type !==
+          "end_run_trash_hardware_and_unpreventable_meat_damage") ||
       subroutine.traceLimit === undefined
     )
       return [];
@@ -133,7 +144,7 @@ export function visibleCorpTraceIceRezQuotes(
         stateVersion: state.stateVersion,
         runId: run.runId,
         rezCredits,
-        variableValue: value,
+        ...(parameter ? { variableValue: value as number } : {}),
         corpBid: 0,
         corpTraceStrength: strength,
         maximumRunnerTraceStrength: maximumRunnerStrength,

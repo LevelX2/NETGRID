@@ -20,6 +20,46 @@ function fixture() {
 }
 afterEach(resetResidentPlanPortfolioMemory);
 describe("existing terminal score continuation before emergency agenda flood", () => {
+  it("funds a nonterminal installed agenda that can score this turn before opening new flood targets", () => {
+    const cp = JSON.parse(
+      readFileSync(
+        new URL(
+          "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-434-r12-score-continuation-g40.json",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+    );
+    restoreAiRuntimeCheckpoint(
+      cp.input,
+      cp.input.ownDeckSnapshot.deckSnapshotId,
+      cp.runtime,
+    );
+    const decision = chooseAiAction(cp.input);
+    expect(decision.actionId).toBe("corp.gain_credit");
+    expect(decision.reasonCode).toBe("plan_first.corp.economy");
+    expect(decision.fallbackUsed).toBe(false);
+    const portfolio = residentPlanPortfolioSnapshot(cp.input)!;
+    const score = portfolio.instances.find(
+      (i) =>
+        i.moduleId === "corp.score_agenda" &&
+        i.dedupeKey ===
+          "agenda:corp_onr_v1_188_ai-chief-financial-officer_1:remote_1",
+    )!;
+    expect(score.moduleState).toMatchObject({
+      signal: {
+        terminalScore: false,
+        sameTurnCloseout: true,
+        fundingGap: 1,
+        conversion: { remainingAdvancementClicks: 1, remainingScoreCredits: 1 },
+      },
+    });
+    const support = portfolio.instances.find(
+      (i) => i.instanceId === portfolio.executorInstanceId,
+    )!;
+    expect(support.moduleId).toBe("corp.economy");
+    expect(support.parentInstanceId).toBe(score.instanceId);
+  });
   it("funds the current Engine-certified G14 agenda through its existing Score parent", () => {
     const cp = fixture();
     restoreAiRuntimeCheckpoint(
@@ -48,6 +88,27 @@ describe("existing terminal score continuation before emergency agenda flood", (
         fundingMilestone: { remainingGap: 1 },
       },
     });
+  });
+  it("keeps emergency development available when nonterminal funding and advancement no longer fit this turn", () => {
+    const cp = JSON.parse(
+      readFileSync(
+        new URL(
+          "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-434-r12-score-continuation-g40.json",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+    );
+    cp.input.playerView.own.clicks = 1;
+    restoreAiRuntimeCheckpoint(
+      cp.input,
+      cp.input.ownDeckSnapshot.deckSnapshotId,
+      cp.runtime,
+    );
+    const decision = chooseAiAction(cp.input);
+    expect(decision.actionId).toContain("corp.install_card.");
+    expect(decision.reasonCode).toBe("plan_first.corp.score_agenda");
+    expect(decision.fallbackUsed).toBe(false);
   });
   it.each(["stale_quote", "incomplete_quote", "unfundable_quote"])(
     "keeps emergency development available without a certified current continuation: %s",

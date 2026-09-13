@@ -697,7 +697,9 @@ export function validExactIceRezRoute(value: unknown): boolean {
     trace.stateVersion === quote?.expiresAtStateVersion &&
     nonEmptyString(trace.runId) &&
     trace.rezCredits === quote?.finalCredits &&
-    knownNonNegativeInteger(trace.variableValue) &&
+    (quote?.costKind === "variable"
+      ? knownNonNegativeInteger(trace.variableValue)
+      : quote?.costKind === "fixed" && trace.variableValue === undefined) &&
     trace.corpBid === 0 &&
     knownNonNegativeInteger(trace.corpTraceStrength) &&
     knownNonNegativeInteger(trace.maximumRunnerTraceStrength) &&
