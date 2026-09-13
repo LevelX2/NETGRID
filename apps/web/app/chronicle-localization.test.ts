@@ -39,6 +39,66 @@ function event(
 
 describe("semantic chronicle localization", () => {
   it.each(["de", "en", "fr"] as const)(
+    "shows actual trace strength and free base link in the compact title in %s",
+    (locale) => {
+      for (const traceStep of ["runner_bid", "post_bid_link"]) {
+        for (const traceSuccessful of [false, true]) {
+          const result = event("resolve_choice", {
+            actor: "runner",
+            traceStep,
+            traceRulesProfile: traceSuccessful
+              ? "classic_blind_corp_ties"
+              : "classic_blind",
+            traceBidsRevealed: true,
+            corpBid: 1,
+            runnerBid: 0,
+            traceValue: 1,
+            runnerStrength: 1,
+            baseLinkValue: 1,
+            traceBaseLinkSourceDefinitionId: "onr_v1_003_baedekers-net-map",
+            traceSuccessful,
+          });
+          const before = structuredClone(result);
+          const item = formatChronicleEvent(result, "corp", {
+            translate: translate(locale),
+          });
+          expect(item.title).toContain(
+            locale === "de"
+              ? "Trace-Stärke 1 gegen Runner-Link 1"
+              : locale === "en"
+                ? "Trace strength 1 against Runner link 1"
+                : "Force de traque 1 contre liaison du Runner 1",
+          );
+          expect(item.title).toContain(
+            translate(locale)(
+              traceSuccessful ? "trace.successful" : "trace.unsuccessful",
+            ),
+          );
+          expect(item.title).not.toMatch(/Credit|credit|crédit/);
+          expect(item.description).toMatch(/0 Credit|0 credit|0 crédit/);
+          expect(result).toEqual(before);
+        }
+      }
+    },
+  );
+
+  it("does not invent zero strength when a trace result lacks strength facts", () => {
+    const item = formatChronicleEvent(
+      event("resolve_choice", {
+        traceStep: "runner_bid",
+        traceSuccessful: false,
+        corpBid: 1,
+        runnerBid: 0,
+      }),
+      "corp",
+      { translate: translate("de") },
+    );
+    expect(item.title).toBe(
+      "Trace-Stärke unbekannt gegen Runner-Link unbekannt: Trace abgewehrt.",
+    );
+  });
+
+  it.each(["de", "en", "fr"] as const)(
     "names the ICE publicly chosen by Dr. Dreff in %s",
     (locale) => {
       const chosen = event("resolve_choice", {
@@ -710,8 +770,9 @@ describe("semantic chronicle localization", () => {
     });
     expect(enResult).toMatchObject({
       title:
-        "Trace resolved: You 3 credits, Runner 0 credits; trace successful; the Runner gained 1 tag.",
-      description: "Final result: trace 7 against Runner strength 0.",
+        "Trace strength 7 against Runner link 0: trace successful; the Runner gained 1 tag.",
+      description:
+        "Bids: You 3 credits, Runner 0 credits. Final result: trace 7 against Runner strength 0.",
       category: "danger",
       visibility: "public",
     });
@@ -808,10 +869,9 @@ describe("semantic chronicle localization", () => {
     });
     expect(hiddenBidItem.title).not.toMatch(/\b0\b/);
     expect(aspResultItem).toMatchObject({
-      title:
-        "Trace entschieden: Du 2 Credits, Runner 1 Credit; Trace erfolgreich.",
+      title: "Trace-Stärke 2 gegen Runner-Link 1: Trace erfolgreich.",
       description:
-        "Endstand: Trace 2 gegen Runner-Stärke 1; der Karteneffekt beendet den Run und sperrt weitere Runs bis zur Zahlung von 1 Credit.",
+        "Gebote: Du 2 Credits, Runner 1 Credit. Endstand: Trace 2 gegen Runner-Stärke 1; der Karteneffekt beendet den Run und sperrt weitere Runs bis zur Zahlung von 1 Credit.",
       category: "danger",
       visibility: "public",
     });

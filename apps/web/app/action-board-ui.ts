@@ -1633,6 +1633,48 @@ function localizedActionCreditAmount(action: LegalAction): number | null {
   return null;
 }
 
+export function boardCardActionLabel(
+  view: PlayerView,
+  action: LegalAction,
+  cardPresentationsById?: PublicCardPresentationsById,
+  locale: AppLocale = "de",
+): string {
+  const label = contextualCardActionLabel(
+    action,
+    cardPresentationsById,
+    locale,
+  );
+  const target = installedIceActionTargetDetail(view, action, locale);
+  return target ? `${label} (${target})` : label;
+}
+
+function installedIceActionTargetDetail(
+  view: PlayerView,
+  action: LegalAction,
+  locale: AppLocale,
+): string | null {
+  const targetCardId = action.payload?.targetCardId;
+  if (typeof targetCardId !== "string") return null;
+  for (const server of view.servers) {
+    const iceIndex = server.ice.findIndex(
+      (ice) => ice.instanceId === targetCardId,
+    );
+    if (iceIndex < 0) continue;
+    const location = `${localizedServerDisplayLabel(server.id, locale)} ICE ${iceIndex + 1}`;
+    const subroutineIndex = action.payload?.subroutineIndex;
+    const subroutine =
+      typeof subroutineIndex === "number" &&
+      Number.isInteger(subroutineIndex) &&
+      subroutineIndex >= 0
+        ? actionPresentationText(locale, "targetSubroutine", {
+            number: subroutineIndex + 1,
+          })
+        : null;
+    return `${location}${subroutine ? ` · ${subroutine}` : ""}`;
+  }
+  return null;
+}
+
 export function contextualCardActionLabel(
   action: LegalAction,
   cardPresentationsById?: PublicCardPresentationsById,
@@ -3402,6 +3444,9 @@ export function runAwareActionButtonLabel(
   cardPresentationsById?: PublicCardPresentationsById,
   locale: AppLocale = "de",
 ): string {
+  const target = installedIceActionTargetDetail(view, action, locale);
+  if (target)
+    return `${actionButtonLabel(action, cardPresentationsById, locale)} (${target})`;
   if (locale !== "de")
     return localizedRunAwareActionButtonLabel(
       view,
@@ -3656,11 +3701,11 @@ export function runWindowActionButtonLabel(
   locale: AppLocale = "de",
 ): string {
   if (locale !== "de")
-    return localizedRunAwareActionButtonLabel(
+    return runAwareActionButtonLabel(
       view,
       action,
-      locale,
       cardPresentationsById,
+      locale,
     );
   if (action.payload?.runnerCostPenaltySupportContinuation === true)
     return paymentSupportContinuationLabel(action);

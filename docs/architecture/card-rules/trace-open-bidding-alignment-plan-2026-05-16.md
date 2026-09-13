@@ -140,6 +140,14 @@ Base-Link-Karte wird dort nicht ein zweites Mal angeboten.
 
 ## Hidden Information, Events und Replay
 
+Die lokalisierte Chronik nennt im Haupttext des Trace-Ergebnisses die von der
+Engine veröffentlichten Endstärken (`traceValue` gegen `runnerStrength`) und
+das Engine-Ergebnis. Das gilt auch in der einfachen Ansicht und nach einem
+Post-Reveal-Link-Fenster. Creditgebote erscheinen getrennt in Beschreibung
+und Chips; sie sind weder im Modern- noch im Classic-Profil mit der Stärke
+gleichzusetzen. Fehlende Endstärken werden ausdrücklich als unbekannt
+angezeigt. Verdeckte Gebote bleiben bis zum Reveal verborgen.
+
 Blind-Choices für die eigentlichen Corp- und Runner-Ausgaben tragen
 `hidden_info_barrier`. Vor Reveal enthalten gegnerische PlayerViews und
 PublicEvents weder Bid noch konkrete Payment-Quellen oder daraus ableitbare

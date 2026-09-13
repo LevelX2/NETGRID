@@ -51,6 +51,7 @@ import {
   counterDisplaysForRendering,
   clampCuePosition,
   contextualCardActionLabel as contextualCardActionLabelWithoutCatalog,
+  boardCardActionLabel,
   corpInstalledCardState,
   corpRootCardsForDisplay,
   fieldCardChoiceInfo,
@@ -133,6 +134,115 @@ const contextualCardActionLabel: typeof contextualCardActionLabelWithoutCatalog 
     contextualCardActionLabelWithoutCatalog(action, TEST_CARD_PRESENTATIONS);
 
 describe("localized action presentation", () => {
+  it("distinguishes Syd Meyer Superstores ICE targets by server and board position", () => {
+    const first = card("colonel_hq", "Colonel Failure", "ice");
+    const second = card("colonel_remote", "Colonel Failure", "ice");
+    const coyote = card("coyote_remote", "Coyote", "ice");
+    const playerView = view("corp", {
+      servers: [
+        { id: "hq", label: "HQ", ice: [first], root: [] },
+        { id: "remote_3", label: "Remote 3", ice: [coyote, second], root: [] },
+      ],
+    });
+    const actions = [first, second, coyote].map((target) =>
+      legalAction(
+        "corp",
+        "activated_card_ability",
+        "syd",
+        `Syd Meyer Superstores: ${target.title} trashen`,
+        {
+          targetCardId: target.instanceId,
+          targetDefinitionId: target.definitionId!,
+          gainedCredits: 4,
+        },
+      ),
+    );
+    const before = structuredClone(actions);
+    expect(
+      actions.map((action) => boardCardActionLabel(playerView, action)),
+    ).toEqual([
+      "Colonel Failure trashen (HQ ICE 1)",
+      "Colonel Failure trashen (Remote 3 ICE 2)",
+      "Coyote trashen (Remote 3 ICE 1)",
+    ]);
+    playerView.servers[0]!.ice.unshift({
+      instanceId: "hidden_ice",
+      known: false,
+    });
+    expect(boardCardActionLabel(playerView, actions[0]!)).toBe(
+      "Colonel Failure trashen (HQ ICE 2)",
+    );
+    expect(
+      boardCardActionLabel(playerView, actions[0]!, undefined, "en"),
+    ).toContain("HQ ICE 2");
+    expect(
+      boardCardActionLabel(playerView, actions[0]!, undefined, "fr"),
+    ).toContain("HQ ICE 2");
+    expect(actions).toEqual(before);
+    const basic = legalAction(
+      "corp",
+      "gain_credit",
+      "basic_action",
+      "Credit nehmen",
+    );
+    expect(boardCardActionLabel(playerView, basic)).toBe(
+      contextualCardActionLabel(basic),
+    );
+  });
+
+  it.each(["Lisa Blight", "Marcel DeSoleil", "Sterdroid"])(
+    "disambiguates %s ICE targets and copied subroutines",
+    (source) => {
+      const playerView = view("corp", {
+        servers: [
+          {
+            id: "remote_3",
+            label: "Remote 3",
+            ice: [
+              card("ice_a", "Colonel Failure", "ice"),
+              card("ice_b", "Colonel Failure", "ice"),
+            ],
+            root: [],
+          },
+        ],
+      });
+      const copying = source !== "Sterdroid";
+      const actions = ["ice_a", "ice_b"].flatMap((targetCardId) =>
+        (copying ? [0, 1] : [undefined]).map((subroutineIndex) =>
+          legalAction(
+            "corp",
+            "activated_card_ability",
+            "source",
+            `${source}: Colonel Failure ${copying ? "Subroutine kopieren" : "stärken"}`,
+            {
+              targetCardId,
+              ...(subroutineIndex !== undefined ? { subroutineIndex } : {}),
+            },
+          ),
+        ),
+      );
+      const before = structuredClone(actions);
+      for (const locale of ["de", "en", "fr"] as const) {
+        const labels = actions.map((action) =>
+          boardCardActionLabel(playerView, action, undefined, locale),
+        );
+        expect(new Set(labels).size).toBe(actions.length);
+        const windowLabels = actions.map((action) =>
+          runWindowActionButtonLabel(playerView, action, undefined, locale),
+        );
+        expect(new Set(windowLabels).size).toBe(actions.length);
+        expect(windowLabels[0]).toContain("ICE 1");
+        expect(labels[0]).toContain("ICE 1");
+        expect(labels.at(-1)).toContain("ICE 2");
+        if (copying)
+          expect(labels[1]).toContain(
+            locale === "fr" ? "Routine 2" : "Subroutine 2",
+          );
+      }
+      expect(actions).toEqual(before);
+    },
+  );
+
   it.each([
     ["de", "Credit nehmen", "Karte ziehen", "Zug beenden"],
     ["en", "Take credit", "Draw card", "End turn"],

@@ -52,6 +52,15 @@ Action-Identität, Replay oder StateHash zu verändern.
 
 ## Annahmen
 
+Installierte Kartenaktionen mit einem ICE-Ziel ergänzen im Kartenmenü den
+lokalisierten Servernamen und die ICE-Nummer aus der aktuellen `PlayerView`.
+Dieselbe Zielangabe gilt für die Aktionsdarstellung im Runfenster.
+Die Nummer entspricht dem Positionsbadge auf dem Spielfeld. Das gemeinsame
+`boardCardActionLabel` unterscheidet damit gleichnamige Ziele von Syd Meyer
+Superstores und Sterdroid; Lisa Blight und Marcel DeSoleil ergänzen zusätzlich
+die gebundene Subroutinennummer. Die Darstellung verändert keine LegalAction
+und benötigt keine verdeckten Kartentitel.
+
 - Die Sprachauswahl ist ein Dropdown mit Locale-Fahne, gilt pro Browser und wird ohne URL-Präfix persistent
   gespeichert. Eine ausdrückliche Auswahl gewinnt gegenüber der Browsersprache.
 - Der nicht angemeldete und der angemeldete Browser verwenden zunächst dieselbe
