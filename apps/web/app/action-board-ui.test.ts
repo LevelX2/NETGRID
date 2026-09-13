@@ -148,8 +148,8 @@ describe("localized action presentation", () => {
         locale === "de"
           ? `Vor ${server}`
           : locale === "en"
-            ? `Install protecting ${server}`
-            : `Installer devant ${server}`;
+            ? `Protect ${server}`
+            : `Devant ${server}`;
       const newRemote =
         locale === "de"
           ? "Neues Remote erstellen"
