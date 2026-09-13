@@ -685,6 +685,26 @@ function currentNeedForCard(
   }
   if (
     role === "draw_or_search_engine" &&
+    context.legalAction?.type === "play_event" &&
+    context.matchingCandidates.some(
+      (candidate) =>
+        candidate.actionId === context.legalAction?.actionId &&
+        candidate.economyProjection?.timing === "immediate" &&
+        candidate.economyProjection.netHandDelta !== undefined &&
+        candidate.economyProjection.netHandDelta >
+          Math.max(
+            0,
+            params.input.playerView.own.maxHandSize -
+              params.input.playerView.own.gripOrHq.length,
+          ),
+    )
+  ) {
+    // A generic draw-engine label cannot justify forced excess cards. Exact
+    // answer draws remain bound to their Coverage/Defense owner independently.
+    return "none";
+  }
+  if (
+    role === "draw_or_search_engine" &&
     recoveryOnlySearchHasNoVisibleTarget(params.input, context) &&
     !doctrineSupportsProspectiveRecoveryInfrastructure(params, context)
   ) {

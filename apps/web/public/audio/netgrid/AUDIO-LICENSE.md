@@ -1,6 +1,6 @@
 # NETGRID premium audio pack
 
-Except for the victory fanfare described below, the WAV files in this
+Except for the locally synthesized cues described below, the WAV files in this
 directory were generated specifically for NETGRID with ElevenLabs Sound
 Effects on 2026-08-22. They are not stock sounds and do not contain voices or
 third-party recordings.
@@ -17,6 +17,17 @@ to a sample peak of -3 dBFS. The manifest uses a dedicated filename so browser
 caches cannot serve the previous victory sound and a 3.8-second cooldown to
 prevent the fanfare from overlapping itself. Per-asset provenance fields
 override the pack defaults in `audio-provenance.json`.
+
+## Locally synthesized agenda-steal cue
+
+`agenda/agenda-stolen-descent.wav` is an original, locally synthesized cue
+created on 2026-09-13. Six short electronic notes descend before a brief pause
+and a sustained lowest note. It contains no samples or provider-generated
+audio; ElevenLabs-specific terms do not apply to this asset. Regenerate it
+with `node scripts/generate-agenda-steal-sound.mjs` from the repository root.
+Output is 48 kHz, stereo, 16-bit PCM, 2.43 seconds, normalized to -17 dBFS RMS
+with a sample-peak ceiling of -3 dBFS. The `agenda-runner` cue uses a dedicated
+filename to avoid the previous sound being served from browser caches.
 
 ## License basis reviewed
 

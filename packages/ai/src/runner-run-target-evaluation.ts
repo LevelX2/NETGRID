@@ -480,7 +480,7 @@ function evaluateRunnerRunTarget(
     path,
     availableCredits: creditsAvailableDuringRun,
     unknownIceCount: unknownUnrezzedIceCount,
-    runnerGripCount: params.input.playerView.own.gripOrHq.length,
+    runnerGripCount: projectedGripAfterRunAction,
   });
   const { noAccessReason: _noAccessReason, ...conditionalBaseRouteQuote } =
     baseRouteQuote;

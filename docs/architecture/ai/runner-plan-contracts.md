@@ -622,6 +622,18 @@ Cleanup-Tausch eingehen; Owner, Parent-Need und Draw-Action bleiben dabei exakt
 gebunden. Der tatsächliche Draw ist eine private Beobachtungsgrenze und führt
 danach zur Neuplanung statt zu einer vorweggenommenen Folgekarte.
 
+Ein sofortiges Draw-Ereignis erhält keinen zusätzlichen allgemeinen
+Kartenentwicklungsplan allein aufgrund seiner Draw-/Search-Rolle, wenn sein
+gequoteter Netto-Handzuwachs die freie Handkapazität übersteigt. Die gemeinsame
+Action-Economy-Projektion berücksichtigt dabei bereits den Verbrauch der
+Ereigniskarte und die tatsächlichen Kosten. Ein abstraktes Setup-Ziel belegt
+keinen Nutzen erzwungener Abwürfe. Konkrete Antwortsuche und Handrettung bleiben
+bei ihren gebundenen Coverage-/Defense-Ownern zulässig; deren Actions werden
+durch eine generische `no_current_need`-Bewertung nicht ausgeschlossen.
+Die gespeicherten D26/D29-Zustände aus `match_cd4828fc5a7c0c7f` sichern diese
+Trennung: begründeter erster Sentry-Draw mit Cleanup-Trade-off gegenüber einem
+ungebundenen zweiten Fünferdraw bei acht Handkarten und einem Restklick.
+
 Zusätzliche Kartensichtung durch die Engine-Draw-Projektion ist kein weiterer
 Handzuwachs. `projectedGrossDrawCount`,
 `projectedPostDrawDispositionCount` und `projectedNetHandDelta` bleiben getrennt:
@@ -1040,6 +1052,17 @@ Verschlechterung gegenüber dem akzeptierten Startvertrag begründet eine
 Jack-out-Präferenz; ein unveränderter Grenzfall erzeugt weder einen neuen Plan
 noch eine zweite Entscheidungsautorität.
 
+Die Zulassung von Run-Ereignissen quotiert Route und Handreserve mit der
+bereits vorhandenen Projektion nach dem Verbrauch der Startkarte. Credit-
+und Klickkosten stammen weiterhin aus der aktuellen LegalAction; dieselbe
+projizierte Handgröße gilt für bekannte Schadensfolgen und unbekannte
+ICE-Risiken. Ein Basisrun verbraucht keine Ereigniskarte. Der erwartete
+Kartenverbrauch darf im Folgefenster keine neue Handpuffer-Verschlechterung
+vortäuschen. Bewusst zugelassene Informationsproben behalten ihren ausdrücklich
+knappen Startvertrag; echte zusätzliche Schäden oder neue Gefahren bleiben
+Gründe für die bestehende Abbruchbewertung. Central-/Remote-Owner, Run-Leaf
+und ihre Action-/Step-Bindungen bleiben unverändert.
+
 Die gemeinsame bekannte Pfadquote enthält auch die kanonischen Passgebühren
 bekannter gerezzter Root-Karten. Jede verbleibende Passage zählt, einschließlich
 unbekannter und für die Encounter-Projektion umgangener ICE. Gebühren werden
@@ -1114,9 +1137,6 @@ wirksam; ein tatsächlich folgendes ICE bleibt ein gültiges Effektziel.
 Bereits beim Runstart verwendet die bestätigte Schadensreserve die Handgröße nach dem
 Verbrauch der konkreten Run-Karte. Die Risikostufe und der verbleibende
 Handpuffer dürfen dabei nicht aus unterschiedlichen Handgrößen stammen.
-Auch die Reserve für unbekanntes ICE verwendet diese verbleibende Hand.
-Eine unveränderte Gefahr darf deshalb nicht erst im nächsten Runfenster
-einen bereits durch den Eventverbrauch entstandenen Reservemangel aufdecken.
 
 Die aktuelle Kostenprojektion für Pump und Break trennt liquide Credits von
 den tatsächlich verwendbaren sichtbaren Run-/Breaker-Pools. Sie verwendet
