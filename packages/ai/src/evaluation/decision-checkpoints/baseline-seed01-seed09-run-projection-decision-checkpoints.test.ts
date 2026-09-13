@@ -13,11 +13,14 @@ describe("baseline Seed 01 and Seed 09 card-run projection checkpoints", () => {
     ["Seed 01 decision 278", seed01Decision278Json],
     ["Seed 01 decision 347", seed01Decision347Json],
     ["Seed 09 decision 290", seed09Decision290Json],
-  ])("blocks the unreachable R&D-Protocol run at %s", (_label, json) => {
-    const result = runAiDecisionCheckpoint(
-      structuredClone(json) as AiDecisionCheckpointV1,
-    );
+  ])(
+    "does not start the constrained R&D-Protocol run at %s",
+    (_label, json) => {
+      const result = runAiDecisionCheckpoint(
+        structuredClone(json) as AiDecisionCheckpointV1,
+      );
 
-    expect(result.ok, `${result.code ?? "ok"}: ${result.message}`).toBe(true);
-  });
+      expect(result.ok, `${result.code ?? "ok"}: ${result.message}`).toBe(true);
+    },
+  );
 });

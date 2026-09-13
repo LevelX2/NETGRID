@@ -325,7 +325,9 @@ function runMemoryPressuredSneakPreviewCoveragePath() {
     .withRunnerCardInGrip("onr_v1_110_sneak-preview")
     .withRunnerCardInGrip("onr_v1_079_bodyweight-synthetic-blood")
     .withRunnerCardInGrip("onr_v1_108_score")
-    .withRunnerProgramInstalled("onr_classic_031_rent-i-con")
+    // Keep a real sentry coverage gap. An installed universal Rent-I-Con
+    // already answers Bolter; damage paid by that answer is not a new gap.
+    .withRunnerProgramInstalled("onr_v1_071_vewy-vewy-quiet")
     .withRunnerProgramInstalled("onr_v1_035_invisibility")
     .withRezzedCorpIceOnServer("hq", "onr_v1_224_bolter-cluster")
     .withRezzedCorpIceOnServer("rd", "onr_v1_237_data-wall")

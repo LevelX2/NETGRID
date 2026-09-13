@@ -292,7 +292,10 @@ describe("selfplay cycle 184 decision checkpoints", () => {
         effectiveRunQuote: {
           iceInstanceId: ice.instanceId,
           iceDefinitionId: "onr_v1_234_data-darts",
-          effectiveStrength: 3,
+          // The quoted +1 strength makes pump plus break cost three while
+          // only two credits are available. This isolates accepting damage,
+          // rather than relying on damage already paid away by MS-todon.
+          effectiveStrength: 4,
           subroutines: [
             {
               id: "printed_subroutines_damage_net",
@@ -313,6 +316,11 @@ describe("selfplay cycle 184 decision checkpoints", () => {
         },
       },
     ];
+    expect(
+      evaluateRunnerRunTargets({ input: capture.input }).find(
+        (target) => target.actionId === "runner.start_run.remote_1",
+      )?.pathPassability,
+    ).toBe("blocked_by_visible_damage_hand_buffer");
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
     expect(deckSnapshotId).toBeDefined();
     resetResidentPlanPortfolioMemory();
