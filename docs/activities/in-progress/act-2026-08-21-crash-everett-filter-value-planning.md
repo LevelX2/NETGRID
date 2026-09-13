@@ -1,13 +1,14 @@
 ---
 activityId: act-2026-08-21-crash-everett-filter-value-planning
-status: inbox
+status: in_progress
 kind: concept
 area: ai
 priority: normal
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-08-21
-startedAt:
+startedAt: 2026-09-13
+owner: netgrid-activities-20260913-89c20ec1
 completedAt:
 branch:
 releaseTarget:
