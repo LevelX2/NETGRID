@@ -1236,6 +1236,10 @@ fehlender Breaker-Abdeckung. Würde ein Zukunftseffekt den sonst passierbaren
 bekannten Restpfad sperren, bleibt die exakte unbezahlte Breakquote als
 Finanzierungsbedarf erhalten. Sie darf nicht verworfen und dadurch die
 Folgeschicht fälschlich als physisch unbrechbar eingeordnet werden.
+Eine zusätzliche Encounter-Gebühr bleibt dagegen ein Creditbedarf. Macht sie
+den Restpfad mit dem aktuellen Budget unbezahlbar, entsteht daraus keine
+physische Zugangssperre und keine Pflicht, ihre Quelle teurer zu brechen.
+Die Pfadquote erhält die günstigere zulässige Zahlung für die Finanzierung.
 
 Die vorab gebundene Reserve für unbekanntes ICE gilt auch vor dessen
 Informationsgrenze: Bekannter Schaden darf den reservierten Handpuffer nicht

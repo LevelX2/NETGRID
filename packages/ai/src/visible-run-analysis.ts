@@ -1476,6 +1476,9 @@ function runPathEffectBreakAssessment(params: {
       (runnerKnownPathAssessmentIsCostNoAccess(futureWithoutEffect) &&
         runnerKnownPathAssessmentIsUnbreakableNoAccess(futureWithEffect))) &&
     !futureWithEffect.canReachAccess &&
+    // A payable encounter tax remains a credit need. A tight current budget
+    // does not turn it into a structural lock that must be broken at any cost.
+    !runnerKnownPathAssessmentIsCostNoAccess(futureWithEffect) &&
     futureWithEffect.assessedKnownIceCount > 0;
   // An unfunded source break remains a funding need. Dropping its quote
   // would apply the lock and misreport the following ICE as missing coverage.
