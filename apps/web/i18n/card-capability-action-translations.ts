@@ -9,6 +9,8 @@ export type CardCapabilityActionTranslationCatalog = Readonly<
 >;
 
 const EN_CARD_CAPABILITY_ACTION_TRANSLATIONS = {
+  "onr_classic_001_data-fort-remapping:spend_remap_counter_end_run":
+    "Data Fort Remapping: End the run",
   "onr_classic_024_sterdroid:corp_main_double_chosen_ice_strength":
     "Sterdroid: double ICE strength",
   "onr_classic_024_sterdroid:during_run_double_chosen_ice_strength":
@@ -94,6 +96,8 @@ const EN_CARD_CAPABILITY_ACTION_TRANSLATIONS = {
 } as const satisfies CardCapabilityActionTranslationCatalog;
 
 const FR_CARD_CAPABILITY_ACTION_TRANSLATIONS = {
+  "onr_classic_001_data-fort-remapping:spend_remap_counter_end_run":
+    "Data Fort Remapping : Mettre fin au piratage",
   "onr_classic_024_sterdroid:corp_main_double_chosen_ice_strength":
     "Sterdroid : doubler la force de la glace",
   "onr_classic_024_sterdroid:during_run_double_chosen_ice_strength":

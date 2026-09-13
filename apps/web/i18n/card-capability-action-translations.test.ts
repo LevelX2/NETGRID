@@ -15,6 +15,45 @@ const EXPECTED_MULTI_CAPABILITY_CARD_COUNT = 21;
 const EXPECTED_MULTI_CAPABILITY_LABEL_COUNT = 46;
 
 describe("card capability action translations", () => {
+  it("names Data Fort Remapping and its run-ending effect without needing a catalog lookup", () => {
+    const capabilityId =
+      "onr_classic_001_data-fort-remapping:spend_remap_counter_end_run";
+    const action: LegalAction = {
+      actionId: "remap_action",
+      side: "corp",
+      type: "activated_card_ability",
+      label: "Data Fort Remapping: Run beenden",
+      source: "remap_agenda",
+      timingPoint: "run.approach_ice",
+      costs: [],
+      targetRequirements: [],
+      visibility: "public",
+      expiresAtStateVersion: 5,
+      abilityRef: {
+        sourceCardInstanceId: "remap_agenda",
+        sourceAbilityId: capabilityId,
+      },
+      payload: {
+        cardId: "remap_agenda",
+        cardImplementationAbilityId: capabilityId,
+      },
+    };
+    const original = structuredClone(action);
+    expect(actionButtonLabel(action, undefined, "de")).toBe(
+      "Data Fort Remapping: Run beenden",
+    );
+    expect(actionButtonLabel(action, undefined, "en")).toBe(
+      "Data Fort Remapping: End the run",
+    );
+    expect(actionButtonLabel(action, undefined, "fr")).toBe(
+      "Data Fort Remapping : Mettre fin au piratage",
+    );
+    expect(contextualCardActionLabel(action, undefined, "en")).toBe(
+      "End the run",
+    );
+    expect(action).toEqual(original);
+  });
+
   it("covers every public card with multiple capability authoring labels", () => {
     const multiCapabilityCards = listPublicCardViews().filter(
       (card) => (card.capabilityText?.length ?? 0) > 1,

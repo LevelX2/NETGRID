@@ -743,6 +743,8 @@ export function counterDisplayTooltipText(
 ): string {
   const amount = safeCounterDisplayAmount(display.amount);
   const countLabel = `${amount} ${counterDisplayShortLabel(display.label)}`;
+  if (display.counterType === "remap")
+    return actionPresentationText(locale, "tooltipRemap", { amount });
   if (display.id === "pattel")
     return actionPresentationText(locale, "tooltipPattel");
   if (normalizeActionPresentationLocale(locale) !== "de")

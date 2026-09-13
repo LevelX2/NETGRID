@@ -96,6 +96,23 @@ describe("Classic Agenda Implementation Smokes", () => {
     state = scored.state;
 
     expect(cardCounterAmount(state, scored.agendaId, "remap")).toBe(1);
+    for (const side of ["corp", "runner"] as const) {
+      const view = getPlayerView(state, side);
+      const scoreArea =
+        side === "corp" ? view.own.scoreArea : view.opponent.scoreArea;
+      expect(
+        scoreArea.find((card) => card.instanceId === scored.agendaId)
+          ?.counterDisplays,
+      ).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: "remap",
+            counterType: "remap",
+            amount: 1,
+          }),
+        ]),
+      );
+    }
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "score_agenda",
       cardDefinitionId: DATA_FORT_REMAPPING,
@@ -133,6 +150,19 @@ describe("Classic Agenda Implementation Smokes", () => {
 
     expect(state.run).toBeUndefined();
     expect(cardCounterAmount(state, scored.agendaId, "remap")).toBe(0);
+    for (const side of ["corp", "runner"] as const) {
+      const view = getPlayerView(state, side);
+      const scoreArea =
+        side === "corp" ? view.own.scoreArea : view.opponent.scoreArea;
+      expect(
+        scoreArea.find((card) => card.instanceId === scored.agendaId)
+          ?.counterDisplays ?? [],
+      ).not.toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ counterType: "remap" }),
+        ]),
+      );
+    }
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "activated_card_ability",
       cardDefinitionId: DATA_FORT_REMAPPING,

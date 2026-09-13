@@ -3808,6 +3808,32 @@ describe("V1.0.6 resource and card-display helpers", () => {
     ).toEqual(["stored_credits"]);
   });
 
+  it("renders the Remap counter on a scored agenda and explains its use in every locale", () => {
+    const display: NonNullable<VisibleCard["counterDisplays"]>[number] = {
+      id: "remap",
+      amount: 1,
+      displayKind: "generic_counter",
+      label: "Remap-Counter",
+      ariaLabel: "1 Remap-Counter",
+      counterType: "remap",
+      usageHint: "status_marker",
+    };
+    const agenda = {
+      ...card("remap", "Data Fort Remapping", "agenda"),
+      counterDisplays: [display],
+    };
+    expect(counterDisplaysForRendering(agenda)).toEqual([display]);
+    expect(counterDisplayTooltipText(display, "de")).toBe(
+      "1 Remap: Gib 1 Remap-Counter aus, um den Run zu beenden.",
+    );
+    expect(counterDisplayTooltipText(display, "en")).toBe(
+      "1 Remap: Spend 1 Remap counter to end the run.",
+    );
+    expect(counterDisplayTooltipText(display, "fr")).toBe(
+      "1 Remap : Dépensez 1 compteur Remap pour mettre fin au piratage.",
+    );
+  });
+
   it("maps CounterDisplay special counters to compact badge models", () => {
     const rawArmoredFridge: VisibleCard = {
       ...card("fridge_1", "Armored Fridge", "hardware"),
