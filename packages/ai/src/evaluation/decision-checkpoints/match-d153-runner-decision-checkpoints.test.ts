@@ -16,6 +16,7 @@ import cashoutForRdD185Json from "../../../../../data/scenarios/ai-decision-chec
 import { bindHistoricalRunEventCadence } from "./checkpoint-cadence-fixture.test-support";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
+import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
 
 describe("match D153 Runner decision checkpoints", () => {
   it.each([
@@ -60,7 +61,10 @@ describe("match D153 Runner decision checkpoints", () => {
 
   it("F08 still cashes out Broker when the exact remote path has a funding gap", () => {
     const checkpoint = fixture(liquidateForRemoteD167Json);
-    checkpoint.engine.testOnlyGameState.runner.credits = 26;
+    // Access costs 25: two on Menus, thirteen on Scanner, one on
+    // Sandstorm, nine on Mobile Barricade. Its optional one net damage
+    // fits the five-card hand; breaking that damage would cost two more.
+    checkpoint.engine.testOnlyGameState.runner.credits = 24;
     checkpoint.engine.stateHash = hashGameState(
       checkpoint.engine.testOnlyGameState,
     );
@@ -80,6 +84,31 @@ describe("match D153 Runner decision checkpoints", () => {
     };
     expectCheckpointToPass(checkpoint);
   });
+
+  it.each([25, 26])(
+    "F08 contests at %i credits when the optional net damage fits the hand",
+    (credits) => {
+      const checkpoint = fixture(liquidateForRemoteD167Json);
+      checkpoint.engine.testOnlyGameState.runner.credits = credits;
+      checkpoint.engine.stateHash = hashGameState(
+        checkpoint.engine.testOnlyGameState,
+      );
+      checkpoint.source.kind = "synthetic_companion";
+      checkpoint.source.findingId = "F08-SAFE-DAMAGE-ACCESS-BOUNDARY";
+      const result = runAiDecisionCheckpoint(checkpoint);
+      expect(result.ok, result.message).toBe(true);
+      expect(result.selectedAction?.actionId).toBe("runner.start_run.remote_1");
+      expect(
+        evaluateRunnerRunTargets({ input: result.input }).find(
+          (t) => t.actionId === "runner.start_run.remote_1",
+        ),
+      ).toMatchObject({
+        pathCost: 25,
+        pathPassability: "reachable",
+        routeQuote: { fundingGap: 0, reachability: "guaranteed_access" },
+      });
+    },
+  );
 });
 
 function fixture(value: unknown): AiDecisionCheckpointV1 {

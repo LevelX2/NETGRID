@@ -188,7 +188,7 @@ function evaluateRunnerRunTarget(
         status.kind === "run_payment_restriction" &&
         status.restriction === "runner_stealth_bit_payment_sources",
     ) === true;
-  const path = assessKnownRezzedIcePath(
+  const pathBeforeDamageBudget = assessKnownRezzedIcePath(
     projectedServerIce,
     params.input.playerView.own.rig ?? [],
     runnerRunPathCreditBudgetWithVisiblePools(
@@ -235,7 +235,7 @@ function evaluateRunnerRunTarget(
   const creditsAfterRun = generalCreditsRemainingAfterRun(
     creditsAfterAction,
     runOnlyCredits,
-    path.creditsAfterPath,
+    pathBeforeDamageBudget.creditsAfterPath,
   );
   const payoff =
     accessReplacementPayoffForTarget(
@@ -258,9 +258,12 @@ function evaluateRunnerRunTarget(
       // The known path has already committed access-preserving breaker and
       // encounter costs.  Optional damage avoidance may only spend what is
       // actually left after those commitments.
-      generalCredits: path.creditsAfterPath,
-      ...(path.fullyBrokenIceInstanceIds
-        ? { fullyBrokenIceInstanceIds: path.fullyBrokenIceInstanceIds }
+      generalCredits: pathBeforeDamageBudget.creditsAfterPath,
+      ...(pathBeforeDamageBudget.fullyBrokenIceInstanceIds
+        ? {
+            fullyBrokenIceInstanceIds:
+              pathBeforeDamageBudget.fullyBrokenIceInstanceIds,
+          }
         : {}),
       runDamagePreventionRemaining: Math.max(
         0,
@@ -278,6 +281,10 @@ function evaluateRunnerRunTarget(
           }
         : {}),
     },
+  );
+  const path = knownPathAfterDamageBudget(
+    pathBeforeDamageBudget,
+    visibleLethalIceDamage === undefined,
   );
   const cumulativeVisibleAndKnownAccessDamageLethal = Boolean(
     payoff.knownAccessDamage &&
@@ -1959,6 +1966,40 @@ function recommendationRank(
     case "do_not_run_now":
       return 1;
   }
+}
+
+function knownPathAfterDamageBudget(
+  path: ReturnType<typeof assessKnownRezzedIcePath>,
+  damageWithinHandBudget: boolean,
+): ReturnType<typeof assessKnownRezzedIcePath> {
+  if (!path.knownPathBlockedOnlyByDamage || !damageWithinHandBudget)
+    return path;
+  // The path producer certified every independent known access barrier;
+  // the damage owner has now checked the cumulative hand budget. Damage
+  // which fits that budget is not an unfunded break or missing coverage.
+  const resolved = { ...path };
+  delete resolved.knownPathBlockedOnlyByDamage;
+  delete resolved.noAccessReason;
+  delete resolved.unpayableReason;
+  delete resolved.unpayableIceIndex;
+  delete resolved.unbreakableIceIndex;
+  delete resolved.unbreakableIceTitle;
+  delete resolved.hardUnbrokenEffectIceIndex;
+  delete resolved.hardUnbrokenEffectIceTitle;
+  delete resolved.hardUnbrokenRunEffects;
+  delete resolved.missingCoverage;
+  return {
+    ...resolved,
+    blocked: false,
+    canReachAccess: true,
+    knownPathBlockedByHardUnbrokenEffect: false,
+    knownPathBlockedByUnbreakableIce: false,
+    knownPathBlockedByMissingCoverage: false,
+    knownPathBlockedByEtr: false,
+    canBreakNextIceButNotFullPath: false,
+    creditsSpentBeforeUnpayableIce: 0,
+    reachableAccessReason: "known_path_reachable",
+  };
 }
 
 function pathPassabilityFor(
