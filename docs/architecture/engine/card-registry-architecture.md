@@ -42,6 +42,32 @@ Eine separate `coverage-source-locations.ts` ist ausdrücklich nicht mehr zuläs
 
 ## Verantwortungsgrenze
 
+### Verbleibende leere Mechanics-Profile
+
+Die alten Tabellen in `mechanics/agenda-scoring.ts`, `payment-costs.ts` und
+`hosting-counters.ts` sind keine Erweiterungspunkte für neue Karten. Die
+Inventur vom 2026-09-13 findet keine produktiven Schreiber oder dynamischen
+Befüllungen; aktive Kartenverträge stammen weiterhin aus CardSpecs.
+
+- `payment-costs.ts`: Beide Lookup-Funktionen liefern immer `undefined`.
+  Der daran gebundene Installed-Economy-Resolver samt Validator und Ports ist
+  unerreichbar. Die eigenständige Investment-Firm-Credit-Choice bleibt aktiv.
+- `hosting-counters.ts`: `COUNTER_UPGRADE_SOURCES` ist dauerhaft leer.
+  Die daran gebundenen `v1918UpgradeAbility=add_power_counter`-Angebote und
+  ihre Ausführung besitzen keinen produktiven Kartenvertrag. Synthetische
+  Hosttests befüllen eine eigene Menge und belegen keine Kartenfreischaltung.
+- `agenda-scoring.ts`: Overadvance-/Reveal-Mengen und Counter-Credit-Profile
+  sind leer. Alte Hostzweige und synthetische Profiltests dürfen entfernt
+  werden; generische CardSpec-Overadvance- und aktivierte Agenda-Fähigkeiten
+  bleiben erhalten. `COUNTER_OPERATION_SOURCES` ist dagegen ein verwendeter
+  Alias der aktiven `CORP_ADVANCEMENT_COUNTER_OPERATION_SOURCES`; beim Entfernen
+  des Moduls muss der Verbraucher direkt diese abgeleitete Menge importieren.
+
+Eine Entfernung umfasst jeweils Producer, Hostports, Verdrahtung und nur die
+synthetischen Tests des toten Pfads. Es entstehen keine Ersatzprofile oder
+Kompatibilitätsaliase. Reale Karten-, Replay- und Public-Verträge sind über
+fokussierte bestehende Regressionen sowie Typ- und Strukturgates zu prüfen.
+
 - CardSpec ist kartenspezifische Autorenwahrheit.
 - `CardImplementationDefinition` ist die von der Engine interpretierte mechanische Projektion.
 - `registry.ts` stellt deterministischen Lookup bereit.
