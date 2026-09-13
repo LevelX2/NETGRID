@@ -1,13 +1,14 @@
 ---
 activityId: act-2026-09-13-empty-hosting-counter-profiles-removal
-status: inbox
+status: in_progress
 kind: cleanup
 area: engine
 priority: low
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-09-13
-startedAt:
+startedAt: 2026-09-13
+owner: netgrid-activities-20260913-89c20ec1
 completedAt:
 branch:
 releaseTarget:
@@ -38,3 +39,4 @@ Kompatibilitätsaliase oder eine allgemeine Runtime-Neustrukturierung.
 ## Ergebnisnotiz
 
 Umsetzung durch den allgemeinen Activities-Auftrag autorisiert.
+
