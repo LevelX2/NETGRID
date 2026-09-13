@@ -87,6 +87,20 @@ werden im Paketfortschritt ergänzt.
   explizitem Overlayering-Verbot geprüft. Alle drei betroffenen Testdateien
   sind im fokussierten Lauf grün.
 - Verbleibend: 13 bekannte fehlgeschlagene Assertions.
+- Paket 5 (Restliche Replay-, Plan- und Choice-Bindungen): 12 Assertions
+  geschlossen. Die Ursachen waren inkonsistente synthetische Encounter-Quotes,
+  veraltete Plan-/Capability-/Evidence-Bindungen, eine fehlende ausführbare
+  `gain-credits`-LegalAction in einer Corp-Fixture sowie Erwartungen, die eine
+  bereits korrekt vom aktuellen Sicherheits- und Defense-Vertrag verdrängte
+  Aktion weiter als zwingend behandelten. Die fachliche Absicht blieb jeweils
+  erhalten: ETR-/Defense-Schutz, Score-Finanzierung, Central-Defense-Owner,
+  nötige Breaker-Coverage und zulässige LegalActions bleiben explizit geprüft.
+  Der zunächst auffällige D89-Fall in `match-41df` war kein Vertragsfehler:
+  Der Einzeltest und die vollständige Testdatei sind grün; der Timeout trat nur
+  im ressourcengeteilten breiten Verzeichnislauf unter paralleler Importlast
+  auf. Es wurde deshalb weder ein globales Timeout erhöht noch eine Assertion
+  abgeschwächt.
+- Verbleibend: 0 bekannte fehlgeschlagene Assertions.
 
 ## Paketfolge und Done-Gates
 

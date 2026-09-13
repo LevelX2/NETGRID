@@ -7004,11 +7004,12 @@
         "expiresAtStateVersion": 149,
         "payload": {
           "encounterContinue": true,
-          "unbrokenSubroutineCount": 1,
+          "unbrokenSubroutineCount": 2,
           "encounterWillEndRun": false,
           "encounterSourceWillTrashAtEndOfTurn": false,
           "abilityFamily": "run-access",
-          "sourceDefinitionId": "onr_v1_260_pocket-virtual-reality"
+          "sourceDefinitionId": "onr_v1_260_pocket-virtual-reality",
+          "encounterSubroutineIds": "printed_subroutines_trace,printed_subroutines_trace_a"
         }
       }
     ],

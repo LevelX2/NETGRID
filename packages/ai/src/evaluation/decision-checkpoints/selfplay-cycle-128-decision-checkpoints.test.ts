@@ -37,14 +37,11 @@ describe("selfplay cycle 128 decision checkpoints", () => {
     });
     expect(decision.decisionDebug?.fallbackUsed).toBe(false);
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      lane: "engine_window",
-      selectionAuthority: "engine_window",
-      rootPlanInstanceId: "run:run_113",
-      leafExecutorInstanceId: "rules.window_resolution",
-      engineWindowAction: {
-        actionId: "corp.resolve_choice",
-        actionType: "resolve_choice",
-      },
+      lane: "plan",
+      selectionAuthority: "turn_plan_commitment",
+      rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      leafExecutorInstanceId:
+        "plan:corp.defend_servers:server-defense-portfolio",
     });
   });
 });

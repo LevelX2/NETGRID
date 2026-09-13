@@ -107,7 +107,7 @@ describe("meta 403 round 5 exact owner regressions", () => {
     );
   });
 
-  it("does not spend the information budget on end-the-run after program trash is broken", () => {
+  it("breaks the remaining end-the-run subroutine when program-trash breaking is unavailable", () => {
     const capture = structuredClone(programJson) as unknown as Capture;
     capture.input.legalActions = capture.input.legalActions.filter(
       (a) => a.type !== "break_subroutine" || a.payload?.subroutineIndex !== 0,
@@ -122,7 +122,8 @@ describe("meta 403 round 5 exact owner regressions", () => {
       unbrokenSubroutineCount: 1,
     });
     const { selected, plan } = choose(capture);
-    expect(selected.type).toBe("continue_run");
+    expect(selected.type).toBe("break_subroutine");
+    expect(selected.payload?.subroutineIndex).toBe(1);
     expect(plan?.selectedPlan?.moduleId).toBe("runner.convert_run_window");
   });
 

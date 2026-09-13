@@ -95,7 +95,7 @@ it("preserves a payable damage response after an information boundary rejects fu
   });
 });
 
-it("does not buy an unaffordable full path after both damage subroutines are already broken", () => {
+it("keeps the remaining end-the-run barrier after damage subroutines are broken", () => {
   const { input, runtime } = structuredClone(checkpointJson) as unknown as {
     input: AiDecisionInputWithDeckCapabilities;
     runtime: AiRuntimeCheckpointV1;
@@ -103,6 +103,15 @@ it("does not buy an unaffordable full path after both damage subroutines are alr
   const continuation = input.legalActions.find(
     (a) => a.type === "continue_run",
   )!;
+  const pump = input.legalActions.find((a) => a.type === "pump_breaker")!;
+  const encounterQuote = input.playerView.run?.encounteredIce
+    ?.effectiveRunQuote;
+  expect(encounterQuote).toBeDefined();
+  Object.assign(encounterQuote!, {
+    subroutines: encounterQuote!.subroutines.filter(
+      (subroutine) => subroutine.type !== "do_damage",
+    ),
+  });
   Object.assign(continuation.payload!, {
     encounterSubroutineIds:
       "printed_subroutines_end_the_run,printed_subroutines_end_the_run_a",
@@ -114,5 +123,5 @@ it("does not buy an unaffordable full path after both damage subroutines are alr
     input.ownDeckSnapshot!.deckSnapshotId,
     runtime,
   );
-  expect(chooseAiAction(input).actionId).toBe(continuation.actionId);
+  expect(chooseAiAction(input).actionId).toBe(pump.actionId);
 });

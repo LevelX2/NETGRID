@@ -26,11 +26,11 @@ describe("match 5F7924 Corp agenda, defense and discard checkpoints", () => {
     expectCheckpointToPass(openingDefenseControlJson);
   });
 
-  it("honors the global R&D defense allocation after Efficiency Experts", () => {
+  it("stages the bound score protection before agenda installation", () => {
     expectCheckpointToPass(turn7AgendaDefenseJson);
   });
 
-  it("continues from the allocated R&D defense into the admitted score remote", () => {
+  it("continues from staged score protection into the admitted score remote", () => {
     expectScoreProtectionDevelopmentContinuation(turn7AgendaDefenseJson);
   });
 
@@ -107,14 +107,18 @@ function expectScoreProtectionDevelopmentContinuation(value: unknown): void {
             entry.actionId.includes("jack-attack"),
         ),
     }),
-  ).toMatchObject({ type: "draw_card", source: "basic_action" });
-  expect(second.decisionDebug?.planKind).toBe("corp.defend_servers");
+  ).toMatchObject({
+    type: "install_card",
+    source: "corp_onr_proteus_005_marked-accounts_1",
+    payload: { serverId: "remote_1" },
+  });
+  expect(second.decisionDebug?.planKind).toBe("corp.score_agenda");
   expect(second.decisionDebug?.planFirstDecision?.route?.capabilityId).toBe(
-    "develop_score_protection",
+    "install_score_agenda",
   );
   expect(
     second.decisionDebug?.planFirstDecision?.assessmentEvidenceCodes.some(
-      (entry) => entry.includes("score_plan_requires_effective_ice_draw"),
+      (entry) => entry.includes("corp_bounded_staged_score_install:remote_1"),
     ),
   ).toBe(true);
 }

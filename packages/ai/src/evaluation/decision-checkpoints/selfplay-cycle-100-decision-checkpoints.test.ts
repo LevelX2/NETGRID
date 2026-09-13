@@ -86,7 +86,7 @@ describe("selfplay cycle 100 decision checkpoints", () => {
     });
   });
 
-  it("uses the exact four-credit ICE cashout under the bound score-funding leaf", () => {
+  it("keeps the bound score-funding leaf when ICE cashout would remove defense", () => {
     const capture = structuredClone(
       exactIceCashoutJson,
     ) as ReconstructedDecisionCapture;
@@ -100,21 +100,21 @@ describe("selfplay cycle 100 decision checkpoints", () => {
       (action) => action.actionId === decision.actionId,
     );
     expect(selectedAction).toMatchObject({
-      type: "activated_card_ability",
-      source: "corp_onr_proteus_076_syd-meyer-superstores_3",
+      type: "gain_credit",
+      source: "basic_action",
       payload: {
-        targetCardId: "corp_onr_classic_013_puzzle_2",
-        gainedCredits: 4,
+        effectKind: "gain_credits",
+        gainCreditsAmount: 1,
       },
     });
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId:
-        "plan:corp.score_agenda:agenda%3Acorp_onr_proteus_007_project-venice_1%3Aremote_2",
+        "plan:corp.score_agenda:agenda%3Acorp_onr_proteus_007_project-venice_1%3Aremote_1",
       leafExecutorInstanceId:
-        "plan:corp.economy:score-support%3Aagenda%3Acorp_onr_proteus_007_project-venice_1%3Aremote_2",
+        "plan:corp.economy:score-support%3Aagenda%3Acorp_onr_proteus_007_project-venice_1%3Aremote_1",
       route: {
         actionId: selectedAction?.actionId,
-        actionType: "activated_card_ability",
+        actionType: "gain_credit",
         semanticActionType: "economy.gain_credit",
       },
     });

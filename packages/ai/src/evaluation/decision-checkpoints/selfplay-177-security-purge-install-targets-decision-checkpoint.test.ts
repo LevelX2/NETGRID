@@ -5,7 +5,7 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 
 describe("selfplay 177 Security Purge install targets decision checkpoint", () => {
-  it("keeps the exact choice under corp.defend_servers ownership", () => {
+  it("binds the choice to the current central-defense allocation", () => {
     const result = runAiDecisionCheckpoint(
       structuredClone(securityPurgeJson) as AiDecisionCheckpointV1,
     );
@@ -19,7 +19,7 @@ describe("selfplay 177 Security Purge install targets decision checkpoint", () =
       selectedChoices: {
         choiceId: "choice_agenda_purge_install_targets_47",
         selectedOptionIds: [
-          "agenda_purge_corp_onr_proteus_012_bug-zapper_2_hq_fixed",
+          "agenda_purge_corp_onr_proteus_012_bug-zapper_2_rd_fixed",
         ],
       },
       decisionDebug: {

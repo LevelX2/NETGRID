@@ -21,7 +21,7 @@ describe("match 7D14 runner decision checkpoints", () => {
     expectCheckpointToPass(fixture(matchpointDiscardJson));
   });
 
-  it("draws the missing AP answer when the competing R&D path is not payable", () => {
+  it("draws the missing sentry-breaker answer when the competing R&D path is not payable", () => {
     const noPayableRun = mutateFixture(staleFundingJson, (checkpoint) => {
       checkpoint.engine.testOnlyGameState.runner.credits = 0;
       checkpoint.source.kind = "synthetic_companion";
@@ -36,8 +36,10 @@ describe("match 7D14 runner decision checkpoints", () => {
         ],
         planExecution: {
           acceptablePlanKinds: ["runner.rig_and_coverage"],
-          acceptableCapabilities: ["draw_for_answer_breaker_ap"],
-          requiredAssessmentEvidence: ["target:remote_1"],
+          acceptableCapabilities: ["draw_for_answer_breaker_sentry"],
+          requiredAssessmentEvidence: [
+            "runner_known_remote_coverage_project:remote_1",
+          ],
         },
       };
     });
