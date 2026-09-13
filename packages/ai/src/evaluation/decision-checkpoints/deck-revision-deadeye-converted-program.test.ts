@@ -1,3 +1,8 @@
+import { CURRENT_RULES_BASELINE } from "@netgrid/shared";
+import {
+  buildPlanningRulesContext,
+  buildPlanningStateIdentity,
+} from "../../plans/turn-planning-contracts";
 import { afterEach, expect, it } from "vitest";
 import checkpoint from "../../../../../data/scenarios/ai-decision-checkpoints/cp-deck-revision-deadeye-converted-program.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
@@ -11,11 +16,22 @@ it("resolves the real Deadeye window with the converted agenda in the complete l
   const input = structuredClone(
     checkpoint.input,
   ) as unknown as AiDecisionInputWithDeckCapabilities;
+  input.planningRulesContext = buildPlanningRulesContext({
+    rulesBaseline: CURRENT_RULES_BASELINE,
+    formatProfileId: "program-trash-contract-test",
+    cardPoolSnapshotId: "program-trash-contract-test",
+  });
+  input.planningStateIdentity = buildPlanningStateIdentity(input);
   const dto = buildAiDecisionInputDto({
     ...input,
     profileId: input.profileId!,
   });
-  const decision = chooseAiAction(dto);
+  const enriched: AiDecisionInputWithDeckCapabilities = {
+    ...dto,
+    planningRulesContext: input.planningRulesContext,
+    planningStateIdentity: buildPlanningStateIdentity(dto),
+  };
+  const decision = chooseAiAction(enriched);
   expect(decision.actionId).toBe("corp.resolve_choice");
   expect(decision.selectedChoices).toEqual({
     choiceId: "trash_installed_program_42",
@@ -23,14 +39,9 @@ it("resolves the real Deadeye window with the converted agenda in the complete l
   });
   expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
     stateVersion: 42,
-    lane: "engine_window",
-    rootPlanInstanceId: "run:run_39",
-    leafExecutorInstanceId: "rules.window_resolution",
-    selectedStep: {
-      planInstanceId: "rules.window_resolution",
-      stepId: "run.encounter_ice:42",
-    },
-    engineWindowAction: { actionId: decision.actionId },
+    lane: "plan",
+    rootPlanInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+    leafExecutorInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
   });
 });
 

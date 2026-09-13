@@ -516,7 +516,8 @@ function defenseCandidates(
   }
   if (
     (signal.phase === "resolve_install_targets" ||
-      signal.phase === "resolve_run_redirect") &&
+      signal.phase === "resolve_run_redirect" ||
+      signal.phase === "resolve_program_trash") &&
     signal.choiceResolution
   ) {
     const resolution = signal.choiceResolution;

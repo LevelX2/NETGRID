@@ -2488,6 +2488,34 @@ function planBoundCorpDefenseChoices(
         }>;
       }
     | undefined;
+  const programSignal = moduleState?.signals?.find(
+    (s) =>
+      s.kind === "generic" &&
+      s.phase === "resolve_program_trash" &&
+      Array.isArray(s.actionIds) &&
+      s.actionIds.length === 1 &&
+      s.actionIds[0] === action.actionId &&
+      s.choiceResolution?.kind === "program_trash",
+  );
+  const programResolution = programSignal?.choiceResolution;
+  if (
+    moduleState?.kind === "defense" &&
+    programResolution?.sourceStateVersion === input.playerView.stateVersion &&
+    typeof programResolution.choiceId === "string" &&
+    typeof programResolution.selectedOptionId === "string" &&
+    action.choiceRequirements?.length === 1 &&
+    action.choiceRequirements[0]?.choiceId === programResolution.choiceId &&
+    action.choiceRequirements[0].minSelections === 1 &&
+    action.choiceRequirements[0].maxSelections === 1 &&
+    action.choiceRequirements[0].optionIds.includes(
+      programResolution.selectedOptionId,
+    )
+  ) {
+    return {
+      choiceId: programResolution.choiceId,
+      selectedOptionIds: [programResolution.selectedOptionId],
+    };
+  }
   const redirectSignal = moduleState?.signals?.find(
     (candidate) =>
       candidate.kind === "generic" &&

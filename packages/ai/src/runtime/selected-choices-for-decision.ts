@@ -1169,15 +1169,7 @@ export function selectedChoicesForDecision(
       action,
       choice,
       selectableOptions,
-      dependencies.rolesForCardId,
     );
-    if (!selected) {
-      throw unresolvedChoiceFailure(
-        input,
-        action,
-        "Preserve the exact run, encountered ICE, printed subroutine, public installed-program target set and resolve-choice LegalAction binding.",
-      );
-    }
     return resolved(selected, "corp_program_trash_subroutine");
   }
   if (

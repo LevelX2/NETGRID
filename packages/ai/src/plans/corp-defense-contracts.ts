@@ -17,6 +17,7 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
     | "install_defense_support"
     | "resolve_install_targets"
     | "resolve_run_redirect"
+    | "resolve_program_trash"
     | "resolve_post_pass_ice_lifecycle"
     | "draw_for_ice"
     | "fund_rez_reserve"
@@ -64,6 +65,16 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
   };
   value: number;
   choiceResolution?:
+    | {
+        kind: "program_trash";
+        choiceId: string;
+        choiceSource: string;
+        sourceStateVersion: number;
+        runId: string;
+        sourceIceInstanceId: string;
+        selectedOptionId: string;
+        targetCardInstanceId: string;
+      }
     | {
         kind: "agenda_purge_install_targets";
         choiceId: string;

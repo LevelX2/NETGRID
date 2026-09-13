@@ -14,6 +14,7 @@ export function corpGenericDefensePriorityClass(
           signal.phase === "fund_rez_reserve" ||
           signal.phase === "resolve_install_targets" ||
           signal.phase === "resolve_run_redirect" ||
+          signal.phase === "resolve_program_trash" ||
           signal.phase === "resolve_post_pass_ice_lifecycle" ||
           (signal.phase === "draw_for_ice" &&
             signal.centralPressure === "terminal") ||

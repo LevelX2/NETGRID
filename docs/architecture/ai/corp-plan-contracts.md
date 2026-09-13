@@ -998,6 +998,30 @@ Sichtbarkeit und Replay. Die Kontrollfälle halten außerdem die bestehende
 risikobegrenzte BBS-Bewertung und Score-Konversion vor zusätzlichem Einkommen
 fest; ein pauschaler neuer Economy- oder Score-Bonus folgt daraus nicht.
 
+Programmzerstörungs-Choices aus ICE-Subroutinen gehören ebenfalls zu
+`corp.defend_servers`. `program-trash-signal.ts` bindet das Ziel vor der
+TurnPlanner-Routenwahl an Action, Choice, Run und StateVersion. Der
+Payload-Resolver liest nur diese Bindung; die einzelne Resolve-Action macht
+die fachliche Zielwahl nicht zu einer automatischen Engine-Fensterentscheidung.
+
+`program-trash-coverage.ts` vergleicht pro bereits gerezztem, bekanntem ICE
+die vorhandene sichtbare Runner-Antwort vor und nach Entfernung jedes legalen
+Programmziels. Es verwendet den bestehenden Run-Pfaddienst mit Engine-Quotes,
+dem aktuellen Runner-Creditbestand, sichtbaren Breaker-Creditpools und den
+Root-Modifikatoren des jeweiligen Forts. Neu unbezahlbare Antworten stehen
+vor bloß verteuerten Antworten; bei gleicher Wirkung entscheiden wie bisher
+Breaker-Rolle, Counter, Installationskosten und Speicherbedarf, zuletzt die
+Options-ID. Redundante und universelle Breaker bleiben im Vergleich enthalten.
+
+Bereits vorher blockierte ICE erzeugen keinen zusätzlichen Abdeckungsverlust.
+Unbekannte oder ungerezzte ICE und ausdrücklich bedingte Sonderpfade tragen
+keinen solchen Nachweis. Fehlende oder widersprüchliche Quotes für bekannte,
+gerezzte ICE scheitern strukturiert. Dies ist ein Vergleich einzelner aktueller
+ICE-Antworten, keine Garantie für den gesamten Run oder künftige Runnerzüge;
+verdeckte Runnerkarten werden nicht einbezogen. Die Engine-Fälle in
+`corp-program-trash-coverage.test.ts` prüfen Zielwirkung, Ersatzbreaker,
+Grenzen, Defense-Ownership, Choice-Bindung und deterministisches Replay.
+
 Auch das anschließende ICE-Lifecycle-Fenster gehört diesem Owner. Die Engine
 liefert in jeder Post-Pass-LegalAction das exakte boolesche Fact
 `postPassIceTrashedUnlessReturned`. Temporäres Encounter-ICE würde bei
