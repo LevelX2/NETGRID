@@ -40,7 +40,7 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
     expectCheckpointToPass(fixture(json));
   });
 
-  it("starts the explicitly owned early credit-bank route", () => {
+  it("starts the explicitly owned early code-gate search route", () => {
     expectCheckpointToPass(fixture(firstEarlyBankLoadJson));
   });
 

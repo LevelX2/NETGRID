@@ -6318,15 +6318,15 @@
     "acceptableActions": [
       {
         "type": "install_card",
-        "sourceDefinitionId": "onr_v1_236_data-raven",
-        "targetServerId": "rd"
+        "sourceDefinitionId": "onr_v1_251_jack-attack",
+        "targetServerId": "new_remote"
       }
     ],
     "planExecution": {
       "acceptablePlanKinds": ["corp.defend_servers"],
-      "acceptableCapabilities": ["allocate_server_defense"],
+      "acceptableCapabilities": ["develop_score_protection"],
       "requiredAssessmentEvidence": [
-        "corp_agenda_capacity_defense_conversion:rd:corp.install_card.corp_onr_v1_236_data-raven_1.rd.corp_onr_v1_236_data-raven_1.1"
+        "score_protection_staging_install:agenda:corp_onr_proteus_005_marked-accounts_1:new_remote:new_remote:development_risk_unmodeled_access_path"
       ]
     }
   }

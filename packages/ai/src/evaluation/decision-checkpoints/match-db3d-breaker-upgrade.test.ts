@@ -205,7 +205,7 @@ it("revalidates the cheaper path after Engine installation and starts the bound 
     card.rezzed = !id.includes("colonel");
     card.faceup = card.rezzed;
   }
-  state.runner.credits = 14;
+  state.runner.credits = 18;
   state.runner.clicks = 2;
   state.corp.credits = 45;
   scoreCorpAgendaForTest(state, "onr_v1_205_main-office-relocation");
@@ -226,7 +226,7 @@ it("revalidates the cheaper path after Engine installation and starts the bound 
     input.legalActions.find((a) => a.actionId === decision.actionId)?.source,
   ).toContain("loony-goon");
   state = applyMatching(state, (a) => a.actionId === decision.actionId);
-  expect(state.runner.credits).toBe(10);
+  expect(state.runner.credits).toBe(14);
   expect(state.runner.clicks).toBe(1);
   const nextInput = inputForState();
   const remote = nextInput.playerView.servers.find((s) => s.id === "remote_1")!;

@@ -26,7 +26,7 @@ describe("match 5F6D runner decision checkpoints", () => {
       "preserves the known remaining run budget across a trace",
       traceRunBudgetJson,
     ],
-    ["prioritizes open sentry coverage at D62", newsgroupD62Json],
+    ["prioritizes open breaker coverage at D62", newsgroupD62Json],
     ["keeps Newsgroup above the basic credit action at D74", newsgroupD74Json],
     ["keeps Newsgroup above the basic credit action at D75", newsgroupD75Json],
     [

@@ -1445,7 +1445,6 @@ describe("authoritative plan-first live runtime", () => {
     ];
 
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
-
     expect(decision).toMatchObject({
       actionId: desperate.actionId,
       reasonCode: "plan_first.runner.secure_terminal_win",
@@ -3027,7 +3026,6 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.timingPoint = "run.encounter_ice";
     input.playerView.own.credits = 15;
     input.playerView.phase = "run";
-    input.playerView.own.credits = 3;
     input.playerView.pendingChoice = {
       choiceId,
       side: "corp",
@@ -9711,7 +9709,7 @@ describe("authoritative plan-first live runtime", () => {
     });
   });
 
-  it("converts a full agenda hand into meaningful central defense instead of drawing into discard", () => {
+  it("keeps a full agenda hand out of discard when no urgent defense need exists", () => {
     resetResidentPlanPortfolioMemory();
     const stateVersion = 1;
     const installHqIce = legalAction(
@@ -9834,14 +9832,14 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.legalActions = input.legalActions;
 
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
-
+    expect(decision.actionId).not.toBe(draw.actionId);
     expect(decision).toMatchObject({
-      actionId: installHqIce.actionId,
-      reasonCode: "plan_first.corp.defend_servers",
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
       fallbackUsed: false,
     });
     expect(decision.evidence).toContain(
-      `plan_assessment_evidence:corp_agenda_capacity_defense_conversion:hq:${installHqIce.actionId}`,
+      "plan_assessment_evidence:corp_non_strategic_residual_capacity_use",
     );
   });
 
@@ -15750,7 +15748,7 @@ describe("authoritative plan-first live runtime", () => {
     ]);
     for (const action of input.legalActions)
       action.expiresAtStateVersion = stateVersion;
-    input.playerView.own.credits = 3;
+    input.playerView.own.credits = 11;
     input.playerView.own.agendaPoints = 5;
     input.playerView.own.gripOrHq = [
       visibleCard("agenda-terminal", "corp", "agenda", {
@@ -28178,8 +28176,8 @@ describe("authoritative plan-first live runtime", () => {
       | { gap?: { priorityClass?: string; evidenceCode?: string } }
       | undefined;
     expect(unadvancedCoverage?.gap).toMatchObject({
-      priorityClass: "P5",
-      evidenceCode: "missing_coverage:breaker_wall",
+      priorityClass: "P4",
+      evidenceCode: "runner_known_remote_coverage_project:remote_1",
     });
 
     resetResidentPlanPortfolioMemory();

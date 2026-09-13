@@ -353,18 +353,26 @@ describe("Last Call at R&D exact choice-window regressions", () => {
     );
   }, 90_000);
 
-  it("replays the frozen singleton-variant Seed 1 deterministically without a run-start order window", () => {
+  it("replays the frozen singleton-variant Seed 1 deterministically without the historical mixed-source Runner start-order window", () => {
     const captures: AiSimulationDecisionCheckpointCapture[] = [];
+    const isHistoricalMixedSourceWindow = (
+      snapshot: AiSimulationDecisionCheckpointCapture,
+    ) => {
+      const choice = snapshot.input.playerView.pendingChoice;
+      return (
+        choice?.source.startsWith("runner_start.order:") === true &&
+        choice.options.some((option) =>
+          option.value.includes("onr_v1_184_top-runners-conference"),
+        )
+      );
+    };
     const first = simulateStandardGame({
       seed: "last-call-panel-fast-advance-batch-01-game-01",
       corpDeckId: "standard_corp_universal_fast_advance",
       runnerCards: singletonKeyCardRegressionCards(),
       runnerDeckHash: "standard-deck:a71c0dcc",
       captures,
-      capturePredicate: (snapshot) =>
-        snapshot.input.playerView.pendingChoice?.source.startsWith(
-          "runner_start.order:",
-        ) === true,
+      capturePredicate: isHistoricalMixedSourceWindow,
     });
     const second = simulateStandardGame({
       seed: "last-call-panel-fast-advance-batch-01-game-01",
@@ -378,11 +386,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
     expect(first.finalStateHash).toBe(second.finalStateHash);
     expect(first.actionSequence).toEqual(second.actionSequence);
 
-    const capture = captures.find((entry) =>
-      entry.input.playerView.pendingChoice?.source.startsWith(
-        "runner_start.order:",
-      ),
-    );
+    const capture = captures.find(isHistoricalMixedSourceWindow);
     expect(capture).toBeUndefined();
   }, 90_000);
 

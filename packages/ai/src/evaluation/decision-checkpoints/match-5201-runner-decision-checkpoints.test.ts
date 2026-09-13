@@ -6,7 +6,7 @@ import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
 describe("match 5201 runner decision checkpoints", () => {
-  it("builds the required damage hand buffer before another run", () => {
+  it("builds the required wall-breaker coverage before another run", () => {
     expectCheckpointToPass(fixture(initialHqInformationRunJson));
   });
 

@@ -1023,8 +1023,8 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "mantis",
       planKind: "runner.rig_and_coverage",
       capability: "search_answer_breaker_wall",
-      priorityClass: "P5",
-      assessmentEvidence: "target:remote_1",
+      priorityClass: "P4",
+      assessmentEvidence: "runner_known_remote_coverage_project:remote_1",
     });
     expect(actionAlternative(decision, "mantis")?.whyChosen).toEqual(
       expect.arrayContaining([
@@ -1190,8 +1190,8 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "bodyweight",
       planKind: "runner.rig_and_coverage",
       capability: "draw_for_answer_breaker_wall",
-      priorityClass: "P5",
-      assessmentEvidence: "target:remote_1",
+      priorityClass: "P4",
+      assessmentEvidence: "runner_known_remote_coverage_project:remote_1",
     });
     expect(decision.decisionDebug?.selectedActionType).toBe("play_event");
   });
@@ -1235,8 +1235,8 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "install-short-circuit",
       planKind: "runner.rig_and_coverage",
       capability: "setup_search_engine_breaker_wall",
-      priorityClass: "P5",
-      assessmentEvidence: "target:remote_1",
+      priorityClass: "P4",
+      assessmentEvidence: "runner_known_remote_coverage_project:remote_1",
     });
     expect(decision.decisionDebug?.selectedActionType).toBe("install_card");
   });
@@ -1280,8 +1280,8 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "install-short-circuit",
       planKind: "runner.rig_and_coverage",
       capability: "setup_search_engine_breaker_wall",
-      priorityClass: "P5",
-      assessmentEvidence: "target:remote_1",
+      priorityClass: "P4",
+      assessmentEvidence: "runner_known_remote_coverage_project:remote_1",
     });
   });
 
@@ -1419,8 +1419,8 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "bodyweight",
       planKind: "runner.rig_and_coverage",
       capability: "draw_for_answer_breaker_wall",
-      priorityClass: "P5",
-      assessmentEvidence: "target:remote_1",
+      priorityClass: "P4",
+      assessmentEvidence: "runner_known_remote_coverage_project:remote_1",
     });
   });
 
@@ -1463,8 +1463,8 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "draw",
       planKind: "runner.rig_and_coverage",
       capability: "draw_for_answer_breaker_wall",
-      priorityClass: "P5",
-      assessmentEvidence: "target:remote_1",
+      priorityClass: "P4",
+      assessmentEvidence: "runner_known_remote_coverage_project:remote_1",
     });
     expect(actionAlternative(decision, "draw")?.whyChosen).toEqual(
       expect.arrayContaining([
@@ -1509,8 +1509,8 @@ describe("Semantic AI runtime cutover — Runner plan and memory contracts", () 
       actionId: "draw",
       planKind: "runner.rig_and_coverage",
       capability: "draw_for_answer_breaker_wall",
-      priorityClass: "P5",
-      assessmentEvidence: "target:remote_1",
+      priorityClass: "P4",
+      assessmentEvidence: "runner_known_remote_coverage_project:remote_1",
     });
     expect(archivesAlternative?.whyNot).toEqual(
       expect.arrayContaining([

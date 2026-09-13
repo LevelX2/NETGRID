@@ -656,11 +656,49 @@ function decisionInput(): AiDecisionInput {
         { id: "archives", label: "Archives", ice: [], root: [] },
       ],
       publicEvents: [],
-      legalActions: [],
+      legalActions: [
+        {
+          actionId: "gain-credits",
+          side: "corp",
+          type: "gain_credit",
+          label: "1 Credit nehmen",
+          source: "basic_action",
+          timingPoint: "corp_action.main",
+          costs: [{ clicks: 1 }],
+          targetRequirements: [],
+          choiceRequirements: [],
+          visibility: "private_to_actor",
+          expiresAtStateVersion: 30,
+          payload: {
+            abilityFamily: "payment-costs",
+            effectKind: "gain_credits",
+            gainCreditsAmount: 2,
+          },
+        },
+      ],
       winner: null,
       agendaPointsToWin: 7,
     },
-    legalActions: [],
+    legalActions: [
+      {
+        actionId: "gain-credits",
+        side: "corp",
+        type: "gain_credit",
+        label: "1 Credit nehmen",
+        source: "basic_action",
+        timingPoint: "corp_action.main",
+        costs: [{ clicks: 1 }],
+        targetRequirements: [],
+        choiceRequirements: [],
+        visibility: "private_to_actor",
+        expiresAtStateVersion: 30,
+        payload: {
+          abilityFamily: "payment-costs",
+          effectKind: "gain_credits",
+          gainCreditsAmount: 2,
+        },
+      },
+    ],
   } as unknown as AiDecisionInput;
 }
 

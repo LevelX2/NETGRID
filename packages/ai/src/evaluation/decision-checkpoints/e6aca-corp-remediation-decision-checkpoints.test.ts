@@ -43,7 +43,7 @@ describe("e6aca Corp remediation decision checkpoints", () => {
       preserveVeniceTargetJson,
     ],
     [
-      "uses the protected current BBS economy route when no exact R&D defense is admitted",
+      "uses a current BBS economy route when no exact R&D defense is admitted",
       activateBbsEconomyJson,
     ],
   ])("passes the corrected Corp behavior: %s", (_label, json) => {

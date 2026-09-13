@@ -10,12 +10,12 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("match e676 exact decision checkpoints", () => {
   it.each([
     [
-      "funds the engine-certified Tycho score line",
+      "funds the Tycho score line while preserving its protection requirement",
       unsafeTychoJson,
       [
         "plan_module:corp.economy",
         "plan_step_capability:develop_or_convert_corp_economy",
-        "plan_assessment_evidence:corp_engine_certified_mature_remote_score_install:remote_1",
+        "plan_assessment_evidence:corp_score_protection_required:remote_1",
       ],
     ],
     [
