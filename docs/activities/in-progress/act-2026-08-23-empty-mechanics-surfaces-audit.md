@@ -1,13 +1,14 @@
 ---
 activityId: act-2026-08-23-empty-mechanics-surfaces-audit
-status: inbox
+status: in_progress
 kind: cleanup
 area: engine
 priority: low
 primaryAgent: architecture-review-agent
 requiresImplementation: false
 createdAt: 2026-08-23
-startedAt:
+startedAt: 2026-09-13
+owner: netgrid-activities-20260913-89c20ec1
 completedAt:
 branch:
 releaseTarget:
@@ -49,3 +50,4 @@ ihren leeren Profiloberflächen abhängt.
 ## Ergebnisnotiz
 
 Noch nicht bearbeitet.
+
