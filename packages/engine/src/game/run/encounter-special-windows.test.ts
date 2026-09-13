@@ -380,13 +380,18 @@ describe("encounter special windows boundary", () => {
 
     expect(actions).toHaveLength(1);
     expect(actions[0]).toMatchObject({
-      actionId: "runner.trigger_ability.startup_1.startup_1",
+      actionId:
+        "runner.trigger_ability.startup_1.startup_1.onr_v1_068_startup-immolator:runner_utility_longtail_trash_fully_broken_passed_ice_after_passing_fully_broken_ice",
       side: "runner",
       type: "trigger_ability",
       source: "startup_1",
       costs: [{ credits: 3 }],
       payload: {
         cardId: "startup_1",
+        sourceDefinitionId: "onr_v1_068_startup-immolator",
+        cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+        cardImplementationAbilityKey:
+          "runner_utility_longtail_trash_fully_broken_passed_ice_after_passing_fully_broken_ice",
         targetIceId: "ice_current",
         targetIceDefinitionId: "onr_v1_272_too-many-doors",
         runnerUtilityAbility: "trash_fully_broken_passed_ice",

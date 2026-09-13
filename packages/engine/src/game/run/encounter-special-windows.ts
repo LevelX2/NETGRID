@@ -486,8 +486,21 @@ export function fullyBrokenPassedIceTrashPostPassActions(
       fullyBrokenPassedIceTrashImplementationForCard(state, cardId),
     )
     .sort()
-    .map((sourceCardId) =>
-      buildLegalAction(
+    .map((sourceCardId) => {
+      const sourceDefinition = definitionFor(state, sourceCardId);
+      const implementation = fullyBrokenPassedIceTrashImplementationForCard(
+        state,
+        sourceCardId,
+      );
+      if (!implementation)
+        throw new Error(
+          "Die Post-Pass-Trash-Fähigkeit ist nicht mehr verfügbar.",
+        );
+      const sourceAbilityId = canonicalCapabilityId(
+        sourceDefinition.id,
+        implementation.capabilityKey,
+      );
+      return buildLegalAction(
         state,
         "runner",
         "trigger_ability",
@@ -498,14 +511,23 @@ export function fullyBrokenPassedIceTrashPostPassActions(
           cardId: sourceCardId,
           targetIceId,
           targetIceDefinitionId: targetDefinition.id,
+          sourceDefinitionId: sourceDefinition.id,
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityKey: implementation.capabilityKey,
+          cardImplementationAbilityId: sourceAbilityId,
+          abilityId: "trash_fully_broken_passed_ice",
           runnerUtilityAbility: "trash_fully_broken_passed_ice",
           abilityKind: "trash_fully_broken_passed_ice",
           cardImplementationTrashSourceCost: true,
           targetRezCost: true,
           rezCostPaid: rezCost,
         },
-      ),
-    );
+        {
+          abilityRef: { sourceCardInstanceId: sourceCardId, sourceAbilityId },
+          effectRef: `effect.${sourceAbilityId}`,
+        },
+      );
+    });
 }
 
 export function fullyBrokenPassedIcePostPassActions(
@@ -940,6 +962,7 @@ function fullyBrokenPassedIceTrashImplementationForCard(
 ):
   | {
       kind: "trash_fully_broken_passed_ice";
+      capabilityKey: ReturnType<typeof capabilityKey>;
       timing: "after_passing_fully_broken_ice";
       target: "that_ice";
       costs: readonly [
@@ -952,9 +975,14 @@ function fullyBrokenPassedIceTrashImplementationForCard(
   const implementation = cardImplementationForDefinitionId(
     definitionFor(state, cardId).id,
   )?.runnerUtilityLongtail;
-  return implementation?.kind === "trash_fully_broken_passed_ice"
-    ? implementation
-    : undefined;
+  if (implementation?.kind !== "trash_fully_broken_passed_ice")
+    return undefined;
+  const rawCapabilityKey = (
+    implementation as typeof implementation & { capabilityKey?: unknown }
+  ).capabilityKey;
+  if (typeof rawCapabilityKey !== "string")
+    throw new Error("Die Post-Pass-Trash-Fähigkeit hat keinen Capability-Key.");
+  return { ...implementation, capabilityKey: capabilityKey(rawCapabilityKey) };
 }
 
 function fullyBrokenPassedIceDerezImplementationForCard(

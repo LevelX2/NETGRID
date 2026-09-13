@@ -75,6 +75,7 @@ import {
 } from "../../runtime/visible-server-agenda-facts";
 import { runnerDefenseHandBufferFacts } from "../defense-recovery/defense-signals";
 import type { RunnerHandDevelopmentEvaluation } from "../hand-development/hand-development-evaluation";
+import { runnerPostBreakTrashPreparationSignals } from "./post-break-trash-preparation";
 function runnerAccumulatedCentralPressureConversionSignals(
   candidates: readonly ActionSemanticCandidate[],
   pressureSignals: RunnerPlanDomain["centralPressure"],
@@ -1331,6 +1332,11 @@ export function buildRunnerCentralPressureSignals({
   const centralPressure: RunnerPlanDomain["centralPressure"] = uniqueBy(
     [
       ...baseCentralPressure,
+      ...runnerPostBreakTrashPreparationSignals(
+        input,
+        candidates,
+        baseCentralPressure,
+      ),
       ...runnerTargetedIceTrashCentralPreparationSignals(
         input,
         candidates,

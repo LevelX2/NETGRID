@@ -114,7 +114,12 @@ function runOriginFromModuleState(moduleState: unknown): RunnerRunOrigin {
   ).informationBoundaryReassessment;
   const runRiskContract = (signal as { runRiskContract?: unknown })
     .runRiskContract;
+  const postBreakTrashCommitment = (signal as RunnerPressureSignal)
+    .postBreakTrashCommitment;
   return {
+    ...(postBreakTrashCommitment
+      ? { postBreakTrashCommitment: structuredClone(postBreakTrashCommitment) }
+      : {}),
     ...(purpose === "access" ||
     purpose === "multiaccess" ||
     purpose === "information" ||

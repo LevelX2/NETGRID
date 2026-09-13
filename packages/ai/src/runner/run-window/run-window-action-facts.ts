@@ -30,6 +30,7 @@ export function isRunnerRunWindowCandidate(
     runnerSuccessfulRunBeforeAccessEffectAction(input, candidate) !==
       undefined ||
     runnerPostPassDerezAndEndRunAction(input, candidate) !== undefined ||
+    runnerPostPassTrashAction(input, candidate) !== undefined ||
     runnerRunRemainderStrengthBoostAction(input, candidate) !== undefined
   );
 }
@@ -153,6 +154,29 @@ export function runnerPostPassDerezAndEndRunAction(
       action.type === "trigger_ability" &&
       (action.payload?.abilityId ?? action.payload?.runnerUtilityAbility) ===
         "derez_fully_broken_passed_ice_and_end_run",
+  );
+}
+
+export function runnerPostPassTrashAction(
+  input: AiDecisionInput,
+  candidate: ActionSemanticCandidate,
+): LegalAction | undefined {
+  if (
+    !runnerCandidateIsCardAbility(candidate) ||
+    candidate.abilityBindingMethod !== "canonical_capability_id"
+  )
+    return undefined;
+  return input.legalActions.find(
+    (action) =>
+      action.actionId === candidate.actionId &&
+      action.type === "trigger_ability" &&
+      action.source === candidate.sourceCardInstanceId &&
+      action.payload?.cardImplementationCapabilityBindingKind ===
+        "card_spec_capability_key" &&
+      action.payload.cardImplementationAbilityKey === candidate.abilityKey &&
+      action.payload.cardImplementationAbilityId === candidate.abilityId &&
+      (action.payload.abilityId ?? action.payload.runnerUtilityAbility) ===
+        "trash_fully_broken_passed_ice",
   );
 }
 

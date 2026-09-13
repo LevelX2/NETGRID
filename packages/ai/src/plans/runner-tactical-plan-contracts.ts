@@ -68,6 +68,13 @@ export type RunnerPressureSignal = {
     | "targeted_ice_trash";
   targetedBypassCommitment?: RunnerTargetedBypassCommitment;
   targetedIceTrashCommitment?: RunnerTargetedIceTrashCommitment;
+  postBreakTrashCommitment?: {
+    sourceCardInstanceId: string;
+    targetIceInstanceId: string;
+    serverId: string;
+    trashCredits: number;
+    observedAtStateVersion: number;
+  };
   encounterCreditSpendLimit?: number;
   accessCommitment?: RunnerRunAccessCommitmentSignal;
   runRiskContract?: RunnerRunRiskContractSignal;
@@ -164,6 +171,7 @@ export type RunnerRunAccessCommitmentSignal = {
 };
 
 export type RunnerRunWindowSignal = {
+  postBreakTrashCommitment?: RunnerPressureSignal["postBreakTrashCommitment"];
   windowId: string;
   serverId?: string;
   rootPlanInstanceId: string;

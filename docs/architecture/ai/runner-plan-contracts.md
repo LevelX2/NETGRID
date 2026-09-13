@@ -155,6 +155,22 @@ Runautorität.
 
 ### Vertikale Implementierung des Zentraldrucks
 
+Post-Break-ICE-Trash wird als Vorbereitung einer bereits zugelassenen
+Central-Instanz behandelt. `post-break-trash-preparation.ts` vergleicht die
+verbleibenden Zugriffe im aktuellen Zug mit Installation und exakt reservierten
+Trash-Credits. Die erste Route setzt ein einzelnes bekanntes, gerezztes ICE mit
+vollständig brechbaren End-the-Run-Subroutinen voraus. Verdeckte, bedingte oder
+nur teilweise mitigierte Pfade begründen diese Vorbereitung nicht. Quelle,
+ICE-Ziel, Server, Kosten und Beobachtungs-StateVersion bleiben am Parent
+gebunden; Installation und Run werden nach jeder Engine-Änderung neu bewertet.
+Priorität und Grenzwert des bestehenden Central-Owners bleiben erhalten.
+
+`runner.convert_run_window` übernimmt diese Bindung. Im echten Post-Pass-Fenster
+verifiziert er die kanonische CardSpec-Fähigkeit, das aktuelle gerezzte Ziel und
+die tatsächlich angebotenen Kosten gegen den reservierten Betrag. Erst dann
+vollendet der Step die vorbereitete Entfernung vor dem weiteren Zugriff.
+Aus der Vorabquote werden keine zukünftigen LegalActions erzeugt.
+
 `packages/ai/src/runner/central-pressure/` bündelt den Owner:
 
 - `central-pressure-signals.ts`: Ziel- und Routenvergleich, Zugriffskadenz,

@@ -7,6 +7,7 @@ import {
   type RunnerRunRiskContractSignal,
 } from "./runner-tactical-plan-contracts";
 export type RunnerRunOrigin = {
+  postBreakTrashCommitment?: RunnerPressureSignal["postBreakTrashCommitment"];
   purpose?: "access" | "multiaccess" | "information" | "contest";
   encounterCreditSpendLimit?: number;
   accessCommitment?: RunnerRunAccessCommitmentSignal;

@@ -20,6 +20,7 @@ import { restrictedHostedCredits } from "../run/run-duration-payment";
 import { evaluateRunStartEligibility } from "../run/run-start-eligibility";
 import { runnerCanStartRun } from "../run/run-start-lock";
 import { runnerFortIceTrashActionPayload } from "./runner-fort-ice-trash-quote";
+import { withRunnerPostBreakTrashQuote } from "./runner-post-break-trash-quote";
 
 type HostFn<T = unknown> = (...args: any[]) => T;
 
@@ -1121,14 +1122,17 @@ export function buildRunnerMainActions(
           runStartTaxCredits
       ) {
         actions.push(
-          action(
+          withRunnerPostBreakTrashQuote(
             state,
-            "runner",
-            "start_run",
-            `Run auf ${server.label}`,
-            "basic_action",
-            runCosts,
-            runPayload,
+            action(
+              state,
+              "runner",
+              "start_run",
+              `Run auf ${server.label}`,
+              "basic_action",
+              runCosts,
+              runPayload,
+            ),
           ),
         );
       }
