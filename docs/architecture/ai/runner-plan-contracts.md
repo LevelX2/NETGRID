@@ -1010,6 +1010,17 @@ Verschlechterung gegenüber dem akzeptierten Startvertrag begründet eine
 Jack-out-Präferenz; ein unveränderter Grenzfall erzeugt weder einen neuen Plan
 noch eine zweite Entscheidungsautorität.
 
+Die Zulassung von Run-Ereignissen quotiert Route und Handreserve mit der
+bereits vorhandenen Projektion nach dem Verbrauch der Startkarte. Credit-
+und Klickkosten stammen weiterhin aus der aktuellen LegalAction; dieselbe
+projizierte Handgröße gilt für bekannte Schadensfolgen und unbekannte
+ICE-Risiken. Ein Basisrun verbraucht keine Ereigniskarte. Der erwartete
+Kartenverbrauch darf im Folgefenster keine neue Handpuffer-Verschlechterung
+vortäuschen. Bewusst zugelassene Informationsproben behalten ihren ausdrücklich
+knappen Startvertrag; echte zusätzliche Schäden oder neue Gefahren bleiben
+Gründe für die bestehende Abbruchbewertung. Central-/Remote-Owner, Run-Leaf
+und ihre Action-/Step-Bindungen bleiben unverändert.
+
 Die gemeinsame bekannte Pfadquote enthält auch die kanonischen Passgebühren
 bekannter gerezzter Root-Karten. Jede verbleibende Passage zählt, einschließlich
 unbekannter und für die Encounter-Projektion umgangener ICE. Gebühren werden

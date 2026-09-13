@@ -394,7 +394,7 @@ function evaluateRunnerRunTarget(
     path,
     availableCredits: creditsAvailableDuringRun,
     unknownIceCount: unknownUnrezzedIceCount,
-    runnerGripCount: params.input.playerView.own.gripOrHq.length,
+    runnerGripCount: projectedGripAfterRunAction,
   });
   const { noAccessReason: _noAccessReason, ...conditionalBaseRouteQuote } =
     baseRouteQuote;
@@ -475,6 +475,7 @@ function evaluateRunnerRunTarget(
       params.input.playerView.agendaPointsToWin - 2;
   const prerunReserveQuote = quoteRunnerPrerunReserve({
     input: params.input,
+    runnerGripCount: projectedGripAfterRunAction,
     deckCapabilities: params.deckCapabilities,
     projection,
     accessPayoff,
@@ -1485,6 +1486,7 @@ function centralPayoffToRunTarget(payoff: KnownCentralAccessPayoff): {
 
 function quoteRunnerPrerunReserve(params: {
   input: AiDecisionInput;
+  runnerGripCount: number;
   deckCapabilities: DeckCapabilityProfile | undefined;
   projection: InternalRunActionProjection;
   accessPayoff: RunnerAccessPayoff;
@@ -1565,7 +1567,7 @@ function quoteRunnerPrerunReserve(params: {
     corpRezCredits,
     corpRezExposureActive,
     riskCreditBuffer: params.unrezzedIceRiskCreditBuffer,
-    runnerGripCount: params.input.playerView.own.gripOrHq.length,
+    runnerGripCount: params.runnerGripCount,
     informationProbeAllowed,
     runnerRig: params.input.playerView.own.rig,
   });
