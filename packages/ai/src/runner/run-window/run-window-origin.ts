@@ -1,4 +1,5 @@
 import { type AiDecisionInput } from "@netgrid/shared";
+import { currentRunPathContext } from "../../run-analysis/current-run-path-context";
 import {
   assessRandomBreakOrDamageRiskForVisibleRunPath,
   randomBreakOrDamageRiskCanCarryRunPath,
@@ -208,6 +209,7 @@ export function reassessActiveInformationRunParent(
       (server) => server.id === run.attackedServerId,
     )?.root ?? [],
     input.playerView.opponent.credits,
+    currentRunPathContext(input),
   );
   const knownPath = pathBeforeDamageBudget.knownPathBlockedOnlyByDamage
     ? knownPathAfterDamageBudget(

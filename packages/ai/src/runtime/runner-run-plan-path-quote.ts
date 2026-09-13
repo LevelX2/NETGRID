@@ -1467,6 +1467,7 @@ function knownRequiredSubroutineIndexes(
 
 function visibleDeflectorContextForInput(input: AiDecisionInput) {
   return {
+    ...currentRunPathContext(input),
     visibleRemoteServerCount: input.playerView.servers.filter((candidate) =>
       candidate.id.startsWith("remote_"),
     ).length,
@@ -1551,3 +1552,4 @@ function unknownPathQuote(
     requiredSequences: [],
   };
 }
+import { currentRunPathContext } from "../run-analysis/current-run-path-context";

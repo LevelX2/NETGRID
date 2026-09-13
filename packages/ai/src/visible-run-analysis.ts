@@ -165,34 +165,50 @@ export function assessKnownRezzedIcePath(
   )
     ? [false, true]
     : [false];
+  const deferredDamageVariants = iceCards.some((ice) =>
+    ice.effectiveRunQuote?.subroutines.some(
+      (subroutine, index, subroutines) =>
+        subroutine.type === "do_damage" &&
+        subroutines
+          .slice(index + 1)
+          .some(
+            (later) => later.unbrokenRunEffect?.preventsFutureBreaking === true,
+          ),
+    ),
+  )
+    ? [false, true]
+    : [false];
   const candidates = selectableSubtypeRigVariants(
     rigCards,
     context,
     availablePreRunCredits,
   ).flatMap((variant) =>
     (["retained", "trashed"] as const).flatMap((bartmossOutcome) =>
-      conditionalFullBreakVariants.map((deferConditionalFullBreak) => ({
-        bartmossOutcome,
-        assessment: assessKnownRezzedIcePathInternal(
-          iceCards,
-          variant.rigCards,
-          runnerCredits,
-          rootCards,
-          normalizedCorpBidCapacity,
-          [],
-          {
-            allowBreakingRunPathEffects: true,
-            bartmossOutcome,
-            deferConditionalFullBreak,
-            initialPassCount: context.additionalPassedIceCount ?? 0,
-            ...(variant.preRunPreparation
-              ? { preRunPreparation: variant.preRunPreparation }
-              : {}),
-          },
-          undefined,
-          context,
-        ),
-      })),
+      conditionalFullBreakVariants.flatMap((deferConditionalFullBreak) =>
+        deferredDamageVariants.map((deferDamageBeforeFutureLock) => ({
+          bartmossOutcome,
+          assessment: assessKnownRezzedIcePathInternal(
+            iceCards,
+            variant.rigCards,
+            runnerCredits,
+            rootCards,
+            normalizedCorpBidCapacity,
+            [],
+            {
+              allowBreakingRunPathEffects: true,
+              bartmossOutcome,
+              deferConditionalFullBreak,
+              deferDamageBeforeFutureLock,
+              initialPassCount: context.additionalPassedIceCount ?? 0,
+              ...(variant.preRunPreparation
+                ? { preRunPreparation: variant.preRunPreparation }
+                : {}),
+            },
+            undefined,
+            context,
+          ),
+        })),
+      ),
     ),
   );
   const best = candidates
@@ -393,6 +409,7 @@ function assessKnownRezzedIcePathInternal(
     allowBreakingRunPathEffects: boolean;
     bartmossOutcome?: "retained" | "trashed";
     deferConditionalFullBreak?: boolean;
+    deferDamageBeforeFutureLock?: boolean;
     preRunPreparation?: KnownRezzedIcePathAssessment["preRunPreparation"];
     /** Passages before this suffix, whose encounter cost was handled by its caller. */
     initialPassCount?: number;
@@ -570,7 +587,9 @@ function assessKnownRezzedIcePathInternal(
     const encounterTax = activeRunPathEffects.reduce(
       (sum, effect) =>
         sum + Math.max(0, Math.floor(effect.addsFutureEncounterCost ?? 0)),
-      0,
+      ice.instanceId === deflectorContext.encounterEntryTax?.paidIceInstanceId
+        ? 0
+        : (deflectorContext.encounterEntryTax?.amount ?? 0),
     );
     if (encounterTax > 0) {
       const payment = projectGeneralCreditPayment(creditBudget, encounterTax);
@@ -979,6 +998,21 @@ function assessKnownRezzedIcePathInternal(
           subroutineOnlyAffectsNextEncounter(sourceSubroutine)
         ),
     );
+    if (
+      !options.deferDamageBeforeFutureLock &&
+      runPathEffects.some(
+        ({ effect }) => effect.preventsFutureBreaking === true,
+      )
+    ) {
+      // Break the access lock first, then price damage with the strength
+      // already bought for this encounter. The separate deferred branch
+      // retains unpaid damage explicitly for the hand-budget owner.
+      runPathEffects.sort(
+        (left, right) =>
+          Number(left.sourceSubroutine.type === "do_damage") -
+          Number(right.sourceSubroutine.type === "do_damage"),
+      );
+    }
     for (const [
       effectIndex,
       { effect, sourceSubroutine },
@@ -1038,6 +1072,25 @@ function assessKnownRezzedIcePathInternal(
         laterEffectPreventsFutureBreaking &&
         hardEffectKinds.length === 1 &&
         hardEffectKinds[0] === "damage_or_program_trash";
+      if (
+        prioritizeLaterAccessPreservation &&
+        sourceSubroutine.type === "do_damage"
+      ) {
+        damageOnlyBlock ??= hardUnbrokenEffectBlockedPathAssessment({
+          visibleBreakCost,
+          creditsAfterPath: creditBudget.credits,
+          iceIndex,
+          iceDefinitionId: effectiveIce.definitionId,
+          iceSubtypes: effectiveIce.subtypes,
+          creditsSpentBeforeUnpayableIce: visibleBreakCost,
+          firstKnownIceBreakable,
+          assessedKnownIceCount,
+          effectKinds: hardEffectKinds,
+          preventsFutureBreaking: false,
+          unpayableReason: "ice_unaffordable",
+        });
+        continue;
+      }
       if (hardEffectKinds.length > 0 && !prioritizeLaterAccessPreservation) {
         // Counterfactual suffixes disable recursive optional-effect search,
         // not a direct, fully quoted break of this mandatory subroutine.

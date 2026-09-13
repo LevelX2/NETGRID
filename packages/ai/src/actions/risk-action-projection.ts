@@ -89,12 +89,15 @@ export function buildRandomBreakOrDamageRiskAssessment(params: {
     Math.floor(params.visibleSubroutinesLikely),
   );
   const worstCaseDamageEstimate =
-    randomBreakUsesLikely * maxSingleFailureDamage + unbrokenEncounterDamageLikely;
+    randomBreakUsesLikely * maxSingleFailureDamage +
+    unbrokenEncounterDamageLikely;
   const lethalOnAnyFailure = handAfterActionCost <= 0;
   const lethalOnHighFailure =
-    handAfterActionCost < maxSingleFailureDamage + unbrokenEncounterDamageLikely;
+    handAfterActionCost <
+    maxSingleFailureDamage + unbrokenEncounterDamageLikely;
   const survivesOneFailedUse =
-    handAfterActionCost >= maxSingleFailureDamage + unbrokenEncounterDamageLikely;
+    handAfterActionCost >=
+    maxSingleFailureDamage + unbrokenEncounterDamageLikely;
   const riskSeverity = randomBreakOrDamageRiskSeverityFor({
     handAfterActionCost,
     worstCaseDamageEstimate,
@@ -249,6 +252,8 @@ export function assessRandomBreakOrDamageRiskForVisibleRunPath(
       rig,
     ),
     server.root,
+    input.playerView.opponent.credits,
+    currentRunPathContext(input),
   );
   const visibleBreakworthySubroutineCount =
     visibleRandomBreakCandidateSubroutineCountForPath(params.visibleIce);
@@ -272,6 +277,8 @@ export function assessRandomBreakOrDamageRiskForVisibleRunPath(
       stableRig,
     ),
     server.root,
+    input.playerView.opponent.credits,
+    currentRunPathContext(input),
   );
   const stableCoverageAvailable =
     stablePath.assessedKnownIceCount > 0 && stablePath.canReachAccess;
@@ -674,3 +681,4 @@ function randomBreakOrDamageRiskShouldAvoidRunSeverity(
 ): boolean {
   return riskSeverity === "lethal" || riskSeverity === "high";
 }
+import { currentRunPathContext } from "../run-analysis/current-run-path-context";

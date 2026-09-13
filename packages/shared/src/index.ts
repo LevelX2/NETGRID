@@ -4188,6 +4188,8 @@ export type PlayerView = {
     prohibitNoisyIcebreakers?: boolean;
     /** Public resolved restriction, consumed by the next actual encounter. */
     nextEncounterNoBreakSubroutines?: boolean;
+    /** Public resolved credit payment at each future actual encounter entry. */
+    encounterTaxForFutureIce?: number;
     /** Public restriction applying only to the currently encountered ICE. */
     noBreakSubroutinesActive?: boolean;
     runnerCreditGainOnCorpRez?: number;

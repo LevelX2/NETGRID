@@ -19,6 +19,7 @@ import {
   type RunnerRunWindowActionAssessment,
 } from "../../plans/runner-tactical-plan-contracts";
 import { quoteRunnerRunRiskReserve } from "../../run-analysis/runner-run-risk-reserve";
+import { currentRunPathContext } from "../../run-analysis/current-run-path-context";
 import {
   runnerConfirmedDamageRequiredHandFloor,
   runnerDamageThreatAssessment,
@@ -236,6 +237,7 @@ export function runnerRunRiskContractReassessment(
     continuationBudget,
     server.root,
     input.playerView.opponent.credits,
+    currentRunPathContext(input),
   );
   const corpRezCredits = Math.max(0, input.playerView.opponent.credits);
   const visibleDuringRunRezSupport =
@@ -357,6 +359,7 @@ export function currentRunAbortAssessment(
     continuationBudget,
     server.root,
     input.playerView.opponent.credits,
+    currentRunPathContext(input),
   );
   if (path.canReachAccess) return undefined;
   if (

@@ -648,6 +648,12 @@ allgemeinen Draw-Bonus ein. Owner für allgemeine Rotation ist die
 Handentwicklung; eine konkrete Breaker-Suche bleibt beim Coverage-Parent.
 Die Zahl zusätzlich gesichteter Karten allein quantifiziert weder die
 Verbesserung der Handqualität noch den Trefferwert eines konkreten Bedarfs.
+Generische Heap-Rückholung bei überfüllter Hand prüft außerdem die
+schrittweise Cleanup-Auswahl desselben Retention-Dienstes. Nach jedem
+projizierten Abwurf werden Duplikate und Kartenwerte neu bewertet;
+Main-Action-Ausführungsboni gelten dabei nicht. Eine anschließend wieder
+abgeworfene Zielkarte rechtfertigt keine generische Recovery. Die Projektion
+erzeugt keine zukünftige LegalAction oder Choice-Bindung.
 Ein späterer Filterwert benötigt daher einen belegten planlokalen
 Draw-vs.-Alternativen-Fall und eine side-sichere Bedarfs-/Qualitätsverteilung
 an der privaten Beobachtungsgrenze. Er darf keine garantierte Folgekarte,
@@ -1009,6 +1015,24 @@ Die bekannte Pfadquote erhält bereits bezahlte einzelne Subroutine-Breaks mit
 ICE- und Subroutine-ID. Nachgelagerte Schadens- und Handreserveprüfungen
 rechnen diese Wirkungen nicht erneut an. Unbezahlte Subroutinen derselben
 ICE bleiben wirksam; ein Teilbruch bescheinigt keinen vollständigen Bruch.
+
+Bei direktem Schaden vor einer späteren Break-Sperre quotiert der Pfaddienst
+beide Fortsetzungen: vollständige Mitigation mit gemeinsam bezahlter
+Encounter-Stärke sowie Zugang mit ausdrücklich verbleibendem Schaden.
+Aufgeschobener Schaden darf weder aus der Kostenquote noch aus dem
+Handbudget verschwinden. Die Finanzierung verwendet den vollständigen Pfad
+mit ihrem garantierten Budget; ein tragbarer günstigerer Schadenspfad bleibt
+ohne unnötiges Darlehen zulässig.
+
+Die Engine projiziert bereits aktivierte Encounter-Gebühren öffentlich als
+`run.encounterTaxForFutureIce`. Restpfad-, Pump-, Break- und Risikoprüfungen
+übernehmen diesen Fakt und bezahlen ihn vor jedem verbleibenden bekannten
+Encounter aus allgemeinen beziehungsweise Run-Credits. Der Eintritt zum
+aktuellen Encounter ist bereits bezahlt; unbekannte oder umgangene ICE
+erhalten dadurch keine erfundene Encounter-Quote. Zusätzliche noch
+ungebrochene Gebührenquellen werden weiterhin in ihrer Pfadreihenfolge
+addiert. Eine bloß vergessene Gebühr darf keine neue Reserveverschlechterung
+und keinen sofortigen Run-Abbruch vortäuschen.
 
 Die Informations-Neubewertung des laufenden Encounters konsumiert die
 exakten offenen Subroutine-IDs der aktuellen Engine-Continue-Action. Die volle

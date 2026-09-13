@@ -34,6 +34,8 @@ export type RunPathProjection = {
 };
 
 export type VisibleDeflectorContext = {
+  /** Engine-certified resolved tax; entry to the current encounter was already paid. */
+  encounterEntryTax?: { amount: number; paidIceInstanceId?: string };
   /** ICE omitted from encounter costs that the route still passes (bypass). */
   additionalPassedIceCount?: number;
   visibleRemoteServerCount?: number;

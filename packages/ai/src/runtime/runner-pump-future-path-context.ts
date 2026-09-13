@@ -66,6 +66,8 @@ export function createRunnerPumpFuturePathContext(
       futureRig,
       creditBudgetAfterPumpAndBreak,
       server.root,
+      input.playerView.opponent.credits,
+      currentRunPathContext(input),
     );
     const currentIce = currentEncounteredIceCard(input);
     const damageIce =
@@ -127,3 +129,4 @@ export function createRunnerPumpFuturePathContext(
 
   return { encounterFuturePathAfterPumpBreakAssessment };
 }
+import { currentRunPathContext } from "../run-analysis/current-run-path-context";

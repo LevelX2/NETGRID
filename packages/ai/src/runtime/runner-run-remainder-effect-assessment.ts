@@ -244,6 +244,7 @@ function deferredFullBreakIndexes(input: AiDecisionInput): number[] {
     [],
     input.playerView.opponent.credits,
     {
+      ...currentRunPathContext(input),
       visibleRemoteServerCount: input.playerView.servers.filter((server) =>
         server.id.startsWith("remote_"),
       ).length,
@@ -257,3 +258,4 @@ function deferredFullBreakIndexes(input: AiDecisionInput): number[] {
     ? indexes
     : [];
 }
+import { currentRunPathContext } from "../run-analysis/current-run-path-context";

@@ -298,6 +298,9 @@ export function buildPlayerViewProjection(
         ...(state.run.nextEncounterNoBreakSubroutines
           ? { nextEncounterNoBreakSubroutines: true }
           : {}),
+        ...(state.run.encounterTaxForFutureIce
+          ? { encounterTaxForFutureIce: state.run.encounterTaxForFutureIce }
+          : {}),
         ...(state.run.noBreakSubroutinesActive
           ? { noBreakSubroutinesActive: true }
           : {}),

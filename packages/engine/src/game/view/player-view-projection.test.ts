@@ -77,6 +77,31 @@ describe("public next-turn basic run preparation", () => {
 });
 
 describe("PlayerView projection", () => {
+  it("projects the public resolved encounter tax for both sides without exposing hands", () => {
+    const state = createGameAfterSetup({ seed: "resolved-encounter-tax-view" });
+    state.run = {
+      runId: "run_tax_view",
+      attackedServerId: "hq",
+      phase: "movement",
+      position: { kind: "ice", serverId: "hq", iceIndex: 0 },
+      brokenSubroutineIndexes: [],
+      resolvedSubroutineIndexes: [],
+      successful: false,
+      encounterTaxForFutureIce: 4,
+      encounterTaxSourceDefinitionId: "onr_v1_222_ball-and-chain",
+    };
+    const before = hashState(state);
+    for (const side of ["runner", "corp"] as const) {
+      const view = getPlayerView(state, side);
+      expect(view.run?.encounterTaxForFutureIce).toBe(4);
+      expect(view.opponent).not.toHaveProperty("gripOrHq");
+    }
+    expect(hashState(state)).toBe(before);
+    delete state.run.encounterTaxForFutureIce;
+    expect(getPlayerView(state, "runner").run).not.toHaveProperty(
+      "encounterTaxForFutureIce",
+    );
+  });
   it("quotes the encounter reset separately from retained turn strength without mutating state", () => {
     const state = createGameAfterSetup({ seed: "encounter-strength-view" });
     state.turnSerial = 0;

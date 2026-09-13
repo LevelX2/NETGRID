@@ -420,6 +420,7 @@ export function createRunnerAccessPathContext(
               state.budget,
               server.root,
               input.playerView.opponent.credits,
+              currentRunPathContext(input),
             ),
           ).canReachAccess;
           continue;
@@ -492,6 +493,8 @@ export function createRunnerAccessPathContext(
         futureRig,
         budgetAfterBreak,
         server.root,
+        input.playerView.opponent.credits,
+        currentRunPathContext(input),
       ),
     );
     if (
@@ -570,3 +573,4 @@ export function createRunnerAccessPathContext(
     encounterRemotePayoffAfterBreakAssessment,
   };
 }
+import { currentRunPathContext } from "../run-analysis/current-run-path-context";

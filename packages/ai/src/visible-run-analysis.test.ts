@@ -1094,7 +1094,7 @@ describe("visible run analysis access-preserving effect choices", () => {
     });
   });
 
-  it("takes damage to preserve credits for a later no-break lock and Wall", () => {
+  it("reports deferred damage explicitly while preserving credits for a later lock and Wall", () => {
     const blocked = assessKnownRezzedIcePath(
       [dataWallTwoPointZeroIce("inner-wall"), neuralBladeIce("outer-blade")],
       [krashBreaker("runner-krash")],
@@ -1115,9 +1115,21 @@ describe("visible run analysis access-preserving effect choices", () => {
       14,
     );
     expect(funded).toMatchObject({
-      blocked: false,
-      canReachAccess: true,
+      blocked: true,
+      canReachAccess: false,
+      knownPathBlockedOnlyByDamage: true,
       visibleBreakCost: 14,
+      creditsAfterPath: 0,
+    });
+    expect(
+      assessKnownRezzedIcePath(
+        [dataWallTwoPointZeroIce("inner-wall"), neuralBladeIce("outer-blade")],
+        [krashBreaker("runner-krash")],
+        16,
+      ),
+    ).toMatchObject({
+      canReachAccess: true,
+      visibleBreakCost: 16,
       creditsAfterPath: 0,
     });
   });

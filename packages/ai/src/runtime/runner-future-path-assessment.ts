@@ -1,4 +1,5 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
+import { currentRunPathContext } from "../run-analysis/current-run-path-context";
 import { runnerRigAfterEncounter } from "./runner-rig-after-encounter";
 
 import {
@@ -36,6 +37,8 @@ export function currentRunFuturePathAssessment(
       input.playerView.own.rig ?? [],
     ),
     server.root,
+    input.playerView.opponent.credits,
+    currentRunPathContext(input),
   );
   const encounterTax = effects.reduce((sum, { effect }) => {
     const perIce = Math.max(0, Math.floor(effect.addsFutureEncounterCost ?? 0));

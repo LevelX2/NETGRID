@@ -4,6 +4,10 @@ import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import type { RunnerHandDevelopmentEvaluation } from "./hand-development-evaluation";
 import type { DiscardKeepScorer } from "../../runtime/discard-choice-selection";
 import { type DiscardChoiceKeepScore } from "../../runtime/discard-choice-selection";
+import {
+  compareDiscardKeepScores,
+  selectDiscardCardKeys,
+} from "../../runtime/discard-choice-selection";
 import { runnerCandidateSourceDefinitionId } from "../../runtime/runner-action-source-facts";
 import { runnerProgramSearchSourceCardInstanceId } from "../../runtime/runner-program-search-facts";
 import type { RunnerDevelopmentInstallServices } from "./development-services";
@@ -274,6 +278,28 @@ export function runnerRecoverySearchCommitment(
       const own = entry.scoringInput.playerView.own;
       if (own.gripOrHq.length <= own.maxHandSize) return true;
       if (own.maxHandSize <= 0) return false;
+      // Cleanup offers no main-action execution bonus. Use its sequential
+      // retention owner so removing a duplicate can change the next discard.
+      const cleanupInput = {
+        ...entry.scoringInput,
+        legalActions: [],
+        playerView: {
+          ...entry.scoringInput.playerView,
+          legalActions: [],
+          own: { ...own, clicks: 0 },
+        },
+      };
+      const discarded = selectDiscardCardKeys(
+        cleanupInput,
+        own.gripOrHq.map((card) => ({
+          key: card.instanceId,
+          label: card.title ?? "",
+          card,
+        })),
+        own.gripOrHq.length - own.maxHandSize,
+        discardKeepScore,
+      );
+      if (discarded.includes(entry.card.instanceId)) return false;
       const retainedThreshold = own.gripOrHq
         .filter((card) => card.instanceId !== entry.card.instanceId)
         .map((card) => ({
@@ -282,19 +308,9 @@ export function runnerRecoverySearchCommitment(
         }))
         .sort(compareRunnerRecoverySearchTargets)[own.maxHandSize - 1];
       if (!retainedThreshold) return false;
-      const targetRank = runnerRecoveryPlanDispositionRank(
-        entry.score.planDisposition,
-      );
-      const retainedRank = runnerRecoveryPlanDispositionRank(
-        retainedThreshold.score.planDisposition,
-      );
       // A generic recovery must improve the retained hand, not pay to recover
       // a card that the same retention owner will discard again at cleanup.
-      return (
-        targetRank > retainedRank ||
-        (targetRank === retainedRank &&
-          entry.score.total > retainedThreshold.score.total)
-      );
+      return compareDiscardKeepScores(entry.score, retainedThreshold.score) > 0;
     })
     .sort(compareRunnerRecoverySearchTargets)[0]?.card;
   if (!target?.definitionId) return undefined;
@@ -341,32 +357,8 @@ function compareRunnerRecoverySearchTargets(
   right: { card: VisibleCard; score: DiscardChoiceKeepScore },
 ): number {
   return (
-    runnerRecoveryPlanDispositionRank(right.score.planDisposition) -
-      runnerRecoveryPlanDispositionRank(left.score.planDisposition) ||
-    right.score.total - left.score.total ||
+    compareDiscardKeepScores(right.score, left.score) ||
     (left.card.title ?? "").localeCompare(right.card.title ?? "", "de") ||
     left.card.instanceId.localeCompare(right.card.instanceId)
   );
-}
-
-function runnerRecoveryPlanDispositionRank(
-  disposition: DiscardChoiceKeepScore["planDisposition"],
-): number {
-  switch (disposition) {
-    case "current_plan_route":
-      return 5;
-    case "support_for_need":
-    case "campaign_hold":
-      return 4;
-    case "blocked_but_developable":
-      return 3;
-    case "redundant":
-      return 2;
-    case "currently_dead":
-    case "discard_candidate":
-      return 1;
-    case "assessment_unknown":
-    case undefined:
-      return 0;
-  }
 }

@@ -52,6 +52,26 @@ export function selectedDiscardChoiceOptionIds(
       card: VisibleCard;
     } => Boolean(entry),
   );
+  return selectDiscardCardKeys(
+    input,
+    remaining.map(({ option, card }) => ({
+      key: option.id,
+      label: option.label,
+      card,
+    })),
+    count,
+    scoreDiscardCandidate,
+  );
+}
+
+/** Shared sequential hand selection; keys bind current options or projected card identities. */
+export function selectDiscardCardKeys(
+  input: AiDecisionInput,
+  candidates: readonly { key: string; label: string; card: VisibleCard }[],
+  count: number,
+  scoreDiscardCandidate: DiscardKeepScorer,
+): string[] {
+  const remaining = [...candidates];
   const selectedOptionIds: string[] = [];
   let scoringInput = input;
   while (selectedOptionIds.length < count && remaining.length > 0) {
@@ -60,11 +80,16 @@ export function selectedDiscardChoiceOptionIds(
         ...entry,
         score: scoreDiscardCandidate(scoringInput, entry.card),
       }))
-      .sort(compareDiscardCandidates);
+      .sort(
+        (left, right) =>
+          compareDiscardKeepScores(left.score, right.score) ||
+          left.label.localeCompare(right.label, "de") ||
+          left.key.localeCompare(right.key),
+      );
     const selected = ranked[0]!;
-    selectedOptionIds.push(selected.option.id);
+    selectedOptionIds.push(selected.key);
     remaining.splice(
-      remaining.findIndex((entry) => entry.option.id === selected.option.id),
+      remaining.findIndex((entry) => entry.key === selected.key),
       1,
     );
     scoringInput = inputWithoutDiscardedCard(
@@ -75,16 +100,13 @@ export function selectedDiscardChoiceOptionIds(
   return selectedOptionIds;
 }
 
-function compareDiscardCandidates(
-  left: { option: PendingChoiceOption; score: DiscardChoiceKeepScore },
-  right: { option: PendingChoiceOption; score: DiscardChoiceKeepScore },
+export function compareDiscardKeepScores(
+  left: DiscardChoiceKeepScore,
+  right: DiscardChoiceKeepScore,
 ): number {
   return (
-    discardProtectionRank(left.score.planDisposition) -
-      discardProtectionRank(right.score.planDisposition) ||
-    left.score.total - right.score.total ||
-    left.option.label.localeCompare(right.option.label, "de") ||
-    left.option.id.localeCompare(right.option.id)
+    discardProtectionRank(left.planDisposition) -
+      discardProtectionRank(right.planDisposition) || left.total - right.total
   );
 }
 
