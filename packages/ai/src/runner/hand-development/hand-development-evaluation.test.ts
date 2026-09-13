@@ -50,7 +50,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
         hand: [
           card,
           ...Array.from({ length: handCount - 1 }, (_, i) =>
-            visibleCard(`other-${i}`),
+            visibleCard(`other-${i}`, {}),
           ),
         ],
         legalActions: [action],
