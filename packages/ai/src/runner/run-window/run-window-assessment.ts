@@ -363,6 +363,9 @@ export function currentRunAbortAssessment(
     path.knownPathBlockedOnlyByDamage &&
     !runnerVisibleLethalIceDamageAssessment(input, remainingIce, {
       generalCredits: path.creditsAfterPath,
+      ...(path.paidSubroutineBreaks
+        ? { paidSubroutineBreaks: path.paidSubroutineBreaks }
+        : {}),
       requiredHandFloor: runnerConfirmedDamageRequiredHandFloor(input),
       ...(path.fullyBrokenIceInstanceIds
         ? { fullyBrokenIceInstanceIds: path.fullyBrokenIceInstanceIds }

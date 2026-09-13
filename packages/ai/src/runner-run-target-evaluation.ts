@@ -260,6 +260,9 @@ function evaluateRunnerRunTarget(
       // encounter costs.  Optional damage avoidance may only spend what is
       // actually left after those commitments.
       generalCredits: pathBeforeDamageBudget.creditsAfterPath,
+      ...(pathBeforeDamageBudget.paidSubroutineBreaks
+        ? { paidSubroutineBreaks: pathBeforeDamageBudget.paidSubroutineBreaks }
+        : {}),
       ...(pathBeforeDamageBudget.fullyBrokenIceInstanceIds
         ? {
             fullyBrokenIceInstanceIds:
@@ -271,7 +274,10 @@ function evaluateRunnerRunTarget(
         projection.damagePreventionPool ?? 0,
       ),
       handCount: projectedGripAfterRunAction,
-      requiredHandFloor: runnerConfirmedDamageRequiredHandFloor(params.input),
+      requiredHandFloor: runnerConfirmedDamageRequiredHandFloor(
+        params.input,
+        projectedGripAfterRunAction,
+      ),
       ...(payoff.knownAccessDamage
         ? {
             postPathDamage: {
@@ -495,6 +501,12 @@ function evaluateRunnerRunTarget(
               0,
               path.creditsAfterPath - prerunReserveQuote.requiredCredits,
             ),
+            ...(path.paidSubroutineBreaks
+              ? { paidSubroutineBreaks: path.paidSubroutineBreaks }
+              : {}),
+            ...(path.fullyBrokenIceInstanceIds
+              ? { fullyBrokenIceInstanceIds: path.fullyBrokenIceInstanceIds }
+              : {}),
             runDamagePreventionRemaining: Math.max(
               0,
               projection.damagePreventionPool ?? 0,

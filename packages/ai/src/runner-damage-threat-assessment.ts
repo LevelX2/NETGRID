@@ -115,6 +115,10 @@ export type RunnerFutureEncounterDamageJackOutAssessment = {
 export type RunnerVisibleLethalIceDamageOptions = {
   generalCredits?: number;
   fullyBrokenIceInstanceIds?: readonly string[];
+  paidSubroutineBreaks?: readonly {
+    iceInstanceId: string;
+    subroutineId: string;
+  }[];
   runDamagePreventionRemaining?: number;
   handCount?: number;
   requiredHandFloor?: number;
@@ -174,6 +178,14 @@ export function runnerVisibleLethalIceDamageAssessment(
     }
     if (options.fullyBrokenIceInstanceIds?.includes(ice.instanceId)) continue;
     for (const subroutine of quote.subroutines) {
+      if (
+        options.paidSubroutineBreaks?.some(
+          (entry) =>
+            entry.iceInstanceId === ice.instanceId &&
+            entry.subroutineId === subroutine.id,
+        )
+      )
+        continue;
       const amount = subroutine.amount;
       if (
         (subroutine.type !== "do_damage" &&
@@ -409,8 +421,12 @@ export function runnerVisibleLethalIceDamageJackOutAssessment(
 
 export function runnerConfirmedDamageRequiredHandFloor(
   input: AiDecisionInput,
+  handCount = input.playerView.own.gripOrHq.length,
 ): number {
-  const flatlineRisk = runnerDamageThreatAssessment(input).flatlineRisk;
+  const flatlineRisk = runnerDamageThreatAssessment(
+    input,
+    handCount,
+  ).flatlineRisk;
   return flatlineRisk.level === "confirmed" || flatlineRisk.level === "critical"
     ? flatlineRisk.recommendedHandFloor
     : 0;
@@ -445,8 +461,8 @@ const AI_HINTS = createAiHintsByCard();
 
 export function runnerDamageThreatAssessment(
   input: AiDecisionInput,
+  handCount = input.playerView.own.gripOrHq.length,
 ): RunnerDamageThreatAssessment {
-  const handCount = input.playerView.own.gripOrHq.length;
   const effectiveMaxHandSize = Math.max(
     0,
     input.playerView.own.maxHandSize ?? 5,

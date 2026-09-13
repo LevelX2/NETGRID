@@ -352,6 +352,9 @@ export function createRunnerAccessPathContext(
           damageIce,
           {
             generalCredits: path.creditsAfterPath,
+            ...(path.paidSubroutineBreaks
+              ? { paidSubroutineBreaks: path.paidSubroutineBreaks }
+              : {}),
             requiredHandFloor: runnerConfirmedDamageRequiredHandFloor(input),
             ...(path.fullyBrokenIceInstanceIds
               ? { fullyBrokenIceInstanceIds: path.fullyBrokenIceInstanceIds }
@@ -384,8 +387,10 @@ export function createRunnerAccessPathContext(
           : [];
       }) ?? [],
     );
-    if (futureIce.length > 0 && remainingForcedIndexes.size > 0) {
-      // Current forced breaks and the inner path consume the same pools.
+    if (remainingForcedIndexes.size > 0) {
+      // All current forced breaks consume the same pools, including on the
+      // innermost ICE. Optional prevention must leave the whole set payable.
+      // Any inner path consumes the remaining budget afterwards.
       // This is a cost projection over current Engine actions, not an executor.
       const pending = [
         {

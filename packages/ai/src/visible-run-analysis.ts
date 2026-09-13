@@ -448,6 +448,9 @@ function assessKnownRezzedIcePathInternal(
     : undefined;
   const breakersAtRiskOfBeingTrashed = new Set<string>();
   const fullyBrokenIceInstanceIds: string[] = [];
+  const paidSubroutineBreaks: NonNullable<
+    KnownRezzedIcePathAssessment["paidSubroutineBreaks"]
+  > = [];
   let requiredFullBreakIceIndex: number | undefined;
   const breakerState: VisibleRunBreakerState = {
     strengthByBreakerInstanceId: new Map(
@@ -929,6 +932,10 @@ function assessKnownRezzedIcePathInternal(
         avoidedVisibleHazardSubroutineIds.add(hazard.subroutineId);
       }
       if (avoidancePayment?.kind === "breaker") {
+        paidSubroutineBreaks.push({
+          iceInstanceId: quote.iceInstanceId,
+          subroutineId: hazard.subroutineId,
+        });
         visibleBreakCost += avoidancePayment.assessment.cost;
         futureClicksLost += avoidancePayment.assessment.futureClicksLost ?? 0;
         spendBreakerCreditsAndApplySideEffects(
@@ -1049,6 +1056,10 @@ function assessKnownRezzedIcePathInternal(
           ? projectBreakerCreditPayment(creditBudget, breakAssessment)
           : undefined;
         if (breakAssessment && payment?.affordable) {
+          paidSubroutineBreaks.push({
+            iceInstanceId: quote.iceInstanceId,
+            subroutineId: sourceSubroutine.id,
+          });
           visibleBreakCost += breakAssessment.cost;
           futureClicksLost += breakAssessment.futureClicksLost ?? 0;
           spendBreakerCreditsAndApplySideEffects(creditBudget, breakAssessment);
@@ -1145,6 +1156,10 @@ function assessKnownRezzedIcePathInternal(
               : "ice_unaffordable",
           );
         }
+        paidSubroutineBreaks.push({
+          iceInstanceId: quote.iceInstanceId,
+          subroutineId: sourceSubroutine.id,
+        });
         visibleBreakCost += breakAssessment.cost;
         futureClicksLost += breakAssessment.futureClicksLost ?? 0;
         spendBreakerCreditsAndApplySideEffects(creditBudget, breakAssessment);
@@ -1175,6 +1190,10 @@ function assessKnownRezzedIcePathInternal(
     return {
       ...damageOnlyBlock,
       knownPathBlockedOnlyByDamage: true,
+      ...(fullyBrokenIceInstanceIds.length
+        ? { fullyBrokenIceInstanceIds }
+        : {}),
+      ...(paidSubroutineBreaks.length ? { paidSubroutineBreaks } : {}),
       visibleBreakCost,
       futureClicksLost,
       ...(preRunPreparation ? { preRunPreparation } : {}),
@@ -1192,6 +1211,7 @@ function assessKnownRezzedIcePathInternal(
   return {
     blocked: false,
     ...(fullyBrokenIceInstanceIds.length ? { fullyBrokenIceInstanceIds } : {}),
+    ...(paidSubroutineBreaks.length ? { paidSubroutineBreaks } : {}),
     ...(visibleBreakCost > 0 ? { visibleBreakCost } : {}),
     ...(futureClicksLost > 0 ? { futureClicksLost } : {}),
     ...(preRunPreparation ? { preRunPreparation } : {}),

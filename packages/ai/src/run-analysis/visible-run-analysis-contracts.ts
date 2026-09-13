@@ -233,6 +233,8 @@ export type KnownRezzedIcePathAssessment = {
   blocked: boolean;
   /** ICE fully broken by the selected, already paid visible path. */
   fullyBrokenIceInstanceIds?: string[];
+  /** Exact breaks already paid by this path; never charge their damage again. */
+  paidSubroutineBreaks?: Array<{ iceInstanceId: string; subroutineId: string }>;
   visibleBreakCost?: number;
   futureClicksLost?: number;
   visibleIceRunHazards?: VisibleIceRunHazard[];

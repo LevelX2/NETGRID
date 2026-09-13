@@ -191,6 +191,12 @@ export function reassessActiveInformationRunParent(
         pathBeforeDamageBudget,
         !runnerVisibleLethalIceDamageAssessment(input, remainingIce, {
           generalCredits: pathBeforeDamageBudget.creditsAfterPath,
+          ...(pathBeforeDamageBudget.paidSubroutineBreaks
+            ? {
+                paidSubroutineBreaks:
+                  pathBeforeDamageBudget.paidSubroutineBreaks,
+              }
+            : {}),
           requiredHandFloor: runnerConfirmedDamageRequiredHandFloor(input),
           ...(pathBeforeDamageBudget.fullyBrokenIceInstanceIds
             ? {

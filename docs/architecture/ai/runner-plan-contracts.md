@@ -937,6 +937,11 @@ verfügbare Abwehraktion.
 
 ## 8. `runner.convert_run_window`
 
+Die bekannte Pfadquote erhält bereits bezahlte einzelne Subroutine-Breaks mit
+ICE- und Subroutine-ID. Nachgelagerte Schadens- und Handreserveprüfungen
+rechnen diese Wirkungen nicht erneut an. Unbezahlte Subroutinen derselben
+ICE bleiben wirksam; ein Teilbruch bescheinigt keinen vollständigen Bruch.
+
 ### Vertikale Implementierung
 
 [`runWindowModule`](../../../packages/ai/src/runner/run-window/run-window-plan-module.ts)
@@ -1032,6 +1037,10 @@ oder Rewind keinen Nutzen. Dafür werden bereits die vorbereitenden Pumps
 abgelehnt. Aktueller Schaden und bestehende Full-Break-Pflichten bleiben
 wirksam; ein tatsächlich folgendes ICE bleibt ein gültiges Effektziel.
 
+Bereits beim Runstart verwendet die bestätigte Schadensreserve die Handgröße nach dem
+Verbrauch der konkreten Run-Karte. Die Risikostufe und der verbleibende
+Handpuffer dürfen dabei nicht aus unterschiedlichen Handgrößen stammen.
+
 Die aktuelle Kostenprojektion für Pump und Break trennt liquide Credits von
 den tatsächlich verwendbaren sichtbaren Run-/Breaker-Pools. Sie verwendet
 dieselbe zweckgebundene Zahlungsprojektion wie die Encounterbewertung;
@@ -1070,7 +1079,10 @@ und der nächsten Encounters verwenden ihn, während aktuelle LegalActions
 weiter mit der aktuellen Stärke arbeiten. Ein optionaler Break reserviert
 außerdem die aktuell legal gequoteten, noch nötigen Breaks desselben ICE und
 den inneren Pfad aus denselben Zahlungspools. Eine bereits gezahlte oder
-gebrochene Subroutine wird dabei nicht erneut angesetzt.
+gebrochene Subroutine wird dabei nicht erneut angesetzt. Auch am innersten ICE
+ohne weiteren Pfad müssen sämtliche verbleibenden Pflicht-Breaks gemeinsam
+finanziert sein. Die Bezahlbarkeit nur eines weiteren Breaks erlaubt keine
+optionale Schadensabwehr, die eine zweite verbleibende ETR-Sperre offenließe.
 
 Öffentlich aufgelöster Corp-Schaden wird nach seiner Quelle zugeordnet.
 Der Runner als Actor einer `continue_run`-Action macht die darin aufgelösten
