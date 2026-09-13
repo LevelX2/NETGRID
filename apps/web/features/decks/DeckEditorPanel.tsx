@@ -162,15 +162,7 @@ type CatalogCardDetail = CatalogCardSummary & {
   engineCardId: string | null;
 };
 
-type DeckValidationResult = {
-  ok: boolean;
-  errors: string[];
-  errorCodes?: string[];
-  warnings: string[];
-  totalCards: number;
-  agendaPoints: number | null;
-  influenceSpent?: number | null;
-};
+import type { DeckValidationResult } from "@netgrid/decks";
 
 type DeckSnapshot = {
   deckSnapshotId: string;

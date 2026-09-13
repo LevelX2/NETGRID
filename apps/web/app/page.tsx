@@ -1,4 +1,5 @@
 "use client";
+import { localizedDeckValidationIssues } from "../i18n/deck-validation";
 
 import {
   Check,
@@ -605,6 +606,8 @@ export default function Page() {
   const gameT = useTranslations("Board.page");
   const errorT = useTranslations("Errors");
   const noticeT = useTranslations("Notices");
+  const deckIssueT = useTranslations("Decks.issues");
+  const deckValidationT = useTranslations("Decks.validation");
   const navigationT = useTranslations("AppShell.navigation");
   const chronicleT = useTranslations("Chronicle");
   const chronicleTranslate = chronicleT as unknown as ChronicleTranslate;
@@ -6089,11 +6092,13 @@ export default function Page() {
     }).then((response) => response.json() as Promise<DeckValidationResponse>);
     if (result.error) throw new Error(result.error.message);
     if (!result.validation.ok || !result.snapshot) {
-      const details =
-        result.validation.errors.length > 0
-          ? ` ${result.validation.errors.join(" ")}`
-          : "";
-      throw new Error(`${deck.name} ist nicht matchstartfähig.${details}`);
+      const details = localizedDeckValidationIssues(
+        result.validation,
+        deckIssueT,
+      ).join(" ");
+      throw new Error(
+        deckValidationT("notMatchReady", { name: deck.name, details }),
+      );
     }
     if (deck.side === "runner") setRunnerLocalSnapshot(result.snapshot);
     else setCorpLocalSnapshot(result.snapshot);

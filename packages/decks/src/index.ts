@@ -1,4 +1,17 @@
 import type { CatalogCard, CatalogStatusKey } from "@netgrid/catalog";
+import {
+  createDeckValidationIssue,
+  type DeckValidationIssue,
+  type DeckValidationIssueCode,
+  type DeckValidationIssueParams,
+} from "./validation-issues";
+export {
+  createDeckValidationIssue,
+  assertDeckValidationIssues,
+  DECK_VALIDATION_ISSUE_PARAMETERS,
+  type DeckValidationIssue,
+  type DeckValidationIssueCode,
+} from "./validation-issues";
 
 export {
   STANDARD_DECK_GUIDE_SCHEMA_VERSION,
@@ -158,7 +171,9 @@ export type DeckFormatProfile = {
 };
 
 export type DeckValidationResult = {
+  issues: DeckValidationIssue[];
   ok: boolean;
+  /** Technical diagnostics; normal UI renders structured issues instead. */
   errors: string[];
   errorCodes?: string[];
   warnings: string[];
@@ -273,15 +288,23 @@ export function validateDeckSnapshot(
     },
     context,
   );
-  if (!snapshot.immutable)
+  if (!snapshot.immutable) {
     validation.errors.push("Deck snapshot must be immutable.");
+    validation.issues.push(
+      createDeckValidationIssue("snapshot_not_immutable", {}),
+    );
+  }
   const expectedHash = computeDeckHash(snapshot);
   if (
     snapshot.deckHash !== expectedHash ||
     snapshot.publicMetadata.deckHash !== expectedHash
-  )
+  ) {
     validation.errors.push("Deck snapshot hash mismatch.");
-  return { ...validation, ok: validation.errors.length === 0 };
+    validation.issues.push(
+      createDeckValidationIssue("snapshot_hash_mismatch", {}),
+    );
+  }
+  return withErrorCodes({ ...validation, ok: validation.errors.length === 0 });
 }
 
 export function createDeckSnapshot(
@@ -435,6 +458,9 @@ export function assertDeckPayloadSafe(payload: unknown): DeckValidationResult {
   return withErrorCodes({
     ok: errors.length === 0,
     errors,
+    issues: errors.map(() =>
+      createDeckValidationIssue("forbidden_payload", {}),
+    ),
     warnings: [],
     totalCards: 0,
     agendaPoints: null,
@@ -458,16 +484,23 @@ function validateDeckLike(
   const errors: string[] = [];
   const errorCodes: string[] = [];
   const warnings: string[] = [];
-  const addError = (code: string, message: string) => {
+  const issues: DeckValidationIssue[] = [];
+  const addError = <C extends DeckValidationIssueCode>(
+    code: C,
+    message: string,
+    params: DeckValidationIssueParams<C>,
+  ) => {
     errorCodes.push(code);
     errors.push(message);
+    issues.push(createDeckValidationIssue(code, params));
   };
   if (!deck.name.trim())
-    addError("deck_name_required", "Deck name is required.");
+    addError("deck_name_required", "Deck name is required.", {});
   if (deck.cardPoolSnapshotId !== context.profile.cardPoolSnapshotId)
     addError(
       "card_pool_mismatch",
       "Deck card pool does not match format profile.",
+      {},
     );
   if (
     context.profile.cardPoolVersion &&
@@ -477,11 +510,13 @@ function validateDeckLike(
     addError(
       "card_pool_version_mismatch",
       "Deck card pool version does not match format profile.",
+      {},
     );
   if (deck.formatProfileId !== context.profile.profileId)
     addError(
       "format_profile_unsupported",
       "Deck format profile is not supported.",
+      {},
     );
   if (
     context.profile.version &&
@@ -491,22 +526,27 @@ function validateDeckLike(
     addError(
       "format_profile_version_mismatch",
       "Deck format profile version does not match.",
+      {},
     );
   const identity = context.cardsById[deck.identityCardId];
   const identityRule =
     context.profile.identityRules?.[deck.side]?.[deck.identityCardId];
   if (!identity)
-    addError("identity_missing", `Missing identity ${deck.identityCardId}.`);
+    addError("identity_missing", `Missing identity ${deck.identityCardId}.`, {
+      cardId: deck.identityCardId,
+    });
   else {
     if (identity.side !== deck.side)
       addError(
         "identity_wrong_side",
         `Identity ${deck.identityCardId} has wrong side.`,
+        { cardId: deck.identityCardId },
       );
     if (!identity.statuses.playable || !identity.statuses.deck_legal)
       addError(
         "identity_not_deck_legal",
         `Identity ${deck.identityCardId} is not deck legal.`,
+        { cardId: deck.identityCardId },
       );
     if (
       context.profile.requireIdentity &&
@@ -517,12 +557,14 @@ function validateDeckLike(
       addError(
         "identity_not_allowed",
         `Identity ${deck.identityCardId} is not allowed in this format.`,
+        { cardId: deck.identityCardId },
       );
     }
     if (context.profile.identityRules?.[deck.side] && !identityRule) {
       addError(
         "identity_rule_missing",
         `Identity ${deck.identityCardId} is missing format identity rules.`,
+        { cardId: deck.identityCardId },
       );
     }
   }
@@ -534,19 +576,26 @@ function validateDeckLike(
     totalCards += entry.quantity;
     const card = context.cardsById[entry.cardId];
     if (!Number.isInteger(entry.quantity) || entry.quantity <= 0)
-      addError("invalid_quantity", `Invalid quantity for ${entry.cardId}.`);
+      addError("invalid_quantity", `Invalid quantity for ${entry.cardId}.`, {
+        cardId: entry.cardId,
+      });
     const copyLimit = copyLimitForEntry(entry, card, context.profile);
     if (entry.quantity > copyLimit)
       addError(
         "too_many_copies",
         `Too many copies of ${entry.cardId}; maximum is ${copyLimit}.`,
+        { cardId: entry.cardId, maximum: copyLimit },
       );
     if (!card) {
-      addError("unknown_card", `Unknown card ${entry.cardId}.`);
+      addError("unknown_card", `Unknown card ${entry.cardId}.`, {
+        cardId: entry.cardId,
+      });
       continue;
     }
     if (card.side !== deck.side)
-      addError("wrong_side_card", `Wrong-side card ${entry.cardId}.`);
+      addError("wrong_side_card", `Wrong-side card ${entry.cardId}.`, {
+        cardId: entry.cardId,
+      });
     const missingStatus = context.profile.allowedCardStatuses.find(
       (status) => !card.statuses[status],
     );
@@ -554,6 +603,7 @@ function validateDeckLike(
       addError(
         "card_missing_required_status",
         `Card ${entry.cardId} is not playable and deck legal; missing required status ${missingStatus}.`,
+        { cardId: entry.cardId, status: missingStatus },
       );
     if (
       card.statuses.deck_legal &&
@@ -563,6 +613,7 @@ function validateDeckLike(
       addError(
         "deck_legal_without_human_playable",
         `Card ${entry.cardId} is deck legal without human_playable status.`,
+        { cardId: entry.cardId },
       );
     }
     if (
@@ -572,6 +623,7 @@ function validateDeckLike(
       addError(
         "format_legal_requires_deck_legal",
         `Card ${entry.cardId} is not deck legal and cannot be format legal.`,
+        { cardId: entry.cardId },
       );
     if (
       context.profile.formatLegal?.requiresHumanPlayable &&
@@ -580,6 +632,7 @@ function validateDeckLike(
       addError(
         "format_legal_requires_human_playable",
         `Card ${entry.cardId} is not human playable and cannot be format legal.`,
+        { cardId: entry.cardId },
       );
     const influence = influenceCostForCard(
       card,
@@ -591,6 +644,7 @@ function validateDeckLike(
       addError(
         "influence_data_missing",
         `Card ${entry.cardId} is missing influence or faction data for this format.`,
+        { cardId: entry.cardId },
       );
     else influenceSpent += influence * entry.quantity;
     if (
@@ -601,6 +655,7 @@ function validateDeckLike(
       addError(
         "agenda_points_missing",
         `Agenda ${entry.cardId} is missing agenda points.`,
+        { cardId: entry.cardId },
       );
     }
     agendaPoints += (card.numeric.agendaPoints ?? 0) * entry.quantity;
@@ -621,6 +676,7 @@ function validateDeckLike(
     addError(
       "minimum_deck_size",
       `Deck has ${totalCards} cards, expected at least ${minimumDeckCards}.`,
+      { actual: totalCards, minimum: minimumDeckCards },
     );
   if (officialAgendaRange && totalCards >= 40) {
     const minimum = 2 * Math.floor(totalCards / 5) + 2;
@@ -629,11 +685,13 @@ function validateDeckLike(
       addError(
         "agenda_points_too_low",
         `Corp deck has ${agendaPoints} agenda points; ${totalCards} cards require ${minimum} to ${maximum}.`,
+        { actual: agendaPoints, cards: totalCards, minimum, maximum },
       );
     if (agendaPoints > maximum)
       addError(
         "agenda_points_too_high",
         `Corp deck has ${agendaPoints} agenda points; ${totalCards} cards require ${minimum} to ${maximum}.`,
+        { actual: agendaPoints, cards: totalCards, minimum, maximum },
       );
   }
   if (
@@ -644,6 +702,7 @@ function validateDeckLike(
     addError(
       "minimum_agenda_points",
       `Corp deck has ${agendaPoints} agenda points, expected at least ${minimumAgendaPoints}.`,
+      { actual: agendaPoints, minimum: minimumAgendaPoints },
     );
   const agendaDensity = context.profile.agenda?.density;
   if (
@@ -656,6 +715,7 @@ function validateDeckLike(
     addError(
       "agenda_density_too_low",
       "Corp deck agenda density is below the format minimum.",
+      {},
     );
   }
   if (
@@ -668,6 +728,7 @@ function validateDeckLike(
     addError(
       "agenda_density_too_high",
       "Corp deck agenda density is above the format maximum.",
+      {},
     );
   }
   if (
@@ -678,16 +739,22 @@ function validateDeckLike(
     addError(
       "influence_limit_exceeded",
       `Deck spends ${influenceSpent} influence, limit is ${identityRule.influenceLimit}.`,
+      { actual: influenceSpent, maximum: identityRule.influenceLimit },
     );
   }
-  if (deck.side === "runner" && agendaPoints > 0)
+  if (deck.side === "runner" && agendaPoints > 0) {
     warnings.push("Runner deck contains agenda points.");
+    issues.push(
+      createDeckValidationIssue("runner_agenda_points", {}, "warning"),
+    );
+  }
 
   return withErrorCodes({
     ok: errors.length === 0,
     errors,
     errorCodes,
     warnings,
+    issues,
     totalCards,
     agendaPoints: deck.side === "corp" ? agendaPoints : null,
     influenceSpent: context.profile.influence?.enabled ? influenceSpent : null,
@@ -695,6 +762,9 @@ function validateDeckLike(
 }
 
 function withErrorCodes(result: DeckValidationResult): DeckValidationResult {
+  result.errorCodes = result.issues
+    .filter((issue) => issue.severity === "error")
+    .map((issue) => issue.code);
   if (!result.errorCodes || result.errorCodes.length === 0) {
     const { errorCodes: _unused, ...withoutCodes } = result;
     return withoutCodes;

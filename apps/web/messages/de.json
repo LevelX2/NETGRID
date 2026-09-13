@@ -1007,7 +1007,8 @@
       "valid": "Validiert",
       "invalid": "Nicht valide",
       "cards": "{count, plural, one {# Karte} other {# Karten}}",
-      "agendaPoints": "{count} Agenda-Punkte"
+      "agendaPoints": "{count} Agenda-Punkte",
+      "notMatchReady": "{name} ist nicht matchstartfähig. {details}"
     },
     "guide": {
       "close": "Deck-Anleitung schließen",
@@ -1201,6 +1202,39 @@
       "createOrImport": "Erstelle ein neues Deck oder importiere ein lokales Deck.",
       "noDeckInSelection": "In dieser Auswahl ist noch kein Deck vorhanden.",
       "freePile": "Freier Stapel"
+    },
+    "issues": {
+      "deck_name_required": "Bitte einen Decknamen angeben.",
+      "card_pool_mismatch": "Der Kartenpool passt nicht zum Formatprofil.",
+      "card_pool_version_mismatch": "Die Kartenpool-Version passt nicht zum Formatprofil.",
+      "format_profile_unsupported": "Dieses Deckformat wird nicht unterstützt.",
+      "format_profile_version_mismatch": "Die Deckformat-Version stimmt nicht überein.",
+      "identity_missing": "Die Identität {cardId} fehlt.",
+      "identity_wrong_side": "Die Identität {cardId} gehört zur anderen Seite.",
+      "identity_not_deck_legal": "Die Identität {cardId} ist nicht für Decks freigegeben.",
+      "identity_not_allowed": "Die Identität {cardId} ist in diesem Format nicht erlaubt.",
+      "identity_rule_missing": "Für die Identität {cardId} fehlen Formatregeln.",
+      "invalid_quantity": "Die Anzahl für {cardId} ist ungültig.",
+      "too_many_copies": "Zu viele Exemplare von {cardId}; erlaubt sind höchstens {maximum}.",
+      "unknown_card": "Die Karte {cardId} ist unbekannt.",
+      "wrong_side_card": "Die Karte {cardId} gehört zur anderen Seite.",
+      "card_missing_required_status": "Für {cardId} fehlt die erforderliche Freigabe {status}.",
+      "deck_legal_without_human_playable": "Die Karte {cardId} ist für Decks, aber nicht für menschliche Spieler freigegeben.",
+      "format_legal_requires_deck_legal": "Das Format erfordert eine Deckfreigabe für {cardId}.",
+      "format_legal_requires_human_playable": "Das Format erfordert die Spielbarkeit von {cardId} für menschliche Spieler.",
+      "influence_data_missing": "Für {cardId} fehlen Einfluss- oder Fraktionsdaten.",
+      "agenda_points_missing": "Für die Agenda {cardId} fehlen die Agenda-Punkte.",
+      "minimum_deck_size": "Das Deck enthält {actual} Karten; erforderlich sind mindestens {minimum}.",
+      "agenda_points_too_low": "Zu wenige Agenda-Punkte: {actual}. Bei {cards} Karten sind {minimum}–{maximum} erforderlich.",
+      "agenda_points_too_high": "Zu viele Agenda-Punkte: {actual}. Bei {cards} Karten sind {minimum}–{maximum} erlaubt.",
+      "minimum_agenda_points": "Das Korp-Deck enthält {actual} Agenda-Punkte; erforderlich sind mindestens {minimum}.",
+      "agenda_density_too_low": "Die Agenda-Punktdichte liegt unter dem Formatminimum.",
+      "agenda_density_too_high": "Die Agenda-Punktdichte liegt über dem Formatmaximum.",
+      "influence_limit_exceeded": "Das Deck nutzt {actual} Einfluss; erlaubt sind höchstens {maximum}.",
+      "runner_agenda_points": "Das Runner-Deck enthält Agenda-Punkte.",
+      "snapshot_not_immutable": "Der Deck-Snapshot ist nicht unveränderlich.",
+      "snapshot_hash_mismatch": "Die Prüfsumme des Deck-Snapshots stimmt nicht überein.",
+      "forbidden_payload": "Die Deckdaten enthalten unzulässige Felder."
     }
   },
   "Catalog": {

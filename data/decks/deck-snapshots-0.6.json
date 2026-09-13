@@ -47,8 +47,10 @@
         "ok": true,
         "errors": [],
         "warnings": [],
+        "issues": [],
         "totalCards": 18,
-        "agendaPoints": 6
+        "agendaPoints": 6,
+        "influenceSpent": null
       },
       "publicMetadata": {
         "side": "corp",
@@ -56,9 +58,9 @@
         "deckName": "Corp Demo Deck 01 - Build & Score",
         "cardPoolSnapshotId": "card-snapshot-0.5",
         "formatProfileId": "local-demo-v0.6",
-        "deckHash": "fnv1a:4d48ca27"
+        "deckHash": "fnv1a:b07b9fbb"
       },
-      "deckHash": "fnv1a:4d48ca27"
+      "deckHash": "fnv1a:b07b9fbb"
     },
     {
       "deckSnapshotId": "demo_corp_004_snapshot_v0_6",
@@ -124,9 +126,11 @@
       "validation": {
         "ok": true,
         "errors": [],
-        "warnings": ["Uses MVP 0.4 expanded local demo card pool."],
+        "warnings": [],
+        "issues": [],
         "totalCards": 24,
-        "agendaPoints": 7
+        "agendaPoints": 7,
+        "influenceSpent": null
       },
       "publicMetadata": {
         "side": "corp",
@@ -134,9 +138,9 @@
         "deckName": "Corp Demo Deck 04 - Build, Tax & Tag",
         "cardPoolSnapshotId": "card-snapshot-0.5",
         "formatProfileId": "local-demo-v0.6",
-        "deckHash": "fnv1a:d77d0873"
+        "deckHash": "fnv1a:54c7851f"
       },
-      "deckHash": "fnv1a:d77d0873"
+      "deckHash": "fnv1a:54c7851f"
     },
     {
       "deckSnapshotId": "demo_runner_001_snapshot_v0_6",
@@ -175,8 +179,10 @@
         "ok": true,
         "errors": [],
         "warnings": [],
+        "issues": [],
         "totalCards": 12,
-        "agendaPoints": null
+        "agendaPoints": null,
+        "influenceSpent": null
       },
       "publicMetadata": {
         "side": "runner",
@@ -184,9 +190,9 @@
         "deckName": "Runner Demo Deck 01 - Run & Steal",
         "cardPoolSnapshotId": "card-snapshot-0.5",
         "formatProfileId": "local-demo-v0.6",
-        "deckHash": "fnv1a:6ec6785c"
+        "deckHash": "fnv1a:b4f61cd0"
       },
-      "deckHash": "fnv1a:6ec6785c"
+      "deckHash": "fnv1a:b4f61cd0"
     },
     {
       "deckSnapshotId": "demo_runner_004_snapshot_v0_6",
@@ -236,9 +242,11 @@
       "validation": {
         "ok": true,
         "errors": [],
-        "warnings": ["Uses MVP 0.4 expanded local demo card pool."],
+        "warnings": [],
+        "issues": [],
         "totalCards": 19,
-        "agendaPoints": null
+        "agendaPoints": null,
+        "influenceSpent": null
       },
       "publicMetadata": {
         "side": "runner",
@@ -246,9 +254,9 @@
         "deckName": "Runner Demo Deck 04 - Setup & Pressure",
         "cardPoolSnapshotId": "card-snapshot-0.5",
         "formatProfileId": "local-demo-v0.6",
-        "deckHash": "fnv1a:b6bc479a"
+        "deckHash": "fnv1a:d3ad4e1c"
       },
-      "deckHash": "fnv1a:b6bc479a"
+      "deckHash": "fnv1a:d3ad4e1c"
     }
   ]
 }

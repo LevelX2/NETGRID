@@ -149,6 +149,45 @@ const allowedVisibleLiterals = new Set([
 ]);
 
 const failures = [];
+for (const relativePath of [
+  "features/decks/DeckValidationSummary.tsx",
+  "app/page.tsx",
+]) {
+  const source = readFileSync(resolve(webRoot, relativePath), "utf8");
+  const sourceFile = ts.createSourceFile(
+    relativePath,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX,
+  );
+  let hasStructuredFormatter = false;
+  const visit = (node) => {
+    if (
+      ts.isCallExpression(node) &&
+      node.expression.getText(sourceFile) === "localizedDeckValidationIssues"
+    )
+      hasStructuredFormatter = true;
+    if (
+      ts.isPropertyAccessExpression(node) &&
+      ["errors", "warnings"].includes(node.name.text) &&
+      /(?:^|\.)validation$/.test(node.expression.getText(sourceFile))
+    ) {
+      const position = sourceFile.getLineAndCharacterOfPosition(
+        node.getStart(sourceFile),
+      );
+      failures.push(
+        `${relativePath}:${position.line + 1}: raw deck diagnostics bypass structured issue localization.`,
+      );
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sourceFile);
+  if (!hasStructuredFormatter)
+    failures.push(
+      `${relativePath}: structured deck issue formatter is missing.`,
+    );
+}
 if (
   exceptionRegistry.schemaVersion !== "netgrid-i18n-exceptions-v1" ||
   !Array.isArray(exceptionRegistry.exceptions) ||

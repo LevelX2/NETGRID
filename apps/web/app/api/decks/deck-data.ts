@@ -8,6 +8,7 @@ import {
 } from "@netgrid/runtime-data/legacy-demo-decks";
 import {
   assertDeckPayloadSafe,
+  createDeckValidationIssue,
   createDeckSnapshot,
   validateDeckSnapshot,
   validateEditableDeck,
@@ -89,6 +90,7 @@ export function deckValidationResponse(
         ok: false,
         errors: ["Deck format profile is not supported."],
         errorCodes: ["format_profile_unsupported"],
+        issues: [createDeckValidationIssue("format_profile_unsupported", {})],
         warnings: [],
         totalCards:
           deckForValidation.cards?.reduce(
