@@ -16,12 +16,12 @@ export function RunTimelineHeading({
   statusLabel: string | null;
 }) {
   const detail = runHeaderTargetLabel(view, hiddenIceLabel) ?? statusLabel;
+  const title = [serverLabel, phaseLabel, statusLabel]
+    .filter(Boolean)
+    .join(" · ");
   return (
     <>
-      <strong
-        className="runTimelineTitle"
-        title={`${serverLabel} · ${phaseLabel}`}
-      >
+      <strong className="runTimelineTitle" title={title}>
         <span>{serverLabel}</span>
         <small> · {phaseLabel}</small>
       </strong>
