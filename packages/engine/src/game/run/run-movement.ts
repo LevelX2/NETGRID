@@ -72,6 +72,10 @@ export type RunMovementHost = {
   };
   access: {
     startAccessFromSuccessfulRun: (legalAction?: LegalAction) => void;
+    finalizeDelayedSuccessfulRunAfterPassedIce: (
+      iceId: CardInstanceId,
+      legalAction: LegalAction,
+    ) => void;
   };
   cleanup: {
     finishRun: (successful: boolean, legalAction?: LegalAction) => void;
@@ -782,6 +786,10 @@ function resolveCorpPostPassIceReturnToHq(
       corpCreditsAfter: host.state.corp.credits,
     };
     host.state.activeSide = "runner";
+    host.access.finalizeDelayedSuccessfulRunAfterPassedIce(
+      pending.passedIceId,
+      legalAction,
+    );
     return { handled: true, runContinues: true, stateChanged: true };
   }
   if (decision === "decline") {
@@ -791,6 +799,10 @@ function resolveCorpPostPassIceReturnToHq(
       );
     delete run.corpPostPassIceReturnToHq;
     host.state.activeSide = "runner";
+    host.access.finalizeDelayedSuccessfulRunAfterPassedIce(
+      pending.passedIceId,
+      legalAction,
+    );
     return { handled: true, runContinues: true, stateChanged: true };
   }
   if (decision === "return_to_hq") {
@@ -815,6 +827,10 @@ function resolveCorpPostPassIceReturnToHq(
       corpCreditsAfter: gainResult?.creditsAfter ?? host.state.corp.credits,
     };
     host.state.activeSide = "runner";
+    host.access.finalizeDelayedSuccessfulRunAfterPassedIce(
+      pending.passedIceId,
+      legalAction,
+    );
     return { handled: true, runContinues: true, stateChanged: true };
   }
   throw new Error("Die ICE-Lifecycle-Entscheidung ist ungueltig.");
@@ -825,12 +841,17 @@ function returnPassedIceToHq(
   iceId: CardInstanceId,
 ): void {
   const instance = host.cards.cardInstanceFor(iceId);
-  if (instance.zone.zone !== "serverIce")
+  if (isBoundTemporaryEncounterIce(host, iceId)) {
+    const setAside = host.state.specialZones!.setAside;
+    setAside.splice(setAside.indexOf(iceId), 1);
+  } else if (instance.zone.zone === "serverIce") {
+    const server = host.servers.mustServer(instance.zone.serverId);
+    const index = server.ice.indexOf(iceId);
+    if (index < 0) throw new Error("Das ICE liegt nicht mehr auf diesem Fort.");
+    server.ice.splice(index, 1);
+  } else {
     throw new Error("Das ICE ist nicht mehr installiert.");
-  const server = host.servers.mustServer(instance.zone.serverId);
-  const index = server.ice.indexOf(iceId);
-  if (index < 0) throw new Error("Das ICE liegt nicht mehr auf diesem Fort.");
-  server.ice.splice(index, 1);
+  }
   host.state.corp.hq.push(iceId);
   host.state.cardInstances[iceId] = {
     ...instance,
@@ -838,6 +859,26 @@ function returnPassedIceToHq(
     rezzed: false,
     faceup: false,
   };
+}
+
+function isBoundTemporaryEncounterIce(
+  host: RunMovementHost,
+  iceId: CardInstanceId,
+): boolean {
+  const delayed = host.state.run?.delayedSuccessfulRun;
+  if (delayed?.temporaryIceId !== iceId) return false;
+  const instance = host.cards.cardInstanceFor(iceId);
+  if (
+    delayed.pendingMode !== "temporary_hq_ice_encounter" ||
+    instance.zone.side !== "special" ||
+    instance.zone.zone !== "set_aside" ||
+    instance.rezzed ||
+    !host.state.specialZones?.setAside.includes(iceId)
+  )
+    throw new Error(
+      "Die temporäre ICE-Pass-Bindung passt nicht zur Set-aside-Zone.",
+    );
+  return true;
 }
 
 function fortPassFollowupsForPassedIce(
@@ -851,7 +892,8 @@ function fortPassFollowupsForPassedIce(
   if (!passedIceId) return {};
   const passedIce = host.state.cardInstances[passedIceId];
   const passedIceLifecycle =
-    passedIce?.rezzed === true
+    passedIce?.rezzed === true ||
+    isBoundTemporaryEncounterIce(host, passedIceId)
       ? fortRunWindowImplementationForCard(
           host,
           passedIceId,

@@ -315,13 +315,13 @@ export function continueRun(
     return;
   }
   applyBartmossPostEncounterTrigger(host, run, legalAction);
-  if (encounteredIceId)
+  movePastCurrentIce(host.movement.host(), legalAction);
+  if (encounteredIceId && !state.run?.corpPostPassIceReturnToHq)
     finalizeDelayedSuccessfulRunAfterPassedIce(
       host.encounter.successfulRunInterventionHost(),
       encounteredIceId,
       legalAction,
     );
-  movePastCurrentIce(host.movement.host(), legalAction);
 }
 
 function currentRunnerForgoneActionOrdinal(

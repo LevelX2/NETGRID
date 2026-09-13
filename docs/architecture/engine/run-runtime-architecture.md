@@ -86,6 +86,39 @@ ihnen aber nicht zurückimportiert.
 - Jeder Zufallspfad bleibt Seed-/RandomCounter-gesteuert; die Extraktionen
   fügen weder Ziehungen hinzu noch verändern sie deren Reihenfolge.
 
+## Dr. Dreff: temporäre Begegnung und Rückkehr vor Trash
+
+Dr. Dreffs Kostenquote verwendet die halben gedruckten ICE-Rezkosten,
+abgerundet. Das ICE liegt während der Begegnung offen in `set_aside` und
+bleibt ungerezzt; Installations- und Rez-Lifecycle-Effekte werden nicht
+ausgeführt. Deshalb verursacht Glacier hier keine zusätzliche Zahlung eines
+Agendapunkts, und Coyote erzeugt kein Rez-Einkommen.
+
+Nach dem tatsächlichen Passieren öffnet `run-movement.ts` zuerst das
+deklarative `corp_return_passed_ice_to_hq`-Fenster. Auch ungerezztes ICE ist
+hier berechtigt, wenn die konkrete Instanz an die laufende temporäre
+Begegnung und die tatsächliche `set_aside`-Zone gebunden ist. Normales
+ungerezztes installiertes ICE erhält dadurch kein Rückkehrfenster.
+
+Der Corp-Entscheid hat Vorrang vor Runner-Fortsetzung und Zugriff. Rückkehr
+entfernt dieselbe Instanz aus `set_aside`, legt sie verdeckt in HQ ab und
+verhindert den nachfolgenden temporären Trash. Bei Zahlung beziehungsweise
+Ablehnung bleibt das ICE bis zum unmittelbar folgenden Cleanup in
+`set_aside` und wird genau einmal getrasht. Die bestehende Finalisierung
+bleibt in `successful-run-interventions.ts`; der Movement-Owner ruft sie
+nach der Entscheidung über einen expliziten Host-Port auf. Der öffentliche
+Entscheid behält das passierte ICE als Regelquelle. Nicht gewählte HQ-Karten
+werden nicht veröffentlicht.
+
+Diese gemeinsame Mechanik gilt für Marionette, Datacomb und Twisty Passages
+sowie die optionale Rückkehr mit Einkommen von Death Yo-Yo, Scaffolding und
+Tumblers. Endet der Run während der Begegnung, ist das ICE nicht passiert:
+Das gewöhnliche Run-End-Cleanup trasht es ohne Rückkehrfenster. Regelquelle
+ist `docs/source/Netrunner Errata 1.70.md`, Abschnitt „Dr. Dreff“.
+`index-tests/mechanics/dreff-ice-return.test.ts` prüft reale Marionette-
+Breakaktionen und Wiederverwendung, beide Rückkehrmodi, Zahlungsgrenzen,
+falsche Seite/veraltete Aktion, Sichtbarkeit und deterministischen Replay.
+
 ## Ausführbare Grenzen
 
 `scripts/check-engine-source-structure.mjs` akzeptiert keine relativen

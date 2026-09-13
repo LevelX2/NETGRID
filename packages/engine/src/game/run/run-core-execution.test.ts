@@ -205,6 +205,11 @@ function hostFor(state: GameState): {
             },
           },
           access: {
+            finalizeDelayedSuccessfulRunAfterPassedIce: () => {
+              throw new Error(
+                "Unexpected delayed pass decision in run-start fixture.",
+              );
+            },
             startAccessFromSuccessfulRun: () => calls.push("access"),
           },
           cleanup: {

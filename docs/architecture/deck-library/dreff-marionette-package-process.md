@@ -1,6 +1,6 @@
 # Dr. Dreff und Marionette
 
-Status: D01 abgenommen; D02 aktiv. Auftrag vom 2026-09-13.
+Status: D01 und D02 abgenommen; lokale Integration ausstehend. Auftrag vom 2026-09-13.
 
 ## D01-Abnahme
 
@@ -16,6 +16,20 @@ Das globale Guide-Gate meldet drei unabhängige veraltete Analysehashes:
 `standard_runner_rd_express`, `standard_runner_rd_express_v2`. Keine
 Neubestätigung fremder Analysen. Kein Volltest, Build oder E2E erforderlich.
 `git diff --check` ist grün.
+
+## D02-Abnahme
+
+Der ursprüngliche Fehler wurde mit 14 roten und einem grünen neuen
+Szenariotest reproduziert. Nach dem Ursachenfix bestehen alle 15 Szenarien,
+einschließlich realer Marionette-Breakaktionen und Wiederverwendung im
+nächsten Run, falscher Seite/veralteter Aktion, Sichtbarkeit, optionalem
+Einkommen und Replay. Der abschließende Lauf der sechs geänderten beziehungsweise
+direkt angebundenen Testdateien besteht mit 52 Tests. Die angrenzende Auswahl
+aus Proteus-Lifecycle, Dreff/Jenny und temporären Begegnungen besteht mit
+27 Tests einschließlich der neuen Szenarien. Engine-Typecheck und
+Engine-Strukturgate (keine relativen Zyklen) sind grün. Keine KI-,
+Workspace-, Build- oder E2E-Gesamtläufe. Aktuelle Verträge sind in
+`run-runtime-architecture.md` und `CODEX_STATUS.md` zurückgeführt.
 
 ## Ziel und Grenzen
 
