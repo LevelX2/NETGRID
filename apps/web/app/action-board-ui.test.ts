@@ -1072,6 +1072,96 @@ describe("V1.0.5 action board UI helpers", () => {
     );
   });
 
+  it.each(["de", "en", "fr"] as const)(
+    "names the actual rez target in %s for ICE, assets and upgrades in every action surface",
+    (locale) => {
+      for (const [title, type] of [
+        ["Dr. Dreff", "upgrade"],
+        ["Syd Meyer Superstores", "asset"],
+        ["Haunting Inquisition", "ice"],
+      ] as const) {
+        const target = card("rez_target", title, type, false);
+        const action = legalAction(
+          "corp",
+          type === "ice" ? "rez_ice" : "rez_card",
+          target.instanceId,
+          `${title} rezzen`,
+          { cardId: target.instanceId, serverId: "remote_1" },
+          "run.approach_ice",
+        );
+        const running = view("corp", {
+          servers: [
+            {
+              id: "remote_1",
+              label: "Remote 1",
+              ice: type === "ice" ? [target] : [],
+              root: type === "ice" ? [] : [target],
+            },
+          ],
+          run: {
+            attackedServerId: "remote_1",
+            phase: "approach_ice",
+            position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+            successful: false,
+          },
+        });
+        const before = structuredClone(action);
+        const expected =
+          locale === "de"
+            ? `${title} rezzen`
+            : locale === "fr"
+              ? `Activer ${title}`
+              : `Rez ${title}`;
+        expect(
+          runWindowActionButtonLabel(running, action, undefined, locale),
+        ).toBe(expected);
+        expect(
+          runAwareActionButtonLabel(running, action, undefined, locale),
+        ).toBe(expected);
+        expect(boardCardActionLabel(running, action, undefined, locale)).toBe(
+          expected,
+        );
+        expect(
+          contextualCardActionLabelWithoutCatalog(
+            action,
+            undefined,
+            locale,
+            target,
+          ),
+        ).toBe(expected);
+        expect(action).toEqual(before);
+        const { run: _run, ...outsideRun } = running;
+        expect(
+          runAwareActionButtonLabel(outsideRun, action, undefined, locale),
+        ).toBe(expected);
+      }
+    },
+  );
+
+  it.each(["en", "fr"] as const)(
+    "does not use an unrelated or concealed card as the rez name in %s",
+    (locale) => {
+      const action = legalAction("corp", "rez_card", "dreff", "Rezzen", {
+        cardId: "dreff",
+      });
+      const generic = locale === "en" ? "Rez" : "Activer";
+      expect(
+        contextualCardActionLabelWithoutCatalog(
+          action,
+          undefined,
+          locale,
+          card("other", "Wrong card", "upgrade"),
+        ),
+      ).toBe(generic);
+      expect(
+        contextualCardActionLabelWithoutCatalog(action, undefined, locale, {
+          ...card("dreff", "Hidden name", "upgrade"),
+          known: false,
+        }),
+      ).toBe(generic);
+    },
+  );
+
   it("labels inactive heap and archive cards distinctly from installed card state", () => {
     expect(inactiveCardZoneBadgeLabel("heap")).toBe("Heap");
     expect(inactiveCardZoneBadgeLabel("archives")).toBe("Archiv");

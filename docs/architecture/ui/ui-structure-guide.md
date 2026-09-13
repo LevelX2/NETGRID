@@ -30,6 +30,11 @@ Aktionsfehlermeldungen bleiben bis zur nächsten erfolgreichen
 `action_receipt` derselben Match-/Spielerseite sichtbar. Neuere allgemeine
 Hinweise sowie Verbindungs- und KI-Fehler werden dadurch nicht gelöscht.
 
+Rez-Schaltflächen lösen den Kartennamen über die `cardId` der LegalAction
+und die bekannte Karte im PlayerView beziehungsweise Kartenmenü auf.
+Damit nennen Run-Fenster, Aktionspanel und Kartenmenüs das Rez-Ziel in
+Deutsch, Englisch und Französisch auch ohne Titel in den Aktionsmetadaten.
+
 Der eigene Runner-Grip verwendet seine kompakte Handbreite als Grundlage
 für den Flex-Umbruch mit Stack, Rig und Heap. Erst danach nimmt der geöffnete
 Grip mit mehreren Karten den freien Platz seiner Zeile auf.

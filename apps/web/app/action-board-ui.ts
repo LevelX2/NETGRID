@@ -1388,9 +1388,15 @@ export function actionButtonLabel(
   action: LegalAction,
   cardPresentationsById?: PublicCardPresentationsById,
   locale: AppLocale = "de",
+  actionCard?: VisibleCard,
 ): string {
   if (locale !== "de")
-    return localizedActionButtonLabel(action, locale, cardPresentationsById);
+    return localizedActionButtonLabel(
+      action,
+      locale,
+      cardPresentationsById,
+      actionCard,
+    );
   switch (action.type) {
     case "mandatory_draw":
       return "Pflichtkarte ziehen";
@@ -1439,6 +1445,7 @@ function localizedActionButtonLabel(
   action: LegalAction,
   locale: Exclude<AppLocale, "de">,
   cardPresentationsById?: PublicCardPresentationsById,
+  actionCard?: VisibleCard,
 ): string {
   const capabilityLabel = localizedCardCapabilityActionLabel(action, locale);
   if (capabilityLabel) return capabilityLabel;
@@ -1463,7 +1470,9 @@ function localizedActionButtonLabel(
       });
     }
   }
-  const title = localizedActionCardTitle(action, cardPresentationsById);
+  const title =
+    visibleRezCardTitle(action, actionCard) ??
+    localizedActionCardTitle(action, cardPresentationsById);
   const named = (
     key:
       | "actionUseNamedCardAbility"
@@ -1636,6 +1645,29 @@ function localizedActionCreditAmount(action: LegalAction): number | null {
   return null;
 }
 
+function rezCardForAction(
+  view: PlayerView,
+  action: LegalAction,
+): VisibleCard | undefined {
+  if (action.type !== "rez_card" && action.type !== "rez_ice") return undefined;
+  return visibleActionCards(view).find(
+    (card) => card.instanceId === action.payload?.cardId,
+  );
+}
+
+function visibleRezCardTitle(
+  action: LegalAction,
+  card?: VisibleCard,
+): string | null {
+  if (
+    (action.type !== "rez_card" && action.type !== "rez_ice") ||
+    !card?.known ||
+    card.instanceId !== action.payload?.cardId
+  )
+    return null;
+  return card.title ?? null;
+}
+
 export function boardCardActionLabel(
   view: PlayerView,
   action: LegalAction,
@@ -1646,6 +1678,7 @@ export function boardCardActionLabel(
     action,
     cardPresentationsById,
     locale,
+    rezCardForAction(view, action),
   );
   const target = installedIceActionTargetDetail(view, action, locale);
   return target ? `${label} (${target})` : label;
@@ -1682,6 +1715,7 @@ export function contextualCardActionLabel(
   action: LegalAction,
   cardPresentationsById?: PublicCardPresentationsById,
   locale: AppLocale = "de",
+  actionCard?: VisibleCard,
 ): string {
   if (isRunnerProgramInstallContextAction(action))
     return runnerProgramInstallContextLabel(action, locale);
@@ -1689,7 +1723,12 @@ export function contextualCardActionLabel(
     const capabilityLabel = localizedCardCapabilityActionLabel(action, locale);
     return capabilityLabel
       ? stripActionSourcePrefix(capabilityLabel)
-      : localizedActionButtonLabel(action, locale, cardPresentationsById);
+      : localizedActionButtonLabel(
+          action,
+          locale,
+          cardPresentationsById,
+          actionCard,
+        );
   }
   switch (action.type) {
     case "gain_credit":
@@ -1713,8 +1752,12 @@ export function contextualCardActionLabel(
     case "score_agenda":
       return scoreAgendaContextLabel(action);
     case "rez_ice":
-    case "rez_card":
-      return "Rezzen";
+    case "rez_card": {
+      const title = visibleRezCardTitle(action, actionCard);
+      return title
+        ? actionPresentationText(locale, "actionRezCard", { card: title })
+        : "Rezzen";
+    }
     case "pump_breaker":
       return stripTrailingActionSourceParenthetical(
         pumpBreakerActionLabel(action),
@@ -3508,7 +3551,12 @@ function localizedRunAwareActionButtonLabel(
   locale: Exclude<AppLocale, "de">,
   cardPresentationsById?: PublicCardPresentationsById,
 ): string {
-  const base = actionButtonLabel(action, cardPresentationsById, locale);
+  const base = actionButtonLabel(
+    action,
+    cardPresentationsById,
+    locale,
+    rezCardForAction(view, action),
+  );
   if (!view.run) return base;
   const iceLabel = runCurrentIceLabel(view);
   if (action.type === "jack_out")

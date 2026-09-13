@@ -170,7 +170,7 @@ export function CardView({
   const resolvedActionLabelForAction =
     actionLabelForAction ??
     ((action: LegalAction) =>
-      contextualCardActionLabel(action, cardPresentationsById, locale));
+      contextualCardActionLabel(action, cardPresentationsById, locale, card));
   const {
     hoverOpenDelayMs,
     mode: tooltipMode,
