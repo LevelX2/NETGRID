@@ -596,6 +596,34 @@ Cleanup-Tausch eingehen; Owner, Parent-Need und Draw-Action bleiben dabei exakt
 gebunden. Der tatsächliche Draw ist eine private Beobachtungsgrenze und führt
 danach zur Neuplanung statt zu einer vorweggenommenen Folgekarte.
 
+Zusätzliche Kartensichtung durch die Engine-Draw-Projektion ist kein weiterer
+Handzuwachs. `projectedGrossDrawCount`,
+`projectedPostDrawDispositionCount` und `projectedNetHandDelta` bleiben getrennt:
+Draw Taxes verwenden den Bruttowert, Handkapazität den Nettowert. Die konkrete
+private Auswahl bleibt unter dem ursprünglichen Executor und dessen gebundener
+`trash_lowest_visible_drawn_card`-Policy. Sie bewertet erst die tatsächlich
+aufgedeckten eigenen Optionen; eine unbekannte Stack-Reihenfolge wird nicht
+vorweggenommen.
+
+Der Review zum zusätzlichen Filterwert (2026-09-13) führt bewusst keinen
+allgemeinen Draw-Bonus ein. Owner für allgemeine Rotation ist die
+Handentwicklung; eine konkrete Breaker-Suche bleibt beim Coverage-Parent.
+Die Zahl zusätzlich gesichteter Karten allein quantifiziert weder die
+Verbesserung der Handqualität noch den Trefferwert eines konkreten Bedarfs.
+Ein späterer Filterwert benötigt daher einen belegten planlokalen
+Draw-vs.-Alternativen-Fall und eine side-sichere Bedarfs-/Qualitätsverteilung
+an der privaten Beobachtungsgrenze. Er darf keine garantierte Folgekarte,
+zusätzliche Netto-Handkapazität oder geringere Draw Taxes behaupten.
+
+Die fokussierte Engine-Simulation
+`simulation/crash-everett-draw-plan-continuation.test.ts` sichert hierfür
+vergleichbare Zustände mit und ohne Filter bei 0, 2, 5 und 6 Handkarten:
+Ein bestehender Central-Plan behält seinen Vorrang. Ergänzend prüfen die
+beiden Choice-Folgen die unveränderte Action-/Executor-Bindung ohne und mit
+zwei Draw Taxes. Economy- und Tax-Projektionstests sichern getrennte Brutto-
+und Nettowerte. Das ist begrenzte Entscheidungsevidence, kein Nachweis einer
+allgemeinen Spielstärkeverbesserung; produktives Verhalten bleibt unverändert.
+
 Eine bereits überfüllte Hand sperrt weiterhin generischen Draw. Eine an eine
 sichtbare terminale Remote-Bedrohung gebundene Coverage-Suche darf dagegen
 auch dann eine legale Basiskarte ziehen, wenn eine passende Antwort im eigenen

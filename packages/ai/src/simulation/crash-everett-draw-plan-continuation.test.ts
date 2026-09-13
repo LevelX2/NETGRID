@@ -26,6 +26,82 @@ const CRASH_EVERETT = "onr_v1_157_crash-everett-inventive-fixer";
 const CITY_SURVEILLANCE = "onr_v1_313_city-surveillance";
 
 describe("Crash Everett draw-plan continuation", () => {
+  it.each([0, 2, 5, 6])(
+    "keeps an available central pressure route ahead of generic filtering with %s cards",
+    (handCount) => {
+      const runnerDeck = deck("proteus_runner_rd_bad_publicity_2026_05_25");
+      const corpDeck = deck("proteus_corp_region_fast_score_2026_05_25");
+      const observations = [];
+      for (const filtering of [false, true]) {
+        resetResidentPlanPortfolioMemory();
+        let state = toRunnerTurn(
+          createGameAfterSetup({
+            seed: "draw-filter-value-review",
+            runnerDeck,
+            corpDeck,
+            agendaPointsToWin: 7,
+          }),
+        );
+        state.runner.credits = 10;
+        const crashId = moveRunnerCardToGrip(state, CRASH_EVERETT);
+        state = applyLegal(
+          state,
+          "runner",
+          getLegalActions(state, "runner").find(
+            (action) =>
+              action.type === "install_card" &&
+              action.payload?.cardId === crashId,
+          ),
+        );
+        if (!filtering) {
+          state.runner.rig.resources = state.runner.rig.resources.filter(
+            (id) => id !== crashId,
+          );
+          state.runner.heap.push(crashId);
+          state.cardInstances[crashId]!.zone = { side: "runner", zone: "heap" };
+        }
+        while (state.runner.grip.length > handCount) {
+          const id = state.runner.grip.pop()!;
+          state.runner.heap.push(id);
+          state.cardInstances[id]!.zone = { side: "runner", zone: "heap" };
+        }
+        while (state.runner.grip.length < handCount) {
+          const id = state.runner.stack.pop()!;
+          state.runner.grip.push(id);
+          state.cardInstances[id]!.zone = { side: "runner", zone: "grip" };
+        }
+        const input = decisionInput(
+          state,
+          runnerDeck,
+          `review:${handCount}:${filtering}`,
+        );
+        expect(
+          input.legalActions.find((action) => action.type === "draw_card")
+            ?.payload,
+        ).toMatchObject({
+          projectedGrossDrawCount: filtering ? 2 : 1,
+          projectedPostDrawDispositionCount: filtering ? 1 : 0,
+          projectedNetHandDelta: 1,
+        });
+        const decision = chooseRunnerAction(input);
+        expect(decision.fallbackUsed).toBe(false);
+        const action = input.legalActions.find(
+          (a) => a.actionId === decision.actionId,
+        )!;
+        expect(action).toBeDefined();
+        observations.push({
+          filtering,
+          action: action.type,
+          owner: decision.reasonCode,
+        });
+      }
+      expect(observations.map((observation) => observation.owner)).toEqual([
+        "plan_first.runner.pressure_central",
+        "plan_first.runner.pressure_central",
+      ]);
+      expect(observations[1]!.action).toBe(observations[0]!.action);
+    },
+  );
   it("resolves the private replacement choice under the exact preceding Runner executor", () => {
     resetResidentPlanPortfolioMemory();
     const runnerDeck = deck("proteus_runner_rd_bad_publicity_2026_05_25");
