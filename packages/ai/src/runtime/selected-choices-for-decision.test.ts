@@ -1889,12 +1889,8 @@ describe("selectedChoicesForDecision", () => {
   });
 
   it.each([
-    ["draws when R&D can still pay the following mandatory draw", 8, "draw"],
-    [
-      "skips when the extra draw would consume the mandatory-draw card",
-      1,
-      "skip",
-    ],
+    ["executes the Hand owner's bound draw", 8, "draw"],
+    ["executes the Hand owner's bound skip", 1, "skip"],
     ["skips when R&D is already empty", 0, "skip"],
   ] as const)("%s", (_label, rdCount, expectedOptionId) => {
     const input = inputWithChoice(
@@ -1921,6 +1917,35 @@ describe("selectedChoicesForDecision", () => {
     input.playerView.pendingChoice!.visibility = "public";
     input.playerView.own.stackOrRdCount = rdCount;
     const action = resolveChoiceActionForInput(input);
+    const instanceId = "test:hand-start-draw";
+    rememberResidentPlanPortfolio(input, {
+      schemaVersion: "resident-plan-portfolio-v2",
+      side: "corp",
+      stateVersion: input.playerView.stateVersion,
+      rootForegroundInstanceId: instanceId,
+      executorInstanceId: instanceId,
+      instances: [
+        {
+          instanceId,
+          moduleId: "corp.hand_and_agenda_management",
+          executionState: "executor",
+          moduleState: {
+            kind: "hand",
+            signal: {
+              phase: "optional_start_draw_window",
+              optionalStartDrawChoiceBinding: {
+                actionId: action.actionId,
+                choiceId: "choice_multi",
+                observedAtStateVersion: input.playerView.stateVersion,
+                selectedOptionId: expectedOptionId,
+              },
+            },
+          },
+        },
+      ],
+      completionHistory: [],
+      transitions: [],
+    } as never);
 
     expect(
       selectedChoicesForDecision(input, action, unusedDependencies()),
@@ -1928,6 +1953,10 @@ describe("selectedChoicesForDecision", () => {
       choiceId: "choice_multi",
       selectedOptionIds: [expectedOptionId],
     });
+    resetResidentPlanPortfolioMemory();
+    expect(() =>
+      selectedChoicesForDecision(input, action, unusedDependencies()),
+    ).toThrowError("window_origin_missing");
   });
 
   it("keeps an unbound scored-agenda start draw fail-closed", () => {

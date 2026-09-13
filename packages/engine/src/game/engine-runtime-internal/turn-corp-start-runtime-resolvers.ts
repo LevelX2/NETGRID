@@ -860,15 +860,39 @@ export function createTurnCorpStartRuntimeResolvers(
     );
     if (state.pendingChoice) return;
     const definition = definitionFor(state, sourceId);
+    const scoredAgenda =
+      deps.scoredAgendaImplementationForDefinition(definition);
     if (
       state.corp.scoreArea.includes(sourceId) &&
-      deps.scoredAgendaImplementationForDefinition(definition)?.kind ===
-        "corp_start_turn_optional_draw"
-    )
-      startScoredAgendaStartDrawChoice(
+      scoredAgenda?.kind === "corp_start_turn_optional_draw"
+    ) {
+      const result = startScoredAgendaStartDrawChoice(
         deps.scoredAgendaFlowHost(state),
         sourceId,
       );
+      const choice = result.pendingChoice;
+      if (
+        !choice ||
+        choice.source !==
+          `scored_agenda.start_draw_choice:${sourceId}:${state.stateVersion + 1}`
+      )
+        throw new Error(
+          "Die optionale Start-Draw-Vorschau benötigt ihre exakte Agenda-Choice.",
+        );
+      const summary = corpMandatoryDrawSummary(state);
+      choice.corpStartDrawQuote = {
+        sourceCardInstanceId: sourceId,
+        observedAtStateVersion: choice.stateVersion,
+        additionalDrawCount: scoredAgenda.drawCount,
+        committedDrawCount: summary.totalBaseDrawCount,
+        mandatoryDrawCount:
+          summary.totalBaseDrawCount -
+          summary.optionalAgendaSources.reduce(
+            (sum, source) => sum + source.count,
+            0,
+          ),
+      };
+    }
   }
 
   function resumeCorpStartOfTurnOrdering(

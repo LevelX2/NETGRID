@@ -1876,12 +1876,17 @@ gewählte Action und darf nur deren Payload vervollständigen. Ein Test muss
 beweisen, dass seine Ausgabe weder `actionId` noch Planinstanz oder Step
 verändern kann.
 
-Der optionale Employee-Empowerment-Start-of-turn-Draw ist ein belegter
-Referenzfall: Der Resolver bindet exakte Agendaquelle, StateVersion,
-`resolve_choice`-Action und ausschließlich die Engine-Optionen `draw` und
-`skip`. Bei mindestens zwei sichtbaren Karten in R&D wählt er `draw`, sonst
-`skip`. Fehlende oder veraltete Bindung scheitert fail-closed und erzeugt
-weder einen neuen Plan noch eine andere Action-ID.
+Optionale Scored-Agenda-Startdraws gehören zur Phase
+`optional_start_draw_window` von `corp.hand_and_agenda_management`.
+Die Engine liefert mit `corpStartDrawQuote` die zusätzliche Kartenanzahl,
+bereits feststehenden Draws einschließlich früher gewählter Zusatzkarten und
+die aktuelle Pflichtdrawrate. Der Hand-Owner entscheidet aus Kapazität,
+R&D-Horizont und konkretem Bedarf; der Score-Owner liefert gegebenenfalls
+einen verfügbaren, finanzierten Remote als Agenda-Suchzweck. Der automatische
+Ein-Aktions-Pfad nimmt diese strategische Choice nicht an. Der Resolver prüft
+exakte Agendaquelle, StateVersion, Action, Handplan und gebundene Option und
+überträgt ausschließlich dessen `draw` oder `skip`. Fehlende oder veraltete
+Quote/Planbindung scheitert fail-closed. Details stehen im Handplanvertrag.
 
 ## 25. Planinterne Weiterentwicklung
 

@@ -871,6 +871,46 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
     expectValid(state);
   });
 
+  it.each(["draw", "skip"])(
+    "quotes the earlier optional %s commitment at the second agenda",
+    (selectedOption) => {
+      let state = corpMainClassic08Game(
+        `classic-08-two-employee-${selectedOption}`,
+      );
+      const first = addScoredCorpAgendaForTest(
+        state,
+        EMPLOYEE_EMPOWERMENT,
+        "employee_first",
+      );
+      addScoredCorpAgendaForTest(
+        state,
+        EMPLOYEE_EMPOWERMENT,
+        "employee_second",
+      );
+      state = toRunnerTurnFromCorpMain(state);
+      state = apply(state, "runner", (action) => action.type === "end_turn");
+      expect(state.pendingChoice?.source).toContain("corp_start.order:");
+      const firstOption = state.pendingChoice!.options.find(
+        (option) => option.value === first,
+      )!;
+      state = applyChoice(state, "corp", firstOption.id);
+      expect(state.pendingChoice?.corpStartDrawQuote).toMatchObject({
+        committedDrawCount: 1,
+        mandatoryDrawCount: 1,
+      });
+      state = applyChoice(state, "corp", selectedOption);
+      expect(
+        getPlayerView(state, "corp").pendingChoice?.corpStartDrawQuote,
+      ).toMatchObject({
+        observedAtStateVersion: state.stateVersion,
+        additionalDrawCount: 1,
+        committedDrawCount: selectedOption === "draw" ? 2 : 1,
+        mandatoryDrawCount: 1,
+      });
+      expectValid(state);
+    },
+  );
+
   it("aggregates mandatory, scored-agenda, selected optional and Skivviss draws before SPG", () => {
     let state = corpMainClassic08Game("classic-08-strategic-aggregate-start");
     addRezzedCorpRootForTest(
@@ -884,7 +924,7 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       UNLISTED_RESEARCH_LAB,
       "unlisted_aggregate_start",
     );
-    addScoredCorpAgendaForTest(
+    const employeeId = addScoredCorpAgendaForTest(
       state,
       EMPLOYEE_EMPOWERMENT,
       "employee_aggregate_start",
@@ -916,6 +956,15 @@ describe("Classic Corp Asset and Upgrade Implementation Smokes", () => {
       "scored_agenda.start_draw_choice",
     );
     expect(startState.corp.hq.length).toBe(hqBeforeMandatoryDraw);
+    expect(
+      getPlayerView(startState, "corp").pendingChoice?.corpStartDrawQuote,
+    ).toEqual({
+      sourceCardInstanceId: employeeId,
+      observedAtStateVersion: startState.stateVersion,
+      additionalDrawCount: 1,
+      committedDrawCount: 4,
+      mandatoryDrawCount: 4,
+    });
 
     let selected = applyChoice(structuredClone(startState), "corp", "draw");
     expect(selected.corp.hq.length).toBe(hqBeforeMandatoryDraw);

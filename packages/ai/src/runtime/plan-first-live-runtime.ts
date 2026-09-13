@@ -1,3 +1,4 @@
+import { corpOptionalStartDrawSignal } from "../corp/hand-management/hand-start-draw";
 import {
   AI_DECISION_DEBUG_SCHEMA_VERSION,
   AI_PLAN_FIRST_DECISION_DEBUG_SCHEMA_VERSION,
@@ -3412,6 +3413,7 @@ function corpContext(
     previous,
   );
   const forcedHandChoiceSignal =
+    corpOptionalStartDrawSignal(input, sourceBoundCandidates) ??
     corpStrategicPlanningGroupDrawChoiceSignal(
       input,
       sourceBoundCandidates,
@@ -3837,6 +3839,13 @@ function resolveEngineWindow(
   ) {
     return undefined;
   }
+  if (
+    context.input.side === "corp" &&
+    context.input.playerView.pendingChoice?.source.startsWith(
+      "scored_agenda.start_draw_choice:",
+    )
+  )
+    return undefined;
   const actionIds = new Set(
     context.input.legalActions.map((action) => action.actionId),
   );

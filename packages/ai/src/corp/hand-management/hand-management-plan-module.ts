@@ -41,7 +41,8 @@ export function handModule(): PlanModule {
               ? "flexible_support"
               : signal.phase === "discard_window" ||
                   signal.phase === "draw_filter_window" ||
-                  signal.phase === "hq_shuffle_window"
+                  signal.phase === "hq_shuffle_window" ||
+                  signal.phase === "optional_start_draw_window"
                 ? "locked_sequence"
                 : "sticky_goal",
             signal.parentPlanInstanceId,

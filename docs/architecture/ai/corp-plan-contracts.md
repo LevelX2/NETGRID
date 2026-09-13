@@ -1508,6 +1508,28 @@ Nettoänderung; ein Refresh kann trotz Ziehen die Hand verkleinern. Auch die
 allgemeine Draw-Zulassung erhält das Vorzeichen der R&D-Nettoänderung:
 Wiederauffüllen ist negative Deckkonsumption, kein Draw mit Nullverbrauch.
 
+`hand-start-draw.ts` entscheidet optionale Scored-Agenda-Startdraws vor der
+Payload-Auflösung als exakte Handplan-Choice. `corpStartDrawQuote` stammt aus
+derselben Engine-Zusammenfassung wie der folgende Pflichtdraw: Pflichtkarte,
+verpflichtende Agenden, Skivviss und bereits zugesagte optionale Karten zählen
+gemeinsam. Source und StateVersion bleiben durch die Actor-DTO erhalten;
+fehlende oder ungültige Daten erlauben keine Ersatzschätzung.
+Ein Zusatzdraw benötigt freien Handplatz nach allen bereits feststehenden
+Draws und lässt mindestens zweimal die aktuell quotierte Pflichtdrawrate
+in R&D. Das ist eine konservative Reserve bei unverändertem Pflichtdrawdruck,
+keine Zusage gegen künftige Mill-Effekte. Bedarf besteht bei höchstens zwei
+Handkarten nach den feststehenden Draws oder bei einem vom Score-Owner
+benannten leeren, bereits finanzierten Remote mit Engine-quotierter
+Run-Reibung und fehlender Agenda in HQ/aktiven Remotes. Agenda-Karten in
+Archives verhindern diese Suche nicht. Die konkrete Installation und
+Risikoprüfung erfolgt erst nach Beobachtung der gezogenen Karte.
+
+Regionsvergleiche verwenden die Funktionssignale sowohl der neuen als auch
+der installierten Karte. So kann Handüberlauf keinen vermeintlichen
+Mehrwert aus einer unvollständigen Beschreibung der alten Region ableiten.
+Der bestehende Placement-Vertrag bleibt zuständig; nachweislich produktive
+Regionswechsel sind weiterhin zulässig (SP-383).
+
 Der bestehende Zielgebietsvergleich bewertet einen eigenen kostenlosen
 Archives-Zugriffseffekt als Nutzen des Abwerfens. Diese Anpassung gilt nur
 für das Ziel Archives; eine R&D-Rückführung bleibt separat bewertet. Cleanup

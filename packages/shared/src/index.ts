@@ -1090,6 +1090,13 @@ export type ChoiceRequest = {
   visibility: EventVisibilityClass;
   stackSearchResolution?: StackSearchResolution;
   cardSearchPresentation?: CardSearchPresentation;
+  corpStartDrawQuote?: {
+    sourceCardInstanceId: CardInstanceId;
+    observedAtStateVersion: number;
+    additionalDrawCount: number;
+    committedDrawCount: number;
+    mandatoryDrawCount: number;
+  };
 };
 
 export type ChoiceContinuation =
