@@ -335,6 +335,9 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
           unbrokenSubroutineCount: 1,
           encounterWillEndRun: true,
           sourceDefinitionId: "onr_v1_249_hunter",
+          encounterSubroutineIds: hunter
+            .effectiveRunQuote!.subroutines.map((s) => s.id)
+            .join(","),
         },
       },
     );
@@ -606,6 +609,9 @@ describe("Semantic AI runtime cutover — Runner safety contracts", () => {
           unbrokenSubroutineCount: 1,
           encounterWillEndRun: true,
           sourceDefinitionId: "onr_v1_252_keeper",
+          encounterSubroutineIds: keeper
+            .effectiveRunQuote!.subroutines.map((s) => s.id)
+            .join(","),
         },
       },
     );

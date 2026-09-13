@@ -19,6 +19,10 @@ import {
   currentEncounterUnbrokenSubroutineIndexes,
 } from "./current-encounter";
 import { currentEncounterRequiresDamagePreservingBreak } from "./current-encounter-damage";
+import {
+  currentEncounterMitigationForAction,
+  encounterMitigationEvidence,
+} from "./runner-encounter-mitigation";
 import { cheaperSafeCurrentTracePayment } from "./runner-encounter-trace-payment";
 import {
   breakerIdForEncounterAction,
@@ -220,6 +224,7 @@ export function createRunnerPumpViabilityContext(
       };
 
     const requiresFullBreak = currentEncounterRequiresFullBreak(input);
+    const remainingIndexes = currentEncounterUnbrokenSubroutineIndexes(input);
     const fullBreakIndexes = requiresFullBreak
       ? currentEncounterUnbrokenSubroutineIndexes(input)
       : undefined;
@@ -227,13 +232,14 @@ export function createRunnerPumpViabilityContext(
       currentQuote?.subroutines.filter((subroutine, index) =>
         fullBreakIndexes
           ? fullBreakIndexes.has(index)
-          : isUnacceptableImmediateSafetyThreatSubroutine(input, subroutine) ||
-            visibleDeflectorSubroutineCanResolve(
-              subroutine,
-              deflectorContext,
-            ) ||
-            (encounterContinue?.payload?.encounterWillEndRun === true &&
-              isEndRunSubroutine(subroutine)),
+          : remainingIndexes.has(index) &&
+            (isUnacceptableImmediateSafetyThreatSubroutine(input, subroutine) ||
+              visibleDeflectorSubroutineCanResolve(
+                subroutine,
+                deflectorContext,
+              ) ||
+              (encounterContinue?.payload?.encounterWillEndRun === true &&
+                isEndRunSubroutine(subroutine))),
       ).length ??
       (encounterContinue?.payload?.encounterWillEndRun === true
         ? endTheRunCount
@@ -242,15 +248,16 @@ export function createRunnerPumpViabilityContext(
       (subroutine, index) =>
         fullBreakIndexes
           ? fullBreakIndexes.has(index)
-          : isUnacceptableImmediateSafetyThreatSubroutine(input, subroutine) ||
-            visibleDeflectorSubroutineCanResolve(
-              subroutine,
-              deflectorContext,
-            ) ||
-            (encounterContinue?.payload?.encounterWillEndRun === true &&
-              isEndRunSubroutine(subroutine)),
+          : remainingIndexes.has(index) &&
+            (isUnacceptableImmediateSafetyThreatSubroutine(input, subroutine) ||
+              visibleDeflectorSubroutineCanResolve(
+                subroutine,
+                deflectorContext,
+              ) ||
+              (encounterContinue?.payload?.encounterWillEndRun === true &&
+                isEndRunSubroutine(subroutine))),
     );
-    const estimatedBreakCost = requiredBreakSubroutines?.length
+    let estimatedBreakCost = requiredBreakSubroutines?.length
       ? creditsToBreakVisibleSubroutinesWithBreaker(
           breaker,
           encounteredIce,
@@ -285,6 +292,13 @@ export function createRunnerPumpViabilityContext(
       });
       return costs.length > 0 ? Math.min(...costs) : undefined;
     }
+    const partialMitigation =
+      estimatedBreakCost === undefined ||
+      !spendIcebreakerCredits(pumpPayment.budget, breaker, estimatedBreakCost)
+        .affordable
+        ? currentEncounterMitigationForAction(input, action)
+        : undefined;
+    if (partialMitigation) estimatedBreakCost = partialMitigation.breakCost;
     if (
       estimatedBreakCost === undefined ||
       !spendIcebreakerCredits(pumpPayment.budget, breaker, estimatedBreakCost)
@@ -426,6 +440,12 @@ export function createRunnerPumpViabilityContext(
         `pump_required_count:${requiredPumps}`,
         `pump_restricted_credits_spent:${pumpPayment.restrictedSpent}`,
         `break_restricted_credits_spent:${breakPayment.restrictedSpent}`,
+        ...(partialMitigation
+          ? encounterMitigationEvidence(
+              partialMitigation,
+              partialMitigation.pumpCost,
+            )
+          : []),
         ...runEffect.evidence,
       ],
     };

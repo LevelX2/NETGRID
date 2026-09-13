@@ -1090,6 +1090,39 @@ sonst wirkungslosen letzten Break als notwendige Schadensvermeidung; bereits
 gebrochene Subroutinen werden nicht erneut budgetiert. Action-Version,
 Planinstanz, Executor und Route bleiben weiterhin bindend.
 
+Der Run-Window bewertet außerdem vollständig finanzierte Teilabwehr gegen
+aktuell gequoteten direkten Schaden und Programmtrash. Der gemeinsame Dienst
+`runtime/runner-encounter-mitigation.ts` bindet verbleibende Engine-Subroutine-IDs,
+Breaker, aktuelle Action und StateVersion. Er quotiert sämtliche nötigen Pumps,
+zusätzliche Breakgebühren und wirksame Breakmengen mit den bestehenden
+Breaker-/Zahlungsdiensten. Pump-Zulassung, Breakziel und Plan-Evidence verwenden
+dieselbe Bewertung; nach jedem Engine-Schritt werden Restmenge und tatsächlich
+verfügbare Pools neu geprüft. Ein verlorener Zugriffspfad oder fehlender
+Remote-Ertrag verwirft diese aktuelle Schadensabwehr nicht.
+
+Die Bewertung vergleicht verbleibende Flatline-Gefahr, Hirnschaden,
+Programmverluste und Handschaden. Präventionspools werden in Effektfolge
+einmalig verbraucht; Programmverluste sind auf die tatsächlich installierten
+Programme begrenzt. Zwei von drei Trash-Subroutinen zu brechen rettet daher
+bei nur einem installierten Programm noch nichts. Gleich wirksame Folgen
+bevorzugen geringere Kosten. Bereits gebrochene oder exakt wirkungslose
+Subroutinen rechtfertigen keine weiteren Ausgaben. Full-Break-Pflichten bleiben
+vollständig zu finanzieren. Unaufgelöste Zufalls-/Selbsttrash- und weitere
+Breaker-Nebenkosten werden nicht als garantierte Teilabwehr zertifiziert und
+bleiben bei ihren bestehenden Risiko-/Zahlungsverträgen. Die Trace-Evidence
+nennt Gesamtkosten, Ziele, verhinderte und verbleibende Verluste.
+
+Der fokussierte Nachweis liegt in
+`evaluation/decision-checkpoints/match-d0f6-partial-break.test.ts`:
+Die side-sicheren Maintenance-Checkpoints D77/D156 wählten auf dem aktuellen
+Ausgangsstand `12f5e5e66` jeweils `continue_run`. Mit der Teilabwehr wählen sie
+den Pump im bestehenden Owner. Separat konstruierte regelgleiche Engine-Fälle
+prüfen die vollständigen KI-Folgen: vier Pumps und zwei Breaks für sechs Credits
+verhindern zwei Hirnschäden; sechs Pumps und zwei Breaks für acht Credits lassen
+bei drei Trash-Subroutinen zwei Programme überleben, auch bei ungünstigem
+legalem Corp-Ziel. Beide Runs enden anschließend. Engine-Replay und StateHash
+stimmen überein. Diese Mechanikfälle sind kein Replay des historischen Matches.
+
 Auch die allgemeine Zugriffspfadprüfung nach einem Break verwendet diese
 Engine-Restliste. Sie zieht nur das aktuelle Breakziel von den noch offenen
 Subroutinen ab; bereits gebrochene ETR- oder Zahlungssubroutinen erzeugen weder

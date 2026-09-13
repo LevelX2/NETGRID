@@ -21,6 +21,10 @@ import {
   runnerConfirmedDamageRequiredHandFloor,
   runnerVisibleLethalIceDamageAssessment,
 } from "../runner-damage-threat-assessment";
+import {
+  currentEncounterMitigationForAction,
+  encounterMitigationEvidence,
+} from "./runner-encounter-mitigation";
 import { runnerRigAfterEncounter } from "./runner-rig-after-encounter";
 import { encounterRunRemainderEffectAssessment } from "./runner-run-remainder-effect-assessment";
 import {
@@ -230,6 +234,16 @@ export function createRunnerAccessPathContext(
       .filter((subroutine): subroutine is NonNullable<typeof subroutine> =>
         Boolean(subroutine),
       );
+    const mitigation = currentEncounterMitigationForAction(input, action);
+    if (mitigation) {
+      return {
+        canPreserveAccessPath: mitigation.supportsCurrentAction,
+        evidence: [
+          ...encounterMitigationEvidence(mitigation),
+          `break_matches_mitigation_targets:${mitigation.supportsCurrentAction}`,
+        ],
+      };
+    }
     if (
       targetSubroutines.some((subroutine) =>
         isUnacceptableImmediateSafetyThreatSubroutine(input, subroutine),

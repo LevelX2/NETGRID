@@ -37,6 +37,10 @@ import {
 } from "../../runtime/current-encounter";
 import { legalActionCreditCost } from "../../runtime/legal-action-credit-cost";
 import { currentEncounterRequiresDamagePreservingBreak } from "../../runtime/current-encounter-damage";
+import {
+  currentEncounterMitigationForAction,
+  encounterMitigationEvidence,
+} from "../../runtime/runner-encounter-mitigation";
 import type { RunWindowAssessmentServices } from "./run-window-services";
 import { assessRunnerAccessTrashImpact } from "./runner-access-trash-impact";
 import {
@@ -724,6 +728,9 @@ function runnerRunWindowActionAssessment(
     runOrigin,
   );
   const exclusion = effectiveEncounterExclusion ?? planStepExclusion;
+  const mitigation = !exclusion
+    ? currentEncounterMitigationForAction(input, action)
+    : undefined;
   const programPreservationPayment = runnerProgramPreservationPaymentValue(
     input,
     action,
@@ -785,6 +792,9 @@ function runnerRunWindowActionAssessment(
               ? "runner_encounter_action_plan_admissible"
               : "runner_run_window_action_plan_admissible",
           `runner_run_window_action:${action.type}`,
+          ...(mitigation
+            ? encounterMitigationEvidence(mitigation, mitigation.pumpCost)
+            : []),
           ...(committedParentPayoff
             ? [`runner_run_parent_payoff_preserved:${committedParentPayoff}`]
             : []),
@@ -1236,6 +1246,8 @@ function runnerRunWindowPlanStepExclusion(
   if (
     (action.type === "pump_breaker" || action.type === "break_subroutine") &&
     currentActiveRunHasKnownNoPayoff(input) &&
+    !runnerCurrentEncounterRequiresDamagePreservingBreak(input, runOrigin) &&
+    !runnerCurrentEncounterRequiresProgramPreservingBreak(input) &&
     !runnerRunOriginCommittedPayoff(runOrigin)
   ) {
     return {

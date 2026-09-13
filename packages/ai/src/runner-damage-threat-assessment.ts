@@ -19,6 +19,7 @@ import {
   creditsToBreakVisibleSubroutinesWithBreaker,
   type assessKnownRezzedIcePath,
 } from "./visible-run-analysis";
+import { projectVisibleDamagePrevention } from "./run-analysis/visible-damage-prevention";
 
 export function knownPathAfterDamageBudget(
   path: ReturnType<typeof assessKnownRezzedIcePath>,
@@ -196,19 +197,18 @@ export function runnerVisibleLethalIceDamageAssessment(
           return assessment !== undefined && assessment.cost <= generalCredits;
         });
       if (affordableBreak) continue;
-      const typedPreventionAvailable =
-        subroutine.damageType === "net" || subroutine.damageType === "core"
-          ? netOrCorePreventionRemaining
-          : 0;
-      const typedPrevention = Math.min(amount, typedPreventionAvailable);
-      netOrCorePreventionRemaining -= typedPrevention;
-      const runPrevention = Math.min(
-        amount - typedPrevention,
-        runPreventionRemaining,
+      const prevention = projectVisibleDamagePrevention(
+        amount,
+        subroutine.damageType,
+        {
+          netOrCore: netOrCorePreventionRemaining,
+          run: runPreventionRemaining,
+        },
       );
-      runPreventionRemaining -= runPrevention;
-      const preventedDamage = typedPrevention + runPrevention;
-      const subroutineDamage = amount - preventedDamage;
+      netOrCorePreventionRemaining = prevention.netOrCore;
+      runPreventionRemaining = prevention.run;
+      const subroutineDamage = prevention.damage;
+      const preventedDamage = amount - subroutineDamage;
       projectedDamage += subroutineDamage;
       if (subroutine.damageType === "core") {
         projectedCoreDamage += subroutineDamage;
