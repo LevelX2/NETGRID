@@ -457,6 +457,25 @@ bei gleicher Antwort und gleichen Kosten bleibt die kanonische Rollenreihenfolge
 stabil. Der gewählte Rollenbedarf, die konkrete
 Installation und der anschließende Run bleiben an denselben Parent gebunden.
 
+Ein konkreter Remote-Parent darf außerdem eine sichtbare Handinstallation als
+Kosten-Vorbereitung binden, auch wenn seine ICE-Kette noch unbekannte Teile
+enthält. Der Coverage-Owner vergleicht dafür den bekannten Pfad mit dem
+aktuellen und dem ergänzten Rig einschließlich sichtbarer zusätzlicher
+Break-Gebühren. Die Installation muss legal, ohne Programmopfer und mit freier
+MU ausführbar sein. Ihre Kosten müssen sich bereits auf dem bekannten Pfad
+dieses einen Runs ausgleichen; Installations- und Run-Klick sowie die gesamte
+bekannte Creditquote müssen im aktuellen Zug verfügbar bleiben. Ein bekannter
+nicht finanzierter Zugriff oder ein fehlender positiver Remote-Payoff lässt
+diese Vorbereitung nicht zu.
+
+Die Quote garantiert nur die Einsparung am bekannten Pfad. Unbekannte ICE und
+spätere Rez-Entscheidungen bleiben ausdrücklich bedingt. Nach der Installation
+bewertet der bestehende Remote-Parent Pfad, Zugriff und Reserven mit dem neuen
+Rig erneut; eine Reserve aus dem alten Rig darf eine konkret gebundene,
+kostenneutrale Vorbereitung nicht als beliebige überlappende Installation
+verwerfen. Direkte terminale Runs auf vollständig bekannten, bereits
+bezahlbaren Pfaden behalten ihre bestehende Priorität.
+
 Eine lokale Economy-Zurückstellung von Mehrzweck-Hardware gilt nur für ihren
 Einkommenszweck. Eine bereits exakt gebundene Coverage- oder MU-Vorbereitung
 derselben Installation bleibt beim Coverage-Owner ausführbar. Andere,
