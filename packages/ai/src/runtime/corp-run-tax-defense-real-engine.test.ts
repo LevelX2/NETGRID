@@ -13,6 +13,7 @@ import { RealEngineFixtureBuilder } from "../evaluation/real-engine-fixture-buil
 import { chooseCorpAction } from "../index";
 import { resetResidentPlanPortfolioMemory } from "../plans/resident-plan-portfolio-memory";
 import { buildAiDecisionInput } from "./ai-decision-input";
+import { buildAiDecisionInputDto } from "../input-dto";
 
 const RASMIN = "onr_proteus_070_rasmin-bridger";
 const HOMING = "onr_proteus_025_homing-missile";
@@ -180,6 +181,11 @@ it("quotes and rezzes a fixed trace that the public Runner cannot beat", () => {
       guaranteedRunEnd: true,
     }),
   ]);
+  const dto = buildAiDecisionInputDto(input(s, true));
+  expect(
+    dto.playerView.servers.find((server) => server.id === "hq")!.ice[0]!
+      .currentTraceIceRezQuotes![0],
+  ).not.toHaveProperty("variableValue");
   const decision = chooseCorpAction(input(s, true));
   const action = getLegalActions(s, "corp").find(
     (a) => a.actionId === decision.actionId,

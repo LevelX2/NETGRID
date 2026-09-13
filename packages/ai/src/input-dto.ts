@@ -2065,7 +2065,9 @@ function sanitizeVisibleCardWithOptions(
             stateVersion: q.stateVersion,
             runId: q.runId,
             rezCredits: q.rezCredits,
-            variableValue: q.variableValue,
+            ...(q.variableValue !== undefined
+              ? { variableValue: q.variableValue }
+              : {}),
             corpBid: q.corpBid,
             corpTraceStrength: q.corpTraceStrength,
             maximumRunnerTraceStrength: q.maximumRunnerTraceStrength,

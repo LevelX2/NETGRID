@@ -64,7 +64,7 @@ it.each([
     const target = evaluateRunnerRunTargets({ input }).find(
       (t) => t.actionId === "runner.start_run.hq",
     );
-    expect(target?.routeQuote.reachability).toBe(reachability);
-    expect(target?.routeQuote.noAccessReason).toBeUndefined();
+    expect(target?.routeQuote?.reachability).toBe(reachability);
+    expect(target?.routeQuote?.noAccessReason).toBeUndefined();
   },
 );
