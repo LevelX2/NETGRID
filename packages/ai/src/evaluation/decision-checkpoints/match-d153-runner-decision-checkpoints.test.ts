@@ -54,7 +54,10 @@ describe("match D153 Runner decision checkpoints", () => {
   });
 
   it.each([
-    ["the breaker-AP coverage draw at D61", preserveHqFacecheckD61Json],
+    [
+      "the breaker-AP coverage or concrete central-defense route at D61",
+      preserveHqFacecheckD61Json,
+    ],
   ])("keeps the positive control: %s", (_label, json) => {
     expectCheckpointToPass(fixture(json));
   });

@@ -77,6 +77,16 @@ werden im Paketfortschritt ergänzt.
   Capability bleiben weiterhin fest gebunden. Der fokussierte e6aca-Test ist
   grün.
 - Verbleibend: 16 bekannte fehlgeschlagene Assertions.
+- Paket 4 (Defense-/Score-Checkpoint-Bindungen): 3 Assertions geschlossen.
+  D153 erlaubte neben dem historischen Breaker-AP-Draw eine aktuell legale
+  konkrete Central-Defense-Route. E676 verlangte veraltete
+  Engine-Zertifizierungs-Evidence, obwohl der aktuelle Score-Owner korrekt
+  eine offene Schutzanforderung meldet. Im Renticon-Matchpoint war R&D durch
+  die bereits rezzte ICE-Schicht engine-zertifiziert bei 0 % Zugriff; eine
+  weitere ICE wäre redundant und wurde deshalb als Economy-Fortschritt mit
+  explizitem Overlayering-Verbot geprüft. Alle drei betroffenen Testdateien
+  sind im fokussierten Lauf grün.
+- Verbleibend: 13 bekannte fehlgeschlagene Assertions.
 
 ## Paketfolge und Done-Gates
 

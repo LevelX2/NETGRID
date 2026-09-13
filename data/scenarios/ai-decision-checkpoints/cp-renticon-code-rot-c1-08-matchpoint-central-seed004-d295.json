@@ -28541,16 +28541,20 @@
     }
   },
   "expectation": {
-    "acceptableActions": [
+    "acceptableActions": [{ "type": "gain_credit" }],
+    "forbiddenActions": [
       {
         "type": "install_card",
+        "sourceDefinitionId": "onr_v1_221_asp",
         "targetServerId": "rd"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.defend_servers"],
-      "acceptableCapabilities": ["allocate_server_defense"],
-      "requiredAssessmentEvidence": []
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
+      "requiredAssessmentEvidence": [
+        "corp_engine_certified_basic_liquidity_development"
+      ]
     }
   }
 }

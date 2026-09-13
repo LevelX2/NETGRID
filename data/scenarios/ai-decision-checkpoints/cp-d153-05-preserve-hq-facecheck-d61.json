@@ -6587,12 +6587,25 @@
     "acceptableActions": [
       {
         "actionId": "runner.draw_card"
+      },
+      {
+        "type": "play_event",
+        "sourceDefinitionId": "onr_v1_086_forged-activation-orders"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.rig_and_coverage"],
-      "acceptableCapabilities": ["draw_for_answer_breaker_ap"],
-      "requiredAssessmentEvidence": ["target:rd"]
+      "acceptablePlanKinds": [
+        "runner.rig_and_coverage",
+        "runner.pressure_central"
+      ],
+      "acceptableCapabilities": [
+        "draw_for_answer_breaker_ap",
+        "develop_onr_v1_086_forged-activation-orders"
+      ],
+      "acceptableAssessmentEvidence": [
+        "target:rd",
+        "runner_targeted_ice_trash_preflight:hq:hidden_02e19739"
+      ]
     }
   }
 }

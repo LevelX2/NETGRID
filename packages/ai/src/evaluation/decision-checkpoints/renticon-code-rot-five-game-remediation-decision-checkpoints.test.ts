@@ -42,7 +42,7 @@ const BEHAVIOR_FIXTURES = [
     scorelineSeed004D247Json,
   ],
   [
-    "allocates exact matchpoint central defense without exposing score material in Seed 004",
+    "preserves matchpoint central protection without redundant layering in Seed 004",
     matchpointSeed004Json,
   ],
 ] as const;
@@ -53,14 +53,15 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
     if (
       _label ===
-      "allocates exact matchpoint central defense without exposing score material in Seed 004"
+      "preserves matchpoint central protection without redundant layering in Seed 004"
     ) {
       expectBoundTurnPlan(result, {
-        actionId:
-          "corp.install_card.corp_onr_v1_221_asp_1.rd.corp_onr_v1_221_asp_1.3",
-        planKind: "corp.defend_servers",
-        capability: "allocate_server_defense",
-        executorInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+        actionId: "corp.gain_credit",
+        planKind: "corp.economy",
+        capability: "develop_or_convert_corp_economy",
+        assessmentEvidence: "corp_engine_certified_basic_liquidity_development",
+        executorInstanceId:
+          "plan:corp.economy:economy-visible-liquidity-development%3A8",
       });
     }
   });
