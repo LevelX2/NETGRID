@@ -35,7 +35,11 @@ Die Engine ist alleinige Regelautorität. UI, Server und KI reichen nur angebote
 20 Agendapunkten und deutscher/englischer Anleitung verfügbar. Version 1.1.0
 ersetzt die beiden Banpei durch zwei Marionette. Die Liste
 verbindet temporäre HQ-ICE-Begegnungen mit Remote-Scoring und Recycling;
-ihre Spielstärke ist noch nicht durch eine Matchserie belegt. Marionette
+eine erste Stichprobe gegen zehn zufällige Runner-Standarddecks endet mit
+17:13 aus 30 Spielen ohne technische Fehlerflags (Registry-Paarungen 435–444).
+Marionette wurde darin regulär gespielt, aber nicht über Dreff eingesetzt;
+ihre temporäre HQ-Rückkehr ist separat im Originalseed verifiziert. Ein
+Stärkevergleich zur Banpei-Version ist damit noch nicht belegt. Marionette
 und die verwandten deklarativen ICE-Rückkehrmodi lösen nach einer
 Dr.-Dreff-Begegnung ihr Pass-Fenster vor dem Trash auf. Rückkehr, Zahlung,
 Run-Ende, Sichtbarkeit und Replay sind fokussiert geprüft; führend ist
