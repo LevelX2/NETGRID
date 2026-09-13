@@ -1,6 +1,6 @@
 # Menschliche Spielmuster in ausführbare KI-Linien überführen
 
-Status: aktiv; HU00 geprüft, HU01 als nächstes. Quelle: Match `match_e553ff2853e6bbba` und ausdrücklicher Umsetzungsauftrag vom 2026-09-13.
+Status: aktiv; HU00 und HU01 geprüft, HU02 als nächstes. Quelle: Match `match_e553ff2853e6bbba` und ausdrücklicher Umsetzungsauftrag vom 2026-09-13.
 
 ## Ziel und Arbeitsvertrag
 
@@ -35,3 +35,5 @@ Alle Pakete vollständig und sequenziell abarbeiten, beendete Pakete getrennt co
 - API-Bundle aus der Analyse: 256 Events, 158 KI-Decisions, vollständiges Endergebnis. D96 und D147 bereits einmal geladen und im Analyseprozess vorhanden.
 - Menschliche Aktionen belegen Verhalten, keine aufgezeichneten Absichten oder verworfenen Alternativen. Corp-Fähigkeiten werden daher mit ausdrücklich vorbereiteten Engine-Szenarien geprüft, nicht als historischer Corp-KI-Checkpoint ausgegeben.
 - Einzelkarten-Draw-Effizienz ist außerhalb dieses vierteiligen Auftrags.
+- HU01: 14 Tests in zwei Dateien grün, AI-Struktur und Erreichbarkeit grün. Voller Paket-Typecheck meldete ausschließlich einen inzwischen korrigierten `exactOptionalPropertyTypes`-Fehler der neuen Projektion. Anschließend fokussierter Typecheck des öffentlichen AI-Einstiegs, aller Shell-Dateien und des Matchtests mit unverändertem Strict-Vertrag grün. Große Replay-Fixtures werden wie bei bestehenden Checkpoints zur Laufzeit geladen; kein ungeprüfter JSON-Uniontyp.
+- HU01 belegt vollständig aktuell liquide Kombinationen vorbereiteter Breaker einschließlich Pfadkosten, MU und Run-Klick; noch benötigte zusätzliche Funding-/Installationsvarianten werden nicht als bewiesen ausgegeben. D147 erhält zunächst einen regulären Draw statt sieben unproduktiver Counterzahlungen. Keine Behauptung eines rettbaren Originalspiels.

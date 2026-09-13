@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import lateShellJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-e553-d147-replay.json";
-import unknownIceJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-e553-d96-replay.json";
+import { readFileSync } from "node:fs";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
+import { assessShellTradersAccess } from "../../runner/shell-traders/shell-traders-access";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import {
@@ -10,9 +10,26 @@ import {
 } from "./runtime-checkpoint";
 
 type Capture = {
+  provenance: string;
+  stateVersion: number;
+  validation: Record<string, boolean>;
   input: AiDecisionInputWithDeckCapabilities;
   runtime: AiRuntimeCheckpointV1;
 };
+
+function readCapture(index: number): Capture {
+  return JSON.parse(
+    readFileSync(
+      new URL(
+        `../../../../../data/scenarios/ai-decision-checkpoints/cp-e553-d${index}-replay.json`,
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+  );
+}
+const lateShellJson = readCapture(147);
+const unknownIceJson = readCapture(96);
 
 function replay(unchecked: unknown) {
   const capture = structuredClone(unchecked) as Capture;
@@ -24,6 +41,120 @@ function replay(unchecked: unknown) {
 }
 
 describe("e553 human-pattern historical evidence", () => {
+  it("keeps liquidity instead of paying for an incomplete matchpoint answer at D147", () => {
+    const { input, decision } = replay(lateShellJson);
+    expect(decision.actionId).toBe("runner.draw_card");
+    expect(
+      decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
+    ).toBe("runner.defense_and_recovery");
+    const paid = input.legalActions.filter(
+      (action) =>
+        action.payload?.delayedInstallAbility === "remove_shell_counter" &&
+        ["onr_v1_016_cyfermaster", "onr_v1_023_evil-twin"].includes(
+          String(action.payload.targetCardDefinitionId),
+        ),
+    );
+    expect(paid).toHaveLength(2);
+    for (const action of paid)
+      expect(
+        decision.decisionDebug?.planFirstDecision?.dispositions,
+      ).toContainEqual(
+        expect.objectContaining({
+          actionId: action.actionId,
+          ownerModuleId: "runner.shell_traders_pipeline",
+          disposition: "explicitly_nonproductive",
+          evidenceCode: "runner_shell_traders_holds_unfunded_access",
+        }),
+      );
+  });
+
+  it("quotes the complete prepared combination, including break costs and the run click", () => {
+    const { input } = structuredClone(lateShellJson) as Capture;
+    // Projection counterfactual: identical visible Engine quotes, more liquid credits.
+    input.playerView.own.credits = 100;
+    const source = "runner_onr_v1_176_the-shell-traders_1";
+    const target = "runner_onr_v1_016_cyfermaster_1";
+    const assessment = assessShellTradersAccess(
+      input,
+      source,
+      target,
+      "remote_1",
+    );
+    expect(assessment).toMatchObject({
+      status: "funded",
+      completionCredits: 8,
+      requiredClicks: 1,
+    });
+    expect(assessment.completionCardIds).toEqual(
+      expect.arrayContaining([target, "runner_onr_v1_023_evil-twin_1"]),
+    );
+    expect(assessment.knownPathCost).toBeGreaterThan(0);
+    const fundedDecision = replay({ ...lateShellJson, input }).decision;
+    expect(fundedDecision.decisionDebug?.planFirstDecision).toMatchObject({
+      selectedPlan: { moduleId: "runner.shell_traders_pipeline" },
+      priority: { effectiveClass: "P2" },
+      route: {
+        actionType: "trigger_ability",
+        stateVersion: input.playerView.stateVersion,
+      },
+    });
+    input.playerView.own.credits = assessment.requiredCredits!;
+    expect(
+      assessShellTradersAccess(input, source, target, "remote_1").status,
+    ).toBe("funded");
+    input.playerView.own.credits -= 1;
+    expect(
+      assessShellTradersAccess(input, source, target, "remote_1").status,
+    ).toBe("blocked");
+    input.playerView.own.credits = 100;
+    input.playerView.own.clicks = 0;
+    expect(
+      assessShellTradersAccess(input, source, target, "remote_1").reason,
+    ).toBe("run_click_unavailable");
+  });
+
+  it("does not replace an unknown ICE quote with a funded access claim", () => {
+    const { input } = structuredClone(lateShellJson) as Capture;
+    input.playerView.own.credits = 100;
+    input.playerView.servers.find(
+      (server) => server.id === "remote_1",
+    )!.ice[0] = { instanceId: "hidden", known: false };
+    expect(
+      assessShellTradersAccess(
+        input,
+        "runner_onr_v1_176_the-shell-traders_1",
+        "runner_onr_v1_016_cyfermaster_1",
+        "remote_1",
+      ).status,
+    ).toBe("unknown");
+  });
+
+  it("requires explicit permitted memory replacement and current source bindings", () => {
+    const { input } = structuredClone(lateShellJson);
+    input.playerView.own.credits = 100;
+    input.playerView.own.memoryLimit = 3;
+    const source = "runner_onr_v1_176_the-shell-traders_1";
+    const target = "runner_onr_v1_016_cyfermaster_1";
+    expect(
+      assessShellTradersAccess(input, source, target, "remote_1").status,
+    ).toBe("blocked");
+    expect(
+      assessShellTradersAccess(input, source, target, "remote_1", [
+        "runner_onr_v1_036_jackhammer_1",
+      ]).status,
+    ).toBe("funded");
+    const action = input.legalActions.find(
+      (entry) =>
+        entry.payload?.targetCardId === target &&
+        entry.payload.delayedInstallAbility === "remove_shell_counter",
+    )!;
+    action.expiresAtStateVersion -= 1;
+    expect(
+      assessShellTradersAccess(input, source, target, "remote_1", [
+        "runner_onr_v1_036_jackhammer_1",
+      ]).status,
+    ).toBe("unknown");
+  });
   it.each([lateShellJson, unknownIceJson])(
     "preserves actor-safe capture and deterministic legal plan selection at $stateVersion",
     (capture) => {

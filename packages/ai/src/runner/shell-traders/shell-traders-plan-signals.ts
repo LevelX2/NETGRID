@@ -12,6 +12,7 @@ import {
 import type { RunnerHandDevelopmentEvaluation } from "../hand-development/runner-hand-development-types";
 import type { RunnerStrategicIntentProfile } from "../../runner-strategic-intent";
 import { shellTradersTargetValue } from "./shell-traders-action";
+import { assessShellTradersAccess } from "./shell-traders-access";
 
 const SHELL_TRADERS_DEFINITION_ID = "onr_v1_176_the-shell-traders" as const;
 
@@ -147,6 +148,22 @@ export function buildRunnerShellTradersPipelineSignals({
       coverageGaps,
       coverageBinding,
     });
+    const requiresMainPhaseAccess =
+      input.playerView.timingPoint === "runner_action.main";
+    const accessAssessment =
+      requiresMainPhaseAccess &&
+      ability === "remove_shell_counter" &&
+      coverageBinding?.targetServerId
+        ? assessShellTradersAccess(
+            input,
+            action.source,
+            targetCardInstanceId,
+            coverageBinding.targetServerId,
+            replacementAssessment.status === "available"
+              ? replacementAssessment.selectedProgramInstanceIds
+              : [],
+          )
+        : undefined;
     const redundantTarget =
       development?.persistentInstallEvaluation?.duplicateRole ===
         "redundant_duplicate" && coverageBinding === undefined;
@@ -178,16 +195,27 @@ export function buildRunnerShellTradersPipelineSignals({
       shellCountersBefore === 1 &&
       (replacementAssessment.status === "harmful" ||
         replacementAssessment.status === "unknown");
+    const paidCoverageWithoutAccess =
+      requiresMainPhaseAccess &&
+      ability === "remove_shell_counter" &&
+      coverageBinding !== undefined &&
+      visibleActionCreditCost(action) > 0 &&
+      accessAssessment?.status !== "funded";
     const phase =
       targetRejected ||
       completionWouldBeHarmful ||
-      paidAccelerationWithoutCurrentUse
+      paidAccelerationWithoutCurrentUse ||
+      paidCoverageWithoutAccess
         ? ("hold" as const)
         : ability === "set_aside_from_grip"
           ? ("prepare" as const)
           : ("progress" as const);
     const priorityClass =
-      coverageBinding?.priorityClass ??
+      (requiresMainPhaseAccess &&
+      coverageBinding?.priorityClass === "P2" &&
+      accessAssessment?.status !== "funded"
+        ? "P5"
+        : coverageBinding?.priorityClass) ??
       (doctrineStageBeforeOverflow || handCapacityReliefPreparation
         ? ("P4" as const)
         : phase === "progress" && shellCountersBefore <= 1
@@ -217,6 +245,14 @@ export function buildRunnerShellTradersPipelineSignals({
         ? [
             `runner_shell_traders_coverage:${coverageBinding.requiredRole}:${coverageBinding.targetServerId ?? "no_server"}`,
           ]
+        : []),
+      ...(accessAssessment
+        ? [
+            `runner_shell_traders_access:${accessAssessment.status}:${accessAssessment.reason}`,
+          ]
+        : []),
+      ...(paidCoverageWithoutAccess
+        ? ["runner_shell_traders_holds_unfunded_access"]
         : []),
       ...(redundantTarget
         ? ["runner_shell_traders_rejected_redundant_target"]
@@ -274,6 +310,7 @@ export function buildRunnerShellTradersPipelineSignals({
             }
           : {}),
         targetRoles: [...roles],
+        ...(accessAssessment ? { accessAssessment } : {}),
         evidenceCodes,
       } satisfies RunnerShellTradersPipelineSignal,
     ];

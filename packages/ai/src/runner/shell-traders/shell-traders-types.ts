@@ -1,4 +1,5 @@
 import type { RunnerCoverageGapSignal } from "../../plans/runner-coverage-contracts";
+import type { ShellTradersAccessAssessment } from "./shell-traders-access";
 
 export type RunnerShellTradersPipelineSignal = {
   pipelineId: string;
@@ -30,6 +31,7 @@ export type RunnerShellTradersPipelineSignal = {
     targetServerId?: string;
   }>;
   targetRoles: string[];
+  accessAssessment?: ShellTradersAccessAssessment;
   evidenceCodes: string[];
 };
 

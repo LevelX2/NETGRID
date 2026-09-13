@@ -59,7 +59,7 @@ describe("runner Shell Traders pipeline signals", () => {
         sourceCardInstanceId: "shell-source",
         targetCardInstanceId: "dwarf",
         actionIds: ["prepare-dwarf"],
-        priorityClass: "P2",
+        priorityClass: "P5",
         shellCountersBefore: 3,
         shellCountersAfterAction: 3,
         coverageBinding: {
@@ -116,7 +116,7 @@ describe("runner Shell Traders pipeline signals", () => {
     ]);
   });
 
-  it("allows a same-role breaker replacement when it completes an acute target", () => {
+  it("keeps a viable same-role replacement but holds payment without a quoted access path", () => {
     const source = shellTraders();
     const prepared = card("dwarf-new", "onr_v1_021_dwarf", "program", {
       installCost: 3,
@@ -149,9 +149,10 @@ describe("runner Shell Traders pipeline signals", () => {
       ]),
     ).toEqual([
       expect.objectContaining({
-        phase: "progress",
-        actionIds: ["remove-last-dwarf"],
-        priorityClass: "P2",
+        phase: "hold",
+        actionIds: [],
+        priorityClass: "P5",
+        accessAssessment: expect.objectContaining({ status: "unknown" }),
         replacementAssessment: expect.objectContaining({
           status: "available",
           selectedProgramInstanceIds: ["dwarf-old"],

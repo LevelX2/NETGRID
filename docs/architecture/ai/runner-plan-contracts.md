@@ -1481,6 +1481,26 @@ Finanzierungsquotes und fehlende Routen sichern diese Trennung ab.
 
 ## 13. `runner.shell_traders_pipeline`
 
+In der Runner-Hauptphase benötigt bezahlte Coverage-Beschleunigung einen
+vollständigen aktuell finanzierten Zugriffsnachweis aus
+`shell-traders-access.ts`. Er bindet Quelle, vorbereitete Karten, Server,
+StateVersion und aktuellen Run. Die begrenzte Kombination vorbereiteter
+Breaker berücksichtigt sämtliche verbleibenden Counterkosten, zulässige
+Speicherverdrängung, den bekannten Engine-gequoteten ICE-Pfad und den
+Run-Klick. Unbekannter Schutz, bedingte Pfade und fehlende Quotes bleiben
+ausdrücklich unbekannt; sie erhalten keinen sicheren Rettungsclaim.
+
+Ein einzelner dringender Coverage-Bedarf vererbt P2 erst mit diesem
+vollständigen Nachweis. Nicht finanzierbare bezahlte Beschleunigung bleibt
+beim Shell-Owner zurückgestellt; reguläre Vorbereitung erhält weiterhin
+ihren Entwicklungswert. Die Abnahme umfasst aktuell liquide Finanzierung,
+keine neue mehrzügige Funding-Suche oder zukünftige Action-Queue. Nach jedem
+realen Schritt wird neu gequotet. Encounter- und verpflichtende
+Installationsfenster behalten ihre bestehenden Verträge. D147 aus Match
+e553 sowie finanzierte, unterfinanzierte und unbekannte Gegenfälle prüfen
+diese Grenze; eine nachträglich garantierte Rettung des Matches ist nicht
+belegt.
+
 **Status:** registrierter Core-Owner. Ein Pipeline-Signal bindet die konkrete
 Quelle, das vorbereitete Programm-/Hardwareziel und die Phase
 `prepare`, `progress` oder `hold`. Discovery hält diese Identität resident;
