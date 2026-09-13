@@ -5878,7 +5878,7 @@
     },
     {
       "standardDeckId": "standard_corp_dr_dreffs_letzte_visite",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "status": "active",
       "name": "Dr. Dreffs letzte Visite",
       "side": "corp",
@@ -5945,6 +5945,10 @@
           "quantity": 3
         },
         {
+          "cardId": "onr_v1_357_dieter-esslin",
+          "quantity": 1
+        },
+        {
           "cardId": "onr_v1_355_crystal-palace-station-grid",
           "quantity": 2
         },
@@ -5962,7 +5966,7 @@
         },
         {
           "cardId": "onr_classic_018_reclamation-project",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_classic_017_corporate-shuffle",
@@ -5972,7 +5976,7 @@
       "source": {
         "kind": "curated_local_deck",
         "sourceDeckId": "local_corp_dr_dreffs_letzte_visite",
-        "sourceDeckVersion": "1.1.0"
+        "sourceDeckVersion": "1.2.0"
       }
     }
   ]

@@ -5486,10 +5486,10 @@
     },
     {
       "standardDeckId": "standard_corp_dr_dreffs_letzte_visite",
-      "sourceDeckVersion": "1.1.0",
-      "sourceDeckHash": "standard-deck:860ee091",
-      "sourceAnalysisHash": "deck-analysis:3f9cfaf5",
-      "sourceAnalysisInputHash": "deck-analysis-input:5a2ba204",
+      "sourceDeckVersion": "1.2.0",
+      "sourceDeckHash": "standard-deck:345a253c",
+      "sourceAnalysisHash": "deck-analysis:16833e6d",
+      "sourceAnalysisInputHash": "deck-analysis-input:6c7e4978",
       "reviewedAt": "2026-09-13",
       "analysis": {
         "primaryStrategyIds": [
@@ -5498,14 +5498,15 @@
           "corp.rush_score"
         ],
         "secondaryStrategyIds": [
-          "corp.overadvance_value"
+          "corp.overadvance_value",
+          "corp.ambush_bluff"
         ],
         "reviewStatus": "plausible"
       },
       "contentByLocale": {
         "en": {
           "summary": "Dr. Dreffs letzte Visite combines affordable central defense with surprising temporary ICE encounters to create protected agenda-scoring windows. Program destruction and brain damage reinforce this control plan.",
-          "deckIdea": "Keep a choice of strong ICE in HQ. Once the Runner has passed the installed defenses, Dr. Dreff forces an additional encounter at half the printed rez cost. Reclamation Project recovers spent ICE, while Crystal Palace Station Grid taxes multi-subroutine encounters. This initial list has no matchup win-rate evidence. Marionette adds an affordable encounter for one Dreff credit: after being passed, it can return to HQ before the trash and be used on a later run.",
+          "deckIdea": "Keep a choice of strong ICE in HQ. Once the Runner has passed the installed defenses, Dr. Dreff forces an additional encounter at half the printed rez cost. Reclamation Project recovers spent ICE, while Crystal Palace Station Grid taxes multi-subroutine encounters. The version with Dieter has not yet been tested in a match series. Marionette adds an affordable encounter for one Dreff credit: after being passed, it can return to HQ before the trash and be used on a later run. A single Dieter Esslin adds an inexpensive access ambush alongside Dreff and an agenda. Two Reclamation Projects retain ICE recovery.",
           "gamePlan": {
             "opening": "Establish credits with Efficiency Experts, Accounts Receivable and BBS Whispering Campaign. Protect HQ and R&D with affordable ICE and prepare a Dreff scoring remote. Keep Glacier available as a zero-credit temporary stop.",
             "midgame": "Reserve both advancement money and the selected Dreff encounter payment. Use Haunting Inquisition to create scoring windows. Employee Empowerment supplies optional draw and Main-Office Relocation expands HQ for ICE choices; Project Zurich is a three-advancement, two-point score without requiring overadvancement.",
@@ -5548,7 +5549,8 @@
             "Dreff does not install or rez the selected ICE. Rez-income effects do not trigger. Keep at least one useful HQ option and decline low-value encounters.",
             "Shock.r must be the last installed ICE before Dreff, and its subroutine must resolve for the combination. Once the Runner can reliably break it, the lock is not guaranteed.",
             "Reclamation Project and Corporate Shuffle each cost two consecutive actions. Avoid spending the same actions on recycling and agenda advancement in your plan.",
-            "When installed normally, Marionette costs one credit after every pass or returns to HQ. Its reuse does not protect Dreff from the Runner’s subsequent access."
+            "When installed normally, Marionette costs one credit after every pass or returns to HQ. Its reuse does not protect Dreff from the Runner’s subsequent access.",
+            "Dieter is a small access ambush, not a standalone damage finish. Keep reserving credits for Dreff and scoring; two Reclamation Projects must cover spent ICE."
           ],
           "weaknesses": [
             "Without Dreff, expensive ICE can clog HQ. A developed breaker suite may pass the temporary encounter and trash the upgrade.",
@@ -5558,7 +5560,7 @@
         },
         "de": {
           "summary": "Dr. Dreffs letzte Visite verbindet günstigen Zentralschutz mit überraschenden temporären ICE-Begegnungen und schafft dadurch geschützte Agenda-Fenster. Programmzerstörung und Hirnschaden verstärken diesen Kontrollplan.",
-          "deckIdea": "Halte unterschiedliche starke ICE in HQ. Nach der installierten Verteidigung erzwingt Dr. Dreff eine weitere Begegnung für die halben gedruckten Rezkosten. Reclamation Project holt verbrauchte ICE zurück; Crystal Palace Station Grid verteuert Begegnungen mit vielen Subroutinen. Für diese erste Liste liegt noch kein Nachweis einer Matchup-Siegquote vor. Marionette ergänzt für einen Dreff-Credit eine günstige Begegnung: Nach dem Passieren kann sie vor dem Trash nach HQ zurückkehren und bei einem späteren Run erneut eingesetzt werden.",
+          "deckIdea": "Halte unterschiedliche starke ICE in HQ. Nach der installierten Verteidigung erzwingt Dr. Dreff eine weitere Begegnung für die halben gedruckten Rezkosten. Reclamation Project holt verbrauchte ICE zurück; Crystal Palace Station Grid verteuert Begegnungen mit vielen Subroutinen. Die Version mit Dieter ist noch nicht in einer Matchserie geprüft. Marionette ergänzt für einen Dreff-Credit eine günstige Begegnung: Nach dem Passieren kann sie vor dem Trash nach HQ zurückkehren und bei einem späteren Run erneut eingesetzt werden. Dieter Esslin ergänzt als einzelnes Upgrade eine günstige Zugriffsfalle neben Dreff und einer Agenda. Zwei Reclamation Project halten die ICE-Rückholung bereit.",
           "gamePlan": {
             "opening": "Baue mit Efficiency Experts, Accounts Receivable und BBS Whispering Campaign Credits auf. Schütze HQ und R&D mit bezahlbaren ICE und bereite einen Scoring-Remote mit Dreff vor. Halte Glacier als temporären Stopp für null Credits bereit.",
             "midgame": "Reserviere sowohl Advancement-Geld als auch die Zahlung für die gewählte Dreff-Begegnung. Haunting Inquisition schafft Scoringfenster. Employee Empowerment liefert optional Karten und Main-Office Relocation mehr HQ-Platz für ICE. Project Zurich bringt schon für drei Advancements zwei Punkte; Überentwicklung ist keine Voraussetzung.",
@@ -5601,7 +5603,8 @@
             "Dreff installiert und rezzt das gewählte ICE nicht. Rez-Einkommen wird nicht ausgelöst. Halte mindestens eine wirksame HQ-Option bereit und verzichte auf Begegnungen mit geringem Nutzen.",
             "Shock.r muss das letzte installierte ICE vor Dreff sein und seine Subroutine durchkommen. Kann der Runner sie zuverlässig brechen, ist die Sperre nicht garantiert.",
             "Reclamation Project und Corporate Shuffle kosten jeweils zwei aufeinanderfolgende Aktionen. Verplane diese Aktionen nicht gleichzeitig für Recycling und Agenda-Advancement.",
-            "Normal installiert kostet Marionette nach jedem Passieren einen Credit oder kehrt nach HQ zurück. Ihre Wiederverwendung schützt Dreff nicht vor dem anschließenden Zugriff des Runners."
+            "Normal installiert kostet Marionette nach jedem Passieren einen Credit oder kehrt nach HQ zurück. Ihre Wiederverwendung schützt Dreff nicht vor dem anschließenden Zugriff des Runners.",
+            "Dieter ist eine kleine Zugriffsfalle, kein eigenständiger Schadensabschluss. Reserviere weiterhin Geld für Dreff und Scoring; zwei Reclamation müssen für verbrauchte ICE reichen."
           ],
           "weaknesses": [
             "Ohne Dreff können teure ICE die HQ verstopfen. Ein fertiges Breaker-Rig kann die temporäre Begegnung überwinden und anschließend das Upgrade trashen.",

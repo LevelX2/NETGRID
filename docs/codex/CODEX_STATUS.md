@@ -32,10 +32,12 @@ Die Engine ist alleinige Regelautorität. UI, Server und KI reichen nur angebote
 ## Engine und Karten
 
 „Dr. Dreffs letzte Visite“ ist als Standarddeck mit 45 Karten,
-20 Agendapunkten und deutscher/englischer Anleitung verfügbar. Version 1.1.0
-ersetzt die beiden Banpei durch zwei Marionette. Die Liste
+20 Agendapunkten und deutscher/englischer Anleitung verfügbar. Version 1.2.0
+enthält zwei Marionette sowie einen Dieter Esslin anstelle des dritten
+Reclamation Project. Die Liste
 verbindet temporäre HQ-ICE-Begegnungen mit Remote-Scoring und Recycling;
-eine erste Stichprobe gegen zehn zufällige Runner-Standarddecks endet mit
+eine erste Stichprobe der Version 1.1.0 ohne Dieter gegen zehn zufällige
+Runner-Standarddecks endet mit
 17:13 aus 30 Spielen ohne technische Fehlerflags (Registry-Paarungen 435–444).
 Marionette wurde darin regulär gespielt, aber nicht über Dreff eingesetzt;
 ihre temporäre HQ-Rückkehr ist separat im Originalseed verifiziert. Ein
