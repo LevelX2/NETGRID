@@ -3816,6 +3816,9 @@ function resolveEngineWindow(
   if (
     context.input.playerView.pendingChoice?.source.startsWith(
       "card_implementation.classic_deflector:",
+    ) ||
+    context.input.playerView.pendingChoice?.source.startsWith(
+      "card_implementation.trash_installed_program:",
     )
   ) {
     return undefined;

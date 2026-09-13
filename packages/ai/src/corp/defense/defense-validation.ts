@@ -528,6 +528,7 @@ export function genericDefensePhase(
     value === "install_defense_support" ||
     value === "resolve_install_targets" ||
     value === "resolve_run_redirect" ||
+    value === "resolve_program_trash" ||
     value === "resolve_post_pass_ice_lifecycle" ||
     value === "draw_for_ice" ||
     value === "fund_rez_reserve" ||
@@ -995,6 +996,8 @@ export function isValidDefenseSignal(
           value.urgent === true
         : value.rezReserveNeed === undefined) &&
       (value.choiceResolution === undefined ||
+        (value.phase === "resolve_program_trash" &&
+          validProgramTrashResolution(value.choiceResolution)) ||
         (value.phase === "resolve_install_targets" &&
           validAgendaPurgeDefenseChoiceResolution(
             value.choiceResolution,
@@ -1094,4 +1097,22 @@ export function isValidDefenseSignal(
     );
   }
   return false;
+}
+
+function validProgramTrashResolution(value: unknown): boolean {
+  if (!value || typeof value !== "object") return false;
+  const r = value as Record<string, unknown>;
+  return (
+    r.kind === "program_trash" &&
+    knownNonNegativeInteger(r.sourceStateVersion) &&
+    [
+      r.choiceId,
+      r.choiceSource,
+      r.runId,
+      r.sourceIceInstanceId,
+      r.selectedOptionId,
+      r.targetCardInstanceId,
+    ].every(nonEmptyString) &&
+    r.selectedOptionId === `card_${r.targetCardInstanceId}`
+  );
 }

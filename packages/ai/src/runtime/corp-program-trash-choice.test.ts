@@ -5,9 +5,9 @@ import type {
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
-import { selectedCorpProgramTrashChoiceOptionIds } from "./corp-program-trash-choice";
+import { rankCorpProgramTrashChoiceOptionIds } from "../corp/defense/program-trash-targets";
 
-describe("selectedCorpProgramTrashChoiceOptionIds", () => {
+describe("rankCorpProgramTrashChoiceOptionIds", () => {
   it("includes a publicly converted Corp agenda controlled as a Runner program", () => {
     const { input, action, choice } = fixture();
     const converted = input.playerView.opponent.rig![1]!;
@@ -18,7 +18,7 @@ describe("selectedCorpProgramTrashChoiceOptionIds", () => {
       scoreAsAgendaAction: true,
     };
     expect(
-      selectedCorpProgramTrashChoiceOptionIds(
+      rankCorpProgramTrashChoiceOptionIds(
         input,
         action,
         choice,
@@ -28,7 +28,7 @@ describe("selectedCorpProgramTrashChoiceOptionIds", () => {
     ).toEqual(["card_utility_1"]);
     delete converted.installedAsRunnerProgram;
     expect(
-      selectedCorpProgramTrashChoiceOptionIds(
+      rankCorpProgramTrashChoiceOptionIds(
         input,
         action,
         choice,
@@ -41,7 +41,7 @@ describe("selectedCorpProgramTrashChoiceOptionIds", () => {
     const { input, action, choice } = fixture();
 
     expect(
-      selectedCorpProgramTrashChoiceOptionIds(
+      rankCorpProgramTrashChoiceOptionIds(
         input,
         action,
         choice,
@@ -78,7 +78,7 @@ describe("selectedCorpProgramTrashChoiceOptionIds", () => {
     ];
 
     expect(
-      selectedCorpProgramTrashChoiceOptionIds(
+      rankCorpProgramTrashChoiceOptionIds(
         input,
         action,
         choice,
@@ -121,7 +121,7 @@ describe("selectedCorpProgramTrashChoiceOptionIds", () => {
     const choice = input.playerView.pendingChoice!;
 
     expect(
-      selectedCorpProgramTrashChoiceOptionIds(
+      rankCorpProgramTrashChoiceOptionIds(
         input,
         action,
         choice,
