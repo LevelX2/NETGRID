@@ -810,6 +810,15 @@ gebundenen akuten Survival- oder Coverage-Nachweis zulässig. Fehlt eine
 solche konvertierbare Zielroute, bleibt der Cashout nicht produktiv; die
 Runtime darf ihn nicht mit allgemeinem „später nützlich“-Wert rechtfertigen.
 
+Eine an einen Run gebundene Darlehensroute darf eine zertifizierte reine
+Creditlücke schließen. Der noch unfinanzierte Parent muss dafür nicht bereits
+`reachable` sein. Bei einer exakt dringlichen Score-Bedrohung ist auch seine
+durch `blocked_unpayable` negative aktuelle Bewertung kein Ausschluss der
+Finanzierung. Der garantierte Nettoertrag muss nach dem gesamten bekannten
+Run die vollständige Ausstiegsreserve erhalten; der Konversionsklick bleibt
+reserviert. Fehlende Coverage, andere Pfadsperren, unzureichende Reserve und
+ungebundene oder spekulative Darlehensverwendung bleiben ausgeschlossen.
+
 ## 7. `runner.defense_and_recovery`
 
 Der vertikale Owner liegt in `packages/ai/src/runner/defense-recovery/`.
@@ -948,6 +957,15 @@ langfristigen Pfadprojektion keinen zusätzlichen Breakbedarf. Nur sein
 Schadensmarker entfällt; unabhängige Run-Effekte und vollständige
 Break-Verpflichtungen bleiben wirksam. Positive oder unbekannte Schadensmengen
 behalten ihre bisherige Bewertung.
+
+Die Restpfadprüfung vor einem freiwilligen Run-Abbruch unterscheidet eine
+reine Schadensmarkierung von einer tatsächlichen Zugangssperre. Zertifiziert
+der gemeinsame Pfad alle unabhängigen Barrieren als überwindbar, prüft der
+bestehende Damage-Owner den kumulativen Schaden mit dem verbleibenden Budget
+nach den notwendigen Breaks und dem bestätigten Handboden. Überlebbarer
+Schaden darf dann nicht nach einem zulässigen Runstart denselben unveränderten
+Pfad als unpassierbar erklären. Echte Letalität, fehlende Handreserve und
+unabhängige unüberwindbare ICE bleiben Abbruchgründe.
 
 **Klasse:** `urgent_response` oder gebundener Kindplan
 **Rolle:** Urgent Response

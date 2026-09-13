@@ -22,6 +22,7 @@ import { quoteRunnerRunRiskReserve } from "../../run-analysis/runner-run-risk-re
 import {
   runnerConfirmedDamageRequiredHandFloor,
   runnerDamageThreatAssessment,
+  runnerVisibleLethalIceDamageAssessment,
   runnerVisibleLethalIceDamageJackOutAssessment,
 } from "../../runner-damage-threat-assessment";
 import type {
@@ -354,6 +355,21 @@ export function currentRunAbortAssessment(
     input.playerView.opponent.credits,
   );
   if (path.canReachAccess) return undefined;
+  if (
+    path.knownPathBlockedOnlyByDamage &&
+    !runnerVisibleLethalIceDamageAssessment(input, remainingIce, {
+      generalCredits: path.creditsAfterPath,
+      requiredHandFloor: runnerConfirmedDamageRequiredHandFloor(input),
+      ...(path.fullyBrokenIceInstanceIds
+        ? { fullyBrokenIceInstanceIds: path.fullyBrokenIceInstanceIds }
+        : {}),
+    })
+  ) {
+    // The known path has already certified independent access barriers and
+    // reserved their costs. Revalidate its remaining damage with the same
+    // cumulative hand budget as the run-start owner before declaring an exit.
+    return undefined;
+  }
   const conditionalRiskRoute = assessRandomBreakOrDamageRiskForVisibleRunPath(
     input,
     {

@@ -195,8 +195,14 @@ function runnerDebtFinancingCandidateHasSafeBoundRunExit(
     projection.confidence !== "high" ||
     projection.grossLiquidCreditGain !== profile.installCreditGain ||
     projection.creditCost !== profile.installCost ||
-    parent.pathPassability !== "reachable" ||
-    parent.score <= 0 ||
+    (parent.pathPassability !== "reachable" &&
+      parent.pathPassability !== "blocked_unpayable") ||
+    (parent.score <= 0 &&
+      !(
+        parent.pathPassability === "blocked_unpayable" &&
+        parent.scoreThreat &&
+        request.priority === "acute_hard_plan_blocker"
+      )) ||
     (!parent.scoreThreat &&
       parent.accessPayoff !== "agenda" &&
       parent.accessPayoff !== "score_threat") ||
@@ -206,6 +212,9 @@ function runnerDebtFinancingCandidateHasSafeBoundRunExit(
     return false;
   }
   const netGain = projection.netLiquidCreditGain;
+  // Funding may close a certified credit-only path gap. Requiring the
+  // unfunded parent to be payable first would exclude the very consumer
+  // this route finances. Coverage and hazard failures remain excluded.
   return (
     typeof netGain === "number" &&
     Number.isFinite(netGain) &&
