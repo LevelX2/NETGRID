@@ -19099,7 +19099,7 @@ describe("authoritative plan-first live runtime", () => {
     },
   );
 
-  it("binds canonical debt financing to the exact profitable run parent and its safe exit reserve", () => {
+  it("rejects debt financing when its hand installation lacks the Engine source-zone binding", () => {
     resetResidentPlanPortfolioMemory();
     const run = legalAction(
       "run-remote",
@@ -19176,25 +19176,13 @@ describe("authoritative plan-first live runtime", () => {
       }),
     }).chooseSemanticRuntimeAction(input, {});
 
+    // A claimed profitable target cannot replace the Engine's hand-cost
+    // binding. Real fully funded positive routes are covered by the
+    // meta-434-debt-funding checkpoints, including parent/leaf ownership.
     expect(decision).toMatchObject({
-      actionId: loan.actionId,
+      actionId: credit.actionId,
       reasonCode: "plan_first.runner.economy",
       fallbackUsed: false,
-    });
-    expect(residentPlanPortfolioSnapshot(input)).toMatchObject({
-      rootForegroundInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-      executorInstanceId: "plan:runner.economy:run-support%3Aremote%3Aremote_1",
-      instances: expect.arrayContaining([
-        expect.objectContaining({
-          instanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-          openNeedIds: ["run-support:remote:remote_1"],
-        }),
-        expect.objectContaining({
-          instanceId: "plan:runner.economy:run-support%3Aremote%3Aremote_1",
-          parentInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-          parentNeedId: "run-support:remote:remote_1",
-        }),
-      ]),
     });
   });
 
