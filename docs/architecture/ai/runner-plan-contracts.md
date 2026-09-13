@@ -268,6 +268,12 @@ Der Plan muss unterscheiden:
 - Ambush-/Damage-Risiko;
 - deckstrategisch begründeten wiederholten Remote-Druck.
 
+Ein allgemeiner Matchpoint-Fokus wird vor den konkret bewerteten Remote-Routen
+zusammengeführt. Er darf deren aktuelle Finanzierungs- oder Coverage-Bindung,
+Zugriffsvertrag und Risikoquote nicht überschreiben. Ein bereits berechneter
+Bank-Support bleibt damit am selben Remote-Parent und Bedarf gebunden; eine
+fehlende bezahlbare Route wird durch den Bedrohungsfokus nicht ausführbar.
+
 Ersetzt eine aktuell ausführbare gezielte ICE-Entfernung die blockierte
 Runroute, entfernt ihr Remote-Signal den bisherigen `supportNeedId` bereits
 bei der Routenbildung. Der ersetzte Coverage-Bedarf darf nicht zugleich eine

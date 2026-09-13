@@ -771,6 +771,9 @@ export function buildRunnerRemoteContestSignals({
   activeRunRoot: ActiveRunnerRunRoot | undefined;
 }): RunnerPlanDomain["remoteContests"] {
   const baseRemoteContestDrafts: RunnerRemoteContestSignalDraft[] = [
+    // General threat focus precedes concrete routes. Deduplication keeps the
+    // later draft, including its exact funding/coverage and risk bindings.
+    ...runnerMatchpointRemoteFocusSignals(input, runTargets, coverageGaps),
     ...runnerRemoteInformationPreparationSignals(input, candidates, runTargets),
     ...runLockReleaseRoutes.flatMap((route) => {
       if (!route.serverId.startsWith("remote_")) return [];
@@ -1010,7 +1013,6 @@ export function buildRunnerRemoteContestSignals({
           ...(runRiskContract ? { runRiskContract } : {}),
         };
       }),
-    ...runnerMatchpointRemoteFocusSignals(input, runTargets, coverageGaps),
     ...input.playerView.servers.flatMap((server) => {
       const knownAgenda = server.root.some(
         (card) => card.known !== false && card.type === "agenda",
