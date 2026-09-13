@@ -180,6 +180,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "corpRezCostSurchargeAmount",
   "corpRezCostSurchargeSourceDefinitionId",
   "rootRezCreditOutcomeQuoteSchemaVersion",
+  "rootRezIceInstallCostQuoteJson",
   "rootRezCreditOutcomeQuoteComplete",
   "rootRezCreditOutcomeQuoteSourceCardInstanceId",
   "rootRezCreditOutcomeQuoteTargetServerId",

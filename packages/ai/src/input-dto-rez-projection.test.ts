@@ -2,6 +2,7 @@ import {
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_KIND,
   CORP_OPTIONAL_REZ_CHOICE_QUOTE_SCHEMA_VERSION,
   CORP_ROOT_REZ_CREDIT_OUTCOME_QUOTE_SCHEMA_VERSION,
+  ORIGINALSET_DEFAULT_DECKS,
   type CorpOptionalRezChoiceQuote,
   type LegalAction,
   type PlayerView,
@@ -10,8 +11,72 @@ import {
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { buildAiDecisionInputDto } from "./input-dto";
+import { createGameAfterSetup, getPlayerView } from "@netgrid/engine";
+import { removeEverywhere } from "../../engine/src/test-fixtures/mechanic-smoke-fixtures";
 
 describe("AI input DTO Corp rez projection contract", () => {
+  it("passes the Engine's same-fort install savings to the Corp input", () => {
+    const state = createGameAfterSetup({
+      seed: "sp337-engine-to-dto",
+      corpDeck: {
+        ...ORIGINALSET_DEFAULT_DECKS.corp,
+        cards: [
+          { id: "onr_v1_352_chester-mix", quantity: 1 },
+          { id: "onr_v1_237_data-wall", quantity: 2 },
+          { id: "onr_v1_188_ai-chief-financial-officer", quantity: 3 },
+        ],
+      },
+    });
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 3;
+    state.corp.credits = 5;
+    const source = Object.values(state.cardInstances).find(
+      (c) => c.definitionId === "onr_v1_352_chester-mix",
+    )!;
+    const walls = Object.values(state.cardInstances).filter(
+      (c) => c.definitionId === "onr_v1_237_data-wall",
+    );
+    const hq = state.corp.servers.find((s) => s.id === "hq")!;
+    for (const c of [source, ...walls]) removeEverywhere(state, c.instanceId);
+    source.zone = { side: "corp", zone: "serverRoot", serverId: "hq" };
+    hq.root.push(source.instanceId);
+    walls[0]!.zone = { side: "corp", zone: "serverIce", serverId: "hq" };
+    hq.ice.push(walls[0]!.instanceId);
+    walls[1]!.zone = { side: "corp", zone: "hq" };
+    state.corp.hq.push(walls[1]!.instanceId);
+    const view = getPlayerView(state, "corp");
+    const rez = view.legalActions.find(
+      (a) => a.type === "rez_card" && a.source === source.instanceId,
+    )!;
+    const raw = rez.payload!.rootRezIceInstallCostQuoteJson;
+    expect(typeof raw).toBe("string");
+    expect(JSON.parse(raw as string).installs).toContainEqual({
+      cardInstanceId: walls[1]!.instanceId,
+      beforeCredits: 1,
+      afterCredits: 0,
+    });
+    const input = buildAiDecisionInputDto({
+      side: "corp",
+      playerView: view,
+      legalActions: view.legalActions,
+      eventTail: [],
+      difficulty: "hard",
+      seed: "sp337-engine-to-dto",
+      decisionId: "sp337-engine-to-dto:1",
+      actionNumber: 1,
+      profileId: "rez-projection-dto-test",
+    });
+    for (const actions of [input.legalActions, input.playerView.legalActions])
+      expect(
+        actions.find((a) => a.actionId === rez.actionId)?.payload
+          ?.rootRezIceInstallCostQuoteJson,
+      ).toBe(raw);
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+      "rootRezIceInstallCostQuoteJson",
+    );
+  });
   it("preserves plan-bound Runner cost-penalty support bindings", () => {
     const action = iceInstallAction();
     action.payload = {

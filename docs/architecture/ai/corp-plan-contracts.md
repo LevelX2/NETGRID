@@ -536,6 +536,10 @@ dafür `CorpRootRezIceInstallCostQuote` nur für reine, öffentliche
 Installationskostenmodifikatoren ohne weitere Lifecycle-Funktion. Die Quote
 vergleicht aktuelle und nach Rez geltende Kosten derselben HQ-Karte im selben
 Fort; sie bleibt Corp-privat und bindet Quelle, Rez-Action und StateVersion.
+Die Positivliste in `input-dto.ts` übernimmt
+`rootRezIceInstallCostQuoteJson` in beide actor-sicheren LegalAction-Listen.
+Der Nachweis umfasst die Engine-Aktion durch diesen DTO-Pfad und die
+anschließende Planwahl; ein direkt ergänzter Testinput allein genügt nicht.
 `corp-ice-install-cost-support.ts` ergänzt nur den bereits ausgewählten
 Installationspfad. Serverallokation, Plan, Schritt und Prioritätsklasse bleiben
 führend; ein Rabatt für eine andere Installation begründet keinen Wechsel.

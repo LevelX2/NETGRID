@@ -5,6 +5,7 @@ import type {
   CorpRootRezIceInstallCostQuote,
 } from "@netgrid/shared";
 import { chooseAiAction } from "../ai-runtime-public-entrypoints";
+import { buildAiDecisionInputDto } from "../input-dto";
 import {
   restoreAiRuntimeCheckpoint,
   type AiRuntimeCheckpointV1,
@@ -88,6 +89,7 @@ describe("meta 434 SP-337 root rez before selected ICE installation", () => {
       const before = choose(cp);
       expect(before.actionId).toContain("corp.install_card.");
       const quotes = addCostQuotes(cp.input);
+      Object.assign(cp.input, buildAiDecisionInputDto(cp.input));
       const after = choose(cp);
       expect(quotes.map((q) => q.actionId)).toContain(after.actionId);
       expect(after.reasonCode).toBe("plan_first.corp.defend_servers");
