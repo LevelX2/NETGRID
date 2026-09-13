@@ -96,8 +96,6 @@ export let resolveCorpOperationAddAdvancementCounters: RuntimePortGroups["corpRu
 export let awardRunnerEventAgendaPoint: RuntimePortGroups["corpRuntimeResolvers"]["awardRunnerEventAgendaPoint"];
 export let choiceAction: RuntimePortGroups["corpRuntimeResolvers"]["choiceAction"];
 export let abilityMetadata: RuntimePortGroups["corpRuntimeResolvers"]["abilityMetadata"];
-export let resolveCorpInstalledEconomyAction: RuntimePortGroups["corpRuntimeResolvers"]["resolveCorpInstalledEconomyAction"];
-export let validateCorpInstalledEconomyAction: RuntimePortGroups["corpRuntimeResolvers"]["validateCorpInstalledEconomyAction"];
 export let rezzedCorpInstalledEconomyCreditSourceIds: RuntimePortGroups["corpRuntimeResolvers"]["rezzedCorpInstalledEconomyCreditSourceIds"];
 export let shouldOpenCorpInstalledEconomyCreditChoice: RuntimePortGroups["corpRuntimeResolvers"]["shouldOpenCorpInstalledEconomyCreditChoice"];
 export let startCorpInstalledEconomyCreditChoice: RuntimePortGroups["corpRuntimeResolvers"]["startCorpInstalledEconomyCreditChoice"];
@@ -603,10 +601,6 @@ export function installRuntimePortBindings(ports: RuntimePortGroups): void {
     ports.corpRuntimeResolvers.awardRunnerEventAgendaPoint;
   choiceAction = ports.corpRuntimeResolvers.choiceAction;
   abilityMetadata = ports.corpRuntimeResolvers.abilityMetadata;
-  resolveCorpInstalledEconomyAction =
-    ports.corpRuntimeResolvers.resolveCorpInstalledEconomyAction;
-  validateCorpInstalledEconomyAction =
-    ports.corpRuntimeResolvers.validateCorpInstalledEconomyAction;
   rezzedCorpInstalledEconomyCreditSourceIds =
     ports.corpRuntimeResolvers.rezzedCorpInstalledEconomyCreditSourceIds;
   shouldOpenCorpInstalledEconomyCreditChoice =

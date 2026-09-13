@@ -529,12 +529,6 @@ import {
 } from "../../card-implementations/registry";
 import { CORP_ADVANCEMENT_COUNTER_OPERATION_SOURCES } from "../../mechanics/card-implementation-derived-sets";
 import { RUN_START_CREDIT_LOSS_SOURCE } from "../../mechanics/global-modifiers";
-import {
-  corpInstalledEconomyActionPayload,
-  corpInstalledEconomyActionProfileForDefinition,
-  corpInstalledEconomyActionProfileForPayload,
-  type EconomyActionProfile,
-} from "../../mechanics/payment-costs";
 import { isP358HiddenReplacementCompatibilityChoiceSource } from "../../compatibility/payload-compatibility";
 import {
   BOARDWALK_RANDOM_PROGRAM_SOURCE,
@@ -1442,88 +1436,6 @@ export function createCorpRuntimeResolvers(
     };
   }
 
-  function resolveCorpInstalledEconomyAction(
-    state: GameState,
-    legalAction: LegalAction,
-  ): boolean {
-    const sourceCardId = String(legalAction.payload?.cardId ?? "");
-    if (!sourceCardId) return false;
-    const definition = state.cardInstances[sourceCardId]
-      ? definitionFor(state, sourceCardId)
-      : undefined;
-    if (!definition) return false;
-    const profile = corpInstalledEconomyActionProfileForPayload(
-      definition.id,
-      legalAction.payload,
-    );
-    if (!profile) return false;
-    validateCorpInstalledEconomyAction(
-      state,
-      legalAction,
-      sourceCardId,
-      profile,
-    );
-    for (
-      let spentClicks = 1;
-      spentClicks < profile.clickCost;
-      spentClicks += 1
-    ) {
-      spendClick(state, "corp");
-    }
-    if (profile.creditCost > 0) spendCredits(state, "corp", profile.creditCost);
-    const gain = credits(state, "corp", profile.creditGain, {
-      kind: "card_effect",
-      sourceDefinitionId: profile.sourceDefinitionId,
-      sourceCardId,
-      gainOrdinal: 1,
-      reason: "corp_installed_economy_action",
-    });
-    if (profile.trashSource)
-      deps.trashCorpInstalledCardToArchives(state, sourceCardId);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      sourceDefinitionId: profile.sourceDefinitionId,
-      gainedCredits: gain.creditedAmount,
-      ...(profile.trashSource ? { selfTrashed: true } : {}),
-      corpCreditsAfter: gain.creditsAfter,
-    };
-    return true;
-  }
-
-  function validateCorpInstalledEconomyAction(
-    state: GameState,
-    legalAction: LegalAction,
-    sourceCardId: string,
-    profile: EconomyActionProfile,
-  ): void {
-    if (legalAction.side !== profile.side)
-      throw new Error("Nur die Korp darf diese Economy-Faehigkeit nutzen.");
-    if (state.phase !== "corp_action_phase" || state.activeSide !== "corp")
-      throw new Error(
-        "Diese Economy-Faehigkeit ist nur in der Korp-Aktionsphase nutzbar.",
-      );
-    if (!deps.rezzedCorpRootCardIds(state).includes(sourceCardId))
-      throw new Error("Die Economy-Faehigkeit ist nicht rezzed installiert.");
-    if (definitionFor(state, sourceCardId).id !== profile.sourceDefinitionId)
-      throw new Error("Die Economy-Faehigkeit passt nicht zur Karte.");
-    if (
-      legalAction.payload?.[profile.abilityPayloadKey] !==
-      profile.abilityPayloadValue
-    )
-      throw new Error("Die Economy-Faehigkeit passt nicht zum Profil.");
-    const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
-    if (!Number.isInteger(gainAmount) || gainAmount !== profile.creditGain)
-      throw new Error(
-        "Die Economy-Faehigkeit hat einen ungueltigen Creditbetrag.",
-      );
-    if (
-      Boolean(legalAction.payload?.trashOnUse) !== Boolean(profile.trashSource)
-    )
-      throw new Error(
-        "Die Economy-Faehigkeit hat einen ungueltigen Trash-Parameter.",
-      );
-  }
-
   function rezzedCorpInstalledEconomyCreditSourceIds(
     state: GameState,
   ): CardInstanceId[] {
@@ -1715,8 +1627,6 @@ export function createCorpRuntimeResolvers(
     awardRunnerEventAgendaPoint,
     choiceAction,
     abilityMetadata,
-    resolveCorpInstalledEconomyAction,
-    validateCorpInstalledEconomyAction,
     rezzedCorpInstalledEconomyCreditSourceIds,
     shouldOpenCorpInstalledEconomyCreditChoice,
     startCorpInstalledEconomyCreditChoice,

@@ -329,7 +329,6 @@ function testHost(
     delegates: {
       shouldOpenCorpInstalledEconomyCreditChoice: () => false,
       startCorpInstalledEconomyCreditChoice: () => undefined,
-      resolveCorpInstalledEconomyAction: () => false,
       handleTraceOrchestrationAction: () => ({ handled: false }),
       handleCorpSpecialDamageAbilityAction: () => ({ handled: false }),
       handleScoredAgendaActivatedAbilityAction: () => ({ handled: false }),

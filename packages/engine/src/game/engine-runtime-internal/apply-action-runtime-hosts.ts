@@ -519,12 +519,6 @@ import {
   cardImplementationForDefinitionId,
 } from "../../card-implementations/registry";
 import { RUN_START_CREDIT_LOSS_SOURCE } from "../../mechanics/global-modifiers";
-import {
-  corpInstalledEconomyActionPayload,
-  corpInstalledEconomyActionProfileForDefinition,
-  corpInstalledEconomyActionProfileForPayload,
-  type EconomyActionProfile,
-} from "../../mechanics/payment-costs";
 import { isP358HiddenReplacementCompatibilityChoiceSource } from "../../compatibility/payload-compatibility";
 import { RUN_TAX_UPGRADE_SOURCES } from "../../mechanics/trace-tags";
 import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
@@ -699,8 +693,6 @@ export function createApplyActionRuntimeHosts(
           deps.shouldOpenCorpInstalledEconomyCreditChoice,
         startCorpInstalledEconomyCreditChoice:
           deps.startCorpInstalledEconomyCreditChoice,
-        resolveCorpInstalledEconomyAction:
-          deps.resolveCorpInstalledEconomyAction,
         handleTraceOrchestrationAction: (legalAction) =>
           handleTraceOrchestrationAction(
             deps.traceOrchestrationHost(state),

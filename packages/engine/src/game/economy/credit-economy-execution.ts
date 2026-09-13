@@ -153,10 +153,6 @@ export type CreditEconomyExecutionHost = {
       state: GameState,
       legalAction: LegalAction,
     ) => void;
-    resolveCorpInstalledEconomyAction: (
-      state: GameState,
-      legalAction: LegalAction,
-    ) => boolean;
     handleTraceOrchestrationAction: (legalAction: LegalAction) => {
       handled: boolean;
     };
@@ -242,9 +238,6 @@ export function handleCreditEconomyExecution(
       ),
       runnerCreditsAfter: state.runner.credits,
     };
-    return handled(legalAction);
-  }
-  if (host.delegates.resolveCorpInstalledEconomyAction(state, legalAction)) {
     return handled(legalAction);
   }
   if (

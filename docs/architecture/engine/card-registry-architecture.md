@@ -42,16 +42,16 @@ Eine separate `coverage-source-locations.ts` ist ausdrücklich nicht mehr zuläs
 
 ## Verantwortungsgrenze
 
-### Verbleibende leere Mechanics-Profile
+### CardSpec-Verträge statt leerer Mechanics-Profile
 
-Die alten Tabellen in `mechanics/agenda-scoring.ts`, `payment-costs.ts` und
-`hosting-counters.ts` sind keine Erweiterungspunkte für neue Karten. Die
-Inventur vom 2026-09-13 findet keine produktiven Schreiber oder dynamischen
-Befüllungen; aktive Kartenverträge stammen weiterhin aus CardSpecs.
+`mechanics/agenda-scoring.ts`, `payment-costs.ts` und `hosting-counters.ts`
+sind samt ihren leeren Profilpfaden entfernt. Neue Karten verwenden die
+CardSpec-Projektionen; leere Tabellen, Lookup-Stubs und synthetische
+Hostprofile dürfen keine zweite Kartenautorität begründen.
 
-- `payment-costs.ts`: Beide Lookup-Funktionen liefern immer `undefined`.
-  Der daran gebundene Installed-Economy-Resolver samt Validator und Ports ist
-  unerreichbar. Die eigenständige Investment-Firm-Credit-Choice bleibt aktiv.
+- Installed-Economy-Fähigkeiten laufen über aktive CardSpec-Verträge.
+  Der leere profilbasierte Resolver samt Validator und Ports ist entfernt.
+  Die eigenständige Investment-Firm-Credit-Choice bleibt aktiv.
 - `hosting-counters.ts` und `COUNTER_UPGRADE_SOURCES` sind entfernt.
   Die daran gebundenen `v1918UpgradeAbility=add_power_counter`-Angebote und
   ihre Ausführung besaßen keinen produktiven Kartenvertrag. Der bestehende
