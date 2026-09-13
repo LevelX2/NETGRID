@@ -3265,6 +3265,12 @@ function sanitizeVisibleChoiceRequest(
           metadata.temporaryEncounterSubroutineTypes = [...kinds];
           metadata.temporaryEncounterHasAdditionalMechanics = additional;
         }
+        if (
+          typeof option.metadata.temporaryEncounterBreakQuoteJson === "string"
+        ) {
+          metadata.temporaryEncounterBreakQuoteJson =
+            option.metadata.temporaryEncounterBreakQuoteJson;
+        }
       }
       if (
         metadata &&

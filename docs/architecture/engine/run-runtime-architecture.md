@@ -94,6 +94,17 @@ bleibt ungerezzt; Installations- und Rez-Lifecycle-Effekte werden nicht
 ausgeführt. Deshalb verursacht Glacier hier keine zusätzliche Zahlung eines
 Agendapunkts, und Coyote erzeugt kein Rez-Einkommen.
 
+Die private Optionsprojektion in `temporary-encounter-option-facts.ts`
+bildet denselben Zonenwechsel und den neuen Encounter für jede angebotene
+HQ-Instanz ab, ohne den Spielzustand zu verändern. Für reine Run-Ende-ICE
+liefert sie zusätzlich eine an Run, Fort, Instanz und Choice-StateVersion
+gebundene sichtbare Breakantwort. Sie verwendet dieselben Zahlungsfakten wie
+die reguläre Rez-/Encounter-Quote, einschließlich aktueller beschränkter
+Run-Credits. Installationsbindungen bleiben getrennt von temporären Bindungen.
+Nicht vollständig modellierte Kosten, Sondermechaniken und gemischte Wirkungen
+erhalten ausdrücklich `unmodeled`. Diese Fakten enthalten weder einen
+Nutzwert noch eine Kartenempfehlung und gelangen nicht in die Runner-View.
+
 Nach dem tatsächlichen Passieren öffnet `run-movement.ts` zuerst das
 deklarative `corp_return_passed_ice_to_hq`-Fenster. Auch ungerezztes ICE ist
 hier berechtigt, wenn die konkrete Instanz an die laufende temporäre

@@ -7,6 +7,7 @@ import {
 import { type ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import { corpIceEffectsOnlyReachFutureEncounters } from "../../runtime/corp-exact-ice-rez-route";
 import { turnKey } from "../../runtime/runtime-identifiers";
+import { preferUnbreakableEquivalentTemporaryIce } from "./temporary-ice-choice";
 
 export function resolvePlanBoundCorpDelayedSuccessChoice(
   context: PlanSchedulerContext,
@@ -105,7 +106,12 @@ export function resolvePlanBoundCorpDelayedSuccessChoice(
       delayedSuccessOptionHasCurrentEffect(entry.option.metadata) === true,
   );
   const selectedOption =
-    productiveIceOptions.length > 0 ? productiveIceOptions[0]?.option : decline;
+    productiveIceOptions.length > 0
+      ? preferUnbreakableEquivalentTemporaryIce(
+          context.input,
+          productiveIceOptions.map((entry) => entry.option),
+        )
+      : decline;
   const choiceActions = context.input.legalActions.filter(
     (action) => action.type === "resolve_choice",
   );
