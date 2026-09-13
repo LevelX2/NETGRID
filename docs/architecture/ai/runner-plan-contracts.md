@@ -967,6 +967,16 @@ Schaden darf dann nicht nach einem zulässigen Runstart denselben unveränderten
 Pfad als unpassierbar erklären. Echte Letalität, fehlende Handreserve und
 unabhängige unüberwindbare ICE bleiben Abbruchgründe.
 
+Dieselbe Zusammenführung von Pfad- und Schadensbudget gilt bei der Zulassung
+eines aktuellen Breaks. Ein bezahlbarer ETR-Break darf nicht als zwecklos
+entfallen, weil allein der sichere Schaden des inneren Pfads keine
+vollständige Breakquote besitzt. Die Prüfung reserviert zunächst die
+aktuellen Pflicht-Breaks und alle Folgekosten. Danach bewertet sie verbleibende
+aktuelle und spätere Schadenssubroutinen gemeinsam mit dem bestätigten
+Handboden. Sie verwendet den bestehenden Damage-Owner und denselben
+Pfadbefund wie die Zielbewertung; Plan-, Executor- und Actionbindung bleiben
+beim laufenden Run.
+
 **Klasse:** `urgent_response` oder gebundener Kindplan
 **Rolle:** Urgent Response
 **Status:** registrierter produktiver Owner; Fähigkeitsgrenzen siehe Einstieg.

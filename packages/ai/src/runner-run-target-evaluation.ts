@@ -77,6 +77,7 @@ import { quoteRunnerRunRoute } from "./run-analysis/runner-run-route-quote";
 import { quoteRunnerRunRiskReserve } from "./run-analysis/runner-run-risk-reserve";
 import { quoteRunnerConsumableRunOpportunity } from "./run-analysis/runner-consumable-run-opportunity";
 import {
+  knownPathAfterDamageBudget,
   runnerConfirmedDamageRequiredHandFloor,
   runnerVisibleLethalIceDamageAssessment,
 } from "./runner-damage-threat-assessment";
@@ -1967,40 +1968,6 @@ function recommendationRank(
     case "do_not_run_now":
       return 1;
   }
-}
-
-function knownPathAfterDamageBudget(
-  path: ReturnType<typeof assessKnownRezzedIcePath>,
-  damageWithinHandBudget: boolean,
-): ReturnType<typeof assessKnownRezzedIcePath> {
-  if (!path.knownPathBlockedOnlyByDamage || !damageWithinHandBudget)
-    return path;
-  // The path producer certified every independent known access barrier;
-  // the damage owner has now checked the cumulative hand budget. Damage
-  // which fits that budget is not an unfunded break or missing coverage.
-  const resolved = { ...path };
-  delete resolved.knownPathBlockedOnlyByDamage;
-  delete resolved.noAccessReason;
-  delete resolved.unpayableReason;
-  delete resolved.unpayableIceIndex;
-  delete resolved.unbreakableIceIndex;
-  delete resolved.unbreakableIceTitle;
-  delete resolved.hardUnbrokenEffectIceIndex;
-  delete resolved.hardUnbrokenEffectIceTitle;
-  delete resolved.hardUnbrokenRunEffects;
-  delete resolved.missingCoverage;
-  return {
-    ...resolved,
-    blocked: false,
-    canReachAccess: true,
-    knownPathBlockedByHardUnbrokenEffect: false,
-    knownPathBlockedByUnbreakableIce: false,
-    knownPathBlockedByMissingCoverage: false,
-    knownPathBlockedByEtr: false,
-    canBreakNextIceButNotFullPath: false,
-    creditsSpentBeforeUnpayableIce: 0,
-    reachableAccessReason: "known_path_reachable",
-  };
 }
 
 function pathPassabilityFor(

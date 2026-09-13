@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
+import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import { corpVoluntaryDrawLeavesUnsafeMandatoryHorizon } from "../../runtime/corp-draw-admission";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
@@ -62,24 +63,46 @@ it("classifies an unaffordable next-ICE lock break as funding rather than missin
   });
 });
 
-it("binds the actual funding need to the contest parent instead of drawing for installed coverage", () => {
-  const input = restoredInput("g31-d346");
-  const result = chooseAiAction(input);
-  const action = input.legalActions.find(
-    (a) => a.actionId === result.actionId,
-  )!;
-  expect(action.type).toBe("gain_credit");
-  expect(result.fallbackUsed).toBe(false);
-  expect(result.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-    leafExecutorInstanceId:
-      "plan:runner.economy:run-support%3Aremote%3Aremote_1",
-  });
-  expect(result.decisionDebug?.planFirstDecision?.route).toMatchObject({
-    actionId: action.actionId,
-    stateVersion: input.playerView.stateVersion,
-  });
-});
+it.each([true, false])(
+  "binds the actual funding need to the contest parent with a safe loan available: %s",
+  (loanAvailable) => {
+    const input = restoredInput("g31-d346");
+    if (!loanAvailable)
+      input.legalActions = input.legalActions.filter(
+        (candidate) =>
+          !candidate.actionId.includes(
+            "install_card.runner_onr_v1_168_loan-from-chiba",
+          ),
+      );
+    const result = chooseAiAction(input);
+    const action = input.legalActions.find(
+      (a) => a.actionId === result.actionId,
+    )!;
+    expect(action.type).toBe(loanAvailable ? "install_card" : "gain_credit");
+    if (loanAvailable) {
+      expect(action.actionId).toBe(
+        "runner.install_card.runner_onr_v1_168_loan-from-chiba_1.runner_onr_v1_168_loan-from-chiba_1",
+      );
+      const target = evaluateRunnerRunTargets({ input }).find(
+        (candidate) => candidate.actionId === "runner.start_run.remote_1",
+      )!;
+      expect(target.pathCost).toBe(12);
+      expect(
+        target.creditsAfterRun + Number(action.payload?.gainCreditsAmount),
+      ).toBe(10);
+    }
+    expect(result.fallbackUsed).toBe(false);
+    expect(result.decisionDebug?.planFirstDecision).toMatchObject({
+      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      leafExecutorInstanceId:
+        "plan:runner.economy:run-support%3Aremote%3Aremote_1",
+    });
+    expect(result.decisionDebug?.planFirstDecision?.route).toMatchObject({
+      actionId: action.actionId,
+      stateVersion: input.playerView.stateVersion,
+    });
+  },
+);
 
 it("replenishes empty R&D through the Engine-quoted shuffle and draw route", () => {
   const input = restoredInput("g34-d436");

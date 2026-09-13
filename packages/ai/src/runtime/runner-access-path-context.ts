@@ -16,6 +16,11 @@ import {
 } from "../run-analysis/visible-subroutine-semantics";
 import { currentEncounterUnbrokenSubroutineIndexes } from "./current-encounter";
 import { currentEncounterRequiresDamagePreservingBreak } from "./current-encounter-damage";
+import {
+  knownPathAfterDamageBudget,
+  runnerConfirmedDamageRequiredHandFloor,
+  runnerVisibleLethalIceDamageAssessment,
+} from "../runner-damage-threat-assessment";
 import { runnerRigAfterEncounter } from "./runner-rig-after-encounter";
 import { encounterRunRemainderEffectAssessment } from "./runner-run-remainder-effect-assessment";
 import {
@@ -304,6 +309,43 @@ export function createRunnerAccessPathContext(
 
     const futureIce = server.ice.slice(0, Math.max(0, run.position.iceIndex));
     const futureRig = runnerRigAfterEncounter(input.playerView.own.rig ?? []);
+    const currentIce = dependencies.currentEncounteredIceCard(input);
+    const damageIce =
+      currentIce && quote
+        ? [
+            ...futureIce,
+            {
+              ...currentIce,
+              effectiveRunQuote: {
+                ...quote,
+                subroutines: remainingSubroutinesAfterBreak,
+              },
+            },
+          ]
+        : futureIce;
+    const pathAfterDamageBudget = (path: KnownIcePathAssessment) => {
+      if (!path.knownPathBlockedOnlyByDamage) return path;
+      return knownPathAfterDamageBudget(
+        path,
+        !runnerVisibleLethalIceDamageAssessment(
+          {
+            ...input,
+            playerView: {
+              ...input.playerView,
+              own: { ...input.playerView.own, rig: futureRig },
+            },
+          },
+          damageIce,
+          {
+            generalCredits: path.creditsAfterPath,
+            requiredHandFloor: runnerConfirmedDamageRequiredHandFloor(input),
+            ...(path.fullyBrokenIceInstanceIds
+              ? { fullyBrokenIceInstanceIds: path.fullyBrokenIceInstanceIds }
+              : {}),
+          },
+        ),
+      );
+    };
     const remainingForcedIndexes = new Set(
       quote?.subroutines.flatMap((subroutine, index) => {
         if (!unbrokenIndexes.has(index) || breakIndexes.has(index)) return [];
@@ -352,12 +394,14 @@ export function createRunnerAccessPathContext(
         if (visited.has(key)) continue;
         visited.add(key);
         if (state.remaining.size === 0) {
-          payableContinuation = dependencies.assessKnownRezzedIcePath(
-            futureIce,
-            futureRig,
-            state.budget,
-            server.root,
-            input.playerView.opponent.credits,
+          payableContinuation = pathAfterDamageBudget(
+            dependencies.assessKnownRezzedIcePath(
+              futureIce,
+              futureRig,
+              state.budget,
+              server.root,
+              input.playerView.opponent.credits,
+            ),
           ).canReachAccess;
           continue;
         }
@@ -423,11 +467,13 @@ export function createRunnerAccessPathContext(
       };
     }
 
-    const pathAssessment = dependencies.assessKnownRezzedIcePath(
-      futureIce,
-      futureRig,
-      budgetAfterBreak,
-      server.root,
+    const pathAssessment = pathAfterDamageBudget(
+      dependencies.assessKnownRezzedIcePath(
+        futureIce,
+        futureRig,
+        budgetAfterBreak,
+        server.root,
+      ),
     );
     if (
       pathAssessment.assessedKnownIceCount <= 0 ||
