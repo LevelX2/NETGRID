@@ -30,6 +30,8 @@ function readCapture(index: number): Capture {
 }
 const lateShellJson = readCapture(147);
 const unknownIceJson = readCapture(96);
+const earlyRemoteJson = readCapture(49);
+const earlySearchJson = readCapture(59);
 
 function replay(unchecked: unknown) {
   const capture = structuredClone(unchecked) as Capture;
@@ -41,6 +43,69 @@ function replay(unchecked: unknown) {
 }
 
 describe("e553 human-pattern historical evidence", () => {
+  it("keeps the early blocked remote and its exact coverage child resident", () => {
+    const { decision } = replay(earlyRemoteJson);
+    const parent = "plan:runner.contest_remote:remote%3Aremote_1";
+    const need = "coverage:breaker_sentry:run:runner.start_run.remote_1";
+    expect(decision.decisionDebug?.planFirstDecision?.portfolio).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ instanceId: parent, openNeedIds: [need] }),
+        expect.objectContaining({
+          moduleId: "runner.rig_and_coverage",
+          parentInstanceId: parent,
+          parentNeedId: need,
+          phase: "search_answer",
+        }),
+      ]),
+    );
+  });
+
+  it("searches the known blocking sentry role early under the remote parent at D59", () => {
+    const { input, decision } = replay(earlySearchJson);
+    const action = input.legalActions.find(
+      (entry) => entry.actionId === decision.actionId,
+    )!;
+    expect(action.type).toBe("activated_card_ability");
+    expect(
+      input.playerView.own.rig?.find(
+        (card) => card.instanceId === action.source,
+      )?.definitionId,
+    ).toBe("onr_v1_177_the-short-circuit");
+    expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
+      selectedPlan: {
+        moduleId: "runner.rig_and_coverage",
+        phase: "search_answer",
+        parentInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+        target: { id: "breaker_sentry" },
+      },
+      executionOrigin: {
+        rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+        stateVersion: input.playerView.stateVersion,
+      },
+      priority: { effectiveClass: "P4" },
+    });
+  });
+
+  it.each(["empty", "unknown_ice"])(
+    "does not claim known remote coverage for %s",
+    (variant) => {
+      const changed = structuredClone(earlyRemoteJson);
+      const server = changed.input.playerView.servers.find(
+        (entry) => entry.id === "remote_1",
+      )!;
+      if (variant === "empty") server.root = [];
+      else server.ice = [{ instanceId: "hidden-remote-ice", known: false }];
+      const { decision } = replay(changed);
+      expect(
+        decision.decisionDebug?.planFirstDecision?.portfolio.some(
+          (entry) =>
+            entry.moduleId === "runner.rig_and_coverage" &&
+            entry.parentInstanceId ===
+              "plan:runner.contest_remote:remote%3Aremote_1",
+        ),
+      ).toBe(false);
+    },
+  );
   it("keeps liquidity instead of paying for an incomplete matchpoint answer at D147", () => {
     const { input, decision } = replay(lateShellJson);
     expect(decision.actionId).toBe("runner.draw_card");
@@ -155,7 +220,7 @@ describe("e553 human-pattern historical evidence", () => {
       ]).status,
     ).toBe("unknown");
   });
-  it.each([lateShellJson, unknownIceJson])(
+  it.each([lateShellJson, unknownIceJson, earlyRemoteJson, earlySearchJson])(
     "preserves actor-safe capture and deterministic legal plan selection at $stateVersion",
     (capture) => {
       expect(capture.provenance).toBe(

@@ -478,8 +478,22 @@ export function uniqueCoverageGaps(
       evaluation.targetKind === "remote"
         ? `remote:${evaluation.targetServerId}`
         : `central:${evaluation.targetServerId}`;
+    const remoteServer = input.playerView.servers.find(
+      (server) => server.id === evaluation.targetServerId,
+    );
+    const knownRemoteCoverageProject =
+      requesterModuleId === "runner.contest_remote" &&
+      !outsideMissingCoverageScope &&
+      deckHasAnswer &&
+      remoteServer?.root.some(
+        (card) => !card.known || card.type === "agenda",
+      ) === true &&
+      remoteServer.ice.some(
+        (ice) => ice.known && ice.rezzed && ice.effectiveRunQuote !== undefined,
+      );
     const bindToRequester =
       coverageUpgrade !== undefined ||
+      knownRemoteCoverageProject ||
       terminalRemotePatternThreat ||
       sameTurnRunConversion !== undefined ||
       heapRecoveryPreparation !== undefined ||
@@ -520,16 +534,20 @@ export function uniqueCoverageGaps(
           ? "P2"
           : coverageUpgrade
             ? "P5"
-            : visibleAnswer
+            : knownRemoteCoverageProject
               ? "P4"
-              : "P5",
+              : visibleAnswer
+                ? "P4"
+                : "P5",
       evidenceCode: terminalRemoteCoverageThreat
         ? `terminal_remote_coverage:${evaluation.targetServerId}`
-        : coverageUpgrade
-          ? `coverage_upgrade:${evaluation.targetServerId}:${coverageUpgrade.targetDefinitionId}`
-          : costRecovery
-            ? `cost_ineffective_coverage:${evaluation.targetServerId}:${evaluation.pathCost}`
-            : (evaluation.evidence[0] ?? `missing_${requiredRole}`),
+        : knownRemoteCoverageProject
+          ? `runner_known_remote_coverage_project:${evaluation.targetServerId}`
+          : coverageUpgrade
+            ? `coverage_upgrade:${evaluation.targetServerId}:${coverageUpgrade.targetDefinitionId}`
+            : costRecovery
+              ? `cost_ineffective_coverage:${evaluation.targetServerId}:${evaluation.pathCost}`
+              : (evaluation.evidence[0] ?? `missing_${requiredRole}`),
       deckHasAnswer,
       answerInHand: visibleAnswer !== undefined,
       ...(answerInstallCost !== undefined ? { answerInstallCost } : {}),

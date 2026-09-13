@@ -329,6 +329,19 @@ Registry, Live-Runtime oder Central-Implementierung zurück.
 
 ## 4. `runner.rig_and_coverage`
 
+Ein belegter Coverage-Blocker vor einem Remote mit verdecktem oder bekanntem
+Agendamaterial erhält bereits vor Matchpoint ein konkretes P4-Projekt,
+sofern eine eigene Antwort bekannt ist und installiertes gerezztes ICE
+eine aktuelle Engine-Quote besitzt. Der Coverage-Bedarf bindet den
+`runner.contest_remote`-Parent, Run und `parentNeedId`; der Root behält
+seinen offenen Bedarf während Suche, Finanzierung und Installation.
+Damit konkurriert eine frühe gezielte Suche mit der aktiven Strategie,
+statt als ungebundener allgemeiner Rig-Aufbau liegenzubleiben. Verdecktes
+Material wird dadurch nicht zur bekannten Agenda oder zum P2-Nachweis.
+Leere Remotes und ausschließlich unbekannter Schutz erhalten diesen
+Projektanspruch nicht. D49/D59 aus Match e553 prüfen frühen Bedarf,
+delegierte Suche und die negativen Gegenfälle.
+
 Der vertikale Owner liegt in `packages/ai/src/runner/rig-coverage/`.
 Die Dateien trennen Lückenbildung (`coverage-signals.ts`), Breaker-Aufrüstung,
 Kosten-Recovery, Search-/Install-/Funding-Unterstützung, Actionzuordnung,
