@@ -1281,7 +1281,8 @@ describe("visible run analysis runner run credit pools", () => {
         availableCredits: 0,
       }),
     ).toMatchObject({
-      reachability: "conditional_access",
+      reachability: "no_access",
+      noAccessReason: "unaffordable_visible_trace_access_prevention",
       guaranteedKnownCost: 4,
       availableCredits: 0,
       fundingGap: 4,
@@ -1315,7 +1316,8 @@ describe("visible run analysis runner run credit pools", () => {
         availableCredits: 0,
       }),
     ).toMatchObject({
-      reachability: "conditional_access",
+      reachability: "no_access",
+      noAccessReason: "unaffordable_visible_trace_access_prevention",
       guaranteedKnownCost: 7,
       fundingGap: 5,
     });

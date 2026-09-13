@@ -89,6 +89,12 @@ export function quoteRunnerRunRoute(params: {
   const accessPreventingConditionalHazard = hazards.some(
     (hazard) => hazard.preventsAccess && hazard.unavoidable,
   );
+  const baseTraceAccessBlocked = hazards.some(
+    (hazard) =>
+      hazard.preventsAccess &&
+      hazard.unavoidable &&
+      hazard.baseTraceCovered === false,
+  );
   const lethalConditionalHazard = effects.some(
     (effect) => effect.canEndGameBeforeAccess,
   );
@@ -110,13 +116,15 @@ export function quoteRunnerRunRoute(params: {
         hazard.unavoidable &&
         (hazard.preventsAccess || hazard.canCauseFlatlineBeforeAccess),
     );
-  const reachability: RunnerRunRouteReachability = params.path.blocked
-    ? traceConditionalBlock
-      ? "conditional_access"
-      : "no_access"
-    : conditionalReasons.length > 0
-      ? "conditional_access"
-      : "guaranteed_access";
+  const reachability: RunnerRunRouteReachability = baseTraceAccessBlocked
+    ? "no_access"
+    : params.path.blocked
+      ? traceConditionalBlock
+        ? "conditional_access"
+        : "no_access"
+      : conditionalReasons.length > 0
+        ? "conditional_access"
+        : "guaranteed_access";
   const fundingGap = Math.max(
     0,
     guaranteedKnownCost - availableKnownRouteCredits,
@@ -136,8 +144,9 @@ export function quoteRunnerRunRoute(params: {
       : {}),
     ...(reachability === "no_access"
       ? {
-          noAccessReason:
-            params.path.noAccessReason ?? "known_route_cannot_reach_access",
+          noAccessReason: baseTraceAccessBlocked
+            ? "unaffordable_visible_trace_access_prevention"
+            : (params.path.noAccessReason ?? "known_route_cannot_reach_access"),
         }
       : {}),
     ...(params.path.preRunPreparation

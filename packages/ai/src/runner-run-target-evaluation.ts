@@ -400,8 +400,10 @@ function evaluateRunnerRunTarget(
       : baseRouteQuote;
   if (
     pathPassability === "reachable" &&
-    routeQuote.reachability === "guaranteed_access" &&
-    (routeQuote.fundingGap > 0 || creditsAfterRun < 0)
+    ((routeQuote.reachability === "guaranteed_access" &&
+      (routeQuote.fundingGap > 0 || creditsAfterRun < 0)) ||
+      routeQuote.noAccessReason ===
+        "unaffordable_visible_trace_access_prevention")
   ) {
     pathPassability = "blocked_unpayable";
   }

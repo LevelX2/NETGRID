@@ -143,6 +143,14 @@ ist dann keine zusätzliche Restguthabenpflicht; der Sicherheitsfloor, reale
 Pfadkosten und die Reserve für unbekanntes ICE bleiben verbindlich. Eine
 vorhandene Remote-Bedrohung behält ihre Reserve.
 
+Ein bekannter Trace-Effekt, der den Zugriff verhindert, ist bei unbezahlbarer
+Basisstärke und ohne bezahlbare Break- oder Abbruchantwort kein bedingt
+erreichbarer Zugriff. Die gemeinsame Runquote weist diesen Pfad als
+`no_access` aus; der vorhandene Run-Owner erhält den Finanzierungsbedarf.
+Ist die Basisabwehr bezahlbar und nur ein zusätzliches Corp-Gebot unsicher,
+bleibt die bedingte Route erhalten. Reine Tag- oder Schadensfolgen werden
+dadurch nicht zu Zugriffssperren.
+
 Ist eine aktuelle Basis-Run-Action nach exakter Runbewertung zwar legal, aber
 erst nach einem gebundenen Funding- oder Vorbereitungsschritt sinnvoll,
 bleibt sie eine ausdrücklich dispositionierte Alternative von
