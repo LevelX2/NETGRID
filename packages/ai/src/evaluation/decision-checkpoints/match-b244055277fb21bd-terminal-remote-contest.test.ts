@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import d184CaptureJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-b244055277fb21bd-01-terminal-remote-contest-d184.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
+import { evaluateRunnerRunTargets } from "../../runner-run-target-evaluation";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import {
@@ -32,10 +33,43 @@ type ReconstructedDecisionCapture = {
 };
 
 describe("match b244055277fb21bd terminal remote contest", () => {
-  it("takes the already executable terminal contest instead of developing Broker", () => {
+  it("does not admit the historical contest with a blocked unknown-ICE reserve", () => {
     const capture = structuredClone(
       d184CaptureJson,
     ) as ReconstructedDecisionCapture;
+    resetResidentPlanPortfolioMemory();
+    restoreAiRuntimeCheckpoint(
+      capture.input,
+      capture.input.ownDeckSnapshot!.deckSnapshotId,
+      capture.runtime,
+    );
+    const target = evaluateRunnerRunTargets({ input: capture.input }).find(
+      (t) => t.targetServerId === "remote_1",
+    );
+    expect(target?.prerunReserveQuote).toMatchObject({
+      status: "blocked",
+      creditGap: 25,
+    });
+    const decision = chooseAiAction(capture.input);
+    expect(decision.actionId).not.toBe("runner.start_run.remote_1");
+    expect(
+      capture.input.legalActions.some(
+        (action) => action.actionId === decision.actionId,
+      ),
+    ).toBe(true);
+  });
+  it("takes the terminal contest when the unknown-ICE reserve is funded", () => {
+    const capture = structuredClone(
+      d184CaptureJson,
+    ) as ReconstructedDecisionCapture;
+    // Synthetic companion: preserve the exact legal run and terminal goal,
+    // but finance the reserve which the historical position did not cover.
+    capture.input.playerView.own.credits = 31;
+    expect(
+      evaluateRunnerRunTargets({ input: capture.input }).find(
+        (t) => t.targetServerId === "remote_1",
+      )?.prerunReserveQuote?.creditGap,
+    ).toBe(0);
     const deckSnapshotId = capture.input.ownDeckSnapshot?.deckSnapshotId;
     expect(deckSnapshotId).toBeDefined();
     resetResidentPlanPortfolioMemory();

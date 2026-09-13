@@ -324,6 +324,13 @@ nicht; andere produktive Zielserver behalten ihre eigenen ausführbaren Heads.
 
 ### Vertikale Implementierung des Remote-Contests
 
+Auch ein als terminal eingestufter Remote-Contest darf eine explizit
+blockierte Vorabreserve für unbekanntes ICE nicht übergehen. Seine Dringlichkeit
+ersetzt keinen ausführbaren Zugriffspfad. Ein finanzierbarer Bedarf bleibt am
+Remote-Parent; nach Auszahlung werden Kosten und Reserve erneut geprüft.
+Identische unterfinanzierte Wiederholungen erhalten dadurch keine neue
+Zulassung, während eine inzwischen finanzierte Route weiterhin zulässig ist.
+
 `packages/ai/src/runner/remote-contest/` enthält:
 
 - `remote-contest-signals.ts`: Bedrohungs- und Zielbewertung, Vorbereitung,
@@ -955,6 +962,15 @@ erzeugen. „Abwehr“ bezeichnet damit das Ziel, nicht nur eine aktuell
 verfügbare Abwehraktion.
 
 ## 8. `runner.convert_run_window`
+
+Die Informations-Neubewertung des laufenden Encounters konsumiert die
+exakten offenen Subroutine-IDs der aktuellen Engine-Continue-Action. Die volle
+Kartenquote beschreibt weiterhin das ICE; bereits gebrochene oder aufgelöste
+Subroutinen dürfen aber nicht erneut als Restkosten, Schaden oder Pfadsperre
+zählen. Die übrigen ICE behalten ihre vollständigen Quotes. Fehlende oder
+widersprüchliche IDs scheitern am bestehenden Rules-Contract fail-closed.
+Während eines Zahlungs-/Choice-Unterfensters ohne Encounter-Continue bleibt
+der gebundene Parent bis zur erneuten Engine-Fortsetzung erhalten.
 
 ### Vertikale Implementierung
 
