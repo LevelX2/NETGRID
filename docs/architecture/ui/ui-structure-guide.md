@@ -96,6 +96,13 @@ Entnehmen gespeicherter Credits aus `hostedCreditsAdded` beziehungsweise
 ausweist, nennt sie die Entnahme „alle Credits“ samt Menge. Der aktuelle
 Kartenstand ist dafür keine Quelle.
 
+Programm-Trash-Subroutinen bleiben einschließlich Zielauswahl und Auflösung
+in der aktiven Run-Gruppe. Die lokalisierte Chronik nennt ICE, Subroutine und
+das tatsächlich getrashte Programm aus den öffentlichen `resolvedEffects`
+(`cardsTrashed`, `cardDefinitionId`, `cardTitle`). Eine offene Zielauswahl,
+eine Zahlung gegen das Trashing und ein Ergebnis ohne Trash werden getrennt
+benannt; fehlende Zielidentität bei bestätigtem Trash wird sichtbar diagnostiziert.
+
 ## Wo Ändern?
 
 - Spielbrett-/Ressourcenanzeige: `features/game-board/`.
