@@ -975,6 +975,29 @@ auf Jenny übertragen werden; weitere Karten derselben groben Effektfamilie
 benötigen ebenfalls ein eigenes Modell.
 
 Die nachfolgende Dr.-Dreff-Choice bleibt an `corp.defend_servers` gebunden.
+Bei einer exponierten eigenen Agenda im angegriffenen Fort oder HQ und
+mehreren produktiven Optionen mit ausschließlich Run-Ende-Subroutinen
+vergleicht derselbe Owner die aktuelle sichtbare Runner-Breakantwort. Die
+Engine liefert dafür eine Corp-private Quote mit Karteninstanz, Fort, Run
+und StateVersion; sie berücksichtigt das installierte sichtbare Rig und
+aktuell verwendbare Run-Credits. Eine Option außerhalb dieser finanzierten
+Breakantwort steht vor einer bereits bezahlbar brechbaren Option. Innerhalb
+derselben Wirkungsklasse bleibt die bestehende Reihenfolge nach Halb-Rezkosten
+erhalten. Fehlt eine erforderliche Quote oder passt ihre Bindung nicht, scheitert
+dieser Vergleich sichtbar.
+
+Der Vergleich ist auf gleichartige reine Run-Ende-Wirkung begrenzt. Schaden,
+Traces, zusätzliche Encountermechaniken und ausdrücklich unvollständige
+Projektionen behalten ihre bestehende qualitative Auswahl; sie werden nicht
+als äquivalent oder garantiert blockierend behandelt. Die Quote behauptet
+keine Abwehr aller möglichen Sonderfähigkeiten des Runners. Zusätzliche
+Kosten vor dem Encounter und nicht vollständig quotierte Folgen tragen
+keinen Break-Dominanznachweis. `corp-dreff-visible-budget.test.ts` prüft die
+Engine-Choice durch den KI-DTO, Budgetgrenzen, Run-Credits, Bindungsfehler,
+Sichtbarkeit und Replay. Die Kontrollfälle halten außerdem die bestehende
+risikobegrenzte BBS-Bewertung und Score-Konversion vor zusätzlichem Einkommen
+fest; ein pauschaler neuer Economy- oder Score-Bonus folgt daraus nicht.
+
 Auch das anschließende ICE-Lifecycle-Fenster gehört diesem Owner. Die Engine
 liefert in jeder Post-Pass-LegalAction das exakte boolesche Fact
 `postPassIceTrashedUnlessReturned`. Temporäres Encounter-ICE würde bei

@@ -40,7 +40,9 @@ it.each([
     };
     state.corp.hq.push(iceId);
     const before = hashState(state);
-    expect(temporaryEncounterOptionFacts(state, iceId, definition)).toEqual({
+    expect(
+      temporaryEncounterOptionFacts(state, iceId, definition),
+    ).toMatchObject({
       temporaryEncounterSubroutineTypes: types,
       temporaryEncounterHasAdditionalMechanics:
         id === "onr_proteus_035_roadblock",
@@ -70,4 +72,29 @@ it("projects pending and active public break restrictions independently to both 
       "nextEncounterNoBreakSubroutines",
     );
   }
+});
+
+it("keeps unprojected entry payments explicitly outside the temporary break comparison", () => {
+  const state = stateWithRun();
+  const iceId = "temporary-wall" as CardInstanceId;
+  const definition = CARD_DEFINITIONS_BY_ID["onr_v1_279_wall-of-static"]!;
+  state.cardInstances[iceId] = {
+    ...state.cardInstances[state.corp.hq[0]!]!,
+    definitionId: definition.id,
+    zone: { side: "corp", zone: "hq" },
+    faceup: false,
+    rezzed: false,
+  };
+  state.corp.hq.push(iceId);
+  state.run!.encounterTaxForFutureIce = 2;
+  const before = hashState(state);
+  const facts = temporaryEncounterOptionFacts(state, iceId, definition);
+  expect(JSON.parse(facts.temporaryEncounterBreakQuoteJson)).toMatchObject({
+    status: "unmodeled",
+    reason: "non_equivalent_or_conditional_encounter",
+    cardId: iceId,
+    runId: state.run!.runId,
+    stateVersion: state.stateVersion + 1,
+  });
+  expect(hashState(state)).toBe(before);
 });
