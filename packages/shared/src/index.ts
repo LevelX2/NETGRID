@@ -918,6 +918,7 @@ export type ChoicePresentationKey =
   | "generic_bid_amount"
   | "generic_confirm"
   | "generic_select_cards"
+  | "trash_installed_program"
   | "generic_select_option"
   | "aardvark_rez"
   | "advancement_move"

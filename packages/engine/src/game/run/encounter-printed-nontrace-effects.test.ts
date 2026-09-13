@@ -428,6 +428,7 @@ describe("encounter printed non-trace effects boundary", () => {
     expect(state.pendingChoice).toMatchObject({
       side: "corp",
       kind: "select_cards",
+      presentationKey: "trash_installed_program",
       options: expect.arrayContaining([
         expect.objectContaining({ id: "card_cheap_program" }),
         expect.objectContaining({ id: "card_expensive_program" }),

@@ -154,6 +154,8 @@ const EN_ACTION_PRESENTATION_MESSAGES = {
   choiceBid: "Bid {amount} {credits}",
   choicePromptRunnerDrawTax: "City Surveillance: pay 1 credit or take 1 tag?",
   choicePromptGenericSelectCards: "Select cards",
+  choicePromptTrashInstalledProgram:
+    "Choose an installed Runner program to trash.",
   choicePromptGenericBidAmount: "Choose an amount",
   choicePromptGenericSelectOption: "Choose an option",
   choicePromptGenericConfirm: "Confirm the decision",
@@ -470,6 +472,8 @@ const DE_ACTION_PRESENTATION_MESSAGES: Record<
   choicePromptRunnerDrawTax:
     "City Surveillance: 1 Credit zahlen oder 1 Tag nehmen?",
   choicePromptGenericSelectCards: "Karten auswählen",
+  choicePromptTrashInstalledProgram:
+    "Wähle ein installiertes Runner-Programm zum Trashen.",
   choicePromptGenericBidAmount: "Betrag auswählen",
   choicePromptGenericSelectOption: "Option auswählen",
   choicePromptGenericConfirm: "Entscheidung bestätigen",
@@ -785,6 +789,8 @@ const FR_ACTION_PRESENTATION_MESSAGES: Record<
   choicePromptRunnerDrawTax:
     "City Surveillance : payer 1 crédit ou prendre 1 tag ?",
   choicePromptGenericSelectCards: "Choisir des cartes",
+  choicePromptTrashInstalledProgram:
+    "Choisissez un programme installé du Runner à effacer.",
   choicePromptGenericBidAmount: "Choisir un montant",
   choicePromptGenericSelectOption: "Choisir une option",
   choicePromptGenericConfirm: "Confirmer la décision",

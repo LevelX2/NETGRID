@@ -20,6 +20,20 @@ import {
 } from "../hidden-zone/search-choice-builders";
 
 describe("ChoiceView projection", () => {
+  it("preserves the specific program-trash prompt key in the player view", () => {
+    const state = createGameAfterSetup({ seed: "program-trash-prompt" });
+    state.pendingChoice = {
+      ...choiceRequest(state, "corp"),
+      kind: "select_cards",
+      presentationKey: "trash_installed_program",
+      options: [],
+    };
+    expect(getPlayerView(state, "corp").pendingChoice?.presentationKey).toBe(
+      "trash_installed_program",
+    );
+    expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
+  });
+
   it("exposes pendingChoice only to the owning side and resolves it through LegalActions", () => {
     const state = toRunnerTurn(createGameAfterSetup({ seed: "v093-choice" }));
     state.pendingChoice = choiceRequest(state, "runner");

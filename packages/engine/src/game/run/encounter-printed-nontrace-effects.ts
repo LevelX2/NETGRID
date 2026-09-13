@@ -1061,6 +1061,7 @@ function startTrashProgramChoice(
       continuation: input.continuation,
     }),
     prompt: `${input.definition.title}: installiertes Programm zum Trashing wählen.`,
+    presentationKey: "trash_installed_program",
     kind: "select_cards",
     options: host.state.runner.rig.programs.map((cardId) => ({
       id: `card_${cardId}`,

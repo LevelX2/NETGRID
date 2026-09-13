@@ -103,7 +103,10 @@ ausweist, nennt sie die Entnahme „alle Credits“ samt Menge. Der aktuelle
 Kartenstand ist dafür keine Quelle.
 
 Programm-Trash-Subroutinen bleiben einschließlich Zielauswahl und Auflösung
-in der aktiven Run-Gruppe. Die lokalisierte Chronik nennt ICE, Subroutine und
+in der aktiven Run-Gruppe. Die Engine kennzeichnet ihre Zielauswahl mit
+`trash_installed_program`; die lokalisierte Aufforderung nennt ausdrücklich
+ein installiertes Runner-Programm zum Trashen statt einer allgemeinen
+Kartenauswahl. Die lokalisierte Chronik nennt ICE, Subroutine und
 das tatsächlich getrashte Programm aus den öffentlichen `resolvedEffects`
 (`cardsTrashed`, `cardDefinitionId`, `cardTitle`). Eine offene Zielauswahl,
 eine Zahlung gegen das Trashing und ein Ergebnis ohne Trash werden getrennt

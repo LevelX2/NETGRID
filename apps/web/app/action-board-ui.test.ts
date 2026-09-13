@@ -581,6 +581,27 @@ describe("localized action presentation", () => {
     },
   );
 
+  it.each([
+    ["de", "Wähle ein installiertes Runner-Programm zum Trashen."],
+    ["en", "Choose an installed Runner program to trash."],
+    ["fr", "Choisissez un programme installé du Runner à effacer."],
+  ])("explains the program-trash selection in %s", (locale, expected) => {
+    const pendingChoice = {
+      ...choice("corp"),
+      presentationKey: "trash_installed_program" as const,
+      prompt: "Colonel Failure: installiertes Programm zum Trashing wählen.",
+      options: [{ id: "card_krash", label: "Krash", value: "krash" }],
+    };
+    expect(choicePromptPresentationLabel(pendingChoice, locale)).toBe(expected);
+    expect(
+      choiceOptionPresentationLabel(
+        pendingChoice,
+        pendingChoice.options[0]!,
+        locale,
+      ),
+    ).toBe("Krash");
+  });
+
   it("reports missing source presentation instead of attributing an ability to a guessed card", () => {
     expect(
       choicePromptPresentationLabel(

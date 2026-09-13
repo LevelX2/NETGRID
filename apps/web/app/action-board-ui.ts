@@ -4766,6 +4766,8 @@ export function choicePromptPresentationLabel(
       );
     case "generic_select_cards":
       return actionPresentationText(locale, "choicePromptGenericSelectCards");
+    case "trash_installed_program":
+      return actionPresentationText(locale, "choicePromptTrashInstalledProgram");
     case "generic_bid_amount":
       return actionPresentationText(locale, "choicePromptGenericBidAmount");
     case "generic_select_option":
