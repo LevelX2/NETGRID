@@ -33,6 +33,49 @@ import {
 } from "../../runner-hand-development.test-support";
 
 describe("RunnerHandDevelopmentEvaluation", () => {
+  it.each([1, 5, 8])(
+    "requires capacity for an unbound five-card draw with %i cards on the last click",
+    (handCount) => {
+      const card = visibleCard("bodyweight", {
+        definitionId: "onr_v1_079_bodyweight-synthetic-blood",
+        title: "Bodyweight Synthetic Blood",
+        type: "event",
+        cost: 2,
+      });
+      const action = playEventAction("play-bodyweight", card, 2);
+      action.payload = { ...action.payload, drawCardsAmount: 5 };
+      const input = runnerInput({
+        credits: 3,
+        clicks: 1,
+        hand: [
+          card,
+          ...Array.from({ length: handCount - 1 }, (_, i) =>
+            visibleCard(`other-${i}`),
+          ),
+        ],
+        legalActions: [action],
+      });
+      const actionCandidates = buildActionSemanticCandidates({
+        legalActions: input.legalActions,
+        visibleSourceDefinitionsByInstanceId: {
+          [card.instanceId]: card.definitionId!,
+        },
+      });
+      expect(actionCandidates[0]?.economyProjection).toMatchObject({
+        cardsDrawn: 5,
+        cardsConsumed: 1,
+        netHandDelta: 4,
+        creditCost: 2,
+      });
+      const evaluation = findByInstance(
+        evaluateRunnerHandDevelopment({ input, actionCandidates }),
+        card.instanceId,
+      );
+      expect(evaluation?.currentNeed === "none").toBe(handCount > 1);
+      if (handCount > 1)
+        expect(evaluation?.deferReason).toBe("no_current_need");
+    },
+  );
   it.each([0, 2])(
     "uses the current Engine draw yield for a draw event: %s",
     (drawCardsAmount) => {

@@ -1,6 +1,6 @@
 # Run-Event-Handreserve und Massenziehprüfung
 
-Status: Paket 1 abgenommen; Paket 2 nach Paketcommit aktiv. Quelle:
+Status: Beide Pakete abgenommen; lokale Integration und Cleanup folgen. Quelle:
 Nutzerauftrag zu `match_cd4828fc5a7c0c7f`.
 
 ## Ziel und Grenzen
@@ -62,6 +62,15 @@ oder pauschalen Paket-Typechecks. Die öffentliche Ownerkarte bleibt gültig.
   keine pauschale Draw-Sperre, fokussierte Checks und Diffprüfung grün.
 - Commit: `fix(ai): require useful hand development for excess draw`
   beziehungsweise bei unverändertem Verhalten `test(ai): verify excess draw purpose`.
+
+Ergebnis: Der zusätzliche allgemeine Kartenentwicklungsplan umging die
+bestehende Draw-Kapazitätsprüfung. Sein Bedarf verwendet jetzt die gequotete
+Netto-Handbilanz; gebundene Coverage-/Defense-Antworten bleiben eigenständig.
+45 direkte Tests grün. Historische D26/D29-Captures über die read-only
+Maintenance-API jeweils einmal geladen; alle Input-/Hash-/Side-Safety-
+Validierungen grün. D29 lehnt den zweiten Draw ab, D26 behält die konkrete
+Antwortsuche trotz Überlauf. Ohne Patch reproduziert D29 den alten Fehler.
+Keine zusätzlichen Typ-/Hint-/Strukturverträge und kein Deckumbau.
 
 ## Abschluss
 
