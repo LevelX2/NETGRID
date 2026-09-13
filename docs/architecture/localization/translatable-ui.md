@@ -52,6 +52,14 @@ Action-Identität, Replay oder StateHash zu verändern.
 
 ## Annahmen
 
+Servergebundene Installationsaktionen verwenden in allen drei Sprachen
+dieselbe strukturierte Zielprojektion: `serverId`, `placement` und gegebenenfalls
+`rootReplacement`. Kartenmenü und lokalisierte Aktionsbuttons unterscheiden
+ICE-Schutz, Root-Installation, Asset-Ersetzung und neues Remote ausdrücklich.
+Ein allgemeines „Install“ darf diese vorhandenen Zielangaben nicht ersetzen.
+Die Regression umfasst ICE, Agendas, Nodes/Assets und Upgrades; serverfreie
+Runner- und Host-Installationen behalten ihre eigenen Präsentationsverträge.
+
 Installierte Kartenaktionen mit einem ICE-Ziel ergänzen im Kartenmenü den
 lokalisierten Servernamen und die ICE-Nummer aus der aktuellen `PlayerView`.
 Dieselbe Zielangabe gilt für die Aktionsdarstellung im Runfenster.

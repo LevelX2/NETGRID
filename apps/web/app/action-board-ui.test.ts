@@ -134,6 +134,108 @@ const contextualCardActionLabel: typeof contextualCardActionLabelWithoutCatalog 
     contextualCardActionLabelWithoutCatalog(action, TEST_CARD_PRESENTATIONS);
 
 describe("localized action presentation", () => {
+  it.each(["de", "en", "fr"] as const)(
+    "keeps ICE, agenda, asset and upgrade installation destinations distinct in %s",
+    (locale) => {
+      const remote = locale === "fr" ? "Serveur distant 3" : "Remote 3";
+      const rootLabel = (server: string) =>
+        locale === "de"
+          ? `In ${server}`
+          : locale === "en"
+            ? `Install in ${server}`
+            : `Installer dans ${server}`;
+      const iceLabel = (server: string) =>
+        locale === "de"
+          ? `Vor ${server}`
+          : locale === "en"
+            ? `Install protecting ${server}`
+            : `Installer devant ${server}`;
+      const newRemote =
+        locale === "de"
+          ? "Neues Remote erstellen"
+          : locale === "en"
+            ? "Create new remote"
+            : "Créer un serveur distant";
+      const archives = locale === "de" ? "Archive" : "Archives";
+      for (const [type, title] of [
+        ["ice", "Wall of Static"],
+        ["agenda", "Project Zurich"],
+        ["asset", "Syd Meyer Superstores"],
+        ["upgrade", "Dr. Dreff"],
+      ] as const) {
+        const destinations =
+          type === "ice" || type === "upgrade"
+            ? [
+                ["hq", "HQ"],
+                ["rd", "R&D"],
+                ["archives", archives],
+                ["remote_3", remote],
+                ["new_remote", newRemote],
+              ]
+            : [
+                ["remote_3", remote],
+                ["new_remote", newRemote],
+              ];
+        const actions = destinations.map(([serverId]) =>
+          legalAction(
+            "corp",
+            "install_card",
+            "hand_card",
+            `${title} installieren`,
+            {
+              cardId: "hand_card",
+              cardTitle: title,
+              serverId: serverId!,
+              placement: type === "ice" ? "ice" : "root",
+            },
+          ),
+        );
+        const before = structuredClone(actions);
+        const labels = actions.map((action) =>
+          contextualCardActionLabelWithoutCatalog(action, undefined, locale),
+        );
+        expect(labels).toEqual(
+          destinations.map(([id, server]) =>
+            id === "new_remote"
+              ? newRemote
+              : type === "ice"
+                ? iceLabel(server!)
+                : rootLabel(server!),
+          ),
+        );
+        expect(new Set(labels).size).toBe(actions.length);
+        if (locale !== "de")
+          expect(
+            actions.map((action) =>
+              actionButtonLabelWithoutCatalog(action, undefined, locale),
+            ),
+          ).toEqual(labels);
+        expect(actions).toEqual(before);
+      }
+      const replacement = legalAction(
+        "corp",
+        "install_card",
+        "agenda",
+        "Agenda installieren und Node ersetzen",
+        {
+          cardId: "agenda",
+          serverId: "remote_3",
+          placement: "root",
+          rootReplacement: "asset_to_agenda",
+        },
+      );
+      expect(
+        contextualCardActionLabelWithoutCatalog(replacement, undefined, locale),
+      ).toBe(
+        locale === "de"
+          ? "In Remote 3 (Node ersetzen)"
+          : locale === "en"
+            ? "Install in Remote 3 (replace asset)"
+            : "Installer dans Serveur distant 3 (remplacer l’actif)",
+      );
+    },
+  );
+
   it("distinguishes Syd Meyer Superstores ICE targets by server and board position", () => {
     const first = card("colonel_hq", "Colonel Failure", "ice");
     const second = card("colonel_remote", "Colonel Failure", "ice");

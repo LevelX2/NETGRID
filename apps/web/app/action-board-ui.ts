@@ -1508,7 +1508,10 @@ function localizedActionButtonLabel(
     case "trigger_ability":
       return named("actionUseNamedCardAbility", "actionUseCardAbility");
     case "install_card":
-      return named("actionInstallCard", "actionInstall");
+      return (
+        serverInstallActionLabel(action, locale) ??
+        named("actionInstallCard", "actionInstall")
+      );
     case "play_event":
     case "play_operation":
       return named("actionPlayCard", "actionPlay");
@@ -2105,7 +2108,10 @@ function breakerNameFromActionLabel(
   return null;
 }
 
-function installContextLabel(action: LegalAction): string {
+function serverInstallActionLabel(
+  action: LegalAction,
+  locale: AppLocale,
+): string | null {
   const serverId =
     typeof action.payload?.serverId === "string"
       ? action.payload.serverId
@@ -2114,6 +2120,27 @@ function installContextLabel(action: LegalAction): string {
     typeof action.payload?.selectedServerId === "string"
       ? action.payload.selectedServerId
       : null;
+  if (!serverId)
+    return selectedServerId
+      ? actionPresentationText(locale, "actionSelectInstallServer", {
+          server: localizedServerDisplayLabel(selectedServerId, locale),
+        })
+      : null;
+  if (isNewRemoteInstallAction(action))
+    return actionPresentationText(locale, "actionCreateRemote");
+  const server = localizedServerDisplayLabel(serverId, locale);
+  const key =
+    action.payload?.placement === "ice"
+      ? "actionInstallProtectServer"
+      : action.payload?.placement === "root"
+        ? action.payload.rootReplacement === "asset_to_agenda"
+          ? "actionInstallReplaceAsset"
+          : "actionInstallInServer"
+        : "actionInstallOnServer";
+  return actionPresentationText(locale, key, { server });
+}
+
+function installContextLabel(action: LegalAction): string {
   const runnerInstallPaymentLabel =
     typeof action.payload?.runnerInstallPaymentLabel === "string"
       ? action.payload.runnerInstallPaymentLabel
@@ -2136,22 +2163,11 @@ function installContextLabel(action: LegalAction): string {
       ? `${runnerInstallPaymentLabel} gehostet installieren`
       : "Gehostet installieren";
   }
-  if (!serverId && selectedServerId)
-    return `Auf ${serverDisplayLabel(selectedServerId)} ausrichten`;
-  if (!serverId)
-    return runnerInstallPaymentLabel
-      ? `${runnerInstallPaymentLabel} installieren`
-      : "Installieren";
-  if (isNewRemoteInstallAction(action)) return "Neues Remote erstellen";
-  const serverLabel = serverDisplayLabel(serverId);
-  if (action.payload?.placement === "ice") return `Vor ${serverLabel}`;
-  if (
-    action.payload?.placement === "root" &&
-    action.payload?.rootReplacement === "asset_to_agenda"
-  )
-    return `In ${serverLabel} (Node ersetzen)`;
-  if (action.payload?.placement === "root") return `In ${serverLabel}`;
-  return `Installieren: ${serverLabel}`;
+  const serverLabel = serverInstallActionLabel(action, "de");
+  if (serverLabel) return serverLabel;
+  return runnerInstallPaymentLabel
+    ? `${runnerInstallPaymentLabel} installieren`
+    : "Installieren";
 }
 
 function isRunnerProgramInstallContextAction(action: LegalAction): boolean {
