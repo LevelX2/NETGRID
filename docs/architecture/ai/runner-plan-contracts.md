@@ -175,7 +175,9 @@ die öffentlichen Engine-Felder `result`, `encounterContinue` und
 `encounterWillEndRun`. Fehlende Outcome-Facts beweisen kein Run-Ende.
 Ein öffentliches `decline_rez` ohne aufgelösten Effekt beendet diese
 Beobachtung nicht. Auch reine Finanzierung durch ein Ereignis erhält sie,
-wenn die öffentlichen Engine-Effekte ausschließlich Runner-Credits vergeben.
+wenn die öffentlichen Engine-Effekte ausschließlich Runner-Credits vergeben
+oder Credits auf einer eigenen Karte einlagern beziehungsweise abheben. Andere Counter-Veränderungen
+werden dadurch nicht als Finanzierung freigegeben.
 Gemischte oder nicht quotierte Ereignisse eröffnen die Bewertung erneut.
 
 Post-Break-ICE-Trash wird als Vorbereitung einer bereits zugelassenen

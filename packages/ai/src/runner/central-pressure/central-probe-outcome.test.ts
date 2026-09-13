@@ -24,7 +24,7 @@ function fixture(game = 3) {
 }
 afterEach(resetResidentPlanPortfolioMemory);
 describe("central information admission after an observed free stop", () => {
-  it.each(["score", "livewire", "decline"])(
+  it.each(["score", "livewire", "decline", "hosted"])(
     "retains the observed stop across the original %s transition",
     (transition) => {
       const cp = JSON.parse(
@@ -37,7 +37,8 @@ describe("central information admission after an observed free stop", () => {
         ),
       );
       const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
-      const serverId = transition === "decline" ? "hq" : "rd";
+      const serverId =
+        transition === "decline" || transition === "hosted" ? "hq" : "rd";
       const target = evaluateRunnerRunTargets({ input }).find(
         (e) => e.actionId === `runner.start_run.${serverId}`,
       )!;
@@ -104,6 +105,28 @@ describe("central information admission after an observed free stop", () => {
       });
     },
   );
+  it("does not treat a power-counter change as credit banking", () => {
+    const cp = JSON.parse(
+      readFileSync(
+        new URL(
+          "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-434-r10-free-probe-hosted.json",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+    );
+    for (const list of [cp.input.eventTail, cp.input.playerView.publicEvents]) {
+      const p = list.find(
+        (e: { eventId: string }) => e.eventId === "evt_117",
+      ).publicPayload;
+      p.resolvedEffects[0].counterType = "power";
+    }
+    const input = { ...cp.input, ...buildAiDecisionInputDto(cp.input) };
+    const target = evaluateRunnerRunTargets({ input }).find(
+      (e) => e.actionId === "runner.start_run.hq",
+    )!;
+    expect(runnerRepeatedFreeStopProbeEvidence(input, target)).toBeUndefined();
+  });
   it.each(["mixed_effect", "unquoted_event"])(
     "requires a pure quoted financing event: %s",
     (condition) => {

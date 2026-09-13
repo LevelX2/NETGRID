@@ -85,13 +85,20 @@ export function runnerRepeatedFreeStopProbeEvidence(
       (type === "draw_card" ||
         type === "gain_credit" ||
         type === "remove_tag" ||
-        (type === "play_event" &&
-          p.effectKind === "gain_credits" &&
+        ((type === "play_event" ||
+          type === "activated_card_ability" ||
+          type === "trigger_ability") &&
+          (p.effectKind === "gain_credits" ||
+            p.effectKind === "counter_change") &&
           p.resolvedEffects !== undefined &&
           p.resolvedEffects.length > 0 &&
           p.resolvedEffects.every(
             (effect) =>
-              effect.kind === "gain_credits" && effect.side === "runner",
+              effect.side === "runner" &&
+              (effect.kind === "gain_credits" ||
+                ((effect.kind === "add_hosted_credits" ||
+                  effect.kind === "take_hosted_credits") &&
+                  effect.counterType === "bit")),
           )))
     )
       continue;
