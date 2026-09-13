@@ -1087,6 +1087,17 @@ Verschlechterung gegenüber dem akzeptierten Startvertrag begründet eine
 Jack-out-Präferenz; ein unveränderter Grenzfall erzeugt weder einen neuen Plan
 noch eine zweite Entscheidungsautorität.
 
+Die Restpfadquote verwendet die Engine-gequotete Stärke nach dem aktuellen
+Encounter. Vor Ausgaben gegen ausschließlich verbleibende ETR-Subroutinen
+prüft derselbe Owner außerdem den vollständigen Pump-/Breakpreis gegen den
+gebundenen Fortsetzungsvertrag. Erhält der danach verbleibende bekannte Pfad
+die akzeptierte Reserve nicht mehr, lässt der Owner die reine ETR auflösen,
+statt zunächst zu bezahlen und im folgenden unveränderten Fenster abzubrechen.
+Bereits gebrochene Subroutinen werden nicht erneut bezahlt. Die Zahlung führt
+zweckgebundene Pools und über den Encounter hinaus gültige Stärke fort.
+Gemischte Wirkungen, notwendiger Schadens-/Programmschutz und ein Break zum
+Erhalt eines späteren Ausstiegs bleiben bei ihren bestehenden Bewertungen.
+
 Die Zulassung von Run-Ereignissen quotiert Route und Handreserve mit der
 bereits vorhandenen Projektion nach dem Verbrauch der Startkarte. Credit-
 und Klickkosten stammen weiterhin aus der aktuellen LegalAction; dieselbe
@@ -1097,6 +1108,13 @@ vortäuschen. Bewusst zugelassene Informationsproben behalten ihren ausdrücklic
 knappen Startvertrag; echte zusätzliche Schäden oder neue Gefahren bleiben
 Gründe für die bestehende Abbruchbewertung. Central-/Remote-Owner, Run-Leaf
 und ihre Action-/Step-Bindungen bleiben unverändert.
+
+Die Run-Action-Projektion erhält auch positive Selbsttags aus der konkret
+gebundenen Successful-Run-Fähigkeit. Der bestehende Ziel-Owner bewertet diese
+mit seiner Run-Risikokomponente; ein Kartenkontext darf den Tag weder verlieren
+noch auf einen unabhängigen Basisrun übertragen. Dieses Risikosignal ist keine
+garantierte Ressourcenverlustquote und ersetzt keine gesonderte Vorbereitung
+gegen den Tag.
 
 Die gemeinsame bekannte Pfadquote enthält auch die kanonischen Passgebühren
 bekannter gerezzter Root-Karten. Jede verbleibende Passage zählt, einschließlich

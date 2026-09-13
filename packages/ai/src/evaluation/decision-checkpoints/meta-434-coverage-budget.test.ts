@@ -1,4 +1,5 @@
 import { readFileSync } from "node:fs";
+import type { LegalAction, VisibleCard } from "@netgrid/shared";
 import { afterEach, expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { buildAiDecisionInputDto } from "../../input-dto";
@@ -58,7 +59,7 @@ it("does not install a duplicate breaker in the original Remote support chain", 
   );
   expect(
     input.legalActions.some(
-      (a) =>
+      (a: LegalAction) =>
         a.actionId === decision.actionId &&
         a.expiresAtStateVersion === input.playerView.stateVersion,
     ),
@@ -68,7 +69,7 @@ it("does not install a duplicate breaker in the original Remote support chain", 
 it("preserves actual missing coverage when the installed breaker is absent", () => {
   const { input } = fixture();
   input.playerView.own.rig = input.playerView.own.rig?.filter(
-    (c) => c.type !== "program",
+    (c: VisibleCard) => c.type !== "program",
   );
   const target = evaluateRunnerRunTargets({ input }).find(
     (t) => t.actionId === "runner.start_run.remote_1",

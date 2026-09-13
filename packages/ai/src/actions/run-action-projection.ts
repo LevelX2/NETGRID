@@ -103,7 +103,7 @@ export function projectInternalRunnerRunActions(
         candidate,
         signals,
       ),
-      riskSignals: riskSignalsForRunAction(candidate, hint),
+      riskSignals: riskSignalsForRunAction(action, candidate, hint),
       ...(temporaryRunCredits > 0 ? { temporaryRunCredits } : {}),
       ...(postRunSelfDamage > 0 ? { postRunSelfDamage } : {}),
       ...(runTraceLinkBonus !== undefined ? { runTraceLinkBonus } : {}),
@@ -1034,13 +1034,33 @@ function tokensIncludePhrase(
 }
 
 function riskSignalsForRunAction(
+  action: LegalAction,
   candidate: ActionSemanticCandidate | undefined,
   hint: AiCardHint | undefined,
 ): string[] {
   const riskTags =
     (hint as { riskTags?: string[] } | undefined)?.riskTags ?? [];
+  const capabilityKey = stringPayloadValue(
+    action,
+    "cardImplementationAbilityKey",
+  );
+  const capability = capabilityKey
+    ? hint?.actionCapabilitySemantics?.find(
+        (entry) => entry.capabilityKey === capabilityKey,
+      )
+    : undefined;
+  const successfulRunSelfTag = capability?.effects?.some(
+    (effect) =>
+      effect.kind === "tag" &&
+      effect.scope === "runner" &&
+      effect.timing === "successful_run" &&
+      typeof effect.amount === "number" &&
+      Number.isFinite(effect.amount) &&
+      effect.amount > 0,
+  );
   return uniqueStrings([
     ...riskTags,
+    ...(successfulRunSelfTag ? ["tag_self:successful_run"] : []),
     ...(candidate?.risks ?? []).map((risk) => `${risk.kind}:${risk.severity}`),
   ]);
 }
