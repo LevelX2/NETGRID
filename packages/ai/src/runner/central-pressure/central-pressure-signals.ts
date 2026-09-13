@@ -76,6 +76,7 @@ import {
 import { runnerDefenseHandBufferFacts } from "../defense-recovery/defense-signals";
 import type { RunnerHandDevelopmentEvaluation } from "../hand-development/hand-development-evaluation";
 import { runnerPostBreakTrashPreparationSignals } from "./post-break-trash-preparation";
+import { runnerRepeatedFreeStopProbeEvidence } from "./central-probe-outcome";
 function runnerAccumulatedCentralPressureConversionSignals(
   candidates: readonly ActionSemanticCandidate[],
   pressureSignals: RunnerPlanDomain["centralPressure"],
@@ -839,7 +840,29 @@ export function buildRunnerCentralPressureSignals({
             evaluation.targetServerId === "rd" ||
             evaluation.targetServerId === "archives",
         )
-        .map((evaluation) => {
+        .map((bestEvaluation) => {
+          const sameServerEvaluations = runTargets.filter(
+            (candidate) =>
+              candidate.targetServerId === bestEvaluation.targetServerId,
+          );
+          const probeExclusions = new Map(
+            sameServerEvaluations.flatMap((candidate) => {
+              const evidence = runnerRepeatedFreeStopProbeEvidence(
+                input,
+                candidate,
+              );
+              return evidence ? [[candidate.actionId, evidence] as const] : [];
+            }),
+          );
+          const evaluation =
+            bestRunTargetsByServer(
+              input,
+              economy,
+              sameServerEvaluations.filter(
+                (candidate) => !probeExclusions.has(candidate.actionId),
+              ),
+              candidates,
+            )[0] ?? bestEvaluation;
           const knownAgendaInArchives =
             evaluation.targetServerId === "archives" &&
             archivesHasVisibleKnownAgenda(input);
@@ -849,14 +872,14 @@ export function buildRunnerCentralPressureSignals({
             evaluation.knownAccessState !== "known_no_current_payoff" &&
             input.playerView.own.agendaPoints >=
               input.playerView.agendaPointsToWin - 1;
-          const pressureCadence = runnerCentralPressureCadence(
+          const ordinaryPressureCadence = runnerCentralPressureCadence(
             input,
             evaluation.targetServerId as "hq" | "rd" | "archives",
           );
-          const sameServerEvaluations = runTargets.filter(
-            (candidate) =>
-              candidate.targetServerId === evaluation.targetServerId,
-          );
+          const probeExclusion = probeExclusions.get(evaluation.actionId);
+          const pressureCadence = probeExclusion
+            ? { routeAvailable: false, evidenceCode: probeExclusion }
+            : ordinaryPressureCadence;
           const multiRunRoutesByActionId = new Map(
             sameServerEvaluations.flatMap((candidateEvaluation) => {
               const quote = runnerCentralPressureMultiRunRouteQuote(
@@ -883,6 +906,7 @@ export function buildRunnerCentralPressureSignals({
               return (
                 actionCandidate?.semanticActionType === "run.start" &&
                 actionCandidate.sourceKind === "basic_action" &&
+                !probeExclusions.has(candidateEvaluation.actionId) &&
                 candidateEvaluation.pathPassability === "reachable" &&
                 (candidateEvaluation.recommendation === "run_now" ||
                   candidateEvaluation.recommendation === "run_if_free")
@@ -1167,6 +1191,9 @@ export function buildRunnerCentralPressureSignals({
             ),
             runActionExclusions: Object.fromEntries(
               sameServerEvaluations.flatMap((candidate) => {
+                const repeatedProbe = probeExclusions.get(candidate.actionId);
+                if (repeatedProbe)
+                  return [[candidate.actionId, [repeatedProbe]]];
                 const actionCandidate = candidates.find(
                   (entry) => entry.actionId === candidate.actionId,
                 );
@@ -1336,6 +1363,7 @@ export function buildRunnerCentralPressureSignals({
         input,
         candidates,
         baseCentralPressure,
+        previous,
       ),
       ...runnerTargetedIceTrashCentralPreparationSignals(
         input,

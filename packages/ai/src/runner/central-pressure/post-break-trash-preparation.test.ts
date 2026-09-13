@@ -15,7 +15,10 @@ import { removeEverywhere } from "../../../../engine/src/test-fixtures/mechanic-
 import { buildAiDecisionInput } from "../../runtime/ai-decision-input";
 import { buildActionSemanticCandidates } from "../../action-semantic-candidate";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
-import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
+import {
+  resetResidentPlanPortfolioMemory,
+  residentPlanPortfolioSnapshot,
+} from "../../plans/resident-plan-portfolio-memory";
 import { runnerPostBreakTrashPreparationSignals } from "./post-break-trash-preparation";
 import type { RunnerPressureSignal } from "../../plans/runner-tactical-plan-contracts";
 import { readFileSync } from "node:fs";
@@ -108,6 +111,135 @@ function signals(state: GameState) {
 }
 afterEach(resetResidentPlanPortfolioMemory);
 describe("SP-350 current Engine post-break trash preparation", () => {
+  it.each(["source_removed", "target_changed", "unaffordable", "cost_changed"])(
+    "revalidates a paused installed commitment against current facts: %s",
+    (condition) => {
+      const checkpoints = JSON.parse(
+        readFileSync(
+          new URL(
+            "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-434-r7-sp350-g30-preparation.json",
+            import.meta.url,
+          ),
+          "utf8",
+        ),
+      );
+      const first = checkpoints[0];
+      restoreAiRuntimeCheckpoint(
+        first.input,
+        first.input.ownDeckSnapshot.deckSnapshotId,
+        first.runtime,
+      );
+      chooseAiAction(first.input);
+      chooseAiAction(checkpoints[1].input);
+      const previous = residentPlanPortfolioSnapshot(checkpoints[1].input)!;
+      const input = checkpoints[2].input;
+      const prior = previous.instances.find(
+        (i) =>
+          i.moduleId === "runner.pressure_central" && i.target?.id === "rd",
+      )!;
+      const signal = (prior.moduleState as { signal: RunnerPressureSignal })
+        .signal;
+      const currentSignal = {
+        ...signal,
+        reachable: true,
+        runActionIds: ["runner.start_run.rd"],
+      };
+      const run = input.legalActions.find(
+        (a: LegalAction) => a.actionId === "runner.start_run.rd",
+      )!;
+      const quote = JSON.parse(run.payload.runnerPostBreakTrashQuoteJson);
+      if (condition === "source_removed")
+        input.playerView.own.rig = input.playerView.own.rig.filter(
+          (c: { instanceId: string }) =>
+            c.instanceId !==
+            signal.postBreakTrashCommitment!.sourceCardInstanceId,
+        );
+      if (condition === "target_changed")
+        input.playerView.servers.find(
+          (s: { id: string }) => s.id === "rd",
+        ).ice[0].instanceId = "replacement-ice";
+      if (condition === "unaffordable") input.playerView.own.credits = 0;
+      if (condition === "cost_changed") {
+        quote.targets[0].trashCredits = 3;
+        run.payload.runnerPostBreakTrashQuoteJson = JSON.stringify(quote);
+      }
+      const result = runnerPostBreakTrashPreparationSignals(
+        input,
+        buildActionSemanticCandidates(input),
+        [currentSignal],
+        previous,
+      );
+      if (condition === "cost_changed") {
+        expect(result).toEqual([
+          expect.objectContaining({
+            postBreakTrashCommitment: expect.objectContaining({
+              trashCredits: 3,
+              observedAtStateVersion: input.playerView.stateVersion,
+            }),
+          }),
+        ]);
+      } else {
+        expect(result).toEqual([]);
+      }
+    },
+  );
+  it("retains the installed removal goal across the real G30 hand-buffer interruption", () => {
+    const checkpoints = JSON.parse(
+      readFileSync(
+        new URL(
+          "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-434-r7-sp350-g30-preparation.json",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+    );
+    const first = checkpoints[0];
+    restoreAiRuntimeCheckpoint(
+      first.input,
+      first.input.ownDeckSnapshot.deckSnapshotId,
+      first.runtime,
+    );
+    const preparation = chooseAiAction(first.input);
+    expect(preparation.actionId).toContain(
+      "runner.install_card.runner_onr_v1_068_startup-immolator_2",
+    );
+    for (const cp of checkpoints.slice(1)) {
+      const decision = chooseAiAction(cp.input);
+      const action = cp.input.legalActions.find(
+        (a: LegalAction) => a.actionId === decision.actionId,
+      );
+      const expected: Record<number, string> = {
+        65: "draw_card",
+        66: "start_run",
+        67: "pump_breaker",
+        68: "break_subroutine",
+        69: "continue_run",
+        70: "trigger_ability",
+      };
+      expect(action.type).toBe(expected[cp.decision]);
+      if (cp.decision === 70) {
+        expect(action.payload).toMatchObject({
+          abilityId: "trash_fully_broken_passed_ice",
+        });
+        expect(decision.reasonCode).toBe(
+          "plan_first.runner.convert_run_window",
+        );
+      }
+      const owner = residentPlanPortfolioSnapshot(cp.input)!.instances.find(
+        (i) =>
+          i.moduleId === "runner.pressure_central" && i.target?.id === "rd",
+      )!;
+      expect(owner.moduleState).toMatchObject({
+        signal: {
+          postBreakTrashCommitment: {
+            sourceCardInstanceId: "runner_onr_v1_068_startup-immolator_2",
+            serverId: "rd",
+          },
+        },
+      });
+      expect(decision.fallbackUsed).toBe(false);
+    }
+  });
   it("prepares Startup in the persisted G4 D142 decision without raising the owner priority", () => {
     const cp = JSON.parse(
       readFileSync(

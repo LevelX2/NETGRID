@@ -270,6 +270,7 @@ export function scoreProjectForCandidate(
   scorelineFeasibility: CorpScorelineFeasibility | undefined,
   centralDefenseAllocation: CorpCentralDefenseAllocation | undefined,
   preferredDeckoutAgendaRecycleRouteAvailable: boolean,
+  preparedTerminalScoreContinuationAvailable: boolean,
   residentScoreDefenseBinding?: Readonly<{
     agendaInstanceId: string;
     serverId: string;
@@ -475,6 +476,7 @@ export function scoreProjectForCandidate(
       ).length >= 2;
     const deckoutAgendaFloodScoreWindow =
       !sameTurnCloseout &&
+      !preparedTerminalScoreContinuationAvailable &&
       scorelineFeasibility?.deadline !== "current_turn_only" &&
       corpDeckoutAgendaFloodRequiresScoreDevelopment(input) &&
       (!preferredDeckoutAgendaRecycleRouteAvailable ||

@@ -61,6 +61,23 @@ export function discoverCorpDirectScoreProjects({
   );
   const preferredDeckoutAgendaRecycleRouteAvailable =
     corpPreferredDeckoutAgendaRecycleRouteAvailable(input, candidates);
+  const preparedTerminalScoreContinuationAvailable =
+    corpNextTurnScoreContinuationProjects(input, candidates).some((project) => {
+      const reserve = project.continuationReserve;
+      if (!project.terminalScore || !reserve) return false;
+      const gap = Math.max(
+        0,
+        reserve.requiredCreditsBeforeNextCorpTurn -
+          input.playerView.own.credits,
+      );
+      return (
+        gap === 0 ||
+        (gap <= input.playerView.own.clicks &&
+          candidates.some((candidate) =>
+            corpExactCurrentBasicLiquidCreditCandidate(input, candidate),
+          ))
+      );
+    });
   const directScoreProjects = candidates.flatMap((candidate) =>
     scoreProjectForCandidate(
       input,
@@ -68,6 +85,7 @@ export function discoverCorpDirectScoreProjects({
       scorelineFeasibility,
       centralDefenseAllocation,
       preferredDeckoutAgendaRecycleRouteAvailable,
+      preparedTerminalScoreContinuationAvailable,
       residentScoreDefenseBinding,
       recentlyCompromisedRemoteIds,
     ),
