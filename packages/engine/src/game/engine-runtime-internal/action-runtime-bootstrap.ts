@@ -529,7 +529,6 @@ import {
   cardImplementationForDefinitionId,
 } from "../../card-implementations/registry";
 import { RUN_START_CREDIT_LOSS_SOURCE } from "../../mechanics/global-modifiers";
-import { COUNTER_UPGRADE_SOURCES } from "../../mechanics/hosting-counters";
 import {
   corpInstalledEconomyActionPayload,
   corpInstalledEconomyActionProfileForDefinition,
@@ -779,7 +778,6 @@ export function configureActionRuntimeBootstrap({
       serverChoiceDisplayLabel,
       runnerMemoryLimit,
       constants: {
-        COUNTER_UPGRADE_SOURCES,
         RUNNER_EVENT_RESOLVERS,
       },
     },

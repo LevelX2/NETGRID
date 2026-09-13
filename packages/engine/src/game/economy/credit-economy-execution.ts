@@ -170,9 +170,6 @@ export type CreditEconomyExecutionHost = {
   random: {
     nextRandom: (state: GameState, purpose: string) => number;
   };
-  constants: {
-    COUNTER_UPGRADE_SOURCES: ReadonlySet<string>;
-  };
 };
 
 export type CreditEconomyExecutionResult = {
@@ -312,42 +309,6 @@ export function handleCreditEconomyExecution(
       ...(targetIdentityKnown
         ? { movedCardDefinitionId: targetDefinitionId }
         : {}),
-    };
-    return handled(legalAction);
-  }
-  if (legalAction.payload?.v1918UpgradeAbility === "add_power_counter") {
-    if (legalAction.side !== "corp")
-      throw new Error("Nur die Korp darf V1.9.18-Upgrade-Counter nutzen.");
-    const sourceCardId = String(
-      legalAction.payload?.cardId ?? "",
-    ) as CardInstanceId;
-    if (!host.corp.rezzedRootCardIds(state).includes(sourceCardId))
-      throw new Error(
-        "Die V1.9.18-Upgrade-Counter-Faehigkeit ist nicht rezzed installiert.",
-      );
-    const definition = host.cards.definitionFor(state, sourceCardId);
-    if (!host.constants.COUNTER_UPGRADE_SOURCES.has(definition.id))
-      throw new Error("Die V1.9.18-Counter-Faehigkeit passt nicht zur Karte.");
-    const addAmount = Number(legalAction.payload?.addCounterAmount ?? 0);
-    if (!Number.isInteger(addAmount) || addAmount !== 1)
-      throw new Error(
-        "V1.9.18-Counter-Upgrades laden in diesem WIP genau 1 Power-Counter.",
-      );
-    host.counters.addCardCounter(state, sourceCardId, "power", addAmount);
-    const serverLabel = host.cards.publicServerLabelForCard(
-      state,
-      sourceCardId,
-    );
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      sourceDefinitionId: definition.id,
-      ...(serverLabel ? { serverLabel } : {}),
-      addedCounterAmount: addAmount,
-      remainingCounters: host.counters.cardCounter(
-        state,
-        sourceCardId,
-        "power",
-      ),
     };
     return handled(legalAction);
   }

@@ -52,10 +52,10 @@ Befüllungen; aktive Kartenverträge stammen weiterhin aus CardSpecs.
 - `payment-costs.ts`: Beide Lookup-Funktionen liefern immer `undefined`.
   Der daran gebundene Installed-Economy-Resolver samt Validator und Ports ist
   unerreichbar. Die eigenständige Investment-Firm-Credit-Choice bleibt aktiv.
-- `hosting-counters.ts`: `COUNTER_UPGRADE_SOURCES` ist dauerhaft leer.
+- `hosting-counters.ts` und `COUNTER_UPGRADE_SOURCES` sind entfernt.
   Die daran gebundenen `v1918UpgradeAbility=add_power_counter`-Angebote und
-  ihre Ausführung besitzen keinen produktiven Kartenvertrag. Synthetische
-  Hosttests befüllen eine eigene Menge und belegen keine Kartenfreischaltung.
+  ihre Ausführung besaßen keinen produktiven Kartenvertrag. Der bestehende
+  Dr.-Dreff-Test schützt weiterhin vor diesem unzulässigen Aktionsangebot.
 - `agenda-scoring.ts` ist entfernt, einschließlich leerer Overadvance-/Reveal-
   Mengen, Counter-Credit-Profile, gebundener Hostzweige und synthetischer
   Profiltests. Generische CardSpec-Overadvance- und aktivierte Agenda-Fähigkeiten

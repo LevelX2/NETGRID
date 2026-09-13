@@ -127,9 +127,6 @@ export type CorpMainActionGenerationHost = {
     specialZoneHarnessActions: HostFn<LegalAction[]>;
     edgerunnerTempsInstallActionsRemaining: HostFn<number>;
   };
-  constants: {
-    COUNTER_UPGRADE_SOURCES: ReadonlySet<string>;
-  };
 };
 
 function corpOperationCapabilityBinding(
@@ -241,7 +238,6 @@ export function buildCorpMainActions(
   const specialZoneHarnessActions = host.specialZones.specialZoneHarnessActions;
   const edgerunnerTempsInstallActionsRemaining =
     host.specialZones.edgerunnerTempsInstallActionsRemaining;
-  const COUNTER_UPGRADE_SOURCES = host.constants.COUNTER_UPGRADE_SOURCES;
 
   const rootRezAction = (
     id: CardInstanceId,
@@ -801,24 +797,6 @@ export function buildCorpMainActions(
           ),
         );
       }
-    }
-    if (COUNTER_UPGRADE_SOURCES.has(definition.id)) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: Power-Counter laden`,
-          assetId,
-          [{ clicks: 1 }],
-          {
-            cardId: assetId,
-            v1918UpgradeAbility: "add_power_counter",
-            counterType: "power",
-            addCounterAmount: 1,
-          },
-        ),
-      );
     }
   }
   const scoredAgendaAbilityActionsHost = scoredAgendaAbilityHost(state);

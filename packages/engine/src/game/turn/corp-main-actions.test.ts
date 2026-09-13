@@ -441,8 +441,5 @@ function testCorpMainHost(
       specialZoneHarnessActions: () => [],
       edgerunnerTempsInstallActionsRemaining: () => 0,
     },
-    constants: {
-      COUNTER_UPGRADE_SOURCES: new Set(),
-    },
   };
 }

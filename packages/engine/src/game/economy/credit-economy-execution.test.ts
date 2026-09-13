@@ -340,9 +340,6 @@ function testHost(
         return 0;
       },
     },
-    constants: {
-      COUNTER_UPGRADE_SOURCES: new Set(["counter_upgrade"]),
-    },
   };
 }
 

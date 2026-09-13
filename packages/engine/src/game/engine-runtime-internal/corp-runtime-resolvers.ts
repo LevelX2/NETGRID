@@ -529,7 +529,6 @@ import {
 } from "../../card-implementations/registry";
 import { CORP_ADVANCEMENT_COUNTER_OPERATION_SOURCES } from "../../mechanics/card-implementation-derived-sets";
 import { RUN_START_CREDIT_LOSS_SOURCE } from "../../mechanics/global-modifiers";
-import { COUNTER_UPGRADE_SOURCES } from "../../mechanics/hosting-counters";
 import {
   corpInstalledEconomyActionPayload,
   corpInstalledEconomyActionProfileForDefinition,
