@@ -39,6 +39,7 @@ import {
   normalizeVisibleTerms,
   runAwareActionButtonLabel,
   runBreakerActionHint,
+  runCurrentIceLabel,
   runWindowInteractionAmbience,
   runWindowActionButtonLabel,
   runWindowActionInstanceDetail,
@@ -56,6 +57,7 @@ import { OverflowAwareActionButton } from "../actions/ActionControls";
 import { tooltipCardRulesText } from "../../i18n/card-rule-translations";
 import { RUN_OVERLAY_POSITION_STORAGE_KEY } from "../../lib/storage-keys";
 import { readLocalStorage } from "../../lib/local-storage";
+import { runHeaderIceTitle } from "./run-header";
 import {
   clampOverlayPosition,
   parseOverlayPositionPreference,
@@ -174,6 +176,13 @@ export function RunTimelineOverlay({
   const breachProgress = breachProgressLabel(view, locale);
   const breachHighlighterHint = breachHighlighterAccessHint(view);
   const headerStatus = runWindowStatusLabel(view, locale);
+  const headerIcePosition = runCurrentIceLabel(view);
+  const headerTitle = t("runOn", {
+    server: serverDisplayLabel(run.attackedServerId),
+  });
+  const headerDetail = headerIcePosition
+    ? (runHeaderIceTitle(view) ?? t("hiddenIce"))
+    : headerStatus;
   const breakerHint = runBreakerActionHint(view, legalActions);
   const positionStyle: CSSProperties =
     position.kind === "custom"
@@ -247,13 +256,19 @@ export function RunTimelineOverlay({
           aria-label={t("moveWindow")}
         >
           <Route size={18} />
-          <span className="runTimelineTitle">
-            <strong>
-              {t("runOn", { server: serverDisplayLabel(run.attackedServerId) })}
-            </strong>
-            {headerStatus ? <small>{headerStatus}</small> : null}
-          </span>
+          <strong
+            className="runTimelineTitle"
+            title={headerStatus ?? headerTitle}
+          >
+            <span>{headerTitle}</span>
+            {headerIcePosition ? <small> · {headerIcePosition}</small> : null}
+          </strong>
           <Move size={15} aria-hidden="true" />
+          {headerDetail ? (
+            <small className="runTimelineDetail" title={headerDetail}>
+              {headerDetail}
+            </small>
+          ) : null}
         </div>
         <div className="runSteps">
           {verticalSteps.map((step) => {

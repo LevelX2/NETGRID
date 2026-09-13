@@ -26,6 +26,12 @@ die Phasensymbole stehen rechts. Aktionsbuttons reservieren feste Spalten
 für Aktions- und Serversymbol, auch wenn das Serversymbol fehlt. Ihre
 Beschriftungen sind linksbündig, Kosten bleiben rechts. Überschrift und
 Auto-pass bleiben zentriert.
+Der Kopf bleibt auf zwei Zeilen begrenzt: Run-Ziel und ICE-Nummer oben,
+darunter der bekannte ICE-Name über die volle Breite, auch in der Bewegung.
+Die Identität stammt ausschließlich aus dem PlayerView; unbekanntes ICE
+bleibt verdeckt. Lange Namen werden einzeilig mit Ellipse dargestellt und
+stehen vollständig im Tooltip. Der Positions-Tooltip erhält zusätzlich
+den bisherigen Fortschritt innerhalb des ICE-Stapels.
 Die aktuelle Stufe hebt ihren Namen mit fetter Schrift und ihre Symbole
 mit höherer Deckkraft und Strichstärke hervor. Die zusätzliche Umrandung
 kennzeichnet weiterhin die aktuell verfügbaren Aktionen.

@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { runHeaderIceTitle } from "../features/game-board/run-header";
 import type {
   LegalAction,
   PlayerView,
@@ -1918,6 +1919,53 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(contextualCardActionLabel(aujourdOui)).toBe(
       "Top 5 nach Programmen prüfen",
     );
+  });
+
+  it.each(["movement", "approach_ice", "encounter_ice"] as const)(
+    "shows the known ICE name in the run header during %s",
+    (phase) => {
+      const ice = card(
+        "ice_1",
+        "A very long ICE name that must remain complete in the tooltip",
+        "ice",
+      );
+      const running = view("corp", {
+        servers: [{ id: "hq", label: "HQ", ice: [ice], root: [] }],
+        run: {
+          attackedServerId: "hq",
+          phase,
+          position: { kind: "ice", serverId: "hq", iceIndex: 0 },
+          successful: false,
+        },
+      });
+      expect(runHeaderIceTitle(running)).toBe(ice.title);
+      ice.known = false;
+      expect(runHeaderIceTitle(running)).toBeNull();
+    },
+  );
+
+  it("uses the temporary encountered ICE and clears the header name at the server", () => {
+    const running = view("runner", {
+      servers: [
+        {
+          id: "hq",
+          label: "HQ",
+          ice: [card("ice_1", "Data Wall", "ice")],
+          root: [],
+        },
+      ],
+      run: {
+        attackedServerId: "hq",
+        phase: "encounter_ice",
+        position: { kind: "ice", serverId: "hq", iceIndex: 0 },
+        encounteredIce: card("temporary_ice", "Marionette", "ice"),
+        successful: false,
+      },
+    });
+    expect(runHeaderIceTitle(running)).toBe("Marionette");
+    running.run!.position = { kind: "server", serverId: "hq" };
+    expect(runHeaderIceTitle(running)).toBeNull();
+    expect(runHeaderIceTitle(view("runner"))).toBeNull();
   });
 
   it("labels encounter breaker actions against the current ICE", () => {
