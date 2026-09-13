@@ -64,7 +64,7 @@ it("classifies an unaffordable next-ICE lock break as funding rather than missin
 });
 
 it.each([true, false])(
-  "binds the actual funding need to the contest parent with a safe loan available: %s",
+  "binds the sufficient bank payout to the contest parent with an unsafe loan available: %s",
   (loanAvailable) => {
     const input = restoredInput("g31-d346");
     if (!loanAvailable)
@@ -78,24 +78,26 @@ it.each([true, false])(
     const action = input.legalActions.find(
       (a) => a.actionId === result.actionId,
     )!;
-    expect(action.type).toBe(loanAvailable ? "install_card" : "gain_credit");
+    expect(action.actionId).toBe(
+      "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:withdraw_credits",
+    );
     if (loanAvailable) {
-      expect(action.actionId).toBe(
-        "runner.install_card.runner_onr_v1_168_loan-from-chiba_1.runner_onr_v1_168_loan-from-chiba_1",
-      );
       const target = evaluateRunnerRunTargets({ input }).find(
         (candidate) => candidate.actionId === "runner.start_run.remote_1",
       )!;
       expect(target.pathCost).toBe(12);
-      expect(
-        target.creditsAfterRun + Number(action.payload?.gainCreditsAmount),
-      ).toBe(10);
+      const funded = structuredClone(input);
+      funded.playerView.own.credits += 12;
+      const wholePath = evaluateRunnerRunTargets({ input: funded }).find(
+        (candidate) => candidate.actionId === target.actionId,
+      )!;
+      expect(wholePath).toMatchObject({ pathCost: 18, creditsAfterRun: 4 });
     }
     expect(result.fallbackUsed).toBe(false);
     expect(result.decisionDebug?.planFirstDecision).toMatchObject({
       rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
       leafExecutorInstanceId:
-        "plan:runner.economy:run-support%3Aremote%3Aremote_1",
+        "plan:runner.credit_bank:runner_onr_v1_154_broker_1",
     });
     expect(result.decisionDebug?.planFirstDecision?.route).toMatchObject({
       actionId: action.actionId,

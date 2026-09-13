@@ -31,6 +31,13 @@ export type RunnerCreditBankServices = {
     target: RunnerRunTargetEvaluation,
   ) => number | undefined;
   isDirectlyMandatoryRun: (target: RunnerRunTargetEvaluation) => boolean;
+  terminalKnownPathFundingGap: (
+    target: RunnerRunTargetEvaluation,
+  ) => number | undefined;
+  quoteRunAfterCashout: (
+    target: RunnerRunTargetEvaluation,
+    actionId: string,
+  ) => RunnerRunTargetEvaluation | undefined;
   developmentFundingRoute: (target: RunnerHandDevelopmentEvaluation) => {
     actionIds: string[];
     evidenceCodes: string[];
@@ -68,7 +75,7 @@ export function runnerCreditBankSignals(
       Math.max(0, tool.portfolioStoredAmount ?? tool.currentBankAmount ?? 0),
     0,
   );
-  return tools.flatMap((tool): RunnerCreditBankSignal[] => {
+  const signals = tools.flatMap((tool): RunnerCreditBankSignal[] => {
     const currentStoredCredits = Math.max(0, tool.currentBankAmount ?? 0);
     const estimatedPayout = Math.max(0, tool.estimatedPayout ?? 0);
     const exactBankOwnerCandidates = candidates.filter(
@@ -307,6 +314,9 @@ export function runnerCreditBankSignals(
           value: concreteFundingNeed
             ? 1_200 + estimatedPayout
             : 700 + estimatedPayout,
+          ...(convertibleRunFundingRoute?.runFunding
+            ? { runFunding: convertibleRunFundingRoute.runFunding }
+            : {}),
           evidenceCodes: [
             ...(convertibleRunFundingRoute?.evidenceCodes ?? []),
             ...(convertibleRunFundingNeed
@@ -408,6 +418,42 @@ export function runnerCreditBankSignals(
         ],
       },
     ];
+  });
+  // One exact parent need has one provider. Choose among sufficient current
+  // bank payouts here, before publishing proposals to the support graph.
+  const providers = new Map<string, RunnerCreditBankSignal>();
+  for (const signal of signals
+    .filter((signal) => signal.runFunding)
+    .sort(
+      (left, right) =>
+        left.runFunding!.routeAssessment.totalClickCost -
+          right.runFunding!.routeAssessment.totalClickCost ||
+        right.estimatedPayout - left.estimatedPayout ||
+        left.bankId.localeCompare(right.bankId),
+    )) {
+    if (!providers.has(signal.runFunding!.needId))
+      providers.set(signal.runFunding!.needId, signal);
+  }
+  return signals.map((signal) => {
+    const provider = signal.runFunding
+      ? providers.get(signal.runFunding.needId)
+      : undefined;
+    if (!provider || provider === signal) return signal;
+    const { runFunding, ...resident } = signal;
+    return {
+      ...resident,
+      phase: "hold" as const,
+      actionIds: [],
+      rejectedActionIds: [
+        ...signal.actionIds,
+        ...(signal.rejectedActionIds ?? []),
+      ],
+      priorityClass: "P5" as const,
+      value: 0,
+      evidenceCodes: [
+        `runner_credit_bank_equivalent_run_funding_owned_by:${provider.bankId}`,
+      ],
+    };
   });
 }
 
@@ -570,7 +616,12 @@ function runnerCreditBankRunFundingRoute(params: {
   cashOutActionIds: readonly string[];
   estimatedPayout: number;
   services: RunnerCreditBankServices;
-}): { evidenceCodes: string[] } | undefined {
+}):
+  | {
+      evidenceCodes: string[];
+      runFunding?: RunnerCreditBankSignal["runFunding"];
+    }
+  | undefined {
   const remainingFundingClicks = Math.max(
     0,
     params.input.playerView.own.clicks - 1,
@@ -620,15 +671,39 @@ function runnerCreditBankRunFundingRoute(params: {
     ) {
       continue;
     }
+    const fundedTerminalTarget =
+      params.services.terminalKnownPathFundingGap(evaluation) !== undefined
+        ? params.cashOutActionIds
+            .map((actionId) =>
+              params.services.quoteRunAfterCashout(evaluation, actionId),
+            )
+            .find(
+              (target) =>
+                target !== undefined &&
+                target.pathPassability === "reachable" &&
+                target.routeQuote?.reachability === "guaranteed_access" &&
+                target.routeQuote.unknownIceCount === 0 &&
+                target.routeQuote.conditionalReasons.length === 0 &&
+                target.prerunReserveQuote?.status !== "blocked" &&
+                target.creditsAfterRun >= 0 &&
+                (target.unavoidableVisibleIceHazardCount ?? 0) === 0 &&
+                target.visibleTraceTagHazardUnavoidable !== true,
+            )
+        : undefined;
     const exactUrgentConvertibleTarget =
       params.services.hasExactRunUrgency(evaluation) &&
-      (evaluation.score > 0 ||
+      (fundedTerminalTarget !== undefined ||
+        evaluation.score > 0 ||
         (terminalVisibleHazardFundingGap !== undefined &&
           terminalVisibleHazardFundingGap <= params.estimatedPayout)) &&
       evaluation.recommendation === "gain_credits_first";
     if (!exactUrgentConvertibleTarget) continue;
-    const conversionFundingGap =
-      terminalVisibleHazardFundingGap ?? admission.concreteFundingGap;
+    const conversionFundingGap = fundedTerminalTarget
+      ? Math.max(
+          0,
+          params.estimatedPayout - fundedTerminalTarget.creditsAfterRun,
+        )
+      : (terminalVisibleHazardFundingGap ?? admission.concreteFundingGap);
     if (conversionFundingGap <= 0) continue;
     const demand = createRunnerCreditDemand({
       demandId: `run-support:${evaluation.actionId}`,
@@ -650,7 +725,13 @@ function runnerCreditBankRunFundingRoute(params: {
     });
     const route = searchFundingRoutes({
       demand,
-      candidates: params.candidates,
+      // This certificate belongs to the bank payout itself. An unrelated
+      // loan must not prune it before the bank's route can be materialized.
+      candidates: fundedTerminalTarget
+        ? params.candidates.filter((candidate) =>
+            cashOutActionIds.has(candidate.actionId),
+          )
+        : params.candidates,
       remainingClicks: remainingFundingClicks,
       maxSteps: remainingFundingClicks,
       maxRoutes: 16,
@@ -663,12 +744,37 @@ function runnerCreditBankRunFundingRoute(params: {
     );
     if (route) {
       return {
+        ...(fundedTerminalTarget
+          ? {
+              runFunding: {
+                parentPlanInstanceId: `plan:runner.contest_remote:${encodeURIComponent(`remote:${evaluation.targetServerId}`)}`,
+                needId: `run-support:remote:${evaluation.targetServerId}`,
+                runActionId: evaluation.actionId,
+                stateVersion: params.input.playerView.stateVersion,
+                gap: conversionFundingGap,
+                routeAssessment: {
+                  stateVersion: params.input.playerView.stateVersion,
+                  routeId: route.routeId,
+                  status: route.status,
+                  reliability: route.reliability,
+                  horizon: route.horizon,
+                  projectedGap: route.projectedGap,
+                  totalClickCost: route.totalClickCost,
+                  firstStepActionId: route.steps[0]!.actionId!,
+                  evidenceCodes: route.evidence,
+                },
+              },
+            }
+          : {}),
         evidenceCodes: [
           `runner_credit_bank_bound_run_action:${evaluation.actionId}`,
           `runner_credit_bank_bound_run_target:${evaluation.targetServerId}`,
           `runner_credit_bank_bound_funding_demand:${demand.demandId}`,
           `runner_credit_bank_bound_funding_route:${route.routeId}`,
           `runner_credit_bank_bound_funding_gap:${conversionFundingGap}`,
+          ...(fundedTerminalTarget
+            ? ["runner_credit_bank_complete_terminal_path_after_cashout"]
+            : []),
           ...(terminalVisibleHazardFundingGap !== undefined
             ? [
                 `runner_credit_bank_terminal_visible_hazard_gap:${terminalVisibleHazardFundingGap}`,

@@ -6,7 +6,7 @@ import { runnerFundingRouteCandidateIsMaterializable } from "../plans/runner-fun
 import type { RunnerFundingRouteAssessment } from "../plans/runner-funding-contracts";
 import type { RunnerExactFundingRouteRequest } from "../plans/runner-funding-service-contract";
 import { runnerPaymentInstallSetups } from "../plans/runner-payment-install-planning";
-import { evaluateRunnerRunTargets } from "../runner-run-target-evaluation";
+import { quoteRunnerRunAfterGuaranteedFunding } from "../runner-run-target-evaluation";
 import { createDeckCapabilitiesContext } from "./deck-capabilities-context";
 import { runnerDebtFinancingProfile } from "./runner-canonical-card-facts";
 import {
@@ -244,29 +244,14 @@ function runnerDebtFinancingCandidateHasSafeBoundRunExit(
   // remaining balance therefore cannot certify the debt's exit reserve.
   // Requote this exact consumer with the guaranteed funding and hand cost;
   // this is prospective assessment only, never a replacement LegalAction.
-  const fundedInput: AiDecisionInput = {
-    ...input,
-    playerView: {
-      ...input.playerView,
-      own: {
-        ...input.playerView.own,
-        credits: input.playerView.own.credits + netGain,
-        clicks: input.playerView.own.clicks - projection.clickCost,
-        gripOrHq: input.playerView.own.gripOrHq.filter(
-          (card) => card.instanceId !== source.instanceId,
-        ),
-      },
-    },
-  };
-  const fundedTarget = evaluateRunnerRunTargets({
-    input: fundedInput,
+  const fundedTarget = quoteRunnerRunAfterGuaranteedFunding({
+    input,
     deckCapabilities:
       createDeckCapabilitiesContext().deckCapabilitiesForInput(input),
-  }).find(
-    (target) =>
-      target.actionId === parent.runActionId &&
-      target.targetServerId === parent.targetServerId,
-  );
+    fundingCandidate: candidate,
+    runActionId: parent.runActionId,
+    targetServerId: parent.targetServerId,
+  });
   return (
     fundedTarget !== undefined &&
     fundedTarget.pathPassability === "reachable" &&

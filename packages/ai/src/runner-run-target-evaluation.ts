@@ -100,6 +100,77 @@ export type { RandomBreakOrDamageRiskProfile } from "./actions/risk-action-proje
 
 export { buildRunnerEconomyPosture } from "./runner-economy-posture";
 
+/** A prospective resource quote for one existing run, never a new action or plan. */
+export function quoteRunnerRunAfterGuaranteedFunding(params: {
+  input: AiDecisionInput;
+  deckCapabilities: DeckCapabilityProfile;
+  fundingCandidate: ActionSemanticCandidate;
+  runActionId: string;
+  targetServerId: string;
+}): RunnerRunTargetEvaluation | undefined {
+  const funding = params.fundingCandidate.economyProjection;
+  const fundingAction = params.input.legalActions.find(
+    (action) => action.actionId === params.fundingCandidate.actionId,
+  );
+  if (
+    !fundingAction ||
+    fundingAction.expiresAtStateVersion !==
+      params.input.playerView.stateVersion ||
+    funding?.source !== "legal_action_payload" ||
+    funding.reliability !== "guaranteed" ||
+    funding.confidence !== "high" ||
+    funding.creditRestriction !== "general" ||
+    funding.timing !== "immediate" ||
+    !Number.isFinite(funding.netLiquidCreditGain) ||
+    (funding.netLiquidCreditGain ?? 0) <= 0 ||
+    funding.cardsDrawn !== 0 ||
+    (funding.cardsConsumed !== 0 && funding.cardsConsumed !== 1) ||
+    funding.netHandDelta !== -funding.cardsConsumed ||
+    params.input.playerView.own.clicks - funding.clickCost < 1
+  )
+    return undefined;
+  const consumedCard =
+    funding.cardsConsumed === 1
+      ? params.input.playerView.own.gripOrHq.find(
+          (card) => card.instanceId === fundingAction.source,
+        )
+      : undefined;
+  if (funding.cardsConsumed === 1 && !consumedCard) return undefined;
+  const fundedInput: AiDecisionInput = {
+    ...params.input,
+    playerView: {
+      ...params.input.playerView,
+      own: {
+        ...params.input.playerView.own,
+        credits:
+          params.input.playerView.own.credits + funding.netLiquidCreditGain!,
+        clicks: params.input.playerView.own.clicks - funding.clickCost,
+        gripOrHq: params.input.playerView.own.gripOrHq.filter(
+          (card) => card.instanceId !== consumedCard?.instanceId,
+        ),
+      },
+    },
+  };
+  const targetParams = {
+    input: fundedInput,
+    deckCapabilities: params.deckCapabilities,
+  };
+  const projection = projectInternalRunnerRunActions(targetParams).find(
+    (run) =>
+      run.action.actionId === params.runActionId &&
+      run.targetServerId === params.targetServerId &&
+      run.projectionStatus === "concrete_target",
+  );
+  if (!projection) return undefined;
+  return evaluateRunnerRunTarget(
+    targetParams,
+    projection,
+    buildRunnerEconomyPosture(targetParams),
+    reconstructBeliefState(fundedInput).runnerOpponentModel
+      ?.unrezzedIceRiskModel ?? [],
+  );
+}
+
 export function evaluateRunnerRunTargets(
   params: EvaluateRunnerRunTargetsParams,
 ): RunnerRunTargetEvaluation[] {

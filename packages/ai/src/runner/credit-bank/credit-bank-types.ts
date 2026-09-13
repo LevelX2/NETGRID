@@ -1,4 +1,5 @@
 import type { RunnerCreditBankProspectivePlan } from "./credit-bank-prospective-planning";
+import type { RunnerFundingRouteAssessment } from "../../plans/runner-funding-contracts";
 
 export type RunnerCreditBankSignal = {
   bankId: string;
@@ -10,6 +11,14 @@ export type RunnerCreditBankSignal = {
   portfolioStoredCredits: number;
   estimatedPayout: number;
   prospectivePlan?: RunnerCreditBankProspectivePlan;
+  runFunding?: {
+    parentPlanInstanceId: string;
+    needId: string;
+    runActionId: string;
+    stateVersion: number;
+    gap: number;
+    routeAssessment: RunnerFundingRouteAssessment;
+  };
   value: number;
   evidenceCodes: string[];
 };
