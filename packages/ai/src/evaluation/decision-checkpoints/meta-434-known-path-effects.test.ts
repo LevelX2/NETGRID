@@ -31,11 +31,15 @@ it.each([37, 38, 40])(
     const target = evaluateRunnerRunTargets({ input }).find(
       (t) => t.actionId === "runner.start_run.remote_1",
     );
-    // Neural Blade's next-ICE lock: ten. Strength-eight Haunting: sixteen
-    // strength plus six breaks at two credits each. Krash covers both ICE.
+    // Neural Blade's next-ICE lock costs ten; its direct damage break adds
+    // two when the whole path can fund it. Haunting costs twenty-eight.
+    // Below forty, access can accept the explicitly quoted safe damage.
+    const expectedCost = credits >= 40 ? 40 : 38;
     expect(target?.pathPassability).not.toBe("blocked_missing_coverage");
-    expect(target?.pathCost).toBe(38);
-    expect(target?.routeQuote?.fundingGap).toBe(Math.max(0, 38 - credits));
+    expect(target?.pathCost).toBe(expectedCost);
+    expect(target?.routeQuote?.fundingGap).toBe(
+      Math.max(0, expectedCost - credits),
+    );
   },
 );
 

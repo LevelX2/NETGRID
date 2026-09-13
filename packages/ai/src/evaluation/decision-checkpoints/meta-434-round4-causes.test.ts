@@ -58,8 +58,8 @@ it("classifies an unaffordable next-ICE lock break as funding rather than missin
   );
   expect(funded).toMatchObject({
     canReachAccess: true,
-    visibleBreakCost: 18,
-    creditsAfterPath: 4,
+    visibleBreakCost: 20,
+    creditsAfterPath: 2,
   });
 });
 
@@ -91,7 +91,9 @@ it.each([true, false])(
       const wholePath = evaluateRunnerRunTargets({ input: funded }).find(
         (candidate) => candidate.actionId === target.actionId,
       )!;
-      expect(wholePath).toMatchObject({ pathCost: 18, creditsAfterRun: 4 });
+      // The full budget also pays Neural Blade's previously omitted damage
+      // break. Loan still fails its ten-credit exit reserve; bank owns support.
+      expect(wholePath).toMatchObject({ pathCost: 20, creditsAfterRun: 2 });
     }
     expect(result.fallbackUsed).toBe(false);
     expect(result.decisionDebug?.planFirstDecision).toMatchObject({

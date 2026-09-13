@@ -81,7 +81,6 @@ function choose(cp: ReturnType<typeof checkpoint>) {
 describe("meta 434 SP-337 root rez before selected ICE installation", () => {
   for (const [game, decision] of [
     [1, 82],
-    [5, 148],
     [38, 154],
   ]) {
     it(`prepares the same defense allocation at G${game} D${decision}`, () => {
@@ -105,6 +104,44 @@ describe("meta 434 SP-337 root rez before selected ICE installation", () => {
       expect(after.decisionDebug?.fallbackUsed).toBe(false);
     });
   }
+
+  it("keeps the selected Remote allocation when the available root discount only applies to HQ", () => {
+    const cp = checkpoint(5, 148);
+    const before = choose(cp);
+    const selected = cp.input.legalActions.find(
+      (action) => action.actionId === before.actionId,
+    );
+    expect(selected).toMatchObject({
+      type: "install_card",
+      payload: { serverId: "remote_1", placement: "ice" },
+    });
+    const quotes = addCostQuotes(cp.input);
+    expect(quotes).toHaveLength(1);
+    expect(quotes[0]?.targetServerId).toBe("hq");
+    Object.assign(cp.input, buildAiDecisionInputDto(cp.input));
+    const after = choose(cp);
+    expect(after.actionId).toBe(before.actionId);
+    expect(after.reasonCode).toBe("plan_first.corp.defend_servers");
+    expect(after.decisionDebug?.planFirstDecision?.selectedStep).toMatchObject({
+      planInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
+      stepId:
+        "plan:corp.defend_servers:server-defense-portfolio:improve_remote_protection_path",
+      parentInstanceId:
+        "plan:corp.establish_scoring_remote:strategic-score-remote",
+      needId: before.decisionDebug?.planFirstDecision?.selectedStep?.needId,
+    });
+    expect(after.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
+      "plan:corp.establish_scoring_remote:strategic-score-remote",
+    );
+    expect(after.decisionDebug?.planFirstDecision?.leafExecutorInstanceId).toBe(
+      "plan:corp.defend_servers:server-defense-portfolio",
+    );
+    expect(after.decisionDebug?.planFirstDecision?.route).toMatchObject({
+      actionId: before.actionId,
+      stateVersion: cp.input.playerView.stateVersion,
+    });
+    expect(after.fallbackUsed).toBe(false);
+  });
 
   for (const [name, mutate] of [
     [
