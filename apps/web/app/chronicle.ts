@@ -5320,6 +5320,9 @@ function formatSemanticChronicleEffect(
     kind === "resolve_subroutine" &&
     (subroutineType === "trash_installed_program" ||
       subroutineType === "trash_installed_program_unless_runner_pays");
+  const runLockSubroutine =
+    kind === "resolve_subroutine" &&
+    subroutineType === "set_runner_run_lock_actions";
   const paidCredits = numberValue(effect.paidCredits) ?? 0;
   const sourcePubliclyNamedByAccess =
     stringValue(event.publicPayload.actionType) === "access_card" &&
@@ -5398,7 +5401,10 @@ function formatSemanticChronicleEffect(
     translate,
   );
   const category: ChronicleCategory =
-    endRunSubroutine || payOrEndRun || programTrashSubroutine
+    endRunSubroutine ||
+    payOrEndRun ||
+    programTrashSubroutine ||
+    runLockSubroutine
       ? "run"
       : kind === "gain_credits" ||
           kind === "take_hosted_credits" ||
@@ -5409,6 +5415,38 @@ function formatSemanticChronicleEffect(
           : kind === "draw_cards" || kind === "trash_card"
             ? "card"
             : "system";
+  if (runLockSubroutine && visibility !== "redacted") {
+    const actions = positiveIntegerValue(effect.amount);
+    const subroutine =
+      subroutineNumber !== undefined
+        ? translate("effect.numberedSubroutineChip", {
+            number: subroutineNumber,
+          })
+        : translate("effect.subroutineChip");
+    return {
+      id: `${event.eventId}:effect:${effect.effectId || index}`,
+      category,
+      importance: "important",
+      visibility,
+      ...(actor ? { actor } : {}),
+      title:
+        actions !== undefined
+          ? translate("effect.subroutineRunLock", {
+              source: sourceTitle,
+              subroutine,
+              amount: actions,
+            })
+          : translate("effect.subroutineRunLockAmountMissing", {
+              source: sourceTitle,
+              subroutine,
+            }),
+      chips: [sourceTitle, subroutine],
+      ...(sourceDefinitionId ? { cardDefinitionId: sourceDefinitionId } : {}),
+      cardTitle: sourceTitle,
+      cardDetailLines: [],
+      groupLabel: translate("group.run", { server: runServer }),
+    };
+  }
   if (programTrashSubroutine && visibility !== "redacted") {
     const cardsTrashed = numberValue(effect.cardsTrashed);
     const targetDefinitionId = stringValue(effect.cardDefinitionId);

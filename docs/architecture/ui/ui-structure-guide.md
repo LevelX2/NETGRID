@@ -127,6 +127,14 @@ das tatsächlich getrashte Programm aus den öffentlichen `resolvedEffects`
 eine Zahlung gegen das Trashing und ein Ergebnis ohne Trash werden getrennt
 benannt; fehlende Zielidentität bei bestätigtem Trash wird sichtbar diagnostiziert.
 
+Die lokalisierte Chronik zeigt eine Subroutine vom Typ
+`set_runner_run_lock_actions` mit Quelle, Subroutinennummer und der Dauer aus
+`resolvedEffects.amount`. Haunting Inquisitions Sperre für die nächsten sechs
+Runner-Aktionen bleibt dadurch ein eigener Run-Eintrag vor dem Run-Ende durch
+Subroutine 2. Die Darstellung erfindet bei fehlender Dauer keinen Wert,
+sondern nennt die fehlende Ereignisinformation. Ein Engine-basierter
+Chroniktest prüft beide Einträge in allen drei Sprachen.
+
 ## Wo Ändern?
 
 - Spielbrett-/Ressourcenanzeige: `features/game-board/`.

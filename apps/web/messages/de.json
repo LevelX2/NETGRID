@@ -2226,6 +2226,8 @@
       "runnerPaidToPassIce": "{subject}: {amount, plural, one {# Credit} other {# Credits}} bezahlt, um {source} zu passieren.",
       "runnerDidNotPayToPassIce": "{subject}: nicht für {source} bezahlt; der Run wurde beendet.",
       "numberedEndRunSubroutine": "{source}: Subroutine {number} beendet den Run.",
+      "subroutineRunLock": "{source}: {subroutine} – der Runner kann während {amount, plural, one {seiner nächsten Aktion} other {seiner nächsten # Aktionen}} keinen weiteren Run starten.",
+      "subroutineRunLockAmountMissing": "{source}: {subroutine} – die Dauer der Runsperre fehlt im Ereignis.",
       "subroutineProgramTrashed": "{source}: {subroutine} trasht {card}.",
       "subroutineProgramTrashTargetMissing": "{source}: {subroutine} – der Name des getrashten Programms fehlt im Ereignis.",
       "subroutineProgramTrashPaid": "{source}: {subroutine} – {subject}: {amount, plural, one {# Credit} other {# Credits}} bezahlt, um das Trashing zu verhindern.",

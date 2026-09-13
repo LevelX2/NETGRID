@@ -2302,6 +2302,8 @@
       "runnerPaidToPassIce": "{subject} : a payé {amount, plural, one {# crédit} other {# crédits}} pour passer {source}.",
       "runnerDidNotPayToPassIce": "{subject} : n’a pas payé pour {source} ; le piratage est terminé.",
       "numberedEndRunSubroutine": "{source} : le sous-programme {number} met fin au piratage.",
+      "subroutineRunLock": "{source} : {subroutine} – le Runner ne peut pas lancer un autre piratage pendant {amount, plural, one {sa prochaine action} other {ses # prochaines actions}}.",
+      "subroutineRunLockAmountMissing": "{source} : {subroutine} – la durée de l’interdiction de piratage manque dans l’événement.",
       "subroutineProgramTrashed": "{source} : {subroutine} envoie {card} à la poubelle.",
       "subroutineProgramTrashTargetMissing": "{source} : {subroutine} – le nom du programme envoyé à la poubelle manque dans l’événement.",
       "subroutineProgramTrashPaid": "{source} : {subroutine} – {subject} a payé {amount, plural, one {# crédit} other {# crédits}} pour empêcher la mise à la poubelle.",
