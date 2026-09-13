@@ -876,6 +876,19 @@ gebundenen akuten Survival- oder Coverage-Nachweis zulässig. Fehlt eine
 solche konvertierbare Zielroute, bleibt der Cashout nicht produktiv; die
 Runtime darf ihn nicht mit allgemeinem „später nützlich“-Wert rechtfertigen.
 
+Ein angebotener Bank-Cashout darf auch einen derzeit unbezahlbaren terminalen
+Remote-Pfad finanzieren. Die negative ungeförderte Runbewertung ist dafür
+kein Ausschluss: Der Run-Owner muss mit dem garantierten Nettobudget den
+vollständigen bekannten Pfad, die Reserven und den verbleibenden Run-Klick
+belegen. Ein Kostenpräfix bis zur ersten unbezahlbaren Subroutine genügt nicht.
+Die Bank bindet ihre Auszahlung an genau den offenen Bedarf des Remote-Parents
+und übernimmt dessen Materialwert. Sie bleibt alleiniger Action-Executor;
+der allgemeine Economy-Plan beansprucht diesen Bedarf dann nicht zusätzlich.
+Mehrere ausreichende Banken ergeben genau einen Provider, bestimmt im
+Bank-Owner nach Klickkosten, Auszahlung und stabiler Instanzreihenfolge.
+Ein fremdes Darlehen darf die bereits belegte Bankroute nicht aus deren
+Finanzierungssuche verdrängen.
+
 Eine an einen Run gebundene Darlehensroute darf eine zertifizierte reine
 Creditlücke schließen. Der noch unfinanzierte Parent muss dafür nicht bereits
 `reachable` sein. Bei einer exakt dringlichen Score-Bedrohung ist auch seine
@@ -884,6 +897,16 @@ Finanzierung. Der garantierte Nettoertrag muss nach dem gesamten bekannten
 Run die vollständige Ausstiegsreserve erhalten; der Konversionsklick bleibt
 reserviert. Fehlende Coverage, andere Pfadsperren, unzureichende Reserve und
 ungebundene oder spekulative Darlehensverwendung bleiben ausgeschlossen.
+Ein an der ersten unbezahlbaren Subroutine abgebrochener Pfad ist dabei nur
+ein bekannter Kostenpräfix. Die Finanzierungszulassung prüft denselben
+Action-/Server-Parent erneut mit dem garantierten Nettobudget und dem
+Handverbrauch der Finanzierungsaktion. Nur dessen vollständiger erreichbarer
+Pfad darf die Ausstiegsreserve belegen; die aktuelle LegalAction und ihre
+StateVersion bleiben die Ausführungsautorität.
+Die prospektive Einzelquote wird durch
+`quoteRunnerRunAfterGuaranteedFunding` beim Run-Owner erzeugt. Funding- und
+Bank-Owner konsumieren diese Quote; sie rufen weder eine zweite Runbewertung
+noch eine eigene Actionauswahl auf.
 
 ## 7. `runner.defense_and_recovery`
 

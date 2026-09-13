@@ -6,6 +6,8 @@ import { runnerFundingRouteCandidateIsMaterializable } from "../plans/runner-fun
 import type { RunnerFundingRouteAssessment } from "../plans/runner-funding-contracts";
 import type { RunnerExactFundingRouteRequest } from "../plans/runner-funding-service-contract";
 import { runnerPaymentInstallSetups } from "../plans/runner-payment-install-planning";
+import { quoteRunnerRunAfterGuaranteedFunding } from "../runner-run-target-evaluation";
+import { createDeckCapabilitiesContext } from "./deck-capabilities-context";
 import { runnerDebtFinancingProfile } from "./runner-canonical-card-facts";
 import {
   runnerStrategicExchangeKinds,
@@ -57,6 +59,7 @@ export function runnerExactFundingRouteContract(
       ? runnerPaymentInstallSetups(input, candidates)
       : [];
   const routeCandidates = runnerExactFundingRouteCandidates(
+    input,
     candidates,
     request,
     demand,
@@ -121,6 +124,7 @@ export function runnerExactFundingRouteContract(
 }
 
 function runnerExactFundingRouteCandidates(
+  input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
   request: RunnerExactFundingRouteRequest,
   demand: ReturnType<typeof createRunnerCreditDemand>,
@@ -158,7 +162,11 @@ function runnerExactFundingRouteCandidates(
       return (
         kinds.includes("self_damage") ||
         (kinds.includes("debt_financing") &&
-          runnerDebtFinancingCandidateHasSafeBoundRunExit(candidate, request))
+          runnerDebtFinancingCandidateHasSafeBoundRunExit(
+            input,
+            candidate,
+            request,
+          ))
       );
     })
     .sort(
@@ -178,6 +186,7 @@ function runnerExactFundingRouteCandidates(
 }
 
 function runnerDebtFinancingCandidateHasSafeBoundRunExit(
+  input: AiDecisionInput,
   candidate: ActionSemanticCandidate,
   request: RunnerExactFundingRouteRequest,
 ): boolean {
@@ -212,13 +221,42 @@ function runnerDebtFinancingCandidateHasSafeBoundRunExit(
     return false;
   }
   const netGain = projection.netLiquidCreditGain;
-  // Funding may close a certified credit-only path gap. Requiring the
-  // unfunded parent to be payable first would exclude the very consumer
-  // this route finances. Coverage and hazard failures remain excluded.
+  if (
+    typeof netGain !== "number" ||
+    !Number.isFinite(netGain) ||
+    parent.creditsAfterRun + netGain < profile.leavePlayPayCost
+  )
+    return false;
+  const action = input.legalActions.find(
+    (entry) => entry.actionId === candidate.actionId,
+  );
+  const source = input.playerView.own.gripOrHq.find(
+    (card) => card.instanceId === action?.source,
+  );
+  if (
+    !action ||
+    !source ||
+    source.definitionId !== candidate.sourceDefinitionId
+  )
+    return false;
+
+  // An unfunded path can stop at its first unaffordable subroutine. Its
+  // remaining balance therefore cannot certify the debt's exit reserve.
+  // Requote this exact consumer with the guaranteed funding and hand cost;
+  // this is prospective assessment only, never a replacement LegalAction.
+  const fundedTarget = quoteRunnerRunAfterGuaranteedFunding({
+    input,
+    deckCapabilities:
+      createDeckCapabilitiesContext().deckCapabilitiesForInput(input),
+    fundingCandidate: candidate,
+    runActionId: parent.runActionId,
+    targetServerId: parent.targetServerId,
+  });
   return (
-    typeof netGain === "number" &&
-    Number.isFinite(netGain) &&
-    parent.creditsAfterRun + netGain >= profile.leavePlayPayCost
+    fundedTarget !== undefined &&
+    fundedTarget.pathPassability === "reachable" &&
+    fundedTarget.prerunReserveQuote?.status !== "blocked" &&
+    fundedTarget.creditsAfterRun >= profile.leavePlayPayCost
   );
 }
 

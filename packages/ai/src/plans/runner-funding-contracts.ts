@@ -41,6 +41,7 @@ export type RunnerDevelopmentFundingMilestone = {
 export type RunnerFundingNeedSignal =
   | (RunnerFundingRouteContract & {
       kind: "parent_plan_support";
+      providerModuleId?: "runner.credit_bank";
       needId: string;
       parentPlanInstanceId: string;
       driver: {

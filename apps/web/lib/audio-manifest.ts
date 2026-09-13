@@ -87,7 +87,7 @@ export const PREMIUM_AUDIO_MANIFEST = {
     category: "security",
   },
   "agenda-runner": {
-    files: [`${ROOT}/agenda/agenda-runner.wav`],
+    files: [`${ROOT}/agenda/agenda-stolen-descent.wav`],
     gain: 0.7,
     cooldownMs: 700,
     preload: false,

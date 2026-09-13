@@ -38,10 +38,19 @@ it.each([8, 9, 10, 11])(
   },
 );
 
-it.each([true, false])(
-  "continues the exact remote funding parent with a safe loan available: %s",
-  (loanAvailable) => {
+it.each([
+  { loanAvailable: true, bankAvailable: true },
+  { loanAvailable: false, bankAvailable: true },
+  { loanAvailable: true, bankAvailable: false },
+  { loanAvailable: false, bankAvailable: false },
+])(
+  "funds the exact taxed path with bank=$bankAvailable and safe loan=$loanAvailable",
+  ({ loanAvailable, bankAvailable }) => {
     const { input, runtime } = structuredClone(checkpoint);
+    if (!bankAvailable)
+      input.legalActions = input.legalActions.filter(
+        (candidate) => !candidate.actionId.includes("withdraw_credits"),
+      );
     if (!loanAvailable)
       input.legalActions = input.legalActions.filter(
         (candidate) =>
@@ -55,19 +64,22 @@ it.each([true, false])(
       runtime,
     );
     const action = input.legalActions.find((candidate) =>
-      loanAvailable
+      bankAvailable
+        ? candidate.actionId ===
+          "runner.activated_card_ability.runner_onr_v1_154_broker_1.runner_onr_v1_154_broker_1.activated.onr_v1_154_broker:withdraw_credits"
+        : loanAvailable
         ? candidate.actionId ===
           "runner.install_card.runner_onr_v1_168_loan-from-chiba_1.runner_onr_v1_168_loan-from-chiba_1"
         : candidate.actionId === "runner.gain_credit",
     )!;
-    if (loanAvailable) {
+    if (bankAvailable || loanAvailable) {
       const target = evaluateRunnerRunTargets({ input }).find(
         (candidate) => candidate.actionId === "runner.start_run.remote_1",
       )!;
       expect(target.pathCost).toBe(10);
       expect(
         target.creditsAfterRun + Number(action.payload?.gainCreditsAmount),
-      ).toBe(10);
+      ).toBe(bankAvailable ? 1 : 10);
     }
     expect(chooseAiAction(input)).toMatchObject({
       actionId: action.actionId,
@@ -76,8 +88,9 @@ it.each([true, false])(
         planFirstDecision: {
           selectedStep: {
             parentInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-            planInstanceId:
-              "plan:runner.economy:run-support%3Aremote%3Aremote_1",
+            planInstanceId: bankAvailable
+              ? "plan:runner.credit_bank:runner_onr_v1_154_broker_1"
+              : "plan:runner.economy:run-support%3Aremote%3Aremote_1",
             needId: "run-support:remote:remote_1",
           },
           route: {

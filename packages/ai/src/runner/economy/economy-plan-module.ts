@@ -1,7 +1,7 @@
 import type { RunnerFundingNeedSignal } from "../../plans/runner-funding-contracts";
 import { validRunnerFundingNeedContract } from "../../plans/runner-funding-contracts";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
-import type { PlanInstance } from "../../plans/plan-kernel-types";
+import { runnerFundingParentMaterialValue } from "../../plans/runner-funding-parent";
 import type {
   PlanMaterialization,
   PlanModule,
@@ -35,7 +35,11 @@ export function createRunnerEconomyModule(): PlanModule {
             need,
             context.input.playerView.stateVersion,
           );
-          const routeExists = economyCandidates(context, need).length > 0;
+          const assignedToBank =
+            need.kind === "parent_plan_support" &&
+            need.providerModuleId === "runner.credit_bank";
+          const routeExists =
+            !assignedToBank && economyCandidates(context, need).length > 0;
           return proposal({
             moduleId: "runner.economy",
             dedupeKey: need.needId,
@@ -51,7 +55,7 @@ export function createRunnerEconomyModule(): PlanModule {
                   ? "orphaned_funding_need"
                   : "invalid_funding_need_revalidation",
             evidenceCode: need.evidenceCode,
-            ...(need.kind === "parent_plan_support"
+            ...(need.kind === "parent_plan_support" && !assignedToBank
               ? {
                   parentInstanceId: need.parentPlanInstanceId,
                   parentNeedId: need.needId,
@@ -117,6 +121,10 @@ export function createRunnerEconomyModule(): PlanModule {
         context.input.playerView.stateVersion,
       );
       const routeExists =
+        !(
+          need.kind === "parent_plan_support" &&
+          need.providerModuleId === "runner.credit_bank"
+        ) &&
         parentIsResidentAndMaterial &&
         supportContractValid &&
         economyCandidates(context, need).length > 0;
@@ -276,48 +284,4 @@ function economyCandidates(
         stepValue: fundingGapProgress * 100 + netLiquidCreditGain,
       };
     });
-}
-
-function runnerFundingParentMaterialValue(
-  candidate: PlanInstance,
-  need: Extract<RunnerFundingNeedSignal, { kind: "parent_plan_support" }>,
-): number | undefined {
-  if (
-    candidate.instanceId !== need.parentPlanInstanceId ||
-    (candidate.viability !== "ready" && candidate.viability !== "blocked")
-  ) {
-    return undefined;
-  }
-  const moduleState = candidate.moduleState as
-    | {
-        signal?: {
-          supportNeedId?: unknown;
-          marginalValue?: unknown;
-          value?: unknown;
-        };
-      }
-    | undefined;
-  const waitsOnlyForThisFunding =
-    candidate.blockers.length === 0 ||
-    candidate.blockers.every(
-      (blocker) =>
-        blocker.code === "waiting_for_bound_funding_support" &&
-        blocker.resumeCondition?.code === need.needId,
-    );
-  if (
-    !waitsOnlyForThisFunding ||
-    moduleState?.signal?.supportNeedId !== need.needId
-  ) {
-    return undefined;
-  }
-  if (
-    typeof moduleState.signal.marginalValue === "number" &&
-    moduleState.signal.marginalValue > 0
-  ) {
-    return moduleState.signal.marginalValue;
-  }
-  return typeof moduleState.signal.value === "number" &&
-    moduleState.signal.value > 0
-    ? moduleState.signal.value
-    : undefined;
 }

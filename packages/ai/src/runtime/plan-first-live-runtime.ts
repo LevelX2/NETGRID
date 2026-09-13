@@ -194,6 +194,7 @@ import {
 } from "../run-analysis/runner-run-preparation-choice-binding";
 import { runnerEffectsProvideTopTrashRecovery } from "../runner-canonical-hint-semantics";
 import { runnerRecentFutureEncounterDamageSafetyAbort } from "../runner-damage-threat-assessment";
+import { quoteRunnerRunAfterGuaranteedFunding } from "../runner-run-target-evaluation";
 import type {
   RunnerEconomyPosture,
   RunnerRunTargetEvaluation,
@@ -268,6 +269,7 @@ import {
   runnerTerminalNonlethalDamageContestAlreadyFailedThisTurn,
   runnerTerminalRemoteContestIsDirectlyMandatory,
   runnerTerminalRemoteContestVisibleHazardFundingGap,
+  runnerTerminalRemoteLastChanceKnownPathFundingGap,
 } from "../runner/remote-contest/remote-contest-admission";
 import {
   buildRunnerRemoteContestSignals,
@@ -2996,6 +2998,22 @@ function buildRunnerDomain(
         runnerTerminalRemoteContestVisibleHazardFundingGap(input, target),
       isDirectlyMandatoryRun: (target) =>
         runnerTerminalRemoteContestIsDirectlyMandatory(input, target),
+      terminalKnownPathFundingGap: (target) =>
+        runnerTerminalRemoteLastChanceKnownPathFundingGap(input, target),
+      quoteRunAfterCashout: (target, actionId) => {
+        const fundingCandidate = candidates.find(
+          (candidate) => candidate.actionId === actionId,
+        );
+        return fundingCandidate
+          ? quoteRunnerRunAfterGuaranteedFunding({
+              input,
+              deckCapabilities: _deckCapabilities,
+              fundingCandidate,
+              runActionId: target.actionId,
+              targetServerId: target.targetServerId,
+            })
+          : undefined;
+      },
       developmentFundingRoute: (target) =>
         runnerSameTurnDevelopmentFundingRoute(input, candidates, target),
     },
@@ -3046,6 +3064,14 @@ function buildRunnerDomain(
           runTargets,
           candidates,
         );
+    const bankFunding = support
+      ? creditBanks.find(
+          (bank) =>
+            bank.runFunding?.parentPlanInstanceId ===
+              support.parentPlanInstanceId &&
+            bank.runFunding.needId === support.needId,
+        )?.runFunding
+      : undefined;
     return support
       ? [
           {
@@ -3064,6 +3090,17 @@ function buildRunnerDomain(
             routeActionIds: support.routeActionIds,
             routeAssessment: support.routeAssessment,
             evidenceCode: support.evidenceCode,
+            ...(bankFunding
+              ? {
+                  providerModuleId: "runner.credit_bank" as const,
+                  gap: bankFunding.gap,
+                  targetCredits: currentCredits + bankFunding.gap,
+                  routeActionIds: [
+                    bankFunding.routeAssessment.firstStepActionId!,
+                  ],
+                  routeAssessment: bankFunding.routeAssessment,
+                }
+              : {}),
           },
         ]
       : [];

@@ -12,6 +12,7 @@ import type {
   RunnerCreditBankSignal,
   CreditBankState,
 } from "./credit-bank-types";
+import { runnerFundingParentMaterialValue } from "../../plans/runner-funding-parent";
 
 export function createRunnerCreditBankModule(): PlanModule {
   return {
@@ -35,21 +36,45 @@ export function createRunnerCreditBankModule(): PlanModule {
           blockerCode: `no_credit_bank_${signal.phase}_route`,
           evidenceCode:
             signal.evidenceCodes[0] ?? `runner_credit_bank_${signal.phase}`,
+          ...(signal.runFunding
+            ? {
+                parentInstanceId: signal.runFunding.parentPlanInstanceId,
+                parentNeedId: signal.runFunding.needId,
+              }
+            : {}),
         }),
       ),
     assess: (instance, context, portfolio) => {
       const signal = (instance.moduleState as CreditBankState).signal;
+      const parentValue =
+        signal.runFunding &&
+        signal.runFunding.stateVersion === context.input.playerView.stateVersion
+          ? portfolio.instances
+              .map((parent) =>
+                runnerFundingParentMaterialValue(parent, signal.runFunding!),
+              )
+              .find((value) => value !== undefined)
+          : undefined;
       return assessment(
         instance,
         signal.priorityClass,
-        bankCandidates(context, signal).length > 0,
-        signal.value,
+        bankCandidates(context, signal).length > 0 &&
+          (!signal.runFunding || parentValue !== undefined),
+        parentValue ?? signal.value,
         portfolio.executorInstanceId,
       );
     },
-    materialize: (instance, _assessment, context) => {
+    materialize: (instance, currentAssessment, context) => {
       const signal = (instance.moduleState as CreditBankState).signal;
-      const candidates = bankCandidates(context, signal);
+      const candidates = bankCandidates(context, signal).map((entry) =>
+        signal.runFunding
+          ? {
+              ...entry,
+              stepValue:
+                currentAssessment.withinClassValue + signal.estimatedPayout,
+            }
+          : entry,
+      );
       const prospectiveBuild =
         signal.phase === "install" &&
         signal.prospectivePlan?.build.kind === "activated" &&
