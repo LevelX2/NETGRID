@@ -9,7 +9,7 @@
   },
   "localDeckLibrary": {
     "counts": {
-      "standard": 51,
+      "standard": 52,
       "internal_ai": 2,
       "retire": 1,
       "test_fixture": 10
@@ -513,6 +513,14 @@
         "side": "runner",
         "classification": "test_fixture",
         "reason": "explicit_lab_or_release_fixture"
+      },
+      {
+        "sourceDeckId": "local_corp_dr_dreffs_letzte_visite",
+        "name": "Dr. Dreffs letzte Visite",
+        "side": "corp",
+        "classification": "standard",
+        "reason": "user_requested_dreff_remote_control",
+        "standardDeckId": "standard_corp_dr_dreffs_letzte_visite"
       }
     ]
   },

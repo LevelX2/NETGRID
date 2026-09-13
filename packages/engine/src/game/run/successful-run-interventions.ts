@@ -894,8 +894,12 @@ export function finalizeDelayedSuccessfulRunAfterPassedIce(
   if (legalAction) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      sourceDefinitionId: host.cards.definitionFor(delayed.interventionSourceId)
-        .id,
+      sourceDefinitionId: host.cards.definitionFor(
+        legalAction.payload?.corpPostPassIceAbility ===
+          "return_passed_ice_to_hq"
+          ? passedIceId
+          : delayed.interventionSourceId,
+      ).id,
       serverId: delayed.originalServerId,
       successfulRunFinalizedAfterIntervention: true,
       delayedSuccessfulRun: false,

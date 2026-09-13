@@ -56,6 +56,7 @@ import {
   applySuccessfulRunEndCreditTriggers,
   buildSuccessfulRunFollowupActions,
   cleanupDelayedSuccessfulRunTemporaryIce,
+  finalizeDelayedSuccessfulRunAfterPassedIce,
   successfulRunInterventionCost,
   successfulRunInterventionKindForDefinition,
   type SuccessfulRunInterventionHost,
@@ -375,6 +376,13 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           beginEncounter(encounterEntryHostForState(state), iceId, legalAction),
       },
       access: {
+        finalizeDelayedSuccessfulRunAfterPassedIce: (iceId, legalAction) => {
+          finalizeDelayedSuccessfulRunAfterPassedIce(
+            successfulRunInterventionHost(state),
+            iceId,
+            legalAction,
+          );
+        },
         startAccessFromSuccessfulRun: (legalAction) =>
           enterAccessFromSuccessfulRun(
             runAccessTransitionHost(state),

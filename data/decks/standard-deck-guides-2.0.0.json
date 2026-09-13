@@ -5483,6 +5483,121 @@
           ]
         }
       }
+    },
+    {
+      "standardDeckId": "standard_corp_dr_dreffs_letzte_visite",
+      "sourceDeckVersion": "1.0.0",
+      "sourceDeckHash": "standard-deck:cfd7da1a",
+      "sourceAnalysisHash": "deck-analysis:e6cfd941",
+      "sourceAnalysisInputHash": "deck-analysis-input:76bb03a5",
+      "reviewedAt": "2026-09-13",
+      "analysis": {
+        "primaryStrategyIds": [
+          "corp.remote_scoring",
+          "corp.draw_engine",
+          "corp.rush_score"
+        ],
+        "secondaryStrategyIds": [
+          "corp.overadvance_value"
+        ],
+        "reviewStatus": "plausible"
+      },
+      "contentByLocale": {
+        "en": {
+          "summary": "Dr. Dreffs letzte Visite combines affordable central defense with surprising temporary ICE encounters to create protected agenda-scoring windows. Program destruction and brain damage reinforce this control plan.",
+          "deckIdea": "Keep a choice of strong ICE in HQ. Once the Runner has passed the installed defenses, Dr. Dreff forces an additional encounter at half the printed rez cost. Reclamation Project recovers spent ICE, while Crystal Palace Station Grid taxes multi-subroutine encounters. This initial list has no matchup win-rate evidence.",
+          "gamePlan": {
+            "opening": "Establish credits with Efficiency Experts, Accounts Receivable and BBS Whispering Campaign. Protect HQ and R&D with affordable ICE and prepare a Dreff scoring remote. Keep Glacier available as a zero-credit temporary stop.",
+            "midgame": "Reserve both advancement money and the selected Dreff encounter payment. Use Haunting Inquisition to create scoring windows. Employee Empowerment supplies optional draw and Main-Office Relocation expands HQ for ICE choices; Project Zurich is a three-advancement, two-point score without requiring overadvancement.",
+            "endgame": "Spend the strongest ICE on decisive agenda defense. Use Reclamation Project to reload and Data Fort Remapping for an emergency run stop. Score toward seven points; pursue damage only when it actually converts, and avoid overadvancing Zurich without a safe window."
+          },
+          "keyCards": [
+            {
+              "cardId": "onr_v1_358_dr-dreff",
+              "title": "Dr. Dreff",
+              "role": "Forces one temporary HQ ICE encounter per run on this fort for half the printed rez cost, rounded down. Keep the chosen ICE and its payment available."
+            },
+            {
+              "cardId": "onr_classic_011_glacier",
+              "title": "Glacier",
+              "role": "Two end-the-run subroutines at strength five for zero Dreff credits; no rez occurs, so no agenda point is paid."
+            },
+            {
+              "cardId": "onr_v1_247_haunting-inquisition",
+              "title": "Haunting Inquisition",
+              "role": "Four Dreff credits threaten a six-action prohibition on further runs and an end-the-run subroutine, opening scoring time if they resolve."
+            },
+            {
+              "cardId": "onr_proteus_015_colonel-failure",
+              "title": "Colonel Failure",
+              "role": "Eight Dreff credits threaten three program trashes and two run stops. Reserve this expensive encounter for an important defense."
+            },
+            {
+              "cardId": "onr_classic_018_reclamation-project",
+              "title": "Reclamation Project",
+              "role": "Spend two consecutive actions to return selected ICE from Archives to HQ, revealing them. Respect HQ capacity when choosing the next defensive supply."
+            }
+          ],
+          "pilotingTips": [
+            "Dreff payments are Glacier 0, Haunting Inquisition 4, Zombie 4, Toughonium Wall 6 and Colonel Failure 8 credits. Temporary ICE is normally trashed after its encounter.",
+            "Dreff does not install or rez the selected ICE. Rez-income effects do not trigger. Keep at least one useful HQ option and decline low-value encounters.",
+            "Shock.r must be the last installed ICE before Dreff, and its subroutine must resolve for the combination. Once the Runner can reliably break it, the lock is not guaranteed.",
+            "Reclamation Project and Corporate Shuffle each cost two consecutive actions. Avoid spending the same actions on recycling and agenda advancement in your plan."
+          ],
+          "weaknesses": [
+            "Without Dreff, expensive ICE can clog HQ. A developed breaker suite may pass the temporary encounter and trash the upgrade.",
+            "Repeated runs drain both ICE cards and credits. Reclamation reveals the returned ICE, and recycling consumes actions.",
+            "A heavily defended remote leaves centrals vulnerable if too much economy is spent on it. The deck has no demonstrated matchup advantage."
+          ]
+        },
+        "de": {
+          "summary": "Dr. Dreffs letzte Visite verbindet günstigen Zentralschutz mit überraschenden temporären ICE-Begegnungen und schafft dadurch geschützte Agenda-Fenster. Programmzerstörung und Hirnschaden verstärken diesen Kontrollplan.",
+          "deckIdea": "Halte unterschiedliche starke ICE in HQ. Nach der installierten Verteidigung erzwingt Dr. Dreff eine weitere Begegnung für die halben gedruckten Rezkosten. Reclamation Project holt verbrauchte ICE zurück; Crystal Palace Station Grid verteuert Begegnungen mit vielen Subroutinen. Für diese erste Liste liegt noch kein Nachweis einer Matchup-Siegquote vor.",
+          "gamePlan": {
+            "opening": "Baue mit Efficiency Experts, Accounts Receivable und BBS Whispering Campaign Credits auf. Schütze HQ und R&D mit bezahlbaren ICE und bereite einen Scoring-Remote mit Dreff vor. Halte Glacier als temporären Stopp für null Credits bereit.",
+            "midgame": "Reserviere sowohl Advancement-Geld als auch die Zahlung für die gewählte Dreff-Begegnung. Haunting Inquisition schafft Scoringfenster. Employee Empowerment liefert optional Karten und Main-Office Relocation mehr HQ-Platz für ICE. Project Zurich bringt schon für drei Advancements zwei Punkte; Überentwicklung ist keine Voraussetzung.",
+            "endgame": "Setze die stärksten ICE für entscheidenden Agenda-Schutz ein. Lade mit Reclamation Project nach und nutze Data Fort Remapping für einen Notfall-Stopp. Score bis zu sieben Punkten. Verfolge Schaden nur bei einem konkreten Abschluss und überentwickle Zurich nur in einem sicheren Fenster."
+          },
+          "keyCards": [
+            {
+              "cardId": "onr_v1_358_dr-dreff",
+              "title": "Dr. Dreff",
+              "role": "Erzwingt einmal je Run auf diesem Fort eine temporäre HQ-ICE-Begegnung für die halben gedruckten Rezkosten, abgerundet. Halte passende ICE und ihre Zahlung bereit."
+            },
+            {
+              "cardId": "onr_classic_011_glacier",
+              "title": "Glacier",
+              "role": "Zwei Run-Stopps bei Stärke fünf für null Dreff-Credits. Ohne Rez entfällt die zusätzliche Zahlung eines Agendapunkts."
+            },
+            {
+              "cardId": "onr_v1_247_haunting-inquisition",
+              "title": "Haunting Inquisition",
+              "role": "Für vier Dreff-Credits drohen sechs Aktionen ohne weitere Runs und ein Run-Stopp. Aufgelöste Subroutinen schaffen Zeit zum Scoren."
+            },
+            {
+              "cardId": "onr_proteus_015_colonel-failure",
+              "title": "Colonel Failure",
+              "role": "Für acht Dreff-Credits drohen dreimal Programmtrash und zwei Run-Stopps. Reserviere diese teure Begegnung für einen wichtigen Schutzbedarf."
+            },
+            {
+              "cardId": "onr_classic_018_reclamation-project",
+              "title": "Reclamation Project",
+              "role": "Hole für zwei aufeinanderfolgende Aktionen gewählte ICE aus Archives offen nach HQ zurück. Berücksichtige bei der Auswahl das Handlimit."
+            }
+          ],
+          "pilotingTips": [
+            "Dreff-Zahlungen: Glacier 0, Haunting Inquisition 4, Zombie 4, Toughonium Wall 6 und Colonel Failure 8 Credits. Temporäre ICE werden nach ihrer Begegnung normalerweise getrasht.",
+            "Dreff installiert und rezzt das gewählte ICE nicht. Rez-Einkommen wird nicht ausgelöst. Halte mindestens eine wirksame HQ-Option bereit und verzichte auf Begegnungen mit geringem Nutzen.",
+            "Shock.r muss das letzte installierte ICE vor Dreff sein und seine Subroutine durchkommen. Kann der Runner sie zuverlässig brechen, ist die Sperre nicht garantiert.",
+            "Reclamation Project und Corporate Shuffle kosten jeweils zwei aufeinanderfolgende Aktionen. Verplane diese Aktionen nicht gleichzeitig für Recycling und Agenda-Advancement."
+          ],
+          "weaknesses": [
+            "Ohne Dreff können teure ICE die HQ verstopfen. Ein fertiges Breaker-Rig kann die temporäre Begegnung überwinden und anschließend das Upgrade trashen.",
+            "Wiederholte Runs verbrauchen ICE-Karten und Credits. Reclamation zeigt zurückgeholte ICE offen; Recycling kostet Aktionen.",
+            "Ein stark geschützter Remote lässt die Zentralen angreifbar, wenn zu viel Economy in ihn fließt. Ein Matchup-Vorteil ist noch nicht nachgewiesen."
+          ]
+        }
+      }
     }
   ]
 }

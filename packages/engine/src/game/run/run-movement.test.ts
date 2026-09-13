@@ -210,6 +210,9 @@ function hostFor(
       },
     },
     access: {
+      finalizeDelayedSuccessfulRunAfterPassedIce: () => {
+        throw new Error("Unexpected delayed encounter in movement fixture.");
+      },
       startAccessFromSuccessfulRun: (legalAction) => {
         if (legalAction) calls.access.push(legalAction);
         if (state.run) state.run = { ...state.run, phase: "access" };

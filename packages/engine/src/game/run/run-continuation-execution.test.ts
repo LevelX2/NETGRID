@@ -244,6 +244,11 @@ function hostFor(
       beginEncounter: (iceId) => calls.push(`beginEncounter:${iceId}`),
     },
     access: {
+      finalizeDelayedSuccessfulRunAfterPassedIce: () => {
+        throw new Error(
+          "Unexpected delayed pass decision in continuation fixture.",
+        );
+      },
       startAccessFromSuccessfulRun: () => calls.push("access"),
     },
     cleanup: {

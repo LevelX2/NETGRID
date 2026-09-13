@@ -1,6 +1,6 @@
 # CODEX_STATUS
 
-Stand: 2026-09-11
+Stand: 2026-09-13
 
 ## Einstieg
 
@@ -30,6 +30,15 @@ Es gibt derzeit keine dauerhaft führende monolithische Release-Roadmap. Aktuell
 Die Engine ist alleinige Regelautorität. UI, Server und KI reichen nur angebotene `LegalActions` ein; die Engine revalidiert Zustand, Kosten, Ziel, Choice und Legalität vor der Ausführung. Hidden-Info-Schutz, Replay, StateHash und seedbasierter Zufall bleiben verbindliche Grenzen.
 
 ## Engine und Karten
+
+„Dr. Dreffs letzte Visite“ ist als Standarddeck mit 45 Karten,
+20 Agendapunkten und deutscher/englischer Anleitung verfügbar. Die Liste
+verbindet temporäre HQ-ICE-Begegnungen mit Remote-Scoring und Recycling;
+ihre Spielstärke ist noch nicht durch eine Matchserie belegt. Marionette
+und die verwandten deklarativen ICE-Rückkehrmodi lösen nach einer
+Dr.-Dreff-Begegnung ihr Pass-Fenster vor dem Trash auf. Rückkehr, Zahlung,
+Run-Ende, Sichtbarkeit und Replay sind fokussiert geprüft; führend ist
+`docs/architecture/engine/run-runtime-architecture.md`.
 
 Shell Traders kann beim letzten Counter auch volle zulässige Program-Hosts
 als Installationsziel anbieten. Eine an den gewählten Host gebundene
