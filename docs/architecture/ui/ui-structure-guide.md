@@ -78,6 +78,13 @@ vom berechneten Kartenabstand, damit
 Resize, Kartenzahl und Skalierung keinen rückgekoppelten Umbruch erzeugen.
 
 `RunTimelineOverlay` zeigt in jeder Stufe dauerhaft blasse Orientierungssymbole.
+Der Run-Kopf besitzt höchstens zwei einzeilige Textreihen: Server und aktuelle
+Stufe, darunter ICE-Position und side-sicherer Name. Bei Movement bezeichnet
+ein vorangestellter Pfeil das nächste Ziel; erst Approach ist die Annäherung
+mit ICE-Rezfenster. Lange Servernamen werden vor der stets sichtbaren Phase
+gekürzt; vollständige Texte bleiben im Tooltip. Der Movement-Root-Rez-Pass
+heißt „Weiter zur Annäherung“ beziehungsweise vor dem Server „Weiter zum
+Zugriff“. Er ist kein Verzicht auf das anschließende ICE-Rezfenster.
 Sie erklären typische Möglichkeiten und sind keine Legalitätsanzeige. Nur
 Symbole für aktuell angebotene `LegalActions` in der aktiven Stufe werden
 kräftig mit einem Leuchtrand dargestellt. Besondere angebotene Aktionen

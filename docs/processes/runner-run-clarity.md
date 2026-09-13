@@ -1,6 +1,6 @@
 # Runner-Run und Phasenanzeige
 
-Status: Paket R1 abgenommen, Paket R2 aktiv. Auftrag: Match `match_28a78ebb6fe87b18`, D85–95,
+Status: R1 und R2 abgenommen, Integration aktiv. Auftrag: Match `match_28a78ebb6fe87b18`, D85–95,
 und missverständliche Movement-Anzeige vor Shock.r (State 194).
 
 ## Ziel und Grenzen
@@ -22,14 +22,14 @@ Fremde Änderungen im Hauptcheckout werden weder übernommen noch verworfen.
    zulässige Action, Root/Executor, finanzierte und unbekannte Gegenfälle.
    Done: fokussierte Regressionen und `git diff --check` grün, Runner-Vertrag
    gepflegt, Paketcommit `fix(ai): preserve remaining encounter costs and remote reserves`.
-2. **R2 – Run-Fenster verständlich darstellen (aktiv).** Nach R1 Titel und
+2. **R2 – Run-Fenster verständlich darstellen (abgenommen).** Nach R1 Titel und
    Movement-Pass in de/en/fr phasengerecht formulieren. Der Kopf bleibt bei
    höchstens zwei Textzeilen (Server/Phase/Ziel und bekannter ICE-Name). Verdeckte ICE bleiben
    verdeckt, andere Passfenster behalten ihre Bedeutung. Direkte UI- und
    Übersetzungsregressionen prüfen Movement, Approach, Encounter und Zugriff.
    Done: fokussierte Checks grün, UI-Vertrag gepflegt, Paketcommit
    `fix(web): distinguish movement targets from ice approach windows`.
-3. **Integration (wartend).** Aktuelles main defensiv einbinden, unmittelbar
+3. **Integration (aktiv).** Aktuelles main defensiv einbinden, unmittelbar
    betroffene Checks ausführen, lokal integrieren; sauberen eigenen Worktree
    und gemergten Branch entfernen und beide Entfernungen verifizieren.
 
@@ -63,3 +63,16 @@ wird nach Rückführung gültiger Erkenntnisse in aktuelle Verträge entfernt.
   beide grün.
 - Fokussierter Strict-Typecheck der drei geänderten Testeingänge und ihrer
   produktiven Abhängigkeiten grün. Keine Vollsuite/Build/Simulation.
+
+## Nachweise R2
+
+- 164 direkte Action-Board-Tests grün, einschließlich de/en/fr,
+  Movement-/Approach-/Fort-Pass-Abgrenzung und Hidden-ICE-Schutz.
+- Firefox-Renderprüfung des echten Head-Components mit produktivem CSS:
+  18 Varianten (drei Sprachen, drei Phasen, kurze/lange ICE-Namen), jeweils
+  zwei einzeilige Textreihen und Tooltip mit vollständigem Text; Sichtprüfung
+  bestanden. Statisches lokales HTML, kein Server oder Matcheingriff.
+- Fokussierter Strict-Typecheck von Overlay, Header und direkten Tests grün.
+  Overlay konsumiert die bestehende typisierte App-Locale-Normalisierung.
+- I18n-Gate mit 2.431 ausgerichteten Meldungen in drei Sprachen grün.
+- UI-Vertrag aktualisiert. Keine neue Regel-/Legalitätsentscheidung.

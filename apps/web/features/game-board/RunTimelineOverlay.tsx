@@ -39,7 +39,6 @@ import {
   normalizeVisibleTerms,
   runAwareActionButtonLabel,
   runBreakerActionHint,
-  runCurrentIceLabel,
   runWindowInteractionAmbience,
   runWindowActionButtonLabel,
   runWindowActionInstanceDetail,
@@ -55,9 +54,10 @@ import { useCardTooltipSettings } from "../cards/card-display-settings";
 import { useCatalogCardPresentations } from "../catalog/catalog-card-presentations";
 import { OverflowAwareActionButton } from "../actions/ActionControls";
 import { tooltipCardRulesText } from "../../i18n/card-rule-translations";
+import { normalizeAppLocale } from "../../i18n/locale";
 import { RUN_OVERLAY_POSITION_STORAGE_KEY } from "../../lib/storage-keys";
 import { readLocalStorage } from "../../lib/local-storage";
-import { runHeaderIceTitle } from "./run-header";
+import { RunTimelineHeading } from "./RunTimelineHeading";
 import {
   clampOverlayPosition,
   parseOverlayPositionPreference,
@@ -96,7 +96,7 @@ export function RunTimelineOverlay({
 }) {
   const t = useTranslations("Board.run");
   const cardPresentationsById = useCatalogCardPresentations();
-  const locale = useLocale();
+  const locale = normalizeAppLocale(useLocale());
   const { translateRulesToSelectedLanguage } = useCardTooltipSettings();
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
@@ -176,13 +176,6 @@ export function RunTimelineOverlay({
   const breachProgress = breachProgressLabel(view, locale);
   const breachHighlighterHint = breachHighlighterAccessHint(view);
   const headerStatus = runWindowStatusLabel(view, locale);
-  const headerIcePosition = runCurrentIceLabel(view);
-  const headerTitle = t("runOn", {
-    server: serverDisplayLabel(run.attackedServerId),
-  });
-  const headerDetail = headerIcePosition
-    ? (runHeaderIceTitle(view) ?? t("hiddenIce"))
-    : headerStatus;
   const breakerHint = runBreakerActionHint(view, legalActions);
   const positionStyle: CSSProperties =
     position.kind === "custom"
@@ -256,19 +249,14 @@ export function RunTimelineOverlay({
           aria-label={t("moveWindow")}
         >
           <Route size={18} />
-          <strong
-            className="runTimelineTitle"
-            title={headerStatus ?? headerTitle}
-          >
-            <span>{headerTitle}</span>
-            {headerIcePosition ? <small> · {headerIcePosition}</small> : null}
-          </strong>
           <Move size={15} aria-hidden="true" />
-          {headerDetail ? (
-            <small className="runTimelineDetail" title={headerDetail}>
-              {headerDetail}
-            </small>
-          ) : null}
+          <RunTimelineHeading
+            view={view}
+            serverLabel={serverDisplayLabel(run.attackedServerId)}
+            phaseLabel={t(`step.${currentStep}`)}
+            hiddenIceLabel={t("hiddenIce")}
+            statusLabel={headerStatus}
+          />
         </div>
         <div className="runSteps">
           {verticalSteps.map((step) => {
