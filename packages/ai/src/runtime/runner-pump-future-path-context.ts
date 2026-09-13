@@ -1,3 +1,4 @@
+import { currentRunPathContext } from "../run-analysis/current-run-path-context";
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { currentEncounteredIceCard } from "./current-encounter";
 import { runnerRigAfterEncounter } from "./runner-rig-after-encounter";
@@ -129,4 +130,3 @@ export function createRunnerPumpFuturePathContext(
 
   return { encounterFuturePathAfterPumpBreakAssessment };
 }
-import { currentRunPathContext } from "../run-analysis/current-run-path-context";

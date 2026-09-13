@@ -1026,6 +1026,8 @@ ohne unnötiges Darlehen zulässig.
 
 Die Engine projiziert bereits aktivierte Encounter-Gebühren öffentlich als
 `run.encounterTaxForFutureIce`. Restpfad-, Pump-, Break- und Risikoprüfungen
+erhalten diesen Wert auch durch die KI-Eingabeprojektion. Diese verwirft
+negative, nichtganzzahlige oder nichtendliche Gebühren sichtbar. Die Prüfungen
 übernehmen diesen Fakt und bezahlen ihn vor jedem verbleibenden bekannten
 Encounter aus allgemeinen beziehungsweise Run-Credits. Der Eintritt zum
 aktuellen Encounter ist bereits bezahlt; unbekannte oder umgangene ICE

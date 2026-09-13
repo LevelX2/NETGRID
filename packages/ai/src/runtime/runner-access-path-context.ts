@@ -1,3 +1,4 @@
+import { currentRunPathContext } from "../run-analysis/current-run-path-context";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -573,4 +574,3 @@ export function createRunnerAccessPathContext(
     encounterRemotePayoffAfterBreakAssessment,
   };
 }
-import { currentRunPathContext } from "../run-analysis/current-run-path-context";

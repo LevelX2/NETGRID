@@ -1,3 +1,4 @@
+import { currentRunPathContext } from "../run-analysis/current-run-path-context";
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import {
@@ -681,4 +682,3 @@ function randomBreakOrDamageRiskShouldAvoidRunSeverity(
 ): boolean {
   return riskSeverity === "lethal" || riskSeverity === "high";
 }
-import { currentRunPathContext } from "../run-analysis/current-run-path-context";

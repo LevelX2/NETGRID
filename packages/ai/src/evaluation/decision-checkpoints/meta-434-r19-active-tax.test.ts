@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { expect, it } from "vitest";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
+import { buildAiDecisionInputDto } from "../../input-dto";
 import { assessKnownRezzedIcePath } from "../../visible-run-analysis";
 import { currentRunRemainingIce } from "../../runtime/current-encounter";
 import { currentRunPathContext } from "../../run-analysis/current-run-path-context";
@@ -28,37 +29,56 @@ function load() {
   };
 }
 
-it("preserves the accepted risk contract after the publicly resolved outer encounter tax", () => {
-  const { input, runtime } = load();
-  const root = activeRunRootPlan(runtime.residentPlanPortfolio, input);
-  const risk = runnerRunRiskContractReassessment(input, root);
-  expect(risk).toMatchObject({
-    decision: "preserve_continuation",
-    currentReserveQuote: {
-      knownPathCost: 12,
-      creditsAfterKnownPath: 6,
-      creditGap: 0,
-    },
-  });
-  resetResidentPlanPortfolioMemory();
-  restoreAiRuntimeCheckpoint(
-    input,
-    input.ownDeckSnapshot!.deckSnapshotId,
-    runtime,
-  );
-  const result = chooseAiAction(input);
-  expect(
-    input.legalActions.find((a) => a.actionId === result.actionId)?.type,
-  ).toBe("continue_run");
-  expect(result.fallbackUsed).toBe(false);
-  expect(
-    result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
-  ).toContain("plan:runner.convert_run_window:");
-  expect(result.decisionDebug?.planFirstDecision?.route).toMatchObject({
-    actionId: result.actionId,
-    stateVersion: input.playerView.stateVersion,
-  });
-});
+it.each([false, true])(
+  "preserves the accepted risk contract with input sanitization=%s",
+  (sanitize) => {
+    const checkpoint = load();
+    const runtime = checkpoint.runtime;
+    const input = sanitize
+      ? { ...checkpoint.input, ...buildAiDecisionInputDto(checkpoint.input) }
+      : checkpoint.input;
+    expect(input.playerView.run?.encounterTaxForFutureIce).toBe(2);
+    const root = activeRunRootPlan(runtime.residentPlanPortfolio, input);
+    const risk = runnerRunRiskContractReassessment(input, root);
+    expect(risk).toMatchObject({
+      decision: "preserve_continuation",
+      currentReserveQuote: {
+        knownPathCost: 12,
+        creditsAfterKnownPath: 6,
+        creditGap: 0,
+      },
+    });
+    resetResidentPlanPortfolioMemory();
+    restoreAiRuntimeCheckpoint(
+      input,
+      input.ownDeckSnapshot!.deckSnapshotId,
+      runtime,
+    );
+    const result = chooseAiAction(input);
+    expect(
+      input.legalActions.find((a) => a.actionId === result.actionId)?.type,
+    ).toBe("continue_run");
+    expect(result.fallbackUsed).toBe(false);
+    expect(
+      result.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+    ).toContain("plan:runner.convert_run_window:");
+    expect(result.decisionDebug?.planFirstDecision?.route).toMatchObject({
+      actionId: result.actionId,
+      stateVersion: input.playerView.stateVersion,
+    });
+  },
+);
+
+it.each([-1, 1.5, Number.NaN])(
+  "rejects an invalid encounter tax %s at the input boundary",
+  (amount) => {
+    const { input } = load();
+    input.playerView.run!.encounterTaxForFutureIce = amount;
+    expect(() => buildAiDecisionInputDto(input)).toThrow(
+      "Invalid Engine run encounter-entry tax quote",
+    );
+  },
+);
 
 it("still rejects a real credit loss after that same tax was activated", () => {
   const { input, runtime } = load();

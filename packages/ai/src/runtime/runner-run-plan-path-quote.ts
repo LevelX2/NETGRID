@@ -1,3 +1,4 @@
+import { currentRunPathContext } from "../run-analysis/current-run-path-context";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -1552,4 +1553,3 @@ function unknownPathQuote(
     requiredSequences: [],
   };
 }
-import { currentRunPathContext } from "../run-analysis/current-run-path-context";

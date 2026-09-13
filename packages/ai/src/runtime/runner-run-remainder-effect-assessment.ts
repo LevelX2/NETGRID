@@ -1,3 +1,4 @@
+import { currentRunPathContext } from "../run-analysis/current-run-path-context";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -258,4 +259,3 @@ function deferredFullBreakIndexes(input: AiDecisionInput): number[] {
     ? indexes
     : [];
 }
-import { currentRunPathContext } from "../run-analysis/current-run-path-context";

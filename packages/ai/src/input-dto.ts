@@ -717,6 +717,12 @@ function sanitizePlayerView(
 ): PlayerView {
   const corpPunishRouteQuoteSet = sanitizeCorpPunishRouteQuoteSet(view);
   if (
+    view.run?.encounterTaxForFutureIce !== undefined &&
+    !nonNegativeInteger(view.run.encounterTaxForFutureIce)
+  ) {
+    throw new Error("Invalid Engine run encounter-entry tax quote.");
+  }
+  if (
     view.runnerNextTurnCreditClicks !== undefined &&
     (!Number.isSafeInteger(view.runnerNextTurnCreditClicks) ||
       view.runnerNextTurnCreditClicks < 0)
@@ -1008,6 +1014,9 @@ function sanitizePlayerView(
               : {}),
             ...(view.run.nextEncounterNoBreakSubroutines === true
               ? { nextEncounterNoBreakSubroutines: true }
+              : {}),
+            ...(view.run.encounterTaxForFutureIce !== undefined
+              ? { encounterTaxForFutureIce: view.run.encounterTaxForFutureIce }
               : {}),
             ...(view.run.noBreakSubroutinesActive === true
               ? { noBreakSubroutinesActive: true }
