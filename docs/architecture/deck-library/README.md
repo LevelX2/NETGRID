@@ -6,3 +6,4 @@
 
 - `local-file-deck-library-2026-05-07.md`
 - `standard-deck-guide-validation.md`
+- `format-validation.md`: gemeinsame Profil- und Corp-Agenda-Validierung

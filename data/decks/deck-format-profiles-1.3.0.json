@@ -30,7 +30,7 @@
         "corp": 7
       },
       "agenda": {
-        "policy": "points_minimum",
+        "policy": "official_size_range",
         "missingDataPolicy": "block",
         "minimumAgendaPoints": {
           "corp": 7
@@ -125,7 +125,7 @@
         "corp": 7
       },
       "agenda": {
-        "policy": "points_minimum",
+        "policy": "official_size_range",
         "missingDataPolicy": "block",
         "minimumAgendaPoints": {
           "corp": 7
@@ -229,7 +229,7 @@
         "corp": 7
       },
       "agenda": {
-        "policy": "points_minimum",
+        "policy": "official_size_range",
         "missingDataPolicy": "block",
         "minimumAgendaPoints": {
           "corp": 7
@@ -332,7 +332,7 @@
         "corp": 7
       },
       "agenda": {
-        "policy": "points_minimum",
+        "policy": "official_size_range",
         "missingDataPolicy": "block",
         "minimumAgendaPoints": {
           "corp": 7
