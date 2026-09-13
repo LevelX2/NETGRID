@@ -109,7 +109,11 @@ export type DeckFormatProfile = {
   minimumDeckCards: Record<DeckSide, number>;
   minimumAgendaPoints: { corp: number };
   agenda?: {
-    policy: "points_minimum" | "density_range" | "local_profile";
+    policy:
+      | "points_minimum"
+      | "density_range"
+      | "local_profile"
+      | "official_size_range";
     missingDataPolicy: "block" | "warn";
     minimumAgendaPoints?: { corp: number };
     density?: {
@@ -602,9 +606,14 @@ function validateDeckLike(
     agendaPoints += (card.numeric.agendaPoints ?? 0) * entry.quantity;
   }
 
-  const minimumDeckCards =
+  const officialAgendaRange =
+    deck.side === "corp" &&
+    context.profile.agenda?.policy === "official_size_range";
+  const minimumDeckCards = Math.max(
     identityRule?.minimumDeckCards ??
-    context.profile.minimumDeckCards[deck.side];
+      context.profile.minimumDeckCards[deck.side],
+    officialAgendaRange ? 40 : 0,
+  );
   const minimumAgendaPoints =
     context.profile.agenda?.minimumAgendaPoints?.corp ??
     context.profile.minimumAgendaPoints.corp;
@@ -613,13 +622,32 @@ function validateDeckLike(
       "minimum_deck_size",
       `Deck has ${totalCards} cards, expected at least ${minimumDeckCards}.`,
     );
-  if (deck.side === "corp" && agendaPoints < minimumAgendaPoints)
+  if (officialAgendaRange && totalCards >= 40) {
+    const minimum = 2 * Math.floor(totalCards / 5) + 2;
+    const maximum = minimum + 1;
+    if (agendaPoints < minimum)
+      addError(
+        "agenda_points_too_low",
+        `Corp deck has ${agendaPoints} agenda points; ${totalCards} cards require ${minimum} to ${maximum}.`,
+      );
+    if (agendaPoints > maximum)
+      addError(
+        "agenda_points_too_high",
+        `Corp deck has ${agendaPoints} agenda points; ${totalCards} cards require ${minimum} to ${maximum}.`,
+      );
+  }
+  if (
+    !officialAgendaRange &&
+    deck.side === "corp" &&
+    agendaPoints < minimumAgendaPoints
+  )
     addError(
       "minimum_agenda_points",
       `Corp deck has ${agendaPoints} agenda points, expected at least ${minimumAgendaPoints}.`,
     );
   const agendaDensity = context.profile.agenda?.density;
   if (
+    !officialAgendaRange &&
     deck.side === "corp" &&
     agendaDensity?.minAgendaPointsPerCards &&
     agendaPoints <
@@ -631,6 +659,7 @@ function validateDeckLike(
     );
   }
   if (
+    !officialAgendaRange &&
     deck.side === "corp" &&
     agendaDensity?.maxAgendaPointsPerCards &&
     agendaPoints >

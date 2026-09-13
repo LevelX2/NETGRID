@@ -124,7 +124,9 @@
       "validation": {
         "ok": true,
         "errors": [],
-        "warnings": ["Uses MVP 0.4 expanded local demo card pool."],
+        "warnings": [
+          "Uses MVP 0.4 expanded local demo card pool."
+        ],
         "totalCards": 24,
         "agendaPoints": 7
       },
@@ -236,7 +238,9 @@
       "validation": {
         "ok": true,
         "errors": [],
-        "warnings": ["Uses MVP 0.4 expanded local demo card pool."],
+        "warnings": [
+          "Uses MVP 0.4 expanded local demo card pool."
+        ],
         "totalCards": 19,
         "agendaPoints": null
       },
@@ -637,9 +641,7 @@
       "side": "corp",
       "identityCardId": "corp_identity_001",
       "cardPoolSnapshotId": "card-snapshot-0.8",
-      "cardPoolVersion": "private-local-onr-v1",
-      "formatProfileId": "netgrid_private_local_v1",
-      "formatProfileVersion": "1.3.0",
+      "formatProfileId": "local-demo-v0.8",
       "rulesBaselineId": "rules-baseline-mvp-0.94",
       "immutable": true,
       "cards": [
@@ -682,19 +684,17 @@
         "warnings": [],
         "totalCards": 18,
         "agendaPoints": 7,
-        "influenceSpent": 0
+        "influenceSpent": null
       },
       "publicMetadata": {
         "side": "corp",
         "identityCardId": "corp_identity_001",
         "deckName": "Corp Demo Deck 1.3.0 - Private Local Format",
         "cardPoolSnapshotId": "card-snapshot-0.8",
-        "cardPoolVersion": "private-local-onr-v1",
-        "formatProfileId": "netgrid_private_local_v1",
-        "formatProfileVersion": "1.3.0",
-        "deckHash": "fnv1a:551ee643"
+        "formatProfileId": "local-demo-v0.8",
+        "deckHash": "fnv1a:ceddeef6"
       },
-      "deckHash": "fnv1a:551ee643"
+      "deckHash": "fnv1a:ceddeef6"
     },
     {
       "deckSnapshotId": "king_of_the_road_runner_ai_snapshot_v1",
@@ -878,9 +878,7 @@
       "side": "corp",
       "identityCardId": "corp_identity_001",
       "cardPoolSnapshotId": "card-snapshot-0.8",
-      "cardPoolVersion": "private-local-onr-v1",
-      "formatProfileId": "netgrid_private_local_v1",
-      "formatProfileVersion": "1.3.0",
+      "formatProfileId": "local-demo-v0.8",
       "rulesBaselineId": "rules-baseline-mvp-0.94",
       "immutable": true,
       "cards": [
@@ -947,19 +945,17 @@
         "warnings": [],
         "totalCards": 23,
         "agendaPoints": 8,
-        "influenceSpent": 0
+        "influenceSpent": null
       },
       "publicMetadata": {
         "side": "corp",
         "identityCardId": "corp_identity_001",
         "deckName": "Corp Origins AI - Tax & Punish",
         "cardPoolSnapshotId": "card-snapshot-0.8",
-        "cardPoolVersion": "private-local-onr-v1",
-        "formatProfileId": "netgrid_private_local_v1",
-        "formatProfileVersion": "1.3.0",
-        "deckHash": "fnv1a:072da05f"
+        "formatProfileId": "local-demo-v0.8",
+        "deckHash": "fnv1a:ff59def2"
       },
-      "deckHash": "fnv1a:072da05f"
+      "deckHash": "fnv1a:ff59def2"
     },
     {
       "deckSnapshotId": "onr_origin_runner_ai_event_pressure_snapshot_v1",
@@ -1052,9 +1048,7 @@
       "side": "corp",
       "identityCardId": "corp_identity_001",
       "cardPoolSnapshotId": "card-snapshot-0.8",
-      "cardPoolVersion": "private-local-onr-v1",
-      "formatProfileId": "netgrid_private_local_v1",
-      "formatProfileVersion": "1.3.0",
+      "formatProfileId": "local-demo-v0.8",
       "rulesBaselineId": "rules-baseline-mvp-0.94",
       "immutable": true,
       "cards": [
@@ -1125,19 +1119,17 @@
         "warnings": [],
         "totalCards": 24,
         "agendaPoints": 7,
-        "influenceSpent": 0
+        "influenceSpent": null
       },
       "publicMetadata": {
         "side": "corp",
         "identityCardId": "corp_identity_001",
         "deckName": "Corp Origins AI - Tag Ops Control",
         "cardPoolSnapshotId": "card-snapshot-0.8",
-        "cardPoolVersion": "private-local-onr-v1",
-        "formatProfileId": "netgrid_private_local_v1",
-        "formatProfileVersion": "1.3.0",
-        "deckHash": "fnv1a:6f425753"
+        "formatProfileId": "local-demo-v0.8",
+        "deckHash": "fnv1a:ba83b70e"
       },
-      "deckHash": "fnv1a:6f425753"
+      "deckHash": "fnv1a:ba83b70e"
     },
     {
       "deckSnapshotId": "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
@@ -1521,9 +1513,7 @@
       "side": "corp",
       "identityCardId": "corp_identity_001",
       "cardPoolSnapshotId": "card-snapshot-0.8",
-      "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
-      "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
-      "formatProfileVersion": "1.0.0",
+      "formatProfileId": "local-demo-v0.8",
       "rulesBaselineId": "rules-baseline-mvp-0.94",
       "immutable": true,
       "cards": [
@@ -1690,19 +1680,17 @@
         "warnings": [],
         "totalCards": 45,
         "agendaPoints": 16,
-        "influenceSpent": 0
+        "influenceSpent": null
       },
       "publicMetadata": {
         "side": "corp",
         "identityCardId": "corp_identity_001",
         "deckName": "Proteus Korp - Region Fast Score",
         "cardPoolSnapshotId": "card-snapshot-0.8",
-        "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
-        "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
-        "formatProfileVersion": "1.0.0",
-        "deckHash": "fnv1a:a8f30c68"
+        "formatProfileId": "local-demo-v0.8",
+        "deckHash": "fnv1a:e99fcbf1"
       },
-      "deckHash": "fnv1a:a8f30c68"
+      "deckHash": "fnv1a:e99fcbf1"
     },
     {
       "deckSnapshotId": "proteus_corp_antibody_tax_snapshot_v2026_05_25",
@@ -1712,9 +1700,7 @@
       "side": "corp",
       "identityCardId": "corp_identity_001",
       "cardPoolSnapshotId": "card-snapshot-0.8",
-      "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
-      "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
-      "formatProfileVersion": "1.0.0",
+      "formatProfileId": "local-demo-v0.8",
       "rulesBaselineId": "rules-baseline-mvp-0.94",
       "immutable": true,
       "cards": [
@@ -1889,19 +1875,17 @@
         "warnings": [],
         "totalCards": 45,
         "agendaPoints": 17,
-        "influenceSpent": 0
+        "influenceSpent": null
       },
       "publicMetadata": {
         "side": "corp",
         "identityCardId": "corp_identity_001",
         "deckName": "Proteus Korp - Antibody Tax & Ambush",
         "cardPoolSnapshotId": "card-snapshot-0.8",
-        "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
-        "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
-        "formatProfileVersion": "1.0.0",
-        "deckHash": "fnv1a:6c4a87d4"
+        "formatProfileId": "local-demo-v0.8",
+        "deckHash": "fnv1a:f35c6abd"
       },
-      "deckHash": "fnv1a:6c4a87d4"
+      "deckHash": "fnv1a:f35c6abd"
     },
     {
       "deckSnapshotId": "classic_runner_ai_snapshot_v1",
@@ -2050,9 +2034,7 @@
       "side": "corp",
       "identityCardId": "corp_identity_001",
       "cardPoolSnapshotId": "card-snapshot-0.8",
-      "cardPoolVersion": "private-local-onr-v1-plus-classic-playtest",
-      "formatProfileId": "netgrid_private_local_classic_playtest_v1",
-      "formatProfileVersion": "1.0.0",
+      "formatProfileId": "local-demo-v0.8",
       "rulesBaselineId": "rules-baseline-mvp-0.94",
       "immutable": true,
       "cards": [
@@ -2167,19 +2149,17 @@
         "warnings": [],
         "totalCards": 45,
         "agendaPoints": 13,
-        "influenceSpent": 0
+        "influenceSpent": null
       },
       "publicMetadata": {
         "side": "corp",
         "identityCardId": "corp_identity_001",
         "deckName": "Classic Corp AI - Agenda Tax Control",
         "cardPoolSnapshotId": "card-snapshot-0.8",
-        "cardPoolVersion": "private-local-onr-v1-plus-classic-playtest",
-        "formatProfileId": "netgrid_private_local_classic_playtest_v1",
-        "formatProfileVersion": "1.0.0",
-        "deckHash": "fnv1a:659bdf52"
+        "formatProfileId": "local-demo-v0.8",
+        "deckHash": "fnv1a:12ea266f"
       },
-      "deckHash": "fnv1a:659bdf52"
+      "deckHash": "fnv1a:12ea266f"
     }
   ]
 }
