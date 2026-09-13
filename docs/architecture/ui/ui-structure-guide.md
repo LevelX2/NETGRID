@@ -44,6 +44,15 @@ und die bekannte Karte im PlayerView beziehungsweise Kartenmenü auf.
 Damit nennen Run-Fenster, Aktionspanel und Kartenmenüs das Rez-Ziel in
 Deutsch, Englisch und Französisch auch ohne Titel in den Aktionsmetadaten.
 
+Bei einem Runner-Sieg durch Agendapunkte erhält die letzte öffentliche
+`steal_agenda`-Nachricht Vorrang vor älteren Access-Präsentationen und dem
+Ergebnisfenster. Ihre eigene Event-ID bindet die lokale Bestätigung; eine
+vorher bestätigte Zugriffsvorschau bestätigt den Diebstahl nicht mit.
+Kartenidentität und Herkunft stammen aus dem öffentlichen Stehl-Ereignis,
+auch wenn der vorherige R&D-Zugriff für die Korp redigiert war. Das
+Ergebnisfenster erscheint erst nach dieser Bestätigung. Die Spielformat-ID
+`rules_match` heißt dort Standardspiel / Standard game / Partie standard.
+
 Der eigene Runner-Grip verwendet seine kompakte Handbreite als Grundlage
 für den Flex-Umbruch mit Stack, Rig und Heap. Erst danach nimmt der geöffnete
 Grip mit mehreren Karten den freien Platz seiner Zeile auf.

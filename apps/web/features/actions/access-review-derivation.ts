@@ -51,7 +51,10 @@ export function accessRevealFromLatestEvent(
   viewerSide: Side,
   events: PublicGameEvent[] = [],
 ): AccessReveal | null {
-  if (!event || event.publicPayload.actionType !== "access_card") return null;
+  if (!event) return null;
+  const agendaStolen = event.publicPayload.actionType === "steal_agenda";
+  if (!agendaStolen && event.publicPayload.actionType !== "access_card")
+    return null;
   const cardId = payloadString(event.publicPayload, "cardDefinitionId");
   const title = payloadString(event.publicPayload, "title");
   if (!cardId || !title) return null;
@@ -61,17 +64,21 @@ export function accessRevealFromLatestEvent(
     ? visibleCardFromCatalogDetail(detail)
     : visibleCardFromPublicEvent(event, cardId, title);
   const serverLabel = serverDisplayLabel(
-    payloadString(event.publicPayload, "serverLabel") ?? "einen Server",
+    payloadString(event.publicPayload, "serverLabel") ??
+      payloadString(event.publicPayload, "serverId") ??
+      "einen Server",
   );
   const accessOrigin = payloadAccessOrigin(event.publicPayload);
-  const actions = legalActions.filter((action) =>
-    [
-      "access_card",
-      "steal_agenda",
-      "trash_accessed_card",
-      "decline_trash",
-    ].includes(action.type),
-  );
+  const actions = agendaStolen
+    ? []
+    : legalActions.filter((action) =>
+        [
+          "access_card",
+          "steal_agenda",
+          "trash_accessed_card",
+          "decline_trash",
+        ].includes(action.type),
+      );
   const pendingAmbushStatus = accessAmbushPendingStatus(
     viewerSide,
     event,
@@ -81,7 +88,12 @@ export function accessRevealFromLatestEvent(
   const terminalDamageStatus = terminalAccessDamageStatus(event, viewerSide);
   const highlighterStatus = accessHighlighterStatus(event.publicPayload);
   const progressStatus = accessProgressStatus(event.publicPayload);
-  const outcome = accessPresentationOutcomeAfter(events, event, viewerSide);
+  const outcome = agendaStolen
+    ? {
+        kind: "stolen" as const,
+        status: `${viewerSide === actorSide ? "Du hast" : "Der Runner hat"} die Agenda ${title} erbeutet.`,
+      }
+    : accessPresentationOutcomeAfter(events, event, viewerSide);
   return {
     eventId: event.eventId,
     kind: "access",
@@ -98,9 +110,11 @@ export function accessRevealFromLatestEvent(
     ),
     ...(progressStatus ? { progressStatus } : {}),
     accessSourceLabel: accessSourceLabel(serverLabel, accessOrigin, card.type),
-    ...(accessHasMoreCandidates(event.publicPayload) !== null
-      ? { hasMoreAccesses: accessHasMoreCandidates(event.publicPayload)! }
-      : {}),
+    ...(agendaStolen
+      ? { hasMoreAccesses: false }
+      : accessHasMoreCandidates(event.publicPayload) !== null
+        ? { hasMoreAccesses: accessHasMoreCandidates(event.publicPayload)! }
+        : {}),
     card,
     actions,
     trashStatus:

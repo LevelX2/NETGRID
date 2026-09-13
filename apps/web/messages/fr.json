@@ -1487,6 +1487,7 @@
     },
     "access": {
       "archivesRevealed": "Des fiches d'archives dévoilées",
+      "confirmAgenda": "Confirmer l’agenda",
       "hqAgendasRevealed": "Les agendas des HQ dévoilés",
       "accessTo": "Accès à {server}",
       "archives": "Archives",
@@ -1563,7 +1564,7 @@
       },
       "format": {
         "single_game": "Jeu unique",
-        "rules_match": "Match des règles",
+        "rules_match": "Partie standard",
         "two_game_side_swap": "Série de matchs",
         "fixed_pairing_repeat": "Affrontement répété"
       },

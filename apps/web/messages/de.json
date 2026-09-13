@@ -1449,6 +1449,7 @@
     },
     "access": {
       "archivesRevealed": "Archivkarten aufgedeckt",
+      "confirmAgenda": "Agenda bestätigen",
       "hqAgendasRevealed": "HQ-Agenden vorgezeigt",
       "accessTo": "Zugriff auf {server}",
       "archives": "Archiv",
@@ -1517,7 +1518,7 @@
       "motifCaption": { "runner": "Runner", "corp": "Korp", "draw": "Draw" },
       "format": {
         "single_game": "Einzelspiel",
-        "rules_match": "Regelmatch",
+        "rules_match": "Standardspiel",
         "two_game_side_swap": "Matchserie",
         "fixed_pairing_repeat": "Wiederholte Paarung"
       },

@@ -1445,6 +1445,7 @@
     },
     "access": {
       "archivesRevealed": "Archives cards revealed",
+      "confirmAgenda": "Confirm agenda",
       "hqAgendasRevealed": "HQ agendas revealed",
       "accessTo": "Accessing {server}",
       "archives": "Archives",
@@ -1513,7 +1514,7 @@
       "motifCaption": { "runner": "Runner", "corp": "Corp", "draw": "Draw" },
       "format": {
         "single_game": "Single game",
-        "rules_match": "Rules match",
+        "rules_match": "Standard game",
         "two_game_side_swap": "Match series",
         "fixed_pairing_repeat": "Repeated pairing"
       },

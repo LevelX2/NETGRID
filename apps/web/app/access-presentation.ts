@@ -147,16 +147,16 @@ export function accessPresentationOutcomeAfter(
   return null;
 }
 
-export function latestStolenAgendaAccessEvent(
+export function latestStolenAgendaEvent(
   events: PublicGameEvent[],
   dismissedEventIds: readonly string[],
 ): PublicGameEvent | null {
-  const dismissed = new Set(dismissedEventIds);
   for (let index = events.length - 1; index >= 0; index -= 1) {
     const event = events[index];
     if (!event || event.publicPayload.actionType !== "steal_agenda") continue;
-    const accessEvent = publicAccessEventForOutcome(events, event);
-    if (accessEvent && !dismissed.has(accessEvent.eventId)) return accessEvent;
+    // A steal is public even when the preceding R&D access was redacted.
+    // Confirmation belongs to this outcome, not to an earlier access preview.
+    return dismissedEventIds.includes(event.eventId) ? null : event;
   }
   return null;
 }
