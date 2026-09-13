@@ -527,14 +527,7 @@ import {
   CARD_IMPLEMENTATIONS,
   cardImplementationForDefinitionId,
 } from "../../card-implementations/registry";
-import {
-  COUNTER_OPERATION_SOURCES,
-  OVERADVANCE_AGENDA_SOURCES,
-  scoredAgendaCounterCreditPayload,
-  scoredAgendaCounterCreditProfileForDefinition,
-  scoredAgendaCounterCreditProfileForPayload,
-  SCORED_REVEAL_AGENDA_SOURCES,
-} from "../../mechanics/agenda-scoring";
+import { CORP_ADVANCEMENT_COUNTER_OPERATION_SOURCES } from "../../mechanics/card-implementation-derived-sets";
 import { RUN_START_CREDIT_LOSS_SOURCE } from "../../mechanics/global-modifiers";
 import { COUNTER_UPGRADE_SOURCES } from "../../mechanics/hosting-counters";
 import {
@@ -1186,7 +1179,7 @@ export function createCorpRuntimeResolvers(
     const targetAgendaId = corpAgendaCounterOperationTarget(state);
     if (!targetAgendaId)
       throw new Error("Die V1.9.19-Counter-Operation findet kein Agenda-Ziel.");
-    if (!COUNTER_OPERATION_SOURCES.has(sourceDefinitionId))
+    if (!CORP_ADVANCEMENT_COUNTER_OPERATION_SOURCES.has(sourceDefinitionId))
       throw new Error("Die V1.9.19-Counter-Operation passt nicht zur Quelle.");
     addCardCounter(state, targetAgendaId, "power", 1);
     legalAction.payload = {

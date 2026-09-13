@@ -56,12 +56,11 @@ Befüllungen; aktive Kartenverträge stammen weiterhin aus CardSpecs.
   Die daran gebundenen `v1918UpgradeAbility=add_power_counter`-Angebote und
   ihre Ausführung besitzen keinen produktiven Kartenvertrag. Synthetische
   Hosttests befüllen eine eigene Menge und belegen keine Kartenfreischaltung.
-- `agenda-scoring.ts`: Overadvance-/Reveal-Mengen und Counter-Credit-Profile
-  sind leer. Alte Hostzweige und synthetische Profiltests dürfen entfernt
-  werden; generische CardSpec-Overadvance- und aktivierte Agenda-Fähigkeiten
-  bleiben erhalten. `COUNTER_OPERATION_SOURCES` ist dagegen ein verwendeter
-  Alias der aktiven `CORP_ADVANCEMENT_COUNTER_OPERATION_SOURCES`; beim Entfernen
-  des Moduls muss der Verbraucher direkt diese abgeleitete Menge importieren.
+- `agenda-scoring.ts` ist entfernt, einschließlich leerer Overadvance-/Reveal-
+  Mengen, Counter-Credit-Profile, gebundener Hostzweige und synthetischer
+  Profiltests. Generische CardSpec-Overadvance- und aktivierte Agenda-Fähigkeiten
+  bleiben erhalten. Der Counter-Operation-Verbraucher importiert direkt
+  `CORP_ADVANCEMENT_COUNTER_OPERATION_SOURCES` aus der CardSpec-Ableitung.
 
 Eine Entfernung umfasst jeweils Producer, Hostports, Verdrahtung und nur die
 synthetischen Tests des toten Pfads. Es entstehen keine Ersatzprofile oder

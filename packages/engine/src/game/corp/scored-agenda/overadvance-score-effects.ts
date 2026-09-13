@@ -1,5 +1,4 @@
 import type {
-  CardDefinition,
   CardInstance,
   CardInstanceId,
   LegalAction,
@@ -16,7 +15,6 @@ export type OveradvanceScoreEffectResult = {
 export function applyOveradvanceScoreEffects(
   host: ScoredAgendaFlowHost,
   cardId: CardInstanceId,
-  definition: CardDefinition,
   instanceBefore: CardInstance,
   requiredDifficulty: number,
   scoredAgenda: CardScoredAgendaImplementation | undefined,
@@ -34,18 +32,6 @@ export function applyOveradvanceScoreEffects(
       applySequencePayloadPatch(legalAction, {
         overadvanceBonusAgendaPointOveradvance: overadvancedBy,
         overadvanceBonusAgendaPoints: bonusAgendaPoints,
-      });
-    }
-  }
-  if (host.cards.isOveradvanceAgendaDefinition(definition.id)) {
-    overadvancedBy = excessAdvancements(instanceBefore, requiredDifficulty);
-    bonusAgendaPoints = Math.floor(overadvancedBy / 2);
-    host.counters.setCardCounter(cardId, "agenda", bonusAgendaPoints);
-    if (legalAction) {
-      applySequencePayloadPatch(legalAction, {
-        v1919AgendaDifficulty: requiredDifficulty,
-        v1919Overadvance: overadvancedBy,
-        v1919BonusAgendaPoints: bonusAgendaPoints,
       });
     }
   }
