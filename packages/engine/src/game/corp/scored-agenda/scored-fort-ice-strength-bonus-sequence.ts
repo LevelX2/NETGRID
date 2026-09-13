@@ -21,7 +21,7 @@ export function resolveScoredFortIceStrengthBonusOnScore(
         ? instanceBefore.zone.serverId
         : undefined;
   if (!selectedServerId || selectedServerId === "new_remote")
-    throw new Error("Scored-Fort-Strength-Bonus braucht ein gueltiges Remote.");
+    throw new Error("Scored fort ICE strength bonus requires a valid server.");
   host.zones.mustServer(selectedServerId as Exclude<ServerId, "new_remote">);
   host.state.cardInstances[cardId] = {
     ...host.cards.mustInstance(cardId),
