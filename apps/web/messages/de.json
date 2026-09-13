@@ -2138,6 +2138,19 @@
     "access": {
       "cardPosition": "Karte {number} von {total}"
     },
+    "socialEngineering": {
+      "result": "Social Engineering: Runner {hidden} Credits, Korp {guess} Credits geraten – {outcome}.",
+      "correct": "richtig geraten",
+      "incorrect": "falsch geraten",
+      "creditsLost": "Der Runner verliert {amount, plural, one {# Credit} other {# Credits}}. Social Engineering startet keinen Run.",
+      "noIceTarget": "Es gibt kein installiertes ICE als Ziel. Social Engineering startet keinen Run.",
+      "chooseTarget": "Der Runner darf einen Server und ein ICE wählen, das er bei diesem Run automatisch passiert.",
+      "targetChosen": "{subject}: durch Social Engineering Run auf {server} gestartet; ICE {number} wird automatisch passiert.",
+      "rezOpportunity": "Die Korp erhält vor dem automatischen Passieren die normale Rez-Gelegenheit.",
+      "hiddenChoice": "{subject}: für Social Engineering verdeckt Credits gewählt.",
+      "hiddenUntilGuess": "Der Betrag bleibt bis zum Raten der Korp verdeckt.",
+      "resultMissing": "Social Engineering: Ergebnisdaten fehlen."
+    },
     "event": {
       "gameCreated": "Das Spiel wurde erstellt.",
       "timeExpired": "{subject}: Spielerzeit abgelaufen.",
@@ -2226,6 +2239,8 @@
       "runnerPaidToPassIce": "{subject}: {amount, plural, one {# Credit} other {# Credits}} bezahlt, um {source} zu passieren.",
       "runnerDidNotPayToPassIce": "{subject}: nicht für {source} bezahlt; der Run wurde beendet.",
       "numberedEndRunSubroutine": "{source}: Subroutine {number} beendet den Run.",
+      "subroutineRunLock": "{source}: {subroutine} – der Runner kann während {amount, plural, one {seiner nächsten Aktion} other {seiner nächsten # Aktionen}} keinen weiteren Run starten.",
+      "subroutineRunLockAmountMissing": "{source}: {subroutine} – die Dauer der Runsperre fehlt im Ereignis.",
       "subroutineProgramTrashed": "{source}: {subroutine} trasht {card}.",
       "subroutineProgramTrashTargetMissing": "{source}: {subroutine} – der Name des getrashten Programms fehlt im Ereignis.",
       "subroutineProgramTrashPaid": "{source}: {subroutine} – {subject}: {amount, plural, one {# Credit} other {# Credits}} bezahlt, um das Trashing zu verhindern.",

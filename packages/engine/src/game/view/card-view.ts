@@ -822,6 +822,14 @@ function specialCounterDisplays(
       counterType: "shell",
       usageHint: "status_marker",
     }),
+    ...singleCounterDisplay(counters.remap, {
+      id: "remap",
+      displayKind: "generic_counter",
+      label: "Remap-Counter",
+      ariaLabelName: "Remap-Counter",
+      counterType: "remap",
+      usageHint: "status_marker",
+    }),
     ...singleCounterDisplay(counters.ablative, {
       id: "ablative",
       displayKind: "damage_prevention",

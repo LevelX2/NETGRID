@@ -2130,6 +2130,19 @@
     "access": {
       "cardPosition": "Card {number} of {total}"
     },
+    "socialEngineering": {
+      "result": "Social Engineering: Runner hid {hidden} credits, Corp guessed {guess} credits – {outcome}.",
+      "correct": "correct guess",
+      "incorrect": "incorrect guess",
+      "creditsLost": "The Runner loses {amount, plural, one {# credit} other {# credits}}. Social Engineering does not start a run.",
+      "noIceTarget": "There is no installed ICE to target. Social Engineering does not start a run.",
+      "chooseTarget": "The Runner may choose a server and an ICE to automatically pass during this run.",
+      "targetChosen": "{subject}: started a run on {server} through Social Engineering; ICE {number} will be passed automatically.",
+      "rezOpportunity": "The Corp gets the normal rez opportunity before the ICE is automatically passed.",
+      "hiddenChoice": "{subject}: secretly chose credits for Social Engineering.",
+      "hiddenUntilGuess": "The amount stays hidden until the Corp guesses.",
+      "resultMissing": "Social Engineering: result data is missing."
+    },
     "event": {
       "gameCreated": "The game was created.",
       "timeExpired": "{subject}: player clock expired.",
@@ -2218,6 +2231,8 @@
       "runnerPaidToPassIce": "{subject}: paid {amount, plural, one {# credit} other {# credits}} to pass {source}.",
       "runnerDidNotPayToPassIce": "{subject}: did not pay for {source}; the run ended.",
       "numberedEndRunSubroutine": "{source}: subroutine {number} ends the run.",
+      "subroutineRunLock": "{source}: {subroutine} – the Runner cannot start another run during their next {amount, plural, one {action} other {# actions}}.",
+      "subroutineRunLockAmountMissing": "{source}: {subroutine} – the event is missing the run lock duration.",
       "subroutineProgramTrashed": "{source}: {subroutine} trashes {card}.",
       "subroutineProgramTrashTargetMissing": "{source}: {subroutine} – the event is missing the trashed program’s name.",
       "subroutineProgramTrashPaid": "{source}: {subroutine} – {subject} paid {amount, plural, one {# credit} other {# credits}} to prevent trashing.",

@@ -2214,6 +2214,19 @@
     "access": {
       "cardPosition": "Carte {number} sur {total}"
     },
+    "socialEngineering": {
+      "result": "Social Engineering : le Runner a caché {hidden} crédits, la Corpo a annoncé {guess} crédits – {outcome}.",
+      "correct": "bonne réponse",
+      "incorrect": "mauvaise réponse",
+      "creditsLost": "Le Runner perd {amount, plural, one {# crédit} other {# crédits}}. Social Engineering ne lance pas de piratage.",
+      "noIceTarget": "Aucune glace installée ne peut être ciblée. Social Engineering ne lance pas de piratage.",
+      "chooseTarget": "Le Runner peut choisir un serveur et une glace à passer automatiquement pendant ce piratage.",
+      "targetChosen": "{subject} : piratage de {server} lancé grâce à Social Engineering ; la glace {number} sera passée automatiquement.",
+      "rezOpportunity": "La Corpo bénéficie de la possibilité habituelle d'activer la glace avant son passage automatique.",
+      "hiddenChoice": "{subject} : montant de crédits choisi secrètement pour Social Engineering.",
+      "hiddenUntilGuess": "Le montant reste caché jusqu'à la réponse de la Corpo.",
+      "resultMissing": "Social Engineering : les données du résultat sont manquantes."
+    },
     "event": {
       "gameCreated": "Le jeu a été créé.",
       "timeExpired": "{subject} : l'horloge du joueur a expiré.",
@@ -2302,6 +2315,8 @@
       "runnerPaidToPassIce": "{subject} : a payé {amount, plural, one {# crédit} other {# crédits}} pour passer {source}.",
       "runnerDidNotPayToPassIce": "{subject} : n’a pas payé pour {source} ; le piratage est terminé.",
       "numberedEndRunSubroutine": "{source} : le sous-programme {number} met fin au piratage.",
+      "subroutineRunLock": "{source} : {subroutine} – le Runner ne peut pas lancer un autre piratage pendant {amount, plural, one {sa prochaine action} other {ses # prochaines actions}}.",
+      "subroutineRunLockAmountMissing": "{source} : {subroutine} – la durée de l’interdiction de piratage manque dans l’événement.",
       "subroutineProgramTrashed": "{source} : {subroutine} envoie {card} à la poubelle.",
       "subroutineProgramTrashTargetMissing": "{source} : {subroutine} – le nom du programme envoyé à la poubelle manque dans l’événement.",
       "subroutineProgramTrashPaid": "{source} : {subroutine} – {subject} a payé {amount, plural, one {# crédit} other {# crédits}} pour empêcher la mise à la poubelle.",

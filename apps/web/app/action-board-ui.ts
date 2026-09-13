@@ -743,6 +743,8 @@ export function counterDisplayTooltipText(
 ): string {
   const amount = safeCounterDisplayAmount(display.amount);
   const countLabel = `${amount} ${counterDisplayShortLabel(display.label)}`;
+  if (display.counterType === "remap")
+    return actionPresentationText(locale, "tooltipRemap", { amount });
   if (display.id === "pattel")
     return actionPresentationText(locale, "tooltipPattel");
   if (normalizeActionPresentationLocale(locale) !== "de")
@@ -4741,6 +4743,13 @@ export function choiceOptionPresentationLabel(
       amount,
       credits: actionPresentationNoun(locale, "credit", amount),
     });
+  }
+  if (
+    choice.presentationKey === "generic_bid_amount" &&
+    typeof option.value === "number" &&
+    Number.isFinite(option.value)
+  ) {
+    return new Intl.NumberFormat(normalizedLocale).format(option.value);
   }
   if (
     option.id === "hq" ||

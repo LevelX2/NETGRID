@@ -10,6 +10,7 @@ import {
   chronicleAccessOutcomePlan,
   formatChronicleEffectItems,
   formatChronicleEvent,
+  shouldSuppressChronicleEventItem,
   type ChronicleTranslate,
 } from "./chronicle";
 import { coalesceAiPumpPresentationEvents } from "./ai-pump-presentation";
@@ -38,6 +39,135 @@ function event(
 }
 
 describe("semantic chronicle localization", () => {
+  it.each(["de", "en", "fr"] as const)(
+    "shows Social Engineering results and consequences from public event facts in %s",
+    (locale) => {
+      const t = translate(locale);
+      for (const side of ["corp", "runner"] as const) {
+        for (const correct of [true, false]) {
+          for (const noIceTarget of correct ? [false] : [false, true]) {
+            const result = event("resolve_choice", {
+              actor: "corp",
+              sourceDefinitionId: "onr_v1_111_social-engineering",
+              hiddenZoneBarrier: true,
+              amounts: {
+                secretHiddenAmountRevealed: 3,
+                secretGuessAmount: correct ? 3 : 4,
+              },
+              targets: {
+                secretSpendGuessRunGuessCorrect: correct,
+                ...(noIceTarget
+                  ? { secretSpendGuessRunNoIceTarget: true }
+                  : {}),
+              },
+            });
+            const before = structuredClone(result);
+            const item = formatChronicleEvent(result, side, { translate: t });
+            expect(item.title).toBe(
+              t("socialEngineering.result", {
+                hidden: 3,
+                guess: correct ? 3 : 4,
+                outcome: t(
+                  correct
+                    ? "socialEngineering.correct"
+                    : "socialEngineering.incorrect",
+                ),
+              }),
+            );
+            expect(item.description).toBe(
+              correct
+                ? t("socialEngineering.creditsLost", { amount: 3 })
+                : t(
+                    noIceTarget
+                      ? "socialEngineering.noIceTarget"
+                      : "socialEngineering.chooseTarget",
+                  ),
+            );
+            expect(item).toMatchObject({
+              visibility: "public",
+              cardTitle: "Social Engineering",
+              cardDefinitionId: "onr_v1_111_social-engineering",
+            });
+            expect(item.title).not.toMatch(
+              /Auswahl aufgelöst|resolved a choice|résolu un choix/,
+            );
+            expect(shouldSuppressChronicleEventItem(result)).toBe(false);
+            expect(result).toEqual(before);
+          }
+        }
+      }
+      const result = formatChronicleEvent(
+        event("resolve_choice", {
+          actor: "corp",
+          sourceDefinitionId: "onr_v1_111_social-engineering",
+          amounts: { secretHiddenAmountRevealed: 3, secretGuessAmount: 4 },
+          targets: { secretSpendGuessRunGuessCorrect: false },
+        }),
+        "corp",
+        { translate: t },
+      );
+      expect(result.title).toBe(
+        locale === "de"
+          ? "Social Engineering: Runner 3 Credits, Korp 4 Credits geraten – falsch geraten."
+          : locale === "en"
+            ? "Social Engineering: Runner hid 3 credits, Corp guessed 4 credits – incorrect guess."
+            : "Social Engineering : le Runner a caché 3 crédits, la Corpo a annoncé 4 crédits – mauvaise réponse.",
+      );
+    },
+  );
+
+  it.each(["de", "en", "fr"] as const)(
+    "keeps Social Engineering hidden choices private and shows the public run target in %s",
+    (locale) => {
+      const t = translate(locale);
+      const hidden = event("resolve_choice", {
+        sourceDefinitionId: "onr_v1_111_social-engineering",
+        hiddenZoneBarrier: true,
+        targets: { secretSpendGuessRunStep: "runner_hidden_amount_selected" },
+      });
+      expect(shouldSuppressChronicleEventItem(hidden)).toBe(true);
+      for (const side of ["corp", "runner"] as const) {
+        const hiddenItem = formatChronicleEvent(hidden, side, { translate: t });
+        expect(hiddenItem.visibility).toBe("redacted");
+        expect(hiddenItem.description).toBe(
+          t("socialEngineering.hiddenUntilGuess"),
+        );
+        expect(hiddenItem.title).not.toMatch(/\d/);
+        const target = event("resolve_choice", {
+          sourceDefinitionId: "onr_v1_111_social-engineering",
+          hiddenZoneBarrier: true,
+          serverId: "hq",
+          amounts: { chosenIcePosition: 0 },
+          targets: {
+            autoPassChosenIce: true,
+            secretSpendGuessRunGuessCorrect: false,
+          },
+        });
+        const item = formatChronicleEvent(target, side, { translate: t });
+        expect(item).toMatchObject({ category: "run", visibility: "public" });
+        expect(item.title).toBe(
+          t("socialEngineering.targetChosen", {
+            subject: t(side === "runner" ? "actor.you" : "actor.runner"),
+            server: "HQ",
+            number: 1,
+          }),
+        );
+        expect(item.description).toBe(t("socialEngineering.rezOpportunity"));
+        expect(shouldSuppressChronicleEventItem(target)).toBe(false);
+      }
+      const incomplete = formatChronicleEvent(
+        event("resolve_choice", {
+          sourceDefinitionId: "onr_v1_111_social-engineering",
+          targets: { secretSpendGuessRunGuessCorrect: true },
+        }),
+        "corp",
+        { translate: t },
+      );
+      expect(incomplete.title).toBe(t("socialEngineering.resultMissing"));
+      expect(incomplete.description).toBeUndefined();
+    },
+  );
+
   it.each(["de", "en", "fr"] as const)(
     "shows actual trace strength and free base link in the compact title in %s",
     (locale) => {

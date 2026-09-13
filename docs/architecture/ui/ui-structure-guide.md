@@ -35,6 +35,14 @@ Die Identität stammt ausschließlich aus dem PlayerView; unbekanntes ICE
 bleibt verdeckt. Lange Namen werden einzeilig mit Ellipse dargestellt und
 stehen vollständig im Tooltip. Der Positions-Tooltip erhält zusätzlich
 den bisherigen Fortschritt innerhalb des ICE-Stapels.
+
+Data Fort Remappings öffentlicher Remap-Counter wird über
+`specialCounterDisplays` in beide Spieleransichten projiziert und als Badge
+auf der gescorten Agenda dargestellt. Nach Verbrauch entfällt der Badge.
+Tooltip und Aktionstext erklären das Beenden des Runs in Deutsch, Englisch
+und Französisch; der Aktionstext ist an die Capability
+`onr_classic_001_data-fort-remapping:spend_remap_counter_end_run` gebunden.
+
 Die aktuelle Stufe hebt ihren Namen mit fetter Schrift und ihre Symbole
 mit höherer Deckkraft und Strichstärke hervor. Die zusätzliche Umrandung
 kennzeichnet weiterhin die aktuell verfügbaren Aktionen.
@@ -118,6 +126,14 @@ das tatsächlich getrashte Programm aus den öffentlichen `resolvedEffects`
 (`cardsTrashed`, `cardDefinitionId`, `cardTitle`). Eine offene Zielauswahl,
 eine Zahlung gegen das Trashing und ein Ergebnis ohne Trash werden getrennt
 benannt; fehlende Zielidentität bei bestätigtem Trash wird sichtbar diagnostiziert.
+
+Die lokalisierte Chronik zeigt eine Subroutine vom Typ
+`set_runner_run_lock_actions` mit Quelle, Subroutinennummer und der Dauer aus
+`resolvedEffects.amount`. Haunting Inquisitions Sperre für die nächsten sechs
+Runner-Aktionen bleibt dadurch ein eigener Run-Eintrag vor dem Run-Ende durch
+Subroutine 2. Die Darstellung erfindet bei fehlender Dauer keinen Wert,
+sondern nennt die fehlende Ereignisinformation. Ein Engine-basierter
+Chroniktest prüft beide Einträge in allen drei Sprachen.
 
 ## Wo Ändern?
 

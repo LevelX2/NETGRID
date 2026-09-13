@@ -121,6 +121,7 @@ const EN_ACTION_PRESENTATION_MESSAGES = {
   runAccessProgress: "Access {current} of {total}",
   tooltipUnknownCounter: "{countLabel}: card-dependent counter.",
   tooltipUnknownStatus: "{source}: active server status.",
+  tooltipRemap: "{amount} Remap: Spend 1 Remap counter to end the run.",
   tooltipPattel:
     "Pattel’s Virus: Each Pattel counter reduces the strength of this ICE by 1. Pattel counters count as virus counters and are removed by a virus purge.",
   tooltipTesseractAria:
@@ -440,6 +441,8 @@ const DE_ACTION_PRESENTATION_MESSAGES: Record<
   runAccessProgress: "Zugriff {current} von {total}",
   tooltipUnknownCounter: "{countLabel}: kartenabhängiger Counter.",
   tooltipUnknownStatus: "{source}: aktiver Serverstatus.",
+  tooltipRemap:
+    "{amount} Remap: Gib 1 Remap-Counter aus, um den Run zu beenden.",
   tooltipPattel:
     "Pattel’s Virus: Jeder Pattel-Counter reduziert die Stärke dieses ICE um 1. Die Pattel-Counter gelten technisch als Virus-Counter und werden durch Virus-Purge entfernt.",
   tooltipTesseractAria:
@@ -758,6 +761,8 @@ const FR_ACTION_PRESENTATION_MESSAGES: Record<
   runAccessProgress: "Accès {current} sur {total}",
   tooltipUnknownCounter: "{countLabel} : pion dépendant de la carte.",
   tooltipUnknownStatus: "{source} : état actif du serveur.",
+  tooltipRemap:
+    "{amount} Remap : Dépensez 1 compteur Remap pour mettre fin au piratage.",
   tooltipPattel:
     "Pattel’s Virus : chaque pion Pattel réduit de 1 la force de cette glace. Les pions Pattel comptent comme des pions Virus et sont retirés par une purge de virus.",
   tooltipTesseractAria:
