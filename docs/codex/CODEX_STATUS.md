@@ -99,6 +99,12 @@ ein allgemeiner Spielstärkegewinn ist damit nicht gemessen. Führend sind die
 [Runner-Verträge](../architecture/ai/runner-plan-contracts.md) und
 [Corp-Economy](../architecture/ai/corp-plan-contracts.md#6-corpeconomy).
 
+Offener fokussierter Kontrollfall: D153/D61 in
+`match-d153-runner-decision-checkpoints.test.ts` erwartet einen Breaker-AP-Draw,
+wählt aber Forged Activation Orders im HQ-Pressure-Parent. Derselbe Fehler ist
+auf `main` vor der e553-Integration reproduziert; die e553-Regressionsfälle,
+der fokussierte Strict-Typecheck und die AI-Strukturgates sind grün. Die
+Kontrollerwartung beziehungsweise ihre fachliche Ursache bleibt separat offen.
 Corp-Scoring erhält seine Finanzierung gegenüber wirkungslosem Central-Ausbau und
 weiteren reinen Abschreckungslayern. Öffentliche Shell-/Host-Vorbereitung und der
 Engine-Basisklickhorizont beeinflussen den Remote-Schutz. Notfall-Scoreziele werden
