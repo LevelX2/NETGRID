@@ -533,22 +533,7 @@ import {
   CARD_IMPLEMENTATIONS,
   cardImplementationForDefinitionId,
 } from "../../card-implementations/registry";
-import {
-  COUNTER_OPERATION_SOURCES,
-  OVERADVANCE_AGENDA_SOURCES,
-  scoredAgendaCounterCreditPayload,
-  scoredAgendaCounterCreditProfileForDefinition,
-  scoredAgendaCounterCreditProfileForPayload,
-  SCORED_REVEAL_AGENDA_SOURCES,
-} from "../../mechanics/agenda-scoring";
 import { RUN_START_CREDIT_LOSS_SOURCE } from "../../mechanics/global-modifiers";
-import { COUNTER_UPGRADE_SOURCES } from "../../mechanics/hosting-counters";
-import {
-  corpInstalledEconomyActionPayload,
-  corpInstalledEconomyActionProfileForDefinition,
-  corpInstalledEconomyActionProfileForPayload,
-  type EconomyActionProfile,
-} from "../../mechanics/payment-costs";
 import { isP358HiddenReplacementCompatibilityChoiceSource } from "../../compatibility/payload-compatibility";
 import {
   BOARDWALK_RANDOM_PROGRAM_SOURCE,

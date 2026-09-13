@@ -27,8 +27,7 @@ export type MainActionHostCompositionHost = {
     mustServer: RunnerMainActionGenerationHost["servers"]["mustServer"];
     serverChoiceDisplayLabel: RunnerMainActionGenerationHost["servers"]["serverChoiceDisplayLabel"];
     runnerMemoryLimit: RunnerMainActionGenerationHost["memory"]["runnerMemoryLimit"];
-    constants: CorpMainActionGenerationHost["constants"] &
-      RunnerMainActionGenerationHost["constants"];
+    constants: RunnerMainActionGenerationHost["constants"];
   };
 };
 
@@ -165,7 +164,6 @@ export function createMainActionHostComposition(
         edgerunnerTempsInstallActionsRemaining:
           specialZones.edgerunnerTempsInstallActionsRemaining,
       },
-      constants: callbacks.constants,
     }),
     runnerMainActionGenerationHost: (state) => ({
       state,

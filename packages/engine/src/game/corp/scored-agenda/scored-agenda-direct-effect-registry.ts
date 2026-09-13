@@ -46,7 +46,6 @@ export const SCORED_AGENDA_DIRECT_EFFECT_RESOLVERS: readonly ScoredAgendaDirectE
         applyOveradvanceScoreEffects(
           context.host,
           context.cardId,
-          context.definition,
           context.instanceBefore,
           context.requiredDifficulty,
           context.scoredAgenda,

@@ -532,22 +532,7 @@ import {
   CARD_IMPLEMENTATIONS,
   cardImplementationForDefinitionId,
 } from "../../card-implementations/registry";
-import {
-  COUNTER_OPERATION_SOURCES,
-  OVERADVANCE_AGENDA_SOURCES,
-  scoredAgendaCounterCreditPayload,
-  scoredAgendaCounterCreditProfileForDefinition,
-  scoredAgendaCounterCreditProfileForPayload,
-  SCORED_REVEAL_AGENDA_SOURCES,
-} from "../../mechanics/agenda-scoring";
 import { RUN_START_CREDIT_LOSS_SOURCE } from "../../mechanics/global-modifiers";
-import { COUNTER_UPGRADE_SOURCES } from "../../mechanics/hosting-counters";
-import {
-  corpInstalledEconomyActionPayload,
-  corpInstalledEconomyActionProfileForDefinition,
-  corpInstalledEconomyActionProfileForPayload,
-  type EconomyActionProfile,
-} from "../../mechanics/payment-costs";
 import { isP358HiddenReplacementCompatibilityChoiceSource } from "../../compatibility/payload-compatibility";
 import {
   BOARDWALK_RANDOM_PROGRAM_SOURCE,
@@ -1215,8 +1200,6 @@ export function createScoredEconomyRuntimeHosts(
             subtype,
             definitionFor(state, cardId),
           ),
-        isOveradvanceAgendaDefinition: (definitionId) =>
-          OVERADVANCE_AGENDA_SOURCES.has(definitionId as CardDefinitionId),
       },
       zones: {
         removeFromAllZones: (cardId) => removeFromAllZones(state, cardId),
@@ -1340,8 +1323,6 @@ export function createScoredEconomyRuntimeHosts(
           deps.scoredAgendaKindForDefinition(definition),
         scoredAgendaForDefinition: (definition) =>
           deps.scoredAgendaImplementationForDefinition(definition),
-        isScoredRevealAgendaDefinition: (definitionId) =>
-          SCORED_REVEAL_AGENDA_SOURCES.has(definitionId as CardDefinitionId),
       },
       actions: {
         createLegalAction: (side, type, label, source, costs, payload) =>
@@ -1350,8 +1331,6 @@ export function createScoredEconomyRuntimeHosts(
       counters: {
         cardCounter: (cardId, counterType) =>
           cardCounter(state, cardId, counterType),
-        spendVisibleCardCounter: (cardId, counterType, amount) =>
-          deps.spendVisibleCardCounter(state, cardId, counterType, amount),
       },
       credits: {
         gainCorpCredits: (amount) => credits(state, "corp", amount),
@@ -1381,14 +1360,6 @@ export function createScoredEconomyRuntimeHosts(
             flatline: summary.flatline,
           };
         },
-      },
-      actionProfiles: {
-        scoredAgendaCounterCreditProfileForDefinition: (definitionId) =>
-          scoredAgendaCounterCreditProfileForDefinition(definitionId),
-        scoredAgendaCounterCreditProfileForPayload: (definitionId, payload) =>
-          scoredAgendaCounterCreditProfileForPayload(definitionId, payload),
-        scoredAgendaCounterCreditPayload: (profile, cardId) =>
-          scoredAgendaCounterCreditPayload(profile, cardId),
       },
       callbacks: {
         pushActivatedCardImplementationActions: (actions, cardId, definition) =>
@@ -1421,10 +1392,6 @@ export function createScoredEconomyRuntimeHosts(
             state,
             legalAction,
           );
-        },
-        revealCorpRdTop: () => {
-          if (!legalAction) throw new Error("Scored-Agenda-Aktion fehlt.");
-          deps.revealCorpRdTop(state, legalAction);
         },
         resolveHqArchivesShuffleDraw: (sourceCardId) => {
           if (!legalAction)

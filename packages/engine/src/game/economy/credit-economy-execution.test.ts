@@ -329,7 +329,6 @@ function testHost(
     delegates: {
       shouldOpenCorpInstalledEconomyCreditChoice: () => false,
       startCorpInstalledEconomyCreditChoice: () => undefined,
-      resolveCorpInstalledEconomyAction: () => false,
       handleTraceOrchestrationAction: () => ({ handled: false }),
       handleCorpSpecialDamageAbilityAction: () => ({ handled: false }),
       handleScoredAgendaActivatedAbilityAction: () => ({ handled: false }),
@@ -339,9 +338,6 @@ function testHost(
         stateToMutate.randomCounter += 1;
         return 0;
       },
-    },
-    constants: {
-      COUNTER_UPGRADE_SOURCES: new Set(["counter_upgrade"]),
     },
   };
 }

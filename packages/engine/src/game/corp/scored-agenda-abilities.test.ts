@@ -8,7 +8,6 @@ import type {
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { CardScoredAgendaImplementation } from "../../ability-engine/definition-types";
-import type { ScoredAgendaActionProfile } from "../../mechanics/agenda-scoring";
 import {
   buildScoredAgendaAbilityActions,
   handleScoredAgendaActivatedAbilityAction,
@@ -53,7 +52,6 @@ type HostInput = {
   archives?: CardInstanceId[];
   definitions?: Record<string, CardDefinition>;
   implementations?: Record<string, CardScoredAgendaImplementation>;
-  profile?: ScoredAgendaActionProfile;
   counters?: Record<string, number>;
   activatedSourceId?: CardInstanceId;
 };
@@ -62,14 +60,11 @@ function makeHost(input: HostInput = {}) {
   const definitions: Record<string, CardDefinition> = {
     ai_cfo: definition("ai_cfo", "agenda", "HQ/Archives-Shuffle-Draw"),
     retreat: definition("retreat", "agenda", "Corporate Retreat"),
-    reveal: definition("reveal", "agenda", "Reveal Agenda"),
-    stored: definition("stored", "agenda", "Stored Credits"),
     boon: definition("onr_v1_192_corporate-boon", "agenda", "Corporate Boon"),
     ...input.definitions,
   };
   const scoreArea =
-    input.scoreArea ??
-    (["ai_cfo", "retreat", "reveal", "stored", "boon"] as CardInstanceId[]);
+    input.scoreArea ?? (["ai_cfo", "retreat", "boon"] as CardInstanceId[]);
   const cardInstances: Record<string, CardInstance> = Object.fromEntries(
     scoreArea.map((cardId) => [
       cardId,
@@ -95,14 +90,12 @@ function makeHost(input: HostInput = {}) {
     Object.entries(
       input.counters ?? {
         "retreat:mark": 1,
-        "stored:power": 2,
       },
     ),
   );
   const calls = {
     pushed: [] as CardInstanceId[],
     activated: 0,
-    reveal: 0,
     aiCfo: [] as CardInstanceId[],
   };
   const host: ScoredAgendaAbilityHost = {
@@ -114,8 +107,6 @@ function makeHost(input: HostInput = {}) {
         input.implementations?.[cardDefinition.id]?.kind,
       scoredAgendaForDefinition: (cardDefinition) =>
         input.implementations?.[cardDefinition.id],
-      isScoredRevealAgendaDefinition: (definitionId) =>
-        definitionId === "reveal",
     },
     actions: {
       createLegalAction: (side, type, label, source, costs, payload) =>
@@ -134,32 +125,11 @@ function makeHost(input: HostInput = {}) {
     counters: {
       cardCounter: (cardId, counterType) =>
         counters.get(`${cardId}:${counterType}`) ?? 0,
-      spendVisibleCardCounter: (cardId, counterType, amount) => {
-        const key = `${cardId}:${counterType}`;
-        counters.set(key, (counters.get(key) ?? 0) - amount);
-        return { remainingCounters: counters.get(key) ?? 0 };
-      },
     },
     credits: {
       gainCorpCredits: (amount) => {
         state.corp.credits += amount;
       },
-    },
-    actionProfiles: {
-      scoredAgendaCounterCreditProfileForDefinition: (definitionId) =>
-        input.profile?.sourceDefinitionId === definitionId
-          ? input.profile
-          : undefined,
-      scoredAgendaCounterCreditProfileForPayload: (definitionId) =>
-        input.profile?.sourceDefinitionId === definitionId
-          ? input.profile
-          : undefined,
-      scoredAgendaCounterCreditPayload: (profile, cardId) => ({
-        cardId,
-        agendaAbility: profile.agendaAbility,
-        removePowerCounterAmount: profile.removeCounterAmount,
-        gainCreditsAmount: profile.creditGain,
-      }),
     },
     callbacks: {
       pushActivatedCardImplementationActions: (actions, cardId) => {
@@ -192,9 +162,6 @@ function makeHost(input: HostInput = {}) {
         calls.activated += 1;
         return true;
       },
-      revealCorpRdTop: () => {
-        calls.reveal += 1;
-      },
       resolveHqArchivesShuffleDraw: (sourceCardId) => {
         calls.aiCfo.push(sourceCardId);
       },
@@ -203,22 +170,9 @@ function makeHost(input: HostInput = {}) {
   return { host, calls };
 }
 
-const storedProfile: ScoredAgendaActionProfile = {
-  profileId: "stored",
-  sourceDefinitionId: "stored",
-  agendaAbility: "stored_take_credits",
-  side: "corp",
-  clickCost: 1,
-  counterType: "power",
-  removeCounterAmount: 1,
-  creditGain: 3,
-  label: "3 Credits nehmen",
-};
-
 describe("scored agenda activated abilities", () => {
   it("builds scored-area LegalActions with stable payloads", () => {
     const { host, calls } = makeHost({
-      profile: storedProfile,
       activatedSourceId: "boon" as CardInstanceId,
       hq: ["hq_1", "hq_2"] as CardInstanceId[],
       archives: ["archives_1"] as CardInstanceId[],
@@ -244,8 +198,6 @@ describe("scored agenda activated abilities", () => {
       "ai_cfo",
       "boon",
       "retreat",
-      "reveal",
-      "stored",
     ]);
     expect(actions.map((action) => action.payload?.agendaAbility)).toContain(
       "hq_archives_shuffle_draw",
@@ -273,12 +225,6 @@ describe("scored agenda activated abilities", () => {
     ).toBe("HQ/Archives in R&D mischen, 5 ziehen");
     expect(actions.map((action) => action.payload?.agendaAbility)).toContain(
       "scored_agenda_credit_until_install_or_rez",
-    );
-    expect(actions.map((action) => action.payload?.agendaAbility)).toContain(
-      "v1919_scored_agenda_reveal_rd_top",
-    );
-    expect(actions.map((action) => action.payload?.agendaAbility)).toContain(
-      "stored_take_credits",
     );
     expect(
       actions.some((action) => action.type === "activated_card_ability"),
@@ -335,26 +281,6 @@ describe("scored agenda activated abilities", () => {
     expect(result.handled).toBe(true);
     expect(calls.aiCfo).toEqual(["ai_cfo"]);
     expect(result.drawCount).toBe(5);
-  });
-
-  it("handles stored-credit scored agenda actions", () => {
-    const action = legalAction("gain_credit", {
-      cardId: "stored",
-      agendaAbility: "stored_take_credits",
-      removePowerCounterAmount: 1,
-      gainCreditsAmount: 3,
-    });
-    const { host } = makeHost({ legalAction: action, profile: storedProfile });
-
-    const result = handleScoredAgendaActivatedAbilityAction(host);
-
-    expect(result.handled).toBe(true);
-    expect(host.state.corp.credits).toBe(3);
-    expect(action.payload).toMatchObject({
-      spentPowerCounters: 1,
-      gainedCredits: 3,
-      remainingPowerCounters: 1,
-    });
   });
 
   it("delegates CardImplementation scored agenda abilities", () => {
