@@ -1,3 +1,4 @@
+import { corpPostPassIceLifecycleComponent } from "../../corp/defense/post-pass-ice-lifecycle";
 import type {
   AiDecisionInput,
   AiDecisionScoreComponent,
@@ -27,7 +28,6 @@ import {
 import {
   corpDownstreamRezReserveAssessment,
   corpInstallServerId,
-  corpPostPassIceLifecycleComponent,
   corpRootRezTimingComponent,
 } from "./semantic-runtime-corp-score-ice-components";
 import {

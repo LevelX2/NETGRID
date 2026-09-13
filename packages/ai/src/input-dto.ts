@@ -264,6 +264,7 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "targetIceId",
   "targetIceDefinitionId",
   "corpPostPassIceAbility",
+  "postPassIceTrashedUnlessReturned",
   "fortRunWindowAbility",
   "decision",
   "paymentAmount",

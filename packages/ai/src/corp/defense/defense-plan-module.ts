@@ -49,6 +49,7 @@ import { corpScorePriorityClass } from "../score/corp-score-priority";
 import type { CorpCentralDefenseAllocation } from "./corp-central-defense-allocation";
 import { assessFundingOnlyIceStaging } from "./corp-defense-staging-policy";
 import { prepareSelectedCorpIceInstallation } from "./corp-ice-install-cost-support";
+import { corpPostPassIceLifecycleComponent } from "./post-pass-ice-lifecycle";
 import {
   canonicalSubtypeArray,
   canonicalSubtypeCsv,
@@ -565,6 +566,8 @@ function defenseCandidates(
           action.source === signal.targetIceInstanceId &&
           action.payload?.corpPostPassIceAbility ===
             "return_passed_ice_to_hq" &&
+          typeof action.payload.postPassIceTrashedUnlessReturned ===
+            "boolean" &&
           action.payload.sourceDefinitionId === sourceDefinitionId &&
           action.payload.serverId === signal.serverId &&
           ((decision === "pay" &&
@@ -580,7 +583,14 @@ function defenseCandidates(
         );
       })
       .map((candidate) => ({ candidate, stepValue: signal.value }));
-    return routes;
+    return routes.map(({ candidate }) => ({
+      candidate,
+      stepValue: corpPostPassIceLifecycleComponent(
+        context.input.legalActions.find(
+          (action) => action.actionId === candidate.actionId,
+        )!,
+      )!.value,
+    }));
   }
   return context.actionCandidates
     .filter((candidate) => {

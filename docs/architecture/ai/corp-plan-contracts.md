@@ -953,6 +953,16 @@ auf Jenny übertragen werden; weitere Karten derselben groben Effektfamilie
 benötigen ebenfalls ein eigenes Modell.
 
 Die nachfolgende Dr.-Dreff-Choice bleibt an `corp.defend_servers` gebunden.
+Auch das anschließende ICE-Lifecycle-Fenster gehört diesem Owner. Die Engine
+liefert in jeder Post-Pass-LegalAction das exakte boolesche Fact
+`postPassIceTrashedUnlessReturned`. Temporäres Encounter-ICE würde bei
+Bezahlen oder Liegenlassen durch das Encounter-Cleanup getrasht; die kostenlose
+HQ-Rückkehr erhält dagegen die Karte. Die Bewertung in
+`corp/defense/post-pass-ice-lifecycle.ts` unterscheidet diesen Fall von
+dauerhaft installiertem Schutz. Fehlt das Fact, scheitert die Bewertung
+strukturiert statt normalen Installationsschutz anzunehmen. Die bestehende
+StateVersion-, Quell- und Serverbindung des Defense-Plans bleibt erforderlich.
+
 Die Engine liefert zu jedem angebotenen HQ-ICE die effektiven
 Subroutinentypen seines temporären Encounters und kennzeichnet zusätzliche
 mechanische Effektfamilien. Die AI-DTO erhält diese privaten Choice-Facts.

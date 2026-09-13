@@ -2502,6 +2502,7 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
       corpInputWithGoals([]),
       corpAction("twisty.pay", "continue_run", {
         corpPostPassIceAbility: "return_passed_ice_to_hq",
+        postPassIceTrashedUnlessReturned: false,
         sourceDefinitionId: "onr_proteus_043_twisty-passages",
         decision: "pay",
         paymentAmount: 1,
@@ -2514,6 +2515,7 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
       corpInputWithGoals([]),
       corpAction("twisty.return_to_hq", "continue_run", {
         corpPostPassIceAbility: "return_passed_ice_to_hq",
+        postPassIceTrashedUnlessReturned: false,
         sourceDefinitionId: "onr_proteus_043_twisty-passages",
         decision: "return_to_hq",
         serverId: "hq",

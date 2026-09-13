@@ -187,6 +187,7 @@ export function corpPostPassIceLifecycleDefenseSignal(
     action.side !== "corp" ||
     action.expiresAtStateVersion !== input.playerView.stateVersion ||
     action.payload?.corpPostPassIceAbility !== "return_passed_ice_to_hq" ||
+    typeof action.payload.postPassIceTrashedUnlessReturned !== "boolean" ||
     typeof action.source !== "string" ||
     action.source.length === 0 ||
     typeof sourceDefinitionId !== "string" ||
@@ -219,7 +220,7 @@ export function corpPostPassIceLifecycleDefenseSignal(
     targetIceInstanceId: action.source,
     urgent: true,
     value: 1,
-    evidenceCode: `corp_post_pass_ice_lifecycle:${sourceDefinitionId}:${serverId}`,
+    evidenceCode: `corp_post_pass_ice_lifecycle:${sourceDefinitionId}:${serverId}:temporary:${action.payload.postPassIceTrashedUnlessReturned}:${decision}`,
   };
 }
 

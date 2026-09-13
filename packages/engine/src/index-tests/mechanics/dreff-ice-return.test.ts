@@ -87,6 +87,11 @@ describe("Dr. Dreff temporary ICE pass lifecycle", () => {
       expect(state.run?.successful).toBe(false);
       expect(state.corp.archives).not.toContain(iceId);
       const actions = getLegalActions(state, "corp");
+      expect(
+        actions.every(
+          (a) => a.payload?.postPassIceTrashedUnlessReturned === true,
+        ),
+      ).toBe(true);
       const returnAction = actions.find(
         (a) => a.payload?.decision === "return_to_hq",
       )!;
@@ -156,6 +161,11 @@ describe("Dr. Dreff temporary ICE pass lifecycle", () => {
           .map((a) => a.payload?.decision)
           .sort(),
       ).toEqual([alternative, "return_to_hq"].sort());
+      expect(
+        getLegalActions(state, "corp").every(
+          (a) => a.payload?.postPassIceTrashedUnlessReturned === true,
+        ),
+      ).toBe(true);
       state = apply(
         state,
         "corp",
