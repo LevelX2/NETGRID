@@ -32,9 +32,12 @@ Die Engine ist alleinige Regelautorität. UI, Server und KI reichen nur angebote
 ## Engine und Karten
 
 „Dr. Dreffs letzte Visite“ ist als Standarddeck mit 45 Karten,
-20 Agendapunkten und deutscher/englischer Anleitung verfügbar. Version 1.2.0
-enthält zwei Marionette sowie einen Dieter Esslin anstelle des dritten
-Reclamation Project. Die Liste
+20 Agendapunkten und deutscher/englischer Anleitung verfügbar. Version 1.3.0
+enthält je ein Reclamation Project und Corporate Shuffle sowie neu Red
+Herrings und Data Masons. Zwei Data Wall werden durch Data Wall 2.0 und
+eine Wall of Static durch Datacomb ersetzt. Zwei Marionette und ein Dieter
+Esslin bleiben enthalten. Die aktuelle Version ist noch nicht in einer
+Matchserie geprüft. Die Liste
 verbindet temporäre HQ-ICE-Begegnungen mit Remote-Scoring und Recycling;
 eine erste Stichprobe der Version 1.1.0 ohne Dieter gegen zehn zufällige
 Runner-Standarddecks endet mit

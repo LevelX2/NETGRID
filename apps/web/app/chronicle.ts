@@ -5316,6 +5316,10 @@ function formatSemanticChronicleEffect(
   const payOrEndRun =
     kind === "resolve_subroutine" &&
     subroutineType === "end_the_run_unless_runner_pays";
+  const programTrashSubroutine =
+    kind === "resolve_subroutine" &&
+    (subroutineType === "trash_installed_program" ||
+      subroutineType === "trash_installed_program_unless_runner_pays");
   const paidCredits = numberValue(effect.paidCredits) ?? 0;
   const sourcePubliclyNamedByAccess =
     stringValue(event.publicPayload.actionType) === "access_card" &&
@@ -5394,7 +5398,7 @@ function formatSemanticChronicleEffect(
     translate,
   );
   const category: ChronicleCategory =
-    endRunSubroutine || payOrEndRun
+    endRunSubroutine || payOrEndRun || programTrashSubroutine
       ? "run"
       : kind === "gain_credits" ||
           kind === "take_hosted_credits" ||
@@ -5405,6 +5409,55 @@ function formatSemanticChronicleEffect(
           : kind === "draw_cards" || kind === "trash_card"
             ? "card"
             : "system";
+  if (programTrashSubroutine && visibility !== "redacted") {
+    const cardsTrashed = numberValue(effect.cardsTrashed);
+    const targetDefinitionId = stringValue(effect.cardDefinitionId);
+    const targetTitle =
+      publicCardTitle(targetDefinitionId, cardPresentationsById) ??
+      stringValue(effect.cardTitle);
+    const subroutineLabel =
+      subroutineNumber !== undefined
+        ? translate("effect.numberedSubroutineChip", {
+            number: subroutineNumber,
+          })
+        : translate("effect.subroutineChip");
+    const key =
+      cardsTrashed !== undefined && cardsTrashed > 0
+        ? targetTitle
+          ? "effect.subroutineProgramTrashed"
+          : "effect.subroutineProgramTrashTargetMissing"
+        : paidCredits > 0
+          ? "effect.subroutineProgramTrashPaid"
+          : cardsTrashed === 0
+            ? "effect.subroutineNoProgramTrashed"
+            : "effect.subroutineProgramTrashSelection";
+    const targetTrashed = cardsTrashed !== undefined && cardsTrashed > 0;
+    const displayedDefinitionId = targetTrashed
+      ? targetDefinitionId
+      : sourceDefinitionId;
+    const displayedTitle = targetTrashed ? targetTitle : sourceTitle;
+    return {
+      id: `${event.eventId}:effect:${effect.effectId || index}`,
+      category,
+      importance: targetTrashed ? "important" : "normal",
+      visibility,
+      ...(actor ? { actor } : {}),
+      title: translate(key, {
+        source: sourceTitle,
+        subroutine: subroutineLabel,
+        card: targetTitle ?? "",
+        subject,
+        amount: paidCredits,
+      }),
+      chips: [sourceTitle, subroutineLabel],
+      ...(displayedDefinitionId
+        ? { cardDefinitionId: displayedDefinitionId }
+        : {}),
+      ...(displayedTitle ? { cardTitle: displayedTitle } : {}),
+      cardDetailLines: [],
+      groupLabel: translate("group.run", { server: runServer }),
+    };
+  }
   const key =
     visibility === "redacted"
       ? "effect.redacted"
