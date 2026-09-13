@@ -85,12 +85,24 @@
     },
     {
       "cueKey": "agenda-runner",
-      "filename": "agenda/agenda-runner.wav",
-      "prompt": "Short triumphant cyber-infiltration success sting. Bright digital breakthrough, crystalline rising texture and a decisive elegant finish. Clever, agile and victorious, not heroic orchestral music. No vocals, no fanfare, no retro arcade tone, no long tail.",
-      "requestedDurationSeconds": 1.0,
-      "finalDurationSeconds": 0.948833,
-      "channels": 1,
-      "sha256": "b1c46e11eb7f383c5c2264511c6122e8d2e561c7d81f836f290553793862bda8"
+      "filename": "agenda/agenda-stolen-descent.wav",
+      "generatedAt": "2026-09-13",
+      "provider": "Local NETGRID synthesis",
+      "product": "scripts/generate-agenda-steal-sound.mjs",
+      "model": null,
+      "accountTier": null,
+      "licenseBasis": {
+        "source": "Original procedural composition and additive/FM synthesis without samples or third-party recordings.",
+        "providerTerms": "ElevenLabs terms and attribution do not apply to this asset."
+      },
+      "prompt": "Threatening low electronic agenda-steal cue: six short descending notes, a small pause, then the sustained lowest note with a deep foundation.",
+      "originalExport": "WAV, 48 kHz, 16-bit PCM, stereo",
+      "technicalPostProcessing": "Deterministic local synthesis with smooth envelopes and stereo reflections; normalization to -17 dBFS RMS with a -3 dBFS sample-peak ceiling, no external processing.",
+      "selection": "User-approved low descending audition with six short notes and a separated long lowest note; integrated without audio changes.",
+      "requestedDurationSeconds": 2.43,
+      "finalDurationSeconds": 2.43,
+      "channels": 2,
+      "sha256": "5c0c4fd88e521ad4b0e1815b33c260bad62395c504d0e02b6213c400b5e9e023"
     },
     {
       "cueKey": "agenda-corp",
