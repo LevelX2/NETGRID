@@ -10,6 +10,33 @@ import type { AiDecisionInput } from "@netgrid/shared";
 
 afterEach(resetResidentPlanPortfolioMemory);
 describe("encounter trace payment preserves the quoted access route", () => {
+  it("requires exact remaining IDs only for a viable cheaper trace route", () => {
+    const cp = JSON.parse(
+      readFileSync(
+        new URL(
+          "../../../../data/scenarios/ai-decision-checkpoints/cp-meta-434-r11-trace-pump.json",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+    );
+    const input: AiDecisionInput = cp.input;
+    delete input.legalActions.find((a) => a.type === "continue_run")!.payload!
+      .encounterSubroutineIds;
+    const breaker = input.playerView.own.rig!.find(
+      (c) => c.definitionId === "onr_v1_039_krash",
+    )!;
+    const assess = () =>
+      cheaperSafeCurrentTracePayment(
+        input,
+        breaker,
+        currentEncounteredIceCard(input)!,
+        18,
+      );
+    expect(assess).toThrow("missing_action_semantics");
+    input.playerView.opponent.credits = 40;
+    expect(assess()).toBeUndefined();
+  });
   it.each([
     "full_break",
     "corp_can_outbid",

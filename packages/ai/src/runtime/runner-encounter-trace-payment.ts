@@ -16,8 +16,7 @@ export function cheaperSafeCurrentTracePayment(
   if (currentEncounterRequiresFullBreak(input)) return undefined;
   const quote = ice.effectiveRunQuote;
   if (!quote || !input.playerView.own.runnerTraceSupportQuote) return undefined;
-  const remaining = currentEncounterUnbrokenSubroutineIndexes(input);
-  const subroutines = quote.subroutines.filter((_, i) => remaining.has(i));
+  const subroutines = quote.subroutines;
   if (
     subroutines.length === 0 ||
     subroutines.some((s) => s.type !== "initiate_trace" || s.unbrokenRunEffect)
@@ -69,5 +68,11 @@ export function cheaperSafeCurrentTracePayment(
       return undefined;
     cost += h.avoidancePayment.cost;
   }
+  if (cost >= generalPumpAndBreakCost) return undefined;
+  // Only a viable cheaper route needs an exact remaining-action binding.
+  // This comparison quotes the whole trace sequence; a partial sequence is
+  // left to the existing encounter assessment, without recharging old traces.
+  const remaining = currentEncounterUnbrokenSubroutineIndexes(input);
+  if (remaining.size !== subroutines.length) return undefined;
   return cost < generalPumpAndBreakCost ? cost : undefined;
 }
