@@ -5875,6 +5875,105 @@
         "sourceDeckId": "local_corp_lucidrine_lockdown",
         "sourceDeckVersion": "1.5.0-low-density-access-denial-2026-09-04"
       }
+    },
+    {
+      "standardDeckId": "standard_corp_dr_dreffs_letzte_visite",
+      "version": "1.0.0",
+      "status": "active",
+      "name": "Dr. Dreffs letzte Visite",
+      "side": "corp",
+      "identityCardId": "corp_identity_001",
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "cardPoolVersion": "private-local-onr-v1-plus-classic-proteus-playtest",
+      "formatProfileId": "netgrid_private_local_classic_proteus_playtest_v1",
+      "formatProfileVersion": "1.0.0",
+      "cards": [
+        {
+          "cardId": "onr_proteus_008_project-zurich",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_199_employee-empowerment",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_205_main-office-relocation",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_classic_001_data-fort-remapping",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_237_data-wall",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_279_wall-of-static",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_223_banpei",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_268_shock-r",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_classic_011_glacier",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_247_haunting-inquisition",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_280_zombie",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_proteus_015_colonel-failure",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_041_toughoniumtm-wall",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_358_dr-dreff",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_355_crystal-palace-station-grid",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_290_efficiency-experts",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_281_accounts-receivable",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_309_bbs-whispering-campaign",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_classic_018_reclamation-project",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_classic_017_corporate-shuffle",
+          "quantity": 2
+        }
+      ],
+      "source": {
+        "kind": "curated_local_deck",
+        "sourceDeckId": "local_corp_dr_dreffs_letzte_visite",
+        "sourceDeckVersion": "1.0.0"
+      }
     }
   ]
 }

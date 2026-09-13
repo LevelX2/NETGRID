@@ -114,12 +114,12 @@ describe("deck validation and snapshots", () => {
     const localCuration = standardDeckCurationData.localDeckLibrary;
     const projectCuration = standardDeckCurationData.projectSnapshots;
 
-    expect(entries).toHaveLength(51);
+    expect(entries).toHaveLength(52);
     expect(new Set(entries.map((entry) => entry.standardDeckId)).size).toBe(
       entries.length,
     );
     expect(localCuration.counts).toEqual({
-      standard: 51,
+      standard: 52,
       internal_ai: 2,
       retire: 1,
       test_fixture: 10,
