@@ -955,6 +955,16 @@ Run-Window verwendet dazu die effektive Breaker-Quote und die zusätzlichen
 Breakgebühren des aktuellen ICE. Eine gedruckte Fähigkeitszusammenfassung
 oder ein Ersatzpreis ist kein Kostennachweis.
 
+Besteht die aktuelle Restmenge ausschließlich aus Trace-Subroutinen, vergleicht
+die Pump-Zulassung die vollständige Breakfolge mit der bestehenden sichtbaren
+Trace-Abwehrquote. Eine gegen die gesamte sichtbare Corp-Zahlungskapazität
+sichere, günstigere Zahlung darf nicht durch vorbereitende Pumps entwertet
+werden. Der Vergleich verlangt eine aktuelle Trace-Supportquote und erhält
+Full-Break-Pflichten, Stärke über mehrere Encounters, Break-Folgeeffekte sowie
+beschränkte Zahlungspools und verbrauchbare Trace-Quellen. Er ändert nur die
+Zulassung beim bestehenden Run-Window-Owner; die konkrete Trace-Choice bleibt
+an ihre spätere Engine-Action gebunden.
+
 Die Engine kennzeichnet bei installierten Runner-Programmen eine vom aktuellen
 Wert abweichende Stärke nach dem Encounter mit `strengthAfterEncounter`.
 Fehlt dieses Feld, bleibt die Stärke unverändert. Der Wert entfernt nur den

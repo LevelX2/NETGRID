@@ -19,6 +19,7 @@ import {
   currentEncounterUnbrokenSubroutineIndexes,
 } from "./current-encounter";
 import { currentEncounterRequiresDamagePreservingBreak } from "./current-encounter-damage";
+import { cheaperSafeCurrentTracePayment } from "./runner-encounter-trace-payment";
 import {
   breakerIdForEncounterAction,
   pumpStrengthAmountForAction,
@@ -304,6 +305,22 @@ export function createRunnerPumpViabilityContext(
     );
     const creditsAfterPumpAndBreak = breakPayment.budget.credits;
     const pumpAndBreakCost = totalPumpCost + estimatedBreakCost;
+    const cheaperTraceCost = cheaperSafeCurrentTracePayment(
+      input,
+      breaker,
+      currentEncounteredIceCard(input) ?? encounteredIce,
+      input.playerView.own.credits - creditsAfterPumpAndBreak,
+    );
+    if (cheaperTraceCost !== undefined) {
+      return {
+        canLeadToBreak: false,
+        evidence: [
+          "pump_has_cheaper_safe_trace_payment:true",
+          `safe_trace_payment_cost:${cheaperTraceCost}`,
+          `pump_and_break_cost:${pumpAndBreakCost}`,
+        ],
+      };
+    }
     if (
       runEffect.hasRunRemainderEffect &&
       !runEffect.mustBreak &&
