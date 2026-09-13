@@ -236,7 +236,11 @@ export function LegalActionsPanel({
               {cardChoiceTitle(cardChoice, cardChoiceT)}
             </h2>
             <p className="meta">
-              {choicePromptPresentationLabel(cardChoice, locale)}
+              {choicePromptPresentationLabel(
+                cardChoice,
+                locale,
+                cardPresentationsById,
+              )}
             </p>
             <p className="meta">{t("choicePaused")}</p>
           </section>
@@ -274,7 +278,11 @@ export function LegalActionsPanel({
           {t("sideDecision", { side: t(`side.${genericChoice.side}`) })}
         </h2>
         <p className="meta">
-          {choicePromptPresentationLabel(genericChoice, locale)}
+          {choicePromptPresentationLabel(
+            genericChoice,
+            locale,
+            cardPresentationsById,
+          )}
         </p>
         <div className="actions setupActions">
           {genericChoice.options.map((option) => {

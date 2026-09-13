@@ -33,6 +33,7 @@ import {
 } from "./card-choice-order-badge";
 import { WindowEventIcon } from "./WindowEventIcon";
 import { windowEventIconKindForChoice } from "./window-event-icon-kind";
+import { useCatalogCardPresentations } from "../catalog/catalog-card-presentations";
 
 type VisibleChoice = NonNullable<PlayerView["pendingChoice"]>;
 type VisibleChoiceOption = VisibleChoice["options"][number];
@@ -82,6 +83,7 @@ export function CardChoicePanel({
 }) {
   const t = useTranslations("Actions.cardChoice");
   const locale = useLocale();
+  const cardPresentationsById = useCatalogCardPresentations();
   const [selected, setSelected] = useState<string[]>([]);
   const [showOnlySelectable, setShowOnlySelectable] = useState(false);
   const minSelections = Math.max(0, Math.floor(choice.minSelections));
@@ -127,7 +129,11 @@ export function CardChoicePanel({
     programInstallTrashInfo?.title ??
     cardChoiceReadonlyPrivateLookTitle(choice, view, t) ??
     cardChoiceTitle(choice, t);
-  const prompt = choicePromptPresentationLabel(choice, locale).trim();
+  const prompt = choicePromptPresentationLabel(
+    choice,
+    locale,
+    cardPresentationsById,
+  ).trim();
   const effectHint =
     programInstallTrashInfo?.effectHint ??
     (readonlyPrivateLook ? cardChoiceReadonlyPositionHint(choice) : null) ??

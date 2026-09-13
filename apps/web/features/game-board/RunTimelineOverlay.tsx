@@ -209,7 +209,11 @@ export function RunTimelineOverlay({
       : null;
   const runChoiceStatus = runChoice
     ? runChoiceStatusLabel(view, runChoice, {
-        prompt: choicePromptPresentationLabel(runChoice, locale),
+        prompt: choicePromptPresentationLabel(
+          runChoice,
+          locale,
+          cardPresentationsById,
+        ),
         own: (amount) => t("ambushOwn", { amount }),
         other: (side, amount) =>
           t(side === "corp" ? "ambushCorp" : "ambushRunner", {
@@ -295,7 +299,11 @@ export function RunTimelineOverlay({
         {runChoice && choiceAction ? (
           <div
             className="runActionBar"
-            aria-label={choicePromptPresentationLabel(runChoice, locale)}
+            aria-label={choicePromptPresentationLabel(
+              runChoice,
+              locale,
+              cardPresentationsById,
+            )}
             data-testid="run-choice-action-bar"
           >
             {runChoiceStatus ? (

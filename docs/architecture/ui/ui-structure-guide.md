@@ -44,6 +44,12 @@ und die bekannte Karte im PlayerView beziehungsweise Kartenmenü auf.
 Damit nennen Run-Fenster, Aktionspanel und Kartenmenüs das Rez-Ziel in
 Deutsch, Englisch und Französisch auch ohne Titel in den Aktionsmetadaten.
 
+Auswahlen zum Einschieben von ICE aus HQ vor dem erfolgreichen Run binden
+ihre Fähigkeitsquelle über `sourceCardInstanceId` und
+`sourceCardDefinitionId`. Die lokalisierte Frage nennt die Quelle aus dem
+öffentlichen Präsentationskatalog, etwa „Dr. Dreff: ICE aus HQ einsetzen?“.
+Die Korp-Auswahl und ihre Optionen behalten ihre bisherigen IDs und Kosten.
+
 Bei einem Runner-Sieg durch Agendapunkte erhält die letzte öffentliche
 `steal_agenda`-Nachricht Vorrang vor älteren Access-Präsentationen und dem
 Ergebnisfenster. Ihre eigene Event-ID bindet die lokale Bestätigung; eine

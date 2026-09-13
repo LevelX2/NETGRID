@@ -514,7 +514,9 @@ export function startSuccessfulRunInterventionChoice(
     choiceId: `p3_54_delayed_success_${host.state.stateVersion + 1}`,
     side: "corp",
     source: `p3_54.delayed_success:${sourceCardId}:${kind}:${server.id}:${host.state.stateVersion + 1}`,
-    prompt: `${definition.title}: Successful Run verzögern?`,
+    sourceCardInstanceId: sourceCardId,
+    sourceCardDefinitionId: definition.id,
+    prompt: `${definition.title}: ICE aus HQ einsetzen?`,
     presentationKey: "delayed_success",
     kind: "select_option",
     options: [

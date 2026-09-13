@@ -4756,6 +4756,7 @@ export function choiceOptionPresentationLabel(
 export function choicePromptPresentationLabel(
   choice: NonNullable<PlayerView["pendingChoice"]>,
   locale: AppLocale | string = "de",
+  cardPresentationsById?: PublicCardPresentationsById,
 ): string {
   switch (choice.presentationKey) {
     case "delayed_install_destination":
@@ -4801,8 +4802,16 @@ export function choicePromptPresentationLabel(
       return actionPresentationText(locale, "choicePromptDamagePrevention");
     case "damage_replacement":
       return actionPresentationText(locale, "choicePromptDamageReplacement");
-    case "delayed_success":
-      return actionPresentationText(locale, "choicePromptDelayedSuccess");
+    case "delayed_success": {
+      const card = publicCardTitle(
+        choice.sourceCardDefinitionId,
+        cardPresentationsById,
+      );
+      if (!card) return "[missing choice source: delayed_success]";
+      return actionPresentationText(locale, "choicePromptDelayedSuccess", {
+        card,
+      });
+    }
     case "expose_fort":
       return actionPresentationText(locale, "choicePromptExposeFort");
     case "expose_prevention":

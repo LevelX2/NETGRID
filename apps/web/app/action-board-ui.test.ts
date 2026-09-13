@@ -556,6 +556,41 @@ describe("localized action presentation", () => {
   });
 
   it.each(["de", "en", "fr"] as const)(
+    "names the source of successful-run ICE intervention choices in %s",
+    (locale) => {
+      for (const sourceTitle of ["Dr. Dreff", "Jenny Jett"]) {
+        const pendingChoice = {
+          ...choice("corp"),
+          sourceCardDefinitionId: "source_definition",
+          presentationKey: "delayed_success" as const,
+        };
+        const before = structuredClone(pendingChoice);
+        const label = choicePromptPresentationLabel(pendingChoice, locale, {
+          source_definition: { title: sourceTitle },
+        });
+        expect(label).toBe(
+          locale === "de"
+            ? `${sourceTitle}: ICE aus HQ einsetzen?`
+            : locale === "en"
+              ? `${sourceTitle}: Use ICE from HQ?`
+              : `${sourceTitle} : Utiliser une glace du QG ?`,
+        );
+        expect(pendingChoice).toEqual(before);
+      }
+    },
+  );
+
+  it("reports missing source presentation instead of attributing an ability to a guessed card", () => {
+    expect(
+      choicePromptPresentationLabel(
+        { ...choice("corp"), presentationKey: "delayed_success" },
+        "en",
+        {},
+      ),
+    ).toBe("[missing choice source: delayed_success]");
+  });
+
+  it.each(["de", "en", "fr"] as const)(
     "localizes Shell Traders host placement in %s",
     (locale) => {
       const choice: NonNullable<PlayerView["pendingChoice"]> = {

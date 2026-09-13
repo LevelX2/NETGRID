@@ -272,6 +272,12 @@ describe("run access transition", () => {
     expect(
       startSuccessfulRunInterventionChoice(fixture.host, fixture.state.run),
     ).toBe(true);
+    expect(fixture.state.pendingChoice).toMatchObject({
+      sourceCardInstanceId: "remote_agenda",
+      sourceCardDefinitionId: "agenda_def",
+      prompt: "agenda_def: ICE aus HQ einsetzen?",
+      presentationKey: "delayed_success",
+    });
     expect(
       fixture.state.pendingChoice?.options.find(
         (option) => option.value === "hq_ice",
