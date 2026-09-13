@@ -11,6 +11,7 @@ keine pauschale Migration technischer Texte.
 | LegalAction-Labels | z. B. `game/turn/runner-draw-actions.ts` → Action-Präsentation | Technische Engine-Labels neben den semantischen Action-Fakten. Normale Buttons konsumieren die lokalisierte Actiondarstellung. Keine Locale in Engine, Action-ID oder Replay einführen. |
 | Choice-Prompts | `game/view/choice-view.ts` → `choicePromptPresentationLabel` | Lokalisierte Deskriptoren; Select-option-Erzeuger besitzen ein bestehendes Source-Gate. Raw-Return allein ist ohne erreichbaren und unklassifizierten Producer noch kein belegtes Migrationspaket. |
 | Choice-Kartentitel | sichtbare `option.card.title` und reine Kartenlabels | Originale Kartentitel bleiben zulässige Ausnahme. Allgemeine Optionen müssen dagegen durch ihre Präsentationssemantik lokalisiert werden. |
+| Choice-Beträge | `generic_bid_amount` → `choiceOptionPresentationLabel` | Generische Zahlenoptionen werden aus dem side-sicheren numerischen `option.value` nach Locale formatiert, auch bei `hide_…` und `guess_…` von Social Engineering. Explizite `bid_…`-Optionen behalten ihren Gebotstext. Rohe Labels werden nicht als Zahlenquelle geparst. |
 | Privilegierte KI-Diagnose | Debug-Fehler in `page.tsx` → `features/debug` | Zulässige Diagnoseprosa nach bestehender Ausnahmeregistry. Kein neuer normaler Nutzerpfad daraus ableiten. |
 | Match-/Snapshot-IDs, Hashes, technische Capability-Keys | Engine, Decks, Server → Diagnose bzw. technische Felder | Machine-Daten; unverändert und locale-neutral. |
 

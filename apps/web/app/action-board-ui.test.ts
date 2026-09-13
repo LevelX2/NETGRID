@@ -561,6 +561,71 @@ describe("localized action presentation", () => {
   });
 
   it.each(["de", "en", "fr"] as const)(
+    "renders Social Engineering hide and guess amounts in %s",
+    (locale) => {
+      for (const stage of ["hide", "guess"] as const) {
+        const pendingChoice = {
+          ...choice(stage === "hide" ? "runner" : "corp"),
+          source: `hidden_zone.secret_spend_guess_then_targeted_bypass_run.${stage}:social:1`,
+          kind: "bid_amount" as const,
+          presentationKey: "generic_bid_amount" as const,
+          visibility: "hidden_info_barrier" as const,
+          options: Array.from({ length: 8 }, (_, index) => ({
+            id: `${stage}_${index + 2}`,
+            label: String(index + 2),
+            publicLabel:
+              stage === "hide" ? "Versteckte Credits" : "Geratene Credits",
+            value: index + 2,
+          })),
+        };
+        const before = structuredClone(pendingChoice);
+        expect(
+          pendingChoice.options.map((option) =>
+            choiceOptionPresentationLabel(pendingChoice, option, locale),
+          ),
+        ).toEqual(["2", "3", "4", "5", "6", "7", "8", "9"]);
+        expect(pendingChoice).toEqual(before);
+      }
+    },
+  );
+
+  it("formats generic amounts from structured values and preserves explicit bids", () => {
+    const pendingChoice = {
+      ...choice("corp"),
+      kind: "bid_amount" as const,
+      presentationKey: "generic_bid_amount" as const,
+    };
+    const amount = { id: "guess_1234", label: "untranslated", value: 1234 };
+    expect(choiceOptionPresentationLabel(pendingChoice, amount, "de")).toBe(
+      "1.234",
+    );
+    expect(choiceOptionPresentationLabel(pendingChoice, amount, "en")).toBe(
+      "1,234",
+    );
+    expect(
+      choiceOptionPresentationLabel(
+        pendingChoice,
+        { id: "bid_2", label: "2 Credits bieten", value: 2 },
+        "en",
+      ),
+    ).toBe("Bid 2 credits");
+    for (const value of [
+      undefined,
+      "2",
+      Number.NaN,
+      Number.POSITIVE_INFINITY,
+    ]) {
+      expect(
+        choiceOptionPresentationLabel(
+          pendingChoice,
+          { id: "guess_2", label: "2", value },
+          "en",
+        ),
+      ).toBe("[missing choice option: generic_bid_amount/guess_2]");
+    }
+  });
+
+  it.each(["de", "en", "fr"] as const)(
     "names the source of successful-run ICE intervention choices in %s",
     (locale) => {
       for (const sourceTitle of ["Dr. Dreff", "Jenny Jett"]) {

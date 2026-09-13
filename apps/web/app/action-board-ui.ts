@@ -4745,6 +4745,13 @@ export function choiceOptionPresentationLabel(
     });
   }
   if (
+    choice.presentationKey === "generic_bid_amount" &&
+    typeof option.value === "number" &&
+    Number.isFinite(option.value)
+  ) {
+    return new Intl.NumberFormat(normalizedLocale).format(option.value);
+  }
+  if (
     option.id === "hq" ||
     option.id === "rd" ||
     option.id === "archives" ||
