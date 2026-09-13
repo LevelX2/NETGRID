@@ -26,6 +26,9 @@ die Phasensymbole stehen rechts. Aktionsbuttons reservieren feste Spalten
 für Aktions- und Serversymbol, auch wenn das Serversymbol fehlt. Ihre
 Beschriftungen sind linksbündig, Kosten bleiben rechts. Überschrift und
 Auto-pass bleiben zentriert.
+Die aktuelle Stufe hebt ihren Namen mit fetter Schrift und ihre Symbole
+mit höherer Deckkraft und Strichstärke hervor. Die zusätzliche Umrandung
+kennzeichnet weiterhin die aktuell verfügbaren Aktionen.
 
 Match-Updates übernehmen `PlayerView` und dessen `legalActions` atomar.
 Die zusätzliche WebSocket-Nachricht `legal_actions` darf die Aktionsliste
