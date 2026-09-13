@@ -1032,17 +1032,19 @@ function assessKnownRezzedIcePathInternal(
         hardEffectKinds.length === 1 &&
         hardEffectKinds[0] === "damage_or_program_trash";
       if (hardEffectKinds.length > 0 && !prioritizeLaterAccessPreservation) {
-        const breakAssessment =
-          options.allowBreakingRunPathEffects &&
-          !runPathEffectsPreventFutureBreaking(activeRunPathEffects)
-            ? minimumCreditsToBreakVisibleSubroutines(
-                effectiveIceForQuote(effectiveIce, quote),
-                rigCardsForEncounter,
-                [sourceSubroutine],
-                breakerStrengths,
-                additionalBreakCostPerSubroutine,
-              )
-            : undefined;
+        // Counterfactual suffixes disable recursive optional-effect search,
+        // not a direct, fully quoted break of this mandatory subroutine.
+        const breakAssessment = !runPathEffectsPreventFutureBreaking(
+          activeRunPathEffects,
+        )
+          ? minimumCreditsToBreakVisibleSubroutines(
+              effectiveIceForQuote(effectiveIce, quote),
+              rigCardsForEncounter,
+              [sourceSubroutine],
+              breakerStrengths,
+              additionalBreakCostPerSubroutine,
+            )
+          : undefined;
         const payment = breakAssessment
           ? projectBreakerCreditPayment(creditBudget, breakAssessment)
           : undefined;
