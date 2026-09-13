@@ -123,6 +123,13 @@ Zugriffswert. Verdeckte HQ-Karten, Multiaccess und ein möglicher Agenda-Steal
 begründen für diese Ersatzroute keinen Matchpoint-Bonus. Die normale HQ-
 Action behält ihre eigenständige Bewertung und denselben Central-Owner.
 
+Der zusätzliche Wert einer HQ-Erfolgsfenster-Vorbereitung gehört zur konkret
+zugelassenen Runroute des Central-Signals. Ein auf Finanzierung verschobener
+Basisrun darf weder seinen Vorbereitungswert noch seine Begründung an einen
+anderen Kartenrun auf demselben Server weitergeben. Kartenruns behalten ihren
+eigenen gequoteten Payoff; zulässige Basisruns können weiterhin die vorbereitete
+ICE-Entfernung begründen.
+
 Bei festem Creditentzug begrenzt zusätzlich die kanonische Effektmenge den
 Payoff; eigene Credits werden dafür nicht ausgegeben. Verlangt die gebundene
 Ersatzwirkung ein nichtleeres Corp-Konto, bleibt bei bereits leerem Konto der

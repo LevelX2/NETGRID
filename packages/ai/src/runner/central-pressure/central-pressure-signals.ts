@@ -921,6 +921,17 @@ export function buildRunnerCentralPressureSignals({
           );
           const hqSuccessWindowRoute = sameServerEvaluations.flatMap(
             (candidateEvaluation) => {
+              // Preparation value belongs to the route represented by this
+              // signal. A deferred basic run cannot lend its future payoff
+              // to the independently admitted event run on the same server.
+              if (
+                candidateEvaluation.actionId !== evaluation.actionId ||
+                (candidateEvaluation.recommendation !== "run_now" &&
+                  candidateEvaluation.recommendation !== "run_if_free") ||
+                candidateEvaluation.prerunReserveQuote?.status === "blocked"
+              ) {
+                return [];
+              }
               const action = input.legalActions.find(
                 (candidateAction) =>
                   candidateAction.actionId === candidateEvaluation.actionId,
