@@ -891,6 +891,13 @@ Action-/Server-Parent erneut mit dem garantierten Nettobudget und dem
 Handverbrauch der Finanzierungsaktion. Nur dessen vollständiger erreichbarer
 Pfad darf die Ausstiegsreserve belegen; die aktuelle LegalAction und ihre
 StateVersion bleiben die Ausführungsautorität.
+Die Handkosten zählen auch Installationen aus dem von der Engine gebundenen
+Grip-/HQ-Bereich; eine Installation aus einem anderen Bereich verbraucht
+keine Handkarte. Der finanzierte Zustand muss außerdem die bestehende
+Direktkonversions- beziehungsweise Terminalzulassung und die gemeinsame
+Remote-Schadensreserve erfüllen. Ein nach Finanzierung nicht mehr materieller
+oder wegen Handmangels blockierter Parent rechtfertigt kein Darlehen, selbst
+wenn die volle Rückzahlungsreserve vorhanden wäre.
 Die prospektive Einzelquote wird durch
 `quoteRunnerRunAfterGuaranteedFunding` beim Run-Owner erzeugt. Funding- und
 Bank-Owner konsumieren diese Quote; sie rufen weder eine zweite Runbewertung
@@ -1067,6 +1074,15 @@ aktuelle und spätere Schadenssubroutinen gemeinsam mit dem bestätigten
 Handboden. Sie verwendet den bestehenden Damage-Owner und denselben
 Pfadbefund wie die Zielbewertung; Plan-, Executor- und Actionbindung bleiben
 beim laufenden Run.
+
+Diese Prüfung gilt bereits vor den vorbereitenden Pumps. Nach vollständigen
+Pump- und Breakkosten werden verbleibender aktueller Schaden und innere
+Schadensquellen gemeinsam bewertet. Die Pumpquote reserviert außerdem alle
+aktuellen Pflichtsubroutinen, einschließlich unabhängig notwendiger
+Run-Locks. Deren Notwendigkeit stammt aus demselben Run-Remainder-Dienst wie
+die spätere Breakentscheidung; es entsteht weder eine erfundene LegalAction
+noch ein eigener Chooser. Eine tragbare Schadensfolge allein macht keinen
+zusätzlichen Pflichtbreak erforderlich.
 
 Nach dem Aufdecken des letzten unbekannten ICE verwendet auch die
 Informationsgrenzenprüfung diese Zusammenführung. Ein vollständig bekannter,

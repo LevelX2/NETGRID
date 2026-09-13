@@ -6,7 +6,12 @@ import { runnerFundingRouteCandidateIsMaterializable } from "../plans/runner-fun
 import type { RunnerFundingRouteAssessment } from "../plans/runner-funding-contracts";
 import type { RunnerExactFundingRouteRequest } from "../plans/runner-funding-service-contract";
 import { runnerPaymentInstallSetups } from "../plans/runner-payment-install-planning";
-import { quoteRunnerRunAfterGuaranteedFunding } from "../runner-run-target-evaluation";
+import { assessRunnerRunAfterGuaranteedFunding } from "../runner-run-target-evaluation";
+import {
+  runnerCriticalDamageContestBlocked,
+  runnerTerminalRemoteContestIsDirectlyMandatory,
+} from "../runner/remote-contest/remote-contest-admission";
+import { runnerRunTargetIsDirectlyConvertible } from "./runner-run-funding-admission";
 import { createDeckCapabilitiesContext } from "./deck-capabilities-context";
 import { runnerDebtFinancingProfile } from "./runner-canonical-card-facts";
 import {
@@ -244,7 +249,7 @@ function runnerDebtFinancingCandidateHasSafeBoundRunExit(
   // remaining balance therefore cannot certify the debt's exit reserve.
   // Requote this exact consumer with the guaranteed funding and hand cost;
   // this is prospective assessment only, never a replacement LegalAction.
-  const fundedTarget = quoteRunnerRunAfterGuaranteedFunding({
+  const funded = assessRunnerRunAfterGuaranteedFunding({
     input,
     deckCapabilities:
       createDeckCapabilitiesContext().deckCapabilitiesForInput(input),
@@ -252,8 +257,19 @@ function runnerDebtFinancingCandidateHasSafeBoundRunExit(
     runActionId: parent.runActionId,
     targetServerId: parent.targetServerId,
   });
+  if (!funded) return false;
+  const fundedTarget = funded.target;
   return (
-    fundedTarget !== undefined &&
+    !runnerCriticalDamageContestBlocked(funded.input, fundedTarget) &&
+    (runnerRunTargetIsDirectlyConvertible({
+      target: fundedTarget,
+      economy: { minimumCreditFloor: profile.leavePlayPayCost },
+      requiredPostRunReserve: profile.leavePlayPayCost,
+    }) ||
+      runnerTerminalRemoteContestIsDirectlyMandatory(
+        funded.input,
+        fundedTarget,
+      )) &&
     fundedTarget.pathPassability === "reachable" &&
     fundedTarget.prerunReserveQuote?.status !== "blocked" &&
     fundedTarget.creditsAfterRun >= profile.leavePlayPayCost

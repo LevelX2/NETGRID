@@ -5,6 +5,29 @@ import {
   serverIdFromEvent,
 } from "../../runtime/public-event-history";
 import { runnerCoverageGapIsTerminalRemoteThreat } from "../rig-coverage/coverage-support";
+import {
+  runnerDamageThreatAssessment,
+  type RunnerDamageThreatAssessment,
+} from "../../runner-damage-threat-assessment";
+
+export function runnerCriticalDamageContestBlocked(
+  input: AiDecisionInput,
+  evaluation: RunnerRunTargetEvaluation,
+  damageThreat: RunnerDamageThreatAssessment = runnerDamageThreatAssessment(
+    input,
+  ),
+): boolean {
+  return (
+    !runnerTerminalRemoteContestIsDirectlyMandatory(input, evaluation) &&
+    (damageThreat.flatlineRisk.level === "confirmed" ||
+      damageThreat.flatlineRisk.level === "critical") &&
+    damageThreat.flatlineRisk.handCount <
+      damageThreat.flatlineRisk.recommendedHandFloor &&
+    damageThreat.flatlineRisk.riskyRunServerIds.includes(
+      evaluation.targetServerId,
+    )
+  );
+}
 export function runnerTerminalRemoteLastChanceKnownPathFundingGap(
   input: AiDecisionInput,
   evaluation: RunnerRunTargetEvaluation,

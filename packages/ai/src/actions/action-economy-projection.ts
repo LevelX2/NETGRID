@@ -133,7 +133,19 @@ export function actionEconomyProjectionFor(
   const cardsDrawn = payloadCardsDrawn ?? basicActionCardsDrawn ?? 0;
   const cardsConsumed =
     corpZoneProjection?.sourceHqConsumptionCount ??
-    (action.type === "play_event" || action.type === "play_operation" ? 1 : 0);
+    (action.type === "play_event" ||
+    action.type === "play_operation" ||
+    (action.type === "install_card" &&
+      action.targetRequirements.some(
+        (target) =>
+          target.kind === "card" &&
+          target.side === action.side &&
+          target.zoneScope?.length === 1 &&
+          target.zoneScope[0] ===
+            (action.side === "runner" ? "runner.grip" : "corp.hq"),
+      ))
+      ? 1
+      : 0);
   const netHandDelta =
     corpZoneProjection?.netHqDelta ??
     runnerDrawProjection?.projectedNetHandDelta ??

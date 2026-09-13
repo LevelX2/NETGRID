@@ -108,6 +108,12 @@ export function quoteRunnerRunAfterGuaranteedFunding(params: {
   runActionId: string;
   targetServerId: string;
 }): RunnerRunTargetEvaluation | undefined {
+  return assessRunnerRunAfterGuaranteedFunding(params)?.target;
+}
+
+export function assessRunnerRunAfterGuaranteedFunding(
+  params: Parameters<typeof quoteRunnerRunAfterGuaranteedFunding>[0],
+): { input: AiDecisionInput; target: RunnerRunTargetEvaluation } | undefined {
   const funding = params.fundingCandidate.economyProjection;
   const fundingAction = params.input.legalActions.find(
     (action) => action.actionId === params.fundingCandidate.actionId,
@@ -127,6 +133,14 @@ export function quoteRunnerRunAfterGuaranteedFunding(params: {
     (funding.cardsConsumed !== 0 && funding.cardsConsumed !== 1) ||
     funding.netHandDelta !== -funding.cardsConsumed ||
     params.input.playerView.own.clicks - funding.clickCost < 1
+  )
+    return undefined;
+  if (
+    fundingAction.type === "install_card" &&
+    params.input.playerView.own.gripOrHq.some(
+      (card) => card.instanceId === fundingAction.source,
+    ) &&
+    funding.cardsConsumed !== 1
   )
     return undefined;
   const consumedCard =
@@ -162,13 +176,14 @@ export function quoteRunnerRunAfterGuaranteedFunding(params: {
       run.projectionStatus === "concrete_target",
   );
   if (!projection) return undefined;
-  return evaluateRunnerRunTarget(
+  const target = evaluateRunnerRunTarget(
     targetParams,
     projection,
     buildRunnerEconomyPosture(targetParams),
     reconstructBeliefState(fundedInput).runnerOpponentModel
       ?.unrezzedIceRiskModel ?? [],
   );
+  return target ? { input: fundedInput, target } : undefined;
 }
 
 export function evaluateRunnerRunTargets(

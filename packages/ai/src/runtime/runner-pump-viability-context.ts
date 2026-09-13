@@ -33,6 +33,7 @@ import {
   isUnacceptableImmediateSafetyThreatSubroutine,
   type VisibleEncounterSubroutine,
 } from "./encounter-subroutine";
+import { isVisibleDirectDamageSubroutine } from "../run-analysis/visible-subroutine-semantics";
 import type { EncounterRunRemainderEffectAssessment } from "./runner-run-remainder-effect-assessment";
 import type {
   RunnerEncounterActionConstraint,
@@ -57,6 +58,7 @@ export type RunnerPumpViabilityContextDependencies = {
   encounterRunRemainderEffectAssessment: (
     input: AiDecisionInput,
     action?: LegalAction,
+    projectedSubroutineIndexes?: readonly number[],
   ) => EncounterRunRemainderEffectAssessment;
   encounterHasImmediateUnbrokenThreat: (input: AiDecisionInput) => boolean;
   actionCreditCost: (action: LegalAction) => number;
@@ -64,6 +66,7 @@ export type RunnerPumpViabilityContextDependencies = {
     input: AiDecisionInput,
     server: VisibleServer,
     creditBudgetAfterPumpAndBreak: number | RunnerRunPathCreditBudget,
+    remainingCurrentSubroutines?: VisibleEncounterSubroutine[],
   ) => { blocksPump: boolean; creditsAfterPath: number; evidence: string[] };
   encounterRemotePayoffAfterBreakAssessment: (
     input: AiDecisionInput,
@@ -228,28 +231,19 @@ export function createRunnerPumpViabilityContext(
     const fullBreakIndexes = requiresFullBreak
       ? currentEncounterUnbrokenSubroutineIndexes(input)
       : undefined;
-    const requiredBreakCount =
-      currentQuote?.subroutines.filter((subroutine, index) =>
-        fullBreakIndexes
-          ? fullBreakIndexes.has(index)
-          : remainingIndexes.has(index) &&
-            (isUnacceptableImmediateSafetyThreatSubroutine(input, subroutine) ||
-              visibleDeflectorSubroutineCanResolve(
-                subroutine,
-                deflectorContext,
-              ) ||
-              (encounterContinue?.payload?.encounterWillEndRun === true &&
-                isEndRunSubroutine(subroutine))),
-      ).length ??
-      (encounterContinue?.payload?.encounterWillEndRun === true
-        ? endTheRunCount
-        : 0);
     const requiredBreakSubroutines = currentQuote?.subroutines.filter(
       (subroutine, index) =>
         fullBreakIndexes
           ? fullBreakIndexes.has(index)
           : remainingIndexes.has(index) &&
             (isUnacceptableImmediateSafetyThreatSubroutine(input, subroutine) ||
+              (subroutine.unbrokenRunEffect !== undefined &&
+                !isVisibleDirectDamageSubroutine(subroutine) &&
+                dependencies.encounterRunRemainderEffectAssessment(
+                  input,
+                  undefined,
+                  [index],
+                ).mustBreak) ||
               visibleDeflectorSubroutineCanResolve(
                 subroutine,
                 deflectorContext,
@@ -257,6 +251,7 @@ export function createRunnerPumpViabilityContext(
               (encounterContinue?.payload?.encounterWillEndRun === true &&
                 isEndRunSubroutine(subroutine))),
     );
+    const requiredBreakCount = requiredBreakSubroutines?.length ?? 0;
     let estimatedBreakCost = requiredBreakSubroutines?.length
       ? creditsToBreakVisibleSubroutinesWithBreaker(
           breaker,
@@ -384,6 +379,11 @@ export function createRunnerPumpViabilityContext(
                 breakPayment.budget.credits +
                 breakPayment.budget.runOnlyCredits,
             },
+            currentQuote.subroutines.filter(
+              (subroutine, index) =>
+                remainingIndexes.has(index) &&
+                !requiredBreakSubroutines?.includes(subroutine),
+            ),
           );
       if (futurePath.blocksPump)
         return {

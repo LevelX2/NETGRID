@@ -47,17 +47,19 @@ export type EncounterRunRemainderEffectAssessment = {
 export function encounterRunRemainderEffectAssessment(
   input: AiDecisionInput,
   action?: LegalAction,
+  projectedSubroutineIndexes?: readonly number[],
 ): EncounterRunRemainderEffectAssessment {
   const quote = currentEncounteredIceCard(input)?.effectiveRunQuote;
   const targetIndexes =
-    action?.type === "break_subroutine" &&
+    projectedSubroutineIndexes ??
+    (action?.type === "break_subroutine" &&
     typeof action.payload?.subroutineIndex === "number"
       ? [action.payload.subroutineIndex]
       : (quote?.subroutines
           .map((subroutine, index) =>
             subroutine.unbrokenRunEffect ? index : undefined,
           )
-          .filter((index): index is number => index !== undefined) ?? []);
+          .filter((index): index is number => index !== undefined) ?? []));
   const effects: RunRemainderEffectEntry[] = targetIndexes.flatMap((index) => {
     const effect = quote?.subroutines[index]?.unbrokenRunEffect;
     const subroutineType = quote?.subroutines[index]?.type;

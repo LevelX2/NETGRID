@@ -62,6 +62,7 @@ import { runnerDefenseHandBufferFacts } from "../defense-recovery/defense-signal
 import type { RunnerHandDevelopmentEvaluation } from "../hand-development/hand-development-evaluation";
 import { runnerCoverageGapIsTerminalRemoteThreat } from "../rig-coverage/coverage-support";
 import {
+  runnerCriticalDamageContestBlocked,
   runnerTerminalNonlethalDamageContestAlreadyFailedThisTurn,
   runnerTerminalRemoteContestIsDirectlyMandatory,
 } from "./remote-contest-admission";
@@ -915,15 +916,11 @@ export function buildRunnerRemoteContestSignals({
             input,
             evaluation,
           );
-        const criticalDamageContestBlocked =
-          !terminalRemoteContestIsDirectlyMandatory &&
-          (damageThreat.flatlineRisk.level === "confirmed" ||
-            damageThreat.flatlineRisk.level === "critical") &&
-          damageThreat.flatlineRisk.handCount <
-            damageThreat.flatlineRisk.recommendedHandFloor &&
-          damageThreat.flatlineRisk.riskyRunServerIds.includes(
-            evaluation.targetServerId,
-          );
+        const criticalDamageContestBlocked = runnerCriticalDamageContestBlocked(
+          input,
+          evaluation,
+          damageThreat,
+        );
         const safetyBlocked =
           recentSafetyBlocked ||
           criticalDamageContestBlocked ||

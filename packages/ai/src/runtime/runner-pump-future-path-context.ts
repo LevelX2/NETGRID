@@ -1,5 +1,11 @@
-import type { AiDecisionInput } from "@netgrid/shared";
+import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
+import { currentEncounteredIceCard } from "./current-encounter";
 import { runnerRigAfterEncounter } from "./runner-rig-after-encounter";
+import {
+  knownPathAfterDamageBudget,
+  runnerConfirmedDamageRequiredHandFloor,
+  runnerVisibleLethalIceDamageAssessment,
+} from "../runner-damage-threat-assessment";
 
 import type {
   assessKnownRezzedIcePath,
@@ -8,6 +14,9 @@ import type {
 
 type KnownIcePathAssessment = ReturnType<typeof assessKnownRezzedIcePath>;
 type VisibleServer = AiDecisionInput["playerView"]["servers"][number];
+type Subroutine = NonNullable<
+  VisibleCard["effectiveRunQuote"]
+>["subroutines"][number];
 
 export type RunnerPumpFuturePathContextDependencies = {
   assessKnownRezzedIcePath: typeof assessKnownRezzedIcePath;
@@ -24,12 +33,14 @@ export function createRunnerPumpFuturePathContext(
     input: AiDecisionInput,
     server: VisibleServer,
     creditBudgetAfterPumpAndBreak: number | RunnerRunPathCreditBudget,
+    remainingCurrentSubroutines?: Subroutine[],
   ) => { blocksPump: boolean; creditsAfterPath: number; evidence: string[] };
 } {
   const encounterFuturePathAfterPumpBreakAssessment = (
     input: AiDecisionInput,
     server: VisibleServer,
     creditBudgetAfterPumpAndBreak: number | RunnerRunPathCreditBudget,
+    remainingCurrentSubroutines?: Subroutine[],
   ): { blocksPump: boolean; creditsAfterPath: number; evidence: string[] } => {
     const creditsAfterPumpAndBreak =
       typeof creditBudgetAfterPumpAndBreak === "number"
@@ -49,11 +60,50 @@ export function createRunnerPumpFuturePathContext(
         creditsAfterPath: creditsAfterPumpAndBreak,
         evidence: [],
       };
-    const pathAssessment = dependencies.assessKnownRezzedIcePath(
+    const futureRig = runnerRigAfterEncounter(input.playerView.own.rig ?? []);
+    const rawPath = dependencies.assessKnownRezzedIcePath(
       futureIce,
-      runnerRigAfterEncounter(input.playerView.own.rig ?? []),
+      futureRig,
       creditBudgetAfterPumpAndBreak,
       server.root,
+    );
+    const currentIce = currentEncounteredIceCard(input);
+    const damageIce =
+      currentIce?.effectiveRunQuote && remainingCurrentSubroutines
+        ? [
+            ...futureIce,
+            {
+              ...currentIce,
+              effectiveRunQuote: {
+                ...currentIce.effectiveRunQuote,
+                subroutines: remainingCurrentSubroutines,
+              },
+            },
+          ]
+        : futureIce;
+    const pathAssessment = knownPathAfterDamageBudget(
+      rawPath,
+      rawPath.knownPathBlockedOnlyByDamage === true &&
+        !runnerVisibleLethalIceDamageAssessment(
+          {
+            ...input,
+            playerView: {
+              ...input.playerView,
+              own: { ...input.playerView.own, rig: futureRig },
+            },
+          },
+          damageIce,
+          {
+            generalCredits: rawPath.creditsAfterPath,
+            requiredHandFloor: runnerConfirmedDamageRequiredHandFloor(input),
+            ...(rawPath.paidSubroutineBreaks
+              ? { paidSubroutineBreaks: rawPath.paidSubroutineBreaks }
+              : {}),
+            ...(rawPath.fullyBrokenIceInstanceIds
+              ? { fullyBrokenIceInstanceIds: rawPath.fullyBrokenIceInstanceIds }
+              : {}),
+          },
+        ),
     );
     const pathEvidence = dependencies.knownIcePathReason(
       pathAssessment,
