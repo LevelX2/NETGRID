@@ -26,6 +26,11 @@ import {
   runnerRunPathCreditBudgetWithVisiblePools,
 } from "../../visible-run-analysis";
 import { reservedAccessTrashCredits } from "./run-window-access";
+import {
+  knownPathAfterDamageBudget,
+  runnerConfirmedDamageRequiredHandFloor,
+  runnerVisibleLethalIceDamageAssessment,
+} from "../../runner-damage-threat-assessment";
 
 export function activeRunRootPlan(
   previous: ResidentPlanPortfolio | undefined,
@@ -168,7 +173,7 @@ export function reassessActiveInformationRunParent(
     [...currentRunRemainingIce(input), encounteredIce],
     (ice) => ice.instanceId,
   );
-  const knownPath = assessKnownRezzedIcePath(
+  const pathBeforeDamageBudget = assessKnownRezzedIcePath(
     remainingIce,
     input.playerView.own.rig ?? [],
     runnerRunPathCreditBudgetWithVisiblePools(
@@ -181,6 +186,21 @@ export function reassessActiveInformationRunParent(
     )?.root ?? [],
     input.playerView.opponent.credits,
   );
+  const knownPath = pathBeforeDamageBudget.knownPathBlockedOnlyByDamage
+    ? knownPathAfterDamageBudget(
+        pathBeforeDamageBudget,
+        !runnerVisibleLethalIceDamageAssessment(input, remainingIce, {
+          generalCredits: pathBeforeDamageBudget.creditsAfterPath,
+          requiredHandFloor: runnerConfirmedDamageRequiredHandFloor(input),
+          ...(pathBeforeDamageBudget.fullyBrokenIceInstanceIds
+            ? {
+                fullyBrokenIceInstanceIds:
+                  pathBeforeDamageBudget.fullyBrokenIceInstanceIds,
+              }
+            : {}),
+        }),
+      )
+    : pathBeforeDamageBudget;
   const unknownIceCount = remainingIce.filter(
     (ice) =>
       ice.known !== true ||

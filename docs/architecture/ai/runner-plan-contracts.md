@@ -977,6 +977,12 @@ Handboden. Sie verwendet den bestehenden Damage-Owner und denselben
 Pfadbefund wie die Zielbewertung; Plan-, Executor- und Actionbindung bleiben
 beim laufenden Run.
 
+Nach dem Aufdecken des letzten unbekannten ICE verwendet auch die
+Informationsgrenzenprüfung diese Zusammenführung. Ein vollständig bekannter,
+finanzierter Pfad mit tragbarem Schaden kann damit vom Informationszweck zu
+Zugriff wechseln. Die bestehenden Anforderungen an Payoff, unbekanntes ICE,
+unvermeidbare Gefahren und gebundene Reserven gelten weiter.
+
 **Klasse:** `urgent_response` oder gebundener Kindplan
 **Rolle:** Urgent Response
 **Status:** registrierter produktiver Owner; Fähigkeitsgrenzen siehe Einstieg.
