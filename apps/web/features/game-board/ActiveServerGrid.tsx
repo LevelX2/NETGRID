@@ -13,6 +13,7 @@ import { useLocale, useTranslations } from "use-intl/react";
 import type { BoardHighlight } from "../../app/action-cues";
 import {
   actionButtonLabel,
+  boardCardActionLabel,
   iceModifierBadgesForServer,
   runPositionStatusLabel,
   serverBoardRows,
@@ -256,6 +257,14 @@ export function ActiveServerGrid({
                         selectedActionContext.id === card.instanceId
                       }
                       actions={cardActionsFor(card)}
+                      actionLabelForAction={(action) =>
+                        boardCardActionLabel(
+                          view,
+                          action,
+                          cardPresentationsById,
+                          locale,
+                        )
+                      }
                       actionDisabled={actionDisabled}
                       slotClassName={[
                         ...(lane.kind === "ice"
