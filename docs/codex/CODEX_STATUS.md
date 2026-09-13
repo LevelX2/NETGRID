@@ -36,16 +36,27 @@ Die Engine ist alleinige Regelautorität. UI, Server und KI reichen nur angebote
 enthält je ein Reclamation Project und Corporate Shuffle sowie neu Red
 Herrings und Data Masons. Zwei Data Wall werden durch Data Wall 2.0 und
 eine Wall of Static durch Datacomb ersetzt. Zwei Marionette und ein Dieter
-Esslin bleiben enthalten. Die aktuelle Version ist noch nicht in einer
-Matchserie geprüft. Die Liste
-verbindet temporäre HQ-ICE-Begegnungen mit Remote-Scoring und Recycling;
-eine erste Stichprobe der Version 1.1.0 ohne Dieter gegen zehn zufällige
-Runner-Standarddecks endet mit
-17:13 aus 30 Spielen ohne technische Fehlerflags (Registry-Paarungen 435–444).
-Marionette wurde darin regulär gespielt, aber nicht über Dreff eingesetzt;
-ihre temporäre HQ-Rückkehr ist separat im Originalseed verifiziert. Ein
-Stärkevergleich zur Banpei-Version ist damit noch nicht belegt. Marionette
-und die verwandten deklarativen ICE-Rückkehrmodi lösen nach einer
+Esslin bleiben enthalten. Die Liste verbindet temporäre HQ-ICE-Begegnungen
+mit Remote-Scoring und Recycling. Die Stichprobe von Version 1.3.0 gegen zehn
+zufällig ohne Wiederholung ausgewählte Runner-Standarddecks endet mit
+23:27 aus jeweils fünf Spielen: 50 reguläre Ergebnisse und 14.502 erfasste
+Entscheidungen ohne technische Fehlerflags (Registry-Paarungen 445–454,
+Quellstand `065bba78d`). Dr. Dreff erzeugte zehn zusätzliche Begegnungen,
+darunter eine Marionette-Begegnung, die den Run beendete. Die temporäre
+HQ-Rückkehr ist separat im Originalseed verifiziert. Ein Stärkevergleich zu
+früheren Deckversionen ist ohne paarweise Kontrollspiele nicht belegt.
+Die vertiefte Verlustanalyse findet 14 Niederlagen ohne eigenen Agenda-Score,
+13 terminale Remote-Steals und vier Deckouts. Die daraus belegten KI-Befunde
+SP-382/383 sind fokussiert behoben: Der Handplan bindet optionale Startdraws
+an eine Engine-Vorschau mit kumulierten Zieheffekten, Handkapazität,
+Pflichtdrawreserve und konkretem Bedarf. Regionsvergleiche berücksichtigen
+auch die Funktionssignale der installierten Karte und verhindern dadurch den
+teuren identischen Austausch. 122 KI- und 34 Engine-/View-Prüfungen sowie zwei
+fehlerfreie Originalseed-Kontrollspiele mit deterministischem Replay sichern
+die Pfade ab. Die 23:27-Bilanz bleibt die ursprüngliche Stichprobe vor den
+Fixes; eine neue Deck-Siegquote oder eine Deckänderung ist damit nicht belegt.
+Führend ist `docs/architecture/ai/corp-plan-contracts.md`.
+Marionette und die verwandten deklarativen ICE-Rückkehrmodi lösen nach einer
 Dr.-Dreff-Begegnung ihr Pass-Fenster vor dem Trash auf. Rückkehr, Zahlung,
 Run-Ende, Sichtbarkeit und Replay sind fokussiert geprüft; führend ist
 `docs/architecture/engine/run-runtime-architecture.md`.
