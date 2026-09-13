@@ -545,6 +545,7 @@ function signalsForVisibleCard(card: VisibleCard | undefined): Set<string> {
   const hint = AI_HINTS_BY_CARD.get(card.definitionId);
   if (!hint) return new Set();
   return new Set([
+    ...(hint.functionSignals ?? []),
     ...(hint.effects ?? []).flatMap((effect) => [
       effect.kind,
       ...("target" in effect && typeof effect.target === "string"

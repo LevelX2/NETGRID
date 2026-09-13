@@ -1067,6 +1067,7 @@ export function selectedChoicesForDecision(
           action,
           choice,
           selectableOptions,
+          currentPortfolio,
         ),
       ],
       "corp_scored_agenda_start_draw",

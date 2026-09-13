@@ -34,6 +34,9 @@ export function visibleChoice(
         ? { sourceCardDefinitionId: choice.sourceCardDefinitionId }
         : {}),
       ...(choice.continuation ? { continuation: choice.continuation } : {}),
+      ...(choice.corpStartDrawQuote
+        ? { corpStartDrawQuote: { ...choice.corpStartDrawQuote } }
+        : {}),
       prompt: choice.prompt,
       ...(choice.presentationKey
         ? { presentationKey: choice.presentationKey }

@@ -10,6 +10,7 @@ export type CorpHandManagementSignal = {
     | "discard_window"
     | "draw_filter_window"
     | "hq_shuffle_window"
+    | "optional_start_draw_window"
     | "preserve_draw_horizon";
   sourceDefinitionIds?: string[];
   sourceInstanceId?: string;
@@ -67,6 +68,12 @@ export type CorpHandManagementSignal = {
     evidenceCodes: string[];
   };
   actionPriorityOrder?: string[];
+  optionalStartDrawChoiceBinding?: {
+    actionId: string;
+    choiceId: string;
+    observedAtStateVersion: number;
+    selectedOptionId: "draw" | "skip";
+  };
   value: number;
   evidenceCode: string;
 };

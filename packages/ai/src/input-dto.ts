@@ -1,3 +1,4 @@
+import { sanitizeCorpStartDrawQuote } from "./runtime/corp-start-draw-quote-input";
 import {
   ABILITY_PAYLOAD_DISCRIMINATOR_FIELDS,
   CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
@@ -3225,6 +3226,11 @@ function sanitizeVisibleChoiceRequest(
     choice.sourceCardInstanceId,
     choice.sourceCardDefinitionId,
   );
+  const corpStartDrawQuote = sanitizeCorpStartDrawQuote(
+    choice,
+    playerViewStateVersion,
+    playerViewSide,
+  );
   return {
     choiceId: choice.choiceId,
     side: choice.side,
@@ -3238,6 +3244,7 @@ function sanitizeVisibleChoiceRequest(
       ? { sourceCardDefinitionId: choice.sourceCardDefinitionId }
       : {}),
     ...(continuation ? { continuation } : {}),
+    ...(corpStartDrawQuote ? { corpStartDrawQuote } : {}),
     prompt: choice.prompt,
     kind: choice.kind,
     options: choice.options.map((option) => {

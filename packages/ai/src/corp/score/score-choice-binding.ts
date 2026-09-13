@@ -1,4 +1,5 @@
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
+import type { HandState } from "../hand-management/hand-management-plan-module";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
 import type { ResidentPlanPortfolio } from "../../plans/resident-plan-portfolio";
 import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
@@ -17,6 +18,7 @@ export function selectedCorpScoredAgendaStartDrawChoiceOptionId(
   action: LegalAction,
   choice: PendingChoice,
   selectableOptions: PendingChoiceOptions,
+  currentPortfolio?: ResidentPlanPortfolio,
 ): string {
   const sourceMatch =
     /^scored_agenda\.start_draw_choice:([^:]+):([0-9]+)$/.exec(choice.source);
@@ -73,7 +75,27 @@ export function selectedCorpScoredAgendaStartDrawChoiceOptionId(
       "Bind the optional scored-agenda start draw to its exact public source agenda, current Engine choice/action contract, and visible R&D count.",
     );
   }
-  return rdCount >= 2 ? draw.id : skip.id;
+  const portfolio = currentPortfolio ?? residentPlanPortfolioSnapshot(input);
+  const executor = portfolio?.instances.find(
+    (instance) => instance.instanceId === portfolio.executorInstanceId,
+  );
+  const hand = executor?.moduleState as HandState | undefined;
+  const binding = hand?.signal?.optionalStartDrawChoiceBinding;
+  if (
+    executor?.moduleId !== "corp.hand_and_agenda_management" ||
+    hand?.kind !== "hand" ||
+    hand.signal.phase !== "optional_start_draw_window" ||
+    binding?.actionId !== action.actionId ||
+    binding.choiceId !== choice.choiceId ||
+    binding.observedAtStateVersion !== input.playerView.stateVersion ||
+    (binding.selectedOptionId !== "draw" && binding.selectedOptionId !== "skip")
+  )
+    throw unresolvedChoiceFailure(
+      input,
+      action,
+      "The Hand owner must bind the exact optional start-draw decision before resolving its choice.",
+    );
+  return binding.selectedOptionId;
 }
 
 export function selectedCorpSatelliteMonitorsStartOptionId(
