@@ -1082,7 +1082,7 @@ describe("plan-first Remote contest continuation", () => {
     });
   });
 
-  it("uses Snowbank's cheaper paid continuation and stays committed toward the unrezzed inner ICE", () => {
+  it("uses Snowbank's cheaper paid continuation with a funded program reserve toward inner ICE", () => {
     resetResidentPlanPortfolioMemory();
     const startRun = legalAction(
       "match-f5f54fac-run-remote-1",
@@ -1105,18 +1105,18 @@ describe("plan-first Remote contest continuation", () => {
       unrezzedIceRisk: 0.81,
       unrezzedIceRiskCreditBuffer: 4,
       pathCost: 1,
-      creditsAfterRun: 5,
+      creditsAfterRun: 6,
       prerunReserveQuote: {
         purpose: "contest" as const,
         status: "satisfied" as const,
         riskTolerance: "standard" as const,
         knownPathCost: 1,
-        creditsAfterKnownPath: 5,
+        creditsAfterKnownPath: 6,
         unknownIceCount: 1,
         unknownIcePositions: [0],
         corpRezCredits: 14,
         visibleCoverage: "partial" as const,
-        requiredCredits: 4,
+        requiredCredits: 6,
         creditGap: 0,
         requiredHandBuffer: 3,
         handBufferGap: 0,
@@ -1169,7 +1169,16 @@ describe("plan-first Remote contest continuation", () => {
       advancementCounters: 3,
     } as VisibleCard;
     const startInput = aiInput("runner", [startRun]);
-    startInput.playerView.own.credits = 6;
+    startInput.playerView.own.credits = 7;
+    startInput.playerView.own.rig = [
+      visibleCard("match-f5f54fac-boring-bit", "runner", "program", {
+        definitionId: "onr_proteus_081_boring-bit",
+        title: "Boring Bit",
+        subtypes: ["icebreaker"],
+        strength: 0,
+        installCost: 6,
+      }),
+    ];
     startInput.playerView.own.gripOrHq = testGrip(3, "match-f5f54fac-start");
     startInput.playerView.opponent.credits = 14;
     startInput.playerView.servers = [
@@ -1247,7 +1256,7 @@ describe("plan-first Remote contest continuation", () => {
       action.expiresAtStateVersion = 2;
       action.timingPoint = "run.encounter_ice";
     }
-    encounterInput.playerView.own.credits = 6;
+    encounterInput.playerView.own.credits = 7;
     encounterInput.playerView.own.gripOrHq = testGrip(
       3,
       "match-f5f54fac-encounter",
@@ -1256,6 +1265,7 @@ describe("plan-first Remote contest continuation", () => {
       visibleCard("match-f5f54fac-boring-bit", "runner", "program", {
         definitionId: "onr_proteus_081_boring-bit",
         title: "Boring Bit",
+        installCost: 6,
         subtypes: ["icebreaker"],
         strength: 0,
       }),
@@ -1337,7 +1347,10 @@ describe("plan-first Remote contest continuation", () => {
       action.expiresAtStateVersion = 3;
       action.timingPoint = "run.jack_out_window";
     }
-    movementInput.playerView.own.credits = 5;
+    movementInput.playerView.own.credits = 6;
+    movementInput.playerView.own.rig = structuredClone(
+      encounterInput.playerView.own.rig,
+    );
     movementInput.playerView.own.gripOrHq = testGrip(
       3,
       "match-f5f54fac-movement",

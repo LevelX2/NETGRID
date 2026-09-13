@@ -85,6 +85,20 @@ Führend:
 
 ## KI
 
+Runner-Vorbereitung für bekannte blockierte Score-Remotes bleibt früh am
+konkreten Remote-Parent gebunden. Dringliche Shell-Traders-Counterzahlungen
+benötigen einen vollständig finanzierbaren Zugriffspfad; einzelne bezahlbare
+Breaker-Schritte genügen nicht. Bei unbekanntem ICE wird das sichtbare
+Programm-Investment mit aktueller Corp-Liquidität vor Run und Fortsetzung
+neu bewertet. Corp-Economy darf eine redundant geschützte statische ICE-Schicht
+für einen gebundenen Bedarf verwerten, mit Defense-Freigabe und erneuter
+Prüfung nach jedem Verkauf. Dynamische Entfernungspfade ohne Engine-Quote
+bleiben ausgeschlossen. Historische Runner-Punkte aus Match e553 und
+fokussierte Engine-/Owner-Gegenfälle belegen diese begrenzten Fähigkeiten;
+ein allgemeiner Spielstärkegewinn ist damit nicht gemessen. Führend sind die
+[Runner-Verträge](../architecture/ai/runner-plan-contracts.md) und
+[Corp-Economy](../architecture/ai/corp-plan-contracts.md#6-corpeconomy).
+
 Corp-Scoring erhält seine Finanzierung gegenüber wirkungslosem Central-Ausbau und
 weiteren reinen Abschreckungslayern. Öffentliche Shell-/Host-Vorbereitung und der
 Engine-Basisklickhorizont beeinflussen den Remote-Schutz. Notfall-Scoreziele werden
