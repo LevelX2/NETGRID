@@ -335,6 +335,7 @@ function coverageInstallCandidates(
         sourceDefinitionId,
         roles,
         gap.requiredRole,
+        action?.payload?.selectedSubtype,
       )
     )
       return [];
@@ -431,7 +432,15 @@ export function runnerInstallDefinitionCoversCoverageGap(
   definitionId: string,
   roles: readonly string[],
   requiredRole: RunnerCoverageGapSignal["requiredRole"],
+  selectedSubtype?: unknown,
 ): boolean {
+  if (
+    selectedSubtype !== undefined &&
+    (typeof selectedSubtype !== "string" ||
+      `breaker_${selectedSubtype}` !== requiredRole)
+  ) {
+    return false;
+  }
   if (runnerRolesCoverCoverageGap(roles, requiredRole)) return true;
   const profile = AI_HINTS_BY_CARD.get(definitionId)?.breakerProfile;
   return (

@@ -46,6 +46,9 @@ export function runnerCoverageOwnedActionIds(
                 sourceDefinitionId,
                 rolesForDeckDoctrineCard(sourceDefinitionId),
                 gap.requiredRole,
+                input.legalActions.find(
+                  (action) => action.actionId === candidate.actionId,
+                )?.payload?.selectedSubtype,
               )
             );
           })

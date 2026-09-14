@@ -458,6 +458,14 @@ keine allgemeine Sentry-Antwort. Für die Beschaffung eines konfigurierbaren
 Breakers gelten seine kanonischen `coverageCandidates`; die installierte
 Instanz deckt weiterhin nur ihren tatsächlich gewählten Modus ab.
 
+Bei einer Installationsaction mit bereits festgelegtem `selectedSubtype`
+zählt für den Coverage-Step genau diese Variante. Der Owner prüft den Modus
+bereits beim Aufbau der Installationswerte und übernimmt ihn in die
+sichtbare Runpfadprojektion. Materialisierung und Actionzuordnung verwenden
+dieselbe Rollenprüfung. Mögliche Modi der Kartendefinition dürfen keinen
+abweichenden aktuellen Installationsmodus als erfüllte Antwort ausweisen.
+Eine erst später zulässige Moduswahl bleibt eine eigene gebundene Vorbereitung.
+
 Mögliche Phasen:
 
 ```text
