@@ -1007,6 +1007,17 @@ function runnerPostPassDerezAndEndRunAssessment(
       ? Math.max(0, targetDefinition.rezCost ?? 0)
       : 0;
   const paidCredits = legalActionCreditCost(action);
+  if (rezCost === 0) {
+    return {
+      admissible: false,
+      evidenceCodes: [
+        "runner_post_pass_derez_and_end_run_has_no_rez_denial_value",
+        `runner_post_pass_target:${targetIceId}`,
+        `runner_post_pass_target_rez_cost:${rezCost}`,
+        `runner_run_target:${run.attackedServerId}`,
+      ],
+    };
+  }
   return {
     admissible: true,
     value: 140 + Math.min(8, rezCost) * 40 - paidCredits * 60,

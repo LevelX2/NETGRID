@@ -163,12 +163,22 @@ export function uniqueCoverageGaps(
       continue;
     }
     // A coverage child may prepare only a route its parent would admit.
-    // Reuse the parent's information-probe policy on the prepared path;
-    // the setup cost is already paid at that future run-start boundary.
+    // Require current funding including preparation and reserve first. Then
+    // reuse the information-probe policy on the path after paying setup.
     const preparedEvaluation = {
       ...evaluation,
       pathCost: Math.max(0, evaluation.pathCost - preparation.credits),
     };
+    if (
+      !services.runnerRunTargetCanConvertNow(
+        input,
+        economy,
+        evaluation,
+        candidates,
+      )
+    ) {
+      continue;
+    }
     if (
       runPurposeForEvaluation(evaluation) === "information" &&
       !runnerInformationProbeCanUseQuotedPath(

@@ -588,6 +588,12 @@ eine kostenpflichtige Umstellung sie unbezahlbar macht. Erst danach vergleicht
 die Pfadquote die verbleibenden Kosten. Die konkrete Run- und Risikowahl bleibt
 beim gebundenen Planowner.
 
+Eine vorbereitende Modusänderung verlangt für jeden Runzweck die aktuelle
+Finanzierungszulassung des Parents einschließlich Umstellung und Runreserve.
+Eine Scorebedrohung allein erlaubt keine unfinanzierte Vorbereitung, die eine
+bereits nutzbare andere Route wieder schließt. Die vorhandenen exakt gebundenen
+terminalen Ausnahmen bleiben beim gemeinsamen Run-Finanzierungsdienst.
+
 Bei einer noch nicht installierten konfigurierbaren Breakerkarte berücksichtigt
 derselbe Coverage-Owner die typisierten `coverageCandidates` des kanonischen
 Hints. Sie sind mögliche zukünftige Modi und keine gleichzeitig aktive
@@ -1193,6 +1199,12 @@ Verantwortung:
 - Multiaccess-Aktivierungen;
 - Credit-, Trash- oder Folge-Run-Payoffs;
 - Ziel- und Choice-Auflösung innerhalb des begonnenen Runplans.
+
+Beim Deaktivieren eines gerade passierten
+ICE gegen Runende muss das sichtbare Ziel einen positiven erneuten Rezpreis
+haben, damit diese Option einen Rez-Verweigerungswert erhält. Ein kostenlos
+erneut aktivierbares ICE begründet keinen solchen Bonus zulasten des Zugriffs.
+Die Bewertung erfolgt im bestehenden Run-Window-Owner.
 
 Die Nutzenprüfung für Pump, Break und verbleibende Run-Effekte verwendet
 denselben aktuellen Zielnachweis. Ausschließlich auf das nächste Encounter
