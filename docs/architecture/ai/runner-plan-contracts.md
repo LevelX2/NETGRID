@@ -465,6 +465,10 @@ sichtbare Runpfadprojektion. Materialisierung und Actionzuordnung verwenden
 dieselbe Rollenprüfung. Mögliche Modi der Kartendefinition dürfen keinen
 abweichenden aktuellen Installationsmodus als erfüllte Antwort ausweisen.
 Eine erst später zulässige Moduswahl bleibt eine eigene gebundene Vorbereitung.
+Die Handentwicklung verwendet dieselbe Prüfung bei der Übergabe an den
+Coverage-Owner. Andere legale Installationsmodi bleiben beim zuständigen
+Entwicklungsplan klassifiziert. Dessen ausführbare Alternativen nehmen keine
+bereits dem Coverage-Owner zugeordneten Varianten wieder auf.
 
 Mögliche Phasen:
 
