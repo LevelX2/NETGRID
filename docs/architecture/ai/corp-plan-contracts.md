@@ -276,6 +276,11 @@ spätere Aktivierungserträge und aktuelle Runfenster tragen diesen Nachweis
 nicht. Der historische Fall Paarung 455 G3 D414/D459 benötigt zwei Credits
 und drei Klicks und stellt mit dem Score fünf Credits für eine Reserve von
 vier wieder her. Er ändert weder Planprioritäten noch Rez-Ownership.
+Nach Installation publiziert derselbe Score-Owner die vollständigen Kosten
+aller verbleibenden Advances plus Score aus der an Agenda, Server und Zustand
+gebundenen `scoreContinuationQuote`. Deren geringerer Vorhaltebedarf für den
+nächsten Corp-Zug ist keine aktuelle Konversionsquote. Der Nachweis bleibt
+damit auch in der Advance- und Score-Phase verfügbar.
 
 Dasselbe aktuelle Reihenfolgenurteil gilt für einen einzigen kostenlosen
 Score, dessen kanonischer Effekt ausschließlich einen eigenen Creditpool

@@ -56,6 +56,7 @@ import {
 import { corpCandidateIsAmbushInstall } from "../ambush/corp-ambush-plan-signals";
 import { corpExactCurrentBasicLiquidCreditCandidate } from "../economy/economy-domain-signals";
 import { corpScorePriorityClass } from "./corp-score-priority";
+import { corpInstalledScoreResourceCost } from "./score-reserve-restoration";
 import {
   corpFundedScoreProtectionNeed,
   corpScoreProtectionNeedIsSatisfied,
@@ -718,6 +719,11 @@ export function scoreProjectForCandidate(
     }
     const serverId = serverForInstalledCard(input, target);
     const projectId = corpScoreProjectId(target, serverId);
+    const completeScoreCost = corpInstalledScoreResourceCost(
+      input,
+      installedCard,
+      serverId,
+    );
     const sameTurnCloseout =
       candidate.semanticActionType === "score.agenda" ||
       corpScorelineActionCanCloseThisTurn(
@@ -852,6 +858,12 @@ export function scoreProjectForCandidate(
             ? "score_agenda"
             : "advance_agenda",
         sameTurnCloseout,
+        ...(sameTurnCloseout && completeScoreCost
+          ? {
+              sameTurnConversionProof: "engine_quoted_path" as const,
+              sameTurnConversionResourceCost: completeScoreCost,
+            }
+          : {}),
         deadlinePressure,
         ...(preventsTerminalSteal ? { preventsTerminalSteal: true } : {}),
         ...(lastViableDeckoutMatchpointWindow

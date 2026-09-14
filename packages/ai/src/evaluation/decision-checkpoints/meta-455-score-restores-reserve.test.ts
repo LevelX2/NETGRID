@@ -128,11 +128,94 @@ it.each([
   if (kind === "blocked") project.feasible = false;
   if (kind === "pending_funding") project.fundingGap = 1;
   if (kind === "conditional_payout")
-    project.agendaDefinitionId = "onr_v1_195_corporate-war";
+    project.agendaDefinitionId = "onr_v1_196_corporate-war";
   if (kind === "ability_income")
     project.agendaDefinitionId = "onr_v1_206_marine-arcology";
   if (kind === "runner_window") input.playerView.activeSide = "runner";
   expect(corpScoreRestoresRezReserveBeforeRunnerTurn(input, [project], 4)).toBe(
     false,
   );
+});
+
+import installed from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-455-fix8-g1-d415.json";
+import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
+it("retains the complete cost certificate after installing the score target", () => {
+  const input = structuredClone(
+    installed.input,
+  ) as unknown as AiDecisionInputWithDeckCapabilities;
+  const runtime = structuredClone(
+    installed.runtime,
+  ) as unknown as AiRuntimeCheckpointV1;
+  resetResidentPlanPortfolioMemory();
+  restoreAiRuntimeCheckpoint(
+    input,
+    input.ownDeckSnapshot!.deckSnapshotId,
+    runtime,
+  );
+  restoreResidentPlanPortfolioMemorySnapshot(
+    input,
+    runtime.residentPlanPortfolio!,
+  );
+  const d = chooseAiAction(input),
+    a = input.legalActions.find((a) => a.actionId === d.actionId)!;
+  expect(a.type).toBe("advance_card");
+  expect(a.source).toBe("corp_onr_v1_203_hostile-takeover_1");
+  const parent =
+    "plan:corp.score_agenda:agenda%3Acorp_onr_v1_203_hostile-takeover_1%3Aremote_1";
+  expect(d.decisionDebug?.planFirstDecision?.leafExecutorInstanceId).toBe(
+    parent,
+  );
+  expect(d.decisionDebug?.planFirstDecision?.route).toMatchObject({
+    actionId: a.actionId,
+    stateVersion: 414,
+  });
+  expect(
+    residentPlanPortfolioSnapshot(input)!.instances.find(
+      (p) => p.instanceId === parent,
+    )!.moduleState,
+  ).toMatchObject({
+    signal: {
+      sameTurnConversionResourceCost: {
+        stateVersion: 414,
+        credits: 2,
+        clicks: 2,
+      },
+    },
+  });
+});
+
+import { corpInstalledScoreResourceCost } from "../../corp/score/score-reserve-restoration";
+import { corpConditionalScoreCreditProfile } from "../../runtime/corp-canonical-card-facts";
+it("uses real conditional-card semantics in the payout contrast", () => {
+  expect(
+    corpConditionalScoreCreditProfile("onr_v1_196_corporate-war"),
+  ).toMatchObject({ threshold: 12 });
+});
+it.each([
+  "current",
+  "stale",
+  "wrong_server",
+  "wrong_agenda",
+  "incomplete",
+  "missing",
+  "negative",
+])("binds installed score costs to the exact Engine quote (%s)", (kind) => {
+  const input = structuredClone(
+    installed.input,
+  ) as unknown as AiDecisionInputWithDeckCapabilities;
+  const agenda = input.playerView.servers
+    .find((s) => s.id === "remote_1")!
+    .root.find((c) => c.instanceId === "corp_onr_v1_203_hostile-takeover_1")!;
+  const q = agenda.scoreContinuationQuote!;
+  expect(q.creditsRequiredBeforeNextCorpTurn).toBe(1);
+  if (kind === "stale") q.expiresAtStateVersion--;
+  if (kind === "wrong_server") q.serverId = "rd";
+  if (kind === "wrong_agenda") q.agendaCardId = "another_agenda";
+  if (kind === "incomplete") q.complete = false;
+  if (kind === "missing") delete agenda.scoreContinuationQuote;
+  if (kind === "negative") q.advancementCreditCostPerCounter = -1;
+  const cost = corpInstalledScoreResourceCost(input, agenda, "remote_1");
+  if (kind === "current")
+    expect(cost).toEqual({ stateVersion: 414, credits: 2, clicks: 2 });
+  else expect(cost).toBeUndefined();
 });
