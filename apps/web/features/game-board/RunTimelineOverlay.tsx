@@ -149,6 +149,7 @@ export function RunTimelineOverlay({
   };
 
   const currentStep = currentRunTimelineStep(view, legalActions);
+  if (!currentStep) return null;
   const ambienceClass = interactionAmbienceClassName(
     runWindowInteractionAmbience(view, runActions, currentStep),
   );
