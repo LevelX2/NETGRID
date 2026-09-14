@@ -208,6 +208,23 @@ export function corpScoredAgendaFreeRezProfile(
   };
 }
 
+/** Only a direct, unconditional liquid payout; no pool, threshold or choice. */
+export function corpUnconditionalScoreCreditGain(
+  definitionId: string | undefined,
+): number | undefined {
+  const card = planningCard(definitionId);
+  const effect = card?.planning.engine.scoredAgenda;
+  if (
+    card?.planning.side !== "corp" ||
+    card.planning.cardType !== "agenda" ||
+    effect?.kind !== "gain_credits_on_score" ||
+    effect.recipient !== "corp" ||
+    !positiveSafeInteger(effect.amount)
+  )
+    return undefined;
+  return effect.amount;
+}
+
 export function corpConditionalScoreCreditProfile(
   definitionId: string | undefined,
 ): CorpConditionalScoreCreditProfile | undefined {

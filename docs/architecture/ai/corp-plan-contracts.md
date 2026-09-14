@@ -264,6 +264,19 @@ weitere installierte Agenden oder aktive Einkommenseffekte auf dem Board.
 Eine zusätzliche freie Aktion, unzureichende Finanzierung, eine erreichbare
 Bonusschwelle oder veraltete Kosten verhindern diesen Variantenvergleich.
 
+Eine vollständig aktuell finanzierte gewöhnliche Scorefolge kann die liquide
+Rezreserve vor dem nächsten Runner-Fenster wiederherstellen. Der Score-Owner
+weist dies in `score-reserve-restoration.ts` mit seiner aktuellen vollständigen
+Engine-Kostenquote und einer kanonischen unbedingten Score-Auszahlung nach.
+Defense stellt dann nur die zusätzliche Finanzierung des aktuellen
+Rezreservebedarfs zurück. Die Auszahlung zählt nicht als Geld für die noch
+offenen Scorekosten. Jeder reale Schritt revalidiert Kosten, LegalAction und
+Reserve; fehlende Klicks, Fundingbedarf, abgelaufene Quotes, bedingte Erträge,
+spätere Aktivierungserträge und aktuelle Runfenster tragen diesen Nachweis
+nicht. Der historische Fall Paarung 455 G3 D414/D459 benötigt zwei Credits
+und drei Klicks und stellt mit dem Score fünf Credits für eine Reserve von
+vier wieder her. Er ändert weder Planprioritäten noch Rez-Ownership.
+
 Dasselbe aktuelle Reihenfolgenurteil gilt für einen einzigen kostenlosen
 Score, dessen kanonischer Effekt ausschließlich einen eigenen Creditpool
 erzeugt und eine sonst kostenfreie Auszahlung pro Klick von mehr als einem
