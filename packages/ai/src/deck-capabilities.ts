@@ -622,8 +622,11 @@ function breakerCapabilityFromRecord(
 function breakerCoverageForRecord(
   record: CardCapabilityRecord,
 ): BreakerCoverageKind[] {
+  const profile = getStructuredBreakerProfileForCard(record.cardId);
   const hintCoverage =
-    getStructuredBreakerProfileForCard(record.cardId)?.coverage ?? [];
+    (profile?.configurableCoverage
+      ? profile.coverageCandidates
+      : profile?.coverage) ?? [];
   const coverage = new Set<BreakerCoverageKind>(
     hintCoverage
       .map(mapHintCoverage)
@@ -631,6 +634,14 @@ function breakerCoverageForRecord(
   );
   const haystack = normalizedRecordText(record);
   const tokens = deckCapabilityTextTokens(haystack);
+  if (profile) {
+    // Keep the inventory's descriptive marker, but never infer another ICE
+    // category from a rider when the canonical profile already defines it.
+    if (deckCapabilityTokensLookLikeBreakSubroutine(tokens)) {
+      coverage.add(coverage.size > 0 ? "subtype_limited" : "special");
+    }
+    return [...coverage].sort();
+  }
   for (const role of [...record.roles, ...record.planRoles]) {
     if (role === "breaker_fracter") coverage.add("wall");
     if (role === "breaker_decoder") coverage.add("code_gate");

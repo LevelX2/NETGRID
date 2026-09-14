@@ -1,4 +1,5 @@
 import type { VisibleCard } from "@netgrid/shared";
+import { getStructuredBreakerProfileForCard } from "../breaker-ontology-consumer";
 import type { RequiredCapabilityKind } from "./tactical-plan-types";
 
 const BREAKER_SUBTYPE_TOKENS = new Set([
@@ -30,6 +31,17 @@ export function cardProvidesBreakerCoverage(
     requiredCoverage === "breaker_universal"
   ) {
     return true;
+  }
+  const profile = getStructuredBreakerProfileForCard(card.definitionId);
+  if (profile) {
+    // Conditional riders in the rules text cannot widen canonical coverage.
+    const coverage = profile.configurableCoverage
+      ? profile.coverageCandidates
+      : profile.coverage;
+    return (coverage ?? []).some(
+      (coverage) =>
+        coverage === "universal" || `breaker_${coverage}` === requiredCoverage,
+    );
   }
   const tokens = cardCoverageTokens(card);
   if (cardLooksLikeUniversalBreaker(tokens)) return true;

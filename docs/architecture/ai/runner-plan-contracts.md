@@ -451,6 +451,13 @@ Diese Einordnung wirkt vor der Installationswahl und Opferbindung; ein bereits
 ausgewählter `PlanExecutionOrigin` wird im folgenden Choice-Fenster weiterhin
 unverändert ausgeführt.
 
+Deckinventar und Handantworten übernehmen die ICE-Kategorien aus dem
+kanonischen Breakerprofil. Bedingte Zusatzeffekte im Regeltext erweitern diese
+Abdeckung nicht: Ein Folgeeffekt nach einer vollständig gebrochenen Wall ist
+keine allgemeine Sentry-Antwort. Für die Beschaffung eines konfigurierbaren
+Breakers gelten seine kanonischen `coverageCandidates`; die installierte
+Instanz deckt weiterhin nur ihren tatsächlich gewählten Modus ab.
+
 Mögliche Phasen:
 
 ```text
