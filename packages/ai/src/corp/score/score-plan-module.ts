@@ -140,8 +140,10 @@ function scoreAssessmentValue(
   if (signal.terminalScore) return 1_000 + agendaPointValue + routeValue;
   if (signal.preventsTerminalSteal)
     return 2_000 + agendaPointValue + routeValue;
-  if (signal.deadlinePressure) return 700 + agendaPointValue + routeValue;
-  if (signal.sameTurnCloseout) return 500 + agendaPointValue + routeValue;
+  // Exposure makes progress urgent, but cannot replace a completion that is
+  // still executable before the Runner's next turn.
+  if (signal.sameTurnCloseout) return 700 + agendaPointValue + routeValue;
+  if (signal.deadlinePressure) return 500 + agendaPointValue + routeValue;
   return 100 + agendaPointValue + routeValue;
 }
 

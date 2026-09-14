@@ -47,6 +47,14 @@ aus dem bestehenden Engine-gequoteten Pfad. Projektvergleich und
 Zusammenführung lesen diesen Nachweis und die gebundenen Routenfakten,
 niemals Evidence-Präfixe oder die Gleichheit von Erklärungstexten.
 
+Innerhalb derselben Prioritätsklasse bewertet der Score-Owner einen aktuell
+ausführbaren Abschluss höher als bloßes Advancement unter Expositionsdruck.
+Die Bedrohung einer zweiten Agenda rechtfertigt keine Verteilung der letzten
+Klicks, durch die beide Abschlüsse ausfallen. Terminale Verlustvermeidung und
+terminaler eigener Score behalten ihre gesonderten Prioritätsklassen; die
+aktuelle Ressourcen- und Routenzulassung wird weiterhin vor jeder Aktion
+revalidiert.
+
 Das Fehlen einer Agenda in HQ erzeugt keinen generischen Score-Parent und
 keinen Auftrag, nach unbekanntem Agendamaterial zu ziehen. Der Score-Owner
 beginnt mit einer konkret verfügbaren Agenda oder einer aktuell gequoteten
