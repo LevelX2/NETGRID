@@ -44,7 +44,8 @@ function visibleRunnerVirusCounters(input: AiDecisionInput): number {
       const activeThreshold =
         display.counterType === "highlighter" ||
         display.counterType === "garbage" ||
-        display.counterType === "cascade"
+        display.counterType === "cascade" ||
+        display.counterType === "crumble"
           ? 2
           : 1;
       return amount >= activeThreshold ? sum + amount : sum;

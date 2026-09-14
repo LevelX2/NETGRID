@@ -4,6 +4,7 @@ import type { ActionSemanticCandidate } from "../../action-semantic-candidate-ty
 import { rolesForDeckDoctrineCard } from "../../deck-doctrine-card-roles";
 import { runnerInstallDefinitionCoversCoverageGap } from "./coverage-plan-module";
 import { type RunnerCoverageGapSignal } from "../../plans/runner-coverage-contracts";
+import { runnerAffordableCoverageSearchActionIds } from "./coverage-search-alternatives";
 export function runnerCoverageOwnedActionIds(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
@@ -25,6 +26,7 @@ export function runnerCoverageOwnedActionIds(
       }
       return [
         ...preparationActionIds,
+        ...runnerAffordableCoverageSearchActionIds(input, candidates, gap),
         ...candidates
           .filter((candidate) => {
             if (candidate.semanticActionType !== "install.card") return false;

@@ -18,6 +18,7 @@ import {
   runnerPlanDomain,
 } from "../../plans/runner-plan-module-support";
 import type { CoverageState } from "./coverage-types";
+import { runnerAffordableCoverageSearchActionIds } from "./coverage-search-alternatives";
 export function runnerCoveragePlanHandDisposition(
   input: AiDecisionInput,
   card: VisibleCard,
@@ -92,7 +93,7 @@ export function createRunnerCoverageModule(
           preparations.length > 0 ||
           installs.length > 0 ||
           (phase === "fund_answer" && funding.length > 0) ||
-          (!gap.answerInHand && draws.length > 0);
+          draws.length > 0;
         return proposal({
           moduleId: "runner.rig_and_coverage",
           dedupeKey: gap.gapId,
@@ -245,13 +246,19 @@ function coveragePhase(
       ? "prepare_coverage"
       : installs.length > 0
         ? "install_answer"
-        : gap.answerInHand && (gap.fundingGap ?? 0) > 0
-          ? "fund_answer"
-          : gap.directSearchActionIds.length > 0
-            ? "search_answer"
-            : gap.searchEngineSetupActionIds.length > 0
-              ? "setup_search_engine"
-              : "draw_for_answer";
+        : runnerAffordableCoverageSearchActionIds(
+              context.input,
+              context.actionCandidates,
+              gap,
+            ).length > 0
+          ? "search_answer"
+          : gap.answerInHand && (gap.fundingGap ?? 0) > 0
+            ? "fund_answer"
+            : gap.directSearchActionIds.length > 0
+              ? "search_answer"
+              : gap.searchEngineSetupActionIds.length > 0
+                ? "setup_search_engine"
+                : "draw_for_answer";
 }
 
 export function runnerCoverageCurrentPhase(params: {
@@ -439,12 +446,21 @@ function coverageDrawCandidates(
   context: PlanSchedulerContext,
   gap: RunnerCoverageGapSignal,
 ): PlanMaterialization["candidates"] {
-  if (gap.answerInHand) return [];
+  const affordableAlternatives = new Set(
+    runnerAffordableCoverageSearchActionIds(
+      context.input,
+      context.actionCandidates,
+      gap,
+    ),
+  );
+  if (gap.answerInHand && affordableAlternatives.size === 0) return [];
   const directSearchIds = new Set(gap.directSearchActionIds);
   const searchSetupIds = new Set(gap.searchEngineSetupActionIds);
   const drawForAnswerIds = new Set(gap.drawForAnswerActionIds);
   return context.actionCandidates
     .filter((candidate) => {
+      if (gap.answerInHand && !affordableAlternatives.has(candidate.actionId))
+        return false;
       const isCoverageRoute =
         directSearchIds.has(candidate.actionId) ||
         searchSetupIds.has(candidate.actionId) ||

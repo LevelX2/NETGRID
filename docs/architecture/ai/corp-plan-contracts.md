@@ -1084,6 +1084,12 @@ die Registry registriert die Factory. Gemeinsame taktische Planstandards liegen
 in `plans/corp-tactical-module-support.ts`. Sichtbare zentrale Druck- und
 Pflichtzieh-Fakten bleiben gemeinsam nutzbare Eingaben der Purge-Bewertung.
 
+Counter unter ihrer aktiven Wirkungsschwelle erhöhen weder den sichtbaren
+Druck noch den materiellen Purge-Wert. Crumble benötigt wie Garbage,
+Highlighter und Cascade mindestens zwei Counter; ein einzelner Vienna-Counter
+ist bereits aktiv. Insbesondere darf Crumble mit einem Counter neben Vienna
+mit einem Counter keine positive Purge-Zulassung erzeugen.
+
 **Klasse:** `urgent_response` oder `bounded_sequence`
 **Rolle:** Vordergrund/Urgent Response
 **Status:** registrierter produktiver Owner; Fähigkeitsgrenzen siehe Einstieg.

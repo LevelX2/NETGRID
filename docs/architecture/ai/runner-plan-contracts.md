@@ -384,6 +384,15 @@ Dispositionen und exakte Fortsetzungsbindungen (`coverage-bindings.ts`).
 `coverage-plan-module.ts` besitzt die Planphasen und Materialisierung.
 Suchbedarf und Upgrade-Ökonomie liegen ebenfalls in diesem Verzeichnis.
 
+Eine unbezahlbare Antwort auf der Hand sperrt keinen bereits exakt gebundenen
+günstigeren Stack-Suchweg. `coverage-search-alternatives.ts` prüft bekannte
+Such- und Installationskosten, freie Handkapazität, bekannte eigene
+Stack-Verfügbarkeit und freie MU. Nur die vollständig finanzierte Beschaffung
+erhält die Suchphase und Action-Ownership; eine direkt bezahlbare Handantwort
+und eine bereits zertifizierte Konversion im selben Zug behalten Vorrang.
+Die gestufte Suche verspricht keinen sofortigen Run. Nach der gebundenen
+Such-Choice wird die tatsächliche Installation neu materialisiert.
+
 Ein Zahlungsfenster erhält die exakt ausgewählte Coverage-Aktion auch in
 `draw_for_answer`. Der bisherige Executor muss die Originalaktion in
 `drawForAnswerActionIds` führen; Phase und benötigte Breaker-Rolle bleiben
