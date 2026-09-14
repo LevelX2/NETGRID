@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION,
   CORP_COUNTER_BANK_PREPARATION_QUOTE_SCHEMA_VERSION,
   type AiDecisionInput,
   type LegalAction,
@@ -1020,6 +1021,24 @@ function corpInput(params: {
   root?: VisibleCard[];
   actions: LegalAction[];
 }): AiDecisionInput {
+  for (const action of params.actions) {
+    const agenda = params.hq.find(
+      (c) => c.instanceId === action.source && c.type === "agenda",
+    );
+    if (action.type !== "install_card" || !agenda) continue;
+    action.payload = {
+      ...action.payload,
+      cardId: agenda.instanceId,
+      placement: "root",
+      agendaInstallScoreHorizonQuoteSchemaVersion:
+        CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION,
+      agendaInstallScoreHorizonQuoteCardId: agenda.instanceId,
+      agendaInstallScoreHorizonQuoteTargetServerId: action.payload?.serverId,
+      agendaInstallScoreHorizonQuoteExpiresAtStateVersion: 1,
+      agendaInstallScoreHorizonQuoteAdvancementRequirement:
+        agenda.advancementRequirement,
+    };
+  }
   return {
     side: "corp",
     playerView: {
@@ -1149,7 +1168,7 @@ function action(
     label: actionId,
     costs: type === "score_agenda" ? [] : [{ clicks: 1, credits: 0 }],
     payload: { cardId, ...payload },
-    stateVersion: 1,
+    expiresAtStateVersion: 1,
     timingPoint: "corp_action.main",
   } as unknown as LegalAction;
 }

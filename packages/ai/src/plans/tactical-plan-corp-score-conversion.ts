@@ -8,6 +8,7 @@ import {
 import { createAiHintsByCard } from "../ai-hints";
 import { actionCapacityProjectionForLegalAction } from "../actions/action-capacity-projection";
 import { PlanResolutionFailure } from "./plan-resolution-failure";
+import { corpAgendaInstallRequirement } from "./corp-agenda-install-requirement";
 import {
   searchActionCapacityRoutes,
   type ActionCapacityActionCandidate,
@@ -140,7 +141,14 @@ function conversionPathForTarget(
   fundingCandidates: readonly ActionSemanticCandidate[],
   recoveryPreparation?: CorpScoreRecoveryPreparation,
 ): CandidatePath | undefined {
-  const requirement = advancementRequirement(target.card);
+  const requirement = target.installAction
+    ? corpAgendaInstallRequirement(
+        input.playerView,
+        target.installAction,
+        target.card.instanceId,
+        target.serverId,
+      )
+    : advancementRequirement(target.card);
   if (requirement === undefined) return undefined;
   const initialCounters = Math.max(0, target.card.advancementCounters ?? 0);
   const desiredTargets = [

@@ -62,6 +62,14 @@ Die Bewertung verwendet denselben Horizont nach der ersten Aktion wie bei
 einem normalen Advance; ein vorgeschalteter Economy-Schritt behält seinen
 vollständigen danach zu finanzierenden Scorebedarf.
 
+Bei einer Agenda aus HQ stammt die benötigte Advancement-Zahl aus der
+aktuellen Engine-Installationsquote für genau diese Agenda und diesen
+Zielserver. Der sichtbare HQ-Wert enthält keinen lokalen Regionsrabatt.
+Konversionssuche und direkte Scoreline-Prüfung lesen dieselbe Quote; fehlt
+ihre Karten-, Server- oder StateVersion-Bindung, scheitert der Pfad mit einer
+strukturierten Diagnose. Ein unvollständiger Folgeturn-Horizont entwertet
+nicht die separat gequotete Schwierigkeit.
+
 Das Fehlen einer Agenda in HQ erzeugt keinen generischen Score-Parent und
 keinen Auftrag, nach unbekanntem Agendamaterial zu ziehen. Der Score-Owner
 beginnt mit einer konkret verfügbaren Agenda oder einer aktuell gequoteten

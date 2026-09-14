@@ -7,6 +7,7 @@ import type {
 } from "@netgrid/shared";
 
 import { RUNTIME_CARDS } from "../ai-hints";
+import { corpAgendaInstallRequirement } from "../plans/corp-agenda-install-requirement";
 import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
 
 export type CorpScorelineDeadline =
@@ -206,7 +207,15 @@ function actionCanCloseScorelineThisTurn(
   if (action.type === "score_agenda") return true;
   const agenda = visibleCardForAction(playerView, action);
   if (agenda?.type !== "agenda") return false;
-  const requirement = optionalNonNegativeNumber(agenda.advancementRequirement);
+  const requirement =
+    action.type === "install_card"
+      ? corpAgendaInstallRequirement(
+          playerView,
+          action,
+          agenda.instanceId,
+          String(action.payload?.serverId),
+        )
+      : optionalNonNegativeNumber(agenda.advancementRequirement);
   if (requirement === undefined) return false;
   const counters = nonNegativeNumber(agenda.advancementCounters);
   const clicks = nonNegativeNumber(playerView.own.clicks);
