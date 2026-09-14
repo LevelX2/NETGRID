@@ -588,11 +588,13 @@ eine kostenpflichtige Umstellung sie unbezahlbar macht. Erst danach vergleicht
 die Pfadquote die verbleibenden Kosten. Die konkrete Run- und Risikowahl bleibt
 beim gebundenen Planowner.
 
-Eine vorbereitende Modusänderung verlangt für jeden Runzweck die aktuelle
-Finanzierungszulassung des Parents einschließlich Umstellung und Runreserve.
+Eine vorbereitende Modusänderung darf für keinen Runzweck eine aktuell
+blockierte Runreserve umgehen; Umstellungskosten sind dabei eingerechnet.
 Eine Scorebedrohung allein erlaubt keine unfinanzierte Vorbereitung, die eine
 bereits nutzbare andere Route wieder schließt. Die vorhandenen exakt gebundenen
 terminalen Ausnahmen bleiben beim gemeinsamen Run-Finanzierungsdienst.
+Eine allgemeine Economy-Untergrenze entzieht einem bereits zugelassenen
+Access-Parent hingegen nicht seine nötige Modusvorbereitung.
 
 Bei einer noch nicht installierten konfigurierbaren Breakerkarte berücksichtigt
 derselbe Coverage-Owner die typisierten `coverageCandidates` des kanonischen

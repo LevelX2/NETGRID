@@ -1,6 +1,7 @@
 import { expect, it } from "vitest";
 import derezCheckpoint from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-455-r2-g3-d148.json";
 import preparationCheckpoint from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-455-r2-g13-d104.json";
+import admittedPreparationCheckpoint from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-455-r2-g13-d102.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
@@ -24,6 +25,27 @@ function decide(checkpoint: unknown, credits?: number) {
   );
   return { input, decision: chooseAiAction(input) };
 }
+
+it("retains the preceding admitted R&D preparation before the reserve-blocked remote can interfere", () => {
+  const { input, decision } = decide(admittedPreparationCheckpoint);
+  const preparation = input.legalActions.find(
+    (a) =>
+      a.payload?.runnerAbility === "change_icebreaker_subtype" &&
+      a.payload.selectedSubtype === "wall",
+  )!;
+  expect(input.playerView.own.credits).toBe(3);
+  expect(decision.actionId).toBe(preparation.actionId);
+  expect(decision.fallbackUsed).toBe(false);
+  expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
+    rootPlanInstanceId: "plan:runner.pressure_central:central%3Ard",
+    route: { actionId: preparation.actionId, stateVersion: 101 },
+  });
+  expect(
+    decision.decisionDebug?.planFirstDecision?.leafExecutorInstanceId,
+  ).toContain(
+    "plan:runner.rig_and_coverage:coverage%3Abreaker_wall%3Aprepare-run",
+  );
+});
 
 it("continues the actual paid HQ access instead of derezzing a zero-rez-cost passed ICE", () => {
   const { input, decision } = decide(derezCheckpoint);
