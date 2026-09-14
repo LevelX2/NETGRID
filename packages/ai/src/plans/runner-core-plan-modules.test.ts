@@ -2715,7 +2715,11 @@ function context(
         actionId: value.actionId,
         type: value.actionType,
       })),
-      playerView: { stateVersion: 10, timingPoint: "runner_action.main" },
+      playerView: {
+        stateVersion: 10,
+        timingPoint: "runner_action.main",
+        own: { credits: 0, clicks: 0, gripOrHq: [], maxHandSize: 5 },
+      },
     } as unknown as AiDecisionInput,
     actionCandidates,
     turnKey: "runner:1",

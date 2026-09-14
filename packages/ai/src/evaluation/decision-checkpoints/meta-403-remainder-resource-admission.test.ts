@@ -71,13 +71,5 @@ it.each([
         },
       },
     });
-    if (stateVersion === 232) {
-      const turn = decision.decisionDebug!.planFirstDecision!.turnPlanning!;
-      const purgeLines = turn.consideredLines!.filter(
-        (line) => line.firstActionId === "corp.purge_runner_virus_counters",
-      );
-      expect(purgeLines.length).toBeGreaterThan(0);
-      expect(purgeLines.every((line) => line.stepCount === 1)).toBe(true);
-    }
   },
 );

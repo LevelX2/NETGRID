@@ -7,6 +7,7 @@ import {
   corpScorelineAllowsMultiTurnDevelopment,
   corpScorelineFeasibilityForDecisionInput,
 } from "../../runtime/corp-scoreline-feasibility";
+import { bindSyntheticAgendaInstallQuotes } from "../../semantic-ai-runtime-cutover.test-support";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 
@@ -87,6 +88,7 @@ describe("baseline Seed 02 shared scoreline feasibility checkpoints", () => {
     input.playerView.own.gripOrHq.push(agenda);
     input.legalActions.push(install);
     input.playerView.legalActions.push(install);
+    bindSyntheticAgendaInstallQuotes(input);
 
     expect(corpScorelineFeasibilityForDecisionInput(input)).toMatchObject({
       feasible: true,
@@ -127,6 +129,6 @@ function syntheticAgendaInstall(agenda: VisibleCard): LegalAction {
     targetRequirements: [],
     visibility: "private_to_actor",
     expiresAtStateVersion: 413,
-    payload: { serverId: "remote_1", placement: "root" },
+    payload: { cardId: agenda.instanceId, serverId: "remote_1", placement: "root" },
   } as LegalAction;
 }

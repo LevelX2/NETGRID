@@ -38,6 +38,7 @@ import {
 import {
   attachOwnDeckSnapshot,
   aiInput,
+  bindSyntheticAgendaInstallQuotes,
   legalAction,
   safeRuntimeRunTarget,
   server,
@@ -5054,6 +5055,7 @@ describe("authoritative plan-first live runtime", () => {
           encounterContinue: true,
           encounterWillEndRun: true,
           unbrokenSubroutineCount: 1,
+          encounterSubroutineIds: "outer-code-gate-fixture-subroutine",
         },
       },
     );
@@ -9571,6 +9573,8 @@ describe("authoritative plan-first live runtime", () => {
       visibleCard("agenda", "corp", "agenda", {
         definitionId: "onr_v1_201_executive-extraction",
         title: "Executive Extraction",
+        advancementRequirement: 3,
+        agendaPoints: 2,
       }),
       ...corpOverflowFillers(3),
     ];
@@ -10850,6 +10854,7 @@ describe("authoritative plan-first live runtime", () => {
       action.expiresAtStateVersion = 3;
     }
     nextTurn.playerView.legalActions = nextTurn.legalActions;
+    bindSyntheticAgendaInstallQuotes(nextTurn, { refreshExisting: true });
     expect(context.chooseSemanticRuntimeAction(nextTurn, {})).toMatchObject({
       actionId: "credit",
       reasonCode: "plan_first.corp.economy",
@@ -10939,6 +10944,8 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.own.gripOrHq = [
       visibleCard("agenda", "corp", "agenda", {
         definitionId: "onr_v1_189_artificial-security-directors",
+        advancementRequirement: 3,
+        agendaPoints: 1,
       }),
       ...Array.from({ length: 5 }, (_, index) =>
         visibleCard(`operation-${index}`, "corp", "operation", {
@@ -11491,6 +11498,7 @@ describe("authoritative plan-first live runtime", () => {
       }
     }
     nextTurn.playerView.legalActions = nextTurn.legalActions;
+    bindSyntheticAgendaInstallQuotes(nextTurn, { refreshExisting: true });
     expect(context.chooseSemanticRuntimeAction(nextTurn, {})).toMatchObject({
       actionId: "draw",
       reasonCode: "plan_first.corp.defend_servers",
@@ -14000,6 +14008,7 @@ describe("authoritative plan-first live runtime", () => {
     protectedAgendaAction.expiresAtStateVersion = 2;
     protectedInput.legalActions = [protectedAgendaAction];
     protectedInput.playerView.legalActions = protectedInput.legalActions;
+    bindSyntheticAgendaInstallQuotes(protectedInput, { refreshExisting: true });
     expect(
       liveContextWithTurnPlanQuote(protectedInput).chooseSemanticRuntimeAction(
         protectedInput,
@@ -14885,6 +14894,7 @@ describe("authoritative plan-first live runtime", () => {
     unprotectedInput.playerView.own.credits = 0;
     for (const action of unprotectedInput.legalActions)
       action.expiresAtStateVersion = 2;
+    bindSyntheticAgendaInstallQuotes(unprotectedInput, { refreshExisting: true });
     unprotectedInput.playerView.servers.find(
       (candidate) => candidate.id === "remote_1",
     )!.ice = [
@@ -14918,6 +14928,7 @@ describe("authoritative plan-first live runtime", () => {
     unknownInput.playerView.own.credits = 0;
     for (const action of unknownInput.legalActions)
       action.expiresAtStateVersion = 3;
+    bindSyntheticAgendaInstallQuotes(unknownInput, { refreshExisting: true });
     const unknownDataWall = unknownInput.playerView.servers.find(
       (candidate) => candidate.id === "remote_1",
     )!.ice[1]!;
@@ -15090,6 +15101,7 @@ describe("authoritative plan-first live runtime", () => {
       action.expiresAtStateVersion = 2;
     }
     revalidated.playerView.legalActions = revalidated.legalActions;
+    bindSyntheticAgendaInstallQuotes(revalidated, { refreshExisting: true });
     resetResidentPlanPortfolioMemory();
     expect(
       liveContext().chooseSemanticRuntimeAction(revalidated, {}),
@@ -15513,6 +15525,7 @@ describe("authoritative plan-first live runtime", () => {
     agendaNewAtState2.expiresAtStateVersion = 2;
     protectedInput.legalActions = [agendaNewAtState2, agendaExistingAtState2];
     protectedInput.playerView.legalActions = protectedInput.legalActions;
+    bindSyntheticAgendaInstallQuotes(protectedInput, { refreshExisting: true });
     resetResidentPlanPortfolioMemory();
     expect(
       liveContext().chooseSemanticRuntimeAction(protectedInput, {}),
@@ -16157,6 +16170,8 @@ describe("authoritative plan-first live runtime", () => {
     const agenda = visibleCard("agenda", "corp", "agenda", {
       definitionId: "onr_v1_201_executive-extraction",
       title: "Executive Extraction",
+      advancementRequirement: 3,
+      agendaPoints: 2,
     });
     const chicago = visibleCard("chicago", "corp", "asset", {
       definitionId: "onr_v1_312_chicago-branch",
@@ -31027,7 +31042,18 @@ function liveContext(overrides: Record<string, unknown> = {}) {
     practicalMicroRuntimeCandidates: () => [],
     ...overrides,
   } as unknown as SemanticRuntimeDecisionContextDependencies;
-  return createSemanticRuntimeDecisionContext(dependencies);
+  const context = createSemanticRuntimeDecisionContext(dependencies);
+  const chooseSemanticRuntimeAction = context.chooseSemanticRuntimeAction;
+  return {
+    ...context,
+    chooseSemanticRuntimeAction: (
+      input: AiDecisionInput,
+      options: Parameters<typeof chooseSemanticRuntimeAction>[1],
+    ) => {
+      bindSyntheticAgendaInstallQuotes(input);
+      return chooseSemanticRuntimeAction.call(context, input, options);
+    },
+  };
 }
 
 function liveContextWithTurnPlanQuote(input: AiDecisionInput) {

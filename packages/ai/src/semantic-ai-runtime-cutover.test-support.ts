@@ -4,6 +4,7 @@ import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import type { SemanticRuntimeChoice } from "./runtime/semantic-runtime-types";
 import {
   CURRENT_RULES_BASELINE,
+  CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION,
   type AiDecisionInput,
   type AiDifficulty,
   type LegalAction,
@@ -139,6 +140,102 @@ export function attachOwnDeckSnapshot(
   ownDeckSnapshot: AiDeckStrategyDeckSnapshot,
 ): void {
   Object.assign(input, { ownDeckSnapshot });
+}
+
+/**
+ * Bind the current synthetic Corp agenda-install actions to the same
+ * destination quote contract as an Engine PlayerView. The helper is only for
+ * hand-built test inputs. By default it leaves existing quotes untouched;
+ * state-transition fixtures may explicitly request a fresh quote.
+ */
+export function bindSyntheticAgendaInstallQuotes(
+  input: AiDecisionInput,
+  options: { refreshExisting?: boolean } = {},
+): void {
+  if (input.side !== "corp") return;
+
+  const cards = [
+    ...input.playerView.own.gripOrHq,
+    ...input.playerView.own.scoreArea,
+    ...input.playerView.servers.flatMap((server) => [
+      ...server.root,
+      ...server.ice,
+    ]),
+  ];
+  const cardsById = new Map(cards.map((card) => [card.instanceId, card]));
+  const stateVersion = input.playerView.stateVersion;
+
+  for (const action of input.legalActions) {
+    if (
+      action.side !== "corp" ||
+      action.type !== "install_card" ||
+      action.payload?.placement !== "root" ||
+      (action.payload?.agendaInstallScoreHorizonQuoteSchemaVersion !==
+        undefined &&
+        !options.refreshExisting)
+    ) {
+      continue;
+    }
+    const cardId =
+      typeof action.payload.cardId === "string"
+        ? action.payload.cardId
+        : typeof action.source === "string" && cardsById.has(action.source)
+          ? action.source
+          : undefined;
+    const serverId = action.payload.serverId;
+    const agenda = typeof cardId === "string" ? cardsById.get(cardId) : undefined;
+    if (
+      !agenda ||
+      agenda.type !== "agenda" ||
+      typeof serverId !== "string" ||
+      !Number.isSafeInteger(agenda.advancementRequirement) ||
+      (action.expiresAtStateVersion !== undefined &&
+        action.expiresAtStateVersion !== stateVersion &&
+        !(action.expiresAtStateVersion === 2 && stateVersion === 1))
+    ) {
+      continue;
+    }
+    if (
+      action.expiresAtStateVersion === undefined ||
+      (action.expiresAtStateVersion === 2 && stateVersion === 1)
+    ) {
+      action.expiresAtStateVersion = stateVersion;
+    }
+
+    const actionClicks = action.costs.reduce(
+      (sum, cost) => sum + (cost.clicks ?? 0),
+      0,
+    );
+    const actionCredits = action.costs.reduce(
+      (sum, cost) => sum + (cost.credits ?? 0),
+      0,
+    );
+    const maximumCurrentTurnAdvances = Math.min(
+      agenda.advancementRequirement,
+      Math.max(0, input.playerView.own.clicks - actionClicks),
+      Math.max(0, input.playerView.own.credits - actionCredits),
+    );
+    const remainingAdvancesAfterCurrentTurn =
+      agenda.advancementRequirement - maximumCurrentTurnAdvances;
+
+    action.payload = {
+      ...action.payload,
+      agendaInstallScoreHorizonQuoteSchemaVersion:
+        CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION,
+      agendaInstallScoreHorizonQuoteCardId: agenda.instanceId,
+      agendaInstallScoreHorizonQuoteTargetServerId: serverId,
+      agendaInstallScoreHorizonQuoteExpiresAtStateVersion: stateVersion,
+      agendaInstallScoreHorizonQuoteAdvancementRequirement:
+        agenda.advancementRequirement,
+      agendaInstallScoreHorizonQuoteMaximumCurrentTurnAdvances:
+        maximumCurrentTurnAdvances,
+      agendaInstallScoreHorizonQuoteRemainingAdvancesAfterCurrentTurn:
+        remainingAdvancesAfterCurrentTurn,
+      agendaInstallScoreHorizonQuoteNextCorpTurnGuaranteedFlexibleClicks:
+        Math.max(3, remainingAdvancesAfterCurrentTurn),
+      agendaInstallScoreHorizonQuoteComplete: true,
+    };
+  }
 }
 
 export function identityCard(side: Side): VisibleCard {

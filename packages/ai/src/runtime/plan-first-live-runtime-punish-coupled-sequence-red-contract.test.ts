@@ -16,6 +16,7 @@ import {
 } from "../plans/resident-plan-portfolio-memory";
 import {
   aiInput,
+  bindSyntheticAgendaInstallQuotes,
   legalAction,
   server,
   visibleCard,
@@ -33,10 +34,12 @@ const CLOSED_ACCOUNTS_DEFINITION_ID = "onr_v1_285_closed-accounts";
 const URBAN_RENEWAL_DEFINITION_ID = "onr_v1_307_urban-renewal";
 const AGENDA_DEFINITION_ID = "onr_v1_203_hostile-takeover";
 
-const chooseCorpAction = (input: AiDecisionInput) =>
-  chooseCorpActionRuntime(input, {
+const chooseCorpAction = (input: AiDecisionInput) => {
+  bindSyntheticAgendaInstallQuotes(input);
+  return chooseCorpActionRuntime(input, {
     corpTurnPlannerMode: "legacy_compare",
   });
+};
 
 describe("plan-first coupled Corp punish sequence contract", () => {
   afterEach(() => {
@@ -755,6 +758,7 @@ function coupledPunishInput(params: {
     includeAuditAlternative: params.includeAuditAlternative === true,
     includeFourDamageAlternative: params.includeFourDamageAlternative === true,
   });
+  bindSyntheticAgendaInstallQuotes(input);
   return input;
 }
 

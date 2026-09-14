@@ -13,6 +13,7 @@ import {
 } from "../plans/resident-plan-portfolio-memory";
 import {
   aiInput,
+  bindSyntheticAgendaInstallQuotes,
   legalAction,
   server,
   visibleCard,
@@ -145,6 +146,11 @@ describe("plan-first Corp ambush preplanning contract", () => {
     input.playerView.own.credits = 5;
     input.playerView.opponent.handCount = 1;
     setCorpIntent(input, true);
+    bindSyntheticAgendaInstallQuotes(input);
+    install.payload = {
+      ...install.payload,
+      agendaInstallScoreHorizonQuoteComplete: false,
+    };
 
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
 
@@ -984,10 +990,12 @@ function liveContext() {
     chooseSemanticRuntimeAction: (
       input: Parameters<typeof context.chooseSemanticRuntimeAction>[0],
       options: Parameters<typeof context.chooseSemanticRuntimeAction>[1],
-    ) =>
-      context.chooseSemanticRuntimeAction(input, {
+    ) => {
+      bindSyntheticAgendaInstallQuotes(input);
+      return context.chooseSemanticRuntimeAction(input, {
         corpTurnPlannerMode: "legacy_compare",
         ...options,
-      }),
+      });
+    },
   };
 }
