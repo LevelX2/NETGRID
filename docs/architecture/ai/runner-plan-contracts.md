@@ -1125,6 +1125,15 @@ Verschlechterung gegenüber dem akzeptierten Startvertrag begründet eine
 Jack-out-Präferenz; ein unveränderter Grenzfall erzeugt weder einen neuen Plan
 noch eine zweite Entscheidungsautorität.
 
+Auch das Encounterbudget einer Informationsprobe konsumiert diese aktuelle
+Reservequote. Die akzeptierte Startquote bleibt der Vergleichsmaßstab für
+Risikoänderungen; ihr ursprünglicher Creditbetrag ist keine dauerhafte Sperre.
+Sinkt die gequotete Reserve nach neu aufgedecktem ICE oder ausgegebenen
+Corp-Rez-Credits, darf derselbe Parent den bezahlbaren bekannten Restpfad
+fortsetzen. Sichtbare Rez-Unterstützung bleibt in der aktuellen Quote erhalten.
+Fehlt deren erforderliche Risikobasis, bleibt die bestehende strukturierte
+Fail-closed-Bewertung des Run-Owners zuständig.
+
 Die Restpfadquote verwendet die Engine-gequotete Stärke nach dem aktuellen
 Encounter. Vor Ausgaben gegen ausschließlich verbleibende ETR-Subroutinen
 prüft derselbe Owner außerdem den vollständigen Pump-/Breakpreis gegen den
