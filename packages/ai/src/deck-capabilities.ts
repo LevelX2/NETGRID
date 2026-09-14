@@ -19,6 +19,8 @@ import type {
 import type { AiHintActionPlanOwnerBinding } from "./action-plan-owner-contracts";
 import { runnerEffectsProvideMultiaccess } from "./runner-canonical-hint-semantics";
 import { exactBankCashOutPayout } from "./actions/action-economy-projection";
+import { icebreakerAbilitiesForDefinition } from "@netgrid/engine";
+import { CARD_DEFINITIONS_BY_ID } from "./card-definition-compatibility";
 
 export const DECK_CAPABILITY_PROFILE_SCHEMA_VERSION =
   "deck-capability-profile-v1" as const;
@@ -307,6 +309,7 @@ function buildRunnerDeckCapabilityProfile(
   const breakerCoverageMatrix = buildBreakerCoverageMatrix(
     breakerInventory,
     searchAccess,
+    params.playerView?.own.rig ?? [],
   );
   const economyBankTools = buildEconomyBankTools(params, records);
   const memoryProfile = buildMemoryCapabilityProfile(
@@ -694,7 +697,47 @@ function mapHintCoverage(
 function buildBreakerCoverageMatrix(
   breakerInventory: readonly BreakerCapability[],
   searchAccess: SearchAccessProfile,
+  installedCards: readonly VisibleCard[],
 ): BreakerCoverageMatrix {
+  // Deck/hand capabilities describe possible answers. Installed coverage must
+  // instead use each visible instance's current mode, without combining the
+  // possible modes of a configurable breaker into simultaneous coverage.
+  const installedBreakers = installedCards.flatMap((card) => {
+    if (!card.known) return [];
+    const breaker = breakerInventory.find(
+      (entry) => entry.cardId === card.definitionId,
+    );
+    if (!breaker) return [];
+    const definition = CARD_DEFINITIONS_BY_ID[breaker.cardId];
+    // Only canonical configurable matchers introduce a mode-dependent fact.
+    // Other inventory entries retain their existing source/confidence contract.
+    if (!definition) return [breaker];
+    const abilities = icebreakerAbilitiesForDefinition(definition);
+    if (
+      !abilities.some(
+        (ability) =>
+          ability.type === "break_subroutine" &&
+          ability.selectedIceSubtypeFromBreaker,
+      )
+    ) {
+      return [breaker];
+    }
+    const coverage: BreakerCoverageKind[] = [];
+    for (const ability of abilities) {
+      if (ability.type !== "break_subroutine") continue;
+      const subtypes = ability.selectedIceSubtypeFromBreaker
+        ? card.selectedSubtype
+          ? [card.selectedSubtype]
+          : []
+        : [ability.iceSubtype, ...(ability.iceSubtypes ?? [])];
+      for (const subtype of subtypes) {
+        if (BREAKER_COVERAGES.some((kind) => kind === subtype)) {
+          coverage.push(subtype as BreakerCoverageKind);
+        }
+      }
+    }
+    return [{ ...breaker, coverage }];
+  });
   return Object.fromEntries(
     BREAKER_COVERAGES.map((coverage) => {
       const matching = breakerInventory.filter(
@@ -702,9 +745,12 @@ function buildBreakerCoverageMatrix(
           breakerHasCoverage(breaker, coverage) ||
           breakerHasCoverage(breaker, "universal"),
       );
-      const installed = matching.some((breaker) =>
-        breakerHasLocation(breaker, "installed"),
+      const installedMatching = installedBreakers.filter(
+        (breaker) =>
+          breakerHasCoverage(breaker, coverage) ||
+          breakerHasCoverage(breaker, "universal"),
       );
+      const installed = installedMatching.length > 0;
       const inHand = matching.some((breaker) =>
         breakerHasLocation(breaker, "in_hand"),
       );
@@ -727,7 +773,14 @@ function buildBreakerCoverageMatrix(
         searchableNow,
         drawOnly: inDeckKnown && !searchableNow && !inHand && !installed,
         missing: !installed && !inHand && !inDeckKnown,
-        bestKnownCards: matching
+        bestKnownCards: [
+          ...new Map(
+            [...matching, ...installedMatching].map((breaker) => [
+              breaker.cardId,
+              breaker,
+            ]),
+          ).values(),
+        ]
           .slice()
           .sort(compareBreakerCapabilities)
           .slice(0, 3)

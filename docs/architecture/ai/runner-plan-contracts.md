@@ -427,6 +427,14 @@ Verantwortung:
 - Bezahlbarkeit des anschließenden Runpfads;
 - deckstrategischer Rig-first- oder Minimal-Rig-Modus.
 
+Die Deck-Fähigkeitsmatrix trennt mögliche
+Deck-/Handantworten von der tatsächlich installierten Abdeckung. Bei einem
+kanonischen Break-Matcher mit gewähltem Untertyp zählt nur der öffentlich
+sichtbare aktuelle Modus jeder installierten Instanz. Noch nicht gewählte
+Modi und weitere Handkopien erzeugen keine aktive Abdeckung; unterschiedliche
+installierte Kopien dürfen ihre jeweils gewählten Rollen gemeinsam abdecken.
+Diese Fakten schließen erfüllte Setup-Bedarfe vor weiterer Suche oder Draw.
+
 Die MU-Opferbewertung unterscheidet feste Breakerfunktionen anhand der
 kanonischen Break-Fähigkeiten. Das gemeinsame gedruckte Merkmal `icebreaker`
 macht eine Wall- und eine Code-Gate-Antwort nicht gegenseitig redundant.
