@@ -390,6 +390,10 @@ des Suchwerkzeugs in `setup_search_engine` und Ziehaktionen in
 `draw_for_answer`. Ein höher bewerteter Zieheffekt darf nicht als Suchroute
 ausgeführt werden. Discovery und Assessment verwenden dieselbe Zulassung;
 die anschließende exakte Suchzielbindung bleibt unverändert verpflichtend.
+Auch die Actionzuordnung verwendet diese Phasenregel. Konkurrierende
+Ziehevents bleiben für die Handentwicklung verfügbar, solange Coverage
+Suche oder Suchwerkzeug-Aufbau materialisiert. Sie werden nicht zugleich
+von Coverage beansprucht und dort ohne ausführbaren Head ausgeschlossen.
 
 Eine unbezahlbare Antwort auf der Hand sperrt keinen bereits exakt gebundenen
 günstigeren Stack-Suchweg. `coverage-search-alternatives.ts` prüft bekannte

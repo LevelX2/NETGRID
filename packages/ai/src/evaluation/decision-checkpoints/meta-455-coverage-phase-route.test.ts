@@ -1,5 +1,6 @@
 import { expect, it } from "vitest";
 import checkpoint from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-455-r12-g34-d15.json";
+import setupCheckpoint from "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-455-r12-control-d8.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import {
   resetResidentPlanPortfolioMemory,
@@ -11,6 +12,39 @@ import {
   restoreAiRuntimeCheckpoint,
   type AiRuntimeCheckpointV1,
 } from "./runtime-checkpoint";
+
+it("leaves competing draw events with their development owner before search setup", () => {
+  const input = structuredClone(
+    setupCheckpoint.input,
+  ) as unknown as AiDecisionInputWithDeckCapabilities;
+  const runtime = structuredClone(
+    setupCheckpoint.runtime,
+  ) as unknown as AiRuntimeCheckpointV1;
+  resetResidentPlanPortfolioMemory();
+  restoreAiRuntimeCheckpoint(
+    input,
+    input.ownDeckSnapshot!.deckSnapshotId,
+    runtime,
+  );
+  restoreResidentPlanPortfolioMemorySnapshot(
+    input,
+    runtime.residentPlanPortfolio!,
+  );
+  const result = chooseAiAction(input);
+  expect(
+    input.legalActions.some((action) => action.actionId === result.actionId),
+  ).toBe(true);
+  expect(result.fallbackUsed).toBe(false);
+  const portfolio = residentPlanPortfolioSnapshot(input)!;
+  const drawId = "runner_onr_proteus_103_cruising-for-netwatch_1";
+  expect(
+    portfolio.instances.some(
+      (entry) =>
+        entry.moduleId === "runner.develop_board_and_hand" &&
+        entry.dedupeKey === `card:${drawId}`,
+    ),
+  ).toBe(true);
+});
 
 it("keeps the admitted search phase on its exact search route when draw events compete", () => {
   const input = structuredClone(

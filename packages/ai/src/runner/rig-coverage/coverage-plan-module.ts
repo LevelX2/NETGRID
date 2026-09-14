@@ -262,11 +262,30 @@ function coveragePhase(
           ? "search_answer"
           : gap.answerInHand && (gap.fundingGap ?? 0) > 0
             ? "fund_answer"
-            : gap.directSearchActionIds.length > 0
-              ? "search_answer"
-              : gap.searchEngineSetupActionIds.length > 0
-                ? "setup_search_engine"
-                : "draw_for_answer";
+            : runnerCoverageAcquisitionPhase(gap);
+}
+
+export function runnerCoverageAcquisitionPhase(
+  gap: RunnerCoverageGapSignal,
+): CoverageState["phase"] {
+  return gap.directSearchActionIds.length > 0
+    ? "search_answer"
+    : gap.searchEngineSetupActionIds.length > 0
+      ? "setup_search_engine"
+      : "draw_for_answer";
+}
+
+export function runnerCoverageAcquisitionActionIds(
+  gap: RunnerCoverageGapSignal,
+  phase: CoverageState["phase"],
+): readonly string[] {
+  return phase === "search_answer"
+    ? gap.directSearchActionIds
+    : phase === "setup_search_engine"
+      ? gap.searchEngineSetupActionIds
+      : phase === "draw_for_answer"
+        ? gap.drawForAnswerActionIds
+        : [];
 }
 
 export function runnerCoverageCurrentPhase(params: {
@@ -477,14 +496,9 @@ function coverageAcquisitionCandidates(
   const drawForAnswerIds = new Set(gap.drawForAnswerActionIds);
   // The phase admits an exact acquisition contract. A draw or setup action
   // cannot execute as a search: its continuation has no bound search target.
-  const phaseActionIds =
-    phase === "search_answer"
-      ? directSearchIds
-      : phase === "setup_search_engine"
-        ? searchSetupIds
-        : phase === "draw_for_answer"
-          ? drawForAnswerIds
-          : new Set<string>();
+  const phaseActionIds = new Set(
+    runnerCoverageAcquisitionActionIds(gap, phase),
+  );
   return context.actionCandidates
     .filter((candidate) => {
       if (gap.answerInHand && !affordableAlternatives.has(candidate.actionId))
