@@ -55,6 +55,13 @@ terminaler eigener Score behalten ihre gesonderten Prioritätsklassen; die
 aktuelle Ressourcen- und Routenzulassung wird weiterhin vor jeder Aktion
 revalidiert.
 
+Auch bei einer beschleunigten Konversion stammen die verbleibenden
+Advancement-Klicks und Score-Credits aus den Engine-gequoteten Folgeschritten.
+Ein bereits nachgewiesener Abschluss macht diese Folgekosten nicht null.
+Die Bewertung verwendet denselben Horizont nach der ersten Aktion wie bei
+einem normalen Advance; ein vorgeschalteter Economy-Schritt behält seinen
+vollständigen danach zu finanzierenden Scorebedarf.
+
 Das Fehlen einer Agenda in HQ erzeugt keinen generischen Score-Parent und
 keinen Auftrag, nach unbekanntem Agendamaterial zu ziehen. Der Score-Owner
 beginnt mit einer konkret verfügbaren Agenda oder einer aktuell gequoteten

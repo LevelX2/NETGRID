@@ -1258,10 +1258,15 @@ export function sameTurnScoreConversionProjectForCandidate(
         input,
         agenda,
         serverId: path.targetServerId,
-        remainingAdvancementClicks: 0,
+        remainingAdvancementClicks: path.steps
+          .slice(1)
+          .filter((routeStep) => routeStep.kind === "basic_advance")
+          .reduce((total, routeStep) => total + routeStep.clickCost, 0),
         remainingScoreCredits: path.fundingPrefix
           ? path.creditsRequired - path.fundingPrefix.creditCost
-          : 0,
+          : path.steps
+              .slice(1)
+              .reduce((total, routeStep) => total + routeStep.creditCost, 0),
         residentParent: false,
         realizedStrategySupportCount: candidate.strategySupport.length,
       }),
