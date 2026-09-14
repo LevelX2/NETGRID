@@ -384,6 +384,13 @@ Dispositionen und exakte Fortsetzungsbindungen (`coverage-bindings.ts`).
 `coverage-plan-module.ts` besitzt die Planphasen und Materialisierung.
 Suchbedarf und Upgrade-Ökonomie liegen ebenfalls in diesem Verzeichnis.
 
+Die Materialisierung verwendet nur die Actionmenge der aktuellen
+Beschaffungsphase: direkte Suchaktionen in `search_answer`, Installationen
+des Suchwerkzeugs in `setup_search_engine` und Ziehaktionen in
+`draw_for_answer`. Ein höher bewerteter Zieheffekt darf nicht als Suchroute
+ausgeführt werden. Discovery und Assessment verwenden dieselbe Zulassung;
+die anschließende exakte Suchzielbindung bleibt unverändert verpflichtend.
+
 Eine unbezahlbare Antwort auf der Hand sperrt keinen bereits exakt gebundenen
 günstigeren Stack-Suchweg. `coverage-search-alternatives.ts` prüft bekannte
 Such- und Installationskosten, freie Handkapazität, bekannte eigene

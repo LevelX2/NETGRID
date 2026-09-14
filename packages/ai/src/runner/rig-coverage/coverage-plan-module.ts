@@ -80,7 +80,6 @@ export function createRunnerCoverageModule(
           gap,
           rolesForDefinitionId,
         );
-        const draws = coverageDrawCandidates(context, gap);
         const funding = coverageFundingCandidates(context, gap);
         const phase = coveragePhase(
           context,
@@ -89,6 +88,7 @@ export function createRunnerCoverageModule(
           preparations,
           installs,
         );
+        const draws = coverageAcquisitionCandidates(context, gap, phase);
         const routeExists =
           preparations.length > 0 ||
           installs.length > 0 ||
@@ -132,7 +132,11 @@ export function createRunnerCoverageModule(
               )
             : current.phase === "fund_answer"
               ? coverageFundingCandidates(context, current.gap)
-              : coverageDrawCandidates(context, current.gap);
+              : coverageAcquisitionCandidates(
+                  context,
+                  current.gap,
+                  current.phase,
+                );
       return assessment(
         instance,
         current.gap.priorityClass,
@@ -211,7 +215,11 @@ export function createRunnerCoverageModule(
           candidates,
         };
       }
-      const candidates = coverageDrawCandidates(context, current.gap);
+      const candidates = coverageAcquisitionCandidates(
+        context,
+        current.gap,
+        current.phase,
+      );
       return {
         step: {
           stepId: `${instance.instanceId}:find:${current.gap.requiredRole}`,
@@ -451,9 +459,10 @@ export function runnerInstallDefinitionCoversCoverageGap(
   );
 }
 
-function coverageDrawCandidates(
+function coverageAcquisitionCandidates(
   context: PlanSchedulerContext,
   gap: RunnerCoverageGapSignal,
+  phase: CoverageState["phase"],
 ): PlanMaterialization["candidates"] {
   const affordableAlternatives = new Set(
     runnerAffordableCoverageSearchActionIds(
@@ -466,14 +475,21 @@ function coverageDrawCandidates(
   const directSearchIds = new Set(gap.directSearchActionIds);
   const searchSetupIds = new Set(gap.searchEngineSetupActionIds);
   const drawForAnswerIds = new Set(gap.drawForAnswerActionIds);
+  // The phase admits an exact acquisition contract. A draw or setup action
+  // cannot execute as a search: its continuation has no bound search target.
+  const phaseActionIds =
+    phase === "search_answer"
+      ? directSearchIds
+      : phase === "setup_search_engine"
+        ? searchSetupIds
+        : phase === "draw_for_answer"
+          ? drawForAnswerIds
+          : new Set<string>();
   return context.actionCandidates
     .filter((candidate) => {
       if (gap.answerInHand && !affordableAlternatives.has(candidate.actionId))
         return false;
-      const isCoverageRoute =
-        directSearchIds.has(candidate.actionId) ||
-        searchSetupIds.has(candidate.actionId) ||
-        drawForAnswerIds.has(candidate.actionId);
+      const isCoverageRoute = phaseActionIds.has(candidate.actionId);
       const isDrawRoute = drawForAnswerIds.has(candidate.actionId);
       const displacedByGeneralHandDevelopment =
         context.actionDispositions?.some(
