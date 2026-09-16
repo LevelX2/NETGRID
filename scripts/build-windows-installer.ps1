@@ -285,7 +285,7 @@ try {
     }
     dataContract = [ordered]@{
       defaultRoot = "C:\ProgramData\NETGRID"
-      mutableDirectories = @("runtime", "card-images")
+      mutableDirectories = @("runtime", "card-images", "card-image-import", "card-image-packs")
       installerManagedDirectories = @("config")
       retainOnUninstall = $true
     }

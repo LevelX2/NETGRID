@@ -120,10 +120,15 @@ werden können.
   nie über MSI-Eigenschaften, Prozessargumente oder Ausgaben transportiert.
   Eine vorhandene valide Konfiguration wird bei Repair nicht ersetzt; ein
   Platzhalter oder abweichender Datenroot bricht sichtbar ab.
-- `runtime`, dessen bekannten Unterordner und `card-images` geben der lokalen
+- `runtime`, dessen bekannten Unterordner, `card-images`, `card-image-import`
+  und `card-image-packs` geben der lokalen
   Benutzergruppe Änderungsrechte. Der Root ist nur durchquerbar, `config`
   samt Runtimekonfiguration und Installationsstatus nur lesbar; Administratoren
   und Local System behalten Vollzugriff.
+  Die beiden Vorbereitungsordner sind Pflicht: Die Maintenance-Oberfläche
+  schreibt Uploads nach `card-image-import/inbox` und private Paketbuilds nach
+  `card-image-packs`. Der normale App-Prozess darf sie nicht erst unter dem
+  schreibgeschützten Datenroot anlegen müssen.
 - UNC-Pfade, nicht feste Laufwerke, Laufwerkswurzeln, Reparse-Points und jede
   Überlappung mit dem Programmordner sind fail-closed. Die MSI-
   Initialisierung ist erhöht, als Deferred Action verborgen und für

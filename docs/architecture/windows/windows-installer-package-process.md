@@ -684,7 +684,8 @@ Keine Releasefreigabe, Integration, Worktreeentfernung oder Übertragung.
   32 kryptografisch zufälligen Bytes und übernimmt nie ein Secret aus einer
   MSI-Eigenschaft oder Kommandozeile.
 - Der Datenroot muss absolut, lokal, fest eingebaut, von Program Files getrennt
-  und frei von Reparse-Points sein. `runtime` und `card-images` sind für lokale
+  und frei von Reparse-Points sein. `runtime`, `card-images`,
+  `card-image-import` und `card-image-packs` sind für lokale
   Benutzer änderbar; `config` und die dortige `runtime.env` bleiben
   installerverwaltet und nur lesbar. Reparatur erhält eine bestehende valide
   Konfiguration bytegleich. Die Initialisierung läuft nicht bei
