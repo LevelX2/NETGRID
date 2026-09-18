@@ -1616,6 +1616,11 @@ select {
   filter: drop-shadow(0 0 3px rgb(247 194 66 / 0.45));
 }
 
+:root[data-theme="white"] .publicGameParticipant.winner,
+:root[data-theme="white"] .publicGameWinnerCrown {
+  color: #805500;
+}
+
 @keyframes publicGameWinnerShine {
   from {
     left: -45%;
@@ -4423,9 +4428,9 @@ select {
   right: 6px;
   padding: 2px 4px;
   border-radius: 5px;
-  color: var(--text);
-  background: rgb(0 0 0 / 0.48);
-  font-size: 10px;
+  color: #ffffff;
+  background: rgb(15 23 42 / 0.94);
+  font-size: 11px;
   font-weight: 800;
   line-height: 1.1;
   overflow: hidden;
@@ -18580,6 +18585,31 @@ select,
 .accountStatisticsHistoryEntry.excluded {
   border-style: dashed;
   opacity: 0.78;
+}
+
+:root[data-theme="white"] .accountStatisticsPanel {
+  border-color: var(--line);
+  background: var(--panel);
+}
+
+:root[data-theme="white"] .accountStatisticsKpi,
+:root[data-theme="white"] .accountStatisticsBreakdown,
+:root[data-theme="white"] .accountStatisticsHistoryEntry {
+  background: var(--field-bg);
+}
+
+:root[data-theme="white"] .accountStatisticsKpi.positive strong {
+  color: var(--ok);
+}
+
+:root[data-theme="white"] .accountStatisticsKpi.negative strong {
+  color: var(--danger);
+}
+
+:root[data-theme="white"] .accountStatisticsSelfPlay {
+  color: #805500;
+  border-color: #b88a32;
+  background: #fff4d6;
 }
 
 @media (max-width: 900px) {

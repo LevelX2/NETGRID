@@ -23,6 +23,29 @@ Der verbleibende potenzielle Stufe-2-Punkt ist Listenvirtualisierung. Sie wird
 nur bei einem separaten Firefox-Messbefund umgesetzt; die aktuelle Messung
 belegt zuerst den Runtime- und Browsercache als wirksamen Ursachenfix.
 
+## Bildanfragen und Deck-Tisch (2026-09-18)
+
+Die Bildroute erstellt die Zuordnung von Katalog-ID zu Printing-ID einmal
+pro geladenem Runtime-Modul. Einzelne Thumbnail- und Preview-Anfragen bauen
+den vollständigen Katalog nicht erneut auf. Persönliche Bildbindungen,
+Collection-Revisionen und Dateifingerprints werden weiterhin über den
+Managed Store aktuell geprüft; die ID-Zuordnung enthält keine Bildbindungen.
+
+Bild-Tooltips in Deckeditor, Spiel und Chronik mounten ihr Preview-Bild erst
+beim Öffnen und laden es dann sofort mit hoher Priorität. Tischkarten bleiben
+bei kleinen, lazy geladenen Thumb-Derivaten. Die Namensleisten verwenden unabhängig vom Theme weiße
+Schrift auf nahezu deckendem dunklem Hintergrund, damit das Kartenmotiv
+den Textkontrast nicht bestimmt.
+
+Der gemeinsame Katalogdetail-Loader begrenzt Abrufe über alle gleichzeitig
+angeforderten Batches auf zwei aktive Requests. Damit belegt das Vorladen
+des Deckeditor-Katalogs nicht sämtliche Browser-Verbindungen vor Bild- und
+Spielanfragen. Die Katalog-API verwendet ihren validierten Runtime-Pool pro
+Testkartenprofil wieder, statt für jede Detailanfrage alle Karten neu zu
+projizieren, zu validieren und zu hashen. Änderungen an den eingebundenen
+Katalogquellen erfordern ein neu geladenes Runtime-Modul; persönliche
+Bildimporte bleiben davon unabhängig live aktualisierbar.
+
 ## Zweck
 
 Dieses Artefakt plant die Härtung der lokalen Kartenbildanzeige in zwei Stufen. Ziel ist spürbar schnellere Wiederanzeige bekannter Kartenbilder, ohne das private lokale Asset-Gate, Hidden-Info-Grenzen oder die Trennung von UI und Engine aufzuweichen.

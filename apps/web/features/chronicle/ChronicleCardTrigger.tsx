@@ -412,6 +412,7 @@ export function ChronicleCardTrigger({
                 src={imageUrl}
                 fallbackSrc={imageSource.fallbackSrc}
                 variant="preview"
+                priority
                 alt={t("imageAlt", { title: card.title })}
               />
               {showHardwareOverlay ? (
