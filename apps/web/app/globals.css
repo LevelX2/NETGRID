@@ -14257,6 +14257,42 @@ select,
   overflow: visible;
 }
 
+/* Joined sections share the sidebar frame; highlights stay inside it. */
+.sidePanel > .section {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  outline: none;
+  box-shadow: none;
+}
+
+.sidePanel > .section:first-child {
+  border-top-left-radius: 7px;
+  border-top-right-radius: 7px;
+}
+
+.sidePanel > .section:last-child {
+  border-bottom: 0;
+  border-bottom-left-radius: 7px;
+  border-bottom-right-radius: 7px;
+}
+
+.sidePanel > .sideStatusPanel {
+  box-shadow: inset 4px 0 0 var(--side-status-accent);
+}
+
+.sidePanel > .sideStatusPanel.turnActive {
+  outline: none;
+  box-shadow: inset 6px 0 0 var(--side-status-accent);
+}
+
+.sidePanel > .section.cueHighlight {
+  outline: none;
+  box-shadow: inset 4px 0 0 color-mix(in srgb, var(--cue), transparent 15%);
+  animation: none;
+}
+
 .boardPanel {
   display: grid;
   gap: 12px;
