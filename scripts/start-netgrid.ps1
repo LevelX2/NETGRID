@@ -1,4 +1,4 @@
-param(
+﻿param(
   [string]$OpenUrl = "",
   [string]$OpenPath = "/",
   [switch]$ServerWatchMode,
@@ -341,10 +341,12 @@ if ($RestartServer -or $serverModeMismatch) {
   $serverReadyLocalBefore = $false
 }
 
+$serverLogStartOffset = $null
 if (-not $serverReadyLanBefore) {
   Stop-PortListeners -Ports @(8787)
   Stop-NetgridServerProcessTrees
   Write-LauncherLog "Starting server command mode=$serverMode"
+  $serverLogStartOffset = if (Test-Path -LiteralPath $serverLog) { (Get-Item -LiteralPath $serverLog).Length } else { 0L }
   Start-NetgridProcess -Command $serverCommand -LogPath $serverLog -Environment $serverEnvironment
 }
 
@@ -386,7 +388,11 @@ if (-not $webReady -and $localWebStillRunning) {
   $hint += "`nHinweis Web: Es laeuft bereits eine lokale Instanz auf 127.0.0.1:3100. Bitte diese beenden und das Icon erneut starten."
 }
 
-$message = "NETGRID konnte nicht im LAN-Modus gestartet werden.`nLAN-IP: $lanIp`nServer bereit: $serverReady`nWeb bereit: $webReady`nZielseite bereit: $targetWebReady$hint`n`nLogs:`n$serverLog`n$webLog"
+$diagnostic = ""
+if (-not $serverReady -and -not $localServerStillRunning -and $null -ne $serverLogStartOffset) {
+  $diagnostic = Get-NetgridStartupDiagnostic -LogPath $serverLog -StartOffset $serverLogStartOffset
+}
+$message = "NETGRID konnte nicht gestartet werden.`n`n$diagnostic`n`nLAN-IP: $lanIp`nServer bereit: $serverReady`nWeb bereit: $webReady`nZielseite bereit: $targetWebReady$hint`n`nStartprotokolle:`n$launcherLog`n$serverLog`n$webLog"
 Write-LauncherLog "Launcher failure serverReady=$serverReady webReady=$webReady targetWebReady=$targetWebReady hint=$hint"
 Add-Type -AssemblyName System.Windows.Forms
 [System.Windows.Forms.MessageBox]::Show($message, "NETGRID starten") | Out-Null

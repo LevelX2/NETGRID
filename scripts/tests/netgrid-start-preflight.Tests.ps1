@@ -1,4 +1,35 @@
-. (Join-Path $PSScriptRoot "..\netgrid-start-preflight.ps1")
+﻿. (Join-Path $PSScriptRoot "..\netgrid-start-preflight.ps1")
+
+Describe "Startfehlerdiagnose" {
+  It "erklärt ein veraltetes Schema und die Folgen eines Resets" {
+    $log = Join-Path $TestDrive "old.log"
+    [IO.File]::WriteAllText($log, 'StorageError: Storage nutzt nicht das aktuelle Schema.')
+    $message = Get-NetgridStartupDiagnostic -LogPath $log -StartOffset 0
+    $message | Should Match 'Datenbank ist veraltet'
+    $message | Should Match 'sichern und zurücksetzen'
+    $message | Should Match 'Kontodecks'
+  }
+
+  It "empfiehlt bei neuerem Schema eine passende Programmversion" {
+    $log = Join-Path $TestDrive "new.log"
+    [IO.File]::WriteAllText($log, 'StorageError: Storage ist neuer als dieser Servercode.')
+    Get-NetgridStartupDiagnostic -LogPath $log -StartOffset 0 | Should Match 'passenden aktuellen Version'
+  }
+
+  It "meldet ein nicht erkanntes Schema" {
+    $log = Join-Path $TestDrive "unknown.log"
+    [IO.File]::WriteAllText($log, 'Storage-Schema konnte nicht sicher erkannt werden.')
+    Get-NetgridStartupDiagnostic -LogPath $log -StartOffset 0 | Should Match 'SQLite-Pfad'
+  }
+
+  It "ignoriert Schemafehler aus früheren Startversuchen" {
+    $log = Join-Path $TestDrive "previous.log"
+    [IO.File]::WriteAllText($log, "Storage nutzt nicht das aktuelle Schema.`n")
+    $offset = (Get-Item -LiteralPath $log).Length
+    [IO.File]::AppendAllText($log, 'Unrelated startup error')
+    Get-NetgridStartupDiagnostic -LogPath $log -StartOffset $offset | Should Match 'nicht automatisch bestimmt'
+  }
+}
 
 Describe "Startskript Serveradresse" {
   It "übergibt dem Webprozess dieselbe Laufzeitadresse wie dem Server" {
