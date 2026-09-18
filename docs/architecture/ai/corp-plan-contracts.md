@@ -361,6 +361,18 @@ eines terminalen Steals. Funding-/Defense-Setup exponiert die Agenda noch nicht
 und erhält diesen Aufschlag nicht. Gleiche Zugriffschancen dürfen beim Vergleich
 gehaltener Agenden nicht die unmittelbare Verlustfolge unterschlagen (Regression:
 Pairing 432, D464; Coup und Security Net bei sechs Corp-/vier Runnerpunkten).
+
+Offener Prüfpunkt bei bereits exponierten Agenden: Der Pfad
+`corp_exposed_agenda_progress_preserves_conversion_clock` erlaubt weitere
+Advances trotz nicht erfülltem Schutz, um den Scoretermin zu erhalten.
+In `match_52de6345f1e39802` verwenden D34/D35 diesen Pfad nach der öffentlichen
+Dwarf-Installation; D36 verwendet anschließend die Next-Turn-Fortsetzung.
+Main-Office Relocation erreicht nur 3/4 Counter, während das Creditbudget von
+6 auf 3 sinkt und der Runner durch einen Steal gewinnt. D34 bleibt auch mit
+der serverübergreifenden Rezreserve reproduzierbar. Zu prüfen ist die
+Abwägung zwischen konkreter Schutzreparatur und Scorefortschritt über das
+Runnerfenster; fehlender finanzierbarer Schutz ist keine bloße Fundinglücke.
+Eine bessere rettende Aktionsfolge ist damit noch nicht nachgewiesen.
 Ein bereits im eigenen Zug
 vollständig schließender Score hat kein dazwischenliegendes Runner-Fenster.
 Nicht bevorzugte, aber zugelassene Agenda-Zuglinien behalten ihre eigene Quote
@@ -962,6 +974,16 @@ Runnerzug; eine aktuelle gebundene Zahlung darf ihn weiterhin verbrauchen.
 Der actor-sichere D7-
 Checkpoint `match-52de-defense-reserve.test.ts` prüft HQ-Erhalt, letzten Klick,
 Zusatzruns, ausreichendes Budget, Matchpoint, unbekannte Quotes und Determinismus.
+
+Davon getrennt bleibt die Wirksamkeit reiner bezahlter Rez-Tax bei einem
+terminalen Zugriff prüfpflichtig. In Match 52de/D38 zertifiziert die Engine
+3 Corp-Credits für Wall of Static und 1 Runner-Credit zum Brechen mit Dwarf.
+Der Runner besitzt 6 Credits und greift auf die spielentscheidende Agenda zu.
+Die lokale Route bleibt als `exact_resource_exchange` produktiv; mangels
+Folgerun greift keine serverübergreifende Reserve. Ein exakt quotierter
+Ressourcentausch belegt hier keinen verhinderten Steal. Der offene
+Bewertungsauftrag gehört zu `corp.defend_servers`, nicht zu den Spielregeln;
+ein anderes einzelnes Rez ist noch kein Nachweis einer rettenden Gesamtlinie.
 
 Eine Rez-Entscheidung ist ein fenstergebundener Urgent-Response-Modus
 desselben Verteidigungsplans. Solange dieses Fenster offen ist, beschränkt es
