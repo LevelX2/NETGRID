@@ -1,4 +1,5 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import { visibleRunnerPreparationIncomePerClick } from "@netgrid/engine";
 import type { CorpExactIceRezRouteProjection } from "../../runtime/corp-exact-ice-rez-route";
 import { assessBestFundedCorpScoreProtection } from "../../runtime/corp-funded-score-protection";
 import { readCorpCentralAgendaExposure } from "./corp-central-defense-facts-adapter";
@@ -40,7 +41,7 @@ export function corpServerAgendaExposure(
   return { expectedPoints: points, maximumPoints: points };
 }
 
-/** A reserve exists only for a fully quoted stopping path, not for ICE count. */
+/** Reserves require quoted access prevention; terminal agendas also justify partial protection. */
 export function corpServerProtectionClaims(
   input: AiDecisionInput,
   leavingHqCardId?: string,
@@ -61,24 +62,32 @@ export function corpServerProtectionClaims(
       continue;
     }
     if (exposure.maximumPoints === 0) continue;
+    const terminal =
+      exposure.maximumPoints >=
+      input.playerView.agendaPointsToWin -
+        input.playerView.opponent.agendaPoints;
+    const income = terminal
+      ? visibleRunnerPreparationIncomePerClick(
+          input.playerView.opponent.rig ?? [],
+        )
+      : 1;
     const protection = assessBestFundedCorpScoreProtection({
       serverIce: server.ice,
+      serverRoot: server.root,
       runnerRig: input.playerView.opponent.rig ?? [],
       runnerSetAside: input.playerView.specialZones?.setAside ?? [],
       runnerCredits: input.playerView.opponent.credits,
       ...(input.playerView.phase === "run"
         ? {
-            runnerPreparationCreditClicks: Math.max(
-              0,
-              input.playerView.opponent.clicks - 1,
-            ),
+            runnerPreparationCreditClicks:
+              income * Math.max(0, input.playerView.opponent.clicks - 1),
           }
         : {}),
       ...(input.playerView.phase !== "run" &&
       input.playerView.runnerNextTurnCreditClicks !== undefined
         ? {
             runnerPreparationCreditClicks:
-              input.playerView.runnerNextTurnCreditClicks,
+              income * input.playerView.runnerNextTurnCreditClicks,
           }
         : {}),
       ...(input.playerView.opponent.memoryUsed !== undefined
@@ -99,8 +108,18 @@ export function corpServerProtectionClaims(
       unknownServerIds.push(server.id);
       continue;
     }
-    const credits = protection.minimumSatisfyingRezCost;
-    const costs = protection.minimumSatisfyingRezCosts;
+    const partialTerminalProtection =
+      terminal &&
+      protection.protection.runnerAccessSuccessProbability.numerator <
+        protection.protection.runnerAccessSuccessProbability.denominator &&
+      (protection.minimumSatisfyingRezCost === undefined ||
+        protection.minimumSatisfyingRezCost > input.playerView.own.credits);
+    const credits = partialTerminalProtection
+      ? protection.totalSelectedRezCost
+      : protection.minimumSatisfyingRezCost;
+    const costs = partialTerminalProtection
+      ? protection.selectedRezCosts
+      : protection.minimumSatisfyingRezCosts;
     if (
       credits === undefined ||
       !costs ||
@@ -112,10 +131,7 @@ export function corpServerProtectionClaims(
       serverId: server.id,
       observedAtStateVersion: input.playerView.stateVersion,
       expectedPoints: exposure.expectedPoints,
-      terminal:
-        exposure.maximumPoints >=
-        input.playerView.agendaPointsToWin -
-          input.playerView.opponent.agendaPoints,
+      terminal,
       credits,
       iceIds: costs.map((c) => c.iceInstanceId),
     });

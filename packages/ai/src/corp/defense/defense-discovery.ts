@@ -777,6 +777,7 @@ export function buildCorpDefenseProtectionSignals({
   const scoreProtectionProjects = scoreProjects
     .filter(
       (project) =>
+        project.terminalDefense === undefined &&
         !(
           project.routeAssessment ===
           "corp_resident_score_parent_dominates_sibling_route"
@@ -901,7 +902,31 @@ export function buildCorpDefenseProtectionSignals({
       candidates,
       centralDefenseAllocation,
     );
-  const selectedScoreProtectionSignals: CorpDefenseSignal[] = [];
+  const selectedScoreProtectionSignals: CorpDefenseSignal[] =
+    scoreProjects.flatMap((project) => {
+      const defense = project.terminalDefense;
+      const install = defense?.install;
+      return defense && install
+        ? [
+            {
+              kind: "score_protection_terminal_install" as const,
+              defenseId: `terminal-protection:${project.projectId}:${install.actionId}`,
+              serverId: defense.serverId,
+              phase:
+                install.placement === "ice"
+                  ? ("install_ice" as const)
+                  : ("install_defense_support" as const),
+              parentProjectId: project.projectId,
+              parentNeedId: defense.need.needId,
+              delegatedPriorityClass: corpScorePriorityClass(project),
+              actionId: install.actionId,
+              sourceCardInstanceId: install.sourceCardInstanceId,
+              sourceDefinitionId: install.sourceDefinitionId,
+              evidenceCode: project.evidenceCode,
+            },
+          ]
+        : [];
+    });
   for (const { project, scan } of scoreProtectionRouteScans) {
     if (
       project.serverId === "new_remote" &&
@@ -1134,6 +1159,7 @@ export function buildCorpDefenseProtectionSignals({
   );
   const exactScoreProtectionInstallActionIds = new Set(
     selectedScoreProtectionSignals.flatMap((signal) =>
+      signal.kind === "score_protection_terminal_install" ||
       signal.kind === "score_protection_install" ||
       signal.kind === "score_protection_staging_install"
         ? [signal.actionId]

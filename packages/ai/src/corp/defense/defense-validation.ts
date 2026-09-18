@@ -5,6 +5,7 @@ import {
   CorpScoreProtectionDrawSignal,
   CorpScoreProtectionInstallSignal,
   CorpScoreProtectionStagingInstallSignal,
+  CorpTerminalProtectionInstallSignal,
 } from "../../plans/corp-defense-contracts";
 import { CorpScorePriorityClass } from "../../plans/corp-score-contracts";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
@@ -514,6 +515,12 @@ export function isScoreProtectionStagingInstallSignal(
   return signal.kind === "score_protection_staging_install";
 }
 
+export function isTerminalProtectionInstallSignal(
+  signal: CorpDefenseSignal,
+): signal is CorpTerminalProtectionInstallSignal {
+  return signal.kind === "score_protection_terminal_install";
+}
+
 export function isScoreProtectionDrawSignal(
   signal: CorpDefenseSignal,
 ): signal is CorpScoreProtectionDrawSignal {
@@ -940,7 +947,8 @@ export function exactInstallRouteCreditCost(
 export function defenseSignalActionIds(signal: CorpDefenseSignal): string[] {
   const value = signal as unknown as Record<string, unknown>;
   if (
-    (value.kind === "score_protection_install" ||
+    (value.kind === "score_protection_terminal_install" ||
+      value.kind === "score_protection_install" ||
       value.kind === "score_protection_staging_install" ||
       value.kind === "score_protection_draw") &&
     nonEmptyString(value.actionId)
@@ -1111,10 +1119,15 @@ export function isValidDefenseSignal(
       )
     );
   }
-  if (value.kind === "score_protection_staging_install") {
+  if (
+    value.kind === "score_protection_staging_install" ||
+    value.kind === "score_protection_terminal_install"
+  ) {
     return (
       hasOnlyKeys(value, SCORE_PROTECTION_STAGING_INSTALL_SIGNAL_KEYS) &&
-      value.phase === "install_ice" &&
+      (value.phase === "install_ice" ||
+        (value.kind === "score_protection_terminal_install" &&
+          value.phase === "install_defense_support")) &&
       nonEmptyString(value.serverId) &&
       nonEmptyString(value.parentProjectId) &&
       nonEmptyString(value.parentNeedId) &&

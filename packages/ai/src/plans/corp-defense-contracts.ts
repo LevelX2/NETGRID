@@ -156,7 +156,16 @@ export type CorpScoreProtectionStagingInstallSignal = CorpDefenseSignalBase & {
 };
 
 export type CorpDefenseSignal =
+  | CorpTerminalProtectionInstallSignal
   | CorpGenericDefenseSignal
   | CorpScoreProtectionInstallSignal
   | CorpScoreProtectionStagingInstallSignal
   | CorpScoreProtectionDrawSignal;
+
+export type CorpTerminalProtectionInstallSignal = Omit<
+  CorpScoreProtectionStagingInstallSignal,
+  "kind" | "phase"
+> & {
+  kind: "score_protection_terminal_install";
+  phase: "install_ice" | "install_defense_support";
+};

@@ -1,4 +1,5 @@
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
+import { assessCorpTerminalAgendaDefense } from "./corp-terminal-agenda-defense";
 import type {
   AiDecisionInput,
   VisibleCard,
@@ -15,6 +16,7 @@ import {
 } from "../../runtime/corp-exact-ice-rez-route";
 import {
   assessCorpRezOpportunityCost,
+  corpServerAgendaExposure,
   type CorpRezOpportunityAssessment,
 } from "./corp-server-protection-reserve";
 
@@ -60,6 +62,51 @@ export function assessCorpExactIceRezAgainstScoreReserves(params: {
     ? params.restrictedCreditFunding.consumer
         .generalCreditsRemainingAfterConsumer
     : input.playerView.own.credits - route.totalRezCredits;
+  const exposure = corpServerAgendaExposure(input, route.targetServerId);
+  if (
+    !routePreventsImmediateAccess(route) &&
+    input.playerView.run?.attackedServerId === route.targetServerId &&
+    exposure &&
+    exposure.maximumPoints + input.playerView.opponent.agendaPoints >=
+      input.playerView.agendaPointsToWin
+  ) {
+    const defense = assessCorpTerminalAgendaDefense(
+      input,
+      route.targetServerId,
+      "current-terminal-run",
+    );
+    if (
+      defense &&
+      defense.best.protection.runnerAccessSuccessProbability.numerator <
+        defense.best.protection.runnerAccessSuccessProbability.denominator
+    ) {
+      const selected = defense.best.selectedRezCosts.find(
+        (cost) => cost.iceInstanceId === route.sourceCardInstanceId,
+      );
+      const requiredCreditsAfterRez =
+        defense.best.totalSelectedRezCost - (selected?.credits ?? 0);
+      const preservesReserve =
+        selected !== undefined &&
+        selected.credits === route.totalRezCredits &&
+        availableCreditsAfterRez >= requiredCreditsAfterRez;
+      return {
+        preservesReserve,
+        requiredCreditsAfterRez,
+        availableCreditsAfterRez,
+        scoreProjectIds: [],
+        immediateRezIceIds: defense.best.selectedRezCosts.map(
+          (cost) => cost.iceInstanceId,
+        ),
+        opportunity: {
+          reason: "current_terminal_access",
+          preservesReserve,
+          requiredCredits: requiredCreditsAfterRez,
+          claims: [],
+          unknownServerIds: [],
+        },
+      };
+    }
+  }
   const opportunity = assessCorpRezOpportunityCost(
     input,
     route,

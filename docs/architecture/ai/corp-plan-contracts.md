@@ -362,34 +362,49 @@ und erhält diesen Aufschlag nicht. Gleiche Zugriffschancen dürfen beim Verglei
 gehaltener Agenden nicht die unmittelbare Verlustfolge unterschlagen (Regression:
 Pairing 432, D464; Coup und Security Net bei sechs Corp-/vier Runnerpunkten).
 
-Offener Prüfpunkt bei bereits exponierten Agenden: Der Pfad
-`corp_exposed_agenda_progress_preserves_conversion_clock` erlaubt weitere
-Advances trotz nicht erfülltem Schutz, um den Scoretermin zu erhalten.
-In `match_52de6345f1e39802` verwenden D34/D35 diesen Pfad nach der öffentlichen
-Dwarf-Installation; D36 verwendet anschließend die Next-Turn-Fortsetzung.
-Main-Office Relocation erreicht nur 3/4 Counter, während das Creditbudget von
-6 auf 3 sinkt und der Runner durch einen Steal gewinnt. D34 bleibt auch mit
-der serverübergreifenden Rezreserve reproduzierbar. Zu prüfen ist die
-Abwägung zwischen konkreter Schutzreparatur und Scorefortschritt über das
-Runnerfenster; fehlender finanzierbarer Schutz ist keine bloße Fundinglücke.
-Die genauere Gegenprüfung findet eine bekannte, legal angebotene Schutzoption:
-Rio de Janeiro City Grid liegt auf HQ und kostet einschließlich sofortigem
-Rez 1 Credit und 1 Klick. Ab D34 lassen Rio-Installation, ein Basiscredit und
-ein Advance 5 Credits für beide Remote-ICE; ab D35 genügt Rio plus Basiscredit.
-Die Agenda erreicht dann erst 1/4 Counter. Beide ICE allein kosten zusammen
-5 Rez-Credits, sind aber durch den sichtbaren Dwarf für zusammen 2 Credits
-brechbar. Rio ergänzt je passiertem gerezzten ICE eine Runstopp-Chance von
-1/6, bei zwei ICE also 11/36 für einen einzelnen vollständigen Runversuch.
-Bei D36 finanziert Rio nach seiner Installation nur noch eines der beiden ICE.
-Die historischen Alternativdiagnosen schließen Rio im Agenda-Remote mit
-`corp_card_action_has_no_exact_parent_need` aus; der Remoteplan verweist auf
-`remote_leased_to_score_project` und `remote_support_route_unavailable`.
-Offen ist daher konkret die parentgebundene probabilistische Schutzroute
-einschließlich Rezbudget und verzögerter Scorekonversion. Die höhere Chance,
-einen Run abzuwehren, beweist weder das Überleben mehrerer Runs noch einen
-Gewinn des Spiels. Nach zusätzlichem ICE zu ziehen bleibt eine unsichere
-Suchroute; bei D34 liegt kein ICE auf HQ. Die Engine-Rio-Fälle in
-`agenda-global-random.test.ts` prüfen Runstopp, Nichtstopp und Replay.
+Bei einer installierten Agenda, deren Steal den Runner gewinnen lässt, stellt
+`corp.score_agenda` gewöhnlichen Advance-Fortschritt hinter einen konkret
+finanzierbaren Schutzweg zurück. Ein im aktuellen Zug schließender Score bleibt
+vorrangig. Der typisierte `terminalDefense`-Bedarf trägt P2, Agenda-/Serverbindung,
+StateVersion und den bestehenden `score-protection`-Need. Eine Next-Turn-
+Fortsetzungsquote hebt diesen Bedarf nicht auf.
+
+`corp.defend_servers` vergleicht mit dem bestehenden exakten ICE-Subset-Solver
+vorhandene Schichten, eine aktuell legale ICE-Installation und eine aktuell
+legale, sofort aktive Post-Pass-Schutzinstallation. Mechanische Wahrscheinlichkeit
+und sofortige Aktivierung kommen aus der Engine, Kosten aus LegalActions und
+Rez-Quotes. Die Suchgrenze ist ausdrücklich eine Installation plus finanzierbare
+Basiscredit-Vorbereitung innerhalb der verbleibenden Klicks; nach jeder Aktion
+wird neu bewertet. Unbekannte Ziehkarten, mehrere hypothetische Installationen,
+Regionersatz und nicht gequotete Mechaniken sind keine zertifizierten Routen.
+Öffentliches, unbedingtes und unbegrenzt wiederholbares Runner-Krediteinkommen
+wird bei der Vorbereitung berücksichtigt; verdeckte Events bleiben unbekannt.
+
+Ziel ist die kleinste belegte Zugriffswahrscheinlichkeit pro Run; bei Gleichstand
+entscheiden Agenda-Punktkosten, gesamte Creditkosten und Installationsklicks.
+Auch Teilabsicherung ist produktiv. `corp.economy` finanziert den vom Scoreparent
+veröffentlichten Credit-Meilenstein. Advances dürfen nur Überschuss verbrauchen;
+wenn ein zusätzlicher Basiscredit Advance und Rezreserve gemeinsam ermöglicht,
+steht diese Finanzierung zuerst. Die Zugplanung übernimmt denselben Parent/Need
+und validiert nach Installation neu. Während eines terminalen Runs erhält die
+gewählte finanzierte ICE-Kombination Vorrang vor Score-Credits und redundanten
+Rezzes. Finanzierbare Teilabsicherung terminaler Server bleibt außerdem beim
+Vergleich mit Rezzes auf anderen Servern reservierbar.
+
+Die historische Gegenprobe `match_52de6345f1e39802` hat bei D34 sechs Credits und
+drei Klicks, eine 0/4 avancierte Main-Office Relocation und den Runner bei vier
+Agendapunkten. Rio de Janeiro City Grid kostet einschließlich sofortigem Rez
+einen Credit und einen Klick. Rio, ein Basiscredit und ein Advance lassen fünf
+Credits für Data Wall 2.0 und Wall of Static; die Agenda endet bei 1/4. Beide ICE
+allein sind durch den sichtbaren Dwarf für insgesamt zwei Credits brechbar.
+Rio ergänzt je passiertem gerezzten ICE eine Runstopp-Chance von 1/6: zwei
+Schichten geben 11/36 Abbruchchance pro vollständigem Runversuch. Bei D35 genügt
+Rio plus Basiscredit; bei D36 finanziert Rio nur noch eine Schicht, wobei die
+billigere gleich wirksame Data Wall erhalten wird. Dies verbessert die belegte
+Abwehrchance, beweist aber weder das Überleben wiederholter Runs noch einen Sieg.
+Die genaue Entscheidung ist durch den actor-sicheren D34-Checkpoint und
+`match-52de-terminal-defense.test.ts` prüfbar; Engine-Runstopp und Replay bleiben
+in `agenda-global-random.test.ts` abgesichert.
 
 Ein bereits im eigenen Zug
 vollständig schließender Score hat kein dazwischenliegendes Runner-Fenster.

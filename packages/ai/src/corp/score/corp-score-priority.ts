@@ -9,6 +9,7 @@ export function corpScorePriorityClass(
   if (signal.terminalScore && signal.sameTurnCloseout) return "P1";
   if (
     signal.preventsTerminalSteal ||
+    signal.terminalDefense !== undefined ||
     (signal.lastDrawScoreSurvival && signal.terminalScore && signal.feasible)
   ) {
     return "P2";
