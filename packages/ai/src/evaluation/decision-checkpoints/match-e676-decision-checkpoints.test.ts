@@ -15,7 +15,7 @@ describe("match e676 exact decision checkpoints", () => {
       [
         "plan_module:corp.economy",
         "plan_step_capability:develop_or_convert_corp_economy",
-        "plan_assessment_evidence:corp_engine_certified_mature_remote_score_install:remote_1",
+        "plan_assessment_evidence:corp_score_protection_required:remote_1",
       ],
     ],
     [
@@ -37,19 +37,28 @@ describe("match e676 exact decision checkpoints", () => {
   it("releases score-material capacity with funded ICE without rezzing Chester Mix", () => {
     const checkpoint = fixture(chesterBeforeHqIceJson);
     checkpoint.expectation = {
-      acceptableActions: [{
-        actionId: "corp.install_card.corp_onr_v1_243_fetch-4-0-1_2.rd.corp_onr_v1_243_fetch-4-0-1_2.2",
-      }],
+      acceptableActions: [
+        {
+          actionId:
+            "corp.install_card.corp_onr_v1_243_fetch-4-0-1_2.rd.corp_onr_v1_243_fetch-4-0-1_2.2",
+        },
+      ],
       forbiddenActions: [{ type: "rez_card", sourceDefinitionId: CHESTER_MIX }],
       planExecution: {
         acceptablePlanKinds: ["corp.defend_servers"],
         acceptableCapabilities: ["allocate_server_defense"],
-        requiredAssessmentEvidence: ["corp_score_material_capacity_release:rd:corp.install_card.corp_onr_v1_243_fetch-4-0-1_2.rd.corp_onr_v1_243_fetch-4-0-1_2.2"],
+        requiredAssessmentEvidence: [
+          "corp_score_material_capacity_release:rd:corp.install_card.corp_onr_v1_243_fetch-4-0-1_2.rd.corp_onr_v1_243_fetch-4-0-1_2.2",
+        ],
       },
     };
     const result = expectCheckpointToPass(checkpoint);
-    expect(result.selectedAction?.payload?.postInstallRezQuoteComplete).toBe(true);
-    expect(result.selectedAction?.payload?.postInstallRezQuoteFinalCredits).toBe(0);
+    expect(result.selectedAction?.payload?.postInstallRezQuoteComplete).toBe(
+      true,
+    );
+    expect(
+      result.selectedAction?.payload?.postInstallRezQuoteFinalCredits,
+    ).toBe(0);
   });
 
   it("still allows Tycho exposure when Project Consultants converts it this turn", () => {

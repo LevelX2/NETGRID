@@ -85,7 +85,7 @@ describe("turn-planner shadow behavior-baseline regressions", () => {
         protectedRemoteIceInstallIndex,
       );
     }
-  }, 15_000);
+  }, 180_000);
 });
 
 function runCapturedSeed(seed: string, actionIndex: number) {

@@ -4,6 +4,8 @@ import {
   applyRandomizedTraceBidSelection,
   applyRandomizedTurnPlanSelection,
   quoteCorpPunishRoute,
+  hashGameState,
+  replayEvents,
 } from "@netgrid/engine";
 import type { AiDecision, GameState } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
@@ -26,11 +28,11 @@ describe("match 5F7924 Corp agenda, defense and discard checkpoints", () => {
     expectCheckpointToPass(openingDefenseControlJson);
   });
 
-  it("honors the global R&D defense allocation after Efficiency Experts", () => {
+  it("develops score protection before exposing Marked Accounts after Efficiency Experts", () => {
     expectCheckpointToPass(turn7AgendaDefenseJson);
   });
 
-  it("continues from the allocated R&D defense into the admitted score remote", () => {
+  it("continues the same bounded score project in the newly created remote", () => {
     expectScoreProtectionDevelopmentContinuation(turn7AgendaDefenseJson);
   });
 
@@ -93,30 +95,40 @@ function expectScoreProtectionDevelopmentContinuation(value: unknown): void {
     (action) => action.actionId === second.actionId,
   );
 
-  expect(
-    selected,
-    JSON.stringify({
-      selected,
-      remote: input.playerView.servers.find(
-        (server) => server.id === "remote_1",
-      ),
-      dispositions:
-        second.decisionDebug?.planFirstDecision?.dispositions.filter(
-          (entry) =>
-            entry.actionId.includes("marked-accounts") ||
-            entry.actionId.includes("jack-attack"),
-        ),
-    }),
-  ).toMatchObject({ type: "draw_card", source: "basic_action" });
-  expect(second.decisionDebug?.planKind).toBe("corp.defend_servers");
-  expect(second.decisionDebug?.planFirstDecision?.route?.capabilityId).toBe(
-    "develop_score_protection",
+  expect(selected).toMatchObject({
+    type: "install_card",
+    source: "corp_onr_proteus_005_marked-accounts_1",
+    payload: { serverId: "remote_1" },
+  });
+  const firstPlan = first.decision!.decisionDebug!.planFirstDecision!;
+  expect(firstPlan.selectedPlan?.parentInstanceId).toBe(
+    "plan:corp.score_agenda:agenda%3Acorp_onr_proteus_005_marked-accounts_1%3Anew_remote",
   );
   expect(
-    second.decisionDebug?.planFirstDecision?.assessmentEvidenceCodes.some(
-      (entry) => entry.includes("score_plan_requires_effective_ice_draw"),
-    ),
-  ).toBe(true);
+    first.selectedAction?.payload?.postInstallRezQuoteProjectedServerId,
+  ).toBe("remote_1");
+  expect(second.decisionDebug?.planFirstDecision).toMatchObject({
+    rootPlanInstanceId:
+      "plan:corp.score_agenda:agenda%3Acorp_onr_proteus_005_marked-accounts_1%3Aremote_1",
+    selectedPlan: { moduleId: "corp.score_agenda", phase: "install_agenda" },
+    route: { actionId: selected!.actionId, stateVersion: state.stateVersion },
+  });
+  expect(
+    second.decisionDebug?.planFirstDecision?.assessmentEvidenceCodes,
+  ).toContain("corp_bounded_staged_score_install:remote_1");
+  expect(
+    input.playerView.servers
+      .find((server) => server.id === "remote_1")
+      ?.ice.map((card) => card.instanceId),
+  ).toContain(first.selectedAction!.source);
+  const initial = checkpointState(checkpoint);
+  state = applyDecision(state, second);
+  const replay = replayEvents(
+    initial,
+    state.eventLog.slice(initial.eventLog.length),
+  );
+  expect(replay.ok).toBe(true);
+  expect(hashGameState(replay.state)).toBe(hashGameState(state));
 }
 
 function decisionsAfterBoundAgendaDefense(

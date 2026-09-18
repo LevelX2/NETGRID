@@ -20,6 +20,7 @@ import { buildPlanningStateIdentity } from "./turn-planning-contracts";
 describe("Corp defense/economy turn-planning vertical slice", () => {
   it("binds exact funding before the ICE install without duplicating defense value", () => {
     const input = decisionInput();
+    offerFundingAction(input, 2);
     const defense = defenseSignal({
       disposition: "funding_only",
       effect: "progress",
@@ -187,6 +188,7 @@ describe("Corp defense/economy turn-planning vertical slice", () => {
 
   it("keeps partial exact funding ahead of staging even when one action cannot close the whole gap", () => {
     const input = decisionInput();
+    offerFundingAction(input, 1);
     const defense = defenseSignal({
       disposition: "funding_only",
       effect: "progress",
@@ -510,6 +512,12 @@ function defenseSignal(params: {
 function economyCandidate(netGain = 2): ActionSemanticCandidate {
   return {
     ...baseCandidate("gain-credits", "economy.gain_credit", "operation-1"),
+    actionType: "play_operation",
+    legalActionRef: {
+      actionId: "gain-credits",
+      actionType: "play_operation",
+      originalPayloadKeys: ["gainCreditsAmount"],
+    },
     economyProjection: {
       schemaVersion: "action-economy-projection-v1",
       kind: "immediate_liquid",
@@ -608,6 +616,24 @@ function baseCandidate(
     hardGates: [],
     evidence: [],
   };
+}
+
+function offerFundingAction(input: AiDecisionInput, gainCreditsAmount: number) {
+  input.legalActions.push({
+    actionId: "gain-credits",
+    side: "corp",
+    type: "play_operation",
+    label: "Funding operation",
+    source: "operation-1",
+    timingPoint: "corp_action.main",
+    costs: [{ clicks: 1 }],
+    targetRequirements: [],
+    choiceRequirements: [],
+    visibility: "private_to_actor",
+    expiresAtStateVersion: input.playerView.stateVersion,
+    payload: { gainCreditsAmount },
+  });
+  input.playerView.legalActions = structuredClone(input.legalActions);
 }
 
 function decisionInput(): AiDecisionInput {

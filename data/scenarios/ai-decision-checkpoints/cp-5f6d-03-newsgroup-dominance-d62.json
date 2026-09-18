@@ -7040,11 +7040,17 @@
     }
   },
   "expectation": {
-    "exactActionId": "runner.install_card.runner_onr_v1_028_force-shield_2.runner_onr_v1_028_force-shield_2",
     "planExecution": {
-      "acceptablePlanKinds": ["runner.defense_and_recovery"],
-      "acceptableCapabilities": ["install_defense_support"],
-      "requiredAssessmentEvidence": ["runner_defense_support_current_need"]
-    }
+      "acceptablePlanKinds": ["runner.rig_and_coverage"],
+      "acceptableCapabilities": ["draw_for_answer_breaker_code_gate"],
+      "requiredAssessmentEvidence": [
+        "runner_known_remote_coverage_project:remote_1"
+      ]
+    },
+    "acceptableActions": [
+      {
+        "type": "draw_card"
+      }
+    ]
   }
 }
