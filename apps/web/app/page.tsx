@@ -1,4 +1,5 @@
 "use client";
+import { nextChronicleWidth, type ChronicleWidth } from "../features/chronicle/chronicle-width";
 import { localizedDeckValidationIssues } from "../i18n/deck-validation";
 
 import {
@@ -806,7 +807,8 @@ export default function Page() {
     runner: { kind: "default" },
     corp: { kind: "default" },
   });
-  const [rightRailCollapsed, setRightRailCollapsed] = useState(false);
+  const [chronicleWidth, setChronicleWidth] = useState<ChronicleWidth>("wide");
+  const rightRailCollapsed = chronicleWidth === "off";
   const [undoPanelOpen, setUndoPanelOpen] = useState(false);
   const [focusedCard, setFocusedCard] = useState<FocusedCard | null>(null);
   const [dismissedAccessEventIds, setDismissedAccessEventIds] = useState<
@@ -7005,6 +7007,7 @@ export default function Page() {
                 canForfeit={canForfeit}
                 canCancelSimulation={canCancelSimulation}
                 rightRailCollapsed={rightRailCollapsed}
+                chronicleWidth={chronicleWidth}
                 canRequestHumanAiAdvice={canRequestHumanAiDecisionPreview}
                 canOpenDeckGuide={Boolean(activeStandardDeckGuide)}
                 humanAiAdvice={humanAiAdvice}
@@ -7021,7 +7024,7 @@ export default function Page() {
                 onRequestForfeitMatch={requestForfeitMatch}
                 onRequestCancelSimulation={requestCancelSimulation}
                 onToggleRightRail={() =>
-                  setRightRailCollapsed((current) => !current)
+                  setChronicleWidth(nextChronicleWidth)
                 }
                 onRequestHumanAiAdvice={() =>
                   void requestHumanAiDecisionPreview()
@@ -7292,7 +7295,7 @@ export default function Page() {
 
               {activeMatchIsGame ? (
                 <div
-                  className={`main${rightRailCollapsed ? " rightRailCollapsed" : ""}`}
+                  className={`main chronicle-${chronicleWidth}${rightRailCollapsed ? " rightRailCollapsed" : ""}`}
                   data-testid="active-game"
                 >
                   <aside

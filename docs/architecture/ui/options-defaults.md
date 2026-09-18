@@ -25,3 +25,17 @@ Initialisierung und Persistenz liegen in `apps/web/app/page.tsx` und den
 Karten-Einstellungshooks. Gemeinsame Darstellungsdefaults liegen in
 `apps/web/features/settings/settings-model.ts`; Replay und Kartenkontexte
 verwenden dieselben Vorgaben. Die Browserwerte werden pro Origin gespeichert.
+
+## Chronik und visuelle Zustandsmarkierungen
+
+Der Chronikknopf im aktiven Spiel schaltet zyklisch zwischen Aus, Breit,
+Mittel und Schmal. Anfangszustand ist Breit; die Auswahl gilt für die laufende
+Seiteninstanz. Auf Desktopbreiten über 1180 Pixel sind die Chronikspalten
+360, 300 beziehungsweise 240 Pixel breit. Darunter bleibt der bestehende
+vertikale Aufbau erhalten. Der Tooltip benennt aktuellen und nächsten Zustand.
+
+Ablagekarten bleiben leicht entsättigt und abgedunkelt; der dunkle Verlauf
+liegt bei 8–20 % Deckkraft. Ungerezzte Karten behalten ebenfalls eine leichte
+Abdunklung. Der helle Modus verwendet zurückhaltendere Zonenfarben, neutralere
+Kartenrahmen und weichere Schatten; Aktions- und Auswahlmarkierungen bleiben
+erhalten.

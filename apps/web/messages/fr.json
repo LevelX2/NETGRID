@@ -279,6 +279,8 @@
       "requestUndo": "Demande d'annulation",
       "hideMatchStatus": "Jeu actif : masquer le statut",
       "showMatchStatus": "Jeu actif : afficher le statut",
+      "cycleChronicle": "Chronique : {current}. Passer à {next}.",
+      "chronicleWidths": {"off":"Masquée","wide":"Large","medium":"Moyenne","narrow":"Étroite"},
       "showRightRail": "Afficher le panneau de droite",
       "hideRightRail": "Masquer le panneau droit",
       "askAi": "Interrogez l'IA à propos de mon deck",
