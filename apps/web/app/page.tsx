@@ -458,6 +458,7 @@ import {
 import {
   noticeAfterActionReceipt,
   noticeAfterServerError,
+  noticeAfterStateUpdate,
   type MatchNotice,
 } from "../features/match-session/match-notice";
 import { useMatchTransport } from "../features/match-session/useMatchTransport";
@@ -6116,6 +6117,15 @@ export default function Page() {
       return;
     }
     if (message.type === "state_update") {
+      const noticeSession = sessionRef.current;
+      if (noticeSession)
+        setMatchNotice((current) =>
+          noticeAfterStateUpdate(current, {
+            matchId: noticeSession.matchId,
+            side: message.payload.playerView.side,
+            stateVersion: message.payload.playerView.stateVersion,
+          }),
+        );
       pendingAiAdvanceKeyRef.current = null;
       const activeLobby = lobbyRef.current;
       if (activeLobby) presentMatchStartLogo(activeLobby.matchId);
@@ -6253,7 +6263,18 @@ export default function Page() {
       paymentSupportContinuationSubmittedKeyRef.current = null;
       const localizedError = errorT(userErrorMessageKey(message.payload.code));
       setMatchNotice((current) =>
-        noticeAfterServerError(current, message.payload.code, localizedError),
+        noticeAfterServerError(
+          current,
+          message.payload.code,
+          localizedError,
+          sessionRef.current && message.payload.playerView
+            ? {
+                matchId: sessionRef.current.matchId,
+                side: message.payload.playerView.side,
+                stateVersion: message.payload.playerView.stateVersion,
+              }
+            : undefined,
+        ),
       );
       if (message.payload.code.startsWith("undo_")) {
         setUndoNotice(localizedError);

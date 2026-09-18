@@ -635,6 +635,34 @@ auch das wirkungsgleiche Mindestgebot 0 zertifizieren. Die Choice-Auflösung
 verwendet dann die vorhandene, exakt gebundene Nulloption; sie bewertet keine
 neue Strategie und gibt keine zusätzlichen Credits ohne Wirkung aus.
 
+Eine aktuelle Grenze bleibt bezahltes reines Trace-/Tag-ICE ohne exakte
+Run-Ende- oder Ressourcentauschquote: Bei unbekannter Schutzprojektion öffnet
+der qualitative Defense-Pfad außerhalb eines gebundenen Bluffbedarfs erst
+für eine bedrohte Agenda-Remote oder einen möglichen terminalen Central-Zugriff.
+Der bloße Besitz ausreichender Rez-Credits genügt nicht. Die Entscheidungen
+aus Match `match_cefc05480ed5b497` bei State 96, 110 und 173 gegenüber 178
+belegen diese Grenze für Pocket Virtual Reality: Der Wechsel von einem auf
+vier Runner-Agendapunkte öffnet die Route. Ein früherer Nutzenvergleich aus
+Trace-Antwort, temporären Trace-Credits und Tag-Verwertung ist damit noch
+nicht abgedeckt; die Ablehnung ist kein Nachweis wirtschaftlicher Nutzlosigkeit.
+
+Die unbekannte Schutzprojektion entsteht in diesem Match durch Clown:
+`runnerRigCardRequiresUnsupportedAccessProjection` schließt dessen noch nicht
+projizierten ICE-Stärkemodifikator aus. Exakte Engine-Quotes bleiben nutzbar;
+der qualitative Ersatzpfad steht dadurch aber nicht allgemein zur Verfügung.
+Die Sperre darf erst mit korrekter Projektion des Modifikators entfallen.
+Ein kontrollierter Vergleich aller 106 ONR-ICE im Approach-Zustand 96
+(Corp 50 Credits, Runner 10 Credits, ein Agendapunkt; jeweils nur die
+ICE-Definition ersetzt) ergibt 25 Karten mit Defense-Route ohne Rig, aber
+ohne Route mit dem ursprünglichen Clown-Rig: Bolter Swarm, Brain Drain,
+Deadeye, Brain Wash, Bug Zapper, Death Yo-Yo, Digiconda, Dog Pile, Marionette,
+Mastermind, Roadblock, Scaffolding, Banpei, Bolter Cluster, D'Arc Knight,
+Data Darts, Data Raven, Hunter, Ice Pick Willie, Jack Attack, Neural Blade,
+Pocket Virtual Reality, Vacuum Link, Viral 15 und Virizz. Das ist eine
+zustandsgebundene Abdeckungslücke, keine pauschale Rezempfehlung für diese
+Karten. Weitere fehlende Routen können fachlich korrekt sein, etwa bei
+Wirkungen ausschließlich für spätere ICE.
+
 **Klasse:** `development_project` mit internem Urgent-Response-Modus
 **Rolle:** Background/Vordergrund/Urgent Response
 **Status:** registrierter produktiver Owner; Fähigkeitsgrenzen siehe Einstieg.
@@ -1449,6 +1477,16 @@ Eine planfremde Aktion wie Closed Accounts darf eine weiterhin lethal
 Drei-Aktionen-Flatline-Sequenz nicht aufbrechen.
 
 ## 9. `corp.ambush_and_bluff`
+
+Im letzten Root-Rez-Fenster vergleicht der residente Ambush-Owner die
+strukturierten installierten Zugriffseffekte vor und nach einem kostenlosen
+Rez. Ein vollständig bekannter höherer Zugriffsnutzen bindet die aktuelle
+Rez-Aktion an denselben Trigger-Step. Advancement-Counter sind keine
+pauschale Voraussetzung: Setup! benötigt keine; Virus Test Site benötigt
+einen tatsächlichen Mehrwert gegenüber seinem ungerezzten Effekt. Unbekannte
+Projektionen, andere angegriffene Server und unveränderter Nutzen öffnen
+diese Route nicht. Auch die Root-Rez-Bewertung liest die Aktivierungsbedingung
+aus CardSpec statt sie aus einem allgemeinen Damage-Hint abzuleiten.
 
 **Klasse:** `development_project` oder `bounded_sequence`
 **Rolle:** Background/Vordergrund

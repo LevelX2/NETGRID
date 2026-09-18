@@ -38,6 +38,10 @@
     cover no-repeat;
 }
 
+:root[data-theme="white"] .app.activeMatch.cyberspaceBackgroundEnabled .main {
+  background-image: url("/backgrounds/cyberspace-board-background-light.png");
+}
+
 .replayTopbar {
   flex-wrap: wrap;
 }
@@ -12024,6 +12028,7 @@ section[data-testid="legal-actions"].cueHighlight {
 
 .gameOverHeroCopy {
   display: grid;
+  min-width: 0;
   gap: 7px;
 }
 
@@ -12392,6 +12397,51 @@ section[data-testid="legal-actions"].cueHighlight {
   margin-left: 10px;
   border-color: rgb(255 255 255 / 0.16);
   color: var(--muted);
+}
+
+:root[data-theme="white"] .gameOverOverlay {
+  background: rgb(31 51 74 / 0.28);
+  backdrop-filter: blur(5px);
+}
+
+:root[data-theme="white"] .gameOverPanel {
+  border-color: var(--line);
+  background: #f8fafc;
+  color: var(--text);
+  box-shadow: 0 24px 80px rgb(28 48 72 / 0.24);
+}
+
+:root[data-theme="white"] .gameOverPanel.withMotifHero::before {
+  background: linear-gradient(135deg, rgb(21 111 216 / 0.05), transparent 55%);
+}
+
+:root[data-theme="white"] .gameOverHero.withVisualMotif .resultWinnerMotif {
+  border-color: #bfd0df;
+  box-shadow: 0 8px 24px rgb(28 48 72 / 0.14);
+}
+
+:root[data-theme="white"] .gameOverPanel .gameStandingStrip {
+  background: #edf4fc;
+  border-color: #b9cee5;
+}
+
+:root[data-theme="white"] .gameOverPanel .gameStandingScore {
+  color: #284866;
+}
+
+:root[data-theme="white"] .gameOverPanel .seriesResultLabel {
+  color: var(--runner);
+}
+
+:root[data-theme="white"] .gameOverFooter {
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+  background: #f8fafc;
+  box-shadow: none;
+}
+
+:root[data-theme="white"] .gameOverActions .seriesExitButton {
+  border-color: var(--line);
 }
 
 .boardSection {

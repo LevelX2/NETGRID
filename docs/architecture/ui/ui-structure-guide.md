@@ -19,6 +19,21 @@
 - Normale Player-UI darf keinen FullState bekommen.
 - `page.tsx` soll nicht wieder neue Sammelbereiche für Card-, Action-, Recent-, Storage- oder Overlay-Helfer aufnehmen.
 
+## Helle Endstandanzeige und Cyberspace-Hintergrund
+
+Die helle Variante (`data-theme="white"`) verwendet für den Endstand eine
+helle, deckende Panel- und Footerfläche mit dunkler Schrift. Die dunkle
+Gewinnerillustration bleibt als abgegrenztes Motiv erhalten. Auf schmalen
+Displays bleibt das Panel scrollbar und der Aktionsfooter hell.
+
+Der bestehende Cyberspace-Schalter steuert beide Themen. Nur bei aktiviertem
+Schalter lädt das helle Thema
+`/backgrounds/cyberspace-board-background-light.png`; das dunkle Thema behält
+sein bisheriges Asset. Das helle Asset wurde mit dem eingebauten
+`image_gen`-Werkzeug und folgendem Prompt erzeugt:
+
+> Use case: stylized-concept. Create a new wide 16:9 raster background asset for the LIGHT THEME of a cyberpunk card game board. An airy luminous cyberspace data architecture: pearlescent white and very pale ice-blue space, delicate translucent glasslike server towers and fine cyan circuit traces toward the side edges, subtle restrained warm silver/gold data accents. Perspective grid fading into an open bright misty center. High-key diffuse daylight, sophisticated calm futuristic atmosphere. Very low contrast overall so dark text and cards above remain clear; mostly near-white/light gray, avoid large dark patches or harsh saturated neon. Background only, no characters, no cards, no panels, no text, no logos, no watermark. Wide quiet central negative space and fine detail concentrated near perimeter. Crisp polished digital environment illustration, not a UI mockup. Generate and save the image.
+
 ## Run-Stufen und Aktionssymbole
 
 Im Run-Fenster beginnen die Phasennamen links auf derselben Textachse;
@@ -55,6 +70,11 @@ ein autoritativer Undo-PlayerView darf weiterhin eine frühere Version liefern.
 Aktionsfehlermeldungen bleiben bis zur nächsten erfolgreichen
 `action_receipt` derselben Match-/Spielerseite sichtbar. Neuere allgemeine
 Hinweise sowie Verbindungs- und KI-Fehler werden dadurch nicht gelöscht.
+Ein Stale-State-Hinweis mit mitgelieferter aktueller Spieleransicht bindet
+seine Auflösung unabhängig von einer Aktionsquittung an Match, Spielerseite
+und StateVersion. Das nächste bestätigte State-Update oder erfolgreiche
+Receipt derselben Bindung ab dieser Version entfernt ihn. Ältere Ansichten,
+fremde Bindungen und neuere unabhängige Fehler werden dadurch nicht gelöscht.
 
 Rez-Schaltflächen lösen den Kartennamen über die `cardId` der LegalAction
 und die bekannte Karte im PlayerView beziehungsweise Kartenmenü auf.
