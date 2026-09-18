@@ -9331,24 +9331,14 @@
       {
         "type": "install_card",
         "sourceDefinitionId": "onr_v1_228_cinderella",
-        "targetServerId": "remote_1"
-      },
-      {
-        "type": "install_card",
-        "sourceDefinitionId": "onr_v1_247_haunting-inquisition",
-        "targetServerId": "new_remote"
-      },
-      {
-        "type": "install_card",
-        "sourceDefinitionId": "onr_v1_228_cinderella",
-        "targetServerId": "hq"
+        "targetServerId": "remote_2"
       }
     ],
     "planExecution": {
       "acceptablePlanKinds": ["corp.defend_servers"],
-      "acceptableCapabilities": [
-        "develop_score_protection",
-        "allocate_server_defense"
+      "acceptableCapabilities": ["develop_score_protection"],
+      "requiredAssessmentEvidence": [
+        "score_protection_staging_install:agenda:corp_onr_v1_188_ai-chief-financial-officer_1:remote_2:remote_2:development_risk_unmodeled_access_path"
       ]
     }
   }

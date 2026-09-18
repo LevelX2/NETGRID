@@ -28543,14 +28543,20 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "install_card",
-        "targetServerId": "rd"
+        "type": "gain_credit"
+      }
+    ],
+    "forbiddenActions": [
+      {
+        "type": "install_card"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["corp.defend_servers"],
-      "acceptableCapabilities": ["allocate_server_defense"],
-      "requiredAssessmentEvidence": []
+      "acceptablePlanKinds": ["corp.economy"],
+      "acceptableCapabilities": ["develop_or_convert_corp_economy"],
+      "requiredAssessmentEvidence": [
+        "corp_engine_certified_basic_liquidity_development"
+      ]
     }
   }
 }

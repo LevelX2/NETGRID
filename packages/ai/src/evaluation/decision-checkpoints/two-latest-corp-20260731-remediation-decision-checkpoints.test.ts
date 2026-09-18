@@ -14,7 +14,9 @@ import preserveScoreReserveD52Json from "../../../../../data/scenarios/ai-decisi
 import retainTychoDiscardCfoD97Json from "../../../../../data/scenarios/ai-decision-checkpoints/cp-daed3ad-latest-08-retain-tycho-discard-cfo-d97.json";
 import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
-import { residentPlanPortfolioSnapshot } from "../../plans/resident-plan-portfolio-memory";
+import { applyAction, hashGameState, replayEvents } from "@netgrid/engine";
+import { buildAiDecisionInput } from "../../runtime/ai-decision-input";
+import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { corpSameTurnScoreConversionPaths } from "../../plans/tactical-plan-corp-score-conversion";
 
 describe("two latest Corp matches 2026-07-31 remediation checkpoints", () => {
@@ -98,22 +100,77 @@ describe("two latest Corp matches 2026-07-31 remediation checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
   });
 
-  it("honors terminal central defense or continues a bound score campaign", () => {
-    const hardening = runAiDecisionCheckpoint(
-      fixture(hardenBoundRemoteD88Json),
+  it("binds each defense action to the score project revalidated after its Engine transition", () => {
+    const checkpoint = fixture(hardenBoundRemoteD88Json);
+    const hardening = runAiDecisionCheckpoint(checkpoint);
+    expect(hardening.ok, hardening.message).toBe(true);
+    const initial = structuredClone(checkpoint.engine.testOnlyGameState);
+    initial.eventLog = structuredClone(checkpoint.engine.eventPrefix);
+    const first = applyAction(initial, {
+      matchId: initial.matchId,
+      side: "corp",
+      actionId: hardening.selectedAction!.actionId,
+      clientKnownStateVersion: initial.stateVersion,
+      idempotencyKey: "score-hardening",
+    });
+    expect(first.ok).toBe(true);
+    if (!first.ok) throw new Error(first.error.message);
+    const input = buildAiDecisionInput(first.state, "corp", {
+      difficulty: checkpoint.difficulty,
+      profileId: checkpoint.profileId,
+      decisionId: `continuation:${first.state.stateVersion}`,
+      actionNumber: first.state.stateVersion,
+      ownDeckSnapshot: checkpoint.deckSnapshot,
+      eventTail: first.state.eventLog,
+    });
+    const decision = chooseAiAction(input);
+    const selected = input.legalActions.find(
+      (action) => action.actionId === decision.actionId,
+    )!;
+    expect(selected).toMatchObject({
+      type: "install_card",
+      payload: { placement: "ice", serverId: "remote_1" },
+    });
+    // Revalidation may move an uninstalled agenda; it must rebind the support
+    // parent and route together, never transplant the historical D89 state.
+    for (const [current, action, version] of [
+      [hardening.decision!, hardening.selectedAction!, initial.stateVersion],
+      [decision, selected, first.state.stateVersion],
+    ] as const) {
+      const parent = `plan:corp.score_agenda:agenda%3Acorp_onr_v1_188_ai-chief-financial-officer_1%3A${action.payload!.serverId}`;
+      expect(current.decisionDebug?.planFirstDecision).toMatchObject({
+        rootPlanInstanceId: parent,
+        selectedPlan: {
+          moduleId: "corp.defend_servers",
+          parentInstanceId: parent,
+        },
+        route: {
+          actionId: action.actionId,
+          stateVersion: version,
+          target: { kind: "server", id: action.payload!.serverId },
+        },
+      });
+    }
+    const second = applyAction(first.state, {
+      matchId: first.state.matchId,
+      side: "corp",
+      actionId: selected.actionId,
+      clientKnownStateVersion: first.state.stateVersion,
+      idempotencyKey: "score-continuation",
+    });
+    expect(second.ok).toBe(true);
+    if (!second.ok) throw new Error(second.error.message);
+    const replay = replayEvents(
+      initial,
+      second.state.eventLog.slice(initial.eventLog.length),
     );
-    expect(hardening.ok, `${hardening.code}: ${hardening.message}`).toBe(true);
+    expect(replay.ok).toBe(true);
+    expect(hashGameState(replay.state)).toBe(hashGameState(second.state));
+  });
 
-    if (hardening.selectedAction?.payload?.serverId !== "remote_1") return;
-
-    const continuation = fixture(continueTychoD89Json);
-    const resident = residentPlanPortfolioSnapshot(hardening.input);
-    expect(resident).toBeDefined();
-    if (!resident) throw new Error("missing resident score campaign");
-    continuation.runtime.residentPlanPortfolio = resident;
-    const result = runAiDecisionCheckpoint(continuation);
-
-    expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+  it("revalidates the separately captured D89 score-support position", () => {
+    const result = runAiDecisionCheckpoint(fixture(continueTychoD89Json));
+    expect(result.ok, result.message).toBe(true);
   });
 
   it.each([

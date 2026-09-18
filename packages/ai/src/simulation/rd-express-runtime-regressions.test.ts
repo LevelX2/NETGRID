@@ -274,7 +274,9 @@ describe("R&D Express selfplay runtime regressions", () => {
       expect(summary.metrics.illegalActions).toBe(0);
       expect(summary.replayOk).toBe(true);
     },
-    120_000,
+    // Functional replay/ownership coverage, not a 120-second performance SLA.
+    // The longest 524-action case takes about 231 s in the parallel shard gate.
+    360_000,
   );
 
   it("keeps Vacuum Link bound across consecutive Runner continuation windows", () => {
