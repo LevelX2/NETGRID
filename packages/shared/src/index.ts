@@ -4091,6 +4091,8 @@ export type PlayerView = {
   own: {
     identity: VisibleCard;
     credits: number;
+    /** Included in credits; only Corp install/rez payments, expires at turn end. Absent means zero. */
+    installRezOnlyCredits?: number;
     clicks: number;
     agendaPoints: number;
     gripOrHq: VisibleCard[];
@@ -4154,6 +4156,10 @@ export type PlayerView = {
   corpPunishRouteQuoteSet?: CorpPunishRouteQuoteSet;
   run?: {
     runId?: string;
+    /** Public Engine fact; a run opportunity, not a guarantee of legality or access. */
+    followupRunOpportunity?: "after_run" | "after_successful_run";
+    /** Remaining runs of public event sequences, independent of run success. */
+    pendingSequenceRunCount?: number;
     attackedServerId: Exclude<ServerId, "new_remote">;
     phase: RunState["phase"];
     position?: RunState["position"];

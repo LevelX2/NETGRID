@@ -1,4 +1,5 @@
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
+import { corpFundedCentralProtectionReserve } from "../defense/corp-server-protection-reserve";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { type CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
@@ -63,6 +64,16 @@ function corpScoreReserveForCandidate(
   );
   return {
     creditBreakdown: [
+      {
+        reserveId: "defense_central_protection",
+        credits: corpFundedCentralProtectionReserve(
+          input,
+          candidate.actionType === "install_card"
+            ? agenda.instanceId
+            : undefined,
+          requireVisibleAgendaPoints(input, agenda),
+        ),
+      },
       {
         reserveId: `score_action:${candidate.actionId}`,
         credits: actionCredits,

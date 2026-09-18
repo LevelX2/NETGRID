@@ -914,6 +914,55 @@ quotierten Need des globalen Defense-Plans überführt oder entfernt. Ein
 unvollständiger Quote erzeugt keinen geschätzten Reservewert; der betroffene
 Need bleibt sichtbar blockiert.
 
+`corp-server-protection-reserve.ts` verbindet konkrete Schutzwege mit dem
+Agendarisiko ihres Servers. HQ verwendet die eigene bekannte Hand und die
+aktuelle Accessquote; R&D verwendet die eigene Deckzusammensetzung abzüglich
+bekannter Karten außerhalb von R&D, niemals die verdeckte Reihenfolge.
+Ein Reserveanspruch benötigt eine vollständig quotierte ICE-Teilmenge, die
+den sichtbaren Runner-Zugriff stoppt. Bereits gerezzter Schutz benötigt keine
+erneute Zahlung; brechbares, unbekanntes oder veraltet quotiertes ICE begründet
+keine behauptete Schutzgarantie. Sichtbare Basiscredit-Vorbereitung des Runners
+wird im jeweiligen Zeithorizont berücksichtigt.
+
+Vor der Zulassung einer produktiven aktuellen ICE-Rezroute vergleicht derselbe
+Defense-Owner deren vermiedenen bedingten Agendapunktverlust mit finanzierbaren
+Schutzwegen anderer Server. Ein aktuell möglicher spielentscheidender Zugriff
+hat bei belegtem Runstopp Vorrang. Für sonstige Konflikte zählen terminale
+Folgebedrohungen zuerst, danach der erwartete Agendapunktverlust bei Zugriff.
+Es wird keine Wahrscheinlichkeit für die Wahl des nächsten Runnerziels erfunden.
+Ein verbleibender Run teilt dieselben Credits zwischen alternativen Zielen;
+mehrere mögliche Runs reservieren die teuersten unterschiedlichen Wege bis
+zur Zahl der verbleibenden Runmöglichkeiten. Unfinanzierbare Portfolios erzeugen
+keinen unerreichbaren Mindestpuffer. Scorefortsetzung, andere Agendaremotes und
+innere ICE des aktuellen Runs bleiben in derselben Ressourcenprüfung;
+derselbe Server wird dabei nicht doppelt reserviert.
+
+Nach dem letzten Runnerklick entfällt die Reserve für spätere normale Runs.
+`run.followupRunOpportunity` erhält öffentlich bekannte Zusatzruns; einen
+erfolgsabhängigen Zusatzrun verhindert ein belegter Stopp des aktuellen Runs.
+Öffentliche Ereignissequenzen bleiben über `pendingSequenceRunCount` auch nach
+einem erfolglosen Run im Horizont.
+Eine fehlende Vergleichsgrundlage blockiert die konkurrierende Allokation
+sichtbar. Sie entwertet keine unabhängige exakte aktuelle Abwehr, wenn kein
+zertifizierter konkurrierender Anspruch existiert oder alle solchen Ansprüche
+nach Zahlung finanziert bleiben. `rezReserveAssessment` hält Entscheidung,
+Beträge, betroffene Server und unbekannte Vergleichsgrundlagen fest.
+
+Scorevorbereitung, Remote-Rezbudget und verzögerte Economy-Entwicklung
+konsumieren die zentralen Schutzansprüche desselben Owners. Eine aus HQ
+installierte Agenda wird aus dessen künftiger Exposition entfernt. Bei der
+Scorevorbereitung konkurriert die konkret zu schützende Agenda mit dem
+Zentralrisiko; eine geringere Zentralbedrohung verdrängt ihren Schutz nicht. Sofortiges
+Scoring und bereits vorher zugelassene positive Sofortkonversionen behalten
+ihre eigenen Verträge. Die Reserve wird aus jedem neuen Zustand berechnet;
+sie ist kein persistierter pauschaler Creditboden. `own.installRezOnlyCredits`
+weist den bereits im Creditbestand enthaltenen, zum Zugende verfallenden
+Installations-/Rez-Anteil aus. Er finanziert keine Reserve für den nächsten
+Runnerzug; eine aktuelle gebundene Zahlung darf ihn weiterhin verbrauchen.
+Der actor-sichere D7-
+Checkpoint `match-52de-defense-reserve.test.ts` prüft HQ-Erhalt, letzten Klick,
+Zusatzruns, ausreichendes Budget, Matchpoint, unbekannte Quotes und Determinismus.
+
 Eine Rez-Entscheidung ist ein fenstergebundener Urgent-Response-Modus
 desselben Verteidigungsplans. Solange dieses Fenster offen ist, beschränkt es
 die ausführbaren Defense-Steps auf passende Rez-Aktionen. Es erzeugt keinen

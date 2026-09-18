@@ -715,6 +715,23 @@ function sanitizePlayerView(
   view: PlayerView,
   publicEvents: PublicGameEvent[],
 ): PlayerView {
+  if (
+    (view.run?.pendingSequenceRunCount !== undefined &&
+      (!Number.isSafeInteger(view.run.pendingSequenceRunCount) ||
+        view.run.pendingSequenceRunCount < 0)) ||
+    (view.run?.followupRunOpportunity !== undefined &&
+      view.run.followupRunOpportunity !== "after_run" &&
+      view.run.followupRunOpportunity !== "after_successful_run")
+  )
+    throw new Error("Invalid Engine public follow-up run opportunity.");
+  if (
+    view.own.installRezOnlyCredits !== undefined &&
+    (view.side !== "corp" ||
+      !Number.isSafeInteger(view.own.installRezOnlyCredits) ||
+      view.own.installRezOnlyCredits < 0 ||
+      view.own.installRezOnlyCredits > view.own.credits)
+  )
+    throw new Error("Invalid Engine Corp install/rez-only credit pool.");
   const corpPunishRouteQuoteSet = sanitizeCorpPunishRouteQuoteSet(view);
   if (
     view.runnerNextTurnCreditClicks !== undefined &&
@@ -749,6 +766,9 @@ function sanitizePlayerView(
     own: {
       identity: sanitizeVisibleCard(view.own.identity),
       credits: view.own.credits,
+      ...(view.side === "corp" && view.own.installRezOnlyCredits !== undefined
+        ? { installRezOnlyCredits: view.own.installRezOnlyCredits }
+        : {}),
       ...(obligation
         ? {
             corpEndTurnCreditObligation: {
@@ -946,6 +966,13 @@ function sanitizePlayerView(
       ? {
           run: {
             ...(view.run.runId ? { runId: view.run.runId } : {}),
+            ...(view.run.pendingSequenceRunCount !== undefined
+              ? { pendingSequenceRunCount: view.run.pendingSequenceRunCount! }
+              : {}),
+            ...(view.run.followupRunOpportunity === "after_run" ||
+            view.run.followupRunOpportunity === "after_successful_run"
+              ? { followupRunOpportunity: view.run.followupRunOpportunity }
+              : {}),
             attackedServerId: view.run.attackedServerId,
             phase: view.run.phase,
             ...(view.run.position

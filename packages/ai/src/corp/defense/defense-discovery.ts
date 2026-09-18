@@ -585,9 +585,12 @@ export function buildCorpDefenseNeeds({
                 ...(targetId ? { targetIceInstanceId: targetId } : {}),
                 urgent: false,
                 rezWindowVerdict: "nonproductive" as const,
+                ...(scoreReserveAdmission
+                  ? { rezReserveAssessment: scoreReserveAdmission }
+                  : {}),
                 value: 0,
                 evidenceCode: exactIceRezRoute
-                  ? `corp_ice_rez_preserves_score_reserve_required:${scoreReserveAdmission?.requiredCreditsAfterRez ?? "unknown"}`
+                  ? `corp_ice_rez_preserves_score_reserve_required:${scoreReserveAdmission?.requiredCreditsAfterRez ?? "unknown"}:opportunity:${scoreReserveAdmission?.opportunity.reason}:protected_servers:${scoreReserveAdmission?.opportunity.claims.map((c) => `${c.serverId}=${c.credits}`).join(",")}:unknown:${scoreReserveAdmission?.opportunity.unknownServerIds.join(",")}`
                   : "corp_ice_rez_resource_exchange_unknown",
               },
             ];
@@ -604,6 +607,9 @@ export function buildCorpDefenseNeeds({
               actionIds: [candidate.actionId],
               ...(targetId ? { targetIceInstanceId: targetId } : {}),
               urgent: input.playerView.run !== undefined,
+              ...(scoreReserveAdmission
+                ? { rezReserveAssessment: scoreReserveAdmission }
+                : {}),
               ...(productiveIceRezRoute
                 ? { rezRoute: productiveIceRezRoute }
                 : {}),
@@ -722,7 +728,20 @@ export function buildCorpDefenseNeeds({
             urgent: genuineCurrentDefenseThreat,
             evidenceCode: genuineCurrentDefenseThreat
               ? "visible_rez_window_decline_with_genuine_defense_threat"
-              : "visible_rez_window_decline_without_defense_threat",
+              : [
+                  "visible_rez_window_decline_without_defense_threat",
+                  ...mergedDefenseNeeds.flatMap((need) =>
+                    need.kind === "generic" &&
+                    need.phase === "rez_response" &&
+                    need.rezWindowVerdict === "nonproductive" &&
+                    (need.rezReserveAssessment?.opportunity.reason ===
+                      "funded_alternative_protection" ||
+                      need.rezReserveAssessment?.opportunity.reason ===
+                        "assessment_unknown")
+                      ? [need.evidenceCode]
+                      : [],
+                  ),
+                ].join(";"),
           }
         : signal,
     );

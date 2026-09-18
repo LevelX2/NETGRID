@@ -12,6 +12,7 @@ import {
   runnerMemoryLimit,
 } from "../../ability-engine/effective-values";
 import { projectInstalledCorpIceRezCost } from "../payment";
+import { corpGeneralCreditAvailability } from "../payment/corp-general-credit-availability";
 import {
   agendaPoints,
   counterDisplaysField,
@@ -28,6 +29,10 @@ import {
   visibleSpecialZones,
 } from "./card-view";
 import { visibleChoice } from "./choice-view";
+import {
+  publicRunFollowupOpportunity,
+  publicPendingSequenceRunCount,
+} from "./run-followup-opportunity";
 import { visibleTraceBidEffect } from "./visible-trace-bid-effect";
 import { toPublicEventForSide } from "./public-event-view";
 import { visibleCorpIceRezResourceExchangeQuote } from "./visible-rez-resource-exchange-quote";
@@ -212,6 +217,8 @@ export function buildPlayerViewProjection(
           encounteredIce,
         )
       : undefined;
+  const followupRunOpportunity = publicRunFollowupOpportunity(state);
+  const pendingSequenceRunCount = publicPendingSequenceRunCount(state);
   const run = state.run
     ? {
         runId: state.run.runId,
@@ -308,6 +315,8 @@ export function buildPlayerViewProjection(
           ? { damagePreventionPool: { ...state.run.damagePreventionPool } }
           : {}),
         successful: state.run.successful,
+        ...(pendingSequenceRunCount > 0 ? { pendingSequenceRunCount } : {}),
+        ...(followupRunOpportunity ? { followupRunOpportunity } : {}),
       }
     : undefined;
   const trace = state.trace;
@@ -462,6 +471,12 @@ export function buildPlayerViewProjection(
       : {
           identity: visibleCorpIdentityCard(state),
           credits: state.corp.credits,
+          ...(state.corpTemporaryInstallRezCredits
+            ? {
+                installRezOnlyCredits:
+                  state.corp.credits - corpGeneralCreditAvailability(state),
+              }
+            : {}),
           clicks: state.corp.clicks,
           agendaPoints: agendaPoints(state, "corp"),
           gripOrHq: state.corp.hq.map((id) => {
