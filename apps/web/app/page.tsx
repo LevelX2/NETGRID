@@ -824,7 +824,7 @@ export default function Page() {
   const [matchDetailsOpen, setMatchDetailsOpen] = useState(false);
   const [colorScheme, setColorScheme] = useState<ColorScheme>("black");
   const [colorSchemeLoaded, setColorSchemeLoaded] = useState(false);
-  const [audioEnabled, setAudioEnabled] = useState(false);
+  const [audioEnabled, setAudioEnabled] = useState(true);
   const [audioVolume, setAudioVolume] = useState(0.45);
   const [audioSettingsLoaded, setAudioSettingsLoaded] = useState(false);
   const [audioLabEnabled, setAudioLabEnabled] = useState(false);
@@ -835,7 +835,7 @@ export default function Page() {
   const [cardImageSkinSettingsLoaded, setCardImageSkinSettingsLoaded] =
     useState(false);
   const [chronicleDetailMode, setChronicleDetailMode] =
-    useState<ChronicleDetailMode>("full");
+    useState<ChronicleDetailMode>(() => normalizeChronicleDetailMode(undefined));
   const [chronicleDetailModeLoaded, setChronicleDetailModeLoaded] =
     useState(false);
 
@@ -865,14 +865,14 @@ export default function Page() {
   const [actionCueAutoDismissMs, setActionCueAutoDismissMs] =
     useState<CueAutoDismissMs>(2500);
   const [actionCueDisplayMode, setActionCueDisplayMode] =
-    useState<CueDisplayMode>("window");
+    useState<CueDisplayMode>(() => normalizeCueDisplayMode(undefined));
   const [automaticEffectCuesEnabled, setAutomaticEffectCuesEnabled] =
-    useState(false);
+    useState(true);
   const [actionCueSettingsLoaded, setActionCueSettingsLoaded] = useState(false);
-  const [autoEndTurnEnabled, setAutoEndTurnEnabled] = useState(false);
+  const [autoEndTurnEnabled, setAutoEndTurnEnabled] = useState(true);
   const [autoCorpMandatoryDrawEnabled, setAutoCorpMandatoryDrawEnabled] =
-    useState(false);
-  const [autoDiscardEnabled, setAutoDiscardEnabled] = useState(false);
+    useState(true);
+  const [autoDiscardEnabled, setAutoDiscardEnabled] = useState(true);
   const [corpRunAutoPassKey, setCorpRunAutoPassKey] = useState<string | null>(
     null,
   );
@@ -945,7 +945,7 @@ export default function Page() {
   const [cardTooltipHoverDelayMs, setCardTooltipHoverDelayMs] =
     useState<CardTooltipHoverDelayMs>(CARD_TOOLTIP_HOVER_OPEN_DELAY_MS);
   const [cardTooltipMode, setCardTooltipMode] =
-    useState<CardTooltipMode>("enhanced");
+    useState<CardTooltipMode>(() => normalizeCardTooltipMode(undefined));
   const [
     translateCardRulesToSelectedLanguage,
     setTranslateCardRulesToSelectedLanguage,
