@@ -361,6 +361,51 @@ eines terminalen Steals. Funding-/Defense-Setup exponiert die Agenda noch nicht
 und erhält diesen Aufschlag nicht. Gleiche Zugriffschancen dürfen beim Vergleich
 gehaltener Agenden nicht die unmittelbare Verlustfolge unterschlagen (Regression:
 Pairing 432, D464; Coup und Security Net bei sechs Corp-/vier Runnerpunkten).
+
+Bei einer installierten Agenda, deren Steal den Runner gewinnen lässt, stellt
+`corp.score_agenda` gewöhnlichen Advance-Fortschritt hinter einen konkret
+finanzierbaren Schutzweg zurück. Ein im aktuellen Zug schließender Score bleibt
+vorrangig. Der typisierte `terminalDefense`-Bedarf trägt P2, Agenda-/Serverbindung,
+StateVersion und den bestehenden `score-protection`-Need. Eine Next-Turn-
+Fortsetzungsquote hebt diesen Bedarf nicht auf.
+
+`corp.defend_servers` vergleicht mit dem bestehenden exakten ICE-Subset-Solver
+vorhandene Schichten, eine aktuell legale ICE-Installation und eine aktuell
+legale, sofort aktive Post-Pass-Schutzinstallation. Mechanische Wahrscheinlichkeit
+und sofortige Aktivierung kommen aus der Engine, Kosten aus LegalActions und
+Rez-Quotes. Die Suchgrenze ist ausdrücklich eine Installation plus finanzierbare
+Basiscredit-Vorbereitung innerhalb der verbleibenden Klicks; nach jeder Aktion
+wird neu bewertet. Unbekannte Ziehkarten, mehrere hypothetische Installationen,
+Regionersatz und nicht gequotete Mechaniken sind keine zertifizierten Routen.
+Öffentliches, unbedingtes und unbegrenzt wiederholbares Runner-Krediteinkommen
+wird bei der Vorbereitung berücksichtigt; verdeckte Events bleiben unbekannt.
+
+Ziel ist die kleinste belegte Zugriffswahrscheinlichkeit pro Run; bei Gleichstand
+entscheiden Agenda-Punktkosten, gesamte Creditkosten und Installationsklicks.
+Auch Teilabsicherung ist produktiv. `corp.economy` finanziert den vom Scoreparent
+veröffentlichten Credit-Meilenstein. Advances dürfen nur Überschuss verbrauchen;
+wenn ein zusätzlicher Basiscredit Advance und Rezreserve gemeinsam ermöglicht,
+steht diese Finanzierung zuerst. Die Zugplanung übernimmt denselben Parent/Need
+und validiert nach Installation neu. Während eines terminalen Runs erhält die
+gewählte finanzierte ICE-Kombination Vorrang vor Score-Credits und redundanten
+Rezzes. Finanzierbare Teilabsicherung terminaler Server bleibt außerdem beim
+Vergleich mit Rezzes auf anderen Servern reservierbar.
+
+Die historische Gegenprobe `match_52de6345f1e39802` hat bei D34 sechs Credits und
+drei Klicks, eine 0/4 avancierte Main-Office Relocation und den Runner bei vier
+Agendapunkten. Rio de Janeiro City Grid kostet einschließlich sofortigem Rez
+einen Credit und einen Klick. Rio, ein Basiscredit und ein Advance lassen fünf
+Credits für Data Wall 2.0 und Wall of Static; die Agenda endet bei 1/4. Beide ICE
+allein sind durch den sichtbaren Dwarf für insgesamt zwei Credits brechbar.
+Rio ergänzt je passiertem gerezzten ICE eine Runstopp-Chance von 1/6: zwei
+Schichten geben 11/36 Abbruchchance pro vollständigem Runversuch. Bei D35 genügt
+Rio plus Basiscredit; bei D36 finanziert Rio nur noch eine Schicht, wobei die
+billigere gleich wirksame Data Wall erhalten wird. Dies verbessert die belegte
+Abwehrchance, beweist aber weder das Überleben wiederholter Runs noch einen Sieg.
+Die genaue Entscheidung ist durch den actor-sicheren D34-Checkpoint und
+`match-52de-terminal-defense.test.ts` prüfbar; Engine-Runstopp und Replay bleiben
+in `agenda-global-random.test.ts` abgesichert.
+
 Ein bereits im eigenen Zug
 vollständig schließender Score hat kein dazwischenliegendes Runner-Fenster.
 Nicht bevorzugte, aber zugelassene Agenda-Zuglinien behalten ihre eigene Quote
@@ -913,6 +958,65 @@ hat im Zielzustand keine eigene Architekturrolle. Er wird entweder in den
 quotierten Need des globalen Defense-Plans überführt oder entfernt. Ein
 unvollständiger Quote erzeugt keinen geschätzten Reservewert; der betroffene
 Need bleibt sichtbar blockiert.
+
+`corp-server-protection-reserve.ts` verbindet konkrete Schutzwege mit dem
+Agendarisiko ihres Servers. HQ verwendet die eigene bekannte Hand und die
+aktuelle Accessquote; R&D verwendet die eigene Deckzusammensetzung abzüglich
+bekannter Karten außerhalb von R&D, niemals die verdeckte Reihenfolge.
+Ein Reserveanspruch benötigt eine vollständig quotierte ICE-Teilmenge, die
+den sichtbaren Runner-Zugriff stoppt. Bereits gerezzter Schutz benötigt keine
+erneute Zahlung; brechbares, unbekanntes oder veraltet quotiertes ICE begründet
+keine behauptete Schutzgarantie. Sichtbare Basiscredit-Vorbereitung des Runners
+wird im jeweiligen Zeithorizont berücksichtigt.
+
+Vor der Zulassung einer produktiven aktuellen ICE-Rezroute vergleicht derselbe
+Defense-Owner deren vermiedenen bedingten Agendapunktverlust mit finanzierbaren
+Schutzwegen anderer Server. Ein aktuell möglicher spielentscheidender Zugriff
+hat bei belegtem Runstopp Vorrang. Für sonstige Konflikte zählen terminale
+Folgebedrohungen zuerst, danach der erwartete Agendapunktverlust bei Zugriff.
+Es wird keine Wahrscheinlichkeit für die Wahl des nächsten Runnerziels erfunden.
+Ein verbleibender Run teilt dieselben Credits zwischen alternativen Zielen;
+mehrere mögliche Runs reservieren die teuersten unterschiedlichen Wege bis
+zur Zahl der verbleibenden Runmöglichkeiten. Unfinanzierbare Portfolios erzeugen
+keinen unerreichbaren Mindestpuffer. Scorefortsetzung, andere Agendaremotes und
+innere ICE des aktuellen Runs bleiben in derselben Ressourcenprüfung;
+derselbe Server wird dabei nicht doppelt reserviert.
+
+Nach dem letzten Runnerklick entfällt die Reserve für spätere normale Runs.
+`run.followupRunOpportunity` erhält öffentlich bekannte Zusatzruns; einen
+erfolgsabhängigen Zusatzrun verhindert ein belegter Stopp des aktuellen Runs.
+Öffentliche Ereignissequenzen bleiben über `pendingSequenceRunCount` auch nach
+einem erfolglosen Run im Horizont.
+Eine fehlende Vergleichsgrundlage blockiert die konkurrierende Allokation
+sichtbar. Sie entwertet keine unabhängige exakte aktuelle Abwehr, wenn kein
+zertifizierter konkurrierender Anspruch existiert oder alle solchen Ansprüche
+nach Zahlung finanziert bleiben. `rezReserveAssessment` hält Entscheidung,
+Beträge, betroffene Server und unbekannte Vergleichsgrundlagen fest.
+
+Scorevorbereitung, Remote-Rezbudget und verzögerte Economy-Entwicklung
+konsumieren die zentralen Schutzansprüche desselben Owners. Eine aus HQ
+installierte Agenda wird aus dessen künftiger Exposition entfernt. Bei der
+Scorevorbereitung konkurriert die konkret zu schützende Agenda mit dem
+Zentralrisiko; eine geringere Zentralbedrohung verdrängt ihren Schutz nicht. Sofortiges
+Scoring und bereits vorher zugelassene positive Sofortkonversionen behalten
+ihre eigenen Verträge. Die Reserve wird aus jedem neuen Zustand berechnet;
+sie ist kein persistierter pauschaler Creditboden. `own.installRezOnlyCredits`
+weist den bereits im Creditbestand enthaltenen, zum Zugende verfallenden
+Installations-/Rez-Anteil aus. Er finanziert keine Reserve für den nächsten
+Runnerzug; eine aktuelle gebundene Zahlung darf ihn weiterhin verbrauchen.
+Der actor-sichere D7-
+Checkpoint `match-52de-defense-reserve.test.ts` prüft HQ-Erhalt, letzten Klick,
+Zusatzruns, ausreichendes Budget, Matchpoint, unbekannte Quotes und Determinismus.
+
+Davon getrennt bleibt die Wirksamkeit reiner bezahlter Rez-Tax bei einem
+terminalen Zugriff prüfpflichtig. In Match 52de/D38 zertifiziert die Engine
+3 Corp-Credits für Wall of Static und 1 Runner-Credit zum Brechen mit Dwarf.
+Der Runner besitzt 6 Credits und greift auf die spielentscheidende Agenda zu.
+Die lokale Route bleibt als `exact_resource_exchange` produktiv; mangels
+Folgerun greift keine serverübergreifende Reserve. Ein exakt quotierter
+Ressourcentausch belegt hier keinen verhinderten Steal. Der offene
+Bewertungsauftrag gehört zu `corp.defend_servers`, nicht zu den Spielregeln;
+ein anderes einzelnes Rez ist noch kein Nachweis einer rettenden Gesamtlinie.
 
 Eine Rez-Entscheidung ist ein fenstergebundener Urgent-Response-Modus
 desselben Verteidigungsplans. Solange dieses Fenster offen ist, beschränkt es

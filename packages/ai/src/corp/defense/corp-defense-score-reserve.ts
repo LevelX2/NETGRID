@@ -1,4 +1,5 @@
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
+import { assessCorpTerminalAgendaDefense } from "./corp-terminal-agenda-defense";
 import type {
   AiDecisionInput,
   VisibleCard,
@@ -13,6 +14,11 @@ import {
   readExactCurrentInstalledCorpIceRezQuote,
   type CorpExactIceRezRouteProjection,
 } from "../../runtime/corp-exact-ice-rez-route";
+import {
+  assessCorpRezOpportunityCost,
+  corpServerAgendaExposure,
+  type CorpRezOpportunityAssessment,
+} from "./corp-server-protection-reserve";
 
 export type CorpDefenseScoreReserveAssessment = Readonly<{
   preservesReserve: boolean;
@@ -21,6 +27,7 @@ export type CorpDefenseScoreReserveAssessment = Readonly<{
   scoreProjectIds: readonly string[];
   immediateRezIceIds: readonly string[];
   currentRunFollowupIceId?: string;
+  opportunity: CorpRezOpportunityAssessment;
 }>;
 
 type ScoreContinuationClaim = Readonly<{
@@ -41,8 +48,8 @@ type ImmediateRezClaim = Readonly<{
 
 /**
  * `corp.defend_servers` consumes, but never derives, the score continuation
- * cash request. Its only additional work is to reserve exact current ICE rez
- * quotes for score servers the Runner can still attack this turn.
+ * cash request. The same owner combines it with exact stopping-path reserves
+ * for other agenda servers the Runner can still attack this turn.
  */
 export function assessCorpExactIceRezAgainstScoreReserves(params: {
   input: AiDecisionInput;
@@ -51,6 +58,60 @@ export function assessCorpExactIceRezAgainstScoreReserves(params: {
   restrictedCreditFunding?: CorpRestrictedCreditRouteQuote;
 }): CorpDefenseScoreReserveAssessment {
   const { input, route } = params;
+  const availableCreditsAfterRez = params.restrictedCreditFunding
+    ? params.restrictedCreditFunding.consumer
+        .generalCreditsRemainingAfterConsumer
+    : input.playerView.own.credits - route.totalRezCredits;
+  const exposure = corpServerAgendaExposure(input, route.targetServerId);
+  if (
+    !routePreventsImmediateAccess(route) &&
+    input.playerView.run?.attackedServerId === route.targetServerId &&
+    exposure &&
+    exposure.maximumPoints + input.playerView.opponent.agendaPoints >=
+      input.playerView.agendaPointsToWin
+  ) {
+    const defense = assessCorpTerminalAgendaDefense(
+      input,
+      route.targetServerId,
+      "current-terminal-run",
+    );
+    if (
+      defense &&
+      defense.best.protection.runnerAccessSuccessProbability.numerator <
+        defense.best.protection.runnerAccessSuccessProbability.denominator
+    ) {
+      const selected = defense.best.selectedRezCosts.find(
+        (cost) => cost.iceInstanceId === route.sourceCardInstanceId,
+      );
+      const requiredCreditsAfterRez =
+        defense.best.totalSelectedRezCost - (selected?.credits ?? 0);
+      const preservesReserve =
+        selected !== undefined &&
+        selected.credits === route.totalRezCredits &&
+        availableCreditsAfterRez >= requiredCreditsAfterRez;
+      return {
+        preservesReserve,
+        requiredCreditsAfterRez,
+        availableCreditsAfterRez,
+        scoreProjectIds: [],
+        immediateRezIceIds: defense.best.selectedRezCosts.map(
+          (cost) => cost.iceInstanceId,
+        ),
+        opportunity: {
+          reason: "current_terminal_access",
+          preservesReserve,
+          requiredCredits: requiredCreditsAfterRez,
+          claims: [],
+          unknownServerIds: [],
+        },
+      };
+    }
+  }
+  const opportunity = assessCorpRezOpportunityCost(
+    input,
+    route,
+    availableCreditsAfterRez,
+  );
   const scoreClaims = scoreContinuationClaims(params.scoreProjects);
   const primaryScoreClaim = scoreClaims[0];
   const activeServerScoreClaim = scoreClaims.find(
@@ -61,15 +122,27 @@ export function assessCorpExactIceRezAgainstScoreReserves(params: {
   // that same agenda's later advancement cash; the score module revalidates
   // its continuation after the protected run.
   const scoreCredits =
-    activeServerScoreClaim === undefined
+    activeServerScoreClaim === undefined &&
+    opportunity.reason !== "current_terminal_access"
       ? (primaryScoreClaim?.requiredCreditsBeforeNextCorpTurn ?? 0)
       : 0;
   const activeServerId = input.playerView.run?.attackedServerId;
-  const remainingRunnerRuns = safeNonNegativeInteger(
-    input.playerView.opponent.clicks,
-  );
+  const remainingRunnerRuns =
+    safeNonNegativeInteger(input.playerView.opponent.clicks) +
+    (input.playerView.run?.pendingSequenceRunCount ?? 0) +
+    Number(
+      input.playerView.run?.followupRunOpportunity === "after_run" ||
+        (!routePreventsImmediateAccess(route) &&
+          input.playerView.run?.followupRunOpportunity ===
+            "after_successful_run"),
+    );
   const immediateRezClaims = scoreClaims
-    .filter((claim) => claim.serverId !== activeServerId)
+    .filter(
+      (claim) =>
+        claim.serverId !== activeServerId &&
+        opportunity.reason !== "current_terminal_access" &&
+        !opportunity.claims.some((other) => other.serverId === claim.serverId),
+    )
     .flatMap((claim) => {
       const route = exactStoppingRezForServer(input, claim.serverId);
       return route
@@ -82,31 +155,34 @@ export function assessCorpExactIceRezAgainstScoreReserves(params: {
             },
           ]
         : [];
-    })
-    .slice(0, remainingRunnerRuns);
+    });
   const currentRunFollowup = routePreventsImmediateAccess(route)
     ? undefined
     : exactCurrentRunFollowupStoppingRez(input, route.sourceCardInstanceId);
   const requiredCreditsAfterRez =
     scoreCredits +
     (route.bluffDefenseNeed?.encounterCredits ?? 0) +
-    immediateRezClaims.reduce((sum, claim) => sum + claim.credits, 0) +
+    [
+      ...immediateRezClaims.map((claim) => claim.credits),
+      ...opportunity.claims.map((claim) => claim.credits),
+    ]
+      .sort((a, b) => b - a)
+      .slice(0, remainingRunnerRuns)
+      .reduce((sum, cost) => sum + cost, 0) +
     (currentRunFollowup?.credits ?? 0);
-  const availableCreditsAfterRez = params.restrictedCreditFunding
-    ? params.restrictedCreditFunding.consumer
-        .generalCreditsRemainingAfterConsumer
-    : input.playerView.own.credits - route.totalRezCredits;
   const consumesNoReservedResources =
     route.totalRezCredits === 0 &&
     route.quote.mandatoryAdditionalCosts.agendaPoints === 0;
   return {
     preservesReserve:
       consumesNoReservedResources ||
-      availableCreditsAfterRez >= requiredCreditsAfterRez,
+      (opportunity.preservesReserve &&
+        availableCreditsAfterRez >= requiredCreditsAfterRez),
     requiredCreditsAfterRez,
     availableCreditsAfterRez,
     scoreProjectIds: scoreClaims.map((claim) => claim.projectId),
     immediateRezIceIds: immediateRezClaims.map((claim) => claim.iceId),
+    opportunity,
     ...(currentRunFollowup
       ? { currentRunFollowupIceId: currentRunFollowup.iceId }
       : {}),
@@ -213,7 +289,7 @@ function exactCurrentRunFollowupStoppingRez(
       if (!quote) return [];
       const after = assessProtectionAfterRezzing(
         input,
-        server.ice,
+        futureIce,
         ice.instanceId,
       );
       return after && after.runnerAccessSuccessProbability.numerator === 0
@@ -256,6 +332,7 @@ function routePreventsImmediateAccess(
 ): boolean {
   return (
     route.accessBlock !== undefined ||
+    route.traceAccessBlock !== undefined ||
     route.after?.runnerAccessSuccessProbability.numerator === 0
   );
 }

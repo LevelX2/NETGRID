@@ -73,6 +73,22 @@ ihnen aber nicht zurückimportiert.
   `corp_paid` und für `during_run` zusammen mit `runner_paid`.
 - Run-End-Cleanup ist geordnet: Trigger und Zahlungen lesen Run-Marker, bevor
   diese entfernt oder temporäre Werte zurückgesetzt werden.
+- `PlayerView.run.followupRunOpportunity` projiziert ausschließlich öffentliche
+  Run-Effekte, installierte Hardware und deren öffentliche Verbrauchsflags.
+  `after_run` bezeichnet einen bereits angekündigten Zusatzrun;
+  `after_successful_run` eine noch nicht verbrauchte erfolgsabhängige Option.
+  Die Projektion liest weder Runnerhand noch Stack, verändert keinen Zustand
+  und garantiert keine zukünftige LegalAction. Die Corp-KI kann damit einen
+  letzten Klick von einer verbleibenden öffentlichen Zusatzrun-Option unterscheiden.
+  `pendingSequenceRunCount` zählt zusätzlich die verbleibenden Runs öffentlicher
+  Ereignissequenzen. Der aktuelle Run wird abgezogen; dieselbe aktive und
+  vorgemerkte Sequenz wird nur einmal gezählt. Diese Runs bleiben auch nach
+  einem erfolglosen aktuellen Run möglich.
+  Die Corp-eigene View weist über `own.installRezOnlyCredits` außerdem den im
+  angezeigten Creditbestand enthaltenen, am Zugende verfallenden Anteil aus.
+  Die Projektion validiert ihn mit derselben Budgetfunktion wie die Engine;
+  der AI-DTO weist ungültige Beträge zurück. Diese Credits sind kein dauerhafter
+  Puffer für den nächsten Runnerzug.
 - Encounter-Eintrittskosten werden vor dem Verbrauch der Next-Encounter-Marker
   bezahlt. Öffnet die Zahlung ein Supportfenster, bewahrt
   `pendingEncounterEntryIceId` die konkrete Eintrittsstelle. Die Engine bietet

@@ -207,6 +207,7 @@ export function projectExactCorpIceRezRoute(params: {
       : {}),
   }));
   const assessmentInput = {
+    serverRoot: server.root,
     runnerRig: input.playerView.opponent.rig ?? [],
     runnerCredits: input.playerView.opponent.credits,
     maximumRunnerAccessSuccessProbability: {

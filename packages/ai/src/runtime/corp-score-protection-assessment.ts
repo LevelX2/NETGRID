@@ -8,6 +8,7 @@ import {
 import {
   visibleBreakerEncounterQuote,
   visibleProgramHostInstallVariants,
+  visibleFortPassProtection,
 } from "@netgrid/engine";
 import { AI_HINTS_BY_CARD } from "../catalog-ai-hint-authority";
 import { creditsToBreakEndTheRunSubroutinesWithBreaker } from "../visible-run-analysis";
@@ -78,6 +79,7 @@ export type UnknownCorpScoreProtectionAssessment =
       protectsScore: false;
       unknownReason:
         | "invalid_probability_threshold"
+        | "unknown_fort_pass_protection"
         | "invalid_runner_credits"
         | "duplicate_ice_instance"
         | "duplicate_runner_rig_instance"
@@ -115,6 +117,7 @@ export type CorpScoreProtectionIceInput = Readonly<{
 
 export type CorpScoreProtectionAssessmentInput = Readonly<{
   serverIce: readonly CorpScoreProtectionIceInput[];
+  serverRoot?: readonly VisibleCard[];
   runnerRig: readonly VisibleCard[];
   /**
    * Public, engine-derived delayed-install cards. A Corp-side projection may
@@ -403,7 +406,37 @@ export function assessCorpScoreProtection(
   const bestPath = states.reduce((best, candidate) =>
     accessPathIsBetter(candidate, best) ? candidate : best,
   );
-  const accessProbability = exactProbabilityFromRational(bestPath.probability);
+  let passProbability = ONE;
+  for (const source of input.serverRoot ?? []) {
+    if (!source.rezzed) continue;
+    const quote = visibleFortPassProtection(source);
+    if (!quote.complete) {
+      return unknownAssessment(
+        input.maximumRunnerAccessSuccessProbability,
+        "unknown_fort_pass_protection",
+        [`fortPassProtectionUnknown:${source.instanceId}:${quote.reason}`],
+      );
+    }
+    if (quote.kind === "end_run_on_pass") {
+      passProbability = multiplyRational(
+        passProbability,
+        powerRational(
+          {
+            numerator: BigInt(quote.dieFaces - quote.endingFaces),
+            denominator: BigInt(quote.dieFaces),
+          },
+          supportedIce.length,
+        ),
+      );
+    }
+  }
+  const protectedPathProbability = multiplyRational(
+    bestPath.probability,
+    passProbability,
+  );
+  const accessProbability = exactProbabilityFromRational(
+    protectedPathProbability,
+  );
   const exactThreshold = exactProbabilityFromRational(threshold);
   if (!accessProbability || !exactThreshold) {
     return unknownAssessment(
@@ -420,7 +453,8 @@ export function assessCorpScoreProtection(
       ["scoreProtectionKnown:false", "probabilityNotSafelyRepresentable:true"],
     );
   }
-  const protectsScore = compareRational(bestPath.probability, threshold) <= 0;
+  const protectsScore =
+    compareRational(protectedPathProbability, threshold) <= 0;
   const requiredRandomBreakSuccesses = requiredRandomBreakSuccessCount(
     bestPath.randomBreaks,
   );

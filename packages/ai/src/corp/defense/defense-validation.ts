@@ -5,6 +5,7 @@ import {
   CorpScoreProtectionDrawSignal,
   CorpScoreProtectionInstallSignal,
   CorpScoreProtectionStagingInstallSignal,
+  CorpTerminalProtectionInstallSignal,
 } from "../../plans/corp-defense-contracts";
 import { CorpScorePriorityClass } from "../../plans/corp-score-contracts";
 import { PlanResolutionFailure } from "../../plans/plan-resolution-failure";
@@ -514,6 +515,12 @@ export function isScoreProtectionStagingInstallSignal(
   return signal.kind === "score_protection_staging_install";
 }
 
+export function isTerminalProtectionInstallSignal(
+  signal: CorpDefenseSignal,
+): signal is CorpTerminalProtectionInstallSignal {
+  return signal.kind === "score_protection_terminal_install";
+}
+
 export function isScoreProtectionDrawSignal(
   signal: CorpDefenseSignal,
 ): signal is CorpScoreProtectionDrawSignal {
@@ -774,6 +781,51 @@ export function nonEmptyString(value: unknown): value is string {
   return typeof value === "string" && value.length > 0;
 }
 
+function validRezReserveAssessment(value: unknown): boolean {
+  if (!value || typeof value !== "object") return false;
+  const reserve = value as Record<string, unknown>;
+  const opportunity = reserve.opportunity as
+    | Record<string, unknown>
+    | undefined;
+  const strings = (value: unknown) =>
+    Array.isArray(value) && value.every(nonEmptyString);
+  return (
+    typeof reserve.preservesReserve === "boolean" &&
+    knownNonNegativeInteger(reserve.requiredCreditsAfterRez) &&
+    Number.isSafeInteger(reserve.availableCreditsAfterRez) &&
+    strings(reserve.scoreProjectIds) &&
+    strings(reserve.immediateRezIceIds) &&
+    Boolean(
+      opportunity &&
+      typeof opportunity.preservesReserve === "boolean" &&
+      knownNonNegativeInteger(opportunity.requiredCredits) &&
+      [
+        "no_followup_click_run",
+        "current_terminal_access",
+        "current_access_preferred",
+        "no_certified_alternative",
+        "all_alternatives_funded",
+        "funded_alternative_protection",
+        "assessment_unknown",
+      ].includes(String(opportunity.reason)) &&
+      strings(opportunity.unknownServerIds) &&
+      Array.isArray(opportunity.claims) &&
+      opportunity.claims.every(
+        (claim: Record<string, unknown>) =>
+          claim &&
+          nonEmptyString(claim.serverId) &&
+          knownNonNegativeInteger(claim.observedAtStateVersion) &&
+          typeof claim.expectedPoints === "number" &&
+          Number.isFinite(claim.expectedPoints) &&
+          claim.expectedPoints >= 0 &&
+          typeof claim.terminal === "boolean" &&
+          knownNonNegativeInteger(claim.credits) &&
+          strings(claim.iceIds),
+      ),
+    )
+  );
+}
+
 export const GENERIC_DEFENSE_SIGNAL_KEYS = new Set([
   "kind",
   "defenseId",
@@ -795,6 +847,7 @@ export const GENERIC_DEFENSE_SIGNAL_KEYS = new Set([
   "installRoute",
   "rezReserveNeed",
   "rezRoute",
+  "rezReserveAssessment",
   "restrictedRezFunding",
   "value",
   "evidenceCode",
@@ -894,7 +947,8 @@ export function exactInstallRouteCreditCost(
 export function defenseSignalActionIds(signal: CorpDefenseSignal): string[] {
   const value = signal as unknown as Record<string, unknown>;
   if (
-    (value.kind === "score_protection_install" ||
+    (value.kind === "score_protection_terminal_install" ||
+      value.kind === "score_protection_install" ||
       value.kind === "score_protection_staging_install" ||
       value.kind === "score_protection_draw") &&
     nonEmptyString(value.actionId)
@@ -1016,6 +1070,9 @@ export function isValidDefenseSignal(
       (value.rezRoute === undefined ||
         (value.phase === "rez_response" &&
           validExactIceRezRoute(value.rezRoute))) &&
+      (value.rezReserveAssessment === undefined ||
+        (value.phase === "rez_response" &&
+          validRezReserveAssessment(value.rezReserveAssessment))) &&
       (value.parentKind === undefined
         ? value.parentProjectId === undefined &&
           value.parentNeedId === undefined &&
@@ -1062,10 +1119,15 @@ export function isValidDefenseSignal(
       )
     );
   }
-  if (value.kind === "score_protection_staging_install") {
+  if (
+    value.kind === "score_protection_staging_install" ||
+    value.kind === "score_protection_terminal_install"
+  ) {
     return (
       hasOnlyKeys(value, SCORE_PROTECTION_STAGING_INSTALL_SIGNAL_KEYS) &&
-      value.phase === "install_ice" &&
+      (value.phase === "install_ice" ||
+        (value.kind === "score_protection_terminal_install" &&
+          value.phase === "install_defense_support")) &&
       nonEmptyString(value.serverId) &&
       nonEmptyString(value.parentProjectId) &&
       nonEmptyString(value.parentNeedId) &&

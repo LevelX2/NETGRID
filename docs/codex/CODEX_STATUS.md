@@ -99,6 +99,15 @@ Führend:
 
 ## KI
 
+Corp-Defense wägt aktuelle ICE-Rezkosten gegen finanzierte Schutzwege anderer
+agendagefährdeter Server ab. Die Reserve berücksichtigt Agendaverlust,
+spielentscheidende Zugriffe, verbleibende Runnerklicks und öffentliche
+Zusatzruns. Scorevorbereitung, Remote-Budget und verzögerte Economy verwenden
+dieselben Schutzansprüche; eine geringere Zentralbedrohung verdrängt keine
+höherwertige geschützte Score-Agenda. D7 aus Match 52de sowie Gegenfälle sichern
+die Entscheidung ab. Führend ist
+[Corp-Defense](../architecture/ai/corp-plan-contracts.md#4-corpdefend_servers).
+
 Runner-Vorbereitung für bekannte blockierte Score-Remotes bleibt früh am
 konkreten Remote-Parent gebunden. Dringliche Shell-Traders-Counterzahlungen
 benötigen einen vollständig finanzierbaren Zugriffspfad; einzelne bezahlbare
