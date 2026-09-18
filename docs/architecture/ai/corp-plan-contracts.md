@@ -635,33 +635,44 @@ auch das wirkungsgleiche Mindestgebot 0 zertifizieren. Die Choice-Auflösung
 verwendet dann die vorhandene, exakt gebundene Nulloption; sie bewertet keine
 neue Strategie und gibt keine zusätzlichen Credits ohne Wirkung aus.
 
-Eine aktuelle Grenze bleibt bezahltes reines Trace-/Tag-ICE ohne exakte
-Run-Ende- oder Ressourcentauschquote: Bei unbekannter Schutzprojektion öffnet
-der qualitative Defense-Pfad außerhalb eines gebundenen Bluffbedarfs erst
-für eine bedrohte Agenda-Remote oder einen möglichen terminalen Central-Zugriff.
-Der bloße Besitz ausreichender Rez-Credits genügt nicht. Die Entscheidungen
-aus Match `match_cefc05480ed5b497` bei State 96, 110 und 173 gegenüber 178
-belegen diese Grenze für Pocket Virtual Reality: Der Wechsel von einem auf
-vier Runner-Agendapunkte öffnet die Route. Ein früherer Nutzenvergleich aus
-Trace-Antwort, temporären Trace-Credits und Tag-Verwertung ist damit noch
-nicht abgedeckt; die Ablehnung ist kein Nachweis wirtschaftlicher Nutzlosigkeit.
+Rez ist grundsätzlich eine einmalige Investition in wiederkehrenden Druck.
+Ein positiver, exakt belegter Breakpreis darf auch unter dem Rezpreis liegen;
+der erste Run muss den Rez nicht allein amortisieren. Nur temporäre
+Rez-Aktionen behalten den bisherigen Vergleich für einen einzelnen Run.
+Öffentlich belegter Schaden, Tags, Tax, Disruption oder eine bedingte
+Stop-Wirkung können unabhängig von einer vollständigen Zugriffswahrscheinlichkeit
+eine `qualitative_encounter_defense`-Route begründen. Die Engine-Quote muss
+an das aktuell angegriffene ICE, den Server und die StateVersion gebunden
+sein. Zukunftseffekte ohne verbleibendes Ziel und unbezahlbare Aktivierungen
+begründen keinen aktuellen Nutzen.
 
-Die unbekannte Schutzprojektion entsteht in diesem Match durch Clown:
-`runnerRigCardRequiresUnsupportedAccessProjection` schließt dessen noch nicht
-projizierten ICE-Stärkemodifikator aus. Exakte Engine-Quotes bleiben nutzbar;
-der qualitative Ersatzpfad steht dadurch aber nicht allgemein zur Verfügung.
-Die Sperre darf erst mit korrekter Projektion des Modifikators entfallen.
-Ein kontrollierter Vergleich aller 106 ONR-ICE im Approach-Zustand 96
-(Corp 50 Credits, Runner 10 Credits, ein Agendapunkt; jeweils nur die
-ICE-Definition ersetzt) ergibt 25 Karten mit Defense-Route ohne Rig, aber
-ohne Route mit dem ursprünglichen Clown-Rig: Bolter Swarm, Brain Drain,
-Deadeye, Brain Wash, Bug Zapper, Death Yo-Yo, Digiconda, Dog Pile, Marionette,
-Mastermind, Roadblock, Scaffolding, Banpei, Bolter Cluster, D'Arc Knight,
-Data Darts, Data Raven, Hunter, Ice Pick Willie, Jack Attack, Neural Blade,
-Pocket Virtual Reality, Vacuum Link, Viral 15 und Virizz. Das ist eine
-zustandsgebundene Abdeckungslücke, keine pauschale Rezempfehlung für diese
-Karten. Weitere fehlende Routen können fachlich korrekt sein, etwa bei
-Wirkungen ausschließlich für spätere ICE.
+Die Route wird erst nach `assessCorpExactIceRezAgainstScoreReserves`
+zugelassen: veröffentlichte Score-Fortsetzungen, andere bedrohte Agenden und
+notwendige weitere ICE im laufenden Run behalten ihre konkreten Reserven.
+Quotierte Encounter-Aktivierungskosten werden zusätzlich zum Rez reserviert;
+eine bereits im Bluffbedarf enthaltene Aktivierung wird nicht doppelt gezählt.
+Eine unbekannte Zugriffsprojektion ist weder eine erfundene Stop-Garantie noch
+allein ein Grund, bekannt wirksames ICE ungerezzt zu lassen. Tags werden
+nicht als garantierter Creditverlust ausgewiesen.
+
+Die Schutzprojektion nutzt `encounterStrength` aus der Engine-Runquote für
+öffentliche installierte ICE-Stärkemodifikatoren wie Clown. Die normale
+`effectiveStrength` bleibt der aktuelle Wert außerhalb beziehungsweise
+innerhalb der tatsächlichen Begegnung. Ohne passende Begegnungsquote bleibt
+die exakte Schutzbewertung unbekannt. Der Rezvergleich übernimmt die exakt
+gebundene Post-Rez-Quote; X-Stärke erhält je LegalAction eine eigene
+`effectivePostRezActionRunQuotes`-Projektion. Andere nicht modellierte
+Run-Effekte werden dadurch nicht pauschal als bekannt behandelt.
+
+Regressionen decken die 25 im Clown-Playtest aufgefallenen ICE ab: Bolter
+Swarm, Brain Drain, Deadeye, Brain Wash, Bug Zapper, Death Yo-Yo, Digiconda,
+Dog Pile, Marionette, Mastermind, Roadblock, Scaffolding, Banpei, Bolter
+Cluster, D'Arc Knight, Data Darts, Data Raven, Hunter, Ice Pick Willie,
+Jack Attack, Neural Blade, Pocket Virtual Reality, Vacuum Link, Viral 15 und
+Virizz. Sie prüfen aktuelle Defense-Routen gegen Krash und zwei Clowns,
+keine pauschale Behauptung einer garantierten Run-Verhinderung. Die
+Originalentscheidungen von `match_cefc05480ed5b497` bei State 96, 110 und 173
+wählen mit dem korrigierten Owner Pocket Virtual Reality statt `decline_rez`.
 
 **Klasse:** `development_project` mit internem Urgent-Response-Modus
 **Rolle:** Background/Vordergrund/Urgent Response

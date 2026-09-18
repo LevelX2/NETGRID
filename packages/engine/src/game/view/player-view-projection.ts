@@ -95,6 +95,25 @@ export function buildPlayerViewProjection(
         side === "corp"
           ? visibleCorpIceRezResourceExchangeQuote(state, id, visibleIce)
           : undefined;
+      const effectivePostRezActionRunQuotes =
+        side === "corp"
+          ? legalActions
+              .filter(
+                (action) =>
+                  action.type === "rez_ice" &&
+                  action.source === id &&
+                  action.payload?.variableRezKind === "x_strength",
+              )
+              .flatMap((action) => {
+                const quote = visibleCorpIcePostRezRunQuote(
+                  state,
+                  id,
+                  visibleIce,
+                  action,
+                );
+                return quote ? [{ ...quote, actionId: action.actionId }] : [];
+              })
+          : [];
       const effectiveRezActionResourceExchangeQuotes =
         side === "corp"
           ? legalActions.flatMap((action) => {
@@ -148,6 +167,9 @@ export function buildPlayerViewProjection(
           : {}),
         ...(effectiveRunQuote ? { effectiveRunQuote } : {}),
         ...(effectivePostRezRunQuote ? { effectivePostRezRunQuote } : {}),
+        ...(effectivePostRezActionRunQuotes.length > 0
+          ? { effectivePostRezActionRunQuotes }
+          : {}),
         ...(effectiveRezCostQuote ? { effectiveRezCostQuote } : {}),
         ...(effectiveRezResourceExchangeQuote
           ? { effectiveRezResourceExchangeQuote }

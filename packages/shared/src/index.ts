@@ -3240,6 +3240,8 @@ export type VisibleEffectiveIceRunQuote = {
   iceInstanceId: CardInstanceId;
   iceDefinitionId: CardDefinitionId;
   effectiveStrength: number;
+  /** Public current-board strength with encounter-only modifiers applied; no lifecycle simulation. */
+  encounterStrength?: number;
   subroutines: VisibleEffectiveSubroutine[];
   breakSubroutineAdditionalCostPerSubroutine?: number;
   breakSubroutineCostSourceDefinitionIds?: CardDefinitionId[];
@@ -4023,6 +4025,10 @@ export type VisibleCard = {
   effectiveRunQuote?: VisibleEffectiveIceRunQuote;
   /** Present only to the Corp for own, installed, currently unrezzed ICE. */
   effectivePostRezRunQuote?: VisibleCorpIcePostRezRunQuote;
+  /** Corp-only projections for exact variable-rez legal actions. */
+  effectivePostRezActionRunQuotes?: (VisibleCorpIcePostRezRunQuote & {
+    actionId: string;
+  })[];
   effectiveRezCostQuote?: VisibleCorpRezCostQuote;
   effectiveRezResourceExchangeQuote?: VisibleCorpIceRezResourceExchangeQuote;
   currentEncounterDefenseQuotes?: VisibleCorpEncounterDefenseQuote[];

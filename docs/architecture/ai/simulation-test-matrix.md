@@ -1,7 +1,7 @@
 # AI Simulation Test Matrix
 
 Status: active_current
-Stand: 2026-08-25
+Stand: 2026-09-18
 
 ## Evidenzstufen
 
@@ -91,3 +91,22 @@ mit genau einem Vitest-Worker. `corepack pnpm --filter @netgrid/ai test` bleibt
 als serieller paketnaher Diagnosepfad erhalten. Nur bei nachgewiesenem
 Speicherdruck oder Instabilität wird auf
 `corepack pnpm test:ai:shards:serial` zurückgefallen.
+
+Auf Rechnern mit 16 GB RAM laufen der vollständige AI-Typecheck und die
+drei AI-Testshards nacheinander. Der Typecheck kann allein rund 7,5 GB RAM
+belegen; parallele Ausführung mit den Shards führte lokal zu weniger als
+0,5 GB freiem RAM und stark verlängerten Laufzeiten. Die drei Testshards
+bleiben untereinander parallel; weitere speicherintensive Gates warten
+auf ihren Abschluss.
+Der Paket-Typecheck kann außerdem seine konfigurierte 8-GB-Heapgrenze
+erreichen. Zur Diagnose lässt sich derselbe vollständige Check isoliert mit
+`pnpm --filter @netgrid/ai exec node --max-old-space-size=10240 ../../node_modules/typescript/bin/tsc -p tsconfig.json --noEmit`
+ausführen. Das ersetzt weder die Typprüfung noch behebt es einen Typfehler;
+es erhöht ausschließlich das Speicherlimit dieses einzelnen Prozesses.
+
+Bekannte Main-Abweichungen im Vergleich gegen `926fc1435` vom 2026-09-18:
+Vier Erwartungen in `meta-403-flood-continuation.test.ts` und eine in
+`meta-403-score-progress-provider.test.ts` schlagen auch ohne die Änderung
+an der ICE-Rez-Bewertung fehl. Sie betreffen Score-/Economy-Auswahl und die
+gebundene Defense-Providerroute. Ein Gesamtlauf mit diesen fünf Fehlern ist
+kein grünes AI-Gate; die Befunde bleiben von den Rez-Regressionen getrennt.

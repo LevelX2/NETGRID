@@ -1,4 +1,5 @@
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import {
   type SubroutineDefinition,
   type VisibleCard,
@@ -315,7 +316,7 @@ export function assessCorpScoreProtection(
   }
   if (
     runnerRig.some((card) =>
-      runnerRigCardRequiresUnsupportedAccessProjection(card),
+      runnerRigCardRequiresUnsupportedAccessProjection(card, activeIce),
     )
   ) {
     return unknownAssessment(
@@ -538,7 +539,8 @@ function readSupportedIce(card: CorpScoreProtectionIceInput): IceReadResult {
     ice: {
       card,
       endTheRunCount: subroutines.filter(isHardEndTheRunSubroutine).length,
-      effectiveStrength: quote?.effectiveStrength ?? card.strength!,
+      effectiveStrength:
+        quote?.encounterStrength ?? quote?.effectiveStrength ?? card.strength!,
       effectiveSubtypes: card.subtypes!,
       additionalBreakCostPerSubroutine:
         quote?.breakSubroutineAdditionalCostPerSubroutine ?? 0,
@@ -554,6 +556,8 @@ function validEffectiveRunQuote(
     quote.iceInstanceId === card.instanceId &&
     quote.iceDefinitionId === card.definitionId &&
     nonNegativeSafeInteger(quote.effectiveStrength) &&
+    (quote.encounterStrength === undefined ||
+      nonNegativeSafeInteger(quote.encounterStrength)) &&
     (quote.breakSubroutineAdditionalCostPerSubroutine === undefined ||
       nonNegativeSafeInteger(
         quote.breakSubroutineAdditionalCostPerSubroutine,
@@ -1040,13 +1044,34 @@ function cardIsIcebreaker(card: VisibleCard): boolean {
 
 function runnerRigCardRequiresUnsupportedAccessProjection(
   card: VisibleCard,
+  activeIce: readonly CorpScoreProtectionIceInput[],
 ): boolean {
   if (!card.definitionId) return false;
   const definition = CARD_DEFINITIONS_BY_ID[card.definitionId];
   if (!definition) return false;
   const hint = AI_HINTS_BY_CARD.get(card.definitionId);
+  const strengthModifiers = cardSpecPlanningCardByDefinitionId(
+    card.definitionId,
+  )?.planning.engine.modifiers?.filter(
+    (modifier) => modifier.kind === "ice_strength",
+  );
+  const strengthIsQuoted =
+    (strengthModifiers?.length ?? 0) > 0 &&
+    strengthModifiers!.every(
+      (modifier) =>
+        modifier.activeWhile === "installed" &&
+        modifier.sourceZone === "runner_installed" &&
+        modifier.visibility === "public",
+    ) &&
+    activeIce.every(
+      (ice) =>
+        ice.effectiveRunQuote !== undefined &&
+        validEffectiveRunQuote(ice, ice.effectiveRunQuote) &&
+        nonNegativeSafeInteger(ice.effectiveRunQuote.encounterStrength),
+    );
   return (
-    hint?.functionSignals?.includes("ice.strength_modifier") === true ||
+    (hint?.functionSignals?.includes("ice.strength_modifier") === true &&
+      !strengthIsQuoted) ||
     hint?.requiredMechanics?.includes("run_start_random_strength_bonus") ===
       true ||
     definition.mechanics.some(
@@ -1057,7 +1082,7 @@ function runnerRigCardRequiresUnsupportedAccessProjection(
         mechanic === "run_spending_cap" ||
         mechanic === "run_flow" ||
         mechanic === "run_modifier" ||
-        mechanic.includes("ice_strength_modifier"),
+        (mechanic.includes("ice_strength_modifier") && !strengthIsQuoted),
     )
   );
 }

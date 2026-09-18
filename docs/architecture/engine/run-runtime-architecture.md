@@ -45,6 +45,18 @@ ihnen aber nicht zurückimportiert.
 
 ## Nicht offensichtliche Verträge
 
+- Effektive ICE-Runquotes unterscheiden die aktuelle `effectiveStrength`
+  von `encounterStrength`: Letztere wendet die aktuellen öffentlichen
+  Encounter-Modifikatoren über dieselbe Stärkeberechnung an, ohne Trigger
+  oder Lifecycle-Effekte auszuführen. Mehrere Clowns kumulieren, die Stärke
+  bleibt mindestens null. Eine unbekannte zukünftige Zufallswirkung wird
+  damit nicht vorweggenommen; die bedingten Effekte bleiben separat sichtbar.
+- Die Corp erhält für angebotene X-Rez-LegalActions eigene
+  `effectivePostRezActionRunQuotes` mit Action-ID und StateVersion. Die
+  Projektion setzt nur den öffentlich gewählten X-Zustand in einer lokalen
+  Kopie; der eigentliche Zustand, RNG und Eventlog bleiben unverändert.
+  Der Runner erhält diese Vorschau für ungerezzt verborgenes ICE nicht.
+
 - Run-Window-Reihenfolge und Timingpunkte werden nicht aus Importreihenfolge
   abgeleitet. Die Registry und der persistierte Run-Zustand bleiben Autorität.
 - Bezahlbare `corp_encounter`-Fähigkeiten öffnen vor der nächsten

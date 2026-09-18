@@ -731,16 +731,16 @@ export function validExactIceRezRoute(value: unknown): boolean {
     (bluff.outcome === "access_cost" ||
       bluff.outcome === "visible_stop" ||
       bluff.outcome === "paid_encounter_opportunity");
-  const freeCurrentEncounterDefense = route.freeCurrentEncounterDefense as
+  const currentEncounterDefense = route.currentEncounterDefense as
     | Record<string, unknown>
     | undefined;
-  const hasExactFreeCurrentEncounterDefense =
+  const hasExactCurrentEncounterDefense =
     route.routeKind === "qualitative_encounter_defense" &&
-    freeCurrentEncounterDefense?.effect ===
+    currentEncounterDefense?.effect ===
       "meaningful_tax_or_damage_or_disruption" &&
-    freeCurrentEncounterDefense.evidenceSource ===
+    currentEncounterDefense.evidenceSource ===
       "visible_corp_ice_defense_profile" &&
-    quote?.finalCredits === 0;
+    knownNonNegativeInteger(currentEncounterDefense.activationCredits);
   return (
     nonEmptyString(route.actionId) &&
     nonEmptyString(route.sourceCardInstanceId) &&
@@ -758,7 +758,7 @@ export function validExactIceRezRoute(value: unknown): boolean {
       hasExactTraceBlock ||
       hasBoundBluffDefense ||
       hasExactMarginalDefenseThreat ||
-      hasExactFreeCurrentEncounterDefense) &&
+      hasExactCurrentEncounterDefense) &&
     (route.effect === "progress" || route.effect === "satisfied") &&
     knownNonNegativeInteger(route.totalRezCredits) &&
     quote.finalCredits === route.totalRezCredits

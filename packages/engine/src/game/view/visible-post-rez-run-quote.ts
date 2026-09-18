@@ -2,6 +2,7 @@ import { CARD_DEFINITIONS_BY_ID } from "../../card-definitions";
 import {
   type CardInstanceId,
   type GameState,
+  type LegalAction,
   type VisibleCard,
   type VisibleCorpIcePostRezRunQuote,
   type ServerId,
@@ -36,15 +37,16 @@ export function projectFixedCorpIcePostRezState(
 }
 
 /**
- * Quotes the run-facing state of one fixed-rez ICE without mutating GameState.
- * Choice-dependent rez state remains deliberately incomplete. During an
- * active run only the exact currently approached fixed ICE can be projected;
- * every other active-run ICE remains incomplete.
+ * Quotes the run-facing state of one ICE without mutating GameState. Fixed
+ * rez and an exactly bound x-strength LegalAction can be projected. Other
+ * choice-dependent rez states remain incomplete. During an active run only
+ * the currently approached ICE can be projected.
  */
 export function visibleCorpIcePostRezRunQuote(
   state: GameState,
   iceId: CardInstanceId,
   visibleIce: VisibleCard,
+  action?: LegalAction,
 ): VisibleCorpIcePostRezRunQuote | undefined {
   const source = state.cardInstances[iceId];
   const definitionId = visibleIce.definitionId;
@@ -75,7 +77,24 @@ export function visibleCorpIcePostRezRunQuote(
     return { ...binding, complete: false, reason: "active_run_context" };
   }
   const implementation = cardImplementationForDefinitionId(definitionId);
-  if (implementation?.variableRez || source.variableIceState) {
+  const variable = implementation?.variableRez;
+  const value = action?.payload?.variableRezValue;
+  const exactVariableAction =
+    variable?.kind === "x_strength" &&
+    action?.type === "rez_ice" &&
+    action.side === "corp" &&
+    action.source === iceId &&
+    action.expiresAtStateVersion === state.stateVersion &&
+    action.payload?.cardId === iceId &&
+    action.payload.variableRezKind === "x_strength" &&
+    typeof value === "number" &&
+    Number.isSafeInteger(value) &&
+    value >= variable.minValue &&
+    value <= variable.maxValue &&
+    action.payload.effectiveStrengthAfterRez === value &&
+    action.payload.variableRezAdditionalCost ===
+      value * variable.additionalCostPerValue;
+  if ((variable && !exactVariableAction) || source.variableIceState) {
     return {
       ...binding,
       complete: false,
@@ -90,6 +109,20 @@ export function visibleCorpIcePostRezRunQuote(
     };
   }
   const projectedState = projectFixedCorpIcePostRezState(state, iceId);
+  if (
+    projectedState &&
+    exactVariableAction &&
+    variable?.kind === "x_strength"
+  ) {
+    projectedState.cardInstances[iceId]!.variableIceState = {
+      family: "x_strength",
+      value: value!,
+      strength: value!,
+      cap: variable.maxValue,
+      additionalCostPaid: value! * variable.additionalCostPerValue,
+      ...(variable.traceLimitFromValue ? { traceLimit: value! } : {}),
+    };
+  }
   const projectedVisibleIce = projectedState
     ? visibleCorpCard(projectedState, iceId, "corp", "ice")
     : undefined;

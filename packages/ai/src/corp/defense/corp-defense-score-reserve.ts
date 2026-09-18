@@ -161,7 +161,10 @@ export function assessCorpExactIceRezAgainstScoreReserves(params: {
     : exactCurrentRunFollowupStoppingRez(input, route.sourceCardInstanceId);
   const requiredCreditsAfterRez =
     scoreCredits +
-    (route.bluffDefenseNeed?.encounterCredits ?? 0) +
+    Math.max(
+      route.bluffDefenseNeed?.encounterCredits ?? 0,
+      route.currentEncounterDefense?.activationCredits ?? 0,
+    ) +
     [
       ...immediateRezClaims.map((claim) => claim.credits),
       ...opportunity.claims.map((claim) => claim.credits),
@@ -172,6 +175,7 @@ export function assessCorpExactIceRezAgainstScoreReserves(params: {
     (currentRunFollowup?.credits ?? 0);
   const consumesNoReservedResources =
     route.totalRezCredits === 0 &&
+    (route.currentEncounterDefense?.activationCredits ?? 0) === 0 &&
     route.quote.mandatoryAdditionalCosts.agendaPoints === 0;
   return {
     preservesReserve:
