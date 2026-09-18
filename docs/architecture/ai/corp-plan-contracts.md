@@ -372,7 +372,25 @@ Main-Office Relocation erreicht nur 3/4 Counter, während das Creditbudget von
 der serverübergreifenden Rezreserve reproduzierbar. Zu prüfen ist die
 Abwägung zwischen konkreter Schutzreparatur und Scorefortschritt über das
 Runnerfenster; fehlender finanzierbarer Schutz ist keine bloße Fundinglücke.
-Eine bessere rettende Aktionsfolge ist damit noch nicht nachgewiesen.
+Die genauere Gegenprüfung findet eine bekannte, legal angebotene Schutzoption:
+Rio de Janeiro City Grid liegt auf HQ und kostet einschließlich sofortigem
+Rez 1 Credit und 1 Klick. Ab D34 lassen Rio-Installation, ein Basiscredit und
+ein Advance 5 Credits für beide Remote-ICE; ab D35 genügt Rio plus Basiscredit.
+Die Agenda erreicht dann erst 1/4 Counter. Beide ICE allein kosten zusammen
+5 Rez-Credits, sind aber durch den sichtbaren Dwarf für zusammen 2 Credits
+brechbar. Rio ergänzt je passiertem gerezzten ICE eine Runstopp-Chance von
+1/6, bei zwei ICE also 11/36 für einen einzelnen vollständigen Runversuch.
+Bei D36 finanziert Rio nach seiner Installation nur noch eines der beiden ICE.
+Die historischen Alternativdiagnosen schließen Rio im Agenda-Remote mit
+`corp_card_action_has_no_exact_parent_need` aus; der Remoteplan verweist auf
+`remote_leased_to_score_project` und `remote_support_route_unavailable`.
+Offen ist daher konkret die parentgebundene probabilistische Schutzroute
+einschließlich Rezbudget und verzögerter Scorekonversion. Die höhere Chance,
+einen Run abzuwehren, beweist weder das Überleben mehrerer Runs noch einen
+Gewinn des Spiels. Nach zusätzlichem ICE zu ziehen bleibt eine unsichere
+Suchroute; bei D34 liegt kein ICE auf HQ. Die Engine-Rio-Fälle in
+`agenda-global-random.test.ts` prüfen Runstopp, Nichtstopp und Replay.
+
 Ein bereits im eigenen Zug
 vollständig schließender Score hat kein dazwischenliegendes Runner-Fenster.
 Nicht bevorzugte, aber zugelassene Agenda-Zuglinien behalten ihre eigene Quote
