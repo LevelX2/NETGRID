@@ -168,10 +168,44 @@ describe("two latest Corp matches 2026-07-31 remediation checkpoints", () => {
     expect(hashGameState(replay.state)).toBe(hashGameState(second.state));
   });
 
-  it("revalidates the separately captured D89 score-support position", () => {
-    const result = runAiDecisionCheckpoint(fixture(continueTychoD89Json));
-    expect(result.ok, result.message).toBe(true);
-  });
+  it.each([0, 1])(
+    "funds D89 protection before installation unless its one-credit gap is covered: %s",
+    (extraCredit) => {
+      const checkpoint = fixture(continueTychoD89Json);
+      if (extraCredit) {
+        checkpoint.source.kind = "synthetic_companion";
+        checkpoint.engine.testOnlyGameState.corp.credits += extraCredit;
+        checkpoint.engine.stateHash = hashGameState(
+          checkpoint.engine.testOnlyGameState,
+        );
+        checkpoint.expectation = {
+          acceptableActions: [
+            {
+              type: "install_card",
+              sourceDefinitionId: "onr_v1_247_haunting-inquisition",
+              targetServerId: "remote_1",
+            },
+          ],
+          planExecution: {
+            acceptablePlanKinds: ["corp.defend_servers"],
+            acceptableCapabilities: ["develop_score_protection"],
+          },
+        };
+      }
+      const result = runAiDecisionCheckpoint(checkpoint);
+      expect(result.ok, result.message).toBe(true);
+      const parent =
+        "plan:corp.score_agenda:agenda%3Acorp_onr_v1_188_ai-chief-financial-officer_1%3Aremote_1";
+      expect(result.decision?.decisionDebug?.planFirstDecision).toMatchObject({
+        rootPlanInstanceId: parent,
+        selectedPlan: { parentInstanceId: parent },
+        route: {
+          actionId: result.selectedAction!.actionId,
+          stateVersion: checkpoint.engine.stateVersion,
+        },
+      });
+    },
+  );
 
   it.each([
     ["rezzes the materially taxing Haunting Inquisition", rezHauntingD78Json],
