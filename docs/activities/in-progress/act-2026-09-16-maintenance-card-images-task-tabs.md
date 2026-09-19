@@ -1,15 +1,15 @@
 ---
 activityId: act-2026-09-16-maintenance-card-images-task-tabs
-status: inbox
+status: in-progress
 kind: concept
 area: ui
 priority: normal
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-09-16
-startedAt:
+startedAt: 2026-09-16
 completedAt:
-branch:
+branch: codex/activity-run-20260916-091351
 releaseTarget:
 blockedBy: []
 resultArtifacts: []

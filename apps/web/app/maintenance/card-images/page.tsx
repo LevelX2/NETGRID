@@ -33,6 +33,8 @@ import {
 
 export default function CardImageMaintenancePage() {
   const t = useTranslations("Maintenance.cardImages");
+  const tabs = ["packages", "mapping", "build"] as const;
+  const [activeTab, setActiveTab] = useState<(typeof tabs)[number]>("packages");
   const auth = useMaintenanceSession();
   const [inventory, setInventory] =
     useState<CardImageCollectionInventory | null>(null);
@@ -380,7 +382,6 @@ export default function CardImageMaintenancePage() {
           </div>
         </header>
 
-        <p style={infoBox}>{t("m014")}</p>
         {error ? <p style={errorBox}>{error}</p> : null}
         {notice ? <p style={successBox}>{notice}</p> : null}
 
@@ -401,7 +402,62 @@ export default function CardImageMaintenancePage() {
           ) : null}
         </section>
 
-        <section style={panel}>
+        <div role="tablist" aria-label={t("tasksLabel")} style={buttonRow}>
+          {tabs.map((tab, index) => (
+            <button
+              key={tab}
+              id={`images-tab-${tab}`}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === tab}
+              aria-controls={`images-panel-${tab}`}
+              tabIndex={activeTab === tab ? 0 : -1}
+              style={activeTab === tab ? primaryButton : button}
+              onClick={() => setActiveTab(tab)}
+              onKeyDown={(event) => {
+                const next =
+                  event.key === "ArrowRight"
+                    ? (index + 1) % tabs.length
+                    : event.key === "ArrowLeft"
+                      ? (index + tabs.length - 1) % tabs.length
+                      : event.key === "Home"
+                        ? 0
+                        : event.key === "End"
+                          ? tabs.length - 1
+                          : undefined;
+                if (next === undefined) return;
+                event.preventDefault();
+                setActiveTab(tabs[next]!);
+                event.currentTarget.parentElement
+                  ?.querySelectorAll<HTMLButtonElement>('[role="tab"]')
+                  [next]?.focus();
+              }}
+            >
+              {t(`tabs.${tab}`)}
+            </button>
+          ))}
+        </div>
+        {uploadingMapping || uploadingPackArchive || packUploadProgress ? (
+          <p role="status" style={infoBox}>
+            {packUploadProgress
+              ? t("folderProgress", packUploadProgress)
+              : uploadingPackArchive
+                ? t("m037")
+                : t("m020")}
+          </p>
+        ) : null}
+
+        <section
+          role="tabpanel"
+          id="images-panel-mapping"
+          aria-labelledby="images-tab-mapping"
+          hidden={activeTab !== "mapping"}
+          style={{
+            ...panel,
+            display: activeTab === "mapping" ? "grid" : "none",
+          }}
+        >
+          <p style={subtle}>{t("mappingHelp")}</p>
           <div style={panelHeader}>
             <div>
               <h2 style={h2}>{t("m018")}</h2>
@@ -524,208 +580,217 @@ export default function CardImageMaintenancePage() {
           </div>
         </section>
 
-        <section style={twoColumns}>
-          <article style={panel}>
-            <div style={panelHeader}>
-              <div>
-                <h2 style={h2}>{t("m034")}</h2>
-                <p style={subtle}>{t("m035")}</p>
-              </div>
-              <div style={buttonRow}>
-                <label style={button}>
-                  <FileUp size={15} />
-                  {packUploadProgress
-                    ? t("folderProgress", {
-                        completed: packUploadProgress.completed,
-                        total: packUploadProgress.total,
-                      })
-                    : t("m036")}
-                  <input
-                    type="file"
-                    multiple
-                    hidden
-                    disabled={
-                      Boolean(packUploadProgress) ||
-                      uploadingPackArchive ||
-                      activeJob
-                    }
-                    {...({ webkitdirectory: "", directory: "" } as Record<
-                      string,
-                      string
-                    >)}
-                    onChange={(event) => {
-                      const files = event.target.files;
-                      event.target.value = "";
-                      if (files) void uploadPackDirectory(files);
-                    }}
-                  />
-                </label>
-                <label style={button}>
-                  <FileUp size={15} />
-                  {uploadingPackArchive ? t("m037") : t("m038")}
-                  <input
-                    type="file"
-                    accept=".zip,application/zip"
-                    hidden
-                    disabled={
-                      Boolean(packUploadProgress) ||
-                      uploadingPackArchive ||
-                      activeJob
-                    }
-                    onChange={(event) => {
-                      const file = event.target.files?.[0];
-                      event.target.value = "";
-                      if (file) void uploadPackArchive(file);
-                    }}
-                  />
-                </label>
-              </div>
-            </div>
-            <Field label={t("m039")}>
-              <select
-                style={input}
-                value={pack}
-                onChange={(event) => setPack(event.target.value)}
-              >
-                <option value="">{t("m040")}</option>
-                {packs.map((entry) => (
-                  <option key={entry.relativePath} value={entry.relativePath}>
-                    {cardImagePackTransport(entry) === "zip"
-                      ? t("m041")
-                      : t("m042")}
-                    {" · "}
-                    {entry.relativePath}
-                  </option>
-                ))}
-              </select>
-              {!packs.length ? <span style={subtle}>{t("m043")}</span> : null}
-            </Field>
-            <ConflictField
-              value={packConflictMode}
-              onChange={setPackConflictMode}
-            />
-            <div style={buttonRow}>
-              <button
-                type="button"
-                style={button}
-                disabled={!pack || activeJob}
-                title={!pack ? t("m044") : undefined}
-                onClick={() =>
-                  void startJob(
-                    "/api/storage/maintenance/card-images/packs/preview",
-                    {
-                      pack,
-                      packTransport: selectedPackTransport,
-                      onExisting: packConflictMode,
-                    },
-                  ).catch((jobError) =>
-                    setError(errorMessage(jobError, t("m045"))),
-                  )
-                }
-              >
-                <Package size={16} /> {t("m046")}
-              </button>
-              <button
-                type="button"
-                style={primaryButton}
-                disabled={!pack || activeJob}
-                title={!pack ? t("m044") : undefined}
-                onClick={() =>
-                  void startJob(
-                    "/api/storage/maintenance/card-images/packs/import",
-                    {
-                      pack,
-                      packTransport: selectedPackTransport,
-                      onExisting: packConflictMode,
-                    },
-                  ).catch((jobError) =>
-                    setError(errorMessage(jobError, t("m047"))),
-                  )
-                }
-              >
-                <ShieldCheck size={16} /> {t("m048")}
-              </button>
-            </div>
-          </article>
-
-          <article style={panel}>
+        <section
+          role="tabpanel"
+          id="images-panel-packages"
+          aria-labelledby="images-tab-packages"
+          hidden={activeTab !== "packages"}
+          style={{
+            ...panel,
+            display: activeTab === "packages" ? "grid" : "none",
+          }}
+        >
+          <p style={subtle}>{t("packageHelp")}</p>
+          <div style={panelHeader}>
             <div>
-              <h2 style={h2}>{t("m049")}</h2>
-              <p style={subtle}>
-                {t("m050")}
-                <code>data/local-assets/card-image-packs/build</code>.
-              </p>
+              <h2 style={h2}>{t("m034")}</h2>
+              <p style={subtle}>{t("m035")}</p>
             </div>
-            <Field label={t("m051")}>
-              <select
-                style={input}
-                value={buildProfile}
-                onChange={(event) =>
-                  setBuildProfile(event.target.value as CardImageProfileId)
-                }
-              >
-                <option value="originalset">{t("m052")}</option>
-                <option value="proteus">{t("m053")}</option>
-                <option value="classic">{t("m054")}</option>
-              </select>
-            </Field>
-            <Field label={t("m055")}>
-              <select
-                style={input}
-                value={mapping}
-                onChange={(event) => setMapping(event.target.value)}
-              >
-                <option value="">{t("m024")}</option>
-                {mappings.map((entry) => (
-                  <option key={entry.relativePath} value={entry.relativePath}>
-                    {entry.relativePath}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label={t("m056")}>
-              <select
-                style={input}
-                value={buildFormat}
-                onChange={(event) =>
-                  setBuildFormat(
-                    event.target.value === "zip" ? "zip" : "directory",
-                  )
-                }
-              >
-                <option value="directory">{t("m057")}</option>
-                <option value="zip">{t("m058")}</option>
-              </select>
-            </Field>
-            <label style={checkField}>
-              <input
-                type="checkbox"
-                checked={replaceBuild}
-                onChange={(event) => setReplaceBuild(event.target.checked)}
-              />
-              {t("m059")}
-            </label>
+            <div style={buttonRow}>
+              <label style={button}>
+                <FileUp size={15} />
+                {packUploadProgress
+                  ? t("folderProgress", {
+                      completed: packUploadProgress.completed,
+                      total: packUploadProgress.total,
+                    })
+                  : t("m036")}
+                <input
+                  type="file"
+                  multiple
+                  hidden
+                  disabled={
+                    Boolean(packUploadProgress) ||
+                    uploadingPackArchive ||
+                    activeJob
+                  }
+                  {...({ webkitdirectory: "", directory: "" } as Record<
+                    string,
+                    string
+                  >)}
+                  onChange={(event) => {
+                    const files = event.target.files;
+                    event.target.value = "";
+                    if (files) void uploadPackDirectory(files);
+                  }}
+                />
+              </label>
+              <label style={button}>
+                <FileUp size={15} />
+                {uploadingPackArchive ? t("m037") : t("m038")}
+                <input
+                  type="file"
+                  accept=".zip,application/zip"
+                  hidden
+                  disabled={
+                    Boolean(packUploadProgress) ||
+                    uploadingPackArchive ||
+                    activeJob
+                  }
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    event.target.value = "";
+                    if (file) void uploadPackArchive(file);
+                  }}
+                />
+              </label>
+            </div>
+          </div>
+          <Field label={t("m039")}>
+            <select
+              style={input}
+              value={pack}
+              onChange={(event) => setPack(event.target.value)}
+            >
+              <option value="">{t("m040")}</option>
+              {packs.map((entry) => (
+                <option key={entry.relativePath} value={entry.relativePath}>
+                  {cardImagePackTransport(entry) === "zip"
+                    ? t("m041")
+                    : t("m042")}
+                  {" · "}
+                  {entry.relativePath}
+                </option>
+              ))}
+            </select>
+            {!packs.length ? <span style={subtle}>{t("m043")}</span> : null}
+          </Field>
+          <ConflictField
+            value={packConflictMode}
+            onChange={setPackConflictMode}
+          />
+          <div style={buttonRow}>
             <button
               type="button"
-              style={primaryButton}
-              disabled={!mapping || activeJob}
+              style={button}
+              disabled={!pack || activeJob}
+              title={!pack ? t("m044") : undefined}
               onClick={() =>
                 void startJob(
-                  "/api/storage/maintenance/card-images/packs/build",
+                  "/api/storage/maintenance/card-images/packs/preview",
                   {
-                    mapping,
-                    profileId: buildProfile,
-                    replace: replaceBuild,
-                    outputFormat: buildFormat,
+                    pack,
+                    packTransport: selectedPackTransport,
+                    onExisting: packConflictMode,
                   },
                 ).catch((jobError) =>
-                  setError(errorMessage(jobError, t("m060"))),
+                  setError(errorMessage(jobError, t("m045"))),
                 )
               }
             >
-              <Package size={16} /> {t("m061")}
+              <Package size={16} /> {t("m046")}
             </button>
-          </article>
+            <button
+              type="button"
+              style={primaryButton}
+              disabled={!pack || activeJob}
+              title={!pack ? t("m044") : undefined}
+              onClick={() =>
+                void startJob(
+                  "/api/storage/maintenance/card-images/packs/import",
+                  {
+                    pack,
+                    packTransport: selectedPackTransport,
+                    onExisting: packConflictMode,
+                  },
+                ).catch((jobError) =>
+                  setError(errorMessage(jobError, t("m047"))),
+                )
+              }
+            >
+              <ShieldCheck size={16} /> {t("m048")}
+            </button>
+          </div>
+        </section>
+
+        <section
+          role="tabpanel"
+          id="images-panel-build"
+          aria-labelledby="images-tab-build"
+          hidden={activeTab !== "build"}
+          style={{ ...panel, display: activeTab === "build" ? "grid" : "none" }}
+        >
+          <div>
+            <h2 style={h2}>{t("m049")}</h2>
+            <p style={subtle}>{t("buildHelp")}</p>
+          </div>
+          <Field label={t("m051")}>
+            <select
+              style={input}
+              value={buildProfile}
+              onChange={(event) =>
+                setBuildProfile(event.target.value as CardImageProfileId)
+              }
+            >
+              <option value="originalset">{t("m052")}</option>
+              <option value="proteus">{t("m053")}</option>
+              <option value="classic">{t("m054")}</option>
+            </select>
+          </Field>
+          <Field label={t("m055")}>
+            <select
+              style={input}
+              value={mapping}
+              onChange={(event) => setMapping(event.target.value)}
+            >
+              <option value="">{t("m024")}</option>
+              {mappings.map((entry) => (
+                <option key={entry.relativePath} value={entry.relativePath}>
+                  {entry.relativePath}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label={t("m056")}>
+            <select
+              style={input}
+              value={buildFormat}
+              onChange={(event) =>
+                setBuildFormat(
+                  event.target.value === "zip" ? "zip" : "directory",
+                )
+              }
+            >
+              <option value="directory">{t("m057")}</option>
+              <option value="zip">{t("m058")}</option>
+            </select>
+          </Field>
+          <label style={checkField}>
+            <input
+              type="checkbox"
+              checked={replaceBuild}
+              onChange={(event) => setReplaceBuild(event.target.checked)}
+            />
+            {t("m059")}
+          </label>
+          <button
+            type="button"
+            style={primaryButton}
+            disabled={!mapping || activeJob}
+            onClick={() =>
+              void startJob(
+                "/api/storage/maintenance/card-images/packs/build",
+                {
+                  mapping,
+                  profileId: buildProfile,
+                  replace: replaceBuild,
+                  outputFormat: buildFormat,
+                },
+              ).catch((jobError) => setError(errorMessage(jobError, t("m060"))))
+            }
+          >
+            <Package size={16} /> {t("m061")}
+          </button>
         </section>
 
         {job ? <JobPanel job={job} /> : null}
@@ -990,7 +1055,7 @@ const button: CSSProperties = {
 };
 const primaryButton: CSSProperties = {
   ...button,
-  borderColor: "var(--primary-border)",
+  border: "1px solid var(--primary-border)",
   background: "var(--primary-bg)",
   color: "var(--primary-text)",
 };
@@ -1037,11 +1102,6 @@ const formGrid: CSSProperties = {
   display: "grid",
   gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))",
   gap: "0.65rem",
-};
-const twoColumns: CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
-  gap: "0.75rem",
 };
 const field: CSSProperties = {
   display: "grid",

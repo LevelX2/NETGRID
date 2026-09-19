@@ -282,6 +282,15 @@
     }
   },
   "cardImages": {
+    "tasksLabel": "Tâches de gestion des images",
+    "tabs": {
+      "packages": "Importer des packs",
+      "mapping": "Importer un CSV",
+      "build": "Créer des packs"
+    },
+    "packageHelp": "Choisissez un fichier ZIP ou un dossier de pack complet contenant un manifeste, mapping.csv et images. Le dossier de compilation parent contenant plusieurs ZIP n’est pas un dossier de pack. Les fichiers sont copiés dans la zone d’import locale.",
+    "mappingHelp": "Associez les images à l’aide d’un CSV. Les fichiers locaux sont lus dans la zone d’import. Les images HTTPS sont téléchargées une fois après confirmation de vos droits ; le jeu utilise ensuite les images stockées localement.",
+    "buildHelp": "Créez un pack d’images sous forme de dossier ou de ZIP à partir d’une table d’association locale complète. Le résultat reste dans la zone de packs du répertoire de données actif.",
     "m001": "La gestion des images de carte n'a pas pu être chargée.",
     "m002": "Le travail d’image cartographique s’est terminé avec succès.",
     "m003": "La tâche d'image cartographique a échoué.",
