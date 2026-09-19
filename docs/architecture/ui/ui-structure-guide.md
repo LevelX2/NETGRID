@@ -141,6 +141,13 @@ Runstartende Events erhalten in der lokalisierten Chronik ihre Run-Farbe
 aus dem öffentlichen Kennzeichen `runnerEventRun: true` bei `play_event`.
 Kartenname, Regeltext und ein Serverziel allein bestimmen diese Zuordnung nicht.
 
+Chronikeinträge trennen Aktions- und Gruppenfarben: Symbol und linke Markierung
+zeigen die Aktionskategorie, Fläche und Rahmen die Gruppe (Corp blau,
+Runner/Run violett). Diese Trennung gilt auch im hellen Farbschema; dort
+mischt der Hintergrund 12 % Gruppenfarbe in die Panel-Farbe.
+Kartenaktionen verwenden Orange für Symbol und linke Markierung, damit sie
+sich in beiden Farbschemata deutlich von grünen Credit-Aktionen unterscheiden.
+
 Programm-Trash-Subroutinen bleiben einschließlich Zielauswahl und Auflösung
 in der aktiven Run-Gruppe. Die Engine kennzeichnet ihre Zielauswahl mit
 `trash_installed_program`; die lokalisierte Aufforderung nennt ausdrücklich

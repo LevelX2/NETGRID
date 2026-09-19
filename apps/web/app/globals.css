@@ -11245,6 +11245,7 @@ section[data-testid="legal-actions"].cueHighlight {
 
 .chronicleEntry {
   --chronicle-accent: var(--chronicle-system);
+  --chronicle-surface-accent: var(--chronicle-accent);
   position: relative;
   display: grid;
   grid-template-columns: 30px minmax(0, 1fr);
@@ -11297,6 +11298,7 @@ section[data-testid="legal-actions"].cueHighlight {
 }
 
 .chronicleEntry.group-corp {
+  --chronicle-surface-accent: var(--corp-status-accent);
   border-color: color-mix(in srgb, var(--corp-status-accent), var(--line) 58%);
   background:
     linear-gradient(
@@ -11308,6 +11310,7 @@ section[data-testid="legal-actions"].cueHighlight {
 
 .chronicleEntry.group-runner,
 .chronicleEntry.group-run {
+  --chronicle-surface-accent: var(--runner-zone-accent);
   border-color: color-mix(in srgb, var(--runner-zone-accent), var(--line) 58%);
   background:
     linear-gradient(
@@ -13113,7 +13116,7 @@ section[data-testid="legal-actions"].cueHighlight {
   --danger-button-border: #e6a1aa;
   --chronicle-turn: #3c6fc4;
   --chronicle-economy: #1d7a45;
-  --chronicle-card: #08766a;
+  --chronicle-card: #b85a14;
   --chronicle-run: #5a55b8;
   --chronicle-agenda: #9b7a16;
   --chronicle-danger: #b42335;
@@ -14274,8 +14277,8 @@ select,
 }
 
 :root[data-theme="white"] .chronicleEntry {
-  background: color-mix(in srgb, var(--panel) 96%, var(--chronicle-accent));
-  border-color: color-mix(in srgb, var(--line) 80%, var(--chronicle-accent));
+  background: color-mix(in srgb, var(--panel) 88%, var(--chronicle-surface-accent));
+  border-color: color-mix(in srgb, var(--line) 80%, var(--chronicle-surface-accent));
 }
 
 :root[data-theme="white"] .runnerRigStrip {
