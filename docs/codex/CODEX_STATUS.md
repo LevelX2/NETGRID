@@ -251,7 +251,8 @@ abgedeckt.
 
 Beide Startwege prüfen die Browser-Origin-Freigabe und die ausgelieferte
 Web-/Serverbindung. Der Entwicklungsstarter diagnostiziert veraltete
-IP-Konfigurationen vor Wiederverwendung; der Windows-LAN-Launcher übernimmt
+IP-Konfigurationen vor Wiederverwendung und führt nach OK im Hinweisdialog
+den regulären Neustart direkt aus; der Windows-LAN-Launcher übernimmt
 beim Prozessstart eine eindeutige neue private IPv4-Adresse in die
 Kindprozessumgebung, ohne die geschützte Installationskonfiguration zu ändern.
 Mehrdeutige oder fehlende LAN-Adressen scheitern sichtbar. Führend sind das

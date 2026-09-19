@@ -75,16 +75,14 @@ powershell -ExecutionPolicy Bypass -File .\scripts\start-netgrid.ps1
 Servers dessen Freigabe für die aktuelle Browser-Origin. Ein erreichbarer
 Webclient muss außerdem die aktuelle Serveradresse im HTML ausliefern.
 Dieselben Prüfungen gelten vor dem abschließenden Öffnen des Browsers.
-Eine alte LAN-Freigabe wird als `startup_browser_origin_rejected`, eine alte
-Webbindung als `startup_web_server_binding_invalid` sichtbar angezeigt und
-im Launcherlog protokolliert.
-
-Bei einem IP-Wechsel werden laufende Spiele nicht automatisch durch einen
-Neustart unterbrochen. Nach Spielende im primären Checkout ausführen:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File C:\Projekte\NETGRID\scripts\start-netgrid.ps1 -RestartServer -RestartWeb
-```
+Bei einer alten LAN-Freigabe erklärt ein Dialog den anstehenden Neustart.
+Nach **OK** setzt derselbe reguläre Startlauf `RestartServer` und `RestartWeb`
+und führt die vorhandenen Stopp-, Start- und Bereitschaftsprüfungen aus.
+Bei ausschließlich veralteter Webbindung wird nur der Webclient neu gestartet.
+Zielseite und Servermodus bleiben erhalten. Ein manueller Shell-Aufruf ist
+nicht erforderlich. **Abbrechen** oder Schließen des Dialogs beendet den
+Startversuch ohne den angekündigten Neustart. Der Dialog weist darauf hin,
+dass beim Serverneustart laufende Verbindungen getrennt werden.
 
 Anschließend bereits offene Browserseiten neu laden. Der Startweg für den
 installierten LAN-Betrieb ist im

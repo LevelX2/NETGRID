@@ -108,3 +108,39 @@ Describe "Browser-Verbindung vor Startfreigabe" {
     Test-NetgridWebServerBinding -ServerUrl 'http://192.168.68.58:8787' -WebUrl 'http://192.168.68.58:3100' | Should Be $false
   }
 }
+
+Describe "Neustart nach OK im Netzwerkdialog" {
+  function Request-NetgridStartupRestart { param($Message) throw 'Dialog must be mocked' }
+  BeforeEach {
+    $ast = [System.Management.Automation.Language.Parser]::ParseFile((Join-Path $PSScriptRoot '..\start-netgrid.ps1'), [ref]$null, [ref]$null)
+    $serverBranch = $ast.Find({ param($node) $node -is [System.Management.Automation.Language.IfStatementAst] -and $node.Clauses[0].Item1.Extent.Text -like '*$serverReadyLanBefore*browserConnectionReady*' }, $true).Extent.Text
+    $webBranch = $ast.Find({ param($node) $node -is [System.Management.Automation.Language.IfStatementAst] -and $node.Clauses[0].Item1.Extent.Text -like '*$webReadyLanBefore*Test-NetgridWebServerBinding*' }, $true).Extent.Text
+    Mock Request-NetgridStartupRestart { $true }
+    Mock Test-NetgridWebServerBinding { $false }
+    $RestartServer = $false
+    $RestartWeb = $false
+    $serverReadyLanBefore = $true
+    $browserConnectionReady = $false
+    $webReadyLanBefore = $true
+    $serverEnvironment = @{ NETGRID_SERVER_BASE_URL = 'http://192.168.68.58:8787' }
+    $targetWebUrl = 'http://192.168.68.58:3100'
+  }
+  It "setzt nach OK beide Neustartoptionen und vermeidet einen zweiten Dialog" {
+    Invoke-Expression $serverBranch
+    $RestartServer | Should Be $true
+    $RestartWeb | Should Be $true
+    Invoke-Expression $webBranch
+    Assert-MockCalled Request-NetgridStartupRestart -Scope It -Times 1 -Exactly
+  }
+  It "startet bei ausschließlich veralteter Webbindung nur den Webclient neu" {
+    Invoke-Expression $webBranch
+    $RestartWeb | Should Be $true
+    $RestartServer | Should Be $false
+    Assert-MockCalled Request-NetgridStartupRestart -Scope It -Times 1 -Exactly
+  }
+  It "zeigt bei bereits angefordertem Serverneustart keinen weiteren Dialog" {
+    $RestartServer = $true
+    Invoke-Expression $serverBranch
+    Assert-MockCalled Request-NetgridStartupRestart -Scope It -Times 0 -Exactly
+  }
+}

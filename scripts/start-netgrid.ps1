@@ -35,12 +35,11 @@ function Test-Endpoint {
   }
 }
 
-function Stop-NetgridStartup {
+function Request-NetgridStartupRestart {
   param([Parameter(Mandatory = $true)][string]$Message)
-  Write-LauncherLog "Launcher preflight failure: $Message"
+  Write-LauncherLog "Launcher network restart requested: $Message"
   Add-Type -AssemblyName System.Windows.Forms
-  [System.Windows.Forms.MessageBox]::Show($Message, "NETGRID starten") | Out-Null
-  exit 1
+  return [System.Windows.Forms.MessageBox]::Show($Message, "NETGRID starten", [System.Windows.Forms.MessageBoxButtons]::OKCancel, [System.Windows.Forms.MessageBoxIcon]::Information) -eq [System.Windows.Forms.DialogResult]::OK
 }
 
 function Test-EndpointOk {
@@ -342,7 +341,9 @@ $activeServerMode = if ($serverReadyLocalBefore) { Get-NetgridServerRuntimeMode 
 $serverModeMismatch = $serverReadyLocalBefore -and $activeServerMode -ne $serverMode
 $browserConnectionReady = $serverReadyLanBefore -and (Test-NetgridBrowserConnection -ServerUrl $serverEnvironment.NETGRID_SERVER_BASE_URL -WebUrl $targetWebUrl)
 if ($serverReadyLanBefore -and -not $browserConnectionReady -and -not $RestartServer) {
-  Stop-NetgridStartup "startup_browser_origin_rejected: Der laufende Server gibt die aktuelle Webadresse $targetWebUrl nicht korrekt frei. Nach einem IP-Wechsel: laufende Spiele beenden und scripts/start-netgrid.ps1 -RestartServer -RestartWeb ausführen. Es wurde kein Prozess beendet."
+  if (-not (Request-NetgridStartupRestart "Die Netzwerkadresse hat sich geändert oder ist im laufenden Server nicht korrekt freigegeben.`n`nMit OK werden Server und Webclient jetzt neu gestartet und NETGRID anschließend geöffnet. Laufende Verbindungen werden dabei getrennt.")) { exit 0 }
+  $RestartServer = $true
+  $RestartWeb = $true
 }
 Write-LauncherLog "Server precheck lan=$serverReadyLanBefore local=$serverReadyLocalBefore activeMode=$activeServerMode requestedMode=$serverMode modeMismatch=$serverModeMismatch maintenanceRequested=$maintenanceRequested"
 
@@ -368,7 +369,8 @@ $webReadyLocalBefore = if ($webPortListeningBefore) { Test-Endpoint -Url $localW
 Write-LauncherLog "Web precheck lan=$webReadyLanBefore local=$webReadyLocalBefore"
 
 if ($webReadyLanBefore -and -not $RestartWeb -and -not (Test-NetgridWebServerBinding -ServerUrl $serverEnvironment.NETGRID_SERVER_BASE_URL -WebUrl $targetWebUrl)) {
-  Stop-NetgridStartup "startup_web_server_binding_invalid: Der laufende Webclient verwendet nicht die aktuelle Serveradresse. scripts/start-netgrid.ps1 -RestartWeb ausführen und die Browserseite neu laden."
+  if (-not (Request-NetgridStartupRestart "Der Webclient verwendet eine veraltete Serveradresse.`n`nMit OK wird der Webclient jetzt neu gestartet und NETGRID anschließend geöffnet.")) { exit 0 }
+  $RestartWeb = $true
 }
 
 if ($RestartWeb) {
