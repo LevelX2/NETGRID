@@ -206,8 +206,6 @@ angeboten wird. Absolute Serverpfade werden nicht übertragen oder
 zurückgeliefert; Quell-URLs bleiben ausschließlich Inhalt der nicht
 zurückgelieferten Zuordnungsdatei.
 
-Die Oberfläche bietet:
-
 Die drei Arbeitsabläufe sind als Untertabs organisiert: „Bildpakete
 importieren“ ist die Startansicht, daneben stehen „CSV importieren“ und
 „Pakete erstellen“. Bestand, Uploadfortschritt und laufender Auftrag bleiben
@@ -215,6 +213,13 @@ außerhalb der wechselnden Formulare sichtbar. Ein Tabwechsel erhält Eingaben
 und startet oder unterbricht keine Operation. Die Ordnerauswahl erwartet
 einen einzelnen vollständigen Paketordner; ein Buildordner mit mehreren ZIPs
 wird über die Auswahl einer einzelnen ZIP-Datei verwendet.
+
+`tests/e2e/maintenance-card-image-tabs.spec.ts` sichert Tastaturnavigation,
+erhaltene Eingaben, ZIP-Upload während eines Tabwechsels, fortgesetzte
+Jobabfragen und sichtbaren Abschluss sowie die schmale Ansicht ab. Der
+UI-Test simuliert die Maintenance-APIs und verändert keine Runtime-Daten.
+
+Die Oberfläche bietet:
 
 - Bestandszahlen für Originalset, Proteus und Classic;
 - CSV-Vorlagen für den Gesamtkatalog oder ein einzelnes Profil;

@@ -7,6 +7,12 @@ test("image tasks preserve inputs and a running job across keyboard tab changes"
 }) => {
   let starts = 0;
   let polls = 0;
+  let uploads = 0;
+  let finishJob = false;
+  let releaseUpload!: () => void;
+  const uploadResponse = new Promise<void>((resolve) => {
+    releaseUpload = resolve;
+  });
   const job = {
     schemaVersion: "netgrid-card-image-maintenance-job-v1",
     jobId: "tabs-test-job",
@@ -43,9 +49,16 @@ test("image tasks preserve inputs and a running job across keyboard tab changes"
       starts++;
       return route.fulfill({ json: { job } });
     }
+    if (path.endsWith("/inbox/package-archives")) {
+      uploads++;
+      await uploadResponse;
+      return route.fulfill({ json: { relativePath: "classic.zip" } });
+    }
     if (path.endsWith("/jobs/tabs-test-job")) {
       polls++;
-      return route.fulfill({ json: { job } });
+      return route.fulfill({
+        json: { job: finishJob ? { ...job, status: "succeeded" } : job },
+      });
     }
     return route.fulfill({ json: {} });
   });
@@ -94,7 +107,23 @@ test("image tasks preserve inputs and a running job across keyboard tab changes"
     page.getByRole("tabpanel").getByRole("combobox").nth(1),
   ).toHaveValue("https");
   await packages.click();
-  await page.getByRole("button", { name: "Vollständig prüfen", exact: true }).click();
+  await page
+    .locator('input[type="file"][accept=".zip,application/zip"]')
+    .setInputFiles({
+      name: "classic.zip",
+      mimeType: "application/zip",
+      buffer: Buffer.from("mock archive; the API is intercepted"),
+    });
+  await expect.poll(() => uploads).toBe(1);
+  await mapping.click();
+  await expect(page.getByRole("status")).toBeVisible();
+  releaseUpload();
+  await expect(page.getByRole("status")).toBeHidden();
+  expect(uploads).toBe(1);
+  await packages.click();
+  await page
+    .getByRole("button", { name: "Vollständig prüfen", exact: true })
+    .click();
   await build.click();
   await expect(
     page.getByRole("tabpanel").getByRole("combobox").first(),
@@ -105,14 +134,27 @@ test("image tasks preserve inputs and a running job across keyboard tab changes"
   await expect.poll(() => polls).toBeGreaterThan(0);
   await expect(page.locator('section[aria-live="polite"]')).toBeVisible();
   expect(starts).toBe(1);
+  finishJob = true;
+  await expect(
+    page.getByText("Kartenbildjob erfolgreich abgeschlossen.", { exact: true }),
+  ).toBeVisible();
+  await expect(page.locator('section[aria-live="polite"]')).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
   await build.focus();
   await page.keyboard.press("Home");
   await expect(packages).toBeFocused();
   await expect(page.getByRole("tabpanel")).toHaveCount(1);
+  await page.keyboard.press("End");
+  await expect(build).toBeFocused();
+  await page.keyboard.press("ArrowRight");
+  await expect(packages).toBeFocused();
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth,
     ),
   ).toBe(true);
+  await page.screenshot({
+    path: test.info().outputPath("card-tabs-mobile.png"),
+    fullPage: true,
+  });
 });
