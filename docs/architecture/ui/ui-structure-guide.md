@@ -137,6 +137,10 @@ Entnehmen gespeicherter Credits aus `hostedCreditsAdded` beziehungsweise
 ausweist, nennt sie die Entnahme „alle Credits“ samt Menge. Der aktuelle
 Kartenstand ist dafür keine Quelle.
 
+Runstartende Events erhalten in der lokalisierten Chronik ihre Run-Farbe
+aus dem öffentlichen Kennzeichen `runnerEventRun: true` bei `play_event`.
+Kartenname, Regeltext und ein Serverziel allein bestimmen diese Zuordnung nicht.
+
 Programm-Trash-Subroutinen bleiben einschließlich Zielauswahl und Auflösung
 in der aktiven Run-Gruppe. Die Engine kennzeichnet ihre Zielauswahl mit
 `trash_installed_program`; die lokalisierte Aufforderung nennt ausdrücklich

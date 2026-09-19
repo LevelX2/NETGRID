@@ -528,7 +528,10 @@ function formatSemanticChronicleEvent(
   const hostedCreditsAdded = positiveIntegerValue(payload.hostedCreditsAdded);
   const hostedCreditAbility =
     actionType === "trigger_ability" || actionType === "activated_card_ability";
-  let category = semanticChronicleCategory(actionType);
+  let category =
+    actionType === "play_event" && payload.runnerEventRun === true
+      ? "run"
+      : semanticChronicleCategory(actionType);
   const isAi = Boolean(
     stringValue(payload.aiExplanation) || stringValue(payload.aiReasonCode),
   );

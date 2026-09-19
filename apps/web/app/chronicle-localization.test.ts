@@ -39,6 +39,35 @@ function event(
 
 describe("semantic chronicle localization", () => {
   it.each(["de", "en", "fr"] as const)(
+    "uses the run category for Edited Shipping Manifests only when the event starts a run in %s",
+    (locale) => {
+      for (const side of ["corp", "runner"] as const) {
+        for (const runnerEventRun of [true, false, undefined]) {
+          const item = formatChronicleEvent(
+            event("play_event", {
+              cardDefinitionId: "onr_v1_084_edited-shipping-manifests",
+              title: "Edited Shipping Manifests",
+              serverId: "hq",
+              aiReasonCode: "plan_bound_runner_run",
+              ...(runnerEventRun !== undefined ? { runnerEventRun } : {}),
+            }),
+            side,
+            { translate: translate(locale) },
+          );
+          expect(item.category).toBe(runnerEventRun === true ? "run" : "card");
+          expect(item.title).toContain("Edited Shipping Manifests");
+          expect(item.visibility).toBe("public");
+          if (runnerEventRun === true) {
+            expect(item.groupLabel).toBe(
+              translate(locale)("group.run", { server: "HQ" }),
+            );
+          }
+        }
+      }
+    },
+  );
+
+  it.each(["de", "en", "fr"] as const)(
     "shows actual trace strength and free base link in the compact title in %s",
     (locale) => {
       for (const traceStep of ["runner_bid", "post_bid_link"]) {
