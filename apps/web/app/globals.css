@@ -2366,6 +2366,9 @@ select {
 
 .catalogPanel {
   width: min(980px, 100%);
+  display: grid;
+  gap: 12px;
+  padding: 14px;
 }
 
 .catalogHeader {
@@ -2380,6 +2383,21 @@ select {
 .catalogHeader h2,
 .catalogDetail h3 {
   margin: 0;
+}
+
+.catalogPanel > .catalogHeader {
+  align-items: start;
+  padding: 0;
+  border-bottom: 0;
+}
+
+.catalogPanel > .catalogHeader h2 {
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+.catalogPanel > .catalogHeader .meta {
+  margin: 4px 0 0;
 }
 
 .catalogHeader > div:first-child {
@@ -2451,8 +2469,10 @@ select {
   grid-template-columns: minmax(420px, 2fr) repeat(2, minmax(130px, 0.6fr));
   align-items: center;
   gap: 8px;
-  padding: 9px 12px;
-  border-bottom: 1px solid var(--line);
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-soft);
 }
 
 .catalogSetPicker {
@@ -2668,6 +2688,7 @@ select {
 .catalogLayout {
   display: grid;
   grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  gap: 12px;
   min-height: 380px;
 }
 
@@ -2676,7 +2697,9 @@ select {
   min-height: 0;
   overflow: auto;
   scrollbar-gutter: stable;
-  border-right: 1px solid var(--line);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
 }
 
 .catalogItem {
@@ -2697,6 +2720,19 @@ select {
   background: var(--catalog-active-bg);
 }
 
+.catalogItem.active {
+  box-shadow: inset 3px 0 0 var(--runner);
+}
+
+.catalogItem:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+
+.catalogItem:last-child {
+  border-bottom: 0;
+}
+
 .catalogItem strong,
 .catalogItem span {
   overflow-wrap: anywhere;
@@ -2713,6 +2749,9 @@ select {
   gap: 12px;
   align-content: start;
   padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
 }
 
 .catalogDetailHead {
@@ -12954,8 +12993,6 @@ section[data-testid="legal-actions"].cueHighlight {
 
   .catalogList {
     max-height: 300px;
-    border-right: 0;
-    border-bottom: 1px solid var(--line);
   }
 }
 
@@ -13198,6 +13235,8 @@ select,
 .setup.v07Entry .catalogPanel,
 .setup.v07Entry .deckPanel,
 .setup.v07Entry .publicGamesPanel,
+.setup.v07Entry .recentGamesPanel,
+.setup.v07Entry .accountPanel,
 .setup.v07Entry .optionsPanel {
   background: color-mix(in srgb, var(--panel), transparent 40%);
 }
