@@ -249,6 +249,15 @@ abgedeckt.
 
 ## Plattform und Betrieb
 
+Beide Startwege prüfen die Browser-Origin-Freigabe und die ausgelieferte
+Web-/Serverbindung. Der Entwicklungsstarter diagnostiziert veraltete
+IP-Konfigurationen vor Wiederverwendung; der Windows-LAN-Launcher übernimmt
+beim Prozessstart eine eindeutige neue private IPv4-Adresse in die
+Kindprozessumgebung, ohne die geschützte Installationskonfiguration zu ändern.
+Mehrdeutige oder fehlende LAN-Adressen scheitern sichtbar. Führend sind das
+[lokale Runbook](../runbooks/netgrid-local-transfer.md#ip-wechsel-beim-lokalen-entwicklungsstart)
+und der [Windows-Netzwerkvertrag](../architecture/windows/windows-installer-product-contract.md#netzwerkprüfung-beim-launcherstart).
+
 Aktuelle Betriebs- und Wartungsverträge liegen unter `docs/runbooks/`:
 
 - `account-alpha-operations.md`

@@ -1,5 +1,9 @@
 {
   "de": {
+    "launcher_network_unavailable": "Keine aktive private IPv4-Adresse gefunden. Verbinden Sie den Rechner mit Ihrem privaten LAN und starten Sie NETGRID erneut. (launcher_network_unavailable)",
+    "launcher_network_ambiguous": "Die gespeicherte LAN-Adresse ist nicht mehr verfügbar; mehrere neue Adressen sind möglich. Aktivieren Sie für den Start nur den gewünschten Netzwerkadapter oder lassen Sie die LAN-Konfiguration anpassen. (launcher_network_ambiguous)",
+    "launcher_network_configuration_invalid": "Web- und Serveradresse der LAN-Konfiguration sind widersprüchlich. Lassen Sie die Installationskonfiguration prüfen. (launcher_network_configuration_invalid)",
+    "launcher_network_browser_rejected": "Die Browser-Verbindung ist nicht korrekt freigegeben oder der Webclient verwendet eine andere Serveradresse. Prüfen Sie die Netzwerkkonfiguration und starten Sie NETGRID erneut. (launcher_network_browser_rejected)",
     "setup.failure.msi_source_unavailable": "Die registrierte Windows-Installationsquelle konnte nicht sicher ermittelt werden. Es wurde keine Ersatzquelle gewählt. Lassen Sie die Installation prüfen und versuchen Sie es anschließend erneut.",
     "setup.existing.values": "Vorhandene Einstellungen verwenden",
     "setup.existing.notice": "Die angezeigten Installationswerte werden beibehalten. Programm- und Datenordner einer vorhandenen Installation bleiben unverändert. Aufbewahrung und Spielerprofile können Sie später in Maintenance verwalten; vorhandene Passwörter bleiben erhalten.",
@@ -196,6 +200,10 @@
     "updater.repair_failed": "Das abgebrochene Update konnte nicht sicher wiederhergestellt werden. Starten Sie NETGRID nicht und entfernen Sie keine Installationssperren von Hand. Prüfen Sie, ob noch ein Setup oder Updater läuft. Für die Diagnose stehen die lokalen Updaterprotokolle und gesicherten Daten bereit."
   },
   "en": {
+    "launcher_network_unavailable": "No active private IPv4 address was found. Connect this computer to your private LAN and start NETGRID again. (launcher_network_unavailable)",
+    "launcher_network_ambiguous": "The saved LAN address is no longer available and several new addresses are possible. Enable only the intended network adapter for startup or have the LAN configuration adjusted. (launcher_network_ambiguous)",
+    "launcher_network_configuration_invalid": "The LAN configuration has conflicting web and server addresses. Have the installation configuration checked. (launcher_network_configuration_invalid)",
+    "launcher_network_browser_rejected": "Browser access is not correctly allowed or the web client uses a different server address. Check the network configuration and restart NETGRID. (launcher_network_browser_rejected)",
     "setup.failure.msi_source_unavailable": "The registered Windows Installer source could not be determined safely. No replacement source was selected. Have the installation checked, then try again.",
     "setup.existing.values": "Use existing settings",
     "setup.existing.notice": "The displayed installation settings will be preserved. An existing installation keeps its program and data folders. You can manage retention and player profiles later in Maintenance; existing passwords are preserved.",
@@ -392,6 +400,10 @@
     "updater.repair_failed": "The interrupted update could not be restored safely. Do not start NETGRID or manually remove installation locks. Check whether a setup or updater is still running. The local updater logs and data backups are available for diagnosis."
   },
   "fr": {
+    "launcher_network_unavailable": "Aucune adresse IPv4 privée active n’a été trouvée. Connectez cet ordinateur à votre réseau local privé et redémarrez NETGRID. (launcher_network_unavailable)",
+    "launcher_network_ambiguous": "L’adresse réseau enregistrée n’est plus disponible et plusieurs nouvelles adresses sont possibles. Activez uniquement la carte réseau souhaitée pour le démarrage ou faites ajuster la configuration réseau. (launcher_network_ambiguous)",
+    "launcher_network_configuration_invalid": "Les adresses web et serveur de la configuration réseau sont incohérentes. Faites vérifier la configuration de l’installation. (launcher_network_configuration_invalid)",
+    "launcher_network_browser_rejected": "L’accès du navigateur n’est pas correctement autorisé ou le client web utilise une autre adresse serveur. Vérifiez la configuration réseau et redémarrez NETGRID. (launcher_network_browser_rejected)",
     "setup.failure.msi_source_unavailable": "La source enregistrée de Windows Installer n’a pas pu être déterminée de manière sûre. Aucune source de remplacement n’a été choisie. Faites vérifier l’installation, puis réessayez.",
     "setup.existing.values": "Utiliser les paramètres existants",
     "setup.existing.notice": "Les paramètres d’installation affichés seront conservés. Les dossiers du programme et des données d’une installation existante restent inchangés. Vous pourrez gérer la conservation et les profils dans Maintenance ; les mots de passe existants sont conservés.",

@@ -27,6 +27,8 @@ if (args is ["--installation-stop-child"])
 }
 
 var assembly = Assembly.Load("NETGRID");
+Console.WriteLine($"LAUNCHER_NETWORK_TESTS_OK checks={await RuntimeNetworkTests.Run(assembly)} runtimeStarted=false");
+if (args is ["--check-network"]) return;
 if (args is ["--check-notices-dialog"])
 {
     Console.WriteLine($"LAUNCHER_NOTICES_DIALOG_TESTS_OK checks={NoticesDialogTests.Run(assembly)} windowsVisible=0 shellAssociationUsed=false");

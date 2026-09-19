@@ -77,6 +77,37 @@ werden können.
 | Abschlussaktion    | „NETGRID jetzt starten“ aktiviert      |
 | Updatekanal        | nur stabile GitHub Releases            |
 
+## Netzwerkprüfung beim Launcherstart
+
+Der LAN-Launcher löst die öffentliche Adresse vor jedem Start seines
+Server-/Webprozesspaars neu auf. Eine konfigurierte, weiterhin aktive private
+IPv4-Adresse bleibt maßgeblich. Ist sie weggefallen, wird genau eine verfügbare
+private IPv4-Adresse übernommen. Ohne Kandidaten oder bei mehreren Kandidaten
+bricht der Start mit `launcher_network_unavailable` beziehungsweise
+`launcher_network_ambiguous` und einer lokalisierten Handlungsanweisung ab.
+Aktive Adapter, bevorzugte nicht transiente IPv4-Adressen und die privaten
+Bereiche 10/8, 172.16/12 und 192.168/16 bestimmen die Kandidaten. Das ist keine
+zusätzliche Windows-Firewallfreigabe; deren Beschränkung auf das private
+Windows-Netzwerkprofil bleibt bestehen.
+
+Web-/Serveradresse, Public Host, Browser-Serveradresse und erlaubte Origins
+werden gemeinsam nur in der Umgebung der Kindprozesse aktualisiert.
+Benutzerdefinierte Ports, Loopback-Launcherzugriff, Maintenance, Secrets und
+die geschützte `config/runtime.env` bleiben erhalten. Der Lokalmodus benötigt
+keine LAN-Adresse. Die gespeicherte Adresse bleibt ein bevorzugter Kandidat,
+keine Zusage einer unveränderlichen DHCP-Adresse.
+
+Startbereitschaft verlangt neben Health auch den Zugriff mit der tatsächlichen
+Browser-Origin, exakte CORS-/Credential-Freigaben und die erwartete
+`data-netgrid-server-origin`-Bindung der ausgelieferten Weboberfläche. Im LAN-Modus
+werden der lokale Launcherzugriff und die LAN-Webadresse geprüft. Fehler
+stoppen das eigene Prozesspaar; fremde Listener werden nicht übernommen.
+Ein IP-Wechsel während laufender Spiele führt nicht zu einem automatischen
+Neustart. Nach Abschluss der Spiele muss der Launcher beendet und neu gestartet
+werden. Native Tests decken Adressauswahl und Browser-Vertragsprüfung ab;
+ein tatsächlicher DHCP-Wechsel in einer installierten Umgebung bleibt Teil
+der LAN-Abnahme.
+
 ## Datenablage und Lebenszyklus
 
 - Alle veränderlichen Daten liegen außerhalb des Programmordners unter einem

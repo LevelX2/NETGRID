@@ -65,12 +65,12 @@ internal sealed class TrayApplicationContext : ApplicationContext
             else OpenGame();
             _ = CheckForUpdatesAsync(manual: false);
         }
-        catch (Exception)
+        catch (Exception error)
         {
             ExitCode = 2;
             _tray.Text = UiText.Get("launcher.start.failed");
             MessageBox.Show(
-                $"{UiText.Get("launcher.start.failed")}\n\n{UiText.Get("launcher.error.help")}",
+                $"{UiText.Get("launcher.start.failed")}\n\n{(error is RuntimeNetworkException ? UiText.Get(error.Message) : UiText.Get("launcher.error.help"))}",
                 "NETGRID",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error

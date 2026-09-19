@@ -67,3 +67,44 @@ Describe "Test-NetgridLocalPortListener" {
     Test-NetgridLocalPortListener -Port 8787 | Should Be $true
   }
 }
+
+Describe "Browser-Verbindung vor Startfreigabe" {
+  BeforeEach {
+    $script:reply = [pscustomobject]@{
+      StatusCode = 200
+      Headers = @{ 'Access-Control-Allow-Origin' = 'http://192.168.68.58:3100'; 'Access-Control-Allow-Credentials' = 'true' }
+      Content = '{"ok":true}'
+    }
+    Mock Invoke-WebRequest { $script:reply }
+  }
+  It "prüft die tatsächliche Browser-Origin statt nur die Erreichbarkeit" {
+    Test-NetgridBrowserConnection -ServerUrl 'http://192.168.68.58:8787' -WebUrl 'http://192.168.68.58:3100' | Should Be $true
+    Assert-MockCalled Invoke-WebRequest -Times 1 -ParameterFilter { $Headers.Origin -eq 'http://192.168.68.58:3100' -and $Uri -eq 'http://192.168.68.58:8787/health' }
+  }
+  It "verweigert die Freigabe mit alter IP" {
+    $script:reply.Headers['Access-Control-Allow-Origin'] = 'http://192.168.68.54:3100'
+    Test-NetgridBrowserConnection -ServerUrl 'http://192.168.68.58:8787' -WebUrl 'http://192.168.68.58:3100' | Should Be $false
+  }
+  It "verweigert Wildcard und fehlende Credential-Freigabe" {
+    $script:reply.Headers['Access-Control-Allow-Origin'] = '*'
+    Test-NetgridBrowserConnection -ServerUrl 'http://192.168.68.58:8787' -WebUrl 'http://192.168.68.58:3100' | Should Be $false
+    $script:reply.Headers['Access-Control-Allow-Origin'] = 'http://192.168.68.58:3100'
+    $script:reply.Headers.Remove('Access-Control-Allow-Credentials')
+    Test-NetgridBrowserConnection -ServerUrl 'http://192.168.68.58:8787' -WebUrl 'http://192.168.68.58:3100' | Should Be $false
+  }
+  It "behandelt HTTP-Fehler als nicht startbereit" {
+    Mock Invoke-WebRequest { throw '403 origin_not_allowed' }
+    Test-NetgridBrowserConnection -ServerUrl 'http://192.168.68.58:8787' -WebUrl 'http://192.168.68.58:3100' | Should Be $false
+  }
+  It "verweigert eine negative Health-Antwort" {
+    $script:reply.Content = '{"ok":false}'
+    Test-NetgridBrowserConnection -ServerUrl 'http://192.168.68.58:8787' -WebUrl 'http://192.168.68.58:3100' | Should Be $false
+  }
+  It "prüft die tatsächlich ausgelieferte Serveradresse im Webclient" {
+    $script:reply.Content = '<html data-netgrid-server-origin="http://192.168.68.58:8787">'
+    Test-NetgridWebServerBinding -ServerUrl 'http://192.168.68.58:8787' -WebUrl 'http://192.168.68.58:3100' | Should Be $true
+    Test-NetgridWebServerBinding -ServerUrl 'http://192.168.68.54:8787' -WebUrl 'http://192.168.68.58:3100' | Should Be $false
+    $script:reply.Content = '<html>Fehlerseite</html>'
+    Test-NetgridWebServerBinding -ServerUrl 'http://192.168.68.58:8787' -WebUrl 'http://192.168.68.58:3100' | Should Be $false
+  }
+}

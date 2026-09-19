@@ -69,6 +69,29 @@ corepack pnpm typecheck
 powershell -ExecutionPolicy Bypass -File .\scripts\start-netgrid.ps1
 ```
 
+## IP-Wechsel beim lokalen Entwicklungsstart
+
+`scripts/start-netgrid.ps1` prüft vor Wiederverwendung eines erreichbaren
+Servers dessen Freigabe für die aktuelle Browser-Origin. Ein erreichbarer
+Webclient muss außerdem die aktuelle Serveradresse im HTML ausliefern.
+Dieselben Prüfungen gelten vor dem abschließenden Öffnen des Browsers.
+Eine alte LAN-Freigabe wird als `startup_browser_origin_rejected`, eine alte
+Webbindung als `startup_web_server_binding_invalid` sichtbar angezeigt und
+im Launcherlog protokolliert.
+
+Bei einem IP-Wechsel werden laufende Spiele nicht automatisch durch einen
+Neustart unterbrochen. Nach Spielende im primären Checkout ausführen:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File C:\Projekte\NETGRID\scripts\start-netgrid.ps1 -RestartServer -RestartWeb
+```
+
+Anschließend bereits offene Browserseiten neu laden. Der Startweg für den
+installierten LAN-Betrieb ist im
+[Windows-Produktvertrag](../architecture/windows/windows-installer-product-contract.md#netzwerkprüfung-beim-launcherstart)
+beschrieben; dort wird eine eindeutige neue Adresse beim Prozessstart in die
+Laufzeitkonfiguration übernommen.
+
 ## Hinweise
 
 - Die SQLite-Runtime ist nicht mergebar. Für einen Rechnerwechsel ist ein einmaliger Transfer sinnvoll; parallele Runtime-Fortschritte auf zwei Rechnern sollten nicht zusammengeführt werden.
