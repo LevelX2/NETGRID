@@ -5,6 +5,12 @@ AGENTS.local.md
 .codex/
 .codex-runlogs/
 
+# Local tool installation and Windows build artifacts.
+/.tools/
+/apps/windows/**/bin/
+/apps/windows/**/obj/
+/output/windows-installer-input/
+
 node_modules/
 .pnpm-store/
 .next/
