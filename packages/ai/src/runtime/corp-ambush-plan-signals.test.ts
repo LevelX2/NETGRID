@@ -11,6 +11,9 @@ import {
 } from "../belief-state";
 import type { CorpStrategicIntentProfile } from "../corp-strategic-intent";
 import type { ResidentPlanPortfolio } from "../plans/resident-plan-portfolio";
+import { ambushModule } from "../corp/ambush/ambush-plan-module";
+import { instantiatePlanProposal } from "../plans/plan-instance";
+import type { PlanSchedulerContext } from "../plans/plan-scheduler";
 import {
   aiInput,
   legalAction,
@@ -670,6 +673,67 @@ describe("Corp compromised Ambush disposition", () => {
     });
   });
 
+  it("materializes Setup rez through its exact resident Ambush trigger", () => {
+    const fixture = installedTrapFixture({
+      exposed: false,
+      corpCredits: 0,
+      zeroCostAccessRez: true,
+      definitionId: "onr_v1_340_setup",
+      counters: 0,
+    });
+    const signals = buildCorpAmbushPlanSignals(fixture);
+    const context: PlanSchedulerContext = {
+      input: fixture.input,
+      actionCandidates: fixture.candidates,
+      turnKey: "corp:1",
+      domain: {
+        ambushes: signals,
+        virusPressure: [],
+        punishCampaigns: [],
+        handManagement: [],
+      },
+    };
+    const module = ambushModule();
+    const proposals = module.discover(context);
+    expect(proposals).toHaveLength(1);
+    const instance = instantiatePlanProposal(
+      proposals[0]!,
+      fixture.input.playerView.stateVersion,
+    );
+    const materialization = module.materialize(instance, {} as never, context);
+    expect(instance.moduleId).toBe("corp.ambush_and_bluff");
+    expect(materialization.step).toMatchObject({
+      stepId: `${instance.instanceId}:trigger`,
+      capability: { capabilityId: "ambush_trigger" },
+      target: { kind: "card", id: "trap-installed" },
+    });
+    expect(
+      materialization.candidates.map((entry) => entry.candidate.actionId),
+    ).toEqual(["rez-prepared-trap"]);
+  });
+
+  it.each([
+    ["onr_v1_340_setup", 0, true],
+    ["onr_v1_348_virus-test-site", 0, false],
+    ["onr_v1_348_virus-test-site", 3, true],
+  ] as const)(
+    "binds the actual post-rez payoff for %s with %i counters",
+    (definitionId, counters, shouldRez) => {
+      const fixture = installedTrapFixture({
+        exposed: false,
+        corpCredits: 3,
+        zeroCostAccessRez: true,
+        definitionId,
+        counters,
+      });
+      const [signal] = buildCorpAmbushPlanSignals(fixture);
+      expect(signal?.actionIds).toEqual(shouldRez ? ["rez-prepared-trap"] : []);
+      expect(signal?.sourceDefinitionId).toBe(definitionId);
+      fixture.input.playerView.run!.attackedServerId = "rd";
+      expect(buildCorpAmbushPlanSignals(fixture)[0]?.actionIds).toEqual([]);
+    },
+  );
+
   it("is deterministic across different hidden Runner hand identities", () => {
     const left = installedTrapFixture({ exposed: true, corpCredits: 3 });
     const right = installedTrapFixture({ exposed: true, corpCredits: 3 });
@@ -919,18 +983,23 @@ function installedTrapFixture(options: {
   corpCredits: number;
   triggerAction?: boolean;
   zeroCostAccessRez?: boolean;
+  definitionId?: string;
+  counters?: number;
 }): {
   input: AiDecisionInput;
   candidates: ActionSemanticCandidate[];
   previous: ResidentPlanPortfolio;
 } {
   const trap = visibleCard("trap-installed", "corp", "asset", {
-    definitionId: options.zeroCostAccessRez
-      ? "onr_v1_348_virus-test-site"
-      : "onr_v1_345_trap",
+    definitionId:
+      options.definitionId ??
+      (options.zeroCostAccessRez
+        ? "onr_v1_348_virus-test-site"
+        : "onr_v1_345_trap"),
     title: options.zeroCostAccessRez ? "Virus Test Site" : "TRAP!",
     rezzed: false,
-    advancementCounters: options.zeroCostAccessRez ? 3 : 0,
+    advancementCounters:
+      options.counters ?? (options.zeroCostAccessRez ? 3 : 0),
   });
   const recycler = visibleCard("recycler-installed", "corp", "asset", {
     definitionId: "onr_v1_316_cowboy-sysop",

@@ -1,3 +1,4 @@
+import { assessCorpTerminalAgendaDefense } from "./corp-terminal-agenda-defense";
 import { corpEconomyCandidateHasExecutablePayload } from "../economy/economy-routes";
 import type { CorpEconomyNeedSignal } from "../economy/economy-types";
 import type {
@@ -216,6 +217,131 @@ export function buildCorpDefenseTurnPlanningSlice(params: {
       continue;
     }
     lines.push(createScoreProtectionDrawLine(params, signal, drawCandidate));
+  }
+  for (const signal of params.defenseNeeds) {
+    if (signal.kind !== "score_protection_terminal_install") continue;
+    const candidate = params.candidates.find(
+      (entry) => entry.actionId === signal.actionId,
+    );
+    const quote = assessCorpTerminalAgendaDefense(
+      params.input,
+      signal.serverId,
+      signal.parentProjectId,
+    );
+    if (!candidate || quote?.install?.actionId !== signal.actionId) {
+      rejected.push({
+        defenseId: signal.defenseId,
+        actionId: signal.actionId,
+        reasonCode: "terminal_protection_quote_drift",
+      });
+      continue;
+    }
+    const invocation = invocationFor(params.stateIdentity, candidate);
+    const lineId = turnPlanningFingerprint("terminal-defense-line", {
+      defenseId: signal.defenseId,
+      invocation,
+    });
+    const fundingGapAfter = quote.preparationCreditClicks;
+    const probability = quote.best.protection.runnerAccessSuccessProbability;
+    const baseline = quote.need.baseline;
+    if (baseline.knowledge !== "known") {
+      rejected.push({
+        defenseId: signal.defenseId,
+        actionId: signal.actionId,
+        reasonCode: "terminal_protection_baseline_unknown",
+      });
+      continue;
+    }
+    const beforeProbability =
+      baseline.protection.runnerAccessSuccessProbability;
+    const defenseValue =
+      30 *
+      Math.max(
+        0,
+        beforeProbability.numerator / beforeProbability.denominator -
+          probability.numerator / probability.denominator,
+      );
+    const campaignId = "campaign:corp.defend_servers";
+    lines.push({
+      lineId,
+      defenseId: signal.defenseId,
+      targetServerId: signal.serverId,
+      disposition:
+        fundingGapAfter > 0 ? "stage_for_later_rez" : "install_rez_ready",
+      currentActionId: signal.actionId,
+      nodes: [
+        {
+          nodeId: `${lineId}:install`,
+          ownerModuleId: "corp.defend_servers",
+          planInstanceId: planInstanceIdForProposal({
+            moduleId: "corp.defend_servers",
+            dedupeKey: "server-defense-portfolio",
+          }),
+          invocation,
+          projectedOnly: false,
+        },
+      ],
+      fundingGapBefore: fundingGapAfter,
+      fundingGapAfter,
+      rezReadyAfterLine: fundingGapAfter === 0,
+      bluffValue: 0,
+      defenseValue,
+      economyValue: 0,
+      totalValue: defenseValue,
+      priorityClass: signal.delegatedPriorityClass,
+      campaignQuote: {
+        quoteId: `${lineId}:after`,
+        campaignId,
+        quoteVersion: CORP_DEFENSE_TURN_SLICE_VERSION,
+        basis: {
+          kind: "projected_frame",
+          baseStateVersion: params.stateIdentity.stateVersion,
+          projectedFrameKey: turnPlanningFingerprint("terminal-defense-frame", {
+            lineId,
+            parent: signal.parentProjectId,
+            need: signal.parentNeedId,
+          }),
+          linePrefixHash: turnPlanningFingerprint("defense-prefix", [
+            invocation.invocationKey,
+          ]),
+        },
+        currentMilestoneId: signal.phase,
+        nextMilestoneId: "revalidate_terminal_defense_budget",
+        commitment: "hard",
+        remainingValue: defenseValue,
+        expiresAt: "current_turn_end",
+        revalidationCodes: [
+          "parent_score_project_still_current",
+          "parent_protection_need_still_current",
+          "recompute_funded_ice_subset",
+        ],
+      },
+      valueClaims: [
+        {
+          claimId: `${lineId}:defense`,
+          campaignId,
+          ownerModuleId: "corp.defend_servers",
+          objectiveKey: `score-protection:${signal.parentProjectId}`,
+          componentKey: "terminal_access_prevention",
+          evaluationDimensionId: "defense",
+          aggregationMode: "delta_from_previous_prefix",
+          contributionKind: "risk_reduction",
+          beforeQuoteId: `${lineId}:before`,
+          afterQuoteId: `${lineId}:after`,
+          amount: defenseValue,
+          dependencyKeys: [signal.parentNeedId],
+          conflictKeys: [`server:${signal.serverId}:defense`],
+          status: "quoted",
+        },
+      ],
+      evidenceCodes: [
+        signal.evidenceCode,
+        `score_protection_parent:${signal.parentProjectId}`,
+        `score_protection_need:${signal.parentNeedId}`,
+        `rez_funding_gap_after:${fundingGapAfter}`,
+        "ice_decision_owned_by_corp_defend_servers",
+      ],
+    });
   }
   lines.sort(compareDefenseLines);
   return {

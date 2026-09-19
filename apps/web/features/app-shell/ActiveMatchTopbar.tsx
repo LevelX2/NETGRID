@@ -24,6 +24,7 @@ import {
   type ConnectionState,
 } from "./AppShell";
 import { AppRuntimeStatus } from "./AppRuntimeStatus";
+import { nextChronicleWidth, type ChronicleWidth } from "../chronicle/chronicle-width";
 
 type PendingUndoState =
   | {
@@ -51,6 +52,7 @@ export function ActiveMatchTopbar({
   canForfeit,
   canCancelSimulation,
   rightRailCollapsed,
+  chronicleWidth,
   canRequestHumanAiAdvice,
   canOpenDeckGuide,
   humanAiAdvice,
@@ -88,6 +90,7 @@ export function ActiveMatchTopbar({
   canForfeit: boolean;
   canCancelSimulation: boolean;
   rightRailCollapsed: boolean;
+  chronicleWidth: ChronicleWidth;
   canRequestHumanAiAdvice: boolean;
   canOpenDeckGuide: boolean;
   humanAiAdvice: string | null;
@@ -113,9 +116,10 @@ export function ActiveMatchTopbar({
   const matchDetailsLabel = matchDetailsOpen
     ? t("hideMatchStatus")
     : t("showMatchStatus");
-  const rightRailLabel = rightRailCollapsed
-    ? t("showRightRail")
-    : t("hideRightRail");
+  const rightRailLabel = t("cycleChronicle", {
+    current: t(`chronicleWidths.${chronicleWidth}`),
+    next: t(`chronicleWidths.${nextChronicleWidth(chronicleWidth)}`),
+  });
 
   return (
     <header className="topbar" ref={topbarRef}>
@@ -245,7 +249,7 @@ export function ActiveMatchTopbar({
             onClick={onToggleRightRail}
             title={rightRailLabel}
             aria-label={rightRailLabel}
-            aria-pressed={rightRailCollapsed}
+            aria-expanded={!rightRailCollapsed}
             type="button"
           >
             {rightRailCollapsed ? (

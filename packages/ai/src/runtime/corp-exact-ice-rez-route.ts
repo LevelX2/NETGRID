@@ -31,7 +31,8 @@ export type CorpExactIceRezRouteProjection = Readonly<{
     | "qualitative_encounter_defense";
   marginalDefenseThreat?: "visible_agenda_remote" | "terminal_central_access";
   traceAccessBlock?: Readonly<VisibleCorpTraceIceRezQuote>;
-  freeCurrentEncounterDefense?: Readonly<{
+  currentEncounterDefense?: Readonly<{
+    activationCredits: number;
     effect: "meaningful_tax_or_damage_or_disruption";
     evidenceSource: "visible_corp_ice_defense_profile";
   }>;
@@ -130,7 +131,16 @@ export function projectExactCorpIceRezRoute(params: {
   targetServerId: string;
   bluffDefenseNeed?: CorpBluffDefenseNeed | undefined;
 }): CorpExactIceRezRouteProjection | undefined {
-  const { input, candidate, sourceCard, targetServerId } = params;
+  const { input, candidate, targetServerId } = params;
+  const actionQuotes =
+    params.sourceCard.effectivePostRezActionRunQuotes?.filter(
+      (q) => q.actionId === candidate.actionId,
+    ) ?? [];
+  if (actionQuotes.length > 1) return undefined;
+  const sourceCard =
+    actionQuotes.length === 1
+      ? { ...params.sourceCard, effectivePostRezRunQuote: actionQuotes[0]! }
+      : params.sourceCard;
   const quoteRead = readExactInstalledCorpIceRezQuote(params);
   if (!quoteRead) return undefined;
   const { quote, totalRezCredits } = quoteRead;
@@ -207,6 +217,7 @@ export function projectExactCorpIceRezRoute(params: {
       : {}),
   }));
   const assessmentInput = {
+    serverRoot: server.root,
     runnerRig: input.playerView.opponent.rig ?? [],
     runnerCredits: input.playerView.opponent.credits,
     maximumRunnerAccessSuccessProbability: {
@@ -221,7 +232,30 @@ export function projectExactCorpIceRezRoute(params: {
   const after = assessCorpScoreProtection({
     ...assessmentInput,
     serverIce: serverIce.map((ice) =>
-      ice.instanceId === sourceCard.instanceId ? { ...ice, rezzed: true } : ice,
+      ice.instanceId === sourceCard.instanceId
+        ? {
+            ...ice,
+            rezzed: true,
+            ...(sourceCard.effectivePostRezRunQuote?.complete === true &&
+            sourceCard.effectivePostRezRunQuote.context ===
+              "installed_post_rez" &&
+            sourceCard.effectivePostRezRunQuote.cardId ===
+              sourceCard.instanceId &&
+            sourceCard.effectivePostRezRunQuote.iceDefinitionId ===
+              sourceCard.definitionId &&
+            sourceCard.effectivePostRezRunQuote.targetServerId ===
+              targetServerId &&
+            sourceCard.effectivePostRezRunQuote.projectedServerId ===
+              targetServerId &&
+            sourceCard.effectivePostRezRunQuote.expiresAtStateVersion ===
+              input.playerView.stateVersion
+              ? {
+                  effectiveRunQuote:
+                    sourceCard.effectivePostRezRunQuote.effectiveRunQuote,
+                }
+              : {}),
+          }
+        : ice,
     ),
   });
   const knownBefore = before.knowledge === "known" ? before : undefined;
@@ -252,20 +286,23 @@ export function projectExactCorpIceRezRoute(params: {
     input,
     targetServerId,
   );
-  const freeQualitativeEncounterDefense =
-    !assessmentsKnown &&
-    totalRezCredits === 0 &&
-    isQualitativeEncounterDefenseOnCurrentRun({
+  // Rez is a persistent investment. Public encounter pressure is productive
+  // independently of an exact access probability; the Defense owner checks
+  // competing credit reserves before admitting this route.
+  const currentEncounterActivationCredits =
+    quoteQualitativeEncounterActivationCredits({
       input,
       sourceCard,
       targetServerId,
       totalRezCredits,
     });
+  const currentEncounterDefense =
+    currentEncounterActivationCredits !== undefined;
   if (
     !assessmentsKnown &&
     !resourceExchange &&
     !accessBlock &&
-    !freeQualitativeEncounterDefense &&
+    !currentEncounterDefense &&
     marginalDefenseThreat === undefined &&
     !bluffDefenseNeed
   )
@@ -300,21 +337,12 @@ export function projectExactCorpIceRezRoute(params: {
         })
       : undefined;
   const qualitativeEncounterDefense =
-    (probabilityComparison === 0 ||
-      freeQualitativeEncounterDefense ||
-      (!assessmentsKnown &&
-        (marginalDefenseThreat !== undefined ||
-          bluffDefenseNeed !== undefined))) &&
+    probabilityComparison !== -1 &&
+    currentEncounterDefense &&
     !resourceExchange &&
     !accessBlock &&
     !freePersistentDefense &&
-    knownAccessPathTax === undefined &&
-    isQualitativeEncounterDefenseOnCurrentRun({
-      input,
-      sourceCard,
-      targetServerId,
-      totalRezCredits,
-    });
+    knownAccessPathTax === undefined;
   if (
     probabilityComparison !== -1 &&
     !resourceExchange &&
@@ -332,9 +360,10 @@ export function projectExactCorpIceRezRoute(params: {
     targetServerId,
     quote,
     ...(marginalDefenseThreat ? { marginalDefenseThreat } : {}),
-    ...(freeQualitativeEncounterDefense
+    ...(qualitativeEncounterDefense
       ? {
-          freeCurrentEncounterDefense: {
+          currentEncounterDefense: {
+            activationCredits: currentEncounterActivationCredits!,
             effect: "meaningful_tax_or_damage_or_disruption" as const,
             evidenceSource: "visible_corp_ice_defense_profile" as const,
           },
@@ -402,12 +431,12 @@ function readKnownCurrentRunAccessPathTax(params: {
   return Number.isSafeInteger(tax) && tax > 0 ? tax : undefined;
 }
 
-function isQualitativeEncounterDefenseOnCurrentRun(params: {
+function quoteQualitativeEncounterActivationCredits(params: {
   input: AiDecisionInput;
   sourceCard: VisibleCard;
   targetServerId: string;
   totalRezCredits: number;
-}): boolean {
+}): number | undefined {
   const { input, sourceCard, targetServerId, totalRezCredits } = params;
   const run = input.playerView.run;
   const server = input.playerView.servers.find(
@@ -420,7 +449,7 @@ function isQualitativeEncounterDefenseOnCurrentRun(params: {
     run.position.serverId !== targetServerId ||
     server?.ice[run.position.iceIndex]?.instanceId !== sourceCard.instanceId
   ) {
-    return false;
+    return undefined;
   }
 
   const postRezQuote = sourceCard.effectivePostRezRunQuote;
@@ -432,7 +461,7 @@ function isQualitativeEncounterDefenseOnCurrentRun(params: {
     postRezQuote.projectedServerId !== targetServerId ||
     postRezQuote.expiresAtStateVersion !== input.playerView.stateVersion
   ) {
-    return false;
+    return undefined;
   }
   const profile = visibleCorpIceDefenseProfile(
     postRezQuote.complete === true
@@ -442,6 +471,18 @@ function isQualitativeEncounterDefenseOnCurrentRun(params: {
         } as VisibleCard)
       : sourceCard,
   );
+  if (
+    postRezQuote.complete === true &&
+    postRezQuote.effectiveRunQuote.subroutines.length > 0 &&
+    postRezQuote.effectiveRunQuote.subroutines.every(
+      (subroutine) =>
+        subroutine.type === "initiate_trace" && subroutine.traceLimit === 0,
+    ) &&
+    !postRezQuote.effectiveRunQuote.encounterTemporaryTraceCredits &&
+    !postRezQuote.effectiveRunQuote.conditionalEncounterEffects?.length
+  ) {
+    return undefined;
+  }
   const hasEngineQuotedPaidEncounterEtr =
     postRezQuote.complete === true &&
     postRezQuote.effectiveRunQuote.conditionalEncounterEffects?.some(
@@ -449,6 +490,11 @@ function isQualitativeEncounterDefenseOnCurrentRun(params: {
         effect.kind === "corp_paid_add_end_the_run_subroutine" &&
         nonNegativeSafeInteger(effect.creditCost),
     ) === true;
+  const hasConditionalStop =
+    profile.hasImmediateStop &&
+    postRezQuote.complete === true &&
+    (postRezQuote.effectiveRunQuote.conditionalEncounterEffects?.length ?? 0) >
+      0;
   // Printed tax/disruption describes an ICE's potential, not necessarily
   // progress on this run. A complete quote containing only future-encounter
   // effects has no target after the innermost ICE. Keep mixed immediate
@@ -463,14 +509,15 @@ function isQualitativeEncounterDefenseOnCurrentRun(params: {
       ),
     )
   ) {
-    return false;
+    return undefined;
   }
   if (
     !profile.hasMeaningfulTaxOrDamage &&
     !profile.hasEncounterDisruption &&
+    !hasConditionalStop &&
     !hasEngineQuotedPaidEncounterEtr
   ) {
-    return false;
+    return undefined;
   }
   const activationCredits =
     postRezQuote.complete === true
@@ -481,10 +528,10 @@ function isQualitativeEncounterDefenseOnCurrentRun(params: {
           totalRezCredits === 0
         ? 0
         : undefined;
-  return (
-    activationCredits !== undefined &&
+  return activationCredits !== undefined &&
     totalRezCredits + activationCredits <= input.playerView.own.credits
-  );
+    ? activationCredits
+    : undefined;
 }
 
 export function corpIceEffectsOnlyReachFutureEncounters(
@@ -708,6 +755,9 @@ function readExactCurrentRunResourceExchange(params: {
     quote.runnerBreak.consumedCards.length > 0 ||
     (quote.runnerBreak.requiredCredits > 0 &&
       (marginalDefenseThreat !== undefined ||
+        input.legalActions.find(
+          (action) => action.actionId === candidate.actionId,
+        )?.payload?.temporaryDerezAfterRun !== true ||
         quote.runnerBreak.requiredCredits > totalRezCredits ||
         (quote.runnerBreak.requiredCredits === totalRezCredits &&
           quote.runnerBreak.requiredCredits >=
@@ -1122,10 +1172,12 @@ export function exactCorpIceRezRoutesEqual(
     left.targetServerId === right.targetServerId &&
     left.routeKind === right.routeKind &&
     traceAccessBlocksEqual(left.traceAccessBlock, right.traceAccessBlock) &&
-    left.freeCurrentEncounterDefense?.effect ===
-      right.freeCurrentEncounterDefense?.effect &&
-    left.freeCurrentEncounterDefense?.evidenceSource ===
-      right.freeCurrentEncounterDefense?.evidenceSource &&
+    left.currentEncounterDefense?.effect ===
+      right.currentEncounterDefense?.effect &&
+    left.currentEncounterDefense?.activationCredits ===
+      right.currentEncounterDefense?.activationCredits &&
+    left.currentEncounterDefense?.evidenceSource ===
+      right.currentEncounterDefense?.evidenceSource &&
     left.knownAccessPathTax === right.knownAccessPathTax &&
     left.effect === right.effect &&
     left.totalRezCredits === right.totalRezCredits &&

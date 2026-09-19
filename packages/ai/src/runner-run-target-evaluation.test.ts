@@ -884,11 +884,13 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         visibleCard("protocol-installed", {
           definitionId: "onr_v1_050_r-and-d-protocol-files",
           type: "program",
+          installCost: 0,
         }),
         visibleCard("krash-installed", {
           definitionId: KRASH_DEFINITION_ID,
           title: "Krash",
           type: "program",
+          installCost: 0,
           subtypes: ["icebreaker"],
         }),
       ],

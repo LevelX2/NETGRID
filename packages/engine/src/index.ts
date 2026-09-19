@@ -83,6 +83,8 @@ export {
   type VisibleBreakerEncounterQuote,
 } from "./game/view/visible-breaker-encounter-quote";
 export { visibleProgramHostInstallVariants } from "./game/view/visible-program-host-install";
+export { visibleFortPassProtection } from "./game/view/visible-fort-pass-protection";
+export { visibleRunnerPreparationIncomePerClick } from "./game/view/visible-runner-preparation-income";
 
 export type {
   ActionType,

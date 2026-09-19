@@ -715,6 +715,23 @@ function sanitizePlayerView(
   view: PlayerView,
   publicEvents: PublicGameEvent[],
 ): PlayerView {
+  if (
+    (view.run?.pendingSequenceRunCount !== undefined &&
+      (!Number.isSafeInteger(view.run.pendingSequenceRunCount) ||
+        view.run.pendingSequenceRunCount < 0)) ||
+    (view.run?.followupRunOpportunity !== undefined &&
+      view.run.followupRunOpportunity !== "after_run" &&
+      view.run.followupRunOpportunity !== "after_successful_run")
+  )
+    throw new Error("Invalid Engine public follow-up run opportunity.");
+  if (
+    view.own.installRezOnlyCredits !== undefined &&
+    (view.side !== "corp" ||
+      !Number.isSafeInteger(view.own.installRezOnlyCredits) ||
+      view.own.installRezOnlyCredits < 0 ||
+      view.own.installRezOnlyCredits > view.own.credits)
+  )
+    throw new Error("Invalid Engine Corp install/rez-only credit pool.");
   const corpPunishRouteQuoteSet = sanitizeCorpPunishRouteQuoteSet(view);
   if (
     view.runnerNextTurnCreditClicks !== undefined &&
@@ -749,6 +766,9 @@ function sanitizePlayerView(
     own: {
       identity: sanitizeVisibleCard(view.own.identity),
       credits: view.own.credits,
+      ...(view.side === "corp" && view.own.installRezOnlyCredits !== undefined
+        ? { installRezOnlyCredits: view.own.installRezOnlyCredits }
+        : {}),
       ...(obligation
         ? {
             corpEndTurnCreditObligation: {
@@ -946,6 +966,13 @@ function sanitizePlayerView(
       ? {
           run: {
             ...(view.run.runId ? { runId: view.run.runId } : {}),
+            ...(view.run.pendingSequenceRunCount !== undefined
+              ? { pendingSequenceRunCount: view.run.pendingSequenceRunCount! }
+              : {}),
+            ...(view.run.followupRunOpportunity === "after_run" ||
+            view.run.followupRunOpportunity === "after_successful_run"
+              ? { followupRunOpportunity: view.run.followupRunOpportunity }
+              : {}),
             attackedServerId: view.run.attackedServerId,
             phase: view.run.phase,
             ...(view.run.position
@@ -1954,6 +1981,23 @@ function sanitizeVisibleCardWithOptions(
     includeEffectivePostRezRunQuote && effectivePostRezRunQuote
       ? sanitizeVisibleCorpIcePostRezRunQuote(effectivePostRezRunQuote)
       : undefined;
+  const sanitizedPostRezActionQuotes = includeEffectivePostRezRunQuote
+    ? (card.effectivePostRezActionRunQuotes ?? []).flatMap((entry) => {
+        const quote = sanitizeVisibleCorpIcePostRezRunQuote(entry);
+        return quote &&
+          effectivePostRezRunQuote !== undefined &&
+          isNonEmptyString(entry.actionId) &&
+          quote.cardId === card.instanceId &&
+          quote.iceDefinitionId === card.definitionId &&
+          quote.targetServerId === effectivePostRezRunQuote?.targetServerId &&
+          quote.projectedServerId ===
+            effectivePostRezRunQuote.projectedServerId &&
+          quote.expiresAtStateVersion ===
+            effectivePostRezRunQuote.expiresAtStateVersion
+          ? [{ ...quote, actionId: entry.actionId }]
+          : [];
+      })
+    : [];
   const installedProgram = card.known
     ? card.installedAsRunnerProgram
     : undefined;
@@ -2114,6 +2158,9 @@ function sanitizeVisibleCardWithOptions(
       : {}),
     ...(sanitizedEffectivePostRezRunQuote
       ? { effectivePostRezRunQuote: sanitizedEffectivePostRezRunQuote }
+      : {}),
+    ...(sanitizedPostRezActionQuotes.length > 0
+      ? { effectivePostRezActionRunQuotes: sanitizedPostRezActionQuotes }
       : {}),
     ...(includeEffectiveRezCostQuote && effectiveRezCostQuote
       ? {
@@ -2807,6 +2854,8 @@ function sanitizeVisibleEffectiveIceRunQuote(
     !isNonEmptyString(value.iceInstanceId) ||
     !isNonEmptyString(value.iceDefinitionId) ||
     !isNonNegativeSafeInteger(value.effectiveStrength) ||
+    (value.encounterStrength !== undefined &&
+      !isNonNegativeSafeInteger(value.encounterStrength)) ||
     !subroutines ||
     subroutines.some((subroutine) => subroutine === undefined) ||
     (value.breakSubroutineAdditionalCostPerSubroutine !== undefined &&
@@ -2828,6 +2877,9 @@ function sanitizeVisibleEffectiveIceRunQuote(
     iceInstanceId: value.iceInstanceId,
     iceDefinitionId: value.iceDefinitionId,
     effectiveStrength: value.effectiveStrength,
+    ...(value.encounterStrength !== undefined
+      ? { encounterStrength: value.encounterStrength }
+      : {}),
     subroutines: subroutines as VisibleEffectiveSubroutine[],
     ...(value.breakSubroutineAdditionalCostPerSubroutine !== undefined
       ? {

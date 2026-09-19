@@ -360,6 +360,7 @@ export function DeckCardTooltipTrigger({
                 src={tooltipImageUrl}
                 fallbackSrc={tooltipImageSource.fallbackSrc}
                 variant="preview"
+                priority
                 decorative
                 onUnavailable={() => setTooltipImageUnavailable(true)}
               />

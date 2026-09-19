@@ -43,11 +43,14 @@ describe("Rent-I-Con versus CODE ROT cycle-nine remediation checkpoint", () => {
     });
 
     const portfolio = residentPlanPortfolioSnapshot(result.input);
+    // Encounter quotes change the semantic fingerprint and its technical
+    // tie-break between score-support heads. Keep the exact selected parent
+    // and all delegation/commitment bindings under test.
     const scoreParent =
-      "plan:corp.score_agenda:agenda%3Acorp_onr_v1_197_data-fort-reclamation_2%3Aremote_1";
+      "plan:corp.score_agenda:agenda%3Acorp_onr_v1_193_corporate-coup_2%3Aremote_1";
     expect(portfolio?.rootForegroundInstanceId).toBe(scoreParent);
     expect(portfolio?.executorInstanceId).toBe(
-      "plan:corp.economy:score-support%3Aagenda%3Acorp_onr_v1_197_data-fort-reclamation_2%3Aremote_1",
+      "plan:corp.economy:score-support%3Aagenda%3Acorp_onr_v1_193_corporate-coup_2%3Aremote_1",
     );
     expect(result.decision?.evidence).toContain(
       `plan_priority_delegated_from:${scoreParent}`,

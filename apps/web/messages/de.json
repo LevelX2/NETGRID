@@ -279,6 +279,8 @@
       "requestUndo": "Zurücknahme anfragen",
       "hideMatchStatus": "Aktives Spiel: Status ausblenden",
       "showMatchStatus": "Aktives Spiel: Status einblenden",
+      "cycleChronicle": "Spielchronik: {current}. Weiter zu {next}.",
+      "chronicleWidths": {"off":"Aus","wide":"Breit","medium":"Mittel","narrow":"Schmal"},
       "showRightRail": "Rechten Bereich einblenden",
       "hideRightRail": "Rechten Bereich ausblenden",
       "askAi": "KI für mein Deck fragen",

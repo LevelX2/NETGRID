@@ -1,4 +1,5 @@
 import type { CorpRestrictedCreditRouteQuote } from "@netgrid/shared";
+import type { CorpDefenseScoreReserveAssessment } from "../corp/defense/corp-defense-score-reserve";
 import { type CorpExactIceRezRouteProjection } from "../runtime/corp-exact-ice-rez-route";
 import { type KnownCorpFundedIceInstallRouteProjection } from "../runtime/corp-funded-score-protection";
 import { type ExactProbability } from "../runtime/corp-score-protection-assessment";
@@ -59,6 +60,7 @@ export type CorpGenericDefenseSignal = CorpDefenseSignalBase & {
     storedRestrictedCredits?: number;
   }>;
   rezRoute?: CorpExactIceRezRouteProjection;
+  rezReserveAssessment?: CorpDefenseScoreReserveAssessment;
   restrictedRezFunding?: {
     gap: number;
     quotes: CorpRestrictedCreditRouteQuote[];
@@ -154,7 +156,16 @@ export type CorpScoreProtectionStagingInstallSignal = CorpDefenseSignalBase & {
 };
 
 export type CorpDefenseSignal =
+  | CorpTerminalProtectionInstallSignal
   | CorpGenericDefenseSignal
   | CorpScoreProtectionInstallSignal
   | CorpScoreProtectionStagingInstallSignal
   | CorpScoreProtectionDrawSignal;
+
+export type CorpTerminalProtectionInstallSignal = Omit<
+  CorpScoreProtectionStagingInstallSignal,
+  "kind" | "phase"
+> & {
+  kind: "score_protection_terminal_install";
+  phase: "install_ice" | "install_defense_support";
+};

@@ -2,8 +2,17 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { CardImageStore } from "@netgrid/card-images/runtime";
-import { afterEach, describe, expect, it } from "vitest";
+import { createRuntimeCardsById } from "@netgrid/catalog";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { lookupCardImage } from "./card-image-lookup";
+
+vi.mock("@netgrid/catalog", async (importOriginal) => {
+  const catalog = await importOriginal<typeof import("@netgrid/catalog")>();
+  return {
+    ...catalog,
+    createRuntimeCardsById: vi.fn(catalog.createRuntimeCardsById),
+  };
+});
 
 const temporaryRoots: string[] = [];
 
@@ -16,6 +25,24 @@ afterEach(async () => {
 });
 
 describe("card image lookup", () => {
+  it("reuses catalog identities across concurrent thumbnail and preview requests", async () => {
+    const personalStore = new CardImageStore({ root: await temporaryRoot() });
+    const images = await Promise.all(
+      ["thumb", "preview", "thumb"].map((variant) =>
+        lookupCardImage(
+          "onr_v1_188_ai-chief-financial-officer",
+          `http://netgrid.local/api/card-images/onr_v1_188_ai-chief-financial-officer?skin=de&variant=${variant}`,
+          { personalStore },
+        ),
+      ),
+    );
+    expect(images.every((image) => image?.kind === "localized_de")).toBe(true);
+    expect(createRuntimeCardsById).toHaveBeenCalledTimes(1);
+    await expect(
+      lookupCardImage("toString", "http://netgrid.local", { personalStore }),
+    ).resolves.toBeNull();
+  });
+
   it("resolves registered German display-only skin assets through printingId", async () => {
     const root = await temporaryRoot();
     const image = await lookupCardImage(

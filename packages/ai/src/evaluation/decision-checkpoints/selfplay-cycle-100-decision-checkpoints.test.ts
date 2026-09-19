@@ -5,6 +5,7 @@ import freeTraceIceRezJson from "../../../../../data/scenarios/ai-decision-check
 import visibleArchivesWinJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-selfplay-100-02-visible-archives-win-d209.json";
 import exactIceCashoutJson from "../../../../../data/scenarios/ai-decision-checkpoints/cp-selfplay-100-03-exact-ice-cashout-d89.json";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
+import { assessCorpIceLiquidation } from "../../corp/defense/corp-ice-liquidation";
 import { resetResidentPlanPortfolioMemory } from "../../plans/resident-plan-portfolio-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 import {
@@ -86,7 +87,7 @@ describe("selfplay cycle 100 decision checkpoints", () => {
     });
   });
 
-  it("uses the exact four-credit ICE cashout under the bound score-funding leaf", () => {
+  it("keeps score funding bound without selling the last defense layer", () => {
     const capture = structuredClone(
       exactIceCashoutJson,
     ) as ReconstructedDecisionCapture;
@@ -99,7 +100,12 @@ describe("selfplay cycle 100 decision checkpoints", () => {
     const selectedAction = capture.input.legalActions.find(
       (action) => action.actionId === decision.actionId,
     );
-    expect(selectedAction).toMatchObject({
+    const cashout = capture.input.legalActions.find(
+      (action) =>
+        action.payload?.targetCardId === "corp_onr_classic_013_puzzle_2" &&
+        action.payload?.gainedCredits === 4,
+    );
+    expect(cashout).toMatchObject({
       type: "activated_card_ability",
       source: "corp_onr_proteus_076_syd-meyer-superstores_3",
       payload: {
@@ -107,14 +113,24 @@ describe("selfplay cycle 100 decision checkpoints", () => {
         gainedCredits: 4,
       },
     });
+    expect(assessCorpIceLiquidation(capture.input, cashout!)).toEqual({
+      status: "blocked",
+      reason: "last_defense_layer",
+    });
+    expect(selectedAction).toMatchObject({ type: "gain_credit" });
+    expect(selectedAction?.actionId).not.toBe(cashout!.actionId);
+    const root =
+      "plan:corp.score_agenda:agenda%3Acorp_onr_proteus_007_project-venice_1%3Aremote_1";
+    const executor =
+      "plan:corp.economy:score-support%3Aagenda%3Acorp_onr_proteus_007_project-venice_1%3Aremote_1";
     expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-      rootPlanInstanceId:
-        "plan:corp.score_agenda:agenda%3Acorp_onr_proteus_007_project-venice_1%3Aremote_2",
-      leafExecutorInstanceId:
-        "plan:corp.economy:score-support%3Aagenda%3Acorp_onr_proteus_007_project-venice_1%3Aremote_2",
+      rootPlanInstanceId: root,
+      leafExecutorInstanceId: executor,
+      selectedPlan: { moduleId: "corp.economy", parentInstanceId: root },
+      selectedStep: { planInstanceId: executor, parentInstanceId: root },
       route: {
         actionId: selectedAction?.actionId,
-        actionType: "activated_card_ability",
+        actionType: "gain_credit",
         semanticActionType: "economy.gain_credit",
       },
     });

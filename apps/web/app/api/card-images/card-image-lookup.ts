@@ -16,6 +16,13 @@ import {
 import { PERSONAL_CARD_IMAGE_STORE } from "../../../server/card-image-runtime";
 
 const REPO_ROOT = resolveNetgridRepositoryRoot();
+// Catalog identity is fixed for this runtime; personal bindings remain live below.
+const PRINTING_IDS_BY_CARD_ID = new Map(
+  Object.values(createRuntimeCardsById()).map((card) => [
+    card.catalogCardId,
+    card.printingId,
+  ]),
+);
 const IMAGE_DIR = resolveNetgridCardImageRoot({ repositoryRoot: REPO_ROOT });
 const LOCALIZED_DE_IMAGE_DIR = path.join(
   REPO_ROOT,
@@ -46,9 +53,8 @@ export async function lookupCardImage(
   requestUrl: string,
   options: CardImageLookupOptions = {},
 ): Promise<CardImageLookupResult | null> {
-  const catalogCard = createRuntimeCardsById()[cardId];
-  if (catalogCard === undefined) return null;
-  const { printingId } = catalogCard;
+  const printingId = PRINTING_IDS_BY_CARD_ID.get(cardId);
+  if (printingId === undefined) return null;
   const request = safeRequestUrl(requestUrl);
   const variant = parseCardImageVariant(request?.searchParams.get("variant"));
   const personalImage = await resolveManagedCardImage(

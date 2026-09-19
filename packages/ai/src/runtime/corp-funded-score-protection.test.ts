@@ -25,6 +25,56 @@ const NO_RESERVE: CorpScoreReserve = {
 };
 
 describe("assessBestFundedCorpScoreProtection", () => {
+  it("includes installed pass protection when projecting another breakable ICE", () => {
+    const setup = routeSetup({
+      source: handIce("outer", "onr_v1_279_wall-of-static"),
+      targetServerId: "remote_1",
+      currentIce: [fundedIce("inner", "onr_v1_238_data-wall-2-0", false)],
+      corpCredits: 6,
+      runnerCredits: 6,
+      runnerRig: [runnerProgram("dwarf", "onr_v1_021_dwarf")],
+    });
+    const root: VisibleCard[] = [
+      {
+        instanceId: "support",
+        known: true,
+        definitionId: "onr_v1_367_rio-de-janeiro-city-grid",
+        type: "upgrade",
+        rezzed: true,
+        subtypes: ["region"],
+      },
+    ];
+    const currentServer = { ...setup.currentServer!, root };
+    const baseline = assessBestFundedCorpScoreProtection({
+      serverIce: currentServer.ice,
+      serverRoot: root,
+      runnerRig: setup.runnerRig,
+      runnerCredits: 6,
+      targetServerId: "remote_1",
+      observedAtStateVersion: 7,
+      availableCorpCredits: 6,
+      availableCorpClicks: 3,
+      availableCorpAgendaPoints: 0,
+      scoreReserve: NO_RESERVE,
+      maximumRunnerAccessSuccessProbability: QUARTER,
+    });
+    const projection = projectCorpFundedIceInstallRoute({
+      ...setup,
+      currentServer,
+      need: { ...setup.need, baseline },
+    });
+    expect(projection).toMatchObject({
+      knowledge: "known",
+      effect: "progress",
+      funded: false,
+      after: {
+        totalSelectedRezCost: 5,
+        protection: {
+          runnerAccessSuccessProbability: { numerator: 25, denominator: 36 },
+        },
+      },
+    });
+  });
   it("enumerates affordable unrezzed ICE and selects the best exact protection", () => {
     const assessment = fundedAssessment({
       serverIce: [

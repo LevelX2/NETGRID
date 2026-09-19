@@ -585,9 +585,12 @@ export function buildCorpDefenseNeeds({
                 ...(targetId ? { targetIceInstanceId: targetId } : {}),
                 urgent: false,
                 rezWindowVerdict: "nonproductive" as const,
+                ...(scoreReserveAdmission
+                  ? { rezReserveAssessment: scoreReserveAdmission }
+                  : {}),
                 value: 0,
                 evidenceCode: exactIceRezRoute
-                  ? `corp_ice_rez_preserves_score_reserve_required:${scoreReserveAdmission?.requiredCreditsAfterRez ?? "unknown"}`
+                  ? `corp_ice_rez_preserves_score_reserve_required:${scoreReserveAdmission?.requiredCreditsAfterRez ?? "unknown"}:opportunity:${scoreReserveAdmission?.opportunity.reason}:protected_servers:${scoreReserveAdmission?.opportunity.claims.map((c) => `${c.serverId}=${c.credits}`).join(",")}:unknown:${scoreReserveAdmission?.opportunity.unknownServerIds.join(",")}`
                   : "corp_ice_rez_resource_exchange_unknown",
               },
             ];
@@ -604,6 +607,9 @@ export function buildCorpDefenseNeeds({
               actionIds: [candidate.actionId],
               ...(targetId ? { targetIceInstanceId: targetId } : {}),
               urgent: input.playerView.run !== undefined,
+              ...(scoreReserveAdmission
+                ? { rezReserveAssessment: scoreReserveAdmission }
+                : {}),
               ...(productiveIceRezRoute
                 ? { rezRoute: productiveIceRezRoute }
                 : {}),
@@ -722,7 +728,20 @@ export function buildCorpDefenseNeeds({
             urgent: genuineCurrentDefenseThreat,
             evidenceCode: genuineCurrentDefenseThreat
               ? "visible_rez_window_decline_with_genuine_defense_threat"
-              : "visible_rez_window_decline_without_defense_threat",
+              : [
+                  "visible_rez_window_decline_without_defense_threat",
+                  ...mergedDefenseNeeds.flatMap((need) =>
+                    need.kind === "generic" &&
+                    need.phase === "rez_response" &&
+                    need.rezWindowVerdict === "nonproductive" &&
+                    (need.rezReserveAssessment?.opportunity.reason ===
+                      "funded_alternative_protection" ||
+                      need.rezReserveAssessment?.opportunity.reason ===
+                        "assessment_unknown")
+                      ? [need.evidenceCode]
+                      : [],
+                  ),
+                ].join(";"),
           }
         : signal,
     );
@@ -758,6 +777,7 @@ export function buildCorpDefenseProtectionSignals({
   const scoreProtectionProjects = scoreProjects
     .filter(
       (project) =>
+        project.terminalDefense === undefined &&
         !(
           project.routeAssessment ===
           "corp_resident_score_parent_dominates_sibling_route"
@@ -882,7 +902,31 @@ export function buildCorpDefenseProtectionSignals({
       candidates,
       centralDefenseAllocation,
     );
-  const selectedScoreProtectionSignals: CorpDefenseSignal[] = [];
+  const selectedScoreProtectionSignals: CorpDefenseSignal[] =
+    scoreProjects.flatMap((project) => {
+      const defense = project.terminalDefense;
+      const install = defense?.install;
+      return defense && install
+        ? [
+            {
+              kind: "score_protection_terminal_install" as const,
+              defenseId: `terminal-protection:${project.projectId}:${install.actionId}`,
+              serverId: defense.serverId,
+              phase:
+                install.placement === "ice"
+                  ? ("install_ice" as const)
+                  : ("install_defense_support" as const),
+              parentProjectId: project.projectId,
+              parentNeedId: defense.need.needId,
+              delegatedPriorityClass: corpScorePriorityClass(project),
+              actionId: install.actionId,
+              sourceCardInstanceId: install.sourceCardInstanceId,
+              sourceDefinitionId: install.sourceDefinitionId,
+              evidenceCode: project.evidenceCode,
+            },
+          ]
+        : [];
+    });
   for (const { project, scan } of scoreProtectionRouteScans) {
     if (
       project.serverId === "new_remote" &&
@@ -1115,6 +1159,7 @@ export function buildCorpDefenseProtectionSignals({
   );
   const exactScoreProtectionInstallActionIds = new Set(
     selectedScoreProtectionSignals.flatMap((signal) =>
+      signal.kind === "score_protection_terminal_install" ||
       signal.kind === "score_protection_install" ||
       signal.kind === "score_protection_staging_install"
         ? [signal.actionId]

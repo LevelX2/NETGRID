@@ -1,5 +1,6 @@
 import { type CorpFundedRemoteAccessRiskNeed } from "../runtime/corp-funded-score-protection";
 import type { CorpOpeningRushDecision } from "../runtime/corp-opening-rush";
+import type { CorpTerminalAgendaDefense } from "../corp/defense/corp-terminal-agenda-defense";
 
 export type CorpScorePhase =
   | "select_agenda"
@@ -39,6 +40,7 @@ export type CorpScoreFundingMilestone = Readonly<{
 export type CorpScoreProjectSignal = {
   /** Current route admission published by corp.score_agenda; evidence only explains it. */
   routeAssessment?:
+    | "corp_terminal_agenda_defense"
     | "corp_opening_rush_engine_randomized"
     | "visible_legal_score_conversion"
     | "corp_funded_protected_score_advance"
@@ -82,6 +84,7 @@ export type CorpScoreProjectSignal = {
   sameTurnCloseout: boolean;
   deadlinePressure?: boolean;
   protectionNeed?: CorpFundedRemoteAccessRiskNeed;
+  terminalDefense?: CorpTerminalAgendaDefense;
   /**
    * Current-state score-horizon evidence derived by corp.score_agenda from
    * state-bound Engine rez and post-rez run quotes. A downstream defense

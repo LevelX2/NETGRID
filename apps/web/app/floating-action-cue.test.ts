@@ -19,7 +19,7 @@ describe("floating action cues", () => {
   it("normalizes the local display mode without changing match state", () => {
     expect(normalizeCueDisplayMode("floating")).toBe("floating");
     expect(normalizeCueDisplayMode("window")).toBe("window");
-    expect(normalizeCueDisplayMode("legacy-value")).toBe("window");
+    expect(normalizeCueDisplayMode("legacy-value")).toBe("floating");
     expect(pageSource).toContain("displayMode: actionCueDisplayMode");
     expect(pageSource).toContain("normalizeCueDisplayMode(parsed.displayMode)");
   });

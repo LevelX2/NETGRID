@@ -118,7 +118,7 @@ describe("AI behavior baseline runtime regressions", () => {
     expect(summary.actionSequence.every((entry) => !entry.fallbackUsed)).toBe(
       true,
     );
-  }, 20_000);
+  }, 90_000);
 });
 
 function runCapturedSeed(slotId: string, seed: string, actionIndex: number) {

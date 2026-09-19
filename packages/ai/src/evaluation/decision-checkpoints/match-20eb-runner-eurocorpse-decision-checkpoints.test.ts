@@ -40,8 +40,35 @@ describe("match 20EB runner and Eurocorpse decision checkpoints", () => {
     expectCheckpointToPass(fixture(json));
   });
 
-  it("starts the explicitly owned early credit-bank route", () => {
-    expectCheckpointToPass(fixture(firstEarlyBankLoadJson));
+  it("keeps early bank loading executable while current coverage search takes priority", () => {
+    const result = runAiDecisionCheckpoint(fixture(firstEarlyBankLoadJson));
+    expect(result.ok, result.message).toBe(true);
+    const bankId =
+      "plan:runner.credit_bank:runner_onr_proteus_150_streetware-distributor_2";
+    expect(
+      result.decision?.decisionDebug?.planFirstDecision?.portfolio,
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          instanceId: bankId,
+          moduleId: "runner.credit_bank",
+          viability: "ready",
+          phase: "build",
+          blockers: [],
+        }),
+      ]),
+    );
+    const bankAction = result.input.legalActions.find(
+      (action) =>
+        action.source === "runner_onr_proteus_150_streetware-distributor_2" &&
+        action.payload?.cardImplementationAddsHostedCredits === true,
+    );
+    expect(bankAction).toBeDefined();
+    expect(
+      result.decision?.decisionDebug?.actionAlternatives?.find(
+        (alternative) => alternative.actionId === bankAction!.actionId,
+      )?.whyNot,
+    ).toContain(`candidate_plan:${bankId}:ready`);
   });
 
   it("does not release the run lock without a follow-up click", () => {

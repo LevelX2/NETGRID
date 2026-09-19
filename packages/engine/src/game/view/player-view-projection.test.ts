@@ -62,6 +62,68 @@ const TEST_CARD_IMPLEMENTATIONS_BY_DEFINITION_ID =
   >;
 
 describe("public next-turn basic run preparation", () => {
+  it("projects public unconditional and success-dependent followup runs without revealing grip", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({ seed: "followup-run-opportunity" }),
+    );
+    state = apply(
+      state,
+      "runner",
+      (a) => a.type === "start_run" && a.payload?.serverId === "hq",
+    );
+    expect(
+      getPlayerView(state, "corp").run?.followupRunOpportunity,
+    ).toBeUndefined();
+    state.run!.grantBonusRunOnFinish = true;
+    const before = hashState(state);
+    expect(getPlayerView(state, "corp").run?.followupRunOpportunity).toBe(
+      "after_run",
+    );
+    expect(hashState(state)).toBe(before);
+    delete state.run!.grantBonusRunOnFinish;
+    const id = "public-extra-run-source" as CardInstanceId;
+    state.cardInstances[id] = {
+      instanceId: id,
+      definitionId: "onr_v1_123_bodyweight-data-creche",
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "rig" },
+      faceup: true,
+      rezzed: true,
+      advancementCounters: 0,
+      strengthModifier: 0,
+    };
+    state.runner.rig.hardware.push(id);
+    expect(getPlayerView(state, "corp").run?.followupRunOpportunity).toBe(
+      "after_successful_run",
+    );
+    ensureRunnerTurnFlags(state).successfulRunExtraRunUsedThisTurn = true;
+    expect(
+      getPlayerView(state, "corp").run?.followupRunOpportunity,
+    ).toBeUndefined();
+    expect(getPlayerView(state, "corp").opponent).not.toHaveProperty(
+      "gripOrHq",
+    );
+    state.run!.activeSequence = {
+      kind: "multi_server_success_sequence",
+      sequence: "run_each_data_fort",
+      sourceCardId: "public-sequence-source",
+      sourceDefinitionId: "onr_proteus_116_pirate-broadcast",
+      sourceTitle: "Pirate Broadcast",
+      pendingServerIds: ["hq", "rd", "archives"],
+      successfulServerIds: [],
+      anyUnsuccessful: false,
+      onAllSuccessful: "gain_runner_event_agenda_point",
+      onAnyUnsuccessful: "forgo_next_action",
+      advanceAfterEachRun: true,
+      resolveAfterAllRuns: true,
+    };
+    ensureRunnerTurnFlags(state).pendingSequences = [state.run!.activeSequence];
+    const sequenceBefore = hashState(state);
+    expect(getPlayerView(state, "corp").run?.pendingSequenceRunCount).toBe(2);
+    expect(hashState(state)).toBe(sequenceBefore);
+  });
+
   it("reserves the run click and subtracts existing action debt without exposing grip", () => {
     const state = createGameAfterSetup({ seed: "next-run-preparation" });
     expect(getPlayerView(state, "corp").runnerNextTurnCreditClicks).toBe(3);

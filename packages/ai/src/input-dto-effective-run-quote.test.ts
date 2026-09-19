@@ -10,6 +10,42 @@ import { describe, expect, it } from "vitest";
 import { buildAiDecisionInputDto } from "./input-dto";
 
 describe("AI input DTO effective ICE run quote contract", () => {
+  it("allowlists state-bound variable-rez quotes only for the Corp and validates encounter strength", () => {
+    const quote: VisibleCorpIcePostRezRunQuote = {
+      context: "installed_post_rez",
+      cardId: ICE_ID,
+      iceDefinitionId: ICE_DEFINITION_ID,
+      targetServerId: "hq",
+      projectedServerId: "hq",
+      expiresAtStateVersion: STATE_VERSION,
+      complete: true,
+      effectiveRunQuote: { ...validEffectiveRunQuote(), encounterStrength: 0 },
+    };
+    const card = {
+      ...unrezzedIce(quote),
+      effectivePostRezActionRunQuotes: [
+        { ...quote, actionId: "rez-x-2", secret: "private" },
+      ],
+    };
+    const sanitized = buildInput(playerView("corp", card)).playerView
+      .servers[0]!.ice[0]!.effectivePostRezActionRunQuotes;
+    expect(sanitized).toEqual([{ ...quote, actionId: "rez-x-2" }]);
+    expect(
+      buildInput(playerView("runner", card)).playerView.servers[0]!.ice[0]!
+        .effectivePostRezActionRunQuotes,
+    ).toBeUndefined();
+    card.effectivePostRezActionRunQuotes[0]!.expiresAtStateVersion -= 1;
+    expect(
+      buildInput(playerView("corp", card)).playerView.servers[0]!.ice[0]!
+        .effectivePostRezActionRunQuotes,
+    ).toBeUndefined();
+    quote.effectiveRunQuote.encounterStrength = -1;
+    expect(
+      buildInput(playerView("corp", unrezzedIce(quote))).playerView.servers[0]!
+        .ice[0]!.effectivePostRezRunQuote,
+    ).toBeUndefined();
+  });
+
   it("preserves the public converted-program role without unknown data and rejects malformed facts", () => {
     const view = playerView("corp", baseIce());
     const converted: VisibleCard = {

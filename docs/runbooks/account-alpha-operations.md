@@ -26,6 +26,31 @@ Stand: 2026-09-05
   Nach Korrektur der Startkonfiguration muss der Webprozess über
   `scripts/start-netgrid.ps1 -RestartWeb` neu gestartet werden.
 
+## Startabbruch durch veraltete lokale SQLite-Daten
+
+Die Desktopverknüpfung für den Entwicklungsbetrieb (lokal
+„NETGRID Entwicklung - Starten“) ruft
+`scripts/start-netgrid.ps1` auf. Startdiagnosen stehen unter
+`%TEMP%\netgrid\launcher.log` und `%TEMP%\netgrid\server.log`.
+Bei einem Serverstartfehler erklärt der Startdialog bekannte Schemafehler
+mit einem passenden nächsten Schritt. Er wertet ausschließlich neue
+Serverlogausgaben dieses Startversuchs aus und verändert keine Daten.
+Bei `schema_missing` mit „Storage nutzt nicht das aktuelle Schema“ ist die
+konfigurierte Datenbank älter als `SQLITE_STORAGE_SCHEMA_VERSION` in
+`apps/server/src/storage-sqlite.ts`; eine Änderung der Verknüpfung hilft nicht.
+
+Für den lokalen Version-0-Entwicklungsbetrieb werden solche Daten bei Bedarf
+zurückgesetzt, nicht automatisch migriert. Zuerst die tatsächlich konfigurierten
+Match-/Accountpfade und den Datenbestand prüfen. Bei gestopptem Server die
+betroffene SQLite-Datei einschließlich vorhandener `-wal`-/`-shm`-Dateien in
+ein eigenes lokales Sicherungsverzeichnis verschieben. Der nächste reguläre
+Scriptstart legt das aktuelle Schema an. Alte Partien und gegebenenfalls
+Konten/Kontodecks stehen danach nur in der Sicherung, nicht in der laufenden
+App zur Verfügung. Die Versionsnummer der alten Datei niemals bloß hochsetzen.
+Anschließend `/health` über die ausgegebene LAN-Adresse auf `ok: true`,
+`storage.ok: true` und die aktuelle Schemaversion sowie die Spielseite auf
+HTTP 200 prüfen. Dieser Reset ist kein Upgradeverfahren für installierte Releases.
+
 ## Zugangsmodi
 
 Die Accountdaten besitzen genau eine Autorität und eine persistente

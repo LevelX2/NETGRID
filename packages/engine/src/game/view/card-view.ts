@@ -1496,11 +1496,27 @@ function hostedProgramStrengthModifier(
   }, 0);
 }
 
-function iceStrengthFor(state: GameState, iceId: CardInstanceId): number {
+/** Current public modifiers evaluated for an encounter, without running lifecycle effects. */
+export function visibleIceEncounterStrength(
+  state: GameState,
+  iceId: CardInstanceId,
+): number {
+  return iceStrengthFor(state, iceId, true);
+}
+
+function iceStrengthFor(
+  state: GameState,
+  iceId: CardInstanceId,
+  assumeEncounter = false,
+): number {
   const definition = definitionFor(state, iceId);
   const instance = mustInstance(state.cardInstances, iceId);
   const runEncounterBonus =
-    state.run?.encounteredIceId === iceId
+    state.run &&
+    (state.run.encounteredIceId === iceId ||
+      (assumeEncounter &&
+        state.run?.attackedServerId ===
+          corpServerIdForInstalledCard(state, iceId)))
       ? Math.max(0, Math.floor(state.run.futureEncounterIceStrengthBonus ?? 0))
       : 0;
   const pattelsReduction = cardCounter(state, iceId, "pattel");
@@ -1514,7 +1530,7 @@ function iceStrengthFor(state: GameState, iceId: CardInstanceId): number {
   const total =
     baseStrength +
     instance.strengthModifier +
-    iceStrengthBonusFor(state, iceId) +
+    iceStrengthBonusFor(state, iceId, assumeEncounter) +
     relativeIceStrengthBonusFor(state, iceId) +
     runEncounterBonus -
     pattelsReduction;
@@ -1541,7 +1557,11 @@ function visibleStrengthModifierForKnownCard(
   return modifier > 0 ? modifier : undefined;
 }
 
-function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
+function iceStrengthBonusFor(
+  state: GameState,
+  iceId: CardInstanceId,
+  assumeEncounter = false,
+): number {
   const iceServerId = corpServerIdForInstalledCard(state, iceId);
   let bonus = 0;
   for (const agendaId of state.corp.scoreArea) {
@@ -1559,7 +1579,11 @@ function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
       continue;
     }
   }
-  bonus += iceStrengthModifierBonusFor(state, iceId);
+  bonus += iceStrengthModifierBonusFor(
+    state,
+    iceId,
+    assumeEncounter ? iceId : state.run?.encounteredIceId,
+  );
   bonus += cardCounter(state, iceId, "mark");
   return bonus;
 }

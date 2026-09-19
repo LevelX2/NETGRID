@@ -53,6 +53,7 @@ export function corpDefenseSignalOwnsAction(
   actionId: string,
 ): boolean {
   if (
+    signal.kind === "score_protection_terminal_install" ||
     signal.kind === "score_protection_install" ||
     signal.kind === "score_protection_staging_install"
   ) {
