@@ -5,6 +5,7 @@ import type {
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
+import { bindSyntheticAgendaInstallQuotes } from "../semantic-ai-runtime-cutover.test-support";
 import { bestCorpSameTurnScoreConversionPath } from "./tactical-plan-corp-score-conversion";
 
 describe("Corp score-conversion play-cost projection", () => {
@@ -60,7 +61,7 @@ function inputWithProjectedConsultants(
     },
     timingPoint: "corp_action.main",
   } as unknown as LegalAction;
-  return {
+  const input = {
     side: "corp",
     playerView: {
       side: "corp",
@@ -110,6 +111,8 @@ function inputWithProjectedConsultants(
     actionNumber: 1,
     profileId: "score-conversion-play-cost",
   } as AiDecisionInput;
+  bindSyntheticAgendaInstallQuotes(input);
+  return input;
 }
 
 function card(

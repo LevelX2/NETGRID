@@ -14,6 +14,7 @@ import {
 import {
   aiInput,
   attachOwnDeckSnapshot,
+  bindSyntheticAgendaInstallQuotes,
   legalAction,
   server,
   visibleCard,
@@ -491,6 +492,7 @@ function scoreConversionFixture(params: {
       preparedDataWall("prepared-wall-2"),
     ]),
   ];
+  bindSyntheticAgendaInstallQuotes(input);
   return {
     input,
     installPrepared,
@@ -561,6 +563,7 @@ function annualReviewsFixture(params: {
     server("archives"),
     server("remote_1"),
   ];
+  bindSyntheticAgendaInstallQuotes(input);
   attachOwnDeckSnapshot(input, {
     deckSnapshotId: "corp-card-variant-annual-reviews",
     side: "corp",
@@ -726,6 +729,7 @@ function bindCurrentStateVersion(input: AiDecisionInput): void {
   for (const action of input.legalActions) {
     action.expiresAtStateVersion = input.playerView.stateVersion;
   }
+  bindSyntheticAgendaInstallQuotes(input);
 }
 
 function endTurn(): LegalAction {

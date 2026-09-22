@@ -14,6 +14,8 @@ import {
   type SemanticRuntimeCorpScoreDependencies,
 } from "../semantic-runtime-corp-score";
 import type { CorpScoringWindowAssessment } from "../semantic-runtime-corp-scoring-window";
+import { CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION } from "@netgrid/shared";
+import { bindSyntheticAgendaInstallQuotes } from "../../semantic-ai-runtime-cutover.test-support";
 import {
   accountsReceivableCard,
   agendaCard,
@@ -63,6 +65,22 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
       [agendaCard("agenda-1", 4), agendaCard("agenda-2", 2)],
       [installAgenda, installRemoteIce],
     );
+    input.playerView.stateVersion = 1;
+    installAgenda.expiresAtStateVersion = 1;
+    installAgenda.payload = {
+      ...installAgenda.payload,
+      cardId: "agenda-1",
+      agendaInstallScoreHorizonQuoteSchemaVersion:
+        CORP_AGENDA_INSTALL_SCORE_HORIZON_QUOTE_SCHEMA_VERSION,
+      agendaInstallScoreHorizonQuoteCardId: "agenda-1",
+      agendaInstallScoreHorizonQuoteTargetServerId: "remote_1",
+      agendaInstallScoreHorizonQuoteExpiresAtStateVersion: 1,
+      agendaInstallScoreHorizonQuoteAdvancementRequirement: 4,
+      agendaInstallScoreHorizonQuoteMaximumCurrentTurnAdvances: 3,
+      agendaInstallScoreHorizonQuoteRemainingAdvancesAfterCurrentTurn: 1,
+      agendaInstallScoreHorizonQuoteNextCorpTurnGuaranteedFlexibleClicks: 3,
+      agendaInstallScoreHorizonQuoteComplete: true,
+    };
     input.playerView.opponent = runnerOpponent({
       agendaPoints: 2,
       credits: 5,
@@ -461,6 +479,7 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
         {
           placement: "root",
           serverId: "new_remote",
+          cardId: agenda.instanceId,
           cardType: "agenda",
         },
         agenda.instanceId,
@@ -468,7 +487,9 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
       costs: [{ clicks: 1 }],
     } as LegalAction;
     const input = corpInputWithHqCards(8, [agenda], [installAgenda]);
+    installAgenda.expiresAtStateVersion = input.playerView.stateVersion;
     input.playerView.own.clicks = 4;
+    bindSyntheticAgendaInstallQuotes(input);
     (
       input as AiDecisionInput & {
         ownDeckSnapshot: {

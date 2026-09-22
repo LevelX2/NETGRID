@@ -106,7 +106,7 @@ describe("match e8047b3e Runner remediation checkpoints", () => {
     );
   });
 
-  it("preserves the contest parent and pumps Snowball instead of accepting a dearer Trace line", () => {
+  it("preserves the contest parent and resolves the quoted trace without an unnecessary pump", () => {
     const { input, decision } = replayDecision(encounterBudgetJson);
     const snowballPump = input.legalActions.find(
       (action) =>
@@ -115,14 +115,14 @@ describe("match e8047b3e Runner remediation checkpoints", () => {
     expect(snowballPump).toBeDefined();
 
     expect(decision).toMatchObject({
-      actionId: snowballPump?.actionId,
+      actionId: "runner.continue_run.printed_subroutines_trace",
       fallbackUsed: false,
       decisionDebug: {
         planKind: "runner.convert_run_window",
         planFirstDecision: {
           rootPlanInstanceId: expect.stringContaining("runner.contest_remote"),
           route: {
-            actionType: "pump_breaker",
+            actionType: "continue_run",
           },
         },
       },

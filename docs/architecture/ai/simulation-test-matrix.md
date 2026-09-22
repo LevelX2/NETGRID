@@ -106,36 +106,26 @@ es erhöht ausschließlich das Speicherlimit dieses einzelnen Prozesses.
 
 ## Aktuelle offene AI-Gate-Abweichungen
 
-Der Integrationslauf vom 2026-09-22 umfasst 6.123 bestandene und 55
-fehlgeschlagene Tests. Die fehlschlagenden Testfälle entsprechen vollständig
-der Vereinigung der Ausgangsstände: 50 wurden separat auf dem unveränderten
-lokalen `main` (`b3b477070`) reproduziert; fünf weitere stammen aus dem
-GitHub-Stand (`2f214cf93`) und waren bereits dort dokumentiert und vor dem
-lokalen Main-Abgleich reproduziert. Die Integration ergänzt keinen weiteren
-fehlschlagenden Testfall. Das ist ausdrücklich **kein grünes AI-Gate**.
+Nach Integration der synthetischen Fixture-Reparaturen aus
+`codex/meta-five-20260912-b` am 2026-09-22 bestehen alle 533 Tests in den elf
+betroffenen Testdateien. Damit sind die 50 zuvor auf lokalem `main`
+reproduzierten Fehler geschlossen. Der gemeinsame fokussierte Lauf mit den
+beiden übrigen bekannten Fehlerdateien ergibt 533 bestandene und fünf
+fehlgeschlagene Tests. Diese fünf stammen bereits aus dem GitHub-Stand
+`2f214cf93`; die betreffenden Dateien bleiben bei dieser Integration
+unverändert. Ein erneuter vollständiger AI-Shard-Lauf wurde nach den
+Fixture-Reparaturen nicht ausgeführt. Das ist ausdrücklich **kein grünes
+AI-Gate**.
 
 | Testdatei unter `packages/ai/src/` | Offene Tests |
 | --- | ---: |
-| `runtime/plan-first-live-runtime.test.ts` | 18 |
-| `runtime/plan-first-live-runtime-punish-coupled-sequence-red-contract.test.ts` | 16 |
-| `runtime/plan-first-live-runtime-corp-card-variant-contract.test.ts` | 5 |
-| `runtime/plan-first-live-runtime-ambush-contract.test.ts` | 3 |
-| `runtime/plan-first-live-runtime-punish-persistent-root-contract.test.ts` | 1 |
-| `runtime/corp-scoreline/semantic-runtime-corp-score-scoreline-and-install.test.ts` | 1 |
-| `plans/tactical-plan-corp-score-conversion-play-cost.test.ts` | 2 |
-| `plans/runner-core-plan-modules.test.ts` | 1 |
-| `evaluation/decision-checkpoints/baseline-seed02-scoreline-feasibility-decision-checkpoints.test.ts` | 1 |
-| `evaluation/decision-checkpoints/meta-403-remainder-resource-admission.test.ts` | 1 |
-| `evaluation/decision-checkpoints/match-e8047b3e-runner-remediation-decision-checkpoints.test.ts` | 1 |
 | `evaluation/decision-checkpoints/meta-403-flood-continuation.test.ts` | 4 |
 | `evaluation/decision-checkpoints/meta-403-score-progress-provider.test.ts` | 1 |
 
-Die synthetischen Corp-Fälle benötigen überwiegend aktuelle, an Agenda,
-Zielserver und StateVersion gebundene Installationsquotes. Weitere Fälle
-betreffen unvollständige Runner-Testeingaben und Score-/Economy-/Run-
-Erwartungen. Diese unabhängigen Baseline-Befunde werden separat behoben;
-Produktverträge und Assertions werden für eine Integration nicht abgeschwächt.
-Die Trace-Fixture von e804 enthält inzwischen in beiden Action-Listen die
-zwei beim frischen Encounter offenen Subroutinen. Der fokussierte Nachlauf
-zeigt dort weiterhin dieselbe Auswahlabweichung wie auf lokalem `main`
-(Continue statt des erwarteten Snowball-Pumps).
+Die synthetischen Corp-Testeingaben binden Agenda-Installationsquotes an
+Agenda, Zielserver und StateVersion; der Testhelfer bleibt auf handgebaute
+Fixtures beschränkt. Runner-Testeingaben enthalten die benötigten Ressourcen
+und Encounter-Subroutinen. Der e804-Checkpoint prüft die angebotene
+Trace-Fortsetzung unter Erhalt des Contest-Elternplans. Die verbleibenden
+Abweichungen betreffen Flood-Priorisierung und Score-/Defense-Planbindung;
+sie benötigen eine separate Prüfung gegen die aktuellen Produktverträge.

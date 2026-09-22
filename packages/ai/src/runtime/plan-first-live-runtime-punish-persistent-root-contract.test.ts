@@ -13,6 +13,7 @@ import {
 } from "../plans/resident-plan-portfolio-memory";
 import {
   aiInput,
+  bindSyntheticAgendaInstallQuotes,
   legalAction,
   server,
   visibleCard,
@@ -255,6 +256,7 @@ function taggedPayoffInput(params: {
           runnerCreditsVisible: input.playerView.opponent.credits,
           routes: [],
         };
+  bindSyntheticAgendaInstallQuotes(input);
   return input;
 }
 
@@ -273,6 +275,7 @@ function advanceToPayoffExecution(input: AiDecisionInput): void {
   input.playerView.own.clicks = 2;
   input.playerView.legalActions = actions;
   input.legalActions = actions;
+  bindSyntheticAgendaInstallQuotes(input);
   input.playerView.corpPunishRouteQuoteSet = closedAccountsQuoteSet({
     stateVersion,
     credits: 1,
@@ -336,6 +339,7 @@ function advanceToUnknownQuoteWithScoreAlternative(
   ];
   input.playerView.legalActions = actions;
   input.legalActions = actions;
+  bindSyntheticAgendaInstallQuotes(input);
   input.playerView.opponent.rig = [
     visibleCard("runner-virus", "runner", "program", {
       definitionId: "test-runner-virus",

@@ -20,6 +20,10 @@ export function corpInputWithGoals(
     side: "corp",
     legalActions,
     playerView: {
+      stateVersion: 1,
+      timingPoint: "corp_action.main",
+      activeSide: "corp",
+      phase: "corp_action_phase",
       own: {
         credits: 5,
         clicks: 3,
