@@ -100,6 +100,13 @@ zurückgestellt. Eine Prüfung ohne Funding-Eingaben darf die bereits
 nachgewiesene Linie nicht verlieren und dadurch eine ownerlose LegalAction
 erzeugen (Regression: Paarung 425, D196).
 
+Auch eine Next-Turn-Fortsetzung ohne bisherige `actionIds` bindet bei der
+terminalen Agenda-Schutzprüfung die aktuell validierte Advance-Action.
+Verbraucht dieser Advance die letzte erforderliche Rezreserve, bleibt er
+unter `corp.score_agenda` ausdrücklich zurückgestellt. Ein bereits vollständig
+finanzierter Schutz mit Funding-Gap null macht den Advance nicht ownerlos;
+nur der verfügbare Überschuss darf Fortschritt finanzieren (Paarung 458, D304).
+
 Eine vollständig gequotete leere Kostenliste zertifiziert null Klicks und
 Credits. Ein nur mit Klickkosten ausgewiesener Advance kostet null Credits;
 beide Fälle bleiben reguläre Scorefortentwicklung. Ein Engine-Payload-Feld,

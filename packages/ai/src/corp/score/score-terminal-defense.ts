@@ -84,6 +84,9 @@ export function withCorpTerminalAgendaDefense(
   );
   return {
     ...project,
+    // Bind even a deferred next-turn continuation to the current advance so
+    // Score can disposition it when spending would consume terminal defense.
+    actionIds: [advance.actionId],
     terminalDefense: { ...defense, requiredCredits },
     protectionNeed: defense.need,
     fundingGap: defense.install ? 0 : fundingGap,
