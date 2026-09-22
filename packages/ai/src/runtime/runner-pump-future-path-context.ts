@@ -35,6 +35,7 @@ export function createRunnerPumpFuturePathContext(
     server: VisibleServer,
     creditBudgetAfterPumpAndBreak: number | RunnerRunPathCreditBudget,
     remainingCurrentSubroutines?: Subroutine[],
+    requiredHandFloor?: number,
   ) => { blocksPump: boolean; creditsAfterPath: number; evidence: string[] };
 } {
   const encounterFuturePathAfterPumpBreakAssessment = (
@@ -42,6 +43,7 @@ export function createRunnerPumpFuturePathContext(
     server: VisibleServer,
     creditBudgetAfterPumpAndBreak: number | RunnerRunPathCreditBudget,
     remainingCurrentSubroutines?: Subroutine[],
+    requiredHandFloor?: number,
   ): { blocksPump: boolean; creditsAfterPath: number; evidence: string[] } => {
     const creditsAfterPumpAndBreak =
       typeof creditBudgetAfterPumpAndBreak === "number"
@@ -98,7 +100,9 @@ export function createRunnerPumpFuturePathContext(
           damageIce,
           {
             generalCredits: rawPath.creditsAfterPath,
-            requiredHandFloor: runnerConfirmedDamageRequiredHandFloor(input),
+            requiredHandFloor:
+              requiredHandFloor ??
+              runnerConfirmedDamageRequiredHandFloor(input),
             ...(rawPath.paidSubroutineBreaks
               ? { paidSubroutineBreaks: rawPath.paidSubroutineBreaks }
               : {}),

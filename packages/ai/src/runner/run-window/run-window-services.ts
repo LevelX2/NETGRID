@@ -15,6 +15,7 @@ export type RunWindowAssessmentServices = {
   runnerEncounterActionExclusion: (
     input: AiDecisionInput,
     action: LegalAction,
+    requiredHandFloor?: number,
   ) => SemanticRuntimeExclusion | undefined;
 };
 

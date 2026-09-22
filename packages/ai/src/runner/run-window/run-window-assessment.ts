@@ -410,15 +410,26 @@ export function runnerTerminalContestPreservesNonlethalDamageContinuation(
 ): boolean {
   const evidenceCode = visibleDamageAssessment?.evidenceCode;
   return (
-    runOrigin?.parentBinding?.moduleId === "runner.contest_remote" &&
-    runOrigin.parentBinding.signal.terminalPatternThreat === true &&
-    runOrigin.purpose === "contest" &&
-    runnerRunOriginCommittedPayoff(runOrigin) === "score_threat" &&
-    runOrigin.runRiskContract !== undefined &&
+    runnerRunWindowEncounterRequiredHandFloor(runOrigin) === 0 &&
     evidenceCode?.startsWith(
       "runner_visible_ice_damage_below_required_hand_floor_requires_jack_out|",
     ) === true
   );
+}
+
+/** The bound contest owner accepts the reserve deficit, never lethal damage. */
+export function runnerRunWindowEncounterRequiredHandFloor(
+  runOrigin:
+    | (RunnerRunOrigin & Partial<Pick<ActiveRunnerRunRoot, "parentBinding">>)
+    | undefined,
+): number | undefined {
+  return runOrigin?.parentBinding?.moduleId === "runner.contest_remote" &&
+    runOrigin.parentBinding.signal.terminalPatternThreat === true &&
+    runOrigin.purpose === "contest" &&
+    runnerRunOriginCommittedPayoff(runOrigin) === "score_threat" &&
+    runOrigin.runRiskContract !== undefined
+    ? 0
+    : undefined;
 }
 
 export function runnerRunWindowActionAssessments(
@@ -718,7 +729,11 @@ function runnerRunWindowActionAssessment(
   }
   const encounterExclusion =
     action.type === "pump_breaker" || action.type === "break_subroutine"
-      ? dependencies.runnerEncounterActionExclusion(input, action)
+      ? dependencies.runnerEncounterActionExclusion(
+          input,
+          action,
+          runnerRunWindowEncounterRequiredHandFloor(runOrigin),
+        )
       : undefined;
   const fullPathCommitmentPreserved = runnerFullPathCommitmentIsPreserved(
     input,
@@ -1344,8 +1359,11 @@ function runnerRunWindowPlanStepExclusion(
       return false;
     }
     return (
-      dependencies.runnerEncounterActionExclusion(input, candidate) ===
-        undefined &&
+      dependencies.runnerEncounterActionExclusion(
+        input,
+        candidate,
+        runnerRunWindowEncounterRequiredHandFloor(runOrigin),
+      ) === undefined &&
       runnerRunWindowPlanStepExclusion(
         input,
         candidate,

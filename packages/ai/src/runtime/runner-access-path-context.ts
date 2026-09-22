@@ -74,6 +74,7 @@ export function createRunnerAccessPathContext(
   breakAccessPathAssessment: (
     input: AiDecisionInput,
     action: LegalAction,
+    requiredHandFloor?: number,
   ) => RunnerEncounterBreakAccessAssessment;
   encounterRemotePayoffAfterBreakAssessment: (
     input: AiDecisionInput,
@@ -209,6 +210,7 @@ export function createRunnerAccessPathContext(
   const breakAccessPathAssessment = (
     input: AiDecisionInput,
     action: LegalAction,
+    requiredHandFloor?: number,
   ): RunnerEncounterBreakAccessAssessment => {
     // Payment windows resume an already selected break. They expose no ordinary
     // encounter continuation; the cost-continuation owner validates the exact
@@ -356,7 +358,9 @@ export function createRunnerAccessPathContext(
             ...(path.paidSubroutineBreaks
               ? { paidSubroutineBreaks: path.paidSubroutineBreaks }
               : {}),
-            requiredHandFloor: runnerConfirmedDamageRequiredHandFloor(input),
+            requiredHandFloor:
+              requiredHandFloor ??
+              runnerConfirmedDamageRequiredHandFloor(input),
             ...(path.fullyBrokenIceInstanceIds
               ? { fullyBrokenIceInstanceIds: path.fullyBrokenIceInstanceIds }
               : {}),

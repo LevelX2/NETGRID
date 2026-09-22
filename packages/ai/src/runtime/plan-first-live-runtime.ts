@@ -303,6 +303,7 @@ import { isRunnerRunWindowCandidate } from "../runner/run-window/run-window-acti
 import {
   runnerRunRiskContractReassessment,
   runnerRunWindowActionAssessments,
+  runnerRunWindowEncounterRequiredHandFloor,
 } from "../runner/run-window/run-window-assessment";
 import {
   resolvePlanBoundRunnerBrokenIceVirusCounterChoice,
@@ -441,6 +442,7 @@ export type PlanFirstLiveDependencies = {
   runnerEncounterActionExclusion: (
     input: AiDecisionInput,
     action: AiDecisionInput["legalActions"][number],
+    requiredHandFloor?: number,
   ) => SemanticRuntimeExclusion | undefined;
   runnerProgramInstallTrashAssessmentForAction: (
     input: AiDecisionInput,
@@ -4724,7 +4726,13 @@ function decisionFromScheduler(
         input.side === "runner" &&
         (alternative.type === "pump_breaker" ||
           alternative.type === "break_subroutine")
-          ? dependencies.runnerEncounterActionExclusion(input, alternative)
+          ? dependencies.runnerEncounterActionExclusion(
+              input,
+              alternative,
+              runnerRunWindowEncounterRequiredHandFloor(
+                activeRunRootPlan(result.portfolio, input),
+              ),
+            )
           : undefined;
       const rejectionEvidence = encounterExclusion
         ? [

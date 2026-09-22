@@ -67,6 +67,7 @@ export type RunnerPumpViabilityContextDependencies = {
     server: VisibleServer,
     creditBudgetAfterPumpAndBreak: number | RunnerRunPathCreditBudget,
     remainingCurrentSubroutines?: VisibleEncounterSubroutine[],
+    requiredHandFloor?: number,
   ) => { blocksPump: boolean; creditsAfterPath: number; evidence: string[] };
   encounterRemotePayoffAfterBreakAssessment: (
     input: AiDecisionInput,
@@ -88,11 +89,13 @@ export function createRunnerPumpViabilityContext(
   pumpViabilityAssessment: (
     input: AiDecisionInput,
     action: LegalAction,
+    requiredHandFloor?: number,
   ) => RunnerEncounterViabilityAssessment;
 } {
   const pumpViabilityAssessment = (
     input: AiDecisionInput,
     action: LegalAction,
+    requiredHandFloor?: number,
   ): RunnerEncounterViabilityAssessment => {
     // The Engine is resuming the pump already admitted by this run owner.
     // Its payment window has no fresh encounter remainder to quote. The
@@ -384,6 +387,7 @@ export function createRunnerPumpViabilityContext(
                 remainingIndexes.has(index) &&
                 !requiredBreakSubroutines?.includes(subroutine),
             ),
+            requiredHandFloor,
           );
       if (futurePath.blocksPump)
         return {

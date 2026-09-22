@@ -33,10 +33,12 @@ export type RunnerEncounterActionExclusionDependencies = {
   pumpViabilityAssessment: (
     input: AiDecisionInput,
     action: LegalAction,
+    requiredHandFloor?: number,
   ) => RunnerEncounterViabilityAssessment;
   breakAccessPathAssessment: (
     input: AiDecisionInput,
     action: LegalAction,
+    requiredHandFloor?: number,
   ) => RunnerEncounterBreakAccessAssessment;
 };
 
@@ -44,6 +46,7 @@ export type RunnerEncounterActionExclusionContext = {
   runnerEncounterActionExclusion: (
     input: AiDecisionInput,
     action: LegalAction,
+    requiredHandFloor?: number,
   ) => SemanticRuntimeExclusion | undefined;
 };
 
@@ -53,8 +56,14 @@ export function createRunnerEncounterActionExclusionContext(
   function encounterActionExclusion(
     input: AiDecisionInput,
     action: LegalAction,
+    requiredHandFloor?: number,
   ): SemanticRuntimeExclusion | undefined {
-    return runnerEncounterActionExclusion(input, action, dependencies);
+    return runnerEncounterActionExclusion(
+      input,
+      action,
+      dependencies,
+      requiredHandFloor,
+    );
   }
 
   return { runnerEncounterActionExclusion: encounterActionExclusion };
@@ -64,10 +73,15 @@ export function runnerEncounterActionExclusion(
   input: AiDecisionInput,
   action: LegalAction,
   dependencies: RunnerEncounterActionExclusionDependencies,
+  requiredHandFloor?: number,
 ): SemanticRuntimeExclusion | undefined {
   if (input.side !== "runner") return undefined;
   if (action.type === "pump_breaker") {
-    const assessment = dependencies.pumpViabilityAssessment(input, action);
+    const assessment = dependencies.pumpViabilityAssessment(
+      input,
+      action,
+      requiredHandFloor,
+    );
     if (assessment.canLeadToBreak) return undefined;
     return {
       key:
@@ -136,7 +150,11 @@ export function runnerEncounterActionExclusion(
           "encounter_action:break_subroutine|visible_safety_threat_has_exact_break_route:true",
       };
     }
-    const assessment = dependencies.breakAccessPathAssessment(input, action);
+    const assessment = dependencies.breakAccessPathAssessment(
+      input,
+      action,
+      requiredHandFloor,
+    );
     if (assessment.canPreserveAccessPath) return undefined;
     return {
       key:

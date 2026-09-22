@@ -1240,6 +1240,15 @@ Handboden. Sie verwendet den bestehenden Damage-Owner und denselben
 Pfadbefund wie die Zielbewertung; Plan-, Executor- und Actionbindung bleiben
 beim laufenden Run.
 
+Hat der gebundene terminale `runner.contest_remote` mit `score_threat` und
+Run-Risikovertrag die nicht tödliche Unterschreitung der Handreserve bereits
+akzeptiert, übergibt der Run-Window-Owner diesen Handboden ausdrücklich auch
+an die Break- und Pump-Restpfadprüfung. Der gemeinsame Bewertungsdienst
+entscheidet diese Ausnahme nicht selbst. Er prüft weiterhin den kumulativen
+Schaden nach Zahlung gegen die tatsächlich verbleibende Hand; Letalität und
+unabhängige Zugangssperren werden dadurch nicht freigegeben. Die
+Alternativendiagnose verwendet dasselbe gebundene Budget.
+
 Diese Prüfung gilt bereits vor den vorbereitenden Pumps. Nach vollständigen
 Pump- und Breakkosten werden verbleibender aktueller Schaden und innere
 Schadensquellen gemeinsam bewertet. Die Pumpquote reserviert außerdem alle
