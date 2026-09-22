@@ -239,7 +239,11 @@ export function createRunnerPumpViabilityContext(
         fullBreakIndexes
           ? fullBreakIndexes.has(index)
           : remainingIndexes.has(index) &&
-            (isUnacceptableImmediateSafetyThreatSubroutine(input, subroutine) ||
+            (isUnacceptableImmediateSafetyThreatSubroutine(
+              input,
+              subroutine,
+              requiredHandFloor,
+            ) ||
               (subroutine.unbrokenRunEffect !== undefined &&
                 !isVisibleDirectDamageSubroutine(subroutine) &&
                 dependencies.encounterRunRemainderEffectAssessment(
@@ -294,7 +298,7 @@ export function createRunnerPumpViabilityContext(
       estimatedBreakCost === undefined ||
       !spendIcebreakerCredits(pumpPayment.budget, breaker, estimatedBreakCost)
         .affordable
-        ? currentEncounterMitigationForAction(input, action)
+        ? currentEncounterMitigationForAction(input, action, requiredHandFloor)
         : undefined;
     if (partialMitigation) estimatedBreakCost = partialMitigation.breakCost;
     if (
@@ -362,9 +366,16 @@ export function createRunnerPumpViabilityContext(
         : undefined;
     if (server) {
       const hasImmediateSafetyThreat =
-        currentEncounterRequiresDamagePreservingBreak(input) ||
+        currentEncounterRequiresDamagePreservingBreak(
+          input,
+          requiredHandFloor,
+        ) ||
         (currentQuote?.subroutines.some((subroutine) =>
-          isUnacceptableImmediateSafetyThreatSubroutine(input, subroutine),
+          isUnacceptableImmediateSafetyThreatSubroutine(
+            input,
+            subroutine,
+            requiredHandFloor,
+          ),
         ) ??
           false);
       const futurePath = hasImmediateSafetyThreat

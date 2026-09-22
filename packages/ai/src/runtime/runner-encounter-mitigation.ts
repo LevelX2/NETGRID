@@ -41,6 +41,7 @@ export type RunnerEncounterMitigation = {
 export function currentEncounterMitigationForAction(
   input: AiDecisionInput,
   action: LegalAction,
+  requiredHandFloor?: number,
 ):
   | (RunnerEncounterMitigation & {
       actionId: string;
@@ -93,6 +94,7 @@ export function currentEncounterMitigationForAction(
         budget: payment.budget,
         cost,
       }).affordable,
+    requiredHandFloor,
   );
   if (!mitigation) return undefined;
   const supportsCurrentAction =
@@ -114,6 +116,7 @@ export function currentEncounterMitigationForBreaker(
   breaker: VisibleCard,
   strength: number,
   canPay: (cost: number) => boolean,
+  requiredHandFloor?: number,
 ): RunnerEncounterMitigation | undefined {
   const ice = currentEncounteredIceCard(input);
   const quote = ice?.effectiveRunQuote;
@@ -126,12 +129,20 @@ export function currentEncounterMitigationForBreaker(
   )
     return undefined;
   const unbroken = currentEncounterUnbrokenSubroutineIndexes(input);
-  const preserveHand = currentEncounterRequiresDamagePreservingBreak(input);
+  const preserveHand = currentEncounterRequiresDamagePreservingBreak(
+    input,
+    requiredHandFloor,
+  );
   const targets = [...unbroken].filter((index) => {
     const s = quote.subroutines[index]!;
     return (
       (s.type === "trash_installed_program" || s.type === "do_damage") &&
-      (isUnacceptableImmediateSafetyThreatSubroutine(input, s) || preserveHand)
+      (isUnacceptableImmediateSafetyThreatSubroutine(
+        input,
+        s,
+        requiredHandFloor,
+      ) ||
+        preserveHand)
     );
   });
   if (targets.length === 0) return undefined;

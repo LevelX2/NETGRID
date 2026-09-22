@@ -47,19 +47,27 @@ export function isImmediateSafetyThreatSubroutine(
 export function isUnacceptableImmediateSafetyThreatSubroutine(
   input: AiDecisionInput,
   subroutine: VisibleEncounterSubroutine,
+  requiredHandFloor?: number,
 ): boolean {
   return (
     isImmediateSafetyThreatSubroutine(subroutine) &&
-    !isAcceptableNonlethalDamageSubroutine(input, subroutine)
+    !isAcceptableNonlethalDamageSubroutine(input, subroutine, requiredHandFloor)
   );
 }
 
 export function isAcceptableNonlethalDamageSubroutine(
   input: AiDecisionInput,
   subroutine: VisibleEncounterSubroutine,
+  requiredHandFloor?: number,
 ): boolean {
   if (!isDirectDamageSubroutine(subroutine)) return false;
-  if (isPermanentDamageSubroutine(subroutine)) return false;
+  if (isPermanentDamageSubroutine(subroutine)) {
+    if (
+      requiredHandFloor !== 0 ||
+      currentEncounterRequiresDamagePreservingBreak(input, 0)
+    )
+      return false;
+  }
   const amount = Math.max(1, Math.floor(subroutine.amount ?? 1));
   return amount <= (input.playerView.own.gripOrHq?.length ?? 0);
 }

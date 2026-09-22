@@ -12,6 +12,33 @@ import { activeRunRootPlan } from "./run-window-origin";
 
 afterEach(resetResidentPlanPortfolioMemory);
 
+it("preserves the same accepted damage budget in the movement phase", () => {
+  const cp = JSON.parse(
+    readFileSync(
+      new URL(
+        "../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-456-terminal-contest-d351.json",
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+  );
+  const input: AiDecisionInput = {
+    ...cp.input,
+    ...buildAiDecisionInputDto(cp.input),
+  };
+  restoreAiRuntimeCheckpoint(
+    input,
+    cp.input.ownDeckSnapshot.deckSnapshotId,
+    cp.runtime,
+  );
+  const decision = chooseAiAction(input);
+  expect(decision.actionId).toBe("runner.continue_run");
+  expect(decision.fallbackUsed).toBe(false);
+  expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
+    "plan:runner.contest_remote:remote%3Aremote_2",
+  );
+});
+
 it("preserves the accepted terminal contest through the payable outer ETR break", () => {
   const cp = JSON.parse(
     readFileSync(
@@ -107,7 +134,9 @@ it("requires the bound terminal contest and its risk contract for reserve accept
   expect(runnerRunWindowEncounterRequiredHandFloor(undefined)).toBeUndefined();
   const withoutRisk = { ...root };
   delete withoutRisk.runRiskContract;
-  expect(runnerRunWindowEncounterRequiredHandFloor(withoutRisk)).toBeUndefined();
+  expect(
+    runnerRunWindowEncounterRequiredHandFloor(withoutRisk),
+  ).toBeUndefined();
   expect(
     runnerRunWindowEncounterRequiredHandFloor({ ...root, purpose: "access" }),
   ).toBeUndefined();

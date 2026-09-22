@@ -376,7 +376,9 @@ export function currentRunAbortAssessment(
       ...(path.paidSubroutineBreaks
         ? { paidSubroutineBreaks: path.paidSubroutineBreaks }
         : {}),
-      requiredHandFloor: runnerConfirmedDamageRequiredHandFloor(input),
+      requiredHandFloor:
+        runnerRunWindowEncounterRequiredHandFloor(runOrigin) ??
+        runnerConfirmedDamageRequiredHandFloor(input),
       ...(path.fullyBrokenIceInstanceIds
         ? { fullyBrokenIceInstanceIds: path.fullyBrokenIceInstanceIds }
         : {}),
@@ -777,7 +779,11 @@ function runnerRunWindowActionAssessment(
   const exclusion =
     effectiveEncounterExclusion ?? planStepExclusion ?? reserveExclusion;
   const mitigation = !exclusion
-    ? currentEncounterMitigationForAction(input, action)
+    ? currentEncounterMitigationForAction(
+        input,
+        action,
+        runnerRunWindowEncounterRequiredHandFloor(runOrigin),
+      )
     : undefined;
   const programPreservationPayment = runnerProgramPreservationPaymentValue(
     input,
@@ -1474,12 +1480,13 @@ export function runnerCurrentEncounterRequiresDamagePreservingBreak(
   return currentEncounterRequiresDamagePreservingBreak(
     input,
     // The bound information-run reserve remains an additional requirement.
-    Math.max(
-      runnerConfirmedDamageRequiredHandFloor(input),
-      runOrigin?.purpose === "information"
-        ? (runOrigin.runRiskContract?.reserveQuote.requiredHandBuffer ?? 0)
-        : 0,
-    ),
+    runnerRunWindowEncounterRequiredHandFloor(runOrigin) ??
+      Math.max(
+        runnerConfirmedDamageRequiredHandFloor(input),
+        runOrigin?.purpose === "information"
+          ? (runOrigin.runRiskContract?.reserveQuote.requiredHandBuffer ?? 0)
+          : 0,
+      ),
   );
 }
 

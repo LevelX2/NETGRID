@@ -142,7 +142,13 @@ export function runnerEncounterActionExclusion(
       action,
     );
     if (randomBreakExclusion) return randomBreakExclusion;
-    if (breakMissesAvailableImmediateSafetyThreat(input, action)) {
+    if (
+      breakMissesAvailableImmediateSafetyThreat(
+        input,
+        action,
+        requiredHandFloor,
+      )
+    ) {
       return {
         key: "break_does_not_mitigate_visible_safety_threat",
         label: "Break löst die sichtbare unmittelbare Gefahr nicht",
@@ -197,13 +203,18 @@ function breakOnlyPreventsAbsentNextEncounter(
 function breakMissesAvailableImmediateSafetyThreat(
   input: AiDecisionInput,
   action: LegalAction,
+  requiredHandFloor?: number,
 ): boolean {
   const subroutines =
     currentEncounteredIceCard(input)?.effectiveRunQuote?.subroutines;
   if (!subroutines?.length) return false;
   const threatenedIndexes = new Set(
     subroutines.flatMap((subroutine, index) =>
-      isUnacceptableImmediateSafetyThreatSubroutine(input, subroutine)
+      isUnacceptableImmediateSafetyThreatSubroutine(
+        input,
+        subroutine,
+        requiredHandFloor,
+      )
         ? [index]
         : [],
     ),

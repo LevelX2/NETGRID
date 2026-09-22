@@ -237,7 +237,11 @@ export function createRunnerAccessPathContext(
       .filter((subroutine): subroutine is NonNullable<typeof subroutine> =>
         Boolean(subroutine),
       );
-    const mitigation = currentEncounterMitigationForAction(input, action);
+    const mitigation = currentEncounterMitigationForAction(
+      input,
+      action,
+      requiredHandFloor,
+    );
     if (mitigation) {
       return {
         canPreserveAccessPath: mitigation.supportsCurrentAction,
@@ -249,9 +253,16 @@ export function createRunnerAccessPathContext(
     }
     if (
       targetSubroutines.some((subroutine) =>
-        isUnacceptableImmediateSafetyThreatSubroutine(input, subroutine),
+        isUnacceptableImmediateSafetyThreatSubroutine(
+          input,
+          subroutine,
+          requiredHandFloor,
+        ),
       ) ||
-      (currentEncounterRequiresDamagePreservingBreak(input) &&
+      (currentEncounterRequiresDamagePreservingBreak(
+        input,
+        requiredHandFloor,
+      ) &&
         targetSubroutines.some(
           (subroutine) =>
             isVisibleDirectDamageSubroutine(subroutine) &&
