@@ -40,7 +40,7 @@ describe("hosted economy consumer admission", () => {
       });
       restoreAiRuntimeCheckpoint(
         input,
-        input.ownDeckSnapshot!.deckSnapshotId,
+        checkpoint.input.ownDeckSnapshot.deckSnapshotId,
         checkpoint.runtime,
       );
       const decision = chooseAiAction(input);
