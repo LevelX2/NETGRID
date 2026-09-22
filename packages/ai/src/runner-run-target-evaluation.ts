@@ -35,6 +35,7 @@ import {
 import { buildRunnerEconomyPosture } from "./runner-economy-posture";
 import {
   assessRandomBreakOrDamageRiskForRunAction,
+  randomBreakOrDamageRiskProfileForDefinitionId,
   randomBreakOrDamageRiskCanCarryRunPath,
   randomBreakOrDamageRiskScorePenalty,
   randomBreakOrDamageRiskShouldAvoidRun,
@@ -275,50 +276,66 @@ function evaluateRunnerRunTarget(
         status.kind === "run_payment_restriction" &&
         status.restriction === "runner_stealth_bit_payment_sources",
     ) === true;
-  const pathBeforeDamageBudget = assessKnownRezzedIcePath(
-    projectedServerIce,
-    params.input.playerView.own.rig ?? [],
-    runnerRunPathCreditBudgetWithVisiblePools(
-      creditsAvailableDuringRun,
+  const quoteKnownPath = (allowRandomBreakAttempts = false) =>
+    assessKnownRezzedIcePath(
+      projectedServerIce,
       params.input.playerView.own.rig ?? [],
+      runnerRunPathCreditBudgetWithVisiblePools(
+        creditsAvailableDuringRun,
+        params.input.playerView.own.rig ?? [],
+        {
+          excludeStealthCredits: stealthCreditsBlocked,
+          liquidCredits: creditsAfterAction,
+        },
+      ),
+      server?.root ?? [],
+      params.input.playerView.opponent.credits,
       {
-        excludeStealthCredits: stealthCreditsBlocked,
-        liquidCredits: creditsAfterAction,
+        visibleRemoteServerCount: params.input.playerView.servers.filter(
+          (candidate) => candidate.id.startsWith("remote_"),
+        ).length,
+        additionalPassedIceCount: bypassedFirstIce ? 1 : 0,
+        allowRandomBreakAttempts,
+        visibleCorpCredits: params.input.playerView.opponent.credits,
+        netOrCoreDamagePreventionRemaining: Math.max(
+          0,
+          params.input.playerView.own.freeNetOrCoreDamagePreventionRemaining ??
+            0,
+        ),
+        runDamagePreventionRemaining: Math.max(
+          0,
+          projection.damagePreventionPool ?? 0,
+        ),
+        prohibitNoisyIcebreakers: projection.noNoisyBreakers,
+        availableRunnerClicks: Math.max(
+          0,
+          params.input.playerView.own.clicks - actionClickCost,
+        ),
+        ...(params.input.playerView.own.runnerTraceSupportQuote
+          ? {
+              runnerTraceSupportQuote:
+                params.input.playerView.own.runnerTraceSupportQuote,
+            }
+          : {}),
+        ...(stealthCreditsBlocked ? { excludeStealthTraceCredits: true } : {}),
+        ...(projection.runTraceLinkBonus !== undefined
+          ? { runTraceLinkBonus: projection.runTraceLinkBonus }
+          : {}),
       },
-    ),
-    server?.root ?? [],
-    params.input.playerView.opponent.credits,
-    {
-      visibleRemoteServerCount: params.input.playerView.servers.filter(
-        (candidate) => candidate.id.startsWith("remote_"),
-      ).length,
-      additionalPassedIceCount: bypassedFirstIce ? 1 : 0,
-      visibleCorpCredits: params.input.playerView.opponent.credits,
-      netOrCoreDamagePreventionRemaining: Math.max(
-        0,
-        params.input.playerView.own.freeNetOrCoreDamagePreventionRemaining ?? 0,
-      ),
-      runDamagePreventionRemaining: Math.max(
-        0,
-        projection.damagePreventionPool ?? 0,
-      ),
-      prohibitNoisyIcebreakers: projection.noNoisyBreakers,
-      availableRunnerClicks: Math.max(
-        0,
-        params.input.playerView.own.clicks - actionClickCost,
-      ),
-      ...(params.input.playerView.own.runnerTraceSupportQuote
-        ? {
-            runnerTraceSupportQuote:
-              params.input.playerView.own.runnerTraceSupportQuote,
-          }
-        : {}),
-      ...(stealthCreditsBlocked ? { excludeStealthTraceCredits: true } : {}),
-      ...(projection.runTraceLinkBonus !== undefined
-        ? { runTraceLinkBonus: projection.runTraceLinkBonus }
-        : {}),
-    },
-  );
+    );
+  const standardPath = quoteKnownPath();
+  const probabilisticPath =
+    !standardPath.canReachAccess &&
+    (params.input.playerView.own.rig ?? []).some(
+      (card) =>
+        card.known &&
+        randomBreakOrDamageRiskProfileForDefinitionId(card.definitionId),
+    )
+      ? quoteKnownPath(true)
+      : undefined;
+  const pathBeforeDamageBudget = probabilisticPath?.canReachAccess
+    ? probabilisticPath
+    : standardPath;
   const creditsAfterRun = generalCreditsRemainingAfterRun(
     creditsAfterAction,
     runOnlyCredits,
@@ -449,6 +466,7 @@ function evaluateRunnerRunTarget(
     projection.spendLimit !== undefined &&
     (path.visibleBreakCost ?? 0) > projection.spendLimit;
   const probabilisticUniversalPathReachable = Boolean(
+    pathBeforeDamageBudget.canReachAccess &&
     randomBreakOrDamageRiskCanCarryRunPath(randomBreakOrDamageRiskAssessment),
   );
   let pathPassability = randomBreakOrDamageRiskAssessment?.blockedByHandBuffer

@@ -254,16 +254,11 @@ export function assessRandomBreakOrDamageRiskForVisibleRunPath(
     ),
     server.root,
     input.playerView.opponent.credits,
-    currentRunPathContext(input),
+    { ...currentRunPathContext(input), allowRandomBreakAttempts: true },
   );
   const visibleBreakworthySubroutineCount =
     visibleRandomBreakCandidateSubroutineCountForPath(params.visibleIce);
-  const randomBreakCanAttemptVisiblePath =
-    visibleBreakworthySubroutineCount > 0;
-  if (
-    fullPath.assessedKnownIceCount <= 0 ||
-    (!fullPath.canReachAccess && !randomBreakCanAttemptVisiblePath)
-  ) {
+  if (fullPath.assessedKnownIceCount <= 0 || !fullPath.canReachAccess) {
     return undefined;
   }
 

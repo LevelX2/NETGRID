@@ -34,6 +34,8 @@ export type RunPathProjection = {
 };
 
 export type VisibleDeflectorContext = {
+  /** Quote the success branch of random attempts; risk admission remains at the Run owner. */
+  allowRandomBreakAttempts?: boolean;
   /** Engine-certified resolved tax; entry to the current encounter was already paid. */
   encounterEntryTax?: { amount: number; paidIceInstanceId?: string };
   /** ICE omitted from encounter costs that the route still passes (bypass). */
@@ -80,7 +82,9 @@ export type BreakAssessment = {
     optionalIfUnavailable: boolean;
   }>;
   futureClicksLost?: number;
-  conditionalAccessReason?: "visible_random_breaker_strength";
+  conditionalAccessReason?:
+    | "visible_random_breaker_strength"
+    | "probabilistic_breaker_route";
   conditionalRiskReason?: "visible_breaker_may_trash_after_pass";
   /** A run-scoped free-break grant was consumed for this assessment. */
   consumedPendingFreeBreak?: boolean;

@@ -452,6 +452,11 @@ function assessKnownRezzedIcePathInternal(
   let firstKnownIceBreakable = false;
   let activeRunPathEffects = initialRunPathEffects.slice();
   const conditionalAccessReasons = new Set<string>();
+  const spendPathBreak = (assessment: BreakAssessment) => {
+    if (assessment.conditionalAccessReason)
+      conditionalAccessReasons.add(assessment.conditionalAccessReason);
+    spendBreakerCreditsAndApplySideEffects(creditBudget, assessment);
+  };
   const conditionalRiskReasons = new Set<string>();
   let visibleCorpCreditsThroughPath = visibleCorpBidCapacity;
   let netOrCoreDamagePreventionRemaining =
@@ -626,6 +631,7 @@ function assessKnownRezzedIcePathInternal(
             breakerStrengths,
             additionalBreakCostPerSubroutine,
             breakerState.pendingFreeBreaks,
+            deflectorContext.allowRandomBreakAttempts,
           );
       const payment = assessment
         ? projectBreakerCreditPayment(creditBudget, assessment)
@@ -645,15 +651,13 @@ function assessKnownRezzedIcePathInternal(
       }
       visibleBreakCost += assessment.cost;
       futureClicksLost += assessment.futureClicksLost ?? 0;
-      spendBreakerCreditsAndApplySideEffects(creditBudget, assessment);
+      spendPathBreak(assessment);
       advanceVisibleRunBreakerState(breakerState, assessment, true);
       recordProjectedBreakerStrength(
         assessment,
         breakerStrengths,
         carriedBreakerStrengths,
       );
-      if (assessment.conditionalAccessReason)
-        conditionalAccessReasons.add(assessment.conditionalAccessReason);
       if (assessment.conditionalRiskReason) {
         conditionalRiskReasons.add(assessment.conditionalRiskReason);
         if (options.bartmossOutcome !== "retained")
@@ -678,6 +682,8 @@ function assessKnownRezzedIcePathInternal(
         [subroutine],
         breakerStrengths,
         additionalBreakCostPerSubroutine,
+        undefined,
+        deflectorContext.allowRandomBreakAttempts,
       );
       const breakPayment = breakAssessment
         ? projectBreakerCreditPayment(creditBudget, breakAssessment)
@@ -689,7 +695,7 @@ function assessKnownRezzedIcePathInternal(
       ) {
         visibleBreakCost += breakAssessment.cost;
         futureClicksLost += breakAssessment.futureClicksLost ?? 0;
-        spendBreakerCreditsAndApplySideEffects(creditBudget, breakAssessment);
+        spendPathBreak(breakAssessment);
         firstKnownIceBreakable = true;
         recordProjectedBreakerStrength(
           breakAssessment,
@@ -724,6 +730,7 @@ function assessKnownRezzedIcePathInternal(
                   deflectorContext,
                 ),
             ),
+            deflectorContext.allowRandomBreakAttempts,
           );
       if (!breakAssessment) {
         return blockedPathAssessment(
@@ -758,12 +765,10 @@ function assessKnownRezzedIcePathInternal(
         );
       }
       visibleBreakCost += breakAssessment.cost;
-      if (breakAssessment.conditionalAccessReason)
-        conditionalAccessReasons.add(breakAssessment.conditionalAccessReason);
       if (breakAssessment.conditionalRiskReason)
         conditionalRiskReasons.add(breakAssessment.conditionalRiskReason);
       futureClicksLost += breakAssessment.futureClicksLost ?? 0;
-      spendBreakerCreditsAndApplySideEffects(creditBudget, breakAssessment);
+      spendPathBreak(breakAssessment);
       advanceVisibleRunBreakerState(
         breakerState,
         breakAssessment,
@@ -798,6 +803,8 @@ function assessKnownRezzedIcePathInternal(
             breakerStrengths,
             additionalBreakCostPerSubroutine,
             breakerState.pendingFreeBreaks,
+            undefined,
+            deflectorContext.allowRandomBreakAttempts,
           );
       const payment = bestAccessPreservingPayment(
         creditBudget,
@@ -822,10 +829,7 @@ function assessKnownRezzedIcePathInternal(
       visibleBreakCost += payment.cost;
       if (payment.breakAssessment) {
         futureClicksLost += payment.breakAssessment.futureClicksLost ?? 0;
-        spendBreakerCreditsAndApplySideEffects(
-          creditBudget,
-          payment.breakAssessment,
-        );
+        spendPathBreak(payment.breakAssessment);
       } else {
         spendGeneralCredits(creditBudget, payment.cost);
       }
@@ -856,6 +860,7 @@ function assessKnownRezzedIcePathInternal(
             breakerStrengths,
             additionalBreakCostPerSubroutine,
             breakerState.pendingFreeBreaks,
+            deflectorContext.allowRandomBreakAttempts,
           );
       if (payCost === undefined) {
         const breakPayment = breakAssessment
@@ -864,7 +869,7 @@ function assessKnownRezzedIcePathInternal(
         if (breakAssessment && breakPayment?.affordable) {
           visibleBreakCost += breakAssessment.cost;
           futureClicksLost += breakAssessment.futureClicksLost ?? 0;
-          spendBreakerCreditsAndApplySideEffects(creditBudget, breakAssessment);
+          spendPathBreak(breakAssessment);
           creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
           firstKnownIceBreakable = true;
           recordProjectedBreakerStrength(
@@ -900,10 +905,7 @@ function assessKnownRezzedIcePathInternal(
       visibleBreakCost += payment.cost;
       if (payment.breakAssessment) {
         futureClicksLost += payment.breakAssessment.futureClicksLost ?? 0;
-        spendBreakerCreditsAndApplySideEffects(
-          creditBudget,
-          payment.breakAssessment,
-        );
+        spendPathBreak(payment.breakAssessment);
         recordProjectedBreakerStrength(
           payment.breakAssessment,
           breakerStrengths,
@@ -957,10 +959,7 @@ function assessKnownRezzedIcePathInternal(
         });
         visibleBreakCost += avoidancePayment.assessment.cost;
         futureClicksLost += avoidancePayment.assessment.futureClicksLost ?? 0;
-        spendBreakerCreditsAndApplySideEffects(
-          creditBudget,
-          avoidancePayment.assessment,
-        );
+        spendPathBreak(avoidancePayment.assessment);
         recordProjectedBreakerStrength(
           avoidancePayment.assessment,
           breakerStrengths,
@@ -1103,6 +1102,8 @@ function assessKnownRezzedIcePathInternal(
               [sourceSubroutine],
               breakerStrengths,
               additionalBreakCostPerSubroutine,
+              undefined,
+              deflectorContext.allowRandomBreakAttempts,
             )
           : undefined;
         const payment = breakAssessment
@@ -1115,7 +1116,7 @@ function assessKnownRezzedIcePathInternal(
           });
           visibleBreakCost += breakAssessment.cost;
           futureClicksLost += breakAssessment.futureClicksLost ?? 0;
-          spendBreakerCreditsAndApplySideEffects(creditBudget, breakAssessment);
+          spendPathBreak(breakAssessment);
           creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
           firstKnownIceBreakable = true;
           recordProjectedBreakerStrength(
@@ -1215,7 +1216,7 @@ function assessKnownRezzedIcePathInternal(
         });
         visibleBreakCost += breakAssessment.cost;
         futureClicksLost += breakAssessment.futureClicksLost ?? 0;
-        spendBreakerCreditsAndApplySideEffects(creditBudget, breakAssessment);
+        spendPathBreak(breakAssessment);
         creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
         firstKnownIceBreakable = true;
         recordProjectedBreakerStrength(
@@ -1517,6 +1518,7 @@ function runPathEffectBreakAssessment(params: {
     params.additionalBreakCostPerSubroutine,
     [],
     [params.sourceSubroutine],
+    params.deflectorContext.allowRandomBreakAttempts,
   );
   if (!breakAssessment) return undefined;
   const payment = projectBreakerCreditPayment(

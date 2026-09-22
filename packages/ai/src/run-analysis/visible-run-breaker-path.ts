@@ -259,6 +259,7 @@ export function minimumCreditsToBreakVisibleSubroutines(
   breakerStrengths: Map<string, number>,
   additionalBreakCostPerSubroutine = 0,
   pendingFreeBreaks: VisibleRunBreakerState["pendingFreeBreaks"] = [],
+  allowRandomBreakAttempt = false,
 ): BreakAssessment | undefined {
   const freeBreak = pendingFreeBreakAssessment(
     ice,
@@ -277,6 +278,7 @@ export function minimumCreditsToBreakVisibleSubroutines(
         targetSubroutines,
         breakerStrengths.get(card.instanceId),
         additionalBreakCostPerSubroutine,
+        allowRandomBreakAttempt,
       ),
     )
     .filter((cost): cost is BreakAssessment => cost !== undefined)
@@ -309,6 +311,7 @@ export function minimumCreditsToBreakVisibleSubroutines(
                   remainder,
                   breakerStrengths.get(card.instanceId),
                   additionalBreakCostPerSubroutine,
+                  allowRandomBreakAttempt,
                 ),
               )
               .filter(
@@ -342,6 +345,7 @@ export function creditsToBreakVisibleSubroutinesWithBreaker(
   currentBreakerStrength = breakerCard.strength ??
     cardDefinitionStrength(breakerCard.definitionId),
   additionalBreakCostPerSubroutine = 0,
+  allowRandomBreakAttempt = false,
 ): BreakAssessment | undefined {
   if (
     targetSubroutines.length <= 0 ||
@@ -362,6 +366,7 @@ export function creditsToBreakVisibleSubroutinesWithBreaker(
     subroutines: targetSubroutines,
     currentBreakerStrength,
     additionalBreakCostPerSubroutine,
+    allowRandomBreakAttempt,
   });
   if (engineBreakAssessment) return engineBreakAssessment;
   return undefined;
@@ -385,6 +390,7 @@ export function minimumCreditsToBreakEndTheRunSubroutines(
   additionalBreakCostPerSubroutine = 0,
   pendingFreeBreaks: VisibleRunBreakerState["pendingFreeBreaks"] = [],
   targetSubroutines?: readonly VisibleEffectiveSubroutine[],
+  allowRandomBreakAttempt = false,
 ): BreakAssessment | undefined {
   const freeBreak = pendingFreeBreakAssessment(
     ice,
@@ -415,6 +421,7 @@ export function minimumCreditsToBreakEndTheRunSubroutines(
         breakerStrengths.get(card.instanceId),
         additionalBreakCostPerSubroutine,
         targetSubroutines,
+        allowRandomBreakAttempt,
       ),
     )
     .filter((cost): cost is BreakAssessment => cost !== undefined)
@@ -453,6 +460,7 @@ export function minimumCreditsToBreakEndTheRunSubroutines(
                   breakerStrengths.get(card.instanceId),
                   additionalBreakCostPerSubroutine,
                   remainder,
+                  allowRandomBreakAttempt,
                 ),
               )
               .filter(
@@ -575,6 +583,7 @@ export function structuredBreakerAssessment(params: {
     BreakAssessment["postBreakStealthLosses"]
   > = [];
   let mayTrashBreakerAfterPass = false;
+  let dependsOnRandomBreakAttempt = false;
   while (remainingIndexes.size > 0) {
     const option = quote.breakOptions
       .filter(
@@ -599,6 +608,9 @@ export function structuredBreakerAssessment(params: {
             ).length || left.creditCost - right.creditCost,
       )[0];
     if (!option) return undefined;
+    dependsOnRandomBreakAttempt ||= option.consequences.some(
+      (effect) => effect.kind === "random_break_attempt",
+    );
     const coveredIndexes = option.breakableSubroutineIndexes.filter((index) =>
       remainingIndexes.has(index),
     );
@@ -707,6 +719,9 @@ export function structuredBreakerAssessment(params: {
             (loss) => loss.occurrences > 0,
           ),
         }
+      : {}),
+    ...(dependsOnRandomBreakAttempt
+      ? { conditionalAccessReason: "probabilistic_breaker_route" as const }
       : {}),
     ...(quote.randomRunStrength?.status === "unresolved" &&
     quote.effectiveStrength < iceStrength

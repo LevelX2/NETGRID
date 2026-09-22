@@ -1581,6 +1581,13 @@ Nach einer Informationsgrenze quotiert der bestehende Run-Parent den
 verbleibenden sichtbaren Pfad erneut. Neben der deterministischen
 Breaker-Abdeckung berücksichtigt er dieselbe kanonische
 Random-Break-/Damage-Risikobewertung wie Run-Start und Abbruchprüfung.
+Die bedingte Zufallsbruchroute wird als Erfolgszweig im gemeinsamen sichtbaren
+Pfadprüfer gequotet. Dieselben Engine-Quotes prüfen Stärke, Subroutinen,
+Zahlungen und alle bekannten Folge-Encounters; bloß vorhandene Subroutinen
+sind kein Coverage-Nachweis. Die Quote markiert tatsächlich verwendete
+Zufallsbreaks ausdrücklich als bedingt. Der Risk-Owner prüft anschließend
+Handpuffer und Fehlschaden; ein Score-Threat hebt keine physische Sperre auf.
+
 Ein ausreichend gepufferter probabilistischer Pfad darf deshalb nach dem
 letzten unbekannten ICE zu Zugriff konvertieren; fehlende sichere Coverage
 allein beweist keine unerreichbare Route. Die Diagnose kennzeichnet diese

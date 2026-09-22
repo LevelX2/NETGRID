@@ -1492,6 +1492,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         visibleCard("runner-blink", {
           definitionId: "onr_v1_007_blink",
           title: "Blink",
+          strength: 5,
           type: "program",
           subtypes: ["icebreaker"],
         }),
@@ -1547,6 +1548,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         visibleCard("runner-blink", {
           definitionId: "onr_v1_007_blink",
           title: "Blink",
+          strength: 5,
           type: "program",
           subtypes: ["icebreaker"],
         }),
@@ -1598,6 +1600,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         visibleCard("runner-blink", {
           definitionId: "onr_v1_007_blink",
           title: "Blink",
+          strength: 5,
           type: "program",
           subtypes: ["icebreaker"],
         }),
@@ -1621,6 +1624,9 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       recommendation: "run_now",
     });
     expect(evaluation?.randomBreakOrDamageRiskAssessment).toBeUndefined();
+    expect(evaluation?.routeQuote?.conditionalReasons).not.toContain(
+      "probabilistic_breaker_route",
+    );
   });
 
   it("adds repeated-risk evidence after recent Blink failure on the same server", () => {
@@ -1656,6 +1662,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         visibleCard("runner-blink", {
           definitionId: "onr_v1_007_blink",
           title: "Blink",
+          strength: 5,
           type: "program",
           subtypes: ["icebreaker"],
         }),
