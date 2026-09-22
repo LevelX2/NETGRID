@@ -175,6 +175,16 @@ export function hostableIcebreakerAvailableAfterInstall(
     }
     const candidateText = signalsForCard(candidate, []).text;
     if (!looksLikeBreaker(candidate, candidateText)) return false;
+    // Generic development rejects an already installed breaker definition.
+    // That rejected copy cannot establish a productive consumer for a new host.
+    if (
+      candidate.definitionId !== undefined &&
+      (input.playerView.own.rig ?? []).some(
+        (installed) => installed.definitionId === candidate.definitionId,
+      )
+    ) {
+      return false;
+    }
     const installCost =
       visibleOrRuntimeNumber(candidate, "installCost") ??
       visibleOrRuntimeNumber(candidate, "cost") ??

@@ -371,14 +371,18 @@ function evaluateHandCard(
     persistentInstallEvaluation,
   );
   const liquidityTiming = liquidityTimingForCard(context, developmentRole);
-  const deferReason = deferReasonForCard(
-    availability,
-    developmentRole,
-    currentNeed,
-    liquidityTiming,
-    persistentInstallEvaluation,
-    fundingNeed,
-  );
+  const deferReason =
+    context.signals.requiresHostedIcebreaker &&
+    context.hostableIcebreakerAvailable !== true
+      ? "no_current_need"
+      : deferReasonForCard(
+          availability,
+          developmentRole,
+          currentNeed,
+          liquidityTiming,
+          persistentInstallEvaluation,
+          fundingNeed,
+        );
   const priority = priorityForCard({
     availability,
     developmentRole,

@@ -681,6 +681,17 @@ Verantwortung:
 - sinnvollen Draw, Search, Install oder Eventeinsatz koordinieren;
 - generische Karten ohne eigenen Spezialplan verwertbar machen.
 
+Die Aktivierungsvoraussetzung einer Hardware mit gehostetem Breaker-Verbraucher
+zählt keine Handkopie, deren Definition bereits im Rig liegt und die der
+generische Entwicklungsowner deshalb als redundant ablehnt. Bloße
+Bezahlbarkeit belegt für diese Kopie keinen produktiven Folgeeinsatz. Fehlt
+der Verbraucher, setzt die Handbewertung `no_current_need`; ein bloßes
+Herabstufen auf `later` darf keinen ausführbaren neutralen Kartenplan erzeugen. Die
+gespeicherten D54/D120-Zustände aus `match_26a1db342966ffbe` sichern die
+Ablehnung des leeren Host-Investments; ein bezahlbarer, noch nicht installierter
+Breaker bleibt als Verbraucher zulässig. Eine gezielte wirtschaftliche
+Ersatz-/Duplikatfolge benötigt weiterhin einen eigenen belegten Entwicklungszweck.
+
 Die allgemeine Handentwicklung und konkrete Supportpläne verwenden dieselbe
 side-sichere Handrotationsbewertung. Ein generischer Draw bei voller Hand setzt
 eine bekannte Karte mit niedrigem aktuellen Haltewert voraus, etwa eine als
