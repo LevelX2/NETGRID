@@ -104,7 +104,7 @@ NETGRID_INITIAL_CLEANUP_RETENTION_DAYS=30
       $source -notmatch '(?m)^NETGRID_ACCOUNT_ACCESS_MODE=protected\r?$') {
     throw "Die materialisierte Runtimekonfiguration enthält ungültige Pflichtwerte."
   }
-  foreach ($relative in @("runtime\multiplayer", "runtime\backups", "runtime\logs", "runtime\maintenance", "card-images")) {
+  foreach ($relative in @("runtime\multiplayer", "runtime\backups", "runtime\logs", "runtime\maintenance", "card-images", "card-image-import", "card-image-packs")) {
     if (-not (Test-Path -LiteralPath (Join-Path $dataRoot $relative) -PathType Container)) {
       throw "Der erwartete Datenordner fehlt: $relative"
     }
@@ -124,6 +124,22 @@ NETGRID_INITIAL_CLEANUP_RETENTION_DAYS=30
   }
   if (($configRights -band $modifyRights) -eq $modifyRights) {
     throw "Lokale Benutzer besitzen unerlaubte Schreibrechte im Konfigurationsordner."
+  }
+
+  foreach ($relative in @("card-images", "card-image-import", "card-image-packs")) {
+    $imageDirectory = Join-Path $dataRoot $relative
+    $imageRights = Get-AllowRightsForUsers -Path $imageDirectory
+    if (($imageRights -band $modifyRights) -ne $modifyRights) {
+      throw "Lokale Benutzer besitzen im Kartenbildordner keine Schreibrechte: $relative"
+    }
+    # Exercise inherited permissions on the nested paths used by uploads/builds.
+    $probeDirectory = Join-Path $imageDirectory "permission-probe\nested"
+    New-Item -ItemType Directory -Path $probeDirectory -Force | Out-Null
+    $probeRights = Get-AllowRightsForUsers -Path $probeDirectory
+    if (($probeRights -band $modifyRights) -ne $modifyRights) {
+      throw "Kartenbild-Schreibrechte werden nicht vererbt: $relative"
+    }
+    [System.IO.File]::WriteAllText((Join-Path $probeDirectory "probe.txt"), "card-image-write-probe")
   }
 
   # Immutable slots/hash conflicts are covered by Netgrid.Updater.Tests.

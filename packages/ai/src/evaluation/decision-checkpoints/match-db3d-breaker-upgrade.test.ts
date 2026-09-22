@@ -148,7 +148,7 @@ it("installs the exact cheaper breaker under the remote parent at db3d/163", () 
   );
 });
 
-it("revalidates the cheaper path after Engine installation and starts the bound remote run", () => {
+it("revalidates the installed cheaper breaker and starts the remote only with the unknown-ICE reserve funded", () => {
   const snapshot = capture(163).input.ownDeckSnapshot!;
   const corpCards = [
     "onr_v1_238_data-wall-2-0",
@@ -238,8 +238,29 @@ it("revalidates the cheaper path after Engine installation and starts the bound 
     nextInput.playerView.opponent.credits,
   );
   expect(path.visibleBreakCost).toBe(10);
-  const next = chooseRunnerAction(nextInput);
-  const runAction = nextInput.legalActions.find(
+  const reserve = evaluateRunnerRunTargets({ input: nextInput }).find(
+    (target) => target.actionId === "runner.start_run.remote_1",
+  )!.prerunReserveQuote!;
+  expect(reserve.status).toBe("blocked");
+  expect(reserve.creditGap).toBeGreaterThan(0);
+  expect(chooseRunnerAction(nextInput).actionId).not.toBe(
+    "runner.start_run.remote_1",
+  );
+  const preparationReplay = replayEvents(
+    initial,
+    state.eventLog.slice(eventStart),
+  );
+  expect(preparationReplay.ok).toBe(true);
+  expect(hashGameState(preparationReplay.state)).toBe(hashGameState(state));
+
+  // Companion position: same installed breaker/path, with exactly the missing
+  // reserve supplied. This fixture boundary starts its own Engine replay.
+  state.runner.credits += reserve.creditGap;
+  const fundedInitial = structuredClone(state);
+  const fundedEventStart = state.eventLog.length;
+  const fundedInput = inputForState();
+  const next = chooseRunnerAction(fundedInput);
+  const runAction = fundedInput.legalActions.find(
     (a) => a.actionId === next.actionId,
   )!;
   expect(runAction.type).toBe("start_run");
@@ -247,7 +268,10 @@ it("revalidates the cheaper path after Engine installation and starts the bound 
   expect(next.fallbackUsed).toBe(false);
   state = applyMatching(state, (a) => a.actionId === next.actionId);
   expect(state.run?.attackedServerId).toBe("remote_1");
-  const replay = replayEvents(initial, state.eventLog.slice(eventStart));
+  const replay = replayEvents(
+    fundedInitial,
+    state.eventLog.slice(fundedEventStart),
+  );
   expect(replay.ok).toBe(true);
   expect(hashGameState(replay.state)).toBe(hashGameState(state));
 });

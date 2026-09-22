@@ -26,6 +26,38 @@ const IMPORTANT_TRASHABLE_MECHANICS = new Set([
   "install_ice",
 ]);
 
+/** Conditional loss on a successful access; never a guess of the next target. */
+export function readCorpCentralAgendaExposure(
+  input: AiDecisionInput,
+  serverId: CorpCentralDefenseServerId,
+  leavingHqCardId?: string,
+): { expectedPoints: number; maximumPoints: number } | undefined {
+  const quote = quotesForCurrentView(input)?.[serverId];
+  const cards =
+    serverId === "hq"
+      ? inventoryForCards(
+          input.playerView.own.gripOrHq.filter(
+            (c) => c.instanceId !== leavingHqCardId,
+          ),
+        )
+      : centralInventory(input)?.rd;
+  if (!quote || !cards) return undefined;
+  if (cards.populationCardCount === 0)
+    return { expectedPoints: 0, maximumPoints: 0 };
+  const maximumPoints = maximumAgendaPointValueForAccesses(
+    cards,
+    quote.effectiveAccessCount,
+  );
+  if (maximumPoints === undefined) return undefined;
+  return {
+    expectedPoints:
+      (Math.min(quote.effectiveAccessCount, cards.populationCardCount) *
+        cards.agendaPointValue) /
+      cards.populationCardCount,
+    maximumPoints,
+  };
+}
+
 export type CorpKnownCentralAgendaThreat = Readonly<{
   serverId: CorpCentralDefenseServerId;
   threat: "none" | "material" | "terminal";

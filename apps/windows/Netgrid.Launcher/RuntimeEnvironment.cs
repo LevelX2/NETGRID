@@ -11,6 +11,9 @@ internal sealed class RuntimeEnvironment
 
     public IEnumerable<KeyValuePair<string, string>> Values => _values;
 
+    public RuntimeEnvironment ResolveNetwork() => new(RuntimeNetwork.Resolve(_values,
+        Required("NETGRID_DEPLOYMENT_PROFILE") == "private_lan" ? RuntimeNetwork.LocalPrivateAddresses() : []));
+
     public string Required(string name)
     {
         if (!_values.TryGetValue(name, out var value) || string.IsNullOrWhiteSpace(value))

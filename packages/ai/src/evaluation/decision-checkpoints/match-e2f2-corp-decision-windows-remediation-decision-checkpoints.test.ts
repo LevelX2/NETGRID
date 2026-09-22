@@ -17,7 +17,10 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 describe("match e2f2 Corp decision-window remediation checkpoints", () => {
   it.each([
     ["declines a zero-yield Data Wall rez", declineZeroYieldDataWallJson],
-    ["declines a negative Wall of Static rez", declineNegativeWallStaticJson],
+    [
+      "rezzes Wall of Static for repeated tax despite a negative first-run exchange",
+      declineNegativeWallStaticJson,
+    ],
     [
       "rezzes Misleading Access Menus for certified qualitative encounter defense",
       keepPositiveMenusRezJson,
@@ -27,7 +30,7 @@ describe("match e2f2 Corp decision-window remediation checkpoints", () => {
       annualReviewsOverSaturatedCreditJson,
     ],
     [
-      "declines R&D Wall of Static against a funded visible breaker",
+      "rezzes R&D Wall of Static for repeated tax against a funded visible breaker",
       keepPositiveRdWallRezJson,
     ],
     [

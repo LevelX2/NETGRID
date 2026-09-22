@@ -26,6 +26,266 @@ import { readKnownCorpCentralAgendaThreat } from "../corp/defense/corp-central-d
 import { assessCorpScoreProtection } from "./corp-score-protection-assessment";
 
 describe("exact Corp ICE rez route", () => {
+  it.each([
+    "onr_classic_006_bolter-swarm",
+    "onr_classic_007_brain-drain",
+    "onr_classic_008_deadeye",
+    "onr_proteus_011_brain-wash",
+    "onr_proteus_012_bug-zapper",
+    "onr_proteus_019_death-yo-yo",
+    "onr_proteus_020_digiconda",
+    "onr_proteus_021_dog-pile",
+    "onr_proteus_029_marionette",
+    "onr_proteus_030_mastermind",
+    "onr_proteus_035_roadblock",
+    "onr_proteus_037_scaffolding",
+    "onr_v1_223_banpei",
+    "onr_v1_224_bolter-cluster",
+    "onr_v1_233_d-arc-knight",
+    "onr_v1_234_data-darts",
+    "onr_v1_236_data-raven",
+    "onr_v1_249_hunter",
+    "onr_v1_250_ice-pick-willie",
+    "onr_v1_251_jack-attack",
+    "onr_v1_258_neural-blade",
+    "onr_v1_260_pocket-virtual-reality",
+    "onr_v1_275_vacuum-link",
+    "onr_v1_276_viral-15",
+    "onr_v1_277_virizz",
+  ])("retains a defense route against two Clowns for %s", (definitionId) => {
+    const fixture = engineIceRezWindow(definitionId, 0, {
+      corpCredits: 50,
+      runnerCredits: 10,
+      runnerPrograms: [
+        "onr_v1_039_krash",
+        "onr_v1_012_clown",
+        "onr_v1_012_clown",
+      ],
+      includeAllRezVariants: true,
+      includeDecline: true,
+    });
+    const routes = buildActionSemanticCandidates({
+      legalActions: fixture.input.legalActions,
+      observerSide: "corp",
+      stateVersion: fixture.input.playerView.stateVersion,
+      visibleSourceDefinitionsByInstanceId: {
+        [fixture.sourceCard.instanceId]: definitionId,
+      },
+    }).map((candidate) =>
+      projectExactCorpIceRezRoute({
+        ...fixture,
+        candidate,
+        targetServerId: "rd",
+      }),
+    );
+    expect(routes.some((route) => route !== undefined)).toBe(true);
+  });
+
+  it.each([
+    { runnerPrograms: [] },
+    {
+      runnerPrograms: [
+        "onr_v1_039_krash",
+        "onr_v1_012_clown",
+        "onr_v1_012_clown",
+      ],
+    },
+    { runnerPrograms: ["onr_v1_002_ai-boon"] },
+  ])(
+    "rezzes Pocket VR through the defense owner independently of exact access modeling: $runnerPrograms",
+    ({ runnerPrograms }) => {
+      resetResidentPlanPortfolioMemory();
+      const fixture = engineIceRezWindow(
+        "onr_v1_260_pocket-virtual-reality",
+        0,
+        {
+          corpCredits: 9,
+          runnerCredits: 5,
+          runnerPrograms,
+          includeDecline: true,
+        },
+      );
+      expect(
+        projectExactCorpIceRezRoute({ ...fixture, targetServerId: "rd" }),
+      ).toMatchObject({
+        routeKind: "qualitative_encounter_defense",
+      });
+      expect(
+        chooseAiAction(fixture.input, {
+          persistTacticalPlanMemory: false,
+          corpTurnPlannerMode: "legacy_compare",
+        }),
+      ).toMatchObject({
+        actionId: fixture.engineAction.actionId,
+        reasonCode: "plan_first.corp.defend_servers",
+        fallbackUsed: false,
+        decisionDebug: {
+          planFirstDecision: {
+            rootPlanInstanceId:
+              "plan:corp.defend_servers:server-defense-portfolio",
+            leafExecutorInstanceId:
+              "plan:corp.defend_servers:server-defense-portfolio",
+          },
+        },
+      });
+    },
+  );
+
+  it("preserves a concrete score reserve before admitting repeatable Pocket VR pressure", () => {
+    const fixture = engineIceRezWindow("onr_v1_260_pocket-virtual-reality", 0, {
+      corpCredits: 9,
+      runnerCredits: 5,
+    });
+    const route = projectExactCorpIceRezRoute({
+      ...fixture,
+      targetServerId: "rd",
+    })!;
+    const project = testScoreContinuationProject("remote_1");
+    const remaining =
+      fixture.input.playerView.own.credits - route.totalRezCredits;
+    for (const required of [remaining, remaining + 1]) {
+      expect(
+        assessCorpExactIceRezAgainstScoreReserves({
+          input: fixture.input,
+          route,
+          scoreProjects: [
+            {
+              ...project,
+              continuationReserve: {
+                ...project.continuationReserve,
+                requiredCreditsBeforeNextCorpTurn: required,
+              },
+            },
+          ],
+        }),
+      ).toMatchObject({
+        preservesReserve: required <= remaining,
+        requiredCreditsAfterRez: required,
+      });
+    }
+  });
+
+  it("admits repeated break costs below the one-time rez price", () => {
+    const fixture = engineIceRezWindow("onr_v1_238_data-wall-2-0", 0, {
+      corpCredits: 20,
+      runnerCredits: 20,
+      runnerPrograms: ["onr_classic_027_early-worm"],
+      runnerProgramStrengthModifiers: [20],
+    });
+    const route = projectExactCorpIceRezRoute({
+      ...fixture,
+      targetServerId: "rd",
+    })!;
+    expect(route.routeKind).toBe("exact_resource_exchange");
+    expect(route.resourceExchange!.runnerRequiredCredits).toBeGreaterThan(0);
+    expect(route.resourceExchange!.runnerRequiredCredits).toBeLessThan(
+      route.totalRezCredits,
+    );
+  });
+
+  it("reserves a paid encounter activation as well as the next score action", () => {
+    const fixture = engineIceRezWindow("onr_proteus_034_riddler", 0, {
+      corpCredits: 8,
+      runnerCredits: 5,
+    });
+    const route = projectExactCorpIceRezRoute({
+      ...fixture,
+      targetServerId: "rd",
+    })!;
+    expect(route.currentEncounterDefense?.activationCredits).toBe(2);
+    const project = testScoreContinuationProject("remote_1");
+    expect(
+      assessCorpExactIceRezAgainstScoreReserves({
+        input: fixture.input,
+        route,
+        scoreProjects: [
+          {
+            ...project,
+            continuationReserve: {
+              ...project.continuationReserve,
+              requiredCreditsBeforeNextCorpTurn: 5,
+            },
+          },
+        ],
+      }),
+    ).toMatchObject({
+      preservesReserve: false,
+      requiredCreditsAfterRez: 7,
+      availableCreditsAfterRez: 6,
+    });
+  });
+
+  it("binds variable X strength to the selected action and rejects stale projections", () => {
+    const fixture = engineIceRezWindow("onr_proteus_020_digiconda", 0, {
+      corpCredits: 50,
+      runnerCredits: 10,
+      runnerPrograms: ["onr_v1_039_krash", "onr_v1_012_clown"],
+      includeAllRezVariants: true,
+    });
+    const quotes = fixture.sourceCard.effectivePostRezActionRunQuotes!;
+    expect(quotes.length).toBe(7);
+    for (const quote of quotes) {
+      const action = fixture.input.legalActions.find(
+        (a) => a.actionId === quote.actionId,
+      )!;
+      const value = action.payload!.variableRezValue!;
+      if (typeof value !== "number")
+        throw new Error("Expected an Engine-certified numeric X value");
+      expect(quote).toMatchObject({
+        complete: true,
+        effectiveRunQuote: { encounterStrength: Math.max(0, value - 1) },
+      });
+      const rezzed = applyEngineAction(
+        fixture.state,
+        "corp",
+        action.actionId,
+        `verify-x-${value}`,
+      );
+      const actual = getPlayerView(rezzed, "corp").servers.find(
+        (s) => s.id === "rd",
+      )!.ice[0]!;
+      expect(actual.strength).toBe(Math.max(0, value - 1));
+    }
+    expect(
+      getPlayerView(fixture.state, "runner").servers.find((s) => s.id === "rd")!
+        .ice[0]!.effectivePostRezActionRunQuotes,
+    ).toBeUndefined();
+    for (const quote of quotes) quote.expiresAtStateVersion -= 1;
+    expect(
+      projectExactCorpIceRezRoute({ ...fixture, targetServerId: "rd" }),
+    ).toBeUndefined();
+  });
+
+  it("projects stacked encounter-only strength reductions without changing current strength or leaking unrezzed ICE", () => {
+    const fixture = engineIceRezWindow("onr_v1_279_wall-of-static", 0, {
+      runnerPrograms: ["onr_v1_012_clown", "onr_v1_012_clown"],
+    });
+    const quote = fixture.sourceCard.effectivePostRezRunQuote;
+    expect(quote).toMatchObject({
+      complete: true,
+      effectiveRunQuote: { effectiveStrength: 2, encounterStrength: 0 },
+    });
+    const runnerIce = getPlayerView(fixture.state, "runner").servers.find(
+      (s) => s.id === "rd",
+    )!.ice[0]!;
+    expect(runnerIce.definitionId).toBeUndefined();
+    expect(runnerIce.effectivePostRezRunQuote).toBeUndefined();
+    const rezzed = applyEngineAction(
+      fixture.state,
+      "corp",
+      fixture.engineAction.actionId,
+      "clown-rez",
+    );
+    const approach = getPlayerView(rezzed, "corp").servers.find(
+      (s) => s.id === "rd",
+    )!.ice[0]!;
+    expect(rezzed.run?.phase).toBe("encounter_ice");
+    expect(approach).toMatchObject({
+      strength: 0,
+      effectiveRunQuote: { effectiveStrength: 0, encounterStrength: 0 },
+    });
+  });
+
   it("declines future-only encounter tax at the innermost ICE", () => {
     resetResidentPlanPortfolioMemory();
     const fixture = engineIceRezWindow("onr_v1_222_ball-and-chain", 0, {
@@ -1227,7 +1487,7 @@ describe("exact Corp ICE rez route", () => {
     });
   });
 
-  it("does not promote an equal paid exchange while the Runner keeps normal credits", () => {
+  it("admits an equal paid exchange as repeatable pressure while the Runner keeps normal credits", () => {
     const fixture = engineIceRezWindow("onr_v1_237_data-wall", 0, {
       runnerCredits: 2,
       runnerPrograms: ["onr_classic_027_early-worm"],
@@ -1240,7 +1500,7 @@ describe("exact Corp ICE rez route", () => {
         sourceCard: fixture.sourceCard,
         targetServerId: "rd",
       }),
-    ).toBeUndefined();
+    ).toMatchObject({ routeKind: "exact_resource_exchange" });
   });
 
   it("keeps a current exact exchange when a recurring credit shifts cash onto later ICE", () => {

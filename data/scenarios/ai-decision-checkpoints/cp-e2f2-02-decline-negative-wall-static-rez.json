@@ -4268,15 +4268,19 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "decline_rez"
+        "sourceDefinitionId": "onr_v1_279_wall-of-static",
+        "type": "rez_ice"
       }
     ],
     "contractKind": "correctness",
     "forbiddenActions": [
       {
-        "sourceDefinitionId": "onr_v1_279_wall-of-static",
-        "type": "rez_ice"
+        "type": "decline_rez"
       }
-    ]
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": ["corp.defend_servers"],
+      "acceptableCapabilities": ["allocate_server_defense"]
+    }
   }
 }

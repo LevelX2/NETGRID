@@ -102,6 +102,33 @@ Bedarf zurückgesetzt oder auf den aktuellen Stand gebracht.
 
 ## Testbetrieb
 
+### Shell-Aufrufe und lokaler Test-TEMP
+
+- Auf Windows können Codex-Shellstarts wiederholte, teure Defender-Prüfungen
+  der aufrufenden `codex.exe` auslösen. Bereits feststehende, zusammengehörige
+  Leseoperationen und Suchen deshalb in einem Shell-Aufruf bündeln.
+  Mehrere `exec_command`-Aufrufe innerhalb eines Tool-Aufrufs sparen keine
+  Shellstarts. Abhängige Entscheidungen, Änderungen und Prüfungen bleiben
+  getrennt und nachvollziehbar; keine notwendigen Prüfungen auslassen.
+- Laufende Tests über die zurückgegebene Prozess-/Cell-ID weiterverfolgen.
+  Keine neue Shell allein zum Warten oder wiederholten Lesen derselben
+  Testausgabe starten, wenn das Ausführungswerkzeug den bestehenden Lauf
+  fortsetzen kann.
+- Ist unter Windows der lokale Starter
+  `%LOCALAPPDATA%\NETGRID\tools\run-tests.ps1` vorhanden, neue pnpm-Testläufe
+  darüber starten: `-Repository` erhält den absoluten Pfad des eigenen
+  Checkouts/Worktrees, `-PnpmArguments` die konkret benötigten pnpm-Argumente.
+  Die Standardargumente des Starters ersetzen nicht die fachlich erforderliche
+  Testauswahl. Der Starter begrenzt TEMP/TMP/TMPDIR auf seine Kindprozesse;
+  globale Umgebungsvariablen und Defender-Ausnahmen nicht eigenständig ändern.
+- Bereits laufende Tests wegen dieser Optimierung fertiglaufen lassen.
+  Abgeschlossene Prüfungen nicht allein wegen eines neuen TEMP-Pfads oder
+  geänderter Arbeitsanweisungen wiederholen. Danach am nächsten offenen
+  Prüfschritt fortsetzen; erforderliche Regressionstests nach neuen Änderungen
+  bleiben verpflichtend.
+
+### Auswahl und Ausführung
+
 - Während Diagnose und iterativer Entwicklung wird nur der kleinste Test
   ausgeführt, der den konkret geänderten Pfad belastbar abdeckt.
 - Kleine lokale Änderungen benötigen standardmäßig einen fokussierten

@@ -1,4 +1,5 @@
 import { type AiDecisionInput } from "@netgrid/shared";
+import { withCorpTerminalAgendaDefense } from "./score-terminal-defense";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { recentlyCompromisedCorpRemoteIds } from "../../plans/corp-opponent-campaign-continuity";
 import { type CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
@@ -349,7 +350,13 @@ export function reconcileCorpScoreProjects({
   // need an independently justified development or defense purpose; the
   // mandatory draw will expose fresh scoring material at its normal cadence.
   const scoreProjects: CorpScoreProjectSignal[] = [
-    ...continuityBoundScoreProjects,
+    ...continuityBoundScoreProjects.map((project) =>
+      withCorpTerminalAgendaDefense(
+        input,
+        project,
+        continuityBoundScoreProjects,
+      ),
+    ),
   ];
   const deferredLastClickScoreProject =
     corpKnownDeferredLastClickScoreProject(scoreProjects);

@@ -10,8 +10,9 @@ export type CuePositionPreference =
   | { kind: "custom"; xPercent: number; yPercent: number };
 
 export const DEFAULT_CUE_POSITION: CuePositionPreference = {
-  kind: "preset",
-  preset: "top-right",
+  kind: "custom",
+  xPercent: 37.56,
+  yPercent: 55.45,
 };
 
 export function parseCuePositionPreference(

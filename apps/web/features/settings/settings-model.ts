@@ -11,6 +11,7 @@ export const CARD_SCALE_PERCENT_MIN = 50;
 export const CARD_SCALE_PERCENT_MAX = 170;
 export const CARD_SCALE_PERCENT_STEP = 5;
 export const CARD_SCALE_DEFAULT_PERCENT = 100;
+export const CARD_TOOLTIP_SCALE_DEFAULT_PERCENT = 135;
 export const CUE_AUTO_DISMISS_MIN_MS = 1000;
 export const CUE_AUTO_DISMISS_MAX_MS = 10000;
 export const CUE_AUTO_DISMISS_STEP_MS = 250;
@@ -56,7 +57,7 @@ export function normalizeCueAutoDismissMs(value: unknown): CueAutoDismissMs {
 }
 
 export function normalizeCueDisplayMode(value: unknown): CueDisplayMode {
-  return value === "floating" || value === "window" ? value : "window";
+  return value === "floating" || value === "window" ? value : "floating";
 }
 
 export function normalizeCardTooltipHoverDelayMs(
@@ -72,7 +73,7 @@ export function normalizeCardTooltipHoverDelayMs(
 export function normalizeCardTooltipMode(value: unknown): CardTooltipMode {
   return value === "simple" || value === "enhanced" || value === "image"
     ? value
-    : "enhanced";
+    : "image";
 }
 
 export function normalizeCardTooltipRuleTranslation(value: unknown): boolean {
@@ -90,7 +91,7 @@ export function normalizeChronicleDetailMode(
 ): ChronicleDetailMode {
   return value === "simple" || value === "medium" || value === "full"
     ? value
-    : "full";
+    : "simple";
 }
 
 export function normalizeAiPacingMode(value: unknown): AiPacingMode {

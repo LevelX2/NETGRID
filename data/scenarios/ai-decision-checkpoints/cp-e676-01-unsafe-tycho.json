@@ -7955,9 +7955,7 @@
       ],
       "acceptablePlanKinds": ["corp.economy"],
       "acceptableCapabilities": ["develop_or_convert_corp_economy"],
-      "requiredAssessmentEvidence": [
-        "corp_engine_certified_mature_remote_score_install:remote_1"
-      ]
+      "requiredAssessmentEvidence": ["corp_score_protection_required:remote_1"]
     }
   }
 }

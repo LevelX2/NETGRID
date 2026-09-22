@@ -9,30 +9,46 @@ import {
 } from "./runtime-checkpoint";
 import type { AiDecisionInputWithDeckCapabilities } from "../../runtime/ai-decision-input";
 
-it("SP-296 retains affordable hazard avoidance instead of paying to lose it before the same contest", () => {
-  const { input, runtime } = structuredClone(checkpoint) as unknown as {
-    input: AiDecisionInputWithDeckCapabilities;
-    runtime: AiRuntimeCheckpointV1;
-  };
-  resetResidentPlanPortfolioMemory();
-  restoreAiRuntimeCheckpoint(
-    input,
-    input.ownDeckSnapshot!.deckSnapshotId,
-    runtime,
-  );
-  const remote = evaluateRunnerRunTargets({ input }).find(
-    (r) => r.actionId === "runner.start_run.remote_1",
-  )!;
-  expect(remote.routeQuote?.preRunPreparation).toBeUndefined();
-  expect(remote.visibleTraceTagHazardUnavoidable).toBe(false);
-  const decision = chooseAiAction(input);
-  expect(decision.actionId).toBe("runner.start_run.remote_1");
-  expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
-    rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-    leafExecutorInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
-    route: {
-      actionId: decision.actionId,
-      stateVersion: input.playerView.stateVersion,
-    },
-  });
-});
+it.each([false, true])(
+  "SP-296 retains hazard avoidance and starts the contest only with its reserve funded: %s",
+  (funded) => {
+    const { input, runtime } = structuredClone(checkpoint) as unknown as {
+      input: AiDecisionInputWithDeckCapabilities;
+      runtime: AiRuntimeCheckpointV1;
+    };
+    if (funded) input.playerView.own.credits += 2;
+    resetResidentPlanPortfolioMemory();
+    restoreAiRuntimeCheckpoint(
+      input,
+      input.ownDeckSnapshot!.deckSnapshotId,
+      runtime,
+    );
+    const remote = evaluateRunnerRunTargets({ input }).find(
+      (r) => r.actionId === "runner.start_run.remote_1",
+    )!;
+    expect(remote.routeQuote?.preRunPreparation).toBeUndefined();
+    expect(remote.visibleTraceTagHazardUnavoidable).toBe(false);
+    const decision = chooseAiAction(input);
+    if (!funded) {
+      expect(remote.prerunReserveQuote).toMatchObject({
+        status: "blocked",
+        creditGap: 2,
+      });
+      expect(decision.actionId).toBe("runner.gain_credit");
+      expect(
+        decision.decisionDebug?.planFirstDecision?.selectedPlan?.moduleId,
+      ).toBe("runner.economy");
+      return;
+    }
+    expect(remote.prerunReserveQuote?.status).toBe("satisfied");
+    expect(decision.actionId).toBe("runner.start_run.remote_1");
+    expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
+      rootPlanInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      leafExecutorInstanceId: "plan:runner.contest_remote:remote%3Aremote_1",
+      route: {
+        actionId: decision.actionId,
+        stateVersion: input.playerView.stateVersion,
+      },
+    });
+  },
+);

@@ -23,6 +23,24 @@ Kartenlegalität.
 
 ## Lokale Zuordnung
 
+### Entwicklungsumgebung und installierte Anwendung
+
+Beide Umgebungen besitzen getrennte persönliche Bildspeicher. Im Checkout
+ohne `NETGRID_DATA_ROOT` liegt die aktive Collection unter
+`data/local-assets/card-images/managed`. Die Windows-Installation verwendet
+bei ihrem Standarddatenroot `C:\ProgramData\NETGRID\card-images\managed`.
+Ein Import in einer Umgebung installiert die Bilder nicht zugleich in der
+anderen. Alte PNG-Quelldateien im Checkout allein belegen keine aktive
+persönliche Collection.
+
+Für die Übernahme dieselben IMG07-ZIP-Pakete mit `pack-import --zip` im
+jeweiligen Zielkontext importieren. Vor einem Checkout-Import sicherstellen,
+dass `NETGRID_DATA_ROOT` nicht auf die installierte Anwendung zeigt. Der
+Importer prüft Paket und Zuordnungen und erzeugt die Anzeigevarianten;
+ein gemeinsamer Datenroot für beide Umgebungen ist dafür nicht erforderlich.
+
+### Zuordnungstabelle
+
 Eine aktuelle Zuordnungstabelle wird aus dem Katalog erzeugt:
 
 ```powershell
@@ -187,6 +205,19 @@ Manifest zuletzt geschrieben, damit ein abgebrochener Upload nicht als Paket
 angeboten wird. Absolute Serverpfade werden nicht übertragen oder
 zurückgeliefert; Quell-URLs bleiben ausschließlich Inhalt der nicht
 zurückgelieferten Zuordnungsdatei.
+
+Die drei Arbeitsabläufe sind als Untertabs organisiert: „Bildpakete
+importieren“ ist die Startansicht, daneben stehen „CSV importieren“ und
+„Pakete erstellen“. Bestand, Uploadfortschritt und laufender Auftrag bleiben
+außerhalb der wechselnden Formulare sichtbar. Ein Tabwechsel erhält Eingaben
+und startet oder unterbricht keine Operation. Die Ordnerauswahl erwartet
+einen einzelnen vollständigen Paketordner; ein Buildordner mit mehreren ZIPs
+wird über die Auswahl einer einzelnen ZIP-Datei verwendet.
+
+`tests/e2e/maintenance-card-image-tabs.spec.ts` sichert Tastaturnavigation,
+erhaltene Eingaben, ZIP-Upload während eines Tabwechsels, fortgesetzte
+Jobabfragen und sichtbaren Abschluss sowie die schmale Ansicht ab. Der
+UI-Test simuliert die Maintenance-APIs und verändert keine Runtime-Daten.
 
 Die Oberfläche bietet:
 

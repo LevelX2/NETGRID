@@ -282,6 +282,15 @@
     }
   },
   "cardImages": {
+    "tasksLabel": "Aufgaben der Bildverwaltung",
+    "tabs": {
+      "packages": "Bildpakete importieren",
+      "mapping": "CSV importieren",
+      "build": "Pakete erstellen"
+    },
+    "packageHelp": "Wähle eine einzelne ZIP-Datei oder einen vollständigen Paketordner mit Manifest, mapping.csv und images. Der übergeordnete Buildordner mit mehreren ZIPs ist kein Paketordner. Die Dateien werden in den lokalen Importbereich übernommen.",
+    "mappingHelp": "Ordne Bilder über eine CSV zu. Lokale Dateien werden aus dem Importbereich gelesen. HTTPS-Bilder werden einmalig nach deiner Rechtebestätigung heruntergeladen; das Spiel verwendet anschließend die lokal gespeicherten Bilder.",
+    "buildHelp": "Erstelle aus einer vollständigen lokalen Zuordnung ein Bildpaket als Ordner oder ZIP. Die Ausgabe bleibt im Paketbereich des aktiven Datenverzeichnisses.",
     "m001": "Kartenbildverwaltung konnte nicht geladen werden.",
     "m002": "Kartenbildjob erfolgreich abgeschlossen.",
     "m003": "Kartenbildjob fehlgeschlagen.",

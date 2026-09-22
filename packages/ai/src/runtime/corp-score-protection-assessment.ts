@@ -1,4 +1,5 @@
 import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
+import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import {
   type SubroutineDefinition,
   type VisibleCard,
@@ -8,6 +9,7 @@ import {
 import {
   visibleBreakerEncounterQuote,
   visibleProgramHostInstallVariants,
+  visibleFortPassProtection,
 } from "@netgrid/engine";
 import { AI_HINTS_BY_CARD } from "../catalog-ai-hint-authority";
 import { creditsToBreakEndTheRunSubroutinesWithBreaker } from "../visible-run-analysis";
@@ -78,6 +80,7 @@ export type UnknownCorpScoreProtectionAssessment =
       protectsScore: false;
       unknownReason:
         | "invalid_probability_threshold"
+        | "unknown_fort_pass_protection"
         | "invalid_runner_credits"
         | "duplicate_ice_instance"
         | "duplicate_runner_rig_instance"
@@ -115,6 +118,7 @@ export type CorpScoreProtectionIceInput = Readonly<{
 
 export type CorpScoreProtectionAssessmentInput = Readonly<{
   serverIce: readonly CorpScoreProtectionIceInput[];
+  serverRoot?: readonly VisibleCard[];
   runnerRig: readonly VisibleCard[];
   /**
    * Public, engine-derived delayed-install cards. A Corp-side projection may
@@ -312,7 +316,7 @@ export function assessCorpScoreProtection(
   }
   if (
     runnerRig.some((card) =>
-      runnerRigCardRequiresUnsupportedAccessProjection(card),
+      runnerRigCardRequiresUnsupportedAccessProjection(card, activeIce),
     )
   ) {
     return unknownAssessment(
@@ -403,7 +407,37 @@ export function assessCorpScoreProtection(
   const bestPath = states.reduce((best, candidate) =>
     accessPathIsBetter(candidate, best) ? candidate : best,
   );
-  const accessProbability = exactProbabilityFromRational(bestPath.probability);
+  let passProbability = ONE;
+  for (const source of input.serverRoot ?? []) {
+    if (!source.rezzed) continue;
+    const quote = visibleFortPassProtection(source);
+    if (!quote.complete) {
+      return unknownAssessment(
+        input.maximumRunnerAccessSuccessProbability,
+        "unknown_fort_pass_protection",
+        [`fortPassProtectionUnknown:${source.instanceId}:${quote.reason}`],
+      );
+    }
+    if (quote.kind === "end_run_on_pass") {
+      passProbability = multiplyRational(
+        passProbability,
+        powerRational(
+          {
+            numerator: BigInt(quote.dieFaces - quote.endingFaces),
+            denominator: BigInt(quote.dieFaces),
+          },
+          supportedIce.length,
+        ),
+      );
+    }
+  }
+  const protectedPathProbability = multiplyRational(
+    bestPath.probability,
+    passProbability,
+  );
+  const accessProbability = exactProbabilityFromRational(
+    protectedPathProbability,
+  );
   const exactThreshold = exactProbabilityFromRational(threshold);
   if (!accessProbability || !exactThreshold) {
     return unknownAssessment(
@@ -420,7 +454,8 @@ export function assessCorpScoreProtection(
       ["scoreProtectionKnown:false", "probabilityNotSafelyRepresentable:true"],
     );
   }
-  const protectsScore = compareRational(bestPath.probability, threshold) <= 0;
+  const protectsScore =
+    compareRational(protectedPathProbability, threshold) <= 0;
   const requiredRandomBreakSuccesses = requiredRandomBreakSuccessCount(
     bestPath.randomBreaks,
   );
@@ -504,7 +539,8 @@ function readSupportedIce(card: CorpScoreProtectionIceInput): IceReadResult {
     ice: {
       card,
       endTheRunCount: subroutines.filter(isHardEndTheRunSubroutine).length,
-      effectiveStrength: quote?.effectiveStrength ?? card.strength!,
+      effectiveStrength:
+        quote?.encounterStrength ?? quote?.effectiveStrength ?? card.strength!,
       effectiveSubtypes: card.subtypes!,
       additionalBreakCostPerSubroutine:
         quote?.breakSubroutineAdditionalCostPerSubroutine ?? 0,
@@ -520,6 +556,8 @@ function validEffectiveRunQuote(
     quote.iceInstanceId === card.instanceId &&
     quote.iceDefinitionId === card.definitionId &&
     nonNegativeSafeInteger(quote.effectiveStrength) &&
+    (quote.encounterStrength === undefined ||
+      nonNegativeSafeInteger(quote.encounterStrength)) &&
     (quote.breakSubroutineAdditionalCostPerSubroutine === undefined ||
       nonNegativeSafeInteger(
         quote.breakSubroutineAdditionalCostPerSubroutine,
@@ -1006,13 +1044,34 @@ function cardIsIcebreaker(card: VisibleCard): boolean {
 
 function runnerRigCardRequiresUnsupportedAccessProjection(
   card: VisibleCard,
+  activeIce: readonly CorpScoreProtectionIceInput[],
 ): boolean {
   if (!card.definitionId) return false;
   const definition = CARD_DEFINITIONS_BY_ID[card.definitionId];
   if (!definition) return false;
   const hint = AI_HINTS_BY_CARD.get(card.definitionId);
+  const strengthModifiers = cardSpecPlanningCardByDefinitionId(
+    card.definitionId,
+  )?.planning.engine.modifiers?.filter(
+    (modifier) => modifier.kind === "ice_strength",
+  );
+  const strengthIsQuoted =
+    (strengthModifiers?.length ?? 0) > 0 &&
+    strengthModifiers!.every(
+      (modifier) =>
+        modifier.activeWhile === "installed" &&
+        modifier.sourceZone === "runner_installed" &&
+        modifier.visibility === "public",
+    ) &&
+    activeIce.every(
+      (ice) =>
+        ice.effectiveRunQuote !== undefined &&
+        validEffectiveRunQuote(ice, ice.effectiveRunQuote) &&
+        nonNegativeSafeInteger(ice.effectiveRunQuote.encounterStrength),
+    );
   return (
-    hint?.functionSignals?.includes("ice.strength_modifier") === true ||
+    (hint?.functionSignals?.includes("ice.strength_modifier") === true &&
+      !strengthIsQuoted) ||
     hint?.requiredMechanics?.includes("run_start_random_strength_bonus") ===
       true ||
     definition.mechanics.some(
@@ -1023,7 +1082,7 @@ function runnerRigCardRequiresUnsupportedAccessProjection(
         mechanic === "run_spending_cap" ||
         mechanic === "run_flow" ||
         mechanic === "run_modifier" ||
-        mechanic.includes("ice_strength_modifier"),
+        (mechanic.includes("ice_strength_modifier") && !strengthIsQuoted),
     )
   );
 }

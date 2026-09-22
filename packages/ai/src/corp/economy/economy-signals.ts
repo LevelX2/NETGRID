@@ -1,4 +1,5 @@
 import { assessCorpSpendAgainstScoreFundingMilestones } from "../score/corp-score-funding";
+import { corpFundedCentralProtectionReserve } from "../defense/corp-server-protection-reserve";
 import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { rootRezCreditOutcomeProjectionStatus } from "../../actions/action-economy-projection";
@@ -491,6 +492,17 @@ export function corpEconomyDevelopmentCampaigns(
       // Installation alone is not a funded economy route. Future payouts cannot
       // pay the rez that makes them available.
       if (phase === "install" && input.playerView.own.credits < setupCreditCost)
+        continue;
+      // Delayed income cannot pay for protection needed before that payout.
+      // Guaranteed immediate positive conversions are admitted above.
+      const creditsAfterSetup = quote
+        ? quote.consumer.generalCreditsRemainingAfterConsumer
+        : Math.min(
+            input.playerView.own.credits -
+              (input.playerView.own.installRezOnlyCredits ?? 0),
+            input.playerView.own.credits - setupCreditCost,
+          );
+      if (creditsAfterSetup < corpFundedCentralProtectionReserve(input))
         continue;
       const payback = assessCorpEconomyAssetPayback({
         input,

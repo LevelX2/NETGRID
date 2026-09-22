@@ -524,6 +524,8 @@ internal static class Program
             @"runtime\logs",
             @"runtime\maintenance",
             "card-images",
+            "card-image-import",
+            "card-image-packs",
         ];
 
         public static InitializationResult Initialize(

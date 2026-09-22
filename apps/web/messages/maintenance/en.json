@@ -282,6 +282,15 @@
     }
   },
   "cardImages": {
+    "tasksLabel": "Image management tasks",
+    "tabs": {
+      "packages": "Import image packs",
+      "mapping": "Import CSV",
+      "build": "Create packs"
+    },
+    "packageHelp": "Choose one ZIP file or a complete pack folder containing a manifest, mapping.csv and images. The parent build folder containing several ZIP files is not a pack folder. Files are copied to the local import area.",
+    "mappingHelp": "Assign images using a CSV file. Local files are read from the import area. HTTPS images are downloaded once after you confirm your rights; the game then uses the locally stored images.",
+    "buildHelp": "Create an image pack as a folder or ZIP from a complete local mapping. The output stays in the pack area of the active data directory.",
     "m001": "Card image management could not be loaded.",
     "m002": "Card image job completed successfully.",
     "m003": "Card image job failed.",

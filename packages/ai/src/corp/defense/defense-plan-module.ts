@@ -1,3 +1,4 @@
+import { assessCorpTerminalAgendaDefense } from "./corp-terminal-agenda-defense";
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import {
@@ -15,6 +16,7 @@ import {
   CorpScoreProtectionDrawSignal,
   CorpScoreProtectionInstallSignal,
   CorpScoreProtectionStagingInstallSignal,
+  CorpTerminalProtectionInstallSignal,
 } from "../../plans/corp-defense-contracts";
 import {
   corpGenericDefensePriorityClass,
@@ -58,6 +60,7 @@ import {
   isScoreProtectionDrawSignal,
   isScoreProtectionInstallSignal,
   isScoreProtectionStagingInstallSignal,
+  isTerminalProtectionInstallSignal,
   isValidDefenseSignal,
   knownExactInstallRouteCreditCost,
   knownNonNegativeInteger,
@@ -254,6 +257,8 @@ export function defenseModule(): PlanModule {
                 },
               }
             : scoreProtectionRoute?.signal.kind ===
+                  "score_protection_terminal_install" ||
+                scoreProtectionRoute?.signal.kind ===
                   "score_protection_install" ||
                 scoreProtectionRoute?.signal.kind ===
                   "score_protection_staging_install"
@@ -395,6 +400,41 @@ function defenseCandidates(
   signal: CorpDefenseSignal,
 ): PlanMaterialization["candidates"] {
   if (!isValidDefenseSignal(signal)) return [];
+  if (signal.kind === "score_protection_terminal_install") {
+    const parent = corpDomainIfAvailable(context)?.scoreProjects.find(
+      (project) => project.projectId === signal.parentProjectId,
+    );
+    const quote = assessCorpTerminalAgendaDefense(
+      context.input,
+      signal.serverId,
+      signal.parentProjectId,
+    );
+    const install = quote?.install;
+    if (
+      (parent &&
+        (!parent.terminalDefense ||
+          parent.protectionNeed?.needId !== signal.parentNeedId)) ||
+      quote?.observedAtStateVersion !== context.input.playerView.stateVersion ||
+      install?.actionId !== signal.actionId ||
+      install.sourceCardInstanceId !== signal.sourceCardInstanceId ||
+      install.sourceDefinitionId !== signal.sourceDefinitionId ||
+      signal.phase !==
+        (install.placement === "ice"
+          ? "install_ice"
+          : "install_defense_support")
+    )
+      return [];
+    return context.actionCandidates
+      .filter(
+        (candidate) =>
+          candidate.actionId === signal.actionId &&
+          candidate.semanticActionType === "install.card" &&
+          candidate.sourceCardInstanceId === signal.sourceCardInstanceId &&
+          candidate.sourceDefinitionId === signal.sourceDefinitionId &&
+          candidateTargetIds(candidate).includes(signal.serverId),
+      )
+      .map((candidate) => ({ candidate, stepValue: 1 }));
+  }
   if (signal.kind === "score_protection_staging_install") {
     return context.actionCandidates
       .filter((candidate) => {
@@ -1259,7 +1299,9 @@ function selectedDefensePortfolioBand(
     (!genericBandAvailable ||
       defensePriorityRank(scoreProtectionRoute.signal.delegatedPriorityClass) <
         defensePriorityRank(genericPriority) ||
-      ((scoreProtectionRoute.signal.kind === "score_protection_install" ||
+      ((scoreProtectionRoute.signal.kind ===
+        "score_protection_terminal_install" ||
+        scoreProtectionRoute.signal.kind === "score_protection_install" ||
         // A qualitative staging backstop may inherit its parent's tie only
         // when its own risk model supports the route. An unmodelled access
         // path cannot displace a same-band, exact central-defense route.
@@ -1796,6 +1838,7 @@ type SelectedScoreProtectionRoute = {
   signal:
     | CorpScoreProtectionInstallSignal
     | CorpScoreProtectionStagingInstallSignal
+    | CorpTerminalProtectionInstallSignal
     | CorpScoreProtectionDrawSignal;
   candidate: ActionSemanticCandidate;
 };
@@ -1810,7 +1853,9 @@ function selectedScoreProtectionRoute(
     ): signal is
       | CorpScoreProtectionInstallSignal
       | CorpScoreProtectionStagingInstallSignal
+      | CorpTerminalProtectionInstallSignal
       | CorpScoreProtectionDrawSignal =>
+      isTerminalProtectionInstallSignal(signal) ||
       isScoreProtectionInstallSignal(signal) ||
       isScoreProtectionStagingInstallSignal(signal) ||
       isScoreProtectionDrawSignal(signal),
@@ -1823,6 +1868,18 @@ function selectedScoreProtectionRoute(
     const parentSignals = scoreSignals.filter(
       (signal) => signal.parentProjectId === parentProjectId,
     );
+    const terminalInstallRoute = parentSignals
+      .filter(isTerminalProtectionInstallSignal)
+      .flatMap((signal) =>
+        defenseCandidates(context, signal).map(({ candidate }) => ({
+          signal,
+          candidate,
+        })),
+      )[0];
+    if (terminalInstallRoute) {
+      parentRoutes.push(terminalInstallRoute);
+      continue;
+    }
     const directInstallRoute = parentSignals
       .filter(isScoreProtectionInstallSignal)
       .flatMap((signal) =>
@@ -2016,6 +2073,7 @@ export function corpDefenseActionDispositions(
     ): signal is
       | CorpScoreProtectionInstallSignal
       | CorpScoreProtectionStagingInstallSignal
+      | CorpTerminalProtectionInstallSignal
       | CorpScoreProtectionDrawSignal => signal.kind !== "generic",
   );
   const selectedAllocation = materializedRoutes

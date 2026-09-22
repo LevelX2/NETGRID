@@ -28,6 +28,22 @@ export function corpScoreFundingMilestone(
     signal.fundingGap > 0
       ? signal.fundingGap
       : 0;
+  if (signal.terminalDefense) {
+    const targetCredits = signal.terminalDefense.install
+      ? Math.min(observedCredits, signal.terminalDefense.requiredCredits)
+      : signal.terminalDefense.requiredCredits;
+    return {
+      kind: "score_credit_milestone",
+      basis: { kind: "score_route_gap" },
+      targetCredits,
+      observedCredits,
+      remainingGap: Math.max(0, targetCredits - observedCredits),
+      priorityClass: corpScorePriorityClass(signal),
+      hardness: "hard",
+      deadline: "current_turn",
+      releaseCondition: "parent_invalidated_or_higher_priority_preemption",
+    };
+  }
   const protectionFundingGap = knownScoreProtectionFundingGap(signal);
   const fundingOptions = [routeFundingGap, protectionFundingGap ?? 0].filter(
     (gap) => gap > 0,

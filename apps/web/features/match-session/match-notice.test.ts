@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   noticeAfterActionReceipt,
   noticeAfterServerError,
+  noticeAfterStateUpdate,
 } from "./match-notice";
 
 const rejected = {
@@ -27,6 +28,48 @@ function rejectedCreditNotice() {
 }
 
 describe("action error notice lifecycle", () => {
+  const recovery = {
+    matchId: "match_credit",
+    side: "corp" as const,
+    stateVersion: 52,
+  };
+  it.each(["stale_state", "ERR_STALE_STATE"])(
+    "clears %s without a rejected receipt after synchronization",
+    (code) => {
+      const notice = noticeAfterServerError(
+        { text: "" },
+        code,
+        "Reloaded",
+        recovery,
+      );
+      expect(noticeAfterStateUpdate(notice, recovery)).toEqual({ text: "" });
+      expect(noticeAfterActionReceipt(notice, accepted)).toEqual({ text: "" });
+      expect(
+        noticeAfterStateUpdate(notice, { ...recovery, stateVersion: 51 }),
+      ).toBe(notice);
+      expect(
+        noticeAfterStateUpdate(notice, { ...recovery, matchId: "other" }),
+      ).toBe(notice);
+      expect(
+        noticeAfterStateUpdate(notice, { ...recovery, side: "runner" }),
+      ).toBe(notice);
+    },
+  );
+  it("preserves a newer unrelated error after stale recovery", () => {
+    const stale = noticeAfterServerError(
+      { text: "" },
+      "stale_state",
+      "Reloaded",
+      recovery,
+    );
+    const next = noticeAfterServerError(
+      stale,
+      "ai_decision_failed",
+      "AI failed",
+    );
+    expect(noticeAfterStateUpdate(next, recovery)).toBe(next);
+    expect(noticeAfterActionReceipt(next, accepted)).toBe(next);
+  });
   it("clears the localized rejection after a confirmed successful action", () => {
     expect(noticeAfterActionReceipt(rejectedCreditNotice(), accepted)).toEqual({
       text: "",

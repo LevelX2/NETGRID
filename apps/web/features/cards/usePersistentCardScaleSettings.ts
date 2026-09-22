@@ -9,12 +9,13 @@ import {
 } from "../../lib/local-storage";
 import {
   CARD_SCALE_DEFAULT_PERCENT,
+  CARD_TOOLTIP_SCALE_DEFAULT_PERCENT,
   normalizeCardScalePercent,
 } from "../settings/settings-model";
 
 export function usePersistentCardScaleSettings() {
   const [cardTooltipScalePercent, setCardTooltipScalePercent] = useState(
-    CARD_SCALE_DEFAULT_PERCENT,
+    CARD_TOOLTIP_SCALE_DEFAULT_PERCENT,
   );
   const [cardHandScalePercent, setCardHandScalePercent] = useState(
     CARD_SCALE_DEFAULT_PERCENT,
@@ -50,7 +51,9 @@ export function usePersistentCardScaleSettings() {
           opponentPercent?: unknown;
         };
         setCardTooltipScalePercent(
-          normalizeCardScalePercent(parsed.tooltipPercent),
+          normalizeCardScalePercent(
+            parsed.tooltipPercent ?? CARD_TOOLTIP_SCALE_DEFAULT_PERCENT,
+          ),
         );
         setCardHandScalePercent(normalizeCardScalePercent(parsed.handPercent));
         setCardArchiveScalePercent(

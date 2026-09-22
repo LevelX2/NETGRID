@@ -2877,7 +2877,7 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
     );
   });
 
-  it("never rezzes an access ambush whose effect resolves while unrezzed", () => {
+  it("recognizes that installed Setup requires rez for its access effect", () => {
     const setup = corpCard("setup", "asset", {
       definitionId: "onr_v1_340_setup",
       title: "Setup!",
@@ -2917,8 +2917,8 @@ describe("semanticRuntimeCorpScoreComponents scoreline and installs", () => {
     expect(components).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          key: "corp_root_rez_unnecessary_access_ambush",
-          value: -5000,
+          key: "corp_root_rez_latest_relevant_window",
+          value: 1600,
         }),
       ]),
     );

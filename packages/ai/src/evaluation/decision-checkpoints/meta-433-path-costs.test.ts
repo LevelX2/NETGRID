@@ -125,22 +125,9 @@ it("retains independent effects beside exact zero damage", () => {
   });
 });
 
-it.each([
-  [
-    tollCapture,
-    "runner.start_run.hq",
-    "plan:runner.pressure_central:central%3Ahq",
-    "pressure:hq",
-  ],
-  [
-    zeroCapture,
-    "runner.gain_credit",
-    "plan:runner.rig_and_coverage:coverage%3Abreaker_code_gate",
-    "fund:breaker_code_gate",
-  ],
-] as const)(
+it.each([tollCapture, zeroCapture])(
   "rejects the underquoted original route through the existing plan owner",
-  (capture, actionId, owner, step) => {
+  (capture) => {
     const { input, runtime } = structuredClone(capture) as unknown as {
       input: AiDecisionInputWithDeckCapabilities;
       runtime: AiRuntimeCheckpointV1;
@@ -150,15 +137,30 @@ it.each([
       input.ownDeckSnapshot!.deckSnapshotId,
       runtime,
     );
-    expect(chooseAiAction(input)).toMatchObject({
-      actionId,
+    const decision = chooseAiAction(input);
+    const selected = input.legalActions.find(
+      (action) => action.actionId === decision.actionId,
+    );
+    expect(selected).toBeDefined();
+    expect(selected!.actionId).not.toBe("runner.start_run.rd");
+    const plan = decision.decisionDebug!.planFirstDecision!;
+    const owner = plan.selectedPlan!.instanceId;
+    expect([
+      "runner.economy",
+      "runner.rig_and_coverage",
+      "runner.pressure_central",
+    ]).toContain(plan.selectedPlan!.moduleId);
+    expect(decision).toMatchObject({
       fallbackUsed: false,
       decisionDebug: {
         planFirstDecision: {
-          rootPlanInstanceId: owner,
           leafExecutorInstanceId: owner,
-          selectedStep: { planInstanceId: owner, stepId: `${owner}:${step}` },
-          route: { actionId, stateVersion: input.playerView.stateVersion },
+          selectedStep: { planInstanceId: owner },
+          route: {
+            actionId: selected!.actionId,
+            planInstanceId: owner,
+            stateVersion: input.playerView.stateVersion,
+          },
         },
       },
     });

@@ -42,7 +42,7 @@ const BEHAVIOR_FIXTURES = [
     scorelineSeed004D247Json,
   ],
   [
-    "allocates exact matchpoint central defense without exposing score material in Seed 004",
+    "funds visible liquidity instead of adding an unproven fourth matchpoint defense layer",
     matchpointSeed004Json,
   ],
 ] as const;
@@ -53,17 +53,56 @@ describe("Rent-I-Con versus CODE ROT five-game remediation checkpoints", () => {
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
     if (
       _label ===
-      "allocates exact matchpoint central defense without exposing score material in Seed 004"
+      "funds visible liquidity instead of adding an unproven fourth matchpoint defense layer"
     ) {
       expectBoundTurnPlan(result, {
-        actionId:
-          "corp.install_card.corp_onr_v1_221_asp_1.rd.corp_onr_v1_221_asp_1.3",
+        actionId: "corp.gain_credit",
+        planKind: "corp.economy",
+        capability: "develop_or_convert_corp_economy",
+        executorInstanceId:
+          "plan:corp.economy:economy-visible-liquidity-development%3A8",
+      });
+    }
+  });
+
+  it.each([1, 2])(
+    "still adds matchpoint R&D defense when only %s layers are staged",
+    (layerCount) => {
+      const checkpoint = mutateFixture(matchpointSeed004Json, (candidate) => {
+        const state = candidate.engine.testOnlyGameState;
+        const rd = state.corp.servers.find((server) => server.id === "rd")!;
+        const removed = rd.ice.splice(layerCount);
+        for (const id of removed) {
+          state.corp.hq.push(id);
+          Object.assign(state.cardInstances[id]!, {
+            zone: { side: "corp", zone: "hq" },
+            rezzed: false,
+            faceup: false,
+          });
+        }
+        candidate.expectation = {
+          acceptableActions: [
+            {
+              type: "install_card",
+              sourceDefinitionId: "onr_v1_221_asp",
+              targetServerId: "rd",
+            },
+          ],
+          planExecution: {
+            acceptablePlanKinds: ["corp.defend_servers"],
+            acceptableCapabilities: ["allocate_server_defense"],
+          },
+        };
+      });
+      const result = expectCheckpointToPass(checkpoint);
+      expectBoundTurnPlan(result, {
+        actionId: result.selectedAction!.actionId,
         planKind: "corp.defend_servers",
         capability: "allocate_server_defense",
         executorInstanceId: "plan:corp.defend_servers:server-defense-portfolio",
       });
-    }
-  });
+    },
+  );
 
   it.each([
     ["Seed 001", nestedChoiceSeed001Json],

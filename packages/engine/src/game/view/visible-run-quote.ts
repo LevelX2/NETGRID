@@ -15,6 +15,7 @@ import { quoteBreakSubroutineCostModifiers } from "../../ability-engine/break-su
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { effectiveIceRunSubroutines } from "../run/effective-ice-run-subroutines";
 import { publicEncounterTemporaryTraceCreditsForIce } from "../run/public-ice-run-derivation";
+import { visibleIceEncounterStrength } from "./card-view";
 
 export function visibleEffectiveIceRunQuote(
   state: GameState,
@@ -48,6 +49,9 @@ export function visibleEffectiveIceRunQuote(
     iceInstanceId: visibleIce.instanceId,
     iceDefinitionId: definitionId,
     effectiveStrength: Math.max(0, Math.floor(visibleIce.strength ?? 0)),
+    ...(state.cardInstances[iceId]?.rezzed === true
+      ? { encounterStrength: visibleIceEncounterStrength(state, iceId) }
+      : {}),
     subroutines,
     ...(breakSubroutineAdditionalCostPerSubroutine > 0
       ? { breakSubroutineAdditionalCostPerSubroutine }

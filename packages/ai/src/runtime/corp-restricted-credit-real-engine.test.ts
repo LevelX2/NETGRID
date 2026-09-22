@@ -24,6 +24,7 @@ import standardDeckCatalog from "../../../../data/decks/standard-deck-catalog-1.
 import { corpRestrictedRezDefenseSignals } from "../corp/defense/corp-restricted-rez-defense";
 import { allocateCorpCentralDefenseFromAiFacts } from "../corp/defense/corp-central-defense-facts-adapter";
 import { corpRestrictedRezPreparationCandidates } from "./corp-restricted-credit-reserve";
+import { corpFundedCentralProtectionReserve } from "../corp/defense/corp-server-protection-reserve";
 
 const CONTRACT = "onr_proteus_059_government-contract";
 const WALL = "onr_v1_279_wall-of-static";
@@ -676,6 +677,8 @@ describe("Corp restricted install/rez credit real-Engine capability", () => {
       )!,
     );
     const fundedInput = decisionInput(funded);
+    expect(fundedInput.playerView.own.installRezOnlyCredits).toBe(3);
+    expect(corpFundedCentralProtectionReserve(fundedInput)).toBe(0);
     expect(
       (fundedInput.corpRestrictedCreditRouteQuotes ?? []).every(
         (quote) => quote.consumer.availableBeforePayout,

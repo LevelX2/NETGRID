@@ -95,24 +95,89 @@ it("preserves a payable damage response after an information boundary rejects fu
   });
 });
 
-it("does not buy an unaffordable full path after both damage subroutines are already broken", () => {
-  const { input, runtime } = structuredClone(checkpointJson) as unknown as {
-    input: AiDecisionInputWithDeckCapabilities;
-    runtime: AiRuntimeCheckpointV1;
-  };
-  const continuation = input.legalActions.find(
-    (a) => a.type === "continue_run",
-  )!;
-  Object.assign(continuation.payload!, {
-    encounterSubroutineIds:
-      "printed_subroutines_end_the_run,printed_subroutines_end_the_run_a",
-    unbrokenSubroutineCount: 2,
-  });
-  resetResidentPlanPortfolioMemory();
-  restoreAiRuntimeCheckpoint(
-    input,
-    input.ownDeckSnapshot!.deckSnapshotId,
-    runtime,
-  );
-  expect(chooseAiAction(input).actionId).toBe(continuation.actionId);
-});
+it.each([2, 3])(
+  "buys the remaining path only when the post-break budget pays both ETRs and the inner Filter: %s",
+  (credits) => {
+    const { input, runtime } = structuredClone(checkpointJson) as unknown as {
+      input: AiDecisionInputWithDeckCapabilities;
+      runtime: AiRuntimeCheckpointV1;
+    };
+    // A post-payment companion must advance strength, remaining subroutines,
+    // spendable pools and offered break actions together.
+    input.playerView.own.credits = credits;
+    const breaker = input.playerView.own.rig!.find(
+      (card) => card.definitionId === "onr_classic_031_rent-i-con",
+    )!;
+    breaker.strength = 6;
+    const pool = input.playerView.own.rig!.find(
+      (card) => card.definitionId === "onr_v1_035_invisibility",
+    )!;
+    pool.counters!.bit = 0;
+    pool.counterDisplays!.forEach((display) => {
+      display.amount = 0;
+    });
+    const pump = input.legalActions.find(
+      (action) => action.type === "pump_breaker",
+    )!;
+    for (const subroutineIndex of [2, 3]) {
+      input.legalActions.push({
+        ...structuredClone(pump),
+        type: "break_subroutine",
+        actionId: `post-payment-break-${subroutineIndex}`,
+        abilityRef: {
+          sourceCardInstanceId: breaker.instanceId,
+          sourceAbilityId:
+            "onr_classic_031_rent-i-con:break_any_subroutine_and_trash_after_run",
+        },
+        effectRef:
+          "effect.onr_classic_031_rent-i-con:break_any_subroutine_and_trash_after_run",
+        payload: {
+          breakerId: breaker.instanceId,
+          iceId: input.playerView.run!.encounteredIce!.instanceId,
+          subroutineIndex,
+          cardId: breaker.instanceId,
+          cardImplementationCapabilityBindingKind: "card_spec_capability_key",
+          cardImplementationAbilityId:
+            "onr_classic_031_rent-i-con:break_any_subroutine_and_trash_after_run",
+          cardImplementationAbilityKey:
+            "break_any_subroutine_and_trash_after_run",
+        },
+      });
+    }
+    const continuation = input.legalActions.find(
+      (a) => a.type === "continue_run",
+    )!;
+    Object.assign(continuation.payload!, {
+      encounterSubroutineIds:
+        "printed_subroutines_end_the_run,printed_subroutines_end_the_run_a",
+      unbrokenSubroutineCount: 2,
+    });
+    continuation.actionId = `runner.continue_run.${continuation.payload!.encounterSubroutineIds}`;
+    input.playerView.legalActions = structuredClone(input.legalActions);
+    resetResidentPlanPortfolioMemory();
+    restoreAiRuntimeCheckpoint(
+      input,
+      input.ownDeckSnapshot!.deckSnapshotId,
+      runtime,
+    );
+    const decision = chooseAiAction(input);
+    if (credits === 2) expect(decision.actionId).toBe(continuation.actionId);
+    else
+      expect(
+        input.legalActions.find(
+          (action) => action.actionId === decision.actionId,
+        )?.type,
+      ).toBe("break_subroutine");
+    expect(decision.fallbackUsed).toBe(false);
+    expect(decision.evidence).toContain(
+      "plan_action_assessment_evidence:runner_information_boundary_known_path_cost:3",
+    );
+    expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
+      selectedPlan: { moduleId: "runner.convert_run_window" },
+      route: {
+        actionId: decision.actionId,
+        stateVersion: input.playerView.stateVersion,
+      },
+    });
+  },
+);

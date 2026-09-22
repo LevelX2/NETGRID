@@ -43,7 +43,7 @@ describe("e6aca Corp remediation decision checkpoints", () => {
       preserveVeniceTargetJson,
     ],
     [
-      "uses the protected current BBS economy route when no exact R&D defense is admitted",
+      "activates a current BBS economy route under its source-bound economy owner",
       activateBbsEconomyJson,
     ],
   ])("passes the corrected Corp behavior: %s", (_label, json) => {
@@ -52,6 +52,19 @@ describe("e6aca Corp remediation decision checkpoints", () => {
     );
 
     expect(result.ok, `${result.code}: ${result.message}`).toBe(true);
+    if (json === activateBbsEconomyJson) {
+      const plan = result.decision?.decisionDebug?.planFirstDecision;
+      expect(plan?.selectedPlan).toMatchObject({
+        moduleId: "corp.economy",
+        phase: "rez",
+        target: { kind: "card", id: result.selectedAction!.source },
+      });
+      expect(plan?.route).toMatchObject({
+        actionId: result.selectedAction!.actionId,
+        stateVersion: result.input.playerView.stateVersion,
+        planInstanceId: plan?.selectedPlan?.instanceId,
+      });
+    }
   });
 
   it("still permits a funded fifth R&D layer", () => {

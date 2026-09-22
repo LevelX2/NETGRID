@@ -39,9 +39,9 @@ export type ReplayBoardSettings = {
 export const DEFAULT_REPLAY_BOARD_SETTINGS: ReplayBoardSettings = {
   cardDisplayMode: "placeholder",
   cardTooltipHoverDelayMs: CARD_TOOLTIP_HOVER_OPEN_DELAY_MS,
-  cardTooltipMode: "enhanced",
+  cardTooltipMode: normalizeCardTooltipMode(undefined),
   translateCardRulesToSelectedLanguage: false,
-  chronicleDetailMode: "full",
+  chronicleDetailMode: normalizeChronicleDetailMode(undefined),
   colorScheme: "black",
   cyberspaceBackgroundEnabled: true,
   preferGermanCardImages: false,

@@ -1,4 +1,5 @@
 "use client";
+import { nextChronicleWidth, type ChronicleWidth } from "../features/chronicle/chronicle-width";
 import { localizedDeckValidationIssues } from "../i18n/deck-validation";
 
 import {
@@ -457,6 +458,7 @@ import {
 import {
   noticeAfterActionReceipt,
   noticeAfterServerError,
+  noticeAfterStateUpdate,
   type MatchNotice,
 } from "../features/match-session/match-notice";
 import { useMatchTransport } from "../features/match-session/useMatchTransport";
@@ -806,7 +808,8 @@ export default function Page() {
     runner: { kind: "default" },
     corp: { kind: "default" },
   });
-  const [rightRailCollapsed, setRightRailCollapsed] = useState(false);
+  const [chronicleWidth, setChronicleWidth] = useState<ChronicleWidth>("wide");
+  const rightRailCollapsed = chronicleWidth === "off";
   const [undoPanelOpen, setUndoPanelOpen] = useState(false);
   const [focusedCard, setFocusedCard] = useState<FocusedCard | null>(null);
   const [dismissedAccessEventIds, setDismissedAccessEventIds] = useState<
@@ -824,7 +827,7 @@ export default function Page() {
   const [matchDetailsOpen, setMatchDetailsOpen] = useState(false);
   const [colorScheme, setColorScheme] = useState<ColorScheme>("black");
   const [colorSchemeLoaded, setColorSchemeLoaded] = useState(false);
-  const [audioEnabled, setAudioEnabled] = useState(false);
+  const [audioEnabled, setAudioEnabled] = useState(true);
   const [audioVolume, setAudioVolume] = useState(0.45);
   const [audioSettingsLoaded, setAudioSettingsLoaded] = useState(false);
   const [audioLabEnabled, setAudioLabEnabled] = useState(false);
@@ -835,7 +838,7 @@ export default function Page() {
   const [cardImageSkinSettingsLoaded, setCardImageSkinSettingsLoaded] =
     useState(false);
   const [chronicleDetailMode, setChronicleDetailMode] =
-    useState<ChronicleDetailMode>("full");
+    useState<ChronicleDetailMode>(() => normalizeChronicleDetailMode(undefined));
   const [chronicleDetailModeLoaded, setChronicleDetailModeLoaded] =
     useState(false);
 
@@ -865,14 +868,14 @@ export default function Page() {
   const [actionCueAutoDismissMs, setActionCueAutoDismissMs] =
     useState<CueAutoDismissMs>(2500);
   const [actionCueDisplayMode, setActionCueDisplayMode] =
-    useState<CueDisplayMode>("window");
+    useState<CueDisplayMode>(() => normalizeCueDisplayMode(undefined));
   const [automaticEffectCuesEnabled, setAutomaticEffectCuesEnabled] =
-    useState(false);
+    useState(true);
   const [actionCueSettingsLoaded, setActionCueSettingsLoaded] = useState(false);
-  const [autoEndTurnEnabled, setAutoEndTurnEnabled] = useState(false);
+  const [autoEndTurnEnabled, setAutoEndTurnEnabled] = useState(true);
   const [autoCorpMandatoryDrawEnabled, setAutoCorpMandatoryDrawEnabled] =
-    useState(false);
-  const [autoDiscardEnabled, setAutoDiscardEnabled] = useState(false);
+    useState(true);
+  const [autoDiscardEnabled, setAutoDiscardEnabled] = useState(true);
   const [corpRunAutoPassKey, setCorpRunAutoPassKey] = useState<string | null>(
     null,
   );
@@ -945,7 +948,7 @@ export default function Page() {
   const [cardTooltipHoverDelayMs, setCardTooltipHoverDelayMs] =
     useState<CardTooltipHoverDelayMs>(CARD_TOOLTIP_HOVER_OPEN_DELAY_MS);
   const [cardTooltipMode, setCardTooltipMode] =
-    useState<CardTooltipMode>("enhanced");
+    useState<CardTooltipMode>(() => normalizeCardTooltipMode(undefined));
   const [
     translateCardRulesToSelectedLanguage,
     setTranslateCardRulesToSelectedLanguage,
@@ -6114,6 +6117,15 @@ export default function Page() {
       return;
     }
     if (message.type === "state_update") {
+      const noticeSession = sessionRef.current;
+      if (noticeSession)
+        setMatchNotice((current) =>
+          noticeAfterStateUpdate(current, {
+            matchId: noticeSession.matchId,
+            side: message.payload.playerView.side,
+            stateVersion: message.payload.playerView.stateVersion,
+          }),
+        );
       pendingAiAdvanceKeyRef.current = null;
       const activeLobby = lobbyRef.current;
       if (activeLobby) presentMatchStartLogo(activeLobby.matchId);
@@ -6251,7 +6263,18 @@ export default function Page() {
       paymentSupportContinuationSubmittedKeyRef.current = null;
       const localizedError = errorT(userErrorMessageKey(message.payload.code));
       setMatchNotice((current) =>
-        noticeAfterServerError(current, message.payload.code, localizedError),
+        noticeAfterServerError(
+          current,
+          message.payload.code,
+          localizedError,
+          sessionRef.current && message.payload.playerView
+            ? {
+                matchId: sessionRef.current.matchId,
+                side: message.payload.playerView.side,
+                stateVersion: message.payload.playerView.stateVersion,
+              }
+            : undefined,
+        ),
       );
       if (message.payload.code.startsWith("undo_")) {
         setUndoNotice(localizedError);
@@ -7005,6 +7028,7 @@ export default function Page() {
                 canForfeit={canForfeit}
                 canCancelSimulation={canCancelSimulation}
                 rightRailCollapsed={rightRailCollapsed}
+                chronicleWidth={chronicleWidth}
                 canRequestHumanAiAdvice={canRequestHumanAiDecisionPreview}
                 canOpenDeckGuide={Boolean(activeStandardDeckGuide)}
                 humanAiAdvice={humanAiAdvice}
@@ -7021,7 +7045,7 @@ export default function Page() {
                 onRequestForfeitMatch={requestForfeitMatch}
                 onRequestCancelSimulation={requestCancelSimulation}
                 onToggleRightRail={() =>
-                  setRightRailCollapsed((current) => !current)
+                  setChronicleWidth(nextChronicleWidth)
                 }
                 onRequestHumanAiAdvice={() =>
                   void requestHumanAiDecisionPreview()
@@ -7292,7 +7316,7 @@ export default function Page() {
 
               {activeMatchIsGame ? (
                 <div
-                  className={`main${rightRailCollapsed ? " rightRailCollapsed" : ""}`}
+                  className={`main chronicle-${chronicleWidth}${rightRailCollapsed ? " rightRailCollapsed" : ""}`}
                   data-testid="active-game"
                 >
                   <aside

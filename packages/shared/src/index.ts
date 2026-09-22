@@ -3240,6 +3240,8 @@ export type VisibleEffectiveIceRunQuote = {
   iceInstanceId: CardInstanceId;
   iceDefinitionId: CardDefinitionId;
   effectiveStrength: number;
+  /** Public current-board strength with encounter-only modifiers applied; no lifecycle simulation. */
+  encounterStrength?: number;
   subroutines: VisibleEffectiveSubroutine[];
   breakSubroutineAdditionalCostPerSubroutine?: number;
   breakSubroutineCostSourceDefinitionIds?: CardDefinitionId[];
@@ -4023,6 +4025,10 @@ export type VisibleCard = {
   effectiveRunQuote?: VisibleEffectiveIceRunQuote;
   /** Present only to the Corp for own, installed, currently unrezzed ICE. */
   effectivePostRezRunQuote?: VisibleCorpIcePostRezRunQuote;
+  /** Corp-only projections for exact variable-rez legal actions. */
+  effectivePostRezActionRunQuotes?: (VisibleCorpIcePostRezRunQuote & {
+    actionId: string;
+  })[];
   effectiveRezCostQuote?: VisibleCorpRezCostQuote;
   effectiveRezResourceExchangeQuote?: VisibleCorpIceRezResourceExchangeQuote;
   currentEncounterDefenseQuotes?: VisibleCorpEncounterDefenseQuote[];
@@ -4091,6 +4097,8 @@ export type PlayerView = {
   own: {
     identity: VisibleCard;
     credits: number;
+    /** Included in credits; only Corp install/rez payments, expires at turn end. Absent means zero. */
+    installRezOnlyCredits?: number;
     clicks: number;
     agendaPoints: number;
     gripOrHq: VisibleCard[];
@@ -4154,6 +4162,10 @@ export type PlayerView = {
   corpPunishRouteQuoteSet?: CorpPunishRouteQuoteSet;
   run?: {
     runId?: string;
+    /** Public Engine fact; a run opportunity, not a guarantee of legality or access. */
+    followupRunOpportunity?: "after_run" | "after_successful_run";
+    /** Remaining runs of public event sequences, independent of run success. */
+    pendingSequenceRunCount?: number;
     attackedServerId: Exclude<ServerId, "new_remote">;
     phase: RunState["phase"];
     position?: RunState["position"];

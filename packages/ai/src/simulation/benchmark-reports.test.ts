@@ -551,7 +551,9 @@ describe("benchmark report formatting", () => {
       corpDeck: corp.deck,
       runnerDeckMetadata: runner.metadata,
       corpDeckMetadata: corp.metadata,
-      maxActions: 160,
+      // The opt-in contract needs actual decisions around the requested
+      // snapshots, not hundreds of unrelated subsequent gameplay decisions.
+      maxActions: 24,
       maxFindings: 50,
     });
     expect(JSON.stringify(base.summaries)).not.toContain("actionAlternatives");
@@ -562,7 +564,7 @@ describe("benchmark report formatting", () => {
       corpDeck: corp.deck,
       runnerDeckMetadata: runner.metadata,
       corpDeckMetadata: corp.metadata,
-      maxActions: 300,
+      maxActions: 24,
       maxFindings: 5,
       includeActionAlternativesForFindings: true,
       maxAlternativesPerFinding: 3,
@@ -581,6 +583,15 @@ describe("benchmark report formatting", () => {
       true,
     );
     expect(withAlternatives.config.maxAlternativesPerFinding).toBe(3);
+    expect(
+      withAlternatives.summaries.map((summary) =>
+        summary.actionSequence.map((entry) => entry.selectedActionId),
+      ),
+    ).toEqual(
+      base.summaries.map((summary) =>
+        summary.actionSequence.map((entry) => entry.selectedActionId),
+      ),
+    );
     expect(entriesWithAlternatives.length).toBeGreaterThan(0);
     expect(
       entriesWithAlternatives.every(

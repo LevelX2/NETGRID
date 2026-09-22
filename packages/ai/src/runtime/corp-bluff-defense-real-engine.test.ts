@@ -251,7 +251,9 @@ it("keeps an unconfigured subtype unknown and quotes a configured matching break
       },
     },
   });
-  expect(chooseAndApply(state, "corp").action.type).toBe("decline_rez");
+  // Unknown exact break cost does not erase the affordable, quoted paid-stop
+  // opportunity. Defense still owns the rez; the quote remains unknown.
+  expect(chooseAndApply(state, "corp").action.type).toBe("rez_ice");
   state.cardInstances[id]!.selectedSubtype = "code_gate";
   expect(read()).toMatchObject({
     complete: true,

@@ -141,12 +141,21 @@ function isStatus(value: string | null): value is CatalogStatusKey {
   );
 }
 
+const catalogRuntimes = new Map<
+  boolean,
+  ReturnType<typeof createRuntimeCardPool>
+>();
+
 function createCatalogRuntime() {
-  return createRuntimeCardPool({
-    excludedSetIds: testCardsEnabledFromEnvironment(process.env)
-      ? []
-      : [TEST_CARD_SET_ID],
-  });
+  const testCardsEnabled = testCardsEnabledFromEnvironment(process.env);
+  let runtime = catalogRuntimes.get(testCardsEnabled);
+  if (!runtime) {
+    runtime = createRuntimeCardPool({
+      excludedSetIds: testCardsEnabled ? [] : [TEST_CARD_SET_ID],
+    });
+    catalogRuntimes.set(testCardsEnabled, runtime);
+  }
+  return runtime;
 }
 
 function catalogSummaryWithAiInspector<T extends { catalogCardId: string }>(

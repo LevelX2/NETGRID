@@ -35,6 +35,35 @@ function detail(cardId: string): CatalogCardDetail {
 }
 
 describe("CatalogDetailRequestCoordinator", () => {
+  it("limits overlapping batches to two active requests and still loads every card", async () => {
+    const coordinator = new CatalogDetailRequestCoordinator();
+    const releases: Array<() => void> = [];
+    const started: string[] = [];
+    const consumed: string[] = [];
+    const fetchDetail = (cardId: string) => {
+      started.push(cardId);
+      return new Promise<CatalogCardDetail>((resolve) => {
+        releases.push(() => resolve(detail(cardId)));
+      });
+    };
+    const consume = (card: CatalogCardDetail) =>
+      consumed.push(card.catalogCardId);
+    const first = coordinator.ensure(
+      ["a", "b", "c"], () => false, fetchDetail, consume,
+    );
+    const second = coordinator.ensure(
+      ["c", "d"], () => false, fetchDetail, consume,
+    );
+    await vi.waitFor(() => expect(started).toEqual(["a", "b"]));
+    releases.shift()!();
+    await vi.waitFor(() => expect(started).toEqual(["a", "b", "c"]));
+    releases.shift()!();
+    await vi.waitFor(() => expect(started).toEqual(["a", "b", "c", "d"]));
+    releases.splice(0).forEach((release) => release());
+    await Promise.all([first, second]);
+    expect(consumed.sort()).toEqual(["a", "b", "c", "d"]);
+  });
+
   it("delivers a resolved card without waiting for an unrelated hanging request", async () => {
     const coordinator = new CatalogDetailRequestCoordinator();
     const hanging = new Promise<CatalogCardDetail | null>(() => undefined);

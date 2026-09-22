@@ -53,10 +53,32 @@ describe("match D153 Runner decision checkpoints", () => {
     expectCheckpointToPass(fixture(json));
   });
 
-  it.each([
-    ["the breaker-AP coverage draw at D61", preserveHqFacecheckD61Json],
-  ])("keeps the positive control: %s", (_label, json) => {
-    expectCheckpointToPass(fixture(json));
+  it("retains the RD sentry-coverage draw while using the available HQ ICE-removal route at D61", () => {
+    const result = runAiDecisionCheckpoint(fixture(preserveHqFacecheckD61Json));
+    expect(result.ok, result.message).toBe(true);
+    expect(
+      result.decision?.decisionDebug?.planFirstDecision?.portfolio,
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          moduleId: "runner.rig_and_coverage",
+          viability: "ready",
+          phase: "draw_for_answer",
+          target: { kind: "capability", id: "breaker_sentry" },
+          evidenceCodes: ["target:rd"],
+          blockers: [],
+        }),
+      ]),
+    );
+    expect(
+      result.input.legalActions.some((action) => action.type === "draw_card"),
+    ).toBe(true);
+    expect(
+      result.decision?.decisionDebug?.planFirstDecision?.selectedPlan,
+    ).toMatchObject({
+      moduleId: "runner.pressure_central",
+      target: { kind: "server", id: "hq" },
+    });
   });
 
   it("F08 still cashes out Broker when the exact remote path has a funding gap", () => {

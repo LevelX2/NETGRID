@@ -29,6 +29,7 @@ function iceStrengthModifierAppliesToIce(
   sourceCardInstanceId: CardInstanceId,
   iceId: CardInstanceId,
   iceDefinition: CardDefinition,
+  encounteredIceId: CardInstanceId | undefined,
 ): boolean {
   if (
     !isPublicRezzedCorpRootModifier(modifier) &&
@@ -36,10 +37,7 @@ function iceStrengthModifierAppliesToIce(
     !isPublicScoredCorpAgendaModifier(modifier)
   )
     return false;
-  if (
-    modifier.appliesTo.encounteredOnly &&
-    state.run?.encounteredIceId !== iceId
-  )
+  if (modifier.appliesTo.encounteredOnly && encounteredIceId !== iceId)
     return false;
   if (modifier.appliesTo.side !== "corp") return false;
   if (
@@ -68,6 +66,7 @@ function iceStrengthModifierAppliesToIce(
 export function iceStrengthModifierBonusFor(
   state: GameState,
   iceId: CardInstanceId,
+  encounteredIceId = state.run?.encounteredIceId,
 ): number {
   const iceInstance = cardInstanceFor(state, iceId);
   if (!iceInstance.rezzed) return 0;
@@ -85,6 +84,7 @@ export function iceStrengthModifierBonusFor(
         match.sourceCardInstanceId,
         iceId,
         iceDefinition,
+        encounteredIceId,
       )
     )
       continue;
@@ -104,6 +104,7 @@ export function iceStrengthModifierBonusFor(
         match.sourceCardInstanceId,
         iceId,
         iceDefinition,
+        encounteredIceId,
       )
     )
       continue;
@@ -123,6 +124,7 @@ export function iceStrengthModifierBonusFor(
         match.sourceCardInstanceId,
         iceId,
         iceDefinition,
+        encounteredIceId,
       )
     )
       continue;

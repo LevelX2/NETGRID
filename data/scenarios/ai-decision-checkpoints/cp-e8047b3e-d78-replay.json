@@ -4730,6 +4730,7 @@
           "payload": {
             "encounterContinue": true,
             "unbrokenSubroutineCount": 1,
+            "encounterSubroutineIds": "printed_subroutines_trace",
             "encounterWillEndRun": false,
             "encounterSourceWillTrashAtEndOfTurn": false,
             "abilityFamily": "run-access",
@@ -7005,6 +7006,7 @@
         "payload": {
           "encounterContinue": true,
           "unbrokenSubroutineCount": 1,
+          "encounterSubroutineIds": "printed_subroutines_trace",
           "encounterWillEndRun": false,
           "encounterSourceWillTrashAtEndOfTurn": false,
           "abilityFamily": "run-access",

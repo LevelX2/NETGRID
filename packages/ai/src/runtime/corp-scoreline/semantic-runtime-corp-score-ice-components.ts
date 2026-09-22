@@ -1,3 +1,4 @@
+import { cardSpecPlanningCardByDefinitionId } from "@netgrid/cards/planning";
 import type {
   AiDecisionInput,
   AiDecisionScoreComponent,
@@ -101,14 +102,23 @@ export function corpRootRezTimingComponent(
   if (!location) return undefined;
   const hint = AI_HINTS_BY_CARD.get(sourceCard.definitionId);
   const effects = hint?.effects ?? [];
+  const installedAccessEffects =
+    cardSpecPlanningCardByDefinitionId(
+      sourceCard.definitionId,
+    )?.planning.engine.accessEffects?.filter(
+      (effect) =>
+        effect.kind === "on_access" &&
+        effect.sourceZones.includes("installed") &&
+        !effect.ignoreIfAccessedFrom?.includes("installed"),
+    ) ?? [];
   const accessAmbushResolvesUnrezzed =
     hint?.roles.includes("ambush") === true &&
-    effects.some(
-      (effect) => effect.timing === "on_access" && effect.kind === "damage",
-    ) &&
-    hint.conditions?.some(
-      (condition) => condition.kind === "requires_accessed_card",
-    ) === true;
+    installedAccessEffects.length > 0 &&
+    installedAccessEffects.every(
+      (effect) =>
+        effect.installedSourceActivation === "any_rez_state" ||
+        effect.installedSourceActivation === "unrezzed_only",
+    );
   if (accessAmbushResolvesUnrezzed) {
     return {
       key: "corp_root_rez_unnecessary_access_ambush",

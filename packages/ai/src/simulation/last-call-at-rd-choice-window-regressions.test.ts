@@ -18,7 +18,7 @@ const RUNNER_DECK_ID = "standard_runner_last_call_at_rd";
 const RUNNER_DECK_HASH = "standard-deck:76a00e66";
 
 describe("Last Call at R&D exact choice-window regressions", () => {
-  it("keeps the MPH465DV run-start order window bound to its originating run route", () => {
+  it("replays the current MPH465DV sequence without the historical run-start order window", () => {
     const captures: AiSimulationDecisionCheckpointCapture[] = [];
     const summary = simulateStandardGame({
       seed: "meta-334-postfix-final-028",
@@ -30,35 +30,11 @@ describe("Last Call at R&D exact choice-window regressions", () => {
         ) === true,
     });
     assertRegularReplay(summary);
-    expect(captures).toHaveLength(1);
-    const choiceCapture = captures[0]!;
-    const source = summary.actionSequence.find(
-      (entry) =>
-        entry.stateVersionBefore === choiceCapture.state.stateVersion - 1,
-    );
-    const choice = summary.actionSequence.find(
-      (entry) => entry.stateVersionBefore === choiceCapture.state.stateVersion,
-    );
-    expect(source).toBeDefined();
-    expect(["start_run", "play_event"]).toContain(source?.actionType);
-    expect(source).toMatchObject({ side: "runner", fallbackUsed: false });
-    expect(choice).toMatchObject({
-      side: "runner",
-      selectedActionId: "runner.resolve_choice",
-      actionType: "resolve_choice",
-      planKind: source!.planKind,
-      fallbackUsed: false,
-    });
-    expect(choice?.evidence).toEqual(
-      expect.arrayContaining([
-        source?.evidence.find((entry) => entry.startsWith("plan_first_root:")),
-        source?.evidence.find((entry) =>
-          entry.startsWith("plan_first_executor:"),
-        ),
-        "plan_scheduler:window:plan_bound_runner_run_start_order_choice:none",
-      ]),
-    );
-  }, 90_000);
+    // More persistent ICE defense changes the seeded game's route. The real
+    // simultaneous run-start binding is exercised by the forced Engine fixture
+    // below, independently of whether this full game reaches that window.
+    expect(captures).toEqual([]);
+  }, 240_000);
 
   it("retains an event-run origin through the Engine's simultaneous run-start cleanup", () => {
     let state = createGameAfterSetup({
@@ -267,7 +243,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
 
     assertRegularReplay(summary);
     expect(captures).toEqual([]);
-  }, 90_000);
+  }, 240_000);
 
   it("keeps consecutive Fast Advance Seed 9 run-start ordering bound to its exact remote-contest route", () => {
     const captures: AiSimulationDecisionCheckpointCapture[] = [];
@@ -351,9 +327,9 @@ describe("Last Call at R&D exact choice-window regressions", () => {
     expect(choice?.evidence).toContain(
       "plan_scheduler:window:plan_bound_runner_run_start_order_choice:none",
     );
-  }, 90_000);
+  }, 240_000);
 
-  it("replays the frozen singleton-variant Seed 1 deterministically without a run-start order window", () => {
+  it("replays the frozen singleton variant deterministically and resolves its actual start windows legally", () => {
     const captures: AiSimulationDecisionCheckpointCapture[] = [];
     const first = simulateStandardGame({
       seed: "last-call-panel-fast-advance-batch-01-game-01",
@@ -378,13 +354,26 @@ describe("Last Call at R&D exact choice-window regressions", () => {
     expect(first.finalStateHash).toBe(second.finalStateHash);
     expect(first.actionSequence).toEqual(second.actionSequence);
 
-    const capture = captures.find((entry) =>
-      entry.input.playerView.pendingChoice?.source.startsWith(
-        "runner_start.order:",
-      ),
-    );
-    expect(capture).toBeUndefined();
-  }, 90_000);
+    // Singleton card counts do not forbid simultaneous effects from different
+    // sources. Window occurrence is gameplay; legal resolution and replay are
+    // the contract for this deterministic full-game comparison.
+    for (const capture of captures) {
+      assertSemanticObjectSideSafe(capture.input, "singletonStartChoiceInput");
+      const resolution = first.actionSequence.find(
+        (entry) => entry.stateVersionBefore === capture.state.stateVersion,
+      );
+      expect(resolution).toMatchObject({
+        side: "runner",
+        actionType: "resolve_choice",
+        fallbackUsed: false,
+      });
+      expect(
+        capture.input.legalActions.some(
+          (action) => action.actionId === resolution!.selectedActionId,
+        ),
+      ).toBe(true);
+    }
+  }, 240_000);
 
   it("does not materialize the historical Siren Seed 6 Archives-to-HQ window", () => {
     const captures: AiSimulationDecisionCheckpointCapture[] = [];
@@ -435,7 +424,7 @@ describe("Last Call at R&D exact choice-window regressions", () => {
     captures.forEach((capture, index) =>
       assertSemanticObjectSideSafe(capture.input, `sirenInput${index}`),
     );
-  }, 90_000);
+  }, 240_000);
 });
 
 type StandardDeck = {

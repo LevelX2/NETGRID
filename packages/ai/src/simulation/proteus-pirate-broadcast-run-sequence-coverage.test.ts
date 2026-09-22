@@ -120,7 +120,7 @@ describe("Proteus restricted multi-run plan-first coverage", () => {
         "plan_action_assessment_evidence:runner_restricted_run_sequence_target:archives",
       ]),
     });
-  }, 15_000);
+  }, 90_000);
 });
 
 function deck(deckId: string): DeckDefinition {

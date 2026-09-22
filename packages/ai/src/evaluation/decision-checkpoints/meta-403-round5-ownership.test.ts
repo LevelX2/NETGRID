@@ -109,6 +109,9 @@ describe("meta 403 round 5 exact owner regressions", () => {
 
   it("does not spend the information budget on end-the-run after program trash is broken", () => {
     const capture = structuredClone(programJson) as unknown as Capture;
+    // The preceding program-preservation break costs two credits. Removing
+    // its subroutine without paying it falsely makes the remaining run fundable.
+    capture.input.playerView.own.credits -= 2;
     capture.input.legalActions = capture.input.legalActions.filter(
       (a) => a.type !== "break_subroutine" || a.payload?.subroutineIndex !== 0,
     );
@@ -121,6 +124,9 @@ describe("meta 403 round 5 exact owner regressions", () => {
       encounterSubroutineIds: "printed_subroutines_end_the_run",
       unbrokenSubroutineCount: 1,
     });
+    capture.input.playerView.legalActions = structuredClone(
+      capture.input.legalActions,
+    );
     const { selected, plan } = choose(capture);
     expect(selected.type).toBe("continue_run");
     expect(plan?.selectedPlan?.moduleId).toBe("runner.convert_run_window");

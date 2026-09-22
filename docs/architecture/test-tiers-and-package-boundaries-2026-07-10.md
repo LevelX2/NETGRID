@@ -133,6 +133,28 @@ Fehlerfreiheit und der aktuelle Fachvertrag das beobachtete Verhalten gemeinsam
 tragen. Andernfalls bleibt der Test rot und der Produktfehler wird an seiner
 Ursprungsschicht behoben.
 
+Für KI-Checkpoints gelten zusätzlich folgende Fixture-Verträge:
+
+- Synthetische LegalActions enthalten dieselben aktuellen Bindungen wie die
+  Engine: StateVersion, kanonische Fähigkeit, betroffene Subroutinen und
+  vollständige Kosten-/Wirkungsquotes. Ein Funding-Kandidat braucht eine
+  tatsächlich angebotene Aktion. Fehlende Angaben sind kein Negativnachweis
+  über das fachliche Verhalten der KI.
+- Ein Zustand nach bezahltem Pumpen oder Brechen muss Credits, nutzbare Pools,
+  Breakerstärke, verbleibende Subroutinen und angebotene Aktionen gemeinsam
+  fortschreiben. Budgetgrenzen erhalten einen bezahlbaren und einen nicht
+  bezahlbaren Kontrollfall. Bekannte Pfadkosten allein ersetzen keine Reserve
+  gegenüber unbekanntem ICE.
+- Fortsetzungstests wenden die gewählte Aktion mit der Engine an und bauen
+  daraus den nächsten KI-Input. Ein historischer Folgezustand darf nicht mit
+  der residenten Planung einer inzwischen anders gewählten Aktion kombiniert
+  werden. Zielwechsel müssen Parent, Step und Route konsistent neu binden;
+  Engine-Legalität und Replay bleiben eigene Assertions.
+- Berichtstests simulieren nur so viele Entscheidungen, wie ihre angeforderten
+  Snapshots benötigen. Funktionale Vollspieltests erhalten ein explizites
+  Zeitfenster mit Abstand zur gemessenen Laufzeit. Trigger, Legalität,
+  Side-Safety und Replay werden dadurch weder entfernt noch gelockert.
+
 ### Abstraktionsguard: Regression statt Inventargleichheit
 
 `check:card-function-abstraction` begrenzt bekannte problematische Fundstellen,

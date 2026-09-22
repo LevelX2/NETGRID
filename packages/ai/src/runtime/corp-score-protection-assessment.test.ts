@@ -674,7 +674,48 @@ describe("assessCorpScoreProtection", () => {
     });
   });
 
-  it("fails closed when a visible non-breaker modifies ICE encounter strength", () => {
+  it("uses encounter strength for Clown instead of charging the printed pump cost", () => {
+    const card = ice("wall", "onr_v1_238_data-wall-2-0");
+    const input = {
+      serverIce: [
+        {
+          ...card,
+          effectiveRunQuote: { ...effectiveQuote(card), encounterStrength: 2 },
+        },
+      ],
+      runnerRig: [
+        runnerProgram("breaker", "onr_v1_037_japanese-water-torture"),
+        runnerProgram("clown", "onr_v1_012_clown"),
+      ],
+      runnerCredits: 0,
+      maximumRunnerAccessSuccessProbability: QUARTER,
+    };
+    expect(assessCorpScoreProtection(input)).toMatchObject({
+      knowledge: "known",
+      protectsScore: false,
+      runnerAccessSuccessProbability: { numerator: 1, denominator: 1 },
+    });
+    expect(
+      assessCorpScoreProtection({
+        ...input,
+        serverIce: [
+          {
+            ...card,
+            effectiveRunQuote: {
+              ...effectiveQuote(card),
+              encounterStrength: 3,
+            },
+          },
+        ],
+      }),
+    ).toMatchObject({
+      knowledge: "known",
+      protectsScore: true,
+      runnerAccessSuccessProbability: { numerator: 0, denominator: 1 },
+    });
+  });
+
+  it("fails closed when encounter strength is not quoted for a visible modifier", () => {
     const clownDefinition = CARD_DEFINITIONS_BY_ID["onr_v1_012_clown"]!;
     const assessment = assessCorpScoreProtection({
       serverIce: [ice("wall", "onr_v1_238_data-wall-2-0")],

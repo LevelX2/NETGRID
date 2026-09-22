@@ -9,9 +9,10 @@ namespace Netgrid.Launcher;
 internal sealed partial class LauncherRuntime : IAsyncDisposable
 {
     private readonly string _programRoot;
-    private readonly RuntimeEnvironment _environment;
-    private readonly Uri _serverUrl;
-    private readonly Uri _webUrl;
+    private readonly RuntimeEnvironment _configuredEnvironment;
+    private RuntimeEnvironment _environment;
+    private Uri _serverUrl;
+    private Uri _webUrl;
     private readonly SemaphoreSlim _lifecycle = new(1, 1);
     private readonly HttpClient _http = new() { Timeout = TimeSpan.FromSeconds(2) };
     private readonly string _controlToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
@@ -31,6 +32,7 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
     {
         _installationBlocked = installationBlocked;
         _programRoot = programRoot;
+        _configuredEnvironment = environment;
         _environment = environment;
         _serverUrl = environment.OptionalUri("NETGRID_LAUNCHER_SERVER_URL", "NETGRID_SERVER_BASE_URL");
         _webUrl = environment.OptionalUri("NETGRID_LAUNCHER_WEB_URL", "NETGRID_WEB_BASE_URL");
@@ -222,6 +224,9 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
                 if (_installationBlocked()) Interlocked.Exchange(ref _installationStopping, 1);
                 ThrowIfInstallationStopping();
                 ValidateFiles();
+                _environment = _configuredEnvironment.ResolveNetwork();
+                _serverUrl = _environment.OptionalUri("NETGRID_LAUNCHER_SERVER_URL", "NETGRID_SERVER_BASE_URL");
+                _webUrl = _environment.OptionalUri("NETGRID_LAUNCHER_WEB_URL", "NETGRID_WEB_BASE_URL");
                 StartNode(
                     Path.Combine(_programRoot, "app", "server.mjs"),
                     Path.Combine(_programRoot, "app"),
@@ -300,7 +305,22 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
             ThrowIfInstallationStopping();
             if (server.HasExited) throw new InvalidOperationException($"launcher_server_exited:{server.ExitCode}");
             if (web.HasExited) throw new InvalidOperationException($"launcher_web_exited:{web.ExitCode}");
-            if (await IsHealthyAsync(new Uri(_serverUrl, "/health"), requireJsonOk: true) && await IsHealthyAsync(_webUrl, requireJsonOk: false)) return;
+            if (await IsHealthyAsync(new Uri(_serverUrl, "/health"), requireJsonOk: true) && await IsHealthyAsync(_webUrl, requireJsonOk: false))
+            {
+                var publicServer = _environment.RequiredUri("NETGRID_SERVER_BASE_URL");
+                var publicWeb = _environment.RequiredUri("NETGRID_WEB_BASE_URL");
+                try
+                {
+                    if (!await RuntimeNetwork.BrowserReadyAsync(_http, publicServer, _webUrl, publicServer) ||
+                        (publicWeb != _webUrl && !await RuntimeNetwork.BrowserReadyAsync(_http, publicServer, publicWeb, publicServer)))
+                        throw new RuntimeNetworkException("launcher_network_browser_rejected");
+                }
+                catch (Exception error) when (error is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException)
+                {
+                    throw new RuntimeNetworkException("launcher_network_browser_rejected", error);
+                }
+                return;
+            }
             await Task.Delay(250);
         }
         throw new TimeoutException("launcher_health_timeout");
@@ -347,6 +367,12 @@ internal sealed partial class LauncherRuntime : IAsyncDisposable
                     await StartPairAndWaitAsync();
                     Recovered?.Invoke(this, EventArgs.Empty);
                     _ = MonitorAsync(_server!, _web!);
+                    return;
+                }
+                catch (RuntimeNetworkException error)
+                {
+                    if (InstallationStopping) return;
+                    FatalFailure?.Invoke(this, UiText.Get(error.Message));
                     return;
                 }
                 catch

@@ -227,7 +227,7 @@ it("quotes and rezzes a fixed trace that the public Runner cannot beat", () => {
   expect(hashState(replay.state)).toBe(hashState(s));
 });
 
-it("does not certify a fixed trace at a tie or in the blind profile", () => {
+it("values repeatable fixed trace pressure without certifying a stop at a tie or in the blind profile", () => {
   const s = fixture("fixed_trace", 6);
   expect(
     getPlayerView(s, "corp").servers.find((x) => x.id === "hq")!.ice[0]!
@@ -237,7 +237,7 @@ it("does not certify a fixed trace at a tie or in the blind profile", () => {
     getLegalActions(s, "corp").find(
       (a) => a.actionId === chooseCorpAction(input(s, true)).actionId,
     )?.type,
-  ).toBe("decline_rez");
+  ).toBe("rez_ice");
   s.traceRulesProfile = "classic_blind";
   expect(
     getPlayerView(s, "corp").servers.find((x) => x.id === "hq")!.ice[0]!
@@ -289,7 +289,7 @@ it("rezzes a priced variable trace ICE that stops a broke Runner without a break
   expect(hashState(replay.state)).toBe(hashState(s));
 });
 
-it("prices trace ties correctly and declines a trace the rich Runner can avoid", () => {
+it("prices trace ties correctly and rezzes positive repeatable trace pressure against a rich Runner", () => {
   const s = fixture("trace", 1);
   const ice = getPlayerView(s, "corp").servers.find((x) => x.id === "hq")!
     .ice[0]!;
@@ -302,11 +302,11 @@ it("prices trace ties correctly and declines a trace the rich Runner can avoid",
       ?.guaranteedRunEnd,
   ).toBe(true);
   s.runner.credits = 20;
-  expect(
-    getLegalActions(s, "corp").find(
-      (a) => a.actionId === chooseCorpAction(input(s)).actionId,
-    )?.type,
-  ).toBe("decline_rez");
+  const action = getLegalActions(s, "corp").find(
+    (a) => a.actionId === chooseCorpAction(input(s)).actionId,
+  )!;
+  expect(action.type).toBe("rez_ice");
+  expect(action.payload?.variableRezValue).toBeGreaterThan(0);
 });
 
 it("includes an affordable visible breaker and does not certify a blind trace", () => {
@@ -325,16 +325,18 @@ it("includes an affordable visible breaker and does not certify a blind trace", 
   ).toBeUndefined();
 });
 
-it("rejects a stale trace receipt and counts bad-publicity credits for pass tolls", () => {
+it("does not certify a stop from a stale trace receipt and counts bad-publicity credits for pass tolls", () => {
   const trace = input(fixture("trace", 0));
   for (const q of trace.playerView.servers.find((x) => x.id === "hq")!.ice[0]!
     .currentTraceIceRezQuotes!)
     q.stateVersion--;
+  const decision = chooseCorpAction(trace);
   expect(
-    trace.legalActions.find(
-      (a) => a.actionId === chooseCorpAction(trace).actionId,
-    )?.type,
-  ).toBe("decline_rez");
+    decision.evidence?.some((entry) => entry.includes("trace_access_block")),
+  ).toBe(false);
+  expect(
+    trace.legalActions.find((a) => a.actionId === decision.actionId)?.type,
+  ).toBe("rez_ice");
   const s = fixture("pass_tax", 2);
   s.corp.credits = 4;
   s.run!.badPublicityCredits = 2;

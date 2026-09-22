@@ -6,6 +6,24 @@ import {
 } from "./replay-board-settings";
 
 describe("replay board settings", () => {
+  it("starts a fresh browser profile with image tooltips and a simple chronicle", () => {
+    expect(loadReplayBoardSettings(() => null)).toMatchObject({
+      cardTooltipMode: "image",
+      chronicleDetailMode: "simple",
+    });
+  });
+
+  it("preserves explicitly saved alternative presentation settings", () => {
+    const storage = new Map([
+      ["netgrid.cardTooltipSettings.v1", JSON.stringify({ mode: "enhanced" })],
+      ["netgrid.chronicleDetailMode.v1", "full"],
+    ]);
+    expect(loadReplayBoardSettings((key) => storage.get(key) ?? null)).toMatchObject({
+      cardTooltipMode: "enhanced",
+      chronicleDetailMode: "full",
+    });
+  });
+
   it("uses the same persisted board presentation settings as a normal match", () => {
     const storage = new Map<string, string>([
       ["netgrid.cardDisplayMode.v1", "text-card"],

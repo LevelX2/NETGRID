@@ -639,6 +639,7 @@ function continuedAmbushSignals(params: {
     }
     if (signal.patternKind === "rd_recycle") return []; // Rediscover the exact current source/zone and legal route.
     const sourceInstanceId = signal.sourceInstanceId;
+    const sourceDefinitionId = signal.sourceDefinitionId;
     const plannedAdvancementTarget = signal.plannedAdvancementTarget!;
     const visibleGripSource = visibleGripCard(params.input, sourceInstanceId);
     if (visibleGripSource) {
@@ -710,8 +711,7 @@ function continuedAmbushSignals(params: {
         candidate.sourceCardInstanceId !== sourceInstanceId ||
         candidate.actionType !== "rez_card" ||
         candidate.semanticActionType !== "corp_window.rez" ||
-        location.card.rezzed === true ||
-        Math.max(0, location.card.advancementCounters ?? 0) === 0
+        location.card.rezzed === true
       ) {
         return false;
       }
@@ -728,7 +728,23 @@ function continuedAmbushSignals(params: {
       const action = params.input.legalActions.find(
         (legalAction) => legalAction.actionId === candidate.actionId,
       );
-      return action !== undefined && exactLegalActionCreditCost(action) === 0;
+      if (action === undefined || exactLegalActionCreditCost(action) !== 0)
+        return false;
+      const beforeRez = projectKnownCorpCardAccessEffect({
+        input: params.input,
+        sourceDefinitionId,
+        sourceCard: location.card,
+      });
+      const afterRez = projectKnownCorpCardAccessEffect({
+        input: params.input,
+        sourceDefinitionId,
+        sourceCard: { ...location.card, rezzed: true },
+      });
+      return (
+        beforeRez.status !== "unknown" &&
+        afterRez.status === "complete" &&
+        afterRez.threatValue > beforeRez.threatValue
+      );
     });
     if (accessWindowRezCandidates.length > 1) {
       throw ambushContractFailure(

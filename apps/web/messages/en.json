@@ -279,6 +279,8 @@
       "requestUndo": "Request undo",
       "hideMatchStatus": "Active game: hide status",
       "showMatchStatus": "Active game: show status",
+      "cycleChronicle": "Chronicle: {current}. Switch to {next}.",
+      "chronicleWidths": {"off":"Off","wide":"Wide","medium":"Medium","narrow":"Narrow"},
       "showRightRail": "Show right panel",
       "hideRightRail": "Hide right panel",
       "askAi": "Ask AI about my deck",

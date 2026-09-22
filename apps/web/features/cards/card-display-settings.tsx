@@ -3,6 +3,8 @@ import { createContext, useContext } from "react";
 import { localCardImageUrl } from "./card-image-service";
 import {
   CARD_SCALE_DEFAULT_PERCENT,
+  CARD_TOOLTIP_SCALE_DEFAULT_PERCENT,
+  normalizeCardTooltipMode,
   CARD_TOOLTIP_HOVER_OPEN_DELAY_MS,
   type CardScaleSettings,
   type CardTooltipSettings,
@@ -15,12 +17,12 @@ export type CardImagePreferenceSettings = {
 
 export const CardTooltipSettingsContext = createContext<CardTooltipSettings>({
   hoverOpenDelayMs: CARD_TOOLTIP_HOVER_OPEN_DELAY_MS,
-  mode: "enhanced",
+  mode: normalizeCardTooltipMode(undefined),
   translateRulesToSelectedLanguage: false,
 });
 
 export const CardScaleSettingsContext = createContext<CardScaleSettings>({
-  tooltipPercent: CARD_SCALE_DEFAULT_PERCENT,
+  tooltipPercent: CARD_TOOLTIP_SCALE_DEFAULT_PERCENT,
   handPercent: CARD_SCALE_DEFAULT_PERCENT,
   archivePercent: CARD_SCALE_DEFAULT_PERCENT,
   zonePercent: CARD_SCALE_DEFAULT_PERCENT,

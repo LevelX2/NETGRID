@@ -850,6 +850,7 @@ export function CardView({
             src={tooltipImageUrl}
             fallbackSrc={preferredImageFallbackUrl}
             variant="preview"
+            priority
             decorative
             onUnavailable={() => setCardImageUnavailable(true)}
           />

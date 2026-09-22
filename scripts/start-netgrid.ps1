@@ -1,4 +1,4 @@
-param(
+﻿param(
   [string]$OpenUrl = "",
   [string]$OpenPath = "/",
   [switch]$ServerWatchMode,
@@ -33,6 +33,13 @@ function Test-Endpoint {
   } catch {
     return $false
   }
+}
+
+function Request-NetgridStartupRestart {
+  param([Parameter(Mandatory = $true)][string]$Message)
+  Write-LauncherLog "Launcher network restart requested: $Message"
+  Add-Type -AssemblyName System.Windows.Forms
+  return [System.Windows.Forms.MessageBox]::Show($Message, "NETGRID starten", [System.Windows.Forms.MessageBoxButtons]::OKCancel, [System.Windows.Forms.MessageBoxIcon]::Information) -eq [System.Windows.Forms.DialogResult]::OK
 }
 
 function Test-EndpointOk {
@@ -332,6 +339,12 @@ $serverReadyLanBefore = if ($serverPortListeningBefore) { Test-Endpoint -Url $se
 $serverReadyLocalBefore = if ($serverPortListeningBefore) { Test-Endpoint -Url $localServerUrl } else { $false }
 $activeServerMode = if ($serverReadyLocalBefore) { Get-NetgridServerRuntimeMode -Url $localServerUrl } else { $null }
 $serverModeMismatch = $serverReadyLocalBefore -and $activeServerMode -ne $serverMode
+$browserConnectionReady = $serverReadyLanBefore -and (Test-NetgridBrowserConnection -ServerUrl $serverEnvironment.NETGRID_SERVER_BASE_URL -WebUrl $targetWebUrl)
+if ($serverReadyLanBefore -and -not $browserConnectionReady -and -not $RestartServer) {
+  if (-not (Request-NetgridStartupRestart "Die Netzwerkadresse hat sich geändert oder ist im laufenden Server nicht korrekt freigegeben.`n`nMit OK werden Server und Webclient jetzt neu gestartet und NETGRID anschließend geöffnet. Laufende Verbindungen werden dabei getrennt.")) { exit 0 }
+  $RestartServer = $true
+  $RestartWeb = $true
+}
 Write-LauncherLog "Server precheck lan=$serverReadyLanBefore local=$serverReadyLocalBefore activeMode=$activeServerMode requestedMode=$serverMode modeMismatch=$serverModeMismatch maintenanceRequested=$maintenanceRequested"
 
 if ($RestartServer -or $serverModeMismatch) {
@@ -341,10 +354,12 @@ if ($RestartServer -or $serverModeMismatch) {
   $serverReadyLocalBefore = $false
 }
 
+$serverLogStartOffset = $null
 if (-not $serverReadyLanBefore) {
   Stop-PortListeners -Ports @(8787)
   Stop-NetgridServerProcessTrees
   Write-LauncherLog "Starting server command mode=$serverMode"
+  $serverLogStartOffset = if (Test-Path -LiteralPath $serverLog) { (Get-Item -LiteralPath $serverLog).Length } else { 0L }
   Start-NetgridProcess -Command $serverCommand -LogPath $serverLog -Environment $serverEnvironment
 }
 
@@ -352,6 +367,11 @@ $webPortListeningBefore = Test-NetgridLocalPortListener -Port 3100
 $webReadyLanBefore = if ($webPortListeningBefore) { Test-Endpoint -Url $webUrl } else { $false }
 $webReadyLocalBefore = if ($webPortListeningBefore) { Test-Endpoint -Url $localWebUrl } else { $false }
 Write-LauncherLog "Web precheck lan=$webReadyLanBefore local=$webReadyLocalBefore"
+
+if ($webReadyLanBefore -and -not $RestartWeb -and -not (Test-NetgridWebServerBinding -ServerUrl $serverEnvironment.NETGRID_SERVER_BASE_URL -WebUrl $targetWebUrl)) {
+  if (-not (Request-NetgridStartupRestart "Der Webclient verwendet eine veraltete Serveradresse.`n`nMit OK wird der Webclient jetzt neu gestartet und NETGRID anschließend geöffnet.")) { exit 0 }
+  $RestartWeb = $true
+}
 
 if ($RestartWeb) {
   Stop-PortListeners -Ports @(3100)
@@ -370,7 +390,10 @@ $webReady = Wait-Endpoint -Url $webUrl
 $targetWebReady = Wait-Endpoint -Url $targetWebUrl -Seconds 10
 Write-LauncherLog "Postcheck serverReady=$serverReady webReady=$webReady targetWebReady=$targetWebReady targetWebUrl=$targetWebUrl"
 
-if ($serverReady -and $webReady -and $targetWebReady) {
+$browserReady = $serverReady -and $targetWebReady -and
+  (Test-NetgridBrowserConnection -ServerUrl $serverEnvironment.NETGRID_SERVER_BASE_URL -WebUrl $targetWebUrl) -and
+  (Test-NetgridWebServerBinding -ServerUrl $serverEnvironment.NETGRID_SERVER_BASE_URL -WebUrl $targetWebUrl)
+if ($serverReady -and $webReady -and $targetWebReady -and $browserReady) {
   Write-LauncherLog "Launcher success opening $targetOpenUrl"
   Start-Process $targetOpenUrl
   exit 0
@@ -379,6 +402,9 @@ if ($serverReady -and $webReady -and $targetWebReady) {
 $localServerStillRunning = Test-Endpoint -Url $localServerUrl
 $localWebStillRunning = Test-Endpoint -Url $localWebUrl
 $hint = ""
+if ($serverReady -and $targetWebReady -and -not $browserReady) {
+  $hint += "`nBrowser-Verbindung ungültig: Serverfreigabe und Webclient müssen dieselbe aktuelle Netzwerkadresse verwenden. Prüfe die Startkonfiguration (startup_browser_connection_invalid)."
+}
 if (-not $serverReady -and $localServerStillRunning) {
   $hint += "`nHinweis Server: Es laeuft bereits eine lokale Instanz auf 127.0.0.1:8787. Bitte diese beenden und das Icon erneut starten."
 }
@@ -386,7 +412,11 @@ if (-not $webReady -and $localWebStillRunning) {
   $hint += "`nHinweis Web: Es laeuft bereits eine lokale Instanz auf 127.0.0.1:3100. Bitte diese beenden und das Icon erneut starten."
 }
 
-$message = "NETGRID konnte nicht im LAN-Modus gestartet werden.`nLAN-IP: $lanIp`nServer bereit: $serverReady`nWeb bereit: $webReady`nZielseite bereit: $targetWebReady$hint`n`nLogs:`n$serverLog`n$webLog"
+$diagnostic = ""
+if (-not $serverReady -and -not $localServerStillRunning -and $null -ne $serverLogStartOffset) {
+  $diagnostic = Get-NetgridStartupDiagnostic -LogPath $serverLog -StartOffset $serverLogStartOffset
+}
+$message = "NETGRID konnte nicht gestartet werden.`n`n$diagnostic`n`nLAN-IP: $lanIp`nServer bereit: $serverReady`nWeb bereit: $webReady`nZielseite bereit: $targetWebReady$hint`n`nStartprotokolle:`n$launcherLog`n$serverLog`n$webLog"
 Write-LauncherLog "Launcher failure serverReady=$serverReady webReady=$webReady targetWebReady=$targetWebReady hint=$hint"
 Add-Type -AssemblyName System.Windows.Forms
 [System.Windows.Forms.MessageBox]::Show($message, "NETGRID starten") | Out-Null

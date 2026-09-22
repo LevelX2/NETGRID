@@ -9719,7 +9719,7 @@ describe("authoritative plan-first live runtime", () => {
       "corp",
       "install_card",
       "Install Data Wall on HQ",
-      { credits: 1, clicks: 1 },
+      { credits: 0, clicks: 1 },
       {
         source: "data-wall",
         payload: {
@@ -9727,10 +9727,10 @@ describe("authoritative plan-first live runtime", () => {
           sourceDefinitionId: "onr_v1_237_data-wall",
           serverId: "hq",
           placement: "ice",
-          iceInstallBaseCost: 1,
+          iceInstallBaseCost: 0,
           iceInstallAdditionalCost: 0,
           iceInstallReduction: 0,
-          iceInstallTotalCost: 1,
+          iceInstallTotalCost: 0,
           postInstallRezQuoteCardId: "data-wall",
           postInstallRezQuoteTargetServerId: "hq",
           postInstallRezQuoteProjectedServerId: "hq",
@@ -9781,16 +9781,9 @@ describe("authoritative plan-first live runtime", () => {
       ...corpOverflowFillers(3),
     ];
     input.playerView.servers = [
-      server("hq", [
-        visibleCard("hq-data-wall", "corp", "ice", {
-          definitionId: "onr_v1_237_data-wall",
-          title: "Data Wall",
-          rezCost: 1,
-          strength: 0,
-          subtypes: ["wall"],
-          rezzed: true,
-        }),
-      ]),
+      // HQ must actually need protection: another identical ETR outside an
+      // already unbreakable wall does not establish defensive progress.
+      server("hq"),
       server("rd", [
         visibleCard("rd-data-wall", "corp", "ice", {
           definitionId: "onr_v1_237_data-wall",
@@ -9840,9 +9833,17 @@ describe("authoritative plan-first live runtime", () => {
       reasonCode: "plan_first.corp.defend_servers",
       fallbackUsed: false,
     });
-    expect(decision.evidence).toContain(
-      `plan_assessment_evidence:corp_agenda_capacity_defense_conversion:hq:${installHqIce.actionId}`,
+    expect(input.playerView.own.gripOrHq).toHaveLength(
+      input.playerView.own.maxHandSize,
     );
+    expect(decision.decisionDebug?.planFirstDecision).toMatchObject({
+      selectedPlan: { moduleId: "corp.defend_servers" },
+      route: {
+        actionId: installHqIce.actionId,
+        actionType: "install_card",
+        stateVersion,
+      },
+    });
   });
 
   it("does not claim a blocked Corp upgrade placement as an executable hand-plan route", () => {
@@ -15750,7 +15751,8 @@ describe("authoritative plan-first live runtime", () => {
     ]);
     for (const action of input.legalActions)
       action.expiresAtStateVersion = stateVersion;
-    input.playerView.own.credits = 3;
+    // Both remote variants must be funded for this priority comparison.
+    input.playerView.own.credits = 11;
     input.playerView.own.agendaPoints = 5;
     input.playerView.own.gripOrHq = [
       visibleCard("agenda-terminal", "corp", "agenda", {
@@ -28178,8 +28180,8 @@ describe("authoritative plan-first live runtime", () => {
       | { gap?: { priorityClass?: string; evidenceCode?: string } }
       | undefined;
     expect(unadvancedCoverage?.gap).toMatchObject({
-      priorityClass: "P5",
-      evidenceCode: "missing_coverage:breaker_wall",
+      priorityClass: "P4",
+      evidenceCode: "runner_known_remote_coverage_project:remote_1",
     });
 
     resetResidentPlanPortfolioMemory();

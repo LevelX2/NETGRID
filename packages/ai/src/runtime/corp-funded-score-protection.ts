@@ -162,6 +162,7 @@ export type CorpFundedScoreProtectionAssessment =
 
 export type CorpBestFundedScoreProtectionInput = Readonly<{
   serverIce: readonly CorpFundedScoreProtectionIceInput[];
+  serverRoot?: readonly VisibleCard[];
   postInstallQuoteCardId?: string;
   preferPostInstallSourceProgress?: boolean;
   runnerRig: readonly VisibleCard[];
@@ -289,6 +290,7 @@ export type CorpFundedIceInstallRouteInput = Readonly<{
   currentServer?: Readonly<{
     id: string;
     ice: readonly CorpFundedScoreProtectionIceInput[];
+    root?: readonly VisibleCard[];
   }>;
   runnerRig: readonly VisibleCard[];
   runnerSetAside?: readonly VisibleCard[];
@@ -517,6 +519,7 @@ export function assessBestFundedCorpScoreProtection(
     }
     if (totalAgendaPointCost > input.availableCorpAgendaPoints) continue;
     const protection = assessCorpScoreProtection({
+      ...(input.serverRoot ? { serverRoot: input.serverRoot } : {}),
       serverIce: input.serverIce.map((ice) => ({
         ...(selectedById.get(ice.instanceId) ?? ice),
         rezzed: ice.rezzed === true || selectedById.has(ice.instanceId),
@@ -804,6 +807,9 @@ export function projectCorpFundedIceInstallRoute(
   const currentIce =
     targetServerId === "new_remote" ? [] : input.currentServer!.ice;
   const recomputedBaseline = assessBestFundedCorpScoreProtection({
+    ...(input.currentServer?.root
+      ? { serverRoot: input.currentServer.root }
+      : {}),
     serverIce: currentIce,
     runnerRig: input.runnerRig,
     ...(input.runnerSetAside ? { runnerSetAside: input.runnerSetAside } : {}),
@@ -980,6 +986,9 @@ export function projectCorpFundedIceInstallRoute(
     effectiveRezCostQuote: projectedRezQuote.quote,
   };
   const after = assessBestFundedCorpScoreProtection({
+    ...(input.currentServer?.root
+      ? { serverRoot: input.currentServer.root }
+      : {}),
     serverIce: [...currentIce, projectedSource],
     postInstallQuoteCardId: sourceCard.instanceId,
     ...(input.preferPostInstallSourceProgress === true
