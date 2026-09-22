@@ -9,8 +9,51 @@ import { createRunnerPumpFuturePathContext } from "../../runtime/runner-pump-fut
 import { assessKnownRezzedIcePath } from "../../visible-run-analysis";
 import { runnerRunWindowEncounterRequiredHandFloor } from "./run-window-assessment";
 import { activeRunRootPlan } from "./run-window-origin";
+import { isAcceptableNonlethalDamageSubroutine } from "../../runtime/encounter-subroutine";
 
 afterEach(resetResidentPlanPortfolioMemory);
+
+it.each([
+  [352, "pump_breaker"],
+  [356, "break_subroutine"],
+])("keeps the accepted inner encounter route at D%s", (index, type) => {
+  const cp = JSON.parse(
+    readFileSync(
+      new URL(
+        `../../../../../data/scenarios/ai-decision-checkpoints/cp-meta-456-terminal-contest-d${index}.json`,
+        import.meta.url,
+      ),
+      "utf8",
+    ),
+  );
+  const input: AiDecisionInput = {
+    ...cp.input,
+    ...buildAiDecisionInputDto(cp.input),
+  };
+  restoreAiRuntimeCheckpoint(
+    input,
+    cp.input.ownDeckSnapshot.deckSnapshotId,
+    cp.runtime,
+  );
+  const decision = chooseAiAction(input);
+  const action = input.legalActions.find(
+    (a) => a.actionId === decision.actionId,
+  );
+  expect(action?.type).toBe(type);
+  expect(decision.fallbackUsed).toBe(false);
+  expect(decision.decisionDebug?.planFirstDecision?.rootPlanInstanceId).toBe(
+    "plan:runner.contest_remote:remote%3Aremote_2",
+  );
+  if (index === 356) {
+    expect(action?.payload?.subroutineIndex).toBe(2);
+    const core =
+      input.playerView.run!.encounteredIce!.effectiveRunQuote!.subroutines[0]!;
+    expect(isAcceptableNonlethalDamageSubroutine(input, core)).toBe(false);
+    expect(isAcceptableNonlethalDamageSubroutine(input, core, 0)).toBe(true);
+    input.playerView.own.gripOrHq = input.playerView.own.gripOrHq.slice(0, 1);
+    expect(isAcceptableNonlethalDamageSubroutine(input, core, 0)).toBe(false);
+  }
+});
 
 it("preserves the same accepted damage budget in the movement phase", () => {
   const cp = JSON.parse(
