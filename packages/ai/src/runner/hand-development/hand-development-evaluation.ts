@@ -1432,7 +1432,11 @@ function deferReasonForCard(
   persistentInstallEvaluation?: RunnerPersistentInstallEvaluation,
   fundingNeed?: RunnerHandDevelopmentFundingNeed,
 ): RunnerHandDevelopmentDeferReason {
-  if (persistentInstallEvaluation?.duplicateRole === "redundant_duplicate") {
+  if (
+    persistentInstallEvaluation?.duplicateRole === "redundant_duplicate" ||
+    persistentInstallEvaluation?.replacementAssessment.status ===
+      "already_satisfied"
+  ) {
     return "duplicate";
   }
   if (

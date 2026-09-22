@@ -692,6 +692,14 @@ Ablehnung des leeren Host-Investments; ein bezahlbarer, noch nicht installierter
 Breaker bleibt als Verbraucher zulässig. Eine gezielte wirtschaftliche
 Ersatz-/Duplikatfolge benötigt weiterhin einen eigenen belegten Entwicklungszweck.
 
+Auch die negative Ersatzbewertung eines exklusiven Decks ist verbindlich:
+`already_satisfied` verwirft die Installation als Duplikat, selbst wenn ein
+allgemeines Teilprofil vermeintlich zusätzliche Speicher- oder Kreditkapazität
+meldet. Eine identische Neuinstallation ersetzt diese Kapazität; sie addiert sie
+nicht. Die realen G1D123/G4D230-Zustände der Paarung 456 sichern die Ablehnung
+beim Entwicklungsowner. Ein durch dieselbe Ersatzbewertung bestätigtes
+`positive_upgrade` bleibt zugelassen.
+
 Die allgemeine Handentwicklung und konkrete Supportpläne verwenden dieselbe
 side-sichere Handrotationsbewertung. Ein generischer Draw bei voller Hand setzt
 eine bekannte Karte mit niedrigem aktuellen Haltewert voraus, etwa eine als

@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
+import type { AiDecisionInput } from "@netgrid/shared";
 import { buildAiDecisionInputDto } from "../../input-dto";
 import { chooseAiAction } from "../../ai-runtime-public-entrypoints";
 import { restoreAiRuntimeCheckpoint } from "../../evaluation/decision-checkpoints/runtime-checkpoint";
@@ -21,7 +22,7 @@ describe("hosted economy consumer admission", () => {
           "utf8",
         ),
       );
-      const input = {
+      const input: AiDecisionInput = {
         ...checkpoint.input,
         ...buildAiDecisionInputDto(checkpoint.input),
       };
@@ -61,10 +62,10 @@ describe("hosted economy consumer admission", () => {
       );
       expect(decision.evidence).toContain("plan_first_runtime:true");
       expect(
-        decision.evidence.some((entry) => entry.startsWith("plan_step_id:")),
+        decision.evidence!.some((entry) => entry.startsWith("plan_step_id:")),
       ).toBe(true);
       expect(
-        decision.evidence.some((entry) =>
+        decision.evidence!.some((entry) =>
           entry.startsWith("plan_scheduler:route:"),
         ),
       ).toBe(true);
