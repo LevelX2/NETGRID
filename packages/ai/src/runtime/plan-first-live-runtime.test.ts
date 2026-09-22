@@ -1445,7 +1445,6 @@ describe("authoritative plan-first live runtime", () => {
     ];
 
     const decision = liveContext().chooseSemanticRuntimeAction(input, {});
-
     expect(decision).toMatchObject({
       actionId: desperate.actionId,
       reasonCode: "plan_first.runner.secure_terminal_win",
@@ -3027,7 +3026,6 @@ describe("authoritative plan-first live runtime", () => {
     input.playerView.timingPoint = "run.encounter_ice";
     input.playerView.own.credits = 15;
     input.playerView.phase = "run";
-    input.playerView.own.credits = 3;
     input.playerView.pendingChoice = {
       choiceId,
       side: "corp",
@@ -9844,6 +9842,140 @@ describe("authoritative plan-first live runtime", () => {
         stateVersion,
       },
     });
+  });
+
+  it("keeps a full agenda hand out of discard when no urgent defense need exists", () => {
+    resetResidentPlanPortfolioMemory();
+    const stateVersion = 1;
+    const installHqIce = legalAction(
+      "install-data-wall-hq",
+      "corp",
+      "install_card",
+      "Install Data Wall on HQ",
+      { credits: 1, clicks: 1 },
+      {
+        source: "data-wall",
+        payload: {
+          cardId: "data-wall",
+          sourceDefinitionId: "onr_v1_237_data-wall",
+          serverId: "hq",
+          placement: "ice",
+          iceInstallBaseCost: 1,
+          iceInstallAdditionalCost: 0,
+          iceInstallReduction: 0,
+          iceInstallTotalCost: 1,
+          postInstallRezQuoteCardId: "data-wall",
+          postInstallRezQuoteTargetServerId: "hq",
+          postInstallRezQuoteProjectedServerId: "hq",
+          postInstallRezQuoteExpiresAtStateVersion: stateVersion,
+          postInstallRezQuoteComplete: true,
+          postInstallRezQuoteCostKind: "fixed",
+          postInstallRezQuoteBaseCredits: 1,
+          postInstallRezQuoteFinalCredits: 1,
+          postInstallRezQuoteMandatoryAgendaPointCost: 0,
+        },
+      },
+    );
+    const draw = legalAction(
+      "draw",
+      "corp",
+      "draw_card",
+      "Draw a card",
+      { credits: 0, clicks: 1 },
+      { source: "basic_action" },
+    );
+    const credit = legalAction(
+      "credit",
+      "corp",
+      "gain_credit",
+      "Gain 1 Credit",
+      { credits: 0, clicks: 1 },
+      { source: "basic_action", payload: { gainCreditsAmount: 1 } },
+    );
+    const input = aiInput("corp", [draw, credit, installHqIce]);
+    input.playerView.own.clicks = 2;
+    input.playerView.own.credits = 5;
+    input.playerView.own.maxHandSize = 5;
+    input.playerView.own.stackOrRdCount = 20;
+    input.playerView.own.gripOrHq = [
+      visibleCard("agenda", "corp", "agenda", {
+        definitionId: "onr_v1_201_executive-extraction",
+        title: "Executive Extraction",
+        advancementRequirement: 3,
+        agendaPoints: 2,
+      }),
+      visibleCard("data-wall", "corp", "ice", {
+        definitionId: "onr_v1_237_data-wall",
+        title: "Data Wall",
+        rezCost: 1,
+        strength: 0,
+        subtypes: ["wall"],
+      }),
+      ...corpOverflowFillers(3),
+    ];
+    input.playerView.servers = [
+      server("hq", [
+        visibleCard("hq-data-wall", "corp", "ice", {
+          definitionId: "onr_v1_237_data-wall",
+          title: "Data Wall",
+          rezCost: 1,
+          strength: 0,
+          subtypes: ["wall"],
+          rezzed: true,
+        }),
+      ]),
+      server("rd", [
+        visibleCard("rd-data-wall", "corp", "ice", {
+          definitionId: "onr_v1_237_data-wall",
+          title: "Data Wall",
+          rezCost: 1,
+          strength: 0,
+          subtypes: ["wall"],
+          rezzed: true,
+        }),
+      ]),
+      server("archives"),
+    ];
+    input.playerView.opponent.rig = [];
+    input.playerView.corpCentralAccessQuotes = ["hq", "rd"].map((serverId) => ({
+      serverId: serverId as "hq" | "rd",
+      stateVersion,
+      complete: true as const,
+      effectiveAccessCount: 1,
+      isMultiaccess: false,
+      sourceDefinitionIds: [],
+      serverBoundEffects: [],
+    }));
+    input.playerView.specialZones = {
+      setAside: [],
+      removedFromGame: [],
+      setAsideCount: 0,
+      removedFromGameCount: 0,
+    };
+    attachOwnDeckSnapshot(input, {
+      deckSnapshotId: "agenda-capacity-defense-conversion",
+      side: "corp",
+      cards: [
+        { cardId: "onr_v1_201_executive-extraction", quantity: 1 },
+        { cardId: "onr_v1_237_data-wall", quantity: 3 },
+        { cardId: "onr_v1_284_chance-observation", quantity: 23 },
+      ],
+    });
+    for (const action of input.legalActions) {
+      action.expiresAtStateVersion = stateVersion;
+    }
+    input.playerView.legalActions = input.legalActions;
+
+    const decision = liveContext().chooseSemanticRuntimeAction(input, {});
+    expect(decision.actionId).not.toBe(draw.actionId);
+    expect(decision).toMatchObject({
+      actionId: credit.actionId,
+      reasonCode: "plan_first.corp.economy",
+      fallbackUsed: false,
+    });
+    expect(decision.evidence).toContain(
+      "plan_assessment_evidence:corp_non_strategic_residual_capacity_use",
+    );
   });
 
   it("does not claim a blocked Corp upgrade placement as an executable hand-plan route", () => {

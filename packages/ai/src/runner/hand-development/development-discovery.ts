@@ -4,7 +4,7 @@ import type { ActionSemanticCandidate } from "../../action-semantic-candidate-ty
 import { rolesForDeckDoctrineCard } from "../../deck-doctrine-card-roles";
 import { planInstanceIdForProposal } from "../../plans/plan-instance";
 
-import { runnerRolesCoverCoverageGap } from "../../plans/runner-coverage-contracts";
+import { runnerInstallDefinitionCoversCoverageGap } from "../rig-coverage/coverage-plan-module";
 import { runnerDevelopmentFundingMilestone } from "../../plans/runner-development-contracts";
 import { type RunnerPlanDomain } from "../../plans/runner-tactical-plan-contracts";
 import type {
@@ -215,7 +215,8 @@ export function buildRunnerCardDevelopmentSignals({
               if (
                 entry.sourceCardInstanceId !== evaluation.cardInstanceId ||
                 entry.actionType !== candidate.actionType ||
-                entry.semanticActionType !== candidate.semanticActionType
+                entry.semanticActionType !== candidate.semanticActionType ||
+                coverageOwnedActionIds.has(entry.actionId)
               ) {
                 return false;
               }
@@ -287,9 +288,13 @@ export function buildRunnerCardDevelopmentSignals({
       const assignedCoveragePlanIds = evaluationDefinitionId
         ? coverageGaps
             .filter((gap) =>
-              runnerRolesCoverCoverageGap(
+              runnerInstallDefinitionCoversCoverageGap(
+                evaluationDefinitionId,
                 rolesForDeckDoctrineCard(evaluationDefinitionId),
                 gap.requiredRole,
+                input.legalActions.find(
+                  (action) => action.actionId === evaluation.legalActionId,
+                )?.payload?.selectedSubtype,
               ),
             )
             .map((gap) => `runner.rig_and_coverage:${gap.gapId}`)

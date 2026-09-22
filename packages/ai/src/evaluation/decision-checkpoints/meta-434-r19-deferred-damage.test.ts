@@ -98,7 +98,7 @@ it("prices both same-encounter breaks once before the inner wall", () => {
   ).toBe(quote.paidSubroutineBreaks!.length);
 });
 
-it("retains the cheaper unpaid-damage branch explicitly when full mitigation cannot be funded", () => {
+it("retains the funding blocker for the cheaper damage branch when mitigation cannot be funded", () => {
   const input = load(33, 241, 16);
   const server = input.playerView.servers.find((s) => s.id === "remote_1")!;
   const quote = assessKnownRezzedIcePath(
@@ -118,7 +118,7 @@ it("retains the cheaper unpaid-damage branch explicitly when full mitigation can
     input,
     deckCapabilities: input.ownDeckCapabilities!,
   }).find((t) => t.targetServerId === "remote_1")!;
-  expect(target.pathPassability).toBe("blocked_unbreakable");
+  expect(target.pathPassability).toBe("blocked_unpayable");
 });
 
 it("does not request a hand buffer for a fully paid damage break", () => {

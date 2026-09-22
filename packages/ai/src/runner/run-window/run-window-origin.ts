@@ -28,6 +28,7 @@ import {
   runnerRunPathCreditBudgetWithVisiblePools,
 } from "../../visible-run-analysis";
 import { reservedAccessTrashCredits } from "./run-window-access";
+import { runnerRunRiskContractReassessment } from "./run-window-assessment";
 import {
   knownPathAfterDamageBudget,
   runnerConfirmedDamageRequiredHandFloor,
@@ -293,9 +294,17 @@ export function reassessActiveInformationRunParent(
       ? ("convert_to_contest" as const)
       : ("convert_to_access" as const)
     : ("retain_information" as const);
+  // The entry quote is the accepted risk baseline, not a permanently locked
+  // credit amount. Revealed ICE and spent Corp rez credits can reduce the
+  // reserve while the same run is still in progress.
+  const currentRisk = runnerRunRiskContractReassessment(input, root);
+  if (root.runRiskContract && !currentRisk?.currentReserveQuote) {
+    // Keep the binding for the run owner's structured fail-closed assessment.
+    return root;
+  }
   const preservedRunReserve = Math.max(
     0,
-    root.runRiskContract?.reserveQuote.requiredCredits ?? 0,
+    currentRisk?.currentReserveQuote?.requiredCredits ?? 0,
   );
   const knownEncounterPathFitsBoundRunBudget =
     knownPathReachable &&

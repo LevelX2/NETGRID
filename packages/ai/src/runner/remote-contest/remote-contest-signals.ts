@@ -63,6 +63,7 @@ import type { RunnerHandDevelopmentEvaluation } from "../hand-development/hand-d
 import { runnerCoverageGapIsTerminalRemoteThreat } from "../rig-coverage/coverage-support";
 import {
   runnerCriticalDamageContestBlocked,
+  runnerRemoteRepeatedFreeStopEvidence,
   runnerTerminalNonlethalDamageContestAlreadyFailedThisTurn,
   runnerTerminalRemoteContestIsDirectlyMandatory,
 } from "./remote-contest-admission";
@@ -581,7 +582,12 @@ function bindRunnerRemoteRunActionAssessments(
     const specialRouteMembership =
       signal.constrainedActionCapacity === true ||
       signal.evidenceCode === "visible_known_agenda_remote";
+    const repeatedFreeStopEvidence = runnerRemoteRepeatedFreeStopEvidence(
+      input,
+      evaluation,
+    );
     const executable =
+      repeatedFreeStopEvidence === undefined &&
       signal.runActionDeferralEvidenceCode === undefined &&
       signal.routePreparation === undefined &&
       signal.reachable &&
@@ -602,15 +608,16 @@ function bindRunnerRemoteRunActionAssessments(
           ...evaluation.evidence,
         ]
       : [
-          lacksDifferentialPayoff
-            ? "runner_remote_card_run_has_no_visible_differential_payoff_over_basic_run"
-            : (signal.runActionDeferralEvidenceCode ??
-              runnerRemoteRunVariantNonproductiveEvidence(
-                signal,
-                evaluation,
-                fundingSupport,
-                preferredActionIds,
-              )),
+          repeatedFreeStopEvidence ??
+            (lacksDifferentialPayoff
+              ? "runner_remote_card_run_has_no_visible_differential_payoff_over_basic_run"
+              : (signal.runActionDeferralEvidenceCode ??
+                runnerRemoteRunVariantNonproductiveEvidence(
+                  signal,
+                  evaluation,
+                  fundingSupport,
+                  preferredActionIds,
+                ))),
           ...evaluation.evidence,
         ];
     const opportunityQuote = evaluation.consumableRunOpportunityQuote;
@@ -764,6 +771,9 @@ export function buildRunnerRemoteContestSignals({
   activeRunRoot: ActiveRunnerRunRoot | undefined;
 }): RunnerPlanDomain["remoteContests"] {
   const baseRemoteContestDrafts: RunnerRemoteContestSignalDraft[] = [
+    // General threat focus precedes concrete routes. Deduplication keeps the
+    // later draft, including its exact funding/coverage and risk bindings.
+    ...runnerMatchpointRemoteFocusSignals(input, runTargets, coverageGaps),
     ...runnerRemoteInformationPreparationSignals(input, candidates, runTargets),
     ...runLockReleaseRoutes.flatMap((route) => {
       if (!route.serverId.startsWith("remote_")) return [];
@@ -1003,7 +1013,6 @@ export function buildRunnerRemoteContestSignals({
           ...(runRiskContract ? { runRiskContract } : {}),
         };
       }),
-    ...runnerMatchpointRemoteFocusSignals(input, runTargets, coverageGaps),
     ...input.playerView.servers.flatMap((server) => {
       const knownAgenda = server.root.some(
         (card) => card.known !== false && card.type === "agenda",

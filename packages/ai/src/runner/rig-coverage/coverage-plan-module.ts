@@ -18,6 +18,7 @@ import {
   runnerPlanDomain,
 } from "../../plans/runner-plan-module-support";
 import type { CoverageState } from "./coverage-types";
+import { runnerAffordableCoverageSearchActionIds } from "./coverage-search-alternatives";
 export function runnerCoveragePlanHandDisposition(
   input: AiDecisionInput,
   card: VisibleCard,
@@ -79,7 +80,6 @@ export function createRunnerCoverageModule(
           gap,
           rolesForDefinitionId,
         );
-        const draws = coverageDrawCandidates(context, gap);
         const funding = coverageFundingCandidates(context, gap);
         const phase = coveragePhase(
           context,
@@ -88,11 +88,12 @@ export function createRunnerCoverageModule(
           preparations,
           installs,
         );
+        const draws = coverageAcquisitionCandidates(context, gap, phase);
         const routeExists =
           preparations.length > 0 ||
           installs.length > 0 ||
           (phase === "fund_answer" && funding.length > 0) ||
-          (!gap.answerInHand && draws.length > 0);
+          draws.length > 0;
         return proposal({
           moduleId: "runner.rig_and_coverage",
           dedupeKey: gap.gapId,
@@ -131,7 +132,11 @@ export function createRunnerCoverageModule(
               )
             : current.phase === "fund_answer"
               ? coverageFundingCandidates(context, current.gap)
-              : coverageDrawCandidates(context, current.gap);
+              : coverageAcquisitionCandidates(
+                  context,
+                  current.gap,
+                  current.phase,
+                );
       return assessment(
         instance,
         current.gap.priorityClass,
@@ -210,7 +215,11 @@ export function createRunnerCoverageModule(
           candidates,
         };
       }
-      const candidates = coverageDrawCandidates(context, current.gap);
+      const candidates = coverageAcquisitionCandidates(
+        context,
+        current.gap,
+        current.phase,
+      );
       return {
         step: {
           stepId: `${instance.instanceId}:find:${current.gap.requiredRole}`,
@@ -245,13 +254,38 @@ function coveragePhase(
       ? "prepare_coverage"
       : installs.length > 0
         ? "install_answer"
-        : gap.answerInHand && (gap.fundingGap ?? 0) > 0
-          ? "fund_answer"
-          : gap.directSearchActionIds.length > 0
-            ? "search_answer"
-            : gap.searchEngineSetupActionIds.length > 0
-              ? "setup_search_engine"
-              : "draw_for_answer";
+        : runnerAffordableCoverageSearchActionIds(
+              context.input,
+              context.actionCandidates,
+              gap,
+            ).length > 0
+          ? "search_answer"
+          : gap.answerInHand && (gap.fundingGap ?? 0) > 0
+            ? "fund_answer"
+            : runnerCoverageAcquisitionPhase(gap);
+}
+
+export function runnerCoverageAcquisitionPhase(
+  gap: RunnerCoverageGapSignal,
+): CoverageState["phase"] {
+  return gap.directSearchActionIds.length > 0
+    ? "search_answer"
+    : gap.searchEngineSetupActionIds.length > 0
+      ? "setup_search_engine"
+      : "draw_for_answer";
+}
+
+export function runnerCoverageAcquisitionActionIds(
+  gap: RunnerCoverageGapSignal,
+  phase: CoverageState["phase"],
+): readonly string[] {
+  return phase === "search_answer"
+    ? gap.directSearchActionIds
+    : phase === "setup_search_engine"
+      ? gap.searchEngineSetupActionIds
+      : phase === "draw_for_answer"
+        ? gap.drawForAnswerActionIds
+        : [];
 }
 
 export function runnerCoverageCurrentPhase(params: {
@@ -328,6 +362,7 @@ function coverageInstallCandidates(
         sourceDefinitionId,
         roles,
         gap.requiredRole,
+        action?.payload?.selectedSubtype,
       )
     )
       return [];
@@ -424,7 +459,15 @@ export function runnerInstallDefinitionCoversCoverageGap(
   definitionId: string,
   roles: readonly string[],
   requiredRole: RunnerCoverageGapSignal["requiredRole"],
+  selectedSubtype?: unknown,
 ): boolean {
+  if (
+    selectedSubtype !== undefined &&
+    (typeof selectedSubtype !== "string" ||
+      `breaker_${selectedSubtype}` !== requiredRole)
+  ) {
+    return false;
+  }
   if (runnerRolesCoverCoverageGap(roles, requiredRole)) return true;
   const profile = AI_HINTS_BY_CARD.get(definitionId)?.breakerProfile;
   return (
@@ -435,20 +478,32 @@ export function runnerInstallDefinitionCoversCoverageGap(
   );
 }
 
-function coverageDrawCandidates(
+function coverageAcquisitionCandidates(
   context: PlanSchedulerContext,
   gap: RunnerCoverageGapSignal,
+  phase: CoverageState["phase"],
 ): PlanMaterialization["candidates"] {
-  if (gap.answerInHand) return [];
+  const affordableAlternatives = new Set(
+    runnerAffordableCoverageSearchActionIds(
+      context.input,
+      context.actionCandidates,
+      gap,
+    ),
+  );
+  if (gap.answerInHand && affordableAlternatives.size === 0) return [];
   const directSearchIds = new Set(gap.directSearchActionIds);
   const searchSetupIds = new Set(gap.searchEngineSetupActionIds);
   const drawForAnswerIds = new Set(gap.drawForAnswerActionIds);
+  // The phase admits an exact acquisition contract. A draw or setup action
+  // cannot execute as a search: its continuation has no bound search target.
+  const phaseActionIds = new Set(
+    runnerCoverageAcquisitionActionIds(gap, phase),
+  );
   return context.actionCandidates
     .filter((candidate) => {
-      const isCoverageRoute =
-        directSearchIds.has(candidate.actionId) ||
-        searchSetupIds.has(candidate.actionId) ||
-        drawForAnswerIds.has(candidate.actionId);
+      if (gap.answerInHand && !affordableAlternatives.has(candidate.actionId))
+        return false;
+      const isCoverageRoute = phaseActionIds.has(candidate.actionId);
       const isDrawRoute = drawForAnswerIds.has(candidate.actionId);
       const displacedByGeneralHandDevelopment =
         context.actionDispositions?.some(

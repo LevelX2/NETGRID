@@ -8,6 +8,7 @@ import { planInstanceIdForProposal } from "../../plans/plan-instance";
 import { corpRestrictedRezPreparationCandidates } from "../../runtime/corp-restricted-credit-reserve";
 import type { CorpScoreProjectSignal } from "../../plans/corp-score-contracts";
 import { corpBasicCreditsDominatedByCurrentScore } from "../score/score-conditional-credit-funding";
+import { corpScoreRestoresRezReserveBeforeRunnerTurn } from "../score/score-reserve-restoration";
 
 export function corpDefenseReserveNeeds(
   input: AiDecisionInput,
@@ -97,6 +98,17 @@ export function corpDefenseReserveNeeds(
     ) {
       return [];
     }
+    // The reserve is needed at the next Runner window. Revalidate after
+    // every real score step; its future payout cannot fund current costs.
+    if (
+      reserve?.observedAtStateVersion === input.playerView.stateVersion &&
+      corpScoreRestoresRezReserveBeforeRunnerTurn(
+        input,
+        scoreProjects,
+        targetCredits,
+      )
+    )
+      return [];
     const restrictedCreditPreparations = reserve
       ? corpRestrictedRezPreparationCandidates(input, candidates, {
           targetIceInstanceId: iceInstanceId,

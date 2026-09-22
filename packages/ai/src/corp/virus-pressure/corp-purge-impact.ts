@@ -190,6 +190,7 @@ function runnerVirusCounterHasActiveEffect(
       return entry.amount >= 2;
     case "garbage":
     case "cascade":
+    case "crumble":
       return entry.amount >= 2;
     default:
       return entry.amount > 0;

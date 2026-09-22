@@ -2,8 +2,13 @@ import { runnerCandidateSourceDefinitionId } from "../../runtime/runner-action-s
 import { type AiDecisionInput } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../../action-semantic-candidate-types";
 import { rolesForDeckDoctrineCard } from "../../deck-doctrine-card-roles";
-import { runnerInstallDefinitionCoversCoverageGap } from "./coverage-plan-module";
+import {
+  runnerInstallDefinitionCoversCoverageGap,
+  runnerCoverageAcquisitionPhase,
+  runnerCoverageAcquisitionActionIds,
+} from "./coverage-plan-module";
 import { type RunnerCoverageGapSignal } from "../../plans/runner-coverage-contracts";
+import { runnerAffordableCoverageSearchActionIds } from "./coverage-search-alternatives";
 export function runnerCoverageOwnedActionIds(
   input: AiDecisionInput,
   candidates: readonly ActionSemanticCandidate[],
@@ -16,15 +21,14 @@ export function runnerCoverageOwnedActionIds(
         return preparationActionIds;
       }
       if (!gap.answerInHand) {
-        return [
-          ...preparationActionIds,
-          ...(gap.directSearchActionIds ?? []),
-          ...(gap.searchEngineSetupActionIds ?? []),
-          ...(gap.drawForAnswerActionIds ?? []),
-        ];
+        return runnerCoverageAcquisitionActionIds(
+          gap,
+          runnerCoverageAcquisitionPhase(gap),
+        );
       }
       return [
         ...preparationActionIds,
+        ...runnerAffordableCoverageSearchActionIds(input, candidates, gap),
         ...candidates
           .filter((candidate) => {
             if (candidate.semanticActionType !== "install.card") return false;
@@ -44,6 +48,9 @@ export function runnerCoverageOwnedActionIds(
                 sourceDefinitionId,
                 rolesForDeckDoctrineCard(sourceDefinitionId),
                 gap.requiredRole,
+                input.legalActions.find(
+                  (action) => action.actionId === candidate.actionId,
+                )?.payload?.selectedSubtype,
               )
             );
           })
@@ -61,6 +68,8 @@ export function runnerDrawActionHasCurrentCoveragePurpose(
     (gap) =>
       !gap.answerInHand &&
       gap.deckHasAnswer &&
+      (gap.preparationActionIds?.length ?? 0) === 0 &&
+      runnerCoverageAcquisitionPhase(gap) === "draw_for_answer" &&
       gap.drawForAnswerActionIds.includes(candidate.actionId),
   );
 }

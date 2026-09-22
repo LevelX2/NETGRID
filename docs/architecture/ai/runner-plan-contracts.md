@@ -174,8 +174,9 @@ Die Informationsroute bewertet ein öffentlich beobachtetes kostenloses
 Run-Ende im laufenden Zug: Folgt auf den Basisrun ausschließlich kostenloses
 ICE-Rezzen und ein von der Engine bestätigtes End-the-Run-Fenster ohne
 Zugriff, rechtfertigt unveränderter Aufbau keine erneute identische Probe.
-`central-probe-outcome.ts` bindet diese Admission-Evidence an Zielserver,
-Zug und Endereignis. Aktuell garantierter Zugriff, Kartenruns und geänderte
+`run-analysis/runner-free-stop-observation.ts` liefert das öffentliche
+Endereignis für Zielserver und Zug; `central-probe-outcome.ts` entscheidet
+dessen Zulassung im Central-Owner. Aktuell garantierter Zugriff, Kartenruns und geänderte
 Board-/Effektzustände bleiben eigenständig bewertete Routen. Ein neuer Zug
 öffnet eine neue Beobachtung; Kartenidentitäten oder verborgene ICE-Quotes
 werden aus der Historie nicht rekonstruiert. Das Eingabe-DTO bewahrt dafür
@@ -187,6 +188,14 @@ wenn die öffentlichen Engine-Effekte ausschließlich Runner-Credits vergeben
 oder Credits auf einer eigenen Karte einlagern beziehungsweise abheben. Andere Counter-Veränderungen
 werden dadurch nicht als Finanzierung freigegeben.
 Gemischte oder nicht quotierte Ereignisse eröffnen die Bewertung erneut.
+
+Der Remote-Owner verwendet dieselbe Beobachtung für einen wiederholten
+Basisrun mit bezahlbarem Trashziel und weiterhin nur bedingtem Probe-Zugriff.
+`remote-contest-admission.ts` lehnt diese einzelne Runvariante ab, ohne ihren
+bekannten Trashwert oder die Engine-Pfadquote zu verändern. Scorebedrohungen,
+terminale Contests und garantierter Zugriff bleiben separat zugelassen.
+Eine bezahlte Verteidigung belegt keine kostenlose Wiederholung: Der erneute
+Run kann die Corp weiter Credits kosten und wird regulär bewertet.
 
 Post-Break-ICE-Trash wird als Vorbereitung einer bereits zugelassenen
 Central-Instanz behandelt. `post-break-trash-preparation.ts` vergleicht die
@@ -258,6 +267,12 @@ Der Plan muss unterscheiden:
 - leeres oder bekannt wertloses Remote;
 - Ambush-/Damage-Risiko;
 - deckstrategisch begründeten wiederholten Remote-Druck.
+
+Ein allgemeiner Matchpoint-Fokus wird vor den konkret bewerteten Remote-Routen
+zusammengeführt. Er darf deren aktuelle Finanzierungs- oder Coverage-Bindung,
+Zugriffsvertrag und Risikoquote nicht überschreiben. Ein bereits berechneter
+Bank-Support bleibt damit am selben Remote-Parent und Bedarf gebunden; eine
+fehlende bezahlbare Route wird durch den Bedrohungsfokus nicht ausführbar.
 
 Ersetzt eine aktuell ausführbare gezielte ICE-Entfernung die blockierte
 Runroute, entfernt ihr Remote-Signal den bisherigen `supportNeedId` bereits
@@ -369,6 +384,26 @@ Dispositionen und exakte Fortsetzungsbindungen (`coverage-bindings.ts`).
 `coverage-plan-module.ts` besitzt die Planphasen und Materialisierung.
 Suchbedarf und Upgrade-Ökonomie liegen ebenfalls in diesem Verzeichnis.
 
+Die Materialisierung verwendet nur die Actionmenge der aktuellen
+Beschaffungsphase: direkte Suchaktionen in `search_answer`, Installationen
+des Suchwerkzeugs in `setup_search_engine` und Ziehaktionen in
+`draw_for_answer`. Ein höher bewerteter Zieheffekt darf nicht als Suchroute
+ausgeführt werden. Discovery und Assessment verwenden dieselbe Zulassung;
+die anschließende exakte Suchzielbindung bleibt unverändert verpflichtend.
+Auch die Actionzuordnung verwendet diese Phasenregel. Konkurrierende
+Ziehevents bleiben für die Handentwicklung verfügbar, solange Coverage
+Suche oder Suchwerkzeug-Aufbau materialisiert. Sie werden nicht zugleich
+von Coverage beansprucht und dort ohne ausführbaren Head ausgeschlossen.
+
+Eine unbezahlbare Antwort auf der Hand sperrt keinen bereits exakt gebundenen
+günstigeren Stack-Suchweg. `coverage-search-alternatives.ts` prüft bekannte
+Such- und Installationskosten, freie Handkapazität, bekannte eigene
+Stack-Verfügbarkeit und freie MU. Nur die vollständig finanzierte Beschaffung
+erhält die Suchphase und Action-Ownership; eine direkt bezahlbare Handantwort
+und eine bereits zertifizierte Konversion im selben Zug behalten Vorrang.
+Die gestufte Suche verspricht keinen sofortigen Run. Nach der gebundenen
+Such-Choice wird die tatsächliche Installation neu materialisiert.
+
 Ein Zahlungsfenster erhält die exakt ausgewählte Coverage-Aktion auch in
 `draw_for_answer`. Der bisherige Executor muss die Originalaktion in
 `drawForAnswerActionIds` führen; Phase und benötigte Breaker-Rolle bleiben
@@ -412,12 +447,39 @@ Verantwortung:
 - Bezahlbarkeit des anschließenden Runpfads;
 - deckstrategischer Rig-first- oder Minimal-Rig-Modus.
 
+Die Deck-Fähigkeitsmatrix trennt mögliche
+Deck-/Handantworten von der tatsächlich installierten Abdeckung. Bei einem
+kanonischen Break-Matcher mit gewähltem Untertyp zählt nur der öffentlich
+sichtbare aktuelle Modus jeder installierten Instanz. Noch nicht gewählte
+Modi und weitere Handkopien erzeugen keine aktive Abdeckung; unterschiedliche
+installierte Kopien dürfen ihre jeweils gewählten Rollen gemeinsam abdecken.
+Diese Fakten schließen erfüllte Setup-Bedarfe vor weiterer Suche oder Draw.
+
 Die MU-Opferbewertung unterscheidet feste Breakerfunktionen anhand der
 kanonischen Break-Fähigkeiten. Das gemeinsame gedruckte Merkmal `icebreaker`
 macht eine Wall- und eine Code-Gate-Antwort nicht gegenseitig redundant.
 Diese Einordnung wirkt vor der Installationswahl und Opferbindung; ein bereits
 ausgewählter `PlanExecutionOrigin` wird im folgenden Choice-Fenster weiterhin
 unverändert ausgeführt.
+
+Deckinventar und Handantworten übernehmen die ICE-Kategorien aus dem
+kanonischen Breakerprofil. Bedingte Zusatzeffekte im Regeltext erweitern diese
+Abdeckung nicht: Ein Folgeeffekt nach einer vollständig gebrochenen Wall ist
+keine allgemeine Sentry-Antwort. Für die Beschaffung eines konfigurierbaren
+Breakers gelten seine kanonischen `coverageCandidates`; die installierte
+Instanz deckt weiterhin nur ihren tatsächlich gewählten Modus ab.
+
+Bei einer Installationsaction mit bereits festgelegtem `selectedSubtype`
+zählt für den Coverage-Step genau diese Variante. Der Owner prüft den Modus
+bereits beim Aufbau der Installationswerte und übernimmt ihn in die
+sichtbare Runpfadprojektion. Materialisierung und Actionzuordnung verwenden
+dieselbe Rollenprüfung. Mögliche Modi der Kartendefinition dürfen keinen
+abweichenden aktuellen Installationsmodus als erfüllte Antwort ausweisen.
+Eine erst später zulässige Moduswahl bleibt eine eigene gebundene Vorbereitung.
+Die Handentwicklung verwendet dieselbe Prüfung bei der Übergabe an den
+Coverage-Owner. Andere legale Installationsmodi bleiben beim zuständigen
+Entwicklungsplan klassifiziert. Dessen ausführbare Alternativen nehmen keine
+bereits dem Coverage-Owner zugeordneten Varianten wieder auf.
 
 Mögliche Phasen:
 
@@ -564,6 +626,14 @@ Eine teure Gefahrenvermeidung darf nicht als Ersparnis verschwinden, nur weil
 eine kostenpflichtige Umstellung sie unbezahlbar macht. Erst danach vergleicht
 die Pfadquote die verbleibenden Kosten. Die konkrete Run- und Risikowahl bleibt
 beim gebundenen Planowner.
+
+Eine vorbereitende Modusänderung darf für keinen Runzweck eine aktuell
+blockierte Runreserve umgehen; Umstellungskosten sind dabei eingerechnet.
+Eine Scorebedrohung allein erlaubt keine unfinanzierte Vorbereitung, die eine
+bereits nutzbare andere Route wieder schließt. Die vorhandenen exakt gebundenen
+terminalen Ausnahmen bleiben beim gemeinsamen Run-Finanzierungsdienst.
+Eine allgemeine Economy-Untergrenze entzieht einem bereits zugelassenen
+Access-Parent hingegen nicht seine nötige Modusvorbereitung.
 
 Bei einer noch nicht installierten konfigurierbaren Breakerkarte berücksichtigt
 derselbe Coverage-Owner die typisierten `coverageCandidates` des kanonischen
@@ -1078,6 +1148,26 @@ Verschlechterung gegenüber dem akzeptierten Startvertrag begründet eine
 Jack-out-Präferenz; ein unveränderter Grenzfall erzeugt weder einen neuen Plan
 noch eine zweite Entscheidungsautorität.
 
+Auch das Encounterbudget einer Informationsprobe konsumiert diese aktuelle
+Reservequote. Die akzeptierte Startquote bleibt der Vergleichsmaßstab für
+Risikoänderungen; ihr ursprünglicher Creditbetrag ist keine dauerhafte Sperre.
+Sinkt die gequotete Reserve nach neu aufgedecktem ICE oder ausgegebenen
+Corp-Rez-Credits, darf derselbe Parent den bezahlbaren bekannten Restpfad
+fortsetzen. Sichtbare Rez-Unterstützung bleibt in der aktuellen Quote erhalten.
+Fehlt deren erforderliche Risikobasis, bleibt die bestehende strukturierte
+Fail-closed-Bewertung des Run-Owners zuständig.
+
+Die Restpfadquote verwendet die Engine-gequotete Stärke nach dem aktuellen
+Encounter. Vor Ausgaben gegen ausschließlich verbleibende ETR-Subroutinen
+prüft derselbe Owner außerdem den vollständigen Pump-/Breakpreis gegen den
+gebundenen Fortsetzungsvertrag. Erhält der danach verbleibende bekannte Pfad
+die akzeptierte Reserve nicht mehr, lässt der Owner die reine ETR auflösen,
+statt zunächst zu bezahlen und im folgenden unveränderten Fenster abzubrechen.
+Bereits gebrochene Subroutinen werden nicht erneut bezahlt. Die Zahlung führt
+zweckgebundene Pools und über den Encounter hinaus gültige Stärke fort.
+Gemischte Wirkungen, notwendiger Schadens-/Programmschutz und ein Break zum
+Erhalt eines späteren Ausstiegs bleiben bei ihren bestehenden Bewertungen.
+
 Die Zulassung von Run-Ereignissen quotiert Route und Handreserve mit der
 bereits vorhandenen Projektion nach dem Verbrauch der Startkarte. Credit-
 und Klickkosten stammen weiterhin aus der aktuellen LegalAction; dieselbe
@@ -1088,6 +1178,13 @@ vortäuschen. Bewusst zugelassene Informationsproben behalten ihren ausdrücklic
 knappen Startvertrag; echte zusätzliche Schäden oder neue Gefahren bleiben
 Gründe für die bestehende Abbruchbewertung. Central-/Remote-Owner, Run-Leaf
 und ihre Action-/Step-Bindungen bleiben unverändert.
+
+Die Run-Action-Projektion erhält auch positive Selbsttags aus der konkret
+gebundenen Successful-Run-Fähigkeit. Der bestehende Ziel-Owner bewertet diese
+mit seiner Run-Risikokomponente; ein Kartenkontext darf den Tag weder verlieren
+noch auf einen unabhängigen Basisrun übertragen. Dieses Risikosignal ist keine
+garantierte Ressourcenverlustquote und ersetzt keine gesonderte Vorbereitung
+gegen den Tag.
 
 Die gemeinsame bekannte Pfadquote enthält auch die kanonischen Passgebühren
 bekannter gerezzter Root-Karten. Jede verbleibende Passage zählt, einschließlich
@@ -1152,6 +1249,12 @@ Verantwortung:
 - Multiaccess-Aktivierungen;
 - Credit-, Trash- oder Folge-Run-Payoffs;
 - Ziel- und Choice-Auflösung innerhalb des begonnenen Runplans.
+
+Beim Deaktivieren eines gerade passierten
+ICE gegen Runende muss das sichtbare Ziel einen positiven erneuten Rezpreis
+haben, damit diese Option einen Rez-Verweigerungswert erhält. Ein kostenlos
+erneut aktivierbares ICE begründet keinen solchen Bonus zulasten des Zugriffs.
+Die Bewertung erfolgt im bestehenden Run-Window-Owner.
 
 Die Nutzenprüfung für Pump, Break und verbleibende Run-Effekte verwendet
 denselben aktuellen Zielnachweis. Ausschließlich auf das nächste Encounter
@@ -1492,6 +1595,12 @@ fehlender Breaker-Abdeckung. Würde ein Zukunftseffekt den sonst passierbaren
 bekannten Restpfad sperren, bleibt die exakte unbezahlte Breakquote als
 Finanzierungsbedarf erhalten. Sie darf nicht verworfen und dadurch die
 Folgeschicht fälschlich als physisch unbrechbar eingeordnet werden.
+Auch die nachgelagerte kumulative Schadensprüfung erhält diese Einordnung:
+Ein aktuell nicht finanzierter, strukturell gequoteter Pfad bleibt
+`blocked_unpayable`, selbst wenn sein ungeblockter Schaden tödlich wäre.
+Der Run bleibt gesperrt; daraus entsteht jedoch kein Bedarf für einen
+zweiten gleichwertigen Breaker. Tatsächlich fehlende Abdeckung und ein
+unabhängiger Handpuffermangel behalten ihre eigenen Blocker.
 Eine zusätzliche Encounter-Gebühr bleibt dagegen ein Creditbedarf. Macht sie
 den Restpfad mit dem aktuellen Budget unbezahlbar, entsteht daraus keine
 physische Zugangssperre und keine Pflicht, ihre Quelle teurer zu brechen.

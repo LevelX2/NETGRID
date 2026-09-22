@@ -229,6 +229,10 @@ function planExecutionExpectationMatches(
     (expectation.requiredAssessmentEvidence ?? []).every((item) =>
       assessmentEvidence.includes(item),
     ) &&
+    (!expectation.acceptableAssessmentEvidence?.length ||
+      expectation.acceptableAssessmentEvidence.some((item) =>
+        assessmentEvidence.includes(item),
+      )) &&
     !(expectation.forbiddenAssessmentEvidence ?? []).some((item) =>
       assessmentEvidence.includes(item),
     )

@@ -1,7 +1,7 @@
 # AI Simulation Test Matrix
 
 Status: active_current
-Stand: 2026-09-18
+Stand: 2026-09-22
 
 ## Evidenzstufen
 
@@ -104,9 +104,38 @@ erreichen. Zur Diagnose lässt sich derselbe vollständige Check isoliert mit
 ausführen. Das ersetzt weder die Typprüfung noch behebt es einen Typfehler;
 es erhöht ausschließlich das Speicherlimit dieses einzelnen Prozesses.
 
-Bekannte Main-Abweichungen im Vergleich gegen `926fc1435` vom 2026-09-18:
-Vier Erwartungen in `meta-403-flood-continuation.test.ts` und eine in
-`meta-403-score-progress-provider.test.ts` schlagen auch ohne die Änderung
-an der ICE-Rez-Bewertung fehl. Sie betreffen Score-/Economy-Auswahl und die
-gebundene Defense-Providerroute. Ein Gesamtlauf mit diesen fünf Fehlern ist
-kein grünes AI-Gate; die Befunde bleiben von den Rez-Regressionen getrennt.
+## Aktuelle offene AI-Gate-Abweichungen
+
+Der Integrationslauf vom 2026-09-22 umfasst 6.123 bestandene und 55
+fehlgeschlagene Tests. Die fehlschlagenden Testfälle entsprechen vollständig
+der Vereinigung der Ausgangsstände: 50 wurden separat auf dem unveränderten
+lokalen `main` (`b3b477070`) reproduziert; fünf weitere stammen aus dem
+GitHub-Stand (`2f214cf93`) und waren bereits dort dokumentiert und vor dem
+lokalen Main-Abgleich reproduziert. Die Integration ergänzt keinen weiteren
+fehlschlagenden Testfall. Das ist ausdrücklich **kein grünes AI-Gate**.
+
+| Testdatei unter `packages/ai/src/` | Offene Tests |
+| --- | ---: |
+| `runtime/plan-first-live-runtime.test.ts` | 18 |
+| `runtime/plan-first-live-runtime-punish-coupled-sequence-red-contract.test.ts` | 16 |
+| `runtime/plan-first-live-runtime-corp-card-variant-contract.test.ts` | 5 |
+| `runtime/plan-first-live-runtime-ambush-contract.test.ts` | 3 |
+| `runtime/plan-first-live-runtime-punish-persistent-root-contract.test.ts` | 1 |
+| `runtime/corp-scoreline/semantic-runtime-corp-score-scoreline-and-install.test.ts` | 1 |
+| `plans/tactical-plan-corp-score-conversion-play-cost.test.ts` | 2 |
+| `plans/runner-core-plan-modules.test.ts` | 1 |
+| `evaluation/decision-checkpoints/baseline-seed02-scoreline-feasibility-decision-checkpoints.test.ts` | 1 |
+| `evaluation/decision-checkpoints/meta-403-remainder-resource-admission.test.ts` | 1 |
+| `evaluation/decision-checkpoints/match-e8047b3e-runner-remediation-decision-checkpoints.test.ts` | 1 |
+| `evaluation/decision-checkpoints/meta-403-flood-continuation.test.ts` | 4 |
+| `evaluation/decision-checkpoints/meta-403-score-progress-provider.test.ts` | 1 |
+
+Die synthetischen Corp-Fälle benötigen überwiegend aktuelle, an Agenda,
+Zielserver und StateVersion gebundene Installationsquotes. Weitere Fälle
+betreffen unvollständige Runner-Testeingaben und Score-/Economy-/Run-
+Erwartungen. Diese unabhängigen Baseline-Befunde werden separat behoben;
+Produktverträge und Assertions werden für eine Integration nicht abgeschwächt.
+Die Trace-Fixture von e804 enthält inzwischen in beiden Action-Listen die
+zwei beim frischen Encounter offenen Subroutinen. Der fokussierte Nachlauf
+zeigt dort weiterhin dieselbe Auswahlabweichung wie auf lokalem `main`
+(Continue statt des erwarteten Snowball-Pumps).

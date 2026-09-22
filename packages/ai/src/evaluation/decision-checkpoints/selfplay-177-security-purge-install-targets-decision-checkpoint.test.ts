@@ -6,7 +6,7 @@ import { runAiDecisionCheckpoint } from "./checkpoint-runner";
 import type { AiDecisionCheckpointV1 } from "./checkpoint-types";
 
 describe("selfplay 177 Security Purge install targets decision checkpoint", () => {
-  it("keeps the exact choice under corp.defend_servers ownership", () => {
+  it("binds the choice to the current central-defense allocation", () => {
     const result = runAiDecisionCheckpoint(
       structuredClone(securityPurgeJson) as AiDecisionCheckpointV1,
     );

@@ -51,6 +51,7 @@ export type AiDecisionCheckpointPlanExecutionExpectation = {
   acceptableCapabilities?: string[];
   forbiddenCapabilities?: string[];
   requiredAssessmentEvidence?: string[];
+  acceptableAssessmentEvidence?: string[];
   forbiddenAssessmentEvidence?: string[];
 };
 

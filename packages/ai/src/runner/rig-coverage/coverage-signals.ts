@@ -163,12 +163,24 @@ export function uniqueCoverageGaps(
       continue;
     }
     // A coverage child may prepare only a route its parent would admit.
-    // Reuse the parent's information-probe policy on the prepared path;
-    // the setup cost is already paid at that future run-start boundary.
+    // Reject a blocked route reserve unless the parent admits an exact
+    // terminal exception. Generic economy floors do not revoke an access
+    // route already admitted by its parent's recommendation.
     const preparedEvaluation = {
       ...evaluation,
       pathCost: Math.max(0, evaluation.pathCost - preparation.credits),
     };
+    if (
+      evaluation.prerunReserveQuote?.status === "blocked" &&
+      !services.runnerRunTargetCanConvertNow(
+        input,
+        economy,
+        evaluation,
+        candidates,
+      )
+    ) {
+      continue;
+    }
     if (
       runPurposeForEvaluation(evaluation) === "information" &&
       !runnerInformationProbeCanUseQuotedPath(

@@ -95,7 +95,21 @@ function expectScoreProtectionDevelopmentContinuation(value: unknown): void {
     (action) => action.actionId === second.actionId,
   );
 
-  expect(selected).toMatchObject({
+  expect(
+    selected,
+    JSON.stringify({
+      selected,
+      remote: input.playerView.servers.find(
+        (server) => server.id === "remote_1",
+      ),
+      dispositions:
+        second.decisionDebug?.planFirstDecision?.dispositions.filter(
+          (entry) =>
+            entry.actionId.includes("marked-accounts") ||
+            entry.actionId.includes("jack-attack"),
+        ),
+    }),
+  ).toMatchObject({
     type: "install_card",
     source: "corp_onr_proteus_005_marked-accounts_1",
     payload: { serverId: "remote_1" },

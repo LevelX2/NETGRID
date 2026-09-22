@@ -297,6 +297,10 @@ export function runnerCoverageInstallActionValues(
   const values: Record<string, number> = {};
   for (const candidate of candidates) {
     if (candidate.semanticActionType !== "install.card") continue;
+    const action = input.legalActions.find(
+      (entry) => entry.actionId === candidate.actionId,
+    );
+    if (!action) continue;
     const definitionId = runnerCandidateSourceDefinitionId(input, candidate);
     if (
       !definitionId ||
@@ -304,6 +308,7 @@ export function runnerCoverageInstallActionValues(
         definitionId,
         rolesForDeckDoctrineCard(definitionId),
         role,
+        action.payload?.selectedSubtype,
       )
     )
       continue;
@@ -322,6 +327,9 @@ export function runnerCoverageInstallActionValues(
     const targetId = candidate.targetContext?.selectedTargets?.[0]?.targetId;
     const projectedCard = {
       ...card,
+      ...(typeof action.payload?.selectedSubtype === "string"
+        ? { selectedSubtype: action.payload.selectedSubtype }
+        : {}),
       ...(typeof targetId === "string"
         ? { selectedTargetCardId: targetId }
         : {}),

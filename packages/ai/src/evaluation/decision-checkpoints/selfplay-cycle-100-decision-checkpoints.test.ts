@@ -117,7 +117,11 @@ describe("selfplay cycle 100 decision checkpoints", () => {
       status: "blocked",
       reason: "last_defense_layer",
     });
-    expect(selectedAction).toMatchObject({ type: "gain_credit" });
+    expect(selectedAction).toMatchObject({
+      type: "gain_credit",
+      source: "basic_action",
+      payload: { effectKind: "gain_credits", gainCreditsAmount: 1 },
+    });
     expect(selectedAction?.actionId).not.toBe(cashout!.actionId);
     const root =
       "plan:corp.score_agenda:agenda%3Acorp_onr_proteus_007_project-venice_1%3Aremote_1";

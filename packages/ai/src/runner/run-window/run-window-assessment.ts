@@ -68,6 +68,8 @@ import {
   visibleDeflectorSubroutineCanResolve,
 } from "../../visible-run-analysis";
 import { reservedAccessTrashCredits } from "./run-window-access";
+import { pureEndRunEncounterPayment } from "./run-window-encounter-budget";
+import { runnerRigAfterEncounter } from "../../runtime/runner-rig-after-encounter";
 import {
   isRunnerRunWindowCandidate,
   runnerOptionalBonusRunDeclineAction,
@@ -196,6 +198,9 @@ export function visibleEncounterMitigation(
 export function runnerRunRiskContractReassessment(
   input: AiDecisionInput,
   runOrigin: RunnerRunOrigin | undefined,
+  afterEncounterPayment?: NonNullable<
+    ReturnType<typeof pureEndRunEncounterPayment>
+  >,
 ): RunnerRunRiskReassessmentSignal | undefined {
   const run = input.playerView.run;
   const contract = runOrigin?.runRiskContract;
@@ -229,11 +234,13 @@ export function runnerRunRiskContractReassessment(
   const unknownIcePositions = remainingIce.flatMap((card, index) =>
     card.known === false && card.rezzed !== true ? [index] : [],
   );
-  const continuationBudget = runnerRunWindowCreditBudget(input);
+  const continuationBudget =
+    afterEncounterPayment?.budget ?? runnerRunWindowCreditBudget(input);
   const generalCredits = continuationBudget.credits;
   const knownPath = assessKnownRezzedIcePath(
     remainingIce,
-    input.playerView.own.rig ?? [],
+    afterEncounterPayment?.rig ??
+      runnerRigAfterEncounter(input.playerView.own.rig ?? []),
     continuationBudget,
     server.root,
     input.playerView.opponent.credits,
@@ -733,7 +740,27 @@ function runnerRunWindowActionAssessment(
     dependencies,
     runOrigin,
   );
-  const exclusion = effectiveEncounterExclusion ?? planStepExclusion;
+  const encounterPayment =
+    !effectiveEncounterExclusion && !planStepExclusion
+      ? pureEndRunEncounterPayment(input, action)
+      : undefined;
+  const paidRunRisk =
+    encounterPayment && runOrigin?.runRiskContract
+      ? runnerRunRiskContractReassessment(input, runOrigin, encounterPayment)
+      : undefined;
+  const reserveExclusion =
+    paidRunRisk?.decision === "prefer_jack_out"
+      ? {
+          key: "run_plan_encounter_payment_degrades_bound_reserve",
+          label: "Encounter-Ausgabe lässt keinen fortsetzbaren Run übrig",
+          reason: [
+            `run_plan_encounter_payment:${encounterPayment!.cost}`,
+            ...paidRunRisk.evidenceCodes,
+          ].join("|"),
+        }
+      : undefined;
+  const exclusion =
+    effectiveEncounterExclusion ?? planStepExclusion ?? reserveExclusion;
   const mitigation = !exclusion
     ? currentEncounterMitigationForAction(input, action)
     : undefined;
@@ -980,6 +1007,17 @@ function runnerPostPassDerezAndEndRunAssessment(
       ? Math.max(0, targetDefinition.rezCost ?? 0)
       : 0;
   const paidCredits = legalActionCreditCost(action);
+  if (rezCost === 0) {
+    return {
+      admissible: false,
+      evidenceCodes: [
+        "runner_post_pass_derez_and_end_run_has_no_rez_denial_value",
+        `runner_post_pass_target:${targetIceId}`,
+        `runner_post_pass_target_rez_cost:${rezCost}`,
+        `runner_run_target:${run.attackedServerId}`,
+      ],
+    };
+  }
   return {
     admissible: true,
     value: 140 + Math.min(8, rezCost) * 40 - paidCredits * 60,

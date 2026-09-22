@@ -47,6 +47,29 @@ aus dem bestehenden Engine-gequoteten Pfad. Projektvergleich und
 Zusammenführung lesen diesen Nachweis und die gebundenen Routenfakten,
 niemals Evidence-Präfixe oder die Gleichheit von Erklärungstexten.
 
+Innerhalb derselben Prioritätsklasse bewertet der Score-Owner einen aktuell
+ausführbaren Abschluss höher als bloßes Advancement unter Expositionsdruck.
+Die Bedrohung einer zweiten Agenda rechtfertigt keine Verteilung der letzten
+Klicks, durch die beide Abschlüsse ausfallen. Terminale Verlustvermeidung und
+terminaler eigener Score behalten ihre gesonderten Prioritätsklassen; die
+aktuelle Ressourcen- und Routenzulassung wird weiterhin vor jeder Aktion
+revalidiert.
+
+Auch bei einer beschleunigten Konversion stammen die verbleibenden
+Advancement-Klicks und Score-Credits aus den Engine-gequoteten Folgeschritten.
+Ein bereits nachgewiesener Abschluss macht diese Folgekosten nicht null.
+Die Bewertung verwendet denselben Horizont nach der ersten Aktion wie bei
+einem normalen Advance; ein vorgeschalteter Economy-Schritt behält seinen
+vollständigen danach zu finanzierenden Scorebedarf.
+
+Bei einer Agenda aus HQ stammt die benötigte Advancement-Zahl aus der
+aktuellen Engine-Installationsquote für genau diese Agenda und diesen
+Zielserver. Der sichtbare HQ-Wert enthält keinen lokalen Regionsrabatt.
+Konversionssuche und direkte Scoreline-Prüfung lesen dieselbe Quote; fehlt
+ihre Karten-, Server- oder StateVersion-Bindung, scheitert der Pfad mit einer
+strukturierten Diagnose. Ein unvollständiger Folgeturn-Horizont entwertet
+nicht die separat gequotete Schwierigkeit.
+
 Das Fehlen einer Agenda in HQ erzeugt keinen generischen Score-Parent und
 keinen Auftrag, nach unbekanntem Agendamaterial zu ziehen. Der Score-Owner
 beginnt mit einer konkret verfügbaren Agenda oder einer aktuell gequoteten
@@ -263,6 +286,24 @@ nur ohne Fundingpräfix, zusätzliche Klickerzeugung, Off-Target-Advancement,
 weitere installierte Agenden oder aktive Einkommenseffekte auf dem Board.
 Eine zusätzliche freie Aktion, unzureichende Finanzierung, eine erreichbare
 Bonusschwelle oder veraltete Kosten verhindern diesen Variantenvergleich.
+
+Eine vollständig aktuell finanzierte gewöhnliche Scorefolge kann die liquide
+Rezreserve vor dem nächsten Runner-Fenster wiederherstellen. Der Score-Owner
+weist dies in `score-reserve-restoration.ts` mit seiner aktuellen vollständigen
+Engine-Kostenquote und einer kanonischen unbedingten Score-Auszahlung nach.
+Defense stellt dann nur die zusätzliche Finanzierung des aktuellen
+Rezreservebedarfs zurück. Die Auszahlung zählt nicht als Geld für die noch
+offenen Scorekosten. Jeder reale Schritt revalidiert Kosten, LegalAction und
+Reserve; fehlende Klicks, Fundingbedarf, abgelaufene Quotes, bedingte Erträge,
+spätere Aktivierungserträge und aktuelle Runfenster tragen diesen Nachweis
+nicht. Der historische Fall Paarung 455 G3 D414/D459 benötigt zwei Credits
+und drei Klicks und stellt mit dem Score fünf Credits für eine Reserve von
+vier wieder her. Er ändert weder Planprioritäten noch Rez-Ownership.
+Nach Installation publiziert derselbe Score-Owner die vollständigen Kosten
+aller verbleibenden Advances plus Score aus der an Agenda, Server und Zustand
+gebundenen `scoreContinuationQuote`. Deren geringerer Vorhaltebedarf für den
+nächsten Corp-Zug ist keine aktuelle Konversionsquote. Der Nachweis bleibt
+damit auch in der Advance- und Score-Phase verfügbar.
 
 Dasselbe aktuelle Reihenfolgenurteil gilt für einen einzigen kostenlosen
 Score, dessen kanonischer Effekt ausschließlich einen eigenen Creditpool
@@ -1226,6 +1267,12 @@ Bewertung und Materialisierung. Die Live-Runtime ruft die Signalbildung auf;
 die Registry registriert die Factory. Gemeinsame taktische Planstandards liegen
 in `plans/corp-tactical-module-support.ts`. Sichtbare zentrale Druck- und
 Pflichtzieh-Fakten bleiben gemeinsam nutzbare Eingaben der Purge-Bewertung.
+
+Counter unter ihrer aktiven Wirkungsschwelle erhöhen weder den sichtbaren
+Druck noch den materiellen Purge-Wert. Crumble benötigt wie Garbage,
+Highlighter und Cascade mindestens zwei Counter; ein einzelner Vienna-Counter
+ist bereits aktiv. Insbesondere darf Crumble mit einem Counter neben Vienna
+mit einem Counter keine positive Purge-Zulassung erzeugen.
 
 **Klasse:** `urgent_response` oder `bounded_sequence`
 **Rolle:** Vordergrund/Urgent Response

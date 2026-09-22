@@ -635,6 +635,50 @@ describe("Corp core plan modules", () => {
     ).toEqual(["systematic-layoffs"]);
   });
 
+  it.each([false, true])(
+    "values current completion above exposed partial progress (completion exposed=%s)",
+    (exposed) => {
+      const action = targetAction(
+        "advance",
+        "score.advance_card",
+        "agenda-1",
+        "card",
+      );
+      const module = corpModule("corp.score_agenda");
+      const assess = (sameTurnCloseout: boolean, deadlinePressure: boolean) => {
+        const ctx = context([action], {
+          scoreProjects: [
+            {
+              projectId: "score-1",
+              agendaDefinitionId: "agenda-def",
+              agendaPoints: 2,
+              agendaInstanceId: "agenda-1",
+              phase: "advance_agenda",
+              sameTurnCloseout,
+              deadlinePressure,
+              terminalScore: false,
+              feasible: true,
+              evidenceCode: "visible_score_line",
+            },
+          ],
+        });
+        const instance = instantiatePlanProposal(module.discover(ctx)[0]!, 10);
+        return requireValidatedPlanAssessment(
+          module.assess(instance, ctx, emptyPortfolio()),
+          CORP_PLAN_PRIORITY_POLICY,
+          10,
+        );
+      };
+      const completion = assess(true, exposed);
+      const partial = assess(false, true);
+      expect(completion.priorityValidation.effectiveClass).toBe("P3");
+      expect(partial.priorityValidation.effectiveClass).toBe("P3");
+      expect(completion.withinClassValue).toBeGreaterThan(
+        partial.withinClassValue,
+      );
+    },
+  );
+
   it("protects same-turn score as P3 with a semantic continuation", () => {
     const advance = targetAction(
       "advance",

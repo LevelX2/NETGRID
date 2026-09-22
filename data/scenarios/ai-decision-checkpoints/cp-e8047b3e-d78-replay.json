@@ -4729,8 +4729,8 @@
           "expiresAtStateVersion": 149,
           "payload": {
             "encounterContinue": true,
-            "unbrokenSubroutineCount": 1,
-            "encounterSubroutineIds": "printed_subroutines_trace",
+            "unbrokenSubroutineCount": 2,
+            "encounterSubroutineIds": "printed_subroutines_trace,printed_subroutines_trace_a",
             "encounterWillEndRun": false,
             "encounterSourceWillTrashAtEndOfTurn": false,
             "abilityFamily": "run-access",
@@ -7005,8 +7005,8 @@
         "expiresAtStateVersion": 149,
         "payload": {
           "encounterContinue": true,
-          "unbrokenSubroutineCount": 1,
-          "encounterSubroutineIds": "printed_subroutines_trace",
+          "unbrokenSubroutineCount": 2,
+          "encounterSubroutineIds": "printed_subroutines_trace,printed_subroutines_trace_a",
           "encounterWillEndRun": false,
           "encounterSourceWillTrashAtEndOfTurn": false,
           "abilityFamily": "run-access",

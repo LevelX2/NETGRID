@@ -107,30 +107,42 @@ describe("meta 403 round 5 exact owner regressions", () => {
     );
   });
 
-  it("does not spend the information budget on end-the-run after program trash is broken", () => {
-    const capture = structuredClone(programJson) as unknown as Capture;
-    // The preceding program-preservation break costs two credits. Removing
-    // its subroutine without paying it falsely makes the remaining run fundable.
-    capture.input.playerView.own.credits -= 2;
-    capture.input.legalActions = capture.input.legalActions.filter(
-      (a) => a.type !== "break_subroutine" || a.payload?.subroutineIndex !== 0,
-    );
-    const continuation = capture.input.legalActions.find(
-      (a) => a.type === "continue_run",
-    )!;
-    continuation.actionId =
-      "runner.continue_run.printed_subroutines_end_the_run";
-    Object.assign(continuation.payload!, {
-      encounterSubroutineIds: "printed_subroutines_end_the_run",
-      unbrokenSubroutineCount: 1,
-    });
-    capture.input.playerView.legalActions = structuredClone(
-      capture.input.legalActions,
-    );
-    const { selected, plan } = choose(capture);
-    expect(selected.type).toBe("continue_run");
-    expect(plan?.selectedPlan?.moduleId).toBe("runner.convert_run_window");
-  });
+  it.each([false, true])(
+    "funds the remaining ETR from the current reserve after a paid program-preservation break: %s",
+    (paid) => {
+      const capture = structuredClone(programJson) as unknown as Capture;
+      // Pay the preceding program-preservation break. The newly revealed path
+      // needs two credits and no remaining unknown-ICE reserve, even when paid.
+      if (paid) capture.input.playerView.own.credits -= 2;
+      capture.input.legalActions = capture.input.legalActions.filter(
+        (a) =>
+          a.type !== "break_subroutine" || a.payload?.subroutineIndex !== 0,
+      );
+      const continuation = capture.input.legalActions.find(
+        (a) => a.type === "continue_run",
+      )!;
+      continuation.actionId =
+        "runner.continue_run.printed_subroutines_end_the_run";
+      Object.assign(continuation.payload!, {
+        encounterSubroutineIds: "printed_subroutines_end_the_run",
+        unbrokenSubroutineCount: 1,
+      });
+      capture.input.playerView.legalActions = structuredClone(
+        capture.input.legalActions,
+      );
+      const { selected, plan, result } = choose(capture);
+      expect(selected.type).toBe("break_subroutine");
+      expect(selected.payload?.subroutineIndex).toBe(1);
+      expect(result.evidence).toEqual(
+        expect.arrayContaining([
+          "plan_action_assessment_evidence:runner_information_boundary_known_path_cost:2",
+          "plan_action_assessment_evidence:runner_information_boundary_preserved_run_reserve:0",
+          "plan_action_assessment_evidence:runner_information_boundary_known_encounter_fits_run_budget:true",
+        ]),
+      );
+      expect(plan?.selectedPlan?.moduleId).toBe("runner.convert_run_window");
+    },
+  );
 
   it("fails visibly if program preservation cannot bind the Engine's remaining subroutines", () => {
     const capture = structuredClone(programJson) as unknown as Capture;

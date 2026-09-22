@@ -459,11 +459,16 @@ function evaluateRunnerRunTarget(
         ? "blocked_unpayable"
         : basePathPassability;
   if (visibleLethalIceDamage) {
+    // Unpaid damage does not erase an exact, structurally supported break
+    // quote. Keep its funding blocker so Coverage does not install the same
+    // answer again. The damage assessment still forbids starting this run.
     pathPassability = visibleLethalIceDamage.evidenceCode.startsWith(
       "runner_visible_ice_damage_below_required_hand_floor|",
     )
       ? "blocked_by_visible_damage_hand_buffer"
-      : "blocked_unbreakable";
+      : basePathPassability === "blocked_unpayable"
+        ? "blocked_unpayable"
+        : "blocked_unbreakable";
   }
   const unknownUnrezzedIceCount = projectedServerIce.filter(
     (card) => card.rezzed !== true && card.known === false,
