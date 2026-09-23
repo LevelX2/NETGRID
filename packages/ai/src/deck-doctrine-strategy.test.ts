@@ -262,7 +262,7 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     ).toBe(true);
   });
 
-  it("scores canonical Runner search support without treating emergency coverage as a normal breaker or pressure anchor", () => {
+  it("counts universal access coverage while keeping search distinct from pressure anchors", () => {
     const profile = buildDeckStrategyProfile({
       deckSnapshotId: "ai006-runner-breaker-search-diagnostic",
       side: "runner",
@@ -293,7 +293,8 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     );
     expect(
       profile.strategyScores["runner.search.breaker"]?.supportGaps,
-    ).toContain("missing_code_gate_coverage");
+    ).not.toContain("missing_code_gate_coverage");
+    expect(profile.runnerProfile?.coverageProfile.universal.count).toBe(2);
     expect(profile.runnerProfile?.setupProfile.search).toBe(2);
     expect(profile.strategyScores["runner.rnd_pressure"]?.anchorScore).toBe(0);
   });

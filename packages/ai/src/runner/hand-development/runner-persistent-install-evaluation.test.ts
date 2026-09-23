@@ -321,7 +321,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("values breaker support programs without misclassifying them as duplicate breakers", () => {
     const krash = visibleCard("krash-installed", {
-      definitionId: "test-krash",
+      definitionId: "onr_v1_039_krash",
       title: "Krash",
       type: "program",
       subtypes: ["icebreaker"],
@@ -329,16 +329,16 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
       memoryCost: 1,
     });
     const lockjaw = visibleCard("lockjaw-1", {
-      definitionId: "test-lockjaw",
+      definitionId: "onr_proteus_091_lockjaw",
       title: "Lockjaw",
       type: "program",
       rulesText:
-        "Choose an installed icebreaker. That icebreaker has +2 strength.",
+        "[T]: Give one of your icebreakers +2 strength for the remainder of this run. Use this ability only during an encounter with a piece of ice.",
       installCost: 0,
       memoryCost: 1,
     });
     const clown = visibleCard("clown-1", {
-      definitionId: "test-clown",
+      definitionId: "onr_v1_012_clown",
       title: "Clown",
       type: "program",
       rulesText: "All ice is encountered with its strength reduced by 1.",
@@ -346,7 +346,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
       memoryCost: 1,
     });
     const vewy = visibleCard("vewy-1", {
-      definitionId: "test-vewy",
+      definitionId: "onr_v1_071_vewy-vewy-quiet",
       title: "Vewy Vewy Quiet",
       type: "program",
       rulesText:
@@ -382,7 +382,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
 
   it("carries a Krash support search through install evaluation and discard", () => {
     const krash = visibleCard("krash-installed", {
-      definitionId: "krash",
+      definitionId: "onr_v1_039_krash",
       title: "Krash",
       type: "program",
       subtypes: ["icebreaker"],
@@ -390,7 +390,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
       memoryCost: 1,
     });
     const duplicateKrash = visibleCard("krash-copy", {
-      definitionId: "krash",
+      definitionId: "onr_v1_039_krash",
       title: "Krash",
       type: "program",
       subtypes: ["icebreaker"],
@@ -398,27 +398,25 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
       memoryCost: 1,
     });
     const lockjaw = visibleCard("lockjaw", {
-      definitionId: "lockjaw",
+      definitionId: "onr_proteus_091_lockjaw",
       title: "Lockjaw",
       type: "program",
       rulesText:
-        "Choose an installed icebreaker. That icebreaker has +2 strength.",
+        "[T]: Give one of your icebreakers +2 strength for the remainder of this run. Use this ability only during an encounter with a piece of ice.",
       installCost: 0,
       memoryCost: 1,
     });
     const clown = visibleCard("clown", {
-      definitionId: "clown",
+      definitionId: "onr_v1_012_clown",
       title: "Clown",
       type: "program",
       rulesText: "All ice is encountered with its strength reduced by 1.",
       installCost: 4,
       memoryCost: 1,
     });
-    const rolesByCardId: Record<string, readonly string[]> = {
-      krash: ["breaker_fracter", "breaker_decoder", "breaker_killer"],
-      lockjaw: ["icebreaker_support", "run_support"],
-      clown: ["ice_modifier", "icebreaker_support", "run_support"],
-    };
+    // Consumer checks must use the same generated roles as the productive path.
+    const rolesForCardId = (id: string | undefined) =>
+      AI_HINTS_BY_CARD.get(id ?? "")?.roles ?? [];
     const searchChoice = {
       id: "short-circuit-search",
       source: "stack search",
@@ -437,16 +435,16 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
         features: {
           credits: 8,
           memoryRemaining: 3,
-          rigRoles: new Set(rolesByCardId.krash),
-          rigDefinitionIds: new Set(["krash"]),
-          gripDefinitionCounts: new Map([["krash", 1]]),
+          rigRoles: new Set(rolesForCardId(krash.definitionId)),
+          rigDefinitionIds: new Set([krash.definitionId!]),
+          gripDefinitionCounts: new Map([[krash.definitionId!, 1]]),
           hasInstalledNonNoisyIcebreaker: true,
         },
-        rolesForCardId: (cardId) => rolesByCardId[cardId ?? ""] ?? [],
+        rolesForCardId,
         effectsForCardId: (cardId) =>
           AI_HINTS_BY_CARD.get(cardId ?? "")?.effects ?? [],
       }),
-    ).toEqual(["lockjaw", "clown"]);
+    ).toEqual([lockjaw.definitionId, clown.definitionId]);
 
     const input = runnerInput({
       credits: 8,
@@ -470,8 +468,7 @@ describe("RunnerHandDevelopmentEvaluation persistent installs", () => {
     ).toBeGreaterThan(0);
 
     const dependencies = {
-      rolesForCardId: (cardId: string | undefined) =>
-        rolesByCardId[cardId ?? ""] ?? [],
+      rolesForCardId,
       definitionTypeForCardId: () => "program",
       visibleCardPlayOrInstallCost: (card: VisibleCard) =>
         card.installCost ?? 0,

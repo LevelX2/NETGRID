@@ -745,6 +745,17 @@ Retention, Preemption und Release tragen strukturierte Diagnose mit altem
 Owner, vorgesehenem nächsten Meilenstein, Grenztyp, Evidence und gegebenenfalls
 übernehmendem Owner.
 
+P6-Restfortschritt erhält dadurch keinen Vorrang vor neu ausführbarer
+Fachplanung. An der internen Fortsetzungsgrenze weicht eine P6-Linie ohne
+hartes PlanCommitment dem aktuell ausgewählten P4-/P5-Head. Der gemeinsame
+Cutover meldet `higher_priority_plan_available` mit bisherigem und
+übernehmendem Root. Finanzierungs-Leaves eines fachlichen Parents behalten
+dessen Priorität und Sequenzbindung. Gleichrangige P4-Fortsetzungen bleiben
+geschützt; ohne höher priorisierten Head bleibt die endliche P6-Linie bestehen.
+Regressionen dieser Grenze müssen mehrere Entscheidungen in derselben
+Runtime ausführen: Ein einzelner Checkpoint-Restore invalidiert Commitments
+absichtlich als Neustart und kann den Fortsetzungsfehler verdecken.
+
 ### 1.12 Commitment-Hierarchie
 
 Die verbindliche Reihenfolge lautet:

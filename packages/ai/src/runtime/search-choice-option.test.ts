@@ -1,5 +1,7 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
+import { AI_HINTS_BY_CARD } from "../ai-hints";
+import { CARD_DEFINITIONS_BY_ID } from "../card-definition-compatibility";
 import {
   isSearchChoice,
   selectedSearchChoiceOptionIds,
@@ -162,15 +164,8 @@ describe("selectedSearchChoiceOptionIds", () => {
   it("prefers a new installable support program over breaker copies already in rig and grip", () => {
     const choice = searchChoice(
       [
-        option("krash", "Krash", "program", {
-          memoryCost: 1,
-          installCost: 0,
-          subtypes: ["Icebreaker"],
-        }),
-        option("lockjaw", "Lockjaw", "program", {
-          memoryCost: 1,
-          installCost: 0,
-        }),
+        canonicalProgramOption("krash", "onr_v1_039_krash"),
+        canonicalProgramOption("lockjaw", "onr_proteus_091_lockjaw"),
       ],
       1,
     );
@@ -178,20 +173,13 @@ describe("selectedSearchChoiceOptionIds", () => {
       features: {
         credits: 4,
         memoryRemaining: 2,
-        hasInstalledNonNoisyIcebreaker: false,
-        rigRoles: new Set([
-          "breaker_fracter",
-          "breaker_decoder",
-          "breaker_killer",
-        ]),
-        rigDefinitionIds: new Set(["krash"]),
-        gripDefinitionCounts: new Map([["krash", 1]]),
+        hasInstalledNonNoisyIcebreaker: true,
+        rigRoles: new Set(AI_HINTS_BY_CARD.get("onr_v1_039_krash")!.roles),
+        rigDefinitionIds: new Set(["onr_v1_039_krash"]),
+        gripDefinitionCounts: new Map([["onr_v1_039_krash", 1]]),
       },
-      effectsForCardId: () => [],
-      rolesForCardId: (cardId) =>
-        cardId === "krash"
-          ? ["breaker_fracter", "breaker_decoder", "breaker_killer"]
-          : ["icebreaker_support", "run_support"],
+      effectsForCardId: (id) => AI_HINTS_BY_CARD.get(id!)!.effects ?? [],
+      rolesForCardId: (id) => AI_HINTS_BY_CARD.get(id!)!.roles,
     });
 
     expect(selected).toEqual(["lockjaw"]);
@@ -200,14 +188,8 @@ describe("selectedSearchChoiceOptionIds", () => {
   it("prefers a fresh support definition over another copy already in grip", () => {
     const choice = searchChoice(
       [
-        option("lockjaw", "Lockjaw", "program", {
-          memoryCost: 1,
-          installCost: 0,
-        }),
-        option("clown", "Clown", "program", {
-          memoryCost: 1,
-          installCost: 4,
-        }),
+        canonicalProgramOption("lockjaw", "onr_proteus_091_lockjaw"),
+        canonicalProgramOption("clown", "onr_v1_012_clown"),
       ],
       1,
     );
@@ -215,16 +197,13 @@ describe("selectedSearchChoiceOptionIds", () => {
       features: {
         credits: 4,
         memoryRemaining: 2,
-        hasInstalledNonNoisyIcebreaker: false,
-        rigRoles: new Set(["breaker_universal"]),
-        rigDefinitionIds: new Set(["krash"]),
-        gripDefinitionCounts: new Map([["lockjaw", 1]]),
+        hasInstalledNonNoisyIcebreaker: true,
+        rigRoles: new Set(AI_HINTS_BY_CARD.get("onr_v1_039_krash")!.roles),
+        rigDefinitionIds: new Set(["onr_v1_039_krash"]),
+        gripDefinitionCounts: new Map([["onr_proteus_091_lockjaw", 1]]),
       },
-      effectsForCardId: () => [],
-      rolesForCardId: (cardId) =>
-        cardId === "lockjaw"
-          ? ["icebreaker_support", "run_support"]
-          : ["ice_modifier", "run_support"],
+      effectsForCardId: (id) => AI_HINTS_BY_CARD.get(id!)!.effects ?? [],
+      rolesForCardId: (id) => AI_HINTS_BY_CARD.get(id!)!.roles,
     });
 
     expect(selected).toEqual(["clown"]);
@@ -487,4 +466,15 @@ function hiddenOption(
     label,
     value: instanceId,
   } as PendingChoice["options"][number];
+}
+
+function canonicalProgramOption(optionId: string, definitionId: string) {
+  const card = CARD_DEFINITIONS_BY_ID[definitionId]!;
+  return option(optionId, card.title, card.type, {
+    definitionId: card.id,
+    subtypes: card.subtypes,
+    memoryCost: card.memoryCost,
+    installCost: card.installCost,
+    rulesText: card.rulesText,
+  });
 }

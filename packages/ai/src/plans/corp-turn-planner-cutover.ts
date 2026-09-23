@@ -320,6 +320,33 @@ function resumePlanInternalContinuation(
       )
     : undefined;
   const takeoverHead = params.planner.selectedHead;
+  // P6 only converts otherwise unused capacity. It must not turn into a
+  // protected sequence once the current search admits a P4/P5 plan.
+  // Bound domain sequences and their inherited priority keep normal retention.
+  if (
+    continuationHead?.priorityClass === "P6" &&
+    !previousPhase.hardPlanCommitmentId &&
+    takeoverHead &&
+    takeoverHead.rootPlanInstanceId !== previousOwnerRootPlanInstanceId &&
+    (takeoverHead.priorityClass === "P4" || takeoverHead.priorityClass === "P5")
+  ) {
+    return {
+      kind: "replan",
+      reason: "higher_priority_plan_available",
+      continuationDiagnostic: continuationDiagnostic({
+        previous: sequencedPrevious,
+        intendedNextMilestoneId: previousPhase.root.milestoneId,
+        status: "preempted",
+        boundaryKind: "higher_priority_plan_available",
+        takeoverRootPlanInstanceId: takeoverHead.rootPlanInstanceId,
+        evidenceCodes: [
+          "residual_p6_continuation_yields_to_admitted_plan",
+          `takeover_priority_class:${takeoverHead.priorityClass}`,
+          "retained_priority_class:P6",
+        ],
+      }),
+    };
+  }
   if (
     takeoverHead &&
     takeoverHead.rootPlanInstanceId !== previousOwnerRootPlanInstanceId &&

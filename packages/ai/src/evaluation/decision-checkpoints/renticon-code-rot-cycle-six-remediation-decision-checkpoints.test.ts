@@ -16,7 +16,10 @@ const FIXTURES = [
     "funds Rent-I-Con after the coverage search is saturated",
     saturatedSearchJson,
   ],
-  ["funds the bound same-turn economy development", richCreditRepeatJson],
+  [
+    "develops the first Shell Traders engine at sufficient liquid credits",
+    richCreditRepeatJson,
+  ],
   ["funds Tycho without forcing an ordinary Archives run", overflowDrawJson],
 ] as const;
 

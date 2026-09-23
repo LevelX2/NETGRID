@@ -7109,16 +7109,35 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "gain_credit"
+        "actionId": "runner.start_run.hq"
+      }
+    ],
+    "forbiddenActions": [
+      {
+        "actionId": "runner.start_run.remote_1"
       }
     ],
     "planExecution": {
-      "acceptablePlanKinds": ["runner.economy"],
-      "acceptableCapabilities": ["gain_general_liquid_credits"],
-      "requiredAssessmentEvidence": [
-        "runner_development_funding:card:runner_onr_proteus_134_cortical-cybermodem_2"
+      "acceptablePlanKinds": [
+        "runner.pressure_central"
+      ],
+      "acceptableCapabilities": [
+        "pressure_hq_information"
       ]
     },
-    "forbiddenActions": [{ "actionId": "runner.start_run.remote_1" }]
+    "runTargets": [
+      {
+        "actionId": "runner.start_run.hq",
+        "recommendation": "run_if_free",
+        "pathCost": 2,
+        "creditsAfterRun": 8
+      },
+      {
+        "actionId": "runner.start_run.remote_1",
+        "pathPassability": "blocked_unpayable",
+        "recommendation": "gain_credits_first",
+        "creditsAfterRun": -2
+      }
+    ]
   }
 }

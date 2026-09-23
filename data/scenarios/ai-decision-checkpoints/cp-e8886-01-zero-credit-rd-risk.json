@@ -4130,15 +4130,30 @@
   "expectation": {
     "acceptableActions": [
       {
-        "type": "gain_credit"
-      },
-      {
-        "actionId": "runner.start_run.hq"
+        "type": "draw_card"
       }
     ],
     "forbiddenActions": [
       {
-        "actionId": "runner.start_run.rd"
+        "type": "start_run"
+      }
+    ],
+    "planExecution": {
+      "acceptablePlanKinds": [
+        "runner.rig_and_coverage"
+      ],
+      "acceptableCapabilities": [
+        "draw_for_answer_breaker_sentry"
+      ],
+      "requiredAssessmentEvidence": [
+        "deck_strategy_open_sentry_coverage"
+      ]
+    },
+    "runTargets": [
+      {
+        "actionId": "runner.start_run.rd",
+        "recommendation": "gain_credits_first",
+        "creditsAfterRun": 0
       }
     ]
   }

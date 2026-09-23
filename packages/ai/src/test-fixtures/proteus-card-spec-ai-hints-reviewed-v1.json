@@ -6831,8 +6831,14 @@
         "side": "runner",
         "cardType": "program",
         "aiSupportStatus": "ai_supported",
-        "roles": [],
-        "planRoles": ["build_rig", "safe_probe_run"],
+        "roles": [
+          "icebreaker_support",
+          "program"
+        ],
+        "planRoles": [
+          "build_rig",
+          "safe_probe_run"
+        ],
         "valueHints": {},
         "targetProfiles": [
           {
@@ -6843,14 +6849,21 @@
               "currently_used_breaker",
               "breaker_matching_current_ice"
             ],
-            "avoid": ["low_value_program", "already_cheap_to_break"],
+            "avoid": [
+              "low_value_program",
+              "already_cheap_to_break"
+            ],
             "kind": "use_target",
             "timing": "during_ice_encounter",
             "targetType": "icebreaker",
             "hiddenInfoPolicy": "public_or_controller_known_only"
           }
         ],
-        "costProfile": { "clicks": 1, "credits": 0, "memory": 1 },
+        "costProfile": {
+          "clicks": 1,
+          "credits": 0,
+          "memory": 1
+        },
         "quality": {
           "hintReviewed": true,
           "needsHumanReview": false,
@@ -6859,7 +6872,10 @@
         "scenarioRefs": [
           "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
         ],
-        "requiredMechanics": ["install_program", "temporary_strength_bonus"]
+        "requiredMechanics": [
+          "install_program",
+          "temporary_strength_bonus"
+        ]
       }
     },
     {

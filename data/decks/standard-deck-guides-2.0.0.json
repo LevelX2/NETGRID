@@ -2,14 +2,14 @@
   "schemaVersion": "netgrid-standard-deck-guides-v2",
   "guideSetId": "netgrid-standard-deck-guides-2.0.0",
   "catalogId": "netgrid-standard-decks-1.0.0",
-  "analyzedAt": "2026-09-04",
+  "analyzedAt": "2026-09-23",
   "guides": [
     {
       "standardDeckId": "standard_corp_express_shutdown",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:01356c2e",
       "sourceAnalysisHash": "deck-analysis:1b4ec27a",
-      "sourceAnalysisInputHash": "deck-analysis-input:6967d9ed",
+      "sourceAnalysisInputHash": "deck-analysis-input:ac1b33c0",
       "reviewedAt": "2026-09-05",
       "analysis": {
         "primaryStrategyIds": [
@@ -139,7 +139,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:20f600a5",
+      "sourceAnalysisInputHash": "deck-analysis-input:63a95a78",
       "contentByLocale": {
         "en": {
           "summary": "Cheap Bag of Tricks relies primarily on taxing ICE layers, tag and trace punishment and concrete flatline pressure. Additionally, the deck utilizes a protected remote scoring line, uncertain remotes with ambush pressure, a distributed asset economy, early rush score windows, and accelerated scoring.",
@@ -248,7 +248,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:ea1207ca",
+      "sourceAnalysisInputHash": "deck-analysis-input:52f8fd33",
       "contentByLocale": {
         "en": {
           "summary": "Chrome Rush Bureau primarily relies on a protected remote scoring line, accelerated scoring and targeted overadvance value. In addition, the deck uses early rush score windows.",
@@ -359,7 +359,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:529d6021",
+      "sourceAnalysisInputHash": "deck-analysis-input:94b2e934",
       "contentByLocale": {
         "en": {
           "summary": "Protected remote scoring and run redirection are supported by immediate operation economy and a finite credit campaign. Research Labs keep cards available while credits finance their use.",
@@ -470,7 +470,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:ed4d4ec4",
+      "sourceAnalysisInputHash": "deck-analysis-input:aa99f4f1",
       "contentByLocale": {
         "en": {
           "summary": "Classic Corp - Superserum Control Grid relies primarily on concrete flatline pressure, tag and trace punishment and a protected remote scoring line. Additionally, the deck utilizes a repeatable draw engine, uncertain remotes with ambush pressure, and early rush scoring windows.",
@@ -580,7 +580,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:00ed9f21",
+      "sourceAnalysisInputHash": "deck-analysis-input:43032834",
       "contentByLocale": {
         "en": {
           "summary": "CODE ROT: Bitte eintreten v2 relies primarily on tag and trace punishment, a protected remote scoring line and concrete flatline pressure. In addition, the deck uses early rush score windows.",
@@ -693,7 +693,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:ddf6219c",
+      "sourceAnalysisInputHash": "deck-analysis-input:9b4134c9",
       "contentByLocale": {
         "en": {
           "summary": "Fast Advance, Baby relies primarily on taxing ICE layers, targeted overadvance values and a protected remote scoring line. Additionally, the deck uses uncertain remotes with ambush pressure, accelerated scoring, a distributed asset economy, early rush scoring windows and concrete flatline pressure.",
@@ -803,7 +803,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:491a2a97",
+      "sourceAnalysisInputHash": "deck-analysis-input:df93d16e",
       "contentByLocale": {
         "en": {
           "summary": "Ivory Bastion relies primarily on taxing ICE layers, a protected remote scoring line and a distributed asset economy. In addition, the deck uses early rush score windows and accelerated scoring.",
@@ -913,7 +913,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:d06b5e6d",
+      "sourceAnalysisInputHash": "deck-analysis-input:131eb840",
       "contentByLocale": {
         "en": {
           "summary": "Manhunt Pressure Bureau relies primarily on tag and trace punishment, concrete flatline pressure, a protected remote scoring line and early rush score windows.",
@@ -1023,7 +1023,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:539fb27b",
+      "sourceAnalysisInputHash": "deck-analysis-input:ea195952",
       "contentByLocale": {
         "en": {
           "summary": "Mumie primarily relies on a protected remote scoring line, accelerated scoring and early rush score windows. In addition, the deck uses insecure remotes with ambush pressure and concrete flatline pressure.",
@@ -1132,7 +1132,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:4acc3fa8",
+      "sourceAnalysisInputHash": "deck-analysis-input:0818e5d5",
       "contentByLocale": {
         "en": {
           "summary": "Neon Guillotine relies primarily on tag and trace punishment, concrete flatline pressure and early rush score windows. In addition, the deck uses a protected remote scoring line.",
@@ -1233,7 +1233,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:5e152dfe",
+      "sourceAnalysisInputHash": "deck-analysis-input:c799f427",
       "contentByLocale": {
         "en": {
           "summary": "Neon Escrow relies primarily on a protected remote scoring line, accelerated scoring and targeted overadvance value. Additionally, the deck uses uncertain remotes with ambush pressure and early rush score windows.",
@@ -1344,7 +1344,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:a25b3b55",
+      "sourceAnalysisInputHash": "deck-analysis-input:e50e9528",
       "contentByLocale": {
         "en": {
           "summary": "Original Speed v1.0 primarily relies on a protected remote scoring line, accelerated scoring and unsafe remotes with ambush pressure. In addition, the deck uses early rush score windows, targeted overadvance value and a repeatable draw engine.",
@@ -1455,7 +1455,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:b635e9ff",
+      "sourceAnalysisInputHash": "deck-analysis-input:4decc556",
       "contentByLocale": {
         "en": {
           "summary": "Proteus Korp - Hidden Node & Region Trap relies primarily on insecure remotes with ambush pressure, a protected remote scoring line and concrete flatline pressure. Additionally, the deck uses tag and trace punishment, early rush score windows, and a resilient rez and trace reserve.",
@@ -1565,7 +1565,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:e959d898",
+      "sourceAnalysisInputHash": "deck-analysis-input:a6a67ec5",
       "contentByLocale": {
         "en": {
           "summary": "Proteus Korp - Variable ICE Gauntlet relies primarily on concrete flatline pressure, additional action speed and early rush score windows. Additionally, the deck uses a protected remote scoring line and unsafe remotes with ambush pressure.",
@@ -1675,7 +1675,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:2cbebc83",
+      "sourceAnalysisInputHash": "deck-analysis-input:c339f65a",
       "contentByLocale": {
         "en": {
           "summary": "Rent to Own War Engine relies primarily on concrete flatline pressure, tag and trace punishment, a protected remote scoring line and early rush score windows. In addition, the deck uses accelerated scoring.",
@@ -1786,7 +1786,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:f9fd9afa",
+      "sourceAnalysisInputHash": "deck-analysis-input:62452ca3",
       "contentByLocale": {
         "en": {
           "summary": "Shadoe Tag & Bag relies primarily on tag and trace punishment, concrete flatline pressure and a protected remote scoring line. In addition, the deck uses additional action speed, accelerated scoring and early rush score windows.",
@@ -1896,7 +1896,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:d44eb468",
+      "sourceAnalysisInputHash": "deck-analysis-input:9199c795",
       "contentByLocale": {
         "en": {
           "summary": "Salazar Toll Road relies primarily on taxing ICE layers, a protected remote scoring line and stable protection for HQ and R&D. In addition, the deck uses concrete flatline pressure and early rush score windows.",
@@ -2007,7 +2007,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:20473d18",
+      "sourceAnalysisInputHash": "deck-analysis-input:dd93e345",
       "contentByLocale": {
         "en": {
           "summary": "Siren Fortress relies primarily on taxing ICE layers, a protected remote scoring line and a distributed asset economy. Additionally, the deck utilizes concrete flatline pressure, repeatable deck recycling and early rush score windows.",
@@ -2117,7 +2117,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:63fe6d56",
+      "sourceAnalysisInputHash": "deck-analysis-input:cc4791ff",
       "contentByLocale": {
         "en": {
           "summary": "Syds ICE-Pfandhaus relies primarily on a protected remote scoring line, a resilient rez and trace reserve and concrete flatline pressure. In addition, the deck uses early rush score windows.",
@@ -2228,7 +2228,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:5ccc95e4",
+      "sourceAnalysisInputHash": "deck-analysis-input:1a193c11",
       "contentByLocale": {
         "en": {
           "summary": "The Korp Master relies primarily on tag and trace punishment, a protected remote scoring line and concrete flatline pressure. In addition, the deck uses uncertain remotes with ambush pressure, accelerated scoring and early rush scoring windows.",
@@ -2337,7 +2337,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:e827918c",
+      "sourceAnalysisInputHash": "deck-analysis-input:a572a4b9",
       "contentByLocale": {
         "en": {
           "summary": "Tycho Ice Stack primarily relies on a protected remote scoring line, a distributed asset economy and early rush score windows. In addition, the deck uses accelerated scoring.",
@@ -2446,7 +2446,7 @@
         ],
         "reviewStatus": "observe"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:eb35fd5f",
+      "sourceAnalysisInputHash": "deck-analysis-input:81b13736",
       "contentByLocale": {
         "en": {
           "summary": "Vom Tablet primarily relies on tag and trace punishment, early rush score windows and a protected remote scoring line.",
@@ -2492,14 +2492,17 @@
       "standardDeckId": "standard_runner_bit_denial_lock",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:23264db8",
-      "sourceAnalysisHash": "deck-analysis:907ff099",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:e0f4c46a",
+      "reviewedAt": "2026-09-23",
       "analysis": {
-        "primaryStrategyIds": [],
+        "primaryStrategyIds": [
+          "runner.hq_pressure",
+          "runner.rig_first"
+        ],
         "secondaryStrategyIds": [],
         "reviewStatus": "observe"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:ec9f4149",
+      "sourceAnalysisInputHash": "deck-analysis-input:2f542e1c",
       "contentByLocale": {
         "en": {
           "summary": "Bit-Denial Lock currently does not have a reliably recognized strategy profile. HQ pressure, rig construction and remote contest remain a plausible playtest hypothesis and should be carefully monitored.",
@@ -2575,16 +2578,20 @@
       "standardDeckId": "standard_runner_blink_pressure_rig",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:5c3b8987",
-      "sourceAnalysisHash": "deck-analysis:679ae65a",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:5279f157",
+      "reviewedAt": "2026-09-23",
       "analysis": {
         "primaryStrategyIds": [
+          "runner.run_event_tempo",
+          "runner.search.breaker",
           "runner.survival_defense"
         ],
-        "secondaryStrategyIds": [],
+        "secondaryStrategyIds": [
+          "runner.rig_first"
+        ],
         "reviewStatus": "observe"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:66ba24cf",
+      "sourceAnalysisInputHash": "deck-analysis-input:fdd32f66",
       "contentByLocale": {
         "en": {
           "summary": "Blink Pressure Rig is currently only reliably detected through protection against tags, traces and damage. Run event tempo, breaker search and rig construction remain plausible playtest hypotheses.",
@@ -2680,8 +2687,8 @@
       "standardDeckId": "standard_classic_runner_cybernetics_risk_rig_2026_07_01",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:afcb633a",
-      "sourceAnalysisHash": "deck-analysis:da4799fe",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:530bc9f1",
+      "reviewedAt": "2026-09-23",
       "analysis": {
         "primaryStrategyIds": [
           "runner.run_event_tempo",
@@ -2697,7 +2704,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:04c97645",
+      "sourceAnalysisInputHash": "deck-analysis-input:477cd018",
       "contentByLocale": {
         "en": {
           "summary": "Classic Runner - Cybernetics Risk Rig relies primarily on short run event pace lines, targeted HQ pressure and repeated R&D pressure. In addition, the deck uses protection against tags, traces and damage, a multi-access conclusion, consistent remote contest, targeted breaker search and a reliable rig structure.",
@@ -2793,8 +2800,8 @@
       "standardDeckId": "standard_classic_runner_prep_economy_pressure_2026_07_01",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:34b312ba",
-      "sourceAnalysisHash": "deck-analysis:27455a26",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:03af6ed3",
+      "reviewedAt": "2026-09-23",
       "analysis": {
         "primaryStrategyIds": [
           "runner.run_event_tempo",
@@ -2809,7 +2816,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:4df7c568",
+      "sourceAnalysisInputHash": "deck-analysis-input:0b42d895",
       "contentByLocale": {
         "en": {
           "summary": "Classic Runner - Prep Economy Pressure relies primarily on targeted HQ pressure, short run event pace lines and repeated R&D pressure. In addition, the deck uses a multi-access conclusion, protection against tags, traces and damage, consistent remote contest and a reliable rig structure.",
@@ -2905,14 +2912,17 @@
       "standardDeckId": "standard_runner_deep_market_engine",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:82157891",
-      "sourceAnalysisHash": "deck-analysis:65cda51e",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:424f56c4",
+      "reviewedAt": "2026-09-23",
       "analysis": {
-        "primaryStrategyIds": [],
+        "primaryStrategyIds": [
+          "runner.search.breaker",
+          "runner.rig_first"
+        ],
         "secondaryStrategyIds": [],
         "reviewStatus": "observe"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:f228b705",
+      "sourceAnalysisInputHash": "deck-analysis-input:34dda3d8",
       "contentByLocale": {
         "en": {
           "summary": "Deep Market Engine currently does not have a reliably identified strategy profile. Breaker search and rig construction remain a plausible playtest hypothesis and should be carefully monitored.",
@@ -2993,7 +3003,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:e53efb0e",
+      "sourceAnalysisInputHash": "deck-analysis-input:4d868cb7",
       "contentByLocale": {
         "en": {
           "summary": "Ghost Circuit v2 uses recon to select the right non-noisy breaker profile, pays for the resulting path with recurring stealth credits, and converts successful HQ or R&D runs into multiaccess.",
@@ -3105,16 +3115,20 @@
       "standardDeckId": "standard_runner_ice_destruction_runner",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:3bf13a4c",
-      "sourceAnalysisHash": "deck-analysis:957eb2e4",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:208eb3bb",
+      "reviewedAt": "2026-09-23",
       "analysis": {
         "primaryStrategyIds": [
-          "runner.survival_defense"
+          "runner.run_event_tempo",
+          "runner.survival_defense",
+          "runner.hq_pressure"
         ],
-        "secondaryStrategyIds": [],
+        "secondaryStrategyIds": [
+          "runner.rig_first"
+        ],
         "reviewStatus": "observe"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:763b1d09",
+      "sourceAnalysisInputHash": "deck-analysis-input:b8ee76dc",
       "contentByLocale": {
         "en": {
           "summary": "Ice Destruction Runner is currently only reliably detected through protection against tags, traces and damage. Run event tempo, HQ pressure, rig setup and remote contest remain plausible playtest hypotheses.",
@@ -3210,14 +3224,17 @@
       "standardDeckId": "standard_runner_inside_forgery_loop",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:618f5760",
-      "sourceAnalysisHash": "deck-analysis:39c99405",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:4d1868f4",
+      "reviewedAt": "2026-09-23",
       "analysis": {
-        "primaryStrategyIds": [],
+        "primaryStrategyIds": [
+          "runner.run_event_tempo",
+          "runner.rig_first"
+        ],
         "secondaryStrategyIds": [],
         "reviewStatus": "observe"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:d12fb13d",
+      "sourceAnalysisInputHash": "deck-analysis-input:13453a50",
       "contentByLocale": {
         "en": {
           "summary": "Inside Forgery Loop currently does not have a reliably identified strategy profile. Run event tempo and rig setup remain a plausible playtest hypothesis and should be carefully monitored.",
@@ -3288,7 +3305,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:9b420dc6",
+      "sourceAnalysisInputHash": "deck-analysis-input:0429032f",
       "contentByLocale": {
         "en": {
           "summary": "King of the Road primarily relies on short run event pace lines, repeated R&D pressure and targeted HQ pressure. Its breaker suite deliberately covers Barrier, Code Gate and Sentry ICE so that targeted search can close the currently missing route instead of merely adding redundant coverage.",
@@ -3386,14 +3403,18 @@
       "standardDeckId": "standard_runner_krashkurs_clown_kreditmaschine_2026_07_11",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:99165f80",
-      "sourceAnalysisHash": "deck-analysis:e12dee99",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:1b34e0e9",
+      "reviewedAt": "2026-09-23",
       "analysis": {
-        "primaryStrategyIds": [],
+        "primaryStrategyIds": [
+          "runner.search.breaker",
+          "runner.run_event_tempo",
+          "runner.rig_first"
+        ],
         "secondaryStrategyIds": [],
         "reviewStatus": "observe"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:987719ac",
+      "sourceAnalysisInputHash": "deck-analysis-input:55c3bfd9",
       "contentByLocale": {
         "en": {
           "summary": "Crash course: Clown credit machine currently does not have a reliably identified strategy profile. Breaker search, run event tempo and rig setup remain plausible playtest hypotheses.",
@@ -3483,7 +3504,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:1d76fbbf",
+      "sourceAnalysisInputHash": "deck-analysis-input:b52f6a16",
       "contentByLocale": {
         "en": {
           "summary": "Last Call at R&D builds a complete rig and then consolidates the R&D accesses with information, multiaccess and a free second run.",
@@ -3607,7 +3628,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:f0f4f332",
+      "sourceAnalysisInputHash": "deck-analysis-input:593c84db",
       "contentByLocale": {
         "en": {
           "summary": "Lucidrine Shell Traders relies primarily on repeated R&D pressure, a multiaccess closure and protection against tags, traces and damage. In addition, the deck uses short run event pace lines and a reliable rig structure.",
@@ -3707,7 +3728,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:1f09316e",
+      "sourceAnalysisInputHash": "deck-analysis-input:888f8a97",
       "contentByLocale": {
         "en": {
           "summary": "Mit Ansage: Der perfekte Coup relies primarily on a multi-access finish, repeated R&D pressure and short run event pace lines. In addition, the deck uses targeted HQ pressure and a reliable rig construction.",
@@ -3803,8 +3824,8 @@
       "standardDeckId": "standard_proteus_runner_breaker_lab_2026_05_25",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:1bd2b10a",
-      "sourceAnalysisHash": "deck-analysis:23bba578",
-      "reviewedAt": "2026-09-08",
+      "sourceAnalysisHash": "deck-analysis:db3e6308",
+      "reviewedAt": "2026-09-23",
       "analysis": {
         "primaryStrategyIds": [
           "runner.hq_pressure",
@@ -3818,7 +3839,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:c29b5637",
+      "sourceAnalysisInputHash": "deck-analysis-input:5a53c48e",
       "contentByLocale": {
         "en": {
           "summary": "A broad breaker toolbox supports repeated central accesses and virus pressure. Cheap economy with card draw and targeted program search make the toolbox easier to assemble.",
@@ -3914,16 +3935,24 @@
       "standardDeckId": "standard_proteus_runner_hidden_sabotage_2026_05_25",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:2d97ff8d",
-      "sourceAnalysisHash": "deck-analysis:a5f93a6c",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:c9c261df",
+      "reviewedAt": "2026-09-23",
       "analysis": {
         "primaryStrategyIds": [
-          "runner.survival_defense"
+          "runner.interface_closeout",
+          "runner.hq_pressure",
+          "runner.run_event_tempo"
         ],
-        "secondaryStrategyIds": [],
+        "secondaryStrategyIds": [
+          "runner.rnd_pressure",
+          "runner.survival_defense",
+          "runner.remote_trash",
+          "runner.search.breaker",
+          "runner.remote_contest"
+        ],
         "reviewStatus": "observe"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:6f0e3784",
+      "sourceAnalysisInputHash": "deck-analysis-input:2c594ab1",
       "contentByLocale": {
         "en": {
           "summary": "Proteus Runner - Hidden Backdoor Sabotage is currently reliably detected through protection against tags, traces and damage. Central pressure, remote sabotage and rig construction remain observed supplementary lines.",
@@ -4029,8 +4058,8 @@
       "standardDeckId": "standard_runner_rd_express",
       "sourceDeckVersion": "1.1.0",
       "sourceDeckHash": "standard-deck:0cb00588",
-      "sourceAnalysisHash": "deck-analysis:af7356f0",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:89420dee",
+      "reviewedAt": "2026-09-23",
       "analysis": {
         "primaryStrategyIds": [
           "runner.interface_closeout",
@@ -4044,7 +4073,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:708cafa6",
+      "sourceAnalysisInputHash": "deck-analysis-input:d973a50f",
       "contentByLocale": {
         "en": {
           "summary": "R&D Express puts pressure on R&D with redundant breaker coverage, fast search, additional MU, and general-purpose recurring run credits. Multiaccess via R&D Interface and Rush Hour completes it; HQ and acute remotes remain clear alternative targets.",
@@ -4154,8 +4183,8 @@
       "standardDeckId": "standard_runner_rd_express_v2",
       "sourceDeckVersion": "2.0.0",
       "sourceDeckHash": "standard-deck:cc6565ae",
-      "sourceAnalysisHash": "deck-analysis:f6ee5aae",
-      "reviewedAt": "2026-08-18",
+      "sourceAnalysisHash": "deck-analysis:22c0042e",
+      "reviewedAt": "2026-09-23",
       "analysis": {
         "primaryStrategyIds": [
           "runner.interface_closeout",
@@ -4169,7 +4198,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:f684336e",
+      "sourceAnalysisInputHash": "deck-analysis-input:600a8c97",
       "contentByLocale": {
         "en": {
           "summary": "R&D Express - Switchyard further develops V1's straight-line R&D pressure with three selectable breaker pairs. Temple Microcode Outlet is not only looking for a missing coverage role, but also for the sidegrade that is more economical for the visible run path. Armadillo adds tag clear support and one-time meat damage protection without changing the R&D mainline.",
@@ -4281,8 +4310,8 @@
       "standardDeckId": "standard_runner_rnd_interface_dig",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:be046044",
-      "sourceAnalysisHash": "deck-analysis:959822ce",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:90e37089",
+      "reviewedAt": "2026-09-23",
       "analysis": {
         "primaryStrategyIds": [
           "runner.rnd_pressure",
@@ -4295,7 +4324,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:16560fc3",
+      "sourceAnalysisInputHash": "deck-analysis-input:acd1499a",
       "contentByLocale": {
         "en": {
           "summary": "R&D Interface Dig relies primarily on repeated R&D pressure, targeted breaker search and a multiaccess conclusion. In addition, the deck uses short run event pace lines and a reliable rig structure.",
@@ -4391,8 +4420,8 @@
       "standardDeckId": "standard_runner_redline_riot",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:30933717",
-      "sourceAnalysisHash": "deck-analysis:bfb92f1d",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:3af21cb1",
+      "reviewedAt": "2026-09-23",
       "analysis": {
         "primaryStrategyIds": [
           "runner.interface_closeout",
@@ -4406,7 +4435,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:b74f35f1",
+      "sourceAnalysisInputHash": "deck-analysis-input:fa028fc4",
       "contentByLocale": {
         "en": {
           "summary": "Redline Riot primarily relies on a multi-access finish, short run event pace lines and targeted HQ pressure. In addition, the deck uses repeated R&D pressure, a reliable rig construction and targeted breaker search.",
@@ -4502,14 +4531,23 @@
       "standardDeckId": "standard_runner_rent_i_con_shellspiel_2026_07_17",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:0697af2f",
-      "sourceAnalysisHash": "deck-analysis:ce513776",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:f98b79ae",
+      "reviewedAt": "2026-09-23",
       "analysis": {
-        "primaryStrategyIds": [],
-        "secondaryStrategyIds": [],
+        "primaryStrategyIds": [
+          "runner.search.breaker",
+          "runner.run_event_tempo",
+          "runner.rnd_pressure"
+        ],
+        "secondaryStrategyIds": [
+          "runner.rig_first",
+          "runner.remote_contest",
+          "runner.interface_closeout",
+          "runner.hq_pressure"
+        ],
         "reviewStatus": "observe"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:d2a9cba9",
+      "sourceAnalysisInputHash": "deck-analysis-input:155d257c",
       "contentByLocale": {
         "en": {
           "summary": "Rent-I-Con: The shell game currently does not have a reliably identified strategy profile. Breaker search, run event tempo, R&D pressure and remote contest remain plausible playtest hypotheses.",
@@ -4605,8 +4643,8 @@
       "standardDeckId": "standard_runner_mp48400s",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:d01806fd",
-      "sourceAnalysisHash": "deck-analysis:80810d71",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:95074795",
+      "reviewedAt": "2026-09-23",
       "analysis": {
         "primaryStrategyIds": [
           "runner.hq_pressure",
@@ -4618,7 +4656,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:b73d72bd",
+      "sourceAnalysisInputHash": "deck-analysis-input:f952fbd0",
       "contentByLocale": {
         "en": {
           "summary": "Run til End relies primarily on targeted HQ pressure, a multiaccess closure and targeted breaker search. In addition, the deck uses a reliable rig structure.",
@@ -4694,8 +4732,8 @@
       "standardDeckId": "standard_runner_skivviss_mill_pressure",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:5e6fbf64",
-      "sourceAnalysisHash": "deck-analysis:956f45d1",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:c9fd5dfa",
+      "reviewedAt": "2026-09-23",
       "analysis": {
         "primaryStrategyIds": [
           "runner.hq_pressure",
@@ -4709,7 +4747,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:313f0ebe",
+      "sourceAnalysisInputHash": "deck-analysis-input:9ac567e7",
       "contentByLocale": {
         "en": {
           "summary": "Skivviss Mill Pressure relies primarily on targeted HQ pressure, targeted breaker search and protection against tags, traces and damage. In addition, the deck uses a reliable rig structure, short run event pace lines and a multi-access finish.",
@@ -4805,8 +4843,8 @@
       "standardDeckId": "standard_runner_stealth_interface_starter",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:a657c8a8",
-      "sourceAnalysisHash": "deck-analysis:21f6ed83",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:14a9584d",
+      "reviewedAt": "2026-09-23",
       "analysis": {
         "primaryStrategyIds": [
           "runner.interface_closeout",
@@ -4820,7 +4858,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:4122ba99",
+      "sourceAnalysisInputHash": "deck-analysis-input:83d7a76c",
       "contentByLocale": {
         "en": {
           "summary": "Stealth Interface Starter relies primarily on a multiaccess closure, targeted HQ pressure and targeted breaker search. Additionally, the deck utilizes repeated R&D pressure, short run event tempo lines and a reliable rig setup.",
@@ -4916,8 +4954,8 @@
       "standardDeckId": "standard_runner_purge_window",
       "sourceDeckVersion": "1.0.0",
       "sourceDeckHash": "standard-deck:6b7eca0c",
-      "sourceAnalysisHash": "deck-analysis:a6e998c8",
-      "reviewedAt": "2026-08-20",
+      "sourceAnalysisHash": "deck-analysis:86bea14c",
+      "reviewedAt": "2026-09-23",
       "analysis": {
         "primaryStrategyIds": [
           "runner.rnd_pressure",
@@ -4930,7 +4968,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:3adc1961",
+      "sourceAnalysisInputHash": "deck-analysis-input:7cf1a274",
       "contentByLocale": {
         "en": {
           "summary": "Purge Window primarily relies on repeated R&D pressure, a multi-access finish and short run event pace lines. In addition, the deck uses a reliable rig construction and targeted breaker search.",
@@ -5037,7 +5075,7 @@
         "secondaryStrategyIds": [],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:e8b0f7f1",
+      "sourceAnalysisInputHash": "deck-analysis-input:2b6451c4",
       "contentByLocale": {
         "en": {
           "summary": "Universal Fast Advance primarily relies on accelerated scoring, a protected remote scoring line and early rush scoring windows.",
@@ -5137,7 +5175,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:7fd0dc47",
+      "sourceAnalysisInputHash": "deck-analysis-input:1787b79e",
       "contentByLocale": {
         "en": {
           "summary": "Dead Channel compresses the Runner hand via access and ICE damage, creates tag and flatline windows from it, and uses its rules-compliant 21 agenda points as a true second way to finish. Flatlining remains the preferred plan.",
@@ -5252,7 +5290,7 @@
         ],
         "reviewStatus": "plausible"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:5e07c974",
+      "sourceAnalysisInputHash": "deck-analysis-input:1bf24061",
       "contentByLocale": {
         "en": {
           "summary": "Counter Shell stores advancement counters on credible traps and Vapor Ops, then converts that prepared board into same-turn scores and efficient overadvance payoffs.",
@@ -5378,7 +5416,7 @@
         ],
         "reviewStatus": "observe"
       },
-      "sourceAnalysisInputHash": "deck-analysis-input:df8d03ba",
+      "sourceAnalysisInputHash": "deck-analysis-input:47d62863",
       "contentByLocale": {
         "en": {
           "summary": "Lucidrine Lockdown combines minimum agenda density, access punishment, central taxation, and fort-wide steal costs against repeated R&D multiaccess.",
@@ -5489,7 +5527,7 @@
       "sourceDeckVersion": "1.3.0",
       "sourceDeckHash": "standard-deck:21c8cd9a",
       "sourceAnalysisHash": "deck-analysis:e214f86b",
-      "sourceAnalysisInputHash": "deck-analysis-input:0d78f89b",
+      "sourceAnalysisInputHash": "deck-analysis-input:a52fd3f2",
       "reviewedAt": "2026-09-13",
       "analysis": {
         "primaryStrategyIds": [

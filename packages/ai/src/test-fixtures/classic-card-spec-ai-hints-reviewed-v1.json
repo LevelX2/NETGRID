@@ -3145,7 +3145,6 @@
         "strategicExchangeKinds": ["temporary_resource"],
         "breakerProfile": {
           "coverage": ["universal"],
-          "emergencyCoverage": true,
           "breakCost": 1,
           "baseStrength": 2,
           "maxSubroutinesPerBreak": 1,
@@ -3165,7 +3164,6 @@
         ],
         "functionSignals": [
           "breaker.configurable_coverage",
-          "breaker.emergency_coverage",
           "breaker.self_trash_risk",
           "breaker.universal"
         ],

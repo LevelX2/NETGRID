@@ -924,6 +924,38 @@ Nicht zulässig bleiben:
 berechtigten Funktionen werden entweder durch Domainrouten oder durch
 Admission-geprüfte kartenbezogene Planinstanzen ersetzt.
 
+### Passive Stärkeinvestition
+
+`hand-development/passive-strength-investment.ts` bewertet eine reine passive
+ICE-Stärkereduktion als eigenständigen Entwicklungszweck. Die Engine projiziert
+die zusätzliche Installation ausschließlich auf bekannte gerezzte ICE. Der
+bestehende Runpfad vergleicht danach die tatsächlichen liquiden Kosten mit und
+ohne Installation einschließlich kompatibler Creditpools. Er verwendet für
+Begegnungen `encounterStrength` aus der Engine-Quote; bereits installierte
+Stärkemodifikatoren werden nicht erneut addiert.
+
+Die Alternative ohne Installation erhält das aktuelle Cashbudget, die
+Installationsalternative das Budget nach den Installkosten. Die geschützte
+Liquiditätsreserve muss nach dem günstigeren projizierten Run erhalten bleiben;
+Bruttokosten des alten Pfads sind dafür kein Ersatz. Regressionen prüfen sowohl
+einen gespeicherten echten Entscheidungszustand als auch die Budgetgrenze mit
+kompatiblen Programmkrediten und den unmittelbar zu knappen Gegenfall.
+
+Admission verlangt eine gegenwärtig sinnvolle, finanzierte HQ-/R&D-Route,
+legalen Install ohne Programmopfer, freie MU, Handpuffer, Klicks und erhaltene
+Reserven. Sichtbare Scorefristen, Matchpoint, Tags, bedingte Breakerpfade und
+unvermeidbare ICE-Gefahren schließen diese begrenzte Investition aus. Die
+Amortisation umfasst den aktuellen und genau einen bedingten künftigen Run;
+für diesen werden nur ausdrücklich erneuernde Pools auf ihre ausgewiesene
+Kapazität gesetzt. Zukünftige Ersparnis wird nicht als heutiges Geld ausgegeben.
+Beide Runs müssen liquide Credits sparen; nach Installcredits und einem
+Creditäquivalent pro Installklick bleiben mindestens zwei Credits Nutzen.
+
+Der Dienst liefert Zweck, Belege und einen auf 300 begrenzten P4-Wert an
+`runner.develop_board_and_hand`. Planinstanz, Step, Route und Aktionsauswahl
+bleiben bei den bestehenden Ownern. Er erzwingt weder eine benannte Karte noch
+wertet er unbekannte ICE als bekannte Ersparnis.
+
 ## 6. `runner.economy`
 
 Der vertikale Owner liegt in `packages/ai/src/runner/economy/`.
@@ -1829,6 +1861,12 @@ Laden und Auszahlen verlangen zusätzlich die passende `planOwnerBinding`-Route.
 Die Installationsfortsetzung bleibt an Bankziel und Capability gebunden;
 nach Engine-Anwendung werden die aktuellen Kandidaten erneut materialisiert.
 Eine prognostizierte spätere Fähigkeit ist keine bereits legale Action.
+Die statische Ladeprojektion unterscheidet eine tatsächlich unbegrenzte
+Fähigkeit von `once_per_turn_per_source`. Das Fehlen eines mechanischen Limits
+verhindert keine Installation und erzeugt kein erfundenes Limit. Unterstützt
+sind ausschließlich die vollständig geprüften Kosten und der einzelne
+`add_hosted_credits`-Effekt auf der Quelle; unbekannte Kombinationen bleiben
+ohne Projektion. Die strategische Ladetaktung bleibt Entscheidung des Bank-Owners.
 Finanzierungsentscheidungen verwenden die bestehenden exakten Demand- und
 Route-Suchen; der Schnitt ergänzt keine neue Parentkante im Scheduler.
 

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { CARD_DEFINITIONS_BY_ID } from "../../card-definition-compatibility";
 
 import type {
   AiDecisionInput,
@@ -381,14 +382,15 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       type: "hardware",
       installCost: 6,
     });
+    const definition = CARD_DEFINITIONS_BY_ID["onr_v1_039_krash"]!;
     const breaker = visibleCard("krash-1", {
-      definitionId: "onr_v1_039_krash",
-      title: "Krash",
-      type: "program",
-      subtypes: ["icebreaker"],
-      installCost: 3,
-      memoryCost: 1,
-      rulesText: "Icebreaker: break ice subroutines.",
+      definitionId: definition.id,
+      title: definition.title,
+      type: definition.type,
+      subtypes: definition.subtypes,
+      installCost: definition.installCost!,
+      memoryCost: definition.memoryCost!,
+      rulesText: definition.rulesText,
     });
     const evaluation = findByInstance(
       evaluateRunnerHandDevelopment({
@@ -398,7 +400,7 @@ describe("RunnerHandDevelopmentEvaluation", () => {
           hand: [eurocorpse, breaker],
           legalActions: [
             installAction("install-eurocorpse", eurocorpse, 6),
-            installAction("install-krash", breaker, 3),
+            installAction("install-krash", breaker, definition.installCost!),
           ],
         }),
       }),
