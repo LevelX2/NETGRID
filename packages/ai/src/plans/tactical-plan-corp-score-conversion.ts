@@ -92,7 +92,11 @@ type ConversionCapability = {
   creditCost: number;
   projected: boolean;
   recoveredFromArchives?: boolean;
-  rezPreparation?: { action: LegalAction; credits: number };
+  rezPreparation?: {
+    action: LegalAction;
+    credits: number;
+    sourceCardId: string;
+  };
 };
 
 type ActionCapacity = {
@@ -550,7 +554,7 @@ function visitCapabilityCombinations(params: {
               {
                 kind: "rez_score_support" as const,
                 actionId: capability.rezPreparation.action.actionId,
-                sourceCardId: capability.sourceCardId,
+                sourceCardId: capability.rezPreparation.sourceCardId,
                 targetCardId: params.target.card.instanceId,
                 targetServerId: params.target.serverId,
                 advancementAmount: 0,
@@ -713,6 +717,7 @@ function conversionCapabilities(
       rezPreparation: {
         action: preparation.action,
         credits: preparation.rezCredits,
+        sourceCardId: preparation.sourceCardId,
       },
     })),
   );
